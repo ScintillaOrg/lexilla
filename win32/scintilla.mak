@@ -29,30 +29,21 @@ VENDOR=BORLAND
 !ENDIF
 !ENDIF
 
-LOGO=
-
 !IF "$(VENDOR)"=="MICROSOFT"
 
 CC=cl
 RC=rc
 LD=link
 
-!IFDEF QUIET
-CC=@$(CC)
-LOGO=/nologo
-!ENDIF
-
-INCLUDEDIRS=-I ../include -I ../src
-CXXFLAGS=/TP /W4 $(LOGO)
-# For something scary:/Wp64
-CXXDEBUG=/Zi /Od /MDd -DDEBUG
-xCXXNDEBUG=/Og /Os /Oy /MD -DNDEBUG
-CXXNDEBUG=/Zi /O1 /GL /MT -DNDEBUG
-#CXXNDEBUG=/Ox /MD -DNDEBUG
-NAMEFLAG=-Fo
-LDFLAGS=/opt:nowin98 /opt:ref /LTCG /DEBUG $(LOGO)
-LDDEBUG=/DEBUG
+CXXFLAGS=-Zi -TP -W4
+# For something scary:-Wp64
+CXXDEBUG=-Od -MTd -DDEBUG
+CXXNDEBUG=-O1 -MT -DNDEBUG -GL
+NAME=-Fo
+LDFLAGS=-OPT:NOWIN98 -OPT:REF -LTCG -DEBUG
+LDDEBUG=
 LIBS=KERNEL32.lib USER32.lib GDI32.lib IMM32.lib OLE32.LIB
+NOLOGO=-nologo
 
 !ELSE
 # BORLAND
@@ -61,21 +52,22 @@ CC=bcc32
 RC=brcc32 -r
 LD=ilink32
 
-!IFDEF QUIET
-CC=@$(CC)
-LOGO=-q
-!ENDIF
-
-INCLUDEDIRS=-I../include -I../src
-CXXFLAGS=-P -tWM -w -w-prc -w-inl -RT- -x- $(LOGO)
+CXXFLAGS=-P -tWM -w -w-prc -w-inl -RT- -x-
 # Above turns off warnings for clarfying parentheses and inlines with for not expanded
-CXXDEBUG=-v -DDEBUG
+CXXDEBUG=-Od -v -DDEBUG
 CXXNDEBUG=-O1 -DNDEBUG
-NAMEFLAG=-o
-LDFLAGS=/Gn /x $(LOGO)
+NAME=-o
+LDFLAGS=-Gn -x -c
 LDDEBUG=-v
 LIBS=import32 cw32mt
+NOLOGO=-q
 
+!ENDIF
+
+!IFDEF QUIET
+CC=@$(CC)
+CXXFLAGS=$(CXXFLAGS) $(NOLOGO)
+LDFLAGS=$(LDFLAGS) $(NOLOGO)
 !ENDIF
 
 !IFDEF DEBUG
@@ -84,6 +76,9 @@ LDFLAGS=$(LDDEBUG) $(LDFLAGS)
 !ELSE
 CXXFLAGS=$(CXXFLAGS) $(CXXNDEBUG)
 !ENDIF
+
+INCLUDEDIRS=-I../include -I../src
+CXXFLAGS=$(CXXFLAGS) $(INCLUDEDIRS)
 
 ALL:	$(COMPONENT) $(LEXCOMPONENT) $(DIR_O)\ScintillaWinS.obj $(DIR_O)\WindowAccessor.obj
 
@@ -164,18 +159,18 @@ $(DIR_O)\ScintRes.res : ScintRes.rc
 !IF "$(VENDOR)"=="MICROSOFT"
 
 $(COMPONENT): $(SOBJS) $(DIR_O)\ScintRes.res
-	$(LD) $(LDFLAGS) /DLL /OUT:$@ $** $(LIBS)
+	$(LD) $(LDFLAGS) -DLL -OUT:$@ $** $(LIBS)
 
 $(LEXCOMPONENT): $(LOBJS) $(DIR_O)\ScintRes.res
-	$(LD) $(LDFLAGS) /DLL /OUT:$@ $** $(LIBS)
+	$(LD) $(LDFLAGS) -DLL -OUT:$@ $** $(LIBS)
 
 !ELSE
 
 $(COMPONENT): $(SOBJS) $(DIR_O)\ScintRes.res
-	$(LD) $(LDFLAGS) -Tpd -c c0d32 $(SOBJS), $@, , $(LIBS), , $(DIR_O)\ScintRes.res
+	$(LD) $(LDFLAGS) -Tpd c0d32 $(SOBJS), $@, , $(LIBS), , $(DIR_O)\ScintRes.res
 
 $(LEXCOMPONENT): $(LOBJS) $(DIR_O)\ScintRes.res
-	$(LD) $(LDFLAGS) -Tpd -c c0d32 $(LOBJS), $@, , $(LIBS), , $(DIR_O)\ScintRes.res
+	$(LD) $(LDFLAGS) -Tpd c0d32 $(LOBJS), $@, , $(LIBS), , $(DIR_O)\ScintRes.res
 
 !ENDIF
 
@@ -183,19 +178,19 @@ $(LEXCOMPONENT): $(LOBJS) $(DIR_O)\ScintRes.res
 
 # Most of the source is in ..\src with a couple in this directory
 {..\src}.cxx{$(DIR_O)}.obj:
-	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c $(NAMEFLAG)$@ $<
+	$(CC) $(CXXFLAGS) -c $(NAME)$@ $<
 {.}.cxx{$(DIR_O)}.obj:
-	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c $(NAMEFLAG)$@ $<
+	$(CC) $(CXXFLAGS) -c $(NAME)$@ $<
 
 # Some source files are compiled into more than one object because of different conditional compilation
 $(DIR_O)\ScintillaBaseL.obj: ..\src\ScintillaBase.cxx
-	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -DSCI_LEXER -c $(NAMEFLAG)$@ ..\src\ScintillaBase.cxx
+	$(CC) $(CXXFLAGS) -DSCI_LEXER -c $(NAME)$@ ..\src\ScintillaBase.cxx
 
 $(DIR_O)\ScintillaWinL.obj: ScintillaWin.cxx
-	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -DSCI_LEXER -c $(NAMEFLAG)$@ ScintillaWin.cxx
+	$(CC) $(CXXFLAGS) -DSCI_LEXER -c $(NAME)$@ ScintillaWin.cxx
 
 $(DIR_O)\ScintillaWinS.obj: ScintillaWin.cxx
-	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -DSTATIC_BUILD -c $(NAMEFLAG)$@ ScintillaWin.cxx
+	$(CC) $(CXXFLAGS) -DSTATIC_BUILD -c $(NAME)$@ ScintillaWin.cxx
 
 # Dependencies
 
@@ -204,35 +199,37 @@ LEX_HEADERS=..\include\Platform.h ..\include\PropSet.h \
  ..\include\SString.h ..\include\Accessor.h ..\include\KeyWords.h \
  ..\include\Scintilla.h ..\include\SciLexer.h ..\src\StyleContext.h
 
-$(DIR_O)\AutoComplete.obj: ..\src\AutoComplete.cxx ..\include\Platform.h ..\src\AutoComplete.h
-
-$(DIR_O)\CallTip.obj: ..\src\CallTip.cxx ..\include\Platform.h ..\src\CallTip.h
-
-$(DIR_O)\CellBuffer.obj: ..\src\CellBuffer.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\CellBuffer.h
-
-$(DIR_O)\ContractionState.obj: ..\src\ContractionState.cxx ..\include\Platform.h ..\src\ContractionState.h
-
-$(DIR_O)\Document.obj: ..\src\Document.cxx ..\include\Platform.h ..\include\Scintilla.h \
- ..\src\RESearch.h ..\src\CellBuffer.h ..\src\Document.h
-
-$(DIR_O)\DocumentAccessor.obj: ..\src\DocumentAccessor.cxx ..\include\Platform.h ..\include\PropSet.h \
- ..\include\SString.h ..\include\Accessor.h ..\src\DocumentAccessor.h ..\include\Scintilla.h
-
-$(DIR_O)\Editor.obj: ..\src\Editor.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\ContractionState.h \
- ..\src\CellBuffer.h ..\src\KeyMap.h ..\src\Indicator.h ..\src\LineMarker.h ..\src\Style.h ..\src\ViewStyle.h \
- ..\src\Document.h ..\src\Editor.h
-
-$(DIR_O)\ExternalLexer.obj: ExternalLexer.cxx ExternalLexer.h \
- ..\include\SciLexer.h ..\include\Platform.h ..\include\PropSet.h ..\include\SString.h \
- ..\include\Accessor.h ..\src\DocumentAccessor.h ..\include\KeyWords.h \
-
-$(DIR_O)\Indicator.obj: ..\src\Indicator.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\Indicator.h
-
-$(DIR_O)\KeyMap.obj: ..\src\KeyMap.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\KeyMap.h
-
-$(DIR_O)\KeyWords.obj: ..\src\KeyWords.cxx ..\include\Platform.h ..\include\PropSet.h \
- ..\include\SString.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h
+$(DIR_O)\AutoComplete.obj: ../src/AutoComplete.cxx ../include/Platform.h \
+ ../include/PropSet.h ../include/SString.h ../src/AutoComplete.h
+$(DIR_O)\CallTip.obj: ../src/CallTip.cxx ../include/Platform.h \
+ ../include/Scintilla.h ../src/CallTip.h
+$(DIR_O)\CellBuffer.obj: ../src/CellBuffer.cxx ../include/Platform.h \
+ ../include/Scintilla.h ../src/SVector.h ../src/CellBuffer.h
+$(DIR_O)\ContractionState.obj: ../src/ContractionState.cxx ../include/Platform.h \
+ ../src/ContractionState.h
+$(DIR_O)\Document.obj: ../src/Document.cxx ../include/Platform.h \
+ ../include/Scintilla.h ../src/SVector.h ../src/CellBuffer.h \
+ ../src/Document.h ../src/RESearch.h
+$(DIR_O)\DocumentAccessor.obj: ../src/DocumentAccessor.cxx ../include/Platform.h \
+ ../include/PropSet.h ../include/SString.h ../src/SVector.h \
+ ../include/Accessor.h ../src/DocumentAccessor.h ../src/CellBuffer.h \
+ ../include/Scintilla.h ../src/Document.h
+$(DIR_O)\Editor.obj: ../src/Editor.cxx ../include/Platform.h \
+ ../include/Scintilla.h ../src/ContractionState.h ../src/SVector.h \
+ ../src/CellBuffer.h ../src/KeyMap.h ../src/Indicator.h \
+ ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
+ ../src/Document.h ../src/Editor.h
+$(DIR_O)\ExternalLexer.obj: ExternalLexer.cxx ../include/Platform.h \
+ ../include/SciLexer.h ../include/PropSet.h ../include/SString.h \
+ ../include/Accessor.h ../src/DocumentAccessor.h ../include/KeyWords.h \
+ ExternalLexer.h
+$(DIR_O)\Indicator.obj: ../src/Indicator.cxx ../include/Platform.h \
+ ../include/Scintilla.h ../src/Indicator.h
+$(DIR_O)\KeyMap.obj: ../src/KeyMap.cxx ../include/Platform.h \
+ ../include/Scintilla.h ../src/KeyMap.h
+$(DIR_O)\KeyWords.obj: ../src/KeyWords.cxx ../include/Platform.h \
+ ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
+ ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
 
 #++Autogenerated -- run src/LexGen.py to regenerate
 #**\n\($(DIR_O)\\\*.obj: ..\\src\\\*.cxx $(LEX_HEADERS)\n\n\)
@@ -278,48 +275,49 @@ $(DIR_O)\LexVB.obj: ..\src\LexVB.cxx $(LEX_HEADERS)
 
 #--Autogenerated -- end of automatically generated section
 
-$(DIR_O)\LineMarker.obj: ..\src\LineMarker.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\LineMarker.h
-
-$(DIR_O)\PlatWin.obj: PlatWin.cxx ..\include\Platform.h PlatformRes.h ..\src\UniConversion.h
-
-$(DIR_O)\PropSet.obj: ..\src\PropSet.cxx ..\include\Platform.h ..\include\PropSet.h \
- ..\include\SString.h
-
-$(DIR_O)\RESearch.obj: ..\src\RESearch.cxx ..\src\RESearch.h
-
-$(DIR_O)\ScintillaBase.obj: ..\src\ScintillaBase.cxx ..\include\Platform.h ..\include\Scintilla.h \
- ..\src\ContractionState.h ..\src\CellBuffer.h ..\src\CallTip.h ..\src\KeyMap.h ..\src\Indicator.h \
- ..\src\LineMarker.h ..\src\Style.h ..\src\ViewStyle.h ..\src\AutoComplete.h ..\src\Document.h ..\src\Editor.h \
- ..\src\ScintillaBase.h
-
+$(DIR_O)\LineMarker.obj: ../src/LineMarker.cxx ../include/Platform.h \
+ ../include/Scintilla.h ../src/LineMarker.h
+$(DIR_O)\PlatWin.obj: PlatWin.cxx ../include/Platform.h PlatformRes.h \
+ ../src/UniConversion.h
+$(DIR_O)\PropSet.obj: ../src/PropSet.cxx ../include/Platform.h \
+ ../include/PropSet.h ../include/SString.h
+$(DIR_O)\RESearch.obj: ../src/RESearch.cxx ../src/RESearch.h
+$(DIR_O)\ScintillaBase.obj: ../src/ScintillaBase.cxx ../include/Platform.h \
+ ../include/Scintilla.h ../include/PropSet.h ../include/SString.h \
+ ../src/ContractionState.h ../src/SVector.h ../src/CellBuffer.h \
+ ../src/CallTip.h ../src/KeyMap.h ../src/Indicator.h \
+ ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
+ ../src/AutoComplete.h ../src/Document.h ../src/Editor.h \
+ ../src/ScintillaBase.h
 $(DIR_O)\ScintillaBaseL.obj: ..\src\ScintillaBase.cxx ..\include\Platform.h ..\include\Scintilla.h ..\include\SciLexer.h \
  ..\src\ContractionState.h ..\src\CellBuffer.h ..\src\CallTip.h ..\src\KeyMap.h ..\src\Indicator.h \
  ..\src\LineMarker.h ..\src\Style.h ..\src\AutoComplete.h ..\src\ViewStyle.h ..\src\Document.h ..\src\Editor.h \
  ..\src\ScintillaBase.h ..\include\PropSet.h \
  ..\include\SString.h ..\include\Accessor.h ..\src\DocumentAccessor.h ..\include\KeyWords.h
-
-$(DIR_O)\ScintillaWin.obj: ScintillaWin.cxx ..\include\Platform.h ..\include\Scintilla.h \
- ..\src\ContractionState.h ..\src\CellBuffer.h ..\src\CallTip.h ..\src\KeyMap.h ..\src\Indicator.h \
- ..\src\LineMarker.h ..\src\Style.h ..\src\AutoComplete.h ..\src\ViewStyle.h ..\src\Document.h ..\src\Editor.h \
- ..\src\ScintillaBase.h ..\src\UniConversion.h
-
+$(DIR_O)\ScintillaWin.obj: ScintillaWin.cxx ../include/Platform.h \
+ ../include/Scintilla.h ../include/SString.h ../src/ContractionState.h \
+ ../src/SVector.h ../src/CellBuffer.h ../src/CallTip.h ../src/KeyMap.h \
+ ../src/Indicator.h ../src/LineMarker.h ../src/Style.h \
+ ../src/AutoComplete.h ../src/ViewStyle.h ../src/Document.h \
+ ../src/Editor.h ../src/ScintillaBase.h ../src/UniConversion.h
 $(DIR_O)\ScintillaWinL.obj: ScintillaWin.cxx ..\include\Platform.h ..\include\Scintilla.h ..\include\SciLexer.h \
  ..\src\ContractionState.h ..\src\CellBuffer.h ..\src\CallTip.h ..\src\KeyMap.h ..\src\Indicator.h \
  ..\src\LineMarker.h ..\src\Style.h ..\src\AutoComplete.h ..\src\ViewStyle.h ..\src\Document.h ..\src\Editor.h \
  ..\src\ScintillaBase.h ..\include\PropSet.h \
  ..\include\SString.h ..\include\Accessor.h ..\include\KeyWords.h ..\src\UniConversion.h
-
 $(DIR_O)\ScintillaWinS.obj: ScintillaWin.cxx ..\include\Platform.h ..\include\Scintilla.h \
  ..\src\ContractionState.h ..\src\CellBuffer.h ..\src\CallTip.h ..\src\KeyMap.h ..\src\Indicator.h \
  ..\src\LineMarker.h ..\src\Style.h ..\src\AutoComplete.h ..\src\ViewStyle.h ..\src\Document.h ..\src\Editor.h \
  ..\src\ScintillaBase.h ..\src\UniConversion.h
-
-$(DIR_O)\Style.obj: ..\src\Style.cxx ..\include\Platform.h ..\src\Style.h
-
-$(DIR_O)\ViewStyle.obj: ..\src\ViewStyle.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\Indicator.h \
- ..\src\LineMarker.h ..\src\Style.h ..\src\ViewStyle.h
-
-$(DIR_O)\UniConversion.obj: ..\src\UniConversion.cxx ..\src\UniConversion.h
-
-$(DIR_O)\WindowAccessor.obj: ..\src\WindowAccessor.cxx ..\include\Platform.h ..\include\PropSet.h \
- ..\include\SString.h ..\include\Accessor.h ..\include\WindowAccessor.h ..\include\Scintilla.h
+$(DIR_O)\Style.obj: ../src/Style.cxx ../include/Platform.h ../include/Scintilla.h \
+ ../src/Style.h
+$(DIR_O)\StyleContext.obj: ../src/StyleContext.cxx ../include/Platform.h \
+ ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
+ ../src/StyleContext.h
+$(DIR_O)\UniConversion.obj: ../src/UniConversion.cxx ../src/UniConversion.h
+$(DIR_O)\ViewStyle.obj: ../src/ViewStyle.cxx ../include/Platform.h \
+ ../include/Scintilla.h ../src/Indicator.h ../src/LineMarker.h \
+ ../src/Style.h ../src/ViewStyle.h
+$(DIR_O)\WindowAccessor.obj: ../src/WindowAccessor.cxx ../include/Platform.h \
+ ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
+ ../include/WindowAccessor.h ../include/Scintilla.h
