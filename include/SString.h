@@ -206,18 +206,6 @@ public:
 	const char *c_str() const {
 		return s ? s : "";
 	}
-	/** Attach to a string allocated by means of StringAlloc(len). */
-	SString &attach(char *s_, lenpos_t sLen_ = measure_length, lenpos_t sSize_ = measure_length) {
-		delete []s;
-		s = s_;
-		if (!s) {
-			sLen = sSize = 0;
-		} else {
-			sLen = (sLen_ == measure_length ? strlen(s) : sLen_);
-			sSize = (sSize_ == measure_length ? sLen + 1 : sSize_);
-		}
-		return *this;
-	}
 	/** Give ownership of buffer to caller which must use delete[] to free buffer. */
 	char *detach() {
 		char *sRet = s;
