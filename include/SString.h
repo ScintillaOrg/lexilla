@@ -6,6 +6,8 @@
 #ifndef SSTRING_H
 #define SSTRING_H
 
+bool EqualCaseInsensitive(const char *a, const char *b);
+
 #if PLAT_WIN
 #define strcasecmp  stricmp
 #define strncasecmp strnicmp
@@ -13,6 +15,7 @@
 
 // Define another string class.
 // While it would be 'better' to use std::string, that doubles the executable size.
+// An SString may contain embedded nul characters.
 
 inline char *StringDup(const char *s, int len=-1) {
 	if (!s)
@@ -28,75 +31,90 @@ inline char *StringDup(const char *s, int len=-1) {
 }
 
 class SString {
-	char *s;
-	int ssize;
+	char *s;		///< The C string
+	int ssize;		///< The size of the buffer, less 1: ie. the maximum size of the string
+	int slen;		///< The size of the string in s
+
+	enum { sizingGranularity = 64 };	// Minimum growth size when appending strings
+
 public:
 	typedef const char* const_iterator;
 	typedef int size_type;
-	static size_type npos;
-	const char* begin(void) const {
-		return s;
-	}
-	const char* end(void) const {
-		return &s[ssize];
-	}
-	size_type size(void) const {
-		if (s)
-			return ssize;
-		else
-			return 0;
-	}
-	SString &assign(const char* sother, int size_ = -1) {
-		char *t = s;
-		s = StringDup(sother,size_);
-		ssize = (s) ? strlen(s) : 0;
-		delete []t;
-		return *this;
-	}
-	SString &assign(const SString& sother, int size_ = -1) {
-		return assign(sother.s,size_);
-	}
-	SString &assign(const_iterator ibeg, const_iterator iend) {
-		return assign(ibeg,iend - ibeg);
-	}
+
 	SString() {
 		s = 0;
 		ssize = 0;
+		slen = 0;
 	}
 	SString(const SString &source) {
 		s = StringDup(source.s);
-		ssize = (s) ? strlen(s) : 0;
+		ssize = slen = (s) ? strlen(s) : 0;
 	}
 	SString(const char *s_) {
 		s = StringDup(s_);
-		ssize = (s) ? strlen(s) : 0;
+		ssize = slen = (s) ? strlen(s) : 0;
 	}
 	SString(const char *s_, int first, int last) {
 		s = StringDup(s_ + first, last - first);
-		ssize = (s) ? strlen(s) : 0;
+		ssize = slen = (s) ? strlen(s) : 0;
 	}
 	SString(int i) {
 		char number[100];
 		sprintf(number, "%0d", i);
 		s = StringDup(number);
-		ssize = (s) ? strlen(s) : 0;
+		ssize = slen = (s) ? strlen(s) : 0;
 	}
 	~SString() {
 		delete []s;
 		s = 0;
 		ssize = 0;
+		slen = 0;
 	}
 	void clear(void) {
 		if (s) {
 			*s = '\0';
 		}
-		ssize = 0;
+		slen = 0;
+	}
+	const char* begin(void) const {
+		return s;
+	}
+	const char* end(void) const {
+		return &s[slen];	// Point after the last character
+	}
+	size_type size(void) const {	// Size of buffer
+		if (s)
+			return ssize;
+		else
+			return 0;
+	}
+	int length() const {	// Size of string in buffer
+		return slen;
+	}
+	SString &assign(const char* sother, int size_ = -1) {
+		if (size_ < 0) {
+			size_ = strlen(sother);
+		}
+		if (ssize > 0 && size_ <= ssize) {	// Does not allocate new buffer if the current is big enough
+			strncpy(s, sother, size_);
+			s[size_] = '\0';
+		} else {
+			delete []s;
+			s = StringDup(sother, size_);
+			ssize = size_;	// Allow buffer bigger than real string, thus providing space to grow
+			slen = (s) ? strlen(s) : 0;
+		}
+		return *this;
+	}
+	SString &assign(const SString& sother, int size_ = -1) {
+		return assign(sother.s, size_);
+	}
+	SString &assign(const_iterator ibeg, const_iterator iend) {
+		return assign(ibeg, iend - ibeg);
 	}
 	SString &operator=(const SString &source) {
 		if (this != &source) {
-			delete []s;
-			s = StringDup(source.s);
-			ssize = (s) ? strlen(s) : 0;
+			assign(source.c_str());
 		}
 		return *this;
 	}
@@ -126,47 +144,50 @@ public:
 		else
 			return "";
 	}
-	int length() const {
-		if (s)
-			return strlen(s);
-		else
-			return 0;
-	}
 	char operator[](int i) const {
-		if (s)
+		if (s && i < ssize)	// Or < slen? Depends on the use, both are OK
 			return s[i];
 		else
 			return '\0';
 	}
-	SString &operator +=(const char *sother) {
-		return append(sother,-1);
-	}
-	SString &operator +=(const SString &sother) {
-		return append(sother.s,sother.ssize);
-	}
-	SString &operator +=(char ch) {
-		return append(&ch,1);
-	}
-	SString &append(const char* sother, int lenOther) {
-		int len = length();
-		if(lenOther < 0) 
+	SString &append(const char* sother, int lenOther = -1) {
+		if (lenOther < 0)
 			lenOther = strlen(sother);
-		char *sNew = new char[len + lenOther + 1];
-		if (sNew) {
-			if (s)
-				memcpy(sNew, s, len);
-			strncpy(&sNew[len], sother, lenOther);
-			sNew[len + lenOther] = '\0';
-			delete []s;
-			s = sNew;
-			ssize = (s) ? strlen(s) : 0;
+		if (slen + lenOther + 1 < ssize) {
+			// Conservative about growing the buffer: don't do it, unless really needed
+			strncpy(&s[slen], sother, lenOther);
+			s[slen + lenOther] = '\0';
+			slen += lenOther;
+		} else {
+			// Grow the buffer bigger than really needed, to have room for other appends
+			char *sNew = new char[slen + lenOther + sizingGranularity + 1];
+			if (sNew) {
+				if (s) {
+					memcpy(sNew, s, slen);
+					delete []s;
+				}
+				strncpy(&sNew[slen], sother, lenOther);
+				sNew[slen + lenOther] = '\0';
+				s = sNew;
+				ssize = slen + lenOther + sizingGranularity;
+				slen += lenOther;
+			}
 		}
 		return *this;
+	}
+	SString &operator +=(const char *sother) {
+		return append(sother, -1);
+	}
+	SString &operator +=(const SString &sother) {
+		return append(sother.s, sother.ssize);
+	}
+	SString &operator +=(char ch) {
+		return append(&ch, 1);
 	}
 	int value() const {
 		if (s)
 			return atoi(s);
-		else 
+		else
 			return 0;
 	}
 	void substitute(char find, char replace) {
@@ -178,33 +199,6 @@ public:
 				t++;
 			}
 		}
-	}
-	//added by ajkc - 08122000
-	char charAt(int i) {
-		return s[i];
-	}
-	//added by ajkc - 08122000
-	SString substring(int startPos, int endPos = -1) {
-		SString result;
-
-		//do some checks first so we do the "right" thing
-		if (endPos > this->size() || endPos == -1)
-			endPos = this->size();
-
-		if (startPos < 0)
-			startPos = 0;
-
-		if (startPos == endPos) {
-			return SString("");
-		}
-
-		if (startPos > endPos) {
-			int tmp = endPos;
-			endPos = startPos;
-			startPos = tmp;
-		}
-		
-		return SString(s, startPos, endPos);
 	}
 	// I don't think this really belongs here -- Neil
 	void correctPath() {
