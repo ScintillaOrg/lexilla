@@ -152,8 +152,7 @@ SString PropSet::GetExpanded(const char *key) {
 	SString val = Get(key);
 	if (IncludesVar(val.c_str(), key))
 		return val;
-	else
-		return Expand(val.c_str());
+	return Expand(val.c_str());
 }
 
 SString PropSet::Expand(const char *withvars) {
@@ -185,8 +184,7 @@ int PropSet::GetInt(const char *key, int defaultValue) {
 	SString val = GetExpanded(key);
 	if (val.length())
 		return val.value();
-	else
-		return defaultValue;
+	return defaultValue;
 }
 
 bool isprefix(const char *target, const char *prefix) {
