@@ -2119,7 +2119,11 @@ void Editor::DropAt(int position, const char *value, bool moving, bool rectangul
 
 	int positionWasInSelection = PositionInSelection(position);
 
-	if ((!inDragDrop) || !(0 == positionWasInSelection)) {
+	bool positionOnEdgeOfSelection = 
+		(position == SelectionStart()) || (position == SelectionEnd());
+
+	if ((!inDragDrop) || !(0 == positionWasInSelection) || 
+		(positionOnEdgeOfSelection && !moving)) {
 
 		int selStart = SelectionStart();
 		int selEnd = SelectionEnd();
