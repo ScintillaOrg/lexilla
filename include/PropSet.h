@@ -27,6 +27,8 @@ class PropSet {
 private:
 	enum { hashRoots=31 };
 	Property *props[hashRoots];
+	Property *enumnext;
+	int enumhash;
 public:
 	PropSet *superPS;
 	PropSet();
@@ -40,6 +42,8 @@ public:
 	SString GetWild(const char *keybase, const char *filename);
 	SString GetNewExpand(const char *keybase, const char *filename);
 	void Clear();
+	bool GetFirst(char **key, char **val);
+	bool GetNext(char **key, char **val);
 };
 
 /**
