@@ -4230,6 +4230,8 @@ void Editor::CopySelectionRange(SelectionText *ss) {
 }
 
 void Editor::CopyRangeToClipboard(int start, int end) {
+	start = pdoc->ClampPositionIntoDocument(start);
+	end = pdoc->ClampPositionIntoDocument(end);
 	SelectionText selectedText;
 	selectedText.Set(CopyRange(start, end), end - start + 1);
 	CopyToClipboard(selectedText);
