@@ -574,9 +574,9 @@ void ScintillaGTK::SetTicking(bool on) {
 	if (timer.ticking != on) {
 		timer.ticking = on;
 		if (timer.ticking) {
-			timer.tickerID = gtk_timeout_add(timer.tickSize, (GtkFunction)TimeOut, this);
+			timer.tickerID = reinterpret_cast<TickerID>(gtk_timeout_add(timer.tickSize, (GtkFunction)TimeOut, this));
 		} else {
-			gtk_timeout_remove(timer.tickerID);
+			gtk_timeout_remove(reinterpret_cast<guint>(timer.tickerID));
 		}
 	}
 	timer.ticksToWait = caret.period;
