@@ -272,6 +272,10 @@ SOURCE=..\src\ViewStyle.cxx
 
 SOURCE=..\src\WindowAccessor.cxx
 # End Source File
+# Begin Source File
+
+SOURCE=..\src\XPM.cxx
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
