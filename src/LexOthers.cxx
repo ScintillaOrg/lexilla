@@ -221,7 +221,8 @@ static void ColourisePropsLine(
 			styler.ColourTo(startLine+i, 3);
 		styler.ColourTo(endPos, 0);
 	} else {
-		while (lineBuffer[i] != '=' && (i < lengthLine))	// Search the '=' character
+		// Search for the '=' character
+		while (lineBuffer[i] != '=' && (i < lengthLine-1))	
 			i++;
 		if (lineBuffer[i] == '=') {
 			styler.ColourTo(startLine+i-1, 0);
