@@ -5635,7 +5635,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_TEXTWIDTH:
-		PLATFORM_ASSERT((wParam >= 0) && (wParam <= STYLE_MAX));
+		PLATFORM_ASSERT(wParam <= STYLE_MAX);
 		PLATFORM_ASSERT(lParam);
 		return TextWidth(wParam, CharPtrFromSPtr(lParam));
 
