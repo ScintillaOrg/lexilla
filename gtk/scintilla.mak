@@ -147,6 +147,7 @@ LEXOBJS=\
 	$(DIR_O)\LexAVE.obj \
 	$(DIR_O)\LexBaan.obj \
 	$(DIR_O)\LexBash.obj \
+	$(DIR_O)\LexBB.obj \
 	$(DIR_O)\LexBullant.obj \
 	$(DIR_O)\LexCLW.obj \
 	$(DIR_O)\LexConf.obj \
@@ -317,6 +318,8 @@ $(DIR_O)\LexAVE.obj: ..\src\LexAVE.cxx $(LEX_HEADERS)
 $(DIR_O)\LexBaan.obj: ..\src\LexBaan.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexBash.obj: ..\src\LexBash.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexBB.obj: ..\src\LexBB.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexBullant.obj: ..\src\LexBullant.cxx $(LEX_HEADERS)
 
