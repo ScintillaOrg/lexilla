@@ -145,6 +145,8 @@ static inline bool isStringState(int state) {
 	case SCE_HPA_STRING:
 	case SCE_HPHP_HSTRING:
 	case SCE_HPHP_SIMPLESTRING:
+	case SCE_HPHP_HSTRING_VARIABLE:
+	case SCE_HPHP_COMPLEX_VARIABLE:
 		bResult = true;
 		break;
 	default :
