@@ -1316,9 +1316,9 @@ gint ScintillaGTK::KeyPress(GtkWidget *widget, GdkEventKey *event) {
 		key &= 0x7F;
 	else
 		key = KeyTranslate(key);
-	// Hack for keys between 256 and 511 but makes Hungarian work.
-	if ((key >= GDK_Aogonek) && (key <= GDK_abovedot))
-		key &= 0xff;
+	// Hack for keys over 256 but makes Hungarian work.
+	// This will have to change for Unicode
+	key &= 0xff;
 
 	bool consumed = false;
 	int added = sciThis->KeyDown(key, shift, ctrl, alt, &consumed);
