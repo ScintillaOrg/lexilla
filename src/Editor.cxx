@@ -3642,6 +3642,7 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	case SCI_LINEUPRECTEXTEND:
 	case SCI_CHARLEFTRECTEXTEND:
 	case SCI_CHARRIGHTRECTEXTEND:
+	case SCI_HOMERECTEXTEND:
 	case SCI_VCHOMERECTEXTEND:
 	case SCI_LINEENDRECTEXTEND:
 	case SCI_PAGEUPRECTEXTEND:
@@ -3915,6 +3916,10 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		break;
 	case SCI_HOMEEXTEND:
 		MovePositionTo(pdoc->LineStart(pdoc->LineFromPosition(currentPos)), selStream);
+		SetLastXChosen();
+		break;
+	case SCI_HOMERECTEXTEND:
+		MovePositionTo(pdoc->LineStart(pdoc->LineFromPosition(currentPos)), selRectangle);
 		SetLastXChosen();
 		break;
 	case SCI_LINEEND:
@@ -6505,6 +6510,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_LINEUPRECTEXTEND:
 	case SCI_CHARLEFTRECTEXTEND:
 	case SCI_CHARRIGHTRECTEXTEND:
+	case SCI_HOMERECTEXTEND:
 	case SCI_VCHOMERECTEXTEND:
 	case SCI_LINEENDRECTEXTEND:
 	case SCI_PAGEUPRECTEXTEND:

@@ -1224,7 +1224,7 @@ fun void LineEndDisplayExtend=2348(,)
 # except they behave differently when word-wrap is enabled:
 # They go first to the start / end of the display line, like (Home|LineEnd)Display
 # The difference is that, the cursor is already at the point, it goes on to the start
-# or end of the document line, as appropriate for (Home|LineEnd|VCHome)Extend.
+# or end of the document line, as appropriate for (Home|LineEnd|VCHome)(Extend)?.
 
 fun void HomeWrap=2349(,)
 fun void HomeWrapExtend=2450(,)
@@ -1483,29 +1483,34 @@ fun position GetLineSelEndPosition=2425(int line,)
 
 
 ## RectExtended rectangular selection moves
-# Move caret down one line extending rectangular selection to new caret position.
+# Move caret down one line, extending rectangular selection to new caret position.
 fun void LineDownRectExtend=2426(,)
 
-# Move caret up one line extending rectangular selection to new caret position.
+# Move caret up one line, extending rectangular selection to new caret position.
 fun void LineUpRectExtend=2427(,)
 
-# Move caret left one character extending rectangular selection to new caret position.
+# Move caret left one character, extending rectangular selection to new caret position.
 fun void CharLeftRectExtend=2428(,)
 
-# Move caret right one character extending rectangular selection to new caret position.
+# Move caret right one character, extending rectangular selection to new caret position.
 fun void CharRightRectExtend=2429(,)
 
-# Move caret to first position on line extending rectangular selection to new caret position.
-fun void VCHomeRectExtend=2430(,)
+# Move caret to first position on line, extending rectangular selection to new caret position.
+fun void HomeRectExtend=2430(,)
 
-# Move caret to last position on line extending rectangular selection to new caret position.
-fun void LineEndRectExtend=2431(,)
+# Move caret to before first visible character on line.
+# If already there move to first character on line.
+# In either case, extend rectangular selection to new caret position.
+fun void VCHomeRectExtend=2431(,)
 
-# Move caret one page up extending rectangular selection to new caret position.
-fun void PageUpRectExtend=2432(,)
+# Move caret to last position on line, extending rectangular selection to new caret position.
+fun void LineEndRectExtend=2432(,)
 
-# Move caret one page down extending rectangular selection to new caret position.
-fun void PageDownRectExtend=2433(,)
+# Move caret one page up, extending rectangular selection to new caret position.
+fun void PageUpRectExtend=2433(,)
+
+# Move caret one page down, extending rectangular selection to new caret position.
+fun void PageDownRectExtend=2434(,)
 
 
 # Start notifying the container of all key presses and commands.
