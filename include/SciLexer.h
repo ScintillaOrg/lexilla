@@ -210,4 +210,13 @@
 #define SCE_LUA_IDENTIFIER 11
 #define SCE_LUA_STRINGEOL 12
 
+// Lexical states for SCLEX_ERRORLIST
+#define SCE_ERR_DEFAULT 0
+#define SCE_ERR_PYTHON 1
+#define SCE_ERR_GCC 2
+#define SCE_ERR_MS 3
+#define SCE_ERR_CMD 4
+#define SCE_ERR_BORLAND 5
+#define SCE_ERR_PERL 6
+
 #endif

@@ -166,15 +166,21 @@ static void ColouriseMakeDoc(unsigned int startPos, int length, int, WordList *[
 static void ColouriseErrorListLine(char *lineBuffer, int lengthLine, int endPos, Accessor &styler) {
 	if (lineBuffer[0] == '>') {
 		// Command or return status
-		styler.ColourTo(endPos, 4);
+		styler.ColourTo(endPos, SCE_ERR_CMD);
 	} else if (strstr(lineBuffer, "File \"") && strstr(lineBuffer, ", line ")) {
-		styler.ColourTo(endPos, 1);
+		styler.ColourTo(endPos, SCE_ERR_PYTHON);
 	} else if (0 == strncmp(lineBuffer, "Error ", strlen("Error "))) {
 		// Borland error message
-		styler.ColourTo(endPos, 5);
+		styler.ColourTo(endPos, SCE_ERR_BORLAND);
 	} else if (0 == strncmp(lineBuffer, "Warning ", strlen("Warning "))) {
 		// Borland warning message
-		styler.ColourTo(endPos, 5);
+		styler.ColourTo(endPos, SCE_ERR_BORLAND);
+	} else if (strstr(lineBuffer, " at "  ) && 
+		strstr(lineBuffer, " at "  ) < lineBuffer+lengthLine && 
+		strstr(lineBuffer, " line ") && 
+		strstr(lineBuffer, " line ") < lineBuffer+lengthLine) {
+		// perl error message
+		styler.ColourTo(endPos, SCE_ERR_PERL);
 	} else {
 		// Look for <filename>:<line>:message
 		// Look for <filename>(line)message
@@ -208,11 +214,11 @@ static void ColouriseErrorListLine(char *lineBuffer, int lengthLine, int endPos,
 			}
 		}
 		if (state == 3) {
-			styler.ColourTo(endPos, 2);
+			styler.ColourTo(endPos, SCE_ERR_GCC);
 		} else if ((state == 13) || (state == 14) || (state == 15)) {
-			styler.ColourTo(endPos, 3);
+			styler.ColourTo(endPos, SCE_ERR_MS);
 		} else {
-			styler.ColourTo(endPos, 0);
+			styler.ColourTo(endPos, SCE_ERR_DEFAULT);
 		}
 	}
 }

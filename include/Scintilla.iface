@@ -1233,6 +1233,13 @@ val SCE_LUA_PREPROCESSOR=9
 val SCE_LUA_OPERATOR=10
 val SCE_LUA_IDENTIFIER=11
 val SCE_LUA_STRINGEOL=12
+val SCE_ERR_DEFAULT=0
+val SCE_ERR_PYTHON=1
+val SCE_ERR_GCC=2
+val SCE_ERR_MS=3
+val SCE_ERR_CMD=4
+val SCE_ERR_BORLAND=5
+val SCE_ERR_PERL=6
 
 ################################################
 # From WinDefs.h
