@@ -490,7 +490,7 @@ void SurfaceImpl::FillRectangle(PRectangle rc, ColourAllocated back) {
 	// There is no need to allocate a brush either.
 	RECT rcw = RectFromPRectangle(rc);
 	::SetBkColor(hdc, back.AsLong());
-	::ExtTextOut(hdc, rc.left, rc.top, ETO_OPAQUE, &rcw, "", 0, NULL);
+	::ExtTextOut(hdc, rc.left, rc.top, ETO_OPAQUE, &rcw, TEXT(""), 0, NULL);
 }
 
 void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern) {
@@ -835,9 +835,9 @@ void Window::SetCursor(Cursor curs) {
 		break;
 	case cursorReverseArrow: {
 			if (!hinstPlatformRes)
-				hinstPlatformRes = ::GetModuleHandle("Scintilla");
+				hinstPlatformRes = ::GetModuleHandle(TEXT("Scintilla"));
 			if (!hinstPlatformRes)
-				hinstPlatformRes = ::GetModuleHandle("SciLexer");
+				hinstPlatformRes = ::GetModuleHandle(TEXT("SciLexer"));
 			if (!hinstPlatformRes)
 				hinstPlatformRes = ::GetModuleHandle(NULL);
 			HCURSOR hcursor = ::LoadCursor(hinstPlatformRes, MAKEINTRESOURCE(IDC_MARGIN));
@@ -966,7 +966,7 @@ void ListBoxX::Create(Window &parent, int ctrlID, int lineHeight_, bool unicodeM
 	unicodeMode = unicodeMode_;
 	HINSTANCE hinstanceParent = GetWindowInstance(reinterpret_cast<HWND>(parent.GetID()));
 	id = ::CreateWindowEx(
-		WS_EX_WINDOWEDGE, ListBoxX_ClassName, "",
+		WS_EX_WINDOWEDGE, ListBoxX_ClassName, TEXT(""),
 		WS_CHILD | WS_THICKFRAME,
 		100,100, 150,80, reinterpret_cast<HWND>(parent.GetID()),
 		reinterpret_cast<HMENU>(ctrlID),
@@ -1136,7 +1136,7 @@ long ListBoxX::WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		HINSTANCE hinstanceParent = GetWindowInstance(parent);
 		CREATESTRUCT *pCreate = reinterpret_cast<CREATESTRUCT *>(lParam);
 		::CreateWindowEx(
-			WS_EX_WINDOWEDGE, "listbox", "",
+			WS_EX_WINDOWEDGE, TEXT("listbox"), TEXT(""),
 			WS_CHILD | WS_VSCROLL | WS_VISIBLE |
 			LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | LBS_NOTIFY,
 			0, 0, 150,80, hWnd,
@@ -1441,7 +1441,7 @@ int Platform::Clamp(int val, int minVal, int maxVal) {
 }
 
 void Platform_Initialise(void *hInstance) {
-	OSVERSIONINFO osv = {sizeof(OSVERSIONINFO),0,0,0,0,""};
+	OSVERSIONINFO osv = {sizeof(OSVERSIONINFO),0,0,0,0,TEXT("")};
 	::GetVersionEx(&osv);
 	onNT = osv.dwPlatformId == VER_PLATFORM_WIN32_NT;
 	::InitializeCriticalSection(&crPlatformLock);

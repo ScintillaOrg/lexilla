@@ -1279,7 +1279,7 @@ void ScintillaWin::Paste() {
 void ScintillaWin::CreateCallTipWindow(PRectangle) {
 #ifdef TOTAL_CONTROL
 	if (!ct.wCallTip.Created()) {
-		ct.wCallTip = ::CreateWindow(callClassName, "ACallTip",
+		ct.wCallTip = ::CreateWindow(callClassName, TEXT("ACallTip"),
 					     WS_POPUP, 100, 100, 150, 20,
 					     MainHWND(), 0,
 					     GetWindowInstance(MainHWND()),
@@ -1632,7 +1632,7 @@ void ScintillaWin::ImeStartComposition() {
 			// Since the style creation code has been made platform independent,
 			// The logfont for the IME is recreated here.
 			int styleHere = (pdoc->StyleAt(currentPos)) & 31;
-			LOGFONT lf = {0,0,0,0,0,0,0,0,0,0,0,0,0,""};
+			LOGFONT lf = {0,0,0,0,0,0,0,0,0,0,0,0,0,TEXT("")};
 			int sizeZoomed = vs.styles[styleHere].size + vs.zoomLevel;
 			if (sizeZoomed <= 2)	// Hangs if sizeZoomed <= 1
 				sizeZoomed = 2;
