@@ -17,6 +17,9 @@
 ##     set -> a property set function
 ##     val -> definition of a constant
 ##     evt -> an event
+##     enu -> associate an enumeration with a set of vals with a prefix
+##     lex -> associate a lexer with the lexical classes it produces
+##
 ## All other feature names should be ignored. They may be defined in the future.
 ## A property may have a set function, a get function or both. Each will have
 ## "Get" or "Set" in their names and the corresponding name will have the obvious switch.
@@ -31,6 +34,16 @@
 ## The feature numbers are stable so features will not be renumbered.
 ## Features may be removed but they will go through a period of deprecation
 ## before removal which is signalled by moving them into the Deprecated category.
+##
+## enu has the syntax enu<ws><numeration>=<prefix>[<ws><prefix>]* where all the val 
+## features in this file starting with a given <prefix> are considered part of the 
+## enumeration.
+##
+## lex has the syntax lex<ws><name>=<lexerVal><ws><prefix>[<ws><prefix>]* 
+## where name is a reasonably capitalised (Python, XML) identifier or UI name,
+## lexerVal is the val used to specify the lexer, and the list of prefixes is similar
+## to enu. The name may not be the same as that used within the lexer so the lexerVal
+## should be used to tie these entities together.
 
 ## Types:
 ##     void
@@ -133,6 +146,7 @@ fun void MarkerDeleteHandle=2018(int handle,)
 # Is undo history being collected?
 get bool GetUndoCollection=2019(,)
 
+enu WhiteSpace=SCWS_
 val SCWS_INVISIBLE=0
 val SCWS_VISIBLEALWAYS=1
 val SCWS_VISIBLEAFTERINDENT=2
@@ -168,6 +182,7 @@ fun int GetCurLine=2027(int length, stringresult text)
 # Retrieve the position of the last correctly styled character.
 get position GetEndStyled=2028(,)
 
+enu EndOfLine=SC_EOL_
 val SC_EOL_CRLF=0
 val SC_EOL_CR=1
 val SC_EOL_LF=2
@@ -216,6 +231,7 @@ set void SetCodePage=2037(int codePage,)
 # more colours. This may lead to ugly displays.
 set void SetUsePalette=2039(bool usePalette,)
 
+enu MarkerSymbol=SC_MARK_
 val MARKER_MAX=31
 val SC_MARK_CIRCLE=0
 val SC_MARK_ROUNDRECT=1
@@ -247,6 +263,7 @@ val SC_MARK_BACKGROUND=22
 
 val SC_MARK_CHARACTER=10000
 
+enu MarkerOutline=SC_MARKNUM_
 # Markers used for outlining column
 val SC_MARKNUM_FOLDEREND=25
 val SC_MARKNUM_FOLDEROPENMID=26
@@ -285,6 +302,7 @@ fun int MarkerNext=2047(int lineStart, int markerMask)
 # Find the previous line before lineStart that includes a marker in mask.
 fun int MarkerPrevious=2048(int lineStart, int markerMask)
 
+enu MarginType=SC_MARGIN_
 val SC_MARGIN_SYMBOL=0
 val SC_MARGIN_NUMBER=1
 
@@ -314,6 +332,7 @@ get bool GetMarginSensitiveN=2247(int margin,)
 
 # Styles in range 32..37 are predefined for parts of the UI and are not used as normal styles.
 # Styles 38 and 39 are for future use.
+enu StylesCommon=STYLE_
 val STYLE_DEFAULT=32
 val STYLE_LINENUMBER=33
 val STYLE_BRACELIGHT=34
@@ -325,6 +344,7 @@ val STYLE_MAX=127
 
 # Character set identifiers are used in StyleSetCharacterSet.
 # The values are the same as the Windows *_CHARSET values.
+enu CharacterSet=SC_CHARSET_
 val SC_CHARSET_ANSI=0
 val SC_CHARSET_DEFAULT=1
 val SC_CHARSET_BALTIC=186
@@ -375,6 +395,7 @@ fun void StyleResetDefault=2058(,)
 # Set a style to be underlined or not.
 set void StyleSetUnderline=2059(int style, bool underline)
 
+enu CaseVisible=SC_CASE_
 val SC_CASE_MIXED=0
 val SC_CASE_UPPER=1
 val SC_CASE_LOWER=2
@@ -425,6 +446,7 @@ fun void BeginUndoAction=2078(,)
 # End a sequence of actions that is undone and redone as a unit.
 fun void EndUndoAction=2079(,)
 
+enu IndicatorStyle=INDIC_
 val INDIC_MAX=7
 val INDIC_PLAIN=0
 val INDIC_SQUIGGLE=1
@@ -630,6 +652,7 @@ set void SetPrintMagnification=2146(int magnification,)
 # Returns the print magnification.
 get int GetPrintMagnification=2147(,)
 
+enu PrintOption=SC_PRINT_
 # PrintColourMode - use same colours as screen.
 val SC_PRINT_NORMAL=0
 # PrintColourMode - invert the light value of each style for printing.
@@ -647,6 +670,7 @@ set void SetPrintColourMode=2148(int mode,)
 # Returns the print colour mode.
 get int GetPrintColourMode=2149(,)
 
+enu FindOption=SCFIND_
 val SCFIND_WHOLEWORD=2
 val SCFIND_MATCHCASE=4
 val SCFIND_WORDSTART=0x00100000
@@ -839,6 +863,7 @@ fun int VisibleFromDocLine=2220(int line,)
 # Find the document line of a display line taking hidden lines into account.
 fun int DocLineFromVisible=2221(int lineDisplay,)
 
+enu FoldLevel=SC_FOLDLEVEL
 val SC_FOLDLEVELBASE=0x400
 val SC_FOLDLEVELWHITEFLAG=0x1000
 val SC_FOLDLEVELHEADERFLAG=0x2000
@@ -912,6 +937,7 @@ fun int WordStartPosition=2266(position pos, bool onlyWordCharacters)
 # Get position of end of word.
 fun int WordEndPosition=2267(position pos, bool onlyWordCharacters)
 
+enu Wrap=SC_WRAP_
 val SC_WRAP_NONE=0
 val SC_WRAP_WORD=1
 
@@ -921,6 +947,7 @@ set void SetWrapMode=2268(int mode,)
 # Retrieve whether text is word wrapped.
 get int GetWrapMode=2269(,)
 
+enu LineCache=SC_CACHE_
 val SC_CACHE_NONE=0
 val SC_CACHE_CARET=1
 val SC_CACHE_PAGE=2
@@ -1122,6 +1149,7 @@ set void SetDocPointer=2358(,int pointer)
 # Set which document modification events are sent to the container.
 set void SetModEventMask=2359(int mask,)
 
+enu EdgeVisualStyle=EDGE_
 val EDGE_NONE=0
 val EDGE_LINE=1
 val EDGE_BACKGROUND=2
@@ -1217,6 +1245,7 @@ set void SetMouseDownCaptures=2384(bool captures,)
 # Get whether mouse gets captured
 get bool GetMouseDownCaptures=2385(,)
 
+enu CursorShape=SC_CURSOR
 val SC_CURSORNORMAL=-1
 val SC_CURSORWAIT=3
 # Sets the cursor to one of the SC_CURSOR* values
@@ -1287,6 +1316,7 @@ set void SetLexerLanguage=4006(, string language)
 # Type of modification and the action which caused the modification
 # These are defined as a bit mask to make it easy to specify which notifications are wanted.
 # One bit is set from each of SC_MOD_* and SC_PERFORMED_*.
+enu ModificationFlags=SC_MOD_ SC_PERFORMED_ SC_LAST
 val SC_MOD_INSERTTEXT=0x1
 val SC_MOD_DELETETEXT=0x2
 val SC_MOD_CHANGESTYLE=0x4
@@ -1310,6 +1340,7 @@ val SCEN_KILLFOCUS=256
 # ASCII and other printable characters below 256
 # Extended keys above 300
 
+enu Keys=SCK_
 val SCK_DOWN=300
 val SCK_UP=301
 val SCK_LEFT=302
@@ -1328,12 +1359,14 @@ val SCK_ADD=310
 val SCK_SUBTRACT=311
 val SCK_DIVIDE=312
 
+val KeyMod=SCMOD_
 val SCMOD_SHIFT=1
 val SCMOD_CTRL=2
 val SCMOD_ALT=4
 
 ################################################
 # For SciLexer.h
+val Lexer=SCLEX_
 val SCLEX_CONTAINER=0
 val SCLEX_NULL=1
 val SCLEX_PYTHON=2
@@ -1372,6 +1405,8 @@ val SCLEX_MATLAB=32
 # value assigned in sequence from SCLEX_AUTOMATIC+1.
 val SCLEX_AUTOMATIC=1000
 # Lexical states for SCLEX_PYTHON
+lex Python=SCLEX_PYTHON SCE_P_
+lex Ruby=SCLEX_RUBY SCE_P_
 val SCE_P_DEFAULT=0
 val SCE_P_COMMENTLINE=1
 val SCE_P_NUMBER=2
@@ -1387,6 +1422,11 @@ val SCE_P_IDENTIFIER=11
 val SCE_P_COMMENTBLOCK=12
 val SCE_P_STRINGEOL=13
 # Lexical states for SCLEX_CPP
+lex Cpp=SCLEX_CPP SCE_C_
+lex SQL=SCLEX_SQL SCE_C_
+lex Pascal=SCLEX_PASCAL SCE_C_
+lex TCL=SCLEX_TCL SCE_C_
+lex BullAnt=SCLEX_BULLANT SCE_C_
 val SCE_C_DEFAULT=0
 val SCE_C_COMMENT=1
 val SCE_C_COMMENTLINE=2
@@ -1406,17 +1446,11 @@ val SCE_C_COMMENTLINEDOC=15
 val SCE_C_WORD2=16
 val SCE_C_COMMENTDOCKEYWORD=17
 val SCE_C_COMMENTDOCKEYWORDERROR=18
-# Lexical states for SCLEX_VB, SCLEX_VBSCRIPT
-val SCE_B_DEFAULT=0
-val SCE_B_COMMENT=1
-val SCE_B_NUMBER=2
-val SCE_B_KEYWORD=3
-val SCE_B_STRING=4
-val SCE_B_PREPROCESSOR=5
-val SCE_B_OPERATOR=6
-val SCE_B_IDENTIFIER=7
-val SCE_B_DATE=8
 # Lexical states for SCLEX_HTML, SCLEX_XML
+lex HTML=SCLEX_HTML SCE_H
+lex XML=SCLEX_XML SCE_H
+lex ASP=SCLEX_ASP SCE_H
+lex PHP=SCLEX_PHP SCE_H
 val SCE_H_DEFAULT=0
 val SCE_H_TAG=1
 val SCE_H_TAGUNKNOWN=2
@@ -1539,6 +1573,7 @@ val SCE_HPHP_COMMENTLINE=125
 val SCE_HPHP_HSTRING_VARIABLE=126
 val SCE_HPHP_OPERATOR=127
 # Lexical states for SCLEX_PERL
+lex Perl=SCLEX_PERL SCE_PL_
 val SCE_PL_DEFAULT=0
 val SCE_PL_ERROR=1
 val SCE_PL_COMMENTLINE=2
@@ -1569,13 +1604,34 @@ val SCE_PL_STRING_QQ=27
 val SCE_PL_STRING_QX=28
 val SCE_PL_STRING_QR=29
 val SCE_PL_STRING_QW=30
+# Lexical states for SCLEX_VB, SCLEX_VBSCRIPT
+lex VB=SCLEX_VB SCE_B_
+lex VBScript=SCLEX_VBSCRIPT SCE_B_
+val SCE_B_DEFAULT=0
+val SCE_B_COMMENT=1
+val SCE_B_NUMBER=2
+val SCE_B_KEYWORD=3
+val SCE_B_STRING=4
+val SCE_B_PREPROCESSOR=5
+val SCE_B_OPERATOR=6
+val SCE_B_IDENTIFIER=7
+val SCE_B_DATE=8
+# Lexical states for SCLEX_PROPERTIES
+lex Properties=SCLEX_PROPERTIES SCE_PROPS_
+val SCE_PROPS_DEFAULT=0
+val SCE_PROPS_COMMENT=1
+val SCE_PROPS_SECTION=2
+val SCE_PROPS_ASSIGNMENT=3
+val SCE_PROPS_DEFVAL=4
 # Lexical states for SCLEX_LATEX
+lex LaTeX=SCLEX_LATEX SCE_L_
 val SCE_L_DEFAULT=0
 val SCE_L_COMMAND=1
 val SCE_L_TAG=2
 val SCE_L_MATH=3
 val SCE_L_COMMENT=4
 # Lexical states for SCLEX_LUA
+lex Lua=SCLEX_LUA SCE_LUA_
 val SCE_LUA_DEFAULT=0
 val SCE_LUA_COMMENT=1
 val SCE_LUA_COMMENTLINE=2
@@ -1595,6 +1651,7 @@ val SCE_LUA_WORD4=15
 val SCE_LUA_WORD5=16
 val SCE_LUA_WORD6=17
 # Lexical states for SCLEX_ERRORLIST
+lex ErrorList=SCLEX_ERRORLIST SCE_ERR_
 val SCE_ERR_DEFAULT=0
 val SCE_ERR_PYTHON=1
 val SCE_ERR_GCC=2
@@ -1610,6 +1667,7 @@ val SCE_ERR_DIFF_ADDITION=11
 val SCE_ERR_DIFF_DELETION=12
 val SCE_ERR_DIFF_MESSAGE=13
 # Lexical states for SCLEX_BATCH
+lex Batch=SCLEX_BATCH SCE_BAT_
 val SCE_BAT_DEFAULT=0
 val SCE_BAT_COMMENT=1
 val SCE_BAT_WORD=2
@@ -1619,6 +1677,7 @@ val SCE_BAT_COMMAND=5
 val SCE_BAT_IDENTIFIER=6
 val SCE_BAT_OPERATOR=7
 # Lexical states for SCLEX_MAKEFILE
+lex MakeFile=SCLEX_MAKEFILE SCE_MAKE_
 val SCE_MAKE_DEFAULT=0
 val SCE_MAKE_COMMENT=1
 val SCE_MAKE_PREPROCESSOR=2
@@ -1627,6 +1686,7 @@ val SCE_MAKE_OPERATOR=4
 val SCE_MAKE_TARGET=5
 val SCE_MAKE_IDEOL=9
 # Lexical states for SCLEX_DIFF
+lex Diff=SCLEX_DIFF SCE_DIFF_
 val SCE_DIFF_DEFAULT=0
 val SCE_DIFF_COMMENT=1
 val SCE_DIFF_COMMAND=2
@@ -1634,7 +1694,8 @@ val SCE_DIFF_HEADER=3
 val SCE_DIFF_POSITION=4
 val SCE_DIFF_DELETED=5
 val SCE_DIFF_ADDED=6
-# Lexical states for the SCLEX_CONF (Apache Configuration Files Lexer)
+# Lexical states for SCLEX_CONF (Apache Configuration Files Lexer)
+lex Conf=SCLEX_CONF SCE_CONF_
 val SCE_CONF_DEFAULT=0
 val SCE_CONF_COMMENT=1
 val SCE_CONF_NUMBER=2
@@ -1645,7 +1706,8 @@ val SCE_CONF_STRING=6
 val SCE_CONF_OPERATOR=7
 val SCE_CONF_IP=8
 val SCE_CONF_DIRECTIVE=9
-# Avenue
+# Lexical states for SCLEX_AVE, Avenue
+lex Avenue=SCLEX_AVE SCE_AVE_
 val SCE_AVE_DEFAULT=0
 val SCE_AVE_COMMENT=1
 val SCE_AVE_NUMBER=2
@@ -1658,6 +1720,7 @@ val SCE_AVE_STRINGEOL=8
 val SCE_AVE_IDENTIFIER=9
 val SCE_AVE_OPERATOR=10
 # Lexical states for SCLEX_ADA
+lex Ada=SCLEX_ADA SCE_ADA_
 val SCE_ADA_DEFAULT=0
 val SCE_ADA_COMMENT=1
 val SCE_ADA_NUMBER=2
@@ -1668,6 +1731,7 @@ val SCE_ADA_OPERATOR=6
 val SCE_ADA_IDENTIFIER=7
 val SCE_ADA_STRINGEOL=8
 # Lexical states for SCLEX_BAAN
+lex Baan=SCLEX_BAAN SCE_BAAN_
 val SCE_BAAN_DEFAULT=0
 val SCE_BAAN_COMMENT=1
 val SCE_BAAN_COMMENTDOC=2
@@ -1680,6 +1744,7 @@ val SCE_BAAN_IDENTIFIER=8
 val SCE_BAAN_STRINGEOL=9
 val SCE_BAAN_WORD2=10
 # Lexical states for SCLEX_LISP
+lex Lisp=SCLEX_LISP SCE_LISP_
 val SCE_LISP_DEFAULT=0
 val SCE_LISP_COMMENT=1
 val SCE_LISP_NUMBER=2
@@ -1689,6 +1754,8 @@ val SCE_LISP_STRINGEOL=8
 val SCE_LISP_IDENTIFIER=9
 val SCE_LISP_OPERATOR=10
 # Lexical states for SCLEX_EIFFEL and SCLEX_EIFFELKW
+lex Eiffel=SCLEX_EIFFEL SCE_EIFFEL_
+lex EiffelKW=SCLEX_EIFFELKW SCE_EIFFEL_
 val SCE_EIFFEL_DEFAULT=0
 val SCE_EIFFEL_COMMENTLINE=1
 val SCE_EIFFEL_NUMBER=2
@@ -1698,7 +1765,8 @@ val SCE_EIFFEL_CHARACTER=5
 val SCE_EIFFEL_OPERATOR=6
 val SCE_EIFFEL_IDENTIFIER=7
 val SCE_EIFFEL_STRINGEOL=8
-# Lexical states for the SCLEX_NNCRONTAB (nnCron crontab Lexer)
+# Lexical states for SCLEX_NNCRONTAB (nnCron crontab Lexer)
+lex NNCronTab=SCLEX_NNCRONTAB SCE_NNCRONTAB_
 val SCE_NNCRONTAB_DEFAULT=0
 val SCE_NNCRONTAB_COMMENT=1
 val SCE_NNCRONTAB_TASK=2
@@ -1711,6 +1779,7 @@ val SCE_NNCRONTAB_STRING=8
 val SCE_NNCRONTAB_ENVIRONMENT=9
 val SCE_NNCRONTAB_IDENTIFIER=10
 # Lexical states for SCLEX_MATLAB
+lex MatLab=SCLEX_MATLAB SCE_MATLAB_
 val SCE_MATLAB_DEFAULT=0
 val SCE_MATLAB_COMMENT=1
 val SCE_MATLAB_COMMAND=2
