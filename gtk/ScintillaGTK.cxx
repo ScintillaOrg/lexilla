@@ -1550,7 +1550,7 @@ guint scintilla_get_type() {
 	static guint scintilla_type = 0;
 
 	if (!scintilla_type) {
-		GtkTypeInfo scintilla_info = {
+		static GtkTypeInfo scintilla_info = {
 		    "Scintilla",
 		    sizeof (ScintillaObject),
 		    sizeof (ScintillaClass),
