@@ -747,6 +747,16 @@ struct TextToFind {
 
     <h2 id="CutCopyAndPaste">Cut, copy and paste</h2>
 
+    <code><a class="message" href="#SCI_CUT">SCI_CUT</a><br />
+     <a class="message" href="#SCI_COPY">SCI_COPY</a><br />
+     <a class="message" href="#SCI_PASTE">SCI_PASTE</a><br />
+     <a class="message" href="#SCI_CLEAR">SCI_CLEAR</a><br />
+     <a class="message" href="#SCI_CANPASTE">SCI_CANPASTE</a><br />
+     <a class="message" href="#SCI_COPYRANGE">SCI_COPYRANGE(int start, int end)</a><br />
+     <a class="message" href="#SCI_COPYTEXT">SCI_COPYTEXT(int length,
+     const char *text)</a><br />
+    </code>
+
     <p><b id="SCI_CUT">SCI_CUT</b><br />
      <b id="SCI_COPY">SCI_COPY</b><br />
      <b id="SCI_PASTE">SCI_PASTE</b><br />
@@ -761,6 +771,12 @@ struct TextToFind {
 
     <p>GTK+ does not really support <code>SCI_CANPASTE</code> and always returns <code>TRUE</code>
     unless the document is read-only.</p>
+
+     <b id="SCI_COPYRANGE">SCI_COPYRANGE(int start, int end)</b><br />
+     <b id="SCI_COPYTEXT">SCI_COPYTEXT(int length, const char *text)</b><br />
+    <p><code>SCI_COPYRANGE</code> copies a range of text from the document to
+    the system clipboard and <code>SCI_COPYTEXT</code> copies a supplied piece of
+    text to the system clipboard.</p>
 
     <h2 id="ErrorHandling">Error handling</h2>
 
@@ -3166,40 +3182,44 @@ struct TextToFind {
         <tr>
           <td><code>SCI_LINECUT</code></td>
 
+          <td><code>SCI_LINECOPY</code></td>
+
           <td><code>SCI_LINEDELETE</code></td>
 
           <td><code>SCI_LINETRANSPOSE</code></td>
-
-          <td><code>SCI_LINEDUPLICATE</code></td>
         </tr>
 
         <tr>
+          <td><code>SCI_LINEDUPLICATE</code></td>
+
           <td><code>SCI_LOWERCASE</code></td>
 
           <td><code>SCI_UPPERCASE</code></td>
 
           <td><code>SCI_WORDPARTLEFT</code></td>
-
-          <td><code>SCI_WORDPARTLEFTEXTEND</code></td>
         </tr>
 
         <tr>
+          <td><code>SCI_WORDPARTLEFTEXTEND</code></td>
+
           <td><code>SCI_WORDPARTRIGHT</code></td>
 
           <td><code>SCI_WORDPARTRIGHTEXTEND</code></td>
 
           <td><code>SCI_HOMEDISPLAY</code></td>
-
-          <td><code>SCI_HOMEDISPLAYEXTEND</code></td>
         </tr>
 
         <tr>
+          <td><code>SCI_HOMEDISPLAYEXTEND</code></td>
+
           <td><code>SCI_LINEENDDISPLAY</code></td>
 
           <td><code>SCI_LINEENDDISPLAYEXTEND</code></td>
 
           <td><code>SCI_VCHOMEWRAP</code></td>
+        </tr>
 
+        <tr>
           <td><code>SCI_VCHOMEWRAPEXTEND</code></td>
         </tr>
       </tbody>

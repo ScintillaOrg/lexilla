@@ -137,6 +137,7 @@ private:
 	void NotifyKey(int key, int modifiers);
 	void NotifyURIDropped(const char *list);
 	virtual int KeyDefault(int key, int modifiers);
+	virtual void CopyToClipboard(const SelectionText &selectedText);
 	virtual void Copy();
 	virtual void Paste();
 	virtual void CreateCallTipWindow(PRectangle rc);
@@ -908,6 +909,13 @@ int ScintillaGTK::KeyDefault(int key, int modifiers) {
 		return 0;
 	}
 	//Platform::DebugPrintf("SK-key: %d %x %x\n",key, modifiers);
+}
+
+void ScintillaGTK::CopyToClipboard(const SelectionText &selectedText) {
+	copyText.Copy(selectedText.s, selectedText.len);
+	gtk_selection_owner_set(GTK_WIDGET(PWidget(wMain)),
+				clipboard_atom,
+				GDK_CURRENT_TIME);
 }
 
 void ScintillaGTK::Copy() {

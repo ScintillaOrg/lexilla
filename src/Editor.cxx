@@ -3441,6 +3441,7 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	case SCI_DELWORDRIGHT:
 	case SCI_DELLINELEFT:
 	case SCI_DELLINERIGHT:
+	case SCI_LINECOPY:
 	case SCI_LINECUT:
 	case SCI_LINEDELETE:
 	case SCI_LINETRANSPOSE:
@@ -3879,6 +3880,13 @@ int Editor::KeyCommand(unsigned int iMessage) {
 			pdoc->DeleteChars(currentPos, end - currentPos);
 		}
 		break;
+	case SCI_LINECOPY: {
+			int lineStart = pdoc->LineFromPosition(SelectionStart());
+			int lineEnd = pdoc->LineFromPosition(SelectionEnd());
+			CopyRangeToClipboard(pdoc->LineStart(lineStart),
+				pdoc->LineStart(lineEnd + 1));
+		}
+		break;
 	case SCI_LINECUT: {
 			int lineStart = pdoc->LineFromPosition(currentPos);
 			int lineEnd = pdoc->LineFromPosition(anchor);
@@ -3891,6 +3899,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 			int end = pdoc->LineStart(lineEnd + 1);
 			SetSelection(start, end);
 			Cut();
+			SetLastXChosen();
 		}
 		break;
 	case SCI_LINEDELETE: {
@@ -4187,10 +4196,14 @@ char *Editor::CopyRange(int start, int end) {
 	return text;
 }
 
+void Editor::CopySelectionFromRange(SelectionText *ss, int start, int end) {
+	ss->Set(CopyRange(start, end), end - start, false);
+}
+
 void Editor::CopySelectionRange(SelectionText *ss) {
-	char *text = 0;
-	int size = 0;
 	if (selType == selRectangle) {
+		char *text = 0;
+		int size = 0;
 		int lineStart = pdoc->LineFromPosition(SelectionStart());
 		int lineEnd = pdoc->LineFromPosition(SelectionEnd());
 		int line;
@@ -4215,11 +4228,22 @@ void Editor::CopySelectionRange(SelectionText *ss) {
 				text[size] = '\0';
 			}
 		}
+		ss->Set(text, size, true);
 	} else {
-		size = SelectionEnd() - SelectionStart();
-		text = CopyRange(SelectionStart(), SelectionEnd());
+		CopySelectionFromRange(ss, SelectionStart(), SelectionEnd());
 	}
-	ss->Set(text, size, selType == selRectangle);
+}
+
+void Editor::CopyRangeToClipboard(int start, int end) {
+	SelectionText selectedText;
+	selectedText.Set(CopyRange(start, end), end - start);
+	CopyToClipboard(selectedText);
+}
+
+void Editor::CopyText(int length, const char *text) {
+	SelectionText selectedText;
+	selectedText.Copy(text, length);
+	CopyToClipboard(selectedText);
 }
 
 void Editor::SetDragPosition(int newPos) {
@@ -5044,6 +5068,14 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_COPY:
 		Copy();
+		break;
+
+	case SCI_COPYRANGE:
+		CopyRangeToClipboard(wParam, lParam);
+		break;
+
+	case SCI_COPYTEXT:
+		CopyText(wParam, CharPtrFromSPtr(lParam));
 		break;
 
 	case SCI_PASTE:
@@ -6187,6 +6219,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_DELWORDRIGHT:
 	case SCI_DELLINELEFT:
 	case SCI_DELLINERIGHT:
+	case SCI_LINECOPY:
 	case SCI_LINECUT:
 	case SCI_LINEDELETE:
 	case SCI_LINETRANSPOSE:

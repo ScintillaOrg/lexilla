@@ -1231,6 +1231,9 @@ fun void LineEndWrapExtend=2452(,)
 fun void VCHomeWrap=2453(,)
 fun void VCHomeWrapExtend=2454(,)
 
+# Copy the line containing the caret.
+fun void LineCopy=2455(,)
+
 # Move the caret inside current view if it's not there already.
 fun void MoveCaretInsideView=2401(,)
 
@@ -1448,6 +1451,12 @@ fun position PositionBefore=2417(position pos,)
 # Given a valid document position, return the next position taking code
 # page into account. Maximum value returned is the last position in the document.
 fun position PositionAfter=2418(position pos,)
+
+# Copy a range of text to the clipboard. Positions are clipped into the document.
+fun void CopyRange=2419(position start, position end)
+
+# Copy argument text to the clipboard.
+fun void CopyText=2420(int length, string text)
 
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)

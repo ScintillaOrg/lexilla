@@ -220,7 +220,7 @@ class ScintillaWin :
 	void AddCharBytes(char b0, char b1=0);
 
 	void GetIntelliMouseParameters();
-	void CopySelTextToClipboard();
+	virtual void CopyToClipboard(const SelectionText &selectedText);
 	void ScrollMessage(WPARAM wParam);
 	void HorizontalScrollMessage(WPARAM wParam);
 	void RealizeWindowPalette(bool inBackGround);
@@ -1036,13 +1036,9 @@ void ScintillaWin::NotifyDoubleClick(Point pt, bool shift) {
 void ScintillaWin::Copy() {
 	//Platform::DebugPrintf("Copy\n");
 	if (currentPos != anchor) {
-		::OpenClipboard(MainHWND());
-		::EmptyClipboard();
-		CopySelTextToClipboard();
-		if (selType == selRectangle) {
-			::SetClipboardData(cfColumnSelect, 0);
-		}
-		::CloseClipboard();
+		SelectionText selectedText;
+		CopySelectionRange(&selectedText);
+		CopyToClipboard(selectedText);
 	}
 }
 
@@ -1534,11 +1530,9 @@ void ScintillaWin::GetIntelliMouseParameters() {
 	::SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, &linesPerScroll, 0);
 }
 
-void ScintillaWin::CopySelTextToClipboard() {
-	SelectionText selectedText;
-	CopySelectionRange(&selectedText);
-	if (selectedText.len == 0)
-		return;
+void ScintillaWin::CopyToClipboard(const SelectionText &selectedText) {
+	::OpenClipboard(MainHWND());
+	::EmptyClipboard();
 
 	HGLOBAL hand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT,
 		selectedText.len + 1);
@@ -1562,6 +1556,12 @@ void ScintillaWin::CopySelTextToClipboard() {
 		}
 		::SetClipboardData(CF_UNICODETEXT, uhand);
 	}
+
+	if (selectedText.rectangular) {
+		::SetClipboardData(cfColumnSelect, 0);
+	}
+
+	::CloseClipboard();
 }
 
 void ScintillaWin::ScrollMessage(WPARAM wParam) {
