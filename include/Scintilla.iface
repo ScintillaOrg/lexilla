@@ -26,7 +26,8 @@
 ## A property may be subscripted, in which case the first parameter is the subscript.
 ## fun, get, and set features have a strict syntax:
 ## <featureType><ws><returnType><ws><name>[=<number](<param>,<param>)
-## param is <paramType><ws><paramName>[=<value>]
+## where <ws> stands for white space.
+## param may be empty (null value) or is <paramType><ws><paramName>[=<value>]
 ## Additional white space is allowed between elements.
 ## The syntax for evt is <featureType><ws><returnType><ws><name>[=<number]([<param>[,<param>]*])
 ## Feature names that contain an underscore are defined by Windows, so in these
@@ -80,7 +81,7 @@ cat Basics
 ################################################
 ## For Scintilla.h
 val INVALID_POSITION=-1
-# Define start of Scintilla messages to be greater than all edit (EM_*) messages
+# Define start of Scintilla messages to be greater than all Windows edit (EM_*) messages
 # as many EM_ messages can be used although that use is deprecated.
 val SCI_START=2000
 val SCI_OPTIONAL_START=3000
@@ -131,7 +132,7 @@ fun void SelectAll=2013(,)
 fun void SetSavePoint=2014(,)
 
 # Retrieve a buffer of cells.
-# Returns the number of bytes in the buffer not including terminating nulls.
+# Returns the number of bytes in the buffer not including terminating NULs.
 fun int GetStyledText=2015(, textrange tr)
 
 # Are there any redoable actions in the undo history?
@@ -427,7 +428,7 @@ set void SetCaretFore=2069(colour fore,)
 # When key+modifier combination km is pressed perform msg.
 fun void AssignCmdKey=2070(keymod km, int msg)
 
-# When key+modifier combination km do nothing.
+# When key+modifier combination km is pressed do nothing.
 fun void ClearCmdKey=2071(keymod km,)
 
 # Drop all key mappings.
@@ -745,7 +746,7 @@ fun void SetSel=2160(position start, position end)
 
 # Retrieve the selected text.
 # Return the length of the text.
-fun int GetSelText=2161(,stringresult text)
+fun int GetSelText=2161(, stringresult text)
 
 # Retrieve a range of text.
 # Return the length of the text.
@@ -849,12 +850,12 @@ set void SetTargetEnd=2192(position pos,)
 get position GetTargetEnd=2193(,)
 
 # Replace the target text with the argument text.
-# Text is counted so it can contain nulls.
+# Text is counted so it can contain NULs.
 # Returns the length of the replacement text.
 fun int ReplaceTarget=2194(int length, string text)
 
 # Replace the target text with the argument text after \d processing.
-# Text is counted so it can contain nulls.
+# Text is counted so it can contain NULs.
 # Looks for \d where d is between 1 and 9 and replaces these with the strings
 # matched in the last search operation which were surrounded by \( and \).
 # Returns the length of the replacement text including any change
@@ -862,7 +863,7 @@ fun int ReplaceTarget=2194(int length, string text)
 fun int ReplaceTargetRE=2195(int length, string text)
 
 # Search for a counted string in the target and set the target to the found
-# range. Text is counted so it can contain nulls.
+# range. Text is counted so it can contain NULs.
 # Returns length of range or -1 for failure in which case target is not moved.
 fun int SearchInTarget=2197(int length, string text)
 
@@ -1017,7 +1018,7 @@ set void SetScrollWidth=2274(int pixelWidth,)
 get int GetScrollWidth=2275(,)
 
 # Measure the pixel width of some text in a particular style.
-# Nul terminated text argument.
+# NUL terminated text argument.
 # Does not handle tab or control characters.
 fun int TextWidth=2276(int style, string text)
 
@@ -1262,7 +1263,7 @@ set void SetViewEOL=2356(bool visible,)
 get int GetDocPointer=2357(,)
 
 # Change the document object used.
-set void SetDocPointer=2358(,int pointer)
+set void SetDocPointer=2358(, int pointer)
 
 # Set which document modification events are sent to the container.
 set void SetModEventMask=2359(int mask,)
@@ -1387,7 +1388,7 @@ fun void DelLineRight=2396(,)
 set void SetXOffset=2397(int newOffset,)
 get int GetXOffset=2398(,)
 
-# Set the last x chosen value to be the caret x position
+# Set the last x chosen value to be the caret x position.
 fun void ChooseCaretX=2399(,)
 
 # Set the focus to this Scintilla widget.
@@ -1429,7 +1430,7 @@ fun void SetYCaretPolicy=2403(int caretPolicy, int caretSlop)
 # Set printing to line wrapped (SC_WRAP_WORD) or not line wrapped (SC_WRAP_NONE).
 set void SetPrintWrapMode=2406(int mode,)
 
-# Is printing line wrapped.
+# Is printing line wrapped?
 get int GetPrintWrapMode=2407(,)
 
 # Set a fore colour for active hotspots.
@@ -1444,7 +1445,7 @@ set void SetHotspotActiveUnderline=2412(bool underline,)
 # Limit hotspots to single line so hotspots on two lines don't merge.
 set void SetHotspotSingleLine=2421(bool singleLine,)
 
-# Move caret between paragraphs (delimited by empty lines)
+# Move caret between paragraphs (delimited by empty lines).
 fun void ParaDown=2413(,)
 fun void ParaDownExtend=2414(,)
 fun void ParaUp=2415(,)
@@ -1481,7 +1482,6 @@ fun position GetLineSelStartPosition=2424(int line,)
 
 # Retrieve the position of the end of the selection at the given line (INVALID_POSITION if no selection on this line).
 fun position GetLineSelEndPosition=2425(int line,)
-
 
 ## RectExtended rectangular selection moves
 # Move caret down one line, extending rectangular selection to new caret position.
@@ -1576,7 +1576,7 @@ set void SetKeyWords=4005(int keywordSet, string keyWords)
 # Set the lexing language of the document based on string name.
 set void SetLexerLanguage=4006(, string language)
 
-# Load a lexer library (dll / so)
+# Load a lexer library (dll / so).
 fun void LoadLexerLibrary=4007(, string path)
 
 # Notifications
