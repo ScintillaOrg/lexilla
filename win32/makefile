@@ -25,7 +25,7 @@ endif
 vpath %.h ../src ../include
 vpath %.cxx ../src
 
-LDFLAGS=-mwindows -lstdc++ -limm32 -lole32 -luuid
+LDFLAGS=-mwindows -lstdc++ -limm32 -lole32 -luuid -mno-cygwin
 # Add -MMD to get dependencies
 #CXXFLAGS = -g -pg -pedantic -Os -fno-exceptions -fvtable-thunks -fno-rtti
 INCLUDEDIRS=-I ../include -I ../src
