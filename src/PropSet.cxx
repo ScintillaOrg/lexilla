@@ -24,7 +24,7 @@ bool EqualCaseInsensitive(const char *a, const char *b) {
 #endif
 }
 
-unsigned int HashString(const char *s) {
+inline unsigned int HashString(const char *s) {
     unsigned int ret = 0;
     while (*s) {
         ret <<= 4;
@@ -66,46 +66,34 @@ static bool GetFullLine(const char *&fpc, int &lenData, char *s, int len) {
 
 PropSet::PropSet() {
 	superPS = 0;
-	size = 20;
-	used = 0;
-	properties = new Property[size];
+    for (int root=0; root < hashRoots; root++)
+        props[root] = 0;
 }
 
 PropSet::~PropSet() {
 	superPS = 0;
 	Clear();
-	delete []properties;
-}
-
-void PropSet::EnsureCanAddEntry() {
-	if (used >= size - 1) {
-		int newsize = size + 20;
-		Property *newprops = new Property[newsize];
-
-		for (int i = 0; i < used; i++) {
-			newprops[i] = properties[i];
-		}
-		delete []properties;
-		properties = newprops;
-		size = newsize;
-	}
 }
 
 void PropSet::Set(const char *key, const char *val) {
-	EnsureCanAddEntry();
-	for (int i = 0; i < used; i++) {
-		if (0 == strcmp(properties[i].key, key)) {
+    unsigned int hash = HashString(key);
+	for (Property *p=props[hash % hashRoots]; p; p=p->next) {
+		if ((hash == p->hash) && (0 == strcmp(p->key, key))) {
 			// Replace current value
-			delete [](properties[i].val);
-			properties[i].val = StringDup(val);
+			delete [](p->val);
+			p->val = StringDup(val);
 			return;
 		}
 	}
 	// Not found
-    properties[used].hash = HashString(key);
-	properties[used].key = StringDup(key);
-	properties[used].val = StringDup(val);
-    used++;
+    Property *pNew = new Property;
+    if (pNew) {
+        pNew->hash = HashString(key);
+	    pNew->key = StringDup(key);
+	    pNew->val = StringDup(val);
+	    pNew->next = props[hash % hashRoots];
+        props[hash % hashRoots] = pNew;
+    }
 }
 
 void PropSet::Set(char *keyval) {
@@ -121,11 +109,11 @@ void PropSet::Set(char *keyval) {
 
 SString PropSet::Get(const char *key) {
     unsigned int hash = HashString(key);
-	for (int i = 0; i < used; i++) {
-		if ((hash == properties[i].hash) && (0 == strcmp(properties[i].key, key))) {
-			return properties[i].val;
-		}
-	}
+	for (Property *p=props[hash % hashRoots]; p; p=p->next) {
+		if ((hash == p->hash) && (0 == strcmp(p->key, key))) {
+            return p->val;
+        }
+    }
 	if (superPS) {
 		// Failed here, so try in base property set
 		return superPS->Get(key);
@@ -172,7 +160,7 @@ int PropSet::GetInt(const char *key, int defaultValue) {
 		return defaultValue;
 }
 
-bool isprefix(const char *target, const char *prefix) {
+inline bool isprefix(const char *target, const char *prefix) {
 	while (*target && *prefix) {
 		if (*target != *prefix)
 			return false;
@@ -198,54 +186,56 @@ bool issuffix(const char *target, const char *suffix) {
 }
 
 SString PropSet::GetWild(const char *keybase, const char *filename) {
-	for (int i = 0; i < used; i++) {
-		if (isprefix(properties[i].key, keybase)) {
-			char *orgkeyfile = properties[i].key + strlen(keybase);
-			char *keyfile = NULL;
+    for (int root=0; root < hashRoots; root++) {
+	    for (Property *p=props[root]; p; p=p->next) {
+		    if (isprefix(p->key, keybase)) {
+			    char *orgkeyfile = p->key + strlen(keybase);
+			    char *keyfile = NULL;
 
-			if (strstr(orgkeyfile, "$(") == orgkeyfile) {
-				char *cpendvar = strchr(orgkeyfile, ')');
-				if (cpendvar) {
-					*cpendvar = '\0';
-					SString s = Get(orgkeyfile + 2);
-					*cpendvar= ')';
-					keyfile = strdup(s.c_str());
-				}
-			}
-			char *keyptr = keyfile;
+			    if (strstr(orgkeyfile, "$(") == orgkeyfile) {
+				    char *cpendvar = strchr(orgkeyfile, ')');
+				    if (cpendvar) {
+					    *cpendvar = '\0';
+					    SString s = Get(orgkeyfile + 2);
+					    *cpendvar= ')';
+					    keyfile = strdup(s.c_str());
+				    }
+			    }
+			    char *keyptr = keyfile;
 
-			if (keyfile == NULL)
-				keyfile = orgkeyfile;
+			    if (keyfile == NULL)
+				    keyfile = orgkeyfile;
 
-			for (; ; ) {
-				char *del = strchr(keyfile, ';');
-				if (del == NULL)
-					del = keyfile + strlen(keyfile);
-				char delchr = *del;
-				*del = '\0';
-				if (*keyfile == '*') {
-					if (issuffix(filename, keyfile + 1)) {
-						*del = delchr;
-						free(keyptr);
-						return properties[i].val;
-					}
-				} else if (0 == strcmp(keyfile, filename)) {
-					*del = delchr;
-					free(keyptr);
-					return properties[i].val;
-				}
-				if (delchr == '\0')
-					break;
-				*del = delchr;
-				keyfile = del + 1;
-			}
-			free(keyptr);
+			    for (; ; ) {
+				    char *del = strchr(keyfile, ';');
+				    if (del == NULL)
+					    del = keyfile + strlen(keyfile);
+				    char delchr = *del;
+				    *del = '\0';
+				    if (*keyfile == '*') {
+					    if (issuffix(filename, keyfile + 1)) {
+						    *del = delchr;
+						    free(keyptr);
+						    return p->val;
+					    }
+				    } else if (0 == strcmp(keyfile, filename)) {
+					    *del = delchr;
+					    free(keyptr);
+					    return p->val;
+				    }
+				    if (delchr == '\0')
+					    break;
+				    *del = delchr;
+				    keyfile = del + 1;
+			    }
+			    free(keyptr);
 
-			if (0 == strcmp(properties[i].key, keybase)) {
-				return properties[i].val;
-			}
-		}
-	}
+			    if (0 == strcmp(p->key, keybase)) {
+				    return p->val;
+			    }
+		    }
+	    }
+    }
 	if (superPS) {
 		// Failed here, so try in base property set
 		return superPS->GetWild(keybase, filename);
@@ -280,14 +270,20 @@ SString PropSet::GetNewExpand(const char *keybase, const char *filename) {
 }
 
 void PropSet::Clear() {
-	for (int i = 0; i < used; i++) {
-		properties[i].hash = 0;
-		delete []properties[i].key;
-		properties[i].key = 0;
-		delete []properties[i].val;
-		properties[i].val = 0;
-	}
-	used = 0;
+    for (int root=0; root < hashRoots; root++) {
+        Property *p=props[root];
+	    while (p) {
+            Property *pNext=p->next;
+		    p->hash = 0;
+		    delete p->key;
+		    p->key = 0;
+		    delete p->val;
+		    p->val = 0;
+            delete p;
+            p = pNext;
+        }
+        props[root] = 0;
+    }
 }
 
 void PropSet::ReadFromMemory(const char *data, int len, const char *directoryForImports) {

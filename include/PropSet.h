@@ -107,21 +107,18 @@ public:
 	}
 };
 
-unsigned int HashString(const char *s);
-
 struct Property {
     unsigned int hash;
 	char *key;
     char *val;
-    Property() : hash(0), key(0), val(0) {}
+    Property *next;
+    Property() : hash(0), key(0), val(0), next(0) {}
 };
 
 class PropSet {
 private:
-    Property *properties;
-	int size;
-	int used;
-	void EnsureCanAddEntry();
+    enum { hashRoots=31 };
+    Property *props[hashRoots];
 public:
 	PropSet *superPS;
 	PropSet();
