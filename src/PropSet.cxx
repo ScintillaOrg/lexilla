@@ -76,7 +76,6 @@ bool EqualCaseInsensitive(const char *a, const char *b) {
 // implementations of the SString members here as well, so
 // that I can quickly see what effect this has.
 
-
 SString::SString(int i) : sizeGrowth(sizeGrowthDefault) {
 	char number[32];
 	sprintf(number, "%0d", i);
@@ -198,7 +197,7 @@ SString &SString::append(const char *sOther, lenpos_t sLenOther, char sep) {
 	}
 	lenpos_t lenNew = sLen + sLenOther + lenSep;
 	// Conservative about growing the buffer: don't do it, unless really needed
-	if ((lenNew + 1 < sSize) || (grow(lenNew))) {
+	if ((lenNew < sSize) || (grow(lenNew))) {
 		if (lenSep) {
 			s[sLen] = sep;
 			sLen++;
@@ -219,7 +218,7 @@ SString &SString::insert(lenpos_t pos, const char *sOther, lenpos_t sLenOther) {
 	}
 	lenpos_t lenNew = sLen + sLenOther;
 	// Conservative about growing the buffer: don't do it, unless really needed
-	if ((lenNew + 1 < sSize) || grow(lenNew)) {
+	if ((lenNew < sSize) || grow(lenNew)) {
 		lenpos_t moveChars = sLen - pos + 1;
 		for (lenpos_t i = moveChars; i > 0; i--) {
 			s[pos + sLenOther + i - 1] = s[pos + i - 1];
@@ -305,16 +304,15 @@ int SString::substitute(const char *sFind, const char *sReplace) {
 	return c;
 }
 
-/**
- * Duplicate a C string.
- * Allocate memory of the given size, or big enough to fit the string if length isn't given;
- * then copy the given string in the allocated memory.
- * @return the pointer to the new string
- */
-char *SString::StringAllocate(
-	const char *s,			///< The string to duplicate
-	lenpos_t len)			///< The length of memory to allocate. Optional.
-{
+char *SContainer::StringAllocate(lenpos_t len) {
+	if (len != measure_length) {
+		return new char[len + 1];
+	} else {
+		return 0;
+	}
+}
+
+char *SContainer::StringAllocate(const char *s, lenpos_t len) {
 	if (s == 0) {
 		return 0;
 	}
@@ -327,17 +325,6 @@ char *SString::StringAllocate(
 		sNew[len] = '\0';
 	}
 	return sNew;
-}
-
-/**
- * Allocate uninitialized memory big enough to fit a string of the given length
- * @return the pointer to the new string
- */
-char *SString::StringAllocate(lenpos_t len) {
-	if (len != measure_length)
-		return new char [len + 1];
-	else
-		return 0;
 }
 
 // End SString functions
