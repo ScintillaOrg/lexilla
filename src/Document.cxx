@@ -784,7 +784,7 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 						found = false;
 				}
 				if (found) {
-					if (!(word && wordStart) ||
+					if ((!word && !wordStart) ||
 						word && IsWordAt(pos, pos + lengthFind) ||
 						wordStart && IsWordStartAt(pos))
  						return pos;
