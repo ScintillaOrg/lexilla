@@ -3678,7 +3678,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			char *ptr = reinterpret_cast<char *>(lParam);
 			short *pBufSize = reinterpret_cast<short *>(lParam);
 			short bufSize = *pBufSize;
-			ptr[0] = '\0'; 	// If no characters copied have to put a NUL into buffer
+			ptr[0] = '\0'; 	// If no characters copied, have to put a NUL into buffer
 			if (static_cast<int>(wParam) > pdoc->LinesTotal()) {
 				return 0;
 			}
@@ -3692,7 +3692,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			return iPlace;
 		}
 
-	case SCI_GETLINE: {	// Simplier than EM_GETLINE, but with risk of overwritting the end of the buffer
+	case SCI_GETLINE: {	// Simpler than EM_GETLINE, but with risk of overwriting the end of the buffer
 			if (lParam == 0) {
 				return 0;
 			}
