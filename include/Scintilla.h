@@ -547,10 +547,6 @@ struct SCNotification {
 
 #ifdef INCLUDE_DEPRECATED_FEATURES
 
-// Deprecated in 1.27
-#define SC_UNDOCOLLECT_NONE 0
-#define SC_UNDOCOLLECT_AUTOSTART 1
-
 #endif
 
 #endif
