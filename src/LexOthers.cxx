@@ -431,7 +431,7 @@ static void ColouriseErrorListLine(
 			} else if ((state == 1) && isdigit(ch)) {
 				state = 2;
 			} else if (state == 2) {
-				if ((ch == ':') && (chNext == ' ')) {
+				if ((ch == ':') && ((chNext == ' ') || (chNext == '\t'))) {
 					state = 3;	// :9.*: is GCC
 					break;
 				} else if (!isdigit(ch)) {
