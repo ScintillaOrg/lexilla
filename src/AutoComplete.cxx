@@ -10,14 +10,16 @@
 
 #include "AutoComplete.h"
 
-AutoComplete::AutoComplete() {
-	active = false;
-	posStart = 0;
-	strcpy(stopChars, "");
-	strcpy(fillUpChars, "");
-	separator = ' ';
-	ignoreCase = false;
-	cancelAtStartPos = true;
+AutoComplete::AutoComplete() : 
+	active(false),
+	separator(' '),
+	ignoreCase(false),
+	chooseSingle(false),
+	posStart(0),
+	startLen(0),
+	cancelAtStartPos(true) {
+	stopChars[0] = '\0';
+	fillUpChars[0] = '\0';
 }
 
 AutoComplete::~AutoComplete() {

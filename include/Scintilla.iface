@@ -7,12 +7,13 @@
 ## A line starting with # followed by a space is a documentation comment and refers 
 ## to the next feature definition.
 
-## Each feature is defined by a line starting with fun, get, set or val.
+## Each feature is defined by a line starting with fun, get, set, val or evt.
 ##     cat -> start a category
 ##     fun -> a function
 ##     get -> a property get function
-##     get -> a property set function
+##     set -> a property set function
 ##     val -> definition of a constant
+##     evt -> an event
 ## All other feature names should be ignored. They may be defined in the future.
 ## A property may have a set function, a get function or both. Each will have
 ## "Get" or "Set" in their names and the corresponding name will have the obvious switch.
@@ -21,6 +22,7 @@
 ## <featureType><ws><returnType><ws><name>[=<number](<param>,<param>)
 ## param is <paramType><ws><paramName>[=<value>]
 ## Additional white space is allowed between elements.
+## The syntax for evt is <featureType><ws><returnType><ws><name>[=<number]([<param>[,<param>]*])
 ## Feature names that contain an underscore are defined by Windows, so in these
 ## cases, using the Windows definition is preferred where available.
 
@@ -33,12 +35,17 @@
 ##     string -> pointer to const character
 ##     stringresult -> pointer to character
 ##     cells -> pointer to array of cells, each cell containing a style byte and character byte
-##     textrange -> complex structure
+##     charrange -> range of a min and a max position
+##     charrangeresult -> like charrange, but output param
+##     textrange -> charrange + output string
 ##     findtext -> searchrange, text -> foundposition
+##     findtextex -> searchrange
 ##     keymod -> integer containing key in low half and modifiers in high half
 ##     countedstring
 ##     formatrange
 ##     point -> x,y
+##     pointresult  -> like point, but output param
+##     rectangle -> left,top,right,bottom
 ## Client code should ignore definitions containing types it does not understand, except 
 ## for possibly #defining the constants
 
@@ -438,6 +445,18 @@ get bool AutoCGetCancelAtStart=2111(,)
 # Define a set of character that when typed fills up the selected word.
 set void AutoCSetFillUps=2112(, string characterSet)
 
+# Should a single item auto-completion list automatically choose the item. 
+set void AutoCSetChooseSingle=2113(bool chooseSingle,)
+
+# Retrieve whether a single item auto-completion list automatically choose the item. 
+get bool AutoCGetChooseSingle=2114(,)
+
+# Set whether case is significant when performing auto-completion searches.
+set void AutoCSetIgnoreCase=2115(bool ignoreCase,)
+
+# Retrieve state of ignore case flag. 
+get bool AutoCGetIgnoreCase=2116(,)
+
 # Set the number of spaces used for one level of indentation.
 set void SetIndent=2122(int indentSize,)
 
@@ -692,7 +711,7 @@ set void SetFoldLevel=2222(int line, int level)
 get int GetFoldLevel=2223(int line,)
 
 # Find the last child line of a header line.
-get int GetLastChild=2224(int line,)
+get int GetLastChild=2224(int line, int level)
 
 # Find the parent line of a child line.
 get int GetFoldParent=2225(int line,)
@@ -1231,7 +1250,7 @@ fun int EM_CharFromPos=215(,point pt)
 fun void EM_EmptyUndoBuffer=205(,)
 
 # Retrieve the selection range.
-fun void EM_ExGetSel=1076(,charrange cr)
+fun void EM_ExGetSel=1076(,charrangeresult cr)
 
 # Retrieve the line number of a position in the document.
 get int EM_ExLineFromChar=1078(,position pos)
@@ -1243,7 +1262,7 @@ fun void EM_ExSetSel=1079(,charrange cr)
 fun position EM_FindText=1080(int flags, findtext ft)
 
 # Find some text in the document. Returns range of found text in ft argument.
-fun position EM_FindTextEx=1103(int flags, findtext ft)
+fun position EM_FindTextEx=1103(int flags, findtextex ft)
 
 # On Windows will draw the document into a display context such as a printer.
 fun void EM_FormatRange=1081(bool draw, formatrange fr)
@@ -1296,7 +1315,7 @@ fun int EM_LineLength=193(int line,)
 fun void EM_LineScroll=182(int columns, int lines)
 
 # Retrieve the point in the window where a position is displayed.
-fun void EM_PosFromChar=214(point pt, position pos)
+fun void EM_PosFromChar=214(pointresult pt, position pos)
 
 # Replace the selected text with the argument text.
 fun void EM_ReplaceSel=194(, string text)
@@ -1375,4 +1394,21 @@ val FR_DOWN=0x1
 val SHIFT_PRESSED=1
 val LEFT_CTRL_PRESSED=2
 val LEFT_ALT_PRESSED=4
+
+#events
+
+evt void StyleNeeded=2000(int position)
+evt void CharAdded=2001(int ch)
+evt void SavePointReached=2002(void)
+evt void SavePointLeft=2003(void)
+evt void ModifyAttemptRO=2004(void)
+evt void Key=2005(int ch, int modifiers)
+evt void DoubleClick=2006(void)
+evt void UpdateUI=2007(void)
+evt void Modified=2008(int position, int modificationType, string text, int length, int linesAdded, int line, int foldLevelNow, int foldLevelPrev)
+evt void MacroRecord=2009(int message, int wParam, int lParam)
+evt void MarginClick=2010(int modifiers, int position, int margin)
+evt void NeedShown=2011(int position, int length)
+evt void PosChanged=2012(int position)
+evt void EN_Change=768(void)
 

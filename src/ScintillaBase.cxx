@@ -171,6 +171,22 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 	//Platform::DebugPrintf("AutoComplete %s\n", list);
 	ct.CallTipCancel();
 
+	if (ac.chooseSingle) {
+		if (list && !strchr(list, ac.GetSeparator())) {
+			if (ac.ignoreCase) {
+				SetEmptySelection(currentPos - lenEntered);
+				pdoc->DeleteChars(currentPos, lenEntered);
+				SetEmptySelection(currentPos);
+				pdoc->InsertString(currentPos, list);
+				SetEmptySelection(currentPos + strlen(list));
+			} else {
+				SetEmptySelection(currentPos);
+				pdoc->InsertString(currentPos, list + lenEntered);
+				SetEmptySelection(currentPos + strlen(list + lenEntered));
+			}
+			return;
+		}
+	}
 	ac.Start(wDraw, idAutoComplete, currentPos, lenEntered);
 
 	PRectangle rcClient = GetClientRectangle();
@@ -396,6 +412,20 @@ long ScintillaBase::WndProc(unsigned int iMessage, unsigned long wParam, long lP
 		ac.SetFillUpChars(reinterpret_cast<char *>(lParam));
 		break;
 
+	case SCI_AUTOCSETCHOOSESINGLE:
+		ac.chooseSingle = wParam;
+		break;
+
+	case SCI_AUTOCGETCHOOSESINGLE:
+		return ac.chooseSingle;
+		
+	case SCI_AUTOCSETIGNORECASE:
+		ac.ignoreCase = wParam;
+		break;
+		
+	case SCI_AUTOCGETIGNORECASE:
+		return ac.ignoreCase;
+		
 	case SCI_CALLTIPSHOW: {
 			AutoCompleteCancel();
 			if (!ct.wCallTip.Created()) {

@@ -122,6 +122,7 @@ class ScintillaWin :
 		    HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
 	virtual void StartDrag();
+	LRESULT WndPaint(unsigned long wParam);
 	virtual LRESULT WndProc(unsigned int iMessage, unsigned long wParam, long lParam);
 	virtual LRESULT DefWndProc(unsigned int iMessage, unsigned long wParam, long lParam);
 	virtual void SetTicking(bool on);
@@ -145,7 +146,7 @@ class ScintillaWin :
 	void ImeStartComposition();
 	void ImeEndComposition();
 
-    void AddCharBytes(char b0, char b1=0);
+	void AddCharBytes(char b0, char b1=0);
 
 	void GetIntelliMouseParameters();
 	void CopySelTextToClipboard();
@@ -284,6 +285,56 @@ static int KeyTranslate(int keyIn) {
 	}
 }
 
+LRESULT ScintillaWin::WndPaint(unsigned long wParam) {
+	//CElapsed ce; ce.Begin();
+	//LARGE_INTEGER perfStart;
+	//LARGE_INTEGER perfEnd;
+	//LARGE_INTEGER performanceFreq;
+	//QueryPerformanceFrequency(&performanceFreq);
+	//QueryPerformanceCounter(&perfStart);
+	paintState = painting;
+	PAINTSTRUCT ps;
+	PAINTSTRUCT* pps;
+
+	bool IsOcxCtrl = (wParam != 0); // if wParam != 0, it contains 
+								   // a PAINSTRUCT* from the OCX
+	if(IsOcxCtrl)
+		pps = reinterpret_cast<PAINTSTRUCT*>(wParam);
+	else{
+		pps = &ps;
+		BeginPaint(wMain.GetID(), pps);
+	}
+	Surface surfaceWindow;
+	surfaceWindow.Init(pps->hdc);
+	surfaceWindow.SetUnicodeMode(IsUnicodeMode());
+	rcPaint = PRectangle(pps->rcPaint.left, pps->rcPaint.top, pps->rcPaint.right, pps->rcPaint.bottom);
+	PRectangle rcText = GetTextRectangle();
+	paintingAllText = rcPaint.Contains(rcText);
+	if (paintingAllText) {
+		//Platform::DebugPrintf("Performing full text paint\n");
+	} else {
+		//Platform::DebugPrintf("Performing partial paint %d .. %d\n", rcPaint.top, rcPaint.bottom);
+	}
+	Paint(&surfaceWindow, rcPaint);
+	surfaceWindow.Release();
+	if(!IsOcxCtrl)
+		EndPaint(wMain.GetID(), pps);
+	if (paintState == paintAbandoned) {
+		// Painting area was insufficient to cover new styling or brace highlight positions
+		FullPaint();
+	}
+	paintState = notPainting;
+	//QueryPerformanceCounter(&perfEnd);
+	//__int64 start = perfStart.QuadPart;
+	//__int64 end = perfEnd.QuadPart;
+	//__int64 freq = performanceFreq.QuadPart;
+	//__int64 dur = end - start;
+	//double per = double(dur) / double(freq);
+	//Platform::DebugPrintf("Paint took %5.03g\n", per);
+	//Platform::DebugPrintf("Paint took %g\n", ce.End());
+	return 0l;
+}
+
 LRESULT ScintillaWin::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 	//Platform::DebugPrintf("S M:%x WP:%x L:%x\n", iMessage, wParam, lParam);
 	switch (iMessage) {
@@ -310,45 +361,8 @@ LRESULT ScintillaWin::WndProc(unsigned int iMessage, unsigned long wParam, long 
 #endif
 		break;
 
-	case WM_PAINT: {
-			//CElapsed ce; ce.Begin();
-			//LARGE_INTEGER perfStart;
-			//LARGE_INTEGER perfEnd;
-			//LARGE_INTEGER performanceFreq;
-			//QueryPerformanceFrequency(&performanceFreq);
-			//QueryPerformanceCounter(&perfStart);
-			paintState = painting;
-			PAINTSTRUCT ps;
-			BeginPaint(wMain.GetID(), &ps);
-			Surface surfaceWindow;
-			surfaceWindow.Init(ps.hdc);
-			surfaceWindow.SetUnicodeMode(IsUnicodeMode());
-			rcPaint = PRectangle(ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right, ps.rcPaint.bottom);
-			PRectangle rcText = GetTextRectangle();
-			paintingAllText = rcPaint.Contains(rcText);
-			if (paintingAllText) {
-				//Platform::DebugPrintf("Performing full text paint\n");
-			} else {
-				//Platform::DebugPrintf("Performing partial paint %d .. %d\n", rcPaint.top, rcPaint.bottom);
-			}
-			Paint(&surfaceWindow, rcPaint);
-			surfaceWindow.Release();
-			EndPaint(wMain.GetID(), &ps);
-			if (paintState == paintAbandoned) {
-				// Painting area was insufficient to cover new styling or brace highlight positions
-				FullPaint();
-			}
-			paintState = notPainting;
-			//QueryPerformanceCounter(&perfEnd);
-			//__int64 start = perfStart.QuadPart;
-			//__int64 end = perfEnd.QuadPart;
-			//__int64 freq = performanceFreq.QuadPart;
-			//__int64 dur = end - start;
-			//double per = double(dur) / double(freq);
-			//Platform::DebugPrintf("Paint took %5.03g\n", per);
-			//Platform::DebugPrintf("Paint took %g\n", ce.End());
-		}
-		break;
+	case WM_PAINT:
+		return WndPaint(wParam);
 
 	case WM_VSCROLL:
 		ScrollMessage(wParam);

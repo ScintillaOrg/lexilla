@@ -13,6 +13,7 @@ class AutoComplete {
 	char separator;
 public:
 	bool ignoreCase;
+	bool chooseSingle;
 	ListBox lb;
 	int posStart;
 	int startLen;
