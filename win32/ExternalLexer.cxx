@@ -250,7 +250,7 @@ void LexerManager::EnumerateLexers() {
 		SString to_open;
 
 		while (found) {
-			to_open.assign(sPath);
+			to_open = sPath;
 			to_open += FindFileData.cFileName;
 			LexerLibrary *lib = new LexerLibrary(to_open.c_str());
 			if (NULL != first) {
