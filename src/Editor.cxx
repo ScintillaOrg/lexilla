@@ -16,7 +16,7 @@
 
 #if PLAT_WX || PLAT_GTK
 #include "WinDefs.h"
-#endif
+#endif 
 
 #include "ContractionState.h"
 #include "SVector.h"
@@ -95,7 +95,7 @@ Editor::Editor() {
 	targetStart = 0;
 	targetEnd = 0;
 	searchFlags = 0;
-	
+
 	topLine = 0;
 	posTopLine = 0;
 
@@ -119,7 +119,7 @@ Editor::Editor() {
 
 #ifdef MACRO_SUPPORT
 	recordingMacro = 0;
-#endif
+#endif 
 	foldFlags = 0;
 }
 
@@ -1345,6 +1345,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 
 		// Right column limit indicator
 
+
 		PRectangle rcBeyondEOF = rcClient;
 		rcBeyondEOF.left = vs.fixedColumnWidth;
 		rcBeyondEOF.right = rcBeyondEOF.right;
@@ -1543,6 +1544,7 @@ void Editor::SetScrollBarsTo(PRectangle) {
 	//Platform::DebugPrintf("end max = %d page = %d\n", nMax, nPage);
 }
 
+
 void Editor::SetScrollBars() {
 	PRectangle rsClient = GetClientRectangle();
 	SetScrollBarsTo(rsClient);
@@ -1713,8 +1715,19 @@ void Editor::DelChar() {
 
 void Editor::DelCharBack() {
 	if (currentPos == anchor) {
-		int newPos = pdoc->DelCharBack(currentPos);
-		SetEmptySelection(newPos);
+		int lineCurrentPos = pdoc->LineFromPosition(currentPos);
+		if (pdoc->GetColumn(currentPos) <= pdoc->GetLineIndentation(lineCurrentPos) &&
+		        pdoc->GetColumn(currentPos) > 0 && pdoc->backspaceUnindents) {
+			pdoc->BeginUndoAction();
+			int indentation = pdoc->GetLineIndentation(lineCurrentPos);
+			int indentationStep = (pdoc->indentInChars ? pdoc->indentInChars : pdoc->tabInChars);
+			pdoc->SetLineIndentation(lineCurrentPos, indentation - indentationStep);
+			SetEmptySelection(pdoc->GetLineIndentPosition(lineCurrentPos));
+			pdoc->EndUndoAction();
+		} else {
+			int newPos = pdoc->DelCharBack(currentPos);
+			SetEmptySelection(newPos);
+		}
 	} else {
 		ClearSelection();
 		SetEmptySelection(currentPos);
@@ -1748,7 +1761,7 @@ void Editor::NotifyChar(char ch) {
 		txt[1] = '\0';
 		NotifyMacroRecord(SCI_REPLACESEL, 0, reinterpret_cast<long>(txt));
 	}
-#endif
+#endif 
 }
 
 void Editor::NotifySavePoint(bool isSavePoint) {
@@ -1946,6 +1959,7 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 			NotifyChange();	// Send EN_CHANGE
 		}
 
+
 		SCNotification scn;
 		scn.nmhdr.code = SCN_MODIFIED;
 		scn.position = mh.position;
@@ -2040,6 +2054,7 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	default:
 		//		printf("Filtered out %ld of macro recording\n", iMessage);
 
+
 		return ;
 	}
 
@@ -2051,7 +2066,7 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	scn.lParam = lParam;
 	NotifyParent(scn);
 }
-#endif
+#endif 
 
 // Force scroll and keep position relative to top of window
 void Editor::PageMove(int direction, bool extend) {
@@ -2243,7 +2258,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		ShowCaretAtCurrentPosition();
 		NotifyUpdateUI();
 		break;
-	case SCI_CANCEL:        	// Cancel any modes - handled in subclass
+	case SCI_CANCEL:         	// Cancel any modes - handled in subclass
 		// Also unselect text
 		CancelModes();
 		break;
@@ -2415,28 +2430,48 @@ void Editor::Indent(bool forwards) {
 	if (lineOfAnchor == lineCurrentPos) {
 		if (forwards) {
 			ClearSelection();
-			if (pdoc->useTabs) {
-				pdoc->InsertChar(currentPos, '\t');
-				SetEmptySelection(currentPos + 1);
+			if (pdoc->GetColumn(currentPos) <= pdoc->GetColumn(pdoc->GetLineIndentPosition(lineCurrentPos)) &&
+			        pdoc->tabIndents) {
+				pdoc->BeginUndoAction();
+				int indentation = pdoc->GetLineIndentation(lineCurrentPos);
+				int indentationStep = (pdoc->indentInChars ? pdoc->indentInChars : pdoc->tabInChars);
+				pdoc->SetLineIndentation(lineCurrentPos, indentation + indentationStep);
+				SetEmptySelection(pdoc->GetLineIndentPosition(lineCurrentPos));
+				pdoc->EndUndoAction();
 			} else {
-				int numSpaces = (pdoc->tabInChars) -
-				                (pdoc->GetColumn(currentPos) % (pdoc->tabInChars));
-				if (numSpaces < 1)
-					numSpaces = pdoc->tabInChars;
-				for (int i = 0; i < numSpaces; i++) {
-					pdoc->InsertChar(currentPos, ' ');
+				if (pdoc->useTabs) {
+					pdoc->InsertChar(currentPos, '\t');
+					SetEmptySelection(currentPos + 1);
+				} else {
+					int numSpaces = (pdoc->tabInChars) -
+					                (pdoc->GetColumn(currentPos) % (pdoc->tabInChars));
+					if (numSpaces < 1)
+						numSpaces = pdoc->tabInChars;
+					for (int i = 0; i < numSpaces; i++) {
+						pdoc->InsertChar(currentPos, ' ');
+					}
+					SetEmptySelection(currentPos + numSpaces);
 				}
-				SetEmptySelection(currentPos + numSpaces);
 			}
 		} else {
-			int newColumn = ((pdoc->GetColumn(currentPos) - 1) / pdoc->tabInChars) *
-			                pdoc->tabInChars;
-			if (newColumn < 0)
-				newColumn = 0;
-			int newPos = currentPos;
-			while (pdoc->GetColumn(newPos) > newColumn)
-				newPos--;
-			SetEmptySelection(newPos);
+			if (pdoc->GetColumn(currentPos) <= pdoc->GetLineIndentation(lineCurrentPos) &&
+			        pdoc->tabIndents) {
+				pdoc->BeginUndoAction();
+				int indentation = pdoc->GetLineIndentation(lineCurrentPos);
+				int indentationStep = (pdoc->indentInChars ? pdoc->indentInChars : pdoc->tabInChars);
+				pdoc->SetLineIndentation(lineCurrentPos, indentation - indentationStep);
+				SetEmptySelection(pdoc->GetLineIndentPosition(lineCurrentPos));
+				pdoc->EndUndoAction();
+			} else {
+				int newColumn = ((pdoc->GetColumn(currentPos) - 1) / pdoc->tabInChars) *
+				                pdoc->tabInChars;
+				if (newColumn < 0)
+					newColumn = 0;
+				int newPos = currentPos;
+				while (pdoc->GetColumn(newPos) > newColumn)
+					newPos--;
+				SetEmptySelection(newPos);
+			}
 		}
 	} else {
 		int anchorPosOnLine = anchor - pdoc->LineStart(lineOfAnchor);
@@ -2468,8 +2503,8 @@ void Editor::Indent(bool forwards) {
  * @return The position of the found text, -1 if not found.
  */
 long Editor::FindText(
-    unsigned int iMessage,  	///< Can be @c EM_FINDTEXT or @c EM_FINDTEXTEX or @c SCI_FINDTEXT.
-    unsigned long wParam,  	///< Search modes : @c SCFIND_MATCHCASE, @c SCFIND_WHOLEWORD,
+    unsigned int iMessage,   	///< Can be @c EM_FINDTEXT or @c EM_FINDTEXTEX or @c SCI_FINDTEXT.
+    unsigned long wParam,   	///< Search modes : @c SCFIND_MATCHCASE, @c SCFIND_WHOLEWORD,
     ///< @c SCFIND_WORDSTART or @c SCFIND_REGEXP.
     long lParam) {			///< @c TextToFind structure: The text to search for in the given range.
 
@@ -2511,8 +2546,8 @@ void Editor::SearchAnchor() {
  * @return The position of the found text, -1 if not found.
  */
 long Editor::SearchText(
-    unsigned int iMessage,  	///< Accepts both @c SCI_SEARCHNEXT and @c SCI_SEARCHPREV.
-    unsigned long wParam,  	///< Search modes : @c SCFIND_MATCHCASE, @c SCFIND_WHOLEWORD,
+    unsigned int iMessage,   	///< Accepts both @c SCI_SEARCHNEXT and @c SCI_SEARCHPREV.
+    unsigned long wParam,   	///< Search modes : @c SCFIND_MATCHCASE, @c SCFIND_WHOLEWORD,
     ///< @c SCFIND_WORDSTART or @c SCFIND_REGEXP.
     long lParam) {			///< The text to search for.
 
@@ -2675,6 +2710,7 @@ void Editor::StartDrag() {
 	//SetMouseCapture(true);
 	//DisplayCursor(Window::cursorArrow);
 }
+
 
 void Editor::DropAt(int position, const char *value, bool moving, bool rectangular) {
 	//Platform::DebugPrintf("DropAt %d\n", inDragDrop);
@@ -2886,6 +2922,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 				//lineAnchor = lineStart; // Keep the same anchor for ButtonMove
 			}
 
+
 			SetDragPosition(invalidPosition);
 			SetMouseCapture(true);
 			selectionType = selLine;
@@ -2971,6 +3008,7 @@ void Editor::ButtonMove(Point pt) {
 				DisplayCursor(Window::cursorReverseArrow);
 				return ; 	// No need to test for selection
 			}
+
 
 		}
 		// Display regular (drag) cursor over selection
@@ -3316,7 +3354,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 #ifdef MACRO_SUPPORT
 	if (recordingMacro)
 		NotifyMacroRecord(iMessage, wParam, lParam);
-#endif
+#endif 
 
 	switch (iMessage) {
 
@@ -3629,34 +3667,34 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETTARGETSTART:
 		return targetStart;
-	
+
 	case SCI_SETTARGETEND:
 		targetEnd = wParam;
 		break;
 
 	case SCI_GETTARGETEND:
 		return targetEnd;
-	
+
 	case SCI_REPLACETARGET:
 		PLATFORM_ASSERT(lParam);
 		return ReplaceTarget(wParam, reinterpret_cast<char *>(lParam));
-	
+
 	case SCI_REPLACETARGETCOUNTED:
 		PLATFORM_ASSERT(lParam);
 		return ReplaceTarget(false, reinterpret_cast<char *>(lParam), wParam);
-	
+
 	case SCI_REPLACETARGETRECOUNTED:
 		PLATFORM_ASSERT(lParam);
 		return ReplaceTarget(true, reinterpret_cast<char *>(lParam), wParam);
-	
+
 	case SCI_SEARCHINTARGET:
 		PLATFORM_ASSERT(lParam);
 		return SearchInTarget(reinterpret_cast<char *>(lParam), wParam);
-		
+
 	case SCI_SETSEARCHFLAGS:
 		searchFlags = wParam;
 		break;
-	
+
 	case SCI_GETSEARCHFLAGS:
 		return searchFlags;
 
@@ -3744,15 +3782,16 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			return len; 	// Not including NUL
 		}
 
+
 	case EM_SELECTIONTYPE:
 #ifdef SEL_EMPTY
 		if (currentPos == anchor)
 			return SEL_EMPTY;
 		else
 			return SEL_TEXT;
-#else
+#else 
 		return 0;
-#endif
+#endif 
 
 	case EM_HIDESELECTION:
 		hideSelection = wParam;
@@ -3786,7 +3825,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			vs.rightMarginWidth = vs.aveCharWidth / 2;
 		}
 		InvalidateStyleRedraw();
-#endif
+#endif 
 		break;
 
 	case SCI_SETMARGINLEFT:
@@ -4018,7 +4057,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		pdoc->SetStyleFor(wParam, static_cast<char>(lParam));
 		break;
 
-	case SCI_SETSTYLINGEX:         // Specify a complete styling buffer
+	case SCI_SETSTYLINGEX:          // Specify a complete styling buffer
 		if (lParam == 0)
 			return 0;
 		pdoc->SetStyles(wParam, reinterpret_cast<char *>(lParam));
@@ -4065,6 +4104,20 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETLINEINDENTPOSITION:
 		return pdoc->GetLineIndentPosition(wParam);
+
+	case SCI_SETTABINDENTS:
+		pdoc->tabIndents = wParam;
+		break;
+
+	case SCI_GETTABINDENTS:
+		return pdoc->tabIndents;
+
+	case SCI_SETBACKSPACEUNINDENTS:
+		pdoc->backspaceUnindents = wParam;
+		break;
+
+	case SCI_GETBACKSPACEUNINDENTS:
+		return pdoc->backspaceUnindents;
 
 	case SCI_GETCOLUMN:
 		return pdoc->GetColumn(wParam);
@@ -4657,7 +4710,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_STOPRECORD:
 		recordingMacro = 0;
 		return 0;
-#endif
+#endif 
 
 	case SCI_MOVECARETINSIDEVIEW:
 		MoveCaretInsideView();

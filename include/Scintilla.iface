@@ -822,6 +822,18 @@ fun void EnsureVisible=2232(int line,)
 # Set some debugging options for folding
 fun void SetFoldFlags=2233(int flags,)
 
+# Sets whether a tab pressed when caret is within indentation indents
+set void SetTabIndents=2260(bool tabIndents,)
+
+# Does a tab pressed when caret is within indentation indent?
+get bool GetTabIndents=2261(,)
+
+# Sets whether a backspace pressed when caret is within indentation unindents
+set void SetBackSpaceUnIndents=2262(bool bsUnIndents,)
+
+# Does a backspace pressed when caret is within indentation unindent?
+get bool GetBackSpaceUnIndents=2263(,)
+
 ## Start of key messages
 # Move caret down one line.
 fun void LineDown=2300(,)
