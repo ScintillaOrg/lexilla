@@ -601,8 +601,10 @@ public:
 	void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back);
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource);
 
+	void DrawTextBase(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore);
 	void DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
 	void DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
+	void DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore);
 	void MeasureWidths(Font &font_, const char *s, int len, int *positions);
 	int WidthText(Font &font_, const char *s, int len);
 	int WidthChar(Font &font_, char ch);
@@ -821,9 +823,8 @@ void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 
 #define MAX_US_LEN 5000
 
-void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len,
-                                 ColourAllocated fore, ColourAllocated back) {
-	FillRectangle(rc, back);
+void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char *s, int len,
+                                 ColourAllocated fore) {
 	PenColour(fore);
 	if (gc && drawable) {
 		// Draw text as a series of segments to avoid limitations in X servers
@@ -896,10 +897,23 @@ void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const ch
 	}
 }
 
+void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len,
+                                 ColourAllocated fore, ColourAllocated back) {
+	FillRectangle(rc, back);
+	DrawTextBase(rc, font_, ybase, s, len, fore);
+}
+
 // On GTK+, exactly same as DrawTextNoClip
 void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len,
                                   ColourAllocated fore, ColourAllocated back) {
-	DrawTextNoClip(rc, font_, ybase, s, len, fore, back);
+	FillRectangle(rc, back);
+	DrawTextBase(rc, font_, ybase, s, len, fore);
+}
+
+// On GTK+, exactly same as DrawTextNoClip
+void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len,
+                                  ColourAllocated fore) {
+	DrawTextBase(rc, font_, ybase, s, len, fore);
 }
 
 void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positions) {

@@ -314,6 +314,7 @@ public:
 
 	virtual void DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back)=0;
 	virtual void DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back)=0;
+	virtual void DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore)=0;
 	virtual void MeasureWidths(Font &font_, const char *s, int len, int *positions)=0;
 	virtual int WidthText(Font &font_, const char *s, int len)=0;
 	virtual int WidthChar(Font &font_, char ch)=0;

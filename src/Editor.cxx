@@ -297,6 +297,7 @@ Editor::Editor() {
 	mouseDownCaptures = true;
 
 	bufferedDraw = true;
+	twoPhaseDraw = true;
 
 	lastClickTime = 0;
 	dwellDelay = SC_TIME_FOREVER;
@@ -1764,6 +1765,34 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 	}
 }
 
+ColourAllocated Editor::TextBackground(ViewStyle &vsDraw, bool overrideBackground,
+	ColourAllocated background, bool inSelection, int styleMain, int i, LineLayout *ll) {
+	if (inSelection) {
+		if (vsDraw.selbackset) {
+			if (primarySelection)
+				return vsDraw.selbackground.allocated;
+			else
+				return vsDraw.selbackground2.allocated;
+		}
+	} else {
+		if ((vsDraw.edgeState == EDGE_BACKGROUND) &&
+			(i >= ll->edgeColumn) &&
+			(ll->chars[i] != '\n') &&
+			(ll->chars[i] != '\r'))
+			return vsDraw.edgecolour.allocated;
+		if (overrideBackground)
+			return background;
+	}
+	return vsDraw.styles[styleMain].back.allocated;
+}
+
+void Editor::DrawIndentGuide(Surface *surface, int lineVisible, int lineHeight, int start, PRectangle rcSegment, bool highlight) {
+	Point from(0, ((lineVisible & 1) && (lineHeight & 1)) ? 1 : 0);
+	PRectangle rcCopyArea(start + 1, rcSegment.top, start + 2, rcSegment.bottom);
+	surface->Copy(rcCopyArea, from,
+		highlight ? *pixmapIndentGuideHighlight : *pixmapIndentGuide);
+}
+
 void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart,
                       PRectangle rcLine, LineLayout *ll, int subLine) {
 
@@ -1810,6 +1839,9 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		}
 	}
 
+	bool drawWhitespaceBackground = (vsDraw.viewWhitespace != wsInvisible) &&
+		(!overrideBackground) && (vsDraw.whitespaceBackgroundSet);
+
 	bool inIndentation = subLine == 0;	// Do not handle indentation except on first subline.
 	int indentWidth = pdoc->indentInChars * vsDraw.spaceWidth;
 	if (indentWidth == 0)
@@ -1818,7 +1850,6 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	int posLineStart = pdoc->LineStart(line);
 	int posLineEnd = pdoc->LineStart(line + 1);
 
-	int styleMask = pdoc->stylingBitsMask;
 	int startseg = ll->LineStart(subLine);
 	int subLineStart = ll->positions[startseg];
 	int lineStart = 0;
@@ -1827,7 +1858,10 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		lineStart = ll->LineStart(subLine);
 		lineEnd = ll->LineStart(subLine+1);
 	}
-	for (int i = lineStart; i < lineEnd; i++) {
+	int i;
+
+	// Background drawing loop
+	for (i = lineStart; twoPhaseDraw && (i < lineEnd); i++) {
 
 		int iDoc = i + posLineStart;
 		// If there is the end of a style run for any reason
@@ -1842,30 +1876,74 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 			// draw strings that are completely past the right side of the window.
 			if ((rcSegment.left <= rcLine.right) && (rcSegment.right >= rcLine.left)) {
 				int styleMain = ll->styles[i];
-				ColourAllocated textBack = vsDraw.styles[styleMain].back.allocated;
+				bool inSelection = (iDoc >= ll->selStart) && (iDoc < ll->selEnd) && (ll->selStart != ll->selEnd);
+				ColourAllocated textBack = TextBackground(vsDraw, overrideBackground, background, inSelection, styleMain, i, ll);
+				if (ll->chars[i] == '\t') {
+					// Tab display
+					if (drawWhitespaceBackground &&
+						(!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways))
+						textBack = vsDraw.whitespaceBackground.allocated;
+					surface->FillRectangle(rcSegment, textBack);
+				} else if (IsControlCharacter(ll->chars[i])) {
+					// Control character display
+					inIndentation = false;
+					surface->FillRectangle(rcSegment, textBack);
+				} else {
+					// Normal text display
+					surface->FillRectangle(rcSegment, textBack);
+					if (vsDraw.viewWhitespace != wsInvisible ||
+					        (inIndentation && vsDraw.viewIndentationGuides)) {
+						for (int cpos = 0; cpos <= i - startseg; cpos++) {
+							if (ll->chars[cpos + startseg] == ' ') {
+								if (drawWhitespaceBackground &&
+									(!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways)) {
+									PRectangle rcSpace(ll->positions[cpos + startseg] + xStart, rcSegment.top,
+										ll->positions[cpos + startseg + 1] + xStart, rcSegment.bottom);
+									surface->FillRectangle(rcSpace, vsDraw.whitespaceBackground.allocated);
+								}
+							} else {
+								inIndentation = false;
+							}
+						}
+					}
+				}
+			}
+			startseg = i + 1;
+		}
+	}
+	inIndentation = subLine == 0;	// Do not handle indentation except on first subline.
+	startseg = ll->LineStart(subLine);
+	// Foreground drawing loop
+	for (i = lineStart; i < lineEnd; i++) {
+
+		int iDoc = i + posLineStart;
+		// If there is the end of a style run for any reason
+		if ((ll->styles[i] != ll->styles[i + 1]) ||
+				i == (lineEnd-1) ||
+		        IsControlCharacter(ll->chars[i]) || IsControlCharacter(ll->chars[i + 1]) ||
+		        ((ll->selStart != ll->selEnd) && ((iDoc + 1 == ll->selStart) || (iDoc + 1 == ll->selEnd))) ||
+		        (i == (ll->edgeColumn - 1))) {
+			rcSegment.left = ll->positions[startseg] + xStart - subLineStart;
+			rcSegment.right = ll->positions[i + 1] + xStart - subLineStart;
+			// Only try to draw if really visible - enhances performance by not calling environment to
+			// draw strings that are completely past the right side of the window.
+			if ((rcSegment.left <= rcLine.right) && (rcSegment.right >= rcLine.left)) {
+				int styleMain = ll->styles[i];
 				ColourAllocated textFore = vsDraw.styles[styleMain].fore.allocated;
 				Font &textFont = vsDraw.styles[styleMain].font;
 				bool inSelection = (iDoc >= ll->selStart) && (iDoc < ll->selEnd) && (ll->selStart != ll->selEnd);
-				if (inSelection) {
-					if (vsDraw.selbackset) {
-						if (primarySelection)
-							textBack = vsDraw.selbackground.allocated;
-						else
-							textBack = vsDraw.selbackground2.allocated;
-					}
-					if (vsDraw.selforeset)
-						textFore = vsDraw.selforeground.allocated;
-				} else {
-					if (overrideBackground)
-						textBack = background;
-					if ((vsDraw.edgeState == EDGE_BACKGROUND) && (i >= ll->edgeColumn) && (ll->chars[i] != '\n') && (ll->chars[i] != '\r'))
-						textBack = vsDraw.edgecolour.allocated;
+				if (inSelection && (vsDraw.selforeset)) {
+					textFore = vsDraw.selforeground.allocated;
 				}
+				ColourAllocated textBack = TextBackground(vsDraw, overrideBackground, background, inSelection, styleMain, i, ll);
 				if (ll->chars[i] == '\t') {
-					// Manage tab display
-					if (!overrideBackground && vsDraw.whitespaceBackgroundSet && (vsDraw.viewWhitespace != wsInvisible) && (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways))
-						textBack = vsDraw.whitespaceBackground.allocated;
-					surface->FillRectangle(rcSegment, textBack);
+					// Tab display
+					if (!twoPhaseDraw) {
+						if (drawWhitespaceBackground &&
+							(!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways))
+							textBack = vsDraw.whitespaceBackground.allocated;
+						surface->FillRectangle(rcSegment, textBack);
+					}
 					if ((vsDraw.viewWhitespace != wsInvisible) || ((inIndentation && vsDraw.viewIndentationGuides))) {
 						if (vsDraw.whitespaceForegroundSet)
 							textFore = vsDraw.whitespaceForeground.allocated;
@@ -1874,10 +1952,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 					if (inIndentation && vsDraw.viewIndentationGuides) {
 						for (int xIG = ll->positions[i] / indentWidth * indentWidth; xIG < ll->positions[i + 1]; xIG += indentWidth) {
 							if (xIG >= ll->positions[i] && xIG > 0) {
-								Point from(0, ((lineVisible & 1) && (vsDraw.lineHeight & 1)) ? 1 : 0);
-								PRectangle rcCopyArea(xIG + xStart + 1, rcSegment.top, xIG + xStart + 2, rcSegment.bottom);
-								surface->Copy(rcCopyArea, from, (ll->xHighlightGuide == xIG) ?
-									      *pixmapIndentGuideHighlight : *pixmapIndentGuide);
+								DrawIndentGuide(surface, lineVisible, vsDraw.lineHeight, xIG + xStart, rcSegment,
+									(ll->xHighlightGuide == xIG));
 							}
 						}
 					}
@@ -1889,12 +1965,14 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 						}
 					}
 				} else if (IsControlCharacter(ll->chars[i])) {
-					// Manage control character display
+					// Control character display
 					inIndentation = false;
 					if (controlCharSymbol < 32) {
 						// Draw the character
 						const char *ctrlChar = ControlCharacterString(ll->chars[i]);
-						surface->FillRectangle(rcSegment, textBack);
+						if (!twoPhaseDraw) {
+							surface->FillRectangle(rcSegment, textBack);
+						}
 						int normalCharHeight = surface->Ascent(ctrlCharsFont) -
 									   surface->InternalLeading(ctrlCharsFont);
 						PRectangle rcCChar = rcSegment;
@@ -1918,10 +1996,16 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 										  cc, 1, textBack, textFore);
 					}
 				} else {
-					// Manage normal display
-					surface->DrawTextNoClip(rcSegment, textFont,
+					// Normal text display
+					if (twoPhaseDraw) {
+						surface->DrawTextTransparent(rcSegment, textFont,
+					                  rcSegment.top + vsDraw.maxAscent, ll->chars + startseg,
+					                  i - startseg + 1, textFore);
+					} else {
+						surface->DrawTextNoClip(rcSegment, textFont,
 					                  rcSegment.top + vsDraw.maxAscent, ll->chars + startseg,
 					                  i - startseg + 1, textFore, textBack);
+					}
 					if (vsDraw.viewWhitespace != wsInvisible ||
 					        (inIndentation && vsDraw.viewIndentationGuides)) {
 						for (int cpos = 0; cpos <= i - startseg; cpos++) {
@@ -1931,7 +2015,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 										textFore = vsDraw.whitespaceForeground.allocated;
 									if (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways) {
 										int xmid = (ll->positions[cpos + startseg] + ll->positions[cpos + startseg + 1]) / 2;
-										if (!overrideBackground && vsDraw.whitespaceBackgroundSet) {
+										if (!twoPhaseDraw && drawWhitespaceBackground &&
+											(!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways)) {
 											textBack = vsDraw.whitespaceBackground.allocated;
 											PRectangle rcSpace(ll->positions[cpos + startseg] + xStart, rcSegment.top, ll->positions[cpos + startseg + 1] + xStart, rcSegment.bottom);
 											surface->FillRectangle(rcSpace, textBack);
@@ -1945,10 +2030,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 								if (inIndentation && vsDraw.viewIndentationGuides) {
 									int startSpace = ll->positions[cpos + startseg];
 									if (startSpace > 0 && (startSpace % indentWidth == 0)) {
-										Point from(0, ((lineVisible & 1) && (vsDraw.lineHeight & 1)) ? 1 : 0);
-										PRectangle rcCopyArea(startSpace + xStart + 1, rcSegment.top, startSpace + xStart + 2, rcSegment.bottom);
-										surface->Copy(rcCopyArea, from, (ll->xHighlightGuide == ll->positions[cpos + startseg]) ?
-										              *pixmapIndentGuideHighlight : *pixmapIndentGuide);
+										DrawIndentGuide(surface, lineVisible, vsDraw.lineHeight, startSpace + xStart, rcSegment,
+											(ll->xHighlightGuide == ll->positions[cpos + startseg]));
 									}
 								}
 							} else {
@@ -1993,6 +2076,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		}
 	}
 	// End of the drawing of the current line
+
+	int styleMask = pdoc->stylingBitsMask;
 
 	// Fill in a PRectangle representing the end of line characters
 	int xEol = ll->positions[lineEnd] - subLineStart;
@@ -5113,6 +5198,14 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETBUFFEREDDRAW:
 		return bufferedDraw;
+
+	case SCI_GETTWOPHASEDRAW:
+		return twoPhaseDraw;
+
+	case SCI_SETTWOPHASEDRAW:
+		twoPhaseDraw = wParam != 0;
+		InvalidateStyleRedraw();
+		break;
 
 	case SCI_SETTABWIDTH:
 		if (wParam > 0)

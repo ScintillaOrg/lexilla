@@ -199,6 +199,9 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	/** In bufferedDraw mode, graphics operations are drawn to a pixmap and then copied to
 	 * the screen. This avoids flashing but is about 30% slower. */
 	bool bufferedDraw;
+	/** In twoPhaseDraw mode, drawing is performed in two phases, first the background
+	* and then the foreground. This avoids chopping off characters that overlap the next run. */
+	bool twoPhaseDraw;
 
 	int xOffset;		///< Horizontal scrolled amount in pixels
 	int xCaretMargin;	///< Ensure this many pixels visible on both sides of caret
@@ -348,6 +351,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	LineLayout *RetrieveLineLayout(int lineNumber);
 	void LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayout *ll,
 		int width=LineLayout::wrapWidthInfinite);
+	ColourAllocated TextBackground(ViewStyle &vsDraw, bool overrideBackground, ColourAllocated background, bool inSelection, int styleMain, int i, LineLayout *ll);
+	void DrawIndentGuide(Surface *surface, int lineVisible, int lineHeight, int start, PRectangle rcSegment, bool highlight);
 	void DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart,
 		PRectangle rcLine, LineLayout *ll, int subLine=0);
 	void Paint(Surface *surfaceWindow, PRectangle rcArea);
