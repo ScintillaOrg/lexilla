@@ -2523,14 +2523,12 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		needUpdateUI = false;
 	}
 
-	PaintSelMargin(surfaceWindow, rcArea);
-
 	// Call priority lines wrap on a window of lines which are likely
 	// to rendered with the following paint (that is wrap the visible
 	// 	lines first).
 	int startLineToWrap = cs.DocFromDisplay(topLine) - 5;
 	if (startLineToWrap < 0)
-		startLineToWrap = 0;
+		startLineToWrap = -1;
 	if (WrapLines(false, startLineToWrap)) {
 		// The wrapping process has changed the height of some lines so
 		// abandon this paint for a complete repaint.
@@ -2540,6 +2538,8 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		RefreshPixMaps(surfaceWindow);	// In case pixmaps invalidated by scrollbar change
 	}
 	PLATFORM_ASSERT(pixmapSelPattern->Initialised());
+
+	PaintSelMargin(surfaceWindow, rcArea);
 
 	PRectangle rcRightMargin = rcClient;
 	rcRightMargin.left = rcRightMargin.right - vs.rightMarginWidth;
@@ -3454,7 +3454,6 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 	if (paintState == painting) {
 		CheckForChangeOutsidePaint(Range(mh.position, mh.position + mh.length));
 	}
-	CheckModificationForWrap(mh);
 	if (mh.modificationType & SC_MOD_CHANGESTYLE) {
 		if (paintState == notPainting) {
 			if (mh.position < pdoc->LineStart(topLine)) {
@@ -3495,6 +3494,7 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 			} else {
 				cs.DeleteLines(lineOfPos, -mh.linesAdded);
 			}
+			CheckModificationForWrap(mh);
 			// Avoid scrolling of display if change before current display
 			if (mh.position < posTopLine) {
 				int newTop = Platform::Clamp(topLine + mh.linesAdded, 0, MaxScrollPos());
