@@ -130,7 +130,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 				sc.SetState(SCE_C_COMMENTDOCKEYWORD);
 			} else if (sc.atLineEnd) {
 				noDocChars = 0;
-			} else if (!isspace(sc.ch)) {
+			} else if (!isspace(sc.ch) && (sc.ch != '*')) {
 				noDocChars++;
 			}
 		} else if (sc.state == SCE_C_COMMENTLINE || sc.state == SCE_C_COMMENTLINEDOC) {
@@ -219,7 +219,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 				}
 			} else if (sc.Match('/', '*')) {
 				if (sc.Match("/**") || sc.Match("/*!")) {	// Support of Qt/Doxygen doc. style
-					noDocChars = -1;
+					noDocChars = 0;
 					sc.SetState(SCE_C_COMMENTDOC);
 				} else {
 					sc.SetState(SCE_C_COMMENT);
