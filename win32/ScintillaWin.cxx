@@ -147,10 +147,6 @@ class ScintillaWin :
 
 	static HINSTANCE hInstance;
 
-#ifdef SCI_LEXER
-	LexerManager *lexMan;
-#endif
-
 	ScintillaWin(HWND hwnd);
 	ScintillaWin(const ScintillaWin &) : ScintillaBase() {}
 	virtual ~ScintillaWin();
@@ -269,7 +265,8 @@ void ScintillaWin::Initialise() {
 	OleInitialize(NULL);
 
 #ifdef SCI_LEXER
-	lexMan = new LexerManager;
+	LexerManager *lexMan = LexerManager::GetInstance();
+	lexMan->Load();
 #endif
 }
 
@@ -278,10 +275,6 @@ void ScintillaWin::Finalise() {
 	SetTicking(false);
 	RevokeDragDrop(wMain.GetID());
 	OleUninitialize();
-
-#ifdef SCI_LEXER
-	delete lexMan;
-#endif
 }
 
 void ScintillaWin::StartDrag() {

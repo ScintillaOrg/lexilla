@@ -21,6 +21,7 @@
 int LexerManager::UseCount = 0;
 LexerLibrary *LexerManager::first = NULL;
 LexerLibrary *LexerManager::last = NULL;
+LexerManager *LexerManager::firstlm = NULL;
 
 //------------------------------------------
 //
@@ -210,7 +211,8 @@ LexerManager::LexerManager() {
 	
 	UseCount++;
 	if (1 == UseCount) {
-		EnumerateLexers();
+		firstlm = this;
+		m_bLoaded = false;
 	}
 }
 
@@ -279,4 +281,31 @@ LexerManager::~LexerManager() {
 			last = NULL;
 		}
 	}
+	if (this == firstlm)
+		firstlm = NULL;
 }
+
+void LexerManager::Load()
+{
+	if(!m_bLoaded)
+	{
+		m_bLoaded = true;
+		EnumerateLexers();
+	}
+}
+
+// Return a LexerManager, or create one and then return it.
+LexerManager *LexerManager::GetInstance() {
+	if(!firstlm)
+		firstlm = new LexerManager;
+	return firstlm;
+}
+
+LMMinder::~LMMinder()
+{
+	LexerManager *rem = LexerManager::firstlm;
+	if(rem)
+		delete rem;
+}
+
+LMMinder minder;

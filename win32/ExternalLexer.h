@@ -61,14 +61,24 @@ private:
 
 // LexerManager manages external lexers, contains LexerLibrarys.
 class LexerManager {
+	friend class LMMinder;
 public:
 	LexerManager();
 	~LexerManager();
+	void Load();
+	static LexerManager *GetInstance();
 private:
+	bool m_bLoaded;
 	void EnumerateLexers();
 	static int UseCount;
 	static LexerLibrary *first;
 	static LexerLibrary *last;
+	static LexerManager *firstlm;
+};
+
+class LMMinder {
+public:
+	~LMMinder();
 };
 
 #endif
