@@ -178,8 +178,7 @@ void ViewStyle::RefreshColourPalette(Palette &pal, bool want) {
 		pal.WantFind(indicators[i].fore, want);
 	}
 	for (i=0;i<(sizeof(markers)/sizeof(markers[0]));i++) {
-		pal.WantFind(markers[i].fore, want);
-		pal.WantFind(markers[i].back, want);
+		markers[i].RefreshColourPalette(pal, want);
 	}
 	pal.WantFind(selforeground, want);
 	pal.WantFind(selbackground, want);
@@ -225,7 +224,7 @@ void ViewStyle::Refresh(Surface &surface) {
 }
 
 void ViewStyle::ResetDefaultStyle() {
-	styles[STYLE_DEFAULT].Clear(ColourDesired(0,0,0), 
+	styles[STYLE_DEFAULT].Clear(ColourDesired(0,0,0),
 		ColourDesired(0xff,0xff,0xff),
 	        Platform::DefaultFontSize(), fontNames.Save(Platform::DefaultFont()),
 		SC_CHARSET_DEFAULT,

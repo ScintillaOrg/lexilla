@@ -302,6 +302,9 @@ fun int MarkerNext=2047(int lineStart, int markerMask)
 # Find the previous line before lineStart that includes a marker in mask.
 fun int MarkerPrevious=2048(int lineStart, int markerMask)
 
+# Define a marker from a pixmap.
+fun void MarkerDefinePixmap=2049(int markerNumber, string pixmap)
+
 enu MarginType=SC_MARGIN_
 val SC_MARGIN_SYMBOL=0
 val SC_MARGIN_NUMBER=1
