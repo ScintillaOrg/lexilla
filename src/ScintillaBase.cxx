@@ -391,7 +391,7 @@ void ScintillaBase::Colourise(int start, int end) {
 		styleStart = styler.StyleAt(start - 1);
 	styler.SetCodePage(pdoc->dbcsCodePage);
 
-	if (lexCurrent) {	// Should always succeed as null lexer should always be available
+	if (lexCurrent && (len > 0)) {	// Should always succeed as null lexer should always be available
 		lexCurrent->Lex(start, len, styleStart, keyWordLists, styler);
 		styler.Flush();
 		if (styler.GetPropertyInt("fold")) {
