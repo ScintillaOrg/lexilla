@@ -1349,8 +1349,8 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 	// Don't show the selection when printing
 	vsPrint.selbackset = false;
 	vsPrint.selforeset = false;
-	// White background for the line numbers
-	vsPrint.styles[STYLE_LINENUMBER].back.desired = Colour(0xff, 0xff, 0xff);
+	
+	// Set colours for printing according to users settings 
 	for (int sty = 0;sty <= STYLE_MAX;sty++) {
 		if (printColourMode == SC_PRINT_INVERTLIGHT) {
 			vsPrint.styles[sty].fore.desired = InvertedLight(vsPrint.styles[sty].fore.desired);
@@ -1358,8 +1358,15 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 		} else if (printColourMode == SC_PRINT_BLACKONWHITE) {
 			vsPrint.styles[sty].fore.desired = Colour(0, 0, 0);
 			vsPrint.styles[sty].back.desired = Colour(0xff, 0xff, 0xff);
+		} else if (printColourMode == SC_PRINT_COLOURONWHITE) { 
+			vsPrint.styles[sty].back.desired = Colour(0xff, 0xff, 0xff); 
+		} else if (printColourMode == SC_PRINT_COLOURONWHITEDEFAULTBG) {
+			if (sty <= STYLE_DEFAULT) {
+				vsPrint.styles[sty].back.desired = Colour(0xff, 0xff, 0xff); 
+			}
 		}
 	}
+	// White background for the line numbers
 	vsPrint.styles[STYLE_LINENUMBER].back.desired = Colour(0xff, 0xff, 0xff);
 
 	vsPrint.Refresh(*surfaceMeasure);

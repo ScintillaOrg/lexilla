@@ -215,6 +215,8 @@ typedef long (*SciFnDirect)(long ptr, unsigned int iMessage, unsigned long wPara
 #define SC_PRINT_NORMAL 0
 #define SC_PRINT_INVERTLIGHT 1
 #define SC_PRINT_BLACKONWHITE 2
+#define SC_PRINT_COLOURONWHITE 3
+#define SC_PRINT_COLOURONWHITEDEFAULTBG 4
 #define SCI_SETPRINTCOLOURMODE 2148
 #define SCI_GETPRINTCOLOURMODE 2149
 #define SCFIND_DOWN 1
