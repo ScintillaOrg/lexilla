@@ -120,6 +120,7 @@
 	<li>Mike Lansdaal</li>
 	<li>Yukihiro Nakai</li>
 	<li>Jochen Tucht</li>
+	<li>Greg Smith</li>
     </ul>
     <p>
        Images used in GTK+ version
@@ -138,18 +139,73 @@
 	Released on 22 January 2003.
       </li>
       <li>
-	Autocompletion lists may have a per-item icon.
+	Autocompletion lists may have a per-item pixmap.
       </li>
       <li>
 	Autocompletion lists allow Unicode text on Windows.
+      </li>
+      <li>
+	Scintilla documentation rewritten.
       </li>
       <li>
 	Additional DBCS encoding support in Scintilla on GTK+ primarily aimed at
 	Japanese EUC encoding.
       </li>
       <li>
+	CSS (Cascading Style Sheets) lexer added.
+      </li>
+      <li>
+	diff lexer understands some more formats.
+      </li>
+      <li>
+	Avenue lexer supports multiple keyword lists.
+      </li>
+      <li>
+	The caret may now be made invisible by setting the caret width to 0.
+      </li>
+      <li>
+	SciTE openpath property on Windows searches a path for files that are
+	the subject of the Open Selected Filename command.
+      </li>
+      <li>
+	On Windows, SciTE can pipe the result of a string expression into a command line tool.
+      </li>
+      <li>
+	On Windows, SciTE's Find dialog has a Mark All button.
+      </li>
+      <li>
+	Python folder attaches comments before blocks to the next block rather
+	than the previous block.
+      </li>
+      <li>
+	Minor fixes to Fortran lexer.
+      </li>
+      <li>
 	Bugs fixed with printing on Windows where line wrapping was causing some text
 	to not print.
+      </li>
+      <li>
+	Bug fixed with Korean Input Method Editor on Windows.
+      </li>
+      <li>
+	Bugs fixed with line wrap which would sometimes choose different break positions
+	after switching focus away and back.
+      </li>
+      <li>
+	Bug fixed where wheel scrolling had no effect on GTK+ after opening a fold.
+      </li>
+      <li>
+	Bug fixed with file paths containing non-ASCII characters on Windows.
+      </li>
+      <li>
+	Crash fixed with printing on Windows after defining pixmap marker.
+      </li>
+      <li>
+	Bug fixed where local properties were not always being applied.
+      </li>
+      <li>
+	Hangs fixed in SciTE's Replace All command when replacing regular expressions '^'
+	or '$'.
       </li>
       <li>
 	SciTE monospace setting behaves more sensibly.
