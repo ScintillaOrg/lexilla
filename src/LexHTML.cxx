@@ -719,17 +719,18 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		/////////////////////////////////////
 		// handle the start of SGML language (DTD)
 		else if (((scriptLanguage == eScriptNone) || (scriptLanguage == eScriptXML)) &&
-		         (chPrev == '<') &&
-		         (ch == '!') &&
-		         (StateToPrint != SCE_H_CDATA) &&
+				 (chPrev == '<') &&
+				 (ch == '!') &&
+				 (StateToPrint != SCE_H_CDATA) &&
 				 (!IsCommentState(StateToPrint)) &&
 				 (!IsScriptCommentState(StateToPrint)) ) {
 			beforePreProc = state;
 			styler.ColourTo(i - 2, StateToPrint);
 			if ((chNext == '-') && (chNext2 == '-')) {
 				state = SCE_H_COMMENT; // wait for a pending command
-			}
-			else if (isWordCdata(i + 1, i + 7, styler)) {
+				styler.ColourTo(i + 2, SCE_H_COMMENT);
+				i += 2; // follow styling after the --
+			} else if (isWordCdata(i + 1, i + 7, styler)) {
 				state = SCE_H_CDATA;
 			} else {
 				styler.ColourTo(i, SCE_H_SGML_DEFAULT); // <! is default
