@@ -162,7 +162,7 @@ private:
 	gint PressThis(GdkEventButton *event);
 	static gint Press(GtkWidget *widget, GdkEventButton *event);
 	static gint MouseRelease(GtkWidget *widget, GdkEventButton *event);
-#if PLAT_GTK_WIN32
+#if PLAT_GTK_WIN32 || (GTK_MAJOR_VERSION >= 2)
 	static gint ScrollEvent(GtkWidget *widget, GdkEventScroll *event);
 #endif
 	static gint Motion(GtkWidget *widget, GdkEventMotion *event);
@@ -174,7 +174,9 @@ private:
 	static void SelectionGet(GtkWidget *widget, GtkSelectionData *selection_data,
 	                         guint info, guint time);
 	static gint SelectionClear(GtkWidget *widget, GdkEventSelection *selection_event);
+#if GTK_MAJOR_VERSION < 2
 	static gint SelectionNotify(GtkWidget *widget, GdkEventSelection *selection_event);
+#endif
 	static void DragBegin(GtkWidget *widget, GdkDragContext *context);
 	static gboolean DragMotion(GtkWidget *widget, GdkDragContext *context,
 	                           gint x, gint y, guint time);
@@ -1195,7 +1197,11 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 		else
 			SetAdjustmentValue(adjustmentv, topLine + 3);
 	}
+#if GTK_MAJOR_VERSION >= 2
 	return TRUE;
+#else
+	return FALSE;
+#endif
 }
 
 gint ScintillaGTK::Press(GtkWidget *widget, GdkEventButton *event) {
@@ -1227,7 +1233,7 @@ gint ScintillaGTK::MouseRelease(GtkWidget *widget, GdkEventButton *event) {
 
 // win32gtk has a special wheel mouse event for whatever reason and doesn't
 // use the button4/5 trick used under X windows.
-#if PLAT_GTK_WIN32
+#if PLAT_GTK_WIN32 || (GTK_MAJOR_VERSION >= 2)
 gint ScintillaGTK::ScrollEvent(GtkWidget *widget,
                                GdkEventScroll *event) {
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
@@ -1530,10 +1536,12 @@ gint ScintillaGTK::SelectionClear(GtkWidget *widget, GdkEventSelection *selectio
 	return gtk_selection_clear(widget, selection_event);
 }
 
+#if GTK_MAJOR_VERSION < 2
 gint ScintillaGTK::SelectionNotify(GtkWidget *widget, GdkEventSelection *selection_event) {
 	//Platform::DebugPrintf("Selection notify\n");
 	return gtk_selection_notify(widget, selection_event);
 }
+#endif
 
 void ScintillaGTK::DragBegin(GtkWidget *, GdkDragContext *) {
 	//Platform::DebugPrintf("DragBegin\n");
@@ -1680,7 +1688,7 @@ void ScintillaGTK::ClassInit(GtkObjectClass* object_class, GtkWidgetClass *widge
 	widget_class->motion_notify_event = Motion;
 	widget_class->button_press_event = Press;
 	widget_class->button_release_event = MouseRelease;
-#if PLAT_GTK_WIN32
+#if PLAT_GTK_WIN32 || (GTK_MAJOR_VERSION >= 2)
 	widget_class->scroll_event = ScrollEvent;
 #endif
 	widget_class->key_press_event = KeyPress;
@@ -1690,7 +1698,9 @@ void ScintillaGTK::ClassInit(GtkObjectClass* object_class, GtkWidgetClass *widge
 	widget_class->selection_received = SelectionReceived;
 	widget_class->selection_get = SelectionGet;
 	widget_class->selection_clear_event = SelectionClear;
+#if GTK_MAJOR_VERSION < 2
 	widget_class->selection_notify_event = SelectionNotify;
+#endif
 
 	widget_class->drag_data_received = DragDataReceived;
 	widget_class->drag_motion = DragMotion;
