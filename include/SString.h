@@ -47,9 +47,9 @@ inline char *StringDup(
  * functions to allow reliable manipulations of these strings.
  **/
 class SString {
-	char *s;		///< The C string
-	int ssize;		///< The size of the buffer, less 1: ie. the maximum size of the string
-	int slen;		///< The size of the string in s
+	char *s;			///< The C string
+	int ssize;	///< The size of the buffer, less 1: ie. the maximum size of the string
+	int slen;	///< The size of the string in s
 
 	/// Minimum growth size when appending strings
 	enum { sizingGranularity = 64 };
@@ -182,26 +182,38 @@ public:
 		else
 			return '\0';
 	}
-	SString &append(const char* sother, int lenOther = -1) {
+	SString &append(const char* sother, int lenOther=-1, char sep=0) {
 		if (lenOther < 0)
 			lenOther = strlen(sother);
-		if (slen + lenOther + 1 < ssize) {
+		int lenSep = 0;
+		if (slen && sep)	// Only add a separator if not empty
+			lenSep = 1;
+		int lenNew = slen + lenOther + lenSep;
+		if (lenNew + 1 < ssize) {
 			// Conservative about growing the buffer: don't do it, unless really needed
+			if (lenSep) {
+				s[slen] = sep;
+				slen++;
+			}
 			strncpy(&s[slen], sother, lenOther);
 			s[slen + lenOther] = '\0';
 			slen += lenOther;
 		} else {
 			// Grow the buffer bigger than really needed, to have room for other appends
-			char *sNew = new char[slen + lenOther + sizingGranularity + 1];
+			char *sNew = new char[lenNew + sizingGranularity + 1];
 			if (sNew) {
 				if (s) {
 					memcpy(sNew, s, slen);
 					delete []s;
 				}
-				strncpy(&sNew[slen], sother, lenOther);
-				sNew[slen + lenOther] = '\0';
 				s = sNew;
-				ssize = slen + lenOther + sizingGranularity;
+				ssize = lenNew + sizingGranularity;
+				if (lenSep) {
+					s[slen] = sep;
+					slen++;
+				}
+				strncpy(&s[slen], sother, lenOther);
+				sNew[slen + lenOther] = '\0';
 				slen += lenOther;
 			}
 		}
@@ -215,6 +227,9 @@ public:
 	}
 	SString &operator +=(char ch) {
 		return append(&ch, 1);
+	}
+	SString &appendwithseparator(const char* sother, char sep) {
+		return append(sother, strlen(sother), sep);
 	}
 	int value() const {
 		if (s)
