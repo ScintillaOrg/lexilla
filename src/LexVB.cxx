@@ -36,6 +36,11 @@ inline bool IsAWordStart(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '_');
 }
 
+inline bool IsADateCharacter(const int ch) {
+	return (ch < 0x80) && 
+		(isalnum(ch) || ch == '|' || ch == '-' || ch == '/' || ch == ':' || ch == ' ' || ch == '\t');
+}
+
 static void ColouriseVBDoc(unsigned int startPos, int length, int initStyle,
                            WordList *keywordlists[], Accessor &styler, bool vbScriptSyntax) {
 
@@ -44,7 +49,7 @@ static void ColouriseVBDoc(unsigned int startPos, int length, int initStyle,
 	styler.StartAt(startPos);
 
 	int visibleChars = 0;
-
+				   
 	StyleContext sc(startPos, length, initStyle, styler);
 
 	for (; sc.More(); sc.Forward()) {
@@ -95,7 +100,7 @@ static void ColouriseVBDoc(unsigned int startPos, int length, int initStyle,
 				sc.SetState(SCE_B_DEFAULT);
 			}
 		} else if (sc.state == SCE_B_DATE) {
-			if (sc.ch == '#') {
+			if (sc.ch == '#' || !IsADateCharacter(sc.chNext)) {
 				sc.ForwardSetState(SCE_B_DEFAULT);
 			}
 		}
