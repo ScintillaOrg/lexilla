@@ -270,7 +270,7 @@ static const char *CharacterSetName(int characterSet) {
 	case SC_CHARSET_DEFAULT:
 		return "iso8859-*";
 	case SC_CHARSET_BALTIC:
-		return "*-*";
+		return "iso8859-13";
 	case SC_CHARSET_CHINESEBIG5:
 		return "*-*";
 	case SC_CHARSET_EASTEUROPE:
@@ -727,7 +727,7 @@ const char *CharacterSetID(int characterSet) {
 	case SC_CHARSET_DEFAULT:
 		return "LATIN1";
 	case SC_CHARSET_BALTIC:
-		return "BALTIC";
+		return "ISO8859-13";
 	case SC_CHARSET_CHINESEBIG5:
 		return "BIG-5";
 	case SC_CHARSET_EASTEUROPE:
