@@ -29,6 +29,10 @@
  * Modification history:
  *
  * $Log$
+ * Revision 1.3  2001/04/06 12:24:21  nyamatongwe
+ * Made regular expression searching work on a line by line basis, made ^ and
+ * $ work, made [set] work, and added a case insensitive option.
+ *
  * Revision 1.2  2001/04/05 01:58:04  nyamatongwe
  * Replace target functionality to make find and replace operations faster
  * by diminishing screen updates and allow for \d patterns in the replacement
@@ -283,8 +287,24 @@ void RESearch::ChSet(char c) {
 	bittab[((c) & BLKIND) >> 3] |= bitarr[(c) & BITIND];
 }
 
-const char *RESearch::Compile(char *pat) {
-	char *p;               /* pattern pointer   */
+void RESearch::ChSetWithCase(char c, bool caseSensitive) {
+	if (caseSensitive) {
+		ChSet(c);
+	} else {
+		if ((c >= 'a') && (c <= 'z')) {
+			ChSet(c);
+			ChSet(static_cast<char>(c - 'a' + 'A'));
+		} else if ((c >= 'A') && (c <= 'Z')) {
+			ChSet(c);
+			ChSet(static_cast<char>(c - 'A' + 'a'));
+		} else {
+			ChSet(c);
+		}
+	}
+}
+
+const char *RESearch::Compile(const char *pat, bool caseSensitive) {
+	const char *p;               /* pattern pointer   */
 	char *mp=nfa;          /* nfa pointer       */
 	char *lp;              /* saved pointer..   */
 	char *sp=nfa;          /* another one..     */
@@ -348,17 +368,18 @@ const char *RESearch::Compile(char *pat) {
 					p++;
 					c1 = *(p-2) + 1;
 					c2 = *p++;
-					while (c1 <= c2)
-						ChSet(static_cast<char>(c1++));
+					while (c1 <= c2) {
+						ChSetWithCase(static_cast<char>(c1++), caseSensitive);
+					}
 				}
 #ifdef EXTEND
 				else if (*p == '\\' && *(p+1)) {
 					p++;
-					ChSet(*p++);
+					ChSetWithCase(*p++, caseSensitive);
 				}
 #endif
 				else
-					ChSet(*p++);
+					ChSetWithCase(*p++, caseSensitive);
 			}
 			if (!*p)
 				return badpat("Missing ]");
@@ -487,8 +508,16 @@ const char *RESearch::Compile(char *pat) {
 			break;
 
 		default :               /* an ordinary char  */
-			*mp++ = CHR;
-			*mp++ = *p;
+			if (caseSensitive) {
+				*mp++ = CHR;
+				*mp++ = *p;
+			} else {
+				*mp++ = CCL;
+				mask = 0;
+				ChSetWithCase(*p, false);
+				for (n = 0; n < BITBLK; bittab[n++] = (char) 0)
+					*mp++ = static_cast<char>(mask ^ bittab[n]);
+			}
 			break;
 		}
 		sp = lp;
@@ -524,7 +553,7 @@ const char *RESearch::Compile(char *pat) {
 
 int RESearch::Execute(CharacterIndexer &ci, int lp) {
 	char c;
-	int ep = 0;
+	int ep = NOTFOUND;
 	char *ap = nfa;
 
 	bol = lp;

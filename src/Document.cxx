@@ -791,15 +791,12 @@ long Document::FindText(int minPos, int maxPos, const char *s,
                         bool caseSensitive, bool word, bool wordStart, bool regExp,
 			int *length) {
 	if (regExp) {
+		
 		if (!pre)
 			pre = new RESearch();
 		if (!pre)
 			return -1;
-		char *pat = new char[strlen(s) + 1];
-		if (!pat)
-			return -1;
 		
-		pat[0] = '\0';
 		int startPos;
 		int endPos;
 
@@ -815,25 +812,42 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 		startPos = MovePositionOutsideChar(startPos, 1, false);
 		endPos = MovePositionOutsideChar(endPos, 1, false);
 
-		DocumentIndexer di(this, endPos);
-		strcat(pat, s);
-		const char *errmsg = pre->Compile(pat);
+		const char *errmsg = pre->Compile(s, caseSensitive);
 		if (errmsg) {
-			delete []pat;
 			return -1;
 		}
 		// Find a variable in a property file: \$(\([A-Za-z0-9_.]+\))
 		// Replace first '.' with '-' in each property file variable reference:
 		//     Search: \$(\([A-Za-z0-9_-]+\)\.\([A-Za-z0-9_.]+\))
 		//     Replace: $(\1-\2)
-		int success = pre->Execute(di, startPos);
+		int lineRangeStart = LineFromPosition(startPos);
+		int lineRangeEnd = LineFromPosition(endPos);
 		int pos = -1;
 		int lenRet = 0;
-		if (success) {
-			pos = pre->bopat[0];
-			lenRet = pre->eopat[0] - pre->bopat[0];
+		char searchEnd = '\0';
+		if (*s)
+			searchEnd = s[strlen(s)-1];
+		for (int line=lineRangeStart; line<=lineRangeEnd; line++) {
+			int startOfLine = LineStart(line);
+			int endOfLine = LineEnd(line);
+			if (line == lineRangeStart) {
+				if ((startPos != startOfLine) && (s[0] == '^'))
+					continue;	// Can't match start of line if start position after start of line 
+				startOfLine = startPos;
+			}
+			if (line == lineRangeEnd) {
+				if ((endPos != endOfLine) && (searchEnd == '$'))
+					continue;	// Can't match end of line if end position before end of line 
+				endOfLine = endPos;
+			}
+			DocumentIndexer di(this, endOfLine);
+			int success = pre->Execute(di, startOfLine);
+			if (success) {
+				pos = pre->bopat[0];
+				lenRet = pre->eopat[0] - pre->bopat[0];
+				break;
+			}
 		}
-		delete []pat;
 		*length = lenRet;
 		return pos;
 
