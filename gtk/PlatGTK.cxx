@@ -1159,8 +1159,10 @@ static void list_image_free(gpointer, gpointer value, gpointer) {
 }
 
 ListBox::~ListBox() {
-	g_hash_table_foreach((GHashTable *) pixhash, list_image_free, NULL);
-	g_hash_table_destroy((GHashTable *) pixhash);
+	if (pixhash) {
+		g_hash_table_foreach((GHashTable *) pixhash, list_image_free, NULL);
+		g_hash_table_destroy((GHashTable *) pixhash);
+	}
 }
 
 static void SelectionAC(GtkWidget *, gint row, gint,
