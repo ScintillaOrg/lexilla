@@ -126,6 +126,72 @@
       </li>
     </ul>
     <h3>
+       <a href="scite126.zip">Release 1.26</a>
+    </h3>
+    <ul>
+      <li>
+        Released on 13 June 2000.
+      </li>
+      <li>
+         Support for the Lua language in both Scintilla and SciTE.
+      </li>
+      <li>
+        Multiple buffers may be open in SciTE.
+      </li>
+      <li>
+         In the C++ lexer, lexing of preprocessor source may either treat it all as being in 
+	 the preprocessor class or only the initial # and preprocessor command word as
+	 being in the preprocessor class.
+      </li>
+      <li>
+        Scintilla provides SCI_CREATEDOCUMENT, SCI_ADDREFDOCUMENT, and 
+	SCI_RELEASEDOCUMENT to make it easier for a container to deal with multiple
+	documents.
+      </li>
+      <li>
+        GTK+ specific definitions in Scintilla.h were removed to ScintillaWidget.h. All GTK+ clients will need to 
+	#include "ScintillaWidget.h".
+      </li>
+      <li>
+        For GTK+, tools can be executed in the background by setting subsystem to 2.
+      </li>
+      <li>
+        Keys in the properties files are now case sensitive. This leads to a performance increase.
+      </li>
+      <li>
+        Menu to choose which lexer to use on a file.
+      </li>
+      <li>
+        Tab size dialog on Windows.
+      </li>
+      <li>
+        File dialogs enlarge on GTK+.
+      </li>
+      <li>
+         Match Brace command bound to Ctrl+E on both platforms with Ctrl+] a synonym on Windows. 
+         Ctrl+Shift+E is select to matching brace. Brace matching tries to match to either the inside or the 
+         outside, depending on whether the cursor is inside or outside the braces initially. 
+	View End of Line bound to Ctrl+Shift+O.
+      </li>
+      <li>
+        The Home key may be bound to move the caret to either the start of the line or the start of the
+        text on the line.
+      </li>
+      <li>
+        Visual C++ project file for SciTE.
+      </li>
+      <li>
+        Bug fixed with current x location after Tab key.
+      </li>
+      <li>
+        Bug fixed with hiding fold margin by setting fold.margin.width to 0.
+      </li>
+      <li>
+        Bugs fixed with file name confusion on Windows when long and short names used, or different capitalisations,
+	or relative paths.
+      </li>
+    </ul>
+    <h3>
        <a href="scite125.zip">Release 1.25</a>
     </h3>
     <ul>
