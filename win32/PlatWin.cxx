@@ -235,7 +235,64 @@ void Font::Release() {
 	id = 0;
 }
 
-Surface::Surface() :
+class SurfaceImpl : Surface {
+	bool unicodeMode;
+	void *hdc; // HDC 
+	bool hdcOwned;
+	void *pen;	// HPEN
+	void *penOld;	// HPEN
+	void *brush;	// HBRUSH
+	void *brushOld; // HBRUSH
+	void *font;	// HFONT 
+	void *fontOld;	// HFONT 
+	void *bitmap;	// HBITMAP 
+	void *bitmapOld;	// HBITMAP 
+	void *paletteOld;	// HPALETTE 
+	void BrushColor(ColourAllocated back);
+	void SetFont(Font &font_);
+public:
+	Surface();
+	~Surface();
+
+	void Init();
+	void Init(SurfaceID sid);
+	void InitPixMap(int width, int height, Surface *surface_);
+
+	void Release();
+	bool Initialised();
+	void PenColour(ColourAllocated fore);
+	int LogPixelsY();
+	int DeviceHeightFont(int points);
+	void MoveTo(int x_, int y_);
+	void LineTo(int x_, int y_);
+	void Polygon(Point *pts, int npts, ColourAllocated fore, ColourAllocated back);
+	void RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back);
+	void FillRectangle(PRectangle rc, ColourAllocated back);
+	void FillRectangle(PRectangle rc, Surface &surfacePattern);
+	void RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back);
+	void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back);
+	void Copy(PRectangle rc, Point from, Surface &surfaceSource);
+
+	void DrawText(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
+	void DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
+	void MeasureWidths(Font &font_, const char *s, int len, int *positions);
+	int WidthText(Font &font_, const char *s, int len);
+	int WidthChar(Font &font_, char ch);
+	int Ascent(Font &font_);
+	int Descent(Font &font_);
+	int InternalLeading(Font &font_);
+	int ExternalLeading(Font &font_);
+	int Height(Font &font_);
+	int AverageCharWidth(Font &font_);
+
+	int SetPalette(Palette *pal, bool inBackGround);
+	void SetClip(PRectangle rc);
+	void FlushCachedState();
+
+	void SetUnicodeMode(bool unicodeMode_);
+};
+
+SurfaceImpl::SurfaceImpl() :
 	unicodeMode(false),
 	hdc(0), 	hdcOwned(false),
 	pen(0), 	penOld(0),
@@ -245,11 +302,11 @@ Surface::Surface() :
 	paletteOld(0) {
 }
 
-Surface::~Surface() {
+SurfaceImpl::~SurfaceImpl() {
 	Release();
 }
 
-void Surface::Release() {
+void SurfaceImpl::Release() {
 	if (penOld) {
 		::SelectObject(reinterpret_cast<HDC>(hdc), penOld);
 		::DeleteObject(pen);
@@ -287,24 +344,24 @@ void Surface::Release() {
 	}
 }
 
-bool Surface::Initialised() {
+bool SurfaceImpl::Initialised() {
 	return hdc != 0;
 }
 
-void Surface::Init() {
+void SurfaceImpl::Init() {
 	Release();
 	hdc = ::CreateCompatibleDC(NULL);
 	hdcOwned = true;
 	::SetTextAlign(reinterpret_cast<HDC>(hdc), TA_BASELINE);
 }
 
-void Surface::Init(SurfaceID sid) {
+void SurfaceImpl::Init(SurfaceID sid) {
 	Release();
 	hdc = sid;
 	::SetTextAlign(reinterpret_cast<HDC>(hdc), TA_BASELINE);
 }
 
-void Surface::InitPixMap(int width, int height, Surface *surface_) {
+void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_) {
 	Release();
 	hdc = ::CreateCompatibleDC(reinterpret_cast<HDC>(surface_->hdc));
 	hdcOwned = true;
@@ -313,7 +370,7 @@ void Surface::InitPixMap(int width, int height, Surface *surface_) {
 	::SetTextAlign(reinterpret_cast<HDC>(hdc), TA_BASELINE);
 }
 
-void Surface::PenColour(ColourAllocated fore) {
+void SurfaceImpl::PenColour(ColourAllocated fore) {
 	if (pen) {
 		::SelectObject(reinterpret_cast<HDC>(hdc), penOld);
 		::DeleteObject(pen);
@@ -324,7 +381,7 @@ void Surface::PenColour(ColourAllocated fore) {
 	penOld = static_cast<HPEN>(::SelectObject(reinterpret_cast<HDC>(hdc), pen));
 }
 
-void Surface::BrushColor(ColourAllocated back) {
+void SurfaceImpl::BrushColor(ColourAllocated back) {
 	if (brush) {
 		::SelectObject(reinterpret_cast<HDC>(hdc), brushOld);
 		::DeleteObject(brush);
@@ -337,7 +394,7 @@ void Surface::BrushColor(ColourAllocated back) {
 	brushOld = static_cast<HBRUSH>(::SelectObject(reinterpret_cast<HDC>(hdc), brush));
 }
 
-void Surface::SetFont(Font &font_) {
+void SurfaceImpl::SetFont(Font &font_) {
 	if (font_.GetID() != font) {
 		if (fontOld) {
 			::SelectObject(reinterpret_cast<HDC>(hdc), font_.GetID());
@@ -348,35 +405,35 @@ void Surface::SetFont(Font &font_) {
 	}
 }
 
-int Surface::LogPixelsY() {
+int SurfaceImpl::LogPixelsY() {
 	return ::GetDeviceCaps(reinterpret_cast<HDC>(hdc), LOGPIXELSY);
 }
 
-int Surface::DeviceHeightFont(int points) {
+int SurfaceImpl::DeviceHeightFont(int points) {
 	return ::MulDiv(points, LogPixelsY(), 72);
 }
 
-void Surface::MoveTo(int x_, int y_) {
+void SurfaceImpl::MoveTo(int x_, int y_) {
 	::MoveToEx(reinterpret_cast<HDC>(hdc), x_, y_, 0);
 }
 
-void Surface::LineTo(int x_, int y_) {
+void SurfaceImpl::LineTo(int x_, int y_) {
 	::LineTo(reinterpret_cast<HDC>(hdc), x_, y_);
 }
 
-void Surface::Polygon(Point *pts, int npts, ColourAllocated fore, ColourAllocated back) {
+void SurfaceImpl::Polygon(Point *pts, int npts, ColourAllocated fore, ColourAllocated back) {
 	PenColour(fore);
 	BrushColor(back);
 	::Polygon(reinterpret_cast<HDC>(hdc), reinterpret_cast<POINT *>(pts), npts);
 }
 
-void Surface::RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+void SurfaceImpl::RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
 	PenColour(fore);
 	BrushColor(back);
 	::Rectangle(reinterpret_cast<HDC>(hdc), rc.left, rc.top, rc.right, rc.bottom);
 }
 
-void Surface::FillRectangle(PRectangle rc, ColourAllocated back) {
+void SurfaceImpl::FillRectangle(PRectangle rc, ColourAllocated back) {
 	// Using ExtTextOut rather than a FillRect ensures that no dithering occurs.
 	// There is no need to allocate a brush either.
 	RECT rcw = RectFromPRectangle(rc);
@@ -384,7 +441,7 @@ void Surface::FillRectangle(PRectangle rc, ColourAllocated back) {
 	::ExtTextOut(reinterpret_cast<HDC>(hdc), rc.left, rc.top, ETO_OPAQUE, &rcw, "", 0, NULL);
 }
 
-void Surface::FillRectangle(PRectangle rc, Surface &surfacePattern) {
+void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 	HBRUSH br;
 	if (surfacePattern.bitmap)
 		br = ::CreatePatternBrush(reinterpret_cast<HBITMAP>(surfacePattern.bitmap));
@@ -395,7 +452,7 @@ void Surface::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 	::DeleteObject(br);
 }
 
-void Surface::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
 	PenColour(fore);
 	BrushColor(back);
 	::RoundRect(reinterpret_cast<HDC>(hdc),
@@ -404,13 +461,13 @@ void Surface::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAlloca
 		8, 8 );
 }
 
-void Surface::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+void SurfaceImpl::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
 	PenColour(fore);
 	BrushColor(back);
 	::Ellipse(reinterpret_cast<HDC>(hdc), rc.left, rc.top, rc.right, rc.bottom);
 }
 
-void Surface::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
+void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	::BitBlt(reinterpret_cast<HDC>(hdc), 
 		rc.left, rc.top, rc.Width(), rc.Height(),
 		reinterpret_cast<HDC>(surfaceSource.hdc), from.x, from.y, SRCCOPY);
@@ -418,7 +475,7 @@ void Surface::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 
 #define MAX_US_LEN 5000
 
-void Surface::DrawText(PRectangle rc, Font &font_, int ybase, const char *s, int len, 
+void SurfaceImpl::DrawText(PRectangle rc, Font &font_, int ybase, const char *s, int len, 
 	ColourAllocated fore, ColourAllocated back) {
 	SetFont(font_);
 	::SetTextColor(reinterpret_cast<HDC>(hdc), fore.AsLong());
@@ -434,7 +491,7 @@ void Surface::DrawText(PRectangle rc, Font &font_, int ybase, const char *s, int
 	}
 }
 
-void Surface::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, 
+void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, 
 	ColourAllocated fore, ColourAllocated back) {
 	SetFont(font_);
 	::SetTextColor(reinterpret_cast<HDC>(hdc), fore.AsLong());
@@ -450,7 +507,7 @@ void Surface::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char 
 	}
 }
 
-int Surface::WidthText(Font &font_, const char *s, int len) {
+int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 	SetFont(font_);
 	SIZE sz={0,0};
 	if (unicodeMode) {
@@ -464,7 +521,7 @@ int Surface::WidthText(Font &font_, const char *s, int len) {
 	return sz.cx;
 }
 
-void Surface::MeasureWidths(Font &font_, const char *s, int len, int *positions) {
+void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positions) {
 	SetFont(font_);
 	SIZE sz={0,0};
 	int fit = 0;
@@ -515,56 +572,56 @@ void Surface::MeasureWidths(Font &font_, const char *s, int len, int *positions)
 	}
 }
 
-int Surface::WidthChar(Font &font_, char ch) {
+int SurfaceImpl::WidthChar(Font &font_, char ch) {
 	SetFont(font_);
 	SIZE sz;
 	::GetTextExtentPoint32(reinterpret_cast<HDC>(hdc), &ch, 1, &sz);
 	return sz.cx;
 }
 
-int Surface::Ascent(Font &font_) {
+int SurfaceImpl::Ascent(Font &font_) {
 	SetFont(font_);
 	TEXTMETRIC tm;
 	::GetTextMetrics(reinterpret_cast<HDC>(hdc), &tm);
 	return tm.tmAscent;
 }
 
-int Surface::Descent(Font &font_) {
+int SurfaceImpl::Descent(Font &font_) {
 	SetFont(font_);
 	TEXTMETRIC tm;
 	::GetTextMetrics(reinterpret_cast<HDC>(hdc), &tm);
 	return tm.tmDescent;
 }
 
-int Surface::InternalLeading(Font &font_) {
+int SurfaceImpl::InternalLeading(Font &font_) {
 	SetFont(font_);
 	TEXTMETRIC tm;
 	::GetTextMetrics(reinterpret_cast<HDC>(hdc), &tm);
 	return tm.tmInternalLeading;
 }
 
-int Surface::ExternalLeading(Font &font_) {
+int SurfaceImpl::ExternalLeading(Font &font_) {
 	SetFont(font_);
 	TEXTMETRIC tm;
 	::GetTextMetrics(reinterpret_cast<HDC>(hdc), &tm);
 	return tm.tmExternalLeading;
 }
 
-int Surface::Height(Font &font_) {
+int SurfaceImpl::Height(Font &font_) {
 	SetFont(font_);
 	TEXTMETRIC tm;
 	::GetTextMetrics(reinterpret_cast<HDC>(hdc), &tm);
 	return tm.tmHeight;
 }
 
-int Surface::AverageCharWidth(Font &font_) {
+int SurfaceImpl::AverageCharWidth(Font &font_) {
 	SetFont(font_);
 	TEXTMETRIC tm;
 	::GetTextMetrics(reinterpret_cast<HDC>(hdc), &tm);
 	return tm.tmAveCharWidth;
 }
 
-int Surface::SetPalette(Palette *pal, bool inBackGround) {
+int SurfaceImpl::SetPalette(Palette *pal, bool inBackGround) {
 	if (paletteOld) {
 		::SelectPalette(reinterpret_cast<HDC>(hdc),
 			reinterpret_cast<HPALETTE>(paletteOld),TRUE);
@@ -580,14 +637,18 @@ int Surface::SetPalette(Palette *pal, bool inBackGround) {
 	return changes;
 }
 
-void Surface::SetClip(PRectangle rc) {
+void SurfaceImpl::SetClip(PRectangle rc) {
 	::IntersectClipRect(reinterpret_cast<HDC>(hdc), rc.left, rc.top, rc.right, rc.bottom);
 }
 
-void Surface::FlushCachedState() {
+void SurfaceImpl::FlushCachedState() {
 	pen = 0;
 	brush = 0;
 	font = 0;
+}
+
+void SurfaceImpl::SetUnicodeMode(bool unicodeMode_) {
+	unicodeMode=unicodeMode_;
 }
 
 Window::~Window() {

@@ -604,10 +604,13 @@ void ScintillaGTK::FullPaint() {
 	//Platform::DebugPrintf("ScintillaGTK::FullPaint %0d,%0d %0d,%0d\n",
 	//	rcPaint.left, rcPaint.top, rcPaint.right, rcPaint.bottom);
 	paintingAllText = true;
-	Surface sw;
-	sw.Init((PWidget(wMain))->window);
-	Paint(&sw, rcPaint);
-	sw.Release();
+	Surface *sw = Surface::Allocate();
+	if (sw) {
+		sw->Init((PWidget(wMain))->window);
+		Paint(sw, rcPaint);
+		sw->Release();
+		delete sw;
+	}
 	paintState = notPainting;
 }
 
@@ -632,10 +635,13 @@ void ScintillaGTK::SyncPaint(PRectangle rc) {
 	paintingAllText = rcPaint.Contains(rcText);
 	//Platform::DebugPrintf("ScintillaGTK::SyncPaint %0d,%0d %0d,%0d\n",
 	//	rcPaint.left, rcPaint.top, rcPaint.right, rcPaint.bottom);
-	Surface sw;
-	sw.Init((PWidget(wMain))->window);
-	Paint(&sw, rc);
-	sw.Release();
+	Surface *sw = Surface::Allocate();
+	if (sw) {
+		sw->Init((PWidget(wMain))->window);
+		Paint(sw, rc);
+		sw->Release();
+		delete sw;
+	}
 	if (paintState == paintAbandoned) {
 		// Painting area was insufficient to cover new styling or brace highlight positions
 		FullPaint();
@@ -1385,10 +1391,13 @@ gint ScintillaGTK::Expose(GtkWidget *, GdkEventExpose *ose, ScintillaGTK *sciThi
 
 	PRectangle rcText = sciThis->GetTextRectangle();
 	sciThis->paintingAllText = sciThis->rcPaint.Contains(rcText);
-	Surface surfaceWindow;
-	surfaceWindow.Init((PWidget(sciThis->wMain))->window);
-	sciThis->Paint(&surfaceWindow, sciThis->rcPaint);
-	surfaceWindow.Release();
+	Surface *surfaceWindow = Surface::Allocate();
+	if (surfaceWindow) {
+		surfaceWindow->Init((PWidget(sciThis->wMain))->window);
+		sciThis->Paint(surfaceWindow, sciThis->rcPaint);
+		surfaceWindow->Release();
+		delete surfaceWindow;
+	}
 	if (sciThis->paintState == paintAbandoned) {
 		// Painting area was insufficient to cover new styling or brace highlight positions
 		sciThis->FullPaint();
@@ -1514,11 +1523,13 @@ void ScintillaGTK::PopUpCB(ScintillaGTK *sciThis, guint action, GtkWidget *) {
 }
 
 gint ScintillaGTK::ExposeCT(GtkWidget *widget, GdkEventExpose * /*ose*/, CallTip *ctip) {
-	Surface surfaceWindow;
-	//surfaceWindow.Init((ct->wCallTip.GetID())->window);
-	surfaceWindow.Init(widget->window);
-	ctip->PaintCT(&surfaceWindow);
-	surfaceWindow.Release();
+	Surface *surfaceWindow = Surface::Allocate();
+	if (surfaceWindow) {
+		surfaceWindow->Init(widget->window);
+		ctip->PaintCT(surfaceWindow);
+		surfaceWindow->Release();
+		delete surfaceWindow;
+	}
 	return TRUE;
 }
 

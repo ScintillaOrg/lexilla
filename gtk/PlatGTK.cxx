@@ -30,14 +30,6 @@ static GdkFont *PFont(Font &f)  {
 	return reinterpret_cast<GdkFont *>(f.GetID()); 
 }
 
-static GdkDrawable *PDrawable(SurfaceID id) { 
-	return reinterpret_cast<GdkDrawable *>(id); 
-}
-
-static GdkGC *PGC(void *gc) { 
-	return reinterpret_cast<GdkGC *>(gc); 
-}
-
 static GtkWidget *PWidget(WindowID id) { 
 	return reinterpret_cast<GtkWidget *>(id); 
 }
@@ -46,25 +38,10 @@ static GtkWidget *PWidget(Window &w) {
 	return PWidget(w.GetID()); 
 }
 
-static GtkItemFactory *PMenu(MenuID id) { 
-	return reinterpret_cast<GtkItemFactory *>(id); 
-}
-
 Point Point::FromLong(long lpoint) {
 	return Point(
 	           Platform::LowShortFromLong(lpoint),
 	           Platform::HighShortFromLong(lpoint));
-}
-
-static GdkColor ColourfromRGB(unsigned int red, unsigned int green, unsigned int blue) {
-	GdkColor co;
-	co.red = red * (65535 / 255);
-	co.green = green * (65535 / 255);
-	co.blue = blue * (65535 / 255);
-	// the pixel value indicates the index in the colourmap of the colour.
-	// it is simply a combination of the RGB values we set earlier
-	co.pixel = (gulong)(red * 65536 + green * 256 + blue);
-	return co;
 }
 
 Palette::Palette() {
@@ -127,6 +104,9 @@ void Palette::Allocate(Window &w) {
 		allocatedLen = used;
 		int iPal = 0;
 		for (iPal = 0; iPal < used; iPal++) {
+			paletteNew[iPal].red = entries[iPal].desired.GetRed() * (65535 / 255);
+			paletteNew[iPal].green = entries[iPal].desired.GetGreen() * (65535 / 255);
+			paletteNew[iPal].blue = entries[iPal].desired.GetBlue() * (65535 / 255);
 			paletteNew[iPal].pixel = entries[iPal].desired.AsLong();
 		}
 		gdk_colormap_alloc_colors(gtk_widget_get_colormap(PWidget(w)),
@@ -230,22 +210,73 @@ void Font::Release() {
 	id = 0;
 }
 
-Surface::Surface() : unicodeMode(false), drawable(0), gc(0), ppixmap(0),
+class SurfaceImpl : public Surface {
+	bool unicodeMode;
+	GdkDrawable *drawable;
+	GdkGC *gc;
+	GdkPixmap *ppixmap;
+	int x;
+	int y;
+	bool inited;
+	bool createdGC;
+public:
+	SurfaceImpl();
+	virtual ~SurfaceImpl();
+
+	void Init();
+	void Init(SurfaceID sid);
+	void InitPixMap(int width, int height, Surface *surface_);
+
+	void Release();
+	bool Initialised();
+	void PenColour(ColourAllocated fore);
+	int LogPixelsY();
+	int DeviceHeightFont(int points);
+	void MoveTo(int x_, int y_);
+	void LineTo(int x_, int y_);
+	void Polygon(Point *pts, int npts, ColourAllocated fore, ColourAllocated back);
+	void RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back);
+	void FillRectangle(PRectangle rc, ColourAllocated back);
+	void FillRectangle(PRectangle rc, Surface &surfacePattern);
+	void RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back);
+	void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back);
+	void Copy(PRectangle rc, Point from, Surface &surfaceSource);
+
+	void DrawText(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
+	void DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
+	void MeasureWidths(Font &font_, const char *s, int len, int *positions);
+	int WidthText(Font &font_, const char *s, int len);
+	int WidthChar(Font &font_, char ch);
+	int Ascent(Font &font_);
+	int Descent(Font &font_);
+	int InternalLeading(Font &font_);
+	int ExternalLeading(Font &font_);
+	int Height(Font &font_);
+	int AverageCharWidth(Font &font_);
+
+	int SetPalette(Palette *pal, bool inBackGround);
+	void SetClip(PRectangle rc);
+	void FlushCachedState();
+
+	void SetUnicodeMode(bool unicodeMode_);
+};
+
+SurfaceImpl::SurfaceImpl() : unicodeMode(false), drawable(0), gc(0), ppixmap(0),
 x(0), y(0), inited(false), createdGC(false) {}
 
-Surface::~Surface() {
+SurfaceImpl::~SurfaceImpl() {
 	Release();
 }
 
-void Surface::Release() {
+void SurfaceImpl::Release() {
 	drawable = 0;
 	if (createdGC) {
 		createdGC = false;
-		gdk_gc_unref(PGC(gc));
+		gdk_gc_unref(gc);
 	}
 	gc = 0;
 	if (ppixmap)
-		gdk_pixmap_unref(PDrawable(ppixmap));
+		gdk_pixmap_unref(ppixmap);
 	ppixmap = 0;
 	x = 0;
 	y = 0;
@@ -253,17 +284,17 @@ void Surface::Release() {
 	createdGC = false;
 }
 
-bool Surface::Initialised() {
+bool SurfaceImpl::Initialised() {
 	return inited;
 }
 
-void Surface::Init() {
+void SurfaceImpl::Init() {
 	Release();
 	inited = true;
 }
 
-void Surface::Init(SurfaceID sid) {
-	GdkDrawable *drawable_ = PDrawable(sid);
+void SurfaceImpl::Init(SurfaceID sid) {
+	GdkDrawable *drawable_ = reinterpret_cast<GdkDrawable *>(sid);
 	Release();
 	drawable = drawable_;
 	gc = gdk_gc_new(drawable_);
@@ -273,49 +304,49 @@ void Surface::Init(SurfaceID sid) {
 	inited = true;
 }
 
-void Surface::InitPixMap(int width, int height, Surface *surface_) {
+void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_) {
 	Release();
 	if (height > 0 && width > 0)
-		ppixmap = gdk_pixmap_new(PDrawable(surface_->drawable), width, height, -1);
+		ppixmap = gdk_pixmap_new(static_cast<SurfaceImpl *>(surface_)->drawable, width, height, -1);
 	drawable = ppixmap;
-	gc = gdk_gc_new(PDrawable(surface_->drawable));
+	gc = gdk_gc_new(static_cast<SurfaceImpl *>(surface_)->drawable);
 	//gdk_gc_set_line_attributes(gc, 1, 
 	//	GDK_LINE_SOLID, GDK_CAP_NOT_LAST, GDK_JOIN_BEVEL);
 	createdGC = true;
 	inited = true;
 }
 
-void Surface::PenColour(ColourAllocated fore) {
+void SurfaceImpl::PenColour(ColourAllocated fore) {
 	if (gc) {
 		GdkColor co;
 		co.pixel = fore.AsLong();
-		gdk_gc_set_foreground(PGC(gc), &co);
+		gdk_gc_set_foreground(gc, &co);
 	}
 }
 
-int Surface::LogPixelsY() {
+int SurfaceImpl::LogPixelsY() {
 	return 72;
 }
 
-int Surface::DeviceHeightFont(int points) {
+int SurfaceImpl::DeviceHeightFont(int points) {
 	int logPix = LogPixelsY();
 	return (points * logPix + logPix / 2) / 72;
 }
 
-void Surface::MoveTo(int x_, int y_) {
+void SurfaceImpl::MoveTo(int x_, int y_) {
 	x = x_;
 	y = y_;
 }
 
-void Surface::LineTo(int x_, int y_) {
-	gdk_draw_line(PDrawable(drawable), PGC(gc),
+void SurfaceImpl::LineTo(int x_, int y_) {
+	gdk_draw_line(drawable, gc,
 	              x, y,
 	              x_, y_);
 	x = x_;
 	y = y_;
 }
 
-void Surface::Polygon(Point *pts, int npts, ColourAllocated fore,
+void SurfaceImpl::Polygon(Point *pts, int npts, ColourAllocated fore,
                       ColourAllocated back) {
 	GdkPoint gpts[20];
 	if (npts < static_cast<int>((sizeof(gpts) / sizeof(gpts[0])))) {
@@ -324,39 +355,39 @@ void Surface::Polygon(Point *pts, int npts, ColourAllocated fore,
 			gpts[i].y = pts[i].y;
 		}
 		PenColour(back);
-		gdk_draw_polygon(PDrawable(drawable), PGC(gc), 1, gpts, npts);
+		gdk_draw_polygon(drawable, gc, 1, gpts, npts);
 		PenColour(fore);
-		gdk_draw_polygon(PDrawable(drawable), PGC(gc), 0, gpts, npts);
+		gdk_draw_polygon(drawable, gc, 0, gpts, npts);
 	}
 }
 
-void Surface::RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+void SurfaceImpl::RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
 	if (gc && drawable) {
 		PenColour(back);
-		gdk_draw_rectangle(PDrawable(drawable), PGC(gc), 1,
+		gdk_draw_rectangle(drawable, gc, 1,
 		                   rc.left + 1, rc.top + 1,
 		                   rc.right - rc.left - 2, rc.bottom - rc.top - 2);
 
 		PenColour(fore);
 		// The subtraction of 1 off the width and height here shouldn't be needed but 
 		// otherwise a different rectangle is drawn than would be done if the fill parameter == 1
-		gdk_draw_rectangle(PDrawable(drawable), PGC(gc), 0,
+		gdk_draw_rectangle(drawable, gc, 0,
 		                   rc.left, rc.top,
 		                   rc.right - rc.left - 1, rc.bottom - rc.top - 1);
 	}
 }
 
-void Surface::FillRectangle(PRectangle rc, ColourAllocated back) {
+void SurfaceImpl::FillRectangle(PRectangle rc, ColourAllocated back) {
 	PenColour(back);
 	if (drawable) {
-		gdk_draw_rectangle(PDrawable(drawable), PGC(gc), 1,
+		gdk_draw_rectangle(drawable, gc, 1,
 		                   rc.left, rc.top,
 		                   rc.right - rc.left, rc.bottom - rc.top);
 	}
 }
 
-void Surface::FillRectangle(PRectangle rc, Surface &surfacePattern) {
-	if (surfacePattern.drawable) {
+void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern) {
+	if (static_cast<SurfaceImpl &>(surfacePattern).drawable) {
 		// Tile pattern over rectangle
 		// Currently assumes 8x8 pattern
 		int widthPat = 8;
@@ -365,9 +396,9 @@ void Surface::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 			int widthx = (xTile + widthPat > rc.right) ? rc.right - xTile : widthPat;
 			for (int yTile = rc.top; yTile < rc.bottom; yTile += heightPat) {
 				int heighty = (yTile + heightPat > rc.bottom) ? rc.bottom - yTile : heightPat;
-				gdk_draw_pixmap(PDrawable(drawable),
-				                PGC(gc),
-				                PDrawable(surfacePattern.drawable),
+				gdk_draw_pixmap(drawable,
+				                gc,
+				                static_cast<SurfaceImpl &>(surfacePattern).drawable,
 				                0, 0,
 				                xTile, yTile,
 				                widthx, heighty);
@@ -380,7 +411,7 @@ void Surface::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 	}
 }
 
-void Surface::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
 	if (((rc.right - rc.left) > 4) && ((rc.bottom - rc.top) > 4)) {
 		// Approximate a round rect with some cut off corners
 		Point pts[] = {
@@ -399,53 +430,53 @@ void Surface::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAlloca
 	}
 }
 
-void Surface::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+void SurfaceImpl::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
 	PenColour(back);
-	gdk_draw_arc(PDrawable(drawable), PGC(gc), 1,
+	gdk_draw_arc(drawable, gc, 1,
 	             rc.left + 1, rc.top + 1,
 	             rc.right - rc.left - 2, rc.bottom - rc.top - 2,
 	             0, 32767);
 
 	// The subtraction of 1 here is similar to the case for RectangleDraw
 	PenColour(fore);
-	gdk_draw_arc(PDrawable(drawable), PGC(gc), 0,
+	gdk_draw_arc(drawable, gc, 0,
 	             rc.left, rc.top,
 	             rc.right - rc.left - 1, rc.bottom - rc.top - 1,
 	             0, 32767);
 }
 
-void Surface::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
-	if (surfaceSource.drawable) {
-		gdk_draw_pixmap(PDrawable(drawable),
-		                PGC(gc),
-		                PDrawable(surfaceSource.drawable),
+void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
+	if (static_cast<SurfaceImpl &>(surfaceSource).drawable) {
+		gdk_draw_pixmap(drawable,
+		                gc,
+		                static_cast<SurfaceImpl &>(surfaceSource).drawable,
 		                from.x, from.y,
 		                rc.left, rc.top,
 		                rc.right - rc.left, rc.bottom - rc.top);
 	}
 }
 
-void Surface::DrawText(PRectangle rc, Font &font_, int ybase, const char *s, int len,
+void SurfaceImpl::DrawText(PRectangle rc, Font &font_, int ybase, const char *s, int len,
                        ColourAllocated fore, ColourAllocated back) {
 	FillRectangle(rc, back);
 	PenColour(fore);
 	if (gc && drawable)
-		gdk_draw_text(PDrawable(drawable), PFont(font_), PGC(gc), rc.left, ybase, s, len);
+		gdk_draw_text(drawable, PFont(font_), gc, rc.left, ybase, s, len);
 }
 
 // On GTK+, exactly same as DrawText
-void Surface::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len,
+void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len,
                               ColourAllocated fore, ColourAllocated back) {
 	FillRectangle(rc, back);
 	PenColour(fore);
 	if (gc && drawable)
-		gdk_draw_text(PDrawable(drawable), PFont(font_), PGC(gc), rc.left, ybase, s, len);
+		gdk_draw_text(drawable, PFont(font_), gc, rc.left, ybase, s, len);
 }
 
-void Surface::MeasureWidths(Font &font_, const char *s, int len, int *positions) {
+void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positions) {
 	int totalWidth = 0;
 	for (int i = 0;i < len;i++) {
-		if (font_.id) {
+		if (font_.GetID()) {
 			int width = gdk_char_width(PFont(font_), s[i]);
 			totalWidth += width;
 		} else {
@@ -455,18 +486,22 @@ void Surface::MeasureWidths(Font &font_, const char *s, int len, int *positions)
 	}
 }
 
-int Surface::WidthText(Font &font_, const char *s, int len) {
-	if (font_.id)
+int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
+	if (font_.GetID())
 		return gdk_text_width(PFont(font_), s, len);
 	else
 		return 1;
 }
 
-int Surface::WidthChar(Font &font_, char ch) {
-	if (font_.id)
+int SurfaceImpl::WidthChar(Font &font_, char ch) {
+	if (font_.GetID())
 		return gdk_char_width(PFont(font_), ch);
 	else
 		return 1;
+}
+
+Surface *Surface::Allocate() {
+	return new SurfaceImpl;
 }
 
 // Three possible strategies for determining ascent and descent of font:
@@ -484,8 +519,8 @@ const char largeSizeString[] = "ÂÃÅÄ `~!@#$%^&*()-_=+\\|[]{};:\"\'<,>.?/12345678
 const char sizeString[] = "`~!@#$%^&*()-_=+\\|[]{};:\"\'<,>.?/1234567890"
                           "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-int Surface::Ascent(Font &font_) {
-	if (!font_.id)
+int SurfaceImpl::Ascent(Font &font_) {
+	if (!font_.GetID())
 		return 1;
 #ifdef FAST_WAY
 	return PFont(font_)->ascent;
@@ -496,14 +531,14 @@ int Surface::Ascent(Font &font_) {
 	gint ascent;
 	gint descent;
 
-	gdk_string_extents(font_.id, sizeString,
+	gdk_string_extents(PFont(font_), sizeString,
 	                   &lbearing, &rbearing, &width, &ascent, &descent);
 	return ascent;
 #endif
 }
 
-int Surface::Descent(Font &font_) {
-	if (!font_.id)
+int SurfaceImpl::Descent(Font &font_) {
+	if (!font_.GetID())
 		return 1;
 #ifdef FAST_WAY
 	return PFont(font_)->descent;
@@ -514,43 +549,47 @@ int Surface::Descent(Font &font_) {
 	gint ascent;
 	gint descent;
 
-	gdk_string_extents(font_.id, sizeString,
+	gdk_string_extents(PFont(font_), sizeString,
 	                   &lbearing, &rbearing, &width, &ascent, &descent);
 	return descent;
 #endif
 }
 
-int Surface::InternalLeading(Font &) {
+int SurfaceImpl::InternalLeading(Font &) {
 	return 0;
 }
 
-int Surface::ExternalLeading(Font &) {
+int SurfaceImpl::ExternalLeading(Font &) {
 	return 0;
 }
 
-int Surface::Height(Font &font_) {
+int SurfaceImpl::Height(Font &font_) {
 	return Ascent(font_) + Descent(font_);
 }
 
-int Surface::AverageCharWidth(Font &font_) {
-	if (font_.id)
+int SurfaceImpl::AverageCharWidth(Font &font_) {
+	if (font_.GetID())
 		return gdk_char_width(PFont(font_), 'n');
 	else
 		return 1;
 }
 
-int Surface::SetPalette(Palette *, bool) {
+int SurfaceImpl::SetPalette(Palette *, bool) {
 	// Handled in palette allocation for GTK so this does nothing
 	return 0;
 }
 
-void Surface::SetClip(PRectangle rc) {
+void SurfaceImpl::SetClip(PRectangle rc) {
 	GdkRectangle area = {rc.left, rc.top,
 	                     rc.right - rc.left, rc.bottom - rc.top};
-	gdk_gc_set_clip_rectangle(PGC(gc), &area);
+	gdk_gc_set_clip_rectangle(gc, &area);
 }
 
-void Surface::FlushCachedState() {}
+void SurfaceImpl::FlushCachedState() {}
+
+void SurfaceImpl::SetUnicodeMode(bool unicodeMode_) {
+	unicodeMode=unicodeMode_;
+}
 
 Window::~Window() {}
 
@@ -844,7 +883,7 @@ void Menu::Destroy() {
 }
 
 void Menu::Show(Point pt, Window &) {
-	gtk_item_factory_popup(PMenu(id), pt.x - 4, pt.y, 3, 0);
+	gtk_item_factory_popup(reinterpret_cast<GtkItemFactory *>(id), pt.x - 4, pt.y, 3, 0);
 }
 
 ColourDesired Platform::Chrome() {
@@ -887,6 +926,10 @@ bool Platform::IsKeyDown(int) {
 long Platform::SendScintilla(
     WindowID w, unsigned int msg, unsigned long wParam, long lParam) {
 	return scintilla_send_message(SCINTILLA(w), msg, wParam, lParam);
+}
+
+bool Platform::IsDBCSLeadByte(int /*codePage*/, char /*ch*/) {
+	return false;
 }
 
 // These are utility functions not really tied to a platform

@@ -23,7 +23,6 @@
 DocumentAccessor::~DocumentAccessor() {
 }
 
-#if PLAT_WIN
 bool DocumentAccessor::InternalIsLeadByte(char ch) {
 	if (SC_CP_UTF8 == codePage)
 		// For lexing, all characters >= 0x80 are treated the
@@ -32,13 +31,6 @@ bool DocumentAccessor::InternalIsLeadByte(char ch) {
 	else
 		return Platform::IsDBCSLeadByte(codePage, ch);
 }
-#else
-// PLAT_GTK or PLAT_WX
-// TODO: support DBCS under GTK+ and WX
-bool DocumentAccessor::InternalIsLeadByte(char) {
-	return false;
-}
-#endif
 
 void DocumentAccessor::Fill(int position) {
 	if (lenDoc == -1)

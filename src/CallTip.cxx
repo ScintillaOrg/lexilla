@@ -118,9 +118,11 @@ void CallTip::PaintCT(Surface *surfaceWindow) {
 
 PRectangle CallTip::CallTipStart(int pos, Point pt, const char *defn,
                                  const char *faceName, int size) {
-	Surface surfaceMeasure;
-	surfaceMeasure.Init();
-	int deviceHeight = surfaceMeasure.DeviceHeightFont(size);
+	Surface *surfaceMeasure=Surface::Allocate();
+	if (!surfaceMeasure)
+		return PRectangle();
+	surfaceMeasure->Init();
+	int deviceHeight = surfaceMeasure->DeviceHeightFont(size);
 	font.Create(faceName, SC_CHARSET_DEFAULT, deviceHeight, false, false);
 	if (val)
 		delete []val;
@@ -139,16 +141,16 @@ PRectangle CallTip::CallTipStart(int pos, Point pt, const char *defn,
 	const char *newline;
 	const char *look = val;
 	while ((newline = strchr(look, '\n')) != NULL) {
-		int thisWidth = surfaceMeasure.WidthText(font, look, newline - look);
+		int thisWidth = surfaceMeasure->WidthText(font, look, newline - look);
 		width = Platform::Maximum(width, thisWidth);
 		look = newline + 1;
 		numLines++;
 	}
-	int lastWidth = surfaceMeasure.WidthText(font, look, strlen(look));
+	int lastWidth = surfaceMeasure->WidthText(font, look, strlen(look));
 	width = Platform::Maximum(width, lastWidth) + 10;
-	int lineHeight = surfaceMeasure.Height(font);
+	int lineHeight = surfaceMeasure->Height(font);
 	// Extra line for border and an empty line at top and bottom
-	int height = lineHeight * numLines - surfaceMeasure.InternalLeading(font) + 2 + 2;
+	int height = lineHeight * numLines - surfaceMeasure->InternalLeading(font) + 2 + 2;
 	return PRectangle(pt.x -5, pt.y + 1, pt.x + width - 5, pt.y + 1 + height);
 }
 

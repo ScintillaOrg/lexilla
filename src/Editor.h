@@ -107,11 +107,11 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int xCaretMargin;	///< Ensure this many pixels visible on both sides of caret
 	bool horizontalScrollBarVisible;
 	
-	Surface pixmapLine;
-	Surface pixmapSelMargin;
-	Surface pixmapSelPattern;
-	Surface pixmapIndentGuide;
-	Surface pixmapIndentGuideHighlight;
+	Surface *pixmapLine;
+	Surface *pixmapSelMargin;
+	Surface *pixmapSelPattern;
+	Surface *pixmapIndentGuide;
+	Surface *pixmapIndentGuideHighlight;
 
 	KeyMap kmap;
 

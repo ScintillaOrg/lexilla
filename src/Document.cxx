@@ -217,7 +217,6 @@ bool Document::IsCrLf(int pos) {
 	return (cb.CharAt(pos) == '\r') && (cb.CharAt(pos + 1) == '\n');
 }
 
-#if PLAT_WIN
 bool Document::IsDBCS(int pos) {
 	if (dbcsCodePage) {
 		if (SC_CP_UTF8 == dbcsCodePage) {
@@ -241,13 +240,6 @@ bool Document::IsDBCS(int pos) {
 	}
 	return false;
 }
-#else
-// PLAT_GTK or PLAT_WX
-// TODO: support DBCS under GTK+ and WX
-bool Document::IsDBCS(int) {
-	return false;
-}
-#endif
 
 int Document::LenChar(int pos) {
 	if (IsCrLf(pos)) {
@@ -300,7 +292,6 @@ int Document::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
 
 	// Not between CR and LF
 
-#if PLAT_WIN
 	if (dbcsCodePage) {
 		if (SC_CP_UTF8 == dbcsCodePage) {
 			unsigned char ch = static_cast<unsigned char>(cb.CharAt(pos));
@@ -327,7 +318,6 @@ int Document::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
 				else
 					atLeadByte = false;
 				startLine++;
-				//Platform::DebugPrintf("DBCS %s\n", atlead ? "D" : "-");
 			}
 
 
@@ -340,7 +330,6 @@ int Document::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
 			}
 		}
 	}
-#endif
 
 	return pos;
 }

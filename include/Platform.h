@@ -42,11 +42,10 @@
 // Underlying the implementation of the platform classes are platform specific types.
 // Sometimes these need to be passed around by client code so they are defined here
 
-typedef void* FontID;
-typedef void* SurfaceID;
-typedef void* WindowID;
-typedef void* MenuID;
-typedef void* PaletteID;
+typedef void *FontID;
+typedef void *SurfaceID;
+typedef void *WindowID;
+typedef void *MenuID;
 
 /**
  * A geometric point class.
@@ -104,7 +103,19 @@ public:
 };
 
 /**
- * A colour class.
+ * In some circumstances, including Win32 in paletted mode and GTK+, each colour
+ * must be allocated before use. The desired colours are held in the ColourDesired class, 
+ * and after allocation the allocation entry is stored in the ColourAllocated class. In other
+ * circumstances, such as Win32 in true colour mode, the allocation process just copies 
+ * the RGB values from the desired to the allocated class.
+ * As each desired colour requires allocation before it can be used, the ColourPair class
+ * holds both a ColourDesired and a ColourAllocated
+ * The Palette class is responsible for managing the palette of colours which contains a 
+ * list of ColourPair objects and performs the allocation.
+ */
+
+/**
+ * Holds a desired RGB colour.
  */
 class ColourDesired {
 	long co;
@@ -142,6 +153,9 @@ public:
 	}
 };
 
+/**
+ * Holds an allocated RGB colour which may be an approximation to the desired colour.
+ */
 class ColourAllocated {
 	long coAllocated;
 	
@@ -161,10 +175,7 @@ public:
 };
 
 /**
- * Colour pairs hold a desired colour and the colour that the graphics engine
- * allocates to approximate the desired colour.
- * To make palette management more automatic, ColourPairs could register at
- * construction time with a palette management object.
+ * Colour pairs hold a desired colour and an allocated colour.
  */
 struct ColourPair {
 	ColourDesired desired;
@@ -190,8 +201,6 @@ class Palette {
 	int allocatedLen;
 #elif PLAT_WIN
 	void *hpal;
-#elif PLAT_WX
-	// wxPalette* pal;  // **** Is this needed?
 #endif
 public:
 	bool allowRealization;
@@ -209,8 +218,6 @@ public:
 	void WantFind(ColourPair &cp, bool want);
 
 	void Allocate(Window &w);
-
-	friend class Surface;
 };
 
 /**
@@ -243,84 +250,50 @@ public:
  */
 class Surface {
 private:
-	bool unicodeMode;
-#if PLAT_GTK
-	void *drawable;	// GdkDrawable *drawable;
-	void *gc;			// GdkGC *gc;
-	void *ppixmap;	// GdkPixmap *ppixmap;
-	int x;
-	int y;
-	bool inited;
-	bool createdGC;
-#elif PLAT_WIN
-	void *hdc; // HDC 
-	bool hdcOwned;
-	void *pen;	// HPEN
-	void *penOld;	// HPEN
-	void *brush;	// HBRUSH
-	void *brushOld; // HBRUSH
-	void *font;	// HFONT 
-	void *fontOld;	// HFONT 
-	void *bitmap;	// HBITMAP 
-	void *bitmapOld;	// HBITMAP 
-	void *paletteOld;	// HPALETTE 
-#elif PLAT_WX
-	void *hdc;	// wxDC*
-	bool hdcOwned;
-	void *bitmap;	// wxBitmap*
-	int x;
-	int y;
-#endif
-
 	// Private so Surface objects can not be copied
 	Surface(const Surface &) {}
 	Surface &operator=(const Surface &) { return *this; }
-#if PLAT_WIN || PLAT_WX
-	void BrushColor(ColourAllocated back);
-	void SetFont(Font &font_);
-#endif
 public:
-	Surface();
-	~Surface();
+	Surface() {};
+	virtual ~Surface() {};
+	static Surface *Allocate();
 
-	void Init();
-	void Init(SurfaceID sid);
-	void InitPixMap(int width, int height, Surface *surface_);
+	virtual void Init()=0;
+	virtual void Init(SurfaceID sid)=0;
+	virtual void InitPixMap(int width, int height, Surface *surface_)=0;
 
-	void Release();
-	bool Initialised();
-	void PenColour(ColourAllocated fore);
-	int LogPixelsY();
-	int DeviceHeightFont(int points);
-	void MoveTo(int x_, int y_);
-	void LineTo(int x_, int y_);
-	void Polygon(Point *pts, int npts, ColourAllocated fore, ColourAllocated back);
-	void RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back);
-	void FillRectangle(PRectangle rc, ColourAllocated back);
-	void FillRectangle(PRectangle rc, Surface &surfacePattern);
-	void RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back);
-	void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back);
-	void Copy(PRectangle rc, Point from, Surface &surfaceSource);
+	virtual void Release()=0;
+	virtual bool Initialised()=0;
+	virtual void PenColour(ColourAllocated fore)=0;
+	virtual int LogPixelsY()=0;
+	virtual int DeviceHeightFont(int points)=0;
+	virtual void MoveTo(int x_, int y_)=0;
+	virtual void LineTo(int x_, int y_)=0;
+	virtual void Polygon(Point *pts, int npts, ColourAllocated fore, ColourAllocated back)=0;
+	virtual void RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back)=0;
+	virtual void FillRectangle(PRectangle rc, ColourAllocated back)=0;
+	virtual void FillRectangle(PRectangle rc, Surface &surfacePattern)=0;
+	virtual void RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back)=0;
+	virtual void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back)=0;
+	virtual void Copy(PRectangle rc, Point from, Surface &surfaceSource)=0;
 
-	void DrawText(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
-	void DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
-	void MeasureWidths(Font &font_, const char *s, int len, int *positions);
-	int WidthText(Font &font_, const char *s, int len);
-	int WidthChar(Font &font_, char ch);
-	int Ascent(Font &font_);
-	int Descent(Font &font_);
-	int InternalLeading(Font &font_);
-	int ExternalLeading(Font &font_);
-	int Height(Font &font_);
-	int AverageCharWidth(Font &font_);
+	virtual void DrawText(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back)=0;
+	virtual void DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back)=0;
+	virtual void MeasureWidths(Font &font_, const char *s, int len, int *positions)=0;
+	virtual int WidthText(Font &font_, const char *s, int len)=0;
+	virtual int WidthChar(Font &font_, char ch)=0;
+	virtual int Ascent(Font &font_)=0;
+	virtual int Descent(Font &font_)=0;
+	virtual int InternalLeading(Font &font_)=0;
+	virtual int ExternalLeading(Font &font_)=0;
+	virtual int Height(Font &font_)=0;
+	virtual int AverageCharWidth(Font &font_)=0;
 
-	int SetPalette(Palette *pal, bool inBackGround);
-	void SetClip(PRectangle rc);
-	void FlushCachedState();
+	virtual int SetPalette(Palette *pal, bool inBackGround)=0;
+	virtual void SetClip(PRectangle rc)=0;
+	virtual void FlushCachedState()=0;
 
-	void SetUnicodeMode(bool unicodeMode_) {
-		unicodeMode=unicodeMode_;
-	}
+	virtual void SetUnicodeMode(bool unicodeMode_)=0;
 };
 
 /**
@@ -333,7 +306,6 @@ typedef void (*CallBackAction)(void*);
  * Does not own the window which will normally have a longer life than this object.
  */
 class Window {
-	friend class ListBox;
 protected:
 	WindowID id;
 public:
