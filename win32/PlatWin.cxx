@@ -526,6 +526,11 @@ void Surface::MeasureWidths(Font &font_, const char *s, int len, int *positions)
 			// Eeek - a NULL DC or other foolishness could cause this.
 			// The least we can do is set the positions to zero!
 			memset(positions, 0, len * sizeof(*positions));
+		} else if (fit < len) {
+			// For some reason, such as an incomplete DBCS character
+			// Not all the positions are filled in so make them equal to end.
+			for (int i=fit;i<len;i++)
+				positions[i] = positions[fit-1];
 		}
 	}
 }
