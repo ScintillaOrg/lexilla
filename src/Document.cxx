@@ -1100,6 +1100,7 @@ void Document::SetStyles(int length, char *styles) {
 		int prevEndStyled = endStyled;
 		bool didChange = false;
 		for (int iPos = 0; iPos < length; iPos++, endStyled++) {
+			PLATFORM_ASSERT(endStyled < Length());
 			if (cb.SetStyleAt(endStyled, styles[iPos], stylingMask)) {
 				didChange = true;
 			}

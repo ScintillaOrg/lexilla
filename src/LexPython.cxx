@@ -156,6 +156,8 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 				sc.ChangeState(SCE_P_STRINGEOL);
 				sc.ForwardSetState(SCE_P_DEFAULT);
 			}
+			if (!sc.More())
+				break;
 		}
 
 		// Check for a state end
@@ -166,7 +168,7 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 			if (!IsAWordChar(sc.ch)) {
 				sc.SetState(SCE_P_DEFAULT);
 			}
-		} else if (sc.state == SCE_P_WORD) {
+		} else if (sc.state == SCE_P_IDENTIFIER) {
 			if ((sc.ch == '.') || (!IsAWordChar(sc.ch))) {
 				char s[100];
 				sc.GetCurrent(s, sizeof(s));
@@ -245,7 +247,7 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 					sc.Forward();
 				}
 			} else if (IsAWordStart(sc.ch)) {
-				sc.SetState(SCE_P_WORD);
+				sc.SetState(SCE_P_IDENTIFIER);
 			}
 		}
 	}

@@ -217,9 +217,9 @@ static void ColourisePropsLine(
 		if (lineBuffer[i] == '=') {
 			styler.ColourTo(startLine + i - 1, 0);
 			styler.ColourTo(startLine + i, 3);
-			styler.ColourTo(endPos, 0);
+			styler.ColourTo(endPos-1, 0);
 		} else {
-			styler.ColourTo(endPos, 0);
+			styler.ColourTo(endPos-1, 0);
 		}
 	}
 }
