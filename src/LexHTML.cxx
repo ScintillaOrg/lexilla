@@ -345,6 +345,13 @@ static bool isOKBeforeRE(char ch) {
 	return (ch == '(') || (ch == '=') || (ch == ',');
 }
 
+static bool isPHPStringState(int state) {
+	return 
+		(state == SCE_HPHP_HSTRING) ||
+		(state == SCE_HPHP_SIMPLESTRING) ||
+		(state == SCE_HPHP_HSTRING_VARIABLE);
+}
+
 static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
                                   Accessor &styler) {
 
@@ -519,7 +526,9 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 
 		/////////////////////////////////////
 		// handle the start of PHP pre-processor = Non-HTML
-		else if ((state != SCE_H_ASPAT) && (ch == '<') && (chNext == '?')) {
+		else if ((state != SCE_H_ASPAT) && 
+			!isPHPStringState(state) && 
+			(ch == '<') && (chNext == '?')) {
 			styler.ColourTo(i - 1, StateToPrint);
 			beforePreProc = state;
 			scriptLanguage = segIsScriptingIndicator(styler, styler.GetStartSegment() + 2, i + 10, eScriptPHP);
@@ -582,7 +591,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		else if (
 			((inScriptType == eNonHtmlPreProc)
 				|| (inScriptType == eNonHtmlScriptPreProc)) && (
-				((scriptLanguage == eScriptPHP) && (ch == '?')) || 
+				((scriptLanguage == eScriptPHP) && (ch == '?') && !isPHPStringState(state)) || 
 				((scriptLanguage != eScriptNone) && !isStringState(state) &&
 				 (ch == '%'))
 			) && (chNext == '>')) {
