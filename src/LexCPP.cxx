@@ -32,6 +32,10 @@ static inline bool IsAWordStart(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '_');
 }
 
+static inline bool IsASpaceOrTab(const int ch) {
+	return (ch == ' ') || (ch == '\t');
+}
+
 static inline bool IsADoxygenChar(const int ch) {
 	return (islower(ch) || ch == '$' || ch == '@' ||
 		    ch == '\\' || ch == '&' || ch == '<' ||
@@ -270,6 +274,15 @@ static bool IsStreamCommentStyle(int style) {
 		style == SCE_C_COMMENTDOCKEYWORDERROR;
 }
 
+static bool MatchString(Accessor &styler, int pos, const char *s) {
+	for (int i=0; *s; i++) {
+		if (*s != styler.SafeGetCharAt(pos+i))
+			return false;
+		s++;
+	}
+	return true;
+}
+
 static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordList *[],
                             Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
@@ -295,6 +308,29 @@ static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordLis
 			} else if (!IsStreamCommentStyle(styleNext) && !atEOL) {
 				// Comments don't end at end of line and the next character may be unstyled.
 				levelCurrent--;
+			}
+		}
+		if (foldComment && (style == SCE_C_COMMENTLINE)) {
+			if ((ch == '/') && (chNext == '/')) {
+				char chNext2 = styler.SafeGetCharAt(i + 2);
+				if (chNext2 == '{') {
+					levelCurrent++;
+				} else if (chNext2 == '}') {
+					levelCurrent--;
+				}
+			}
+		}
+		if (style == SCE_C_PREPROCESSOR) {
+			if (ch == '#') {
+				unsigned int j=i+1;
+				while ((j<endPos) && IsASpaceOrTab(styler.SafeGetCharAt(j))) {
+					j++;
+				}
+				if (MatchString(styler, j, "region")) {
+					levelCurrent++;
+				} else if (MatchString(styler, j, "endregion")) {
+					levelCurrent--;
+				}
 			}
 		}
 		if (style == SCE_C_OPERATOR) {
