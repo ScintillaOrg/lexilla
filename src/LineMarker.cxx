@@ -128,7 +128,7 @@ void XPM::Draw(Surface *surface, PRectangle &rc) {
 	int startY = rc.top + (rc.Height() - height) / 2;
 	int startX = rc.left + (rc.Width() - width) / 2;
 	for (int y=0;y<height;y++) {
-		char prevCode = 0;
+		int prevCode = 0;
 		int xStartRun = 0;
 		for (int x=0; x<width; x++) {
 			int code = data[y*width + x];
