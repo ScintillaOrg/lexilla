@@ -2319,6 +2319,10 @@ struct TextToFind {
     horizontal space, such as Thai, will mostly work but there are some issues where the characters
     are drawn separately leading to visual glitches. Bi-directional text is not supported.</p>
 
+    <p>On Windows, code page can be set to 932 (Japanese Shift-JIS), 936 (Simplified Chinese GBK), 
+    949 (Korean), and 950 (Traditional Chinese Big5) although these may require installation of language 
+    specific support.</p>
+
     <p>On GTK+, code page <code>SC_CP_DBCS</code> (1) sets Scintilla into
     multi byte character mode as is required for Japanese language processing with
     the EUC encoding.</p>
