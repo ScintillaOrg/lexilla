@@ -173,31 +173,26 @@ enum {
 
 #define SCINT_WIDGET(x) ((ScintillaGTK *) ((ScintillaObject *)x)->pscin)
 
-static gint scint_key_press(GtkWidget *widget, GdkEventKey *event)
-{
+static gint scint_key_press(GtkWidget *widget, GdkEventKey *event) {
 	ScintillaGTK *scint = SCINT_WIDGET(widget);
 	return scint->KeyPress(widget, event, scint);
 }
 
-static gint scint_key_release(GtkWidget *widget, GdkEventKey *event)
-{
+static gint scint_key_release(GtkWidget *widget, GdkEventKey *event) {
 	ScintillaGTK *scint = SCINT_WIDGET(widget);
 	return scint->KeyRelease(widget, event, scint);
 }
 
-static gint scint_focus_in(GtkWidget *widget, GdkEventFocus *event)
-{
+static gint scint_focus_in(GtkWidget *widget, GdkEventFocus *event) {
 	ScintillaGTK *scint = SCINT_WIDGET(widget);
 	return scint->FocusIn(widget, event, scint);
 }
 
-static gint scint_focus_out(GtkWidget *widget, GdkEventFocus *event)
-{
+static gint scint_focus_out(GtkWidget *widget, GdkEventFocus *event) {
 	ScintillaGTK *scint = SCINT_WIDGET(widget);
 	return scint->FocusOut(widget, event, scint);
 }
 #endif // DEFAULT_SIG_HANDLERS
-
 
 ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 	adjustmentv(0), adjustmenth(0), 
