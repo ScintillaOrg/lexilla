@@ -1,6 +1,6 @@
 // Scintilla source code edit control
 /** @file LexCSS.cxx
- ** Lexer for Cascade Style Sheets
+ ** Lexer for Cascading Style Sheets
  ** Written by Jakub Vrána
  **/
 // Copyright 1998-2002 by Neil Hodgson <neilh@scintilla.org>
@@ -21,19 +21,27 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
+
 static inline bool IsAWordChar(const unsigned int ch) {
 	return (isalnum(ch) || ch == '-' || ch == '_' || ch >= 161); // _ is not in fact correct CSS word-character
 }
 
 inline bool IsCssOperator(const char ch) {
-	if (!isalnum(ch) && (ch == '{' || ch == '}' || ch == ':' || ch == ',' || ch == ';' || ch == '.' || ch == '#' || ch == '!' || ch == '@'))
+	if (!isalnum(ch) &&
+		(ch == '{' || ch == '}' || ch == ':' || ch == ',' || ch == ';' ||
+		 ch == '.' || ch == '#' || ch == '!' || ch == '@' ||
+		 /* CSS2 */
+		 ch == '*' || ch == '>' || ch == '+' || ch == '=' || ch == '~' || ch == '|' ||
+		 ch == '[' || ch == ']' || ch == '(' || ch == ')')) {
 		return true;
+	}
 	return false;
 }
 
 static void ColouriseCssDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[], Accessor &styler) {
 	WordList &keywords = *keywordlists[0];
 	WordList &pseudoClasses = *keywordlists[1];
+	WordList &keywords2 = *keywordlists[2];
 
 	StyleContext sc(startPos, length, initStyle, styler);
 
@@ -44,7 +52,8 @@ static void ColouriseCssDoc(unsigned int startPos, int length, int initStyle, Wo
 	for (; sc.More(); sc.Forward()) {
 		if (sc.state == SCE_CSS_COMMENT && sc.Match('*', '/')) {
 			if (lastStateC == -1) {
-				// backtrack to get last state
+				// backtrack to get last state:
+				// comments are like whitespace, so we must return to the previous state
 				unsigned int i = startPos;
 				for (; i > 0; i--) {
 					if ((lastStateC = styler.StyleAt(i-1)) != SCE_CSS_COMMENT) {
@@ -157,7 +166,7 @@ static void ColouriseCssDoc(unsigned int startPos, int length, int initStyle, Wo
 				s2++;
 			switch (sc.state) {
 			case SCE_CSS_IDENTIFIER:
-				if (!keywords.InList(s2))
+				if (!keywords.InList(s2) && !keywords2.InList(s2))
 					sc.ChangeState(SCE_CSS_UNKNOWN_IDENTIFIER);
 				break;
 			case SCE_CSS_UNKNOWN_IDENTIFIER:
