@@ -190,7 +190,7 @@ static int classifyTagHTML(unsigned int start, unsigned int end,
 	unsigned int i = 0;
 	for (unsigned int cPos = start; cPos <= end && i < 30; cPos++) {
 		char ch = styler[cPos];
-		if (ch != '<')
+		if ((ch != '<') && (ch != '/'))
 			s[i++] = static_cast<char>(tolower(ch));
 	}
 	s[i] = '\0';
@@ -516,15 +516,14 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			case SCE_HP_TRIPLEDOUBLE:
 				break;
 			default :
-				// maybe we should check here if it's a tag and if it's SCRIPT
+				// closing tag of the script (it's a closing HTML tag anyway)
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_H_TAGUNKNOWN;
 				inScriptType = eHtml;
 				scriptLanguage = eScriptNone;
 				clientScript = eScriptJS;
 				i += 2;
-				// unfold closing script
-				levelCurrent--;
+				tagClosing = true;
 				continue;
 			}
 		}
@@ -708,9 +707,14 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			if (!ishtmlwordchar(ch) && !((ch == '/') && (chPrev == '<')) && ch != '[') {
 				int eClass = classifyTagHTML(styler.GetStartSegment(), i - 1, keywords, styler);
 				if (eClass == SCE_H_SCRIPT) {
-					inScriptType = eNonHtmlScript;
-					scriptLanguage = clientScript;
-					eClass = SCE_H_TAG;
+					if (!tagClosing) {
+						inScriptType = eNonHtmlScript;
+						scriptLanguage = clientScript;
+						eClass = SCE_H_TAG;
+					} else {
+						scriptLanguage = eScriptNone;
+						eClass = SCE_H_TAG;
+					}
 				}
 				if (ch == '>') {
 					styler.ColourTo(i, eClass);
@@ -720,12 +724,13 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 						state = SCE_H_DEFAULT;
 					}
 					tagOpened = false;
-					if (tagClosing)
+					if (tagClosing) {
 						levelCurrent--;
-					else
+					} else {
 						levelCurrent++;
+					}
 					tagClosing = false;
-			    } else if (ch == '/' && chNext == '>') {
+			  } else if (ch == '/' && chNext == '>') {
 					if (eClass == SCE_H_TAGUNKNOWN) {
 						styler.ColourTo(i + 1, SCE_H_TAGUNKNOWN);
 					} else {
