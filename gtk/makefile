@@ -39,7 +39,7 @@ CellBuffer.o: CellBuffer.cxx Platform.h Scintilla.h WinDefs.h \
 ContractionState.o: ContractionState.cxx Platform.h ContractionState.h
 Document.o: Document.cxx Platform.h Scintilla.h WinDefs.h CellBuffer.h \
  Document.h
-DocumentAccessor.o: Accessor.cxx Platform.h PropSet.h Accessor.h \
+DocumentAccessor.o: DocumentAccessor.cxx Platform.h PropSet.h Accessor.h \
  DocumentAccessor.h Scintilla.h WinDefs.h
 Editor.o: Editor.cxx Platform.h Scintilla.h WinDefs.h \
  ContractionState.h CellBuffer.h KeyMap.h Indicator.h LineMarker.h \

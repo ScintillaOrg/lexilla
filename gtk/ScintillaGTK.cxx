@@ -69,6 +69,7 @@ private:
 	virtual void SetVerticalScrollPos();
 	virtual void SetHorizontalScrollPos();
 	virtual bool ModifyScrollBars(int nMax, int nPage);
+	void ScintillaGTK::ReconfigureScrollBars();
 	virtual void NotifyChange();
 	virtual void NotifyFocus(bool focus);
 	virtual void NotifyParent(SCNotification scn);
@@ -446,6 +447,11 @@ bool ScintillaGTK::ModifyScrollBars(int nMax, int nPage) {
 	return modified;
 }
 
+void ScintillaGTK::ReconfigureScrollBars() {
+	PRectangle rc = wMain.GetClientPosition();
+	Resize(rc.Width(), rc.Height());
+}
+
 void ScintillaGTK::NotifyChange() {
 	gtk_signal_emit(GTK_OBJECT(sci), scintilla_signals[COMMAND_SIGNAL],
                 	MAKELONG(ctrlID, EN_CHANGE), wMain.GetID());
@@ -644,16 +650,26 @@ void ScintillaGTK::Resize(int width, int height) {
 	// These allocations should never produce negative sizes as they would wrap around to huge 
 	// unsigned numbers inside GTK+ causing warnings.
 	
+	int horizontalScrollBarHeight = scrollBarWidth;
+	if (!horizontalScrollBarVisible)
+		horizontalScrollBarHeight = 0;
+	
 	alloc.x = 0;
 	alloc.y = 0;
 	alloc.width = Platform::Maximum(1, width - scrollBarWidth) + 1;
-	alloc.height = Platform::Maximum(1, height - scrollBarHeight) + 1;
+	alloc.height = Platform::Maximum(1, height - horizontalScrollBarHeight) + 1;
 	gtk_widget_size_allocate(GTK_WIDGET(wDraw.GetID()), &alloc);
 
 	alloc.x = 0;
-	alloc.y = height - scrollBarHeight + 1;
-	alloc.width = Platform::Maximum(1, width - scrollBarWidth) + 1;
-	alloc.height = scrollBarHeight;
+	if (horizontalScrollBarVisible) {
+		alloc.y = height - scrollBarHeight + 1;
+		alloc.width = Platform::Maximum(1, width - scrollBarWidth) + 1;
+		alloc.height = horizontalScrollBarHeight;
+	} else {
+		alloc.y = height ;
+		alloc.width = 0;
+		alloc.height = 0;
+	}
 	gtk_widget_size_allocate(GTK_WIDGET(scrollbarh.GetID()), &alloc);
 
 	alloc.x = width - scrollBarWidth + 1;
