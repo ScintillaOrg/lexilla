@@ -29,6 +29,7 @@ CallTip::CallTip() {
 }
 
 CallTip::~CallTip() {
+    font.Release();
 	wCallTip.Destroy();
 	delete []val;
 	val = 0;
