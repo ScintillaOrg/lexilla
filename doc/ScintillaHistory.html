@@ -119,7 +119,66 @@
 	Eiffel lexer and support.
       </li>
       <li>
+	Modes for better handling of Tab and BackSpace keys within 
+	indentation.
+      </li>
+      <li>
+	ReplaceTarget replaced with two calls ReplaceTarget 
+	(which is incompatible with previous ReplaceTarget) and 
+	ReplaceTargetRE. Both of these calls have a count first 
+	parameter which allows using strings containing nulls.
+	SearchInTarget and SetSearchFlags functions allow 
+	specifying a search in several simple steps which helps 
+	some clients which can not create structs or pointers easily.
+      </li>
+      <li>
+	Asian language input through an Input Method Editor works 
+	on Windows 2000.
+      </li>
+      <li>
+	On Windows, control characters can be entered through use of 
+	the numeric keypad in conjusnction with the Alt key.
+      </li>
+      <li>
+	Document memory allocation changed to grow exponentially 
+	which reduced time to load a 30 Megabyte file from
+	1000 seconds to 25. Change means more memory may be used.
+      </li>
+      <li>
+	Word part movement keys now handled in Scintilla rather than 
+	SciTE.
+      </li>
+      <li>
+	Regular expression '^' and '$' work more often allowing insertion
+	of text at start or end of line with a replace command. 
+	Backslash quoted control characters \a, \b, \f, \t, and \v
+	recognised within sets.
+      </li>
+      <li>
 	Session files for SciTE.
+      </li>
+      <li>
+	Export as PDF command hidden in SciTE as it often failed.
+	Code still present so can be turned on by those willing to cope.
+      </li>
+      <li>
+	Bug fixed in HTML lexer handling % before &gt; as end ASP
+	even when no start ASP encountered.
+      </li>
+      <li>
+	Bug fixed on Windows where context menu key caused menu to 
+	appear in corner of screen rather than within window.
+      </li>
+      <li>
+	Bug fixed in SciTE's Replace All command not processing
+	whole file when replace string longer than search string.
+      </li>
+      <li>
+	Bug fixed in SciTE's MRU list repeating entries if Ctrl+Tab
+	used when all entries filled.
+      </li>
+      <li>
+	ConvertEOLs call documentation fixed.
       </li>
     </ul>
     <h3>
