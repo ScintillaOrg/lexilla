@@ -13,7 +13,7 @@
  * The following defines are not meant to be changeable.
  * They are for readability only.
  */
-#define MAXCHR	128
+#define MAXCHR	256
 #define CHRBIT	8
 #define BITBLK	MAXCHR/CHRBIT
 
