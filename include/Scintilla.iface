@@ -613,11 +613,9 @@ set void SetPrintColourMode=2148(int mode,)
 # Returns the print colour mode.
 get int GetPrintColourMode=2149(,)
 
-val SCFIND_DOWN=1
 val SCFIND_WHOLEWORD=2
 val SCFIND_MATCHCASE=4
 val SCFIND_WORDSTART=0x00100000
-# SCFIND_REGEXP is not yet implemented.
 val SCFIND_REGEXP=0x00200000
 
 # Find some text in the document.
@@ -1573,6 +1571,8 @@ evt void DwellStart=2016(int position)
 evt void DwellEnd=2017(int position)
 
 cat Deprecated
+
+val SCFIND_DOWN=1
 
 ################################################
 # From WinDefs.h
