@@ -747,6 +747,8 @@ void ScintillaWin::Copy() {
 }
 
 bool ScintillaWin::CanPaste() {
+	if (!Editor::CanPaste())
+		return false;
 	if (::IsClipboardFormatAvailable(CF_TEXT))
 		return true;
 	if (IsUnicodeMode())
