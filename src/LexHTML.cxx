@@ -1662,6 +1662,8 @@ static void ColouriseHTMLPiece(StyleContext &sc, WordList *keywordlists[]) {
 			sc.SetState(SCE_H_TAG);
 			sc.Forward();
 			sc.ForwardSetState(SCE_H_DEFAULT);
+		} else if (sc.chPrev == '=') {
+			sc.SetState(SCE_H_VALUE);
 		}
 	} else if (sc.state == SCE_H_DOUBLESTRING) {
 		if (sc.ch == '\"') {
