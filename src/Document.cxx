@@ -855,14 +855,15 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 
 		int startPos;
 		int endPos;
+		int increment = (minPos <= maxPos) ? 1 : -1;
 
-		if (minPos <= maxPos) {
+//		if (minPos <= maxPos) {
 			startPos = minPos;
 			endPos = maxPos;
-		} else {
-			startPos = maxPos;
-			endPos = minPos;
-		}
+//		} else {
+//			startPos = maxPos;
+//			endPos = minPos;
+//		}
 
 		// Range endpoints should not be inside DBCS characters, but just in case, move them.
 		startPos = MovePositionOutsideChar(startPos, 1, false);
@@ -878,7 +879,9 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 		//     Replace: $(\1-\2)
 		int lineRangeStart = LineFromPosition(startPos);
 		int lineRangeEnd = LineFromPosition(endPos);
-		if ((startPos >= LineEnd(lineRangeStart)) && (lineRangeStart < lineRangeEnd)) {
+		if ((increment == 1) && 
+			(startPos >= LineEnd(lineRangeStart)) && 
+			(lineRangeStart < lineRangeEnd)) {
 			// the start position is at end of line or between line end characters.
 			lineRangeStart++;
 			startPos = LineStart(lineRangeStart);
@@ -886,7 +889,7 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 		int pos = -1;
 		int lenRet = 0;
 		char searchEnd = s[*length - 1];
-		if (*length == 1) {
+		if ((increment == 1) && (*length == 1)) {
 			// These produce empty selections so nudge them on if needed
 			if (s[0] == '^') {
 				if (startPos == LineStart(lineRangeStart))
@@ -898,15 +901,16 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 			lineRangeStart = LineFromPosition(startPos);
 			lineRangeEnd = LineFromPosition(endPos);
 		}
-		for (int line = lineRangeStart; line <= lineRangeEnd; line++) {
+		int lineRangeBreak = lineRangeEnd + increment;
+		for (int line = lineRangeStart; line != lineRangeBreak; line += increment) {
 			int startOfLine = LineStart(line);
 			int endOfLine = LineEnd(line);
-			if (line == lineRangeStart) {
+			if ((increment == 1) && (line == lineRangeStart)) {
 				if ((startPos != startOfLine) && (s[0] == '^'))
 					continue;	// Can't match start of line if start position after start of line
 				startOfLine = startPos;
 			}
-			if (line == lineRangeEnd) {
+			if ((increment == 1) && (line == lineRangeEnd)) {
 				if ((endPos != endOfLine) && (searchEnd == '$'))
 					continue;	// Can't match end of line if end position before end of line
 				endOfLine = endPos;
@@ -916,6 +920,20 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 			if (success) {
 				pos = pre->bopat[0];
 				lenRet = pre->eopat[0] - pre->bopat[0];
+				if (increment == -1) {
+					// Check for the last match on this line.
+					while (success) {
+						success = pre->Execute(di, pos + 1, endOfLine);
+						if (success) {
+							if (pre->eopat[0] <= minPos) {
+								pos = pre->bopat[0];
+								lenRet = pre->eopat[0] - pre->bopat[0];
+							} else {
+								success = 0;
+							}
+						}
+					}
+				}
 				break;
 			}
 		}
