@@ -154,6 +154,10 @@ SOURCE=..\src\LexCPP.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexCrontab.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexHTML.cxx
 # End Source File
 # Begin Source File
