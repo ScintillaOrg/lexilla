@@ -2745,6 +2745,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 			NotifyDoubleClick(pt, shift);
 	} else {	// Single click
 		if (inSelMargin) {
+			selType = selStream;
 			if (ctrl) {
 				SelectAll();
 				lastClickTime = curTime;
