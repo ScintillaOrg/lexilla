@@ -838,8 +838,8 @@ const char *WordList::GetNearestWord(const char *wordStart, int searchLen /*= -1
 						// Found another word
 						first = pivot;
 						end = pivot - 1;
-					} 
-					else if (cond > 0) 
+					}
+					else if (cond > 0)
 						start = pivot + 1;
 					else if (cond <= 0)
 						break;
@@ -875,8 +875,8 @@ const char *WordList::GetNearestWord(const char *wordStart, int searchLen /*= -1
 						// Found another word
 						first = pivot;
 						end = pivot - 1;
-					} 
-					else if (cond > 0) 
+					}
+					else if (cond > 0)
 						start = pivot + 1;
 					else if (cond <= 0)
 						break;
@@ -937,8 +937,9 @@ char *WordList::GetNearestWords(
     const char *wordStart,
     int searchLen /*= -1*/,
     bool ignoreCase /*= false*/,
-    char otherSeparator /*= '\0'*/) {
-	int wordlen; // length of the word part (before the '(' brace) of the api array element
+    char otherSeparator /*= '\0'*/,
+    bool exactLen /*=false*/) {
+	unsigned int wordlen; // length of the word part (before the '(' brace) of the api array element
 	SString wordsNear;
 	wordsNear.setsizegrowth(1000);
 	int start = 0; // lower bound of the api array block to search
@@ -968,6 +969,8 @@ char *WordList::GetNearestWords(
 					(0 == CompareNCaseInsensitive(wordStart,
 						wordsNoCase[pivot], searchLen))) {
 					wordlen = LengthWord(wordsNoCase[pivot], otherSeparator) + 1;
+					if (exactLen && wordlen != LengthWord(wordStart, otherSeparator) + 1)
+						break;
 					wordsNear.append(wordsNoCase[pivot], wordlen, ' ');
 					++pivot;
 				}
@@ -994,6 +997,8 @@ char *WordList::GetNearestWords(
 					(0 == strncmp(wordStart,
 						words[pivot], searchLen))) {
 					wordlen = LengthWord(words[pivot], otherSeparator) + 1;
+					if (exactLen && wordlen != LengthWord(wordStart, otherSeparator) + 1)
+						break;
 					wordsNear.append(words[pivot], wordlen, ' ');
 					++pivot;
 				}

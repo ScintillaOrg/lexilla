@@ -83,7 +83,7 @@ public:
 	const char *GetNearestWord(const char *wordStart, int searchLen = -1,
 		bool ignoreCase = false, SString wordCharacters="", int wordIndex = -1);
 	char *GetNearestWords(const char *wordStart, int searchLen=-1,
-		bool ignoreCase=false, char otherSeparator='\0');
+		bool ignoreCase=false, char otherSeparator='\0', bool exactLen=false);
 };
 
 inline bool IsAlphabetic(unsigned int ch) {
