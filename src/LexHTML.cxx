@@ -25,7 +25,7 @@ static int segIsScriptingIndicator(StylingContext &styler, unsigned int start, u
 		s[i] = tolower(styler[start + i]);
 		s[i + 1] = '\0';
 	}
-Platform::DebugPrintf("Scripting indicator [%s]\n", s);
+//Platform::DebugPrintf("Scripting indicator [%s]\n", s);
 	if (strstr(s, "vbs"))
 		return eScriptVBS;
 	if (strstr(s, "pyth"))
