@@ -164,6 +164,7 @@ set void SetTabWidth=2036(int tabWidth,)
 # Retrieve the visible size of a tab. 
 get int GetTabWidth=2121(,)
 
+# The SC_CP_UTF8 value can be used to enter Unicode mode.
 val SC_CP_UTF8=65001
 
 # Set the code page used to interpret the bytes of the document as characters.

@@ -182,6 +182,11 @@ SCI_GETHSCROLLBAR
        SCI_GETCURLINE retrieves the text of the line containing the caret and returns the position
       within the line of the caret.
     </p>
+    <p>
+      SCI_SETCARETPOLICY can be set to a combination of the flags CARET_SLOP, 
+      CARET_CENTER, and CARET_STRICT to change the automatic vertical positioning of the view
+      when ensuring a position is visible.
+    </p>
     <h3>
        Searching
     </h3>
@@ -302,7 +307,7 @@ SCI_STYLESETCHARACTERSET(int stylenumber, int charset)
     <p>
       SCI_STYLESETCHARACTERSET can set a styel to use a different character set than the default.
       For example, SCI_STYLESETCHARACTERSET(SCE_C_STRING, SC_CHARSET_RUSSIAN)
-      would ensure that strings in Russian would display corectly. 
+      would ensure that strings in Russian would display correctly. 
       This feature currently only works on Windows.
     </p>
     <p>
@@ -417,8 +422,11 @@ SCI_SETBUFFEREDDRAW(bool isbuffered)
       although it does take longer. The default is for drawing to be buffered.
     </p>
 <pre>
+SCI_GETTABWIDTH
 SCI_SETTABWIDTH(int widthinchars)
+SCI_GETINDENT
 SCI_SETINDENT(int widthinchars)
+SCI_GETUSETABS
 SCI_SETUSETABS(bool usetabs)
 </pre>
     <p>
@@ -431,7 +439,7 @@ SCI_SETUSETABS(bool usetabs)
 SCI_SETLINEINDENTATION(int line, int indentation)
 SCI_GETLINEINDENTATION(int line)
 SCI_GETLINEINDENTPOSITION(int line)
-SCI_GETCOLUMN
+SCI_GETCOLUMN(int position)
 </pre>
     <p>
      The amount of indentation on a line can be discovered and set with SCI_GETLINEINDENTATION and 
@@ -537,6 +545,12 @@ SCI_MARKERDELETEHANDLE(int handle)
        SC_MARK_SMALLRECT, SC_MARK_SHORTARROW, SC_MARK_EMPTY, SC_MARK_ARROWDOWN, 
        SC_MARK_MINUS, SC_MARK_PLUS. The SC_MARK_EMPTY symbol is invisible,
        allowing client code to track the movement of lines.
+    </p>
+    <p>
+       The marker numbers SC_MARKNUM_FOLDER and SC_MARKNUM_FOLDEROPEN are
+       used for showing that a fold is present and open or closed. Any symbols may be assigned for 
+       this purpose although the (SC_MARK_PLUS, SC_MARK_MINUS) pair or the
+       (SC_MARK_ARROW, SC_MARK_ARROWDOWN) pair are good choices.
     </p>
     <h3>
        Indicators
@@ -653,6 +667,11 @@ SCI_DELWORDLEFT
 SCI_DELWORDRIGHT
 SCI_LINESCROLLDOWN
 SCI_LINESCROLLUP
+SCI_LINECUT
+SCI_LINEDELETE
+SCI_LINETRANSPOSE
+SCI_LOWERCASE
+SCI_UPPERCASE
 </pre>
     <p>
        To allow the container application to perform any of the actions available to the user with
@@ -1034,11 +1053,11 @@ EM_SETTARGETDEVICE
        Building Scintilla with GTK+ on Linux
     </h3>
     <p>
-       On Linux, Scintilla and SciTE have been built with GCC and linked with GTK+ 1.20. GTK+ 1.0x
+       On Linux, Scintilla and SciTE have been built with GCC and linked with GTK+ 1.2x. GTK+ 1.0x
       will not work (and when it did it was very slow). The current make file only supports static
-      linking between SciTE and Scintilla. The Makefile_gtk file is used to build SciTE, it can be
+      linking between SciTE and Scintilla. The gtk/makefile file is used to build SciTE, it can be
       invoked as:<br />
-       make -f Makefile_gtk<br />
+       make<br />
        The SciTEGTK.properties file is better than the SciTEGlobal.properties for use on Linux/GTK+
       as it specifies fonts that are likely to be installed. Under Linux, SciTE reads its
       SciTEGlobal.properties file from the user's home directory.
