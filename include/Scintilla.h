@@ -574,13 +574,8 @@ struct SCNotification {
 	int y;		// SCN_DWELLSTART, SCN_DWELLEND
 };
 
-#define SC_MASK_FOLDERS ((1<<SC_MARKNUM_FOLDER) | \
-	(1<<SC_MARKNUM_FOLDEROPEN) | \
-	(1<<SC_MARKNUM_FOLDERSUB) | \
-	(1<<SC_MARKNUM_FOLDERTAIL) | \
-	(1<<SC_MARKNUM_FOLDERMIDTAIL) | \
-	(1<<SC_MARKNUM_FOLDEROPENMID) | \
-	(1<<SC_MARKNUM_FOLDEREND))
+// This long line is caused by problems with continuation lines with some compilers so leave as is
+#define SC_MASK_FOLDERS ((1<<SC_MARKNUM_FOLDER) | (1<<SC_MARKNUM_FOLDEROPEN) | (1<<SC_MARKNUM_FOLDERSUB) | (1<<SC_MARKNUM_FOLDERTAIL) | (1<<SC_MARKNUM_FOLDERMIDTAIL) | (1<<SC_MARKNUM_FOLDEROPENMID) | (1<<SC_MARKNUM_FOLDEREND))
 
 // Deprecation section listing all API features that are deprecated and will
 // will be removed completely in a future version.
