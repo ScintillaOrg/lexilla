@@ -1717,7 +1717,8 @@ void Window::SetCursor(Cursor curs) {
 		break;
 	}
 
-	gdk_window_set_cursor(PWidget(id)->window, gdkCurs);
+	if (PWidget(id)->window)
+		gdk_window_set_cursor(PWidget(id)->window, gdkCurs);
 	gdk_cursor_destroy(gdkCurs);
 }
 
