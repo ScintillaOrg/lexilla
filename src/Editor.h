@@ -276,7 +276,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void InvalidateCaret();
 
 	void NeedWrapping(int docLineStartWrapping=0);
-	bool WrapLines(int *goodTopLine);
+	bool WrapLines();
 
 	int SubstituteMarkerIfEmpty(int markerCheck, int markerDefault);
 	void PaintSelMargin(Surface *surface, PRectangle &rc);

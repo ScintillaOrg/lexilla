@@ -627,7 +627,7 @@ void Editor::HorizontalScrollTo(int xPos) {
 	//Platform::DebugPrintf("HorizontalScroll %d\n", xPos);
 	if (xPos < 0)
 		xPos = 0;
-	if (xOffset != xPos) {
+	if ((wrapState == eWrapNone) && (xOffset != xPos)) {
 		xOffset = xPos;
 		SetHorizontalScrollPos();
 		RedrawRect(GetClientRectangle());
@@ -750,12 +750,14 @@ void Editor::InvalidateCaret() {
 
 void Editor::NeedWrapping(int docLineStartWrapping) {
 	docLineLastWrapped = docLineStartWrapping - 1;
+	if (docLineLastWrapped < -1)
+		docLineLastWrapped = -1;
 }
 
 // Check if wrapping needed and perform any needed wrapping.
 // Return true if wrapping occurred.
-bool Editor::WrapLines(int *goodTopLine) {
-	*goodTopLine = topLine;
+bool Editor::WrapLines() {
+	int goodTopLine = topLine;
 	bool wrapOccurred = false;
 	if (docLineLastWrapped < pdoc->LinesTotal()) {
 		if (wrapState == eWrapNone) {
@@ -787,12 +789,17 @@ bool Editor::WrapLines(int *goodTopLine) {
 						wrapOccurred = true;
 				}
 			}
-			*goodTopLine = cs.DisplayFromDoc(lineDocTop);
+			goodTopLine = cs.DisplayFromDoc(lineDocTop);
 			if (subLineTop < cs.GetHeight(lineDocTop))
-				*goodTopLine += subLineTop;
+				goodTopLine += subLineTop;
 			else
-				*goodTopLine += cs.GetHeight(lineDocTop);
+				goodTopLine += cs.GetHeight(lineDocTop);
 		}
+	}
+	if (wrapOccurred) {
+		SetScrollBars();
+		SetTopLine(Platform::Clamp(goodTopLine, 0, MaxScrollPos()));
+		SetVerticalScrollPos();
 	}
 	return wrapOccurred;
 }
@@ -1433,11 +1440,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	//Platform::DebugPrintf("Client: (%3d,%3d) ... (%3d,%3d)   %d\n",
 	//	rcClient.left, rcClient.top, rcClient.right, rcClient.bottom);
 
-	int goodTopLine = topLine;
-	if (WrapLines(&goodTopLine)) {
-		SetScrollBars();
-		SetTopLine(Platform::Clamp(goodTopLine, 0, MaxScrollPos()));
-		SetVerticalScrollPos();
+	if (WrapLines()) {
 		// The wrapping process has changed the height of some lines so abandon this
 		// paint for a complete repaint.
 		paintState = paintAbandoned;
@@ -2263,7 +2266,7 @@ void Editor::CheckModificationForWrap(DocModification mh) {
 					LineLayout ll;
 					LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
 					if (cs.GetHeight(lineDoc) != ll.lines) {
-						NeedWrapping(lineDoc);
+						NeedWrapping(lineDoc-1);
 						Redraw();
 					}
 				} else {
@@ -3708,6 +3711,10 @@ void Editor::ToggleContraction(int line) {
 // Recurse up from this line to find any folds that prevent this line from being visible
 // and unfold them all.
 void Editor::EnsureLineVisible(int lineDoc, bool enforcePolicy) {
+
+	// In case in need of wrapping to ensure DisplayFromDoc works.
+	WrapLines();
+
 	if (!cs.GetVisible(lineDoc)) {
 		int lineParent = pdoc->GetFoldParent(lineDoc);
 		if (lineParent >= 0) {
