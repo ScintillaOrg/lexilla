@@ -1544,20 +1544,21 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 	STGMEDIUM medium={0,{0},0};
 	HRESULT hr = S_OK;
 
-	wchar_t *udata = 0;
 	char *data = 0;
+	bool dataAllocated = false;
 
 	if (IsUnicodeMode()) {
 		FORMATETC fmtu = {CF_UNICODETEXT, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 		hr = pIDataSource->GetData(&fmtu, &medium);
 		if (SUCCEEDED(hr) && medium.hGlobal) {
-			udata = static_cast<wchar_t *>(::GlobalLock(medium.hGlobal));
+			wchar_t *udata = static_cast<wchar_t *>(::GlobalLock(medium.hGlobal));
 			int tlen = ::GlobalSize(medium.hGlobal);
 			// Convert UCS-2 to UTF-8
 			int dataLen = UTF8Length(udata, tlen/2);
 			data = new char[dataLen+1];
 			if (data) {
 				UTF8FromUCS2(udata, tlen/2, data, dataLen);
+				dataAllocated = true;
 			}
 		}
 	}
@@ -1592,7 +1593,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
     else
     	::GlobalFree(medium.hGlobal);
 
-	if (udata)
+	if (dataAllocated)
 		delete []data;
 
 	return S_OK;
