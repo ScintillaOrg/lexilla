@@ -1054,7 +1054,7 @@ struct TextToFind {
     <b id="SCI_GETSELTEXT">SCI_GETSELTEXT(&lt;unused&gt;, char *text)</b><br />
      This copies the currently selected text and a terminating 0 byte to the <code>text</code>
     buffer. The buffer must be at least
-    <code>SCI_GETSELECTIONEND()-SCI_SETSELECTIONSTART()+1</code> bytes long. <br />
+    <code>SCI_GETSELECTIONEND()-SCI_GETSELECTIONSTART()+1</code> bytes long. <br />
      <br />
 
     <p>See also: <code><a class="message" href="#SCI_GETCURLINE">SCI_GETCURLINE</a>, <a
