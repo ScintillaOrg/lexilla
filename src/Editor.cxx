@@ -990,21 +990,38 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	// is taken by an individual character - internal leading gives varying results.
 	Font &ctrlCharsFont = vsDraw.styles[STYLE_CONTROLCHAR].font;
 
+	// See if something overrides the line background color:  Either if caret is on the line
+	// and background color is set for that, or if a marker is defined that forces its background
+	// color onto the line, or if a marker is defined but has no selection margin in which to
+	// display itself.  These are checked in order with the earlier taking precedence.  When
+	// multiple markers cause background override, the color for the highest numbered one is used.
 	bool overrideBackground = false;
 	Colour background = Colour(0, 0, 0);
 	if (caret.active && vsDraw.showCaretLineBackground && ll.containsCaret) {
 		overrideBackground = true;
 		background = vsDraw.caretLineBackground.allocated;
 	}
-	if (vsDraw.maskInLine) {
-		int marks = pdoc->GetMark(line) & vsDraw.maskInLine;
-		if (marks) {
-			overrideBackground = true;
-			for (int markBit = 0; (markBit < 32) && marks; markBit++) {
-				if (marks & 1) {
-					background = vsDraw.markers[markBit].back.allocated;
+	if (!overrideBackground) {
+		int marks = pdoc->GetMark(line);
+		for (int markBit = 0; (markBit < 32) && marks; markBit++) {
+			if ((marks & 1) && vsDraw.markers[markBit].markType == SC_MARK_BACKGROUND) {
+				background = vsDraw.markers[markBit].back.allocated;
+				overrideBackground = true;
+			}
+			marks >>= 1;
+		}
+	}
+	if (!overrideBackground) {
+		if (vsDraw.maskInLine) {
+			int marks = pdoc->GetMark(line) & vsDraw.maskInLine;
+			if (marks) {
+				overrideBackground = true;
+				for (int markBit = 0; (markBit < 32) && marks; markBit++) {
+					if (marks & 1) {
+						background = vsDraw.markers[markBit].back.allocated;
+					}
+					marks >>= 1;
 				}
-				marks >>= 1;
 			}
 		}
 	}

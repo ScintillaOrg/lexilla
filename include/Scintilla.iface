@@ -240,6 +240,9 @@ val SC_MARKNUM_FOLDERSUB=29
 val SC_MARKNUM_FOLDER=30
 val SC_MARKNUM_FOLDEROPEN=31
 
+# Invisible mark that only sets the line background color
+val SC_MARK_BACKGROUND=32
+
 # Set the symbol used for a particular marker number.
 fun void MarkerDefine=2040(int markerNumber, int markerSymbol)
 
