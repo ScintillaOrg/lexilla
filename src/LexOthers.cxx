@@ -47,7 +47,7 @@ static void ColouriseBatchLine(char *lineBuffer, int startLine, int endLine, Acc
 // ToDo: %n (parameters), %EnvironmentVariable% colourising
 // ToDo: Colourise = > >> < | "
 #else
-static void ColouriseBatchLine(char *lineBuffer, int endLine, int startLine, Accessor &styler) {
+static void ColouriseBatchLine(char *lineBuffer, int endLine, int, Accessor &styler) {
 	if (0 == strncmp(lineBuffer, "rem", 3)) {
 		styler.ColourTo(endLine, 1);
 	} else if (0 == strncmp(lineBuffer, "set", 3)) {
