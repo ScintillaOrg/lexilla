@@ -173,7 +173,6 @@
 #define SCE_PL_ARRAY 13
 #define SCE_PL_HASH 14
 #define SCE_PL_SYMBOLTABLE 15
-#define SCE_PL_REF 16
 #define SCE_PL_REGEX 17
 #define SCE_PL_REGSUBST 18
 #define SCE_PL_LONGQUOTE 19
