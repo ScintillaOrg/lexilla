@@ -725,7 +725,7 @@ ListBox::~ListBox() {
 void ListBox::Create(Window &parent, int ctrlID) {
 	id = ::CreateWindowEx(
                 WS_EX_WINDOWEDGE, "listbox", "",
-       		WS_CHILD | WS_THICKFRAME | WS_VSCROLL | LBS_SORT | LBS_NOTIFY,
+       		WS_CHILD | WS_THICKFRAME | WS_VSCROLL | LBS_NOTIFY,
        		100,100, 150,80, parent.GetID(), reinterpret_cast<HMENU>(ctrlID),
 		parent.GetInstance(), 0);
 }
