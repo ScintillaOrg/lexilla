@@ -1627,7 +1627,7 @@ void Window::InvalidateRectangle(PRectangle rc) {
 }
 
 void Window::SetFont(Font &) {
-	// TODO
+	// Can not be done generically but only needed for ListBox
 }
 
 void Window::SetCursor(Cursor curs) {
@@ -1802,14 +1802,22 @@ void ListBoxX::SetFont(Font &scint_font) {
 	}
 #else
 	GtkStyle *styleCurrent = gtk_widget_get_style(GTK_WIDGET(PWidget(list)));
-	GdkFont *fontCurrent = gtk_style_get_font(styleCurrent);
 	if (PFont(scint_font)->pfont) {
+		// Current font is GDK font
+		GdkFont *fontCurrent = gtk_style_get_font(styleCurrent);
 		if (!gdk_font_equal(fontCurrent, PFont(scint_font)->pfont)) {
 			GtkStyle *styleNew = gtk_style_copy(styleCurrent);
 			gtk_style_set_font(styleNew, PFont(scint_font)->pfont);
 			gtk_widget_set_style(GTK_WIDGET(PWidget(list)), styleNew);
 			gtk_style_unref(styleCurrent);
 		}
+	} else if (PFont(scint_font)->pfd) {
+		// Current font is Pango font
+		GtkStyle *styleNew = gtk_style_copy(styleCurrent);
+		pango_font_description_free(styleNew->font_desc);
+		styleNew->font_desc = pango_font_description_copy(PFont(scint_font)->pfd);
+		gtk_widget_set_style(GTK_WIDGET(PWidget(list)), styleNew);
+		gtk_style_unref(styleCurrent);
 	}
 #endif
 }
