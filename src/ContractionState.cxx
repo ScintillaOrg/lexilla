@@ -44,12 +44,14 @@ void ContractionState::MakeValid() const {
 		}
 		if (sizeDocLines < linesInDisplay) {
 			delete []docLines;
-			docLines = new int[linesInDisplay + growSize];
-			if (docLines) {
-				sizeDocLines = linesInDisplay + growSize;
-			} else {
+			int *docLinesNew = new int[linesInDisplay + growSize];
+			if (!docLinesNew) {
+				docLines = 0;
+				sizeDocLines = 0;
 				return;
 			}
+			docLines = docLinesNew;
+			sizeDocLines = linesInDisplay + growSize;
 		}
 
 		int lineInDisplay=0;

@@ -3685,6 +3685,7 @@ void Editor::SetDocPointer(Document *document) {
 	// Reset the contraction state to fully shown.
 	cs.Clear();
 	cs.InsertLines(0, pdoc->LinesTotal() - 1);
+	NeedWrapping();
 
 	pdoc->AddWatcher(this, 0);
 	Redraw();
