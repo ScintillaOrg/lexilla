@@ -603,11 +603,13 @@ void Editor::ScrollText(int /* linesToMove */) {
 
 void Editor::HorizontalScrollTo(int xPos) {
 	//Platform::DebugPrintf("HorizontalScroll %d\n", xPos);
-	xOffset = xPos;
-	if (xOffset < 0)
-		xOffset = 0;
-	SetHorizontalScrollPos();
-	RedrawRect(GetClientRectangle());
+	if (xPos < 0)
+		xPos = 0;
+	if (xOffset != xPos) {
+		xOffset = xPos;
+		SetHorizontalScrollPos();
+		RedrawRect(GetClientRectangle());
+	}
 }
 
 void Editor::MoveCaretInsideView() {
@@ -1075,83 +1077,78 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		        IsControlCharacter(ll.chars[i]) || IsControlCharacter(ll.chars[i + 1]) ||
 		        ((ll.selStart != ll.selEnd) && ((iDoc + 1 == ll.selStart) || (iDoc + 1 == ll.selEnd))) ||
 		        (i == (ll.edgeColumn - 1))) {
-			int styleMain = ll.styles[i];
-			ColourAllocated textBack = vsDraw.styles[styleMain].back.allocated;
-			ColourAllocated textFore = vsDraw.styles[styleMain].fore.allocated;
-			Font &textFont = vsDraw.styles[styleMain].font;
-			bool inSelection = (iDoc >= ll.selStart) && (iDoc < ll.selEnd) && (ll.selStart != ll.selEnd);
-			if (inSelection) {
-				if (vsDraw.selbackset) {
-					if (primarySelection)
-						textBack = vsDraw.selbackground.allocated;
-					else
-						textBack = vsDraw.selbackground2.allocated;
+			rcSegment.left = ll.positions[startseg] + xStart;
+			rcSegment.right = ll.positions[i + 1] + xStart;
+			// Only try to draw if really visible - enhances performance by not calling environment to
+			// draw strings that are completely past the right side of the window.
+			//if (rcSegment.left <= rcLine.right) {
+			if ((rcSegment.left <= rcLine.right) && (rcSegment.right >= rcLine.left)) {
+				int styleMain = ll.styles[i];
+				ColourAllocated textBack = vsDraw.styles[styleMain].back.allocated;
+				ColourAllocated textFore = vsDraw.styles[styleMain].fore.allocated;
+				Font &textFont = vsDraw.styles[styleMain].font;
+				bool inSelection = (iDoc >= ll.selStart) && (iDoc < ll.selEnd) && (ll.selStart != ll.selEnd);
+				if (inSelection) {
+					if (vsDraw.selbackset) {
+						if (primarySelection)
+							textBack = vsDraw.selbackground.allocated;
+						else
+							textBack = vsDraw.selbackground2.allocated;
+					}
+					if (vsDraw.selforeset)
+						textFore = vsDraw.selforeground.allocated;
+				} else {
+					if (overrideBackground)
+						textBack = background;
+					if ((vsDraw.edgeState == EDGE_BACKGROUND) && (i >= ll.edgeColumn) && (ll.chars[i] != '\n') && (ll.chars[i] != '\r'))
+						textBack = vsDraw.edgecolour.allocated;
 				}
-				if (vsDraw.selforeset)
-					textFore = vsDraw.selforeground.allocated;
-			} else {
-				if (overrideBackground)
-					textBack = background;
-				if ((vsDraw.edgeState == EDGE_BACKGROUND) && (i >= ll.edgeColumn) && (ll.chars[i] != '\n') && (ll.chars[i] != '\r'))
-					textBack = vsDraw.edgecolour.allocated;
-			}
-			// Manage tab display
-			if (ll.chars[i] == '\t') {
-				rcSegment.left = ll.positions[i] + xStart;
-				rcSegment.right = ll.positions[i + 1] + xStart;
-				surface->FillRectangle(rcSegment, textBack);
-				if ((vsDraw.viewWhitespace != wsInvisible) || ((inIndentation && vsDraw.viewIndentationGuides))) {
-					surface->PenColour(textFore);
-				}
-				if (inIndentation && vsDraw.viewIndentationGuides) {
-					for (int xIG = ll.positions[i] / indentWidth * indentWidth; xIG < ll.positions[i + 1]; xIG += indentWidth) {
-						if (xIG >= ll.positions[i] && xIG > 0) {
-							Point from(0, ((lineVisible & 1) && (vsDraw.lineHeight & 1)) ? 1 : 0);
-							PRectangle rcCopyArea(xIG + xStart + 1, rcSegment.top, xIG + xStart + 2, rcSegment.bottom);
-							surface->Copy(rcCopyArea, from, (ll.xHighlightGuide == xIG) ?
-							              *pixmapIndentGuideHighlight : *pixmapIndentGuide);
+				if (ll.chars[i] == '\t') {
+					// Manage tab display
+					surface->FillRectangle(rcSegment, textBack);
+					if ((vsDraw.viewWhitespace != wsInvisible) || ((inIndentation && vsDraw.viewIndentationGuides))) {
+						surface->PenColour(textFore);
+					}
+					if (inIndentation && vsDraw.viewIndentationGuides) {
+						for (int xIG = ll.positions[i] / indentWidth * indentWidth; xIG < ll.positions[i + 1]; xIG += indentWidth) {
+							if (xIG >= ll.positions[i] && xIG > 0) {
+								Point from(0, ((lineVisible & 1) && (vsDraw.lineHeight & 1)) ? 1 : 0);
+								PRectangle rcCopyArea(xIG + xStart + 1, rcSegment.top, xIG + xStart + 2, rcSegment.bottom);
+								surface->Copy(rcCopyArea, from, (ll.xHighlightGuide == xIG) ?
+									      *pixmapIndentGuideHighlight : *pixmapIndentGuide);
+							}
 						}
 					}
-				}
-				if (vsDraw.viewWhitespace != wsInvisible) {
-					if (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways) {
-						PRectangle rcTab(rcSegment.left + 1, rcSegment.top + 4,
-						                 rcSegment.right - 1, rcSegment.bottom - vsDraw.maxDescent);
-						DrawTabArrow(surface, rcTab, rcSegment.top + vsDraw.lineHeight / 2);
+					if (vsDraw.viewWhitespace != wsInvisible) {
+						if (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways) {
+							PRectangle rcTab(rcSegment.left + 1, rcSegment.top + 4,
+									 rcSegment.right - 1, rcSegment.bottom - vsDraw.maxDescent);
+							DrawTabArrow(surface, rcTab, rcSegment.top + vsDraw.lineHeight / 2);
+						}
 					}
-				}
-				// Manage control character display
-			}
-			else if (IsControlCharacter(ll.chars[i])) {
-				inIndentation = false;
-				const char *ctrlChar = ControlCharacterString(ll.chars[i]);
-				rcSegment.left = ll.positions[i] + xStart;
-				rcSegment.right = ll.positions[i + 1] + xStart;
-				surface->FillRectangle(rcSegment, textBack);
-				int normalCharHeight = surface->Ascent(ctrlCharsFont) -
-				                       surface->InternalLeading(ctrlCharsFont);
-				PRectangle rcCChar = rcSegment;
-				rcCChar.left = rcCChar.left + 1;
-				rcCChar.top = rcSegment.top + vsDraw.maxAscent - normalCharHeight;
-				rcCChar.bottom = rcSegment.top + vsDraw.maxAscent + 1;
-				PRectangle rcCentral = rcCChar;
-				rcCentral.top++;
-				rcCentral.bottom--;
-				surface->FillRectangle(rcCentral, textFore);
-				PRectangle rcChar = rcCChar;
-				rcChar.left++;
-				rcChar.right--;
-				surface->DrawTextClipped(rcChar, ctrlCharsFont,
-				                         rcSegment.top + vsDraw.maxAscent, ctrlChar, strlen(ctrlChar),
-				                         textBack, textFore);
-				// Manage normal display
-			}
-			else {
-				rcSegment.left = ll.positions[startseg] + xStart;
-				rcSegment.right = ll.positions[i + 1] + xStart;
-				// Only try to draw if really visible - enhances performance by not calling environment to
-				// draw strings that are completely past the right side of the window.
-				if (rcSegment.left <= rcLine.right) {
+				} else if (IsControlCharacter(ll.chars[i])) {
+					// Manage control character display
+					inIndentation = false;
+					const char *ctrlChar = ControlCharacterString(ll.chars[i]);
+					surface->FillRectangle(rcSegment, textBack);
+					int normalCharHeight = surface->Ascent(ctrlCharsFont) -
+							       surface->InternalLeading(ctrlCharsFont);
+					PRectangle rcCChar = rcSegment;
+					rcCChar.left = rcCChar.left + 1;
+					rcCChar.top = rcSegment.top + vsDraw.maxAscent - normalCharHeight;
+					rcCChar.bottom = rcSegment.top + vsDraw.maxAscent + 1;
+					PRectangle rcCentral = rcCChar;
+					rcCentral.top++;
+					rcCentral.bottom--;
+					surface->FillRectangle(rcCentral, textFore);
+					PRectangle rcChar = rcCChar;
+					rcChar.left++;
+					rcChar.right--;
+					surface->DrawTextClipped(rcChar, ctrlCharsFont,
+								 rcSegment.top + vsDraw.maxAscent, ctrlChar, strlen(ctrlChar),
+								 textBack, textFore);
+				} else {
+					// Manage normal display
 					surface->DrawTextNoClip(rcSegment, textFont,
 					                  rcSegment.top + vsDraw.maxAscent, ll.chars + startseg,
 					                  i - startseg + 1, textFore, textBack);
