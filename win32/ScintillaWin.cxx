@@ -1559,11 +1559,10 @@ void ScintillaWin::CopyToClipboard(const SelectionText &selectedText) {
 	::EmptyClipboard();
 
 	HGLOBAL hand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT,
-		selectedText.len + 1);
+		selectedText.len);
 	if (hand) {
 		char *ptr = static_cast<char *>(::GlobalLock(hand));
 		memcpy(ptr, selectedText.s, selectedText.len);
-		ptr[selectedText.len] = '\0';
 		::GlobalUnlock(hand);
 	}
 	::SetClipboardData(CF_TEXT, hand);
@@ -1571,11 +1570,10 @@ void ScintillaWin::CopyToClipboard(const SelectionText &selectedText) {
 	if (IsUnicodeMode()) {
 		int uchars = UCS2Length(selectedText.s, selectedText.len);
 		HGLOBAL uhand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT,
-			2 * (uchars + 1));
+			2 * (uchars));
 		if (uhand) {
 			wchar_t *uptr = static_cast<wchar_t *>(::GlobalLock(uhand));
 			UCS2FromUTF8(selectedText.s, selectedText.len, uptr, uchars);
-			uptr[uchars] = 0;
 			::GlobalUnlock(uhand);
 		}
 		::SetClipboardData(CF_UNICODETEXT, uhand);
@@ -1870,20 +1868,18 @@ STDMETHODIMP ScintillaWin::GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM) {
 	HGLOBAL hand;
 	if (pFEIn->cfFormat == CF_UNICODETEXT) {
 		int uchars = UCS2Length(drag.s, drag.len);
-		hand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, 2 * (uchars + 1));
+		hand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, 2 * (uchars));
 		if (hand) {
 			wchar_t *uptr = static_cast<wchar_t *>(::GlobalLock(hand));
 			UCS2FromUTF8(drag.s, drag.len, uptr, uchars);
-			uptr[uchars] = 0;
 		}
 	} else {
-		hand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, drag.len + 1);
+		hand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, drag.len);
 		if (hand) {
 			char *ptr = static_cast<char *>(::GlobalLock(hand));
 			for (int i = 0; i < drag.len; i++) {
 				ptr[i] = drag.s[i];
 			}
-			ptr[drag.len] = '\0';
 		}
 	}
 	::GlobalUnlock(hand);

@@ -126,6 +126,8 @@ public:
 };
 
 /**
+ * Hold a piece of text selected for copying or dragging.
+ * The text is expected to hold a terminating '\0'.
  */
 class SelectionText {
 public:

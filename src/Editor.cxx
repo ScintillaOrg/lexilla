@@ -5487,7 +5487,6 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			if (selectedText.len) {
 				for (; iChar < selectedText.len; iChar++)
 					ptr[iChar] = selectedText.s[iChar];
-				ptr[iChar] = '\0';
 			} else {
 				ptr[0] = '\0';
 			}
