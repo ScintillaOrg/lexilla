@@ -21,8 +21,6 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-
-
 static inline bool IsAWordChar(const unsigned int ch) {
 	return (isalnum(ch) || ch == '-' || ch == '_' || ch >= 161); // _ is not in fact correct CSS word-character
 }
@@ -72,6 +70,17 @@ static void ColouriseCssDoc(unsigned int startPos, int length, int initStyle, Wo
 
 		if (sc.state == SCE_CSS_COMMENT)
 			continue;
+
+		if (sc.state == SCE_CSS_DOUBLESTRING || sc.state == SCE_CSS_SINGLESTRING) {
+			if (sc.ch != (sc.state == SCE_CSS_DOUBLESTRING ? '\"' : '\''))
+				continue;
+			unsigned int i = sc.currentPos;
+			while (i && styler[i-1] == '\\')
+				i--;
+			if ((sc.currentPos - i) % 2 == 1)
+				continue;
+			sc.ForwardSetState(SCE_CSS_VALUE);
+		}
 
 		if (sc.state == SCE_CSS_OPERATOR) {
 			if (op == ' ') {
@@ -169,19 +178,18 @@ static void ColouriseCssDoc(unsigned int startPos, int length, int initStyle, Wo
 			}
 		}
 
-		if (sc.ch != '.' && sc.ch != ':' && sc.ch != '#' && (sc.state == SCE_CSS_CLASS || sc.state == SCE_CSS_PSEUDOCLASS || sc.state == SCE_CSS_UNKNOWN_PSEUDOCLASS || sc.state == SCE_CSS_UNKNOWN_PSEUDOCLASS || sc.state == SCE_CSS_ID))
+		if (sc.ch != '.' && sc.ch != ':' && sc.ch != '#' && (sc.state == SCE_CSS_CLASS || sc.state == SCE_CSS_PSEUDOCLASS || sc.state == SCE_CSS_UNKNOWN_PSEUDOCLASS || sc.state == SCE_CSS_ID))
 			sc.SetState(SCE_CSS_TAG);
 
 		if (sc.Match('/', '*')) {
 			lastStateC = sc.state;
 			sc.SetState(SCE_CSS_COMMENT);
 			sc.Forward();
-			continue;
-		}
-
-		if (IsCssOperator(static_cast<char>(sc.ch))
-		&& (sc.state != SCE_CSS_VALUE || sc.ch == ';' || sc.ch == '}' || sc.ch == '!')
-		&& (sc.state != SCE_CSS_DIRECTIVE || sc.ch == ';' || sc.ch == '{')
+		} else if (sc.state == SCE_CSS_VALUE && (sc.ch == '\"' || sc.ch == '\'')) {
+			sc.SetState((sc.ch == '\"' ? SCE_CSS_DOUBLESTRING : SCE_CSS_SINGLESTRING));
+		} else if (IsCssOperator(static_cast<char>(sc.ch))
+			&& (sc.state != SCE_CSS_VALUE || sc.ch == ';' || sc.ch == '}' || sc.ch == '!')
+			&& (sc.state != SCE_CSS_DIRECTIVE || sc.ch == ';' || sc.ch == '{')
 		) {
 			if (sc.state != SCE_CSS_OPERATOR)
 				lastState = sc.state;
