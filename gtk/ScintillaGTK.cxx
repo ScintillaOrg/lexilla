@@ -1110,6 +1110,36 @@ fprintf(stderr, "iconv failed for %s\n", static_cast<char *>(s));
 }
 #endif
 
+// Convert line endings for a piece of text to a particular mode.
+// Stop at len or when a NUL is found.
+char *ConvertLineEnds(size_t *pLenOut, const char *s, size_t len, int eolMode) {
+	char *dest = new char[2 * len + 1];
+	const char *sptr = s;
+	char *dptr = dest;
+	for (size_t i = 0; (i < len) && (*sptr != '\0'); i++) {
+		if (*sptr == '\n' || *sptr == '\r') {
+			if (eolMode == SC_EOL_CR) {
+				*dptr++ = '\r';
+			} else if (eolMode == SC_EOL_LF) {
+				*dptr++ = '\n';
+			} else { // eolMode == SC_EOL_CRLF
+				*dptr++ = '\r';
+				*dptr++ = '\n';
+			}
+			if ((*sptr == '\r') && (i+1 < len) && (*(sptr+1) == '\n')) {
+				i++;
+				sptr++;
+			}
+			sptr++;
+		} else {
+			*dptr++ = *sptr++;
+		}
+	}
+	*dptr++ = '\0';
+	*pLenOut = (dptr - dest) - 1;
+	return dest;
+}
+
 // Detect rectangular text, convert line ends to current mode, convert from or to UTF-8
 void ScintillaGTK::GetGtkSelectionText(const GtkSelectionData *selectionData, SelectionText &selText) {
 	char *data = reinterpret_cast<char *>(selectionData->data);
@@ -1126,34 +1156,10 @@ void ScintillaGTK::GetGtkSelectionText(const GtkSelectionData *selectionData, Se
 
 	// Check for "\n\0" ending to string indicating that selection is rectangular
 	bool isRectangular = ((len > 2) && (data[len - 1] == 0 && data[len - 2] == '\n'));
-
 	// Need to convert to correct newline form for this file: win32gtk *always* returns
 	// only \n line delimiter from clipboard, and linux/unix gtk may also not send the
 	// form that matches the document (this is probably not effectively standardized by X)
-	char *dest = new char[2 * len + 1];
-	const char *sptr = data;
-	char *dptr = dest;
-	for (size_t i = 0; (i < len) && (*sptr != '\0'); i++) {
-		if (*sptr == '\n' || *sptr == '\r') {
-			if (pdoc->eolMode == SC_EOL_CR) {
-				*dptr++ = '\r';
-			} else if (pdoc->eolMode == SC_EOL_LF) {
-				*dptr++ = '\n';
-			} else { // pdoc->eolMode == SC_EOL_CRLF
-				*dptr++ = '\r';
-				*dptr++ = '\n';
-			}
-			if ((*sptr == '\r') && (i+1 < len) && (*(sptr+1) == '\n')) {
-				i++;
-				sptr++;
-			}
-			sptr++;
-		} else {
-			*dptr++ = *sptr++;
-		}
-	}
-	*dptr++ = '\0';
-	len = (dptr - dest) - 1;
+	char *dest = ConvertLineEnds(&len, data, len, pdoc->eolMode);
 	selText.Set(dest, len, isRectangular);
 
 #if !PLAT_GTK_WIN32
