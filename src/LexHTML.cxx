@@ -80,6 +80,23 @@ static int statePrintForState(int state, int inScriptType)
 	return StateToPrint;
 }
 
+static int stateForPrintState(int StateToPrint)
+{
+	int state;
+
+	if ((StateToPrint >= SCE_HPA_START) && (StateToPrint <= SCE_HPA_IDENTIFIER)) {
+		state = StateToPrint - SCE_HA_PYTHON;
+	} else if ((StateToPrint >= SCE_HBA_START) && (StateToPrint <= SCE_HBA_STRINGEOL)) {
+		state = StateToPrint - SCE_HA_VBS;
+	} else if ((StateToPrint >= SCE_HJA_START) && (StateToPrint <= SCE_HJA_STRINGEOL)) {
+		state = StateToPrint - SCE_HA_JS;
+	} else {
+		state = StateToPrint;
+	}
+
+	return state;
+}
+
 static void classifyAttribHTML(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler) {
 	bool wordIsNumber = isdigit(styler[start]) || (styler[start] == '.') ||
 	                    (styler[start] == '-') || (styler[start] == '#');
@@ -270,8 +287,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	char prevWord[200];
 	prevWord[0] = '\0';
 	int scriptLanguage = eScriptJS;
-	int state = initStyle;
-	int StateToPrint = state;
+	int StateToPrint = initStyle;
+	int state = stateForPrintState(StateToPrint);
 
 	// If inside a tag, it may be a script tag, so reread from the start to ensure any language tags are seen
 	if (InTagState(state)) {
@@ -791,7 +808,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					chPrev = ' ';
 					chNext = styler.SafeGetCharAt(i + 1);
 				} else {
-					state = statePrintForState(SCE_HP_STRING,inScriptType);
+//					state = statePrintForState(SCE_HP_STRING,inScriptType);
+					state = SCE_HP_STRING;
 				}
 			} else if (ch == '\'') {
 				styler.ColourTo(i - 1, StateToPrint);
