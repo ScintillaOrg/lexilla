@@ -2126,6 +2126,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 			surface = pixmapLine;
 		}
 		surface->SetUnicodeMode(IsUnicodeMode());
+		surface->SetDBCSMode(CodePage());
 
 		int visibleLine = topLine + screenLinePaintFirst;
 
