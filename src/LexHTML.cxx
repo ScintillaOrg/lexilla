@@ -196,30 +196,31 @@ static void classifyAttribHTML(unsigned int start, unsigned int end, WordList &k
 	styler.ColourTo(end, chAttr);
 }
 
-
 static int classifyTagHTML(unsigned int start, unsigned int end,
-                           WordList &keywords, Accessor &styler, bool &tagDontFold) {
+                           WordList &keywords, Accessor &styler, bool &tagDontFold,
+			   bool caseSensitive) {
 	char s[30 + 2];
 	// Copy after the '<'
 	unsigned int i = 0;
 	for (unsigned int cPos = start; cPos <= end && i < 30; cPos++) {
 		char ch = styler[cPos];
-		if ((ch != '<') && (ch != '/'))
-			s[i++] = static_cast<char>(tolower(ch));
+		if ((ch != '<') && (ch != '/')) {
+			s[i++] = caseSensitive ? ch : static_cast<char>(tolower(ch));
+		}
 	}
-	
+
 	//The following is only a quick hack, to see if this whole thing would work
 	//we first need the tagname with a trailing space...
 	s[i] = ' ';
 	s[i+1] = '\0';
-	
+
 	//...to find it in the list of no-container-tags
 	// (There are many more. We will need a keywordlist in the property file for this)
 	tagDontFold = (NULL != strstr("meta link img area br hr input ",s));
-	
+
 	//now we can remove the trailing space
 	s[i] = '\0';
-	
+
 	bool isScript = false;
 	char chAttr = SCE_H_TAGUNKNOWN;
 	if (s[0] == '!') {
@@ -465,6 +466,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	const bool fold = foldHTML && styler.GetPropertyInt("fold", 0);
 	const bool foldHTMLPreprocessor = foldHTML && styler.GetPropertyInt("fold.html.preprocessor", 1);
 	const bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
+	const bool caseSensitive = styler.GetPropertyInt("html.tags.case.sensitive", 0) != 0;
 
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
@@ -483,7 +485,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		ch = styler[i];
 		char chNext = styler.SafeGetCharAt(i + 1);
 		const char chNext2 = styler.SafeGetCharAt(i + 2);
-        
+
 		// Handle DBCS codepages
 		if (styler.IsLeadByte(ch)) {
 			chPrev = ' ';
@@ -933,7 +935,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			break;
 		case SCE_H_TAGUNKNOWN:
 			if (!ishtmlwordchar(ch) && !((ch == '/') && (chPrev == '<')) && ch != '[') {
-				int eClass = classifyTagHTML(styler.GetStartSegment(), i - 1, keywords, styler, tagDontFold);
+				int eClass = classifyTagHTML(styler.GetStartSegment(),
+					i - 1, keywords, styler, tagDontFold, caseSensitive);
 				if (eClass == SCE_H_SCRIPT) {
 					if (!tagClosing) {
 						inScriptType = eNonHtmlScript;
