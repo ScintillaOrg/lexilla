@@ -155,6 +155,7 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmLout);
 	LINK_LEXER(lmLua);
 	LINK_LEXER(lmMatlab);
+	LINK_LEXER(lmMETAPOST);
 	LINK_LEXER(lmMMIXAL);
 	LINK_LEXER(lmLot);
 	LINK_LEXER(lmNsis);
@@ -173,6 +174,7 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmRuby);
 	LINK_LEXER(lmScriptol);
 	LINK_LEXER(lmSQL);
+	LINK_LEXER(lmTeX);
 	LINK_LEXER(lmVB);
 	LINK_LEXER(lmVBScript);
 	LINK_LEXER(lmYAML);
