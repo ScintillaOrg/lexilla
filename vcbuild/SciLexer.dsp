@@ -134,6 +134,10 @@ SOURCE=..\src\KeyWords.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexConf.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexCPP.cxx
 # End Source File
 # Begin Source File
@@ -147,6 +151,10 @@ SOURCE=..\src\LexLua.cxx
 # Begin Source File
 
 SOURCE=..\src\LexOthers.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexPascal.cxx
 # End Source File
 # Begin Source File
 
