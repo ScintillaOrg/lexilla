@@ -532,6 +532,20 @@ bool WordList::InList(const char *s) {
 			j++;
 		}
 	}
+	j = starts['^'];
+	if (j >= 0) {
+		while (words[j][0] == '^') {
+			const char *a = words[j] + 1;
+			const char *b = s;
+			while (*a && *a == *b) {
+				a++;
+				b++;
+			}
+			if (!*a)
+				return true;
+			j++;
+		}
+	}
 	return false;
 }
 
