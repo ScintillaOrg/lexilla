@@ -310,6 +310,9 @@
     *tr)</a><br />
      <a class="message" href="#SCI_SETSTYLEBITS">SCI_SETSTYLEBITS(int bits)</a><br />
      <a class="message" href="#SCI_GETSTYLEBITS">SCI_GETSTYLEBITS</a><br />
+     <a class="message" href="#SCI_TARGETASUTF8">SCI_TARGETASUTF8(&lt;unused&gt;, char *s)</a><br />
+     <a class="message" href="#SCI_ENCODEDFROMUTF8">SCI_ENCODEDFROMUTF8(const char *utf8, char *encoded)</a><br />
+     <a class="message" href="#SCI_SETLENGTHFORENCODE">SCI_SETLENGTHFORENCODE(int bytes)</a><br />
     </code>
 
     <p><b id="SCI_GETTEXT">SCI_GETTEXT(int length, char *text)</b><br />
@@ -466,6 +469,25 @@ struct TextRange {
     char *lpstrText;
 };
 </pre>
+
+    <h3 id="EncodedAccess">GTK+-specific: Access to encoded text</h3>
+
+    <p><b id="SCI_TARGETASUTF8">SCI_TARGETASUTF8(&lt;unused&gt;, char *s)</b><br />
+     This method retrieves the value of the target encoded as UTF-8 which is the default
+     encoding of GTK+ so is useful for retrieving text for use in other parts of the user interface,
+     such as find and replace dialogs. The length of the encoded text in bytes is returned.
+    </p>
+
+    <p><b id="SCI_ENCODEDFROMUTF8">SCI_ENCODEDFROMUTF8(const char *utf8, char *encoded)</b><br />
+     <b id="SCI_SETLENGTHFORENCODE">SCI_SETLENGTHFORENCODE(int bytes)</b><br />
+     <code>SCI_ENCODEDFROMUTF8</code> converts a UTF-8 string into the document's
+     encoding which is useful for taking the results of a find dialog, for example, and receiving
+     a string of bytes that can be searched for in the document. Since the text can contain nul bytes,
+     the <code>SCI_SETLENGTHFORENCODE</code> method can be used to set the 
+     length that will be converted. If set to -1, the length is determined by finding a nul byte.
+     The length of the converted string is returned.
+    </p>
+
 
     <h2 id="Searching">Searching</h2>
     <code><a class="message" href="#SCI_FINDTEXT">SCI_FINDTEXT(int flags, TextToFind
