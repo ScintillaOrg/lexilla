@@ -20,6 +20,20 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
+static char MakeUpperCase(char ch) {
+	if (ch < 'a' || ch > 'z')
+		return ch;
+	else
+		return static_cast<char>(ch - 'a' + 'A');
+}
+
+static void MakeUpperCaseString(char *s) {
+	while (*s) {
+		*s = MakeUpperCase(*s);
+		s++;
+	}
+}
+
 // Is a label start character
 inline bool IsALabelStart(const int iChar) {
 	return(isalpha(iChar) || iChar == '_');
@@ -142,7 +156,7 @@ static void ColouriseClwDoc(unsigned int uiStartPos, int iLength, int iInitStyle
 					scDoc.GetCurrent(cLabel,sizeof(cLabel));
 					// If case insensitive, convert string to UPPERCASE to match passed keywords.
 					if (!bCaseSensitive) {
-						strupr(cLabel);
+						MakeUpperCaseString(cLabel);
 					}
 					// If label string is in the Clarion reserved keyword list
 					if (wlReservedWords.InList(cLabel)){
@@ -170,7 +184,7 @@ static void ColouriseClwDoc(unsigned int uiStartPos, int iLength, int iInitStyle
 				scDoc.GetCurrent(cEquate,sizeof(cEquate));
 				// If case insensitive, convert string to UPPERCASE to match passed keywords.
 				if (!bCaseSensitive) {
-					strupr(cEquate);
+					MakeUpperCaseString(cEquate);
 				}
 				// If statement string is in the equate list
 				if (wlStandardEquates.InList(cEquate)) {
@@ -185,7 +199,7 @@ static void ColouriseClwDoc(unsigned int uiStartPos, int iLength, int iInitStyle
 				scDoc.GetCurrent(cStatement,sizeof(cStatement));
 				// If case insensitive, convert string to UPPERCASE to match passed keywords.
 				if (!bCaseSensitive) {
-					strupr(cStatement);
+					MakeUpperCaseString(cStatement);
 				}
 				// If statement string is in the Clarion keyword list
 				if (wlClarionKeywords.InList(cStatement)) {
