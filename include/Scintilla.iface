@@ -151,12 +151,12 @@ fun int GetCurLine=2027(int length, stringresult text)
 # Retrieve the position of the last correctly styled character.
 get position GetEndStyled=2028(,)
 
-# Convert all line endings in the document to use the current mode.
-fun void ConvertEOLs=2029(,)
-
 val SC_EOL_CRLF=0
 val SC_EOL_CR=1
 val SC_EOL_LF=2
+
+# Convert all line endings in the document to one mode.
+fun void ConvertEOLs=2029(int eolMode,)
 
 # Retrieve the current end of line mode - one of CRLF, CR, or LF.
 get int GetEOLMode=2030(,)
