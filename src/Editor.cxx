@@ -2319,7 +2319,9 @@ void Editor::ClearAll() {
 	if (0 != pdoc->Length()) {
 		pdoc->DeleteChars(0, pdoc->Length());
 	}
-	cs.Clear();
+	if (!pdoc->IsReadOnly()) {
+		cs.Clear();
+	}
 	pdoc->EndUndoAction();
 	anchor = 0;
 	currentPos = 0;
