@@ -1437,6 +1437,7 @@ void ScintillaGTK::ReceivedDrop(GtkSelectionData *selection_data) {
 
 void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, SelectionText *text) {
 #if GTK_MAJOR_VERSION >= 2
+	(void)info;	// Parameter unused on GTK+ 2
 	// Convert text to utf8 if it isn't already
 	if (text->characterSet != SC_CP_UTF8) {
 		const char *charSet = ::CharacterSetID(text->characterSet);
