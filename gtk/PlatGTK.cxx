@@ -846,6 +846,8 @@ void SurfaceImpl::Init(SurfaceID sid, WindowID WID_NAME) {
 #endif
 	drawable = drawable_;
 	gc = gdk_gc_new(drawable_);
+	// Ask for lines that do not paint the last pixel so is like Win32
+	gdk_gc_set_line_attributes(gc, 0, GDK_LINE_SOLID, GDK_CAP_NOT_LAST, GDK_JOIN_MITER);
 	createdGC = true;
 	inited = true;
 }
@@ -866,6 +868,8 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID 
 		ppixmap = gdk_pixmap_new(surfImpl->drawable, width, height, -1);
 	drawable = ppixmap;
 	gc = gdk_gc_new(surfImpl->drawable);
+	// Ask for lines that do not paint the last pixel so is like Win32
+	gdk_gc_set_line_attributes(gc, 0, GDK_LINE_SOLID, GDK_CAP_NOT_LAST, GDK_JOIN_MITER);
 	createdGC = true;
 	inited = true;
 }
