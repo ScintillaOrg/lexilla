@@ -71,7 +71,6 @@ static int classifyTagHTML(unsigned int start, unsigned int end,
 			s[i++] = static_cast<char>(tolower(ch));
 	}
 	s[i] = '\0';
-Platform::DebugPrintf("Classify =%s=\n", s);
 	char chAttr = SCE_H_TAGUNKNOWN;
 	if (s[0] == '!' && s[1] == '-' && s[2] == '-') {	//Comment
 		chAttr = SCE_H_COMMENT;
