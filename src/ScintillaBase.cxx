@@ -279,31 +279,19 @@ void ScintillaBase::AutoCompleteCompleted(char fillUp/*='\0'*/) {
 	}
 	ac.Cancel();
 	
-	if (ac.ignoreCase) {
-		if (currentPos != ac.posStart) {
-			pdoc->DeleteChars(ac.posStart, currentPos - ac.posStart);
-		}
-		SetEmptySelection(ac.posStart - ac.startLen);
-		pdoc->DeleteChars(ac.posStart - ac.startLen, ac.startLen);
-		if (item != -1) {
-			SString piece = selected;
-			if (fillUp)
-				piece += fillUp;
-			pdoc->InsertString(currentPos, piece.c_str());
-			SetEmptySelection(currentPos + piece.length());
-		}
-	} else {
-		if (currentPos != ac.posStart) {
-			pdoc->DeleteChars(ac.posStart, currentPos - ac.posStart);
-		}
-		SetEmptySelection(ac.posStart);
-		if (item != -1) {
-			SString piece = selected + ac.startLen;
-			if (fillUp)
-				piece += fillUp;
-			pdoc->InsertString(currentPos, piece.c_str());
-			SetEmptySelection(currentPos + piece.length());
-		}
+	Position firstPos = ac.posStart - ac.startLen;
+	if (currentPos < firstPos)
+		return;
+	if (currentPos != firstPos) {
+		pdoc->DeleteChars(firstPos, currentPos - firstPos);
+	}
+	SetEmptySelection(ac.posStart);
+	if (item != -1) {
+		SString piece = selected;
+		if (fillUp)
+			piece += fillUp;
+		pdoc->InsertString(firstPos, piece.c_str());
+		SetEmptySelection(firstPos + piece.length());
 	}
 }
 
