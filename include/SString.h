@@ -8,7 +8,7 @@
 #ifndef SSTRING_H
 #define SSTRING_H
 
-// These functions are implemented because each platform calls them something different
+// These functions are implemented because each platform calls them something different.
 int CompareCaseInsensitive(const char *a, const char *b);
 int CompareNCaseInsensitive(const char *a, const char *b, int len);
 bool EqualCaseInsensitive(const char *a, const char *b);
@@ -27,8 +27,9 @@ bool EqualCaseInsensitive(const char *a, const char *b);
  **/
 class SString {
 public:
-	/** Type of string lengths (sizes) and positions (indexes) */
+	/** Type of string lengths (sizes) and positions (indexes). */
 	typedef unsigned int lenpos_t;
+	/** Out of bounds value indicating that the string argument should be measured. */
 	enum { measure_length=0xffffffffU};
 
 private:
@@ -52,6 +53,31 @@ private:
 			sSize = lenNew + sizeGrowth;
 		}
 		return sNew != 0;
+	}
+
+	SString &assign(const char *sOther, lenpos_t sSize_=measure_length) {
+		if (!sOther) {
+			sSize_ = 0;
+		} else if (sSize_ == measure_length) {
+			sSize_ = strlen(sOther);
+		}
+		if (sSize > 0 && sSize_ <= sSize) {	// Does not allocate new buffer if the current is big enough
+			if (s && sSize_) {
+				strncpy(s, sOther, sSize_);
+			}
+			s[sSize_] = '\0';
+			sLen = sSize_;
+		} else {
+			delete []s;
+			s = StringAllocate(sOther, sSize_);
+			if (s) {
+				sSize = sSize_;	// Allow buffer bigger than real string, thus providing space to grow
+				sLen = strlen(s);
+			} else {
+				sSize = sLen = 0;
+			}
+		}
+		return *this;
 	}
 
 public:
@@ -103,33 +129,6 @@ public:
 	/** Size of string in buffer. */
 	lenpos_t length() const {
 		return sLen;
-	}
-	SString &assign(const char *sOther, lenpos_t sSize_=measure_length) {
-		if (!sOther) {
-			sSize_ = 0;
-		} else if (sSize_ == measure_length) {
-			sSize_ = strlen(sOther);
-		}
-		if (sSize > 0 && sSize_ <= sSize) {	// Does not allocate new buffer if the current is big enough
-			if (s && sSize_) {
-				strncpy(s, sOther, sSize_);
-			}
-			s[sSize_] = '\0';
-			sLen = sSize_;
-		} else {
-			delete []s;
-			s = StringAllocate(sOther, sSize_);
-			if (s) {
-				sSize = sSize_;	// Allow buffer bigger than real string, thus providing space to grow
-				sLen = strlen(s);
-			} else {
-				sSize = sLen = 0;
-			}
-		}
-		return *this;
-	}
-	SString &assign(const SString& sOther, lenpos_t sSize_=measure_length) {
-		return assign(sOther.s, sSize_);
 	}
 	SString &operator=(const char *source) {
 		return assign(source);
@@ -214,7 +213,7 @@ public:
 		return *this;
 	}
 	SString &operator+=(const char *sOther) {
-		return append(sOther, 0);
+		return append(sOther, static_cast<lenpos_t>(measure_length));
 	}
 	SString &operator+=(const SString &sOther) {
 		return append(sOther.s, sOther.sSize);
@@ -260,6 +259,7 @@ public:
 			sLen -= len;
 		}
 	}
+	/** Read an integral numeric value from the string. */
 	int value() const {
 		if (s)
 			return atoi(s);
