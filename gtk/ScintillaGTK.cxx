@@ -432,7 +432,7 @@ gint ScintillaGTK::FocusOut(GtkWidget *widget, GdkEventFocus * /*event*/) {
 }
 
 void ScintillaGTK::SizeRequest(GtkWidget *widget, GtkRequisition *requisition) {
-	requisition->width = 2000;
+	requisition->width = 600;
 	requisition->height = 2000;
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	GtkRequisition child_requisition;
