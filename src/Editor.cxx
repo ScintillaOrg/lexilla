@@ -2732,11 +2732,13 @@ int Editor::KeyCommand(unsigned int iMessage) {
 	case SCI_ZOOMIN:
 		if (vs.zoomLevel < 20)
 			vs.zoomLevel++;
+		NeedWrapping();
 		InvalidateStyleRedraw();
 		break;
 	case SCI_ZOOMOUT:
 		if (vs.zoomLevel > -10)
 			vs.zoomLevel--;
+		NeedWrapping();
 		InvalidateStyleRedraw();
 		break;
 	case SCI_DELWORDLEFT: {
@@ -4857,6 +4859,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETZOOM:
 		vs.zoomLevel = wParam;
+		NeedWrapping();
 		InvalidateStyleRedraw();
 		break;
 
