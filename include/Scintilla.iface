@@ -1574,6 +1574,7 @@ val SCLEX_FORTRAN=36
 val SCLEX_F77=37
 val SCLEX_CSS=38
 val SCLEX_POV=39
+val SCLEX_LOUT=40
 
 # When a lexer specifies its language as SCLEX_AUTOMATIC it receives a
 # value assigned in sequence from SCLEX_AUTOMATIC+1.
@@ -2056,6 +2057,20 @@ val SCE_POV_OPERATOR=7
 val SCE_POV_IDENTIFIER=8
 val SCE_POV_BRACE=9
 val SCE_POV_WORD2=10
+# Lexical states for SCLEX_LOUT
+lex LOUT=SCLEX_LOUT SCE_LOUT_
+val SCE_LOUT_DEFAULT=0
+val SCE_LOUT_COMMENT=1
+val SCE_LOUT_NUMBER=2
+val SCE_LOUT_WORD=3
+val SCE_LOUT_WORD2=4
+val SCE_LOUT_WORD3=5
+val SCE_LOUT_WORD4=6
+val SCE_LOUT_STRING=7
+val SCE_LOUT_OPERATOR=8
+val SCE_LOUT_IDENTIFIER=9
+val SCE_LOUT_STRINGEOL=10
+
 # Events
 
 evt void StyleNeeded=2000(int position)

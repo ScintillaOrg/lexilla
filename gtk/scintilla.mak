@@ -133,6 +133,7 @@ LEXOBJS=\
 	$(DIR_O)\LexFortran.obj \
 	$(DIR_O)\LexHTML.obj \
 	$(DIR_O)\LexLisp.obj \
+	$(DIR_O)\LexLout.obj \
 	$(DIR_O)\LexLua.obj \
 	$(DIR_O)\LexMatlab.obj \
 	$(DIR_O)\LexOthers.obj \
@@ -280,6 +281,8 @@ $(DIR_O)\LexFortran.obj: ..\src\LexFortran.cxx $(LEX_HEADERS)
 $(DIR_O)\LexHTML.obj: ..\src\LexHTML.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexLisp.obj: ..\src\LexLisp.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexLout.obj: ..\src\LexLout.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexLua.obj: ..\src\LexLua.cxx $(LEX_HEADERS)
 
