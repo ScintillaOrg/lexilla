@@ -2268,7 +2268,7 @@ void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 
 	if (bufferedDraw) {
 		if (!pixmapLine->Initialised()) {
-            PRectangle rcClient = GetClientRectangle();
+			PRectangle rcClient = GetClientRectangle();
 			pixmapLine->InitPixMap(rcClient.Width(), rcClient.Height(),
 			                       surfaceWindow);
 			pixmapSelMargin->InitPixMap(vs.fixedColumnWidth,
@@ -2283,7 +2283,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 
 	RefreshStyleData();
 
-    RefreshPixMaps(surfaceWindow);
+	RefreshPixMaps(surfaceWindow);
 
 	PRectangle rcClient = GetClientRectangle();
 	//Platform::DebugPrintf("Client: (%3d,%3d) ... (%3d,%3d)   %d\n",
