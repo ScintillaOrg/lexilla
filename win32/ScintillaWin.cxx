@@ -446,8 +446,7 @@ sptr_t ScintillaWin::HandleComposition(uptr_t wParam, sptr_t lParam) {
 	// Digital Mars compiler does not include Imm library
 	return 0;
 #else
-	sptr_t ret;
-	if ((lParam & GCS_RESULTSTR) && (IsNT())) {
+	if (lParam & GCS_RESULTSTR) {
 		HIMC hIMC = ::ImmGetContext(MainHWND());
 		if (hIMC) {
 			const int maxLenInputIME = 200;
@@ -469,24 +468,18 @@ sptr_t ScintillaWin::HandleComposition(uptr_t wParam, sptr_t lParam) {
 					AddChar(dbcsval[i]);
 				}
 			}
+			// Set new position after converted
+			Point pos = LocationFromPosition(currentPos);
+			COMPOSITIONFORM CompForm;
+			CompForm.dwStyle = CFS_POINT;
+			CompForm.ptCurrentPos.x = pos.x;
+			CompForm.ptCurrentPos.y = pos.y;
+			::ImmSetCompositionWindow(hIMC, &CompForm);
 			::ImmReleaseContext(MainHWND(), hIMC);
 		}
-		ret = 0;
-	} else {
-		ret = ::DefWindowProc(MainHWND(), WM_IME_COMPOSITION, wParam, lParam);
-	}
-	if ((lParam & GCS_RESULTSTR) && (!IsNT())) {
-		HIMC hIMC = ::ImmGetContext(MainHWND());
-		Point pos = LocationFromPosition(currentPos);
-		COMPOSITIONFORM CompForm;
-		CompForm.dwStyle = CFS_POINT;
-		CompForm.ptCurrentPos.x = pos.x;
-		CompForm.ptCurrentPos.y = pos.y;
-		::ImmSetCompositionWindow(hIMC, &CompForm);
-		::ImmReleaseContext(MainHWND(), hIMC);
-		DropCaret();
-	}
-	return ret;
+		return 0;
+	} 
+	return ::DefWindowProc(MainHWND(), WM_IME_COMPOSITION, wParam, lParam);
 #endif
 }
 
@@ -649,7 +642,12 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 	case WM_GETMINMAXINFO:
 		return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 
-	case WM_LBUTTONDOWN:
+	case WM_LBUTTONDOWN: {
+		// For IME, set the composition string as the result string.
+		HIMC hIMC = ::ImmGetContext(MainHWND());
+		::ImmNotifyIME(hIMC, NI_COMPOSITIONSTR, CPS_COMPLETE, 0);
+		::ImmReleaseContext(MainHWND(), hIMC);
+		//
 		//Platform::DebugPrintf("Buttdown %d %x %x %x %x %x\n",iMessage, wParam, lParam,
 		//	Platform::IsKeyDown(VK_SHIFT),
 		//	Platform::IsKeyDown(VK_CONTROL),
@@ -659,6 +657,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			(wParam & MK_CONTROL) != 0,
 			Platform::IsKeyDown(VK_MENU));
 		::SetFocus(MainHWND());
+		}
 		break;
 
 	case WM_MOUSEMOVE:
