@@ -308,11 +308,11 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void ToggleContraction(int line);
 	void EnsureLineVisible(int line);
 
-	virtual long DefWndProc(unsigned int iMessage, unsigned long wParam, long lParam) = 0;
+	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) = 0;
 	
 public:
 	// Public so scintilla_send_message can use it
-	virtual long WndProc(unsigned int iMessage, unsigned long wParam, long lParam);
+	virtual sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 	// Public so scintilla_set_id can use it
 	int ctrlID;	
 };

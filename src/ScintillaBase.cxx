@@ -367,7 +367,7 @@ void ScintillaBase::NotifyStyleToNeeded(int endStyleNeeded) {
 	Editor::NotifyStyleToNeeded(endStyleNeeded);
 }
 
-long ScintillaBase::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
+sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	switch (iMessage) {
 	case SCI_AUTOCSHOW:
 		listType = 0;

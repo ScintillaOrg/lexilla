@@ -78,9 +78,9 @@ private:
 	virtual void Finalise();
 	virtual void StartDrag();
 public:	// Public for scintilla_send_message
-	virtual long WndProc(unsigned int iMessage, unsigned long wParam, long lParam);
+	virtual sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 private:
-	virtual long DefWndProc(unsigned int iMessage, unsigned long wParam, long lParam);
+	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 	virtual void SetTicking(bool on);
 	virtual void SetMouseCapture(bool on);
 	virtual bool HaveMouseCapture();
@@ -156,8 +156,8 @@ private:
 	static gint TimeOut(ScintillaGTK *sciThis);
 	static void PopUpCB(ScintillaGTK *sciThis, guint action, GtkWidget *widget);
 	static gint ExposeCT(GtkWidget *widget, GdkEventExpose *ose, CallTip *ct);
-	static long DirectFunction(ScintillaGTK *sciThis, 
-		unsigned int iMessage, unsigned long wParam, long lParam);
+	static sptr_t DirectFunction(ScintillaGTK *sciThis, 
+		unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 };
 
 enum {
@@ -496,7 +496,7 @@ void ScintillaGTK::StartDrag() {
 		reinterpret_cast<GdkEvent *>(&evbtn));
 }
 
-long ScintillaGTK::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
+sptr_t ScintillaGTK::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	switch (iMessage) {
 
 	case SCI_GRABFOCUS:
@@ -504,10 +504,10 @@ long ScintillaGTK::WndProc(unsigned int iMessage, unsigned long wParam, long lPa
 		break;
 
 	case SCI_GETDIRECTFUNCTION:
-		return reinterpret_cast<long>(DirectFunction);
+		return reinterpret_cast<sptr_t>(DirectFunction);
 	
 	case SCI_GETDIRECTPOINTER:
-		return reinterpret_cast<long>(this);
+		return reinterpret_cast<sptr_t>(this);
 
 	default:
 		return ScintillaBase::WndProc(iMessage,wParam,lParam);
@@ -515,7 +515,7 @@ long ScintillaGTK::WndProc(unsigned int iMessage, unsigned long wParam, long lPa
 	return 0l;
 }
 
-long ScintillaGTK::DefWndProc(unsigned int, unsigned long, long) {
+sptr_t ScintillaGTK::DefWndProc(unsigned int, uptr_t, sptr_t) {
 	return 0;
 }
 
@@ -1295,12 +1295,12 @@ gint ScintillaGTK::ExposeCT(GtkWidget *widget, GdkEventExpose * /*ose*/, CallTip
 	return TRUE;
 }
 
-long ScintillaGTK::DirectFunction(
-    ScintillaGTK *sciThis, unsigned int iMessage, unsigned long wParam, long lParam) {
+sptr_t ScintillaGTK::DirectFunction(
+    ScintillaGTK *sciThis, unsigned int iMessage, sptr_t wParam, sptr_t lParam) {
 	return sciThis->WndProc(iMessage, wParam, lParam);
 }
 
-long scintilla_send_message(ScintillaObject *sci, int iMessage, int wParam, int lParam) {
+sptr_t scintilla_send_message(ScintillaObject *sci, int iMessage, uptr_t wParam, sptr_t lParam) {
 	ScintillaGTK *psci = reinterpret_cast<ScintillaGTK *>(sci->pscin);
 	return psci->WndProc(iMessage, wParam, lParam);
 }

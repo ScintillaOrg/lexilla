@@ -35,7 +35,7 @@ struct _ScintillaClass {
 guint		scintilla_get_type	(void);
 GtkWidget*	scintilla_new		(void);
 void		scintilla_set_id	(ScintillaObject *sci,int id);
-long 		scintilla_send_message	(ScintillaObject *sci,int iMessage,int wParam,int lParam);
+sptr_t	scintilla_send_message	(ScintillaObject *sci,int iMessage, uptr_t wParam, sptr_t lParam);
 
 #ifdef __cplusplus
 }

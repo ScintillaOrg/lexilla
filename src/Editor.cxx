@@ -3200,7 +3200,7 @@ static bool ValidMargin(unsigned long wParam) {
 	return wParam < ViewStyle::margins;
 }
 
-long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
+sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	//Platform::DebugPrintf("S start wnd proc %d %d %d\n",iMessage, wParam, lParam);
 
 	// Optional macro recording hook

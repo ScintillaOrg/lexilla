@@ -118,17 +118,17 @@ class ScintillaWin :
 	virtual void Initialise();
 	virtual void Finalise();
 
-	static LRESULT DirectFunction(
-		    ScintillaWin *sci, UINT iMessage, WPARAM wParam, LPARAM lParam);
-	static LRESULT PASCAL SWndProc(
-		    HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
-	static LRESULT PASCAL CTWndProc(
-		    HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
+	static sptr_t DirectFunction(
+		    ScintillaWin *sci, UINT iMessage, uptr_t wParam, sptr_t lParam);
+	static sptr_t PASCAL SWndProc(
+		    HWND hWnd, UINT iMessage, WPARAM wParam, sptr_t lParam);
+	static sptr_t PASCAL CTWndProc(
+		    HWND hWnd, UINT iMessage, WPARAM wParam, sptr_t lParam);
 
 	virtual void StartDrag();
-	LRESULT WndPaint(unsigned long wParam);
-	virtual LRESULT WndProc(unsigned int iMessage, unsigned long wParam, long lParam);
-	virtual LRESULT DefWndProc(unsigned int iMessage, unsigned long wParam, long lParam);
+	sptr_t WndPaint(unsigned long wParam);
+	virtual sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
+	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 	virtual void SetTicking(bool on);
 	virtual void SetMouseCapture(bool on);
 	virtual bool HaveMouseCapture();
@@ -349,7 +349,7 @@ LRESULT ScintillaWin::WndPaint(unsigned long wParam) {
 	return 0l;
 }
 
-LRESULT ScintillaWin::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
+sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	//Platform::DebugPrintf("S M:%x WP:%x L:%x\n", iMessage, wParam, lParam);
 	switch (iMessage) {
 
@@ -606,10 +606,10 @@ LRESULT ScintillaWin::WndProc(unsigned int iMessage, unsigned long wParam, long 
 		return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
 
 	case SCI_GETDIRECTFUNCTION:
-		return reinterpret_cast<LRESULT>(DirectFunction);
+		return reinterpret_cast<sptr_t>(DirectFunction);
 	
 	case SCI_GETDIRECTPOINTER:
-		return reinterpret_cast<LRESULT>(this);
+		return reinterpret_cast<sptr_t>(this);
 
 	case SCI_GRABFOCUS:
 		::SetFocus(wMain.GetID());
@@ -621,7 +621,7 @@ LRESULT ScintillaWin::WndProc(unsigned int iMessage, unsigned long wParam, long 
 	return 0l;
 }
 
-long ScintillaWin::DefWndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
+sptr_t ScintillaWin::DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
 }
 
@@ -1589,8 +1589,8 @@ void ScintillaWin::Register(HINSTANCE hInstance_) {
 	}
 }
 
-LRESULT PASCAL ScintillaWin::CTWndProc(
-    HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam) {
+sptr_t PASCAL ScintillaWin::CTWndProc(
+    HWND hWnd, UINT iMessage, WPARAM wParam, sptr_t lParam) {
 
 	// Find C++ object associated with window.
 	CallTip *ctp = reinterpret_cast<CallTip *>(GetWindowLong(hWnd, 0));
@@ -1624,17 +1624,17 @@ LRESULT PASCAL ScintillaWin::CTWndProc(
 	}
 }
 
-LRESULT ScintillaWin::DirectFunction(
-    ScintillaWin *sci, UINT iMessage, WPARAM wParam, LPARAM lParam) {
+sptr_t ScintillaWin::DirectFunction(
+    ScintillaWin *sci, UINT iMessage, uptr_t wParam, sptr_t lParam) {
 	return sci->WndProc(iMessage, wParam, lParam);
 }
 	    
-LRESULT PASCAL ScintillaWin::SWndProc(
-    HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam) {
+sptr_t PASCAL ScintillaWin::SWndProc(
+    HWND hWnd, UINT iMessage, WPARAM wParam, sptr_t lParam) {
 	//Platform::DebugPrintf("S W:%x M:%x WP:%x L:%x\n", hWnd, iMessage, wParam, lParam);
 
 	// Find C++ object associated with window.
-	ScintillaWin *sci = reinterpret_cast<ScintillaWin *>(GetWindowLong(hWnd, 0));
+	ScintillaWin *sci = reinterpret_cast<ScintillaWin *>(::GetWindowLong(hWnd, 0));
 	// sci will be zero if WM_CREATE not seen yet
 	if (sci == 0) {
 		if (iMessage == WM_CREATE) {
@@ -1643,14 +1643,14 @@ LRESULT PASCAL ScintillaWin::SWndProc(
 			SetWindowLong(hWnd, 0, reinterpret_cast<LONG>(sci));
 			return sci->WndProc(iMessage, wParam, lParam);
 		} else {
-            return ::DefWindowProc(hWnd, iMessage, wParam, lParam);
+			return ::DefWindowProc(hWnd, iMessage, wParam, lParam);
 		}
 	} else {
 		if (iMessage == WM_DESTROY) {
 			sci->Finalise();
 			delete sci;
 			SetWindowLong(hWnd, 0, 0);
-            return ::DefWindowProc(hWnd, iMessage, wParam, lParam);
+			return ::DefWindowProc(hWnd, iMessage, wParam, lParam);
 		} else {
 			return sci->WndProc(iMessage, wParam, lParam);
 		}

@@ -70,7 +70,7 @@ protected:
 	virtual void NotifyStyleToNeeded(int endStyleNeeded);
 public:
 	// Public so scintilla_send_message can use it
-	virtual long WndProc(unsigned int iMessage, unsigned long wParam, long lParam);
+	virtual sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 };
 
 #endif
