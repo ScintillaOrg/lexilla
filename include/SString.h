@@ -279,17 +279,21 @@ public:
 	bool contains(const char *sFind) {
 		return search(sFind) >= 0;
 	}
-	void substitute(char chFind, char chReplace) {
+	int substitute(char chFind, char chReplace) {
+		int c = 0;
 		char *t = s;
 		while (t) {
 			t = strchr(t, chFind);
 			if (t) {
 				*t = chReplace;
 				t++;
+				c++;
 			}
 		}
+		return c;
 	}
-	void substitute(const char *sFind, const char *sReplace) {
+	int substitute(const char *sFind, const char *sReplace) {
+		int c = 0;
 		int lenFind = strlen(sFind);
 		int lenReplace = strlen(sReplace);
 		int posFound = search(sFind);
@@ -297,10 +301,12 @@ public:
 			remove(posFound, lenFind);
 			insert(posFound, sReplace, lenReplace);
 			posFound = search(sFind, posFound + lenReplace);
+			c++;
 		}
+		return c;
 	}
-	void remove(const char *sFind) {
-		substitute(sFind, "");
+	int remove(const char *sFind) {
+		return substitute(sFind, "");
 	}
 };
 
