@@ -186,6 +186,10 @@ SOURCE=..\src\LexEScript.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexForth.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexFortran.cxx
 # End Source File
 # Begin Source File
@@ -231,6 +235,10 @@ SOURCE=..\src\LexOthers.cxx
 # Begin Source File
 
 SOURCE=..\src\LexPascal.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexPB.cxx
 # End Source File
 # Begin Source File
 
