@@ -496,6 +496,19 @@ set void SetSelectionEnd=2144(position pos,)
 # Returns the position at the end of the selection.
 get position GetSelectionEnd=2145(,)
 
+# Sets the print magnification added to the point size of each style for printing.
+set void SetPrintMagnification=2146(int magnification,)
+
+# Returns the print magnification.
+get int GetPrintMagnification=2147(,)
+
+# Set to invert the light value of each style for printing.
+# Used to produce reasonable print output when black background used.
+set void SetPrintInvertLight=2148(bool invert,)
+
+# Returns the invert light value property.
+get bool GetPrintInvertLight=2149(,)
+
 # Show a call tip containing a definition near position pos.
 fun void CallTipShow=2200(position pos, string definition)
 
