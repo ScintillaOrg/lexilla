@@ -367,29 +367,6 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 						preferRE = true;
 					state = SCE_PL_DEFAULT;
 					ch = ' ';
-/*
-					if (ch == '#') {
-						state = SCE_PL_COMMENTLINE;
-					} else if (ch == '\"') {
-						state = SCE_PL_STRING;
-						Quote.New(1);
-						Quote.Open(ch);
-					} else if (ch == '\'') {
-						state = SCE_PL_CHARACTER;
-						Quote.New(1);
-						Quote.Open(ch);
-					} else if (ch == '<' && chNext == '<') {
-						state = SCE_PL_HERE_DELIM;
-						HereDoc.State = 0;
-					} else if (isPerlOperator(ch)) {
-						if (ch == ')' || ch == ']')
-							preferRE = false;
-						else
-							preferRE = true;
-						styler.ColourTo(i, SCE_PL_OPERATOR);
-						state = SCE_PL_DEFAULT;
-					}
-*/
 				}
 			}
 		} else {
