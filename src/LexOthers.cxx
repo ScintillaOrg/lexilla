@@ -210,28 +210,28 @@ static void ColourisePropsLine(
 		i++;
 	if (i < lengthLine) {
 		if (lineBuffer[i] == '#' || lineBuffer[i] == '!' || lineBuffer[i] == ';') {
-			styler.ColourTo(endPos, 1);
+			styler.ColourTo(endPos, SCE_PROPS_COMMENT);
 		} else if (lineBuffer[i] == '[') {
-			styler.ColourTo(endPos, 2);
+			styler.ColourTo(endPos, SCE_PROPS_SECTION);
 		} else if (lineBuffer[i] == '@') {
-			styler.ColourTo(startLine + i, 4);
+			styler.ColourTo(startLine + i, SCE_PROPS_DEFVAL);
 			if (lineBuffer[++i] == '=')
-				styler.ColourTo(startLine + i, 3);
-			styler.ColourTo(endPos, 0);
+				styler.ColourTo(startLine + i, SCE_PROPS_ASSIGNMENT);
+			styler.ColourTo(endPos, SCE_PROPS_DEFAULT);
 		} else {
 			// Search for the '=' character
 			while ((i < lengthLine) && (lineBuffer[i] != '='))
 				i++;
 			if ((i < lengthLine) && (lineBuffer[i] == '=')) {
-				styler.ColourTo(startLine + i - 1, 0);
+				styler.ColourTo(startLine + i - 1, SCE_PROPS_DEFAULT);
 				styler.ColourTo(startLine + i, 3);
-				styler.ColourTo(endPos, 0);
+				styler.ColourTo(endPos, SCE_PROPS_DEFAULT);
 			} else {
-				styler.ColourTo(endPos, 0);
+				styler.ColourTo(endPos, SCE_PROPS_DEFAULT);
 			}
 		}
 	} else {
-		styler.ColourTo(endPos, 0);
+		styler.ColourTo(endPos, SCE_PROPS_DEFAULT);
 	}
 }
 
