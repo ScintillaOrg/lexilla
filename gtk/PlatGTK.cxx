@@ -830,7 +830,9 @@ void ListBox::Append(char *s) {
 }
 
 int ListBox::Length() {
-	return GTK_CLIST(list)->rows;
+	if (id)
+		return GTK_CLIST(list)->rows;
+	return 0;
 }
 
 void ListBox::Select(int n) {
