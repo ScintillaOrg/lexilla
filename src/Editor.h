@@ -91,9 +91,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	Surface pixmapSelPattern;
 	Surface pixmapIndentGuide;
 	Surface pixmapIndentGuideHighlight;
-	// Intellimouse support - currently only implemented for Windows
-	unsigned int ucWheelScrollLines;
-	int cWheelDelta; ///< Wheel delta from roll
 
 	KeyMap kmap;
 

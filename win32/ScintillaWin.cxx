@@ -136,6 +136,9 @@ class ScintillaWin :
 	bool lastKeyDownConsumed;
 
 	bool capturedMouse;
+	
+	unsigned int linesPerScroll;	///< Intellimouse support
+	int wheelDelta; ///< Wheel delta from roll
 
 	bool hasOKText;
 
@@ -239,6 +242,8 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	lastKeyDownConsumed = false;
 
 	capturedMouse = false;
+	linesPerScroll = 0;
+	wheelDelta = 0;   // Wheel delta from roll
 
 	hasOKText = false;
 
@@ -492,27 +497,26 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		}
 
 		// Either SCROLL or ZOOM. We handle the wheel steppings calculation
-		cWheelDelta -= static_cast<short>(HiWord(wParam));
-		if (abs(cWheelDelta) >= WHEEL_DELTA && ucWheelScrollLines > 0) {
-			int cLineScroll;
-			cLineScroll = ucWheelScrollLines;
-			if (cLineScroll == 0) {
-				cLineScroll++;
+		wheelDelta -= static_cast<short>(HiWord(wParam));
+		if (abs(wheelDelta) >= WHEEL_DELTA && linesPerScroll > 0) {
+			int linesToScroll = linesPerScroll;
+			if (linesToScroll == 0) {
+				linesToScroll = 1;
 			}
-			cLineScroll *= (cWheelDelta / WHEEL_DELTA);
-			cWheelDelta = cWheelDelta % WHEEL_DELTA;
+			linesToScroll *= (wheelDelta / WHEEL_DELTA);
+			wheelDelta = wheelDelta % WHEEL_DELTA;
 
 			if (wParam & MK_CONTROL) {
 				// Zoom! We play with the font sizes in the styles.
 				// Number of steps/line is ignored, we just care if sizing up or down
-				if (cLineScroll < 0) {
+				if (linesToScroll < 0) {
 					KeyCommand(SCI_ZOOMIN);
 				} else {
 					KeyCommand(SCI_ZOOMOUT);
 				}
 			} else {
 				// Scroll
-				ScrollTo(topLine + cLineScroll);
+				ScrollTo(topLine + linesToScroll);
 			}
 		}
 		return 0;
@@ -1312,7 +1316,7 @@ void ScintillaWin::AddCharBytes(char b0, char b1) {
 
 void ScintillaWin::GetIntelliMouseParameters() {
 	// This retrieves the number of lines per scroll as configured inthe Mouse Properties sheet in Control Panel
-	::SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, &ucWheelScrollLines, 0);
+	::SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, &linesPerScroll, 0);
 }
 
 void ScintillaWin::CopySelTextToClipboard() {

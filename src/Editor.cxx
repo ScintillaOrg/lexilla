@@ -85,9 +85,6 @@ Editor::Editor() {
 
 	searchAnchor = 0;
 
-	ucWheelScrollLines = 0;
-	cWheelDelta = 0;   //wheel delta from roll
-
 	xOffset = 0;
 	xCaretMargin = 50;
 	horizontalScrollBarVisible = true;
