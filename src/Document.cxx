@@ -149,7 +149,10 @@ int Document::GetLastChild(int lineParent, int level) {
 		level = GetLevel(lineParent) & SC_FOLDLEVELNUMBERMASK;
 	int maxLine = LinesTotal();
 	int lineMaxSubord = lineParent;
-	while ((lineMaxSubord < maxLine-1) && IsSubordinate(level, GetLevel(lineMaxSubord+1))) {
+	while (lineMaxSubord < maxLine-1) {
+		EnsureStyledTo(LineStart(lineMaxSubord+2));
+		if (!IsSubordinate(level, GetLevel(lineMaxSubord+1)))
+			break;
 		lineMaxSubord++;
 	}
 	if (lineMaxSubord > lineParent) {
@@ -694,6 +697,13 @@ void Document::SetStyles(int length, char *styles) {
 		}
 		enteredCount--;
 	}
+}
+
+bool Document::EnsureStyledTo(int pos) {
+	// Ask the watchers to style, and stop as soon as one responds.
+	for (int i = 0; pos > GetEndStyled() && i < lenWatchers; i++)
+		watchers[i].watcher->NotifyStyleNeeded(this, watchers[i].userData, pos);
+	return pos <= GetEndStyled();
 }
 
 bool Document::AddWatcher(DocWatcher *watcher, void *userData) {

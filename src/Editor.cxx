@@ -991,10 +991,9 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		ypos += screenLinePaintFirst * vs.lineHeight;
 	int yposScreen = screenLinePaintFirst * vs.lineHeight;
 
-	if (endPosPaint > pdoc->GetEndStyled()) {
-		// Notify container to do some more styling
-		NotifyStyleNeeded(endPosPaint);
-	}
+	// Ensure we are styled as far as we are painting.
+	pdoc->EnsureStyledTo(endPosPaint);
+
 	if (needUpdateUI) {
 		NotifyUpdateUI();
 		needUpdateUI = false;
@@ -1009,7 +1008,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	}
 
 	if (paintState == paintAbandoned) {
-		// Either NotifyStyleNeeded or NotifyUpdateUI noticed that painting is needed
+		// Either styling or NotifyUpdateUI noticed that painting is needed
 		// outside the current painting rectangle
 		//Platform::DebugPrintf("Abandoning paint\n");
 		return;
@@ -1212,10 +1211,9 @@ long Editor::FormatRange(bool draw, FORMATRANGE *pfr) {
 	if (linePrintLast < pdoc->LinesTotal())
 		endPosPrint = pdoc->LineStart(linePrintLast + 1);
 
-	if (endPosPrint > pdoc->GetEndStyled()) {
-		// Notify container to do some more styling
-		NotifyStyleNeeded(endPosPrint);
-	}
+	// Ensure we are styled to where we are formatting.
+	pdoc->EnsureStyledTo(endPosPrint);
+
 	int xStart = vsPrint.fixedColumnWidth + pfr->rc.left + lineNumberWidth;
 	int ypos = pfr->rc.top;
 	int line = linePrintStart;
@@ -1434,6 +1432,10 @@ void Editor::NotifyStyleNeeded(int endStyleNeeded) {
 	scn.nmhdr.code = SCN_STYLENEEDED;
 	scn.position = endStyleNeeded;
 	NotifyParent(scn);
+}
+
+void Editor::NotifyStyleNeeded(Document*, void *, int endStyleNeeded) {
+	NotifyStyleNeeded(endStyleNeeded);
 }
 
 void Editor::NotifyChar(char ch) {
@@ -1903,6 +1905,7 @@ int Editor::KeyCommand(UINT iMessage) {
 	case SCI_DELWORDRIGHT: {
 			int endWord = pdoc->NextWordStart(currentPos, 1);
 			pdoc->DeleteChars(currentPos, endWord - currentPos);
+			MovePositionTo(currentPos);
 		}
 		break;
 	}
@@ -2591,7 +2594,7 @@ void Editor::SetDocPointer(Document *document) {
 	pdoc->AddRef();
 	// Reset the contraction state to fully shown.
 	cs.Clear();
-	cs.InsertLines(0, pdoc->LinesTotal());
+	cs.InsertLines(0, pdoc->LinesTotal()-1);
 
 	pdoc->AddWatcher(this, 0);
 	Redraw();

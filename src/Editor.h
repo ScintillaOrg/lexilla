@@ -218,6 +218,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void NotifySavePoint(Document *document, void *userData, bool atSavePoint);
 	void NotifyModified(Document *document, DocModification mh, void *userData);
 	void NotifyDeleted(Document *document, void *userData);
+	void NotifyStyleNeeded(Document *doc, void *userData, int endPos);
+
 	
 #ifdef MACRO_SUPPORT
 	void NotifyMacroRecord(UINT iMessage, WPARAM wParam, LPARAM lParam);

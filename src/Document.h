@@ -160,6 +160,7 @@ public:
 	void SetStyleFor(int length, char style);
 	void SetStyles(int length, char *styles);
 	int GetEndStyled() { return endStyled; }
+	bool EnsureStyledTo(int pos);
 
 	int SetLineState(int line, int state) { return cb.SetLineState(line, state); }
 	int GetLineState(int line) { return cb.GetLineState(line); }
@@ -217,6 +218,7 @@ public:
 	virtual void NotifySavePoint(Document *doc, void *userData, bool atSavePoint) = 0;
 	virtual void NotifyModified(Document *doc, DocModification mh, void *userData) = 0;
 	virtual void NotifyDeleted(Document *doc, void *userData) = 0;
+	virtual void NotifyStyleNeeded(Document *doc, void *userData, int endPos) = 0;
 };
 
 #endif
