@@ -220,10 +220,10 @@ gint ScintillaGTK::Realize(GtkWidget *widget, ScintillaGTK *sciThis) {
 		GdkICAttributesType attrmask = GDK_IC_ALL_REQ;
 		GdkIMStyle style;
 		GdkIMStyle supported_style = (GdkIMStyle) (GDK_IM_PREEDIT_NONE | 
-													 GDK_IM_PREEDIT_NOTHING |
-													 GDK_IM_PREEDIT_POSITION |
-													 GDK_IM_STATUS_NONE |
-													 GDK_IM_STATUS_NOTHING);
+							 GDK_IM_PREEDIT_NOTHING |
+							 GDK_IM_PREEDIT_POSITION |
+							 GDK_IM_STATUS_NONE |
+							 GDK_IM_STATUS_NOTHING);
 		  
 		if (widget->style && widget->style->font->type != GDK_FONT_FONTSET)
 			supported_style = (GdkIMStyle) ((int) supported_style & ~GDK_IM_PREEDIT_POSITION);
@@ -280,7 +280,7 @@ gint ScintillaGTK::UnRealize(GtkWidget *, ScintillaGTK *sciThis) {
 		gdk_ic_attr_destroy (sciThis->ic_attr);
 		sciThis->ic_attr = NULL;
 	}
-  return FALSE;
+	return FALSE;
 }
 
 gint ScintillaGTK::CursorMoved(GtkWidget *widget, int xoffset, int yoffset, ScintillaGTK *sciThis) {
@@ -290,7 +290,7 @@ gint ScintillaGTK::CursorMoved(GtkWidget *widget, int xoffset, int yoffset, Scin
 	  sciThis->ic_attr->spot_location.y = yoffset;
 	  gdk_ic_set_attr (sciThis->ic, sciThis->ic_attr, GDK_IC_SPOT_LOCATION);
 	}
-  return FALSE;
+	return FALSE;
 }
 #endif
 
@@ -562,6 +562,11 @@ void ScintillaGTK::ScrollText(int linesToMove) {
 	int diff = vs.lineHeight * -linesToMove;
 	WindowID wi = wDraw.GetID();
 	GdkGC *gc = gdk_gc_new(wi->window);
+	GdkEvent* event;
+
+	// Set up gc so we get GraphicsExposures from gdk_draw_pixmap
+	//  which calls XCopyArea
+	gdk_gc_set_exposures(gc, TRUE);
 	
 	// Redraw exposed bit : scrolling upwards
 	if (diff > 0) {
@@ -570,9 +575,6 @@ void ScintillaGTK::ScrollText(int linesToMove) {
 			0, diff,
 			0, 0,
 			rc.Width(), rc.Height() - diff);
-		// RedrawRect(PRectangle(0,rc.Height() - diff -
-		//                           vs.lineHeight, rc.Width(), rc.Height()));
-		gdk_gc_unref(gc);
 		SyncPaint(PRectangle(0,rc.Height() - diff -
 			vs.lineHeight, rc.Width(), rc.Height()));
 		
@@ -583,10 +585,20 @@ void ScintillaGTK::ScrollText(int linesToMove) {
 			0, 0,
 			0, -diff,
 			rc.Width(), rc.Height() - diff);
-		gdk_gc_unref(gc);
-		// RedrawRect(PRectangle(0,0,rc.Width(),-diff + vs.lineHeight));
 		SyncPaint(PRectangle(0,0,rc.Width(),-diff + vs.lineHeight));
 	}
+	
+	// Look for any graphics expose
+	while ((event = gdk_event_get_graphics_expose(wi->window)) != NULL) {
+		gtk_widget_event(wi, event);
+		if (event->expose.count == 0) {
+			gdk_event_free(event);
+			break;
+		}
+		gdk_event_free(event);
+	}
+
+	gdk_gc_unref(gc);
 }
 
 
@@ -1030,11 +1042,11 @@ static int KeyTranslate(int keyIn) {
 		case GDK_KP_Add:	return SCK_ADD;
 		case GDK_KP_Subtract:	return SCK_SUBTRACT;
 		case GDK_KP_Divide:	return SCK_DIVIDE;
-		default:				return keyIn;
+		default:		return keyIn;
 	}
 }
 
-gint ScintillaGTK::KeyPress(GtkWidget *w, GdkEventKey *event, ScintillaGTK *sciThis) {
+gint ScintillaGTK::KeyPress(GtkWidget *, GdkEventKey *event, ScintillaGTK *sciThis) {
 	//Platform::DebugPrintf("SC-key: %d %x %x\n",event->keyval, event->state, GTK_WIDGET_FLAG(sciThis));
 	bool shift = event->state & GDK_SHIFT_MASK;
 	bool ctrl = event->state & GDK_CONTROL_MASK;
