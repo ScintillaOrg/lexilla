@@ -21,6 +21,9 @@
 #include "PlatformRes.h"
 #include "UniConversion.h"
 
+static CRITICAL_SECTION crPlatformLock;
+static HINSTANCE hinstPlatformRes = 0;
+
 Point Point::FromLong(long lpoint) {
 	return Point(static_cast<short>(LOWORD(lpoint)), static_cast<short>(HIWORD(lpoint)));
 }
@@ -169,25 +172,30 @@ void FontCached::Release() {
 }
 
 FontID FontCached::FindOrCreate(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_) {
+	FontID ret = 0;
+	::EnterCriticalSection(&crPlatformLock);
 	int hashFind = HashFont(faceName_, characterSet_, size_, bold_, italic_);
 	for (FontCached *cur=first; cur; cur=cur->next) {
 		if ((cur->hash == hashFind) &&
 			cur->SameAs(faceName_, characterSet_, size_, bold_, italic_)) {
 			cur->usage++;
-			return cur->id;
+			ret = cur->id;
 		}
 	}
-	FontCached *fc = new FontCached(faceName_, characterSet_, size_, bold_, italic_);
-	if (fc) {
-		fc->next = first;
-		first = fc;
-		return fc->id;
-	} else {
-		return 0;
+	if (ret == 0) {
+		FontCached *fc = new FontCached(faceName_, characterSet_, size_, bold_, italic_);
+		if (fc) {
+			fc->next = first;
+			first = fc;
+			ret = fc->id;
+		}
 	}
+	::LeaveCriticalSection(&crPlatformLock);
+	return ret;
 }
 
 void FontCached::ReleaseId(FontID id_) {
+	::EnterCriticalSection(&crPlatformLock);
 	FontCached **pcur=&first;
 	for (FontCached *cur=first; cur; cur=cur->next) {
 		if (cur->id == id_) {
@@ -198,10 +206,11 @@ void FontCached::ReleaseId(FontID id_) {
 				cur->next = 0;
 				delete cur;
 			}
-			return;
+			break;
 		}
 		pcur=&cur->next;
 	}
+	::LeaveCriticalSection(&crPlatformLock);
 }
 
 Font::Font() {
@@ -716,8 +725,6 @@ void Window::SetFont(Font &font) {
 		reinterpret_cast<WPARAM>(font.GetID()), 0);
 }
 
-HINSTANCE hinstPlatformRes = 0;
-
 void Window::SetCursor(Cursor curs) {
 	switch (curs) {
 	case cursorText:
@@ -1023,4 +1030,13 @@ int Platform::Clamp(int val, int minVal, int maxVal) {
 	if (val < minVal)
 		val = minVal;
 	return val;
+}
+
+void Platform_Initialise(void *hInstance) {
+	::InitializeCriticalSection(&crPlatformLock);
+	hinstPlatformRes = reinterpret_cast<HINSTANCE>(hInstance);
+}
+
+void Platform_Finalise() {
+	::DeleteCriticalSection(&crPlatformLock);
 }

@@ -1916,12 +1916,19 @@ sptr_t PASCAL ScintillaWin::SWndProc(
 	}
 }
 
-extern HINSTANCE hinstPlatformRes;
+extern void Platform_Initialise(void *hInstance);
+extern void Platform_Finalise();
 
-// This function is externally visible so it can be called from container when building statically
+// This function is externally visible so it can be called from container when building statically.
+// Must be called once only.
 void Scintilla_RegisterClasses(void *hInstance) {
-	hinstPlatformRes = reinterpret_cast<HINSTANCE>(hInstance);
-	ScintillaWin::Register(hinstPlatformRes);
+	Platform_Initialise(hInstance);
+	ScintillaWin::Register(reinterpret_cast<HINSTANCE>(hInstance));
+}
+
+// This function is externally visible so it can be called from container when building statically.
+void Scintilla_ReleaseResources() {
+	Platform_Finalise();
 }
 
 #ifndef STATIC_BUILD
@@ -1929,6 +1936,8 @@ extern "C" int APIENTRY DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID) {
 	//Platform::DebugPrintf("Scintilla::DllMain %d %d\n", hInstance, dwReason);
 	if (dwReason == DLL_PROCESS_ATTACH) {
 		Scintilla_RegisterClasses(hInstance);
+	} else if (dwReason == DLL_PROCESS_DETACH) {
+		Scintilla_ReleaseResources();
 	}
 	return TRUE;
 }
