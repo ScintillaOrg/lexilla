@@ -1623,7 +1623,7 @@ static void ColouriseHTMLPiece(StyleContext &sc, WordList *keywordlists[]) {
 			sc.SetState(SCE_H_DEFAULT);
 		}
 	} else if (sc.state == SCE_H_TAGUNKNOWN) {
-		if (!ishtmlwordchar(sc.ch) && !((sc.ch == '/') && (sc.chPrev == '<')) && sc.ch != '[') {
+		if (!ishtmlwordchar(static_cast<char>(sc.ch)) && !((sc.ch == '/') && (sc.chPrev == '<')) && sc.ch != '[') {
 			char s[100];
 			sc.GetCurrentLowered(s, sizeof(s));
 			if (s[1] == '/') {
@@ -1646,7 +1646,7 @@ static void ColouriseHTMLPiece(StyleContext &sc, WordList *keywordlists[]) {
 			}
 		}
 	} else if (sc.state == SCE_H_ATTRIBUTE) {
-		if (!ishtmlwordchar(sc.ch)) {
+		if (!ishtmlwordchar(static_cast<char>(sc.ch))) {
 			char s[100];
 			sc.GetCurrentLowered(s, sizeof(s));
 			if (!keywordsTags.InList(s)) {
@@ -1698,7 +1698,7 @@ static void ColouriseHTMLPiece(StyleContext &sc, WordList *keywordlists[]) {
 		} else if (sc.ch == '>') {
 			sc.SetState(SCE_H_TAG);
 			sc.ForwardSetState(SCE_H_DEFAULT);
-		} else if (ishtmlwordchar(sc.ch)) {
+		} else if (ishtmlwordchar(static_cast<char>(sc.ch))) {
 			sc.SetState(SCE_H_ATTRIBUTE);
 		}
 	}
