@@ -5744,6 +5744,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		}
 		break;
 
+	case SCI_SETCHARSDEFAULT:
+		pdoc->SetDefaultCharClasses();
+		break;
+
 	case SCI_GETLENGTH:
 		return pdoc->Length();
 

@@ -1541,6 +1541,9 @@ fun void WordRightEndExtend=2442(,)
 # Set the set of characters making up whitespace for when moving or selecting by word.
 set void SetWhitespaceChars=2443(, string characters)
 
+# Reset the set of characters for whitespace and word characters to the defaults.
+fun void SetCharsDefault=2444(,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 

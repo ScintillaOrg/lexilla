@@ -1119,11 +1119,9 @@ void Document::ChangeCase(Range r, bool makeUpperCase) {
 	}
 }
 
-
 void Document::SetDefaultCharClasses() {
-	int ch;
 	// Initialize all char classes to default values
-	for (ch = 0; ch < 256; ch++) {
+	for (int ch = 0; ch < 256; ch++) {
 		if (ch == '\r' || ch == '\n')
 			charClass[ch] = ccNewLine;
 		else if (ch < 0x20 || ch == ' ')
@@ -1136,56 +1134,14 @@ void Document::SetDefaultCharClasses() {
 }
 
 void Document::SetCharClasses(unsigned char *chars, charClassification newCharClass) {
-	int ch;
-	// The old code always reset all chars to their default charClass and then applied the new charClass 
-	// to a specific set of chars, so the most reasonable way to honour the old promise is to reset all chars
-	// that currently are of class newCharClass, and then apply the newCharClass to any specified chars.  Remember,
-	// the point is to allow the caller to explicitly define all chars which are to be of class newCharClass.
-	// The only other tricky thing is that the old promise was that if the user passes in NULL for the chars
-	// parameter, we are supposed to reset all chars that default to newCharClass, which is not the
-	// same as resetting the char class of any chars that are currently of newCharClass (user might have altered
-	// some char classes from their default class).
-	
-	// If all of that seems a little complex, well, it is.  If we could break the old promise and make some
-	// simplifying assumptions, this would all be waaaaay simpler.  This way though, Scintilla will do the right
-	// thing if lots of changes of charClass are applied during the lifetime of the Document object (not very likely,
-	// but as long as I'm doing this, might as well get it right).
-	
-	// So, first reset the char class of any chars that are currently of the class newCharClass
-	for (ch = 0; ch < 256; ch++) {
-		if (charClass[ch] == newCharClass) {
-			if (ch == '\r' || ch == '\n')
-				charClass[ch] = ccNewLine;
-			else if (ch < 0x20 || ch == ' ')
-				charClass[ch] = ccSpace;
-			else if (ch >= 0x80 || isalnum(ch) || ch == '_')
-				charClass[ch] = ccWord;
-			else
-				charClass[ch] = ccPunctuation;
-		}
-	}
-	
-	// Next, apply the newCharClass to the specifed chars
+	// Apply the newCharClass to the specifed chars
 	if (chars) {
 		while (*chars) {
 			charClass[*chars] = newCharClass;
 			chars++;
 		}
-	} else {
-		// If user passed NULL for chars, reinitialize only the specified class of chars
-		for (ch = 0; ch < 256; ch++) {
-			if ((ch == '\r' || ch == '\n') && newCharClass == ccNewLine)
-				charClass[ch] = ccNewLine;
-			else if ((ch < 0x20 || ch == ' ') && newCharClass == ccSpace)
-				charClass[ch] = ccSpace;
-			else if ((ch >= 0x80 || isalnum(ch) || ch == '_') && newCharClass == ccWord)
-				charClass[ch] = ccWord;
-			else if (newCharClass == ccPunctuation)
-				charClass[ch] = ccPunctuation;
-		}
 	}
 }
-
 
 void Document::SetStylingBits(int bits) {
 	stylingBits = bits;
