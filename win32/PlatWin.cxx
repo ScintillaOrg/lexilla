@@ -781,8 +781,9 @@ void Window::SetPositionRelative(PRectangle rc, Window w) {
 }
 
 PRectangle Window::GetClientPosition() {
-	RECT rc;
-	::GetClientRect(reinterpret_cast<HWND>(id), &rc);
+	RECT rc={0,0,0,0};
+	if (id)
+		::GetClientRect(reinterpret_cast<HWND>(id), &rc);
 	return  PRectangle(rc.left, rc.top, rc.right, rc.bottom);
 }
 
