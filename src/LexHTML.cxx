@@ -380,11 +380,9 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	if (lineCurrent > 0) {
 		lineState = styler.GetLineState(lineCurrent);
 	} else {
-		lineState = eScriptJS << 8;	// Default client script is JavaScript
-		if (styler.GetPropertyInt("asp.default.to.vbs"))
-			lineState |= eScriptVBS << 4;
-		else	// Default ASP script to JavaScript for compatibbility with old versions
-			lineState |= eScriptJS << 4;
+		// Default client and ASP scripting language is JavaScript
+		lineState = eScriptJS << 8;	
+		lineState |= styler.GetPropertyInt("asp.default.language", eScriptJS) << 4;
 	}
 	int inScriptType  = (lineState >> 0) & 0x03; // 2 bits of scripting type
 	bool tagOpened    = (lineState >> 2) & 0x01; // 1 bit to know if we are in an opened tag
