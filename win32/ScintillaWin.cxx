@@ -379,8 +379,8 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 	AutoSurface surfaceWindow(pps->hdc, IsUnicodeMode());
 	if (surfaceWindow) {
 		rcPaint = PRectangle(pps->rcPaint.left, pps->rcPaint.top, pps->rcPaint.right, pps->rcPaint.bottom);
-		PRectangle rcText = GetTextRectangle();
-		paintingAllText = rcPaint.Contains(rcText);
+		PRectangle rcClient = GetClientRectangle();
+		paintingAllText = rcPaint.Contains(rcClient);
 		if (paintingAllText) {
 			//Platform::DebugPrintf("Performing full text paint\n");
 		} else {
@@ -1446,6 +1446,7 @@ void ScintillaWin::ImeEndComposition() {
 }
 
 void ScintillaWin::AddCharBytes(char b0, char b1) {
+
 	int inputCodePage = InputCodePage();
 	if (inputCodePage && IsUnicodeMode()) {
 		char utfval[4]="\0\0\0";
@@ -1593,7 +1594,7 @@ void ScintillaWin::RealizeWindowPalette(bool inBackGround) {
  */
 void ScintillaWin::FullPaint() {
 	paintState = painting;
-	rcPaint = GetTextRectangle();
+	rcPaint = GetClientRectangle();
 	paintingAllText = true;
 	HDC hdc = ::GetDC(MainHWND());
 	AutoSurface surfaceWindow(hdc, IsUnicodeMode());
