@@ -380,7 +380,7 @@ Editor::Editor() {
 	wrapWidth = LineLayout::wrapWidthInfinite;
 	docLineLastWrapped = -1;
 	docLastLineToWrap = -1;
-	backgroundWrapEnabled = false;
+	backgroundWrapEnabled = true;
 
 	hsStart = -1;
 	hsEnd = -1;
