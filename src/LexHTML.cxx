@@ -341,7 +341,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	int scriptLanguage = ScriptOfState(state);
 
 	bool fold = styler.GetPropertyInt("fold");
-	bool wrapFold = styler.GetPropertyInt("fold.wrap",0);
+	bool foldCompact = styler.GetPropertyInt("fold.compact",1);
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
 	int visibleChars;
@@ -369,7 +369,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			continue;
 		}
 
-		if ((!isspacechar(ch) || wrapFold) && fold)
+		if ((!isspacechar(ch) || !foldCompact) && fold)
 			visibleChars++;
 
 		// decide what is the current state to print (depending of the script tag)
