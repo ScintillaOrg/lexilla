@@ -543,8 +543,8 @@ bool Window::HasFocus() {
 }
 
 PRectangle Window::GetPosition() {
-	// Before any size allocated pretend its 100 wide so not scrolled
-	PRectangle rc(0, 0, 100, 100);
+	// Before any size allocated pretend its 1000 wide so not scrolled
+	PRectangle rc(0, 0, 1000, 1000);
 	if (id) {
 		rc.left = id->allocation.x;
 		rc.top = id->allocation.y;
