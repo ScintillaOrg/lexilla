@@ -155,6 +155,9 @@
       <li>
 	Jan Hercek
       </li>
+      <li>
+	Richard Pecl
+      </li>
     </ul>
     <p>
        Sponsorship
@@ -181,8 +184,8 @@
         Released on 29 January 2001.
       </li>
       <li>
-        Rewritten and simplified widget code for the GTK+ version to enhance 
-        solidity and make more fully compliant with platform norms. This includes more 
+        Rewritten and simplified widget code for the GTK+ version to enhance
+        solidity and make more fully compliant with platform norms. This includes more
         normal handling of keystrokes so they are forwarded to containers correctly.
       </li>
       <li>
@@ -204,7 +207,7 @@
         Make file lexer has variable, preprocessor, and operator states.
       </li>
       <li>
-        Wider area given to an italics character that is at the end of a line to prevent it 
+        Wider area given to an italics character that is at the end of a line to prevent it
 	being cut off.
       </li>
       <li>
@@ -221,7 +224,7 @@
         Undo batching changed so that a paste followed by typing creates two undo actions..
       </li>
       <li>
-        A "visibility policy" setting for Scintilla determines which range of lines are displayed 
+        A "visibility policy" setting for Scintilla determines which range of lines are displayed
 	when a particular line is moved to. Also exposed as a property in SciTE.
       </li>
       <li>
@@ -258,14 +261,14 @@
         Default selection colour changed to be visible on low colour displays.
       </li>
       <li>
-        Fixed problems with automatically reloading changed documents in SciTE on 
+        Fixed problems with automatically reloading changed documents in SciTE on
         Windows.
       </li>
       <li>
         Fixed problem with uppercase file extensions in SciTE.
       </li>
       <li>
-        Fixed some problems when using characters >= 128, some of which werre being 
+        Fixed some problems when using characters >= 128, some of which werre being
         incorrectly treated as spaces.
       </li>
       <li>
@@ -293,7 +296,7 @@
       </li>
       <li>
         SciTE for GTK+ can check for another instance of SciTE
-	editing a file and switch to it rather than open a second instance 
+	editing a file and switch to it rather than open a second instance
 	on one file.
       </li>
       <li>
@@ -314,8 +317,8 @@
         Better scrolling performance on GTK+.
       </li>
       <li>
-        Fixed problem where rectangles with negative coordinates were 
-	invalidated leading to trouble with platforms that use 
+        Fixed problem where rectangles with negative coordinates were
+	invalidated leading to trouble with platforms that use
 	unsigned coordinates.
       </li>
       <li>
@@ -340,17 +343,17 @@
         Released on 6 November 2000.
       </li>
       <li>
-        XIM support for the GTK+ version of Scintilla ensures that more non-English 
+        XIM support for the GTK+ version of Scintilla ensures that more non-English
         characters can be typed.
       </li>
       <li>
-        Caret may be 1, 2, or 3 pixels wide. 
+        Caret may be 1, 2, or 3 pixels wide.
       </li>
       <li>
         Cursor may be switched to wait image during lengthy processing.
       </li>
       <li>
-        Scintilla's internal focus flag is exposed for clients where focus is handled in 
+        Scintilla's internal focus flag is exposed for clients where focus is handled in
         complex ways.
       </li>
       <li>
@@ -359,17 +362,17 @@
         so as to be ready for when it does.
       </li>
       <li>
-        Context sensitive help in SciTE. 
+        Context sensitive help in SciTE.
       </li>
       <li>
-        CurrentWord property available in SciTE holding the value of the word the 
+        CurrentWord property available in SciTE holding the value of the word the
         caret is within or near.
       </li>
       <li>
         Apache CONF file lexer.
       </li>
       <li>
-        Changes to Python lexer to allow 'as' as a context sensitive keyword and the 
+        Changes to Python lexer to allow 'as' as a context sensitive keyword and the
         string forms starting with u, r, and ur to be recognised.
       </li>
       <li>
@@ -388,7 +391,7 @@
       </li>
       <li>
         SciTE can be set to automatically determine the line ending type from the contents of a
-        file when it is opened. 
+        file when it is opened.
       </li>
       <li>
         Dialogs in GTK+ version of SciTE made more modal and have accelerator keys.
@@ -424,7 +427,7 @@
         Bug fixed in autocompletion where user backspaces into existing text.
       </li>
       <li>
-        Bugs fixed in opening files and ensuring they are saved before running. 
+        Bugs fixed in opening files and ensuring they are saved before running.
         A case bug also fixed here.
       </li>
     </ul>
@@ -457,7 +460,7 @@
         Style setting to make text invisible.
       </li>
       <li>
-        SciTE has an extensibility interface that can be used to implement features such as 
+        SciTE has an extensibility interface that can be used to implement features such as
         a scripting language or remote control. An example use of this is the extlua module
         available from CVS which allows SciTE to be scripted in Lua.
       </li>
@@ -489,7 +492,7 @@
         case insensitive.
       </li>
       <li>
-        Autocompletion can be set to automatically choose the only 
+        Autocompletion can be set to automatically choose the only
 	element in a single element list.
       </li>
       <li>
@@ -497,7 +500,7 @@
 	can be set.
       </li>
       <li>
-        SciTE command to display calltip - useful when dropped because of 
+        SciTE command to display calltip - useful when dropped because of
 	editing.
       </li>
       <li>
@@ -508,7 +511,7 @@
 	to Export as HTML and is located on the Export sub menu.
       </li>
       <li>
-        SciTE command "Complete Word" searches document for any 
+        SciTE command "Complete Word" searches document for any
 	words starting with characters before caret.
       </li>
       <li>
@@ -516,18 +519,18 @@
 	as HTML or RTF.
       </li>
       <li>
-        SciTE "character.set" option for choosing the character 
+        SciTE "character.set" option for choosing the character
 	set for all fonts.
       </li>
       <li>
         SciTE has a "Toggle all folds" command.
       </li>
       <li>
-        The makefiles have changed. The makefile_vc and 
-	makefile_bor files in scintilla/win32 and scite/win32 have been 
-	merged into scintilla/win32/scintilla.mak and scite/win32/scite.mak. 
-	DEBUG may be defined for all make files and this will turn on 
-	assertions and for some make files will choose other debugging 
+        The makefiles have changed. The makefile_vc and
+	makefile_bor files in scintilla/win32 and scite/win32 have been
+	merged into scintilla/win32/scintilla.mak and scite/win32/scite.mak.
+	DEBUG may be defined for all make files and this will turn on
+	assertions and for some make files will choose other debugging
 	options.
       </li>
       <li>
@@ -536,7 +539,7 @@
 	 all of Scintilla and SciTE into one executable.
       </li>
       <li>
-         The size of the SciTE output window can be set with the 
+         The size of the SciTE output window can be set with the
 	 output.horizontal.size and output.vertical.size settings.
       </li>
       <li>
@@ -566,14 +569,14 @@
         Much better support for PHP which is now an integral part of the HTML support.
       </li>
       <li>
-        Start replacement of Windows-specific APIs with cross platform APIs. 
+        Start replacement of Windows-specific APIs with cross platform APIs.
         In 1.30, the new APIs are introduced but the old APIs are still available.
-        For the GTK+ version, may have to include "WinDefs.h" explicitly to 
+        For the GTK+ version, may have to include "WinDefs.h" explicitly to
         use the old APIs.
       </li>
       <li>
         "if" and "import" statements in SciTE properties files allows modularisation into
-        language-specific properties files and choices based upon platform. 
+        language-specific properties files and choices based upon platform.
         This means that SciTE is delivered with 9 language-specific properties files
         as well as the standard SciTEGlobal.properties file.
       </li>
@@ -584,8 +587,8 @@
         "/p" option in SciTE on Windows for printing a file and then exiting.
       </li>
       <li>
-        Options for printing with inverted brightness (when the screen is set to use 
-        a dark background) and to force black on white printing. 
+        Options for printing with inverted brightness (when the screen is set to use
+        a dark background) and to force black on white printing.
       </li>
       <li>
         Option for printing magnified or miniaturised from screen settings.
@@ -639,7 +642,7 @@
          Fixes to installation on GTK+/Linux. User properties file on GTK+ has a dot at front of name:
          .SciTEUser.properties. Global properties file location configurable at compile time
          defaulting to $prefix/share/scite. $prefix determined from Gnome if present else its
-         /usr/local and can be overridden by installer. Gnome menu integration performed in 
+         /usr/local and can be overridden by installer. Gnome menu integration performed in
          make install if Gnome present.
       </li>
     </ul>
@@ -655,11 +658,11 @@
 	 in indentation.
       </li>
       <li>
-        Set methods have corresponding gets for UndoCollection, BufferedDraw, 
+        Set methods have corresponding gets for UndoCollection, BufferedDraw,
 	CodePage, UsePalette, ReadOnly, CaretFore, and ModEventMask.
       </li>
       <li>
-        Caret is continuously on rather than blinking while typing or holding down 
+        Caret is continuously on rather than blinking while typing or holding down
 	delete or backspace. And is now always shown if non blinking when focused on GTK+.
       </li>
       <li>
@@ -690,17 +693,17 @@
 	the characters that are displayed by the style.
       </li>
       <li>
-         In the C++ lexer, lexing of preprocessor source may either treat it all as being in 
+         In the C++ lexer, lexing of preprocessor source may either treat it all as being in
 	 the preprocessor class or only the initial # and preprocessor command word as
 	 being in the preprocessor class.
       </li>
       <li>
-        Scintilla provides SCI_CREATEDOCUMENT, SCI_ADDREFDOCUMENT, and 
+        Scintilla provides SCI_CREATEDOCUMENT, SCI_ADDREFDOCUMENT, and
 	SCI_RELEASEDOCUMENT to make it easier for a container to deal with multiple
 	documents.
       </li>
       <li>
-        GTK+ specific definitions in Scintilla.h were removed to ScintillaWidget.h. All GTK+ clients will need to 
+        GTK+ specific definitions in Scintilla.h were removed to ScintillaWidget.h. All GTK+ clients will need to
 	#include "ScintillaWidget.h".
       </li>
       <li>
@@ -719,9 +722,9 @@
         File dialogs enlarged on GTK+.
       </li>
       <li>
-         Match Brace command bound to Ctrl+E on both platforms with Ctrl+] a synonym on Windows. 
-         Ctrl+Shift+E is select to matching brace. Brace matching tries to match to either the inside or the 
-         outside, depending on whether the cursor is inside or outside the braces initially. 
+         Match Brace command bound to Ctrl+E on both platforms with Ctrl+] a synonym on Windows.
+         Ctrl+Shift+E is select to matching brace. Brace matching tries to match to either the inside or the
+         outside, depending on whether the cursor is inside or outside the braces initially.
 	View End of Line bound to Ctrl+Shift+O.
       </li>
       <li>
@@ -777,7 +780,7 @@
         Property to remove trailing spaces when saving file.
       </li>
       <li>
-        On Windows, changed font size calculation to be more compatible with 
+        On Windows, changed font size calculation to be more compatible with
 	other applications.
       </li>
       <li>
@@ -785,7 +788,7 @@
 	SCITE_HOME environment variable if it is set. This allows hiding in a dot directory.
       </li>
       <li>
-        Keyword lists in SciTE updated for Javascript to include those destined to be used in 
+        Keyword lists in SciTE updated for Javascript to include those destined to be used in
 	the future. IDL includes XPIDL keyords as well as MSIDL keywords.
       </li>
       <li>
@@ -821,7 +824,7 @@
         Added lexing of IDL based on C++ lexer with extra UUID lexical class.
       </li>
       <li>
-        Functions and associated keys for Line Delete, Line Cut, Line Transpose, 
+        Functions and associated keys for Line Delete, Line Cut, Line Transpose,
 	Selection Lower Case and Sleection Upper Case.
       </li>
       <li>
@@ -867,7 +870,7 @@
         Very simple Windows-only demonstration application DMApp is available from cvs as dmapp.
       </li>
       <li>
-        Lexing functionality may optionally be included in Scintilla rather than be provided by 
+        Lexing functionality may optionally be included in Scintilla rather than be provided by
         the container.
       </li>
       <li>
@@ -878,7 +881,7 @@
         On Windows, the SciLexer.DLL extends Scintilla.DLL with the standard lexers.
       </li>
       <li>
-        Enhanced HTML lexer styles embedded VBScript and Python. 
+        Enhanced HTML lexer styles embedded VBScript and Python.
 	ASP segments are styled and ASP scripts in Javascript, VBScript and Python are styled.
       </li>
       <li>
@@ -926,8 +929,8 @@
         Released on 27 February 2000.
       </li>
       <li>
-        wxWindows platform defined. 
-	Implementation for wxWindows will be available separately 
+        wxWindows platform defined.
+	Implementation for wxWindows will be available separately
 	from main Scintilla distribution.
       </li>
       <li>
@@ -940,14 +943,14 @@
         Optional macro recording support.
       </li>
       <li>
-        User properties file (SciTEUser.properties) allows for customisation by the user 
+        User properties file (SciTEUser.properties) allows for customisation by the user
 	that is not overwritten with each installation of SciTE.
       </li>
       <li>
         Python lexer detects and highlights inconsistent indentation.
       </li>
       <li>
-        Margin API made more orthogonal.SCI_SETMARGINWIDTH and SCI_SETLINENUMBERWIDTH 
+        Margin API made more orthogonal.SCI_SETMARGINWIDTH and SCI_SETLINENUMBERWIDTH
         are deprecated in favour of this new API.
       </li>
       <li>
@@ -972,7 +975,7 @@
         Container is notified when Scintilla gains or loses focus.
       </li>
       <li>
-        SciTE handles focus in a more standard way and applies the main 
+        SciTE handles focus in a more standard way and applies the main
 	edit commands to the focused pane.
       </li>
       <li>
@@ -994,7 +997,7 @@
         SciTE understands format of diagnostic messages from WScript.
       </li>
       <li>
-        SciTE remembers top line of window for each file in MRU list so switching to a recent file 
+        SciTE remembers top line of window for each file in MRU list so switching to a recent file
 	is more likeley to show the same text as when the file was previously visible.
       </li>
       <li>
