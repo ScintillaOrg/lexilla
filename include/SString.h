@@ -170,6 +170,12 @@ public:
 	bool operator!=(const char *sother) const {
 		return !operator==(sother);
 	}
+	bool contains(char ch) {
+		if (s && *s)
+			return strchr(s, ch) != 0;
+		else
+			return false;
+	}
 	const char *c_str() const {
 		if (s)
 			return s;
