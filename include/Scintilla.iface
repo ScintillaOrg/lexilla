@@ -229,6 +229,9 @@ val SC_MARK_CIRCLEPLUSCONNECTED=19
 val SC_MARK_CIRCLEMINUS=20
 val SC_MARK_CIRCLEMINUSCONNECTED=21
 
+# Invisible mark that only sets the line background color
+val SC_MARK_BACKGROUND=22
+
 val SC_MARK_CHARACTER=10000
 
 # Markers used for outlining column
@@ -239,9 +242,6 @@ val SC_MARKNUM_FOLDERTAIL=28
 val SC_MARKNUM_FOLDERSUB=29
 val SC_MARKNUM_FOLDER=30
 val SC_MARKNUM_FOLDEROPEN=31
-
-# Invisible mark that only sets the line background color
-val SC_MARK_BACKGROUND=32
 
 # Set the symbol used for a particular marker number.
 fun void MarkerDefine=2040(int markerNumber, int markerSymbol)
