@@ -5,10 +5,10 @@
 // Copyright 2001 Simon Steele <ss@pnotepad.org>, portions copyright Neil Hodgson.
 // The License.txt file describes the conditions under which this software may be distributed.
 
-#include <stdlib.h> 
-#include <stdio.h> 
+#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
-#include <ctype.h> 
+#include <ctype.h>
 
 #include "Platform.h"
 
@@ -63,8 +63,8 @@ void ExternalLexerModule::Lex(unsigned int startPos, int lengthDoc, int initStyl
 
 	char **kwds = WordListsToStrings(keywordlists);
 	char *ps = styler.GetProperties();
-	
-	// The accessor passed in is always a DocumentAccessor so this cast and the subsequent 
+
+	// The accessor passed in is always a DocumentAccessor so this cast and the subsequent
 	// access will work. Can not use the stricter dynamic_cast as that requires RTTI.
 	DocumentAccessor &da = static_cast<DocumentAccessor &>(styler);
 	WindowID wID = da.GetWindow();
@@ -82,8 +82,8 @@ void ExternalLexerModule::Fold(unsigned int startPos, int lengthDoc, int initSty
 
 	char **kwds = WordListsToStrings(keywordlists);
 	char *ps = styler.GetProperties();
-	
-	// The accessor passed in is always a DocumentAccessor so this cast and the subsequent 
+
+	// The accessor passed in is always a DocumentAccessor so this cast and the subsequent
 	// access will work. Can not use the stricter dynamic_cast as that requires RTTI.
 	DocumentAccessor &da = static_cast<DocumentAccessor &>(styler);
 	WindowID wID = da.GetWindow();
