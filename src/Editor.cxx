@@ -2908,19 +2908,20 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		//		EM_GETPUNCTUATION
 		//		EM_SETPUNCTUATION
 		//		EM_GETTHUMB
+		//		EM_SETTARGETDEVICE
 
 		// Not supported but should be:
 		//		EM_GETEVENTMASK
 		//		EM_SETEVENTMASK
 		//		For printing:
 		//			EM_DISPLAYBAND
-		//			EM_SETTARGETDEVICE
 
 	case EM_CANUNDO:
 		return pdoc->CanUndo() ? TRUE : FALSE;
 
 	case EM_UNDO:
 		Undo();
+		SetLastXChosen();
 		break;
 
 	case EM_EMPTYUNDOBUFFER:
@@ -2955,12 +2956,6 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 
 	case EM_GETMODIFY:
 		return !pdoc->IsSavePoint();
-
-	case EM_SETMODIFY:
-		// Not really supported now that there is the save point stuff
-		//pdoc->isModified = wParam;
-		//return pdoc->isModified;
-		return false;
 
 	case EM_GETRECT:
 		if (lParam == 0)
@@ -3024,22 +3019,6 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 			}
 			return iChar;
 		}
-
-	case EM_GETWORDBREAKPROC:
-		return 0;
-
-	case EM_SETWORDBREAKPROC:
-		break;
-
-	case EM_SETLIMITTEXT:
-		// wParam holds the number of characters control should be limited to
-		break;
-
-	case EM_GETLIMITTEXT:
-		return 0xffffffff;
-
-	case EM_GETOLEINTERFACE:
-		return 0;
 
 	case EM_LINEFROMCHAR:
 		if (static_cast<int>(wParam) < 0)
@@ -3109,9 +3088,6 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	case EM_SETREADONLY:
 		pdoc->SetReadOnly(wParam);
 		return TRUE;
-
-	case EM_SETRECT:
-		break;
 
 	case EM_CANPASTE:
 		return 1;
