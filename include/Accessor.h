@@ -24,7 +24,8 @@ protected:
 	virtual bool InternalIsLeadByte(char ch)=0;
 	virtual void Fill(int position)=0;
 public:
-	Accessor() : startPos(extremePosition), endPos(0), codePage(0) { }
+	Accessor() : startPos(extremePosition), endPos(0), codePage(0) {}
+	virtual ~Accessor() {}
 	char operator[](int position) {
 		if (position < startPos || position >= endPos) {
 			Fill(position);

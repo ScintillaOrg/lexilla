@@ -14,6 +14,9 @@
 #include "WindowAccessor.h"
 #include "Scintilla.h"
 
+WindowAccessor::~WindowAccessor() {
+}
+
 bool WindowAccessor::InternalIsLeadByte(char ch) {
 #if PLAT_GTK
 	// TODO: support DBCS under GTK+

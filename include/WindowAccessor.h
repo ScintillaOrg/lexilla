@@ -20,6 +20,7 @@ public:
 	WindowAccessor(WindowID id_, PropSet &props_) : 
 		id(id_), props(props_), lenDoc(-1), validLen(0), chFlags(0) {
 	}
+	~WindowAccessor();
 	char StyleAt(int position);
 	int GetLine(int position);
 	int LineStart(int line);

@@ -17,6 +17,9 @@
 #include "Scintilla.h"
 #include "Document.h"
 
+DocumentAccessor::~DocumentAccessor() {
+}
+
 bool DocumentAccessor::InternalIsLeadByte(char ch) {
 #if PLAT_GTK
 	// TODO: support DBCS under GTK+

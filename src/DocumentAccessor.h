@@ -22,6 +22,7 @@ public:
 	DocumentAccessor(Document *pdoc_, PropSet &props_) : 
 		pdoc(pdoc_), props(props_), lenDoc(-1), validLen(0), chFlags(0) {
 	}
+	~DocumentAccessor();
 	char StyleAt(int position);
 	int GetLine(int position);
 	int LineStart(int line);
