@@ -394,7 +394,7 @@ bool Document::InsertStyledString(int position, char *s, int insertLength) {
 			    DocModification(
 			        SC_MOD_BEFOREINSERT | SC_PERFORMED_USER,
 			        position / 2, insertLength / 2,
-			        0, 0));
+			        0, s));
 			int prevLinesTotal = LinesTotal();
 			bool startSavePoint = cb.IsSavePoint();
 			const char *text = cb.InsertString(position, s, insertLength);
