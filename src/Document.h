@@ -37,11 +37,21 @@ public:
 		return (start != invalidPosition) && (end != invalidPosition);
 	}
 
+	// Is the position within the range?
 	bool Contains(Position pos) const {
 		if (start < end) {
 			return (pos >= start && pos <= end);
 		} else {
 			return (pos <= start && pos >= end);
+		}
+	}
+
+	// Is the character after pos within the range?
+	bool ContainsCharacter(Position pos) const {
+		if (start < end) {
+			return (pos >= start && pos < end);
+		} else {
+			return (pos < start && pos >= end);
 		}
 	}
 

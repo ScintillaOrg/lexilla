@@ -106,6 +106,44 @@ void LineLayout::SetLineStart(int line, int start) {
 	lineStarts[line] = start;
 }
 
+void LineLayout::SetBracesHighlight(Range rangeLine, Position braces[], 
+	char bracesMatchStyle, int xHighlight) {
+	if (rangeLine.ContainsCharacter(braces[0])) {
+		int braceOffset = braces[0] - rangeLine.start;
+		if (braceOffset < numCharsInLine) {
+			bracePreviousStyles[0] = styles[braceOffset];
+			styles[braceOffset] = static_cast<char>(bracesMatchStyle);
+		}
+	}
+	if (rangeLine.ContainsCharacter(braces[1])) {
+		int braceOffset = braces[1] - rangeLine.start;
+		if (braceOffset < numCharsInLine) {
+			bracePreviousStyles[1] = styles[braceOffset];
+			styles[braceOffset] = static_cast<char>(bracesMatchStyle);
+		}
+	}
+	if ((braces[0] >= rangeLine.start && braces[1] <= rangeLine.end) ||
+		(braces[1] >= rangeLine.start && braces[0] <= rangeLine.end)) {
+		xHighlightGuide = xHighlight;
+	}
+}
+
+void LineLayout::RestoreBracesHighlight(Range rangeLine, Position braces[]) {
+	if (rangeLine.ContainsCharacter(braces[0])) {
+		int braceOffset = braces[0] - rangeLine.start;
+		if (braceOffset < numCharsInLine) {
+			styles[braceOffset] = bracePreviousStyles[0];
+		}
+	}
+	if (rangeLine.ContainsCharacter(braces[1])) {
+		int braceOffset = braces[1] - rangeLine.start;
+		if (braceOffset < numCharsInLine) {
+			styles[braceOffset] = bracePreviousStyles[1];
+		}
+	}
+	xHighlightGuide = 0;
+}
+
 LineLayoutCache::LineLayoutCache() : 
 	level(0), length(0), size(0), cache(0), 
 	allInvalidated(false), styleClock(-1) {
@@ -1855,34 +1893,22 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 					ll->containsCaret = false;
 				}
 	
-				int posLineStart = pdoc->LineStart(lineDoc);
-				int posLineEnd = pdoc->LineStart(lineDoc + 1);
-				//Platform::DebugPrintf("line %d %d - %d\n", visibleLine, posLineStart, posLineEnd);
-	
 				PRectangle rcLine = rcClient;
 				rcLine.top = ypos;
 				rcLine.bottom = ypos + vs.lineHeight;
-	
+
+				Range rangeLine(pdoc->LineStart(lineDoc), pdoc->LineStart(lineDoc + 1));
 				// Highlight the current braces if any
-				if ((braces[0] >= posLineStart) && (braces[0] < posLineEnd)) {
-					int braceOffset = braces[0] - posLineStart;
-					if (braceOffset < ll->numCharsInLine)
-						ll->styles[braceOffset] = static_cast<char>(bracesMatchStyle);
-				}
-				if ((braces[1] >= posLineStart) && (braces[1] < posLineEnd)) {
-					int braceOffset = braces[1] - posLineStart;
-					if (braceOffset < ll->numCharsInLine)
-						ll->styles[braceOffset] = static_cast<char>(bracesMatchStyle);
-				}
-				if ((braces[0] >= posLineStart && braces[1] <= posLineEnd) ||
-					(braces[1] >= posLineStart && braces[0] <= posLineEnd)) {
-					ll->xHighlightGuide = highlightGuideColumn * vs.spaceWidth;
-				}
+				ll->SetBracesHighlight(rangeLine, braces, 
+					bracesMatchStyle, highlightGuideColumn * vs.spaceWidth);
 	
 				// Draw the line
 				DrawLine(surface, vs, lineDoc, visibleLine, xStart, rcLine, ll, subLine);
 				//durPaint += et.Duration(true);
 	
+				// Restore the precvious styles for the brace highlights in case layout is in cache.
+				ll->RestoreBracesHighlight(rangeLine, braces);
+
 				bool expanded = cs.GetExpanded(lineDoc);
 				if ( (expanded && (foldFlags & 2)) || (!expanded && (foldFlags & 4)) ) {
 					if (pdoc->GetLevel(lineDoc) & SC_FOLDLEVELHEADERFLAG) {
@@ -1901,14 +1927,14 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	
 				// Draw the Caret
 				if (lineDoc == lineCaret) {
-					int offset = Platform::Minimum(posCaret - posLineStart, ll->maxLineLength);
+					int offset = Platform::Minimum(posCaret - rangeLine.start, ll->maxLineLength);
 					if ((offset >= ll->LineStart(subLine)) &&
 						((offset < ll->LineStart(subLine+1)) || offset == ll->numCharsInLine)) {
 						int xposCaret = ll->positions[offset] - ll->positions[ll->LineStart(subLine)] + xStart;
 						int widthOverstrikeCaret;
 						if (posCaret == pdoc->Length())	{   // At end of document
 							widthOverstrikeCaret = vs.aveCharWidth;
-						} else if ((posCaret - posLineStart) >= ll->numCharsInLine) {	// At end of line
+						} else if ((posCaret - rangeLine.start) >= ll->numCharsInLine) {	// At end of line
 							widthOverstrikeCaret = vs.aveCharWidth;
 						} else {
 							widthOverstrikeCaret = ll->positions[offset + 1] - ll->positions[offset];

@@ -55,6 +55,7 @@ public:
 	char *styles;
 	char *indicators;
 	int *positions;
+	char bracePreviousStyles[2];
 
 	// Wrapped line support
 	int widthLine;
@@ -75,6 +76,9 @@ public:
 		}
 	}
 	void SetLineStart(int line, int start);
+	void SetBracesHighlight(Range rangeLine, Position braces[], 
+		char bracesMatchStyle, int xHighlight);
+	void RestoreBracesHighlight(Range rangeLine, Position braces[]);
 };
 
 /**
