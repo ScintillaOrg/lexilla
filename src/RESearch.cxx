@@ -30,6 +30,9 @@
  * Modification history:
  *
  * $Log$
+ * Revision 1.10  2003/08/26 11:45:22  nyamatongwe
+ * Fixed bug that ignored high bit of characters in comparisons.
+ *
  * Revision 1.9  2003/03/21 10:36:08  nyamatongwe
  * Detect patterns too long in regular expression search.
  *
@@ -258,7 +261,7 @@
  * The following defines are not meant to be changeable.
  * They are for readability only.
  */
-#define BLKIND	0170
+#define BLKIND	0370
 #define BITIND	07
 
 #define ASCIIB	0177
