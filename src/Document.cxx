@@ -32,6 +32,7 @@ Document::Document() {
 	}
 	endStyled = 0;
 	enteredCount = 0;
+	enteredReadOnlyCount = 0;
 	tabInChars = 8;
 	watchers = 0;
 	lenWatchers = 0;
@@ -292,10 +293,13 @@ void Document::ModifiedAt(int pos) {
 
 // Unlike Undo, Redo, and InsertStyledString, the pos argument is a cell number not a char number
 void Document::DeleteChars(int pos, int len) {
+	if (cb.IsReadOnly() && enteredReadOnlyCount==0) {
+		enteredReadOnlyCount++;
+		NotifyModifyAttempt();
+		enteredReadOnlyCount--;
+	}
 	if (enteredCount == 0) {
 		enteredCount++;
-		if (cb.IsReadOnly())
-			NotifyModifyAttempt();
 		if (!cb.IsReadOnly()) {
 			int prevLinesTotal = LinesTotal();
 			bool startSavePoint = cb.IsSavePoint();
@@ -312,10 +316,13 @@ void Document::DeleteChars(int pos, int len) {
 }
 
 void Document::InsertStyledString(int position, char *s, int insertLength) {
+	if (cb.IsReadOnly() && enteredReadOnlyCount==0) {
+		enteredReadOnlyCount++;
+		NotifyModifyAttempt();
+		enteredReadOnlyCount--;
+	}
 	if (enteredCount == 0) {
 		enteredCount++;
-		if (cb.IsReadOnly())
-			NotifyModifyAttempt();
 		if (!cb.IsReadOnly()) {
 			int prevLinesTotal = LinesTotal();
 			bool startSavePoint = cb.IsSavePoint();
