@@ -34,7 +34,7 @@ ALL:	$(COMPONENT) $(LEXCOMPONENT) ScintillaWinS.o WindowAccessor.o
 clean:
 	del /q *.exe *.o *.obj *.dll *.res *.map
 
-LEXOBJS	=  LexCPP.o LexHTML.o LexLua.o LexOthers.o LexPerl.o LexPython.o LexSQL.o LexVB.o
+LEXOBJS	=  LexCPP.o LexHTML.o LexLua.o LexOthers.o LexPerl.o LexPython.o LexSQL.o LexVB.o LexConf.o
 
 SOBJS	= ScintillaWin.o ScintillaBase.o Editor.o Document.o \
 	ContractionState.o CellBuffer.o CallTip.o \
@@ -77,6 +77,8 @@ LexPython.o: LexPython.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
 LexSQL.o: LexSQL.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 
 LexVB.o: LexVB.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+ Scintilla.h SciLexer.h 
+LexConf.o: LexConf.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 
 KeyWords.o: KeyWords.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 

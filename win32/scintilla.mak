@@ -109,7 +109,8 @@ LEXOBJS=\
 	$(DIR_O)\LexPerl.obj \
 	$(DIR_O)\LexPython.obj \
 	$(DIR_O)\LexSQL.obj \
-	$(DIR_O)\LexVB.obj
+	$(DIR_O)\LexVB.obj \
+	$(DIR_O)\LexConf.obj
 
 LOBJS=\
 	$(DIR_O)\AutoComplete.obj \
@@ -218,6 +219,9 @@ $(DIR_O)\LexSQL.obj: ..\src\LexSQL.cxx ..\include\Platform.h ..\include\PropSet.
  ..\include\Scintilla.h ..\include\SciLexer.h 
 
 $(DIR_O)\LexVB.obj: ..\src\LexVB.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h 
+
+$(DIR_O)\LexConf.obj: ..\src\LexConf.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
  ..\include\Scintilla.h ..\include\SciLexer.h 
 
 $(DIR_O)\LineMarker.obj: ..\src\LineMarker.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\LineMarker.h
