@@ -1383,36 +1383,6 @@ void ScintillaGTK::ClaimSelection() {
 	}
 }
 
-// Convert line endings for a piece of text to a particular mode.
-// Stop at len or when a NUL is found.
-char *ConvertLineEnds(int *pLenOut, const char *s, size_t len, int eolMode) {
-	char *dest = new char[2 * len + 1];
-	const char *sptr = s;
-	char *dptr = dest;
-	for (size_t i = 0; (i < len) && (*sptr != '\0'); i++) {
-		if (*sptr == '\n' || *sptr == '\r') {
-			if (eolMode == SC_EOL_CR) {
-				*dptr++ = '\r';
-			} else if (eolMode == SC_EOL_LF) {
-				*dptr++ = '\n';
-			} else { // eolMode == SC_EOL_CRLF
-				*dptr++ = '\r';
-				*dptr++ = '\n';
-			}
-			if ((*sptr == '\r') && (i+1 < len) && (*(sptr+1) == '\n')) {
-				i++;
-				sptr++;
-			}
-			sptr++;
-		} else {
-			*dptr++ = *sptr++;
-		}
-	}
-	*dptr++ = '\0';
-	*pLenOut = (dptr - dest) - 1;
-	return dest;
-}
-
 // Detect rectangular text, convert line ends to current mode, convert from or to UTF-8
 void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, SelectionText &selText) {
 	char *data = reinterpret_cast<char *>(selectionData->data);
@@ -1437,7 +1407,7 @@ void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, Selectio
 
 	char *dest;
 	if (selectionType == GDK_TARGET_STRING) {
-		dest = ConvertLineEnds(&len, data, len, pdoc->eolMode);
+		dest = Document::TransformLineEnds(&len, data, len, pdoc->eolMode);
 		if (IsUnicodeMode()) {
 			// Unknown encoding so assume in Latin1
 			char *destPrevious = dest;
@@ -1450,7 +1420,7 @@ void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, Selectio
 				vs.styles[STYLE_DEFAULT].characterSet, isRectangular);
 		}
 	} else {	// UTF-8
-		dest = ConvertLineEnds(&len, data, len, pdoc->eolMode);
+		dest = Document::TransformLineEnds(&len, data, len, pdoc->eolMode);
 		selText.Set(dest, len, SC_CP_UTF8, 0, isRectangular);
 #ifdef USE_CONVERTER
 		const char *charSetBuffer = CharacterSetID();
@@ -1560,7 +1530,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 	 // so make a copy of the clip text now with newlines converted
 
 	int new_len;
-	char *tmpstr = ConvertLineEnds(&new_len, selBuffer, text->len, SC_EOL_LF);
+	char *tmpstr = Document::TransformLineEnds(&new_len, selBuffer, text->len, SC_EOL_LF);
 	selBuffer = tmpstr;
 #endif
 	char *tmputf = 0;
