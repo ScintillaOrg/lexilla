@@ -178,16 +178,18 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 	ColouriseContext cc(startPos, length, initStyle, styler);
 
 	for (; cc.More(); cc.Forward()) {
-		if (cc.Match("\\\n")) {
-			cc.Forward();
-			cc.Forward();
-			continue;
-		}
-		if (cc.Match("\\\r\n")) {
-			cc.Forward();
-			cc.Forward();
-			cc.Forward();
-			continue;
+		if (cc.ch == '\\') {
+			if (cc.Match("\\\n")) {
+				cc.Forward();
+				cc.Forward();
+				continue;
+			}
+			if (cc.Match("\\\r\n")) {
+				cc.Forward();
+				cc.Forward();
+				cc.Forward();
+				continue;
+			}
 		}
 
 		if (cc.state == SCE_C_OPERATOR) {
