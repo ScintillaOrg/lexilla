@@ -39,57 +39,14 @@
 #endif
 
 
-// Include the main header for each platform
-
-#if PLAT_GTK
-#ifdef _MSC_VER
-#pragma warning(disable: 4505 4514 4710 4800)
-#endif
-#include <gtk/gtk.h>
-#include <gdk/gdkkeysyms.h>
-#endif
-
-#if PLAT_WIN
-#define _WIN32_WINNT  0x0400 // Otherwise some required stuff gets ifdef'd out
-// Vassili Bourdo: shut up annoying Visual C++ warnings:
-#ifdef _MSC_VER
-#pragma warning(disable: 4244 4309 4710 4800)
-#endif
-#include <windows.h>
-#include <commctrl.h>
-#include <richedit.h>
-#endif
-
-#if PLAT_WX
-#include <wx/wx.h>
-#endif
-
 // Underlying the implementation of the platform classes are platform specific types.
 // Sometimes these need to be passed around by client code so they are defined here
 
-#if PLAT_GTK
-typedef GdkColor ColourID;
-typedef GdkFont* FontID;
-typedef GdkDrawable* SurfaceID;
-typedef GtkWidget* WindowID;
-typedef GtkItemFactory* MenuID;
-#endif
-
-#if PLAT_WIN
-typedef COLORREF ColourID;
-typedef HFONT FontID;
-typedef HDC SurfaceID;
-typedef HWND WindowID;
-typedef HMENU MenuID;
-#endif
-
-#if PLAT_WX
-typedef wxColour ColourID;
-typedef wxFont* FontID;
-typedef wxDC* SurfaceID;
-typedef wxWindow* WindowID;
-typedef wxMenu* MenuID;
-#endif
+typedef void* FontID;
+typedef void* SurfaceID;
+typedef void* WindowID;
+typedef void* MenuID;
+typedef void* PaletteID;
 
 /**
  * A geometric point class.
@@ -146,27 +103,61 @@ public:
 	int Height() { return bottom - top; }
 };
 
-#if PLAT_WX
-wxRect wxRectFromPRectangle(PRectangle prc);
-PRectangle PRectangleFromwxRect(wxRect rc);
-#endif
-
 /**
  * A colour class.
  */
-class Colour {
-	ColourID co;
+class ColourDesired {
+	long co;
 public:
-	Colour(long lcol=0);
-	Colour(unsigned int red, unsigned int green, unsigned int blue);
-	bool operator==(const Colour &other) const;
-	long AsLong() const;
-	unsigned int GetRed();
-	unsigned int GetGreen();
-	unsigned int GetBlue();
+	ColourDesired(long lcol=0) {
+		co = lcol;
+	}
+	
+	ColourDesired(unsigned int red, unsigned int green, unsigned int blue) {
+		co = red | (green << 8) | (blue << 16);
+	}
+	
+	bool operator==(const ColourDesired &other) const {
+		return co == other.co;
+	}
+	
+	void Set(long lcol) {
+		co = lcol;
+	}
+	
+	long AsLong() const {
+		return co;
+	}
+	
+	unsigned int GetRed() {
+		return co & 0xff;
+	}
+	
+	unsigned int GetGreen() {
+		return (co >> 8) & 0xff;
+	}
+	
+	unsigned int GetBlue() {
+		return (co >> 16) & 0xff;
+	}
+};
 
-	friend class Surface;
-	friend class Palette;
+class ColourAllocated {
+	long coAllocated;
+	
+public:
+
+	ColourAllocated(long lcol=0) {
+		coAllocated = lcol;
+	}
+	
+	void Set(long lcol) {
+		coAllocated = lcol;
+	}
+	
+	long AsLong() const {
+		return coAllocated;
+	}
 };
 
 /**
@@ -176,12 +167,12 @@ public:
  * construction time with a palette management object.
  */
 struct ColourPair {
-	Colour desired;
-	Colour allocated;
+	ColourDesired desired;
+	ColourAllocated allocated;
 
-	ColourPair(Colour desired_=Colour(0,0,0)) {
+	ColourPair(ColourDesired desired_=ColourDesired(0,0,0)) {
 		desired = desired_;
-		allocated = desired;
+		allocated.Set(desired.AsLong());
 	}
 };
 
@@ -195,10 +186,10 @@ class Palette {
 	enum {numEntries = 100};
 	ColourPair entries[numEntries];
 #if PLAT_GTK
-	GdkColor *allocatedPalette;
+	void *allocatedPalette; // GdkColor *
 	int allocatedLen;
 #elif PLAT_WIN
-	HPALETTE hpal;
+	void *hpal;
 #elif PLAT_WX
 	// wxPalette* pal;  // **** Is this needed?
 #endif
@@ -254,29 +245,29 @@ class Surface {
 private:
 	bool unicodeMode;
 #if PLAT_GTK
-	GdkDrawable *drawable;
-	GdkGC *gc;
-	GdkPixmap *ppixmap;
+	void *drawable;	// GdkDrawable *drawable;
+	void *gc;			// GdkGC *gc;
+	void *ppixmap;	// GdkPixmap *ppixmap;
 	int x;
 	int y;
 	bool inited;
 	bool createdGC;
 #elif PLAT_WIN
-	HDC hdc;
+	void *hdc; // HDC 
 	bool hdcOwned;
-	HPEN pen;
-	HPEN penOld;
-	HBRUSH brush;
-	HBRUSH brushOld;
-	HFONT font;
-	HFONT fontOld;
-	HBITMAP bitmap;
-	HBITMAP bitmapOld;
-	HPALETTE paletteOld;
+	void *pen;	// HPEN
+	void *penOld;	// HPEN
+	void *brush;	// HBRUSH
+	void *brushOld; // HBRUSH
+	void *font;	// HFONT 
+	void *fontOld;	// HFONT 
+	void *bitmap;	// HBITMAP 
+	void *bitmapOld;	// HBITMAP 
+	void *paletteOld;	// HPALETTE 
 #elif PLAT_WX
-	wxDC* hdc;
+	void *hdc;	// wxDC*
 	bool hdcOwned;
-	wxBitmap* bitmap;
+	void *bitmap;	// wxBitmap*
 	int x;
 	int y;
 #endif
@@ -285,7 +276,7 @@ private:
 	Surface(const Surface &) {}
 	Surface &operator=(const Surface &) { return *this; }
 #if PLAT_WIN || PLAT_WX
-	void BrushColor(Colour back);
+	void BrushColor(ColourAllocated back);
 	void SetFont(Font &font_);
 #endif
 public:
@@ -293,26 +284,26 @@ public:
 	~Surface();
 
 	void Init();
-	void Init(SurfaceID hdc_);
+	void Init(SurfaceID sid);
 	void InitPixMap(int width, int height, Surface *surface_);
 
 	void Release();
 	bool Initialised();
-	void PenColour(Colour fore);
+	void PenColour(ColourAllocated fore);
 	int LogPixelsY();
 	int DeviceHeightFont(int points);
 	void MoveTo(int x_, int y_);
 	void LineTo(int x_, int y_);
-	void Polygon(Point *pts, int npts, Colour fore, Colour back);
-	void RectangleDraw(PRectangle rc, Colour fore, Colour back);
-	void FillRectangle(PRectangle rc, Colour back);
+	void Polygon(Point *pts, int npts, ColourAllocated fore, ColourAllocated back);
+	void RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back);
+	void FillRectangle(PRectangle rc, ColourAllocated back);
 	void FillRectangle(PRectangle rc, Surface &surfacePattern);
-	void RoundedRectangle(PRectangle rc, Colour fore, Colour back);
-	void Ellipse(PRectangle rc, Colour fore, Colour back);
+	void RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back);
+	void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back);
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource);
 
-	void DrawText(PRectangle rc, Font &font_, int ybase, const char *s, int len, Colour fore, Colour back);
-	void DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, Colour fore, Colour back);
+	void DrawText(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
+	void DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
 	void MeasureWidths(Font &font_, const char *s, int len, int *positions);
 	int WidthText(Font &font_, const char *s, int len);
 	int WidthChar(Font &font_, char ch);
@@ -368,11 +359,6 @@ public:
 	enum Cursor { cursorText, cursorArrow, cursorUp, cursorWait, cursorHoriz, cursorVert, cursorReverseArrow };
 	void SetCursor(Cursor curs);
 	void SetTitle(const char *s);
-#if PLAT_WIN
-	LRESULT SendMessage(UINT msg, WPARAM wParam=0, LPARAM lParam=0);
-	int GetDlgCtrlID();
-	HINSTANCE GetInstance();
-#endif
 };
 
 /**
@@ -440,8 +426,8 @@ public:
 	// but gcc warns about this
 	Platform() {}
 	~Platform() {}
-	static Colour Chrome();
-	static Colour ChromeHighlight();
+	static ColourDesired Chrome();
+	static ColourDesired ChromeHighlight();
 	static const char *DefaultFont();
 	static int DefaultFontSize();
 	static unsigned int DoubleClickTime();
@@ -449,6 +435,7 @@ public:
 	static bool IsKeyDown(int key);
 	static long SendScintilla(
 		WindowID w, unsigned int msg, unsigned long wParam=0, long lParam=0);
+	static bool IsDBCSLeadByte(int codePage, char ch);
 
 	// These are utility functions not really tied to a platform
 	static int Minimum(int a, int b);
@@ -473,6 +460,11 @@ public:
 #define PLATFORM_ASSERT(c) ((void)0)
 #else
 #define PLATFORM_ASSERT(c) ((c) ? (void)(0) : Platform::Assert(#c, __FILE__, __LINE__))
+#endif
+
+// Shut up annoying Visual C++ warnings:
+#ifdef _MSC_VER
+#pragma warning(disable: 4244 4309 4514 4710 4800)
 #endif
 
 #endif

@@ -9,8 +9,11 @@
 #include <stdio.h> 
 #include <ctype.h> 
 
-#include "SciLexer.h"
+#define _WIN32_WINNT  0x0400
+#include <windows.h>
+
 #include "Platform.h"
+#include "SciLexer.h"
 #include "PropSet.h"
 #include "Accessor.h"
 #include "DocumentAccessor.h"

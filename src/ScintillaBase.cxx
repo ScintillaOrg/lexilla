@@ -517,7 +517,7 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		break;
 
 	case SCI_CALLTIPSETBACK:
-		ct.colourBG = Colour(wParam);
+		ct.colourBG = ColourDesired(wParam);
 		InvalidateStyleRedraw();
 		break;
 

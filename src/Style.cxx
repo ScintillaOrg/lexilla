@@ -14,13 +14,13 @@
 
 Style::Style() {
 	aliasOfDefaultFont = true;
-	Clear(Colour(0, 0, 0), Colour(0xff, 0xff, 0xff),
+	Clear(ColourDesired(0, 0, 0), ColourDesired(0xff, 0xff, 0xff),
 	      Platform::DefaultFontSize(), 0, SC_CHARSET_DEFAULT,
 	      false, false, false, false, caseMixed, true);
 }
 
 Style::Style(const Style &source) {
-	Clear(Colour(0, 0, 0), Colour(0xff, 0xff, 0xff),
+	Clear(ColourDesired(0, 0, 0), ColourDesired(0xff, 0xff, 0xff),
 	      0, 0, 0,
 	      false, false, false, false, caseMixed, true);
 	fore.desired = source.fore.desired;
@@ -46,7 +46,7 @@ Style::~Style() {
 Style &Style::operator=(const Style &source) {
 	if (this == &source)
 		return * this;
-	Clear(Colour(0, 0, 0), Colour(0xff, 0xff, 0xff),
+	Clear(ColourDesired(0, 0, 0), ColourDesired(0xff, 0xff, 0xff),
 	      0, 0, SC_CHARSET_DEFAULT,
 	      false, false, false, false, caseMixed, true);
 	fore.desired = source.fore.desired;
@@ -62,7 +62,7 @@ Style &Style::operator=(const Style &source) {
 	return *this;
 }
 
-void Style::Clear(Colour fore_, Colour back_, int size_,
+void Style::Clear(ColourDesired fore_, ColourDesired back_, int size_,
                   const char *fontName_, int characterSet_,
                   bool bold_, bool italic_, bool eolFilled_, 
                   bool underline_, ecaseForced caseForce_, bool visible_) {

@@ -21,11 +21,11 @@ CallTip::CallTip() {
 	startHighlight = 0;
 	endHighlight = 0;
 
-	colourBG.desired = Colour(0xff, 0xff, 0xff);
-	colourUnSel.desired = Colour(0x80, 0x80, 0x80);
-	colourSel.desired = Colour(0, 0, 0x80);
-	colourShade.desired = Colour(0, 0, 0);
-	colourLight.desired = Colour(0xc0, 0xc0, 0xc0);
+	colourBG.desired = ColourDesired(0xff, 0xff, 0xff);
+	colourUnSel.desired = ColourDesired(0x80, 0x80, 0x80);
+	colourSel.desired = ColourDesired(0, 0, 0x80);
+	colourShade.desired = ColourDesired(0, 0, 0);
+	colourLight.desired = ColourDesired(0xc0, 0xc0, 0xc0);
 }
 
 CallTip::~CallTip() {

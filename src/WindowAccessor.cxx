@@ -27,7 +27,7 @@ bool WindowAccessor::InternalIsLeadByte(char ch) {
 		// same so none is considered a lead byte.
 		return false;	
 	else
-		return IsDBCSLeadByteEx(codePage, ch);
+		return Platform::IsDBCSLeadByte(codePage, ch);
 }
 #else
 // PLAT_GTK or PLAT_WX

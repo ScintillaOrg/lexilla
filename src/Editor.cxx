@@ -997,7 +997,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	// display itself.  These are checked in order with the earlier taking precedence.  When
 	// multiple markers cause background override, the color for the highest numbered one is used.
 	bool overrideBackground = false;
-	Colour background = Colour(0, 0, 0);
+	ColourAllocated background;
 	if (caret.active && vsDraw.showCaretLineBackground && ll.containsCaret) {
 		overrideBackground = true;
 		background = vsDraw.caretLineBackground.allocated;
@@ -1046,8 +1046,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		        ((ll.selStart != ll.selEnd) && ((iDoc + 1 == ll.selStart) || (iDoc + 1 == ll.selEnd))) ||
 		        (i == (ll.edgeColumn - 1))) {
 			int styleMain = ll.styles[i];
-			Colour textBack = vsDraw.styles[styleMain].back.allocated;
-			Colour textFore = vsDraw.styles[styleMain].fore.allocated;
+			ColourAllocated textBack = vsDraw.styles[styleMain].back.allocated;
+			ColourAllocated textFore = vsDraw.styles[styleMain].fore.allocated;
 			Font &textFont = vsDraw.styles[styleMain].font;
 			bool inSelection = (iDoc >= ll.selStart) && (iDoc < ll.selEnd) && (ll.selStart != ll.selEnd);
 			if (inSelection) {
@@ -1239,7 +1239,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		// way between the chrome colour and the chrome highlight colour making a nice transition
 		// between the window chrome and the content area. And it works in low colour depths.
 		PRectangle rcPattern(0, 0, 8, 8);
-		if (vs.selbarlight.desired == Colour(0xff, 0xff, 0xff)) {
+		if (vs.selbarlight.desired == ColourDesired(0xff, 0xff, 0xff)) {
 			pixmapSelPattern.FillRectangle(rcPattern, vs.selbar.allocated);
 			pixmapSelPattern.PenColour(vs.selbarlight.allocated);
 			for (int stripe = 0; stripe < 8; stripe++) {
@@ -1494,18 +1494,18 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 // Space (3 space characters) between line numbers and text when printing.
 #define lineNumberPrintSpace "   "
 
-Colour InvertedLight(Colour orig) {
+ColourDesired InvertedLight(ColourDesired orig) {
 	unsigned int r = orig.GetRed();
 	unsigned int g = orig.GetGreen();
 	unsigned int b = orig.GetBlue();
 	unsigned int l = (r + g + b) / 3; 	// There is a better calculation for this that matches human eye
 	unsigned int il = 0xff - l;
 	if (l == 0)
-		return Colour(0xff, 0xff, 0xff);
+		return ColourDesired(0xff, 0xff, 0xff);
 	r = r * il / l;
 	g = g * il / l;
 	b = b * il / l;
-	return Colour(Platform::Minimum(r, 0xff), Platform::Minimum(g, 0xff), Platform::Minimum(b, 0xff));
+	return ColourDesired(Platform::Minimum(r, 0xff), Platform::Minimum(g, 0xff), Platform::Minimum(b, 0xff));
 }
 
 // This is mostly copied from the Paint method but with some things omitted
@@ -1549,18 +1549,18 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 			vsPrint.styles[sty].fore.desired = InvertedLight(vsPrint.styles[sty].fore.desired);
 			vsPrint.styles[sty].back.desired = InvertedLight(vsPrint.styles[sty].back.desired);
 		} else if (printColourMode == SC_PRINT_BLACKONWHITE) {
-			vsPrint.styles[sty].fore.desired = Colour(0, 0, 0);
-			vsPrint.styles[sty].back.desired = Colour(0xff, 0xff, 0xff);
+			vsPrint.styles[sty].fore.desired = ColourDesired(0, 0, 0);
+			vsPrint.styles[sty].back.desired = ColourDesired(0xff, 0xff, 0xff);
 		} else if (printColourMode == SC_PRINT_COLOURONWHITE) {
-			vsPrint.styles[sty].back.desired = Colour(0xff, 0xff, 0xff);
+			vsPrint.styles[sty].back.desired = ColourDesired(0xff, 0xff, 0xff);
 		} else if (printColourMode == SC_PRINT_COLOURONWHITEDEFAULTBG) {
 			if (sty <= STYLE_DEFAULT) {
-				vsPrint.styles[sty].back.desired = Colour(0xff, 0xff, 0xff);
+				vsPrint.styles[sty].back.desired = ColourDesired(0xff, 0xff, 0xff);
 			}
 		}
 	}
 	// White background for the line numbers
-	vsPrint.styles[STYLE_LINENUMBER].back.desired = Colour(0xff, 0xff, 0xff);
+	vsPrint.styles[STYLE_LINENUMBER].back.desired = ColourDesired(0xff, 0xff, 0xff);
 
 	vsPrint.Refresh(*surfaceMeasure);
 	// Ensure colours are set up
@@ -3529,11 +3529,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SETTEXT:
 		{
 			if (lParam == 0)
-				return FALSE;
+				return 0;
 			pdoc->DeleteChars(0, pdoc->Length());
 			SetEmptySelection(0);
 			pdoc->InsertString(0, reinterpret_cast<char *>(lParam));
-			return TRUE;
+			return 1;
 		}
 
 	case SCI_GETTEXTLENGTH:
@@ -3565,7 +3565,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_CANUNDO:
-		return pdoc->CanUndo() ? TRUE : FALSE;
+		return pdoc->CanUndo() ? 1 : 0;
 
 	case SCI_EMPTYUNDOBUFFER:
 		pdoc->DeleteUndoHistory();
@@ -3699,7 +3699,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_LINESCROLL:
 		ScrollTo(topLine + lParam);
 		HorizontalScrollTo(xOffset + wParam * vs.spaceWidth);
-		return TRUE;
+		return 1;
 
 	case SCI_SETXOFFSET:
 		xOffset = wParam;
@@ -3715,7 +3715,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETREADONLY:
 		pdoc->SetReadOnly(wParam);
-		return TRUE;
+		return 1;
 
 	case SCI_GETREADONLY:
 		return pdoc->IsReadOnly();
@@ -3934,7 +3934,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		}
 
 	case SCI_CANREDO:
-		return pdoc->CanRedo() ? TRUE : FALSE;
+		return pdoc->CanRedo() ? 1 : 0;
 
 	case SCI_MARKERLINEFROMHANDLE:
 		return pdoc->LineFromHandle(wParam);
@@ -4128,13 +4128,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 	case SCI_MARKERSETFORE:
 		if (wParam <= MARKER_MAX)
-			vs.markers[wParam].fore.desired = Colour(lParam);
+			vs.markers[wParam].fore.desired = ColourDesired(lParam);
 		InvalidateStyleData();
 		RedrawSelMargin();
 		break;
 	case SCI_MARKERSETBACK:
 		if (wParam <= MARKER_MAX)
-			vs.markers[wParam].back.desired = Colour(lParam);
+			vs.markers[wParam].back.desired = ColourDesired(lParam);
 		InvalidateStyleData();
 		RedrawSelMargin();
 		break;
@@ -4230,13 +4230,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_STYLESETFORE:
 		if (wParam <= STYLE_MAX) {
-			vs.styles[wParam].fore.desired = Colour(lParam);
+			vs.styles[wParam].fore.desired = ColourDesired(lParam);
 			InvalidateStyleRedraw();
 		}
 		break;
 	case SCI_STYLESETBACK:
 		if (wParam <= STYLE_MAX) {
-			vs.styles[wParam].back.desired = Colour(lParam);
+			vs.styles[wParam].back.desired = ColourDesired(lParam);
 			InvalidateStyleRedraw();
 		}
 		break;
@@ -4418,18 +4418,18 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETSELFORE:
 		vs.selforeset = wParam;
-		vs.selforeground.desired = Colour(lParam);
+		vs.selforeground.desired = ColourDesired(lParam);
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETSELBACK:
 		vs.selbackset = wParam;
-		vs.selbackground.desired = Colour(lParam);
+		vs.selbackground.desired = ColourDesired(lParam);
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETCARETFORE:
-		vs.caretcolour.desired = Colour(wParam);
+		vs.caretcolour.desired = ColourDesired(wParam);
 		InvalidateStyleRedraw();
 		break;
 
@@ -4475,7 +4475,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_INDICSETFORE:
 		if (wParam <= INDIC_MAX) {
-			vs.indicators[wParam].fore.desired = Colour(lParam);
+			vs.indicators[wParam].fore.desired = ColourDesired(lParam);
 			InvalidateStyleRedraw();
 		}
 		break;
@@ -4584,7 +4584,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return vs.edgecolour.desired.AsLong();
 
 	case SCI_SETEDGECOLOUR:
-		vs.edgecolour.desired = Colour(wParam);
+		vs.edgecolour.desired = ColourDesired(wParam);
 		InvalidateStyleRedraw();
 		break;
 
@@ -4629,7 +4629,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_GETOVERTYPE:
-		return inOverstrike ? TRUE : FALSE;
+		return inOverstrike ? 1 : 0;
 
 	case SCI_SETFOCUS:
 		SetFocusState(wParam);

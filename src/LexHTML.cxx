@@ -15,6 +15,7 @@
 
 #include "PropSet.h"
 #include "Accessor.h"
+#include "StyleContext.h"
 #include "KeyWords.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
@@ -25,6 +26,14 @@
 
 enum { eScriptNone = 0, eScriptJS, eScriptVBS, eScriptPython, eScriptPHP, eScriptXML, eScriptSGML, eScriptSGMLblock };
 enum { eHtml = 0, eNonHtmlScript, eNonHtmlPreProc, eNonHtmlScriptPreProc };
+
+inline bool IsAWordChar(const int ch) {
+	return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_');
+}
+
+inline bool IsAWordStart(const int ch) {
+	return (ch < 0x80) && (isalnum(ch) || ch == '_');
+}
 
 static int segIsScriptingIndicator(Accessor &styler, unsigned int start, unsigned int end, int prevValue) {
 	char s[30 + 1];
@@ -1541,5 +1550,193 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	}
 }
 
+static bool isASPScript(int state) {
+	return 
+		(state >= SCE_HJA_START && state <= SCE_HJA_REGEX) ||
+		(state >= SCE_HBA_START && state <= SCE_HBA_STRINGEOL) ||
+		(state >= SCE_HPA_DEFAULT && state <= SCE_HPA_IDENTIFIER);
+}
+
+static void ColouriseHBAPiece(StyleContext &sc, WordList *keywordlists[]) {
+	WordList &keywordsVBS = *keywordlists[2];
+	if (sc.state == SCE_HBA_WORD) {
+		if (!IsAWordChar(sc.ch)) {
+			char s[100];
+			sc.GetCurrentLowered(s, sizeof(s));
+			if (keywordsVBS.InList(s)) {
+				if (strcmp(s, "rem") == 0) {
+					sc.ChangeState(SCE_HBA_COMMENTLINE);
+					if (sc.atLineEnd) {
+						sc.SetState(SCE_HBA_DEFAULT);
+					}
+				} else {
+					sc.SetState(SCE_HBA_DEFAULT);
+				}
+			} else {
+				sc.ChangeState(SCE_HBA_IDENTIFIER);
+				sc.SetState(SCE_HBA_DEFAULT);
+			}
+		}
+	} else if (sc.state == SCE_HBA_NUMBER) {
+		if (!IsAWordChar(sc.ch)) {
+			sc.SetState(SCE_HBA_DEFAULT);
+		}
+	} else if (sc.state == SCE_HBA_STRING) {
+		if (sc.ch == '\"') {
+			sc.ForwardSetState(SCE_HBA_DEFAULT);
+		} else if (sc.ch == '\r' || sc.ch == '\n') {
+			sc.ChangeState(SCE_HBA_STRINGEOL);
+			sc.ForwardSetState(SCE_HBA_DEFAULT);
+		}
+	} else if (sc.state == SCE_HBA_COMMENTLINE) {
+		if (sc.ch == '\r' || sc.ch == '\n') {
+			sc.SetState(SCE_HBA_DEFAULT);
+		}
+	}
+
+	if (sc.state == SCE_HBA_DEFAULT) {
+		if (IsADigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext))) {
+			sc.SetState(SCE_HBA_NUMBER);
+		} else if (IsAWordStart(sc.ch)) {
+			sc.SetState(SCE_HBA_WORD);
+		} else if (sc.ch == '\'') {
+			sc.SetState(SCE_HBA_COMMENTLINE);
+		} else if (sc.ch == '\"') {
+			sc.SetState(SCE_HBA_STRING);
+		}
+	}
+}
+
+static void ColouriseASPPiece(StyleContext &sc, WordList *keywordlists[]) {
+	// Possibly exit current state to either SCE_H_DEFAULT or SCE_HBA_DEFAULT
+	if ((sc.state == SCE_H_ASPAT || isASPScript(sc.state)) && sc.Match('%', '>')) {
+		sc.SetState(SCE_H_ASP);
+		sc.Forward();
+		sc.ForwardSetState(SCE_H_DEFAULT);
+	} 
+			 
+	// Handle some ASP script
+	if (sc.state >= SCE_HBA_START && sc.state <= SCE_HBA_STRINGEOL) {
+		ColouriseHBAPiece(sc, keywordlists);
+	}
+	
+	// Enter new sc.state
+	if (sc.state == SCE_H_DEFAULT) {
+		if (sc.Match('<', '%')) {
+			sc.SetState(SCE_H_ASP);
+			sc.Forward();
+			sc.Forward();
+			if (sc.ch == '@') {
+				sc.ForwardSetState(SCE_H_ASPAT);
+			} else {
+				if (sc.ch == '=') {
+					sc.Forward();
+				}
+				sc.SetState(SCE_HBA_DEFAULT);
+			}
+		}
+	}
+}
+
+static void ColouriseASPDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+                                  Accessor &styler) {
+	// Lexer for HTML requires more lexical states (7 bits worth) than most lexers
+	StyleContext sc(startPos, length, initStyle, styler, 0x7f);
+	for (; sc.More(); sc.Forward()) {
+		ColouriseASPPiece(sc, keywordlists);
+	}
+	sc.Complete();
+}
+
+static void ColourisePHPPiece(StyleContext &sc, WordList *[]) {
+	// Possibly exit current state to either SCE_H_DEFAULT or SCE_HBA_DEFAULT
+	if (sc.state >= SCE_HPHP_DEFAULT && sc.state <= SCE_HPHP_OPERATOR) {
+		if (!isPHPStringState(sc.state) && 
+			(sc.state != SCE_HPHP_COMMENT) &&
+			(sc.Match('?', '>'))) {
+			sc.SetState(SCE_H_QUESTION);
+			sc.Forward();
+			sc.ForwardSetState(SCE_H_DEFAULT);
+		}
+	} 
+			 
+	// Handle some PHP script
+	if (sc.state == SCE_HPHP_WORD) {
+		if (!IsAWordStart(sc.ch)) {
+			sc.SetState(SCE_HPHP_DEFAULT);
+		}
+	} else if (sc.state == SCE_HPHP_COMMENTLINE) {
+		if (sc.ch == '\r' || sc.ch == '\n') {
+			sc.SetState(SCE_HPHP_DEFAULT);
+		}
+	} else if (sc.state == SCE_HPHP_COMMENT) {
+		if (sc.Match('*', '/')) {
+			sc.Forward();
+			sc.Forward();
+			sc.SetState(SCE_HPHP_DEFAULT);
+		}
+	} else if (sc.state == SCE_HPHP_HSTRING) {
+		if (sc.ch == '\"') {
+			sc.ForwardSetState(SCE_HPHP_DEFAULT);
+		}
+	} else if (sc.state == SCE_HPHP_SIMPLESTRING) {
+		if (sc.ch == '\'') {
+			sc.ForwardSetState(SCE_HPHP_DEFAULT);
+		}
+	} else if (sc.state == SCE_HPHP_VARIABLE) {
+		if (!IsAWordStart(sc.ch)) {
+			sc.SetState(SCE_HPHP_DEFAULT);
+		}
+	} else if (sc.state == SCE_HPHP_OPERATOR) {
+		sc.SetState(SCE_HPHP_DEFAULT);
+	}
+	
+	// Enter new sc.state
+	if (sc.state == SCE_H_DEFAULT) {
+		if (sc.Match("<?php")) {
+			sc.SetState(SCE_H_QUESTION);
+			sc.Forward();
+			sc.Forward();
+			sc.Forward();
+			sc.Forward();
+			sc.Forward();
+			sc.SetState(SCE_HPHP_DEFAULT);
+		}
+	}
+	if (sc.state == SCE_HPHP_DEFAULT) {
+		if (IsAWordStart(sc.ch)) {
+			sc.SetState(SCE_HPHP_WORD);
+		} else if (sc.ch == '#') {
+			sc.SetState(SCE_HPHP_COMMENTLINE);
+		} else if (sc.Match("<!--")) {
+			sc.SetState(SCE_HPHP_COMMENTLINE);
+		} else if (sc.Match('/', '/')) {
+			sc.SetState(SCE_HPHP_COMMENTLINE);
+		} else if (sc.Match('/', '*')) {
+			sc.SetState(SCE_HPHP_COMMENT);
+		} else if (sc.ch == '\"') {
+			sc.SetState(SCE_HPHP_HSTRING);
+		} else if (sc.ch == '\'') {
+			sc.SetState(SCE_HPHP_SIMPLESTRING);
+		} else if (sc.ch == '$') {
+			sc.SetState(SCE_HPHP_VARIABLE);
+		} else if (isoperator(static_cast<char>(sc.ch))) {
+			sc.SetState(SCE_HPHP_OPERATOR);
+		}
+	}
+}
+
+static void ColourisePHPDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+                                  Accessor &styler) {
+	// Lexer for HTML requires more lexical states (7 bits worth) than most lexers
+	StyleContext sc(startPos, length, initStyle, styler, 0x7f);
+	for (; sc.More(); sc.Forward()) {
+		ColourisePHPPiece(sc, keywordlists);
+	}
+	sc.Complete();
+}
+
 LexerModule lmHTML(SCLEX_HTML, ColouriseHyperTextDoc, "hypertext");
 LexerModule lmXML(SCLEX_XML, ColouriseHyperTextDoc, "xml");
+LexerModule lmASP(SCLEX_ASP, ColouriseASPDoc, "asp");
+LexerModule lmPHP(SCLEX_PHP, ColourisePHPDoc, "php");

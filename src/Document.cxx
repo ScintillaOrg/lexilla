@@ -230,7 +230,7 @@ bool Document::IsDBCS(int pos) {
 			while (startLine > 0 && cb.CharAt(startLine) != '\r' && cb.CharAt(startLine) != '\n')
 				startLine--;
 			while (startLine <= pos) {
-				if (IsDBCSLeadByteEx(dbcsCodePage, cb.CharAt(startLine))) {
+				if (Platform::IsDBCSLeadByte(dbcsCodePage, cb.CharAt(startLine))) {
 					startLine++;
 					if (startLine >= pos)
 						return true;
@@ -322,7 +322,7 @@ int Document::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
 			while (startLine < pos) {
 				if (atLeadByte)
 					atLeadByte = false;
-				else if (IsDBCSLeadByteEx(dbcsCodePage, cb.CharAt(startLine)))
+				else if (Platform::IsDBCSLeadByte(dbcsCodePage, cb.CharAt(startLine)))
 					atLeadByte = true;
 				else
 					atLeadByte = false;

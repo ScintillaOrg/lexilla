@@ -13,7 +13,7 @@
 
 #if PLAT_WIN
 #ifdef STATIC_BUILD
-void Scintilla_RegisterClasses(HINSTANCE hInstance);
+void Scintilla_RegisterClasses(void *hInstance);
 #endif
 #endif
 
