@@ -4137,6 +4137,8 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		{
 			if (lParam == 0)
 				return 0;
+			if (wParam == 0)
+				return 0;
 			char *ptr = CharPtrFromSPtr(lParam);
 			unsigned int iChar = 0;
 			for (; iChar < wParam - 1; iChar++)
