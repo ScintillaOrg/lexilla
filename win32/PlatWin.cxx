@@ -723,9 +723,6 @@ void Window::SetCursor(Cursor curs) {
 	case cursorText:
 		::SetCursor(::LoadCursor(NULL,IDC_IBEAM));
 		break;
-	case cursorArrow:
-		::SetCursor(::LoadCursor(NULL,IDC_ARROW));
-		break;
 	case cursorUp:
 		::SetCursor(::LoadCursor(NULL,IDC_UPARROW));
 		break;
@@ -747,6 +744,10 @@ void Window::SetCursor(Cursor curs) {
 				hinstPlatformRes = ::GetModuleHandle(NULL);
 			::SetCursor(::LoadCursor(hinstPlatformRes, MAKEINTRESOURCE(IDC_MARGIN)));
 		}
+		break;
+	case cursorArrow:
+	case cursorInvalid:	// Should not occur, but just in case.
+		::SetCursor(::LoadCursor(NULL,IDC_ARROW));
 		break;
 	}
 }

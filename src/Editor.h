@@ -54,6 +54,8 @@ public:
 	int lines;
 	enum {maxDisplayLines = 400};
 	int lineStarts[maxDisplayLines];
+
+	LineLayout() : numCharsInLine(0) {}
 };
 
 class SelectionText {

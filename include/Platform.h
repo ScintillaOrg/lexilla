@@ -310,8 +310,8 @@ class Window {
 protected:
 	WindowID id;
 public:
-	Window() : id(0) {}
-	Window(const Window &source) : id(source.id) {}
+	Window() : id(0), cursorLast(cursorInvalid) {}
+	Window(const Window &source) : id(source.id), cursorLast(cursorInvalid) {}
 	virtual ~Window();
 	Window &operator=(WindowID id_) {
 		id = id_;
@@ -329,9 +329,11 @@ public:
 	void InvalidateAll();
 	void InvalidateRectangle(PRectangle rc);
 	virtual void SetFont(Font &font);
-	enum Cursor { cursorText, cursorArrow, cursorUp, cursorWait, cursorHoriz, cursorVert, cursorReverseArrow };
+	enum Cursor { cursorInvalid, cursorText, cursorArrow, cursorUp, cursorWait, cursorHoriz, cursorVert, cursorReverseArrow };
 	void SetCursor(Cursor curs);
 	void SetTitle(const char *s);
+private:
+	Cursor cursorLast;
 };
 
 /**
