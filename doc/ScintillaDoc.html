@@ -910,7 +910,7 @@ struct TextToFind {
      <a class="message" href="#SCI_GETSELTEXT">SCI_GETSELTEXT(&lt;unused&gt;, char *text)</a><br />
      <a class="message" href="#SCI_GETCURLINE">SCI_GETCURLINE(int textLen, char *text)</a><br />
      <a class="message" href="#SCI_SELECTIONISRECTANGLE">SCI_SELECTIONISRECTANGLE</a><br />
-     <a class="message" href="#SCI_SETSELECTIONMODE">SCI_SETSELECTIONMODE</a><br />
+     <a class="message" href="#SCI_SETSELECTIONMODE">SCI_SETSELECTIONMODE(int mode)</a><br />
      <a class="message" href="#SCI_GETSELECTIONMODE">SCI_GETSELECTIONMODE</a><br />
      <a class="message" href="#SCI_GETLINESELSTARTPOSITION">SCI_GETLINESELSTARTPOSITION(int line)</a><br />
      <a class="message" href="#SCI_GETLINESELENDPOSITION">SCI_GETLINESELENDPOSITION(int line)</a><br />
@@ -1096,7 +1096,7 @@ struct TextToFind {
     <p><b id="SCI_SELECTIONISRECTANGLE">SCI_SELECTIONISRECTANGLE</b><br />
      This returns 1 if the current selection is in rectangle mode, 0 if not.</p>
 
-    <p><b id="SCI_SETSELECTIONMODE">SCI_SETSELECTIONMODE</b><br />
+    <p><b id="SCI_SETSELECTIONMODE">SCI_SETSELECTIONMODE(int mode)</b><br />
     <b id="SCI_GETSELECTIONMODE">SCI_GETSELECTIONMODE</b><br />
     The two functions set and get the selection mode, which can be
      stream (<code>SC_SEL_STREAM</code>=1) or
