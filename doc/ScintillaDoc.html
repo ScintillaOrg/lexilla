@@ -786,6 +786,10 @@ struct TextToFind {
     <p>GTK+ does not really support <code>SCI_CANPASTE</code> and always returns <code>TRUE</code>
     unless the document is read-only.</p>
 
+    <p>On X, the clipboard is asynchronous and may require several messages between
+    the destination and source applications. Data from SCI_PASTE will not arrive in the 
+    document immediately.</p>
+
      <b id="SCI_COPYRANGE">SCI_COPYRANGE(int start, int end)</b><br />
      <b id="SCI_COPYTEXT">SCI_COPYTEXT(int length, const char *text)</b><br />
     <p><code>SCI_COPYRANGE</code> copies a range of text from the document to
