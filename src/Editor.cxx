@@ -181,14 +181,11 @@ void LineLayoutCache::AllocateForLevel(int linesOnScreen, int linesInDoc) {
 	}
 	if (lengthForLevel > size) {
 		Deallocate();
-	} else {
-		if (lengthForLevel < length) {
-			for (int i=lengthForLevel; i<length; i++) {
-				delete cache[i];
-				cache[i] = 0;
-			}
+	} else if (lengthForLevel < length) {
+		for (int i=lengthForLevel; i<length; i++) {
+			delete cache[i];
+			cache[i] = 0;
 		}
-		Invalidate(LineLayout::llInvalid);
 	}
 	if (!cache) {
 		Allocate(lengthForLevel);
@@ -1219,10 +1216,12 @@ void Editor::InvalidateCaret() {
 }
 
 void Editor::NeedWrapping(int docLineStartWrapping) {
-	docLineLastWrapped = docLineStartWrapping - 1;
-	if (docLineLastWrapped < -1)
-		docLineLastWrapped = -1;
-	llc.Invalidate(LineLayout::llPositions);
+	if (docLineLastWrapped > (docLineStartWrapping - 1)) {
+		docLineLastWrapped = docLineStartWrapping - 1;
+		if (docLineLastWrapped < -1)
+			docLineLastWrapped = -1;
+		llc.Invalidate(LineLayout::llPositions);
+	}
 }
 
 // Check if wrapping needed and perform any needed wrapping.
@@ -1622,6 +1621,9 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 	if ((ll->validity == LineLayout::llPositions) || (ll->widthLine != width)) {
 		ll->widthLine = width;
 		if (width == LineLayout::wrapWidthInfinite) {
+			ll->lines = 1;
+		} else if (width > ll->positions[ll->numCharsInLine]) {
+			// Simple common case where line does not need wrapping.
 			ll->lines = 1;
 		} else {
 			ll->lines = 0;
