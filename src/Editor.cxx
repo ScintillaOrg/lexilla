@@ -475,6 +475,7 @@ int Editor::MovePositionTo(int newPos, bool extend) {
 	}
 	EnsureCaretVisible();
 	ShowCaretAtCurrentPosition();
+	NotifyMove(newPos);
 	return 0;
 }
 
