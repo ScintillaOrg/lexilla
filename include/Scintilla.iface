@@ -1544,6 +1544,7 @@ val SCLEX_CPPNOCASE=35
 val SCLEX_FORTRAN=36
 val SCLEX_F77=37
 val SCLEX_CSS=38
+val SCLEX_POV=39
 
 # When a lexer specifies its language as SCLEX_AUTOMATIC it receives a
 # value assigned in sequence from SCLEX_AUTOMATIC+1.
@@ -2012,7 +2013,19 @@ val SCE_CSS_IMPORTANT=11
 val SCE_CSS_DIRECTIVE=12
 val SCE_CSS_DOUBLESTRING=13
 val SCE_CSS_SINGLESTRING=14
-
+# Lexical states for SCLEX_POV
+lex POV=SCLEX_POV SCE_POV_
+val SCE_POV_DEFAULT=0
+val SCE_POV_COMMENT=1
+val SCE_POV_COMMENTLINE=2
+val SCE_POV_COMMENTDOC=3
+val SCE_POV_NUMBER=4
+val SCE_POV_WORD=5
+val SCE_POV_STRING=6
+val SCE_POV_OPERATOR=7
+val SCE_POV_IDENTIFIER=8
+val SCE_POV_BRACE=9
+val SCE_POV_WORD2=10
 # Events
 
 evt void StyleNeeded=2000(int position)
