@@ -915,7 +915,7 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 				lenRet = pre->eopat[0] - pre->bopat[0];
 				if (increment == -1) {
 					// Check for the last match on this line.
-					while (success) {
+					while (success && (pre->eopat[0] < endOfLine)) {
 						success = pre->Execute(di, pre->eopat[0], endOfLine);
 						if (success) {
 							if (pre->eopat[0] <= minPos) {
