@@ -45,7 +45,7 @@ protected:
 
 	virtual void RefreshColourPalette(Palette &pal, bool want);
 	
-	virtual void AddChar(char ch);
+	virtual void AddCharUTF(char *s, unsigned int len);
 	void Command(int cmdId);
 	virtual int KeyCommand(UINT iMessage);
 	

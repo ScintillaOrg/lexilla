@@ -192,7 +192,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void SetScrollBarsTo(PRectangle rsClient);
 	void SetScrollBars();
 
-	virtual void AddChar(char ch);
+	void AddChar(char ch);
+	virtual void AddCharUTF(char *s, unsigned int len);
 	void ClearSelection();
 	void ClearAll();
 	void Cut();

@@ -52,11 +52,11 @@ void ScintillaBase::RefreshColourPalette(Palette &pal, bool want) {
 	ct.RefreshColourPalette(pal, want);
 }
 
-void ScintillaBase::AddChar(char ch) {
+void ScintillaBase::AddCharUTF(char *s, unsigned int len) {
 	bool acActiveBeforeCharAdded = ac.Active();
-	Editor::AddChar(ch);
+	Editor::AddCharUTF(s, len);
 	if (acActiveBeforeCharAdded)
-		AutoCompleteChanged(ch);
+		AutoCompleteChanged(s[0]);
 }
 
 void ScintillaBase::Command(int cmdId) {

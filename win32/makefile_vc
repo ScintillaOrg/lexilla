@@ -35,7 +35,7 @@ CXXFLAGS=$(CXXFLAGS) /Ox /MD
 ALL:	$(COMPONENT) $(LEXCOMPONENT) $(DIR_O)\ScintillaWinS.obj $(DIR_O)\WindowAccessor.obj
 
 clean:
-	del /q $(DIR_O)\*.obj $(COMPONENT) $(LEXCOMPONENT) $(DIR_O)\*.res $(DIR_BIN)\*.map
+	del /q $(DIR_O)\*.obj $(DIR_O)\*.pdb $(COMPONENT) $(LEXCOMPONENT) $(DIR_O)\*.res $(DIR_BIN)\*.map
 
 SOBJS	= $(DIR_O)\ScintillaWin.obj $(DIR_O)\ScintillaBase.obj \
 	$(DIR_O)\Editor.obj $(DIR_O)\Document.obj \

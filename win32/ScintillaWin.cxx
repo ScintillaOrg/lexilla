@@ -67,7 +67,9 @@ public:
 	void **vtbl;
 	int ref;
 	int pos;
-	FormatEnumerator(int pos_);
+	CLIPFORMAT formats[2];
+	int formatsLen;
+	FormatEnumerator(int pos_, CLIPFORMAT formats_[], int formatsLen_);
 };
 
 class DropSource {
@@ -165,6 +167,8 @@ public:
 	// Implement important part of IDataObject
 	STDMETHODIMP GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM);
 
+	bool IsUnicodeMode() const;
+	
 	static void Register(HINSTANCE hInstance_);
 	friend class DropSource;
 	friend class DataObject;
@@ -273,7 +277,7 @@ LRESULT ScintillaWin::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 			BeginPaint(wMain.GetID(), &ps);
 			Surface surfaceWindow;
 			surfaceWindow.Init(ps.hdc);
-			surfaceWindow.SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
+			surfaceWindow.SetUnicodeMode(IsUnicodeMode());
 			rcPaint = PRectangle(ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right, ps.rcPaint.bottom);
 			PRectangle rcText = GetTextRectangle();
 			paintingAllText = rcPaint.Contains(rcText);
@@ -391,10 +395,22 @@ LRESULT ScintillaWin::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		} else
 			return DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
 
-	case WM_CHAR:
-		//Platform::DebugPrintf("S char proc %d %x %x\n",iMessage, wParam, lParam);
-		if (!iscntrl(wParam&0xff))
-			AddChar(static_cast<char>(wParam&0xff));
+	case WM_CHAR: {
+			char utfval[4]="\0\0\0";
+			if (IsUnicodeMode()) {
+				if ((wParam > 0xff) || (!iscntrl(wParam))) {
+					wchar_t uchar = wParam;
+					unsigned int len = UTF8Length(&uchar, 1);
+					UTF8FromUCS2(&uchar, 1, utfval, len);
+					utfval[len] = '\0';
+					AddCharUTF(utfval,len);
+				}
+			} else {
+				if (!iscntrl(wParam&0xff)) {
+					AddChar(static_cast<char>(wParam&0xff));
+				}
+			}
+		}
 		return 1;
 
 	case WM_KEYDOWN:
@@ -464,7 +480,7 @@ LRESULT ScintillaWin::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	case EM_CANPASTE: {
 			::OpenClipboard(wMain.GetID());
 			HGLOBAL hmemSelection = ::GetClipboardData(CF_TEXT);
-			if (!hmemSelection && (SC_CP_UTF8 == pdoc->dbcsCodePage))
+			if (!hmemSelection && IsUnicodeMode())
 				hmemSelection = ::GetClipboardData(CF_UNICODETEXT);
 			if (hmemSelection)
 				::GlobalUnlock(hmemSelection);
@@ -610,7 +626,7 @@ void ScintillaWin::Paste() {
 	::OpenClipboard(wMain.GetID());
 	bool isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect);
 	HGLOBAL hmemUSelection = 0;
-	if (SC_CP_UTF8 == pdoc->dbcsCodePage) {
+	if (IsUnicodeMode()) {
 		hmemUSelection = ::GetClipboardData(CF_UNICODETEXT);
 		if (hmemUSelection) {
 			wchar_t *uptr = static_cast<wchar_t *>(::GlobalLock(hmemUSelection));
@@ -715,8 +731,8 @@ STDMETHODIMP FormatEnumerator_Next(FormatEnumerator *fe, ULONG celt, FORMATETC *
 	if (rgelt == NULL) return E_POINTER;
 	// We only support one format, so this is simple.
 	unsigned int putPos = 0;
-	while ((fe->pos < 1) && (putPos < celt)) {
-		rgelt->cfFormat = CF_TEXT;
+	while ((fe->pos < fe->formatsLen) && (putPos < celt)) {
+		rgelt->cfFormat = fe->formats[fe->pos];
 		rgelt->ptd = 0;
 		rgelt->dwAspect = DVASPECT_CONTENT;
 		rgelt->lindex = -1;
@@ -737,7 +753,7 @@ STDMETHODIMP FormatEnumerator_Reset(FormatEnumerator *fe) {
 	return S_OK;
 }
 STDMETHODIMP FormatEnumerator_Clone(FormatEnumerator *fe, IEnumFORMATETC **ppenum) {
-	FormatEnumerator *pfe = new FormatEnumerator(fe->pos);
+	FormatEnumerator *pfe = new FormatEnumerator(fe->pos, fe->formats, fe->formatsLen);
 	return FormatEnumerator_QueryInterface(pfe, IID_IEnumFORMATETC,
 	                                       reinterpret_cast<void **>(ppenum));
 }
@@ -752,10 +768,13 @@ static void *vtFormatEnumerator[] = {
 	FormatEnumerator_Clone
 };
 
-FormatEnumerator::FormatEnumerator(int pos_) {
+FormatEnumerator::FormatEnumerator(int pos_, CLIPFORMAT formats_[], int formatsLen_) {
 	vtbl = vtFormatEnumerator;
 	ref = 0;   // First QI adds first reference...
 	pos = pos_;
+	formatsLen = formatsLen_;
+	for (int i=0;i<formatsLen;i++)
+		formats[i] = formats_[i];
 }
 
 // Implement IUnknown
@@ -826,8 +845,10 @@ STDMETHODIMP DataObject_QueryGetData(DataObject *pd, FORMATETC *pFE) {
 		return S_OK;
 	}
 	
-	if (
-	    ((pFE->cfFormat != CF_TEXT) && (pFE->cfFormat != CF_UNICODETEXT) && (pFE->cfFormat != CF_HDROP)) ||
+	bool formatOK = (pFE->cfFormat == CF_TEXT) || 
+		((pFE->cfFormat == CF_UNICODETEXT) && pd->sci->IsUnicodeMode()) || 
+		(pFE->cfFormat == CF_HDROP);
+	if (!formatOK ||
 	    pFE->ptd != 0 ||
 	    (pFE->dwAspect & DVASPECT_CONTENT) == 0 ||
 	    pFE->lindex != -1 ||
@@ -841,9 +862,12 @@ STDMETHODIMP DataObject_QueryGetData(DataObject *pd, FORMATETC *pFE) {
 	return S_OK;
 }
 
-STDMETHODIMP DataObject_GetCanonicalFormatEtc(DataObject *, FORMATETC *, FORMATETC *pFEOut) {
+STDMETHODIMP DataObject_GetCanonicalFormatEtc(DataObject *pd, FORMATETC *, FORMATETC *pFEOut) {
 	//Platform::DebugPrintf("DOB GetCanon\n");
-	pFEOut->cfFormat = CF_TEXT;
+	if (pd->sci->IsUnicodeMode())
+		pFEOut->cfFormat = CF_UNICODETEXT;
+	else
+		pFEOut->cfFormat = CF_TEXT;
 	pFEOut->ptd = 0;
 	pFEOut->dwAspect = DVASPECT_CONTENT;
 	pFEOut->lindex = -1;
@@ -856,13 +880,20 @@ STDMETHODIMP DataObject_SetData(DataObject *, FORMATETC *, STGMEDIUM *, BOOL) {
 	return E_FAIL;
 }
 
-STDMETHODIMP DataObject_EnumFormatEtc(DataObject *, DWORD dwDirection, IEnumFORMATETC **ppEnum) {
+STDMETHODIMP DataObject_EnumFormatEtc(DataObject *pd, DWORD dwDirection, IEnumFORMATETC **ppEnum) {
 	//Platform::DebugPrintf("DOB EnumFormatEtc %d\n", dwDirection);
 	if (dwDirection != DATADIR_GET) {
 		*ppEnum = 0;
 		return E_FAIL;
 	}
-	FormatEnumerator *pfe = new FormatEnumerator(0);
+	FormatEnumerator *pfe;
+	if (pd->sci->IsUnicodeMode()) {
+		CLIPFORMAT formats[] = {CF_UNICODETEXT, CF_TEXT};
+		pfe = new FormatEnumerator(0, formats, 2);
+	} else {
+		CLIPFORMAT formats[] = {CF_TEXT};
+		pfe = new FormatEnumerator(0, formats,1);
+	}
 	return FormatEnumerator_QueryInterface(pfe, IID_IEnumFORMATETC,
 	                                       reinterpret_cast<void **>(ppEnum));
 }
@@ -1011,7 +1042,7 @@ void ScintillaWin::CopySelTextToClipboard() {
 	}
 	::SetClipboardData(CF_TEXT, hand);
 
-	if (SC_CP_UTF8 == pdoc->dbcsCodePage) {
+	if (IsUnicodeMode()) {
 		int uchars = UCS2Length(selChars, bytes);
 		HGLOBAL uhand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, 
 			2 * (uchars + 1));
@@ -1110,7 +1141,7 @@ void ScintillaWin::FullPaint() {
 	HDC hdc = ::GetDC(wMain.GetID());
 	Surface surfaceWindow;
 	surfaceWindow.Init(hdc);
-	surfaceWindow.SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
+	surfaceWindow.SetUnicodeMode(IsUnicodeMode());
 	Paint(&surfaceWindow, rcPaint);
 	surfaceWindow.Release();
 	::ReleaseDC(wMain.GetID(), hdc);
@@ -1200,7 +1231,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 	wchar_t *udata = 0;
 	char *data = 0;
 
-	if (SC_CP_UTF8 == pdoc->dbcsCodePage) {
+	if (IsUnicodeMode()) {
 		FORMATETC fmtu = {CF_UNICODETEXT, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 		hr = pIDataSource->GetData(&fmtu, &medium);
 		if (SUCCEEDED(hr) && medium.hGlobal) {
@@ -1251,8 +1282,10 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 
 // Implement important part of IDataObject
 STDMETHODIMP ScintillaWin::GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM) {
-	if (
-	    ((pFEIn->cfFormat != CF_TEXT) && (pFEIn->cfFormat != CF_HDROP)) ||
+	bool formatOK = (pFEIn->cfFormat == CF_TEXT) || 
+		((pFEIn->cfFormat == CF_UNICODETEXT) && IsUnicodeMode()) || 
+		(pFEIn->cfFormat == CF_HDROP);
+	if (!formatOK ||
 	    pFEIn->ptd != 0 ||
 	    (pFEIn->dwAspect & DVASPECT_CONTENT) == 0 ||
 	    pFEIn->lindex != -1 ||
@@ -1269,22 +1302,42 @@ STDMETHODIMP ScintillaWin::GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM) {
 	}
 	//Platform::DebugPrintf("DOB GetData OK %d %x %x\n", lenDrag, pFEIn, pSTM);
 
-	HGLOBAL hand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, 
-		lenDrag + 1);
-	if (hand) {
-		char *ptr = static_cast<char *>(::GlobalLock(hand));
-		for (int i = 0; i < lenDrag; i++) {
-			ptr[i] = dragChars[i];
+	HGLOBAL hand;
+	if (pFEIn->cfFormat == CF_UNICODETEXT) {
+		int uchars = UCS2Length(dragChars, lenDrag);
+		hand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, 2 * (uchars + 1));
+		if (hand) {
+			wchar_t *uptr = static_cast<wchar_t *>(::GlobalLock(hand));
+			UCS2FromUTF8(dragChars, lenDrag, uptr, uchars);
+			uptr[uchars] = 0;
 		}
-		ptr[lenDrag] = '\0';
-		::GlobalUnlock(hand);
+	} else {
+		hand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, lenDrag + 1);
+		if (hand) {
+			char *ptr = static_cast<char *>(::GlobalLock(hand));
+			for (int i = 0; i < lenDrag; i++) {
+				ptr[i] = dragChars[i];
+			}
+			ptr[lenDrag] = '\0';
+		}
 	}
+	::GlobalUnlock(hand);
 	pSTM->hGlobal = hand;
 	pSTM->pUnkForRelease = 0;
 	return S_OK;
 }
 
+bool ScintillaWin::IsUnicodeMode() const {
+	return pdoc && (SC_CP_UTF8 == pdoc->dbcsCodePage);
+}
+
 const char scintillaClassName[] = "Scintilla";
+
+static BOOL IsNT() {
+		OSVERSIONINFO osv = {sizeof(OSVERSIONINFO),0,0,0,0,""};
+		::GetVersionEx(&osv);
+		return osv.dwPlatformId == VER_PLATFORM_WIN32_NT;
+}
 
 void ScintillaWin::Register(HINSTANCE hInstance_) {
 
@@ -1292,38 +1345,45 @@ void ScintillaWin::Register(HINSTANCE hInstance_) {
 
 	InitCommonControls();
 
-	WNDCLASS wndclass;
-
 	// Register the Scintilla class
-
-	wndclass.style = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW;
-	wndclass.lpfnWndProc = ::ScintillaWin::SWndProc;
-	wndclass.cbClsExtra = 0;
-	// Reserve extra bytes for each instance of the window;
-	// we will use these bytes to store a pointer to the C++
-	// (ScintillaWin) object corresponding to the window.
-	wndclass.cbWndExtra = sizeof(ScintillaWin *);
-	wndclass.hInstance = hInstance;
-	wndclass.hIcon = NULL;
-	//wndclass.hCursor = LoadCursor(NULL,IDC_IBEAM);
-	wndclass.hCursor = NULL;
-	wndclass.hbrBackground = NULL;
-	wndclass.lpszMenuName = NULL;
-	wndclass.lpszClassName = scintillaClassName;
-
-	if (!RegisterClass(&wndclass)) {
-		//Platform::DebugPrintf("Could not register class\n");
-		// TODO: fail nicely
-		return;
+	if (IsNT()) {
+		// Register Scintilla as a wide character window
+		WNDCLASSW wndclass;
+		wndclass.style = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW;
+		wndclass.lpfnWndProc = ::ScintillaWin::SWndProc;
+		wndclass.cbClsExtra = 0;
+		wndclass.cbWndExtra = sizeof(ScintillaWin *);
+		wndclass.hInstance = hInstance;
+		wndclass.hIcon = NULL;
+		wndclass.hCursor = NULL;
+		wndclass.hbrBackground = NULL;
+		wndclass.lpszMenuName = NULL;
+		wndclass.lpszClassName = L"Scintilla";
+		::RegisterClassW(&wndclass);
+	} else {
+		// Register Scintilla as a normal character window
+		WNDCLASS wndclass;
+		wndclass.style = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW;
+		wndclass.lpfnWndProc = ::ScintillaWin::SWndProc;
+		wndclass.cbClsExtra = 0;
+		wndclass.cbWndExtra = sizeof(ScintillaWin *);
+		wndclass.hInstance = hInstance;
+		wndclass.hIcon = NULL;
+		wndclass.hCursor = NULL;
+		wndclass.hbrBackground = NULL;
+		wndclass.lpszMenuName = NULL;
+		wndclass.lpszClassName = scintillaClassName;
+		::RegisterClass(&wndclass);
 	}
 
 	// Register the CallTip class
+	WNDCLASS wndclassc;
 
-	wndclass.lpfnWndProc = ScintillaWin::CTWndProc;
-	wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wndclass.lpszClassName = callClassName;
+	wndclassc.lpfnWndProc = ScintillaWin::CTWndProc;
+	wndclassc.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wndclassc.lpszClassName = callClassName;
 
-	if (!RegisterClass(&wndclass)) {
+	if (!RegisterClass(&wndclassc)) {
 		//Platform::DebugPrintf("Could not register class\n");
 		return;
 	}

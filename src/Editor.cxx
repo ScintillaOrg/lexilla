@@ -1300,6 +1300,13 @@ void Editor::SetScrollBars() {
 }
 
 void Editor::AddChar(char ch) {
+	char s[2];
+	s[0] = ch;
+	s[1] = '\0';
+	AddCharUTF(s, 1);
+}
+
+void Editor::AddCharUTF(char *s, unsigned int len) {
 	bool wasSelection = currentPos != anchor;
 	ClearSelection();
 	if (inOverstrike && !wasSelection) {
@@ -1309,11 +1316,11 @@ void Editor::AddChar(char ch) {
 			}
 		}
 	}
-	pdoc->InsertChar(currentPos, ch);
-	SetEmptySelection(currentPos + 1);
+	pdoc->InsertString(currentPos, s, len);
+	SetEmptySelection(currentPos + len);
 	EnsureCaretVisible();
 	SetLastXChosen();
-	NotifyChar(ch);
+	NotifyChar(s[0]);
 }
 
 void Editor::ClearSelection() {
