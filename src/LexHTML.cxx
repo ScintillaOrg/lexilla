@@ -993,7 +993,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				state = SCE_HB_COMMENTLINE;
 			} else if (isoperator(ch)) {
 				styler.ColourTo(i - 1, StateToPrint);
-				styler.ColourTo(i, SCE_HB_DEFAULT);
+				styler.ColourTo(i, statePrintForState(SCE_HB_DEFAULT, inScriptType));
 				state = SCE_HB_DEFAULT;
 			} else if ((ch == ' ') || (ch == '\t')) {
 				if (state == SCE_HB_START) {
