@@ -459,7 +459,7 @@ struct VarChain {
 	VarChain(const char*var_=NULL, const VarChain *link_=NULL): var(var_), link(link_) {}
 
 	bool contains(const char *testVar) const {
-		return (var && (0 == strcmp(var, testVar))) 
+		return (var && (0 == strcmp(var, testVar)))
 			|| (link && link->contains(testVar));
 	}
 
@@ -790,11 +790,13 @@ void WordList::Clear() {
 	list = 0;
 	len = 0;
 	sorted = false;
+	sortedNoCase = false;
 }
 
 void WordList::Set(const char *s) {
 	list = StringDup(s);
 	sorted = false;
+	sortedNoCase = false;
 	words = ArrayFromWordList(list, &len, onlyLineEnds);
 	wordsNoCase = new char * [len + 1];
 	memcpy(wordsNoCase, words, (len + 1) * sizeof (*words));
@@ -808,6 +810,7 @@ char *WordList::Allocate(int size) {
 
 void WordList::SetFromAllocated() {
 	sorted = false;
+	sortedNoCase = false;
 	words = ArrayFromWordList(list, &len, onlyLineEnds);
 	wordsNoCase = new char * [len + 1];
 	memcpy(wordsNoCase, words, (len + 1) * sizeof (*words));
@@ -823,9 +826,12 @@ int cmpStringNoCase(const void *a1, const void *a2) {
 	return CompareCaseInsensitive(*(char**)(a1), *(char**)(a2));
 }
 
-static void SortWordList(char **words, char **wordsNoCase, unsigned int len) {
+static void SortWordList(char **words, unsigned int len) {
 	qsort(reinterpret_cast<void*>(words), len, sizeof(*words),
 	      cmpString);
+}
+
+static void SortWordListNoCase(char **wordsNoCase, unsigned int len) {
 	qsort(reinterpret_cast<void*>(wordsNoCase), len, sizeof(*wordsNoCase),
 	      cmpStringNoCase);
 }
@@ -835,7 +841,7 @@ bool WordList::InList(const char *s) {
 		return false;
 	if (!sorted) {
 		sorted = true;
-		SortWordList(words, wordsNoCase, len);
+		SortWordList(words, len);
 		for (unsigned int k = 0; k < (sizeof(starts) / sizeof(starts[0])); k++)
 			starts[k] = -1;
 		for (int l = len - 1; l >= 0; l--) {
@@ -892,11 +898,11 @@ const char *WordList::GetNearestWord(const char *wordStart, int searchLen, bool 
 
 	if (0 == words)
 		return NULL;
-	if (!sorted) {
-		sorted = true;
-		SortWordList(words, wordsNoCase, len);
-	}
 	if (ignoreCase) {
+		if (!sortedNoCase) {
+			sortedNoCase = true;
+			SortWordListNoCase(wordsNoCase, len);
+		}
 		while (start <= end) { // binary searching loop
 			pivot = (start + end) >> 1;
 			word = wordsNoCase[pivot];
@@ -912,7 +918,7 @@ const char *WordList::GetNearestWord(const char *wordStart, int searchLen, bool 
 				while (end < len-1 && !CompareNCaseInsensitive(wordStart, wordsNoCase[end+1], searchLen)) {
 					end++;
 				}
-				
+
 				// Finds first word in a series of equal words
 				for (pivot = start; pivot <= end; pivot++) {
 					word = wordsNoCase[pivot];
@@ -930,6 +936,10 @@ const char *WordList::GetNearestWord(const char *wordStart, int searchLen, bool 
 				end = pivot - 1;
 		}
 	} else { // preserve the letter case
+		if (!sorted) {
+			sorted = true;
+			SortWordList(words, len);
+		}
 		while (start <= end) { // binary searching loop
 			pivot = (start + end) >> 1;
 			word = words[pivot];
@@ -945,7 +955,7 @@ const char *WordList::GetNearestWord(const char *wordStart, int searchLen, bool 
 				while (end < len-1 && !strncmp(wordStart, words[end+1], searchLen)) {
 					end++;
 				}
-				
+
 				// Finds first word in a series of equal words
 				pivot = start;
 				while (pivot <= end) {
@@ -1020,11 +1030,11 @@ char *WordList::GetNearestWords(
 
 	if (0 == words)
 		return NULL;
-	if (!sorted) {
-		sorted = true;
-		SortWordList(words, wordsNoCase, len);
-	}
 	if (ignoreCase) {
+		if (!sortedNoCase) {
+			sortedNoCase = true;
+			SortWordListNoCase(wordsNoCase, len);
+		}
 		while (start <= end) { // Binary searching loop
 			pivot = (start + end) / 2;
 			cond = CompareNCaseInsensitive(wordStart, wordsNoCase[pivot], searchLen);
@@ -1053,6 +1063,10 @@ char *WordList::GetNearestWords(
 			}
 		}
 	} else {	// Preserve the letter case
+		if (!sorted) {
+			sorted = true;
+			SortWordList(words, len);
+		}
 		while (start <= end) { // Binary searching loop
 			pivot = (start + end) / 2;
 			cond = strncmp(wordStart, words[pivot], searchLen);
