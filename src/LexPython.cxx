@@ -402,4 +402,4 @@ static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unuse
 	//styler.SetLevel(lineCurrent, indentCurrent);
 }
 
-LexerModule lmPython(SCLEX_PYTHON, ColourisePyDoc, "python", FoldPyDoc);
+const LexerModule lmPython(SCLEX_PYTHON, ColourisePyDoc, "python", FoldPyDoc);

@@ -19,7 +19,7 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-LexerModule *LexerModule::base = 0;
+const LexerModule *LexerModule::base = 0;
 int LexerModule::nextLanguage = SCLEX_AUTOMATIC+1;
 
 LexerModule::LexerModule(int language_, LexerFunction fnLexer_,
@@ -36,8 +36,8 @@ LexerModule::LexerModule(int language_, LexerFunction fnLexer_,
 	}
 }
 
-LexerModule *LexerModule::Find(int language) {
-	LexerModule *lm = base;
+const LexerModule *LexerModule::Find(int language) {
+	const LexerModule *lm = base;
 	while (lm) {
 		if (lm->language == language) {
 			return lm;
@@ -47,9 +47,9 @@ LexerModule *LexerModule::Find(int language) {
 	return 0;
 }
 
-LexerModule *LexerModule::Find(const char *languageName) {
+const LexerModule *LexerModule::Find(const char *languageName) {
 	if (languageName) {
-		LexerModule *lm = base;
+		const LexerModule *lm = base;
 		while (lm) {
 			if (lm->languageName && 0 == strcmp(lm->languageName, languageName)) {
 				return lm;
@@ -61,13 +61,13 @@ LexerModule *LexerModule::Find(const char *languageName) {
 }
 
 void LexerModule::Lex(unsigned int startPos, int lengthDoc, int initStyle,
-	  WordList *keywordlists[], Accessor &styler) {
+	  WordList *keywordlists[], Accessor &styler) const {
 	if (fnLexer)
 		fnLexer(startPos, lengthDoc, initStyle, keywordlists, styler);
 }
 
 void LexerModule::Fold(unsigned int startPos, int lengthDoc, int initStyle,
-	  WordList *keywordlists[], Accessor &styler) {
+	  WordList *keywordlists[], Accessor &styler) const {
 	if (fnFolder) {
 		int lineCurrent = styler.GetLine(startPos);
 		// Move back one line in case deletion wrecked current line fold state
@@ -95,7 +95,7 @@ static void ColouriseNullDoc(unsigned int startPos, int length, int, WordList *[
 	}
 }
 
-LexerModule lmNull(SCLEX_NULL, ColouriseNullDoc, "null");
+const LexerModule lmNull(SCLEX_NULL, ColouriseNullDoc, "null");
 
 #ifdef __vms
 #define LINK_LEXERS

@@ -49,7 +49,7 @@ inline void classifyWordAda(unsigned int start, unsigned int end,
 }
 
 
-inline bool isAdaOperator(char ch) {
+static inline bool isAdaOperator(char ch) {
 	
 	if (ch == '&' || ch == '\'' || ch == '(' || ch == ')' ||
 	        ch == '*' || ch == '+' || ch == ',' || ch == '-' ||
@@ -195,4 +195,4 @@ static void ColouriseAdaDoc(unsigned int startPos, int length, int initStyle,
 //	}
 }
 
-LexerModule lmAda(SCLEX_ADA, ColouriseAdaDoc, "ada");
+const LexerModule lmAda(SCLEX_ADA, ColouriseAdaDoc, "ada");

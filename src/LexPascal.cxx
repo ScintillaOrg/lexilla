@@ -18,7 +18,6 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-
 static int classifyWordPascal(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler) {
 	char s[100];
 	for (unsigned int i = 0; i < end - start + 1 && i < 30; i++) {
@@ -219,4 +218,4 @@ static void ColourisePascalDoc(unsigned int startPos, int length, int initStyle,
 	}
 }
 
-LexerModule lmPascal(SCLEX_PASCAL, ColourisePascalDoc, "pascal");
+const LexerModule lmPascal(SCLEX_PASCAL, ColourisePascalDoc, "pascal");

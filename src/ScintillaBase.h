@@ -41,7 +41,7 @@ protected:
 
 #ifdef SCI_LEXER
 	int lexLanguage;
-	LexerModule *lexCurrent;
+	const LexerModule *lexCurrent;
 	PropSet props;
 	enum {numWordLists=6};
 	WordList *keyWordLists[numWordLists+1];

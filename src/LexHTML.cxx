@@ -27,11 +27,11 @@
 enum { eScriptNone = 0, eScriptJS, eScriptVBS, eScriptPython, eScriptPHP, eScriptXML, eScriptSGML, eScriptSGMLblock };
 enum { eHtml = 0, eNonHtmlScript, eNonHtmlPreProc, eNonHtmlScriptPreProc };
 
-inline bool IsAWordChar(const int ch) {
+static inline bool IsAWordChar(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_');
 }
 
-inline bool IsAWordStart(const int ch) {
+static inline bool IsAWordStart(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '_');
 }
 
@@ -358,11 +358,11 @@ static int StateForScript(int scriptLanguage) {
 	return Result;
 }
 
-inline bool ishtmlwordchar(char ch) {
+static inline bool ishtmlwordchar(char ch) {
 	return isalnum(ch) || ch == '.' || ch == '-' || ch == '_' || ch == ':' || ch == '!' || ch == '#';
 }
 
-inline bool issgmlwordchar(char ch) {
+static inline bool issgmlwordchar(char ch) {
 	return isalnum(ch) || ch == '.' || ch == '_' || ch == ':' || ch == '!' || ch == '#' || ch == '[';
 }
 
@@ -1842,7 +1842,7 @@ static void ColourisePHPDoc(unsigned int startPos, int length, int initStyle, Wo
 	sc.Complete();
 }
 
-LexerModule lmHTML(SCLEX_HTML, ColouriseHyperTextDoc, "hypertext");
-LexerModule lmXML(SCLEX_XML, ColouriseHyperTextDoc, "xml");
-LexerModule lmASP(SCLEX_ASP, ColouriseASPDoc, "asp");
-LexerModule lmPHP(SCLEX_PHP, ColourisePHPDoc, "php");
+const LexerModule lmHTML(SCLEX_HTML, ColouriseHyperTextDoc, "hypertext");
+const LexerModule lmXML(SCLEX_XML, ColouriseHyperTextDoc, "xml");
+const LexerModule lmASP(SCLEX_ASP, ColouriseASPDoc, "asp");
+const LexerModule lmPHP(SCLEX_PHP, ColourisePHPDoc, "php");

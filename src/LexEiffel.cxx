@@ -21,7 +21,7 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-inline bool isEiffelOperator(unsigned int ch) {
+static inline bool isEiffelOperator(unsigned int ch) {
 	// '.' left out as it is used to make up numbers
 	return ch == '*' || ch == '/' || ch == '\\' || ch == '-' || ch == '+' ||
 	        ch == '(' || ch == ')' || ch == '=' ||
@@ -32,11 +32,11 @@ inline bool isEiffelOperator(unsigned int ch) {
 		ch == '!' || ch == '@' || ch == '?';
 }
 
-inline bool IsAWordChar(unsigned int  ch) {
+static inline bool IsAWordChar(unsigned int  ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_');
 }
 
-inline bool IsAWordStart(unsigned int ch) {
+static inline bool IsAWordStart(unsigned int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '_');
 }
 
@@ -226,5 +226,5 @@ static void FoldEiffelDocKeyWords(unsigned int startPos, int length, int /* init
 	styler.SetLevel(lineCurrent, levelPrev | flagsNext);
 }
 
-LexerModule lmEiffel(SCLEX_EIFFEL, ColouriseEiffelDoc, "eiffel", FoldEiffelDocIndent);
-LexerModule lmEiffelkw(SCLEX_EIFFELKW, ColouriseEiffelDoc, "eiffelkw", FoldEiffelDocKeyWords);
+const LexerModule lmEiffel(SCLEX_EIFFEL, ColouriseEiffelDoc, "eiffel", FoldEiffelDocIndent);
+const LexerModule lmEiffelkw(SCLEX_EIFFELKW, ColouriseEiffelDoc, "eiffelkw", FoldEiffelDocKeyWords);

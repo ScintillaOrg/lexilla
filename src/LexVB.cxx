@@ -24,19 +24,19 @@ static bool IsVBComment(Accessor &styler, int pos, int len) {
 	return len>0 && styler[pos]=='\'';
 }
 
-inline bool IsTypeCharacter(const int ch) {
+static inline bool IsTypeCharacter(const int ch) {
 	return ch == '%' || ch == '&' || ch == '@' || ch == '!' || ch == '#' || ch == '$';
 }
 
-inline bool IsAWordChar(const int ch) {
+static inline bool IsAWordChar(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_');
 }
 
-inline bool IsAWordStart(const int ch) {
+static inline bool IsAWordStart(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '_');
 }
 
-inline bool IsADateCharacter(const int ch) {
+static inline bool IsADateCharacter(const int ch) {
 	return (ch < 0x80) && 
 		(isalnum(ch) || ch == '|' || ch == '-' || ch == '/' || ch == ':' || ch == ' ' || ch == '\t');
 }
@@ -200,6 +200,6 @@ static void ColouriseVBScriptDoc(unsigned int startPos, int length, int initStyl
 	ColouriseVBDoc(startPos, length, initStyle, keywordlists, styler, true);
 }
 
-LexerModule lmVB(SCLEX_VB, ColouriseVBNetDoc, "vb", FoldVBDoc);
-LexerModule lmVBScript(SCLEX_VBSCRIPT, ColouriseVBScriptDoc, "vbscript", FoldVBDoc);
+const LexerModule lmVB(SCLEX_VB, ColouriseVBNetDoc, "vb", FoldVBDoc);
+const LexerModule lmVBScript(SCLEX_VBSCRIPT, ColouriseVBScriptDoc, "vbscript", FoldVBDoc);
 

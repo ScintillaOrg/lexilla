@@ -28,18 +28,18 @@ static inline bool IsAWordChar(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_');
 }
 
-inline bool IsAWordStart(const int ch) {
+static inline bool IsAWordStart(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '_');
 }
 
-inline bool IsADoxygenChar(const int ch) {
+static inline bool IsADoxygenChar(const int ch) {
 	return (islower(ch) || ch == '$' || ch == '@' ||
 		    ch == '\\' || ch == '&' || ch == '<' ||
 			ch == '>' || ch == '#' || ch == '{' ||
 			ch == '}' || ch == '[' || ch == ']');
 }
 
-inline bool IsStateComment(const int state) {
+static inline bool IsStateComment(const int state) {
 	return ((state == SCE_C_COMMENT) ||
 		      (state == SCE_C_COMMENTLINE) ||
 		      (state == SCE_C_COMMENTDOC) ||
@@ -47,7 +47,7 @@ inline bool IsStateComment(const int state) {
 		      (state == SCE_C_COMMENTDOCKEYWORDERROR));
 }
 
-inline bool IsStateString(const int state) {
+static inline bool IsStateString(const int state) {
 	return ((state == SCE_C_STRING) || (state == SCE_C_VERBATIM));
 }
 
@@ -316,5 +316,5 @@ static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordLis
 	styler.SetLevel(lineCurrent, levelPrev | flagsNext);
 }
 
-LexerModule lmCPP(SCLEX_CPP, ColouriseCppDoc, "cpp", FoldCppDoc);
-LexerModule lmTCL(SCLEX_TCL, ColouriseCppDoc, "tcl", FoldCppDoc);
+const LexerModule lmCPP(SCLEX_CPP, ColouriseCppDoc, "cpp", FoldCppDoc);
+const LexerModule lmTCL(SCLEX_TCL, ColouriseCppDoc, "tcl", FoldCppDoc);

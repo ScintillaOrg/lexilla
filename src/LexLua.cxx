@@ -64,9 +64,6 @@ static void ColouriseLuaDoc(unsigned int startPos, int length, int initStyle, Wo
 	if (initStyle == SCE_LUA_STRINGEOL)
 		initStyle = SCE_LUA_DEFAULT;
 
-	int chPrevNonWhite = ' ';
-	int visibleChars = 0;
-
 	StyleContext sc(startPos, length, initStyle, styler);
 	if(startPos == 0 && sc.ch == '#') sc.SetState(SCE_LUA_COMMENTLINE);
 	for (; sc.More(); sc.Forward()) {
@@ -117,7 +114,6 @@ static void ColouriseLuaDoc(unsigned int startPos, int length, int initStyle, Wo
 		} else if (sc.state == SCE_LUA_COMMENTLINE ) {
 			if (sc.atLineEnd) {
 				sc.SetState(SCE_LUA_DEFAULT);
-				visibleChars = 0;
 			}
 		} else if (sc.state == SCE_LUA_STRING) {
 			if (sc.ch == '\\') {
@@ -129,7 +125,6 @@ static void ColouriseLuaDoc(unsigned int startPos, int length, int initStyle, Wo
 			} else if (sc.atLineEnd) {
 				sc.ChangeState(SCE_LUA_STRINGEOL);
 				sc.ForwardSetState(SCE_LUA_DEFAULT);
-				visibleChars = 0;
 			}
 			
 		} else if (sc.state == SCE_LUA_CHARACTER) {
@@ -142,7 +137,6 @@ static void ColouriseLuaDoc(unsigned int startPos, int length, int initStyle, Wo
 			} else if (sc.atLineEnd) {
 				sc.ChangeState(SCE_LUA_STRINGEOL);
 				sc.ForwardSetState(SCE_LUA_DEFAULT);
-				visibleChars = 0;
 			}
 		} else if (sc.state == SCE_LUA_LITERALSTRING) {
 			if (sc.chPrev == '[' && sc.ch == '[' && literalStringFlag != 1) 	{
@@ -174,17 +168,6 @@ static void ColouriseLuaDoc(unsigned int startPos, int length, int initStyle, Wo
 			}  else if (isLuaOperator(static_cast<char>(sc.ch))) {
 				sc.SetState(SCE_LUA_OPERATOR);
 			}
-		}
-		
-		if (sc.atLineEnd) {
-			// Reset states to begining of colourise so no surprises 
-			// if different sets of lines lexed.
-			chPrevNonWhite = ' ';
-			visibleChars = 0;
-		}
-		if (!IsASpace(sc.ch)) {
-			chPrevNonWhite = sc.ch;
-			visibleChars++;
 		}
 	}
 	sc.Complete();
@@ -255,4 +238,4 @@ static void FoldLuaDoc(unsigned int startPos, int length, int /* initStyle */, W
 	styler.SetLevel(lineCurrent, levelPrev | flagsNext);
 }
 
-LexerModule lmLua(SCLEX_LUA, ColouriseLuaDoc, "lua", FoldLuaDoc);
+const LexerModule lmLua(SCLEX_LUA, ColouriseLuaDoc, "lua", FoldLuaDoc);

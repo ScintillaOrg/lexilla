@@ -175,4 +175,4 @@ static void ColouriseConfDoc(unsigned int startPos, int length, int, WordList *k
 	delete []buffer;
 }
 
-LexerModule lmConf(SCLEX_CONF, ColouriseConfDoc, "conf");
+const LexerModule lmConf(SCLEX_CONF, ColouriseConfDoc, "conf");
