@@ -72,15 +72,18 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 
 	for (; sc.More(); sc.Forward()) {
 	
+		if (sc.atLineStart && (sc.state == SCE_C_STRING)) {
+			// Prevent SCE_C_STRINGEOL from leaking back to previous line
+			sc.SetState(SCE_C_STRING);
+		}
+
 		// Handle line continuation generically.
 		if (sc.ch == '\\') {
 			if (sc.Match("\\\n")) {
 				sc.Forward();
-				sc.Forward();
 				continue;
 			}
 			if (sc.Match("\\\r\n")) {
-				sc.Forward();
 				sc.Forward();
 				sc.Forward();
 				continue;
