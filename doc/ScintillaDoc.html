@@ -4393,8 +4393,8 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
     href="#SCI_SETREADONLY">SCI_SETREADONLY</a></code>.</p>
 
     <p><b id="SCN_KEY">SCN_KEY</b><br />
-     Reports all keys pressed. Used on GTK+ because of some problems with keyboard focus and is not
-    sent by the Windows version. <code>SCNotification.ch</code> holds the key code and
+     Reports all keys pressed but not consumed by Scintilla. Used on GTK+ because of 
+     some problems with keyboard focus and is not sent by the Windows version. <code>SCNotification.ch</code> holds the key code and
     <code>SCNotification.modifiers</code> holds the modifiers. This notification is sent if the
     modifiers include <code>SCMOD_ALT</code> or <code>SCMOD_CTRL</code> and the key code is less
     than 256.</p>
