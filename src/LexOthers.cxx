@@ -424,7 +424,7 @@ static void ColouriseErrorListLine(
 			styler.ColourTo(endPos, SCE_ERR_GCC);
 		} else if ((state == 13) || (state == 14) || (state == 15)) {
 			styler.ColourTo(endPos, SCE_ERR_MS);
-		} else if ((state == 22) || (state == 24)) {
+		} else if (((state == 22) || (state == 24)) && (lineBuffer[0] != '\t')) {
 			styler.ColourTo(endPos, SCE_ERR_CTAG);	
 		} else {
 			styler.ColourTo(endPos, SCE_ERR_DEFAULT);
