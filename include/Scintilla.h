@@ -14,6 +14,7 @@
 #if PLAT_WIN
 void Scintilla_RegisterClasses(void *hInstance);
 #endif
+int Scintilla_LinkLexers();
 
 // Here should be placed typedefs for uptr_t, an unsigned integer type large enough to
 // hold a pointer and sptr_t, a signed integer large enough to hold a pointer.
