@@ -4018,7 +4018,6 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETSAVEPOINT:
 		pdoc->SetSavePoint();
-		NotifySavePoint(true);
 		break;
 
 	case SCI_GETSTYLEDTEXT: {
