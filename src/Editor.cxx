@@ -551,6 +551,8 @@ void Editor::MoveCaretInsideView() {
 void Editor::EnsureCaretVisible(bool useMargin) {
 	//Platform::DebugPrintf("EnsureCaretVisible %d\n", xOffset);
 	PRectangle rcClient = GetTextRectangle();
+	int rcClientFullWidth = rcClient.Width();
+	bool forceHZero = false;
 	int posCaret = currentPos;
 	if (posDrag >= 0)
 		posCaret = posDrag;
@@ -569,7 +571,14 @@ void Editor::EnsureCaretVisible(bool useMargin) {
 	rcClient.left = rcClient.left + xMargin;
 	rcClient.right = rcClient.right - xMargin;
 
-	if (!rcClient.Contains(pt) || !rcClient.Contains(ptBottomCaret) || (caretPolicy & CARET_STRICT)) {
+	// If scrolled horizontally, check whether scrolling back to col 0 would
+	// still leave the caret on screen; do this if so since it's nicer
+	// to be able to see the start of lines
+	if (xOffset > 0 && pt.x >= 0 && pt.x <= rcClientFullWidth - xMargin) {
+		forceHZero = true;
+	}
+
+	if (!rcClient.Contains(pt) || !rcClient.Contains(ptBottomCaret) || (caretPolicy & CARET_STRICT) || (forceHZero)) {
 		//Platform::DebugPrintf("EnsureCaretVisible move, (%d,%d) (%d,%d)\n", pt.x, pt.y, rcClient.left, rcClient.right);
 		// It should be possible to scroll the window to show the caret,
 		// but this fails to remove the caret on GTK+
@@ -592,7 +601,9 @@ void Editor::EnsureCaretVisible(bool useMargin) {
 			}
 		}
 		int xOffsetNew = xOffset;
-		if (pt.x < rcClient.left) {
+		if (forceHZero) {
+			xOffsetNew = 0;
+		} else if (pt.x < rcClient.left) {
 			xOffsetNew = xOffset - (rcClient.left - pt.x);
 		} else if (pt.x >= rcClient.right) {
 			xOffsetNew = xOffset + (pt.x - rcClient.right);
