@@ -35,6 +35,9 @@
 // Include the main header for each platform
 
 #if PLAT_GTK
+#ifdef _MSC_VER
+#pragma warning(disable: 4505 4514 4710 4800)
+#endif
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #endif

@@ -100,7 +100,7 @@ class ScintillaWin :
 
 	bool capturedMouse;
 
-    bool hasOKText;
+	bool hasOKText;
 
 	CLIPFORMAT cfColumnSelect;
 	
@@ -193,7 +193,7 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 
 	capturedMouse = false;
 
-    hasOKText = false;
+	hasOKText = false;
 
 	// There does not seem to be a real standard for indicating that the clipboard contains a rectangular
 	// selection, so copy Developer Studio.

@@ -16,7 +16,11 @@
 
 bool EqualCaseInsensitive(const char *a, const char *b) {
 #if PLAT_GTK 
+#  ifdef G_OS_WIN32
+	return 0 == stricmp(a, b);
+#  else
 	return 0 == strcasecmp(a, b);
+#  endif 
 #elif PLAT_WIN 
 	return 0 == stricmp(a, b);
 #elif PLAT_WX 
@@ -24,6 +28,20 @@ bool EqualCaseInsensitive(const char *a, const char *b) {
 #endif 
 }
 
+bool EqualNCaseInsensitive(const char *a, const char *b, int len) {
+#if PLAT_GTK
+#  ifdef G_OS_WIN32
+	return 0 == strnicmp(a, b, len);
+#  else
+	return 0 == strncasecmp(a, b, len);
+#  endif
+#elif PLAT_WIN
+	return 0 == strnicmp(a, b, len);
+#elif PLAT_WX
+	return 0 == wxStrnicmp(a, b, len);
+#endif
+}
+ 
 inline unsigned int HashString(const char *s) {
 	unsigned int ret = 0;
 	while (*s) {
@@ -360,7 +378,7 @@ int cmpString(const void *a1, const void *a2) {
 
 int cmpStringNoCase(const void *a1, const void *a2) {
 	// Can't work out the correct incantation to use modern casts here
-	return strcasecmp(*(char**)(a1), *(char**)(a2));
+	return EqualCaseInsensitive(*(char**)(a1), *(char**)(a2));
 }
 
 static void SortWordList(char **words, char **wordsNoCase, unsigned int len) {
@@ -425,7 +443,7 @@ const char *WordList::GetNearestWord(const char *wordStart, int searchLen /*= -1
 		while (start <= end) { // binary searching loop
 			pivot = (start + end) >> 1;
 			word = wordsNoCase[pivot];
-			cond = strncasecmp(wordStart, word, searchLen);
+			cond = EqualNCaseInsensitive(wordStart, word, searchLen);
 			if (!cond && nonFuncChar(word[searchLen])) // maybe there should be a "non-word character" test here?
 				return word; // result must not be freed with free()
 			else if (cond >= 0)
@@ -485,7 +503,7 @@ char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, b
 		while (start <= end) { // binary searching loop
 			pivot = (start + end) >> 1;
 			word = wordsNoCase[pivot];
-			cond = strncasecmp(wordStart, word, searchLen);
+			cond = EqualNCaseInsensitive(wordStart, word, searchLen);
 			if (!cond) {
 				oldpivot = pivot;
 				do { // browse sequentially the rest after the hit
@@ -520,14 +538,14 @@ char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, b
 					if (++pivot > end)
 						break;
 					word = wordsNoCase[pivot];
-				} while (!strncasecmp(wordStart, word, searchLen));
+				} while (!EqualNCaseInsensitive(wordStart, word, searchLen));
 
 				pivot = oldpivot;
 				for (;;) { // browse sequentially the rest before the hit
 					if (--pivot < start)
 						break;
 					word = wordsNoCase[pivot];
-					if (strncasecmp(wordStart, word, searchLen))
+					if (EqualNCaseInsensitive(wordStart, word, searchLen))
 						break;
 					brace = strchr(word, '(');
 					if (brace)

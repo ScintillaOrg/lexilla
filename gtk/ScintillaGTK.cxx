@@ -31,9 +31,15 @@
 #include "ViewStyle.h"
 #include "Document.h"
 #include "Editor.h"
+#include "SString.h"
 #include "ScintillaBase.h"
 
 #include "gtk/gtksignal.h"
+
+#ifdef _MSC_VER
+// Constant conditional expressions are because of GTK+ headers
+#pragma warning(disable: 4127)
+#endif
 
 class ScintillaGTK : public ScintillaBase {
 	_ScintillaObject *sci;
@@ -58,6 +64,10 @@ class ScintillaGTK : public ScintillaBase {
 	GdkIC     *ic;
 	GdkICAttr *ic_attr;
 
+	// Private so ScintillaGTK objects can not be copied
+	ScintillaGTK(const ScintillaGTK &) {}
+	ScintillaGTK &operator=(const ScintillaGTK &) { return *this; }
+	
 public:
 	ScintillaGTK(_ScintillaObject *sci_);
 	virtual ~ScintillaGTK();
@@ -372,7 +382,7 @@ gint ScintillaGTK::FocusOut(GtkWidget *widget, GdkEventFocus * /*event*/) {
 	return FALSE;
 }
 
-void ScintillaGTK::SizeRequest(GtkWidget */*widget*/, GtkRequisition *requisition) {
+void ScintillaGTK::SizeRequest(GtkWidget * /*widget*/, GtkRequisition *requisition) {
 	requisition->width = 1000;
 	requisition->height = 1000;
 }

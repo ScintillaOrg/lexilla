@@ -14,6 +14,12 @@
 #include "ScintillaWidget.h"
 #include "Scintilla.h"
 
+/* Use fast way of getting char data on win32 to work around problems 
+   with gdk_string_extents. */
+#ifdef G_OS_WIN32
+#define FAST_WAY
+#endif
+
 Point Point::FromLong(long lpoint) {
 	return Point(
 		Platform::LowShortFromLong(lpoint), 
