@@ -1111,15 +1111,17 @@ bool Document::SetStyles(int length, char *styles) {
 		enteredCount++;
 		int prevEndStyled = endStyled;
 		bool didChange = false;
+		int lastChange = 0;
 		for (int iPos = 0; iPos < length; iPos++, endStyled++) {
 			PLATFORM_ASSERT(endStyled < Length());
 			if (cb.SetStyleAt(endStyled, styles[iPos], stylingMask)) {
 				didChange = true;
+				lastChange = iPos;
 			}
 		}
 		if (didChange) {
 			DocModification mh(SC_MOD_CHANGESTYLE | SC_PERFORMED_USER,
-			                   prevEndStyled, endStyled - prevEndStyled);
+			                   prevEndStyled, lastChange);
 			NotifyModified(mh);
 		}
 		enteredCount--;
@@ -1133,10 +1135,11 @@ bool Document::EnsureStyledTo(int pos) {
 		if (styleClock > 0x100000) {
 			styleClock = 0;
 		}
+		// Ask the watchers to style, and stop as soon as one responds.
+		for (int i = 0; pos > GetEndStyled() && i < lenWatchers; i++) {
+			watchers[i].watcher->NotifyStyleNeeded(this, watchers[i].userData, pos);
+		}
 	}
-	// Ask the watchers to style, and stop as soon as one responds.
-	for (int i = 0; pos > GetEndStyled() && i < lenWatchers; i++)
-		watchers[i].watcher->NotifyStyleNeeded(this, watchers[i].userData, pos);
 	return pos <= GetEndStyled();
 }
 
