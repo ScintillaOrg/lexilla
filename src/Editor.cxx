@@ -2561,7 +2561,7 @@ int Editor::KeyDefault(int, int) {
 }
 
 int Editor::KeyDown(int key, bool shift, bool ctrl, bool alt, bool *consumed) {
-	DwellEnd();
+	DwellEnd(false);
 	int modifiers = (shift ? SCI_SHIFT : 0) | (ctrl ? SCI_CTRL : 0) |
 	                (alt ? SCI_ALT : 0);
 	int msg = kmap.Find(key, modifiers);
@@ -3007,8 +3007,11 @@ void Editor::LineSelection(int lineCurrent_, int lineAnchor_) {
 	}
 }
 
-void Editor::DwellEnd() {
-	ticksToDwell = dwellDelay;
+void Editor::DwellEnd(bool mouseMoved) {
+	if (mouseMoved)
+		ticksToDwell = dwellDelay;
+	else
+		ticksToDwell = SC_TIME_FOREVER;
 	if (dwelling && (dwellDelay < SC_TIME_FOREVER)) {
 		dwelling = false;
 		NotifyDwelling(ptMouseLast, dwelling);
@@ -3124,7 +3127,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 
 void Editor::ButtonMove(Point pt) {
 	if ((ptMouseLast.x != pt.x) || (ptMouseLast.y != pt.y)) {
-		DwellEnd();
+		DwellEnd(true);
 	}
 	ptMouseLast = pt;
 	//Platform::DebugPrintf("Move %d %d\n", pt.x, pt.y);
