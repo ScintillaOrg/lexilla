@@ -147,10 +147,67 @@
 	Released on 16 May 2003.
       </li>
       <li>
+	On GTK+ 2, encodings other than ASCII, Latin1, and Unicode are
+	supported for both display and input using iconv.
+      </li>
+      <li>
+	External lexers supported on GTK+/Linux.
+	External lexers must now be explicitly loaded with SCI_LOADLEXERLIBRARY
+	rather than relying upon a naming convention and automatic loading.
+      </li>
+      <li>
 	Support of Lout typesetting language.
       </li>
       <li>
 	Support of E-Scripts language used in the POL Ultima Online Emulator.
+      </li>
+      <li>
+	Scrolling and drawing performance on GTK+ enhanced, particularly for GTK+ 2.x
+	with an extra window for the text area avoiding conflicts with the scroll bars.
+      </li>
+      <li>
+	CopyText and CopyRange methods in Scintilla allow container to
+	easily copy to the system clipboard.
+      </li>
+      <li>
+	Line Copy command implemented and bound to Ctrl+Shift+T.
+      </li>
+      <li>
+	Scintilla APIs PositionBefore and PositionAfter can be used to iterate through
+	a document taking into account the encoding and multi-byte characters.
+      </li>
+      <li>
+	C++ folder can fold on the "} else {" line of an if statement by setting
+	fold.at.else property to 1.
+      </li>
+      <li>
+	C++ lexer allows an extra set of keywords.
+      </li>
+      <li>
+	Property names and thus abbreviations may be non-ASCII.
+      </li>
+      <li>
+	Removed attempt to load a file when setting properties that was
+	part of an old scripting experiment.
+      </li>
+      <li>
+	SciTE no longer warns about a file not existing when opening
+	properties files from the Options menu as there is a good chance
+	the user wants to create one.
+      </li>
+      <li>
+	Bug fixed with brace recognition in multi-byte encoded files where a partial
+	character matched a brace byte.
+      </li>
+      <li>
+	More protection against infinite loops or recursion with recursive property definitions.
+      </li>
+      <li>
+	On Windows, cursor will no longer disappear over margins in custom builds when
+	cursor resource not present. The Windows default cursor is displayed instead.
+      </li>
+      <li>
+	load.on.activate fixed in SciTE as was broken in 1.52.
       </li>
     </ul>
     <h3>
