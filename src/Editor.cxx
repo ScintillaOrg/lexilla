@@ -1793,6 +1793,42 @@ void Editor::DrawIndentGuide(Surface *surface, int lineVisible, int lineHeight, 
 		highlight ? *pixmapIndentGuideHighlight : *pixmapIndentGuide);
 }
 
+void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, LineLayout *ll,
+	int line, int lineEnd, int xStart, int subLine, int subLineStart, 
+	bool overrideBackground, ColourAllocated background) {
+
+	int styleMask = pdoc->stylingBitsMask;
+	PRectangle rcSegment = rcLine;
+
+	// Fill in a PRectangle representing the end of line characters
+	int xEol = ll->positions[lineEnd] - subLineStart;
+	rcSegment.left = xEol + xStart;
+	rcSegment.right = xEol + vsDraw.aveCharWidth + xStart;
+	int posLineEnd = pdoc->LineStart(line + 1);
+	bool eolInSelection = (subLine == (ll->lines-1)) &&
+		(posLineEnd > ll->selStart) && (posLineEnd <= ll->selEnd) && (ll->selStart != ll->selEnd);
+	if (eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1)) {
+		if (primarySelection)
+			surface->FillRectangle(rcSegment, vsDraw.selbackground.allocated);
+		else
+			surface->FillRectangle(rcSegment, vsDraw.selbackground2.allocated);
+	} else if (overrideBackground) {
+		surface->FillRectangle(rcSegment, background);
+	} else {
+		surface->FillRectangle(rcSegment, vsDraw.styles[ll->styles[ll->numCharsInLine] & styleMask].back.allocated);
+	}
+
+	rcSegment.left = xEol + vsDraw.aveCharWidth + xStart;
+	rcSegment.right = rcLine.right;
+	if (overrideBackground) {
+		surface->FillRectangle(rcSegment, background);
+	} else if (vsDraw.styles[ll->styles[ll->numCharsInLine] & styleMask].eolFilled) {
+		surface->FillRectangle(rcSegment, vsDraw.styles[ll->styles[ll->numCharsInLine] & styleMask].back.allocated);
+	} else {
+		surface->FillRectangle(rcSegment, vsDraw.styles[STYLE_DEFAULT].back.allocated);
+	}
+}
+
 void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart,
                       PRectangle rcLine, LineLayout *ll, int subLine) {
 
@@ -1848,7 +1884,6 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		indentWidth = pdoc->tabInChars * vsDraw.spaceWidth;
 
 	int posLineStart = pdoc->LineStart(line);
-	int posLineEnd = pdoc->LineStart(line + 1);
 
 	int startseg = ll->LineStart(subLine);
 	int subLineStart = ll->positions[startseg];
@@ -1911,6 +1946,12 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 			startseg = i + 1;
 		}
 	}
+
+	if (twoPhaseDraw) {
+		DrawEOL(surface, vsDraw, rcLine, ll, line, lineEnd, 
+			xStart, subLine, subLineStart, overrideBackground, background);
+	}
+
 	inIndentation = subLine == 0;	// Do not handle indentation except on first subline.
 	startseg = ll->LineStart(subLine);
 	// Foreground drawing loop
@@ -2077,33 +2118,9 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	}
 	// End of the drawing of the current line
 
-	int styleMask = pdoc->stylingBitsMask;
-
-	// Fill in a PRectangle representing the end of line characters
-	int xEol = ll->positions[lineEnd] - subLineStart;
-	rcSegment.left = xEol + xStart;
-	rcSegment.right = xEol + vsDraw.aveCharWidth + xStart;
-	bool eolInSelection = (subLine == (ll->lines-1)) &&
-		(posLineEnd > ll->selStart) && (posLineEnd <= ll->selEnd) && (ll->selStart != ll->selEnd);
-	if (eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1)) {
-		if (primarySelection)
-			surface->FillRectangle(rcSegment, vsDraw.selbackground.allocated);
-		else
-			surface->FillRectangle(rcSegment, vsDraw.selbackground2.allocated);
-	} else if (overrideBackground) {
-		surface->FillRectangle(rcSegment, background);
-	} else {
-		surface->FillRectangle(rcSegment, vsDraw.styles[ll->styles[ll->numCharsInLine] & styleMask].back.allocated);
-	}
-
-	rcSegment.left = xEol + vsDraw.aveCharWidth + xStart;
-	rcSegment.right = rcLine.right;
-	if (overrideBackground) {
-		surface->FillRectangle(rcSegment, background);
-	} else if (vsDraw.styles[ll->styles[ll->numCharsInLine] & styleMask].eolFilled) {
-		surface->FillRectangle(rcSegment, vsDraw.styles[ll->styles[ll->numCharsInLine] & styleMask].back.allocated);
-	} else {
-		surface->FillRectangle(rcSegment, vsDraw.styles[STYLE_DEFAULT].back.allocated);
+	if (!twoPhaseDraw) {
+		DrawEOL(surface, vsDraw, rcLine, ll, line, lineEnd, 
+			xStart, subLine, subLineStart, overrideBackground, background);
 	}
 
 	if (vsDraw.edgeState == EDGE_LINE) {
