@@ -205,6 +205,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define INDIC_DIAGONAL 3
 #define INDIC_STRIKE 4
 #define INDIC_HIDDEN 5
+#define INDIC_BOX 6
 #define INDIC0_MASK 0x20
 #define INDIC1_MASK 0x40
 #define INDIC2_MASK 0x80

@@ -2237,7 +2237,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 						rcLine.top + vsDraw.maxAscent,
 						ll->positions[endIndicator + 1] + xStart - subLineStart,
 						rcLine.top + vsDraw.maxAscent + 3);
-					vsDraw.indicators[indicnum].Draw(surface, rcIndic);
+					vsDraw.indicators[indicnum].Draw(surface, rcIndic, rcLine);
 				}
 				mask = mask << 1;
 			}
