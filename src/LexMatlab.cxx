@@ -2,7 +2,7 @@
 /** @file LexMatlab.cxx
  ** Lexer for Matlab.
  ** Written by José Fonseca
- **/
+ **/ 
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
@@ -22,7 +22,7 @@
 #include "SciLexer.h"
 
 static bool IsMatlabComment(Accessor &styler, int pos, int len) {
-	return len>0 && (styler[pos]=='%' || styler[pos]=='!') ;
+	return len > 0 && (styler[pos] == '%' || styler[pos] == '!') ;
 }
 
 static inline bool IsAWordChar(const int ch) {
@@ -39,7 +39,7 @@ static void ColouriseMatlabDoc(unsigned int startPos, int length, int initStyle,
 	WordList &keywords = *keywordlists[0];
 
 	styler.StartAt(startPos);
-	
+
 	bool transpose = false;
 
 	StyleContext sc(startPos, length, initStyle, styler);
@@ -49,19 +49,17 @@ static void ColouriseMatlabDoc(unsigned int startPos, int length, int initStyle,
 		if (sc.state == SCE_MATLAB_OPERATOR) {
 			if (sc.chPrev == '.') {
 				if (sc.ch == '*' || sc.ch == '/' || sc.ch == '\\' || sc.ch == '^') {
+					sc.ForwardSetState(SCE_MATLAB_DEFAULT);
 					transpose = false;
 				} else if (sc.ch == '\'') {
+					sc.ForwardSetState(SCE_MATLAB_DEFAULT);
 					transpose = true;
 				} else {
 					sc.SetState(SCE_MATLAB_DEFAULT);
-					transpose = false;
 				}
 			} else {
 				sc.SetState(SCE_MATLAB_DEFAULT);
-				transpose = false;
 			}
-			sc.SetState(SCE_MATLAB_DEFAULT);
-			transpose = false;
 		} else if (sc.state == SCE_MATLAB_KEYWORD) {
 			if (!isalnum(sc.ch) && sc.ch != '_') {
 				char s[100];
@@ -76,14 +74,14 @@ static void ColouriseMatlabDoc(unsigned int startPos, int length, int initStyle,
 				}
 			}
 		} else if (sc.state == SCE_MATLAB_NUMBER) {
-			if (!isdigit(sc.ch) && sc.ch != '.' 
-			    && !(sc.ch == 'e' || sc.ch == 'E')
-				&& !((sc.ch == '+' || sc.ch == '-') && (sc.chPrev == 'e' || sc.chPrev == 'E'))) {
+			if (!isdigit(sc.ch) && sc.ch != '.'
+			        && !(sc.ch == 'e' || sc.ch == 'E')
+			        && !((sc.ch == '+' || sc.ch == '-') && (sc.chPrev == 'e' || sc.chPrev == 'E'))) {
 				sc.SetState(SCE_MATLAB_DEFAULT);
 				transpose = true;
 			}
 		} else if (sc.state == SCE_MATLAB_STRING) {
-			// Matlab doubles quotes to preserve them, so just end this string 
+			// Matlab doubles quotes to preserve them, so just end this string
 			// state now as a following quote will start again
 			if (sc.ch == '\'') {
 				sc.ForwardSetState(SCE_MATLAB_DEFAULT);
@@ -94,7 +92,7 @@ static void ColouriseMatlabDoc(unsigned int startPos, int length, int initStyle,
 				transpose = false;
 			}
 		}
-		
+
 		if (sc.state == SCE_MATLAB_DEFAULT) {
 			if (sc.ch == '%') {
 				sc.SetState(SCE_MATLAB_COMMENT);
@@ -113,6 +111,8 @@ static void ColouriseMatlabDoc(unsigned int startPos, int length, int initStyle,
 			} else if (isoperator(static_cast<char>(sc.ch)) || sc.ch == '@' || sc.ch == '\\') {
 				if (sc.ch == ')' || sc.ch == ']') {
 					transpose = true;
+				} else {
+					transpose = false;
 				}
 				sc.SetState(SCE_MATLAB_OPERATOR);
 			} else {
@@ -124,7 +124,7 @@ static void ColouriseMatlabDoc(unsigned int startPos, int length, int initStyle,
 }
 
 static void FoldMatlabDoc(unsigned int startPos, int length, int,
-						   WordList *[], Accessor &styler) {
+                          WordList *[], Accessor &styler) {
 	int endPos = startPos + length;
 
 	// Backtrack to previous line in case need to fix its fold status
