@@ -195,7 +195,7 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 				pdoc->InsertString(currentPos, list + lenEntered);
 				SetEmptySelection(currentPos + strlen(list + lenEntered));
 			}
-			return ;
+			return;
 		}
 	}
 	ac.Start(wMain, idAutoComplete, currentPos, lenEntered);
