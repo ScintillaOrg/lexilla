@@ -114,8 +114,8 @@ static void ColouriseSQLDoc(unsigned int startPos, int length,
 				if (ch == '/' && chPrev == '*') {
 					if (((i > (styler.GetStartSegment() + 2)) || ((initStyle == SCE_C_COMMENT) &&
 					    (styler.GetStartSegment() == startPos)))) {
-						state = SCE_C_DEFAULT;
 						styler.ColourTo(i, state);
+						state = SCE_C_DEFAULT;
 					}
 				}
 			} else if (state == SCE_C_COMMENTLINE) {
