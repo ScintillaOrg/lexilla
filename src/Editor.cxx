@@ -1410,8 +1410,9 @@ void Editor::NeedWrapping(int docLineStartWrapping, int docLineEndWrapping) {
 			docLastLineToWrap = pdoc->LinesTotal();
 	}
 	// Wrap lines during idle.
-	if (docLastLineToWrap != docLineLastWrapped)
+	if (docLastLineToWrap != docLineLastWrapped) {
 		SetIdle(true);
+	}
 }
 
 // Check if wrapping needed and perform any needed wrapping.
@@ -3408,7 +3409,7 @@ void Editor::CheckModificationForWrap(DocModification mh) {
 		llc.Invalidate(LineLayout::llCheckTextAndStyle);
 		if (wrapState != eWrapNone) {
 			int lineDoc = pdoc->LineFromPosition(mh.position);
-			if (mh.linesAdded == 0) {
+			if (mh.linesAdded <= 0) {
 				AutoSurface surface(this);
 				AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
 				if (surface && ll) {
@@ -3417,11 +3418,9 @@ void Editor::CheckModificationForWrap(DocModification mh) {
 						NeedWrapping(lineDoc - 1, lineDoc + 1);
 						Redraw();
 					}
-				} else {
-					NeedWrapping(lineDoc, lineDoc + 1);
 				}
 			} else {
-				NeedWrapping(lineDoc, lineDoc + 1);
+				NeedWrapping(lineDoc, lineDoc + 1 + mh.linesAdded);
 			}
 		}
 	}
