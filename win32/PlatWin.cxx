@@ -501,6 +501,9 @@ void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const ch
 		tbuf[tlen] = L'\0';
 		::ExtTextOutW(hdc, rc.left, ybase, ETO_OPAQUE, &rcw, tbuf, tlen, NULL);
 	} else {
+		// There appears to be a 16 bit string length limit in GDI
+		if (len > 65535)	
+			len = 65535;
 		::ExtTextOut(hdc, rc.left, ybase, ETO_OPAQUE, &rcw, s, len, NULL);
 	}
 }
@@ -517,6 +520,9 @@ void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const c
 		tbuf[tlen] = L'\0';
 		::ExtTextOutW(hdc, rc.left, ybase, ETO_OPAQUE | ETO_CLIPPED, &rcw, tbuf, tlen, NULL);
 	} else {
+		// There appears to be a 16 bit string length limit in GDI
+		if (len > 65535)	
+			len = 65535;
 		::ExtTextOut(hdc, rc.left, ybase, ETO_OPAQUE | ETO_CLIPPED, &rcw, s, len, NULL);
 	}
 }
