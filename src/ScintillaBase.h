@@ -59,7 +59,7 @@ protected:
 	
 	virtual void ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, bool alt);
 
-	virtual void NotifyStyleNeeded(int endStyleNeeded);
+	virtual void NotifyStyleToNeeded(int endStyleNeeded);
 public:
 	// Public so scintilla_send_message can use it
 	virtual LRESULT WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam);

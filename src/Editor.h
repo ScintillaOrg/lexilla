@@ -207,7 +207,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual void NotifyChange() = 0;
 	virtual void NotifyFocus(bool focus);
 	virtual void NotifyParent(SCNotification scn) = 0;
-	virtual void NotifyStyleNeeded(int endStyleNeeded);
+	virtual void NotifyStyleToNeeded(int endStyleNeeded);
 	void NotifyChar(char ch);
 	void NotifySavePoint(bool isSavePoint);
 	void NotifyModifyAttempt();

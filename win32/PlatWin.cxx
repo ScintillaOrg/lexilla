@@ -101,12 +101,12 @@ void Palette::Allocate(Window &) {
 		char *pal = new char[sizeof(LOGPALETTE) + (used-1) * sizeof(PALETTEENTRY)];
 		LOGPALETTE *logpal = reinterpret_cast<LOGPALETTE *>(pal);
 		logpal->palVersion = 0x300;
-		logpal->palNumEntries = used;
+		logpal->palNumEntries = static_cast<WORD>(used);
 		for (int iPal=0;iPal<used;iPal++) {
 			Colour desired = entries[iPal].desired;
-			logpal->palPalEntry[iPal].peRed   = desired.GetRed();
-			logpal->palPalEntry[iPal].peGreen = desired.GetGreen();
-			logpal->palPalEntry[iPal].peBlue  = desired.GetBlue();
+			logpal->palPalEntry[iPal].peRed   = static_cast<BYTE>(desired.GetRed());
+			logpal->palPalEntry[iPal].peGreen = static_cast<BYTE>(desired.GetGreen());
+			logpal->palPalEntry[iPal].peBlue  = static_cast<BYTE>(desired.GetBlue());
 			entries[iPal].allocated = 
 				PALETTERGB(desired.GetRed(), desired.GetGreen(), desired.GetBlue());
 			// PC_NOCOLLAPSE means exact colours allocated even when in background this means other windows 
@@ -135,7 +135,7 @@ void Font::Create(const char *faceName, int size, bool bold, bool italic) {
 	// The negative is to allow for leading
 	lf.lfHeight = -(abs(size));
 	lf.lfWeight = bold ? FW_BOLD : FW_NORMAL;
-	lf.lfItalic = italic ? 1 : 0;
+	lf.lfItalic = static_cast<BYTE>(italic ? 1 : 0);
 	lf.lfCharSet = DEFAULT_CHARSET;
 	strcpy(lf.lfFaceName, faceName);
 

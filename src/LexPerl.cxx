@@ -31,7 +31,7 @@ inline bool isPerlOperator(char ch) {
 	return false;
 }
 
-static int classifyWordPerl(unsigned int start, unsigned int end, WordList &keywords, BufferAccess &styler) {
+static int classifyWordPerl(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler) {
 	char s[100];
 	bool wordIsNumber = isdigit(styler[start]) || (styler[start] == '.');
 	for (unsigned int i = 0; i < end - start + 1 && i < 30; i++) {
@@ -54,7 +54,7 @@ static bool isEndVar(char ch) {
 	       ch != '_' && ch != '\'';
 }
 
-static bool isMatch(BufferAccess &styler, int lengthDoc, int pos, const char *val) {
+static bool isMatch(Accessor &styler, int lengthDoc, int pos, const char *val) {
 	if ((pos + static_cast<int>(strlen(val))) >= lengthDoc) {
 		return false;
 	}
@@ -90,7 +90,7 @@ static char opposite(char ch) {
 }
 
 static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
-                             WordList *keywordlists[], BufferAccess &styler) {
+                             WordList *keywordlists[], Accessor &styler) {
 
 	// Lexer for perl often has to backtrack to start of current style to determine
 	// which characters are being used as quotes, how deeply nested is the

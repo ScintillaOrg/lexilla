@@ -5,12 +5,12 @@
 
 enum { wsSpace = 1, wsTab = 2, wsSpaceTab = 4, wsInconsistent=8};
 
-class BufferAccess;
+class Accessor;
 
-typedef bool (*PFNIsCommentLeader)(BufferAccess &styler, int pos, int len);
+typedef bool (*PFNIsCommentLeader)(Accessor &styler, int pos, int len);
 
 // Interface to data in a Scintilla
-class BufferAccess {
+class Accessor {
 public:
 	virtual void SetCodePage(int codePage_)=0;
 	virtual char operator[](int position)=0;

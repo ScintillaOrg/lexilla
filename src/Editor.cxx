@@ -719,8 +719,8 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 		styleByte = pdoc->StyleAt(charInDoc);
 		if (vstyle.viewEOL || ((chDoc != '\r') && (chDoc != '\n'))) {
 			ll.chars[numCharsInLine] = chDoc;
-			ll.styles[numCharsInLine] = styleByte & styleMask;
-			ll.indicators[numCharsInLine] = styleByte & ~styleMask;
+			ll.styles[numCharsInLine] = static_cast<char>(styleByte & styleMask);
+			ll.indicators[numCharsInLine] = static_cast<char>(styleByte & ~styleMask);
 			numCharsInLine++;
 		}
 	}
@@ -1059,9 +1059,11 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 			                                
 			// Highlight the current braces if any
 			if ((braces[0] >= posLineStart) && (braces[0] < posLineEnd))
-				ll.styles[braces[0] - posLineStart] = bracesMatchStyle;
+				ll.styles[braces[0] - posLineStart] = 
+					static_cast<char>(bracesMatchStyle);
 			if ((braces[1] >= posLineStart) && (braces[1] < posLineEnd))
-				ll.styles[braces[1] - posLineStart] = bracesMatchStyle;
+				ll.styles[braces[1] - posLineStart] = 
+					static_cast<char>(bracesMatchStyle);
 				
 			// Draw the line
 			if (cs.GetVisible(line))
@@ -1428,7 +1430,7 @@ void Editor::DelCharBack() {
 void Editor::NotifyFocus(bool) {
 }
 
-void Editor::NotifyStyleNeeded(int endStyleNeeded) {
+void Editor::NotifyStyleToNeeded(int endStyleNeeded) {
 	SCNotification scn;
 	scn.nmhdr.code = SCN_STYLENEEDED;
 	scn.position = endStyleNeeded;
@@ -1436,7 +1438,7 @@ void Editor::NotifyStyleNeeded(int endStyleNeeded) {
 }
 
 void Editor::NotifyStyleNeeded(Document*, void *, int endStyleNeeded) {
-	NotifyStyleNeeded(endStyleNeeded);
+	NotifyStyleToNeeded(endStyleNeeded);
 }
 
 void Editor::NotifyChar(char ch) {
@@ -1641,7 +1643,7 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 	}
 }
 
-void Editor::NotifyDeleted(Document *document, void *userData) {
+void Editor::NotifyDeleted(Document *, void *) {
 	/* Do nothing */
 }
 
@@ -2629,12 +2631,13 @@ char BraceOpposite(char ch) {
 // TODO: should be able to extend styled region to find matching brace
 // TODO: may need to make DBCS safe
 // so should be moved into Document
-int Editor::BraceMatch(int position, int maxReStyle) {
+int Editor::BraceMatch(int position, int /*maxReStyle*/) {
 	char chBrace = pdoc->CharAt(position);
 	char chSeek = BraceOpposite(chBrace);
-	if (!chSeek)
+	if (chSeek != '\0')
 		return - 1;
-	char styBrace = pdoc->StyleAt(position) & pdoc->stylingBitsMask;
+	char styBrace = static_cast<char>(
+		pdoc->StyleAt(position) & pdoc->stylingBitsMask);
 	int direction = -1;
 	if (chBrace == '(' || chBrace == '[' || chBrace == '{' || chBrace == '<')
 		direction = 1;
@@ -2750,6 +2753,11 @@ void Editor::EnsureLineVisible(int line) {
 		Redraw();
 	}
 }
+
+static bool ValidMargin(WPARAM wParam) {
+	return (wParam >= 0 && wParam < ViewStyle::margins);
+}
+
 
 LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	//Platform::DebugPrintf("S start wnd proc %d %d %d\n",iMessage, wParam, lParam);
@@ -3314,11 +3322,11 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case SCI_STARTSTYLING:
-		pdoc->StartStyling(wParam, lParam);
+		pdoc->StartStyling(wParam, static_cast<char>(lParam));
 		break;
 
 	case SCI_SETSTYLING:
-		pdoc->SetStyleFor(wParam, lParam);
+		pdoc->SetStyleFor(wParam, static_cast<char>(lParam));
 		break;
 
 	case SCI_SETSTYLINGEX:   // Specify a complete styling buffer
@@ -3417,53 +3425,53 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		return -1;
 
 	case SCI_SETMARGINTYPEN:
-		if (wParam >= 0 && wParam < ViewStyle::margins) {
+		if (ValidMargin(wParam)) {
 			vs.ms[wParam].symbol = (lParam == SC_MARGIN_SYMBOL);
 			InvalidateStyleRedraw();
 		}
 		break;
 		
 	case SCI_GETMARGINTYPEN:
-		if (wParam >= 0 && wParam < ViewStyle::margins) 
+		if (ValidMargin(wParam)) 
 			return vs.ms[wParam].symbol ? SC_MARGIN_SYMBOL : SC_MARGIN_NUMBER;
 		else
 			return 0;
 			
 	case SCI_SETMARGINWIDTHN:
-		if (wParam >= 0 && wParam < ViewStyle::margins) {
+		if (ValidMargin(wParam)) {
 			vs.ms[wParam].width = lParam;
 			InvalidateStyleRedraw();
 		}
 		break;
 		
 	case SCI_GETMARGINWIDTHN:
-		if (wParam >= 0 && wParam < ViewStyle::margins) 
+		if (ValidMargin(wParam)) 
 			return vs.ms[wParam].width;
 		else
 			return 0;
 			
 	case SCI_SETMARGINMASKN:
-		if (wParam >= 0 && wParam < ViewStyle::margins) {
+		if (ValidMargin(wParam)) {
 			vs.ms[wParam].mask = lParam;
 			InvalidateStyleRedraw();
 		}
 		break;
 		
 	case SCI_GETMARGINMASKN:
-		if (wParam >= 0 && wParam < ViewStyle::margins) 
+		if (ValidMargin(wParam)) 
 			return vs.ms[wParam].mask;
 		else
 			return 0;
 		
 	case SCI_SETMARGINSENSITIVEN:
-		if (wParam >= 0 && wParam < ViewStyle::margins) {
+		if (ValidMargin(wParam)) {
 			vs.ms[wParam].sensitive = lParam;
 			InvalidateStyleRedraw();
 		}
 		break;
 		
 	case SCI_GETMARGINSENSITIVEN:
-		if (wParam >= 0 && wParam < ViewStyle::margins) 
+		if (ValidMargin(wParam)) 
 			return vs.ms[wParam].sensitive ? 1 : 0;
 		else
 			return 0;

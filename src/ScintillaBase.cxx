@@ -291,7 +291,7 @@ void ScintillaBase::Colourise(int start, int end) {
 }
 #endif
 
-void ScintillaBase::NotifyStyleNeeded(int endStyleNeeded) {
+void ScintillaBase::NotifyStyleToNeeded(int endStyleNeeded) {
 #ifdef SCI_LEXER
 	if (lexLanguage != SCLEX_CONTAINER) {
 		int endStyled = Platform::SendScintilla(wMain.GetID(), SCI_GETENDSTYLED, 0, 0);
@@ -301,7 +301,7 @@ void ScintillaBase::NotifyStyleNeeded(int endStyleNeeded) {
 		return;
 	}
 #endif
-	Editor::NotifyStyleNeeded(endStyleNeeded);
+	Editor::NotifyStyleToNeeded(endStyleNeeded);
 }
 
 LRESULT ScintillaBase::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {

@@ -93,7 +93,7 @@ class ScintillaWin :
 
 	bool capturedMouse;
 
-	UINT cfColumnSelect;
+	CLIPFORMAT cfColumnSelect;
 	
 	DropSource ds;
 	DataObject dob;
@@ -164,7 +164,7 @@ public:
 	friend class DropSource;
 	friend class DataObject;
 	friend class DropTarget;
-	bool DragIsRectangularOK(UINT fmt) {
+	bool DragIsRectangularOK(CLIPFORMAT fmt) {
 		return dragIsRectangle && (fmt == cfColumnSelect);
 	}
 };
@@ -177,7 +177,8 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 
 	// There does not seem to be a real standard for indicating that the clipboard contains a rectangular
 	// selection, so copy Developer Studio.
-	cfColumnSelect = ::RegisterClipboardFormat("MSDEVColumnSelect");
+	cfColumnSelect = static_cast<CLIPFORMAT>(
+		::RegisterClipboardFormat("MSDEVColumnSelect"));
 	
 	wMain = hwnd;
 	wDraw = hwnd;
@@ -527,7 +528,7 @@ bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
 	    sizeof(sci)
 	};
 	sci.fMask = SIF_PAGE | SIF_RANGE;
-	BOOL bz = ::GetScrollInfo(wMain.GetID(), SB_VERT, &sci);
+	::GetScrollInfo(wMain.GetID(), SB_VERT, &sci);
 	if ((sci.nMin != 0) || (sci.nMax != pdoc->LinesTotal()) ||
 	        (sci.nPage != static_cast<unsigned int>(pdoc->LinesTotal() - MaxScrollPos() + 1)) ||
 	        (sci.nPos != 0)) {
@@ -940,7 +941,7 @@ void ScintillaWin::ImeStartComposition() {
 			// The negative is to allow for leading
 			lf.lfHeight = -(abs(deviceHeight));
 			lf.lfWeight = vs.styles[styleHere].bold ? FW_BOLD : FW_NORMAL;
-			lf.lfItalic = vs.styles[styleHere].italic ? 1 : 0;
+			lf.lfItalic = static_cast<BYTE>(vs.styles[styleHere].italic ? 1 : 0);
 			lf.lfCharSet = DEFAULT_CHARSET;
 			strcpy(lf.lfFaceName, vs.styles[styleHere].fontName);
 
@@ -992,7 +993,7 @@ void ScintillaWin::ScrollMessage(WPARAM wParam) {
 	sci.cbSize = sizeof(sci);
 	sci.fMask = SIF_ALL;
 
-	BOOL b = ::GetScrollInfo(wMain.GetID(), SB_VERT, &sci);
+	::GetScrollInfo(wMain.GetID(), SB_VERT, &sci);
 
 	//Platform::DebugPrintf("ScrollInfo %d mask=%x min=%d max=%d page=%d pos=%d track=%d\n", b,sci.fMask,
 	//sci.nMin, sci.nMax, sci.nPage, sci.nPos, sci.nTrackPos);

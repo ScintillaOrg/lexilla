@@ -17,7 +17,7 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-static void classifyWordPy(unsigned int start, unsigned int end, WordList &keywords, BufferAccess &styler, char *prevWord) {
+static void classifyWordPy(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler, char *prevWord) {
 	char s[100];
 	bool wordIsNumber = isdigit(styler[start]);
 	for (unsigned int i = 0; i < end - start + 1 && i < 30; i++) {
@@ -37,12 +37,12 @@ static void classifyWordPy(unsigned int start, unsigned int end, WordList &keywo
 	strcpy(prevWord, s);
 }
 
-static bool IsPyComment(BufferAccess &styler, int pos, int len) {
+static bool IsPyComment(Accessor &styler, int pos, int len) {
 	return len>0 && styler[pos]=='#';
 }
 
 static void ColourisePyDoc(unsigned int startPos, int length, int initStyle, 
-						   WordList *keywordlists[], BufferAccess &styler) {
+						   WordList *keywordlists[], Accessor &styler) {
 
 	// Python uses a different mask because bad indentation is marked by oring with 32
 	styler.StartAt(startPos, 127);
@@ -71,15 +71,19 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 	for (int i = startPos; i <= lengthDoc; i++) {
 	
 		if (atStartLine) {
+			char chFlags;
+			char chBad = static_cast<char>(64);
+			char chGood = static_cast<char>(0);
 			if (whingeLevel == 1) {
-				styler.SetFlags((spaceFlags & wsInconsistent) ? 64 : 0, state);
+				chFlags = (spaceFlags & wsInconsistent) ? chBad : chGood;
 			} else if (whingeLevel == 2) {
-				styler.SetFlags((spaceFlags & wsSpaceTab) ? 64 : 0, state);
+				chFlags = (spaceFlags & wsSpaceTab) ? chBad : chGood;
 			} else if (whingeLevel == 3) {
-				styler.SetFlags((spaceFlags & wsSpace) ? 64 : 0, state);
+				chFlags = (spaceFlags & wsSpace) ? chBad : chGood;
 			} else if (whingeLevel == 4) {
-				styler.SetFlags((spaceFlags & wsTab) ? 64 : 0, state);
+				chFlags = (spaceFlags & wsTab) ? chBad : chGood;
 			}
+			styler.SetFlags(chFlags, static_cast<char>(state));
 			atStartLine = false;
 		}
 		

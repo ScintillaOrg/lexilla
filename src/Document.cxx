@@ -604,7 +604,7 @@ long Document::FindText(int minPos, int maxPos, const char *s, bool caseSensitiv
 	//Platform::DebugPrintf("Find %d %d %s %d\n", startPos, endPos, ft->lpstrText, lengthFind);
 	char firstChar = s[0];
 	if (!caseSensitive)
-		firstChar = toupper(firstChar);
+		firstChar = static_cast<char>(toupper(firstChar));
 	int pos = startPos;
 	while (forward ? (pos < endSearch) : (pos >= endSearch)) {
 		char ch = CharAt(pos);
@@ -657,11 +657,11 @@ void Document::ChangeCase(Range r, bool makeUpperCase) {
 		} else {
 			if (makeUpperCase) {
 				if (islower(ch)) {
-					ChangeChar(pos, toupper(ch));
+					ChangeChar(pos, static_cast<char>(toupper(ch)));
 				}
 			} else {
 				if (isupper(ch)) {
-					ChangeChar(pos, tolower(ch));
+					ChangeChar(pos, static_cast<char>(tolower(ch)));
 				}
 			}
 		}
