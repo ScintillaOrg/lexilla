@@ -1399,17 +1399,13 @@ void Editor::NeedWrapping(int docLineStartWrapping, int docLineEndWrapping) {
 	}
 	if (noWrap) {
 		docLastLineToWrap = docLineEndWrapping;
-		if (docLastLineToWrap < -1)
-			docLastLineToWrap = -1;
-		if (docLastLineToWrap > pdoc->LinesTotal())
-			docLastLineToWrap = pdoc->LinesTotal();
 	} else if (docLastLineToWrap < docLineEndWrapping) {
 		docLastLineToWrap = docLineEndWrapping + 1;
-		if (docLastLineToWrap < -1)
-			docLastLineToWrap = -1;
-		if (docLastLineToWrap > pdoc->LinesTotal())
-			docLastLineToWrap = pdoc->LinesTotal();
 	}
+	if (docLastLineToWrap < -1)
+		docLastLineToWrap = -1;
+	if (docLastLineToWrap >= pdoc->LinesTotal())
+		docLastLineToWrap = pdoc->LinesTotal()-1;
 	// Wrap lines during idle.
 	if (backgroundWrapEnabled && docLastLineToWrap != docLineLastWrapped ) {
 		SetIdle(true);
@@ -1481,14 +1477,14 @@ bool Editor::WrapLines(bool fullWrap, int priorityWrapLineStart) {
 					} else {
 						// This is idle wrap.
 						lastLineToWrap = docLineLastWrapped + 100;
-						if (lastLineToWrap >= docLastLineToWrap)
-							lastLineToWrap = docLastLineToWrap;
 					}
+					if (lastLineToWrap >= docLastLineToWrap)
+						lastLineToWrap = docLastLineToWrap;
 				} // else do a fullWrap.
 
 				// printf("Wraplines: full = %d, priorityStart = %d (wrapping: %d to %d)\n", fullWrap, priorityWrapLineStart, firstLineToWrap, lastLineToWrap);
 				// printf("Pending wraps: %d to %d\n", docLineLastWrapped, docLastLineToWrap);
-				while (firstLineToWrap <= lastLineToWrap) {
+				while (firstLineToWrap < lastLineToWrap) {
 					firstLineToWrap++;
 					if (!priorityWrap)
 						docLineLastWrapped++;
@@ -1826,6 +1822,7 @@ LineLayout *Editor::RetrieveLineLayout(int lineNumber) {
 void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayout *ll, int width) {
 	if (!ll)
 		return;
+	PLATFORM_ASSERT(line < pdoc->LinesTotal());
 	int posLineStart = pdoc->LineStart(line);
 	int posLineEnd = pdoc->LineStart(line + 1);
 	// If the line is very long, limit the treatment to a length that should fit in the viewport
