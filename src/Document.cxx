@@ -853,17 +853,10 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 		if (!pre)
 			return -1;
 
-		int startPos;
-		int endPos;
 		int increment = (minPos <= maxPos) ? 1 : -1;
 
-//		if (minPos <= maxPos) {
-			startPos = minPos;
-			endPos = maxPos;
-//		} else {
-//			startPos = maxPos;
-//			endPos = minPos;
-//		}
+		int startPos = minPos;
+		int endPos = maxPos;
 
 		// Range endpoints should not be inside DBCS characters, but just in case, move them.
 		startPos = MovePositionOutsideChar(startPos, 1, false);
@@ -923,7 +916,7 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 				if (increment == -1) {
 					// Check for the last match on this line.
 					while (success) {
-						success = pre->Execute(di, pos + 1, endOfLine);
+						success = pre->Execute(di, pre->eopat[0], endOfLine);
 						if (success) {
 							if (pre->eopat[0] <= minPos) {
 								pos = pre->bopat[0];
