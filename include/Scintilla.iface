@@ -258,6 +258,8 @@ val SC_MARK_CIRCLEMINUSCONNECTED=21
 
 # Invisible mark that only sets the line background color.
 val SC_MARK_BACKGROUND=22
+val SC_MARK_DOTDOTDOT=23
+val SC_MARK_ARROWS=24
 
 val SC_MARK_CHARACTER=10000
 
