@@ -3,11 +3,11 @@
 // Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
-#include <stdlib.h> 
-#include <string.h> 
-#include <ctype.h> 
-#include <stdio.h> 
-#include <stdarg.h> 
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <stdarg.h>
 
 #include "Platform.h"
 
@@ -85,9 +85,28 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 	// Lexer for perl often has to backtrack to start of current style to determine
 	// which characters are being used as quotes, how deeply nested is the
 	// start position and what the termination string is for here documents
-	
+
 	WordList &keywords = *keywordlists[0];
-	
+
+	class HereDocCls
+	{
+		public:
+		int  State;		// 0: '<<' encountered
+					// 1: collect the delimiter
+					// 2: here doc text (lines after the delimiter)
+		char Quote;		// the char after '<<'
+		bool Quoted;		// true if Quote in ('\'','"','`')
+		int  DelimiterLength;	// strlen(Delimiter)
+		char Delimiter[256];	// the Delimiter, 256: sizeof PL_tokenbuf
+		HereDocCls()
+		{
+			State = 0;
+			DelimiterLength = 0;
+			Delimiter[0] = '\0';
+		}
+	};
+	HereDocCls HereDoc;	// TODO: FIFO for stacked here-docs
+
 	char sooked[100];
 	int quotes = 0;
 	char quoteDown = 'd';
@@ -98,18 +117,28 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 	sooked[sookedpos] = '\0';
 	int state = initStyle;
 	int lengthDoc = startPos + length;
+
 	// If in a long distance lexical state, seek to the beginning  to find quote characters
-	if (state == SCE_PL_HERE || state == SCE_PL_REGEX || 
+	if (state == SCE_PL_HERE_Q || state == SCE_PL_HERE_QQ || state == SCE_PL_HERE_QX) {
+		while ((startPos > 1) && (styler.StyleAt(startPos) != SCE_PL_HERE_DELIM)) {
+			startPos--;
+		}
+		startPos = styler.LineStart(styler.GetLine(startPos));
+		state = styler.StyleAt(startPos - 1);
+	}
+	if (state == SCE_PL_REGEX ||
 		state == SCE_PL_REGSUBST || state == SCE_PL_LONGQUOTE) {
 		while ((startPos > 1) && (styler.StyleAt(startPos - 1) == state)) {
 			startPos--;
 		}
 		state = SCE_PL_DEFAULT;
 	}
+
 	styler.StartAt(startPos);
 	char chPrev = styler.SafeGetCharAt(startPos - 1);
 	char chNext = styler[startPos];
 	styler.StartSegment(startPos);
+
 	for (int i = startPos; i < lengthDoc; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
@@ -120,6 +149,35 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 			chPrev = ' ';
 			i += 1;
 			continue;
+		}
+		if ((chPrev == '\r' && ch == '\n')) {	// skip on DOS/Windows
+			chPrev = ch;
+			continue;
+		}
+
+		if (HereDoc.State == 1 && (ch == '\r' || ch == '\n')) {
+			// Begin of here-doc (the line after the here-doc delimiter):
+			HereDoc.State = 2;
+			styler.ColourTo(i - 1, state);
+			if (HereDoc.Quoted) {
+				if (state == SCE_PL_HERE_DELIM) {
+					// Missing quote at end of string! We are stricter than perl.
+					state = SCE_PL_ERROR;
+				}
+				else {
+					switch (HereDoc.Quote) {
+						case '\'': state = SCE_PL_HERE_Q ; break;
+						case  '"': state = SCE_PL_HERE_QQ; break;
+						case  '`': state = SCE_PL_HERE_QX; break;
+					}
+				}
+			}
+			else {
+				switch (HereDoc.Quote) {
+					case '\\': state = SCE_PL_HERE_Q ; break;
+					default  : state = SCE_PL_HERE_QQ;
+				}
+			}
 		}
 
 		if (state == SCE_PL_DEFAULT) {
@@ -221,15 +279,11 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				quoteDown = '/';
 				quotes = 1;
 				quoteRep = 1;
+
 			} else if (ch == '<' && chNext == '<') {
 				styler.ColourTo(i - 1, state);
-				state = SCE_PL_HERE;
-				i++;
-				ch = chNext;
-				chNext = chNext2;
-				quotes = 0;
-				sookedpos = 0;
-				sooked[sookedpos] = '\0';
+				state = SCE_PL_HERE_DELIM;
+				HereDoc.State = 0;
 			} else if (ch == '=' && (chPrev == '\r' || chPrev == '\n') && isalpha(chNext)) {
 				styler.ColourTo(i - 1, state);
 				state = SCE_PL_POD;
@@ -263,10 +317,8 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					} else if (ch == '\'') {
 						state = SCE_PL_CHARACTER;
 					} else if (ch == '<' && chNext == '<') {
-						state = SCE_PL_HERE;
-						quotes = 0;
-						sookedpos = 0;
-						sooked[sookedpos] = '\0';
+						state = SCE_PL_HERE_DELIM;
+						HereDoc.State = 0;
 					} else if (isPerlOperator(ch)) {
 						if (ch == ')' || ch == ']')
 							preferRE = false;
@@ -283,23 +335,96 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					styler.ColourTo(i - 1, state);
 					state = SCE_PL_DEFAULT;
 				}
-			} else if (state == SCE_PL_HERE) {
-				if ((isalnum(ch) || ch == '_') && quotes < 2) {
-					sooked[sookedpos++] = ch;
-					sooked[sookedpos] = '\0';
-					if (quotes == 0)
-						quotes = 1;
-				} else {
-					quotes++;
+			} else if (state == SCE_PL_HERE_DELIM) {
+				//
+				// From perldata.pod:
+				// ------------------
+				// A line-oriented form of quoting is based on the shell ``here-doc''
+				// syntax.
+				// Following a << you specify a string to terminate the quoted material,
+				// and all lines following the current line down to the terminating
+				// string are the value of the item.
+				// The terminating string may be either an identifier (a word),
+				// or some quoted text.
+				// If quoted, the type of quotes you use determines the treatment of
+				// the text, just as in regular quoting.
+				// An unquoted identifier works like double quotes.
+				// There must be no space between the << and the identifier.
+				// (If you put a space it will be treated as a null identifier,
+				// which is valid, and matches the first empty line.)
+				// The terminating string must appear by itself (unquoted and with no
+				// surrounding whitespace) on the terminating line.
+				//
+				if (HereDoc.State == 0) { // '<<' encountered
+					HereDoc.State = 1;
+					HereDoc.Quote = chNext;
+					HereDoc.Quoted = false;
+					HereDoc.DelimiterLength = 0;
+					HereDoc.Delimiter[HereDoc.DelimiterLength] = '\0';
+					if (chNext == '\'' || chNext == '"' || chNext == '`') { // a quoted here-doc delimiter
+						i++;
+						ch = chNext;
+						chNext = chNext2;
+						HereDoc.Quoted = true;
+					}
+					else if (chNext == '\\') { // ref?
+						i++;
+						ch = chNext;
+						chNext = chNext2;
+					}
+					else if (isalnum(chNext) || chNext == '_')
+					{ // an unquoted here-doc delimiter
+					}
+					else if (isspace(chNext))
+					{ // deprecated here-doc delimiter || TODO: left shift operator
+					}
+					else
+					{ // TODO: ???
+					}
 				}
-				if ((quotes > 1) && 
-					(chPrev == '\n' || chPrev == '\r') &&
-					isMatch(styler, lengthDoc, i, sooked)) {
-					i += sookedpos;
+				else if (HereDoc.State == 1) { // collect the delimiter
+					if (HereDoc.Quoted) { // a quoted here-doc delimiter
+						if (ch == HereDoc.Quote) { // closing quote => end of delimiter
+							styler.ColourTo(i, state);
+							state = SCE_PL_DEFAULT;
+							i++;
+							ch = chNext;
+							chNext = chNext2;
+						}
+						else {
+							if (ch == '\\' && chNext == HereDoc.Quote) { // escaped quote
+								i++;
+								ch = chNext;
+								chNext = chNext2;
+							}
+							HereDoc.Delimiter[HereDoc.DelimiterLength++] = ch;
+							HereDoc.Delimiter[HereDoc.DelimiterLength] = '\0';
+						}
+					}
+					else { // an unquoted here-doc delimiter
+						if (isalnum(ch) || ch == '_') {
+							HereDoc.Delimiter[HereDoc.DelimiterLength++] = ch;
+							HereDoc.Delimiter[HereDoc.DelimiterLength] = '\0';
+						}
+						else {
+							styler.ColourTo(i - 1, state);
+							state = SCE_PL_DEFAULT;
+						}
+					}
+					if (HereDoc.DelimiterLength >= static_cast<int>(sizeof(HereDoc.Delimiter)) - 1) {
+						styler.ColourTo(i - 1, state);
+						state = SCE_PL_ERROR;
+					}
+				}
+			} else if (HereDoc.State == 2) {
+			// state == SCE_PL_HERE_Q || state == SCE_PL_HERE_QQ || state == SCE_PL_HERE_QX
+				if ((chPrev == '\n' || chPrev == '\r') && isMatch(styler, lengthDoc, i, HereDoc.Delimiter)) {
+					i += HereDoc.DelimiterLength;
 					chNext = styler.SafeGetCharAt(i);
 					if (chNext == '\n' || chNext == '\r') {
-						styler.ColourTo(i - 1, SCE_PL_HERE);
+						styler.ColourTo(i - 1, state);
 						state = SCE_PL_DEFAULT;
+						HereDoc.State = 0;
 					}
 					ch = chNext;
 					chNext = styler.SafeGetCharAt(i + 1);
@@ -509,6 +634,9 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					styler.ColourTo(i, SCE_PL_OPERATOR);
 				}
 			}
+		}
+		if (state == SCE_PL_ERROR) {
+			break;
 		}
 		chPrev = ch;
 	}
