@@ -14,16 +14,15 @@
     <style type="text/css">
 <!--
 /*<![CDATA[*/
-    CODE { font-family: "Courier New", monospace; font-size: 10pt; }
+    CODE { font-family: "Courier New", monospace; }
     A:visited { color: blue; }
     A:hover { text-decoration: underline ! important; }
-    A.message { text-decoration: none; font-family: "Courier New", monospace; font-size: 10pt; }
+    A.message { text-decoration: none; font-family: "Courier New", monospace; }
     A.toc { text-decoration: none; }
     A.jump { text-decoration: none; }
-    A.next { text-decoration: none; width: 10em; text-align: right; font-family: Verdana, sans-serif; }
-    /*]]>*/
-    -->
-                                                                                    </style>
+/*]]>*/
+-->
+    </style>
   </head>
 
   <body bgcolor="#FFFFFF" text="#000000">
@@ -33,7 +32,7 @@
         <td><img src="SciTEIco.png" border="3" height="64" width="64" alt="Scintilla icon" /></td>
 
         <td><a href="index.html"
-        style="color:white;text-decoration:none;font-size:large">Scintilla</a></td>
+        style="color:white;text-decoration:none;font-size:200%">Scintilla</a></td>
       </tr>
     </table>
 
@@ -261,8 +260,9 @@
     href="#Indicators">indicators</a>. This allows 32 fundamental styles, which is enough for most
     languages, and three independent indicators so that, for example, syntax errors, deprecated
     names and bad indentation could all be displayed at once. The number of bits used for styles
-    can be altered with <a class="message" href="#SCI_SETSTYLEBITS">SCI_SETSTYLEBITS</a> up to a
-    maximum of 7 bits. The remaining bits can be used for indicators.</p>
+    can be altered with <a class="message"
+    href="#SCI_SETSTYLEBITS"><code>SCI_SETSTYLEBITS</code></a> up to a maximum of 7 bits. The
+    remaining bits can be used for indicators.</p>
 
     <p>Positions within the Scintilla document refer to a character or the gap before that
     character. The first character in a document is 0, the second 1 and so on. If a document
@@ -280,7 +280,7 @@
     largest font in any current style. This restriction is for performance; if lines differed in
     height then calculations involving positioning of text would require the text to be styled
     first.</p>
-    <a class="message" href="#SCI_GETTEXT">SCI_GETTEXT(int length, char *text)</a><br />
+    <code><a class="message" href="#SCI_GETTEXT">SCI_GETTEXT(int length, char *text)</a><br />
      <a class="message" href="#SCI_SETTEXT">SCI_SETTEXT(&lt;unused&gt;, const char *text)</a><br />
      <a class="message" href="#SCI_SETSAVEPOINT">SCI_SETSAVEPOINT</a><br />
      <a class="message" href="#SCI_GETLINE">SCI_GETLINE(int line, char *text)</a><br />
@@ -302,7 +302,7 @@
     *tr)</a><br />
      <a class="message" href="#SCI_SETSTYLEBITS">SCI_SETSTYLEBITS(int bits)</a><br />
      <a class="message" href="#SCI_GETSTYLEBITS">SCI_GETSTYLEBITS</a><br />
-
+    </code> 
 
     <p><b id="SCI_GETTEXT">SCI_GETTEXT(int length, char *text)</b><br />
      This returns <code>length</code>-1 characters of text from the start of the document plus one
@@ -312,11 +312,11 @@
     *text)</code>. If you then save the text, you should use <code>SCI_SETSAVEPOINT</code> to mark
     the text as unmodified.</p>
 
-    <p>See also: <a class="message" href="#SCI_GETSELTEXT">SCI_GETSELTEXT</a>, <a class="message"
-    href="#SCI_GETCURLINE">SCI_GETCURLINE</a>, <a class="message"
+    <p>See also: <code><a class="message" href="#SCI_GETSELTEXT">SCI_GETSELTEXT</a>, <a
+    class="message" href="#SCI_GETCURLINE">SCI_GETCURLINE</a>, <a class="message"
     href="#SCI_GETLINE">SCI_GETLINE</a>, <a class="message"
     href="#SCI_GETSTYLEDTEXT">SCI_GETSTYLEDTEXT</a>, <a class="message"
-    href="#SCI_GETTEXTRANGE">SCI_GETTEXTRANGE</a></p>
+    href="#SCI_GETTEXTRANGE">SCI_GETTEXTRANGE</a></code></p>
 
     <p><b id="SCI_SETTEXT">SCI_SETTEXT(&lt;unused&gt;, const char *text)</b><br />
      This replaces all the text in the document with the zero terminated text string you pass
@@ -332,8 +332,8 @@
     href="#Notifications">notification messages</a>, allowing the container to know if the file
     should be considered dirty or not.</p>
 
-    <p>See also: <a class="message" href="#SCI_EMPTYUNDOBUFFER">SCI_EMPTYUNDOBUFFER</a>, <a
-    class="message" href="#SCI_GETMODIFY">SCI_GETMODIFY</a></p>
+    <p>See also: <code><a class="message" href="#SCI_EMPTYUNDOBUFFER">SCI_EMPTYUNDOBUFFER</a>, <a
+    class="message" href="#SCI_GETMODIFY">SCI_GETMODIFY</a></code></p>
 
     <p><b id="SCI_GETLINE">SCI_GETLINE(int line, char *text)</b><br />
      This fills the buffer defined by text with the contents of the nominated line (lines start at
@@ -344,11 +344,11 @@
     characters. If you ask for a line number outside the range of lines in the document, 0
     characters are copied.</p>
 
-    <p>See also: <a class="message" href="#SCI_GETCURLINE">SCI_GETCURLINE</a>, <a class="message"
-    href="#SCI_GETSELTEXT">SCI_GETSELTEXT</a>, <a class="message"
+    <p>See also: <code><a class="message" href="#SCI_GETCURLINE">SCI_GETCURLINE</a>, <a
+    class="message" href="#SCI_GETSELTEXT">SCI_GETSELTEXT</a>, <a class="message"
     href="#SCI_GETTEXTRANGE">SCI_GETTEXTRANGE</a>, <a class="message"
     href="#SCI_GETSTYLEDTEXT">SCI_GETSTYLEDTEXT</a>, <a class="message"
-    href="#SCI_GETTEXT">SCI_GETTEXT</a></p>
+    href="#SCI_GETTEXT">SCI_GETTEXT</a></code></p>
 
     <p><b id="SCI_REPLACESEL">SCI_REPLACESEL(&lt;unused&gt;, const char *text)</b><br />
      The currently selected text between the <a class="jump" href="#SelectionAndInformation">anchor
@@ -360,7 +360,7 @@
      <b id="SCI_GETREADONLY">SCI_GETREADONLY</b><br />
      These messages set and get the read-only flag for the document. If you mark a document as read
     only, attempts to modify the text cause the <a class="message"
-    href="#SCN_MODIFYATTEMPTRO">SCN_MODIFYATTEMPTRO</a> notification.</p>
+    href="#SCN_MODIFYATTEMPTRO"><code>SCN_MODIFYATTEMPTRO</code></a> notification.</p>
 
     <p><b id="SCI_GETTEXTRANGE">SCI_GETTEXTRANGE(&lt;unused&gt;, <a class="jump"
     href="#TextRange">TextRange</a> *tr)</b><br />
@@ -371,11 +371,11 @@
     longer than the number of characters you wish to read. The return value is the length of the
     returned text not including the terminating 0.</p>
 
-    <p>See also: <a class="message" href="#SCI_GETSELTEXT">SCI_GETSELTEXT</a>, <a class="message"
-    href="#SCI_GETLINE">SCI_GETLINE</a>, <a class="message"
+    <p>See also: <code><a class="message" href="#SCI_GETSELTEXT">SCI_GETSELTEXT</a>, <a
+    class="message" href="#SCI_GETLINE">SCI_GETLINE</a>, <a class="message"
     href="#SCI_GETCURLINE">SCI_GETCURLINE</a>, <a class="message"
     href="#SCI_GETSTYLEDTEXT">SCI_GETSTYLEDTEXT</a>, <a class="message"
-    href="#SCI_GETTEXT">SCI_GETTEXT</a></p>
+    href="#SCI_GETTEXT">SCI_GETTEXT</a></code></p>
 
     <p><b id="SCI_GETSTYLEDTEXT">SCI_GETSTYLEDTEXT(&lt;unused&gt;, <a class="jump"
     href="#TextRange">TextRange</a> *tr)</b><br />
@@ -388,11 +388,11 @@
     <code>cpMin</code> or <code>cpMax</code>. Positions outside the document return character codes
     and style bytes of 0.</p>
 
-    <p>See also: <a class="message" href="#SCI_GETSELTEXT">SCI_GETSELTEXT</a>, <a class="message"
-    href="#SCI_GETLINE">SCI_GETLINE</a>, <a class="message"
+    <p>See also: <code><a class="message" href="#SCI_GETSELTEXT">SCI_GETSELTEXT</a>, <a
+    class="message" href="#SCI_GETLINE">SCI_GETLINE</a>, <a class="message"
     href="#SCI_GETCURLINE">SCI_GETCURLINE</a>, <a class="message"
     href="#SCI_GETTEXTRANGE">SCI_GETTEXTRANGE</a>, <a class="message"
-    href="#SCI_GETTEXT">SCI_GETTEXT</a></p>
+    href="#SCI_GETTEXT">SCI_GETTEXT</a></code></p>
 
     <p><b id="SCI_ADDTEXT">SCI_ADDTEXT(int length, const char *s)</b><br />
      This inserts the first <code>length</code> characters from the string <code>s</code>,
@@ -452,7 +452,8 @@ struct TextRange {
 </pre>
 
     <h2 id="Searching">Searching</h2>
-    <a class="message" href="#SCI_FINDTEXT">SCI_FINDTEXT(int flags, TextToFind *ttf)</a><br />
+    <code><a class="message" href="#SCI_FINDTEXT">SCI_FINDTEXT(int flags, TextToFind
+    *ttf)</a><br />
      <a class="message" href="#SCI_SEARCHANCHOR">SCI_SEARCHANCHOR</a><br />
      <a class="message" href="#SCI_SEARCHNEXT">SCI_SEARCHNEXT(int searchFlags, const char
     *text)</a><br />
@@ -460,7 +461,7 @@ struct TextRange {
     *text)</a><br />
      <a class="jump" href="#SearchAndReplaceUsingTheTarget">Search and replace using the
     target</a><br />
-
+    </code> 
 
     <p><b id="searchFlags"><code>searchFlags</code></b><br />
      Several of the search routines use flag options, which include a simple regular expression
@@ -611,7 +612,8 @@ struct TextRange {
     is succeeds. The <code>chrgText.cpMin</code> and <code>chrgText.cpMax</code> members of
     <code>TextToFind</code> are filled in with the start and end positions of the found text.</p>
 
-    <p>See also: <a class="message" href="#SCI_SEARCHINTARGET">SCI_SEARCHINTARGET</a></p>
+    <p>See also: <code><a class="message"
+    href="#SCI_SEARCHINTARGET">SCI_SEARCHINTARGET</a></code></p>
 
     <p><b id="TextToFind">TextToFind</b><br />
      This structure is defined to have exactly the same shape as the Win32 structure
@@ -630,7 +632,7 @@ struct TextToFind {
      These messages provide relocatable search support. This allows multiple incremental
     interactive searches to be macro recorded while still setting the selection to found text so
     the find/select operation is self-contained. These three messages send <a class="message"
-    href="#SCN_MACRORECORD">SCN_MACRORECORD</a> <a class="jump"
+    href="#SCN_MACRORECORD"><code>SCN_MACRORECORD</code></a> <a class="jump"
     href="#Notifications">notifications</a> if macro recording is enabled.</p>
 
     <p><code>SCI_SEARCHANCHOR</code> sets the search start point used by
@@ -649,16 +651,16 @@ struct TextToFind {
     of the matching text. The selection is updated to show the matched text, but is not scrolled
     into view.</p>
 
-    <p>See also: <a class="message" href="#SCI_SEARCHINTARGET">SCI_SEARCHINTARGET</a>, <a
-    class="message" href="#SCI_FINDTEXT">SCI_FINDTEXT</a></p>
+    <p>See also: <a class="message" href="#SCI_SEARCHINTARGET"><code>SCI_SEARCHINTARGET</code></a>,
+    <a class="message" href="#SCI_FINDTEXT"><code>SCI_FINDTEXT</code></a></p>
 
     <h3 id="SearchAndReplaceUsingTheTarget">Search and replace using the target</h3>
 
-    <p>Using <a class="message" href="#SCI_REPLACESEL">SCI_REPLACESEL</a>, modifications cause
-    scrolling and other visible changes, which may take some time and cause unwanted display
-    updates. If performing many changes, such as a replace all command, the target can be used
-    instead. First, set the range to be replaced. Then call <code>SCI_REPLACETARGET</code> or
-    <code>SCI_REPLACETARGETRE</code>.</p>
+    <p>Using <a class="message" href="#SCI_REPLACESEL"><code>SCI_REPLACESEL</code></a>,
+    modifications cause scrolling and other visible changes, which may take some time and cause
+    unwanted display updates. If performing many changes, such as a replace all command, the target
+    can be used instead. First, set the range to be replaced. Then call
+    <code>SCI_REPLACETARGET</code> or <code>SCI_REPLACETARGETRE</code>.</p>
 
     <p>Searching can be performed within the target range with <code>SCI_SEARCHINTARGET</code>,
     which uses a counted string to allow searching for null characters. It returns the length of
@@ -666,9 +668,10 @@ struct TextToFind {
     <code>SCI_SEARCHINTARGET</code> such as <code>SCFIND_MATCHCASE</code>,
     <code>SCFIND_WHOLEWORD</code>, <code>SCFIND_WORDSTART</code>, and <code>SCFIND_REGEXP</code>
     can be set with <code>SCI_SETSEARCHFLAGS</code>. <code>SCI_SEARCHINTARGET</code> may be simpler
-    for some clients to use than <a class="message" href="#SCI_FINDTEXT">SCI_FINDTEXT</a>, as that
-    requires using a pointer to a structure.</p>
-    <a class="message" href="#SCI_SETTARGETSTART">SCI_SETTARGETSTART(int pos)</a><br />
+    for some clients to use than <a class="message"
+    href="#SCI_FINDTEXT"><code>SCI_FINDTEXT</code></a>, as that requires using a pointer to a
+    structure.</p>
+    <code><a class="message" href="#SCI_SETTARGETSTART">SCI_SETTARGETSTART(int pos)</a><br />
      <a class="message" href="#SCI_GETTARGETSTART">SCI_GETTARGETSTART</a><br />
      <a class="message" href="#SCI_SETTARGETEND">SCI_SETTARGETEND(int pos)</a><br />
      <a class="message" href="#SCI_GETTARGETEND">SCI_GETTARGETEND</a><br />
@@ -680,7 +683,7 @@ struct TextToFind {
      <a class="message" href="#SCI_GETSEARCHFLAGS">SCI_GETSEARCHFLAGS</a><br />
      <a class="message" href="#SCI_SEARCHINTARGET">SCI_SEARCHINTARGET(int length, const char
     *text)</a><br />
-
+    </code> 
 
     <p><b id="SCI_SETTARGETSTART">SCI_SETTARGETSTART(int pos)</b><br />
      <b id="SCI_GETTARGETSTART">SCI_GETTARGETSTART</b><br />
@@ -718,7 +721,7 @@ struct TextToFind {
     text and the return value is the position of the start of the matching text. If the search
     fails, the result is -1.</p>
 
-    <p>See also: <a class="message" href="#SCI_FINDTEXT">SCI_FINDTEXT</a></p>
+    <p>See also: <a class="message" href="#SCI_FINDTEXT"><code>SCI_FINDTEXT</code></a></p>
 
     <h2 id="Overtype">Overtype</h2>
 
@@ -765,7 +768,7 @@ struct TextToFind {
     These sequences occur between <code>SCI_BEGINUNDOACTION</code> and
     <code>SCI_ENDUNDOACTION</code> messages. These sequences can be nested and only the top-level
     sequences are undone as units.</p>
-    <a class="message" href="#SCI_UNDO">SCI_UNDO</a><br />
+    <code><a class="message" href="#SCI_UNDO">SCI_UNDO</a><br />
      <a class="message" href="#SCI_CANUNDO">SCI_CANUNDO</a><br />
      <a class="message" href="#SCI_EMPTYUNDOBUFFER">SCI_EMPTYUNDOBUFFER</a><br />
      <a class="message" href="#SCI_REDO">SCI_REDO</a><br />
@@ -775,7 +778,7 @@ struct TextToFind {
      <a class="message" href="#SCI_GETUNDOCOLLECTION">SCI_GETUNDOCOLLECTION</a><br />
      <a class="message" href="#SCI_BEGINUNDOACTION">SCI_BEGINUNDOACTION</a><br />
      <a class="message" href="#SCI_ENDUNDOACTION">SCI_ENDUNDOACTION</a><br />
-
+    </code> 
 
     <p><b id="SCI_UNDO">SCI_UNDO</b><br />
      <b id="SCI_CANUNDO">SCI_CANUNDO</b><br />
@@ -801,7 +804,7 @@ struct TextToFind {
     href="#SCN_SAVEPOINTREACHED">SCN_SAVEPOINTREACHED</a></code> notification to be sent to the
     container.</p>
 
-    <p>See also: <a class="message" href="#SCI_SETSAVEPOINT">SCI_SETSAVEPOINT</a></p>
+    <p>See also: <a class="message" href="#SCI_SETSAVEPOINT"><code>SCI_SETSAVEPOINT</code></a></p>
     <b id="SCI_SETUNDOCOLLECTION">SCI_SETUNDOCOLLECTION(bool collectUndo)</b><br />
      <b id="SCI_GETUNDOCOLLECTION">SCI_GETUNDOCOLLECTION</b><br />
      You can control whether Scintilla collects undo information with
@@ -810,7 +813,7 @@ struct TextToFind {
     <code>SCI_EMPTYUNDOBUFFER</code> to avoid the undo buffer being unsynchronized with the data in
     the buffer. <br />
      <br />
-
+     
 
     <p>You might wish to turn off saving undo information if you use the Scintilla to store text
     generated by a program (a Log view) or in a display window where text is often deleted and
@@ -831,7 +834,7 @@ struct TextToFind {
     (after the last character). If you use messages, there is nothing to stop you setting a
     position that is in the middle of a CRLF pair, or in the middle of a 2 byte character. However,
     keyboard commands will not move the caret into such positions.</p>
-    <a class="message" href="#SCI_GETTEXTLENGTH">SCI_GETTEXTLENGTH</a><br />
+    <code><a class="message" href="#SCI_GETTEXTLENGTH">SCI_GETTEXTLENGTH</a><br />
      <a class="message" href="#SCI_GETLENGTH">SCI_GETLENGTH</a><br />
      <a class="message" href="#SCI_GETLINECOUNT">SCI_GETLINECOUNT</a><br />
      <a class="message" href="#SCI_GETFIRSTVISIBLELINE">SCI_GETFIRSTVISIBLELINE</a><br />
@@ -873,7 +876,7 @@ struct TextToFind {
      <a class="message" href="#SCI_TEXTWIDTH">SCI_TEXTWIDTH(int styleNumber, char *text)</a><br />
      <a class="message" href="#SCI_TEXTHEIGHT">SCI_TEXTHEIGHT(int line)</a><br />
      <a class="message" href="#SCI_CHOOSECARETX">SCI_CHOOSECARETX</a><br />
-
+    </code> 
 
     <p><b id="SCI_GETTEXTLENGTH">SCI_GETTEXTLENGTH</b><br />
      <b id="SCI_GETLENGTH">SCI_GETLENGTH</b><br />
@@ -896,13 +899,13 @@ struct TextToFind {
     <p><b id="SCI_GETMODIFY">SCI_GETMODIFY</b><br />
      This returns non-zero if the document is modified and 0 if it is unmodified. The modified
     status of a document is determined by the undo position relative to the save point. The save
-    point is set by <a class="message" href="#SCI_SETSAVEPOINT">SCI_SETSAVEPOINT</a>, usually when
-    you have saved data to a file.</p>
+    point is set by <a class="message" href="#SCI_SETSAVEPOINT"><code>SCI_SETSAVEPOINT</code></a>,
+    usually when you have saved data to a file.</p>
 
     <p>If you need to be notified when the document becomes modified, Scintilla notifies the
     container that it has entered or left the save point with the <a class="message"
-    href="#SCN_SAVEPOINTREACHED">SCN_SAVEPOINTREACHED</a> and <a class="message"
-    href="#SCN_SAVEPOINTLEFT">SCN_SAVEPOINTLEFT</a> <a class="jump"
+    href="#SCN_SAVEPOINTREACHED"><code>SCN_SAVEPOINTREACHED</code></a> and <a class="message"
+    href="#SCN_SAVEPOINTLEFT"><code>SCN_SAVEPOINTLEFT</code></a> <a class="jump"
     href="#Notifications">notification messages</a>.</p>
 
     <p><b id="SCI_SETSEL">SCI_SETSEL(int anchorPos, int currentPos)</b><br />
@@ -927,7 +930,7 @@ struct TextToFind {
      This sets the current position and creates a selection between the anchor and the current
     position. The caret is not scrolled into view.</p>
 
-    <p>See also: <a class="message" href="#SCI_SCROLLCARET">SCI_SCROLLCARET</a></p>
+    <p>See also: <a class="message" href="#SCI_SCROLLCARET"><code>SCI_SCROLLCARET</code></a></p>
 
     <p><b id="SCI_GETCURRENTPOS">SCI_GETCURRENTPOS</b><br />
      This returns the current position.</p>
@@ -936,7 +939,7 @@ struct TextToFind {
      This sets the anchor position and creates a selection between the anchor position and the
     current position. The caret is not scrolled into view.</p>
 
-    <p>See also: <a class="message" href="#SCI_SCROLLCARET">SCI_SCROLLCARET</a></p>
+    <p>See also: <a class="message" href="#SCI_SCROLLCARET"><code>SCI_SCROLLCARET</code></a></p>
 
     <p><b id="SCI_GETANCHOR">SCI_GETANCHOR</b><br />
      This returns the current anchor position.</p>
@@ -978,7 +981,7 @@ struct TextToFind {
       </tbody>
     </table>
 
-    <p>See also: <a class="message" href="#SCI_SCROLLCARET">SCI_SCROLLCARET</a></p>
+    <p>See also: <a class="message" href="#SCI_SCROLLCARET"><code>SCI_SCROLLCARET</code></a></p>
 
     <p><b id="SCI_GETSELECTIONSTART">SCI_GETSELECTIONSTART</b><br />
      <b id="SCI_GETSELECTIONEND">SCI_GETSELECTIONEND</b><br />
@@ -1021,12 +1024,13 @@ struct TextToFind {
     buffer. The buffer must be at least
     <code>SCI_GETSELECTIONEND()-SCI_SETSELECTIONSTART()+1</code> bytes long. <br />
      <br />
+     
 
-
-    <p>See also: <a class="message" href="#SCI_GETCURLINE">SCI_GETCURLINE</a>, <a class="message"
-    href="#SCI_GETLINE">SCI_GETLINE</a>, <a class="message" href="#SCI_GETTEXT">SCI_GETTEXT</a>, <a
-    class="message" href="#SCI_GETSTYLEDTEXT">SCI_GETSTYLEDTEXT</a>, <a class="message"
-    href="#SCI_GETTEXTRANGE">SCI_GETTEXTRANGE</a></p>
+    <p>See also: <code><a class="message" href="#SCI_GETCURLINE">SCI_GETCURLINE</a>, <a
+    class="message" href="#SCI_GETLINE">SCI_GETLINE</a>, <a class="message"
+    href="#SCI_GETTEXT">SCI_GETTEXT</a>, <a class="message"
+    href="#SCI_GETSTYLEDTEXT">SCI_GETSTYLEDTEXT</a>, <a class="message"
+    href="#SCI_GETTEXTRANGE">SCI_GETTEXTRANGE</a></code></p>
 
     <p><b id="SCI_GETCURLINE">SCI_GETCURLINE(int textLen, char *text)</b><br />
      This retrieves the text of the line containing the caret and returns the position within the
@@ -1034,10 +1038,11 @@ struct TextToFind {
     the text you wish to retrieve and a terminating 0 character. Set <code>textLen</code> to the
     length of the buffer.</p>
 
-    <p>See also: <a class="message" href="#SCI_GETSELTEXT">SCI_GETSELTEXT</a>, <a class="message"
-    href="#SCI_GETLINE">SCI_GETLINE</a>, <a class="message" href="#SCI_GETTEXT">SCI_GETTEXT</a>, <a
-    class="message" href="#SCI_GETSTYLEDTEXT">SCI_GETSTYLEDTEXT</a>, <a class="message"
-    href="#SCI_GETTEXTRANGE">SCI_GETTEXTRANGE</a></p>
+    <p>See also: <code><a class="message" href="#SCI_GETSELTEXT">SCI_GETSELTEXT</a>, <a
+    class="message" href="#SCI_GETLINE">SCI_GETLINE</a>, <a class="message"
+    href="#SCI_GETTEXT">SCI_GETTEXT</a>, <a class="message"
+    href="#SCI_GETSTYLEDTEXT">SCI_GETSTYLEDTEXT</a>, <a class="message"
+    href="#SCI_GETTEXTRANGE">SCI_GETTEXTRANGE</a></code></p>
 
     <p><b id="SCI_SELECTIONISRECTANGLE">SCI_SELECTIONISRECTANGLE</b><br />
      This returns 1 if the current selection is in rectangle mode, 0 if not.</p>
@@ -1052,9 +1057,9 @@ struct TextToFind {
     onlyWordCharacters)</b><br />
      These messages return the start and end of words using the same definition of words as used
     internally within Scintilla. You can set your own list of characters that count as words with
-    <a class="message" href="#SCI_SETWORDCHARS">SCI_SETWORDCHARS</a>. The position sets the start
-    or the search, which is forwards when searching for the end and backwards when searching for
-    the start.</p>
+    <a class="message" href="#SCI_SETWORDCHARS"><code>SCI_SETWORDCHARS</code></a>. The position
+    sets the start or the search, which is forwards when searching for the end and backwards when
+    searching for the start.</p>
 
     <p>Set <code>onlyWordCharacters</code> to <code>true</code> (1) to stop searching at the first
     non-word character in the search direction. If <code>onlyWordCharacters</code> is
@@ -1162,9 +1167,9 @@ struct TextToFind {
 
     <p><b id="SCI_HIDESELECTION">SCI_HIDESELECTION(bool hide)</b><br />
      The normal state is to make the selection visible by drawing it as set by <a class="message"
-    href="#SCI_SETSELFORE">SCI_SETSELFORE</a> and <a class="message"
-    href="#SCI_SETSELBACK">SCI_SETSELBACK</a>. However, if you hide the selection, it is drawn as
-    normal text.</p>
+    href="#SCI_SETSELFORE"><code>SCI_SETSELFORE</code></a> and <a class="message"
+    href="#SCI_SETSELBACK"><code>SCI_SETSELBACK</code></a>. However, if you hide the selection, it
+    is drawn as normal text.</p>
 
     <p><b id="SCI_CHOOSECARETX">SCI_CHOOSECARETX</b><br />
      Scintilla remembers the x value of the last position horizontally moved to explicitly by the
@@ -1172,7 +1177,7 @@ struct TextToFind {
     This message sets the current x position of the caret as the remembered value.</p>
 
     <h2 id="ScrollingAndAutomaticScrolling">Scrolling and automatic scrolling</h2>
-    <a class="message" href="#SCI_LINESCROLL">SCI_LINESCROLL(int column, int line)</a><br />
+    <code><a class="message" href="#SCI_LINESCROLL">SCI_LINESCROLL(int column, int line)</a><br />
      <a class="message" href="#SCI_SCROLLCARET">SCI_SCROLLCARET</a><br />
      <a class="message" href="#SCI_SETXCARETPOLICY">SCI_SETXCARETPOLICY(int caretPolicy, int
     caretSlop)</a><br />
@@ -1191,7 +1196,7 @@ struct TextToFind {
      <a class="message" href="#SCI_SETENDATLASTLINE">SCI_SETENDATLASTLINE(bool
     endAtLastLine)</a><br />
      <a class="message" href="#SCI_GETENDATLASTLINE">SCI_GETENDATLASTLINE</a><br />
-
+    </code> 
 
     <p><b id="SCI_LINESCROLL">SCI_LINESCROLL(int column, int line)</b><br />
      This will attempt to scroll the display by the number of columns and lines that you specify.
@@ -1202,7 +1207,7 @@ struct TextToFind {
     the column at the left edge of the view (i.e. they move the text leftwards as far as the user
     is concerned). Negative values do the reverse.</p>
 
-    <p>See also: <a class="message" href="#SCI_SETXOFFSET">SCI_SETXOFFSET</a></p>
+    <p>See also: <a class="message" href="#SCI_SETXOFFSET"><code>SCI_SETXOFFSET</code></a></p>
 
     <p><b id="SCI_SCROLLCARET">SCI_SCROLLCARET</b><br />
      If the current position (this is the caret if there is no selection) is not visible, the view
@@ -1460,9 +1465,9 @@ struct TextToFind {
 
     <p><b id="SCI_SETVISIBLEPOLICY">SCI_SETVISIBLEPOLICY(int caretPolicy, int caretSlop)</b><br />
      This determines how the vertical positioning is determined when <a class="message"
-    href="#SCI_ENSUREVISIBLEENFORCEPOLICY">SCI_ENSUREVISIBLEENFORCEPOLICY</a> is called. It takes
-    <code>VISIBLE_SLOP</code> and <code>VISIBLE_STRICT</code> flags for the policy parameter. It is
-    similar in operation to <a class="message"
+    href="#SCI_ENSUREVISIBLEENFORCEPOLICY"><code>SCI_ENSUREVISIBLEENFORCEPOLICY</code></a> is
+    called. It takes <code>VISIBLE_SLOP</code> and <code>VISIBLE_STRICT</code> flags for the policy
+    parameter. It is similar in operation to <a class="message"
     href="#SCI_SETYCARETPOLICY"><code>SCI_SETYCARETPOLICY(int caretPolicy, int
     caretSlop)</code></a>.</p>
 
@@ -1485,7 +1490,7 @@ struct TextToFind {
     view. A value of 0 is the normal position with the first text column visible at the left of the
     view.</p>
 
-    <p>See also: <a class="message" href="#SCI_LINESCROLL">SCI_LINESCROLL</a></p>
+    <p>See also: <a class="message" href="#SCI_LINESCROLL"><code>SCI_LINESCROLL</code></a></p>
 
     <p><b id="SCI_SETSCROLLWIDTH">SCI_SETSCROLLWIDTH(int pixelWidth)</b><br />
      <b id="SCI_GETSCROLLWIDTH">SCI_GETSCROLLWIDTH</b><br />
@@ -1499,13 +1504,13 @@ struct TextToFind {
     scrolling one page below the last line.</p>
 
     <h2 id="WhiteSpace">White space</h2>
-    <a class="message" href="#SCI_SETVIEWWS">SCI_SETVIEWWS(int wsMode)</a><br />
+    <code><a class="message" href="#SCI_SETVIEWWS">SCI_SETVIEWWS(int wsMode)</a><br />
      <a class="message" href="#SCI_GETVIEWWS">SCI_GETVIEWWS</a><br />
      <a class="message" href="#SCI_SETWHITESPACEFORE">SCI_SETWHITESPACEFORE(bool
     useWhitespaceForeColour, int colour)</a><br />
      <a class="message" href="#SCI_SETWHITESPACEBACK">SCI_SETWHITESPACEBACK(bool
     useWhitespaceBackColour, int colour)</a><br />
-
+    </code> 
 
     <p><b id="SCI_SETVIEWWS">SCI_SETVIEWWS(int wsMode)</b><br />
      <b id="SCI_GETVIEWWS">SCI_GETVIEWWS</b><br />
@@ -1607,12 +1612,12 @@ struct TextToFind {
     this can be changed with the <code>SCI_SETEOLMODE</code> message. You can also convert the
     entire document to one of these line endings with <code>SCI_CONVERTEOLS</code>. Finally, you
     can choose to display the line endings with <code>SCI_SETVIEWEOL</code>.</p>
-    <a class="message" href="#">SCI_SETEOLMODE(int eolMode)</a><br />
+    <code><a class="message" href="#">SCI_SETEOLMODE(int eolMode)</a><br />
      <a class="message" href="#">SCI_GETEOLMODE</a><br />
      <a class="message" href="#">SCI_CONVERTEOLS(int eolMode)</a><br />
      <a class="message" href="#">SCI_SETVIEWEOL(bool visible)</a><br />
      <a class="message" href="#">SCI_GETVIEWEOL</a><br />
-
+    </code> 
 
     <p><b id="SCI_SETEOLMODE">SCI_SETEOLMODE(int eolMode)</b><br />
      <b id="SCI_GETEOLMODE">SCI_GETEOLMODE</b><br />
@@ -1640,17 +1645,18 @@ struct TextToFind {
     divide the 8 style bits available for each character into 5 bits (0 to 4 = <a class="jump"
     href="#StyleDefinition">styles 0 to 31</a>) that set a style and three bits (5 to 7) that
     define <a class="jump" href="#Indicators">indicators</a>. You can change the balance between
-    styles and indicators with <a class="message" href="#SCI_SETSTYLEBITS">SCI_SETSTYLEBITS</a>. If
-    your styling needs can be met by one of the standard lexers, or if you can write your own, then
-    a lexer is probably the easiest way to style your document. If you choose to use the container
-    to do the styling you can use the <a class="message" href="#SCI_SETLEXER">SCI_SETLEXER</a>
-    command to select <code>SCLEX_CONTAINER</code>, in which case the container is sent a <a
-    class="message" href="#SCN_STYLENEEDED">SCN_STYLENEEDED</a> <a class="jump"
+    styles and indicators with <a class="message"
+    href="#SCI_SETSTYLEBITS"><code>SCI_SETSTYLEBITS</code></a>. If your styling needs can be met by
+    one of the standard lexers, or if you can write your own, then a lexer is probably the easiest
+    way to style your document. If you choose to use the container to do the styling you can use
+    the <a class="message" href="#SCI_SETLEXER"><code>SCI_SETLEXER</code></a> command to select
+    <code>SCLEX_CONTAINER</code>, in which case the container is sent a <a class="message"
+    href="#SCN_STYLENEEDED"><code>SCN_STYLENEEDED</code></a> <a class="jump"
     href="#Notifications">notification</a> each time text needs styling for display. As another
     alternative, you might use idle time to style the document. Even if you use a lexer, you might
     use the styling commands to mark errors detected by a compiler. The following commands can be
     used.</p>
-    <a class="message" href="#SCI_GETENDSTYLED">SCI_GETENDSTYLED</a><br />
+    <code><a class="message" href="#SCI_GETENDSTYLED">SCI_GETENDSTYLED</a><br />
      <a class="message" href="#SCI_STARTSTYLING">SCI_STARTSTYLING(int position, int mask)</a><br />
      <a class="message" href="#SCI_SETSTYLING">SCI_SETSTYLING(int length, int style)</a><br />
      <a class="message" href="#SCI_SETSTYLINGEX">SCI_SETSTYLINGEX(int length, const char
@@ -1658,7 +1664,7 @@ struct TextToFind {
      <a class="message" href="#SCI_SETLINESTATE">SCI_SETLINESTATE(int line, int value)</a><br />
      <a class="message" href="#SCI_GETLINESTATE">SCI_GETLINESTATE(int line)</a><br />
      <a class="message" href="#SCI_GETMAXLINESTATE">SCI_GETMAXLINESTATE</a><br />
-
+    </code> 
 
     <p><b id="SCI_GETENDSTYLED">SCI_GETENDSTYLED</b><br />
      Scintilla keeps a record of the last character that is likely to be styled correctly. This is
@@ -1710,9 +1716,10 @@ struct TextToFind {
     <p>While the style setting messages mentioned above, change the style numbers associated with
     text, these messages define how those style numbers are interpreted visually. There are 128
     lexer styles that can be set, numbered 0 to <code>STYLEMAX</code> (127). Unless you use <a
-    class="message" href="#SCI_SETSTYLEBITS">SCI_SETSTYLEBITS</a> to change the number of style
-    bits, styles 0 to 31 are used to set the text attributes. There are also some predefined
-    numbered styles starting at 32, The following <code>STYLE_</code>* constants are defined.</p>
+    class="message" href="#SCI_SETSTYLEBITS"><code>SCI_SETSTYLEBITS</code></a> to change the number
+    of style bits, styles 0 to 31 are used to set the text attributes. There are also some
+    predefined numbered styles starting at 32, The following <code>STYLE_</code>* constants are
+    defined.</p>
 
     <table cellpadding="1" cellspacing="2" border="0" summary="Preset styles">
       <tbody valign="top">
@@ -1734,7 +1741,7 @@ struct TextToFind {
           number margin. The background colour set for this style also sets the background colour
           for all margins that do not have any folding mask bits set. That is, any margin for which
           <code>mask &amp; SC_MASK_FOLDERS</code> is 0. See <a class="message"
-          href="#SCI_SETMARGINMASKN">SCI_SETMARGINMASKN</a> for more about masks.</td>
+          href="#SCI_SETMARGINMASKN"><code>SCI_SETMARGINMASKN</code></a> for more about masks.</td>
         </tr>
 
         <tr>
@@ -1743,9 +1750,9 @@ struct TextToFind {
           <td>34</td>
 
           <td>This style sets the attributes used when highlighting braces with the <a
-          class="message" href="#BraceHighlighting">SCI_BRACEHIGHLIGHT</a> message and when
-          highlighting the corresponding indentation with <a class="message"
-          href="#SCI_SETHIGHLIGHTGUIDE">SCI_SETHIGHLIGHTGUIDE</a>.</td>
+          class="message" href="#BraceHighlighting"><code>SCI_BRACEHIGHLIGHT</code></a> message and
+          when highlighting the corresponding indentation with <a class="message"
+          href="#SCI_SETHIGHLIGHTGUIDE"><code>SCI_SETHIGHLIGHTGUIDE</code></a>.</td>
         </tr>
 
         <tr>
@@ -1754,7 +1761,8 @@ struct TextToFind {
           <td>35</td>
 
           <td>This style sets the display attributes used when marking an unmatched brace with the
-          <a class="message" href="#BraceHighlighting">SCI_BRACEBADLIGHT</a> message.</td>
+          <a class="message" href="#BraceHighlighting"><code>SCI_BRACEBADLIGHT</code></a>
+          message.</td>
         </tr>
 
         <tr>
@@ -1764,7 +1772,7 @@ struct TextToFind {
 
           <td>This style sets the display attributes used when drawing control characters. See
           also: <a class="message"
-          href="#SCI_SETCONTROLCHARSYMBOL">SCI_SETCONTROLCHARSYMBOL</a>.</td>
+          href="#SCI_SETCONTROLCHARSYMBOL"><code>SCI_SETCONTROLCHARSYMBOL</code></a>.</td>
         </tr>
 
         <tr>
@@ -1794,8 +1802,8 @@ struct TextToFind {
 
           <td>This is not a style but is the number of the maximum style that can be set. Styles
           between <code>STYLE_LASTPREDEFINED</code> and <code>STYLE_MAX</code> would be appropriate
-          if you used <a class="message" href="#SCI_SETSTYLEBITS">SCI_SETSTYLEBITS</a> to set more
-          than 5 style bits.</td>
+          if you used <a class="message" href="#SCI_SETSTYLEBITS"><code>SCI_SETSTYLEBITS</code></a>
+          to set more than 5 style bits.</td>
         </tr>
       </tbody>
     </table>
@@ -1809,7 +1817,7 @@ struct TextToFind {
     <p>It is entirely up to you how you use styles. If you want to use syntax colouring you might
     use style 0 for white space, style 1 for numbers, style 2 for keywords, style 3 for strings,
     style 4 for preprocessor, style 5 for operators, and so on.</p>
-    <a class="message" href="#SCI_STYLERESETDEFAULT">SCI_STYLERESETDEFAULT</a><br />
+    <code><a class="message" href="#SCI_STYLERESETDEFAULT">SCI_STYLERESETDEFAULT</a><br />
      <a class="message" href="#SCI_STYLECLEARALL">SCI_STYLECLEARALL</a><br />
      <a class="message" href="#SCI_STYLESETFONT">SCI_STYLESETFONT(int styleNumber, char
     *fontName)</a><br />
@@ -1835,7 +1843,7 @@ struct TextToFind {
     visible)</a><br />
      <a class="message" href="#SCI_STYLESETCHANGEABLE">SCI_STYLESETCHANGEABLE(int styleNumber, bool
     changeable)</a><br />
-
+    </code> 
 
     <p><b id="SCI_STYLERESETDEFAULT">SCI_STYLERESETDEFAULT</b><br />
      This message resets <code>STYLE_DEFAULT</code> to its state when Scintilla was
@@ -1854,11 +1862,12 @@ struct TextToFind {
      <b id="SCI_STYLESETBOLD">SCI_STYLESETBOLD(int styleNumber, bool bold)</b><br />
      <b id="SCI_STYLESETITALIC">SCI_STYLESETITALIC(int styleNumber, bool italic)</b><br />
      These messages (plus <a class="message"
-    href="#SCI_STYLESETCHARACTERSET">SCI_STYLESETCHARACTERSET</a>) set the font attributes that are
-    used to match the fonts you request to those available. The <code>fontName</code> is a zero
-    terminated string holding the name of a font. Under Windows, only the first 32 characters of
-    the name are used and the name is not case sensitive. For internal caching, Scintilla tracks
-    fonts by name and does care about the casing of font names, so please be consistent.</p>
+    href="#SCI_STYLESETCHARACTERSET"><code>SCI_STYLESETCHARACTERSET</code></a>) set the font
+    attributes that are used to match the fonts you request to those available. The
+    <code>fontName</code> is a zero terminated string holding the name of a font. Under Windows,
+    only the first 32 characters of the name are used and the name is not case sensitive. For
+    internal caching, Scintilla tracks fonts by name and does care about the casing of font names,
+    so please be consistent.</p>
 
     <p><b id="SCI_STYLESETUNDERLINE">SCI_STYLESETUNDERLINE(int styleNumber, bool
     underline)</b><br />
@@ -1932,7 +1941,7 @@ struct TextToFind {
     it was not selected. When there is no selection, the current insertion point is marked by the
     text caret. This is a vertical line that is normally blinking on and off to attract the users
     attention.</p>
-    <a class="message" href="#SCI_SETSELFORE">SCI_SETSELFORE(bool useSelectionForeColour, int
+    <code><a class="message" href="#SCI_SETSELFORE">SCI_SETSELFORE(bool useSelectionForeColour, int
     colour)</a><br />
      <a class="message" href="#SCI_SETSELBACK">SCI_SETSELBACK(bool useSelectionBackColour, int
     colour)</a><br />
@@ -1950,7 +1959,7 @@ struct TextToFind {
      <a class="message" href="#SCI_SETCONTROLCHARSYMBOL">SCI_SETCONTROLCHARSYMBOL(int
     symbol)</a><br />
      <a class="message" href="#SCI_GETCONTROLCHARSYMBOL">SCI_GETCONTROLCHARSYMBOL</a><br />
-
+    </code> 
 
     <p><b id="SCI_SETSELFORE">SCI_SETSELFORE(bool useSelectionForeColour, int <a class="jump"
     href="#colour">colour</a>)</b><br />
@@ -1989,9 +1998,10 @@ struct TextToFind {
 
     <p><b id="SCI_SETCARETWIDTH">SCI_SETCARETWIDTH(int pixels)</b><br />
      <b id="SCI_GETCARETWIDTH">SCI_GETCARETWIDTH</b><br />
-     The width of the caret can be set with <code>SCI_SETCARETWIDTH</code> to a value of 1, 2 or 3
-    pixels. The default width is 1 pixel. You can read back the current width with
-    <code>SCI_GETCARETWIDTH</code>.</p>
+     The width of the caret can be set with <code>SCI_SETCARETWIDTH</code> to a value of 0, 1, 2 or
+    3 pixels. The default width is 1 pixel. You can read back the current width with
+    <code>SCI_GETCARETWIDTH</code>. A width of 0 makes the caret invisible (added at version
+    1.50).</p>
 
     <p><b id="SCI_SETCONTROLCHARSYMBOL">SCI_SETCONTROLCHARSYMBOL(int symbol)</b><br />
      <b id="SCI_GETCONTROLCHARSYMBOL">SCI_GETCONTROLCHARSYMBOL</b><br />
@@ -2012,20 +2022,21 @@ struct TextToFind {
 
     <p>There may be up to three margins to the left of the text display, plus a gap either side of
     the text. Each margin can be set to display either symbols or line numbers with <a
-    class="message" href="#SCI_SETMARGINTYPEN">SCI_SETMARGINTYPEN</a>. The markers that can be
-    displayed in each margin are set with <a class="message"
-    href="#SCI_SETMARGINMASKN">SCI_SETMARGINMASKN</a>. Any markers not associated with a visible
-    margin will be displayed as changes in background colour in the text. A width in pixels can be
-    set for each margin. Margins with a zero width are ignored completely. You can choose if a
-    mouse click in a margin sends a <a class="message" href="#SCN_MARGINCLICK">SCN_MARGINCLICK</a>
-    notification to the container or selects a line of text.</p>
+    class="message" href="#SCI_SETMARGINTYPEN"><code>SCI_SETMARGINTYPEN</code></a>. The markers
+    that can be displayed in each margin are set with <a class="message"
+    href="#SCI_SETMARGINMASKN"><code>SCI_SETMARGINMASKN</code></a>. Any markers not associated with
+    a visible margin will be displayed as changes in background colour in the text. A width in
+    pixels can be set for each margin. Margins with a zero width are ignored completely. You can
+    choose if a mouse click in a margin sends a <a class="message"
+    href="#SCN_MARGINCLICK"><code>SCN_MARGINCLICK</code></a> notification to the container or
+    selects a line of text.</p>
 
     <p>The margins are numbered 0 to 2. Using a margin number outside the valid range has no
     effect. By default, margin 0 is set to display line numbers, but is given a width of 0, so it
     is hidden. Margin 1 is set to display non-folding symbols and is given a width of 16 pixels, so
     it is visible. Margin 2 is set to display the folding symbols, but is given a width of 0, so it
     is hidden. Of course, you can set the margins to be whatever you wish.</p>
-    <a class="message" href="#SCI_SETMARGINTYPEN">SCI_SETMARGINTYPEN(int margin, int
+    <code><a class="message" href="#SCI_SETMARGINTYPEN">SCI_SETMARGINTYPEN(int margin, int
     type)</a><br />
      <a class="message" href="#SCI_GETMARGINTYPEN">SCI_GETMARGINTYPEN(int margin)</a><br />
      <a class="message" href="#SCI_SETMARGINWIDTHN">SCI_SETMARGINWIDTHN(int margin, int
@@ -2044,7 +2055,7 @@ struct TextToFind {
      <a class="message" href="#SCI_SETMARGINRIGHT">SCI_SETMARGINRIGHT(&lt;unused&gt;, int
     pixels)</a><br />
      <a class="message" href="#SCI_GETMARGINRIGHT">SCI_GETMARGINRIGHT</a><br />
-
+    </code> 
 
     <p><b id="SCI_SETMARGINTYPEN">SCI_SETMARGINTYPEN(int margin, int iType)</b><br />
      <b id="SCI_GETMARGINTYPEN">SCI_GETMARGINTYPEN(int margin)</b><br />
@@ -2071,16 +2082,16 @@ struct TextToFind {
     symbols used to denote folding. You can assign a wide range of symbols and colours to each of
     the 32 logical symbols, see <a href="#Markers">Markers</a> for more information. If <code>(mask
     &amp; SC_MASK_FOLDERS)==0</code>, the margin background colour is controlled by style 33 (<a
-    class="message" href="#StyleDefinition">STYLE_LINENUMBER</a>).</p>
+    class="message" href="#StyleDefinition"><code>STYLE_LINENUMBER</code></a>).</p>
 
     <p>You add logical markers to a line with <a class="message"
-    href="#SCI_MARKERADD">SCI_MARKERADD</a>. If a line has an associated marker that does not
-    appear in the mask of any margin with a non-zero width, the marker changes the background
-    colour of the line. For example, suppose you decide to use logical marker 10 to mark lines with
-    a syntax error and you want to show such lines by changing the background colour. The mask for
-    this marker is 1 shifted left 10 times (1&lt;&lt;10) which is 0x400. If you make sure that no
-    symbol margin includes 0x400 in its mask, any line with the marker gets the background colour
-    changed.</p>
+    href="#SCI_MARKERADD"><code>SCI_MARKERADD</code></a>. If a line has an associated marker that
+    does not appear in the mask of any margin with a non-zero width, the marker changes the
+    background colour of the line. For example, suppose you decide to use logical marker 10 to mark
+    lines with a syntax error and you want to show such lines by changing the background colour.
+    The mask for this marker is 1 shifted left 10 times (1&lt;&lt;10) which is 0x400. If you make
+    sure that no symbol margin includes 0x400 in its mask, any line with the marker gets the
+    background colour changed.</p>
 
     <p>To set a non-folding margin 1 use <code>SCI_SETMARGINMASKN(1, ~SC_MASK_FOLDERS)</code>; to
     set a folding margin 2 use <code>SCI_SETMARGINMASKN(2, SC_MASK_FOLDERS)</code>. This is the
@@ -2092,10 +2103,11 @@ struct TextToFind {
     sensitive)</b><br />
      <b id="SCI_GETMARGINSENSITIVEN">SCI_GETMARGINSENSITIVEN(int margin)</b><br />
      Each of the three margins can be set sensitive or insensitive to mouse clicks. A click in a
-    sensitive margin sends a <a class="message" href="#SCN_MARGINCLICK">SCN_MARGINCLICK</a> <a
-    class="jump" href="#Notifications">notification</a> to the container. Margins that are not
-    sensitive act as selection margins which make it easy to select ranges of lines. By default,
-    all margins are insensitive.</p>
+    sensitive margin sends a <a class="message"
+    href="#SCN_MARGINCLICK"><code>SCN_MARGINCLICK</code></a> <a class="jump"
+    href="#Notifications">notification</a> to the container. Margins that are not sensitive act as
+    selection margins which make it easy to select ranges of lines. By default, all margins are
+    insensitive.</p>
 
     <p><b id="SCI_SETMARGINLEFT">SCI_SETMARGINLEFT(&lt;unused&gt;, int pixels)</b><br />
      <b id="SCI_GETMARGINLEFT">SCI_GETMARGINLEFT</b><br />
@@ -2105,7 +2117,8 @@ struct TextToFind {
     The default is to one pixel on each side.</p>
 
     <h2 id="OtherSettings">Other settings</h2>
-    <a class="message" href="#SCI_SETUSEPALETTE">SCI_SETUSEPALETTE(bool allowPaletteUse)</a><br />
+    <code><a class="message" href="#SCI_SETUSEPALETTE">SCI_SETUSEPALETTE(bool
+    allowPaletteUse)</a><br />
      <a class="message" href="#SCI_GETUSEPALETTE">SCI_GETUSEPALETTE</a><br />
      <a class="message" href="#SCI_SETBUFFEREDDRAW">SCI_SETBUFFEREDDRAW(bool isBuffered)</a><br />
      <a class="message" href="#SCI_GETBUFFEREDDRAW">SCI_GETBUFFEREDDRAW</a><br />
@@ -2116,7 +2129,7 @@ struct TextToFind {
      <a class="message" href="#SCI_GRABFOCUS">SCI_GRABFOCUS</a><br />
      <a class="message" href="#SCI_SETFOCUS">SCI_SETFOCUS(bool focus)</a><br />
      <a class="message" href="#SCI_GETFOCUS">SCI_GETFOCUS</a><br />
-
+    </code> 
 
     <p><b id="SCI_SETUSEPALETTE">SCI_SETUSEPALETTE(bool allowPaletteUse)</b><br />
      <b id="SCI_GETUSEPALETTE">SCI_GETUSEPALETTE</b><br />
@@ -2199,19 +2212,20 @@ struct TextToFind {
     but with the need to indicate that Scintilla has the logical focus.</p>
 
     <h2 id="BraceHighlighting">Brace highlighting</h2>
-    <a class="message" href="#SCI_BRACEHIGHLIGHT">SCI_BRACEHIGHLIGHT(int pos1, int pos2)</a><br />
+    <code><a class="message" href="#SCI_BRACEHIGHLIGHT">SCI_BRACEHIGHLIGHT(int pos1, int
+    pos2)</a><br />
      <a class="message" href="#SCI_BRACEBADLIGHT">SCI_BRACEBADLIGHT(int pos1)</a><br />
      <a class="message" href="#SCI_BRACEMATCH">SCI_BRACEMATCH(int position, int
     maxReStyle)</a><br />
-
+    </code> 
 
     <p><b id="SCI_BRACEHIGHLIGHT">SCI_BRACEHIGHLIGHT(int pos1, int pos2)</b><br />
      Up to two characters can be highlighted in a 'brace highlighting style', which is defined as
-    style number <a class="message" href="#StyleDefinition">STYLE_BRACELIGHT</a> (34). If you have
-    enabled indent guides, you may also wish to highlight the indent that corresponds with the
-    brace. You can locate the column with <a class="message"
-    href="#SCI_GETCOLUMN">SCI_GETCOLUMN</a> and highlight the indent with <a class="message"
-    href="#SCI_SETHIGHLIGHTGUIDE">SCI_SETHIGHLIGHTGUIDE</a>.</p>
+    style number <a class="message" href="#StyleDefinition"><code>STYLE_BRACELIGHT</code></a> (34).
+    If you have enabled indent guides, you may also wish to highlight the indent that corresponds
+    with the brace. You can locate the column with <a class="message"
+    href="#SCI_GETCOLUMN"><code>SCI_GETCOLUMN</code></a> and highlight the indent with <a
+    class="message" href="#SCI_SETHIGHLIGHTGUIDE"><code>SCI_SETHIGHLIGHTGUIDE</code></a>.</p>
 
     <p><b id="SCI_BRACEBADLIGHT">SCI_BRACEBADLIGHT(int pos1)</b><br />
      If there is no matching brace then the <a class="jump" href="#StyleDefinition">brace
@@ -2244,7 +2258,7 @@ struct TextToFind {
     inserting a tab at the current character position and backspace unindents the line rather than
     deleting a character. Scintilla can also display indentation guides (vertical lines) to help
     you to generate code.</p>
-    <a class="message" href="#SCI_SETTABWIDTH">SCI_SETTABWIDTH(int widthInChars)</a><br />
+    <code><a class="message" href="#SCI_SETTABWIDTH">SCI_SETTABWIDTH(int widthInChars)</a><br />
      <a class="message" href="#SCI_GETTABWIDTH">SCI_GETTABWIDTH</a><br />
      <a class="message" href="#SCI_SETUSETABS">SCI_SETUSETABS(bool useTabs)</a><br />
      <a class="message" href="#SCI_GETUSETABS">SCI_GETUSETABS</a><br />
@@ -2265,7 +2279,7 @@ struct TextToFind {
      <a class="message" href="#SCI_GETINDENTATIONGUIDES">SCI_GETINDENTATIONGUIDES</a><br />
      <a class="message" href="#SCI_SETHIGHLIGHTGUIDE">SCI_SETHIGHLIGHTGUIDE(int column)</a><br />
      <a class="message" href="#SCI_GETHIGHLIGHTGUIDE">SCI_GETHIGHLIGHTGUIDE</a><br />
-
+    </code> 
 
     <p><b id="SCI_SETTABWIDTH">SCI_SETTABWIDTH(int widthInChars)</b><br />
      <b id="SCI_GETTABWIDTH">SCI_GETTABWIDTH</b><br />
@@ -2278,16 +2292,16 @@ struct TextToFind {
      <code>SCI_SETUSETABS</code> determines whether indentation should be created out of a mixture
     of tabs and spaces or be based purely on spaces. Set <code>useTabs</code> to <code>false</code>
     (0) to create all tabs and indents out of spaces. The default is <code>true</code>. You can use
-    <a class="message" href="#SCI_GETCOLUMN">SCI_GETCOLUMN</a> to get the column of a position
-    taking the width of a tab into account.</p>
+    <a class="message" href="#SCI_GETCOLUMN"><code>SCI_GETCOLUMN</code></a> to get the column of a
+    position taking the width of a tab into account.</p>
     <b id="SCI_SETINDENT">SCI_SETINDENT(int widthInChars)</b><br />
      <b id="SCI_GETINDENT">SCI_GETINDENT</b><br />
      <code>SCI_SETINDENT</code> sets the size of indentation in terms of the width of a space in <a
-    class="message" href="#StyleDefinition">STYLE_DEFAULT</a>. If you set a width of 0, the indent
-    size is the same as the tab size. There are no limits on indent sizes, but values less than 0
-    or large values may have undesirable effects. <br />
+    class="message" href="#StyleDefinition"><code>STYLE_DEFAULT</code></a>. If you set a width of
+    0, the indent size is the same as the tab size. There are no limits on indent sizes, but values
+    less than 0 or large values may have undesirable effects. <br />
      <br />
-
+     
 
     <p><b id="SCI_SETTABINDENTS">SCI_SETTABINDENTS(bool tabIndents)</b><br />
      <b id="SCI_GETTABINDENTS">SCI_GETTABINDENTS</b><br />
@@ -2313,15 +2327,15 @@ struct TextToFind {
      Indentation guides are dotted vertical lines that appear within indentation white space every
     indent size columns. They make it easy to see which constructs line up especially when they
     extend over multiple pages. Style <a class="message"
-    href="#StyleDefinition">STYLE_INDENTGUIDE</a> (37) is used to specify the foreground and
-    background colour of the indentation guides.</p>
+    href="#StyleDefinition"><code>STYLE_INDENTGUIDE</code></a> (37) is used to specify the
+    foreground and background colour of the indentation guides.</p>
 
     <p><b id="SCI_SETHIGHLIGHTGUIDE">SCI_SETHIGHLIGHTGUIDE(int column)</b><br />
      <b id="SCI_GETHIGHLIGHTGUIDE">SCI_GETHIGHLIGHTGUIDE</b><br />
      When brace highlighting occurs, the indentation guide corresponding to the braces may be
     highlighted with the brace highlighting style, <a class="message"
-    href="#StyleDefinition">STYLE_BRACELIGHT</a> (34). Set <code>column</code> to 0 to cancel this
-    highlight.</p>
+    href="#StyleDefinition"><code>STYLE_BRACELIGHT</code></a> (34). Set <code>column</code> to 0 to
+    cancel this highlight.</p>
 
     <h2 id="Markers">Markers</h2>
 
@@ -2346,7 +2360,7 @@ struct TextToFind {
     top of lower numbered ones. Markers try to move with their text by tracking where the start of
     their line moves. When a line is deleted, its markers are combined, by an <code>OR</code>
     operation, with the markers of the previous line.</p>
-    <a class="message" href="#SCI_MARKERDEFINE">SCI_MARKERDEFINE(int markerNumber, int
+    <code><a class="message" href="#SCI_MARKERDEFINE">SCI_MARKERDEFINE(int markerNumber, int
     markerSymbols)</a><br />
      <a class="message" href="#SCI_MARKERDEFINEPIXMAP">SCI_MARKERDEFINEPIXMAP(int markerNumber,
     const char *xpm)</a><br />
@@ -2366,7 +2380,7 @@ struct TextToFind {
      <a class="message" href="#SCI_MARKERLINEFROMHANDLE">SCI_MARKERLINEFROMHANDLE(int
     handle)</a><br />
      <a class="message" href="#SCI_MARKERDELETEHANDLE">SCI_MARKERDELETEHANDLE(int handle)</a><br />
-
+    </code> 
 
     <p><b id="SCI_MARKERDEFINE">SCI_MARKERDEFINE(int markerNumber, int markerSymbols)</b><br />
      This message associates a marker number in the range 0 to 31 with one of the marker symbols or
@@ -2404,7 +2418,7 @@ struct TextToFind {
     number 1 use:<br />
      <code>SCI_MARKETDEFINE(1, SC_MARK_CHARACETR+65)</code>. <br />
      <br />
-
+     
 
     <p>The marker numbers <code>SC_MARKNUM_FOLDER</code> and <code>SC_MARKNUM_FOLDEROPEN</code> are
     used for showing that a fold is present and open or closed. Any symbols may be assigned for
@@ -2534,11 +2548,11 @@ struct TextToFind {
      This message adds marker number <code>markerNumber</code> to a line. The message returns -1 if
     this fails (illegal line number, out of memory) or it returns a marker handle number that
     identifies the added marker. You can use this returned handle with <a class="message"
-    href="#SCI_MARKERLINEFROMHANDLE">SCI_MARKERLINEFROMHANDLE</a> to find where a marker is after
-    moving or combining lines and with <a class="message"
-    href="#SCI_MARKERDELETEHANDLE">SCI_MARKERDELETEHANDLE</a> to delete the marker based on its
-    handle. The message does not check that the value of markerNumber, nor does it check if the
-    line already contains the marker.</p>
+    href="#SCI_MARKERLINEFROMHANDLE"><code>SCI_MARKERLINEFROMHANDLE</code></a> to find where a
+    marker is after moving or combining lines and with <a class="message"
+    href="#SCI_MARKERDELETEHANDLE"><code>SCI_MARKERDELETEHANDLE</code></a> to delete the marker
+    based on its handle. The message does not check that the value of markerNumber, nor does it
+    check if the line already contains the marker.</p>
 
     <p><b id="SCI_MARKERDELETE">SCI_MARKERDELETE(int line, int markerNumber)</b><br />
      This searches the given line number for the given marker number and deletes it if it is
@@ -2566,14 +2580,14 @@ struct TextToFind {
 
     <p><b id="SCI_MARKERLINEFROMHANDLE">SCI_MARKERLINEFROMHANDLE(int markerHandle)</b><br />
      The <code>markerHandle</code> argument is an identifier for a marker returned by <a
-    class="message" href="#SCI_MARKERADD">SCI_MARKERADD</a>. This function searches the document
-    for the marker with this handle and returns the line number that contains it or -1 if it is not
-    found.</p>
+    class="message" href="#SCI_MARKERADD"><code>SCI_MARKERADD</code></a>. This function searches
+    the document for the marker with this handle and returns the line number that contains it or -1
+    if it is not found.</p>
 
     <p><b id="SCI_MARKERDELETEHANDLE">SCI_MARKERDELETEHANDLE(int markerHandle)</b><br />
      The <code>markerHandle</code> argument is an identifier for a marker returned by <a
-    class="message" href="#SCI_MARKERADD">SCI_MARKERADD</a>. This function searches the document
-    for the marker with this handle and deletes the marker if it is found.</p>
+    class="message" href="#SCI_MARKERADD"><code>SCI_MARKERADD</code></a>. This function searches
+    the document for the marker with this handle and deletes the marker if it is found.</p>
 
     <h2 id="Indicators">Indicators</h2>
 
@@ -2584,27 +2598,28 @@ struct TextToFind {
     line of small 'T' shapes, a line of diagonal hatching or as strike-out.</p>
 
     <p>The indicators are set using <a class="message"
-    href="#SCI_STARTSTYLING">SCI_STARTSTYLING</a> with a <code>INDICS_MASK</code> mask and <a
-    class="message" href="#SCI_SETSTYLING">SCI_SETSTYLING</a> with the values
+    href="#SCI_STARTSTYLING"><code>SCI_STARTSTYLING</code></a> with a <code>INDICS_MASK</code> mask
+    and <a class="message" href="#SCI_SETSTYLING"><code>SCI_SETSTYLING</code></a> with the values
     <code>INDIC0_MASK</code>, <code>INDIC1_MASK</code> and <code>INDIC2_MASK</code>.</p>
 
     <p>The number of bits used for styles can be altered with <a class="message"
-    href="#SCI_SETSTYLEBITS">SCI_SETSTYLEBITS</a> from 0 to 7 bits. The remaining bits can be used
-    for indicators, so there can be from 1 to 8 indicators. However, the <code>INDIC*_MASK</code>
-    constants defined in <code>Scintilla.h</code> all assume 5 bits of styling information and 3
-    indicators. If you use a different arrangement, you must define your own constants.</p>
+    href="#SCI_SETSTYLEBITS"><code>SCI_SETSTYLEBITS</code></a> from 0 to 7 bits. The remaining bits
+    can be used for indicators, so there can be from 1 to 8 indicators. However, the
+    <code>INDIC*_MASK</code> constants defined in <code>Scintilla.h</code> all assume 5 bits of
+    styling information and 3 indicators. If you use a different arrangement, you must define your
+    own constants.</p>
 
     <p>The <code>SCI_INDIC*</code> messages allow you to get and set the visual appearance of the
     indicators. They all use an <code>indicatorNumber</code> argument in the range 0 to 7 to set
     the indicator to style. With the default settings, only indicators 0, 1 and 2 will have any
     visible effect.</p>
-    <a class="message" href="#SCI_INDICSETSTYLE">SCI_INDICSETSTYLE(int indicatorNumber, int
+    <code><a class="message" href="#SCI_INDICSETSTYLE">SCI_INDICSETSTYLE(int indicatorNumber, int
     indicatorStyle)</a><br />
      <a class="message" href="#SCI_INDICGETSTYLE">SCI_INDICGETSTYLE(int indicatorNumber)</a><br />
      <a class="message" href="#SCI_INDICSETFORE">SCI_INDICSETFORE(int indicatorNumber, int
     colour)</a><br />
      <a class="message" href="#SCI_INDICGETFORE">SCI_INDICGETFORE(int indicatorNumber)</a><br />
-
+    </code> 
 
     <p><b id="SCI_INDICSETSTYLE">SCI_INDICSETSTYLE(int indicatorNumber, int
     indicatorStyle)</b><br />
@@ -2694,7 +2709,7 @@ struct TextToFind {
 
     <p>To make use of autocompletion you must monitor each character added to the document. See
     <code>SciTEBase::CharAdded()</code> in SciTEBase.cxx for an example of autocompletion.</p>
-    <a class="message" href="#SCI_AUTOCSHOW">SCI_AUTOCSHOW(int lenEntered, const char
+    <code><a class="message" href="#SCI_AUTOCSHOW">SCI_AUTOCSHOW(int lenEntered, const char
     *list)</a><br />
      <a class="message" href="#SCI_AUTOCCANCEL">SCI_AUTOCCANCEL</a><br />
      <a class="message" href="#SCI_AUTOCACTIVE">SCI_AUTOCACTIVE</a><br />
@@ -2723,19 +2738,20 @@ struct TextToFind {
      <a class="message" href="#SCI_AUTOCSETDROPRESTOFWORD">SCI_AUTOCSETDROPRESTOFWORD(bool
     dropRestOfWord)</a><br />
      <a class="message" href="#SCI_AUTOCGETDROPRESTOFWORD">SCI_AUTOCGETDROPRESTOFWORD</a><br />
-
+    </code> 
 
     <p><b id="SCI_AUTOCSHOW">SCI_AUTOCSHOW(int lenEntered, const char *list)</b><br />
      This message causes a list to be displayed. <code>lenEntered</code> is the number of
     characters of the word already entered and <code>list</code> is the list of words separated by
     separator characters. The initial separator character is a space but this can be set or got
-    with <a class="message" href="#SCI_AUTOCSETSEPARATOR">SCI_AUTOCSETSEPARATOR</a> and <a
-    class="message" href="#SCI_AUTOCGETSEPARATOR">SCI_AUTOCGETSEPARATOR</a>.</p>
+    with <a class="message" href="#SCI_AUTOCSETSEPARATOR"><code>SCI_AUTOCSETSEPARATOR</code></a>
+    and <a class="message"
+    href="#SCI_AUTOCGETSEPARATOR"><code>SCI_AUTOCGETSEPARATOR</code></a>.</p>
 
     <p>The list of words should be in sorted order. If set to ignore case mode with <a
-    class="message" href="#SCI_AUTOCSETIGNORECASE">SCI_AUTOCSETIGNORECASE</a>, then strings are
-    matched after being converted to upper case. One result of this is that the list should be
-    sorted with the punctuation characters '[', '\', ']', '^', '_', and '`' sorted after
+    class="message" href="#SCI_AUTOCSETIGNORECASE"><code>SCI_AUTOCSETIGNORECASE</code></a>, then
+    strings are matched after being converted to upper case. One result of this is that the list
+    should be sorted with the punctuation characters '[', '\', ']', '^', '_', and '`' sorted after
     letters.</p>
 
     <p><b id="SCI_AUTOCCANCEL">SCI_AUTOCCANCEL</b><br />
@@ -2743,7 +2759,7 @@ struct TextToFind {
     should disappear when the user types a character that can not be part of the autocompletion,
     such as '.', '(' or '[' when typing an identifier. A set of characters that will cancel
     autocompletion can be specified with <a class="message"
-    href="#SCI_AUTOCSTOPS">SCI_AUTOCSTOPS</a>.</p>
+    href="#SCI_AUTOCSTOPS"><code>SCI_AUTOCSTOPS</code></a>.</p>
 
     <p><b id="SCI_AUTOCACTIVE">SCI_AUTOCACTIVE</b><br />
      This message returns non-zero if there is an active autocompletion list and zero if there is
@@ -2769,12 +2785,13 @@ struct TextToFind {
     <p><b id="SCI_AUTOCSELECT">SCI_AUTOCSELECT(&lt;unused&gt;,const char *select)</b><br />
      This message selects an item in the autocompletion list. It searches the list of words for the
     first that matches <code>select</code>. By default, comparisons are case sensitive, but you can
-    change this with <a class="message" href="#SCI_AUTOCSETIGNORECASE">SCI_AUTOCSETIGNORECASE</a>.
-    The match is character by character for the length of the <code>select</code> string. That is,
-    if select is "Fred" it will match "Frederick" if this is the first item in the list that begins
-    with "Fred". If an item is found, it is selected. If the item is not found, the autocompletion
-    list closes if auto-hide is true (see <a class="message"
-    href="#SCI_AUTOCSETAUTOHIDE">SCI_AUTOCSETAUTOHIDE</a>).</p>
+    change this with <a class="message"
+    href="#SCI_AUTOCSETIGNORECASE"><code>SCI_AUTOCSETIGNORECASE</code></a>. The match is character
+    by character for the length of the <code>select</code> string. That is, if select is "Fred" it
+    will match "Frederick" if this is the first item in the list that begins with "Fred". If an
+    item is found, it is selected. If the item is not found, the autocompletion list closes if
+    auto-hide is true (see <a class="message"
+    href="#SCI_AUTOCSETAUTOHIDE"><code>SCI_AUTOCSETAUTOHIDE</code></a>).</p>
 
     <p><b id="SCI_AUTOCSETCANCELATSTART">SCI_AUTOCSETCANCELATSTART(bool cancel)</b><br />
      <b id="SCI_AUTOCGETCANCELATSTART">SCI_AUTOCGETCANCELATSTART</b><br />
@@ -2805,7 +2822,7 @@ struct TextToFind {
      By default, the list is cancelled if there are no viable matches (the user has typed
     characters that no longer match a list entry). If you want to keep displaying the original
     list, set <code>autoHide</code> to <code>false</code>. This also effects <a class="message"
-    href="#SCI_AUTOCSELECT">SCI_AUTOCSELECT</a>.</p>
+    href="#SCI_AUTOCSELECT"><code>SCI_AUTOCSELECT</code></a>.</p>
 
     <p><b id="SCI_AUTOCSETDROPRESTOFWORD">SCI_AUTOCSETDROPRESTOFWORD(bool dropRestOfWord)</b><br />
      <b id="SCI_AUTOCGETDROPRESTOFWORD">SCI_AUTOCGETDROPRESTOFWORD</b><br />
@@ -2831,10 +2848,11 @@ struct TextToFind {
 
     <p><b id="SCI_USERLISTSHOW">SCI_USERLISTSHOW(int listType, const char *list)</b><br />
      The <code>listType</code> parameter is returned to the container as the <code>wParam</code>
-    field of the <a class="message" href="#SCNotification">SCNotification</a> structure. It must be
-    greater than 0 as this is how Scintilla tells the difference between an autocompletion list and
-    a user list. If you have different types of list, for example a list of buffers and a list of
-    macros, you can use <code>listType</code> to tell which one has returned a selection.</p>
+    field of the <a class="message" href="#SCNotification"><code>SCNotification</code></a>
+    structure. It must be greater than 0 as this is how Scintilla tells the difference between an
+    autocompletion list and a user list. If you have different types of list, for example a list of
+    buffers and a list of macros, you can use <code>listType</code> to tell which one has returned
+    a selection.</p>
 
     <h2 id="CallTips">Call tips</h2>
 
@@ -2855,7 +2873,7 @@ struct TextToFind {
     href="#SCN_DWELLEND">SCN_DWELLEND</a></code>. This method could be used in a debugger to give
     the value of a variable, or during editing to give information about the word under the
     pointer.</p>
-    <a class="message" href="#SCI_CALLTIPSHOW">SCI_CALLTIPSHOW(int posStart, const char
+    <code><a class="message" href="#SCI_CALLTIPSHOW">SCI_CALLTIPSHOW(int posStart, const char
     *definition)</a><br />
      <a class="message" href="#SCI_CALLTIPCANCEL">SCI_CALLTIPCANCEL</a><br />
      <a class="message" href="#SCI_CALLTIPACTIVE">SCI_CALLTIPACTIVE</a><br />
@@ -2863,7 +2881,7 @@ struct TextToFind {
      <a class="message" href="#SCI_CALLTIPSETHLT">SCI_CALLTIPSETHLT(int highlightStart, int
     highlightEnd)</a><br />
      <a class="message" href="#SCI_CALLTIPSETBACK">SCI_CALLTIPSETBACK(int colour)</a><br />
-
+    </code> 
 
     <p><b id="SCI_CALLTIPSHOW">SCI_CALLTIPSHOW(int posStart, const char *definition)</b><br />
      This message starts the process by displaying the call tip window. If a call tip is already
@@ -2908,7 +2926,7 @@ struct TextToFind {
     <p>To allow the container application to perform any of the actions available to the user with
     keyboard, all the keyboard actions are messages. They do not take any parameters. These
     commands are also used when redefining the key bindings with the <a class="message"
-    href="#SCI_ASSIGNCMDKEY">SCI_ASSIGNCMDKEY</a> message.</p>
+    href="#SCI_ASSIGNCMDKEY"><code>SCI_ASSIGNCMDKEY</code></a> message.</p>
 
     <table border="0" summary="Keyboard commands">
       <tbody>
@@ -3073,12 +3091,12 @@ struct TextToFind {
     class="jump" href="#KeyboardCommands">keyboard commands</a> discussed above, but any Scintilla
     command that has no arguments can be mapped). You can change the mapping to suit your own
     requirements.</p>
-    <a class="message" href="#SCI_ASSIGNCMDKEY">SCI_ASSIGNCMDKEY(int keyDefinition, int
+    <code><a class="message" href="#SCI_ASSIGNCMDKEY">SCI_ASSIGNCMDKEY(int keyDefinition, int
     sciCommand)</a><br />
      <a class="message" href="#SCI_CLEARCMDKEY">SCI_CLEARCMDKEY(int keyDefinition)</a><br />
      <a class="message" href="#SCI_CLEARALLCMDKEYS">SCI_CLEARALLCMDKEYS</a><br />
      <a class="message" href="#SCI_NULL">SCI_NULL</a><br />
-
+    </code> 
 
     <p><b id="keyDefinition">keyDefinition</b><br />
      A key definition contains the key code in the low 16-bits and the key modifiers in the high
@@ -3141,16 +3159,16 @@ struct TextToFind {
     which can include a printer display context. Printed output shows text styling as on the
     screen, but it hides all margins except a line number margin. All special marker effects are
     removed and the selection and caret are hidden.</p>
-    <a class="message" href="#SCI_FORMATRANGE">SCI_FORMATRANGE(bool bDraw, RangeToFormat
+    <code><a class="message" href="#SCI_FORMATRANGE">SCI_FORMATRANGE(bool bDraw, RangeToFormat
     *pfr)</a><br />
      <a class="message" href="#SCI_SETPRINTMAGNIFICATION">SCI_SETPRINTMAGNIFICATION(int
     magnification)</a><br />
      <a class="message" href="#SCI_GETPRINTMAGNIFICATION">SCI_GETPRINTMAGNIFICATION</a><br />
      <a class="message" href="#SCI_SETPRINTCOLOURMODE">SCI_SETPRINTCOLOURMODE(int mode)</a><br />
      <a class="message" href="#SCI_GETPRINTCOLOURMODE">SCI_GETPRINTCOLOURMODE</a><br />
-     <a class="message" href="#SCI_SETPRINTWRAPMODE">SCI_SETPRINTWRAPMODE(int wrapMode)</a><br />
+     <a class="message" href="#SCI_SETPRINTWRAPMODE">SCI_SETPRINTWRAPMODE</a><br />
      <a class="message" href="#SCI_GETPRINTWRAPMODE">SCI_GETPRINTWRAPMODE</a><br />
-
+    </code> 
 
     <p><b id="SCI_FORMATRANGE">SCI_FORMATRANGE(bool bDraw, RangeToFormat *pfr)</b><br />
      This call allows Windows users to render a range of text into a device context. If you use
@@ -3191,7 +3209,7 @@ struct RangeToFormat {
 
     <p><b id="SCI_SETPRINTMAGNIFICATION">SCI_SETPRINTMAGNIFICATION(int magnification)</b><br />
      <b id="SCI_GETPRINTMAGNIFICATION">SCI_GETPRINTMAGNIFICATION</b><br />
-     <code>SCI_SETPRINTMAGNIFICATION</code> lets you to print at a different size than the screen
+     <code>SCI_GETPRINTMAGNIFICATION</code> lets you to print at a different size than the screen
     font. <code>magnification</code> is the number of points to add to the size of each screen
     font. A value of -3 or -4 gives reasonably small print. You can get this value with
     <code>SCI_GETPRINTMAGNIFICATION</code>.</p>
@@ -3261,15 +3279,17 @@ struct RangeToFormat {
 
     <p><b id="SCI_SETPRINTWRAPMODE">SCI_SETPRINTWRAPMODE(int wrapMode)</b><br />
      <b id="SCI_GETPRINTWRAPMODE">SCI_GETPRINTWRAPMODE</b><br />
-     Set wrapMode to <code>SC_WRAP_WORD</code> (1) to enable line wrapping and to
-    <code>SC_WRAP_NONE</code> (0) to disable line wrapping.
-    The default setting is <code>SC_WRAP_WORD</code>.
-    You can get this value with <code>SCI_GETPRINTWRAPMODE</code>.</p>
+     These two functions get and set the printer wrap mode. <code>wrapMode</code> can be
+     set to <code>SC_WRAP_NONE</code> (0) or <code>SC_WRAP_WORD</code> (1). The default is
+     <code>SC_WRAP_WORD</code>, which wraps printed output so that all characters fit
+     into the print rectangle. If you set <code>SC_WRAP_NONE</code>, each line of text
+     generates one line of output and the line is truncated if it is too long to fit
+     into the print area.</p>
 
     <h2 id="DirectAccess">Direct access</h2>
-    <a class="message" href="#SCI_GETDIRECTFUNCTION">SCI_GETDIRECTFUNCTION</a><br />
+    <code><a class="message" href="#SCI_GETDIRECTFUNCTION">SCI_GETDIRECTFUNCTION</a><br />
      <a class="message" href="#SCI_GETDIRECTPOINTER">SCI_GETDIRECTPOINTER</a><br />
-
+    </code> 
 
     <p>On Windows, the message-passing scheme used to communicate between the container and
     Scintilla is mediated by the operating system <code>SendMessage</code> function and can lead to
@@ -3327,7 +3347,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     releases of Scintilla you should treat <code>pDoc</code> as an opaque <code>void*</code>. That
     is, you can use and store the pointer as described in this section but you should not
     dereference it.</p>
-    <a class="message" href="#SCI_GETDOCPOINTER">SCI_GETDOCPOINTER</a><br />
+    <code><a class="message" href="#SCI_GETDOCPOINTER">SCI_GETDOCPOINTER</a><br />
      <a class="message" href="#SCI_SETDOCPOINTER">SCI_SETDOCPOINTER(&lt;unused&gt;, document
     *pDoc)</a><br />
      <a class="message" href="#SCI_CREATEDOCUMENT">SCI_CREATEDOCUMENT</a><br />
@@ -3335,7 +3355,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     *pDoc)</a><br />
      <a class="message" href="#SCI_RELEASEDOCUMENT">SCI_RELEASEDOCUMENT(&lt;unused&gt;, document
     *pDoc)</a><br />
-
+    </code> 
 
     <p><b id="SCI_GETDOCPOINTER">SCI_GETDOCPOINTER</b><br />
      This returns a pointer to the document currently in use by the window. It has no other
@@ -3391,7 +3411,8 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     The best way to see how this is done is to search the SciTE source code for the messages used
     in this section of the documentation and see how they are used. You will also need to use
     markers and a folding margin to complete your folding implementation.</p>
-    <a class="message" href="#SCI_VISIBLEFROMDOCLINE">SCI_VISIBLEFROMDOCLINE(int docLine)</a><br />
+    <code><a class="message" href="#SCI_VISIBLEFROMDOCLINE">SCI_VISIBLEFROMDOCLINE(int
+    docLine)</a><br />
      <a class="message" href="#SCI_DOCLINEFROMVISIBLE">SCI_DOCLINEFROMVISIBLE(int
     displayLine)</a><br />
      <a class="message" href="#SCI_SHOWLINES">SCI_SHOWLINES(int lineStart, int lineEnd)</a><br />
@@ -3409,7 +3430,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_ENSUREVISIBLE">SCI_ENSUREVISIBLE(int line)</a><br />
      <a class="message" href="#SCI_ENSUREVISIBLEENFORCEPOLICY">SCI_ENSUREVISIBLEENFORCEPOLICY(int
     line)</a><br />
-
+    </code> 
 
     <p><b id="SCI_VISIBLEFROMDOCLINE">SCI_VISIBLEFROMDOCLINE(int docLine)</b><br />
      When some lines are folded, then a particular line in the document may be displayed at a
@@ -3455,13 +3476,13 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     If you use a lexer, you should not need to use <code>SCI_SETFOLDLEVEL</code> as this is far
     better handled by the lexer. You will need to use <code>SCI_GETFOLDLEVEL</code> to decide how
     to handle user folding requests. If you do change the fold levels, the folding margin will
-    update to match your changes.
+    update to match your changes. 
 
     <p><b id="SCI_SETFOLDFLAGS">SCI_SETFOLDFLAGS(int flags)</b><br />
      In addition to showing markers in the folding margin, you can indicate folds to the user by
     drawing lines in the text area. The lines are drawn in the foreground colour set for <a
-    class="message" href="#StyleDefinition">STYLE_DEFAULT</a>. Bits set in <code>flags</code>
-    determine where folding lines are drawn:<br />
+    class="message" href="#StyleDefinition"><code>STYLE_DEFAULT</code></a>. Bits set in
+    <code>flags</code> determine where folding lines are drawn:<br />
     </p>
 
     <table cellpadding="1" cellspacing="2" border="0" summary="Fold flags">
@@ -3554,14 +3575,14 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     message travels up the fold hierarchy, expanding any contracted folds until they reach the top
     level. The line will then be visible. If you use <code>SCI_ENSUREVISIBLEENFORCEPOLICY</code>,
     the vertical caret policy set by <a class="message"
-    href="#SCI_SETVISIBLEPOLICY">SCI_SETVISIBLEPOLICY</a> is then applied.</p>
+    href="#SCI_SETVISIBLEPOLICY"><code>SCI_SETVISIBLEPOLICY</code></a> is then applied.</p>
 
     <h2 id="LineWrapping">Line wrapping</h2>
-    <a class="message" href="#SCI_SETWRAPMODE">SCI_SETWRAPMODE(int wrapMode)</a><br />
+    <code><a class="message" href="#SCI_SETWRAPMODE">SCI_SETWRAPMODE(int wrapMode)</a><br />
      <a class="message" href="#SCI_GETWRAPMODE">SCI_GETWRAPMODE</a><br />
      <a class="message" href="#SCI_SETLAYOUTCACHE">SCI_SETLAYOUTCACHE(int cacheMode)</a><br />
      <a class="message" href="#SCI_GETLAYOUTCACHE">SCI_GETLAYOUTCACHE</a><br />
-
+    </code> 
 
     <p>By default, Scintilla does not wrap lines of text. If you enable line wrapping, lines wider
     than the window width are continued on the following lines. Lines are broken after space or tab
@@ -3644,18 +3665,18 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     </table>
     <br />
      <br />
-
+     
 
     <h2 id="Zooming">Zooming</h2>
 
     <p>Scintilla incorporates a "zoom factor" that lets you make all the text in the document
     larger or smaller in steps of one point. The displayed point size never goes below 2, whatever
     zoom factor you set. You can set zoom factors in the range -10 to +20 points.</p>
-    <a class="message" href="#SCI_ZOOMIN">SCI_ZOOMIN</a><br />
+    <code><a class="message" href="#SCI_ZOOMIN">SCI_ZOOMIN</a><br />
      <a class="message" href="#SCI_ZOOMOUT">SCI_ZOOMOUT</a><br />
      <a class="message" href="#SCI_SETZOOM">SCI_SETZOOM(int zoomInPoints)</a><br />
      <a class="message" href="#SCI_GETZOOM">SCI_GETZOOM</a><br />
-
+    </code> 
 
     <p><b id="SCI_ZOOMIN">SCI_ZOOMIN</b><br />
      <b id="SCI_ZOOMOUT">SCI_ZOOMOUT</b><br />
@@ -3673,13 +3694,13 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 
     <p>You can choose to mark lines that exceed a given length by drawing a vertical line or by
     colouring the background of characters that exceed the set length.</p>
-    <a class="message" href="#SCI_SETEDGEMODE">SCI_SETEDGEMODE(int mode)</a><br />
+    <code><a class="message" href="#SCI_SETEDGEMODE">SCI_SETEDGEMODE(int mode)</a><br />
      <a class="message" href="#SCI_GETEDGEMODE">SCI_GETEDGEMODE</a><br />
      <a class="message" href="#SCI_SETEDGECOLUMN">SCI_SETEDGECOLUMN(int column)</a><br />
      <a class="message" href="#SCI_GETEDGECOLUMN">SCI_GETEDGECOLUMN</a><br />
      <a class="message" href="#SCI_SETEDGECOLOUR">SCI_SETEDGECOLOUR(int colour)</a><br />
      <a class="message" href="#SCI_GETEDGECOLOUR">SCI_GETEDGECOLOUR</a><br />
-
+    </code> 
 
     <p><b id="SCI_SETEDGEMODE">SCI_SETEDGEMODE(int edgeMode)</b><br />
      <b id="SCI_GETEDGEMODE">SCI_GETEDGEMODE</b><br />
@@ -3713,9 +3734,10 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 
           <td>A vertical line is drawn at the column number set by <code>SCI_SETEDGECOLUMN</code>.
           This works well for monospaced fonts. The line is drawn at a position based on the width
-          of a space character in <a class="message" href="#StyleDefinition">STYLE_DEFAULT</a>, so
-          it may not work very well if your styles use proportional fonts or if your style have
-          varied font sizes or you use a mixture of bold, italic and normal text. .</td>
+          of a space character in <a class="message"
+          href="#StyleDefinition"><code>STYLE_DEFAULT</code></a>, so it may not work very well if
+          your styles use proportional fonts or if your style have varied font sizes or you use a
+          mixture of bold, italic and normal text. .</td>
         </tr>
 
         <tr>
@@ -3730,7 +3752,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     </table>
     <br />
      <br />
-
+     
 
     <p><b id="SCI_SETEDGECOLUMN">SCI_SETEDGECOLUMN(int column)</b><br />
      <b id="SCI_GETEDGECOLUMN">SCI_GETEDGECOLUMN</b><br />
@@ -3756,7 +3778,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <p>Scintilla (Windows version) also supports external lexers. These are DLLs that export four
     functions: <code>GetLexerCount</code>, <code>GetLexerName</code>, <code>Lex</code> and
     <code>Fold</code>. See <code>externalLexer.cxx</code> for more.</p>
-    <a class="message" href="#SCI_SETLEXER">SCI_SETLEXER(int lexer)</a><br />
+    <code><a class="message" href="#SCI_SETLEXER">SCI_SETLEXER(int lexer)</a><br />
      <a class="message" href="#SCI_GETLEXER">SCI_GETLEXER</a><br />
      <a class="message" href="#SCI_SETLEXERLANGUAGE">SCI_SETLEXERLANGUAGE(&lt;unused&gt;, char
     *name)</a><br />
@@ -3764,7 +3786,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_SETPROPERTY">SCI_SETPROPERTY(char *key, char *value)</a><br />
      <a class="message" href="#SCI_SETKEYWORDS">SCI_SETKEYWORDS(int keyWordSet, char
     *keyWordList)</a><br />
-
+    </code> 
 
     <p><b id="SCI_SETLEXER">SCI_SETLEXER(int lexer)</b><br />
      <b id="SCI_GETLEXER">SCI_GETLEXER</b><br />
@@ -3786,8 +3808,8 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <code>LexerModule</code> constructor is the name to use.</p>
 
     <p>To test if your lexer assignment worked, use <a class="message"
-    href="#SCI_GETLEXER">SCI_GETLEXER</a> before and after setting the new lexer to see if the
-    lexer number changed.</p>
+    href="#SCI_GETLEXER"><code>SCI_GETLEXER</code></a> before and after setting the new lexer to
+    see if the lexer number changed.</p>
 
     <p><b id="SCI_COLOURISE">SCI_COLOURISE(int startPos, int endPos)</b><br />
      This forces the current lexer or the container (if the lexer is set to
@@ -3875,7 +3897,7 @@ struct SCNotification {
 
     <p>The notification messages that your container can choose to handle and the messages
     associated with them are:</p>
-    <a class="message" href="#SCN_STYLENEEDED">SCN_STYLENEEDED</a><br />
+    <code><a class="message" href="#SCN_STYLENEEDED">SCN_STYLENEEDED</a><br />
      <a class="message" href="#SCN_CHARADDED">SCN_CHARADDED</a><br />
      <a class="message" href="#SCN_SAVEPOINTREACHED">SCN_SAVEPOINTREACHED</a><br />
      <a class="message" href="#SCN_SAVEPOINTLEFT">SCN_SAVEPOINTLEFT</a><br />
@@ -3893,29 +3915,31 @@ struct SCNotification {
      <a class="message" href="#SCN_DWELLSTART">SCN_DWELLSTART</a><br />
      <a class="message" href="#SCN_DWELLEND">SCN_DWELLEND</a><br />
      <a class="message" href="#SCN_ZOOM">SCN_ZOOM</a><br />
-
+    </code> 
 
     <p>The following <code>SCI_*</code> messages are associated with these notifications:</p>
-    <a class="message" href="#SCI_SETMODEVENTMASK">SCI_SETMODEVENTMASK(int eventMask)</a><br />
+    <code><a class="message" href="#SCI_SETMODEVENTMASK">SCI_SETMODEVENTMASK(int
+    eventMask)</a><br />
      <a class="message" href="#SCI_GETMODEVENTMASK">SCI_GETMODEVENTMASK</a><br />
      <a class="message" href="#SCI_SETMOUSEDWELLTIME">SCI_SETMOUSEDWELLTIME</a><br />
      <a class="message" href="#SCI_GETMOUSEDWELLTIME">SCI_GETMOUSEDWELLTIME</a><br />
-
+    </code> 
 
     <p>The following additional notifications are sent using the <code>WM_COMMAND</code> message on
     Windows and the "Command" signal on GTK+ to emulate the windows edit control:</p>
-    <a class="message" href="#SCEN_CHANGE">SCEN_CHANGE</a><br />
+    <code><a class="message" href="#SCEN_CHANGE">SCEN_CHANGE</a><br />
      <a class="message" href="#SCEN_SETFOCUS">SCEN_SETFOCUS</a><br />
      <a class="message" href="#SCEN_KILLFOCUS">SCEN_KILLFOCUS</a><br />
-
+    </code> 
 
     <p><b id="SCN_STYLENEEDED">SCN_STYLENEEDED</b><br />
      If you used <code><a class="message"
     href="#SCI_SETLEXER">SCI_SETLEXER</a>(SCLEX_CONTAINER)</code> to make the container act as the
     lexer, you will receive this notification when Scintilla is about to display or print text that
     requires styling. You are required to style the text from the line that contains the position
-    returned by <a class="message" href="#SCI_GETENDSTYLED">SCI_GETENDSTYLED</a> up to the position
-    passed in <code>SCNotification.position</code>. Symbolically, you need code of the form:</p>
+    returned by <a class="message" href="#SCI_GETENDSTYLED"><code>SCI_GETENDSTYLED</code></a> up to
+    the position passed in <code>SCNotification.position</code>. Symbolically, you need code of the
+    form:</p>
 <pre>
     startPos = <a class="message" href="#SCI_GETENDSTYLED">SCI_GETENDSTYLED</a>()
     lineNumber = <a class="message"
@@ -3935,8 +3959,8 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
      <b id="SCN_SAVEPOINTLEFT">SCN_SAVEPOINTLEFT</b><br />
      Sent to the container when the save point is entered or left, allowing the container to
     display a "document dirty" indicator and change its menus.<br />
-     See also: <a class="message" href="#SCI_SETSAVEPOINT">SCI_SETSAVEPOINT</a>, <a class="message"
-    href="#SCI_GETMODIFY">SCI_GETMODIFY</a></p>
+     See also: <a class="message" href="#SCI_SETSAVEPOINT"><code>SCI_SETSAVEPOINT</code></a>, <a
+    class="message" href="#SCI_GETMODIFY"><code>SCI_GETMODIFY</code></a></p>
 
     <p><b id="SCN_MODIFYATTEMPTRO">SCN_MODIFYATTEMPTRO</b><br />
      When in read-only mode, this notification is sent to the container if the user tries to change
@@ -3960,16 +3984,17 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
     This was previously called <code><a class="message"
     href="#SCN_CHECKBRACE">SCN_CHECKBRACE</a></code> because a common use is to check whether the
     caret is next to a brace and set highlights on this brace and its corresponding matching brace.
-    This also replaces <a class="message" href="#SCN_POSCHANGED">SCN_POSCHANGED</a>, which is now
-    deprecated.</p>
+    This also replaces <a class="message" href="#SCN_POSCHANGED"><code>SCN_POSCHANGED</code></a>,
+    which is now deprecated.</p>
 
     <p><b id="SCN_MODIFIED">SCN_MODIFIED</b><br />
      This notification is sent when the text or styling of the document changes or is about to
     change. You can set a mask for the notifications that are sent to the container with <a
-    class="message" href="#SCI_SETMODEVENTMASK">SCI_SETMODEVENTMASK</a>. The notification structure
-    contains information about what changed, how the change occurred and whether this changed the
-    number of lines in the document. No modifications may be performed while in a
-    <code>SCN_MODIFIED</code> event. The <code>SCNotification</code> fields used are:</p>
+    class="message" href="#SCI_SETMODEVENTMASK"><code>SCI_SETMODEVENTMASK</code></a>. The
+    notification structure contains information about what changed, how the change occurred and
+    whether this changed the number of lines in the document. No modifications may be performed
+    while in a <code>SCN_MODIFIED</code> event. The <code>SCNotification</code> fields used
+    are:</p>
 
     <table cellpadding="1" cellspacing="2" border="0" summary="Modify notification types">
       <tbody>
@@ -4174,7 +4199,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
           <td align="center">0xf77</td>
 
           <td>This is a mask for all valid flags. This is the default mask state set by <a
-          class="message" href="#SCI_SETMODEVENTMASK">SCI_SETMODEVENTMASK</a>.</td>
+          class="message" href="#SCI_SETMODEVENTMASK"><code>SCI_SETMODEVENTMASK</code></a>.</td>
 
           <td>None</td>
         </tr>
@@ -4187,15 +4212,16 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
     "Command" signal on GTK+ as this is the behavior of the standard edit control
     (<code>SCEN_CHANGE</code> has the same value as the Windows edit control
     <code>EN_CHANGE</code>). No other information is sent. If you need more detailed information
-    use <a class="message" href="#SCN_MODIFIED">SCN_MODIFIED</a>. You can filter the types of
-    changes you are notified about with <a class="message"
-    href="#SCI_SETMODEVENTMASK">SCI_SETMODEVENTMASK</a>.</p>
+    use <a class="message" href="#SCN_MODIFIED"><code>SCN_MODIFIED</code></a>. You can filter the
+    types of changes you are notified about with <a class="message"
+    href="#SCI_SETMODEVENTMASK"><code>SCI_SETMODEVENTMASK</code></a>.</p>
 
     <p><b id="SCI_SETMODEVENTMASK">SCI_SETMODEVENTMASK(int eventMask)</b><br />
      <b id="SCI_GETMODEVENTMASK">SCI_GETMODEVENTMASK</b><br />
      These messages set and get an event mask that determines which document change events are
-    notified to the container with <a class="message" href="#SCN_MODIFIED">SCN_MODIFIED</a> and <a
-    class="message" href="#SCEN_CHANGE">SCEN_CHANGE</a>. For example, a container may decide to see
+    notified to the container with <a class="message"
+    href="#SCN_MODIFIED"><code>SCN_MODIFIED</code></a> and <a class="message"
+    href="#SCEN_CHANGE"><code>SCEN_CHANGE</code></a>. For example, a container may decide to see
     only notifications about changes to text and not styling changes by calling
     <code>SCI_SETMODEVENTMASK(SC_MOD_INSERTTEXT|SC_MOD_DELETETEXT)</code>.</p>
 
@@ -4218,12 +4244,13 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
 
     <p><b id="SCN_MACRORECORD">SCN_MACRORECORD</b><br />
      The <code><a class="message" href="#SCI_STARTRECORD">SCI_STARTRECORD</a></code> and <a
-    class="message" href="#SCI_STOPRECORD">SCI_STOPRECORD</a> messages enable and disable macro
-    recording. When enabled, each time a recordable change occurs, the <code>SCN_MACRORECORD</code>
-    notification is sent to the container. It is up to the container to record the action. To see
-    the complete list of <code>SCI_*</code> messages that are recordable, search the Scintilla
-    source <code>Editor.cxx</code> for <code>Editor::NotifyMacroRecord</code>. The fields of
-    <code>SCNotification</code> set in this notification are:</p>
+    class="message" href="#SCI_STOPRECORD"><code>SCI_STOPRECORD</code></a> messages enable and
+    disable macro recording. When enabled, each time a recordable change occurs, the
+    <code>SCN_MACRORECORD</code> notification is sent to the container. It is up to the container
+    to record the action. To see the complete list of <code>SCI_*</code> messages that are
+    recordable, search the Scintilla source <code>Editor.cxx</code> for
+    <code>Editor::NotifyMacroRecord</code>. The fields of <code>SCNotification</code> set in this
+    notification are:</p>
 
     <table cellpadding="1" cellspacing="2" border="0" summary="Macro record notification data">
       <tbody>
@@ -4258,8 +4285,9 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
     <p><b id="SCN_MARGINCLICK">SCN_MARGINCLICK</b><br />
      This notification tells the container that the mouse was clicked inside a <a class="jump"
     href="#Margins">margin</a> that was marked as sensitive (see <a class="message"
-    href="#SCI_SETMARGINSENSITIVEN">SCI_SETMARGINSENSITIVEN</a>). This can be used to perform
-    folding or to place breakpoints. The following <code>SCNotification</code> fields are used:</p>
+    href="#SCI_SETMARGINSENSITIVEN"><code>SCI_SETMARGINSENSITIVEN</code></a>). This can be used to
+    perform folding or to place breakpoints. The following <code>SCNotification</code> fields are
+    used:</p>
 
     <table cellpadding="1" cellspacing="2" border="0" summary="Margin click notification">
       <tbody>
@@ -4300,7 +4328,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
     point is deleted. This message is sent to the container in case it wants to make the line
     visible in some unusual way such as making the whole document visible. Most containers will
     just ensure each line in the range is visible by calling <a class="message"
-    href="#SCI_ENSUREVISIBLE">SCI_ENSUREVISIBLE</a>. The <code>position</code> and
+    href="#SCI_ENSUREVISIBLE"><code>SCI_ENSUREVISIBLE</code></a>. The <code>position</code> and
     <code>length</code> fields of <code>SCNotification</code> indicate the range of the document
     that should be made visible. The container code will be similar to the following code
     skeleton:</p>
@@ -4333,8 +4361,8 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
           <td align="left"><code>wParam</code></td>
 
           <td align="left">This is set to the <code>listType</code> parameter from the <a
-          class="message" href="#SCI_USERLISTSHOW">SCI_USERLISTSHOW</a> message that initiated the
-          list.</td>
+          class="message" href="#SCI_USERLISTSHOW"><code>SCI_USERLISTSHOW</code></a> message that
+          initiated the list.</td>
         </tr>
 
         <tr>
@@ -4346,7 +4374,7 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     </table>
     <br />
      <br />
-
+     
 
     <p><b id="SCN_URIDROPPED">SCN_URIDROPPED</b><br />
      Only on the GTK+ version. Indicates that the user has dragged a URI such as a file name or web
@@ -4390,7 +4418,7 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     </table>
     <br />
      <br />
-
+     
 
     <p><b id="SCI_SETMOUSEDWELLTIME">SCI_SETMOUSEDWELLTIME</b><br />
      <b id="SCI_GETMOUSEDWELLTIME">SCI_GETMOUSEDWELLTIME</b><br />
@@ -4460,13 +4488,13 @@ EM_FORMATRANGE
 
     <p><b id="SCN_POSCHANGED">SCN_POSCHANGED()</b> Deprecated<br />
      Fired when the user moves the cursor to a different position in the text. Use <a
-    class="message" href="#SCN_UPDATEUI">SCN_UPDATEUI</a> instead.</p>
+    class="message" href="#SCN_UPDATEUI"><code>SCN_UPDATEUI</code></a> instead.</p>
 
     <p><b id="SCN_CHECKBRACE">SCN_CHECKBRACE</b> Deprecated<br />
      Either the text or styling of the document has changed or the selection range has changed.
-    This is replaced by <a class="message" href="#SCN_UPDATEUI">SCN_UPDATEUI</a>. You can also use
-    <code><a class="message" href="#SCN_MODIFIED">SCN_MODIFIED</a></code> for more detailed
-    information on text and styling changes,</p>
+    This is replaced by <a class="message" href="#SCN_UPDATEUI"><code>SCN_UPDATEUI</code></a>. You
+    can also use <code><a class="message" href="#SCN_MODIFIED">SCN_MODIFIED</a></code> for more
+    detailed information on text and styling changes,</p>
 
     <h2 id="EditMessagesNeverSupportedByScintilla">Edit messages never supported by Scintilla</h2>
 <pre>
