@@ -322,6 +322,7 @@ public:
 	void FlushCachedState();
 
 	void SetUnicodeMode(bool unicodeMode_);
+	void SetDBCSMode(int codePage);
 };
 
 SurfaceImpl::SurfaceImpl() :
@@ -692,6 +693,10 @@ void SurfaceImpl::SetUnicodeMode(bool unicodeMode_) {
 	unicodeMode=unicodeMode_;
 }
 
+void SurfaceImpl::SetDBCSMode(int) {
+	// No action on window as automatically handled by system.
+}
+
 Surface *Surface::Allocate() {
 	return new SurfaceImpl;
 }
@@ -1051,6 +1056,7 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 			if (surfaceItem) {
 				surfaceItem->Init(pDrawItem->hDC);
 				//surf->SetUnicodeMode(unicodeMode);
+				//surf->SetDBCSMode(codePage);
 				int left = pDrawItem->rcItem.left;
 				PRectangle rc(left + 1, pDrawItem->rcItem.top,
 					left + 1 + widthPix, pDrawItem->rcItem.bottom);

@@ -83,6 +83,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_SETTABWIDTH 2036
 #define SCI_GETTABWIDTH 2121
 #define SC_CP_UTF8 65001
+#define SC_CP_DBCS 1
 #define SCI_SETCODEPAGE 2037
 #define SCI_SETUSEPALETTE 2039
 #define MARKER_MAX 31

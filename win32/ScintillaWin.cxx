@@ -379,7 +379,7 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 		pps = &ps;
 		::BeginPaint(MainHWND(), pps);
 	}
-	AutoSurface surfaceWindow(pps->hdc, IsUnicodeMode());
+	AutoSurface surfaceWindow(pps->hdc, CodePage());
 	if (surfaceWindow) {
 		rcPaint = PRectangle(pps->rcPaint.left, pps->rcPaint.top, pps->rcPaint.right, pps->rcPaint.bottom);
 		PRectangle rcClient = GetClientRectangle();
@@ -1426,7 +1426,7 @@ void ScintillaWin::ImeStartComposition() {
 			int sizeZoomed = vs.styles[styleHere].size + vs.zoomLevel;
 			if (sizeZoomed <= 2)	// Hangs if sizeZoomed <= 1
 				sizeZoomed = 2;
-			AutoSurface surface(IsUnicodeMode());
+			AutoSurface surface(CodePage());
 			int deviceHeight = sizeZoomed;
 			if (surface) {
 				deviceHeight = (sizeZoomed * surface->LogPixelsY()) / 72;
@@ -1587,7 +1587,7 @@ void ScintillaWin::HorizontalScrollMessage(WPARAM wParam) {
 void ScintillaWin::RealizeWindowPalette(bool inBackGround) {
 	RefreshStyleData();
 	HDC hdc = ::GetDC(MainHWND());
-	AutoSurface surfaceWindow(hdc, IsUnicodeMode());
+	AutoSurface surfaceWindow(hdc, CodePage());
 	if (surfaceWindow) {
 		int changes = surfaceWindow->SetPalette(&palette, inBackGround);
 		if (changes > 0)
@@ -1606,7 +1606,7 @@ void ScintillaWin::FullPaint() {
 	rcPaint = GetClientRectangle();
 	paintingAllText = true;
 	HDC hdc = ::GetDC(MainHWND());
-	AutoSurface surfaceWindow(hdc, IsUnicodeMode());
+	AutoSurface surfaceWindow(hdc, CodePage());
 	if (surfaceWindow) {
 		Paint(surfaceWindow, rcPaint);
 		surfaceWindow->Release();
@@ -1929,7 +1929,7 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
 		} else if (iMessage == WM_PAINT) {
 			PAINTSTRUCT ps;
 			::BeginPaint(hWnd, &ps);
-			AutoSurface surfaceWindow(ps.hdc, ctp->unicodeMode);
+			AutoSurface surfaceWindow(ps.hdc, ctp->codePage);
 			if (surfaceWindow) {
 				ctp->PaintCT(surfaceWindow);
 				surfaceWindow->Release();

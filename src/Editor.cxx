@@ -419,7 +419,7 @@ void Editor::RefreshColourPalette(Palette &pal, bool want) {
 void Editor::RefreshStyleData() {
 	if (!stylesValid) {
 		stylesValid = true;
-		AutoSurface surface(IsUnicodeMode());
+		AutoSurface surface(CodePage());
 		if (surface) {
 			vs.Refresh(*surface);
 			RefreshColourPalette(palette, true);
@@ -499,7 +499,7 @@ Point Editor::LocationFromPosition(int pos) {
 	int line = pdoc->LineFromPosition(pos);
 	int lineVisible = cs.DisplayFromDoc(line);
 	//Platform::DebugPrintf("line=%d\n", line);
-	AutoSurface surface(IsUnicodeMode());
+	AutoSurface surface(CodePage());
 	LineLayout *ll = RetrieveLineLayout(line);
 	if (surface && ll) {
 		// -1 because of adding in for visible lines in following loop.
@@ -552,7 +552,7 @@ int Editor::PositionFromLocation(Point pt) {
 	int lineDoc = cs.DocFromDisplay(visibleLine);
 	if (lineDoc >= pdoc->LinesTotal())
 		return pdoc->Length();
-	AutoSurface surface(IsUnicodeMode());
+	AutoSurface surface(CodePage());
 	int retVal = 0;
 	LineLayout *ll = RetrieveLineLayout(lineDoc);
 	if (surface && ll) {
@@ -600,7 +600,7 @@ int Editor::PositionFromLocationClose(Point pt) {
 		return INVALID_POSITION;
 	if (lineDoc >= pdoc->LinesTotal())
 		return INVALID_POSITION;
-	AutoSurface surface(IsUnicodeMode());
+	AutoSurface surface(CodePage());
 	LineLayout *ll = RetrieveLineLayout(lineDoc);
 	if (surface && ll) {
 		LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
@@ -634,7 +634,7 @@ int Editor::PositionFromLineX(int lineDoc, int x) {
 	if (lineDoc >= pdoc->LinesTotal())
 		return pdoc->Length();
 	//Platform::DebugPrintf("Position of (%d,%d) line = %d top=%d\n", pt.x, pt.y, line, topLine);
-	AutoSurface surface(IsUnicodeMode());
+	AutoSurface surface(CodePage());
 	LineLayout *ll = RetrieveLineLayout(lineDoc);
 	int retVal = 0;
 	if (surface && ll) {
@@ -935,7 +935,7 @@ void Editor::MoveCaretInsideView(bool ensureVisible) {
 int Editor::DisplayFromPosition(int pos) {
 	int lineDoc = pdoc->LineFromPosition(pos);
 	int lineDisplay = cs.DisplayFromDoc(lineDoc);
-	AutoSurface surface(IsUnicodeMode());
+	AutoSurface surface(CodePage());
 	LineLayout *ll = RetrieveLineLayout(lineDoc);
 	if (surface && ll) {
 		LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
@@ -1272,7 +1272,7 @@ bool Editor::WrapLines() {
 			wrapWidth = rcTextArea.Width();
 			// Ensure all of the document is styled.
 			pdoc->EnsureStyledTo(pdoc->Length());
-			AutoSurface surface(IsUnicodeMode());
+			AutoSurface surface(CodePage());
 			if (surface) {
 				int lastLineToWrap = pdoc->LinesTotal();
 				while (docLineLastWrapped <= lastLineToWrap) {
@@ -2356,10 +2356,10 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 	if (!pfr)
 		return 0;
 
-	AutoSurface surface(pfr->hdc, IsUnicodeMode());
+	AutoSurface surface(pfr->hdc, CodePage());
 	if (!surface)
 		return 0;
-	AutoSurface surfaceMeasure(pfr->hdcTarget, IsUnicodeMode());
+	AutoSurface surfaceMeasure(pfr->hdcTarget, CodePage());
 	if (!surfaceMeasure) {
 		return 0;
 	}
@@ -2531,7 +2531,7 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 
 int Editor::TextWidth(int style, const char *text) {
 	RefreshStyleData();
-	AutoSurface surface(IsUnicodeMode());
+	AutoSurface surface(CodePage());
 	if (surface) {
 		return surface->WidthText(vs.styles[style].font, text, strlen(text));
 	} else {
@@ -2935,7 +2935,7 @@ void Editor::CheckModificationForWrap(DocModification mh) {
 		if (wrapState != eWrapNone) {
 			int lineDoc = pdoc->LineFromPosition(mh.position);
 			if (mh.linesAdded == 0) {
-				AutoSurface surface(IsUnicodeMode());
+				AutoSurface surface(CodePage());
 				LineLayout *ll = RetrieveLineLayout(lineDoc);
 				if (surface && ll) {
 					LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
@@ -3303,7 +3303,7 @@ void Editor::CursorUpOrDown(int direction, bool extend) {
 int Editor::StartEndDisplayLine(int pos, bool start) {
 	RefreshStyleData();
 	int line = pdoc->LineFromPosition(pos);
-	AutoSurface surface(IsUnicodeMode());
+	AutoSurface surface(CodePage());
 	LineLayout *ll = RetrieveLineLayout(line);
 	int posRet = INVALID_POSITION;
 	if (surface && ll) {
@@ -4552,6 +4552,13 @@ int Editor::ReplaceTarget(bool replacePatterns, const char *text, int length) {
 
 bool Editor::IsUnicodeMode() const {
 	return pdoc && (SC_CP_UTF8 == pdoc->dbcsCodePage);
+}
+
+int Editor::CodePage() const {
+	if (pdoc)
+		return pdoc->dbcsCodePage;
+	else
+		return 0;
 }
 
 static bool ValidMargin(unsigned long wParam) {

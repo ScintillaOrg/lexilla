@@ -232,6 +232,18 @@ static const char *CharacterSetName(int characterSet) {
 	}
 }
 
+static bool IsDBCSCharacterSet(int characterSet) {
+	switch (characterSet) {
+	case SC_CHARSET_GB2312:
+	case SC_CHARSET_HANGUL:
+	case SC_CHARSET_SHIFTJIS:
+	case SC_CHARSET_CHINESEBIG5:
+		return true;
+	default:
+		return false;
+	}
+}
+
 static void GenerateFontSpecStrings(const char *fontName, int characterSet,
                                     char *foundary, int foundary_len,
                                     char *faceName, int faceName_len,
@@ -384,6 +396,14 @@ void FontCached::ReleaseId(FontID id_) {
 	FontMutexUnlock();
 }
 
+static FontID LoadFontOrSet(const char *fontspec, int characterSet) {
+	if (IsDBCSCharacterSet(characterSet)) {
+		return gdk_fontset_load(fontspec);
+	} else {
+		return gdk_font_load(fontspec);
+	}
+}
+
 FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
                                  int size, bool bold, bool italic) {
 	char fontset[1024];
@@ -401,7 +421,7 @@ FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
 	// If name of the font begins with a '-', assume, that it is
 	// a full fontspec.
 	if (fontName[0] == '-') {
-		if (strchr(fontName, ',')) {
+		if (strchr(fontName, ',') || IsDBCSCharacterSet(characterSet)) {
 			newid = gdk_fontset_load(fontName);
 		} else {
 			newid = gdk_font_load(fontName);
@@ -409,7 +429,8 @@ FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
 		if (!newid) {
 			// Font not available so substitute a reasonable code font
 			// iso8859 appears to only allow western characters.
-			newid = gdk_font_load("-*-*-*-*-*-*-*-*-*-*-*-*-iso8859-*");
+			newid = LoadFontOrSet("-*-*-*-*-*-*-*-*-*-*-*-*-iso8859-*",
+				characterSet);
 		}
 		return newid;
 	}
@@ -502,7 +523,7 @@ FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
 	         italic ? "-i" : "-r",
 	         size * 10,
 	         charset);
-	newid = gdk_font_load(fontspec);
+	newid = LoadFontOrSet(fontspec, characterSet);
 	if (!newid) {
 		// some fonts have oblique, not italic
 		snprintf(fontspec,
@@ -513,7 +534,7 @@ FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
 		         italic ? "-o" : "-r",
 		         size * 10,
 		         charset);
-		newid = gdk_font_load(fontspec);
+		newid = LoadFontOrSet(fontspec, characterSet);
 	}
 	if (!newid) {
 		snprintf(fontspec,
@@ -526,7 +547,8 @@ FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
 	if (!newid) {
 		// Font not available so substitute a reasonable code font
 		// iso8859 appears to only allow western characters.
-		newid = gdk_font_load("-*-*-*-*-*-*-*-*-*-*-*-*-iso8859-*");
+		newid = LoadFontOrSet("-*-*-*-*-*-*-*-*-*-*-*-*-iso8859-*",
+			characterSet);
 	}
 	return newid;
 }
@@ -548,6 +570,7 @@ void Font::Release() {
 
 class SurfaceImpl : public Surface {
 	bool unicodeMode;
+	bool dbcsMode;
 	GdkDrawable *drawable;
 	GdkGC *gc;
 	GdkPixmap *ppixmap;
@@ -595,10 +618,12 @@ public:
 	void FlushCachedState();
 
 	void SetUnicodeMode(bool unicodeMode_);
+	void SetDBCSMode(int codePage);
 };
 
-SurfaceImpl::SurfaceImpl() : unicodeMode(false), drawable(0), gc(0), ppixmap(0),
-x(0), y(0), inited(false), createdGC(false) {}
+SurfaceImpl::SurfaceImpl() : unicodeMode(false), dbcsMode(false), drawable(0), gc(0), ppixmap(0),
+x(0), y(0), inited(false), createdGC(false) {
+}
 
 SurfaceImpl::~SurfaceImpl() {
 	Release();
@@ -822,6 +847,40 @@ void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const ch
 				}
 				wcp += lenDraw;
 			}
+		} else if (dbcsMode) {
+			GdkWChar wctext[MAX_US_LEN];
+			GdkWChar *wcp = (GdkWChar *) & wctext;
+			int wclen = gdk_mbstowcs(wcp, s, MAX_US_LEN);
+
+			/* In the annoying case when non-locale chars
+			 * in the line.
+			 * e.g. latin1 chars in Japanese locale */
+			if (wclen < 1) {
+				while ((len > 0) && (x < maxCoordinate)) {
+					int lenDraw = Platform::Minimum(len, segmentLength);
+					gdk_draw_text(drawable, PFont(font_), gc,
+					              x, ybase, s, lenDraw);
+					len -= lenDraw;
+					if (len > 0) {
+						x += gdk_text_width(PFont(font_), s, lenDraw);
+					}
+					s += lenDraw;
+				}
+			} else {
+				wctext[wclen] = L'\0';
+				int lenDraw;
+				while ((wclen > 0) && (x < maxCoordinate)) {
+					lenDraw = Platform::Minimum(wclen, segmentLength);
+					gdk_draw_text_wc(drawable, PFont(font_), gc,
+					                 x, ybase, wcp, lenDraw);
+					wclen -= lenDraw;
+					if (wclen > 0) {
+						x += gdk_text_width_wc(PFont(font_),
+						                       wcp, lenDraw);
+					}
+					wcp += lenDraw;
+ 				}
+			}
 		} else {
 			while ((len > 0) && (x < maxCoordinate)) {
 				int lenDraw = Platform::Minimum(len, segmentLength);
@@ -881,6 +940,49 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 				lastPos = positions[i - 1];
 			while (i < static_cast<size_t>(len)) {
 				positions[i++] = lastPos;
+			}
+		} else if (dbcsMode) {
+			GdkWChar wctext[MAX_US_LEN];
+			size_t wclen = (size_t)gdk_mbstowcs(wctext, s, MAX_US_LEN);
+			/* In the annoying case when non-locale chars
+			 * in the line.
+			 * e.g. latin1 chars in Japanese locale */
+			if( (int)wclen < 1 ) {
+				for (int i = 0; i < len; i++) {
+					int width = gdk_char_width(gf, s[i]);
+					totalWidth += width;
+					positions[i] = totalWidth;
+				}
+			} else {
+				wctext[wclen] = L'\0';
+				int poses[MAX_US_LEN];
+				size_t i;
+				for (i = 0; i < wclen; i++) {
+					int width = gdk_char_width_wc(gf, wctext[i]);
+					totalWidth += width;
+					poses[i] = totalWidth;
+				}
+				size_t ui = 0;
+				i = 0;
+				for (ui = 0; ui< wclen; ui++) {
+					GdkWChar wch[2];
+					wch[0] = wctext[ui];
+					wch[1] = L'\0';
+					gchar* mbstr = gdk_wcstombs(wch);
+					if (mbstr == NULL || *mbstr == '\0')
+						g_error("mbs broken\n");
+					for(int j=0; j<(int)strlen(mbstr); j++) {
+						positions[i++] = poses[ui];
+					}
+					if( mbstr != NULL )
+						g_free(mbstr);
+				}
+				int lastPos = 0;
+				if (i > 0)
+					lastPos = positions[i - 1];
+				while (i < static_cast<size_t>(len)) {
+					positions[i++] = lastPos;
+				}
 			}
 		} else {
 			for (int i = 0; i < len; i++) {
@@ -1007,6 +1109,10 @@ void SurfaceImpl::FlushCachedState() {}
 
 void SurfaceImpl::SetUnicodeMode(bool unicodeMode_) {
 	unicodeMode = unicodeMode_;
+}
+
+void SurfaceImpl::SetDBCSMode(int codePage) {
+	dbcsMode = codePage == SC_CP_DBCS;
 }
 
 Surface *Surface::Allocate() {
@@ -1361,7 +1467,7 @@ static void init_pixmap(ListImage *list_image, GtkWidget *window) {
 	if (list_image->bitmap)
 		gdk_bitmap_unref(list_image->bitmap);
 	list_image->bitmap = NULL;
-		
+
 	list_image->pixmap = gdk_pixmap_colormap_create_from_xpm_d(NULL
 	             , gtk_widget_get_colormap(window), &(list_image->bitmap), NULL
 	             , (gchar **) xpm_lineform);
@@ -1476,7 +1582,7 @@ void ListBoxX::RegisterImage(int type, const char *xpm_data) {
 	} else {
 		list_image = g_new0(ListImage, 1);
 		list_image->xpm_data = xpm_data;
-		g_hash_table_insert((GHashTable *) pixhash, GINT_TO_POINTER(type), 
+		g_hash_table_insert((GHashTable *) pixhash, GINT_TO_POINTER(type),
 			(gpointer) list_image);
 	}
 }

@@ -329,6 +329,7 @@ public:
 	virtual void FlushCachedState()=0;
 
 	virtual void SetUnicodeMode(bool unicodeMode_)=0;
+	virtual void SetDBCSMode(int codePage)=0;
 };
 
 /**
