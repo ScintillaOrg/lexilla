@@ -380,8 +380,13 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					quoteUp = ch;
 					quoteDown = opposite(ch);
 					quotes++;
+				} else if (ch == '\\' && quoteUp != '\\') {
+					// SG: Is it save to skip *every* escaped char?
+					i++;
+					ch = chNext;
+					chNext = styler.SafeGetCharAt(i + 1);
 				} else {
-					if (ch == quoteDown && chPrev != '\\') {
+					if (ch == quoteDown /*&& chPrev != '\\'*/) {
 						quotes--;
 						if (quotes == 0) {
 							quoteRep--;
@@ -396,7 +401,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 								ch = ' ';
 							}
 						}
-					} else if (ch == quoteUp && chPrev != '\\') {
+					} else if (ch == quoteUp /*&& chPrev != '\\'*/) {
 						quotes++;
 					} else if (!isalpha(chNext)) {
 						if (quoteRep <= 0) {
@@ -411,6 +416,11 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					quoteUp = ch;
 					quoteDown = opposite(ch);
 					quotes++;
+				} else if (ch == '\\' && quoteUp != '\\') {
+					// SG: Is it save to skip *every* escaped char?
+					i++;
+					ch = chNext;
+					chNext = styler.SafeGetCharAt(i + 1);
 				} else {
 					if (quotes == 0 && quoteRep == 1) {
 						/* We matched something like s(...) or tr{...}
@@ -437,7 +447,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 							quoteDown = opposite(ch);
 							quotes++;
 						}
-					} else if (ch == quoteDown && chPrev != '\\') {
+					} else if (ch == quoteDown /*&& chPrev != '\\'*/) {
 						quotes--;
 						if (quotes == 0) {
 							quoteRep--;
@@ -452,7 +462,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 						if (quoteUp == quoteDown) {
 							quotes++;
 						}
-					} else if (ch == quoteUp && chPrev != '\\') {
+					} else if (ch == quoteUp /*&& chPrev != '\\'*/) {
 						quotes++;
 					} else if (!isalpha(chNext)) {
 						if (quoteRep <= 0) {
