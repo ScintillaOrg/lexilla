@@ -516,7 +516,11 @@ void Surface::MeasureWidths(Font &font_, const char *s, int len, int *positions)
 		}
 		positions[i] = sz.cx;
 	} else {
-		::GetTextExtentExPoint(hdc, s, len, 30000, &fit, positions, &sz);
+		if (!::GetTextExtentExPoint(hdc, s, len, 30000, &fit, positions, &sz)) {
+			// Eeek - a NULL DC or other foolishness could cause this.
+			// The least we can do is set the positions to zero!
+			memset(positions, 0, len * sizeof(*positions));
+		}
 	}
 }
 
