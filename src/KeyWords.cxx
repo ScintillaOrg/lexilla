@@ -73,7 +73,13 @@ void LexerModule::Fold(unsigned int startPos, int lengthDoc, int initStyle,
 		// Move back one line in case deletion wrecked current line fold state
 		if (lineCurrent > 0) {
 			lineCurrent--;
-			startPos = styler.LineStart(lineCurrent);
+			int newStartPos = styler.LineStart(lineCurrent);
+			lengthDoc += startPos - newStartPos;
+			startPos = newStartPos;
+			initStyle = 0;
+			if (startPos > 0) {
+				initStyle = styler.StyleAt(startPos - 1);
+			}
 		}
 		fnFolder(startPos, lengthDoc, initStyle, keywordlists, styler);
 	}
