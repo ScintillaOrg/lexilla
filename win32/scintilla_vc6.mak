@@ -127,6 +127,7 @@ LEXOBJS=\
 	$(DIR_O)\LexForth.obj \
 	$(DIR_O)\LexFortran.obj \
 	$(DIR_O)\LexHTML.obj \
+	$(DIR_O)\LexKix.obj \
 	$(DIR_O)\LexLisp.obj \
 	$(DIR_O)\LexLout.obj \
 	$(DIR_O)\LexLua.obj \
@@ -290,6 +291,8 @@ $(DIR_O)\LexForth.obj: ..\src\LexForth.cxx $(LEX_HEADERS)
 $(DIR_O)\LexFortran.obj: ..\src\LexFortran.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexHTML.obj: ..\src\LexHTML.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexKix.obj: ..\src\LexKix.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexLisp.obj: ..\src\LexLisp.cxx $(LEX_HEADERS)
 
