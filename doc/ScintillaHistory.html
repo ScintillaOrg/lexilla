@@ -237,7 +237,18 @@
 	output pane message.
 	</li>
 	<li>
-	SciTE Lua scripting enhanced with buffer specific data, scite.Open
+	SciTE Lua scripting enhanced with 
+	<ul>
+	<li>A Lua table called 'buffer' is associated with each buffer and can be used to 
+	maintain buffer-specific state.</li>
+	<li>A 'scite' object allows interaction with the application such as opening 
+	files from script.</li>
+	<li>Dynamic properties can be reset by assigning nil to a given key in 
+	the props table.</li>
+	<li>An 'OnClear' event fires whenever properties and extension scripts are 
+	about to be reloaded.</li>
+	<li>On Windows, loadlib is enabled and can be used to access Lua 
+	binary modules / DLLs.</li></ul>
 	</li>
 	<li>
 	SciTE Find in Files on Windows can be used in a modeless way and gains a '..' 
