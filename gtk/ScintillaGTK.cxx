@@ -58,6 +58,10 @@
 #define INTERNATIONAL_INPUT
 
 #if !PLAT_GTK_WIN32 || GTK_MAJOR_VERSION >= 2
+#define USE_CONVERTER
+#endif
+
+#ifdef USE_CONVERTER
 #include "Converter.h"
 #endif
 
@@ -269,9 +273,9 @@ enum {
     TARGET_UTF8_STRING
 };
 
-GdkAtom ScintillaGTK::atomClipboard = GDK_NONE;
-GdkAtom ScintillaGTK::atomUTF8 = GDK_NONE;
-GdkAtom ScintillaGTK::atomString = GDK_NONE;
+GdkAtom ScintillaGTK::atomClipboard = 0;
+GdkAtom ScintillaGTK::atomUTF8 = 0;
+GdkAtom ScintillaGTK::atomString = 0;
 
 static const GtkTargetEntry clipboardTargets[] = {
 	{ "UTF8_STRING", 0, TARGET_UTF8_STRING },
@@ -695,13 +699,6 @@ void ScintillaGTK::Initialise() {
 
 	gtk_selection_add_targets(GTK_WIDGET(PWidget(wMain)), GDK_SELECTION_PRIMARY,
 	                          clipboardTargets, nClipboardTargets);
-
-	if (atomClipboard == GDK_NONE)
-		atomClipboard = gdk_atom_intern("CLIPBOARD", FALSE);
-	if (atomUTF8 == GDK_NONE)
-		atomUTF8 = gdk_atom_intern("UTF8_STRING", FALSE);
-	if (atomString == GDK_NONE)
-		atomString = gdk_atom_intern("STRING", FALSE);
 
 #if GTK_MAJOR_VERSION == 1
 	gtk_selection_add_targets(GTK_WIDGET(PWidget(wMain)), atomClipboard,
@@ -1260,7 +1257,7 @@ void ScintillaGTK::ClaimSelection() {
 	}
 }
 
-#if !PLAT_GTK_WIN32
+#ifdef USE_CONVERTER
 static char *ConvertText(size_t *lenResult, char *s, size_t len, const char *charSetDest, const char *charSetSource) {
 	*lenResult = 0;
 	char *destForm = 0;
@@ -1366,7 +1363,7 @@ void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, Selectio
 		selText.Set(dest, len, SC_CP_UTF8, isRectangular);
 #endif
 
-#if !PLAT_GTK_WIN32
+#ifdef USE_CONVERTER
 	// Possible character set conversion
 	const char *charSetBuffer = CharacterSetID();
 	if (*charSetBuffer) {
@@ -1480,7 +1477,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 	char *tmputf = 0;
 	if ((info == TARGET_UTF8_STRING) || (info == TARGET_STRING)) {
 		size_t len = strlen(selBuffer);
-#if !PLAT_GTK_WIN32
+#ifdef USE_CONVERTER
 		// Possible character set conversion
 		const char *charSetBuffer = ::CharacterSetID(text->characterSet);
 		if (info == TARGET_UTF8_STRING) {
@@ -2369,6 +2366,10 @@ guint scintilla_get_type() {
 }
 
 void ScintillaGTK::ClassInit(GtkObjectClass* object_class, GtkWidgetClass *widget_class, GtkContainerClass *container_class) {
+    atomClipboard = gdk_atom_intern("CLIPBOARD", FALSE);
+    atomUTF8 = gdk_atom_intern("UTF8_STRING", FALSE);
+    atomString = GDK_SELECTION_TYPE_STRING;
+
 	// Define default signal handlers for the class:  Could move more
 	// of the signal handlers here (those that currently attached to wDraw
 	// in Initialise() may require coordinate translation?)
