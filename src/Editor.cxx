@@ -1754,11 +1754,15 @@ void Editor::DelCharBack() {
 	if (currentPos == anchor) {
 		int lineCurrentPos = pdoc->LineFromPosition(currentPos);
 		if (pdoc->GetColumn(currentPos) <= pdoc->GetLineIndentation(lineCurrentPos) &&
-		        pdoc->GetColumn(currentPos) > 0 && pdoc->backspaceUnindents) {
+			pdoc->GetColumn(currentPos) > 0 && pdoc->backspaceUnindents) {
 			pdoc->BeginUndoAction();
 			int indentation = pdoc->GetLineIndentation(lineCurrentPos);
 			int indentationStep = (pdoc->indentInChars ? pdoc->indentInChars : pdoc->tabInChars);
-			pdoc->SetLineIndentation(lineCurrentPos, indentation - indentationStep);
+			if (indentation % indentationStep == 0) {
+				pdoc->SetLineIndentation(lineCurrentPos, indentation - indentationStep);
+			} else {
+				pdoc->SetLineIndentation(lineCurrentPos, indentation - (indentation % indentationStep));
+			}
 			SetEmptySelection(pdoc->GetLineIndentPosition(lineCurrentPos));
 			pdoc->EndUndoAction();
 		} else {
