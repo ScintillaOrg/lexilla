@@ -38,7 +38,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 29/February/2004 NH</p>
+    <p>Last edited 29/May/2004 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -3702,7 +3702,9 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <p>It is up to your code to set the connection between user actions and folding and unfolding.
     The best way to see how this is done is to search the SciTE source code for the messages used
     in this section of the documentation and see how they are used. You will also need to use
-    markers and a folding margin to complete your folding implementation.</p>
+    markers and a folding margin to complete your folding implementation.
+    The <code>"fold"</code> property should be set to <code>"1"</code> with 
+    <code>SCI_SETPROPERTY("fold", "1")</code> to enable folding. </p>
     <code><a class="message" href="#SCI_VISIBLEFROMDOCLINE">SCI_VISIBLEFROMDOCLINE(int
     docLine)</a><br />
      <a class="message" href="#SCI_DOCLINEFROMVISIBLE">SCI_DOCLINEFROMVISIBLE(int
