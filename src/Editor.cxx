@@ -1224,6 +1224,14 @@ void Editor::EnsureCaretVisible(bool useMargin, bool vert, bool horiz) {
 		}
 		if (xOffset != xOffsetNew) {
 			xOffset = xOffsetNew;
+			if (xOffsetNew > 0) {
+				PRectangle rcText = GetTextRectangle();
+				if (horizontalScrollBarVisible == true &&
+					rcText.Width() + xOffset > scrollWidth) {
+					scrollWidth = xOffset + rcText.Width();
+					SetScrollBars();
+				}
+			}
 			SetHorizontalScrollPos();
 			Redraw();
 		}
@@ -4782,6 +4790,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETXOFFSET:
 		xOffset = wParam;
+		SetHorizontalScrollPos();
 		Redraw();
 		break;
 
