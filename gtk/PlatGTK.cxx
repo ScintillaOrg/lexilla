@@ -1484,8 +1484,11 @@ int SurfaceImpl::Ascent(Font &font_) {
 		ascent = PFont(font_)->ascent;
 	}
 #endif
-	if (ascent == 0) {
+	if ((ascent == 0) && (PFont(font_)->pfont)) {
 		ascent = PFont(font_)->pfont->ascent;
+	}
+	if (ascent == 0) {
+		ascent = 1;
 	}
 	FontMutexUnlock();
 	return ascent;
