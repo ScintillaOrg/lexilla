@@ -881,7 +881,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 
 	bool overrideBackground = false;
 	Colour background = Colour(0, 0, 0);
-	if (vsDraw.showCaretLineBackground && ll.containsCaret) {
+	if (caret.active && vsDraw.showCaretLineBackground && ll.containsCaret) {
 		overrideBackground = true;
 		background = vsDraw.caretLineBackground.allocated;
 	}
