@@ -1,6 +1,6 @@
 // Scintilla source code edit control
-/** @file LexBB.cxx
- ** Lexer for BlitzBasic.
+/** @file LexBasic.cxx
+ ** Lexer for BlitzBasic and PureBasic.
  **/
 // Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
