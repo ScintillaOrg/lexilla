@@ -420,6 +420,19 @@ static bool isPHPStringState(int state) {
 	    (state == SCE_HPHP_COMPLEX_VARIABLE);
 }
 
+static int FindPhpStringDelimiter(char *phpStringDelimiter, const int phpStringDelimiterSize, int i, const int lengthDoc, Accessor &styler) {
+	int j;
+	phpStringDelimiter[0] = '\n';
+	for (j = i; j < lengthDoc && styler[j] != '\n' && styler[j] != '\r'; j++) {
+		if (j - i < phpStringDelimiterSize - 2)
+			phpStringDelimiter[j-i+1] = styler[j];
+		else
+			i++;
+	}
+	phpStringDelimiter[j-i+1] = '\0';
+	return j;
+}
+
 static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
                                   Accessor &styler) {
 	WordList &keywords = *keywordlists[0];
@@ -433,6 +446,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	styler.StartAt(startPos, STYLE_MAX);
 	char prevWord[200];
 	prevWord[0] = '\0';
+	char phpStringDelimiter[200]; // PHP is not limited in length, we are
+	phpStringDelimiter[0] = '\0';
 	int StateToPrint = initStyle;
 	int state = stateForPrintState(StateToPrint);
 
@@ -443,6 +458,12 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			length++;
 		}
 		state = SCE_H_DEFAULT;
+	}
+	// String can be heredoc, must find a delimiter first
+	while (startPos > 0 && isPHPStringState(state) && state != SCE_HPHP_SIMPLESTRING) {
+		startPos--;
+		length++;
+		state = styler.StyleAt(startPos);
 	}
 	styler.StartAt(startPos, STYLE_MAX);
 
@@ -1456,6 +1477,10 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					state = SCE_HPHP_COMMENTLINE;
 				} else if (ch == '\"') {
 					state = SCE_HPHP_HSTRING;
+					strcpy(phpStringDelimiter, "\"");
+				} else if (styler.Match(i, "<<<")) {
+					state = SCE_HPHP_HSTRING;
+					i = FindPhpStringDelimiter(phpStringDelimiter, sizeof(phpStringDelimiter), i + 3, lengthDoc, styler);
 				} else if (ch == '\'') {
 					state = SCE_HPHP_SIMPLESTRING;
 				} else if (ch == '$' && IsPhpWordStart(chNext)) {
@@ -1498,17 +1523,19 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			}
 			break;
 		case SCE_HPHP_HSTRING:
-			if (ch == '\\') {
+			if (ch == '\\' && (phpStringDelimiter[0] == '\"' || chNext == '$' || chNext == '{')) {
 				// skip the next char
 				i++;
-			} else if (ch == '$' && ((chPrev == '{' && chPrev2 != '\\' && IsPhpWordStart(chNext))
-				|| (chNext == '{' && IsPhpWordStart(chNext2)))) {
-				styler.ColourTo(i - (chNext == '{' ? 1 : 2), StateToPrint);
+			} else if (((ch == '{' && chNext == '$') || (ch == '$' && chNext == '{'))
+				&& IsPhpWordStart(chNext2)) {
+				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_HPHP_COMPLEX_VARIABLE;
 			} else if (ch == '$' && IsPhpWordStart(chNext)) {
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_HPHP_HSTRING_VARIABLE;
-			} else if (ch == '\"') {
+			} else if (styler.Match(i, phpStringDelimiter)) {
+				if (strlen(phpStringDelimiter) > 1)
+					i += strlen(phpStringDelimiter) - 1;
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_HPHP_DEFAULT;
 			}
@@ -1552,6 +1579,10 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				state = SCE_HPHP_COMMENTLINE;
 			} else if (ch == '\"') {
 				state = SCE_HPHP_HSTRING;
+				strcpy(phpStringDelimiter, "\"");
+			} else if (styler.Match(i, "<<<")) {
+				state = SCE_HPHP_HSTRING;
+				i = FindPhpStringDelimiter(phpStringDelimiter, sizeof(phpStringDelimiter), i + 3, lengthDoc, styler);
 			} else if (ch == '\'') {
 				state = SCE_HPHP_SIMPLESTRING;
 			} else if (ch == '$' && IsPhpWordStart(chNext)) {
