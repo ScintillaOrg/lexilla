@@ -20,16 +20,35 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-static bool IsOKBeforeRE(int ch) {
+static bool IsOKBeforeRE(const int ch) {
 	return (ch == '(') || (ch == '=') || (ch == ',');
 }
 
-inline bool IsAWordChar(int  ch) {
+inline bool IsAWordChar(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_');
 }
 
-inline bool IsAWordStart(int ch) {
+inline bool IsAWordStart(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '_');
+}
+
+inline bool IsADoxygenChar(const int ch) {
+	return (islower(ch) || ch == '$' || ch == '@' ||
+		    ch == '\\' || ch == '&' || ch == '<' ||
+			ch == '>' || ch == '#' || ch == '{' ||
+			ch == '}' || ch == '[' || ch == ']');
+}
+
+inline bool IsStateComment(const int state) {
+	return ((state == SCE_C_COMMENT) ||
+		      (state == SCE_C_COMMENTLINE) ||
+		      (state == SCE_C_COMMENTDOC) ||
+		      (state == SCE_C_COMMENTDOCKEYWORD) ||
+		      (state == SCE_C_COMMENTDOCKEYWORDERROR));
+}
+
+inline bool IsStateString(const int state) {
+	return ((state == SCE_C_STRING) || (state == SCE_C_VERBATIM));
 }
 
 static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
@@ -37,6 +56,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 
 	WordList &keywords = *keywordlists[0];
 	WordList &keywords2 = *keywordlists[1];
+//	WordList &keywords3 = *keywordlists[2];
 
 	bool stylingWithinPreprocessor = styler.GetPropertyInt("styling.within.preprocessor");
 
@@ -46,6 +66,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 
 	int chPrevNonWhite = ' ';
 	int visibleChars = 0;
+	int noDocChars = 0;
 	bool lastWordWasUUID = false;
 
 	StyleContext sc(startPos, length, initStyle, styler);
@@ -83,7 +104,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 				}
 				sc.SetState(SCE_C_DEFAULT);
 			}
-		} if (sc.state == SCE_C_PREPROCESSOR) {
+		} else if (sc.state == SCE_C_PREPROCESSOR) {
 			if (stylingWithinPreprocessor) {
 				if (IsASpace(sc.ch)) {
 					sc.SetState(SCE_C_DEFAULT);
@@ -174,6 +195,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 					sc.SetState(SCE_C_IDENTIFIER);
 				}
 			} else if (sc.Match('/', '*')) {
+				noDocChars = 0;
 				if (sc.Match("/**") || sc.Match("/*!"))	// Support of Qt/Doxygen doc. style
 					sc.SetState(SCE_C_COMMENTDOC);
 				else
