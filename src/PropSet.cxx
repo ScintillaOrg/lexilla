@@ -325,9 +325,18 @@ char *SString::StringAllocate(
 	return sNew;
 }
 
+/**
+ * Allocate uninitialized memory big enough to fit a string of the given length
+ * @return the pointer to the new string
+ */
+char *SString::StringAllocate(lenpos_t len) {
+	if (len != measure_length)
+		return new char [len + 1];
+	else
+		return 0;
+}
+
 // End SString functions
-
-
 
 PropSet::PropSet() {
 	superPS = 0;
