@@ -29,7 +29,7 @@ BEGIN
 			VALUE	"FileDescription",	"Scintilla.DLL - a Source Editing Component\0"
 			VALUE	"FileVersion",	"1.59\0"
 			VALUE	"InternalName",	"Scintilla\0"
-			VALUE	"LegalCopyright",	"Copyright 1998-2003 by Neil Hodgson\0"
+			VALUE	"LegalCopyright",	"Copyright 1998-2004 by Neil Hodgson\0"
 			VALUE	"OriginalFilename",	"Scintilla.DLL\0"
 			VALUE	"ProductName",	"Scintilla\0"
 			VALUE	"ProductVersion",	"1.59\0"
