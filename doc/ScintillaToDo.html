@@ -32,15 +32,12 @@
        At the end of italics style runs characters can be chopped off. An example is using Verdana
       12 point italics for strings makes an ending double quote half visible and an ending single
       quote invisible. This is hard to solve completely, may be better to avoid these situations
-      by, for example, choosing a font like Times New Roman for strings.
+      by, for example, choosing a font like Times New Roman for strings. There is a specific kluge 
+      for the end of line which adds some room for italics but this does not work elsewhere.
     </p>
     <p>
        Dragging over bold text in some fonts will ripple because of the difference in size between
       drawing all of a string at once and drawing it in parts.
-    </p>
-    <p>
-	Python lexer does not understand escapes within triple quoted string like:
-	"""String with embedded quote \""""
     </p>
     <h3>
        GTK+ Version Bugs
@@ -99,14 +96,14 @@
     <p>
 	Port to MacOS X.
     </p>
-    <h3>
-	SciTE To Do
-    </h3>
     <p>
 	More lexers for other languages such as PostScript and Smalltalk.
 	Make the subset Perl lexer understand more Perl. 
 	Improve the Ruby and TCL lexers.
     </p>
+    <h3>
+	SciTE To Do
+    </h3>
     <p>
 	Printing on GTK+.
     </p>
@@ -118,10 +115,6 @@
     </p>
     <p>
 	Retain folding state when changing buffers.
-    </p>
-    <p>
-	Load menus and accelerators from a property file so they can be modified
-	easily and localised into other languages.
     </p>
     <p>
 	Allow file name based selection on all properties rather than just a chosen few.
