@@ -4872,7 +4872,10 @@ void Editor::SetDocPointer(Document *document) {
 
 	pdoc->AddWatcher(this, 0);
 	Redraw();
-	SetScrollBars();
+	// Removed because of reentrance problems of GTK+ 2.x
+	// where changing a scroll bar position causes synchronous
+	// painting before lexer and styling state is set up.
+	//SetScrollBars();
 }
 
 // Recursively expand a fold, making lines visible except where they have an unexpanded parent
