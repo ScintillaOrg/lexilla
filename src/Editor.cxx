@@ -3606,10 +3606,16 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		targetStart = wParam;
 		break;
 
+	case SCI_GETTARGETSTART:
+		return targetStart;
+	
 	case SCI_SETTARGETEND:
 		targetEnd = wParam;
 		break;
 
+	case SCI_GETTARGETEND:
+		return targetEnd;
+	
 	case SCI_REPLACETARGET:
 		PLATFORM_ASSERT(lParam);
 		return ReplaceTarget(wParam, reinterpret_cast<char *>(lParam));
