@@ -387,7 +387,8 @@ public:
 };
 
 class ElapsedTime {
-	double beginTime;
+	long bigBit;
+	long littleBit;
 public:
 	ElapsedTime();
 	double Duration(bool reset=false);

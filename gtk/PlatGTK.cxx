@@ -886,42 +886,24 @@ void Menu::Show(Point pt, Window &) {
 	gtk_item_factory_popup(reinterpret_cast<GtkItemFactory *>(id), pt.x - 4, pt.y, 3, 0);
 }
 
-static double DoublePack(glong a, glong b) {
-	double d;
-	long *lp = reinterpret_cast<glong *>(&d);
-	lp[0] = a;
-	lp[1] = b;
-	return d;
-}
-
-static void DoubleUnpack(double d, glong &a, glong &b) {
-	long *lp = reinterpret_cast<glong *>(&d);
-	a = lp[0];
-	b = lp[1];
-}
-
-static double Now() {
+ElapsedTime::ElapsedTime() {
 	GTimeVal curTime;
 	g_get_current_time(&curTime);
-	return DoublePack(curTime.tv_sec, curTime.tv_usec);
-}
-
-ElapsedTime::ElapsedTime() {
-	beginTime = Now();
+	bigBit = curTime.tv_sec;
+	littleBit = curTime.tv_usec;
 }
 
 double ElapsedTime::Duration(bool reset) {
-	double endTime = Now();
-	GTimeVal tvStart;
-	DoubleUnpack(beginTime, tvStart.tv_sec, tvStart.tv_usec);
-	GTimeVal tvEnd;
-	DoubleUnpack(endTime, tvEnd.tv_sec, tvEnd.tv_usec);
-	double result = tvEnd.tv_sec - tvStart.tv_sec;
-	result *= 1000000;
-	result += tvEnd.tv_usec - tvStart.tv_usec;
-	result /= 1000000;
+	GTimeVal curTime;
+	g_get_current_time(&curTime);
+	long endBigBit = curTime.tv_sec;
+	long endLittleBit = curTime.tv_usec;
+	double result = 1000000.0 * (endBigBit - bigBit);
+	result += endLittleBit - littleBit;
+	result /= 1000000.0;
 	if (reset) {
-		beginTime = endTime;
+		bigBit = endBigBit;
+		littleBit = endLittleBit;
 	}
 	return result;
 }

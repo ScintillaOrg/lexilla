@@ -877,38 +877,45 @@ static bool initialisedET = false;
 static bool usePerformanceCounter = false;
 static LARGE_INTEGER frequency;
 
-static double Now() {
-	if (usePerformanceCounter) {
-		LARGE_INTEGER timeVal;
-		::QueryPerformanceCounter(&timeVal);
-		return *(reinterpret_cast<double *>(&timeVal));
-	} else {
-		return clock();
-	}
-}
-
 ElapsedTime::ElapsedTime() {
 	if (!initialisedET) {
 		usePerformanceCounter = ::QueryPerformanceFrequency(&frequency);
 		initialisedET = true;
 	}
-	beginTime = Now();
+	if (usePerformanceCounter) {
+		LARGE_INTEGER timeVal;
+		::QueryPerformanceCounter(&timeVal);
+		bigBit = timeVal.HighPart;
+		littleBit = timeVal.LowPart;
+	} else {
+		bigBit = clock();
+	}
 }
 
 double ElapsedTime::Duration(bool reset) {
-	double endTime = Now();
 	double result;
+	long endBigBit;
+	long endLittleBit;
+
 	if (usePerformanceCounter) {
-		LARGE_INTEGER lBegin = *(reinterpret_cast<LARGE_INTEGER *>(&beginTime));
-		LARGE_INTEGER lEnd = *(reinterpret_cast<LARGE_INTEGER *>(&endTime));
+		LARGE_INTEGER lEnd;
+		::QueryPerformanceCounter(&lEnd);
+		endBigBit = lEnd.HighPart;
+		endLittleBit = lEnd.LowPart;
+		LARGE_INTEGER lBegin;
+		lBegin.HighPart = bigBit;
+		lBegin.LowPart = littleBit;
 		double elapsed = lEnd.QuadPart - lBegin.QuadPart;
 		result = elapsed / static_cast<double>(frequency.QuadPart);
 	} else {
-		double elapsed = endTime - beginTime;
+		endBigBit = clock();
+		endLittleBit = 0;
+		double elapsed = endBigBit - bigBit;
 		result = elapsed / CLOCKS_PER_SEC;
 	}
 	if (reset) {
-		beginTime = endTime;
+		bigBit = endBigBit;
+		littleBit = endLittleBit;
 	}
 	return result;
 }
