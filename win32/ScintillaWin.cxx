@@ -1,5 +1,7 @@
 // Scintilla source code edit control
-// ScintillaWin.cxx - Windows specific subclass of ScintillaBase
+/** @file ScintillaWin.cxx
+ ** Windows specific subclass of ScintillaBase.
+ **/
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
@@ -54,8 +56,10 @@
 #define MK_ALT 32
 #endif
 
-// TOTAL_CONTROL ifdef surrounds code that will only work when ScintillaWin
-// is derived from ScintillaBase (all features) rather than directly from Editor (lightweight editor).
+/** TOTAL_CONTROL ifdef surrounds code that will only work when ScintillaWin
+ * is derived from ScintillaBase (all features) rather than directly from Editor
+ * (lightweight editor).
+ */
 #define TOTAL_CONTROL
 
 // GCC has trouble with the standard COM ABI so do it the old C way with explicit vtables.
@@ -64,6 +68,8 @@ const char callClassName[] = "CallTip";
 
 class ScintillaWin; 	// Forward declaration for COM interface subobjects
 
+/**
+ */
 class FormatEnumerator {
 public:
 	void **vtbl;
@@ -74,6 +80,8 @@ public:
 	FormatEnumerator(int pos_, CLIPFORMAT formats_[], int formatsLen_);
 };
 
+/**
+ */
 class DropSource {
 public:
 	void **vtbl;
@@ -81,6 +89,8 @@ public:
 	DropSource();
 };
 
+/**
+ */
 class DataObject {
 public:
 	void **vtbl;
@@ -88,6 +98,8 @@ public:
 	DataObject();
 };
 
+/**
+ */
 class DropTarget {
 public:
 	void **vtbl;
@@ -95,6 +107,8 @@ public:
 	DropTarget();
 };
 
+/**
+ */
 class ScintillaWin :
 	public ScintillaBase {
 
@@ -161,12 +175,12 @@ class ScintillaWin :
 	void FullPaint();
 
 public:
-	// Implement IUnknown
+	/// Implement IUnknown
 	STDMETHODIMP QueryInterface(REFIID riid, PVOID *ppv);
 	STDMETHODIMP_(ULONG)AddRef();
 	STDMETHODIMP_(ULONG)Release();
 
-	// Implement IDropTarget
+	/// Implement IDropTarget
 	STDMETHODIMP DragEnter(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 	                       POINTL pt, PDWORD pdwEffect);
 	STDMETHODIMP DragOver(DWORD grfKeyState, POINTL pt, PDWORD pdwEffect);
@@ -174,7 +188,7 @@ public:
 	STDMETHODIMP Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 	                  POINTL pt, PDWORD pdwEffect);
 
-	// Implement important part of IDataObject
+	/// Implement important part of IDataObject
 	STDMETHODIMP GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM);
 
 	bool IsUnicodeMode() const;
@@ -196,8 +210,8 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 
 	hasOKText = false;
 
-	// There does not seem to be a real standard for indicating that the clipboard contains a rectangular
-	// selection, so copy Developer Studio.
+	// There does not seem to be a real standard for indicating that the clipboard
+	// contains a rectangular selection, so copy Developer Studio.
 	cfColumnSelect = static_cast<CLIPFORMAT>(
 		::RegisterClipboardFormat("MSDEVColumnSelect"));
 	
@@ -267,7 +281,7 @@ static int InputCodePage() {
 	return atoi(sCodePage);
 }
 
-// Map the key codes to their equivalent SCK_ form
+/** Map the key codes to their equivalent SCK_ form. */
 static int KeyTranslate(int keyIn) {
 //PLATFORM_ASSERT(!keyIn);
 	switch (keyIn) {
@@ -658,7 +672,7 @@ bool ScintillaWin::HaveMouseCapture() {
 void ScintillaWin::ScrollText(int linesToMove) {
 	//Platform::DebugPrintf("ScintillaWin::ScrollText %d\n", linesToMove);
 	::ScrollWindow(wMain.GetID(), 0, 
-		vs.lineHeight * (linesToMove), 0, 0);
+		vs.lineHeight * linesToMove, 0, 0);
 	::UpdateWindow(wMain.GetID());
 }
 
@@ -837,7 +851,7 @@ void ScintillaWin::ClaimSelection() {
 	// Windows does not have a primary selection
 }
 
-// Implement IUnknown
+/// Implement IUnknown
 
 STDMETHODIMP_(ULONG)FormatEnumerator_AddRef(FormatEnumerator *fe);
 STDMETHODIMP FormatEnumerator_QueryInterface(FormatEnumerator *fe, REFIID riid, PVOID *ppv) {
@@ -862,7 +876,7 @@ STDMETHODIMP_(ULONG)FormatEnumerator_Release(FormatEnumerator *fe) {
 	delete fe;
 	return 0;
 }
-// Implement IEnumFORMATETC
+/// Implement IEnumFORMATETC
 STDMETHODIMP FormatEnumerator_Next(FormatEnumerator *fe, ULONG celt, FORMATETC *rgelt, ULONG *pceltFetched) {
 	//Platform::DebugPrintf("EFE Next %d %d", fe->pos, celt);
 	if (rgelt == NULL) return E_POINTER;
@@ -914,7 +928,7 @@ FormatEnumerator::FormatEnumerator(int pos_, CLIPFORMAT formats_[], int formatsL
 		formats[i] = formats_[i];
 }
 
-// Implement IUnknown
+/// Implement IUnknown
 STDMETHODIMP DropSource_QueryInterface(DropSource *ds, REFIID riid, PVOID *ppv) {
 	return ds->sci->QueryInterface(riid, ppv);
 }
@@ -925,7 +939,7 @@ STDMETHODIMP_(ULONG)DropSource_Release(DropSource *ds) {
 	return ds->sci->Release();
 }
 
-// Implement IDropSource
+/// Implement IDropSource
 STDMETHODIMP DropSource_QueryContinueDrag(DropSource *, BOOL fEsc, DWORD grfKeyState) {
 	if (fEsc)
 		return DRAGDROP_S_CANCEL;
@@ -951,7 +965,7 @@ DropSource::DropSource() {
 	sci = 0;
 }
 
-// Implement IUnkown
+/// Implement IUnkown
 STDMETHODIMP DataObject_QueryInterface(DataObject *pd, REFIID riid, PVOID *ppv) {
 	//Platform::DebugPrintf("DO QI %x\n", pd);
 	return pd->sci->QueryInterface(riid, ppv);
@@ -962,7 +976,7 @@ STDMETHODIMP_(ULONG)DataObject_AddRef(DataObject *pd) {
 STDMETHODIMP_(ULONG)DataObject_Release(DataObject *pd) {
 	return pd->sci->Release();
 }
-// Implement IDataObject
+/// Implement IDataObject
 STDMETHODIMP DataObject_GetData(DataObject *pd, FORMATETC *pFEIn, STGMEDIUM *pSTM) {
 	return pd->sci->GetData(pFEIn, pSTM);
 }
@@ -1070,7 +1084,7 @@ DataObject::DataObject() {
 	sci = 0;
 }
 
-// Implement IUnknown
+/// Implement IUnknown
 STDMETHODIMP DropTarget_QueryInterface(DropTarget *dt, REFIID riid, PVOID *ppv) {
 	//Platform::DebugPrintf("DT QI %x\n", dt);
 	return dt->sci->QueryInterface(riid, ppv);
@@ -1082,7 +1096,7 @@ STDMETHODIMP_(ULONG)DropTarget_Release(DropTarget *dt) {
 	return dt->sci->Release();
 }
 
-// Implement IDropTarget by forwarding to Scintilla
+/// Implement IDropTarget by forwarding to Scintilla
 STDMETHODIMP DropTarget_DragEnter(DropTarget *dt, LPDATAOBJECT pIDataSource, DWORD grfKeyState,
                                   POINTL pt, PDWORD pdwEffect) {
 	return dt->sci->DragEnter(pIDataSource, grfKeyState, pt, pdwEffect);
@@ -1113,8 +1127,10 @@ DropTarget::DropTarget() {
 	sci = 0;
 }
 
-// DBCS: support Input Method Editor (IME)
-// Called when IME Window opened.
+/**
+ * DBCS: support Input Method Editor (IME).
+ * Called when IME Window opened.
+ */
 void ScintillaWin::ImeStartComposition() {
 	if (caret.active) {
 		// Move IME Window to current caret position
@@ -1156,7 +1172,7 @@ void ScintillaWin::ImeStartComposition() {
 	}
 }
 
-// Called when IME Window closed.
+/** Called when IME Window closed. */
 void ScintillaWin::ImeEndComposition() {
 	ShowCaretAtCurrentPosition();
 }
@@ -1295,7 +1311,10 @@ void ScintillaWin::RealizeWindowPalette(bool inBackGround) {
 	::ReleaseDC(wMain.GetID(), hdc);
 }
 
-// Redraw all of text area. This paint will not be abandoned.
+/**
+ * Redraw all of text area.
+ * This paint will not be abandoned.
+ */
 void ScintillaWin::FullPaint() {
 	paintState = painting;
 	rcPaint = GetTextRectangle();
@@ -1310,7 +1329,7 @@ void ScintillaWin::FullPaint() {
 	paintState = notPainting;
 }
 
-// Implement IUnknown
+/// Implement IUnknown
 STDMETHODIMP ScintillaWin::QueryInterface(REFIID riid, PVOID *ppv) {
 	*ppv = NULL;
 	if (riid == IID_IUnknown)
@@ -1334,7 +1353,7 @@ STDMETHODIMP_(ULONG) ScintillaWin::Release() {
 	return 1;
 }
 
-// Implement IDropTarget
+/// Implement IDropTarget
 STDMETHODIMP ScintillaWin::DragEnter(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
                                      POINTL, PDWORD pdwEffect) {
 	if (pIDataSource == NULL)
@@ -1466,7 +1485,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 	return S_OK;
 }
 
-// Implement important part of IDataObject
+/// Implement important part of IDataObject
 STDMETHODIMP ScintillaWin::GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM) {
 	bool formatOK = (pFEIn->cfFormat == CF_TEXT) || 
 		((pFEIn->cfFormat == CF_UNICODETEXT) && IsUnicodeMode()) || 
