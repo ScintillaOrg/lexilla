@@ -210,7 +210,7 @@ void ViewStyle::ResetDefaultStyle() {
 	styles[STYLE_DEFAULT].Clear(Colour(0,0,0), Colour(0xff,0xff,0xff),
 	        Platform::DefaultFontSize(), fontNames.Save(Platform::DefaultFont()), 
 		SC_CHARSET_DEFAULT,
-		false, false, false, false);
+		false, false, false, false, true);
 }
 
 void ViewStyle::ClearStyles() {
@@ -226,7 +226,8 @@ void ViewStyle::ClearStyles() {
 				styles[STYLE_DEFAULT].bold, 
 				styles[STYLE_DEFAULT].italic,
 				styles[STYLE_DEFAULT].eolFilled,
-				styles[STYLE_DEFAULT].underline);
+				styles[STYLE_DEFAULT].underline,
+				styles[STYLE_DEFAULT].visible);
 		}
 	}
 	styles[STYLE_LINENUMBER].back.desired = Platform::Chrome();

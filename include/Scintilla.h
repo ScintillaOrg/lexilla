@@ -157,6 +157,7 @@ typedef long (*SciFnDirect)(long ptr, unsigned int iMessage, unsigned long wPara
 #define SCI_STYLERESETDEFAULT SCI_START + 58
 #define SCI_STYLESETUNDERLINE SCI_START + 59
 #define SCI_STYLESETCHARACTERSET SCI_START + 66
+#define SCI_STYLESETVISIBLE SCI_START + 74
 
 #define SCI_SETSELFORE SCI_START + 67
 #define SCI_SETSELBACK SCI_START + 68

@@ -36,10 +36,10 @@ public:
 	int selStart;
 	int selEnd;
 	int edgeColumn;
-	char chars[maxLineLength];
-	char styles[maxLineLength];
-	char indicators[maxLineLength];
-	int positions[maxLineLength];
+	char chars[maxLineLength+1];
+	char styles[maxLineLength+1];
+	char indicators[maxLineLength+1];
+	int positions[maxLineLength+1];
 };
 
 class Editor : public DocWatcher {
@@ -178,6 +178,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void SetSelection(int currentPos_, int anchor_);
 	void SetSelection(int currentPos_);
 	void SetEmptySelection(int currentPos_);
+    int MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd=true);
 	int MovePositionTo(int newPos, bool extend = false);
 	int MovePositionSoVisible(int pos, int moveDir);
 	void SetLastXChosen();
