@@ -24,6 +24,16 @@ bool EqualCaseInsensitive(const char *a, const char *b) {
 #endif
 }
 
+unsigned int HashString(const char *s) {
+    unsigned int ret = 0;
+    while (*s) {
+        ret <<= 4;
+        ret ^= *s;
+        s++;
+    }
+    return ret;
+}
+
 // Get a line of input. If end of line escaped with '\\' then continue reading.
 static bool GetFullLine(const char *&fpc, int &lenData, char *s, int len) {
 	bool continuation = true;
@@ -56,44 +66,46 @@ static bool GetFullLine(const char *&fpc, int &lenData, char *s, int len) {
 
 PropSet::PropSet() {
 	superPS = 0;
-	size = 10;
+	size = 20;
 	used = 0;
-	vals = new char * [size];
+	properties = new Property[size];
 }
 
 PropSet::~PropSet() {
 	superPS = 0;
 	Clear();
-	delete []vals;
+	delete []properties;
 }
 
 void PropSet::EnsureCanAddEntry() {
-	if (used >= size - 2) {
-		int newsize = size + 10;
-		char **newvals = new char * [newsize];
+	if (used >= size - 1) {
+		int newsize = size + 20;
+		Property *newprops = new Property[newsize];
 
 		for (int i = 0; i < used; i++) {
-			newvals[i] = vals[i];
+			newprops[i] = properties[i];
 		}
-		delete []vals;
-		vals = newvals;
+		delete []properties;
+		properties = newprops;
 		size = newsize;
 	}
 }
 
 void PropSet::Set(const char *key, const char *val) {
 	EnsureCanAddEntry();
-	for (int i = 0; i < used; i += 2) {
-		if (0 == strcmp(vals[i], key)) {
+	for (int i = 0; i < used; i++) {
+		if (0 == strcmp(properties[i].key, key)) {
 			// Replace current value
-			delete [](vals[i + 1]);
-			vals[i + 1] = StringDup(val);
+			delete [](properties[i].val);
+			properties[i].val = StringDup(val);
 			return;
 		}
 	}
 	// Not found
-	vals[used++] = StringDup(key);
-	vals[used++] = StringDup(val);
+    properties[used].hash = HashString(key);
+	properties[used].key = StringDup(key);
+	properties[used].val = StringDup(val);
+    used++;
 }
 
 void PropSet::Set(char *keyval) {
@@ -108,9 +120,10 @@ void PropSet::Set(char *keyval) {
 }
 
 SString PropSet::Get(const char *key) {
-	for (int i = 0; i < used; i += 2) {
-		if (0 == strcmp(vals[i], key)) {
-			return vals[i + 1];
+    unsigned int hash = HashString(key);
+	for (int i = 0; i < used; i++) {
+		if ((hash == properties[i].hash) && (0 == strcmp(properties[i].key, key))) {
+			return properties[i].val;
 		}
 	}
 	if (superPS) {
@@ -119,6 +132,36 @@ SString PropSet::Get(const char *key) {
 	} else {
 		return "";
 	}
+}
+
+SString PropSet::GetExpanded(const char *key) {
+    SString val = Get(key);
+    return Expand(val.c_str());
+}
+
+SString PropSet::Expand(const char *withvars) {
+	char *base = StringDup(withvars);
+	char *cpvar = strstr(base, "$(");
+	while (cpvar) {
+		char *cpendvar = strchr(cpvar, ')');
+		if (cpendvar) {
+			int lenvar = cpendvar - cpvar - 2;  	// Subtract the $()
+			char *var = StringDup(cpvar+2, lenvar);
+			SString val = GetExpanded(var);
+			int newlenbase = strlen(base) + val.length() - lenvar;
+			char *newbase = new char[newlenbase];
+			strncpy(newbase, base, cpvar - base);
+			strcpy(newbase + (cpvar - base), val.c_str());
+			strcpy(newbase + (cpvar - base) + val.length(), cpendvar + 1);
+			delete []var;
+			delete []base;
+			base = newbase;
+		}
+		cpvar = strstr(base, "$(");
+	}
+	SString sret = base;
+	delete []base;
+	return sret;
 }
 
 int PropSet::GetInt(const char *key, int defaultValue) {
@@ -155,9 +198,9 @@ bool issuffix(const char *target, const char *suffix) {
 }
 
 SString PropSet::GetWild(const char *keybase, const char *filename) {
-	for (int i = 0; i < used; i += 2) {
-		if (isprefix(vals[i], keybase)) {
-			char *orgkeyfile = vals[i] + strlen(keybase);
+	for (int i = 0; i < used; i++) {
+		if (isprefix(properties[i].key, keybase)) {
+			char *orgkeyfile = properties[i].key + strlen(keybase);
 			char *keyfile = NULL;
 
 			if (strstr(orgkeyfile, "$(") == orgkeyfile) {
@@ -184,12 +227,12 @@ SString PropSet::GetWild(const char *keybase, const char *filename) {
 					if (issuffix(filename, keyfile + 1)) {
 						*del = delchr;
 						free(keyptr);
-						return vals[i + 1];
+						return properties[i].val;
 					}
 				} else if (0 == strcmp(keyfile, filename)) {
 					*del = delchr;
 					free(keyptr);
-					return vals[i + 1];
+					return properties[i].val;
 				}
 				if (delchr == '\0')
 					break;
@@ -198,8 +241,8 @@ SString PropSet::GetWild(const char *keybase, const char *filename) {
 			}
 			free(keyptr);
 
-			if (0 == strcmp(vals[i], keybase)) {
-				return vals[i + 1];
+			if (0 == strcmp(properties[i].key, keybase)) {
+				return properties[i].val;
 			}
 		}
 	}
@@ -218,9 +261,7 @@ SString PropSet::GetNewExpand(const char *keybase, const char *filename) {
 		char *cpendvar = strchr(cpvar, ')');
 		if (cpendvar) {
 			int lenvar = cpendvar - cpvar - 2;  	// Subtract the $()
-			char *var = new char[lenvar + 1];
-			strncpy(var, cpvar + 2, lenvar);
-			var[lenvar] = '\0';
+			char *var = StringDup(cpvar+2, lenvar);
 			SString val = GetWild(var, filename);
 			int newlenbase = strlen(base) + val.length() - lenvar;
 			char *newbase = new char[newlenbase];
@@ -240,8 +281,11 @@ SString PropSet::GetNewExpand(const char *keybase, const char *filename) {
 
 void PropSet::Clear() {
 	for (int i = 0; i < used; i++) {
-		delete [](vals[i]);
-		vals[i] = 0;
+		properties[i].hash = 0;
+		delete []properties[i].key;
+		properties[i].key = 0;
+		delete []properties[i].val;
+		properties[i].val = 0;
 	}
 	used = 0;
 }

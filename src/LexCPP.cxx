@@ -19,14 +19,13 @@
 
 static bool classifyWordCpp(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler) {
 	char s[100];
-	bool wordIsNumber = isdigit(styler[start]) || (styler[start] == '.');
-	bool wordIsUUID = false;
 	for (unsigned int i = 0; i < end - start + 1 && i < 30; i++) {
 		s[i] = styler[start + i];
 		s[i + 1] = '\0';
 	}
+	bool wordIsUUID = false;
 	char chAttr = SCE_C_IDENTIFIER;
-	if (wordIsNumber)
+	if (isdigit(s[0]) || (s[0] == '.'))
 		chAttr = SCE_C_NUMBER;
 	else {
 		if (keywords.InList(s)) {
@@ -99,7 +98,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 					state = SCE_C_UUID;
 					lastWordWasUUID = false;
 				} else {
-					state = SCE_C_WORD;
+					state = SCE_C_IDENTIFIER;
 				}
 			} else if (ch == '/' && chNext == '*') {
 				styler.ColourTo(i-1, state);
@@ -132,7 +131,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 					levelCurrent += (ch == '{') ? 1 : -1;
 				}
 			}
-		} else if (state == SCE_C_WORD) {
+		} else if (state == SCE_C_IDENTIFIER) {
 			if (!iswordchar(ch)) {
 				lastWordWasUUID = classifyWordCpp(styler.GetStartSegment(), i - 1, keywords, styler);
 				state = SCE_C_DEFAULT;

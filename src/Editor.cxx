@@ -734,9 +734,10 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 	char styleByte = 0;
 	int styleMask = pdoc->stylingBitsMask;
 	ll.xHighlightGuide = 0;
-	for (int charInDoc = posLineStart; 
-		charInDoc < posLineEnd && numCharsInLine < LineLayout::maxLineLength - 2; 
-		charInDoc++) {
+    if (posLineEnd >= (posLineStart + LineLayout::maxLineLength)) {
+        posLineEnd = posLineStart + LineLayout::maxLineLength - 1;
+    }
+    for (int charInDoc=posLineStart; charInDoc<posLineEnd; charInDoc++) {
 		char chDoc = pdoc->CharAt(charInDoc);
 		styleByte = pdoc->StyleAt(charInDoc);
 		if (vstyle.viewEOL || ((chDoc != '\r') && (chDoc != '\n'))) {
@@ -772,8 +773,14 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 					ll.positions[charInLine + 1] = surface->WidthText(ctrlCharsFont, ctrlChar, strlen(ctrlChar)) + 3;
 				}
 			} else {
-				surface->MeasureWidths(vstyle.styles[ll.styles[charInLine]].font, ll.chars + startseg, 
-					charInLine - startseg + 1, ll.positions + startseg + 1);
+                int lenSeg = charInLine - startseg + 1;
+                if ((lenSeg == 1) && (' ' == ll.chars[startseg])) {
+                    // Over half the segments are single characters and of these about half are space characters.
+					ll.positions[charInLine + 1] = vstyle.styles[ll.styles[charInLine]].spaceWidth;
+                } else {
+				    surface->MeasureWidths(vstyle.styles[ll.styles[charInLine]].font, ll.chars + startseg, 
+					    charInLine - startseg + 1, ll.positions + startseg + 1);
+                }
 			}
 			for (int posToIncrease = startseg; posToIncrease <= (charInLine + 1); posToIncrease++) {
 				ll.positions[posToIncrease] += startsegx;
@@ -1723,10 +1730,14 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 					}
 				}
 			}
-			if (mh.modificationType & SC_MOD_BEFOREINSERT) {
-				NotifyNeedShown(mh.position, 0);
-            } else if (mh.modificationType & SC_MOD_BEFOREDELETE) {
-				NotifyNeedShown(mh.position, mh.length);
+            if (cs.LinesDisplayed() < cs.LinesInDoc()) {
+                // Some lines are hidden so may need shown.
+                // TODO: check if the modified area is hidden.
+			    if (mh.modificationType & SC_MOD_BEFOREINSERT) {
+				    NotifyNeedShown(mh.position, 0);
+                } else if (mh.modificationType & SC_MOD_BEFOREDELETE) {
+				    NotifyNeedShown(mh.position, mh.length);
+                }
             }
 			if (mh.linesAdded != 0) {
 
