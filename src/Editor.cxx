@@ -88,6 +88,8 @@ Editor::Editor() {
 	
 	modEventMask = SC_MODEVENTMASKALL;
 
+	displayPopupMenu = true;
+	
 	pdoc = new Document();
 	pdoc ->AddRef();
 	pdoc->AddWatcher(this, 0);
@@ -3522,6 +3524,10 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 
 	case SCI_LINESONSCREEN:
 		return LinesOnScreen();
+
+	case SCI_USEPOPUP:
+		displayPopupMenu = wParam;
+		break;
 
   #ifdef INCLUDE_DEPRECATED_FEATURES
 	case SCI_SETFORE:

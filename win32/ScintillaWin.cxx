@@ -448,7 +448,9 @@ LRESULT ScintillaWin::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 
 	case WM_CONTEXTMENU:
 #ifdef TOTAL_CONTROL
-		ContextMenu(Point::FromLong(lParam));
+		if (displayPopupMenu) {
+			ContextMenu(Point::FromLong(lParam));
+		}
 #endif
 		break;
 

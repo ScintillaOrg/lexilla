@@ -116,6 +116,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	int searchAnchor;
 
+	int displayPopupMenu;
+
 #ifdef MACRO_SUPPORT
 	int recordingMacro;
 #endif

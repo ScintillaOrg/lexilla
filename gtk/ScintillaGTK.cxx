@@ -668,7 +668,7 @@ void ScintillaGTK::Resize(int width, int height) {
 gint ScintillaGTK::MoveResize(GtkWidget *, GtkAllocation *allocation, ScintillaGTK *sciThis) {
 	// Platform::DebugPrintf("sci move resize %d %d\n", allocation->width, allocation->height);
 	sciThis->Resize(allocation->width, allocation->height);
-	return TRUE;
+	return FALSE;
 }
 
 gint ScintillaGTK::Press(GtkWidget *, GdkEventButton *event, ScintillaGTK *sciThis) {
@@ -694,7 +694,7 @@ gint ScintillaGTK::Press(GtkWidget *, GdkEventButton *event, ScintillaGTK *sciTh
 		gtk_selection_convert(GTK_WIDGET(sciThis->wDraw.GetID()),
 		                   	GDK_SELECTION_PRIMARY,
 		                   	gdk_atom_intern("STRING", FALSE), event->time);
-	} else if (event->button == 3) {
+	} else if (event->button == 3 && sciThis->displayPopupMenu) {
 		// PopUp menu
 		// Convert to screen
 		int ox = 0;
@@ -719,7 +719,7 @@ gint ScintillaGTK::MouseRelease(GtkWidget *, GdkEventButton *event, ScintillaGTK
 			pt = sciThis->ptMouseLast;
 		sciThis->ButtonUp(pt, event->time, event->state & 4);
 	}
-	return TRUE;
+	return FALSE;
 }
 
 gint ScintillaGTK::Motion(GtkWidget *, GdkEventMotion *event, ScintillaGTK *sciThis) {
@@ -742,7 +742,7 @@ gint ScintillaGTK::Motion(GtkWidget *, GdkEventMotion *event, ScintillaGTK *sciT
 		pt.y = y;
 		sciThis->ButtonMove(pt);
 	}
-	return TRUE;
+	return FALSE;
 }
 
 // Map the keypad keys to their equivalent functions
@@ -779,19 +779,19 @@ gint ScintillaGTK::KeyPress(GtkWidget *, GdkEventKey *event, ScintillaGTK *sciTh
 
 	sciThis->KeyDown(key, shift, ctrl, alt);
 	//Platform::DebugPrintf("SK-key: %d %x %x\n",event->keyval, event->state, GTK_WIDGET_FLAGS(widget));
-	return 1;
+	return TRUE;
 }
 
 gint ScintillaGTK::KeyRelease(GtkWidget *, GdkEventKey *event, ScintillaGTK *sciThis) {
 	//Platform::DebugPrintf("SC-keyrel: %d %x %3s\n",event->keyval, event->state, event->string);
-	return TRUE;
+	return FALSE;
 }
 
 gint ScintillaGTK::DestroyWindow(GtkWidget *, ScintillaGTK *sciThis) {
 //Platform::DebugPrintf("Destroying window %x %x\n", sciThis, widget);
 	sciThis->Finalise();
 	delete sciThis;
-	return TRUE;
+	return FALSE;
 }
 
 gint ScintillaGTK::Expose(GtkWidget *, GdkEventExpose *ose, ScintillaGTK *sciThis) {
@@ -819,7 +819,7 @@ gint ScintillaGTK::Expose(GtkWidget *, GdkEventExpose *ose, ScintillaGTK *sciThi
 	}
 	sciThis->paintState = notPainting;
 
-	return TRUE;
+	return FALSE;
 }
 
 void ScintillaGTK::ScrollSignal(GtkAdjustment *adj, ScintillaGTK *sciThis) {
@@ -857,7 +857,7 @@ gboolean ScintillaGTK::DragMotion(GtkWidget *, GdkDragContext *context,
 	sciThis->inDragDrop = true;
 	sciThis->SetDragPosition(sciThis->PositionFromLocation(npt));
 	gdk_drag_status(context, context->suggested_action, dragtime);
-	return TRUE;
+	return FALSE;
 }
 
 void ScintillaGTK::DragLeave(GtkWidget *, GdkDragContext *context, 
@@ -879,7 +879,7 @@ gboolean ScintillaGTK::Drop(GtkWidget *, GdkDragContext *context,
 	gint, gint, guint, ScintillaGTK *sciThis) {
 	//Platform::DebugPrintf("Drop %x\n", sciThis);
 	sciThis->SetDragPosition(invalidPosition);
-	return TRUE;
+	return FALSE;
 }
 
 void ScintillaGTK::DragDataReceived(GtkWidget *, GdkDragContext *context,
