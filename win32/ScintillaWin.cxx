@@ -12,6 +12,7 @@
 #include "Platform.h"
 
 #include "Scintilla.h"
+#include "SString.h"
 #ifdef SCI_LEXER
 #include "SciLexer.h"
 #include "PropSet.h"

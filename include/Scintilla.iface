@@ -464,6 +464,9 @@ set void AutoCSetIgnoreCase=2115(bool ignoreCase,)
 # Retrieve state of ignore case flag. 
 get bool AutoCGetIgnoreCase=2116(,)
 
+# Retrieve state of ignore case flag. 
+fun void UserListShow=2117(int listType, string itemList)
+
 # Set the number of spaces used for one level of indentation.
 set void SetIndent=2122(int indentSize,)
 
@@ -1346,6 +1349,7 @@ evt void MarginClick=2010(int modifiers, int position, int margin)
 evt void NeedShown=2011(int position, int length)
 evt void PosChanged=2012(int position)
 evt void Painted=2013(void)
+evt void UserListSelection=2014(int listType, string text)
 
 cat Deprecated 
 

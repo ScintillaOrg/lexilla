@@ -30,6 +30,9 @@ protected:
 
 	CallTip ct;
 
+	int listType;			// 0 is an autocomplete list
+	SString userListSelected;	// Receives listbox selected string
+	
 #ifdef SCI_LEXER
 	int lexLanguage;
 	PropSet props;

@@ -34,6 +34,7 @@
 #include "ScintillaBase.h"
 
 ScintillaBase::ScintillaBase() {
+	listType = 0;
 #ifdef SCI_LEXER	
 	lexLanguage = SCLEX_CONTAINER;
 	for (int wl=0;wl<numWordLists;wl++)
@@ -170,7 +171,7 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 	//Platform::DebugPrintf("AutoComplete %s\n", list);
 	ct.CallTipCancel();
 
-	if (ac.chooseSingle) {
+	if (ac.chooseSingle && (listType == 0)) {
 		if (list && !strchr(list, ac.GetSeparator())) {
 			if (ac.ignoreCase) {
 				SetEmptySelection(currentPos - lenEntered);
@@ -279,6 +280,18 @@ void ScintillaBase::AutoCompleteCompleted(char fillUp/*='\0'*/) {
 	}
 	ac.Cancel();
 	
+	if (listType > 0) {
+		userListSelected = selected;
+		SCNotification scn;
+		scn.nmhdr.code = SCN_USERLISTSELECTION;
+		scn.message = 0;
+		scn.wParam = listType;
+		scn.lParam = 0;
+		scn.text = userListSelected.c_str();
+		NotifyParent(scn);
+		return;
+	}
+	
 	Position firstPos = ac.posStart - ac.startLen;
 	if (currentPos < firstPos)
 		return;
@@ -356,6 +369,7 @@ void ScintillaBase::NotifyStyleToNeeded(int endStyleNeeded) {
 long ScintillaBase::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 	switch (iMessage) {
 	case SCI_AUTOCSHOW:
+		listType = 0;
 		AutoCompleteStart(wParam, reinterpret_cast<const char *>(lParam));
 		break;
 
@@ -413,6 +427,11 @@ long ScintillaBase::WndProc(unsigned int iMessage, unsigned long wParam, long lP
 	case SCI_AUTOCGETIGNORECASE:
 		return ac.ignoreCase;
 		
+	case SCI_USERLISTSHOW:
+		listType = wParam;
+		AutoCompleteStart(0, reinterpret_cast<const char *>(lParam));
+		break;
+
 	case SCI_CALLTIPSHOW: {
 			AutoCompleteCancel();
 			if (!ct.wCallTip.Created()) {
