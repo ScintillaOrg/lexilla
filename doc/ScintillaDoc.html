@@ -198,6 +198,7 @@ SCI_LINESONSCREEN
 SCI_SELECTIONISRECTANGLE
 SCI_SETHSCROLLBAR(bool visible)
 SCI_GETHSCROLLBAR
+SCI_MOVECARETINSIDEVIEW
 </pre>
     <p>
        Scintilla maintains a selection which stretches between two points, the anchor and the
@@ -652,7 +653,7 @@ SCI_INDICGETFORE(int indicatornumber)
        Autocompletion
     </h3>
 <pre>
-SCI_AUTOCSHOW(int lenEntered;,char *list)
+SCI_AUTOCSHOW(int lenEntered,char *list)
 SCI_AUTOCCANCEL
 SCI_AUTOCACTIVE
 SCI_AUTOCPOSSTART
@@ -690,6 +691,19 @@ SCI_AUTOCGETIGNORECASE
       at when the list was displayed. By calling SCI_AUTOCSETCANCELATSTART with
       a false argument, the list is not cancelled until the caret moves before the first character of the 
       word being completed.
+    </p>
+    <h3>
+       User lists
+    </h3>
+<pre>
+SCI_USERLISTSHOW(int listType,char *list)
+</pre>
+    <p>
+      User lists are similar to auto completion but do not insert text when an item is selected, 
+      instead notifying the container with a SCN_USERLISTSELECTION. 
+      The listType parameter is returned to the container and 
+      can be used to differentiate between different types of list such as between a list of
+      buffers and a list of keywords.
     </p>
     <h3>
        Calltips
@@ -1139,6 +1153,13 @@ SCN_PAINTED
     <p>
       Painting has just been done. Useful when you want to update some other widgets
       based on a change in Scintilla, but want to have the paint occur first to appear more responsive.
+    </p>
+<pre>
+SCN_USERLISTSELECTION
+</pre>
+    <p>
+      User has selected an item in a user list. 
+      The list type is available in wParam and the text chosen in text.
     </p>
     <h3>
        Edit messages currently supported by Scintilla which will be removed in the future.
