@@ -1050,7 +1050,6 @@ set void SetTwoPhaseDraw=2284(bool twoPhase,)
 fun void TargetFromSelection=2287(,)
 
 # Join the lines in the target.
-# This is an experimental feature and may be changed or removed.
 fun void LinesJoin=2288(,)
 
 # Split the lines in the target into lines that are less wide than pixelWidth
@@ -1467,6 +1466,7 @@ set void SetKeyWords=4005(int keywordSet, string keyWords)
 set void SetLexerLanguage=4006(, string language)
 
 # Load a lexer library (dll / so)
+# NOT YET IMPLEMENTED
 fun void LoadLexerLibrary=4007(, string path)
 
 # Notifications
