@@ -560,15 +560,13 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				inScriptType = eNonHtmlPreProc;
 
 			if (chNext2 == '@') {
-				char chNext3 = styler.SafeGetCharAt(i + 3);
-				if (chNext3 == '@') {
-					styler.ColourTo(i + 3, SCE_H_ASP);
-					state = SCE_H_XCCOMMENT;
-					scriptLanguage = eScriptVBS;
-					continue;
-				}
 				i += 2; // place as if it was the second next char treated
 				state = SCE_H_ASPAT;
+			} else if ((chNext2 == '-') && (styler.SafeGetCharAt(i + 3) == '-')) {
+				styler.ColourTo(i + 3, SCE_H_ASP);
+				state = SCE_H_XCCOMMENT;
+				scriptLanguage = eScriptVBS;
+				continue;
 			} else {
 				if (chNext2 == '=') {
 					i += 2; // place as if it was the second next char treated

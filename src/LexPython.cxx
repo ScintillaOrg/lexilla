@@ -145,8 +145,8 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 	int lengthDoc = startPos + length;
 
 	// Backtrack to previous line in case need to fix its tab whinging
+	int lineCurrent = styler.GetLine(startPos);
 	if (startPos > 0) {
-		int lineCurrent = styler.GetLine(startPos);
 		if (lineCurrent > 0) {
 			startPos = styler.LineStart(lineCurrent-1);
 			if (startPos == 0)
@@ -176,6 +176,7 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 	styler.StartSegment(startPos);
 	bool atStartLine = true;
 	int spaceFlags = 0;
+	styler.IndentAmount(lineCurrent, &spaceFlags, IsPyComment);
 	for (int i = startPos; i < lengthDoc; i++) {
 
 		if (atStartLine) {
@@ -205,6 +206,8 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 				// tab marking to work inside white space and triple quoted strings
 				styler.ColourTo(i, state);
 			}
+			lineCurrent++;
+			styler.IndentAmount(lineCurrent + 1, &spaceFlags, IsPyComment);
 			atStartLine = true;
 		}
 
@@ -342,10 +345,10 @@ static void FoldPyDoc(unsigned int startPos, int length, int initStyle,
 	for (int i = startPos; i < lengthDoc; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
-		int style = styler.StyleAt(i) & 31;
 
 		if ((ch == '\r' && chNext != '\n') || (ch == '\n') || (i == lengthDoc)) {
 			int lev = indentCurrent;
+			int style = styler.StyleAt(i) & 31;
 			int indentNext = styler.IndentAmount(lineCurrent + 1, &spaceFlags, IsPyComment);
 			if ((style == SCE_P_TRIPLE) || (style== SCE_P_TRIPLEDOUBLE))
 				indentNext |= SC_FOLDLEVELWHITEFLAG;
@@ -368,5 +371,5 @@ static void FoldPyDoc(unsigned int startPos, int length, int initStyle,
 		}
 	}
 }
-						   
+
 LexerModule lmPython(SCLEX_PYTHON, ColourisePyDoc, "python", FoldPyDoc);
