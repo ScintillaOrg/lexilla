@@ -428,8 +428,7 @@ static void FoldAU3Doc(unsigned int startPos, int length, int, WordList *[], Acc
 			visibleChars++;
 		}
 		// get the syle for the current character neede to check in comment
-		//### stylech = styler.StyleAt(i);
-		int stylech = GetStyleFirstWord(lineCurrent,styler);
+		int stylech = styler.StyleAt(i);
 		// get first word for the line for indent check max 9 characters
 		if (FirstWordStart && (!(FirstWordEnd))) {
 			if (!IsAWordChar(ch)) {
