@@ -3493,7 +3493,7 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		return vs.viewIndentationGuides;
 
 	case SCI_SETHIGHLIGHTGUIDE:
-		if (highlightGuideColumn != wParam) {
+		if ((highlightGuideColumn != static_cast<int>(wParam)) || (wParam > 0)) {
 			highlightGuideColumn = wParam;
 			Redraw();
 		}
@@ -3501,6 +3501,9 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	
 	case SCI_GETHIGHLIGHTGUIDE:
 		return highlightGuideColumn;
+	
+	case SCI_GETLINEENDPOSITION:
+		return pdoc->LineEnd(wParam);
 	
 	case SCI_SETCODEPAGE:
 		pdoc->dbcsCodePage = wParam;

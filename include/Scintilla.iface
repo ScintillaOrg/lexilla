@@ -463,6 +463,9 @@ set void SetHighlightGuide=2134(int column,)
 # Get the highlighted indentation guide column.
 get int GetHighlightGuide=2135(,)
 
+# Get the position after the last visible characters on a line.
+get int GetLineEndPosition=2136(int line,)
+
 # Show a call tip containing a definition near position pos.
 fun void CallTipShow=2200(position pos, string definition)
 
