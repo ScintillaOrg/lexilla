@@ -136,7 +136,7 @@
     </h3>
     <ul>
       <li>
-	Released on 22 January 2003.
+	Released on 24 January 2003.
       </li>
       <li>
 	Autocompletion lists may have a per-item pixmap.
@@ -158,14 +158,24 @@
 	diff lexer understands some more formats.
       </li>
       <li>
+	Fold box feature is an alternative way to show the structure of code.
+      </li>
+      <li>
 	Avenue lexer supports multiple keyword lists.
       </li>
       <li>
 	The caret may now be made invisible by setting the caret width to 0.
       </li>
       <li>
+	Python folder attaches comments before blocks to the next block rather
+	than the previous block.
+      </li>
+      <li>
 	SciTE openpath property on Windows searches a path for files that are
 	the subject of the Open Selected Filename command.
+      </li>
+      <li>
+        The localisation file name can be changed with the locale.properties property.
       </li>
       <li>
 	On Windows, SciTE can pipe the result of a string expression into a command line tool.
@@ -174,11 +184,31 @@
 	On Windows, SciTE's Find dialog has a Mark All button.
       </li>
       <li>
-	Python folder attaches comments before blocks to the next block rather
-	than the previous block.
+	On Windows, there is an Insert Abbreviation command that allows a choice from
+	the defined abbreviations and inserts the selection into the abbreviation at the
+	position of a '|'.
       </li>
       <li>
 	Minor fixes to Fortran lexer.
+      </li>
+      <li>
+	fold.html.preprocessor decides whether to fold &lt;? and ?&gt;.
+	Minor improvements to PHP folding.
+      </li>
+      <li>
+	Maximum number of keyword lists allowed increased from 6 to 9.
+      </li>
+      <li>
+	Duplicate line command added with default assignment to Ctrl+D.
+      </li>
+      <li>
+	SciTE sets $(Replacements) to the number of replacements made by the
+	replace all command. $(CurrentWord) is set to the word before the caret if the caret
+	is at the end of a word.
+      </li>
+      <li>
+	Opening a SciTE session now loads files in remembered order, sets the current file
+	as remembered, and moves the caret to the remembered line.
       </li>
       <li>
 	Bugs fixed with printing on Windows where line wrapping was causing some text
@@ -201,7 +231,13 @@
 	Crash fixed with printing on Windows after defining pixmap marker.
       </li>
       <li>
+	Crash fixed in makefile lexer when first character on line was '='.
+      </li>
+      <li>
 	Bug fixed where local properties were not always being applied.
+      </li>
+      <li>
+	Ctrl+Keypad* fold command works on GTK+.
       </li>
       <li>
 	Hangs fixed in SciTE's Replace All command when replacing regular expressions '^'
