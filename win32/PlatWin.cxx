@@ -121,17 +121,7 @@ void Palette::Allocate(Window &) {
 	}
 }
 
-Font::Font() {
-	id = 0;
-}
-
-Font::~Font() {
-}
-
-void Font::Create(const char *faceName, int characterSet, int size, bool bold, bool italic) {
-	Release();
-	
-	LOGFONT lf;
+void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, int size, bool bold, bool italic) {
 	memset(&lf, 0, sizeof(lf));
 	// The negative is to allow for leading
 	lf.lfHeight = -(abs(size));
@@ -139,13 +129,126 @@ void Font::Create(const char *faceName, int characterSet, int size, bool bold, b
 	lf.lfItalic = static_cast<BYTE>(italic ? 1 : 0);
 	lf.lfCharSet = characterSet;
 	strcpy(lf.lfFaceName, faceName);
+}
 
+// Create a hash from the parameters for a font to allow easy checking for identity.
+// If one font is the same as another, its hash will be the same, but if the hash is the 
+// same then they may still be different.
+int HashFont(const char *faceName, int characterSet, int size, bool bold, bool italic) {
+    return 
+        size ^
+        (characterSet << 10) ^
+        (bold ? 0x10000000 : 0) ^
+        (italic ? 0x20000000 : 0) ^
+        faceName[0];
+}
+
+class FontCached : Font {
+	FontCached *next;
+	int usage;
+	LOGFONT lf;
+    int hash;
+	FontCached(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_);
+	~FontCached() {}
+    bool SameAs(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_);
+	virtual void Release();
+		
+	static FontCached *first;
+public:
+	static FontID FindOrCreate(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_);
+	static void ReleaseId(FontID id_);
+};
+
+FontCached *FontCached::first = 0;
+
+FontCached::FontCached(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_) : 
+    next(0), usage(0), hash(0) {
+    SetLogFont(lf, faceName_, characterSet_, size_, bold_, italic_);
+    hash = HashFont(faceName_, characterSet_, size_, bold_, italic_);
 	id = ::CreateFontIndirect(&lf);
+	usage = 1;
+}
+
+bool FontCached::SameAs(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_) {
+	return 
+        (lf.lfHeight == -(abs(size_))) &&
+		(lf.lfWeight == (bold_ ? FW_BOLD : FW_NORMAL)) &&
+		(lf.lfItalic == static_cast<BYTE>(italic_ ? 1 : 0)) &&
+		(lf.lfCharSet == characterSet_) &&
+		0 == strcmp(lf.lfFaceName,faceName_);
+}
+
+void FontCached::Release() {
+	if (id)
+		::DeleteObject(id);
+    id = 0;
+}
+
+FontID FontCached::FindOrCreate(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_) {
+    int hashFind = HashFont(faceName_, characterSet_, size_, bold_, italic_);
+	for (FontCached *cur=first; cur; cur=cur->next) {
+        if ((cur->hash == hashFind) && 
+            cur->SameAs(faceName_, characterSet_, size_, bold_, italic_)) {
+			cur->usage++;
+			return cur->id;
+		}
+	}
+	FontCached *fc = new FontCached(faceName_, characterSet_, size_, bold_, italic_);
+	if (fc) {
+		fc->next = first;
+		first = fc;
+		return fc->id;
+	} else {
+		return 0;
+	}
+}
+
+void FontCached::ReleaseId(FontID id_) {
+	FontCached **pcur=&first;
+	for (FontCached *cur=first; cur; cur=cur->next) {
+		if (cur->id == id_) {
+			cur->usage--;
+			if (cur->usage == 0) {
+				*pcur = cur->next;
+                cur->Release();
+				cur->next = 0;
+				delete cur;
+			}
+			return;
+		}
+		pcur=&cur->next;
+	}
+}
+
+Font::Font() {
+	id = 0;
+}
+
+Font::~Font() {
+}
+
+#define FONTS_CACHED
+
+void Font::Create(const char *faceName, int characterSet, int size, bool bold, bool italic) {
+#ifndef FONTS_CACHED
+	Release();
+	
+	LOGFONT lf;
+    SetLogFont(lf, faceName, characterSet, size, bold, italic);
+    id = ::CreateFontIndirect(&lf);
+#else
+	id = FontCached::FindOrCreate(faceName, characterSet, size, bold, italic);
+#endif
 }
 
 void Font::Release() {
+#ifndef FONTS_CACHED
 	if (id)
 		::DeleteObject(id);
+#else
+	if (id)
+		FontCached::ReleaseId(id);
+#endif
 	id = 0;
 }
 
@@ -721,7 +824,7 @@ int Platform::Maximum(int a, int b) {
 		return b;
 }
 
-//#define TRACE
+#define TRACE
 
 #ifdef TRACE
 void Platform::DebugPrintf(const char *format, ...) {
