@@ -294,12 +294,15 @@ set void SetMarginSensitiveN=2246(int margin, bool sensitive)
 # Retrieve the mouse click sensitivity of a margin.
 get bool GetMarginSensitiveN=2247(int margin,)
 
+# Styles in range 32..37 are predefined for parts of the UI and are not used as normal styles.
+# Styles 38 and 39 are for future use.
 val STYLE_DEFAULT=32
 val STYLE_LINENUMBER=33
 val STYLE_BRACELIGHT=34
 val STYLE_BRACEBAD=35
 val STYLE_CONTROLCHAR=36
 val STYLE_INDENTGUIDE=37
+val STYLE_LASTPREDEFINED=39
 val STYLE_MAX=127
 
 # Character set identifiers are used in StyleSetCharacterSet.
@@ -1331,7 +1334,12 @@ val SCE_H_VALUE=19
 # X-Code
 val SCE_H_XCCOMMENT=20
 # SGML
-val SCE_H_SGML=21
+val SCE_H_SGML_DEFAULT=21
+val SCE_H_SGML_COMMAND=22
+val SCE_H_SGML_1ST_PARAM=23
+val SCE_H_SGML_STRING=24
+val SCE_H_SGML_COMMENT=25
+val SCE_H_SGML_ERROR=26
 # Embedded Javascript
 val SCE_HJ_START=40
 val SCE_HJ_DEFAULT=41

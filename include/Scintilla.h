@@ -132,6 +132,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define STYLE_BRACEBAD 35
 #define STYLE_CONTROLCHAR 36
 #define STYLE_INDENTGUIDE 37
+#define STYLE_LASTPREDEFINED 39
 #define STYLE_MAX 127
 #define SC_CHARSET_ANSI 0
 #define SC_CHARSET_DEFAULT 1

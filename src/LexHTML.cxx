@@ -23,7 +23,7 @@
 #define SCE_HA_VBS (SCE_HBA_START - SCE_HB_START)
 #define SCE_HA_PYTHON (SCE_HPA_START - SCE_HP_START)
 
-enum { eScriptNone = 0, eScriptJS, eScriptVBS, eScriptPython, eScriptPHP, eScriptXML };
+enum { eScriptNone = 0, eScriptJS, eScriptVBS, eScriptPython, eScriptPHP, eScriptXML, eScriptSGML };
 enum { eHtml = 0, eNonHtmlScript, eNonHtmlPreProc, eNonHtmlScriptPreProc };
 
 static int segIsScriptingIndicator(Accessor &styler, unsigned int start, unsigned int end, int prevValue) {
@@ -76,6 +76,8 @@ static int ScriptOfState(int state) {
 		return eScriptJS;
 	} else if ((state >= SCE_HPHP_DEFAULT) && (state <= SCE_HPHP_COMMENTLINE)) {
 		return eScriptPHP;
+	} else if ((state >= SCE_H_SGML_DEFAULT) && (state <= SCE_H_SGML_ERROR)) {
+		return eScriptSGML;
 	} else {
 		return eScriptNone;
 	}
@@ -201,7 +203,7 @@ static int classifyTagHTML(unsigned int start, unsigned int end,
 	} else if (strcmp(s, "![cdata[") == 0) {	// In lower case because already converted
 		chAttr = SCE_H_CDATA;
 	} else if (s[0] == '!') {
-		chAttr = SCE_H_SGML;
+		chAttr = SCE_H_SGML_DEFAULT;
 	} else if (s[0] == '/') {	// Closing tag
 		if (keywords.InList(s + 1))
 			chAttr = SCE_H_TAG;
@@ -299,6 +301,15 @@ static void classifyWordHTPHP(unsigned int start, unsigned int end, WordList &ke
 	styler.ColourTo(end, chAttr);
 }
 
+static bool isWordHSGML(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler) {
+	char s[30 + 1];
+	for (unsigned int i = 0; i < end - start + 1 && i < 30; i++) {
+		s[i] = styler[start + i];
+		s[i + 1] = '\0';
+	}
+	return keywords.InList(s);
+}
+
 // Return the first state to reach when entering a scripting language
 static int StateForScript(int scriptLanguage) {
 	int Result;
@@ -314,6 +325,9 @@ static int StateForScript(int scriptLanguage) {
 		break;
 	case eScriptXML:
 		Result = SCE_H_TAGUNKNOWN;
+		break;
+	case eScriptSGML:
+		Result = SCE_H_SGML_DEFAULT;
 		break;
 	default :
 		Result = SCE_HJ_START;
@@ -357,9 +371,10 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	WordList &keywords3 = *keywordlists[2];
 	WordList &keywords4 = *keywordlists[3];
 	WordList &keywords5 = *keywordlists[4];
+	WordList &keywords6 = *keywordlists[5]; // SGML (DTD) keywords
 
 	// Lexer for HTML requires more lexical states (7 bits worth) than most lexers
-	styler.StartAt(startPos, 127);
+	styler.StartAt(startPos, STYLE_MAX);
 	char prevWord[200];
 	prevWord[0] = '\0';
 	int StateToPrint = initStyle;
@@ -373,7 +388,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		}
 		state = SCE_H_DEFAULT;
 	}
-	styler.StartAt(startPos, 127);
+	styler.StartAt(startPos, STYLE_MAX);
 
 	int lineCurrent = styler.GetLine(startPos);
 	int lineState;
@@ -593,14 +608,31 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			continue;
 		}
 
+		/////////////////////////////////////
+		// handle the start of SGML language (DTD)
+		else if (((scriptLanguage == eScriptNone) || (scriptLanguage == eScriptXML)) &&
+			       (chPrev == '<') &&
+						 (ch == '!') &&
+						 (chNext != '[')) {
+			styler.ColourTo(i - 2, StateToPrint);
+			styler.ColourTo(i, SCE_H_SGML_DEFAULT);
+			scriptLanguage = eScriptSGML;
+			state = SCE_H_SGML_COMMAND; // wait for a pending command
+			// fold whole tag (-- when closing the tag)
+			levelCurrent++;
+			continue;
+		}
+
 		// handle the end of a pre-processor = Non-HTML
-		else if (
+		else if ((
 			((inScriptType == eNonHtmlPreProc)
 				|| (inScriptType == eNonHtmlScriptPreProc)) && (
 				((scriptLanguage == eScriptPHP) && (ch == '?') && !isPHPStringState(state) && (state != SCE_HPHP_COMMENT)) || 
+				((scriptLanguage == eScriptSGML) && (ch == '>')) || 
 				((scriptLanguage != eScriptNone) && !isStringState(state) &&
 				 (ch == '%'))
-			) && (chNext == '>')) {
+			) && (chNext == '>')) || 
+			((scriptLanguage == eScriptSGML) && (ch == '>'))) {
 			if (state == SCE_H_ASPAT) {
 				aspScript = segIsScriptingIndicator(styler,
 					styler.GetStartSegment(), i - 1, aspScript);
@@ -631,6 +663,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				styler.ColourTo(i, SCE_H_ASP);
 			else if (scriptLanguage == eScriptXML)
 				styler.ColourTo(i, SCE_H_XMLEND);
+			else if (scriptLanguage == eScriptSGML)
+				styler.ColourTo(i, SCE_H_SGML_DEFAULT);
 			else
 				styler.ColourTo(i, SCE_H_QUESTION);
 			state = beforePreProc;
@@ -662,8 +696,11 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					i += 3;
 					levelCurrent++;
 					state = SCE_H_COMMENT;
-				} else
+				} else if ((chNext == '!') && (chNext2 != '[')) {
+					state = SCE_H_SGML_DEFAULT;
+				} else {
 					state = SCE_H_TAGUNKNOWN;
+				}
 			} else if (ch == '&') {
 				styler.ColourTo(i - 1, SCE_H_DEFAULT);
 				state = SCE_H_ENTITY;
@@ -685,12 +722,55 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				tagOpened = false;
 			}
 			break;
-		case SCE_H_SGML:
-			if (ch == '>') {
-				levelCurrent--;
+		case SCE_H_SGML_DEFAULT:
+/*			if (ch == '!' && chPrev == '<') {
+				styler.ColourTo(i, StateToPrint);
+				state = SCE_H_SGML_COMMAND; // wait for the command
+			} else */if (ch == '\"') {
+				styler.ColourTo(i-1, StateToPrint);
+				state = SCE_H_SGML_STRING; // wait for the command
+			} else if ((ch == '-') && (chPrev == '-')) {
+				styler.ColourTo(i-2, StateToPrint);
+				state = SCE_H_SGML_COMMENT;
+			} else if (ch == '>') {
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_H_DEFAULT;
 				tagOpened = false;
+			}
+			break;
+		case SCE_H_SGML_COMMAND:
+			if (!ishtmlwordchar(ch)) {
+				if (isWordHSGML(styler.GetStartSegment(), i - 1, keywords6, styler)) {
+					styler.ColourTo(i - 1, StateToPrint);
+					state = SCE_H_SGML_1ST_PARAM;
+				} else {
+					styler.ColourTo(i - 1, SCE_H_SGML_ERROR);
+					state = SCE_H_SGML_1ST_PARAM;
+				}
+			}
+			break;
+		case SCE_H_SGML_1ST_PARAM:
+			// wait for the beginning of the word
+			if (ishtmlwordchar(ch)) {
+				styler.ColourTo(i - 1, SCE_H_SGML_DEFAULT);
+				// find the length of the word
+				int size = 1;
+				while (ishtmlwordchar(styler.SafeGetCharAt(i+size)))
+					size++;
+				styler.ColourTo(i + size - 1, StateToPrint);
+				state = SCE_H_SGML_DEFAULT;
+			}
+			break;
+		case SCE_H_SGML_STRING:
+			if (ch == '\"') {
+				styler.ColourTo(i, StateToPrint);
+				state = SCE_H_SGML_DEFAULT;
+			}
+			break;
+		case SCE_H_SGML_COMMENT:
+			if ((ch == '-') && (chPrev == '-')) {
+				styler.ColourTo(i, StateToPrint);
+				state = SCE_H_SGML_DEFAULT;
 			}
 			break;
 		case SCE_H_ENTITY:
@@ -745,8 +825,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					if (eClass != SCE_H_TAGUNKNOWN) {
 						if (eClass == SCE_H_CDATA) {
 							state = SCE_H_CDATA;
-						} else if (eClass == SCE_H_SGML) {
-							state = SCE_H_SGML;
+						} else if (eClass == SCE_H_SGML_DEFAULT) {
+							state = SCE_H_SGML_DEFAULT;
 						} else {
 							state = SCE_H_OTHER;
 						}
@@ -1366,4 +1446,3 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 
 LexerModule lmHTML(SCLEX_HTML, ColouriseHyperTextDoc, "hypertext");
 LexerModule lmXML(SCLEX_XML, ColouriseHyperTextDoc, "xml");
-
