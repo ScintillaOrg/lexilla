@@ -52,7 +52,7 @@ LOBJS	= ScintillaWinL.o ScintillaBaseL.o Editor.o Document.o \
 	ContractionState.o CellBuffer.o CallTip.o \
 	ScintRes.o PlatWin.o KeyMap.o Indicator.o LineMarker.o RESearch.o \
 	Style.o ViewStyle.o AutoComplete.o UniConversion.o KeyWords.o \
-	DocumentAccessor.o PropSet.o $(LEXOBJS)
+	DocumentAccessor.o PropSet.o ExternalLexer.o $(LEXOBJS)
 $(LEXCOMPONENT): $(LOBJS)
 	$(DLLWRAP) --target i386-mingw32 -o $@ $(LOBJS) $(LDFLAGS) -s --relocatable
 
@@ -63,11 +63,13 @@ include deps.mak
 ScintillaBaseL.o: ScintillaBase.cxx Platform.h Scintilla.h SciLexer.h \
  ContractionState.h CellBuffer.h CallTip.h KeyMap.h Indicator.h \
  LineMarker.h Style.h AutoComplete.h ViewStyle.h Document.h Editor.h \
- ScintillaBase.h PropSet.h SString.h Accessor.h DocumentAccessor.h KeyWords.h
+ ScintillaBase.h PropSet.h SString.h Accessor.h DocumentAccessor.h \
+ KeyWords.h ExternalLexer.h
 ScintillaWinL.o: ScintillaWin.cxx Platform.h Scintilla.h SciLexer.h \
  ContractionState.h CellBuffer.h CallTip.h KeyMap.h Indicator.h \
  LineMarker.h Style.h AutoComplete.h ViewStyle.h Document.h Editor.h \
- ScintillaBase.h PropSet.h SString.h Accessor.h KeyWords.h UniConversion.h
+ ScintillaBase.h PropSet.h SString.h Accessor.h KeyWords.h \
+ ExternalLexer.h UniConversion.h
 ScintillaWinS.o: ScintillaWin.cxx Platform.h Scintilla.h \
  ContractionState.h CellBuffer.h CallTip.h KeyMap.h Indicator.h \
  LineMarker.h Style.h AutoComplete.h ViewStyle.h Document.h Editor.h \

@@ -36,10 +36,31 @@
 #include "ScintillaBase.h"
 #include "UniConversion.h"
 
+#ifdef SCI_LEXER
+#include "ExternalLexer.h"
+#endif
+
 //#include "CElapsed.h"
 
 #ifndef SPI_GETWHEELSCROLLLINES
 #define SPI_GETWHEELSCROLLLINES   104
+#endif
+
+// These undefinitions are required to work around differences between different versions
+// of the mingw headers, some of which define these twice, in both winuser.h and imm.h.
+#ifdef __MINGW_H
+#undef WM_IME_STARTCOMPOSITION
+#undef WM_IME_ENDCOMPOSITION
+#undef WM_IME_COMPOSITION
+#undef WM_IME_KEYLAST
+#undef WM_IME_SETCONTEXT
+#undef WM_IME_NOTIFY
+#undef WM_IME_CONTROL
+#undef WM_IME_COMPOSITIONFULL
+#undef WM_IME_SELECT
+#undef WM_IME_CHAR
+#undef WM_IME_KEYDOWN
+#undef WM_IME_KEYUP
 #endif
 
 #ifndef WM_IME_STARTCOMPOSITION
@@ -126,6 +147,10 @@ class ScintillaWin :
 
 	static HINSTANCE hInstance;
 
+#ifdef SCI_LEXER
+	LexerManager *lexMan;
+#endif
+
 	ScintillaWin(HWND hwnd);
 	ScintillaWin(const ScintillaWin &) : ScintillaBase() {}
 	virtual ~ScintillaWin();
@@ -193,6 +218,12 @@ public:
 	/// Implement important part of IDataObject
 	STDMETHODIMP GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM);
 
+	// External Lexers
+#ifdef SCI_LEXER
+	void SetLexerLanguage(const char *languageName);
+	void SetLexer(uptr_t wParam);
+#endif
+
 	bool IsUnicodeMode() const;
 
 	static void Register(HINSTANCE hInstance_);
@@ -235,6 +266,10 @@ void ScintillaWin::Initialise() {
 	// no effect.  If the app hasnt, we really shouldnt ask them to call
 	// it just so this internal feature works.
 	OleInitialize(NULL);
+
+#ifdef SCI_LEXER
+	lexMan = new LexerManager;
+#endif
 }
 
 void ScintillaWin::Finalise() {
@@ -242,6 +277,10 @@ void ScintillaWin::Finalise() {
 	SetTicking(false);
 	RevokeDragDrop(wMain.GetID());
 	OleUninitialize();
+
+#ifdef SCI_LEXER
+	delete lexMan;
+#endif
 }
 
 void ScintillaWin::StartDrag() {
@@ -859,6 +898,35 @@ void ScintillaWin::AddToPopUp(const char *label, int cmd, bool enabled) {
 void ScintillaWin::ClaimSelection() {
 	// Windows does not have a primary selection
 }
+
+#ifdef SCI_LEXER
+
+/* 
+
+  Initial Windows-Only implementation of the external lexer
+  system in ScintillaWin class. Intention is to create a LexerModule
+  subclass (?) to have lex and fold methods which will call out to their
+  relevant DLLs...
+
+*/
+
+void ScintillaWin::SetLexer(uptr_t wParam) {
+	lexLanguage = wParam;
+	lexCurrent = LexerModule::Find(lexLanguage);
+	if (!lexCurrent)
+		lexCurrent = LexerModule::Find(SCLEX_NULL);
+}
+
+void ScintillaWin::SetLexerLanguage(const char *languageName) {
+	lexLanguage = SCLEX_CONTAINER;
+	lexCurrent = LexerModule::Find(languageName);
+	if (!lexCurrent)
+		lexCurrent = LexerModule::Find(SCLEX_NULL);
+	if (lexCurrent)
+		lexLanguage = lexCurrent->GetLanguage();
+}
+
+#endif
 
 /// Implement IUnknown
 

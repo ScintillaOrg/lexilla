@@ -122,6 +122,10 @@ SOURCE=..\src\Editor.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\win32\ExternalLexer.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\Indicator.cxx
 # End Source File
 # Begin Source File

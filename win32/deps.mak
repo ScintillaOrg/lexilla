@@ -1,3 +1,7 @@
+ExternalLexer.o: ExternalLexer.cxx ..\include\SciLexer.h \
+ ..\include\platform.h ..\include\propset.h ..\include\SString.h \
+ ..\include\accessor.h ..\src\DocumentAccessor.h ..\include\KeyWords.h \
+ ExternalLexer.h
 PlatWin.o: PlatWin.cxx ..\include\Platform.h PlatformRes.h \
  ..\src\UniConversion.h
 ScintillaWin.o: ScintillaWin.cxx ..\include\Platform.h \
@@ -45,9 +49,6 @@ LexConf.o: ../src/LexConf.cxx ..\include\Platform.h \
 LexCPP.o: ../src/LexCPP.cxx ..\include\Platform.h ..\include\PropSet.h \
  ..\include\SString.h ..\include\Accessor.h ..\include\KeyWords.h \
  ..\include\Scintilla.h ..\include\SciLexer.h
-LexerManager.o: ../src/LexerManager.cxx ..\include\SciLexer.h \
- ..\include\platform.h ..\include\propset.h ..\include\SString.h \
- ..\include\accessor.h ..\include\KeyWords.h ..\include\LexerManager.h
 LexHTML.o: ../src/LexHTML.cxx ..\include\Platform.h \
  ..\include\PropSet.h ..\include\SString.h ..\include\Accessor.h \
  ..\include\KeyWords.h ..\include\Scintilla.h ..\include\SciLexer.h

@@ -126,6 +126,7 @@ LOBJS=\
 	$(DIR_O)\Document.obj \
 	$(DIR_O)\DocumentAccessor.obj \
 	$(DIR_O)\Editor.obj \
+	$(DIR_O)\ExternalLexer.obj \
 	$(DIR_O)\Indicator.obj \
 	$(DIR_O)\KeyMap.obj \
 	$(DIR_O)\KeyWords.obj \
@@ -206,6 +207,10 @@ $(DIR_O)\DocumentAccessor.obj: ..\src\DocumentAccessor.cxx ..\include\Platform.h
 $(DIR_O)\Editor.obj: ..\src\Editor.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\ContractionState.h \
  ..\src\CellBuffer.h ..\src\KeyMap.h ..\src\Indicator.h ..\src\LineMarker.h ..\src\Style.h ..\src\ViewStyle.h \
  ..\src\Document.h ..\src\Editor.h
+
+$(DIR_O)\ExternalLexer.obj: ExternalLexer.cxx ExternalLexer.h \
+ ..\include\SciLexer.h ..\include\Platform.h ..\include\PropSet.h ..\include\SString.h \
+ ..\include\Accessor.h ..\src\DocumentAccessor.h ..\include\KeyWords.h \
 
 $(DIR_O)\Indicator.obj: ..\src\Indicator.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\Indicator.h
 
