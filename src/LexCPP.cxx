@@ -123,7 +123,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 					sc.SetState(SCE_C_DEFAULT);
 				}
 			} else {
-				if ((sc.atLineEnd) || (sc.Match('/', '*')) || (sc.Match('/', '/'))) {
+				if ((sc.ch == '\r') || (sc.ch == '\n') || (sc.Match('/', '*')) || (sc.Match('/', '/'))) {
 					sc.SetState(SCE_C_DEFAULT);
 				}
 			}
@@ -140,7 +140,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 				sc.SetState(SCE_C_COMMENTDOCKEYWORD);
 			}
 		} else if (sc.state == SCE_C_COMMENTLINE || sc.state == SCE_C_COMMENTLINEDOC) {
-			if (sc.atLineEnd) {
+			if (sc.ch == '\r' || sc.ch == '\n') {
 				sc.SetState(SCE_C_DEFAULT);
 				visibleChars = 0;
 			}
@@ -253,7 +253,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 				do {
 					sc.Forward();
 				} while ((sc.ch == ' ' || sc.ch == '\t') && sc.More());
-				if (sc.atLineEnd) {
+				if (sc.ch == '\r' || sc.ch == '\n') {
 					sc.SetState(SCE_C_DEFAULT);
 				}
 			} else if (isoperator(static_cast<char>(sc.ch))) {
