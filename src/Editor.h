@@ -36,7 +36,7 @@ public:
 class LineLayout {
 public:
 	/// Drawing is only performed for @a maxLineLength characters on each line.
-	enum {maxLineLength = 16000};
+	enum {maxLineLength = 8000};
 	int numCharsInLine;
 	int xHighlightGuide;
 	bool highlightColumn;
