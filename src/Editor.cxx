@@ -4691,9 +4691,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETSCROLLWIDTH:
 		PLATFORM_ASSERT(wParam > 0);
-		if (wParam > 0)
+		if ((wParam > 0) && (wParam != static_cast<unsigned int >(scrollWidth))) {
 			scrollWidth = wParam;
-		SetScrollBars();
+			SetScrollBars();
+		}
 		break;
 
 	case SCI_GETSCROLLWIDTH:
