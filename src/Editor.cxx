@@ -4907,7 +4907,17 @@ void Editor::ButtonMove(Point pt) {
 				SetSelection(movePos);
 			} else if (selectionType == selWord) {
 				// Continue selecting by word
-				if (movePos >= originalAnchorPos) {	// Moved forward
+				if (movePos == originalAnchorPos) {	// Didn't move
+					// No need to do anything. Previously this case was lumped
+					// in with "Moved forward", but that can be harmful in this
+					// case: a handler for the NotifyDoubleClick re-adjusts
+					// the selection for a fancier definition of "word" (for
+					// example, in Perl it is useful to include the leading
+					// '$', '%' or '@' on variables for word selection). In this
+					// the ButtonMove() called via Tick() for auto-scrolling
+					// could result in the fancier word selection adjustment
+					// being unmade.
+				} else if (movePos > originalAnchorPos) {	// Moved forward
 					SetSelection(pdoc->ExtendWordSelect(movePos, 1),
 					             pdoc->ExtendWordSelect(originalAnchorPos, -1));
 				} else {	// Moved backward
