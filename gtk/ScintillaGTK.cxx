@@ -1300,7 +1300,7 @@ sptr_t ScintillaGTK::DirectFunction(
 	return sciThis->WndProc(iMessage, wParam, lParam);
 }
 
-sptr_t scintilla_send_message(ScintillaObject *sci, int iMessage, uptr_t wParam, sptr_t lParam) {
+sptr_t scintilla_send_message(ScintillaObject *sci, unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	ScintillaGTK *psci = reinterpret_cast<ScintillaGTK *>(sci->pscin);
 	return psci->WndProc(iMessage, wParam, lParam);
 }
