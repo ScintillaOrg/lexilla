@@ -640,26 +640,30 @@ void Window::SetFont(Font &) {
 }
 
 void Window::SetCursor(Cursor curs) {
+	GdkCursor *gdkCurs;
 	switch (curs) {
 	case cursorText:
-		gdk_window_set_cursor(id->window, gdk_cursor_new(GDK_XTERM));
+		gdkCurs = gdk_cursor_new(GDK_XTERM);
 		break;
 	case cursorArrow:
-		gdk_window_set_cursor(id->window, gdk_cursor_new(GDK_ARROW));
+		gdkCurs = gdk_cursor_new(GDK_ARROW);
 		break;
 	case cursorUp:
-		gdk_window_set_cursor(id->window, gdk_cursor_new(GDK_CENTER_PTR));
+		gdkCurs = gdk_cursor_new(GDK_CENTER_PTR);
 		break;
 	case cursorWait:
-		gdk_window_set_cursor(id->window, gdk_cursor_new(GDK_WATCH));
+		gdkCurs = gdk_cursor_new(GDK_WATCH);
 		break;
 	case cursorReverseArrow:
-		gdk_window_set_cursor(id->window, gdk_cursor_new(GDK_TOP_LEFT_ARROW));
+		gdkCurs = gdk_cursor_new(GDK_TOP_LEFT_ARROW);
 		break;
 	default:
-		gdk_window_set_cursor(id->window, gdk_cursor_new(GDK_ARROW));
+		gdkCurs = gdk_cursor_new(GDK_ARROW);
 		break;
 	}
+	
+	gdk_window_set_cursor(id->window, gdkCurs);
+	gdk_cursor_destroy(gdkCurs);
 }
 
 void Window::SetTitle(const char *s) {
