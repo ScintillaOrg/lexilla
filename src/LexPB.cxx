@@ -1,12 +1,13 @@
 // Scintilla source code edit control
 /** @file LexPB.cxx
  ** Lexer for PowerBasic by Roland Walter, roland@rowalt.de
+ ** Last update: 17.10.2003 (toggling of subs/functions now until next sub/functin - this gives better results)
  **/
 //
 // Necessary changes in Scintilla project:
 //  - In SciLexer.h and Scintilla.iface:
 //
-//    #define SCLEX_PB 49				//Provisional inofficial ID for PowerBasic lexer,
+//    #define SCLEX_PB 51				//ID for PowerBasic lexer
 //    (...)
 //    #define SCE_B_DEFAULT 0			//in both VB and PB lexer
 //    #define SCE_B_COMMENT 1			//in both VB and PB lexer
@@ -19,7 +20,7 @@
 //    #define SCE_B_DATE 8				//VB lexer only, unsupported by PB lexer
 
 //  - Statement added to KeyWords.cxx:      'LINK_LEXER(lmPB);'
-//  - Statement added to scintilla_vc6.mak: '$(DIR_O)\LexPB.obj: ..\src\LexPB.cxx $(LEX_HEADERS)'
+//  - Statement added to scintilla_vc6.mak: '$(DIR_O)\LexPB.obj: ...\src\LexPB.cxx $(LEX_HEADERS)'
 //
 // Copyright for Scintilla: 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
@@ -172,14 +173,10 @@ static void FoldPBDoc(unsigned int startPos, int length, int, WordList *[], Acce
 	{
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
-		// Functions Start: Function, Sub
-		// Functions End: End Function, End Sub
 
 		if( atEOL )			//Begin of a new line (The Sub/Function/Macro keywords may occur at begin of line only)
 		{
-			if( MatchUpperCase(styler,i,"END FUNCTION") )
-				levelNext=SC_FOLDLEVELBASE;
-			else if( MatchUpperCase(styler,i,"FUNCTION") )
+			if( MatchUpperCase(styler,i,"FUNCTION") )  //else if(
 			{
 				styler.SetLevel(lineCurrent, (SC_FOLDLEVELBASE << 16) | SC_FOLDLEVELHEADERFLAG);
 				levelNext=SC_FOLDLEVELBASE+1;
@@ -194,8 +191,6 @@ static void FoldPBDoc(unsigned int startPos, int length, int, WordList *[], Acce
 				styler.SetLevel(lineCurrent, (SC_FOLDLEVELBASE << 16) | SC_FOLDLEVELHEADERFLAG);
 				levelNext=SC_FOLDLEVELBASE+1;
 			}
-			else if( MatchUpperCase(styler,i,"END SUB") )
-				levelNext=SC_FOLDLEVELBASE;
 			else if( MatchUpperCase(styler,i,"SUB") )
 			{
 				styler.SetLevel(lineCurrent, (SC_FOLDLEVELBASE << 16) | SC_FOLDLEVELHEADERFLAG);
@@ -206,21 +201,12 @@ static void FoldPBDoc(unsigned int startPos, int length, int, WordList *[], Acce
 				styler.SetLevel(lineCurrent, (SC_FOLDLEVELBASE << 16) | SC_FOLDLEVELHEADERFLAG);
 				levelNext=SC_FOLDLEVELBASE+1;
 			}
-			//else if( MatchUpperCase(styler,i,"END MACRO") )
-			//	levelNext--;
 			//else if( MatchUpperCase(styler,i,"MACRO") )  //ToDo: What's with single-line macros?
-			//	levelNext++;
 		}
 
 		atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 		if( atEOL )
 		{
-			if (levelNext == SC_FOLDLEVELBASE)
-			{
-				int levelUse = levelCurrent;
-				int lev = levelUse | levelNext << 16;
-				styler.SetLevel(lineCurrent, lev);
-			}
 			lineCurrent++;
 			levelCurrent = levelNext;
 		}
