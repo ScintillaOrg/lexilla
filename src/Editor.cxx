@@ -1587,9 +1587,9 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		surfaceWindow->SetClip(rcTextArea);
 
 		// Loop on visible lines
-		double durLayout = 0.0;
-		double durPaint = 0.0;
-		double durCopy = 0.0;
+		//double durLayout = 0.0;
+		//double durPaint = 0.0;
+		//double durCopy = 0.0;
 		int lineDocPrevious = -1;	// Used to avoid laying out one document line multiple times
 		LineLayout ll;
 		while (visibleLine < cs.LinesDisplayed() && yposScreen < rcArea.bottom) {
@@ -1603,12 +1603,12 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 
 			// Copy this line and its styles from the document into local arrays
 			// and determine the x position at which each character starts.
-			ElapsedTime et;
+			//ElapsedTime et;
 			if (lineDoc != lineDocPrevious) {
 				LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
 				lineDocPrevious = lineDoc;
 			}
-			durLayout += et.Duration(true);
+			//durLayout += et.Duration(true);
 
 			ll.selStart = SelectionStart(lineDoc);
 			ll.selEnd = SelectionEnd(lineDoc);
@@ -1645,7 +1645,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 
 			// Draw the line
 			DrawLine(surface, vs, lineDoc, visibleLine, xStart, rcLine, ll, subLine);
-			durPaint += et.Duration(true);
+			//durPaint += et.Duration(true);
 
 			bool expanded = cs.GetExpanded(lineDoc);
 			if ( (expanded && (foldFlags & 2)) || (!expanded && (foldFlags & 4)) ) {
@@ -1708,7 +1708,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 						      rcClient.right, yposScreen + vs.lineHeight);
 				surfaceWindow->Copy(rcCopyArea, from, *pixmapLine);
 			}
-			durCopy += et.Duration(true);
+			//durCopy += et.Duration(true);
 
 			if (!bufferedDraw) {
 				ypos += vs.lineHeight;
@@ -1718,7 +1718,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 			visibleLine++;
 			//gdk_flush();
 		}
-		Platform::DebugPrintf("Layout:%9.6g    Paint:%9.6g    Ratio:%9.6g   Copy:%9.6g\n", durLayout, durPaint, durLayout / durPaint, durCopy);
+		//Platform::DebugPrintf("Layout:%9.6g    Paint:%9.6g    Ratio:%9.6g   Copy:%9.6g\n", durLayout, durPaint, durLayout / durPaint, durCopy);
 
 		// Right column limit indicator
 		PRectangle rcBeyondEOF = rcClient;
