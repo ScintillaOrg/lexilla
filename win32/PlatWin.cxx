@@ -1116,9 +1116,9 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 		if (pxpm) {
 			Surface *surfaceItem = Surface::Allocate();
 			if (surfaceItem) {
-				surfaceItem->Init(pDrawItem->hDC);
-				//surf->SetUnicodeMode(unicodeMode);
-				//surf->SetDBCSMode(codePage);
+				surfaceItem->Init(pDrawItem->hDC, pDrawItem->hwndItem);
+				//surfaceItem->SetUnicodeMode(unicodeMode);
+				//surfaceItem->SetDBCSMode(codePage);
 				int left = pDrawItem->rcItem.left;
 				PRectangle rc(left + 1, pDrawItem->rcItem.top,
 					left + 1 + widthPix, pDrawItem->rcItem.bottom);
