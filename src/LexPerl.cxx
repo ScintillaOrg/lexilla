@@ -68,6 +68,10 @@ static inline bool isEndVar(char ch) {
 	       ch != '_' && ch != '\'';
 }
 
+static inline bool isNonQuote(char ch) {
+	return isalnum(ch) || ch == '_';
+}
+
 static inline char actualNumStyle(int numberStyle) {
 	switch (numberStyle) {
 	case PERLNUM_VECTOR:
@@ -271,24 +275,24 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					numState = PERLNUM_V_VECTOR;
 				}
 			} else if (iswordstart(ch)) {
-				if (ch == 's' && !isalnum(chNext)) {
+				if (ch == 's' && !isNonQuote(chNext)) {
 					state = SCE_PL_REGSUBST;
 					Quote.New(2);
-				} else if (ch == 'm' && !isalnum(chNext)) {
+				} else if (ch == 'm' && !isNonQuote(chNext)) {
 					state = SCE_PL_REGEX;
 					Quote.New(1);
-				} else if (ch == 'q' && !isalnum(chNext)) {
+				} else if (ch == 'q' && !isNonQuote(chNext)) {
 					state = SCE_PL_STRING_Q;
 					Quote.New(1);
-				} else if (ch == 'y' && !isalnum(chNext)) {
+				} else if (ch == 'y' && !isNonQuote(chNext)) {
 					state = SCE_PL_REGSUBST;
 					Quote.New(2);
-				} else if (ch == 't' && chNext == 'r' && !isalnum(chNext2)) {
+				} else if (ch == 't' && chNext == 'r' && !isNonQuote(chNext2)) {
 					state = SCE_PL_REGSUBST;
 					Quote.New(2);
 					i++;
 					chNext = chNext2;
-				} else if (ch == 'q' && (chNext == 'q' || chNext == 'r' || chNext == 'w' || chNext == 'x') && !isalnum(chNext2)) {
+				} else if (ch == 'q' && (chNext == 'q' || chNext == 'r' || chNext == 'w' || chNext == 'x') && !isNonQuote(chNext2)) {
 					if      (chNext == 'q') state = SCE_PL_STRING_QQ;
 					else if (chNext == 'x') state = SCE_PL_STRING_QX;
 					else if (chNext == 'r') state = SCE_PL_STRING_QR;
@@ -497,6 +501,10 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 						if (!isdigit(chNext))	// vector then dot
 							goto numAtEnd;
 					}
+				}
+			} else if (ch == '_' && numState == PERLNUM_DECIMAL) {
+				if (!isdigit(chNext)) {
+					goto numAtEnd;
 				}
 			} else if (isalnum(ch)) {
 				if (numState == PERLNUM_VECTOR || numState == PERLNUM_V_VECTOR) {
