@@ -360,7 +360,7 @@ Editor::Editor() {
 
 	topLine = 0;
 	posTopLine = 0;
-	
+
 	lengthForEncode = 0;
 
 	needUpdateUI = true;
@@ -2208,8 +2208,9 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	// See if something overrides the line background color:  Either if caret is on the line
 	// and background color is set for that, or if a marker is defined that forces its background
 	// color onto the line, or if a marker is defined but has no selection margin in which to
-	// display itself.  These are checked in order with the earlier taking precedence.  When
-	// multiple markers cause background override, the color for the highest numbered one is used.
+	// display itself (as long as it's not an SC_MARK_EMPTY marker).  These are checked in order
+	// with the earlier taking precedence.  When multiple markers cause background override,
+	// the color for the highest numbered one is used.
 	bool overrideBackground = false;
 	ColourAllocated background;
 	if (caret.active && vsDraw.showCaretLineBackground && ll->containsCaret) {
@@ -2230,9 +2231,9 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		if (vsDraw.maskInLine) {
 			int marks = pdoc->GetMark(line) & vsDraw.maskInLine;
 			if (marks) {
-				overrideBackground = true;
 				for (int markBit = 0; (markBit < 32) && marks; markBit++) {
-					if (marks & 1) {
+					if ((marks & 1) && (vsDraw.markers[markBit].markType != SC_MARK_EMPTY)) {
+						overrideBackground = true;
 						background = vsDraw.markers[markBit].back.allocated;
 					}
 					marks >>= 1;
