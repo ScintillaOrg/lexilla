@@ -723,16 +723,19 @@ int Platform::Maximum(int a, int b) {
 
 //#define TRACE
 
-void Platform::DebugPrintf(const char *format, ...) {
 #ifdef TRACE
+void Platform::DebugPrintf(const char *format, ...) {
 	char buffer[2000];
 	va_list pArguments;
 	va_start(pArguments, format);
 	vsprintf(buffer,format,pArguments);
 	va_end(pArguments);
 	Platform::DebugDisplay(buffer);
-#endif
 }
+#else
+void Platform::DebugPrintf(const char *, ...) {
+}
+#endif
 
 int Platform::Clamp(int val, int minVal, int maxVal) {
 	if (val > maxVal)
