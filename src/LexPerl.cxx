@@ -258,6 +258,8 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 			} else if (ch == '\"') {
 				styler.ColourTo(i - 1, state);
 				state = SCE_PL_STRING;
+				Quote.New(1);
+				Quote.Open(ch);
 			} else if (ch == '\'') {
 				if (chPrev == '&') {
 					// Archaic call
@@ -265,10 +267,14 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				} else {
 					styler.ColourTo(i - 1, state);
 					state = SCE_PL_CHARACTER;
+					Quote.New(1);
+					Quote.Open(ch);
 				}
 			} else if (ch == '`') {
 				styler.ColourTo(i - 1, state);
 				state = SCE_PL_BACKTICKS;
+				Quote.New(1);
+				Quote.Open(ch);
 			} else if (ch == '$') {
 				preferRE = false;
 				styler.ColourTo(i - 1, state);
@@ -360,8 +366,12 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 						state = SCE_PL_COMMENTLINE;
 					} else if (ch == '\"') {
 						state = SCE_PL_STRING;
+						Quote.New(1);
+						Quote.Open(ch);
 					} else if (ch == '\'') {
 						state = SCE_PL_CHARACTER;
+						Quote.New(1);
+						Quote.Open(ch);
 					} else if (ch == '<' && chNext == '<') {
 						state = SCE_PL_HERE_DELIM;
 						HereDoc.State = 0;
@@ -464,42 +474,6 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 						state = SCE_PL_DEFAULT;
 						HereDoc.State = 0;
 					}
-					ch = chNext;
-					chNext = styler.SafeGetCharAt(i + 1);
-				}
-			} else if (state == SCE_PL_STRING) {
-				if (ch == '\\') {
-					if (chNext == '\"' || chNext == '\'' || chNext == '\\') {
-						i++;
-						ch = chNext;
-						chNext = styler.SafeGetCharAt(i + 1);
-					}
-				} else if (ch == '\"') {
-					styler.ColourTo(i, state);
-					state = SCE_PL_DEFAULT;
-					i++;
-					ch = chNext;
-					chNext = styler.SafeGetCharAt(i + 1);
-				}
-			} else if (state == SCE_PL_CHARACTER) {
-				if (ch == '\\') {
-					if (chNext == '\"' || chNext == '\'' || chNext == '\\') {
-						i++;
-						ch = chNext;
-						chNext = styler.SafeGetCharAt(i + 1);
-					}
-				} else if (ch == '\'') {
-					styler.ColourTo(i, state);
-					state = SCE_PL_DEFAULT;
-					i++;
-					ch = chNext;
-					chNext = styler.SafeGetCharAt(i + 1);
-				}
-			} else if (state == SCE_PL_BACKTICKS) {
-				if (ch == '`') {
-					styler.ColourTo(i, state);
-					state = SCE_PL_DEFAULT;
-					i++;
 					ch = chNext;
 					chNext = styler.SafeGetCharAt(i + 1);
 				}
@@ -631,6 +605,9 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				|| state == SCE_PL_STRING_QQ
 				|| state == SCE_PL_STRING_QX
 				|| state == SCE_PL_STRING_QW
+				|| state == SCE_PL_STRING
+				|| state == SCE_PL_CHARACTER
+				|| state == SCE_PL_BACKTICKS
 				) {
 				if (!Quote.Down && !isspace(ch)) {
 					Quote.Open(ch);
@@ -661,8 +638,12 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					state = SCE_PL_COMMENTLINE;
 				} else if (ch == '\"') {
 					state = SCE_PL_STRING;
+					Quote.New(1);
+					Quote.Open(ch);
 				} else if (ch == '\'') {
 					state = SCE_PL_CHARACTER;
+					Quote.New(1);
+					Quote.Open(ch);
 				} else if (iswordstart(ch)) {
 					state = SCE_PL_WORD;
 					preferRE = false;
