@@ -745,14 +745,15 @@ void Editor::EnsureCaretVisible(bool useMargin, bool vert, bool horiz) {
 }
 
 void Editor::ShowCaretAtCurrentPosition() {
-	if (!hasFocus) {
+	if (hasFocus) {
+		caret.active = true;
+		caret.on = true;
+		SetTicking(true);
+	} else {
 		caret.active = false;
 		caret.on = false;
-		return;
 	}
-	caret.active = true;
-	caret.on = true;
-	SetTicking(true);
+	InvalidateCaret();
 }
 
 void Editor::DropCaret() {
@@ -3536,7 +3537,6 @@ void Editor::SetFocusState(bool focusState) {
 	NotifyFocus(hasFocus);
 	if (hasFocus) {
 		ShowCaretAtCurrentPosition();
-		InvalidateCaret();
 	} else {
 		DropCaret();
 	}
