@@ -223,6 +223,7 @@ SCI_LINELENGTH(int line)
 SCI_LINESCROLL(int column, int line)
 SCI_SCROLLCARET
 SCI_POSITIONFROMPOINT(int x, int y)
+SCI_POSITIONFROMPOINTCLOSE(int x, int y)
 SCI_POINTXFROMPOSITION(&lt;unused&gt;, int position)
 SCI_POINTYFROMPOSITION(&lt;unused&gt;, int position)
 SCI_HIDESELECTION(bool hide)
@@ -268,10 +269,18 @@ SCI_MOVECARETINSIDEVIEW
       CARET_STRICT is set then caret policy is rechecked even if the caret is completely 
       visible. If CARET_XEVEN is set then both the left and right margins are treated
       equally whereas if it is not set then displaying text to the left is preferred.
+      CARET_XJUMPS causes the display to move in jumps and then stay still
+      rather than in a series of smaller movements.
       SCI_SETVISIBLEPOLICY is a similar function that 
-      determines how the vertical positioning is determined when SCI_ENSUREVISIBLE is
+      determines how the vertical positioning is determined when 
+      SCI_ENSUREVISIBLEENFORCEPOLICY is
       called. It takes VISIBLE_SLOP and VISIBLE_STRICT flags 
       for the policy parameter.
+    </p>
+    <p>
+    SCI_POSITIONFROMPOINT finds the closes character position to a point and
+    SCI_POSITIONFROMPOINTCLOSE is similar but returns -1 if the point is 
+    outside the window or not close to any characters.
     </p>
     <h3>
        Searching
@@ -739,10 +748,32 @@ SCI_MARKERDELETEHANDLE(int handle)
        allowing client code to track the movement of lines.
     </p>
     <p>
+       There are also marker symbols available for the folding margin in an flattened tree style:
+	SC_MARK_BOXMINUS,
+	SC_MARK_BOXMINUSCONNECTED,
+	SC_MARK_BOXPLUS,
+	SC_MARK_BOXPLUSCONNECTED,
+	SC_MARK_CIRCLEMINUS,
+	SC_MARK_CIRCLEMINUSCONNECTED,
+	SC_MARK_CIRCLEPLUS,
+	SC_MARK_CIRCLEPLUSCONNECTED,
+	SC_MARK_LCORNER,
+	SC_MARK_LCORNERCURVE,
+	SC_MARK_TCORNER,
+	SC_MARK_TCORNERCURVE, and
+	SC_MARK_VLINE.
+    </p>
+    <p>
        The marker numbers SC_MARKNUM_FOLDER and SC_MARKNUM_FOLDEROPEN are
        used for showing that a fold is present and open or closed. Any symbols may be assigned for 
        this purpose although the (SC_MARK_PLUS, SC_MARK_MINUS) pair or the
        (SC_MARK_ARROW, SC_MARK_ARROWDOWN) pair are good choices.
+       As well as these two, more assignments are needed for the flattened tree style:
+       SC_MARKNUM_FOLDEREND,
+	SC_MARKNUM_FOLDERMIDTAIL,
+	SC_MARKNUM_FOLDEROPENMID,
+	SC_MARKNUM_FOLDERSUB, and
+	SC_MARKNUM_FOLDERTAIL.
     </p>
     <h3>
        Indicators
@@ -1042,6 +1073,7 @@ SCI_SETFOLDEXPANDED(int line)
 SCI_GETFOLDEXPANDED(int line)
 SCI_TOGGLEFOLD(int line)
 SCI_ENSUREVISIBLE(int line)
+SCI_ENSUREVISIBLEENFORCEPOLICY(int line)
 </pre>
     <p>
        The fundamental operation in folding is making lines invisible or visible. 
@@ -1315,6 +1347,24 @@ SCN_URIDROPPED
       Only on the GTK+ version. Indicates that the user has dragged a URI such as
       a file name or web address onto Scintilla. The container could interpret this
       as a request to open the file.
+    </p>
+<pre>
+SCN_DWELLSTART
+SCN_DWELLEND
+SCI_SETMOUSEDWELLTIME
+SCI_GETMOUSEDWELLTIME
+SC_TIME_FOREVER
+</pre>
+    <p>
+      SCN_DWELLSTART is generated when the user hold the 
+      mouse still in one spot for the dwell period. 
+      SCN_DWELLEND is generated after a SCN_DWELLSTART
+      and the mouse is moved or other activity such as key press
+      indicates the dwell is over.
+    </p>
+    <p>
+      The time the mouse must sit still, in milliseconds, to generate a SCI_DWELLSTART.
+      If set to SC_TIME_FOREVER, the default, no dwell events will be generated.
     </p>
     <h3>
        Edit messages currently supported by Scintilla which will be removed in the future.
