@@ -12,8 +12,9 @@
 #define SCINTILLA_H
 
 #if PLAT_WIN
-void Scintilla_RegisterClasses(void *hInstance);
-void Scintilla_ReleaseResources();
+// Return false on failure:
+bool Scintilla_RegisterClasses(void *hInstance);
+bool Scintilla_ReleaseResources();
 #endif
 int Scintilla_LinkLexers();
 
