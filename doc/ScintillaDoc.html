@@ -120,16 +120,32 @@ SCI_SETTARGETSTART(int pos)
 SCI_GETTARGETSTART 
 SCI_SETTARGETEND(int pos)
 SCI_GETTARGETEND
-SCI_REPLACETARGET(bool replacePatterns, char *text)
+SCI_REPLACETARGET(int length, char *text)
+SCI_REPLACETARGETRE(int length, char *text)
+SCI_SETSEARCHFLAGS(int flags)
+SCI_GETSEARCHFLAGS
+SCI_SEARCHINTARGET(int length, string text)
 </pre>
     <p>
        Using SCI_REPLACESEL, modifications cause scrolling and other visible changes
        which may take some time and cause unwanted display updates. If performing many 
        changes, such as a replace all command, the target can be used instead. 
-       First set the range to be replaced. Then call SCI_REPLACETARGET which returns
-       the length taken by the replacement string. If replacePatterns is set then \d patterns 
-       where d is a digit from 1 to 9 in the text are replaced by tagged matches from the 
+       First set the range to be replaced. Then call SCI_REPLACETARGET or
+       SCI_REPLACETARGETRE which returns the length taken by the replacement string. 
+       The difference between SCI_REPLACETARGET and SCI_REPLACETARGETRE
+       is that SCI_REPLACETARGETRE looks for \d patterns in the replacement text
+       where d is a digit from 1 to 9 and substitutes in the values of tagged matches from the 
        most recent regular expression search.
+    </p>
+    <p>
+       Searching can be performed within the target range with SCI_SEARCHINTARGET
+       which uses a counted string to allow searching for null characters.
+       Returns length of range or -1 for failure in which case target is not moved.
+       The flags used by SCI_SEARCHINTARGET such as SCFIND_MATCHCASE,
+       SCFIND_WHOLEWORD, SCFIND_WORDSTART, and SCFIND_REGEXP can 
+       be set with SCI_SETSEARCHFLAGS. The SCI_SEARCHINTARGET call 
+       may be simpler for some clients to use than SCI_FINDTEXT as that requires 
+       using a pointer to a structure.
     </p>
 <pre>
 SCI_SETOVERTYPE
@@ -241,7 +257,7 @@ SCI_MOVECARETINSIDEVIEW
       SCI_SETCARETPOLICY can be set to a combination of the flags CARET_SLOP
       and CARET_STRICT to change the automatic vertical positioning of the view
       when ensuring a position is visible. If CARET_SLOP is on then the slop value 
-      determines the number of line at top and botom of the view where the caret should not
+      determines the number of line at top and bottom of the view where the caret should not
       go. If CARET_SLOP is off then the caret is centred within the view. When 
       CARET_STRICT is set then caret policy is rechecked even if the caret is completely 
       visible. If CARET_XEVEN is set then both the left and right margins are treated
@@ -275,6 +291,9 @@ SCI_FINDTEXT(int flags, TextToFind *ttf)
        to indicate a set of characters, ^ within a set to complement the set, ^ outside a set
        to match the start of line, $ to match the end of line, * to match 0 or more times, 
        + to match 1 or more times
+    </p>
+    <p>
+       See also SCI_SEARCHINTARGET.
     </p>
 <pre>
 SCI_SEARCHANCHOR
@@ -547,18 +566,27 @@ SCI_GETBUFFEREDDRAW
       although it does take longer. The default is for drawing to be buffered.
     </p>
 <pre>
-SCI_GETTABWIDTH
 SCI_SETTABWIDTH(int widthinchars)
-SCI_GETINDENT
+SCI_GETTABWIDTH
 SCI_SETINDENT(int widthinchars)
-SCI_GETUSETABS
+SCI_GETINDENT
 SCI_SETUSETABS(bool usetabs)
+SCI_GETUSETABS
+SCI_SETTABINDENTS(bool tabIndents)
+SCI_GETTABINDENTS
+SCI_SETBACKSPACEUNINDENTS(bool bsUnIndents)
+SCI_GETBACKSPACEUNINDENTS
 </pre>
     <p>
        SCI_SETTABWIDTH sets the size of a tab as a multiple of the size of a space character in the style of the
       first style definition. SCI_SETINDENT sets the size of indentation in terms of characters. 
       SCI_SETUSETABS determines whether indentation should be created out of a mixture of tabs 
       and space or be based purely on spaces.
+    </p>
+    <p>
+      Inside indentation whitespace the tab and backspace keys can be made to indent and 
+      unindent rather than insert a tab character or delete a character with the 
+      SCI_SETTABINDENTS and SCI_GETBACKSPACEUNINDENTS functions.
     </p>
 <pre>
 SCI_SETLINEINDENTATION(int line, int indentation)
@@ -587,7 +615,7 @@ SCI_GETCODEPAGE
     </p>
     <p>
        On Windows, code page SC_CP_UTF8 (65001) sets Scintilla into Unicode mode with the 
-       document treated as a sequence of characters expressed in UTF8. The text is converted to 
+       document treated as a sequence of characters expressed in UTF-8. The text is converted to 
        UCS-2 before being drawn by the OS and can thus display Hebrew, Arabic, Cyrillic, and 
        Han characters.
     </p>
@@ -746,6 +774,8 @@ SCI_AUTOCSETCHOOSESINGLE(bool chooseSingle)
 SCI_AUTOCGETCHOOSESINGLE
 SCI_AUTOCSETIGNORECASE(bool ignoreCase)
 SCI_AUTOCGETIGNORECASE
+SCI_AUTOCSETAUTOHIDE(bool bool autoHide)
+SCI_AUTOCGETAUTOHIDE
 </pre>
     <p>
        Auto completion displays a list box based upon the users typing showing likely identifiers.
@@ -768,6 +798,10 @@ SCI_AUTOCGETIGNORECASE
       at when the list was displayed. By calling SCI_AUTOCSETCANCELATSTART with
       a false argument, the list is not cancelled until the caret moves before the first character of the 
       word being completed.
+    </p>
+    <p>
+      The list will also be cancelled if there are no viable matches. To avoid this behaviour
+      call SCI_AUTOCSETAUTOHIDE with a false argument.
     </p>
     <h3>
        User lists
@@ -1264,7 +1298,7 @@ SCN_USERLISTSELECTION
       The list type is available in wParam and the text chosen in text.
     </p>
 <pre>
-SCN_URISDROPPED
+SCN_URIDROPPED
 </pre>
     <p>
       Only on the GTK+ version. Indicates that the user has dragged a URI such as
