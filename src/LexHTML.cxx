@@ -726,10 +726,10 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		case SCE_H_ATTRIBUTE:
 			if (!ishtmlwordchar(ch) && ch != '/' && ch != '-') {
 				if (inScriptType == eNonHtmlScript) {
-                    int scriptLanguagePrev = scriptLanguage;
+					int scriptLanguagePrev = scriptLanguage;
 					scriptLanguage = segIsScriptingIndicator(styler, styler.GetStartSegment(), i - 1, scriptLanguage);
-                    if ((scriptLanguagePrev != scriptLanguage) && (scriptLanguage == eScriptNone))
-                        inScriptType = eHtml;
+					if ((scriptLanguagePrev != scriptLanguage) && (scriptLanguage == eScriptNone))
+						inScriptType = eHtml;
 				}
 				classifyAttribHTML(styler.GetStartSegment(), i - 1, keywords, styler);
 				if (ch == '>') {
@@ -1272,6 +1272,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				state = SCE_HPHP_VARIABLE;
 			} else if (isoperator(ch)) {
 				state = SCE_HPHP_OPERATOR;
+			} else if ((state == SCE_HPHP_OPERATOR) && (isspacechar(ch))) {
+				state = SCE_HPHP_DEFAULT;
 			}
 			break;
 			///////////// end - PHP state handling
