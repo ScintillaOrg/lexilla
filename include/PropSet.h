@@ -79,7 +79,7 @@ inline bool nonFuncChar(char ch) {
 	return strchr("\t\n\r !\"#$%&'()*+,-./:;<=>?@[\\]^`{|}~", ch) != NULL;
 }
 
-inline bool IsAlphabetic(char ch) {
+inline bool IsAlphabetic(unsigned int ch) {
 	return ((ch >= 'A') && (ch <= 'Z')) || ((ch >= 'a') && (ch <= 'z'));
 }
 
