@@ -1610,14 +1610,10 @@ evt void ModifyAttemptRO=2004(void)
 evt void Key=2005(int ch, int modifiers)
 evt void DoubleClick=2006(void)
 evt void UpdateUI=2007(void)
-# The old name for SCN_UPDATEUI
-val SCN_CHECKBRACE=2007
 evt void Modified=2008(int position, int modificationType, string text, int length, int linesAdded, int line, int foldLevelNow, int foldLevelPrev)
-# Optional module for macro recording
 evt void MacroRecord=2009(int message, int wParam, int lParam)
 evt void MarginClick=2010(int modifiers, int position, int margin)
 evt void NeedShown=2011(int position, int length)
-evt void PosChanged=2012(int position)
 evt void Painted=2013(void)
 evt void UserListSelection=2014(int listType, string text)
 evt void URIDropped=2015(string text)
@@ -1625,3 +1621,7 @@ evt void DwellStart=2016(int position)
 evt void DwellEnd=2017(int position)
 
 cat Deprecated
+
+# The old name for SCN_UPDATEUI
+val SCN_CHECKBRACE=2007
+evt void PosChanged=2012(int position)

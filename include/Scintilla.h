@@ -496,12 +496,10 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCN_KEY 2005
 #define SCN_DOUBLECLICK 2006
 #define SCN_UPDATEUI 2007
-#define SCN_CHECKBRACE 2007
 #define SCN_MODIFIED 2008
 #define SCN_MACRORECORD 2009
 #define SCN_MARGINCLICK 2010
 #define SCN_NEEDSHOWN 2011
-#define SCN_POSCHANGED 2012
 #define SCN_PAINTED 2013
 #define SCN_USERLISTSELECTION 2014
 #define SCN_URIDROPPED 2015
@@ -582,6 +580,9 @@ struct SCNotification {
 // To enable these features define INCLUDE_DEPRECATED_FEATURES
 
 #ifdef INCLUDE_DEPRECATED_FEATURES
+
+#define SCN_POSCHANGED 2012
+#define SCN_CHECKBRACE 2007
 
 #endif
 

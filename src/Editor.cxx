@@ -12,6 +12,7 @@
 
 #include "Platform.h"
 
+#define INCLUDE_DEPRECATED_FEATURES
 #include "Scintilla.h"
 
 #include "ContractionState.h"
