@@ -54,6 +54,9 @@ static void classifyAttribHTML(unsigned int start, unsigned int end, WordList &k
 		if (keywords.InList(s))
 			chAttr = SCE_H_ATTRIBUTE;
 	}
+	if ((chAttr == SCE_H_ATTRIBUTEUNKNOWN) && !keywords)
+		// No keywords -> all are known
+		chAttr = SCE_H_ATTRIBUTE;
 	styler.ColourTo(end, chAttr);
 }
 
@@ -81,6 +84,9 @@ static int classifyTagHTML(unsigned int start, unsigned int end,
 				chAttr = SCE_H_SCRIPT;
 		}
 	}
+	if ((chAttr == SCE_H_TAGUNKNOWN) && !keywords)
+		// No keywords -> all are known
+		chAttr = SCE_H_TAG;
 	styler.ColourTo(end, chAttr);
 	return chAttr;
 }
@@ -353,13 +359,10 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				styler.ColourTo(i, state);
 				state = SCE_H_DEFAULT;
 			}
-#ifdef OLD /* PL 2000/05/18 -- An bad entity may stop on a non-alphabetic character */
-#else  /* OLD PL 2000/05/18 */
 			if (ch != '#' && !isalnum(ch)) {	// Should check that '#' follows '&', but it is unlikely anyway...
 				styler.ColourTo(i, SCE_H_TAGUNKNOWN);
 				state = SCE_H_DEFAULT;
 			}
-#endif /* OLD PL 2000/05/18 */
 		} else if (state == SCE_H_TAGUNKNOWN) {
 			if (!ishtmlwordchar(ch) && ch != '/' && ch != '-') {
 				int eClass = classifyTagHTML(styler.GetStartSegment(), i - 1, keywords, styler);
@@ -368,7 +371,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					scriptLanguage = eScriptJS;
 					eClass = SCE_H_TAG;
 				}
-				if (ch == '>') {
+				if ((ch == '>') && (eClass != SCE_H_COMMENT)) {
 					styler.ColourTo(i, SCE_H_TAG);
 					if (lastTagWasScript) {
 						if (scriptLanguage == eScriptVBS)
