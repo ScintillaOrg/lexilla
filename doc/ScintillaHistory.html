@@ -192,9 +192,75 @@
 	Improvements to selection handling on GTK+.
 	</li>
 	<li>
-	SciTE on GTK+ 2.4 uses the improved file chooser.
+	SciTE on GTK+ 2.4 uses the improved file chooser which allows
+	file extension filters, multiple selection, and remembers favourite 
+	directories.
 	</li>
-    <ul>
+	<li>
+	SciTE Load Session and Save Session commands available on GTK+.
+	</li>
+	<li>
+	SciTE lists Lua Startup Script in Options menu when loaded.
+	</li>
+	<li>
+	In SciTE, OnUserListSelection can be implemented in Lua.
+	</li>
+	<li>
+	SQL lexer allows '#' comments and optionally '\' quoting inside strings.
+	</li>
+	<li>
+	Mssql lexer improved.
+	</li>
+	<li>
+	AutoIt3 lexer updated.
+	</li>
+	<li>
+	Errorlist lexer understands Lua tracebacks and copes with findstr
+	output for file names that end with digits.
+	</li>
+	<li>
+	Drawing of lines on GTK+ improved and made more like Windows
+	without final point.
+	</li>
+	<li>
+	SciTE on Windows has a context menu on the file tabs.
+	</li>
+	<li>
+	SciTE on GTK+ uses a high resolution window icon.
+	</li>
+	<li>
+	SciTE can be set to warn before loading files larger than a particular size.
+	</li>
+	<li>
+	SciTE Lua scripting bugs fixed included a crashing bug when using 
+	an undefined function name that would go before first actual name.
+	</li>
+	<li>
+	SciTE bug fixed where a modified buffer was not saved if it was
+	the last buffer and was not current when the New command used.
+	</li>
+	<li>
+	SciTE monofont mode no longer affects line numbers.
+	</li>
+	<li>
+	Crashing bug in SciTE avoided by not allowing both the Find and Replace
+	dialogs to be visible at one time.
+	</li>
+	<li>
+	Crashing bug in SciTE fixed when Lua scripts were being run
+	concurrently.
+	</li>
+	<li>
+	Bug fixed that caused incorrect line number width in SciTE.
+	</li>
+	<li>
+	PHP folding bug fixed.
+	</li>
+	<li>
+	Regression fixed when setting word characters to not include
+	some of the standard word characters.
+	</li>
+    </ul>
     <h3>
        <a href="http://prdownloads.sourceforge.net/scintilla/scite159.zip?download">Release 1.60</a>
     </h3>
