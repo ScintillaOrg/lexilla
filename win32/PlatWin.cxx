@@ -761,10 +761,19 @@ PRectangle Window::GetPosition() {
 
 void Window::SetPosition(PRectangle rc) {
 	::SetWindowPos(reinterpret_cast<HWND>(id),
-		0, rc.left, rc.top, rc.Width(), rc.Height(), SWP_NOZORDER);
+		0, rc.left, rc.top, rc.Width(), rc.Height(), SWP_NOZORDER|SWP_NOACTIVATE);
 }
 
-void Window::SetPositionRelative(PRectangle rc, Window) {
+void Window::SetPositionRelative(PRectangle rc, Window w) {
+	LONG style = ::GetWindowLong(reinterpret_cast<HWND>(id), GWL_STYLE);
+	if (style & WS_POPUP) {
+		RECT rcOther;
+		::GetWindowRect(reinterpret_cast<HWND>(w.GetID()), &rcOther);
+		rc.top += rcOther.top;
+		rc.left += rcOther.left;
+		rc.bottom += rcOther.top;
+		rc.right += rcOther.left;
+	}
 	SetPosition(rc);
 }
 
@@ -776,7 +785,7 @@ PRectangle Window::GetClientPosition() {
 
 void Window::Show(bool show) {
 	if (show)
-		::ShowWindow(reinterpret_cast<HWND>(id), SW_SHOWNORMAL);
+		::ShowWindow(reinterpret_cast<HWND>(id), SW_SHOWNOACTIVATE);
 	else
 		::ShowWindow(reinterpret_cast<HWND>(id), SW_HIDE);
 }

@@ -512,8 +512,6 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				if (cmd != LBN_SETFOCUS)
 					::SetFocus(MainHWND());
 			}
-		} else if (LoWord(wParam) == idCallTip) {
-			CallTipClick();
 		}
 		Command(LoWord(wParam));
 #endif
@@ -670,11 +668,14 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 	case WM_GETDLGCODE:
 		return DLGC_HASSETSEL | DLGC_WANTALLKEYS;
 
-	case WM_KILLFOCUS:
-		if (!wParam ||
-			!::IsChild(reinterpret_cast<HWND>(wMain.GetID()),
-			reinterpret_cast<HWND>(wParam))) {
-			SetFocusState(false);
+	case WM_KILLFOCUS: {
+			HWND wOther = reinterpret_cast<HWND>(wParam);
+			HWND wThis = reinterpret_cast<HWND>(wMain.GetID());
+			HWND wCT = reinterpret_cast<HWND>(ct.wCallTip.GetID());
+			if (!wParam ||
+				!(::IsChild(wThis,wOther) || (wOther == wCT))) {
+				SetFocusState(false);
+			}
 		}
 		//RealizeWindowPalette(true);
 		break;
@@ -753,6 +754,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
         // These are not handled in Scintilla and its faster to dispatch them here.
         // Also moves time out to here so profile doesn't count lots of empty message calls.
+
 	case WM_MOVE:
 	case WM_MOUSEACTIVATE:
 	case WM_NCHITTEST:
@@ -1084,10 +1086,10 @@ void ScintillaWin::CreateCallTipWindow(PRectangle) {
 #ifdef TOTAL_CONTROL
 	if (!ct.wCallTip.Created()) {
 		ct.wCallTip = ::CreateWindow(callClassName, "ACallTip",
-					     WS_VISIBLE | WS_CHILD, 100, 100, 150, 20,
-					     MainHWND(), reinterpret_cast<HMENU>(idCallTip),
+					     WS_POPUP, 100, 100, 150, 20,
+					     MainHWND(), 0,
 					     GetWindowInstance(MainHWND()),
-					     &ct);
+					     this);
 		ct.wDraw = ct.wCallTip;
 	}
 #endif
@@ -1926,9 +1928,9 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
     HWND hWnd, UINT iMessage, WPARAM wParam, sptr_t lParam) {
 
 	// Find C++ object associated with window.
-	CallTip *ctp = reinterpret_cast<CallTip *>(PointerFromWindow(hWnd));
+	ScintillaWin *sciThis = reinterpret_cast<ScintillaWin *>(PointerFromWindow(hWnd));
 	// ctp will be zero if WM_CREATE not seen yet
-	if (ctp == 0) {
+	if (sciThis == 0) {
 		if (iMessage == WM_CREATE) {
 			// Associate CallTip object with window
 			CREATESTRUCT *pCreate = reinterpret_cast<CREATESTRUCT *>(lParam);
@@ -1947,23 +1949,32 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
 			Surface *surfaceWindow = Surface::Allocate();
 			if (surfaceWindow) {
 				surfaceWindow->Init(ps.hdc, hWnd);
-				surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == ctp->codePage);
-				surfaceWindow->SetDBCSMode(ctp->codePage);
-				ctp->PaintCT(surfaceWindow);
+				surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == sciThis->ct.codePage);
+				surfaceWindow->SetDBCSMode(sciThis->ct.codePage);
+				sciThis->ct.PaintCT(surfaceWindow);
 				surfaceWindow->Release();
 				delete surfaceWindow;
 			}
 			::EndPaint(hWnd, &ps);
 			return 0;
+		} else if ((iMessage == WM_NCLBUTTONDOWN) || (iMessage == WM_NCLBUTTONDBLCLK)) {
+			POINT pt;
+			pt.x = static_cast<short>(LOWORD(lParam));
+			pt.y = static_cast<short>(HIWORD(lParam));
+			ScreenToClient(hWnd, &pt);
+			sciThis->ct.MouseClick(Point(pt.x, pt.y));
+			sciThis->CallTipClick();
+			return 0;
 		} else if (iMessage == WM_LBUTTONDOWN) {
-			ctp->MouseClick(Point::FromLong(lParam));
-			::SendMessage(::GetParent(hWnd), WM_COMMAND,
-					MAKELONG(::GetDlgCtrlID(hWnd), SCEN_CHANGE),
-					reinterpret_cast<LPARAM>(hWnd));
+			// This does not fire due to the hit test code
+			sciThis->ct.MouseClick(Point::FromLong(lParam));
+			sciThis->CallTipClick();
 			return 0;
 		} else if (iMessage == WM_SETCURSOR) {
 			::SetCursor(::LoadCursor(NULL,IDC_ARROW));
 			return 0;
+		} else if (iMessage == WM_NCHITTEST) {
+			return HTCAPTION;
 		} else {
 			return ::DefWindowProc(hWnd, iMessage, wParam, lParam);
 		}
