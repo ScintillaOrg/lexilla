@@ -37,6 +37,10 @@ static bool classifyWordCpp(unsigned int start, unsigned int end, WordList &keyw
 	return wordIsUUID;
 }
 
+static bool isOKBeforeRE(char ch) {
+	return (ch == '(') || (ch == '=') || (ch == ',');
+}
+
 static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[], 
 	Accessor &styler) {
 	
@@ -55,6 +59,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 		state = SCE_C_DEFAULT;
 	char chPrev = ' ';
 	char chNext = styler[startPos];
+	char chPrevNonWhite = ' ';
 	unsigned int lengthDoc = startPos + length;
 	int visibleChars = 0;
 	styler.StartSegment(startPos);
@@ -117,6 +122,9 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			} else if (ch == '/' && chNext == '/') {
 				styler.ColourTo(i-1, state);
 				state = SCE_C_COMMENTLINE;
+			} else if (ch == '/' && isOKBeforeRE(chPrevNonWhite)) {
+				styler.ColourTo(i-1, state);
+				state = SCE_C_REGEX;
 			} else if (ch == '\"') {
 				styler.ColourTo(i-1, state);
 				state = SCE_C_STRING;
@@ -226,6 +234,18 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 					styler.ColourTo(i, state);
 					state = SCE_C_DEFAULT;
 				}
+			} else if (state == SCE_C_REGEX) {
+				if (ch == '\r' || ch == '\n' || ch == '/') {
+					styler.ColourTo(i, state);
+					state = SCE_C_DEFAULT;
+				} else if (ch == '\\') {
+					// Gobble up the quoted character
+					if (chNext == '\\' || chNext == '/') {
+						i++;
+						ch = chNext;
+						chNext = styler.SafeGetCharAt(i + 1);
+					}
+				}
 			} else if (state == SCE_C_VERBATIM) {
 				if (ch == '\"') {
 					if (chNext == '\"') {
@@ -247,6 +267,8 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			}
 		}
 		chPrev = ch;
+		if (ch != ' ' && ch != '\t')
+			chPrevNonWhite = ch;
 	}
 	styler.ColourTo(lengthDoc - 1, state);
 
