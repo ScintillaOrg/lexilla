@@ -158,6 +158,10 @@ SOURCE=..\src\LexBullant.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexCLW.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexConf.cxx
 # End Source File
 # Begin Source File
