@@ -55,6 +55,7 @@ WM_SETTEXT(&lt;unused&gt;, char *text)
 EM_GETLINE(int line, char *text)
 EM_REPLACESEL(&lt;unused&gt;, char *text)
 EM_SETREADONLY
+SCI_GETREADONLY
 EM_GETTEXTRANGE(&lt;unused&gt;, TEXTRANGE *tr)
 SCI_ADDTEXT(int length, char *s)
 SCI_ADDSTYLEDTEXT(int length, cell *s)
@@ -112,10 +113,10 @@ EM_CANUNDO
 EM_EMPTYUNDOBUFFER
 SCI_REDO
 SCI_CANREDO
-SCI_SETUNDOCOLLECTION(SC_UNDOCOLLECT_NONE | SC_UNDOCOLLECT_AUTOSTART | SC_UNDOCOLLECT_MANUALSTART)
+SCI_SETUNDOCOLLECTION(bool collectUndo)
+SCI_GETUNDOCOLLECTION
 SCI_BEGINUNDOACTION
 SCI_ENDUNDOACTION
-SCI_APPENDUNDOSTARTACTION
 </pre>
     <p>
        Scintilla has multiple level undo and redo. It will continue to collect undoable actions
@@ -123,10 +124,7 @@ SCI_APPENDUNDOSTARTACTION
       make it easier to undo and redo at a sensible level of detail. Sequences of actions can be
       combined into actions that are undone as a unit. These sequences occur between
       SCI_BEGINUNDOACTION and SCI_ENDUNDOACTION messages. These sequences can be nested and only
-      the top level sequences are undone as units.<br />
-       If undo collection is put into manual mode, then the SCI_APPENDUNDOSTARTACTION message
-      finishes any current sequence and starts a new sequence. This message and the corresponding
-      SC_UNDOCOLLECT_MANUALSTART are deprecated and only included for backward compatibility.
+      the top level sequences are undone as units.
     </p>
     <h3>
        Selection and information
@@ -333,6 +331,7 @@ SCI_SETFONT(char *fontname)
 SCI_SETSELFORE(bool useSelectionForeColour, int colour)
 SCI_SETSELBACK(bool useSelectionBackColour, int colour)
 SCI_SETCARETFORE(int colour)
+SCI_GETCARETFORE
 SCI_GETCARETPERIOD
 SCI_SETCARETPERIOD(int milliseconds)
 </pre>
@@ -395,6 +394,7 @@ SCI_GETMARGINSENSITIVEN(int margin)
     </h3>
 <pre>
 SCI_SETUSEPALETTE(bool allowPaletteUse)
+SCI_GETUSEPALETTE
 </pre>
     <p>
        On 8 bit displays, which can only display a maximum of 256 colours, the graphics environment
@@ -415,6 +415,7 @@ SCI_SETUSEPALETTE(bool allowPaletteUse)
     </p>
 <pre>
 SCI_SETBUFFEREDDRAW(bool isbuffered)
+SCI_GETBUFFEREDDRAW
 </pre>
     <p>
        Turns on or off buffered drawing. Buffered drawing draws each line into a bitmap rather than
@@ -451,6 +452,7 @@ SCI_GETCOLUMN(int position)
     </p>
 <pre>
 SCI_SETCODEPAGE(int codepage)
+SCI_GETCODEPAGE
 </pre>
     <p>
        Scintilla has some very simple Japanese DBCS (and probably Chinese and Korean) support. Use
@@ -947,6 +949,7 @@ SCN_KEY
 SCN_MODIFIED
 EN_CHANGE
 SCI_SETMODEVENTMASK(int eventmask)
+SCI_GETMODEVENTMASK
 </pre>
     <p>
        SCN_MODIFIED is fired when the document has been changed including changes to both the text

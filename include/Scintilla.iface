@@ -81,12 +81,9 @@ get int GetStyleAt=2010(position pos,)
 # Redoes the next action on the undo history
 fun void Redo=2011(,)
 
-val SC_UNDOCOLLECT_NONE=0
-val SC_UNDOCOLLECT_AUTOSTART=1
-
 # Choose between collecting actions into the undo 
 # history and discarding them.
-set void SetUndoCollection=2012(int collectUndo,)
+set void SetUndoCollection=2012(bool collectUndo,)
 
 # Select all the text in the document.
 fun void SelectAll=2013(,)
@@ -107,6 +104,9 @@ fun int MarkerLineFromHandle=2017(int handle,)
 
 # Delete a marker.
 fun void MarkerDeleteHandle=2018(int handle,)
+
+# Is undo history being collected?
+get bool GetUndoCollection=2019(,)
 
 val SCWS_INVISIBLE=0
 val SCWS_VISIBLEALWAYS=1
@@ -157,6 +157,9 @@ fun void StartStyling=2032(position pos, int mask)
 # Change style from current styling position for length characters to a style
 # and move the current styling position to after this newly styled segment.
 fun void SetStyling=2033(int length, int style)
+
+# Is drawing done first into a buffer or direct to the screen.
+get bool GetBufferedDraw=2034(,)
 
 # If drawing is buffered then each line of text is drawn into a bitmap buffer
 # before drawing it to the screen to avoid flicker.
@@ -466,6 +469,18 @@ get int GetHighlightGuide=2135(,)
 # Get the position after the last visible characters on a line.
 get int GetLineEndPosition=2136(int line,)
 
+# Get the code page used to interpret the bytes of the document as characters.
+get int GetCodePage=2137(,)
+
+# Get the foreground colour of the caret.
+get colour GetCaretFore=2138(,)
+
+# In palette mode?
+get bool GetUsePalette=2139(,)
+
+# In read-only mode?
+get bool GetReadOnly=2140(,)
+
 # Show a call tip containing a definition near position pos.
 fun void CallTipShow=2200(position pos, string definition)
 
@@ -757,6 +772,9 @@ fun int CreateDocument=2375(,)
 fun void AddRefDocument=2376(, int doc)
 # Release a reference to the document, deleting document if it fades to black.
 fun void ReleaseDocument=2377(, int doc)
+
+# Get which document modification events are sent to the container.
+get int GetModEventMask=2378(,)
 
 # Set the focus to this Scintilla widget.
 fun void GrabFocus=2400(,)

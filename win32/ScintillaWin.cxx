@@ -289,11 +289,11 @@ LRESULT ScintillaWin::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 
 	case WM_PAINT: {
 			//CElapsed ce; ce.Begin();
-			LARGE_INTEGER perfStart;
-			LARGE_INTEGER perfEnd;
-			LARGE_INTEGER performanceFreq;
-			QueryPerformanceFrequency(&performanceFreq);
-			QueryPerformanceCounter(&perfStart);
+			//LARGE_INTEGER perfStart;
+			//LARGE_INTEGER perfEnd;
+			//LARGE_INTEGER performanceFreq;
+			//QueryPerformanceFrequency(&performanceFreq);
+			//QueryPerformanceCounter(&perfStart);
 			paintState = painting;
 			PAINTSTRUCT ps;
 			BeginPaint(wMain.GetID(), &ps);
@@ -316,13 +316,13 @@ LRESULT ScintillaWin::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 				FullPaint();
 			}
 			paintState = notPainting;
-			QueryPerformanceCounter(&perfEnd);
-			__int64 start = perfStart.QuadPart;
-			__int64 end = perfEnd.QuadPart;
-			__int64 freq = performanceFreq.QuadPart;
-			__int64 dur = end - start;
-			double per = double(dur) / double(freq);
-			Platform::DebugPrintf("Paint took %5.03g\n", per);
+			//QueryPerformanceCounter(&perfEnd);
+			//__int64 start = perfStart.QuadPart;
+			//__int64 end = perfEnd.QuadPart;
+			//__int64 freq = performanceFreq.QuadPart;
+			//__int64 dur = end - start;
+			//double per = double(dur) / double(freq);
+			//Platform::DebugPrintf("Paint took %5.03g\n", per);
 			//Platform::DebugPrintf("Paint took %g\n", ce.End());
 		}
 		break;

@@ -3160,6 +3160,9 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		pdoc->SetReadOnly(wParam);
 		return TRUE;
 
+	case SCI_GETREADONLY:
+		return pdoc->IsReadOnly();
+
 	case EM_CANPASTE:
 		return 1;
 
@@ -3277,15 +3280,11 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		return 0;
 
 	case SCI_SETUNDOCOLLECTION:
-		pdoc->SetUndoCollection(static_cast<enum undoCollectionType>(wParam));
+		pdoc->SetUndoCollection(wParam);
 		return 0;
 
-#ifdef INCLUDE_DEPRECATED_FEATURES
-	case SCI_APPENDUNDOSTARTACTION:
-		// Not just deprecated - now dead
-		//pdoc->AppendUndoStartAction();
-		return 0;
-#endif
+	case SCI_GETUNDOCOLLECTION:
+		return pdoc->IsCollectingUndo();
 
 	case SCI_BEGINUNDOACTION:
 		pdoc->BeginUndoAction();
@@ -3424,18 +3423,12 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		pdoc->SetStyles(wParam, reinterpret_cast<char *>(lParam));
 		break;
 
-#ifdef INCLUDE_DEPRECATED_FEATURES
-	case SCI_SETMARGINWIDTH:
-		if (wParam < 100) {
-			vs.ms[1].width = wParam;
-		}
-		InvalidateStyleRedraw();
-		break;
-#endif
-
 	case SCI_SETBUFFEREDDRAW:
 		bufferedDraw = wParam;
 		break;
+
+	case SCI_GETBUFFEREDDRAW:
+		return bufferedDraw;
 
 	case SCI_SETTABWIDTH:
 		if (wParam > 0)
@@ -3509,19 +3502,16 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		pdoc->dbcsCodePage = wParam;
 		break;
 
-#ifdef INCLUDE_DEPRECATED_FEATURES
-	case SCI_SETLINENUMBERWIDTH:
-		if (wParam < 200) {
-			vs.ms[0].width = wParam;
-		}
-		InvalidateStyleRedraw();
-		break;
-#endif
+	case SCI_GETCODEPAGE:
+		return pdoc->dbcsCodePage;
 
 	case SCI_SETUSEPALETTE:
 		palette.allowRealization = wParam;
 		InvalidateStyleRedraw();
 		break;
+
+	case SCI_GETUSEPALETTE:
+		return palette.allowRealization;
 
 		// Marker definition and setting
 	case SCI_MARKERDEFINE:
@@ -3790,40 +3780,6 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		displayPopupMenu = wParam;
 		break;
 
-  #ifdef INCLUDE_DEPRECATED_FEATURES
-	case SCI_SETFORE:
-		vs.styles[STYLE_DEFAULT].fore.desired = Colour(wParam);
-		InvalidateStyleRedraw();
-		break;
-
-	case SCI_SETBACK:
-		vs.styles[STYLE_DEFAULT].back.desired = Colour(wParam);
-		InvalidateStyleRedraw();
-		break;
-
-	case SCI_SETBOLD:
-		vs.styles[STYLE_DEFAULT].bold = wParam;
-		InvalidateStyleRedraw();
-		break;
-
-	case SCI_SETITALIC:
-		vs.styles[STYLE_DEFAULT].italic = wParam;
-		InvalidateStyleRedraw();
-		break;
-
-	case SCI_SETSIZE:
-		vs.styles[STYLE_DEFAULT].size = wParam;
-		InvalidateStyleRedraw();
-		break;
-
-	case SCI_SETFONT:
-		if (wParam == 0)
-			return 0;
-		strcpy(vs.styles[STYLE_DEFAULT].fontName, reinterpret_cast<char *>(wParam));
-		InvalidateStyleRedraw();
-		break;
-#endif
-
 	case SCI_SETSELFORE:
 		vs.selforeset = wParam;
 		vs.selforeground.desired = Colour(lParam);
@@ -3840,6 +3796,9 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		vs.caretcolour.desired = Colour(wParam);
 		InvalidateStyleRedraw();
 		break;
+
+	case SCI_GETCARETFORE:
+		return vs.caretcolour.desired.AsLong();
 
 	case SCI_ASSIGNCMDKEY:
 		kmap.AssignCmdKey(LOWORD(wParam), HIWORD(wParam), lParam);
@@ -3996,6 +3955,9 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	case SCI_SETMODEVENTMASK:
 		modEventMask = wParam;
 		return 0;
+		
+	case SCI_GETMODEVENTMASK:
+		return modEventMask;
 		
 	case SCI_CONVERTEOLS:
 		pdoc->ConvertLineEnds(wParam);
