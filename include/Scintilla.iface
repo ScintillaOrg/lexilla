@@ -729,20 +729,17 @@ set void SetTargetEnd=2192(position pos,)
 get position GetTargetEnd=2193(,)
 
 # Replace the target text with the argument text.
-# If replacePatterns then looks for \d where d is between 1 and 9
-# and replaces these with the strings matched in the last search
-# operation which were surrounded by \( and \).
-# Returns the length of the replacement text including any change
-# caused by processing the \d patterns.
-fun int ReplaceTarget=2194(bool replacePatterns, string text)
-
-# Replace the target text with the argument text.
 # Text is counted so it can contain nulls.
-fun int ReplaceTargetCounted=2195(int length, string text)
+# Returns the length of the replacement text.
+fun int ReplaceTarget=2194(int length, string text)
 
 # Replace the target text with the argument text after \d processing.
 # Text is counted so it can contain nulls.
-fun int ReplaceTargetRECounted=2196(int length, string text)
+# Looks for \d where d is between 1 and 9 and replaces these with the strings 
+# matched in the last search operation which were surrounded by \( and \).
+# Returns the length of the replacement text including any change
+# caused by processing the \d patterns.
+fun int ReplaceTargetRE=2195(int length, string text)
 
 # Search for a counted string in the target and set the target to the found
 # range. Text is counted so it can contain nulls.
