@@ -114,6 +114,7 @@
 	<li>Ryan Christianson</li>
 	<li>Martin Steffensen</li>
 	<li>Jakub Vrána</li>
+	<li>The Black Horus</li>
     </ul>
     <p>
        Images used in GTK+ version
@@ -129,7 +130,94 @@
     </h3>
     <ul>
       <li>
-	Released on 30 October 2002.
+	Released on 31 October 2002.
+      </li>
+      <li>
+	Unicode supported on GTK+. To perform well, this added a font cache to GTK+
+	and to make that safe, a mutex is used. The mutex requires the application to link in
+	the threading library by evaluating `glib-config --libs gthread`. A Unicode locale
+	should also be set up by a call like setlocale(LC_CTYPE, "en_US.UTF-8").
+	scintilla_release_resources function added to release mutex.
+      </li>
+      <li>
+	FORTRAN and assembler lexers added along with other support for these
+	languages in SciTE.
+      </li>
+      <li>
+	Ada lexer improved handling of based numbers, identifier validity and attributes
+	distinguished from character literals.
+      </li>
+      <li>
+	Lua lexer handles block comments and a deep level of nesting for literal strings
+	and block comments.
+      </li>
+      <li>
+	Errorlist lexer recognises PHP error messages.
+      </li>
+      <li>
+	Variant of the C++ lexer with case insensitive keywords
+	called cppnocase. Whitespace in preprocessor text handled more correctly.
+      </li>
+      <li>
+	Folder added for Perl.
+      </li>
+      <li>
+	Compilation with GCC 3.2 supported.
+      </li>
+      <li>
+	Markers can be pixmaps.
+      </li>
+      <li>
+	Lines are wrapped when printing.
+	Bug fixed which printed line numbers in different styles.
+      </li>
+      <li>
+	Text can be appended to end with AppendText method.
+      </li>
+      <li>
+	ChooseCaretX method added.
+      </li>
+      <li>
+	Vertical scroll bar can be turned off with SetVScrollBar method.
+      </li>
+      <li>
+	SciTE Save All command saves all buffers.
+      </li>
+      <li>
+	SciTE localisation compares keys case insensitively to make translations more flexible.
+      </li>
+      <li>
+	SciTE detects a utf-8 coding cookie "coding: utf-8" in first two
+	lines and goes into Unicode mode.
+      </li>
+      <li>
+	SciTE key bindings are definable.
+      </li>
+      <li>
+	SciTE Find in Files dialog can display directory browser to
+	choose directory to search.
+      </li>
+      <li>
+	SciTE enabling of undo and redo toolbar buttons improved.
+      </li>
+      <li>
+	Fixed crashing bug when using automatic tag closing in XML or HTML.
+      </li>
+      <li>
+	Fixed bug on Windows causing very long (&gt;64K) lines to not display.
+      </li>
+      <li>
+	Fixed bug in backwards regular expression searching.
+      </li>
+      <li>
+	Fixed bug in calltips where wrong argument was highlighted.
+      </li>
+      <li>
+	Fixed bug in tab timmy feature when file has line feed line endings.
+      </li>
+      <li>
+	Fixed bug in compiling without INCLUDE_DEPRECATED_FEATURES
+	defined.
       </li>
     </ul>
     <h3>
