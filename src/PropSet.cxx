@@ -228,7 +228,7 @@ SString PropSet::GetWild(const char *keybase, const char *filename) {
 						*cpendvar = '\0';
 						SString s = GetExpanded(orgkeyfile + 2);
 						*cpendvar = ')';
-						keyfile = strdup(s.c_str());
+						keyfile = StringDup(s.c_str());
 					}
 				}
 				char *keyptr = keyfile;
@@ -245,12 +245,12 @@ SString PropSet::GetWild(const char *keybase, const char *filename) {
 					if (*keyfile == '*') {
 						if (IsSuffixCaseInsensitive(filename, keyfile + 1)) {
 							*del = delchr;
-							free(keyptr);
+							delete []keyptr;
 							return p->val;
 						}
 					} else if (0 == strcmp(keyfile, filename)) {
 						*del = delchr;
-						free(keyptr);
+						delete []keyptr;
 						return p->val;
 					}
 					if (delchr == '\0')
@@ -258,7 +258,7 @@ SString PropSet::GetWild(const char *keybase, const char *filename) {
 					*del = delchr;
 					keyfile = del + 1;
 				}
-				free(keyptr);
+				delete []keyptr;
 
 				if (0 == strcmp(p->key, keybase)) {
 					return p->val;
@@ -364,7 +364,7 @@ void WordList::Clear() {
 	if (words) {
 		delete []list;
 		delete []words;
-		free(wordsNoCase);
+		delete []wordsNoCase;
 	}
 	words = 0;
 	wordsNoCase = 0;
@@ -377,7 +377,7 @@ void WordList::Set(const char *s) {
 	list = StringDup(s);
 	sorted = false;
 	words = ArrayFromWordList(list, &len, onlyLineEnds);
-	wordsNoCase = (char**) malloc ((len + 1) * sizeof (*wordsNoCase));
+	wordsNoCase = new char * [len + 1];
 	memcpy(wordsNoCase, words, (len + 1) * sizeof (*words));
 }
 
@@ -390,7 +390,7 @@ char *WordList::Allocate(int size) {
 void WordList::SetFromAllocated() {
 	sorted = false;
 	words = ArrayFromWordList(list, &len, onlyLineEnds);
-	wordsNoCase = (char**) malloc ((len + 1) * sizeof (*wordsNoCase));
+	wordsNoCase = new char * [len + 1];
 	memcpy(wordsNoCase, words, (len + 1) * sizeof (*words));
 }
 
@@ -463,32 +463,103 @@ const char *WordList::GetNearestWord(const char *wordStart, int searchLen /*= -1
 		sorted = true;
 		SortWordList(words, wordsNoCase, len);
 	}
-	if (ignoreCase)
+	if (ignoreCase) {
 		while (start <= end) { // binary searching loop
 			pivot = (start + end) >> 1;
 			word = wordsNoCase[pivot];
 			cond = CompareNCaseInsensitive(wordStart, word, searchLen);
 			if (!cond && nonFuncChar(word[searchLen])) // maybe there should be a "non-word character" test here?
 				return word; // result must not be freed with free()
-			else if (cond >= 0)
+			else if (cond > 0)
 				start = pivot + 1;
-			else if (cond < 0)
+			else if (cond <= 0)
 				end = pivot - 1;
 		}
-	else // preserve the letter case
+	} else { // preserve the letter case
 		while (start <= end) { // binary searching loop
 			pivot = (start + end) >> 1;
 			word = words[pivot];
 			cond = strncmp(wordStart, word, searchLen);
 			if (!cond && nonFuncChar(word[searchLen])) // maybe there should be a "non-word character" test here?
 				return word; // result must not be freed with free()
-			else if (cond >= 0)
+			else if (cond > 0)
 				start = pivot + 1;
-			else if (cond < 0)
+			else if (cond <= 0)
 				end = pivot - 1;
 		}
+	}
 	return NULL;
 }
+
+/** 
+ * Find the length of a 'word' which is actually an identifier in a string 
+ * which looks like "identifier(..." or "identifier:" or "identifier" and where
+ * there may be extra spaces after the identifier that should not be 
+ * counted in the length.
+ */
+static unsigned int LengthWord(const char *word, char otherSeparator) {
+	// Find a '(', or ':'. If that fails go to the end of the string.
+ 	const char *endWord = strchr(word, '(');
+	if (!endWord)
+		endWord = strchr(word, ':');
+	if (!endWord && otherSeparator)
+		endWord = strchr(word, otherSeparator);
+	if (!endWord)
+		endWord = word + strlen(word);
+	// Last case always succeeds so endWord != 0
+	
+	// Drop any space characters.
+	if (endWord > word) {
+		endWord--;	// Back from the '(', ':', or '\0'
+		// Move backwards over any spaces
+		while ((endWord > word) && (isspace(*endWord))) {
+			endWord--;
+		}
+	}
+	return endWord - word;
+}
+
+/**
+ * Accumulate words in a space separated string
+ */
+class WordAccumulator {
+	/// How many characters will be pre-allocated (to avoid buffer reallocation on each new word)
+	enum {wordChunk = 100};
+	/// Length of the returned buffer of words (string)
+	unsigned int length; 
+	/// Allocated size of the buffer
+	unsigned int size;
+public:
+	/// Buffer for the words returned - this must be freed by client using delete[].
+	char *buffer; 
+	WordAccumulator() : length(0), size(wordChunk), buffer(0) {
+		buffer = new char[size];
+		if (buffer)
+			buffer[0] = '\0';
+	}
+	void Append(const char *word, unsigned int wordLen) {
+		if (!buffer)
+			return;
+		unsigned int newLength = length + wordLen; // stretch the buffer
+		if (length)
+			newLength++;
+		if (newLength >= size) {
+			unsigned int newSize = (((newLength+1) / wordChunk) + 1) * wordChunk;
+			char *newBuffer = new char[newSize];
+			if (!newBuffer)
+				return;
+			memcpy(newBuffer, buffer, length);
+			delete []buffer;
+			buffer = newBuffer;
+			size = newSize;
+		}
+		if (length) // append a new entry
+			buffer[length++] = ' ';
+		memcpy(buffer + length, word, wordLen);
+		length = newLength;
+		buffer[length] = '\0';
+	}
+};
 
 /**
  * Returns elements (first words of them) of the wordlist array which have
@@ -498,23 +569,21 @@ const char *WordList::GetNearestWord(const char *wordStart, int searchLen /*= -1
  * If there are more words meeting the condition they are returned all of
  * them in the ascending order separated with spaces.
  *
- * NOTE: returned buffer has to be freed with a free() call.
+ * NOTE: returned buffer has to be freed with delete[].
  */
-char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, bool ignoreCase /*= false*/) {
+char *WordList::GetNearestWords(
+	const char *wordStart, 
+	int searchLen /*= -1*/, 
+	bool ignoreCase /*= false*/, 
+	char otherSeparator /*= '\0'*/) {
 	int wordlen; // length of the word part (before the '(' brace) of the api array element
-	int length = 0; // length of the returned buffer of words (string)
-	int newlength; // length of the new buffer before the reallocating itself
-#undef WORDCHUNK // how many characters will be pre-allocated (to avoid buffer reallocation on each new word)
-#define WORDCHUNK 100
-	int size = WORDCHUNK; // real size of the returned buffer of words
-	char *buffer; // buffer for the words returned
+	WordAccumulator wordsNear;
 	int start = 0; // lower bound of the api array block to search
 	int end = len - 1; // upper bound of the api array block to search
 	int pivot; // index of api array element just being compared
 	int cond; // comparison result (in the sense of strcmp() result)
 	int oldpivot; // pivot storage to be able to browse the api array upwards and then downwards
 	const char *word; // api array element just being compared
-	const char *brace; // position of the opening brace in the api array element just being compared
 
 	if (0 == words)
 		return NULL;
@@ -522,9 +591,7 @@ char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, b
 		sorted = true;
 		SortWordList(words, wordsNoCase, len);
 	}
-	buffer = (char*) malloc(size);
-	*buffer = '\0';
-	if (ignoreCase)
+	if (ignoreCase) {
 		while (start <= end) { // binary searching loop
 			pivot = (start + end) >> 1;
 			word = wordsNoCase[pivot];
@@ -532,34 +599,8 @@ char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, b
 			if (!cond) {
 				oldpivot = pivot;
 				do { // browse sequentially the rest after the hit
-					brace = strchr(word, '(');
-					if (brace)
-						do
-							if (--brace < word)
-								break;
-						while (isspace(*brace));
-					else {
-						brace = word + strlen(word);
-						do
-							if (--brace < word)
-								break;
-						while (isspace(*brace));
-					}
-					wordlen = brace - word + 1;
-					newlength = length + wordlen; // stretch the buffer
-					if (length)
-						newlength++;
-					if (newlength >= size) {
-						do
-							size += WORDCHUNK;
-						while (size <= newlength);
-						buffer = (char*) realloc(buffer, size);
-					}
-					if (length) // append a new entry
-						buffer[length++] = ' ';
-					memcpy(buffer + length, word, wordlen);
-					length = newlength;
-					buffer[length] = '\0';
+					wordlen = LengthWord(word, otherSeparator) + 1;
+					wordsNear.Append(word, wordlen);
 					if (++pivot > end)
 						break;
 					word = wordsNoCase[pivot];
@@ -572,43 +613,17 @@ char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, b
 					word = wordsNoCase[pivot];
 					if (CompareNCaseInsensitive(wordStart, word, searchLen))
 						break;
-					brace = strchr(word, '(');
-					if (brace)
-						do
-							if (--brace < word)
-								break;
-						while (isspace(*brace));
-					else {
-						brace = word + strlen(word);
-						do
-							if (--brace < word)
-								break;
-						while (isspace(*brace));
-					}
-					wordlen = brace - word + 1;
-					newlength = length + wordlen; // stretch the buffer
-					if (length)
-						newlength++;
-					if (newlength >= size) {
-						do
-							size += WORDCHUNK;
-						while (size <= newlength);
-						buffer = (char*) realloc(buffer, size);
-					}
-					if (length) // append a new entry
-						buffer[length++] = ' ';
-					memcpy(buffer + length, word, wordlen);
-					length = newlength;
-					buffer[length] = '\0';
+					wordlen = LengthWord(word, otherSeparator) + 1;
+					wordsNear.Append(word, wordlen);
 				}
-				return buffer; // result has to be freed with free()
+				return wordsNear.buffer;
 			}
 			else if (cond < 0)
 				end = pivot - 1;
 			else if (cond > 0)
 				start = pivot + 1;
 		}
-	else // preserve the letter case
+	} else {	// preserve the letter case
 		while (start <= end) { // binary searching loop
 			pivot = (start + end) >> 1;
 			word = words[pivot];
@@ -616,34 +631,8 @@ char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, b
 			if (!cond) {
 				oldpivot = pivot;
 				do { // browse sequentially the rest after the hit
-					brace = strchr(word, '(');
-					if (brace)
-						do
-							if (--brace < word)
-								break;
-						while (isspace(*brace));
-					else {
-						brace = word + strlen(word);
-						do
-							if (--brace < word)
-								break;
-						while (isspace(*brace));
-					}
-					wordlen = brace - word + 1;
-					newlength = length + wordlen; // stretch the buffer
-					if (length)
-						newlength++;
-					if (newlength >= size) {
-						do
-							size += WORDCHUNK;
-						while (size <= newlength);
-						buffer = (char*) realloc(buffer, size);
-					}
-					if (length) // append a new entry
-						buffer[length++] = ' ';
-					memcpy(buffer + length, word, wordlen);
-					length = newlength;
-					buffer[length] = '\0';
+					wordlen = LengthWord(word, otherSeparator) + 1;
+					wordsNear.Append(word, wordlen);
 					if (++pivot > end)
 						break;
 					word = words[pivot];
@@ -656,42 +645,17 @@ char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, b
 					word = words[pivot];
 					if (strncmp(wordStart, word, searchLen))
 						break;
-					brace = strchr(word, '(');
-					if (brace)
-						do
-							if (--brace < word)
-								break;
-						while (isspace(*brace));
-					else {
-						brace = word + strlen(word);
-						do
-							if (--brace < word)
-								break;
-						while (isspace(*brace));
-					}
-					wordlen = brace - word + 1;
-					newlength = length + wordlen; // stretch the buffer
-					if (length)
-						newlength++;
-					if (newlength >= size) {
-						do
-							size += WORDCHUNK;
-						while (size <= newlength);
-						buffer = (char*) realloc(buffer, size);
-					}
-					if (length) // append a new entry
-						buffer[length++] = ' ';
-					memcpy(buffer + length, word, wordlen);
-					length = newlength;
-					buffer[length] = '\0';
+					wordlen = LengthWord(word, otherSeparator) + 1;
+					wordsNear.Append(word, wordlen);
 				}
-				return buffer; // result has to be freed with free()
+				return wordsNear.buffer;
 			}
 			else if (cond < 0)
 				end = pivot - 1;
 			else if (cond > 0)
 				start = pivot + 1;
 		}
-	free(buffer);
+	}
+	delete []wordsNear.buffer;
 	return NULL;
 }
