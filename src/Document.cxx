@@ -868,18 +868,6 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 		int pos = -1;
 		int lenRet = 0;
 		char searchEnd = s[*length - 1];
-		if ((increment == 1) && (*length == 1)) {
-			// These produce empty selections so nudge them on if needed
-			if (s[0] == '^') {
-				if (startPos == LineStart(lineRangeStart))
-					startPos++;
-			} else if (s[0] == '$') {
-				if ((startPos == LineEnd(lineRangeStart)) && (lineRangeStart < lineRangeEnd))
-					startPos = LineStart(lineRangeStart + 1);
-			}
-			lineRangeStart = LineFromPosition(startPos);
-			lineRangeEnd = LineFromPosition(endPos);
-		}
 		int lineRangeBreak = lineRangeEnd + increment;
 		for (int line = lineRangeStart; line != lineRangeBreak; line += increment) {
 			int startOfLine = LineStart(line);
