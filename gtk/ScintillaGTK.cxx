@@ -10,6 +10,9 @@
 #include <time.h>
 
 #include "Platform.h"
+#ifdef _MSC_VER
+#include "Windows.h"
+#endif
 
 #include "Scintilla.h"
 #include "ScintillaWidget.h"
@@ -59,6 +62,10 @@ class ScintillaGTK : public ScintillaBase {
 	GtkWidgetClass *parentClass;
 
 	static GdkAtom clipboard_atom;
+ 
+#ifdef _MSC_VER       
+	CLIPFORMAT cfColumnSelect;
+#endif
 
 	// Input context used for supporting internationalized key entry
 	GdkIC *ic;
@@ -191,6 +198,13 @@ ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 		ic(NULL), ic_attr(NULL) {
 	sci = sci_;
 	wMain = GTK_WIDGET(sci);
+
+#ifdef _MSC_VER       
+ 	// There does not seem to be a real standard for indicating that the clipboard
+	// contains a rectangular selection, so copy Developer Studio.
+	cfColumnSelect = static_cast<CLIPFORMAT>(
+		::RegisterClipboardFormat("MSDEVColumnSelect"));
+#endif
 
 	Initialise();
 }
@@ -735,6 +749,13 @@ void ScintillaGTK::Copy() {
 		gtk_selection_owner_set(GTK_WIDGET(wMain.GetID()),
 		                        clipboard_atom,
 		                        GDK_CURRENT_TIME);
+#ifdef _MSC_VER              
+		if (selType == selRectangle) {
+			::OpenClipboard(NULL);
+			::SetClipboardData(cfColumnSelect, 0);
+			::CloseClipboard();
+		}
+#endif              
 	}
 }
 
@@ -808,18 +829,47 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 		        (selection_data->length > 0)) {
 			char *ptr = reinterpret_cast<char *>(selection_data->data);
 			unsigned int len = selection_data->length;
-			for (unsigned int i = 0; i < static_cast<unsigned int>(selection_data->length); i++) {
+			unsigned int i;
+			for (i = 0; i < static_cast<unsigned int>(selection_data->length); i++) {
 				if ((len == static_cast<unsigned int>(selection_data->length)) && (0 == ptr[i]))
 					len = i;
+			}                     
+#ifdef _MSC_VER
+			/* Need to convert \n to correct newline form for this file as win32gtk always returns */
+			/* only \n line delimiter from clipboard */
+			char *tmpstr = (char *) malloc(2 * len);
+			char *dptr = tmpstr;
+			char *sptr = ptr;
+			unsigned int newlen = len;                     
+			for (i = 0; i < len; i++) {
+				if (*sptr == '\n') {
+					if (pdoc->eolMode != SC_EOL_LF)
+						*dptr++ = '\r';
+					if (pdoc->eolMode != SC_EOL_CR)
+						*dptr++ = '\n';
+					if (pdoc->eolMode == SC_EOL_CRLF)
+						newlen++;
+					sptr++;
+				}
+				else {
+					*dptr++ = *sptr++;
+				}
 			}
+			ptr = tmpstr;
+			len = newlen;
+#endif
 			pdoc->BeginUndoAction();
 			int selStart = SelectionStart();
 			if (selection_data->selection != GDK_SELECTION_PRIMARY) {
 				ClearSelection();
 			}
 			// Check for "\n\0" ending to string indicating that selection is rectangular
+#ifndef _MSC_VER
 			bool isRectangular = ((selection_data->length > 1) &&
 			                      (ptr[selection_data->length - 1] == 0 && ptr[selection_data->length - 2] == '\n'));
+#else
+			bool isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect);
+#endif
 			if (isRectangular) {
 				PasteRectangular(selStart, ptr, len);
 			} else {
@@ -827,6 +877,9 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 				SetEmptySelection(currentPos + len);
 			}
 			pdoc->EndUndoAction();
+#ifdef _MSC_VER
+			free(tmpstr);
+#endif
 		}
 	}
 	Redraw();
@@ -838,8 +891,12 @@ void ScintillaGTK::ReceivedDrop(GtkSelectionData *selection_data) {
 		if (selection_data->length > 0) {
 			char *ptr = reinterpret_cast<char *>(selection_data->data);
 			// 3rd argument is false because the deletion of the moved data is handle by GetSelection
+#ifndef _MSC_VER                     
 			bool isRectangular = ((selection_data->length > 1) &&
 			                      (ptr[selection_data->length - 1] == 0 && ptr[selection_data->length - 2] == '\n'));
+#else
+			bool isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect);
+#endif
 			DropAt(posDrop, ptr, false, isRectangular);
 		}
 	} else {
@@ -867,6 +924,29 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, ch
 			selBuffer = tmpBuffer;
 		}
 	}
+
+#ifdef _MSC_VER
+	// win32gtk requires \n delimited lines and doesn't work right with
+	// other line formats, so make a copy of the clip text now with 
+	// newlines converted
+	char *tmpstr = (char *) malloc(strlen(selBuffer));
+	char *sptr = selBuffer;
+	char *dptr = tmpstr;
+	while (*sptr != '\0') {
+		if (pdoc->eolMode == SC_EOL_CR && *sptr == '\r') {
+			*dptr++ = '\n';
+			sptr++;
+		}
+		else if (pdoc->eolMode != SC_EOL_CR && *sptr == '\r') {
+			sptr++;
+		}
+		else {
+			*dptr++ = *sptr++;
+		}
+	}
+	*dptr = '\0';       
+	selBuffer = tmpstr;
+#endif
 
 	if (info == TARGET_STRING) {
 		int len = strlen(selBuffer);
@@ -897,6 +977,9 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, ch
 	}
 
 	delete []tmpBuffer;
+#ifdef _MSC_VER
+	free(tmpstr);
+#endif
 }
 
 void ScintillaGTK::UnclaimSelection(GdkEventSelection *selection_event) {
