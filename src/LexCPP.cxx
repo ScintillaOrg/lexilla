@@ -328,7 +328,6 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 	}
 	styler.ColourTo(lengthDoc - 1, state);
 	styler.Flush();
-	FoldCppDoc(startPos, length, initStyle, keywordlists, styler);
 }
 
-LexerModule lmCPP(SCLEX_CPP, ColouriseCppDoc);
+LexerModule lmCPP(SCLEX_CPP, ColouriseCppDoc, "cpp", FoldCppDoc);

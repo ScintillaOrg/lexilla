@@ -40,9 +40,12 @@ protected:
 	
 #ifdef SCI_LEXER
 	int lexLanguage;
+	LexerModule *lexCurrent;
 	PropSet props;
 	enum {numWordLists=5};
 	WordList *keyWordLists[numWordLists];
+	void SetLexer(uptr_t wParam);
+	void SetLexerLanguage(const char *languageName);
 	void Colourise(int start, int end);
 #endif
 

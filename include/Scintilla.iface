@@ -1102,6 +1102,9 @@ set void SetProperty=4004(string key, string value)
 # Set up the key words used by the lexer.
 set void SetKeyWords=4005(int keywordSet, string keyWords)
 
+# Set the lexing language of the document based on string name.
+set void SetLexerLanguage=4006(, string language)
+
 # Notifications
 # Type of modification and the action which caused the modification
 # These are defined as a bit mask to make it easy to specify which notifications are wanted.
@@ -1174,6 +1177,9 @@ val SCLEX_CONF=17
 val SCLEX_PASCAL=18
 val SCLEX_AVE=19
 val SCLEX_ADA=20
+# When a lexer specifies its language as SCLEX_AUTOMATIC it receives a 
+# value assigned in sequence from SCLEX_AUTOMATIC+1.
+val SCLEX_AUTOMATIC=1000
 # Lexical states for SCLEX_PYTHON
 val SCE_P_DEFAULT=0
 val SCE_P_COMMENTLINE=1

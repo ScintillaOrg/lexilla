@@ -411,6 +411,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_COLOURISE 4003
 #define SCI_SETPROPERTY 4004
 #define SCI_SETKEYWORDS 4005
+#define SCI_SETLEXERLANGUAGE 4006
 #define SC_MOD_INSERTTEXT 0x1
 #define SC_MOD_DELETETEXT 0x2
 #define SC_MOD_CHANGESTYLE 0x4

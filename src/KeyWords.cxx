@@ -20,31 +20,69 @@
 #include "SciLexer.h"
 
 LexerModule *LexerModule::base = 0;
+int LexerModule::nextLanguage = SCLEX_AUTOMATIC+1;
 
-LexerModule::LexerModule(int language_, LexerFunction fn_) :
-	language(language_), fn(fn_) {
+LexerModule::LexerModule(int language_, LexerFunction fnLexer_,
+	const char *languageName_, LexerFunction fnFolder_) :
+	language(language_), 
+	languageName(languageName_), 
+	fnLexer(fnLexer_), 
+	fnFolder(fnFolder_) {
 	next = base;
 	base = this;
+	if (language == SCLEX_AUTOMATIC) {
+		language = nextLanguage;
+		nextLanguage++;
+	}
 }
 
-void LexerModule::Colourise(unsigned int startPos, int lengthDoc, int initStyle,
-		int language, WordList *keywordlists[], Accessor &styler) {
+LexerModule *LexerModule::Find(int language) {
 	LexerModule *lm = base;
 	while (lm) {
 		if (lm->language == language) {
-			lm->fn(startPos, lengthDoc, initStyle, keywordlists, styler);
-			return;
+			return lm;
 		}
 		lm = lm->next;
 	}
-	// Unknown language
+	return 0;
+}
+
+LexerModule *LexerModule::Find(const char *languageName) {
+	if (languageName) {
+		LexerModule *lm = base;
+		while (lm) {
+			if (lm->languageName && 0 == strcmp(lm->languageName, languageName)) {
+				return lm;
+			}
+			lm = lm->next;
+		}
+	}
+	return 0;
+}
+
+void LexerModule::Lex(unsigned int startPos, int lengthDoc, int initStyle,
+	  WordList *keywordlists[], Accessor &styler) {
+	if (fnLexer)
+		fnLexer(startPos, lengthDoc, initStyle, keywordlists, styler);
+}
+
+void LexerModule::Fold(unsigned int startPos, int lengthDoc, int initStyle,
+	  WordList *keywordlists[], Accessor &styler) {
+	if (fnFolder)
+		fnFolder(startPos, lengthDoc, initStyle, keywordlists, styler);
+}
+
+static void ColouriseNullDoc(unsigned int startPos, int length, int, WordList *[],
+                            Accessor &styler) {
 	// Null language means all style bytes are 0 so just mark the end - no need to fill in.
-	if (lengthDoc > 0) {
-		styler.StartAt(startPos + lengthDoc - 1);
-		styler.StartSegment(startPos + lengthDoc - 1);
-		styler.ColourTo(startPos + lengthDoc - 1, 0);
+	if (length > 0) {
+		styler.StartAt(startPos + length - 1);
+		styler.StartSegment(startPos + length - 1);
+		styler.ColourTo(startPos + length - 1, 0);
 	}
 }
+
+LexerModule lmNull(SCLEX_NULL, ColouriseNullDoc, "null");
 
 #ifdef __vms
 
@@ -55,6 +93,7 @@ void LexerModule::Colourise(unsigned int startPos, int lengthDoc, int initStyle,
 // Taken from wxWindow's stc.cpp. Walter.
 
 int wxForceScintillaLexers(void) {
+  extern LexerModule lmAda;
   extern LexerModule lmCPP;
   extern LexerModule lmHTML;
   extern LexerModule lmXML;
@@ -68,7 +107,8 @@ int wxForceScintillaLexers(void) {
   extern LexerModule lmVB;
 
   if (
-      &lmCPP
+      &lmAda
+      && &lmCPP
       && &lmHTML
       && &lmXML
       && &lmProps

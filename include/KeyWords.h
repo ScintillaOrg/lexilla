@@ -9,17 +9,30 @@ typedef void (*LexerFunction)(unsigned int startPos, int lengthDoc, int initStyl
                   WordList *keywordlists[], Accessor &styler);
                   
 /**
+ * A LexerModule is responsible for lexing and folding a particular language.
+ * The class maintains a list of LexerModules which can be searched to find a
+ * module appropriate to a particular language.
  */
 class LexerModule {
-	static LexerModule *base;
 	LexerModule *next;
 	int language;
-	LexerFunction fn;
+	const char *languageName;
+	LexerFunction fnLexer;
+	LexerFunction fnFolder;
+	
+	static LexerModule *base;
+	static int nextLanguage;
 
 public:
-	LexerModule(int language_, LexerFunction fn_);
-	static void Colourise(unsigned int startPos, int lengthDoc, int initStyle,
-                  int language, WordList *keywordlists[], Accessor &styler);
+	LexerModule(int language_, LexerFunction fnLexer_, 
+		const char *languageName_=0, LexerFunction fnFolder_=0);
+	int GetLanguage() { return language; }
+	void Lex(unsigned int startPos, int lengthDoc, int initStyle,
+                  WordList *keywordlists[], Accessor &styler);
+	void Fold(unsigned int startPos, int lengthDoc, int initStyle,
+                  WordList *keywordlists[], Accessor &styler);
+	static LexerModule *Find(int language);
+	static LexerModule *Find(const char *languageName);
 };
 
 /**

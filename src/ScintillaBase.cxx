@@ -38,6 +38,7 @@ ScintillaBase::ScintillaBase() {
 	listType = 0;
 #ifdef SCI_LEXER
 	lexLanguage = SCLEX_CONTAINER;
+	lexCurrent = 0;
 	for (int wl = 0;wl < numWordLists;wl++)
 		keyWordLists[wl] = new WordList;
 #endif
@@ -338,6 +339,22 @@ void ScintillaBase::ButtonDown(Point pt, unsigned int curTime, bool shift, bool 
 }
 
 #ifdef SCI_LEXER
+void ScintillaBase::SetLexer(uptr_t wParam) {
+	lexLanguage = wParam;
+	lexCurrent = LexerModule::Find(lexLanguage);
+	if (!lexCurrent)
+		lexCurrent = LexerModule::Find(SCLEX_NULL);
+}
+
+void ScintillaBase::SetLexerLanguage(const char *languageName) {
+	lexLanguage = SCLEX_CONTAINER;
+	lexCurrent = LexerModule::Find(languageName);
+	if (!lexCurrent)
+		lexCurrent = LexerModule::Find(SCLEX_NULL);
+	if (lexCurrent)
+		lexLanguage = lexCurrent->GetLanguage();
+}
+
 void ScintillaBase::Colourise(int start, int end) {
 	int lengthDoc = pdoc->Length();
 	if (end == -1)
@@ -352,8 +369,12 @@ void ScintillaBase::Colourise(int start, int end) {
 		styleStart = styler.StyleAt(start - 1);
 	styler.SetCodePage(pdoc->dbcsCodePage);
 
-	LexerModule::Colourise(start, len, styleStart, lexLanguage, keyWordLists, styler);
-	styler.Flush();
+	if (lexCurrent) {	// Should always succeed as null lexer should always be available
+		lexCurrent->Lex(start, len, styleStart, keyWordLists, styler);
+		styler.Flush();
+		lexCurrent->Fold(start, len, styleStart, keyWordLists, styler);
+		styler.Flush();
+	}
 }
 #endif
 
@@ -482,6 +503,7 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 
 #ifdef SCI_LEXER
 	case SCI_SETLEXER:
+		SetLexer(wParam);
 		lexLanguage = wParam;
 		break;
 
@@ -504,6 +526,11 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 			keyWordLists[wParam]->Set(reinterpret_cast<const char *>(lParam));
 		}
 		break;
+
+	case SCI_SETLEXERLANGUAGE:
+		SetLexerLanguage(reinterpret_cast<const char *>(lParam));
+		break;
+
 #endif
 
 	default:
