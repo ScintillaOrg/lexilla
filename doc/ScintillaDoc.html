@@ -2934,7 +2934,11 @@ struct TextToFind {
      <a class="message" href="#SCI_CALLTIPSETHLT">SCI_CALLTIPSETHLT(int highlightStart, int
     highlightEnd)</a><br />
      <a class="message" href="#SCI_CALLTIPSETBACK">SCI_CALLTIPSETBACK(int colour)</a><br />
+     <a class="message" href="#SCI_CALLTIPSETFORE">SCI_CALLTIPSETFORE(int colour)</a><br />
+     <a class="message" href="#SCI_CALLTIPSETFOREHLT">SCI_CALLTIPSETFOREHLT(int colour)</a><br />
     </code>
+
+
 
     <p><b id="SCI_CALLTIPSHOW">SCI_CALLTIPSHOW(int posStart, const char *definition)</b><br />
      This message starts the process by displaying the call tip window. If a call tip is already
@@ -2965,14 +2969,22 @@ struct TextToFind {
     required.</p>
 
     <p>Unhighlighted text is drawn in a mid gray. Selected text is drawn in a dark blue. The
-    default background is white, but this can be changed with <code>SCI_CALLTIPSETBACK</code>. The
-    only way to change the text colours is to edit the Scintilla source file
-    <code>CallTip.cxx</code>.</p>
+    background is white. These can be changed with
+    <code>SCI_CALLTIPSETBACK</code>,
+    <code>SCI_CALLTIPSETFORE</code>, and
+    <code>SCI_CALLTIPSETFOREHLT</code>.
+    </p>
 
     <p><b id="SCI_CALLTIPSETBACK">SCI_CALLTIPSETBACK(int colour)</b><br />
      The background colour of call tips can be set with this message; the default colour is white.
     It is not a good idea to set a dark colour as the background as the unselected text is drawn in
     mid gray and the selected text in a dark blue.</p>
+
+    <p><b id="SCI_CALLTIPSETFORE">SCI_CALLTIPSETFORE(int colour)</b><br />
+     The colour of call tip text can be set with this message; the default colour is mid gray.</p>
+
+    <p><b id="SCI_CALLTIPSETFOREHLT">SCI_CALLTIPSETFOREHLT(int colour)</b><br />
+     The colour of highlighted call tip text can be set with this message; the default colour is dark blue.</p>
 
     <h2 id="KeyboardCommands">Keyboard commands</h2>
 
