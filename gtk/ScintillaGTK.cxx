@@ -1118,6 +1118,17 @@ void ScintillaGTK::Resize(int width, int height) {
 	ChangeSize();
 }
 
+static void SetAdjustmentValue(GtkObject *object, int value) {
+	GtkAdjustment *adjustment = GTK_ADJUSTMENT(object);
+	int maxValue = static_cast<int>(
+		adjustment->upper - adjustment->page_size);
+	if (value > maxValue)
+		value = maxValue;
+	if (value < 0)
+		value = 0;
+	gtk_adjustment_set_value(adjustment, value);
+}
+
 gint ScintillaGTK::PressThis(GdkEventButton *event) {
 	//Platform::DebugPrintf("Press %x time=%d state = %x button = %x\n",this,event->time, event->state, event->button);
 	// Do not use GTK+ double click events as Scintilla has its own double click detection
@@ -1169,19 +1180,15 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 	} else if (event->button == 4) {
 		// Wheel scrolling up (only xwin gtk does it this way)
 		if (ctrl)
-			gtk_adjustment_set_value(GTK_ADJUSTMENT(adjustmenth), (
-			                             (xOffset) / 2 ) - 6);
+			SetAdjustmentValue(adjustmenth, (xOffset / 2) - 6);
 		else
-			gtk_adjustment_set_value(GTK_ADJUSTMENT(adjustmentv),
-			                         topLine - 3);
-	} else if ( event->button == 5 ) {
+			SetAdjustmentValue(adjustmentv, topLine - 3);
+	} else if (event->button == 5) {
 		// Wheel scrolling down (only xwin gtk does it this way)
 		if (ctrl)
-			gtk_adjustment_set_value(GTK_ADJUSTMENT(adjustmenth), (
-			                             (xOffset) / 2 ) + 6);
+			SetAdjustmentValue(adjustmenth, (xOffset / 2) + 6);
 		else
-			gtk_adjustment_set_value(GTK_ADJUSTMENT(adjustmentv),
-			                         topLine + 3);
+			SetAdjustmentValue(adjustmentv, topLine + 3);
 	}
 	return FALSE;
 }
@@ -1477,13 +1484,11 @@ gint ScintillaGTK::Expose(GtkWidget *, GdkEventExpose *ose, ScintillaGTK *sciThi
 }
 
 void ScintillaGTK::ScrollSignal(GtkAdjustment *adj, ScintillaGTK *sciThis) {
-	//Platform::DebugPrintf("Scrolly %g %x\n",adj->value,p);
-	sciThis->ScrollTo((int)adj->value);
+	sciThis->ScrollTo(static_cast<int>(adj->value), false);
 }
 
 void ScintillaGTK::ScrollHSignal(GtkAdjustment *adj, ScintillaGTK *sciThis) {
-	//Platform::DebugPrintf("Scrollyh %g %x\n",adj->value,p);
-	sciThis->HorizontalScrollTo((int)adj->value * 2);
+	sciThis->HorizontalScrollTo(static_cast<int>(adj->value * 2));
 }
 
 void ScintillaGTK::SelectionReceived(GtkWidget *widget,
@@ -1739,4 +1744,3 @@ void scintilla_set_id(ScintillaObject *sci, int id) {
 void scintilla_release_resources(void) {
 	Platform_Finalise();
 }
-
