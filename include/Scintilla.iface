@@ -187,7 +187,6 @@ val SC_MARK_PLUS=8
 
 val SC_MARKNUM_FOLDER=30
 val SC_MARKNUM_FOLDEROPEN=31
-##val SC_MASK_FOLDERS=1<<SC_MARKNUM_FOLDER | 1<<SC_MARKNUM_FOLDEROPEN 
 
 # Set the symbol used for a particular marker number.
 fun void MarkerDefine=2040(int markerNumber, int markerSymbol)
@@ -804,6 +803,7 @@ val SCLEX_MAKEFILE=11
 val SCLEX_BATCH=12
 val SCLEX_XCODE=13
 val SCLEX_LATEX=14
+val SCLEX_LUA=15
 val SCE_P_DEFAULT=0
 val SCE_P_COMMENTLINE=1
 val SCE_P_NUMBER=2
@@ -941,6 +941,19 @@ val SCE_L_COMMAND=1
 val SCE_L_TAG=2
 val SCE_L_MATH=3
 val SCE_L_COMMENT=4
+val SCE_LUA_DEFAULT=0
+val SCE_LUA_COMMENT=1
+val SCE_LUA_COMMENTLINE=2
+val SCE_LUA_COMMENTDOC=3
+val SCE_LUA_NUMBER=4
+val SCE_LUA_WORD=5
+val SCE_LUA_STRING=6
+val SCE_LUA_CHARACTER=7
+val SCE_LUA_LITERALSTRING=8
+val SCE_LUA_PREPROCESSOR=9
+val SCE_LUA_OPERATOR=10
+val SCE_LUA_IDENTIFIER=11
+val SCE_LUA_STRINGEOL=12
 
 ################################################
 # From WinDefs.h

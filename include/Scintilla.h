@@ -19,6 +19,8 @@ void Scintilla_RegisterClasses(HINSTANCE hInstance);
 #endif
 #endif
 
+// Start of section which could be automatically generated from Scintilla.iface
+
 #define INVALID_POSITION -1 
 
 // Define start of Scintilla messages to be greater than all edit (EM_*) messages
@@ -100,8 +102,6 @@ void Scintilla_RegisterClasses(HINSTANCE hInstance);
 
 #define SC_MARKNUM_FOLDER 30
 #define SC_MARKNUM_FOLDEROPEN 31
-
-#define SC_MASK_FOLDERS ((1<<SC_MARKNUM_FOLDER) | (1<<SC_MARKNUM_FOLDEROPEN))
 
 #define SC_MARGIN_SYMBOL 0
 #define SC_MARGIN_NUMBER 1
@@ -368,6 +368,27 @@ typedef void (tMacroRecorder)(UINT iMessage, WPARAM wParam, LPARAM lParam,
 
 #define SC_MODEVENTMASKALL 0xF77
 
+#define SCN_STYLENEEDED 2000
+#define SCN_CHARADDED 2001
+#define SCN_SAVEPOINTREACHED 2002
+#define SCN_SAVEPOINTLEFT 2003
+#define SCN_MODIFYATTEMPTRO 2004
+// GTK+ Specific to work around focus and accelerator problems:
+#define SCN_KEY 2005
+#define SCN_DOUBLECLICK 2006
+#define SCN_UPDATEUI 2007
+// The old name for SCN_UPDATEUI:
+#define SCN_CHECKBRACE 2007
+#define SCN_MODIFIED 2008
+// Optional module for macro recording
+#ifdef MACRO_SUPPORT
+#define SCN_MACRORECORD 2009
+#endif
+#define SCN_MARGINCLICK 2010
+#define SCN_NEEDSHOWN 2011
+
+// End of definitions that could be generated from Scintilla.iface
+
 struct SCNotification {
 	NMHDR nmhdr;
 	int position;			// SCN_STYLENEEDED, SCN_MODIFIED
@@ -388,24 +409,7 @@ struct SCNotification {
 	int margin;	// SCN_MARGINCLICK
 };
 
-#define SCN_STYLENEEDED 2000
-#define SCN_CHARADDED 2001
-#define SCN_SAVEPOINTREACHED 2002
-#define SCN_SAVEPOINTLEFT 2003
-#define SCN_MODIFYATTEMPTRO 2004
-// GTK+ Specific to work around focus and accelerator problems:
-#define SCN_KEY 2005
-#define SCN_DOUBLECLICK 2006
-#define SCN_UPDATEUI 2007
-// The old name for SCN_UPDATEUI:
-#define SCN_CHECKBRACE 2007
-#define SCN_MODIFIED 2008
-// Optional module for macro recording
-#ifdef MACRO_SUPPORT
-#define SCN_MACRORECORD 2009
-#endif
-#define SCN_MARGINCLICK 2010
-#define SCN_NEEDSHOWN 2011
+#define SC_MASK_FOLDERS ((1<<SC_MARKNUM_FOLDER) | (1<<SC_MARKNUM_FOLDEROPEN))
 
 // Deprecation section listing all API features that are deprecated and will
 // will be removed completely in a future version.
