@@ -442,8 +442,34 @@ sptr_t ScintillaWin::HandleComposition(uptr_t wParam, sptr_t lParam) {
 		}
 }
 
+// Translate message IDs from WM_* and EM_* to SCI_* so can partly emulate Windows Edit control
+static unsigned int SciMessageFromEM(unsigned int iMessage) {
+	switch (iMessage) {
+		case EM_CANPASTE: return SCI_CANPASTE;
+		case EM_CANUNDO: return SCI_CANUNDO;
+		case EM_EMPTYUNDOBUFFER: return SCI_EMPTYUNDOBUFFER;
+		case EM_FINDTEXTEX: return SCI_FINDTEXT;
+		case EM_FORMATRANGE: return SCI_FORMATRANGE;
+		case EM_GETFIRSTVISIBLELINE: return SCI_GETFIRSTVISIBLELINE;
+		case EM_GETLINECOUNT: return SCI_GETLINECOUNT;
+		case EM_GETTEXTRANGE: return SCI_GETTEXTRANGE;
+		case EM_HIDESELECTION: return SCI_HIDESELECTION;
+		case EM_LINEINDEX: return SCI_POSITIONFROMLINE;
+		case EM_LINESCROLL: return SCI_LINESCROLL;
+		case EM_REPLACESEL: return SCI_REPLACESEL;
+		case WM_CLEAR: return SCI_CLEAR;
+		case WM_COPY: return SCI_COPY;
+		case WM_CUT: return SCI_CUT;
+		case WM_GETTEXTLENGTH: return SCI_GETTEXTLENGTH;
+		case WM_PASTE: return SCI_PASTE;
+		case WM_UNDO: return SCI_UNDO;
+	}
+	return iMessage;
+}
+
 sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	//Platform::DebugPrintf("S M:%x WP:%x L:%x\n", iMessage, wParam, lParam);
+	iMessage = SciMessageFromEM(iMessage);
 	switch (iMessage) {
 
 	case WM_CREATE:
@@ -697,6 +723,34 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
     	case WM_WINDOWPOSCHANGING:
     	case WM_WINDOWPOSCHANGED:
 		return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
+
+	case EM_LINEFROMCHAR:
+		if (static_cast<int>(wParam) < 0)
+			wParam = SelectionStart();
+		return pdoc->LineFromPosition(wParam);
+
+	case EM_EXGETSEL: {
+			if (lParam == 0)
+				return 0;
+			CharacterRange *pCR = reinterpret_cast<CharacterRange *>(lParam);
+			pCR->cpMin = SelectionStart();
+			pCR->cpMax = SelectionEnd();
+		}
+		break;
+
+	case EM_EXSETSEL: {
+			if (lParam == 0)
+				return 0;
+			CharacterRange *pCR = reinterpret_cast<CharacterRange *>(lParam);
+			selType = selStream;
+			if (pCR->cpMax == -1) {
+				SetSelection(pCR->cpMin, pdoc->Length());
+			} else {
+				SetSelection(pCR->cpMin, pCR->cpMax);
+			}
+			EnsureCaretVisible();
+			return pdoc->LineFromPosition(SelectionStart());
+		}
 
 	case SCI_GETDIRECTFUNCTION:
 		return reinterpret_cast<sptr_t>(DirectFunction);
