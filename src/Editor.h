@@ -328,6 +328,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void SetSelection(int currentPos_, int anchor_);
 	void SetSelection(int currentPos_);
 	void SetEmptySelection(int currentPos_);
+	bool RangeContainsProtected(int start, int end) const;
+	bool SelectionContainsProtected() const;
 	int MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd=true);
 	int MovePositionTo(int newPos, bool extend=false, bool ensureVisible=true);
 	int MovePositionSoVisible(int pos, int moveDir);

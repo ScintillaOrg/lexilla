@@ -139,6 +139,7 @@ void ViewStyle::Init() {
 	edgecolour.desired = ColourDesired(0xc0, 0xc0, 0xc0);
 	edgeState = EDGE_NONE;
 	caretWidth = 1;
+	someStylesProtected = false;
 
 	leftMarginWidth = 1;
 	rightMarginWidth = 1;
@@ -197,6 +198,7 @@ void ViewStyle::Refresh(Surface &surface) {
 	styles[STYLE_DEFAULT].Realise(surface, zoomLevel);
 	maxAscent = styles[STYLE_DEFAULT].ascent;
 	maxDescent = styles[STYLE_DEFAULT].descent;
+	someStylesProtected = false;
 	for (unsigned int i=0;i<(sizeof(styles)/sizeof(styles[0]));i++) {
 		if (i != STYLE_DEFAULT) {
 			styles[i].Realise(surface, zoomLevel, &styles[STYLE_DEFAULT]);
@@ -204,6 +206,9 @@ void ViewStyle::Refresh(Surface &surface) {
 				maxAscent = styles[i].ascent;
 			if (maxDescent < styles[i].descent)
 				maxDescent = styles[i].descent;
+		}
+		if (styles[i].IsProtected()) {
+			someStylesProtected = true;
 		}
 	}
 
@@ -242,4 +247,8 @@ void ViewStyle::ClearStyles() {
 
 void ViewStyle::SetStyleFontName(int styleIndex, const char *name) {
 	styles[styleIndex].fontName = fontNames.Save(name);
+}
+
+bool ViewStyle::ProtectionActive() const {
+    return someStylesProtected;
 }

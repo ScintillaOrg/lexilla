@@ -78,6 +78,7 @@ public:
 	ColourPair edgecolour;
 	int edgeState;
 	int caretWidth;
+	bool someStylesProtected;
 	
 	ViewStyle();
 	ViewStyle(const ViewStyle &source);
@@ -88,6 +89,7 @@ public:
 	void ResetDefaultStyle();
 	void ClearStyles();
 	void SetStyleFontName(int styleIndex, const char *name);
+	bool ProtectionActive() const;
 };
 
 #endif

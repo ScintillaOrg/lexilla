@@ -49,7 +49,7 @@ public:
 	void ClearTo(const Style &source);
 	bool EquivalentFontTo(const Style *other) const;
 	void Realise(Surface &surface, int zoomLevel, Style *defaultStyle = 0);
-	bool IsProtected() { return !(changeable && visible);} ;
+	bool IsProtected() const { return !(changeable && visible);};
 };
 
 #endif

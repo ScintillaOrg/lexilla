@@ -843,18 +843,45 @@ void Editor::SetEmptySelection(int currentPos_) {
 	SetSelection(currentPos_, currentPos_);
 }
 
+bool Editor::RangeContainsProtected(int start, int end) const {
+	if (vs.ProtectionActive()) {
+		if (start > end) {
+			int t = start;
+			start = end;
+			end = t;
+		}
+		int mask = pdoc->stylingBitsMask;
+		for (int pos = start; pos < end; pos++) {
+			if (vs.styles[pdoc->StyleAt(pos) & mask].IsProtected())
+				return true;
+		}
+	}
+	return false;
+}
+
+bool Editor::SelectionContainsProtected() const {
+	// TODO: make support rectangular selection
+	return RangeContainsProtected(anchor, currentPos);
+}
+
 int Editor::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
 	// Asks document to find a good position and then moves out of any invisible positions
 	pos = pdoc->MovePositionOutsideChar(pos, moveDir, checkLineEnd);
-	int mask = pdoc->stylingBitsMask;
-	if (moveDir > 0) {
-		while ((pos < pdoc->Length()) &&
-		        (vs.styles[pdoc->StyleAt(pos - 1) & mask].IsProtected()))
-			pos++;
-	} else {
-		while ((pos > 0) &&
-		        (vs.styles[pdoc->StyleAt(pos - 1) & mask].IsProtected()))
-			pos--;
+	if (vs.ProtectionActive()) {
+		int mask = pdoc->stylingBitsMask;
+		if (moveDir > 0) {
+			if ((pos > 0) && vs.styles[pdoc->StyleAt(pos-1) & mask].IsProtected()) {
+				while ((pos < pdoc->Length()) &&
+						(vs.styles[pdoc->StyleAt(pos) & mask].IsProtected()))
+					pos++;
+			}
+		} else if (moveDir < 0) {
+			if (vs.styles[pdoc->StyleAt(pos) & mask].IsProtected()) {
+				while ((pos > 0) &&
+						(vs.styles[pdoc->StyleAt(pos-1) & mask].IsProtected()))
+					pos--;
+			}
+		}
 	}
 	return pos;
 }
@@ -2038,14 +2065,16 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 					}
 				} else {
 					// Normal text display
-					if (twoPhaseDraw) {
-						surface->DrawTextTransparent(rcSegment, textFont,
-					                  rcSegment.top + vsDraw.maxAscent, ll->chars + startseg,
-					                  i - startseg + 1, textFore);
-					} else {
-						surface->DrawTextNoClip(rcSegment, textFont,
-					                  rcSegment.top + vsDraw.maxAscent, ll->chars + startseg,
-					                  i - startseg + 1, textFore, textBack);
+					if (vsDraw.styles[styleMain].visible) {
+						if (twoPhaseDraw) {
+							surface->DrawTextTransparent(rcSegment, textFont,
+										rcSegment.top + vsDraw.maxAscent, ll->chars + startseg,
+										i - startseg + 1, textFore);
+						} else {
+							surface->DrawTextNoClip(rcSegment, textFont,
+										rcSegment.top + vsDraw.maxAscent, ll->chars + startseg,
+										i - startseg + 1, textFore, textBack);
+						}
 					}
 					if (vsDraw.viewWhitespace != wsInvisible ||
 					        (inIndentation && vsDraw.viewIndentationGuides)) {
@@ -2712,7 +2741,7 @@ void Editor::AddChar(char ch) {
 void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 	bool wasSelection = currentPos != anchor;
 	ClearSelection();
-	if (inOverstrike && !wasSelection) {
+	if (inOverstrike && !wasSelection && !RangeContainsProtected(currentPos, currentPos+1)) {
 		if (currentPos < (pdoc->Length() - 1)) {
 			if ((pdoc->CharAt(currentPos) != '\r') && (pdoc->CharAt(currentPos) != '\n')) {
 				pdoc->DelChar(currentPos);
@@ -2766,29 +2795,31 @@ void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 }
 
 void Editor::ClearSelection() {
-	if (selType == selRectangle) {
-		pdoc->BeginUndoAction();
-		int lineStart = pdoc->LineFromPosition(SelectionStart());
-		int lineEnd = pdoc->LineFromPosition(SelectionEnd());
-		int startPos = SelectionStart();
-		for (int line = lineEnd; line >= lineStart; line--) {
-			startPos = SelectionStart(line);
-			unsigned int chars = SelectionEnd(line) - startPos;
-			if (0 != chars) {
-				pdoc->DeleteChars(startPos, chars);
-			}
-		}
-		SetEmptySelection(startPos);
-		pdoc->EndUndoAction();
-		selType = selStream;
-	} else {
-		int startPos = SelectionStart();
-		unsigned int chars = SelectionEnd() - startPos;
-		SetEmptySelection(startPos);
-		if (0 != chars) {
+	if (!SelectionContainsProtected()) {
+		if (selType == selRectangle) {
 			pdoc->BeginUndoAction();
-			pdoc->DeleteChars(startPos, chars);
+			int lineStart = pdoc->LineFromPosition(SelectionStart());
+			int lineEnd = pdoc->LineFromPosition(SelectionEnd());
+			int startPos = SelectionStart();
+			for (int line = lineEnd; line >= lineStart; line--) {
+				startPos = SelectionStart(line);
+				unsigned int chars = SelectionEnd(line) - startPos;
+				if (0 != chars) {
+					pdoc->DeleteChars(startPos, chars);
+				}
+			}
+			SetEmptySelection(startPos);
 			pdoc->EndUndoAction();
+			selType = selStream;
+		} else {
+			int startPos = SelectionStart();
+			unsigned int chars = SelectionEnd() - startPos;
+			SetEmptySelection(startPos);
+			if (0 != chars) {
+				pdoc->BeginUndoAction();
+				pdoc->DeleteChars(startPos, chars);
+				pdoc->EndUndoAction();
+			}
 		}
 	}
 }
@@ -2816,14 +2847,14 @@ void Editor::ClearDocumentStyle() {
 }
 
 void Editor::Cut() {
-	if (!pdoc->IsReadOnly()) {
+	if (!pdoc->IsReadOnly() && !SelectionContainsProtected()) {
 		Copy();
 		ClearSelection();
 	}
 }
 
 void Editor::PasteRectangular(int pos, const char *ptr, int len) {
-	if (pdoc->IsReadOnly()) {
+	if (pdoc->IsReadOnly() || SelectionContainsProtected()) {
 		return;
 	}
 	currentPos = pos;
@@ -2861,12 +2892,14 @@ void Editor::PasteRectangular(int pos, const char *ptr, int len) {
 }
 
 bool Editor::CanPaste() {
-	return !pdoc->IsReadOnly();
+	return !pdoc->IsReadOnly() && !SelectionContainsProtected();
 }
 
 void Editor::Clear() {
 	if (currentPos == anchor) {
-		DelChar();
+		if (!RangeContainsProtected(currentPos, currentPos+1)) {
+			DelChar();
+		}
 	} else {
 		ClearSelection();
 	}
@@ -2896,29 +2929,33 @@ void Editor::Redo() {
 }
 
 void Editor::DelChar() {
-	pdoc->DelChar(currentPos);
+	if (!RangeContainsProtected(currentPos, currentPos+1)) {
+		pdoc->DelChar(currentPos);
+	}
 	// Avoid blinking during rapid typing:
 	ShowCaretAtCurrentPosition();
 }
 
 void Editor::DelCharBack(bool allowLineStartDeletion) {
 	if (currentPos == anchor) {
-		int lineCurrentPos = pdoc->LineFromPosition(currentPos);
-		if (allowLineStartDeletion || (pdoc->LineStart(lineCurrentPos) != currentPos)) {
-			if (pdoc->GetColumn(currentPos) <= pdoc->GetLineIndentation(lineCurrentPos) &&
-				pdoc->GetColumn(currentPos) > 0 && pdoc->backspaceUnindents) {
-				pdoc->BeginUndoAction();
-				int indentation = pdoc->GetLineIndentation(lineCurrentPos);
-				int indentationStep = (pdoc->indentInChars ? pdoc->indentInChars : pdoc->tabInChars);
-				if (indentation % indentationStep == 0) {
-					pdoc->SetLineIndentation(lineCurrentPos, indentation - indentationStep);
+		if (!RangeContainsProtected(currentPos-1, currentPos)) {
+			int lineCurrentPos = pdoc->LineFromPosition(currentPos);
+			if (allowLineStartDeletion || (pdoc->LineStart(lineCurrentPos) != currentPos)) {
+				if (pdoc->GetColumn(currentPos) <= pdoc->GetLineIndentation(lineCurrentPos) &&
+					pdoc->GetColumn(currentPos) > 0 && pdoc->backspaceUnindents) {
+					pdoc->BeginUndoAction();
+					int indentation = pdoc->GetLineIndentation(lineCurrentPos);
+					int indentationStep = (pdoc->indentInChars ? pdoc->indentInChars : pdoc->tabInChars);
+					if (indentation % indentationStep == 0) {
+						pdoc->SetLineIndentation(lineCurrentPos, indentation - indentationStep);
+					} else {
+						pdoc->SetLineIndentation(lineCurrentPos, indentation - (indentation % indentationStep));
+					}
+					SetEmptySelection(pdoc->GetLineIndentPosition(lineCurrentPos));
+					pdoc->EndUndoAction();
 				} else {
-					pdoc->SetLineIndentation(lineCurrentPos, indentation - (indentation % indentationStep));
+					pdoc->DelCharBack(currentPos);
 				}
-				SetEmptySelection(pdoc->GetLineIndentPosition(lineCurrentPos));
-				pdoc->EndUndoAction();
-			} else {
-				pdoc->DelCharBack(currentPos);
 			}
 		}
 	} else {
