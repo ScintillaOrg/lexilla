@@ -1,7 +1,7 @@
 // Scintilla source code edit control
 /** @file LexHTML.cxx
  ** Lexer for HTML.
- **/ 
+ **/
 // Copyright 1998-2002 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
@@ -24,8 +24,8 @@
 #define SCE_HA_VBS (SCE_HBA_START - SCE_HB_START)
 #define SCE_HA_PYTHON (SCE_HPA_START - SCE_HP_START)
 
-enum { eScriptNone = 0, eScriptJS, eScriptVBS, eScriptPython, eScriptPHP, eScriptXML, eScriptSGML, eScriptSGMLblock };
-enum { eHtml = 0, eNonHtmlScript, eNonHtmlPreProc, eNonHtmlScriptPreProc };
+enum script_type { eScriptNone = 0, eScriptJS, eScriptVBS, eScriptPython, eScriptPHP, eScriptXML, eScriptSGML, eScriptSGMLblock };
+enum script_mode { eHtml = 0, eNonHtmlScript, eNonHtmlPreProc, eNonHtmlScriptPreProc };
 
 static inline bool IsAWordChar(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_');
@@ -35,7 +35,7 @@ static inline bool IsAWordStart(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '_');
 }
 
-static int segIsScriptingIndicator(Accessor &styler, unsigned int start, unsigned int end, int prevValue) {
+static script_type segIsScriptingIndicator(Accessor &styler, unsigned int start, unsigned int end, script_type prevValue) {
 	char s[30 + 1];
 	unsigned int i = 0;
 	for (; i < end - start + 1 && i < 30; i++) {
@@ -76,7 +76,7 @@ static int PrintScriptingIndicatorOffset(Accessor &styler, unsigned int start, u
 	return iResult;
 }
 
-static int ScriptOfState(int state) {
+static script_type ScriptOfState(int state) {
 	if ((state >= SCE_HP_START) && (state <= SCE_HP_IDENTIFIER)) {
 		return eScriptPython;
 	} else if ((state >= SCE_HB_START) && (state <= SCE_HB_STRINGEOL)) {
@@ -85,7 +85,7 @@ static int ScriptOfState(int state) {
 		return eScriptJS;
 	} else if ((state >= SCE_HPHP_DEFAULT) && (state <= SCE_HPHP_COMMENTLINE)) {
 		return eScriptPHP;
-	} else if ((state >= SCE_H_SGML_DEFAULT) && (state <= SCE_H_SGML_BLOCK_DEFAULT)) {
+	} else if ((state >= SCE_H_SGML_DEFAULT) && (state < SCE_H_SGML_BLOCK_DEFAULT)) {
 		return eScriptSGML;
 	} else if (state == SCE_H_SGML_BLOCK_DEFAULT) {
 		return eScriptSGMLblock;
@@ -94,7 +94,7 @@ static int ScriptOfState(int state) {
 	}
 }
 
-static int statePrintForState(int state, int inScriptType) {
+static int statePrintForState(int state, script_mode inScriptType) {
 	int StateToPrint;
 
 	if ((state >= SCE_HP_START) && (state <= SCE_HP_IDENTIFIER)) {
@@ -228,7 +228,7 @@ static int classifyTagHTML(unsigned int start, unsigned int end,
 }
 
 static void classifyWordHTJS(unsigned int start, unsigned int end,
-                             WordList &keywords, Accessor &styler, int inScriptType) {
+                             WordList &keywords, Accessor &styler, script_mode inScriptType) {
 	char chAttr = SCE_HJ_WORD;
 	bool wordIsNumber = isdigit(styler[start]) || (styler[start] == '.');
 	if (wordIsNumber)
@@ -246,7 +246,7 @@ static void classifyWordHTJS(unsigned int start, unsigned int end,
 	styler.ColourTo(end, statePrintForState(chAttr, inScriptType));
 }
 
-static int classifyWordHTVB(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler, int inScriptType) {
+static int classifyWordHTVB(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler, script_mode inScriptType) {
 	char chAttr = SCE_HB_IDENTIFIER;
 	bool wordIsNumber = isdigit(styler[start]) || (styler[start] == '.');
 	if (wordIsNumber)
@@ -271,7 +271,7 @@ static int classifyWordHTVB(unsigned int start, unsigned int end, WordList &keyw
 		return SCE_HB_DEFAULT;
 }
 
-static void classifyWordHTPy(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler, char *prevWord, int inScriptType) {
+static void classifyWordHTPy(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler, char *prevWord, script_mode inScriptType) {
 	bool wordIsNumber = isdigit(styler[start]) != 0;
 	char s[30 + 1];
 	unsigned int i = 0;
@@ -333,7 +333,7 @@ static bool isWordCdata(unsigned int start, unsigned int end, Accessor &styler) 
 }
 
 // Return the first state to reach when entering a scripting language
-static int StateForScript(int scriptLanguage) {
+static int StateForScript(script_type scriptLanguage) {
 	int Result;
 	switch (scriptLanguage) {
 	case eScriptVBS:
@@ -428,14 +428,14 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		lineState = eScriptJS << 8;
 		lineState |= styler.GetPropertyInt("asp.default.language", eScriptJS) << 4;
 	}
-	int inScriptType = (lineState >> 0) & 0x03; // 2 bits of scripting type
+	script_mode inScriptType = script_mode((lineState >> 0) & 0x03); // 2 bits of scripting mode
 	bool tagOpened = (lineState >> 2) & 0x01; // 1 bit to know if we are in an opened tag
 	bool tagClosing = (lineState >> 3) & 0x01; // 1 bit to know if we are in a closing tag
-	int aspScript = (lineState >> 4) & 0x0F; // 4 bits of script name
-	int clientScript = (lineState >> 8) & 0x0F; // 4 bits of script name
+	script_type aspScript = script_type((lineState >> 4) & 0x0F); // 4 bits of script name
+	script_type clientScript = script_type((lineState >> 8) & 0x0F); // 4 bits of script name
 	int beforePreProc = (lineState >> 12) & 0xFF; // 8 bits of state
 
-	int scriptLanguage = ScriptOfState(state);
+	script_type scriptLanguage = ScriptOfState(state);
 
 	const bool foldHTML = styler.GetPropertyInt("fold.html", 0) != 0;
 	const bool fold = foldHTML && styler.GetPropertyInt("fold");
@@ -510,6 +510,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 						}
 					}
 				}
+				break;
+			default:
 				break;
 			}
 		}
@@ -738,8 +740,9 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			}
 			break;
 		case SCE_H_SGML_DEFAULT:
-			if (scriptLanguage == eScriptSGMLblock)
-				StateToPrint = SCE_H_SGML_BLOCK_DEFAULT;
+		case SCE_H_SGML_BLOCK_DEFAULT:
+//			if (scriptLanguage == eScriptSGMLblock)
+//				StateToPrint = SCE_H_SGML_BLOCK_DEFAULT;
 
 			if (ch == '\"') {
 				styler.ColourTo(i - 1, StateToPrint);
@@ -759,6 +762,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			} else if (ch == '[') {
 				styler.ColourTo(i - 1, StateToPrint);
 				scriptLanguage = eScriptSGMLblock;
+				state = SCE_H_SGML_BLOCK_DEFAULT;
 			} else if (ch == ']') {
 				if (scriptLanguage == eScriptSGMLblock) {
 					styler.ColourTo(i, StateToPrint);
@@ -767,6 +771,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					styler.ColourTo(i - 1, StateToPrint);
 					styler.ColourTo(i, SCE_H_SGML_ERROR);
 				}
+				state = SCE_H_SGML_DEFAULT;
 			} else if (scriptLanguage == eScriptSGMLblock) {
 				if ((ch == '!') && (chPrev == '<')) {
 					styler.ColourTo(i - 2, StateToPrint);
@@ -814,7 +819,11 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				i += size - 1;
 				visibleChars += size - 1;
 				ch = styler.SafeGetCharAt(i);
-				state = SCE_H_SGML_DEFAULT;
+				if (scriptLanguage == eScriptSGMLblock) {
+					state = SCE_H_SGML_BLOCK_DEFAULT;
+				} else {
+					state = SCE_H_SGML_DEFAULT;
+				}
 				continue;
 			}
 			break;
@@ -1551,7 +1560,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 }
 
 static bool isASPScript(int state) {
-	return 
+	return
 		(state >= SCE_HJA_START && state <= SCE_HJA_REGEX) ||
 		(state >= SCE_HBA_START && state <= SCE_HBA_STRINGEOL) ||
 		(state >= SCE_HPA_DEFAULT && state <= SCE_HPA_IDENTIFIER);
@@ -1678,7 +1687,7 @@ static void ColouriseHTMLPiece(StyleContext &sc, WordList *keywordlists[]) {
 			sc.SetState(SCE_H_OTHER);
 		}
 	}
-	
+
 	if (sc.state == SCE_H_DEFAULT) {
 		if (sc.ch == '<') {
 			if (sc.Match("<!--"))
@@ -1710,15 +1719,15 @@ static void ColouriseASPPiece(StyleContext &sc, WordList *keywordlists[]) {
 		sc.SetState(SCE_H_ASP);
 		sc.Forward();
 		sc.ForwardSetState(SCE_H_DEFAULT);
-	} 
-			 
+	}
+
 	// Handle some ASP script
 	if (sc.state >= SCE_HBA_START && sc.state <= SCE_HBA_STRINGEOL) {
 		ColouriseHBAPiece(sc, keywordlists);
 	} else if (sc.state >= SCE_H_DEFAULT && sc.state <= SCE_H_SGML_BLOCK_DEFAULT) {
 		ColouriseHTMLPiece(sc, keywordlists);
 	}
-	
+
 	// Enter new sc.state
 	if ((sc.state == SCE_H_DEFAULT) || (sc.state == SCE_H_TAGUNKNOWN)) {
 		if (sc.Match('<', '%')) {
@@ -1753,19 +1762,19 @@ static void ColouriseASPDoc(unsigned int startPos, int length, int initStyle, Wo
 static void ColourisePHPPiece(StyleContext &sc, WordList *keywordlists[]) {
 	// Possibly exit current state to either SCE_H_DEFAULT or SCE_HBA_DEFAULT
 	if (sc.state >= SCE_HPHP_DEFAULT && sc.state <= SCE_HPHP_OPERATOR) {
-		if (!isPHPStringState(sc.state) && 
+		if (!isPHPStringState(sc.state) &&
 			(sc.state != SCE_HPHP_COMMENT) &&
 			(sc.Match('?', '>'))) {
 			sc.SetState(SCE_H_QUESTION);
 			sc.Forward();
 			sc.ForwardSetState(SCE_H_DEFAULT);
 		}
-	} 
-			 
+	}
+
 	if (sc.state >= SCE_H_DEFAULT && sc.state <= SCE_H_SGML_BLOCK_DEFAULT) {
 		ColouriseHTMLPiece(sc, keywordlists);
 	}
-	
+
 	// Handle some PHP script
 	if (sc.state == SCE_HPHP_WORD) {
 		if (!IsAWordStart(sc.ch)) {
@@ -1796,7 +1805,7 @@ static void ColourisePHPPiece(StyleContext &sc, WordList *keywordlists[]) {
 	} else if (sc.state == SCE_HPHP_OPERATOR) {
 		sc.SetState(SCE_HPHP_DEFAULT);
 	}
-	
+
 	// Enter new sc.state
 	if ((sc.state == SCE_H_DEFAULT) || (sc.state == SCE_H_TAGUNKNOWN)) {
 		if (sc.Match("<?php")) {
