@@ -1,5 +1,5 @@
-ExternalLexer.o: ExternalLexer.cxx ../include/SciLexer.h \
- ../include/Platform.h ../include/PropSet.h ../include/SString.h \
+ExternalLexer.o: ExternalLexer.cxx ../include/Platform.h \
+ ../include/SciLexer.h ../include/PropSet.h ../include/SString.h \
  ../include/Accessor.h ../src/DocumentAccessor.h ../include/KeyWords.h \
  ExternalLexer.h
 PlatWin.o: PlatWin.cxx ../include/Platform.h PlatformRes.h \
@@ -43,6 +43,10 @@ LexAda.o: ../src/LexAda.cxx ../include/Platform.h ../include/PropSet.h \
 LexAVE.o: ../src/LexAVE.cxx ../include/Platform.h ../include/PropSet.h \
  ../include/SString.h ../include/Accessor.h ../include/KeyWords.h \
  ../include/Scintilla.h ../include/SciLexer.h
+LexBaan.o: ../src/LexBaan.cxx ../include/Platform.h \
+ ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
+ ../src/StyleContext.h ../include/KeyWords.h ../include/Scintilla.h \
+ ../include/SciLexer.h
 LexBullant.o: ../src/LexBullant.cxx ../include/Platform.h \
  ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
  ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
@@ -61,7 +65,8 @@ LexEiffel.o: ../src/LexEiffel.cxx ../include/Platform.h \
  ../include/SciLexer.h
 LexHTML.o: ../src/LexHTML.cxx ../include/Platform.h \
  ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
- ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
+ ../src/StyleContext.h ../include/KeyWords.h ../include/Scintilla.h \
+ ../include/SciLexer.h
 LexLisp.o: ../src/LexLisp.cxx ../include/Platform.h \
  ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
  ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
@@ -88,8 +93,8 @@ LexSQL.o: ../src/LexSQL.cxx ../include/Platform.h ../include/PropSet.h \
  ../include/SString.h ../include/Accessor.h ../include/KeyWords.h \
  ../include/Scintilla.h ../include/SciLexer.h
 LexVB.o: ../src/LexVB.cxx ../include/Platform.h ../include/PropSet.h \
- ../include/SString.h ../include/Accessor.h ../include/KeyWords.h \
- ../include/Scintilla.h ../include/SciLexer.h
+ ../include/SString.h ../include/Accessor.h ../src/StyleContext.h \
+ ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
 LineMarker.o: ../src/LineMarker.cxx ../include/Platform.h \
  ../include/Scintilla.h ../src/LineMarker.h
 ListLexers.o: ../src/ListLexers.cxx ../include/Platform.h \
@@ -117,3 +122,5 @@ ViewStyle.o: ../src/ViewStyle.cxx ../include/Platform.h \
 WindowAccessor.o: ../src/WindowAccessor.cxx ../include/Platform.h \
  ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
  ../include/WindowAccessor.h ../include/Scintilla.h
+xContractionState.o: ../src/xContractionState.cxx \
+ ../include/Platform.h ../src/ContractionState.h
