@@ -111,6 +111,22 @@ SCI_GETSTYLEBITS
        reset the folding state.
     </p>
 <pre>
+SCI_SETTARGETSTART(int pos) 
+SCI_GETTARGETSTART 
+SCI_SETTARGETEND(int pos)
+SCI_GETTARGETEND
+SCI_REPLACETARGET(bool replacePatterns, char *text)
+</pre>
+    <p>
+       Using SCI_REPLACESEL, modifications cause scrolling and other visible changes
+       which may take some time and cause unwanted display updates. If performing many 
+       changes, such as a replace all command, the target can be used instead. 
+       First set the range to be replaced. Then call SCI_REPLACETARGET which returns
+       the length taken by the replacement string. If replacePatterns is set then \d patterns 
+       where d is a digit from 1 to 9 in the text are replaced by tagged matches from the 
+       most recent regular expression search.
+    </p>
+<pre>
 SCI_SETOVERTYPE
 SCI_GETOVERTYPE
 </pre>
@@ -234,10 +250,29 @@ SCI_MOVECARETINSIDEVIEW
        Searching
     </h3>
 <pre>
-SCI_FINDTEXT(int flags, FINDTEXTEX *ft)
+SCI_FINDTEXT(int flags, TextToFind *ttf)
 </pre>
     <p>
-       Scintilla can find where a string is present in its document.
+       Scintilla can find where a string is present in the document. 
+       There are several option flags including a simple regular expression search.
+       SCFIND_MATCHCASE indicates that a match only occurs with a 
+       string that matches the case of the search string. 
+       SCFIND_WHOLEWORD indicates that a match only occurs if the characters
+       before and after are not word characters. SCFIND_WORDSTART
+       indicates that a match only occurs if the character before is not a word character.
+    </p>
+    <p>
+       SCFIND_REGEXP indicates that the search string should be interpreted as a regular 
+       expression. Special characters interpreted are '.' for any character, '\(' and '\)' to tag
+       parts of the match, '\1' .. '\9' to refer to tagged parts, '\&lt;' to match the start of a word,
+       '\&gt;' to match the end of a word, 
+       '\' as a quote character, '[' and ']'
+       to indicate a set of characters, ^ within a set to complement the set, ^ outside a set
+       to match the start of line, $ to match the end of line, * to match 0 or more times, 
+       + to match 1 or more times
+       
+
+       
     </p>
 <pre>
 SCI_SEARCHANCHOR
@@ -255,12 +290,14 @@ SCI_SEARCHPREV(int flags, char *text)
     </h3>
 <pre>
 SCI_GETVIEWWS
-SCI_SETVIEWWS(bool visible)
+SCI_SETVIEWWS(SCWS_INVISIBLE or SCWS_VISIBLEAFTERINDENT or
+SCWS_VISIBLEALWAYS)
 </pre>
     <p>
        White space can be made visible which may useful for languages in which whitespace is
       significant, such as Python. Space characters appear as small centred dots and tab characters
-      as light arrows pointing to the right.
+      as light arrows pointing to the right. With the SCWS_VISIBLEAFTERINDENT option, 
+      white space used for indentation is invisible but after the first visible character, it is visible.
     </p>
     <h3>
        Cursor
@@ -380,7 +417,22 @@ SCI_STYLESETVISIBLE(int stylenumber, bool visible)
       SCI_STYLESETCHARACTERSET can set a style to use a different character set than the default.
       For example, SCI_STYLESETCHARACTERSET(SCE_C_STRING, SC_CHARSET_RUSSIAN)
       would ensure that strings in Russian would display correctly. 
-      This feature currently only works on Windows.
+      This feature currently only works fully on Windows. 
+    </p>
+    <p>
+      The character sets supported on Windows are:
+SC_CHARSET_ANSI, SC_CHARSET_ARABIC, SC_CHARSET_BALTIC,
+SC_CHARSET_CHINESEBIG5, SC_CHARSET_DEFAULT, 
+SC_CHARSET_EASTEUROPE, SC_CHARSET_GB2312, SC_CHARSET_GREEK, 
+SC_CHARSET_HANGUL, SC_CHARSET_HEBREW, SC_CHARSET_JOHAB, 
+SC_CHARSET_MAC, SC_CHARSET_OEM, SC_CHARSET_SHIFTJIS, 
+SC_CHARSET_SYMBOL, SC_CHARSET_THAI, SC_CHARSET_TURKISH, and
+SC_CHARSET_VIETNAMESE. 
+    </p>
+    <p>
+      The character sets supported on GTK+ are SC_CHARSET_ANSI,
+SC_CHARSET_EASTEUROPE, SC_CHARSET_GB2312, 
+SC_CHARSET_HANGUL, and SC_CHARSET_SHIFTJIS.
     </p>
     <p>
        As well as the 32 fundamental lexer styles, there are also some predefined numbered styles
@@ -825,9 +877,14 @@ SCI_NULL
        There is a default binding of keys to commands in Scintilla which can be overridden with
       these messages. To fit the parameters into a message, the first argument contains the key
       code in the low word and the key modifiers (possibly shift and control) in the high word. The
-      key code is from the VK_* enumeration, and the modifiers are a combination of zero or more of
-      SHIFT_PRESSED and LEFT_CTRL_PRESSED. SCI_NULL does nothing and is the
-      value assigned to keys that perform no action.
+      key code is a visible or control character or a key from the SCK_* enumeration, 
+      which contains SCK_ADD, SCK_BACK, SCK_DELETE, SCK_DIVIDE,
+      SCK_DOWN, SCK_END, SCK_ESCAPE, SCK_HOME, SCK_INSERT,
+      SCK_LEFT, SCK_NEXT, SCK_PRIOR, SCK_RETURN, SCK_RIGHT, 
+      SCK_SUBTRACT, SCK_TAB, and SCK_UP.
+      The modifiers are a combination of zero or more of
+      SCMOD_ALT, SCMOD_CTRL, and SCMOD_SHIFT. 
+      SCI_NULL does nothing and is the value assigned to keys that perform no action.
     </p>
     <h3>
        Popup edit menu
@@ -872,6 +929,8 @@ SCI_GETPRINTCOLOURMODE
        with SCI_SETPRINTCOLOURMODE(SC_PRINT_INVERTLIGHT) when printing to give a 
        white background. If intermediate tones are used on screen then black on white print can be 
        chosen with SCI_SETPRINTCOLOURMODE(SC_PRINT_BLACKONWHITE).
+       Other options are the default, SC_PRINT_NORMAL, and 
+       SC_PRINT_COLOURONWHITE and SC_PRINT_COLOURONWHITEDEFAULTBG.
     </p>
     <h3>
        Direct Access
@@ -1024,6 +1083,7 @@ SCI_SETEDGECOLOUR(int colour)
     </h3>
 <pre>
 SCI_SETLEXER(int lexer)
+SCI_SETLEXERLANGUAGE(, char *name)
 SCI_GETLEXER
 SCI_COLOURISE(int start, int end)
 SCI_SETPROPERTY(char *key, char *value)
@@ -1032,7 +1092,8 @@ SCI_SETKEYWORDS(int keywordset, char *keywordlist)
     <p>
       If the SciLexer version of Scintilla is used, then lexing support for some programming languages
       is included. A particular lexer may be chosen from the SCLEX* enumeration and it is invoked
-      automatically to style the document as required. 
+      automatically to style the document as required. Lexers can also be chosen by string name rather
+      than by integer ID.
       If the lexer is set to SCLEX_CONTAINER then the container is notified to perform styling 
       as is the case with the standard Scintilla.DLL version. Styling may be requested for a range
       of the document by using SCI_COLOURISE.
@@ -1090,13 +1151,13 @@ SCN_POSCHANGED(int newPos)
       Can be used by the container to cancel some time consuming thread.
     </p>
 <pre>
-SCN_SAVEPOINTREACHED(int issavepoint)
+SCN_SAVEPOINTREACHED
+SCN_SAVEPOINTLEFT
 SCI_SETSAVEPOINT
 </pre>
     <p>
        Sent to the container when the savepoint is entered or left, allowing the container to
-      display a dirty indicator and change its menus. The first parameter is 1 when entering the
-      save point, 0 when leaving.
+      display a dirty indicator and change its menus. 
     </p>
     <p>
       The container tells Scintilla where the save point is by sending the SCI_SETSAVEPOINT
@@ -1147,6 +1208,21 @@ SCI_GETMODEVENTMASK
       notifications about changes to text and not styling changes by calling
       SCI_SETMODEVENTMASK(SC_MOD_INSERTTEXT|SC_MOD_DELETETEXT).
     </p>
+    <p>
+    The possible notification types are
+SC_MOD_INSERTTEXT,
+SC_MOD_DELETETEXT, 
+SC_MOD_CHANGESTYLE, 
+SC_MOD_CHANGEFOLD, 
+SC_PERFORMED_USER, 
+SC_PERFORMED_UNDO, 
+SC_PERFORMED_REDO, 
+SC_LASTSTEPINUNDOREDO, 
+SC_MOD_CHANGEMARKER, 
+SC_MOD_BEFOREINSERT, 
+SC_MOD_BEFOREDELETE, and 
+SC_MODEVENTMASKALL.
+    </p>
 <pre>
 SCN_MACRORECORD
 </pre>
@@ -1184,6 +1260,14 @@ SCN_USERLISTSELECTION
     <p>
       User has selected an item in a user list. 
       The list type is available in wParam and the text chosen in text.
+    </p>
+<pre>
+SCN_URISDROPPED
+</pre>
+    <p>
+      Only on the GTK+ version. Indicates that the user has dragged a URI such as
+      a file name or web address onto Scintilla. The container could interpret this
+      as a request to open the file.
     </p>
     <h3>
        Edit messages currently supported by Scintilla which will be removed in the future.

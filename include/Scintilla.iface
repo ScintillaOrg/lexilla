@@ -712,9 +712,15 @@ get int GetCaretWidth=2189(,)
 # document without affecting the scroll position.
 set void SetTargetStart=2190(position pos,)
 
+# Get the position that starts the target.
+get position GetTargetStart=2191(,)
+
 # Sets the position that ends the target which is used for updating the 
 # document without affecting the scroll position.
-set void SetTargetEnd=2191(position pos,)
+set void SetTargetEnd=2192(position pos,)
+
+# Get the position that ends the target.
+get position GetTargetEnd=2193(,)
 
 # Replace the target text with the argument text.
 # If replacePatterns then looks for \d where d is between 1 and 9
@@ -722,7 +728,7 @@ set void SetTargetEnd=2191(position pos,)
 # operation which were surrounded by \( and \).
 # Returns the length of the replacement text including any change
 # caused by processing the \d patterns.
-fun int ReplaceTarget=2192(bool replacePatterns, string text)
+fun int ReplaceTarget=2194(bool replacePatterns, string text)
 
 # Show a call tip containing a definition near position pos.
 fun void CallTipShow=2200(position pos, string definition)
