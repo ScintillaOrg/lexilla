@@ -557,22 +557,28 @@ void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const c
 
 void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len,
 	ColourAllocated fore) {
-	SetFont(font_);
-	::SetTextColor(hdc, fore.AsLong());
-	::SetBkMode(hdc, TRANSPARENT);
-	RECT rcw = RectFromPRectangle(rc);
-	if (unicodeMode) {
-		wchar_t tbuf[MAX_US_LEN];
-		int tlen = UCS2FromUTF8(s, len, tbuf, sizeof(tbuf)/sizeof(wchar_t)-1);
-		tbuf[tlen] = L'\0';
-		::ExtTextOutW(hdc, rc.left, ybase, 0, &rcw, tbuf, tlen, NULL);
-	} else {
-		// There appears to be a 16 bit string length limit in GDI
-		if (len > 65535)
-			len = 65535;
-		::ExtTextOut(hdc, rc.left, ybase, 0, &rcw, s, len, NULL);
+	// Avoid drawing spaces in transparent mode
+	for (int i=0;i<len;i++) {
+		if (s[i] != ' ') {
+			SetFont(font_);
+			::SetTextColor(hdc, fore.AsLong());
+			::SetBkMode(hdc, TRANSPARENT);
+			RECT rcw = RectFromPRectangle(rc);
+			if (unicodeMode) {
+				wchar_t tbuf[MAX_US_LEN];
+				int tlen = UCS2FromUTF8(s, len, tbuf, sizeof(tbuf)/sizeof(wchar_t)-1);
+				tbuf[tlen] = L'\0';
+				::ExtTextOutW(hdc, rc.left, ybase, 0, &rcw, tbuf, tlen, NULL);
+			} else {
+				// There appears to be a 16 bit string length limit in GDI
+				if (len > 65535)
+					len = 65535;
+				::ExtTextOut(hdc, rc.left, ybase, 0, &rcw, s, len, NULL);
+			}
+			::SetBkMode(hdc, OPAQUE);
+			return;
+		}
 	}
-	::SetBkMode(hdc, OPAQUE);
 }
 
 int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
