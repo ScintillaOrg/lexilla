@@ -134,20 +134,22 @@ public:
 	char *s;
 	int len;
 	bool rectangular;
-	SelectionText() : s(0), len(0), rectangular(false) {}
+	int characterSet;
+	SelectionText() : s(0), len(0), rectangular(false), characterSet(0) {}
 	~SelectionText() {
-		Set(0, 0);
+		Set(0, 0, 0);
 	}
-	void Set(char *s_, int len_, bool rectangular_=false) {
+	void Set(char *s_, int len_, int characterSet_, bool rectangular_=false) {
 		delete []s;
 		s = s_;
 		if (s)
 			len = len_;
 		else
 			len = 0;
+		characterSet = characterSet_;
 		rectangular = rectangular_;
 	}
-	void Copy(const char *s_, int len_, bool rectangular_=false) {
+	void Copy(const char *s_, int len_, int characterSet_, bool rectangular_=false) {
 		delete []s;
 		s = new char[len_];
 		if (s) {
@@ -158,6 +160,7 @@ public:
 		} else {
 			len = 0;
 		}
+		characterSet = characterSet_;
 		rectangular = rectangular_;
 	}
 };
