@@ -83,11 +83,11 @@ static int GetPyStringState(Accessor &styler, int i, int *nextIndex) {
 	}
 }
 
-inline bool IsAWordChar(int  ch) {
+static inline bool IsAWordChar(int  ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_');
 }
 
-inline bool IsAWordStart(int ch) {
+static inline bool IsAWordStart(int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '_');
 }
 
