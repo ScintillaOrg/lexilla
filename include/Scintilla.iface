@@ -262,8 +262,8 @@ fun void MarkerSetFore=2041(int markerNumber, colour fore)
 # Set the background colour used for a particular marker number.
 fun void MarkerSetBack=2042(int markerNumber, colour back)
 
-# Add a marker to a line.
-fun void MarkerAdd=2043(int line, int markerNumber)
+# Add a marker to a line, returning an ID which can be used to find or delete the marker.
+fun int MarkerAdd=2043(int line, int markerNumber)
 
 # Delete a marker from a line
 fun void MarkerDelete=2044(int line, int markerNumber)
