@@ -640,7 +640,11 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				} else if (iswordstart(ch)) {
 					state = SCE_PL_WORD;
 					preferRE = false;
-				} else if (isoperator(ch)) {
+				} else if (isPerlOperator(ch)) {
+					if (ch == ')' || ch == ']')
+						preferRE = false;
+					else
+						preferRE = true;
 					styler.ColourTo(i, SCE_PL_OPERATOR);
 				}
 			}
