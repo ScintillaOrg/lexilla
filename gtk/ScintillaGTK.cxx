@@ -893,7 +893,15 @@ void ScintillaGTK::Resize(int width, int height) {
 
 	// Not always needed, but some themes can have different sizes of scrollbars
 	scrollBarWidth = GTK_WIDGET(scrollbarv.GetID())->requisition.width;
+	if ((scrollBarWidth == 0)) {
+		scrollBarWidth = 16;
+		GTK_WIDGET(scrollbarv.GetID())->requisition.width = scrollBarWidth;
+	}
 	scrollBarHeight = GTK_WIDGET(scrollbarh.GetID())->requisition.height;
+	if (horizontalScrollBarVisible && (scrollBarHeight == 0)) {
+		scrollBarHeight = 16;
+		GTK_WIDGET(scrollbarh.GetID())->requisition.height = scrollBarHeight;
+	}
 	
 	// These allocations should never produce negative sizes as they would wrap around to huge 
 	// unsigned numbers inside GTK+ causing warnings.
