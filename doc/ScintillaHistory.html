@@ -125,10 +125,16 @@
 	Released on 1 August 2002.
       </li>
       <li>
-	Support for GTK+ 2 in Scintilla. International input methods not supported on GTK+2.
+	Support for GTK+ 2 in Scintilla. International input methods not supported 
+	on GTK+2.
       </li>
       <li>
 	Line wrapping performance improved greatly.
+      </li>
+      <li>
+	New caret policy implementation that treats horizontal and vertical 
+	positioning equivalently and independently. Old caret policy methods
+	deprecated and not all options work correctly with old methods.
       </li>
       <li>
 	Extra fold points for C, C++, Java, ... for fold comments //{ .. //} and
@@ -137,6 +143,12 @@
       <li>
 	Scintilla method to find the height in pixels of a lin. Currently returns the 
 	same result for every line as all lines are same height.
+      </li>
+      <li>
+	Separate make file, scintilla_vc6.mak, for Scintilla to use Visual C++
+	version 6 since main makefile now assumes VS .NET. 
+	VS .NET project files available for combined Scintilla and 
+	SciTE in scite/boundscheck.
       </li>
       <li>
 	SciTE automatically recognises Unicode files based 
@@ -157,12 +169,33 @@
 	Regular expressions in JavaScript within hypertext files are lexed better.
       </li>
       <li>
-	The SciTE strip.trailing.spaces setting now works on the buffer so the 
+	On Windows, Scintilla exports a function called Scintilla_DirectFunction
+	that can be used the same as the function returned by GetDirectFunction.
+      </li>
+      <li>
+	Scintilla converts line endings of text obtained from the clipboard to 
+	the current default line endings. 
+      </li>
+      <li>
+	New SciTE property ensure.final.line.end can ensure that saved files
+	always end with a new line as his is required by some tools.
+	The ensure.consistent.line.ends property ensures all line ends are the 
+	current default when saving files.
+	The strip.trailing.spaces property now works on the buffer so the 
 	buffer in memory and the file on disk are the same after a save is performed.
       </li>
       <li>
 	The SciTE expand abbreviation command again allows '|' characters
 	in expansions to be quoted by using '||'.
+      </li>
+      <li>
+	SciTE on Windows can send data to the find tool through standard
+	input rather than using a command line argument to avoid problems
+	with quoting command line arguments.
+      </li>
+      <li>
+	The Stop Executing command in SciTE on Windows improved to send 
+	a Ctrl+Z character to the tool. Better messages when stopping a tool.
       </li>
       <li>
 	Autocompletion can automatically "fill up" when one of a set of characters is 
@@ -174,12 +207,18 @@
 	applications.
       </li>
       <li>
+	Environment variables are available as properties in SciTE.
+      </li>
+      <li>
 	SciTE on Windows keeps status line more current.
       </li>
       <li>
+	Abbreviations work in SciTE on Linux when first opened.
+      </li>
+      <li>
 	File saving fixed in SciTE to ensure files are not closed when they can not be 
-	saved because of file permissions. Also fixed a problem with buffers that caused
-	files to not be saved.
+	saved because of file permissions. Also fixed a problem with buffers that 
+	caused files to not be saved.
       </li>
       <li>
 	SciTE bug fixed where monospace mode not remembered when saving files.
@@ -190,10 +229,23 @@
 	to avoid zombies.
       </li>
       <li>
-	
+	SciTE on Linux has a Print menu command that defaults to invoking a2ps.
       </li>
       <li>
-	
+	Fixed incorrect highlighting of indentation guides in SciTE for Python.
+      </li>
+      <li>
+	Crash fixed in Scintilla when calling GetText for 0 characters.
+      </li>
+      <li>
+	Exporting as LaTeX improved when processing backslashes and tabs
+	and setting up font.
+      </li>
+      <li>
+	Crash fixed in SciTE when exporting or copying as RTF.
+      </li>
+      <li>
+	SciTE session loading fixed to handle more than 10 files in session.
       </li>
     </ul>
     <h3>

@@ -29,19 +29,21 @@
        Scintilla Bugs
     </h3>
     <p>
-       At the end of italics style runs characters can be chopped off. An example is using Verdana
-      12 point italics for strings makes an ending double quote half visible and an ending single
-      quote invisible. This is hard to solve completely, may be better to avoid these situations
-      by, for example, choosing a font like Times New Roman for strings. There is a specific kluge 
-      for the end of line which adds some room for italics but this does not work elsewhere.
+       At the end of italics style runs characters can be chopped off. An example 
+       is using Verdana 12 point italics for strings makes an ending double quote 
+       half visible and an ending single quote invisible. This is hard to solve 
+       completely, may be better to avoid these situations by, for example, 
+       choosing a font like Times New Roman for strings. There is a specific kluge 
+       for the end of line which adds some room for italics but this does not 
+       work elsewhere.
     </p>
     <p>
-       Dragging over bold text in some fonts will ripple because of the difference in size between
-      drawing all of a string at once and drawing it in parts.
+       Dragging over bold text in some fonts will ripple because of the difference in 
+       size between drawing all of a string at once and drawing it in parts.
     </p>
     <p>
-       In read-only mode the caret moves when you type or perform other actions that would
-       insert or remove text if not in read-only mode..
+       In read-only mode the caret moves when you type or perform other actions 
+       that would insert or remove text if not in read-only mode..
     </p>
     <p>
       Automatic scrolling when text dragged near edge of window.
@@ -55,6 +57,13 @@
     <h3>
        Scintilla To Do
     </h3>
+    <p>
+       Indented word wrap.
+    </p>
+    <p>
+       Folding for languages that don't have it yet and good folding for languages
+       that inherited poor folding from another languages folding code.
+    </p>
     <p>
        Simple pattern based styling.
     </p>
@@ -87,15 +96,14 @@
     </p>
     <p>
 	Flow diagrams inside editor similar to 
-	<a href="http://www.eng.auburn.edu/grasp/grasp_main.shtml">GRASP</a>.
-    </p>
-    <p>
-	Automatic resizing of line number margin when font size is changed.
+	<a href="http://www.eng.auburn.edu/grasp/grasp_main.shtml">
+	GRASP</a>.
     </p>
     <p>
 	A VCL component wrapper around Scintilla so it can be used with Delphi or
 	Borland C++ Builder. 
-	There is <a href="http://www.pnotepad.org/scintilla/">some work</a> on this available.
+	There is <a href="http://www.pnotepad.org/scintilla/">some work</a> 
+	on this available.
     </p>
     <p>
 	Port to MacOS X.
@@ -110,12 +118,13 @@
 	Could be modelled on Visual Studio's Ctrl+Shift+F8 command.
     </p>
     <p>
-	Better or more flexible range for horizontal scrolling.
+	Automatically calculated range for horizontal scrolling.
     </p>
     <p>
-	Commands and/or modes for treating display lines as document lines are now, such
-	as allowing the End key to move to the end of a display line. This can be useful when 
-	Scintilla used to edit documentation as it is the normal convention for word processors.
+	Commands and/or modes for treating display lines as document lines are now, 
+	such as allowing the End key to move to the end of a display line. This can be 
+	useful when Scintilla used to edit documentation as it is the normal convention 
+	for word processors.
     </p>
     <p>
 	Virtual space at the end of lines so the caret can be moved beyond the end 
@@ -126,7 +135,21 @@
 	SciTE To Do
     </h3>
     <p>
-	Printing on GTK+.
+	Interface to allow plugging in different scripting languages.
+    </p>
+    <p>
+	Good regular expression support through a plugin.
+    </p>
+    <p>
+	Allow tools to transform the selection, performing an operation like
+	indentation or sorting.
+    </p>
+    <p>
+	Ctrl+Tab working like Visual C++ where it goes to the next window in 
+	z-order.
+    </p>
+    <p>
+	Compatible with GTK+ 2.
     </p>
     <p>
 	Tab bar on GTK+.
@@ -150,14 +173,7 @@
 	Save All command.
     </p>
     <p>
-	Save as Copy command.
-    </p>
-    <p>
 	Silent mode that does not display any message boxes.
-    </p>
-    <p>
-	Automatic detection of character set and code page through examining text
-	and determining Unicode mode by presence of BOM.
     </p>
     <h3>
 	Features I am unlikely to do
@@ -170,7 +186,8 @@
 	Automatically saving modified menu shortcuts on exit.
     </p>
     <p>
-	Mouse wheel panning (press the mouse wheel and then move the mouse) on Windows.
+	Mouse wheel panning (press the mouse wheel and then move the mouse) on 
+	Windows.
     </p>
     <p>
 	Adding options to the save dialog to save in a particular encoding or with a
@@ -180,17 +197,19 @@
        Directions
     </h3>
     <p>
-       The main point of this development is Scintilla, and this is where most effort will go.
-      SciTE will get new features, but only when they make my life easier - I am not intending to
-      make it grow up to be a huge full-function IDE like Visual Cafe. The lines I've currently
-      decided not to step over in SciTE are any sort of project facility and any configuration
-      dialogs. SciTE for Windows now has a Director interface for communicating with a
-      separate project manager application.
+       The main point of this development is Scintilla, and this is where most effort will 
+       go. SciTE will get new features, but only when they make my life easier - I am 
+       not intending to make it grow up to be a huge full-function IDE like Visual 
+       Cafe. The lines I've currently decided not to step over in SciTE are any sort of 
+       project facility and any configuration dialogs. SciTE for Windows now has a 
+       Director interface for communicating with a separate project manager 
+       application.
     </p>
     <p>
-       If you are interested in contributing code, do not feel any need to make it cross platform.
-      Just code it for your platform and I'll either reimplement for the other platform or ensure
-      that there is no effect on the other platform.
+       If you are interested in contributing code, do not feel any need to make it cross 
+       platform.
+      Just code it for your platform and I'll either reimplement for the other platform or 
+      ensure that there is no effect on the other platform.
     </p>
   </body>
 </html>
