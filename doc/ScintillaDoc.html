@@ -2136,7 +2136,7 @@ struct TextToFind {
      <a class="message" href="#SCI_GETUSEPALETTE">SCI_GETUSEPALETTE</a><br />
      <a class="message" href="#SCI_SETBUFFEREDDRAW">SCI_SETBUFFEREDDRAW(bool isBuffered)</a><br />
      <a class="message" href="#SCI_GETBUFFEREDDRAW">SCI_GETBUFFEREDDRAW</a><br />
-     <a class="message" href="#SCI_SETTWOPHASEDRAW">SCI_SETTWOPHASEDRAW</a><br />
+     <a class="message" href="#SCI_SETTWOPHASEDRAW">SCI_SETTWOPHASEDRAW(bool twoPhase)</a><br />
      <a class="message" href="#SCI_GETTWOPHASEDRAW">SCI_GETTWOPHASEDRAW</a><br />
      <a class="message" href="#SCI_SETCODEPAGE">SCI_SETCODEPAGE(int codePage)</a><br />
      <a class="message" href="#SCI_GETCODEPAGE">SCI_GETCODEPAGE</a><br />
@@ -2182,14 +2182,16 @@ struct TextToFind {
     bitmap to the screen. This avoids flickering although it does take longer. The default is for
     drawing to be buffered.</p>
 
-    <p><b id="SCI_SETTWOPHASEDRAW">SCI_SETTWOPHASEDRAW(bool isBuffered)</b><br />
+    <p><b id="SCI_SETTWOPHASEDRAW">SCI_SETTWOPHASEDRAW(bool twoPhase)</b><br />
      <b id="SCI_GETTWOPHASEDRAW">SCI_GETTWOPHASEDRAW</b><br />
      Two phase drawing is a better but slower way of drawing text.
      In single phase drawing each run of characters in one style is drawn along with its background.
-     If a character overhangs the end of a run, such as in "T." where the "T" is in a different style
-     from the ".", then this can cause the right hand side of the "T" to be overdrawn by the background of
-     the "." which cuts it off. Two phase drawing fixes this by drawing all the backgrounds first and then
-     drawing the text in transparent mode. Two phase drawing may flicker more than single phase
+     If a character overhangs the end of a run, such as in "<i>V</i>_" where the
+     "<i>V</i>" is in a different style from the "_", then this can cause the right hand
+     side of the "<i>V</i>" to be overdrawn by the background of the "_" which
+     cuts it off. Two phase drawing
+     fixes this by drawing all the backgrounds first and then drawing the text in
+     transparent mode. Two phase drawing may flicker more than single phase
      unless buffered drawing is on. The default is for drawing to be two phase.</p>
 
     <p><b id="SCI_SETCODEPAGE">SCI_SETCODEPAGE(int codePage)</b><br />
