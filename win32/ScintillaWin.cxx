@@ -306,6 +306,7 @@ void ScintillaWin::Finalise() {
 	ScintillaBase::Finalise();
 	SetTicking(false);
 	SetIdle(false);
+	DestroySystemCaret();
 	::RevokeDragDrop(MainHWND());
 	::OleUninitialize();
 }
@@ -765,6 +766,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 	case WM_SETFOCUS:
 		SetFocusState(true);
 		RealizeWindowPalette(false);
+		DestroySystemCaret();
 		CreateSystemCaret();
 		break;
 
@@ -2147,7 +2149,10 @@ BOOL ScintillaWin::CreateSystemCaret() {
 BOOL ScintillaWin::DestroySystemCaret() {
 	::HideCaret(MainHWND());
 	BOOL retval = ::DestroyCaret();
-	::DeleteObject(sysCaretBitmap);
+	if (sysCaretBitmap) {
+		::DeleteObject(sysCaretBitmap);
+		sysCaretBitmap = 0;
+	}
 	return retval;
 }
  
