@@ -869,8 +869,12 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, ch
 		// and need some way to mark the clipping as being stream or rectangular,
 		// the terminating \0 is included in the length for rectangular clippings.
 		// All other tested aplications behave benignly by ignoring the \0.
+		// The #ifndef is the responsibility of archaeopteryx.com who say its
+		// needed because on Windows there is already a '\0' at the end.
+#ifndef _MSC_VER
 		if (isRectangular)
 			len++;
+#endif
 		gtk_selection_data_set(selection_data, GDK_SELECTION_TYPE_STRING,
 		                       8, reinterpret_cast<unsigned char *>(selBuffer),
 		                       len);
