@@ -2300,14 +2300,16 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		indStart[indica] = 0;
 
 	for (int indicPos = lineStart; indicPos <= lineEnd; indicPos++) {
-		if ((ll->indicators[indicPos] != ll->indicators[indicPos + 1]) || (indicPos == lineEnd)) {
+		if ((indicPos == lineEnd) || (ll->indicators[indicPos] != ll->indicators[indicPos + 1])) {
 			int mask = 1 << pdoc->stylingBits;
 			for (int indicnum = 0; mask < 0x100; indicnum++) {
-				if ((ll->indicators[indicPos + 1] & mask) && !(ll->indicators[indicPos] & mask)) {
+				if ((indicPos == lineEnd)) {
+					indStart[indicnum] = ll->positions[indicPos];
+				} else if ((ll->indicators[indicPos + 1] & mask) && !(ll->indicators[indicPos] & mask)) {
 					indStart[indicnum] = ll->positions[indicPos + 1];
 				}
-				if ((ll->indicators[indicPos] & mask) && (
-					!(ll->indicators[indicPos + 1] & mask) || (indicPos == lineEnd))) {
+				if ((ll->indicators[indicPos] & mask) && 
+					((indicPos == lineEnd) || !(ll->indicators[indicPos + 1] & mask))) {
 					int endIndicator = indicPos;
 					if (endIndicator >= lineEnd)
 						endIndicator = lineEnd-1;
