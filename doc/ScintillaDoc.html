@@ -1312,8 +1312,10 @@ SCI_GETDIRECTPOINTER
 	the container and Scintilla is mediated by the operating system
 	SendMessage function which can lead to bad performance when
 	calling intensively.
-	To avoid this overhead a pointer to a message handling function
-	inside Scintilla can be retrieved with SCI_GETDIRECTFUNCTION.
+	To avoid this overhead a pointer to a message handling function inside 
+	Scintilla can be retrieved with SCI_GETDIRECTFUNCTION. 
+	The function is also exported from the Windows DLL under the name 
+	'Scintilla_DirectFunction'. 
 	The first argument to use when calling the returned function is the
 	value retrieved from SCI_GETDIRECTPOINTER. After that go the
 	message number, wParam, and lParam.
