@@ -65,7 +65,7 @@ class ScintillaGTK : public ScintillaBase {
 	GdkICAttr *ic_attr;
 
 	// Private so ScintillaGTK objects can not be copied
-	ScintillaGTK(const ScintillaGTK &) {}
+	ScintillaGTK(const ScintillaGTK &) : ScintillaBase() {}
 	ScintillaGTK &operator=(const ScintillaGTK &) { return *this; }
 	
 public:
