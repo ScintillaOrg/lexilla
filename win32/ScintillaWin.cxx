@@ -259,9 +259,6 @@ static int InputCodePage() {
 	return atoi(sCodePage);
 }
 
-//#undef DefWindowProc
-//#define DefWindowProc  DefWindowProcW
-
 LRESULT ScintillaWin::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	switch (iMessage) {
 

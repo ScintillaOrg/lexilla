@@ -1404,6 +1404,8 @@ void Editor::AddCharUTF(char *s, unsigned int len) {
 	pdoc->InsertString(currentPos, s, len);
 	SetEmptySelection(currentPos + len);
 	EnsureCaretVisible();
+	// Avoid blinking during rapid typing:
+	ShowCaretAtCurrentPosition();	
 	SetLastXChosen();
 	NotifyChar(s[0]);
 }
@@ -1510,6 +1512,8 @@ void Editor::Redo() {
 
 void Editor::DelChar() {
 	pdoc->DelChar(currentPos);
+	// Avoid blinking during rapid typing:
+	ShowCaretAtCurrentPosition();	
 }
 
 void Editor::DelCharBack() {
@@ -1520,6 +1524,8 @@ void Editor::DelCharBack() {
 		ClearSelection();
 		SetEmptySelection(currentPos);
 	}
+	// Avoid blinking during rapid typing:
+	ShowCaretAtCurrentPosition();	
 }
 
 void Editor::NotifyFocus(bool) {

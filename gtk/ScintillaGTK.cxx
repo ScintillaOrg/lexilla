@@ -157,6 +157,7 @@ gint ScintillaGTK::FocusIn(GtkWidget *widget, GdkEventFocus * /*event*/, Scintil
 	GTK_WIDGET_SET_FLAGS(widget, GTK_HAS_FOCUS);
 	sciThis->NotifyFocus(true);
 	sciThis->ShowCaretAtCurrentPosition();
+	sciThis->InvalidateCaret();
 	return FALSE;
 }
 
