@@ -704,10 +704,13 @@ set void SetZoom=2373(int zoom,)
 # Retrieve the zoom level.
 get int GetZoom=2374(,)
 
+# Create a new document object. 
+# Starts with reference count of 1 and not selected into editor.
+fun int CreateDocument=2375(,)
 # Extend life of document.
-fun void AddRefDoc=2375(, int doc)
+fun void AddRefDocument=2376(, int doc)
 # Release a reference to the document, deleting document if it fades to black.
-fun void ReleaseDoc=2376(, int doc)
+fun void ReleaseDocument=2377(, int doc)
 
 # Set the focus to this Scintilla widget.
 fun void GrabFocus=2400(,)

@@ -54,7 +54,7 @@ int Document::AddRef() {
 	return refCount++;
 }
 
-// Decrease reference count and return its provius value.
+// Decrease reference count and return its previous value.
 // Delete the document if reference count reaches zero.
 int Document::Release() {
 	int curRefCount = --refCount;

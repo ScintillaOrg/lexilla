@@ -3893,11 +3893,17 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		SetDocPointer(reinterpret_cast<Document *>(lParam));
 		return 0;
 
-	case SCI_ADDREFDOC:
+	case SCI_CREATEDOCUMENT: {
+			Document *doc = new Document();
+			doc->AddRef();
+			return reinterpret_cast<LRESULT>(doc);
+		}
+		
+	case SCI_ADDREFDOCUMENT:
 		(reinterpret_cast<Document *>(lParam))->AddRef();
 		break;
 		
-	case SCI_RELEASEDOC:
+	case SCI_RELEASEDOCUMENT:
 		(reinterpret_cast<Document *>(lParam))->Release();
 		break;
 		

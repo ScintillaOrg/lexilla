@@ -324,7 +324,7 @@ LRESULT ScintillaWin::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case WM_SIZE: {
-			//Platform::DebugPrintf("S start wnd proc %d %d %d\n",iMessage, wParam, lParam);
+			//Platform::DebugPrintf("Scintilla WM_SIZE %d %d\n", LoWord(lParam), HiWord(lParam));
 			PRectangle rsClient(0, 0, LoWord(lParam), HiWord(lParam));
 			SetScrollBarsTo(rsClient);
 			DropGraphics();
