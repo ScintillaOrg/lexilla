@@ -3641,6 +3641,8 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 					ptr[iChar] = text[iChar];
 				ptr[iChar] = '\0';
 				delete []text;
+			} else {
+				ptr[0] = '\0';
 			}
 			return iChar;
 		}
