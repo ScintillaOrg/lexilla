@@ -168,6 +168,7 @@ class ScintillaWin :
 
 	virtual void StartDrag();
 	sptr_t WndPaint(unsigned long wParam);
+	sptr_t HandleComposition(uptr_t wParam, sptr_t lParam);
 	virtual sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 	virtual void SetTicking(bool on);
@@ -406,6 +407,43 @@ LRESULT ScintillaWin::WndPaint(unsigned long wParam) {
 	return 0l;
 }
 
+static BOOL IsNT() {
+		OSVERSIONINFO osv = {sizeof(OSVERSIONINFO),0,0,0,0,""};
+		::GetVersionEx(&osv);
+		return osv.dwPlatformId == VER_PLATFORM_WIN32_NT;
+}
+
+sptr_t ScintillaWin::HandleComposition(uptr_t wParam, sptr_t lParam) {
+		if ((lParam & GCS_RESULTSTR) && (IsNT())) {
+			HIMC hIMC = ::ImmGetContext(wMain.GetID());
+			if (hIMC) {
+				const int maxLenInputIME = 200;
+				wchar_t wcs[maxLenInputIME];
+				LONG bytes = ::ImmGetCompositionStringW(hIMC, 
+					GCS_RESULTSTR, wcs, (maxLenInputIME-1)*2); 
+				int wides = bytes / 2;
+				if (IsUnicodeMode()) {
+					char utfval[maxLenInputIME * 3];
+					unsigned int len = UTF8Length(wcs, wides);
+					UTF8FromUCS2(wcs, wides, utfval, len);
+					utfval[len] = '\0';
+					AddCharUTF(utfval, len);
+				} else {
+					char dbcsval[maxLenInputIME * 2];
+					int size = ::WideCharToMultiByte(InputCodePage(), 
+						0, wcs, wides, dbcsval, sizeof(dbcsval) - 1, 0, 0);
+					for (int i=0; i<size; i++) {
+						AddChar(dbcsval[i]);
+					}
+				}
+				::ImmReleaseContext(wMain.GetID(), hIMC);
+			}
+			return 0;
+		} else {
+			return ::DefWindowProc(wMain.GetID(), WM_IME_COMPOSITION, wParam, lParam);
+		}
+}
+
 sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	//Platform::DebugPrintf("S M:%x WP:%x L:%x\n", iMessage, wParam, lParam);
 	switch (iMessage) {
@@ -609,10 +647,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
 
 	case WM_IME_COMPOSITION:
-		if (lParam & GCS_RESULTSTR) {
-			//Platform::DebugPrintf("Result\n");
-		}
-		return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
+		return HandleComposition(wParam, lParam);
 
 	case WM_IME_CHAR: {
 			AddCharBytes(HIBYTE(wParam), LOBYTE(wParam));
@@ -1622,14 +1657,6 @@ bool ScintillaWin::IsUnicodeMode() const {
 }
 
 const char scintillaClassName[] = "Scintilla";
-
-#if 0
-static BOOL IsNT() {
-		OSVERSIONINFO osv = {sizeof(OSVERSIONINFO),0,0,0,0,""};
-		::GetVersionEx(&osv);
-		return osv.dwPlatformId == VER_PLATFORM_WIN32_NT;
-}
-#endif
 
 void ScintillaWin::Register(HINSTANCE hInstance_) {
 
