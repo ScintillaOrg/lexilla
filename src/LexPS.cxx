@@ -275,7 +275,7 @@ static void ColourisePSDoc(
     sc.Complete();
 }
 
-static void FoldPSDoc(unsigned int startPos, int length, int initStyle, WordList *[],
+static void FoldPSDoc(unsigned int startPos, int length, int, WordList *[],
                        Accessor &styler) {
     bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
     bool foldAtElse = styler.GetPropertyInt("fold.at.else", 0) != 0;
