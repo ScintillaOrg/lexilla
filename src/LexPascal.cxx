@@ -32,10 +32,13 @@ static int classifyWordPascal(unsigned int start, unsigned int end, WordList &ke
 	else {
 		if (keywords.InList(s)) {
 			chAttr = SCE_C_WORD;
-			if (strcmp(s, "begin") == 0 || strcmp(s, "object") == 0)
+			if (strcmp(s, "begin") == 0 || 
+				strcmp(s, "object") == 0 || 
+				strcmp(s,"case") == 0) {
 				lev=1;
-			else if (strcmp(s, "end") == 0)
+			} else if (strcmp(s, "end") == 0) {
 				lev=-1;
+			}
 		}
 	}
 	styler.ColourTo(end, chAttr);
