@@ -342,6 +342,7 @@ typedef void (tMacroRecorder)(UINT iMessage, WPARAM wParam, LPARAM lParam,
 #define SC_PERFORMED_UNDO 0x20
 #define SC_PERFORMED_REDO 0x40
 #define SC_LASTSTEPINUNDOREDO 0x100
+#define SC_MOD_CHANGEMARKER 0x200
 
 #define SC_MODEVENTMASKALL 0x377
 
