@@ -336,7 +336,7 @@ static bool iswordsep(char ch, bool onlyLineEnds) {
 // Creates an array that points into each word in the string and puts \0 terminators
 // after each word.
 static char **ArrayFromWordList(char *wordlist, int *len, bool onlyLineEnds = false) {
-#if 0
+#if 1
 	char prev = '\n';
 	int words = 0;
 	for (int j = 0; wordlist[j]; j++) {
@@ -403,7 +403,11 @@ out:
 void WordList::Clear() {
 	if (words) {
 		delete []list;
+#if 1
+        delete []words;
+#else
 		free(words);
+#endif
 		free(wordsNoCase);
 	}
 	words = 0;
