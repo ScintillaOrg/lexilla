@@ -512,15 +512,16 @@ bool Document::InsertString(int position, const char *s) {
 }
 
 // Insert a string with a length
-bool Document::InsertString(int position, const char *s, int insertLength) {
+bool Document::InsertString(int position, const char *s, size_t insertLength) {
 	bool changed = false;
 	char *sWithStyle = new char[insertLength * 2];
 	if (sWithStyle) {
-		for (int i = 0; i < insertLength; i++) {
+		for (size_t i = 0; i < insertLength; i++) {
 			sWithStyle[i*2] = s[i];
 			sWithStyle[i*2 + 1] = 0;
 		}
-		changed = InsertStyledString(position*2, sWithStyle, insertLength*2);
+		changed = InsertStyledString(position*2, sWithStyle, 
+			static_cast<int>(insertLength*2));
 		delete []sWithStyle;
 	}
 	return changed;
@@ -928,7 +929,7 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 		// Compute actual search ranges needed
 		int lengthFind = *length;
 		if (lengthFind == -1)
-			lengthFind = strlen(s);
+			lengthFind = static_cast<int>(strlen(s));
 		int endSearch = endPos;
 		if (startPos <= endPos) {
 			endSearch = endPos - lengthFind + 1;

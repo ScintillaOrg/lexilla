@@ -160,7 +160,7 @@ public:
 
 	bool InsertChar(int pos, char ch);
 	bool InsertString(int position, const char *s);
-	bool InsertString(int position, const char *s, int insertLength);
+	bool InsertString(int position, const char *s, size_t insertLength);
 	void ChangeChar(int pos, char ch);
 	void DelChar(int pos);
 	void DelCharBack(int pos);

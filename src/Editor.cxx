@@ -2468,7 +2468,7 @@ void Editor::NotifyChar(int ch) {
 		char txt[2];
 		txt[0] = static_cast<char>(ch);
 		txt[1] = '\0';
-		NotifyMacroRecord(SCI_REPLACESEL, 0, reinterpret_cast<long>(txt));
+		NotifyMacroRecord(SCI_REPLACESEL, 0, reinterpret_cast<sptr_t>(txt));
 	}
 }
 
@@ -3260,9 +3260,9 @@ void Editor::Indent(bool forwards) {
  * @return The position of the found text, -1 if not found.
  */
 long Editor::FindText(
-    unsigned long wParam,    	///< Search modes : @c SCFIND_MATCHCASE, @c SCFIND_WHOLEWORD,
+    uptr_t wParam,    	///< Search modes : @c SCFIND_MATCHCASE, @c SCFIND_WHOLEWORD,
     ///< @c SCFIND_WORDSTART or @c SCFIND_REGEXP.
-    long lParam) {			///< @c TextToFind structure: The text to search for in the given range.
+    sptr_t lParam) {			///< @c TextToFind structure: The text to search for in the given range.
 
 	TextToFind *ft = reinterpret_cast<TextToFind *>(lParam);
 	int lengthFound = strlen(ft->lpstrText);
@@ -3301,9 +3301,9 @@ void Editor::SearchAnchor() {
  */
 long Editor::SearchText(
     unsigned int iMessage,    	///< Accepts both @c SCI_SEARCHNEXT and @c SCI_SEARCHPREV.
-    unsigned long wParam,    	///< Search modes : @c SCFIND_MATCHCASE, @c SCFIND_WHOLEWORD,
+    uptr_t wParam,    	///< Search modes : @c SCFIND_MATCHCASE, @c SCFIND_WHOLEWORD,
     ///< @c SCFIND_WORDSTART or @c SCFIND_REGEXP.
-    long lParam) {			///< The text to search for.
+    sptr_t lParam) {			///< The text to search for.
 
 	const char *txt = reinterpret_cast<char *>(lParam);
 	int pos;
@@ -4116,6 +4116,10 @@ static bool ValidMargin(unsigned long wParam) {
 	return wParam < ViewStyle::margins;
 }
 
+static char *CharPtrFromSPtr(sptr_t lParam) {
+	return reinterpret_cast<char *>(lParam);
+}
+
 sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	//Platform::DebugPrintf("S start wnd proc %d %d %d\n",iMessage, wParam, lParam);
 
@@ -4129,7 +4133,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		{
 			if (lParam == 0)
 				return 0;
-			char *ptr = reinterpret_cast<char *>(lParam);
+			char *ptr = CharPtrFromSPtr(lParam);
 			unsigned int iChar = 0;
 			for (; iChar < wParam - 1; iChar++)
 				ptr[iChar] = pdoc->CharAt(iChar);
@@ -4143,7 +4147,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 				return 0;
 			pdoc->DeleteChars(0, pdoc->Length());
 			SetEmptySelection(0);
-			pdoc->InsertString(0, reinterpret_cast<char *>(lParam));
+			pdoc->InsertString(0, CharPtrFromSPtr(lParam));
 			return 1;
 		}
 
@@ -4191,7 +4195,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			}
 			int lineStart = pdoc->LineStart(wParam);
 			int lineEnd = pdoc->LineStart(wParam + 1);
-			char *ptr = reinterpret_cast<char *>(lParam);
+			char *ptr = CharPtrFromSPtr(lParam);
 			int iPlace = 0;
 			for (int iChar = lineStart; iChar < lineEnd; iChar++) {
 				ptr[iPlace++] = pdoc->CharAt(iChar);
@@ -4226,7 +4230,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 				return 0;
 			SelectionText selectedText;
 			CopySelectionRange(&selectedText);
-			char *ptr = reinterpret_cast<char *>(lParam);
+			char *ptr = CharPtrFromSPtr(lParam);
 			int iChar = 0;
 			if (selectedText.len) {
 				for (; iChar < selectedText.len; iChar++)
@@ -4266,7 +4270,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 				return 0;
 			pdoc->BeginUndoAction();
 			ClearSelection();
-			char *replacement = reinterpret_cast<char *>(lParam);
+			char *replacement = CharPtrFromSPtr(lParam);
 			pdoc->InsertString(currentPos, replacement);
 			pdoc->EndUndoAction();
 			SetEmptySelection(currentPos + strlen(replacement));
@@ -4290,15 +4294,15 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_REPLACETARGET:
 		PLATFORM_ASSERT(lParam);
-		return ReplaceTarget(false, reinterpret_cast<char *>(lParam), wParam);
+		return ReplaceTarget(false, CharPtrFromSPtr(lParam), wParam);
 
 	case SCI_REPLACETARGETRE:
 		PLATFORM_ASSERT(lParam);
-		return ReplaceTarget(true, reinterpret_cast<char *>(lParam), wParam);
+		return ReplaceTarget(true, CharPtrFromSPtr(lParam), wParam);
 
 	case SCI_SEARCHINTARGET:
 		PLATFORM_ASSERT(lParam);
-		return SearchInTarget(reinterpret_cast<char *>(lParam), wParam);
+		return SearchInTarget(CharPtrFromSPtr(lParam), wParam);
 
 	case SCI_SETSEARCHFLAGS:
 		searchFlags = wParam;
@@ -4398,7 +4402,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_ADDTEXT: {
 			if (lParam == 0)
 				return 0;
-			pdoc->InsertString(CurrentPosition(), reinterpret_cast<char *>(lParam), wParam);
+			pdoc->InsertString(CurrentPosition(), CharPtrFromSPtr(lParam), wParam);
 			SetEmptySelection(currentPos + wParam);
 			return 0;
 		}
@@ -4406,7 +4410,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_ADDSTYLEDTEXT: {
 			if (lParam == 0)
 				return 0;
-			pdoc->InsertStyledString(CurrentPosition() * 2, reinterpret_cast<char *>(lParam), wParam);
+			pdoc->InsertStyledString(CurrentPosition() * 2, CharPtrFromSPtr(lParam), wParam);
 			SetEmptySelection(currentPos + wParam / 2);
 			return 0;
 		}
@@ -4418,13 +4422,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			if (static_cast<short>(wParam) == -1)
 				insertPos = CurrentPosition();
 			int newCurrent = CurrentPosition();
-			int newAnchor = anchor;
-			char *sz = reinterpret_cast<char *>(lParam);
+			char *sz = CharPtrFromSPtr(lParam);
 			pdoc->InsertString(insertPos, sz);
 			if (newCurrent > insertPos)
 				newCurrent += strlen(sz);
-			if (newAnchor > insertPos)
-				newAnchor += strlen(sz);
 			SetEmptySelection(newCurrent);
 			return 0;
 		}
@@ -4587,7 +4588,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			int lineCurrentPos = pdoc->LineFromPosition(currentPos);
 			int lineStart = pdoc->LineStart(lineCurrentPos);
 			unsigned int lineEnd = pdoc->LineStart(lineCurrentPos + 1);
-			char *ptr = reinterpret_cast<char *>(lParam);
+			char *ptr = CharPtrFromSPtr(lParam);
 			unsigned int iPlace = 0;
 			for (unsigned int iChar = lineStart; iChar < lineEnd && iPlace < wParam - 1; iChar++) {
 				ptr[iPlace++] = pdoc->CharAt(iChar);
@@ -4617,7 +4618,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SETSTYLINGEX:           // Specify a complete styling buffer
 		if (lParam == 0)
 			return 0;
-		pdoc->SetStyles(wParam, reinterpret_cast<char *>(lParam));
+		pdoc->SetStyles(wParam, CharPtrFromSPtr(lParam));
 		break;
 
 	case SCI_SETBUFFEREDDRAW:
@@ -4722,7 +4723,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_TEXTWIDTH:
 		PLATFORM_ASSERT((wParam >= 0) && (wParam <= STYLE_MAX));
 		PLATFORM_ASSERT(lParam);
-		return TextWidth(wParam, reinterpret_cast<char *>(lParam));
+		return TextWidth(wParam, CharPtrFromSPtr(lParam));
 
 	case SCI_SETENDATLASTLINE:
 		PLATFORM_ASSERT((wParam == 0) || (wParam ==1));
@@ -4935,7 +4936,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		if (lParam == 0)
 			return 0;
 		if (wParam <= STYLE_MAX) {
-			vs.SetStyleFontName(wParam, reinterpret_cast<const char *>(lParam));
+			vs.SetStyleFontName(wParam, CharPtrFromSPtr(lParam));
 			InvalidateStyleRedraw();
 		}
 		break;

@@ -10,7 +10,7 @@
 
 // These functions are implemented because each platform calls them something different.
 int CompareCaseInsensitive(const char *a, const char *b);
-int CompareNCaseInsensitive(const char *a, const char *b, int len);
+int CompareNCaseInsensitive(const char *a, const char *b, size_t len);
 bool EqualCaseInsensitive(const char *a, const char *b);
 
 // Define another string class.

@@ -394,7 +394,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void NotifyModified(Document *document, DocModification mh, void *userData);
 	void NotifyDeleted(Document *document, void *userData);
 	void NotifyStyleNeeded(Document *doc, void *userData, int endPos);
-	void NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long lParam);
+	void NotifyMacroRecord(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
 	void PageMove(int direction, bool extend=false);
 	void ChangeCaseOfSelection(bool makeUpperCase);
@@ -411,9 +411,9 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	void Indent(bool forwards);
 
-	long FindText(unsigned long wParam, long lParam);
+	long FindText(uptr_t wParam, sptr_t lParam);
 	void SearchAnchor();
-	long SearchText(unsigned int iMessage, unsigned long wParam, long lParam);
+	long SearchText(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 	long SearchInTarget(const char *text, int length);
 	void GoToLine(int lineNo);
 

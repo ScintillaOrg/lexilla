@@ -230,7 +230,7 @@ void LexerManager::EnumerateLexers() {
 	int i = FindLastSlash(path);
 
 	if (i == -1)
-		i = strlen(path);
+		i = static_cast<int>(strlen(path));
 
 	SString sPath(path, 0, i);
 

@@ -174,7 +174,7 @@ class ScintillaWin :
 		    HWND hWnd, UINT iMessage, WPARAM wParam, sptr_t lParam);
 
 	virtual void StartDrag();
-	sptr_t WndPaint(unsigned long wParam);
+	sptr_t WndPaint(uptr_t wParam);
 	sptr_t HandleComposition(uptr_t wParam, sptr_t lParam);
 	virtual sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
@@ -356,14 +356,14 @@ static int KeyTranslate(int keyIn) {
 	}
 }
 
-LRESULT ScintillaWin::WndPaint(unsigned long wParam) {
+LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 	//ElapsedTime et;
 
 	// Redirect assertions to debug output and save current state
 	bool assertsPopup = Platform::ShowAssertionPopUps(false);
 	paintState = painting;
 	PAINTSTRUCT ps;
-	PAINTSTRUCT* pps;
+	PAINTSTRUCT *pps;
 
 	bool IsOcxCtrl = (wParam != 0); // if wParam != 0, it contains
 								   // a PAINSTRUCT* from the OCX
@@ -677,7 +677,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		break;
 
 	case WM_PALETTECHANGED:
-		if (wParam != reinterpret_cast<unsigned int>(MainHWND())) {
+		if (wParam != reinterpret_cast<uptr_t>(MainHWND())) {
 			//Platform::DebugPrintf("** Palette Changed\n");
 			RealizeWindowPalette(true);
 		}
@@ -838,7 +838,7 @@ void ScintillaWin::SetTicking(bool on) {
 		if (timer.ticking) {
 			timer.tickerID = reinterpret_cast<TickerID>(::SetTimer(MainHWND(), 1, timer.tickSize, NULL));
 		} else {
-			::KillTimer(MainHWND(), reinterpret_cast<UINT>(timer.tickerID));
+			::KillTimer(MainHWND(), reinterpret_cast<uptr_t>(timer.tickerID));
 			timer.tickerID = 0;
 		}
 	}
