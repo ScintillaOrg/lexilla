@@ -60,7 +60,9 @@ def Regenerate(filename, genfn, definition):
 	out.close()
 	hfile.close()
 	outText = contents(tempname)
-	if inText != outText:
+	if inText == outText:
+		os.unlink(tempname)
+	else:
 		os.unlink(filename)
 		os.rename(tempname, filename)
 
