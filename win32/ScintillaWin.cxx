@@ -1,6 +1,6 @@
 // Scintilla source code edit control
 // ScintillaWin.cxx - Windows specific subclass of ScintillaBase
-// Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <stdlib.h>
@@ -201,7 +201,6 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 		::RegisterClipboardFormat("MSDEVColumnSelect"));
 	
 	wMain = hwnd;
-	wDraw = hwnd;
 
 	dob.sci = this;
 	ds.sci = this;
@@ -815,7 +814,7 @@ void ScintillaWin::CreateCallTipWindow(PRectangle) {
 #ifdef TOTAL_CONTROL
 	ct.wCallTip = ::CreateWindow(callClassName, "ACallTip",
 	                             WS_VISIBLE | WS_CHILD, 100, 100, 150, 20,
-	                             wDraw.GetID(), reinterpret_cast<HMENU>(idCallTip), wDraw.GetInstance(), &ct);
+	                             wMain.GetID(), reinterpret_cast<HMENU>(idCallTip), wMain.GetInstance(), &ct);
 	ct.wDraw = ct.wCallTip;
 #endif
 }

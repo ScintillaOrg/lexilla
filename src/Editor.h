@@ -1,6 +1,6 @@
 // Scintilla source code edit control
 // Editor.h - defines the main editor class
-// Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #ifndef EDITOR_H
@@ -48,11 +48,9 @@ class Editor : public DocWatcher {
 	Editor &operator=(const Editor &) { return *this; }
 protected:	// ScintillaBase subclass needs access to much of Editor
 
-	// On GTK+, Scintilla is a container widget holding two scroll bars and a drawing area
+	// On GTK+, Scintilla is a container widget holding two scroll bars
 	// whereas on Windows there is just one window with both scroll bars turned on.
-	// Therefore, on GTK+ the following are separate windows but only one window on Windows.
 	Window wMain;	// The Scintilla parent window
-	Window wDraw;	// The text drawing area
 
 	// Style resources may be expensive to allocate so are cached between uses.
 	// When a style attribute is changed, this cache is flushed.
@@ -161,7 +159,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void RefreshStyleData();
 	void DropGraphics();
 
-	PRectangle GetClientRectangle();
+	virtual PRectangle GetClientRectangle();
 	PRectangle GetTextRectangle();
 	
 	int LinesOnScreen();

@@ -1,6 +1,6 @@
 // Scintilla source code edit control
 // ScintillaBase.cxx - an enhanced subclass of Editor with calltips, autocomplete and context menu
-// Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <stdlib.h>
@@ -187,7 +187,7 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 			return;
 		}
 	}
-	ac.Start(wDraw, idAutoComplete, currentPos, lenEntered);
+	ac.Start(wMain, idAutoComplete, currentPos, lenEntered);
 
 	PRectangle rcClient = GetClientRectangle();
 	Point pt = LocationFromPosition(currentPos-lenEntered);
@@ -448,7 +448,7 @@ long ScintillaBase::WndProc(unsigned int iMessage, unsigned long wParam, long lP
 				}
 				// Now display the window.
 				CreateCallTipWindow(rc);
-				ct.wCallTip.SetPositionRelative(rc, wDraw);
+				ct.wCallTip.SetPositionRelative(rc, wMain);
 				ct.wCallTip.Show();
 			}
 		}

@@ -1,6 +1,6 @@
 // Scintilla source code edit control
 // Editor.cxx - main code for the edit control
-// Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <stdlib.h>
@@ -168,7 +168,7 @@ void Editor::RefreshStyleData() {
 }
 
 PRectangle Editor::GetClientRectangle() {
-	return wDraw.GetClientPosition();
+	return wMain.GetClientPosition();
 }
 
 PRectangle Editor::GetTextRectangle() {
@@ -310,7 +310,7 @@ int Editor::PositionFromLineX(int line, int x) {
 }
 
 void Editor::RedrawRect(PRectangle rc) {
-	//Platform::DebugPrintf("Redraw %d %d - %d %d\n", rc.left, rc.top, rc.right, rc.bottom);
+	//Platform::DebugPrintf("Redraw %0d,%0d - %0d,%0d\n", rc.left, rc.top, rc.right, rc.bottom);
 
 	// Clip the redraw rectangle into the client area
 	PRectangle rcClient = GetClientRectangle();
@@ -324,13 +324,13 @@ void Editor::RedrawRect(PRectangle rc) {
 		rc.right = rcClient.right;
 
 	if ((rc.bottom > rc.top) && (rc.right > rc.left)) {
-		wDraw.InvalidateRectangle(rc);
+		wMain.InvalidateRectangle(rc);
 	}
 }
 
 void Editor::Redraw() {
 	//Platform::DebugPrintf("Redraw all\n");
-	wDraw.InvalidateAll();
+	wMain.InvalidateAll();
 }
 
 void Editor::RedrawSelMargin() {
@@ -339,7 +339,7 @@ void Editor::RedrawSelMargin() {
 	} else {
 		PRectangle rcSelMargin = GetClientRectangle();
 		rcSelMargin.right = vs.fixedColumnWidth;
-		wDraw.InvalidateRectangle(rcSelMargin);
+		wMain.InvalidateRectangle(rcSelMargin);
 	}
 }
 
@@ -549,7 +549,7 @@ void Editor::HorizontalScrollTo(int xPos) {
 	if (xOffset < 0)
 		xOffset = 0;
 	SetHorizontalScrollPos();
-	Redraw();
+	RedrawRect(GetClientRectangle());
 }
 
 void Editor::MoveCaretInsideView() {
@@ -2563,9 +2563,9 @@ void Editor::SetDragPosition(int newPos) {
 
 void Editor::DisplayCursor(Window::Cursor c) {
 	if (cursorMode == SC_CURSORNORMAL)
-		wDraw.SetCursor(c);
+		wMain.SetCursor(c);
 	else
-		wDraw.SetCursor(static_cast<Window::Cursor>(cursorMode));
+		wMain.SetCursor(static_cast<Window::Cursor>(cursorMode));
 }
 
 void Editor::StartDrag() {
