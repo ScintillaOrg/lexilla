@@ -802,6 +802,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int xStart,
 		marks = pdoc->GetMark(line) & vsDraw.maskInLine;
 	}
 
+    bool inIndentation = true;
 	int posLineStart = pdoc->LineStart(line);
 	int posLineEnd = pdoc->LineStart(line + 1);
 
@@ -840,13 +841,21 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int xStart,
 				rcSegment.right = ll.positions[i + 1] + xStart;
 				surface->FillRectangle(rcSegment, textBack);
 				if (vsDraw.viewWhitespace) {
-					surface->PenColour(textFore);
-					PRectangle rcTab(rcSegment.left + 1, rcSegment.top + 4,
-					                 rcSegment.right - 1, rcSegment.bottom - vsDraw.maxDescent);
-					DrawTabArrow(surface, rcTab, rcSegment.top + vsDraw.lineHeight / 2);
+				    surface->PenColour(textFore);
+                    if (inIndentation) {
+                        if (ll.positions[i] > 0) {
+	                        surface->MoveTo(rcSegment.left + 1, rcSegment.top);
+	                        surface->LineTo(rcSegment.left + 1, rcSegment.bottom);
+                        }
+                    } else {
+					    PRectangle rcTab(rcSegment.left + 1, rcSegment.top + 4,
+					                     rcSegment.right - 1, rcSegment.bottom - vsDraw.maxDescent);
+					    DrawTabArrow(surface, rcTab, rcSegment.top + vsDraw.lineHeight / 2);
+                    }
 				}
 			// Manage control character display
 			} else if (IsControlCharacter(ll.chars[i])) {
+                inIndentation = false;
 				const char *ctrlChar = ControlCharacterString(ll.chars[i]);
 				rcSegment.left = ll.positions[i] + xStart;
 				rcSegment.right = ll.positions[i + 1] + xStart;
@@ -869,6 +878,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int xStart,
 							textBack, textFore);
 			// Manage normal display
 			} else {
+                inIndentation = false;
 				rcSegment.left = ll.positions[startseg] + xStart;
 				rcSegment.right = ll.positions[i + 1] + xStart;
 				// Only try to draw if really visible - enhances performance by not calling environment to 
