@@ -143,6 +143,8 @@ class ScintillaWin :
 	void ImeStartComposition();
 	void ImeEndComposition();
 
+    void AddCharBytes(char b0, char b1=0);
+
 	void GetIntelliMouseParameters();
 	void CopySelTextToClipboard();
 	void ScrollMessage(WPARAM wParam);
@@ -412,7 +414,11 @@ LRESULT ScintillaWin::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 
 	case WM_CHAR:
 		if (!iscntrl(wParam&0xff)) {
-			AddChar(static_cast<char>(wParam&0xff));
+            if (IsUnicodeMode()) {
+                AddCharBytes(static_cast<char>(wParam&0xff));
+            } else {
+			    AddChar(static_cast<char>(wParam&0xff));
+            }
 		}
 		return 1;
 
@@ -487,21 +493,7 @@ LRESULT ScintillaWin::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
 
 	case WM_IME_CHAR: {
-			int nRet = 0;
-			int inputCodePage = InputCodePage();
-			if (inputCodePage) {
-				char utfval[4]="\0\0\0";
-				char ansiChars[3];
-				ansiChars[0] = HIBYTE(wParam);
-				ansiChars[1] = LOBYTE(wParam);
-				ansiChars[2] = '\0';
-				wchar_t wcs[2];
-				nRet = ::MultiByteToWideChar(inputCodePage, 0, ansiChars, 2, wcs, 1);
-				unsigned int len = UTF8Length(wcs, 1);
-				UTF8FromUCS2(wcs, 1, utfval, len);
-				utfval[len] = '\0';
-				AddCharUTF(utfval,len);
-			}
+            AddCharBytes(HIBYTE(wParam), LOBYTE(wParam));
 			return 0;
 		}
 
@@ -1074,6 +1066,26 @@ void ScintillaWin::ImeStartComposition() {
 // Called when IME Window closed.
 void ScintillaWin::ImeEndComposition() {
 	ShowCaretAtCurrentPosition();
+}
+
+void ScintillaWin::AddCharBytes(char b0, char b1) {
+	int inputCodePage = InputCodePage();
+	if (inputCodePage) {
+		char utfval[4]="\0\0\0";
+		char ansiChars[3];
+		ansiChars[0] = b0;
+		ansiChars[1] = b1;
+		ansiChars[2] = '\0';
+		wchar_t wcs[2];
+		::MultiByteToWideChar(inputCodePage, 0, ansiChars, 2, wcs, 1);
+		unsigned int len = UTF8Length(wcs, 1);
+		UTF8FromUCS2(wcs, 1, utfval, len);
+		utfval[len] = '\0';
+		AddCharUTF(utfval,len);
+    } else {
+        AddChar(b0);
+        AddChar(b1);
+    }
 }
 
 void ScintillaWin::GetIntelliMouseParameters() {
