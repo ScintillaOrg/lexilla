@@ -320,56 +320,121 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 	}
 }
 
-static void FoldPyDoc(unsigned int startPos, int length, int initStyle,
-						   WordList *[], Accessor &styler) {
-	int lengthDoc = startPos + length;
-
-	// Backtrack to previous line in case need to fix its fold status
-	int lineCurrent = styler.GetLine(startPos);
-	if (startPos > 0) {
-		if (lineCurrent > 0) {
-			lineCurrent--;
-			startPos = styler.LineStart(lineCurrent);
-			if (startPos == 0)
-				initStyle = SCE_P_DEFAULT;
-			else
-				initStyle = styler.StyleAt(startPos-1);
-		}
+static bool IsCommentLine(int line, Accessor &styler) {
+	int pos = styler.LineStart(line);
+	int eol_pos = styler.LineStart(line+1) - 1;
+	for (int i = pos; i < eol_pos; i++) {
+		char ch = styler[i];
+		if (ch == '#')
+			return true;
+		else if (ch != ' ' && ch != '\t')
+			return false;
 	}
-	int state = initStyle & 31;
+	return false;
+}
+
+static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unused*/,
+					WordList *[], Accessor &styler) {
+	int maxPos = startPos + length;
+	int maxLines = styler.GetLine(maxPos-1);
+	int lengthDoc = styler.Length();
+
+	// Backtrack to previous non-blank line so we can determine indent level
+	// for any white space lines (needed esp. within triple quoted strings)
+	// and so we can fix any preceding fold level (which is why we go back
+	// at least one line in all cases)
 	int spaceFlags = 0;
-	int indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, IsPyComment);
-	if ((state == SCE_P_TRIPLE) || (state == SCE_P_TRIPLEDOUBLE))
-		indentCurrent |= SC_FOLDLEVELWHITEFLAG;
+	int lineCurrent = styler.GetLine(startPos);
+	int indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, NULL);
+	bool first = true;
+	while ((startPos > 0) && (lineCurrent > 0) && (first || indentCurrent & SC_FOLDLEVELWHITEFLAG)) {
+		lineCurrent--;
+		startPos = styler.LineStart(lineCurrent);
+		indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, NULL);
+		first = false;
+	}
+
+	// Set up initial state
+	int prev_state = SCE_P_DEFAULT & 31;
+	if (lineCurrent >= 1)
+		prev_state = styler.StyleAt(startPos-1) & 31;
+	int prevQuote = ((prev_state == SCE_P_TRIPLE) || (prev_state == SCE_P_TRIPLEDOUBLE));
+	int prevComment = 0;
+	if (lineCurrent >= 1)
+		prevComment = IsCommentLine(lineCurrent - 1, styler);
 	char chNext = styler[startPos];
-	for (int i = startPos; i < lengthDoc; i++) {
+
+	// Process all characters to end of requested range or end of any triple quote
+	// or comment that hangs over the end of the range
+	for (int i = startPos; i < lengthDoc && ((lineCurrent < maxLines) || prevQuote || prevComment); i++) {
+
+		// Next character
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 
-		if ((ch == '\r' && chNext != '\n') || (ch == '\n') || (i == lengthDoc)) {
+		// Process line change (also if reach very end of document)
+		if ((ch == '\r' && chNext != '\n') || (ch == '\n') || (i == lengthDoc-1)) {
+
+			// Gather info
 			int lev = indentCurrent;
 			int style = styler.StyleAt(i) & 31;
-			int indentNext = styler.IndentAmount(lineCurrent + 1, &spaceFlags, IsPyComment);
-			if ((style == SCE_P_TRIPLE) || (style== SCE_P_TRIPLEDOUBLE))
-				indentNext |= SC_FOLDLEVELWHITEFLAG;
-			if (!(indentCurrent & SC_FOLDLEVELWHITEFLAG)) {
-				// Only non whitespace lines can be headers
-				if ((indentCurrent & SC_FOLDLEVELNUMBERMASK) < (indentNext & SC_FOLDLEVELNUMBERMASK)) {
-					lev |= SC_FOLDLEVELHEADERFLAG;
-				} else if (indentNext & SC_FOLDLEVELWHITEFLAG) {
-					// Line after is blank so check the next - maybe should continue further?
-					int spaceFlags2 = 0;
-					int indentNext2 = styler.IndentAmount(lineCurrent + 2, &spaceFlags2, IsPyComment);
-					if ((indentCurrent & SC_FOLDLEVELNUMBERMASK) < (indentNext2 & SC_FOLDLEVELNUMBERMASK)) {
-						lev |= SC_FOLDLEVELHEADERFLAG;
-					}
-				}
+			int lineNext = lineCurrent + 1;
+			int indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
+			int quote = ((style == SCE_P_TRIPLE) || (style== SCE_P_TRIPLEDOUBLE));
+			int quote_start = (quote && !prevQuote);
+			int quote_continue = (quote && prevQuote);
+			int comment = IsCommentLine(lineCurrent, styler);
+			int comment_start = (comment && !prevComment && IsCommentLine(lineNext, styler));
+			int comment_continue = (comment && prevComment);
+
+			if (quote_start) {
+				// Place fold point at start of triple quoted string
+				lev |= SC_FOLDLEVELHEADERFLAG;
+			} else if (quote_continue || prevQuote) {
+				// Add level to rest of lines in the string
+				lev = lev + 1;
+			} else if (comment_start) {
+				// Place fold point at start of a block of comments
+				lev |= SC_FOLDLEVELHEADERFLAG;
+			} else if (comment_continue) {
+				// Add level to rest of lines in the block
+				lev = lev + 1;
 			}
-			indentCurrent = indentNext;
+
+			// Skip past any blank lines for next indent level info; we skip also comments
+			// starting in column 0 which effectively folds them into surrounding code
+			// rather than screwing up folding.  Then set indent level on the lines
+			// we skipped to be same as maximum of current and next indent.  This approach
+			// does a reasonable job of collapsing white space into surrounding code
+			// without getting confused by white space at the start of an indented level.
+			while (!quote &&
+			       ((indentNext & SC_FOLDLEVELWHITEFLAG) || styler[styler.LineStart(lineNext)] == '#') &&
+			       (lineNext < maxLines)) {
+				styler.SetLevel(lineNext, Platform::Maximum(indentCurrent, indentNext));
+				lineNext++;
+				indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
+			}
+
+			// Set fold header on non-quote/non-comment line
+			if (!quote && !comment && !(indentCurrent & SC_FOLDLEVELWHITEFLAG) ) {
+				if ((indentCurrent & SC_FOLDLEVELNUMBERMASK) < (indentNext & SC_FOLDLEVELNUMBERMASK))
+					lev |= SC_FOLDLEVELHEADERFLAG;
+			}
+
+			// Keep track of triple quote and block comment state of previous line
+			prevQuote = quote;
+			prevComment = comment_start || comment_continue;
+
+			// Set fold level for this line and move to next line
 			styler.SetLevel(lineCurrent, lev);
-			lineCurrent++;
+			indentCurrent = indentNext;
+			lineCurrent = lineNext;
+			i = styler.LineStart(lineNext);
 		}
 	}
+
+	// Make sure last line indent level is set too
+	styler.SetLevel(lineCurrent, indentCurrent);
 }
 
 LexerModule lmPython(SCLEX_PYTHON, ColourisePyDoc, "python", FoldPyDoc);
