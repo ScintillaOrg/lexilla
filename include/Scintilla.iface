@@ -320,7 +320,7 @@ fun void SetSelFore=2067(bool useSetting, colour fore)
 fun void SetSelBack=2068(bool useSetting, colour back)
 
 # Set the foreground colour of the caret.
-fun void SetCaretFore=2069(colour fore,)
+set void SetCaretFore=2069(colour fore,)
 
 # When key+modifier combination km is pressed perform msg.
 fun void AssignCmdKey=2070(keymod km, int msg)
