@@ -135,6 +135,7 @@
 	<li>Mathias Rauen</li>
 	<li>Angelo Mandato</li>
 	<li>Denis Sureau</li>
+	<li>Kaspar Schiess</li>
     </ul>
     <p>
        Images used in GTK+ version
@@ -156,6 +157,9 @@
 	SciTE on GTK+ 2.x can display a tab bar.
       </li>
       <li>
+	SciTE on Windows provides incremental search.
+      </li>
+      <li>
 	Lexer for PostScript.
       </li>
       <li>
@@ -165,19 +169,59 @@
 	New lexer for POV-Ray replaces previous implementation.
       </li>
       <li>
+	Lexer for the Scriptol language.
+      </li>
+      <li>
+	Incompatibility: SQL keywords are specified in lower case rather than upper case.
 	SQL lexer allows double quoted strings.
       </li>
       <li>
-
+	Pascal lexer: character constants that start with '#' understood,
+	'@' only allowed within assembler blocks,
+	'$' can be the start of a number,
+	initial '.' in 0..constant not treated as part of a number,
+	and assembler blocks made more distinctive.
       </li>
       <li>
-
+	Lua lexer allows '.' in keywords.
+	Multi-line strings and comments can be folded.
       </li>
       <li>
-
+	CSS lexer handles multiple psuedoclasses.
       </li>
       <li>
-
+	Properties file folder works for INI file format.
+      </li>
+      <li>
+	Hidden indicator style allows the container to mark text within Scintilla
+	without there being any visual effect.
+      </li>
+      <li>
+	SciTE does not promnpt to save changes when the buffer is empty and untitled.
+      </li>
+      <li>
+	Modification notifications caused by SCI_INSERTSTYLEDSTRING
+	now include the contents of the insertion.
+      </li>
+      <li>
+	SCI_MARKERDELETEALL deletes all the markers on a line
+	rather than just the first match.
+      </li>
+      <li>
+	SciTE now uses value of output.vertical.size property.
+      </li>
+      <li>
+	Crash fixed in SciTE autocompletion on long lines.
+      </li>
+      <li>
+	Crash fixed in SciTE comment command on long lines.
+      </li>
+      <li>
+	Bug fixed with backwards regular expression search skipping
+	every second match.
+      </li>
+      <li>
+	Hang fixed with regular expression replace where both target and replacement were empty.
       </li>
     </ul>
     <h3>
