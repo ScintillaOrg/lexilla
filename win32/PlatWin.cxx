@@ -722,7 +722,7 @@ PRectangle Window::GetPosition() {
 
 void Window::SetPosition(PRectangle rc) {
 	::SetWindowPos(reinterpret_cast<HWND>(id),
-		0, rc.left, rc.top, rc.Width(), rc.Height(), 0);
+		0, rc.left, rc.top, rc.Width(), rc.Height(), SWP_NOZORDER);
 }
 
 void Window::SetPositionRelative(PRectangle rc, Window) {
