@@ -85,6 +85,7 @@ private:
 	charClassification charClass[256];
 	char stylingMask;
 	int endStyled;
+	int styleClock;
 	int enteredCount;
 	int enteredReadOnlyCount;
 
@@ -195,6 +196,7 @@ public:
 	void SetStyles(int length, char *styles);
 	int GetEndStyled() { return endStyled; }
 	bool EnsureStyledTo(int pos);
+	int GetStyleClock() { return styleClock; }
 
 	int SetLineState(int line, int state) { return cb.SetLineState(line, state); }
 	int GetLineState(int line) { return cb.GetLineState(line); }

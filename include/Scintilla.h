@@ -353,6 +353,12 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_WRAP_WORD 1
 #define SCI_SETWRAPMODE 2268
 #define SCI_GETWRAPMODE 2269
+#define SC_CACHE_NONE 0
+#define SC_CACHE_CARET 1
+#define SC_CACHE_PAGE 2
+#define SC_CACHE_DOCUMENT 3
+#define SCI_SETLAYOUTCACHE 2272
+#define SCI_GETLAYOUTCACHE 2273
 #define SCI_LINEDOWN 2300
 #define SCI_LINEDOWNEXTEND 2301
 #define SCI_LINEUP 2302

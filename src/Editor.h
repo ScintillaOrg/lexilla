@@ -35,8 +35,11 @@ public:
  */
 class LineLayout {
 public:
+	enum validLevel { llInvalid, llPositions, llLines } validity;
 	/// Drawing is only performed for @a maxLineLength characters on each line.
-	enum {maxLineLength = 8000};
+	int maxLineLength;
+	int lineNumber;
+	bool inCache;
 	int numCharsInLine;
 	int xHighlightGuide;
 	bool highlightColumn;
@@ -44,18 +47,51 @@ public:
 	int selEnd;
 	bool containsCaret;
 	int edgeColumn;
-	char chars[maxLineLength+1];
-	char styles[maxLineLength+1];
-	char indicators[maxLineLength+1];
-	int positions[maxLineLength+1];
+	char *chars;
+	char *styles;
+	char *indicators;
+	int *positions;
 
 	// Wrapped line support
 	int widthLine;
 	int lines;
-	enum {maxDisplayLines = 400};
-	int lineStarts[maxDisplayLines];
+	int maxDisplayLines;
+	int *lineStarts;
 
-	LineLayout() : numCharsInLine(0) {}
+	LineLayout(int maxLineLength_ = 8000, int maxDisplayLines=100);
+	virtual ~LineLayout();
+	void Resize(int maxLineLength_);
+	void Free();
+	void Invalidate(validLevel validity_);
+};
+
+/**
+ */
+class LineLayoutCache {
+	int level;
+	int length;
+	int size;
+	LineLayout **cache;
+	bool allInvalidated;
+	int styleClock;
+	void Allocate(int length_);
+	void AllocateForLevel(int linesOnScreen, int linesInDoc);
+	void Deallocate();
+public:
+	LineLayoutCache();
+	virtual ~LineLayoutCache();
+	enum { 
+		llcNone=SC_CACHE_NONE, 
+		llcCaret=SC_CACHE_CARET, 
+		llcPage=SC_CACHE_PAGE, 
+		llcDocument=SC_CACHE_DOCUMENT
+	};
+	void Invalidate(LineLayout::validLevel validity_);
+	void SetLevel(int level_);
+	int GetLevel() { return level; }
+	LineLayout *Retrieve(int lineNumber, int lineCaret, int maxChars, int styleClock_, 
+		int linesOnScreen, int linesInDoc);
+	void Dispose(LineLayout *ll);
 };
 
 class SelectionText {
@@ -153,6 +189,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	Surface *pixmapSelPattern;
 	Surface *pixmapIndentGuide;
 	Surface *pixmapIndentGuideHighlight;
+
+	LineLayoutCache llc;
 
 	KeyMap kmap;
 
@@ -281,10 +319,11 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	int SubstituteMarkerIfEmpty(int markerCheck, int markerDefault);
 	void PaintSelMargin(Surface *surface, PRectangle &rc);
-	void LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayout &ll, 
+	LineLayout *RetrieveLineLayout(int lineNumber);
+	void LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayout *ll, 
 		int width=wrapWidthInfinite);
 	void DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart,
-		PRectangle rcLine, LineLayout &ll, int subLine=0);
+		PRectangle rcLine, LineLayout *ll, int subLine=0);
 	void Paint(Surface *surfaceWindow, PRectangle rcArea);
 	long FormatRange(bool draw, RangeToFormat *pfr);
 

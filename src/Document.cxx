@@ -36,6 +36,7 @@ Document::Document() {
 	stylingMask = 0;
 	SetWordChars(0);
 	endStyled = 0;
+	styleClock = 0;
 	enteredCount = 0;
 	enteredReadOnlyCount = 0;
 	tabInChars = 8;
@@ -1115,6 +1116,12 @@ void Document::SetStyles(int length, char *styles) {
 }
 
 bool Document::EnsureStyledTo(int pos) {
+	if (pos > GetEndStyled()) {
+		styleClock++;
+		if (styleClock > 0x100000) {
+			styleClock = 0;
+		}
+	}
 	// Ask the watchers to style, and stop as soon as one responds.
 	for (int i = 0; pos > GetEndStyled() && i < lenWatchers; i++)
 		watchers[i].watcher->NotifyStyleNeeded(this, watchers[i].userData, pos);

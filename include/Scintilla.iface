@@ -921,6 +921,17 @@ set void SetWrapMode=2268(int mode,)
 # Retrieve whether text is word wrapped
 get int GetWrapMode=2269(,)
 
+val SC_CACHE_NONE=0
+val SC_CACHE_CARET=1
+val SC_CACHE_PAGE=2
+val SC_CACHE_DOCUMENT=3
+
+# Sets the degree of caching of layout information
+set void SetLayoutCache=2272(int mode,)
+
+# Retrieve the degree of caching of layout information
+get int GetLayoutCache=2273(,)
+
 ## Start of key messages
 # Move caret down one line.
 fun void LineDown=2300(,)
