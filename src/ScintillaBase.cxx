@@ -459,6 +459,14 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		AutoCompleteStart(0, reinterpret_cast<const char *>(lParam));
 		break;
 
+	case SCI_AUTOCSETAUTOHIDE:
+		ac.autoHide = wParam;
+		break;
+
+	case SCI_AUTOCGETAUTOHIDE:
+		return ac.autoHide;
+		break;
+
 	case SCI_CALLTIPSHOW: {
 			AutoCompleteCancel();
 			if (!ct.wCallTip.Created()) {

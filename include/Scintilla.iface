@@ -479,6 +479,12 @@ get bool AutoCGetIgnoreCase=2116(,)
 # Display a list of strings and send notification when user chooses one.
 fun void UserListShow=2117(int listType, string itemList)
 
+# Set whether or not autocompletion is hidden automatically when nothing matches
+set void AutoCSetAutoHide=2118(bool autoHide,)
+
+# Retrieve whether or not autocompletion is hidden automatically when nothing matches
+get bool AutoCGetAutoHide=2119(,)
+
 # Set the number of spaces used for one level of indentation.
 set void SetIndent=2122(int indentSize,)
 

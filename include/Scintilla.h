@@ -199,6 +199,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_AUTOCSETIGNORECASE 2115
 #define SCI_AUTOCGETIGNORECASE 2116
 #define SCI_USERLISTSHOW 2117
+#define SCI_AUTOCSETAUTOHIDE 2118
+#define SCI_AUTOCGETAUTOHIDE 2119
 #define SCI_SETINDENT 2122
 #define SCI_GETINDENT 2123
 #define SCI_SETUSETABS 2124
