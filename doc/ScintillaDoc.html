@@ -38,7 +38,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 15/Feb/2003 NH</p>
+    <p>Last edited 15/April/2003 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -174,7 +174,7 @@
 
           <td>o <a class="toc" href="#StyleDefinition">Style definition</a></td>
 
-          <td>o <a class="toc" href="#CaretAndSelectionStyles">Caret and selection styles</a></td>
+          <td>o <a class="toc" href="#CaretAndSelectionStyles">Caret, selection, and hotspot styles</a></td>
         </tr>
 
         <tr>
@@ -493,6 +493,12 @@ struct TextRange {
           <td><code>SCFIND_REGEXP</code></td>
 
           <td>The search string should be interpreted as a regular expression.</td>
+        </tr>
+        <tr>
+          <td><code>SCFIND_POSIX</code></td>
+
+          <td>Treat regular expression in a more POSIX compatible manner
+	  by interpreting bare ( and ) for tagged sections rather than \( and \).</td>
         </tr>
       </tbody>
     </table>
@@ -1851,6 +1857,8 @@ struct TextToFind {
     visible)</a><br />
      <a class="message" href="#SCI_STYLESETCHANGEABLE">SCI_STYLESETCHANGEABLE(int styleNumber, bool
     changeable)</a><br />
+     <a class="message" href="#SCI_STYLESETHOTSPOT">SCI_STYLESETHOTSPOT(int styleNumber, bool
+    hotspot)</a><br />
     </code>
 
     <p><b id="SCI_STYLERESETDEFAULT">SCI_STYLERESETDEFAULT</b><br />
@@ -1941,7 +1949,17 @@ struct TextToFind {
     read-only. Currently it only stops the caret from being within not-changeable text and does not
     yet stop deleting a range that contains not-changeable text.</p>
 
-    <h2 id="CaretAndSelectionStyles">Caret and selection styles</h2>
+    <p><b id="SCI_STYLESETHOTSPOT">SCI_STYLESETHOTSPOT(int styleNumber, bool
+    hotspot)</b><br />
+     This style is used to mark ranges of text that can detect mouse clicks.
+     The cursor changes to a hand over hotspots, and the foreground, and background colours
+     may change and an underline appear to indicate that these areas are sensitive to clicking.
+     This may be used to allow hyperlinks to other documents.</p>
+
+     <a class="message" href="#SCI_STYLESETHOTSPOT">SCI_STYLESETHOTSPOT(int styleNumber, bool
+    hotspot)</a><br />
+
+    <h2 id="CaretAndSelectionStyles">Caret, selection, and hotspot styles</h2>
 
     <p>The selection is shown by changing the foreground and/or background colours. If one of these
     is not set then that attribute is not changed for the selection. The default is to show the
@@ -1964,6 +1982,9 @@ struct TextToFind {
      <a class="message" href="#SCI_GETCARETPERIOD">SCI_GETCARETPERIOD</a><br />
      <a class="message" href="#SCI_SETCARETWIDTH">SCI_SETCARETWIDTH(int pixels)</a><br />
      <a class="message" href="#SCI_GETCARETWIDTH">SCI_GETCARETWIDTH</a><br />
+     <a class="message" href="#SCI_SETHOTSPOTACTIVEFORE">SCI_SETHOTSPOTACTIVEFORE</a><br />
+     <a class="message" href="#SCI_SETHOTSPOTACTIVEBACK">SCI_SETHOTSPOTACTIVEBACK</a><br />
+     <a class="message" href="#SCI_SETHOTSPOTACTIVEUNDERLINE">SCI_SETHOTSPOTACTIVEUNDERLINE</a><br />
      <a class="message" href="#SCI_SETCONTROLCHARSYMBOL">SCI_SETCONTROLCHARSYMBOL(int
     symbol)</a><br />
      <a class="message" href="#SCI_GETCONTROLCHARSYMBOL">SCI_GETCONTROLCHARSYMBOL</a><br />
@@ -2010,6 +2031,14 @@ struct TextToFind {
     3 pixels. The default width is 1 pixel. You can read back the current width with
     <code>SCI_GETCARETWIDTH</code>. A width of 0 makes the caret invisible (added at version
     1.50).</p>
+
+    <p><b id="SCI_SETHOTSPOTACTIVEFORE">SCI_SETHOTSPOTACTIVEFORE(bool useHotSpotForeColour, int <a class="jump"
+    href="#colour">colour</a>)</b><br />
+     <b id="SCI_SETHOTSPOTACTIVEBACK">SCI_SETHOTSPOTACTIVEBACK(bool useHotSpotBackColour, int <a class="jump"
+    href="#colour">colour</a>)</b><br />
+     <b id="SCI_SETHOTSPOTACTIVEUNDERLINE">SCI_SETHOTSPOTACTIVEUNDERLINE(bool underline,)</b><br />
+     While the cursor hovers over text in a style with the hotspot attribute set,
+     the default colouring can be modified and an underline drawn with these settings.</p>
 
     <p><b id="SCI_SETCONTROLCHARSYMBOL">SCI_SETCONTROLCHARSYMBOL(int symbol)</b><br />
      <b id="SCI_GETCONTROLCHARSYMBOL">SCI_GETCONTROLCHARSYMBOL</b><br />
@@ -2919,6 +2948,13 @@ struct TextToFind {
     language uses). See <code>SciTEBase::CharAdded()</code> in <code>SciTEBase.cxx</code> for an
     example of call tip use.</p>
 
+    <p>The mouse may be clicked on call tips and this causes a
+    <a class="message" href="#SCN_CALLTIPCLICK">SCN_CALLTIPCLICK</a></code>
+    notification to be sent to the container. Small up an down arrows may be displayed within
+    a call tip by, respectively, including the characters '\001', or '\002'. This is useful
+    for showing that there are overloaded variants of one function name and that the user can
+    click on the arrows to cycle through the overloads.</p>
+
     <p>Alternatively, call tips can be displayed when you leave the mouse pointer for a while over
     a word in response to the <code><a class="message"
     href="#SCN_DWELLSTART">SCN_DWELLSTART</a></code> <a class="jump"
@@ -3040,9 +3076,19 @@ struct TextToFind {
 
           <td><code>SCI_HOMEEXTEND</code></td>
 
+          <td><code>SCI_HOMEWRAP</code></td>
+
+          <td><code>SCI_HOMEWRAPEXTEND</code></td>
+        </tr>
+
+        <tr>
           <td><code>SCI_LINEEND</code></td>
 
           <td><code>SCI_LINEENDEXTEND</code></td>
+
+          <td><code>SCI_LINEENDWRAP</code></td>
+
+          <td><code>SCI_LINEENDWRAPEXTEND</code></td>
         </tr>
 
         <tr>
@@ -3140,11 +3186,9 @@ struct TextToFind {
 
           <td><code>SCI_LINEENDDISPLAYEXTEND</code></td>
 
-          <td>
-          </td>
+          <td><code>SCI_VCHOMEWRAP</code></td>
 
-          <td>
-          </td>
+          <td><code>SCI_VCHOMEWRAPEXTEND</code></td>
         </tr>
       </tbody>
     </table>
@@ -3658,6 +3702,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_SETLAYOUTCACHE">SCI_SETLAYOUTCACHE(int cacheMode)</a><br />
      <a class="message" href="#SCI_GETLAYOUTCACHE">SCI_GETLAYOUTCACHE</a><br />
      <a class="message" href="#SCI_LINESSPLIT">SCI_LINESSPLIT</a><br />
+     <a class="message" href="#SCI_LINESJOIN">SCI_LINESJOIN</a><br />
     </code>
 
     <p>By default, Scintilla does not wrap lines of text. If you enable line wrapping, lines wider
@@ -3745,6 +3790,12 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      Split a range of lines indicated by the target into lines that are at most pixelWidth wide.
      Splitting occurs on word boundaries wherever possible in a similar manner to line wrapping.
      When <code>pixelWidth</code> is 0 then the width of the window is used.
+     <br />
+
+    <p><b id="SCI_LINESJOIN">SCI_LINESJOIN</b><br />
+     Join a range of lines indicated by the target into one line by
+     removing line end characters.
+     Where this would lead to no space between words, an extra space is inserted.
      <br />
 
     <h2 id="Zooming">Zooming</h2>
@@ -3955,9 +4006,12 @@ struct NotifyHeader {   // This matches the Win32 NMHDR structure
 
 struct SCNotification {
     struct NotifyHeader nmhdr;
-    int position;       // SCN_STYLENEEDED, SCN_MODIFIED, SCN_DWELLSTART, SCN_DWELLEND
+    int position;
+    // SCN_STYLENEEDED, SCN_MODIFIED, SCN_DWELLSTART,
+    // SCN_DWELLEND, SCN_CALLTIPCLICK,
+    // SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK
     int ch;             // SCN_CHARADDED, SCN_KEY
-    int modifiers;      // SCN_KEY
+    int modifiers;      // SCN_KEY, SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK
     int modificationType; // SCN_MODIFIED
     const char *text;   // SCN_MODIFIED
     int length;         // SCN_MODIFIED
@@ -3995,6 +4049,9 @@ struct SCNotification {
      <a class="message" href="#SCN_DWELLSTART">SCN_DWELLSTART</a><br />
      <a class="message" href="#SCN_DWELLEND">SCN_DWELLEND</a><br />
      <a class="message" href="#SCN_ZOOM">SCN_ZOOM</a><br />
+     <a class="message" href="#SCN_HOTSPOTCLICK">SCN_HOTSPOTCLICK</a><br />
+     <a class="message" href="#SCN_HOTSPOTDOUBLECLICK">SCN_HOTSPOTDOUBLECLICK</a><br />
+     <a class="message" href="#SCN_CALLTIPCLICK">SCN_CALLTIPCLICK</a><br />
     </code>
 
     <p>The following <code>SCI_*</code> messages are associated with these notifications:</p>
@@ -4499,7 +4556,6 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     <br />
      <br />
 
-
     <p><b id="SCI_SETMOUSEDWELLTIME">SCI_SETMOUSEDWELLTIME</b><br />
      <b id="SCI_GETMOUSEDWELLTIME">SCI_GETMOUSEDWELLTIME</b><br />
      These two messages set and get the time the mouse must sit still, in milliseconds, to generate
@@ -4512,6 +4568,23 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     notification can be used to recalculate positions, such as the width of the line number margin
     to maintain sizes in terms of characters rather than pixels. <code>SCNotification</code> has no
     additional information.</p>
+
+    <p>
+    <b id="SCN_HOTSPOTCLICK">SCN_HOTSPOTCLICK</b><br />
+    <b id="SCN_HOTSPOTDOUBLECLICK">SCN_HOTSPOTDOUBLECLICK</b><br />
+     These notifications are generated when the user clicks or double clicks on
+     text that is in a style with the hotspot attribute set.
+    This notification can be used to link to variable definitions or web pages.
+    The <code>position</code> field is set the text position of the click or
+    double click and the <code>modifiers</code> field set to the key modifiers
+    held down in a similar manner to <a class="message" href="#SCN_KEY">SCN_KEY</a>.</p>
+
+    <p><b id="SCN_CALLTIPCLICK">SCN_CALLTIPCLICK</b><br />
+     This notification is generated when the user clicks on a calltip.
+    This notification can be used to display the next function prototype when a
+    function name is overloaded with different arguments.
+    The <code>position</code> field is set to 1 if the click is in an up arrow,
+    2 if in a down arrow, and 0 if elsewhere.</p>
 
     <h2 id="DeprecatedMessages">Deprecated messages and notifications</h2>
 
