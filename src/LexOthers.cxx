@@ -183,7 +183,7 @@ static void ColouriseDiffLine(char *lineBuffer, int endLine, Accessor &styler) {
 			styler.ColourTo(endLine, SCE_DIFF_HEADER);
 	} else if (0 == strncmp(lineBuffer, "====", 4)) {  // For p4's diff
 		styler.ColourTo(endLine, SCE_DIFF_HEADER);
- 	} else if (0 == strncmp(lineBuffer, "***", 3)) {
+	} else if (0 == strncmp(lineBuffer, "***", 3)) {
 		// In a context diff, *** appears in both the header and the position markers.
 		// Also ******** is a chunk header, but here it's treated as part of the
 		// position marker since there is no separate style for a chunk header.
@@ -192,7 +192,7 @@ static void ColouriseDiffLine(char *lineBuffer, int endLine, Accessor &styler) {
 		else if (lineBuffer[3] == '*')
 			styler.ColourTo(endLine, SCE_DIFF_POSITION);
 		else
-		styler.ColourTo(endLine, SCE_DIFF_HEADER);
+			styler.ColourTo(endLine, SCE_DIFF_HEADER);
 	} else if (0 == strncmp(lineBuffer, "? ", 2)) {    // For difflib
 		styler.ColourTo(endLine, SCE_DIFF_HEADER);
 	} else if (lineBuffer[0] == '@') {
