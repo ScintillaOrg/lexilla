@@ -99,6 +99,8 @@ class ScintillaWin :
 
 	bool capturedMouse;
 
+    bool hasOKText;
+
 	CLIPFORMAT cfColumnSelect;
 	
 	DropSource ds;
@@ -189,6 +191,8 @@ HINSTANCE ScintillaWin::hInstance = 0;
 ScintillaWin::ScintillaWin(HWND hwnd) {
 
 	capturedMouse = false;
+
+    hasOKText = false;
 
 	// There does not seem to be a real standard for indicating that the clipboard contains a rectangular
 	// selection, so copy Developer Studio.
@@ -1328,8 +1332,25 @@ STDMETHODIMP_(ULONG) ScintillaWin::Release() {
 }
 
 // Implement IDropTarget
-STDMETHODIMP ScintillaWin::DragEnter(LPDATAOBJECT, DWORD grfKeyState,
+STDMETHODIMP ScintillaWin::DragEnter(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
                                      POINTL, PDWORD pdwEffect) {
+	if (pIDataSource == NULL)
+		return E_POINTER;
+	if (IsUnicodeMode()) {
+	    FORMATETC fmtu = {CF_UNICODETEXT, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
+        HRESULT hrHasUText = pIDataSource->QueryGetData(&fmtu);
+        hasOKText = hrHasUText == S_OK;
+    }
+    if (!hasOKText) {
+	    FORMATETC fmte = {CF_TEXT, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
+        HRESULT hrHasText = pIDataSource->QueryGetData(&fmte);
+        hasOKText = hrHasText == S_OK;
+    }
+    if (!hasOKText) {
+		*pdwEffect = DROPEFFECT_NONE;
+        return S_OK;
+    }
+ 
 	if (inDragDrop)	// Internal defaults to move
 		*pdwEffect = DROPEFFECT_MOVE;
 	else
@@ -1342,6 +1363,11 @@ STDMETHODIMP ScintillaWin::DragEnter(LPDATAOBJECT, DWORD grfKeyState,
 }
 
 STDMETHODIMP ScintillaWin::DragOver(DWORD grfKeyState, POINTL pt, PDWORD pdwEffect) {
+    if (!hasOKText) {
+		*pdwEffect = DROPEFFECT_NONE;
+        return S_OK;
+    }
+
 	// These are the Wordpad semantics.
 	if (inDragDrop)	// Internal defaults to move
 		*pdwEffect = DROPEFFECT_MOVE;
