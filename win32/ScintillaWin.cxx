@@ -60,25 +60,6 @@
 #define UNICODE_NOCHAR                  0xFFFF
 #endif
 
-// These undefinitions are required to work around differences between different versions
-// of the mingw headers, some of which define these twice, in both winuser.h and imm.h.
-#ifdef __MINGW_H
-#if __MINGW32_MAJOR_VERSION == 1
-#undef WM_IME_STARTCOMPOSITION
-#undef WM_IME_ENDCOMPOSITION
-#undef WM_IME_COMPOSITION
-#undef WM_IME_KEYLAST
-#undef WM_IME_SETCONTEXT
-#undef WM_IME_NOTIFY
-#undef WM_IME_CONTROL
-#undef WM_IME_COMPOSITIONFULL
-#undef WM_IME_SELECT
-#undef WM_IME_CHAR
-#undef WM_IME_KEYDOWN
-#undef WM_IME_KEYUP
-#endif
-#endif
-
 #ifndef WM_IME_STARTCOMPOSITION
 #include <imm.h>
 #endif
