@@ -406,6 +406,11 @@ static bool IsCommentState(const int state) {
 	return state == SCE_H_COMMENT || state == SCE_H_SGML_COMMENT;
 }
 
+static bool IsScriptCommentState(const int state) {
+	return state == SCE_HJ_COMMENT || state == SCE_HJ_COMMENTLINE || state == SCE_HJA_COMMENT ||
+		   state == SCE_HJA_COMMENTLINE || state == SCE_HB_COMMENTLINE || state == SCE_HBA_COMMENTLINE;
+}
+
 static bool isLineEnd(char ch) {
 	return ch == '\r' || ch == '\n';
 }
@@ -607,7 +612,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			case SCE_HJ_COMMENTDOC:
 				// SCE_HJ_COMMENTLINE removed as this is a common thing done to hide
 				// the end of script marker from some JS interpreters.
-				//case SCE_HJ_COMMENTLINE:
+				case SCE_HJ_COMMENTLINE:
 			case SCE_HJ_DOUBLESTRING:
 			case SCE_HJ_SINGLESTRING:
 			case SCE_HJ_REGEX:
@@ -636,7 +641,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		         !isPHPStringState(state) &&
 		         (state != SCE_HPHP_COMMENT) &&
 		         (ch == '<') &&
-		         (chNext == '?')) {
+		         (chNext == '?') &&
+				 !IsScriptCommentState(state) ) {
 			scriptLanguage = segIsScriptingIndicator(styler, styler.GetStartSegment() + 2, i + 10, eScriptPHP);
 			if (scriptLanguage != eScriptPHP && isStringState(state)) continue;
 			styler.ColourTo(i - 1, StateToPrint);
@@ -708,7 +714,9 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		else if (((scriptLanguage == eScriptNone) || (scriptLanguage == eScriptXML)) &&
 		         (chPrev == '<') &&
 		         (ch == '!') &&
-		         (StateToPrint != SCE_H_CDATA) && (!IsCommentState(StateToPrint))) {
+		         (StateToPrint != SCE_H_CDATA) &&
+				 (!IsCommentState(StateToPrint)) &&
+				 (!IsScriptCommentState(StateToPrint)) ) {
 			beforePreProc = state;
 			styler.ColourTo(i - 2, StateToPrint);
 			if ((chNext == '-') && (chNext2 == '-')) {
