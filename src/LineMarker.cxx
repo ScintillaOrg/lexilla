@@ -2,146 +2,16 @@
 /** @file LineMarker.cxx
  ** Defines the look of a line marker in the margin .
  **/
-// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <string.h>
-#include <stdlib.h>
 
 #include "Platform.h"
 
 #include "Scintilla.h"
+#include "XPM.h"
 #include "LineMarker.h"
-
-static const char *NextField(const char *s) {
-	while (*s && *s != ' ') {
-		s++;
-	}
-	while (*s && *s == ' ') {
-		s++;
-	}
-	return s;
-}
-
-void XPM::Init(const char * const *linesForm) {
-	height = 1;
-	width = 1;
-	nColours = 1;
-	data = NULL;
-	codeTransparent = ' ';
-	codes = NULL;
-	colours = NULL;
-	if (!linesForm)
-		return;
-
-	const char *line0 = linesForm[0];
-	width = atoi(line0);
-	line0 = NextField(line0);
-	height = atoi(line0);
-	line0 = NextField(line0);
-	nColours = atoi(line0);
-	data = new char[height * width];
-	codes = new char[nColours];
-	colours = new ColourPair[nColours];
-
-	for (int c=0; c<nColours; c++) {
-		const char *colourDef = linesForm[c+1];
-		codes[c] = colourDef[0];
-		colourDef += 4;
-		if (*colourDef == '#') {
-			colours[c].desired.Set(colourDef);
-		} else {
-			colours[c].desired = ColourDesired(0xff, 0xff, 0xff);
-			codeTransparent = codes[c];
-		}
-	}
-	int datapos = 0;
-	for (int l=0; l<height; l++) {
-		for (int x=0; x<width; x++) {
-			data[datapos++] = linesForm[1+nColours+l][x];
-		}
-	}
-}
-
-ColourAllocated XPM::ColourFromCode(int ch) {
-	for (int i=0;i<nColours;i++) {
-		if (codes[i] == ch) {
-			return colours[i].allocated;
-		}
-	}
-	return colours[0].allocated;
-}
-
-void XPM::FillRun(Surface *surface, int code, int startX, int y, int x) {
-	if (code != codeTransparent) {
-		PRectangle rc(startX, y, x, y+1);
-		surface->FillRectangle(rc, ColourFromCode(code));
-	}
-}
-
-XPM::XPM(const char *textForm) {
-	int countQuotes = 0;
-	for (int i=0; textForm[i]; i++) {
-		if (textForm[i] == '\"') {
-			countQuotes++;
-		}
-	}
-	const char **linesForm = new const char *[countQuotes/2];
-	countQuotes = 0;
-	if (linesForm) {
-		for (int j=0; textForm[j]; j++) {
-			if (textForm[j] == '\"') {
-				if ((countQuotes & 1) == 0) {
-					linesForm[countQuotes / 2] = textForm + j + 1;
-				}
-				countQuotes++;
-			}
-		}
-	}
-	Init(linesForm);
-	delete []linesForm;
-}
-
-XPM::XPM(const char * const *linesForm) {
-	Init(linesForm);
-}
-
-XPM::~XPM() {
-	delete []data;
-	delete []codes;
-	delete []colours;
-}
-
-void XPM::RefreshColourPalette(Palette &pal, bool want) {
-	if (!data || !codes || !colours) {
-		return;
-	}
-	for (int i=0;i<nColours;i++) {
-		pal.WantFind(colours[i], want);
-	}
-}
-
-void XPM::Draw(Surface *surface, PRectangle &rc) {
-	if (!data || !codes || !colours) {
-		return;
-	}
-	// Centre the pixmap
-	int startY = rc.top + (rc.Height() - height) / 2;
-	int startX = rc.left + (rc.Width() - width) / 2;
-	for (int y=0;y<height;y++) {
-		int prevCode = 0;
-		int xStartRun = 0;
-		for (int x=0; x<width; x++) {
-			int code = data[y*width + x];
-			if (code != prevCode) {
-				FillRun(surface, prevCode, startX + xStartRun, startY + y, startX + x);
-				xStartRun = x;
-				prevCode = code;
-			}
-		}
-		FillRun(surface, prevCode, startX + xStartRun, startY + y, startX + width);
-	}
-}
 
 void LineMarker::RefreshColourPalette(Palette &pal, bool want) {
 	pal.WantFind(fore, want);
@@ -152,17 +22,9 @@ void LineMarker::RefreshColourPalette(Palette &pal, bool want) {
 }
 
 void LineMarker::SetXPM(const char *textForm) {
-	// Test done is two parts to avoid possibility of overstepping the memory
-	// if memcmp implemented strangely. Must be 4 bytes at least at destination.
-	if ((0 == memcmp(textForm, "/* X", 4)) && (0 == memcmp(textForm, "/* XPM */", 9))) {
-		// It is in text form
-		delete pxpm;
-		pxpm = new XPM(textForm);
-		markType = SC_MARK_PIXMAP;
-	} else {
-		// It is really in line form
-		SetXPM(reinterpret_cast<const char * const *>(textForm));
-	}
+	delete pxpm;
+	pxpm = new XPM(textForm);
+	markType = SC_MARK_PIXMAP;
 }
 
 void LineMarker::SetXPM(const char * const *linesForm) {
