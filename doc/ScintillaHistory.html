@@ -145,7 +145,7 @@
       </li>
       <li>
 	Pango font support on GTK+ 2.
-	Unicode input improved on GTK+ 2.x.
+	Unicode input improved on GTK+ 2.
       </li>
       <li>
 	Hotspot style implemented in Scintilla.
@@ -161,6 +161,7 @@
       </li>
       <li>
 	Error message lexer tightened to yield fewer false matches.
+	Recognition of Lahey and Intel FORTRAN error formats.
       </li>
       <li>
 	Scintilla keyboard commands for moving to start and end of
@@ -171,10 +172,16 @@
 	Line joining command.
       </li>
       <li>
+	Lexer for POV-Ray.
+      </li>
+      <li>
 	Calltips on Windows are no longer clipped by the parent window.
       </li>
       <li>
 	Autocompletion lists are cancelled when focus leaves their parent window.
+      </li>
+      <li>
+	Move to next/previous empty line delimited paragraph key commands.
       </li>
       <li>
 	SciTE hang fixed with recursive property definitions by placing limit
@@ -185,6 +192,39 @@
       </li>
       <li>
 	Added loadsession: command line command to SciTE.
+      </li>
+      <li>
+	SciTE option to quit application when last document closed.
+      </li>
+      <li>
+	SciTE option to ask user if it is OK to reload a file that has been
+	modified outside SciTE.
+      </li>
+      <li>
+	SciTE option to automatically save before running particular command tools
+	or to ask user or to not save.
+      </li>
+      <li>
+	SciTE on Windows 9x will write a Ctrl+Z to the process input pipe before
+	closing the pipe when running tool commands that take input.
+      </li>
+      <li>
+	SciTE calltips handle nested calls and other situations better.
+      </li>
+      <li>
+	CSS lexer improved.
+      </li>
+      <li>
+	Interface to platform layer changed - Surface initialisation now requires
+	a WindowID parameter.
+      </li>
+      <li>
+	Bug fixed with drawing or measuring long ieces of text on Windows 9x
+	by truncating the pieces.
+      </li>
+      <li>
+	Bug fixed with SciTE on GTK+ where a user shortcut for a visible character
+	inserted the character as well as executing the command.
       </li>
       <li>
 	Bug fixed where primary selection on GTK+ was reset by
@@ -199,6 +239,12 @@
       </li>
       <li>
 	Hang fixed when '#' last character in VB file.
+      </li>
+      <li>
+	Crash fixed in error message lexer.
+      </li>
+      <li>
+	Crash fixed when searching for long regular expressions.
       </li>
       <li>
 	Pressing return when nothing selected in user list sends notification with
