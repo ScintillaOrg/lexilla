@@ -25,6 +25,11 @@
 //                  Added fold.compact support set with fold.compact=1
 //                  Changed folding inside of #cs-#ce. Default is no keyword folding inside comment blocks when fold.comment=1
 //                        it will now only happen when fold.comment=2.
+// Sep 5, 2004    - Added logic to handle colourizing words on the last line. 
+//                        Typed Characters now show as "default" till they match any table.
+// Oct 10, 2004   - Added logic to show Comments in "Special" directives. 
+// Nov  1, 2004   - Added better testing for Numbers supporting x and e notation.
+// Nov 28, 2004   - Added logic to handle continuation lines for syntax highlighting.
 // 
 // Copyright for Scintilla: 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
@@ -132,6 +137,34 @@ static int GetSendKey(const char *szLine, char *szKey)
 
 } // GetSendKey() 
 
+//
+// Routine to check the last "none comment" character on a line to see if its a continuation
+// 
+static bool IsContinuationLine(unsigned int szLine, Accessor &styler)
+{
+	int nsPos = styler.LineStart(szLine);
+	int nePos = styler.LineStart(szLine+1) - 2;
+	//int stylech = styler.StyleAt(nsPos);
+	while (nsPos < nePos)
+	{
+		//stylech = styler.StyleAt(nePos);
+		int stylech = styler.StyleAt(nsPos);
+		if (!(stylech == SCE_AU3_COMMENT)) {
+			char ch = styler.SafeGetCharAt(nePos);
+			if (!isspacechar(ch)) {
+				if (ch == '_')
+					return true;
+				else
+					return false;
+			}
+		}
+		nePos--; // skip to next char
+	} // End While
+	return false;
+} // IsContinuationLine()
+
+//
+// syntax highlighting logic
 static void ColouriseAU3Doc(unsigned int startPos, 
 							int length, int initStyle,
 							WordList *keywordlists[],
@@ -143,15 +176,42 @@ static void ColouriseAU3Doc(unsigned int startPos,
     WordList &keywords4 = *keywordlists[3];
     WordList &keywords5 = *keywordlists[4];
     WordList &keywords6 = *keywordlists[5];
+    WordList &keywords7 = *keywordlists[6];
+	// find the first previous line without continuation character at the end
+	int lineCurrent = styler.GetLine(startPos);
+	int s_startPos = startPos;
+	while ((lineCurrent > 0 && IsContinuationLine(lineCurrent,styler)) ||
+	       (lineCurrent > 1 && IsContinuationLine(lineCurrent-1,styler))) {
+		lineCurrent--;
+		startPos = styler.LineStart(lineCurrent); // get start position
+		initStyle =  0;                           // reset the start style to 0 
+	}
+	// Set the new length to include it from the start and set the start position
+	length = length + s_startPos - startPos;      // correct the total length to process
     styler.StartAt(startPos);
-
+	
     StyleContext sc(startPos, length, initStyle, styler);
 	char si;     // string indicator "=1 '=2
-	si=0;
+	char ni;     // Numeric indicator error=9 normal=0 normal+dec=1 hex=2 Enot=3
+	char s_save[100];
+	si=0;  
+	ni=0;
 	//$$$
     for (; sc.More(); sc.Forward()) {
 		char s[100];
 		sc.GetCurrentLowered(s, sizeof(s));
+		// **********************************************
+		// save the total current word for eof processing
+		if (IsAWordChar(sc.ch)) 
+		{
+			strcpy(s_save,s);
+			char test = static_cast<char>(sc.ch);
+			int tp = strlen(s_save);
+			s_save[tp] = static_cast<char>(tolower(test));
+			s_save[tp+1] = '\0';
+		}
+		// **********************************************
+		//
 		switch (sc.state)
         {
             case SCE_AU3_COMMENTBLOCK:
@@ -177,7 +237,8 @@ static void ColouriseAU3Doc(unsigned int startPos,
             }
             case SCE_AU3_SPECIAL:
             {
-                if (sc.atLineEnd) {sc.SetState(SCE_AU3_DEFAULT);}
+                if (sc.ch == ';') {sc.SetState(SCE_AU3_COMMENT);}
+				if (sc.atLineEnd) {sc.SetState(SCE_AU3_DEFAULT);}
                 break;
             }
             case SCE_AU3_KEYWORD:
@@ -215,6 +276,10 @@ static void ColouriseAU3Doc(unsigned int startPos,
 							sc.ChangeState(SCE_AU3_SPECIAL);
 							sc.SetState(SCE_AU3_SPECIAL);
 						}
+						else if (keywords7.InList(s)) {
+							sc.ChangeState(SCE_AU3_EXPAND);
+							sc.SetState(SCE_AU3_DEFAULT);
+						}
 						else if (strcmp(s, "_") == 0) {
 							sc.ChangeState(SCE_AU3_OPERATOR);
 							sc.SetState(SCE_AU3_DEFAULT);
@@ -228,15 +293,56 @@ static void ColouriseAU3Doc(unsigned int startPos,
                 if (sc.atLineEnd) {sc.SetState(SCE_AU3_DEFAULT);}
                 break;
             }
-            case SCE_AU3_NUMBER:
+			case SCE_AU3_NUMBER:
             {
-                if (!IsAWordChar(sc.ch)) {sc.SetState(SCE_AU3_DEFAULT);}
-                break;
-            }
-            case SCE_AU3_VARIABLE:
-            {
-                if (!IsAWordChar(sc.ch)) {sc.SetState(SCE_AU3_DEFAULT);}
-                break;
+				// Numeric indicator error=9 normal=0 normal+dec=1 hex=2 E-not=3
+				//
+				// test for Hex notation
+				if (strcmp(s, "0") == 0 && (sc.ch == 'x' || sc.ch == 'X') && ni == 0)
+				{
+					ni = 2;
+					break;
+				}
+				// test for E notation
+				if (IsADigit(sc.chPrev) && (sc.ch == 'e' || sc.ch == 'E') && ni <= 1)
+				{
+					ni = 3;
+					break;
+				}
+				//  Allow Hex characters inside hex numeric strings
+				if ((ni == 2) &&
+					(sc.ch == 'a' || sc.ch == 'b' || sc.ch == 'c' || sc.ch == 'd' || sc.ch == 'e' || sc.ch == 'f' ||
+					 sc.ch == 'A' || sc.ch == 'B' || sc.ch == 'C' || sc.ch == 'D' || sc.ch == 'E' || sc.ch == 'F' ))
+				{
+					break;
+				}
+				// test for 1 dec point only
+				if (sc.ch == '.')
+				{
+					if (ni==0)
+					{
+						ni=1;
+					}
+					else
+					{
+						ni=9;
+					}
+					break;
+				}
+				// end of numeric string ?
+				if (!(IsADigit(sc.ch)))
+				{
+					if (ni==9)
+					{
+						sc.ChangeState(SCE_AU3_DEFAULT);
+					}
+					sc.SetState(SCE_AU3_DEFAULT);
+				}
+			}
+			case SCE_AU3_VARIABLE:
+			{
+				if (!IsAWordChar(sc.ch)) {sc.SetState(SCE_AU3_DEFAULT);}
+				break;
             }
             case SCE_AU3_STRING:
             {
@@ -246,7 +352,15 @@ static void ColouriseAU3Doc(unsigned int startPos,
 				{
 					sc.ForwardSetState(SCE_AU3_DEFAULT);
 				}
-                if (sc.atLineEnd) {sc.SetState(SCE_AU3_DEFAULT);}
+                if (sc.atLineEnd)
+				{
+					// at line end and not found a continuation char then reset to default
+					int lineCurrent = styler.GetLine(sc.currentPos);
+					if (!IsContinuationLine(lineCurrent,styler)) 
+					{
+						sc.SetState(SCE_AU3_DEFAULT);
+					}
+				}
 				// find Sendkeys in a STRING
 				if (sc.ch == '{') {sc.SetState(SCE_AU3_SENT);}
 				if (sc.ch == '+' && sc.chNext == '{') {sc.SetState(SCE_AU3_SENT);}
@@ -322,13 +436,58 @@ static void ColouriseAU3Doc(unsigned int startPos,
             else if (sc.ch == '\'') {
 				sc.SetState(SCE_AU3_STRING);
 				si = 2;	}
-            else if (IsADigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext))) {sc.SetState(SCE_AU3_NUMBER);}
+            else if (IsADigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext))) 
+			{
+				sc.SetState(SCE_AU3_NUMBER);
+				ni = 0;
+			}
             else if (IsAWordStart(sc.ch)) {sc.SetState(SCE_AU3_KEYWORD);}
             else if (IsAOperator(static_cast<char>(sc.ch))) {sc.SetState(SCE_AU3_OPERATOR);}
 			else if (sc.atLineEnd) {sc.SetState(SCE_AU3_DEFAULT);}
         }
     }      //for (; sc.More(); sc.Forward())
-    sc.Complete();
+
+	//*************************************
+	// Colourize the last word correctly 
+	//*************************************
+	if (sc.state == SCE_AU3_KEYWORD)
+		{
+		if (strcmp(s_save, "#cs")== 0 || strcmp(s_save, "#comments-start")== 0 )
+		{
+			sc.ChangeState(SCE_AU3_COMMENTBLOCK);
+			sc.SetState(SCE_AU3_COMMENTBLOCK);
+		}
+		else if (keywords.InList(s_save)) {
+			sc.ChangeState(SCE_AU3_KEYWORD);
+			sc.SetState(SCE_AU3_KEYWORD);
+		}
+		else if (keywords2.InList(s_save)) {
+			sc.ChangeState(SCE_AU3_FUNCTION);
+			sc.SetState(SCE_AU3_FUNCTION);
+		}
+		else if (keywords3.InList(s_save)) {
+			sc.ChangeState(SCE_AU3_MACRO);
+			sc.SetState(SCE_AU3_MACRO);
+		}
+		else if (keywords5.InList(s_save)) {
+			sc.ChangeState(SCE_AU3_PREPROCESSOR);
+			sc.SetState(SCE_AU3_PREPROCESSOR);
+		}
+		else if (keywords6.InList(s_save)) {
+			sc.ChangeState(SCE_AU3_SPECIAL);
+			sc.SetState(SCE_AU3_SPECIAL);
+		}
+		else if (keywords7.InList(s_save)) {
+			sc.ChangeState(SCE_AU3_EXPAND);
+			sc.SetState(SCE_AU3_EXPAND);
+		}
+		else {
+			sc.ChangeState(SCE_AU3_DEFAULT);
+			sc.SetState(SCE_AU3_DEFAULT);
+		}
+	}
+	//*************************************
+	sc.Complete();
 }
 
 //
@@ -351,32 +510,6 @@ static int GetStyleFirstWord(unsigned int szLine, Accessor &styler)
 	return styler.StyleAt(nsPos);
 
 } // GetStyleFirstWord()
-
-//
-// Routine to check the last "none comment" character on a line to see if its a continuation
-// 
-static bool IsContinuationLine(unsigned int szLine, Accessor &styler)
-{
-	int nsPos = styler.LineStart(szLine);
-	int nePos = styler.LineStart(szLine+1) - 2;
-	//int stylech = styler.StyleAt(nsPos);
-	while (nsPos < nePos)
-	{
-		//stylech = styler.StyleAt(nePos);
-		int stylech = styler.StyleAt(nsPos);
-		if (!(stylech == SCE_AU3_COMMENT)) {
-			char ch = styler.SafeGetCharAt(nePos);
-			if (!isspacechar(ch)) {
-				if (ch == '_')
-					return true;
-				else
-					return false;
-			}
-		}
-		nePos--; // skip to next char
-	} // End While
-	return false;
-} // IsContinuationLine()
 
 
 //
@@ -609,6 +742,7 @@ static const char * const AU3WordLists[] = {
     "#autoit Sent keys",
     "#autoit Pre-processors",
     "#autoit Special",
+    "#autoit Expand",
     0
 };
 LexerModule lmAU3(SCLEX_AU3, ColouriseAU3Doc, "au3", FoldAU3Doc , AU3WordLists);
