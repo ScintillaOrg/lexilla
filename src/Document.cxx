@@ -684,41 +684,40 @@ void Document::Indent(bool forwards, int lineBottom, int lineTop) {
 
 void Document::ConvertLineEnds(int eolModeSet) {
 	BeginUndoAction();
+
 	for (int pos = 0; pos < Length(); pos++) {
 		if (cb.CharAt(pos) == '\r') {
-			if (cb.CharAt(pos + 1) == '\n') {
-				if (eolModeSet != SC_EOL_CRLF) {
-					DeleteChars(pos, 2);
-					if (eolModeSet == SC_EOL_CR)
-						InsertString(pos, "\r", 1);
-					else
-						InsertString(pos, "\n", 1);
+			if (cb.CharAt(pos + 1) == '\n') { 
+				// CRLF
+				if (eolModeSet == SC_EOL_CR) {
+					DeleteChars(pos + 1, 1); // Delete the LF
+				} else if (eolModeSet == SC_EOL_LF) {
+					DeleteChars(pos, 1); // Delete the CR
 				} else {
 					pos++;
 				}
-			} else {
-				if (eolModeSet != SC_EOL_CR) {
-					DeleteChars(pos, 1);
-					if (eolModeSet == SC_EOL_CRLF) {
-						InsertString(pos, "\r\n", 2);
-						pos++;
-					} else {
-						InsertString(pos, "\n", 1);
-					}
+			} else { 
+				// CR
+				if (eolModeSet == SC_EOL_CRLF) {
+					InsertString(pos + 1, "\n", 1); // Insert LF
+					pos++;
+				} else if (eolModeSet == SC_EOL_LF) {
+					InsertString(pos, "\n", 1); // Insert LF
+					DeleteChars(pos + 1, 1); // Delete CR
 				}
 			}
 		} else if (cb.CharAt(pos) == '\n') {
-			if (eolModeSet != SC_EOL_LF) {
-				DeleteChars(pos, 1);
-				if (eolModeSet == SC_EOL_CRLF) {
-					InsertString(pos, "\r\n", 2);
-					pos++;
-				} else {
-					InsertString(pos, "\r", 1);
-				}
+			// LF
+			if (eolModeSet == SC_EOL_CRLF) {
+				InsertString(pos, "\r", 1); // Insert CR
+				pos++;
+			} else if (eolModeSet == SC_EOL_CR) {
+				InsertString(pos, "\r", 1); // Insert CR
+				DeleteChars(pos + 1, 1); // Delete LF
 			}
 		}
 	}
+
 	EndUndoAction();
 }
 
