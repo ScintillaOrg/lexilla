@@ -20,7 +20,7 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-static inline AtEOL(Accessor &styler, unsigned int i) {
+static inline bool AtEOL(Accessor &styler, unsigned int i) {
 	return (styler[i] == '\n') ||
 		((styler[i] == '\r') && (styler.SafeGetCharAt(i + 1) != '\n'));
 }
