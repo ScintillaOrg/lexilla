@@ -314,9 +314,9 @@ void Surface::Init() {
 	::SetTextAlign(hdc, TA_BASELINE);
 }
 
-void Surface::Init(HDC hdc_) {
+void Surface::Init(SurfaceID sid) {
 	Release();
-	hdc = hdc_;
+	hdc = sid;
 	::SetTextAlign(hdc, TA_BASELINE);
 }
 

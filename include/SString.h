@@ -2,6 +2,7 @@
 // SString.h - a simple string class
 // Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
+/** @file **/
 
 #ifndef SSTRING_H
 #define SSTRING_H
@@ -17,7 +18,15 @@ bool EqualCaseInsensitive(const char *a, const char *b);
 // While it would be 'better' to use std::string, that doubles the executable size.
 // An SString may contain embedded nul characters.
 
-inline char *StringDup(const char *s, int len=-1) {
+/** Duplicate a C string.
+ * Allocate memory of the given size, or big enough to fit the string if length isn't given;
+ * then copy the given string in the allocated memory.
+ * @return the pointer to the new string
+ **/
+inline char *StringDup(
+	const char *s,	///< The string to duplicate
+	int len=-1)		///< The length of memory to allocate. Optional.
+{
 	if (!s)
 		return 0;
 	if (len == -1)
@@ -30,12 +39,19 @@ inline char *StringDup(const char *s, int len=-1) {
 	return sNew;
 }
 
+/** A simple string class.
+ * Hold the length of the string for quick operations,
+ * can have a buffer bigger than the string to avoid too many memory allocations and copies.
+ * May have embedded zeroes as a result of @a substitute, but rely too heavily on C string
+ * functions to allow reliable manipulations of these strings.
+ **/
 class SString {
 	char *s;		///< The C string
 	int ssize;		///< The size of the buffer, less 1: ie. the maximum size of the string
 	int slen;		///< The size of the string in s
 
-	enum { sizingGranularity = 64 };	// Minimum growth size when appending strings
+	/// Minimum growth size when appending strings
+	enum { sizingGranularity = 64 };
 
 public:
 	typedef const char* const_iterator;
@@ -59,7 +75,7 @@ public:
 		ssize = slen = (s) ? strlen(s) : 0;
 	}
 	SString(int i) {
-		char number[100];
+		char number[32];
 		sprintf(number, "%0d", i);
 		s = StringDup(number);
 		ssize = slen = (s) ? strlen(s) : 0;
@@ -92,17 +108,27 @@ public:
 		return slen;
 	}
 	SString &assign(const char* sother, int size_ = -1) {
+		if (!sother) {
+			size_ = 0;
+		}
 		if (size_ < 0) {
 			size_ = strlen(sother);
 		}
 		if (ssize > 0 && size_ <= ssize) {	// Does not allocate new buffer if the current is big enough
+			if (s && size_) {
 			strncpy(s, sother, size_);
+			}
 			s[size_] = '\0';
+			slen = size_;
 		} else {
 			delete []s;
 			s = StringDup(sother, size_);
+			if (s) {
 			ssize = size_;	// Allow buffer bigger than real string, thus providing space to grow
-			slen = (s) ? strlen(s) : 0;
+				slen = strlen(s);
+			} else {
+				ssize = slen = 0;
+			}
 		}
 		return *this;
 	}
@@ -111,6 +137,9 @@ public:
 	}
 	SString &assign(const_iterator ibeg, const_iterator iend) {
 		return assign(ibeg, iend - ibeg);
+	}
+	SString &operator=(const char *source) {
+		return assign(source);
 	}
 	SString &operator=(const SString &source) {
 		if (this != &source) {

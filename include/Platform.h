@@ -4,6 +4,7 @@
 // Implemented in PlatGTK.cxx for GTK+/Linux, PlatWin.cxx for Windows, and PlatWX.cxx for wxWindows
 // Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
+/** @file **/
 
 #ifndef PLATFORM_H
 #define PLATFORM_H
@@ -80,8 +81,9 @@ typedef wxWindow* WindowID;
 typedef wxMenu* MenuID;
 #endif
 
-// Point is exactly the same as the Win32 POINT and GTK+ GdkPoint so can be used interchangeably
-
+/** A geometric point class.
+ * Point is exactly the same as the Win32 POINT and GTK+ GdkPoint so can be used interchangeably.
+ **/
 class Point {
 public:
 	int x;
@@ -95,8 +97,10 @@ public:
 	static Point FromLong(long lpoint);
 };
 
-// PRectangle is exactly the same as the Win32 RECT so can be used interchangeably
-// PRectangles contain their top and left sides, but not their right and bottom sides
+/** A geometric rectangle class.
+ * PRectangle is exactly the same as the Win32 RECT so can be used interchangeably.
+ * PRectangles contain their top and left sides, but not their right and bottom sides.
+ **/
 class PRectangle {
 public:
 	int left;
@@ -131,6 +135,8 @@ wxRect wxRectFromPRectangle(PRectangle prc);
 PRectangle PRectangleFromwxRect(wxRect rc);
 #endif
 
+/** A colour class.
+ **/
 class Colour {
 	ColourID co;
 public:
@@ -146,10 +152,11 @@ public:
 	friend class Palette;
 };
 
-// Colour pairs hold a desired colour and the colour that the graphics engine
-// allocates to approximate the desired colour.
-// To make palette management more automatic, ColourPairs could register at 
-// construction time with a palette management object.
+/** Colour pairs hold a desired colour and the colour that the graphics engine
+ * allocates to approximate the desired colour.
+ * To make palette management more automatic, ColourPairs could register at
+ * construction time with a palette management object.
+ **/
 struct ColourPair {
 	Colour desired;
 	Colour allocated;
@@ -162,6 +169,8 @@ struct ColourPair {
 
 class Window;	// Forward declaration for Palette
 
+/** Colour palette management.
+ **/
 class Palette {
 	int used;
 	enum {numEntries = 100};
@@ -182,9 +191,10 @@ public:
 
 	void Release();
 	
-	// This method either adds a colour to the list of wanted colours (want==true)
-	// or retrieves the allocated colour back to the ColourPair.
-	// This is one method to make it easier to keep the code for wanting and retrieving in sync.
+	/** This method either adds a colour to the list of wanted colours (want==true)
+	 * or retrieves the allocated colour back to the ColourPair.
+	 * This is one method to make it easier to keep the code for wanting and retrieving in sync.
+	 **/
 	void WantFind(ColourPair &cp, bool want);
 
 	void Allocate(Window &w);
@@ -192,6 +202,8 @@ public:
 	friend class Surface;
 };
 
+/** Font management.
+ **/
 class Font {
 protected:
 	FontID id;
@@ -214,7 +226,8 @@ public:
 	friend class Surface;
 };
 
-// A surface abstracts a place to draw
+/** A surface abstracts a place to draw.
+ **/
 class Surface {
 private:
 	bool unicodeMode;
@@ -297,8 +310,9 @@ public:
 	}
 };
 
-// Class to hide the details of window manipulation
-// Does not own the window which will normally have a longer life than this object
+/** Class to hide the details of window manipulation.
+ * Does not own the window which will normally have a longer life than this object.
+ **/
 class Window {
 	friend class ListBox;
 protected:
@@ -333,6 +347,8 @@ public:
 #endif
 };
 
+/** Listbox management.
+ **/
 class ListBox : public Window {
 #if PLAT_GTK
 	WindowID list;
@@ -360,6 +376,8 @@ public:
 	void Sort();
 };
 
+/** Menu management.
+ **/
 class Menu {
 	MenuID id;
 public:
@@ -370,8 +388,9 @@ public:
 	void Show(Point pt, Window &w);
 };
 
-// Platform class used to retrieve system wide parameters such as double click speed
-// and chrome colour. Not a creatable object, more of a module with several functions.
+/** Platform class used to retrieve system wide parameters such as double click speed
+ * and chrome colour. Not a creatable object, more of a module with several functions.
+ **/
 class Platform {
 	// Private so Platform objects can not be copied
 	Platform(const Platform &) {}
