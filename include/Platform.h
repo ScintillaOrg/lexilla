@@ -101,8 +101,8 @@ public:
 			(rc.top >= top) && (rc.bottom <= bottom);
 	}
 	bool Intersects(PRectangle other) {
-		return (right >= other.left) && (left <= other.right) &&
-			(bottom >= other.top) && (top <= other.bottom);
+		return (right > other.left) && (left < other.right) &&
+			(bottom > other.top) && (top < other.bottom);
 	}
 	int Width() { return right - left; }
 	int Height() { return bottom - top; }
