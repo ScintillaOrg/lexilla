@@ -52,6 +52,11 @@
 #define SPI_GETWHEELSCROLLLINES   104
 #endif
 
+#ifndef WM_UNICHAR
+#define WM_UNICHAR                      0x0109
+#define UNICODE_NOCHAR                  0xFFFF
+#endif
+
 // These undefinitions are required to work around differences between different versions
 // of the mingw headers, some of which define these twice, in both winuser.h and imm.h.
 #ifdef __MINGW_H
@@ -635,6 +640,20 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			}
 		}
 		return 1;
+
+	case WM_UNICHAR:
+		if (wParam == UNICODE_NOCHAR) {
+			return 1;
+		} else if (lastKeyDownConsumed) {
+			return 1;
+		} else {
+			if (IsUnicodeMode()) {
+				AddCharBytes(static_cast<char>(wParam & 0xff));
+				return 1;
+			} else {
+				return 0;
+			}
+		}
 
 	case WM_SYSKEYDOWN:
 	case WM_KEYDOWN: {
