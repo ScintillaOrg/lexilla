@@ -197,7 +197,195 @@
 	Released on 31 October 2004.
 	</li>
 	<li>
-	Something.
+	Lexer added for ASN.1.
+	</li>
+	<li>
+	Lexer added for VHDL.
+	</li>
+	<li>
+	On Windows, an invisible system caret is used to allow screen readers to determine
+	where the caret is. The visible caret is still drawn by the painting code.
+	</li>
+	<li>
+	On GTK+, Scintilla has methods to read the target as UTF-8 and to convert
+	a string from UTF-8 to the document encoding. This eases integration with
+	containers that use the UTF-8 encoding which is the API encoding for GTK+ 2.
+	</li>
+	<li>
+	SciTE on GTK+2 and Windows NT/2000/XP allows search and replace of Unicode text.
+	</li>
+	<li>
+	SciTE calltips allow setting the characters used to start and end parameter lists and 
+	to separate parameters.
+	</li>
+	<li>
+	FindColumn method converts a line and column into a position, taking into account
+	tabs and multi-byte characters.
+	</li>
+	<li>
+	On Windows, when Scintilla copies text to the clipboard as Unicode, it avoids
+	adding an ANSI copy as the system will automatically convert as required in 
+	a context-sensitive manner.
+	</li>
+	<li>
+	SciTE indent.auto setting automatically determines indent.size and use.tabs from 
+	document contents.
+	</li>
+	<li>
+	SciTE defines a CurrentMessage property that holds the most recently selected 
+	output pane message.
+	</li>
+	<li>
+	SciTE Lua scripting enhanced with buffer specific data, scite.Open
+	</li>
+	<li>
+	SciTE Find in Files on Windows can be used in a modeless way and gains a '..' 
+	button to move up to the parent directory. It is also wider so that longer paths 
+	can be seen.
+	</li>
+	<li>
+	Close buttons added to dialogs in SciTE on Windows.
+	</li>
+	<li>
+	SciTE on GTK+ 2 has a "hidden files" check box in file open dialog.
+	</li>
+	<li>
+	SciTE use.monospaced setting removed. More information in the 
+	<a href="SciTEFAQ.html">FAQ</a>.
+	</li>
+	<li>
+	APDL lexer updated with more lexical classes
+	</li>
+	<li>
+	AutoIt3 lexer updated.
+	</li>
+	<li>
+	Ada lexer fixed to support non-ASCII text.
+	</li>
+	<li>
+	Cpp lexer now only matches exactly three slashes as starting a doc-comment so that 
+	lines of slashes are seen as a normal comment.
+	Line ending characters are appear in default style on preprocessor and single line
+	comment lines.
+	</li>
+	<li>
+	CSS lexer updated to support CSS2 including second set of keywords.
+	</li>
+	<li>
+	Errorlist lexer now understands Java stack trace lines.
+	</li>
+	<li>
+	SciTE's handling of HTML Tidy messages jumps to column as well as line indicated.
+	</li>
+	<li>
+	Lisp lexer allows multiline strings.
+	</li>
+	<li>
+	Lua lexer treats .. as an operator when between identifiers.
+	</li>
+	<li>
+	PHP lexer handles 'e' in numerical literals.
+	</li>
+	<li>
+	PowerBasic lexer updated for macros and optimised.
+	</li>
+	<li>
+	Properties file folder changed to leave lines before a header at the base level 
+	and thus avoid a vertical line when using connected folding symbols.
+	</li>
+	<li>
+	GTK+ on Windows version uses Alt for rectangular selection to be compatible with
+	platform convention.
+	</li>
+	<li>
+	SciTE abbreviations file moved from system directory to user directory
+	so each user can have separate abbreviations.
+	</li>
+	<li>
+	SciTE on GTK+ has improved .desktop file and make install support that may
+	lead to better integration with system shell.
+	</li>
+	<li>
+	Disabling of themed background drawing on GTK+ extended to all cases.
+	</li>
+	<li>
+	SciTE date formatting on Windows performed with the user setting rather than the
+	system setting.
+	</li>
+	<li>
+	GTK+ 2 redraw while scrolling fixed.
+	</li>
+	<li>
+	Recursive property definitions are safer, avoiding expansion when detected.
+	</li>
+	<li>
+	SciTE thread synchronization for scripts no longer uses HWND_MESSAGE 
+	so is compatible with older versions of Windows.
+	Other Lua scripting bugs fixed.
+	</li>
+	<li>
+	SciTE on Windows localisation of menu accelerators changed to be compatible
+	with alternative UI themes.
+	</li>
+	<li>
+	SciTE on Windows full screen mode now fits better when menu different height 
+	to title bar height.
+	</li>
+	<li>
+	SC_MARK_EMPTY marker is now invisible and does not change the background 
+	colour.
+	</li>
+	<li>
+	Bug fixed in SciTE abbreviation expansion that could break indentation or crash.
+	</li>
+	<li>
+	Bug fixed when searching for a whole word string that ends one character before 
+	end of document.
+	</li>
+	<li>
+	Drawing bug fixed when indicators drawn on wrapped lines.
+	</li>
+	<li>
+	Bug fixed when double clicking a hotspot.
+	</li>
+	<li>
+	Bug fixed where autocompletion would remove typed text if no match found.
+	</li>
+	<li>
+	Bug fixed where display does not scroll when inserting in long wrapped line.
+	</li>
+	<li>
+	Bug fixed where SCI_MARKERDELETEALL would only remove one of the markers
+	on a line that contained multiple markers with the same number.
+	</li>
+	<li>
+	Bug fixed where markers would move when converting line endings.
+	</li>
+	<li>
+	Bug fixed where SCI_LINEENDWRAP would move too far when line ends are visible.
+	</li>
+	<li>
+	Bugs fixed where calltips with unicode or other non-ASCII text would display 
+	incorrectly.
+	</li>
+	<li>
+	Bug fixed in determining if at save point after undoing from save point and then 
+	performing changes.
+	</li>
+	<li>
+	Bug fixed on GTK+ using unsupported code pages where extraneous text could 
+	be drawn.
+	</li>
+	<li>
+	Bug fixed in drag and drop code on Windows where dragging from SciTE to
+	Firefox could hang both applications.
+	</li>
+	<li>
+	Crashing bug fixed when autocompleting word longer than 1000 characters.
+	</li>
+	<li>
+	SciTE crashing bug fixed when both Find and Replace dialogs shown by disallowing 
+	this situation.
 	</li>
     </ul>
     <h3>
