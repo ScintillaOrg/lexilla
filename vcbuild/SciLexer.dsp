@@ -134,6 +134,10 @@ SOURCE=..\src\KeyWords.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexAda.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexAVE.cxx
 # End Source File
 # Begin Source File

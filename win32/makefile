@@ -34,8 +34,8 @@ ALL:	$(COMPONENT) $(LEXCOMPONENT) ScintillaWinS.o WindowAccessor.o
 clean:
 	del /q *.exe *.o *.obj *.dll *.res *.map
 
-LEXOBJS	=  LexAVE.o LexConf.o LexCPP.o LexHTML.o LexLua.o LexOthers.o \
-	LexPascal.o LexPerl.o LexPython.o LexSQL.o LexVB.o
+LEXOBJS	= LexAda.o LexAVE.o LexConf.o LexCPP.o LexHTML.o LexLua.o \
+	LexOthers.o LexPascal.o LexPerl.o LexPython.o LexSQL.o LexVB.o
 
 SOBJS	= ScintillaWin.o ScintillaBase.o Editor.o Document.o \
 	ContractionState.o CellBuffer.o CallTip.o \
@@ -52,6 +52,10 @@ LOBJS	= ScintillaWinL.o ScintillaBaseL.o Editor.o Document.o \
 $(LEXCOMPONENT): $(LOBJS)
 	$(DLLWRAP) --target i386-mingw32 -o $@ $(LOBJS) $(LDFLAGS) -s --relocatable
 
+# All lexers depend on this set of headers
+LEX_HEADERS=Platform.h PropSet.h SString.h Accessor.h \
+ KeyWords.h Scintilla.h WinDefs.h SciLexer.h
+
 AutoComplete.o: AutoComplete.cxx Platform.h AutoComplete.h
 CallTip.o: CallTip.cxx Platform.h CallTip.h
 CellBuffer.o: CellBuffer.cxx Platform.h Scintilla.h CellBuffer.h
@@ -65,28 +69,18 @@ Editor.o: Editor.cxx Platform.h Scintilla.h ContractionState.h \
  Document.h Editor.h
 Indicator.o: Indicator.cxx Platform.h Scintilla.h Indicator.h
 KeyMap.o: KeyMap.cxx Platform.h Scintilla.h KeyMap.h
-LexAVE.o: LexAVE.cxx Platform.h PropSet.h \
- SString.h Accessor.h KeyWords.h Scintilla.h SciLexer.h
-LexConf.o: LexConf.cxx Platform.h PropSet.h \
- SString.h Accessor.h KeyWords.h Scintilla.h SciLexer.h
-LexCPP.o: LexCPP.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
- Scintilla.h SciLexer.h
-LexHTML.o: LexHTML.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
- Scintilla.h SciLexer.h
-LexLua.o: LexLua.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
- Scintilla.h SciLexer.h
-LexOthers.o: LexOthers.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
- Scintilla.h SciLexer.h
-LexPascal.o: LexPascal.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
- Scintilla.h SciLexer.h
-LexPerl.o: LexPerl.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
- Scintilla.h SciLexer.h
-LexPython.o: LexPython.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
- Scintilla.h SciLexer.h
-LexSQL.o: LexSQL.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
- Scintilla.h SciLexer.h
-LexVB.o: LexVB.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
- Scintilla.h SciLexer.h
+LexAda.o: LexAVE.cxx $(LEX_HEADERS)
+LexAVE.o: LexAVE.cxx $(LEX_HEADERS)
+LexConf.o: LexConf.cxx $(LEX_HEADERS)
+LexCPP.o: LexCPP.cxx $(LEX_HEADERS)
+LexHTML.o: LexHTML.cxx $(LEX_HEADERS)
+LexLua.o: LexLua.cxx $(LEX_HEADERS)
+LexOthers.o: LexOthers.cxx $(LEX_HEADERS)
+LexPascal.o: LexPascal.cxx $(LEX_HEADERS)
+LexPerl.o: LexPerl.cxx $(LEX_HEADERS)
+LexPython.o: LexPython.cxx $(LEX_HEADERS)
+LexSQL.o: LexSQL.cxx $(LEX_HEADERS)
+LexVB.o: LexVB.cxx $(LEX_HEADERS)
 KeyWords.o: KeyWords.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h
 LineMarker.o: LineMarker.cxx Platform.h Scintilla.h LineMarker.h
