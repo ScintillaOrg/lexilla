@@ -37,7 +37,7 @@ public:
 		Accessor(), pdoc(pdoc_), props(props_), id(id_),
 		lenDoc(-1), validLen(0), chFlags(0), chWhile(0), 
 		startSeg(0), startPosStyling(0),
-		mask(31) { // Initialize the mask to the same as the default.
+		mask(127) { // Initialize the mask to be big enough for any lexer.
 	}
 	~DocumentAccessor();
 	bool Match(int pos, const char *s);
