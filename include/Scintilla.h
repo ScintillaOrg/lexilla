@@ -12,9 +12,7 @@
 #define SCINTILLA_H
 
 #if PLAT_WIN
-#ifdef STATIC_BUILD
 void Scintilla_RegisterClasses(void *hInstance);
-#endif
 #endif
 
 // Here should be placed typedefs for uptr_t, an unsigned integer type large enough to
