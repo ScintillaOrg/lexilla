@@ -670,7 +670,7 @@ void ScintillaGTK::SetTicking(bool on) {
 	timer.ticksToWait = caret.period;
 }
 
-void ScintillaGTK::SetIdle(bool on) {
+bool ScintillaGTK::SetIdle(bool on) {
 	if (on) {
 		// Start idler, if it's not running.
 		if (idler.state == false) {
