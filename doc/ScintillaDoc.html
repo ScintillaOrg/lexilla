@@ -910,7 +910,12 @@ SCI_AUTOCGETDROPRESTOFWORD
 </pre>
     <p>
 	Auto completion displays a list box based upon the users typing 
-	showing likely identifiers.
+	showing likely identifiers. 
+	The user chooses the currently selected item by pressing the tab character 
+	or another character that is a member of the fillup character set defined
+	with SCI_AUTOCSETFILLUPS.
+    </p>
+    <p>
 	The SCI_AUTOCSHOW message causes this list to be displayed, with 
 	its argument being a list of words separated by separator 
 	characters. The initial separator character is a space but this can 
