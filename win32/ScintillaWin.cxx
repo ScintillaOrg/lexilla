@@ -452,11 +452,14 @@ static unsigned int SciMessageFromEM(unsigned int iMessage) {
 		case EM_FORMATRANGE: return SCI_FORMATRANGE;
 		case EM_GETFIRSTVISIBLELINE: return SCI_GETFIRSTVISIBLELINE;
 		case EM_GETLINECOUNT: return SCI_GETLINECOUNT;
+		case EM_GETSELTEXT: return SCI_GETSELTEXT;
 		case EM_GETTEXTRANGE: return SCI_GETTEXTRANGE;
 		case EM_HIDESELECTION: return SCI_HIDESELECTION;
 		case EM_LINEINDEX: return SCI_POSITIONFROMLINE;
 		case EM_LINESCROLL: return SCI_LINESCROLL;
 		case EM_REPLACESEL: return SCI_REPLACESEL;
+		case EM_SCROLLCARET: return SCI_SCROLLCARET;
+		case EM_SETREADONLY: return SCI_SETREADONLY;
 		case WM_CLEAR: return SCI_CLEAR;
 		case WM_COPY: return SCI_COPY;
 		case WM_CUT: return SCI_CUT;
@@ -728,6 +731,9 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		if (static_cast<int>(wParam) < 0)
 			wParam = SelectionStart();
 		return pdoc->LineFromPosition(wParam);
+
+	case EM_EXLINEFROMCHAR:
+		return pdoc->LineFromPosition(lParam);
 
 	case EM_EXGETSEL: {
 			if (lParam == 0)
