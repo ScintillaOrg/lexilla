@@ -65,6 +65,9 @@ LexPerl.o: ../src/LexPerl.cxx ../include/Platform.h \
 LexPython.o: ../src/LexPython.cxx ../include/Platform.h \
  ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
  ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
+LexRuby.o: ../src/LexRuby.cxx ../include/Platform.h ../include/PropSet.h \
+ ../include/SString.h ../include/Accessor.h ../include/KeyWords.h \
+ ../include/Scintilla.h ../include/SciLexer.h
 LexSQL.o: ../src/LexSQL.cxx ../include/Platform.h ../include/PropSet.h \
  ../include/SString.h ../include/Accessor.h ../include/KeyWords.h \
  ../include/Scintilla.h ../include/SciLexer.h
