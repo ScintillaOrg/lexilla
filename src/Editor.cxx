@@ -862,7 +862,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 					//}
 				}
 				if (vsDraw.viewWhitespace != wsInvisible) {
-					if (inIndentation || vsDraw.viewWhitespace == wsVisibleAlways) {
+					if (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways) {
 						PRectangle rcTab(rcSegment.left + 1, rcSegment.top + 4,
 							rcSegment.right - 1, rcSegment.bottom - vsDraw.maxDescent);
 						DrawTabArrow(surface, rcTab, rcSegment.top + vsDraw.lineHeight / 2);
@@ -906,7 +906,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 						for (int cpos = 0; cpos <= i - startseg; cpos++) {
 							if (ll.chars[cpos + startseg] == ' ') {
 								if (vsDraw.viewWhitespace != wsInvisible) {
-									if (inIndentation || vsDraw.viewWhitespace == wsVisibleAlways) {
+									if (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways) {
 										int xmid = (ll.positions[cpos + startseg] + ll.positions[cpos + startseg + 1]) / 2;
 										PRectangle rcDot(xmid + xStart, rcSegment.top + vsDraw.lineHeight / 2, 0, 0);
 										rcDot.right = rcDot.left + 1;
