@@ -1174,6 +1174,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					state = SCE_HPHP_SIMPLESTRING;
 				} else if (ch == '$') {
 					state = SCE_HPHP_VARIABLE;
+				} else if (isoperator(ch)) {
+					state = SCE_HPHP_OPERATOR;
 				} else {
 					state = SCE_HPHP_DEFAULT;
 				}
@@ -1231,7 +1233,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				state = SCE_HPHP_HSTRING;
 			}
 			break;
-		case SCE_HPHP_DEFAULT:
+		case SCE_HPHP_OPERATOR:
+  		case SCE_HPHP_DEFAULT:
 			styler.ColourTo(i - 1, StateToPrint);
 			if (isdigit(ch)) {
 				state = SCE_HPHP_NUMBER;
@@ -1251,6 +1254,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				state = SCE_HPHP_SIMPLESTRING;
 			} else if (ch == '$') {
 				state = SCE_HPHP_VARIABLE;
+			} else if (isoperator(ch)) {
+				state = SCE_HPHP_OPERATOR;
 			}
 			break;
 			///////////// end - PHP state handling
