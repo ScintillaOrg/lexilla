@@ -600,6 +600,25 @@ int Document::GetLineIndentPosition(int line) {
 	return pos;
 }
 
+int Document::GetColumn(int pos) {
+	int column = 0;
+	int line = LineFromPosition(pos);
+	if ((line >= 0) && (line < LinesTotal())) {
+		for (int i=LineStart(line);i<pos;i++) {
+			char ch = cb.CharAt(i);
+			if (ch == '\t')
+				column = NextTab(column, tabInChars);
+			else if (ch == '\r')
+				return column;
+			else if (ch == '\n')
+				return column;
+			else
+				column++;
+		}
+	}
+	return column;
+}
+
 void Document::Indent(bool forwards, int lineBottom, int lineTop) {
 	// Dedent - suck white space off the front of the line to dedent by equivalent of a tab
 	for (int line = lineBottom; line >= lineTop; line--) {

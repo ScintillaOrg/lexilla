@@ -2995,6 +2995,7 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 				nEnd = pdoc->Length();
 			if (nStart < 0)
 				nStart = nEnd; 	// Remove selection
+			selType = selStream;
 			SetSelection(nEnd, nStart);
 			EnsureCaretVisible();
 		}
@@ -3004,6 +3005,7 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 			if (lParam == 0)
 				return 0;
 			CHARRANGE *pCR = reinterpret_cast<CHARRANGE *>(lParam);
+			selType = selStream;
 			if (pCR->cpMax == -1) {
 				SetSelection(pCR->cpMin, pdoc->Length());
 			} else {
@@ -3409,6 +3411,9 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		
 	case SCI_GETLINEINDENTPOSITION:
 		return pdoc->GetLineIndentPosition(wParam);
+
+	case SCI_GETCOLUMN:
+		return pdoc->GetColumn(wParam);
 		
 	case SCI_SETHSCROLLBAR :
 		horizontalScrollBarVisible = wParam;

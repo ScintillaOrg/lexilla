@@ -414,6 +414,9 @@ get int GetLineIndentation=2127(int line,)
 # Retrieve the position before the first non indentation character on a line.
 get position GetLineIndentPosition=2128(int line,)
 
+# Retrieve the column number of a position, taking tab width into account.
+get int GetColumn=2129(position pos,)
+
 # Show or hide the horizontal scroll bar
 set void SetHScrollBar=2130(bool show,)
 
