@@ -124,7 +124,7 @@ SString &SString::assign(const char *sOther, lenpos_t sSize_) {
 		s = StringAllocate(sOther, sSize_);
 		if (s) {
 			sSize = sSize_;	// Allow buffer bigger than real string, thus providing space to grow
-			sLen = strlen(s);
+			sLen = sSize_;
 		} else {
 			sSize = sLen = 0;
 		}

@@ -360,6 +360,8 @@ Editor::Editor() {
 
 	topLine = 0;
 	posTopLine = 0;
+	
+	lengthForEncode = 0;
 
 	needUpdateUI = true;
 	braces[0] = invalidPosition;
@@ -6946,6 +6948,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_CONVERTEOLS:
 		pdoc->ConvertLineEnds(wParam);
 		SetSelection(currentPos, anchor);	// Ensure selection inside document
+		return 0;
+
+	case SCI_SETLENGTHFORENCODE:
+		lengthForEncode = wParam;
 		return 0;
 
 	case SCI_SELECTIONISRECTANGLE:

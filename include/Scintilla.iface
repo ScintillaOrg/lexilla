@@ -1582,6 +1582,19 @@ fun int AutoCGetCurrent=2445(,)
 # Enlarge the document to a particular size of text bytes.
 fun void Allocate=2446(int bytes,)
 
+# Returns the target converted to UTF8.
+# Return the length in bytes.
+fun int TargetAsUTF8=2447(, stringresult s)
+
+# Set the length of the utf8 argument for calling EncodedFromUTF8.
+# Set to 0 and the string will be measured to the first nul.
+fun void SetLengthForEncode=2448(int bytes,)
+
+# Translates a UTF8 string into the document encoding.
+# Return the length of the result in bytes.
+# On error return 0.
+fun int EncodedFromUTF8=2449(string utf8, stringresult encoded)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 

@@ -257,6 +257,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int searchFlags;
 	int topLine;
 	int posTopLine;
+	int lengthForEncode;
 
 	bool needUpdateUI;
 	Position braces[2];

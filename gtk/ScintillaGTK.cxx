@@ -143,6 +143,8 @@ private:
 	virtual void Finalise();
 	virtual void DisplayCursor(Window::Cursor c);
 	virtual void StartDrag();
+	int TargetAsUTF8(char *text);
+	int EncodedFromUTF8(char *utf8, char *encoded);
 public: 	// Public for scintilla_send_message
 	virtual sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 private:
@@ -747,6 +749,116 @@ void ScintillaGTK::StartDrag() {
 	               reinterpret_cast<GdkEvent *>(&evbtn));
 }
 
+#ifdef USE_CONVERTER
+static char *ConvertText(int *lenResult, char *s, size_t len, const char *charSetDest, const char *charSetSource) {
+	*lenResult = 0;
+	char *destForm = 0;
+	Converter conv(charSetDest, charSetSource);
+	if (conv) {
+		destForm = new char[len*3+1];
+		char *pin = s;
+		size_t inLeft = len;
+		char *pout = destForm;
+		size_t outLeft = len*3+1;
+		size_t conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
+		if (conversions == ((size_t)(-1))) {
+fprintf(stderr, "iconv %s->%s failed for %s\n", charSetSource, charSetDest, static_cast<char *>(s));
+			delete []destForm;
+			destForm = 0;
+		} else {
+//fprintf(stderr, "iconv OK %s %d\n", destForm, pout - destForm);
+			*pout = '\0';
+			*lenResult = pout - destForm;
+		}
+	} else {
+fprintf(stderr, "Can not iconv %s %s\n", charSetDest, charSetSource);
+	}
+	if (!destForm) {
+		destForm = new char[1];
+		destForm[0] = '\0';
+		*lenResult = 0;
+	}
+	return destForm;
+}
+#endif
+
+// Returns the target converted to UTF8.
+// Return the length in bytes.
+int ScintillaGTK::TargetAsUTF8(char *text) {
+	int targetLength = targetEnd - targetStart;
+	if (IsUnicodeMode()) {
+		if (text) {
+			pdoc->GetCharRange(text, targetStart, targetLength);
+		}
+	} else {
+		// Need to convert
+#ifdef USE_CONVERTER
+		const char *charSetBuffer = CharacterSetID();
+		if (*charSetBuffer) {
+//~ fprintf(stderr, "AsUTF8 %s %d  %0d-%0d\n", charSetBuffer, targetLength, targetStart, targetEnd);
+			char *s = new char[targetLength];
+			if (s) {
+				pdoc->GetCharRange(s, targetStart, targetLength);
+//~ fprintf(stderr, "    \"%s\"\n", s);
+				if (text) {
+					char *tmputf = ConvertText(&targetLength, s, targetLength, "UTF-8", charSetBuffer);
+					memcpy(text, tmputf, targetLength);
+					delete []tmputf;
+//~ fprintf(stderr, "    \"%s\"\n", text);
+				}
+				delete []s;
+			}
+		} else {
+			if (text) {
+				pdoc->GetCharRange(text, targetStart, targetLength);
+			}
+		}
+#else
+		// Fail
+		return 0;
+#endif
+	}
+//~ fprintf(stderr, "Length = %d bytes\n", targetLength);
+	return targetLength;
+}
+
+// Translates a nul terminated UTF8 string into the document encoding.
+// Return the length of the result in bytes.
+int ScintillaGTK::EncodedFromUTF8(char *utf8, char *encoded) {
+	int inputLength = lengthForEncode ? lengthForEncode : strlen(utf8);
+	if (IsUnicodeMode()) {
+		if (encoded) {
+			memcpy(encoded, utf8, inputLength);
+		}
+		return inputLength;
+	} else {
+		// Need to convert
+#ifdef USE_CONVERTER
+		const char *charSetBuffer = CharacterSetID();
+		if (*charSetBuffer) {
+//~ fprintf(stderr, "Encode %s %d\n", charSetBuffer, inputLength);
+			int outLength = 0;
+			char *tmpEncoded = ConvertText(&outLength, utf8, inputLength, charSetBuffer, "UTF-8");
+			if (tmpEncoded) {
+//~ fprintf(stderr, "    \"%s\"\n", tmpEncoded);
+				if (encoded) {
+					memcpy(encoded, tmpEncoded, outLength);
+				}
+				delete []tmpEncoded;
+			}
+			return outLength;
+		} else {
+			if (encoded) {
+				memcpy(encoded, utf8, inputLength);
+			}
+			return inputLength;
+		}
+#endif
+	}
+	// Fail
+	return 0;
+}
+
 sptr_t ScintillaGTK::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	switch (iMessage) {
 
@@ -762,9 +874,15 @@ sptr_t ScintillaGTK::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 #ifdef SCI_LEXER
 	case SCI_LOADLEXERLIBRARY:
-		LexerManager::GetInstance()->Load(reinterpret_cast<const char*>( wParam ));
+		LexerManager::GetInstance()->Load(reinterpret_cast<const char*>(wParam));
 		break;
 #endif
+	case SCI_TARGETASUTF8:
+		return TargetAsUTF8(reinterpret_cast<char*>(lParam));
+
+	case SCI_ENCODEDFROMUTF8:
+		return EncodedFromUTF8(reinterpret_cast<char*>(wParam), 
+			reinterpret_cast<char*>(lParam));
 
 	default:
 		return ScintillaBase::WndProc(iMessage, wParam, lParam);
@@ -1263,39 +1381,6 @@ void ScintillaGTK::ClaimSelection() {
 		primary.Free();
 	}
 }
-
-#ifdef USE_CONVERTER
-static char *ConvertText(int *lenResult, char *s, size_t len, const char *charSetDest, const char *charSetSource) {
-	*lenResult = 0;
-	char *destForm = 0;
-	Converter conv(charSetDest, charSetSource);
-	if (conv) {
-		destForm = new char[len*3+1];
-		char *pin = s;
-		size_t inLeft = len;
-		char *pout = destForm;
-		size_t outLeft = len*3+1;
-		size_t conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
-		if (conversions == ((size_t)(-1))) {
-fprintf(stderr, "iconv %s->%s failed for %s\n", charSetSource, charSetDest, static_cast<char *>(s));
-			delete []destForm;
-			destForm = 0;
-		} else {
-//fprintf(stderr, "iconv OK %s %d\n", destForm, pout - destForm);
-			*pout = '\0';
-			*lenResult = pout - destForm;
-		}
-	} else {
-//fprintf(stderr, "Can not iconv %s %s\n", charSetDest, charSetSource);
-	}
-	if (!destForm) {
-		destForm = new char[1];
-		destForm[0] = '\0';
-		*lenResult = 0;
-	}
-	return destForm;
-}
-#endif
 
 // Convert line endings for a piece of text to a particular mode.
 // Stop at len or when a NUL is found.
