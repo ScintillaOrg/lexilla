@@ -3175,11 +3175,11 @@ void Editor::ToggleContraction(int line) {
 
 // Recurse up from this line to find any folds that prevent this line from being visible
 // and unfold them all.
-void Editor::EnsureLineVisible(int line) {
-	if (!cs.GetVisible(line)) {
-		int lineParent = pdoc->GetFoldParent(line);
+void Editor::EnsureLineVisible(int lineDoc) {
+	if (!cs.GetVisible(lineDoc)) {
+		int lineParent = pdoc->GetFoldParent(lineDoc);
 		if (lineParent >= 0) {
-			if (line != lineParent)
+			if (lineDoc != lineParent)
 				EnsureLineVisible(lineParent);
 			if (!cs.GetExpanded(lineParent)) {
 				cs.SetExpanded(lineParent, 1);
@@ -3189,20 +3189,21 @@ void Editor::EnsureLineVisible(int line) {
 		SetScrollBars();
 		Redraw();
 	}
+	int lineDisplay = cs.DisplayFromDoc(lineDoc);
 	if (visiblePolicy & VISIBLE_SLOP) {
-		if ((topLine > line) || ((visiblePolicy & VISIBLE_STRICT) && (topLine + visibleSlop > line))) {
-			SetTopLine(Platform::Clamp(line - visibleSlop, 0, MaxScrollPos()));
+		if ((topLine > lineDisplay) || ((visiblePolicy & VISIBLE_STRICT) && (topLine + visibleSlop > lineDisplay))) {
+			SetTopLine(Platform::Clamp(lineDisplay - visibleSlop, 0, MaxScrollPos()));
 			SetVerticalScrollPos();
 			Redraw();
-		} else if ((line > topLine + LinesOnScreen() - 1) ||
-		           ((visiblePolicy & VISIBLE_STRICT) && (line > topLine + LinesOnScreen() - 1 - visibleSlop))) {
-			SetTopLine(Platform::Clamp(line - LinesOnScreen() + 1 + visibleSlop, 0, MaxScrollPos()));
+		} else if ((lineDisplay > topLine + LinesOnScreen() - 1) ||
+		           ((visiblePolicy & VISIBLE_STRICT) && (lineDisplay > topLine + LinesOnScreen() - 1 - visibleSlop))) {
+			SetTopLine(Platform::Clamp(lineDisplay - LinesOnScreen() + 1 + visibleSlop, 0, MaxScrollPos()));
 			SetVerticalScrollPos();
 			Redraw();
 		}
 	} else {
-		if ((topLine > line) || (line > topLine + LinesOnScreen() - 1) || (visiblePolicy & VISIBLE_STRICT)) {
-			SetTopLine(Platform::Clamp(line - LinesOnScreen() / 2 + 1, 0, MaxScrollPos()));
+		if ((topLine > lineDisplay) || (lineDisplay > topLine + LinesOnScreen() - 1) || (visiblePolicy & VISIBLE_STRICT)) {
+			SetTopLine(Platform::Clamp(lineDisplay - LinesOnScreen() / 2 + 1, 0, MaxScrollPos()));
 			SetVerticalScrollPos();
 			Redraw();
 		}
