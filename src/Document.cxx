@@ -46,7 +46,7 @@ Document::Document() {
 	useTabs = true;
 	watchers = 0;
 	lenWatchers = 0;
-	
+
 	matchesValid = false;
 	pre = 0;
 	substituted = 0;
@@ -733,6 +733,10 @@ int Document::NextWordStart(int pos, int delta) {
 	return pos;
 }
 
+/**
+ * Check that the character before the given position
+ * is not a word character.
+ */
 bool Document::IsWordStartAt(int pos) {
 	if (pos > 0) {
 		return !IsWordChar(CharAt(pos - 1));
@@ -740,6 +744,10 @@ bool Document::IsWordStartAt(int pos) {
 	return true;
 }
 
+/**
+ * Check that the character after the given position
+ * is not a word character.
+ */
 bool Document::IsWordEndAt(int pos) {
 	if (pos < Length() - 1) {
 		return !IsWordChar(CharAt(pos));
@@ -747,6 +755,10 @@ bool Document::IsWordEndAt(int pos) {
 	return true;
 }
 
+/**
+ * Check that the given range is delimited by
+ * non word characters.
+ */
 bool Document::IsWordAt(int start, int end) {
 	return IsWordStartAt(start) && IsWordEndAt(end);
 }
@@ -772,31 +784,32 @@ static inline char MakeLowerCase(char ch) {
 class DocumentIndexer : public CharacterIndexer {
 	Document *pdoc;
 	int end;
-public: 
-	DocumentIndexer(Document *pdoc_, int end_) : 
-		pdoc(pdoc_), end(end_) {
-	}
+public:
+DocumentIndexer(Document *pdoc_, int end_) :
+	pdoc(pdoc_), end(end_) {}
+
 	virtual char CharAt(int index) {
 		if (index < 0 || index >= end)
 			return 0;
-		else 
+		else
 			return pdoc->CharAt(index);
 	}
 };
 
-// Find text in document, supporting both forward and backward
-// searches (just pass minPos > maxPos to do a backward search)
-// Has not been tested with backwards DBCS searches yet.
+/**
+ * Find text in document, supporting both forward and backward
+ * searches (just pass minPos > maxPos to do a backward search)
+ * Has not been tested with backwards DBCS searches yet.
+ */
 long Document::FindText(int minPos, int maxPos, const char *s,
                         bool caseSensitive, bool word, bool wordStart, bool regExp,
-			int *length) {
+                        int *length) {
 	if (regExp) {
-		
 		if (!pre)
 			pre = new RESearch();
 		if (!pre)
 			return -1;
-		
+
 		int startPos;
 		int endPos;
 
@@ -826,18 +839,18 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 		int lenRet = 0;
 		char searchEnd = '\0';
 		if (*s)
-			searchEnd = s[strlen(s)-1];
-		for (int line=lineRangeStart; line<=lineRangeEnd; line++) {
+			searchEnd = s[strlen(s) - 1];
+		for (int line = lineRangeStart; line <= lineRangeEnd; line++) {
 			int startOfLine = LineStart(line);
 			int endOfLine = LineEnd(line);
 			if (line == lineRangeStart) {
 				if ((startPos != startOfLine) && (s[0] == '^'))
-					continue;	// Can't match start of line if start position after start of line 
+					continue;	// Can't match start of line if start position after start of line
 				startOfLine = startPos;
 			}
 			if (line == lineRangeEnd) {
 				if ((endPos != endOfLine) && (searchEnd == '$'))
-					continue;	// Can't match end of line if end position before end of line 
+					continue;	// Can't match end of line if end position before end of line
 				endOfLine = endPos;
 			}
 			DocumentIndexer di(this, endOfLine);
@@ -852,14 +865,14 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 		return pos;
 
 	} else {
-				
+
 		bool forward = minPos <= maxPos;
 		int increment = forward ? 1 : -1;
-	
+
 		// Range endpoints should not be inside DBCS characters, but just in case, move them.
 		int startPos = MovePositionOutsideChar(minPos, increment, false);
 		int endPos = MovePositionOutsideChar(maxPos, increment, false);
-	
+
 		// Compute actual search ranges needed
 		int lengthFind = strlen(s);
 		int endSearch = endPos;
@@ -883,8 +896,8 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 					}
 					if (found) {
 						if ((!word && !wordStart) ||
-							word && IsWordAt(pos, pos + lengthFind) ||
-							wordStart && IsWordStartAt(pos))
+						        word && IsWordAt(pos, pos + lengthFind) ||
+						        wordStart && IsWordStartAt(pos))
 							return pos;
 					}
 				}
@@ -898,8 +911,8 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 					}
 					if (found) {
 						if ((!word && !wordStart) ||
-							word && IsWordAt(pos, pos + lengthFind) ||
-							wordStart && IsWordStartAt(pos))
+						        word && IsWordAt(pos, pos + lengthFind) ||
+						        wordStart && IsWordStartAt(pos))
 							return pos;
 					}
 				}
@@ -924,9 +937,9 @@ const char *Document::SubstituteByPosition(const char *text) {
 	if (!pre->GrabMatches(di))
 		return 0;
 	unsigned int lenResult = 0;
-	for (const char *t=text; *t; t++) {
-		if ((*t == '\\') && (*(t+1) >= '1' && *(t+1) <= '9')) {
-			unsigned int patNum = *(t+1) - '0'; 
+	for (const char *t = text; *t; t++) {
+		if ((*t == '\\') && (*(t + 1) >= '1' && *(t + 1) <= '9')) {
+			unsigned int patNum = *(t + 1) - '0';
 			lenResult += pre->eopat[patNum] - pre->bopat[patNum];
 			t++;
 		} else {
@@ -937,9 +950,9 @@ const char *Document::SubstituteByPosition(const char *text) {
 	if (!substituted)
 		return 0;
 	char *o = substituted;
-	for (const char *s=text; *s; s++) {
-		if ((*s == '\\') && (*(s+1) >= '1' && *(s+1) <= '9')) {
-			unsigned int patNum = *(s+1) - '0'; 
+	for (const char *s = text; *s; s++) {
+		if ((*s == '\\') && (*(s + 1) >= '1' && *(s + 1) <= '9')) {
+			unsigned int patNum = *(s + 1) - '0';
 			unsigned int len = pre->eopat[patNum] - pre->bopat[patNum];
 			strcpy(o, pre->pat[patNum]);
 			o += len;

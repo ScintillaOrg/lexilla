@@ -79,7 +79,7 @@ Editor::Editor() {
 
 	visiblePolicy = VISIBLE_SLOP;
 	visibleSlop = 0;
-	
+
 	searchAnchor = 0;
 
 	ucWheelScrollLines = 0;
@@ -94,7 +94,7 @@ Editor::Editor() {
 
 	targetStart = 0;
 	targetEnd = 0;
-	
+
 	topLine = 0;
 	posTopLine = 0;
 
@@ -823,7 +823,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 	ll.positions[0] = 0;
 	unsigned int tabWidth = vstyle.spaceWidth * pdoc->tabInChars;
 	bool lastSegItalics = false;
-	
+
 	for (int charInLine = 0; charInLine < numCharsInLine; charInLine++) {
 		if ((ll.styles[charInLine] != ll.styles[charInLine + 1]) ||
 		        IsControlCharacter(ll.chars[charInLine]) || IsControlCharacter(ll.chars[charInLine + 1])) {
@@ -864,7 +864,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 	}
 	// Small hack to make lines that end with italics not cut off the edge of the last character
 	if ((startseg > 0) && lastSegItalics) {
-		ll.positions[startseg] +=2;
+		ll.positions[startseg] += 2;
 	}
 	ll.numCharsInLine = numCharsInLine;
 }
@@ -1342,6 +1342,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		//g_timer_destroy(tim);
 
 		// Right column limit indicator
+
 		PRectangle rcBeyondEOF = rcClient;
 		rcBeyondEOF.left = vs.fixedColumnWidth;
 		rcBeyondEOF.right = rcBeyondEOF.right;
@@ -1410,7 +1411,7 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 	vsPrint.selbackset = false;
 	vsPrint.selforeset = false;
 	vsPrint.showCaretLineBackground = false;
-	
+
 	// Set colours for printing according to users settings
 	for (int sty = 0;sty <= STYLE_MAX;sty++) {
 		if (printColourMode == SC_PRINT_INVERTLIGHT) {
@@ -1573,7 +1574,7 @@ void Editor::AddCharUTF(char *s, unsigned int len) {
 
 void Editor::ClearSelection() {
 	if (selType == selRectangle) {
-    		pdoc->BeginUndoAction();
+		pdoc->BeginUndoAction();
 		int lineStart = pdoc->LineFromPosition(SelectionStart());
 		int lineEnd = pdoc->LineFromPosition(SelectionEnd());
 		int startPos = SelectionStart();
@@ -1585,16 +1586,16 @@ void Editor::ClearSelection() {
 			}
 		}
 		SetEmptySelection(startPos);
-    		pdoc->EndUndoAction();
+		pdoc->EndUndoAction();
 		selType = selStream;
 	} else {
 		int startPos = SelectionStart();
 		unsigned int chars = SelectionEnd() - startPos;
 		SetEmptySelection(startPos);
 		if (0 != chars) {
-           		pdoc->BeginUndoAction();
+			pdoc->BeginUndoAction();
 			pdoc->DeleteChars(startPos, chars);
-           		pdoc->EndUndoAction();
+			pdoc->EndUndoAction();
 		}
 	}
 }
@@ -1628,7 +1629,7 @@ void Editor::Cut() {
 
 void Editor::PasteRectangular(int pos, const char *ptr, int len) {
 	if (pdoc->IsReadOnly()) {
-		return;
+		return ;
 	}
 	currentPos = pos;
 	int insertPos = currentPos;
@@ -1648,8 +1649,8 @@ void Editor::PasteRectangular(int pos, const char *ptr, int len) {
 			}
 			// Pad the end of lines with spaces if required
 			currentPos = PositionFromLineX(line, xInsert);
-			if ((XFromPosition(currentPos) < xInsert) && (i+1 < len)) {
-				for (int i=0; i < xInsert - XFromPosition(currentPos); i++) {
+			if ((XFromPosition(currentPos) < xInsert) && (i + 1 < len)) {
+				for (int i = 0; i < xInsert - XFromPosition(currentPos); i++) {
 					pdoc->InsertChar(currentPos, ' ');
 					currentPos++;
 				}
@@ -2036,7 +2037,8 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	case SCI_NEWLINE:
 	default:
 		//		printf("Filtered out %ld of macro recording\n", iMessage);
-		return;
+
+		return ;
 	}
 
 	// Send notification
@@ -2239,7 +2241,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		ShowCaretAtCurrentPosition();
 		NotifyUpdateUI();
 		break;
-	case SCI_CANCEL:      	// Cancel any modes - handled in subclass
+	case SCI_CANCEL:        	// Cancel any modes - handled in subclass
 		// Also unselect text
 		CancelModes();
 		break;
@@ -2314,7 +2316,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 	case SCI_DELLINELEFT: {
 			int line = pdoc->LineFromPosition(currentPos);
 			int start = pdoc->LineStart(line);
-			pdoc->DeleteChars(start,currentPos - start);
+			pdoc->DeleteChars(start, currentPos - start);
 			MovePositionTo(start);
 			SetLastXChosen();
 		}
@@ -2322,7 +2324,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 	case SCI_DELLINERIGHT: {
 			int line = pdoc->LineFromPosition(currentPos);
 			int end = pdoc->LineEnd(line);
-			pdoc->DeleteChars(currentPos,end - currentPos);
+			pdoc->DeleteChars(currentPos, end - currentPos);
 			MovePositionTo(currentPos);
 		}
 		break;
@@ -2459,15 +2461,24 @@ void Editor::Indent(bool forwards) {
 	}
 }
 
-long Editor::FindText(unsigned int iMessage, unsigned long wParam, long lParam) {
+/**
+ * Search of a text in the document, in the given range.
+ * @return The position of the found text, -1 if not found.
+ */
+long Editor::FindText(
+    unsigned int iMessage,  	///< Can be @c EM_FINDTEXT or @c EM_FINDTEXTEX or @c SCI_FINDTEXT.
+    unsigned long wParam,  	///< Search modes : @c SCFIND_MATCHCASE, @c SCFIND_WHOLEWORD,
+    ///< @c SCFIND_WORDSTART or @c SCFIND_REGEXP.
+    long lParam) {			///< @c TextToFind structure: The text to search for in the given range.
+
 	TextToFind *ft = reinterpret_cast<TextToFind *>(lParam);
 	int lengthFound = strlen(ft->lpstrText);
 	int pos = pdoc->FindText(ft->chrg.cpMin, ft->chrg.cpMax, ft->lpstrText,
-		wParam & SCFIND_MATCHCASE, 
-		wParam & SCFIND_WHOLEWORD,
-		wParam & SCFIND_WORDSTART,
-		wParam & SCFIND_REGEXP,
-		&lengthFound);
+	                         wParam & SCFIND_MATCHCASE,
+	                         wParam & SCFIND_WHOLEWORD,
+	                         wParam & SCFIND_WORDSTART,
+	                         wParam & SCFIND_REGEXP,
+	                         &lengthFound);
 	if (pos != -1) {
 		if (iMessage != EM_FINDTEXT) {
 			ft->chrgText.cpMin = pos;
@@ -2477,40 +2488,49 @@ long Editor::FindText(unsigned int iMessage, unsigned long wParam, long lParam) 
 	return pos;
 }
 
-// Relocatable search support : Searches relative to current selection
-// point and sets the selection to the found text range with
-// each search.
-
-// Anchor following searches at current selection start:  This allows
-// multiple incremental interactive searches to be macro recorded
-// while still setting the selection to found text so the find/select
-// operation is self-contained.
+/**
+ * Relocatable search support : Searches relative to current selection
+ * point and sets the selection to the found text range with
+ * each search.
+ */
+/**
+ * Anchor following searches at current selection start: This allows
+ * multiple incremental interactive searches to be macro recorded
+ * while still setting the selection to found text so the find/select
+ * operation is self-contained.
+ */
 void Editor::SearchAnchor() {
 	searchAnchor = SelectionStart();
 }
 
-// Find text from current search anchor:  Must call SearchAnchor first.
-// Accepts both SCI_SEARCHNEXT and SCI_SEARCHPREV.
-// wParam contains search modes : ORed FR_MATCHCASE and FR_WHOLEWORD.
-// lParam contains the text to search for.
-long Editor::SearchText(unsigned int iMessage, unsigned long wParam, long lParam) {
+/**
+ * Find text from current search anchor: Must call @c SearchAnchor first.
+ * Used for next text and previous text requests.
+ * @return The position of the found text, -1 if not found.
+ */
+long Editor::SearchText(
+    unsigned int iMessage,  	///< Accepts both @c SCI_SEARCHNEXT and @c SCI_SEARCHPREV.
+    unsigned long wParam,  	///< Search modes : @c SCFIND_MATCHCASE, @c SCFIND_WHOLEWORD,
+    ///< @c SCFIND_WORDSTART or @c SCFIND_REGEXP.
+    long lParam) {			///< The text to search for.
+
 	const char *txt = reinterpret_cast<char *>(lParam);
 	int pos;
 	int lengthFound = strlen(txt);
 	if (iMessage == SCI_SEARCHNEXT) {
 		pos = pdoc->FindText(searchAnchor, pdoc->Length(), txt,
-					wParam & SCFIND_MATCHCASE,
-					wParam & SCFIND_WHOLEWORD,
-					wParam & SCFIND_WORDSTART,
-					wParam & SCFIND_REGEXP,
-					&lengthFound);
+		                     wParam & SCFIND_MATCHCASE,
+		                     wParam & SCFIND_WHOLEWORD,
+		                     wParam & SCFIND_WORDSTART,
+		                     wParam & SCFIND_REGEXP,
+		                     &lengthFound);
 	} else {
 		pos = pdoc->FindText(searchAnchor, 0, txt,
-					wParam & SCFIND_MATCHCASE,
-					wParam & SCFIND_WHOLEWORD,
-					wParam & SCFIND_WORDSTART,
-					wParam & SCFIND_REGEXP,
-					&lengthFound);
+		                     wParam & SCFIND_MATCHCASE,
+		                     wParam & SCFIND_WHOLEWORD,
+		                     wParam & SCFIND_WORDSTART,
+		                     wParam & SCFIND_REGEXP,
+		                     &lengthFound);
 	}
 
 	if (pos != -1) {
@@ -3405,31 +3425,37 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return topLine;
 
 	case EM_GETLINE: {
-			if (lParam == 0)
-				return 0;
-			int lineStart = pdoc->LineStart(wParam);
-			int lineEnd = pdoc->LineStart(wParam + 1);
-			char *ptr = reinterpret_cast<char *>(lParam);
-			short *pBufSize = reinterpret_cast<short *>(lParam);
-			if (*pBufSize < lineEnd - lineStart) {
-				ptr[0] = '\0'; 	// If no characters copied have to put a NUL into buffer
+			if (lParam == 0) {
 				return 0;
 			}
+			char *ptr = reinterpret_cast<char *>(lParam);
+			short *pBufSize = reinterpret_cast<short *>(lParam);
+			short bufSize = *pBufSize;
+			ptr[0] = '\0'; 	// If no characters copied have to put a NUL into buffer
+			if (static_cast<int>(wParam) > pdoc->LinesTotal()) {
+				return 0;
+			}
+			int lineStart = pdoc->LineStart(wParam);
+			int lineEnd = pdoc->LineStart(wParam + 1);
+			// The first word of the buffer is the size, in TCHARs, of the buffer
 			int iPlace = 0;
-			for (int iChar = lineStart; iChar < lineEnd; iChar++)
+			for (int iChar = lineStart; iChar < lineEnd && iPlace < bufSize; iChar++) {
 				ptr[iPlace++] = pdoc->CharAt(iChar);
+			}
 			return iPlace;
 		}
 
-	case SCI_GETLINE: {
-			if (lParam == 0)
+	case SCI_GETLINE: {	// Simplier than EM_GETLINE, but with risk of overwritting the end of the buffer
+			if (lParam == 0) {
 				return 0;
+			}
 			int lineStart = pdoc->LineStart(wParam);
 			int lineEnd = pdoc->LineStart(wParam + 1);
 			char *ptr = reinterpret_cast<char *>(lParam);
 			int iPlace = 0;
-			for (int iChar = lineStart; iChar < lineEnd; iChar++)
+			for (int iChar = lineStart; iChar < lineEnd; iChar++) {
 				ptr[iPlace++] = pdoc->CharAt(iChar);
+			}
 			return iPlace;
 		}
 
@@ -3535,7 +3561,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		if (wParam == 0)
 			return 0; 	// Even if there is no text, there is a first line that starts at 0
 		if (static_cast<int>(wParam) > pdoc->LinesTotal())
-			return - 1;
+			return -1;
 		//if (wParam > pdoc->LineFromPosition(pdoc->Length()))	// Useful test, anyway...
 		//	return -1;
 		return pdoc->LineStart(wParam);
@@ -3578,15 +3604,15 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SETTARGETSTART:
 		targetStart = wParam;
 		break;
-	
+
 	case SCI_SETTARGETEND:
 		targetEnd = wParam;
 		break;
-	
-	case SCI_REPLACETARGET: 
+
+	case SCI_REPLACETARGET:
 		PLATFORM_ASSERT(lParam);
 		return ReplaceTarget(wParam, reinterpret_cast<char *>(lParam));
-	
+
 	case EM_LINESCROLL:
 	case SCI_LINESCROLL:
 		ScrollTo(topLine + lParam);
@@ -3912,15 +3938,17 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_GETCURLINE: {
-			if (lParam == 0)
+			if (lParam == 0) {
 				return 0;
+			}
 			int lineCurrentPos = pdoc->LineFromPosition(currentPos);
 			int lineStart = pdoc->LineStart(lineCurrentPos);
 			unsigned int lineEnd = pdoc->LineStart(lineCurrentPos + 1);
 			char *ptr = reinterpret_cast<char *>(lParam);
 			unsigned int iPlace = 0;
-			for (unsigned int iChar = lineStart; iChar < lineEnd && iPlace < wParam; iChar++)
+			for (unsigned int iChar = lineStart; iChar < lineEnd && iPlace < wParam - 1; iChar++) {
 				ptr[iPlace++] = pdoc->CharAt(iChar);
+			}
 			ptr[iPlace] = '\0';
 			return currentPos - lineStart;
 		}
@@ -3943,7 +3971,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		pdoc->SetStyleFor(wParam, static_cast<char>(lParam));
 		break;
 
-	case SCI_SETSTYLINGEX:       // Specify a complete styling buffer
+	case SCI_SETSTYLINGEX:         // Specify a complete styling buffer
 		if (lParam == 0)
 			return 0;
 		pdoc->SetStyles(wParam, reinterpret_cast<char *>(lParam));
@@ -4243,7 +4271,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		vs.caretLineBackground.desired = wParam;
 		InvalidateStyleRedraw();
 		break;
-	
+
 		// Folding messages
 
 	case SCI_VISIBLEFROMDOCLINE:
@@ -4322,7 +4350,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		visiblePolicy = wParam;
 		visibleSlop = lParam;
 		break;
-	
+
 	case SCI_LINESONSCREEN:
 		return LinesOnScreen();
 

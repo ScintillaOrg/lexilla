@@ -137,7 +137,7 @@ SString PropSet::Get(const char *key) {
 static bool IncludesVar(const char *value, const char *key) {
 	const char *var = strstr(value, "$(");
 	while (var) {
-		if (isprefix(var+2, key) && (var[2 + strlen(key)] == ')')) {
+		if (isprefix(var + 2, key) && (var[2 + strlen(key)] == ')')) {
 			// Found $(key) which would lead to an infinite loop so exit
 			return true;
 		}
@@ -150,7 +150,7 @@ static bool IncludesVar(const char *value, const char *key) {
 
 SString PropSet::GetExpanded(const char *key) {
 	SString val = Get(key);
-	if (IncludesVar(val.c_str(), key)) 
+	if (IncludesVar(val.c_str(), key))
 		return val;
 	else
 		return Expand(val.c_str());
@@ -208,8 +208,8 @@ static bool IsSuffixCaseInsensitive(const char *target, const char *suffix) {
 	if (lensuffix > lentarget)
 		return false;
 	for (int i = lensuffix - 1; i >= 0; i--) {
-		if (MakeUpperCase(target[i + lentarget - lensuffix]) != 
-			MakeUpperCase(suffix[i]))
+		if (MakeUpperCase(target[i + lentarget - lensuffix]) !=
+		        MakeUpperCase(suffix[i]))
 			return false;
 	}
 	return true;
@@ -274,7 +274,7 @@ SString PropSet::GetWild(const char *keybase, const char *filename) {
 	}
 }
 
-// GetNewExpand does not use Expand as it has to use GetWild with the filename for each 
+// GetNewExpand does not use Expand as it has to use GetWild with the filename for each
 // variable reference found.
 SString PropSet::GetNewExpand(const char *keybase, const char *filename) {
 	char *base = StringDup(GetWild(keybase, filename).c_str());
@@ -318,9 +318,11 @@ void PropSet::Clear() {
 	}
 }
 
-// Called to initiate enumeration
+/**
+ * Initiate enumeration.
+ */
 bool PropSet::GetFirst(char **key, char **val) {
-	for (int i=0; i<hashRoots; i++) {
+	for (int i = 0; i < hashRoots; i++) {
 		for (Property *p = props[i]; p; p = p->next) {
 			if (p) {
 				*key = p->key;
@@ -334,17 +336,19 @@ bool PropSet::GetFirst(char **key, char **val) {
 	return false;
 }
 
-// Called to continue enumeration
-bool PropSet::GetNext(char ** key,char ** val) {
+/**
+ * Continue enumeration.
+ */
+bool PropSet::GetNext(char ** key, char ** val) {
 	bool firstloop = true;
 
 	// search begins where we left it : in enumhash block
-	for (int i=enumhash; i<hashRoots; i++) {
-		if (!firstloop) 
-			enumnext=props[i]; // Begin with first property in block
+	for (int i = enumhash; i < hashRoots; i++) {
+		if (!firstloop)
+			enumnext = props[i]; // Begin with first property in block
 		// else : begin where we left
-		firstloop=false;
-		
+		firstloop = false;
+
 		for (Property *p = enumnext; p; p = p->next) {
 			if (p) {
 				*key = p->key;
@@ -366,8 +370,10 @@ static bool iswordsep(char ch, bool onlyLineEnds) {
 	return ch == '\r' || ch == '\n';
 }
 
-// Creates an array that points into each word in the string and puts \0 terminators
-// after each word.
+/**
+ * Creates an array that points into each word in the string and puts \0 terminators
+ * after each word.
+ */
 static char **ArrayFromWordList(char *wordlist, int *len, bool onlyLineEnds = false) {
 	char prev = '\n';
 	int words = 0;
@@ -531,15 +537,15 @@ const char *WordList::GetNearestWord(const char *wordStart, int searchLen /*= -1
 	return NULL;
 }
 
-/** 
- * Find the length of a 'word' which is actually an identifier in a string 
+/**
+ * Find the length of a 'word' which is actually an identifier in a string
  * which looks like "identifier(..." or "identifier:" or "identifier" and where
- * there may be extra spaces after the identifier that should not be 
+ * there may be extra spaces after the identifier that should not be
  * counted in the length.
  */
 static unsigned int LengthWord(const char *word, char otherSeparator) {
 	// Find a '(', or ':'. If that fails go to the end of the string.
- 	const char *endWord = strchr(word, '(');
+	const char *endWord = strchr(word, '(');
 	if (!endWord)
 		endWord = strchr(word, ':');
 	if (!endWord && otherSeparator)
@@ -547,7 +553,7 @@ static unsigned int LengthWord(const char *word, char otherSeparator) {
 	if (!endWord)
 		endWord = word + strlen(word);
 	// Last case always succeeds so endWord != 0
-	
+
 	// Drop any space characters.
 	if (endWord > word) {
 		endWord--;	// Back from the '(', ':', or '\0'
@@ -570,10 +576,10 @@ static unsigned int LengthWord(const char *word, char otherSeparator) {
  * NOTE: returned buffer has to be freed with delete[].
  */
 char *WordList::GetNearestWords(
-	const char *wordStart, 
-	int searchLen /*= -1*/, 
-	bool ignoreCase /*= false*/, 
-	char otherSeparator /*= '\0'*/) {
+    const char *wordStart,
+    int searchLen /*= -1*/,
+    bool ignoreCase /*= false*/,
+    char otherSeparator /*= '\0'*/) {
 	int wordlen; // length of the word part (before the '(' brace) of the api array element
 	SString wordsNear;
 	wordsNear.setsizegrowth(1000);
@@ -616,8 +622,7 @@ char *WordList::GetNearestWords(
 					wordsNear.append(word, wordlen, ' ');
 				}
 				return wordsNear.detach();
-			}
-			else if (cond < 0)
+			} else if (cond < 0)
 				end = pivot - 1;
 			else if (cond > 0)
 				start = pivot + 1;
@@ -648,8 +653,7 @@ char *WordList::GetNearestWords(
 					wordsNear.append(word, wordlen, ' ');
 				}
 				return wordsNear.detach();
-			}
-			else if (cond < 0)
+			} else if (cond < 0)
 				end = pivot - 1;
 			else if (cond > 0)
 				start = pivot + 1;
