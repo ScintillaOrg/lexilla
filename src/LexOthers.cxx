@@ -523,6 +523,10 @@ static void ColouriseErrorListLine(
 		strstr(lineBuffer, ", file ")) {
 		// Essential Lahey Fortran error message
 		styler.ColourTo(endPos, SCE_ERR_ELF);
+	} else if (strstart(lineBuffer, "line ") &&
+		       strstr(lineBuffer, " column ")) {
+		// HTML tidy style: line 42 column 1
+		styler.ColourTo(endPos, SCE_ERR_TIDY);
 	} else if (strstart(lineBuffer, "\tat ") &&
 		strstr(lineBuffer, "(") &&
 		strstr(lineBuffer, ".java:")) {
