@@ -249,6 +249,10 @@ class SurfaceImpl : public Surface {
 	HPALETTE paletteOld;
 	void BrushColor(ColourAllocated back);
 	void SetFont(Font &font_);
+
+	// Private so SurfaceImpl objects can not be copied
+	SurfaceImpl(const SurfaceImpl &) : Surface() {}
+	SurfaceImpl &operator=(const SurfaceImpl &) { return *this; }
 public:
 	SurfaceImpl();
 	virtual ~SurfaceImpl();
