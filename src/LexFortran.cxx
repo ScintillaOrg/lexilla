@@ -29,6 +29,9 @@ static inline bool IsAWordStart(const int ch) {
 	return (ch < 0x80) && (isalnum(ch));
 }
 
+inline bool IsABlank(unsigned int ch) {
+    return (ch == ' ') || (ch == 0x09) || (ch == 0x0b) ;
+}
 static void ColouriseFortranDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
                             Accessor &styler, bool isFixFormat) {
 
@@ -36,32 +39,51 @@ static void ColouriseFortranDoc(unsigned int startPos, int length, int initStyle
 	WordList &keywords2 = *keywordlists[1];
 	WordList &keywords3 = *keywordlists[2];
 
-	int posLineStart = 0;
+	unsigned int posLineStart = 0, currentState;
+	int endPos = startPos + length;
 
-	StyleContext sc(startPos, length, initStyle, styler);
+	// backtrack to the beginning of the document, this may be slow for big documents.
+	// initStyle = SCE_F_DEFAULT;
+	// StyleContext sc(0, startPos+length, initStyle, styler);
+
+	// backtrack to the nearest keyword
+	while ((startPos > 1) && (styler.StyleAt(startPos) != SCE_F_WORD)) {
+		startPos--;
+	}
+	startPos = styler.LineStart(styler.GetLine(startPos));
+	initStyle = styler.StyleAt(startPos - 1);
+	StyleContext sc(startPos, endPos-startPos, initStyle, styler);
 
 	for (; sc.More(); sc.Forward()) {
 
-		if (sc.atLineStart) {
-			posLineStart = sc.currentPos;
-			if (sc.state == SCE_F_STRING1) {
-			    // Prevent SCE_F_STRINGEOL from leaking back to previous line
-			    sc.SetState(SCE_F_STRING1);
-			}
-			else if(sc.state == SCE_F_STRING2) {
-				sc.SetState(SCE_F_STRING2);
-			}
-		}
+		// remember the position of the line
+		if (sc.atLineStart) posLineStart = sc.currentPos;
 
 		// Handle line continuation generically.
 		if (sc.ch == '&') {
-			if (sc.chNext == '\n' || sc.chNext == '\r') {
-				sc.Forward();
-				if (sc.ch == '\r' && sc.chNext == '\n') {
-					sc.Forward();
-				}
-				continue;
+			int chTemp = ' ';
+			int j = 1;
+			while (IsABlank(chTemp) && j<132) {
+				chTemp = sc.GetRelative(j);
+				j ++;
 			}
+			if (chTemp == '!') {
+				sc.SetState(SCE_F_CONTINUATION);
+				if (sc.chNext == '!') sc.ForwardSetState(SCE_F_COMMENT);
+			} else if (chTemp == '\r' || chTemp == '\n') {
+				currentState = sc.state;
+				sc.SetState(SCE_F_CONTINUATION);
+				if (currentState == SCE_F_STRING1 || currentState == SCE_F_STRING2) {
+					sc.ForwardSetState(SCE_F_DEFAULT);
+					while (IsASpace(sc.ch) && sc.More()) sc.Forward();
+					if (sc.ch == '&') {
+						sc.SetState(SCE_F_CONTINUATION);
+						sc.Forward();
+					}
+					sc.SetState(currentState);
+				}
+			}
+			continue;
 		}
 
 		// Determine if the current state should terminate.
@@ -89,14 +111,11 @@ static void ColouriseFortranDoc(unsigned int startPos, int length, int initStyle
 				sc.SetState(SCE_F_DEFAULT);
 			}
 		} else if (sc.state == SCE_F_STRING1) {
-			if (sc.ch == '&') {
-				sc.Forward();
-			} else if (sc.ch == '\'') {
-				sc.Forward();
+			if (sc.ch == '\'') {
 				if (sc.chNext == '\'') {
 					sc.Forward();
 				} else {
-					sc.SetState(SCE_F_DEFAULT);
+					sc.ForwardSetState(SCE_F_DEFAULT);
 				}
 			} else if (sc.atLineEnd) {
 				sc.ChangeState(SCE_F_STRINGEOL);
@@ -106,14 +125,11 @@ static void ColouriseFortranDoc(unsigned int startPos, int length, int initStyle
 			if (sc.atLineEnd) {
 				sc.ChangeState(SCE_F_STRINGEOL);
 				sc.ForwardSetState(SCE_F_DEFAULT);
-			} else if (sc.ch == '&') {
-				sc.Forward();
 			} else if (sc.ch == '\"') {
-				sc.Forward();
 				if (sc.chNext == '\"') {
 					sc.Forward();
 				} else {
-					sc.SetState(SCE_F_DEFAULT);
+					sc.ForwardSetState(SCE_F_DEFAULT);
 				}
 			}
 		} else if (sc.state == SCE_F_OPERATOR2) {
@@ -138,7 +154,7 @@ static void ColouriseFortranDoc(unsigned int startPos, int length, int initStyle
 					sc.SetState(SCE_F_COMMENT);
 				} else if (toLineStart < 5 && !IsASpace(sc.ch)) {
 					sc.SetState(SCE_F_LABEL);
-				} else if (toLineStart == 5 && (sc.ch != ' ' || sc.ch != '0')) {
+				} else if (toLineStart == 5 && (!IsASpace(sc.ch) && sc.ch != '0')) {
 					sc.SetState(SCE_F_CONTINUATION);
 				}
 			} else if (IsADigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext))) {
@@ -161,9 +177,12 @@ static void ColouriseFortranDoc(unsigned int startPos, int length, int initStyle
 	sc.Complete();
 }
 
+// The folding depends on the mercy of the programer.
 static int classifyFoldPointFortran(const char* s, const char* prevWord) {
 	int lev = 0;
 	if (strcmp(prevWord, "end") == 0) return lev;
+	if ((strcmp(prevWord, "else") == 0 && strcmp(s, "if") == 0) || strcmp(s, "elseif") == 0)
+		return -1;
 	if (strcmp(s, "associate") == 0 || strcmp(s, "block") == 0
 	    || strcmp(s, "blockdata") == 0 || strcmp(s, "case") == 0
 	    || strcmp(s, "do") == 0 || strcmp(s, "enum") ==0
@@ -173,7 +192,7 @@ static int classifyFoldPointFortran(const char* s, const char* prevWord) {
 	    || strcmp(s, "then") == 0 || strcmp(s, "type") == 0
 	    || strcmp(s, "where") == 0) {
 		lev = 1;
-	} else if (strcmp(s, "end") == 0
+	} else if (strcmp(s, "end") == 0 || strcmp(s, "continue") == 0
 	    || strcmp(s, "endassociate") == 0 || strcmp(s, "endblock") == 0
 	    || strcmp(s, "endblockdata") == 0 || strcmp(s, "endselect") == 0
 	    || strcmp(s, "enddo") == 0 || strcmp(s, "endenum") ==0
@@ -181,7 +200,8 @@ static int classifyFoldPointFortran(const char* s, const char* prevWord) {
 	    || strcmp(s, "endforall") == 0 || strcmp(s, "endfunction") == 0
 	    || strcmp(s, "endinterface") == 0 || strcmp(s, "endmodule") == 0
 	    || strcmp(s, "endprogram") == 0 || strcmp(s, "endsubroutine") == 0
-	    || strcmp(s, "endtype") == 0 || strcmp(s, "endwhere") == 0) {
+	    || strcmp(s, "endtype") == 0 || strcmp(s, "endwhere") == 0
+            || strcmp(s, "procedure") == 0 ) {
 		lev = -1;
 	}
 	return lev;
