@@ -128,8 +128,8 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 		startPos = styler.LineStart(styler.GetLine(startPos));
 		state = styler.StyleAt(startPos - 1);
 	}
-	if (state == SCE_PL_REGEX ||
-		state == SCE_PL_REGSUBST || state == SCE_PL_LONGQUOTE) {
+	if (state == SCE_PL_REGEX || state == SCE_PL_REGSUBST
+		|| state == SCE_PL_LONGQUOTE || state == SCE_PL_STRING_Q) {
 		while ((startPos > 1) && (styler.StyleAt(startPos - 1) == state)) {
 			startPos--;
 		}
@@ -138,6 +138,8 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 
 	styler.StartAt(startPos);
 	char chPrev = styler.SafeGetCharAt(startPos - 1);
+	if (startPos == 0)
+		chPrev = '\n';
 	char chNext = styler[startPos];
 	styler.StartSegment(startPos);
 
@@ -191,6 +193,12 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					quoteRep = 2;
 				} else if (ch == 'm' && !isalnum(chNext)) {
 					state = SCE_PL_REGEX;
+					quotes = 0;
+					quoteUp = '\0';
+					quoteDown = '\0';
+					quoteRep = 1;
+				} else if (ch == 'q' && !isalnum(chNext)) {
+					state = SCE_PL_STRING_Q;
 					quotes = 0;
 					quoteUp = '\0';
 					quoteDown = '\0';
@@ -262,13 +270,9 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				styler.ColourTo(i - 1, state);
 				if (isalpha(chNext) || chNext == '#' || chNext == '$' || chNext == '_') {
 					state = SCE_PL_HASH;
-				// } else if (chNext != '{' && chNext != '[') {
 				} else if (chNext == '{') {
 					styler.ColourTo(i, SCE_PL_HASH);
-					// i++;
-					// ch = ' ';
 				} else {
-					// styler.ColourTo(i, SCE_PL_HASH);
 					styler.ColourTo(i, SCE_PL_OPERATOR);
 				}
 			} else if (ch == '*') {
@@ -287,7 +291,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				HereDoc.State = 0;
 			} else if (ch == '='
 				&& isalpha(chNext)
-				&& ((startPos == 0) || isEOLChar(chPrev))) {
+				&& (isEOLChar(chPrev))) {
 				styler.ColourTo(i - 1, state);
 				state = SCE_PL_POD;
 				quotes = 0;
@@ -302,7 +306,10 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				styler.ColourTo(i, SCE_PL_OPERATOR);
 			}
 		} else if (state == SCE_PL_WORD) {
-			if (!iswordchar(ch) && ch != '\'') {	// Archaic Perl has quotes inside names
+			if ((!iswordchar(ch) && ch != '\'')
+				|| (ch == '.' && chNext == '.')) {
+				// ".." is always an operator if preceded by a SCE_PL_WORD.
+				// Archaic Perl has quotes inside names
 				if (isMatch(styler, lengthDoc, styler.GetStartSegment(), "__DATA__")) {
 					styler.ColourTo(i, SCE_PL_DATASECTION);
 					state = SCE_PL_DATASECTION;
@@ -595,7 +602,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 						}
 					}
 				}
-			} else if (state == SCE_PL_LONGQUOTE) {
+			} else if (state == SCE_PL_LONGQUOTE || state == SCE_PL_STRING_Q) {
 				if (!quoteDown && !isspace(ch)) {
 					quoteUp = ch;
 					quoteDown = opposite(quoteUp);

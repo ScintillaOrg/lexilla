@@ -15,30 +15,30 @@
 #include "PropSet.h"
 
 bool EqualCaseInsensitive(const char *a, const char *b) {
-#if PLAT_GTK
+#if PLAT_GTK 
 	return 0 == strcasecmp(a, b);
-#elif PLAT_WIN
+#elif PLAT_WIN 
 	return 0 == stricmp(a, b);
-#elif PLAT_WX
+#elif PLAT_WX 
 	return 0 == wxStricmp(a, b);
-#endif
+#endif 
 }
 
 SString::size_type SString::npos = -1;
 
 inline unsigned int HashString(const char *s) {
-    unsigned int ret = 0;
-    while (*s) {
-        ret <<= 4;
-        ret ^= *s;
-        s++;
-    }
-    return ret;
+	unsigned int ret = 0;
+	while (*s) {
+		ret <<= 4;
+		ret ^= *s;
+		s++;
+	}
+	return ret;
 }
 
 PropSet::PropSet() {
 	superPS = 0;
-	for (int root=0; root < hashRoots; root++)
+	for (int root = 0; root < hashRoots; root++)
 		props[root] = 0;
 }
 
@@ -48,44 +48,46 @@ PropSet::~PropSet() {
 }
 
 void PropSet::Set(const char *key, const char *val) {
-    unsigned int hash = HashString(key);
-	for (Property *p=props[hash % hashRoots]; p; p=p->next) {
+	unsigned int hash = HashString(key);
+	for (Property *p = props[hash % hashRoots]; p; p = p->next) {
 		if ((hash == p->hash) && (0 == strcmp(p->key, key))) {
 			// Replace current value
 			delete [](p->val);
 			p->val = StringDup(val);
-			return;
+			return ;
 		}
 	}
 	// Not found
-    Property *pNew = new Property;
-    if (pNew) {
-        pNew->hash = HashString(key);
-	    pNew->key = StringDup(key);
-	    pNew->val = StringDup(val);
-	    pNew->next = props[hash % hashRoots];
-        props[hash % hashRoots] = pNew;
-    }
+	Property *pNew = new Property;
+	if (pNew) {
+		pNew->hash = HashString(key);
+		pNew->key = StringDup(key);
+		pNew->val = StringDup(val);
+		pNew->next = props[hash % hashRoots];
+		props[hash % hashRoots] = pNew;
+	}
 }
 
 void PropSet::Set(char *keyval) {
-    while (isspace(*keyval))
-        keyval++;
+	while (isspace(*keyval))
+		keyval++;
 	char *eqat = strchr(keyval, '=');
 	if (eqat) {
 		*eqat = '\0';
 		Set(keyval, eqat + 1);
 		*eqat = '=';
+	} else {	// No '=' so assume '=1'
+		Set(keyval, "1");
 	}
 }
 
 SString PropSet::Get(const char *key) {
-    unsigned int hash = HashString(key);
-	for (Property *p=props[hash % hashRoots]; p; p=p->next) {
+	unsigned int hash = HashString(key);
+	for (Property *p = props[hash % hashRoots]; p; p = p->next) {
 		if ((hash == p->hash) && (0 == strcmp(p->key, key))) {
-            return p->val;
-        }
-    }
+			return p->val;
+		}
+	}
 	if (superPS) {
 		// Failed here, so try in base property set
 		return superPS->Get(key);
@@ -95,8 +97,8 @@ SString PropSet::Get(const char *key) {
 }
 
 SString PropSet::GetExpanded(const char *key) {
-    SString val = Get(key);
-    return Expand(val.c_str());
+	SString val = Get(key);
+	return Expand(val.c_str());
 }
 
 SString PropSet::Expand(const char *withvars) {
@@ -106,7 +108,7 @@ SString PropSet::Expand(const char *withvars) {
 		char *cpendvar = strchr(cpvar, ')');
 		if (cpendvar) {
 			int lenvar = cpendvar - cpvar - 2;  	// Subtract the $()
-			char *var = StringDup(cpvar+2, lenvar);
+			char *var = StringDup(cpvar + 2, lenvar);
 			SString val = GetExpanded(var);
 			int newlenbase = strlen(base) + val.length() - lenvar;
 			char *newbase = new char[newlenbase];
@@ -158,56 +160,56 @@ bool issuffix(const char *target, const char *suffix) {
 }
 
 SString PropSet::GetWild(const char *keybase, const char *filename) {
-    for (int root=0; root < hashRoots; root++) {
-	    for (Property *p=props[root]; p; p=p->next) {
-		    if (isprefix(p->key, keybase)) {
-			    char *orgkeyfile = p->key + strlen(keybase);
-			    char *keyfile = NULL;
+	for (int root = 0; root < hashRoots; root++) {
+		for (Property *p = props[root]; p; p = p->next) {
+			if (isprefix(p->key, keybase)) {
+				char * orgkeyfile = p->key + strlen(keybase);
+				char *keyfile = NULL;
 
-			    if (strstr(orgkeyfile, "$(") == orgkeyfile) {
-				    char *cpendvar = strchr(orgkeyfile, ')');
-				    if (cpendvar) {
-					    *cpendvar = '\0';
-					    SString s = Get(orgkeyfile + 2);
-					    *cpendvar= ')';
-					    keyfile = strdup(s.c_str());
-				    }
-			    }
-			    char *keyptr = keyfile;
+				if (strstr(orgkeyfile, "$(") == orgkeyfile) {
+					char *cpendvar = strchr(orgkeyfile, ')');
+					if (cpendvar) {
+						*cpendvar = '\0';
+						SString s = Get(orgkeyfile + 2);
+						*cpendvar = ')';
+						keyfile = strdup(s.c_str());
+					}
+				}
+				char *keyptr = keyfile;
 
-			    if (keyfile == NULL)
-				    keyfile = orgkeyfile;
+				if (keyfile == NULL)
+					keyfile = orgkeyfile;
 
-			    for (; ; ) {
-				    char *del = strchr(keyfile, ';');
-				    if (del == NULL)
-					    del = keyfile + strlen(keyfile);
-				    char delchr = *del;
-				    *del = '\0';
-				    if (*keyfile == '*') {
-					    if (issuffix(filename, keyfile + 1)) {
-						    *del = delchr;
-						    free(keyptr);
-						    return p->val;
-					    }
-				    } else if (0 == strcmp(keyfile, filename)) {
-					    *del = delchr;
-					    free(keyptr);
-					    return p->val;
-				    }
-				    if (delchr == '\0')
-					    break;
-				    *del = delchr;
-				    keyfile = del + 1;
-			    }
-			    free(keyptr);
+				for (; ; ) {
+					char *del = strchr(keyfile, ';');
+					if (del == NULL)
+						del = keyfile + strlen(keyfile);
+					char delchr = *del;
+					*del = '\0';
+					if (*keyfile == '*') {
+						if (issuffix(filename, keyfile + 1)) {
+							*del = delchr;
+							free(keyptr);
+							return p->val;
+						}
+					} else if (0 == strcmp(keyfile, filename)) {
+						*del = delchr;
+						free(keyptr);
+						return p->val;
+					}
+					if (delchr == '\0')
+						break;
+					*del = delchr;
+					keyfile = del + 1;
+				}
+				free(keyptr);
 
-			    if (0 == strcmp(p->key, keybase)) {
-				    return p->val;
-			    }
-		    }
-	    }
-    }
+				if (0 == strcmp(p->key, keybase)) {
+					return p->val;
+				}
+			}
+		}
+	}
 	if (superPS) {
 		// Failed here, so try in base property set
 		return superPS->GetWild(keybase, filename);
@@ -223,7 +225,7 @@ SString PropSet::GetNewExpand(const char *keybase, const char *filename) {
 		char *cpendvar = strchr(cpvar, ')');
 		if (cpendvar) {
 			int lenvar = cpendvar - cpvar - 2;  	// Subtract the $()
-			char *var = StringDup(cpvar+2, lenvar);
+			char *var = StringDup(cpvar + 2, lenvar);
 			SString val = GetWild(var, filename);
 			int newlenbase = strlen(base) + val.length() - lenvar;
 			char *newbase = new char[newlenbase];
@@ -242,20 +244,20 @@ SString PropSet::GetNewExpand(const char *keybase, const char *filename) {
 }
 
 void PropSet::Clear() {
-    for (int root=0; root < hashRoots; root++) {
-        Property *p=props[root];
-	    while (p) {
-            Property *pNext=p->next;
-		    p->hash = 0;
-		    delete p->key;
-		    p->key = 0;
-		    delete p->val;
-		    p->val = 0;
-            delete p;
-            p = pNext;
-        }
-        props[root] = 0;
-    }
+	for (int root = 0; root < hashRoots; root++) {
+		Property *p = props[root];
+		while (p) {
+			Property *pNext = p->next;
+			p->hash = 0;
+			delete p->key;
+			p->key = 0;
+			delete p->val;
+			p->val = 0;
+			delete p;
+			p = pNext;
+		}
+		props[root] = 0;
+	}
 }
 
 static bool iswordsep(char ch, bool onlyLineEnds) {
@@ -269,7 +271,6 @@ static bool iswordsep(char ch, bool onlyLineEnds) {
 // Creates an array that points into each word in the string and puts \0 terminators
 // after each word.
 static char **ArrayFromWordList(char *wordlist, int *len, bool onlyLineEnds = false) {
-#if 1
 	char prev = '\n';
 	int words = 0;
 	for (int j = 0; wordlist[j]; j++) {
@@ -298,49 +299,13 @@ static char **ArrayFromWordList(char *wordlist, int *len, bool onlyLineEnds = fa
 	} else {
 		*len = 0;
 	}
-#else
-	int words = 0; // length of the returned buffer of pointers
-	#undef APICHUNK // how many pointers will be pre-allocated (to avoid buffer reallocation on each new pointer)
-	#define APICHUNK 256
-	int size = APICHUNK; // real size of the returned buffer of pointers
-	char **keywords; // buffer for the pointers returned
-	int slen = strlen(wordlist); //length of the buffer with api file
-	keywords = (char**) malloc((size + 1) * sizeof (*keywords));
-	words = 0;
-	for (int k = 0;;) {
-		while (iswordsep(wordlist[k], onlyLineEnds))
-			wordlist[k++] = '\0';
-		if (k >= slen)
-			break;
-		if (words >= size) {
-			do
-				size += APICHUNK;
-			while (size <= words);
-			keywords = (char**) realloc(keywords, (size + 1) * sizeof (*keywords));
-		}
-		keywords[words++] = wordlist + k;
-		do
-			if (k < slen)
-				k++;
-			else
-				goto out;
-		while (!iswordsep(wordlist[k], onlyLineEnds));
-	}
-out:
-	keywords[words] = wordlist + slen;
-	*len = words;
-#endif
 	return keywords;
 }
 
 void WordList::Clear() {
 	if (words) {
 		delete []list;
-#if 1
-        delete []words;
-#else
-		free(words);
-#endif
+		delete []words;
 		free(wordsNoCase);
 	}
 	words = 0;
@@ -372,22 +337,22 @@ void WordList::SetFromAllocated() {
 }
 
 int cmpString(const void *a1, const void *a2) {
-    // Can't work out the correct incantation to use modern casts here
-    return strcmp(*(char**)(a1), *(char**)(a2));
+	// Can't work out the correct incantation to use modern casts here
+	return strcmp(*(char**)(a1), *(char**)(a2));
 }
 
 int cmpStringNoCase(const void *a1, const void *a2) {
-    // Can't work out the correct incantation to use modern casts here
-    return strcasecmp(*(char**)(a1), *(char**)(a2));
+	// Can't work out the correct incantation to use modern casts here
+	return strcasecmp(*(char**)(a1), *(char**)(a2));
 }
 
 static void SortWordList(char **words, char **wordsNoCase, unsigned int len) {
 	qsort(reinterpret_cast<void*>(words), len, sizeof(*words),
-		cmpString);
+	      cmpString);
 	qsort(reinterpret_cast<void*>(wordsNoCase), len, sizeof(*wordsNoCase),
-		cmpStringNoCase);
+	      cmpStringNoCase);
 }
- 
+
 bool WordList::InList(const char *s) {
 	if (0 == words)
 		return false;
@@ -465,7 +430,7 @@ const char *WordList::GetNearestWord(const char *wordStart, int searchLen /*= -1
 		}
 	return NULL;
 }
-	
+
 /**
  * Returns elements (first words of them) of the wordlist array which have
  * the beginning the same as the passed string. The length of the word to
@@ -479,8 +444,8 @@ char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, b
 	int wordlen; // length of the word part (before the '(' brace) of the api array element
 	int length = 0; // length of the returned buffer of words (string)
 	int newlength; // length of the new buffer before the reallocating itself
-	#undef WORDCHUNK // how many characters will be pre-allocated (to avoid buffer reallocation on each new word)
-	#define WORDCHUNK 100
+#undef WORDCHUNK // how many characters will be pre-allocated (to avoid buffer reallocation on each new word)
+#define WORDCHUNK 100
 	int size = WORDCHUNK; // real size of the returned buffer of words
 	char *buffer; // buffer for the words returned
 	int start = 0; // lower bound of the api array block to search
@@ -546,7 +511,7 @@ char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, b
 						break;
 					word = wordsNoCase[pivot];
 					if (strncasecmp(wordStart, word, searchLen))
-						break;                 
+						break;
 					brace = strchr(word, '(');
 					if (brace)
 						do
@@ -564,8 +529,7 @@ char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, b
 					newlength = length + wordlen; // stretch the buffer
 					if (length)
 						newlength++;
-					if (newlength >= size)
-					{
+					if (newlength >= size) {
 						do
 							size += WORDCHUNK;
 						while (size <= newlength);
@@ -609,8 +573,7 @@ char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, b
 					newlength = length + wordlen; // stretch the buffer
 					if (length)
 						newlength++;
-					if (newlength >= size)
-					{
+					if (newlength >= size) {
 						do
 							size += WORDCHUNK;
 						while (size <= newlength);
@@ -650,8 +613,7 @@ char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, b
 					newlength = length + wordlen; // stretch the buffer
 					if (length)
 						newlength++;
-					if (newlength >= size)
-					{
+					if (newlength >= size) {
 						do
 							size += WORDCHUNK;
 						while (size <= newlength);
@@ -673,4 +635,3 @@ char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, b
 	free(buffer);
 	return NULL;
 }
-
