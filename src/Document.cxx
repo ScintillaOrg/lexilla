@@ -592,6 +592,8 @@ void Document::SetLineIndentation(int line, int indent) {
 }
 
 int Document::GetLineIndentPosition(int line) {
+    if (line < 0)
+        return 0;
 	int pos = LineStart(line);
 	int length = Length();
 	while ((pos < length) && isindentchar(cb.CharAt(pos))) {
