@@ -524,15 +524,17 @@ bool Document::InsertString(int position, const char *s) {
  */
 bool Document::InsertString(int position, const char *s, size_t insertLength) {
 	bool changed = false;
-	char *sWithStyle = new char[insertLength * 2];
-	if (sWithStyle) {
-		for (size_t i = 0; i < insertLength; i++) {
-			sWithStyle[i*2] = s[i];
-			sWithStyle[i*2 + 1] = 0;
+	if (insertLength > 0) {
+		char *sWithStyle = new char[insertLength * 2];
+		if (sWithStyle) {
+			for (size_t i = 0; i < insertLength; i++) {
+				sWithStyle[i*2] = s[i];
+				sWithStyle[i*2 + 1] = 0;
+			}
+			changed = InsertStyledString(position*2, sWithStyle,
+				static_cast<int>(insertLength*2));
+			delete []sWithStyle;
 		}
-		changed = InsertStyledString(position*2, sWithStyle,
-			static_cast<int>(insertLength*2));
-		delete []sWithStyle;
 	}
 	return changed;
 }
@@ -611,8 +613,10 @@ void Document::SetLineIndentation(int line, int indent) {
 		CreateIndentation(linebuf, sizeof(linebuf), indent, tabInChars, !useTabs);
 		int thisLineStart = LineStart(line);
 		int indentPos = GetLineIndentPosition(line);
+		BeginUndoAction();
 		DeleteChars(thisLineStart, indentPos - thisLineStart);
 		InsertString(thisLineStart, linebuf);
+		EndUndoAction();
 	}
 }
 
