@@ -2321,19 +2321,30 @@ void Editor::Indent(bool forwards) {
 	int lineOfAnchor = pdoc->LineFromPosition(anchor);
 	int lineCurrentPos = pdoc->LineFromPosition(currentPos);
 	if (lineOfAnchor == lineCurrentPos) {
-		ClearSelection();
-		if (pdoc->useTabs) {
-			pdoc->InsertChar(currentPos, '\t');
-			SetEmptySelection(currentPos + 1);
-		} else {
-			int numSpaces = (pdoc->tabInChars) - 
-				(pdoc->GetColumn(currentPos) % (pdoc->tabInChars));
-			if (numSpaces < 1)
-				numSpaces = pdoc->tabInChars;
-			for (int i = 0; i < numSpaces; i++) {
-				pdoc->InsertChar(currentPos, ' ');
+		if (forwards) {
+			ClearSelection();
+			if (pdoc->useTabs) {
+				pdoc->InsertChar(currentPos, '\t');
+				SetEmptySelection(currentPos + 1);
+			} else {
+				int numSpaces = (pdoc->tabInChars) - 
+					(pdoc->GetColumn(currentPos) % (pdoc->tabInChars));
+				if (numSpaces < 1)
+					numSpaces = pdoc->tabInChars;
+				for (int i = 0; i < numSpaces; i++) {
+					pdoc->InsertChar(currentPos, ' ');
+				}
+				SetEmptySelection(currentPos + numSpaces);
 			}
-			SetEmptySelection(currentPos + numSpaces);
+		} else {
+			int newColumn = ((pdoc->GetColumn(currentPos)-1) / pdoc->tabInChars) * 
+				pdoc->tabInChars;
+			if (newColumn < 0)
+				newColumn = 0;
+			int newPos = currentPos;
+			while (pdoc->GetColumn(newPos) > newColumn)
+				newPos--;
+			SetEmptySelection(newPos);
 		}
 	} else {
 		int anchorPosOnLine = anchor - pdoc->LineStart(lineOfAnchor);
