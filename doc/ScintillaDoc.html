@@ -1296,7 +1296,8 @@ SCI_GETMODEVENTMASK
     <p>
        SCN_MODIFIED is fired when the document has been changed including changes to both the text
       and styling. The notification structure contains information about what changed, how the
-      change occurred and whether this changed the number of lines in the document.
+      change occurred and whether this changed the number of lines in the document. No 
+      modifications may be performed while in a SCN_MODIFIED event.
     </p>
     <p>
        SCEN_CHANGE is fired when the text of the document has been changed for any reason. This
