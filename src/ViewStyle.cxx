@@ -51,7 +51,7 @@ ViewStyle::ViewStyle() {
 
 ViewStyle::ViewStyle(const ViewStyle &source) {
 	Init();
-	for (int sty=0;sty<=STYLE_MAX;sty++) {
+	for (unsigned int sty=0;sty<(sizeof(styles)/sizeof(styles[0]));sty++) {
 		styles[sty] = source.styles[sty];
 	}
 	for (int mrk=0;mrk<=MARKER_MAX;mrk++) {
@@ -163,9 +163,7 @@ void ViewStyle::RefreshColourPalette(Palette &pal, bool want) {
 	pal.WantFind(edgecolour, want);
 }
 
-#include <mmsystem.h>
 void ViewStyle::Refresh(Surface &surface) {
-DWORD dwStart = timeGetTime();
 	selbar.desired = Platform::Chrome();
 	selbarlight.desired = Platform::ChromeHighlight();
 	maxAscent = 1;
@@ -194,8 +192,6 @@ DWORD dwStart = timeGetTime();
 		if (ms[margin].width > 0)
 			maskInLine &= ~ms[margin].mask;
 	}
-DWORD dwEnd = timeGetTime();
-Platform::DebugPrintf("Refresh took %d\n", dwEnd - dwStart);
 }
 
 void ViewStyle::ResetDefaultStyle() {
@@ -206,7 +202,7 @@ void ViewStyle::ResetDefaultStyle() {
 
 void ViewStyle::ClearStyles() {
 	// Reset all styles to be like the default style
-	for (int i=0; i<=STYLE_MAX; i++) {
+	for (unsigned int i=0;i<(sizeof(styles)/sizeof(styles[0]));i++) {
 		if (i != STYLE_DEFAULT) {
 			styles[i].Clear(
 				styles[STYLE_DEFAULT].fore.desired, 

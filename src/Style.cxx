@@ -10,6 +10,7 @@
 #include "Style.h"
 
 Style::Style() {
+	aliasOfDefaultFont = false;
 	Clear(Colour(0,0,0), Colour(0xff,0xff,0xff),
 	        Platform::DefaultFontSize(), 0,
 		false, false, false);
@@ -18,11 +19,14 @@ Style::Style() {
 Style::~Style() {
 	if (!aliasOfDefaultFont)
 		font.Release();
+	aliasOfDefaultFont = false;
 }
 
 Style &Style::operator=(const Style &source) {
 	if (this == &source)
 		return *this;
+	// Crash:
+	*(char *)0 = 1;
 	Clear(Colour(0,0,0), Colour(0xff,0xff,0xff),
 	        Platform::DefaultFontSize(), 0,
 		false, false, false);
@@ -47,6 +51,8 @@ void Style::Clear(Colour fore_, Colour back_, int size_, const char *fontName_,
 	eolFilled = eolFilled_;
 	if (!aliasOfDefaultFont)
 		font.Release();
+	else 
+		font.SetID(0);
 	aliasOfDefaultFont = false;
 }
 
@@ -68,7 +74,8 @@ void Style::Realise(Surface &surface, int zoomLevel, Style *defaultStyle) {
 	int sizeZoomed = size + zoomLevel;
 	if (sizeZoomed <= 2)	// Hangs if sizeZoomed <= 1
 		sizeZoomed = 2;
-		
+
+	font.Release();		
 	int deviceHeight = (sizeZoomed * surface.LogPixelsY()) / 72;
 	aliasOfDefaultFont = defaultStyle && EquivalentFontTo(defaultStyle);
 	if (aliasOfDefaultFont) {

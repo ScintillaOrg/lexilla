@@ -381,8 +381,12 @@ void Surface::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char 
 void Surface::MeasureWidths(Font &font_, const char *s, int len, int *positions) {
 	int totalWidth = 0;
 	for (int i=0;i<len;i++) {
-		int width = gdk_char_width(font_.id, s[i]);
-		totalWidth += width;
+		if (font_.id) {
+			int width = gdk_char_width(font_.id, s[i]);
+			totalWidth += width;
+		} else {
+			totalWidth++;
+		}
 		positions[i] = totalWidth;
 	}
 }

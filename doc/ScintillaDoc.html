@@ -809,12 +809,14 @@ SCI_SETSAVEPOINT
 </pre>
     <p>
        Sent to the container when the savepoint is entered or left, allowing the container to to
-      display a dirty indicator and change its menues. The first parameter is 1 when entering the
+      display a dirty indicator and change its menus. The first parameter is 1 when entering the
       save point, 0 when leaving.
     </p>
     <p>
-       The container tells Scintilla where the save point is by sending the SCI_SETSAVEPOINT
-      message.
+      The container tells Scintilla where the save point is by sending the SCI_SETSAVEPOINT
+      message.  This is usually done when the file is saved or loaded.  As Scintilla performs 
+      undo and redo operations, it will notify the container that it has entered or left the save 
+      point, allowing the container to know if the file should be considered dirty or not.
     </p>
 <pre>
 SCN_MODIFYATTEMPTRO
