@@ -250,6 +250,28 @@ val STYLE_BRACEBAD=35
 val STYLE_CONTROLCHAR=36
 val STYLE_MAX=127
 
+# Character set identifiers are used in StyleSetCharacterSet.
+# The values are the same as the Windows *_CHARSET values.
+val SC_CHARSET_ANSI=0
+val SC_CHARSET_DEFAULT=1
+val SC_CHARSET_BALTIC=186
+val SC_CHARSET_CHINESEBIG5=136
+val SC_CHARSET_EASTEUROPE=238
+val SC_CHARSET_GB2312=134
+val SC_CHARSET_GREEK=161
+val SC_CHARSET_HANGUL=129
+val SC_CHARSET_MAC=77
+val SC_CHARSET_OEM=255
+val SC_CHARSET_RUSSIAN=204
+val SC_CHARSET_SHIFTJIS=128
+val SC_CHARSET_SYMBOL=2
+val SC_CHARSET_TURKISH=162
+val SC_CHARSET_JOHAB=130
+val SC_CHARSET_HEBREW=177
+val SC_CHARSET_ARABIC=178
+val SC_CHARSET_VIETNAMESE=163
+val SC_CHARSET_THAI=222
+
 # Clear all the styles and make equivalent to the global default style.
 set void StyleClearAll=2050(,)
 
