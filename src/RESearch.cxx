@@ -30,6 +30,9 @@
  * Modification history:
  *
  * $Log$
+ * Revision 1.5  2001/04/20 07:36:09  nyamatongwe
+ * Removed DEBUG code that failed to compile on GTK+.
+ *
  * Revision 1.4  2001/04/13 03:52:13  nyamatongwe
  * Added URL to find original code to comments.
  *
@@ -836,81 +839,3 @@ int RESearch::Substitute(CharacterIndexer &ci, char *src, char *dst) {
 	*dst = (char) 0;
 	return 1;
 }
-			
-#ifdef DEBUG
-/*
- * symbolic - produce a symbolic dump of the nfa
- */
-void symbolic(char *s) {
-	printf("pattern: %s\n", s);
-	printf("nfacode:\n");
-	nfadump(nfa);
-}
-
-static void nfadump(char *ap) {
-	int n;
-
-	while (*ap != END)
-		switch(*ap++) {
-		case CLO:
-			printf("CLOSURE");
-			nfadump(ap);
-			switch(*ap) {
-			case CHR:
-				n = CHRSKIP;
-				break;
-			case ANY:
-				n = ANYSKIP;
-				break;
-			case CCL:
-				n = CCLSKIP;
-				break;
-			}
-			ap += n;
-			break;
-		case CHR:
-			printf("\tCHR %c\n",*ap++);
-			break;
-		case ANY:
-			printf("\tANY .\n");
-			break;
-		case BOL:
-			printf("\tBOL -\n");
-			break;
-		case EOL:
-			printf("\tEOL -\n");
-			break;
-		case BOT:
-			printf("BOT: %d\n",*ap++);
-			break;
-		case EOT:
-			printf("EOT: %d\n",*ap++);
-			break;
-		case BOW:
-			printf("BOW\n");
-			break;
-		case EOW:
-			printf("EOW\n");
-			break;
-		case REF:
-			printf("REF: %d\n",*ap++);
-			break;
-		case CCL:
-			printf("\tCCL [");
-			for (n = 0; n < MAXCHR; n++)
-				if (isinset(ap,(char)n)) {
-					if (n < ' ')
-						printf("^%c", n ^ 0x040);
-					else
-						printf("%c", n);
-				}
-			printf("]\n");
-			ap += BITBLK;
-			break;
-		default:
-			printf("bad nfa. opcode %o\n", ap[-1]);
-			exit(1);
-			break;
-		}
-}
-#endif
