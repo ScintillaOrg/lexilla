@@ -42,7 +42,6 @@ static int classifyWordPascal(unsigned int start, unsigned int end, WordList &ke
 
 static void ColourisePascalDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[], 
 	Accessor &styler) {
-	
 	WordList &keywords = *keywordlists[0];
 	
 	styler.StartAt(startPos);
@@ -97,10 +96,15 @@ static void ColourisePascalDoc(unsigned int startPos, int length, int initStyle,
 		if (state == SCE_C_DEFAULT) {
 			if (iswordstart(ch) || (ch == '@')) {
 				styler.ColourTo(i-1, state);
-					state = SCE_C_IDENTIFIER;
+				state = SCE_C_IDENTIFIER;
 			} else if (ch == '{' && chNext != '$' && chNext != '&') {
 				styler.ColourTo(i-1, state);
-					state = SCE_C_COMMENT;
+				state = SCE_C_COMMENT;
+			} else if (ch == '(' && chNext == '*' 
+						&& styler.SafeGetCharAt(i + 2) != '$' 
+						&& styler.SafeGetCharAt(i + 2) != '&') {
+				styler.ColourTo(i-1, state);
+				state = SCE_C_COMMENTDOC;
 			} else if (ch == '/' && chNext == '/') {
 				styler.ColourTo(i-1, state);
 				state = SCE_C_COMMENTLINE;
@@ -125,6 +129,11 @@ static void ColourisePascalDoc(unsigned int startPos, int length, int initStyle,
 				chNext = styler.SafeGetCharAt(i + 1);
 				if (ch == '{' && chNext != '$' && chNext != '&') {
 					state = SCE_C_COMMENT;
+				} else if (ch == '(' && chNext == '*' 
+						&& styler.SafeGetCharAt(i + 2) != '$' 
+						&& styler.SafeGetCharAt(i + 2) != '&') {
+					styler.ColourTo(i-1, state);
+					state = SCE_C_COMMENTDOC;
 				} else if (ch == '/' && chNext == '/') {
 					state = SCE_C_COMMENTLINE;
 				} else if (ch == '\"') {
@@ -149,11 +158,16 @@ static void ColourisePascalDoc(unsigned int startPos, int length, int initStyle,
 				}
 			} else if (state == SCE_C_COMMENT) {
 				if (ch == '}' ) {
+					styler.ColourTo(i, state);
+					state = SCE_C_DEFAULT;
+				}
+			} else if (state == SCE_C_COMMENTDOC) {
+				if (ch == ')' && chPrev == '*') {
 					if (((i > styler.GetStartSegment() + 2) || (
-						(initStyle == SCE_C_COMMENT) && 
+						(initStyle == SCE_C_COMMENTDOC) && 
 						(styler.GetStartSegment() == static_cast<unsigned int>(startPos))))) {
-						styler.ColourTo(i, state);
-						state = SCE_C_DEFAULT;
+							styler.ColourTo(i, state);
+							state = SCE_C_DEFAULT;
 					}
 				}
 			} else if (state == SCE_C_COMMENTLINE) {
