@@ -4324,6 +4324,7 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 	
 	case SCI_SETCURSOR:
 		cursorMode = wParam;
+		DisplayCursor(Window::cursorText);
 		break;
 	
 	case SCI_GETCURSOR:
