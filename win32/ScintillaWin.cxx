@@ -804,13 +804,13 @@ bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
 }
 
 void ScintillaWin::NotifyChange() {
-	::SendMessage(GetParent(wMain.GetID()), WM_COMMAND,
+	::SendMessage(::GetParent(wMain.GetID()), WM_COMMAND,
 	        MAKELONG(wMain.GetDlgCtrlID(), SCEN_CHANGE),
 		reinterpret_cast<LPARAM>(wMain.GetID()));
 }
 
 void ScintillaWin::NotifyFocus(bool focus) {
-	::SendMessage(GetParent(wMain.GetID()), WM_COMMAND,
+	::SendMessage(::GetParent(wMain.GetID()), WM_COMMAND,
 	        MAKELONG(wMain.GetDlgCtrlID(), focus ? SCEN_SETFOCUS : SCEN_KILLFOCUS),
 		reinterpret_cast<LPARAM>(wMain.GetID()));
 }
@@ -818,7 +818,7 @@ void ScintillaWin::NotifyFocus(bool focus) {
 void ScintillaWin::NotifyParent(SCNotification scn) {
 	scn.nmhdr.hwndFrom = wMain.GetID();
 	scn.nmhdr.idFrom = ctrlID;
-	::SendMessage(GetParent(wMain.GetID()), WM_NOTIFY,
+	::SendMessage(::GetParent(wMain.GetID()), WM_NOTIFY,
 	              wMain.GetDlgCtrlID(), reinterpret_cast<LPARAM>(&scn));
 }
 
