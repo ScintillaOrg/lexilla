@@ -272,7 +272,7 @@ LexerManager::~LexerManager() {
 		if (NULL != first) {
 			LexerLibrary *cur = first;
 			LexerLibrary *next = first->next;
-			while (first) {
+			while (cur) {
 				delete cur;
 				cur = next;
 			}
