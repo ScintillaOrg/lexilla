@@ -1194,13 +1194,19 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		case SCE_HPHP_NUMBER:
 			if (!isdigit(ch)) {
 				styler.ColourTo(i - 1, SCE_HPHP_NUMBER);
-				state = SCE_HPHP_DEFAULT;
+				if (isoperator(ch)) 
+					state =SCE_HPHP_OPERATOR;
+				else 
+					state = SCE_HPHP_DEFAULT;
 			}
 			break;
 		case SCE_HPHP_VARIABLE:
 			if (!iswordstart(ch)) {
 				styler.ColourTo(i - 1, SCE_HPHP_VARIABLE);
-				state = SCE_HPHP_DEFAULT;
+				if (isoperator(ch)) 
+					state =SCE_HPHP_OPERATOR;
+				else 
+					state = SCE_HPHP_DEFAULT;
 			}
 			break;
 		case SCE_HPHP_COMMENT:
