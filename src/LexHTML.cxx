@@ -1006,25 +1006,25 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			}
 			break;
 		case SCE_HPHP_HSTRING:
-			if (ch == '\\') {
+			if (ch == '\\') { // escape characters
 				if (chNext == '\"' || chNext == '\'' || chNext == '\\') {
 					i++;
-					ch = chNext;
-					chNext = styler.SafeGetCharAt(i + 1);
+//					ch = chNext;
+//					chNext = styler.SafeGetCharAt(i + 1);
 				}
 			} else if (ch == '\"') {
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_HPHP_DEFAULT;
-			} else if (chNext == '\r' || chNext == '\n') {
+			}/* else if (chNext == '\r' || chNext == '\n') {
 				styler.ColourTo(i - 1, SCE_HPHP_STRINGEOL);
 				state = SCE_HPHP_STRINGEOL;
-			}
+			}*/
 			break;
 		case SCE_HPHP_SIMPLESTRING:
-			if ((ch == '\r' || ch == '\n') && (chPrev != '\\')) {
+/*			if ((ch == '\r' || ch == '\n') && (chPrev != '\\')) {
 				styler.ColourTo(i - 1, SCE_HPHP_STRINGEOL);
 				state = SCE_HPHP_STRINGEOL;
-			} else if (ch == '\\') {
+			} else*/ if (ch == '\\') {
 				if (chNext == '\"' || chNext == '\'' || chNext == '\\') {
 					i++;
 					ch = chNext;
@@ -1035,8 +1035,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				state = SCE_HPHP_DEFAULT;
 			}
 			break;
-		case SCE_HPHP_STRINGEOL:
-			break;
+/*		case SCE_HPHP_STRINGEOL:
+			break;*/
 		case SCE_HPHP_DEFAULT:
 			styler.ColourTo(i - 1, StateToPrint);
 			if (isdigit(ch)) {
