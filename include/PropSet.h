@@ -136,39 +136,6 @@ public:
 	void Read(const char *filename, const char *directoryForImports);
 };
 
-// This is a fixed length list of strings suitable for display  in combo boxes
-// as a memory of user entries
-template<int sz>
-class EntryMemory {
-	SString entries[sz];
-public:
-	void Insert(SString s) {
-		for (int i=0;i<sz;i++) {
-			if (entries[i] == s) {
-				for (int j=i;j>0;j--) {
-					entries[j] = entries[j-1];
-				}
-				entries[0] = s;
-				return;
-			}
-		}
-		for (int k=sz-1;k>0;k--) {
-			entries[k] = entries[k-1];
-		}
-		entries[0] = s;
-	}
-	int Length() const {
-		int len = 0;
-		for (int i=0;i<sz;i++)
-			if (entries[i].length())
-				len++;
-		return len;
-	}
-	SString At(int n) const {
-		return entries[n];
-	}
-};
-
 class WordList {
 public:
 	// Each word contains at least one character - a empty word acts as sentinal at the end.
