@@ -118,6 +118,10 @@ get int GetViewWS=2020(,)
 
 # Make white space characters invisible, always visible or visible outside indentation.
 set void SetViewWS=2021(int viewWS,)
+# Find the position and line from a point within the window.
+
+# Find the position from a point within the window.
+fun int PositionFromPoint=2022(,point pt)
 
 # Set caret to start of a line and ensure it is visible.
 fun void GotoLine=2024(int line,)

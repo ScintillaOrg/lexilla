@@ -3476,6 +3476,13 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		Redraw();
 		break;
 	
+	case SCI_POSITIONFROMPOINT: {
+			if (lParam == 0)
+				return 0;
+			Point *ppt = reinterpret_cast<Point *>(lParam);
+			return PositionFromLocation(*ppt);
+		}
+
 	case SCI_GOTOLINE:
 		GoToLine(wParam);
 		break;
