@@ -1079,6 +1079,9 @@ val CARET_STRICT=0x04
 # If CARET_XEVEN set then both left and right margins are given equal weight
 # rather than favouring left following behaviour.
 val CARET_XEVEN=0x08
+# If CARET_XJUMPS set then when caret reaches the margin the display jumps
+# enough to leave the caret solidly within the display.
+val CARET_XJUMPS=0x10
 # Set the way the line the caret is on is kept visible.
 fun void SetCaretPolicy=2369(int caretPolicy, int caretSlop)
 

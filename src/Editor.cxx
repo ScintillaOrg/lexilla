@@ -588,15 +588,22 @@ void Editor::EnsureCaretVisible(bool useMargin, bool vert, bool horiz) {
 	int lineCaret = cs.DisplayFromDoc(pdoc->LineFromPosition(posCaret));
 	ptBottomCaret.y += vs.lineHeight - 1;
 
-	// Ensure the caret is reasonably visible in context.
+	// Ensure the caret is reasonably visible in context:
+	// xMargin must equal to xCaretMargin, with a minimum of 2 and a maximum of
+	// slightly less than half the width of the text area.
 	int xMargin = Platform::Clamp(xCaretMargin, 2, Platform::Maximum(rcClient.Width() - 10, 4) / 2);
 	if (!useMargin)
 		xMargin = 2;
 
-	// Ensure certain amount of text visible on both sides of caret
-	// So move if caret just on edge
-	rcClient.left = rcClient.left + xMargin;
-	rcClient.right = rcClient.right - xMargin;
+	// If we scroll the display, we use a minimum amount of xMargin.
+	int offsetLeft = rcClient.left + xMargin;
+	int offsetRight = rcClient.right - xMargin;
+	// If we are in XJUMPS mode, then when the margin is reached, the 
+	// offset jumps so that it won't need to move agin for a while.
+	if (!(caretPolicy & CARET_XJUMPS)) {
+		rcClient.left = offsetLeft;
+		rcClient.right = offsetRight;
+	}
 
 	// Vertical positioning
 	if (vert && (!rcClient.Contains(pt) || !rcClient.Contains(ptBottomCaret) || (caretPolicy & CARET_STRICT))) {
@@ -627,10 +634,10 @@ void Editor::EnsureCaretVisible(bool useMargin, bool vert, bool horiz) {
 	if (horiz) {
 		int xOffsetNew = xOffset;
 		if (pt.x < rcClient.left) {
-			xOffsetNew = xOffset - (rcClient.left - pt.x);
+			xOffsetNew = xOffset - (offsetLeft - pt.x);
 		} else if (((caretPolicy & CARET_XEVEN) && ((xOffset > 0) && useMargin)) || pt.x >= rcClient.right) {
-			xOffsetNew = xOffset + (pt.x - rcClient.right);
-			int xOffsetEOL = xOffset + (ptEOL.x - rcClient.right) - xMargin + 2;
+			xOffsetNew = xOffset + (pt.x - offsetRight);
+			int xOffsetEOL = xOffset + (ptEOL.x - offsetRight) - xMargin + 2;
 			//Platform::DebugPrintf("Margin %d %d\n", xOffsetNew, xOffsetEOL);
 			// Ensure don't scroll out into empty space
 			if (xOffsetNew > xOffsetEOL)
@@ -2035,7 +2042,6 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 				}
 			}
 			if (mh.linesAdded != 0) {
-
 				// Update contraction state for inserted and removed lines
 				// lineOfPos should be calculated in context of state before modification, shouldn't it
 				int lineOfPos = pdoc->LineFromPosition(mh.position);

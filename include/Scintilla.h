@@ -411,6 +411,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define CARET_CENTER 0x02
 #define CARET_STRICT 0x04
 #define CARET_XEVEN 0x08
+#define CARET_XJUMPS 0x10
 #define SCI_SETCARETPOLICY 2369
 #define SCI_LINESONSCREEN 2370
 #define SCI_USEPOPUP 2371
