@@ -125,7 +125,7 @@
 	<li>Mauritius Thinnes</li>
 	<li>Darren Schroeder</li>
 	<li>Pedro Guerreiro</li>
-	<li>Steven te Brinke</li>
+	<li>Dan Petitt</li>
     </ul>
     <p>
        Images used in GTK+ version
@@ -145,6 +145,7 @@
       </li>
       <li>
 	Pango font support on GTK+ 2.
+	Unicode input improved on GTK+ 2.x.
       </li>
       <li>
 	Hotspot style implemented in Scintilla.
@@ -152,17 +153,74 @@
       <li>
 	Small up and down arrows can be displayed in calltips and the container
 	is notified when the mouse is clicked on a calltip.
+	Normal and selected calltip text colours can be set.
       </li>
       <li>
 	POSIX compatibility flag in Scintilla regular expression search
 	interprets bare ( and ) as tagged sections.
       </li>
       <li>
+	Error message lexer tightened to yield fewer false matches.
+      </li>
+      <li>
 	Scintilla keyboard commands for moving to start and end of
-	screen lines rather than document lines.
+	screen lines rather than document lines, unless already there
+	where these keys move to the start or end of the document line.
       </li>
       <li>
 	Line joining command.
+      </li>
+      <li>
+	Calltips on Windows are no longer clipped by the parent window.
+      </li>
+      <li>
+	Autocompletion lists are cancelled when focus leaves their parent window.
+      </li>
+      <li>
+	SciTE hang fixed with recursive property definitions by placing limit
+	on number of substitutions performed.
+      </li>
+      <li>
+	SciTE Export as PDF reenabled and works.
+      </li>
+      <li>
+	Added loadsession: command line command to SciTE.
+      </li>
+      <li>
+	Bug fixed where primary selection on GTK+ was reset by
+	Scintilla during creation.
+      </li>
+      <li>
+	Bug fixed where SciTE would close immediately on startup
+	when using save.session.
+      </li>
+      <li>
+	Crash fixed when entering '\' in LaTeX file.
+      </li>
+      <li>
+	Hang fixed when '#' last character in VB file.
+      </li>
+      <li>
+	Pressing return when nothing selected in user list sends notification with
+	empty text rather than random text.
+      </li>
+      <li>
+	Mouse debouncing disabled on Windows as it interfered with some
+	mouse utilities.
+      </li>
+      <li>
+	Bug fixed where overstrike mode inserted before rather than replaced last
+	character in document.
+      </li>
+      <li>
+	Bug fixed with syntax highlighting of Japanese text.
+      </li>
+      <li>
+	Bug fixed in split lines function.
+      </li>
+      <li>
+	Cosmetic fix to SciTE tab bar on Windows when window resized.
+	Focus sticks to either pane more consistently.
       </li>
     </ul>
     <h3>
