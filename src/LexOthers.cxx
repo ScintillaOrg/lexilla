@@ -270,25 +270,22 @@ static void ColourisePropsDoc(unsigned int startPos, int length, int, WordList *
 
 // adaption by ksc, using the "} else {" trick of 1.53
 // 030721
-static void FoldPropsDoc(unsigned int startPos, int length, int initStyle, WordList *[], Accessor &styler) {
+static void FoldPropsDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler) {
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 
 	unsigned int endPos = startPos + length;
 	int visibleChars = 0;
 	int lineCurrent = styler.GetLine(startPos);
-	int levelCurrent = SC_FOLDLEVELBASE;
-	int levelNext = levelCurrent;
 
 	char chNext = styler[startPos];
 	int styleNext = styler.StyleAt(startPos);
-	int style = initStyle;
 	bool headerPoint = false;
 
 	for (unsigned int i = startPos; i < endPos; i++) {
 		char ch = chNext;
 		chNext = styler[i+1];
 
-		style = styleNext;
+		int style = styleNext;
 		styleNext = styler.StyleAt(i + 1);
 		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 
@@ -313,7 +310,6 @@ static void FoldPropsDoc(unsigned int startPos, int length, int initStyle, WordL
 
 			lineCurrent++;
 			visibleChars = 0;
-			levelCurrent = levelNext;
 			headerPoint=false;
 		}
 		if (!isspacechar(ch))
