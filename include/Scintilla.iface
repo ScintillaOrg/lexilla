@@ -938,6 +938,11 @@ set void SetScrollWidth=2274(int pixelWidth,)
 # Retrieve the document width assumed for scrolling.
 get int GetScrollWidth=2275(,)
 
+# Measure the pixel width of some text in a particular style.
+# Nul terminated text argument. 
+# Does not handle tab or control characters.
+fun int TextWidth=2276(int style, string text)
+
 ## Start of key messages
 # Move caret down one line.
 fun void LineDown=2300(,)
@@ -1725,6 +1730,7 @@ evt void UserListSelection=2014(int listType, string text)
 evt void URIDropped=2015(string text)
 evt void DwellStart=2016(int position)
 evt void DwellEnd=2017(int position)
+evt void Zoom=2018(void)
 
 cat Deprecated
 

@@ -343,6 +343,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 		PRectangle rcLine, LineLayout *ll, int subLine=0);
 	void Paint(Surface *surfaceWindow, PRectangle rcArea);
 	long FormatRange(bool draw, RangeToFormat *pfr);
+	int TextWidth(int style, const char *text);
 
 	virtual void SetVerticalScrollPos() = 0;
 	virtual void SetHorizontalScrollPos() = 0;
@@ -384,6 +385,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool NotifyMarginClick(Point pt, bool shift, bool ctrl, bool alt);
 	void NotifyNeedShown(int pos, int len);
 	void NotifyDwelling(Point pt, bool state);
+	void NotifyZoom();
 
 	void NotifyModifyAttempt(Document *document, void *userData);
 	void NotifySavePoint(Document *document, void *userData, bool atSavePoint);

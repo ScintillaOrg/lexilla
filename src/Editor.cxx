@@ -2168,6 +2168,16 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 	return endPosPrint;
 }
 
+int Editor::TextWidth(int style, const char *text) {
+	RefreshStyleData();
+	AutoSurface surface(IsUnicodeMode());
+	if (surface) {
+		return surface->WidthText(vs.styles[style].font, text, strlen(text));
+	} else {
+		return 1;
+	}
+}
+
 // Empty method is overridden on GTK+ to show / hide scrollbars
 void Editor::ReconfigureScrollBars() {}
 
@@ -2525,6 +2535,12 @@ void Editor::NotifyDwelling(Point pt, bool state) {
 	scn.position = PositionFromLocationClose(pt);
 	scn.x = pt.x;
 	scn.y = pt.y;
+	NotifyParent(scn);
+}
+
+void Editor::NotifyZoom() {
+	SCNotification scn;
+	scn.nmhdr.code = SCN_ZOOM;
 	NotifyParent(scn);
 }
 
@@ -3028,16 +3044,20 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		SetLastXChosen();
 		break;
 	case SCI_ZOOMIN:
-		if (vs.zoomLevel < 20)
+		if (vs.zoomLevel < 20) {
 			vs.zoomLevel++;
-		NeedWrapping();
-		InvalidateStyleRedraw();
+			NeedWrapping();
+			InvalidateStyleRedraw();
+			NotifyZoom();
+		}
 		break;
 	case SCI_ZOOMOUT:
-		if (vs.zoomLevel > -10)
+		if (vs.zoomLevel > -10) {
 			vs.zoomLevel--;
-		NeedWrapping();
-		InvalidateStyleRedraw();
+			NeedWrapping();
+			InvalidateStyleRedraw();
+			NotifyZoom();
+		}
 		break;
 	case SCI_DELWORDLEFT: {
 			int startWord = pdoc->NextWordStart(currentPos, -1);
@@ -4679,6 +4699,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETSCROLLWIDTH:
 		return scrollWidth;
 
+	case SCI_TEXTWIDTH:
+		PLATFORM_ASSERT((wParam >= 0) && (wParam <= STYLE_MAX));
+		PLATFORM_ASSERT(lParam);
+		return TextWidth(wParam, reinterpret_cast<char *>(lParam));
+
 	case SCI_GETCOLUMN:
 		return pdoc->GetColumn(wParam);
 
@@ -5178,6 +5203,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		vs.zoomLevel = wParam;
 		NeedWrapping();
 		InvalidateStyleRedraw();
+		NotifyZoom();
 		break;
 
 	case SCI_GETZOOM:
