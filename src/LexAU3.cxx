@@ -24,6 +24,10 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
+static bool IsAU3Comment(Accessor &styler, int pos, int len) {
+	return len>0 && styler[pos]==';';
+}
+
 static inline bool IsTypeCharacter(const int ch)
 {
     return ch == '$';
@@ -207,6 +211,53 @@ static void ColouriseAU3Doc(unsigned int startPos,
 }
 
 //
+//
+static void FoldAU3Doc(unsigned int startPos, int length, int, WordList *[], Accessor &styler)
+{
+		int endPos = startPos + length;
+
+	// Backtrack to previous line in case need to fix its fold status
+	int lineCurrent = styler.GetLine(startPos);
+	if (startPos > 0) {
+		if (lineCurrent > 0) {
+			lineCurrent--;
+			startPos = styler.LineStart(lineCurrent);
+		}
+	}
+	int spaceFlags = 0;
+	int indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, IsAU3Comment);
+	char chNext = styler[startPos];
+	for (int i = startPos; i < endPos; i++) {
+		char ch = chNext;
+		chNext = styler.SafeGetCharAt(i + 1);
+
+		if ((ch == '\r' && chNext != '\n') || (ch == '\n') || (i == endPos)) {
+			int lev = indentCurrent;
+			int indentNext = styler.IndentAmount(lineCurrent + 1, &spaceFlags, IsAU3Comment);
+			if (!(indentCurrent & SC_FOLDLEVELWHITEFLAG)) {
+				// Only non whitespace lines can be headers
+				if ((indentCurrent & SC_FOLDLEVELNUMBERMASK) < (indentNext & SC_FOLDLEVELNUMBERMASK)) {
+					lev |= SC_FOLDLEVELHEADERFLAG;
+				} else if (indentNext & SC_FOLDLEVELWHITEFLAG) {
+					// Line after is blank so check the next - maybe should continue further?
+					int spaceFlags2 = 0;
+					int indentNext2 = styler.IndentAmount(lineCurrent + 2, &spaceFlags2, IsAU3Comment);
+					if ((indentCurrent & SC_FOLDLEVELNUMBERMASK) < (indentNext2 & SC_FOLDLEVELNUMBERMASK)) {
+						lev |= SC_FOLDLEVELHEADERFLAG;
+					}
+				}
+			}
+			indentCurrent = indentNext;
+			styler.SetLevel(lineCurrent, lev);
+			lineCurrent++;
+		}
+	}
+
+}
+
+
+
+//
 
 static const char * const AU3WordLists[] = {
     "#autoit keywords",
@@ -215,4 +266,4 @@ static const char * const AU3WordLists[] = {
     "#autoit Sent keys",
     0
 };
-LexerModule lmAU3(SCLEX_AU3, ColouriseAU3Doc, "au3", NULL , AU3WordLists);
+LexerModule lmAU3(SCLEX_AU3, ColouriseAU3Doc, "au3", FoldAU3Doc , AU3WordLists);
