@@ -1130,14 +1130,14 @@ fun void DeleteBackNotLine=2344(,)
 # Move caret to first position on display line.
 fun void HomeDisplay=2345(,)
 
-# Move caret to first position on display line extending selection to 
+# Move caret to first position on display line extending selection to
 # new caret position.
 fun void HomeDisplayExtend=2346(,)
 
 # Move caret to last position on display line.
 fun void LineEndDisplay=2347(,)
 
-# Move caret to last position on display line extending selection to new 
+# Move caret to last position on display line extending selection to new
 # caret position.
 fun void LineEndDisplayExtend=2348(,)
 
@@ -1442,6 +1442,7 @@ val SCLEX_PHP=30
 val SCLEX_BAAN=31
 val SCLEX_MATLAB=32
 val SCLEX_SCRIPTOL=33
+val SCLEX_ASM=34
 
 # When a lexer specifies its language as SCLEX_AUTOMATIC it receives a
 # value assigned in sequence from SCLEX_AUTOMATIC+1.
@@ -1852,6 +1853,19 @@ val SCE_SCRIPTOL_WORD2=16
 val SCE_SCRIPTOL_COMMENTDOCKEYWORD=17
 val SCE_SCRIPTOL_COMMENTDOCKEYWORDERROR=18
 val SCE_SCRIPTOL_COMMENTBASIC=19
+# Lexical states for SCLEX_ASM
+lex Asm=SCLEX_ASM SCE_ASM_
+val SCE_ASM_DEFAULT=0
+val SCE_ASM_COMMENT=1
+val SCE_ASM_NUMBER=2
+val SCE_ASM_STRING=3
+val SCE_ASM_OPERATOR=4
+val SCE_ASM_IDENTIFIER=5
+val SCE_ASM_CPUINSTRUCTION=6
+val SCE_ASM_MATHINSTRUCTION=7
+val SCE_ASM_REGISTER=8
+val SCE_ASM_DIRECTIVE=9
+val SCE_ASM_DIRECTIVEOPERAND=10
 
 # Events
 
