@@ -132,40 +132,6 @@ public:
 };
 
 /**
- * A smart pointer class to ensure Surfaces are set up and deleted correctly.
- */
-class AutoSurface {
-private:
-	Surface *surf;
-public:
-	AutoSurface(int codePage) {
-		surf = Surface::Allocate();
-		if (surf) {
-			surf->Init();
-			surf->SetUnicodeMode(SC_CP_UTF8 == codePage);
-			surf->SetDBCSMode(codePage);
-		}
-	}
-	AutoSurface(SurfaceID sid, int codePage) {
-		surf = Surface::Allocate();
-		if (surf) {
-			surf->Init(sid);
-			surf->SetUnicodeMode(SC_CP_UTF8 == codePage);
-			surf->SetDBCSMode(codePage);
-		}
-	}
-	~AutoSurface() {
-		delete surf;
-	}
-	Surface *operator->() const {
-		return surf;
-	}
-	operator Surface *() const {
-		return surf;
-	}
-};
-
-/**
  */
 class Editor : public DocWatcher {
 	// Private so Editor objects can not be copied
@@ -362,7 +328,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 		bool overrideBackground, ColourAllocated background);
 	void DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart,
 		PRectangle rcLine, LineLayout *ll, int subLine=0);
-    void RefreshPixMaps(Surface *surfaceWindow);
+	void RefreshPixMaps(Surface *surfaceWindow);
 	void Paint(Surface *surfaceWindow, PRectangle rcArea);
 	long FormatRange(bool draw, RangeToFormat *pfr);
 	int TextWidth(int style, const char *text);
@@ -485,6 +451,45 @@ public:
 	virtual sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 	// Public so scintilla_set_id can use it.
 	int ctrlID;
+	friend class AutoSurface;
+};
+
+/**
+ * A smart pointer class to ensure Surfaces are set up and deleted correctly.
+ */
+class AutoSurface {
+private:
+	Surface *surf;
+public:
+	AutoSurface(Editor *ed) : surf(0) {
+		if (ed->wMain.GetID()) {
+			surf = Surface::Allocate();
+			if (surf) {
+				surf->Init(ed->wMain.GetID());
+				surf->SetUnicodeMode(SC_CP_UTF8 == ed->CodePage());
+				surf->SetDBCSMode(ed->CodePage());
+			}
+		}
+	}
+	AutoSurface(SurfaceID sid, Editor *ed) : surf(0) {
+		if (ed->wMain.GetID()) {
+			surf = Surface::Allocate();
+			if (surf) {
+				surf->Init(sid, ed->wMain.GetID());
+				surf->SetUnicodeMode(SC_CP_UTF8 == ed->CodePage());
+				surf->SetDBCSMode(ed->CodePage());
+			}
+		}
+	}
+	~AutoSurface() {
+		delete surf;
+	}
+	Surface *operator->() const {
+		return surf;
+	}
+	operator Surface *() const {
+		return surf;
+	}
 };
 
 #endif

@@ -93,7 +93,7 @@ class ScintillaGTK : public ScintillaBase {
 	gint wheelMouseIntensity;
 
 	// Private so ScintillaGTK objects can not be copied
-ScintillaGTK(const ScintillaGTK &) : ScintillaBase() {}
+	ScintillaGTK(const ScintillaGTK &) : ScintillaBase() {}
 	ScintillaGTK &operator=(const ScintillaGTK &) { return * this; }
 
 public:
@@ -654,7 +654,7 @@ void ScintillaGTK::FullPaint() {
 	if ((PWidget(wMain))->window) {
 		Surface *sw = Surface::Allocate();
 		if (sw) {
-			sw->Init((PWidget(wMain))->window);
+			sw->Init(PWidget(wMain)->window, PWidget(wMain));
 			Paint(sw, rcPaint);
 			sw->Release();
 			delete sw;
@@ -691,7 +691,7 @@ void ScintillaGTK::SyncPaint(PRectangle rc) {
 	if ((PWidget(wMain))->window) {
 		Surface *sw = Surface::Allocate();
 		if (sw) {
-			sw->Init((PWidget(wMain))->window);
+			sw->Init(PWidget(wMain)->window, PWidget(wMain));
 			Paint(sw, rc);
 			sw->Release();
 			delete sw;
@@ -1520,7 +1520,7 @@ gint ScintillaGTK::Expose(GtkWidget *, GdkEventExpose *ose) {
 	paintingAllText = rcPaint.Contains(rcClient);
 	Surface *surfaceWindow = Surface::Allocate();
 	if (surfaceWindow) {
-		surfaceWindow->Init((PWidget(wMain))->window);
+		surfaceWindow->Init(PWidget(wMain)->window, PWidget(wMain));
 		// Fill the corner between the scrollbars
 		PRectangle rcCorner = wMain.GetClientPosition();
 		if (verticalScrollBarVisible)
@@ -1668,7 +1668,7 @@ void ScintillaGTK::PopUpCB(ScintillaGTK *sciThis, guint action, GtkWidget *) {
 gint ScintillaGTK::ExposeCT(GtkWidget *widget, GdkEventExpose * /*ose*/, CallTip *ctip) {
 	Surface *surfaceWindow = Surface::Allocate();
 	if (surfaceWindow) {
-		surfaceWindow->Init(widget->window);
+		surfaceWindow->Init(widget->window, widget);
 		ctip->PaintCT(surfaceWindow);
 		surfaceWindow->Release();
 		delete surfaceWindow;

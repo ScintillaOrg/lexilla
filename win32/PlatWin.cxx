@@ -292,9 +292,9 @@ public:
 	SurfaceImpl();
 	virtual ~SurfaceImpl();
 
-	void Init();
-	void Init(SurfaceID sid);
-	void InitPixMap(int width, int height, Surface *surface_);
+	void Init(WindowID wid);
+	void Init(SurfaceID sid, WindowID wid);
+	void InitPixMap(int width, int height, Surface *surface_, WindowID wid);
 
 	void Release();
 	bool Initialised();
@@ -390,20 +390,20 @@ bool SurfaceImpl::Initialised() {
 	return hdc != 0;
 }
 
-void SurfaceImpl::Init() {
+void SurfaceImpl::Init(WindowID) {
 	Release();
 	hdc = ::CreateCompatibleDC(NULL);
 	hdcOwned = true;
 	::SetTextAlign(reinterpret_cast<HDC>(hdc), TA_BASELINE);
 }
 
-void SurfaceImpl::Init(SurfaceID sid) {
+void SurfaceImpl::Init(SurfaceID sid, WindowID) {
 	Release();
 	hdc = reinterpret_cast<HDC>(sid);
 	::SetTextAlign(reinterpret_cast<HDC>(hdc), TA_BASELINE);
 }
 
-void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_) {
+void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID) {
 	Release();
 	hdc = ::CreateCompatibleDC(static_cast<SurfaceImpl *>(surface_)->hdc);
 	hdcOwned = true;

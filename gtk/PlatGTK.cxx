@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
+#define assert(c) ((c) ? (void)(0) : Platform::Assert(#c, __FILE__, __LINE__))
 
 #include <glib.h>
 #include <gdk/gdk.h>
@@ -34,10 +35,49 @@
 #define snprintf _snprintf
 #endif
 
+#if GTK_MAJOR_VERSION >= 2
+#define USE_PANGO 1
+#endif
+
 #ifdef _MSC_VER
 // Ignore unreferenced local functions in GTK+ headers
 #pragma warning(disable: 4505)
 #endif
+
+// On GTK+ 1.x holds a GdkFont* but on GTK+ 2.x can hold a GdkFont* or a
+// PangoFontDescription*.
+class FontHandle {
+public:
+	int ascent;
+	GdkFont *pfont;
+#ifdef USE_PANGO
+	PangoFontDescription *pfd;
+#endif
+	FontHandle(GdkFont *pfont_) {
+		ascent = 0;
+		pfont = pfont_;
+#ifdef USE_PANGO
+		pfd = 0;
+#endif
+	}
+#ifdef USE_PANGO
+	FontHandle(PangoFontDescription *pfd_) {
+		ascent = 0;
+		pfont = 0;
+		pfd = pfd_;
+	}
+#endif
+	~FontHandle() {
+		if (pfont)
+			gdk_font_unref(pfont);
+		pfont = 0;
+#ifdef USE_PANGO
+		if (pfd)
+			pango_font_description_free(pfd);
+		pfd = 0;
+#endif
+	}
+};
 
 struct LOGFONT {
 	int size;
@@ -94,8 +134,8 @@ static void FontMutexUnlock() {
 // X has a 16 bit coordinate space, so stop drawing here to avoid wrapping
 static const int maxCoordinate = 32000;
 
-static GdkFont *PFont(Font &f) {
-	return reinterpret_cast<GdkFont *>(f.GetID());
+static FontHandle *PFont(Font &f) {
+	return reinterpret_cast<FontHandle *>(f.GetID());
 }
 
 static GtkWidget *PWidget(WindowID id) {
@@ -350,7 +390,7 @@ bool FontCached::SameAs(const char *faceName_, int characterSet_, int size_, boo
 
 void FontCached::Release() {
 	if (id)
-		gdk_font_unref(PFont(*this));
+		delete PFont(*this);
 	id = 0;
 }
 
@@ -396,7 +436,7 @@ void FontCached::ReleaseId(FontID id_) {
 	FontMutexUnlock();
 }
 
-static FontID LoadFontOrSet(const char *fontspec, int characterSet) {
+static GdkFont *LoadFontOrSet(const char *fontspec, int characterSet) {
 	if (IsDBCSCharacterSet(characterSet)) {
 		return gdk_fontset_load(fontspec);
 	} else {
@@ -416,8 +456,21 @@ FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
 	foundary[0] = '\0';
 	faceName[0] = '\0';
 	charset[0] = '\0';
-	FontID newid = 0;
 
+#ifdef USE_PANGO
+	if (fontName[0] == '!') {
+		PangoFontDescription *pfd = pango_font_description_new();
+		if (pfd) {
+			pango_font_description_set_family(pfd, fontName+1);
+			pango_font_description_set_size(pfd, size * PANGO_SCALE);
+			pango_font_description_set_weight(pfd, bold ? PANGO_WEIGHT_BOLD : PANGO_WEIGHT_NORMAL);
+			pango_font_description_set_style(pfd, italic ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
+			return new FontHandle(pfd);
+		}
+	}
+#endif
+
+	GdkFont *newid = 0;
 	// If name of the font begins with a '-', assume, that it is
 	// a full fontspec.
 	if (fontName[0] == '-') {
@@ -432,7 +485,7 @@ FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
 			newid = LoadFontOrSet("-*-*-*-*-*-*-*-*-*-*-*-*-iso8859-*",
 				characterSet);
 		}
-		return newid;
+		return new FontHandle(newid);
 	}
 
 	// it's not a full fontspec, build one.
@@ -501,7 +554,7 @@ FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
 
 		newid = gdk_fontset_load(fontset);
 		if (newid)
-			return newid;
+			return new FontHandle(newid);
 
 		// if fontset load failed, fall through, we'll use
 		// the last font entry and continue to try and
@@ -550,7 +603,7 @@ FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
 		newid = LoadFontOrSet("-*-*-*-*-*-*-*-*-*-*-*-*-iso8859-*",
 			characterSet);
 	}
-	return newid;
+	return new FontHandle(newid);
 }
 
 Font::Font() : id(0) {}
@@ -578,13 +631,17 @@ class SurfaceImpl : public Surface {
 	int y;
 	bool inited;
 	bool createdGC;
+#ifdef USE_PANGO
+	PangoContext *pcontext;
+	PangoLayout *layout;
+#endif
 public:
 	SurfaceImpl();
 	virtual ~SurfaceImpl();
 
-	void Init();
-	void Init(SurfaceID sid);
-	void InitPixMap(int width, int height, Surface *surface_);
+	void Init(WindowID wid);
+	void Init(SurfaceID sid, WindowID wid);
+	void InitPixMap(int width, int height, Surface *surface_, WindowID wid);
 
 	void Release();
 	bool Initialised();
@@ -624,7 +681,11 @@ public:
 };
 
 SurfaceImpl::SurfaceImpl() : unicodeMode(false), dbcsMode(false), drawable(0), gc(0), ppixmap(0),
-x(0), y(0), inited(false), createdGC(false) {
+x(0), y(0), inited(false), createdGC(false)
+#ifdef USE_PANGO
+, pcontext(0), layout(0)
+#endif
+{
 }
 
 SurfaceImpl::~SurfaceImpl() {
@@ -641,6 +702,14 @@ void SurfaceImpl::Release() {
 	if (ppixmap)
 		gdk_pixmap_unref(ppixmap);
 	ppixmap = 0;
+#ifdef USE_PANGO
+	if (layout)
+		g_object_unref(layout);
+	layout = 0;
+	if (pcontext)
+		g_object_unref(pcontext);
+	pcontext = 0;
+#endif
 	x = 0;
 	y = 0;
 	inited = false;
@@ -651,30 +720,56 @@ bool SurfaceImpl::Initialised() {
 	return inited;
 }
 
-void SurfaceImpl::Init() {
+// The WindowID argument is only used for Pango builds
+#ifdef USE_PANGO
+#define WID_NAME wid
+#else
+#define WID_NAME
+#endif
+
+void SurfaceImpl::Init(WindowID WID_NAME) {
+	PLATFORM_ASSERT(wid);
 	Release();
+#ifdef USE_PANGO
+	pcontext = gtk_widget_create_pango_context(PWidget(wid));
+	PLATFORM_ASSERT(pcontext);
+	layout = pango_layout_new(pcontext);
+	PLATFORM_ASSERT(layout);
+#endif
 	inited = true;
 }
 
-void SurfaceImpl::Init(SurfaceID sid) {
+void SurfaceImpl::Init(SurfaceID sid, WindowID WID_NAME) {
+	PLATFORM_ASSERT(wid);
+	PLATFORM_ASSERT(sid);
 	GdkDrawable *drawable_ = reinterpret_cast<GdkDrawable *>(sid);
 	Release();
+#ifdef USE_PANGO
+	pcontext = gtk_widget_create_pango_context(PWidget(wid));
+	layout = pango_layout_new(pcontext);
+#endif
 	drawable = drawable_;
 	gc = gdk_gc_new(drawable_);
-	//gdk_gc_set_line_attributes(gc, 1,
-	//	GDK_LINE_SOLID, GDK_CAP_NOT_LAST, GDK_JOIN_BEVEL);
 	createdGC = true;
 	inited = true;
 }
 
-void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_) {
+void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID WID_NAME) {
+	PLATFORM_ASSERT(wid);
+	PLATFORM_ASSERT(surface_);
 	Release();
+	SurfaceImpl *surfImpl = static_cast<SurfaceImpl *>(surface_);
+	PLATFORM_ASSERT(surfImpl->drawable);
+#ifdef USE_PANGO
+	pcontext = gtk_widget_create_pango_context(PWidget(wid));
+	PLATFORM_ASSERT(pcontext);
+	layout = pango_layout_new(pcontext);
+	PLATFORM_ASSERT(layout);
+#endif
 	if (height > 0 && width > 0)
-		ppixmap = gdk_pixmap_new(static_cast<SurfaceImpl *>(surface_)->drawable, width, height, -1);
+		ppixmap = gdk_pixmap_new(surfImpl->drawable, width, height, -1);
 	drawable = ppixmap;
-	gc = gdk_gc_new(static_cast<SurfaceImpl *>(surface_)->drawable);
-	//gdk_gc_set_line_attributes(gc, 1,
-	//	GDK_LINE_SOLID, GDK_CAP_NOT_LAST, GDK_JOIN_BEVEL);
+	gc = gdk_gc_new(surfImpl->drawable);
 	createdGC = true;
 	inited = true;
 }
@@ -821,77 +916,142 @@ void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	}
 }
 
-#define MAX_US_LEN 5000
+static size_t UTF8Len(char ch) {
+	unsigned char uch = static_cast<unsigned char>(ch);
+	if (uch < 0x80)
+		return 1;
+	else if (uch < (0x80 + 0x40 + 0x20))
+		return 2;
+	else
+		return 3;
+}
+
+#ifdef USE_PANGO
+
+static char *UTF8FromLatin1(const char *s, int len) {
+	char *utfForm = new char[len*2+1];
+	size_t lenU = 0;
+	for (int i=0;i<len;i++) {
+		unsigned int uch = static_cast<unsigned char>(s[i]);
+		if (uch < 0x80) {
+			utfForm[lenU++] = uch;
+		} else {
+			utfForm[lenU++] = static_cast<char>(0xC0 | (uch >> 6));
+			utfForm[lenU++] = static_cast<char>(0x80 | (uch & 0x3f));
+		}
+	}
+	utfForm[lenU] = '\0';
+	return utfForm;
+}
+
+static char *UTF8FromGdkWChar(GdkWChar *wctext, int wclen) {
+	char *utfForm = new char[wclen*3+1];	// Maximum of 3 UTF-8 bytes per character
+	size_t lenU = 0;
+	for (int i = 0; i < wclen && wctext[i]; i++) {
+		unsigned int uch = wctext[i];
+		if (uch < 0x80) {
+			utfForm[lenU++] = static_cast<char>(uch);
+		} else if (uch < 0x800) {
+			utfForm[lenU++] = static_cast<char>(0xC0 | (uch >> 6));
+			utfForm[lenU++] = static_cast<char>(0x80 | (uch & 0x3f));
+		} else {
+			utfForm[lenU++] = static_cast<char>(0xE0 | (uch >> 12));
+			utfForm[lenU++] = static_cast<char>(0x80 | ((uch >> 6) & 0x3f));
+			utfForm[lenU++] = static_cast<char>(0x80 | (uch & 0x3f));
+		}
+	}
+	utfForm[lenU] = '\0';
+	return utfForm;
+}
+
+static char *UTF8FromDBCS(const char *s, int len) {
+	GdkWChar *wctext = new GdkWChar[len + 1];
+	GdkWChar *wcp = wctext;
+	int wclen = gdk_mbstowcs(wcp, s, len);
+	if (wclen < 1) {
+		// In the annoying case when non-locale chars in the line.
+		// e.g. latin1 chars in Japanese locale.
+		delete []wctext;
+		return 0;
+	}
+
+	char *utfForm = UTF8FromGdkWChar(wctext, wclen);
+	delete []wctext;
+	return utfForm;
+}
+
+#endif
+
+// On GTK+, wchar_t is 4 bytes
+
+const int maxLengthTextRun = 10000;
 
 void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char *s, int len,
                                  ColourAllocated fore) {
 	PenColour(fore);
 	if (gc && drawable) {
+		int x = rc.left;
+#ifdef USE_PANGO
+		if (PFont(font_)->pfd) {
+			char *utfForm = 0;
+			if (unicodeMode) {
+				pango_layout_set_text(layout, s, len);
+			} else {
+				if (dbcsMode) {
+					// Convert to utf8
+					utfForm = UTF8FromDBCS(s, len);
+				}
+				if (!utfForm)	// Latin1 or DBCS failed so treat as Latin1
+					utfForm = UTF8FromLatin1(s, len);
+				pango_layout_set_text(layout, utfForm, strlen(utfForm));
+			}
+			pango_layout_set_font_description(layout, PFont(font_)->pfd);
+			PangoLayoutLine *pll = pango_layout_get_line(layout,0);
+			gdk_draw_layout_line(drawable, gc, x, ybase, pll);
+			delete []utfForm;
+			return;
+		}
+#endif
 		// Draw text as a series of segments to avoid limitations in X servers
 		const int segmentLength = 1000;
-		int x = rc.left;
-		if (unicodeMode) {
-			GdkWChar wctext[MAX_US_LEN];
-			GdkWChar *wcp = (GdkWChar *) & wctext;
-			size_t wclen = UCS2FromUTF8(s, len, (wchar_t *)wctext,
-			                            sizeof(wctext) / sizeof(GdkWChar) - 1);
-			wctext[wclen] = L'\0';
-			int lenDraw;
-			while ((wclen > 0) && (x < maxCoordinate)) {
-				lenDraw = Platform::Minimum(wclen, segmentLength);
-				gdk_draw_text_wc(drawable, PFont(font_), gc,
-				                 x, ybase, wcp, lenDraw);
-				wclen -= lenDraw;
-				if (wclen > 0) {
-					x += gdk_text_width_wc(PFont(font_),
-					                       wcp, lenDraw);
-				}
-				wcp += lenDraw;
+		bool draw8bit = true;
+		if (unicodeMode || dbcsMode) {
+			GdkWChar wctext[maxLengthTextRun];
+			int wclen;
+			if (unicodeMode) {
+				wclen = UCS2FromUTF8(s, len,
+					reinterpret_cast<wchar_t *>(wctext), maxLengthTextRun - 1);
+			} else {	// dbcsMode, so convert using current locale
+				wclen = gdk_mbstowcs(
+					wctext, s, maxLengthTextRun - 1);
 			}
-		} else if (dbcsMode) {
-			GdkWChar wctext[MAX_US_LEN];
-			GdkWChar *wcp = (GdkWChar *) & wctext;
-			int wclen = gdk_mbstowcs(wcp, s, MAX_US_LEN);
-
-			/* In the annoying case when non-locale chars
-			 * in the line.
-			 * e.g. latin1 chars in Japanese locale */
-			if (wclen < 1) {
-				while ((len > 0) && (x < maxCoordinate)) {
-					int lenDraw = Platform::Minimum(len, segmentLength);
-					gdk_draw_text(drawable, PFont(font_), gc,
-					              x, ybase, s, lenDraw);
-					len -= lenDraw;
-					if (len > 0) {
-						x += gdk_text_width(PFont(font_), s, lenDraw);
-					}
-					s += lenDraw;
-				}
-			} else {
+			if (wclen > 0) {
+				draw8bit = false;
 				wctext[wclen] = L'\0';
-				int lenDraw;
+				GdkWChar *wcp = wctext;
 				while ((wclen > 0) && (x < maxCoordinate)) {
-					lenDraw = Platform::Minimum(wclen, segmentLength);
-					gdk_draw_text_wc(drawable, PFont(font_), gc,
-					                 x, ybase, wcp, lenDraw);
+					int lenDraw = Platform::Minimum(wclen, segmentLength);
+					gdk_draw_text_wc(drawable, PFont(font_)->pfont, gc,
+							 x, ybase, wcp, lenDraw);
 					wclen -= lenDraw;
-					if (wclen > 0) {
-						x += gdk_text_width_wc(PFont(font_),
-						                       wcp, lenDraw);
-					}
 					wcp += lenDraw;
- 				}
+					if (wclen > 0) {	// Avoid next calculation if possible as may be expensive
+						x += gdk_text_width_wc(PFont(font_)->pfont,
+								       wcp, lenDraw);
+					}
+				}
 			}
-		} else {
+		}
+		if (draw8bit) {
 			while ((len > 0) && (x < maxCoordinate)) {
 				int lenDraw = Platform::Minimum(len, segmentLength);
-				gdk_draw_text(drawable, PFont(font_), gc,
+				gdk_draw_text(drawable, PFont(font_)->pfont, gc,
 				              x, ybase, s, lenDraw);
 				len -= lenDraw;
-				if (len > 0) {
-					x += gdk_text_width(PFont(font_), s, lenDraw);
-				}
 				s += lenDraw;
+				if (len > 0) {	// Avoid next calculation if possible as may be expensive
+					x += gdk_text_width(PFont(font_)->pfont, s, lenDraw);
+				}
 			}
 		}
 	}
@@ -919,86 +1079,98 @@ void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, int ybase, con
 void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positions) {
 	if (font_.GetID()) {
 		int totalWidth = 0;
-		GdkFont *gf = PFont(font_);
-		if (unicodeMode) {
-			GdkWChar wctext[MAX_US_LEN];
-			size_t wclen = UCS2FromUTF8(s, len, (wchar_t *)wctext, sizeof(wctext) / sizeof(GdkWChar) - 1);
-			wctext[wclen] = L'\0';
-			int poses[MAX_US_LEN];
-			size_t i;
-			for (i = 0; i < wclen; i++) {
-				int width = gdk_char_width_wc(gf, wctext[i]);
-				totalWidth += width;
-				poses[i] = totalWidth;
-			}
-			// map widths back to utf-8 input string
-			size_t ui = 0;
-			i = 0;
-			const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
-			unsigned char uch;
-			while (ui < wclen) {
-				uch = us[i];
-				positions[i++] = poses[ui];
-				if (uch >= 0x80) {
-					if (uch < (0x80 + 0x40 + 0x20)) {
-						positions[i++] = poses[ui];
-					} else {
-						positions[i++] = poses[ui];
-						positions[i++] = poses[ui];
-					}
-				}
-				ui++;
-			}
-			int lastPos = 0;
-			if (i > 0)
-				lastPos = positions[i - 1];
-			while (i < static_cast<size_t>(len)) {
-				positions[i++] = lastPos;
-			}
-		} else if (dbcsMode) {
-			GdkWChar wctext[MAX_US_LEN];
-			size_t wclen = (size_t)gdk_mbstowcs(wctext, s, MAX_US_LEN);
-			/* In the annoying case when non-locale chars
-			 * in the line.
-			 * e.g. latin1 chars in Japanese locale */
-			if( (int)wclen < 1 ) {
-				for (int i = 0; i < len; i++) {
-					int width = gdk_char_width(gf, s[i]);
-					totalWidth += width;
-					positions[i] = totalWidth;
+#ifdef USE_PANGO
+		if (PFont(font_)->pfd) {
+			PangoRectangle pos;
+			pango_layout_set_font_description(layout, PFont(font_)->pfd);
+			if (unicodeMode) {
+				// Simple and direct as UTF-8 is native Pango encoding
+				pango_layout_set_text(layout, s, len);
+				int i = 0;
+				while (i < len) {
+					pango_layout_index_to_pos(layout, i+1, &pos);
+					positions[i++] = PANGO_PIXELS(pos.x);
 				}
 			} else {
-				wctext[wclen] = L'\0';
-				int poses[MAX_US_LEN];
-				size_t i;
-				for (i = 0; i < wclen; i++) {
-					int width = gdk_char_width_wc(gf, wctext[i]);
-					totalWidth += width;
-					poses[i] = totalWidth;
-				}
-				size_t ui = 0;
-				i = 0;
-				for (ui = 0; ui< wclen; ui++) {
-					GdkWChar wch[2];
-					wch[0] = wctext[ui];
-					wch[1] = L'\0';
-					gchar* mbstr = gdk_wcstombs(wch);
-					if (mbstr == NULL || *mbstr == '\0')
-						g_error("mbs broken\n");
-					for(int j=0; j<(int)strlen(mbstr); j++) {
-						positions[i++] = poses[ui];
+				int wclen = 0;
+				if (dbcsMode) {
+					GdkWChar *wctext = new GdkWChar[len + 1];
+					GdkWChar *wcp = wctext;
+					wclen = gdk_mbstowcs(wcp, s, len);
+					if (wclen >= 1 ) {
+						// Convert to UTF-8 so can ask Pango for widths, then
+						// Loop through UTF-8 and DBCS forms, taking account of different
+						// character byte lengths.
+						char *utfForm = UTF8FromGdkWChar(wctext, wclen);
+						pango_layout_set_text(layout, utfForm, strlen(utfForm));
+						int i = 0;
+						int iU = 0;
+						while (i < len) {
+							pango_layout_index_to_pos(layout, iU+1, &pos);
+							iU += UTF8Len(utfForm[iU]);
+							size_t lenChar = mblen(s+i, MB_CUR_MAX);
+							while (lenChar--) {
+								positions[i++] = PANGO_PIXELS(pos.x);
+							}
+						}
+						delete []utfForm;
 					}
-					if( mbstr != NULL )
-						g_free(mbstr);
+					delete []wctext;
 				}
-				int lastPos = 0;
-				if (i > 0)
-					lastPos = positions[i - 1];
-				while (i < static_cast<size_t>(len)) {
-					positions[i++] = lastPos;
+				if (wclen < 1 ) {
+					// Either Latin1 or DBCS conversion failed so treat as Latin1.
+					char *utfForm = UTF8FromLatin1(s, len);
+					pango_layout_set_text(layout, utfForm, strlen(utfForm));
+					int i = 0;
+					int iU = 0;
+					while (i < len) {
+						pango_layout_index_to_pos(layout, iU+1, &pos);
+						iU += UTF8Len(s[i]);
+						positions[i++] = PANGO_PIXELS(pos.x);
+					}
+					delete []utfForm;
 				}
 			}
-		} else {
+			return;
+		}
+#endif
+		GdkFont *gf = PFont(font_)->pfont;
+		bool measure8bit = true;
+		if (unicodeMode || dbcsMode) {
+			GdkWChar wctext[maxLengthTextRun];
+			int wclen;
+			if (unicodeMode) {
+				wclen = UCS2FromUTF8(s, len,
+					reinterpret_cast<wchar_t *>(wctext), maxLengthTextRun - 1);
+			} else {	// dbcsMode, so convert using current locale
+				wclen = gdk_mbstowcs(
+					wctext, s, maxLengthTextRun - 1);
+			}
+			if (wclen > 0) {
+				measure8bit = false;
+				wctext[wclen] = L'\0';
+				// Map widths back to utf-8 or DBCS input string
+				int i = 0;
+				for (int iU = 0; iU < wclen; iU++) {
+					int width = gdk_char_width_wc(gf, wctext[iU]);
+					totalWidth += width;
+					size_t lenChar;
+					if (unicodeMode) {
+						lenChar = UTF8Len(s[i]);
+					} else {
+						lenChar = mblen(s+i, MB_CUR_MAX);
+					}
+					while (lenChar--) {
+						positions[i++] = totalWidth;
+					}
+				}
+				while (i < len) {	// In case of problems with lengths
+					positions[i++] = totalWidth;
+				}
+			}
+		}
+		if (measure8bit) {
+			// Either Latin1 or conversion failed so treat as Latin1.
 			for (int i = 0; i < len; i++) {
 				int width = gdk_char_width(gf, s[i]);
 				totalWidth += width;
@@ -1006,6 +1178,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 			}
 		}
 	} else {
+		// No font so return an ascending range of values
 		for (int i = 0; i < len; i++) {
 			positions[i] = i + 1;
 		}
@@ -1014,24 +1187,52 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 
 int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 	if (font_.GetID()) {
+#ifdef USE_PANGO
+		if (PFont(font_)->pfd) {
+			char *utfForm = 0;
+			pango_layout_set_font_description(layout, PFont(font_)->pfd);
+			PangoRectangle pos;
+			if (unicodeMode) {
+				pango_layout_set_text(layout, s, len);
+			} else {
+				if (dbcsMode) {
+					// Convert to utf8
+					utfForm = UTF8FromDBCS(s, len);
+				}
+				if (!utfForm)	// Latin1 or DBCS failed so treat as Latin1
+					utfForm = UTF8FromLatin1(s, len);
+				pango_layout_set_text(layout, utfForm, strlen(utfForm));
+			}
+			pango_layout_index_to_pos(layout, len, &pos);
+			int width = PANGO_PIXELS(pos.x);
+			delete []utfForm;
+			return width;
+		}
+#endif
 		if (unicodeMode) {
-			GdkWChar wctext[MAX_US_LEN];
+			GdkWChar wctext[maxLengthTextRun];
 			size_t wclen = UCS2FromUTF8(s, len, (wchar_t *)wctext, sizeof(wctext) / sizeof(GdkWChar) - 1);
 			wctext[wclen] = L'\0';
-			int width = gdk_text_width_wc(PFont(font_), wctext, wclen);
-			return width;
-		} else
-			return gdk_text_width(PFont(font_), s, len);
+			return gdk_text_width_wc(PFont(font_)->pfont, wctext, wclen);
+		} else {
+			return gdk_text_width(PFont(font_)->pfont, s, len);
+		}
 	} else {
 		return 1;
 	}
 }
 
 int SurfaceImpl::WidthChar(Font &font_, char ch) {
-	if (font_.GetID())
-		return gdk_char_width(PFont(font_), ch);
-	else
+	if (font_.GetID()) {
+#ifdef USE_PANGO
+		if (PFont(font_)->pfd) {
+			return WidthText(font_, &ch, 1);
+		}
+#endif
+		return gdk_char_width(PFont(font_)->pfont, ch);
+	} else {
 		return 1;
+	}
 }
 
 // Three possible strategies for determining ascent and descent of font:
@@ -1050,11 +1251,23 @@ const char sizeString[] = "`~!@#$%^&*()-_=+\\|[]{};:\"\'<,>.?/1234567890"
                           "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 int SurfaceImpl::Ascent(Font &font_) {
-	if (!font_.GetID())
+	if (!(font_.GetID()))
 		return 1;
 #ifdef FAST_WAY
+	if (PFont(font_)->ascent > 0)
+		return PFont(font_)->ascent;
+#ifdef USE_PANGO
+	if (PFont(font_)->pfd) {
+		PangoFontMetrics *metrics = pango_context_get_metrics(pcontext,
+			PFont(font_)->pfd, pango_context_get_language(pcontext));
+		PFont(font_)->ascent =
+			PANGO_PIXELS(pango_font_metrics_get_ascent(metrics));
+		pango_font_metrics_unref(metrics);
+		return PFont(font_)->ascent;
+	}
+#endif
 
-	return PFont(font_)->ascent;
+	return PFont(font_)->pfont->ascent;
 #else
 
 	gint lbearing;
@@ -1063,18 +1276,27 @@ int SurfaceImpl::Ascent(Font &font_) {
 	gint ascent;
 	gint descent;
 
-	gdk_string_extents(PFont(font_), sizeString,
+	gdk_string_extents(PFont(font_)->pfont, sizeString,
 					   &lbearing, &rbearing, &width, &ascent, &descent);
 	return ascent;
 #endif
 }
 
 int SurfaceImpl::Descent(Font &font_) {
-	if (!font_.GetID())
+	if (!(font_.GetID()))
 		return 1;
 #ifdef FAST_WAY
 
-	return PFont(font_)->descent;
+#ifdef USE_PANGO
+	if (PFont(font_)->pfd) {
+		PangoFontMetrics *metrics = pango_context_get_metrics(pcontext,
+			PFont(font_)->pfd, pango_context_get_language(pcontext));
+		int descent = PANGO_PIXELS(pango_font_metrics_get_descent(metrics));
+		pango_font_metrics_unref(metrics);
+		return descent;
+	}
+#endif
+	return PFont(font_)->pfont->descent;
 #else
 
 	gint lbearing;
@@ -1083,7 +1305,7 @@ int SurfaceImpl::Descent(Font &font_) {
 	gint ascent;
 	gint descent;
 
-	gdk_string_extents(PFont(font_), sizeString,
+	gdk_string_extents(PFont(font_)->pfont, sizeString,
 					   &lbearing, &rbearing, &width, &ascent, &descent);
 	return descent;
 #endif
@@ -1102,10 +1324,7 @@ int SurfaceImpl::Height(Font &font_) {
 }
 
 int SurfaceImpl::AverageCharWidth(Font &font_) {
-	if (font_.GetID())
-		return gdk_char_width(PFont(font_), 'n');
-	else
-		return 1;
+	return WidthChar(font_, 'n');
 }
 
 int SurfaceImpl::SetPalette(Palette *, bool) {
@@ -1381,10 +1600,10 @@ void ListBoxX::Create(Window &, int, int, bool) {
 void ListBoxX::SetFont(Font &scint_font) {
 #if GTK_MAJOR_VERSION < 2
 	GtkStyle *style = gtk_widget_get_style(GTK_WIDGET(PWidget(list)));
-	if (!gdk_font_equal(style->font, PFont(scint_font))) {
+	if (!gdk_font_equal(style->font, PFont(scint_font)->pfont)) {
 		style = gtk_style_copy(style);
 		gdk_font_unref(style->font);
-		style->font = PFont(scint_font);
+		style->font = PFont(scint_font)->pfont;
 		gdk_font_ref(style->font);
 		gtk_widget_set_style(GTK_WIDGET(PWidget(list)), style);
 		gtk_style_unref(style);
@@ -1392,9 +1611,9 @@ void ListBoxX::SetFont(Font &scint_font) {
 #else
 	GtkStyle *styleCurrent = gtk_widget_get_style(GTK_WIDGET(PWidget(list)));
 	GdkFont *fontCurrent = gtk_style_get_font(styleCurrent);
-	if (!gdk_font_equal(fontCurrent, PFont(scint_font))) {
+	if (!gdk_font_equal(fontCurrent, PFont(scint_font)->pfont)) {
 		GtkStyle *styleNew = gtk_style_copy(styleCurrent);
-		gtk_style_set_font(styleNew, PFont(scint_font));
+		gtk_style_set_font(styleNew, PFont(scint_font)->pfont);
 		gtk_widget_set_style(GTK_WIDGET(PWidget(list)), styleNew);
 		gtk_style_unref(styleCurrent);
 	}

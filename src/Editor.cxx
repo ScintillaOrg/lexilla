@@ -420,7 +420,7 @@ void Editor::RefreshColourPalette(Palette &pal, bool want) {
 void Editor::RefreshStyleData() {
 	if (!stylesValid) {
 		stylesValid = true;
-		AutoSurface surface(CodePage());
+		AutoSurface surface(this);
 		if (surface) {
 			vs.Refresh(*surface);
 			RefreshColourPalette(palette, true);
@@ -523,7 +523,7 @@ Point Editor::LocationFromPosition(int pos) {
 	int line = pdoc->LineFromPosition(pos);
 	int lineVisible = cs.DisplayFromDoc(line);
 	//Platform::DebugPrintf("line=%d\n", line);
-	AutoSurface surface(CodePage());
+	AutoSurface surface(this);
 	AutoLineLayout ll(llc, RetrieveLineLayout(line));
 	if (surface && ll) {
 		// -1 because of adding in for visible lines in following loop.
@@ -581,7 +581,7 @@ int Editor::PositionFromLocation(Point pt) {
 		return pdoc->Length();
 	unsigned int posLineStart = pdoc->LineStart(lineDoc);
 	int retVal = posLineStart;
-	AutoSurface surface(CodePage());
+	AutoSurface surface(this);
 	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
 	if (surface && ll) {
 		LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
@@ -624,7 +624,7 @@ int Editor::PositionFromLocationClose(Point pt) {
 		return INVALID_POSITION;
 	if (lineDoc >= pdoc->LinesTotal())
 		return INVALID_POSITION;
-	AutoSurface surface(CodePage());
+	AutoSurface surface(this);
 	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
 	if (surface && ll) {
 		LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
@@ -656,7 +656,7 @@ int Editor::PositionFromLineX(int lineDoc, int x) {
 	if (lineDoc >= pdoc->LinesTotal())
 		return pdoc->Length();
 	//Platform::DebugPrintf("Position of (%d,%d) line = %d top=%d\n", pt.x, pt.y, line, topLine);
-	AutoSurface surface(CodePage());
+	AutoSurface surface(this);
 	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
 	int retVal = 0;
 	if (surface && ll) {
@@ -983,7 +983,7 @@ void Editor::MoveCaretInsideView(bool ensureVisible) {
 int Editor::DisplayFromPosition(int pos) {
 	int lineDoc = pdoc->LineFromPosition(pos);
 	int lineDisplay = cs.DisplayFromDoc(lineDoc);
-	AutoSurface surface(CodePage());
+	AutoSurface surface(this);
 	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
 	if (surface && ll) {
 		LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
@@ -1327,7 +1327,7 @@ bool Editor::WrapLines() {
 			wrapWidth = rcTextArea.Width();
 			// Ensure all of the document is styled.
 			pdoc->EnsureStyledTo(pdoc->Length());
-			AutoSurface surface(CodePage());
+			AutoSurface surface(this);
 			if (surface) {
 				int lastLineToWrap = pdoc->LinesTotal();
 				while (docLineLastWrapped <= lastLineToWrap) {
@@ -1394,7 +1394,7 @@ void Editor::LinesSplit(int pixelWidth) {
 		const char *eol = StringFromEOLMode(pdoc->eolMode);
 		pdoc->BeginUndoAction();
 		for (int line = lineStart; line <= lineEnd; line++) {
-			AutoSurface surface(CodePage());
+			AutoSurface surface(this);
 			AutoLineLayout ll(llc, RetrieveLineLayout(line));
 			if (surface && ll) {
 				unsigned int posLineStart = pdoc->LineStart(line);
@@ -2214,7 +2214,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 	if (!pixmapSelPattern->Initialised()) {
 		const int patternSize=8;
-		pixmapSelPattern->InitPixMap(patternSize, patternSize, surfaceWindow);
+		pixmapSelPattern->InitPixMap(patternSize, patternSize, surfaceWindow, wMain.GetID());
 		// This complex procedure is to reproduce the checkerboard dithered pattern used by windows
 		// for scroll bars and Visual Studio for its selection margin. The colour of this pattern is half
 		// way between the chrome colour and the chrome highlight colour making a nice transition
@@ -2251,8 +2251,8 @@ void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 
 	if (!pixmapIndentGuide->Initialised()) {
 		// 1 extra pixel in height so can handle odd/even positions and so produce a continuous line
-		pixmapIndentGuide->InitPixMap(1, vs.lineHeight + 1, surfaceWindow);
-		pixmapIndentGuideHighlight->InitPixMap(1, vs.lineHeight + 1, surfaceWindow);
+		pixmapIndentGuide->InitPixMap(1, vs.lineHeight + 1, surfaceWindow, wMain.GetID());
+		pixmapIndentGuideHighlight->InitPixMap(1, vs.lineHeight + 1, surfaceWindow, wMain.GetID());
 		PRectangle rcIG(0, 0, 1, vs.lineHeight);
 		pixmapIndentGuide->FillRectangle(rcIG, vs.styles[STYLE_INDENTGUIDE].back.allocated);
 		pixmapIndentGuide->PenColour(vs.styles[STYLE_INDENTGUIDE].fore.allocated);
@@ -2270,9 +2270,9 @@ void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 		if (!pixmapLine->Initialised()) {
 			PRectangle rcClient = GetClientRectangle();
 			pixmapLine->InitPixMap(rcClient.Width(), rcClient.Height(),
-			                       surfaceWindow);
+			                       surfaceWindow, wMain.GetID());
 			pixmapSelMargin->InitPixMap(vs.fixedColumnWidth,
-			                            rcClient.Height(), surfaceWindow);
+			                            rcClient.Height(), surfaceWindow, wMain.GetID());
 		}
 	}
 }
@@ -2583,10 +2583,10 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 	if (!pfr)
 		return 0;
 
-	AutoSurface surface(pfr->hdc, CodePage());
+	AutoSurface surface(pfr->hdc, this);
 	if (!surface)
 		return 0;
-	AutoSurface surfaceMeasure(pfr->hdcTarget, CodePage());
+	AutoSurface surfaceMeasure(pfr->hdcTarget, this);
 	if (!surfaceMeasure) {
 		return 0;
 	}
@@ -2758,7 +2758,7 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 
 int Editor::TextWidth(int style, const char *text) {
 	RefreshStyleData();
-	AutoSurface surface(CodePage());
+	AutoSurface surface(this);
 	if (surface) {
 		return surface->WidthText(vs.styles[style].font, text, strlen(text));
 	} else {
@@ -3169,7 +3169,7 @@ void Editor::CheckModificationForWrap(DocModification mh) {
 		if (wrapState != eWrapNone) {
 			int lineDoc = pdoc->LineFromPosition(mh.position);
 			if (mh.linesAdded == 0) {
-				AutoSurface surface(CodePage());
+				AutoSurface surface(this);
 				AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
 				if (surface && ll) {
 					LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
@@ -3537,7 +3537,7 @@ void Editor::CursorUpOrDown(int direction, bool extend) {
 int Editor::StartEndDisplayLine(int pos, bool start) {
 	RefreshStyleData();
 	int line = pdoc->LineFromPosition(pos);
-	AutoSurface surface(CodePage());
+	AutoSurface surface(this);
 	AutoLineLayout ll(llc, RetrieveLineLayout(line));
 	int posRet = INVALID_POSITION;
 	if (surface && ll) {

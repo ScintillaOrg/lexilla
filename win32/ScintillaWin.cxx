@@ -384,7 +384,7 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 		pps = &ps;
 		::BeginPaint(MainHWND(), pps);
 	}
-	AutoSurface surfaceWindow(pps->hdc, CodePage());
+	AutoSurface surfaceWindow(pps->hdc, this);
 	if (surfaceWindow) {
 		rcPaint = PRectangle(pps->rcPaint.left, pps->rcPaint.top, pps->rcPaint.right, pps->rcPaint.bottom);
 		PRectangle rcClient = GetClientRectangle();
@@ -1428,7 +1428,7 @@ void ScintillaWin::ImeStartComposition() {
 			int sizeZoomed = vs.styles[styleHere].size + vs.zoomLevel;
 			if (sizeZoomed <= 2)	// Hangs if sizeZoomed <= 1
 				sizeZoomed = 2;
-			AutoSurface surface(CodePage());
+			AutoSurface surface(this);
 			int deviceHeight = sizeZoomed;
 			if (surface) {
 				deviceHeight = (sizeZoomed * surface->LogPixelsY()) / 72;
@@ -1589,7 +1589,7 @@ void ScintillaWin::HorizontalScrollMessage(WPARAM wParam) {
 void ScintillaWin::RealizeWindowPalette(bool inBackGround) {
 	RefreshStyleData();
 	HDC hdc = ::GetDC(MainHWND());
-	AutoSurface surfaceWindow(hdc, CodePage());
+	AutoSurface surfaceWindow(hdc, this);
 	if (surfaceWindow) {
 		int changes = surfaceWindow->SetPalette(&palette, inBackGround);
 		if (changes > 0)
@@ -1608,7 +1608,7 @@ void ScintillaWin::FullPaint() {
 	rcPaint = GetClientRectangle();
 	paintingAllText = true;
 	HDC hdc = ::GetDC(MainHWND());
-	AutoSurface surfaceWindow(hdc, CodePage());
+	AutoSurface surfaceWindow(hdc, this);
 	if (surfaceWindow) {
 		Paint(surfaceWindow, rcPaint);
 		surfaceWindow->Release();
@@ -1931,10 +1931,14 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
 		} else if (iMessage == WM_PAINT) {
 			PAINTSTRUCT ps;
 			::BeginPaint(hWnd, &ps);
-			AutoSurface surfaceWindow(ps.hdc, ctp->codePage);
+			Surface *surfaceWindow = Surface::Allocate();
 			if (surfaceWindow) {
+				surfaceWindow->Init(ps.hdc, hWnd);
+				surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == ctp->codePage);
+				surfaceWindow->SetDBCSMode(ctp->codePage);
 				ctp->PaintCT(surfaceWindow);
 				surfaceWindow->Release();
+				delete surfaceWindow;
 			}
 			::EndPaint(hWnd, &ps);
 			return 0;

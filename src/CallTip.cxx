@@ -129,7 +129,7 @@ PRectangle CallTip::CallTipStart(int pos, Point pt, const char *defn,
 	Surface *surfaceMeasure = Surface::Allocate();
 	if (!surfaceMeasure)
 		return PRectangle();
-	surfaceMeasure->Init();
+	surfaceMeasure->Init(wCallTip.GetID());
 	surfaceMeasure->SetUnicodeMode(SC_CP_UTF8 == codePage);
 	surfaceMeasure->SetDBCSMode(codePage);
 	startHighlight = 0;
