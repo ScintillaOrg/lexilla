@@ -124,6 +124,50 @@ static inline bool IsNumber(unsigned int start, Accessor &styler) {
 	       (styler[start] == '-') || (styler[start] == '#');
 }
 
+static inline bool isStringState(int state) {
+	bool bResult;
+
+	switch (state) {
+	case SCE_HJ_DOUBLESTRING:
+	case SCE_HJ_SINGLESTRING:
+	case SCE_HJA_DOUBLESTRING:
+	case SCE_HJA_SINGLESTRING:
+	case SCE_HB_STRING:
+	case SCE_HBA_STRING:
+	case SCE_HP_STRING:
+	case SCE_HPA_STRING:
+	case SCE_HPHP_HSTRING:
+	case SCE_HPHP_SIMPLESTRING:
+		bResult = true;
+		break;
+	default :
+		bResult = false;
+		break;
+	}
+	return bResult;
+}
+
+// not really well done, since it's only comments that should lex the %> and <%
+static inline bool isCommentASPState(int state) {
+	bool bResult;
+
+	switch (state) {
+	case SCE_HJ_COMMENT:
+	case SCE_HJ_COMMENTLINE:
+	case SCE_HJ_COMMENTDOC:
+	case SCE_HB_COMMENTLINE:
+	case SCE_HP_COMMENTLINE:
+	case SCE_HPHP_COMMENT:
+	case SCE_HPHP_COMMENTLINE:
+		bResult = true;
+		break;
+	default :
+		bResult = false;
+		break;
+	}
+	return bResult;
+}
+
 static void classifyAttribHTML(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler) {
 	bool wordIsNumber = IsNumber(start, styler);
 	char chAttr = SCE_H_ATTRIBUTEUNKNOWN;
@@ -478,7 +522,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 
 		/////////////////////////////////////
 		// handle the start of PHP pre-processor = Non-HTML
-		else if ((ch == '<') && (chNext == '?')) {
+		else if ((state != SCE_H_ASPAT) && (ch == '<') && (chNext == '?')) {
 			styler.ColourTo(i - 1, StateToPrint);
 			beforePreProc = state;
 			scriptLanguage = segIsScriptingIndicator(styler, styler.GetStartSegment() + 2, i + 10, eScriptPHP);
@@ -501,7 +545,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		}
 
 		// handle the start of ASP pre-processor = Non-HTML
-		else if ((ch == '<') && (chNext == '%')) {
+		else if (!isCommentASPState(state) && (ch == '<') && (chNext == '%')) {
 			styler.ColourTo(i - 1, StateToPrint);
 			beforePreProc = state;
 			if (inScriptType == eNonHtmlScript)
@@ -530,7 +574,11 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		}
 
 		// handle the end of a pre-processor = Non-HTML
-		else if (((inScriptType == eNonHtmlPreProc) || (inScriptType == eNonHtmlScriptPreProc)) && ((ch == '?') || (ch == '%')) && (chNext == '>')) {
+		else if (((inScriptType == eNonHtmlPreProc)
+			   || (inScriptType == eNonHtmlScriptPreProc))
+			  && (((scriptLanguage == eScriptPHP) && (ch == '?'))
+			   || (!isStringState(state) && !isCommentASPState(state) && (ch == '%')))
+			  && (chNext == '>')) {
 			if (state == SCE_H_ASPAT) {
 				defaultScript = segIsScriptingIndicator(styler, styler.GetStartSegment(), i - 1, defaultScript);
 			}
@@ -1164,6 +1212,9 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			if (ch == '\\') {
 				// skip the next char
 				i++;
+			} else if (ch == '$') {
+				styler.ColourTo(i-1, StateToPrint);
+				state = SCE_HPHP_HSTRING_VARIABLE;
 			} else if (ch == '\"') {
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_HPHP_DEFAULT;
@@ -1176,6 +1227,12 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			} else if (ch == '\'') {
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_HPHP_DEFAULT;
+			}
+			break;
+		case SCE_HPHP_HSTRING_VARIABLE:
+			if (!iswordstart(ch)) {
+				styler.ColourTo(i-1, StateToPrint);
+				state = SCE_HPHP_HSTRING;
 			}
 			break;
 		case SCE_HPHP_DEFAULT:
