@@ -73,8 +73,9 @@ SCI_GETSTYLEBITS
       indicators. This allows 32 fundamental styles which is enough for most languages and three
       independent indicators so that, for example, syntax errors, deprecated names and bad
       indentation could all be displayed at once. Indicators may be displayed as simple underlines,
-      squiggly underlines or a line of small 'T' shapes. Additional indicators such as strike-out
-      or blurred could be defined in the future. The number of bits used for styles can be altered 
+      squiggly underlines, a line of small 'T' shapes, a line of diagonal hatching or as strike-out. 
+      Additional indicators such as blurred could be defined in the future. 
+      The number of bits used for styles can be altered 
       with SCI_SETSTYLEBITS up to a maximum of 6 bits. 
       The remaining bits can be used for indicators.
     </p>
@@ -284,6 +285,7 @@ SCI_STYLESETITALIC(int stylenumber, bool italic)
 SCI_STYLESETSIZE(int stylenumber, int sizeinpoints)
 SCI_STYLESETFONT(int stylenumber, char *fontname)
 SCI_STYLESETEOLFILLED(int stylenumber, bool eolfilled)
+SCI_STYLESETUNDERLINE(int stylenumber, bool underline)
 </pre>
     <p>
        While the style setting messages mentioned above, change the style numbers associated with
@@ -540,7 +542,8 @@ SCI_INDICGETFORE(int indicatornumber)
       indicators.
     </p>
     <p>
-       The indicator styles currently available are INDIC_PLAIN, INDIC_SQUIGGLE, and INDIC_TT.
+       The indicator styles currently available are INDIC_PLAIN, INDIC_SQUIGGLE, INDIC_TT, 
+       INDIC_DIAGONAL, and INDIC_STRIKE.
     </p>
     <p>
        The indicators are set using SCI_STARTSTYLING with a INDICS_MASK mask and SCI_SETSTYLING
