@@ -54,6 +54,7 @@
 // These undefinitions are required to work around differences between different versions
 // of the mingw headers, some of which define these twice, in both winuser.h and imm.h.
 #ifdef __MINGW_H
+#if __MINGW32_MAJOR_VERSION == 1
 #undef WM_IME_STARTCOMPOSITION
 #undef WM_IME_ENDCOMPOSITION
 #undef WM_IME_COMPOSITION
@@ -66,6 +67,7 @@
 #undef WM_IME_CHAR
 #undef WM_IME_KEYDOWN
 #undef WM_IME_KEYUP
+#endif
 #endif
 
 #ifndef WM_IME_STARTCOMPOSITION
@@ -140,7 +142,7 @@ public:
  */
 class ScintillaWin :
 	public ScintillaBase {
-		
+
 	bool lastKeyDownConsumed;
 
 	bool capturedMouse;
@@ -584,8 +586,8 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		//	Platform::IsKeyDown(VK_CONTROL),
 		//	Platform::IsKeyDown(VK_MENU));
 		ButtonDown(Point::FromLong(lParam), ::GetMessageTime(),
-			(wParam & MK_SHIFT) != 0, 
-			(wParam & MK_CONTROL) != 0, 
+			(wParam & MK_SHIFT) != 0,
+			(wParam & MK_CONTROL) != 0,
 			Platform::IsKeyDown(VK_MENU));
 		::SetFocus(MainHWND());
 		break;
@@ -595,8 +597,8 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		break;
 
 	case WM_LBUTTONUP:
-		ButtonUp(Point::FromLong(lParam), 
-			::GetMessageTime(), 
+		ButtonUp(Point::FromLong(lParam),
+			::GetMessageTime(),
 			(wParam & MK_CONTROL) != 0);
 		break;
 
@@ -900,7 +902,7 @@ bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
 	};
 	sci.fMask = SIF_PAGE | SIF_RANGE;
 	::GetScrollInfo(MainHWND(), SB_VERT, &sci);
-	if ((sci.nMin != 0) || 
+	if ((sci.nMin != 0) ||
 		(sci.nMax != nMax) ||
 	        (sci.nPage != static_cast<unsigned int>(nPage)) ||
 	        (sci.nPos != 0)) {
@@ -925,7 +927,7 @@ bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
 	unsigned int pageWidth = rcText.Width();
 	sci.fMask = SIF_PAGE | SIF_RANGE;
 	::GetScrollInfo(MainHWND(), SB_HORZ, &sci);
-	if ((sci.nMin != 0) || 
+	if ((sci.nMin != 0) ||
 		(sci.nMax != horizEndPreferred) ||
 		(sci.nPage != pageWidth) ||
 	        (sci.nPos != 0)) {
@@ -1173,13 +1175,13 @@ STDMETHODIMP FormatEnumerator_Clone(FormatEnumerator *fe, IEnumFORMATETC **ppenu
 }
 
 static void *vtFormatEnumerator[] = {
-	FormatEnumerator_QueryInterface,
-	FormatEnumerator_AddRef,
-	FormatEnumerator_Release,
-	FormatEnumerator_Next,
-	FormatEnumerator_Skip,
-	FormatEnumerator_Reset,
-	FormatEnumerator_Clone
+	(void *)(FormatEnumerator_QueryInterface),
+	(void *)(FormatEnumerator_AddRef),
+	(void *)(FormatEnumerator_Release),
+	(void *)(FormatEnumerator_Next),
+	(void *)(FormatEnumerator_Skip),
+	(void *)(FormatEnumerator_Reset),
+	(void *)(FormatEnumerator_Clone)
 };
 
 FormatEnumerator::FormatEnumerator(int pos_, CLIPFORMAT formats_[], int formatsLen_) {
@@ -1216,11 +1218,11 @@ STDMETHODIMP DropSource_GiveFeedback(DropSource *, DWORD) {
 }
 
 static void *vtDropSource[] = {
-	DropSource_QueryInterface,
-	DropSource_AddRef,
-	DropSource_Release,
-	DropSource_QueryContinueDrag,
-	DropSource_GiveFeedback
+	(void *)(DropSource_QueryInterface),
+	(void *)(DropSource_AddRef),
+	(void *)(DropSource_Release),
+	(void *)(DropSource_QueryContinueDrag),
+	(void *)(DropSource_GiveFeedback)
 };
 
 DropSource::DropSource() {
@@ -1328,18 +1330,18 @@ STDMETHODIMP DataObject_EnumDAdvise(DataObject *, IEnumSTATDATA **) {
 }
 
 static void *vtDataObject[] = {
-	DataObject_QueryInterface,
-	DataObject_AddRef,
-	DataObject_Release,
-	DataObject_GetData,
-	DataObject_GetDataHere,
-	DataObject_QueryGetData,
-	DataObject_GetCanonicalFormatEtc,
-	DataObject_SetData,
-	DataObject_EnumFormatEtc,
-	DataObject_DAdvise,
-	DataObject_DUnadvise,
-	DataObject_EnumDAdvise
+	(void *)(DataObject_QueryInterface),
+	(void *)(DataObject_AddRef),
+	(void *)(DataObject_Release),
+	(void *)(DataObject_GetData),
+	(void *)(DataObject_GetDataHere),
+	(void *)(DataObject_QueryGetData),
+	(void *)(DataObject_GetCanonicalFormatEtc),
+	(void *)(DataObject_SetData),
+	(void *)(DataObject_EnumFormatEtc),
+	(void *)(DataObject_DAdvise),
+	(void *)(DataObject_DUnadvise),
+	(void *)(DataObject_EnumDAdvise)
 };
 
 DataObject::DataObject() {
@@ -1376,13 +1378,13 @@ STDMETHODIMP DropTarget_Drop(DropTarget *dt, LPDATAOBJECT pIDataSource, DWORD gr
 }
 
 static void *vtDropTarget[] = {
-	DropTarget_QueryInterface,
-	DropTarget_AddRef,
-	DropTarget_Release,
-	DropTarget_DragEnter,
-	DropTarget_DragOver,
-	DropTarget_DragLeave,
-	DropTarget_Drop
+	(void *)(DropTarget_QueryInterface),
+	(void *)(DropTarget_AddRef),
+	(void *)(DropTarget_Release),
+	(void *)(DropTarget_DragEnter),
+	(void *)(DropTarget_DragOver),
+	(void *)(DropTarget_DragLeave),
+	(void *)(DropTarget_Drop)
 };
 
 DropTarget::DropTarget() {
@@ -1867,7 +1869,7 @@ bool ScintillaWin::Register(HINSTANCE hInstance_) {
 		wndclassc.hCursor = ::LoadCursor(NULL, IDC_ARROW);
 		wndclassc.lpszClassName = callClassName;
 		wndclassc.hIconSm = 0;
-	
+
 		result = ::RegisterClassEx(&wndclassc) != 0;
 	}
 
