@@ -677,6 +677,9 @@ gint ScintillaGTK::Press(GtkWidget *, GdkEventButton *event, ScintillaGTK *sciTh
 	Point pt;
 	pt.x = int(event->x);
 	pt.y = int(event->y);
+
+	bool ctrl = event->state & GDK_CONTROL_MASK;
+	
 	gtk_widget_grab_focus(sciThis->wMain.GetID());
 	if (event->button == 1) {
 		//sciThis->ButtonDown(pt, event->time, 
@@ -684,7 +687,7 @@ gint ScintillaGTK::Press(GtkWidget *, GdkEventButton *event, ScintillaGTK *sciTh
 		//	event->state & GDK_CONTROL_MASK, 
 		//	event->state & GDK_MOD1_MASK);
 		// Instead of sending literal modifiers use control instead of alt
-		// Ths s because all the window managers seem to grab alt + click for moving
+		// This is because all the window managers seem to grab alt + click for moving
 		sciThis->ButtonDown(pt, event->time, 
 			event->state & GDK_SHIFT_MASK, 
 			event->state & GDK_CONTROL_MASK, 
@@ -701,6 +704,22 @@ gint ScintillaGTK::Press(GtkWidget *, GdkEventButton *event, ScintillaGTK *sciTh
 		int oy = 0;
 		gdk_window_get_origin(sciThis->wDraw.GetID()->window, &ox, &oy);
 		sciThis->ContextMenu(Point(pt.x + ox, pt.y + oy));
+	} else if (event->button == 4) {
+		// Wheel scrolling up
+		if (ctrl)
+			gtk_adjustment_set_value(GTK_ADJUSTMENT(sciThis->adjustmenth),(
+				(sciThis->xOffset) / 2 ) - 6);
+		else
+			gtk_adjustment_set_value(GTK_ADJUSTMENT(sciThis->adjustmentv),
+				sciThis->topLine - 3);
+	} else if( event->button == 5 ) {
+		// Wheel scrolling down
+		if (ctrl)
+			gtk_adjustment_set_value(GTK_ADJUSTMENT(sciThis->adjustmenth), (
+				(sciThis->xOffset) / 2 ) + 6);
+		else
+			gtk_adjustment_set_value(GTK_ADJUSTMENT(sciThis->adjustmentv),
+				sciThis->topLine + 3);
 	}
 	return FALSE;
 }
