@@ -76,7 +76,7 @@ static void ColouriseConfDoc(unsigned int startPos, int length, int, WordList *k
 				} else if( isalpha(ch) ) {
 					// signals the start of an identifier 
 					bufferCount = 0;
-					buffer[bufferCount++] = tolower(ch);
+					buffer[bufferCount++] = static_cast<char>(tolower(ch));
 					state = SCE_CONF_IDENTIFIER;
 				} else if( isdigit(ch) ) {
 					// signals the start of a number
@@ -128,7 +128,7 @@ static void ColouriseConfDoc(unsigned int startPos, int length, int, WordList *k
 			case SCE_CONF_IDENTIFIER:
 				// stay  in CONF_IDENTIFIER state until we find a non-alphanumeric
 				if( isalnum(ch) || (ch == '_') || (ch == '-') || (ch == '/') || (ch == '$') || (ch == '.') || (ch == '*')) {
-					buffer[bufferCount++] = tolower(ch);
+					buffer[bufferCount++] = static_cast<char>(tolower(ch));
 				} else {
 					state = SCE_CONF_DEFAULT;
 					buffer[bufferCount] = '\0';
