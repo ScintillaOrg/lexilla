@@ -41,7 +41,7 @@ public:
 	SString Expand(const char *withVars);
 	int GetInt(const char *key, int defaultValue=0);
 	SString GetWild(const char *keybase, const char *filename);
-	SString GetNewExpand(const char *keybase, const char *filename);
+	SString GetNewExpand(const char *keybase, const char *filename="");
 	void Clear();
 	char *ToString();	// Caller must delete[] the return value
 	bool GetFirst(char **key, char **val);
