@@ -158,8 +158,6 @@ SCI_GETLENGTH
 SCI_GETCURRENTPOS
 SCI_GETANCHOR
 SCI_SELECTALL
-SCI_CHANGEPOSITION(int delta, bool extendselection)
-SCI_PAGEMOVE(int cmdkey, bool extendselection)
 SCI_GOTOLINE(int line)
 SCI_GOTOPOS(int position)
 SCI_SETANCHOR(int position)
@@ -552,7 +550,7 @@ SCI_INDICGETFORE(int indicatornumber)
        Autocompletion
     </h3>
 <pre>
-SCI_AUTOCSHOW(&lt;unused&gt;,char *list)
+SCI_AUTOCSHOW(int lenEntered;,char *list)
 SCI_AUTOCCANCEL
 SCI_AUTOCACTIVE
 SCI_AUTOCPOSSTART
@@ -582,7 +580,7 @@ SCI_AUTOCSELECT(&lt;unused&gt;,char *stringtoselect)
        Calltips
     </h3>
 <pre>
-SCI_CALLTIPSHOW(&lt;unused&gt;, char *definition)
+SCI_CALLTIPSHOW(int posStart, char *definition)
 SCI_CALLTIPCANCEL
 SCI_CALLTIPACTIVE
 SCI_CALLTIPPOSSTART

@@ -89,7 +89,6 @@ extern "C" {
 
 #define SCI_GETVIEWWS SCI_START + 20
 #define SCI_SETVIEWWS SCI_START + 21
-#define SCI_CHANGEPOSITION SCI_START + 22
 #define SCI_GOTOLINE SCI_START + 24
 #define SCI_GOTOPOS SCI_START + 25
 #define SCI_SETANCHOR SCI_START + 26
@@ -426,6 +425,8 @@ void Scintilla_RegisterClasses(HINSTANCE hInstance);
 // To enable these features define INCLUDE_DEPRECATED_FEATURES
 
 #ifdef INCLUDE_DEPRECATED_FEATURES
+
+#define SCI_CHANGEPOSITION SCI_START + 22
 
 // Default style settings. These are deprecated and will be removed in a future version.
 #define SCI_SETFORE SCI_START + 60

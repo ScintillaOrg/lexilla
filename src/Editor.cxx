@@ -3031,7 +3031,7 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	case EM_SETWORDBREAKPROC:
 		break;
 
-	case EM_LIMITTEXT:
+	case EM_SETLIMITTEXT:
 		// wParam holds the number of characters control should be limited to
 		break;
 
