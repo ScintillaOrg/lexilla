@@ -727,15 +727,15 @@ const char *CharacterSetID(int characterSet) {
 	case SC_CHARSET_DEFAULT:
 		return "LATIN1";
 	case SC_CHARSET_BALTIC:
-		return "ISO8859-13";
+		return "ISO-8859-13";
 	case SC_CHARSET_CHINESEBIG5:
 		return "BIG-5";
 	case SC_CHARSET_EASTEUROPE:
-		return "ISO8859-2";
+		return "ISO-8859-2";
 	case SC_CHARSET_GB2312:
 		return "GB2312";
 	case SC_CHARSET_GREEK:
-		return "ISO8859-7";
+		return "ISO-8859-7";
 	case SC_CHARSET_HANGUL:
 		return "";
 	case SC_CHARSET_MAC:
@@ -749,17 +749,17 @@ const char *CharacterSetID(int characterSet) {
 	case SC_CHARSET_SYMBOL:
 		return "";
 	case SC_CHARSET_TURKISH:
-		return "ISO8859-9";
+		return "ISO-8859-9";
 	case SC_CHARSET_JOHAB:
 		return "JOHAB";
 	case SC_CHARSET_HEBREW:
-		return "ISO8859-8";
+		return "ISO-8859-8";
 	case SC_CHARSET_ARABIC:
-		return "ISO8859-6";
+		return "ISO-8859-6";
 	case SC_CHARSET_VIETNAMESE:
 		return "";
 	case SC_CHARSET_THAI:
-		return "ISO8859-1";
+		return "ISO-8859-1";
 	default:
 		return "";
 	}
@@ -773,7 +773,7 @@ void SurfaceImpl::SetIconv(int characterSet_) {
 		characterSet = characterSet_;
 		const char *source = CharacterSetID(characterSet);
 		if (*source) {
-			iconvh = iconv_open("UTF8", source);
+			iconvh = iconv_open("UTF-8", source);
 		}
 	}
 }
@@ -1233,11 +1233,17 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 			if (et == UTF8) {
 				// Simple and direct as UTF-8 is native Pango encoding
 				pango_layout_set_text(layout, s, len);
+				PangoLayoutIter *iter = pango_layout_get_iter (layout);
 				int i = 0;
-				while (i < len) {
-					pango_layout_index_to_pos(layout, i+1, &pos);
-					positions[i++] = PANGO_PIXELS(pos.x);
+				while (pango_layout_iter_next_cluster (iter)) {
+					pango_layout_iter_get_cluster_extents(iter, NULL, &pos);
+					int position = PANGO_PIXELS(pos.x);
+					int curIndex = pango_layout_iter_get_index (iter);
+					while (i < curIndex) {
+						positions[i++] = position;
+					}
 				}
+				pango_layout_iter_free (iter);
 			} else {
 				int wclen = 0;
 				if (et == dbcs) {
@@ -1251,15 +1257,19 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 						char *utfForm = UTF8FromGdkWChar(wctext, wclen);
 						pango_layout_set_text(layout, utfForm, strlen(utfForm));
 						int i = 0;
-						int iU = 0;
-						while (i < len) {
-							iU += UTF8Len(utfForm[iU]);
-							pango_layout_index_to_pos(layout, iU, &pos);
+						PangoLayoutIter *iter = pango_layout_get_iter (layout);
+						while (pango_layout_iter_next_cluster (iter)) {
 							size_t lenChar = mblen(s+i, MB_CUR_MAX);
+							pango_layout_iter_get_cluster_extents (iter, NULL, &pos);
+							int position = PANGO_PIXELS(pos.x);
+							// TODO: measure number of bytes of the DBCS input 
+							// in the cluster just measured and set that number of elements 
+							// of positions.
 							while (lenChar--) {
-								positions[i++] = PANGO_PIXELS(pos.x);
+								positions[i++] = position;
 							}
 						}
+						pango_layout_iter_free (iter);
 						delete []utfForm;
 					}
 					delete []wctext;
@@ -1269,22 +1279,17 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 					bool useGFree = false;
 					SetIconv(PFont(font_)->characterSet);
 					char *utfForm = UTF8FromIconv(iconvh, s, len);
-					//~ if (!utfForm) {	// iconv failed so treat as locale
-						//~ gsize w; // stub
-						//~ utfForm = g_locale_to_utf8(s, len, NULL, &w, NULL);
-						//~ useGFree = static_cast<bool>(utfForm);
-					//~ }
 					if (!utfForm) {
 						utfForm = UTF8FromLatin1(s, len);
 					}
 					pango_layout_set_text(layout, utfForm, strlen(utfForm));
 					int i = 0;
-					int iU = 0;
-					while (i < len) {
-						iU += UTF8Len(utfForm[iU]);
-						pango_layout_index_to_pos(layout, iU, &pos);
+					PangoLayoutIter *iter = pango_layout_get_iter (layout);
+					while (pango_layout_iter_next_cluster (iter)) {
+						pango_layout_iter_get_cluster_extents (iter, NULL, &pos);
 						positions[i++] = PANGO_PIXELS(pos.x);
 					}
+					pango_layout_iter_free (iter);
 					if (useGFree) {
 						g_free(utfForm);
 					} else {
@@ -1379,14 +1384,14 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 				pango_layout_set_text(layout, utfForm, strlen(utfForm));
 				len = strlen(utfForm);
 			}
-			pango_layout_index_to_pos(layout, len, &pos);
-			int width = PANGO_PIXELS(pos.x);
+			PangoLayoutLine *pangoLine = pango_layout_get_line(layout, 0);
+			pango_layout_line_get_extents (pangoLine, NULL, &pos);
 			if (useGFree) {
 				g_free(utfForm);
 			} else {
 				delete []utfForm;
 			}
-			return width;
+			return PANGO_PIXELS(pos.width);
 		}
 #endif
 		if (et == UTF8) {
