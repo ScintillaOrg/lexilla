@@ -19,27 +19,34 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-static void classifyWordSQL(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler) {
+static void classifyWordSQL(unsigned int start, unsigned int end, WordList *keywordlists[], Accessor &styler) {
 	char s[100];
 	bool wordIsNumber = isdigit(styler[start]) || (styler[start] == '.');
 	for (unsigned int i = 0; i < end - start + 1 && i < 30; i++) {
 		s[i] = static_cast<char>(tolower(styler[start + i]));
 		s[i + 1] = '\0';
 	}
+
+	WordList &keywords1 = *keywordlists[0];
+	WordList &keywords2 = *keywordlists[1];
+
 	char chAttr = SCE_C_IDENTIFIER;
 	if (wordIsNumber)
 		chAttr = SCE_C_NUMBER;
 	else {
-		if (keywords.InList(s))
+		if (keywords1.InList(s)) {
 			chAttr = SCE_C_WORD;
+		}
+
+		if (keywords2.InList(s)) {
+			chAttr = SCE_C_WORD2;
+		}
 	}
 	styler.ColourTo(end, chAttr);
 }
 
 static void ColouriseSQLDoc(unsigned int startPos, int length,
                             int initStyle, WordList *keywordlists[], Accessor &styler) {
-
-	WordList &keywords = *keywordlists[0];
 
 	styler.StartAt(startPos);
 
@@ -104,7 +111,7 @@ static void ColouriseSQLDoc(unsigned int startPos, int length,
 			}
 		} else if (state == SCE_C_WORD) {
 			if (!iswordchar(ch)) {
-				classifyWordSQL(styler.GetStartSegment(), i - 1, keywords, styler);
+				classifyWordSQL(styler.GetStartSegment(), i - 1, keywordlists, styler);
 				state = SCE_C_DEFAULT;
 				if (ch == '/' && chNext == '*') {
 					state = SCE_C_COMMENT;
@@ -188,6 +195,7 @@ static void ColouriseSQLDoc(unsigned int startPos, int length,
 
 static const char * const sqlWordListDesc[] = {
 	"Keywords",
+	"Database Objects",
 	0
 };
 
