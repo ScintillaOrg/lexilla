@@ -1012,7 +1012,7 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 				}
 			}
 			pos += increment;
-			if (dbcsCodePage) {
+			if (dbcsCodePage && (pos >= 0)) {
 				// Ensure trying to match from start of character
 				pos = MovePositionOutsideChar(pos, increment, false);
 			}
