@@ -580,7 +580,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		//	Platform::IsKeyDown(VK_SHIFT),
 		//	Platform::IsKeyDown(VK_CONTROL),
 		//	Platform::IsKeyDown(VK_MENU));
-		ButtonDown(Point::FromLong(lParam), ::GetTickCount(),
+		ButtonDown(Point::FromLong(lParam), ::GetMessageTime(),
 			(wParam & MK_SHIFT) != 0, 
 			(wParam & MK_CONTROL) != 0, 
 			Platform::IsKeyDown(VK_MENU));
@@ -593,7 +593,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 	case WM_LBUTTONUP:
 		ButtonUp(Point::FromLong(lParam), 
-			::GetTickCount(), 
+			::GetMessageTime(), 
 			(wParam & MK_CONTROL) != 0);
 		break;
 
