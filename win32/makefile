@@ -14,7 +14,7 @@ LEXCOMPONENT = ../bin/SciLexer.dll
 vpath %.h ../src ../include
 vpath %.cxx ../src
 
-LDFLAGS = -lkernel32 -luser32 -lgdi32 -limm32 -lole32 -luuid
+LDFLAGS=-mwindows -limm32 -lole32 -luuid
 # Add -MMD to get dependencies
 #CXXFLAGS = -g -pg -pedantic -Os -fno-exceptions -fvtable-thunks -fno-rtti
 INCLUDEDIRS=-I ../include -I ../src
