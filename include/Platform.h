@@ -199,6 +199,7 @@ public:
 };
 
 class Font {
+protected:
 	FontID id;
 #if PLAT_WX
 	int ascent;
@@ -208,10 +209,10 @@ class Font {
 	Font &operator=(const Font &) { id=0; return *this; }
 public:
 	Font();
-	~Font();
+	virtual ~Font();
 
-	void Create(const char *faceName, int characterSet, int size, bool bold, bool italic);
-	void Release();
+	virtual void Create(const char *faceName, int characterSet, int size, bool bold, bool italic);
+	virtual void Release();
 
 	FontID GetID() { return id; }
 	// Alias another font - caller guarantees not to Release
