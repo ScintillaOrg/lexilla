@@ -836,7 +836,7 @@ int Editor::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
 	return pos;
 }
 
-int Editor::MovePositionTo(int newPos, bool extend) {
+int Editor::MovePositionTo(int newPos, bool extend, bool ensureVisible) {
 	int delta = newPos - currentPos;
 	newPos = pdoc->ClampPositionIntoDocument(newPos);
 	newPos = MovePositionOutsideChar(newPos, delta);
@@ -845,7 +845,8 @@ int Editor::MovePositionTo(int newPos, bool extend) {
 	} else {
 		SetEmptySelection(newPos);
 	}
-	EnsureCaretVisible();
+	if (ensureVisible)
+		EnsureCaretVisible();
 	ShowCaretAtCurrentPosition();
 	NotifyMove(newPos);
 	return 0;
@@ -909,16 +910,18 @@ void Editor::HorizontalScrollTo(int xPos) {
 	}
 }
 
-void Editor::MoveCaretInsideView() {
+void Editor::MoveCaretInsideView(bool ensureVisible) {
 	PRectangle rcClient = GetTextRectangle();
 	Point pt = LocationFromPosition(currentPos);
 	if (pt.y < rcClient.top) {
 		MovePositionTo(PositionFromLocation(
-		                   Point(lastXChosen, rcClient.top)));
+		                   Point(lastXChosen, rcClient.top)),
+						   false, ensureVisible);
 	} else if ((pt.y + vs.lineHeight - 1) > rcClient.bottom) {
 		int yOfLastLineFullyDisplayed = rcClient.top + (LinesOnScreen() - 1) * vs.lineHeight;
 		MovePositionTo(PositionFromLocation(
-		                   Point(lastXChosen, rcClient.top + yOfLastLineFullyDisplayed)));
+		                   Point(lastXChosen, rcClient.top + yOfLastLineFullyDisplayed)),
+						   false, ensureVisible);
 	}
 }
 
@@ -3180,7 +3183,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		break;
 	case SCI_LINESCROLLDOWN:
 		ScrollTo(topLine + 1);
-		MoveCaretInsideView();
+		MoveCaretInsideView(false);
 		break;
 	case SCI_LINEUP:
 		CursorUpOrDown(-1);
@@ -3190,7 +3193,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		break;
 	case SCI_LINESCROLLUP:
 		ScrollTo(topLine - 1);
-		MoveCaretInsideView();
+		MoveCaretInsideView(false);
 		break;
 	case SCI_CHARLEFT:
 		if (SelectionEmpty()) {
