@@ -191,6 +191,7 @@
 	<li>Sergey Philippov</li>
 	<li>Borujoa</li>
 	<li>Michael Owens</li>
+	<li>Franck Marcia</li>
     </ul>
     <p>
        Images used in GTK+ version
@@ -227,7 +228,7 @@
 	SciTE on GTK+2 and Windows NT/2000/XP allows search and replace of Unicode text.
 	</li>
 	<li>
-	SciTE calltips allow setting the characters used to start and end parameter lists and 
+	SciTE calltips allow setting the characters used to start and end parameter lists and
 	to separate parameters.
 	</li>
 	<li>
@@ -236,34 +237,34 @@
 	</li>
 	<li>
 	On Windows, when Scintilla copies text to the clipboard as Unicode, it avoids
-	adding an ANSI copy as the system will automatically convert as required in 
+	adding an ANSI copy as the system will automatically convert as required in
 	a context-sensitive manner.
 	</li>
 	<li>
-	SciTE indent.auto setting automatically determines indent.size and use.tabs from 
+	SciTE indent.auto setting automatically determines indent.size and use.tabs from
 	document contents.
 	</li>
 	<li>
-	SciTE defines a CurrentMessage property that holds the most recently selected 
+	SciTE defines a CurrentMessage property that holds the most recently selected
 	output pane message.
 	</li>
 	<li>
-	SciTE Lua scripting enhanced with 
+	SciTE Lua scripting enhanced with
 	<ul>
-	<li>A Lua table called 'buffer' is associated with each buffer and can be used to 
+	<li>A Lua table called 'buffer' is associated with each buffer and can be used to
 	maintain buffer-specific state.</li>
-	<li>A 'scite' object allows interaction with the application such as opening 
+	<li>A 'scite' object allows interaction with the application such as opening
 	files from script.</li>
-	<li>Dynamic properties can be reset by assigning nil to a given key in 
+	<li>Dynamic properties can be reset by assigning nil to a given key in
 	the props table.</li>
-	<li>An 'OnClear' event fires whenever properties and extension scripts are 
+	<li>An 'OnClear' event fires whenever properties and extension scripts are
 	about to be reloaded.</li>
-	<li>On Windows, loadlib is enabled and can be used to access Lua 
+	<li>On Windows, loadlib is enabled and can be used to access Lua
 	binary modules / DLLs.</li></ul>
 	</li>
 	<li>
-	SciTE Find in Files on Windows can be used in a modeless way and gains a '..' 
-	button to move up to the parent directory. It is also wider so that longer paths 
+	SciTE Find in Files on Windows can be used in a modeless way and gains a '..'
+	button to move up to the parent directory. It is also wider so that longer paths
 	can be seen.
 	</li>
 	<li>
@@ -273,7 +274,7 @@
 	SciTE on GTK+ 2 has a "hidden files" check box in file open dialog.
 	</li>
 	<li>
-	SciTE use.monospaced setting removed. More information in the 
+	SciTE use.monospaced setting removed. More information in the
 	<a href="SciTEFAQ.html">FAQ</a>.
 	</li>
 	<li>
@@ -286,7 +287,7 @@
 	Ada lexer fixed to support non-ASCII text.
 	</li>
 	<li>
-	Cpp lexer now only matches exactly three slashes as starting a doc-comment so that 
+	Cpp lexer now only matches exactly three slashes as starting a doc-comment so that
 	lines of slashes are seen as a normal comment.
 	Line ending characters are appear in default style on preprocessor and single line
 	comment lines.
@@ -313,7 +314,7 @@
 	PowerBasic lexer updated for macros and optimised.
 	</li>
 	<li>
-	Properties file folder changed to leave lines before a header at the base level 
+	Properties file folder changed to leave lines before a header at the base level
 	and thus avoid a vertical line when using connected folding symbols.
 	</li>
 	<li>
@@ -342,7 +343,7 @@
 	Recursive property definitions are safer, avoiding expansion when detected.
 	</li>
 	<li>
-	SciTE thread synchronization for scripts no longer uses HWND_MESSAGE 
+	SciTE thread synchronization for scripts no longer uses HWND_MESSAGE
 	so is compatible with older versions of Windows.
 	Other Lua scripting bugs fixed.
 	</li>
@@ -351,22 +352,22 @@
 	with alternative UI themes.
 	</li>
 	<li>
-	SciTE on Windows full screen mode now fits better when menu different height 
+	SciTE on Windows full screen mode now fits better when menu different height
 	to title bar height.
 	</li>
 	<li>
-	SC_MARK_EMPTY marker is now invisible and does not change the background 
+	SC_MARK_EMPTY marker is now invisible and does not change the background
 	colour.
 	</li>
 	<li>
-	Bug fixed in HTML lexer to allow use of &lt;?xml in strings in scripts without 
+	Bug fixed in HTML lexer to allow use of &lt;?xml in strings in scripts without
 	triggering xml mode.
 	</li>
 	<li>
 	Bug fixed in SciTE abbreviation expansion that could break indentation or crash.
 	</li>
 	<li>
-	Bug fixed when searching for a whole word string that ends one character before 
+	Bug fixed when searching for a whole word string that ends one character before
 	end of document.
 	</li>
 	<li>
@@ -392,15 +393,15 @@
 	Bug fixed where SCI_LINEENDWRAP would move too far when line ends are visible.
 	</li>
 	<li>
-	Bugs fixed where calltips with unicode or other non-ASCII text would display 
+	Bugs fixed where calltips with unicode or other non-ASCII text would display
 	incorrectly.
 	</li>
 	<li>
-	Bug fixed in determining if at save point after undoing from save point and then 
+	Bug fixed in determining if at save point after undoing from save point and then
 	performing changes.
 	</li>
 	<li>
-	Bug fixed on GTK+ using unsupported code pages where extraneous text could 
+	Bug fixed on GTK+ using unsupported code pages where extraneous text could
 	be drawn.
 	</li>
 	<li>
@@ -414,7 +415,7 @@
 	Crashing bug fixed when autocompleting word longer than 1000 characters.
 	</li>
 	<li>
-	SciTE crashing bug fixed when both Find and Replace dialogs shown by disallowing 
+	SciTE crashing bug fixed when both Find and Replace dialogs shown by disallowing
 	this situation.
 	</li>
     </ul>
@@ -430,7 +431,7 @@
 	</li>
 	<li>
 	SciTE on GTK+ 2.4 uses the improved file chooser which allows
-	file extension filters, multiple selection, and remembers favourite 
+	file extension filters, multiple selection, and remembers favourite
 	directories.
 	</li>
 	<li>
@@ -472,7 +473,7 @@
 	SciTE can be set to warn before loading files larger than a particular size.
 	</li>
 	<li>
-	SciTE Lua scripting bugs fixed included a crashing bug when using 
+	SciTE Lua scripting bugs fixed included a crashing bug when using
 	an undefined function name that would go before first actual name.
 	</li>
 	<li>
