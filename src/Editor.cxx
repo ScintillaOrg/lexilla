@@ -3677,13 +3677,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_REPLACETARGET:
 		PLATFORM_ASSERT(lParam);
-		return ReplaceTarget(wParam, reinterpret_cast<char *>(lParam));
-
-	case SCI_REPLACETARGETCOUNTED:
-		PLATFORM_ASSERT(lParam);
 		return ReplaceTarget(false, reinterpret_cast<char *>(lParam), wParam);
 
-	case SCI_REPLACETARGETRECOUNTED:
+	case SCI_REPLACETARGETRE:
 		PLATFORM_ASSERT(lParam);
 		return ReplaceTarget(true, reinterpret_cast<char *>(lParam), wParam);
 
