@@ -647,6 +647,25 @@ void Editor::MoveCaretInsideView() {
 	}
 }
 
+int Editor::DisplayFromPosition(int pos) {
+	int lineDoc = pdoc->LineFromPosition(pos);
+	int lineDisplay = cs.DisplayFromDoc(lineDoc);
+	AutoSurface surface(IsUnicodeMode());
+	if (surface) {
+		unsigned int posLineStart = pdoc->LineStart(lineDoc);
+		int posInLine = pos - posLineStart;
+		lineDisplay--; // To make up for first increment ahead.
+		LineLayout ll;
+		LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
+		for (int subLine=0; subLine<ll.lines; subLine++) {
+ 			if (posInLine >= ll.lineStarts[subLine]) {
+				lineDisplay++;
+			}
+		}
+	}
+	return lineDisplay;
+}
+
 void Editor::EnsureCaretVisible(bool useMargin, bool vert, bool horiz) {
 	//Platform::DebugPrintf("EnsureCaretVisible %d %s\n", xOffset, useMargin ? " margin" : " ");
 	PRectangle rcClient = GetTextRectangle();
@@ -657,7 +676,7 @@ void Editor::EnsureCaretVisible(bool useMargin, bool vert, bool horiz) {
 	Point pt = LocationFromPosition(posCaret);
 	Point ptEOL = LocationFromPosition(pdoc->LineEndPosition(posCaret));
 	Point ptBottomCaret = pt;
-	int lineCaret = cs.DisplayFromDoc(pdoc->LineFromPosition(posCaret));
+	int lineCaret = DisplayFromPosition(posCaret);
 	ptBottomCaret.y += vs.lineHeight - 1;
 
 	// Ensure the caret is reasonably visible in context:
