@@ -366,6 +366,8 @@ typedef long (*SciFnDirect)(long ptr, unsigned int iMessage, unsigned long wPara
 #define SCI_ADDREFDOCUMENT 2376
 #define SCI_RELEASEDOCUMENT 2377
 #define SCI_GETMODEVENTMASK 2378
+#define SCI_SETFOCUS 2380
+#define SCI_GETFOCUS 2381
 #define SCI_GRABFOCUS 2400
 #define SCI_STARTRECORD 3001
 #define SCI_STOPRECORD 3002

@@ -993,6 +993,11 @@ fun void ReleaseDocument=2377(, int doc)
 # Get which document modification events are sent to the container.
 get int GetModEventMask=2378(,)
 
+# Change internal focus flag
+set void SetFocus=2380(bool focus,)
+# Get internal focus flag
+get bool GetFocus=2381(,)
+
 # Set the focus to this Scintilla widget.
 # GTK+ Specific
 fun void GrabFocus=2400(,)
