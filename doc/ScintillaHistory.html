@@ -126,6 +126,64 @@
 	Static linking on Windows handles cursor resource better. 
 	Documentation of static linking improved.
       </li>
+      <li>
+	Autocompletion has an option to delete any word characters after the caret
+	upon selecting an item.
+      </li>
+      <li>
+	FOX version identified by PLAT_FOX in Platform.h.
+      </li>
+      <li>
+	Calltips in SciTE use the calltip.&lt;lexer&gt;.word.characters setting to 
+	correctly find calltips for functions that include characters like '$' which 
+	is not normally considered a word character.
+      </li>
+      <li>
+	SciTE has a command to show help on itself which gets hooked up to displaying
+	SciTEDoc.html.
+      </li>
+      <li>
+	SciTE option calltip.&lt;lexer&gt;.end.definition to display help text on a 
+	second line of calltip.
+      </li>
+      <li>
+	Fixed the handling of the Buffers menu on GTK+ to ensure current buffer 
+	indicated and no warnings occur.
+	Changed some menu items on GTK+ version to be same as Windows version. 
+      </li>
+      <li>
+	use.monospaced property for SciTE determines initial state of Use Monospaced Font
+	setting.
+      </li>
+      <li>
+	The SciTE Complete Symbol command now works when there are no word 
+	characters before the caret, even though it is slow to display the whole set of 
+	symbols.
+      </li>
+      <li>
+	Function names removed from SciTE's list of PHP keywords. The full list of
+	predefined functions is available from another web site mentioned on the
+	Extras page.
+      </li>
+      <li>
+	Crashing bug at startup on GTK+ for some configurations fixed.
+      </li>
+      <li>
+	Crashing bug on GTK+ on 64 bit platforms fixed.
+      </li>
+      <li>
+	Compilation problem with some compilers fixed in GTK+.
+      </li>
+      <li>
+	Japanese text entry improved on Windows 9x.
+      </li>
+      <li>
+        SciTE recent files directory problem on Windows when HOME and SciTE_HOME
+	environment variables not set is now the directory of the executable.
+      </li>
+      <li>
+	Session files no longer include untitled buffers.
+      </li>
     </ul>
     <h3>
        <a href="scite142.zip">Release 1.42</a>
