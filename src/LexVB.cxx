@@ -200,6 +200,6 @@ static void ColouriseVBScriptDoc(unsigned int startPos, int length, int initStyl
 	ColouriseVBDoc(startPos, length, initStyle, keywordlists, styler, true);
 }
 
-const LexerModule lmVB(SCLEX_VB, ColouriseVBNetDoc, "vb", FoldVBDoc);
-const LexerModule lmVBScript(SCLEX_VBSCRIPT, ColouriseVBScriptDoc, "vbscript", FoldVBDoc);
+LexerModule lmVB(SCLEX_VB, ColouriseVBNetDoc, "vb", FoldVBDoc);
+LexerModule lmVBScript(SCLEX_VBSCRIPT, ColouriseVBScriptDoc, "vbscript", FoldVBDoc);
 

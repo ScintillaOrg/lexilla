@@ -226,5 +226,5 @@ static void FoldEiffelDocKeyWords(unsigned int startPos, int length, int /* init
 	styler.SetLevel(lineCurrent, levelPrev | flagsNext);
 }
 
-const LexerModule lmEiffel(SCLEX_EIFFEL, ColouriseEiffelDoc, "eiffel", FoldEiffelDocIndent);
-const LexerModule lmEiffelkw(SCLEX_EIFFELKW, ColouriseEiffelDoc, "eiffelkw", FoldEiffelDocKeyWords);
+LexerModule lmEiffel(SCLEX_EIFFEL, ColouriseEiffelDoc, "eiffel", FoldEiffelDocIndent);
+LexerModule lmEiffelkw(SCLEX_EIFFELKW, ColouriseEiffelDoc, "eiffelkw", FoldEiffelDocKeyWords);

@@ -1842,7 +1842,7 @@ static void ColourisePHPDoc(unsigned int startPos, int length, int initStyle, Wo
 	sc.Complete();
 }
 
-const LexerModule lmHTML(SCLEX_HTML, ColouriseHyperTextDoc, "hypertext");
-const LexerModule lmXML(SCLEX_XML, ColouriseHyperTextDoc, "xml");
-const LexerModule lmASP(SCLEX_ASP, ColouriseASPDoc, "asp");
-const LexerModule lmPHP(SCLEX_PHP, ColourisePHPDoc, "php");
+LexerModule lmHTML(SCLEX_HTML, ColouriseHyperTextDoc, "hypertext");
+LexerModule lmXML(SCLEX_XML, ColouriseHyperTextDoc, "xml");
+LexerModule lmASP(SCLEX_ASP, ColouriseASPDoc, "asp");
+LexerModule lmPHP(SCLEX_PHP, ColourisePHPDoc, "php");

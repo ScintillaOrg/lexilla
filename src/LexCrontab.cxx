@@ -202,4 +202,4 @@ static void ColouriseNncrontabDoc(unsigned int startPos, int length, int, WordLi
 	delete []buffer;
 }
 
-const LexerModule lmNncrontab(SCLEX_NNCRONTAB, ColouriseNncrontabDoc, "nncrontab");
+LexerModule lmNncrontab(SCLEX_NNCRONTAB, ColouriseNncrontabDoc, "nncrontab");

@@ -521,9 +521,9 @@ static void ColouriseLatexDoc(unsigned int startPos, int length, int initStyle,
 	styler.ColourTo(lengthDoc, state);
 }
 
-const LexerModule lmBatch(SCLEX_BATCH, ColouriseBatchDoc, "batch");
-const LexerModule lmDiff(SCLEX_DIFF, ColouriseDiffDoc, "diff");
-const LexerModule lmProps(SCLEX_PROPERTIES, ColourisePropsDoc, "props");
-const LexerModule lmMake(SCLEX_MAKEFILE, ColouriseMakeDoc, "makefile");
-const LexerModule lmErrorList(SCLEX_ERRORLIST, ColouriseErrorListDoc, "errorlist");
-const LexerModule lmLatex(SCLEX_LATEX, ColouriseLatexDoc, "latex");
+LexerModule lmBatch(SCLEX_BATCH, ColouriseBatchDoc, "batch");
+LexerModule lmDiff(SCLEX_DIFF, ColouriseDiffDoc, "diff");
+LexerModule lmProps(SCLEX_PROPERTIES, ColourisePropsDoc, "props");
+LexerModule lmMake(SCLEX_MAKEFILE, ColouriseMakeDoc, "makefile");
+LexerModule lmErrorList(SCLEX_ERRORLIST, ColouriseErrorListDoc, "errorlist");
+LexerModule lmLatex(SCLEX_LATEX, ColouriseLatexDoc, "latex");

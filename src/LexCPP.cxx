@@ -316,5 +316,5 @@ static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordLis
 	styler.SetLevel(lineCurrent, levelPrev | flagsNext);
 }
 
-const LexerModule lmCPP(SCLEX_CPP, ColouriseCppDoc, "cpp", FoldCppDoc);
-const LexerModule lmTCL(SCLEX_TCL, ColouriseCppDoc, "tcl", FoldCppDoc);
+LexerModule lmCPP(SCLEX_CPP, ColouriseCppDoc, "cpp", FoldCppDoc);
+LexerModule lmTCL(SCLEX_TCL, ColouriseCppDoc, "tcl", FoldCppDoc);

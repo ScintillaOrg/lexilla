@@ -238,4 +238,4 @@ static void FoldLuaDoc(unsigned int startPos, int length, int /* initStyle */, W
 	styler.SetLevel(lineCurrent, levelPrev | flagsNext);
 }
 
-const LexerModule lmLua(SCLEX_LUA, ColouriseLuaDoc, "lua", FoldLuaDoc);
+LexerModule lmLua(SCLEX_LUA, ColouriseLuaDoc, "lua", FoldLuaDoc);

@@ -230,4 +230,4 @@ static void ColouriseBullantDoc(unsigned int startPos, int length, int initStyle
 	}
 }
 
-const LexerModule lmBullant(SCLEX_BULLANT, ColouriseBullantDoc, "bullant");
+LexerModule lmBullant(SCLEX_BULLANT, ColouriseBullantDoc, "bullant");

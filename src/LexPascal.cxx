@@ -218,4 +218,4 @@ static void ColourisePascalDoc(unsigned int startPos, int length, int initStyle,
 	}
 }
 
-const LexerModule lmPascal(SCLEX_PASCAL, ColourisePascalDoc, "pascal");
+LexerModule lmPascal(SCLEX_PASCAL, ColourisePascalDoc, "pascal");

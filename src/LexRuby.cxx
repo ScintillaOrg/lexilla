@@ -352,4 +352,4 @@ static void FoldRbDoc(unsigned int startPos, int length, int initStyle,
 	}
 }
 						   
-const LexerModule lmRuby(SCLEX_RUBY, ColouriseRbDoc, "ruby", FoldRbDoc);
+LexerModule lmRuby(SCLEX_RUBY, ColouriseRbDoc, "ruby", FoldRbDoc);

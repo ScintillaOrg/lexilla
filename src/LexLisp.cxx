@@ -192,4 +192,4 @@ static void FoldLispDoc(unsigned int startPos, int length, int /* initStyle */, 
 	styler.SetLevel(lineCurrent, levelPrev | flagsNext);
 }
 
-const LexerModule lmLISP(SCLEX_LISP, ColouriseLispDoc, "lisp", FoldLispDoc);
+LexerModule lmLISP(SCLEX_LISP, ColouriseLispDoc, "lisp", FoldLispDoc);
