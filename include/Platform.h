@@ -403,7 +403,6 @@ public:
 	virtual int GetSelection()=0;
 	virtual int Find(const char *prefix)=0;
 	virtual void GetValue(int n, char *value, int len)=0;
-	virtual void Sort()=0;
 	virtual void RegisterImage(int type, const char *xpm_data)=0;
 	virtual void ClearRegisteredImages()=0;
 	virtual void SetDoubleClickAction(CallBackAction, void *)=0;

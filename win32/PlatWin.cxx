@@ -946,7 +946,6 @@ public:
 	virtual int GetSelection();
 	virtual int Find(const char *prefix);
 	virtual void GetValue(int n, char *value, int len);
-	virtual void Sort();
 	virtual void RegisterImage(int type, const char *xpm_data);
 	virtual void ClearRegisteredImages();
 	virtual void SetDoubleClickAction(CallBackAction, void *) {
@@ -1068,10 +1067,6 @@ void ListBoxX::GetValue(int n, char *value, int len) {
 	} else {
 		value[0] = '\0';
 	}
-}
-
-void ListBoxX::Sort() {
-	// Windows keeps sorted so no need to sort
 }
 
 void ListBoxX::RegisterImage(int type, const char *xpm_data) {

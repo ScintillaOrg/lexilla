@@ -1314,10 +1314,10 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 					int i = 0;
 					PangoLayoutIter *iter = pango_layout_get_iter (layout);
 					while (pango_layout_iter_next_cluster (iter)) {
-						pango_layout_iter_get_cluster_extents (iter, NULL, &pos);
+						pango_layout_iter_get_cluster_extents(iter, NULL, &pos);
 						positions[i++] = PANGO_PIXELS(pos.x);
 					}
-					pango_layout_iter_free (iter);
+					pango_layout_iter_free(iter);
 					if (useGFree) {
 						g_free(utfForm);
 					} else {
@@ -1408,7 +1408,7 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 				len = strlen(utfForm);
 			}
 			PangoLayoutLine *pangoLine = pango_layout_get_line(layout, 0);
-			pango_layout_line_get_extents (pangoLine, NULL, &pos);
+			pango_layout_line_get_extents(pangoLine, NULL, &pos);
 			if (useGFree) {
 				g_free(utfForm);
 			} else {
@@ -1779,7 +1779,6 @@ public:
 	virtual int GetSelection();
 	virtual int Find(const char *prefix);
 	virtual void GetValue(int n, char *value, int len);
-	virtual void Sort();
 	virtual void RegisterImage(int type, const char *xpm_data);
 	virtual void ClearRegisteredImages();
 	virtual void SetDoubleClickAction(CallBackAction action, void *data) {
@@ -1815,7 +1814,7 @@ void ListBoxX::Create(Window &, int, int, bool) {
 	id = gtk_window_new(GTK_WINDOW_POPUP);
 
 	GtkWidget *frame = gtk_frame_new(NULL);
-	gtk_widget_show (frame);
+	gtk_widget_show(frame);
 	gtk_container_add(GTK_CONTAINER(GetID()), frame);
 	gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_OUT);
 	gtk_container_set_border_width(GTK_CONTAINER(frame), 0);
@@ -1841,36 +1840,35 @@ void ListBoxX::Create(Window &, int, int, bool) {
 #else
 	/* Tree and its model */
 	GtkListStore *store =
-		gtk_list_store_new (N_COLUMNS, GDK_TYPE_PIXBUF, G_TYPE_STRING);
+		gtk_list_store_new(N_COLUMNS, GDK_TYPE_PIXBUF, G_TYPE_STRING);
 
-	list = gtk_tree_view_new_with_model (GTK_TREE_MODEL(store));
+	list = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	GtkTreeSelection *selection =
-		gtk_tree_view_get_selection (GTK_TREE_VIEW (list));
-	gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
+		gtk_tree_view_get_selection(GTK_TREE_VIEW(list));
+	gtk_tree_selection_set_mode(selection, GTK_SELECTION_SINGLE);
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(list), FALSE);
-	gtk_tree_view_set_reorderable (GTK_TREE_VIEW(list), FALSE);
+	gtk_tree_view_set_reorderable(GTK_TREE_VIEW(list), FALSE);
 
 	/* Columns */
-	GtkTreeViewColumn *column = gtk_tree_view_column_new ();
-	gtk_tree_view_column_set_sizing (column, GTK_TREE_VIEW_COLUMN_AUTOSIZE);
-	gtk_tree_view_column_set_title (column, "Autocomplete");
-	gtk_tree_view_column_set_sort_column_id (column, TEXT_COLUMN);
+	GtkTreeViewColumn *column = gtk_tree_view_column_new();
+	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_AUTOSIZE);
+	gtk_tree_view_column_set_title(column, "Autocomplete");
 
-	GtkCellRenderer *renderer = gtk_cell_renderer_pixbuf_new ();
-	gtk_tree_view_column_pack_start (column, renderer, FALSE);
-	gtk_tree_view_column_add_attribute (column, renderer,
+	GtkCellRenderer *renderer = gtk_cell_renderer_pixbuf_new();
+	gtk_tree_view_column_pack_start(column, renderer, FALSE);
+	gtk_tree_view_column_add_attribute(column, renderer,
 										"pixbuf", PIXBUF_COLUMN);
 
-	renderer = gtk_cell_renderer_text_new ();
-	gtk_tree_view_column_pack_start (column, renderer, TRUE);
-	gtk_tree_view_column_add_attribute (column, renderer,
+	renderer = gtk_cell_renderer_text_new();
+	gtk_tree_view_column_pack_start(column, renderer, TRUE);
+	gtk_tree_view_column_add_attribute(column, renderer,
 										"text", TEXT_COLUMN);
 
-	gtk_tree_view_append_column (GTK_TREE_VIEW (list), column);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
 	gtk_container_add(GTK_CONTAINER(PWidget(scroller)), PWidget(list));
 	gtk_widget_show(PWidget(list));
 
-	gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE(store),
+	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(store),
 										  TEXT_COLUMN, GTK_SORT_ASCENDING);
 
 	gtk_signal_connect(GTK_OBJECT(PWidget(list)), "button_press_event",
@@ -1940,8 +1938,8 @@ PRectangle ListBoxX::GetDesiredRect() {
 		int row_width=0;
 		int row_height=0;
 		GtkTreeViewColumn * column =
-			gtk_tree_view_get_column (GTK_TREE_VIEW (list), 0);
-		gtk_tree_view_column_cell_get_size (column, NULL,
+			gtk_tree_view_get_column(GTK_TREE_VIEW(list), 0);
+		gtk_tree_view_column_cell_get_size(column, NULL,
 			NULL, NULL, &row_width, &row_height);
 		int ythickness = PWidget(list)->style->ythickness;
 		height = (rows * row_height
@@ -1974,8 +1972,8 @@ void ListBoxX::Clear() {
 #if GTK_MAJOR_VERSION < 2
 	gtk_clist_clear(GTK_CLIST(list));
 #else
-	GtkTreeModel *model = gtk_tree_view_get_model (GTK_TREE_VIEW (list));
-	gtk_list_store_clear (GTK_LIST_STORE (model));
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(list));
+	gtk_list_store_clear(GTK_LIST_STORE(model));
 #endif
 	maxItemCharacters = 0;
 }
@@ -2017,9 +2015,9 @@ static void init_pixmap(ListImage *list_image) {
 	}
 #else
 	if (list_image->pixbuf)
-		gdk_pixbuf_unref (list_image->pixbuf);
+		gdk_pixbuf_unref(list_image->pixbuf);
 	list_image->pixbuf =
-		gdk_pixbuf_new_from_xpm_data ((const gchar**)xpm_lineform);
+		gdk_pixbuf_new_from_xpm_data((const gchar**)xpm_lineform);
 #endif
 	delete []xpm_lineformfromtext;
 }
@@ -2044,21 +2042,21 @@ void ListBoxX::Append(char *s, int type) {
 #else
 	GtkTreeIter iter;
 	GtkListStore *store =
-		GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (list)));
-	gtk_list_store_append (GTK_LIST_STORE (store), &iter);
+		GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(list)));
+	gtk_list_store_append(GTK_LIST_STORE(store), &iter);
 	if (list_image) {
 		if (NULL == list_image->pixbuf)
 			init_pixmap(list_image);
 		if (list_image->pixbuf) {
-			gtk_list_store_set (GTK_LIST_STORE (store), &iter,
+			gtk_list_store_set(GTK_LIST_STORE(store), &iter,
 								PIXBUF_COLUMN, list_image->pixbuf,
 								TEXT_COLUMN, s, -1);
 		} else {
-			gtk_list_store_set (GTK_LIST_STORE (store), &iter,
+			gtk_list_store_set(GTK_LIST_STORE(store), &iter,
 								TEXT_COLUMN, s, -1);
 		}
 	} else {
-			gtk_list_store_set (GTK_LIST_STORE (store), &iter,
+			gtk_list_store_set(GTK_LIST_STORE(store), &iter,
 								TEXT_COLUMN, s, -1);
 	}
 #endif
@@ -2072,8 +2070,8 @@ int ListBoxX::Length() {
 #if GTK_MAJOR_VERSION < 2
 		return GTK_CLIST(list)->rows;
 #else
-		return gtk_tree_model_iter_n_children (gtk_tree_view_get_model
-											   (GTK_TREE_VIEW (list)), NULL);
+		return gtk_tree_model_iter_n_children(gtk_tree_view_get_model
+											   (GTK_TREE_VIEW(list)), NULL);
 #endif
 	return 0;
 }
@@ -2083,18 +2081,21 @@ void ListBoxX::Select(int n) {
 	gtk_clist_select_row(GTK_CLIST(list), n, 0);
 	gtk_clist_moveto(GTK_CLIST(list), n, 0, 0.5, 0.5);
 #else
+	if (n < 0)
+		return;
+
 	GtkTreeIter iter;
-	GtkTreeModel *model = gtk_tree_view_get_model (GTK_TREE_VIEW(list));
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(list));
 	GtkTreeSelection *selection =
-		gtk_tree_view_get_selection (GTK_TREE_VIEW(list));
-	bool valid = gtk_tree_model_iter_nth_child (model, &iter, NULL, n);
+		gtk_tree_view_get_selection(GTK_TREE_VIEW(list));
+	bool valid = gtk_tree_model_iter_nth_child(model, &iter, NULL, n);
 	if (valid) {
-		gtk_tree_selection_select_iter (selection, &iter);
+		gtk_tree_selection_select_iter(selection, &iter);
 
 		// Move the scrollbar to show the selection.
 		int total = Length();
 		GtkAdjustment *adj =
-			gtk_tree_view_get_vadjustment (GTK_TREE_VIEW(list));
+			gtk_tree_view_get_vadjustment(GTK_TREE_VIEW(list));
 		gfloat value = ((gfloat)n / total) * (adj->upper - adj->lower)
 							+ adj->lower - adj->page_size / 2;
 
@@ -2102,8 +2103,8 @@ void ListBoxX::Select(int n) {
 		int row_width;
 		int row_height;
 		GtkTreeViewColumn * column =
-			gtk_tree_view_get_column (GTK_TREE_VIEW (list), 0);
-		gtk_tree_view_column_cell_get_size (column, NULL, NULL,
+			gtk_tree_view_get_column(GTK_TREE_VIEW(list), 0);
+		gtk_tree_view_column_cell_get_size(column, NULL, NULL,
 											NULL, &row_width, &row_height);
 
 		int rows = Length();
@@ -2120,7 +2121,7 @@ void ListBoxX::Select(int n) {
 					(adj->upper - adj->page_size) : value;
 
 		// Set it.
-		gtk_adjustment_set_value (adj, value);
+		gtk_adjustment_set_value(adj, value);
 	}
 #endif
 }
@@ -2132,10 +2133,10 @@ int ListBoxX::GetSelection() {
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
-	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (list));
-	if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
-		GtkTreePath *path = gtk_tree_model_get_path (model, &iter);
-		int *indices = gtk_tree_path_get_indices (path);
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(list));
+	if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
+		GtkTreePath *path = gtk_tree_model_get_path(model, &iter);
+		int *indices = gtk_tree_path_get_indices(path);
 		// Don't free indices.
 		if (indices)
 			return indices[0];
@@ -2157,17 +2158,16 @@ int ListBoxX::Find(const char *prefix) {
 #else
 	GtkTreeIter iter;
 	GtkTreeModel *model =
-		gtk_tree_view_get_model (GTK_TREE_VIEW(list));
-	bool valid = gtk_tree_model_get_iter_first (model, &iter);
+		gtk_tree_view_get_model(GTK_TREE_VIEW(list));
+	bool valid = gtk_tree_model_get_iter_first(model, &iter);
 	int i = 0;
-	while (valid)
-	{
+	while(valid) {
 		gchar *s;
-		gtk_tree_model_get (model, &iter, TEXT_COLUMN, &s, -1);
+		gtk_tree_model_get(model, &iter, TEXT_COLUMN, &s, -1);
 		if (s && (0 == strncmp(prefix, s, strlen(prefix)))) {
 			return i;
 		}
-		valid = gtk_tree_model_iter_next (model, &iter);
+		valid = gtk_tree_model_iter_next(model, &iter);
 		i++;
 	}
 #endif
@@ -2190,10 +2190,10 @@ void ListBoxX::GetValue(int n, char *value, int len) {
 	}
 #else
 	GtkTreeIter iter;
-	GtkTreeModel *model = gtk_tree_view_get_model (GTK_TREE_VIEW(list));
-	bool valid = gtk_tree_model_iter_nth_child (model, &iter, NULL, n);
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(list));
+	bool valid = gtk_tree_model_iter_nth_child(model, &iter, NULL, n);
 	if (valid) {
-		gtk_tree_model_get (model, &iter, TEXT_COLUMN, &text, -1);
+		gtk_tree_model_get(model, &iter, TEXT_COLUMN, &text, -1);
 	}
 #endif
 	if (text && len > 0) {
@@ -2202,17 +2202,6 @@ void ListBoxX::GetValue(int n, char *value, int len) {
 	} else {
 		value[0] = '\0';
 	}
-}
-
-void ListBoxX::Sort() {
-#if GTK_MAJOR_VERSION < 2
-	gtk_clist_sort(GTK_CLIST(list));
-#else
-	GtkTreeModel *model = gtk_tree_view_get_model (GTK_TREE_VIEW(list));
-	gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE(model),
-										  TEXT_COLUMN, GTK_SORT_ASCENDING);
-
-#endif
 }
 
 // g_return_if_fail causes unnecessary compiler warning in release compile.
@@ -2244,7 +2233,7 @@ void ListBoxX::RegisterImage(int type, const char *xpm_data) {
 		list_image->bitmap = 0;
 #else
 		if (list_image->pixbuf)
-			gdk_pixbuf_unref (list_image->pixbuf);
+			gdk_pixbuf_unref(list_image->pixbuf);
 		list_image->pixbuf = NULL;
 #endif
 		list_image->xpm_data = xpm_data;
