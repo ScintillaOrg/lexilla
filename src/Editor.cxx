@@ -2830,11 +2830,9 @@ void Editor::NotifySavePoint(bool isSavePoint) {
 }
 
 void Editor::NotifyModifyAttempt() {
-#ifdef INCLUDE_DEPRECATED_FEATURES
 	SCNotification scn;
 	scn.nmhdr.code = SCN_MODIFYATTEMPTRO;
 	NotifyParent(scn);
-#endif
 }
 
 void Editor::NotifyDoubleClick(Point, bool) {
