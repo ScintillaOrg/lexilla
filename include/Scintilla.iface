@@ -957,9 +957,11 @@ set void SetEdgeColour=2365(colour edgeColour,)
 fun void SearchAnchor=2366(,)
 
 # Find some text starting at the search anchor.
+# Does not ensure the selection is visible.
 fun int SearchNext=2367(int flags, string text)
 
 # Find some text starting at the search anchor and moving backwards.
+# Does not ensure the selection is visible.
 fun int SearchPrev=2368(int flags, string text)
 
 # Show caret within N lines of edge when it's scrolled to view
