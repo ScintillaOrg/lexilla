@@ -524,7 +524,7 @@ static unsigned int LengthWord(const char *word, char otherSeparator) {
  */
 class WordAccumulator {
 	/// How many characters will be pre-allocated (to avoid buffer reallocation on each new word)
-	enum {wordChunk = 100};
+	enum {wordChunk = 1000};
 	/// Length of the returned buffer of words (string)
 	unsigned int length; 
 	/// Allocated size of the buffer
