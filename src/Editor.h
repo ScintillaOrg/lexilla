@@ -218,6 +218,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int scrollWidth;
 	bool verticalScrollBarVisible;
 	bool endAtLastLine;
+	bool caretSticky;
 
 	Surface *pixmapLine;
 	Surface *pixmapSelMargin;

@@ -607,11 +607,11 @@ get int AutoCGetTypeSeparator=2285(,)
 # Default is '?' but can be changed if items contain '?'.
 set void AutoCSetTypeSeparator=2286(int separatorCharacter,)
 
-# Set the maximum width, in characters, of auto-completion and user lists. 
+# Set the maximum width, in characters, of auto-completion and user lists.
 # Set to 0 to autosize to fit longest item, which is the default.
 set void AutoCSetMaxWidth=2208(int characterCount,)
 
-# Get the maximum width, in characters, of auto-completion and user lists. 
+# Get the maximum width, in characters, of auto-completion and user lists.
 get int AutoCGetMaxWidth=2209(,)
 
 # Set the maximum height, in rows, of auto-completion and user lists.
@@ -1613,9 +1613,18 @@ fun void SetLengthForEncode=2448(int bytes,)
 # On error return 0.
 fun int EncodedFromUTF8=2449(string utf8, stringresult encoded)
 
-# Find the position of a column on a line taking into account tabs and 
+# Find the position of a column on a line taking into account tabs and
 # multi-byte characters. If beyond end of line, return line end position.
 fun int FindColumn=2456(int line, int column)
+
+# Can the caret preferred x position only be changed by explicit movement commands?
+get bool GetCaretSticky=2457(,)
+
+# Stop the caret preferred x position changing when the user types.
+set void SetCaretSticky=2458(bool useCaretStickyBehaviour,)
+
+# Switch between sticky and non-sticky: meant to be bound to a key.
+fun void ToggleCaretSticky=2459(,)
 
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)

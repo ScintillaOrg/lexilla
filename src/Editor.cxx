@@ -344,6 +344,7 @@ Editor::Editor() {
 	scrollWidth = 2000;
 	verticalScrollBarVisible = true;
 	endAtLastLine = true;
+	caretSticky = false;
 
 	pixmapLine = Surface::Allocate();
 	pixmapSelMargin = Surface::Allocate();
@@ -3224,7 +3225,9 @@ void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 	EnsureCaretVisible();
 	// Avoid blinking during rapid typing:
 	ShowCaretAtCurrentPosition();
-	SetLastXChosen();
+	if (!caretSticky) {
+		SetLastXChosen();
+	}
 
 	if (treatAsDBCS) {
 		NotifyChar((static_cast<unsigned char>(s[0]) << 8) |
@@ -4253,22 +4256,30 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		break;
 	case SCI_DELETEBACK:
 		DelCharBack(true);
-		SetLastXChosen();
+		if (!caretSticky) {
+			SetLastXChosen();
+		}
 		EnsureCaretVisible();
 		break;
 	case SCI_DELETEBACKNOTLINE:
 		DelCharBack(false);
-		SetLastXChosen();
+		if (!caretSticky) {
+			SetLastXChosen();
+		}
 		EnsureCaretVisible();
 		break;
 	case SCI_TAB:
 		Indent(true);
-		SetLastXChosen();
+		if (!caretSticky) {
+			SetLastXChosen();
+		}
 		EnsureCaretVisible();
 		break;
 	case SCI_BACKTAB:
 		Indent(false);
-		SetLastXChosen();
+		if (!caretSticky) {
+			SetLastXChosen();
+		}
 		EnsureCaretVisible();
 		break;
 	case SCI_NEWLINE:
@@ -5647,7 +5658,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_PASTE:
 		Paste();
-		SetLastXChosen();
+		if (!caretSticky) {
+			SetLastXChosen();
+		}
 		EnsureCaretVisible();
 		break;
 
@@ -6346,6 +6359,20 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETENDATLASTLINE:
 		return endAtLastLine;
+
+	case SCI_SETCARETSTICKY:
+		PLATFORM_ASSERT((wParam == 0) || (wParam == 1));
+		if (caretSticky != (wParam != 0)) {
+			caretSticky = wParam != 0;
+		}
+		break;
+
+	case SCI_GETCARETSTICKY:
+		return caretSticky;
+
+	case SCI_TOGGLECARETSTICKY:
+		caretSticky = !caretSticky;
+		break;
 
 	case SCI_GETCOLUMN:
 		return pdoc->GetColumn(wParam);

@@ -597,6 +597,9 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_SETLENGTHFORENCODE 2448
 #define SCI_ENCODEDFROMUTF8 2449
 #define SCI_FINDCOLUMN 2456
+#define SCI_GETCARETSTICKY 2457
+#define SCI_SETCARETSTICKY 2458
+#define SCI_TOGGLECARETSTICKY 2459
 #define SCI_STARTRECORD 3001
 #define SCI_STOPRECORD 3002
 #define SCI_SETLEXER 4001
