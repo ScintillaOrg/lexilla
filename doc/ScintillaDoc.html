@@ -538,12 +538,18 @@ SCI_AUTOCACTIVE
 SCI_AUTOCPOSSTART
 SCI_AUTOCCOMPLETE
 SCI_AUTOCSTOPS(&lt;unused&gt;,char *chars)
+SCI_AUTOCSETSEPARATOR(char separator)
+SCI_AUTOCGETSEPARATOR
+SCI_AUTOCSELECT(&lt;unused&gt;,char *stringtoselect)
 </pre>
     <p>
        Auto completion displays a list box based upon the users typing showing likely identifiers.
       The SCI_AUTOCSHOW message causes this list to be displayed, with its argument being a list of
-      words separated by space characters. SCI_AUTOCPOSSTART returns the value of the current
+      words separated by separator characters. The initial separator character is a space but this can 
+      be set  or got with SCI_AUTOCSETSEPARATOR and SCI_AUTOCGETSEPARATOR.
+      SCI_AUTOCPOSSTART returns the value of the current
       position when SCI_AUTOCSHOW started display of the list.
+      An entry can be selected SCI_AUTOCSELECT.
     </p>
     <p>
        The current selection can be triggered with the SCI_AUTOCCOMPLETE message. This has the same
