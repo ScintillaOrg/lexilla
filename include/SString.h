@@ -41,15 +41,16 @@ inline char *StringDup(
 
 /**
  * @brief A simple string class.
+ *
  * Hold the length of the string for quick operations,
  * can have a buffer bigger than the string to avoid too many memory allocations and copies.
  * May have embedded zeroes as a result of @a substitute, but rely too heavily on C string
  * functions to allow reliable manipulations of these strings.
  **/
 class SString {
-	char *s;			///< The C string
-	int sSize;	///< The size of the buffer, less 1: ie. the maximum size of the string
-	int sLen;	///< The size of the string in s
+	char *s;		///< The C string
+	int sSize;		///< The size of the buffer, less 1: ie. the maximum size of the string
+	int sLen;		///< The size of the string in s
 	int sizeGrowth;	///< Minimum growth size when appending strings
 	enum { sizeGrowthDefault = 64 };
 	bool grow(int lenNew) {
@@ -113,7 +114,7 @@ public:
 	int length() const {
 		return sLen;
 	}
-	SString &assign(const char* sOther, int sSize_ = -1) {
+	SString &assign(const char *sOther, int sSize_ = -1) {
 		if (!sOther) {
 			sSize_ = 0;
 		}
@@ -199,12 +200,14 @@ public:
 		else
 			return '\0';
 	}
-	SString &append(const char* sOther, int sLenOther=-1, char sep=0) {
-		if (sLenOther < 0)
+	SString &append(const char *sOther, int sLenOther=-1, char sep=0) {
+		if (sLenOther < 0) {
 			sLenOther = strlen(sOther);
+		}
 		int lenSep = 0;
-		if (sLen && sep)	// Only add a separator if not empty
+		if (sLen && sep) {	// Only add a separator if not empty
 			lenSep = 1;
+		}
 		int lenNew = sLen + sLenOther + lenSep;
 		// Conservative about growing the buffer: don't do it, unless really needed
 		if ((lenNew + 1 < sSize) || (grow(lenNew))) {
@@ -218,19 +221,19 @@ public:
 		}
 		return *this;
 	}
-	SString &operator +=(const char *sOther) {
+	SString &operator+=(const char *sOther) {
 		return append(sOther, -1);
 	}
-	SString &operator +=(const SString &sOther) {
+	SString &operator+=(const SString &sOther) {
 		return append(sOther.s, sOther.sSize);
 	}
-	SString &operator +=(char ch) {
+	SString &operator+=(char ch) {
 		return append(&ch, 1);
 	}
-	SString &appendwithseparator(const char* sOther, char sep) {
+	SString &appendwithseparator(const char *sOther, char sep) {
 		return append(sOther, strlen(sOther), sep);
 	}
-	SString &insert(int pos, const char* sOther, int sLenOther=-1) {
+	SString &insert(int pos, const char *sOther, int sLenOther=-1) {
 		if (sLenOther < 0)
 			sLenOther = strlen(sOther);
 		int lenNew = sLen + sLenOther;
