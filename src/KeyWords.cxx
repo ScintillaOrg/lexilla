@@ -63,7 +63,7 @@ const LexerModule *LexerModule::Find(const char *languageName) {
 void LexerModule::Lex(unsigned int startPos, int lengthDoc, int initStyle,
 	  WordList *keywordlists[], Accessor &styler) const {
 	if (fnLexer)
-		fnLexer(startPos, lengthDoc, initStyle, keywordlists, styler);
+		fnLexer(startPos, lengthDoc-1, initStyle, keywordlists, styler);
 }
 
 void LexerModule::Fold(unsigned int startPos, int lengthDoc, int initStyle,

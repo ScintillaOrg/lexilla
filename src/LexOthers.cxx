@@ -131,7 +131,7 @@ static void ColouriseBatchDoc(
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
 	unsigned int linePos = 0, startLine = startPos;
-	for (unsigned int i = startPos; i <= startPos + length; i++) {
+	for (unsigned int i = startPos; i < startPos + length; i++) {
 		lineBuffer[linePos++] = styler[i];
 		if (styler[i] == '\r' || styler[i] == '\n' || (linePos >=
 		        sizeof(lineBuffer) - 1)) {
@@ -229,7 +229,7 @@ static void ColourisePropsDoc(unsigned int startPos, int length, int, WordList *
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
 	unsigned int linePos = 0, startLine = startPos;
-	for (unsigned int i = startPos; i <= startPos + length; i++) {
+	for (unsigned int i = startPos; i < startPos + length; i++) {
 		lineBuffer[linePos++] = styler[i];
 		if ((styler[i] == '\r' && styler.SafeGetCharAt(i + 1) != '\n') ||
 		        styler[i] == '\n' ||
@@ -296,9 +296,9 @@ static void ColouriseMakeLine(
 		i++;
 	}
 	if (state == SCE_MAKE_IDENTIFIER) {
-		styler.ColourTo(endPos, SCE_MAKE_IDEOL);	// Error, variable reference not ended
+		styler.ColourTo(endPos-1, SCE_MAKE_IDEOL);	// Error, variable reference not ended
 	} else {
-		styler.ColourTo(endPos, SCE_MAKE_DEFAULT);
+		styler.ColourTo(endPos-1, SCE_MAKE_DEFAULT);
 	}
 }
 
@@ -307,7 +307,7 @@ static void ColouriseMakeDoc(unsigned int startPos, int length, int, WordList *[
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
 	unsigned int linePos = 0, startLine = startPos;
-	for (unsigned int i = startPos; i <= startPos + length; i++) {
+	for (unsigned int i = startPos; i < startPos + length; i++) {
 		lineBuffer[linePos++] = styler[i];
 		if (styler[i] == '\r' || styler[i] == '\n' || (linePos >= sizeof(lineBuffer) - 1)) {
 			lineBuffer[linePos] = '\0';
@@ -409,7 +409,7 @@ static void ColouriseErrorListDoc(unsigned int startPos, int length, int, WordLi
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
 	unsigned int linePos = 0;
-	for (unsigned int i = startPos; i <= startPos + length; i++) {
+	for (unsigned int i = startPos; i < startPos + length; i++) {
 		lineBuffer[linePos++] = styler[i];
 		if (styler[i] == '\r' || styler[i] == '\n' || (linePos >= sizeof(lineBuffer) - 1)) {
 			ColouriseErrorListLine(lineBuffer, linePos, i, styler);

@@ -294,9 +294,9 @@ static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
 		chPrev = ch;
 	}
 	if (state == SCE_P_WORD) {
-		ClassifyWordRb(styler.GetStartSegment(), lengthDoc, keywords, styler, prevWord);
+		ClassifyWordRb(styler.GetStartSegment(), lengthDoc-1, keywords, styler, prevWord);
 	} else {
-		styler.ColourTo(lengthDoc, state);
+		styler.ColourTo(lengthDoc-1, state);
 	}
 }
 
