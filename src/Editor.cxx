@@ -3888,13 +3888,8 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		}
 		break;
 	case SCI_LINECUT: {
-			int lineStart = pdoc->LineFromPosition(currentPos);
-			int lineEnd = pdoc->LineFromPosition(anchor);
-			if (lineStart > lineEnd) {
-				int t = lineEnd;
-				lineEnd = lineStart;
-				lineStart = t;
-			}
+			int lineStart = pdoc->LineFromPosition(SelectionStart());
+			int lineEnd = pdoc->LineFromPosition(SelectionEnd());
 			int start = pdoc->LineStart(lineStart);
 			int end = pdoc->LineStart(lineEnd + 1);
 			SetSelection(start, end);
@@ -4197,7 +4192,7 @@ char *Editor::CopyRange(int start, int end) {
 }
 
 void Editor::CopySelectionFromRange(SelectionText *ss, int start, int end) {
-	ss->Set(CopyRange(start, end), end - start, false);
+	ss->Set(CopyRange(start, end), end - start + 1, false);
 }
 
 void Editor::CopySelectionRange(SelectionText *ss) {
@@ -4228,7 +4223,7 @@ void Editor::CopySelectionRange(SelectionText *ss) {
 				text[size] = '\0';
 			}
 		}
-		ss->Set(text, size, true);
+		ss->Set(text, size + 1, true);
 	} else {
 		CopySelectionFromRange(ss, SelectionStart(), SelectionEnd());
 	}
@@ -4236,7 +4231,7 @@ void Editor::CopySelectionRange(SelectionText *ss) {
 
 void Editor::CopyRangeToClipboard(int start, int end) {
 	SelectionText selectedText;
-	selectedText.Set(CopyRange(start, end), end - start);
+	selectedText.Set(CopyRange(start, end), end - start + 1);
 	CopyToClipboard(selectedText);
 }
 
