@@ -34,6 +34,8 @@ void FontNames::Clear() {
 }
 
 const char *FontNames::Save(const char *name) {
+	if (!name)
+		return 0;
 	for (int i=0;i<max;i++) {
 		if (strcmp(names[i], name) == 0) {
 			return names[i];
