@@ -3452,6 +3452,7 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 		CheckForChangeOutsidePaint(Range(mh.position, mh.position + mh.length));
 	}
 	if (mh.modificationType & SC_MOD_CHANGESTYLE) {
+		pdoc->IncrementStyleClock();
 		if (paintState == notPainting) {
 			if (mh.position < pdoc->LineStart(topLine)) {
 				// Styling performed before this view

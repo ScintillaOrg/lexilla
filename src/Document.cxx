@@ -1246,16 +1246,20 @@ bool Document::SetStyles(int length, char *styles) {
 
 bool Document::EnsureStyledTo(int pos) {
 	if (pos > GetEndStyled()) {
-		styleClock++;
-		if (styleClock > 0x100000) {
-			styleClock = 0;
-		}
+		IncrementStyleClock();
 		// Ask the watchers to style, and stop as soon as one responds.
 		for (int i = 0; pos > GetEndStyled() && i < lenWatchers; i++) {
 			watchers[i].watcher->NotifyStyleNeeded(this, watchers[i].userData, pos);
 		}
 	}
 	return pos <= GetEndStyled();
+}
+
+void Document::IncrementStyleClock() {
+	styleClock++;
+	if (styleClock > 0x100000) {
+		styleClock = 0;
+	}
 }
 
 bool Document::AddWatcher(DocWatcher *watcher, void *userData) {
