@@ -63,10 +63,10 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_SETANCHOR 2026
 #define SCI_GETCURLINE 2027
 #define SCI_GETENDSTYLED 2028
-#define SCI_CONVERTEOLS 2029
 #define SC_EOL_CRLF 0
 #define SC_EOL_CR 1
 #define SC_EOL_LF 2
+#define SCI_CONVERTEOLS 2029
 #define SCI_GETEOLMODE 2030
 #define SCI_SETEOLMODE 2031
 #define SCI_STARTSTYLING 2032
