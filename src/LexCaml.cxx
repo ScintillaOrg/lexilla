@@ -9,6 +9,7 @@
 	20050205 Quick compiler standards/"cleanliness" adjustment.
 	20050206 Added cast for IsLeadByte().
 	20050209 Changes to "external" build support.
+	20050306 Fix for 1st-char-in-doc "corner" case.
 */
 
 #include <stdlib.h>
@@ -353,7 +354,8 @@ void ColouriseCamlDoc(
 
 		// handle state change and char coloring as required
 		if (state2 >= 0) {
-			if (chColor > 0)
+			// (1st char will NOT be colored until AT LEAST 2nd char)
+			if (chColor >= 0)
 				styler.ColourTo(chColor, state);
 			state = state2;
 		}
@@ -362,7 +364,7 @@ void ColouriseCamlDoc(
 
 	// do terminal char coloring (JIC)
 	styler.ColourTo(i, state);
-//	styler.Flush();	// (is this always called by calling code?)
+//	styler.Flush();	// (is this always done by calling code?)
 }
 
 #ifdef BUILD_AS_EXTERNAL_LEXER
