@@ -43,12 +43,13 @@ bool AutoComplete::Active() {
 	return active;
 }
 
-void AutoComplete::Start(Window &parent, int ctrlID, int position,
-	int startLen_, int lineHeight, bool unicodeMode) {
+void AutoComplete::Start(Window &parent, int ctrlID, 
+	int position, Point location, int startLen_, 
+	int lineHeight, bool unicodeMode) {
 	if (active) {
 		Cancel();
 	}
-	lb->Create(parent, ctrlID, lineHeight, unicodeMode);
+	lb->Create(parent, ctrlID, location, lineHeight, unicodeMode);
 	lb->Clear();
 	active = true;
 	startLen = startLen_;
@@ -90,32 +91,7 @@ char AutoComplete::GetTypesep() {
 }
 
 void AutoComplete::SetList(const char *list) {
-	lb->Clear();
-	char *words = new char[strlen(list) + 1];
-	if (words) {
-		strcpy(words, list);
-		char *startword = words;
-		char *numword = NULL;
-		int i = 0;
-		for (; words && words[i]; i++) {
-			if (words[i] == separator) {
-				words[i] = '\0';
-				if (numword)
-					*numword = '\0';
-				lb->Append(startword, numword?atoi(numword + 1):-1);
-				startword = words + i + 1;
-				numword = NULL;
-			} else if (words[i] == typesep) {
-				numword = words + i;
-			}
-		}
-		if (startword) {
-			if (numword)
-				*numword = '\0';
-			lb->Append(startword, numword?atoi(numword + 1):-1);
-		}
-		delete []words;
-	}
+	lb->SetList(list, separator, typesep);
 }
 
 void AutoComplete::Show(bool show) {
@@ -126,6 +102,7 @@ void AutoComplete::Show(bool show) {
 
 void AutoComplete::Cancel() {
 	if (lb->Created()) {
+		lb->Clear();
 		lb->Destroy();
 		active = false;
 	}
