@@ -339,9 +339,15 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	int scriptLanguage = ScriptOfState(state);
 
 	bool fold = styler.GetPropertyInt("fold");
+//	bool wrapFold = styler.GetPropertyInt("fold.wrap");
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
-	int visibleChars = 0;
+	int visibleChars;
+
+//	if (!wrapFold)
+		visibleChars = 0;
+//	else
+//		visibleChars = 1;
 
 	char chPrev = ' ';
 	char ch = ' ';
@@ -364,8 +370,12 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			continue;
 		}
 
-		if (fold && !isspacechar(ch))
+//		if (!isspacechar(ch) && fold && !wrapFold)
+		if (!isspacechar(ch) && fold)
 			visibleChars++;
+
+		// decide what is the current state to print (depending of the script tag)
+		StateToPrint = statePrintForState(state, inScriptType);
 
 		// handle script folding
 		if (fold) {
@@ -406,9 +416,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			}
 		}
 
-		// decide what is the current state to print (depending of the script tag)
-		StateToPrint = statePrintForState(state, inScriptType);
-
 		if ((ch == '\r' && chNext != '\n') || (ch == '\n')) {
 			// Trigger on CR only (Mac style) or either on LF from CR+LF (Dos/Win) or on LF alone (Unix)
 			// Avoid triggering two times on Dos/Win
@@ -419,8 +426,9 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					lev |= SC_FOLDLEVELWHITEFLAG;
 				if ((levelCurrent > levelPrev) && (visibleChars > 0))
 					lev |= SC_FOLDLEVELHEADERFLAG;
+//				if (wrapFold)
+//					visibleChars = 0;
 				styler.SetLevel(lineCurrent, lev);
-				visibleChars = 0;
 				levelPrev = levelCurrent;
 			}
 			lineCurrent++;
@@ -451,12 +459,13 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				break;
 			default :
 				// maybe we should check here if it's a tag and if it's SCRIPT
-
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_H_TAGUNKNOWN;
 				inScriptType = eHtml;
 				scriptLanguage = eScriptNone;
 				i += 2;
+				// unfold closing script
+				levelCurrent--;
 				continue;
 			}
 		}
@@ -478,6 +487,10 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				inScriptType = eNonHtmlScriptPreProc;
 			else
 				inScriptType = eNonHtmlPreProc;
+			// fold whole script
+			levelCurrent++;
+			// should be better
+			ch = styler.SafeGetCharAt(i);
 			continue;
 		}
 
@@ -503,6 +516,10 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				state = StateForScript(defaultScript);
 			}
 			styler.ColourTo(i, SCE_H_ASP);
+			// fold whole script
+			levelCurrent++;
+			// should be better
+			ch = styler.SafeGetCharAt(i);
 			continue;
 		}
 
@@ -542,6 +559,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			else
 				inScriptType = eHtml;
 			scriptLanguage = eScriptNone;
+			// unfold all scripting languages
+			levelCurrent--;
 			continue;
 		}
 		/////////////////////////////////////
@@ -549,10 +568,18 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		switch (state) {
 		case SCE_H_DEFAULT:
 			if (ch == '<') {
-				styler.ColourTo(i - 1, StateToPrint);
-				if (chNext == '!' && chNext2 == '-' && styler.SafeGetCharAt(i + 3) == '-')
-					state = SCE_H_COMMENT;
+				// in HTML, fold on tag open and unfold on tag close
+				if (chNext == '/')
+					levelCurrent--;
 				else
+					levelCurrent++;
+
+				styler.ColourTo(i - 1, StateToPrint);
+				if (chNext == '!' && chNext2 == '-' && styler.SafeGetCharAt(i + 3) == '-') {
+					// should be better
+					i += 3;
+					state = SCE_H_COMMENT;
+				} else
 					state = SCE_H_TAGUNKNOWN;
 			} else if (ch == '&') {
 				styler.ColourTo(i - 1, SCE_H_DEFAULT);
@@ -561,6 +588,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			break;
 		case SCE_H_COMMENT:
 			if ((ch == '>') && (chPrev == '-') && (chPrev2 == '-')) {
+				// unfold HTML comment
+				levelCurrent--;
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_H_DEFAULT;
 			}
@@ -590,23 +619,31 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					eClass = SCE_H_TAG;
 				}
 				if (ch == '>') {
-					styler.ColourTo(i, SCE_H_TAG);
+					styler.ColourTo(i, eClass);
 					if (inScriptType == eNonHtmlScript) {
 						state = StateForScript(scriptLanguage);
 					} else {
 						state = SCE_H_DEFAULT;
 					}
 			    } else if (ch == '/' && chNext == '>') {
-				    styler.ColourTo(i - 1, StateToPrint);
-				    styler.ColourTo(i + 1, SCE_H_TAGEND);
+					// disable folding on self-closing tags
+					levelCurrent--;
+					if (eClass == SCE_H_TAGUNKNOWN) {
+					    styler.ColourTo(i + 1, SCE_H_TAGUNKNOWN);
+					} else {
+					    styler.ColourTo(i - 1, StateToPrint);
+					    styler.ColourTo(i + 1, SCE_H_TAGEND);
+					}
 				    i++;
 				    ch = chNext;
 				    state = SCE_H_DEFAULT;
 				} else {
-					if (eClass == SCE_H_CDATA) {
-						state = SCE_H_CDATA;
-					} else {
-						state = SCE_H_OTHER;
+					if (eClass != SCE_H_TAGUNKNOWN) {
+						if (eClass == SCE_H_CDATA) {
+							state = SCE_H_CDATA;
+						} else {
+							state = SCE_H_OTHER;
+						}
 					}
 				}
 			}
@@ -654,6 +691,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_H_VALUE;
 			} else if (ch == '/' && chNext == '>') {
+				// disable folding on self-closing tags
+				levelCurrent--;
 				styler.ColourTo(i - 1, StateToPrint);
 				styler.ColourTo(i + 1, SCE_H_TAGEND);
 				i++;
@@ -873,7 +912,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				state = SCE_HB_COMMENTLINE;
 			} else if (isoperator(ch)) {
 				styler.ColourTo(i - 1, StateToPrint);
-				styler.ColourTo(i, statePrintForState(SCE_HB_DEFAULT, inScriptType));
+				styler.ColourTo(i, SCE_HB_DEFAULT);
 				state = SCE_HB_DEFAULT;
 			} else if ((ch == ' ') || (ch == '\t')) {
 				if (state == SCE_HB_START) {
