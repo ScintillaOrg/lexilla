@@ -35,6 +35,8 @@
 
 #include "gtk/gtksignal.h"
 
+#define USE_XIM 1
+
 class ScintillaGTK : public ScintillaBase {
 	_ScintillaObject *sci;
 	Window scrollbarv;
@@ -49,6 +51,10 @@ class ScintillaGTK : public ScintillaBase {
 	char *primarySelectionCopy;
 
 	static GdkAtom clipboard_atom;
+
+	// Input context used for supporting internationalized key entry
+	GdkIC     *ic;
+	GdkICAttr *ic_attr;
 
 public:
 	ScintillaGTK(_ScintillaObject *sci_);
@@ -90,6 +96,11 @@ private:
 	void Resize(int width, int height);
 	
 	// Callback functions
+#ifdef USE_XIM
+	static gint Realize(GtkWidget *widget, ScintillaGTK *sciThis);
+	static gint UnRealize(GtkWidget *widget, ScintillaGTK *sciThis);
+	static gint CursorMoved(GtkWidget *widget, int xoffset, int yoffset, ScintillaGTK *sciThis);
+#endif
 	static gint FocusIn(GtkWidget *widget, GdkEventFocus *event, ScintillaGTK *sciThis);
 	static gint FocusOut(GtkWidget *widget, GdkEventFocus *event, ScintillaGTK *sciThis);
 	static gint Expose(GtkWidget *widget, GdkEventExpose *ose, ScintillaGTK *sciThis);
@@ -149,7 +160,7 @@ ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 	adjustmentv(0), adjustmenth(0), 
 	pasteBuffer(0), pasteBufferIsRectangular(false), 
 	capturedMouse(false), dragWasDropped(false),
-	primarySelectionCopy(0) {
+	primarySelectionCopy(0), ic(NULL), ic_attr(NULL) {
 	sci = sci_;
 	wMain = GTK_WIDGET(sci);
 	
@@ -160,12 +171,104 @@ ScintillaGTK::~ScintillaGTK() {
 	delete []primarySelectionCopy;
 }
 
+#ifdef USE_XIM
+gint ScintillaGTK::Realize(GtkWidget *widget, ScintillaGTK *sciThis) {
+	//Platform::DebugPrintf("ScintillaGTK::realize in %x\n", sciThis);
+	if (gdk_im_ready () && (sciThis->ic_attr = gdk_ic_attr_new ()) != NULL) {
+		gint width, height;
+		GdkColormap *colormap;
+		GdkEventMask mask;
+		GdkICAttr *attr = sciThis->ic_attr;
+		GdkICAttributesType attrmask = GDK_IC_ALL_REQ;
+		GdkIMStyle style;
+		GdkIMStyle supported_style = GDK_IM_PREEDIT_NONE | 
+													 GDK_IM_PREEDIT_NOTHING |
+													 GDK_IM_PREEDIT_POSITION |
+													 GDK_IM_STATUS_NONE |
+													 GDK_IM_STATUS_NOTHING;
+		  
+		if (widget->style && widget->style->font->type != GDK_FONT_FONTSET)
+			supported_style &= ~GDK_IM_PREEDIT_POSITION;
+		  
+		attr->style = style = gdk_im_decide_style (supported_style);
+		attr->client_window = widget->window;
+
+		if ((colormap = gtk_widget_get_colormap (widget)) != gtk_widget_get_default_colormap ()) {
+			attrmask |= GDK_IC_PREEDIT_COLORMAP;
+			attr->preedit_colormap = colormap;
+		}
+
+		switch (style & GDK_IM_PREEDIT_MASK) {
+			case GDK_IM_PREEDIT_POSITION:
+			if (widget->style && widget->style->font->type != GDK_FONT_FONTSET)	{
+				g_warning ("over-the-spot style requires fontset");
+				break;
+			}
+
+			attrmask |= GDK_IC_PREEDIT_POSITION_REQ;
+			gdk_window_get_size (widget->window, &width, &height);
+			attr->spot_location.x = 0;
+			attr->spot_location.y = height;
+			attr->preedit_area.x = 0;
+			attr->preedit_area.y = 0;
+			attr->preedit_area.width = width;
+			attr->preedit_area.height = height;
+			attr->preedit_fontset = widget->style->font;
+	  
+			break;
+		}
+		sciThis->ic = gdk_ic_new (attr, attrmask);
+		  
+		if (sciThis->ic == NULL)
+			g_warning ("Can't create input context.");
+		else {
+			mask = gdk_window_get_events (widget->window);
+			mask |= gdk_ic_get_events (sciThis->ic);
+			gdk_window_set_events (widget->window, mask);
+	  
+			if (GTK_WIDGET_HAS_FOCUS (widget))
+				gdk_im_begin (sciThis->ic, widget->window);
+		}
+	}
+	return FALSE;
+}
+
+gint ScintillaGTK::UnRealize(GtkWidget *, ScintillaGTK *sciThis) {
+	if (sciThis->ic) {
+		gdk_ic_destroy (sciThis->ic);
+		sciThis->ic = NULL;
+	}
+	if (sciThis->ic_attr) {
+		gdk_ic_attr_destroy (sciThis->ic_attr);
+		sciThis->ic_attr = NULL;
+	}
+  return FALSE;
+}
+
+gint ScintillaGTK::CursorMoved(GtkWidget *widget, int xoffset, int yoffset, ScintillaGTK *sciThis) {
+  if (GTK_WIDGET_HAS_FOCUS(widget) && gdk_im_ready() && sciThis->ic && 
+     (gdk_ic_get_style (sciThis->ic) & GDK_IM_PREEDIT_POSITION)) {
+	  sciThis->ic_attr->spot_location.x = xoffset;
+	  sciThis->ic_attr->spot_location.y = yoffset;
+	  gdk_ic_set_attr (sciThis->ic, sciThis->ic_attr, GDK_IC_SPOT_LOCATION);
+	}
+  return FALSE;
+}
+
+#endif
+
 gint ScintillaGTK::FocusIn(GtkWidget *widget, GdkEventFocus * /*event*/, ScintillaGTK *sciThis) {
 	//Platform::DebugPrintf("ScintillaGTK::focus in %x\n", sciThis);
 	GTK_WIDGET_SET_FLAGS(widget, GTK_HAS_FOCUS);
 	sciThis->NotifyFocus(true);
 	sciThis->ShowCaretAtCurrentPosition();
 	sciThis->InvalidateCaret();
+
+#ifdef USE_XIM
+  if (sciThis->ic)
+    gdk_im_begin (sciThis->ic, widget->window);
+#endif
+
 	return FALSE;
 }
 
@@ -174,6 +277,11 @@ gint ScintillaGTK::FocusOut(GtkWidget *widget, GdkEventFocus * /*event*/, Scinti
 	GTK_WIDGET_UNSET_FLAGS(widget, GTK_HAS_FOCUS);
 	sciThis->NotifyFocus(false);
 	sciThis->DropCaret();
+  
+#ifdef USE_XIM
+  gdk_im_end ();
+#endif
+  
 	return FALSE;
 }
 
@@ -189,6 +297,16 @@ void ScintillaGTK::Initialise() {
                        	GDK_KEY_PRESS_MASK
                        	| GDK_KEY_RELEASE_MASK
                        	| GDK_FOCUS_CHANGE_MASK);
+
+#ifdef USE_XIM
+	gtk_signal_connect(GTK_OBJECT(wMain.GetID()), "realize",
+										GtkSignalFunc(Realize), this);
+	gtk_signal_connect(GTK_OBJECT(wMain.GetID()), "unrealize",
+										GtkSignalFunc(UnRealize), this);
+//	gtk_signal_connect(GTK_OBJECT(wMain.GetID()), "cursor_moved",
+//										GtkSignalFunc(CursorMoved), this);
+#endif
+
 	// Using "after" connect to avoid main window using cursor keys
 	// to move focus.
 	//gtk_signal_connect(GTK_OBJECT(wMain), "key_press_event",
@@ -719,9 +837,23 @@ void ScintillaGTK::Resize(int width, int height) {
 	SetScrollBars();
 }
 
-gint ScintillaGTK::MoveResize(GtkWidget *, GtkAllocation *allocation, ScintillaGTK *sciThis) {
+gint ScintillaGTK::MoveResize(GtkWidget *widget, GtkAllocation *allocation, ScintillaGTK *sciThis) {
 	// Platform::DebugPrintf("sci move resize %d %d\n", allocation->width, allocation->height);
+
 	sciThis->Resize(allocation->width, allocation->height);
+
+#ifdef USE_XIM 
+  if (sciThis->ic && (gdk_ic_get_style (sciThis->ic) & GDK_IM_PREEDIT_POSITION)) {
+	  gint width, height;
+	  
+	  gdk_window_get_size (widget->window, &width, &height);
+	  sciThis->ic_attr->preedit_area.width = width;
+	  sciThis->ic_attr->preedit_area.height = height;
+
+	  gdk_ic_set_attr (sciThis->ic, sciThis->ic_attr, GDK_IC_PREEDIT_AREA);
+	}
+#endif
+
 	return FALSE;
 }
 
@@ -864,7 +996,7 @@ static int KeyTranslate(int keyIn) {
 }
 
 gint ScintillaGTK::KeyPress(GtkWidget *, GdkEventKey *event, ScintillaGTK *sciThis) {
-	//Platform::DebugPrintf("SC-key: %d %x %x\n",event->keyval, event->state);
+	//Platform::DebugPrintf("SC-key: %d %x %x\n",event->keyval, event->state, GTK_WIDGET_FLAG(sciThis));
 	bool shift = event->state & GDK_SHIFT_MASK;
 	bool ctrl = event->state & GDK_CONTROL_MASK;
 	bool alt = event->state & GDK_MOD1_MASK;
