@@ -204,7 +204,7 @@ class ScintillaWin :
 	void ImeStartComposition();
 	void ImeEndComposition();
 
-	void AddCharBytes(char b0, char b1=0);
+	void AddCharBytes(char b0, char b1);
 
 	void GetIntelliMouseParameters();
 	virtual void CopyToClipboard(const SelectionText &selectedText);
@@ -704,12 +704,12 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				//unsigned int len = UTF8Length(wcs, 1);
 				//UTF8FromUCS2(wcs, 1, utfval, len);
 				//AddCharUTF(utfval, len);
-				AddCharBytes(static_cast<char>(wParam & 0xff));
+				AddCharBytes('\0', LOBYTE(wParam));
 			} else {
-				AddChar(static_cast<char>(wParam & 0xff));
+				AddChar(LOBYTE(wParam));
 			}
 		}
-		return 1;
+		return 0;
 
 	case WM_UNICHAR:
 		if (wParam == UNICODE_NOCHAR) {
@@ -810,10 +810,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		return HandleComposition(wParam, lParam);
 
 	case WM_IME_CHAR: {
-			if (HIBYTE(wParam) == '\0')
-				AddChar(LOBYTE(wParam));
-			else
-				AddCharBytes(HIBYTE(wParam), LOBYTE(wParam));
+			AddCharBytes(HIBYTE(wParam), LOBYTE(wParam));
 			return 0;
 		}
 
@@ -1671,23 +1668,29 @@ void ScintillaWin::AddCharBytes(char b0, char b1) {
 	if (inputCodePage && IsUnicodeMode()) {
 		char utfval[4]="\0\0\0";
 		char ansiChars[3];
-		ansiChars[0] = b0;
-		ansiChars[1] = b1;
-		ansiChars[2] = '\0';
 		wchar_t wcs[2];
-		::MultiByteToWideChar(inputCodePage, 0, ansiChars, 2, wcs, 1);
+		if (b0) {	// Two bytes from IME
+			ansiChars[0] = b0;
+			ansiChars[1] = b1;
+			ansiChars[2] = '\0';
+			::MultiByteToWideChar(inputCodePage, 0, ansiChars, 2, wcs, 1);
+		} else {
+			ansiChars[0] = b1;
+			ansiChars[1] = '\0';
+			::MultiByteToWideChar(inputCodePage, 0, ansiChars, 1, wcs, 1);
+		}
 		unsigned int len = UTF8Length(wcs, 1);
 		UTF8FromUCS2(wcs, 1, utfval, len);
 		utfval[len] = '\0';
 		AddCharUTF(utfval,len);
-	} else if (b1) {
+	} else if (b0) {
 		char dbcsChars[3];
 		dbcsChars[0] = b0;
 		dbcsChars[1] = b1;
 		dbcsChars[2] = '\0';
 		AddCharUTF(dbcsChars, 2, true);
 	} else {
-		AddChar(b0);
+		AddChar(b1);
 	}
 }
 
