@@ -3587,9 +3587,11 @@ struct RangeToFormat {
      <code>SC_WRAP_WORD</code>, which wraps printed output so that all characters fit
      into the print rectangle. If you set <code>SC_WRAP_NONE</code>, each line of text
      generates one line of output and the line is truncated if it is too long to fit
-     into the print area.<br />It is important that <code>SC_WRAP_WORD</code> is
-     not only for low spec computers but for some languages/situations. This makes
-     wrapping after any characters but it is OK. Some language don't have whitespaces
+     into the print area.<br />
+     <code>SC_WRAP_WORD</code> tries to wrap only between words as indicated by 
+     white space or style changes although if a word is longer than a line, it will be wrapped before 
+     the line end. <code>SC_WRAP_CHAR</code> is preferred to 
+     <code>SC_WRAP_WORD</code> for Asian languages where there is no white space 
      between words.</p>
 
     <h2 id="DirectAccess">Direct access</h2>
@@ -3931,10 +3933,12 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 
     <p><b id="SCI_SETWRAPMODE">SCI_SETWRAPMODE(int wrapMode)</b><br />
      <b id="SCI_GETWRAPMODE">SCI_GETWRAPMODE</b><br />
-     Set wrapMode to <code>SC_WRAP_WORD</code> (1) to enable line wrapping and to
-    <code>SC_WRAP_NONE</code> (0) to disable line wrapping. And to
-    <code>SC_WRAP_CHAR</code> (2), it is highly recommended to implement for i18n
-    product, enables character wrapping mode.</p>
+     Set wrapMode to <code>SC_WRAP_WORD</code> (1) to enable wrapping 
+     on word boundaries, <code>SC_WRAP_CHAR</code> (2) to enable wrapping 
+     between any characters, and to <code>SC_WRAP_NONE</code> (0) to disable line 
+     wrapping. <code>SC_WRAP_CHAR</code> is preferred to 
+     <code>SC_WRAP_WORD</code> for Asian languages where there is no white space 
+     between words.</p>
     
 
     <p><b id="SCI_SETWRAPVISUALFLAGS">SCI_SETWRAPVISUALFLAGS(int wrapVisualFlags)</b><br />
