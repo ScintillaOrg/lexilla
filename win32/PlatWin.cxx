@@ -839,7 +839,11 @@ void Window::SetCursor(Cursor curs) {
 				hinstPlatformRes = ::GetModuleHandle("SciLexer");
 			if (!hinstPlatformRes)
 				hinstPlatformRes = ::GetModuleHandle(NULL);
-			::SetCursor(::LoadCursor(hinstPlatformRes, MAKEINTRESOURCE(IDC_MARGIN)));
+			HCURSOR hcursor = ::LoadCursor(hinstPlatformRes, MAKEINTRESOURCE(IDC_MARGIN));
+			if (hcursor)
+				::SetCursor(hcursor);
+			else
+				::SetCursor(::LoadCursor(NULL,IDC_ARROW));
 		}
 		break;
 	case cursorArrow:
