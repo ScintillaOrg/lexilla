@@ -213,11 +213,16 @@ SCI_MOVECARETINSIDEVIEW
       within the line of the caret.
     </p>
     <p>
-      SCI_SETCARETPOLICY can be set to a combination of the flags CARET_SLOP, 
-      CARET_CENTER, and CARET_STRICT to change the automatic vertical positioning of the view
-      when ensuring a position is visible. SCI_SETVISIBLEPOLICY is a similar function that 
+      SCI_SETCARETPOLICY can be set to a combination of the flags CARET_SLOP
+      and CARET_STRICT to change the automatic vertical positioning of the view
+      when ensuring a position is visible. If CARET_SLOP is on then the slop value 
+      determines the number of line at top and botom of the view where the caret should not
+      go. If CARET_SLOP is off then the caret is centred within the view. When 
+      CARET_STRICT is set then caret policy is rechecked even if the caret is completely 
+      visible.
+      SCI_SETVISIBLEPOLICY is a similar function that 
       determines how the vertical positioning is determined when SCI_ENSUREVISIBLE is
-      called. It takes VISIBLE_SLOP, VISIBLE_CENTER, and VISIBLE_STRICT flags 
+      called. It takes VISIBLE_SLOP and VISIBLE_STRICT flags 
       for the policy parameter.
     </p>
     <h3>
