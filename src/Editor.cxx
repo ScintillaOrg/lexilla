@@ -2220,19 +2220,23 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	for (int indica = 0; indica <= INDIC_MAX; indica++)
 		indStart[indica] = 0;
 
-	for (int indicPos = 0; indicPos < ll->numCharsInLine; indicPos++) {
-		if (ll->indicators[indicPos] != ll->indicators[indicPos + 1]) {
+	for (int indicPos = lineStart; indicPos <= lineEnd; indicPos++) {
+		if ((ll->indicators[indicPos] != ll->indicators[indicPos + 1]) || (indicPos == lineEnd)) {
 			int mask = 1 << pdoc->stylingBits;
 			for (int indicnum = 0; mask < 0x100; indicnum++) {
 				if ((ll->indicators[indicPos + 1] & mask) && !(ll->indicators[indicPos] & mask)) {
 					indStart[indicnum] = ll->positions[indicPos + 1];
 				}
-				if (!(ll->indicators[indicPos + 1] & mask) && (ll->indicators[indicPos] & mask)) {
+				if ((ll->indicators[indicPos] & mask) && (
+					!(ll->indicators[indicPos + 1] & mask) || (indicPos == lineEnd))) {
+					int endIndicator = indicPos;
+					if (endIndicator >= lineEnd)
+						endIndicator = lineEnd-1;
 					PRectangle rcIndic(
-					    indStart[indicnum] + xStart,
-					    rcLine.top + vsDraw.maxAscent,
-					    ll->positions[indicPos + 1] + xStart,
-					    rcLine.top + vsDraw.maxAscent + 3);
+						indStart[indicnum] + xStart - subLineStart,
+						rcLine.top + vsDraw.maxAscent,
+						ll->positions[endIndicator + 1] + xStart - subLineStart,
+						rcLine.top + vsDraw.maxAscent + 3);
 					vsDraw.indicators[indicnum].Draw(surface, rcIndic);
 				}
 				mask = mask << 1;
