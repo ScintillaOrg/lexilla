@@ -48,6 +48,12 @@ public:
 	char styles[maxLineLength+1];
 	char indicators[maxLineLength+1];
 	int positions[maxLineLength+1];
+
+	// Wrapped line support
+	int widthLine;
+	int lines;
+	enum {maxDisplayLines = 100};
+	int lineStarts[maxDisplayLines];
 };
 
 class SelectionText {
@@ -207,6 +213,12 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int foldFlags;
 	ContractionState cs;
 
+	// Wrapping support
+	enum { eWrapNone, eWrapWord } wrapState;
+	enum { wrapWidthInfinite = 0x7ffffff};
+	int wrapWidth;
+	bool needWrap;
+
 	Document *pdoc;
 
 	Editor();
@@ -261,11 +273,14 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void DropCaret();
 	void InvalidateCaret();
 
+	bool WrapLines(int *goodTopLine);
+
 	int SubstituteMarkerIfEmpty(int markerCheck, int markerDefault);
 	void PaintSelMargin(Surface *surface, PRectangle &rc);
-        void LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayout &ll);
+	void LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayout &ll, 
+		int width=wrapWidthInfinite);
 	void DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart,
-		PRectangle rcLine, LineLayout &ll);
+		PRectangle rcLine, LineLayout &ll, int subLine=0);
 	void Paint(Surface *surfaceWindow, PRectangle rcArea);
 	long FormatRange(bool draw, RangeToFormat *pfr);
 
@@ -273,8 +288,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual void SetHorizontalScrollPos() = 0;
 	virtual bool ModifyScrollBars(int nMax, int nPage) = 0;
 	virtual void ReconfigureScrollBars();
-	void SetScrollBarsTo(PRectangle rsClient);
 	void SetScrollBars();
+	void ChangeSize();
 
 	void AddChar(char ch);
 	virtual void AddCharUTF(char *s, unsigned int len);
@@ -312,6 +327,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	void NotifyModifyAttempt(Document *document, void *userData);
 	void NotifySavePoint(Document *document, void *userData, bool atSavePoint);
+	void CheckModificationForWrap(DocModification mh);
 	void NotifyModified(Document *document, DocModification mh, void *userData);
 	void NotifyDeleted(Document *document, void *userData);
 	void NotifyStyleNeeded(Document *doc, void *userData, int endPos);

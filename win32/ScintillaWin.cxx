@@ -512,9 +512,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 	case WM_SIZE: {
 			//Platform::DebugPrintf("Scintilla WM_SIZE %d %d\n", LoWord(lParam), HiWord(lParam));
-			PRectangle rsClient(0, 0, LoWord(lParam), HiWord(lParam));
-			SetScrollBarsTo(rsClient);
-			DropGraphics();
+			ChangeSize();
 		}
 		break;
 
@@ -864,8 +862,9 @@ bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
 	};
 	sci.fMask = SIF_PAGE | SIF_RANGE;
 	::GetScrollInfo(MainHWND(), SB_VERT, &sci);
-	if ((sci.nMin != 0) || (sci.nMax != pdoc->LinesTotal()) ||
-	        (sci.nPage != static_cast<unsigned int>(pdoc->LinesTotal() - MaxScrollPos() + 1)) ||
+	if ((sci.nMin != 0) || 
+			(sci.nMax != nMax) ||
+	        (sci.nPage != static_cast<unsigned int>(nPage)) ||
 	        (sci.nPos != 0)) {
 		//Platform::DebugPrintf("Scroll info changed %d %d %d %d %d\n",
 		//	sci.nMin, sci.nMax, sci.nPage, sci.nPos, sci.nTrackPos);
@@ -881,7 +880,7 @@ bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
 	int horizStart = 0;
 	int horizEnd = 2000;
 	int horizEndPreferred = 2000;
-	if (!horizontalScrollBarVisible)
+	if (!horizontalScrollBarVisible || (wrapState != eWrapNone))
 		horizEndPreferred = 0;
 	if (!::GetScrollRange(MainHWND(), SB_HORZ, &horizStart, &horizEnd) ||
 	        horizStart != 0 || horizEnd != horizEndPreferred) {
