@@ -570,7 +570,6 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 			}
 			ui++;
 		}
-		positions[i] = sz.cx;
 	} else {
 		if (!::GetTextExtentExPoint(hdc, s, len, 30000, &fit, positions, &sz)) {
 			// Eeek - a NULL DC or other foolishness could cause this.
