@@ -28,7 +28,7 @@ bool EqualCaseInsensitive(const char *a, const char *b);
 class SString {
 public:
 	/** Type of string lengths (sizes) and positions (indexes). */
-	typedef unsigned int lenpos_t;
+	typedef size_t lenpos_t;
 	/** Out of bounds value indicating that the string argument should be measured. */
 	enum { measure_length=0xffffffffU};
 
