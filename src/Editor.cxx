@@ -391,7 +391,6 @@ Editor::~Editor() {
 	pdoc->Release();
 	pdoc = 0;
 	DropGraphics();
-	/* 	SetIdle(false) must be called in a platform independent way */
 	delete pixmapLine;
 	delete pixmapSelMargin;
 	delete pixmapSelPattern;
@@ -1306,18 +1305,62 @@ void Editor::InvalidateCaret() {
 		InvalidateRange(currentPos, currentPos + 1);
 }
 
-void Editor::NeedWrapping(int docLineStartWrapping) {
+void Editor::NeedWrapping(int docLineStartWrapping, int docLineEndWrapping) {
+	bool noWrap = (docLastLineToWrap == docLineLastWrapped);
 	if (docLineLastWrapped > (docLineStartWrapping - 1)) {
 		docLineLastWrapped = docLineStartWrapping - 1;
 		if (docLineLastWrapped < -1)
 			docLineLastWrapped = -1;
 		llc.Invalidate(LineLayout::llPositions);
 	}
+	if (noWrap) {
+		docLastLineToWrap = docLineEndWrapping;
+		if (docLastLineToWrap < -1)
+			docLastLineToWrap = -1;
+		if (docLastLineToWrap > pdoc->LinesTotal())
+			docLastLineToWrap = pdoc->LinesTotal();
+	} else if (docLastLineToWrap < docLineEndWrapping) {
+		docLastLineToWrap = docLineEndWrapping + 1;
+		if (docLastLineToWrap < -1)
+			docLastLineToWrap = -1;
+		if (docLastLineToWrap > pdoc->LinesTotal())
+			docLastLineToWrap = pdoc->LinesTotal();
+	}
+	// Wrap lines during idle.
+	if (docLastLineToWrap != docLineLastWrapped)
+		SetIdle(true);
 }
 
 // Check if wrapping needed and perform any needed wrapping.
+// fullwrap: if true, all lines which need wrapping will be done,
+//           in this single call.
+// priorityWrapLineStart: If greater than zero, all lines starting from
+//           here to 100 lines past will be wrapped (even if there are
+//           more lines under wrapping process in idle).
+// If it is neither fullwrap, nor priorityWrap, then 100 lines will be
+// wrapped, if there are any wrapping going on in idle. (Generally this
+// condition is called only from idler).
 // Return true if wrapping occurred.
-bool Editor::WrapLines() {
+bool Editor::WrapLines(bool fullWrap, int priorityWrapLineStart) {
+	// If there are any pending wraps do them during idle.
+	if (wrapState != eWrapNone) {
+		if (docLineLastWrapped < docLastLineToWrap) {
+			if (!SetIdle(true)) {
+				// If platform does not have Idle events, perform full wrap
+				fullWrap = true;
+			}
+		}
+		if (!fullWrap && priorityWrapLineStart >= 0 &&
+			// .. and if the paint window is outside pending wraps
+			(((priorityWrapLineStart + 100) < docLineLastWrapped) ||
+			 (priorityWrapLineStart > docLastLineToWrap))) {
+			// No priority wrap pending
+			return false;
+		}
+	} else {
+		// If there is no wrap, disable the idle call.
+		SetIdle(false);
+	}
 	int goodTopLine = topLine;
 	bool wrapOccurred = false;
 	if (docLineLastWrapped < pdoc->LinesTotal()) {
@@ -1342,18 +1385,43 @@ bool Editor::WrapLines() {
 			pdoc->EnsureStyledTo(pdoc->Length());
 			AutoSurface surface(this);
 			if (surface) {
-				int lastLineToWrap = pdoc->LinesTotal();
-				while (docLineLastWrapped <= lastLineToWrap) {
-					docLineLastWrapped++;
-					AutoLineLayout ll(llc, RetrieveLineLayout(docLineLastWrapped));
+				bool priorityWrap = false;
+				int lastLineToWrap = docLastLineToWrap;
+				int firstLineToWrap = docLineLastWrapped;
+				if (!fullWrap) {
+					if (priorityWrapLineStart >= 0) {
+						// This is a priority wrap.
+						firstLineToWrap = priorityWrapLineStart;
+						lastLineToWrap = firstLineToWrap + 100;
+						priorityWrap = true;
+					} else {
+						// This is idle wrap.
+						lastLineToWrap = docLineLastWrapped + 100;
+						if (lastLineToWrap >= docLastLineToWrap)
+							lastLineToWrap = docLastLineToWrap;
+					}
+				} // else do a fullWrap.
+
+				// printf("Wraplines: full = %d, priorityStart = %d (wrapping: %d to %d)\n", fullWrap, priorityWrapLineStart, firstLineToWrap, lastLineToWrap);
+				// printf("Pending wraps: %d to %d\n", docLineLastWrapped, docLastLineToWrap);
+				while (firstLineToWrap <= lastLineToWrap) {
+					firstLineToWrap++;
+					if (!priorityWrap)
+						docLineLastWrapped++;
+					AutoLineLayout ll(llc, RetrieveLineLayout(firstLineToWrap));
 					int linesWrapped = 1;
 					if (ll) {
-						LayoutLine(docLineLastWrapped, surface, vs, ll, wrapWidth);
+						LayoutLine(firstLineToWrap, surface, vs, ll, wrapWidth);
 						linesWrapped = ll->lines;
 					}
-					if (cs.SetHeight(docLineLastWrapped, linesWrapped)) {
+					if (cs.SetHeight(firstLineToWrap, linesWrapped)) {
 						wrapOccurred = true;
 					}
+				}
+				// If wrapping is done, bring it to resting position
+				if (docLineLastWrapped > docLastLineToWrap) {
+					docLineLastWrapped = -1;
+					docLastLineToWrap = -1;
 				}
 			}
 			goodTopLine = cs.DisplayFromDoc(lineDocTop);
@@ -2371,9 +2439,15 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 
 	PaintSelMargin(surfaceWindow, rcArea);
 
-	if (WrapLines()) {
-		// The wrapping process has changed the height of some lines so abandon this
-		// paint for a complete repaint.
+	// Call priority lines wrap on a window of lines which are likely
+	// to rendered with the following paint (that is wrap the visible
+	// 	lines first).
+	int startLineToWrap = cs.DocFromDisplay(topLine) - 5;
+	if (startLineToWrap < 0)
+		startLineToWrap = 0;
+	if (WrapLines(false, startLineToWrap)) {
+		// The wrapping process has changed the height of some lines so
+		// abandon this paint for a complete repaint.
 		if (AbandonPaint()) {
 			return;
 		}
@@ -3251,14 +3325,14 @@ void Editor::CheckModificationForWrap(DocModification mh) {
 				if (surface && ll) {
 					LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
 					if (cs.GetHeight(lineDoc) != ll->lines) {
-						NeedWrapping(lineDoc - 1);
+						NeedWrapping(lineDoc - 1, lineDoc + 1);
 						Redraw();
 					}
 				} else {
-					NeedWrapping(lineDoc);
+					NeedWrapping(lineDoc, lineDoc + 1);
 				}
 			} else {
-				NeedWrapping(lineDoc);
+				NeedWrapping(lineDoc, lineDoc + 1);
 			}
 		}
 	}
@@ -3577,7 +3651,8 @@ void Editor::LineDuplicate() {
 	delete []thisLine;
 }
 
-void Editor::CancelModes() {}
+void Editor::CancelModes() {
+}
 
 void Editor::NewLine() {
 	ClearSelection();
@@ -4756,6 +4831,23 @@ void Editor::Tick() {
 	}
 }
 
+bool Editor::Idle() {
+
+	bool idleDone = false;
+	// Wrap lines during idle.
+	WrapLines(false, -1);
+	// No more wrapping
+	if (docLineLastWrapped == docLastLineToWrap)
+		idleDone = true;
+
+	// Add more idle things to do here, but make sure idleDone is
+	// set correctly before the function returns. returning
+	// false will stop calling this idle funtion until SetIdle() is
+	// called again.
+
+	return !idleDone;
+}
+
 void Editor::SetFocusState(bool focusState) {
 	hasFocus = focusState;
 	NotifyFocus(hasFocus);
@@ -4969,7 +5061,7 @@ void Editor::ToggleContraction(int line) {
 void Editor::EnsureLineVisible(int lineDoc, bool enforcePolicy) {
 
 	// In case in need of wrapping to ensure DisplayFromDoc works.
-	WrapLines();
+	WrapLines(true, -1);
 
 	if (!cs.GetVisible(lineDoc)) {
 		int lineParent = pdoc->GetFoldParent(lineDoc);

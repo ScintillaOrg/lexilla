@@ -345,8 +345,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void DropCaret();
 	void InvalidateCaret();
 
-	void NeedWrapping(int docLineStartWrapping=0);
-	bool WrapLines();
+	void NeedWrapping(int docLineStartWrapping = 0, int docLineEndWrapping = 0x7ffffff);
+	bool WrapLines(bool fullWrap, int priorityWrapLineStart);
 	void LinesJoin();
 	void LinesSplit(int pixelWidth);
 
@@ -466,7 +466,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void Tick();
 	bool Idle();
 	virtual void SetTicking(bool on) = 0;
-	virtual void SetIdle(bool on) = 0;
+	virtual bool SetIdle(bool) { return false; }
 	virtual void SetMouseCapture(bool on) = 0;
 	virtual bool HaveMouseCapture() = 0;
 	void SetFocusState(bool focusState);

@@ -127,7 +127,7 @@ public: 	// Public for scintilla_send_message
 private:
 	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 	virtual void SetTicking(bool on);
-	virtual void SetIdle(bool on);
+	virtual bool SetIdle(bool on);
 	virtual void SetMouseCapture(bool on);
 	virtual bool HaveMouseCapture();
 	void FullPaint();
@@ -685,6 +685,7 @@ void ScintillaGTK::SetIdle(bool on) {
 			gtk_idle_remove(GPOINTER_TO_UINT(idler.idlerID));
 		}
 	}
+	return true;
 }
 
 void ScintillaGTK::SetMouseCapture(bool on) {
@@ -1976,7 +1977,7 @@ int ScintillaGTK::IdleCallback(ScintillaGTK *sciThis) {
 	// to do while idle.
 	bool ret = sciThis->Idle();
 	if (ret == false) {
-		// FIXME: This will remove the idler from GTK, we don't want to 
+		// FIXME: This will remove the idler from GTK, we don't want to
 		// remove it as it is removed automatically when this function
 		// returns false (although, it should be harmless).
 		sciThis->SetIdle(false);

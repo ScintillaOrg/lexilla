@@ -195,7 +195,6 @@ class ScintillaWin :
 	sptr_t HandleComposition(uptr_t wParam, sptr_t lParam);
 	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 	virtual void SetTicking(bool on);
-	virtual void SetIdle(bool) {}
 	virtual void SetMouseCapture(bool on);
 	virtual bool HaveMouseCapture();
 	virtual void ScrollText(int linesToMove);
