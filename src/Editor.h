@@ -373,9 +373,11 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) = 0;
 
 public:
-	// Public so scintilla_send_message can use it
+	// Public so the COM thunks can access it.
+	bool IsUnicodeMode() const;
+	// Public so scintilla_send_message can use it.
 	virtual sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
-	// Public so scintilla_set_id can use it
+	// Public so scintilla_set_id can use it.
 	int ctrlID;
 };
 

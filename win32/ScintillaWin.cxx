@@ -231,8 +231,6 @@ public:
 	void SetLexer(uptr_t wParam);
 #endif
 
-	bool IsUnicodeMode() const;
-
 	static void Register(HINSTANCE hInstance_);
 	friend class DropSource;
 	friend class DataObject;
@@ -376,10 +374,8 @@ LRESULT ScintillaWin::WndPaint(unsigned long wParam) {
 		pps = &ps;
 		::BeginPaint(MainHWND(), pps);
 	}
-	Surface *surfaceWindow = Surface::Allocate();
+	AutoSurface surfaceWindow(pps->hdc, IsUnicodeMode());
 	if (surfaceWindow) {
-		surfaceWindow->Init(pps->hdc);
-		surfaceWindow->SetUnicodeMode(IsUnicodeMode());
 		rcPaint = PRectangle(pps->rcPaint.left, pps->rcPaint.top, pps->rcPaint.right, pps->rcPaint.bottom);
 		PRectangle rcText = GetTextRectangle();
 		paintingAllText = rcPaint.Contains(rcText);
@@ -390,7 +386,6 @@ LRESULT ScintillaWin::WndPaint(unsigned long wParam) {
 		}
 		Paint(surfaceWindow, rcPaint);
 		surfaceWindow->Release();
-		delete surfaceWindow;
 	}
 	if(!IsOcxCtrl)
 		::EndPaint(MainHWND(), pps);
@@ -1368,12 +1363,10 @@ void ScintillaWin::ImeStartComposition() {
 			int sizeZoomed = vs.styles[styleHere].size + vs.zoomLevel;
 			if (sizeZoomed <= 2)	// Hangs if sizeZoomed <= 1
 				sizeZoomed = 2;
-			Surface *surface = Surface::Allocate();
+			AutoSurface surface(IsUnicodeMode());
 			int deviceHeight = sizeZoomed;
 			if (surface) {
-				surface->Init();
 				deviceHeight = (sizeZoomed * surface->LogPixelsY()) / 72;
-				delete surface;
 			}
 			// The negative is to allow for leading
 			lf.lfHeight = -(abs(deviceHeight));
@@ -1522,14 +1515,12 @@ void ScintillaWin::HorizontalScrollMessage(WPARAM wParam) {
 void ScintillaWin::RealizeWindowPalette(bool inBackGround) {
 	RefreshStyleData();
 	HDC hdc = ::GetDC(MainHWND());
-	Surface *surfaceWindow = Surface::Allocate();
+	AutoSurface surfaceWindow(hdc, IsUnicodeMode());
 	if (surfaceWindow) {
-		surfaceWindow->Init(hdc);
 		int changes = surfaceWindow->SetPalette(&palette, inBackGround);
 		if (changes > 0)
 			Redraw();
 		surfaceWindow->Release();
-		delete surfaceWindow;
 	}
 	::ReleaseDC(MainHWND(), hdc);
 }
@@ -1543,13 +1534,10 @@ void ScintillaWin::FullPaint() {
 	rcPaint = GetTextRectangle();
 	paintingAllText = true;
 	HDC hdc = ::GetDC(MainHWND());
-	Surface *surfaceWindow = Surface::Allocate();
+	AutoSurface surfaceWindow(hdc, IsUnicodeMode());
 	if (surfaceWindow) {
-		surfaceWindow->Init(hdc);
-		surfaceWindow->SetUnicodeMode(IsUnicodeMode());
 		Paint(surfaceWindow, rcPaint);
 		surfaceWindow->Release();
-		delete surfaceWindow;
 	}
 	::ReleaseDC(MainHWND(), hdc);
 	paintState = notPainting;
@@ -1759,10 +1747,6 @@ STDMETHODIMP ScintillaWin::GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM) {
 	return S_OK;
 }
 
-bool ScintillaWin::IsUnicodeMode() const {
-	return pdoc && (SC_CP_UTF8 == pdoc->dbcsCodePage);
-}
-
 const char scintillaClassName[] = "Scintilla";
 
 void ScintillaWin::Register(HINSTANCE hInstance_) {
@@ -1850,12 +1834,10 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
 		} else if (iMessage == WM_PAINT) {
 			PAINTSTRUCT ps;
 			::BeginPaint(hWnd, &ps);
-			Surface *surfaceWindow = Surface::Allocate();
+			AutoSurface surfaceWindow(ps.hdc);
 			if (surfaceWindow) {
-				surfaceWindow->Init(ps.hdc);
 				ctp->PaintCT(surfaceWindow);
 				surfaceWindow->Release();
-				delete surfaceWindow;
 			}
 			::EndPaint(hWnd, &ps);
 			return 0;

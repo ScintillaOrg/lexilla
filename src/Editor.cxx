@@ -160,14 +160,12 @@ void Editor::RefreshColourPalette(Palette &pal, bool want) {
 void Editor::RefreshStyleData() {
 	if (!stylesValid) {
 		stylesValid = true;
-		Surface *surface = Surface::Allocate();
+		AutoSurface surface(IsUnicodeMode());
 		if (surface) {
-			surface->Init();
 			vs.Refresh(*surface);
 			RefreshColourPalette(palette, true);
 			palette.Allocate(wMain);
 			RefreshColourPalette(palette, false);
-			delete surface;
 		}
 		SetScrollBars();
 	}
@@ -236,7 +234,7 @@ Point Editor::LocationFromPosition(int pos) {
 	int line = pdoc->LineFromPosition(pos);
 	int lineVisible = cs.DisplayFromDoc(line);
 	//Platform::DebugPrintf("line=%d\n", line);
-	Surface *surface = Surface::Allocate();
+	AutoSurface surface(IsUnicodeMode());
 	if (surface) {
 		surface->Init();
 		surface->SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
@@ -250,7 +248,6 @@ Point Editor::LocationFromPosition(int pos) {
 		} else {
 			pt.x = ll.positions[pos - posLineStart] + vs.fixedColumnWidth - xOffset;
 		}
-		delete surface;
 	}
 	return pt;
 }
@@ -272,30 +269,26 @@ void Editor::SetTopLine(int topLineNew) {
 int Editor::PositionFromLocation(Point pt) {
 	RefreshStyleData();
 	pt.x = pt.x - vs.fixedColumnWidth + xOffset;
-	int line = cs.DocFromDisplay(pt.y / vs.lineHeight + topLine);
+	int lineDoc = cs.DocFromDisplay(pt.y / vs.lineHeight + topLine);
 	if (pt.y < 0) {	// Division rounds towards 0
-		line = cs.DocFromDisplay((pt.y - (vs.lineHeight - 1)) / vs.lineHeight + topLine);
+		lineDoc = cs.DocFromDisplay((pt.y - (vs.lineHeight - 1)) / vs.lineHeight + topLine);
 	}
-	if (line < 0)
+	if (lineDoc < 0)
 		return 0;
-	if (line >= pdoc->LinesTotal())
+	if (lineDoc >= pdoc->LinesTotal())
 		return pdoc->Length();
-	Surface *surface = Surface::Allocate();
+	AutoSurface surface(IsUnicodeMode());
 	if (surface) {
-		surface->Init();
-		surface->SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
-		unsigned int posLineStart = pdoc->LineStart(line);
+		unsigned int posLineStart = pdoc->LineStart(lineDoc);
 
 		LineLayout ll;
-		LayoutLine(line, surface, vs, ll);
+		LayoutLine(lineDoc, surface, vs, ll);
 		for (int i = 0; i < ll.numCharsInLine; i++) {
 			if (pt.x < ((ll.positions[i] + ll.positions[i + 1]) / 2) ||
 				ll.chars[i] == '\r' || ll.chars[i] == '\n') {
-				delete surface;
 				return i + posLineStart;
 			}
 		}
-		delete surface;
 		return ll.numCharsInLine + posLineStart;
 	}
 	return 0;
@@ -320,10 +313,8 @@ int Editor::PositionFromLocationClose(Point pt) {
 		return INVALID_POSITION;
 	if (line >= pdoc->LinesTotal())
 		return INVALID_POSITION;
-	Surface *surface = Surface::Allocate();
+	AutoSurface surface(IsUnicodeMode());
 	if (surface) {
-		surface->Init();
-		surface->SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
 		unsigned int posLineStart = pdoc->LineStart(line);
 
 		LineLayout ll;
@@ -331,11 +322,9 @@ int Editor::PositionFromLocationClose(Point pt) {
 		for (int i = 0; i < ll.numCharsInLine; i++) {
 			if (pt.x < ((ll.positions[i] + ll.positions[i + 1]) / 2) ||
 				ll.chars[i] == '\r' || ll.chars[i] == '\n') {
-				delete surface;
 				return i + posLineStart;
 			}
 		}
-		delete surface;
 	}
 
 	return INVALID_POSITION;
@@ -346,10 +335,8 @@ int Editor::PositionFromLineX(int line, int x) {
 	if (line >= pdoc->LinesTotal())
 		return pdoc->Length();
 	//Platform::DebugPrintf("Position of (%d,%d) line = %d top=%d\n", pt.x, pt.y, line, topLine);
-	Surface *surface = Surface::Allocate();
+	AutoSurface surface(IsUnicodeMode());
 	if (surface) {
-		surface->Init();
-		surface->SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
 		unsigned int posLineStart = pdoc->LineStart(line);
 
 		LineLayout ll;
@@ -357,12 +344,10 @@ int Editor::PositionFromLineX(int line, int x) {
 		for (int i = 0; i < ll.numCharsInLine; i++) {
 			if (x < ((ll.positions[i] + ll.positions[i + 1]) / 2) ||
 				ll.chars[i] == '\r' || ll.chars[i] == '\n') {
-				delete surface;
 				return i + posLineStart;
 			}
 		}
 
-		delete surface;
 		return ll.numCharsInLine + posLineStart;
 	}
 	return 0;
@@ -1369,7 +1354,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		if (bufferedDraw) {
 			surface = pixmapLine;
 		}
-		surface->SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
+		surface->SetUnicodeMode(IsUnicodeMode());
 
 		int visibleLine = topLine + screenLinePaintFirst;
 		int line = cs.DocFromDisplay(visibleLine);
@@ -1387,7 +1372,9 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		surfaceWindow->SetClip(rcTextArea);
 
 		// Loop on visible lines
-		//GTimer *tim=g_timer_new();
+		double durLayout = 0.0;
+		double durPaint = 0.0;
+		double durCopy = 0.0;
 		while (visibleLine < cs.LinesDisplayed() && yposScreen < rcArea.bottom) {
 			//g_timer_start(tim);
 			//Platform::DebugPrintf("Painting line %d\n", line);
@@ -1505,10 +1492,8 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 			visibleLine++;
 			line = cs.DocFromDisplay(visibleLine);
 			//gdk_flush();
-			//g_timer_stop(tim);
-			//Platform::DebugPrintf("Paint [%0d] took %g\n", line, g_timer_elapsed(tim, 0));
 		}
-		//g_timer_destroy(tim);
+		Platform::DebugPrintf("Layout:%9.6g    Paint:%9.6g    Ratio:%9.6g   Copy:%9.6g\n", durLayout, durPaint, durLayout / durPaint, durCopy);
 
 		// Right column limit indicator
 
@@ -1555,18 +1540,13 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 	if (!pfr)
 		return 0;
 
-	Surface *surface = Surface::Allocate();
+	AutoSurface surface(pfr->hdc, IsUnicodeMode());
 	if (!surface)
 		return 0;
-	surface->Init(pfr->hdc);
-	surface->SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
-	Surface *surfaceMeasure = Surface::Allocate();
+	AutoSurface surfaceMeasure(pfr->hdcTarget, IsUnicodeMode());
 	if (!surfaceMeasure) {
-		delete surface;
 		return 0;
 	}
-	surfaceMeasure->Init(pfr->hdcTarget);
-	surfaceMeasure->SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
 
 	ViewStyle vsPrint(vs);
 
@@ -1689,9 +1669,6 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 			line++;
 		}
 	}
-
-	delete surface;
-	delete surfaceMeasure;
 
 	return endPosPrint;
 }
@@ -3555,6 +3532,10 @@ int Editor::ReplaceTarget(bool replacePatterns, const char *text, int length) {
 	targetEnd = targetStart + length;
 	pdoc->EndUndoAction();
 	return length;
+}
+
+bool Editor::IsUnicodeMode() const {
+	return pdoc && (SC_CP_UTF8 == pdoc->dbcsCodePage);
 }
 
 static bool ValidMargin(unsigned long wParam) {
