@@ -5788,6 +5788,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETLENGTH:
 		return pdoc->Length();
 
+	case SCI_ALLOCATE:
+		pdoc->Allocate(wParam);
+		break;
+
 	case SCI_GETCHARAT:
 		return pdoc->CharAt(wParam);
 

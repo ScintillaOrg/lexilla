@@ -1549,6 +1549,9 @@ fun void SetCharsDefault=2444(,)
 # Get currently selected item position in the auto-completion list
 fun int AutoCGetCurrent=2445(,)
 
+# Enlarge the document to a particular size of text bytes.
+fun void Allocate=2446(int bytes,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 

@@ -87,7 +87,7 @@ public:
 			userData = 0;
 		}
 	};
-	
+
 	enum charClassification { ccSpace, ccNewLine, ccWord, ccPunctuation };
 
 private:
@@ -193,6 +193,7 @@ public:
 	int NextWordStart(int pos, int delta);
 	int NextWordEnd(int pos, int delta);
 	int Length() { return cb.Length(); }
+	void Allocate(int newSize) { cb.Allocate(newSize*2); }
 	long FindText(int minPos, int maxPos, const char *s,
 		bool caseSensitive, bool word, bool wordStart, bool regExp, bool posix, int *length);
 	long FindText(int iMessage, unsigned long wParam, long lParam);
@@ -200,7 +201,7 @@ public:
 	int LinesTotal();
 
 	void ChangeCase(Range r, bool makeUpperCase);
-	
+
 	void SetDefaultCharClasses();
 	void SetCharClasses(unsigned char *chars, charClassification newCharClass);
 	void SetStylingBits(int bits);

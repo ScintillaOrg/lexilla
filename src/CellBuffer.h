@@ -184,6 +184,7 @@ public:
 
 	int ByteLength();
 	int Length();
+	void Allocate(int newSize);
 	int Lines();
 	int LineStart(int line);
 	int LineFromPosition(int pos) { return lv.LineFromPosition(pos); }
@@ -212,7 +213,7 @@ public:
 	int GetMark(int line);
 	void DeleteAllMarks(int markerNum);
 	int LineFromHandle(int markerHandle);
- 
+
 	/// Actions without undo
 	void BasicInsertString(int position, char *s, int insertLength);
 	void BasicDeleteChars(int position, int deleteLength);
