@@ -195,9 +195,8 @@ void LexerLibrary::Release() {
 //------------------------------------------
 
 int FindLastSlash(char *inp) {
-	int i;
 	int ret = -1;
-	for (i = strlen(inp) - 1; i >= 0; i--) {
+	for (int i = static_cast<int>(strlen(inp)) - 1; i >= 0; i--) {
 		if (inp[i] == '\\' || inp[i] == '/') {
 			// if you don't like break:
 			/*
