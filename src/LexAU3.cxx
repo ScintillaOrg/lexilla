@@ -20,6 +20,7 @@
 //                        triggered by: fold.comment=1
 //                  Added Folding logic for preprocessor blocks triggered by fold.preprocessor=1
 //                  Added Special for #region - #endregion syntax highlight and folding.
+// May 30, 2004   - Fixed issue with continuation lines on If statements.
 // 
 // Copyright for Scintilla: 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
@@ -395,7 +396,8 @@ static void FoldAU3Doc(unsigned int startPos, int length, int, WordList *[], Acc
 	//### int styleNext = 0;
 	int stylePrev = 0;
 	// find the first previous line without continuation character at the end
-	while (lineCurrent > 0 && IsContinuationLine(lineCurrent,styler)) {
+	while ((lineCurrent > 0 && IsContinuationLine(lineCurrent,styler)) ||
+	       (lineCurrent > 1 && IsContinuationLine(lineCurrent-1,styler))) {
 		lineCurrent--;
 		startPos = styler.LineStart(lineCurrent);
 	}
