@@ -32,6 +32,8 @@ static int segIsScriptingIndicator(Accessor &styler, unsigned int start, unsigne
 		s[i + 1] = '\0';
 	}
 	//Platform::DebugPrintf("Scripting indicator [%s]\n", s);
+	if (strstr(s, "src"))	// External script
+		return eScriptNone;
 	if (strstr(s, "vbs"))
 		return eScriptVBS;
 	if (strstr(s, "pyth"))
@@ -319,6 +321,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	if (InTagState(state)) {
 		while ((startPos > 1) && (InTagState(styler.StyleAt(startPos - 1)))) {
 			startPos--;
+            length++;
 		}
 		state = SCE_H_DEFAULT;
 	}
@@ -436,7 +439,9 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			case SCE_H_SINGLESTRING:
 			case SCE_HJ_COMMENT:
 			case SCE_HJ_COMMENTDOC:
-			case SCE_HJ_COMMENTLINE:
+			// SCE_HJ_COMMENTLINE removed as this is a common thing done to hide 
+			// the end of script marker from some JS interpreters.
+			//case SCE_HJ_COMMENTLINE:
 			case SCE_HJ_DOUBLESTRING:
 			case SCE_HJ_SINGLESTRING:
 			case SCE_HB_STRING:
@@ -577,7 +582,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			}
 			break;
 		case SCE_H_TAGUNKNOWN:
-			if (!ishtmlwordchar(ch) && ch != '/' && ch != '-' && ch != '[') {
+			if (!ishtmlwordchar(ch) && !((ch == '/') && (chPrev == '<')) && ch != '[') {
 				int eClass = classifyTagHTML(styler.GetStartSegment(), i - 1, keywords, styler);
 				if (eClass == SCE_H_SCRIPT) {
 					inScriptType = eNonHtmlScript;
@@ -591,6 +596,12 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					} else {
 						state = SCE_H_DEFAULT;
 					}
+			    } else if (ch == '/' && chNext == '>') {
+				    styler.ColourTo(i - 1, StateToPrint);
+				    styler.ColourTo(i + 1, SCE_H_TAGEND);
+				    i++;
+				    ch = chNext;
+				    state = SCE_H_DEFAULT;
 				} else {
 					if (eClass == SCE_H_CDATA) {
 						state = SCE_H_CDATA;
@@ -603,7 +614,10 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		case SCE_H_ATTRIBUTE:
 			if (!ishtmlwordchar(ch) && ch != '/' && ch != '-') {
 				if (inScriptType == eNonHtmlScript) {
+                    int scriptLanguagePrev = scriptLanguage;
 					scriptLanguage = segIsScriptingIndicator(styler, styler.GetStartSegment(), i - 1, scriptLanguage);
+                    if ((scriptLanguagePrev != scriptLanguage) && (scriptLanguage == eScriptNone))
+                        inScriptType = eHtml;
 				}
 				classifyAttribHTML(styler.GetStartSegment(), i - 1, keywords, styler);
 				if (ch == '>') {
