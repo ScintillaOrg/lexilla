@@ -450,6 +450,9 @@ void UndoHistory::AppendAction(actionType at, int position, char *data, int leng
 	//Platform::DebugPrintf("%% %d action %d %d %d\n", at, position, lengthData, currentAction);
 	//Platform::DebugPrintf("^ %d action %d %d\n", actions[currentAction - 1].at,
 	//	actions[currentAction - 1].position, actions[currentAction - 1].lenData);
+	if (currentAction < savePoint) {
+		savePoint = -1;
+	}
 	if (currentAction >= 1) {
 		if (0 == undoSequenceDepth) {
 			// Top level actions may not always be coalesced
