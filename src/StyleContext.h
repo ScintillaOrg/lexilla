@@ -113,6 +113,20 @@ public:
 		}
 		return true;
 	}
+	bool MatchIgnoreCase(const char *s) {
+		if (tolower(ch) != *s)
+			return false;
+		s++;
+		if (tolower(chNext) != *s)
+			return false;
+		s++;
+		for (int n=2; *s; n++) {
+			if (*s != tolower((styler.SafeGetCharAt(currentPos+n))))
+				return false;
+			s++;
+		}
+		return true;
+	}
 	// Non-inline
 	void GetCurrent(char *s, int len);
 	void GetCurrentLowered(char *s, int len);
