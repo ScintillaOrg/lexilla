@@ -65,7 +65,9 @@ void LineLayout::Resize(int maxLineLength_) {
 		chars = new char[maxLineLength_ + 1];
 		styles = new char[maxLineLength_ + 1];
 		indicators = new char[maxLineLength_ + 1];
-		positions = new int[maxLineLength_ + 1];
+		// Extra position allocated as sometimes the Windows
+		// GetTextExtentExPoint API writes an extra element.
+		positions = new int[maxLineLength_ + 1 + 1];
 		maxLineLength = maxLineLength_;
 	}
 }
