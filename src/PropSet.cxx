@@ -71,6 +71,233 @@ bool EqualCaseInsensitive(const char *a, const char *b) {
 	return 0 == CompareCaseInsensitive(a, b);
 }
 
+// Since the CaseInsensitive functions declared in SString
+// are implemented here, I will for now put the non-inline
+// implementations of the SString members here as well, so
+// that I can quickly see what effect this has.
+
+bool SString::grow(lenpos_t lenNew) {
+	while (sizeGrowth * 6 < lenNew) {
+		sizeGrowth *= 2;
+	}
+	char *sNew = new char[lenNew + sizeGrowth + 1];
+	if (sNew) {
+		if (s) {
+			memcpy(sNew, s, sLen);
+			delete []s;
+		}
+		s = sNew;
+		s[sLen] = '\0';
+		sSize = lenNew + sizeGrowth;
+	}
+	return sNew != 0;
+}
+
+SString &SString::assign(const char *sOther, lenpos_t sSize_) {
+	if (!sOther) {
+		sSize_ = 0;
+	} else if (sSize_ == measure_length) {
+		sSize_ = strlen(sOther);
+	}
+	if (sSize > 0 && sSize_ <= sSize) {	// Does not allocate new buffer if the current is big enough
+		if (s && sSize_) {
+			memcpy(s, sOther, sSize_);
+		}
+		s[sSize_] = '\0';
+		sLen = sSize_;
+	} else {
+		delete []s;
+		s = StringAllocate(sOther, sSize_);
+		if (s) {
+			sSize = sSize_;	// Allow buffer bigger than real string, thus providing space to grow
+			sLen = strlen(s);
+		} else {
+			sSize = sLen = 0;
+		}
+	}
+	return *this;
+}
+
+bool SString::operator==(const SString &sOther) const {
+	if ((s == 0) && (sOther.s == 0))
+		return true;
+	if ((s == 0) || (sOther.s == 0))
+		return false;
+	return strcmp(s, sOther.s) == 0;
+}
+
+bool SString::operator==(const char *sOther) const {
+	if ((s == 0) && (sOther == 0))
+		return true;
+	if ((s == 0) || (sOther == 0))
+		return false;
+	return strcmp(s, sOther) == 0;
+}
+
+SString SString::substr(lenpos_t subPos, lenpos_t subLen) const {
+	if (subPos >= sLen) {
+		return SString();					// return a null string if start index is out of bounds
+	}
+	if ((subLen == measure_length) || (subPos + subLen > sLen)) {
+		subLen = sLen - subPos;		// can't substr past end of source string
+	}
+	return SString(s, subPos, subPos + subLen);
+}
+
+SString &SString::lowercase(lenpos_t subPos, lenpos_t subLen) {
+	if ((subLen == measure_length) || (subPos + subLen > sLen)) {
+		subLen = sLen - subPos;		// don't apply past end of string
+	}
+	for (lenpos_t i = subPos; i < subPos + subLen; i++) {
+		if (s[i] < 'A' || s[i] > 'Z')
+			continue;
+		else
+			s[i] = static_cast<char>(s[i] - 'A' + 'a');
+	}
+	return *this;
+}
+
+SString &SString::uppercase(lenpos_t subPos, lenpos_t subLen) {
+	if ((subLen == measure_length) || (subPos + subLen > sLen)) {
+		subLen = sLen - subPos;		// don't apply past end of string
+	}
+	for (lenpos_t i = subPos; i < subPos + subLen; i++) {
+		if (s[i] < 'a' || s[i] > 'z')
+			continue;
+		else
+			s[i] = static_cast<char>(s[i] - 'a' + 'A');
+	}
+	return *this;
+}
+
+SString &SString::append(const char *sOther, lenpos_t sLenOther, char sep) {
+	if (!sOther) {
+		return *this;
+	}
+	if (sLenOther == measure_length) {
+		sLenOther = strlen(sOther);
+	}
+	int lenSep = 0;
+	if (sLen && sep) {	// Only add a separator if not empty
+		lenSep = 1;
+	}
+	lenpos_t lenNew = sLen + sLenOther + lenSep;
+	// Conservative about growing the buffer: don't do it, unless really needed
+	if ((lenNew + 1 < sSize) || (grow(lenNew))) {
+		if (lenSep) {
+			s[sLen] = sep;
+			sLen++;
+		}
+		memcpy(&s[sLen], sOther, sLenOther);
+		sLen += sLenOther;
+		s[sLen] = '\0';
+	}
+	return *this;
+}
+
+SString &SString::insert(lenpos_t pos, const char *sOther, lenpos_t sLenOther) {
+	if (!sOther) {
+		return *this;
+	}
+	if (sLenOther == measure_length) {
+		sLenOther = strlen(sOther);
+	}
+	lenpos_t lenNew = sLen + sLenOther;
+	// Conservative about growing the buffer: don't do it, unless really needed
+	if ((lenNew + 1 < sSize) || grow(lenNew)) {
+		lenpos_t moveChars = sLen - pos + 1;
+		for (lenpos_t i = moveChars; i > 0; i--) {
+			s[pos + sLenOther + i - 1] = s[pos + i - 1];
+		}
+		memcpy(s + pos, sOther, sLenOther);
+		sLen = lenNew;
+	}
+	return *this;
+}
+
+/** Remove @a len characters from the @a pos position, included.
+ * Characters at pos + len and beyond replace characters at pos.
+ * If @a len is 0, or greater than the length of the string
+ * starting at @a pos, the string is just truncated at @a pos.
+ */
+void SString::remove(lenpos_t pos, lenpos_t len) {
+	if (len < 1 || pos + len >= sLen) {
+		s[pos] = '\0';
+		sLen = pos;
+	} else {
+		for (lenpos_t i = pos; i < sLen - len + 1; i++) {
+			s[i] = s[i+len];
+		}
+		sLen -= len;
+	}
+}
+
+int SString::search(const char *sFind, lenpos_t start) const {
+	if (start < sLen) {
+		const char *sFound = strstr(s + start, sFind);
+		if (sFound) {
+			return sFound - s;
+		}
+	}
+	return -1;
+}
+
+int SString::substitute(char chFind, char chReplace) {
+	int c = 0;
+	char *t = s;
+	while (t) {
+		t = strchr(t, chFind);
+		if (t) {
+			*t = chReplace;
+			t++;
+			c++;
+		}
+	}
+	return c;
+}
+
+int SString::substitute(const char *sFind, const char *sReplace) {
+	int c = 0;
+	lenpos_t lenFind = strlen(sFind);
+	lenpos_t lenReplace = strlen(sReplace);
+	int posFound = search(sFind);
+	while (posFound >= 0) {
+		remove(posFound, lenFind);
+		insert(posFound, sReplace, lenReplace);
+		posFound = search(sFind, posFound + lenReplace);
+		c++;
+	}
+	return c;
+}
+
+/**
+ * Duplicate a C string.
+ * Allocate memory of the given size, or big enough to fit the string if length isn't given;
+ * then copy the given string in the allocated memory.
+ * @return the pointer to the new string
+ */
+char *SString::StringAllocate(
+	const char *s,			///< The string to duplicate
+	lenpos_t len)			///< The length of memory to allocate. Optional.
+{
+	if (s == 0) {
+		return 0;
+	}
+	if (len == measure_length) {
+		len = strlen(s);
+	}
+	char *sNew = new char[len + 1];
+	if (sNew) {
+		memcpy(sNew, s, len);
+		sNew[len] = '\0';
+	}
+	return sNew;
+}
+
+// End SString functions
+
+
+
 PropSet::PropSet() {
 	superPS = 0;
 	for (int root = 0; root < hashRoots; root++)
