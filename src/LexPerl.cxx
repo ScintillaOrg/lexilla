@@ -107,7 +107,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 		state = SCE_PL_DEFAULT;
 	}
 	styler.StartAt(startPos);
-	char chPrev = ' ';
+	char chPrev = styler.SafeGetCharAt(startPos - 1);
 	char chNext = styler[startPos];
 	styler.StartSegment(startPos);
 	for (int i = startPos; i < lengthDoc; i++) {
@@ -345,8 +345,8 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 						styler.ColourTo(i - 1 + 4, state);
 						i += 4;
 						state = SCE_PL_DEFAULT;
-						chNext = ' ';
-						ch = ' ';
+						ch = styler.SafeGetCharAt(i);
+						chNext = styler.SafeGetCharAt(i + 1);
 					}
 				}
 			} else if (state == SCE_PL_SCALAR) {
