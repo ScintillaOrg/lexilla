@@ -1,0 +1,120 @@
+# Make file for Scintilla on Windows Borland C++ Builder version
+# Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
+# The License.txt file describes the conditions under which this software may be distributed.
+# This makefile is for using Visual C++ and nmake. 
+# The main makefile uses mingw32 gcc and may be more current than this file.
+
+.SUFFIXES: .cxx
+CC = bcc32
+RC = brcc32
+LD = tlink32
+
+COMPONENT = ..\bin\Scintilla.dll
+LEXCOMPONENT = ..\bin\SciLexer.dll
+
+LDFLAGS = import32 cw32mt
+INCLUDEDIRS=-I../include -I../src
+CXXFLAGS = -P -tW -w -RT- -x- -v
+
+.cxx.obj:
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c $*.cxx
+
+.rc.res:
+	$(RC) /r $*.rc
+	
+ALL:	$(COMPONENT) $(LEXCOMPONENT) ScintillaWinS.obj
+
+clean:
+	del /q *.exe *.o *.obj *.dll *.res *.map
+
+SOBJS	= ScintillaWin.obj ScintillaBase.obj Editor.obj Document.obj \
+	ContractionState.obj CellBuffer.obj CallTip.obj \
+	PlatWin.obj KeyMap.obj Indicator.obj LineMarker.obj Style.obj \
+	ViewStyle.obj AutoComplete.obj
+$(COMPONENT): $(SOBJS) ScintRes.res
+	$(LD) -Tpd /c c0d32 $(SOBJS), $(COMPONENT), ,$(LDFLAGS), , ScintRes.res
+	
+LOBJS	= ScintillaWinL.obj ScintillaBaseL.obj Editor.obj Document.obj \
+	ContractionState.obj CellBuffer.obj CallTip.obj \
+	PlatWin.obj KeyMap.obj Indicator.obj LineMarker.obj Style.obj \
+	ViewStyle.obj AutoComplete.obj KeyWords.obj Accessor.obj PropSet.obj
+$(LEXCOMPONENT): $(LOBJS)
+	$(LD) -Tpd /c c0d32 $(LOBJS), $(LEXCOMPONENT), ,$(LDFLAGS), , ScintRes.res
+	
+Accessor.obj: ..\src\Accessor.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\Scintilla.h
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$*
+
+AutoComplete.obj: ..\src\AutoComplete.cxx ..\include\Platform.h ..\src\AutoComplete.h
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$*
+
+CallTip.obj: ..\src\CallTip.cxx ..\include\Platform.h ..\src\CallTip.h
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$*
+
+CellBuffer.obj: ..\src\CellBuffer.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\CellBuffer.h
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$*
+
+ContractionState.obj: ..\src\ContractionState.cxx ..\include\Platform.h ..\src\ContractionState.h
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$*
+
+Document.obj: ..\src\Document.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\CellBuffer.h \
+ ..\src\Document.h
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$*
+ 
+Editor.obj: ..\src\Editor.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\ContractionState.h \
+ ..\src\CellBuffer.h ..\src\KeyMap.h ..\src\Indicator.h ..\src\LineMarker.h ..\src\Style.h ..\src\ViewStyle.h \
+ ..\src\Document.h ..\src\Editor.h
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$*
+ 
+Indicator.obj: ..\src\Indicator.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\Indicator.h
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$*
+
+KeyMap.obj: ..\src\KeyMap.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\KeyMap.h
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$*
+
+KeyWords.obj: ..\src\KeyWords.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h 
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$*
+ 
+LineMarker.obj: ..\src\LineMarker.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\LineMarker.h
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$*
+
+PlatWin.obj: PlatWin.cxx ..\include\Platform.h PlatformRes.h
+
+PropSet.obj: ..\src\PropSet.cxx ..\include\Platform.h ..\include\PropSet.h
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$*
+
+ScintillaBase.obj: ..\src\ScintillaBase.cxx ..\include\Platform.h ..\include\Scintilla.h \
+ ..\src\ContractionState.h ..\src\CellBuffer.h ..\src\CallTip.h ..\src\KeyMap.h ..\src\Indicator.h \
+ ..\src\LineMarker.h ..\src\Style.h ..\src\ViewStyle.h ..\src\AutoComplete.h ..\src\Document.h ..\src\Editor.h \
+ ..\src\ScintillaBase.h
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\ScintillaBase.cxx -o$@
+	
+ScintillaBaseL.obj: ..\src\ScintillaBase.cxx ..\include\Platform.h ..\include\Scintilla.h ..\include\SciLexer.h \
+ ..\src\ContractionState.h ..\src\CellBuffer.h ..\src\CallTip.h ..\src\KeyMap.h ..\src\Indicator.h \
+ ..\src\LineMarker.h ..\src\Style.h ..\src\AutoComplete.h ..\src\ViewStyle.h ..\src\Document.h ..\src\Editor.h \
+ ..\src\ScintillaBase.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /DSCI_LEXER -o$* /c ..\src\ScintillaBase.cxx
+
+ScintillaWin.obj: ScintillaWin.cxx ..\include\Platform.h ..\include\Scintilla.h \
+ ..\src\ContractionState.h ..\src\CellBuffer.h ..\src\CallTip.h ..\src\KeyMap.h ..\src\Indicator.h \
+ ..\src\LineMarker.h ..\src\Style.h ..\src\AutoComplete.h ..\src\ViewStyle.h ..\src\Document.h ..\src\Editor.h \
+ ..\src\ScintillaBase.h
+
+ScintillaWinL.obj: ScintillaWin.cxx ..\include\Platform.h ..\include\Scintilla.h ..\include\SciLexer.h \
+ ..\src\ContractionState.h ..\src\CellBuffer.h ..\src\CallTip.h ..\src\KeyMap.h ..\src\Indicator.h \
+ ..\src\LineMarker.h ..\src\Style.h ..\src\AutoComplete.h ..\src\ViewStyle.h ..\src\Document.h ..\src\Editor.h \
+ ..\src\ScintillaBase.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /DSCI_LEXER -o$* /c ScintillaWin.cxx
+
+ScintillaWinS.obj: ScintillaWin.cxx ..\include\Platform.h ..\include\Scintilla.h \
+ ..\src\ContractionState.h ..\src\CellBuffer.h ..\src\CallTip.h ..\src\KeyMap.h ..\src\Indicator.h \
+ ..\src\LineMarker.h ..\src\Style.h ..\src\AutoComplete.h ..\src\ViewStyle.h ..\src\Document.h ..\src\Editor.h \
+ ..\src\ScintillaBase.h
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /DSTATIC_BUILD -o$* /c ScintillaWin.cxx
+
+Style.obj: ..\src\Style.cxx ..\include\Platform.h ..\src\Style.h
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$@
+
+ViewStyle.obj: ..\src\ViewStyle.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\Indicator.h \
+ ..\src\LineMarker.h ..\src\Style.h ..\src\ViewStyle.h
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$@
