@@ -1568,9 +1568,9 @@ void Editor::ClearSelection() {
 		unsigned int chars = SelectionEnd() - startPos;
 		SetEmptySelection(startPos);
 		if (0 != chars) {
-           	pdoc->EndUndoAction();
-			pdoc->DeleteChars(startPos, chars);
            	pdoc->BeginUndoAction();
+			pdoc->DeleteChars(startPos, chars);
+           	pdoc->EndUndoAction();
 		}
 	}
 }
