@@ -67,7 +67,7 @@ static void ColouriseBatchDoc(unsigned int startPos, int length, int, WordList *
 	unsigned int linePos = 0, startLine = startPos;
 	for (unsigned int i = startPos; i < startPos + length; i++) {
 		if (linePos != 0 || !isspace(styler[i])) {	// Skip initial spaces
-			lineBuffer[linePos++] = tolower(styler[i]);
+			lineBuffer[linePos++] = static_cast<char>(tolower(styler[i]));
 		}
 		if (styler[i] == '\r' || styler[i] == '\n' || (linePos >= sizeof(lineBuffer) - 1)) {
 			lineBuffer[linePos] = '\0';

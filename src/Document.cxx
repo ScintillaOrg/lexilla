@@ -971,7 +971,6 @@ int Document::WordPartLeft(int pos) {
 			while (pos > 0 && IsWordPartSeparator(cb.CharAt(pos))) {
 				--pos;
 			}
-			startChar = cb.CharAt(pos);
 		}
 		if (pos > 0) {
 			startChar = cb.CharAt(pos);
