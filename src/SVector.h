@@ -6,13 +6,12 @@
 #ifndef SVECTOR_H
 #define SVECTOR_H
 
-// A simple expandable vector. 
-// T must support assignment.
+// A simple expandable integer vector. 
 // Storage not allocated for elements until an element is used. 
 // This makes it very lightweight unless used so is a good match for optional features.
-template<class T, int sizeIncrement>
+
 class SVector {
-	T *v;
+	int *v;
 	unsigned int size;	// Number of elements allocated
 	unsigned int len;	// Number of elements in vector
 	bool allocFailure;	// A memory allocation call has failed
@@ -20,17 +19,17 @@ class SVector {
 	// Internally allocate more elements than the user wants to avoid 
 	// thrashng the memory allocator
 	void SizeTo(int newSize) {
-		if (newSize < sizeIncrement)
-			newSize += sizeIncrement;
+		if (newSize < 4000)
+			newSize += 4000;
 		else 
 			newSize = (newSize * 3) / 2;
-		T* newv = new T[newSize];
+		int* newv = new int[newSize];
 		if (!newv) {
 			allocFailure = true;
 			return;
 		}
 		size = newSize;
-        unsigned int i=0;
+        	unsigned int i=0;
 		for (; i<len; i++) {
 			newv[i] = v[i];
 		}
@@ -83,7 +82,7 @@ public:
 		}
 		return *this;
 	}
-	T &operator[](unsigned int i) {
+	int &operator[](unsigned int i) {
 		if (i >= len) {
 			if (i >= size) {
 				SizeTo(i);

@@ -144,7 +144,7 @@ private:
 
 	LineVector lv;
 
-	SVector<int, 4000> lineStates;
+	SVector lineStates;
 
 	void GapTo(int position);
 	void RoomFor(int insertionLength);
