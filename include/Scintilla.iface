@@ -1483,7 +1483,6 @@ set void SetKeyWords=4005(int keywordSet, string keyWords)
 set void SetLexerLanguage=4006(, string language)
 
 # Load a lexer library (dll / so)
-# NOT YET IMPLEMENTED
 fun void LoadLexerLibrary=4007(, string path)
 
 # Notifications
