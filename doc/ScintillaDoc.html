@@ -89,37 +89,37 @@ SCI_SETSTYLEBITS(int bits)
 SCI_GETSTYLEBITS
 </pre>
     <p>
-       Each character in a Scintilla document is followed by an associated byte of styling
-      information. The combination of a character byte and a style byte is called a cell. Style
-      bytes are interpreted as a style index in the low 5 bits and as 3 individual bits of
-      indicators. This allows 32 fundamental styles which is enough for most languages and three
-      independent indicators so that, for example, syntax errors, deprecated names and bad
-      indentation could all be displayed at once. Indicators may be displayed as simple underlines,
-      squiggly underlines, a line of small 'T' shapes, a line of diagonal hatching or as strike-out. 
-      Additional indicators such as blurred could be defined in the future. 
-      The number of bits used for styles can be altered 
-      with SCI_SETSTYLEBITS up to a maximum of 7 bits. 
-      The remaining bits can be used for indicators.
+	Each character in a Scintilla document is followed by an associated byte of styling
+	information. The combination of a character byte and a style byte is called a cell. Style
+	bytes are interpreted as a style index in the low 5 bits and as 3 individual bits of
+	indicators. This allows 32 fundamental styles which is enough for most languages and three
+	independent indicators so that, for example, syntax errors, deprecated names and bad
+	indentation could all be displayed at once. Indicators may be displayed as simple underlines,
+	squiggly underlines, a line of small 'T' shapes, a line of diagonal hatching or as strike-out. 
+	Additional indicators such as blurred could be defined in the future. 
+	The number of bits used for styles can be altered 
+	with SCI_SETSTYLEBITS up to a maximum of 7 bits. 
+	The remaining bits can be used for indicators.
     </p>
     <p>
-       Positions within the Scintilla document refer to a character or the gap before that
-      character. The caret exists between character positions and can be located from before the
-      first character to after the last character. There are places where the caret can not go
-      where two character bytes make up one character. This occurs when a DBCS character from a
-      language like Japanese is included in the document or when line ends are marked with the CP/M
-      standard of a carriage return followed by a line feed. The INVALID_POSITION constant (-1)
-      represents an invalid position within the document.
+	Positions within the Scintilla document refer to a character or the gap before that
+	character. The caret exists between character positions and can be located from before the
+	first character to after the last character. There are places where the caret can not go
+	where two character bytes make up one character. This occurs when a DBCS character from a
+	language like Japanese is included in the document or when line ends are marked with the CP/M
+	standard of a carriage return followed by a line feed. The INVALID_POSITION constant (-1)
+	represents an invalid position within the document.
     </p>
     <p>
-       All lines of text in Scintilla are the same height, and this height is calculated from the
-      largest font in any current style. This restriction is for performance as if lines differed
-      in height then calculations involving positioning of text would require that text to be
-      styled first.
+	All lines of text in Scintilla are the same height, and this height is calculated from the
+	largest font in any current style. This restriction is for performance as if lines differed
+	in height then calculations involving positioning of text would require that text to be
+	styled first.
     </p>
     <p>
-       When wanting to completely restyle the document, for example after choosing a lexer,
-       the SCI_CLEARDOCUMENTSTYLE can be used to clear all styling information and
-       reset the folding state.
+	When wanting to completely restyle the document, for example after choosing a lexer,
+	the SCI_CLEARDOCUMENTSTYLE can be used to clear all styling information and
+	reset the folding state.
     </p>
 <pre>
 SCI_SETTARGETSTART(int pos) 
@@ -133,25 +133,25 @@ SCI_GETSEARCHFLAGS
 SCI_SEARCHINTARGET(int length, string text)
 </pre>
     <p>
-       Using SCI_REPLACESEL, modifications cause scrolling and other visible changes
-       which may take some time and cause unwanted display updates. If performing many 
-       changes, such as a replace all command, the target can be used instead. 
-       First set the range to be replaced. Then call SCI_REPLACETARGET or
-       SCI_REPLACETARGETRE which returns the length taken by the replacement string. 
-       The difference between SCI_REPLACETARGET and SCI_REPLACETARGETRE
-       is that SCI_REPLACETARGETRE looks for \d patterns in the replacement text
-       where d is a digit from 1 to 9 and substitutes in the values of tagged matches from the 
-       most recent regular expression search.
+	Using SCI_REPLACESEL, modifications cause scrolling and other visible changes
+	which may take some time and cause unwanted display updates. If performing many 
+	changes, such as a replace all command, the target can be used instead. 
+	First set the range to be replaced. Then call SCI_REPLACETARGET or
+	SCI_REPLACETARGETRE which returns the length taken by the replacement string. 
+	The difference between SCI_REPLACETARGET and SCI_REPLACETARGETRE
+	is that SCI_REPLACETARGETRE looks for \d patterns in the replacement text
+	where d is a digit from 1 to 9 and substitutes in the values of tagged matches from the 
+	most recent regular expression search.
     </p>
     <p>
-       Searching can be performed within the target range with SCI_SEARCHINTARGET
-       which uses a counted string to allow searching for null characters.
-       Returns length of range or -1 for failure in which case target is not moved.
-       The flags used by SCI_SEARCHINTARGET such as SCFIND_MATCHCASE,
-       SCFIND_WHOLEWORD, SCFIND_WORDSTART, and SCFIND_REGEXP can 
-       be set with SCI_SETSEARCHFLAGS. The SCI_SEARCHINTARGET call 
-       may be simpler for some clients to use than SCI_FINDTEXT as that requires 
-       using a pointer to a structure.
+	Searching can be performed within the target range with SCI_SEARCHINTARGET
+	which uses a counted string to allow searching for null characters.
+	Returns length of range or -1 for failure in which case target is not moved.
+	The flags used by SCI_SEARCHINTARGET such as SCFIND_MATCHCASE,
+	SCFIND_WHOLEWORD, SCFIND_WORDSTART, and SCFIND_REGEXP can 
+	be set with SCI_SETSEARCHFLAGS. The SCI_SEARCHINTARGET call 
+	may be simpler for some clients to use than SCI_FINDTEXT as that requires 
+	using a pointer to a structure.
     </p>
 <pre>
 SCI_SETOVERTYPE
@@ -179,10 +179,10 @@ SCI_SETSTATUS
 SCI_GETSTATUS
 </pre>
     <p>
-      If an error occurs, Scintilla may set an internal error number which can be retrieved 
-      with SCI_GETSTATUS.
-      Not currently used but will be in the future.
-      To clear the error status call SCI_SETSTATUS(0).
+	If an error occurs, Scintilla may set an internal error number 
+	which can be retrieved with SCI_GETSTATUS.
+	Not currently used but will be in the future.
+	To clear the error status call SCI_SETSTATUS(0).
     </p>
     <h3>
        Undo and Redo
@@ -199,15 +199,15 @@ SCI_BEGINUNDOACTION
 SCI_ENDUNDOACTION
 </pre>
     <p>
-       Scintilla has multiple level undo and redo. It will continue to collect undoable actions
-      until memory runs out. Sequences of typing or deleting are compressed into single actions to
-      make it easier to undo and redo at a sensible level of detail. Sequences of actions can be
-      combined into actions that are undone as a unit. These sequences occur between
-      SCI_BEGINUNDOACTION and SCI_ENDUNDOACTION messages. These sequences can be nested and only
-      the top level sequences are undone as units.
+	Scintilla has multiple level undo and redo. It will continue to collect undoable actions
+	until memory runs out. Sequences of typing or deleting are compressed into single actions to
+	make it easier to undo and redo at a sensible level of detail. Sequences of actions can be
+	combined into actions that are undone as a unit. These sequences occur between
+	SCI_BEGINUNDOACTION and SCI_ENDUNDOACTION messages. These sequences can be nested and only
+	the top level sequences are undone as units.
     </p>
     <h3>
-       Selection and information
+	Selection and information
     </h3>
 <pre>
 SCI_GETTEXTLENGTH
@@ -241,23 +241,30 @@ SCI_GETCURLINE(int textlen, char *text)
 SCI_LINESONSCREEN
 SCI_SELECTIONISRECTANGLE
 SCI_MOVECARETINSIDEVIEW
+SCI_WORDENDPOSITION(int position)
+SCI_WORDSTARTPOSITION(int position)
 </pre>
     <p>
-       Scintilla maintains a selection which stretches between two points, the anchor and the
-      current position.
+	Scintilla maintains a selection which stretches between two points, the anchor and the
+	current position.
     </p>
     <p>
-       It is not possible to change the modified status as whether the document is modified is 
-       determined by whether the undo position is at the save point.
+	It is not possible to change the modified status as whether the document is modified is 
+	determined by whether the undo position is at the save point.
     </p>
     <p>
-       SCI_GETCURLINE retrieves the text of the line containing the caret and returns the position
-      within the line of the caret.
+	SCI_GETCURLINE retrieves the text of the line containing the caret and returns the position
+	within the line of the caret.
     </p>
     <p>
-    SCI_POSITIONFROMPOINT finds the closest character position to a point and
-    SCI_POSITIONFROMPOINTCLOSE is similar but returns -1 if the point is 
-    outside the window or not close to any characters.
+	SCI_POSITIONFROMPOINT finds the closest character position to a point and
+	SCI_POSITIONFROMPOINTCLOSE is similar but returns -1 if the point is 
+	outside the window or not close to any characters.
+    </p>
+    <p>
+	SCI_WORDENDPOSITION and SCI_WORDSTARTPOSITION can be used to find 
+	the start and end of words using the same definition of words as used internally 
+	within Scintilla.
     </p>
     <h3>
        Scrolling and automatic scrolling
@@ -448,23 +455,27 @@ SCI_STYLESETUNDERLINE(int stylenumber, bool underline)
 SCI_STYLESETCHARACTERSET(int stylenumber, int charset)
 SCI_STYLESETVISIBLE(int stylenumber, bool visible)
 SCI_STYLESETCASE(int stylenumber, SC_CASE_MIXED or SC_CASE_UPPER or SC_CASE_LOWER)
+SCI_STYLESETCHANGEABLE(int stylenumber, bool changeable)
 </pre>
     <p>
-       While the style setting messages mentioned above, change the style numbers associated with
-      text, these messages define how those style numbers are interpreted visually. The
-      STYLE_DEFAULT style defines the attributes that all styles will receive when
-      SCI_STYLECLEARALL is called. SCI_STYLERESETDEFAULT resets STYLE_DEFAULT to its state when
-      Scintilla was initialised.
+	While the style setting messages mentioned above, change the style 
+	numbers associated with	text, these messages define how those style 
+	numbers are interpreted visually. The STYLE_DEFAULT style defines 
+	the attributes that all styles will receive when SCI_STYLECLEARALL 
+	is called. SCI_STYLERESETDEFAULT resets STYLE_DEFAULT to its state 
+	when Scintilla was initialised.
     </p>
     <p>
-       The EOLFILLED style allows to colourise from the end of the line to the right side of the
-      window.
+	The EOLFILLED style allows to colourise from the end of the line to 
+	the right side of the window.
     </p>
     <p>
-      SCI_STYLESETCHARACTERSET can set a style to use a different character set than the default.
-      For example, SCI_STYLESETCHARACTERSET(SCE_C_STRING, SC_CHARSET_RUSSIAN)
-      would ensure that strings in Russian would display correctly. 
-      This feature currently only works fully on Windows. 
+	SCI_STYLESETCHARACTERSET can set a style to use a different 
+	character set than the default.
+	For example, SCI_STYLESETCHARACTERSET(SCE_C_STRING, 
+	SC_CHARSET_RUSSIAN) would ensure that strings in Russian would 
+	display correctly. 
+	This feature currently only works fully on Windows. 
     </p>
     <p>
       The character sets supported on Windows are:
@@ -477,19 +488,32 @@ SC_CHARSET_SYMBOL, SC_CHARSET_THAI, SC_CHARSET_TURKISH, and
 SC_CHARSET_VIETNAMESE. 
     </p>
     <p>
-      The character sets supported on GTK+ are SC_CHARSET_ANSI,
-SC_CHARSET_EASTEUROPE, SC_CHARSET_GB2312, 
-SC_CHARSET_HANGUL, and SC_CHARSET_SHIFTJIS.
+	The character sets supported on GTK+ are SC_CHARSET_ANSI,
+	SC_CHARSET_EASTEUROPE, SC_CHARSET_GB2312, 
+	SC_CHARSET_HANGUL, and SC_CHARSET_SHIFTJIS.
     </p>
     <p>
-       As well as the 32 fundamental lexer styles, there are also some predefined numbered styles
-      starting at 32, STYLE_DEFAULT, STYLE_LINENUMBER, STYLE_BRACELIGHT, STYLE_BRACEBAD, 
-      STYLE_CONTROLCHAR, and STYLE_INDENTGUIDE. 
-      These can be defined with the SCI_STYLESET* messages.
+	As well as the 32 fundamental lexer styles, there are also some 
+	predefined numbered styles starting at 32, STYLE_DEFAULT, 
+	STYLE_LINENUMBER, STYLE_BRACELIGHT, STYLE_BRACEBAD, 
+	STYLE_CONTROLCHAR, and STYLE_INDENTGUIDE. 
+	These can be defined with the SCI_STYLESET* messages.
+	To make it easier for client code to discover the range of styles 
+	that are predefined, STYLE_LASTPREDEFINED is set to the style 
+	number of the last predefined style.
     </p>
     <p>
-      SCI_STYLESETCASE can force text to be displayed in upper case
-      (SC_CASE_UPPER) or lower case (SC_CASE_LOWER).
+	SCI_STYLESETCASE can force text to be displayed in upper case
+	(SC_CASE_UPPER) or lower case (SC_CASE_LOWER).
+    </p>
+    <p>
+	SCI_STYLESETCHANGEABLE is an experimental and incompletely 
+	implemented style attribute. 
+	The default setting is changeable but when turned off it makes text 
+	read-only.
+	Currently only stops caret from being within not-changeable text 
+	and does not yet stop deleting a range that contains not-changeable 
+	text.
     </p>
     <h3>
        Caret and Selection styles
@@ -499,33 +523,43 @@ SCI_SETSELFORE(bool useSelectionForeColour, int colour)
 SCI_SETSELBACK(bool useSelectionBackColour, int colour)
 SCI_SETCARETFORE(int colour)
 SCI_GETCARETFORE
-SCI_GETCARETLINEVISIBLE
 SCI_SETCARETLINEVISIBLE(bool show)
-SCI_GETCARETLINEBACK
+SCI_GETCARETLINEVISIBLE
 SCI_SETCARETLINEBACK(int colour)
-SCI_GETCARETPERIOD
+SCI_GETCARETLINEBACK
 SCI_SETCARETPERIOD(int milliseconds)
-SCI_GETCARETWIDTH
+SCI_GETCARETPERIOD
 SCI_SETCARETWIDTH(int pixels)
+SCI_GETCARETWIDTH
+SCI_SETCONTROLCHARSYMBOL(int symbol)
+SCI_GETCONTROLCHARSYMBOL
 </pre>
     <p>
-       The selection is shown by changing the foreground and / or background colours. 
-       If one of these is not set then that attribute is not changed for the selection. The 
-       default is to show the selection by changing the background to light grey and 
-       leaving the foreground the same as when it was not selected.
+	The selection is shown by changing the foreground and / or 
+	background colours. 
+	If one of these is not set then that attribute is not changed for 
+	the selection. The default is to show the selection by changing the 
+	background to light grey and leaving the foreground the same as 
+	when it was not selected.
     </p>
     <p>
-       The colour of the caret can be set with SCI_SETCARETFORE. 
-       The background colour of the line containing the caret can be changed 
-       to override the styles on that line with SCI_GETCARETLINEVISIBLE
-       and the colour used set with SCI_SETCARETLINEBACK. 
-       The caret line background colour is overridden by any background colour
-       used to display markers.
-       The rate at which the caret blinks can be set with SCI_SETCARETPERIOD 
-       which determines the time in milliseconds that the caret
-      is visible or invisible before changing state. Setting the period to 0 stops the caret
-      blinking. The width of the caret can be set with SCI_SETCARETWIDTH to a value
-      of 1, 2 or 3 pixels.
+	The colour of the caret can be set with SCI_SETCARETFORE. 
+	The background colour of the line containing the caret can be 
+	changed to override the styles on that line with 
+	SCI_GETCARETLINEVISIBLE	and the colour used set with 
+	SCI_SETCARETLINEBACK. 
+	The caret line background colour is overridden by any background 
+	colour used to display markers.
+	The rate at which the caret blinks can be set with 
+	SCI_SETCARETPERIOD which determines the time in milliseconds that 
+	the caret is visible or invisible before changing state. 
+	Setting the period to 0 stops the caret	blinking. 
+	The width of the caret can be set with SCI_SETCARETWIDTH to a value
+	of 1, 2 or 3 pixels.
+    </p>
+    <p>
+	SCI_SETCONTROLCHARSYMBOL specifies a character to use to indicate 
+	control characters rather than having them displayed as mnemonics.
     </p>
     <h3>
        Margins
@@ -537,8 +571,8 @@ SCI_SETMARGINRIGHT(int width)
 SCI_GETMARGINRIGHT
 </pre>
     <p>
-       Gets or sets the width of the blank margin on both sides of the text. This defaults to one
-      pixel on each side. 
+	Gets or sets the width of the blank margin on both sides of the 
+	text. This defaults to one pixel on each side. 
     </p>
 <pre>
 SCI_SETMARGINTYPEN(int margin, SC_MARGIN_SYMBOL | SC_MARGIN_NUMBER)
@@ -551,16 +585,18 @@ SCI_SETMARGINSENSITIVEN(int margin, bool sensitive)
 SCI_GETMARGINSENSITIVEN(int margin)
 </pre>
     <p>
-       There may be up to three margins to the left of the text display. Each margin may contain 
-       marker symbols and some may be set to display line numbers 
-       (with SCI_SETMARGINTYPEN). The markers displayed in each margin are set with
-       SCI_SETMARGINMASKN. Any markers not associated with a visible margin will 
-       be displayed as changes in background colour in the text.
-       A width in pixels can be set for each margin. Margins
-       with a zero width are ignored completely. Each margin may be made sensitive to mouse 
-       clicks. A click in a sensitive margin will result in a SCN_MARGINCLICK notification being
-       sent to the container. Margins that are not sensitive act as selection margins which make it 
-       easy to select ranges of lines. 
+	There may be up to three margins to the left of the text display. 
+	Each margin may contain marker symbols and some may be set to 
+	display line numbers (with SCI_SETMARGINTYPEN). The markers 
+	displayed in each margin are set withSCI_SETMARGINMASKN. Any 
+	markers not associated with a visible margin will be displayed as 
+	changes in background colour in the text.
+	A width in pixels can be set for each margin. Margins with a zero 
+	width are ignored completely. Each margin may be made sensitive to 
+	mouse clicks. A click in a sensitive margin will result in a 
+	SCN_MARGINCLICK notification being sent to the container. Margins 
+	that are not sensitive act as selection margins which make it 
+	easy to select ranges of lines. 
     </p>
     <h3>
        Other settings
@@ -570,30 +606,35 @@ SCI_SETUSEPALETTE(bool allowPaletteUse)
 SCI_GETUSEPALETTE
 </pre>
     <p>
-       On 8 bit displays, which can only display a maximum of 256 colours, the graphics environment
-      mediates between the colour needs of applications through the use of palettes. On GTK+,
-      Scintilla always uses a palette. On Windows, there are some problems with visual flashing
-      when switching between applications with palettes and it is also necessary for the
-      application containing the Scintilla control to forward some messages to Scintilla for its
-      palette code to work.
+	On 8 bit displays, which can only display a maximum of 256 colours, 
+	the graphics environment mediates between the colour needs of 
+	applications through the use of palettes. On GTK+, Scintilla always 
+	uses a palette. On Windows, there are some problems with visual 
+	flashing when switching between applications with palettes and it 
+	is also necessary for the application containing the Scintilla 
+	control to forward some messages to Scintilla for its palette code 
+	to work.
     </p>
     <p>
-       Because of these issues, the application must tell Scintilla to use a palette. If Scintilla
-      is not using a palette, then it will only be able to display in those colours already
-      available, which are often the 20 Windows system colours.
+	Because of these issues, the application must tell Scintilla to use 
+	a palette. If Scintilla is not using a palette, then it will only 
+	be able to display in those colours already available, which are 
+	often the 20 Windows system colours.
     </p>
     <p>
-       To see an example of how to enable palette support in Scintilla, search the text of SciTE
-      for WM_PALETTECHANGED, WM_QUERYNEWPALETTE and SCI_SETUSEPALETTE.
+	To see an example of how to enable palette support in Scintilla, 
+	search the text of SciTE for WM_PALETTECHANGED, WM_QUERYNEWPALETTE 
+	and SCI_SETUSEPALETTE.
     </p>
 <pre>
 SCI_SETBUFFEREDDRAW(bool isbuffered)
 SCI_GETBUFFEREDDRAW
 </pre>
     <p>
-       Turns on or off buffered drawing. Buffered drawing draws each line into a bitmap rather than
-      directly to the screen and then copies the bitmap to the screen. This avoids flickering
-      although it does take longer. The default is for drawing to be buffered.
+	Turns on or off buffered drawing. Buffered drawing draws each line 
+	into a bitmap rather than directly to the screen and then copies 
+	the bitmap to the screen. This avoids flickering although it does 
+	take longer. The default is for drawing to be buffered.
     </p>
 <pre>
 SCI_SETTABWIDTH(int widthinchars)
@@ -608,15 +649,17 @@ SCI_SETBACKSPACEUNINDENTS(bool bsUnIndents)
 SCI_GETBACKSPACEUNINDENTS
 </pre>
     <p>
-       SCI_SETTABWIDTH sets the size of a tab as a multiple of the size of a space character in the style of the
-      first style definition. SCI_SETINDENT sets the size of indentation in terms of characters. 
-      SCI_SETUSETABS determines whether indentation should be created out of a mixture of tabs 
-      and space or be based purely on spaces.
+	SCI_SETTABWIDTH sets the size of a tab as a multiple of the size 
+	of a space character in the style of the first style definition. 
+	SCI_SETINDENT sets the size of indentation in terms of characters. 
+	SCI_SETUSETABS determines whether indentation should be created out 
+	of a mixture of tabs and space or be based purely on spaces.
     </p>
     <p>
-      Inside indentation whitespace the tab and backspace keys can be made to indent and 
-      unindent rather than insert a tab character or delete a character with the 
-      SCI_SETTABINDENTS and SCI_GETBACKSPACEUNINDENTS functions.
+	Inside indentation whitespace the tab and backspace keys can be 
+	made to indent and unindent rather than insert a tab character or 
+	delete a character with the SCI_SETTABINDENTS and 
+	SCI_GETBACKSPACEUNINDENTS functions.
     </p>
 <pre>
 SCI_SETLINEINDENTATION(int line, int indentation)
@@ -625,38 +668,48 @@ SCI_GETLINEINDENTPOSITION(int line)
 SCI_GETCOLUMN(int position)
 </pre>
     <p>
-     The amount of indentation on a line can be discovered and set with SCI_GETLINEINDENTATION and 
-     SCI_SETLINEINDENTATION. The indentation is measured in character columns which correspond 
-     to the width of space characters. 
-     SCI_GETLINEINDENTPOSITION returns the position at the end of indentation of a line.
-     SCI_GETCOLUMN returns the column number of a position within the document taking the width
-     of tabs into account.
+	The amount of indentation on a line can be discovered and set with 
+	SCI_GETLINEINDENTATION and SCI_SETLINEINDENTATION. The indentation 
+	is measured in character columns which correspond to the width of 
+	space characters. 
+	SCI_GETLINEINDENTPOSITION returns the position at the end of 
+	indentation of a line. 
+	SCI_GETCOLUMN returns the column number of a position within the 
+	document taking the width of tabs into account.
     </p>
 <pre>
 SCI_SETCODEPAGE(int codepage)
 SCI_GETCODEPAGE
 </pre>
     <p>
-       Scintilla has some very simple Japanese DBCS (and probably Chinese and Korean) support. Use
-      this message with argument set to the code page number to set Scintilla to use code page
-      information to ensure double byte characters are treated as one character rather than two.
-      This also stops the caret from moving between the two bytes in a double byte character. Call
-      with argument set to zero to disable DBCS support.
+	Scintilla has some very simple Japanese DBCS (and probably Chinese 
+	and Korean) support. Use this message with argument set to the 
+	code page number to set Scintilla to use code page information to 
+	ensure double byte characters are treated as one character rather 
+	than two. This also stops the caret from moving between the two 
+	bytes in a double byte character. Call with argument set to zero 
+	to disable DBCS support.
     </p>
     <p>
-       On Windows, code page SC_CP_UTF8 (65001) sets Scintilla into Unicode mode with the 
-       document treated as a sequence of characters expressed in UTF-8. The text is converted to 
-       UCS-2 before being drawn by the OS and can thus display Hebrew, Arabic, Cyrillic, and 
-       Han characters.
+	On Windows, code page SC_CP_UTF8 (65001) sets Scintilla into 
+	Unicode mode with the document treated as a sequence of characters 
+	expressed in UTF-8. The text is converted to UCS-2 before being 
+	drawn by the OS and can thus display Hebrew, Arabic, Cyrillic, and 
+	Han characters. Languages which can use two characters stacked
+	vertically in one horizontal space such as Thai will mostly work
+	but there are som eissues where the characters are drawn 
+	separately leading to visual glitches. Bidirectional text is not
+	supported.
     </p>
 <pre>
 SCI_SETWORDCHARS(&lt;unused&gt;, char *chars)
 </pre>
     <p>
-       Scintilla has several functions that operate on words which are defined to be contiguous
-      sequences of characters from a particular set of characters. This message defines which
-      characters are members of that set. If chars is null then the default set, alphanumeric and
-      '_', is used.
+	Scintilla has several functions that operate on words which are 
+	defined to be contiguous sequences of characters from a particular 
+	set of characters. This message defines which characters are 
+	members of that set. If chars is null then the default set, 
+	alphanumeric and '_', is used.
     </p>
 <pre>
 SCI_GRABFOCUS
@@ -664,14 +717,14 @@ SCI_SETFOCUS(bool focus)
 SCI_GETFOCUS
 </pre>
     <p>
-       On GTK+, focus handling is more complicated than on Windows, so Scintilla can be told with
-      this message to grab the focus.
+	On GTK+, focus handling is more complicated than on Windows, 
+	so Scintilla can be told with this message to grab the focus.
     </p>
     <p>
-       The internal focus flag can be set with SCI_SETFOCUS.
-       This is used by clients which have complex focus requirements such as 
-       having their own window which gets the real focus but with the need to indicate that 
-       Scintilla has the logical focus.
+	The internal focus flag can be set with SCI_SETFOCUS.
+	This is used by clients which have complex focus requirements such 
+	as having their own window which gets the real focus but with the 
+	need to indicate that Scintilla has the logical focus.
     </p>
     <h3>
        Brace highlighting
@@ -682,17 +735,20 @@ SCI_BRACEBADLIGHT(int pos1)
 SCI_BRACEMATCH(int position, int maxReStyle)
 </pre>
     <p>
-       Up to two characters can be highlighted in a 'brace highlighting style' which is defined as
-      style number 34. If there is no matching brace then the 'brace badlighting style', style
-      number 35, can be used to show the brace that is unmatched. Using a position of
-      INVALID_POSITION removes the highlight.
+	Up to two characters can be highlighted in a 'brace highlighting 
+	style' which is defined as style number 34. If there is no matching 
+	brace then the 'brace badlighting style', style	number 35, can be 
+	used to show the brace that is unmatched. Using a position of
+	INVALID_POSITION removes the highlight.
     </p>
     <p>
-       The SCI_BRACEMATCH message finds a corresponding matching brace given the position of one
-      brace. The brace characters handled are '(', ')', '[', ']', '{', '}', '&lt;', and '&gt;'. A
-      match only occurs if the style of the matching brace is the same as the starting brace or the
-      matching brace is beyond the end of styling. Nested braces are handled correctly. The
-      maxReStyle parameter must currently be 0.
+	The SCI_BRACEMATCH message finds a corresponding matching brace 
+	given the position of one brace. The brace characters handled are 
+	'(', ')', '[', ']', '{', '}', '&lt;', and '&gt;'. 
+	A match only occurs if the style of the matching brace is the same 
+	as the starting brace or the matching brace is beyond the end of 
+	styling. Nested braces are handled correctly. The maxReStyle 
+	parameter must currently be 0.
     </p>
     <h3>
        Indentation Guides
@@ -704,17 +760,19 @@ SCI_SETHIGHLIGHTGUIDE(int column)
 SCI_GETHIGHLIGHTGUIDE
 </pre>
     <p>
-       Indentation guides are dotted vertical lines that appear within indentation whitespace
-       every indent size columns. They make it easy to see which constructs line up especially 
-       when they extend over multiple pages. Style 37 is used to specify the foreground and
-       background colour of the indentation guides.
+	Indentation guides are dotted vertical lines that appear within 
+	indentation whitespace every indent size columns. They make it 
+	easy to see which constructs line up especially when they extend 
+	over multiple pages. Style 37 is used to specify the foreground and
+	background colour of the indentation guides.
     </p>
     <p>
-       When brace highlighting occurs, the indentation guide corresponding to the braces may be
-       highlighted with the brace highlighting style, 34.
+	When brace highlighting occurs, the indentation guide corresponding 
+	to the braces may be highlighted with the brace highlighting style, 
+	34.
     </p>
     <h3>
-       Markers
+	Markers
     </h3>
 <pre>
 SCI_MARKERDEFINE(int markernumber, int markersymbols)
@@ -730,38 +788,48 @@ SCI_MARKERLINEFROMHANDLE(int handle)
 SCI_MARKERDELETEHANDLE(int handle)
 </pre>
     <p>
-       Markers appear in the selection margin to the left of the text. They are small geometric
-      symbols often used in debuggers to indicate breakpoints and the current line. If the
-      selection margin is set to zero width then the background colour of the whole line is changed
-      instead. There may be up to 32 marker symbols defined and each line has a set of these markers
-      associated with it. The markers are drawn in the order of their numbers. Markers try to move
-      with their text by tracking where the start of their line moves. When a line is deleted, its
-      markers are combined, by an or operation, with the markers of the previous line. The
-      SCI_MARKERDELETEALL removes markers of the given number from all lines, and treats a
-      parameter of -1 as meaning delete all markers from all lines.<br />
-       SCI_MARKERADD returns a marker handle number which may be used to find out where a marker
-      has moved to with the SCI_MARKERLINEFROMHANDLE message. SCI_MARKERDELETEHANDLE can be used to
-      delete a marker based upon its handle.
+	Markers appear in the selection margin to the left of the text. 
+	They are small geometric symbols often used in debuggers to 
+	indicate breakpoints and the current line. If the selection margin 
+	is set to zero width then the background colour of the whole line 
+	is changed instead. There may be up to 32 marker symbols defined 
+	and each line has a set of these markers associated with it. The 
+	markers are drawn in the order of their numbers. Markers try to 
+	move with their text by tracking where the start of their line 
+	moves. When a line is deleted, its markers are combined, by an or 
+	operation, with the markers of the previous line. The 
+	SCI_MARKERDELETEALL removes markers of the given number from all 
+	lines, and treats a parameter of -1 as meaning delete all markers 
+	from all lines.<br />
+	SCI_MARKERADD returns a marker handle number which may be used to 
+	find out where a marker has moved to with the 
+	SCI_MARKERLINEFROMHANDLE message. SCI_MARKERDELETEHANDLE can be 
+	used to	delete a marker based upon its handle.
     </p>
     <p>
-       SCI_MARKERGET retrieves the set of markers associated with a line. SCI_MARKERNEXT and
-      SCI_MARKERPREVIOUS can be used to efficiently search for lines that contain markers. They
-      return the next / previous line with a set of markers that includes some of the bits set in
-      the markermask parameter.<br />
-       The markermask is equal to a OR of (1 &lt;&lt; markernumber) for each marker of the desired
-      / retrieved set.
+	SCI_MARKERGET retrieves the set of markers associated with a line. 
+	SCI_MARKERNEXT and SCI_MARKERPREVIOUS can be used to efficiently 
+	search for lines that contain markers. They return the next / 
+	previous line with a set of markers that includes some of the bits 
+	set in the markermask parameter.<br />
+	The markermask is equal to a OR of (1 &lt;&lt; markernumber) for 
+	each marker of the desired / retrieved set.
     </p>
     <p>
-       The marker symbols currently available are SC_MARK_CIRCLE, SC_MARK_ROUNDRECT, SC_MARK_ARROW,
-       SC_MARK_SMALLRECT, SC_MARK_SHORTARROW, SC_MARK_EMPTY, SC_MARK_ARROWDOWN, 
-       SC_MARK_MINUS, SC_MARK_PLUS. The SC_MARK_BACKGROUND marker changes the background colour
-       of the line only.
-       The SC_MARK_EMPTY symbol is invisible,
-       allowing client code to track the movement of lines. Characters can be used as markers by adding 
-       the ASCII value of the character to SC_MARK_CHARACTER.
+	The marker symbols currently available are SC_MARK_CIRCLE, 
+	SC_MARK_ROUNDRECT, SC_MARK_ARROW, SC_MARK_SMALLRECT, 
+	SC_MARK_SHORTARROW, SC_MARK_EMPTY, SC_MARK_ARROWDOWN, 
+	SC_MARK_MINUS, SC_MARK_PLUS. 
+	The SC_MARK_BACKGROUND marker changes the background colour
+	of the line only.
+	The SC_MARK_EMPTY symbol is invisible,
+	allowing client code to track the movement of lines. 
+	Characters can be used as markers by adding 
+	the ASCII value of the character to SC_MARK_CHARACTER.
     </p>
     <p>
-       There are also marker symbols available for the folding margin in an flattened tree style:
+	There are also marker symbols available for the folding margin in a 
+	flattened tree style:
 	SC_MARK_BOXMINUS,
 	SC_MARK_BOXMINUSCONNECTED,
 	SC_MARK_BOXPLUS,
@@ -777,16 +845,21 @@ SCI_MARKERDELETEHANDLE(int handle)
 	SC_MARK_VLINE.
     </p>
     <p>
-       The marker numbers SC_MARKNUM_FOLDER and SC_MARKNUM_FOLDEROPEN are
-       used for showing that a fold is present and open or closed. Any symbols may be assigned for 
-       this purpose although the (SC_MARK_PLUS, SC_MARK_MINUS) pair or the
-       (SC_MARK_ARROW, SC_MARK_ARROWDOWN) pair are good choices.
-       As well as these two, more assignments are needed for the flattened tree style:
-       SC_MARKNUM_FOLDEREND,
+	The marker numbers SC_MARKNUM_FOLDER and SC_MARKNUM_FOLDEROPEN are
+	used for showing that a fold is present and open or closed. Any 
+	symbols may be assigned for this purpose although the 
+	(SC_MARK_PLUS, SC_MARK_MINUS) pair or the (SC_MARK_ARROW, 
+	SC_MARK_ARROWDOWN) pair are good choices.
+	As well as these two, more assignments are needed for the 
+	flattened tree style:
+	SC_MARKNUM_FOLDEREND,
 	SC_MARKNUM_FOLDERMIDTAIL,
 	SC_MARKNUM_FOLDEROPENMID,
 	SC_MARKNUM_FOLDERSUB, and
 	SC_MARKNUM_FOLDERTAIL.
+	The bits used for folding is specified by SC_MASK_FOLDERS which is 
+	commonly used as an argument to SCI_SETMARGINMASKN when defining a 
+	margin to be used for folding.
     </p>
     <h3>
        Indicators
@@ -798,16 +871,17 @@ SCI_INDICSETFORE(int indicatornumber, int colour)
 SCI_INDICGETFORE(int indicatornumber)
 </pre>
     <p>
-       These messages allow setting the visual appearance of the three (0, 1, and 2) available
-      indicators.
+	These messages allow setting the visual appearance of the three 
+	(0, 1, and 2) available	indicators.
     </p>
     <p>
-       The indicator styles currently available are INDIC_PLAIN, INDIC_SQUIGGLE, INDIC_TT, 
-       INDIC_DIAGONAL, and INDIC_STRIKE.
+	The indicator styles currently available are INDIC_PLAIN, 
+	INDIC_SQUIGGLE, INDIC_TT, INDIC_DIAGONAL, and INDIC_STRIKE.
     </p>
     <p>
-       The indicators are set using SCI_STARTSTYLING with a INDICS_MASK mask and SCI_SETSTYLING
-      with the values INDIC0_MASK, INDIC1_MASK and INDIC2_MASK.
+	The indicators are set using SCI_STARTSTYLING with a INDICS_MASK 
+	mask and SCI_SETSTYLING	with the values INDIC0_MASK, INDIC1_MASK 
+	and INDIC2_MASK.
     </p>
     <h3>
        Autocompletion
@@ -833,30 +907,37 @@ SCI_AUTOCSETAUTOHIDE(bool bool autoHide)
 SCI_AUTOCGETAUTOHIDE
 </pre>
     <p>
-       Auto completion displays a list box based upon the users typing showing likely identifiers.
-      The SCI_AUTOCSHOW message causes this list to be displayed, with its argument being a list of
-      words separated by separator characters. The initial separator character is a space but this can 
-      be set  or got with SCI_AUTOCSETSEPARATOR and SCI_AUTOCGETSEPARATOR.
-      SCI_AUTOCPOSSTART returns the value of the current
-      position when SCI_AUTOCSHOW started display of the list.
-      An entry can be selected SCI_AUTOCSELECT.
+	Auto completion displays a list box based upon the users typing 
+	showing likely identifiers.
+	The SCI_AUTOCSHOW message causes this list to be displayed, with 
+	its argument being a list of words separated by separator 
+	characters. The initial separator character is a space but this can 
+	be set  or got with SCI_AUTOCSETSEPARATOR and 
+	SCI_AUTOCGETSEPARATOR.
+	SCI_AUTOCPOSSTART returns the value of the current position when 
+	SCI_AUTOCSHOW started display of the list.
+	An entry can be selected SCI_AUTOCSELECT.
     </p>
     <p>
-       The current selection can be triggered with the SCI_AUTOCCOMPLETE message. This has the same
-      effect as the tab key. When in autocompletion mode, the list should disappear when the user
-      types a character that can not be part of the autocompletion, such as '.', '(' or '[' when
-      typing an identifier. A set of characters which will cancel autocompletion can be specified
-      with the SCI_AUTOCSTOPS.
+	The current selection can be triggered with the SCI_AUTOCCOMPLETE 
+	message. This has the same effect as the tab key. When in 
+	autocompletion mode, the list should disappear when the user
+	types a character that can not be part of the autocompletion, 
+	such as '.', '(' or '[' when typing an identifier. A set of 
+	characters which will cancel autocompletion can be specified
+	with the SCI_AUTOCSTOPS.
     </p>
     <p>
-      The default behaviour is for the list to be cancelled if the caret moves before the location it was
-      at when the list was displayed. By calling SCI_AUTOCSETCANCELATSTART with
-      a false argument, the list is not cancelled until the caret moves before the first character of the 
-      word being completed.
+	The default behaviour is for the list to be cancelled if the caret 
+	moves before the location it was at when the list was displayed. 
+	By calling SCI_AUTOCSETCANCELATSTART with a false argument, the 
+	list is not cancelled until the caret moves before the first 
+	character of the word being completed.
     </p>
     <p>
-      The list will also be cancelled if there are no viable matches. To avoid this behaviour
-      call SCI_AUTOCSETAUTOHIDE with a false argument.
+	The list will also be cancelled if there are no viable matches. 
+	To avoid this behaviour	call SCI_AUTOCSETAUTOHIDE with a false 
+	argument.
     </p>
     <h3>
        User lists
@@ -865,11 +946,12 @@ SCI_AUTOCGETAUTOHIDE
 SCI_USERLISTSHOW(int listType,char *list)
 </pre>
     <p>
-      User lists are similar to auto completion but do not insert text when an item is selected, 
-      instead notifying the container with a SCN_USERLISTSELECTION. 
-      The listType parameter is returned to the container and 
-      can be used to differentiate between different types of list such as between a list of
-      buffers and a list of keywords.
+	User lists are similar to auto completion but do not insert text 
+	when an item is selected, instead notifying the container with a 
+	SCN_USERLISTSELECTION. 
+	The listType parameter is returned to the container and can be used 
+	to differentiate between different types of list such as between a 
+	list of	buffers and a list of keywords.
     </p>
     <h3>
        Calltips
@@ -883,16 +965,19 @@ SCI_CALLTIPSETHLT(int highlightstart, int highlightend)
 SCI_CALLTIPSETBACK(int colour)
 </pre>
     <p>
-       Call tips are small windows displaying the arguments to a function and are displayed after
-      the user has typed the name of the function. As the user types values for each argument, the
-      name of the argument currently being entered is highlighted.
+	Call tips are small windows displaying the arguments to a function 
+	and are displayed after	the user has typed the name of the 
+	function. As the user types values for each argument, the
+	name of the argument currently being entered is highlighted.
     </p>
     <p>
-       SCI_CALLTIPSHOW starts the process by displaying the calltip window, with the definition
-      argument containing the text to display. SCI_CALLTIPPOSSTART returns the value of the current
-      position when SCI_CALLTIPSHOW started display of the list. SCI_CALLTIPSETHLT sets the region
-      of the calltip text displayed in a highlighted style. The background colour of calltips can
-      be set with SCI_CALLTIPSETBACK with the default being white.
+	SCI_CALLTIPSHOW starts the process by displaying the calltip 
+	window, with the definition argument containing the text to 
+	display. SCI_CALLTIPPOSSTART returns the value of the current
+	position when SCI_CALLTIPSHOW started display of the list. 
+	SCI_CALLTIPSETHLT sets the region of the calltip text displayed in 
+	a highlighted style. The background colour of calltips can
+	be set with SCI_CALLTIPSETBACK with the default being white.
     </p>
     <h3>
        Keyboard Commands
@@ -925,6 +1010,7 @@ SCI_PAGEDOWNEXTEND
 SCI_EDITTOGGLEOVERTYPE
 SCI_CANCEL
 SCI_DELETEBACK
+SCI_DELETEBACKNOTLINE
 SCI_TAB
 SCI_BACKTAB
 SCI_NEWLINE
@@ -948,12 +1034,18 @@ SCI_WORDPARTRIGHT
 SCI_WORDPARTRIGHTEXTEND
 </pre>
     <p>
-       To allow the container application to perform any of the actions available to the user with
-      keyboard, all the keyboard actions are messages. They do not take any parameters.
+	To allow the container application to perform any of the actions 
+	available to the user with keyboard, all the keyboard actions are 
+	messages. They do not take any parameters.
     </p>
     <p>
-       These commands are also used when redefining the key bindings with the SCI_ASSIGNCMDKEY
-      message.
+	These commands are also used when redefining the key bindings with 
+	the SCI_ASSIGNCMDKEY message.
+    </p>
+    <p>
+	The SCI_WORDPART* commands are used to move between word segments
+	marked by capitalisation (aCamelCaseIdentifier) or underscores
+	(an_under_bar_ident).
     </p>
     <h3>
        Key Bindings
@@ -965,40 +1057,44 @@ SCI_CLEARALLCMDKEYS
 SCI_NULL
 </pre>
     <p>
-       There is a default binding of keys to commands in Scintilla which can be overridden with
-      these messages. To fit the parameters into a message, the first argument contains the key
-      code in the low word and the key modifiers (possibly shift and control) in the high word. The
-      key code is a visible or control character or a key from the SCK_* enumeration, 
-      which contains SCK_ADD, SCK_BACK, SCK_DELETE, SCK_DIVIDE,
-      SCK_DOWN, SCK_END, SCK_ESCAPE, SCK_HOME, SCK_INSERT,
-      SCK_LEFT, SCK_NEXT, SCK_PRIOR, SCK_RETURN, SCK_RIGHT, 
-      SCK_SUBTRACT, SCK_TAB, and SCK_UP.
-      The modifiers are a combination of zero or more of
-      SCMOD_ALT, SCMOD_CTRL, and SCMOD_SHIFT. 
-      SCI_NULL does nothing and is the value assigned to keys that perform no action.
+	There is a default binding of keys to commands in Scintilla which 
+	can be overridden with these messages. 
+	To fit the parameters into a message, the first argument contains 
+	the key	code in the low word and the key modifiers (possibly shift 
+	and control) in the high word. The key code is a visible or control 
+	character or a key from the SCK_* enumeration, 
+	which contains SCK_ADD, SCK_BACK, SCK_DELETE, SCK_DIVIDE,
+	SCK_DOWN, SCK_END, SCK_ESCAPE, SCK_HOME, SCK_INSERT,
+	SCK_LEFT, SCK_NEXT, SCK_PRIOR, SCK_RETURN, SCK_RIGHT, 
+	SCK_SUBTRACT, SCK_TAB, and SCK_UP.
+	The modifiers are a combination of zero or more of
+	SCMOD_ALT, SCMOD_CTRL, and SCMOD_SHIFT. 
+	SCI_NULL does nothing and is the value assigned to keys that 
+	perform no action.
     </p>
     <h3>
-       Popup edit menu
+	Popup edit menu
     </h3>
 <pre>
 SCI_USEPOPUP
 </pre>
     <p>
-    	Clicking the wrong button on the mouse pops up a short default editing menu.
-    	This may be turned off with SCI_USEPOPUP(0).
+	Clicking the wrong button on the mouse pops up a short default 
+	editing menu.
+	This may be turned off with SCI_USEPOPUP(0).
     </p>
     <h3>
-       Macro Recording
+	Macro Recording
     </h3>
 <pre>
 SCI_STARTRECORD
 SCI_STOPRECORD
 </pre>
     <p>
-    	Starts and stops macro recording mode.
+	Starts and stops macro recording mode.
     </p>
     <h3>
-       Printing
+	Printing
     </h3>
 <pre>
 SCI_FORMATRANGE
@@ -1008,42 +1104,54 @@ SCI_SETPRINTCOLOURMODE(int mode)
 SCI_GETPRINTCOLOURMODE
 </pre>
     <p>
-       On Windows SCI_FORMATRANGE can be used to draw the text onto a display context which can
-      include a printer display context.
+	On Windows SCI_FORMATRANGE can be used to draw the text onto a 
+	display context which can include a printer display context.
     </p>
     <p>
-       To print at a different size than drawing on screen use SCI_SETPRINTMAGNIFICATION with
-       a value which is the number of points to add to each style. -3 or -4 gives reasonable small print.
+	To print at a different size than drawing on screen use 
+	SCI_SETPRINTMAGNIFICATION with a value which is the number of 
+	points to add to each style. -3 or -4 gives reasonable small print.
     </p>
     <p>
-       If a black background is used on the screen then it is best to invert the light value of all colours
-       with SCI_SETPRINTCOLOURMODE(SC_PRINT_INVERTLIGHT) when printing to give a 
-       white background. If intermediate tones are used on screen then black on white print can be 
-       chosen with SCI_SETPRINTCOLOURMODE(SC_PRINT_BLACKONWHITE).
-       Other options are the default, SC_PRINT_NORMAL, and 
-       SC_PRINT_COLOURONWHITE and SC_PRINT_COLOURONWHITEDEFAULTBG.
+	If a black background is used on the screen then it is best to 
+	invert the light value of all colours with 
+	SCI_SETPRINTCOLOURMODE(SC_PRINT_INVERTLIGHT) when printing to give 
+	a white background. 
+	If intermediate tones are used on screen then black on white print 
+	can be chosen with SCI_SETPRINTCOLOURMODE(SC_PRINT_BLACKONWHITE).
+	Other options are the default, SC_PRINT_NORMAL, and 
+	SC_PRINT_COLOURONWHITE and SC_PRINT_COLOURONWHITEDEFAULTBG.
     </p>
     <h3>
-       Direct Access
+	Direct Access
     </h3>
 <pre>
 SCI_GETDIRECTFUNCTION
 SCI_GETDIRECTPOINTER
 </pre>
     <p>
-      On Windows, the message passing scheme used to communicate between the container and
-      Scintilla is mediated by the operating system SendMessage function which can lead to bad 
-      performance when calling intensively. 
-      To avoid this overhead a pointer to a message handling function inside Scintilla
-      can be retrieved with SCI_GETDIRECTFUNCTION. The first argument to use when calling
-      the returned function is the value retrieved from SCI_GETDIRECTPOINTER. After that go 
-      the message number, wParam, and lParam.
+	On Windows, the message passing scheme used to communicate between 
+	the container and Scintilla is mediated by the operating system 
+	SendMessage function which can lead to bad performance when 
+	calling intensively. 
+	To avoid this overhead a pointer to a message handling function 
+	inside Scintilla can be retrieved with SCI_GETDIRECTFUNCTION. 
+	The first argument to use when calling the returned function is the 
+	value retrieved from SCI_GETDIRECTPOINTER. After that go the 
+	message number, wParam, and lParam. 
     </p>
     <p>
-      This feature also works on GTK+ but has no significant impact on speed.
+	While faster, this direct calling will cause problems if performed 
+	from a different thread to the native thread of the Scintilla 
+	window in which case SendMessage should be used to synchronize with
+	the window's thread.
+    </p>
+    <p>
+	This feature also works on GTK+ but has no significant impact on 
+	speed.
     </p>
     <h3>
-       Multiple Views
+	Multiple Views
     </h3>
 <pre>
 SCI_GETDOCPOINTER
@@ -1053,23 +1161,27 @@ SCI_ADDREFDOCUMENT(&lt;unused&gt;,document *pdoc)
 SCI_RELEASEDOCUMENT(&lt;unused&gt;,document *pdoc)
 </pre>
     <p>
-       This is to allow simple split views of documents and so applications may maintain multiple buffer
-       which may be individually selected into the editor. Each Scintilla has a pointer to a used document. 
-       Initially the used document is a default one created when the Scintilla was created. 
-       The SCI_GETDOCPOINTER call returns a pointer to the used document. 
-       SCI_SETDOCPOINTER sets the used document. 
-       SCI_SETDOCPOINTER(0) switches to a new empty document.
-       Before closing down Scintilla make sure all document pointers retrieved are released to avoid 
-       memory leaks. 
+	This is to allow simple split views of documents and so 
+	applications may maintain multiple buffer which may be 
+	individually selected into the editor. Each Scintilla has a pointer 
+	to a used document. 
+	Initially the used document is a default one created when the 
+	Scintilla was created. 
+	The SCI_GETDOCPOINTER call returns a pointer to the used document. 
+	SCI_SETDOCPOINTER sets the used document. 
+	SCI_SETDOCPOINTER(0) switches to a new empty document.
+	Before closing down Scintilla make sure all document pointers 
+	retrieved are released to avoid memory leaks. 
     </p>
     <p>
-      A new document may be created by SCI_CREATEDOCUMENT which returns a pointer to 
-      the document. This document is not selected into the editor and starts with a reference count
-      of 1. A document may be released with SCI_RELEASEDOCUMENT and have its reference
-      count incremented with SCI_ADDREFDOCUMENT.
+	A new document may be created by SCI_CREATEDOCUMENT which returns a 
+	pointer to the document. This document is not selected into the 
+	editor and starts with a reference count of 1. A document may be 
+	released with SCI_RELEASEDOCUMENT and have its reference count 
+	incremented with SCI_ADDREFDOCUMENT.
     </p>
     <h3>
-       Folding
+	Folding
     </h3>
 <pre>
 SCI_VISIBLEFROMDOCLINE(int docLine)
@@ -1089,54 +1201,79 @@ SCI_ENSUREVISIBLE(int line)
 SCI_ENSUREVISIBLEENFORCEPOLICY(int line)
 </pre>
     <p>
-       The fundamental operation in folding is making lines invisible or visible. 
-       Line visibility is a property of the view rather than the document so each 
-       view may be displaying a different set of lines. SCI_SHOWLINES and 
-       SCI_HIDELINES show or hide a range of lines. SCI_GETLINEVISIBLE 
-       determines whether a line is visible. When some lines are hidden, then a 
-       particular line in the document may be displayed at a different position to its 
-       document position. SCI_VISIBLEFROMDOCLINE and 
-       SCI_DOCLINEFROMVISIBLE map from document line to display line and 
-       back.
+	The fundamental operation in folding is making lines invisible or 
+	visible. 
+	Line visibility is a property of the view rather than the document 
+	so each view may be displaying a different set of lines. 
+	SCI_SHOWLINES and SCI_HIDELINES show or hide a range of lines. 
+	SCI_GETLINEVISIBLE determines whether a line is visible. 
+	When some lines are hidden, then a particular line in the document 
+	may be displayed at a different position to its document position. 
+	SCI_VISIBLEFROMDOCLINE and SCI_DOCLINEFROMVISIBLE map from 
+	document line to display line and back.
     </p>
     <p>
-       Generally the fold points of a document are based on the hierarchical structure
-       of the contents of the document. In Python, the hierarchy is determined by 
-       indentation and in C++ by brace characters. This hierarchy can be represented
-       within a Scintilla document object by attaching a numeric level to each line. 
-       The initial level of a file is SC_FOLDLEVELBASE to allow unsigned arithmetic
-       on levels. The SC_FOLDLEVELNUMBERMASK constant can be used to mask
-       out the other bits to reveal the fold level number.
-       There 
-       are also two bit flags associated with each line. SC_FOLDLEVELWHITEFLAG
-       indicates that the line is blank and allows to be treated slightly different then its 
-       level may indicate. For example, blank lines should generally not be fold points. 
-       SC_FOLDLEVELHEADERFLAG indicates that the line is a header or fold point.
+	Generally the fold points of a document are based on the 
+	hierarchical structure of the contents of the document. 
+	In Python, the hierarchy is determined by indentation and in C++ 
+	by brace characters. This hierarchy can be represented within a 
+	Scintilla document object by attaching a numeric level to each 
+	line. 
+	The initial level of a file is SC_FOLDLEVELBASE to allow unsigned 
+	arithmetic on levels. The SC_FOLDLEVELNUMBERMASK constant can be 
+	used to mask out the other bits to reveal the fold level number.
+	There are also two bit flags associated with each line. 
+	SC_FOLDLEVELWHITEFLAG indicates that the line is blank and allows 
+	it to be treated slightly different then its level may indicate. 
+	For example, blank lines should generally not be fold points. 
+	SC_FOLDLEVELHEADERFLAG indicates that the line is a header or fold 
+	point.
     </p>
     <p>
-       The hierarchy can be navigated just through SCI_GETFOLDLEVEL, but it is
-       often useful to find the parent of a line (SCI_GETFOLDPARENT) or the line 
-       that is the last child of a line (SCI_GETLASTCHILD).
+	The hierarchy can be navigated just through SCI_GETFOLDLEVEL, but 
+	it is often useful to find the parent of a line (SCI_GETFOLDPARENT) 
+	or the line that is the last child of a line (SCI_GETLASTCHILD).
     </p>
     <p>
-       Each fold point may be either expanded, displaying all its child lines, or 
-       contracted, hiding all the child lines. This is per view state and can be 
-       manipulated with SCI_SETFOLDEXPANDED and 
-       SCI_GETFOLDEXPANDED. Using SCI_SETFOLDEXPANDED does not
-       show or hide any lines but only changes a state flag and the margin markers 
-       that show the contraction state. SCI_TOGGLEFOLD performs the expansion 
-       or contraction of a fold point in the manner normally expected. 
+	Each fold point may be either expanded, displaying all its child 
+	lines, or contracted, hiding all the child lines. This is per view 
+	state and can be manipulated with SCI_SETFOLDEXPANDED and 
+	SCI_GETFOLDEXPANDED. Using SCI_SETFOLDEXPANDED does not show or 
+	hide any lines but only changes a state flag and the margin markers 
+	that show the contraction state. SCI_TOGGLEFOLD performs the 
+	expansion or contraction of a fold point in the manner normally 
+	expected. 
     </p>
     <p>
-       A hidden line may be hidden because more than one of its parent lines is 
-       contracted. SCI_ENSUREVISIBLE travels up the fold hierarchy, expanding any
-       contracted folds until it reaches the top level. The line will then be visible.
+	A hidden line may be hidden because more than one of its parent 
+	lines is contracted. SCI_ENSUREVISIBLE travels up the fold 
+	hierarchy, expanding any contracted folds until it reaches the top 
+	level. The line will then be visible.
     </p>
     <p>
-       The fold flags is a set of bit flags set with the SCI_SETFOLDFLAGS message to 
-       determine where folding lines are drawn. 2 is draw above if expanded, 4 is draw above 
-       if not expanded. 8 is draw below if expanded and 16 is draw below if not expanded.
-       This feature needs to be redesigned to be sensible.
+	The fold flags is a set of bit flags set with the SCI_SETFOLDFLAGS 
+	message to determine where folding lines are drawn. 2 is draw above 
+	if expanded, 4 is draw above if not expanded. 8 is draw below if 
+	expanded and 16 is draw below if not expanded. This feature needs 
+	to be redesigned to be sensible.
+    </p>
+    <h3>
+       Line Wrapping
+    </h3>
+<pre>
+SCI_SETWRAPMODE(SC_WRAP_NONE or SC_WRAP_WORD)
+SCI_GETWRAPMODE
+</pre>
+    <p>
+	Line wrapping is an experimental feature that currently has 
+	performance and appearence problems. 
+	When the wrap mode is set to SC_WRAP_WORD lines wider than the 
+	window width are continued on the following lines. Lines are 
+	broken after space or tab characters or between runs of different
+	styles. If this is not possible because a word in one style is 
+	wider than the window then the break occurs before after the last 
+	character that completely fits on the line.
+	The horizontal scroll bar does not appear when wrap mode is on.
     </p>
     <h3>
     	Zooming
@@ -1148,13 +1285,15 @@ SCI_SETZOOM
 SCI_GETZOOM
 </pre>
     <p>
-    The text can be made larger and smaller by using SCI_ZOOMIN and SCI_ZOOMOUT.
-    The zoom level can be retrieved by SCI_GETZOOM and set by SCI_SETZOOM. The zoom factors 
-    may range from -10 to + 20 and is added to each styles point size. The calculated point size never 
-    goes below 2.
+	The text can be made larger and smaller by using SCI_ZOOMIN and 
+	SCI_ZOOMOUT.
+	The zoom level can be retrieved by SCI_GETZOOM and set by 
+	SCI_SETZOOM. 
+	The zoom factors may range from -10 to + 20 and is added to each 
+	styles point size. The calculated point size never goes below 2.
     </p>
     <h3>
-    	Long Lines
+	Long Lines
     </h3>
 <pre>
 SCI_GETEDGECOLUMN 
@@ -1165,11 +1304,14 @@ SCI_GETEDGECOLOUR
 SCI_SETEDGECOLOUR(int colour)
 </pre>
     <p>
-       This mechanism marks lines that are longer than a specified length in one of two ways. A
-      vertical line can be displayed at the specified column number (EDGE_LINE) or characters after
-      that column can be displayed with a specified background colour (EDGE_BACKGROUND). The
-      vertical line works well for monospaced fonts but not for proportional fonts which should use
-      EDGE_BACKGROUND. The default is to not have any form of long line marking (EDGE_NONE).
+	This mechanism marks lines that are longer than a specified length 
+	in one of two ways. A vertical line can be displayed at the 
+	specified column number (EDGE_LINE) or characters after	that 
+	column can be displayed with a specified background colour 
+	(EDGE_BACKGROUND). The vertical line works well for monospaced 
+	fonts but not for proportional fonts which should use 
+	EDGE_BACKGROUND. The default is to not have any form of long line 
+	marking (EDGE_NONE).
     </p>
     <h3>
     	Lexer
@@ -1183,58 +1325,66 @@ SCI_SETPROPERTY(char *key, char *value)
 SCI_SETKEYWORDS(int keywordset, char *keywordlist)
 </pre>
     <p>
-      If the SciLexer version of Scintilla is used, then lexing support for some programming languages
-      is included. A particular lexer may be chosen from the SCLEX* enumeration and it is invoked
-      automatically to style the document as required. Lexers can also be chosen by string name rather
-      than by integer ID.
-      If the lexer is set to SCLEX_CONTAINER then the container is notified to perform styling 
-      as is the case with the standard Scintilla.DLL version. Styling may be requested for a range
-      of the document by using SCI_COLOURISE.
+	If the SciLexer version of Scintilla is used, then lexing support 
+	for some programming languages is included. A particular lexer may 
+	be chosen from the SCLEX* enumeration and it is invoked 
+	automatically to style the document as required. Lexers can also 
+	be chosen by string name rather	than by integer ID.
+	If the lexer is set to SCLEX_CONTAINER then the container is 
+	notified to perform styling as is the case with the standard 
+	Scintilla.DLL version. Styling may be requested for a range of the 
+	document by using SCI_COLOURISE.
     </p>
     <p>
-      Settings can be communicated to the lexers using SCI_SETPROPERTY. Currently the "fold"
-      property is defined for the SCLEX_PYTHON, SCLEX_CPP, and SCLEX_SQL lexers to 
-      set the fold structure if set to "1". SCLEX_PYTHON understands "tab.timmy.whinge.level"
-      as a setting that determines how to indicate bad indentation. Many languages style a set of keywords
-      distinctly from other words. Some languages, such as HTML may contain embedded languages,
-      VBScript and Javascript are common for HTML. SCI_SETKEYWORDS specifies the keywords
-      separated by spaces. For HTML, key word set is for HTML, 1 is for Javascript and 2 is for VBScript.
+	Settings can be communicated to the lexers using SCI_SETPROPERTY. 
+	Currently the "fold" property is defined for most of the lexers to 
+	set the fold structure if set to "1". SCLEX_PYTHON understands 
+	"tab.timmy.whinge.level" as a setting that determines how to 
+	indicate bad indentation. Many languages style a set of keywords
+	distinctly from other words. Some languages, such as HTML may 
+	contain embedded languages, VBScript and Javascript are common for 
+	HTML. SCI_SETKEYWORDS specifies the keywords separated by spaces. 
+	For HTML, key word set is for HTML, 1 is for Javascript and 2 is 
+	for VBScript.
     </p>
     <h3>
        Notifications
     </h3>
     <p>
-       Notifications are sent (fired) from the Scintilla control to its container when an event has
-      occurred that may interest the container. Notifications are sent using the WM_NOTIFY message
-      on Windows and the "notify" signal on GTK+ with a structure containing information 
-      about the event.
+	Notifications are sent (fired) from the Scintilla control to its 
+	container when an event has occurred that may interest the 
+	container. Notifications are sent using the WM_NOTIFY message on 
+	Windows and the "notify" signal on GTK+ with a structure containing 
+	information about the event.
     </p>
 <pre>
 SCN_STYLENEEDED(int endstyleneeded)
 </pre>
     <p>
-       Before displaying a page or printing, this message is sent to the container. It is a good
-      opportunity for the container to ensure that syntax styling information for the visible text.
+	Before displaying a page or printing, this message is sent to the 
+	container. It is a good opportunity for the container to ensure 
+	that syntax styling information for the visible text.
     </p>
 <pre>
 SCN_UPDATEUI
 SCN_CHECKBRACE
 </pre>
     <p>
-	Either the text or styling of the document has changed or the selection
-	range has changed. Now would be a good time to update any container UI
-	elements that depend on document or view state. Was previously called 
-	SCN_CHECKBRACE because a common use is to check whether the caret 
-	is next to a brace and set highlights on this brace and its
-        corresponding matching brace.
+	Either the text or styling of the document has changed or the 
+	selection range has changed. Now would be a good time to update 
+	any container UI elements that depend on document or view state. 
+	Was previously called SCN_CHECKBRACE because a common use is to 
+	check whether the caret is next to a brace and set highlights on 
+	this brace and its corresponding matching brace.
     </p>
 <pre>
 SCN_CHARADDED(int charadded)
 </pre>
     <p>
-       Fired when the user types an ordinary text character (as opposed to a command character)
-      which is entered into the text. Can be used by the container to decide to display a call tip
-      or auto completion list.
+	Fired when the user types an ordinary text character (as opposed 
+	to a command character)	which is entered into the text. 
+	Can be used by the container to decide to display a call tip or 
+	auto completion list.
     </p>
 <pre>
 SCN_POSCHANGED(int newPos)
@@ -1249,43 +1399,49 @@ SCN_SAVEPOINTLEFT
 SCI_SETSAVEPOINT
 </pre>
     <p>
-       Sent to the container when the savepoint is entered or left, allowing the container to
-      display a dirty indicator and change its menus. 
+	Sent to the container when the savepoint is entered or left, 
+	allowing the container to display a dirty indicator and change its 
+	menus. 
     </p>
     <p>
-      The container tells Scintilla where the save point is by sending the SCI_SETSAVEPOINT
-      message.  This is usually done when the file is saved or loaded.  As Scintilla performs 
-      undo and redo operations, it will notify the container that it has entered or left the save 
-      point, allowing the container to know if the file should be considered dirty or not.
+	The container tells Scintilla where the save point is by sending 
+	the SCI_SETSAVEPOINT message.  This is usually done when the file 
+	is saved or loaded.  As Scintilla performs undo and redo 
+	operations, it will notify the container that it has entered or 
+	left the save point, allowing the container to know if the file 
+	should be considered dirty or not.
     </p>
 <pre>
 SCN_MODIFYATTEMPTRO
 </pre>
     <p>
-       When in read-only mode, this notification is sent to the container should the user try to
-      edit the document. This can be used to check the document out of a version control system.
+	When in read-only mode, this notification is sent to the container 
+	should the user try to edit the document. This can be used to 
+	check the document out of a version control system.
     </p>
 <pre>
 SCN_DOUBLECLICK
 </pre>
     <p>
-       Mouse button was double clicked in editor.
+	Mouse button was double clicked in editor.
     </p>
 <pre>
 SCN_KEY
 </pre>
     <p>
-       Reports all keys pressed. Used on GTK+ because of some problems with keyboard focus. Not
-      sent by Windows version.
+	Reports all keys pressed. Used on GTK+ because of some problems 
+	with keyboard focus. Not sent by Windows version.
     </p>
 <pre>
 SCEN_SETFOCUS
 SCEN_KILLFOCUS
 </pre>
     <p>
-       SCEN_SETFOCUS is fired when Scintilla receives focus and SCEN_KILLFOCUS when it loses focus.
-       These notifications are sent using the WM_COMMAND message on Windows and the "Command" signal 
-      on GTK+ as this is the behaviour of the standard edit control.
+	SCEN_SETFOCUS is fired when Scintilla receives focus and 
+	SCEN_KILLFOCUS when it loses focus.
+	These notifications are sent using the WM_COMMAND message on 
+	Windows and the "Command" signal on GTK+ as this is the behaviour 
+	of the standard edit control.
     </p>
 <pre>
 SCN_MODIFIED
@@ -1294,83 +1450,91 @@ SCI_SETMODEVENTMASK(int eventmask)
 SCI_GETMODEVENTMASK
 </pre>
     <p>
-       SCN_MODIFIED is fired when the document has been changed including changes to both the text
-      and styling. The notification structure contains information about what changed, how the
-      change occurred and whether this changed the number of lines in the document. No 
-      modifications may be performed while in a SCN_MODIFIED event.
+	SCN_MODIFIED is fired when the document has been changed including 
+	changes to both the text and styling. The notification structure 
+	contains information about what changed, how the change occurred 
+	and whether this changed the number of lines in the document. No 
+	modifications may be performed while in a SCN_MODIFIED event.
     </p>
     <p>
-       SCEN_CHANGE is fired when the text of the document has been changed for any reason. This
-      notification is sent using the WM_COMMAND message on Windows and the "Command" signal 
-      on GTK+ as this is the behaviour of the standard
-      edit control.
+	SCEN_CHANGE is fired when the text of the document has been changed 
+	for any reason. This notification is sent using the WM_COMMAND 
+	message on Windows and the "Command" signal on GTK+ as this is the 
+	behaviour of the standard edit control.
     </p>
     <p>
-       Both these notifications can be masked by the SCI_SETMODEVENTMASK function which sets which
-      notification types are sent to the container. For example, a container may decide to see only
-      notifications about changes to text and not styling changes by calling
-      SCI_SETMODEVENTMASK(SC_MOD_INSERTTEXT|SC_MOD_DELETETEXT).
+	Both these notifications can be masked by the SCI_SETMODEVENTMASK 
+	function which sets which notification types are sent to the 
+	container. For example, a container may decide to see only
+	notifications about changes to text and not styling changes by 
+	calling SCI_SETMODEVENTMASK(SC_MOD_INSERTTEXT|SC_MOD_DELETETEXT).
     </p>
     <p>
-    The possible notification types are
-SC_MOD_INSERTTEXT,
-SC_MOD_DELETETEXT, 
-SC_MOD_CHANGESTYLE, 
-SC_MOD_CHANGEFOLD, 
-SC_PERFORMED_USER, 
-SC_PERFORMED_UNDO, 
-SC_PERFORMED_REDO, 
-SC_LASTSTEPINUNDOREDO, 
-SC_MOD_CHANGEMARKER, 
-SC_MOD_BEFOREINSERT, 
-SC_MOD_BEFOREDELETE, and 
-SC_MODEVENTMASKALL.
+	The possible notification types are
+	SC_MOD_INSERTTEXT,
+	SC_MOD_DELETETEXT, 
+	SC_MOD_CHANGESTYLE, 
+	SC_MOD_CHANGEFOLD, 
+	SC_PERFORMED_USER, 
+	SC_PERFORMED_UNDO, 
+	SC_PERFORMED_REDO, 
+	SC_LASTSTEPINUNDOREDO, 
+	SC_MOD_CHANGEMARKER, 
+	SC_MOD_BEFOREINSERT, 
+	SC_MOD_BEFOREDELETE, and 
+	SC_MODEVENTMASKALL.
     </p>
 <pre>
 SCN_MACRORECORD
 </pre>
     <p>
-      Tells the container that an operation is being performed so that the container may choose 
-       to record the fact if it is in a macro recording mode.
+	Tells the container that an operation is being performed so that 
+	the container may choose to record the fact if it is in a macro 
+	recording mode.
     </p>
 <pre>
 SCN_MARGINCLICK
 </pre>
     <p>
-      Tells the container that the mouse was clicked inside a margin marked sensitive. 
-      Can be used to perform folding or to place breakpoints.
+	Tells the container that the mouse was clicked inside a margin 
+	marked sensitive. Can be used to perform folding or to place 
+	breakpoints.
     </p>
 <pre>
 SCN_NEEDSHOWN
 </pre>
     <p>
-      Scintilla has determined that a range of lines that is currently invisible should be made visible. 
-      An example of where this may be needed is if the end of line of a contracted fold point
-      is deleted. This message is sent to the container in case it wants to make the line
-      visible in some unusual way such as making the whole document visible. Most containers 
-      will just ensure each line in the range is visible by calling SCI_ENSUREVISIBLE.
+	Scintilla has determined that a range of lines that is currently 
+	invisible should be made visible. 
+	An example of where this may be needed is if the end of line of a 
+	contracted fold point is deleted. This message is sent to the 
+	container in case it wants to make the line visible in some 
+	unusual way such as making the whole document visible. 
+	Most containers will just ensure each line in the range is 
+	visible by calling SCI_ENSUREVISIBLE.
     </p>
 <pre>
 SCN_PAINTED
 </pre>
     <p>
-      Painting has just been done. Useful when you want to update some other widgets
-      based on a change in Scintilla, but want to have the paint occur first to appear more responsive.
+	Painting has just been done. Useful when you want to update some 
+	other widgets based on a change in Scintilla, but want to have the 
+	paint occur first to appear more responsive.
     </p>
 <pre>
 SCN_USERLISTSELECTION
 </pre>
     <p>
-      User has selected an item in a user list. 
-      The list type is available in wParam and the text chosen in text.
+	User has selected an item in a user list. 
+	The list type is available in wParam and the text chosen in text.
     </p>
 <pre>
 SCN_URIDROPPED
 </pre>
     <p>
-      Only on the GTK+ version. Indicates that the user has dragged a URI such as
-      a file name or web address onto Scintilla. The container could interpret this
-      as a request to open the file.
+	Only on the GTK+ version. Indicates that the user has dragged a URI 
+	such as	a file name or web address onto Scintilla. 
+	The container could interpret this as a request to open the file.
     </p>
 <pre>
 SCN_DWELLSTART
@@ -1380,18 +1544,21 @@ SCI_GETMOUSEDWELLTIME
 SC_TIME_FOREVER
 </pre>
     <p>
-      SCN_DWELLSTART is generated when the user hold the 
-      mouse still in one spot for the dwell period. 
-      SCN_DWELLEND is generated after a SCN_DWELLSTART
-      and the mouse is moved or other activity such as key press
-      indicates the dwell is over.
+	SCN_DWELLSTART is generated when the user hold the 
+	mouse still in one spot for the dwell period. 
+	SCN_DWELLEND is generated after a SCN_DWELLSTART
+	and the mouse is moved or other activity such as key press
+	indicates the dwell is over.
     </p>
     <p>
-      The time the mouse must sit still, in milliseconds, to generate a SCI_DWELLSTART.
-      If set to SC_TIME_FOREVER, the default, no dwell events will be generated.
+	The time the mouse must sit still, in milliseconds, to generate a 
+	SCI_DWELLSTART.
+	If set to SC_TIME_FOREVER, the default, no dwell events will be 
+	generated.
     </p>
     <h3>
-       Edit messages currently supported by Scintilla which will be removed in the future.
+	Edit messages currently supported by Scintilla which will be 
+	removed in the future.
     </h3>
 <pre>
 WM_GETTEXT(int length, char *text)
@@ -1469,18 +1636,20 @@ EM_DISPLAYBAND
 EM_SETTARGETDEVICE
 </pre>
     <p>
-       Scintilla tries to be a superset of the standard windows Edit and Richedit controls wherever
-      that makes sense. As it is not intended for use in a word processor, some edit messages can
-      not be sensibly handled. Unsupported messages have no effect.
+	Scintilla tries to be a superset of the standard windows Edit and 
+	Richedit controls wherever that makes sense. As it is not 
+	intended for use in a word processor, some edit messages can
+	not be sensibly handled. Unsupported messages have no effect.
     </p>
     <h3>
-       Building Scintilla
+	Building Scintilla
     </h3>
     <p>
-       To build Scintilla or SciTE, see the README file present in both the scintilla and 
-       scite directories. For Windows, GCC 2.95.2, Borland C++ or Microsoft Visual C++ can 
-       be used for building. For GTK+, GCC 2.95.2 should be used. Only GTK+ 1.2x is 
-       supported.
+	To build Scintilla or SciTE, see the README file present in both 
+	the scintilla and scite directories. For Windows, GCC 2.95.3, 
+	Borland C++ or Microsoft Visual C++ can be used for building. 
+	For GTK+, GCC 2.95.2 should be used. Only GTK+ 1.2x is 
+	supported.
     </p>
   </body>
 </html>
