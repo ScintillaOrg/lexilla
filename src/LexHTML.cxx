@@ -637,9 +637,10 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		         (state != SCE_HPHP_COMMENT) &&
 		         (ch == '<') &&
 		         (chNext == '?')) {
+			scriptLanguage = segIsScriptingIndicator(styler, styler.GetStartSegment() + 2, i + 10, eScriptPHP);
+			if (scriptLanguage != eScriptPHP && isStringState(state)) continue;
 			styler.ColourTo(i - 1, StateToPrint);
 			beforePreProc = state;
-			scriptLanguage = segIsScriptingIndicator(styler, styler.GetStartSegment() + 2, i + 10, eScriptPHP);
 			i++;
 			visibleChars++;
 			i += PrintScriptingIndicatorOffset(styler, styler.GetStartSegment() + 2, i + 10);
