@@ -308,7 +308,21 @@ int Editor::PositionFromLineX(int line, int x) {
 
 void Editor::RedrawRect(PRectangle rc) {
 	//Platform::DebugPrintf("Redraw %d %d - %d %d\n", rc.left, rc.top, rc.right, rc.bottom);
-	wDraw.InvalidateRectangle(rc);
+	
+	// Clip the redraw rectangle into the client area
+	PRectangle rcClient = GetClientRectangle();
+	if (rc.top < rcClient.top)
+		rc.top = rcClient.top;
+	if (rc.bottom > rcClient.bottom)
+		rc.bottom = rcClient.bottom;
+	if (rc.left < rcClient.left)
+		rc.left = rcClient.left;
+	if (rc.right > rcClient.right)
+		rc.right = rcClient.right;
+	
+	if ((rc.bottom > rc.top) && (rc.right > rc.left)) {
+		wDraw.InvalidateRectangle(rc);
+	}
 }
 
 void Editor::Redraw() {
