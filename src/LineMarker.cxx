@@ -66,7 +66,6 @@ void XPM::Init(const char * const *linesForm) {
 		codes[c] = colourDef[0];
 		colourDef += 4;
 		if (*colourDef == '#') {
-			colourDef++;
 			colours[c].desired = ColourFromString(colourDef);
 		} else {
 			colours[c].desired = ColourDesired(0xff, 0xff, 0xff);
