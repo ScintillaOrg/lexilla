@@ -961,6 +961,7 @@ SCI_GETHIGHLIGHTGUIDE
     </h3>
 <pre>
 SCI_MARKERDEFINE(int markernumber, int markersymbols)
+SCI_MARKERDEFINEPIXMAP(int markernumber, const char *xpm)
 SCI_MARKERSETFORE(int markernumber, int colour)
 SCI_MARKERSETBACK(int markernumber, int colour)
 SCI_MARKERADD(int line, int markernumber)
@@ -1047,6 +1048,11 @@ SCI_MARKERDELETEHANDLE(int handle)
 	The bits used for folding is specified by SC_MASK_FOLDERS which is
 	commonly used as an argument to SCI_SETMARGINMASKN when defining a
 	margin to be used for folding.
+    </p>
+    <p>
+	Markers can be set to pixmaps using the SCI_MARKERDEFINEPIXMAP
+	method. The XPM format is used for the pixmap and it is limited to
+	to pixmaps that use one character per pixel. The data should be null terminated.
     </p>
     <h3>
        Indicators
