@@ -3105,11 +3105,11 @@ void Editor::ButtonMove(Point pt) {
 		// Autoscroll
 		PRectangle rcClient = GetClientRectangle();
 		if (pt.y > rcClient.bottom) {
-			int lineMove = LineFromLocation(pt);
+			int lineMove = cs.DisplayFromDoc(LineFromLocation(pt));
 			ScrollTo(lineMove - LinesOnScreen() + 5);
 			Redraw();
 		} else if (pt.y < rcClient.top) {
-			int lineMove = LineFromLocation(pt);
+			int lineMove = cs.DisplayFromDoc(LineFromLocation(pt));
 			ScrollTo(lineMove - 5);
 			Redraw();
 		}
