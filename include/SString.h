@@ -18,28 +18,6 @@ bool EqualCaseInsensitive(const char *a, const char *b);
 // An SString may contain embedded nul characters.
 
 /**
- * Duplicate a C string.
- * Allocate memory of the given size, or big enough to fit the string if length isn't given;
- * then copy the given string in the allocated memory.
- * @return the pointer to the new string
- */
-inline char *StringDup(
-	const char *s,	///< The string to duplicate
-	int len=-1)		///< The length of memory to allocate. Optional.
-{
-	if (!s)
-		return 0;
-	if (len == -1)
-		len = strlen(s);
-	char *sNew = new char[len + 1];
-	if (sNew) {
-		strncpy(sNew, s, len);
-		sNew[len] = '\0';
-	}
-	return sNew;
-}
-
-/**
  * @brief A simple string class.
  *
  * Hold the length of the string for quick operations,
@@ -48,14 +26,21 @@ inline char *StringDup(
  * functions to allow reliable manipulations of these strings.
  **/
 class SString {
-	char *s;		///< The C string
-	int sSize;		///< The size of the buffer, less 1: ie. the maximum size of the string
-	int sLen;		///< The size of the string in s
-	int sizeGrowth;	///< Minimum growth size when appending strings
+public:
+	/** Type of string lengths (sizes) and positions (indexes) */
+	typedef unsigned int lenpos_t;
+	enum { measure_length=0xffffffffU};
+
+private:
+	char *s;				///< The C string
+	lenpos_t sSize;			///< The size of the buffer, less 1: ie. the maximum size of the string
+	lenpos_t sLen;			///< The size of the string in s
+	lenpos_t sizeGrowth;	///< Minimum growth size when appending strings
 	enum { sizeGrowthDefault = 64 };
-	bool grow(int lenNew) {
-		while (sizeGrowth * 6 < lenNew)
+	bool grow(lenpos_t lenNew) {
+		while (sizeGrowth * 6 < lenNew) {
 			sizeGrowth *= 2;
+		}
 		char *sNew = new char[lenNew + sizeGrowth + 1];
 		if (sNew) {
 			if (s) {
@@ -68,33 +53,32 @@ class SString {
 		}
 		return sNew != 0;
 	}
-public:
-	typedef int size_type;
 
+public:
 	SString() : s(0), sSize(0), sLen(0), sizeGrowth(sizeGrowthDefault) {
 	}
 	SString(const SString &source) : sizeGrowth(sizeGrowthDefault) {
-		s = StringDup(source.s);
+		s = StringAllocate(source.s);
 		sSize = sLen = (s) ? strlen(s) : 0;
 	}
 	SString(const char *s_) : sizeGrowth(sizeGrowthDefault) {
-		s = StringDup(s_);
+		s = StringAllocate(s_);
 		sSize = sLen = (s) ? strlen(s) : 0;
 	}
-	SString(const char *s_, int first, int last) : sizeGrowth(sizeGrowthDefault) {
-		s = StringDup(s_ + first, last - first);
+	SString(const char *s_, lenpos_t first, lenpos_t last) : sizeGrowth(sizeGrowthDefault) {
+		s = StringAllocate(s_ + first, last - first);
 		sSize = sLen = (s) ? strlen(s) : 0;
 	}
 	SString(int i) : sizeGrowth(sizeGrowthDefault) {
 		char number[32];
 		sprintf(number, "%0d", i);
-		s = StringDup(number);
+		s = StringAllocate(number);
 		sSize = sLen = (s) ? strlen(s) : 0;
 	}
 	SString(double d, int precision) : sizeGrowth(sizeGrowthDefault) {
 		char number[32];
 		sprintf(number, "%.*f", precision, d);
-		s = StringDup(number);
+		s = StringAllocate(number);
 		sSize = sLen = (s) ? strlen(s) : 0;
 	}
 	~SString() {
@@ -110,7 +94,7 @@ public:
 		sLen = 0;
 	}
 	/** Size of buffer. */
-	size_type size(void) const {	///<
+	lenpos_t size(void) const {
 		if (s)
 			return sSize;
 		else
@@ -120,11 +104,10 @@ public:
 	int length() const {
 		return sLen;
 	}
-	SString &assign(const char *sOther, int sSize_ = -1) {
+	SString &assign(const char *sOther, lenpos_t sSize_=measure_length) {
 		if (!sOther) {
 			sSize_ = 0;
-		}
-		if (sSize_ < 0) {
+		} else if (sSize_ == 0) {
 			sSize_ = strlen(sOther);
 		}
 		if (sSize > 0 && sSize_ <= sSize) {	// Does not allocate new buffer if the current is big enough
@@ -135,7 +118,7 @@ public:
 			sLen = sSize_;
 		} else {
 			delete []s;
-			s = StringDup(sOther, sSize_);
+			s = StringAllocate(sOther, sSize_);
 			if (s) {
 				sSize = sSize_;	// Allow buffer bigger than real string, thus providing space to grow
 				sLen = strlen(s);
@@ -145,7 +128,7 @@ public:
 		}
 		return *this;
 	}
-	SString &assign(const SString& sOther, int sSize_ = -1) {
+	SString &assign(const SString& sOther, lenpos_t sSize_=measure_length) {
 		return assign(sOther.s, sSize_);
 	}
 	SString &operator=(const char *source) {
@@ -183,7 +166,7 @@ public:
 		else
 			return false;
 	}
-	void setsizegrowth(int sizeGrowth_) {
+	void setsizegrowth(lenpos_t sizeGrowth_) {
 		sizeGrowth = sizeGrowth_;
 	}
 	const char *c_str() const {
@@ -200,21 +183,24 @@ public:
 		sLen = 0;
 		return sRet;
 	}
-	char operator[](int i) const {
+	char operator[](lenpos_t i) const {
 		if (s && i < sSize)	// Or < sLen? Depends on the use, both are OK
 			return s[i];
 		else
 			return '\0';
 	}
-	SString &append(const char *sOther, int sLenOther=-1, char sep=0) {
-		if (sLenOther < 0) {
+	SString &append(const char *sOther, lenpos_t sLenOther=measure_length, char sep = '\0') {
+		if (!sOther) {
+			return *this;
+		}
+		if (sLenOther == 0) {
 			sLenOther = strlen(sOther);
 		}
 		int lenSep = 0;
 		if (sLen && sep) {	// Only add a separator if not empty
 			lenSep = 1;
 		}
-		int lenNew = sLen + sLenOther + lenSep;
+		lenpos_t lenNew = sLen + sLenOther + lenSep;
 		// Conservative about growing the buffer: don't do it, unless really needed
 		if ((lenNew + 1 < sSize) || (grow(lenNew))) {
 			if (lenSep) {
@@ -228,7 +214,7 @@ public:
 		return *this;
 	}
 	SString &operator+=(const char *sOther) {
-		return append(sOther, -1);
+		return append(sOther, 0);
 	}
 	SString &operator+=(const SString &sOther) {
 		return append(sOther.s, sOther.sSize);
@@ -239,24 +225,40 @@ public:
 	SString &appendwithseparator(const char *sOther, char sep) {
 		return append(sOther, strlen(sOther), sep);
 	}
-	SString &insert(int pos, const char *sOther, int sLenOther=-1) {
-		if (sLenOther < 0)
+	SString &insert(lenpos_t pos, const char *sOther, lenpos_t sLenOther=measure_length) {
+		if (!sOther) {
+			return *this;
+		}
+		if (sLenOther == 0) {
 			sLenOther = strlen(sOther);
-		int lenNew = sLen + sLenOther;
+		}
+		lenpos_t lenNew = sLen + sLenOther;
 		// Conservative about growing the buffer: don't do it, unless really needed
-		if ((lenNew + 1 < sSize) || (grow(lenNew))) {
-			int moveChars = sLen-pos;
-			for (int i=moveChars; i>=0; i--)
-				s[lenNew-moveChars+i] = s[pos+i];
+		if ((lenNew + 1 < sSize) || grow(lenNew)) {
+			lenpos_t moveChars = sLen - pos + 1;
+			for (lenpos_t i = moveChars; i > 0; i--) {
+				s[pos + sLenOther + i - 1] = s[pos + i - 1];
+			}
 			memcpy(s + pos, sOther, sLenOther);
-			sLen += sLenOther;
+			sLen = lenNew;
 		}
 		return *this;
 	}
-	void remove(int pos, int len=1) {
-		for (int i=pos; i<sLen-len+1; i++)
-			s[i] = s[i+len];
-		sLen -= len;
+	/** Remove @a len characters from the @a pos position, included.
+	 * Characters at pos + len and beyond replace characters at pos.
+	 * If @a len is 0, or greater than the length of the string
+	 * starting at @a pos, the string is just truncated at @a pos.
+	 */
+	void remove(lenpos_t pos, lenpos_t len) {
+		if (len < 1 || pos + len >= sLen) {
+			s[pos] = '\0';
+			sLen = pos;
+		} else {
+			for (lenpos_t i = pos; i < sLen - len + 1; i++) {
+				s[i] = s[i+len];
+			}
+			sLen -= len;
+		}
 	}
 	int value() const {
 		if (s)
@@ -264,11 +266,12 @@ public:
 		else
 			return 0;
 	}
-	int search(const char *sFind, int start=0) {
-		if ((start >= 0) && (start < sLen)) {
-			const char *sFound = strstr(s+start, sFind);
-			if (sFound)
+	int search(const char *sFind, lenpos_t start = 0) {
+		if (start < sLen) {
+			const char *sFound = strstr(s + start, sFind);
+			if (sFound) {
 				return sFound - s;
+			}
 		}
 		return -1;
 	}
@@ -290,8 +293,8 @@ public:
 	}
 	int substitute(const char *sFind, const char *sReplace) {
 		int c = 0;
-		int lenFind = strlen(sFind);
-		int lenReplace = strlen(sReplace);
+		lenpos_t lenFind = strlen(sFind);
+		lenpos_t lenReplace = strlen(sReplace);
 		int posFound = search(sFind);
 		while (posFound >= 0) {
 			remove(posFound, lenFind);
@@ -304,6 +307,42 @@ public:
 	int remove(const char *sFind) {
 		return substitute(sFind, "");
 	}
+	/**
+	 * Duplicate a C string.
+	 * Allocate memory of the given size, or big enough to fit the string if length isn't given;
+	 * then copy the given string in the allocated memory.
+	 * @return the pointer to the new string
+	 */
+	static char *StringAllocate(
+		const char *s,			///< The string to duplicate
+		lenpos_t len=measure_length)	///< The length of memory to allocate. Optional.
+	{
+		if (s == 0) {
+			return 0;
+		}
+		if (len == 0) {
+			len = strlen(s);
+		}
+		char *sNew = new char[len + 1];
+		if (sNew) {
+			strncpy(sNew, s, len);
+			sNew[len] = '\0';
+		}
+		return sNew;
+	}
 };
+
+/**
+ * Duplicate a C string.
+ * Allocate memory of the given size, or big enough to fit the string if length isn't given;
+ * then copy the given string in the allocated memory.
+ * @return the pointer to the new string
+ */
+inline char *StringDup(
+	const char *s,			///< The string to duplicate
+	SString::lenpos_t len=SString::measure_length)	///< The length of memory to allocate. Optional.
+{
+	return SString::StringAllocate(s, len);
+}
 
 #endif
