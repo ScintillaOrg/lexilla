@@ -669,7 +669,8 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		return DLGC_HASSETSEL | DLGC_WANTALLKEYS;
 
 	case WM_KILLFOCUS:
-		if (!IsChild(reinterpret_cast<HWND>(wMain.GetID()),
+		if (!wParam ||
+			!::IsChild(reinterpret_cast<HWND>(wMain.GetID()),
 			reinterpret_cast<HWND>(wParam))) {
 			SetFocusState(false);
 		}
