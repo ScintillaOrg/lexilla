@@ -2378,8 +2378,8 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 	if (linePrintLast > linePrintMax)
 		linePrintLast = linePrintMax;
 	//Platform::DebugPrintf("Formatting lines=[%0d,%0d,%0d] top=%0d bottom=%0d line=%0d %0d\n",
-	//	linePrintStart, linePrintLast, linePrintMax, pfr->rc.top, pfr->rc.bottom, vsPrint.lineHeight,
-	//	surfaceMeasure->Height(vsPrint.styles[STYLE_LINENUMBER].font));
+	//      linePrintStart, linePrintLast, linePrintMax, pfr->rc.top, pfr->rc.bottom, vsPrint.lineHeight,
+	//      surfaceMeasure->Height(vsPrint.styles[STYLE_LINENUMBER].font));
 	int endPosPrint = pdoc->Length();
 	if (linePrintLast < pdoc->LinesTotal())
 		endPosPrint = pdoc->LineStart(linePrintLast + 1);
@@ -2389,22 +2389,46 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 
 	int xStart = vsPrint.fixedColumnWidth + pfr->rc.left + lineNumberWidth;
 	int ypos = pfr->rc.top;
-	int line = linePrintStart;
 
-	if (draw) {	// Otherwise just measuring
+	int lineDoc = linePrintStart;
 
-		while (line <= linePrintLast && ypos < pfr->rc.bottom) {
+	int nPrintPos = pdoc->LineStart(lineDoc);
+	int visibleLine = 0;
 
-			// When printing, the hdc and hdcTarget may be the same, so
-			// changing the state of surfaceMeasure may change the underlying
-			// state of surface. Therefore, any cached state is discarded before
-			// using each surface.
-			surfaceMeasure->FlushCachedState();
+	while (lineDoc <= linePrintLast && ypos < pfr->rc.bottom) {
 
-			// Copy this line and its styles from the document into local arrays
-			// and determine the x position at which each character starts.
-			LineLayout ll(8000);
-			LayoutLine(line, surfaceMeasure, vsPrint, &ll);
+		// When printing, the hdc and hdcTarget may be the same, so
+		// changing the state of surfaceMeasure may change the underlying
+		// state of surface. Therefore, any cached state is discarded before
+		// using each surface.
+		surfaceMeasure->FlushCachedState();
+
+		// Copy this line and its styles from the document into local arrays
+		// and determine the x position at which each character starts.
+		LineLayout ll(8000);
+		LayoutLine(lineDoc, surfaceMeasure, vsPrint, &ll, pfr->rc.Width() - lineNumberWidth);
+
+		// When document line is wrapped over multiple display lines, find where
+		// to start printing from to ensure a particular position is on the first
+		// line of the page.
+		if (visibleLine == 0) {
+			for (int iwl = 0; iwl < ll.lines - 1; iwl++) {
+				if (ll.LineStart(iwl) <= nPrintPos && ll.LineStart(iwl + 1) >= nPrintPos)
+					nPrintPos = ll.LineStart(iwl);
+			}
+
+			if (ll.lines > 1 && nPrintPos >= ll.LineStart(ll.lines - 1)) {
+				nPrintPos = ll.LineStart(ll.lines - 1);
+			}
+		}
+
+		if (ypos + vsPrint.lineHeight * ll.lines > pfr->rc.bottom) {
+			ypos = pfr->rc.bottom;
+			continue;
+		}
+
+
+		if (draw && nPrintPos >= pfr->chrg.cpMin) {
 			ll.selStart = -1;
 			ll.selEnd = -1;
 			ll.containsCaret = false;
@@ -2412,31 +2436,39 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 			PRectangle rcLine;
 			rcLine.left = pfr->rc.left + lineNumberWidth;
 			rcLine.top = ypos;
-			rcLine.right = pfr->rc.right;
+			rcLine.right = pfr->rc.right - 1;
 			rcLine.bottom = ypos + vsPrint.lineHeight;
 
 			if (lineNumberWidth) {
 				char number[100];
-				sprintf(number, "%d" lineNumberPrintSpace, line + 1);
+				sprintf(number, "%d" lineNumberPrintSpace, lineDoc + 1);
 				PRectangle rcNumber = rcLine;
 				rcNumber.right = rcNumber.left + lineNumberWidth;
 				// Right justify
-				rcNumber.left -=
-				    surface->WidthText(vsPrint.styles[STYLE_LINENUMBER].font, number, strlen(number));
+				rcNumber.left -= surfaceMeasure->WidthText(
+					vsPrint.styles[STYLE_LINENUMBER].font, number, strlen(number));
+				surface->FlushCachedState();
 				surface->DrawTextNoClip(rcNumber, vsPrint.styles[STYLE_LINENUMBER].font,
-				                  ypos + vsPrint.maxAscent, number, strlen(number),
-				                  vsPrint.styles[STYLE_LINENUMBER].fore.allocated,
-				                  vsPrint.styles[STYLE_LINENUMBER].back.allocated);
+				                        ypos + vsPrint.maxAscent, number, strlen(number),
+				                        vsPrint.styles[STYLE_LINENUMBER].fore.allocated,
+				                        vsPrint.styles[STYLE_LINENUMBER].back.allocated);
 			}
 
 			// Draw the line
 			surface->FlushCachedState();
-			DrawLine(surface, vsPrint, line, line, xStart, rcLine, &ll);
-
-			ypos += vsPrint.lineHeight;
-			line++;
+			for (int iwl = 0; iwl < ll.lines; iwl++) {
+				DrawLine(surface, vsPrint, lineDoc, visibleLine, xStart, rcLine, &ll, iwl);
+				++visibleLine;
+				ypos += vsPrint.lineHeight;
+				rcLine.top = ypos;
+				rcLine.bottom = ypos + vsPrint.lineHeight;
+			}
 		}
+
+		nPrintPos += ll.numCharsInLine;
+		++lineDoc;
 	}
+	endPosPrint = pdoc->LineStart(lineDoc);
 
 	return endPosPrint;
 }
