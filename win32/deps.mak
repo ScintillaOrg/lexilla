@@ -37,9 +37,12 @@ KeyMap.o: ../src/KeyMap.cxx ../include/Platform.h \
 KeyWords.o: ../src/KeyWords.cxx ../include/Platform.h \
  ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
  ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
-LexAda.o: ../src/LexAda.cxx ../include/Platform.h ../include/PropSet.h \
- ../include/SString.h ../include/Accessor.h ../include/KeyWords.h \
- ../include/Scintilla.h ../include/SciLexer.h
+LexAda.o: ../src/LexAda.cxx ../include/Platform.h \
+ ../include/Accessor.h ../src/StyleContext.h ../include/PropSet.h \
+ ../include/SString.h ../include/KeyWords.h ../include/SciLexer.h
+LexAsm.o: ../src/LexAsm.cxx ../include/Platform.h ../include/PropSet.h \
+ ../include/SString.h ../include/Accessor.h ../src/StyleContext.h \
+ ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
 LexAVE.o: ../src/LexAVE.cxx ../include/Platform.h ../include/PropSet.h \
  ../include/SString.h ../include/Accessor.h ../include/KeyWords.h \
  ../include/Scintilla.h ../include/SciLexer.h
@@ -63,6 +66,10 @@ LexEiffel.o: ../src/LexEiffel.cxx ../include/Platform.h \
  ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
  ../src/StyleContext.h ../include/KeyWords.h ../include/Scintilla.h \
  ../include/SciLexer.h
+LexFortran.o: ../src/LexFortran.cxx ../include/Platform.h \
+ ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
+ ../src/StyleContext.h ../include/KeyWords.h ../include/Scintilla.h \
+ ../include/SciLexer.h
 LexHTML.o: ../src/LexHTML.cxx ../include/Platform.h \
  ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
  ../src/StyleContext.h ../include/KeyWords.h ../include/Scintilla.h \
@@ -82,7 +89,8 @@ LexOthers.o: ../src/LexOthers.cxx ../include/Platform.h \
  ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
 LexPascal.o: ../src/LexPascal.cxx ../include/Platform.h \
  ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
- ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
+ ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h \
+ ../src/StyleContext.h
 LexPerl.o: ../src/LexPerl.cxx ../include/Platform.h \
  ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
  ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
