@@ -1051,10 +1051,12 @@ void ScintillaGTK::ScrollText(int linesToMove) {
 }
 
 void ScintillaGTK::SetVerticalScrollPos() {
+	DwellEnd(true);
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(adjustmentv), topLine);
 }
 
 void ScintillaGTK::SetHorizontalScrollPos() {
+	DwellEnd(true);
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(adjustmenth), xOffset / 2);
 }
 

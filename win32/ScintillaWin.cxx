@@ -1034,6 +1034,7 @@ void ScintillaWin::ChangeScrollPos(int barType, int pos) {
 	sci.fMask = SIF_POS;
 	GetScrollInfo(barType, &sci);
 	if (sci.nPos != pos) {
+		DwellEnd(true);
 		sci.nPos = pos;
 		SetScrollInfo(barType, &sci, TRUE);
 	}
