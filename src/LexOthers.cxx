@@ -3,11 +3,11 @@
 // Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
-#include <stdlib.h> 
-#include <string.h> 
-#include <ctype.h> 
-#include <stdio.h> 
-#include <stdarg.h> 
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <stdarg.h>
 
 #include "Platform.h"
 
@@ -17,13 +17,39 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-static void ColouriseBatchLine(char *lineBuffer, int endLine, Accessor &styler) {
-	if (0 == strncmp(lineBuffer, "REM", 3)) {
+#ifdef NEW_BATCH
+static void ColouriseBatchLine(char *lineBuffer, int startLine, int endLine, Accessor &styler) {
+	for (unsigned int i = 0; i < 4; i++) {
+		lineBuffer[i] = tolower(lineBuffer[i]);
+	}
+	if (0 == strncmp(lineBuffer, "rem", 3) && isspace(lineBuffer[3])) {
 		styler.ColourTo(endLine, 1);
-	} else if (0 == strncmp(lineBuffer, "rem", 3)) {
-		styler.ColourTo(endLine, 1);
-	} else if (0 == strncmp(lineBuffer, "SET", 3)) {
+	} else if (0 == strncmp(lineBuffer, "set", 3) && isspace(lineBuffer[3])) {
 		styler.ColourTo(endLine, 2);
+	} else if (0 == strncmp(lineBuffer, "if", 2) && isspace(lineBuffer[2])) {
+		styler.ColourTo(endLine, 2);
+	} else if (lineBuffer[0] == ':') {
+		if (lineBuffer[1] == ':') {	// Fake label, similar to REM, see http://www.winmag.com/columns/explorer/2000/21.htm
+			styler.ColourTo(endLine, 1);
+		} else {
+			styler.ColourTo(endLine, 3);
+		}
+	} else if (lineBuffer[0] == '@') {	// Hide command (ECHO OFF)
+		styler.ColourTo(startLine, 4);
+		ColouriseBatchLine(lineBuffer + 1, startLine + 1, i, styler);
+	} else {
+		styler.ColourTo(endLine, 0);
+	}
+}
+// ToDo: (not necessarily at beginning of line) GOTO, [IF] NOT, ERRORLEVEL
+// if [no] (test) (command) -- test is EXIST (filename) | (string1)==(string2) | ERRORLEVEL (number)
+// for %%(variable) IN (set) DO (command) -- variable is [a-zA-Z] -- eg for %%X in (*.txt) do type %%X
+// ToDo: %n (parameters), %EnvironmentVariable% colourising
+// ToDo: Colourise = > >> < | "
+#else
+static void ColouriseBatchLine(char *lineBuffer, int endLine, int startLine, Accessor &styler) {
+	if (0 == strncmp(lineBuffer, "rem", 3)) {
+		styler.ColourTo(endLine, 1);
 	} else if (0 == strncmp(lineBuffer, "set", 3)) {
 		styler.ColourTo(endLine, 2);
 	} else if (lineBuffer[0] == ':') {
@@ -32,21 +58,32 @@ static void ColouriseBatchLine(char *lineBuffer, int endLine, Accessor &styler) 
 		styler.ColourTo(endLine, 0);
 	}
 }
+#endif
 
 static void ColouriseBatchDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler) {
 	char lineBuffer[1024];
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
-	unsigned int linePos = 0;
+	unsigned int linePos = 0, startLine = startPos;
 	for (unsigned int i = startPos; i < startPos + length; i++) {
-		lineBuffer[linePos++] = styler[i];
+		if (linePos != 0 || !isspace(styler[i])) {	// Skip initial spaces
+			lineBuffer[linePos++] = tolower(styler[i]);
+		}
 		if (styler[i] == '\r' || styler[i] == '\n' || (linePos >= sizeof(lineBuffer) - 1)) {
-			ColouriseBatchLine(lineBuffer, i, styler);
+			lineBuffer[linePos] = '\0';
+			if (lineBuffer[0] == '@') {	// Hide command (ECHO OFF)
+				styler.ColourTo(startLine, 4);
+				ColouriseBatchLine(lineBuffer + 1, i, startLine, styler);
+			} else {
+				ColouriseBatchLine(lineBuffer, i, startLine, styler);
+			}
 			linePos = 0;
+			startLine = i+1;
 		}
 	}
-	if (linePos > 0)
-		ColouriseBatchLine(lineBuffer, startPos + length, styler);
+	if (linePos > 0) {
+		ColouriseBatchLine(lineBuffer, startPos + length, startLine, styler);
+	}
 }
 
 static void ColouriseDiffLine(char *lineBuffer, int endLine, Accessor &styler) {
@@ -89,8 +126,12 @@ static void ColouriseDiffDoc(unsigned int startPos, int length, int, WordList *[
 		ColouriseDiffLine(lineBuffer, startPos + length, styler);
 }
 
-static void ColourisePropsLine(char *lineBuffer, int lengthLine, int startLine, int endPos, Accessor &styler) {
-	int i = 0;
+static void ColourisePropsLine(char *lineBuffer,
+							  unsigned int lengthLine, 
+							  unsigned int startLine, 
+							  unsigned int endPos, 
+							  Accessor &styler) {
+	unsigned int i = 0;
 	while (isspace(lineBuffer[i]) && (i < lengthLine))	// Skip initial spaces
 		i++;
 	if (lineBuffer[i] == '#' || lineBuffer[i] == '!' || lineBuffer[i] == ';') {
@@ -119,51 +160,83 @@ static void ColourisePropsDoc(unsigned int startPos, int length, int, WordList *
 	char lineBuffer[1024];
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
-	unsigned int linePos = 0;
-	int startLine = startPos;
+	unsigned int linePos = 0, startLine = startPos;
 	for (unsigned int i = startPos; i <= startPos + length; i++) {
 		lineBuffer[linePos++] = styler[i];
-		if ((styler[i] == '\r' && styler.SafeGetCharAt(i+1) != '\n') || 
-			styler[i] == '\n' || 
+		if ((styler[i] == '\r' && styler.SafeGetCharAt(i+1) != '\n') ||
+			styler[i] == '\n' ||
 			(linePos >= sizeof(lineBuffer) - 1)) {
-			lineBuffer[linePos] = '\0';
-			ColourisePropsLine(lineBuffer, linePos, startLine, i, styler);
-			linePos = 0;
-			startLine = i+1;
+				lineBuffer[linePos] = '\0';
+				ColourisePropsLine(lineBuffer, linePos, startLine, i, styler);
+				linePos = 0;
+				startLine = i+1;
 		}
 	}
 	if (linePos > 0)
 		ColourisePropsLine(lineBuffer, linePos, startLine, startPos + length, styler);
 }
 
-static void ColouriseMakeLine(char *lineBuffer, int lengthLine, int endPos, Accessor &styler) {
-	int i = 0;
+static void ColouriseMakeLine(char *lineBuffer,
+							  unsigned int lengthLine, 
+							  unsigned int startLine, 
+							  unsigned int endPos, 
+							  Accessor &styler) {
+	unsigned int i = 0, state = 0;
+	bool bSpecial = false;
+	// Skip initial spaces
 	while (isspace(lineBuffer[i]) && (i < lengthLine))
 		i++;
-	if (lineBuffer[i] == '#' || lineBuffer[i] == '!') {
+	if (lineBuffer[i] == '#') {
 		styler.ColourTo(endPos, 1);
-	} else {
-		styler.ColourTo(endPos, 0);
+		return;
 	}
+	if (lineBuffer[i] == '!') {
+		styler.ColourTo(endPos, 2);
+		return;
+	}
+	while (i < lengthLine) {
+		if (lineBuffer[i] == '$' && lineBuffer[i+1] == '(') {
+			styler.ColourTo(startLine + i - 1, state);
+			state = 3;
+		} else if (state == 3 && lineBuffer[i] == ')') {
+			styler.ColourTo(startLine + i, state);
+			state = 0;
+		}
+		if (state == 0 && !bSpecial && (lineBuffer[i] == ':' || lineBuffer[i] == '=')) {
+			styler.ColourTo(startLine + i - 1, state);
+			styler.ColourTo(startLine + i, 4);
+			bSpecial = true;	// Only react to the first '=' or ':' of the line
+		}
+		i++;
+	}
+	if (state == 3)
+		styler.ColourTo(endPos, 9);
+	else
+		styler.ColourTo(endPos, 0);
 }
 
 static void ColouriseMakeDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler) {
 	char lineBuffer[1024];
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
-	unsigned int linePos = 0;
+	unsigned int linePos = 0, startLine = startPos;
 	for (unsigned int i = startPos; i <= startPos + length; i++) {
 		lineBuffer[linePos++] = styler[i];
 		if (styler[i] == '\r' || styler[i] == '\n' || (linePos >= sizeof(lineBuffer) - 1)) {
-			ColouriseMakeLine(lineBuffer, linePos, i, styler);
+			lineBuffer[linePos] = '\0';
+			ColouriseMakeLine(lineBuffer, linePos, startLine, i, styler);
 			linePos = 0;
+			startLine = i+1;
 		}
 	}
 	if (linePos > 0)
-		ColouriseMakeLine(lineBuffer, linePos, startPos + length, styler);
+		ColouriseMakeLine(lineBuffer, linePos, startLine, startPos + length, styler);
 }
 
-static void ColouriseErrorListLine(char *lineBuffer, int lengthLine, int endPos, Accessor &styler) {
+static void ColouriseErrorListLine(char *lineBuffer,
+								   unsigned int lengthLine,
+								   unsigned int endPos,
+								   Accessor &styler) {
 	if (lineBuffer[0] == '>') {
 		// Command or return status
 		styler.ColourTo(endPos, SCE_ERR_CMD);
@@ -175,9 +248,9 @@ static void ColouriseErrorListLine(char *lineBuffer, int lengthLine, int endPos,
 	} else if (0 == strncmp(lineBuffer, "Warning ", strlen("Warning "))) {
 		// Borland warning message
 		styler.ColourTo(endPos, SCE_ERR_BORLAND);
-	} else if (strstr(lineBuffer, " at "  ) && 
-		strstr(lineBuffer, " at "  ) < lineBuffer+lengthLine && 
-		strstr(lineBuffer, " line ") && 
+	} else if (strstr(lineBuffer, " at "  ) &&
+		strstr(lineBuffer, " at "  ) < lineBuffer+lengthLine &&
+		strstr(lineBuffer, " line ") &&
 		strstr(lineBuffer, " line ") < lineBuffer+lengthLine) {
 		// perl error message
 		styler.ColourTo(endPos, SCE_ERR_PERL);
@@ -186,7 +259,7 @@ static void ColouriseErrorListLine(char *lineBuffer, int lengthLine, int endPos,
 		// Look for <filename>(line)message
 		// Look for <filename>(line,pos)message
 		int state = 0;
-		for (int i = 0; i < lengthLine; i++) {
+		for (unsigned int i = 0; i < lengthLine; i++) {
 			if (state == 0 && lineBuffer[i] == ':' && isdigit(lineBuffer[i + 1])) {
 				state = 1;
 			} else if (state == 0 && lineBuffer[i] == '(') {
@@ -286,7 +359,7 @@ static void ColouriseLatexDoc(unsigned int startPos, int length, int initStyle,
 							styler.ColourTo(i + 1, SCE_L_COMMAND);
 							i++;
 							chNext = styler.SafeGetCharAt(i + 1);
-						}		
+						}
 						else {
 						    if (isTag(i+1, styler))
 							state = SCE_L_TAG;
@@ -307,16 +380,16 @@ static void ColouriseLatexDoc(unsigned int startPos, int length, int initStyle,
 						state = SCE_L_COMMENT;
 						break;
 				}
-				break;                          
+				break;
 			case SCE_L_COMMAND :
-				if (chNext == '[' || chNext == '{' || chNext == '}' || 
+				if (chNext == '[' || chNext == '{' || chNext == '}' ||
 				    chNext == ' ' || chNext == '\r' || chNext == '\n') {
 					styler.ColourTo(i, state);
 					state = SCE_L_DEFAULT;
 					i++;
 					chNext = styler.SafeGetCharAt(i + 1);
 				}
-				break;                                  
+				break;
 			case SCE_L_TAG :
 				if (ch == '}') {
 					styler.ColourTo(i, state);
@@ -338,7 +411,7 @@ static void ColouriseLatexDoc(unsigned int startPos, int length, int initStyle,
 					styler.ColourTo(i - 1, state);
 					state = SCE_L_DEFAULT;
 				}
-		}               
+		}
 	}
 	styler.ColourTo(lengthDoc, state);
 }
