@@ -200,3 +200,9 @@ bool ContractionState::SetExpanded(int lineDoc, bool expanded) {
 	}
 	return false;
 }
+
+void ContractionState::ShowAll() {
+	delete []lines;
+	lines = 0;
+	size = 0;
+}

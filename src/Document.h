@@ -156,6 +156,7 @@ public:
 
 	int SetLevel(int line, int level);
 	int GetLevel(int line) { return cb.GetLevel(line); }
+	void ClearLevels() { cb.ClearLevels(); }
 	int GetLastChild(int lineParent, int level=-1);
 	int GetFoldParent(int line);
 

@@ -1502,6 +1502,13 @@ void Editor::ClearAll() {
 	SetVerticalScrollPos();
 }
 
+void Editor::ClearDocumentStyle() {
+	pdoc->StartStyling(0, '\377');
+	pdoc->SetStyleFor(pdoc->Length(), 0);
+	cs.ShowAll();
+    pdoc->ClearLevels();
+}
+
 void Editor::Cut() {
 	Copy();
 	ClearSelection();
@@ -3347,7 +3354,11 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		ClearAll();
 		return 0;
 
-	case SCI_SETUNDOCOLLECTION:
+    case SCI_CLEARDOCUMENTSTYLE:
+        ClearDocumentStyle();
+        return 0;
+
+    case SCI_SETUNDOCOLLECTION:
 		pdoc->SetUndoCollection(wParam);
 		return 0;
 

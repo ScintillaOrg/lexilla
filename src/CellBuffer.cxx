@@ -186,6 +186,12 @@ void LineVector::ExpandLevels(int sizeNew) {
 	}
 }
 
+void LineVector::ClearLevels() {
+	delete []levels;
+	levels = 0;
+    sizeLevels = 0;
+}
+
 void LineVector::InsertValue(int pos, int value) {
 	//Platform::DebugPrintf("InsertValue[%d] = %d\n", pos, value);
 	if ((lines + 2) >= size) {
@@ -1070,3 +1076,6 @@ int CellBuffer::GetLevel(int line) {
 	}
 }
 
+void CellBuffer::ClearLevels() {
+    lv.ClearLevels();
+}

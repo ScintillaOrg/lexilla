@@ -209,6 +209,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual void AddCharUTF(char *s, unsigned int len);
 	void ClearSelection();
 	void ClearAll();
+    void ClearDocumentStyle();
 	void Cut();
 	void PasteRectangular(int pos, const char *ptr, int len);
 	virtual void Copy() = 0;

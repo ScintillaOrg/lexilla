@@ -63,6 +63,9 @@ fun void InsertText=2003(position pos, string text)
 # Delete all text in the document
 fun void ClearAll=2004(,)
 
+# Set all style bytes to 0, remove all folding information
+fun void ClearDocumentStyle=2005(,)
+
 # The number of characters in the document
 get int GetLength=2006(,)
 
