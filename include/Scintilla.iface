@@ -1749,6 +1749,7 @@ val SCLEX_SPECMAN=59
 val SCLEX_AU3=60
 val SCLEX_APDL=61
 val SCLEX_BASH=62
+val SCLEX_ASN1=63
 
 # When a lexer specifies its language as SCLEX_AUTOMATIC it receives a
 # value assigned in sequence from SCLEX_AUTOMATIC+1.
@@ -2545,6 +2546,20 @@ val SCE_SH_PARAM=10
 val SCE_SH_BACKTICKS=11
 val SCE_SH_HERE_DELIM=12
 val SCE_SH_HERE_Q=13
+# Lexical states for SCLEX_ASN1
+lex Asn1=SCLEX_ASN1 SCE_ASN1_
+val SCE_ASN1_DEFAULT=0
+val SCE_ASN1_COMMENT=1
+val SCE_ASN1_IDENTIFIER=2
+val SCE_ASN1_STRING=3
+val SCE_ASN1_OID=4
+val SCE_ASN1_SCALAR=5
+val SCE_ASN1_KEYWORD=6
+val SCE_ASN1_ATTRIBUTE=7
+val SCE_ASN1_DESCRIPTOR=8
+val SCE_ASN1_TYPE=9
+val SCE_ASN1_OPERATOR=10
+
 # Events
 
 evt void StyleNeeded=2000(int position)
