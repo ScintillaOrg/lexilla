@@ -141,6 +141,7 @@ class ScintillaWin :
 	virtual void NotifyParent(SCNotification scn);
 	virtual void NotifyDoubleClick(Point pt, bool shift);
 	virtual void Copy();
+	virtual bool CanPaste();
 	virtual void Paste();
 	virtual void CreateCallTipWindow(PRectangle rc);
 	virtual void AddToPopUp(const char *label, int cmd = 0, bool enabled = true);
@@ -553,7 +554,7 @@ LRESULT ScintillaWin::WndProc(unsigned int iMessage, unsigned long wParam, long 
 		return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
 
 	case WM_IME_CHAR: {
-            AddCharBytes(HIBYTE(wParam), LOBYTE(wParam));
+			AddCharBytes(HIBYTE(wParam), LOBYTE(wParam));
 			return 0;
 		}
 
@@ -565,16 +566,8 @@ LRESULT ScintillaWin::WndProc(unsigned int iMessage, unsigned long wParam, long 
 #endif
 		break;
 
-	case EM_CANPASTE: {
-			::OpenClipboard(wMain.GetID());
-			HGLOBAL hmemSelection = ::GetClipboardData(CF_TEXT);
-			if (!hmemSelection && IsUnicodeMode())
-				hmemSelection = ::GetClipboardData(CF_UNICODETEXT);
-			if (hmemSelection)
-				::GlobalUnlock(hmemSelection);
-			::CloseClipboard();
-			return hmemSelection != 0;
-		}
+	case EM_CANPASTE:
+		return CanPaste();
 
 	case EM_SCROLL: {
 			int topStart = topLine;
@@ -751,6 +744,14 @@ void ScintillaWin::Copy() {
 		}
 		::CloseClipboard();
 	}
+}
+
+bool ScintillaWin::CanPaste() {
+	if (::IsClipboardFormatAvailable(CF_TEXT))
+		return true;
+	if (IsUnicodeMode())
+		return ::IsClipboardFormatAvailable(CF_UNICODETEXT);
+	return false;
 }
 
 void ScintillaWin::Paste() {

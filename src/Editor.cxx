@@ -1643,6 +1643,10 @@ void Editor::PasteRectangular(int pos, const char *ptr, int len) {
 	SetEmptySelection(insertPos);
 }
 
+bool Editor::CanPaste() {
+	return !pdoc->IsReadOnly();
+}
+
 void Editor::Clear() {
 	if (currentPos == anchor) {
 		DelChar();
@@ -3525,7 +3529,7 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 
 	case EM_CANPASTE:
 	case SCI_CANPASTE:
-		return !pdoc->IsReadOnly();
+		return CanPaste();
 
 	case EM_CHARFROMPOS: {
 			if (lParam == 0)
