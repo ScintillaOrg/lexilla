@@ -226,7 +226,7 @@ ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 #endif
 	::SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, &linesPerScroll, 0);
 #else
-	ucWheelScrollLines = 4;
+	linesPerScroll = 4;
 #endif
 	lastWheelMouseTime.tv_sec = 0;
 	lastWheelMouseTime.tv_usec = 0;
