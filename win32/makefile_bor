@@ -77,6 +77,34 @@ KeyWords.obj: ..\src\KeyWords.cxx ..\include\Platform.h ..\include\PropSet.h ..\
  ..\include\Scintilla.h ..\include\SciLexer.h 
 	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$*
  
+LexCPP.obj: ..\src\LexCPP.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h 
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$*
+ 
+LexHTML.obj: ..\src\LexHTML.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h 
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$*
+ 
+LexOthers.obj: ..\src\LexOthers.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h 
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$*
+ 
+LexPerl.obj: ..\src\LexPerl.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h 
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$*
+ 
+LexPython.obj: ..\src\LexPython.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h 
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$*
+ 
+LexSQL.obj: ..\src\LexSQL.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h 
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$*
+ 
+LexVB.obj: ..\src\LexVB.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h 
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$*
+ 
 LineMarker.obj: ..\src\LineMarker.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\LineMarker.h
 	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$*
 
