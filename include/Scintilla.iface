@@ -1646,6 +1646,7 @@ val SCLEX_LOT=47
 val SCLEX_YAML=48
 val SCLEX_TEX=49
 val SCLEX_METAPOST=50
+val SCLEX_POWERBASIC=51
 
 # When a lexer specifies its language as SCLEX_AUTOMATIC it receives a
 # value assigned in sequence from SCLEX_AUTOMATIC+1.
