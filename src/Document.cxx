@@ -220,39 +220,10 @@ bool Document::IsCrLf(int pos) {
 
 static const int maxBytesInDBCSCharacter=5;
 
-bool Document::IsDBCS(int pos) {
-	if (dbcsCodePage) {
-		if (SC_CP_UTF8 == dbcsCodePage) {
-			unsigned char ch = static_cast<unsigned char>(cb.CharAt(pos));
-			return ch >= 0x80;
-		} else {
-			// Anchor DBCS calculations at start of line because start of line can
-			// not be a DBCS trail byte.
-			int startLine = pos;
-			char mbstr[maxBytesInDBCSCharacter+1];
-			while (startLine > 0 && cb.CharAt(startLine) != '\r' && cb.CharAt(startLine) != '\n')
-				startLine--;
-			while (startLine <= pos) {
-				int i;
-				for (i=0; i<Platform::DBCSCharMaxLength(); i++) {
-					mbstr[i] = cb.CharAt(startLine+i);
-				}
-				mbstr[i] = '\0';
-				int mbsize = Platform::DBCSCharLength(dbcsCodePage, mbstr);
-				if (mbsize >= 1) {
-					startLine += mbsize;
-					if (startLine >= pos)
-						return true;
-				}
-				startLine++;
-			}
-		}
-	}
-	return false;
-}
-
 int Document::LenChar(int pos) {
-	if (IsCrLf(pos)) {
+	if (pos < 0) {
+		return 1;
+	} else if (IsCrLf(pos)) {
 		return 2;
 	} else if (SC_CP_UTF8 == dbcsCodePage) {
 		unsigned char ch = static_cast<unsigned char>(cb.CharAt(pos));
@@ -326,7 +297,7 @@ int Document::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
 
 			while (startLine > 0 && cb.CharAt(startLine) != '\r' && cb.CharAt(startLine) != '\n')
 				startLine--;
-			for (;startLine <= pos;) {
+			while (startLine < pos) {
 				char mbstr[maxBytesInDBCSCharacter+1];
 				int i;
 				for(i=0;i<Platform::DBCSCharMaxLength();i++) {
@@ -335,19 +306,16 @@ int Document::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
 				mbstr[i] = '\0';
 
 				int mbsize = Platform::DBCSCharLength(dbcsCodePage, mbstr);
-				if (mbsize >= 1) {
-					if (startLine + mbsize == pos) {
-						return pos;
-					} else if (startLine + mbsize > pos) {
-						if (moveDir > 0)
-							return startLine + mbsize;
-						else
-							return startLine;
+				if (startLine + mbsize == pos) {
+					return pos;
+				} else if (startLine + mbsize > pos) {
+					if (moveDir > 0) {
+						return startLine + mbsize;
+					} else {
+						return startLine;
 					}
-					startLine += mbsize;
-					continue;
 				}
-				startLine++;
+				startLine += mbsize;
 			}
 		}
 	}
@@ -565,11 +533,9 @@ void Document::DelCharBack(int pos) {
 		return;
 	} else if (IsCrLf(pos - 2)) {
 		DeleteChars(pos - 2, 2);
-	} else if (SC_CP_UTF8 == dbcsCodePage) {
+	} else if (dbcsCodePage) {
 		int startChar = MovePositionOutsideChar(pos - 1, -1, false);
 		DeleteChars(startChar, pos - startChar);
-	} else if (IsDBCS(pos - 1)) {
-		DeleteChars(pos - 2, 2);
 	} else {
 		DeleteChars(pos - 1, 1);
 	}
@@ -1064,11 +1030,11 @@ int Document::LinesTotal() {
 
 void Document::ChangeCase(Range r, bool makeUpperCase) {
 	for (int pos = r.start; pos < r.end; pos++) {
-		char ch = CharAt(pos);
-		if (dbcsCodePage && IsDBCS(pos)) {
-			pos += LenChar(pos);
+		int len = LenChar(pos);
+		if (dbcsCodePage && (len > 1)) {
+			pos += len;
 		} else {
-			if (makeUpperCase) {
+			char ch = CharAt(pos);			if (makeUpperCase) {
 				if (islower(ch)) {
 					ChangeChar(pos, static_cast<char>(MakeUpperCase(ch)));
 				}
