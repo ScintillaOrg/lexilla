@@ -667,7 +667,7 @@ PRectangle ScintillaGTK::GetClientRectangle() {
 	PRectangle rc = wMain.GetClientPosition();
 	if (verticalScrollBarVisible)
 		rc.right -= scrollBarWidth + 1;
-	if (horizontalScrollBarVisible)
+	if (horizontalScrollBarVisible && (wrapState == eWrapNone))
 		rc.bottom -= scrollBarHeight + 1;
 	// Move to origin
 	rc.right -= rc.left;
@@ -721,7 +721,7 @@ void ScintillaGTK::ScrollText(int linesToMove) {
 		                0, diff,
 		                0, 0,
 		                rc.Width()-1, rc.Height() - diff);
-		SyncPaint(PRectangle(0, rc.Height() - diff - vs.lineHeight,
+		SyncPaint(PRectangle(0, rc.Height() - diff,
 		                     rc.Width(), rc.Height()+1));
 
 	// Redraw exposed bit : scrolling downwards
@@ -731,7 +731,7 @@ void ScintillaGTK::ScrollText(int linesToMove) {
 		                0, 0,
 		                0, -diff,
 		                rc.Width()-1, rc.Height() + diff);
-		SyncPaint(PRectangle(0, 0, rc.Width(), -diff + vs.lineHeight));
+		SyncPaint(PRectangle(0, 0, rc.Width(), -diff));
 	}
 
 	// Look for any graphics expose
@@ -1109,8 +1109,9 @@ void ScintillaGTK::Resize(int width, int height) {
 
 	// These allocations should never produce negative sizes as they would wrap around to huge
 	// unsigned numbers inside GTK+ causing warnings.
+	bool showSBHorizontal = horizontalScrollBarVisible && (wrapState == eWrapNone);
 	int horizontalScrollBarHeight = scrollBarWidth;
-	if (!horizontalScrollBarVisible)
+	if (!showSBHorizontal)
 		horizontalScrollBarHeight = 0;
 	int verticalScrollBarHeight = scrollBarHeight;
 	if (!verticalScrollBarVisible)
@@ -1118,7 +1119,7 @@ void ScintillaGTK::Resize(int width, int height) {
 
 	GtkAllocation alloc;
 	alloc.x = 0;
-	if (horizontalScrollBarVisible) {
+	if (showSBHorizontal) {
 		alloc.y = height - scrollBarHeight;
 		alloc.width = Platform::Maximum(1, width - scrollBarWidth) + 1;
 		alloc.height = horizontalScrollBarHeight;
@@ -1134,6 +1135,8 @@ void ScintillaGTK::Resize(int width, int height) {
 		alloc.x = width - scrollBarWidth;
 		alloc.width = scrollBarWidth;
 		alloc.height = Platform::Maximum(1, height - scrollBarHeight) + 1;
+		if (!showSBHorizontal)
+			alloc.height += scrollBarWidth-2;
 	} else {
 		alloc.x = -scrollBarWidth;
 		alloc.width = 0;
@@ -1448,7 +1451,7 @@ gint ScintillaGTK::KeyRelease(GtkWidget *, GdkEventKey * /*event*/) {
 
 void ScintillaGTK::Destroy(GtkObject* object) {
 	ScintillaObject *scio = reinterpret_cast<ScintillaObject *>(object);
-	// This avoids a double destruction - don't know why this happens
+	// This avoids a double destruction
 	if (!scio->pscin)
 		return;
 	ScintillaGTK *sciThis = reinterpret_cast<ScintillaGTK *>(scio->pscin);
