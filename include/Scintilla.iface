@@ -1513,6 +1513,32 @@ fun void PageUpRectExtend=2433(,)
 fun void PageDownRectExtend=2434(,)
 
 
+# Move caret to top of page, or one page up if already at top of page.
+fun void StutteredPageUp=2435(,)
+
+# Move caret to top of page, or one page up if already at top of page, extending selection to new caret position.
+fun void StutteredPageUpExtend=2436(,)
+
+# Move caret to bottom of page, or one page down if already at bottom of page.
+fun void StutteredPageDown=2437(,)
+
+# Move caret to bottom of page, or one page down if already at bottom of page, extending selection to new caret position.
+fun void StutteredPageDownExtend=2438(,)
+
+
+# Move caret left one word, position cursor at end of word.
+fun void WordLeftEnd=2439(,)
+
+# Move caret left one word, position cursor at end of word, extending selection to new caret position.
+fun void WordLeftEndExtend=2440(,)
+
+# Move caret right one word, position cursor at end of word.
+fun void WordRightEnd=2441(,)
+
+# Move caret right one word, position cursor at end of word, extending selection to new caret position.
+fun void WordRightEndExtend=2442(,)
+
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 

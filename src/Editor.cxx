@@ -3593,6 +3593,10 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	case SCI_WORDPARTLEFTEXTEND:
 	case SCI_WORDPARTRIGHT:
 	case SCI_WORDPARTRIGHTEXTEND:
+	case SCI_WORDLEFTEND:
+	case SCI_WORDLEFTENDEXTEND:
+	case SCI_WORDRIGHTEND:
+	case SCI_WORDRIGHTENDEXTEND:
 	case SCI_HOME:
 	case SCI_HOMEEXTEND:
 	case SCI_LINEEND:
@@ -3605,6 +3609,10 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	case SCI_DOCUMENTSTARTEXTEND:
 	case SCI_DOCUMENTEND:
 	case SCI_DOCUMENTENDEXTEND:
+	case SCI_STUTTEREDPAGEUP:
+	case SCI_STUTTEREDPAGEUPEXTEND:
+	case SCI_STUTTEREDPAGEDOWN:
+	case SCI_STUTTEREDPAGEDOWNEXTEND:
 	case SCI_PAGEUP:
 	case SCI_PAGEUPEXTEND:
 	case SCI_PAGEDOWN:
@@ -3668,13 +3676,35 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 
 /**
  * Force scroll and keep position relative to top of window.
+ *
+ * If stuttered = true and not already at first/last row, move to first/last row of window.
+ * If stuttered = true and already at first/last row, scroll as normal.
  */
-void Editor::PageMove(int direction, selTypes sel) {
-	Point pt = LocationFromPosition(currentPos);
-	int topLineNew = Platform::Clamp(
+void Editor::PageMove(int direction, selTypes sel, bool stuttered) {
+	int topLineNew, newPos;
+
+	// I consider only the caretYSlop, and ignore the caretYPolicy-- is that a problem?
+	int currentLine = pdoc->LineFromPosition(currentPos);
+	int topStutterLine = topLine + caretYSlop;
+	int bottomStutterLine = topLine + LinesToScroll() - caretYSlop;
+
+	if (stuttered && (direction < 0 && currentLine > topStutterLine)) {
+		topLineNew = topLine;
+		newPos = PositionFromLocation(Point(lastXChosen, vs.lineHeight * caretYSlop));
+
+	} else if (stuttered && (direction > 0 && currentLine < bottomStutterLine)) {
+		topLineNew = topLine;
+		newPos = PositionFromLocation(Point(lastXChosen, vs.lineHeight * (LinesToScroll() - caretYSlop)));
+
+	} else {
+		Point pt = LocationFromPosition(currentPos);
+
+		topLineNew = Platform::Clamp(
 	                     topLine + direction * LinesToScroll(), 0, MaxScrollPos());
-	int newPos = PositionFromLocation(
+		newPos = PositionFromLocation(
 	                 Point(lastXChosen, pt.y + direction * (vs.lineHeight * LinesToScroll())));
+	}
+
 	if (topLineNew != topLine) {
 		SetTopLine(topLineNew);
 		MovePositionTo(newPos, sel);
@@ -3910,6 +3940,24 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		MovePositionTo(MovePositionSoVisible(pdoc->NextWordStart(currentPos, 1), 1), selStream);
 		SetLastXChosen();
 		break;
+
+	case SCI_WORDLEFTEND:
+		MovePositionTo(MovePositionSoVisible(pdoc->NextWordEnd(currentPos, -1), -1));
+		SetLastXChosen();
+		break;
+	case SCI_WORDLEFTENDEXTEND:
+		MovePositionTo(MovePositionSoVisible(pdoc->NextWordEnd(currentPos, -1), -1), selStream);
+		SetLastXChosen();
+		break;
+	case SCI_WORDRIGHTEND:
+		MovePositionTo(MovePositionSoVisible(pdoc->NextWordEnd(currentPos, 1), 1));
+		SetLastXChosen();
+		break;
+	case SCI_WORDRIGHTENDEXTEND:
+		MovePositionTo(MovePositionSoVisible(pdoc->NextWordEnd(currentPos, 1), 1), selStream);
+		SetLastXChosen();
+		break;
+
 	case SCI_HOME:
 		MovePositionTo(pdoc->LineStart(pdoc->LineFromPosition(currentPos)));
 		SetLastXChosen();
@@ -3981,6 +4029,18 @@ int Editor::KeyCommand(unsigned int iMessage) {
 	case SCI_DOCUMENTENDEXTEND:
 		MovePositionTo(pdoc->Length(), selStream);
 		SetLastXChosen();
+		break;
+	case SCI_STUTTEREDPAGEUP:
+		PageMove(-1, noSel, true);
+		break;
+	case SCI_STUTTEREDPAGEUPEXTEND:
+		PageMove(-1, selStream, true);
+		break;
+	case SCI_STUTTEREDPAGEDOWN:
+		PageMove(1, noSel, true);
+		break;
+	case SCI_STUTTEREDPAGEDOWNEXTEND:
+		PageMove(1, selStream, true);
 		break;
 	case SCI_PAGEUP:
 		PageMove(-1);
@@ -6455,6 +6515,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_WORDLEFTEXTEND:
 	case SCI_WORDRIGHT:
 	case SCI_WORDRIGHTEXTEND:
+	case SCI_WORDLEFTEND:
+	case SCI_WORDLEFTENDEXTEND:
+	case SCI_WORDRIGHTEND:
+	case SCI_WORDRIGHTENDEXTEND:
 	case SCI_HOME:
 	case SCI_HOMEEXTEND:
 	case SCI_LINEEND:
@@ -6467,6 +6531,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_DOCUMENTSTARTEXTEND:
 	case SCI_DOCUMENTEND:
 	case SCI_DOCUMENTENDEXTEND:
+
+	case SCI_STUTTEREDPAGEUP:
+	case SCI_STUTTEREDPAGEUPEXTEND:
+	case SCI_STUTTEREDPAGEDOWN:
+	case SCI_STUTTEREDPAGEDOWNEXTEND:
+
 	case SCI_PAGEUP:
 	case SCI_PAGEUPEXTEND:
 	case SCI_PAGEDOWN:

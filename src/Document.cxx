@@ -792,6 +792,40 @@ int Document::NextWordStart(int pos, int delta) {
 }
 
 /**
+ * Find the end of the next word in either a forward (delta >= 0) or backwards direction
+ * (delta < 0).
+ * This is looking for a transition between character classes although there is also some
+ * additional movement to transit white space.
+ * Used by cursor movement by word commands.
+ */
+int Document::NextWordEnd(int pos, int delta) {
+	if (delta < 0) {
+		if (pos > 0) {
+			charClassification ccStart = WordCharClass(cb.CharAt(pos-1));
+			if (ccStart != ccSpace) {
+				while (pos > 0 && WordCharClass(cb.CharAt(pos - 1)) == ccStart) {
+					pos--;
+				}
+			}
+			while (pos > 0 && WordCharClass(cb.CharAt(pos - 1)) == ccSpace) {
+				pos--;
+			}
+		}
+	} else {
+		while (pos < Length() && WordCharClass(cb.CharAt(pos)) == ccSpace) {
+			pos++;
+		}
+		if (pos < Length()) {
+			charClassification ccStart = WordCharClass(cb.CharAt(pos));
+			while (pos < Length() && WordCharClass(cb.CharAt(pos)) == ccStart) {
+				pos++;
+			}
+		}
+	}
+	return pos;
+}
+
+/**
  * Check that the character at the given position is a word or punctuation character and that
  * the previous character is of a different character class.
  */
