@@ -864,6 +864,21 @@ void Platform::DebugPrintf(const char *, ...) {
 }
 #endif
 
+// Not supported for GTK+
+static bool assertionPopUps = true;
+
+void Platform::ShowAssertionPopUps(bool assertionPopUps_) {
+	assertionPopUps = assertionPopUps_;
+}
+
+void Platform::Assert(const char *c, const char *file, int line) {
+	char buffer[2000];
+	sprintf(buffer, "Assertion [%s] failed at %s %d", c, file, line);
+	strcat(buffer, "\r\n");
+	Platform::DebugDisplay(buffer);
+	abort();
+}
+
 int Platform::Clamp(int val, int minVal, int maxVal) {
 	if (val > maxVal)
 		val = maxVal;

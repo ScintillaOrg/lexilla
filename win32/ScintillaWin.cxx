@@ -264,7 +264,7 @@ static int InputCodePage() {
 
 // Map the key codes to their equivalent SCK_ form
 static int KeyTranslate(int keyIn) {
-//assert(!keyIn);
+//PLATFORM_ASSERT(!keyIn);
 	switch (keyIn) {
 		case VK_DOWN:		return SCK_DOWN;
 		case VK_UP:		return SCK_UP;
