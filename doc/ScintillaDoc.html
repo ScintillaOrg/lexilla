@@ -690,6 +690,8 @@ SCI_SETCARETWIDTH(int pixels)
 SCI_GETCARETWIDTH
 SCI_SETCONTROLCHARSYMBOL(int symbol)
 SCI_GETCONTROLCHARSYMBOL
+SCI_SETWHITESPACEFORE(bool useWhitespaceForeColour, int colour)
+SCI_SETWHITESPACEBACK(bool useWhitespaceBackColour, int colour)
 </pre>
     <p>
 	The selection is shown by changing the foreground and / or
@@ -703,7 +705,7 @@ SCI_GETCONTROLCHARSYMBOL
 	The colour of the caret can be set with SCI_SETCARETFORE.
 	The background colour of the line containing the caret can be
 	changed to override the styles on that line with
-	SCI_GETCARETLINEVISIBLE	and the colour used set with
+	SCI_GETCARETLINEVISIBLE and the colour used set with
 	SCI_SETCARETLINEBACK.
 	The caret line background colour is overridden by any background
 	colour used to display markers.
@@ -713,6 +715,12 @@ SCI_GETCONTROLCHARSYMBOL
 	Setting the period to 0 stops the caret	blinking.
 	The width of the caret can be set with SCI_SETCARETWIDTH to a value
 	of 1, 2 or 3 pixels.
+    </p>
+    <p>
+	By default, the colour of visible whitespace is determined by the lexer in use.  The
+	foreground and / or background colour of all visible whitespace can be set globally,
+	overriding the lexer's colours with	SCI_SETWHITESPACEFORE and 
+	SCI_SETWHITESPACEBACK.
     </p>
     <p>
 	SCI_SETCONTROLCHARSYMBOL specifies a character to use to indicate
