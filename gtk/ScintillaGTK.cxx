@@ -859,6 +859,8 @@ void ScintillaGTK::NotifyURIDropped(const char *list) {
 }
 const char *CharacterSetID(int characterSet);
 
+#if GTK_MAJOR_VERSION >= 2
+
 #define IS_ACC(x) \
 	((x) >= 65103 && (x) <= 65111)
 #define IS_CHAR(x) \
@@ -906,6 +908,7 @@ static int MakeAccent(int key, int acc) {
 	}
 	return key;
 }
+#endif
 
 int ScintillaGTK::KeyDefault(int key, int modifiers) {
 	if (!(modifiers & SCI_CTRL) && !(modifiers & SCI_ALT)) {
