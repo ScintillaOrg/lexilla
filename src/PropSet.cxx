@@ -39,7 +39,7 @@ static bool GetFullLine(const char *&fpc, int &lenData, char *s, int len) {
 					fpc++;
 					lenData--;
 				}
-				*s++ = '\0';
+				*s = '\0';
 				return true;
 			}
 		} else if ((ch == '\\') && (lenData > 0) && ((*fpc == '\r') || (*fpc == '\n'))) {

@@ -233,9 +233,8 @@ int LineVector::LineFromPosition(int pos) {
 		return lines - 1;
 	int lower = 0;
 	int upper = lines;
-	int middle = 0;
 	do {
-		middle = (upper + lower + 1) / 2; 	// Round high
+		int middle = (upper + lower + 1) / 2; 	// Round high
 		if (pos < linesData[middle].startPosition) {
 			upper = middle - 1;
 		} else {

@@ -65,7 +65,6 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 	char chPrev = ' ';
 	char chPrev2 = ' ';
 	char chNext = styler[startPos];
-	char chNext2 = styler[startPos];
 	styler.StartSegment(startPos);
 	int lengthDoc = startPos + length;
 	bool atStartLine = true;
@@ -86,7 +85,7 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 		
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
-		chNext2 = styler.SafeGetCharAt(i + 2);
+		char chNext2 = styler.SafeGetCharAt(i + 2);
 		
 		if ((ch == '\r' && chNext != '\n') || (ch == '\n') || (i == lengthDoc)) {
 			if ((state == SCE_P_DEFAULT) || (state == SCE_P_TRIPLE) || (state == SCE_P_TRIPLEDOUBLE)) {

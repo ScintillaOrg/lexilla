@@ -652,11 +652,10 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 					sprintf(number, "%d", line + 1);
 					if (foldFlags & 64)
 						sprintf(number, "%X", pdoc->GetLevel(line));
-					int xpos = 0;
 					PRectangle rcNumber=rcMarker;
 					// Right justify
 					int width = surface->WidthText(vs.styles[STYLE_LINENUMBER].font, number, strlen(number));
-					xpos = rcNumber.right - width - 3;
+					int xpos = rcNumber.right - width - 3;
 					rcNumber.left = xpos;
 					if ((visibleLine < cs.LinesDisplayed()) && cs.GetVisible(line)) {
 						surface->DrawText(rcNumber, vs.styles[STYLE_LINENUMBER].font,
@@ -3608,7 +3607,6 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	case SCI_SEARCHNEXT:
 	case SCI_SEARCHPREV:
 		return SearchText(iMessage, wParam, lParam);
-		break;
 
 	case SCI_SETCARETPOLICY:
 		caretPolicy = wParam;

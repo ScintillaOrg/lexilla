@@ -44,20 +44,18 @@ static void ColouriseSQLDoc(unsigned int startPos, int length,
 	bool fold = styler.GetPropSet().GetInt("fold");
 	int lineCurrent = styler.GetLine(startPos);
 	int spaceFlags = 0;
-	int indentCurrent = 0;
 
 	int state = initStyle;
 	char chPrev = ' ';
 	char chNext = styler[startPos];
 	styler.StartSegment(startPos);
 	unsigned int lengthDoc = startPos + length;
-	bool prevCr = false;
 	for (unsigned int i = startPos; i <= lengthDoc; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 
 		if ((ch == '\r' && chNext != '\n') || (ch == '\n')) {
-			indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags);
+			int indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags);
 			int lev = indentCurrent;
 			if (!(indentCurrent & SC_FOLDLEVELWHITEFLAG)) {
 				// Only non whitespace lines can be headers
