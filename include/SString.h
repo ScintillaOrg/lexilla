@@ -234,20 +234,69 @@ public:
 	SString &appendwithseparator(const char* sOther, char sep) {
 		return append(sOther, strlen(sOther), sep);
 	}
+	SString &insert(int pos, const char* sOther, int sLenOther=-1) {
+		if (sLenOther < 0)
+			sLenOther = strlen(sOther);
+		int lenNew = sLen + sLenOther;
+		if (lenNew + 1 >= sSize) {
+			// Conservative about growing the buffer: don't do it, unless really needed
+			char *sNew = new char[lenNew + sizeGrowth + 1];
+			if (!sNew)
+				return *this;
+			if (s) {
+				memcpy(sNew, s, sLen+1);
+				delete []s;
+			}
+			s = sNew;
+			sSize = lenNew + sizeGrowth;
+		}
+		int moveChars = sLen-pos;
+		for (int i=moveChars; i>=0; i--)
+			s[lenNew-moveChars+i] = s[pos+i];
+		memcpy(s + pos, sOther, sLenOther);
+		sLen += sLenOther;
+		return *this;
+	}
+	void remove(int pos, int len=1) {
+		for (int i=pos; i<sLen-len+1; i++)
+			s[i] = s[i+len];
+		sLen -= len;
+	}
 	int value() const {
 		if (s)
 			return atoi(s);
 		else
 			return 0;
 	}
-	void substitute(char find, char replace) {
+	int search(const char *sFind, int start=0) {
+		if ((start >= 0) && (start < sLen)) {
+			const char *sFound = strstr(s+start, sFind);
+			if (sFound)
+				return sFound - s;
+		}
+		return -1;
+	}
+	bool contains(const char *sFind) {
+		return search(sFind) >= 0;
+	}
+	void substitute(char chFind, char chReplace) {
 		char *t = s;
 		while (t) {
-			t = strchr(t, find);
+			t = strchr(t, chFind);
 			if (t) {
-				*t = replace;
+				*t = chReplace;
 				t++;
 			}
+		}
+	}
+	void substitute(const char *sFind, const char *sReplace) {
+		int lenFind = strlen(sFind);
+		int lenReplace = strlen(sReplace);
+		int posFound = search(sFind);
+		while (posFound >= 0) {
+			remove(posFound, lenFind);
+			insert(posFound, sReplace, lenReplace);
+			posFound = search(sFind, posFound + lenReplace);
 		}
 	}
 };
