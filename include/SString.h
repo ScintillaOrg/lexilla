@@ -91,6 +91,12 @@ public:
 		s = StringDup(number);
 		sSize = sLen = (s) ? strlen(s) : 0;
 	}
+	SString(double d) : sizeGrowth(sizeGrowthDefault) {
+		char number[32];
+		sprintf(number, "%.6f", d);
+		s = StringDup(number);
+		sSize = sLen = (s) ? strlen(s) : 0;
+	}
 	~SString() {
 		delete []s;
 		s = 0;

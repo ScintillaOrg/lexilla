@@ -386,6 +386,13 @@ public:
 	void Show(Point pt, Window &w);
 };
 
+class ElapsedTime {
+	double beginTime;
+public:
+	ElapsedTime();
+	double Duration(bool reset=false);
+};
+
 /**
  * Platform class used to retrieve system wide parameters such as double click speed
  * and chrome colour. Not a creatable object, more of a module with several functions.
