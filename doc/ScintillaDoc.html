@@ -441,6 +441,12 @@ SCI_SETCODEPAGE(int codepage)
       This also stops the caret from moving between the two bytes in a double byte character. Call
       with argument set to zero to disable DBCS support.
     </p>
+    <p>
+       On Windows, code page SC_CP_UTF8 (65001) sets Scintilla into Unicode mode with the 
+       document treated as a sequence of characters expressed in UTF8. The text is converted to 
+       UCS-2 before being drawn by the OS and can thus display Hebrew, Arabic, Cyrillic, and 
+       Han characters.
+    </p>
 <pre>
 SCI_SETWORDCHARS(&lt;unused&gt;, char *chars)
 </pre>
@@ -632,8 +638,6 @@ SCI_NEWLINE
 SCI_FORMFEED
 SCI_VCHOME
 SCI_VCHOMEEXTEND
-SCI_ZOOMIN
-SCI_ZOOMOUT
 SCI_DELWORDLEFT
 SCI_DELWORDRIGHT
 SCI_LINESCROLLDOWN
@@ -767,6 +771,21 @@ SCI_ENSUREVISIBLE(int line)
        A hidden line may be hidden because more than one of its parent lines is 
        contracted. SCI_ENSUREVISIBLE travels up the fold hierarchy, expanding any
        contracted folds until it reaches the top level. The line will then be visible.
+    </p>
+    <h3>
+    	Zooming
+    </h3>
+<pre>
+SCI_ZOOMIN
+SCI_ZOOMOUT
+SCI_SETZOOM
+SCI_GETZOOM
+</pre>
+    <p>
+    The text can be made larger and smaller by using SCI_ZOOMIN and SCI_ZOOMOUT.
+    The zoom level can be retreived by SCI_GETZOOM and set by SCI_SETZOOM. The zoom factors 
+    may range from -10 to + 20 and is added to each styles point size. The calculated point size never 
+    goes below 2.
     </p>
     <h3>
     	Long Lines
