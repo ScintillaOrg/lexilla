@@ -207,7 +207,7 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 				styler.ColourTo(i, state);
 			}
 			lineCurrent++;
-			styler.IndentAmount(lineCurrent + 1, &spaceFlags, IsPyComment);
+			styler.IndentAmount(lineCurrent, &spaceFlags, IsPyComment);
 			atStartLine = true;
 		}
 
