@@ -1169,13 +1169,18 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 		bool draw8bit = true;
 		if (et != singleByte) {
 			GdkWChar wctext[maxLengthTextRun];
+			if (len >= maxLengthTextRun) 
+				len = maxLengthTextRun-1;
 			int wclen;
 			if (et == UTF8) {
 				wclen = UCS2FromUTF8(s, len,
 					reinterpret_cast<wchar_t *>(wctext), maxLengthTextRun - 1);
 			} else {	// dbcs, so convert using current locale
+				char sMeasure[maxLengthTextRun];
+				memcpy(sMeasure, s, len);
+				sMeasure[len] = '\0';
 				wclen = gdk_mbstowcs(
-					wctext, s, maxLengthTextRun - 1);
+					wctext, sMeasure, maxLengthTextRun - 1);
 			}
 			if (wclen > 0) {
 				draw8bit = false;
@@ -1326,13 +1331,18 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 		bool measure8bit = true;
 		if (et != singleByte) {
 			GdkWChar wctext[maxLengthTextRun];
+			if (len >= maxLengthTextRun) 
+				len = maxLengthTextRun-1;
 			int wclen;
 			if (et == UTF8) {
 				wclen = UCS2FromUTF8(s, len,
 					reinterpret_cast<wchar_t *>(wctext), maxLengthTextRun - 1);
 			} else {	// dbcsMode, so convert using current locale
+				char sDraw[maxLengthTextRun];
+				memcpy(sDraw, s, len);
+				sDraw[len] = '\0';
 				wclen = gdk_mbstowcs(
-					wctext, s, maxLengthTextRun - 1);
+					wctext, sDraw, maxLengthTextRun - 1);
 			}
 			if (wclen > 0) {
 				measure8bit = false;
@@ -1342,11 +1352,13 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 				for (int iU = 0; iU < wclen; iU++) {
 					int width = gdk_char_width_wc(gf, wctext[iU]);
 					totalWidth += width;
-					size_t lenChar;
+					int lenChar;
 					if (et == UTF8) {
 						lenChar = UTF8Len(s[i]);
 					} else {
 						lenChar = mblen(s+i, MB_CUR_MAX);
+						if (lenChar < 0)
+							lenChar = 1;
 					}
 					while (lenChar--) {
 						positions[i++] = totalWidth;
