@@ -60,6 +60,7 @@ public:
 
 class DocWatcher;
 class DocModification;
+class RESearch;
 
 /**
  */
@@ -89,7 +90,11 @@ private:
 	
 	WatcherWithUserData *watchers;
 	int lenWatchers;
-	
+
+	bool matchesValid;
+	RESearch *pre;
+	char *substituted;
+
 public:
 	int stylingBits;
 	int stylingBitsMask;
@@ -175,6 +180,7 @@ public:
 	long FindText(int minPos, int maxPos, const char *s, 
 		bool caseSensitive, bool word, bool wordStart, bool regExp, int *length);
 	long FindText(int iMessage, unsigned long wParam, long lParam);
+	const char *SubstituteByPosition(const char *text);
 	int LinesTotal();
 	
 	void ChangeCase(Range r, bool makeUpperCase);

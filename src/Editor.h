@@ -320,6 +320,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void Expand(int &line, bool doExpand);
 	void ToggleContraction(int line);
 	void EnsureLineVisible(int lineDoc);
+	int ReplaceTarget(bool replacePatterns, const char *text);
 
 	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) = 0;
 	

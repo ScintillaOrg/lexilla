@@ -117,7 +117,9 @@ void AutoComplete::Move(int delta) {
 void AutoComplete::Select(const char *word) {
 	int pos = lb.Find(word);
 	//Platform::DebugPrintf("Autocompleting at <%s> %d\n", wordCurrent, pos);
-	if (pos != -1)
+	if (pos == -1)
+		Cancel();
+	else
 		lb.Select(pos);
 }
 

@@ -696,7 +696,10 @@ void Window::SetTitle(const char *s) {
 }
 
 LRESULT Window::SendMessage(UINT msg, WPARAM wParam, LPARAM lParam) {
-	return ::SendMessage(id, msg, wParam, lParam);
+	if (id)
+		return ::SendMessage(id, msg, wParam, lParam);
+	else
+		return 0;
 }
 
 int Window::GetDlgCtrlID() {

@@ -18,9 +18,6 @@
 #include "Document.h"
 #include "RESearch.h"
 
-void re_fail(char *,char) {
-}
-
 // This is ASCII specific but is safe with chars >= 0x80
 inline bool isspacechar(unsigned char ch) {
 	return (ch == ' ') || ((ch >= 0x09) && (ch <= 0x0d));
@@ -49,6 +46,10 @@ Document::Document() {
 	useTabs = true;
 	watchers = 0;
 	lenWatchers = 0;
+	
+	matchesValid = false;
+	pre = 0;
+	substituted = 0;
 }
 
 Document::~Document() {
@@ -58,6 +59,10 @@ Document::~Document() {
 	delete []watchers;
 	watchers = 0;
 	lenWatchers = 0;
+	delete pre;
+	pre = 0;
+	delete []substituted;
+	substituted = 0;
 }
 
 // Increase reference count and return its previous value.
@@ -786,6 +791,10 @@ long Document::FindText(int minPos, int maxPos, const char *s,
                         bool caseSensitive, bool word, bool wordStart, bool regExp,
 			int *length) {
 	if (regExp) {
+		if (!pre)
+			pre = new RESearch();
+		if (!pre)
+			return -1;
 		char *pat = new char[strlen(s) + 1];
 		if (!pat)
 			return -1;
@@ -807,20 +816,22 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 		endPos = MovePositionOutsideChar(endPos, 1, false);
 
 		DocumentIndexer di(this, endPos);
-		RESearch re;
 		strcat(pat, s);
-		const char *errmsg = re.Compile(pat);
+		const char *errmsg = pre->Compile(pat);
 		if (errmsg) {
 			delete []pat;
 			return -1;
 		}
-		// Find a variable in a property file: \$([A-Za-z0-9_.]+)
-		int success = re.Execute(di, startPos);
+		// Find a variable in a property file: \$(\([A-Za-z0-9_.]+\))
+		// Replace first '.' with '-' in each property file variable reference:
+		//     Search: \$(\([A-Za-z0-9_-]+\)\.\([A-Za-z0-9_.]+\))
+		//     Replace: $(\1-\2)
+		int success = pre->Execute(di, startPos);
 		int pos = -1;
 		int lenRet = 0;
 		if (success) {
-			pos = re.bopat[0];
-			lenRet = re.eopat[0] - re.bopat[0];
+			pos = pre->bopat[0];
+			lenRet = pre->eopat[0] - pre->bopat[0];
 		}
 		delete []pat;
 		*length = lenRet;
@@ -888,6 +899,43 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 	}
 	//Platform::DebugPrintf("Not found\n");
 	return -1;
+}
+
+const char *Document::SubstituteByPosition(const char *text) {
+	if (!pre)
+		return 0;
+	delete []substituted;
+	substituted = 0;
+	DocumentIndexer di(this, Length());
+	if (!pre->GrabMatches(di))
+		return 0;
+	unsigned int lenResult = 0;
+	for (const char *t=text; *t; t++) {
+		if ((*t == '\\') && (*(t+1) >= '1' && *(t+1) <= '9')) {
+			unsigned int patNum = *(t+1) - '0'; 
+			lenResult += pre->eopat[patNum] - pre->bopat[patNum];
+			t++;
+		} else {
+			lenResult++;
+		}
+	}
+	substituted = new char[lenResult + 1];
+	if (!substituted)
+		return 0;
+	char *o = substituted;
+	for (const char *s=text; *s; s++) {
+		if ((*s == '\\') && (*(s+1) >= '1' && *(s+1) <= '9')) {
+			unsigned int patNum = *(s+1) - '0'; 
+			unsigned int len = pre->eopat[patNum] - pre->bopat[patNum];
+			strcpy(o, pre->pat[patNum]);
+			o += len;
+			s++;
+		} else {
+			*o++ = *s;
+		}
+	}
+	*o = '\0';
+	return substituted;
 }
 
 int Document::LinesTotal() {

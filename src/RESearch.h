@@ -26,6 +26,10 @@ class RESearch {
 
 public:
 	RESearch();
+	~RESearch();
+	void Init();
+	void Clear();
+	bool GrabMatches(CharacterIndexer &ci);
 	void ChSet(char c);
 	const char *Compile(char *pat);
 	int Execute(CharacterIndexer &ci, int lp);
@@ -33,11 +37,12 @@ public:
 	int Substitute(CharacterIndexer &ci, char *src, char *dst);
 
 	enum {MAXTAG=10};
-	enum {MAXNFA=1024};
+	enum {MAXNFA=2048};
 	enum {NOTFOUND=-1};
 
 	int bopat[MAXTAG];
 	int eopat[MAXTAG];
+	char *pat[MAXTAG];
 
 private:
 	int PMatch(CharacterIndexer &ci, int lp, char *ap);

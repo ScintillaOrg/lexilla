@@ -3246,6 +3246,23 @@ void Editor::EnsureLineVisible(int lineDoc) {
 	}
 }
 
+int Editor::ReplaceTarget(bool replacePatterns, const char *text) {
+	pdoc->BeginUndoAction();
+	if (replacePatterns) {
+		text = pdoc->SubstituteByPosition(text);
+		if (!text)
+			return 0;
+	}
+	if (targetStart != targetEnd)
+		pdoc->DeleteChars(targetStart, targetEnd - targetStart);
+	targetEnd = targetStart;
+	unsigned int len = strlen(text);
+	pdoc->InsertString(targetStart, text);
+	targetEnd = targetStart + len;
+	pdoc->EndUndoAction();
+	return len;
+}
+
 static bool ValidMargin(unsigned long wParam) {
 	return wParam < ViewStyle::margins;
 }
@@ -3566,20 +3583,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		targetEnd = wParam;
 		break;
 	
-	case SCI_REPLACETARGET: {
-			if (lParam == 0)
-				return 0;
-			pdoc->BeginUndoAction();
-			unsigned int chars = targetEnd - targetStart;
-			if (targetStart != targetEnd)
-				pdoc->DeleteChars(targetStart, chars);
-			targetEnd = targetStart;
-			char *replacement = reinterpret_cast<char *>(lParam);
-			pdoc->InsertString(targetStart, replacement);
-			targetEnd = targetStart + strlen(replacement);
-			pdoc->EndUndoAction();
-		}
-		break;
+	case SCI_REPLACETARGET: 
+		PLATFORM_ASSERT(lParam);
+		return ReplaceTarget(wParam, reinterpret_cast<char *>(lParam));
 	
 	case EM_LINESCROLL:
 	case SCI_LINESCROLL:

@@ -29,6 +29,11 @@
  * Modification history:
  *
  * $Log$
+ * Revision 1.2  2001/04/05 01:58:04  nyamatongwe
+ * Replace target functionality to make find and replace operations faster
+ * by diminishing screen updates and allow for \d patterns in the replacement
+ * text.
+ *
  * Revision 1.1  2001/04/04 12:52:44  nyamatongwe
  * Moved to public domain regular expresion implementation.
  *
@@ -231,10 +236,47 @@ const char bitarr[] = {1,2,4,8,16,32,64,'\200'};
 #define badpat(x)	(*nfa = END, x)
  
 RESearch::RESearch() {
+	Init();
+}
+
+RESearch::~RESearch() {
+	Clear();
+}
+
+void RESearch::Init() {
 	sta = NOP;               	/* status of lastpat */
 	bol = 0;
-	for (int i=0; i<BITBLK; i++)
-		bittab[i] = 0;
+	for (int i=0; i<MAXTAG; i++)
+		pat[i] = 0;
+	for (int j=0; j<BITBLK; j++)
+		bittab[j] = 0;
+}
+
+void RESearch::Clear() {
+	for (int i=0; i<MAXTAG; i++) {
+		delete []pat[i];
+		pat[i] = 0;
+		bopat[i] = NOTFOUND;
+		eopat[i] = NOTFOUND;
+	}
+}
+
+bool RESearch::GrabMatches(CharacterIndexer &ci) {
+	bool success = true;
+	for (unsigned int i=0; i<MAXTAG; i++) {
+		if ((bopat[i] != NOTFOUND) && (eopat[i] != NOTFOUND)) {
+			unsigned int len = eopat[i] - bopat[i];
+			pat[i] = new char[len + 1];
+			if (pat[i]) {
+				for (unsigned int j=0; j<len; j++)
+					pat[i][j] = ci.CharAt(bopat[i] + j);
+				pat[i][len] = '\0';
+			} else {
+				success = false;
+			}
+		}
+	}
+	return success;
 }
 
 void RESearch::ChSet(char c) {
@@ -487,11 +529,8 @@ int RESearch::Execute(CharacterIndexer &ci, int lp) {
 
 	bol = lp;
 	failure = 0;
-
-	for (int i=0;i<MAXTAG;i++) {
-		bopat[i] = NOTFOUND;
-		eopat[i] = NOTFOUND;
-	}
+	
+	Clear();
 
 	switch(*ap) {
 
