@@ -479,6 +479,7 @@ void ScintillaGTK::UnRealizeThis(GtkWidget *widget) {
 	gtk_widget_unrealize(PWidget(wPreedit));
 	gtk_widget_unrealize(PWidget(wPreeditDraw));
 	g_object_unref(im_context);
+	im_context = NULL;
 #endif
 #endif
 	if (GTK_WIDGET_CLASS(parentClass)->unrealize)
@@ -585,16 +586,21 @@ gint ScintillaGTK::FocusIn(GtkWidget *widget, GdkEventFocus * /*event*/) {
 	if (sciThis->ic)
 		gdk_im_begin(sciThis->ic, widget->window);
 #else
-	gchar *str;
-	gint cursor_pos;
-	gtk_im_context_get_preedit_string(sciThis->im_context, &str, NULL, &cursor_pos);
-	if (strlen(str) > 0){
-		gtk_widget_show(PWidget(sciThis->wPreedit));
-	} else{
-		gtk_widget_hide(PWidget(sciThis->wPreedit));
+	if (sciThis->im_context != NULL) {
+		gchar *str = NULL;
+		gint cursor_pos;
+
+		gtk_im_context_get_preedit_string(sciThis->im_context, &str, NULL, &cursor_pos);
+		if (PWidget(sciThis->wPreedit) != NULL) {
+			if (strlen(str) > 0) {
+				gtk_widget_show(PWidget(sciThis->wPreedit));
+			} else {
+				gtk_widget_hide(PWidget(sciThis->wPreedit));
+			}
+		}
+		g_free(str);
+		gtk_im_context_focus_in(sciThis->im_context);
 	}
-	g_free(str);
-	gtk_im_context_focus_in(sciThis->im_context);
 #endif
 #endif
 
@@ -611,8 +617,10 @@ gint ScintillaGTK::FocusOut(GtkWidget *widget, GdkEventFocus * /*event*/) {
 #if GTK_MAJOR_VERSION < 2
 	gdk_im_end();
 #else
-	gtk_widget_hide(PWidget(sciThis->wPreedit));
-	gtk_im_context_focus_out(sciThis->im_context);
+	if (PWidget(sciThis->wPreedit) != NULL)
+		gtk_widget_hide(PWidget(sciThis->wPreedit));
+	if (sciThis->im_context != NULL)
+		gtk_im_context_focus_out(sciThis->im_context);
 #endif
 #endif
 
