@@ -254,11 +254,7 @@ void LineVector::Remove(int pos) {
 		linesData[i] = linesData[i + 1];
 	}
 	if (levels) {
-		// Level information merges back onto previous line
-		int posAbove = pos - 1;
-		if (posAbove < 0)
-			posAbove = 0;
-		for (int j = posAbove; j < lines; j++) {
+		for (int j = pos; j < lines; j++) {
 			levels[j] = levels[j + 1];
 		}
 	}
