@@ -1,0 +1,627 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta name="generator" content="HTML Tidy, see www.w3.org" />
+    <meta name="generator" content="SciTE" />
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>
+      Scintilla and SciTE
+    </title>
+  </head>
+  <body bgcolor="#FFFFFF" text="#000000">
+    <table bgcolor="#000000" width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tr>
+        <td>
+          <img src="SciTEIco.png" border="3" height="64" width="64" alt="Scintilla icon" />
+        </td>
+        <td>
+          <a href="index.html" style="color:white;text-decoration:none"><font size="5">Scintilla
+          and SciTE</font></a>
+        </td>
+      </tr>
+    </table>
+    <h2>
+       History of Scintilla and SciTE
+    </h2>
+    <h3>
+       Contributors
+    </h3>
+    <p>
+       Thanks to all the people that have contributed patches, bug reports and suggestions.
+    </p>
+    <p>
+       Source code and documentation have been contributed by
+    </p>
+    <ul>
+      <li>
+        Atsuo Ishimoto
+      </li>
+      <li>
+        Mark Hammond
+      </li>
+      <li>
+        Francois Le Coguiec
+      </li>
+      <li>
+        Dale Nagata
+      </li>
+      <li>
+        Ralf Reinhardt
+      </li>
+      <li>
+        Philippe Lhoste
+      </li>
+      <li>
+        Andrew McKinlay
+      </li>
+      <li>
+        Stephan R. A. Deibel
+      </li>
+      <li>
+        Hans Eckardt
+      </li>
+      <li>
+        Vassili Bourdo
+      </li>
+      <li>
+        Maksim Lin
+      </li>
+      <li>
+        Robin Dunn
+      </li>
+      <li>
+        John Ehresman
+      </li>
+      <li>
+        Steffen Goeldner
+      </li>
+      <li>
+        Deepak S.
+      </li>
+    </ul>
+    <h3>
+       <a href="SciTE122.zip">Release 1.22</a>
+    </h3>
+    <ul>
+      <li>
+        Released on 27 February 2000.
+      </li>
+      <li>
+        wxWindows platform defined. 
+	Implementation for wxWindows will be available separately 
+	from main Scintilla distribution.
+      </li>
+      <li>
+        Line folding in Scintilla.
+      </li>
+      <li>
+        SciTE performs syntax directed folding for C/C++/Java/Javascript and for Python.
+      </li>
+      <li>
+        Optional macro recording support.
+      </li>
+      <li>
+        User properties file (SciTEUser.properties) allows for customisation by the user 
+	that is not overwritten with each installation of SciTE.
+      </li>
+      <li>
+        Python lexer detects and highlights inconsistent indentation.
+      </li>
+      <li>
+        Margin API made more orthogonal.SCI_SETMARGINWIDTH and SCI_SETLINENUMBERWIDTH 
+        are deprecated in favour of this new API.
+      </li>
+      <li>
+        Margins may be made sensitive to forward mouse click events to container.
+      </li>
+      <li>
+        SQL lexer and styles included.
+      </li>
+      <li>
+        Perl lexer handles regular expressions better.
+      </li>
+      <li>
+        Caret policy determines how closely caret is tracked by visible area.
+      </li>
+      <li>
+        New marker shapes: arrow pointing down, plus and minus.
+      </li>
+      <li>
+        Optionally display full path in title rather than just file name.
+      </li>
+      <li>
+        Container is notified when Scintilla gains or loses focus.
+      </li>
+      <li>
+        SciTE handles focus in a more standard way and applies the main 
+	edit commands to the focused pane.
+      </li>
+      <li>
+        Container is notified when Scintilla determines that a line needs to be made visible.
+      </li>
+      <li>
+        Document watchers receive notification when document about to be deleted.
+      </li>
+      <li>
+        Document interface allows access to list of watchers.
+      </li>
+      <li>
+        Line end determined correctly for lines ending with only a '\n'.
+      </li>
+      <li>
+        Search variant that searches form current selection and sets selection.
+      </li>
+      <li>
+        SciTE understands format of diagnostic messages from WScript.
+      </li>
+      <li>
+        SciTE remembers top line of window for each file in MRU list so switching to a recent file 
+	is more likeley to show the same text as when the file was previously visible.
+      </li>
+      <li>
+        Document reference count now initialised correctly.
+      </li>
+      <li>
+        Setting a null document pointer creates an empty document.
+      </li>
+      <li>
+        WM_GETTEXT can no longer overrun buffer.
+      </li>
+      <li>
+        Polygon drawing bug fixed on GTK+.
+      </li>
+      <li>
+        Java and Javascript lexers merged into C++ lexer.
+      </li>
+      <li>
+        C++ lexer indicates unterminated strings by colouring the end of the line
+	rather than changing the rest of the file to string style. This is less
+	obtrusive and helps the folding.
+      </li>
+    </ul>
+    <h3>
+       <a href="SciTE121.zip">Release 1.21</a>
+    </h3>
+    <ul>
+      <li>
+        Released on 2 February 2000.
+      </li>
+      <li>
+        Blank margins on left and right side of text.
+      </li>
+      <li>
+        SCN_CHECKBRACE renamed SCN_UPDATEUI and made more efficient.
+      </li>
+      <li>
+        SciTE source code refactored into platform independent and platform specific classes.
+      </li>
+      <li>
+        XML and Perl subset lexers in SciTE.
+      </li>
+      <li>
+        Large improvement to lexing speed.
+      </li>
+      <li>
+        A new subsystem, 2, allows use of ShellExec on Windows.
+      </li>
+      <li>
+        Borland compatible makefile.
+      </li>
+      <li>
+        Status bar showing caret position in GTK+ version of SciTE.
+      </li>
+      <li>
+        Bug fixes to selection drawing when part of selection outside window, mouse release over
+        scroll bars, and scroll positioning after deletion.
+      </li>
+    </ul>
+    <h3>
+       <a href="SciTE120.zip">Release 1.2</a>
+    </h3>
+    <ul>
+      <li>
+        Released on 21 January 2000.
+      </li>
+      <li>
+        Multiple views of one document.
+      </li>
+      <li>
+        Rectangular selection, cut, copy, paste, drag and drop.
+      </li>
+      <li>
+        Long line indication.
+      </li>
+      <li>
+        Reverse searching
+      </li>
+      <li>
+        Line end conversion.
+      </li>
+      <li>
+        Generic autocompletion and calltips in SciTE.
+      </li>
+      <li>
+        Call tip background colour can be set.
+      </li>
+      <li>
+        SCI_MARKERPREV for moving to a previous marker.
+      </li>
+      <li>
+        Caret kept more within window where possible.
+      </li>
+    </ul>
+    <h3>
+       <a href="SciTE115.zip">Release 1.15</a>
+    </h3>
+    <ul>
+      <li>
+        Released on 15 December 1999.
+      </li>
+      <li>
+        Brace highlighting and badlighting (for mismatched braces).
+      </li>
+      <li>
+        Visible line ends.
+      </li>
+      <li>
+        Multiple line call tips.
+      </li>
+      <li>
+        Printing now works from SciTE on Windows.
+      </li>
+      <li>
+        SciTE has a global "*" lexer style that is used as the basis for all the lexers' styles.
+      </li>
+      <li>
+        Fixes some warnings on GTK+ 1.2.6.
+      </li>
+      <li>
+        Better handling of modal dialogs on GTK+.
+      </li>
+      <li>
+        Resize handle drawn on pane splitter in SciTE on GTK+ so it looks more like a regular GTK+
+        *paned widget.
+      </li>
+      <li>
+        SciTE does not place window origin offscreen if no properties file found on GTK+.
+      </li>
+      <li>
+        File open filter remembered in SciTE on Windows.
+      </li>
+      <li>
+        New mechanism using style numbers 32 to 36 standardises the setting of styles for brace
+        highlighting, brace badlighting, line numbers, control characters and the default style.
+      </li>
+      <li>
+        Old messages SCI_SETFORE .. SCI_SETFONT have been replaced by the default style 32. The old
+        messages are deprecated and will disappear in a future version.
+      </li>
+    </ul>
+    <h3>
+       <a href="SciTE114.zip">Release 1.14</a>
+    </h3>
+    <ul>
+      <li>
+        Released on 20 November 1999.
+      </li>
+      <li>
+        Fixes a scrolling bug reported on GTK+.
+      </li>
+    </ul>
+    <h3>
+       <a href="SciTE113.zip">Release 1.13</a>
+    </h3>
+    <ul>
+      <li>
+        Released on 18 November 1999.
+      </li>
+      <li>
+        Fixes compilation problems with the mingw32 GCC 2.95.2 on Windows.
+      </li>
+      <li>
+        Control characters are now visible.
+      </li>
+      <li>
+        Performance has improved, particularly for scrolling.
+      </li>
+      <li>
+        Windows RichEdit emulation is more accurate. This may break client code that uses these
+        messages: EM_GETLINE, EM_GETLINECOUNT, EM_EXGETSEL, EM_EXSETSEL, EM_EXLINEFROMCHAR,
+        EM_LINELENGTH, EM_LINEINDEX, EM_CHARFROMPOS, EM_POSFROMCHAR, and EM_GETTEXTRANGE.
+      </li>
+      <li>
+        Menus rearranged and accelerator keys set for all static items.
+      </li>
+      <li>
+        Placement of space indicators in view whitespace mode is more accurate with some fonts.
+      </li>
+    </ul>
+    <h3>
+       <a href="SciTE112.zip">Release 1.12</a>
+    </h3>
+    <ul>
+      <li>
+        Released on 9 November 1999.
+      </li>
+      <li>
+        Packaging error in 1.11 meant that the compilation error was not fixed in that release.
+        Linux/GTK+ should compile with GCC 2.95 this time.
+      </li>
+    </ul>
+    <h3>
+       <a href="SciTE111.zip">Release 1.11</a>
+    </h3>
+    <ul>
+      <li>
+        Released on 7 November 1999.
+      </li>
+      <li>
+        Fixed a compilation bug in ScintillaGTK.cxx.
+      </li>
+      <li>
+        Added a README file to explain how to build.
+      </li>
+      <li>
+        GTK+/Linux downloads now include documentation.
+      </li>
+      <li>
+        Binary only Sc1.EXE one file download for Windows.
+      </li>
+    </ul>
+    <h3>
+       <a href="SciTE110.zip">Release 1.1</a>
+    </h3>
+    <ul>
+      <li>
+        Released on 6 November 1999.
+      </li>
+      <li>
+        Major restructuring for better modularity and platform independence.
+      </li>
+      <li>
+        Inter-application drag and drop.
+      </li>
+      <li>
+        Printing support in Scintilla on Windows.
+      </li>
+      <li>
+        Styles can select colouring to end of line. This can be used when a file contains more than
+        one language to differentiate between the areas in each language. An example is the HTML +
+        JavaScript styling in SciTE.
+      </li>
+      <li>
+        Actions can be grouped in the undo stack, so they will be undone together. This grouping is
+        hierarchical so higher level actions such as replace all can be undone in one go. Call to
+        discover whether there are any actions to redo.
+      </li>
+      <li>
+        The set of characters that define words can be changed.
+      </li>
+      <li>
+        Markers now have identifiers and can be found and deleted by their identifier. The empty
+        marker type can be used to make a marker that is invisible and which is only used to trace
+        where a particular line moves to.
+      </li>
+      <li>
+        Double click notification.
+      </li>
+      <li>
+        HTML styling in SciTE also styles embedded JavaScript.
+      </li>
+      <li>
+        Additional tool commands can be added to SciTE.
+      </li>
+      <li>
+        SciTE option to allow reloading if changed upon application activation and saving on
+        application deactivation. Not yet working on GTK+ version.
+      </li>
+      <li>
+        Entry fields in search dialogs remember last 10 user entries. Not working in all cases in
+        Windows version.
+      </li>
+      <li>
+        SciTE can save a styled copy of the current file in HTML format. As SciTE does not yet
+        support printing, this can be used to print a file by then using a browser to print the
+        HTML file.
+      </li>
+    </ul>
+    <h3>
+       <a href="SciTE102.zip">Release 1.02</a>
+    </h3>
+    <ul>
+      <li>
+        Released on 1 October 1999.
+      </li>
+      <li>
+        GTK+ version compiles with GCC 2.95.
+      </li>
+      <li>
+        Properly deleting objects when window destroyed under GTK+.
+      </li>
+      <li>
+        If the selection is not empty backspace deletes the selection.
+      </li>
+      <li>
+        Some X style middle mouse button handling for copying the primary selection to and from
+        Scintilla. Does not work in all cases.
+      </li>
+      <li>
+        HTML styling in SciTE.
+      </li>
+      <li>
+        Stopped dirty flag being set in SciTE when results pane modified.
+      </li>
+    </ul>
+    <h3>
+       <a href="SciTE101.zip">Release 1.01</a>
+    </h3>
+    <ul>
+      <li>
+        Released on 28 September 1999.
+      </li>
+      <li>
+        Better DBCS support on Windows including IME.
+      </li>
+      <li>
+        Wheel mouse support for scrolling and zooming on Windows. Zooming with Ctrl+KeypadPlus and
+        Ctrl+KeypadMinus.
+      </li>
+      <li>
+        Performance improvements especially on GTK+.
+      </li>
+      <li>
+        Caret blinking and settable colour on both GTK+ and Windows.
+      </li>
+      <li>
+        Drag and drop within a Scintilla window. On Windows, files can be dragged into SciTE.
+      </li>
+    </ul>
+    <h3>
+       <a href="SciTE100.zip">Release 1.0</a>
+    </h3>
+    <ul>
+      <li>
+        Released on 17 May 1999.
+      </li>
+      <li>
+        Changed name of "Tide" to "SciTE" to avoid clash with a TCL based IDE. "SciTE" is a
+        SCIntilla based Text Editor and is Latin meaning something like "understanding in a neat
+        way" and is also an Old English version of the word "shit".
+      </li>
+      <li>
+        There is a SCI_AUTOCSTOPS message for defining a string of characters that will stop
+        autocompletion mode. Autocompletion mode is cancelled when any cursor movement occurs apart
+        from backspace.
+      </li>
+      <li>
+        GTK+ version now splits horizontally as well as vertically and all dialogs cancel when the
+        escape key is pressed.
+      </li>
+    </ul>
+    <h3>
+       <a href="Tide92.zip">Beta release 0.93</a>
+    </h3>
+    <ul>
+      <li>
+        Released on 12 May 1999.
+      </li>
+      <li>
+        A bit more robust than 0.92 and supports SCI_MARKERNEXT message.
+      </li>
+    </ul>
+    <h3>
+       <a href="Tide92.zip">Beta release 0.92</a>
+    </h3>
+    <ul>
+      <li>
+        Released on 11 May 1999.
+      </li>
+      <li>
+        GTK+ version now contains all features of Windows version with some very small differences.
+        Executing programs works much better now.
+      </li>
+      <li>
+        New palette code to allow more colours to be displayed in 256 colour screen modes. A line
+        number column can be displayed to the left of the selection margin.
+      </li>
+      <li>
+        The code that maps from line numbers to text positions and back has been completely
+        rewritten to be faster, and to allow markers to move with the text.
+      </li>
+    </ul>
+    <h3>
+       <a href="Tide91.zip">Beta release 0.91</a>
+    </h3>
+    <ul>
+      <li>
+        Released on 30 April 1999, containing fixes to text measuring to make Scintilla work better
+        with bitmap fonts. Also some small fixes to make compiling work with Visual C++.
+      </li>
+    </ul>
+    <h3>
+       <a href="Tide90.zip">Beta release 0.90</a>
+    </h3>
+    <ul>
+      <li>
+        Released on 29 April 1999, containing working GTK+/Linux version.
+      </li>
+      <li>
+        The Java, C++ and Python lexers recognise operators as distinct from default allowing them
+        to be highlighted.
+      </li>
+    </ul>
+    <h3>
+       <a href="Tide82.zip">Beta release 0.82</a>
+    </h3>
+    <ul>
+      <li>
+        Released on 1 April 1999, to fix a problem with handling the Enter key in PythonWin. Also
+        fixes some problems with cmd key mapping.
+      </li>
+    </ul>
+    <h3>
+       <a href="Tide82.zip">Beta release 0.81</a>
+    </h3>
+    <ul>
+      <li>
+        Released on 30th March 1999, containing bug fixes and a few more features.
+      </li>
+      <li>
+        Static linking supported and Tidy.EXE, a statically linked version of Tide.EXE. Changes to
+        compiler flags in the makefiles to optimise for size.
+      </li>
+      <li>
+        Scintilla supports a 'savepoint' in the undo stack which can be set by the container when
+        the document is saved. Notifications are sent to the container when the savepoint is
+        entered or left, allowing the container to to display a dirty indicator and change its
+        menues.
+      </li>
+      <li>
+        When Scintilla is set to read-only mode, a notification is sent to the container should the
+        user try to edit the document. This can be used to check the document out of a version
+        control system.
+      </li>
+      <li>
+        There is an API for setting the appearence of indicators.
+      </li>
+      <li>
+        The keyboard mapping can be redefined or removed so it can be implemented completely by the
+        container. All of the keyboard commands are now commands which can be sent by the
+        container.
+      </li>
+      <li>
+        A home command like Visual C++ with one hit going to the start of the text on the line and
+        the next going to the left margin is available. I do not personally like this but my
+        fingers have become trained to it by much repetition.
+      </li>
+      <li>
+        SCI_MARKERDELETEALL has an argument in wParam which is the number of the type marker to
+        delete with -1 performing the old action of removing all marker types.
+      </li>
+      <li>
+        Tide now understands both the file name and line numbers in error messages in most cases.
+      </li>
+      <li>
+        Tide remembers the current lines of files in the recently used list.
+      </li>
+      <li>
+        Tide has a Find in Files command.
+      </li>
+    </ul>
+    <h3>
+       Beta release 0.80
+    </h3>
+    <ul>
+      <li>
+        This was the first public release on 14th March 1999, containing a mostly working Win32
+        Scintilla DLL and Tide EXE.
+      </li>
+    </ul>
+    <h3>
+       Beta releases of SciTE were called Tide
+    </h3>
+  </body>
+</html>
+

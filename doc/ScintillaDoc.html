@@ -1,0 +1,966 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta name="generator" content="HTML Tidy, see www.w3.org" />
+    <meta name="generator" content="SciTE" />
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>
+      Scintilla and SciTE
+    </title>
+  </head>
+  <body bgcolor="#FFFFFF" text="#000000">
+    <table bgcolor="#000000" width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tr>
+        <td>
+          <img src="SciTEIco.png" border="3" height="64" width="64" alt="Scintilla icon" />
+        </td>
+        <td>
+          <a href="index.html" style="color:white;text-decoration:none"><font size="5">
+          Scintilla</font></a>
+        </td>
+      </tr>
+    </table>
+    <h2>
+       Scintilla Documentation
+    </h2>
+    <p>
+       There is <a href="Design.html">an overview of the internal design of Scintilla</a>.
+    </p>
+    <p>
+       <a href="ScintillaUsage.html">Some notes on using Scintilla</a>.
+    </p>
+    <p>
+       For now, the best way to work out how to develop using Scintilla is to see how SciTE uses
+      it. SciTE exercises most of Scintilla's facilities.
+    </p>
+    <p>
+       The Windows version of Scintilla is a Windows Control. As such, its primary programming
+      interface is through Windows messages. It responds to many of the messages defined for the
+      standard Edit and Richedit controls as well as a suite of its own for controlling syntax
+      styling, markers, auto-completion and call tips.
+    </p>
+    The GTK+ version also uses messages in a similar way to the Windows version. This is different
+    to normal GTK+ practice but made it easier to implement rapidly. 
+    <p>
+       The messages are (with wParam and lParam use)
+    </p>
+    <h3>
+       Text retrieval and modification.
+    </h3>
+<pre>
+WM_GETTEXT(int length, char *text)
+WM_SETTEXT(&lt;unused&gt;, char *text)
+EM_GETLINE(int line, char *text)
+EM_REPLACESEL(&lt;unused&gt;, char *text)
+EM_SETREADONLY
+EM_GETTEXTRANGE(&lt;unused&gt;, TEXTRANGE *tr)
+SCI_ADDTEXT(char *s, int length)
+SCI_ADDSTYLEDTEXT(cell *s,int length)
+SCI_INSERTTEXT(int pos, char *text)
+SCI_CLEARALL
+SCI_GETCHARAT(int position)
+SCI_GETSTYLEAT(int position)
+SCI_GETSTYLEDTEXT(&lt;unused&gt;, TEXTRANGE *tr)
+SCI_SETSTYLEBITS(int bits)
+SCI_GETSTYLEBITS
+</pre>
+    <p>
+       Each character in a Scintilla document is followed by an associated byte of styling
+      information. The combination of a character byte and a style byte is called a cell. Style
+      bytes are interpreted as a style index in the low 5 bits and as 3 individual bits of
+      indicators. This allows 32 fundamental styles which is enough for most languages and three
+      independent indicators so that, for example, syntax errors, deprecated names and bad
+      indentation could all be displayed at once. Indicators may be displayed as simple underlines,
+      squiggly underlines or a line of small 'T' shapes. Additional indicators such as strike-out
+      or blurred could be defined in the future. The number of bits used for styles can be altered 
+      with SCI_SETSTYLEBITS up to a maximum of 6 bits. 
+      The remaining bits can be used for indicators.
+    </p>
+    <p>
+       Positions within the Scintilla document refer to a character or the gap before that
+      character. The caret exists between character positions and can be located from before the
+      first character to after the last character. There are places where the caret can not go
+      where two character bytes make up one character. This occurs when a DBCS character from a
+      language like Japanese is included in the document or when line ends are marked with the CP/M
+      standard of a carriage return followed by a line feed. The INVALID_POSITION constant (-1)
+      represent an invalid position within the document.
+    </p>
+    <p>
+       All lines of text in Scintilla are the same height, and this height is calculated from the
+      largest font in any current style. This restriction is for performance as if lines differed
+      in height then calculations involving positioning of text would require that text to be
+      styled first.
+    </p>
+    <h3>
+       Standard commands
+    </h3>
+<pre>
+WM_CUT
+WM_COPY
+WM_PASTE
+WM_CLEAR
+</pre>
+    <h3>
+       Undo and Redo
+    </h3>
+<pre>
+WM_UNDO
+EM_CANUNDO
+EM_EMPTYUNDOBUFFER
+SCI_REDO
+SCI_CANREDO
+SCI_SETUNDOCOLLECTION(SC_UNDOCOLLECT_NONE | SC_UNDOCOLLECT_AUTOSTART | SC_UNDOCOLLECT_MANUALSTART)
+SCI_BEGINUNDOACTION
+SCI_ENDUNDOACTION
+SCI_APPENDUNDOSTARTACTION
+</pre>
+    <p>
+       Scintilla has multiple level undo and redo. It will continue to collect undoable actions
+      until memory runs out. Sequences of typing or deleting are compressed into single actions to
+      make it easier to undo and redo at a sensible level of detail. Sequences of actions can be
+      combined into actions that are undone as a unit. These sequences occur between
+      SCI_BEGINUNDOACTION and SCI_ENDUNDOACTION messages. These sequences can be nested and only
+      the top level sequences are undone as units.<br />
+       If undo collection is put into manual mode, then the SCI_APPENDUNDOSTARTACTION message
+      finishes any current sequence and starts a new sequence. This message and the corresponding
+      SC_UNDOCOLLECT_MANUALSTART are deprecated and only included for backward compatibility.
+    </p>
+    <h3>
+       Selection and information
+    </h3>
+<pre>
+WM_GETTEXTLENGTH
+EM_GETFIRSTVISIBLELINE
+EM_GETLINECOUNT
+EM_GETMODIFY
+EM_SETMODIFY(bool ismodified)
+EM_GETRECT(RECT *rect)
+EM_GETSEL(int *start, int *end)
+EM_EXGETSEL(&lt;unused&gt;, CHARRANGE *cr)
+EM_SETSEL(int start, int end)
+EM_EXSETSEL(&lt;unused&gt;, CHARRANGE *cr)
+EM_GETSELTEXT(&lt;unused&gt;, char *text)
+EM_LINEFROMCHAR(int position)
+EM_EXLINEFROMCHAR(int position)
+EM_LINEINDEX(int line)
+EM_LINELENGTH(int position)
+EM_SCROLL(int line)
+EM_LINESCROLL(int column, int line)
+EM_SCROLLCARET()
+EM_CANPASTE
+EM_CHARFROMPOS(&lt;unused&gt;, POINT *location)
+EM_POSFROMCHAR(int position, POINT *location)
+EM_SELECTIONTYPE
+EM_HIDESELECTION(bool hide)
+SCI_GETLENGTH
+SCI_GETCURRENTPOS
+SCI_GETANCHOR
+SCI_SELECTALL
+SCI_CHANGEPOSITION(int delta, bool extendselection)
+SCI_PAGEMOVE(int cmdkey, bool extendselection)
+SCI_GOTOLINE(int line)
+SCI_GOTOPOS(int position)
+SCI_SETANCHOR(int position)
+SCI_GETCURLINE(int textlen, char *text)
+SCI_LINELENGTH(int line)
+SCI_SETCARETPOLICY(int policy)
+</pre>
+    <p>
+       Scintilla maintains a selection which stretches between two points, the anchor and the
+      current position.
+    </p>
+    <p>
+       EM_SETMODIFY is no longer supported as whether the document is modified is determined by
+      whether the undo position is at the save point.
+    </p>
+    <p>
+       SCI_GETCURLINE retrieves the text of the line containing the caret and returns the position
+      within the line of the caret.
+    </p>
+    <h3>
+       Searching
+    </h3>
+<pre>
+EM_FINDTEXT(int flags, FINDTEXTEX *ft)
+EM_FINDTEXTEX(int flags, FINDTEXTEX *ft)
+</pre>
+    <p>
+       Scintilla can find where a string is present in its document.
+    </p>
+<pre>
+SCI_SEARCHANCHOR
+SCI_SEARCHNEXT(int flags, char *text)
+SCI_SEARCHPREV(int flags, char *text)
+</pre>
+    <p>
+	Relocatable search support. This allows
+	multiple incremental interactive searches to be macro recorded
+	while still setting the selection to found text so the find/select
+	operation is self-contained.
+    </p>
+    <h3>
+       Visible white space
+    </h3>
+<pre>
+SCI_GETVIEWWS
+SCI_SETVIEWWS(bool visisble)
+</pre>
+    <p>
+       White space can be made visible which may useful for languages in which whitespace is
+      significant, such as Python. Space characters appear as small centred dots and tab characters
+      as light arrows pointing to the right.
+    </p>
+    <h3>
+       Line endings
+    </h3>
+<pre>
+SCI_GETEOLMODE
+SCI_SETEOLMODE(SC_EOL_CRLF or SC_EOL_CR or SC_EOL_LF)
+SCI_GETVIEWEOL
+SCI_SETVIEWEOL(bool visible)
+SCI_CONVERTEOLS(SC_EOL_CRLF or SC_EOL_CR or SC_EOL_LF)
+</pre>
+    <p>
+       Scintilla can interpret any of the three major line end conventions, Macintosh (\r), Unix
+      (\n) and CP/M / DOS / Windows (\r\n). When the user presses the Enter key, one of these line
+      end strings is inserted into the buffer. The default is \r\n, but this can be changed with
+      the SCI_SETEOLMODE message taking a an argument of SC_EOL_CRLF, SC_EOL_CR, or SC_EOL_LF. The
+      SCI_GETEOLMODE message retrieves the current state.
+    </p>
+    <p>
+       The characters that make up line ends can be made visible with the view EOL option. This
+      looks similar to (CR), (LF), or (CR)(LF).
+    </p>
+    <p>
+       All of the line ends in the document may be changed by calling SCI_CONVERTEOLS with the
+      desired line ending.
+    </p>
+    <h3>
+       Styling
+    </h3>
+<pre>
+SCI_GETENDSTYLED
+SCI_STARTSTYLING(int position, int mask)
+SCI_SETSTYLING(int length, int style)
+SCI_SETSTYLINGEX(int length, stylesequence *s)
+</pre>
+    <p>
+       Scintilla keeps a record of the last character that is likely to be styled correctly. This
+      is moved forwards when characters after it are styled and moved backwards if changes are made
+      to the text of the document before it. Before drawing text, this position is checked to see
+      if any styling is needed and a notification message sent to the container if so. The
+      container can send SCI_GETENDSTYLED to work out where it needs to start styling.
+    </p>
+    <p>
+       To perform the actual styling, SCI_STARTSTYLING is sent with the position to start at and a
+      mask indicating which bits of the style bytes can be set. The mask allows styling to occur
+      over several passes, with, for example, basic styling done on an initial pass to ensure that
+      the text of the code is seen quickly and correctly, and then a second slower pass, detecting
+      syntax errors and using indicators to show where these are. After SCI_STARTSTYLING, multiple
+      SCI_SETSTYLING messages are sent for each lexical entity to be styled.
+    </p>
+    <h3>
+       Style Definition
+    </h3>
+<pre>
+SCI_STYLECLEARALL
+SCI_STYLERESETDEFAULT
+SCI_STYLESETFORE(int stylenumber, int colour)
+SCI_STYLESETBACK(int stylenumber, int colour)
+SCI_STYLESETBOLD(int stylenumber, bool bold)
+SCI_STYLESETITALIC(int stylenumber, bool italic)
+SCI_STYLESETSIZE(int stylenumber, int sizeinpoints)
+SCI_STYLESETFONT(int stylenumber, char *fontname)
+SCI_STYLESETEOLFILLED(int stylenumber, bool eolfilled)
+</pre>
+    <p>
+       While the style setting messages mentioned above, change the style numbers associated with
+      text, these messages define how those style numbers are interpreted visually. The
+      STYLE_DEFAULT style defines the attributes that all styles will receive when
+      SCI_STYLECLEARALL is called. SCI_STYLERESETDEFAULT resets STYLE_DEFAULT to its state when
+      Scintilla was initialised.
+    </p>
+    <p>
+       The EOLFILLED style allows to colourise from the end of the line to the right side of the
+      window.
+    </p>
+    <p>
+       As well as the 32 fundamental lexer styles, there are also some predefined numbered styles
+      starting at 32, STYLE_DEFAULT, STYLE_LINENUMBER, STYLE_BRACELIGHT, STYLE_BRACEBAD, and
+      STYLE_CONTROLCHAR. These can be defined with the SCI_STYLESET* messages.
+    </p>
+<pre>
+SCI_SETFORE(int colour)
+SCI_SETBACK(int colour)
+SCI_SETBOLD(bool bold)
+SCI_SETITALIC(bool italic)
+SCI_SETSIZE(int sizeinpoints)
+SCI_SETFONT(char *fontname)
+</pre>
+    <p>
+       These messages are responsible for global default styling and are used when no explicit
+      setting is defined for a style.<br />
+       These messages are deprecated in favour of using the SCI_STYLESET* messages for
+      STYLE_DEFAULT. They will be removed in a future release.
+    </p>
+<pre>
+SCI_SETSELFORE(bool useSelectionForeColour, int colour)
+SCI_SETSELBACK(bool useSelectionBackColour, int colour)
+SCI_SETCARETFORE(int colour)
+SCI_GETCARETPERIOD
+SCI_SETCARETPERIOD(int milliseconds)
+</pre>
+    <p>
+       The selection is shown by changing the foreground and / or background colours. If one of
+      these is not set then that attribute is not changed for the selection. The default is to show
+      the selection by changing the background to light grey and leaving the foreground the same as
+      when it was not selected.
+    </p>
+    <p>
+       The colour of the caret can be set with SCI_SETCARETFORE. The rate at which the caret blinks
+      can be set with SCI_SETCARETPERIOD which determines the time in milliseconds that the caret
+      is visible or invisible before changing state. Setting the period to 0 stops the caret
+      blinking.
+    </p>
+    <h3>
+       Margins
+    </h3>
+<pre>
+EM_GETMARGINS 
+EM_SETMARGINS(EC_LEFTMARGIN or EC_RIGHTMARGIN or EC_USEFONTINFO, int val)
+</pre>
+    <p>
+       Gets or sets the width of the blank margin on both sides of the text. This defaults to one
+      pixel on each side. val contains a left margin size in its low word and a right margin size
+      in its high word. This is also the way that EM_GETMARGINS returns the current setting.
+      EC_LEFTMARGIN and EC_RIGHTMARGIN are bit flags that can be used individually or combined to
+      set both margins at once. EC_USEFONTINFO ignores val and sets both margins to be half the
+      average character width in the current default font.
+    </p>
+<pre>
+SCI_SETMARGINTYPEN(int margin, SC_MARGIN_SYMBOL | SC_MARGIN_NUMBER)
+SCI_GETMARGINTYPEN(int margin)
+SCI_SETMARGINWIDTHN(int margin, int pixelwidth)
+SCI_GETMARGINWIDTHN(int margin)
+SCI_SETMARGINMASKN(int margin, int mask)
+SCI_GETMARGINMASKN(int margin)
+SCI_SETMARGINSENSITIVEN(int margin, bool sensitive)
+SCI_GETMARGINSENSITIVEN(int margin)
+</pre>
+    <p>
+       There may be up to three margins to the left of the text display. Each margin may contain 
+       marker symbols and some may be set to display line numbers 
+       (with SCI_SETMARGINTYPEN). The markers displayed in each margin are set with
+       SCI_SETMARGINMASKN. Any markers not associated with a visible margin will 
+       be displayed as changes in background colour in the text.
+       A width in pixels can be set for each margin. Margins
+       with a zero width are ignored completely. Each margin may be made sensitive to mouse 
+       clicks. A click in a sensitive margin will result in a SCN_MARGINCLICK notification being
+       sent to the container. Margins that are not sensitive act as selection margins which make it 
+       easy to select ranges of lines. 
+    </p>
+    <p>
+       Earlier versions of Scintilla hard coded particular margin types and provided
+       SCI_SETMARGINWIDTH and SCI_SETLINENUMBERWIDTH which are
+       now deprecated.
+    </p>
+    <h3>
+       Other settings
+    </h3>
+<pre>
+SCI_SETUSEPALETTE(bool allowPaletteUse)
+</pre>
+    <p>
+       On 8 bit displays, which can only display a maximum of 256 colours, the graphics environment
+      mediates between the colour needs of applications through the use of palettes. On GTK+,
+      Scintilla always uses a palette. On Windows, there are some problems with visual flashing
+      when switching between applications with palettes and it is also necessary for the
+      application containing the Scintilla control to forward some messages to Scintilla for its
+      palette code to work.
+    </p>
+    <p>
+       Because of these issues, the application must tell Scintilla to use a palette. If Scintilla
+      is not using a palette, then it will only be able to display in those colours already
+      available, which are often the 20 Windows system colours.
+    </p>
+    <p>
+       To see an example of how to enable palette support in Scintilla, search the text of SciTE
+      for WM_PALETTECHANGED, WM_QUERYNEWPALETTE and SCI_SETUSEPALETTE.
+    </p>
+<pre>
+SCI_SETBUFFEREDDRAW(bool isbuffered)
+</pre>
+    <p>
+       Turns on or off buffered drawing. Buffered drawing draws each line into a bitmap rather than
+      directly to the screen and then copies the bitmap to the screen. This avoids flickering
+      although it does take longer. The default is for drawing to be buffered.
+    </p>
+<pre>
+SCI_SETTABWIDTH(int widthinchars)
+</pre>
+    <p>
+       Sets the size of a tab as a multiple of the size of a space character in the style of the
+      first style definition
+    </p>
+<pre>
+SCI_SETCODEPAGE(int codepage)
+</pre>
+    <p>
+       Scintilla has some very simple Japanese DBCS (and probably Chinese and Korean) support. Use
+      this message with argument set to the code page number to set Scintilla to use code page
+      information to ensure double byte characters are treated as one character rather than two.
+      This also stops the caret from moving between the two bytes in a double byte character. Call
+      with argument set to zero to disable DBCS support.
+    </p>
+<pre>
+SCI_SETWORDCHARS(&lt;unused&gt;, char *chars)
+</pre>
+    <p>
+       Scintilla has several functions that operate on words which are defined to be contiguous
+      sequences of characters from a particular set of characters. This message defines which
+      characters are members of that set. If chars is null then the default set, alphanumeric and
+      '_', is used.
+    </p>
+<pre>
+SCI_GRABFOCUS
+</pre>
+    <p>
+       On GTK+, focus handling is more complicated than on Windows, so Scintilla can be told with
+      this message to grab the focus.
+    </p>
+    <h3>
+       Brace highlighting
+    </h3>
+<pre>
+SCI_BRACEHIGHLIGHT(int pos1, int pos2)
+SCI_BRACEBADLIGHT(int pos1)
+SCI_BRACEMATCH(int position, int maxReStyle)
+</pre>
+    <p>
+       Up to two characters can be highlighted in a 'brace highlighting style' which is defined as
+      style number 34. If there is no matching brace then the 'brace badlighting style', style
+      number 35, can be used to show the brace that is unmatched. Using a position of
+      INVALID_POSITION removes the highlight.
+    </p>
+    <p>
+       The SCI_BRACEMATCH message finds a corresponding matching brace given the position of one
+      brace. The brace characters handled are '(', ')', '[', ']', '{', '}', '&lt;', and '&gt;'. A
+      match only occurs if the style of the matching brace is the same as the starting brace or the
+      matching brace is beyond the end of styling. Nested braces are handled correctly. The
+      maxReStyle parameter must currently be 0.
+    </p>
+    <h3>
+       Markers
+    </h3>
+<pre>
+SCI_MARKERDEFINE(int markernumber, int markersymbols)
+SCI_MARKERSETFORE(int markernumber, int colour)
+SCI_MARKERSETBACK(int markernumber, int colour)
+SCI_MARKERADD(int line, int markernumber)
+SCI_MARKERDELETE(int line, int markernumber)
+SCI_MARKERDELETEALL(int markernumber)
+SCI_MARKERGET(int line)
+SCI_MARKERNEXT(int lineStart, int markermask)
+SCI_MARKERPREVIOUS(int lineStart, int markermask)
+SCI_MARKERLINEFROMHANDLE(int handle)
+SCI_MARKERDELETEHANDLE(int handle)
+</pre>
+    <p>
+       Markers appear in the selection margin to the left of the text. They are small geometric
+      symbols often used in debuggers to indicate breakpoints and the current line. If the
+      selection margin is set to zero width then the background colour of the whole line is changed
+      instead. There may be upto 32 marker symbols defined and each line has a set of these markers
+      associated with it. The markers are drawn in the order of their numbers. Markers try to move
+      with their text by tracking where the start of their line moves. When a line is deleted, its
+      markers are combined, by an or operation, with the markers of the previous line. The
+      SCI_MARKERDELETEALL removes markers of the given number from all lines, and treats a
+      parameter of -1 as meaning delete all markers from all lines.<br />
+       SCI_MARKERADD returns a marker handle number which may be used to find out where a marker
+      has moved to with the SCI_MARKERLINEFROMHANDLE message. SCI_MARKERDELETEHANDLE can be used to
+      delete a marker based upon its handle.
+    </p>
+    <p>
+       SCI_MARKERGET retrieves the set of markers associated with a line. SCI_MARKERNEXT and
+      SCI_MARKERPREVIOUS can be used to efficiently search for lines that contain markers. They
+      return the next / previous line with a set of markers that includes some of the bits set in
+      the markermask parameter.<br />
+       The markermask is equal to a OR of (1 &lt;&lt; markernumber) for each marker of the desired
+      / retrieved set.
+    </p>
+    <p>
+       The marker symbols currently available are SC_MARK_CIRCLE, SC_MARK_ROUNDRECT, SC_MARK_ARROW,
+       SC_MARK_SMALLRECT, SC_MARK_SHORTARROW, SC_MARK_EMPTY, SC_MARK_ARROWDOWN, 
+       SC_MARK_MINUS, SC_MARK_PLUS. The SC_MARK_EMPTY symbol is invisible,
+       allowing client code to track the movement of lines.
+    </p>
+    <h3>
+       Indicators
+    </h3>
+<pre>
+SCI_INDICSETSTYLE(int indicatornumber, int indicatorstyle)
+SCI_INDICGETSTYLE(int indicatornumber)
+SCI_INDICSETFORE(int indicatornumber, int colour)
+SCI_INDICGETFORE(int indicatornumber)
+</pre>
+    <p>
+       These messages allow setting the visual appearance of the three (0, 1, and 2) available
+      indicators.
+    </p>
+    <p>
+       The indicator styles currently available are INDIC_PLAIN, INDIC_SQUIGGLE, and INDIC_TT.
+    </p>
+    <p>
+       The indicators are set using SCI_STARTSTYLING with a INDICS_MASK mask and SCI_SETSTYLING
+      with the values INDIC0_MASK, INDIC1_MASK and INDIC2_MASK.
+    </p>
+    <h3>
+       Autocompletion
+    </h3>
+<pre>
+SCI_AUTOCSHOW(&lt;unused&gt;,char *list)
+SCI_AUTOCCANCEL
+SCI_AUTOCACTIVE
+SCI_AUTOCPOSSTART
+SCI_AUTOCCOMPLETE
+SCI_AUTOCSTOPS(&lt;unused&gt;,char *chars)
+</pre>
+    <p>
+       Auto completion displays a list box based upon the users typing showing likely identifiers.
+      The SCI_AUTOCSHOW message causes this list to be displayed, with its argument being a list of
+      words separated by space characters. SCI_AUTOCPOSSTART returns the value of the current
+      position when SCI_AUTOCSHOW started display of the list.
+    </p>
+    <p>
+       The current selection can be triggered with the SCI_AUTOCCOMPLETE message. This has the same
+      effect as the tab key. When in autocompletion mode, the list should disappear when the user
+      types a character that can not be part of the autocompletion, such as '.', '(' or '[' when
+      typing an identifier. A set of characters which will cancel autocompletion can be specified
+      with the SCI_AUTOCSTOPS.
+    </p>
+    <h3>
+       Calltips
+    </h3>
+<pre>
+SCI_CALLTIPSHOW(&lt;unused&gt;, char *definition)
+SCI_CALLTIPCANCEL
+SCI_CALLTIPACTIVE
+SCI_CALLTIPPOSSTART
+SCI_CALLTIPSETHLT(int highlightstart, int highlightend)
+SCI_CALLTIPSETBACK(int colour)
+</pre>
+    <p>
+       Call tips are small windows displaying the arguments to a function and are displayed after
+      the user has typed the name of the function. As the user types values for each argument, the
+      name of the argument currently being entered is highlighted.
+    </p>
+    <p>
+       SCI_CALLTIPSHOW starts the process by displaying the calltip window, with the definition
+      argument containing the text to display. SCI_CALLTIPPOSSTART returns the value of the current
+      position when SCI_CALLTIPSHOW started display of the list. SCI_CALLTIPSETHLT sets the region
+      of the calltip text displayed in a highlighted style. The background colour of calltips can
+      be set with SCI_CALLTIPSETBACK with the default being white.
+    </p>
+    <h3>
+       Keyboard Commands
+    </h3>
+<pre>
+SCI_LINEDOWN
+SCI_LINEDOWNEXTEND
+SCI_LINEUP
+SCI_LINEUPEXTEND
+SCI_CHARLEFT
+SCI_CHARLEFTEXTEND
+SCI_CHARRIGHT
+SCI_CHARRIGHTEXTEND
+SCI_WORDLEFT
+SCI_WORDLEFTEXTEND
+SCI_WORDRIGHT
+SCI_WORDRIGHTEXTEND
+SCI_HOME
+SCI_HOMEEXTEND
+SCI_LINEEND
+SCI_LINEENDEXTEND
+SCI_DOCUMENTSTART
+SCI_DOCUMENTSTARTEXTEND
+SCI_DOCUMENTEND
+SCI_DOCUMENTENDEXTEND
+SCI_PAGEUP
+SCI_PAGEUPEXTEND
+SCI_PAGEDOWN
+SCI_PAGEDOWNEXTEND
+SCI_EDITTOGGLEOVERTYPE
+SCI_CANCEL
+SCI_DELETEBACK
+SCI_TAB
+SCI_BACKTAB
+SCI_NEWLINE
+SCI_FORMFEED
+SCI_VCHOME
+SCI_VCHOMEEXTEND
+SCI_ZOOMIN
+SCI_ZOOMOUT
+SCI_DELWORDLEFT
+SCI_DELWORDRIGHT
+</pre>
+    <p>
+       To allow the container application to perform any of the actions available to the user with
+      keyboard, all the keyboard actions are messages. They do not take any parameters.
+    </p>
+    <p>
+       These commands are also used when redefining the key bindings with the SCI_ASSIGNCMDKEY
+      message.
+    </p>
+    <h3>
+       Key Bindings
+    </h3>
+<pre>
+SCI_ASSIGNCMDKEY((short key,short modifiers), int message)
+SCI_CLEARCMDKEY((short key,short modifiers))
+SCI_CLEARALLCMDKEYS
+</pre>
+    <p>
+       There is a default binding of keys to commands in Scintilla which can be overridden with
+      these messages. To fit the parameters into a message, the first argument contains the key
+      code in the low word and the key modifiers (possibly shift and control) in the high word. The
+      key code is from the VK_* enumeration, and the modifiers are a combination of zero or more of
+      SHIFT_PRESSED and LEFT_CTRL_PRESSED.
+    </p>
+    <h3>
+       Macro Recording
+    </h3>
+<pre>
+SCI_STARTRECORD
+SCI_STOPRECORD
+</pre>
+    <p>
+    	Starts and stops macro recording mode.
+    </p>
+    <h3>
+       Printing
+    </h3>
+<pre>
+EM_FORMATRANGE
+</pre>
+    <p>
+       On Windows EM_FORMATRANGE can be used to draw the text onto a display context which can
+      include a printer display context.
+    </p>
+    <h3>
+       Multiple Views
+    </h3>
+<pre>
+SCI_GETDOCPOINTER
+SCI_SETDOCPOINTER(&lt;unused&gt;,document *pdoc)
+</pre>
+    <p>
+       This is to allow simple split views of documents. Each Scintilla owns one default document
+      and has a pointer to a used document. Initially the used document is the default one. The
+      SCI_GETDOCPOINTER call returns a pointer to the default document. SCI_SETDOCPOINTER sets the
+      used document. SCI_SETDOCPOINTER(0) restores the use of the default document and should
+      always be called before closing the Scintilla that owns the current document (to avoid
+      calling methods on a deleted object).
+    </p>
+    <h3>
+       Folding
+    </h3>
+<pre>
+SCI_VISIBLEFROMDOCLINE(int docLine)
+SCI_DOCLINEFROMVISIBLE(int displayLine)
+SCI_SETFOLDLEVEL(int line, int level)
+SCI_GETFOLDLEVEL(int level)
+SCI_GETLASTCHILD(int line)
+SCI_GETFOLDPARENT(int line)
+SCI_SHOWLINES(int lineStart, int lineEnd)
+SCI_HIDELINES(int lineStart, int lineEnd)
+SCI_GETLINEVISIBLE(int line)
+SCI_SETFOLDEXPANDED(int line)
+SCI_GETFOLDEXPANDED(int line)
+SCI_TOGGLEFOLD(int line)
+SCI_ENSUREVISIBLE(int line)
+</pre>
+    <p>
+       The fundamental operation in folding is making lines invisible or visible. 
+       Line visibility is a property of the view rather than the document so each 
+       view may be displaying a different set of lines. SCI_SHOWLINES and 
+       SCI_HIDELINES show or hide a range of lines. SCI_GETLINEVISIBLE 
+       determines whether a line is visible. When some lines are hidden, then a 
+       particular line in the document may be displayed at a different position to its 
+       document position. SCI_VISIBLEFROMDOCLINE and 
+       SCI_DOCLINEFROMVISIBLE map from document line to display line and 
+       back.
+    </p>
+    <p>
+       Generally the fold points of a document are based on the hierarchical structure
+       of the contents of the document. In Python, the hierarchy is determined by 
+       indentation and in C++ by brace characters. This hierarchy can be represented
+       within a Scintilla document object by attaching a numeric level to each line. 
+       The initial level of a file is SC_FOLDLEVELBASE to allow unsigned arithmetic
+       on levels.
+       There 
+       are also two bit flags associated with each line. SC_FOLDLEVELWHITEFLAG
+       indicates that the line is blank and allows to be treated slightly different then its 
+       level may indicate. For example, blank lines should generally not be fold points. 
+       SC_FOLDLEVELHEADERFLAG indicates that the line is a header or fold point.
+    </p>
+    <p>
+       The hierarchy can be navigated just through SCI_GETFOLDLEVEL, but it is
+       often useful to find the parent of a line (SCI_GETFOLDPARENT) or the line 
+       that is the last child of a line (SCI_GETLASTCHILD).
+    </p>
+    <p>
+       Each fold point may be either expanded, displaying all its child lines, or 
+       contracted, hding all the child lines. This is per view state and can be 
+       manipulated with SCI_SETFOLDEXPANDED and 
+       SCI_GETFOLDEXPANDED. Using SCI_SETFOLDEXPANDED does not
+       show or hide any lines but only changes a state flag and the margin markers 
+       that show the contractrion state. SCI_TOGGLEFOLD performs the expansion 
+       or contraction of a fold point in the manner normally expected. 
+    </p>
+    <p>
+       A hidden line may be hidden because more than one of its parent lines is 
+       contracted. SCI_ENSUREVISIBLE travels up the fold hierarchy, expanding any
+       contracted folds until it reaches the top level. The line will then be visible.
+    </p>
+    <h3>
+    	Long Lines
+    </h3>
+<pre>
+SCI_GETEDGECOLUMN 
+SCI_SETEDGECOLUMN(int column)
+SCI_GETEDGEMODE
+SCI_SETEDGEMODE(int mode)
+SCI_GETEDGECOLOUR 
+SCI_SETEDGECOLOUR(int colour)
+</pre>
+    <p>
+       This mechanism marks lines that are longer than a specified length in one of two ways. A
+      vertical line can be displayed at the specified column number (EDGE_LINE) or characters after
+      that column can be displayed with a specified background colour (EDGE_BACKGROUND). The
+      vertical line works well for monospaced fonts but not for proportional fonts which should use
+      EDGE_BACKGROUND. The defaullt is to not have any form of long line marking (EDGE_NONE).
+    </p>
+    <h3>
+    	Lexer
+    </h3>
+<pre>
+SCI_SETLEXER(int lexer)
+SCI_GETLEXER
+SCI_COLOURISE(int start, int end)
+SCI_SETPROPERTY(char *key, char *value)
+SCI_SETKEYWORDS(int keywordset, char *keywordlist)
+</pre>
+    <p>
+      If the SciLexer version of Scintilla is used, then lexing support for some programming languages
+      is included. A particular lexer may be chosen from the SCLEX* enumeration and it is invoked
+      automatically to dtyle the coument as required. 
+      If the lexer is set to SCLEX_CONTAINER then the container is notified to perform styling 
+      as is the case with the standard Scintilla.DLL version. Styling may be requested for a range
+      of the document by using SCI_COLOURISE.
+    </p>
+    <p>
+      Settings can be communicated to the lexers using SCI_SETPROPERTY. Currently the "fold"
+      property is defined for the SCLEX_PYTHON, SCLEX_CPP, and SCLEX_SQL lexers to 
+      set the fold stucture if set to "1". SCLEX_PYTHON understands "tab.timmy.whinge.level"
+      as a setting that determines how to indicate bad indentation. Many languages style a set of keywords
+      distinctly from other words. Some languages, such as HTML may contain embedded languages,
+      VBScript and Javascript are common for HTML. SCI_SETKEYWORDS specifies the keywords
+      separated by spaces. For HTML, key word set is for HTML, 1 is for Javascript and 2 is for VBScript.
+    </p>
+    <h3>
+       Notifications
+    </h3>
+    <p>
+       Notifications are sent (fired) from the Scintilla control to its container when an event has
+      occurred that may interest the container. Notifications are sent using the WM_NOTIFY message
+      with a structure containing information about the event.
+    </p>
+<pre>
+SCN_STYLENEEDED(int endstyleneeded)
+</pre>
+    <p>
+       Before displaying a page or printing, this message is sent to the container. It is a good
+      opportunity for the container to ensure that syntax styling information for the visible text.
+    </p>
+<pre>
+SCN_UPDATEUI
+SCN_CHECKBRACE
+</pre>
+    <p>
+	Either the text or styling of the document has changed or the selection
+	range has changed. Now would be a good time to update any container UI
+	elements that depend on document or view state. Was previously called 
+	SCN_CHECKBRACE because a common use is to check whether the caret 
+	is next to a brace and set highlights on this brace and its
+        corresponding matching brace.
+    </p>
+<pre>
+SCN_CHARADDED(int charadded)
+</pre>
+    <p>
+       Fired when the user types an ordinary text character (as opposed to a command character)
+      which is entered into the text. Can be used by the container to decide to display a call tip
+      or auto completion list.
+    </p>
+<pre>
+SCN_SAVEPOINTREACHED(int issavepoint)
+SCI_SETSAVEPOINT
+</pre>
+    <p>
+       Sent to the container when the savepoint is entered or left, allowing the container to to
+      display a dirty indicator and change its menues. The first parameter is 1 when entering the
+      save point, 0 when leaving.
+    </p>
+    <p>
+       The container tells Scintilla where the save point is by sending the SCI_SETSAVEPOINT
+      message.
+    </p>
+<pre>
+SCN_MODIFYATTEMPTRO
+</pre>
+    <p>
+       When in read-only mode, this notification is sent to the container should the user try to
+      edit the document. This can be used to check the document out of a version control system.
+    </p>
+<pre>
+SCN_DOUBLECLICK
+</pre>
+    <p>
+       Mouse button was double clicked in editor.
+    </p>
+<pre>
+SCN_KEY
+</pre>
+    <p>
+       Reports all keys pressed. Used on GTK+ because of some problems with keyboard focus. Not
+      sent by Windows version.
+    </p>
+<pre>
+SCN_MODIFIED
+EN_CHANGE
+SCI_SETMODEVENTMASK(int eventmask)
+</pre>
+    <p>
+       SCN_MODIFIED is fired when the document has been changed including changes to both the text
+      and styling. The notification structure contains information about what changed, how the
+      change occurred and whether this changed the number of lines in the document.
+    </p>
+    <p>
+       EN_CHANGE is fired when the text of the document has been changed for any reason. This
+      notification is sent using the WM_COMMAND message as this is the behaviour of the standard
+      edit control.
+    </p>
+    <p>
+       Both these notifications can be masked by the SCI_SETMODEVENTMASK function which sets which
+      notification types are sent to the container. For example, a container may decide to see only
+      notifications about changes to text and not styling changes by calling
+      SCI_SETMODEVENTMASK(SC_MOD_INSERTTEXT|SC_MOD_DELETETEXT).
+    </p>
+<pre>
+SCN_MACRORECORD
+</pre>
+    <p>
+      Tells the container that an operation is being performed so that the container may choose 
+       to record the fact if it is in a macro recording mode.
+    </p>
+<pre>
+SCN_MARGINCLICK
+</pre>
+    <p>
+      Tells the container that the mouse was clicked inside a margin marked sensitive. 
+      Can be used to perform folding or to place breakpoints.
+    </p>
+<pre>
+SCN_NEEDSHOWN
+</pre>
+    <p>
+      Scintilla has determined that a range of lines that is currently invisible should be made visible. 
+      An example of where this may be needed is if the end of line of a contracted fold point
+      is deleted. This message is sent to the container in case it wants to make the line
+      visible in some unusual way such as making the whole document visible. Most containers 
+      will just ensure each line in the range is visible by calling SCI_ENSUREVISIBLE.
+    </p>
+    <h3>
+       Edit messages not supported by Scintilla
+    </h3>
+<pre>
+EM_GETWORDBREAKPROC EM_GETWORDBREAKPROCEX
+EM_SETWORDBREAKPROC EM_SETWORDBREAKPROCEX
+EM_GETWORDWRAPMODE EM_SETWORDWRAPMODE
+EM_LIMITTEXT EM_EXLIMITTEXT
+EM_SETRECT EM_SETRECTNP
+EM_FMTLINES
+EM_GETHANDLE EM_SETHANDLE
+EM_GETPASSWORDCHAR EM_SETPASSWORDCHAR
+EM_SETTABSTOPS
+EM_FINDWORDBREAK
+EM_GETCHARFORMAT EM_SETCHARFORMAT
+EM_GETOLEINTERFACE EM_SETOLEINTERFACE
+EM_SETOLECALLBACK
+EM_GETPARAFORMAT EM_SETPARAFORMAT
+EM_PASTESPECIAL
+EM_REQUESTRESIZE
+EM_GETBKGNDCOLOR EM_SETBKGNDCOLOR
+EM_STREAMIN EM_STREAMOUT
+EM_GETIMECOLOR EM_SETIMECOLOR
+EM_GETIMEOPTIONS EM_SETIMEOPTIONS
+EM_GETOPTIONS EM_SETOPTIONS
+EM_GETPUNCTUATION EM_SETPUNCTUATION
+EM_GETTHUMB
+</pre>
+    <p>
+       Scintilla tries to be a superset of the standard windows Edit and Richedit controls wherever
+      that makes sense. As it is not intended for use in a word processor, some edit messages can
+      not be sensibly handled. Unsupported messages have no effect.
+    </p>
+<pre>
+EM_GETEVENTMASK
+EM_SETEVENTMASK
+EM_DISPLAYBAND
+EM_SETTARGETDEVICE
+</pre>
+    <p>
+       To support printing better and control the notifications fired, these messages should be
+      supported but are not yet.
+    </p>
+    <h3>
+       Building Scintilla on Windows
+    </h3>
+    <p>
+       Scintilla and SciTE have been developed using Mingw32 GCC 2.9.5 and most testing has
+      occurred on executables produced by this compiler. It may also be compiled with Visual C++
+      which leads to smaller executables. It will no longer build with the older release of Mingw32
+      EGCS 1.1.2 which used a different set of Windows headers to GCC 2.9.5.
+    </p>
+    <p>
+       To compile with GCC, use make on the "makefile" file.<br />
+    </p>
+    <p>
+       To compile with VC++, use nmake on the "makefile_vc" file.
+    </p>
+    <p>
+       To compile with Borland C++ or C++ Builder, use make on the "makefile_bor" file.
+    </p>
+    <p>
+       Scintilla can also be linked into an application statically. To do this, the symbol
+      STATIC_BUILD should be defined and the function Scintilla_RegisterClasses called to
+      initialise Scintilla. The Sc1.exe target in the makefile demonstrates building a statically
+      linked version of SciTE.
+    </p>
+    <h3>
+       Building Scintilla with GTK+ on Linux
+    </h3>
+    <p>
+       On Linux, Scintilla and SciTE have been built with GCC and linked with GTK+ 1.20. GTK+ 1.0x
+      will not work (and when it did it was very slow). The current make file only supports static
+      linking between SciTE and Scintilla. The Makefile_gtk file is used to build SciTE, it can be
+      invoked as:<br />
+       make -f Makefile_gtk<br />
+       The SciTEGTK.properties file is better than the SciTEGlobal.properties for use on Linux/GTK+
+      as it specifies fonts that are likely to be installed. Under Linux, SciTE reads its
+      SciTEGlobal.properties file from the user's home directory.
+    </p>
+  </body>
+</html>
+

@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta name="generator" content="HTML Tidy, see www.w3.org" />
+    <meta name="generator" content="SciTE" />
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>
+      Download Scintilla and SciTE
+    </title>
+  </head>
+  <body bgcolor="#FFFFFF" text="#000000">
+    <table bgcolor="#000000" width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tr>
+        <td>
+          <img src="SciTEIco.png" border="3" height="64" width="64" alt="Scintilla icon" />
+        </td>
+        <td>
+          <a href="index.html" style="color:white;text-decoration:none"><font size="5">Download
+          Scintilla and SciTE</font></a>
+        </td>
+      </tr>
+    </table>
+    <table bgcolor="#CCCCCC" width="100%" cellspacing="0" cellpadding="8" border="0">
+      <tr>
+        <td>
+          <font size="4"> <a href="SciTE122.zip">Windows</a>&nbsp;&nbsp; <a href="SciTE.tgz">
+          GTK+/Linux</a>&nbsp;&nbsp;</font>
+        </td>
+      </tr>
+    </table>
+    <h2>
+       Download.
+    </h2>
+    <p>
+       The <a href="License.txt">license</a> for using Scintilla is similar to that of Python
+      containing very few restrictions.
+    </p>
+    <h3>
+       Release 1.22
+    </h3>
+    <h4>
+       Windows
+    </h4>
+    <p>
+       You can <a href="SciTE122.zip">download a ZIP file (410K)</a> containing the C++ source code
+      and executables for Scintilla and SciTE. While a release version, it is likely that there are
+      still bugs in the code that could lead to loss of data. Please make sure you save often and
+      back up your source code.<br />
+       After downloading the file, unzip it, and run SciTE.EXE. The files required to run SciTE are
+      SciTE.EXE, Scintilla.DLL, and SciTEGlobal.properties and these are best located in one
+      directory on the path.
+    </p>
+    <p>
+       A <a href="Sc1.exe">single file executable called Sc1 (230K)</a> does not need any DLL or
+      properties files as these are linked into the executable. You may still create properties
+      files if you wish.
+    </p>
+    <h4>
+       Linux and Linux compatible
+    </h4>
+    <p>
+       There is a <a href="SciTE.tgz">GTK+/Linux</a> version (250K). In the Linux tradition, this
+      download only contains source code and documentation and it is exactly the same source code
+      as in the Windows version. To build it, you will have to have a c++ compiler (I use gcc
+      2.95.2, but older gcc or egcs should do just as well) and GTK+ 1.2.x installed (tested on
+      1.2.6).<br />
+       The Makefile_gtk file is used to build SciTE, it can be invoked as:<br />
+       make -f Makefile_gtk<br />
+       The SciTEGTK.properties file is better than the SciTEGlobal.properties for use on Linux/GTK+
+      as it specifies fonts that are likely to be installed. Under Linux, SciTE reads its
+      SciTEGlobal.properties file from the user's home directory. The download file is available
+      under the name <a href="SciTETGZ.zip"> SciTETGZ.zip</a> in case your browser does not want to
+      download a .tgz file. Despite the .zip extension, this is still a tarred gzipped file.
+    </p>
+    <p>
+       Previous versions can be downloaded from the <a href="ScintillaHistory.html">history
+      page</a>.
+    </p>
+  </body>
+</html>
+
