@@ -702,7 +702,7 @@ gint ScintillaGTK::Press(GtkWidget *, GdkEventButton *event, ScintillaGTK *sciTh
 		gdk_window_get_origin(sciThis->wDraw.GetID()->window, &ox, &oy);
 		sciThis->ContextMenu(Point(pt.x + ox, pt.y + oy));
 	}
-	return TRUE;
+	return FALSE;
 }
 
 gint ScintillaGTK::MouseRelease(GtkWidget *, GdkEventButton *event, ScintillaGTK *sciThis) {
