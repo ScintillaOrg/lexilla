@@ -56,6 +56,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool stylesValid;	
 	ViewStyle vs;
 	Palette palette;
+	int printMagnification;
+	bool printInvertLight;
 	
 	bool hideSelection;
 	bool inOverstrike;

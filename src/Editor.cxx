@@ -32,7 +32,10 @@ Editor::Editor() {
 	ctrlID = 0;
 
 	stylesValid = false;
-
+	
+	printMagnification = 0;
+	printInvertLight = false;
+	
 	hideSelection = false;
 	inOverstrike = false;
 
@@ -807,9 +810,9 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	}
 
 	bool inIndentation = true;
-	int indentWidth = pdoc->indentInChars * vs.spaceWidth;
+	int indentWidth = pdoc->indentInChars * vsDraw.spaceWidth;
 	if (indentWidth == 0)
-		indentWidth = pdoc->tabInChars * vs.spaceWidth;
+		indentWidth = pdoc->tabInChars * vsDraw.spaceWidth;
 	
 	int posLineStart = pdoc->LineStart(line);
 	int posLineEnd = pdoc->LineStart(line + 1);
@@ -1240,6 +1243,20 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 // Space (3 space characters) between line numbers and text when printing.
 #define lineNumberPrintSpace "   "
 
+Colour InvertedLight(Colour orig) {
+	unsigned int r = orig.GetRed();
+	unsigned int g = orig.GetGreen();
+	unsigned int b = orig.GetBlue();
+	unsigned int l = (r + g + b) / 3; 	// There is a better calculation for this that matches human eye
+	unsigned int il = 0xff - l;
+	if (l == 0)
+		return Colour(0xff,0xff,0xff);
+	r = r * il / l;
+	g = g * il / l;
+	b = b * il / l;
+	return Colour(Platform::Minimum(r, 0xff),Platform::Minimum(g, 0xff),Platform::Minimum(b, 0xff));
+}
+
 // This is mostly copied from the Paint method but with some things omitted
 // such as the margin markers, line numbers, selection and caret
 // Should be merged back into a combined Draw method.
@@ -1268,11 +1285,20 @@ long Editor::FormatRange(bool draw, FORMATRANGE *pfr) {
 	}
 	vsPrint.showMarkedLines = false;
 	vsPrint.fixedColumnWidth = 0;
-	vsPrint.zoomLevel = 0;
+	vsPrint.zoomLevel = printMagnification;
+    vsPrint.viewIndentationGuides = false;
 	// Don't show the selection when printing
 	vsPrint.selbackset = false;
 	vsPrint.selforeset = false;
 	// White background for the line numbers
+	vsPrint.styles[STYLE_LINENUMBER].back.desired = Colour(0xff,0xff,0xff); 
+	if (printInvertLight) {
+	    for (int sty=0;sty<=STYLE_MAX;sty++) {
+			vsPrint.styles[sty].fore.desired = InvertedLight(vsPrint.styles[sty].fore.desired); 
+			vsPrint.styles[sty].back.desired = InvertedLight(vsPrint.styles[sty].back.desired); 
+		}
+		//vsPrint.styles[sty].size = vsPrint.styles[sty].size * printMagnification / 100;
+	}
 	vsPrint.styles[STYLE_LINENUMBER].back.desired = Colour(0xff,0xff,0xff); 
 	
 	vsPrint.Refresh(*surfaceMeasure);
@@ -3349,6 +3375,20 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		
 	case SCI_GETSELECTIONEND:
 		return Platform::Maximum(anchor, currentPos);
+	
+	case SCI_SETPRINTMAGNIFICATION:
+		printMagnification = wParam;
+		break;
+	
+	case SCI_GETPRINTMAGNIFICATION:
+		return printMagnification;
+	
+	case SCI_SETPRINTINVERTLIGHT:
+		printInvertLight = wParam;
+		break;
+	
+	case SCI_GETPRINTINVERTLIGHT:
+		return printInvertLight;
 	
 	case SCI_GETSTYLEAT:
 		if (static_cast<short>(wParam) >= pdoc->Length())
