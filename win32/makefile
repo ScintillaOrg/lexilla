@@ -55,7 +55,7 @@ LOBJS	= ScintillaWinL.o ScintillaBaseL.o Editor.o Document.o \
 $(LEXCOMPONENT): $(LOBJS)
 	$(DLLWRAP) --target i386-mingw32 -o $@ $(LOBJS) $(LDFLAGS) -s --relocatable
 
-# Automatically generate dependencies for most files with "make depends"
+# Automatically generate dependencies for most files with "make depend"
 include depend
 
 # These dependencies are maintained by hand as they do not use the default output name
