@@ -1622,7 +1622,15 @@ void Editor::PasteRectangular(int pos, const char *ptr, int len) {
 				if (pdoc->eolMode != SC_EOL_CR)
 					pdoc->InsertChar(pdoc->Length(), '\n');
 			}
+			// Pad the end of lines with spaces if required
 			currentPos = PositionFromLineX(line, xInsert);
+			if ((XFromPosition(currentPos) < xInsert) && (i+1 < len)) {
+				for (int i=0; i < xInsert - XFromPosition(currentPos); i++) {
+					pdoc->InsertChar(currentPos, ' ');
+					currentPos++;
+				}
+				insertPos = currentPos;
+			}
 			prevCr = ptr[i] == '\r';
 		} else {
 			pdoc->InsertString(currentPos, ptr + i, 1);
