@@ -211,8 +211,10 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 	}
 	rcList.bottom = rcList.top + heightAlloced;
 	ac.lb.SetPositionRelative(rcList, wMain);
-	//lbAutoComplete.SetPosition(rcList);
 	ac.Show();
+	if (lenEntered != 0) {
+		AutoCompleteMoveToCurrentWord();
+	}		
 }
 
 void ScintillaBase::AutoCompleteCancel() {
@@ -223,19 +225,25 @@ void ScintillaBase::AutoCompleteMove(int delta) {
 	ac.Move(delta);
 }
 
+void ScintillaBase::AutoCompleteMoveToCurrentWord() {
+	char wordCurrent[1000];
+	int i;
+	int startWord = ac.posStart - ac.startLen;
+	for (i = startWord; i < currentPos; i++)
+		wordCurrent[i - startWord] = pdoc->CharAt(i);
+	wordCurrent[i - startWord] = '\0';
+	ac.Select(wordCurrent);
+}
+
 void ScintillaBase::AutoCompleteChanged(char ch) {
-	if (currentPos <= ac.posStart) {
+	if (currentPos <= ac.posStart - ac.startLen) {
+		ac.Cancel();
+	} else if (ac.cancelAtStartPos && currentPos <= ac.posStart) {
 		ac.Cancel();
 	} else if (ac.IsStopChar(ch)) {
 		ac.Cancel();
 	} else {
-		char wordCurrent[1000];
-		int i;
-		int startWord = ac.posStart - ac.startLen;
-		for (i = startWord; i < currentPos; i++)
-			wordCurrent[i - startWord] = pdoc->CharAt(i);
-		wordCurrent[i - startWord] = '\0';
-		ac.Select(wordCurrent);
+		AutoCompleteMoveToCurrentWord();
 	}
 }
 

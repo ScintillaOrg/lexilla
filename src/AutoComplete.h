@@ -14,6 +14,8 @@ public:
 	ListBox lb;
 	int posStart;
 	int startLen;
+	// Should autocompletion be canceled if editor's currentPos <= startPos?
+	bool cancelAtStartPos;
 	
 	AutoComplete();
 	~AutoComplete();

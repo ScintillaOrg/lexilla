@@ -54,6 +54,7 @@ protected:
 	void AutoCompleteMove(int delta);
 	void AutoCompleteChanged(char ch=0);
 	void AutoCompleteCompleted();
+	void AutoCompleteMoveToCurrentWord();
 
 	virtual void CreateCallTipWindow(PRectangle rc) = 0;
 		
