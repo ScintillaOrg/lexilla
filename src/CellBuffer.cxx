@@ -782,10 +782,10 @@ int CellBuffer::Length() {
 }
 
 void CellBuffer::Allocate(int newSize) {
-	if (newSize > size) {
+	if (newSize > length) {
 		GapTo(length);
 		char *newBody = new char[newSize];
-		memcpy(newBody, body, size);
+		memcpy(newBody, body, length);
 		delete []body;
 		body = newBody;
 		gaplen += newSize - size;

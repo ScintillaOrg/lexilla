@@ -292,6 +292,7 @@
      <a class="message" href="#SCI_GETREADONLY">SCI_GETREADONLY</a><br />
      <a class="message" href="#SCI_GETTEXTRANGE">SCI_GETTEXTRANGE(&lt;unused&gt;, TextRange
     *tr)</a><br />
+     <a class="message" href="#SCI_ALLOCATE">SCI_ALLOCATE(int bytes, &lt;unused&gt;)</a><br />
      <a class="message" href="#SCI_ADDTEXT">SCI_ADDTEXT(int length, char *s)</a><br />
      <a class="message" href="#SCI_ADDSTYLEDTEXT">SCI_ADDSTYLEDTEXT(int length, cell *s)</a><br />
      <a class="message" href="#SCI_APPENDTEXT">SCI_APPENDTEXT(int length, const char *s)</a><br />
@@ -395,6 +396,10 @@
     href="#SCI_GETCURLINE">SCI_GETCURLINE</a>, <a class="message"
     href="#SCI_GETTEXTRANGE">SCI_GETTEXTRANGE</a>, <a class="message"
     href="#SCI_GETTEXT">SCI_GETTEXT</a></code></p>
+
+    <p><b id="SCI_ALLOCATE">SCI_ALLOCATE(int bytes, &lt;unused&gt;)</b><br />
+     Allocate a document buffer large enough to store a given number of bytes.
+     The document will not be made smaller than its current contents.</p>
 
     <p><b id="SCI_ADDTEXT">SCI_ADDTEXT(int length, const char *s)</b><br />
      This inserts the first <code>length</code> characters from the string <code>s</code>
