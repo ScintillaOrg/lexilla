@@ -17,7 +17,6 @@
 #ifdef SCI_LEXER
 #include "SciLexer.h"
 #include "Accessor.h"
-#include "WindowAccessor.h"
 #include "DocumentAccessor.h"
 #include "KeyWords.h"
 #endif
@@ -338,7 +337,7 @@ void ScintillaBase::ButtonDown(Point pt, unsigned int curTime, bool shift, bool 
 
 #ifdef SCI_LEXER
 void ScintillaBase::Colourise(int start, int end) {
-	int lengthDoc = Platform::SendScintilla(wMain.GetID(), SCI_GETLENGTH, 0, 0);
+	int lengthDoc = pdoc->Length();
 	if (end == -1)
 		end = lengthDoc;
 	int len = end - start;
@@ -359,9 +358,9 @@ void ScintillaBase::Colourise(int start, int end) {
 void ScintillaBase::NotifyStyleToNeeded(int endStyleNeeded) {
 #ifdef SCI_LEXER
 	if (lexLanguage != SCLEX_CONTAINER) {
-		int endStyled = Platform::SendScintilla(wMain.GetID(), SCI_GETENDSTYLED, 0, 0);
-		int lineEndStyled = Platform::SendScintilla(wMain.GetID(), SCI_LINEFROMPOSITION, endStyled, 0);
-		endStyled = Platform::SendScintilla(wMain.GetID(), SCI_POSITIONFROMLINE, lineEndStyled, 0);
+		int endStyled = WndProc(SCI_GETENDSTYLED, 0, 0);
+		int lineEndStyled = WndProc(SCI_LINEFROMPOSITION, endStyled, 0);
+		endStyled = WndProc(SCI_POSITIONFROMLINE, lineEndStyled, 0);
 		Colourise(endStyled, endStyleNeeded);
 		return;
 	}
