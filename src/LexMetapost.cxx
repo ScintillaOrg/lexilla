@@ -24,14 +24,6 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-// Definitions in Scintilla.iface:
-//
-// Lexical states for SCLEX_METAPOST
-//
-// val SCLEX_METAPOST = 46
-//
-// lex METAPOST=SCLEX_METAPOST SCE_METAPOST_
-//
 // val SCE_METAPOST_DEFAULT = 0
 // val SCE_METAPOST_SPECIAL = 1
 // val SCE_METAPOST_GROUP = 2
@@ -40,7 +32,6 @@
 // val SCE_METAPOST_TEXT = 5
 
 // Definitions in SciTEGlobal.properties:
-//
 //
 // Metapost Highlighting
 //
@@ -56,6 +47,8 @@
 // style.metapost.4=fore:#008800
 // # Text
 // style.metapost.5=fore:#000000
+
+// lexer.tex.comment.process=0
 
 // Auxiliary functions:
 
@@ -113,8 +106,22 @@ bool ColourMETAPOSTRange(
     bool texMode,
     char *key,
     unsigned int endPos,
-    WordList &keywords,
+    WordList *keywordlists[],
+	int currentInterface, 
     Accessor &styler) {
+
+	// 0  no keyword highlighting 
+	// 1  metapost keyword hightlighting
+	// 2+ metafun keyword hightlighting
+
+	int extraInterface = 0 ; 
+
+	if (currentInterface != 0) {  
+		extraInterface = currentInterface ; 
+	} 
+		
+	WordList &keywords  = *keywordlists[0] ;
+	WordList &keywords2 = *keywordlists[extraInterface-1] ;
 
     switch (metapostMode) {
         case 0 : // comment mode
@@ -139,7 +146,9 @@ bool ColourMETAPOSTRange(
                 { styler.ColourTo(endPos, SCE_METAPOST_DEFAULT) ; }
             break ;
         case 4 : // command and/or keyword mode
-            if (texMode) {
+			if (currentInterface == 0) {
+                styler.ColourTo(endPos, SCE_METAPOST_TEXT) ;
+        	} else if (texMode) {
                 if (0 == strcmp(key,"etex")) {
                     styler.ColourTo(endPos, SCE_METAPOST_COMMAND) ;
                     return false ;
@@ -149,8 +158,10 @@ bool ColourMETAPOSTRange(
             } else if ((0 == strcmp(key,"btex")) || (0 == strcmp(key,"verbatimtex"))) {
                 styler.ColourTo(endPos, SCE_METAPOST_COMMAND) ;
                 return true ;
-            } else if (keywords.InList(key)) {
+            } else if (keywords && keywords.InList(key)) {
                 styler.ColourTo(endPos, SCE_METAPOST_COMMAND) ;
+            } else if (keywords2 && keywords2.InList(key)) {
+                styler.ColourTo(endPos, SCE_METAPOST_EXTRA) ;
             } else {
                 styler.ColourTo(endPos, SCE_METAPOST_TEXT) ;
             }
@@ -172,7 +183,8 @@ static void ColouriseMETAPOSTLine(
     char *lineBuffer,
     unsigned int lengthLine,
     unsigned int startPos,
-    WordList &keywords,
+    WordList *keywordlists[],
+	int currentInterface, 
     Accessor &styler) {
 
     char ch = ' ' ;
@@ -183,11 +195,10 @@ static void ColouriseMETAPOSTLine(
     char key[1024] ; // length check in calling routine
     unsigned int start = startPos-1 ;
 
-    bool comment = true ; // does not work: (styler.GetPropertyInt("lexer.metapost.comment.process", 0) == 1) ;
-    bool tex = false ;
+    bool comment = (styler.GetPropertyInt("lexer.metapost.comment.process", 0) == 0) ;
+    bool tex     = false ; 
 
     // we may safely assume that pc is either on the same line or a \n \r token
-
     // we use a cheap append to key method, ugly, but fast and ok
 
     while (offset < lengthLine) {
@@ -198,35 +209,35 @@ static void ColouriseMETAPOSTLine(
         if (!tex && (mode == 6)) {
             if (isMETAPOSTstring(ch)) {
                 // we've run into the end of the string
-                tex = ColourMETAPOSTRange(mode,tex,key,start,keywords,styler) ; k = 0 ;
+                tex = ColourMETAPOSTRange(mode,tex,key,start,keywordlists,currentInterface,styler) ; k = 0 ;
                 mode = 5 ;
             } else {
                 // we're still in the string, comment is valid
             }
         } else if ((comment) && ((mode == 0) || (isMETAPOSTcomment(ch,pc)))) {
-            tex = ColourMETAPOSTRange(mode,tex,key,start,keywords,styler) ; k = 0 ;
+            tex = ColourMETAPOSTRange(mode,tex,key,start,keywordlists,currentInterface,styler) ; k = 0 ;
             mode = 0 ;
         } else if (isMETAPOSTstring(ch)) {
-            if (mode != 6) { tex = ColourMETAPOSTRange(mode,tex,key,start,keywords,styler) ; k = 0 ; }
+            if (mode != 6) { tex = ColourMETAPOSTRange(mode,tex,key,start,keywordlists,currentInterface,styler) ; k = 0 ; }
             mode = 6 ;
         } else if (isMETAPOSTone(ch)) {
-            if (mode != 1) { tex = ColourMETAPOSTRange(mode,tex,key,start,keywords,styler) ; k = 0 ; }
+            if (mode != 1) { tex = ColourMETAPOSTRange(mode,tex,key,start,keywordlists,currentInterface,styler) ; k = 0 ; }
             mode = 1 ;
         } else if (isMETAPOSTtwo(ch)) {
-            if (mode != 2) { tex = ColourMETAPOSTRange(mode,tex,key,start,keywords,styler) ; k = 0 ; }
+            if (mode != 2) { tex = ColourMETAPOSTRange(mode,tex,key,start,keywordlists,currentInterface,styler) ; k = 0 ; }
             mode = 2 ;
         } else if (isMETAPOSTthree(ch)) {
-            if (mode != 3) { tex = ColourMETAPOSTRange(mode,tex,key,start,keywords,styler) ; k = 0 ; }
+            if (mode != 3) { tex = ColourMETAPOSTRange(mode,tex,key,start,keywordlists,currentInterface,styler) ; k = 0 ; }
             mode = 3 ;
         } else if (isMETAPOSTidentifier(ch)) {
-            if (mode != 4) { tex = ColourMETAPOSTRange(mode,tex,key,start,keywords,styler) ; k = 0 ; }
+            if (mode != 4) { tex = ColourMETAPOSTRange(mode,tex,key,start,keywordlists,currentInterface,styler) ; k = 0 ; }
             mode = 4 ; key[k] = ch ; ++k ; key[k] = '\0' ;
         } else if (isMETAPOSTnumber(ch)) {
             // rather redundant since for the moment we don't handle numbers
-            if (mode != 5) { tex = ColourMETAPOSTRange(mode,tex,key,start,keywords,styler) ; k = 0 ; }
+            if (mode != 5) { tex = ColourMETAPOSTRange(mode,tex,key,start,keywordlists,currentInterface,styler) ; k = 0 ; }
             mode = 5 ;
         } else {
-            if (mode != 5) { tex = ColourMETAPOSTRange(mode,tex,key,start,keywords,styler) ; k = 0 ; }
+            if (mode != 5) { tex = ColourMETAPOSTRange(mode,tex,key,start,keywordlists,currentInterface,styler) ; k = 0 ; }
             mode = 5 ;
         }
 
@@ -235,8 +246,44 @@ static void ColouriseMETAPOSTLine(
 
     }
 
-    ColourMETAPOSTRange(mode,tex,key,start,keywords,styler) ;
+    ColourMETAPOSTRange(mode,tex,key,start,keywordlists,currentInterface,styler) ;
 
+}
+
+static int CheckMETAPOSTInterface(
+    unsigned int startPos,
+    int length,
+    Accessor &styler) {
+
+    char lineBuffer[1024] ;
+	unsigned int linePos = 0 ;
+
+    int defaultInterface = styler.GetPropertyInt("lexer.metapost.interface.default", 1) ;
+
+	// some day we can make something lexer.metapost.mapping=(none,0)(metapost,1)(mp,1)(metafun,2)...
+
+    if (styler.SafeGetCharAt(0) == '%') {
+        for (unsigned int i = 0; i < startPos + length; i++) {
+            lineBuffer[linePos++] = styler[i];
+            if (endOfLine(styler, i) || (linePos >= sizeof(lineBuffer) - 1)) {
+                lineBuffer[linePos] = '\0';
+				if (strstr(lineBuffer, "interface=none")) {
+                    return 0 ;
+				} else if (strstr(lineBuffer, "interface=metapost") || strstr(lineBuffer, "interface=mp")) {
+                    return 1 ;
+				} else if (strstr(lineBuffer, "interface=metafun")) {
+                    return 2 ;
+				} else if (styler.SafeGetCharAt(1) == 'D' && strstr(lineBuffer, "%D \\module")) {
+					// better would be to limit the search to just one line
+					return 2 ;
+                } else {
+                    return defaultInterface ;
+                }
+            }
+		}
+    }
+
+    return defaultInterface ;
 }
 
 // Main handler:
@@ -253,26 +300,27 @@ static void ColouriseMETAPOSTDoc(
     WordList *keywordlists[],
     Accessor &styler) {
 
-	char lineBuffer[1024] ;
-    WordList &keywords = *keywordlists[0] ;
-	unsigned int linePos = 0 ;
-
 	styler.StartAt(startPos) ;
 	styler.StartSegment(startPos) ;
+
+	int currentInterface = CheckMETAPOSTInterface(startPos,length,styler) ;
+
+	char lineBuffer[1024] ;
+	unsigned int linePos = 0 ;
 
     for (unsigned int i = startPos; i < startPos + length; i++) {
 		lineBuffer[linePos++] = styler[i] ;
 		if (endOfLine(styler, i) || (linePos >= sizeof(lineBuffer) - 1)) {
 			// End of line (or of line buffer) met, colourise it
 			lineBuffer[linePos] = '\0' ;
-			ColouriseMETAPOSTLine(lineBuffer, linePos, i-linePos+1, keywords, styler) ;
+			ColouriseMETAPOSTLine(lineBuffer, linePos, i-linePos+1, keywordlists, currentInterface, styler) ;
 			linePos = 0 ;
 		}
 	}
 
 	if (linePos > 0) {
         // Last line does not have ending characters
-		ColouriseMETAPOSTLine(lineBuffer, linePos, startPos+length-linePos, keywords, styler) ;
+		ColouriseMETAPOSTLine(lineBuffer, linePos, startPos+length-linePos, keywordlists, currentInterface, styler) ;
 	}
 
 }
@@ -280,7 +328,8 @@ static void ColouriseMETAPOSTDoc(
 // Hooks info the system:
 
 static const char * const metapostWordListDesc[] = {
-	"Keywords",
+	"MetaPost",
+	"MetaFun",
 	0
 } ;
 

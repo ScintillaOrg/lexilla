@@ -25,14 +25,6 @@
 #include "SciLexer.h"
 #include "StyleContext.h"
 
-// Definitions in Scintilla.iface:
-//
-// Lexical states for SCLEX_TEX
-//
-// val SCLEX_TEX = 45
-//
-// lex TeX=SCLEX_TEX SCE_TEX_
-//
 // val SCE_TEX_DEFAULT = 0
 // val SCE_TEX_SPECIAL = 1
 // val SCE_TEX_GROUP   = 2
@@ -40,14 +32,7 @@
 // val SCE_TEX_COMMAND = 4
 // val SCE_TEX_TEXT    = 5
 
-// in SciTEProps.cxx
-//
-// ForwardPropertyToEditor("lexer.tex.comment.process") ;
-// ForwardPropertyToEditor("lexer.metapost.comment.process") ;
-// ForwardPropertyToEditor("lexer.tex.interface.default") ;
-
 // Definitions in SciTEGlobal.properties:
-//
 //
 // TeX Highlighting
 //
@@ -63,6 +48,9 @@
 // style.tex.4=fore:#008800
 // # Text
 // style.tex.5=fore:#000000
+
+// lexer.tex.interface.default=0
+// lexer.tex.comment.process=0
 
 // Auxiliary functions:
 
@@ -184,7 +172,7 @@ static void ColouriseTeXLine(
     char key[1024] ; // length check in calling routine
     unsigned int start = startPos-1 ;
 
-    bool comment = true ; // does not work: (styler.GetPropertyInt("lexer.tex.comment.process", 0) == 1) ;
+    bool comment = (styler.GetPropertyInt("lexer.tex.comment.process", 0) == 0) ;
 
     // we use a cheap append to key method, ugly, but fast and ok
 
@@ -237,13 +225,6 @@ static void ColouriseTeXLine(
 
 }
 
-// Main handler:
-//
-// The lexer works on a per line basis. I'm not familiar with the internals of scintilla, but
-// since the lexer does not look back or forward beyond the current view, some optimization can
-// be accomplished by providing just the viewport. The following code is more or less copied
-// from the LexOthers.cxx file.
-
 static int CheckTeXInterface(
     unsigned int startPos,
     int length,
@@ -254,6 +235,8 @@ static int CheckTeXInterface(
 
     int defaultInterface = styler.GetPropertyInt("lexer.tex.interface.default", 1) ;
 
+    // some day we can make something lexer.tex.mapping=(all,0)(nl,1)(en,2)...
+
     if (styler.SafeGetCharAt(0) == '%') {
         for (unsigned int i = 0; i < startPos + length; i++) {
             lineBuffer[linePos++] = styler[i];
@@ -261,6 +244,8 @@ static int CheckTeXInterface(
                 lineBuffer[linePos] = '\0';
                 if (strstr(lineBuffer, "interface=all")) {
                     return 0 ;
+				} else if (strstr(lineBuffer, "interface=tex")) {
+                    return 1 ;
                 } else if (strstr(lineBuffer, "interface=nl")) {
                     return 2 ;
                 } else if (strstr(lineBuffer, "interface=en")) {
@@ -273,6 +258,9 @@ static int CheckTeXInterface(
                     return 6 ;
                 } else if (strstr(lineBuffer, "interface=ro")) {
                     return 7 ;
+                } else if (strstr(lineBuffer, "interface=latex")) {
+					// we will move latex cum suis up to 91+ when more keyword lists are supported 
+                    return 8 ;
 				} else if (styler.SafeGetCharAt(1) == 'D' && strstr(lineBuffer, "%D \\module")) {
 					// better would be to limit the search to just one line
 					return 3 ;
@@ -285,6 +273,13 @@ static int CheckTeXInterface(
 
     return defaultInterface ;
 }
+
+// Main handler:
+//
+// The lexer works on a per line basis. I'm not familiar with the internals of scintilla, but
+// since the lexer does not look back or forward beyond the current view, some optimization can
+// be accomplished by providing just the viewport. The following code is more or less copied
+// from the LexOthers.cxx file.
 
 static void ColouriseTeXDoc(
     unsigned int startPos,
@@ -330,13 +325,13 @@ static void ColouriseTeXDoc(
 // Hooks into the system:
 
 static const char * const texWordListDesc[] = {
-    "Default"
-    "Dutch",
-    "English",
-    "German",
-    "Czech",
-    "Italian",
-    "Romanian",
+    "TeX, eTeX, pdfTeX, Omega"
+    "ConTeXt Dutch",
+    "ConTeXt English",
+    "ConTeXt German",
+    "ConTeXt Czech",
+    "ConTeXt Italian",
+    "ConTeXt Romanian",
 	0,
 } ;
 
