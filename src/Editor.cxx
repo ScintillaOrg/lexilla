@@ -620,7 +620,7 @@ void Editor::EnsureCaretVisible(bool useMargin, bool vert, bool horiz) {
 		int xOffsetNew = xOffset;
 		if (pt.x < rcClient.left) {
 			xOffsetNew = xOffset - (rcClient.left - pt.x);
-		} else if (((xOffset > 0) && useMargin) || pt.x >= rcClient.right) {
+		} else if (((caretPolicy & CARET_XEVEN) && ((xOffset > 0) && useMargin)) || pt.x >= rcClient.right) {
 			xOffsetNew = xOffset + (pt.x - rcClient.right);
 			int xOffsetEOL = xOffset + (ptEOL.x - rcClient.right) - xMargin + 2;
 			//Platform::DebugPrintf("Margin %d %d\n", xOffsetNew, xOffsetEOL);
@@ -2012,6 +2012,8 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	case SCI_VCHOMEEXTEND:
 	case SCI_DELWORDLEFT:
 	case SCI_DELWORDRIGHT:
+	case SCI_DELLINELEFT:
+	case SCI_DELLINERIGHT:
 	case SCI_LINECUT:
 	case SCI_LINEDELETE:
 	case SCI_LINETRANSPOSE:
@@ -2295,6 +2297,21 @@ int Editor::KeyCommand(unsigned int iMessage) {
 	case SCI_DELWORDRIGHT: {
 			int endWord = pdoc->NextWordStart(currentPos, 1);
 			pdoc->DeleteChars(currentPos, endWord - currentPos);
+			MovePositionTo(currentPos);
+		}
+		break;
+	case SCI_DELLINELEFT: {
+			int line = pdoc->LineFromPosition(currentPos);
+			int start = pdoc->LineStart(line);
+			pdoc->DeleteChars(start,currentPos - start);
+			MovePositionTo(start);
+			SetLastXChosen();
+		}
+		break;
+	case SCI_DELLINERIGHT: {
+			int line = pdoc->LineFromPosition(currentPos);
+			int end = pdoc->LineEnd(line);
+			pdoc->DeleteChars(currentPos,end - currentPos);
 			MovePositionTo(currentPos);
 		}
 		break;
@@ -4356,6 +4373,8 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_ZOOMOUT:
 	case SCI_DELWORDLEFT:
 	case SCI_DELWORDRIGHT:
+	case SCI_DELLINELEFT:
+	case SCI_DELLINERIGHT:
 	case SCI_LINECUT:
 	case SCI_LINEDELETE:
 	case SCI_LINETRANSPOSE:
