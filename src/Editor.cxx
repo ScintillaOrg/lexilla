@@ -45,7 +45,8 @@ Editor::Editor() {
 	hideSelection = false;
 	inOverstrike = false;
 	errorStatus = 0;
-
+	mouseDownCaptures = true;
+	
 	bufferedDraw = true;
 
 	lastClickTime = 0;
@@ -4291,6 +4292,12 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 	
 	case SCI_GETSTATUS:
 		return errorStatus;
+	
+	case SCI_SETMOUSEDOWNCAPTURES:
+		mouseDownCaptures = wParam;
+	
+	case SCI_GETMOUSEDOWNCAPTURES:
+		return mouseDownCaptures;
 	
 #ifdef MACRO_SUPPORT
 	case SCI_STARTRECORD:

@@ -294,15 +294,18 @@ LRESULT ScintillaWin::WndPaint(unsigned long wParam) {
 	//LARGE_INTEGER performanceFreq;
 	//QueryPerformanceFrequency(&performanceFreq);
 	//QueryPerformanceCounter(&perfStart);
+	
+	// Redirect assertions to debug output and save current state 
+	bool assertsPopup = Platform::ShowAssertionPopUps(false);
 	paintState = painting;
 	PAINTSTRUCT ps;
 	PAINTSTRUCT* pps;
 
-    bool IsOcxCtrl = (wParam != 0); // if wParam != 0, it contains 
+	bool IsOcxCtrl = (wParam != 0); // if wParam != 0, it contains 
 								   // a PAINSTRUCT* from the OCX
-	if(IsOcxCtrl)
+	if (IsOcxCtrl) {
 		pps = reinterpret_cast<PAINTSTRUCT*>(wParam);
-	else{
+	} else {
 		pps = &ps;
 		BeginPaint(wMain.GetID(), pps);
 	}
@@ -326,6 +329,10 @@ LRESULT ScintillaWin::WndPaint(unsigned long wParam) {
 		FullPaint();
 	}
 	paintState = notPainting;
+
+	// Restore debug output state 
+	Platform::ShowAssertionPopUps(assertsPopup);
+	
 	//QueryPerformanceCounter(&perfEnd);
 	//__int64 start = perfStart.QuadPart;
 	//__int64 end = perfEnd.QuadPart;
@@ -581,6 +588,10 @@ LRESULT ScintillaWin::WndProc(unsigned int iMessage, unsigned long wParam, long 
 	case WM_ERASEBKGND:
         	return 1;   // Avoid any background erasure as whole window painted. 
 
+    	case WM_CAPTURECHANGED:
+		capturedMouse = false;
+		return 0;
+	
         // These are not handled in Scintilla and its faster to dispatch them here.
         // Also moves time out to here so profile doesn't count lots of empty message calls.
     	case WM_MOVE:
@@ -590,7 +601,6 @@ LRESULT ScintillaWin::WndProc(unsigned int iMessage, unsigned long wParam, long 
 	case WM_NCPAINT:
     	case WM_NCMOUSEMOVE:
     	case WM_NCLBUTTONDOWN:
-    	case WM_CAPTURECHANGED:
     	case WM_IME_SETCONTEXT:
     	case WM_IME_NOTIFY:
     	case WM_SYSCOMMAND:
@@ -632,10 +642,12 @@ void ScintillaWin::SetTicking(bool on) {
 }
 
 void ScintillaWin::SetMouseCapture(bool on) {
-	if (on) {
-		::SetCapture(wMain.GetID());
-	} else {
-		::ReleaseCapture();
+	if (mouseDownCaptures) {
+		if (on) {
+			::SetCapture(wMain.GetID());
+		} else {
+			::ReleaseCapture();
+		}
 	}
 	capturedMouse = on;
 }

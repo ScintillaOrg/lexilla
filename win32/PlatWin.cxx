@@ -880,8 +880,10 @@ void Platform::DebugPrintf(const char *, ...) {
 
 static bool assertionPopUps = true;
 
-void Platform::ShowAssertionPopUps(bool assertionPopUps_) {
+bool Platform::ShowAssertionPopUps(bool assertionPopUps_) {
+	bool ret = assertionPopUps;
 	assertionPopUps = assertionPopUps_;
+	return ret;
 }
 
 void Platform::Assert(const char *c, const char *file, int line) {
