@@ -924,6 +924,7 @@ SCI_AUTOCGETDROPRESTOFWORD
 	SCI_AUTOCPOSSTART returns the value of the current position when 
 	SCI_AUTOCSHOW started display of the list.
 	An entry can be selected SCI_AUTOCSELECT.
+	The list of words should be in sorted order.
     </p>
     <p>
 	The current selection can be triggered with the SCI_AUTOCCOMPLETE 
@@ -933,6 +934,12 @@ SCI_AUTOCGETDROPRESTOFWORD
 	such as '.', '(' or '[' when typing an identifier. A set of 
 	characters which will cancel autocompletion can be specified
 	with the SCI_AUTOCSTOPS.
+    </p>
+    <p>
+	If set to ignore case mode with SCI_AUTOCSETIGNORECASE, 
+	then strings are matched after being converted to upper case.
+	One result of this is that the list should be sorted with the punctuation 
+	characters '[', '\', ']', '^', '_', and '`' sorted after letters.
     </p>
     <p>
 	The default behaviour is for the list to be cancelled if the caret 
