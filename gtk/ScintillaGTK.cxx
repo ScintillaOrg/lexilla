@@ -430,10 +430,6 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	wPreeditDraw = gtk_drawing_area_new();
 	gtk_signal_connect(GTK_OBJECT(PWidget(wPreeditDraw)), "expose_event",
 			   GtkSignalFunc(ExposePreedit), this);
-	gtk_signal_connect_after(GTK_OBJECT(PWidget(wText)), "style_set",
-				 GtkSignalFunc(ScintillaGTK::StyleSetText), NULL);
-	gtk_signal_connect_after(GTK_OBJECT(PWidget(wText)), "realize",
-				 GtkSignalFunc(ScintillaGTK::RealizeText), NULL);
 	gtk_container_add(GTK_CONTAINER(PWidget(wPreedit)), PWidget(wPreeditDraw));
 	gtk_widget_realize(PWidget(wPreedit));
 	gtk_widget_realize(PWidget(wPreeditDraw));
@@ -447,6 +443,10 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	gtk_im_context_set_client_window(im_context, widget->window);
 #endif
 #endif
+	gtk_signal_connect_after(GTK_OBJECT(PWidget(wText)), "style_set",
+				 GtkSignalFunc(ScintillaGTK::StyleSetText), NULL);
+	gtk_signal_connect_after(GTK_OBJECT(PWidget(wText)), "realize",
+				 GtkSignalFunc(ScintillaGTK::RealizeText), NULL);
 	gtk_widget_realize(PWidget(wText));
 	gtk_widget_realize(PWidget(scrollbarv));
 	gtk_widget_realize(PWidget(scrollbarh));
