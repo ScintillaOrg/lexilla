@@ -280,9 +280,9 @@ void ScintillaBase::AutoCompleteMoveToCurrentWord() {
 	char wordCurrent[1000];
 	int i;
 	int startWord = ac.posStart - ac.startLen;
-	for (i = startWord; i < currentPos; i++)
+	for (i = startWord; i < currentPos && i - startWord < 1000; i++)
 		wordCurrent[i - startWord] = pdoc->CharAt(i);
-	wordCurrent[i - startWord] = '\0';
+	wordCurrent[Platform::Minimum(i - startWord, 999)] = '\0';
 	ac.Select(wordCurrent);
 }
 
