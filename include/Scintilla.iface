@@ -1441,6 +1441,14 @@ fun void ParaDownExtend=2414(,)
 fun void ParaUp=2415(,)
 fun void ParaUpExtend=2416(,)
 
+# Given a valid document position, return the previous position taking code
+# page into account. Returns 0 if passed 0.
+fun position PositionBefore=2417(position pos,)
+
+# Given a valid document position, return the next position taking code
+# page into account. Maximum value returned is the last position in the document.
+fun position PositionAfter=2418(position pos,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 

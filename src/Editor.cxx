@@ -5199,6 +5199,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETSEARCHFLAGS:
 		return searchFlags;
 
+	case SCI_POSITIONBEFORE:
+		return pdoc->MovePositionOutsideChar(wParam-1, -1, true);
+
+	case SCI_POSITIONAFTER:
+		return pdoc->MovePositionOutsideChar(wParam+1, 1, true);
+
 	case SCI_LINESCROLL:
 		ScrollTo(topLine + lParam);
 		HorizontalScrollTo(xOffset + wParam * vs.spaceWidth);

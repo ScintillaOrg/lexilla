@@ -885,6 +885,8 @@ struct TextToFind {
     onlyWordCharacters)</a><br />
      <a class="message" href="#SCI_WORDSTARTPOSITION">SCI_WORDSTARTPOSITION(int position, bool
     onlyWordCharacters)</a><br />
+     <a class="message" href="#SCI_POSITIONBEFORE">SCI_POSITIONBEFORE(int position)</a><br />
+     <a class="message" href="#SCI_POSITIONAFTER">SCI_POSITIONAFTER(int position)</a><br />
      <a class="message" href="#SCI_TEXTWIDTH">SCI_TEXTWIDTH(int styleNumber, char *text)</a><br />
      <a class="message" href="#SCI_TEXTHEIGHT">SCI_TEXTHEIGHT(int line)</a><br />
      <a class="message" href="#SCI_CHOOSECARETX">SCI_CHOOSECARETX</a><br />
@@ -1148,6 +1150,14 @@ struct TextToFind {
         </tr>
       </tbody>
     </table>
+
+    <p><b id="SCI_POSITIONBEFORE">SCI_POSITIONBEFORE(int position)</b><br />
+     <b id="SCI_POSITIONAFTER">SCI_POSITIONAFTER(int position)</b><br />
+     These messages return the position before and after another position
+     in the document taking into account the current code page. The minimum
+     position returned is 0 and the maximum is the last position in the document.
+     If called with a position within a multi byte character will return the position
+     of the start/end of that character.</p>
 
     <p><b id="SCI_TEXTWIDTH">SCI_TEXTWIDTH(int styleNumber, char *text)</b><br />
      This returns the pixel width of a string drawn in the given <code>styleNumber</code> which can

@@ -535,6 +535,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_PARADOWNEXTEND 2414
 #define SCI_PARAUP 2415
 #define SCI_PARAUPEXTEND 2416
+#define SCI_POSITIONBEFORE 2417
+#define SCI_POSITIONAFTER 2418
 #define SCI_STARTRECORD 3001
 #define SCI_STOPRECORD 3002
 #define SCI_SETLEXER 4001
