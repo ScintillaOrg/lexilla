@@ -3858,6 +3858,14 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		Redraw();
 		break;
 
+	case SCI_SETZOOM:
+		vs.zoomLevel = wParam;
+		InvalidateStyleRedraw();
+		break;
+
+	case SCI_GETZOOM:
+		return vs.zoomLevel;
+	
 	case SCI_GETEDGECOLUMN:
 		return theEdge;
 		
