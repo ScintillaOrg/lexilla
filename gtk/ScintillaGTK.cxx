@@ -72,6 +72,10 @@
 #pragma warning(disable: 4505)
 #endif
 
+#if GTK_MAJOR_VERSION == 2 && GTK_MINOR_VERSION >= 2
+#define USE_GTK_CLIPBOARD
+#endif
+
 extern char *UTF8FromLatin1(const char *s, int &len);
 
 class ScintillaGTK : public ScintillaBase {
@@ -85,7 +89,7 @@ class ScintillaGTK : public ScintillaBase {
 	int scrollBarHeight;
 
 	// Because clipboard access is asynchronous, copyText is created by Copy
-#if GTK_MAJOR_VERSION == 1
+#ifndef USE_GTK_CLIPBOARD
 	SelectionText copyText;
 #endif
 
@@ -174,7 +178,7 @@ private:
 	void ReceivedSelection(GtkSelectionData *selection_data);
 	void ReceivedDrop(GtkSelectionData *selection_data);
 	static void GetSelection(GtkSelectionData *selection_data, guint info, SelectionText *selected);
-#if GTK_MAJOR_VERSION >= 2
+#ifdef USE_GTK_CLIPBOARD
 	static void ClipboardGetSelection(GtkClipboard* clip, GtkSelectionData *selection_data, guint info, void *data);
 	static void ClipboardClearSelection(GtkClipboard* clip, void *data);
 #endif
@@ -702,7 +706,7 @@ void ScintillaGTK::Initialise() {
 	gtk_selection_add_targets(GTK_WIDGET(PWidget(wMain)), GDK_SELECTION_PRIMARY,
 	                          clipboardTargets, nClipboardTargets);
 
-#if GTK_MAJOR_VERSION == 1
+#ifndef USE_GTK_CLIPBOARD
 	gtk_selection_add_targets(GTK_WIDGET(PWidget(wMain)), atomClipboard,
 	                          clipboardTargets, nClipboardTargets);
 #endif
@@ -1136,7 +1140,7 @@ int ScintillaGTK::KeyDefault(int key, int modifiers) {
 }
 
 void ScintillaGTK::CopyToClipboard(const SelectionText &selectedText) {
-#if GTK_MAJOR_VERSION == 1
+#ifndef USE_GTK_CLIPBOARD
 	copyText.Copy(selectedText);
 	gtk_selection_owner_set(GTK_WIDGET(PWidget(wMain)),
 				atomClipboard,
@@ -1158,7 +1162,7 @@ void ScintillaGTK::CopyToClipboard(const SelectionText &selectedText) {
 
 void ScintillaGTK::Copy() {
 	if (currentPos != anchor) {
-#if GTK_MAJOR_VERSION == 1
+#ifndef USE_GTK_CLIPBOARD
 		CopySelectionRange(&copyText);
 		gtk_selection_owner_set(GTK_WIDGET(PWidget(wMain)),
 		                        atomClipboard,
@@ -1532,7 +1536,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 #endif /* Gtk >= 2 */
 }
 
-#if GTK_MAJOR_VERSION >= 2
+#ifdef USE_GTK_CLIPBOARD
 void ScintillaGTK::ClipboardGetSelection(GtkClipboard *, GtkSelectionData *selection_data, guint info, void *data) {
 	GetSelection(selection_data, info, static_cast<SelectionText*>(data));
 }
@@ -2185,7 +2189,7 @@ void ScintillaGTK::SelectionGet(GtkWidget *widget,
 		}
 		sciThis->GetSelection(selection_data, info, &sciThis->primary);
 	}
-#if GTK_MAJOR_VERSION == 1 /* Gtk 2+ uses GtkClipboard for non-primary selections. */
+#ifndef USE_GTK_CLIPBOARD
 	else {
 		sciThis->GetSelection(selection_data, info, &sciThis->copyText);
 	}
