@@ -33,7 +33,7 @@ endif
 	$(CC) `gtk-config --cflags` $(CXXFLAGS) -c $<
 
 LEXOBJS=LexAda.o LexAVE.o LexBaan.o LexBullant.o LexConf.o LexCPP.o \
-	LexCrontab.o LexEiffel.o LexHTML.o LexLisp.o LexLua.o LexOthers.o \
+	LexCrontab.o LexEiffel.o LexHTML.o LexLisp.o LexLua.o LexMatlab.o LexOthers.o \
 	LexPascal.o LexPerl.o LexPython.o LexRuby.o LexSQL.o LexVB.o
 
 # The LEXOBJS have to be treated specially as the functions in them are not called from external code

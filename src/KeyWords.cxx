@@ -129,6 +129,7 @@ int Scintilla_LinkLexers() {
   extern LexerModule lmLISP;
   extern LexerModule lmLua;
   extern LexerModule lmMake;
+  extern LexerModule lmMatlab;
   extern LexerModule lmPascal;
   extern LexerModule lmPerl;
   extern LexerModule lmProps;  
@@ -153,6 +154,7 @@ int Scintilla_LinkLexers() {
       && &lmProps
       && &lmErrorList
       && &lmMake
+      && &lmMatlab
       && &lmBatch
       && &lmPerl
       && &lmPython

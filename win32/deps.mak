@@ -71,8 +71,12 @@ LexLisp.o: ../src/LexLisp.cxx ../include/Platform.h \
  ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
  ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
 LexLua.o: ../src/LexLua.cxx ../include/Platform.h ../include/PropSet.h \
- ../include/SString.h ../include/Accessor.h ../include/KeyWords.h \
- ../include/Scintilla.h ../include/SciLexer.h
+ ../include/SString.h ../include/Accessor.h ../src/StyleContext.h \
+ ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
+LexMatlab.o: ../src/LexMatlab.cxx ../include/Platform.h \
+ ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
+ ../src/StyleContext.h ../include/KeyWords.h ../include/Scintilla.h \
+ ../include/SciLexer.h
 LexOthers.o: ../src/LexOthers.cxx ../include/Platform.h \
  ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
  ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
@@ -122,5 +126,3 @@ ViewStyle.o: ../src/ViewStyle.cxx ../include/Platform.h \
 WindowAccessor.o: ../src/WindowAccessor.cxx ../include/Platform.h \
  ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
  ../include/WindowAccessor.h ../include/Scintilla.h
-xContractionState.o: ../src/xContractionState.cxx \
- ../include/Platform.h ../src/ContractionState.h

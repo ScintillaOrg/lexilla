@@ -116,6 +116,7 @@ LEXOBJS=\
 	$(DIR_O)\LexHTML.obj \
 	$(DIR_O)\LexLisp.obj \
 	$(DIR_O)\LexLua.obj \
+	$(DIR_O)\LexMatlab.obj \
 	$(DIR_O)\LexOthers.obj \
 	$(DIR_O)\LexPascal.obj \
 	$(DIR_O)\LexPerl.obj \
@@ -248,6 +249,8 @@ $(DIR_O)\LexHTML.obj: ..\src\LexHTML.cxx $(LEX_HEADERS)
 $(DIR_O)\LexLisp.obj: ..\src\LexLisp.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexLua.obj: ..\src\LexLua.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexMatlab.obj: ..\src\LexMatlab.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexOthers.obj: ..\src\LexOthers.cxx $(LEX_HEADERS)
 
