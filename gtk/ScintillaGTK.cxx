@@ -1399,6 +1399,12 @@ gint ScintillaGTK::KeyPress(GtkWidget *widget, GdkEventKey *event) {
 	if (!consumed)
 		consumed = added;
 	//Platform::DebugPrintf("SK-key: %d %x %x\n",event->keyval, event->state, consumed);
+	if (event->keyval == 0xffffff && event->length > 0) {
+		sciThis->ClearSelection();
+		if (sciThis->pdoc->InsertString(sciThis->CurrentPosition(), event->string)) {
+			sciThis->MovePositionTo(sciThis->CurrentPosition() + event->length);
+		}
+	}
 	return consumed;
 }
 
@@ -1437,6 +1443,13 @@ void ScintillaGTK::Draw(GtkWidget *widget, GdkRectangle *area) {
 		DrawChild(PWidget(sciThis->scrollbarv), area);
 	}
 
+#ifdef INTERNATIONAL_INPUT
+	Point pt = sciThis->LocationFromPosition(sciThis->currentPos);
+	pt.y += sciThis->vs.lineHeight - 2;
+	if (pt.x < 0) pt.x = 0;
+	if (pt.y < 0) pt.y = 0;
+	CursorMoved(widget, pt.x, pt.y, sciThis);
+#endif
 }
 
 gint ScintillaGTK::ExposeMain(GtkWidget *widget, GdkEventExpose *ose) {
