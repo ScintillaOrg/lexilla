@@ -14,9 +14,10 @@
 #include "PropSet.h"
 #include "AutoComplete.h"
 
-AutoComplete::AutoComplete() : 
+AutoComplete::AutoComplete() :
 	active(false),
 	separator(' '),
+	typesep('?'),
 	ignoreCase(false),
 	chooseSingle(false),
 	posStart(0),
@@ -63,7 +64,7 @@ void AutoComplete::SetFillUpChars(const char *fillUpChars_) {
 bool AutoComplete::IsFillUpChar(char ch) {
 	return ch && strchr(fillUpChars, ch);
 }
- 
+
 void AutoComplete::SetSeparator(char separator_) {
 	separator = separator_;
 }
@@ -72,22 +73,38 @@ char AutoComplete::GetSeparator() {
 	return separator;
 }
 
+void AutoComplete::SetTypesep(char separator_) {
+	typesep = separator_;
+}
+
+char AutoComplete::GetTypesep() {
+	return typesep;
+}
+
 void AutoComplete::SetList(const char *list) {
 	lb.Clear();
 	char *words = new char[strlen(list) + 1];
 	if (words) {
 		strcpy(words, list);
 		char *startword = words;
+		char *numword = NULL;
 		int i = 0;
 		for (; words && words[i]; i++) {
 			if (words[i] == separator) {
 				words[i] = '\0';
-				lb.Append(startword);
+				if (numword)
+					*numword = '\0';
+				lb.Append(startword, numword?atoi(numword + 1):0);
 				startword = words + i + 1;
+				numword = NULL;
+			} else if (words[i] == typesep) {
+				numword = words + i;
 			}
 		}
 		if (startword) {
-			lb.Append(startword);
+			if (numword)
+				*numword = '\0';
+			lb.Append(startword, numword?atoi(numword + 1):0);
 		}
 		delete []words;
 	}
