@@ -390,43 +390,60 @@ static void ColouriseErrorListLine(
 		// A .NET traceback
 		styler.ColourTo(endPos, SCE_ERR_NET);
 	} else {
-		// Look for <filename>:<line>:message
-		// Look for <filename>(line)message
-		// Look for <filename>(line,pos)message
+		// Look for GCC <filename>:<line>:message
+		// Look for Microsoft <filename>(line)message
+		// Look for Microsoft <filename>(line,pos)message
+		// Look for CTags \tmessage
 		int state = 0;
 		for (unsigned int i = 0; i < lengthLine; i++) {
-			if ((state == 0) && (lineBuffer[i] == ':') && isdigit(lineBuffer[i + 1])) {
-				state = 1;
-			} else if ((state == 0) && (lineBuffer[i] == '(')) {
-				state = 10;
-			} else if ((state == 0) && (lineBuffer[i] == '\t')) {
-				state = 20;
-			} else if ((state == 1) && isdigit(lineBuffer[i])) {
+			char ch = lineBuffer[i];
+			if (state == 0) {
+				if ((ch == ':') && isdigit(lineBuffer[i + 1])) {
+					// May be GCC
+					state = 1;
+				} else if (ch == '(') {
+					// May be Microsoft
+					state = 10;
+				} else if (ch == '\t') {
+					// May be CTags
+					state = 20;
+				}
+			} else if ((state == 1) && isdigit(ch)) {
 				state = 2;
-			} else if ((state == 2) && (lineBuffer[i] == ':')) {
-				state = 3;
-				break;
-			} else if ((state == 2) && !isdigit(lineBuffer[i])) {
-				state = 99;
-			} else if ((state == 10) && isdigit(lineBuffer[i])) {
-				state = 11;
-			} else if ((state == 11) && (lineBuffer[i] == ',')) {
-				state = 14;
-			} else if ((state == 11) && (lineBuffer[i] == ')')) {
-				state = 12;
-			} else if ((state == 12) && (lineBuffer[i] == ':')) {
+			} else if (state == 2) {
+				if (ch == ':') {
+					state = 3;	// :9.*: is GCC
+					break;
+				} else if (!isdigit(ch)) {
+					state = 99;
+				}
+			} else if (state == 10) {
+				state = isdigit(ch) ? 11 : 99;
+			} else if (state == 11) {
+				if (ch == ',') {
+					state = 14;
+				} else if (ch == ')') {
+					state = 12;
+				} else if ((ch != ' ') && !isdigit(ch)) {
+					state = 99;
+				}
+			} else if ((state == 12) && (ch == ':')) {
 				state = 13;
-			} else if ((state == 14) && (lineBuffer[i] == ')')) {
-				state = 15;
-				break;
-			} else if (((state == 11) || (state == 14)) && !((lineBuffer[i] == ' ') || isdigit(lineBuffer[i]))) {
-				state = 99;
-			} else if ((state == 20) && (lineBuffer[i-1] == '\t') &&
-				((lineBuffer[i] == '/' && lineBuffer[i+1] == '^') || isdigit(lineBuffer[i]))) {
-				state = 24;
-				break;
-			} else if ((state == 20) && ((lineBuffer[i] == '/') && (lineBuffer[i+1] == '^'))) {
-				state = 21;
+			} else if (state == 14) {
+				if (ch == ')') {
+					state = 15;
+					break;
+				} else if ((ch != ' ') && !isdigit(ch)) {
+					state = 99;
+				}
+			} else if (state == 20) {
+				if ((lineBuffer[i-1] == '\t') &&
+					((ch == '/' && lineBuffer[i+1] == '^') || isdigit(ch))) {
+					state = 24;
+					break;
+				} else if ((ch == '/') && (lineBuffer[i+1] == '^')) {
+					state = 21;
+				}
 			} else if ((state == 21) && ((lineBuffer[i] == '$') && (lineBuffer[i+1] == '/'))) {
 				state = 22;
 				break;
