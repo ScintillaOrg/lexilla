@@ -379,7 +379,7 @@ void SurfaceImpl::RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAlloc
 
 void SurfaceImpl::FillRectangle(PRectangle rc, ColourAllocated back) {
 	PenColour(back);
-	if (drawable) {
+	if (drawable && (rc.left < 32000)) {	// Protect against out of range
 		gdk_draw_rectangle(drawable, gc, 1,
 		                   rc.left, rc.top,
 		                   rc.right - rc.left, rc.bottom - rc.top);
