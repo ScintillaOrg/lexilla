@@ -1046,6 +1046,7 @@ void ScintillaGTK::ScrollText(int linesToMove) {
 	gdk_gc_unref(gc);
 #else
 	gdk_window_scroll(wi->window, 0, -diff);
+	gdk_window_process_updates(wi->window, FALSE);
 #endif
 }
 
