@@ -711,7 +711,9 @@ void Editor::RedrawRect(PRectangle rc) {
 
 void Editor::Redraw() {
 	//Platform::DebugPrintf("Redraw all\n");
-	wMain.InvalidateAll();
+	PRectangle rcClient = GetClientRectangle();
+	wMain.InvalidateRectangle(rcClient);
+	//wMain.InvalidateAll();
 }
 
 void Editor::RedrawSelMargin() {
