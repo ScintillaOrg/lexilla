@@ -607,6 +607,20 @@ get int AutoCGetTypeSeparator=2285(,)
 # Default is '?' but can be changed if items contain '?'.
 set void AutoCSetTypeSeparator=2286(int separatorCharacter,)
 
+# Set the maximum width, in characters, of auto-completion and user lists. 
+# Set to 0 to autosize to fit longest item, which is the default.
+set void AutoCSetMaxWidth=2208(int characterCount,)
+
+# Get the maximum width, in characters, of auto-completion and user lists. 
+get int AutoCGetMaxWidth=2209(,)
+
+# Set the maximum height, in rows, of auto-completion and user lists.
+# The default is 5 rows.
+set void AutoCSetMaxHeight=2210(int rowCount,)
+
+# Set the maximum height, in rows, of auto-completion and user lists.
+get int AutoCGetMaxHeight=2211(,)
+
 # Set the number of spaces used for one level of indentation.
 set void SetIndent=2122(int indentSize,)
 
@@ -1599,7 +1613,7 @@ fun void SetLengthForEncode=2448(int bytes,)
 # On error return 0.
 fun int EncodedFromUTF8=2449(string utf8, stringresult encoded)
 
-# Find the position of a column on a line taking into account tabs and
+# Find the position of a column on a line taking into account tabs and 
 # multi-byte characters. If beyond end of line, return line end position.
 fun int FindColumn=2456(int line, int column)
 
