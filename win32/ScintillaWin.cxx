@@ -1113,42 +1113,79 @@ bool ScintillaWin::CanPaste() {
 	return false;
 }
 
+static UINT CodePageFromCharSet(DWORD characterSet, UINT documentCodePage) {
+	CHARSETINFO ci = { 0, 0, { { 0, 0, 0, 0 }, { 0, 0 } } };
+	BOOL bci = ::TranslateCharsetInfo((DWORD*)characterSet,
+		&ci, TCI_SRCCHARSET);
+
+	UINT cp;
+	if (bci)
+		cp = ci.ciACP;
+	else
+		cp = documentCodePage;
+
+	CPINFO cpi;
+	if (!IsValidCodePage(cp) && !GetCPInfo(cp, &cpi))
+		cp = CP_ACP;
+
+	return cp;
+}
+
 void ScintillaWin::Paste() {
-	if (!::OpenClipboard(MainHWND())) 
+	if (!::OpenClipboard(MainHWND()))
 		return;
 	pdoc->BeginUndoAction();
 	int selStart = SelectionStart();
 	ClearSelection();
 	bool isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect) != 0;
-	HGLOBAL hmemUSelection = 0;
-	if (IsUnicodeMode()) {
-		hmemUSelection = ::GetClipboardData(CF_UNICODETEXT);
-		if (hmemUSelection) {
-			wchar_t *uptr = static_cast<wchar_t *>(::GlobalLock(hmemUSelection));
-			if (uptr) {
+
+	// Always use CF_UNICODETEXT if available
+	HGLOBAL hmemUSelection = ::GetClipboardData(CF_UNICODETEXT);
+	if (hmemUSelection) {
+		wchar_t *uptr = static_cast<wchar_t *>(::GlobalLock(hmemUSelection));
+		if (uptr) {
+			unsigned int len;
+			char *putf;
+			// Default Scintilla behaviour in Unicode mode
+			if (IsUnicodeMode()) {
 				unsigned int bytes = ::GlobalSize(hmemUSelection);
-				unsigned int len = UTF8Length(uptr, bytes/2);
-				char *putf = new char[len+1];
+				len = UTF8Length(uptr, bytes / 2);
+				putf = new char[len + 1];
 				if (putf) {
-					UTF8FromUCS2(uptr, bytes/2, putf, len);
-					if (isRectangular) {
-						PasteRectangular(selStart, putf, len);
-					} else {
-						if (pdoc->InsertString(currentPos, putf, len)) {
-							SetEmptySelection(currentPos + len);
-						}
-					}
-					delete []putf;
+					UTF8FromUCS2(uptr, bytes / 2, putf, len);
+				}
+			} else {
+				// CF_UNICODETEXT available, but not in Unicode mode
+				// Convert from Unicode to current Scintilla code page
+				UINT cpDest = CodePageFromCharSet(
+					vs.styles[STYLE_DEFAULT].characterSet, pdoc->dbcsCodePage);
+				len = ::WideCharToMultiByte(cpDest, 0, uptr, -1,
+				                            NULL, 0, NULL, NULL) - 1; // subtract 0 terminator
+				putf = new char[len + 1];
+				if (putf) {
+					::WideCharToMultiByte(cpDest, 0, uptr, -1,
+					                      putf, len + 1, NULL, NULL);
 				}
 			}
-			::GlobalUnlock(hmemUSelection);
+
+			if (putf) {
+				if (isRectangular) {
+					PasteRectangular(selStart, putf, len);
+				} else {
+					if (pdoc->InsertString(currentPos, putf, len)) {
+						SetEmptySelection(currentPos + len);
+					}
+				}
+				delete []putf;
+			}
 		}
-	}
-	if (!hmemUSelection) {
+		::GlobalUnlock(hmemUSelection);
+	} else {
+		// CF_UNICODETEXT not available, paste ANSI text
 		HGLOBAL hmemSelection = ::GetClipboardData(CF_TEXT);
 		if (hmemSelection) {
 			char *ptr = static_cast<char *>(
-				::GlobalLock(hmemSelection));
+			                ::GlobalLock(hmemSelection));
 			if (ptr) {
 				unsigned int bytes = ::GlobalSize(hmemSelection);
 				unsigned int len = bytes;
@@ -1156,11 +1193,38 @@ void ScintillaWin::Paste() {
 					if ((len == bytes) && (0 == ptr[i]))
 						len = i;
 				}
-				if (isRectangular) {
-					PasteRectangular(selStart, ptr, len);
+
+				// In Unicode mode, convert clipboard text to UTF-8
+				if (IsUnicodeMode()) {
+					wchar_t *uptr = static_cast<wchar_t *>(::GlobalAlloc(GPTR,
+					                                       len * 2 + 2));
+
+					unsigned int ulen = ::MultiByteToWideChar(CP_ACP, 0,
+					                    ptr, len, uptr, GlobalSize(static_cast<wchar_t *>(uptr)));
+
+					unsigned int mlen = UTF8Length(uptr, ulen);
+					char *putf = new char[mlen + 1];
+					if (putf) {
+						// CP_UTF8 not available on Windows 95, so use UTF8FromUCS2()
+						UTF8FromUCS2(uptr, ulen, putf, mlen);
+					}
+
+					::GlobalFree(static_cast<wchar_t *>(uptr));
+
+					if (isRectangular) {
+						PasteRectangular(selStart, putf, mlen);
+					} else {
+						pdoc->InsertString(currentPos, putf, mlen);
+						SetEmptySelection(currentPos + mlen);
+					}
+					delete []putf;
 				} else {
-					pdoc->InsertString(currentPos, ptr, len);
-					SetEmptySelection(currentPos + len);
+					if (isRectangular) {
+						PasteRectangular(selStart, ptr, len);
+					} else {
+						pdoc->InsertString(currentPos, ptr, len);
+						SetEmptySelection(currentPos + len);
+					}
 				}
 			}
 			::GlobalUnlock(hmemSelection);
@@ -1594,27 +1658,65 @@ void ScintillaWin::GetIntelliMouseParameters() {
 
 void ScintillaWin::CopyToClipboard(const SelectionText &selectedText) {
 	if (!::OpenClipboard(MainHWND()))
-		return;
+		return ;
 	::EmptyClipboard();
 
-	HGLOBAL hand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT,
-		selectedText.len);
-	if (hand) {
-		char *ptr = static_cast<char *>(::GlobalLock(hand));
-		memcpy(ptr, selectedText.s, selectedText.len);
-		::GlobalUnlock(hand);
-		::SetClipboardData(CF_TEXT, hand);
-	}
+	HGLOBAL uhand;
+	wchar_t *uptr = 0;
 
+	// Default Scintilla behaviour in Unicode mode
 	if (IsUnicodeMode()) {
 		int uchars = UCS2Length(selectedText.s, selectedText.len);
-		HGLOBAL uhand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT,
-			2 * (uchars));
+		uhand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT,
+		                      2 * (uchars));
 		if (uhand) {
-			wchar_t *uptr = static_cast<wchar_t *>(::GlobalLock(uhand));
+			uptr = static_cast<wchar_t *>(::GlobalLock(uhand));
 			UCS2FromUTF8(selectedText.s, selectedText.len, uptr, uchars);
-			::GlobalUnlock(uhand);
-			::SetClipboardData(CF_UNICODETEXT, uhand);
+		}
+	} else {
+		// Not Unicode mode
+		// Convert to Unicode using the current Scintilla code page
+		UINT cpSrc = CodePageFromCharSet(
+					selectedText.characterSet, selectedText.codePage);
+		uhand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT,
+		                      2 * (selectedText.len + 1));
+		if (uhand) {
+			uptr = static_cast<wchar_t *>(::GlobalLock(uhand));
+			::MultiByteToWideChar(cpSrc, 0,
+			                      selectedText.s, selectedText.len, uptr, GlobalSize(uhand));
+		}
+	}
+
+	// Copy ANSI text to clipboard on Windows 9x
+	// Convert from Unicode text, so other ANSI programs can
+	// paste the text
+	// Windows NT, 2k, XP automatically generates CF_TEXT
+	if (!IsNT() && uhand) {
+		HGLOBAL hand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT,
+		                     selectedText.len);
+		if (hand) {
+			char *ptr = static_cast<char *>(::GlobalLock(hand));
+			::WideCharToMultiByte(CP_ACP, 0, uptr, -1, ptr, GlobalSize(hand),
+			                      NULL, NULL);
+			::GlobalUnlock(hand);
+			::SetClipboardData(CF_TEXT, hand);
+		}
+	}
+
+	if (uhand) {
+		::GlobalUnlock(uhand);
+		::SetClipboardData(CF_UNICODETEXT, uhand);
+	}
+
+	// There was a failure - try to copy at least ANSI text
+	if (!uhand) {
+		HGLOBAL hand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT,
+		                     selectedText.len);
+		if (hand) {
+			char *ptr = static_cast<char *>(::GlobalLock(hand));
+			memcpy(ptr, selectedText.s, selectedText.len);
+			::GlobalUnlock(hand);
+			::SetClipboardData(CF_TEXT, hand);
 		}
 	}
 
