@@ -1314,11 +1314,12 @@ gint ScintillaGTK::KeyPress(GtkWidget *widget, GdkEventKey *event) {
 		key = toupper(key);
 	else if (!ctrl && (key >= GDK_KP_Multiply && key <= GDK_KP_9))
 		key &= 0x7F;
+	// Hack for keys over 256 and below command keys but makes Hungarian work.
+	// This will have to change for Unicode
+	else if ((key >= 0x100) && (key < 0x1000))
+		key &= 0xff;
 	else
 		key = KeyTranslate(key);
-	// Hack for keys over 256 but makes Hungarian work.
-	// This will have to change for Unicode
-	key &= 0xff;
 
 	bool consumed = false;
 	int added = sciThis->KeyDown(key, shift, ctrl, alt, &consumed);
