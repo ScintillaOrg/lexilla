@@ -1582,11 +1582,16 @@ void Editor::ClearDocumentStyle() {
 }
 
 void Editor::Cut() {
-	Copy();
-	ClearSelection();
+	if (!pdoc->IsReadOnly()) {
+		Copy();
+		ClearSelection();
+	}
 }
 
 void Editor::PasteRectangular(int pos, const char *ptr, int len) {
+	if (pdoc->IsReadOnly()) {
+		return;
+	}
 	currentPos = pos;
 	int insertPos = currentPos;
 	int xInsert = XFromPosition(currentPos);
@@ -3478,7 +3483,7 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 
 	case EM_CANPASTE:
 	case SCI_CANPASTE:
-		return 1;
+		return !pdoc->IsReadOnly();
 
 	case EM_CHARFROMPOS: {
 			if (lParam == 0)
