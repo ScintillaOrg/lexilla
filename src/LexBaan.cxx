@@ -186,4 +186,4 @@ static void FoldBaanDoc(unsigned int startPos, int length, int initStyle, WordLi
 	styler.SetLevel(lineCurrent, levelPrev | flagsNext);
 }
 
-LexerModule lmBAAN(SCLEX_BAAN, ColouriseBaanDoc, "baan", FoldBaanDoc);
+LexerModule lmBaan(SCLEX_BAAN, ColouriseBaanDoc, "baan", FoldBaanDoc);
