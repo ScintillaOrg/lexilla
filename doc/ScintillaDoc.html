@@ -38,7 +38,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 24/Jan/2003 NH</p>
+    <p>Last edited 15/Feb/2003 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -677,6 +677,7 @@ struct TextToFind {
      <a class="message" href="#SCI_GETTARGETSTART">SCI_GETTARGETSTART</a><br />
      <a class="message" href="#SCI_SETTARGETEND">SCI_SETTARGETEND(int pos)</a><br />
      <a class="message" href="#SCI_GETTARGETEND">SCI_GETTARGETEND</a><br />
+     <a class="message" href="#SCI_TARGETFROMSELECTION">SCI_TARGETFROMSELECTION</a><br />
      <a class="message" href="#SCI_REPLACETARGET">SCI_REPLACETARGET(int length, const char
     *text)</a><br />
      <a class="message" href="#SCI_REPLACETARGETRE">SCI_REPLACETARGETRE(int length, const char
@@ -695,6 +696,9 @@ struct TextToFind {
     expression mode, you can set start greater than end to find the last matching text in the
     target rather than the first matching text. The target is also set by a successful
     <code>SCI_SEARCHINTARGET</code>.</p>
+
+     <p><b id="SCI_TARGETFROMSELECTION">SCI_TARGETFROMSELECTION</b><br />
+     Set the target start and end to the start and end positions of the selection.</p>
 
     <p><b id="SCI_REPLACETARGET">SCI_REPLACETARGET(int length, const char *text)</b><br />
      If <code>length</code> is -1, <code>text</code> is a zero terminated string, otherwise
@@ -2132,6 +2136,8 @@ struct TextToFind {
      <a class="message" href="#SCI_GETUSEPALETTE">SCI_GETUSEPALETTE</a><br />
      <a class="message" href="#SCI_SETBUFFEREDDRAW">SCI_SETBUFFEREDDRAW(bool isBuffered)</a><br />
      <a class="message" href="#SCI_GETBUFFEREDDRAW">SCI_GETBUFFEREDDRAW</a><br />
+     <a class="message" href="#SCI_SETTWOPHASEDRAW">SCI_SETTWOPHASEDRAW</a><br />
+     <a class="message" href="#SCI_GETTWOPHASEDRAW">SCI_GETTWOPHASEDRAW</a><br />
      <a class="message" href="#SCI_SETCODEPAGE">SCI_SETCODEPAGE(int codePage)</a><br />
      <a class="message" href="#SCI_GETCODEPAGE">SCI_GETCODEPAGE</a><br />
      <a class="message" href="#SCI_SETWORDCHARS">SCI_SETWORDCHARS(&lt;unused&gt;, const char
@@ -2176,6 +2182,16 @@ struct TextToFind {
     bitmap to the screen. This avoids flickering although it does take longer. The default is for
     drawing to be buffered.</p>
 
+    <p><b id="SCI_SETTWOPHASEDRAW">SCI_SETTWOPHASEDRAW(bool isBuffered)</b><br />
+     <b id="SCI_GETTWOPHASEDRAW">SCI_GETTWOPHASEDRAW</b><br />
+     Two phase drawing is a better but slower way of drawing text.
+     In single phase drawing each run of characters in one style is drawn along with its background.
+     If a character overhangs the end of a run, such as in "T." where the "T" is in a different style
+     from the ".", then this can cause the right hand side of the "T" to be overdrawn by the background of
+     the "." which cuts it off. Two phase drawing fixes this by drawing all the backgrounds first and then
+     drawing the text in transparent mode. Two phase drawing may flicker more than single phase
+     unless buffered drawing is on. The default is for drawing to be two phase.</p>
+
     <p><b id="SCI_SETCODEPAGE">SCI_SETCODEPAGE(int codePage)</b><br />
      <b id="SCI_GETCODEPAGE">SCI_GETCODEPAGE</b><br />
      Scintilla has some support for Japanese, Chinese and Korean DBCS. Use this message with
@@ -2191,6 +2207,10 @@ struct TextToFind {
     Cyrillic, and Han characters. Languages which can use two characters stacked vertically in one
     horizontal space, such as Thai, will mostly work but there are some issues where the characters
     are drawn separately leading to visual glitches. Bi-directional text is not supported.</p>
+
+    <p>On GTK+, code page <code>SC_CP_DBCS</code> (1) sets Scintilla into
+    multi byte character mode as is required for Japanese language processing with
+    the EUC encoding.</p>
 
     <p>For GTK+, the locale should be set to a Unicode locale with a call similar to
     <code>setlocale(LC_CTYPE, "en_US.UTF-8")</code>. Fonts with an <code>"iso10646"</code> registry
@@ -2748,6 +2768,10 @@ struct TextToFind {
      <a class="message" href="#SCI_AUTOCSETDROPRESTOFWORD">SCI_AUTOCSETDROPRESTOFWORD(bool
     dropRestOfWord)</a><br />
      <a class="message" href="#SCI_AUTOCGETDROPRESTOFWORD">SCI_AUTOCGETDROPRESTOFWORD</a><br />
+     <a class="message" href="#SCI_REGISTERIMAGE">SCI_REGISTERIMAGE</a><br />
+     <a class="message" href="#SCI_CLEARREGISTEREDIMAGES">SCI_CLEARREGISTEREDIMAGES</a><br />
+     <a class="message" href="#SCI_AUTOCSETTYPESEPARATOR">SCI_AUTOCSETTYPESEPARATOR(char separatorCharacter)</a><br />
+     <a class="message" href="#SCI_AUTOCGETTYPESEPARATOR">SCI_AUTOCGETTYPESEPARATOR</a><br />
     </code>
 
     <p><b id="SCI_AUTOCSHOW">SCI_AUTOCSHOW(int lenEntered, const char *list)</b><br />
@@ -2838,6 +2862,21 @@ struct TextToFind {
      <b id="SCI_AUTOCGETDROPRESTOFWORD">SCI_AUTOCGETDROPRESTOFWORD</b><br />
      When an item is selected, any word characters following the caret are first erased if
     <code>dropRestOfWord</code> is set <code>true</code>. The default is <code>false</code>.</p>
+
+    <p>
+      <b id="SCI_REGISTERIMAGE">SCI_REGISTERIMAGE(int type, const char *xpmData)</b><br />
+      <b id="SCI_CLEARREGISTEREDIMAGES">SCI_CLEARREGISTEREDIMAGES</b><br />
+      <b id="SCI_AUTOCSETTYPESEPARATOR">SCI_AUTOCSETTYPESEPARATOR(char separatorCharacter)</b><br />
+      <b id="SCI_AUTOCGETTYPESEPARATOR">SCI_AUTOCGETTYPESEPARATOR</b><br />
+
+      Autocompletion list items may display an image as well as text. Each image is first registered with an integer
+      type. Then this integer is included in the text of the list separated by a '?' from the text. For example,
+      "fclose?2 fopen" displays image 2 before the string "fclose" and no image before "fopen".
+      The images are in XPM format as is described for
+      <a class="message" href="#SCI_MARKERDEFINEPIXMAP"><code>SCI_MARKERDEFINEPIXMAP</code></a>
+      The set of registered images can be cleared with <code>SCI_CLEARREGISTEREDIMAGES</code> and the '?' separator changed
+      with <code>SCI_AUTOCSETTYPESEPARATOR</code>.
+    </p>
 
     <h2 id="UserLists">User lists</h2>
 
@@ -3592,6 +3631,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_GETWRAPMODE">SCI_GETWRAPMODE</a><br />
      <a class="message" href="#SCI_SETLAYOUTCACHE">SCI_SETLAYOUTCACHE(int cacheMode)</a><br />
      <a class="message" href="#SCI_GETLAYOUTCACHE">SCI_GETLAYOUTCACHE</a><br />
+     <a class="message" href="#SCI_LINESSPLIT">SCI_LINESSPLIT</a><br />
     </code>
 
     <p>By default, Scintilla does not wrap lines of text. If you enable line wrapping, lines wider
@@ -3674,8 +3714,12 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
       </tbody>
     </table>
     <br />
-     <br />
 
+    <p><b id="SCI_LINESSPLIT">SCI_LINESSPLIT(int pixelWidth)</b><br />
+     Split a range of lines indicated by the target into lines that are at most pixelWidth wide.
+     Splitting occurs on word boundaries wherever possible in a similar manner to line wrapping.
+     When <code>pixelWidth</code> is 0 then the width of the window is used.
+     <br />
 
     <h2 id="Zooming">Zooming</h2>
 
