@@ -44,22 +44,55 @@ static void getRangeLowered(unsigned int start,
 	s[i] = '\0';
 }
 
-static void classifyWordEiffel(unsigned int start,
-                            unsigned int end,
-                            WordList	&keywords,
-                            Accessor &styler) {
-	char chAttr = SCE_EIFFEL_IDENTIFIER;
-	if (isdigit(styler[start]) || (styler[start] == '.')) {
-		chAttr = SCE_EIFFEL_NUMBER;
-	} else {
-		char s[100];
-		getRangeLowered(start, end, styler, s, sizeof(s));
-		if (keywords.InList(s)) {
-			chAttr = SCE_EIFFEL_WORD;
+class LexContext {
+	Accessor &styler;
+	int lengthDoc;
+	int currentPos;
+public:
+	int state;
+	char ch;
+	char chNext;
+
+	LexContext(unsigned int startPos, int length,
+                        int initStyle, Accessor &styler_) : 
+		styler(styler_),
+		lengthDoc(startPos + length),
+		currentPos(startPos), 
+		state(initStyle), 
+		ch(0), 
+		chNext(0) {
+		styler.StartAt(startPos);
+		styler.StartSegment(startPos);
+		ch = styler.SafeGetCharAt(currentPos);
+		chNext = styler.SafeGetCharAt(currentPos+1);
+	}
+	void Complete() {
+		styler.ColourTo(currentPos - 1, state);
+	}
+	bool More() {
+		return currentPos <= lengthDoc;
+	}
+	void Forward() {
+		currentPos++;
+		ch = chNext;
+		chNext = styler.SafeGetCharAt(currentPos + 1);
+		if (styler.IsLeadByte(ch)) {
+			currentPos++;
+			ch = chNext;
+			chNext = styler.SafeGetCharAt(currentPos + 1);
 		}
 	}
-	styler.ColourTo(end, chAttr);
-}
+	void ChangeState(int state_) {
+		state = state_;
+	}
+	void SetState(int state_) {
+		styler.ColourTo(currentPos - 1, state);
+		state = state_;
+	}
+	void GetCurrentLowered(char *s, int len) {
+		getRangeLowered(styler.GetStartSegment(), currentPos - 1, styler, s, len);
+	}
+};
 
 static void ColouriseEiffelDoc(unsigned int startPos,
                             int length,
@@ -69,103 +102,68 @@ static void ColouriseEiffelDoc(unsigned int startPos,
 
 	WordList &keywords = *keywordlists[0];
 
-	styler.StartAt(startPos);
+	LexContext lc(startPos, length, initStyle, styler);
 
-	int state = initStyle;
-	char chNext = styler[startPos];
-	unsigned int lengthDoc = startPos + length;
+	for (; lc.More(); lc.Forward()) {
 
-	styler.StartSegment(startPos);
-	for (unsigned int i = startPos; i <= lengthDoc; i++) {
-		char ch = chNext;
-		chNext = styler.SafeGetCharAt(i + 1);
-
-		if (styler.IsLeadByte(ch)) {
-			chNext = styler.SafeGetCharAt(i + 2);
-			i += 1;
-			continue;
-		}
-
-		if (state == SCE_EIFFEL_STRINGEOL) {
-			if (ch != '\r' && ch != '\n') {
-				styler.ColourTo(i - 1, state);
-				state = SCE_EIFFEL_DEFAULT;
+		if (lc.state == SCE_EIFFEL_STRINGEOL) {
+			if (lc.ch != '\r' && lc.ch != '\n') {
+				lc.SetState(SCE_EIFFEL_DEFAULT);
+			}
+		} else if (lc.state == SCE_EIFFEL_OPERATOR) {
+			lc.SetState(SCE_EIFFEL_DEFAULT);
+		} else if (lc.state == SCE_EIFFEL_WORD) {
+			if (!iswordchar(lc.ch)) {
+				char s[100];
+				lc.GetCurrentLowered(s, sizeof(s));
+				if (!keywords.InList(s)) {
+					lc.ChangeState(SCE_EIFFEL_IDENTIFIER);
+				}
+				lc.SetState(SCE_EIFFEL_DEFAULT);
+			}
+		} else if (lc.state == SCE_EIFFEL_NUMBER) {
+			if (!iswordchar(lc.ch)) {
+				lc.SetState(SCE_EIFFEL_DEFAULT);
+			}
+		} else if (lc.state == SCE_EIFFEL_COMMENTLINE) {
+			if (lc.ch == '\r' || lc.ch == '\n') {
+				lc.SetState(SCE_EIFFEL_DEFAULT);
+			}
+		} else if (lc.state == SCE_EIFFEL_STRING) {
+			if (lc.ch == '%') {
+				lc.Forward();
+			} else if (lc.ch == '\"') {
+				lc.Forward();
+				lc.SetState(SCE_EIFFEL_DEFAULT);
+			}
+		} else if (lc.state == SCE_EIFFEL_CHARACTER) {
+			if (lc.ch == '\r' || lc.ch == '\n') {
+				lc.SetState(SCE_EIFFEL_STRINGEOL);
+			} else if (lc.ch == '%') {
+				lc.Forward();
+			} else if (lc.ch == '\'') {
+				lc.Forward();
+				lc.SetState(SCE_EIFFEL_DEFAULT);
 			}
 		}
 
-		if (state == SCE_EIFFEL_DEFAULT) {
-			if (ch == '-' && chNext == '-') {
-				styler.ColourTo(i - 1, state);
-				state = SCE_EIFFEL_COMMENTLINE;
-			} else if (ch == '\"') {
-				styler.ColourTo(i - 1, state);
-				state = SCE_EIFFEL_STRING;
-			} else if (ch == '\'') {
-				styler.ColourTo(i - 1, state);
-				state = SCE_EIFFEL_CHARACTER;
-			} else if (isEiffelOperator(ch)) {
-				styler.ColourTo(i - 1, state);
-				styler.ColourTo(i, SCE_EIFFEL_OPERATOR);
-			} else if (iswordstart(ch)) {
-				styler.ColourTo(i - 1, state);
-				state = SCE_EIFFEL_WORD;
-			}
-		} else {
-			if (state == SCE_EIFFEL_WORD) {
-				if (!iswordchar(ch)) {
-					classifyWordEiffel(styler.GetStartSegment(), i - 1, keywords, styler);
-					state = SCE_EIFFEL_DEFAULT;
-				}
-			} else if (state == SCE_EIFFEL_COMMENTLINE) {
-				if (ch == '\r' || ch == '\n') {
-					styler.ColourTo(i - 1, state);
-					state = SCE_EIFFEL_DEFAULT;
-				}
-			} else if (state == SCE_EIFFEL_STRING) {
-				if (ch == '%') {
-					i++;
-					ch = chNext;
-					chNext = styler.SafeGetCharAt(i + 1);
-				} else if (ch == '\"') {
-					styler.ColourTo(i, state);
-					state = SCE_EIFFEL_DEFAULT;
-					i++;
-					ch = chNext;
-					chNext = styler.SafeGetCharAt(i + 1);
-				}
-			} else if (state == SCE_EIFFEL_CHARACTER) {
-				if (ch == '\r' || ch == '\n') {
-					styler.ColourTo(i - 1, state);
-					state = SCE_EIFFEL_STRINGEOL;
-				} else if (ch == '%') {
-					i++;
-					ch = chNext;
-					chNext = styler.SafeGetCharAt(i + 1);
-				} else if (ch == '\'') {
-					styler.ColourTo(i, state);
-					state = SCE_EIFFEL_DEFAULT;
-					i++;
-					ch = chNext;
-					chNext = styler.SafeGetCharAt(i + 1);
-				}
-			}
-
-			if (state == SCE_EIFFEL_DEFAULT) {
-				if (ch == '-' && chNext == '-') {
-					state = SCE_EIFFEL_COMMENTLINE;
-				} else if (ch == '\"') {
-					state = SCE_EIFFEL_STRING;
-				} else if (ch == '\'') {
-					state = SCE_EIFFEL_CHARACTER;
-				} else if (iswordstart(ch)) {
-					state = SCE_EIFFEL_WORD;
-				} else if (isEiffelOperator(ch)) {
-					styler.ColourTo(i, SCE_EIFFEL_OPERATOR);
-				}
+		if (lc.state == SCE_EIFFEL_DEFAULT) {
+			if (lc.ch == '-' && lc.chNext == '-') {
+				lc.SetState(SCE_EIFFEL_COMMENTLINE);
+			} else if (lc.ch == '\"') {
+				lc.SetState(SCE_EIFFEL_STRING);
+			} else if (lc.ch == '\'') {
+				lc.SetState(SCE_EIFFEL_CHARACTER);
+			} else if (isdigit(lc.ch) || (lc.ch == '.')) {
+				lc.SetState(SCE_EIFFEL_NUMBER);
+			} else if (iswordstart(lc.ch)) {
+				lc.SetState(SCE_EIFFEL_WORD);
+			} else if (isEiffelOperator(lc.ch)) {
+				lc.SetState(SCE_EIFFEL_OPERATOR);
 			}
 		}
 	}
-	styler.ColourTo(lengthDoc - 1, state);
+	lc.Complete();
 }
 
 static bool IsEiffelComment(Accessor &styler, int pos, int len) {
