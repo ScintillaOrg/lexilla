@@ -441,14 +441,14 @@ struct CharacterRange {
 };
 
 struct TextRange {
-	CharacterRange chrg;
+	struct CharacterRange chrg;
 	char *lpstrText;
 };
 
 struct TextToFind {
-	CharacterRange chrg;
+	struct CharacterRange chrg;
 	char *lpstrText;
-	CharacterRange chrgText;
+	struct CharacterRange chrgText;
 };
 
 #ifdef PLATFORM_H
@@ -467,8 +467,8 @@ struct RangeToFormat {
 #endif
 
 struct NotifyHeader {
-    // hwndFrom is really an environment specifc window handle or pointer
-    // but most clients of Scintilla.h do not have this type visible.
+	// hwndFrom is really an environment specifc window handle or pointer
+	// but most clients of Scintilla.h do not have this type visible.
 	//WindowID hwndFrom;
 	void *hwndFrom; 
 	unsigned int idFrom;
@@ -476,14 +476,14 @@ struct NotifyHeader {
 };
 
 struct SCNotification {
-	NotifyHeader nmhdr;
+	struct NotifyHeader nmhdr;
 	int position;			// SCN_STYLENEEDED, SCN_MODIFIED
 	int ch;					// SCN_CHARADDED, SCN_KEY
 	int modifiers;			// SCN_KEY
-  	int modificationType;	// SCN_MODIFIED
- 	const char *text;		// SCN_MODIFIED
- 	int length;				// SCN_MODIFIED
- 	int linesAdded;	// SCN_MODIFIED
+	int modificationType;	// SCN_MODIFIED
+	const char *text;		// SCN_MODIFIED
+	int length;				// SCN_MODIFIED
+	int linesAdded;	// SCN_MODIFIED
 #ifdef MACRO_SUPPORT
 	int message;	// SCN_MACRORECORD
 	int wParam;	// SCN_MACRORECORD
