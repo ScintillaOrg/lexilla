@@ -58,7 +58,6 @@ CellBuffer.o: CellBuffer.cxx Platform.h Scintilla.h CellBuffer.h
 ContractionState.o: ContractionState.cxx Platform.h ContractionState.h
 Document.o: Document.cxx Platform.h Scintilla.h PosRegExp.h CellBuffer.h \
  Document.h
-PosRegExp.o: PosRegExp.cxx PosRegExp.h
 DocumentAccessor.o: DocumentAccessor.cxx Platform.h PropSet.h \
  SString.h Accessor.h DocumentAccessor.h Scintilla.h
 Editor.o: Editor.cxx Platform.h Scintilla.h ContractionState.h \
@@ -92,6 +91,9 @@ KeyWords.o: KeyWords.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h
 LineMarker.o: LineMarker.cxx Platform.h Scintilla.h LineMarker.h
 PlatWin.o: PlatWin.cxx Platform.h PlatformRes.h UniConversion.h
+# PosRegExp.cxx is an external library so is not purged of warnings so turn the warnings off with -w.
+PosRegExp.o: PosRegExp.cxx PosRegExp.h
+	$(CC) $(CXXFLAGS) -w -c $< -o $@
 PropSet.o: PropSet.cxx Platform.h PropSet.h SString.h
 ScintillaBase.o: ScintillaBase.cxx Platform.h Scintilla.h \
  ContractionState.h CellBuffer.h CallTip.h KeyMap.h Indicator.h \

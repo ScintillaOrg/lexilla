@@ -747,6 +747,23 @@ char Document::DocCharAt(int pos, void *param) {
 	return reinterpret_cast<Document*>(param)->CharAt(pos);
 }
 
+// The comparison and case changing functions here assume ASCII
+// or extended ASCII such as the normal Windows code page.
+
+static inline char MakeUpperCase(char ch) {
+	if (ch < 'a' || ch > 'z')
+		return ch;
+	else
+		return static_cast<char>(ch - 'a' + 'A');
+}
+
+static inline char MakeLowerCase(char ch) {
+	if (ch < 'A' || ch > 'Z')
+		return ch;
+	else
+		return static_cast<char>(ch - 'A' + 'a');
+}
+
 // Find text in document, supporting both forward and backward
 // searches (just pass minPos > maxPos to do a backward search)
 // Has not been tested with backwards DBCS searches yet.
@@ -811,7 +828,7 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 		//Platform::DebugPrintf("Find %d %d %s %d\n", startPos, endPos, ft->lpstrText, lengthFind);
 		char firstChar = s[0];
 		if (!caseSensitive)
-			firstChar = static_cast<char>(toupper(firstChar));
+			firstChar = static_cast<char>(MakeUpperCase(firstChar));
 		int pos = startPos;
 		while (forward ? (pos < endSearch) : (pos >= endSearch)) {
 			char ch = CharAt(pos);
@@ -831,11 +848,11 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 					}
 				}
 			} else {
-				if (toupper(ch) == firstChar) {
+				if (MakeUpperCase(ch) == firstChar) {
 					bool found = true;
 					for (int posMatch = 1; posMatch < lengthFind && found; posMatch++) {
 						ch = CharAt(pos + posMatch);
-						if (toupper(ch) != toupper(s[posMatch]))
+						if (MakeUpperCase(ch) != MakeUpperCase(s[posMatch]))
 							found = false;
 					}
 					if (found) {
@@ -869,11 +886,11 @@ void Document::ChangeCase(Range r, bool makeUpperCase) {
 		} else {
 			if (makeUpperCase) {
 				if (islower(ch)) {
-					ChangeChar(pos, static_cast<char>(toupper(ch)));
+					ChangeChar(pos, static_cast<char>(MakeUpperCase(ch)));
 				}
 			} else {
 				if (isupper(ch)) {
-					ChangeChar(pos, static_cast<char>(tolower(ch)));
+					ChangeChar(pos, static_cast<char>(MakeLowerCase(ch)));
 				}
 			}
 		}

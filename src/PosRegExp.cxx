@@ -8,7 +8,14 @@
 #ifdef _MSC_VER
 #pragma warning(disable: 4244)
 #endif
-
+#ifdef __BORLANDC__
+// Too much effort to to cean this code up so just ignore badly 
+// bracketed initialisers, conversions losing significant digits, 
+// and values assigned but not used.
+#pragma warn -pin
+#pragma warn -sig
+#pragma warn -aus
+#endif
 //Up: /[A-Z \x80-\x9f \xf0 ]/x
 //Lo: /[a-z \xa0-\xaf \xe0-\xef \xf1 ]/x
 //Wd: /[\d _ A-Z a-z \xa0-\xaf \xe0-\xf1 \x80-\x9f]/x

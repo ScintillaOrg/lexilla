@@ -19,7 +19,7 @@
 // The comparison and case changing functions here assume ASCII
 // or extended ASCII such as the normal Windows code page.
 
-inline char MakeUpperCase(char ch) {
+static inline char MakeUpperCase(char ch) {
 	if (ch < 'a' || ch > 'z')
 		return ch;
 	else
