@@ -29,30 +29,30 @@ VENDOR=BORLAND
 !ENDIF
 !ENDIF
 
+LOGO=
+
 !IF "$(VENDOR)"=="MICROSOFT"
 
 CC=cl
 RC=rc
 LD=link
 
+!IFDEF QUIET
+CC=@$(CC)
+LOGO=/nologo
+!ENDIF
+
 INCLUDEDIRS=-I ../include -I ../src
-CXXFLAGS=/TP /W4
+CXXFLAGS=/TP /W4 $(LOGO)
 # For something scary:/Wp64
 CXXDEBUG=/Zi /Od /MDd -DDEBUG
 xCXXNDEBUG=/Og /Os /Oy /MD -DNDEBUG
 CXXNDEBUG=/Zi /O1 /GL /MT -DNDEBUG
 #CXXNDEBUG=/Ox /MD -DNDEBUG
 NAMEFLAG=-Fo
-LDFLAGS=/opt:nowin98 /opt:ref /LTCG /DEBUG
+LDFLAGS=/opt:nowin98 /opt:ref /LTCG /DEBUG $(LOGO)
 LDDEBUG=/DEBUG
 LIBS=KERNEL32.lib USER32.lib GDI32.lib IMM32.lib OLE32.LIB
-
-!IFDEF QUIET
-CC=@$(CC)
-CXXDEBUG=$(CXXDEBUG) /nologo
-CXXNDEBUG=$(CXXNDEBUG) /nologo
-LDFLAGS=$(LDFLAGS) /nologo
-!ENDIF
 
 !ELSE
 # BORLAND
@@ -61,14 +61,18 @@ CC=bcc32
 RC=brcc32 -r
 LD=ilink32
 
+!IFDEF QUIET
+CC=@$(CC)
+LOGO=-q
+!ENDIF
+
 INCLUDEDIRS=-I../include -I../src
-CXXFLAGS =  -v
-CXXFLAGS=-P -tWM -w -w-prc -w-inl -RT- -x-
+CXXFLAGS=-P -tWM -w -w-prc -w-inl -RT- -x- $(LOGO)
 # Above turns off warnings for clarfying parentheses and inlines with for not expanded
 CXXDEBUG=-v -DDEBUG
 CXXNDEBUG=-O1 -DNDEBUG
 NAMEFLAG=-o
-LDFLAGS=/Gn /x
+LDFLAGS=/Gn /x $(LOGO)
 LDDEBUG=-v
 LIBS=import32 cw32mt
 
@@ -154,24 +158,21 @@ LOBJS=\
 	$(DIR_O)\ViewStyle.obj \
 	$(LEXOBJS)
 
+$(DIR_O)\ScintRes.res : ScintRes.rc
+	$(RC) -fo$@ $**
+
 !IF "$(VENDOR)"=="MICROSOFT"
 
 $(COMPONENT): $(SOBJS) $(DIR_O)\ScintRes.res
-	$(LD) $(LDFLAGS) /DLL /OUT:$@ $(SOBJS) $(DIR_O)\ScintRes.res $(LIBS)
-
-$(DIR_O)\ScintRes.res : ScintRes.rc
-	$(RC) /fo$@ $(*B).rc
+	$(LD) $(LDFLAGS) /DLL /OUT:$@ $** $(LIBS)
 
 $(LEXCOMPONENT): $(LOBJS) $(DIR_O)\ScintRes.res
-	$(LD) $(LDFLAGS) /DLL /OUT:$@ $(LOBJS) $(DIR_O)\ScintRes.res $(LIBS)
+	$(LD) $(LDFLAGS) /DLL /OUT:$@ $** $(LIBS)
 
 !ELSE
 
 $(COMPONENT): $(SOBJS) $(DIR_O)\ScintRes.res
 	$(LD) $(LDFLAGS) -Tpd -c c0d32 $(SOBJS), $@, , $(LIBS), , $(DIR_O)\ScintRes.res
-
-$(DIR_O)\ScintRes.res: ScintRes.rc
-	$(RC) $*.rc
 
 $(LEXCOMPONENT): $(LOBJS) $(DIR_O)\ScintRes.res
 	$(LD) $(LDFLAGS) -Tpd -c c0d32 $(LOBJS), $@, , $(LIBS), , $(DIR_O)\ScintRes.res
