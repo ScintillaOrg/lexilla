@@ -647,6 +647,7 @@ int Document::FindColumn(int line, int column) {
 			char ch = cb.CharAt(position);
 			if (ch == '\t') {
 				columnCurrent = NextTab(columnCurrent, tabInChars);
+				position++;
 			} else if (ch == '\r') {
 				return position;
 			} else if (ch == '\n') {
