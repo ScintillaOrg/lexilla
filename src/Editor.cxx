@@ -120,7 +120,7 @@ Editor::Editor() {
 
 	wrapState = eWrapNone;
 	wrapWidth = wrapWidthInfinite;
-	needWrap = true;
+	docLineLastWrapped = -1;
 }
 
 Editor::~Editor() {
@@ -748,12 +748,16 @@ void Editor::InvalidateCaret() {
 		InvalidateRange(currentPos, currentPos + 1);
 }
 
+void Editor::NeedWrapping(int docLineStartWrapping) {
+	docLineLastWrapped = docLineStartWrapping - 1;
+}
+
 // Check if wrapping needed and perform any needed wrapping.
 // Return true if wrapping occurred.
 bool Editor::WrapLines(int *goodTopLine) {
 	*goodTopLine = topLine;
 	bool wrapOccurred = false;
-	if (needWrap) {
+	if (docLineLastWrapped < pdoc->LinesTotal()) {
 		if (wrapState == eWrapNone) {
 			if (wrapWidth != wrapWidthInfinite) {
 				wrapWidth = wrapWidthInfinite;
@@ -762,6 +766,7 @@ bool Editor::WrapLines(int *goodTopLine) {
 				}
 				wrapOccurred = true;
 			}
+			docLineLastWrapped = 0x7ffffff;
 		} else {
 			int lineDocTop = cs.DocFromDisplay(topLine);
 			int subLineTop = topLine - cs.DisplayFromDoc(lineDocTop);
@@ -773,10 +778,12 @@ bool Editor::WrapLines(int *goodTopLine) {
 			pdoc->EnsureStyledTo(pdoc->Length());
 			AutoSurface surface(IsUnicodeMode());
 			if (surface) {
-				for (int lineDoc=0; lineDoc<pdoc->LinesTotal(); lineDoc++) {
+				int lastLineToWrap = pdoc->LinesTotal();
+				while (docLineLastWrapped <= lastLineToWrap) {
+					docLineLastWrapped++;
 					LineLayout ll;
-					LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
-					if (cs.SetHeight(lineDoc, ll.lines))
+					LayoutLine(docLineLastWrapped, surface, vs, ll, wrapWidth);
+					if (cs.SetHeight(docLineLastWrapped, ll.lines))
 						wrapOccurred = true;
 				}
 			}
@@ -787,7 +794,6 @@ bool Editor::WrapLines(int *goodTopLine) {
 				*goodTopLine += cs.GetHeight(lineDocTop);
 		}
 	}
-	needWrap = false;
 	return wrapOccurred;
 }
 
@@ -1506,7 +1512,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 
 	// Ensure we are styled as far as we are painting.
 	pdoc->EnsureStyledTo(endPosPaint);
-
+	bool paintAbandonedByStyling = paintState == paintAbandoned;
 	if (needUpdateUI) {
 		NotifyUpdateUI();
 		needUpdateUI = false;
@@ -1525,7 +1531,11 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		// outside the current painting rectangle
 		//Platform::DebugPrintf("Abandoning paint\n");
 		if (wrapState != eWrapNone) {
-			needWrap = true;
+			if (paintAbandonedByStyling) {
+				// Styling has spilled over a line end, such as occurs by starting a multiline 
+				// comment. The width of subsequent text may have changed, so rewrap.
+				NeedWrapping(cs.DocFromDisplay(topLine));
+			}
 		}
 		return;
 	}
@@ -1884,11 +1894,16 @@ void Editor::SetScrollBars() {
 }
 
 void Editor::ChangeSize() {
-	needWrap = true;
 	DropGraphics();
 	SetScrollBars();
 	if (wrapState != eWrapNone) {
-		Redraw();
+		PRectangle rcTextArea = GetClientRectangle();
+		rcTextArea.left = vs.fixedColumnWidth;
+		rcTextArea.right -= vs.rightMarginWidth;
+		if (wrapWidth != rcTextArea.Width()) {
+			NeedWrapping();
+			Redraw();
+		}
 	}
 }
 
@@ -2236,21 +2251,21 @@ void Editor::CheckModificationForWrap(DocModification mh) {
 	if ((mh.modificationType & SC_MOD_INSERTTEXT) ||
 		(mh.modificationType & SC_MOD_DELETETEXT)) {
 		if (wrapState != eWrapNone) {
+			int lineDoc = pdoc->LineFromPosition(mh.position);
 			if (mh.linesAdded == 0) {
-				int lineDoc = pdoc->LineFromPosition(mh.position);
 				AutoSurface surface(IsUnicodeMode());
 				if (surface) {
 					LineLayout ll;
 					LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
 					if (cs.GetHeight(lineDoc) != ll.lines) {
-						needWrap = true;
+						NeedWrapping(lineDoc);
 						Redraw();
 					}
 				} else {
-					needWrap = true;
+					NeedWrapping(lineDoc);
 				}
 			} else {
-				needWrap = true;
+				NeedWrapping(lineDoc);
 			}
 		}
 	}
@@ -4017,13 +4032,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETMARGINLEFT:
 		vs.leftMarginWidth = lParam;
-		needWrap = true;
+		NeedWrapping();
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETMARGINRIGHT:
 		vs.rightMarginWidth = lParam;
-		needWrap = true;
+		NeedWrapping();
 		InvalidateStyleRedraw();
 		break;
 
@@ -4326,7 +4341,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETWRAPMODE:
 		wrapState = (wParam == SC_WRAP_WORD) ? eWrapWord : eWrapNone;
-		needWrap = true;
+		NeedWrapping();
 		xOffset = 0;
 		InvalidateStyleRedraw();
 		ReconfigureScrollBars();
@@ -4451,7 +4466,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SETMARGINWIDTHN:
 		if (ValidMargin(wParam)) {
 			vs.ms[wParam].width = lParam;
-			needWrap = true;
+			NeedWrapping();
 			InvalidateStyleRedraw();
 		}
 		break;

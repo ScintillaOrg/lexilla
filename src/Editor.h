@@ -217,9 +217,9 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	// Wrapping support
 	enum { eWrapNone, eWrapWord } wrapState;
-	enum { wrapWidthInfinite = 0x7ffffff};
+	enum { wrapWidthInfinite = 0x7ffffff };
 	int wrapWidth;
-	bool needWrap;
+	int docLineLastWrapped;
 
 	Document *pdoc;
 
@@ -275,6 +275,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void DropCaret();
 	void InvalidateCaret();
 
+	void NeedWrapping(int docLineStartWrapping=0);
 	bool WrapLines(int *goodTopLine);
 
 	int SubstituteMarkerIfEmpty(int markerCheck, int markerDefault);
