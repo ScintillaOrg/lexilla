@@ -44,66 +44,6 @@ static bool isOKBeforeRE(char ch) {
 	return (ch == '(') || (ch == '=') || (ch == ',');
 }
 
-static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordList *[],
-                            Accessor &styler) {
-	// Finished the styling, time for folding
-	bool fold = styler.GetPropertyInt("fold");
-	bool foldComment = styler.GetPropertyInt("fold.comment");
-	unsigned int lengthDoc = startPos + length;
-	int visibleChars = 0;
-	int lineCurrent = styler.GetLine(startPos);
-	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
-	int levelCurrent = levelPrev;
-	char chNext = styler[startPos];
-	int styleNext = styler.StyleAt(startPos);
-	int style = initStyle;
-	if (fold) {
-		for (unsigned int j = startPos; j < lengthDoc; j++) {
-			char ch = chNext;
-			chNext = styler.SafeGetCharAt(j + 1);
-			int stylePrev = style;
-			style = styleNext;
-			styleNext = styler.StyleAt(j + 1);
-			bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
-			if (foldComment &&
-				(style == SCE_C_COMMENT || style == SCE_C_COMMENTDOC)) {
-				if (style != stylePrev) {
-					levelCurrent++;
-				} else if ((style != styleNext) && !atEOL) {
-					// Comments don't end at end of line and the next character may be unstyled.
-					levelCurrent--;
-				}
-			}
-			if (style == SCE_C_OPERATOR) {
-				if (ch == '{') {
-					levelCurrent++;
-				} else if (ch == '}') {
-					levelCurrent--;
-				}
-			}
-			if (atEOL) {
-				int lev = levelPrev;
-				if (visibleChars == 0)
-					lev |= SC_FOLDLEVELWHITEFLAG;
-				if ((levelCurrent > levelPrev) && (visibleChars > 0))
-					lev |= SC_FOLDLEVELHEADERFLAG;
-				if (lev != styler.LevelAt(lineCurrent)) {
-					styler.SetLevel(lineCurrent, lev);
-				}
-				lineCurrent++;
-				levelPrev = levelCurrent;
-				visibleChars = 0;
-			}
-			if (!isspacechar(ch))
-				visibleChars++;
-		}
-		// Fill in the real level of the next line, keeping the current flags as they will be filled in later
-		int flagsNext = styler.LevelAt(lineCurrent) & ~SC_FOLDLEVELNUMBERMASK;
-		//styler.SetLevel(lineCurrent, levelCurrent | flagsNext);
-		styler.SetLevel(lineCurrent, levelPrev | flagsNext);
-	}
-}
-
 static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
                             Accessor &styler) {
 
@@ -327,7 +267,61 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			chPrevNonWhite = ch;
 	}
 	styler.ColourTo(lengthDoc - 1, state);
-	styler.Flush();
+}
+
+static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordList *[],
+                            Accessor &styler) {
+	bool foldComment = styler.GetPropertyInt("fold.comment");
+	unsigned int lengthDoc = startPos + length;
+	int visibleChars = 0;
+	int lineCurrent = styler.GetLine(startPos);
+	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
+	int levelCurrent = levelPrev;
+	char chNext = styler[startPos];
+	int styleNext = styler.StyleAt(startPos);
+	int style = initStyle;
+	for (unsigned int i = startPos; i < lengthDoc; i++) {
+		char ch = chNext;
+		chNext = styler.SafeGetCharAt(i + 1);
+		int stylePrev = style;
+		style = styleNext;
+		styleNext = styler.StyleAt(i + 1);
+		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
+		if (foldComment &&
+			(style == SCE_C_COMMENT || style == SCE_C_COMMENTDOC)) {
+			if (style != stylePrev) {
+				levelCurrent++;
+			} else if ((style != styleNext) && !atEOL) {
+				// Comments don't end at end of line and the next character may be unstyled.
+				levelCurrent--;
+			}
+		}
+		if (style == SCE_C_OPERATOR) {
+			if (ch == '{') {
+				levelCurrent++;
+			} else if (ch == '}') {
+				levelCurrent--;
+			}
+		}
+		if (atEOL) {
+			int lev = levelPrev;
+			if (visibleChars == 0)
+				lev |= SC_FOLDLEVELWHITEFLAG;
+			if ((levelCurrent > levelPrev) && (visibleChars > 0))
+				lev |= SC_FOLDLEVELHEADERFLAG;
+			if (lev != styler.LevelAt(lineCurrent)) {
+				styler.SetLevel(lineCurrent, lev);
+			}
+			lineCurrent++;
+			levelPrev = levelCurrent;
+			visibleChars = 0;
+		}
+		if (!isspacechar(ch))
+			visibleChars++;
+	}
+	// Fill in the real level of the next line, keeping the current flags as they will be filled in later
+	int flagsNext = styler.LevelAt(lineCurrent) & ~SC_FOLDLEVELNUMBERMASK;
+	styler.SetLevel(lineCurrent, levelPrev | flagsNext);
 }
 
 LexerModule lmCPP(SCLEX_CPP, ColouriseCppDoc, "cpp", FoldCppDoc);
