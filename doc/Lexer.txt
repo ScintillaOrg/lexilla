@@ -25,7 +25,7 @@ The startPos and length parameters indicate the range of text to be
 recolored; the lexer must determine the proper color for all characters
 in positions startPos through startPos+length.
 
-The initStyle paramter indicates the initial state, that is, the state
+The initStyle parameter indicates the initial state, that is, the state
 at the character before startPos. States also indicate the coloring to
 be used for a particular range of text.
 
@@ -53,7 +53,7 @@ should set the state variable to the coloring state of the character at
 position i and continue until the entire text has been colored.
 
 Note 1:  the styler (Accessor) object remembers the i parameter in the
-previous calls to styler.ColourTo, so the single i paramter suffices to
+previous calls to styler.ColourTo, so the single i parameter suffices to
 indicate a range of characters.
 
 Note 2: As a side effect of calling styler.ColourTo(i,state), the
@@ -143,7 +143,7 @@ Folding may be performed in the lexer function. It is better to use a
 separate folder function as that avoids some troublesome interaction 
 between styling and folding. The folder function will be run after the
 lexer function if folding is enabled. The rest of this section explains
-how to perform folding within the lexer fucntion.
+how to perform folding within the lexer function.
 
 During initialization, lexers that support folding set
 
