@@ -871,7 +871,7 @@ void ListBox::Sort() {
 	// Windows keeps sorted so no need to sort
 }
 
-void ListBox::SetTypeXpm(int, const char **) {
+void ListBox::SetTypeXpm(int, const char *) {
 }
 
 Menu::Menu() : id(0) {
