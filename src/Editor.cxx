@@ -548,9 +548,8 @@ void Editor::MoveCaretInsideView() {
 	}
 }
 
-
 void Editor::EnsureCaretVisible(bool useMargin) {
-	//Platform::DebugPrintf("EnsureCaretVisible %d\n", xOffset);
+    //Platform::DebugPrintf("EnsureCaretVisible %d %s\n", xOffset, useMargin ? " margin" : " ");
 	PRectangle rcClient = GetTextRectangle();
 	//int rcClientFullWidth = rcClient.Width();
 	int posCaret = currentPos;
@@ -601,7 +600,7 @@ void Editor::EnsureCaretVisible(bool useMargin) {
 	int xOffsetNew = xOffset;
 	if (pt.x < rcClient.left) {
 		xOffsetNew = xOffset - (rcClient.left - pt.x);
-	} else if (xOffset > 0 || pt.x >= rcClient.right) {
+	} else if (((xOffset > 0) && useMargin) || pt.x >= rcClient.right) {
 		xOffsetNew = xOffset + (pt.x - rcClient.right);
 		int xOffsetEOL = xOffset + (ptEOL.x - rcClient.right) - xMargin + 2;
 		//Platform::DebugPrintf("Margin %d %d\n", xOffsetNew, xOffsetEOL);
@@ -2814,9 +2813,6 @@ void Editor::ButtonMove(Point pt) {
 				DisplayCursor(Window::cursorReverseArrow);
 				return ; 	// No need to test for selection
 			}
-
-
-
 		}
 		// Display regular (drag) cursor over selection
 		if (PointInSelection(pt))
