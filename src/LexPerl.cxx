@@ -116,11 +116,30 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 	};
 	HereDocCls HereDoc;	// TODO: FIFO for stacked here-docs
 
+	class QuoteCls {
+		public:
+		int  Rep;
+		int  Count;
+		char Up;
+		char Down;
+		QuoteCls() {
+			this->New(1);
+		}
+		void New(int r) {
+			Rep   = r;
+			Count = 0;
+			Up    = '\0';
+			Down  = '\0';
+		}
+		void Open(char u) {
+			Count++;
+			Up    = u;
+			Down  = opposite(Up);
+		}
+	};
+	QuoteCls Quote;
+
 	char sooked[100];
-	int quotes = 0;
-	char quoteDown = 'd';
-	char quoteUp = 'd';
-	int quoteRep = 1;
 	int sookedpos = 0;
 	bool preferRE = true;
 	sooked[sookedpos] = '\0';
@@ -209,28 +228,16 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				styler.ColourTo(i - 1, state);
 				if (ch == 's' && !isalnum(chNext)) {
 					state = SCE_PL_REGSUBST;
-					quotes = 0;
-					quoteUp = '\0';
-					quoteDown = '\0';
-					quoteRep = 2;
+					Quote.New(2);
 				} else if (ch == 'm' && !isalnum(chNext)) {
 					state = SCE_PL_REGEX;
-					quotes = 0;
-					quoteUp = '\0';
-					quoteDown = '\0';
-					quoteRep = 1;
+					Quote.New(1);
 				} else if (ch == 'q' && !isalnum(chNext)) {
 					state = SCE_PL_STRING_Q;
-					quotes = 0;
-					quoteUp = '\0';
-					quoteDown = '\0';
-					quoteRep = 1;
+					Quote.New(1);
 				} else if (ch == 't' && chNext == 'r' && !isalnum(chNext2)) {
 					state = SCE_PL_REGSUBST;
-					quotes = 0;
-					quoteUp = '\0';
-					quoteDown = '\0';
-					quoteRep = 2;
+					Quote.New(2);
 					i++;
 					chNext = chNext2;
 				} else if (ch == 'q' && (chNext == 'q' || chNext == 'r' || chNext == 'w' || chNext == 'x') && !isalnum(chNext2)) {
@@ -240,10 +247,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					else if (chNext == 'w') state = SCE_PL_STRING_QW;
 					i++;
 					chNext = chNext2;
-					quotes = 0;
-					quoteUp = '\0';
-					quoteDown = '\0';
-					quoteRep = 1;
+					Quote.New(1);
 				} else {
 					state = SCE_PL_WORD;
 					preferRE = false;
@@ -306,10 +310,8 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 			} else if (ch == '/' && preferRE) {
 				styler.ColourTo(i - 1, state);
 				state = SCE_PL_REGEX;
-				quoteUp = '/';
-				quoteDown = '/';
-				quotes = 1;
-				quoteRep = 1;
+				Quote.New(1);
+				Quote.Open(ch);
 			} else if (ch == '<' && chNext == '<') {
 				styler.ColourTo(i - 1, state);
 				state = SCE_PL_HERE_DELIM;
@@ -319,7 +321,6 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 			           && (isEOLChar(chPrev))) {
 				styler.ColourTo(i - 1, state);
 				state = SCE_PL_POD;
-				quotes = 0;
 				sookedpos = 0;
 				sooked[sookedpos] = '\0';
 			} else if (ch == '-'
@@ -535,35 +536,33 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 			} else if (state == SCE_PL_REGEX
 				|| state == SCE_PL_STRING_QR
 				) {
-				if (!quoteUp && !isspace(ch)) {
-					quoteUp = ch;
-					quoteDown = opposite(ch);
-					quotes++;
-				} else if (ch == '\\' && quoteUp != '\\') {
+				if (!Quote.Up && !isspace(ch)) {
+					Quote.Open(ch);
+				} else if (ch == '\\' && Quote.Up != '\\') {
 					// SG: Is it save to skip *every* escaped char?
 					i++;
 					ch = chNext;
 					chNext = styler.SafeGetCharAt(i + 1);
 				} else {
-					if (ch == quoteDown /*&& chPrev != '\\'*/) {
-						quotes--;
-						if (quotes == 0) {
-							quoteRep--;
-							if (quoteUp == quoteDown) {
-								quotes++;
+					if (ch == Quote.Down /*&& chPrev != '\\'*/) {
+						Quote.Count--;
+						if (Quote.Count == 0) {
+							Quote.Rep--;
+							if (Quote.Up == Quote.Down) {
+								Quote.Count++;
 							}
 						}
 						if (!isalpha(chNext)) {
-							if (quoteRep <= 0) {
+							if (Quote.Rep <= 0) {
 								styler.ColourTo(i, state);
 								state = SCE_PL_DEFAULT;
 								ch = ' ';
 							}
 						}
-					} else if (ch == quoteUp /*&& chPrev != '\\'*/) {
-						quotes++;
+					} else if (ch == Quote.Up /*&& chPrev != '\\'*/) {
+						Quote.Count++;
 					} else if (!isalpha(chNext)) {
-						if (quoteRep <= 0) {
+						if (Quote.Rep <= 0) {
 							styler.ColourTo(i, state);
 							state = SCE_PL_DEFAULT;
 							ch = ' ';
@@ -571,17 +570,15 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					}
 				}
 			} else if (state == SCE_PL_REGSUBST) {
-				if (!quoteUp && !isspace(ch)) {
-					quoteUp = ch;
-					quoteDown = opposite(ch);
-					quotes++;
-				} else if (ch == '\\' && quoteUp != '\\') {
+				if (!Quote.Up && !isspace(ch)) {
+					Quote.Open(ch);
+				} else if (ch == '\\' && Quote.Up != '\\') {
 					// SG: Is it save to skip *every* escaped char?
 					i++;
 					ch = chNext;
 					chNext = styler.SafeGetCharAt(i + 1);
 				} else {
-					if (quotes == 0 && quoteRep == 1) {
+					if (Quote.Count == 0 && Quote.Rep == 1) {
 						/* We matched something like s(...) or tr{...}
 						* and are looking for the next matcher characters,
 						* which could be either bracketed ({...}) or non-bracketed
@@ -589,7 +586,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 						*
 						* Number-signs are problematic.  If they occur after
 						* the close of the first part, treat them like
-						* a quoteUp char, even if they actually start comments.
+						* a Quote.Up char, even if they actually start comments.
 						*
 						* If we find an alnum, we end the regsubst, and punt.
 						*
@@ -603,29 +600,27 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 							state = SCE_PL_DEFAULT;
 							ch = ' ';
 						} else {
-							quoteUp = ch;
-							quoteDown = opposite(ch);
-							quotes++;
+							Quote.Open(ch);
 						}
-					} else if (ch == quoteDown /*&& chPrev != '\\'*/) {
-						quotes--;
-						if (quotes == 0) {
-							quoteRep--;
+					} else if (ch == Quote.Down /*&& chPrev != '\\'*/) {
+						Quote.Count--;
+						if (Quote.Count == 0) {
+							Quote.Rep--;
 						}
 						if (!isalpha(chNext)) {
-							if (quoteRep <= 0) {
+							if (Quote.Rep <= 0) {
 								styler.ColourTo(i, state);
 								state = SCE_PL_DEFAULT;
 								ch = ' ';
 							}
 						}
-						if (quoteUp == quoteDown) {
-							quotes++;
+						if (Quote.Up == Quote.Down) {
+							Quote.Count++;
 						}
-					} else if (ch == quoteUp /*&& chPrev != '\\'*/) {
-						quotes++;
+					} else if (ch == Quote.Up /*&& chPrev != '\\'*/) {
+						Quote.Count++;
 					} else if (!isalpha(chNext)) {
-						if (quoteRep <= 0) {
+						if (Quote.Rep <= 0) {
 							styler.ColourTo(i, state);
 							state = SCE_PL_DEFAULT;
 							ch = ' ';
@@ -637,29 +632,27 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				|| state == SCE_PL_STRING_QX
 				|| state == SCE_PL_STRING_QW
 				) {
-				if (!quoteDown && !isspace(ch)) {
-					quoteUp = ch;
-					quoteDown = opposite(quoteUp);
-					quotes++;
-				} else if (ch == '\\' && quoteUp != '\\') {
+				if (!Quote.Down && !isspace(ch)) {
+					Quote.Open(ch);
+				} else if (ch == '\\' && Quote.Up != '\\') {
 					i++;
 					ch = chNext;
 					chNext = styler.SafeGetCharAt(i + 1);
-				} else if (ch == quoteDown) {
-					quotes--;
-					if (quotes == 0) {
-						quoteRep--;
-						if (quoteRep <= 0) {
+				} else if (ch == Quote.Down) {
+					Quote.Count--;
+					if (Quote.Count == 0) {
+						Quote.Rep--;
+						if (Quote.Rep <= 0) {
 							styler.ColourTo(i, state);
 							state = SCE_PL_DEFAULT;
 							ch = ' ';
 						}
-						if (quoteUp == quoteDown) {
-							quotes++;
+						if (Quote.Up == Quote.Down) {
+							Quote.Count++;
 						}
 					}
-				} else if (ch == quoteUp) {
-					quotes++;
+				} else if (ch == Quote.Up) {
+					Quote.Count++;
 				}
 			}
 
