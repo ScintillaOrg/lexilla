@@ -146,6 +146,10 @@ SOURCE=..\src\LexAVE.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexBullant.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexConf.cxx
 # End Source File
 # Begin Source File
