@@ -33,6 +33,9 @@ public:
 	int numCharsInLine;
 	int xHighlightGuide;
 	bool highlightColumn;
+	int selStart;
+	int selEnd;
+	int edgeColumn;
 	char chars[maxLineLength];
 	char styles[maxLineLength];
 	char indicators[maxLineLength];
@@ -106,7 +109,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int bracesMatchStyle;
 	int highlightGuideColumn;
 	
-	int edgeState;
 	int theEdge;
 
 	enum { notPainting, painting, paintAbandoned } paintState;

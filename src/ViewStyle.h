@@ -59,6 +59,7 @@ public:
 	bool showMarkedLines;
 	ColourPair caretcolour;
 	ColourPair edgecolour;
+	int edgeState;
 	
 	ViewStyle();
 	ViewStyle(const ViewStyle &source);

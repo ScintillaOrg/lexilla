@@ -86,7 +86,6 @@ Editor::Editor() {
 	bracesMatchStyle = STYLE_BRACEBAD;
 	highlightGuideColumn = 0;
 
-	edgeState = EDGE_NONE;
 	theEdge = 0;
 	
 	paintState = notPainting;
@@ -817,9 +816,6 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	int posLineStart = pdoc->LineStart(line);
 	int posLineEnd = pdoc->LineStart(line + 1);
 
-	int selStart = SelectionStart(line);
-	int selEnd = SelectionEnd(line);
-
 	int styleMask = pdoc->stylingBitsMask;
 	int startseg = 0;
 	for (int i = 0; i < ll.numCharsInLine; i++) {
@@ -828,14 +824,14 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		// If there is the end of a style run for any reason
 		if ((ll.styles[i] != ll.styles[i + 1]) ||
 			IsControlCharacter(ll.chars[i]) || IsControlCharacter(ll.chars[i + 1]) ||
-			((selStart != selEnd) && ((iDoc + 1 == selStart) || (iDoc + 1 == selEnd))) ||
-				(i == (theEdge-1))) {
+			((ll.selStart != ll.selEnd) && ((iDoc + 1 == ll.selStart) || (iDoc + 1 == ll.selEnd))) ||
+				(i == (ll.edgeColumn-1))) {
 			int styleMain = ll.styles[i];
 			Colour textBack = vsDraw.styles[styleMain].back.allocated;
 			Colour textFore = vsDraw.styles[styleMain].fore.allocated;
 			Font &textFont = vsDraw.styles[styleMain].font;
-			bool inSelection = (iDoc >= selStart) && (iDoc < selEnd) && (selStart != selEnd);
-			if (inSelection && !hideSelection) {
+			bool inSelection = (iDoc >= ll.selStart) && (iDoc < ll.selEnd) && (ll.selStart != ll.selEnd);
+			if (inSelection) {
 				if (vsDraw.selbackset)
 					textBack = vsDraw.selbackground.allocated;
 				if (vsDraw.selforeset)
@@ -843,8 +839,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 			} else {
 				if (marks)
 					textBack = markBack;
-				if ((edgeState == EDGE_BACKGROUND) && (i >= theEdge) && (ll.chars[i] != '\n') && (ll.chars[i] != '\r'))
-					textBack = vs.edgecolour.allocated;
+				if ((vsDraw.edgeState == EDGE_BACKGROUND) && (i >= ll.edgeColumn) && (ll.chars[i] != '\n') && (ll.chars[i] != '\r'))
+					textBack = vsDraw.edgecolour.allocated;
 			}
 			// Manage tab display
 			if (ll.chars[i] == '\t') {
@@ -857,14 +853,12 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 				if (inIndentation && vsDraw.viewIndentationGuides) {
 					for (int xIG = ll.positions[i] / indentWidth * indentWidth; xIG < ll.positions[i + 1]; xIG += indentWidth) {
 						if (xIG >= ll.positions[i] && xIG > 0) {
-							Point from(0, ((lineVisible & 1) && (vs.lineHeight & 1)) ? 1 : 0);
+							Point from(0, ((lineVisible & 1) && (vsDraw.lineHeight & 1)) ? 1 : 0);
 							PRectangle rcCopyArea(xIG + xStart + 1, rcSegment.top, xIG + xStart + 2, rcSegment.bottom);
 							surface->Copy(rcCopyArea, from, (ll.xHighlightGuide == xIG) ? 
 								pixmapIndentGuideHighlight : pixmapIndentGuide);
 						}
 					}
-					//if (ll.positions[i] > 0 && (ll.positions[i] % indentWidth == 0)) {
-					//}
 				}
 				if (vsDraw.viewWhitespace != wsInvisible) {
 					if (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways) {
@@ -907,7 +901,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 							rcSegment.top + vsDraw.maxAscent, ll.chars + startseg,
 							i - startseg + 1, textFore, textBack);
 					if (vsDraw.viewWhitespace != wsInvisible || 
-						(inIndentation && vs.viewIndentationGuides)) {
+						(inIndentation && vsDraw.viewIndentationGuides)) {
 						for (int cpos = 0; cpos <= i - startseg; cpos++) {
 							if (ll.chars[cpos + startseg] == ' ') {
 								if (vsDraw.viewWhitespace != wsInvisible) {
@@ -922,7 +916,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 								if (inIndentation && vsDraw.viewIndentationGuides) {
 									int startSpace = ll.positions[cpos + startseg];
 									if (startSpace > 0 && (startSpace % indentWidth == 0)) {
-										Point from(0, ((lineVisible & 1) && (vs.lineHeight & 1)) ? 1 : 0);
+										Point from(0, ((lineVisible & 1) && (vsDraw.lineHeight & 1)) ? 1 : 0);
 										PRectangle rcCopyArea(startSpace + xStart + 1, rcSegment.top, startSpace + xStart + 2, rcSegment.bottom);
 										surface->Copy(rcCopyArea, from, (ll.xHighlightGuide == ll.positions[cpos + startseg]) ? 
 											pixmapIndentGuideHighlight : pixmapIndentGuide);
@@ -975,8 +969,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	int xEol = ll.positions[ll.numCharsInLine];
 	rcSegment.left = xEol + xStart;
 	rcSegment.right = xEol + vsDraw.aveCharWidth + xStart;
-	bool eolInSelection = (posLineEnd > selStart) && (posLineEnd <= selEnd) && (selStart != selEnd);
-	if (eolInSelection && !hideSelection && vsDraw.selbackset && (line < pdoc->LinesTotal()-1)) {
+	bool eolInSelection = (posLineEnd > ll.selStart) && (posLineEnd <= ll.selEnd) && (ll.selStart != ll.selEnd);
+	if (eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal()-1)) {
 		surface->FillRectangle(rcSegment, vsDraw.selbackground.allocated);
 	} else if (marks) {
 		surface->FillRectangle(rcSegment, markBack);
@@ -994,11 +988,11 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		surface->FillRectangle(rcSegment, vsDraw.styles[STYLE_DEFAULT].back.allocated);
 	}
 	
-	if (edgeState == EDGE_LINE) {
-		int edgeX = theEdge * vsDraw.spaceWidth;
+	if (vsDraw.edgeState == EDGE_LINE) {
+		int edgeX = ll.edgeColumn * vsDraw.spaceWidth;
 		rcSegment.left = edgeX + xStart;
 		rcSegment.right = rcSegment.left + 1;
-		surface->FillRectangle(rcSegment, vs.edgecolour.allocated);
+		surface->FillRectangle(rcSegment, vsDraw.edgecolour.allocated);
 	}
 }
 
@@ -1152,6 +1146,15 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 				ll.xHighlightGuide = highlightGuideColumn * vs.spaceWidth;
 			}
 				
+			ll.selStart = SelectionStart(line);
+			ll.selEnd = SelectionEnd(line);
+			if (hideSelection) {
+				ll.selStart = -1;
+				ll.selEnd = -1;
+			}
+			// Need to fix this up so takes account of Unicode and DBCS
+			ll.edgeColumn = theEdge;
+				
 			// Draw the line
 			if (cs.GetVisible(line))
 				DrawLine(surface, vs, line, visibleLine, xStart, rcLine, ll);
@@ -1230,7 +1233,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		rcBeyondEOF.top = (cs.LinesDisplayed() - topLine) * vs.lineHeight;
 		if (rcBeyondEOF.top < rcBeyondEOF.bottom) {
 			surfaceWindow->FillRectangle(rcBeyondEOF, vs.styles[STYLE_DEFAULT].back.allocated);
-			if (edgeState == EDGE_LINE) {
+			if (vs.edgeState == EDGE_LINE) {
 				int edgeX = theEdge * vs.spaceWidth;
 				rcBeyondEOF.left = edgeX + xStart;
 				rcBeyondEOF.right = rcBeyondEOF.left + 1;
@@ -1286,7 +1289,7 @@ long Editor::FormatRange(bool draw, FORMATRANGE *pfr) {
 	vsPrint.showMarkedLines = false;
 	vsPrint.fixedColumnWidth = 0;
 	vsPrint.zoomLevel = printMagnification;
-    vsPrint.viewIndentationGuides = false;
+	vsPrint.viewIndentationGuides = false;
 	// Don't show the selection when printing
 	vsPrint.selbackset = false;
 	vsPrint.selforeset = false;
@@ -1368,6 +1371,10 @@ long Editor::FormatRange(bool draw, FORMATRANGE *pfr) {
 			surfaceMeasure->FlushCachedState();
 			LineLayout ll;
 			LayoutLine(line, surfaceMeasure, vsPrint, ll);
+			ll.selStart = -1;
+			ll.selEnd = -1;
+			// Need to fix this up so takes account of Unicode and DBCS
+			ll.edgeColumn = theEdge;
 			                                
 			// Draw the line
 			surface->FlushCachedState();
@@ -3982,10 +3989,10 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		break;
 		
 	case SCI_GETEDGEMODE:
-		return edgeState;
+		return vs.edgeState;
 		
 	case SCI_SETEDGEMODE:
-		edgeState = wParam;
+		vs.edgeState = wParam;
 		InvalidateStyleRedraw();
 		break;
 		

@@ -73,6 +73,7 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	selbarlight.desired = source.selbarlight.desired;
 	caretcolour.desired = source.caretcolour.desired;
 	edgecolour.desired = source.edgecolour.desired;
+	edgeState = source.edgeState;
 	leftMarginWidth = source.leftMarginWidth;
 	rightMarginWidth = source.rightMarginWidth;
 	for (int i=0;i < margins; i++) {
@@ -119,6 +120,7 @@ void ViewStyle::Init() {
 	//caretcolour.desired = Colour(0xff, 0, 0);
 	caretcolour.desired = Colour(0, 0, 0);
 	edgecolour.desired = Colour(0xc0, 0xc0, 0xc0);
+	edgeState = EDGE_NONE;
 	
 	leftMarginWidth = 1;
 	rightMarginWidth = 1;
