@@ -173,6 +173,11 @@ int ScintillaBase::KeyCommand(unsigned int iMessage) {
 	return Editor::KeyCommand(iMessage);
 }
 
+void ScintillaBase::AutoCompleteDoubleClick(void* p) {
+	ScintillaBase* sci = reinterpret_cast<ScintillaBase*>(p);
+	sci->AutoCompleteCompleted();
+}
+
 void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 	//Platform::DebugPrintf("AutoComplete %s\n", list);
 	ct.CallTipCancel();
@@ -222,6 +227,7 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 	ac.lb.SetPositionRelative(rcac, wMain);
 	ac.lb.SetFont(vs.styles[STYLE_DEFAULT].font);
 	ac.lb.SetAverageCharWidth(vs.styles[STYLE_DEFAULT].aveCharWidth);
+	ac.lb.SetDoubleClickAction(AutoCompleteDoubleClick, this);
 
 	ac.SetList(list);
 

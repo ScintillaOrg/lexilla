@@ -670,7 +670,8 @@ void Window::SetTitle(const char *s) {
 	gtk_window_set_title(GTK_WINDOW(id), s);
 }
 
-ListBox::ListBox() : list(0), current(0), desiredVisibleRows(5), maxItemCharacters(0) {}
+ListBox::ListBox() : list(0), current(0), desiredVisibleRows(5), maxItemCharacters(0),
+	doubleClickAction(NULL), doubleClickActionData(NULL) {}
 
 ListBox::~ListBox() {}
 
@@ -678,6 +679,16 @@ static void SelectionAC(GtkWidget *, gint row, gint,
                         GdkEventButton *, gpointer p) {
 	int *pi = reinterpret_cast<int *>(p);
 	*pi = row;
+}
+
+static gboolean ButtonPress(GtkWidget *, GdkEventButton* ev, gpointer p) {
+	ListBox* lb = reinterpret_cast<ListBox*>(p);
+	if (ev->type == GDK_2BUTTON_PRESS && lb->doubleClickAction != NULL) {
+		lb->doubleClickAction(lb->doubleClickActionData);
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 void ListBox::Create(Window &, int) {
@@ -703,6 +714,8 @@ void ListBox::Create(Window &, int) {
 	gtk_clist_set_selection_mode(GTK_CLIST(list), GTK_SELECTION_BROWSE);
 	gtk_signal_connect(GTK_OBJECT(list), "select_row",
 	                   GTK_SIGNAL_FUNC(SelectionAC), &current);
+	gtk_signal_connect(GTK_OBJECT(list), "button_press_event",
+	                   GTK_SIGNAL_FUNC(ButtonPress), this);
 	gtk_clist_set_shadow_type(GTK_CLIST(list), GTK_SHADOW_NONE);
 
 	gtk_widget_realize(id);

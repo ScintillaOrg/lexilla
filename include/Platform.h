@@ -333,6 +333,11 @@ public:
 };
 
 /**
+ * A simple callback action passing one piece of untyped user data.
+ */
+typedef void (*CallBackAction)(void*);
+
+/**
  * Class to hide the details of window manipulation.
  * Does not own the window which will normally have a longer life than this object.
  */
@@ -373,7 +378,9 @@ public:
 /**
  * Listbox management.
  */
+
 class ListBox : public Window {
+private:
 #if PLAT_GTK
 	WindowID list;
 	WindowID scroller;
@@ -382,6 +389,9 @@ class ListBox : public Window {
 	int desiredVisibleRows;
 	unsigned int maxItemCharacters;
 	unsigned int aveCharWidth;
+public:
+	CallBackAction doubleClickAction;
+	void *doubleClickActionData;
 public:
 	ListBox();
 	virtual ~ListBox();
@@ -398,6 +408,10 @@ public:
 	int Find(const char *prefix);
 	void GetValue(int n, char *value, int len);
 	void Sort();
+	void SetDoubleClickAction(CallBackAction action, void *data) {
+		doubleClickAction = action;
+		doubleClickActionData = data;
+	}
 };
 
 /**
