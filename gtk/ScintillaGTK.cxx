@@ -454,6 +454,7 @@ void ScintillaGTK::MapThis() {
 	wMain.SetCursor(Window::cursorArrow);
 	scrollbarv.SetCursor(Window::cursorArrow);
 	scrollbarh.SetCursor(Window::cursorArrow);
+	ChangeSize();
 	gdk_window_show(PWidget(wMain)->window);
 }
 
