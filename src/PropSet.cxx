@@ -913,15 +913,13 @@ const char *WordList::GetNearestWord(const char *wordStart, int searchLen /*= -1
 
 /**
  * Find the length of a 'word' which is actually an identifier in a string
- * which looks like "identifier(..." or "identifier:" or "identifier" and where
+ * which looks like "identifier(..." or "identifier" and where
  * there may be extra spaces after the identifier that should not be
  * counted in the length.
  */
 static unsigned int LengthWord(const char *word, char otherSeparator) {
-	// Find a '(', or ':'. If that fails go to the end of the string.
+	// Find a '('. If that fails go to the end of the string.
 	const char *endWord = strchr(word, '(');
-	if (!endWord)
-		endWord = strchr(word, ':');
 	if (!endWord && otherSeparator)
 		endWord = strchr(word, otherSeparator);
 	if (!endWord)
@@ -930,7 +928,7 @@ static unsigned int LengthWord(const char *word, char otherSeparator) {
 
 	// Drop any space characters.
 	if (endWord > word) {
-		endWord--;	// Back from the '(', ':', or '\0'
+		endWord--;	// Back from the '(', otherSeparator, or '\0'
 		// Move backwards over any spaces
 		while ((endWord > word) && (IsASpace(*endWord))) {
 			endWord--;
