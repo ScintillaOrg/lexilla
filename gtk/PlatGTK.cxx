@@ -335,12 +335,15 @@ void Surface::RectangleDraw(PRectangle rc, Colour fore, Colour back) {
 	if (gc && drawable) {
 		PenColour(back);
 		gdk_draw_rectangle(drawable, gc, 1,
-		                   rc.left, rc.top,
-		                   rc.right - rc.left, rc.bottom - rc.top);
+		                   rc.left + 1, rc.top + 1,
+		                   rc.right - rc.left - 2, rc.bottom - rc.top - 2);
+
 		PenColour(fore);
+		// The subtraction of 1 off the width and height here shouldn't be needed but 
+		// otherwise a different rectangle is drawn than would be done if the fill parameter == 1
 		gdk_draw_rectangle(drawable, gc, 0,
 		                   rc.left, rc.top,
-		                   rc.right - rc.left, rc.bottom - rc.top);
+		                   rc.right - rc.left - 1, rc.bottom - rc.top - 1);
 	}
 }
 
@@ -400,13 +403,15 @@ void Surface::RoundedRectangle(PRectangle rc, Colour fore, Colour back) {
 void Surface::Ellipse(PRectangle rc, Colour fore, Colour back) {
 	PenColour(back);
 	gdk_draw_arc(drawable, gc, 1,
-	             rc.left, rc.top,
-	             rc.right - rc.left, rc.bottom - rc.top,
+	             rc.left + 1, rc.top + 1,
+	             rc.right - rc.left - 2, rc.bottom - rc.top - 2,
 	             0, 32767);
+
+	// The subtraction of 1 here is similar to the case for RectangleDraw
 	PenColour(fore);
 	gdk_draw_arc(drawable, gc, 0,
 	             rc.left, rc.top,
-	             rc.right - rc.left, rc.bottom - rc.top,
+	             rc.right - rc.left - 1, rc.bottom - rc.top - 1,
 	             0, 32767);
 }
 
