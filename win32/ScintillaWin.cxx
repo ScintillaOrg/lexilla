@@ -651,7 +651,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				char utfval[4];
 				wchar_t wcs[2] = {wParam, 0};
 				unsigned int len = UTF8Length(wcs, 1);
-				UTF8FromUCS2(wcs, 1, utfval, 4);
+				UTF8FromUCS2(wcs, 1, utfval, len);
 				AddCharUTF(utfval, len);
 				return 1;
 			} else {
