@@ -80,7 +80,7 @@ static void ColouriseBullantDoc(unsigned int startPos, int length, int initStyle
 	char chNext = styler[startPos];
 	unsigned int lengthDoc = startPos + length;
 	int visibleChars = 0;
-	//int blockChange = 0;
+	// int blockChange = 0;
 	styler.StartSegment(startPos);
 	int endFoundThisLine = 0;
 	for (unsigned int i = startPos; i < lengthDoc; i++) {
@@ -177,6 +177,7 @@ static void ColouriseBullantDoc(unsigned int startPos, int length, int initStyle
 				if (styler.SafeGetCharAt(i+2) == 'n') {
 					styler.ColourTo(i+2, state);
 					state = SCE_C_DEFAULT;
+					i+=2;
 				}
 			}
 		} else if (state == SCE_C_COMMENTLINE) {
