@@ -14,34 +14,54 @@
 
 #include "PropSet.h"
 
-bool EqualCaseInsensitive(const char *a, const char *b) {
-#if PLAT_GTK 
-#  ifdef G_OS_WIN32
-	return 0 == stricmp(a, b);
-#  else
-	return 0 == strcasecmp(a, b);
-#  endif 
-#elif PLAT_WIN 
-	return 0 == stricmp(a, b);
-#elif PLAT_WX 
-	return 0 == wxStricmp(a, b);
-#endif 
+// The comparison and case changing functions here assume ASCII
+// or extended ASCII such as the normal Windows code page.
+
+inline char MakeUpperCase(char ch) {
+	if (ch < 'a' || ch > 'z')
+		return ch;
+	else
+		return ch - 'a' + 'A';
 }
 
-bool EqualNCaseInsensitive(const char *a, const char *b, int len) {
-#if PLAT_GTK
-#  ifdef G_OS_WIN32
-	return 0 == strnicmp(a, b, len);
-#  else
-	return 0 == strncasecmp(a, b, len);
-#  endif
-#elif PLAT_WIN
-	return 0 == strnicmp(a, b, len);
-#elif PLAT_WX
-	return 0 == wxStrnicmp(a, b, len);
-#endif
+int CompareCaseInsensitive(const char *a, const char *b) {
+	while (*a && *b) {
+		if (*a != *b) {
+			char upperA = MakeUpperCase(*a);
+			char upperB = MakeUpperCase(*b);
+			if (upperA != upperB)
+				return upperA - upperB;
+		}
+		a++;
+		b++;
+	}
+	// Either *a or *b is nul
+	return *a - *b;
 }
- 
+
+int CompareNCaseInsensitive(const char *a, const char *b, int len) {
+	while (*a && *b && len) {
+		if (*a != *b) {
+			char upperA = MakeUpperCase(*a);
+			char upperB = MakeUpperCase(*b);
+			if (upperA != upperB)
+				return upperA - upperB;
+		}
+		a++;
+		b++;
+		len--;
+	}
+	if (len == 0)
+		return 0;
+	else
+		// Either *a or *b is nul
+		return *a - *b;
+}
+
+bool EqualCaseInsensitive(const char *a, const char *b) {
+	return 0 == CompareCaseInsensitive(a, b);
+}
+
 inline unsigned int HashString(const char *s) {
 	unsigned int ret = 0;
 	while (*s) {
@@ -378,7 +398,7 @@ int cmpString(const void *a1, const void *a2) {
 
 int cmpStringNoCase(const void *a1, const void *a2) {
 	// Can't work out the correct incantation to use modern casts here
-	return EqualCaseInsensitive(*(char**)(a1), *(char**)(a2));
+	return CompareCaseInsensitive(*(char**)(a1), *(char**)(a2));
 }
 
 static void SortWordList(char **words, char **wordsNoCase, unsigned int len) {
@@ -443,7 +463,7 @@ const char *WordList::GetNearestWord(const char *wordStart, int searchLen /*= -1
 		while (start <= end) { // binary searching loop
 			pivot = (start + end) >> 1;
 			word = wordsNoCase[pivot];
-			cond = EqualNCaseInsensitive(wordStart, word, searchLen);
+			cond = CompareNCaseInsensitive(wordStart, word, searchLen);
 			if (!cond && nonFuncChar(word[searchLen])) // maybe there should be a "non-word character" test here?
 				return word; // result must not be freed with free()
 			else if (cond >= 0)
@@ -503,7 +523,7 @@ char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, b
 		while (start <= end) { // binary searching loop
 			pivot = (start + end) >> 1;
 			word = wordsNoCase[pivot];
-			cond = EqualNCaseInsensitive(wordStart, word, searchLen);
+			cond = CompareNCaseInsensitive(wordStart, word, searchLen);
 			if (!cond) {
 				oldpivot = pivot;
 				do { // browse sequentially the rest after the hit
@@ -538,14 +558,14 @@ char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, b
 					if (++pivot > end)
 						break;
 					word = wordsNoCase[pivot];
-				} while (!EqualNCaseInsensitive(wordStart, word, searchLen));
+				} while (!CompareNCaseInsensitive(wordStart, word, searchLen));
 
 				pivot = oldpivot;
 				for (;;) { // browse sequentially the rest before the hit
 					if (--pivot < start)
 						break;
 					word = wordsNoCase[pivot];
-					if (EqualNCaseInsensitive(wordStart, word, searchLen))
+					if (CompareNCaseInsensitive(wordStart, word, searchLen))
 						break;
 					brace = strchr(word, '(');
 					if (brace)

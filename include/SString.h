@@ -7,12 +7,10 @@
 #ifndef SSTRING_H
 #define SSTRING_H
 
+// These functions are implemented because each platform calls them something different
+int CompareCaseInsensitive(const char *a, const char *b);
+int CompareNCaseInsensitive(const char *a, const char *b, int len);
 bool EqualCaseInsensitive(const char *a, const char *b);
-
-#if PLAT_WIN
-#define strcasecmp  stricmp
-#define strncasecmp strnicmp
-#endif
 
 // Define another string class.
 // While it would be 'better' to use std::string, that doubles the executable size.
