@@ -144,12 +144,11 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 
 	int lengthDoc = startPos + length;
 
-	// Backtrack to previous line in case need to fix its fold status or tab whinging
-	int lineCurrent = styler.GetLine(startPos);
+	// Backtrack to previous line in case need to fix its tab whinging
 	if (startPos > 0) {
+		int lineCurrent = styler.GetLine(startPos);
 		if (lineCurrent > 0) {
-			lineCurrent--;
-			startPos = styler.LineStart(lineCurrent);
+			startPos = styler.LineStart(lineCurrent-1);
 			if (startPos == 0)
 				initStyle = SCE_P_DEFAULT;
 			else
@@ -162,19 +161,13 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 
 	WordList &keywords = *keywordlists[0];
 
-	bool fold = styler.GetPropertyInt("fold");
 	int whingeLevel = styler.GetPropertyInt("tab.timmy.whinge.level");
 	char prevWord[200];
 	prevWord[0] = '\0';
 	if (length == 0)
 		return ;
-	int spaceFlags = 0;
 
 	int state = initStyle & 31;
-
-	int indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, IsPyComment);
-	if ((state == SCE_P_TRIPLE) || (state == SCE_P_TRIPLEDOUBLE))
-		indentCurrent |= SC_FOLDLEVELWHITEFLAG;
 
 	int nextIndex = 0;
 	char chPrev = ' ';
@@ -182,6 +175,7 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 	char chNext = styler[startPos];
 	styler.StartSegment(startPos);
 	bool atStartLine = true;
+	int spaceFlags = 0;
 	for (int i = startPos; i < lengthDoc; i++) {
 
 		if (atStartLine) {
@@ -211,29 +205,6 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 				// tab marking to work inside white space and triple quoted strings
 				styler.ColourTo(i, state);
 			}
-
-			int lev = indentCurrent;
-			int indentNext = styler.IndentAmount(lineCurrent + 1, &spaceFlags, IsPyComment);
-			if ((state == SCE_P_TRIPLE) || (state == SCE_P_TRIPLEDOUBLE))
-				indentNext |= SC_FOLDLEVELWHITEFLAG;
-			if (!(indentCurrent & SC_FOLDLEVELWHITEFLAG)) {
-				// Only non whitespace lines can be headers
-				if ((indentCurrent & SC_FOLDLEVELNUMBERMASK) < (indentNext & SC_FOLDLEVELNUMBERMASK)) {
-					lev |= SC_FOLDLEVELHEADERFLAG;
-				} else if (indentNext & SC_FOLDLEVELWHITEFLAG) {
-					// Line after is blank so check the next - maybe should continue further?
-					int spaceFlags2 = 0;
-					int indentNext2 = styler.IndentAmount(lineCurrent + 2, &spaceFlags2, IsPyComment);
-					if ((indentCurrent & SC_FOLDLEVELNUMBERMASK) < (indentNext2 & SC_FOLDLEVELNUMBERMASK)) {
-						lev |= SC_FOLDLEVELHEADERFLAG;
-					}
-				}
-			}
-			indentCurrent = indentNext;
-			if (fold) {
-				styler.SetLevel(lineCurrent, lev);
-			}
-			lineCurrent++;
 			atStartLine = true;
 		}
 
@@ -346,4 +317,56 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 	}
 }
 
-LexerModule lmPython(SCLEX_PYTHON, ColourisePyDoc, "python");
+static void FoldPyDoc(unsigned int startPos, int length, int initStyle,
+						   WordList *[], Accessor &styler) {
+	int lengthDoc = startPos + length;
+
+	// Backtrack to previous line in case need to fix its fold status
+	int lineCurrent = styler.GetLine(startPos);
+	if (startPos > 0) {
+		if (lineCurrent > 0) {
+			lineCurrent--;
+			startPos = styler.LineStart(lineCurrent);
+			if (startPos == 0)
+				initStyle = SCE_P_DEFAULT;
+			else
+				initStyle = styler.StyleAt(startPos-1);
+		}
+	}
+	int state = initStyle & 31;
+	int spaceFlags = 0;
+	int indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, IsPyComment);
+	if ((state == SCE_P_TRIPLE) || (state == SCE_P_TRIPLEDOUBLE))
+		indentCurrent |= SC_FOLDLEVELWHITEFLAG;
+	char chNext = styler[startPos];
+	for (int i = startPos; i < lengthDoc; i++) {
+		char ch = chNext;
+		chNext = styler.SafeGetCharAt(i + 1);
+		int style = styler.StyleAt(i) & 31;
+
+		if ((ch == '\r' && chNext != '\n') || (ch == '\n') || (i == lengthDoc)) {
+			int lev = indentCurrent;
+			int indentNext = styler.IndentAmount(lineCurrent + 1, &spaceFlags, IsPyComment);
+			if ((style == SCE_P_TRIPLE) || (style== SCE_P_TRIPLEDOUBLE))
+				indentNext |= SC_FOLDLEVELWHITEFLAG;
+			if (!(indentCurrent & SC_FOLDLEVELWHITEFLAG)) {
+				// Only non whitespace lines can be headers
+				if ((indentCurrent & SC_FOLDLEVELNUMBERMASK) < (indentNext & SC_FOLDLEVELNUMBERMASK)) {
+					lev |= SC_FOLDLEVELHEADERFLAG;
+				} else if (indentNext & SC_FOLDLEVELWHITEFLAG) {
+					// Line after is blank so check the next - maybe should continue further?
+					int spaceFlags2 = 0;
+					int indentNext2 = styler.IndentAmount(lineCurrent + 2, &spaceFlags2, IsPyComment);
+					if ((indentCurrent & SC_FOLDLEVELNUMBERMASK) < (indentNext2 & SC_FOLDLEVELNUMBERMASK)) {
+						lev |= SC_FOLDLEVELHEADERFLAG;
+					}
+				}
+			}
+			indentCurrent = indentNext;
+			styler.SetLevel(lineCurrent, lev);
+			lineCurrent++;
+		}
+	}
+}
+						   
+LexerModule lmPython(SCLEX_PYTHON, ColourisePyDoc, "python", FoldPyDoc);
