@@ -315,12 +315,13 @@ Action::~Action() {
 	Destroy();
 }
 
-void Action::Create(actionType at_, int position_, char *data_, int lenData_) {
+void Action::Create(actionType at_, int position_, char *data_, int lenData_, bool mayCoalesce_) {
 	delete []data;
 	position = position_;
 	at = at_;
 	data = data_;
 	lenData = lenData_;
+	mayCoalesce = mayCoalesce_;
 }
 
 void Action::Destroy() {
@@ -335,12 +336,14 @@ void Action::Grab(Action *source) {
 	at = source->at;
 	data = source->data;
 	lenData = source->lenData;
-
+	mayCoalesce = source->mayCoalesce;
+	
 	// Ownership of source data transferred to this
 	source->position = 0;
 	source->at = startAction;
 	source->data = 0;
 	source->lenData = 0;
+	source->mayCoalesce = true;
 }
 
 // The undo history stores a sequence of user operations that represent the user's view of the 
@@ -425,7 +428,9 @@ void UndoHistory::AppendAction(actionType at, int position, char *data, int leng
 				//Platform::DebugPrintf("action coalesced\n");
 			}
 		} else {
-			currentAction++;
+			// Actions not at top level are always coalesced unless this is after return to top level
+			if (!actions[currentAction].mayCoalesce)
+				currentAction++;
 		} 
 	} else {
 		currentAction++;
@@ -457,6 +462,7 @@ void UndoHistory::EndUndoAction() {
 			actions[currentAction].Create(startAction);
 			maxAction = currentAction;
 		}
+		actions[currentAction].mayCoalesce = false;
 	}
 }
 	

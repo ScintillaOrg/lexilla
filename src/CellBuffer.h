@@ -79,10 +79,11 @@ public:
 	int position;
 	char *data;
 	int lenData;
+	bool mayCoalesce;
 
 	Action();
 	~Action();
-	void Create(actionType at_, int position_=0, char *data_=0, int lenData_=0);
+	void Create(actionType at_, int position_=0, char *data_=0, int lenData_=0, bool mayCoalesce_=true);
 	void Destroy();
 	void Grab(Action *source);
 };
