@@ -236,6 +236,11 @@ int Surface::LogPixelsY() {
 	return 72;
 }
 
+int Surface::DeviceHeightFont(int points) {
+	int logPix = LogPixelsY();
+	return (points * logPix + logPix / 2) / 72;
+}
+
 void Surface::MoveTo(int x_, int y_) {
 	x = x_;
 	y = y_;

@@ -112,7 +112,7 @@ void ContractionState::InsertLines(int lineDoc, int lineCount) {
 	}
 	linesInDoc += lineCount;
 	linesInDisplay += lineCount;
-	for (int i = linesInDoc + 1; i >= lineDoc + lineCount; i--) {
+	for (int i = linesInDoc; i >= lineDoc + lineCount; i--) {
 		lines[i].visible = lines[i - lineCount].visible;
 		lines[i].expanded = lines[i - lineCount].expanded;
 	}

@@ -269,6 +269,7 @@ public:
 	bool Initialised();
 	void PenColour(Colour fore);
 	int LogPixelsY();
+	int DeviceHeightFont(int points);
 	void MoveTo(int x_, int y_);
 	void LineTo(int x_, int y_);
 	void Polygon(Point *pts, int npts, Colour fore, Colour back);

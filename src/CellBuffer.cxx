@@ -191,11 +191,20 @@ void LineVector::InsertValue(int pos, int value) {
 		}
 	}
 	lines++;
-	for (int i = lines + 1; i > pos; i--) {
+	for (int i = lines; i > pos; i--) {
 		linesData[i] = linesData[i - 1];
 	}
 	linesData[pos].startPosition = value;
 	linesData[pos].handleSet = 0;
+	if (levels) {
+		for (int j = lines; j > pos; j--) {
+			levels[j] = levels[j - 1];
+		}
+		if (pos == (lines-1))	// Last line will not be a folder
+			levels[pos] = SC_FOLDLEVELBASE;
+		else
+			levels[pos] = SC_FOLDLEVELBASE | SC_FOLDLEVELHEADERFLAG;
+	}
 }
 
 void LineVector::SetValue(int pos, int value) {

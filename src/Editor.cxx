@@ -1605,8 +1605,8 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 				// lineOfPos should be calculated in context of state before modification, shouldn't it
 				int lineOfPos = pdoc->LineFromPosition(mh.position);
 				if (mh.linesAdded > 0) {
-					NotifyNeedShown(mh.position, mh.length);
 					cs.InsertLines(lineOfPos, mh.linesAdded);
+					NotifyNeedShown(mh.position, mh.length);
 				} else {
 					cs.DeleteLines(lineOfPos, -mh.linesAdded);
 				}
