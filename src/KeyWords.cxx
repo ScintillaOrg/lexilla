@@ -130,9 +130,7 @@ int wxForceScintillaLexers(void) {
 }
 
 // Shorten the code that declares a lexer and ensures it is linked in by calling a method.
-#define LINK_LEXER(lexer) \
-	extern LexerModule lexer; \
-	lexer.GetLanguage();
+#define LINK_LEXER(lexer) extern LexerModule lexer; lexer.GetLanguage();
 
 // To add or remove a lexer, add or remove its file and run LexGen.py.
 
