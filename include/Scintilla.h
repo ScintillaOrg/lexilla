@@ -532,8 +532,6 @@ struct SCNotification {
 
 #define SC_MASK_FOLDERS ((1<<SC_MARKNUM_FOLDER) | (1<<SC_MARKNUM_FOLDEROPEN))
 
-// Moving from WM_* and EM_*
-
 #define SCFIND_MATCHCASE	4
 #define SCFIND_WHOLEWORD 2
 #define SCFIND_DOWN 1
@@ -545,7 +543,7 @@ struct SCNotification {
 #define SCK_DOWN 300
 #define SCK_UP 301
 #define SCK_LEFT 302
-#define SCK_RIGHT 202
+#define SCK_RIGHT 303
 #define SCK_HOME 304
 #define SCK_END 305
 #define SCK_PRIOR 306
@@ -563,7 +561,6 @@ struct SCNotification {
 #define SCMOD_SHIFT 1
 #define SCMOD_CTRL 2
 #define SCMOD_ALT 4
-
 
 // Deprecation section listing all API features that are deprecated and will
 // will be removed completely in a future version.

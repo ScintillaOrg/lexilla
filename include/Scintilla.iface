@@ -3,7 +3,7 @@
 ## This file defines the interface to Scintilla
 
 ## A line starting with ## is a pure comment and should be stripped by readers.
-## A line starting with #!! is for future shbang use
+## A line starting with #! is for future shbang use
 ## A line starting with # followed by a space is a documentation comment and refers 
 ## to the next feature definition.
 
@@ -528,6 +528,10 @@ set void SetPrintColourMode=2148(int mode,)
 # Returns the print colour mode.
 get int GetPrintColourMode=2149(,)
 
+val SCFIND_MATCHCASE=4
+val SCFIND_WHOLEWORD=2
+val SCFIND_DOWN=1
+
 # Find some text in the document.
 fun position FindText=2150(int flags, findtext ft)
 
@@ -992,6 +996,32 @@ val SCEN_CHANGE=768
 val SCEN_SETFOCUS=512
 val SCEN_KILLFOCUS=256
 
+# Symbolic key codes and modifier flags
+# ASCII and other printable characters below 256
+# Extended keys above 300
+
+val SCK_DOWN=300
+val SCK_UP=301
+val SCK_LEFT=302
+val SCK_RIGHT=303
+val SCK_HOME=304
+val SCK_END=305
+val SCK_PRIOR=306
+val SCK_NEXT=307
+val SCK_DELETE=308
+val SCK_INSERT=309
+val SCK_ESCAPE=7
+val SCK_BACK=8
+val SCK_TAB=9
+val SCK_RETURN=13
+val SCK_ADD=310
+val SCK_SUBTRACT=311
+val SCK_DIVIDE=312
+
+val SCMOD_SHIFT=1
+val SCMOD_CTRL=2
+val SCMOD_ALT=4
+
 ################################################
 # From SciLexer.h
 val SCLEX_CONTAINER=0
@@ -1054,6 +1084,8 @@ val SCE_H_XMLEND=13
 val SCE_H_SCRIPT=14
 val SCE_H_ASP=15
 val SCE_H_ASPAT=16
+val SCE_H_CDATA=17
+val SCE_H_QUESTION=18
 val SCE_HJ_START=40
 val SCE_HJ_DEFAULT=41
 val SCE_HJ_COMMENT=42
@@ -1120,6 +1152,15 @@ val SCE_HPA_CLASSNAME=114
 val SCE_HPA_DEFNAME=115
 val SCE_HPA_OPERATOR=116
 val SCE_HPA_IDENTIFIER=117
+val SCE_HPHP_DEFAULT=118
+val SCE_HPHP_HSTRING=119
+val SCE_HPHP_SIMPLESTRING=120
+val SCE_HPHP_WORD=121
+val SCE_HPHP_NUMBER=122
+val SCE_HPHP_VARIABLE=123
+val SCE_HPHP_COMMENT=124
+val SCE_HPHP_COMMENTLINE=125
+val SCE_HPHP_STRINGEOL=126
 val SCE_PL_DEFAULT=0
 val SCE_PL_HERE=1
 val SCE_PL_COMMENTLINE=2
@@ -1163,6 +1204,8 @@ val SCE_LUA_STRINGEOL=12
 
 ################################################
 # From WinDefs.h
+
+# ***** DEPRECATED from here to end of file ******
 
 # Will a paste succeed?
 fun bool EM_CanPaste=1074(,)
