@@ -129,7 +129,7 @@ void PropSet::Set(const char *keyVal) {
 }
 
 void PropSet::SetMultiple(const char *s) {
-	char *eol = strchr(s, '\n');
+	const char *eol = strchr(s, '\n');
 	while (eol) {
 		Set(s);
 		s = eol + 1;
