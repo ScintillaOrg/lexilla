@@ -54,6 +54,9 @@
 
 #ifndef WM_UNICHAR
 #define WM_UNICHAR                      0x0109
+#endif
+
+#ifndef UNICODE_NOCHAR
 #define UNICODE_NOCHAR                  0xFFFF
 #endif
 
@@ -634,6 +637,12 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 	case WM_CHAR:
 		if (!iscntrl(wParam&0xff) || !lastKeyDownConsumed) {
 			if (IsUnicodeMode()) {
+				// For a wide character version of the window:
+				//char utfval[4];
+				//wchar_t wcs[2] = {wParam, 0};
+				//unsigned int len = UTF8Length(wcs, 1);
+				//UTF8FromUCS2(wcs, 1, utfval, len);
+				//AddCharUTF(utfval, len);
 				AddCharBytes(static_cast<char>(wParam & 0xff));
 			} else {
 				AddChar(static_cast<char>(wParam & 0xff));
