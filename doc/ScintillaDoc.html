@@ -903,8 +903,10 @@ SCI_AUTOCSETCHOOSESINGLE(bool chooseSingle)
 SCI_AUTOCGETCHOOSESINGLE
 SCI_AUTOCSETIGNORECASE(bool ignoreCase)
 SCI_AUTOCGETIGNORECASE
-SCI_AUTOCSETAUTOHIDE(bool bool autoHide)
+SCI_AUTOCSETAUTOHIDE(bool autoHide)
 SCI_AUTOCGETAUTOHIDE
+SCI_AUTOCSETDROPRESTOFWORD(bool dropRestOfWord)
+SCI_AUTOCGETDROPRESTOFWORD
 </pre>
     <p>
 	Auto completion displays a list box based upon the users typing 
@@ -936,8 +938,12 @@ SCI_AUTOCGETAUTOHIDE
     </p>
     <p>
 	The list will also be cancelled if there are no viable matches. 
-	To avoid this behaviour	call SCI_AUTOCSETAUTOHIDE with a false 
+	To avoid this behaviour call SCI_AUTOCSETAUTOHIDE with a false 
 	argument.
+    </p>
+    <p>
+	When an item is selected, any word characters following the caret are first
+	erased if SCI_AUTOCSETDROPRESTOFWORD is used to set this mode.
     </p>
     <h3>
        User lists
