@@ -1263,6 +1263,7 @@ val SCLEX_LISP=21
 val SCLEX_RUBY=22
 val SCLEX_EIFFEL=23
 val SCLEX_EIFFELKW=24
+val SCLEX_TCL=25
 # When a lexer specifies its language as SCLEX_AUTOMATIC it receives a 
 # value assigned in sequence from SCLEX_AUTOMATIC+1.
 val SCLEX_AUTOMATIC=1000
