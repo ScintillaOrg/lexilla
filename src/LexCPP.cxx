@@ -124,7 +124,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 					i++;
 					ch = chNext;
 					chNext = styler.SafeGetCharAt(i + 1);
-				} while (isspace(ch));
+				} while (isspace(ch) && (i < lengthDoc));
 			} else if (isoperator(ch)) {
 				styler.ColourTo(i-1, state);
 				styler.ColourTo(i, SCE_C_OPERATOR);
