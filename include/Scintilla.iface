@@ -159,11 +159,11 @@ get int GetViewWS=2020(,)
 set void SetViewWS=2021(int viewWS,)
 
 # Find the position from a point within the window.
-fun int PositionFromPoint=2022(int x, int y)
+fun position PositionFromPoint=2022(int x, int y)
 
 # Find the position from a point within the window but return
 # INVALID_POSITION if not close to text.
-fun int PositionFromPointClose=2023(int x, int y)
+fun position PositionFromPointClose=2023(int x, int y)
 
 # Set caret to start of a line and ensure it is visible.
 fun void GotoLine=2024(int line,)
@@ -763,7 +763,7 @@ fun int PointYFromPosition=2165(, position pos)
 fun int LineFromPosition=2166(position pos,)
 
 # Retrieve the position at the start of a line.
-fun int PositionFromLine=2167(int line,)
+fun position PositionFromLine=2167(int line,)
 
 # Scroll horizontally and vertically.
 fun void LineScroll=2168(int columns, int lines)
@@ -1462,6 +1462,51 @@ fun void CopyRange=2419(position start, position end)
 
 # Copy argument text to the clipboard.
 fun void CopyText=2420(int length, string text)
+
+enu SelectionMode=SC_SEL_
+val SC_SEL_STREAM=0
+val SC_SEL_RECTANGLE=1
+val SC_SEL_LINES=2
+
+# Set the selection mode to stream (SC_SEL_STREAM) or rectangular (SC_SEL_RECTANGLE) or
+# by lines (SC_SEL_LINES).
+set void SetSelectionMode=2422(int mode,)
+
+# Get the mode of the current selection.
+get int GetSelectionMode=2423(,)
+
+# Retrieve the position of the start of the selection at the given line (INVALID_POSITION of no selection on this line).
+fun position GetLineSelStartPosition=2424(int line,)
+
+# Retrieve the position of the end of the selection at the given line (INVALID_POSITION of no selection on this line).
+fun position GetLineSelEndPosition=2425(int line,)
+
+
+## RectExtended rectangular selection moves
+# Move caret down one line extending rectangular selection to new caret position.
+fun void LineDownRectExtend=2426(,)
+
+# Move caret up one line extending rectangular selection to new caret position.
+fun void LineUpRectExtend=2427(,)
+
+# Move caret left one character extending rectangular selection to new caret position.
+fun void CharLeftRectExtend=2428(,)
+
+# Move caret right one character extending rectangular selection to new caret position.
+fun void CharRightRectExtend=2429(,)
+
+# Move caret to first position on line extending rectangular selection to new caret position.
+fun void VCHomeRectExtend=2430(,)
+
+# Move caret to last position on line extending rectangular selection to new caret position.
+fun void LineEndRectExtend=2431(,)
+
+# Move caret one page up extending rectangular selection to new caret position.
+fun void PageUpRectExtend=2432(,)
+
+# Move caret one page down extending rectangular selection to new caret position.
+fun void PageDownRectExtend=2433(,)
+
 
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)

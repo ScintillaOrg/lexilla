@@ -125,6 +125,8 @@ public:
 	void Dispose(LineLayout *ll);
 };
 
+/**
+ */
 class SelectionText {
 public:
 	char *s;
@@ -256,9 +258,10 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int modEventMask;
 
 	SelectionText drag;
-	enum { selStream, selRectangle, selRectangleFixed } selType;
-	int xStartSelect;
-	int xEndSelect;
+	enum selTypes { noSel, selStream, selRectangle, selLines };
+	selTypes selType;
+	bool moveExtendsSelection;
+	int xEndSelect;		///< x position of end of rectangular selection by mouse.
 	bool primarySelection;
 
 	int caretXPolicy;
@@ -323,15 +326,16 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	int CurrentPosition();
 	bool SelectionEmpty();
-	int SelectionStart(int line=-1);
-	int SelectionEnd(int line=-1);
+	int SelectionStart();
+	int SelectionEnd();
+	void InvalidateSelection(int currentPos_, int anchor_);
 	void SetSelection(int currentPos_, int anchor_);
 	void SetSelection(int currentPos_);
 	void SetEmptySelection(int currentPos_);
 	bool RangeContainsProtected(int start, int end) const;
 	bool SelectionContainsProtected() const;
 	int MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd=true);
-	int MovePositionTo(int newPos, bool extend=false, bool ensureVisible=true);
+	int MovePositionTo(int newPos, selTypes sel=noSel, bool ensureVisible=true);
 	int MovePositionSoVisible(int pos, int moveDir);
 	void SetLastXChosen();
 
@@ -419,13 +423,13 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void NotifyStyleNeeded(Document *doc, void *userData, int endPos);
 	void NotifyMacroRecord(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
-	void PageMove(int direction, bool extend=false);
+	void PageMove(int direction, selTypes sel=noSel);
 	void ChangeCaseOfSelection(bool makeUpperCase);
 	void LineTranspose();
 	void LineDuplicate();
 	virtual void CancelModes();
 	void NewLine();
-	void CursorUpOrDown(int direction, bool extend=false);
+	void CursorUpOrDown(int direction, selTypes sel=noSel);
 	int StartEndDisplayLine(int pos, bool start);
 	virtual int KeyCommand(unsigned int iMessage);
 	virtual int KeyDefault(int /* key */, int /*modifiers*/);
@@ -499,6 +503,7 @@ public:
 	// Public so scintilla_set_id can use it.
 	int ctrlID;
 	friend class AutoSurface;
+	friend class SelectionLineIterator;
 };
 
 /**
