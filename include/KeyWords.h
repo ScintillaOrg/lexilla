@@ -17,16 +17,21 @@ public:
                   int language, WordList *keywordlists[], Accessor &styler);
 };
 
+// This is ASCII specific but is safe with chars >= 0x80
+inline bool isspacechar(unsigned char ch) {
+    return (ch == ' ') || ((ch >= 0x09) && (ch <= 0x0d));
+}
+
 inline bool iswordchar(char ch) {
-	return isalnum(ch) || ch == '.' || ch == '_';
+	return isascii(ch) && (isalnum(ch) || ch == '.' || ch == '_');
 }
 
 inline bool iswordstart(char ch) {
-	return isalnum(ch) || ch == '_';
+	return isascii(ch) && (isalnum(ch) || ch == '_');
 }
 
 inline bool isoperator(char ch) {
-	if (isalnum(ch))
+	if (isascii(ch) && isalnum(ch))
 		return false;
 	// '.' left out as it is used to make up numbers
 	if (ch == '%' || ch == '^' || ch == '&' || ch == '*' ||

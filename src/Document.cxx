@@ -15,6 +15,11 @@
 #include "CellBuffer.h"
 #include "Document.h"
 
+// This is ASCII specific but is safe with chars >= 0x80
+inline bool isspacechar(unsigned char ch) {
+    return (ch == ' ') || ((ch >= 0x09) && (ch <= 0x0d));
+}
+
 Document::Document() {
 	refCount = 0;
 #ifdef unix
@@ -697,19 +702,19 @@ int Document::NextWordStart(int pos, int delta) {
 	if (delta < 0) {
 		while (pos > 0 && (cb.CharAt(pos - 1) == ' ' || cb.CharAt(pos - 1) == '\t'))
 			pos--;
-		if (isspace(cb.CharAt(pos - 1))) {	// Back up to previous line
-			while (pos > 0 && isspace(cb.CharAt(pos - 1)))
+		if (isspacechar(cb.CharAt(pos - 1))) {	// Back up to previous line
+			while (pos > 0 && isspacechar(cb.CharAt(pos - 1)))
 				pos--;
 		} else {
 			bool startAtWordChar = IsWordChar(cb.CharAt(pos - 1));
-			while (pos > 0 && !isspace(cb.CharAt(pos - 1)) && (startAtWordChar == IsWordChar(cb.CharAt(pos - 1))))
+			while (pos > 0 && !isspacechar(cb.CharAt(pos - 1)) && (startAtWordChar == IsWordChar(cb.CharAt(pos - 1))))
 				pos--;
 		}
 	} else {
 		bool startAtWordChar = IsWordChar(cb.CharAt(pos));
-		while (pos < (Length()) && isspace(cb.CharAt(pos)))
+		while (pos < (Length()) && isspacechar(cb.CharAt(pos)))
 			pos++;
-		while (pos < (Length()) && !isspace(cb.CharAt(pos)) && (startAtWordChar == IsWordChar(cb.CharAt(pos))))
+		while (pos < (Length()) && !isspacechar(cb.CharAt(pos)) && (startAtWordChar == IsWordChar(cb.CharAt(pos))))
 			pos++;
 		while (pos < (Length()) && (cb.CharAt(pos) == ' ' || cb.CharAt(pos) == '\t'))
 			pos++;
@@ -995,10 +1000,10 @@ int Document::WordPartLeft(int pos) {
 					--pos;
 				if (!ispunct(cb.CharAt(pos)))
 					++pos;
-			} else if (isspace(startChar)) {
-				while (pos > 0 && isspace(cb.CharAt(pos)))
+			} else if (isspacechar(startChar)) {
+				while (pos > 0 && isspacechar(cb.CharAt(pos)))
 					--pos;
-				if (!isspace(cb.CharAt(pos)))
+				if (!isspacechar(cb.CharAt(pos)))
 					++pos;
 			}
 		}
@@ -1034,8 +1039,8 @@ int Document::WordPartRight(int pos) {
 	} else if (ispunct(startChar)) {
 		while (pos < length && ispunct(cb.CharAt(pos)))
 			++pos;
-	} else if (isspace(startChar)) {
-		while (pos < length && isspace(cb.CharAt(pos)))
+	} else if (isspacechar(startChar)) {
+		while (pos < length && isspacechar(cb.CharAt(pos)))
 			++pos;
 	}
 	return pos;

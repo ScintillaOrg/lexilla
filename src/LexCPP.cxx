@@ -88,7 +88,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			}
 			visibleChars = 0;
 		}
-		if (!isspace(ch))
+		if (!isspacechar(ch))
 			visibleChars++;
 
 		if (styler.IsLeadByte(ch)) {
@@ -145,7 +145,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 					i++;
 					ch = chNext;
 					chNext = styler.SafeGetCharAt(i + 1);
-				} while (isspace(ch) && (i < lengthDoc));
+				} while (isspacechar(ch) && (i < lengthDoc));
 			} else if (isoperator(ch)) {
 				styler.ColourTo(i-1, state);
 				styler.ColourTo(i, SCE_C_OPERATOR);
@@ -178,7 +178,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 		} else {
 			if (state == SCE_C_PREPROCESSOR) {
 				if (stylingWithinPreprocessor) {
-					if (isspace(ch)) {
+					if (isspacechar(ch)) {
 						styler.ColourTo(i-1, state);
 						state = SCE_C_DEFAULT;
 					}
