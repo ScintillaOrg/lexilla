@@ -585,12 +585,12 @@ int Editor::MovePositionSoVisible(int pos, int moveDir) {
 	} else {
 		int lineDisplay = cs.DisplayFromDoc(lineDoc);
 		if (moveDir > 0) {
-			lineDisplay = Platform::Clamp(lineDisplay + 1, 0, cs.LinesDisplayed());
+			// lineDisplay is already line before fold as lines in fold use display line of line after fold
+			lineDisplay = Platform::Clamp(lineDisplay, 0, cs.LinesDisplayed());
 			return pdoc->LineStart(cs.DocFromDisplay(lineDisplay));
 		} else {
-			// lineDisplay is already line before fold as lines in fold use display line of line before fold
-			lineDisplay = Platform::Clamp(lineDisplay, 0, cs.LinesDisplayed());
-			return pdoc->LineEndPosition(pdoc->LineStart(cs.DocFromDisplay(lineDisplay)));
+			lineDisplay = Platform::Clamp(lineDisplay - 1, 0, cs.LinesDisplayed());
+			return pdoc->LineEnd(cs.DocFromDisplay(lineDisplay));
 		}
 	}
 }
