@@ -292,8 +292,9 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				} else {
 					quotes++;
 				}
-				if (quotes > 1 && isMatch(styler, lengthDoc, i, sooked) && (chPrev == '\n' || chPrev == '\r') ) {
-					styler.ColourTo(i + sookedpos - 1, SCE_PL_HERE);
+				if ((quotes > 1) && 
+					(chPrev == '\n' || chPrev == '\r') &&
+					isMatch(styler, lengthDoc, i, sooked)) {
 					i += sookedpos;
 					chNext = styler.SafeGetCharAt(i);
 					if (chNext == '\n' || chNext == '\r') {
