@@ -45,7 +45,7 @@ public:
 		currentPos(startPos),
 		atLineStart(true),
 		atLineEnd(false),
-		state(initStyle),
+		state(initStyle & chMask), // Mask off all bits which aren't in the chMask.
 		chPrev(0),
 		ch(0),
 		chNext(0) {
