@@ -307,6 +307,7 @@ void ScintillaBase::AutoCompleteCharacterDeleted() {
 void ScintillaBase::AutoCompleteCompleted() {
 	int item = ac.lb->GetSelection();
 	char selected[1000];
+	selected[0] = '\0';
 	if (item != -1) {
 		ac.lb->GetValue(item, selected, sizeof(selected));
 	}
