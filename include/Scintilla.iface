@@ -896,6 +896,15 @@ fun int WordStartPosition=2266(position pos,)
 # Get position of end of word
 fun int WordEndPosition=2267(position pos,)
 
+val SC_WRAP_NONE=0
+val SC_WRAP_WORD=1
+
+# Sets whether text is word wrapped
+set void SetWrapMode=2268(int mode,)
+
+# Retrieve whether text is word wrapped
+get int GetWrapMode=2269(,)
+
 ## Start of key messages
 # Move caret down one line.
 fun void LineDown=2300(,)

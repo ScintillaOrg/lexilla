@@ -344,6 +344,10 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_GETMOUSEDWELLTIME 2265
 #define SCI_WORDSTARTPOSITION 2266
 #define SCI_WORDENDPOSITION 2267
+#define SC_WRAP_NONE 0
+#define SC_WRAP_WORD 1
+#define SCI_SETWRAPMODE 2268
+#define SCI_GETWRAPMODE 2269
 #define SCI_LINEDOWN 2300
 #define SCI_LINEDOWNEXTEND 2301
 #define SCI_LINEUP 2302

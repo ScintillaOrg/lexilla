@@ -1020,7 +1020,6 @@ void ScintillaGTK::UnclaimSelection(GdkEventSelection *selection_event) {
 void ScintillaGTK::Resize(int width, int height) {
 	//Platform::DebugPrintf("Resize %d %d\n", width, height);
 	//printf("Resize %d %d\n", width, height);
-	DropGraphics();
 
 	// Not always needed, but some themes can have different sizes of scrollbars
 	scrollBarWidth = GTK_WIDGET(PWidget(scrollbarv))->requisition.width;
@@ -1051,7 +1050,7 @@ void ScintillaGTK::Resize(int width, int height) {
 	alloc.height = Platform::Maximum(1, height - scrollBarHeight) + 1;
 	gtk_widget_size_allocate(GTK_WIDGET(PWidget(scrollbarv)), &alloc);
 
-	SetScrollBars();
+	ChangeSize();
 }
 
 gint ScintillaGTK::PressThis(GdkEventButton *event) {
