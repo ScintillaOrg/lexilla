@@ -140,6 +140,90 @@
       <li>
 	Released on 16 February 2003.
       </li>
+      <li>
+	Two phase drawing avoids cutting off text that overlaps runs by drawing
+	all the backgrounds of a line then drawing all the text transparently.
+	Single phase drawing is an option.
+      </li>
+      <li>
+	Scintilla method to split lines at a particular width by adding new line
+	characters.
+      </li>
+      <li>
+	The character used in autocompletion lists to separate the text from the image
+	number can be changed.
+      </li>
+      <li>
+	The scrollbar range will automatically expand when the caret is moved
+	beyond the current range.
+	The scroll bar is updated when SCI_SETXOFFSET is called.
+      </li>
+      <li>
+	Mouse cursors on GTK+ improved to be consistent with other applications
+	and the Windows version.
+      </li>
+      <li>
+	Horizontal scrollbar on GTK+ now disappears in wrapped mode.
+      </li>
+      <li>
+	Scintilla on GTK+ 2: mouse wheel scrolling, cursor over scrollbars, focus,
+	and syntax highlighting now work.
+	gtk_selection_notify avoided for compatibility with GTK+ 2.2.
+      </li>
+      <li>
+	Fold margin colours can now be set.
+      </li>
+      <li>
+	SciTE can be built for GTK+ 2.
+      </li>
+      <li>
+	SciTE can optionally preserve the undo history over an automatic file reload.
+      </li>
+      <li>
+	Tags can optionally be case insensitive in XML and HTML.
+      </li>
+      <li>
+	SciTE on Windows handles input to tool commands in a way that should avoid
+	deadlock. Output from tools can be used to replace the selection.
+      </li>
+      <li>
+	Crash fixed in SciTE brace matching.
+      </li>
+      <li>
+	Bug fixed where automatic scrolling past end of document
+	flipped back to the beginning.
+      </li>
+      <li>
+	Bug fixed where wrapping caused text to disappear.
+      </li>
+      <li>
+	SciTE on GTK+ automatically substitutes '|' for '/' in menu items as '/'
+	is used to define the menu hierarchy.
+      </li>
+      <li>
+	Optional buffer number in SciTE title bar.
+      </li>
+      <li>
+	Bug fixed on Windows where images in autocompletion lists were
+	shown on the wrong item.
+      </li>
+      <li>
+	Crash fixed due to memory bug in autocompletion lists on Windows.
+      </li>
+      <li>
+	Crash fixed when double clicking some error messages.
+      </li>
+      <li>
+	Bug fixed in word part movement where sometimes no movement would occur.
+      </li>
+      <li>
+	Bug fixed on Windows NT where long text runs were truncated by
+	treating NT differently to 9x where there is a limitation.
+      </li>
+      <li>
+	Text in not-changeable style works better but there remain some cases where
+	it is still possible to delete text protected this way.
+      </li>
     </ul>
     <h3>
        <a href="scite150.zip">Release 1.50</a>
