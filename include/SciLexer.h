@@ -56,6 +56,7 @@
 #define SCE_C_OPERATOR 10
 #define SCE_C_IDENTIFIER 11
 #define SCE_C_STRINGEOL 12
+#define SCE_C_VERBATIM 13
 
 // Lexical states for SCLEX_HTML, SCLEX_XML
 #define SCE_H_DEFAULT 0
