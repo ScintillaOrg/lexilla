@@ -18,7 +18,7 @@
 #include "SciLexer.h"
 
 enum { eScriptNone, eScriptJS, eScriptVBS, eScriptPython };
-static int segIsScriptingIndicator(StylingContext &styler, unsigned int start, unsigned int end, int prevValue) {
+static int segIsScriptingIndicator(BufferAccess &styler, unsigned int start, unsigned int end, int prevValue) {
 	char s[100];
 	s[0] = '\0';
 	for (unsigned int i = 0; i < end - start + 1 && i < 30; i++) {
@@ -38,7 +38,7 @@ static int segIsScriptingIndicator(StylingContext &styler, unsigned int start, u
 	return prevValue;
 }
 
-static void classifyAttribHTML(unsigned int start, unsigned int end, WordList &keywords, StylingContext &styler) {
+static void classifyAttribHTML(unsigned int start, unsigned int end, WordList &keywords, BufferAccess &styler) {
 	bool wordIsNumber = isdigit(styler[start]) || (styler[start] == '.') ||
 	                    (styler[start] == '-') || (styler[start] == '#');
 	char chAttr = SCE_H_ATTRIBUTEUNKNOWN;
@@ -58,7 +58,7 @@ static void classifyAttribHTML(unsigned int start, unsigned int end, WordList &k
 }
 
 static int classifyTagHTML(unsigned int start, unsigned int end,
-                         WordList &keywords, StylingContext &styler) {
+                         WordList &keywords, BufferAccess &styler) {
 	char s[100];
 	// Copy after the '<'
 	unsigned int i = 0;
@@ -86,7 +86,7 @@ static int classifyTagHTML(unsigned int start, unsigned int end,
 }
 
 static void classifyWordHTJS(unsigned int start, unsigned int end,
-                             WordList &keywords, StylingContext &styler) {
+                             WordList &keywords, BufferAccess &styler) {
 	char s[100];
 	bool wordIsNumber = isdigit(styler[start]) || (styler[start] == '.');
 	for (unsigned int i = 0; i < end - start + 1 && i < 30; i++) {
@@ -104,7 +104,7 @@ static void classifyWordHTJS(unsigned int start, unsigned int end,
 }
 
 static void classifyWordHTJSA(unsigned int start, unsigned int end,
-                             WordList &keywords, StylingContext &styler) {
+                             WordList &keywords, BufferAccess &styler) {
 	char s[100];
 	bool wordIsNumber = isdigit(styler[start]) || (styler[start] == '.');
 	for (unsigned int i = 0; i < end - start + 1 && i < 30; i++) {
@@ -121,7 +121,7 @@ static void classifyWordHTJSA(unsigned int start, unsigned int end,
 	styler.ColourTo(end, chAttr);
 }
 
-static int classifyWordHTVB(unsigned int start, unsigned int end, WordList &keywords, StylingContext &styler) {
+static int classifyWordHTVB(unsigned int start, unsigned int end, WordList &keywords, BufferAccess &styler) {
 	char s[100];
 	bool wordIsNumber = isdigit(styler[start]) || (styler[start] == '.');
 	for (unsigned int i = 0; i < end - start + 1 && i < 30; i++) {
@@ -145,7 +145,7 @@ static int classifyWordHTVB(unsigned int start, unsigned int end, WordList &keyw
 		return SCE_HB_DEFAULT;
 }
 
-static int classifyWordHTVBA(unsigned int start, unsigned int end, WordList &keywords, StylingContext &styler) {
+static int classifyWordHTVBA(unsigned int start, unsigned int end, WordList &keywords, BufferAccess &styler) {
 	char s[100];
 	bool wordIsNumber = isdigit(styler[start]) || (styler[start] == '.');
 	for (unsigned int i = 0; i < end - start + 1 && i < 30; i++) {
@@ -169,7 +169,7 @@ static int classifyWordHTVBA(unsigned int start, unsigned int end, WordList &key
 		return SCE_HBA_DEFAULT;
 }
 
-static void classifyWordHTPy(unsigned int start, unsigned int end, WordList &keywords, StylingContext &styler, char *prevWord) {
+static void classifyWordHTPy(unsigned int start, unsigned int end, WordList &keywords, BufferAccess &styler, char *prevWord) {
 	char s[100];
 	bool wordIsNumber = isdigit(styler[start]);
 	for (unsigned int i = 0; i < end - start + 1 && i < 30; i++) {
@@ -189,7 +189,7 @@ static void classifyWordHTPy(unsigned int start, unsigned int end, WordList &key
 	strcpy(prevWord, s);
 }
 
-static void classifyWordHTPyA(unsigned int start, unsigned int end, WordList &keywords, StylingContext &styler, char *prevWord) {
+static void classifyWordHTPyA(unsigned int start, unsigned int end, WordList &keywords, BufferAccess &styler, char *prevWord) {
 	char s[100];
 	bool wordIsNumber = isdigit(styler[start]);
 	for (unsigned int i = 0; i < end - start + 1 && i < 30; i++) {
@@ -226,7 +226,7 @@ static bool isLineEnd(char ch) {
 }
 
 static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[], 
-	StylingContext &styler) {
+	BufferAccess &styler) {
 	
 	WordList &keywords=*keywordlists[0];
 	WordList &keywords2=*keywordlists[1];

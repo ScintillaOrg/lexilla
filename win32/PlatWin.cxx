@@ -323,12 +323,20 @@ void Surface::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 		surfaceSource.hdc, from.x, from.y, SRCCOPY);
 }
 
+#define ASCII_ONLY 1
+
 void Surface::DrawText(PRectangle rc, Font &font_, int ybase, const char *s, int len, Colour fore, Colour back) {
 	SetFont(font_);
 	::SetTextColor(hdc, fore.AsLong());
 	::SetBkColor(hdc, back.AsLong());
 	RECT rcw = RectFromPRectangle(rc);
+#ifdef ASCII_ONLY
 	::ExtTextOut(hdc, rc.left, ybase, ETO_OPAQUE, &rcw, s, len, NULL);
+#else
+	wchar_t tbuf[20000];
+	int tlen = MultiByteToWideChar(CP_UTF8, 0, s, len, tbuf, sizeof(tbuf));
+	::ExtTextOutW(hdc, rc.left, ybase, ETO_OPAQUE, &rcw, tbuf, tlen, NULL);
+#endif
 }
 
 void Surface::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, Colour fore, Colour back) {
@@ -336,13 +344,25 @@ void Surface::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char 
 	::SetTextColor(hdc, fore.AsLong());
 	::SetBkColor(hdc, back.AsLong());
 	RECT rcw = RectFromPRectangle(rc);
+#ifdef ASCII_ONLY
 	::ExtTextOut(hdc, rc.left, ybase, ETO_OPAQUE | ETO_CLIPPED, &rcw, s, len, NULL);
+#else
+	wchar_t tbuf[20000];
+	int tlen = MultiByteToWideChar(CP_UTF8, 0, s, len, tbuf, sizeof(tbuf));
+	::ExtTextOutW(hdc, rc.left, ybase, ETO_OPAQUE | ETO_CLIPPED, &rcw, tbuf, tlen, NULL);
+#endif
 }
 
 int Surface::WidthText(Font &font_, const char *s, int len) {
 	SetFont(font_);
 	SIZE sz;
+#ifdef ASCII_ONLY
 	::GetTextExtentPoint32(hdc, s, len, &sz);
+#else
+	wchar_t tbuf[20000];
+	int tlen = MultiByteToWideChar(CP_UTF8, 0, s, len, tbuf, sizeof(tbuf));
+	::GetTextExtentPoint32W(hdc, tbuf, tlen, &sz);
+#endif
 	return sz.cx;
 }
 
@@ -350,7 +370,34 @@ void Surface::MeasureWidths(Font &font_, const char *s, int len, int *positions)
 	SetFont(font_);
 	SIZE sz;
 	int fit = 0;
+#ifdef ASCII_ONLY
 	::GetTextExtentExPoint(hdc, s, len, 30000, &fit, positions, &sz);
+#else
+	wchar_t tbuf[20000];
+	int poses[20000];
+	int tlen = MultiByteToWideChar(CP_UTF8, 0, s, len, tbuf, sizeof(tbuf));
+	::GetTextExtentExPointW(hdc, tbuf, tlen, 30000, &fit, poses, &sz);
+	int ui=0;
+	const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
+	int i=0;
+	while (i<len) {
+		positions[i] = poses[ui];
+		if (us[i] < 128) {
+			ui++;
+		} else if (us[i] < (128 + 64 + 32)) {
+			positions[i+1] = poses[ui];
+			ui++;
+			i++;
+		} else {
+			positions[i+1] = poses[ui];
+			positions[i+2] = poses[ui];
+			ui++;
+			i++;
+			i++;
+		}
+		i++;
+	}
+#endif
 }
 
 int Surface::WidthChar(Font &font_, char ch) {

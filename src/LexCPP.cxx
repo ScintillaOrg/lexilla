@@ -17,7 +17,7 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-static bool classifyWordCpp(unsigned int start, unsigned int end, WordList &keywords, StylingContext &styler) {
+static bool classifyWordCpp(unsigned int start, unsigned int end, WordList &keywords, BufferAccess &styler) {
 	char s[100];
 	bool wordIsNumber = isdigit(styler[start]) || (styler[start] == '.');
 	bool wordIsUUID = false;
@@ -39,7 +39,7 @@ static bool classifyWordCpp(unsigned int start, unsigned int end, WordList &keyw
 }
 
 static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[], 
-	StylingContext &styler) {
+	BufferAccess &styler) {
 	
 	WordList &keywords = *keywordlists[0];
 	

@@ -17,7 +17,7 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-static void classifyWordPy(unsigned int start, unsigned int end, WordList &keywords, StylingContext &styler, char *prevWord) {
+static void classifyWordPy(unsigned int start, unsigned int end, WordList &keywords, BufferAccess &styler, char *prevWord) {
 	char s[100];
 	bool wordIsNumber = isdigit(styler[start]);
 	for (unsigned int i = 0; i < end - start + 1 && i < 30; i++) {
@@ -37,12 +37,12 @@ static void classifyWordPy(unsigned int start, unsigned int end, WordList &keywo
 	strcpy(prevWord, s);
 }
 
-static bool IsPyComment(StylingContext &styler, int pos, int len) {
+static bool IsPyComment(BufferAccess &styler, int pos, int len) {
 	return len>0 && styler[pos]=='#';
 }
 
 static void ColourisePyDoc(unsigned int startPos, int length, int initStyle, 
-						   WordList *keywordlists[], StylingContext &styler) {
+						   WordList *keywordlists[], BufferAccess &styler) {
 
 	// Python uses a different mask because bad indentation is marked by oring with 32
 	styler.StartAt(startPos, 127);

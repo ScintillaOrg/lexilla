@@ -54,7 +54,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib imm32.lib comctl32.lib /nologo /dll /machine:I386 /out:"Release/SciLexer.dll"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib imm32.lib comctl32.lib /nologo /dll /machine:I386
 
 !ELSEIF  "$(CFG)" == "SciLexer - Win32 Debug"
 
@@ -81,7 +81,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib imm32.lib comctl32.lib /nologo /dll /debug /machine:I386 /out:"Debug/SciLexer.dll" /pdbtype:sept
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib imm32.lib comctl32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
 
 !ENDIF 
 
@@ -92,10 +92,6 @@ LINK32=link.exe
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
-# Begin Source File
-
-SOURCE=..\src\Accessor.cxx
-# End Source File
 # Begin Source File
 
 SOURCE=..\src\AutoComplete.cxx
@@ -115,6 +111,10 @@ SOURCE=..\src\ContractionState.cxx
 # Begin Source File
 
 SOURCE=..\src\Document.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\DocumentAccessor.cxx
 # End Source File
 # Begin Source File
 
@@ -191,6 +191,10 @@ SOURCE=..\src\Style.cxx
 # Begin Source File
 
 SOURCE=..\src\ViewStyle.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\WindowAccessor.cxx
 # End Source File
 # End Group
 # Begin Group "Header Files"

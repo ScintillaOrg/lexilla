@@ -17,7 +17,7 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-static int classifyWordVB(unsigned int start, unsigned int end, WordList &keywords, StylingContext &styler) {
+static int classifyWordVB(unsigned int start, unsigned int end, WordList &keywords, BufferAccess &styler) {
 
 	char s[100];
 	bool wordIsNumber = isdigit(styler[start]) || (styler[start] == '.');
@@ -43,7 +43,7 @@ static int classifyWordVB(unsigned int start, unsigned int end, WordList &keywor
 }
 
 static void ColouriseVBDoc(unsigned int startPos, int length, int initStyle,
-                           WordList *keywordlists[], StylingContext &styler) {
+                           WordList *keywordlists[], BufferAccess &styler) {
 
 	WordList &keywords = *keywordlists[0];
 	

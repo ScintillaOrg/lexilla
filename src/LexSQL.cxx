@@ -17,7 +17,7 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-static void classifyWordSQL(unsigned int start, unsigned int end, WordList &keywords, StylingContext &styler) {
+static void classifyWordSQL(unsigned int start, unsigned int end, WordList &keywords, BufferAccess &styler) {
 	char s[100];
 	bool wordIsNumber = isdigit(styler[start]) || (styler[start] == '.');
 	for (unsigned int i = 0; i < end - start + 1 && i < 30; i++) {
@@ -35,7 +35,7 @@ static void classifyWordSQL(unsigned int start, unsigned int end, WordList &keyw
 }
 
 static void ColouriseSQLDoc(unsigned int startPos, int length,
-                            int initStyle, WordList *keywordlists[], StylingContext &styler) {
+                            int initStyle, WordList *keywordlists[], BufferAccess &styler) {
 
 	WordList &keywords = *keywordlists[0];
 	

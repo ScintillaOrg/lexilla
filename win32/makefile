@@ -24,7 +24,7 @@ CXXFLAGS = -pedantic $(INCLUDEDIRS) -Os -fno-exceptions -fvtable-thunks -fno-rtt
 .cxx.o:
 	$(CC) $(CXXFLAGS) -c $< -o $@
 
-ALL:	$(COMPONENT) $(LEXCOMPONENT) ScintillaWinS.o
+ALL:	$(COMPONENT) $(LEXCOMPONENT) ScintillaWinS.o WindowAccessor.o
 
 clean:
 	del /q *.exe *.o *.obj *.dll *.res *.map
@@ -41,17 +41,17 @@ $(COMPONENT): $(SOBJS)
 LOBJS	= ScintillaWinL.o ScintillaBaseL.o Editor.o Document.o \
 	ContractionState.o CellBuffer.o CallTip.o \
 	ScintRes.o PlatWin.o KeyMap.o Indicator.o LineMarker.o Style.o \
-	ViewStyle.o AutoComplete.o KeyWords.o Accessor.o PropSet.o $(LEXOBJS)
+	ViewStyle.o AutoComplete.o KeyWords.o DocumentAccessor.o PropSet.o $(LEXOBJS)
 $(LEXCOMPONENT): $(LOBJS)
 	$(DLLWRAP) --target i386-mingw32 -o $(LEXCOMPONENT) $(LOBJS) $(LDFLAGS) -s --relocatable
 	
-Accessor.o: Accessor.cxx Platform.h PropSet.h Accessor.h Scintilla.h
 AutoComplete.o: AutoComplete.cxx Platform.h AutoComplete.h
 CallTip.o: CallTip.cxx Platform.h CallTip.h
 CellBuffer.o: CellBuffer.cxx Platform.h Scintilla.h CellBuffer.h
 ContractionState.o: ContractionState.cxx Platform.h ContractionState.h
 Document.o: Document.cxx Platform.h Scintilla.h CellBuffer.h \
  Document.h
+DocumentAccessor.o: DocumentAccessor.cxx Platform.h PropSet.h Accessor.h DocumentAccessor.h Scintilla.h
 Editor.o: Editor.cxx Platform.h Scintilla.h ContractionState.h \
  CellBuffer.h KeyMap.h Indicator.h LineMarker.h Style.h ViewStyle.h \
  Document.h Editor.h
@@ -83,7 +83,7 @@ ScintillaBase.o: ScintillaBase.cxx Platform.h Scintilla.h \
 ScintillaBaseL.o: ScintillaBase.cxx Platform.h Scintilla.h SciLexer.h \
  ContractionState.h CellBuffer.h CallTip.h KeyMap.h Indicator.h \
  LineMarker.h Style.h AutoComplete.h ViewStyle.h Document.h Editor.h \
- ScintillaBase.h PropSet.h Accessor.h KeyWords.h
+ ScintillaBase.h PropSet.h Accessor.h DocumentAccessor.h KeyWords.h
 ScintillaWin.o: ScintillaWin.cxx Platform.h Scintilla.h \
  ContractionState.h CellBuffer.h CallTip.h KeyMap.h Indicator.h \
  LineMarker.h Style.h AutoComplete.h ViewStyle.h Document.h Editor.h \
@@ -99,6 +99,7 @@ ScintillaWinS.o: ScintillaWin.cxx Platform.h Scintilla.h \
 Style.o: Style.cxx Platform.h Style.h
 ViewStyle.o: ViewStyle.cxx Platform.h Scintilla.h Indicator.h \
  LineMarker.h Style.h ViewStyle.h
+WindowAccessor.o: DocumentAccessor.cxx Platform.h PropSet.h Accessor.h WindowAccessor.h Scintilla.h
 
 ScintillaBaseL.o:
 	$(CC) $(CXXFLAGS) -D SCI_LEXER -c $< -o ScintillaBaseL.o

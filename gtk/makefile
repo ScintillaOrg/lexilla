@@ -26,14 +26,12 @@ LEXOBJS	=  LexCPP.o LexHTML.o LexOthers.o LexPerl.o LexPython.o LexSQL.o LexVB.o
 
 all: $(COMPLIB) $(LEXOBJS)
 
-$(COMPLIB): Accessor.o KeyWords.o Document.o CallTip.o \
+$(COMPLIB): DocumentAccessor.o WindowAccessor.o KeyWords.o Document.o CallTip.o \
 	ScintillaBase.o ContractionState.o Editor.o PropSet.o PlatGTK.o \
 	KeyMap.o LineMarker.o ScintillaGTK.o CellBuffer.o ViewStyle.o \
 	Style.o Indicator.o AutoComplete.o
 	$(AR) rc $@ $^
 
-Accessor.o: Accessor.cxx Platform.h PropSet.h Accessor.h Scintilla.h \
- WinDefs.h
 AutoComplete.o: AutoComplete.cxx Platform.h AutoComplete.h
 CallTip.o: CallTip.cxx Platform.h CallTip.h
 CellBuffer.o: CellBuffer.cxx Platform.h Scintilla.h WinDefs.h \
@@ -41,6 +39,8 @@ CellBuffer.o: CellBuffer.cxx Platform.h Scintilla.h WinDefs.h \
 ContractionState.o: ContractionState.cxx Platform.h ContractionState.h
 Document.o: Document.cxx Platform.h Scintilla.h WinDefs.h CellBuffer.h \
  Document.h
+DocumentAccessor.o: Accessor.cxx Platform.h PropSet.h Accessor.h \
+ DocumentAccessor.h Scintilla.h WinDefs.h
 Editor.o: Editor.cxx Platform.h Scintilla.h WinDefs.h \
  ContractionState.h CellBuffer.h KeyMap.h Indicator.h LineMarker.h \
  Style.h ViewStyle.h Document.h Editor.h
@@ -82,6 +82,8 @@ ScintillaGTK.o: ScintillaGTK.cxx Platform.h Scintilla.h WinDefs.h \
 Style.o: Style.cxx Platform.h Style.h
 ViewStyle.o: ViewStyle.cxx Platform.h Scintilla.h WinDefs.h \
  Indicator.h LineMarker.h Style.h ViewStyle.h
+WindowAccessor.o: WindowAccessor.cxx Platform.h PropSet.h Accessor.h \
+ WindowAccessor.h Scintilla.h WinDefs.h
 
 clean: 
 	rm -f *.o SciTE

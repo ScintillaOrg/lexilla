@@ -15,6 +15,8 @@
 #include "SciLexer.h"
 #include "PropSet.h"
 #include "Accessor.h"
+#include "WindowAccessor.h"
+#include "DocumentAccessor.h"
 #include "KeyWords.h"
 #endif
 #include "ContractionState.h"
@@ -276,7 +278,8 @@ void ScintillaBase::Colourise(int start, int end) {
 		end = lengthDoc;
 	int len = end - start;
 
-	StylingContext styler(wMain.GetID(), props);
+	//WindowAccessor styler(wMain.GetID(), props);
+	DocumentAccessor styler(pdoc, props);
 
 	int styleStart = 0;
 	if (start > 0)
