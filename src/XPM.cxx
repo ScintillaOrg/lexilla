@@ -261,6 +261,7 @@ void XPMSet::Add(int id, const char *textForm) {
 	for (int i = 0; i < len; i++) {
 		if (set[i]->GetId() == id) {
 			set[i]->Init(textForm);
+			set[i]->CopyDesiredColours();
 			return;
 		}
 	}
