@@ -271,6 +271,8 @@ void Surface::Init(GdkDrawable *drawable_) {
 	Release();
 	drawable = drawable_;
 	gc = gdk_gc_new(drawable_);
+	//gdk_gc_set_line_attributes(gc, 1, 
+	//	GDK_LINE_SOLID, GDK_CAP_NOT_LAST, GDK_JOIN_BEVEL);
 	createdGC = true;
 	inited = true;
 }
@@ -281,6 +283,8 @@ void Surface::InitPixMap(int width, int height, Surface *surface_) {
 		ppixmap = gdk_pixmap_new(surface_->drawable, width, height, -1);
 	drawable = ppixmap;
 	gc = gdk_gc_new(surface_->drawable);
+	//gdk_gc_set_line_attributes(gc, 1, 
+	//	GDK_LINE_SOLID, GDK_CAP_NOT_LAST, GDK_JOIN_BEVEL);
 	createdGC = true;
 	inited = true;
 }
@@ -314,8 +318,6 @@ void Surface::LineTo(int x_, int y_) {
 
 void Surface::Polygon(Point *pts, int npts, Colour fore,
                       Colour back) {
-	// Nasty casts works because Point is exactly same as GdkPoint
-	// Oh no it doesn't...
 	GdkPoint gpts[20];
 	if (npts < static_cast<int>((sizeof(gpts) / sizeof(gpts[0])))) {
 		for (int i = 0;i < npts;i++) {
@@ -323,8 +325,6 @@ void Surface::Polygon(Point *pts, int npts, Colour fore,
 			gpts[i].y = pts[i].y;
 		}
 		PenColour(back);
-		//gdk_draw_polygon(drawable, gc, 1,
-		//                 reinterpret_cast<GdkPoint *>(pts), npts);
 		gdk_draw_polygon(drawable, gc, 1, gpts, npts);
 		PenColour(fore);
 		gdk_draw_polygon(drawable, gc, 0, gpts, npts);
@@ -336,23 +336,20 @@ void Surface::RectangleDraw(PRectangle rc, Colour fore, Colour back) {
 		PenColour(back);
 		gdk_draw_rectangle(drawable, gc, 1,
 		                   rc.left, rc.top,
-		                   rc.right - rc.left + 1, rc.bottom - rc.top + 1);
+		                   rc.right - rc.left, rc.bottom - rc.top);
 		PenColour(fore);
 		gdk_draw_rectangle(drawable, gc, 0,
 		                   rc.left, rc.top,
-		                   rc.right - rc.left + 1, rc.bottom - rc.top + 1);
+		                   rc.right - rc.left, rc.bottom - rc.top);
 	}
 }
 
 void Surface::FillRectangle(PRectangle rc, Colour back) {
-	// GTK+ rectangles include their lower and right edges
-	rc.bottom--;
-	rc.right--;
 	PenColour(back);
 	if (drawable) {
 		gdk_draw_rectangle(drawable, gc, 1,
 		                   rc.left, rc.top,
-		                   rc.right - rc.left + 1, rc.bottom - rc.top + 1);
+		                   rc.right - rc.left, rc.bottom - rc.top);
 	}
 }
 
