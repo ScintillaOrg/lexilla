@@ -218,7 +218,7 @@ void ScintillaGTK::Initialise() {
                        	| GDK_POINTER_MOTION_HINT_MASK
                       	);
 
-	gtk_drawing_area_size(GTK_DRAWING_AREA(wDraw.GetID()), 400, 400);
+	gtk_drawing_area_size(GTK_DRAWING_AREA(wDraw.GetID()), 1000, 1000);
 	gtk_fixed_put(GTK_FIXED(sci), wDraw.GetID(), 0, 0);
 
 	adjustmentv = gtk_adjustment_new(0.0, 0.0, 201.0, 1.0, 20.0, 20.0);
