@@ -846,13 +846,14 @@ public:
 	void Add(int index, int value) {
 		if (index >= maximum) {
 			if (index >= len) {
-				int lenNew = index * 2;
+				int lenNew = (index+1) * 2;
 				int *dataNew = new int[lenNew];
 				for (int i=0; i<maximum; i++) {
 					dataNew[i] = data[i];
 				}
 				delete []data;
 				data = dataNew;
+				len = lenNew;
 			}
 			while (maximum < index) {
 				data[maximum] = 0;
