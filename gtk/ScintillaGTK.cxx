@@ -46,6 +46,7 @@ class ScintillaGTK : public ScintillaBase {
 	GdkEventButton evbtn;
 	bool capturedMouse;
 	bool dragWasDropped;
+	char *primarySelectionCopy;
 
 	static GdkAtom clipboard_atom;
 
@@ -80,6 +81,7 @@ private:
 	virtual void Paste();
 	virtual void CreateCallTipWindow(PRectangle rc);
 	virtual void AddToPopUp(const char *label, int cmd=0, bool enabled=true);
+	bool OwnPrimarySelection();
 	virtual void ClaimSelection();
 	void ReceivedSelection(GtkSelectionData *selection_data);
 	void ReceivedDrop(GtkSelectionData *selection_data);
@@ -142,7 +144,8 @@ enum {
 ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 	adjustmentv(0), adjustmenth(0), 
 	pasteBuffer(0), pasteBufferIsRectangular(false), 
-	capturedMouse(false), dragWasDropped(false) {
+	capturedMouse(false), dragWasDropped(false),
+	primarySelectionCopy(0) {
 	sci = sci_;
 	wMain = GTK_WIDGET(sci);
 	
@@ -150,6 +153,7 @@ ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 }
 
 ScintillaGTK::~ScintillaGTK() { 
+	delete []primarySelectionCopy;
 }
 
 gint ScintillaGTK::FocusIn(GtkWidget *widget, GdkEventFocus * /*event*/, ScintillaGTK *sciThis) {
@@ -539,16 +543,26 @@ void ScintillaGTK::AddToPopUp(const char *label, int cmd, bool enabled) {
 	}
 }
 
+bool ScintillaGTK::OwnPrimarySelection() {
+	return (gdk_selection_owner_get(GDK_SELECTION_PRIMARY) \
+		== GTK_WIDGET(wDraw.GetID())->window);
+}
+
 void ScintillaGTK::ClaimSelection() {
 	// X Windows has a 'primary selection' as well as the clipboard.
 	// Whenever the user selects some text, we become the primary selection
-	if (currentPos != anchor) {
-		gtk_selection_owner_set(GTK_WIDGET(wDraw.GetID()), 
-			GDK_SELECTION_PRIMARY, GDK_CURRENT_TIME);
-    } else if (gdk_selection_owner_get(GDK_SELECTION_PRIMARY) == 
-		GTK_WIDGET(wDraw.GetID())->window) {
-		gtk_selection_owner_set(NULL, GDK_SELECTION_PRIMARY, GDK_CURRENT_TIME);
-	}
+  	if (currentPos != anchor) {
+  		gtk_selection_owner_set(GTK_WIDGET(wDraw.GetID()), 
+                                GDK_SELECTION_PRIMARY, GDK_CURRENT_TIME);
+		delete []primarySelectionCopy;
+		primarySelectionCopy = NULL;
+	} else if (OwnPrimarySelection()) {
+		if (primarySelectionCopy == NULL) 
+			gtk_selection_owner_set(NULL, GDK_SELECTION_PRIMARY, GDK_CURRENT_TIME);
+	} else {
+		delete []primarySelectionCopy;
+		primarySelectionCopy = NULL;
+  	}
 }
 
 void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
@@ -557,7 +571,6 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 		if (((selection_data->selection == clipboard_atom)||
 			(selection_data->selection == GDK_SELECTION_PRIMARY)) &&
     			(selection_data->length > 0)) {
-		//if (selection_data->length > 0) {
 			char *ptr = reinterpret_cast<char *>(selection_data->data);
 			unsigned int len = selection_data->length;
 			for (unsigned int i=0; i<static_cast<unsigned int>(selection_data->length); i++) {
@@ -566,14 +579,16 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 			}
 			pdoc->BeginUndoAction();
 			int selStart = SelectionStart();
-			ClearSelection();
+                        if (selection_data->selection != GDK_SELECTION_PRIMARY) {
+                                ClearSelection();
+                        }
 			// Check for "\n\0" ending to string indicating that selection is rectangular
 			bool isRectangular = ((selection_data->length > 1) && 
 				(ptr[selection_data->length-1] == 0 && ptr[selection_data->length-2] == '\n'));
 			if (isRectangular) {
 				PasteRectangular(selStart, ptr, len);
 			} else {
-			pdoc->InsertString(currentPos, ptr, len);
+				pdoc->InsertString(currentPos, ptr, len);
 				SetEmptySelection(currentPos + len);
 			}
 			pdoc->EndUndoAction();
@@ -597,11 +612,16 @@ void ScintillaGTK::ReceivedDrop(GtkSelectionData *selection_data) {
 }
 
 void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, char *text, bool isRectangular) {
-//Platform::DebugPrintf("GetSelection %d\n", info);
 	char *selBuffer = text;
+	char *tmpBuffer = NULL; // Buffer to be freed
+	
 	if (selection_data->selection == GDK_SELECTION_PRIMARY) {
-//Platform::DebugPrintf("GetSelection PRIMARY\n");
-		selBuffer = CopySelectionRange();
+		if (primarySelectionCopy != NULL) {            
+			selBuffer = primarySelectionCopy;
+		} else {
+			tmpBuffer = CopySelectionRange();
+			selBuffer = tmpBuffer;
+		}                
 	}
 
 	if (info == TARGET_STRING) {
@@ -613,15 +633,10 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, ch
 		// All other tested aplications behave benignly by ignoring the \0.
 		if (isRectangular)
 			len++;	
-//Platform::DebugPrintf("GetSelection STRING %d %s %d\n", selection_data->type, 
-//isRectangular ? "rect" : "stream", len);
 		gtk_selection_data_set(selection_data, GDK_SELECTION_TYPE_STRING,
                        	8, reinterpret_cast<unsigned char *>(selBuffer),
                        	len);
 	} else if ((info == TARGET_TEXT) || (info == TARGET_COMPOUND_TEXT)) {
-//Platform::DebugPrintf("GetSelection TEXT\n");
-//if (info == TARGET_COMPOUND_TEXT)
-//Platform::DebugPrintf("GetSelection COMPOUND\n");
 		guchar *text;
 		GdkAtom encoding;
 		gint format;
@@ -633,11 +648,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, ch
 		gdk_free_compound_text(text);
 	}
 
-//Platform::DebugPrintf("GetSelection FREE\n");
-	if (selection_data->selection == GDK_SELECTION_PRIMARY) {
-		delete []selBuffer;
-	}
-//Platform::DebugPrintf("GetSelection END\n");
+	delete []tmpBuffer;
 }
 
 void ScintillaGTK::Resize(int width, int height) {
@@ -711,10 +722,14 @@ gint ScintillaGTK::Press(GtkWidget *, GdkEventButton *event, ScintillaGTK *sciTh
 			event->state & GDK_CONTROL_MASK, 
 			event->state & GDK_CONTROL_MASK);
 	} else if (event->button == 2) {
-		// Grab the primary selection
-		gtk_selection_convert(GTK_WIDGET(sciThis->wDraw.GetID()),
-		                   	GDK_SELECTION_PRIMARY,
-		                   	gdk_atom_intern("STRING", FALSE), event->time);
+		// Grab the primary selection if it exists
+		Position pos = sciThis->PositionFromLocation(pt);
+		if (sciThis->OwnPrimarySelection() && sciThis->primarySelectionCopy == NULL) 
+			sciThis->primarySelectionCopy = sciThis->CopySelectionRange();
+
+		sciThis->SetSelection(pos, pos);
+		gtk_selection_convert(GTK_WIDGET(sciThis->wDraw.GetID()), GDK_SELECTION_PRIMARY,
+				      gdk_atom_intern("STRING", FALSE), event->time);
 	} else if (event->button == 3 && sciThis->displayPopupMenu) {
 		// PopUp menu
 		// Convert to screen
