@@ -557,6 +557,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				//case SCE_HJ_COMMENTLINE:
 			case SCE_HJ_DOUBLESTRING:
 			case SCE_HJ_SINGLESTRING:
+			case SCE_HJ_REGEX:
 			case SCE_HB_STRING:
 			case SCE_HP_STRING:
 			case SCE_HP_TRIPLE:
