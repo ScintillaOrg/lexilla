@@ -393,7 +393,8 @@ static void ColouriseErrorListLine(
 	} else if (strstr(lineBuffer, " at " ) &&
 	           (strstr(lineBuffer, " at " ) < (lineBuffer + lengthLine)) &&
 	           strstr(lineBuffer, " line ") &&
-	           (strstr(lineBuffer, " line ") < (lineBuffer + lengthLine))) {
+	           (strstr(lineBuffer, " line ") < (lineBuffer + lengthLine)) &&
+			   (strstr(lineBuffer, " at " ) < (strstr(lineBuffer, " line ")))) {
 		// perl error message
 		styler.ColourTo(endPos, SCE_ERR_PERL);
 	} else if ((memcmp(lineBuffer, "   at ", 6) == 0) &&
@@ -405,19 +406,23 @@ static void ColouriseErrorListLine(
 		// Essential Lahey Fortran error message
 		styler.ColourTo(endPos, SCE_ERR_ELF);
 	} else {
-		// Look for GCC <filename>:<line>:message
-		// Look for Microsoft <filename>(line)message
+		// Look for GCC <filename>:<line>: message
+		// Look for Microsoft <filename>(line) :message
 		// Look for Microsoft <filename>(line,pos)message
 		// Look for CTags \tmessage
 		int state = 0;
 		for (unsigned int i = 0; i < lengthLine; i++) {
 			char ch = lineBuffer[i];
+			char chNext = ' ';
+			if ((i+1) < lengthLine)
+				chNext = lineBuffer[i+1];
 			if (state == 0) {
-				if ((ch == ':') && isdigit(lineBuffer[i + 1])) {
+				if ((ch == ':') && isdigit(chNext)) {
 					// May be GCC
 					state = 1;
-				} else if (ch == '(') {
+				} else if ((ch == '(') && isdigit(chNext) && (chNext != '0')) {
 					// May be Microsoft
+					// Check againt '0' often removes phone numbers
 					state = 10;
 				} else if (ch == '\t') {
 					// May be CTags
@@ -426,7 +431,7 @@ static void ColouriseErrorListLine(
 			} else if ((state == 1) && isdigit(ch)) {
 				state = 2;
 			} else if (state == 2) {
-				if (ch == ':') {
+				if ((ch == ':') && (chNext == ' ')) {
 					state = 3;	// :9.*: is GCC
 					break;
 				} else if (!isdigit(ch)) {
@@ -442,8 +447,11 @@ static void ColouriseErrorListLine(
 				} else if ((ch != ' ') && !isdigit(ch)) {
 					state = 99;
 				}
-			} else if ((state == 12) && (ch == ':')) {
-				state = 13;
+			} else if (state == 12) {
+				if ((ch == ' ') && (chNext == ':'))
+					state = 13;
+				else
+					state = 99;
 			} else if (state == 14) {
 				if (ch == ')') {
 					state = 15;
