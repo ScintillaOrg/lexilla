@@ -244,6 +244,10 @@
 	AutoIt 3 lexer improved.
 	</li>
 	<li>
+	Lua lexer styles end of line characters on comment and preprocessor
+	lines so that the eolfilled style can be applied to them.
+	</li>
+	<li>
 	NSIS support updated for line continuations, box comments, SectionGroup and 
 	PageEx, and with more up-to-date properties.
 	</li>
@@ -301,7 +305,8 @@
 	<li>
 	SciTE on GTK+ 2.x allows the height and width of the file open file chooser to 
 	be set, for the show hidden files check box to be set from an option and for it
-	to be opened in the directory of the current file explicitly.
+	to be opened in the directory of the current file explicitly. Enter key works in 
+	save chooser.
 	</li>
 	<li>
 	Scintilla lexers should no longer see bits in style bytes that are outside the set
@@ -332,7 +337,8 @@
 	Fix for folding becoming confused.
 	</li>
 	<li>
-	Fixes for Japanese Input Method Editor on Windows.
+	On Windows, fixes for Japanese Input Method Editor and for 8 bit Katakana 
+	characters.
 	</li>
 	<li>
 	Fixed buffer size bug avoided when typing long words by making buffer bigger.
@@ -344,13 +350,26 @@
 	SciTE menus on GTK+ uses Shift and Ctrl rather than old style abbreviations.
 	</li>
 	<li>
+	SciTE full screen mode on Windows calculates size more correctly.
+	</li>
+	<li>
+	SciTE on Windows menus work better with skinning applications.
+	</li>
+	<li>
 	Searching bugs fixed.
 	</li>
 	<li>
 	Colours reallocated when changing image using SCI_REGISTERIMAGE.
 	</li>
 	<li>
+	Caret stays visible when Enter held down.
+	</li>
+	<li>
 	Undo of automatic indentation more reasonable.
+	</li>
+	<li>
+	High processor usage fixed in background wrapping under some 
+	circumstances.
 	</li>
 	<li>
 	Crashing bug fixed on AMD64.
