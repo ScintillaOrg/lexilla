@@ -242,7 +242,7 @@ public:
 	void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back);
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource);
 
-	void DrawText(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
+	void DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
 	void DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
 	void MeasureWidths(Font &font_, const char *s, int len, int *positions);
 	int WidthText(Font &font_, const char *s, int len);
@@ -456,7 +456,7 @@ void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	}
 }
 
-void SurfaceImpl::DrawText(PRectangle rc, Font &font_, int ybase, const char *s, int len,
+void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len,
                        ColourAllocated fore, ColourAllocated back) {
 	FillRectangle(rc, back);
 	PenColour(fore);
@@ -464,7 +464,7 @@ void SurfaceImpl::DrawText(PRectangle rc, Font &font_, int ybase, const char *s,
 		gdk_draw_text(drawable, PFont(font_), gc, rc.left, ybase, s, len);
 }
 
-// On GTK+, exactly same as DrawText
+// On GTK+, exactly same as DrawTextNoClip
 void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len,
                               ColourAllocated fore, ColourAllocated back) {
 	FillRectangle(rc, back);
@@ -498,10 +498,6 @@ int SurfaceImpl::WidthChar(Font &font_, char ch) {
 		return gdk_char_width(PFont(font_), ch);
 	else
 		return 1;
-}
-
-Surface *Surface::Allocate() {
-	return new SurfaceImpl;
 }
 
 // Three possible strategies for determining ascent and descent of font:
@@ -589,6 +585,10 @@ void SurfaceImpl::FlushCachedState() {}
 
 void SurfaceImpl::SetUnicodeMode(bool unicodeMode_) {
 	unicodeMode=unicodeMode_;
+}
+
+Surface *Surface::Allocate() {
+	return new SurfaceImpl;
 }
 
 Window::~Window() {}

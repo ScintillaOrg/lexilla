@@ -876,7 +876,7 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 					int xpos = rcNumber.right - width - 3;
 					rcNumber.left = xpos;
 					if ((visibleLine < cs.LinesDisplayed()) && cs.GetVisible(line)) {
-						surface->DrawText(rcNumber, vs.styles[STYLE_LINENUMBER].font,
+						surface->DrawTextNoClip(rcNumber, vs.styles[STYLE_LINENUMBER].font,
 						                  rcNumber.top + vs.maxAscent, number, strlen(number),
 						                  vs.styles[STYLE_LINENUMBER].fore.allocated,
 						                  vs.styles[STYLE_LINENUMBER].back.allocated);
@@ -1152,7 +1152,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 				// Only try to draw if really visible - enhances performance by not calling environment to
 				// draw strings that are completely past the right side of the window.
 				if (rcSegment.left <= rcLine.right) {
-					surface->DrawText(rcSegment, textFont,
+					surface->DrawTextNoClip(rcSegment, textFont,
 					                  rcSegment.top + vsDraw.maxAscent, ll.chars + startseg,
 					                  i - startseg + 1, textFore, textBack);
 					if (vsDraw.viewWhitespace != wsInvisible ||
@@ -1665,7 +1665,7 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 				// Right justify
 				rcNumber.left -=
 				    surface->WidthText(vsPrint.styles[STYLE_LINENUMBER].font, number, strlen(number));
-				surface->DrawText(rcNumber, vsPrint.styles[STYLE_LINENUMBER].font,
+				surface->DrawTextNoClip(rcNumber, vsPrint.styles[STYLE_LINENUMBER].font,
 				                  ypos + vsPrint.maxAscent, number, strlen(number),
 				                  vsPrint.styles[STYLE_LINENUMBER].fore.allocated,
 				                  vsPrint.styles[STYLE_LINENUMBER].back.allocated);

@@ -81,7 +81,7 @@ void CallTip::PaintCT(Surface *surfaceWindow) {
 		rcClient.left = x;
 		rcClient.top = ytext - ascent - 1;
 		rcClient.right = xEnd;
-		surfaceWindow->DrawText(rcClient, font, ytext,
+		surfaceWindow->DrawTextNoClip(rcClient, font, ytext,
 		                        chunkVal, thisStartHighlight,
 		                        colourUnSel.allocated, colourBG.allocated);
 		x = xEnd;
@@ -91,7 +91,7 @@ void CallTip::PaintCT(Surface *surfaceWindow) {
 		rcClient.top = ytext;
 		rcClient.left = x;
 		rcClient.right = xEnd;
-		surfaceWindow->DrawText(rcClient, font, ytext,
+		surfaceWindow->DrawTextNoClip(rcClient, font, ytext,
 		                        chunkVal + thisStartHighlight, thisEndHighlight - thisStartHighlight,
 		                        colourSel.allocated, colourBG.allocated);
 		x = xEnd;
@@ -100,7 +100,7 @@ void CallTip::PaintCT(Surface *surfaceWindow) {
 		                                    chunkLength - thisEndHighlight);
 		rcClient.left = x;
 		rcClient.right = xEnd;
-		surfaceWindow->DrawText(rcClient, font, ytext,
+		surfaceWindow->DrawTextNoClip(rcClient, font, ytext,
 		                        chunkVal + thisEndHighlight, chunkLength - thisEndHighlight,
 		                        colourUnSel.allocated, colourBG.allocated);
 		chunkVal = chunkEnd + 1;

@@ -199,10 +199,11 @@ class Palette {
 #if PLAT_GTK
 	void *allocatedPalette; // GdkColor *
 	int allocatedLen;
-#elif PLAT_WIN
-	void *hpal;
 #endif
 public:
+#if PLAT_WIN
+	void *hpal;
+#endif
 	bool allowRealization;
 
 	Palette();
@@ -277,7 +278,7 @@ public:
 	virtual void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back)=0;
 	virtual void Copy(PRectangle rc, Point from, Surface &surfaceSource)=0;
 
-	virtual void DrawText(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back)=0;
+	virtual void DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back)=0;
 	virtual void DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back)=0;
 	virtual void MeasureWidths(Font &font_, const char *s, int len, int *positions)=0;
 	virtual int WidthText(Font &font_, const char *s, int len)=0;
