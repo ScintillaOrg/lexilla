@@ -56,6 +56,11 @@ public:
 	char *ToString();	// Caller must delete[] the return value
 	bool GetFirst(char **key, char **val);
 	bool GetNext(char **key, char **val);
+
+private:
+	// copy-value semantics not implemented	
+	PropSet(const PropSet &copy);
+	void operator=(const PropSet &assign);
 };
 
 /**
