@@ -17,8 +17,8 @@ class XPM {
 	char *codes;
 	ColourPair *colours;
 	void Init(const char * const *linesForm);
-	ColourAllocated ColourFromCode(char ch);
-	void FillRun(Surface *surface, char code, int startX, int y, int x);
+	ColourAllocated ColourFromCode(int ch);
+	void FillRun(Surface *surface, int code, int startX, int y, int x);
 public:
 	XPM(const char *textForm);
 	XPM(const char * const *linesForm);

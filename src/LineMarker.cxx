@@ -62,7 +62,7 @@ void XPM::Init(const char * const *linesForm) {
 	}
 }
 
-ColourAllocated XPM::ColourFromCode(char ch) {
+ColourAllocated XPM::ColourFromCode(int ch) {
 	for (int i=0;i<nColours;i++) {
 		if (codes[i] == ch) {
 			return colours[i].allocated;
@@ -71,7 +71,7 @@ ColourAllocated XPM::ColourFromCode(char ch) {
 	return colours[0].allocated;
 }
 
-void XPM::FillRun(Surface *surface, char code, int startX, int y, int x) {
+void XPM::FillRun(Surface *surface, int code, int startX, int y, int x) {
 	if (code != codeTransparent) {
 		PRectangle rc(startX, y, x, y+1);
 		surface->FillRectangle(rc, ColourFromCode(code));
