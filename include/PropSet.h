@@ -70,7 +70,8 @@ public:
 	char *Allocate(int size);
 	void SetFromAllocated();
 	bool InList(const char *s);
-	const char *GetNearestWord(const char *wordStart, int searchLen = -1, bool ignoreCase = false);
+	const char *GetNearestWord(const char *wordStart, int searchLen = -1, 
+		bool ignoreCase = false, SString wordCharacters="");
 	char *GetNearestWords(const char *wordStart, int searchLen=-1, 
 		bool ignoreCase=false, char otherSeparator='\0');
 };

@@ -567,7 +567,7 @@ bool WordList::InList(const char *s) {
  * The length of the word to compare is passed too.
  * Letter case can be ignored or preserved (default).
  */
-const char *WordList::GetNearestWord(const char *wordStart, int searchLen /*= -1*/, bool ignoreCase /*= false*/) {
+const char *WordList::GetNearestWord(const char *wordStart, int searchLen /*= -1*/, bool ignoreCase /*= false*/, SString wordCharacters /*='/0' */) {
 	int start = 0; // lower bound of the api array block to search
 	int end = len - 1; // upper bound of the api array block to search
 	int pivot; // index of api array element just being compared
@@ -585,8 +585,8 @@ const char *WordList::GetNearestWord(const char *wordStart, int searchLen /*= -1
 			pivot = (start + end) >> 1;
 			word = wordsNoCase[pivot];
 			cond = CompareNCaseInsensitive(wordStart, word, searchLen);
-			if (!cond && nonFuncChar(word[searchLen])) // maybe there should be a "non-word character" test here?
-				return word; // result must not be freed with free()
+			if (!cond && (!wordCharacters.contains(word[searchLen])))
+					return word; // result must not be freed with free()
 			else if (cond > 0)
 				start = pivot + 1;
 			else if (cond <= 0)
@@ -597,7 +597,7 @@ const char *WordList::GetNearestWord(const char *wordStart, int searchLen /*= -1
 			pivot = (start + end) >> 1;
 			word = words[pivot];
 			cond = strncmp(wordStart, word, searchLen);
-			if (!cond && nonFuncChar(word[searchLen])) // maybe there should be a "non-word character" test here?
+			if (!cond && (!wordCharacters.contains(word[searchLen])))
 				return word; // result must not be freed with free()
 			else if (cond > 0)
 				start = pivot + 1;
