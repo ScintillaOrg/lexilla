@@ -92,6 +92,7 @@ public:
 		sSize = sLen = (s) ? strlen(s) : 0;
 	}
 	SString(const char *s_, lenpos_t first, lenpos_t last) : sizeGrowth(sizeGrowthDefault) {
+		// note: expects the "last" argument to point one beyond the range end (a la STL iterators)
 		s = StringAllocate(s_ + first, last - first);
 		sSize = sLen = (s) ? strlen(s) : 0;
 	}
@@ -187,6 +188,27 @@ public:
 			return s[i];
 		else
 			return '\0';
+	}
+	SString substr(lenpos_t subPos, lenpos_t subLen=measure_length) const {
+		if (subPos >= sLen) {
+			return SString();					// return a null string if start index is out of bounds
+		}
+		if ((subLen == measure_length) || (subPos + subLen > sLen)) {
+			subLen = sLen - subPos;		// can't substr past end of source string
+		}
+		return SString(s, subPos, subPos + subLen);
+	}
+	SString &lowercase(lenpos_t subPos = 0, lenpos_t subLen=measure_length) {
+		if ((subLen == measure_length) || (subPos + subLen > sLen)) {
+			subLen = sLen - subPos;		// don't apply past end of string
+		}
+		for (unsigned int i = subPos; i < subPos + subLen; i++) {
+			if (s[i] < 'A' || s[i] > 'Z')
+				continue;
+			else
+				s[i] = static_cast<char>(s[i] - 'A' + 'a');
+		}
+		return *this;
 	}
 	SString &append(const char *sOther, lenpos_t sLenOther=measure_length, char sep = '\0') {
 		if (!sOther) {
