@@ -366,6 +366,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define CARET_SLOP 0x01
 #define CARET_CENTER 0x02
 #define CARET_STRICT 0x04
+#define CARET_XEVEN 0x08
 #define SCI_SETCARETPOLICY 2369
 #define SCI_LINESONSCREEN 2370
 #define SCI_USEPOPUP 2371
@@ -393,6 +394,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define VISIBLE_SLOP 0x01
 #define VISIBLE_STRICT 0x04
 #define SCI_SETVISIBLEPOLICY 2394
+#define SCI_DELLINELEFT 2395
+#define SCI_DELLINERIGHT 2396
 #define SCI_GRABFOCUS 2400
 #define SCI_STARTRECORD 3001
 #define SCI_STOPRECORD 3002

@@ -971,6 +971,9 @@ val CARET_CENTER=0x02
 # If CARET_SLOP also set then reposition whenever outside slop border
 # If CARET_SLOP not set then recentre even when visible
 val CARET_STRICT=0x04
+# If CARET_XEVEN set then both left and right margins are given equal weight
+# rather than favouring left following behaviour.
+val CARET_XEVEN=0x08
 # Set the way the line the caret is on is kept visible.
 fun void SetCaretPolicy=2369(int caretPolicy, int caretSlop)
 
@@ -1037,6 +1040,12 @@ val VISIBLE_SLOP=0x01
 val VISIBLE_STRICT=0x04
 # Set the way the display area is determined when a particular line is to be moved to.
 fun void SetVisiblePolicy=2394(int visiblePolicy, int visibleSlop)
+
+# Delete back from the current position to the start of the line
+fun void DelLineLeft=2395(,)
+
+# Delete forwards from the current position to the end of the line
+fun void DelLineRight=2396(,)
 
 # Set the focus to this Scintilla widget.
 # GTK+ Specific
