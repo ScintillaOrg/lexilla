@@ -200,13 +200,14 @@ bool isprefix(const char *target, const char *prefix) {
 		return true;
 }
 
-bool issuffix(const char *target, const char *suffix) {
+static bool IsSuffixCaseInsensitive(const char *target, const char *suffix) {
 	int lentarget = strlen(target);
 	int lensuffix = strlen(suffix);
 	if (lensuffix > lentarget)
 		return false;
 	for (int i = lensuffix - 1; i >= 0; i--) {
-		if (target[i + lentarget - lensuffix] != suffix[i])
+		if (MakeUpperCase(target[i + lentarget - lensuffix]) != 
+			MakeUpperCase(suffix[i]))
 			return false;
 	}
 	return true;
@@ -240,7 +241,7 @@ SString PropSet::GetWild(const char *keybase, const char *filename) {
 					char delchr = *del;
 					*del = '\0';
 					if (*keyfile == '*') {
-						if (issuffix(filename, keyfile + 1)) {
+						if (IsSuffixCaseInsensitive(filename, keyfile + 1)) {
 							*del = delchr;
 							free(keyptr);
 							return p->val;
