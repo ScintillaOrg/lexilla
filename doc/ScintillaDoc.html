@@ -286,6 +286,10 @@ SCI_SETHSCROLLBAR(bool visible)
 SCI_GETHSCROLLBAR
 SCI_GETXOFFSET
 SCI_SETXOFFSET(int xoffset)
+SCI_SETSCROLLWIDTH(int pixelWidth)
+SCI_GETSCROLLWIDTH
+SCI_SETENDATLASTLINE(bool endAtLastLine)
+SCI_GETENDATLASTLINE
 </pre>
     <p>
       SCI_SETCARETPOLICY can be set to a combination of the flags CARET_SLOP
@@ -306,6 +310,14 @@ SCI_SETXOFFSET(int xoffset)
     </p>
     <p>
       The xoffset is the horizontal scroll position in pixels.
+    </p>
+    <p>
+      SCI_SETSCROLLWIDTH sets the document width assumed for scrolling.
+    </p>
+    <p>
+      SCI_SETENDATLASTLINE sets the scroll range so that maximum 
+      scroll position has the last line at the bottom of the view (default). 
+      Setting this to false allows scrolling one page below the last line.
     </p>
     <h3>
        Searching

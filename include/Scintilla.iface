@@ -943,6 +943,15 @@ get int GetScrollWidth=2275(,)
 # Does not handle tab or control characters.
 fun int TextWidth=2276(int style, string text)
 
+# Sets the scroll range so that maximum scroll position has 
+# the last line at the bottom of the view (default). 
+# Setting this to false allows scrolling one page below the last line.
+set void SetEndAtLastLine=2277(bool endAtLastLine,)
+
+# Retrieve whether the maximum scroll position has the last 
+# line at the bottom of the view. 
+get int GetEndAtLastLine=2278(,)
+
 ## Start of key messages
 # Move caret down one line.
 fun void LineDown=2300(,)

@@ -327,6 +327,7 @@ Editor::Editor() {
 	xCaretMargin = 50;
 	horizontalScrollBarVisible = true;
 	scrollWidth = 2000;
+	endAtLastLine = true;
 
 	pixmapLine = Surface::Allocate();
 	pixmapSelMargin = Surface::Allocate();
@@ -452,11 +453,17 @@ int Editor::LinesToScroll() {
 int Editor::MaxScrollPos() {
 	//Platform::DebugPrintf("Lines %d screen = %d maxScroll = %d\n",
 	//LinesTotal(), LinesOnScreen(), LinesTotal() - LinesOnScreen() + 1);
-	int retVal = cs.LinesDisplayed() - LinesOnScreen();
-	if (retVal < 0)
+	int retVal = cs.LinesDisplayed();
+	if (endAtLastLine) {
+		retVal -= LinesOnScreen();
+	} else {
+		retVal--;
+	}
+	if (retVal < 0) {
 		return 0;
-	else
+	} else {
 		return retVal;
+	}
 }
 
 static inline bool IsControlCharacter(char ch) {
@@ -2184,9 +2191,9 @@ void Editor::ReconfigureScrollBars() {}
 void Editor::SetScrollBars() {
 	RefreshStyleData();
 
-	int nMax = cs.LinesDisplayed();
-	int nPage = nMax - MaxScrollPos() + 1;
-	bool modified = ModifyScrollBars(nMax, nPage);
+	int nMax = MaxScrollPos();
+	int nPage = LinesOnScreen();
+	bool modified = ModifyScrollBars(nMax + nPage - 1, nPage);
 
 	// TODO: ensure always showing as many lines as possible
 	// May not be, if, for example, window made larger
@@ -4716,6 +4723,17 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		PLATFORM_ASSERT((wParam >= 0) && (wParam <= STYLE_MAX));
 		PLATFORM_ASSERT(lParam);
 		return TextWidth(wParam, reinterpret_cast<char *>(lParam));
+
+	case SCI_SETENDATLASTLINE:
+		PLATFORM_ASSERT((wParam == 0) || (wParam ==1));
+		if (endAtLastLine != (wParam != 0)) {
+			endAtLastLine = wParam != 0;
+			SetScrollBars();
+		}
+		break;
+
+	case SCI_GETENDATLASTLINE:
+		return endAtLastLine;
 
 	case SCI_GETCOLUMN:
 		return pdoc->GetColumn(wParam);

@@ -362,6 +362,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_SETSCROLLWIDTH 2274
 #define SCI_GETSCROLLWIDTH 2275
 #define SCI_TEXTWIDTH 2276
+#define SCI_SETENDATLASTLINE 2277
+#define SCI_GETENDATLASTLINE 2278
 #define SCI_LINEDOWN 2300
 #define SCI_LINEDOWNEXTEND 2301
 #define SCI_LINEUP 2302
