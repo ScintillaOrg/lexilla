@@ -49,6 +49,7 @@ ScintillaBase::~ScintillaBase() {
 }
 
 void ScintillaBase::Finalise() {
+    Editor::Finalise();
 	popup.Destroy();
 }
 
@@ -162,7 +163,7 @@ int ScintillaBase::KeyCommand(UINT iMessage) {
 }
 
 void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
-	//Platform::DebugPrintf("AutoCOmplete %s\n", list);
+	//Platform::DebugPrintf("AutoComplete %s\n", list);
 	ct.CallTipCancel();
 
 	ac.Start(wDraw, idAutoComplete, currentPos, lenEntered);
@@ -170,7 +171,6 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 	PRectangle rcClient = GetClientRectangle();
 	Point pt = LocationFromPosition(currentPos-lenEntered);
 
-	//Platform::DebugPrintf("Auto complete %x\n", lbAutoComplete);
 	int heightLB = 100;
 	int widthLB = 100;
 	if (pt.x >= rcClient.right - widthLB) {
@@ -193,16 +193,18 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 	rcac.right = rcac.left + widthLB;
 	rcac.bottom = Platform::Minimum(rcac.top + heightLB, rcClient.bottom);
 	ac.lb.SetPositionRelative(rcac, wMain);
-	ac.lb.SetFont(vs.styles[0].font);
+	ac.lb.SetFont(vs.styles[STYLE_DEFAULT].font);
+	ac.lb.SetAverageCharWidth(vs.styles[STYLE_DEFAULT].aveCharWidth);
 
-	int maxStrLen = ac.SetList(list);
+	ac.SetList(list);
 
 	// Fiddle the position of the list so it is right next to the target and wide enough for all its strings
-	PRectangle rcList = ac.lb.GetPosition();
+	PRectangle rcList = ac.lb.GetDesiredRect();
 	int heightAlloced = rcList.bottom - rcList.top;
+	widthLB = Platform::Maximum(widthLB, rcList.right - rcList.left);
 	// Make an allowance for large strings in list
 	rcList.left = pt.x - 5;
-	rcList.right = rcList.left + Platform::Maximum(widthLB, maxStrLen * 8 + 16);
+	rcList.right = rcList.left + widthLB;
 	if (pt.y >= rcClient.bottom - heightLB && // Wont fit below.
 	    pt.y >= (rcClient.bottom + rcClient.top) / 2) { // and there is more room above.
 		rcList.top = pt.y - heightAlloced;
@@ -249,7 +251,7 @@ void ScintillaBase::AutoCompleteChanged(char ch) {
 
 void ScintillaBase::AutoCompleteCompleted() {
 	int item = ac.lb.GetSelection();
-	char selected[200];
+	char selected[1000];
 	if (item != -1) {
 		ac.lb.GetValue(item, selected, sizeof(selected));
 	}
@@ -278,9 +280,14 @@ void ScintillaBase::ContextMenu(Point pt) {
 	popup.Show(pt, wMain);
 }
 
-void ScintillaBase::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, bool alt) {
+void ScintillaBase::CancelModes() {
 	AutoCompleteCancel();
 	ct.CallTipCancel();
+    Editor::CancelModes();
+}
+
+void ScintillaBase::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, bool alt) {
+    CancelModes();
 	Editor::ButtonDown(pt, curTime, shift, ctrl, alt);
 }
 
@@ -364,7 +371,7 @@ LRESULT ScintillaBase::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 			if (!ct.wCallTip.Created()) {
 				PRectangle rc = ct.CallTipStart(currentPos, LocationFromPosition(wParam),
 				                                reinterpret_cast<char *>(lParam),
-				                                vs.styles[0].fontName, vs.styles[0].size);
+				                                vs.styles[STYLE_DEFAULT].fontName, vs.styles[STYLE_DEFAULT].size);
 				// If the call-tip window would be out of the client
 				// space, adjust so it displays above the text.
 				PRectangle rcClient = GetClientRectangle();

@@ -525,6 +525,7 @@ PRectangle Window::GetPosition() {
 }
 
 void Window::SetPosition(PRectangle rc) {
+#if 0
 	//gtk_widget_set_uposition(id, rc.left, rc.top);
 	GtkAllocation alloc;
 	alloc.x = rc.left;
@@ -532,6 +533,9 @@ void Window::SetPosition(PRectangle rc) {
 	alloc.width = rc.Width();
 	alloc.height = rc.Height();
 	gtk_widget_size_allocate(id, &alloc);
+#endif
+	gtk_widget_set_uposition(id, rc.left, rc.top);
+	gtk_widget_set_usize(id, rc.right - rc.left,rc.bottom - rc.top);
 }
 
 void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
@@ -540,12 +544,15 @@ void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
 	gdk_window_get_origin(relativeTo.id->window, &ox, &oy);
 
 	gtk_widget_set_uposition(id, rc.left + ox, rc.top + oy);
+#if 0
 	GtkAllocation alloc;
 	alloc.x = rc.left + ox;
 	alloc.y = rc.top + oy;
 	alloc.width = rc.right - rc.left;
 	alloc.height = rc.bottom - rc.top;
 	gtk_widget_size_allocate(id, &alloc);
+#endif
+	gtk_widget_set_usize(id, rc.right - rc.left,rc.bottom - rc.top);
 }
 
 PRectangle Window::GetClientPosition() {
@@ -603,7 +610,7 @@ void Window::SetTitle(const char *s) {
 	gtk_window_set_title(GTK_WINDOW(id), s);
 }
 
-ListBox::ListBox() : list(0), current(0) {}
+ListBox::ListBox() : list(0), current(0), desiredVisibleRows(5), maxItemCharacters(0) {}
 
 ListBox::~ListBox() {}
 
@@ -637,13 +644,68 @@ void ListBox::Create(Window &, int) {
 	gtk_widget_realize(id);
 }
 
+void ListBox::SetFont(Font &scint_font) {
+	GtkStyle* style;
+
+	style = gtk_widget_get_style(GTK_WIDGET(list));
+	if (!gdk_font_equal(style->font, scint_font.GetID())) {
+		style = gtk_style_copy(style);
+		gdk_font_unref(style->font);
+		style->font = scint_font.GetID();
+		gdk_font_ref(style->font);
+		gtk_widget_set_style(GTK_WIDGET(list), style);
+		gtk_style_unref(style);
+	}
+}
+
+void ListBox::SetAverageCharWidth(int width) {
+    aveCharWidth = width;
+}
+
+void ListBox::SetVisibleRows(int rows) {
+	desiredVisibleRows = rows;
+}
+
+PRectangle ListBox::GetDesiredRect() {
+	// Before any size allocated pretend its 100 wide so not scrolled
+	PRectangle rc(0, 0, 100, 100);
+	if (id) {
+		GtkRequisition req;
+		int height;
+
+		// First calculate height of the clist for our desired visible row count otherwise it tries to expand to the total # of rows
+		height = (desired_visible_rows * GTK_CLIST(list)->row_height
+		          + desired_visible_rows + 1
+		          + 2 * (list->style->klass->ythickness 
+		                 + GTK_CONTAINER(list)->border_width));
+		gtk_widget_set_usize(GTK_WIDGET(list), -1, height);
+
+		// Get the size of the scroller because we set usize on the window
+		gtk_widget_size_request(GTK_WIDGET(scroller), &req);
+		rc.right = req.width;
+		rc.bottom = req.height;
+                
+		gtk_widget_set_usize(GTK_WIDGET(list), -1, -1);
+        int width = maxItemCharacters;
+        if (width < 12)
+            width = 12;
+	    rc.right = width * 8 + 16;
+	}
+	return rc;
+    
+}
+
 void ListBox::Clear() {
 	gtk_clist_clear(GTK_CLIST(list));
+    maxItemCharacters = 0;
 }
 
 void ListBox::Append(char *s) {
 	char *szs[] = { s, 0};
 	gtk_clist_append(GTK_CLIST(list), szs);
+    size_t len = strlen(s);
+    if (maxItemCharacters < len)
+        maxItemCharacters = len;
 }
 
 int ListBox::Length() {

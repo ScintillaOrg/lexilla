@@ -698,7 +698,7 @@ HINSTANCE Window::GetInstance() {
 		::GetWindowLong(id,GWL_HINSTANCE));
 }
 
-ListBox::ListBox() {
+ListBox::ListBox() : desiredVisibleRows(5), maxItemCharacters(0), aveCharWidth(8) {
 }
 
 ListBox::~ListBox() {
@@ -712,12 +712,45 @@ void ListBox::Create(Window &parent, int ctrlID) {
 		parent.GetInstance(), 0);
 }
 
+void ListBox::SetFont(Font &font) {
+	Window::SetFont(font);
+}
+
+void ListBox::SetAverageCharWidth(int width) {
+    aveCharWidth = width;
+}
+
+void ListBox::SetVisibleRows(int rows) {
+	desiredVisibleRows = rows;
+}
+
+PRectangle ListBox::GetDesiredRect() {
+	PRectangle rcDesired = GetPosition();
+	int itemHeight = SendMessage(LB_GETITEMHEIGHT, 0);
+	int rows = Length();
+	if ((rows == 0) || (rows > desiredVisibleRows))
+		rows = desiredVisibleRows;
+	// The +6 allows for borders
+	rcDesired.bottom = rcDesired.top + 6 + itemHeight * rows;
+    int width = maxItemCharacters;
+    if (width < 12)
+        width = 12;
+	rcDesired.right = rcDesired.left + width * (aveCharWidth+aveCharWidth/3);
+    if (Length() > rows)
+        rcDesired.right = rcDesired.right + GetSystemMetrics(SM_CXVSCROLL);
+	return rcDesired;
+}
+
 void ListBox::Clear() {
 	SendMessage(LB_RESETCONTENT);
+    maxItemCharacters = 0;
 }
 
 void ListBox::Append(char *s) {
 	SendMessage(LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(s));
+    size_t len = strlen(s);
+    if (maxItemCharacters < len)
+        maxItemCharacters = len;
 }
 
 int ListBox::Length() {
@@ -733,7 +766,8 @@ int ListBox::GetSelection() {
 }
 
 int ListBox::Find(const char *prefix) {
-	return SendMessage(LB_FINDSTRING, 0, reinterpret_cast<LPARAM>(prefix));
+	return SendMessage(LB_FINDSTRING, static_cast<WPARAM>(-1), 
+        reinterpret_cast<LPARAM>(prefix));
 }
 
 void ListBox::GetValue(int n, char *value, int len) {

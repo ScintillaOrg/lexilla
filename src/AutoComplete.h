@@ -35,7 +35,7 @@ public:
 	char GetSeparator();
 	
 	// The list string contains a sequence of words separated by the separator character
-	int SetList(const char *list);
+	void SetList(const char *list);
 	
 	void Show();
 	void Cancel();

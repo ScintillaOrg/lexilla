@@ -116,6 +116,7 @@ Editor::~Editor() {
 }
 
 void Editor::Finalise() {
+    CancelModes();
 }
 
 void Editor::DropGraphics() {
@@ -1950,6 +1951,10 @@ void Editor::LineTranspose() {
 	}
 }
 
+void Editor::CancelModes() {
+	SetEmptySelection(currentPos);
+}
+
 int Editor::KeyCommand(UINT iMessage) {
 	Point pt = LocationFromPosition(currentPos);
 
@@ -2069,7 +2074,7 @@ int Editor::KeyCommand(UINT iMessage) {
 		break;
 	case SCI_CANCEL:  	// Cancel any modes - handled in subclass
 		// Also unselect text
-		SetEmptySelection(currentPos);
+        CancelModes();
 		break;
 	case SCI_DELETEBACK:
 		DelCharBack();

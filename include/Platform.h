@@ -328,7 +328,7 @@ public:
 	void Show(bool show=true);
 	void InvalidateAll();
 	void InvalidateRectangle(PRectangle rc);
-	void SetFont(Font &font);
+	virtual void SetFont(Font &font);
 	enum Cursor { cursorText, cursorArrow, cursorUp, cursorWait, cursorHoriz, cursorVert, cursorReverseArrow };
 	void SetCursor(Cursor curs);
 	void SetTitle(const char *s);
@@ -345,14 +345,17 @@ class ListBox : public Window {
 	WindowID scroller;
 	int current;
 #endif
+	int desiredVisibleRows;
+    size_t maxItemCharacters;
+	unsigned int aveCharWidth;
 public:
 	ListBox();
 	virtual ~ListBox();
-	ListBox &operator=(WindowID id_) {
-		id = id_;
-		return *this;
-	}
 	void Create(Window &parent, int ctrlID);
+	virtual void SetFont(Font &font);
+	void SetAverageCharWidth(int width);
+	void SetVisibleRows(int rows);
+	PRectangle GetDesiredRect();
 	void Clear();
 	void Append(char *s);
 	int Length();
