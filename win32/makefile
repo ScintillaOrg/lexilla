@@ -44,7 +44,7 @@ LEXOBJS=LexAda.o LexAVE.o LexConf.o LexCPP.o LexEiffel.o LexHTML.o \
 SOBJS	= ScintillaWin.o ScintillaBase.o Editor.o Document.o \
 	ContractionState.o CellBuffer.o CallTip.o \
 	ScintRes.o PlatWin.o KeyMap.o Indicator.o LineMarker.o RESearch.o \
-	Style.o ViewStyle.o AutoComplete.o UniConversion.o
+	Style.o ViewStyle.o AutoComplete.o UniConversion.o PropSet.o
 $(COMPONENT): $(SOBJS)
 	$(DLLWRAP) --target i386-mingw32 -o $@ $(SOBJS) $(LDFLAGS) -s --relocatable
 

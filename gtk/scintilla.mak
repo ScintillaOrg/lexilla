@@ -108,6 +108,7 @@ SOBJS=\
 	$(DIR_O)\LineMarker.obj \
 	$(DIR_O)\PlatGTK.obj \
 	$(DIR_O)\RESearch.obj \
+	$(DIR_O)\PropSet.obj \
 	$(DIR_O)\ScintillaBase.obj \
 	$(DIR_O)\ScintillaGTK.obj \
 	$(DIR_O)\Style.obj \
