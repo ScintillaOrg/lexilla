@@ -5276,16 +5276,34 @@ void Editor::Expand(int &line, bool doExpand) {
 }
 
 void Editor::ToggleContraction(int line) {
-	if (pdoc->GetLevel(line) & SC_FOLDLEVELHEADERFLAG) {
+	if (line >= 0) {
+		if ((pdoc->GetLevel(line) & SC_FOLDLEVELHEADERFLAG) == 0) {
+			line = pdoc->GetFoldParent(line);
+			if (line < 0)
+				return;
+		}
+
 		if (cs.GetExpanded(line)) {
 			int lineMaxSubord = pdoc->GetLastChild(line);
 			cs.SetExpanded(line, 0);
 			if (lineMaxSubord > line) {
 				cs.SetVisible(line + 1, lineMaxSubord, false);
+
+				int lineCurrent = pdoc->LineFromPosition(currentPos);
+				if (lineCurrent > line && lineCurrent <= lineMaxSubord) {
+					// This does not re-expand the fold
+					EnsureCaretVisible();
+				}
+
 				SetScrollBars();
 				Redraw();
 			}
+
 		} else {
+			if (!(cs.GetVisible(line))) {
+				EnsureLineVisible(line, false);
+				GoToLine(line);
+			}
 			cs.SetExpanded(line, 1);
 			Expand(line, true);
 			SetScrollBars();
