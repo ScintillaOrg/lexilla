@@ -67,7 +67,6 @@ static int PrintScriptingIndicatorOffset(Accessor &styler, unsigned int start, u
 	return iResult;
 }
 
-//static int ScriptOfState(int state,int defaultScript)
 static int ScriptOfState(int state) {
 	int scriptLanguage;
 
@@ -383,7 +382,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	int defaultScript = (lineState >> 4) & 0x0F; // 4 bits of script name
 	int beforePreProc = (lineState >> 8) & 0xFF; // 8 bits of state
 
-	//	int scriptLanguage = ScriptOfState(state,defaultScript);
 	int scriptLanguage = ScriptOfState(state);
 
 	bool fold = styler.GetPropertyInt("fold");
@@ -565,6 +563,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 
 				state = StateForScript(defaultScript);
 			}
+			scriptLanguage = eScriptVBS;
 			styler.ColourTo(i, SCE_H_ASP);
 			// fold whole script
 			levelCurrent++;
@@ -574,13 +573,16 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		}
 
 		// handle the end of a pre-processor = Non-HTML
-		else if (((inScriptType == eNonHtmlPreProc)
-			   || (inScriptType == eNonHtmlScriptPreProc))
-			  && (((scriptLanguage == eScriptPHP) && (ch == '?'))
-			   || (!isStringState(state) && !isCommentASPState(state) && (ch == '%')))
-			  && (chNext == '>')) {
+		else if (
+			((inScriptType == eNonHtmlPreProc)
+				|| (inScriptType == eNonHtmlScriptPreProc)) && (
+				((scriptLanguage == eScriptPHP) && (ch == '?')) || 
+				((scriptLanguage != eScriptNone) && !isStringState(state) &&
+					!isCommentASPState(state) && (ch == '%'))
+			) && (chNext == '>')) {
 			if (state == SCE_H_ASPAT) {
-				defaultScript = segIsScriptingIndicator(styler, styler.GetStartSegment(), i - 1, defaultScript);
+				defaultScript = segIsScriptingIndicator(styler,
+					styler.GetStartSegment(), i - 1, defaultScript);
 			}
 			// Bounce out of any ASP mode
 			switch (state) {
