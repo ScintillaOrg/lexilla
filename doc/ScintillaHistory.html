@@ -116,7 +116,7 @@
       <li>
 	Better localisation support including context menus and most messages.
 	Translations of the SciTE user interface available for Bulgarian,
-	French, German, Italian and Turkish.
+	French, German, Italian, Russian, and Turkish.
       </li>
       <li>
 	Can specify a character to use to indicate control characters
@@ -128,6 +128,10 @@
       </li>
       <li>
 	Scintilla method to find start and end of words.
+      </li>
+      <li>
+	SciTE on GTK+ now supports the load.on.activate and save.on.deactivate 
+	properties in an equivalent way to the Windows version.
       </li>
       <li>
 	The output pane of SciTE on Windows is now interactive so command line 
@@ -145,6 +149,9 @@
 	Used for debugging and for showing the user how long commands take in SciTE.
       </li>
       <li>
+	Baan lexer added.
+      </li>
+      <li>
 	In C++ lexer, document comment keywords no longer have to be at the start 
 	of the line.
       </li>
@@ -152,8 +159,10 @@
 	PHP lexer changed to match keywords case insensitively.
       </li>
       <li>
-	SciTE on GTK+ now supports the load.on.activate and save.on.deactivate 
-	properties in an equivalent way to the Windows version.
+	More shell keywords added.
+      </li>
+      <li>
+	SciTE support for VoiceXML added to xml.properties.
       </li>
        <li>
 	In SciTE the selection is not copied to the find field of the Search and Replace
@@ -163,14 +172,43 @@
 	SciTE on Windows has a menu item to decide whether to respond to other 
 	instances which are performing their check.if.already.open check.
       </li>
-	 Scintilla on Windows again supports EM_GETSEL and EM_SETSEL.
       <li>
-	Problem fixed in Scintilla on Windows where control ID was cached and it could 
-	be changed by external code, so no longer cached.
+	SciTE accelerator key for Box Comment command changed to avoid problems
+	in non-English locales.
+      </li>
+      <li>
+	SciTE context menu includes Close command for the editor pane and
+	Hide command for the output pane.
+      </li>
+      <li>
+	output: command added to SciTE director interface to add text to the 
+	output pane. The director interface can execute commands (such as tool
+	commands with subsystem set to 3) by sending a macro:run message.
+      </li>
+      <li>
+	SciTE on GTK+ will defer to the Window Manager for position if position.left or 
+	position.top not set and for size if position.width or position.height not set.
+      </li>
+      <li>
+	SciTE on Windows has a position.tile property to place a second instance
+	to the right of the first.
+      </li>
+      <li>
+	 Scintilla on Windows again supports EM_GETSEL and EM_SETSEL.
+      </li>
+      <li>
+	Problem fixed in Scintilla on Windows where control ID is no longer cached 
+	as it could be changed by external code.
       </li>
       <li>
 	Problems fixed in SciTE on Windows when finding any other open instances at 
 	start up when check.if.already.open is true.
+      </li>
+      <li>
+	Bugs fixed with displaying partial double-byte and Unicode characters
+	in rectangular selections and at the edge when edge mode is EDGE_BACKGROUND.
+	Column numbers reported by GetColumn treat multiple byte characters as one column
+	rather than counting bytes.
       </li>
       <li>
 	Bug fixed with caret movement over folded lines.
@@ -180,13 +218,18 @@
 	modifications.
       </li>
       <li>
+	Horizontal scrolling and display of long lines optimised.
+      </li>
+      <li>
+	Cursor setting in Scintilla on GTK+ optimised.
       </li>
       <li>
 	Experimental changeable style attribute. 
 	Set to false to make text read-only.
 	Currently only stops caret from being within not-changeable
 	text and does not yet stop deleting a range that contains 
-	not-changeable text.
+	not-changeable text. 
+	Can be used from SciTE by adding notchangeable to style entries.
       </li>
       <li>
 	Experimental line wrapping. 
