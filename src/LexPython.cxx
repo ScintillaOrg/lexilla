@@ -241,7 +241,7 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 					chPrev = ' ';
 					chNext = styler.SafeGetCharAt(i + 1);
 				}
-			} else if (isoperator(ch)) {
+			} else if (isoperator(ch) || ch == '`') {
 				styler.ColourTo(i - 1, state);
 				styler.ColourTo(i, SCE_P_OPERATOR);
 			}
@@ -260,7 +260,7 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 						chPrev = ' ';
 						chNext = styler.SafeGetCharAt(i + 1);
 					}
-				} else if (isoperator(ch)) {
+				} else if (isoperator(ch) || ch == '`') {
 					styler.ColourTo(i, SCE_P_OPERATOR);
 				}
 			}
