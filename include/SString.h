@@ -299,6 +299,9 @@ public:
 			posFound = search(sFind, posFound + lenReplace);
 		}
 	}
+	void remove(const char *sFind) {
+		substitute(sFind, "");
+	}
 };
 
 #endif
