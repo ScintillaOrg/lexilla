@@ -353,6 +353,13 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				styler.ColourTo(i, state);
 				state = SCE_H_DEFAULT;
 			}
+#ifdef OLD /* PL 2000/05/18 -- An bad entity may stop on a non-alphabetic character */
+#else  /* OLD PL 2000/05/18 */
+			if (ch != '#' && !isalnum(ch)) {	// Should check that '#' follows '&', but it is unlikely anyway...
+				styler.ColourTo(i, SCE_H_TAGUNKNOWN);
+				state = SCE_H_DEFAULT;
+			}
+#endif /* OLD PL 2000/05/18 */
 		} else if (state == SCE_H_TAGUNKNOWN) {
 			if (!ishtmlwordchar(ch) && ch != '/' && ch != '-') {
 				int eClass = classifyTagHTML(styler.GetStartSegment(), i - 1, keywords, styler);

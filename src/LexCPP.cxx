@@ -118,6 +118,15 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			} else if (ch == '#') {
 				styler.ColourTo(i-1, state);
 				state = SCE_C_PREPROCESSOR;
+#ifdef COLORIZE_ALL_PREPROC /* PL 2000/05/18 */
+#else  /* OLD PL 2000/05/18 */
+				// Skip whitespace between # and preprocessor word
+				do {
+					i++;
+					ch = chNext;
+					chNext = styler.SafeGetCharAt(i + 1);
+				} while (isspace(ch));
+#endif /* OLD PL 2000/05/18 */
 			} else if (isoperator(ch)) {
 				styler.ColourTo(i-1, state);
 				styler.ColourTo(i, SCE_C_OPERATOR);
@@ -140,8 +149,10 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 					state = SCE_C_STRING;
 				} else if (ch == '\'') {
 					state = SCE_C_CHARACTER;
+#ifdef OLD /* PL 2000/05/18 -- A preprocessor symbol shouldn't start in the middle of a word! */
 				} else if (ch == '#') {
 					state = SCE_C_PREPROCESSOR;
+#endif /* OLD PL 2000/05/18 */
 				} else if (isoperator(ch)) {
 					styler.ColourTo(i, SCE_C_OPERATOR);
 					if ((ch == '{') || (ch == '}')) {
@@ -151,10 +162,17 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			}
 		} else {
 			if (state == SCE_C_PREPROCESSOR) {
+#ifdef COLORIZE_ALL_PREPROC /* PL 2000/05/18 -- Stop after the preprocessor word */
 				if ((ch == '\r' || ch == '\n') && !(chPrev == '\\' || chPrev == '\r')) {
 					styler.ColourTo(i-1, state);
 					state = SCE_C_DEFAULT;
 				}
+#else  /* OLD PL 2000/05/18 */
+				if (isspace(ch)) {
+					styler.ColourTo(i-1, state);
+					state = SCE_C_DEFAULT;
+				}
+#endif /* OLD PL 2000/05/18 */
 			} else if (state == SCE_C_COMMENT) {
 				if (ch == '/' && chPrev == '*') {
 					if (((i > styler.GetStartSegment() + 2) || (
@@ -230,8 +248,10 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 					state = SCE_C_STRING;
 				} else if (ch == '\'') {
 					state = SCE_C_CHARACTER;
+#ifdef OLD /* PL 2000/05/18 -- A preprocessor symbol SHOULD be the first non-white char. of the line! */
 				} else if (ch == '#') {
 					state = SCE_C_PREPROCESSOR;
+#endif /* OLD PL 2000/05/18 */
 				} else if (iswordstart(ch)) {
 					state = SCE_C_WORD;
 				} else if (isoperator(ch)) {
