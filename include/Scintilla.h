@@ -277,6 +277,9 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_GETOVERTYPE 2187
 #define SCI_SETCARETWIDTH 2188
 #define SCI_GETCARETWIDTH 2189
+#define SCI_SETTARGETSTART 2190
+#define SCI_SETTARGETEND 2191
+#define SCI_REPLACETARGET 2192
 #define SCI_CALLTIPSHOW 2200
 #define SCI_CALLTIPCANCEL 2201
 #define SCI_CALLTIPACTIVE 2202

@@ -92,6 +92,9 @@ Editor::Editor() {
 	currentPos = 0;
 	anchor = 0;
 
+	targetStart = 0;
+	targetEnd = 0;
+	
 	topLine = 0;
 	posTopLine = 0;
 
@@ -1570,7 +1573,7 @@ void Editor::AddCharUTF(char *s, unsigned int len) {
 
 void Editor::ClearSelection() {
 	if (selType == selRectangle) {
-    	pdoc->BeginUndoAction();
+    		pdoc->BeginUndoAction();
 		int lineStart = pdoc->LineFromPosition(SelectionStart());
 		int lineEnd = pdoc->LineFromPosition(SelectionEnd());
 		int startPos = SelectionStart();
@@ -1582,16 +1585,16 @@ void Editor::ClearSelection() {
 			}
 		}
 		SetEmptySelection(startPos);
-    	pdoc->EndUndoAction();
+    		pdoc->EndUndoAction();
 		selType = selStream;
 	} else {
 		int startPos = SelectionStart();
 		unsigned int chars = SelectionEnd() - startPos;
 		SetEmptySelection(startPos);
 		if (0 != chars) {
-           	pdoc->BeginUndoAction();
+           		pdoc->BeginUndoAction();
 			pdoc->DeleteChars(startPos, chars);
-           	pdoc->EndUndoAction();
+           		pdoc->EndUndoAction();
 		}
 	}
 }
@@ -3555,6 +3558,29 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		}
 		break;
 
+	case SCI_SETTARGETSTART:
+		targetStart = wParam;
+		break;
+	
+	case SCI_SETTARGETEND:
+		targetEnd = wParam;
+		break;
+	
+	case SCI_REPLACETARGET: {
+			if (lParam == 0)
+				return 0;
+			pdoc->BeginUndoAction();
+			unsigned int chars = targetEnd - targetStart;
+			if (targetStart != targetEnd)
+				pdoc->DeleteChars(targetStart, chars);
+			targetEnd = targetStart;
+			char *replacement = reinterpret_cast<char *>(lParam);
+			pdoc->InsertString(targetStart, replacement);
+			targetEnd = targetStart + strlen(replacement);
+			pdoc->EndUndoAction();
+		}
+		break;
+	
 	case EM_LINESCROLL:
 	case SCI_LINESCROLL:
 		ScrollTo(topLine + lParam);

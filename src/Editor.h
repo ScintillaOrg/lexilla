@@ -116,6 +116,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int originalAnchorPos;
 	int currentPos;
 	int anchor;
+	int targetStart;
+	int targetEnd;
 	int topLine;
 	int posTopLine;
 	

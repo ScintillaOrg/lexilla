@@ -708,6 +708,17 @@ set void SetCaretWidth=2188(int pixelWidth,)
 # Returns the width of the insert mode caret
 get int GetCaretWidth=2189(,)
 
+# Sets the position that starts the target which is used for updating the 
+# document without affecting the scroll position.
+set void SetTargetStart=2190(position pos,)
+
+# Sets the position that ends the target which is used for updating the 
+# document without affecting the scroll position.
+set void SetTargetEnd=2191(position pos,)
+
+# Replace the target text with the argument text.
+fun void ReplaceTarget=2192(, string text)
+
 # Show a call tip containing a definition near position pos.
 fun void CallTipShow=2200(position pos, string definition)
 
