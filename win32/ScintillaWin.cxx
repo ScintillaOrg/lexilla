@@ -1167,6 +1167,8 @@ void ScintillaWin::ScrollMessage(WPARAM wParam) {
 
 void ScintillaWin::HorizontalScrollMessage(WPARAM wParam) {
 	int xPos = xOffset;
+	PRectangle rcText = GetTextRectangle();
+	int pageWidth = rcText.Width() * 2 / 3;
 	switch (LoWord(wParam)) {
 	case SB_LINEUP:
 		xPos -= 20;
@@ -1175,10 +1177,10 @@ void ScintillaWin::HorizontalScrollMessage(WPARAM wParam) {
 		xPos += 20;
 		break;
 	case SB_PAGEUP:
-		xPos -= 200;
+		xPos -= pageWidth;
 		break;
 	case SB_PAGEDOWN:
-		xPos += 200;
+		xPos += pageWidth;
 		break;
 	case SB_TOP:
 		xPos = 0;
