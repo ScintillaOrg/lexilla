@@ -96,6 +96,16 @@ SString PropSet::Get(const char *key) {
 
 SString PropSet::GetExpanded(const char *key) {
 	SString val = Get(key);
+    const char *var = strstr(val.c_str(), "$(");
+    while (var) {
+        if (isprefix(var+2, key) && (var[2 + strlen(key)] == ')')) {
+            // Found $(key) which would lead to an infinite loop so exit
+            return val;
+        }
+        var = strstr(var + 2, ")");
+        if (var)
+            var = strstr(var + 1, "$(");
+    }
 	return Expand(val.c_str());
 }
 
