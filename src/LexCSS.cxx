@@ -243,4 +243,10 @@ static void FoldCSSDoc(unsigned int startPos, int length, int, WordList *[], Acc
 	styler.SetLevel(lineCurrent, levelPrev | flagsNext);
 }
 
-LexerModule lmCss(SCLEX_CSS, ColouriseCssDoc, "css", FoldCSSDoc);
+static const char * const cssWordListDesc[] = {
+	"Keywords",
+	"Pseudo classes",
+	0
+};
+
+LexerModule lmCss(SCLEX_CSS, ColouriseCssDoc, "css", FoldCSSDoc, cssWordListDesc);
