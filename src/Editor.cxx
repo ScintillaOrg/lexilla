@@ -646,8 +646,7 @@ Point Editor::LocationFromPosition(int pos) {
 				pt.x = ll->positions[posInLine] - ll->positions[ll->LineStart(subLine)];
 				if (actualWrapVisualStartIndent != 0) {
 					int lineStart = ll->LineStart(subLine);
-					bool continuedWrapLine = lineStart != 0;
-					if (continuedWrapLine)
+					if (lineStart != 0)	// Wrapped
 						pt.x += actualWrapVisualStartIndent * vs.aveCharWidth;
 				}
 			}
@@ -704,8 +703,7 @@ int Editor::PositionFromLocation(Point pt) {
 			int subLineStart = ll->positions[lineStart];
 
 			if (actualWrapVisualStartIndent != 0) {
-				bool continuedWrapLine = lineStart != 0;
-				if (continuedWrapLine)
+				if (lineStart != 0)	// Wrapped
 					pt.x -= actualWrapVisualStartIndent * vs.aveCharWidth;
 			}
 			for (int i = lineStart; i < lineEnd; i++) {
@@ -754,8 +752,7 @@ int Editor::PositionFromLocationClose(Point pt) {
 			int subLineStart = ll->positions[lineStart];
 
 			if (actualWrapVisualStartIndent != 0) {
-				bool continuedWrapLine = lineStart != 0;
-				if (continuedWrapLine)
+				if (lineStart != 0)	// Wrapped
 					pt.x -= actualWrapVisualStartIndent * vs.aveCharWidth;
 			}
 			for (int i = lineStart; i < lineEnd; i++) {
@@ -792,8 +789,7 @@ int Editor::PositionFromLineX(int lineDoc, int x) {
 		int subLineStart = ll->positions[lineStart];
 
 		if (actualWrapVisualStartIndent != 0) {
-			bool continuedWrapLine = lineStart != 0;
-			if (continuedWrapLine)
+			if (lineStart != 0)	// Wrapped
 				x -= actualWrapVisualStartIndent * vs.aveCharWidth;
 		}
 		for (int i = lineStart; i < lineEnd; i++) {
@@ -2862,8 +2858,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 
 						if (actualWrapVisualStartIndent != 0) {
 							int lineStart = ll->LineStart(subLine);
-							bool continuedWrapLine = lineStart != 0;
-							if (continuedWrapLine)
+							if (lineStart != 0)	// Wrapped
 								xposCaret += actualWrapVisualStartIndent * vs.aveCharWidth;
 						}
 						int widthOverstrikeCaret;
