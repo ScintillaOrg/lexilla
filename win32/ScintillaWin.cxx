@@ -76,6 +76,8 @@
 #define MK_ALT 32
 #endif
 
+#define SC_WIN_IDLE 5001
+
 // Functions imported from PlatWin
 extern bool IsNT();
 extern void Platform_Initialise(void *hInstance);
@@ -584,10 +586,33 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		if (wParam == standardTimerID && timer.ticking) {
 			Tick();
 		} else if (wParam == idleTimerID && idler.state) {
-			if (!Idle())
-				SetIdle(false);
+			SendMessage(MainHWND(), SC_WIN_IDLE, 0, 1);
 		} else {
 			return 1;
+		}
+		break;
+
+	case SC_WIN_IDLE:
+		// wParam=dwTickCountInitial, or 0 to initialize.  lParam=bSkipUserInputTest
+		if (idler.state) {
+			if (lParam || (WAIT_TIMEOUT==MsgWaitForMultipleObjects(0,0,0,0, QS_INPUT|QS_HOTKEY))) {
+				if (Idle()) {
+					// User input was given priority above, but all events do get a turn.  Other
+					// messages, notifications, etc. will get interleaved with the idle messages.
+
+					// However, some things like WM_PAINT are a lower priority, and will not fire
+					// when there's a message posted.  So, several times a second, we stop and let
+					// the low priority events have a turn (after which the timer will fire again).
+
+					DWORD dwCurrent = GetTickCount();
+					DWORD dwStart = wParam ? wParam : dwCurrent;
+
+					if (dwCurrent >= dwStart && dwCurrent > 200 && dwCurrent - 200 < dwStart)
+						PostMessage(MainHWND(), SC_WIN_IDLE, dwStart, 0);
+				} else {
+					SetIdle(false);
+				}
+			}
 		}
 		break;
 
