@@ -1133,7 +1133,10 @@ SCI_STARTRECORD
 SCI_STOPRECORD
 </pre>
     <p>
-	Starts and stops macro recording mode.
+	Start and stop macro recording mode. 
+	In macro recording mode, actions are reported to the container through 
+	SCN_MACRORECORD notifications. It is then up to the container to 
+	record these actions for future replay.
     </p>
     <h3>
 	Printing
@@ -1555,7 +1558,8 @@ SCN_MACRORECORD
     <p>
 	Tells the container that an operation is being performed so that 
 	the container may choose to record the fact if it is in a macro 
-	recording mode.
+	recording mode. 
+	The fields set in this notification are message, wParam, and lParam.
     </p>
 <pre>
 SCN_MARGINCLICK
