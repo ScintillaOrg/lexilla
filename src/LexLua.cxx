@@ -36,7 +36,6 @@ inline bool isLuaOperator(char ch) {
 	return false;
 }
 
-
 static void ColouriseLuaDoc(unsigned int startPos,
                             int length,
                             int initStyle,
@@ -84,9 +83,7 @@ static void ColouriseLuaDoc(unsigned int startPos,
 			}
 		}
 
-		if (state == SCE_LUA_LITERALSTRING && ch == '[' && chNext == '[') {
-			literalString++;
-		} else if (state == SCE_LUA_DEFAULT) {
+		if (state == SCE_LUA_DEFAULT) {
 			if (ch == '-' && chNext == '-') {
 				styler.ColourTo(i - 1, state);
 				state = SCE_LUA_COMMENTLINE;
@@ -108,27 +105,31 @@ static void ColouriseLuaDoc(unsigned int startPos,
 			} else if (isLuaOperator(ch)) {
 				styler.ColourTo(i - 1, state);
 				styler.ColourTo(i, SCE_LUA_OPERATOR);
+			} else if (isdigit(ch) || (ch == '.')) {
+				styler.ColourTo(i - 1, state);
+				state = SCE_LUA_NUMBER;
 			} else if (iswordstart(ch)) {
 				styler.ColourTo(i - 1, state);
 				state = SCE_LUA_WORD;
 			}
-		} else if (state == SCE_LUA_WORD) {
-			if (!iswordchar(ch) || (ch == '.')) {
-				char s[100];
-				unsigned int start = styler.GetStartSegment();
-				unsigned int end = i - 1;
-				bool wordIsNumber = isdigit(styler[start]) || (styler[start] == '.');
-
-				for (unsigned int n = 0; n < end - start + 1 && n < 30; n++) {
-					s[n] = styler[start + n];
-					s[n + 1] = '\0';
+		} else {
+			if (state == SCE_LUA_NUMBER) {
+				if (!iswordchar(ch)) {
+					styler.ColourTo(i - 1, SCE_LUA_NUMBER);
+					state = SCE_LUA_DEFAULT;
 				}
-
-				char chAttr = SCE_LUA_IDENTIFIER;
-
-				if (wordIsNumber) {
-					chAttr = SCE_LUA_NUMBER;
-				} else {
+			} else if (state == SCE_LUA_WORD) {
+				if (!iswordchar(ch) || (ch == '.')) {
+					char s[100];
+					unsigned int start = styler.GetStartSegment();
+					unsigned int end = i - 1;
+	
+					for (unsigned int n = 0; n < end - start + 1 && n < 30; n++) {
+						s[n] = styler[start + n];
+						s[n + 1] = '\0';
+					}
+	
+					char chAttr = SCE_LUA_IDENTIFIER;
 					if (keywords.InList(s)) {
 						chAttr = SCE_LUA_WORD;
 					} else if (keywords2.InList(s)) {
@@ -142,29 +143,13 @@ static void ColouriseLuaDoc(unsigned int startPos,
 					} else if (keywords6.InList(s)) {
 						chAttr = SCE_LUA_WORD6 ;
 					}
+					styler.ColourTo(end, chAttr);
+					state = SCE_LUA_DEFAULT;
 				}
-				styler.ColourTo(end, chAttr);
-
-				state = SCE_LUA_DEFAULT;
-
+			} else if (state == SCE_LUA_LITERALSTRING) {
 				if (ch == '[' && chNext == '[') {
-					literalString = 1;
-					state = SCE_LUA_LITERALSTRING;
-				} else if (ch == '-' && chNext == '-') {
-					state = SCE_LUA_COMMENTLINE;
-				} else if (ch == '\"') {
-					state = SCE_LUA_STRING;
-				} else if (ch == '\'') {
-					state = SCE_LUA_CHARACTER;
-				} else if (ch == '$' && firstChar) {
-					state = SCE_LUA_PREPROCESSOR;
-				} else if (isLuaOperator(ch)) {
-					styler.ColourTo(i, SCE_LUA_OPERATOR);
-				}
-			}
-		} else {
-			if (state == SCE_LUA_LITERALSTRING) {
-				if (ch == ']' && (chPrev == ']') && (--literalString == 0)) {
+					literalString++;
+				} else if (ch == ']' && (chPrev == ']') && (--literalString == 0)) {
 					styler.ColourTo(i, state);
 					state = SCE_LUA_DEFAULT;
 				}
@@ -213,16 +198,21 @@ static void ColouriseLuaDoc(unsigned int startPos,
 					chNext = styler.SafeGetCharAt(i + 1);
 				}
 			}
-
+	
 			if (state == SCE_LUA_DEFAULT) {
 				if (ch == '-' && chNext == '-') {
 					state = SCE_LUA_COMMENTLINE;
+				} else if (ch == '[' && chNext == '[') {
+					literalString = 1;
+					state = SCE_LUA_LITERALSTRING;
 				} else if (ch == '\"') {
 					state = SCE_LUA_STRING;
 				} else if (ch == '\'') {
 					state = SCE_LUA_CHARACTER;
 				} else if (ch == '$' && firstChar) {
 					state = SCE_LUA_PREPROCESSOR;
+				} else if (isdigit(ch) || (ch == '.')) {
+					state = SCE_LUA_NUMBER;
 				} else if (iswordstart(ch)) {
 					state = SCE_LUA_WORD;
 				} else if (isLuaOperator(ch)) {
@@ -245,6 +235,7 @@ static void FoldLuaDoc(unsigned int startPos, int length, int /* initStyle */, W
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
 	char chNext = styler[startPos];
+	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	int styleNext = styler.StyleAt(startPos);
 	char s[10];
 	for (unsigned int i = startPos; i < lengthDoc; i++) {
@@ -253,7 +244,7 @@ static void FoldLuaDoc(unsigned int startPos, int length, int /* initStyle */, W
 		int style = styleNext;
 		styleNext = styler.StyleAt(i + 1);
 		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
-		if (style == SCE_LUA_WORD)
+		if (style == SCE_LUA_WORD) {
 			if ( ch == 'i' || ch == 'e' || ch == 't' || ch == 'd' || ch == 'f') {
 				for (unsigned int j = 0; j < 8; j++) {
 					if (!iswordchar(styler[i + j]))
@@ -269,9 +260,16 @@ static void FoldLuaDoc(unsigned int startPos, int length, int /* initStyle */, W
 					levelCurrent--;
 
 			}
+		} else if (style == SCE_LUA_OPERATOR) {
+			if (ch == '{' || ch == '(')
+				levelCurrent++;
+			else if (ch == '}' || ch == ')')
+				levelCurrent--;
+		}
+
 		if (atEOL) {
 			int lev = levelPrev;
-			if (visibleChars == 0)
+			if (visibleChars == 0 && foldCompact)
 				lev |= SC_FOLDLEVELWHITEFLAG;
 			if ((levelCurrent > levelPrev) && (visibleChars > 0))
 				lev |= SC_FOLDLEVELHEADERFLAG;
