@@ -1835,8 +1835,10 @@ void ScintillaGTK::ClassInit(GtkObjectClass* object_class, GtkWidgetClass *widge
 #if GTK_MAJOR_VERSION < 2
 #define GTK_CLASS_TYPE(c) (c->type)
 #define SIG_MARSHAL gtk_marshal_NONE__INT_POINTER
+#define MARSHAL_ARGUMENTS GTK_TYPE_INT, GTK_TYPE_POINTER
 #else
 #define SIG_MARSHAL gtk_marshal_NONE__INT_INT
+#define MARSHAL_ARGUMENTS GTK_TYPE_INT, GTK_TYPE_INT
 #endif
 
 static void scintilla_class_init(ScintillaClass *klass) {
@@ -1852,7 +1854,7 @@ static void scintilla_class_init(ScintillaClass *klass) {
 	                                        GTK_SIGNAL_OFFSET(ScintillaClass, command),
 	                                        SIG_MARSHAL,
 	                                        GTK_TYPE_NONE,
-	                                        2, GTK_TYPE_INT, GTK_TYPE_POINTER);
+	                                        2, MARSHAL_ARGUMENTS);
 
 	scintilla_signals[NOTIFY_SIGNAL] = gtk_signal_new(
 	                                       SCINTILLA_NOTIFY,
@@ -1861,7 +1863,7 @@ static void scintilla_class_init(ScintillaClass *klass) {
 	                                       GTK_SIGNAL_OFFSET(ScintillaClass, notify),
 	                                       SIG_MARSHAL,
 	                                       GTK_TYPE_NONE,
-	                                       2, GTK_TYPE_INT, GTK_TYPE_POINTER);
+	                                       2, MARSHAL_ARGUMENTS);
 #if GTK_MAJOR_VERSION < 2
 	gtk_object_class_add_signals(object_class,
 	                             reinterpret_cast<unsigned int *>(scintilla_signals), LAST_SIGNAL);
