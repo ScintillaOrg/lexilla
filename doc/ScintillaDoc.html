@@ -56,8 +56,8 @@ EM_GETLINE(int line, char *text)
 EM_REPLACESEL(&lt;unused&gt;, char *text)
 EM_SETREADONLY
 EM_GETTEXTRANGE(&lt;unused&gt;, TEXTRANGE *tr)
-SCI_ADDTEXT(char *s, int length)
-SCI_ADDSTYLEDTEXT(cell *s,int length)
+SCI_ADDTEXT(int length, char *s)
+SCI_ADDSTYLEDTEXT(int length, cell *s)
 SCI_INSERTTEXT(int pos, char *text)
 SCI_CLEARALL
 SCI_GETCHARAT(int position)
@@ -167,6 +167,9 @@ SCI_GETCURLINE(int textlen, char *text)
 SCI_LINELENGTH(int line)
 SCI_SETCARETPOLICY(int policy)
 SCI_LINESONSCREEN
+SCI_SELECTIONISRECTANGLE
+SCI_SETHSCROLLBAR(bool visible)
+SCI_GETHSCROLLBAR
 </pre>
     <p>
        Scintilla maintains a selection which stretches between two points, the anchor and the
@@ -633,6 +636,8 @@ SCI_ZOOMIN
 SCI_ZOOMOUT
 SCI_DELWORDLEFT
 SCI_DELWORDRIGHT
+SCI_LINESCROLLDOWN
+SCI_LINESCROLLUP
 </pre>
     <p>
        To allow the container application to perform any of the actions available to the user with
