@@ -104,6 +104,9 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	Point lastClick;
 	unsigned int lastClickTime;
+	int dwellDelay;
+	int ticksToDwell;
+	bool dwelling;
 	enum { selChar, selWord, selLine } selectionType;
 	Point ptMouseLast;
 	bool firstExpose;
@@ -259,6 +262,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void NotifyPainted();
 	bool NotifyMarginClick(Point pt, bool shift, bool ctrl, bool alt);
 	void NotifyNeedShown(int pos, int len);
+	void NotifyDwelling(Point pt, bool state);
 	
 	void NotifyModifyAttempt(Document *document, void *userData);
 	void NotifySavePoint(Document *document, void *userData, bool atSavePoint);

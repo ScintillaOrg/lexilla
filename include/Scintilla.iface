@@ -858,6 +858,14 @@ set void SetBackSpaceUnIndents=2262(bool bsUnIndents,)
 # Does a backspace pressed when caret is within indentation unindent?
 get bool GetBackSpaceUnIndents=2263(,)
 
+val SC_TIME_FOREVER=10000000
+
+# Sets the time the mouse must sit still to generate a mouse dwell event
+set void SetMouseDwellTime=2264(int periodMilliseconds,)
+
+# Retrieve the time the mouse must sit still to generate a mouse dwell event
+get int GetMouseDwellTime=2265(,)
+
 ## Start of key messages
 # Move caret down one line.
 fun void LineDown=2300(,)
@@ -1550,6 +1558,8 @@ evt void PosChanged=2012(int position)
 evt void Painted=2013(void)
 evt void UserListSelection=2014(int listType, string text)
 evt void URIDropped=2015(string text)
+evt void DwellStart=2016(int position)
+evt void DwellEnd=2017(int position)
 
 cat Deprecated
 

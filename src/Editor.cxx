@@ -53,6 +53,9 @@ Editor::Editor() {
 	bufferedDraw = true;
 
 	lastClickTime = 0;
+	dwellDelay = SC_TIME_FOREVER;
+	ticksToDwell = SC_TIME_FOREVER;
+	dwelling = false;
 	ptMouseLast.x = 0;
 	ptMouseLast.y = 0;
 	firstExpose = true;
@@ -1937,6 +1940,15 @@ void Editor::NotifyNeedShown(int pos, int len) {
 	NotifyParent(scn);
 }
 
+void Editor::NotifyDwelling(Point pt, bool state) {
+	SCNotification scn;
+	scn.nmhdr.code = state ? SCN_DWELLSTART : SCN_DWELLEND;
+	scn.position = PositionFromLocation(pt);
+	scn.x = pt.x;
+	scn.y = pt.y;
+	NotifyParent(scn);
+}
+
 // Notifications from document
 void Editor::NotifyModifyAttempt(Document*, void *) {
 	//Platform::DebugPrintf("** Modify Attempt\n");
@@ -3034,8 +3046,6 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 				//lineAnchor = lineStart; // Keep the same anchor for ButtonMove
 			}
 
-
-
 			SetDragPosition(invalidPosition);
 			SetMouseCapture(true);
 			selectionType = selLine;
@@ -3067,6 +3077,14 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 }
 
 void Editor::ButtonMove(Point pt) {
+	if ((ptMouseLast.x != pt.x) || (ptMouseLast.y != pt.y)) {
+		ticksToDwell = dwellDelay;
+		if (dwelling && (dwellDelay < SC_TIME_FOREVER)) {
+			dwelling = false;
+			NotifyDwelling(ptMouseLast, dwelling);
+		}
+	}
+	ptMouseLast = pt;
 	//Platform::DebugPrintf("Move %d %d\n", pt.x, pt.y);
 	if (HaveMouseCapture()) {
 
@@ -3078,7 +3096,6 @@ void Editor::ButtonMove(Point pt) {
 
 		// Adjust selection
 		xEndSelect = pt.x - vs.fixedColumnWidth + xOffset;
-		ptMouseLast = pt;
 		int movePos = PositionFromLocation(pt);
 		movePos = MovePositionOutsideChar(movePos, currentPos - movePos);
 		if (posDrag >= 0) {
@@ -3199,6 +3216,13 @@ void Editor::Tick() {
 			caret.on = !caret.on;
 			timer.ticksToWait = caret.period;
 			InvalidateCaret();
+		}
+	}
+	if ((dwellDelay < SC_TIME_FOREVER) && (ticksToDwell > 0)) {
+		ticksToDwell -= timer.tickSize;
+		if (ticksToDwell <= 0) {
+			dwelling = true;
+			NotifyDwelling(ptMouseLast, dwelling);
 		}
 	}
 }
@@ -4231,6 +4255,14 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETBACKSPACEUNINDENTS:
 		return pdoc->backspaceUnindents;
 
+	case SCI_SETMOUSEDWELLTIME:
+		dwellDelay = wParam;
+		ticksToDwell = dwellDelay;
+		break;
+	
+	case SCI_GETMOUSEDWELLTIME:
+		return dwellDelay;
+	
 	case SCI_GETCOLUMN:
 		return pdoc->GetColumn(wParam);
 
