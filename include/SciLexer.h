@@ -318,6 +318,7 @@
 #define SCE_ERR_IFORT 17
 #define SCE_ERR_ABSF 18
 #define SCE_ERR_TIDY 19
+#define SCE_ERR_JAVA_STACK 20
 #define SCE_BAT_DEFAULT 0
 #define SCE_BAT_COMMENT 1
 #define SCE_BAT_WORD 2

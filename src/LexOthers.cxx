@@ -523,6 +523,11 @@ static void ColouriseErrorListLine(
 		strstr(lineBuffer, ", file ")) {
 		// Essential Lahey Fortran error message
 		styler.ColourTo(endPos, SCE_ERR_ELF);
+	} else if (strstart(lineBuffer, "\tat ") &&
+		strstr(lineBuffer, "(") &&
+		strstr(lineBuffer, ".java:")) {
+		// Java stack back trace
+		styler.ColourTo(endPos, SCE_ERR_JAVA_STACK);
 	} else {
 		// Look for GCC <filename>:<line>:message
 		// Look for Microsoft <filename>(line) :message
