@@ -1607,6 +1607,101 @@ static void ColouriseHBAPiece(StyleContext &sc, WordList *keywordlists[]) {
 	}
 }
 
+static void ColouriseHTMLPiece(StyleContext &sc, WordList *keywordlists[]) {
+	WordList &keywordsTags = *keywordlists[0];
+	if (sc.state == SCE_H_COMMENT) {
+		if (sc.Match("-->")) {
+			sc.Forward();
+			sc.Forward();
+			sc.ForwardSetState(SCE_H_DEFAULT);
+		}
+	} else if (sc.state == SCE_H_ENTITY) {
+		if (sc.ch == ';') {
+			sc.ForwardSetState(SCE_H_DEFAULT);
+		} else if (sc.ch != '#' && (sc.ch < 0x80) && !isalnum(sc.ch)) {	// Should check that '#' follows '&', but it is unlikely anyway...
+			sc.ChangeState(SCE_H_TAGUNKNOWN);
+			sc.SetState(SCE_H_DEFAULT);
+		}
+	} else if (sc.state == SCE_H_TAGUNKNOWN) {
+		if (!ishtmlwordchar(sc.ch) && !((sc.ch == '/') && (sc.chPrev == '<')) && sc.ch != '[') {
+			char s[100];
+			sc.GetCurrentLowered(s, sizeof(s));
+			if (s[1] == '/') {
+				if (keywordsTags.InList(s + 2)) {
+					sc.ChangeState(SCE_H_TAG);
+				}
+			} else {
+				if (keywordsTags.InList(s + 1)) {
+					sc.ChangeState(SCE_H_TAG);
+				}
+			}
+			if (sc.ch == '>') {
+				sc.ForwardSetState(SCE_H_DEFAULT);
+			} else if (sc.Match('/', '>')) {
+				sc.SetState(SCE_H_TAGEND);
+				sc.Forward();
+				sc.ForwardSetState(SCE_H_DEFAULT);
+			} else {
+				sc.SetState(SCE_H_OTHER);
+			}
+		}
+	} else if (sc.state == SCE_H_ATTRIBUTE) {
+		if (!ishtmlwordchar(sc.ch)) {
+			char s[100];
+			sc.GetCurrentLowered(s, sizeof(s));
+			if (!keywordsTags.InList(s)) {
+				sc.ChangeState(SCE_H_ATTRIBUTEUNKNOWN);
+			}
+			sc.SetState(SCE_H_OTHER);
+		}
+	} else if (sc.state == SCE_H_OTHER) {
+		if (sc.ch == '>') {
+			sc.SetState(SCE_H_TAG);
+			sc.ForwardSetState(SCE_H_DEFAULT);
+		} else if (sc.Match('/', '>')) {
+			sc.SetState(SCE_H_TAG);
+			sc.Forward();
+			sc.ForwardSetState(SCE_H_DEFAULT);
+		}
+	} else if (sc.state == SCE_H_DOUBLESTRING) {
+		if (sc.ch == '\"') {
+			sc.ForwardSetState(SCE_H_OTHER);
+		}
+	} else if (sc.state == SCE_H_SINGLESTRING) {
+		if (sc.ch == '\'') {
+			sc.ForwardSetState(SCE_H_OTHER);
+		}
+	} else if (sc.state == SCE_H_NUMBER) {
+		if (!IsADigit(sc.ch)) {
+			sc.SetState(SCE_H_OTHER);
+		}
+	}
+	
+	if (sc.state == SCE_H_DEFAULT) {
+		if (sc.ch == '<') {
+			if (sc.Match("<!--"))
+				sc.SetState(SCE_H_COMMENT);
+			else
+				sc.SetState(SCE_H_TAGUNKNOWN);
+		} else if (sc.ch == '&') {
+			sc.SetState(SCE_H_ENTITY);
+		}
+	} else if ((sc.state == SCE_H_OTHER) || (sc.state == SCE_H_VALUE)) {
+		if (sc.ch == '\"') {
+			sc.SetState(SCE_H_DOUBLESTRING);
+		} else if (sc.ch == '\'') {
+			sc.SetState(SCE_H_SINGLESTRING);
+		} else if (IsADigit(sc.ch)) {
+			sc.SetState(SCE_H_NUMBER);
+		} else if (sc.ch == '>') {
+			sc.SetState(SCE_H_TAG);
+			sc.ForwardSetState(SCE_H_DEFAULT);
+		} else if (ishtmlwordchar(sc.ch)) {
+			sc.SetState(SCE_H_ATTRIBUTE);
+		}
+	}
+}
+
 static void ColouriseASPPiece(StyleContext &sc, WordList *keywordlists[]) {
 	// Possibly exit current state to either SCE_H_DEFAULT or SCE_HBA_DEFAULT
 	if ((sc.state == SCE_H_ASPAT || isASPScript(sc.state)) && sc.Match('%', '>')) {
@@ -1618,12 +1713,17 @@ static void ColouriseASPPiece(StyleContext &sc, WordList *keywordlists[]) {
 	// Handle some ASP script
 	if (sc.state >= SCE_HBA_START && sc.state <= SCE_HBA_STRINGEOL) {
 		ColouriseHBAPiece(sc, keywordlists);
+	} else if (sc.state >= SCE_H_DEFAULT && sc.state <= SCE_H_SGML_BLOCK_DEFAULT) {
+		ColouriseHTMLPiece(sc, keywordlists);
 	}
 	
 	// Enter new sc.state
-	if (sc.state == SCE_H_DEFAULT) {
+	if ((sc.state == SCE_H_DEFAULT) || (sc.state == SCE_H_TAGUNKNOWN)) {
 		if (sc.Match('<', '%')) {
-			sc.SetState(SCE_H_ASP);
+			if (sc.state == SCE_H_TAGUNKNOWN)
+				sc.ChangeState(SCE_H_ASP);
+			else
+				sc.SetState(SCE_H_ASP);
 			sc.Forward();
 			sc.Forward();
 			if (sc.ch == '@') {
@@ -1648,7 +1748,7 @@ static void ColouriseASPDoc(unsigned int startPos, int length, int initStyle, Wo
 	sc.Complete();
 }
 
-static void ColourisePHPPiece(StyleContext &sc, WordList *[]) {
+static void ColourisePHPPiece(StyleContext &sc, WordList *keywordlists[]) {
 	// Possibly exit current state to either SCE_H_DEFAULT or SCE_HBA_DEFAULT
 	if (sc.state >= SCE_HPHP_DEFAULT && sc.state <= SCE_HPHP_OPERATOR) {
 		if (!isPHPStringState(sc.state) && 
@@ -1660,6 +1760,10 @@ static void ColourisePHPPiece(StyleContext &sc, WordList *[]) {
 		}
 	} 
 			 
+	if (sc.state >= SCE_H_DEFAULT && sc.state <= SCE_H_SGML_BLOCK_DEFAULT) {
+		ColouriseHTMLPiece(sc, keywordlists);
+	}
+	
 	// Handle some PHP script
 	if (sc.state == SCE_HPHP_WORD) {
 		if (!IsAWordStart(sc.ch)) {
@@ -1692,7 +1796,7 @@ static void ColourisePHPPiece(StyleContext &sc, WordList *[]) {
 	}
 	
 	// Enter new sc.state
-	if (sc.state == SCE_H_DEFAULT) {
+	if ((sc.state == SCE_H_DEFAULT) || (sc.state == SCE_H_TAGUNKNOWN)) {
 		if (sc.Match("<?php")) {
 			sc.SetState(SCE_H_QUESTION);
 			sc.Forward();
