@@ -857,7 +857,7 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 #ifdef _MSC_VER
 			/* Need to convert \n to correct newline form for this file as win32gtk always returns */
 			/* only \n line delimiter from clipboard */
-			char *tmpstr = (char *) malloc(2 * len);
+			char *tmpstr = new char [2 * len];
 			char *dptr = tmpstr;
 			char *sptr = ptr;
 			unsigned int newlen = len;                     
@@ -898,7 +898,7 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 			}
 			pdoc->EndUndoAction();
 #ifdef _MSC_VER
-			free(tmpstr);
+			delete []tmpstr;
 #endif
 		}
 	}
@@ -949,7 +949,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, ch
 	// win32gtk requires \n delimited lines and doesn't work right with
 	// other line formats, so make a copy of the clip text now with 
 	// newlines converted
-	char *tmpstr = (char *) malloc(strlen(selBuffer));
+	char *tmpstr = new char[strlen(selBuffer) + 1];
 	char *sptr = selBuffer;
 	char *dptr = tmpstr;
 	while (*sptr != '\0') {
@@ -998,7 +998,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, ch
 
 	delete []tmpBuffer;
 #ifdef _MSC_VER
-	free(tmpstr);
+	delete []tmpstr;
 #endif
 }
 
