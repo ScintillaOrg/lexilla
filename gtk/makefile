@@ -35,7 +35,7 @@ all: $(COMPLIB) $(LEXOBJS)
 $(COMPLIB): DocumentAccessor.o WindowAccessor.o KeyWords.o Document.o CallTip.o \
 	ScintillaBase.o ContractionState.o Editor.o PropSet.o PlatGTK.o \
 	KeyMap.o LineMarker.o ScintillaGTK.o CellBuffer.o ViewStyle.o \
-	PosRegExp.o Style.o Indicator.o AutoComplete.o
+	RESearch.o Style.o Indicator.o AutoComplete.o
 	$(AR) rc $@ $^
 
 AutoComplete.o: AutoComplete.cxx Platform.h AutoComplete.h
@@ -43,7 +43,7 @@ CallTip.o: CallTip.cxx Platform.h CallTip.h
 CellBuffer.o: CellBuffer.cxx Platform.h Scintilla.h WinDefs.h \
  CellBuffer.h
 ContractionState.o: ContractionState.cxx Platform.h ContractionState.h
-Document.o: Document.cxx Platform.h Scintilla.h WinDefs.h PosRegExp.h \
+Document.o: Document.cxx Platform.h Scintilla.h WinDefs.h RESearch.h \
  CellBuffer.h Document.h
 DocumentAccessor.o: DocumentAccessor.cxx Platform.h PropSet.h SString.h \
  Accessor.h DocumentAccessor.h Scintilla.h WinDefs.h
@@ -80,8 +80,8 @@ LexVB.o: LexVB.cxx Platform.h PropSet.h SString.h \
 LineMarker.o: LineMarker.cxx Platform.h Scintilla.h WinDefs.h \
  LineMarker.h
 PlatGTK.o: PlatGTK.cxx Platform.h Scintilla.h ScintillaWidget.h WinDefs.h
-PosRegExp.o: PosRegExp.cxx PosRegExp.h
 PropSet.o: PropSet.cxx Platform.h PropSet.h SString.h
+RESearch.o: RESearch.cxx RESearch.h
 SciTEBase.o: SciTEBase.cxx Platform.h WinDefs.h SciTE.h PropSet.h \
  SString.h Accessor.h KeyWords.h Scintilla.h SciLexer.h SciTEBase.h
 SciTEGTK.o: SciTEGTK.cxx Platform.h WinDefs.h SciTE.h PropSet.h \

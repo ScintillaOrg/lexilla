@@ -16,7 +16,10 @@
 #include "SVector.h"
 #include "CellBuffer.h"
 #include "Document.h"
-#include "PosRegExp.h"
+#include "RESearch.h"
+
+void re_fail(char *,char) {
+}
 
 // This is ASCII specific but is safe with chars >= 0x80
 inline bool isspacechar(unsigned char ch) {
@@ -743,10 +746,6 @@ bool Document::IsWordAt(int start, int end) {
 	return IsWordStartAt(start) && IsWordEndAt(end);
 }
 
-char Document::DocCharAt(int pos, void *param) {
-	return reinterpret_cast<Document*>(param)->CharAt(pos);
-}
-
 // The comparison and case changing functions here assume ASCII
 // or extended ASCII such as the normal Windows code page.
 
@@ -764,6 +763,22 @@ static inline char MakeLowerCase(char ch) {
 		return static_cast<char>(ch - 'A' + 'a');
 }
 
+// Define a way for the Regular Expression code to access the document
+class DocumentIndexer : public CharacterIndexer {
+	Document *pdoc;
+	int end;
+public: 
+	DocumentIndexer(Document *pdoc_, int end_) : 
+		pdoc(pdoc_), end(end_) {
+	}
+	virtual char CharAt(int index) {
+		if (index < 0 || index >= end)
+			return 0;
+		else 
+			return pdoc->CharAt(index);
+	}
+};
+
 // Find text in document, supporting both forward and backward
 // searches (just pass minPos > maxPos to do a backward search)
 // Has not been tested with backwards DBCS searches yet.
@@ -771,11 +786,11 @@ long Document::FindText(int minPos, int maxPos, const char *s,
                         bool caseSensitive, bool word, bool wordStart, bool regExp,
 			int *length) {
 	if (regExp) {
-		char *pat = new char[strlen(s) + 4];
+		char *pat = new char[strlen(s) + 1];
 		if (!pat)
 			return -1;
 		
-		strcpy(pat, "/");
+		pat[0] = '\0';
 		int startPos;
 		int endPos;
 
@@ -791,25 +806,26 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 		startPos = MovePositionOutsideChar(startPos, 1, false);
 		endPos = MovePositionOutsideChar(endPos, 1, false);
 
+		DocumentIndexer di(this, endPos);
+		RESearch re;
 		strcat(pat, s);
-		strcat(pat, "/");
-		PosRegExp re;
-		if (!caseSensitive)
-			strcat(pat, "i");
-		if (!re.SetExpr(pat)) {
+		const char *errmsg = re.Compile(pat);
+		if (errmsg) {
 			delete []pat;
 			return -1;
 		}
-		re.param = this;
-		re.CharAt = DocCharAt;
-		SMatches matches;
-		if (!re.Parse(startPos, 0, endPos, &matches)) {
-			delete []pat;
-			return -1;
+		// Find a variable in a property file: \$([A-Za-z0-9_.]+)
+		int success = re.Execute(di, startPos);
+		int pos = -1;
+		int lenRet = 0;
+		if (success) {
+			pos = re.bopat[0];
+			lenRet = re.eopat[0] - re.bopat[0];
 		}
-		*length = matches.e[0] - matches.s[0];
 		delete []pat;
-		return matches.s[0];
+		*length = lenRet;
+		return pos;
+
 	} else {
 				
 		bool forward = minPos <= maxPos;

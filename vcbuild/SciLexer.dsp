@@ -186,11 +186,11 @@ SOURCE=..\win32\PlatWin.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\PosRegExp.cxx
+SOURCE=..\src\PropSet.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\PropSet.cxx
+SOURCE=..\src\RESearch.cxx
 # End Source File
 # Begin Source File
 
