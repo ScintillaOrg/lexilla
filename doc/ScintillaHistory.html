@@ -164,26 +164,89 @@
        <a href="http://prdownloads.sourceforge.net/scintilla/scite156.zip?download">Release 1.56</a>
     </h3>
     <ul>
-      <li>
+	<li>
 	Released on 25 October 2003.
-      </li>
-      <li>
-      </li>
-      <li>
-      </li>
-      <li>
-      </li>
-      <li>
-      </li>
-      <li>
-      </li>
-      <li>
-      Fixes to wrapping problems, such as only first display line being visible in some cases.
-      </li>
-      <li>
-      </li>
-      <li>
-      </li>
+	</li>
+	<li>
+	Rectangular selection can be performed using the keyboard.
+	Greater programmatic control over rectangular selection.
+	This has caused several changes to key bindings.
+	</li>
+	<li>
+	SciTE Replace In Selection works on rectangular selections.
+	</li>
+	<li>
+	Improved lexer for TeX, new lexer for Metapost and other support for these
+	languages.
+	</li>
+	<li>
+	Lexer for PowerBasic.
+	</li>
+	<li>
+	Lexer for Forth.
+	</li>
+	<li>
+	YAML lexer improved to include error styling.
+	</li>
+	<li>
+	Perl lexer improved to correctly handle more cases.
+	</li>
+	<li>
+	Assembler lexer updated to support single-quote strings and fix some
+	problems.
+	</li>
+	<li>
+	SciTE on Windows can switch between buffers in order of use (z-order) rather
+	than static order.
+	</li>
+	<li>
+	SciTE supports adding an extension for "Open Selected Filename".
+	The openpath setting works on GTK+.
+	</li>
+	<li>
+	SciTE can Export as XML.
+	</li>
+	<li>
+	SciTE $(SelHeight) variable gives a more natural result for empty and whole line
+	selections.
+	</li>
+	<li>
+	Fixes to wrapping problems, such as only first display line being visible in some
+	cases.
+	</li>
+	<li>
+	Fixes to hotspot to only highlight when over the hotspot, only use background
+	colour when set and option to limit hotspots to a single line.
+	</li>
+	<li>
+	Small fixes to FORTRAN lexing and folding.
+	</li>
+	<li>
+	SQL lexer treats single quote strings as a separate class to double quote strings..
+	</li>
+	<li>
+	Scintilla made compatible with expectations of container widget in GTK+ 2.3.
+	</li>
+	<li>
+	Fix to strip out pixmap ID when automatically choosing from an autocompletion
+	list with only one element.
+	</li>
+	<li>
+	SciTE bug fixed where UTF-8 files longer than 128K were gaining more than one
+	BOM.
+	</li>
+	<li>
+	Crashing bug fixed in SciTE on GTK+ where using "Stop Executing" twice leads
+	to all applications exiting.
+	</li>
+	<li>
+	Bug fixed in autocompletion scrolling on GTK+ 2 with a case sensitive list.
+	The ListBox::Sort method is no longer needed or available so platform
+	maintainers should remove it.
+	</li>
+	<li>
+	SciTE check.if.already.open setting removed from GTK+ version as unmaintained.
+	</li>
     </ul>
     <h3>
        <a href="http://prdownloads.sourceforge.net/scintilla/scite155.zip?download">Release 1.55</a>
