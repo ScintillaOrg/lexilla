@@ -159,21 +159,23 @@ static void ColouriseDiffLine(char *lineBuffer, int endLine, Accessor &styler) {
 	// difference starts then each line starting with ' ' is a whitespace
 	// otherwise it is considered a comment (Only in..., Binary file...)
 	if (0 == strncmp(lineBuffer, "diff ", 3)) {
-		styler.ColourTo(endLine, 2);
+		styler.ColourTo(endLine, SCE_DIFF_COMMAND);
 	} else if (0 == strncmp(lineBuffer, "--- ", 3)) {
-		styler.ColourTo(endLine, 3);
+		styler.ColourTo(endLine, SCE_DIFF_HEADER);
 	} else if (0 == strncmp(lineBuffer, "+++ ", 3)) {
-		styler.ColourTo(endLine, 3);
+		styler.ColourTo(endLine, SCE_DIFF_HEADER);
+	} else if (0 == strncmp(lineBuffer, "***", 3)) {
+		styler.ColourTo(endLine, SCE_DIFF_HEADER);
 	} else if (lineBuffer[0] == '@') {
-		styler.ColourTo(endLine, 4);
+		styler.ColourTo(endLine, SCE_DIFF_POSITION);
 	} else if (lineBuffer[0] == '-') {
-		styler.ColourTo(endLine, 5);
+		styler.ColourTo(endLine, SCE_DIFF_DELETED);
 	} else if (lineBuffer[0] == '+') {
-		styler.ColourTo(endLine, 6);
+		styler.ColourTo(endLine, SCE_DIFF_ADDED);
 	} else if (lineBuffer[0] != ' ') {
-		styler.ColourTo(endLine, 1);
+		styler.ColourTo(endLine, SCE_DIFF_COMMENT);
 	} else {
-		styler.ColourTo(endLine, 0);
+		styler.ColourTo(endLine, SCE_DIFF_DEFAULT);
 	}
 }
 
