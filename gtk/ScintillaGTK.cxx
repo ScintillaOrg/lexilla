@@ -86,6 +86,7 @@ private:
 	void ReceivedSelection(GtkSelectionData *selection_data);
 	void ReceivedDrop(GtkSelectionData *selection_data);
 	void GetSelection(GtkSelectionData *selection_data, guint info, char *text, bool isRectangular);
+	void UnclaimSelection(GdkEventSelection *selection_event);
 	void Resize(int width, int height);
 	
 	// Callback functions
@@ -105,6 +106,7 @@ private:
 		guint time, ScintillaGTK *sciThis);
 	static void SelectionGet(GtkWidget *widget, GtkSelectionData *selection_data,
 		guint info, guint time, ScintillaGTK *sciThis);
+	static void SelectionClearEvent(GtkWidget *widget, GdkEventSelection *selection_event, ScintillaGTK *sciThis);
 	static void DragBegin(GtkWidget *widget, GdkDragContext *context, 
 		ScintillaGTK *sciThis);
 	static gboolean DragMotion(GtkWidget *widget, GdkDragContext *context, 
@@ -214,6 +216,8 @@ void ScintillaGTK::Initialise() {
                    	GtkSignalFunc(SelectionReceived), this);
 	gtk_signal_connect(GTK_OBJECT(wDraw.GetID()), "selection_get",
                    	GtkSignalFunc(SelectionGet), this);
+	gtk_signal_connect(GTK_OBJECT(wDraw.GetID()), "selection_clear_event",
+                   	GtkSignalFunc(SelectionClearEvent), this);
 
 	gtk_widget_set_events(wDraw.GetID(),
                        	GDK_EXPOSURE_MASK
@@ -651,6 +655,13 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, ch
 	delete []tmpBuffer;
 }
 
+void ScintillaGTK::UnclaimSelection(GdkEventSelection *selection_event) {
+	if (selection_event->selection == GDK_SELECTION_PRIMARY) {
+		delete [] primarySelectionCopy;
+		primarySelectionCopy = NULL;
+	}
+}
+
 void ScintillaGTK::Resize(int width, int height) {
 	//Platform::DebugPrintf("Resize %d %d\n", width, height);
 	DropGraphics();
@@ -894,6 +905,11 @@ void ScintillaGTK::SelectionGet(GtkWidget *,
 	GtkSelectionData *selection_data, guint info, guint, ScintillaGTK *sciThis) {
 	//Platform::DebugPrintf("Selection get\n");
 	sciThis->GetSelection(selection_data, info, sciThis->pasteBuffer, sciThis->pasteBufferIsRectangular);
+}
+
+void ScintillaGTK::SelectionClearEvent(GtkWidget *, GdkEventSelection *selection_event, ScintillaGTK *sciThis) {
+	//Platform::DebugPrintf("Selection clear\n");
+	sciThis->UnclaimSelection(selection_event);
 }
 
 void ScintillaGTK::DragBegin(GtkWidget *, GdkDragContext *, 
