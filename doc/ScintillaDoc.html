@@ -1288,8 +1288,6 @@ SCI_SETWRAPMODE(SC_WRAP_NONE or SC_WRAP_WORD)
 SCI_GETWRAPMODE
 </pre>
     <p>
-	Line wrapping is an experimental feature that currently has 
-	performance and appearence problems. 
 	When the wrap mode is set to SC_WRAP_WORD lines wider than the 
 	window width are continued on the following lines. Lines are 
 	broken after space or tab characters or between runs of different
@@ -1297,6 +1295,30 @@ SCI_GETWRAPMODE
 	wider than the window then the break occurs before after the last 
 	character that completely fits on the line.
 	The horizontal scroll bar does not appear when wrap mode is on.
+    </p>
+<pre>
+SCI_SETLAYOUTCACHE(SC_CACHE_NONE or SC_CACHE_CARET or SC_CACHE_PAGE or SC_CACHE_DOCUMENT)
+SCI_GETLAYOUTCACHE
+</pre>
+    <p>
+	Much of the time used by Scintilla is spent on laying out and drawing text.
+	The same text layout calculations may be performed many times
+	even when the data used in these calculations does not change. 
+	To avoid these unnecessary calculations in some circumstances, the line
+	layout cache can store the results of the calculations. 
+	The cache in invalidated whenever the underlying data, such as the contents 
+	or styling of the document changes.
+	Caching the layout of the whole document has the most effect, making dynamic
+	line wrap as much as 20 times faster but this requires 7 times the memory 
+	required by the document contents.
+    </p>
+    <p>
+	SC_CACHE_NONE performs no caching and is the default.
+	SC_CACHE_CARET caches the layout information for the line containing the
+	caret. 
+	SC_CACHE_PAGE caches the layout of the visible lines and the caret
+	line. 
+	SC_CACHE_DOCUMENT caches the layout of the entire document.
     </p>
     <h3>
     	Zooming
