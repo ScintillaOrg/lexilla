@@ -1736,8 +1736,16 @@ EM_SETTARGETDEVICE
 	Depending on the compiler and linker used, the lexers may be stripped
 	out. This is most often caused when building a static library. To ensure 
 	the lexers are linked in, the Scintilla_LinkLexers() function may be 
-	called. This function is not normally compiled and to ensure it is compiled
-	the preprocessor symbol LINK_LEXERS should be defined.
+	called. 
+    </p>
+    <h3>
+	Changing set of lexers
+    </h3>
+    <p>
+	To change the set of lexers in Scintilla, add and remove lexer source files
+	(Lex*.cxx) from the scintilla/src directory and run the src/LexGen.py script
+	from the src directory to update the make files and KeyWords.cxx.
+	LexGen.py requires Pyuthon 2.1 or later.
     </p>
   </body>
 </html>
