@@ -225,6 +225,11 @@ bool ContractionState::GetExpanded(int lineDoc) const {
 
 bool ContractionState::SetExpanded(int lineDoc, bool expanded) {
 	if (size == 0) {
+		if (expanded) {
+			// If in completely expanded state then setting
+			// one line to expanded has no effect.
+			return false;
+		}
 		Grow(linesInDoc + growSize);
 	}
 	if ((lineDoc >= 0) && (lineDoc < linesInDoc)) {
@@ -252,6 +257,11 @@ bool ContractionState::SetHeight(int lineDoc, int height) {
 	if (lineDoc > linesInDoc)
 		return false;
 	if (size == 0) {
+		if (height == 1) {
+			// If in completely expanded state then all lines
+			// assumed to have height of one so no effect here.
+			return false;
+		}
 		Grow(linesInDoc + growSize);
 	}
 	if (lines[lineDoc].height != height) {
