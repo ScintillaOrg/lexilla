@@ -206,6 +206,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_INDICGETSTYLE 2081
 #define SCI_INDICSETFORE 2082
 #define SCI_INDICGETFORE 2083
+#define SCI_SETWHITESPACEFORE 2084
+#define SCI_SETWHITESPACEBACK 2085
 #define SCI_SETSTYLEBITS 2090
 #define SCI_GETSTYLEBITS 2091
 #define SCI_SETLINESTATE 2092

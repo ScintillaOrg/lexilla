@@ -467,6 +467,12 @@ set void IndicSetFore=2082(int indic, colour fore)
 # Retrieve the foreground colour of an indicator.
 get colour IndicGetFore=2083(int indic,)
 
+# Set the foreground colour of all whitespace and whether to use this setting.
+fun void SetWhitespaceFore=2084(bool useSetting, colour fore)
+
+# Set the background colour of all whitespace and whether to use this setting.
+fun void SetWhitespaceBack=2085(bool useSetting, colour back)
+
 # Divide each styling byte into lexical class bits (default: 5) and indicator
 # bits (default: 3). If a lexer requires more than 32 lexical states, then this
 # is used to expand the possible states.
