@@ -359,6 +359,8 @@ static void ColouriseErrorListLine(
 		styler.ColourTo(endPos, SCE_ERR_DIFF_DELETION);
 	} else if (strstr(lineBuffer, "File \"") && strstr(lineBuffer, ", line ")) {
 		styler.ColourTo(endPos, SCE_ERR_PYTHON);
+	} else if (strstr(lineBuffer, " in ") && strstr(lineBuffer, " on line ")) {
+		styler.ColourTo(endPos, SCE_ERR_PHP);
 	} else if (0 == strncmp(lineBuffer, "Error ", strlen("Error "))) {
 		// Borland error message
 		styler.ColourTo(endPos, SCE_ERR_BORLAND);
