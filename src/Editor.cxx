@@ -5108,6 +5108,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETCODEPAGE:
 		pdoc->dbcsCodePage = wParam;
+		InvalidateStyleRedraw();
 		break;
 
 	case SCI_GETCODEPAGE:
