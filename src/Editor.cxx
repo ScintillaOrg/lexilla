@@ -14,9 +14,6 @@
 
 #if PLAT_WX || PLAT_GTK
 #include "WinDefs.h"
-#define MAKELONG(a, b) ((a) | ((b) << 16))
-#define LOWORD(x) (x & 0xffff)
-#define HIWORD(x) (x >> 16)
 #endif
 
 #include "ContractionState.h"
@@ -3141,7 +3138,9 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 			*reinterpret_cast<int *>(wParam) = SelectionStart();
 		if (lParam)
 			*reinterpret_cast<int *>(lParam) = SelectionEnd();
-		return MAKELONG(SelectionStart(), SelectionEnd());
+		return Platform::LongFromTwoShorts(
+			static_cast<short>(SelectionStart()), 
+			static_cast<short>(SelectionEnd()));
 
 	case EM_EXGETSEL: {
 			if (lParam == 0)
@@ -3290,7 +3289,8 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 			Point *ppt = reinterpret_cast<Point *>(lParam);
 			int pos = PositionFromLocation(*ppt);
 			int line = pdoc->LineFromPosition(pos);
-			return MAKELONG(pos, line);
+			return Platform::LongFromTwoShorts(
+				static_cast<short>(pos), static_cast<short>(line));
 		}
 
 	case EM_POSFROMCHAR: {
@@ -3365,7 +3365,8 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 		return FormatRange(wParam, reinterpret_cast<RangeToFormat *>(lParam));
 
 	case EM_GETMARGINS:
-		return MAKELONG(vs.leftMarginWidth, vs.rightMarginWidth);
+		return Platform::LongFromTwoShorts(static_cast<short>(vs.leftMarginWidth), 
+			static_cast<short>(vs.rightMarginWidth));
 	
 	case SCI_GETMARGINLEFT:
 		return vs.leftMarginWidth;
@@ -3376,10 +3377,10 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 	case EM_SETMARGINS:
 #ifdef EC_LEFTMARGIN
 		if (wParam & EC_LEFTMARGIN) {
-			vs.leftMarginWidth = LOWORD(lParam);
+			vs.leftMarginWidth = Platform::LowShortFromLong(lParam);
 		}
 		if (wParam & EC_RIGHTMARGIN) {
-			vs.rightMarginWidth = HIWORD(lParam);
+			vs.rightMarginWidth = Platform::HighShortFromLong(lParam);
 		}
 		if (wParam == EC_USEFONTINFO) {
 			vs.leftMarginWidth = vs.aveCharWidth / 2;
@@ -4004,11 +4005,13 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 		return vs.caretcolour.desired.AsLong();
 
 	case SCI_ASSIGNCMDKEY:
-		kmap.AssignCmdKey(LOWORD(wParam), HIWORD(wParam), lParam);
+		kmap.AssignCmdKey(Platform::LowShortFromLong(wParam), 
+			Platform::HighShortFromLong(wParam), lParam);
 		break;
 
 	case SCI_CLEARCMDKEY:
-		kmap.AssignCmdKey(LOWORD(wParam), HIWORD(wParam), WM_NULL);
+		kmap.AssignCmdKey(Platform::LowShortFromLong(wParam), 
+			Platform::HighShortFromLong(wParam), WM_NULL);
 		break;
 
 	case SCI_CLEARALLCMDKEYS:

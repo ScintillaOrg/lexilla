@@ -80,12 +80,6 @@ typedef wxWindow* WindowID;
 typedef wxMenu* MenuID;
 #endif
 
-#if PLAT_GTK || PLAT_WX
-#define SHIFT_PRESSED 1
-#define LEFT_CTRL_PRESSED 2
-#define LEFT_ALT_PRESSED 4
-#endif
-
 // Point is exactly the same as the Win32 POINT and GTK+ GdkPoint so can be used interchangeably
 
 class Point {
@@ -400,6 +394,16 @@ public:
 	// These are utility functions not really tied to a platform
 	static int Minimum(int a, int b);
 	static int Maximum(int a, int b);
+	// Next three assume 16 bit shorts and 32 bit longs
+	static long LongFromTwoShorts(short a,short b) {
+		return (a) | ((b) << 16);
+	}
+	static short HighShortFromLong(long x) {
+		return static_cast<short>(x >> 16);
+	}
+	static short LowShortFromLong(long x) {
+		return static_cast<short>(x & 0xffff);
+	}
 	static void DebugPrintf(const char *format, ...);
 	static int Clamp(int val, int minVal, int maxVal);
 };

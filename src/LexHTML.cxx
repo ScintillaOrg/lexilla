@@ -345,7 +345,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 
 		// Handle DBCS codepages
 		if (styler.IsLeadByte(ch)) {
-			chPrev2 = ' ';
 			chPrev = ' ';
 			i += 1;
 			continue;
@@ -434,7 +433,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				scriptLanguage = eScriptNone;
 				i += 2;
 				continue;
-				break;
 			}
 		}
 

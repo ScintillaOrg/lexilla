@@ -125,6 +125,8 @@ private:
 	static gint TimeOut(ScintillaGTK *sciThis);
 	static void PopUpCB(ScintillaGTK *sciThis, guint action, GtkWidget *widget);
 	static gint ExposeCT(GtkWidget *widget, GdkEventExpose *ose, CallTip *ct);
+	static long DirectFunction(ScintillaGTK *sciThis, 
+		unsigned int iMessage, unsigned long wParam, long lParam);
 };
 
 enum {
@@ -327,6 +329,12 @@ long ScintillaGTK::WndProc(unsigned int iMessage, unsigned long wParam, long lPa
 		gtk_widget_grab_focus(wMain.GetID());
 		break;
 
+	case SCI_GETDIRECTFUNCTION:
+		return reinterpret_cast<long>(DirectFunction);
+	
+	case SCI_GETDIRECTPOINTER:
+		return reinterpret_cast<long>(this);
+
 	default:
 		return ScintillaBase::WndProc(iMessage,wParam,lParam);
 	}
@@ -464,12 +472,12 @@ void ScintillaGTK::ReconfigureScrollBars() {
 
 void ScintillaGTK::NotifyChange() {
 	gtk_signal_emit(GTK_OBJECT(sci), scintilla_signals[COMMAND_SIGNAL],
-                	MAKELONG(ctrlID, SCEN_CHANGE), wMain.GetID());
+                Platform::LongFromTwoShorts(ctrlID, SCEN_CHANGE), wMain.GetID());
 }
 
 void ScintillaGTK::NotifyFocus(bool focus) {
 	gtk_signal_emit(GTK_OBJECT(sci), scintilla_signals[COMMAND_SIGNAL],
-                	MAKELONG(ctrlID, focus ? SCEN_SETFOCUS : SCEN_KILLFOCUS), wMain.GetID());
+                Platform::LongFromTwoShorts(ctrlID, focus ? SCEN_SETFOCUS : SCEN_KILLFOCUS), wMain.GetID());
 }
 
 void ScintillaGTK::NotifyParent(SCNotification scn) {
@@ -718,7 +726,7 @@ gint ScintillaGTK::MoveResize(GtkWidget *, GtkAllocation *allocation, ScintillaG
 }
 
 gint ScintillaGTK::Press(GtkWidget *, GdkEventButton *event, ScintillaGTK *sciThis) {
-	Platform::DebugPrintf("Press %x time=%d state = %x button = %x\n",sciThis,event->time, event->state, event->button);
+	//Platform::DebugPrintf("Press %x time=%d state = %x button = %x\n",sciThis,event->time, event->state, event->button);
 	// Do not use GTK+ double click events as Scintilla has its own double click detection
 	if (event->type != GDK_BUTTON_PRESS) 
 		return FALSE;
@@ -1024,6 +1032,11 @@ gint ScintillaGTK::ExposeCT(GtkWidget *widget, GdkEventExpose * /*ose*/, CallTip
 	ctip->PaintCT(&surfaceWindow);
 	surfaceWindow.Release();
 	return TRUE;
+}
+
+long ScintillaGTK::DirectFunction(
+    ScintillaGTK *sciThis, unsigned int iMessage, unsigned long wParam, long lParam) {
+	return sciThis->WndProc(iMessage, wParam, lParam);
 }
 
 long scintilla_send_message(ScintillaObject *sci, int iMessage, int wParam, int lParam) {

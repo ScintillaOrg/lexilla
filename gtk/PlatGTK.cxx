@@ -13,11 +13,10 @@
 #include "ScintillaWidget.h"
 #include "Scintilla.h"
 
-#define LOWORD(x) (x & 0xffff)
-#define HIWORD(x) (x >> 16)
-
 Point Point::FromLong(long lpoint) {
-	return Point(LOWORD(lpoint), HIWORD(lpoint));
+	return Point(
+		Platform::LowShortFromLong(lpoint), 
+		Platform::HighShortFromLong(lpoint));
 }
 
 static GdkColor ColourfromRGB(unsigned int red, unsigned int green, unsigned int blue) {

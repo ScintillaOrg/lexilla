@@ -15,6 +15,8 @@ void Scintilla_RegisterClasses(HINSTANCE hInstance);
 #endif
 #endif
 
+typedef long (*SciFnDirect)(long ptr, unsigned int iMessage, unsigned long wParam, long lParam);
+
 // Start of section which could be automatically generated from Scintilla.iface
 
 #define INVALID_POSITION -1 

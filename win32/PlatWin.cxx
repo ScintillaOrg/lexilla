@@ -127,7 +127,7 @@ void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, int size, b
 	lf.lfHeight = -(abs(size));
 	lf.lfWeight = bold ? FW_BOLD : FW_NORMAL;
 	lf.lfItalic = static_cast<BYTE>(italic ? 1 : 0);
-	lf.lfCharSet = characterSet;
+	lf.lfCharSet = static_cast<BYTE>(characterSet);
 	strcpy(lf.lfFaceName, faceName);
 }
 
