@@ -402,6 +402,7 @@ void Editor::InvalidateStyleData() {
 }
 
 void Editor::InvalidateStyleRedraw() {
+	NeedWrapping();
 	InvalidateStyleData();
 	Redraw();
 }
@@ -3322,7 +3323,6 @@ int Editor::KeyCommand(unsigned int iMessage) {
 	case SCI_ZOOMIN:
 		if (vs.zoomLevel < 20) {
 			vs.zoomLevel++;
-			NeedWrapping();
 			InvalidateStyleRedraw();
 			NotifyZoom();
 		}
@@ -3330,7 +3330,6 @@ int Editor::KeyCommand(unsigned int iMessage) {
 	case SCI_ZOOMOUT:
 		if (vs.zoomLevel > -10) {
 			vs.zoomLevel--;
-			NeedWrapping();
 			InvalidateStyleRedraw();
 			NotifyZoom();
 		}
@@ -4647,13 +4646,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETMARGINLEFT:
 		vs.leftMarginWidth = lParam;
-		NeedWrapping();
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETMARGINRIGHT:
 		vs.rightMarginWidth = lParam;
-		NeedWrapping();
 		InvalidateStyleRedraw();
 		break;
 
@@ -4953,7 +4950,6 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETWRAPMODE:
 		wrapState = (wParam == SC_WRAP_WORD) ? eWrapWord : eWrapNone;
-		NeedWrapping();
 		xOffset = 0;
 		InvalidateStyleRedraw();
 		ReconfigureScrollBars();
@@ -5117,7 +5113,6 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SETMARGINWIDTHN:
 		if (ValidMargin(wParam)) {
 			vs.ms[wParam].width = lParam;
-			NeedWrapping();
 			InvalidateStyleRedraw();
 		}
 		break;
@@ -5506,7 +5501,6 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETZOOM:
 		vs.zoomLevel = wParam;
-		NeedWrapping();
 		InvalidateStyleRedraw();
 		NotifyZoom();
 		break;
