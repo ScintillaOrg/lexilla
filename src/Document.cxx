@@ -1066,10 +1066,24 @@ const char *Document::SubstituteByPosition(const char *text, int *length) {
 		return 0;
 	unsigned int lenResult = 0;
 	for (int i = 0; i < *length; i++) {
-		if ((text[i] == '\\') && (text[i + 1] >= '1' && text[i + 1] <= '9')) {
-			unsigned int patNum = text[i + 1] - '0';
-			lenResult += pre->eopat[patNum] - pre->bopat[patNum];
-			i++;
+		if (text[i] == '\\') {
+			if (text[i + 1] >= '1' && text[i + 1] <= '9') {
+				unsigned int patNum = text[i + 1] - '0';
+				lenResult += pre->eopat[patNum] - pre->bopat[patNum];
+				i++;
+			} else {
+				switch (text[i + 1]) {
+				case 'a':
+				case 'b':
+				case 'f':
+				case 'n':
+				case 'r':
+				case 't':
+				case 'v':
+					i++;
+				}
+				lenResult++;
+			}
 		} else {
 			lenResult++;
 		}
@@ -1079,13 +1093,43 @@ const char *Document::SubstituteByPosition(const char *text, int *length) {
 		return 0;
 	char *o = substituted;
 	for (int j = 0; j < *length; j++) {
-		if ((text[j] == '\\') && (text[j + 1] >= '1' && text[j + 1] <= '9')) {
-			unsigned int patNum = text[j + 1] - '0';
-			unsigned int len = pre->eopat[patNum] - pre->bopat[patNum];
-			if (pre->pat[patNum])	// Will be null if try for a match that did not occur
-				memcpy(o, pre->pat[patNum], len);
-			o += len;
-			j++;
+		if (text[j] == '\\') {
+			if (text[j + 1] >= '1' && text[j + 1] <= '9') {
+				unsigned int patNum = text[j + 1] - '0';
+				unsigned int len = pre->eopat[patNum] - pre->bopat[patNum];
+				if (pre->pat[patNum])	// Will be null if try for a match that did not occur
+					memcpy(o, pre->pat[patNum], len);
+				o += len;
+				j++;
+			} else {
+				j++;
+				switch (text[j]) {
+				case 'a':
+					*o++ = '\a';
+					break;
+				case 'b':
+					*o++ = '\b';
+					break;
+				case 'f':
+					*o++ = '\f';
+					break;
+				case 'n':
+					*o++ = '\n';
+					break;
+				case 'r':
+					*o++ = '\r';
+					break;
+				case 't':
+					*o++ = '\t';
+					break;
+				case 'v':
+					*o++ = '\v';
+					break;
+				default:
+					*o++ = '\\';
+					j--;
+				}
+			}
 		} else {
 			*o++ = text[j];
 		}
