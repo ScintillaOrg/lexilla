@@ -847,7 +847,7 @@ public:
  * Has not been tested with backwards DBCS searches yet.
  */
 long Document::FindText(int minPos, int maxPos, const char *s,
-                        bool caseSensitive, bool word, bool wordStart, bool regExp,
+                        bool caseSensitive, bool word, bool wordStart, bool regExp, bool posix,
                         int *length) {
 	if (regExp) {
 		if (!pre)
@@ -864,7 +864,7 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 		startPos = MovePositionOutsideChar(startPos, 1, false);
 		endPos = MovePositionOutsideChar(endPos, 1, false);
 
-		const char *errmsg = pre->Compile(s, *length, caseSensitive);
+		const char *errmsg = pre->Compile(s, *length, caseSensitive, posix);
 		if (errmsg) {
 			return -1;
 		}
@@ -888,16 +888,30 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 		for (int line = lineRangeStart; line != lineRangeBreak; line += increment) {
 			int startOfLine = LineStart(line);
 			int endOfLine = LineEnd(line);
-			if ((increment == 1) && (line == lineRangeStart)) {
-				if ((startPos != startOfLine) && (s[0] == '^'))
-					continue;	// Can't match start of line if start position after start of line
-				startOfLine = startPos;
+			if (increment == 1) {
+				if (line == lineRangeStart) {
+					if ((startPos != startOfLine) && (s[0] == '^'))
+						continue;	// Can't match start of line if start position after start of line
+					startOfLine = startPos;
+				}
+				if (line == lineRangeEnd) {
+					if ((endPos != endOfLine) && (searchEnd == '$'))
+						continue;	// Can't match end of line if end position before end of line
+					endOfLine = endPos;
+				}
+			} else {
+				if (line == lineRangeEnd) {
+					if ((endPos != startOfLine) && (s[0] == '^'))
+						continue;	// Can't match start of line if end position after start of line
+					startOfLine = endPos;
+				}
+				if (line == lineRangeStart) {
+					if ((startPos != endOfLine) && (searchEnd == '$'))
+						continue;	// Can't match end of line if start position before end of line
+					endOfLine = startPos;
+				}
 			}
-			if ((increment == 1) && (line == lineRangeEnd)) {
-				if ((endPos != endOfLine) && (searchEnd == '$'))
-					continue;	// Can't match end of line if end position before end of line
-				endOfLine = endPos;
-			}
+			
 			DocumentIndexer di(this, endOfLine);
 			int success = pre->Execute(di, startOfLine, endOfLine);
 			if (success) {

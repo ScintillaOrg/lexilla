@@ -30,6 +30,15 @@
  * Modification history:
  *
  * $Log$
+ * Revision 1.8  2003/03/04 10:53:59  nyamatongwe
+ * Patch from Jakub to optionally implement more POSIX compatible regular
+ * expressions. \(..\) changes to (..)
+ * Fixes problem where find previous would not find earlier matches on same
+ * line.
+ *
+ * Revision 1.8  2003/03/03 20:12:56  vrana
+ * Added posix syntax.
+ *
  * Revision 1.7  2002/09/28 00:33:28  nyamatongwe
  * Fixed problem with character ranges caused by expansion to 8 bits.
  *
@@ -332,7 +341,7 @@ const char escapeValue(char ch) {
 	return 0;
 }
 
-const char *RESearch::Compile(const char *pat, int length, bool caseSensitive) {
+const char *RESearch::Compile(const char *pat, int length, bool caseSensitive, bool posix) {
 	char *mp=nfa;          /* nfa pointer       */
 	char *lp;              /* saved pointer..   */
 	char *sp=nfa;          /* another one..     */
@@ -467,25 +476,6 @@ const char *RESearch::Compile(const char *pat, int length, bool caseSensitive) {
 			i++;
 			switch(*++p) {
 
-			case '(':
-				if (tagc < MAXTAG) {
-					tagstk[++tagi] = tagc;
-					*mp++ = BOT;
-					*mp++ = static_cast<char>(tagc++);
-				}
-				else
-					return badpat("Too many \\(\\) pairs");
-				break;
-			case ')':
-				if (*sp == BOT)
-					return badpat("Null pattern inside \\(\\)");
-				if (tagi > 0) {
-					*mp++ = static_cast<char>(EOT);
-					*mp++ = static_cast<char>(tagstk[tagi--]);
-				}
-				else
-					return badpat("Unmatched \\)");
-				break;
 			case '<':
 				*mp++ = BOW;
 				break;
@@ -524,13 +514,49 @@ const char *RESearch::Compile(const char *pat, int length, bool caseSensitive) {
 				*mp++ = escapeValue(*p);
 				break;
 			default:
-				*mp++ = CHR;
-				*mp++ = *p;
+				if (!posix && *p == '(') {
+					if (tagc < MAXTAG) {
+						tagstk[++tagi] = tagc;
+						*mp++ = BOT;
+						*mp++ = static_cast<char>(tagc++);
+					}
+					else
+						return badpat("Too many \\(\\) pairs");
+				} else if (!posix && *p == ')') {
+					if (*sp == BOT)
+						return badpat("Null pattern inside \\(\\)");
+					if (tagi > 0) {
+						*mp++ = static_cast<char>(EOT);
+						*mp++ = static_cast<char>(tagstk[tagi--]);
+					}
+					else
+						return badpat("Unmatched \\)");
+				} else {
+					*mp++ = CHR;
+					*mp++ = *p;
+				}
 			}
 			break;
 
 		default :               /* an ordinary char  */
-			if (caseSensitive) {
+			if (posix && *p == '(') {
+				if (tagc < MAXTAG) {
+					tagstk[++tagi] = tagc;
+					*mp++ = BOT;
+					*mp++ = static_cast<char>(tagc++);
+				}
+				else
+					return badpat("Too many () pairs");
+			} else if (posix && *p == ')') {
+				if (*sp == BOT)
+					return badpat("Null pattern inside ()");
+				if (tagi > 0) {
+					*mp++ = static_cast<char>(EOT);
+					*mp++ = static_cast<char>(tagstk[tagi--]);
+				}
+				else
+					return badpat("Unmatched )");
+			} else if (caseSensitive) {
 				*mp++ = CHR;
 				*mp++ = *p;
 			} else {
@@ -545,7 +571,7 @@ const char *RESearch::Compile(const char *pat, int length, bool caseSensitive) {
 		sp = lp;
 	}
 	if (tagi > 0)
-		return badpat("Unmatched \\(");
+		return badpat((posix ? "Unmatched (" : "Unmatched \\("));
 	*mp = END;
 	sta = OKP;
 	return 0;

@@ -3988,7 +3988,7 @@ void Editor::Indent(bool forwards) {
  */
 long Editor::FindText(
     uptr_t wParam,     	///< Search modes : @c SCFIND_MATCHCASE, @c SCFIND_WHOLEWORD,
-    ///< @c SCFIND_WORDSTART or @c SCFIND_REGEXP.
+    ///< @c SCFIND_WORDSTART, @c SCFIND_REGEXP or @c SCFIND_POSIX.
     sptr_t lParam) {			///< @c TextToFind structure: The text to search for in the given range.
 
 	TextToFind *ft = reinterpret_cast<TextToFind *>(lParam);
@@ -3998,6 +3998,7 @@ long Editor::FindText(
 	                         (wParam & SCFIND_WHOLEWORD) != 0,
 	                         (wParam & SCFIND_WORDSTART) != 0,
 	                         (wParam & SCFIND_REGEXP) != 0,
+	                         (wParam & SCFIND_POSIX) != 0,
 	                         &lengthFound);
 	if (pos != -1) {
 		ft->chrgText.cpMin = pos;
@@ -4041,6 +4042,7 @@ long Editor::SearchText(
 		                     (wParam & SCFIND_WHOLEWORD) != 0,
 		                     (wParam & SCFIND_WORDSTART) != 0,
 		                     (wParam & SCFIND_REGEXP) != 0,
+		                     (wParam & SCFIND_POSIX) != 0,
 		                     &lengthFound);
 	} else {
 		pos = pdoc->FindText(searchAnchor, 0, txt,
@@ -4048,6 +4050,7 @@ long Editor::SearchText(
 		                     (wParam & SCFIND_WHOLEWORD) != 0,
 		                     (wParam & SCFIND_WORDSTART) != 0,
 		                     (wParam & SCFIND_REGEXP) != 0,
+		                     (wParam & SCFIND_POSIX) != 0,
 		                     &lengthFound);
 	}
 
@@ -4069,6 +4072,7 @@ long Editor::SearchInTarget(const char *text, int length) {
 	                         (searchFlags & SCFIND_WHOLEWORD) != 0,
 	                         (searchFlags & SCFIND_WORDSTART) != 0,
 	                         (searchFlags & SCFIND_REGEXP) != 0,
+	                         (searchFlags & SCFIND_POSIX) != 0,
 	                         &lengthFound);
 	if (pos != -1) {
 		targetStart = pos;

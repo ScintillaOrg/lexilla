@@ -285,6 +285,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCFIND_MATCHCASE 4
 #define SCFIND_WORDSTART 0x00100000
 #define SCFIND_REGEXP 0x00200000
+#define SCFIND_POSIX 0x00400000
 #define SCI_FINDTEXT 2150
 #define SCI_FORMATRANGE 2151
 #define SCI_GETFIRSTVISIBLELINE 2152
