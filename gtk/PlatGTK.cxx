@@ -46,69 +46,6 @@
 
 enum encodingType { singleByte, UTF8, dbcs};
 
-// On GTK+ 1.x holds a GdkFont* but on GTK+ 2.x can hold a GdkFont* or a
-// PangoFontDescription*.
-class FontHandle {
-	int width[128];
-	encodingType et;
-public:
-	int ascent;
-	GdkFont *pfont;
-#ifdef USE_PANGO
-	PangoFontDescription *pfd;
-#endif
-	FontHandle(GdkFont *pfont_) {
-		et = singleByte;
-		ascent = 0;
-		pfont = pfont_;
-#ifdef USE_PANGO
-		pfd = 0;
-#endif
-		ResetWidths(et);
-	}
-#ifdef USE_PANGO
-	FontHandle(PangoFontDescription *pfd_) {
-		et = singleByte;
-		ascent = 0;
-		pfont = 0;
-		pfd = pfd_;
-		ResetWidths(et);
-	}
-#endif
-	~FontHandle() {
-		if (pfont)
-			gdk_font_unref(pfont);
-		pfont = 0;
-#ifdef USE_PANGO
-		if (pfd)
-			pango_font_description_free(pfd);
-		pfd = 0;
-#endif
-	}
-	void ResetWidths(encodingType et_) {
-		et = et_;
-		for (int i=0; i<=127; i++) {
-			width[i] = 0;
-		}
-	}
-	int CharWidth(unsigned char ch, encodingType et_) {
-		if (ch <= 127) {
-			if (et != et_) {
-				return 0;
-			}
-		}
-		return width[ch];
-	}
-	void SetCharWidth(unsigned char ch, int w, encodingType et_) {
-		if (ch <= 127) {
-			if (et != et_) {
-				ResetWidths(et_);
-			}
-			width[ch] = w;
-		}
-	}
-};
-
 struct LOGFONT {
 	int size;
 	bool bold;
@@ -160,6 +97,72 @@ static void FontMutexUnlock() {
 	}
 #endif
 }
+
+// On GTK+ 1.x holds a GdkFont* but on GTK+ 2.x can hold a GdkFont* or a
+// PangoFontDescription*.
+class FontHandle {
+	int width[128];
+	encodingType et;
+public:
+	int ascent;
+	GdkFont *pfont;
+#ifdef USE_PANGO
+	PangoFontDescription *pfd;
+#endif
+	FontHandle(GdkFont *pfont_) {
+		et = singleByte;
+		ascent = 0;
+		pfont = pfont_;
+#ifdef USE_PANGO
+		pfd = 0;
+#endif
+		ResetWidths(et);
+	}
+#ifdef USE_PANGO
+	FontHandle(PangoFontDescription *pfd_) {
+		et = singleByte;
+		ascent = 0;
+		pfont = 0;
+		pfd = pfd_;
+		ResetWidths(et);
+	}
+#endif
+	~FontHandle() {
+		if (pfont)
+			gdk_font_unref(pfont);
+		pfont = 0;
+#ifdef USE_PANGO
+		if (pfd)
+			pango_font_description_free(pfd);
+		pfd = 0;
+#endif
+	}
+	void ResetWidths(encodingType et_) {
+		et = et_;
+		for (int i=0; i<=127; i++) {
+			width[i] = 0;
+		}
+	}
+	int CharWidth(unsigned char ch, encodingType et_) {
+		int w = 0;
+		FontMutexLock();
+		if ((ch <= 127) && (et == et_)) {
+			w = width[ch];
+		}
+		FontMutexUnlock();
+		return w;
+	}
+	void SetCharWidth(unsigned char ch, int w, encodingType et_) {
+		if (ch <= 127) {
+			FontMutexLock();
+			if (et != et_) {
+				ResetWidths(et_);
+			}
+			width[ch] = w;
+			FontMutexUnlock();
+		}
+	}
+};
 
 // X has a 16 bit coordinate space, so stop drawing here to avoid wrapping
 static const int maxCoordinate = 32000;
@@ -1298,20 +1301,23 @@ int SurfaceImpl::Ascent(Font &font_) {
 	if (!(font_.GetID()))
 		return 1;
 #ifdef FAST_WAY
-	if (PFont(font_)->ascent > 0)
-		return PFont(font_)->ascent;
+	FontMutexLock();
+	int ascent = PFont(font_)->ascent;
 #ifdef USE_PANGO
-	if (PFont(font_)->pfd) {
+	if ((ascent == 0) && (PFont(font_)->pfd)) {
 		PangoFontMetrics *metrics = pango_context_get_metrics(pcontext,
 			PFont(font_)->pfd, pango_context_get_language(pcontext));
 		PFont(font_)->ascent =
 			PANGO_PIXELS(pango_font_metrics_get_ascent(metrics));
 		pango_font_metrics_unref(metrics);
-		return PFont(font_)->ascent;
+		ascent = PFont(font_)->ascent;
 	}
 #endif
-
-	return PFont(font_)->pfont->ascent;
+	if (ascent == 0) {
+		ascent = PFont(font_)->pfont->ascent;
+	}
+	FontMutexUnlock();
+	return ascent;
 #else
 
 	gint lbearing;
