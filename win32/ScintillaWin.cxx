@@ -112,6 +112,8 @@ public:
 class ScintillaWin :
 	public ScintillaBase {
 
+	bool lastKeyDownConsumed;
+
 	bool capturedMouse;
 
 	bool hasOKText;
@@ -205,6 +207,8 @@ public:
 HINSTANCE ScintillaWin::hInstance = 0;
 
 ScintillaWin::ScintillaWin(HWND hwnd) {
+
+	lastKeyDownConsumed = false;
 
 	capturedMouse = false;
 
@@ -490,7 +494,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
 
 	case WM_CHAR:
-		if (!iscntrl(wParam&0xff)) {
+		if (!iscntrl(wParam&0xff) || !lastKeyDownConsumed) {
 			if (IsUnicodeMode()) {
 				AddCharBytes(static_cast<char>(wParam&0xff));
 			} else {
@@ -499,12 +503,16 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		}
 		return 1;
 
+	case WM_SYSKEYDOWN:
 	case WM_KEYDOWN: {
 		//Platform::DebugPrintf("S keydown %d %x %x %x %x\n",iMessage, wParam, lParam, ::IsKeyDown(VK_SHIFT), ::IsKeyDown(VK_CONTROL));
+			lastKeyDownConsumed = false;
 			int ret = KeyDown(KeyTranslate(wParam),
 				Platform::IsKeyDown(VK_SHIFT),
-		               	Platform::IsKeyDown(VK_CONTROL), false);
-			if (!ret)
+		                Platform::IsKeyDown(VK_CONTROL), 
+						Platform::IsKeyDown(VK_MENU),
+						&lastKeyDownConsumed);
+			if (!ret && !lastKeyDownConsumed)
                 		return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
 			break;
 		}
