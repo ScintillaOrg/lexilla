@@ -4930,7 +4930,8 @@ void Editor::ButtonMove(Point pt) {
 		}
 		// While dragging to make rectangular selection, we don't want the current
 		// position to jump to the end of smaller or empty lines.
-		xEndSelect = pt.x - vs.fixedColumnWidth + xOffset;
+		//xEndSelect = pt.x - vs.fixedColumnWidth + xOffset;
+		xEndSelect = XFromPosition(movePos);
 
 		// Autoscroll
 		PRectangle rcClient = GetClientRectangle();
