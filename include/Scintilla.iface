@@ -1702,6 +1702,7 @@ val SCLEX_GUI4CLI=58
 val SCLEX_SPECMAN=59
 val SCLEX_AU3=60
 val SCLEX_APDL=61
+val SCLEX_BASH=62
 
 # When a lexer specifies its language as SCLEX_AUTOMATIC it receives a
 # value assigned in sequence from SCLEX_AUTOMATIC+1.
@@ -2475,6 +2476,22 @@ val SCE_APDL_WORD=5
 val SCE_APDL_COMMAND=6
 val SCE_APDL_PROCESSOR=7
 val SCE_APDL_FUNCTION=8
+# Lexical states for SCLEX_BASH
+lex Bash=SCLEX_BASH SCE_SH_
+val SCE_SH_DEFAULT=0
+val SCE_SH_ERROR=1
+val SCE_SH_COMMENTLINE=2
+val SCE_SH_NUMBER=3
+val SCE_SH_WORD=4
+val SCE_SH_STRING=5
+val SCE_SH_CHARACTER=6
+val SCE_SH_OPERATOR=7
+val SCE_SH_IDENTIFIER=8
+val SCE_SH_SCALAR=9
+val SCE_SH_PARAM=10
+val SCE_SH_BACKTICKS=11
+val SCE_SH_HERE_DELIM=12
+val SCE_SH_HERE_Q=13
 # Events
 
 evt void StyleNeeded=2000(int position)
