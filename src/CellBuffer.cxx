@@ -418,22 +418,19 @@ UndoHistory::~UndoHistory() {
 }
 
 void UndoHistory::EnsureUndoRoom() {
-	//Platform::DebugPrintf("%% %d action %d %d %d\n", at, position, length, currentAction);
-	if (currentAction >= 2) {
-		// Have to test that there is room for 2 more actions in the array
-		// as two actions may be created by this function
-		if (currentAction >= (lenActions - 2)) {
-			// Run out of undo nodes so extend the array
-			int lenActionsNew = lenActions * 2;
-			Action *actionsNew = new Action[lenActionsNew];
-			if (!actionsNew)
-				return ;
-			for (int act = 0; act <= currentAction; act++)
-				actionsNew[act].Grab(&actions[act]);
-			delete []actions;
-			lenActions = lenActionsNew;
-			actions = actionsNew;
-		}
+	// Have to test that there is room for 2 more actions in the array
+	// as two actions may be created by the calling function
+	if (currentAction >= (lenActions - 2)) {
+		// Run out of undo nodes so extend the array
+		int lenActionsNew = lenActions * 2;
+		Action *actionsNew = new Action[lenActionsNew];
+		if (!actionsNew)
+			return ;
+		for (int act = 0; act <= currentAction; act++)
+			actionsNew[act].Grab(&actions[act]);
+		delete []actions;
+		lenActions = lenActionsNew;
+		actions = actionsNew;
 	}
 }
 

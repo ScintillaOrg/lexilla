@@ -30,7 +30,7 @@
 #include "Editor.h"
 
 Caret::Caret() :
-active(true), on(true), period(500) {}
+active(false), on(false), period(500) {}
 
 Timer::Timer() :
 ticking(false), ticksToWait(0), tickerID(0) {}
