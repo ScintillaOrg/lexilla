@@ -1511,10 +1511,12 @@ struct TextToFind {
 
     <p><b id="SCI_SETHSCROLLBAR">SCI_SETHSCROLLBAR(bool visible)</b><br />
      <b id="SCI_GETHSCROLLBAR">SCI_GETHSCROLLBAR</b><br />
-     The horizontal scroll bar is only displayed if it is needed. If you never wish to see it, call
+     The horizontal scroll bar is only displayed if it is needed for the assumed width.
+     If you never wish to see it, call
     <code>SCI_SETHSCROLLBAR(0)</code>. Use <code>SCI_SETHSCROLLBAR(1)</code> to enable it again.
     <code>SCI_GETHSCROLLBAR</code> returns the current state. The default state is to display it
-    when needed.</p>
+    when needed.
+    See also: <a class="message" href="#SCI_SETSCROLLWIDTH">SCI_SETSCROLLWIDTH</a>.</p>
 
     <p><b id="SCI_SETVSCROLLBAR">SCI_SETVSCROLLBAR(bool visible)</b><br />
      <b id="SCI_GETVSCROLLBAR">SCI_GETVSCROLLBAR</b><br />
@@ -1532,8 +1534,10 @@ struct TextToFind {
 
     <p><b id="SCI_SETSCROLLWIDTH">SCI_SETSCROLLWIDTH(int pixelWidth)</b><br />
      <b id="SCI_GETSCROLLWIDTH">SCI_GETSCROLLWIDTH</b><br />
-     These set and get the document width in pixels assumed by Scintilla when calculating how to
-    display the horizontal scroll bar. The default value is 2000.</p>
+     For performance, Scintilla does not measure the display width of the document to determine
+     the properties of the horizontal scroll bar. Instead, an assumed width is used.
+     These messages set and get the document width in pixels assumed by Scintilla.
+     The default value is 2000.</p>
 
     <p><b id="SCI_SETENDATLASTLINE">SCI_SETENDATLASTLINE(bool endAtLastLine)</b><br />
      <b id="SCI_GETENDATLASTLINE">SCI_GETENDATLASTLINE</b><br />
