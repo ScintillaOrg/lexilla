@@ -71,7 +71,7 @@ void LineLayout::Resize(int maxLineLength_) {
 	if (maxLineLength_ > maxLineLength) {
 		Free();
 		chars = new char[maxLineLength_ + 1];
-		styles = new char[maxLineLength_ + 1];
+		styles = new unsigned char[maxLineLength_ + 1];
 		indicators = new char[maxLineLength_ + 1];
 		// Extra position allocated as sometimes the Windows
 		// GetTextExtentExPoint API writes an extra element.
@@ -4631,7 +4631,7 @@ char *Editor::CopyRange(int start, int end) {
 }
 
 void Editor::CopySelectionFromRange(SelectionText *ss, int start, int end) {
-	ss->Set(CopyRange(start, end), end - start + 1, 
+	ss->Set(CopyRange(start, end), end - start + 1,
 		pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false);
 }
 
@@ -4674,7 +4674,7 @@ void Editor::CopySelectionRange(SelectionText *ss) {
 				text[size] = '\0';
 			}
 		}
- 		ss->Set(text, size + 1, pdoc->dbcsCodePage, 
+ 		ss->Set(text, size + 1, pdoc->dbcsCodePage,
 			vs.styles[STYLE_DEFAULT].characterSet, selType == selRectangle);
 	}
 }
@@ -4683,14 +4683,14 @@ void Editor::CopyRangeToClipboard(int start, int end) {
 	start = pdoc->ClampPositionIntoDocument(start);
 	end = pdoc->ClampPositionIntoDocument(end);
 	SelectionText selectedText;
-	selectedText.Set(CopyRange(start, end), end - start + 1, 
+	selectedText.Set(CopyRange(start, end), end - start + 1,
 		pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false);
 	CopyToClipboard(selectedText);
 }
 
 void Editor::CopyText(int length, const char *text) {
 	SelectionText selectedText;
-	selectedText.Copy(text, length, 
+	selectedText.Copy(text, length,
 		pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false);
 	CopyToClipboard(selectedText);
 }

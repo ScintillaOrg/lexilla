@@ -63,7 +63,7 @@ public:
 	bool containsCaret;
 	int edgeColumn;
 	char *chars;
-	char *styles;
+	unsigned char *styles;
 	char *indicators;
 	int *positions;
 	char bracePreviousStyles[2];
