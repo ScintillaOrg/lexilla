@@ -36,6 +36,7 @@
 #include "gtk/gtksignal.h"
 
 #define USE_XIM 1
+#define DEFAULT_SIG_HANDLERS 1
 
 class ScintillaGTK : public ScintillaBase {
 	_ScintillaObject *sci;
@@ -101,8 +102,14 @@ private:
 	static gint UnRealize(GtkWidget *widget, ScintillaGTK *sciThis);
 	static gint CursorMoved(GtkWidget *widget, int xoffset, int yoffset, ScintillaGTK *sciThis);
 #endif
+#ifdef DEFAULT_SIG_HANDLERS
+public:
+#endif
 	static gint FocusIn(GtkWidget *widget, GdkEventFocus *event, ScintillaGTK *sciThis);
 	static gint FocusOut(GtkWidget *widget, GdkEventFocus *event, ScintillaGTK *sciThis);
+#ifdef DEFAULT_SIG_HANDLERS
+private:
+#endif
 	static gint Expose(GtkWidget *widget, GdkEventExpose *ose, ScintillaGTK *sciThis);
 	static void ScrollSignal(GtkAdjustment *adj, ScintillaGTK *sciThis);
 	static void ScrollHSignal(GtkAdjustment *adj, ScintillaGTK *sciThis);
@@ -110,8 +117,14 @@ private:
 	static gint Press(GtkWidget *widget, GdkEventButton *event, ScintillaGTK *sciThis);
 	static gint MouseRelease(GtkWidget *widget, GdkEventButton *event, ScintillaGTK *sciThis);
 	static gint Motion(GtkWidget *widget, GdkEventMotion *event, ScintillaGTK *sciThis);
+#ifdef DEFAULT_SIG_HANDLERS
+public:
+#endif
 	static gint KeyPress(GtkWidget *widget, GdkEventKey *event, ScintillaGTK *sciThis);
 	static gint KeyRelease(GtkWidget *widget, GdkEventKey *event, ScintillaGTK *sciThis);
+#ifdef DEFAULT_SIG_HANDLERS
+private:
+#endif
 	static gint DestroyWindow(GtkWidget *widget, ScintillaGTK *sciThis);
 	static void SelectionReceived(GtkWidget *widget, GtkSelectionData *selection_data,
 		guint time, ScintillaGTK *sciThis);
@@ -155,6 +168,36 @@ enum {
     TARGET_TEXT,
     TARGET_COMPOUND_TEXT
 };
+
+#ifdef DEFAULT_SIG_HANDLERS
+
+#define SCINT_WIDGET(x) ((ScintillaGTK *) ((ScintillaObject *)x)->pscin)
+
+static gint scint_key_press(GtkWidget *widget, GdkEventKey *event)
+{
+	ScintillaGTK *scint = SCINT_WIDGET(widget);
+	return scint->KeyPress(widget, event, scint);
+}
+
+static gint scint_key_release(GtkWidget *widget, GdkEventKey *event)
+{
+	ScintillaGTK *scint = SCINT_WIDGET(widget);
+	return scint->KeyRelease(widget, event, scint);
+}
+
+static gint scint_focus_in(GtkWidget *widget, GdkEventFocus *event)
+{
+	ScintillaGTK *scint = SCINT_WIDGET(widget);
+	return scint->FocusIn(widget, event, scint);
+}
+
+static gint scint_focus_out(GtkWidget *widget, GdkEventFocus *event)
+{
+	ScintillaGTK *scint = SCINT_WIDGET(widget);
+	return scint->FocusOut(widget, event, scint);
+}
+#endif // DEFAULT_SIG_HANDLERS
+
 
 ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 	adjustmentv(0), adjustmenth(0), 
@@ -254,7 +297,6 @@ gint ScintillaGTK::CursorMoved(GtkWidget *widget, int xoffset, int yoffset, Scin
 	}
   return FALSE;
 }
-
 #endif
 
 gint ScintillaGTK::FocusIn(GtkWidget *widget, GdkEventFocus * /*event*/, ScintillaGTK *sciThis) {
@@ -302,14 +344,15 @@ void ScintillaGTK::Initialise() {
 										GtkSignalFunc(UnRealize), this);
 //	gtk_signal_connect(GTK_OBJECT(wMain.GetID()), "cursor_moved",
 //										GtkSignalFunc(CursorMoved), this);
-#endif
+#endif // USE_XIM
 
+#ifndef DEFAULT_SIG_HANDLERS
 	// Using "after" connect to avoid main window using cursor keys
 	// to move focus.
 	gtk_signal_connect(GTK_OBJECT(wMain.GetID()), "key_press_event",
 			GtkSignalFunc(KeyPress), this);
-	//gtk_signal_connect_after(GTK_OBJECT(wMain.GetID()), "key_press_event",
-        //         	GtkSignalFunc(KeyPress), this);
+//	gtk_signal_connect_after(GTK_OBJECT(wMain.GetID()), "key_press_event",
+//			GtkSignalFunc(KeyPress), this);
 
 	gtk_signal_connect(GTK_OBJECT(wMain.GetID()), "key_release_event",
                    	GtkSignalFunc(KeyRelease), this);
@@ -317,6 +360,7 @@ void ScintillaGTK::Initialise() {
                    	GtkSignalFunc(FocusIn), this);
 	gtk_signal_connect(GTK_OBJECT(wMain.GetID()), "focus_out_event",
                    	GtkSignalFunc(FocusOut), this);
+#endif // !DEFAULT_SIG_HANDLERS
 	gtk_signal_connect(GTK_OBJECT(wMain.GetID()), "destroy", 
 					GtkSignalFunc(DestroyWindow), this);
 
@@ -383,6 +427,7 @@ void ScintillaGTK::Initialise() {
 	gtk_drag_dest_set(GTK_WIDGET(wDraw.GetID()), 
 		GTK_DEST_DEFAULT_ALL, targets, n_targets, 
 		static_cast<GdkDragAction>(GDK_ACTION_COPY|GDK_ACTION_MOVE));
+
 	gtk_signal_connect(GTK_OBJECT(wDraw.GetID()), 
 		"drag_data_received",
 		GTK_SIGNAL_FUNC(DragDataReceived),
@@ -412,7 +457,7 @@ void ScintillaGTK::Initialise() {
 		"drag_data_get",
 		GTK_SIGNAL_FUNC(DragDataGet),
 		this);
-		
+
 	SetTicking(true);
 }
 
@@ -1204,9 +1249,11 @@ guint scintilla_get_type() {
 
 static void scintilla_class_init(ScintillaClass *klass) {
 	GtkObjectClass *object_class;
+	GtkWidgetClass *widget_class;
 
 	object_class = (GtkObjectClass*) klass;
-
+	widget_class = (GtkWidgetClass*) klass;
+	
 	scintilla_signals[COMMAND_SIGNAL] = gtk_signal_new(
                                         	"command",
                                         	GTK_RUN_LAST,
@@ -1230,6 +1277,16 @@ static void scintilla_class_init(ScintillaClass *klass) {
 
 	klass->command = NULL;
 	klass->notify = NULL;
+
+	// Define default signal handlers for the class:  Could move more
+	// of the signal handlers here (those that currently attached to wDraw
+	// in Initialise() may require coordinate translation?)
+#ifdef DEFAULT_SIG_HANDLERS
+	widget_class->key_press_event = scint_key_press;
+	widget_class->key_release_event = scint_key_release;
+	widget_class->focus_in_event = scint_focus_in;
+	widget_class->focus_out_event = scint_focus_out;
+#endif
 }
 
 static void scintilla_init(ScintillaObject *sci) {
