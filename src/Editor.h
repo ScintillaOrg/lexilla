@@ -71,6 +71,38 @@ public:
 };
 
 /**
+ * A smart pointer class to ensure Surfaces are set up and deleted correctly.
+ */
+class AutoSurface {
+private:
+	Surface *surf;
+public:
+	AutoSurface(bool unicodeMode) {
+		surf = Surface::Allocate();
+		if (surf) {
+			surf->Init();
+			surf->SetUnicodeMode(unicodeMode);
+		}
+	}
+	AutoSurface(SurfaceID sid, bool unicodeMode) {
+		surf = Surface::Allocate();
+		if (surf) {
+			surf->Init(sid);
+			surf->SetUnicodeMode(unicodeMode);
+		}
+	}
+	~AutoSurface() {
+		delete surf;
+	}
+	Surface *operator->() const {
+		return surf;
+	}
+	operator Surface *() const {
+		return surf;
+	}
+};
+
+/**
  */
 class Editor : public DocWatcher {
 	// Private so Editor objects can not be copied
