@@ -4,3 +4,10 @@ del /S /Q *.map
 del /S /Q *.res
 del /S /Q *.exe
 del /S /Q *.dll
+del /S /Q *.ncb
+del /S /Q *.dsw
+del /S /Q *.opt
+del /S /Q *.plg
+del /S /Q *.ilk
+del /S /Q *.pdb
+del /S /Q *.idb
