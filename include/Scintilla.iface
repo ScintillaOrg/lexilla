@@ -1008,6 +1008,13 @@ set void SetMouseDownCaptures=2384(bool captures,)
 # Get whether mouse gets captured
 get bool GetMouseDownCaptures=2385(,)
 
+val SC_CURSORNORMAL=-1
+val SC_CURSORWAIT=3
+# Sets the cursor to one of the SC_CURSOR* values
+set void SetCursor=2386(int cursorType,)
+# Get cursor type
+get int GetCursor=2387(,)
+
 # Set the focus to this Scintilla widget.
 # GTK+ Specific
 fun void GrabFocus=2400(,)
