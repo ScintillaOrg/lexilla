@@ -761,7 +761,7 @@ int Document::ExtendWordSelect(int pos, int delta, bool onlyWordCharacters) {
 		while (pos < (Length()) && (WordCharClass(cb.CharAt(pos)) == ccStart))
 			pos++;
 	}
-	return pos;
+	return MovePositionOutsideChar(pos, delta);
 }
 
 /**
