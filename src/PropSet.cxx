@@ -122,7 +122,7 @@ SString PropSet::Get(const char *key) {
 int PropSet::GetInt(const char *key, int defaultValue) {
 	SString val = Get(key);
 	if (val.length())
-		return Get(key).value();
+		return val.value();
 	else
 		return defaultValue;
 }
