@@ -104,7 +104,7 @@ int ContractionState::DocFromDisplay(int lineDisplay) const {
 	if (lineDisplay <= 0)
 		return 0;
 	if (lineDisplay >= linesInDisplay)
-		return linesInDoc-1;
+		return linesInDoc;
 	if (size == 0)
 		return lineDisplay;
 	MakeValid();
