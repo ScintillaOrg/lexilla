@@ -135,7 +135,11 @@ static void ColouriseCssDoc(unsigned int startPos, int length, int initStyle, Wo
 			continue;
 		}
 
-		if (IsAWordChar(sc.chPrev) && (sc.state == SCE_CSS_IDENTIFIER || sc.state == SCE_CSS_PSEUDOCLASS || sc.state == SCE_CSS_IMPORTANT)) {
+		if (IsAWordChar(sc.chPrev) && (
+			sc.state == SCE_CSS_IDENTIFIER || sc.state == SCE_CSS_UNKNOWN_IDENTIFIER
+			|| sc.state == SCE_CSS_PSEUDOCLASS || sc.state == SCE_CSS_UNKNOWN_PSEUDOCLASS
+			|| sc.state == SCE_CSS_IMPORTANT
+		)) {
 			char s[100];
 			sc.GetCurrentLowered(s, sizeof(s));
 			char *s2 = s;
@@ -146,9 +150,17 @@ static void ColouriseCssDoc(unsigned int startPos, int length, int initStyle, Wo
 				if (!keywords.InList(s2))
 					sc.ChangeState(SCE_CSS_UNKNOWN_IDENTIFIER);
 				break;
+			case SCE_CSS_UNKNOWN_IDENTIFIER:
+				if (keywords.InList(s2))
+					sc.ChangeState(SCE_CSS_IDENTIFIER);
+				break;
 			case SCE_CSS_PSEUDOCLASS:
 				if (!pseudoClasses.InList(s2))
 					sc.ChangeState(SCE_CSS_UNKNOWN_PSEUDOCLASS);
+				break;
+			case SCE_CSS_UNKNOWN_PSEUDOCLASS:
+				if (pseudoClasses.InList(s2))
+					sc.ChangeState(SCE_CSS_PSEUDOCLASS);
 				break;
 			case SCE_CSS_IMPORTANT:
 				if (strcmp(s2, "important") != 0)
