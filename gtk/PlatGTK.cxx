@@ -18,6 +18,7 @@
 #include "Scintilla.h"
 #include "ScintillaWidget.h"
 #include "UniConversion.h"
+#include "XPM.h"
 
 /* GLIB must be compiled with thread support, otherwise we
    will bail on trying to use locks, and that could lead to
@@ -1146,9 +1147,6 @@ struct ListImage {
 	GdkBitmap *bitmap;
 };
 
-ListBox::ListBox() : list(0), current(0), pixhash(NULL), desiredVisibleRows(5), maxItemCharacters(0),
-doubleClickAction(NULL), doubleClickActionData(NULL) {}
-
 static void list_image_free(gpointer, gpointer value, gpointer) {
 	ListImage *list_image = (ListImage *) value;
 	if (list_image->pixmap)
@@ -1158,11 +1156,61 @@ static void list_image_free(gpointer, gpointer value, gpointer) {
 	g_free(list_image);
 }
 
+ListBox::ListBox() {
+}
+
 ListBox::~ListBox() {
-	if (pixhash) {
-		g_hash_table_foreach((GHashTable *) pixhash, list_image_free, NULL);
-		g_hash_table_destroy((GHashTable *) pixhash);
+}
+
+class ListBoxX : public ListBox {
+	WindowID list;
+	WindowID scroller;
+	int current;
+	void *pixhash;
+	int lineHeight;
+	XPMSet xset;
+	bool unicodeMode;
+	int desiredVisibleRows;
+	unsigned int maxItemCharacters;
+	unsigned int aveCharWidth;
+public:
+	CallBackAction doubleClickAction;
+	void *doubleClickActionData;
+
+	ListBoxX() : list(0), current(0), pixhash(NULL), desiredVisibleRows(5), maxItemCharacters(0),
+		doubleClickAction(NULL), doubleClickActionData(NULL) {
 	}
+	virtual ~ListBoxX() {
+		if (pixhash) {
+			g_hash_table_foreach((GHashTable *) pixhash, list_image_free, NULL);
+			g_hash_table_destroy((GHashTable *) pixhash);
+		}
+	}
+	virtual void SetFont(Font &font);
+	virtual void Create(Window &parent, int ctrlID, int lineHeight_, bool unicodeMode_);
+	virtual void SetAverageCharWidth(int width);
+	virtual void SetVisibleRows(int rows);
+	virtual PRectangle GetDesiredRect();
+	virtual int CaretFromEdge();
+	virtual void Clear();
+	virtual void Append(char *s, int type = -1);
+	virtual int Length();
+	virtual void Select(int n);
+	virtual int GetSelection();
+	virtual int Find(const char *prefix);
+	virtual void GetValue(int n, char *value, int len);
+	virtual void Sort();
+	virtual void RegisterImage(int type, const char *xpm_data);
+	virtual void ClearRegisteredImages();
+	virtual void SetDoubleClickAction(CallBackAction action, void *data) {
+		doubleClickAction = action;
+		doubleClickActionData = data;
+	}
+};
+
+ListBox *ListBox::Allocate() {
+	ListBoxX *lb = new ListBoxX();
+	return lb;
 }
 
 static void SelectionAC(GtkWidget *, gint row, gint,
@@ -1172,7 +1220,7 @@ static void SelectionAC(GtkWidget *, gint row, gint,
 }
 
 static gboolean ButtonPress(GtkWidget *, GdkEventButton* ev, gpointer p) {
-	ListBox* lb = reinterpret_cast<ListBox*>(p);
+	ListBoxX* lb = reinterpret_cast<ListBoxX*>(p);
 	if (ev->type == GDK_2BUTTON_PRESS && lb->doubleClickAction != NULL) {
 		lb->doubleClickAction(lb->doubleClickActionData);
 		return TRUE;
@@ -1181,7 +1229,7 @@ static gboolean ButtonPress(GtkWidget *, GdkEventButton* ev, gpointer p) {
 	return FALSE;
 }
 
-void ListBox::Create(Window &, int) {
+void ListBoxX::Create(Window &, int, int, bool) {
 	id = gtk_window_new(GTK_WINDOW_POPUP);
 
 	GtkWidget *frame = gtk_frame_new(NULL);
@@ -1211,7 +1259,7 @@ void ListBox::Create(Window &, int) {
 	gtk_widget_realize(PWidget(id));
 }
 
-void ListBox::SetFont(Font &scint_font) {
+void ListBoxX::SetFont(Font &scint_font) {
 #if GTK_MAJOR_VERSION < 2
 	GtkStyle *style = gtk_widget_get_style(GTK_WIDGET(PWidget(list)));
 	if (!gdk_font_equal(style->font, PFont(scint_font))) {
@@ -1234,15 +1282,15 @@ void ListBox::SetFont(Font &scint_font) {
 #endif
 }
 
-void ListBox::SetAverageCharWidth(int width) {
+void ListBoxX::SetAverageCharWidth(int width) {
 	aveCharWidth = width;
 }
 
-void ListBox::SetVisibleRows(int rows) {
+void ListBoxX::SetVisibleRows(int rows) {
 	desiredVisibleRows = rows;
 }
 
-PRectangle ListBox::GetDesiredRect() {
+PRectangle ListBoxX::GetDesiredRect() {
 	// Before any size allocated pretend its 100 wide so not scrolled
 	PRectangle rc(0, 0, 100, 100);
 	if (id) {
@@ -1283,7 +1331,7 @@ PRectangle ListBox::GetDesiredRect() {
 	return rc;
 }
 
-void ListBox::Clear() {
+void ListBoxX::Clear() {
 	gtk_clist_clear(GTK_CLIST(list));
 	maxItemCharacters = 0;
 }
@@ -1291,40 +1339,15 @@ void ListBox::Clear() {
 static void init_pixmap(ListImage *li, GtkWidget *window) {
 	const char *textForm = li->xpm_data;
 	const char * const * xpm_lineform = reinterpret_cast<const char * const *>(textForm);
-	const char *xpm_lineformpointers[1000];
+	const char **xpm_lineformfromtext = 0;
 	// The XPM data can be either in atext form as will be read from a file
 	// or in a line form (array of char  *) as will be used for images defined in code.
 	// Test for text form and convert to line form
 	if ((0 == memcmp(textForm, "/* X", 4)) && (0 == memcmp(textForm, "/* XPM */", 9))) {
-		// Test done is two parts to avoid possibility of overstepping the memory 
+		// Test done is two parts to avoid possibility of overstepping the memory
 		// if memcmp implemented strangely. Must be 4 bytes at least at destination.
-		int countQuotes = 0;
-		int lines=1;
-		for (int j=0; textForm[j] && (countQuotes < 2*lines); j++) {
-			if (textForm[j] == '\"') {
-				if (countQuotes == 0) {
-					const char *info = textForm + j + 1;
-					// Skip width
-					while (*info != ' ')
-						info++;
-					while (*info == ' ')
-						info++;
-					// Add height
-					lines += atoi(info);
-					while (*info != ' ')
-						info++;
-					while (*info == ' ')
-						info++;
-					// Add colours
-					lines += atoi(info);
-				}
-				if ((countQuotes & 1) == 0) {
-					xpm_lineformpointers[countQuotes / 2] = textForm + j + 1;
-				}
-				countQuotes++;
-			}
-		}
-		xpm_lineform = xpm_lineformpointers;
+		xpm_lineformfromtext = XPM::LinesFormFromTextForm(textForm);
+		xpm_lineform = xpm_lineformfromtext;
 	}
 
 	li->pixmap = gdk_pixmap_colormap_create_from_xpm_d(NULL
@@ -1335,11 +1358,12 @@ static void init_pixmap(ListImage *li, GtkWidget *window) {
 			gdk_bitmap_unref(li->bitmap);
 		li->bitmap = NULL;
 	}
+	delete []xpm_lineformfromtext;
 }
 
 #define SPACING 5
 
-void ListBox::Append(char *s, int type) {
+void ListBoxX::Append(char *s, int type) {
 	char * szs[] = { s, NULL };
 	ListImage *list_image = NULL;
 	if (type >= 0)
@@ -1357,22 +1381,22 @@ void ListBox::Append(char *s, int type) {
 		maxItemCharacters = len;
 }
 
-int ListBox::Length() {
+int ListBoxX::Length() {
 	if (id)
 		return GTK_CLIST(list)->rows;
 	return 0;
 }
 
-void ListBox::Select(int n) {
+void ListBoxX::Select(int n) {
 	gtk_clist_select_row(GTK_CLIST(list), n, 0);
 	gtk_clist_moveto(GTK_CLIST(list), n, 0, 0.5, 0.5);
 }
 
-int ListBox::GetSelection() {
+int ListBoxX::GetSelection() {
 	return current;
 }
 
-int ListBox::Find(const char *prefix) {
+int ListBoxX::Find(const char *prefix) {
 	int count = Length();
 	for (int i = 0; i < count; i++) {
 		char *s = 0;
@@ -1384,7 +1408,7 @@ int ListBox::Find(const char *prefix) {
 	return - 1;
 }
 
-void ListBox::GetValue(int n, char *value, int len) {
+void ListBoxX::GetValue(int n, char *value, int len) {
 	char *text = NULL;
 	GtkCellType type = gtk_clist_get_cell_type(GTK_CLIST(list), n, 0);
 	switch (type) {
@@ -1405,7 +1429,7 @@ void ListBox::GetValue(int n, char *value, int len) {
 	}
 }
 
-void ListBox::Sort() {
+void ListBoxX::Sort() {
 	gtk_clist_sort(GTK_CLIST(list));
 }
 
@@ -1414,9 +1438,13 @@ void ListBox::Sort() {
 #pragma warning(disable: 4127)
 #endif
 
-void ListBox::SetTypeXpm(int type, const char *xpm_data) {
+void ListBoxX::RegisterImage(int type, const char *xpm_data) {
 	ListImage *list_image;
 	g_return_if_fail(xpm_data);
+
+	// Saved and use the saved copy so caller's copy an disappear.
+	xset.Add(type, xpm_data);
+	xpm_data = reinterpret_cast<const char *>(xset.Get(type));
 
 	if (NULL == pixhash)
 		pixhash = g_hash_table_new(g_direct_hash, g_direct_equal);
@@ -1430,6 +1458,10 @@ void ListBox::SetTypeXpm(int type, const char *xpm_data) {
 	list_image->xpm_data = xpm_data;
 	g_hash_table_insert((GHashTable *) pixhash, GINT_TO_POINTER(type)
 	                    , (gpointer) list_image);
+}
+
+void ListBoxX::ClearRegisteredImages() {
+	xset.Clear();
 }
 
 Menu::Menu() : id(0) {}
