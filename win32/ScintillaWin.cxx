@@ -1421,8 +1421,6 @@ static BOOL IsNT() {
 void ScintillaWin::Register(HINSTANCE hInstance_) {
 
 	hInstance = hInstance_;
-
-	InitCommonControls();
 #if 0
 	// Register the Scintilla class
 	if (IsNT()) {
