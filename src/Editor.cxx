@@ -2053,7 +2053,6 @@ void Editor::PasteRectangular(int pos, const char *ptr, int len) {
 		return;
 	}
 	currentPos = pos;
-	int insertPos = currentPos;
 	int xInsert = XFromPosition(currentPos);
 	int line = pdoc->LineFromPosition(currentPos);
 	bool prevCr = false;
@@ -2075,13 +2074,11 @@ void Editor::PasteRectangular(int pos, const char *ptr, int len) {
 					pdoc->InsertChar(currentPos, ' ');
 					currentPos++;
 				}
-				insertPos = currentPos;
 			}
 			prevCr = ptr[i] == '\r';
 		} else {
 			pdoc->InsertString(currentPos, ptr + i, 1);
 			currentPos++;
-			insertPos = currentPos;
 			prevCr = false;
 		}
 	}
