@@ -2555,7 +2555,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 				DrawLine(surface, vs, lineDoc, visibleLine, xStart, rcLine, ll, subLine);
 				//durPaint += et.Duration(true);
 
-				// Restore the precvious styles for the brace highlights in case layout is in cache.
+				// Restore the previous styles for the brace highlights in case layout is in cache.
 				ll->RestoreBracesHighlight(rangeLine, braces);
 
 				bool expanded = cs.GetExpanded(lineDoc);
