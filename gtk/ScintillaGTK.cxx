@@ -306,10 +306,10 @@ void ScintillaGTK::Initialise() {
 
 	// Using "after" connect to avoid main window using cursor keys
 	// to move focus.
-	//gtk_signal_connect(GTK_OBJECT(wMain), "key_press_event",
-	//	GtkSignalFunc(key_event), this);
-	gtk_signal_connect_after(GTK_OBJECT(wMain.GetID()), "key_press_event",
-                         	GtkSignalFunc(KeyPress), this);
+	gtk_signal_connect(GTK_OBJECT(wMain.GetID()), "key_press_event",
+			GtkSignalFunc(KeyPress), this);
+	//gtk_signal_connect_after(GTK_OBJECT(wMain.GetID()), "key_press_event",
+        //         	GtkSignalFunc(KeyPress), this);
 
 	gtk_signal_connect(GTK_OBJECT(wMain.GetID()), "key_release_event",
                    	GtkSignalFunc(KeyRelease), this);
@@ -994,7 +994,7 @@ static int KeyTranslate(int keyIn) {
 	}
 }
 
-gint ScintillaGTK::KeyPress(GtkWidget *, GdkEventKey *event, ScintillaGTK *sciThis) {
+gint ScintillaGTK::KeyPress(GtkWidget *w, GdkEventKey *event, ScintillaGTK *sciThis) {
 	//Platform::DebugPrintf("SC-key: %d %x %x\n",event->keyval, event->state, GTK_WIDGET_FLAG(sciThis));
 	bool shift = event->state & GDK_SHIFT_MASK;
 	bool ctrl = event->state & GDK_CONTROL_MASK;
@@ -1007,8 +1007,11 @@ gint ScintillaGTK::KeyPress(GtkWidget *, GdkEventKey *event, ScintillaGTK *sciTh
 	else	
 		key = KeyTranslate(key);
 
-	sciThis->KeyDown(key, shift, ctrl, alt);
+	bool consumed = false;
+	sciThis->KeyDown(key, shift, ctrl, alt, &consumed);
 	//Platform::DebugPrintf("SK-key: %d %x %x\n",event->keyval, event->state, GTK_WIDGET_FLAGS(widget));
+	if (consumed)
+		gtk_signal_emit_stop_by_name(GTK_OBJECT(w), "key_press_event");
 	return TRUE;
 }
 

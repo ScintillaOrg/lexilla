@@ -2296,14 +2296,19 @@ int Editor::KeyDefault(int, int) {
 	return 0;
 }
 
-int Editor::KeyDown(int key, bool shift, bool ctrl, bool alt) {
+int Editor::KeyDown(int key, bool shift, bool ctrl, bool alt, bool *consumed) {
 	int modifiers = (shift ? SCI_SHIFT : 0) | (ctrl ? SCI_CTRL : 0) |
 	                (alt ? SCI_ALT : 0);
 	int msg = kmap.Find(key, modifiers);
-	if (msg)
+	if (msg) {
+		if (consumed)
+			*consumed = true;
 		return WndProc(msg, 0, 0);
-	else
+	} else {
+		if (consumed)
+			*consumed = false;
 		return KeyDefault(key, modifiers);
+	}
 }
 
 void Editor::SetWhitespaceVisible(int view) {
