@@ -51,6 +51,8 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 	int levelCurrent = levelPrev;
 
 	int state = initStyle;
+	if (state == SCE_C_STRINGEOL)	// Does not leak onto next line
+		state = SCE_C_DEFAULT;
 	char chPrev = ' ';
 	char chNext = styler[startPos];
 	unsigned int lengthDoc = startPos + length;
@@ -61,16 +63,23 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 
-		if ((fold) && ((ch == '\r' && chNext != '\n') || (ch == '\n'))) {
-			int lev = levelPrev;
-			if (visChars == 0)
-				lev |= SC_FOLDLEVELWHITEFLAG;
-			if ((levelCurrent > levelPrev) && (visChars > 0))
-				lev |= SC_FOLDLEVELHEADERFLAG;
-			styler.SetLevel(lineCurrent, lev);
-			lineCurrent++;
-			visChars = 0;
-			levelPrev = levelCurrent;
+		if ((ch == '\r' && chNext != '\n') || (ch == '\n')) {
+			// End of line
+			if (state == SCE_C_STRINGEOL) {
+				styler.ColourTo(i, state);
+				state = SCE_C_DEFAULT;
+			}
+			if (fold) {
+				int lev = levelPrev;
+				if (visChars == 0)
+					lev |= SC_FOLDLEVELWHITEFLAG;
+				if ((levelCurrent > levelPrev) && (visChars > 0))
+					lev |= SC_FOLDLEVELHEADERFLAG;
+				styler.SetLevel(lineCurrent, lev);
+				lineCurrent++;
+				visChars = 0;
+				levelPrev = levelCurrent;
+			}
 		}
 		if (!isspace(ch))
 			visChars++;
@@ -82,12 +91,6 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			continue;
 		}
 
-		if (state == SCE_C_STRINGEOL) {
-			if (ch != '\r' && ch != '\n') {
-				styler.ColourTo(i-1, state);
-				state = SCE_C_DEFAULT;
-			}
-		}
 		if (state == SCE_C_DEFAULT) {
 			if (iswordstart(ch)) {
 				styler.ColourTo(i-1, state);
@@ -148,7 +151,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			}
 		} else {
 			if (state == SCE_C_PREPROCESSOR) {
-				if ((ch == '\r' || ch == '\n') && (chPrev != '\\')) {
+				if ((ch == '\r' || ch == '\n') && !(chPrev == '\\' || chPrev == '\r')) {
 					styler.ColourTo(i-1, state);
 					state = SCE_C_DEFAULT;
 				}
