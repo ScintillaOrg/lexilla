@@ -13,6 +13,7 @@
 
 #if PLAT_WIN
 void Scintilla_RegisterClasses(void *hInstance);
+void Scintilla_ReleaseResources();
 #endif
 int Scintilla_LinkLexers();
 
