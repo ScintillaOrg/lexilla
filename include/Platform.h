@@ -287,6 +287,7 @@ public:
 	// Alias another font - caller guarantees not to Release
 	void SetID(FontID id_) { id = id_; }
 	friend class Surface;
+        friend class SurfaceImpl;
 };
 
 /**
