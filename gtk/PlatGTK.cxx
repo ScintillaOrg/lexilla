@@ -907,7 +907,20 @@ void Menu::Destroy() {
 }
 
 void Menu::Show(Point pt, Window &) {
-	gtk_item_factory_popup(reinterpret_cast<GtkItemFactory *>(id), pt.x - 4, pt.y, 3, 0);
+	int screenHeight = gdk_screen_height();
+	int screenWidth = gdk_screen_width();
+	GtkItemFactory *factory = reinterpret_cast<GtkItemFactory *>(id);
+	GtkWidget *widget = gtk_item_factory_get_widget(factory, "<main>");
+	gtk_widget_show_all(widget);
+	GtkRequisition requisition;
+	gtk_widget_size_request(widget, &requisition);
+	if ((pt.x + requisition.width) > screenWidth) {
+		pt.x = screenWidth - requisition.width;
+	}
+	if ((pt.y + requisition.height) > screenHeight) {
+		pt.y = screenHeight - requisition.height;
+	}
+	gtk_item_factory_popup(factory, pt.x - 4, pt.y, 3, 0);
 }
 
 ElapsedTime::ElapsedTime() {
