@@ -1114,10 +1114,11 @@ bool ScintillaWin::CanPaste() {
 }
 
 void ScintillaWin::Paste() {
+	if (!::OpenClipboard(MainHWND())) 
+		return;
 	pdoc->BeginUndoAction();
 	int selStart = SelectionStart();
 	ClearSelection();
-	::OpenClipboard(MainHWND());
 	bool isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect) != 0;
 	HGLOBAL hmemUSelection = 0;
 	if (IsUnicodeMode()) {
@@ -1592,7 +1593,8 @@ void ScintillaWin::GetIntelliMouseParameters() {
 }
 
 void ScintillaWin::CopyToClipboard(const SelectionText &selectedText) {
-	::OpenClipboard(MainHWND());
+	if (!::OpenClipboard(MainHWND()))
+		return;
 	::EmptyClipboard();
 
 	HGLOBAL hand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT,
@@ -1601,8 +1603,8 @@ void ScintillaWin::CopyToClipboard(const SelectionText &selectedText) {
 		char *ptr = static_cast<char *>(::GlobalLock(hand));
 		memcpy(ptr, selectedText.s, selectedText.len);
 		::GlobalUnlock(hand);
+		::SetClipboardData(CF_TEXT, hand);
 	}
-	::SetClipboardData(CF_TEXT, hand);
 
 	if (IsUnicodeMode()) {
 		int uchars = UCS2Length(selectedText.s, selectedText.len);
@@ -1612,8 +1614,8 @@ void ScintillaWin::CopyToClipboard(const SelectionText &selectedText) {
 			wchar_t *uptr = static_cast<wchar_t *>(::GlobalLock(uhand));
 			UCS2FromUTF8(selectedText.s, selectedText.len, uptr, uchars);
 			::GlobalUnlock(uhand);
+			::SetClipboardData(CF_UNICODETEXT, uhand);
 		}
-		::SetClipboardData(CF_UNICODETEXT, uhand);
 	}
 
 	if (selectedText.rectangular) {
