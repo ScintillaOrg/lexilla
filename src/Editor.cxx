@@ -491,6 +491,30 @@ const char *ControlCharacterString(unsigned char ch) {
 	}
 }
 
+// Convenience class to ensure LineLayout objects are always disposed.
+class AutoLineLayout {
+	LineLayoutCache &llc;
+	LineLayout *ll;
+	AutoLineLayout &operator=(const AutoLineLayout &) { return *this; }
+public:
+	AutoLineLayout(LineLayoutCache &llc_, LineLayout *ll_) : llc(llc_), ll(ll_) {
+	}
+	~AutoLineLayout() {
+		llc.Dispose(ll);
+		ll = 0;
+	}
+	LineLayout *operator->() const {
+		return ll;
+	}
+	operator LineLayout *() const {
+		return ll;
+	}
+	void Set(LineLayout *ll_) {
+		llc.Dispose(ll);
+		ll = ll_;
+	}
+};
+
 Point Editor::LocationFromPosition(int pos) {
 	Point pt;
 	RefreshStyleData();
@@ -500,7 +524,7 @@ Point Editor::LocationFromPosition(int pos) {
 	int lineVisible = cs.DisplayFromDoc(line);
 	//Platform::DebugPrintf("line=%d\n", line);
 	AutoSurface surface(CodePage());
-	LineLayout *ll = RetrieveLineLayout(line);
+	AutoLineLayout ll(llc, RetrieveLineLayout(line));
 	if (surface && ll) {
 		// -1 because of adding in for visible lines in following loop.
 		pt.y = (lineVisible - topLine - 1) * vs.lineHeight;
@@ -522,7 +546,6 @@ Point Editor::LocationFromPosition(int pos) {
 		}
 		pt.x += vs.fixedColumnWidth - xOffset;
 	}
-	llc.Dispose(ll);
 	return pt;
 }
 
@@ -552,12 +575,12 @@ int Editor::PositionFromLocation(Point pt) {
 	int lineDoc = cs.DocFromDisplay(visibleLine);
 	if (lineDoc >= pdoc->LinesTotal())
 		return pdoc->Length();
+	unsigned int posLineStart = pdoc->LineStart(lineDoc);
+	int retVal = posLineStart;
 	AutoSurface surface(CodePage());
-	int retVal = 0;
-	LineLayout *ll = RetrieveLineLayout(lineDoc);
+	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
 	if (surface && ll) {
 		LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
-		unsigned int posLineStart = pdoc->LineStart(lineDoc);
 		int lineStartSet = cs.DisplayFromDoc(lineDoc);
 		int subLine = visibleLine - lineStartSet;
 		if (subLine < ll->lines) {
@@ -567,16 +590,13 @@ int Editor::PositionFromLocation(Point pt) {
 			for (int i = lineStart; i < lineEnd; i++) {
 				if (pt.x < (((ll->positions[i] + ll->positions[i + 1]) / 2) - subLineStart) ||
 					ll->chars[i] == '\r' || ll->chars[i] == '\n') {
-					llc.Dispose(ll);
 					return pdoc->MovePositionOutsideChar(i + posLineStart, 1);
 				}
 			}
-			llc.Dispose(ll);
 			return lineEnd + posLineStart;
 		}
 		retVal = ll->numCharsInLine + posLineStart;
 	}
-	llc.Dispose(ll);
 	return retVal;
 }
 
@@ -601,7 +621,7 @@ int Editor::PositionFromLocationClose(Point pt) {
 	if (lineDoc >= pdoc->LinesTotal())
 		return INVALID_POSITION;
 	AutoSurface surface(CodePage());
-	LineLayout *ll = RetrieveLineLayout(lineDoc);
+	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
 	if (surface && ll) {
 		LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
 		unsigned int posLineStart = pdoc->LineStart(lineDoc);
@@ -614,13 +634,11 @@ int Editor::PositionFromLocationClose(Point pt) {
 			for (int i = lineStart; i < lineEnd; i++) {
 				if (pt.x < (((ll->positions[i] + ll->positions[i + 1]) / 2) - subLineStart) ||
 					ll->chars[i] == '\r' || ll->chars[i] == '\n') {
-					llc.Dispose(ll);
 					return pdoc->MovePositionOutsideChar(i + posLineStart, 1);
 				}
 			}
 		}
 	}
-	llc.Dispose(ll);
 
 	return INVALID_POSITION;
 }
@@ -635,7 +653,7 @@ int Editor::PositionFromLineX(int lineDoc, int x) {
 		return pdoc->Length();
 	//Platform::DebugPrintf("Position of (%d,%d) line = %d top=%d\n", pt.x, pt.y, line, topLine);
 	AutoSurface surface(CodePage());
-	LineLayout *ll = RetrieveLineLayout(lineDoc);
+	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
 	int retVal = 0;
 	if (surface && ll) {
 		unsigned int posLineStart = pdoc->LineStart(lineDoc);
@@ -653,7 +671,6 @@ int Editor::PositionFromLineX(int lineDoc, int x) {
 			}
 		}
 	}
-	llc.Dispose(ll);
 	return retVal;
 }
 
@@ -936,7 +953,7 @@ int Editor::DisplayFromPosition(int pos) {
 	int lineDoc = pdoc->LineFromPosition(pos);
 	int lineDisplay = cs.DisplayFromDoc(lineDoc);
 	AutoSurface surface(CodePage());
-	LineLayout *ll = RetrieveLineLayout(lineDoc);
+	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
 	if (surface && ll) {
 		LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
 		unsigned int posLineStart = pdoc->LineStart(lineDoc);
@@ -948,7 +965,6 @@ int Editor::DisplayFromPosition(int pos) {
 			}
 		}
 	}
-	llc.Dispose(ll);
 	return lineDisplay;
 }
 
@@ -1277,13 +1293,12 @@ bool Editor::WrapLines() {
 				int lastLineToWrap = pdoc->LinesTotal();
 				while (docLineLastWrapped <= lastLineToWrap) {
 					docLineLastWrapped++;
-					LineLayout *ll = RetrieveLineLayout(docLineLastWrapped);
+					AutoLineLayout ll(llc, RetrieveLineLayout(docLineLastWrapped));
 					int linesWrapped = 1;
 					if (ll) {
 						LayoutLine(docLineLastWrapped, surface, vs, ll, wrapWidth);
 						linesWrapped = ll->lines;
 					}
-					llc.Dispose(ll);
 					if (cs.SetHeight(docLineLastWrapped, linesWrapped)) {
 						wrapOccurred = true;
 					}
@@ -2148,7 +2163,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		//double durCopy = 0.0;
 		//ElapsedTime etWhole;
 		int lineDocPrevious = -1;	// Used to avoid laying out one document line multiple times
-		LineLayout *ll = 0;
+		AutoLineLayout ll(llc, 0);
 		while (visibleLine < cs.LinesDisplayed() && yposScreen < rcArea.bottom) {
 
 			int lineDoc = cs.DocFromDisplay(visibleLine);
@@ -2161,8 +2176,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 			// and determine the x position at which each character starts.
 			//ElapsedTime et;
 			if (lineDoc != lineDocPrevious) {
-				llc.Dispose(ll);
-				ll = RetrieveLineLayout(lineDoc);
+				ll.Set(RetrieveLineLayout(lineDoc));
 				LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
 				lineDocPrevious = lineDoc;
 			}
@@ -2308,7 +2322,6 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 			visibleLine++;
 			//gdk_flush();
 		}
-		llc.Dispose(ll);
 		//if (durPaint < 0.00000001)
 		//	durPaint = 0.00000001;
 
@@ -2937,7 +2950,7 @@ void Editor::CheckModificationForWrap(DocModification mh) {
 			int lineDoc = pdoc->LineFromPosition(mh.position);
 			if (mh.linesAdded == 0) {
 				AutoSurface surface(CodePage());
-				LineLayout *ll = RetrieveLineLayout(lineDoc);
+				AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
 				if (surface && ll) {
 					LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
 					if (cs.GetHeight(lineDoc) != ll->lines) {
@@ -2947,7 +2960,6 @@ void Editor::CheckModificationForWrap(DocModification mh) {
 				} else {
 					NeedWrapping(lineDoc);
 				}
-				llc.Dispose(ll);
 			} else {
 				NeedWrapping(lineDoc);
 			}
@@ -3305,7 +3317,7 @@ int Editor::StartEndDisplayLine(int pos, bool start) {
 	RefreshStyleData();
 	int line = pdoc->LineFromPosition(pos);
 	AutoSurface surface(CodePage());
-	LineLayout *ll = RetrieveLineLayout(line);
+	AutoLineLayout ll(llc, RetrieveLineLayout(line));
 	int posRet = INVALID_POSITION;
 	if (surface && ll) {
 		unsigned int posLineStart = pdoc->LineStart(line);
@@ -3326,7 +3338,6 @@ int Editor::StartEndDisplayLine(int pos, bool start) {
 			}
 		}
 	}
-	llc.Dispose(ll);
 	if (posRet == INVALID_POSITION) {
 		return pos;
 	} else {
