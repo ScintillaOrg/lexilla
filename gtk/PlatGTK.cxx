@@ -645,7 +645,8 @@ Font::Font() : id(0) {}
 
 Font::~Font() {}
 
-void Font::Create(const char *faceName, int characterSet, int size, bool bold, bool italic) {
+void Font::Create(const char *faceName, int characterSet, int size,
+	bool bold, bool italic, bool) {
 	Release();
 	id = FontCached::FindOrCreate(faceName, characterSet, size, bold, italic);
 }
@@ -1169,7 +1170,7 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 		bool draw8bit = true;
 		if (et != singleByte) {
 			GdkWChar wctext[maxLengthTextRun];
-			if (len >= maxLengthTextRun) 
+			if (len >= maxLengthTextRun)
 				len = maxLengthTextRun-1;
 			int wclen;
 			if (et == UTF8) {
@@ -1331,7 +1332,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 		bool measure8bit = true;
 		if (et != singleByte) {
 			GdkWChar wctext[maxLengthTextRun];
-			if (len >= maxLengthTextRun) 
+			if (len >= maxLengthTextRun)
 				len = maxLengthTextRun-1;
 			int wclen;
 			if (et == UTF8) {

@@ -279,7 +279,8 @@ public:
 	Font();
 	virtual ~Font();
 
-	virtual void Create(const char *faceName, int characterSet, int size, bool bold, bool italic);
+	virtual void Create(const char *faceName, int characterSet, int size,
+		bool bold, bool italic, bool extraFontFlag=false);
 	virtual void Release();
 
 	FontID GetID() { return id; }
