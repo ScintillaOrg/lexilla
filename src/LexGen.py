@@ -84,7 +84,9 @@ def CopyWithInsertion(input, commentPrefix, retainDefs, *lists):
 			copying = 1
 			if retainDefs:
 				output.append(line)
-	return "\n".join(output)
+	ret = "\n".join(output)
+	ret = ret.replace(" \n", "\n")
+	return ret
 
 def UpdateFile(filename, updated):
 	""" If the file is different to updated then copy updated
