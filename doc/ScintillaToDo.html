@@ -39,6 +39,13 @@
        Dragging over bold text in some fonts will ripple because of the difference in size between
       drawing all of a string at once and drawing it in parts.
     </p>
+    <p>
+       In read-only mode the caret moves when you type or perform other actions that would
+       insert or remove text if not in read-only mode..
+    </p>
+    <p>
+      Automatic scrolling when text dragged near edge of window.
+    </p>
     <h3>
        GTK+ Version Bugs
     </h3>
@@ -98,6 +105,23 @@
 	Make the subset Perl lexer understand more Perl. 
 	Improve the Ruby and TCL lexers.
     </p>
+    <p>
+	Keyboard based rectangular selection. 
+	Could be modelled on Visual Studio's Ctrl+Shift+F8 command.
+    </p>
+    <p>
+	Better or more flexible range for horizontal scrolling.
+    </p>
+    <p>
+	Commands and/or modes for treating display lines as document lines are now, such
+	as allowing the End key to move to the end of a display line. This can be useful when 
+	Scintilla used to edit documentation as it is the normal convention for word processors.
+    </p>
+    <p>
+	Virtual space at the end of lines so the caret can be moved beyond the end 
+	of lines with the cursor keys. May also make rectangular operations easier 
+	to perform.
+    </p>
     <h3>
 	SciTE To Do
     </h3>
@@ -118,6 +142,22 @@
     </p>
     <p>
 	Setting to fold away comments upon opening.
+    </p>
+    <p>
+	User defined fold ranges.
+    </p>
+    <p>
+	Save All command.
+    </p>
+    <p>
+	Save as Copy command.
+    </p>
+    <p>
+	Silent mode that does not display any message boxes.
+    </p>
+    <p>
+	Automatic detection of character set and code page through examining text
+	and determining Unicode mode by presence of BOM.
     </p>
     <h3>
 	Features I am unlikely to do

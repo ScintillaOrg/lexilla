@@ -116,6 +116,115 @@
       </li>
     </ul>
     <h3>
+       <a href="scite145.zip">Release 1.45</a>
+    </h3>
+    <ul>
+      <li>
+	Released on 15 March 2002.
+      </li>
+      <li>
+	Line layout cache implemented to improve performance by maintaining
+	the positioning of characters on lines. Can be set to cache nothing, 
+	the line with the caret, the visible page or the whole document.
+      </li>
+      <li>
+	Support, including a new lexer, added for Matlab programs.
+      </li>
+      <li>
+	Lua folder supports folding {} ranges and compact mode.
+	Lua lexer styles floating point numbers in number style instead of 
+	setting the '.' in operator style. 
+	Up to 6 sets of keywords. 
+	Better support for [[ although only works well
+	when all on one line.
+      </li>
+      <li>
+	Python lexer improved to handle floating point numbers that contain negative 
+	exponents and that start with '.'.
+      </li>
+      <li>
+	When performing a rectangular paste, the caret now remains at the 
+	insertion point.
+      </li>
+      <li>
+	On Windows with a wheel mouse, page-at-a-time mode is recognised.
+      </li>
+      <li>
+	Read-only mode added to SciTE with a property to initialise it and another property,
+	$(ReadOnly) available to show this mode in the status bar.
+      </li>
+      <li>
+	SciTE status bar can show the number of lines in the selection 
+	with the $(SelHeight) property.
+      </li>
+      <li>
+	SciTE's "Export as HTML" command uses the current character set to produce 
+	correct output for non-Western-European character sets, such as Russian.
+      </li>
+      <li>
+	SciTE's "Export as RTF" fixed to produce correct output when file contains '\'.
+      </li>
+      <li>
+	SciTE goto command accepts a column as well as a line.
+	If given a column, it selects the word at that column.
+      </li>
+      <li>
+	SciTE's Build, Compile and Go commands are now disabled if no
+	action has been assigned to them.
+      </li>
+      <li>
+	The Refresh button in the status bar has been removed from SciTE on Windows.
+      </li>
+      <li>
+	Bug fixed in line wrap mode where cursor up or down command did not work.
+      </li>
+      <li>
+	Some styling bugs fixed that were due to a compilation problem with 
+	gcc and inline functions with same name but different code.
+      </li>
+      <li>
+	The way that lexers loop over text was changed to avoid accessing beyond the 
+	end or setting beyond the end. May fix some bugs and make the code safer but 
+	may also cause new bugs.
+      </li>
+      <li>
+	Bug fixed in HTML lexer's handling of SGML.
+      </li>
+      <li>
+	Bug fixed on GTK+/X where lines wider than 32767 pixels did not display.
+      </li>
+      <li>
+	SciTE bug fixed with file name generation for standard property files.
+      </li>
+      <li>
+	SciTE bug fixed with Open Selected Filename command when used with 
+	file name and line number combination.
+      </li>
+      <li>
+	In SciTE, indentation and tab settings stored with buffers so maintained correctly
+	as buffers selected. 
+	The properties used to initialise these settings can now be set separately for different
+	file patterns.
+      </li>
+      <li>
+	Thread safety improved on Windows with a critical section protecting the font 
+	cache and initialisation of globals performed within Scintilla_RegisterClasses.
+	New Scintilla_ReleaseResources call provided to allow explicit freeing of resources
+	when statically bound into another application. Resources automatically freed
+	in DLL version. The window classes are now unregistered as part of resource
+	freeing which fixes bugs that occurred in some containers such as Internet Explorer.
+      </li>
+      <li>
+	'make install' fixed on Solaris.
+      </li>
+      <li>
+	Bug fixed that could lead to a file being opened twice in SciTE.
+      </li>
+      <li>
+	
+      </li>
+    </ul>
+    <h3>
        <a href="scite144.zip">Release 1.44</a>
     </h3>
     <ul>
