@@ -3578,6 +3578,16 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     this requires 7 times the memory required by the document contents plus around 80 bytes per
     line.</p>
 
+    <p>Wrapping is not performed immediately there is a change but is delayed until the display
+    is redrawn. This delay improves peformance by allowing a set of changes to be performed
+    and then wrapped and displayed once. Because of this, some operations may not occur as
+    expected. If a file is read and the scroll position moved to a particular line in the text,
+    such as occurs when a container tries to restore a previous editing session, then
+    the scroll position will have been determined before wrapping so an unexpected range
+    of text will be displayed. To scroll to the position correctly, delay the scroll until the
+    wrapping has been performed by waiting for an initial
+    <a class="message" href="#SCN_PAINTED">SCN_PAINTED</a> notification.</p>
+
     <p><b id="SCI_SETWRAPMODE">SCI_SETWRAPMODE(int wrapMode)</b><br />
      <b id="SCI_GETWRAPMODE">SCI_GETWRAPMODE</b><br />
      Set wrapMode to <code>SC_WRAP_WORD</code> (1) to enable line wrapping and to
