@@ -347,6 +347,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	void NeedWrapping(int docLineStartWrapping=0);
 	bool WrapLines();
+	void LinesJoin();
+	void LinesSplit(int pixelWidth);
 
 	int SubstituteMarkerIfEmpty(int markerCheck, int markerDefault);
 	void PaintSelMargin(Surface *surface, PRectangle &rc);
@@ -355,7 +357,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 		int width=LineLayout::wrapWidthInfinite);
 	ColourAllocated TextBackground(ViewStyle &vsDraw, bool overrideBackground, ColourAllocated background, bool inSelection, int styleMain, int i, LineLayout *ll);
 	void DrawIndentGuide(Surface *surface, int lineVisible, int lineHeight, int start, PRectangle rcSegment, bool highlight);
-	void DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, LineLayout *ll, 
+	void DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, LineLayout *ll,
 		int line, int lineEnd, int xStart, int subLine, int subLineStart,
 		bool overrideBackground, ColourAllocated background);
 	void DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart,

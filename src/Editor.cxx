@@ -564,6 +564,10 @@ void Editor::SetTopLine(int topLineNew) {
 	posTopLine = pdoc->LineStart(topLine);
 }
 
+static inline bool IsEOLChar(char ch) {
+	return (ch == '\r') || (ch == '\n');
+}
+
 int Editor::PositionFromLocation(Point pt) {
 	RefreshStyleData();
 	pt.x = pt.x - vs.fixedColumnWidth + xOffset;
@@ -590,7 +594,7 @@ int Editor::PositionFromLocation(Point pt) {
 			int subLineStart = ll->positions[lineStart];
 			for (int i = lineStart; i < lineEnd; i++) {
 				if (pt.x < (((ll->positions[i] + ll->positions[i + 1]) / 2) - subLineStart) ||
-					ll->chars[i] == '\r' || ll->chars[i] == '\n') {
+					IsEOLChar(ll->chars[i])) {
 					return pdoc->MovePositionOutsideChar(i + posLineStart, 1);
 				}
 			}
@@ -634,7 +638,7 @@ int Editor::PositionFromLocationClose(Point pt) {
 			int subLineStart = ll->positions[lineStart];
 			for (int i = lineStart; i < lineEnd; i++) {
 				if (pt.x < (((ll->positions[i] + ll->positions[i + 1]) / 2) - subLineStart) ||
-					ll->chars[i] == '\r' || ll->chars[i] == '\n') {
+					IsEOLChar(ll->chars[i])) {
 					return pdoc->MovePositionOutsideChar(i + posLineStart, 1);
 				}
 			}
@@ -666,7 +670,7 @@ int Editor::PositionFromLineX(int lineDoc, int x) {
 		int subLineStart = ll->positions[lineStart];
 		for (int i = lineStart; i < lineEnd; i++) {
 			if (x < (((ll->positions[i] + ll->positions[i + 1]) / 2) - subLineStart) ||
-				ll->chars[i] == '\r' || ll->chars[i] == '\n') {
+				IsEOLChar(ll->chars[i])) {
 				retVal = pdoc->MovePositionOutsideChar(i + posLineStart, 1);
 				break;
 			}
@@ -1357,6 +1361,55 @@ bool Editor::WrapLines() {
 	return wrapOccurred;
 }
 
+void Editor::LinesJoin() {
+	if (!RangeContainsProtected(targetStart, targetEnd)) {
+		pdoc->BeginUndoAction();
+		for (int pos = targetStart; pos < targetEnd; pos++) {
+			if (IsEOLChar(pdoc->CharAt(pos))) {
+				targetEnd -= pdoc->LenChar(pos);
+				pdoc->DelChar(pos);
+			}
+		}
+		pdoc->EndUndoAction();
+	}
+}
+
+const char *StringFromEOLMode(int eolMode) {
+	if (eolMode == SC_EOL_CRLF) {
+		return "\r\n";
+	} else if (eolMode == SC_EOL_CR) {
+		return "\r";
+	} else {
+		return "\n";
+	}
+}
+
+void Editor::LinesSplit(int pixelWidth) {
+	if (!RangeContainsProtected(targetStart, targetEnd)) {
+		if (pixelWidth == 0) {
+			PRectangle rcText = GetTextRectangle();
+			pixelWidth = rcText.Width();
+		}
+		int lineStart = pdoc->LineFromPosition(targetStart);
+		int lineEnd = pdoc->LineFromPosition(targetEnd);
+		const char *eol = StringFromEOLMode(pdoc->eolMode);
+		pdoc->BeginUndoAction();
+		for (int line = lineStart; line <= lineEnd; line++) {
+			AutoSurface surface(CodePage());
+			AutoLineLayout ll(llc, RetrieveLineLayout(line));
+			if (surface && ll) {
+				unsigned int posLineStart = pdoc->LineStart(line);
+				LayoutLine(line, surface, vs, ll, pixelWidth);
+				for (int subLine=1; subLine < ll->lines; subLine++) {
+					pdoc->InsertString(posLineStart + subLine - 1 + ll->LineStart(subLine), eol);
+					targetEnd+=strlen(eol);
+				}
+			}
+		}
+		pdoc->EndUndoAction();
+	}
+}
+
 int Editor::SubstituteMarkerIfEmpty(int markerCheck, int markerDefault) {
 	if (vs.markers[markerCheck].markType == SC_MARK_EMPTY)
 		return markerDefault;
@@ -1598,7 +1651,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 		int lineLength = 0;
 		for (int cid = posLineStart; cid < posLineEnd; cid++) {
 			char chDoc = pdoc->CharAt(cid);
-			if (vstyle.viewEOL || ((chDoc != '\r') && (chDoc != '\n'))) {
+			if (vstyle.viewEOL || (!IsEOLChar(chDoc))) {
 				lineLength++;
 			}
 		}
@@ -1612,7 +1665,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 			for (int charInDoc = posLineStart; allSame && (charInDoc < posLineEnd); charInDoc++) {
 				char chDoc = pdoc->CharAt(charInDoc);
 				styleByte = pdoc->StyleAt(charInDoc);
-				if (vstyle.viewEOL || ((chDoc != '\r') && (chDoc != '\n'))) {
+				if (vstyle.viewEOL || (!IsEOLChar(chDoc != '\r'))) {
 					allSame = allSame &&
 						(ll->styles[numCharsInLine] == static_cast<char>(styleByte & styleMask));
 					allSame = allSame &&
@@ -1657,7 +1710,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 		for (int charInDoc = posLineStart; charInDoc < posLineEnd; charInDoc++) {
 			char chDoc = pdoc->CharAt(charInDoc);
 			styleByte = pdoc->StyleAt(charInDoc);
-			if (vstyle.viewEOL || ((chDoc != '\r') && (chDoc != '\n'))) {
+			if (vstyle.viewEOL || (!IsEOLChar(chDoc))) {
 				ll->chars[numCharsInLine] = chDoc;
 				ll->styles[numCharsInLine] = static_cast<char>(styleByte & styleMask);
 				ll->indicators[numCharsInLine] = static_cast<char>(styleByte & ~styleMask);
@@ -1804,8 +1857,7 @@ ColourAllocated Editor::TextBackground(ViewStyle &vsDraw, bool overrideBackgroun
 	} else {
 		if ((vsDraw.edgeState == EDGE_BACKGROUND) &&
 			(i >= ll->edgeColumn) &&
-			(ll->chars[i] != '\n') &&
-			(ll->chars[i] != '\r'))
+			!IsEOLChar(ll->chars[i]))
 			return vsDraw.edgecolour.allocated;
 		if (overrideBackground)
 			return background;
@@ -1821,7 +1873,7 @@ void Editor::DrawIndentGuide(Surface *surface, int lineVisible, int lineHeight, 
 }
 
 void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, LineLayout *ll,
-	int line, int lineEnd, int xStart, int subLine, int subLineStart, 
+	int line, int lineEnd, int xStart, int subLine, int subLineStart,
 	bool overrideBackground, ColourAllocated background) {
 
 	int styleMask = pdoc->stylingBitsMask;
@@ -1975,7 +2027,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	}
 
 	if (twoPhaseDraw) {
-		DrawEOL(surface, vsDraw, rcLine, ll, line, lineEnd, 
+		DrawEOL(surface, vsDraw, rcLine, ll, line, lineEnd,
 			xStart, subLine, subLineStart, overrideBackground, background);
 	}
 
@@ -2148,7 +2200,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	// End of the drawing of the current line
 
 	if (!twoPhaseDraw) {
-		DrawEOL(surface, vsDraw, rcLine, ll, line, lineEnd, 
+		DrawEOL(surface, vsDraw, rcLine, ll, line, lineEnd,
 			xStart, subLine, subLineStart, overrideBackground, background);
 	}
 
@@ -2743,7 +2795,7 @@ void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 	ClearSelection();
 	if (inOverstrike && !wasSelection && !RangeContainsProtected(currentPos, currentPos+1)) {
 		if (currentPos < (pdoc->Length() - 1)) {
-			if ((pdoc->CharAt(currentPos) != '\r') && (pdoc->CharAt(currentPos) != '\n')) {
+			if (!IsEOLChar(pdoc->CharAt(currentPos))) {
 				pdoc->DelChar(currentPos);
 			}
 		}
@@ -2863,7 +2915,7 @@ void Editor::PasteRectangular(int pos, const char *ptr, int len) {
 	bool prevCr = false;
 	pdoc->BeginUndoAction();
 	for (int i = 0; i < len; i++) {
-		if ((ptr[i] == '\r') || (ptr[i] == '\n')) {
+		if (IsEOLChar(ptr[i])) {
 			if ((ptr[i] == '\r') || (!prevCr))
 				line++;
 			if (line >= pdoc->LinesTotal()) {
@@ -3410,12 +3462,7 @@ void Editor::LineDuplicate() {
 	int start = pdoc->LineStart(line);
 	int end = pdoc->LineEnd(line);
 	char *thisLine = CopyRange(start, end);
-	const char *eol = "\n";
-	if (pdoc->eolMode == SC_EOL_CRLF) {
-		eol = "\r\n";
-	} else if (pdoc->eolMode == SC_EOL_CR) {
-		eol = "\r";
-	}
+	const char *eol = StringFromEOLMode(pdoc->eolMode);
 	pdoc->InsertString(end, eol);
 	pdoc->InsertString(end + strlen(eol), thisLine, end - start);
 	delete []thisLine;
@@ -4903,6 +4950,16 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETTARGETEND:
 		return targetEnd;
 
+	case SCI_TARGETFROMSELECTION:
+		if (currentPos < anchor) {
+			targetStart = currentPos;
+			targetEnd = anchor;
+		} else {
+			targetStart = anchor;
+			targetEnd = currentPos;
+		}
+		break;
+
 	case SCI_REPLACETARGET:
 		PLATFORM_ASSERT(lParam);
 		return ReplaceTarget(false, CharPtrFromSPtr(lParam), wParam);
@@ -5351,6 +5408,14 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETSCROLLWIDTH:
 		return scrollWidth;
+
+	case SCI_LINESJOIN:
+		LinesJoin();
+		break;
+
+	case SCI_LINESSPLIT:
+		LinesSplit(wParam);
+		break;
 
 	case SCI_TEXTWIDTH:
 		PLATFORM_ASSERT((wParam >= 0) && (wParam <= STYLE_MAX));

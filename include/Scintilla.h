@@ -399,6 +399,9 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_APPENDTEXT 2282
 #define SCI_GETTWOPHASEDRAW 2283
 #define SCI_SETTWOPHASEDRAW 2284
+#define SCI_TARGETFROMSELECTION 2287
+#define SCI_LINESJOIN 2288
+#define SCI_LINESSPLIT 2289
 #define SCI_LINEDOWN 2300
 #define SCI_LINEDOWNEXTEND 2301
 #define SCI_LINEUP 2302

@@ -1036,6 +1036,16 @@ get bool GetTwoPhaseDraw=2283(,)
 # and then the foreground. This avoids chopping off characters that overlap the next run.
 set void SetTwoPhaseDraw=2284(bool twoPhase,)
 
+# Make the target range start and end be the same as the selection range start and end.
+fun void TargetFromSelection=2287(,)
+
+# Join the lines in the target.
+fun void LinesJoin=2288(,)
+
+# Split the lines in the target into lines that are less wide than pixelWidth
+# where possible.
+fun void LinesSplit=2289(int pixelWidth,)
+
 ## New messages go here
 
 ## Start of key messages
