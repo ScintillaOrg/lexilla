@@ -4835,7 +4835,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 }
 
 bool Editor::PositionIsHotspot(int position) {
-	return vs.styles[pdoc->StyleAt(position)].hotspot;
+	return vs.styles[pdoc->StyleAt(position) & pdoc->stylingBitsMask].hotspot;
 }
 
 bool Editor::PointIsHotspot(Point pt) {
