@@ -81,7 +81,8 @@ public:
 private:	
 	int refCount;
 	CellBuffer cb;
-	bool wordchars[256];
+	enum charClassification { ccSpace, ccNewLine, ccWord, ccPunctuation };
+	charClassification charClass[256];
 	char stylingMask;
 	int endStyled;
 	int enteredCount;
@@ -209,7 +210,7 @@ public:
 
 private:
 	bool IsDBCS(int pos);
-	bool IsWordChar(unsigned char ch);
+	charClassification WordCharClass(unsigned char ch);
 	bool IsWordStartAt(int pos);
 	bool IsWordEndAt(int pos);
 	bool IsWordAt(int start, int end);
