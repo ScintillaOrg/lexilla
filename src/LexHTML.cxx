@@ -805,7 +805,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				i += size - 1;
 				visibleChars += size - 1;
 				ch = styler.SafeGetCharAt(i);
-				chNext = styler.SafeGetCharAt(i + 1);
 				state = SCE_H_SGML_DEFAULT;
 				continue;
 			}
