@@ -108,7 +108,7 @@
 	Bug fixed with scroll bars being invisible on GTK+ 1.2.9.
       </li>
       <li>
-	Scintilla and Scite support find and replace using simple regular 
+	Scintilla and SciTE support find and replace using simple regular 
 	expressions with tagged expressions. SciTE supports C '\' escapes
 	in the Find and Replace dialogs. 
 	Replace in Selection available in SciTE.
@@ -143,7 +143,7 @@
       </li>
       <li>
 	Commands to delete from the caret to the end of line and 
-	from the caret to the beginningof line.
+	from the caret to the beginning of line.
       </li>
       <li>
 	SciTE has commands for inserting and removing block comments and 
@@ -315,7 +315,7 @@
 	Documentation added for lexers and for the extension and director interfaces.
       </li>
       <li>
-	SciTE menus rearranged with new View menu taking over soe of the items that
+	SciTE menus rearranged with new View menu taking over some of the items that
 	were under the Options menu. Clear All Bookmarks command added.
       </li>
       <li>
@@ -350,7 +350,7 @@
 	two phases. First any arguments before the first file name are processed, then the
 	UI is opened, then the remaining arguments are processed. Actions defined for the
 	Director interface (currently only "open") may also be used on the command line.
-	For example, "Scite -open:x.txt" will start SciTE and open x.txt.
+	For example, "SciTE -open:x.txt" will start SciTE and open x.txt.
       </li>
       <li>
 	Numbered menu items SciTE's Buffers menu and the Most Recently Used portion
@@ -453,7 +453,7 @@
         Fixed problem with uppercase file extensions in SciTE.
       </li>
       <li>
-        Fixed some problems when using characters >= 128, some of which werre being
+        Fixed some problems when using characters >= 128, some of which were being
         incorrectly treated as spaces.
       </li>
       <li>
@@ -740,7 +740,7 @@
         Crash with long lines fixed.
       </li>
       <li>
-        Bug fxed with merging markers when lines merged.
+        Bug fixed with merging markers when lines merged.
       </li>
     </ul>
     <h3>
@@ -973,8 +973,8 @@
 	SCITE_HOME environment variable if it is set. This allows hiding in a dot directory.
       </li>
       <li>
-        Keyword lists in SciTE updated for Javascript to include those destined to be used in
-	the future. IDL includes XPIDL keyords as well as MSIDL keywords.
+        Keyword lists in SciTE updated for JavaScript to include those destined to be used in
+	the future. IDL includes XPIDL keywords as well as MSIDL keywords.
       </li>
       <li>
         Zoom level can be set and queried through API.
@@ -1010,7 +1010,7 @@
       </li>
       <li>
         Functions and associated keys for Line Delete, Line Cut, Line Transpose,
-	Selection Lower Case and Sleection Upper Case.
+	Selection Lower Case and Selection Upper Case.
       </li>
       <li>
         Property setting for SciTE, eol.mode, chooses initial state of line end characters.
@@ -1067,7 +1067,7 @@
       </li>
       <li>
         Enhanced HTML lexer styles embedded VBScript and Python.
-	ASP segments are styled and ASP scripts in Javascript, VBScript and Python are styled.
+	ASP segments are styled and ASP scripts in JavaScript, VBScript and Python are styled.
       </li>
       <li>
         PLSQL and PHP supported.
@@ -1122,7 +1122,7 @@
         Line folding in Scintilla.
       </li>
       <li>
-        SciTE performs syntax directed folding for C/C++/Java/Javascript and for Python.
+        SciTE performs syntax directed folding for C/C++/Java/JavaScript and for Python.
       </li>
       <li>
         Optional macro recording support.
@@ -1135,7 +1135,7 @@
         Python lexer detects and highlights inconsistent indentation.
       </li>
       <li>
-        Margin API made more orthogonal.SCI_SETMARGINWIDTH and SCI_SETLINENUMBERWIDTH
+        Margin API made more orthogonal. SCI_SETMARGINWIDTH and SCI_SETLINENUMBERWIDTH
         are deprecated in favour of this new API.
       </li>
       <li>
@@ -1183,7 +1183,7 @@
       </li>
       <li>
         SciTE remembers top line of window for each file in MRU list so switching to a recent file
-	is more likeley to show the same text as when the file was previously visible.
+	is more likely to show the same text as when the file was previously visible.
       </li>
       <li>
         Document reference count now initialised correctly.
@@ -1198,7 +1198,7 @@
         Polygon drawing bug fixed on GTK+.
       </li>
       <li>
-        Java and Javascript lexers merged into C++ lexer.
+        Java and JavaScript lexers merged into C++ lexer.
       </li>
       <li>
         C++ lexer indicates unterminated strings by colouring the end of the line
@@ -1601,7 +1601,7 @@
         Scintilla supports a 'savepoint' in the undo stack which can be set by the container when
         the document is saved. Notifications are sent to the container when the savepoint is
         entered or left, allowing the container to to display a dirty indicator and change its
-        menues.
+        menus.
       </li>
       <li>
         When Scintilla is set to read-only mode, a notification is sent to the container should the
@@ -1609,7 +1609,7 @@
         control system.
       </li>
       <li>
-        There is an API for setting the appearence of indicators.
+        There is an API for setting the appearance of indicators.
       </li>
       <li>
         The keyboard mapping can be redefined or removed so it can be implemented completely by the

@@ -46,7 +46,7 @@
 		<p><h3>The simple way to control Scintilla</h3>
 			<p>
 				The simple way is just like with any other windows control. You can send messages to the 
-				Scintilla Edit Control and recieve notifications from the control. (Note that the notifications 
+				Scintilla Edit Control and receive notifications from the control. (Note that the notifications 
 				are sent to the parent window of the Scintilla Edit Control.)
 			</p>
 			<p>
@@ -65,13 +65,13 @@
 	SendMessage(hwndScintilla,SCI_CREATEDOCUMENT, 0, 0);
 			</pre>
 			<p>
-				Some of the commands will return a value and unused parameters sould be set to NULL.
+				Some of the commands will return a value and unused parameters should be set to NULL.
 			</p>
 		</p>
 		<p><h3>The fast way to control Scintilla</h3>
 			<p>
-				The fast way of controling the Scintilla Edit Control  is to call message handling function by yourself.
-				You can retrive a pointer to the message handling function of the Scintilla Edit Control and 
+				The fast way of controlling the Scintilla Edit Control  is to call message handling function by yourself.
+				You can retrieve a pointer to the message handling function of the Scintilla Edit Control and 
 				call it directly to execute a command. This way is much more faster than the SendMessage() way.
 			</p>
 			<p>
@@ -102,11 +102,11 @@
 			</p>
 
 		</p>
-		<p><h3>How will I recive notifications?</h3>
+		<p><h3>How will I receive notifications?</h3>
 			<p>
-				Whenever an event occures where Scintilla wants to inform you about something, the Scintilla Edit Control 
+				Whenever an event occurs where Scintilla wants to inform you about something, the Scintilla Edit Control 
 				will send notification to the parent window. This is done by a WM_NOTITY message.
-				When recieving that message, you have to look in the xxx struct for the actual message.
+				When receiving that message, you have to look in the xxx struct for the actual message.
 			</p>
 			<p>
 				So in Scintillas parent window message handling function you have to include some code like this:
