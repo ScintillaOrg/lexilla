@@ -95,4 +95,11 @@ inline bool IsAlphabetic(unsigned int ch) {
 	return ((ch >= 'A') && (ch <= 'Z')) || ((ch >= 'a') && (ch <= 'z'));
 }
 
+
+#ifdef _MSC_VER
+// Visual C++ doesn't like the private copy idiom for disabling
+// the default copy constructor and operator=, but it's fine.
+#pragma warning(disable: 4511 4512)
+#endif
+
 #endif
