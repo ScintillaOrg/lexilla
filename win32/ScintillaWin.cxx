@@ -212,6 +212,8 @@ class ScintillaWin :
 	void HorizontalScrollMessage(WPARAM wParam);
 	void RealizeWindowPalette(bool inBackGround);
 	void FullPaint();
+	void FullPaintDC(HDC dc);
+	bool IsCompatibleDC(HDC dc);
 
 	virtual int SetScrollInfo(int nBar, LPCSCROLLINFO lpsi, BOOL bRedraw);
 	virtual bool GetScrollInfo(int nBar, LPSCROLLINFO lpsi);
@@ -547,6 +549,15 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 	case WM_PAINT:
 		return WndPaint(wParam);
+
+	case WM_PRINTCLIENT: {
+			HDC hdc = reinterpret_cast<HDC>(wParam);
+			if (!IsCompatibleDC(hdc)) {
+				return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
+			}
+			FullPaintDC(hdc);
+		}
+		break;
 
 	case WM_VSCROLL:
 		ScrollMessage(wParam);
@@ -1842,17 +1853,41 @@ void ScintillaWin::RealizeWindowPalette(bool inBackGround) {
  * This paint will not be abandoned.
  */
 void ScintillaWin::FullPaint() {
+	HDC hdc = ::GetDC(MainHWND());
+	FullPaintDC(hdc);
+	::ReleaseDC(MainHWND(), hdc);
+}
+
+/**
+ * Redraw all of text area on the specified DC.
+ * This paint will not be abandoned.
+ */
+void ScintillaWin::FullPaintDC(HDC hdc) {
 	paintState = painting;
 	rcPaint = GetClientRectangle();
 	paintingAllText = true;
-	HDC hdc = ::GetDC(MainHWND());
 	AutoSurface surfaceWindow(hdc, this);
 	if (surfaceWindow) {
 		Paint(surfaceWindow, rcPaint);
 		surfaceWindow->Release();
 	}
-	::ReleaseDC(MainHWND(), hdc);
 	paintState = notPainting;
+}
+
+static bool CompareDevCap(HDC hdc, HDC hOtherDC, int nIndex) {
+	return ::GetDeviceCaps(hdc, nIndex) == ::GetDeviceCaps(hOtherDC, nIndex);
+}
+
+bool ScintillaWin::IsCompatibleDC(HDC hOtherDC) {
+	HDC hdc = ::GetDC(MainHWND());
+	bool isCompatible = 
+		CompareDevCap(hdc, hOtherDC, TECHNOLOGY) &&
+		CompareDevCap(hdc, hOtherDC, LOGPIXELSY) &&
+		CompareDevCap(hdc, hOtherDC, LOGPIXELSX) &&
+		CompareDevCap(hdc, hOtherDC, BITSPIXEL) &&
+		CompareDevCap(hdc, hOtherDC, PLANES);
+	::ReleaseDC(MainHWND(), hdc);
+	return isCompatible;
 }
 
 /// Implement IUnknown
