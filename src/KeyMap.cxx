@@ -95,6 +95,7 @@ KeyToCommand KeyMap::MapDefault[] = {
     {VK_INSERT, 		SCI_CTRL,	WM_COPY},
     {VK_ESCAPE,  	SCI_NORM,	SCI_CANCEL},
     {VK_BACK,		SCI_NORM, 	SCI_DELETEBACK},
+    {VK_BACK,		SCI_SHIFT, 	SCI_DELETEBACK},
     {VK_BACK,		SCI_CTRL, 	SCI_DELWORDLEFT},
     {'Z', 			SCI_CTRL,	WM_UNDO},
     {'Y', 			SCI_CTRL,	SCI_REDO},
