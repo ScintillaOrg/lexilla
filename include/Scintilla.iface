@@ -253,6 +253,8 @@ val SC_MARKNUM_FOLDERSUB=29
 val SC_MARKNUM_FOLDER=30
 val SC_MARKNUM_FOLDEROPEN=31
 
+val SC_MASK_FOLDERS=0xFE000000
+
 # Set the symbol used for a particular marker number.
 fun void MarkerDefine=2040(int markerNumber, int markerSymbol)
 
@@ -426,10 +428,10 @@ val INDIC_SQUIGGLE=1
 val INDIC_TT=2
 val INDIC_DIAGONAL=3
 val INDIC_STRIKE=4
-val INDIC0_MASK=32
-val INDIC1_MASK=64
-val INDIC2_MASK=128
-val INDICS_MASK=INDIC0_MASK | INDIC1_MASK | INDIC2_MASK
+val INDIC0_MASK=0x20
+val INDIC1_MASK=0x40
+val INDIC2_MASK=0x80
+val INDICS_MASK=0xE0
 
 # Set an indicator to plain, squiggle or TT.
 set void IndicSetStyle=2080(int indic, int style)

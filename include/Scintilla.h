@@ -107,6 +107,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_MARKNUM_FOLDERSUB 29
 #define SC_MARKNUM_FOLDER 30
 #define SC_MARKNUM_FOLDEROPEN 31
+#define SC_MASK_FOLDERS 0xFE000000
 #define SCI_MARKERDEFINE 2040
 #define SCI_MARKERSETFORE 2041
 #define SCI_MARKERSETBACK 2042
@@ -187,10 +188,10 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define INDIC_TT 2
 #define INDIC_DIAGONAL 3
 #define INDIC_STRIKE 4
-#define INDIC0_MASK 32
-#define INDIC1_MASK 64
-#define INDIC2_MASK 128
-#define INDICS_MASK INDIC0_MASK | INDIC1_MASK | INDIC2_MASK
+#define INDIC0_MASK 0x20
+#define INDIC1_MASK 0x40
+#define INDIC2_MASK 0x80
+#define INDICS_MASK 0xE0
 #define SCI_INDICSETSTYLE 2080
 #define SCI_INDICGETSTYLE 2081
 #define SCI_INDICSETFORE 2082
@@ -580,9 +581,6 @@ struct SCNotification {
 	int x;			// SCN_DWELLSTART, SCN_DWELLEND
 	int y;		// SCN_DWELLSTART, SCN_DWELLEND
 };
-
-// This long line is caused by problems with continuation lines with some compilers so leave as is
-#define SC_MASK_FOLDERS ((1<<SC_MARKNUM_FOLDER) | (1<<SC_MARKNUM_FOLDEROPEN) | (1<<SC_MARKNUM_FOLDERSUB) | (1<<SC_MARKNUM_FOLDERTAIL) | (1<<SC_MARKNUM_FOLDERMIDTAIL) | (1<<SC_MARKNUM_FOLDEROPENMID) | (1<<SC_MARKNUM_FOLDEREND))
 
 // Deprecation section listing all API features that are deprecated and will
 // will be removed completely in a future version.
