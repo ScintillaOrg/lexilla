@@ -411,6 +411,8 @@ static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unuse
 			styler.SetLevel(lineNext, Platform::Maximum(indentCurrent, indentNext));
 			lineNext++;
 			indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
+			if (indentNext & SC_FOLDLEVELWHITEFLAG)
+				indentNext = SC_FOLDLEVELWHITEFLAG | indentCurrentLevel;
 		}
 
 		// Set fold header on non-quote/non-comment line
