@@ -1883,7 +1883,9 @@ struct TextToFind {
     <code>fontName</code> is a zero terminated string holding the name of a font. Under Windows,
     only the first 32 characters of the name are used and the name is not case sensitive. For
     internal caching, Scintilla tracks fonts by name and does care about the casing of font names,
-    so please be consistent.</p>
+    so please be consistent. On GTK+ 2.x, either GDK or Pango can be used to display text.
+    Pango antialiases text and works well with Unicode but GDK is faster.
+    Prepend a '!' character to the font name to use Pango.</p>
 
     <p><b id="SCI_STYLESETUNDERLINE">SCI_STYLESETUNDERLINE(int styleNumber, bool
     underline)</b><br />
