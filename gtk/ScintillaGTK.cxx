@@ -556,6 +556,7 @@ void ScintillaGTK::ClaimSelection() {
 	// X Windows has a 'primary selection' as well as the clipboard.
 	// Whenever the user selects some text, we become the primary selection
   	if (currentPos != anchor) {
+		primarySelection = true;
   		gtk_selection_owner_set(GTK_WIDGET(wDraw.GetID()), 
                                 GDK_SELECTION_PRIMARY, GDK_CURRENT_TIME);
 		delete []primarySelectionCopy;
@@ -563,9 +564,11 @@ void ScintillaGTK::ClaimSelection() {
 	} else if (OwnPrimarySelection()) {
 		if (primarySelectionCopy == NULL) 
 			gtk_selection_owner_set(NULL, GDK_SELECTION_PRIMARY, GDK_CURRENT_TIME);
+		primarySelection = true;
 	} else {
 		delete []primarySelectionCopy;
 		primarySelectionCopy = NULL;
+		primarySelection = false;
   	}
 }
 
@@ -659,6 +662,8 @@ void ScintillaGTK::UnclaimSelection(GdkEventSelection *selection_event) {
 	if (selection_event->selection == GDK_SELECTION_PRIMARY) {
 		delete [] primarySelectionCopy;
 		primarySelectionCopy = NULL;
+		primarySelection = false;
+		FullPaint();
 	}
 }
 

@@ -61,7 +61,8 @@ Editor::Editor() {
 	selType = selStream;
 	xStartSelect = 0;
 	xEndSelect = 0;
-
+	primarySelection = true;
+	
 	caretPolicy = CARET_SLOP;
 	caretSlop = 0;
 
@@ -842,8 +843,12 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 			Font &textFont = vsDraw.styles[styleMain].font;
 			bool inSelection = (iDoc >= ll.selStart) && (iDoc < ll.selEnd) && (ll.selStart != ll.selEnd);
 			if (inSelection) {
-				if (vsDraw.selbackset)
-					textBack = vsDraw.selbackground.allocated;
+				if (vsDraw.selbackset) {
+					if (primarySelection)
+						textBack = vsDraw.selbackground.allocated;
+					else
+						textBack = vsDraw.selbackground2.allocated;
+				}
 				if (vsDraw.selforeset)
 					textFore = vsDraw.selforeground.allocated;
 			} else {
@@ -981,7 +986,10 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	rcSegment.right = xEol + vsDraw.aveCharWidth + xStart;
 	bool eolInSelection = (posLineEnd > ll.selStart) && (posLineEnd <= ll.selEnd) && (ll.selStart != ll.selEnd);
 	if (eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal()-1)) {
-		surface->FillRectangle(rcSegment, vsDraw.selbackground.allocated);
+		if (primarySelection)
+			surface->FillRectangle(rcSegment, vsDraw.selbackground.allocated);
+		else
+			surface->FillRectangle(rcSegment, vsDraw.selbackground2.allocated);
 	} else if (marks) {
 		surface->FillRectangle(rcSegment, markBack);
 	} else {

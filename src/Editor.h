@@ -123,6 +123,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	enum { selStream, selRectangle, selRectangleFixed } selType;
 	int xStartSelect;
 	int xEndSelect;
+	bool primarySelection;
 	
 	int caretPolicy;
 	int caretSlop;
