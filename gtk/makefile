@@ -3,7 +3,9 @@
 # The License.txt file describes the conditions under which this software may be distributed.
 # This makefile assumes GCC 2.95.2 is used and changes will be needed to use other compilers.
 # GNU make does not like \r\n line endings so should be saved to CVS in binary form.
-# To build for GTK+ 2, define GTK2 on the make command line.
+# Builds for GTK+ 2 if available else GTK+ 1.
+# To force GTK+ 2 build, define GTK2 on the make command line.
+# To force GTK+ 1 build, define GTK1 on the make command line.
 
 .SUFFIXES: .cxx .o .h .a
 CC = g++
@@ -36,10 +38,20 @@ else
 CXXFLAGS=-DNDEBUG -Os $(CXXBASEFLAGS) $(THREADFLAGS)
 endif
 
+# If explicit setting of GTK1 or GTK2 then use that else look for
+# pkg-config which is an OK indication that GTK2 is available
 ifdef GTK2
 CONFIGFLAGS=pkg-config --cflags gtk+-2.0
 else
+ifdef GTK1
 CONFIGFLAGS=gtk-config --cflags
+else
+ifneq (,$(findstring /,$(shell whereis -b pkg-config)))
+CONFIGFLAGS=pkg-config --cflags gtk+-2.0
+else
+CONFIGFLAGS=gtk-config --cflags
+endif
+endif
 endif
 
 .cxx.o:
