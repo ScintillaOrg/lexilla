@@ -610,7 +610,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 	case WM_IME_COMPOSITION:
 		if (lParam & GCS_RESULTSTR) {
-			Platform::DebugPrintf("Result\n");
+			//Platform::DebugPrintf("Result\n");
 		}
 		return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
 
@@ -622,7 +622,15 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 	case WM_CONTEXTMENU:
 #ifdef TOTAL_CONTROL
 		if (displayPopupMenu) {
-			ContextMenu(Point::FromLong(lParam));
+			Point pt = Point::FromLong(lParam);
+			if ((pt.x == -1) && (pt.y == -1)) {
+				// Caused by keyboard so display menu near caret
+				pt = LocationFromPosition(currentPos);
+				POINT spt = {pt.x, pt.y};
+				::ClientToScreen(wMain.GetID(), &spt);
+				pt = Point(spt.x, spt.y);
+			}
+			ContextMenu(pt);
 			return 0;
 		}
 #endif
