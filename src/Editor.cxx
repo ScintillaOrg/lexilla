@@ -6037,6 +6037,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return reinterpret_cast<sptr_t>(pdoc);
 
 	case SCI_SETDOCPOINTER:
+		CancelModes();
 		SetDocPointer(reinterpret_cast<Document *>(lParam));
 		return 0;
 
