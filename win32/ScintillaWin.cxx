@@ -260,6 +260,30 @@ static int InputCodePage() {
 	return atoi(sCodePage);
 }
 
+// Map the key codes to their equivalent SCK_ form
+static int KeyTranslate(int keyIn) {
+	switch (keyIn) {
+		case VK_DOWN:		return SCK_DOWN;
+		case VK_UP:		return SCK_UP;
+		case VK_LEFT:		return SCK_LEFT;
+		case VK_RIGHT:		return SCK_RIGHT;
+		case VK_HOME:		return SCK_HOME;
+		case VK_END:		return SCK_END;
+		case VK_PRIOR:		return SCK_PRIOR;
+		case VK_NEXT:		return SCK_NEXT;
+		case VK_DELETE:	return SCK_DELETE;
+		case VK_INSERT:		return SCK_INSERT;
+		case VK_ESCAPE:	return SCK_ESCAPE;
+		case VK_BACK:		return SCK_BACK;
+		case VK_TAB:		return SCK_TAB;
+		case VK_RETURN:	return SCK_RETURN;
+		case VK_ADD:		return SCK_ADD;
+		case VK_SUBTRACT:	return SCK_SUBTRACT;
+		case VK_DIVIDE:		return SCK_DIVIDE;
+		default:			return keyIn;
+	}
+}
+
 LRESULT ScintillaWin::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 	switch (iMessage) {
 
@@ -424,25 +448,26 @@ LRESULT ScintillaWin::WndProc(unsigned int iMessage, unsigned long wParam, long 
 
 	case WM_CHAR:
 		if (!iscntrl(wParam&0xff)) {
-            if (IsUnicodeMode()) {
-                AddCharBytes(static_cast<char>(wParam&0xff));
-            } else {
-			    AddChar(static_cast<char>(wParam&0xff));
-            }
+			if (IsUnicodeMode()) {
+				AddCharBytes(static_cast<char>(wParam&0xff));
+			} else {
+				AddChar(static_cast<char>(wParam&0xff));
+			}
 		}
 		return 1;
 
 	case WM_KEYDOWN: {
 		//Platform::DebugPrintf("S keydown %d %x %x %x %x\n",iMessage, wParam, lParam, ::IsKeyDown(VK_SHIFT), ::IsKeyDown(VK_CONTROL));
-			int ret = KeyDown(wParam, Platform::IsKeyDown(VK_SHIFT),
-		               Platform::IsKeyDown(VK_CONTROL), false);
+			int ret = KeyDown(KeyTranslate(wParam), 
+				Platform::IsKeyDown(VK_SHIFT),
+		               	Platform::IsKeyDown(VK_CONTROL), false);
 			if (!ret)
-                return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
+                		return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
 			break;
 		}
 
 	case WM_IME_KEYDOWN:
-        return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
+        	return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
 
 	case WM_KEYUP:
 		//Platform::DebugPrintf("S keyup %d %x %x\n",iMessage, wParam, lParam);
