@@ -26,7 +26,7 @@ public:
 	bool ticking;
 	int ticksToWait;
 	enum {tickSize = 100};
-	int tickerID;
+	TickerID tickerID;
 
 	Timer();
 };

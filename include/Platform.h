@@ -51,6 +51,7 @@ typedef void *FontID;
 typedef void *SurfaceID;
 typedef void *WindowID;
 typedef void *MenuID;
+typedef void *TickerID;
 
 /**
  * A geometric point class.

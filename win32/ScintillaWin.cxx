@@ -832,9 +832,9 @@ void ScintillaWin::SetTicking(bool on) {
 	if (timer.ticking != on) {
 		timer.ticking = on;
 		if (timer.ticking) {
-			timer.tickerID = ::SetTimer(MainHWND(), 1, timer.tickSize, NULL);
+			timer.tickerID = reinterpret_cast<TickerID>(::SetTimer(MainHWND(), 1, timer.tickSize, NULL));
 		} else {
-			::KillTimer(MainHWND(), timer.tickerID);
+			::KillTimer(MainHWND(), reinterpret_cast<UINT>(timer.tickerID));
 			timer.tickerID = 0;
 		}
 	}
