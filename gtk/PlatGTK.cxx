@@ -176,7 +176,6 @@ static const char *CharacterSetName(int characterSet) {
 
 void Font::Create(const char *faceName, int characterSet, 
 	int size, bool bold, bool italic) {
-	// TODO: take notice of characterSet
 	Release();
 	// If name of the font begins with a '-', assume, that it is
 	// a full fontspec.
