@@ -1050,9 +1050,9 @@ gint ScintillaGTK::KeyPress(GtkWidget *w, GdkEventKey *event, ScintillaGTK *sciT
 	bool consumed = false;
 	sciThis->KeyDown(key, shift, ctrl, alt, &consumed);
 	//Platform::DebugPrintf("SK-key: %d %x %x\n",event->keyval, event->state, GTK_WIDGET_FLAGS(widget));
-	if (consumed)
-		gtk_signal_emit_stop_by_name(GTK_OBJECT(w), "key_press_event");
-	return TRUE;
+	//if (consumed)
+	//	gtk_signal_emit_stop_by_name(GTK_OBJECT(w), "key_press_event");
+	return consumed;
 }
 
 gint ScintillaGTK::KeyRelease(GtkWidget *, GdkEventKey * /*event*/, ScintillaGTK * /*sciThis*/) {
