@@ -70,6 +70,7 @@
 #define SCE_C_VERBATIM 13
 #define SCE_C_REGEX 14
 #define SCE_C_COMMENTLINEDOC 15
+#define SCE_C_WORD2 16
 #define SCE_H_DEFAULT 0
 #define SCE_H_TAG 1
 #define SCE_H_TAGUNKNOWN 2
