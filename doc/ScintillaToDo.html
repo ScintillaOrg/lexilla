@@ -29,20 +29,20 @@
        Scintilla Bugs
     </h3>
     <p>
-       At the end of italics style runs characters can be chopped off. An example 
-       is using Verdana 12 point italics for strings makes an ending double quote 
-       half visible and an ending single quote invisible. This is hard to solve 
-       completely, may be better to avoid these situations by, for example, 
-       choosing a font like Times New Roman for strings. There is a specific kluge 
-       for the end of line which adds some room for italics but this does not 
+       At the end of italics style runs characters can be chopped off. An example
+       is using Verdana 12 point italics for strings makes an ending double quote
+       half visible and an ending single quote invisible. This is hard to solve
+       completely, may be better to avoid these situations by, for example,
+       choosing a font like Times New Roman for strings. There is a specific kluge
+       for the end of line which adds some room for italics but this does not
        work elsewhere.
     </p>
     <p>
-       Dragging over bold text in some fonts will ripple because of the difference in 
+       Dragging over bold text in some fonts will ripple because of the difference in
        size between drawing all of a string at once and drawing it in parts.
     </p>
     <p>
-       In read-only mode the caret moves when you type or perform other actions 
+       In read-only mode the caret moves when you type or perform other actions
        that would insert or remove text if not in read-only mode..
     </p>
     <p>
@@ -52,7 +52,7 @@
        GTK+ Version Bugs
     </h3>
     <p>
-       No DBCS or Unicode support.
+       No DBCS support.
     </p>
     <h3>
        Scintilla To Do
@@ -95,14 +95,14 @@
 	Printing of highlight lines and folding margin.
     </p>
     <p>
-	Flow diagrams inside editor similar to 
+	Flow diagrams inside editor similar to
 	<a href="http://www.eng.auburn.edu/grasp/grasp_main.shtml">
 	GRASP</a>.
     </p>
     <p>
 	A VCL component wrapper around Scintilla so it can be used with Delphi or
-	Borland C++ Builder. 
-	There is <a href="http://www.pnotepad.org/scintilla/">some work</a> 
+	Borland C++ Builder.
+	There is <a href="http://www.pnotepad.org/scintilla/">some work</a>
 	on this available.
     </p>
     <p>
@@ -110,25 +110,25 @@
     </p>
     <p>
 	More lexers for other languages such as PostScript and Smalltalk.
-	Make the subset Perl lexer understand more Perl. 
+	Make the subset Perl lexer understand more Perl.
 	Improve the Ruby and TCL lexers.
     </p>
     <p>
-	Keyboard based rectangular selection. 
+	Keyboard based rectangular selection.
 	Could be modelled on Visual Studio's Ctrl+Shift+F8 command.
     </p>
     <p>
 	Automatically calculated range for horizontal scrolling.
     </p>
     <p>
-	Commands and/or modes for treating display lines as document lines are now, 
-	such as allowing the End key to move to the end of a display line. This can be 
-	useful when Scintilla used to edit documentation as it is the normal convention 
+	Commands and/or modes for treating display lines as document lines are now,
+	such as allowing the End key to move to the end of a display line. This can be
+	useful when Scintilla used to edit documentation as it is the normal convention
 	for word processors.
     </p>
     <p>
-	Virtual space at the end of lines so the caret can be moved beyond the end 
-	of lines with the cursor keys. May also make rectangular operations easier 
+	Virtual space at the end of lines so the caret can be moved beyond the end
+	of lines with the cursor keys. May also make rectangular operations easier
 	to perform.
     </p>
     <h3>
@@ -145,7 +145,7 @@
 	indentation or sorting.
     </p>
     <p>
-	Ctrl+Tab working like Visual C++ where it goes to the next window in 
+	Ctrl+Tab working like Visual C++ where it goes to the next window in
 	z-order.
     </p>
     <p>
@@ -170,9 +170,6 @@
 	User defined fold ranges.
     </p>
     <p>
-	Save All command.
-    </p>
-    <p>
 	Silent mode that does not display any message boxes.
     </p>
     <h3>
@@ -186,7 +183,7 @@
 	Automatically saving modified menu shortcuts on exit.
     </p>
     <p>
-	Mouse wheel panning (press the mouse wheel and then move the mouse) on 
+	Mouse wheel panning (press the mouse wheel and then move the mouse) on
 	Windows.
     </p>
     <p>
@@ -197,18 +194,18 @@
        Directions
     </h3>
     <p>
-       The main point of this development is Scintilla, and this is where most effort will 
-       go. SciTE will get new features, but only when they make my life easier - I am 
-       not intending to make it grow up to be a huge full-function IDE like Visual 
-       Cafe. The lines I've currently decided not to step over in SciTE are any sort of 
-       project facility and any configuration dialogs. SciTE for Windows now has a 
-       Director interface for communicating with a separate project manager 
+       The main point of this development is Scintilla, and this is where most effort will
+       go. SciTE will get new features, but only when they make my life easier - I am
+       not intending to make it grow up to be a huge full-function IDE like Visual
+       Cafe. The lines I've currently decided not to step over in SciTE are any sort of
+       project facility and any configuration dialogs. SciTE for Windows now has a
+       Director interface for communicating with a separate project manager
        application.
     </p>
     <p>
-       If you are interested in contributing code, do not feel any need to make it cross 
+       If you are interested in contributing code, do not feel any need to make it cross
        platform.
-      Just code it for your platform and I'll either reimplement for the other platform or 
+      Just code it for your platform and I'll either reimplement for the other platform or
       ensure that there is no effect on the other platform.
     </p>
   </body>
