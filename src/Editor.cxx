@@ -4729,6 +4729,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		PLATFORM_ASSERT(lParam);
 		return TextWidth(wParam, CharPtrFromSPtr(lParam));
 
+	case SCI_TEXTHEIGHT:
+		return vs.lineHeight;
+
 	case SCI_SETENDATLASTLINE:
 		PLATFORM_ASSERT((wParam == 0) || (wParam ==1));
 		if (endAtLastLine != (wParam != 0)) {

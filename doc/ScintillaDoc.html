@@ -244,6 +244,7 @@ SCI_MOVECARETINSIDEVIEW
 SCI_WORDENDPOSITION(int position, bool onlyWordCharacters)
 SCI_WORDSTARTPOSITION(int position, bool onlyWordCharacters)
 SCI_TEXTWIDTH(int stylenumber, char *text)
+SCI_TEXTHEIGHT(int line)
 </pre>
     <p>
 	Scintilla maintains a selection which stretches between two points, the anchor and the
@@ -267,7 +268,9 @@ SCI_TEXTWIDTH(int stylenumber, char *text)
 	can be used to find the pixel location of text on the display. 
 	SCI_TEXTWIDTH can be used to find the pixel width of a string which 
 	can be used, for example, to decide how wide to make the line number
-	margin in order to display a given number of numerals.
+	margin in order to display a given number of numerals. SCI_TEXTHEIGHT
+	returns the height in pixels of a particular line. Currently all lines are the 
+	same height.
     </p>
     <p>
 	SCI_WORDENDPOSITION and SCI_WORDSTARTPOSITION can be used to find 
