@@ -231,9 +231,8 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 		surface->LineTo(centreX, centreY - blobSize);
 		
 	} else if (markType >= SC_MARK_CHARACTER) {
-		char character[2];
-		character[0] = ' ';
-		character[0] = markType - SC_MARK_CHARACTER;
+		char character[1];
+		character[0] = static_cast<char>(markType - SC_MARK_CHARACTER);
 		int width = surface->WidthText(fontForCharacter, character, 1);
 		rc.left += (rc.Width() - width) / 2;
 		rc.right = rc.left + width;
