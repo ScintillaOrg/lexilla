@@ -161,6 +161,7 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmMETAPOST);
 	LINK_LEXER(lmMMIXAL);
 	LINK_LEXER(lmLot);
+	LINK_LEXER(lmMSSQL);
 	LINK_LEXER(lmNsis);
 	LINK_LEXER(lmBatch);
 	LINK_LEXER(lmDiff);
