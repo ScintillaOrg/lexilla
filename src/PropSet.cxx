@@ -211,7 +211,7 @@ SString &SString::append(const char *sOther, lenpos_t sLenOther, char sep) {
 }
 
 SString &SString::insert(lenpos_t pos, const char *sOther, lenpos_t sLenOther) {
-	if (!sOther) {
+	if (!sOther || pos > sLen) {
 		return *this;
 	}
 	if (sLenOther == measure_length) {
@@ -230,12 +230,16 @@ SString &SString::insert(lenpos_t pos, const char *sOther, lenpos_t sLenOther) {
 	return *this;
 }
 
-/** Remove @a len characters from the @a pos position, included.
+/**
+ * Remove @a len characters from the @a pos position, included.
  * Characters at pos + len and beyond replace characters at pos.
  * If @a len is 0, or greater than the length of the string
  * starting at @a pos, the string is just truncated at @a pos.
  */
 void SString::remove(lenpos_t pos, lenpos_t len) {
+	if (pos >= sLen) {
+		return;
+	}
 	if (len < 1 || pos + len >= sLen) {
 		s[pos] = '\0';
 		sLen = pos;
