@@ -3384,8 +3384,12 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	case SCI_SEARCHPREV:
 	case SCI_LINEDOWN:
 	case SCI_LINEDOWNEXTEND:
+	case SCI_PARADOWN:
+	case SCI_PARADOWNEXTEND:
 	case SCI_LINEUP:
 	case SCI_LINEUPEXTEND:
+	case SCI_PARAUP:
+	case SCI_PARAUPEXTEND:
 	case SCI_CHARLEFT:
 	case SCI_CHARLEFTEXTEND:
 	case SCI_CHARRIGHT:
@@ -3622,6 +3626,12 @@ int Editor::KeyCommand(unsigned int iMessage) {
 	case SCI_LINEDOWNEXTEND:
 		CursorUpOrDown(1, true);
 		break;
+	case SCI_PARADOWN:
+		MovePositionTo(pdoc->ParaDown(currentPos));
+		break;
+	case SCI_PARADOWNEXTEND:
+		MovePositionTo(pdoc->ParaDown(currentPos), true);
+		break;
 	case SCI_LINESCROLLDOWN:
 		ScrollTo(topLine + 1);
 		MoveCaretInsideView(false);
@@ -3631,6 +3641,12 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		break;
 	case SCI_LINEUPEXTEND:
 		CursorUpOrDown(-1, true);
+		break;
+	case SCI_PARAUP:
+		MovePositionTo(pdoc->ParaUp(currentPos));
+		break;
+	case SCI_PARAUPEXTEND:
+		MovePositionTo(pdoc->ParaUp(currentPos), true);
 		break;
 	case SCI_LINESCROLLUP:
 		ScrollTo(topLine - 1);
@@ -6102,8 +6118,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_LINEDOWN:
 	case SCI_LINEDOWNEXTEND:
+	case SCI_PARADOWN:
+	case SCI_PARADOWNEXTEND:
 	case SCI_LINEUP:
 	case SCI_LINEUPEXTEND:
+	case SCI_PARAUP:
+	case SCI_PARAUPEXTEND:
 	case SCI_CHARLEFT:
 	case SCI_CHARLEFTEXTEND:
 	case SCI_CHARRIGHT:

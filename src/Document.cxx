@@ -720,6 +720,33 @@ void Document::ConvertLineEnds(int eolModeSet) {
 	EndUndoAction();
 }
 
+int Document::ParaDown(int pos) {
+	int line = LineFromPosition(pos);
+	while (line < LinesTotal() && LineStart(line) != LineEnd(line)) { // skip non-empty lines
+		line++;
+	}
+	while (line < LinesTotal() && LineStart(line) == LineEnd(line)) { // skip empty lines
+		line++;
+	}
+	if (line < LinesTotal())
+		return LineStart(line);
+	else // end of a document
+		return LineEnd(line-1);
+}
+
+int Document::ParaUp(int pos) {
+	int line = LineFromPosition(pos);
+	line--;
+	while (line >= 0 && LineStart(line) == LineEnd(line)) { // skip empty lines
+		line--;
+	}
+	while (line >= 0 && LineStart(line) != LineEnd(line)) { // skip non-empty lines
+		line--;
+	}
+	line++;
+	return LineStart(line);
+}
+
 Document::charClassification Document::WordCharClass(unsigned char ch) {
 	if ((SC_CP_UTF8 == dbcsCodePage) && (ch >= 0x80))
 		return ccWord;

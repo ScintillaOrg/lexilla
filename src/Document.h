@@ -221,6 +221,8 @@ public:
 	int WordPartLeft(int pos);
 	int WordPartRight(int pos);
 	int ExtendStyleRange(int pos, int delta);
+	int ParaUp(int pos);
+	int ParaDown(int pos);
 
 private:
 	charClassification WordCharClass(unsigned char ch);
