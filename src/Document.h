@@ -229,6 +229,7 @@ public:
 	int WordPartLeft(int pos);
 	int WordPartRight(int pos);
 	int ExtendStyleRange(int pos, int delta, bool singleLine = false);
+	bool IsWhiteLine(int line);
 	int ParaUp(int pos);
 	int ParaDown(int pos);
 	int IndentSize() { return actualIndentInChars; }

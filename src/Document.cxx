@@ -722,7 +722,7 @@ void Document::ConvertLineEnds(int eolModeSet) {
 
 	for (int pos = 0; pos < Length(); pos++) {
 		if (cb.CharAt(pos) == '\r') {
-			if (cb.CharAt(pos + 1) == '\n') { 
+			if (cb.CharAt(pos + 1) == '\n') {
 				// CRLF
 				if (eolModeSet == SC_EOL_CR) {
 					DeleteChars(pos + 1, 1); // Delete the LF
@@ -731,7 +731,7 @@ void Document::ConvertLineEnds(int eolModeSet) {
 				} else {
 					pos++;
 				}
-			} else { 
+			} else {
 				// CR
 				if (eolModeSet == SC_EOL_CRLF) {
 					InsertString(pos + 1, "\n", 1); // Insert LF
@@ -756,31 +756,43 @@ void Document::ConvertLineEnds(int eolModeSet) {
 	EndUndoAction();
 }
 
+bool Document::IsWhiteLine(int line) {
+	int currentChar = LineStart(line);
+	int endLine = LineEnd(line);
+	while (currentChar < endLine) {
+		if (cb.CharAt(currentChar) != ' ' && cb.CharAt(currentChar) != '\t') {
+			return false;
+		}
+		++currentChar;
+	}
+	return true;
+}
+
+int Document::ParaUp(int pos) {
+	int line = LineFromPosition(pos);
+	line--;
+	while (line >= 0 && IsWhiteLine(line)) { // skip empty lines
+		line--;
+	}
+	while (line >= 0 && !IsWhiteLine(line)) { // skip non-empty lines
+		line--;
+	}
+	line++;
+	return LineStart(line);
+}
+
 int Document::ParaDown(int pos) {
 	int line = LineFromPosition(pos);
-	while (line < LinesTotal() && LineStart(line) != LineEnd(line)) { // skip non-empty lines
+	while (line < LinesTotal() && !IsWhiteLine(line)) { // skip non-empty lines
 		line++;
 	}
-	while (line < LinesTotal() && LineStart(line) == LineEnd(line)) { // skip empty lines
+	while (line < LinesTotal() && IsWhiteLine(line)) { // skip empty lines
 		line++;
 	}
 	if (line < LinesTotal())
 		return LineStart(line);
 	else // end of a document
 		return LineEnd(line-1);
-}
-
-int Document::ParaUp(int pos) {
-	int line = LineFromPosition(pos);
-	line--;
-	while (line >= 0 && LineStart(line) == LineEnd(line)) { // skip empty lines
-		line--;
-	}
-	while (line >= 0 && LineStart(line) != LineEnd(line)) { // skip non-empty lines
-		line--;
-	}
-	line++;
-	return LineStart(line);
 }
 
 Document::charClassification Document::WordCharClass(unsigned char ch) {
