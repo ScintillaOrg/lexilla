@@ -466,8 +466,12 @@ SCI_STYLESETCHANGEABLE(int stylenumber, bool changeable)
 	when Scintilla was initialised.
     </p>
     <p>
-	The EOLFILLED style allows to colourise from the end of the line to 
-	the right side of the window.
+	The EOLFILLED style uses the background colour at the end of the line
+	to colour from the last character of the line to the right side of the window.
+	This is useful when a document contains embedded sections in another 
+	language such as HTML pages with embedded JavaScript. By setting both 
+	the EOLFILLED style and a consistent background colour to all JavaScript 
+	styles then JavaScript sections will be easily distinguished from HTML.
     </p>
     <p>
 	SCI_STYLESETCHARACTERSET can set a style to use a different 
