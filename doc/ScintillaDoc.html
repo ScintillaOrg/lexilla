@@ -1651,6 +1651,31 @@ EM_SETTARGETDEVICE
 	For GTK+, GCC 2.95.2 should be used. Only GTK+ 1.2x is 
 	supported.
     </p>
+    <h3>
+	Static linking
+    </h3>
+    <p>
+	On Windows, Scintilla is normally used as a dynamic library as a .DLL file.
+	If you want to link Scintilla directly into your application .EXE or .DLL file, 
+	then the STATIC_BUILD preprocessor symbol should be defined and 
+	Scintilla_RegisterClasses called. STATIC_BUILD prevents compiling the 
+	DllMain function which will conflict with any DllMain defined in your code.
+	Scintilla_RegisterClasses takes the HINSTANCE of your application and 
+	ensures that the "Scintilla" window class is registered. To make sure that
+	the right pointing arrow cursor used in the margin is displayed by Scintilla
+	add the scintilla/win32/Margin.cur file to your application's resources with
+	the ID IDC_MARGIN which is defined in scintilla/win32/platfromRes.h as 400.
+    </p>
+    <h3>
+	Ensuring lexers are linked into Scintilla
+    </h3>
+    <p>
+	Depending on the compiler and linker used, the lexers may be stripped
+	out. This is most often caused when building a static library. To ensure 
+	the lexers are linked in, the Scintilla_ForceLexers() function may be 
+	called. This function is not normally compiled and to ensure it is compiled
+	the preprocessor symbol LINK_LEXERS should be defined.
+    </p>
   </body>
 </html>
 
