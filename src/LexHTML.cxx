@@ -1232,6 +1232,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		case SCE_HPHP_HSTRING_VARIABLE:
 			if (!iswordstart(ch)) {
 				styler.ColourTo(i-1, StateToPrint);
+				i--; // strange but it works
 				state = SCE_HPHP_HSTRING;
 			}
 			break;
