@@ -848,6 +848,10 @@ fun void EnsureVisible=2232(int line,)
 # Set some debugging options for folding
 fun void SetFoldFlags=2233(int flags,)
 
+# Ensure a particular line is visible by expanding any header line hiding it.
+# Use the currently set visibility policy to determine which range to display.
+fun void EnsureVisibleEnforcePolicy=2234(int line,)
+
 # Sets whether a tab pressed when caret is within indentation indents
 set void SetTabIndents=2260(bool tabIndents,)
 

@@ -3482,12 +3482,12 @@ void Editor::ToggleContraction(int line) {
 
 // Recurse up from this line to find any folds that prevent this line from being visible
 // and unfold them all.
-void Editor::EnsureLineVisible(int lineDoc) {
+void Editor::EnsureLineVisible(int lineDoc, bool enforcePolicy) {
 	if (!cs.GetVisible(lineDoc)) {
 		int lineParent = pdoc->GetFoldParent(lineDoc);
 		if (lineParent >= 0) {
 			if (lineDoc != lineParent)
-				EnsureLineVisible(lineParent);
+				EnsureLineVisible(lineParent, enforcePolicy);
 			if (!cs.GetExpanded(lineParent)) {
 				cs.SetExpanded(lineParent, 1);
 				Expand(lineParent, true);
@@ -3496,23 +3496,25 @@ void Editor::EnsureLineVisible(int lineDoc) {
 		SetScrollBars();
 		Redraw();
 	}
-	int lineDisplay = cs.DisplayFromDoc(lineDoc);
-	if (visiblePolicy & VISIBLE_SLOP) {
-		if ((topLine > lineDisplay) || ((visiblePolicy & VISIBLE_STRICT) && (topLine + visibleSlop > lineDisplay))) {
-			SetTopLine(Platform::Clamp(lineDisplay - visibleSlop, 0, MaxScrollPos()));
-			SetVerticalScrollPos();
-			Redraw();
-		} else if ((lineDisplay > topLine + LinesOnScreen() - 1) ||
-		           ((visiblePolicy & VISIBLE_STRICT) && (lineDisplay > topLine + LinesOnScreen() - 1 - visibleSlop))) {
-			SetTopLine(Platform::Clamp(lineDisplay - LinesOnScreen() + 1 + visibleSlop, 0, MaxScrollPos()));
-			SetVerticalScrollPos();
-			Redraw();
-		}
-	} else {
-		if ((topLine > lineDisplay) || (lineDisplay > topLine + LinesOnScreen() - 1) || (visiblePolicy & VISIBLE_STRICT)) {
-			SetTopLine(Platform::Clamp(lineDisplay - LinesOnScreen() / 2 + 1, 0, MaxScrollPos()));
-			SetVerticalScrollPos();
-			Redraw();
+	if (enforcePolicy) {
+		int lineDisplay = cs.DisplayFromDoc(lineDoc);
+		if (visiblePolicy & VISIBLE_SLOP) {
+			if ((topLine > lineDisplay) || ((visiblePolicy & VISIBLE_STRICT) && (topLine + visibleSlop > lineDisplay))) {
+				SetTopLine(Platform::Clamp(lineDisplay - visibleSlop, 0, MaxScrollPos()));
+				SetVerticalScrollPos();
+				Redraw();
+			} else if ((lineDisplay > topLine + LinesOnScreen() - 1) ||
+					   ((visiblePolicy & VISIBLE_STRICT) && (lineDisplay > topLine + LinesOnScreen() - 1 - visibleSlop))) {
+				SetTopLine(Platform::Clamp(lineDisplay - LinesOnScreen() + 1 + visibleSlop, 0, MaxScrollPos()));
+				SetVerticalScrollPos();
+				Redraw();
+			}
+		} else {
+			if ((topLine > lineDisplay) || (lineDisplay > topLine + LinesOnScreen() - 1) || (visiblePolicy & VISIBLE_STRICT)) {
+				SetTopLine(Platform::Clamp(lineDisplay - LinesOnScreen() / 2 + 1, 0, MaxScrollPos()));
+				SetVerticalScrollPos();
+				Redraw();
+			}
 		}
 	}
 }
@@ -4637,7 +4639,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_ENSUREVISIBLE:
-		EnsureLineVisible(wParam);
+		EnsureLineVisible(wParam, false);
+		break;
+
+	case SCI_ENSUREVISIBLEENFORCEPOLICY:
+		EnsureLineVisible(wParam, true);
 		break;
 
 	case SCI_SEARCHANCHOR:

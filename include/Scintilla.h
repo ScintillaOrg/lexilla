@@ -334,6 +334,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_TOGGLEFOLD 2231
 #define SCI_ENSUREVISIBLE 2232
 #define SCI_SETFOLDFLAGS 2233
+#define SCI_ENSUREVISIBLEENFORCEPOLICY 2234
 #define SCI_SETTABINDENTS 2260
 #define SCI_GETTABINDENTS 2261
 #define SCI_SETBACKSPACEUNINDENTS 2262
