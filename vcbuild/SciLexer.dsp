@@ -206,6 +206,10 @@ SOURCE=..\src\LexMatlab.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexMMIXAL.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexNsis.cxx
 # End Source File
 # Begin Source File
