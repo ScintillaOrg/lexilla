@@ -91,9 +91,9 @@ public:
 		s = StringDup(number);
 		sSize = sLen = (s) ? strlen(s) : 0;
 	}
-	SString(double d) : sizeGrowth(sizeGrowthDefault) {
+	SString(double d, int precision) : sizeGrowth(sizeGrowthDefault) {
 		char number[32];
-		sprintf(number, "%.6f", d);
+		sprintf(number, "%.*f", precision, d);
 		s = StringDup(number);
 		sSize = sLen = (s) ? strlen(s) : 0;
 	}
