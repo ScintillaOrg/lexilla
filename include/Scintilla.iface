@@ -1716,8 +1716,6 @@ val SCLEX_TCL=25
 val SCLEX_NNCRONTAB=26
 val SCLEX_BULLANT=27
 val SCLEX_VBSCRIPT=28
-val SCLEX_ASP=29
-val SCLEX_PHP=30
 val SCLEX_BAAN=31
 val SCLEX_MATLAB=32
 val SCLEX_SCRIPTOL=33
@@ -2648,3 +2646,6 @@ val CARET_XJUMPS=0x10
 val SCN_CHECKBRACE=2007
 evt void PosChanged=2012(int position)
 
+# SCLEX_HTML should be used in preference to these.
+val SCLEX_ASP=29
+val SCLEX_PHP=30
