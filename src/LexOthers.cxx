@@ -201,26 +201,30 @@ static void ColourisePropsLine(
 	unsigned int i = 0;
 	while (isspacechar(lineBuffer[i]) && (i < lengthLine))	// Skip initial spaces
 		i++;
-	if (lineBuffer[i] == '#' || lineBuffer[i] == '!' || lineBuffer[i] == ';') {
-		styler.ColourTo(endPos, 1);
-	} else if (lineBuffer[i] == '[') {
-		styler.ColourTo(endPos, 2);
-	} else if (lineBuffer[i] == '@') {
-		styler.ColourTo(startLine + i, 4);
-		if (lineBuffer[++i] == '=')
-			styler.ColourTo(startLine + i, 3);
-		styler.ColourTo(endPos, 0);
-	} else {
-		// Search for the '=' character
-		while (lineBuffer[i] != '=' && (i < lengthLine - 1))
-			i++;
-		if (lineBuffer[i] == '=') {
-			styler.ColourTo(startLine + i - 1, 0);
-			styler.ColourTo(startLine + i, 3);
-			styler.ColourTo(endPos-1, 0);
+	if (i < lengthLine) {
+		if (lineBuffer[i] == '#' || lineBuffer[i] == '!' || lineBuffer[i] == ';') {
+			styler.ColourTo(endPos, 1);
+		} else if (lineBuffer[i] == '[') {
+			styler.ColourTo(endPos, 2);
+		} else if (lineBuffer[i] == '@') {
+			styler.ColourTo(startLine + i, 4);
+			if (lineBuffer[++i] == '=')
+				styler.ColourTo(startLine + i, 3);
+			styler.ColourTo(endPos, 0);
 		} else {
-			styler.ColourTo(endPos-1, 0);
+			// Search for the '=' character
+			while (lineBuffer[i] != '=' && (i < lengthLine - 1))
+				i++;
+			if (lineBuffer[i] == '=') {
+				styler.ColourTo(startLine + i - 1, 0);
+				styler.ColourTo(startLine + i, 3);
+				styler.ColourTo(endPos-1, 0);
+			} else {
+				styler.ColourTo(endPos-1, 0);
+			}
 		}
+	} else {
+		styler.ColourTo(endPos-1, 0);
 	}
 }
 
