@@ -128,7 +128,7 @@ static void ColouriseCppDoc(int codePage, int startPos, int length,
 	char chPrev = ' ';
 	char chNext = styler[startPos];
 	int startSeg = startPos;
-	int lengthDoc = startPos + length;
+	unsigned int lengthDoc = startPos + length;
 	int visChars = 0;
 	for (unsigned int i = startPos; i <= lengthDoc; i++) {
 		char ch = chNext;
@@ -1259,7 +1259,7 @@ static int classifyTagHTML(unsigned int start, unsigned int end,
 	char s[100];
 	// Copy after the '<'
 	unsigned int i = 0;
-	for (int cPos=start; cPos <= end && i < 30; cPos++) {
+	for (unsigned int cPos=start; cPos <= end && i < 30; cPos++) {
 		char ch = styler[cPos];
 		if (ch != '<')
 			s[i++] = tolower(ch);

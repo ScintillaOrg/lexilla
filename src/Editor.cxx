@@ -2692,6 +2692,7 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	case WM_PASTE:
 		Paste();
 		SetLastXChosen();
+		EnsureCaretVisible();
 		break;
 
 	case WM_CLEAR:
