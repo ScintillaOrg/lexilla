@@ -102,7 +102,7 @@ void XPM::Init(const char * const *linesForm) {
 
 	int strings = 1+height+nColours;
 	lines = new char *[strings];
-	int allocation = 0;
+	size_t allocation = 0;
 	for (int i=0; i<strings; i++) {
 		allocation += MeasureLength(linesForm[i]) + 1;
 	}
