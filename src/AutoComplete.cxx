@@ -126,7 +126,7 @@ void AutoComplete::Select(const char *word) {
 	while ((start <= end) && (location == -1)) { // Binary searching loop
 		int pivot = (start + end) / 2;
 		lb.GetValue(pivot, item, maxItemLen);
-		int cond = 0;
+		int cond;
 		if (ignoreCase)
 			cond = CompareNCaseInsensitive(word, item, lenWord);
 		else
