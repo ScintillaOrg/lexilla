@@ -23,7 +23,7 @@ static void classifyWordSQL(unsigned int start, unsigned int end, WordList &keyw
 	char s[100];
 	bool wordIsNumber = isdigit(styler[start]) || (styler[start] == '.');
 	for (unsigned int i = 0; i < end - start + 1 && i < 30; i++) {
-		s[i] = static_cast<char>(toupper(styler[start + i]));
+		s[i] = static_cast<char>(tolower(styler[start + i]));
 		s[i + 1] = '\0';
 	}
 	char chAttr = SCE_C_IDENTIFIER;
