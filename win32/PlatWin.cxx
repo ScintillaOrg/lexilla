@@ -716,7 +716,7 @@ void Window::SetFont(Font &font) {
 		reinterpret_cast<WPARAM>(font.GetID()), 0);
 }
 
-static HINSTANCE hinstPlatformRes = 0;
+HINSTANCE hinstPlatformRes = 0;
 
 void Window::SetCursor(Cursor curs) {
 	switch (curs) {

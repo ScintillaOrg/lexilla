@@ -1879,9 +1879,12 @@ sptr_t PASCAL ScintillaWin::SWndProc(
 	}
 }
 
+extern HINSTANCE hinstPlatformRes;
+
 // This function is externally visible so it can be called from container when building statically
 void Scintilla_RegisterClasses(void *hInstance) {
-	ScintillaWin::Register(reinterpret_cast<HINSTANCE>(hInstance));
+	hinstPlatformRes = reinterpret_cast<HINSTANCE>(hInstance);
+	ScintillaWin::Register(hinstPlatformRes);
 }
 
 #ifndef STATIC_BUILD
