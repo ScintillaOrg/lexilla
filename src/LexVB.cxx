@@ -52,12 +52,17 @@ static void ColouriseVBDoc(unsigned int startPos, int length, int initStyle,
 					sc.GetCurrentLowered(s, sizeof(s));
 					if (keywords.InList(s)) {
 						if (strcmp(s, "rem") == 0) {
-							sc.ChangeState(SCE_C_COMMENTLINE);
+							sc.ChangeState(SCE_B_COMMENT);
+							if (sc.atLineEnd) {
+								sc.SetState(SCE_B_DEFAULT);
+							}
+						} else {
+							sc.SetState(SCE_B_DEFAULT);
 						}
 					} else {
 						sc.ChangeState(SCE_B_IDENTIFIER);
+						sc.SetState(SCE_B_DEFAULT);
 					}
-					sc.SetState(SCE_B_DEFAULT);
 				}
 			}
 		} else if (sc.state == SCE_B_NUMBER) {
