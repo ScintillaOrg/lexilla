@@ -88,6 +88,24 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_MARK_ARROWDOWN 6
 #define SC_MARK_MINUS 7
 #define SC_MARK_PLUS 8
+#define SC_MARK_VLINE 9
+#define SC_MARK_LCORNER 10
+#define SC_MARK_TCORNER 11
+#define SC_MARK_BOXPLUS 12
+#define SC_MARK_BOXPLUSCONNECTED 13
+#define SC_MARK_BOXMINUS 14
+#define SC_MARK_BOXMINUSCONNECTED 15
+#define SC_MARK_LCORNERCURVE 16
+#define SC_MARK_TCORNERCURVE 17
+#define SC_MARK_CIRCLEPLUS 18
+#define SC_MARK_CIRCLEPLUSCONNECTED 19
+#define SC_MARK_CIRCLEMINUS 20
+#define SC_MARK_CIRCLEMINUSCONNECTED 21
+#define SC_MARKNUM_FOLDEREND 25
+#define SC_MARKNUM_FOLDEROPENMID 26
+#define SC_MARKNUM_FOLDERMIDTAIL 27
+#define SC_MARKNUM_FOLDERTAIL 28
+#define SC_MARKNUM_FOLDERSUB 29
 #define SC_MARKNUM_FOLDER 30
 #define SC_MARKNUM_FOLDEROPEN 31
 #define SCI_MARKERDEFINE 2040
@@ -553,7 +571,13 @@ struct SCNotification {
 	int listType;	// SCN_USERLISTSELECTION
 };
 
-#define SC_MASK_FOLDERS ((1<<SC_MARKNUM_FOLDER) | (1<<SC_MARKNUM_FOLDEROPEN))
+#define SC_MASK_FOLDERS ((1<<SC_MARKNUM_FOLDER) | \
+	(1<<SC_MARKNUM_FOLDEROPEN) | \
+	(1<<SC_MARKNUM_FOLDERSUB) | \
+	(1<<SC_MARKNUM_FOLDERTAIL) | \
+	(1<<SC_MARKNUM_FOLDERMIDTAIL) | \
+	(1<<SC_MARKNUM_FOLDEROPENMID) | \
+	(1<<SC_MARKNUM_FOLDEREND))
 
 // Deprecation section listing all API features that are deprecated and will
 // will be removed completely in a future version.

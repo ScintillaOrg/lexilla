@@ -712,14 +712,64 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 			int visibleLine = topLine;
 			int line = cs.DocFromDisplay(visibleLine);
 			int yposScreen = 0;
-
+			bool needWhiteClosure = false;
+			int level = pdoc->GetLevel(line);
+			if (level & SC_FOLDLEVELWHITEFLAG) {
+				int lineBack = line-1;
+				while ((lineBack > 0) && (level & SC_FOLDLEVELWHITEFLAG)) {
+					lineBack--;
+					level = pdoc->GetLevel(lineBack);
+				}
+				if (!(level & SC_FOLDLEVELHEADERFLAG) && (lineBack > 0)) {
+					int levelPrev = pdoc->GetLevel(lineBack-1);
+					if ((level & SC_FOLDLEVELNUMBERMASK) < (levelPrev & SC_FOLDLEVELNUMBERMASK))
+						needWhiteClosure = true;
+				}
+			}
 			while ((visibleLine < cs.LinesDisplayed()) && yposScreen < rcMargin.bottom) {
+				level = pdoc->GetLevel(line);
+				int levelNext = pdoc->GetLevel(line+1);
 				int marks = pdoc->GetMark(line);
-				if (pdoc->GetLevel(line) & SC_FOLDLEVELHEADERFLAG) {
+				int levelNum = level & SC_FOLDLEVELNUMBERMASK;
+				int levelNextNum = levelNext & SC_FOLDLEVELNUMBERMASK;
+				if (level & SC_FOLDLEVELHEADERFLAG) {
 					if (cs.GetExpanded(line)) {
-						marks |= 1 << SC_MARKNUM_FOLDEROPEN;
+						if (levelNum == SC_FOLDLEVELBASE)
+							marks |= 1 << SC_MARKNUM_FOLDEROPEN;
+						else 
+							marks |= 1 << SC_MARKNUM_FOLDEROPENMID;
 					} else {
-						marks |= 1 << SC_MARKNUM_FOLDER;
+						if (levelNum == SC_FOLDLEVELBASE)
+							marks |= 1 << SC_MARKNUM_FOLDER;
+						else
+							marks |= 1 << SC_MARKNUM_FOLDEREND;
+					}
+					needWhiteClosure = false;
+				} else if (level & SC_FOLDLEVELWHITEFLAG) {
+					if (needWhiteClosure) {
+						if (levelNext & SC_FOLDLEVELWHITEFLAG) {
+							marks |= 1 << SC_MARKNUM_FOLDERSUB;
+						} else if (levelNum > SC_FOLDLEVELBASE) {
+							marks |= 1 << SC_MARKNUM_FOLDERMIDTAIL;
+						} else {
+							marks |= 1 << SC_MARKNUM_FOLDERTAIL;
+							needWhiteClosure = false;
+						}
+					} else if (levelNum > SC_FOLDLEVELBASE) {
+						marks |= 1 << SC_MARKNUM_FOLDERSUB;
+					}
+				} else if (levelNum > SC_FOLDLEVELBASE) {
+					if (levelNextNum < levelNum) {
+						if (levelNext & SC_FOLDLEVELWHITEFLAG) {
+							marks |= 1 << SC_MARKNUM_FOLDERSUB;
+							needWhiteClosure = true;
+						} else if (levelNextNum > SC_FOLDLEVELBASE) {
+							marks |= 1 << SC_MARKNUM_FOLDERMIDTAIL;
+						} else {
+							marks |= 1 << SC_MARKNUM_FOLDERTAIL;
+						}
+					} else {
+						marks |= 1 << SC_MARKNUM_FOLDERSUB;
 					}
 				}
 				marks &= vs.ms[margin].mask;
@@ -748,8 +798,6 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 				if (marks) {
 					for (int markBit = 0; (markBit < 32) && marks; markBit++) {
 						if (marks & 1) {
-							rcMarker.top++;
-							rcMarker.bottom--;
 							vs.markers[markBit].Draw(surface, rcMarker);
 						}
 						marks >>= 1;
