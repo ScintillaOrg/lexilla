@@ -150,6 +150,10 @@ SOURCE=..\src\LexAsm.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexAsn1.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexAU3.cxx
 # End Source File
 # Begin Source File
@@ -311,6 +315,10 @@ SOURCE=..\src\LexVB.cxx
 # Begin Source File
 
 SOURCE=..\src\LexVerilog.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexVHDL.cxx
 # End Source File
 # Begin Source File
 
