@@ -144,7 +144,7 @@ public:
 	 * starting at @a pos, the string is just truncated at @a pos.
 	 */
 	void remove(lenpos_t pos, lenpos_t len);
-	
+
 	SString &change(lenpos_t pos, char ch) {
 		if (pos < sLen) {					// character changed must be in string bounds
 			*(s + pos) = ch;
@@ -155,6 +155,8 @@ public:
 	int value() const {
 		return s ? atoi(s) : 0;
 	}
+	bool startswith(const char *prefix);
+	bool endswith(const char *suffix);
 	int search(const char *sFind, lenpos_t start=0) const;
 	bool contains(const char *sFind) {
 		return search(sFind) >= 0;

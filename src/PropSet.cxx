@@ -247,6 +247,22 @@ void SString::remove(lenpos_t pos, lenpos_t len) {
 	}
 }
 
+bool SString::startswith(const char *prefix) {
+	lenpos_t lenPrefix = strlen(prefix);
+	if (lenPrefix > sLen) {
+		return false;
+	}
+	return strncmp(s, prefix, lenPrefix) == 0;
+}
+
+bool SString::endswith(const char *suffix) {
+	lenpos_t lenSuffix = strlen(suffix);
+	if (lenSuffix > sLen) {
+		return false;
+	}
+	return strncmp(s + sLen - lenSuffix, suffix, lenSuffix) == 0;
+}
+
 int SString::search(const char *sFind, lenpos_t start) const {
 	if (start < sLen) {
 		const char *sFound = strstr(s + start, sFind);
