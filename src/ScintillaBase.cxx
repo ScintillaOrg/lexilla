@@ -64,11 +64,18 @@ void ScintillaBase::RefreshColourPalette(Palette &pal, bool want) {
 }
 
 void ScintillaBase::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
-	bool acActiveBeforeCharAdded = ac.Active();
-	if (!acActiveBeforeCharAdded || !ac.IsFillUpChar(*s))
+	bool isFillUp = ac.Active() && ac.IsFillUpChar(*s);
+	if (!isFillUp) {
 		Editor::AddCharUTF(s, len, treatAsDBCS);
-	if (acActiveBeforeCharAdded)
+	}
+	if (ac.Active()) {
 		AutoCompleteChanged(s[0]);
+		// For fill ups add the character after the autocompletion has 
+		// triggered so containers see the key so can display a calltip.
+		if (isFillUp) {
+			Editor::AddCharUTF(s, len, treatAsDBCS);
+		}
+	}
 }
 
 void ScintillaBase::Command(int cmdId) {
@@ -278,7 +285,7 @@ void ScintillaBase::AutoCompleteMoveToCurrentWord() {
 
 void ScintillaBase::AutoCompleteChanged(char ch) {
 	if (ac.IsFillUpChar(ch)) {
-		AutoCompleteCompleted(ch);
+		AutoCompleteCompleted();
 	} else if (currentPos <= ac.posStart - ac.startLen) {
 		ac.Cancel();
 	} else if (ac.cancelAtStartPos && currentPos <= ac.posStart) {
@@ -290,7 +297,7 @@ void ScintillaBase::AutoCompleteChanged(char ch) {
 	}
 }
 
-void ScintillaBase::AutoCompleteCompleted(char fillUp/*='\0'*/) {
+void ScintillaBase::AutoCompleteCompleted() {
 	int item = ac.lb.GetSelection();
 	char selected[1000];
 	if (item != -1) {
@@ -323,8 +330,6 @@ void ScintillaBase::AutoCompleteCompleted(char fillUp/*='\0'*/) {
 	SetEmptySelection(ac.posStart);
 	if (item != -1) {
 		SString piece = selected;
-		if (fillUp)
-			piece += fillUp;
 		pdoc->InsertString(firstPos, piece.c_str());
 		SetEmptySelection(firstPos + piece.length());
 	}
