@@ -158,7 +158,6 @@ static void ColouriseErrorListLine(char *lineBuffer, int lengthLine, int endPos,
 				state = 14;
 			} else if (state == 11 && lineBuffer[i] == ')') {
 				state = 12;
-				break;
 			} else if (state == 12 && lineBuffer[i] == ':') {
 				state = 13;
 			} else if (state == 14 && lineBuffer[i] == ')') {
@@ -170,7 +169,7 @@ static void ColouriseErrorListLine(char *lineBuffer, int lengthLine, int endPos,
 		}
 		if (state == 3) {
 			styler.ColourTo(endPos, 2);
-		} else if ((state == 14) || (state == 15)) {
+		} else if ((state == 13) || (state == 14) || (state == 15)) {
 			styler.ColourTo(endPos, 3);
 		} else {
 			styler.ColourTo(endPos, 0);

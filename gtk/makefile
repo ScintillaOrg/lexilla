@@ -15,7 +15,7 @@ vpath %.cxx ../src
 
 #CXXFLAGS= -g -DGTK -DSCI_LEXER -Wwrite-strings
 INCLUDEDIRS=-I ../include -I ../src
-CXXFLAGS= -DGTK -DSCI_LEXER
+CXXFLAGS= -DGTK -DSCI_LEXER -W -Wall
 
 .cxx.o:
 	$(CC) `gtk-config --cflags` $(INCLUDEDIRS) $(CXXFLAGS) -c $< -o $@

@@ -11,6 +11,7 @@
 
 #include "Platform.h"
 #include "PlatformRes.h"
+#include "UniConversion.h"
 
 Point Point::FromLong(long lpoint) {
 	return Point(static_cast<short>(LOWORD(lpoint)), static_cast<short>(HIWORD(lpoint)));
@@ -321,34 +322,6 @@ void Surface::Ellipse(PRectangle rc, Colour fore, Colour back) {
 void Surface::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	::BitBlt(hdc, rc.left, rc.top, rc.Width(), rc.Height(), 
 		surfaceSource.hdc, from.x, from.y, SRCCOPY);
-}
-
-int UCS2FromUTF8(const char *s, int len, wchar_t *tbuf, int tlen) {
-#ifdef USE_API
-	return ::MultiByteToWideChar(CP_UTF8, 0, s, len, tbuf, tlen);
-#else 
-	int ui=0;
-	const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
-	int i=0;
-	while ((i<len) && (ui<tlen)) {
-		unsigned char ch = us[i++];
-		if (ch < 0x80) {
-			tbuf[ui] = ch;
-		} else if (ch < 0x80 + 0x40 + 0x20) {
-			tbuf[ui] = (ch & 0x1F) << 6;
-			ch = us[i++];
-			tbuf[ui] += ch & 0x7F;
-		} else {
-			tbuf[ui] = (ch & 0xF) << 12;
-			ch = us[i++];
-			tbuf[ui] += (ch & 0x7F) << 6;
-			ch = us[i++];
-			tbuf[ui] += ch & 0x7F;
-		}
-		ui++;
-	}
-	return ui;
-#endif
 }
 
 #define MAX_US_LEN 5000

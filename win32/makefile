@@ -15,7 +15,6 @@ vpath %.h ../src ../include
 vpath %.cxx ../src
 
 LDFLAGS = -lkernel32 -lgdi32 -luser32 -lwinmm -lcomdlg32 -lcomctl32 -limm32 -lole32 -luuid
-#CXXFLAGS = -W -Wall
 # Add -MMD to get dependencies
 #CXXFLAGS = -g -pg -pedantic -Os -fno-exceptions -fvtable-thunks -fno-rtti
 INCLUDEDIRS=-I ../include -I ../src
@@ -34,14 +33,14 @@ LEXOBJS	=  LexCPP.o LexHTML.o LexOthers.o LexPerl.o LexPython.o LexSQL.o LexVB.o
 SOBJS	= ScintillaWin.o ScintillaBase.o Editor.o Document.o \
 	ContractionState.o CellBuffer.o CallTip.o \
 	ScintRes.o PlatWin.o KeyMap.o Indicator.o LineMarker.o Style.o \
-	ViewStyle.o AutoComplete.o
+	ViewStyle.o AutoComplete.o UniConversion.o
 $(COMPONENT): $(SOBJS)
 	$(DLLWRAP) --target i386-mingw32 -o $(COMPONENT) $(SOBJS) $(LDFLAGS) -s --relocatable
 	
 LOBJS	= ScintillaWinL.o ScintillaBaseL.o Editor.o Document.o \
 	ContractionState.o CellBuffer.o CallTip.o \
-	ScintRes.o PlatWin.o KeyMap.o Indicator.o LineMarker.o Style.o \
-	ViewStyle.o AutoComplete.o KeyWords.o DocumentAccessor.o PropSet.o $(LEXOBJS)
+	ScintRes.o PlatWin.o KeyMap.o Indicator.o LineMarker.o Style.o ViewStyle.o \
+	AutoComplete.o UniConversion.o KeyWords.o DocumentAccessor.o PropSet.o $(LEXOBJS)
 $(LEXCOMPONENT): $(LOBJS)
 	$(DLLWRAP) --target i386-mingw32 -o $(LEXCOMPONENT) $(LOBJS) $(LDFLAGS) -s --relocatable
 	
@@ -74,7 +73,7 @@ LexVB.o: LexVB.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
 KeyWords.o: KeyWords.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 
 LineMarker.o: LineMarker.cxx Platform.h Scintilla.h LineMarker.h
-PlatWin.o: PlatWin.cxx Platform.h PlatformRes.h
+PlatWin.o: PlatWin.cxx Platform.h PlatformRes.h UniConversion.h
 PropSet.o: PropSet.cxx Platform.h PropSet.h
 ScintillaBase.o: ScintillaBase.cxx Platform.h Scintilla.h \
  ContractionState.h CellBuffer.h CallTip.h KeyMap.h Indicator.h \
@@ -87,16 +86,17 @@ ScintillaBaseL.o: ScintillaBase.cxx Platform.h Scintilla.h SciLexer.h \
 ScintillaWin.o: ScintillaWin.cxx Platform.h Scintilla.h \
  ContractionState.h CellBuffer.h CallTip.h KeyMap.h Indicator.h \
  LineMarker.h Style.h AutoComplete.h ViewStyle.h Document.h Editor.h \
- ScintillaBase.h
+ ScintillaBase.h UniConversion.h
 ScintillaWinL.o: ScintillaWin.cxx Platform.h Scintilla.h SciLexer.h \
  ContractionState.h CellBuffer.h CallTip.h KeyMap.h Indicator.h \
  LineMarker.h Style.h AutoComplete.h ViewStyle.h Document.h Editor.h \
- ScintillaBase.h PropSet.h Accessor.h KeyWords.h
+ ScintillaBase.h PropSet.h Accessor.h KeyWords.h UniConversion.h
 ScintillaWinS.o: ScintillaWin.cxx Platform.h Scintilla.h \
  ContractionState.h CellBuffer.h CallTip.h KeyMap.h Indicator.h \
  LineMarker.h Style.h AutoComplete.h ViewStyle.h Document.h Editor.h \
- ScintillaBase.h
+ ScintillaBase.h UniConversion.h
 Style.o: Style.cxx Platform.h Style.h
+UniConversion.o: UniConversion.cxx UniConversion.h
 ViewStyle.o: ViewStyle.cxx Platform.h Scintilla.h Indicator.h \
  LineMarker.h Style.h ViewStyle.h
 WindowAccessor.o: DocumentAccessor.cxx Platform.h PropSet.h Accessor.h WindowAccessor.h Scintilla.h

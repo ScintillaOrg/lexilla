@@ -150,7 +150,7 @@ ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 ScintillaGTK::~ScintillaGTK() { 
 }
 
-gint ScintillaGTK::FocusIn(GtkWidget *widget, GdkEventFocus *event, ScintillaGTK *sciThis) {
+gint ScintillaGTK::FocusIn(GtkWidget *widget, GdkEventFocus * /*event*/, ScintillaGTK *sciThis) {
 	//Platform::DebugPrintf("ScintillaGTK::focus in %x\n", sciThis);
 	GTK_WIDGET_SET_FLAGS(widget, GTK_HAS_FOCUS);
 	sciThis->NotifyFocus(true);
@@ -158,7 +158,7 @@ gint ScintillaGTK::FocusIn(GtkWidget *widget, GdkEventFocus *event, ScintillaGTK
 	return FALSE;
 }
 
-gint ScintillaGTK::FocusOut(GtkWidget *widget, GdkEventFocus *event, ScintillaGTK *sciThis) {
+gint ScintillaGTK::FocusOut(GtkWidget *widget, GdkEventFocus * /*event*/, ScintillaGTK *sciThis) {
 	//Platform::DebugPrintf("ScintillaGTK::focus out %x\n", sciThis);
 	GTK_WIDGET_UNSET_FLAGS(widget, GTK_HAS_FOCUS);
 	sciThis->NotifyFocus(false);
@@ -552,8 +552,8 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 		//if (selection_data->length > 0) {
 			char *ptr = reinterpret_cast<char *>(selection_data->data);
 			unsigned int len = selection_data->length;
-			for (unsigned int i=0; i<selection_data->length; i++) {
-				if ((len == selection_data->length) && (0 == ptr[i]))
+			for (unsigned int i=0; i<static_cast<unsigned int>(selection_data->length); i++) {
+				if ((len == static_cast<unsigned int>(selection_data->length)) && (0 == ptr[i]))
 					len = i;
 			}
 			pdoc->BeginUndoAction();
@@ -801,7 +801,7 @@ gint ScintillaGTK::KeyPress(GtkWidget *, GdkEventKey *event, ScintillaGTK *sciTh
 	return TRUE;
 }
 
-gint ScintillaGTK::KeyRelease(GtkWidget *, GdkEventKey *event, ScintillaGTK *sciThis) {
+gint ScintillaGTK::KeyRelease(GtkWidget *, GdkEventKey * /*event*/, ScintillaGTK * /*sciThis*/) {
 	//Platform::DebugPrintf("SC-keyrel: %d %x %3s\n",event->keyval, event->state, event->string);
 	return FALSE;
 }
@@ -879,13 +879,13 @@ gboolean ScintillaGTK::DragMotion(GtkWidget *, GdkDragContext *context,
 	return FALSE;
 }
 
-void ScintillaGTK::DragLeave(GtkWidget *, GdkDragContext *context, 
+void ScintillaGTK::DragLeave(GtkWidget *, GdkDragContext * /*context*/, 
 	guint, ScintillaGTK *sciThis) {
 	sciThis->SetDragPosition(invalidPosition);
 	//Platform::DebugPrintf("DragLeave %x\n", sciThis);
 }
 
-void ScintillaGTK::DragEnd(GtkWidget *, GdkDragContext *context, 
+void ScintillaGTK::DragEnd(GtkWidget *, GdkDragContext * /*context*/, 
 	ScintillaGTK *sciThis) {
 	// If drag did not result in drop here or elsewhere
 	if (!sciThis->dragWasDropped)
@@ -894,15 +894,15 @@ void ScintillaGTK::DragEnd(GtkWidget *, GdkDragContext *context,
 	//Platform::DebugPrintf("DragEnd %x %d\n", sciThis, sciThis->dragWasDropped);
 }
 
-gboolean ScintillaGTK::Drop(GtkWidget *, GdkDragContext *context, 
+gboolean ScintillaGTK::Drop(GtkWidget *, GdkDragContext * /*context*/, 
 	gint, gint, guint, ScintillaGTK *sciThis) {
 	//Platform::DebugPrintf("Drop %x\n", sciThis);
 	sciThis->SetDragPosition(invalidPosition);
 	return FALSE;
 }
 
-void ScintillaGTK::DragDataReceived(GtkWidget *, GdkDragContext *context,
-	gint, gint, GtkSelectionData *selection_data, guint info, guint, 
+void ScintillaGTK::DragDataReceived(GtkWidget *, GdkDragContext * /*context*/,
+	gint, gint, GtkSelectionData *selection_data, guint /*info*/, guint, 
 	ScintillaGTK *sciThis) {
 	sciThis->ReceivedDrop(selection_data);
 	sciThis->SetDragPosition(invalidPosition);
@@ -940,7 +940,7 @@ void ScintillaGTK::PopUpCB(ScintillaGTK *sciThis, guint action, GtkWidget *) {
 	}
 }
 
-gint ScintillaGTK::ExposeCT(GtkWidget *widget, GdkEventExpose *ose, CallTip *ctip) {
+gint ScintillaGTK::ExposeCT(GtkWidget *widget, GdkEventExpose * /*ose*/, CallTip *ctip) {
 	Surface surfaceWindow;
 	//surfaceWindow.Init((ct->wCallTip.GetID())->window);
 	surfaceWindow.Init(widget->window);
@@ -968,7 +968,8 @@ guint scintilla_get_type() {
     		(GtkClassInitFunc) scintilla_class_init,
     		(GtkObjectInitFunc) scintilla_init,
     		(GtkArgSetFunc) NULL,
-    		(GtkArgGetFunc) NULL
+    		(GtkArgGetFunc) NULL,
+    		0
 		};
 
 		scintilla_type = gtk_type_unique(gtk_fixed_get_type(), &scintilla_info);

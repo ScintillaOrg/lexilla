@@ -2638,7 +2638,7 @@ char BraceOpposite(char ch) {
 int Editor::BraceMatch(int position, int /*maxReStyle*/) {
 	char chBrace = pdoc->CharAt(position);
 	char chSeek = BraceOpposite(chBrace);
-	if (chSeek != '\0')
+	if (chSeek == '\0')
 		return - 1;
 	char styBrace = static_cast<char>(
 		pdoc->StyleAt(position) & pdoc->stylingBitsMask);

@@ -30,6 +30,7 @@
 #include "Document.h"
 #include "Editor.h"
 #include "ScintillaBase.h"
+#include "UniConversion.h"
 
 //#include "CElapsed.h"
 
@@ -602,38 +603,6 @@ void ScintillaWin::Copy() {
 	}
 }
 
-unsigned int UTF8Length(wchar_t *uptr, unsigned int tlen) {
-	unsigned int len = 0;
-	for (unsigned int i = 0; i < tlen && uptr[i]; i++) {
-		unsigned int uch = uptr[i];
-		if (uch < 0x80)
-			len++;
-		else if (uch < 0x800)
-			len+=2;
-		else
-			len +=3;
-	}
-	return len;
-}
-
-void UTF8FromUCS2(wchar_t *uptr, unsigned int tlen, char *putf, int len) {
-	int k = 0;
-	for (unsigned int i = 0; i < tlen && uptr[i]; i++) {
-		unsigned int uch = uptr[i];
-		if (uch < 0x80) {
-			putf[k++] = static_cast<char>(uch);
-		} else if (uch < 0x800) {
-			putf[k++] = static_cast<char>(0xC0 | (uch >> 6));
-			putf[k++] = static_cast<char>(0x80 | (uch & 0x3f));
-		} else {
-			putf[k++] = static_cast<char>(0xE0 | (uch >> 12));
-			putf[k++] = static_cast<char>(0x80 | ((uch >> 6) & 0x3f));
-			putf[k++] = static_cast<char>(0x80 | (uch & 0x3f));
-		}
-	}
-	putf[len] = '\0';
-}
-
 void ScintillaWin::Paste() {
 	pdoc->BeginUndoAction();
 	int selStart = SelectionStart();
@@ -1043,33 +1012,12 @@ void ScintillaWin::CopySelTextToClipboard() {
 	::SetClipboardData(CF_TEXT, hand);
 
 	if (SC_CP_UTF8 == pdoc->dbcsCodePage) {
-		int uchars = 0;
-		for (int i=0;i<bytes;i++) {
-			unsigned char ch = static_cast<unsigned char>(selChars[i]);
-			if ((ch < 0x80) || (ch > (0x80 + 0x40)))
-				uchars++;
-		}
+		int uchars = UCS2Length(selChars, bytes);
 		HGLOBAL uhand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, 
 			2 * (uchars + 1));
 		if (uhand) {
 			wchar_t *uptr = static_cast<wchar_t *>(::GlobalLock(uhand));
-			int k=0;
-			for (int j=0; j<uchars; j++) {
-				unsigned char ch = static_cast<unsigned char>(selChars[k++]);
-				if (ch < 0x80) {
-					uptr[j] = ch;
-				} else if (ch < 0x80 + 0x40 + 0x20) {
-					uptr[j] = (ch & 0x1F) << 6;
-					ch = static_cast<unsigned char>(selChars[k++]);
-					uptr[j] += ch & 0x7F;
-				} else {
-					uptr[j] = (ch & 0xF) << 12;
-					ch = static_cast<unsigned char>(selChars[k++]);
-					uptr[j] += (ch & 0x7F) << 6;
-					ch = static_cast<unsigned char>(selChars[k++]);
-					uptr[j] += ch & 0x7F;
-				}
-			}
+			UCS2FromUTF8(selChars, bytes, uptr, uchars);
 			uptr[uchars] = 0;
 			::GlobalUnlock(uhand);
 		}

@@ -42,7 +42,7 @@ SOBJS	= $(DIR_O)\ScintillaWin.obj $(DIR_O)\ScintillaBase.obj \
 	$(DIR_O)\ContractionState.obj $(DIR_O)\CellBuffer.obj \
 	$(DIR_O)\CallTip.obj $(DIR_O)\PlatWin.obj $(DIR_O)\KeyMap.obj \
 	$(DIR_O)\Indicator.obj $(DIR_O)\LineMarker.obj $(DIR_O)\Style.obj \
-	$(DIR_O)\ViewStyle.obj $(DIR_O)\AutoComplete.obj
+	$(DIR_O)\ViewStyle.obj $(DIR_O)\AutoComplete.obj $(DIR_O)\UniConversion.obj
 
 LEXOBJS	= $(DIR_O)\LexCPP.obj \
 	$(DIR_O)\LexHTML.obj \
@@ -60,7 +60,7 @@ LOBJS	= $(DIR_O)\ScintillaWinL.obj $(DIR_O)\ScintillaBaseL.obj \
 	$(DIR_O)\ContractionState.obj $(DIR_O)\CellBuffer.obj $(DIR_O)\CallTip.obj \
 	$(DIR_O)\PlatWin.obj $(DIR_O)\KeyMap.obj $(DIR_O)\Indicator.obj \
 	$(DIR_O)\LineMarker.obj $(DIR_O)\Style.obj \
-	$(DIR_O)\ViewStyle.obj $(DIR_O)\AutoComplete.obj \
+	$(DIR_O)\ViewStyle.obj $(DIR_O)\AutoComplete.obj $(DIR_O)\UniConversion.obj \
 	$(DIR_O)\KeyWords.obj $(DIR_O)\DocumentAccessor.obj \
 	$(DIR_O)\PropSet.obj $(LEXOBJS)
 
@@ -135,7 +135,7 @@ $(DIR_O)\LexVB.obj: ..\src\LexVB.cxx ..\include\Platform.h ..\include\PropSet.h 
 $(DIR_O)\LineMarker.obj: ..\src\LineMarker.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\LineMarker.h
 	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /Fo$@ /c ..\src\$(@B).cxx
 
-$(DIR_O)\PlatWin.obj: PlatWin.cxx ..\include\Platform.h PlatformRes.h
+$(DIR_O)\PlatWin.obj: PlatWin.cxx ..\include\Platform.h PlatformRes.h ..\src\UniConversion.h
 	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /Fo$@ /c $(@B).cxx
 
 $(DIR_O)\PropSet.obj: ..\src\PropSet.cxx ..\include\Platform.h ..\include\PropSet.h
@@ -156,19 +156,19 @@ $(DIR_O)\ScintillaBaseL.obj: ..\src\ScintillaBase.cxx ..\include\Platform.h ..\i
 $(DIR_O)\ScintillaWin.obj: ScintillaWin.cxx ..\include\Platform.h ..\include\Scintilla.h \
  ..\src\ContractionState.h ..\src\CellBuffer.h ..\src\CallTip.h ..\src\KeyMap.h ..\src\Indicator.h \
  ..\src\LineMarker.h ..\src\Style.h ..\src\AutoComplete.h ..\src\ViewStyle.h ..\src\Document.h ..\src\Editor.h \
- ..\src\ScintillaBase.h
+ ..\src\ScintillaBase.h ..\src\UniConversion.h
 	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /Fo$@ /c $(@B).cxx
 
 $(DIR_O)\ScintillaWinL.obj: ScintillaWin.cxx ..\include\Platform.h ..\include\Scintilla.h ..\include\SciLexer.h \
  ..\src\ContractionState.h ..\src\CellBuffer.h ..\src\CallTip.h ..\src\KeyMap.h ..\src\Indicator.h \
  ..\src\LineMarker.h ..\src\Style.h ..\src\AutoComplete.h ..\src\ViewStyle.h ..\src\Document.h ..\src\Editor.h \
- ..\src\ScintillaBase.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h
+ ..\src\ScintillaBase.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h ..\src\UniConversion.h
 	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /D SCI_LEXER /c ScintillaWin.cxx /Fo$@
 
 $(DIR_O)\ScintillaWinS.obj: ScintillaWin.cxx ..\include\Platform.h ..\include\Scintilla.h \
  ..\src\ContractionState.h ..\src\CellBuffer.h ..\src\CallTip.h ..\src\KeyMap.h ..\src\Indicator.h \
  ..\src\LineMarker.h ..\src\Style.h ..\src\AutoComplete.h ..\src\ViewStyle.h ..\src\Document.h ..\src\Editor.h \
- ..\src\ScintillaBase.h
+ ..\src\ScintillaBase.h ..\src\UniConversion.h
 	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /D STATIC_BUILD /c ScintillaWin.cxx /Fo$@
 
 $(DIR_O)\Style.obj: ..\src\Style.cxx ..\include\Platform.h ..\src\Style.h
@@ -177,6 +177,9 @@ $(DIR_O)\Style.obj: ..\src\Style.cxx ..\include\Platform.h ..\src\Style.h
 $(DIR_O)\ViewStyle.obj: ..\src\ViewStyle.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\Indicator.h \
  ..\src\LineMarker.h ..\src\Style.h ..\src\ViewStyle.h
 	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /Fo$@ /c ..\src\$(@B).cxx
+
+$(DIR_O)\UniConversion.obj: ..\src\UniConversion.cxx ..\src\UniConversion.h
+ 	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /Fo$@ /c ..\src\$(@B).cxx
 
 $(DIR_O)\WindowAccessor.obj: ..\src\WindowAccessor.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\WindowAccessor.h ..\include\Scintilla.h
 	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /Fo$@ /c ..\src\$(@B).cxx

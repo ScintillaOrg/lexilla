@@ -190,6 +190,10 @@ SOURCE=..\src\Style.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\UniConversion.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\ViewStyle.cxx
 # End Source File
 # Begin Source File

@@ -254,7 +254,7 @@ void Surface::Polygon(Point *pts, int npts, Colour fore,
 	// Nasty casts works because Point is exactly same as GdkPoint
 	// Oh no it doesn't...
 	GdkPoint gpts[20];
-	if (npts < (sizeof(gpts)/sizeof(gpts[0]))) {
+	if (npts < static_cast<int>((sizeof(gpts)/sizeof(gpts[0])))) {
 		for (int i=0;i<npts;i++) {
 			gpts[i].x = pts[i].x;
 			gpts[i].y = pts[i].y;
