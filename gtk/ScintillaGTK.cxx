@@ -1663,6 +1663,10 @@ static int KeyTranslate(int keyIn) {
 gint ScintillaGTK::KeyThis(GdkEventKey *event) {
 	//Platform::DebugPrintf("SC-key: %d %x [%s]\n",
 	//	event->keyval, event->state, (event->length > 0) ? event->string : "empty");
+	if (!event->keyval) {
+		return true;
+	}
+
 	bool shift = (event->state & GDK_SHIFT_MASK) != 0;
 	bool ctrl = (event->state & GDK_CONTROL_MASK) != 0;
 	bool alt = (event->state & GDK_MOD1_MASK) != 0;
