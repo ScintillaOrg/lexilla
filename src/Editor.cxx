@@ -2086,7 +2086,7 @@ void Editor::PasteRectangular(int pos, const char *ptr, int len) {
 		}
 	}
 	pdoc->EndUndoAction();
-	SetEmptySelection(insertPos);
+	SetEmptySelection(pos);
 }
 
 bool Editor::CanPaste() {
