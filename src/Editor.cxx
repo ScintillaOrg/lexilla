@@ -2438,7 +2438,7 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 
 	int lineDoc = linePrintStart;
 
-	int nPrintPos = pdoc->LineStart(lineDoc);
+	int nPrintPos = pfr->chrg.cpMin;
 	int visibleLine = 0;
 
 	while (lineDoc <= linePrintLast && ypos < pfr->rc.bottom) {
@@ -2454,69 +2454,74 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 		LineLayout ll(8000);
 		LayoutLine(lineDoc, surfaceMeasure, vsPrint, &ll, pfr->rc.Width() - lineNumberWidth);
 
+		ll.selStart = -1;
+		ll.selEnd = -1;
+		ll.containsCaret = false;
+
+		PRectangle rcLine;
+		rcLine.left = pfr->rc.left + lineNumberWidth;
+		rcLine.top = ypos;
+		rcLine.right = pfr->rc.right - 1;
+		rcLine.bottom = ypos + vsPrint.lineHeight;
+
 		// When document line is wrapped over multiple display lines, find where
 		// to start printing from to ensure a particular position is on the first
 		// line of the page.
 		if (visibleLine == 0) {
+			int startWithinLine = nPrintPos - pdoc->LineStart(lineDoc);
 			for (int iwl = 0; iwl < ll.lines - 1; iwl++) {
-				if (ll.LineStart(iwl) <= nPrintPos && ll.LineStart(iwl + 1) >= nPrintPos)
-					nPrintPos = ll.LineStart(iwl);
+				if (ll.LineStart(iwl) <= startWithinLine && ll.LineStart(iwl + 1) >= startWithinLine) {
+					visibleLine = -iwl;
+				}
 			}
 
-			if (ll.lines > 1 && nPrintPos >= ll.LineStart(ll.lines - 1)) {
-				nPrintPos = ll.LineStart(ll.lines - 1);
+			if (ll.lines > 1 && startWithinLine >= ll.LineStart(ll.lines - 1)) {
+				visibleLine = -(ll.lines - 1);
 			}
 		}
 
-		if (ypos + vsPrint.lineHeight * ll.lines > pfr->rc.bottom) {
-			ypos = pfr->rc.bottom;
-			continue;
-		}
-
-
-		if (draw && nPrintPos >= pfr->chrg.cpMin) {
-			ll.selStart = -1;
-			ll.selEnd = -1;
-			ll.containsCaret = false;
-
-			PRectangle rcLine;
-			rcLine.left = pfr->rc.left + lineNumberWidth;
-			rcLine.top = ypos;
-			rcLine.right = pfr->rc.right - 1;
-			rcLine.bottom = ypos + vsPrint.lineHeight;
-
-			if (lineNumberWidth) {
-				char number[100];
-				sprintf(number, "%d" lineNumberPrintSpace, lineDoc + 1);
-				PRectangle rcNumber = rcLine;
-				rcNumber.right = rcNumber.left + lineNumberWidth;
-				// Right justify
-				rcNumber.left -= surfaceMeasure->WidthText(
-					vsPrint.styles[STYLE_LINENUMBER].font, number, strlen(number));
-				surface->FlushCachedState();
-				surface->DrawTextNoClip(rcNumber, vsPrint.styles[STYLE_LINENUMBER].font,
-				                        ypos + vsPrint.maxAscent, number, strlen(number),
-				                        vsPrint.styles[STYLE_LINENUMBER].fore.allocated,
-				                        vsPrint.styles[STYLE_LINENUMBER].back.allocated);
-			}
-
-			// Draw the line
+		if (draw && lineNumberWidth && 
+			(ypos + vsPrint.lineHeight <= pfr->rc.bottom) &&
+			(visibleLine >= 0)) {
+			char number[100];
+			sprintf(number, "%d" lineNumberPrintSpace, lineDoc + 1);
+			PRectangle rcNumber = rcLine;
+			rcNumber.right = rcNumber.left + lineNumberWidth;
+			// Right justify
+			rcNumber.left -= surfaceMeasure->WidthText(
+				vsPrint.styles[STYLE_LINENUMBER].font, number, strlen(number));
 			surface->FlushCachedState();
-			for (int iwl = 0; iwl < ll.lines; iwl++) {
-				DrawLine(surface, vsPrint, lineDoc, visibleLine, xStart, rcLine, &ll, iwl);
-				++visibleLine;
-				ypos += vsPrint.lineHeight;
-				rcLine.top = ypos;
-				rcLine.bottom = ypos + vsPrint.lineHeight;
+			surface->DrawTextNoClip(rcNumber, vsPrint.styles[STYLE_LINENUMBER].font,
+									ypos + vsPrint.maxAscent, number, strlen(number),
+									vsPrint.styles[STYLE_LINENUMBER].fore.allocated,
+									vsPrint.styles[STYLE_LINENUMBER].back.allocated);
+		}
+
+		// Draw the line
+		surface->FlushCachedState();
+
+		for (int iwl = 0; iwl < ll.lines; iwl++) {
+			if (ypos + vsPrint.lineHeight <= pfr->rc.bottom) {
+				if (visibleLine >= 0) {
+					if (draw) {
+						rcLine.top = ypos;
+						rcLine.bottom = ypos + vsPrint.lineHeight;
+						DrawLine(surface, vsPrint, lineDoc, visibleLine, xStart, rcLine, &ll, iwl);
+					}
+					ypos += vsPrint.lineHeight;
+				}
+				visibleLine++;
+				if (iwl == ll.lines-1)
+					nPrintPos = pdoc->LineStart(lineDoc + 1);
+				else 
+					nPrintPos += ll.LineStart(iwl+1) - ll.LineStart(iwl);
 			}
 		}
 
-		nPrintPos += ll.numCharsInLine;
 		++lineDoc;
 	}
-	endPosPrint = pdoc->LineStart(lineDoc);
 
-	return endPosPrint;
+	return nPrintPos;
 }
 
 int Editor::TextWidth(int style, const char *text) {
