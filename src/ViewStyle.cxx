@@ -83,6 +83,7 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	fixedColumnWidth = source.fixedColumnWidth;
 	zoomLevel = source.zoomLevel;
 	viewWhitespace = source.viewWhitespace;
+	viewIndentationGuides = source.viewIndentationGuides;
 	viewEOL = source.viewEOL;
 	showMarkedLines = source.showMarkedLines;		
 }
@@ -142,7 +143,8 @@ void ViewStyle::Init() {
 			maskInLine &= ~ms[margin].mask;
 	}
 	zoomLevel = 0;
-	viewWhitespace = false;
+	viewWhitespace = wsInvisible;
+	viewIndentationGuides = false;
 	viewEOL = false;
 	showMarkedLines = true;
 }

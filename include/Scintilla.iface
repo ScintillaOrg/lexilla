@@ -108,11 +108,16 @@ fun int MarkerLineFromHandle=2017(int handle,)
 # Delete a marker.
 fun void MarkerDeleteHandle=2018(int handle,)
 
-# Are white space characters currently visible?
-get bool GetViewWS=2020(,)
+val SCWS_INVISIBLE=0
+val SCWS_VISIBLEALWAYS=1
+val SCWS_VISIBLEAFTERINDENT=2
 
-# Make white space characters visible or invisible.
-set void SetViewWS=2021(bool viewWS,)
+# Are white space characters currently visible?
+# Returns one of SCWS_* constants.
+get int GetViewWS=2020(,)
+
+# Make white space characters invisible, always visible or visible outside indentation.
+set void SetViewWS=2021(int viewWS,)
 
 # Set caret to start of a line and ensure it is visible.
 fun void GotoLine=2024(int line,)
@@ -439,11 +444,24 @@ get position GetLineIndentPosition=2128(int line,)
 # Retrieve the column number of a position, taking tab width into account.
 get int GetColumn=2129(position pos,)
 
-# Show or hide the horizontal scroll bar
+# Show or hide the horizontal scroll bar.
 set void SetHScrollBar=2130(bool show,)
 
-# Is the horizontal scroll bar visible.
+# Is the horizontal scroll bar visible?
 get bool GetHScrollBar=2131(,)
+
+# Show or hide indentation guides.
+set void SetIndentationGuides=2132(bool show,)
+
+# Are the indentation guides visible?
+get bool GetIndentationGuides=2133(,)
+
+# Set the highlighted indentation guide column.
+# 0 = no highlighted guide.
+set void SetHighlightGuide=2134(int column,)
+
+# Get the highlighted indentation guide column.
+get int GetHighlightGuide=2135(,)
 
 # Show a call tip containing a definition near position pos.
 fun void CallTipShow=2200(position pos, string definition)
