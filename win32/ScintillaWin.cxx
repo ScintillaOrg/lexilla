@@ -114,6 +114,8 @@ class ScintillaWin :
 	virtual void Initialise();
 	virtual void Finalise();
 
+	static LRESULT DirectFunction(
+		    ScintillaWin *sci, UINT iMessage, WPARAM wParam, LPARAM lParam);
 	static LRESULT PASCAL SWndProc(
 		    HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 	static LRESULT PASCAL CTWndProc(
@@ -555,6 +557,12 @@ LRESULT ScintillaWin::WndProc(unsigned int iMessage, unsigned long wParam, long 
     	case WM_WINDOWPOSCHANGING:
     	case WM_WINDOWPOSCHANGED:
 		return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
+
+	case SCI_GETDIRECTFUNCTION:
+		return reinterpret_cast<LRESULT>(DirectFunction);
+	
+	case SCI_GETDIRECTPOINTER:
+		return reinterpret_cast<LRESULT>(this);
 
 	default:
 	    return ScintillaBase::WndProc(iMessage, wParam, lParam);
@@ -1528,6 +1536,11 @@ LRESULT PASCAL ScintillaWin::CTWndProc(
 	}
 }
 
+LRESULT ScintillaWin::DirectFunction(
+    ScintillaWin *sci, UINT iMessage, WPARAM wParam, LPARAM lParam) {
+	return sci->WndProc(iMessage, wParam, lParam);
+}
+	    
 LRESULT PASCAL ScintillaWin::SWndProc(
     HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	//Platform::DebugPrintf("S W:%x M:%x WP:%x L:%x\n", hWnd, iMessage, wParam, lParam);
