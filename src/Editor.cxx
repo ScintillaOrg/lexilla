@@ -3304,6 +3304,7 @@ void Editor::ClearAll() {
 	currentPos = 0;
 	SetTopLine(0);
 	SetVerticalScrollPos();
+	InvalidateStyleRedraw();
 }
 
 void Editor::ClearDocumentStyle() {
