@@ -103,6 +103,14 @@ SCI_GETSTYLEBITS
        the SCI_CLEARDOCUMENTSTYLE can be used to clear all styling information and
        reset the folding state.
     </p>
+<pre>
+SCI_SETOVERTYPE
+SCI_GETOVERTYPE
+</pre>
+    <p>
+      SCI_GETOVERTYPE returns TRUE if overtyping is active otherwise 
+      FALSE will be returned. Use SCI_GETOVERTYPE to set the overtype node.
+    </p>
     <h3>
        Standard commands
     </h3>
@@ -968,6 +976,13 @@ SCN_CHARADDED(int charadded)
        Fired when the user types an ordinary text character (as opposed to a command character)
       which is entered into the text. Can be used by the container to decide to display a call tip
       or auto completion list.
+    </p>
+<pre>
+SCN_POSCHANGED(int newPos)
+</pre>
+    <p>
+       Fired when the user moves the cursor to a different position in the text.
+      Can be used by the container to cancel some time consuming thread.
     </p>
 <pre>
 SCN_SAVEPOINTREACHED(int issavepoint)

@@ -14,7 +14,9 @@ AutoComplete::AutoComplete() {
 	active = false;
 	posStart = 0;
 	strcpy(stopChars, "");
+	strcpy(fillUpChars, "");
 	separator = ' ';
+	ignoreCase = false;
 	cancelAtStartPos = true;
 }
 
@@ -45,6 +47,15 @@ bool AutoComplete::IsStopChar(char ch) {
 	return ch && strchr(stopChars, ch);
 }
 
+void AutoComplete::SetFillUpChars(const char *fillUpChars_) {
+	strncpy(fillUpChars, fillUpChars_, sizeof(fillUpChars));
+	fillUpChars[sizeof(fillUpChars) - 1] = '\0';
+}
+
+bool AutoComplete::IsFillUpChar(char ch) {
+	return ch && strchr(fillUpChars, ch);
+}
+ 
 void AutoComplete::SetSeparator(char separator_) {
 	separator = separator_;
 }

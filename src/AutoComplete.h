@@ -9,8 +9,10 @@
 class AutoComplete {
 	bool active;
 	char stopChars[256];
+	char fillUpChars[256];
 	char separator;
 public:
+	bool ignoreCase;
 	ListBox lb;
 	int posStart;
 	int startLen;
@@ -30,6 +32,10 @@ public:
 	void SetStopChars(const char *stopChars_);
 	bool IsStopChar(char ch);
 	
+	// The fillup chars are characters which, when typed, fill up the selected word
+	void SetFillUpChars(const char *fillUpChars_);
+	bool IsFillUpChar(char ch);
+
 	// The separator character is used when interpreting the list in SetList
 	void SetSeparator(char separator_);
 	char GetSeparator();

@@ -1397,6 +1397,8 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 	// Free data
 	if (medium.pUnkForRelease != NULL)
 		medium.pUnkForRelease->Release();
+    else
+    	::GlobalFree(medium.hGlobal);
 
 	if (udata) 
 		delete []data;

@@ -211,6 +211,7 @@ typedef long (*SciFnDirect)(long ptr, unsigned int iMessage, unsigned long wPara
 #define SCI_AUTOCSELECT SCI_START + 108
 #define SCI_AUTOCSETCANCELATSTART SCI_START + 110
 #define SCI_AUTOCGETCANCELATSTART SCI_START + 111
+#define SCI_AUTOCSETFILLUPS SCI_START + 112
 
 #define SCI_GETTABWIDTH SCI_START + 121
 #define SCI_SETINDENT SCI_START + 122
@@ -287,6 +288,9 @@ typedef long (*SciFnDirect)(long ptr, unsigned int iMessage, unsigned long wPara
 
 #define SCI_GETDIRECTFUNCTION SCI_START + 184
 #define SCI_GETDIRECTPOINTER SCI_START + 185
+
+#define SCI_SETOVERTYPE SCI_START + 186
+#define SCI_GETOVERTYPE SCI_START + 187
 
 #define SCI_CALLTIPSHOW SCI_START + 200
 #define SCI_CALLTIPCANCEL SCI_START + 201
@@ -458,6 +462,7 @@ typedef void (tMacroRecorder)(unsigned int iMessage, unsigned long wParam,
 #endif
 #define SCN_MARGINCLICK 2010
 #define SCN_NEEDSHOWN 2011
+#define SCN_POSCHANGED 2012
 
 // For compatibility, these go through the COMMAND notification rather than NOTIFY
 // and have exactly the same values as the EN_* constants.

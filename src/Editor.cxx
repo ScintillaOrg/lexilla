@@ -988,7 +988,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	for (int indica = 0; indica <= INDIC_MAX; indica++)
 		indStart[indica] = 0;
 
-	for (int indicPos = 0; indicPos <= ll.numCharsInLine; indicPos++) {
+	for (int indicPos = 0; indicPos < ll.numCharsInLine; indicPos++) {
 		if (ll.indicators[indicPos] != ll.indicators[indicPos + 1]) {
 			int mask = 1 << pdoc->stylingBits;
 			for (int indicnum = 0; mask < 0x100; indicnum++) {
@@ -1718,6 +1718,13 @@ void Editor::NotifyModifyAttempt(Document*, void *) {
 	NotifyModifyAttempt();
 }
 
+void Editor::NotifyMove(int position) {
+	SCNotification scn;
+	scn.nmhdr.code = SCN_POSCHANGED;
+	scn.position = position;
+	NotifyParent(scn);
+}
+
 void Editor::NotifySavePoint(Document*, void *, bool atSavePoint) {
 	//Platform::DebugPrintf("** Save Point %s\n", atSavePoint ? "On" : "Off");
 	NotifySavePoint(atSavePoint);
@@ -2122,6 +2129,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		inOverstrike = !inOverstrike;
 		DropCaret();
 		ShowCaretAtCurrentPosition();
+		NotifyUpdateUI();
 		break;
 	case SCI_CANCEL:   	// Cancel any modes - handled in subclass
 		// Also unselect text
@@ -4222,6 +4230,13 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 	case SCI_SELECTIONISRECTANGLE:
 		return (selType == selRectangle) ? 1 : 0;
 
+	case SCI_SETOVERTYPE:
+		inOverstrike = wParam;
+		break;
+	
+	case SCI_GETOVERTYPE:
+		return inOverstrike ? TRUE : FALSE;
+	
 #ifdef MACRO_SUPPORT
 	case SCI_STARTRECORD:
 		recordingMacro = 1;

@@ -435,6 +435,9 @@ set void AutoCSetCancelAtStart=2110(bool cancel,)
 # Retrieve whether auto-completion cancelled by backspacing before start.
 get bool AutoCGetCancelAtStart=2111(,)
 
+# Define a set of character that when typed fills up the selected word.
+set void AutoCSetFillUps=2112(, string characterSet)
+
 # Set the number of spaces used for one level of indentation.
 set void SetIndent=2122(int indentSize,)
 
@@ -644,6 +647,12 @@ get int GetDirectFunction=2184(,)
 # Retrieve a pointer value to use as the first argument when calling
 # the function returned by GetDirectFunction.
 get int GetDirectPointer=2185(,)
+
+# Set to overtype (true) or insert mode
+set void SetOvertype=2186(bool overtype,)
+
+# Returns true if overtype mode is active otherwise false is returned.
+get bool GetOvertype=2187(,)
 
 # Show a call tip containing a definition near position pos.
 fun void CallTipShow=2200(position pos, string definition)
@@ -989,6 +998,7 @@ val SCN_MODIFIED=2008
 val SCN_MACRORECORD=2009
 val SCN_MARGINCLICK=2010
 val SCN_NEEDSHOWN=2011
+val SCN_POSCHANGED=2012
 
 # For compatibility, these go through the COMMAND notification rather than NOTIFY
 # and have exactly the same values as the EN_* constants.
@@ -1040,6 +1050,7 @@ val SCLEX_BATCH=12
 val SCLEX_XCODE=13
 val SCLEX_LATEX=14
 val SCLEX_LUA=15
+val SCLEX_DIFF=16
 val SCE_P_DEFAULT=0
 val SCE_P_COMMENTLINE=1
 val SCE_P_NUMBER=2

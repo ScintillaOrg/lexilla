@@ -60,12 +60,18 @@ public:
 			return false;
 		return strcmp(s, other.s) == 0;
 	}
+	bool operator!=(const SString &other) const {
+		return !operator==(other);
+	}
 	bool operator==(const char *sother) const {
 		if ((s == 0) && (sother == 0))
 			return true;
 		if ((s == 0) || (sother == 0))
 			return false;
 		return strcmp(s, sother) == 0;
+	}
+	bool operator!=(const char *sother) const {
+		return !operator==(sother);
 	}
 	const char *c_str() const {
 		if (s)
@@ -99,26 +105,55 @@ public:
 		}
 		return *this;
 	}
+	SString &operator +=(char ch) {
+		int len = length();
+		char *sNew = new char[len + 1 + 1];
+		if (sNew) {
+			if (s)
+				memcpy(sNew, s, len);
+			sNew[len] = ch;
+			sNew[len + 1] = '\0';
+			delete []s;
+			s = sNew;
+		}
+		return *this;
+	}
 	int value() const {
 		if (s)
 			return atoi(s);
 		else 
 			return 0;
 	}
+	void substitute(char find, char replace) {
+		char *t = s;
+		while (t) {
+			t = strchr(t, find);
+			if (t)
+				*t = replace;
+		}
+	}
+	// I don't think this really belongs here -- Neil
+	void correctPath() {
+#ifdef unix
+		substitute('\\', '/');
+#else
+		substitute('/', '\\');
+#endif
+	}
 };
 
 struct Property {
-    unsigned int hash;
+	unsigned int hash;
 	char *key;
-    char *val;
-    Property *next;
-    Property() : hash(0), key(0), val(0), next(0) {}
+	char *val;
+	Property *next;
+	Property() : hash(0), key(0), val(0), next(0) {}
 };
 
 class PropSet {
 private:
-    enum { hashRoots=31 };
-    Property *props[hashRoots];
+	enum { hashRoots=31 };
+	Property *props[hashRoots];
 public:
 	PropSet *superPS;
 	PropSet();
@@ -126,8 +161,8 @@ public:
 	void Set(const char *key, const char *val);
 	void Set(char *keyval);
 	SString Get(const char *key);
-    SString GetExpanded(const char *key);
-    SString Expand(const char *withvars);
+	SString GetExpanded(const char *key);
+	SString Expand(const char *withvars);
 	int GetInt(const char *key, int defaultValue=0);
 	SString GetWild(const char *keybase, const char *filename);
 	SString GetNewExpand(const char *keybase, const char *filename);
@@ -143,11 +178,12 @@ public:
 	char *list;
 	int len;
 	bool onlyLineEnds;	// Delimited by any white space or only line ends
+	bool sorted;
 	int starts[256];
 	WordList(bool onlyLineEnds_ = false) : 
-		words(0), list(0), len(0), onlyLineEnds(onlyLineEnds_) {}
+		words(0), list(0), len(0), onlyLineEnds(onlyLineEnds_), sorted(false) {}
 	~WordList() { Clear(); }
-	operator bool() { return (list && list[0]) ? true : false; }
+	operator bool() { return words ? true : false; }
 	const char *operator[](int ind) { return words[ind]; }
 	void Clear();
 	void Set(const char *s);

@@ -24,6 +24,7 @@
 #define SCLEX_XCODE 13
 #define SCLEX_LATEX 14
 #define SCLEX_LUA 15
+#define SCLEX_DIFF 16
 
 // Lexical states for SCLEX_PYTHON
 #define SCE_P_DEFAULT 0

@@ -333,7 +333,7 @@ static bool iswordsep(char ch, bool onlyLineEnds) {
 
 // Creates an array that points into each word in the string and puts \0 terminators
 // after each word.
-static char **ArrayFromWordList(char *wordlist, bool onlyLineEnds = false) {
+static char **ArrayFromWordList(char *wordlist, int *len, bool onlyLineEnds = false) {
 	char prev = '\n';
 	int words = 0;
 	for (int j = 0; wordlist[j]; j++) {
@@ -345,8 +345,8 @@ static char **ArrayFromWordList(char *wordlist, bool onlyLineEnds = false) {
 	if (keywords) {
 		words = 0;
 		prev = '\0';
-		int len = strlen(wordlist);
-		for (int k = 0; k < len; k++) {
+		int slen = strlen(wordlist);
+		for (int k = 0; k < slen; k++) {
 			if (!iswordsep(wordlist[k], onlyLineEnds)) {
 				if (!prev) {
 					keywords[words] = &wordlist[k];
@@ -357,7 +357,10 @@ static char **ArrayFromWordList(char *wordlist, bool onlyLineEnds = false) {
 			}
 			prev = wordlist[k];
 		}
-		keywords[words] = &wordlist[len];
+		keywords[words] = &wordlist[slen];
+		*len = words;
+	} else {
+		*len = 0;
 	}
 	return keywords;
 }
@@ -370,12 +373,13 @@ void WordList::Clear() {
 	words = 0;
 	list = 0;
 	len = 0;
+	sorted = false;
 }
 
 void WordList::Set(const char *s) {
-	len = 0;
 	list = StringDup(s);
-	words = ArrayFromWordList(list, onlyLineEnds);
+	sorted = false;
+	words = ArrayFromWordList(list, &len, onlyLineEnds);
 }
 
 char *WordList::Allocate(int size) {
@@ -385,10 +389,11 @@ char *WordList::Allocate(int size) {
 }
 
 void WordList::SetFromAllocated() {
-	len = 0;
-	words = ArrayFromWordList(list, onlyLineEnds);
+	sorted = false;
+	words = ArrayFromWordList(list, &len, onlyLineEnds);
 }
 
+#ifdef __MINGW32__
 // Shell sort based upon public domain C implementation by Raymond Gardner 1991
 // Used here because of problems with mingw qsort.
 static void SortWordList(char **words, unsigned int len) {
@@ -416,13 +421,19 @@ static void SortWordList(char **words, unsigned int len) {
 		gap = gap / 2;
 	}
 }
+#else
+// traditional qsort - hope it works elsewhere...
+static void SortWordList(char **words, unsigned int len) {
+	qsort (reinterpret_cast<void*>(words), len, sizeof(*words),
+		reinterpret_cast<int (*)(const void*, const void*)>(strcmp));
+}
+#endif
 
 bool WordList::InList(const char *s) {
 	if (0 == words)
 		return false;
-	if (len == 0) {
-		for (int i = 0; words[i][0]; i++)
-			len++;
+	if (!sorted) {
+		sorted = true;
 		SortWordList(words, len);
 		for (unsigned int k = 0; k < (sizeof(starts) / sizeof(starts[0])); k++)
 			starts[k] = -1;
