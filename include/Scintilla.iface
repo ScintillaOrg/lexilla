@@ -1459,7 +1459,7 @@ evt void NeedShown=2011(int position, int length)
 evt void PosChanged=2012(int position)
 evt void Painted=2013(void)
 evt void UserListSelection=2014(int listType, string text)
-evt void URIsDropped=2015(string text)
+evt void URIDropped=2015(string text)
 
 cat Deprecated
 

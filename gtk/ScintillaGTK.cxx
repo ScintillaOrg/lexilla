@@ -96,7 +96,7 @@ private:
 	virtual void NotifyFocus(bool focus);
 	virtual void NotifyParent(SCNotification scn);
 	void NotifyKey(int key, int modifiers);
-	void NotifyURIsDropped(const char *list);
+	void NotifyURIDropped(const char *list);
 	virtual int KeyDefault(int key, int modifiers);
 	virtual void Copy();
 	virtual void Paste();
@@ -707,9 +707,9 @@ void ScintillaGTK::NotifyKey(int key, int modifiers) {
 	NotifyParent(scn);
 }
 
-void ScintillaGTK::NotifyURIsDropped(const char *list) {
+void ScintillaGTK::NotifyURIDropped(const char *list) {
 	SCNotification scn;
-	scn.nmhdr.code = SCN_URISDROPPED;
+	scn.nmhdr.code = SCN_URIDROPPED;
 	scn.text = list;
 
 	NotifyParent(scn);
@@ -844,7 +844,7 @@ void ScintillaGTK::ReceivedDrop(GtkSelectionData *selection_data) {
 		}
 	} else {
 		char *ptr = reinterpret_cast<char *>(selection_data->data);
-		NotifyURIsDropped(ptr);
+		NotifyURIDropped(ptr);
 	}
 	Redraw();
 }
