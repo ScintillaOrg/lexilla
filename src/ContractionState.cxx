@@ -129,17 +129,18 @@ void ContractionState::DeleteLines(int lineDoc, int lineCount) {
 		linesInDisplay -= lineCount;
 		return;
 	}
-	int delta = 0;
-	for (int d=0;d<lineCount;d++)
-		if (lines[lineDoc+d].visible && (lineDoc+d != 0))
-			delta--;
+	int deltaDisplayed = 0;
+	for (int d=0;d<lineCount;d++) {
+		if (lines[lineDoc+d].visible)
+			deltaDisplayed--;
+	}
 	for (int i = lineDoc; i < linesInDoc-lineCount; i++) {
-        if (i != 0) // Line zero is always visible
-		    lines[i].visible = lines[i + lineCount].visible;
+		if (i != 0) // Line zero is always visible
+			lines[i].visible = lines[i + lineCount].visible;
 		lines[i].expanded = lines[i + lineCount].expanded;
 	}
 	linesInDoc -= lineCount;
-	linesInDisplay += delta;
+	linesInDisplay += deltaDisplayed;
 	valid = false;
 }
 
