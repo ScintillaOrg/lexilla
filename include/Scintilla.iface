@@ -1595,6 +1595,7 @@ val SCLEX_MMIXAL=44
 val SCLEX_CLW=45
 val SCLEX_CLWNOCASE=46
 val SCLEX_LOT=47
+val SCLEX_YAML=48
 
 # When a lexer specifies its language as SCLEX_AUTOMATIC it receives a
 # value assigned in sequence from SCLEX_AUTOMATIC+1.
@@ -2192,6 +2193,15 @@ val SCE_LOT_SET=3
 val SCE_LOT_PASS=4
 val SCE_LOT_FAIL=5
 val SCE_LOT_ABORT=6
+# Lexical states for SCLEX_YAML
+lex YAML=SCLEX_YAML SCE_YAML_
+val SCE_YAML_DEFAULT=0
+val SCE_YAML_COMMENT=1
+val SCE_YAML_IDENTIFIER=2
+val SCE_YAML_KEYWORD=3
+val SCE_YAML_NUMBER=4
+val SCE_YAML_REFERENCE=5
+val SCE_YAML_DOCUMENT=6
 
 # Events
 
