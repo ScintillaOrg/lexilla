@@ -1549,7 +1549,7 @@ void Editor::AddCharUTF(char *s, unsigned int len) {
 
 void Editor::ClearSelection() {
 	if (selType == selRectangle) {
-		pdoc->BeginUndoAction();
+    	pdoc->BeginUndoAction();
 		int lineStart = pdoc->LineFromPosition(SelectionStart());
 		int lineEnd = pdoc->LineFromPosition(SelectionEnd());
 		int startPos = SelectionStart();
@@ -1561,23 +1561,27 @@ void Editor::ClearSelection() {
 			}
 		}
 		SetEmptySelection(startPos);
+    	pdoc->EndUndoAction();
 		selType = selStream;
-		pdoc->EndUndoAction();
 	} else {
 		int startPos = SelectionStart();
 		unsigned int chars = SelectionEnd() - startPos;
 		SetEmptySelection(startPos);
 		if (0 != chars) {
+           	pdoc->EndUndoAction();
 			pdoc->DeleteChars(startPos, chars);
+           	pdoc->BeginUndoAction();
 		}
 	}
 }
 
 void Editor::ClearAll() {
+	pdoc->BeginUndoAction();
 	if (0 != pdoc->Length()) {
 		pdoc->DeleteChars(0, pdoc->Length());
 	}
 	cs.Clear();
+	pdoc->EndUndoAction();
 	anchor = 0;
 	currentPos = 0;
 	SetTopLine(0);
@@ -1607,6 +1611,7 @@ void Editor::PasteRectangular(int pos, const char *ptr, int len) {
 	int xInsert = XFromPosition(currentPos);
 	int line = pdoc->LineFromPosition(currentPos);
 	bool prevCr = false;
+	pdoc->BeginUndoAction();
 	for (int i = 0; i < len; i++) {
 		if ((ptr[i] == '\r') || (ptr[i] == '\n')) {
 			if ((ptr[i] == '\r') || (!prevCr))
@@ -1626,6 +1631,7 @@ void Editor::PasteRectangular(int pos, const char *ptr, int len) {
 			prevCr = false;
 		}
 	}
+	pdoc->EndUndoAction();
 	SetEmptySelection(insertPos);
 }
 

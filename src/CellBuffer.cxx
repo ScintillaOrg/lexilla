@@ -458,6 +458,9 @@ void UndoHistory::AppendAction(actionType at, int position, char *data, int leng
 			           (position != (actPrevious.position + actPrevious.lenData*2))) {
 				// Insertions must be immediately after to coalesce
 				currentAction++;
+            } else if (!actions[currentAction].mayCoalesce) {
+				// Not allowed to coalesce if this set
+				currentAction++;
 			} else {
 				//Platform::DebugPrintf("action coalesced\n");
 			}
