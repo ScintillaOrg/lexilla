@@ -847,12 +847,25 @@ void ScintillaWin::ScrollText(int linesToMove) {
 	::UpdateWindow(MainHWND());
 }
 
+// Change the scroll position but avoid repaint if changing to same value
+static void ChangeScrollPos(HWND w, int barType, int pos) {
+	SCROLLINFO sci = {
+		sizeof(sci),0,0,0,0,0,0
+	};
+	sci.fMask = SIF_POS;
+	::GetScrollInfo(w, barType, &sci);
+	if (sci.nPos != pos) {
+		sci.nPos = pos;
+		::SetScrollInfo(w, barType, &sci, TRUE);
+	}
+}
+
 void ScintillaWin::SetVerticalScrollPos() {
-	::SetScrollPos(MainHWND(), SB_VERT, topLine, TRUE);
+	ChangeScrollPos(MainHWND(), SB_VERT, topLine);
 }
 
 void ScintillaWin::SetHorizontalScrollPos() {
-	::SetScrollPos(MainHWND(), SB_HORZ, xOffset, TRUE);
+	ChangeScrollPos(MainHWND(), SB_HORZ, xOffset);
 }
 
 bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
