@@ -816,15 +816,20 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 							marks |= 1 << SC_MARKNUM_FOLDERSUB;
 						} else if (levelNum > SC_FOLDLEVELBASE) {
 							marks |= 1 << SC_MARKNUM_FOLDERMIDTAIL;
+							needWhiteClosure = false;
 						} else {
 							marks |= 1 << SC_MARKNUM_FOLDERTAIL;
 							needWhiteClosure = false;
 						}
 					} else if (levelNum > SC_FOLDLEVELBASE) {
-						marks |= 1 << SC_MARKNUM_FOLDERSUB;
+						if (levelNextNum < levelNum)
+							marks |= 1 << SC_MARKNUM_FOLDERTAIL;
+						else 
+							marks |= 1 << SC_MARKNUM_FOLDERSUB;
 					}
 				} else if (levelNum > SC_FOLDLEVELBASE) {
 					if (levelNextNum < levelNum) {
+						needWhiteClosure = false;
 						if (levelNext & SC_FOLDLEVELWHITEFLAG) {
 							marks |= 1 << SC_MARKNUM_FOLDERSUB;
 							needWhiteClosure = true;
