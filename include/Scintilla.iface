@@ -1436,6 +1436,12 @@ set void SetHotspotActiveBack=2411(bool useSetting, colour back)
 # Enable / Disable underlining active hotspots.
 set void SetHotspotActiveUnderline=2412(bool underline,)
 
+# Move caret between paragraphs (delimited by empty lines)
+fun void ParaDown=2413(,)
+fun void ParaDownExtend=2414(,)
+fun void ParaUp=2415(,)
+fun void ParaUpExtend=2416(,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 
