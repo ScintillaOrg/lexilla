@@ -1405,7 +1405,7 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 	int lineNumberWidth = 0;
 	if (lineNumberIndex >= 0) {
 		lineNumberWidth = surface->WidthText(vsPrint.styles[STYLE_LINENUMBER].font,
-		                                     "9999" lineNumberPrintSpace, 4 + strlen(lineNumberPrintSpace));
+		                                     "99999" lineNumberPrintSpace, 5 + strlen(lineNumberPrintSpace));
 		vsPrint.ms[lineNumberIndex].width = lineNumberWidth;
 	}
 

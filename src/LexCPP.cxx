@@ -216,7 +216,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 				} else if (ch == '\"') {
 					styler.ColourTo(i, state);
 					state = SCE_C_DEFAULT;
-				} else if (chNext == '\r' || chNext == '\n') {
+				} else if ((chNext == '\r' || chNext == '\n') && (chPrev != '\\')) {
 					styler.ColourTo(i-1, SCE_C_STRINGEOL);
 					state = SCE_C_STRINGEOL;
 				}
