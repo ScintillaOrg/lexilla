@@ -9,6 +9,7 @@
 .SUFFIXES: .cxx
 CC = g++
 DLLWRAP = dllwrap
+DEL = del /q
 
 COMPONENT = ../bin/Scintilla.dll
 LEXCOMPONENT = ../bin/SciLexer.dll
@@ -28,7 +29,7 @@ LDFLAGS=-mwindows -lstdc++ -limm32 -lole32 -luuid
 # Add -MMD to get dependencies
 #CXXFLAGS = -g -pg -pedantic -Os -fno-exceptions -fvtable-thunks -fno-rtti
 INCLUDEDIRS=-I ../include -I ../src
-CXXBASEFLAGS = -W -Wall -pedantic $(INCLUDEDIRS) -Os -fno-exceptions $(THUNKFLAGS) -fno-rtti
+CXXBASEFLAGS = -W -Wall -pedantic $(INCLUDEDIRS) -Os -fno-exceptions $(THUNKFLAGS) -fno-rtti -mno-cygwin
 
 ifdef DEBUG
 CXXFLAGS=-DDEBUG $(CXXBASEFLAGS)
@@ -42,7 +43,7 @@ endif
 ALL:	$(COMPONENT) $(LEXCOMPONENT) $(LEXLIB) ScintillaWinS.o WindowAccessor.o
 
 clean:
-	del /q *.exe *.o *.obj *.dll *.res *.map
+	$(DEL) *.exe *.o *.obj *.dll *.res *.map
 
 deps:
 	$(CC) -MM $(CXXFLAGS) *.cxx ../src/*.cxx >deps.mak
