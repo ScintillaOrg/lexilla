@@ -34,9 +34,11 @@
 ##     stringresult -> pointer to character
 ##     cells -> pointer to array of cells, each cell containing a style byte and character byte
 ##     textrange -> complex structure
+##     findtext -> searchrange, text -> foundposition
 ##     keymod -> integer containing key in low half and modifiers in high half
 ##     countedstring
 ##     formatrange
+##     point -> x,y
 ## Client code should ignore definitions containing types it does not understand, except 
 ## for possibly #defining the constants
 
@@ -120,11 +122,11 @@ fun void GotoPos=2025(position pos,)
 
 # Set the selection anchor to a position. The anchor is the opposite
 # end of the selection from the caret.
-fun void SetAnchor=2026(position posAnchor,)
+set void SetAnchor=2026(position posAnchor,)
 
 # Retrieve the text of the line containing the caret.
 # Returns the index of the caret on the line.
-fun int GetCurLine=2027(,stringresult text)
+fun int GetCurLine=2027(int length, stringresult text)
 
 # Retrieve the position of the last correctly styled character.
 get position GetEndStyled=2028(,)
@@ -340,7 +342,7 @@ get colour IndicGetFore=2083(int indic,)
 set void SetStyleBits=2090(int bits,)
 
 # Retrieve number of bits in style bytes used to hold the lexical state.
-get void GetStyleBits=2091(,)
+get int GetStyleBits=2091(,)
 
 # Used to hold extra styling information for each line.
 set void SetLineState=2092(int line, int state)
@@ -349,7 +351,7 @@ set void SetLineState=2092(int line, int state)
 get int GetLineState=2093(int line,)
 
 # Retrieve the last line number that has line state. 
-get void GetMaxLineState=2094(,)
+get int GetMaxLineState=2094(,)
 
 # Display a auto-completion list.
 # The lenEntered parameter indicates how many characters before
@@ -466,7 +468,7 @@ get bool GetLineVisible=2228(int line,)
 set void SetFoldExpanded=2229(int line, bool expanded)
 
 # Is a header line expanded?
-get bool GetFoldExpanded=2230(,)
+get bool GetFoldExpanded=2230(int line,)
 
 # Switch a header line between expanded and contracted.
 fun void ToggleFold=2231(int line,)
@@ -1016,7 +1018,7 @@ fun void WM_Cut=768(,)
 fun int WM_GetText=13(int length, stringresult text)
 
 # Retrieve the number of characters in the document.
-fun void WM_GetTextLength=14(,)
+fun int WM_GetTextLength=14(,)
 
 # Notification back to container
 fun void WM_Notify=78(int id, int stuff)
