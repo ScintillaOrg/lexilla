@@ -270,8 +270,13 @@ static void FoldLuaDoc(unsigned int startPos, int length, int /* initStyle */, W
 			} else if (ch == '}' || ch == ')') {
 				levelCurrent--;
 			}
+		} else if (style == SCE_LUA_COMMENT || style == SCE_LUA_LITERALSTRING) {
+			if (ch == '[' && chNext == '[') {
+				levelCurrent++;
+			} else if (ch == ']' && chNext == ']') {
+				levelCurrent--;
+			}
 		}
-
 		if (atEOL) {
 			int lev = levelPrev;
 			if (visibleChars == 0 && foldCompact) {
