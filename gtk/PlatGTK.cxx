@@ -6,7 +6,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 
+#include <glib.h>
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
@@ -17,6 +19,12 @@
 #include "ScintillaWidget.h"
 #include "UniConversion.h"
 
+/* GLIB must be compiled with thread support, otherwise we
+   will bail on trying to use locks, and that could lead to
+   problems for someone.  `glib-config --libs gthread` needs
+   to be used to get the glib libraries for linking, otherwise
+   g_thread_init will fail */
+#define USE_LOCK defined(G_THREADS_ENABLED) && !defined(G_THREADS_IMPL_NONE)
 /* Use fast way of getting char data on win32 to work around problems
    with gdk_string_extents. */
 #define FAST_WAY
@@ -29,6 +37,60 @@
 // Ignore unreferenced local functions in GTK+ headers
 #pragma warning(disable: 4505)
 #endif
+
+typedef struct _logfont {
+    int size;
+    bool bold;
+    bool italic;
+    int characterSet;
+    char faceName[300];
+} LOGFONT;
+
+#if USE_LOCK
+GMutex *fontMutex = NULL;
+#endif
+
+void initializeGLIBThreads() {
+#if USE_LOCK
+    if (!g_thread_supported()) g_thread_init(NULL);
+#endif
+}
+
+void fontMutexAllocate(void) {
+#if USE_LOCK
+    if (!fontMutex) {
+        initializeGLIBThreads();
+        fontMutex = g_mutex_new();
+    }
+#endif
+}
+
+void fontMutexFree(void) {
+#if USE_LOCK
+    if (fontMutex) {
+        g_mutex_free(fontMutex);
+    }
+#endif
+}
+
+void fontMutexLock(void) {
+#if USE_LOCK
+    if (!fontMutex) {
+        /* this is indeed lame, but can be changed later to be put into
+           some kind of scintilla startup function */
+        fontMutexAllocate();
+    }
+    g_mutex_lock(fontMutex);
+#endif
+}
+
+void fontMutexUnlock(void) {
+#if USE_LOCK
+    if (fontMutex) {
+        g_mutex_unlock(fontMutex);
+    }
+#endif
+}
 
 // X has a 16 bit coordinate space, so stop drawing here to avoid wrapping
 static const int maxCoordinate = 32000;
@@ -126,9 +188,6 @@ void Palette::Allocate(Window &w) {
 	delete []successPalette;
 }
 
-Font::Font() : id(0) {}
-
-Font::~Font() {}
 
 static const char *CharacterSetName(int characterSet) {
 	switch (characterSet) {
@@ -220,9 +279,115 @@ void GenerateFontSpecStrings(const char *fontName, int characterSet,
 	}
 }
 
-void Font::Create(const char *fontName, int characterSet,
+void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, int size, bool bold, bool italic) {
+	memset(&lf, 0, sizeof(lf));
+	lf.size = size;
+	lf.bold = bold;
+	lf.italic = italic;
+	lf.characterSet = characterSet;
+	strncpy(lf.faceName, faceName, sizeof(lf.faceName)-1);
+}
+
+/**
+ * Create a hash from the parameters for a font to allow easy checking for identity.
+ * If one font is the same as another, its hash will be the same, but if the hash is the
+ * same then they may still be different.
+ */
+int HashFont(const char *faceName, int characterSet, int size, bool bold, bool italic) {
+	return
+		size ^
+		(characterSet << 10) ^
+		(bold ? 0x10000000 : 0) ^
+		(italic ? 0x20000000 : 0) ^
+		faceName[0];
+}
+
+class FontCached : Font {
+	FontCached *next;
+	int usage;
+	LOGFONT lf;
+	int hash;
+	FontCached(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_);
+	~FontCached() {}
+	bool SameAs(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_);
+	virtual void Release();
+        static FontID CreateNewFont(const char *fontName, int characterSet,
+                  int size, bool bold, bool italic);
+	static FontCached *first;
+public:
+	static FontID FindOrCreate(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_);
+	static void ReleaseId(FontID id_);
+};
+
+FontCached *FontCached::first = 0;
+
+FontCached::FontCached(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_) :
+	next(0), usage(0), hash(0) {
+	::SetLogFont(lf, faceName_, characterSet_, size_, bold_, italic_);
+	hash = HashFont(faceName_, characterSet_, size_, bold_, italic_);
+	id = CreateNewFont(faceName_, characterSet_, size_, bold_, italic_);
+	usage = 1;
+}
+
+bool FontCached::SameAs(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_) {
+	return
+		lf.size == size_ &&
+		lf.bold == bold_ &&
+		lf.italic == italic_ &&
+		lf.characterSet == characterSet_ &&
+		0 == strcmp(lf.faceName,faceName_);
+}
+
+void FontCached::Release() {
+	if (id)
+		gdk_font_unref(PFont(*this));
+	id = 0;
+}
+
+FontID FontCached::FindOrCreate(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_) {
+	FontID ret = 0;
+	fontMutexLock();
+	int hashFind = HashFont(faceName_, characterSet_, size_, bold_, italic_);
+	for (FontCached *cur=first; cur; cur=cur->next) {
+		if ((cur->hash == hashFind) &&
+			cur->SameAs(faceName_, characterSet_, size_, bold_, italic_)) {
+			cur->usage++;
+			ret = cur->id;
+		}
+	}
+	if (ret == 0) {
+		FontCached *fc = new FontCached(faceName_, characterSet_, size_, bold_, italic_);
+		if (fc) {
+			fc->next = first;
+			first = fc;
+			ret = fc->id;
+		}
+	}
+	fontMutexUnlock();
+	return ret;
+}
+
+void FontCached::ReleaseId(FontID id_) {
+	fontMutexLock();
+	FontCached **pcur=&first;
+	for (FontCached *cur=first; cur; cur=cur->next) {
+		if (cur->id == id_) {
+			cur->usage--;
+			if (cur->usage == 0) {
+				*pcur = cur->next;
+				cur->Release();
+				cur->next = 0;
+				delete cur;
+			}
+			break;
+		}
+		pcur=&cur->next;
+	}
+	fontMutexUnlock();
+}
+
+FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
                   int size, bool bold, bool italic) {
-	Release();
 	char fontset[1024];
 	char fontspec[300];
 	char foundary[50];
@@ -233,21 +398,22 @@ void Font::Create(const char *fontName, int characterSet,
 	foundary[0] = '\0';
 	faceName[0] = '\0';
 	charset[0] = '\0';
+        FontID newid = 0;
 
 	// If name of the font begins with a '-', assume, that it is
 	// a full fontspec.
 	if (fontName[0] == '-') {
 		if (strchr(fontName, ',')) {
-			id = gdk_fontset_load(fontName);
+			newid = gdk_fontset_load(fontName);
 		} else {
-			id = gdk_font_load(fontName);
+			newid = gdk_font_load(fontName);
 		}
-		if (!id) {
+		if (!newid) {
 			// Font not available so substitute a reasonable code font
 			// iso8859 appears to only allow western characters.
-			id = gdk_font_load("-*-*-*-*-*-*-*-*-*-*-*-*-iso8859-*");
+			newid = gdk_font_load("-*-*-*-*-*-*-*-*-*-*-*-*-iso8859-*");
 		}
-		return;
+		return newid;
 	}
 
 	// it's not a full fontspec, build one.
@@ -314,9 +480,9 @@ void Font::Create(const char *fontName, int characterSet,
 			fp = strchr(fn, ',');
 		}
 
-		id = gdk_fontset_load(fontset);
-		if (id)
-			return;
+		newid = gdk_fontset_load(fontset);
+		if (newid)
+			return newid;
 
 		// if fontset load failed, fall through, we'll use
 		// the last font entry and continue to try and
@@ -338,8 +504,8 @@ void Font::Create(const char *fontName, int characterSet,
 	         italic ? "-i" : "-r",
 	         size * 10,
 	         charset);
-	id = gdk_font_load(fontspec);
-	if (!id) {
+	newid = gdk_font_load(fontspec);
+	if (!newid) {
 		// some fonts have oblique, not italic
 		snprintf(fontspec,
 		         sizeof(fontspec) - 1,
@@ -349,28 +515,40 @@ void Font::Create(const char *fontName, int characterSet,
 		         italic ? "-o" : "-r",
 		         size * 10,
 		         charset);
-		id = gdk_font_load(fontspec);
+		newid = gdk_font_load(fontspec);
 	}
-	if (!id) {
+	if (!newid) {
 		snprintf(fontspec,
 		         sizeof(fontspec) - 1,
 		         "-*-*-*-*-*-*-*-%0d-*-*-*-*-%s",
 		         size * 10,
 		         charset);
-		id = gdk_font_load(fontspec);
+		newid = gdk_font_load(fontspec);
 	}
-	if (!id) {
+	if (!newid) {
 		// Font not available so substitute a reasonable code font
 		// iso8859 appears to only allow western characters.
-		id = gdk_font_load("-*-*-*-*-*-*-*-*-*-*-*-*-iso8859-*");
+		newid = gdk_font_load("-*-*-*-*-*-*-*-*-*-*-*-*-iso8859-*");
 	}
+	return newid;
+}
+
+
+Font::Font() : id(0) {}
+
+Font::~Font() {}
+
+void Font::Create(const char *faceName, int characterSet, int size, bool bold, bool italic) {
+	Release();
+	id = FontCached::FindOrCreate(faceName, characterSet, size, bold, italic);
 }
 
 void Font::Release() {
 	if (id)
-		gdk_font_unref(PFont(*this));
+		FontCached::ReleaseId(id);
 	id = 0;
 }
+
 
 class SurfaceImpl : public Surface {
 	bool unicodeMode;
