@@ -245,6 +245,7 @@ SCI_WORDENDPOSITION(int position, bool onlyWordCharacters)
 SCI_WORDSTARTPOSITION(int position, bool onlyWordCharacters)
 SCI_TEXTWIDTH(int stylenumber, char *text)
 SCI_TEXTHEIGHT(int line)
+SCI_CHOOSECARETX
 </pre>
     <p>
 	Scintilla maintains a selection which stretches between two points, the anchor and the
@@ -276,6 +277,12 @@ SCI_TEXTHEIGHT(int line)
 	SCI_WORDENDPOSITION and SCI_WORDSTARTPOSITION can be used to find
 	the start and end of words using the same definition of words as used internally
 	within Scintilla.
+    </p>
+    <p>
+	Scintilla remembers the x value of the last position horizontally moved to explicitly
+	by the user and this value is then used when moving vertically such as by using
+	the up and down keys. This remembered value may be set to the x position of the
+	caret with SCI_CHOOSECARETX.
     </p>
     <h3>
        Scrolling and automatic scrolling
