@@ -50,7 +50,7 @@ LineLayout::LineLayout(int maxLineLength_) :
 	styles(0),
 	indicators(0),
 	positions(0),
-	widthLine(0),
+	widthLine(wrapWidthInfinite),
 	lines(1) {
 		Resize(maxLineLength_);
 }
@@ -357,7 +357,7 @@ Editor::Editor() {
 	foldFlags = 0;
 
 	wrapState = eWrapNone;
-	wrapWidth = wrapWidthInfinite;
+	wrapWidth = LineLayout::wrapWidthInfinite;
 	docLineLastWrapped = -1;
 
 	llc.SetLevel(LineLayoutCache::llcDocument);
@@ -493,7 +493,7 @@ Point Editor::LocationFromPosition(int pos) {
 			pt.x = ll->positions[ll->maxLineLength] - ll->positions[ll->LineStart(ll->lines)];
 		}
 		for (int subLine=0; subLine<ll->lines; subLine++) {
-			if ((posInLine > ll->LineStart(subLine)) && (posInLine <= ll->LineStart(subLine+1))) {
+			if ((posInLine >= ll->LineStart(subLine)) && (posInLine <= ll->LineStart(subLine+1))) {
 				pt.x = ll->positions[posInLine] - ll->positions[ll->LineStart(subLine)];
 			}
 			if (posInLine >= ll->LineStart(subLine)) {
@@ -1030,8 +1030,8 @@ bool Editor::WrapLines() {
 	bool wrapOccurred = false;
 	if (docLineLastWrapped < pdoc->LinesTotal()) {
 		if (wrapState == eWrapNone) {
-			if (wrapWidth != wrapWidthInfinite) {
-				wrapWidth = wrapWidthInfinite;
+			if (wrapWidth != LineLayout::wrapWidthInfinite) {
+				wrapWidth = LineLayout::wrapWidthInfinite;
 				for (int lineDoc=0; lineDoc<pdoc->LinesTotal(); lineDoc++) {
 					cs.SetHeight(lineDoc, 1);
 				}
@@ -1315,7 +1315,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 		return;
 	int posLineStart = pdoc->LineStart(line);
 	if (ll->validity == LineLayout::llInvalid) {
-		ll->widthLine = width;
+		ll->widthLine = LineLayout::wrapWidthInfinite;
 		ll->lines = 1;
 		int numCharsInLine = 0;
 		if (vstyle.edgeState == EDGE_BACKGROUND) {
@@ -1413,15 +1413,15 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 		ll->numCharsInLine = numCharsInLine;
 		ll->validity = LineLayout::llPositions;
 	}
-	if (ll->validity == LineLayout::llPositions) {
-		if (width == wrapWidthInfinite) {
+	// Hard to cope when too narrow, so just assume there is space
+	if (width < 20) {
+		width = 20;
+	}
+	if ((ll->validity == LineLayout::llPositions) || (ll->widthLine != width)) {
+		ll->widthLine = width;
+		if (width == LineLayout::wrapWidthInfinite) {
 			ll->lines = 1;
-			ll->widthLine = ll->positions[ll->numCharsInLine];
 		} else {
-			if (width < 20)	{ // Hard to cope when too narrow, so just assume there is space
-				width = 20;
-				ll->widthLine = width;
-			}
 			ll->lines = 0;
 			// Calculate line start positions based upon width.
 			// For now this is simplistic - wraps on byte rather than character and

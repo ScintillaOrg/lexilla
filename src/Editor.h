@@ -42,6 +42,7 @@ private:
 	int lineNumber;
 	bool inCache;
 public:
+	enum { wrapWidthInfinite = 0x7ffffff };
 	int maxLineLength;
 	int numCharsInLine;
 	enum validLevel { llInvalid, llPositions, llLines } validity;
@@ -271,7 +272,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	// Wrapping support
 	enum { eWrapNone, eWrapWord } wrapState;
-	enum { wrapWidthInfinite = 0x7ffffff };
 	int wrapWidth;
 	int docLineLastWrapped;
 
@@ -337,7 +337,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void PaintSelMargin(Surface *surface, PRectangle &rc);
 	LineLayout *RetrieveLineLayout(int lineNumber);
 	void LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayout *ll, 
-		int width=wrapWidthInfinite);
+		int width=LineLayout::wrapWidthInfinite);
 	void DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart,
 		PRectangle rcLine, LineLayout *ll, int subLine=0);
 	void Paint(Surface *surfaceWindow, PRectangle rcArea);
