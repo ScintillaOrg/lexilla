@@ -1223,20 +1223,19 @@ void Window::SetFont(Font &) {
 }
 
 void Window::SetCursor(Cursor curs) {
-	GdkCursor *gdkCurs;
-
 	// We don't set the cursor to same value numerous times under gtk because
 	// it stores the cursor in the window once it's set
 	if (curs == cursorLast)
 		return;
-	cursorLast = curs;
 
+	cursorLast = curs;
+	GdkCursor *gdkCurs;
 	switch (curs) {
 	case cursorText:
 		gdkCurs = gdk_cursor_new(GDK_XTERM);
 		break;
 	case cursorArrow:
-		gdkCurs = gdk_cursor_new(GDK_ARROW);
+		gdkCurs = gdk_cursor_new(GDK_LEFT_PTR);
 		break;
 	case cursorUp:
 		gdkCurs = gdk_cursor_new(GDK_CENTER_PTR);
@@ -1245,10 +1244,10 @@ void Window::SetCursor(Cursor curs) {
 		gdkCurs = gdk_cursor_new(GDK_WATCH);
 		break;
 	case cursorReverseArrow:
-		gdkCurs = gdk_cursor_new(GDK_TOP_LEFT_ARROW);
+		gdkCurs = gdk_cursor_new(GDK_RIGHT_PTR);
 		break;
 	default:
-		gdkCurs = gdk_cursor_new(GDK_ARROW);
+		gdkCurs = gdk_cursor_new(GDK_LEFT_PTR);
 		cursorLast = cursorArrow;
 		break;
 	}
