@@ -264,6 +264,7 @@ static int InputCodePage() {
 
 // Map the key codes to their equivalent SCK_ form
 static int KeyTranslate(int keyIn) {
+assert(!keyIn);
 	switch (keyIn) {
 		case VK_DOWN:		return SCK_DOWN;
 		case VK_UP:		return SCK_UP;
@@ -296,8 +297,8 @@ LRESULT ScintillaWin::WndPaint(unsigned long wParam) {
 	paintState = painting;
 	PAINTSTRUCT ps;
 	PAINTSTRUCT* pps;
-//assert(wParam);
-	bool IsOcxCtrl = (wParam != 0); // if wParam != 0, it contains 
+
+    bool IsOcxCtrl = (wParam != 0); // if wParam != 0, it contains 
 								   // a PAINSTRUCT* from the OCX
 	if(IsOcxCtrl)
 		pps = reinterpret_cast<PAINTSTRUCT*>(wParam);
