@@ -2063,7 +2063,12 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 					continue;
 				}
 				if (p > 0) {
-					if (ll->styles[p] != ll->styles[p - 1]) {
+					if (wrapState == eWrapChar){
+						lastGoodBreak = pdoc->MovePositionOutsideChar(p + posLineStart, -1)
+												- posLineStart;
+						p = pdoc->MovePositionOutsideChar(p + 1 + posLineStart, 1) - posLineStart;
+						continue;
+					} else if (ll->styles[p] != ll->styles[p - 1]) {
 						lastGoodBreak = p;
 					} else if (IsSpaceOrTab(ll->chars[p - 1]) && !IsSpaceOrTab(ll->chars[p])) {
 						lastGoodBreak = p;
@@ -6231,7 +6236,17 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return pdoc->ExtendWordSelect(wParam, 1, lParam != 0);
 
 	case SCI_SETWRAPMODE:
-		wrapState = (wParam == SC_WRAP_WORD) ? eWrapWord : eWrapNone;
+		switch(wParam){
+			case SC_WRAP_WORD:
+				wrapState = eWrapWord;
+				break;
+			case SC_WRAP_CHAR:
+				wrapState = eWrapChar;
+				break;
+			default:
+				wrapState = eWrapNone;
+				break;
+		}
 		xOffset = 0;
 		InvalidateStyleRedraw();
 		ReconfigureScrollBars();

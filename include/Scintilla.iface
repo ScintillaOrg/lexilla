@@ -994,6 +994,7 @@ fun int WordEndPosition=2267(position pos, bool onlyWordCharacters)
 enu Wrap=SC_WRAP_
 val SC_WRAP_NONE=0
 val SC_WRAP_WORD=1
+val SC_WRAP_CHAR=2
 
 # Sets whether text is word wrapped.
 set void SetWrapMode=2268(int mode,)
@@ -1751,6 +1752,9 @@ val SCLEX_APDL=61
 val SCLEX_BASH=62
 val SCLEX_ASN1=63
 val SCLEX_VHDL=64
+val SCLEX_CAML=65
+val SCLEX_BLITZBASIC=66
+val SCLEX_PUREBASIC=67
 
 # When a lexer specifies its language as SCLEX_AUTOMATIC it receives a
 # value assigned in sequence from SCLEX_AUTOMATIC+1.
@@ -1977,6 +1981,10 @@ val SCE_B_KEYWORD3=11
 val SCE_B_KEYWORD4=12
 val SCE_B_CONSTANT=13
 val SCE_B_ASM=14
+val SCE_B_LABEL=15
+val SCE_B_ERROR=16
+val SCE_B_HEXNUMBER=17
+val SCE_B_BINNUMBER=18
 # Lexical states for SCLEX_PROPERTIES
 lex Properties=SCLEX_PROPERTIES SCE_PROPS_
 val SCE_PROPS_DEFAULT=0
@@ -2579,6 +2587,22 @@ val SCE_VHDL_STDFUNCTION=11
 val SCE_VHDL_STDPACKAGE=12
 val SCE_VHDL_STDTYPE=13
 val SCE_VHDL_USERWORD=14
+# Lexical states for SCLEX_CAML
+lex Caml=SCLEX_CAML SCE_CAML_
+val SCE_CAML_DEFAULT=0
+val SCE_CAML_IDENTIFIER=1
+val SCE_CAML_TAGNAME=2
+val SCE_CAML_KEYWORD=3
+val SCE_CAML_KEYWORD2=4
+val SCE_CAML_LINENUM=5
+val SCE_CAML_OPERATOR=6
+val SCE_CAML_NUMBER=7
+val SCE_CAML_CHAR=8
+val SCE_CAML_STRING=9
+val SCE_CAML_COMMENT=10
+val SCE_CAML_COMMENT1=11
+val SCE_CAML_COMMENT2=12
+val SCE_CAML_COMMENT3=13
 
 # Events
 

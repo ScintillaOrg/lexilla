@@ -301,7 +301,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int hsEnd;
 
 	// Wrapping support
-	enum { eWrapNone, eWrapWord } wrapState;
+	enum { eWrapNone, eWrapWord, eWrapChar } wrapState;
 	bool backgroundWrapEnabled;
 	int wrapWidth;
 	int docLineLastWrapped;
