@@ -3,11 +3,11 @@
 // Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
-#include <stdlib.h> 
-#include <string.h> 
-#include <ctype.h> 
-#include <stdio.h> 
-#include <stdarg.h> 
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <stdarg.h>
 
 #include "Platform.h"
 
@@ -117,7 +117,7 @@ static int stateForPrintState(int StateToPrint) {
 
 static inline bool IsNumber(unsigned int start, Accessor &styler) {
 	return isdigit(styler[start]) || (styler[start] == '.') ||
-	                    (styler[start] == '-') || (styler[start] == '#');
+	       (styler[start] == '-') || (styler[start] == '#');
 }
 
 static void classifyAttribHTML(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler) {
@@ -370,31 +370,32 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			case eScriptJS:
 			case eScriptPHP:
 				//not currently supported				case eScriptVBS:
+
 				if ((state != SCE_HPHP_COMMENT) && (state != SCE_HPHP_COMMENTLINE) && (state != SCE_HJ_COMMENT) && (state != SCE_HJ_COMMENTLINE) && (state != SCE_HJ_COMMENTDOC)) {
-				if ((ch == '{') || (ch == '}')) {
-					levelCurrent += (ch == '{') ? 1 : -1;
+					if ((ch == '{') || (ch == '}')) {
+						levelCurrent += (ch == '{') ? 1 : -1;
 					}
 				}
 				break;
 			case eScriptPython:
 				if (state != SCE_HP_COMMENTLINE) {
-				if ((ch == ':') && ((chNext == '\n') || (chNext == '\r' && chNext2 == '\n'))) {
-					levelCurrent++;
-				} else if ((ch == '\n') && !((chNext == '\r') && (chNext2 == '\n')) && (chNext != '\n')) {
-					// check if the number of tabs is lower than the level
-					int Findlevel = (levelCurrent & ~SC_FOLDLEVELBASE) * 8;
-					for (int j = 0;Findlevel > 0;j++) {
-						char chTmp = styler.SafeGetCharAt(i + j + 1);
-						if (chTmp == '\t') {
-							Findlevel -= 8;
-						}	else if (chTmp == ' ') {
-							Findlevel--;
-						}	else break;
-					}
+					if ((ch == ':') && ((chNext == '\n') || (chNext == '\r' && chNext2 == '\n'))) {
+						levelCurrent++;
+					} else if ((ch == '\n') && !((chNext == '\r') && (chNext2 == '\n')) && (chNext != '\n')) {
+						// check if the number of tabs is lower than the level
+						int Findlevel = (levelCurrent & ~SC_FOLDLEVELBASE) * 8;
+						for (int j = 0;Findlevel > 0;j++) {
+							char chTmp = styler.SafeGetCharAt(i + j + 1);
+							if (chTmp == '\t') {
+								Findlevel -= 8;
+							}	else if (chTmp == ' ') {
+								Findlevel--;
+							}	else break;
+						}
 
-					if (Findlevel > 0) {
-						levelCurrent -= Findlevel / 8;
-						if (Findlevel % 8) levelCurrent--;
+						if (Findlevel > 0) {
+							levelCurrent -= Findlevel / 8;
+							if (Findlevel % 8) levelCurrent--;
 						}
 					}
 				}
@@ -490,11 +491,9 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			} else {
 				if (chNext2 == '=') {
 					i += 2; // place as if it was the second next char treated
-				}
-				else {
+				} else {
 					i++; // place as if it was the next char treated
 				}
-
 
 				state = StateForScript(defaultScript);
 			}
@@ -1077,8 +1076,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			break;
 		case SCE_HPHP_HSTRING:
 			if (ch == '\\') {
-        // skip the next char
-					i++;
+				// skip the next char
+				i++;
 			} else if (ch == '\"') {
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_HPHP_DEFAULT;
@@ -1117,8 +1116,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			break;
 			///////////// end - PHP state handling
 		}
-
-
 
 		if (state == SCE_HB_DEFAULT) {    // One of the above succeeded
 			if (ch == '\"') {
