@@ -1377,7 +1377,7 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 					utfForm = UTF8FromLatin1(s, len);
 				}
 				pango_layout_set_text(layout, utfForm, strlen(utfForm));
-				len = strlen(utfForm)
+				len = strlen(utfForm);
 			}
 			pango_layout_index_to_pos(layout, len, &pos);
 			int width = PANGO_PIXELS(pos.x);
