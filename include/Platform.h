@@ -446,6 +446,8 @@ public:
 	static long SendScintillaPointer(
 		WindowID w, unsigned int msg, unsigned long wParam=0, void *lParam=0);
 	static bool IsDBCSLeadByte(int codePage, char ch);
+	static int DBCSCharLength(int codePage, const char *s);
+	static int DBCSCharMaxLength();
 
 	// These are utility functions not really tied to a platform
 	static int Minimum(int a, int b);

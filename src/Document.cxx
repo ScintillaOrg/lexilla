@@ -218,6 +218,8 @@ bool Document::IsCrLf(int pos) {
 	return (cb.CharAt(pos) == '\r') && (cb.CharAt(pos + 1) == '\n');
 }
 
+static const int maxBytesInDBCSCharacter=5;
+
 bool Document::IsDBCS(int pos) {
 	if (dbcsCodePage) {
 		if (SC_CP_UTF8 == dbcsCodePage) {
@@ -227,11 +229,18 @@ bool Document::IsDBCS(int pos) {
 			// Anchor DBCS calculations at start of line because start of line can
 			// not be a DBCS trail byte.
 			int startLine = pos;
+			char mbstr[maxBytesInDBCSCharacter+1];
 			while (startLine > 0 && cb.CharAt(startLine) != '\r' && cb.CharAt(startLine) != '\n')
 				startLine--;
 			while (startLine <= pos) {
-				if (Platform::IsDBCSLeadByte(dbcsCodePage, cb.CharAt(startLine))) {
-					startLine++;
+				int i;
+				for (i=0; i<Platform::DBCSCharMaxLength(); i++) {
+					mbstr[i] = cb.CharAt(startLine+i);
+				}
+				mbstr[i] = '\0';
+				int mbsize = Platform::DBCSCharLength(dbcsCodePage, mbstr);
+				if (mbsize >= 1) {
+					startLine += mbsize;
 					if (startLine >= pos)
 						return true;
 				}
@@ -257,8 +266,14 @@ int Document::LenChar(int pos) {
 			return lengthDoc -pos;
 		else
 			return len;
-	} else if (IsDBCS(pos)) {
-		return 2;
+	} else if (dbcsCodePage) {
+		char mbstr[maxBytesInDBCSCharacter+1];
+		int i;
+		for (i=0; i<Platform::DBCSCharMaxLength(); i++) {
+			mbstr[i] = cb.CharAt(pos+i);
+		}
+		mbstr[i] = '\0';
+		return Platform::DBCSCharLength(dbcsCodePage, mbstr);
 	} else {
 		return 1;
 	}
@@ -308,26 +323,31 @@ int Document::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
 			// Anchor DBCS calculations at start of line because start of line can
 			// not be a DBCS trail byte.
 			int startLine = pos;
+
 			while (startLine > 0 && cb.CharAt(startLine) != '\r' && cb.CharAt(startLine) != '\n')
 				startLine--;
-			bool atLeadByte = false;
-			while (startLine < pos) {
-				if (atLeadByte)
-					atLeadByte = false;
-				else if (Platform::IsDBCSLeadByte(dbcsCodePage, cb.CharAt(startLine)))
-					atLeadByte = true;
-				else
-					atLeadByte = false;
+			for (;startLine <= pos;) {
+				char mbstr[maxBytesInDBCSCharacter+1];
+				int i;
+				for(i=0;i<Platform::DBCSCharMaxLength();i++) {
+					mbstr[i] = cb.CharAt(startLine+i);
+				}
+				mbstr[i] = '\0';
+
+				int mbsize = Platform::DBCSCharLength(dbcsCodePage, mbstr);
+				if (mbsize >= 1) {
+					if (startLine + mbsize == pos) {
+						return pos;
+					} else if (startLine + mbsize > pos) {
+						if (moveDir > 0)
+							return startLine + mbsize;
+						else
+							return startLine;
+					}
+					startLine += mbsize;
+					continue;
+				}
 				startLine++;
-			}
-
-
-			if (atLeadByte) {
-				// Position is between a lead byte and a trail byte
-				if (moveDir > 0)
-					return pos + 1;
-				else
-					return pos - 1;
 			}
 		}
 	}

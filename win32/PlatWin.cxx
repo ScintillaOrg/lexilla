@@ -1271,6 +1271,14 @@ bool Platform::IsDBCSLeadByte(int codePage, char ch) {
 	return ::IsDBCSLeadByteEx(codePage, ch) != 0;
 }
 
+int Platform::DBCSCharLength(int codePage, const char *s) {
+	return (::IsDBCSLeadByteEx(codePage, s[0]) != 0) ? 2 : 1;
+}
+
+int Platform::DBCSCharMaxLength() {
+	return 2;
+}
+
 // These are utility functions not really tied to a platform
 
 int Platform::Minimum(int a, int b) {
