@@ -3730,6 +3730,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			return len; 	// Not including NUL
 		}
 
+	case SCI_HIDESELECTION:
+		hideSelection = wParam;
+		Redraw();
+		break;
+
 	case SCI_FORMATRANGE:
 		return FormatRange(wParam, reinterpret_cast<RangeToFormat *>(lParam));
 
