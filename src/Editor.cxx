@@ -808,6 +808,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 
 	bool inIndentation = true;
 	int indentWidth = pdoc->indentInChars * vs.spaceWidth;
+	if (indentWidth == 0)
+		indentWidth = pdoc->tabInChars * vs.spaceWidth;
 	
 	int posLineStart = pdoc->LineStart(line);
 	int posLineEnd = pdoc->LineStart(line + 1);
