@@ -42,6 +42,11 @@ static void SetWindowPointer(HWND hWnd, void *ptr) {
 
 static CRITICAL_SECTION crPlatformLock;
 static HINSTANCE hinstPlatformRes = 0;
+static bool onNT = false;
+
+bool IsNT() {
+	return onNT;
+}
 
 Point Point::FromLong(long lpoint) {
 	return Point(static_cast<short>(LOWORD(lpoint)), static_cast<short>(HIWORD(lpoint)));
@@ -276,6 +281,7 @@ class SurfaceImpl : public Surface {
 	HBITMAP bitmap;
 	HBITMAP bitmapOld;
 	HPALETTE paletteOld;
+	int maxWidthMeasure;
 	void BrushColor(ColourAllocated back);
 	void SetFont(Font &font_);
 
@@ -334,6 +340,8 @@ SurfaceImpl::SurfaceImpl() :
 	font(0), 	fontOld(0),
 	bitmap(0), bitmapOld(0),
 	paletteOld(0) {
+	// Windows 9x has only a 16 bit coordinate system so break after 30000 pixels
+	maxWidthMeasure = IsNT() ? 1000000 : 30000;
 }
 
 SurfaceImpl::~SurfaceImpl() {
@@ -507,7 +515,7 @@ void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 		static_cast<SurfaceImpl &>(surfaceSource).hdc, from.x, from.y, SRCCOPY);
 }
 
-#define MAX_US_LEN 5000
+#define MAX_US_LEN 10000
 
 void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len,
 	ColourAllocated fore, ColourAllocated back) {
@@ -591,7 +599,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 		tbuf[tlen] = L'\0';
 		int poses[MAX_US_LEN];
 		fit = tlen;
-		if (!::GetTextExtentExPointW(hdc, tbuf, tlen, 30000, &fit, poses, &sz)) {
+		if (!::GetTextExtentExPointW(hdc, tbuf, tlen, maxWidthMeasure, &fit, poses, &sz)) {
 			// Likely to have failed because on Windows 9x where function not available
 			// So measure the character widths by measuring each initial substring
 			// Turns a linear operation into a qudratic but seems fast enough on test files
@@ -624,7 +632,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 			positions[i++] = lastPos;
 		}
 	} else {
-		if (!::GetTextExtentExPoint(hdc, s, len, 30000, &fit, positions, &sz)) {
+		if (!::GetTextExtentExPoint(hdc, s, len, maxWidthMeasure, &fit, positions, &sz)) {
 			// Eeek - a NULL DC or other foolishness could cause this.
 			// The least we can do is set the positions to zero!
 			memset(positions, 0, len * sizeof(*positions));
@@ -1370,6 +1378,9 @@ int Platform::Clamp(int val, int minVal, int maxVal) {
 }
 
 void Platform_Initialise(void *hInstance) {
+	OSVERSIONINFO osv = {sizeof(OSVERSIONINFO),0,0,0,0,""};
+	::GetVersionEx(&osv);
+	onNT = osv.dwPlatformId == VER_PLATFORM_WIN32_NT;
 	::InitializeCriticalSection(&crPlatformLock);
 	hinstPlatformRes = reinterpret_cast<HINSTANCE>(hInstance);
 	ListBoxX_Register();

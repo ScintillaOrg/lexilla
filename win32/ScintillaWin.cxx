@@ -87,6 +87,11 @@
 #define MK_ALT 32
 #endif
 
+// Functions imported from PlatWin
+extern bool IsNT();
+extern void Platform_Initialise(void *hInstance);
+extern void Platform_Finalise();
+
 /** TOTAL_CONTROL ifdef surrounds code that will only work when ScintillaWin
  * is derived from ScintillaBase (all features) rather than directly from Editor
  * (lightweight editor).
@@ -405,12 +410,6 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 
 	//Platform::DebugPrintf("Paint took %g\n", et.Duration());
 	return 0l;
-}
-
-static BOOL IsNT() {
-	OSVERSIONINFO osv = {sizeof(OSVERSIONINFO),0,0,0,0,""};
-	::GetVersionEx(&osv);
-	return osv.dwPlatformId == VER_PLATFORM_WIN32_NT;
 }
 
 sptr_t ScintillaWin::HandleComposition(uptr_t wParam, sptr_t lParam) {
@@ -1979,9 +1978,6 @@ sptr_t PASCAL ScintillaWin::SWndProc(
 		}
 	}
 }
-
-extern void Platform_Initialise(void *hInstance);
-extern void Platform_Finalise();
 
 // This function is externally visible so it can be called from container when building statically.
 // Must be called once only.
