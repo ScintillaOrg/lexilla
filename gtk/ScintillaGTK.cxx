@@ -1,6 +1,6 @@
 // Scintilla source code edit control
 // ScintillaGTK.cxx - GTK+ specific subclass of ScintillaBase
-// Copyright 1998-2002 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <stdlib.h>

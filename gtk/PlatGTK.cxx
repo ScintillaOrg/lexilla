@@ -1,6 +1,6 @@
 // Scintilla source code edit control
 // PlatGTK.cxx - implementation of platform facilities on GTK+/Linux
-// Copyright 1998-2002 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <string.h>
