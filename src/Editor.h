@@ -65,6 +65,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool hasFocus;
 	bool hideSelection;
 	bool inOverstrike;
+	int errorStatus;
 
 	// In bufferedDraw mode, graphics operations are drawn to a pixmap and then copied to 
 	// the screen. This avoids flashing but is about 30% slower.

@@ -998,6 +998,11 @@ set void SetFocus=2380(bool focus,)
 # Get internal focus flag
 get bool GetFocus=2381(,)
 
+# Change error status - 0 = OK
+set void SetStatus=2382(int statusCode,)
+# Get error status
+get int GetStatus=2383(,)
+
 # Set the focus to this Scintilla widget.
 # GTK+ Specific
 fun void GrabFocus=2400(,)

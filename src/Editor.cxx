@@ -44,6 +44,7 @@ Editor::Editor() {
 	hasFocus = false;
 	hideSelection = false;
 	inOverstrike = false;
+	errorStatus = 0;
 
 	bufferedDraw = true;
 
@@ -4283,6 +4284,13 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 	
 	case SCI_GETFOCUS:
 		return hasFocus;
+	
+	case SCI_SETSTATUS:
+		errorStatus = wParam;
+		break;
+	
+	case SCI_GETSTATUS:
+		return errorStatus;
 	
 #ifdef MACRO_SUPPORT
 	case SCI_STARTRECORD:
