@@ -960,6 +960,12 @@ long Platform::SendScintilla(
 	return scintilla_send_message(SCINTILLA(w), msg, wParam, lParam);
 }
 
+long Platform::SendScintillaPointer(
+    WindowID w, unsigned int msg, unsigned long wParam, void *lParam) {
+	return scintilla_send_message(SCINTILLA(w), msg, wParam, 
+	    reinterpret_cast<sptr_t>(lParam));
+}
+
 bool Platform::IsDBCSLeadByte(int /*codePage*/, char /*ch*/) {
 	return false;
 }

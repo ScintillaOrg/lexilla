@@ -228,7 +228,7 @@ static bool IsSuffixCaseInsensitive(const char *target, const char *suffix) {
 	size_t lensuffix = strlen(suffix);
 	if (lensuffix > lentarget)
 		return false;
-	for (int i = lensuffix - 1; i >= 0; i--) {
+	for (int i = static_cast<int>(lensuffix) - 1; i >= 0; i--) {
 		if (MakeUpperCase(target[i + lentarget - lensuffix]) !=
 		        MakeUpperCase(suffix[i]))
 			return false;
