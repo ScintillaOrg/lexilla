@@ -133,6 +133,7 @@ LEXOBJS=\
 	$(DIR_O)\LexNsis.obj \
 	$(DIR_O)\LexOthers.obj \
 	$(DIR_O)\LexPascal.obj \
+	$(DIR_O)\LexPB.obj \
 	$(DIR_O)\LexPerl.obj \
 	$(DIR_O)\LexPOV.obj \
 	$(DIR_O)\LexPS.obj \
@@ -299,6 +300,8 @@ $(DIR_O)\LexNsis.obj: ..\src\LexNsis.cxx $(LEX_HEADERS)
 $(DIR_O)\LexOthers.obj: ..\src\LexOthers.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexPascal.obj: ..\src\LexPascal.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexPB.obj: ..\src\LexPB.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexPerl.obj: ..\src\LexPerl.cxx $(LEX_HEADERS)
 
