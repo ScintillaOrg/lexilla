@@ -2,7 +2,8 @@
 /** @file LexPS.cxx
  ** Lexer for PostScript
  **
- ** Written by Nigel Hathaway.
+ ** Written by Nigel Hathaway <nigel@bprj.co.uk>.
+ ** The License.txt file describes the conditions under which this software may be distributed.
  **/
 
 #include <stdlib.h>
