@@ -884,6 +884,12 @@ fun void CallTipSetHlt=2204(int start, int end)
 # Set the background colour for the call tip.
 set void CallTipSetBack=2205(colour back,)
 
+# Set the foreground colour for the call tip.
+set void CallTipSetFore=2206(colour fore,)
+
+# Set the foreground colour for the highlighted part of the call tip.
+set void CallTipSetForeHlt=2207(colour fore,)
+
 # Find the display line of a document line taking hidden lines into account.
 fun int VisibleFromDocLine=2220(int line,)
 

@@ -571,6 +571,16 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		InvalidateStyleRedraw();
 		break;
 
+	case SCI_CALLTIPSETFORE:
+		ct.colourUnSel = ColourDesired(wParam);
+		InvalidateStyleRedraw();
+		break;
+
+	case SCI_CALLTIPSETFOREHLT:
+		ct.colourSel = ColourDesired(wParam);
+		InvalidateStyleRedraw();
+		break;
+
 	case SCI_USEPOPUP:
 		displayPopupMenu = wParam != 0;
 		break;
