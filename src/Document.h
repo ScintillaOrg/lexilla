@@ -87,6 +87,7 @@ public:
 	int stylingBitsMask;
 	
 	int eolMode;
+	// dbcsCodePage can also be SC_CP_UTF8 to enable UTF-8 mode
 	int dbcsCodePage;
 	int tabInChars;
 	
@@ -99,6 +100,7 @@ public:
 	int LineFromPosition(int pos);
 	int ClampPositionIntoDocument(int pos);
 	bool IsCrLf(int pos);
+	int LenChar(int pos);
 	int MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd=true);
 
 	// Gateways to modifying document

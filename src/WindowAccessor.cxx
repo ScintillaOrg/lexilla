@@ -19,7 +19,12 @@ bool WindowAccessor::InternalIsLeadByte(char ch) {
 	// TODO: support DBCS under GTK+
 	return false;
 #elif PLAT_WIN 
-	return IsDBCSLeadByteEx(codePage, ch);
+	if (SC_CP_UTF8 == codePage)
+		// For lexing, all characters >= 0x80 are treated the
+		// same so none is considered a lead byte.
+		return false;	
+	else
+		return IsDBCSLeadByteEx(codePage, ch);
 #elif PLAT_WX 
 	return false;
 #endif 

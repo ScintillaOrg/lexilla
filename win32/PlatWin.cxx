@@ -323,20 +323,49 @@ void Surface::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 		surfaceSource.hdc, from.x, from.y, SRCCOPY);
 }
 
-#define ASCII_ONLY 1
+int UCS2FromUTF8(const char *s, int len, wchar_t *tbuf, int tlen) {
+#ifdef USE_API
+	return ::MultiByteToWideChar(CP_UTF8, 0, s, len, tbuf, tlen);
+#else 
+	int ui=0;
+	const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
+	int i=0;
+	while (i<len) {
+		unsigned char ch = us[i++];
+		if (ch < 0x80) {
+			tbuf[ui] = ch;
+		} else if (ch < 0x80 + 0x40 + 0x20) {
+			tbuf[ui] = (ch & 0x1F) << 6;
+			ch = us[i++];
+			tbuf[ui] += ch & 0x7F;
+		} else {
+			tbuf[ui] = (ch & 0xF) << 12;
+			ch = us[i++];
+			tbuf[ui] += (ch & 0x7F) << 6;
+			ch = us[i++];
+			tbuf[ui] += ch & 0x7F;
+		}
+		ui++;
+	}
+	return ui;
+#endif
+}
+
+#define MAX_US_LEN 5000
 
 void Surface::DrawText(PRectangle rc, Font &font_, int ybase, const char *s, int len, Colour fore, Colour back) {
 	SetFont(font_);
 	::SetTextColor(hdc, fore.AsLong());
 	::SetBkColor(hdc, back.AsLong());
 	RECT rcw = RectFromPRectangle(rc);
-#ifdef ASCII_ONLY
-	::ExtTextOut(hdc, rc.left, ybase, ETO_OPAQUE, &rcw, s, len, NULL);
-#else
-	wchar_t tbuf[20000];
-	int tlen = MultiByteToWideChar(CP_UTF8, 0, s, len, tbuf, sizeof(tbuf));
-	::ExtTextOutW(hdc, rc.left, ybase, ETO_OPAQUE, &rcw, tbuf, tlen, NULL);
-#endif
+	if (unicodeMode) {
+		wchar_t tbuf[MAX_US_LEN];
+		int tlen = UCS2FromUTF8(s, len, tbuf, sizeof(tbuf)/sizeof(wchar_t));
+		tbuf[tlen] = L'\0';
+		::ExtTextOutW(hdc, rc.left, ybase, ETO_OPAQUE, &rcw, tbuf, tlen, NULL);
+	} else {
+		::ExtTextOut(hdc, rc.left, ybase, ETO_OPAQUE, &rcw, s, len, NULL);
+	}
 }
 
 void Surface::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, Colour fore, Colour back) {
@@ -344,60 +373,75 @@ void Surface::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char 
 	::SetTextColor(hdc, fore.AsLong());
 	::SetBkColor(hdc, back.AsLong());
 	RECT rcw = RectFromPRectangle(rc);
-#ifdef ASCII_ONLY
-	::ExtTextOut(hdc, rc.left, ybase, ETO_OPAQUE | ETO_CLIPPED, &rcw, s, len, NULL);
-#else
-	wchar_t tbuf[20000];
-	int tlen = MultiByteToWideChar(CP_UTF8, 0, s, len, tbuf, sizeof(tbuf));
-	::ExtTextOutW(hdc, rc.left, ybase, ETO_OPAQUE | ETO_CLIPPED, &rcw, tbuf, tlen, NULL);
-#endif
+	if (unicodeMode) {
+		wchar_t tbuf[MAX_US_LEN];
+		int tlen = UCS2FromUTF8(s, len, tbuf, sizeof(tbuf)/sizeof(wchar_t));
+		tbuf[tlen] = L'\0';
+		::ExtTextOutW(hdc, rc.left, ybase, ETO_OPAQUE | ETO_CLIPPED, &rcw, tbuf, tlen, NULL);
+	} else {
+		::ExtTextOut(hdc, rc.left, ybase, ETO_OPAQUE | ETO_CLIPPED, &rcw, s, len, NULL);
+	}
 }
 
 int Surface::WidthText(Font &font_, const char *s, int len) {
 	SetFont(font_);
-	SIZE sz;
-#ifdef ASCII_ONLY
-	::GetTextExtentPoint32(hdc, s, len, &sz);
-#else
-	wchar_t tbuf[20000];
-	int tlen = MultiByteToWideChar(CP_UTF8, 0, s, len, tbuf, sizeof(tbuf));
-	::GetTextExtentPoint32W(hdc, tbuf, tlen, &sz);
-#endif
+	SIZE sz={0,0};
+	if (unicodeMode) {
+		int fit = 0;
+		wchar_t tbuf[MAX_US_LEN];
+		int tlen = UCS2FromUTF8(s, len, tbuf, sizeof(tbuf)/sizeof(wchar_t));
+		tbuf[tlen] = L'\0';
+		fit = tlen;
+		//::GetTextExtentPoint32W(hdc, tbuf, tlen, &sz);
+		if (!::GetTextExtentExPointW(hdc, tbuf, tlen, 30000, &fit, NULL, &sz)) {
+			DWORD dw = GetLastError();
+			Platform::DebugPrintf("Error for 1 GTEEPW %d\n", dw);
+		} else {
+			//Platform::DebugPrintf("OK 1 GTEEPW %d\n", len);
+		}
+	} else {
+		::GetTextExtentPoint32(hdc, s, len, &sz);
+	}
 	return sz.cx;
 }
 
 void Surface::MeasureWidths(Font &font_, const char *s, int len, int *positions) {
 	SetFont(font_);
-	SIZE sz;
+	SIZE sz={0,0};
 	int fit = 0;
-#ifdef ASCII_ONLY
-	::GetTextExtentExPoint(hdc, s, len, 30000, &fit, positions, &sz);
-#else
-	wchar_t tbuf[20000];
-	int poses[20000];
-	int tlen = MultiByteToWideChar(CP_UTF8, 0, s, len, tbuf, sizeof(tbuf));
-	::GetTextExtentExPointW(hdc, tbuf, tlen, 30000, &fit, poses, &sz);
-	int ui=0;
-	const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
-	int i=0;
-	while (i<len) {
-		positions[i] = poses[ui];
-		if (us[i] < 128) {
-			ui++;
-		} else if (us[i] < (128 + 64 + 32)) {
-			positions[i+1] = poses[ui];
-			ui++;
-			i++;
+	if (unicodeMode) {
+		wchar_t tbuf[MAX_US_LEN];
+		int tlen = UCS2FromUTF8(s, len, tbuf, sizeof(tbuf)/sizeof(wchar_t));
+		tbuf[tlen] = L'\0';
+		int poses[MAX_US_LEN];
+		fit = tlen;
+		SetLastError(0);
+		if (!::GetTextExtentExPointW(hdc, tbuf, tlen, 30000, &fit, poses, &sz)) {
+			DWORD dw = GetLastError();
+			Platform::DebugPrintf("Error for GTEEPW %d\n", dw);
 		} else {
-			positions[i+1] = poses[ui];
-			positions[i+2] = poses[ui];
-			ui++;
-			i++;
-			i++;
+			//Platform::DebugPrintf("OK GTEEPW %d\n", len);
 		}
-		i++;
+		int ui=0;
+		const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
+		int i=0;
+		while (i<len) {
+			unsigned char uch = us[i];
+			positions[i++] = poses[ui];
+			if (uch >= 0x80) {
+				if (uch < (0x80 + 0x40 + 0x20)) {
+					positions[i++] = poses[ui];
+				} else {
+					positions[i++] = poses[ui];
+					positions[i++] = poses[ui];
+				}
+			}
+			ui++;
+		}
+		positions[i] = sz.cx;
+	} else {
+		::GetTextExtentExPoint(hdc, s, len, 30000, &fit, positions, &sz);
 	}
-#endif
 }
 
 int Surface::WidthChar(Font &font_, char ch) {
@@ -704,7 +748,7 @@ int Platform::Maximum(int a, int b) {
 		return b;
 }
 
-//#define TRACE
+#define TRACE
 
 void Platform::DebugPrintf(const char *format, ...) {
 #ifdef TRACE

@@ -71,9 +71,9 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 	for (int i = startPos; i <= lengthDoc; i++) {
 	
 		if (atStartLine) {
-			char chFlags;
 			char chBad = static_cast<char>(64);
 			char chGood = static_cast<char>(0);
+			char chFlags = chGood;
 			if (whingeLevel == 1) {
 				chFlags = (spaceFlags & wsInconsistent) ? chBad : chGood;
 			} else if (whingeLevel == 2) {

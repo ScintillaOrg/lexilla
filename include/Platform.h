@@ -221,6 +221,7 @@ public:
 // A surface abstracts a place to draw
 class Surface {
 private:
+	bool unicodeMode;
 #if PLAT_GTK
 	GdkDrawable *drawable;
 	GdkGC *gc;
@@ -293,6 +294,10 @@ public:
 	int SetPalette(Palette *pal, bool inBackGround);
 	void SetClip(PRectangle rc);
 	void FlushCachedState();
+
+	void SetUnicodeMode(bool unicodeMode_) {
+		unicodeMode=unicodeMode_;
+	}
 };
 
 // Class to hide the details of window manipulation

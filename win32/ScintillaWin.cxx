@@ -137,7 +137,7 @@ class ScintillaWin :
 	void ImeEndComposition();
 
 	void GetIntelliMouseParameters();
-	HGLOBAL GetSelText();
+	void CopySelTextToClipboard();
 	void ScrollMessage(WPARAM wParam);
 	void HorizontalScrollMessage(WPARAM wParam);
 	void RealizeWindowPalette(bool inBackGround);
@@ -268,6 +268,7 @@ LRESULT ScintillaWin::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 			BeginPaint(wMain.GetID(), &ps);
 			Surface surfaceWindow;
 			surfaceWindow.Init(ps.hdc);
+			surfaceWindow.SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
 			rcPaint = PRectangle(ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right, ps.rcPaint.bottom);
 			PRectangle rcText = GetTextRectangle();
 			paintingAllText = rcPaint.Contains(rcText);
@@ -456,11 +457,13 @@ LRESULT ScintillaWin::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case EM_CANPASTE: {
-			OpenClipboard(wMain.GetID());
-			HGLOBAL hmemSelection = GetClipboardData(CF_TEXT);
+			::OpenClipboard(wMain.GetID());
+			HGLOBAL hmemSelection = ::GetClipboardData(CF_TEXT);
+			if (!hmemSelection && (SC_CP_UTF8 == pdoc->dbcsCodePage))
+				hmemSelection = ::GetClipboardData(CF_UNICODETEXT);
 			if (hmemSelection)
-				GlobalUnlock(hmemSelection);
-			CloseClipboard();
+				::GlobalUnlock(hmemSelection);
+			::CloseClipboard();
 			return hmemSelection != 0;
 		}
 
@@ -585,15 +588,46 @@ void ScintillaWin::NotifyDoubleClick(Point pt, bool shift) {
 void ScintillaWin::Copy() {
 	//Platform::DebugPrintf("Copy\n");
 	if (currentPos != anchor) {
-		HGLOBAL hmemSelection = GetSelText();
 		::OpenClipboard(wMain.GetID());
 		::EmptyClipboard();
-		::SetClipboardData(CF_TEXT, hmemSelection);
+		CopySelTextToClipboard();
 		if (selType == selRectangle) {
 			::SetClipboardData(cfColumnSelect, 0);
 		}
 		::CloseClipboard();
 	}
+}
+
+unsigned int UTF8Length(wchar_t *uptr, unsigned int tlen) {
+	unsigned int len = 0;
+	for (unsigned int i = 0; i < tlen && uptr[i]; i++) {
+		unsigned int uch = uptr[i];
+		if (uch < 0x80)
+			len++;
+		else if (uch < 0x800)
+			len+=2;
+		else
+			len +=3;
+	}
+	return len;
+}
+
+void UTF8FromUCS2(wchar_t *uptr, unsigned int tlen, char *putf, int len) {
+	int k = 0;
+	for (unsigned int i = 0; i < tlen && uptr[i]; i++) {
+		unsigned int uch = uptr[i];
+		if (uch < 0x80) {
+			putf[k++] = uch;
+		} else if (uch < 0x800) {
+			putf[k++] = 0xC0 | (uch >> 6);
+			putf[k++] = 0x80 | (uch & 0x3f);
+		} else {
+			putf[k++] = 0xE0 | (uch >> 12);
+			putf[k++] = 0x80 | ((uch >> 6) & 0x3f);
+			putf[k++] = 0x80 | (uch & 0x3f);
+		}
+	}
+	putf[len] = '\0';
 }
 
 void ScintillaWin::Paste() {
@@ -602,25 +636,50 @@ void ScintillaWin::Paste() {
 	ClearSelection();
 	::OpenClipboard(wMain.GetID());
 	bool isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect);
-	HGLOBAL hmemSelection = ::GetClipboardData(CF_TEXT);
-	if (hmemSelection) {
-		char *ptr = static_cast<char *>(
-			::GlobalLock(hmemSelection));
-		if (ptr) {
-			unsigned int bytes = ::GlobalSize(hmemSelection);
-			unsigned int len = bytes;
-			for (unsigned int i = 0; i < bytes; i++) {
-				if ((len == bytes) && (0 == ptr[i]))
-					len = i;
+	HGLOBAL hmemUSelection = 0;
+	if (SC_CP_UTF8 == pdoc->dbcsCodePage) {
+		hmemUSelection = ::GetClipboardData(CF_UNICODETEXT);
+		if (hmemUSelection) {
+			wchar_t *uptr = static_cast<wchar_t *>(::GlobalLock(hmemUSelection));
+			if (uptr) {
+				unsigned int bytes = ::GlobalSize(hmemUSelection);
+				unsigned int len = UTF8Length(uptr, bytes/2);
+				char *putf = new char[len+1];
+				if (putf) {
+					UTF8FromUCS2(uptr, bytes/2, putf, len);
+					if (isRectangular) {
+						PasteRectangular(selStart, putf, len);
+					} else {
+						pdoc->InsertString(currentPos, putf, len);
+						SetEmptySelection(currentPos + len);
+					}
+					delete []putf;
+				}
 			}
-			if (isRectangular) {
-				PasteRectangular(selStart, ptr, len);
-			} else {
-				pdoc->InsertString(currentPos, ptr, len);
-				SetEmptySelection(currentPos + len);
-			}
+			::GlobalUnlock(hmemUSelection);
 		}
-		::GlobalUnlock(hmemSelection);
+	}
+	if (!hmemUSelection) {
+		HGLOBAL hmemSelection = ::GetClipboardData(CF_TEXT);
+		if (hmemSelection) {
+			char *ptr = static_cast<char *>(
+				::GlobalLock(hmemSelection));
+			if (ptr) {
+				unsigned int bytes = ::GlobalSize(hmemSelection);
+				unsigned int len = bytes;
+				for (unsigned int i = 0; i < bytes; i++) {
+					if ((len == bytes) && (0 == ptr[i]))
+						len = i;
+				}
+				if (isRectangular) {
+					PasteRectangular(selStart, ptr, len);
+				} else {
+					pdoc->InsertString(currentPos, ptr, len);
+					SetEmptySelection(currentPos + len);
+				}
+			}
+			::GlobalUnlock(hmemSelection);
+		}
 	}
 	::CloseClipboard();
 	pdoc->EndUndoAction();
@@ -795,7 +854,7 @@ STDMETHODIMP DataObject_QueryGetData(DataObject *pd, FORMATETC *pFE) {
 	}
 	
 	if (
-	    ((pFE->cfFormat != CF_TEXT) && (pFE->cfFormat != CF_HDROP)) ||
+	    ((pFE->cfFormat != CF_TEXT) && (pFE->cfFormat != CF_UNICODETEXT) && (pFE->cfFormat != CF_HDROP)) ||
 	    pFE->ptd != 0 ||
 	    (pFE->dwAspect & DVASPECT_CONTENT) == 0 ||
 	    pFE->lindex != -1 ||
@@ -963,25 +1022,56 @@ void ScintillaWin::GetIntelliMouseParameters() {
 	::SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, &ucWheelScrollLines, 0);
 }
 
-HGLOBAL ScintillaWin::GetSelText() {
+void ScintillaWin::CopySelTextToClipboard() {
 	int bytes = SelectionRangeLength();
+	char *selChars = CopySelectionRange();
+	if (!selChars) 
+		return;
 
 	HGLOBAL hand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, 
 		bytes + 1);
 	if (hand) {
 		char *ptr = static_cast<char *>(::GlobalLock(hand));
-		char *selChars = CopySelectionRange();
-		if (selChars) {
-			memcpy(ptr, selChars, bytes);
-			delete []selChars;
-			//for (int i = 0; i < bytes; i++) {
-			//	ptr[i] = pdoc->CharAt(startPos + i);
-			//}
-		}
+		memcpy(ptr, selChars, bytes);
 		ptr[bytes] = '\0';
 		::GlobalUnlock(hand);
 	}
-	return hand;
+	::SetClipboardData(CF_TEXT, hand);
+
+	if (SC_CP_UTF8 == pdoc->dbcsCodePage) {
+		int uchars = 0;
+		for (int i=0;i<bytes;i++) {
+			unsigned char ch = static_cast<unsigned char>(selChars[i]);
+			if ((ch < 0x80) || (ch > (0x80 + 0x40)))
+				uchars++;
+		}
+		HGLOBAL uhand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, 
+			2 * (uchars + 1));
+		if (uhand) {
+			wchar_t *uptr = static_cast<wchar_t *>(::GlobalLock(uhand));
+			int k=0;
+			for (int j=0; j<uchars; j++) {
+				unsigned char ch = static_cast<unsigned char>(selChars[k++]);
+				if (ch < 0x80) {
+					uptr[j] = ch;
+				} else if (ch < 0x80 + 0x40 + 0x20) {
+					uptr[j] = (ch & 0x1F) << 6;
+					ch = static_cast<unsigned char>(selChars[k++]);
+					uptr[j] += ch & 0x7F;
+				} else {
+					uptr[j] = (ch & 0xF) << 12;
+					ch = static_cast<unsigned char>(selChars[k++]);
+					uptr[j] += (ch & 0x7F) << 6;
+					ch = static_cast<unsigned char>(selChars[k++]);
+					uptr[j] += ch & 0x7F;
+				}
+			}
+			uptr[uchars] = 0;
+			::GlobalUnlock(uhand);
+		}
+		::SetClipboardData(CF_UNICODETEXT, uhand);
+	}
+	delete []selChars;
 }
 
 void ScintillaWin::ScrollMessage(WPARAM wParam) {
@@ -1068,6 +1158,7 @@ void ScintillaWin::FullPaint() {
 	HDC hdc = ::GetDC(wMain.GetID());
 	Surface surfaceWindow;
 	surfaceWindow.Init(hdc);
+	surfaceWindow.SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
 	Paint(&surfaceWindow, rcPaint);
 	surfaceWindow.Release();
 	::ReleaseDC(wMain.GetID(), hdc);
@@ -1151,30 +1242,42 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 
 	SetDragPosition(invalidPosition);
 
-	FORMATETC fmte = {CF_TEXT,
-	                  NULL,
-	                  DVASPECT_CONTENT,
-	                  -1,
-	                  TYMED_HGLOBAL
-	                 };
 	STGMEDIUM medium;
+	HRESULT hr = S_OK;
 
-	HRESULT hres = pIDataSource->GetData(&fmte, &medium);
-	if (FAILED(hres)) {
+	wchar_t *udata = 0;
+	char *data = 0;
+	int dataLen = 0;
+
+	if (SC_CP_UTF8 == pdoc->dbcsCodePage) {
+		FORMATETC fmtu = {CF_UNICODETEXT, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
+		hr = pIDataSource->GetData(&fmtu, &medium);
+		if (SUCCEEDED(hr) && medium.hGlobal) {
+			udata = static_cast<wchar_t *>(::GlobalLock(medium.hGlobal));
+			int tlen = ::GlobalSize(medium.hGlobal);
+			// Convert UCS-2 to UTF-8
+			dataLen = UTF8Length(udata, tlen/2);
+			data = new char[dataLen+1];
+			if (data) {
+				UTF8FromUCS2(udata, tlen/2, data, dataLen);
+			}
+		}
+	}
+
+	if (!data) {
+		FORMATETC fmte = {CF_TEXT, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
+		hr = pIDataSource->GetData(&fmte, &medium);
+		if (SUCCEEDED(hr) && medium.hGlobal) {
+			data = static_cast<char *>(::GlobalLock(medium.hGlobal));
+		}
+	}
+
+	if (!data) {
 		//Platform::DebugPrintf("Bad data format: 0x%x\n", hres);
-		return hres;
+		return hr;
 	}
-	if (medium.hGlobal == 0) {
-		return E_OUTOFMEMORY;
-	}
-	char *data = static_cast<char *>(::GlobalLock(medium.hGlobal));
 
-	FORMATETC fmtr = {cfColumnSelect,
-	                  NULL,
-	                  DVASPECT_CONTENT,
-	                  -1,
-	                  TYMED_HGLOBAL
-	                 };
+	FORMATETC fmtr = {cfColumnSelect, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL};
 	HRESULT hrRectangular = pIDataSource->QueryGetData(&fmtr);
 	
 	POINT rpt = {pt.x, pt.y};
@@ -1189,6 +1292,9 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 	// Free data
 	if (medium.pUnkForRelease != NULL)
 		medium.pUnkForRelease->Release();
+
+	if (udata) 
+		delete []data;
 
 	return S_OK;
 }

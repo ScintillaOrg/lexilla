@@ -210,6 +210,7 @@ Point Editor::LocationFromPosition(unsigned int pos) {
 	//Platform::DebugPrintf("line=%d\n", line);
 	Surface surface;
 	surface.Init();
+	surface.SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
 	Point pt;
 	pt.y = (lineVisible - topLine) * vs.lineHeight;  	// + half a lineheight?
 	unsigned int posLineStart = pdoc->LineStart(line);
@@ -252,6 +253,7 @@ int Editor::PositionFromLocation(Point pt) {
 //Platform::DebugPrintf("Position of (%d,%d) line = %d top=%d\n", pt.x, pt.y, line, topLine);
 	Surface surface;
 	surface.Init();
+	surface.SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
 	unsigned int posLineStart = pdoc->LineStart(line);
 
 	LineLayout ll;
@@ -273,6 +275,7 @@ int Editor::PositionFromLineX(int line, int x) {
 	//Platform::DebugPrintf("Position of (%d,%d) line = %d top=%d\n", pt.x, pt.y, line, topLine);
 	Surface surface;
 	surface.Init();
+	surface.SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
 	unsigned int posLineStart = pdoc->LineStart(line);
 
 	LineLayout ll;
@@ -1024,6 +1027,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		} else {
 			surface = surfaceWindow;
 		}
+		surface->SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
 
 		int visibleLine = topLine + screenLinePaintFirst;
 		int line = cs.DocFromDisplay(visibleLine);
@@ -1164,8 +1168,10 @@ long Editor::FormatRange(bool draw, FORMATRANGE *pfr) {
 
 	Surface *surface = new Surface();
 	surface->Init(pfr->hdc);
+	surface->SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
 	Surface *surfaceMeasure = new Surface();
 	surfaceMeasure->Init(pfr->hdcTarget);
+	surfaceMeasure->SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
 	
 	ViewStyle vsPrint(vs);
 	
