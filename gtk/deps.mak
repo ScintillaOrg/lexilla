@@ -29,7 +29,7 @@ Editor.o: ../src/Editor.cxx ../include/Platform.h ../include/Scintilla.h \
   ../src/Style.h ../src/ViewStyle.h ../src/Document.h ../src/Editor.h
 ExternalLexer.o: ../src/ExternalLexer.cxx ../include/Platform.h \
  ../include/Scintilla.h ../include/SciLexer.h ../include/PropSet.h \
- ../include/Accessor.h ../src/DocumentAccessor.h ../src/Keywords.h \
+ ../include/Accessor.h ../src/DocumentAccessor.h ../include/KeyWords.h \
  ../src/ExternalLexer.h
 Indicator.o: ../src/Indicator.cxx ../include/Platform.h \
   ../include/Scintilla.h ../src/Indicator.h
