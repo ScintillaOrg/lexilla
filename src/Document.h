@@ -1,6 +1,6 @@
 // Scintilla source code edit control
 // Document.h - text document that handles notifications, DBCS, styling, words and end of line
-// Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #ifndef DOCUMENT_H

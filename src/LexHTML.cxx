@@ -1,6 +1,6 @@
 // SciTE - Scintilla based Text Editor
 // LexHTML.cxx - lexer for HTML
-// Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <stdlib.h>

@@ -1,5 +1,5 @@
 // SciTE - Scintilla based Text Editor
-// Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 //
 // NAME
 // 	LexConf.cxx - lexer for Apache Configuration Files

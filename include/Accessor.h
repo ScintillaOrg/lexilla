@@ -1,6 +1,6 @@
 // SciTE - Scintilla based Text Editor
 // Accessor.h - rapid easy access to contents of a Scintilla
-// Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 enum { wsSpace = 1, wsTab = 2, wsSpaceTab = 4, wsInconsistent=8};

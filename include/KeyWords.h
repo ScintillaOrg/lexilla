@@ -1,6 +1,6 @@
 // SciTE - Scintilla based Text Editor
 // KeyWords.h - colourise for particular languages
-// Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 typedef void (*LexerFunction)(unsigned int startPos, int lengthDoc, int initStyle,

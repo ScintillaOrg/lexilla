@@ -1,6 +1,6 @@
 // Scintilla source code edit control
 // SVector.h - a simple expandable vector
-// Copyright 1998-1999 by Neil Hodgson <neilh@hare.net.au>
+// Copyright 1998-2001 by Neil Hodgson <neilh@hare.net.au>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #ifndef SVECTOR_H
