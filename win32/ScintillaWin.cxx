@@ -382,19 +382,22 @@ LRESULT ScintillaWin::WndPaint(unsigned long wParam) {
 		pps = &ps;
 		::BeginPaint(MainHWND(), pps);
 	}
-	Surface surfaceWindow;
-	surfaceWindow.Init(pps->hdc);
-	surfaceWindow.SetUnicodeMode(IsUnicodeMode());
-	rcPaint = PRectangle(pps->rcPaint.left, pps->rcPaint.top, pps->rcPaint.right, pps->rcPaint.bottom);
-	PRectangle rcText = GetTextRectangle();
-	paintingAllText = rcPaint.Contains(rcText);
-	if (paintingAllText) {
-		//Platform::DebugPrintf("Performing full text paint\n");
-	} else {
-		//Platform::DebugPrintf("Performing partial paint %d .. %d\n", rcPaint.top, rcPaint.bottom);
+	Surface *surfaceWindow = Surface::Allocate();
+	if (surfaceWindow) {
+		surfaceWindow->Init(pps->hdc);
+		surfaceWindow->SetUnicodeMode(IsUnicodeMode());
+		rcPaint = PRectangle(pps->rcPaint.left, pps->rcPaint.top, pps->rcPaint.right, pps->rcPaint.bottom);
+		PRectangle rcText = GetTextRectangle();
+		paintingAllText = rcPaint.Contains(rcText);
+		if (paintingAllText) {
+			//Platform::DebugPrintf("Performing full text paint\n");
+		} else {
+			//Platform::DebugPrintf("Performing partial paint %d .. %d\n", rcPaint.top, rcPaint.bottom);
+		}
+		Paint(surfaceWindow, rcPaint);
+		surfaceWindow->Release();
+		delete surfaceWindow;
 	}
-	Paint(&surfaceWindow, rcPaint);
-	surfaceWindow.Release();
 	if(!IsOcxCtrl)
 		::EndPaint(MainHWND(), pps);
 	if (paintState == paintAbandoned) {
@@ -1342,9 +1345,13 @@ void ScintillaWin::ImeStartComposition() {
 			int sizeZoomed = vs.styles[styleHere].size + vs.zoomLevel;
 			if (sizeZoomed <= 2)	// Hangs if sizeZoomed <= 1
 				sizeZoomed = 2;
-			Surface surface;
-			surface.Init();
-			int deviceHeight = (sizeZoomed * surface.LogPixelsY()) / 72;
+			Surface *surface = Surface::Allocate();
+			int deviceHeight = sizeZoomed;
+			if (surface) {
+				surface->Init();
+				deviceHeight = (sizeZoomed * surface->LogPixelsY()) / 72;
+				delete surface;
+			}
 			// The negative is to allow for leading
 			lf.lfHeight = -(abs(deviceHeight));
 			lf.lfWeight = vs.styles[styleHere].bold ? FW_BOLD : FW_NORMAL;
@@ -1491,13 +1498,16 @@ void ScintillaWin::HorizontalScrollMessage(WPARAM wParam) {
 
 void ScintillaWin::RealizeWindowPalette(bool inBackGround) {
 	RefreshStyleData();
-	Surface surfaceWindow;
 	HDC hdc = ::GetDC(MainHWND());
-	surfaceWindow.Init(hdc);
-	int changes = surfaceWindow.SetPalette(&palette, inBackGround);
-	if (changes > 0)
-		Redraw();
-	surfaceWindow.Release();
+	Surface *surfaceWindow = Surface::Allocate();
+	if (surfaceWindow) {
+		surfaceWindow->Init(hdc);
+		int changes = surfaceWindow->SetPalette(&palette, inBackGround);
+		if (changes > 0)
+			Redraw();
+		surfaceWindow->Release();
+		delete surfaceWindow;
+	}
 	::ReleaseDC(MainHWND(), hdc);
 }
 
@@ -1510,11 +1520,14 @@ void ScintillaWin::FullPaint() {
 	rcPaint = GetTextRectangle();
 	paintingAllText = true;
 	HDC hdc = ::GetDC(MainHWND());
-	Surface surfaceWindow;
-	surfaceWindow.Init(hdc);
-	surfaceWindow.SetUnicodeMode(IsUnicodeMode());
-	Paint(&surfaceWindow, rcPaint);
-	surfaceWindow.Release();
+	Surface *surfaceWindow = Surface::Allocate();
+	if (surfaceWindow) {
+		surfaceWindow->Init(hdc);
+		surfaceWindow->SetUnicodeMode(IsUnicodeMode());
+		Paint(surfaceWindow, rcPaint);
+		surfaceWindow->Release();
+		delete surfaceWindow;
+	}
 	::ReleaseDC(MainHWND(), hdc);
 	paintState = notPainting;
 }
@@ -1814,10 +1827,13 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
 		} else if (iMessage == WM_PAINT) {
 			PAINTSTRUCT ps;
 			::BeginPaint(hWnd, &ps);
-			Surface surfaceWindow;
-			surfaceWindow.Init(ps.hdc);
-			ctp->PaintCT(&surfaceWindow);
-			surfaceWindow.Release();
+			Surface *surfaceWindow = Surface::Allocate();
+			if (surfaceWindow) {
+				surfaceWindow->Init(ps.hdc);
+				ctp->PaintCT(surfaceWindow);
+				surfaceWindow->Release();
+				delete surfaceWindow;
+			}
 			::EndPaint(hWnd, &ps);
 			return 0;
 		} else {
