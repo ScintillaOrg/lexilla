@@ -2,7 +2,7 @@
 /** @file KeyMap.cxx
  ** Defines a mapping between keystrokes and commands.
  **/
-// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include "Platform.h"
@@ -15,7 +15,7 @@ KeyMap::KeyMap() : kmap(0), len(0), alloc(0) {
 	for (int i = 0; MapDefault[i].key; i++) {
 		AssignCmdKey(MapDefault[i].key,
 			MapDefault[i].modifiers,
-             		MapDefault[i].msg);
+			MapDefault[i].msg);
 	}
 }
 
@@ -35,7 +35,7 @@ void KeyMap::AssignCmdKey(int key, int modifiers, unsigned int msg) {
 		KeyToCommand *ktcNew = new KeyToCommand[alloc + 5];
 		if (!ktcNew)
 			return;
-		for (int k=0;k<len;k++)
+		for (int k = 0; k < len; k++)
 			ktcNew[k] = kmap[k];
 		alloc += 5;
 		delete []kmap;
@@ -54,7 +54,7 @@ void KeyMap::AssignCmdKey(int key, int modifiers, unsigned int msg) {
 }
 
 unsigned int KeyMap::Find(int key, int modifiers) {
-	for (int i=0; i < len; i++) {
+	for (int i = 0; i < len; i++) {
 		if ((key == kmap[i].key) && (modifiers == kmap[i].modifiers)) {
 			return kmap[i].msg;
 		}

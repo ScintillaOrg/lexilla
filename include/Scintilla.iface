@@ -2,7 +2,7 @@
 
 ## This file defines the interface to Scintilla
 
-## Copyright 2000-2002 by Neil Hodgson <neilh@scintilla.org>
+## Copyright 2000-2003 by Neil Hodgson <neilh@scintilla.org>
 ## The License.txt file describes the conditions under which this software may be distributed.
 
 ## A line starting with ## is a pure comment and should be stripped by readers.

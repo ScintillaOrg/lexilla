@@ -502,7 +502,9 @@ const char *ControlCharacterString(unsigned char ch) {
 	}
 }
 
-// Convenience class to ensure LineLayout objects are always disposed.
+/**
+ * Convenience class to ensure LineLayout objects are always disposed.
+ */
 class AutoLineLayout {
 	LineLayoutCache &llc;
 	LineLayout *ll;
@@ -688,8 +690,10 @@ int Editor::PositionFromLineX(int lineDoc, int x) {
 	return retVal;
 }
 
-// If painting then abandon the painting because a wider redraw is needed.
-// Return true if calling code should stop drawing
+/**
+ * If painting then abandon the painting because a wider redraw is needed.
+ * @return true if calling code should stop drawing.
+ */
 bool Editor::AbandonPaint() {
 	if ((paintState == painting) && !paintingAllText) {
 		paintState = paintAbandoned;
