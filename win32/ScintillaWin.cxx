@@ -1955,6 +1955,7 @@ bool Scintilla_RegisterClasses(void *hInstance) {
 	Platform_Initialise(hInstance);
 	bool result = ScintillaWin::Register(reinterpret_cast<HINSTANCE>(hInstance));
 #ifdef SCI_LEXER
+	Scintilla_LinkLexers();
 	LexerManager *lexMan = LexerManager::GetInstance();
 	lexMan->Load();
 #endif
