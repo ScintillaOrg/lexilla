@@ -345,6 +345,13 @@ void ScintillaBase::AutoCompleteCompleted() {
 	pdoc->EndUndoAction();
 }
 
+void ScintillaBase::CallTipClick() {
+	SCNotification scn;
+	scn.nmhdr.code = SCN_CALLTIPCLICK;
+	scn.position = ct.clickPlace;
+	NotifyParent(scn);
+}
+
 void ScintillaBase::ContextMenu(Point pt) {
 	if (displayPopupMenu) {
 		bool writable = !WndProc(SCI_GETREADONLY, 0, 0);
@@ -528,14 +535,15 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 
 	case SCI_CALLTIPSHOW: {
 			AutoCompleteCancel();
-			if (!ct.wCallTip.Created()) {
+			//if (!ct.wCallTip.Created()) {
 				Point pt = LocationFromPosition(wParam);
 				pt.y += vs.lineHeight;
 				PRectangle rc = ct.CallTipStart(currentPos, pt,
 				                                reinterpret_cast<char *>(lParam),
 				                                vs.styles[STYLE_DEFAULT].fontName,
 				                                vs.styles[STYLE_DEFAULT].sizeZoomed,
-												IsUnicodeMode());
+				                                IsUnicodeMode(),
+				                                wMain);
 				// If the call-tip window would be out of the client
 				// space, adjust so it displays above the text.
 				PRectangle rcClient = GetClientRectangle();
@@ -548,7 +556,7 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 				CreateCallTipWindow(rc);
 				ct.wCallTip.SetPositionRelative(rc, wMain);
 				ct.wCallTip.Show();
-			}
+			//}
 		}
 		break;
 

@@ -512,6 +512,8 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				if (cmd != LBN_SETFOCUS)
 					::SetFocus(MainHWND());
 			}
+		} else if (LoWord(wParam) == idCallTip) {
+			CallTipClick();
 		}
 		Command(LoWord(wParam));
 #endif
@@ -1080,12 +1082,14 @@ void ScintillaWin::Paste() {
 
 void ScintillaWin::CreateCallTipWindow(PRectangle) {
 #ifdef TOTAL_CONTROL
-	ct.wCallTip = ::CreateWindow(callClassName, "ACallTip",
-				     WS_VISIBLE | WS_CHILD, 100, 100, 150, 20,
-				     MainHWND(), reinterpret_cast<HMENU>(idCallTip),
-				     GetWindowInstance(MainHWND()),
-				     &ct);
-	ct.wDraw = ct.wCallTip;
+	if (!ct.wCallTip.Created()) {
+		ct.wCallTip = ::CreateWindow(callClassName, "ACallTip",
+					     WS_VISIBLE | WS_CHILD, 100, 100, 150, 20,
+					     MainHWND(), reinterpret_cast<HMENU>(idCallTip),
+					     GetWindowInstance(MainHWND()),
+					     &ct);
+		ct.wDraw = ct.wCallTip;
+	}
 #endif
 }
 
@@ -1950,6 +1954,15 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
 				delete surfaceWindow;
 			}
 			::EndPaint(hWnd, &ps);
+			return 0;
+		} else if (iMessage == WM_LBUTTONDOWN) {
+			ctp->MouseClick(Point::FromLong(lParam));
+			::SendMessage(::GetParent(hWnd), WM_COMMAND,
+					MAKELONG(::GetDlgCtrlID(hWnd), SCEN_CHANGE),
+					reinterpret_cast<LPARAM>(hWnd));
+			return 0;
+		} else if (iMessage == WM_SETCURSOR) {
+			::SetCursor(::LoadCursor(NULL,IDC_ARROW));
 			return 0;
 		} else {
 			return ::DefWindowProc(hWnd, iMessage, wParam, lParam);

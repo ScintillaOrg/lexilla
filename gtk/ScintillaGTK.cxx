@@ -202,7 +202,10 @@ private:
 	                        GtkSelectionData *selection_data, guint info, guint time);
 	static gint TimeOut(ScintillaGTK *sciThis);
 	static void PopUpCB(ScintillaGTK *sciThis, guint action, GtkWidget *widget);
+
 	static gint ExposeCT(GtkWidget *widget, GdkEventExpose *ose, CallTip *ct);
+	static gint PressCT(GtkWidget *widget, GdkEventButton *event, ScintillaGTK *sciThis);
+
 	static sptr_t DirectFunction(ScintillaGTK *sciThis,
 	                             unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 };
@@ -892,15 +895,22 @@ void ScintillaGTK::Paste() {
 }
 
 void ScintillaGTK::CreateCallTipWindow(PRectangle rc) {
-	ct.wCallTip = gtk_window_new(GTK_WINDOW_POPUP);
-	ct.wDraw = gtk_drawing_area_new();
-	gtk_container_add(GTK_CONTAINER(PWidget(ct.wCallTip)), PWidget(ct.wDraw));
-	gtk_signal_connect(GTK_OBJECT(PWidget(ct.wDraw)), "expose_event",
-	                   GtkSignalFunc(ScintillaGTK::ExposeCT), &ct);
-	gtk_widget_set_events(PWidget(ct.wDraw), GDK_EXPOSURE_MASK);
+	if (!ct.wCallTip.Created()) {
+		ct.wCallTip = gtk_window_new(GTK_WINDOW_POPUP);
+		ct.wDraw = gtk_drawing_area_new();
+		gtk_container_add(GTK_CONTAINER(PWidget(ct.wCallTip)), PWidget(ct.wDraw));
+		gtk_signal_connect(GTK_OBJECT(PWidget(ct.wDraw)), "expose_event",
+				   GtkSignalFunc(ScintillaGTK::ExposeCT), &ct);
+		gtk_signal_connect(GTK_OBJECT(PWidget(ct.wDraw)), "button_press_event",
+				   GtkSignalFunc(ScintillaGTK::PressCT), static_cast<void *>(this));
+		gtk_widget_set_events(PWidget(ct.wDraw),
+			GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
+	}
 	gtk_drawing_area_size(GTK_DRAWING_AREA(PWidget(ct.wDraw)),
 	                      rc.Width(), rc.Height());
 	ct.wDraw.Show();
+	gtk_widget_set_usize(PWidget(ct.wCallTip), rc.Width(), rc.Height());
+	//gtk_widget_queue_resize(PWidget(ct.wCallTip));
 }
 
 void ScintillaGTK::AddToPopUp(const char *label, int cmd, bool enabled) {
@@ -1700,6 +1710,23 @@ void ScintillaGTK::PopUpCB(ScintillaGTK *sciThis, guint action, GtkWidget *) {
 	if (action) {
 		sciThis->Command(action);
 	}
+}
+
+gint ScintillaGTK::PressCT(GtkWidget *widget, GdkEventButton *event, ScintillaGTK *sciThis) {
+	if (event->window != widget->window)
+		return FALSE;
+	if (event->type != GDK_BUTTON_PRESS)
+		return FALSE;
+	Point pt;
+	pt.x = int(event->x);
+	pt.y = int(event->y);
+	sciThis->ct.MouseClick(pt);
+	sciThis->CallTipClick();
+#if GTK_MAJOR_VERSION >= 2
+	return TRUE;
+#else
+	return FALSE;
+#endif
 }
 
 gint ScintillaGTK::ExposeCT(GtkWidget *widget, GdkEventExpose * /*ose*/, CallTip *ctip) {

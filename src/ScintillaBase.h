@@ -71,6 +71,7 @@ protected:
 	void AutoCompleteMoveToCurrentWord();
 	static void AutoCompleteDoubleClick(void* p);
 
+	void CallTipClick();
 	virtual void CreateCallTipWindow(PRectangle rc) = 0;
 
 	virtual void AddToPopUp(const char *label, int cmd=0, bool enabled=true) = 0;

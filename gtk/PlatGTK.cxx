@@ -1664,11 +1664,13 @@ void ListBoxX::SetFont(Font &scint_font) {
 #else
 	GtkStyle *styleCurrent = gtk_widget_get_style(GTK_WIDGET(PWidget(list)));
 	GdkFont *fontCurrent = gtk_style_get_font(styleCurrent);
-	if (!gdk_font_equal(fontCurrent, PFont(scint_font)->pfont)) {
-		GtkStyle *styleNew = gtk_style_copy(styleCurrent);
-		gtk_style_set_font(styleNew, PFont(scint_font)->pfont);
-		gtk_widget_set_style(GTK_WIDGET(PWidget(list)), styleNew);
-		gtk_style_unref(styleCurrent);
+	if (PFont(scint_font)->pfont) {
+		if (!gdk_font_equal(fontCurrent, PFont(scint_font)->pfont)) {
+			GtkStyle *styleNew = gtk_style_copy(styleCurrent);
+			gtk_style_set_font(styleNew, PFont(scint_font)->pfont);
+			gtk_widget_set_style(GTK_WIDGET(PWidget(list)), styleNew);
+			gtk_style_unref(styleCurrent);
+		}
 	}
 #endif
 }
