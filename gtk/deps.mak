@@ -40,6 +40,9 @@ LexAda.o: ../src/LexAda.cxx ../include/Platform.h ../include/PropSet.h \
 LexAVE.o: ../src/LexAVE.cxx ../include/Platform.h ../include/PropSet.h \
   ../include/SString.h ../include/Accessor.h ../include/KeyWords.h \
   ../include/Scintilla.h ../include/SciLexer.h
+LexBullant.o: ../src/LexBullant.cxx ../include/Platform.h \
+  ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
+  ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
 LexConf.o: ../src/LexConf.cxx ../include/Platform.h ../include/PropSet.h \
   ../include/SString.h ../include/Accessor.h ../include/KeyWords.h \
   ../include/Scintilla.h ../include/SciLexer.h
