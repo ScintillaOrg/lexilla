@@ -27,7 +27,7 @@ endif
 .cxx.o:
 	$(CC) `gtk-config --cflags` $(INCLUDEDIRS) $(CXXFLAGS) -c $< -o $@
 
-LEXOBJS	=  LexCPP.o LexHTML.o LexLua.o LexOthers.o LexPerl.o LexPython.o LexSQL.o LexVB.o
+LEXOBJS	=  LexCPP.o LexHTML.o LexLua.o LexOthers.o LexPerl.o LexPython.o LexSQL.o LexVB.o LexConf.o
 
 # The LEXOBJS have to be treated specially as the functions in them are not called from external code
 
@@ -71,6 +71,8 @@ LexPython.o: LexPython.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
 LexSQL.o: LexSQL.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h WinDefs.h SciLexer.h
 LexVB.o: LexVB.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+ Scintilla.h WinDefs.h SciLexer.h
+LexConf.o: LexConf.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h WinDefs.h SciLexer.h
 LineMarker.o: LineMarker.cxx Platform.h Scintilla.h WinDefs.h \
  LineMarker.h
