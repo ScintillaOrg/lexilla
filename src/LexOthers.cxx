@@ -30,7 +30,7 @@ static bool Is1To9(char ch) {
 
 static inline bool AtEOL(Accessor &styler, unsigned int i) {
 	return (styler[i] == '\n') ||
-		((styler[i] == '\r') && (styler.SafeGetCharAt(i + 1) != '\n'));
+	       ((styler[i] == '\r') && (styler.SafeGetCharAt(i + 1) != '\n'));
 }
 
 static void ColouriseBatchLine(
@@ -75,7 +75,7 @@ static void ColouriseBatchLine(
 		// Check if it is a comment
 		if (CompareCaseInsensitive(wordBuffer, "rem") == 0) {
 			styler.ColourTo(endPos, SCE_BAT_COMMENT);
-			return ;
+			return;
 		}
 		// Check if it is in the list
 		if (keywords.InList(wordBuffer)) {
@@ -240,7 +240,7 @@ static void FoldDiffDoc(unsigned int startPos, int length, int, WordList*[], Acc
 		int nextLevel = prevLevel;
 		if (prevLevel & SC_FOLDLEVELHEADERFLAG)
 			nextLevel = (prevLevel & SC_FOLDLEVELNUMBERMASK) + 1;
-		
+
 		int lineType = styler.StyleAt(curLineStart);
 		if (lineType == SCE_DIFF_COMMAND)
 			nextLevel = (SC_FOLDLEVELBASE + 1) | SC_FOLDLEVELHEADERFLAG;
@@ -248,13 +248,13 @@ static void FoldDiffDoc(unsigned int startPos, int length, int, WordList*[], Acc
 			nextLevel = (SC_FOLDLEVELBASE + 2) | SC_FOLDLEVELHEADERFLAG;
 		} else if (lineType == SCE_DIFF_POSITION)
 			nextLevel = (SC_FOLDLEVELBASE + 3) | SC_FOLDLEVELHEADERFLAG;
-		
+
 		if ((nextLevel & SC_FOLDLEVELHEADERFLAG) && (nextLevel == prevLevel))
 			styler.SetLevel(curLine-1, prevLevel & ~SC_FOLDLEVELHEADERFLAG);
 
 		styler.SetLevel(curLine, nextLevel);
 		prevLevel = nextLevel;
-		
+
 		curLineStart = styler.LineStart(++curLine);
 	} while (static_cast<int>(startPos) + length > curLineStart);
 }
@@ -372,7 +372,7 @@ static void FoldPropsDoc(unsigned int startPos, int length, int, WordList *[], A
 
 			lineCurrent++;
 			visibleChars = 0;
-			headerPoint=false;
+			headerPoint = false;
 		}
 		if (!isspacechar(ch))
 			visibleChars++;
@@ -475,168 +475,197 @@ static void ColouriseMakeDoc(unsigned int startPos, int length, int, WordList *[
 	}
 }
 
-static bool strstart(char *haystack, char *needle) {
+static bool strstart(const char *haystack, const char *needle) {
 	return strncmp(haystack, needle, strlen(needle)) == 0;
 }
 
-static void ColouriseErrorListLine(
-    char *lineBuffer,
-    unsigned int lengthLine,
-    //		unsigned int startLine,
-    unsigned int endPos,
-    Accessor &styler) {
-	const int unRecognized = 99;
+static int RecogniseErrorListLine(const char *lineBuffer, unsigned int lengthLine) {
 	if (lineBuffer[0] == '>') {
 		// Command or return status
-		styler.ColourTo(endPos, SCE_ERR_CMD);
+		return SCE_ERR_CMD;
 	} else if (lineBuffer[0] == '<') {
 		// Diff removal, but not interested. Trapped to avoid hitting CTAG cases.
-		styler.ColourTo(endPos, SCE_ERR_DEFAULT);
+		return SCE_ERR_DEFAULT;
 	} else if (lineBuffer[0] == '!') {
-		styler.ColourTo(endPos, SCE_ERR_DIFF_CHANGED);
+		return SCE_ERR_DIFF_CHANGED;
 	} else if (lineBuffer[0] == '+') {
-		styler.ColourTo(endPos, SCE_ERR_DIFF_ADDITION);
+		return SCE_ERR_DIFF_ADDITION;
 	} else if (lineBuffer[0] == '-' && lineBuffer[1] == '-' && lineBuffer[2] == '-') {
-		styler.ColourTo(endPos, SCE_ERR_DIFF_MESSAGE);
+		return SCE_ERR_DIFF_MESSAGE;
 	} else if (lineBuffer[0] == '-') {
-		styler.ColourTo(endPos, SCE_ERR_DIFF_DELETION);
+		return SCE_ERR_DIFF_DELETION;
 	} else if (strstart(lineBuffer, "cf90-")) {
 		// Absoft Pro Fortran 90/95 v8.2 error and/or warning message
-		styler.ColourTo(endPos, SCE_ERR_ABSF);
+		return SCE_ERR_ABSF;
 	} else if (strstart(lineBuffer, "fortcom:")) {
 		// Intel Fortran Compiler v8.0 error/warning message
-		styler.ColourTo(endPos, SCE_ERR_IFORT);
+		return SCE_ERR_IFORT;
 	} else if (strstr(lineBuffer, "File \"") && strstr(lineBuffer, ", line ")) {
-		styler.ColourTo(endPos, SCE_ERR_PYTHON);
+		return SCE_ERR_PYTHON;
 	} else if (strstr(lineBuffer, " in ") && strstr(lineBuffer, " on line ")) {
-		styler.ColourTo(endPos, SCE_ERR_PHP);
+		return SCE_ERR_PHP;
 	} else if ((strstart(lineBuffer, "Error ") ||
-		strstart(lineBuffer, "Warning ")) &&
-		strstr(lineBuffer, " at (") &&
-		strstr(lineBuffer, ") : ") &&
-		(strstr(lineBuffer, " at (") < strstr(lineBuffer, ") : "))) {
+	            strstart(lineBuffer, "Warning ")) &&
+	           strstr(lineBuffer, " at (") &&
+	           strstr(lineBuffer, ") : ") &&
+	           (strstr(lineBuffer, " at (") < strstr(lineBuffer, ") : "))) {
 		// Intel Fortran Compiler error/warning message
-		styler.ColourTo(endPos, SCE_ERR_IFC);
+		return SCE_ERR_IFC;
 	} else if (strstart(lineBuffer, "Error ")) {
 		// Borland error message
-		styler.ColourTo(endPos, SCE_ERR_BORLAND);
+		return SCE_ERR_BORLAND;
 	} else if (strstart(lineBuffer, "Warning ")) {
 		// Borland warning message
-		styler.ColourTo(endPos, SCE_ERR_BORLAND);
+		return SCE_ERR_BORLAND;
 	} else if (strstr(lineBuffer, "at line " ) &&
 	           (strstr(lineBuffer, "at line " ) < (lineBuffer + lengthLine)) &&
 	           strstr(lineBuffer, "file ") &&
 	           (strstr(lineBuffer, "file ") < (lineBuffer + lengthLine))) {
 		// Lua 4 error message
-		styler.ColourTo(endPos, SCE_ERR_LUA);
+		return SCE_ERR_LUA;
 	} else if (strstr(lineBuffer, " at " ) &&
 	           (strstr(lineBuffer, " at " ) < (lineBuffer + lengthLine)) &&
 	           strstr(lineBuffer, " line ") &&
 	           (strstr(lineBuffer, " line ") < (lineBuffer + lengthLine)) &&
-			   (strstr(lineBuffer, " at " ) < (strstr(lineBuffer, " line ")))) {
+	           (strstr(lineBuffer, " at " ) < (strstr(lineBuffer, " line ")))) {
 		// perl error message
-		styler.ColourTo(endPos, SCE_ERR_PERL);
+		return SCE_ERR_PERL;
 	} else if ((memcmp(lineBuffer, "   at ", 6) == 0) &&
-		strstr(lineBuffer, ":line ")) {
+	           strstr(lineBuffer, ":line ")) {
 		// A .NET traceback
-		styler.ColourTo(endPos, SCE_ERR_NET);
+		return SCE_ERR_NET;
 	} else if (strstart(lineBuffer, "Line ") &&
-		strstr(lineBuffer, ", file ")) {
+	           strstr(lineBuffer, ", file ")) {
 		// Essential Lahey Fortran error message
-		styler.ColourTo(endPos, SCE_ERR_ELF);
+		return SCE_ERR_ELF;
 	} else if (strstart(lineBuffer, "line ") &&
-		       strstr(lineBuffer, " column ")) {
+	           strstr(lineBuffer, " column ")) {
 		// HTML tidy style: line 42 column 1
-		styler.ColourTo(endPos, SCE_ERR_TIDY);
+		return SCE_ERR_TIDY;
 	} else if (strstart(lineBuffer, "\tat ") &&
-		strstr(lineBuffer, "(") &&
-		strstr(lineBuffer, ".java:")) {
+	           strstr(lineBuffer, "(") &&
+	           strstr(lineBuffer, ".java:")) {
 		// Java stack back trace
-		styler.ColourTo(endPos, SCE_ERR_JAVA_STACK);
+		return SCE_ERR_JAVA_STACK;
 	} else {
-		// Look for GCC <filename>:<line>:message
-		// Look for Microsoft <filename>(line) :message
-		// Look for Microsoft <filename>(line,pos)message
-		// Look for CTags \tmessage
-		// Look for Lua 5 traceback \t<filename>:<line>:message
+		// Look for one of the following formats:
+		// GCC: <filename>:<line>:<message>
+		// Microsoft: <filename>(<line>) :<message>
+		// Common: <filename>(<line>): warning|error|note|remark|catastrophic|fatal
+		// Common: <filename>(<line>) warning|error|note|remark|catastrophic|fatal
+		// Microsoft: <filename>(<line>,<column>)<message>
+		// CTags: \t<message>
+		// Lua 5 traceback: \t<filename>:<line>:<message>
 		bool initialTab = (lineBuffer[0] == '\t');
-		int state = 0;
+		enum { stInitial, 
+			stGccStart, stGccDigit, stGcc,
+			stMsStart, stMsDigit, stMsBracket, stMsVc, stMsDigitComma, stMsDotNet,
+			stCtagsStart, stCtagsStartString, stCtagsStringDollar, stCtags,
+			stUnrecognized
+		} state = stInitial;
 		for (unsigned int i = 0; i < lengthLine; i++) {
 			char ch = lineBuffer[i];
 			char chNext = ' ';
-			if ((i+1) < lengthLine)
-				chNext = lineBuffer[i+1];
-			if (state == 0) {
+			if ((i + 1) < lengthLine)
+				chNext = lineBuffer[i + 1];
+			if (state == stInitial) {
 				if (ch == ':') {
 					// May be GCC, or might be Lua 5 (Lua traceback same but with tab prefix)
 					if ((chNext != '\\') && (chNext != '/')) {
 						// This check is not completely accurate as may be on
 						// GTK+ with a file name that includes ':'.
-						state = 1;
+						state = stGccStart;
 					}
 				} else if ((ch == '(') && Is1To9(chNext) && (!initialTab)) {
 					// May be Microsoft
 					// Check against '0' often removes phone numbers
-					state = 10;
+					state = stMsStart;
 				} else if ((ch == '\t') && (!initialTab)) {
 					// May be CTags
-					state = 20;
+					state = stCtagsStart;
 				}
-			} else if (state == 1) {
-				state = Is1To9(ch) ? 2 : unRecognized;
-			} else if (state == 2) {
+			} else if (state == stGccStart) {	// <filename>:
+				state = Is1To9(ch) ? stGccDigit : stUnrecognized;
+			} else if (state == stGccDigit) {	// <filename>:<line>
 				if (ch == ':') {
-					state = 3;	// :9.*: is GCC
+					state = stGcc;	// :9.*: is GCC
 					break;
 				} else if (!Is0To9(ch)) {
-					state = unRecognized;
+					state = stUnrecognized;
 				}
-			} else if (state == 10) {
-				state = Is0To9(ch) ? 11 : unRecognized;
-			} else if (state == 11) {
+			} else if (state == stMsStart) {	// <filename>(
+				state = Is0To9(ch) ? stMsDigit : stUnrecognized;
+			} else if (state == stMsDigit) {	// <filename>(<line>
 				if (ch == ',') {
-					state = 14;
+					state = stMsDigitComma;
 				} else if (ch == ')') {
-					state = 12;
+					state = stMsBracket;
 				} else if ((ch != ' ') && !Is0To9(ch)) {
-					state = unRecognized;
+					state = stUnrecognized;
 				}
-			} else if (state == 12) {
+			} else if (state == stMsBracket) {	// <filename>(<line>)
 				if ((ch == ' ') && (chNext == ':')) {
-					state = 13;
+					state = stMsVc;
+				} else if ((ch == ':' && chNext == ' ') || (ch == ' ')) {
+					// Possibly Delphi.. don't test against chNext as it's one of the strings below.
+					char word[512];
+					unsigned int j, chPos;
+					unsigned numstep;
+					chPos = 0;
+					if (ch == ' ')
+						numstep = 1; // ch was ' ', handle as if it's a delphi errorline, only add 1 to i.
+					else
+						numstep = 2; // otherwise add 2.
+					for (j = i + numstep; j < lengthLine && isalpha(lineBuffer[j]) && chPos < sizeof(word) - 1; j++)
+						word[chPos++] = lineBuffer[j];
+					word[chPos] = 0;
+					if (!CompareCaseInsensitive(word, "error") || !CompareCaseInsensitive(word, "warning") || 
+						!CompareCaseInsensitive(word, "fatal") || !CompareCaseInsensitive(word, "catastrophic") || 
+						!CompareCaseInsensitive(word, "note") || !CompareCaseInsensitive(word, "remark")) {
+						state = stMsVc;
+					} else
+						state = stUnrecognized;
 				} else {
-					state = unRecognized;
+					state = stUnrecognized;
 				}
-			} else if (state == 14) {
+			} else if (state == stMsDigitComma) {	// <filename>(<line>,
 				if (ch == ')') {
-					state = 15;
+					state = stMsDotNet;
 					break;
 				} else if ((ch != ' ') && !Is0To9(ch)) {
-					state = unRecognized;
+					state = stUnrecognized;
 				}
-			} else if (state == 20) {
-				if ((lineBuffer[i-1] == '\t') &&
-					((ch == '/' && lineBuffer[i+1] == '^') || Is0To9(ch))) {
-					state = 24;
+			} else if (state == stCtagsStart) {
+				if ((lineBuffer[i - 1] == '\t') &&
+				        ((ch == '/' && lineBuffer[i + 1] == '^') || Is0To9(ch))) {
+					state = stCtags;
 					break;
-				} else if ((ch == '/') && (lineBuffer[i+1] == '^')) {
-					state = 21;
+				} else if ((ch == '/') && (lineBuffer[i + 1] == '^')) {
+					state = stCtagsStartString;
 				}
-			} else if ((state == 21) && ((lineBuffer[i] == '$') && (lineBuffer[i+1] == '/'))) {
-				state = 22;
+			} else if ((state == stCtagsStartString) && ((lineBuffer[i] == '$') && (lineBuffer[i + 1] == '/'))) {
+				state = stCtagsStringDollar;
 				break;
 			}
 		}
-		if (state == 3) {
-			styler.ColourTo(endPos, SCE_ERR_GCC);
-		} else if ((state == 13) || (state == 14) || (state == 15)) {
-			styler.ColourTo(endPos, SCE_ERR_MS);
-		} else if ((state == 22) || (state == 24)) {
-			styler.ColourTo(endPos, SCE_ERR_CTAG);
+		if (state == stGcc) {
+			return SCE_ERR_GCC;
+		} else if ((state == stMsVc) || (state == stMsDotNet)) {
+			return SCE_ERR_MS;
+		} else if ((state == stCtagsStringDollar) || (state == stCtags)) {
+			return SCE_ERR_CTAG;
 		} else {
-			styler.ColourTo(endPos, SCE_ERR_DEFAULT);
+			return SCE_ERR_DEFAULT;
 		}
 	}
+}
+
+static void ColouriseErrorListLine(
+    char *lineBuffer,
+    unsigned int lengthLine,
+    unsigned int endPos,
+    Accessor &styler) {
+	styler.ColourTo(endPos, RecogniseErrorListLine(lineBuffer, lengthLine));
 }
 
 static void ColouriseErrorListDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler) {
