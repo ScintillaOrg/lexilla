@@ -69,10 +69,10 @@ static void ColouriseCssDoc(unsigned int startPos, int length, int initStyle, Wo
 			sc.Forward();
 			sc.ForwardSetState(lastStateC);
 		}
-		
+
 		if (sc.state == SCE_CSS_COMMENT)
 			continue;
-		
+
 		if (sc.state == SCE_CSS_OPERATOR) {
 			if (op == ' ') {
 				unsigned int i = startPos;
@@ -101,7 +101,7 @@ static void ColouriseCssDoc(unsigned int startPos, int length, int initStyle, Wo
 			case ':':
 				if (lastState == SCE_CSS_TAG || lastState == SCE_CSS_DEFAULT || lastState == SCE_CSS_CLASS || lastState == SCE_CSS_ID)
 					sc.SetState(SCE_CSS_PSEUDOCLASS);
-				else if (lastState == SCE_CSS_IDENTIFIER || SCE_CSS_UNKNOWN_IDENTIFIER)
+				else if (lastState == SCE_CSS_IDENTIFIER || lastState == SCE_CSS_UNKNOWN_IDENTIFIER)
 					sc.SetState(SCE_CSS_VALUE);
 				break;
 			case '.':
@@ -128,13 +128,13 @@ static void ColouriseCssDoc(unsigned int startPos, int length, int initStyle, Wo
 				break;
 			}
 		}
-		
+
 		if (IsAWordChar(sc.ch)) {
 			if (sc.state == SCE_CSS_DEFAULT)
 				sc.SetState(SCE_CSS_TAG);
 			continue;
 		}
-		
+
 		if (IsAWordChar(sc.chPrev) && (sc.state == SCE_CSS_IDENTIFIER || sc.state == SCE_CSS_PSEUDOCLASS || sc.state == SCE_CSS_IMPORTANT)) {
 			char s[100];
 			sc.GetCurrentLowered(s, sizeof(s));
@@ -156,18 +156,18 @@ static void ColouriseCssDoc(unsigned int startPos, int length, int initStyle, Wo
 				break;
 			}
 		}
-		
+
 		if (sc.ch != '.' && sc.ch != ':' && sc.ch != '#' && (sc.state == SCE_CSS_CLASS || sc.state == SCE_CSS_PSEUDOCLASS || sc.state == SCE_CSS_UNKNOWN_PSEUDOCLASS || sc.state == SCE_CSS_UNKNOWN_PSEUDOCLASS || sc.state == SCE_CSS_ID))
 			sc.SetState(SCE_CSS_TAG);
-		
+
 		if (sc.Match('/', '*')) {
 			lastStateC = sc.state;
 			sc.SetState(SCE_CSS_COMMENT);
 			sc.Forward();
 			continue;
 		}
-		
-		if (IsCssOperator(sc.ch)
+
+		if (IsCssOperator(static_cast<char>(sc.ch))
 		&& (sc.state != SCE_CSS_VALUE || sc.ch == ';' || sc.ch == '}' || sc.ch == '!')
 		&& (sc.state != SCE_CSS_DIRECTIVE || sc.ch == ';' || sc.ch == '{')
 		) {
@@ -177,7 +177,7 @@ static void ColouriseCssDoc(unsigned int startPos, int length, int initStyle, Wo
 			op = sc.ch;
 		}
 	}
-	
+
 	sc.Complete();
 }
 

@@ -1790,7 +1790,7 @@ static void ColourisePHPPiece(StyleContext &sc, WordList *keywordlists[]) {
 
 	// Handle some PHP script
 	if (sc.state == SCE_HPHP_WORD) {
-		if (!IsPhpWordChar(sc.ch)) {
+		if (!IsPhpWordChar(static_cast<char>(sc.ch))) {
 			sc.SetState(SCE_HPHP_DEFAULT);
 		}
 	} else if (sc.state == SCE_HPHP_COMMENTLINE) {
@@ -1812,7 +1812,7 @@ static void ColourisePHPPiece(StyleContext &sc, WordList *keywordlists[]) {
 			sc.ForwardSetState(SCE_HPHP_DEFAULT);
 		}
 	} else if (sc.state == SCE_HPHP_VARIABLE) {
-		if (!IsPhpWordChar(sc.ch)) {
+		if (!IsPhpWordChar(static_cast<char>(sc.ch))) {
 			sc.SetState(SCE_HPHP_DEFAULT);
 		}
 	} else if (sc.state == SCE_HPHP_OPERATOR) {
@@ -1832,7 +1832,7 @@ static void ColourisePHPPiece(StyleContext &sc, WordList *keywordlists[]) {
 		}
 	}
 	if (sc.state == SCE_HPHP_DEFAULT) {
-		if (IsPhpWordStart(sc.ch)) {
+		if (IsPhpWordStart(static_cast<char>(sc.ch))) {
 			sc.SetState(SCE_HPHP_WORD);
 		} else if (sc.ch == '#') {
 			sc.SetState(SCE_HPHP_COMMENTLINE);
@@ -1846,7 +1846,7 @@ static void ColourisePHPPiece(StyleContext &sc, WordList *keywordlists[]) {
 			sc.SetState(SCE_HPHP_HSTRING);
 		} else if (sc.ch == '\'') {
 			sc.SetState(SCE_HPHP_SIMPLESTRING);
-		} else if (sc.ch == '$' && IsPhpWordStart(sc.chNext)) {
+		} else if (sc.ch == '$' && IsPhpWordStart(static_cast<char>(sc.chNext))) {
 			sc.SetState(SCE_HPHP_VARIABLE);
 		} else if (isoperator(static_cast<char>(sc.ch))) {
 			sc.SetState(SCE_HPHP_OPERATOR);
