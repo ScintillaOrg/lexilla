@@ -116,6 +116,7 @@ public:
 	int dbcsCodePage;
 	int tabInChars;
 	int indentInChars;
+	int actualIndentInChars;
 	bool useTabs;
 	bool tabIndents;
 	bool backspaceUnindents;
@@ -228,6 +229,7 @@ public:
 	int ExtendStyleRange(int pos, int delta, bool singleLine = false);
 	int ParaUp(int pos);
 	int ParaDown(int pos);
+	int IndentSize() { return actualIndentInChars; }
 
 private:
 	charClassification WordCharClass(unsigned char ch);
@@ -239,8 +241,6 @@ private:
 	void NotifyModifyAttempt();
 	void NotifySavePoint(bool atSavePoint);
 	void NotifyModified(DocModification mh);
-
-	int IndentSize() { return indentInChars ? indentInChars : tabInChars; }
 };
 
 /**

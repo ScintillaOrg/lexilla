@@ -1001,6 +1001,34 @@ set void SetWrapMode=2268(int mode,)
 # Retrieve whether text is word wrapped.
 get int GetWrapMode=2269(,)
 
+enu WrapVisualFlag=SC_WRAPVISUALFLAG_
+val SC_WRAPVISUALFLAG_NONE=0x0000
+val SC_WRAPVISUALFLAG_END=0x0001
+val SC_WRAPVISUALFLAG_START=0x0002
+
+# Set the display mode of visual flags for wrapped lines.
+set void SetWrapVisualFlags=2460(int wrapVisualFlags,)
+
+# Retrive the display mode of visual flags for wrapped lines.
+get int GetWrapVisualFlags=2461(,)
+
+enu WrapVisualLocation=SC_WRAPVISUALFLAGLOC_
+val SC_WRAPVISUALFLAGLOC_DEFAULT=0x0000
+val SC_WRAPVISUALFLAGLOC_END_BY_TEXT=0x0001
+val SC_WRAPVISUALFLAGLOC_START_BY_TEXT=0x0002
+
+# Set the location of visual flags for wrapped lines.
+set void SetWrapVisualFlagsLocation=2462(int wrapVisualFlagsLocation,)
+
+# Retrive the location of visual flags for wrapped lines.
+get int GetWrapVisualFlagsLocation=2463(,)
+
+# Set the start indent for wrapped lines.
+fun void SetWrapStartIndent=2464(int indent,)
+
+# Retrive the start indent for wrapped lines.
+get int GetWrapStartIndent=2465(,)
+
 enu LineCache=SC_CACHE_
 val SC_CACHE_NONE=0
 val SC_CACHE_CARET=1

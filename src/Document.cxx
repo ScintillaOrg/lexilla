@@ -57,6 +57,7 @@ Document::Document() {
 	enteredReadOnlyCount = 0;
 	tabInChars = 8;
 	indentInChars = 0;
+	actualIndentInChars = 8;
 	useTabs = true;
 	tabIndents = true;
 	backspaceUnindents = false;

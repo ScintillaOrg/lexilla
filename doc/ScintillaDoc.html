@@ -3869,6 +3869,10 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 
     <code><a class="message" href="#SCI_SETWRAPMODE">SCI_SETWRAPMODE(int wrapMode)</a><br />
      <a class="message" href="#SCI_GETWRAPMODE">SCI_GETWRAPMODE</a><br />
+     <a class="message" href="#SCI_SETWRAPVISUALFLAGS">SCI_SETWRAPVISUALFLAGS(int wrapVisualFlags)</a><br />
+     <a class="message" href="#SCI_GETWRAPVISUALFLAGS">SCI_GETWRAPVISUALFLAGS</a><br />
+     <a class="message" href="#SCI_SETWRAPSTARTINDENT">SCI_SETWRAPSTARTINDENT(int indent)</a><br />
+     <a class="message" href="#SCI_GETWRAPSTARTINDENT">SCI_GETWRAPSTARTINDENT</a><br />
      <a class="message" href="#SCI_SETLAYOUTCACHE">SCI_SETLAYOUTCACHE(int cacheMode)</a><br />
      <a class="message" href="#SCI_GETLAYOUTCACHE">SCI_GETLAYOUTCACHE</a><br />
      <a class="message" href="#SCI_LINESSPLIT">SCI_LINESSPLIT</a><br />
@@ -3880,6 +3884,11 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     characters or between runs of different styles. If this is not possible because a word in one
     style is wider than the window then the break occurs after the last character that completely
     fits on the line. The horizontal scroll bar does not appear when wrap mode is on.</p>
+
+	<p>For wrapped lines Scintilla can draw visual flags (little arrows) at end of a a subline of a
+	wrapped line and at begin of the next subline. These can be enabled individually, but if Scintilla
+	draws the visual flag at begin of the next subline this subline will be indented by one char.
+	Independent from drawing a visual flag at the begin the subline can have an indention.</p>
 
     <p>Much of the time used by Scintilla is spent on laying out and drawing text. The same text
     layout calculations may be performed many times even when the data used in these calculations
@@ -3904,6 +3913,91 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <b id="SCI_GETWRAPMODE">SCI_GETWRAPMODE</b><br />
      Set wrapMode to <code>SC_WRAP_WORD</code> (1) to enable line wrapping and to
     <code>SC_WRAP_NONE</code> (0) to disable line wrapping.</p>
+
+    <p><b id="SCI_SETWRAPVISUALFLAGS">SCI_SETWRAPVISUALFLAGS(int wrapVisualFlags)</b><br />
+     <b id="SCI_GETWRAPVISUALFLAGS">SCI_GETWRAPVISUALFLAGS</b><br />
+		You can enable the drawing of visual flags to indicate a line is wrapped. Bits set in
+		wrapVisualFlags determine which visual flags are drawn.
+
+    <table cellpadding="1" cellspacing="2" border="0" summary="Wrap visual flags">
+      <tbody>
+        <tr>
+          <th align="left">Symbol</th>
+          <th>Value</th>
+          <th align="left">Effect</th>
+        </tr>
+      </tbody>
+
+      <tbody valign="top">
+        <tr>
+          <td align="left"><code>SC_WRAPVISUALFLAG_NONE</code></td>
+          <td align="center">0</td>
+          <td>No visual flags</td>
+        </tr>
+
+        <tr>
+          <td align="left"><code>SC_WRAPVISUALFLAG_END</code></td>
+          <td align="center">1</td>
+          <td>Visual flag at end of subline of a wrapped line.</td>
+        </tr>
+
+        <tr>
+          <td align="left"><code>SC_WRAPVISUALFLAG_START</code></td>
+          <td align="center">2</td>
+          <td>Visual flag at begin of subline of a wrapped line.<br />
+					     Subline is indented by at least 1 to make room for the flag.<br />
+				</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><b id="SCI_SETWRAPVISUALFLAGSLOCATION">SCI_SETWRAPVISUALFLAGSLOCATION(int wrapVisualFlagsLocation)</b><br />
+     <b id="SCI_GETWRAPVISUALFLAGSLOCATION">SCI_GETWRAPVISUALFLAGSLOCATION</b><br />
+		You can set wether the visual flags to indicate a line is wrapped are drawn near the border or near the text.
+		Bits set in wrapVisualFlagsLocation set the location to near the text for the corresponding visual flag.
+
+    <table cellpadding="1" cellspacing="2" border="0" summary="Wrap visual flags locations">
+      <tbody>
+        <tr>
+          <th align="left">Symbol</th>
+          <th>Value</th>
+          <th align="left">Effect</th>
+        </tr>
+      </tbody>
+
+      <tbody valign="top">
+        <tr>
+          <td align="left"><code>SC_WRAPVISUALFLAGLOC_DEFAULT</code></td>
+          <td align="center">0</td>
+          <td>Visual flags drawn near border</td>
+        </tr>
+
+        <tr>
+          <td align="left"><code>SC_WRAPVISUALFLAGLOC_END_BY_TEXT</code></td>
+          <td align="center">1</td>
+          <td>Visual flag at end of subline drawn near text</td>
+        </tr>
+
+        <tr>
+          <td align="left"><code>SC_WRAPVISUALFLAGLOC_START_BY_TEXT</code></td>
+          <td align="center">2</td>
+          <td>Visual flag at begin of subline drawn near text</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <br />
+
+    <p><b id="SCI_SETWRAPSTARTINDENT">SCI_SETWRAPSTARTINDENT(int indent)</b><br />
+     <b id="SCI_GETWRAPSTARTINDENT">SCI_GETWRAPSTARTINDENT</b><br />
+     <code>SCI_SETWRAPSTARTINDENT</code> sets the size of indentation of sublines for
+		 wrapped lines in terms of the width of a space in
+		<a class="message" href="#StyleDefinition"><code>STYLE_DEFAULT</code></a>.
+		There are no limits on indent sizes, but values	less than 0 or large values may have
+		undesirable effects.<br />
+		The indention of sublines is independent of visual flags, but if
+		<code>SC_WRAPVISUALFLAG_START</code> is set an indent of at least 1 is used.
+     </p>
 
     <p><b id="SCI_SETLAYOUTCACHE">SCI_SETLAYOUTCACHE(int cacheMode)</b><br />
      <b id="SCI_GETLAYOUTCACHE">SCI_GETLAYOUTCACHE</b><br />
