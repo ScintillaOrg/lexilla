@@ -1576,8 +1576,15 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 					number[0] = '\0';
 					if (firstSubLine)
 						sprintf(number, "%d", lineDoc + 1);
-					if (foldFlags & SC_FOLDFLAG_LEVELNUMBERS)
-						sprintf(number, "%X", pdoc->GetLevel(lineDoc));
+					if (foldFlags & SC_FOLDFLAG_LEVELNUMBERS) {
+						int lev = pdoc->GetLevel(lineDoc);
+						sprintf(number, "%c%c %03X %03X",
+							(lev & SC_FOLDLEVELHEADERFLAG) ? 'H' : '_',
+							(lev & SC_FOLDLEVELWHITEFLAG) ? 'W' : '_',
+							lev & SC_FOLDLEVELNUMBERMASK,
+							lev >> 16
+						);
+					}
 					PRectangle rcNumber = rcMarker;
 					// Right justify
 					int width = surface->WidthText(vs.styles[STYLE_LINENUMBER].font, number, strlen(number));
@@ -2476,7 +2483,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 				} else {
 					int FoldLevelCurr = (pdoc->GetLevel(lineDoc) & SC_FOLDLEVELNUMBERMASK) - SC_FOLDLEVELBASE;
 					int FoldLevelPrev = (pdoc->GetLevel(lineDoc - 1) & SC_FOLDLEVELNUMBERMASK) - SC_FOLDLEVELBASE;
-					int FoldLevelFlags = (pdoc->GetLevel(lineDoc) & ~SC_FOLDLEVELNUMBERMASK);
+					int FoldLevelFlags = (pdoc->GetLevel(lineDoc) & ~SC_FOLDLEVELNUMBERMASK) & ~(0xFFF0000);
 					int indentationStep = (pdoc->indentInChars ? pdoc->indentInChars : pdoc->tabInChars);
 					// Draw line above fold
 					if ((FoldLevelPrev < FoldLevelCurr)
