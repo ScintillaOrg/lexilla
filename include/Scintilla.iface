@@ -519,7 +519,8 @@ set void AutoCSetCancelAtStart=2110(bool cancel,)
 # Retrieve whether auto-completion cancelled by backspacing before start.
 get bool AutoCGetCancelAtStart=2111(,)
 
-# Define a set of character that when typed fills up the selected word.
+# Define a set of characters that when typed will cause the autocompletion to 
+# choose the selected item.
 set void AutoCSetFillUps=2112(, string characterSet)
 
 # Should a single item auto-completion list automatically choose the item.
