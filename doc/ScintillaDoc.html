@@ -388,25 +388,38 @@ SCI_STYLESETVISIBLE(int stylenumber, bool visible)
       STYLE_CONTROLCHAR, and STYLE_INDENTGUIDE. 
       These can be defined with the SCI_STYLESET* messages.
     </p>
+    <h3>
+       Caret and Selection styles
+    </h3>
 <pre>
 SCI_SETSELFORE(bool useSelectionForeColour, int colour)
 SCI_SETSELBACK(bool useSelectionBackColour, int colour)
 SCI_SETCARETFORE(int colour)
 SCI_GETCARETFORE
+SCI_GETCARETLINEVISIBLE
+SCI_SETCARETLINEVISIBLE(bool show)
+SCI_GETCARETLINEBACK
+SCI_SETCARETLINEBACK(int colour)
 SCI_GETCARETPERIOD
 SCI_SETCARETPERIOD(int milliseconds)
 SCI_GETCARETWIDTH
 SCI_SETCARETWIDTH(int pixels)
 </pre>
     <p>
-       The selection is shown by changing the foreground and / or background colours. If one of
-      these is not set then that attribute is not changed for the selection. The default is to show
-      the selection by changing the background to light grey and leaving the foreground the same as
-      when it was not selected.
+       The selection is shown by changing the foreground and / or background colours. 
+       If one of these is not set then that attribute is not changed for the selection. The 
+       default is to show the selection by changing the background to light grey and 
+       leaving the foreground the same as when it was not selected.
     </p>
     <p>
-       The colour of the caret can be set with SCI_SETCARETFORE. The rate at which the caret blinks
-      can be set with SCI_SETCARETPERIOD which determines the time in milliseconds that the caret
+       The colour of the caret can be set with SCI_SETCARETFORE. 
+       The background colour of the line containing the caret can be changed 
+       to override the styles on that line with SCI_GETCARETLINEVISIBLE
+       and the colour used set with SCI_SETCARETLINEBACK. 
+       The caret line background colour is overridden by any background colour
+       used to display markers.
+       The rate at which the caret blinks can be set with SCI_SETCARETPERIOD 
+       which determines the time in milliseconds that the caret
       is visible or invisible before changing state. Setting the period to 0 stops the caret
       blinking. The width of the caret can be set with SCI_SETCARETWIDTH to a value
       of 1, 2 or 3 pixels.
