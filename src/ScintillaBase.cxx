@@ -69,7 +69,7 @@ void ScintillaBase::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 		Editor::AddCharUTF(s, len, treatAsDBCS);
 	}
 	if (ac.Active()) {
-		AutoCompleteChanged(s[0]);
+		AutoCompleteCharacterAdded(s[0]);
 		// For fill ups add the character after the autocompletion has 
 		// triggered so containers see the key so can display a calltip.
 		if (isFillUp) {
@@ -145,12 +145,12 @@ int ScintillaBase::KeyCommand(unsigned int iMessage) {
 			return 0;
 		case SCI_DELETEBACK:
 			DelCharBack(true);
-			AutoCompleteChanged();
+			AutoCompleteCharacterDeleted();
 			EnsureCaretVisible();
 			return 0;
 		case SCI_DELETEBACKNOTLINE:
 			DelCharBack(false);
-			AutoCompleteChanged();
+			AutoCompleteCharacterDeleted();
 			EnsureCaretVisible();
 			return 0;
 		case SCI_TAB:
@@ -283,14 +283,20 @@ void ScintillaBase::AutoCompleteMoveToCurrentWord() {
 	ac.Select(wordCurrent);
 }
 
-void ScintillaBase::AutoCompleteChanged(char ch) {
+void ScintillaBase::AutoCompleteCharacterAdded(char ch) {
 	if (ac.IsFillUpChar(ch)) {
 		AutoCompleteCompleted();
-	} else if (currentPos <= ac.posStart - ac.startLen) {
-		ac.Cancel();
-	} else if (ac.cancelAtStartPos && currentPos <= ac.posStart) {
-		ac.Cancel();
 	} else if (ac.IsStopChar(ch)) {
+		ac.Cancel();
+	} else {
+		AutoCompleteMoveToCurrentWord();
+	}
+}
+
+void ScintillaBase::AutoCompleteCharacterDeleted() {
+	if (currentPos <= ac.posStart - ac.startLen) {
+		ac.Cancel();
+	} else if (ac.cancelAtStartPos && (currentPos <= ac.posStart)) {
 		ac.Cancel();
 	} else {
 		AutoCompleteMoveToCurrentWord();
