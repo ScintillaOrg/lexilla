@@ -83,6 +83,7 @@ class ScintillaGTK : public ScintillaBase {
 	GdkEventButton evbtn;
 	bool capturedMouse;
 	bool dragWasDropped;
+	int lastKey;
 
 	GtkWidgetClass *parentClass;
 
@@ -245,7 +246,7 @@ ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 		adjustmentv(0), adjustmenth(0),
 		scrollBarWidth(30), scrollBarHeight(30),
 		capturedMouse(false), dragWasDropped(false),
-		parentClass(0),
+		lastKey(0), parentClass(0),
 #ifdef INTERNATIONAL_INPUT
 		ic(NULL),
 		ic_attr(NULL),
@@ -858,11 +859,57 @@ void ScintillaGTK::NotifyURIDropped(const char *list) {
 }
 const char *CharacterSetID(int characterSet);
 
+#define IS_ACC(x) \
+	((x) >= 65103 && (x) <= 65111)
+#define IS_CHAR(x) \
+	((x) >= 0 && (x) <= 128)
+
+#define IS_ACC_OR_CHAR(x) \
+	(IS_CHAR(x)) || (IS_ACC(x))
+
+static int MakeAccent(int key, int acc) {
+	const char *conv[] =	{
+		"aeioun AEIOUN",
+		"ãeiõuñ~ÃEIÕUÑ",
+		"áéíóún'ÁÉÍÓÚN",
+		"àèìòùn`ÀÈÌÒÙN",
+		"âêîôûn^ÂÊÎÔÛN",
+		"äëïöün¨ÄËÏÖÜN"
+	};
+	int idx;
+	for (idx = 0; idx < 13; ++idx) {
+		if (char(key) == conv[0][idx]) {
+			break;
+		}
+	}
+	if (idx == 13) {
+		return key;
+	}
+	if (acc == 65107) { // ~
+		return int((unsigned char)(conv[1][idx]));
+	} else if (acc == 65105) { // '
+		return int((unsigned char)(conv[2][idx]));
+	} else if (acc == 65104) { // `
+		return int((unsigned char)(conv[3][idx]));
+	} else if (acc == 65106) { // ^
+		return int((unsigned char)(conv[4][idx]));
+	} else if (acc == 65111) { // "
+		return int((unsigned char)(conv[5][idx]));
+	}
+	return key;
+}
+
 int ScintillaGTK::KeyDefault(int key, int modifiers) {
 	if (!(modifiers & SCI_CTRL) && !(modifiers & SCI_ALT)) {
 #if GTK_MAJOR_VERSION >= 2
 		char utfVal[4]="\0\0\0";
 		wchar_t wcs[2];
+		if (IS_CHAR(key) && IS_ACC(lastKey)) {
+			key = MakeAccent(key, lastKey);
+		}
+		if (IS_ACC_OR_CHAR(key)) {
+			lastKey = key;
+		}
 		wcs[0] = gdk_keyval_to_unicode(key);
 		wcs[1] = 0;
 		UTF8FromUCS2(wcs, 1, utfVal, 3);
