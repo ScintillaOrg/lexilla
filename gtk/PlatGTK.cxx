@@ -44,34 +44,35 @@
 #pragma warning(disable: 4505)
 #endif
 
+enum encodingType { singleByte, UTF8, dbcs};
+
 // On GTK+ 1.x holds a GdkFont* but on GTK+ 2.x can hold a GdkFont* or a
 // PangoFontDescription*.
 class FontHandle {
+	int width[128];
+	encodingType et;
 public:
 	int ascent;
-	int width[128];
 	GdkFont *pfont;
 #ifdef USE_PANGO
 	PangoFontDescription *pfd;
 #endif
 	FontHandle(GdkFont *pfont_) {
+		et = singleByte;
 		ascent = 0;
 		pfont = pfont_;
 #ifdef USE_PANGO
 		pfd = 0;
 #endif
-		for (int i=0;i<128;i++) {
-			width[i] = 0;
-		}
+		ResetWidths(et);
 	}
 #ifdef USE_PANGO
 	FontHandle(PangoFontDescription *pfd_) {
+		et = singleByte;
 		ascent = 0;
 		pfont = 0;
 		pfd = pfd_;
-		for (int i=0;i<128;i++) {
-			width[i] = 0;
-		}
+		ResetWidths(et);
 	}
 #endif
 	~FontHandle() {
@@ -83,6 +84,28 @@ public:
 			pango_font_description_free(pfd);
 		pfd = 0;
 #endif
+	}
+	void ResetWidths(encodingType et_) {
+		et = et_;
+		for (int i=0; i<=127; i++) {
+			width[i] = 0;
+		}
+	}
+	int CharWidth(unsigned char ch, encodingType et_) {
+		if (ch <= 127) {
+			if (et != et_) {
+				return 0;
+			}
+		}
+		return width[ch];
+	}
+	void SetCharWidth(unsigned char ch, int w, encodingType et_) {
+		if (ch <= 127) {
+			if (et != et_) {
+				ResetWidths(et_);
+			}
+			width[ch] = w;
+		}
 	}
 };
 
@@ -629,8 +652,7 @@ void Font::Release() {
 }
 
 class SurfaceImpl : public Surface {
-	bool unicodeMode;
-	bool dbcsMode;
+	encodingType et;
 	GdkDrawable *drawable;
 	GdkGC *gc;
 	GdkPixmap *ppixmap;
@@ -687,7 +709,7 @@ public:
 	void SetDBCSMode(int codePage);
 };
 
-SurfaceImpl::SurfaceImpl() : unicodeMode(false), dbcsMode(false), drawable(0), gc(0), ppixmap(0),
+SurfaceImpl::SurfaceImpl() : et(singleByte), drawable(0), gc(0), ppixmap(0),
 x(0), y(0), inited(false), createdGC(false)
 #ifdef USE_PANGO
 , pcontext(0), layout(0)
@@ -1001,10 +1023,10 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 #ifdef USE_PANGO
 		if (PFont(font_)->pfd) {
 			char *utfForm = 0;
-			if (unicodeMode) {
+			if (et == UTF8) {
 				pango_layout_set_text(layout, s, len);
 			} else {
-				if (dbcsMode) {
+				if (et == dbcs) {
 					// Convert to utf8
 					utfForm = UTF8FromDBCS(s, len);
 				}
@@ -1022,13 +1044,13 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 		// Draw text as a series of segments to avoid limitations in X servers
 		const int segmentLength = 1000;
 		bool draw8bit = true;
-		if (unicodeMode || dbcsMode) {
+		if (et != singleByte) {
 			GdkWChar wctext[maxLengthTextRun];
 			int wclen;
-			if (unicodeMode) {
+			if (et == UTF8) {
 				wclen = UCS2FromUTF8(s, len,
 					reinterpret_cast<wchar_t *>(wctext), maxLengthTextRun - 1);
-			} else {	// dbcsMode, so convert using current locale
+			} else {	// dbcs, so convert using current locale
 				wclen = gdk_mbstowcs(
 					wctext, s, maxLengthTextRun - 1);
 			}
@@ -1093,13 +1115,16 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 		int totalWidth = 0;
 #ifdef USE_PANGO
 		if (PFont(font_)->pfd) {
-			if (len == 1 && (static_cast<unsigned char>(*s) <= 127) && PFont(font_)->width[*s]) {
-				positions[0] = PFont(font_)->width[*s];
-				return;
+			if (len == 1) {
+				int width = PFont(font_)->CharWidth(*s);
+				if (width) {
+					positions[0] = width;
+					return;
+				}
 			}
 			PangoRectangle pos;
 			pango_layout_set_font_description(layout, PFont(font_)->pfd);
-			if (unicodeMode) {
+			if (et == UTF8) {
 				// Simple and direct as UTF-8 is native Pango encoding
 				pango_layout_set_text(layout, s, len);
 				int i = 0;
@@ -1147,18 +1172,18 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 					delete []utfForm;
 				}
 			}
-			if (len == 1 && (static_cast<unsigned char>(*s) <= 127)) {
-				PFont(font_)->width[*s] = positions[0];
+			if (len == 1) {
+				PFont(font_)->SetCharWidth(*s, positions[0]);
 			}
 			return;
 		}
 #endif
 		GdkFont *gf = PFont(font_)->pfont;
 		bool measure8bit = true;
-		if (unicodeMode || dbcsMode) {
+		if (et != singleByte) {
 			GdkWChar wctext[maxLengthTextRun];
 			int wclen;
-			if (unicodeMode) {
+			if (et == UTF8) {
 				wclen = UCS2FromUTF8(s, len,
 					reinterpret_cast<wchar_t *>(wctext), maxLengthTextRun - 1);
 			} else {	// dbcsMode, so convert using current locale
@@ -1174,7 +1199,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 					int width = gdk_char_width_wc(gf, wctext[iU]);
 					totalWidth += width;
 					size_t lenChar;
-					if (unicodeMode) {
+					if (et == UTF8) {
 						lenChar = UTF8Len(s[i]);
 					} else {
 						lenChar = mblen(s+i, MB_CUR_MAX);
@@ -1211,10 +1236,10 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 			char *utfForm = 0;
 			pango_layout_set_font_description(layout, PFont(font_)->pfd);
 			PangoRectangle pos;
-			if (unicodeMode) {
+			if (et == UTF8) {
 				pango_layout_set_text(layout, s, len);
 			} else {
-				if (dbcsMode) {
+				if (et == dbcs) {
 					// Convert to utf8
 					utfForm = UTF8FromDBCS(s, len);
 				}
@@ -1228,7 +1253,7 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 			return width;
 		}
 #endif
-		if (unicodeMode) {
+		if (et == UTF8) {
 			GdkWChar wctext[maxLengthTextRun];
 			size_t wclen = UCS2FromUTF8(s, len, (wchar_t *)wctext, sizeof(wctext) / sizeof(GdkWChar) - 1);
 			wctext[wclen] = L'\0';
@@ -1360,11 +1385,13 @@ void SurfaceImpl::SetClip(PRectangle rc) {
 void SurfaceImpl::FlushCachedState() {}
 
 void SurfaceImpl::SetUnicodeMode(bool unicodeMode_) {
-	unicodeMode = unicodeMode_;
+	if (unicodeMode_)
+		et = UTF8;
 }
 
 void SurfaceImpl::SetDBCSMode(int codePage) {
-	dbcsMode = codePage == SC_CP_DBCS;
+	if (codePage == SC_CP_DBCS)
+		et = dbcs;
 }
 
 Surface *Surface::Allocate() {
