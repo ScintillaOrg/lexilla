@@ -2078,7 +2078,7 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 				if (braces[1] > mh.position) {
 					braces[1] += mh.length;
 				}
-			} else {	// SC_MOD_DELETETEXT
+			} else if (mh.modificationType & SC_MOD_DELETETEXT) {
 				int endPos = mh.position + mh.length;
 				if (currentPos > mh.position) {
 					if (currentPos > endPos) {
