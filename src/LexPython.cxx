@@ -60,8 +60,8 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 	
 	WordList &keywords = *keywordlists[0];
 	
-	bool fold = styler.GetPropSet().GetInt("fold");
-	int whingeLevel = styler.GetPropSet().GetInt("tab.timmy.whinge.level");
+	bool fold = styler.GetPropertyInt("fold");
+	int whingeLevel = styler.GetPropertyInt("tab.timmy.whinge.level");
 	char prevWord[200];
 	prevWord[0] = '\0';
 	if (length == 0)

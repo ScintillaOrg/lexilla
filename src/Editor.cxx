@@ -69,6 +69,7 @@ Editor::Editor() {
 
 	xOffset = 0;
 	xCaretMargin = 50;
+	horizontalScrollBarVisible = true;
 	
 	currentPos = 0;
 	anchor = 0;
@@ -1275,6 +1276,10 @@ long Editor::FormatRange(bool draw, FORMATRANGE *pfr) {
 	return endPosPrint;
 }
 
+// Empty method is overridden on GTK+ to show / hide scrollbars
+void Editor::ReconfigureScrollBars() {
+}
+
 void Editor::SetScrollBarsTo(PRectangle) {
 	RefreshStyleData();
 
@@ -1818,6 +1823,9 @@ int Editor::KeyCommand(UINT iMessage) {
 		MovePositionTo(PositionFromLocation(
 		                   Point(lastXChosen, pt.y + vs.lineHeight)), true);
 		break;
+	case SCI_LINESCROLLDOWN:
+		ScrollTo(topLine + 1);
+		break;
 	case SCI_LINEUP:
 		MovePositionTo(PositionFromLocation(
 		                   Point(lastXChosen, pt.y - vs.lineHeight)));
@@ -1825,6 +1833,9 @@ int Editor::KeyCommand(UINT iMessage) {
 	case SCI_LINEUPEXTEND:
 		MovePositionTo(PositionFromLocation(
 		                   Point(lastXChosen, pt.y - vs.lineHeight)), true);
+		break;
+	case SCI_LINESCROLLUP:
+		ScrollTo(topLine - 1);
 		break;
 	case SCI_CHARLEFT:
 		if (SelectionEmpty()) {
@@ -3394,6 +3405,15 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	case SCI_GETLINEINDENTPOSITION:
 		return pdoc->GetLineIndentPosition(wParam);
 		
+	case SCI_SETHSCROLLBAR :
+		horizontalScrollBarVisible = wParam;
+		SetScrollBars();
+		ReconfigureScrollBars();
+		break;
+		
+	case SCI_GETHSCROLLBAR:
+		return horizontalScrollBarVisible;
+		
 	case SCI_SETCODEPAGE:
 		pdoc->dbcsCodePage = wParam;
 		break;
@@ -3793,6 +3813,8 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	case SCI_LINETRANSPOSE:
 	case SCI_LOWERCASE:
 	case SCI_UPPERCASE:
+	case SCI_LINESCROLLDOWN:
+	case SCI_LINESCROLLUP:
 		return KeyCommand(iMessage);
 
 	case SCI_BRACEHIGHLIGHT:
@@ -3855,6 +3877,9 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		pdoc->ConvertLineEnds(wParam);
 		SetSelection(currentPos, anchor);	// Ensure selection inside document
 		return 0;
+
+	case SCI_SELECTIONISRECTANGLE:
+		return (selType == selRectangle) ? 1 : 0;
 
 #ifdef MACRO_SUPPORT
 	case SCI_STARTRECORD:
