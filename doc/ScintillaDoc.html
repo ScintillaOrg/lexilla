@@ -750,8 +750,8 @@ SCI_STOPRECORD
 EM_FORMATRANGE
 SCI_SETPRINTMAGNIFICATION(int magnification)
 SCI_GETPRINTMAGNIFICATION
-SCI_SETPRINTINVERTLIGHT(bool invert)
-SCI_GETPRINTINVERTLIGHT
+SCI_SETPRINTCOLOURMODE(int mode)
+SCI_GETPRINTCOLOURMODE
 </pre>
     <p>
        On Windows EM_FORMATRANGE can be used to draw the text onto a display context which can
@@ -760,8 +760,12 @@ SCI_GETPRINTINVERTLIGHT
     <p>
        To print at a different size than drawing on screen use SCI_SETPRINTMAGNIFICATION with
        a value which is the number of points to add to each style. -3 or -4 gives reasonable small print.
+    </p>
+    <p>
        If a black background is used on the screen then it is best to invert the light value of all colours
-       with SCI_SETPRINTINVERTLIGHT when printing to give a white bavkground.
+       with SCI_SETPRINTCOLOURMODE(SC_PRINT_INVERTLIGHT) when printing to give a 
+       white background. If intermediate tones are used on screen then black on white print can be 
+       chosen with SCI_SETPRINTCOLOURMODE(SC_PRINT_BLACKONWHITE).
     </p>
     <h3>
        Multiple Views

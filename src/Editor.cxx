@@ -34,7 +34,7 @@ Editor::Editor() {
 	stylesValid = false;
 	
 	printMagnification = 0;
-	printInvertLight = false;
+	printColourMode = SC_PRINT_NORMAL;
 	
 	hideSelection = false;
 	inOverstrike = false;
@@ -1295,12 +1295,14 @@ long Editor::FormatRange(bool draw, FORMATRANGE *pfr) {
 	vsPrint.selforeset = false;
 	// White background for the line numbers
 	vsPrint.styles[STYLE_LINENUMBER].back.desired = Colour(0xff,0xff,0xff); 
-	if (printInvertLight) {
-	    for (int sty=0;sty<=STYLE_MAX;sty++) {
+	for (int sty=0;sty<=STYLE_MAX;sty++) {
+		if (printColourMode == SC_PRINT_INVERTLIGHT) {
 			vsPrint.styles[sty].fore.desired = InvertedLight(vsPrint.styles[sty].fore.desired); 
 			vsPrint.styles[sty].back.desired = InvertedLight(vsPrint.styles[sty].back.desired); 
+		} else if (printColourMode == SC_PRINT_BLACKONWHITE) {
+			vsPrint.styles[sty].fore.desired = Colour(0,0,0); 
+			vsPrint.styles[sty].back.desired = Colour(0xff,0xff,0xff);
 		}
-		//vsPrint.styles[sty].size = vsPrint.styles[sty].size * printMagnification / 100;
 	}
 	vsPrint.styles[STYLE_LINENUMBER].back.desired = Colour(0xff,0xff,0xff); 
 	
@@ -3390,12 +3392,12 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	case SCI_GETPRINTMAGNIFICATION:
 		return printMagnification;
 	
-	case SCI_SETPRINTINVERTLIGHT:
-		printInvertLight = wParam;
+	case SCI_SETPRINTCOLOURMODE:
+		printColourMode = wParam;
 		break;
 	
-	case SCI_GETPRINTINVERTLIGHT:
-		return printInvertLight;
+	case SCI_GETPRINTCOLOURMODE:
+		return printColourMode;
 	
 	case SCI_GETSTYLEAT:
 		if (static_cast<short>(wParam) >= pdoc->Length())
