@@ -2006,7 +2006,6 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	case SCI_DELETEBACK:
 	case SCI_TAB:
 	case SCI_BACKTAB:
-	case SCI_NEWLINE:
 	case SCI_FORMFEED:
 	case SCI_VCHOME:
 	case SCI_VCHOMEEXTEND:
@@ -2021,11 +2020,12 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	case SCI_UPPERCASE:
 		break;
 
-		// Filter out all others (display changes, etc)
+		// Filter out all others like display changes.  Also, newlines are redundant
+		// with char insert messages.
+	case SCI_NEWLINE:
 	default:
 		//		printf("Filtered out %ld of macro recording\n", iMessage);
-
-		return ;
+		return;
 	}
 
 	// Send notification
