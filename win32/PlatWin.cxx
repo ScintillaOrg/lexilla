@@ -250,7 +250,8 @@ Font::~Font() {
 
 #define FONTS_CACHED
 
-void Font::Create(const char *faceName, int characterSet, int size, bool bold, bool italic) {
+void Font::Create(const char *faceName, int characterSet, int size,
+	bool bold, bool italic, bool) {
 	Release();
 #ifndef FONTS_CACHED
 	LOGFONT lf;
