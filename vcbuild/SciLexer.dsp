@@ -122,7 +122,7 @@ SOURCE=..\src\Editor.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\win32\ExternalLexer.cxx
+SOURCE=..\src\ExternalLexer.cxx
 # End Source File
 # Begin Source File
 
@@ -178,6 +178,10 @@ SOURCE=..\src\LexEiffel.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexEScript.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexFortran.cxx
 # End Source File
 # Begin Source File
@@ -187,6 +191,10 @@ SOURCE=..\src\LexHTML.cxx
 # Begin Source File
 
 SOURCE=..\src\LexLisp.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexLout.cxx
 # End Source File
 # Begin Source File
 
