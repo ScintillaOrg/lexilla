@@ -688,7 +688,7 @@ void Document::ConvertLineEnds(int eolModeSet) {
 }
 
 Document::charClassification Document::WordCharClass(unsigned char ch) {
-	if ((SC_CP_UTF8 == dbcsCodePage) && (ch > 0x80))
+	if ((SC_CP_UTF8 == dbcsCodePage) && (ch >= 0x80))
 		return ccWord;
 	return charClass[ch];
 }
@@ -1032,7 +1032,7 @@ void Document::SetWordChars(unsigned char *chars) {
 		}
 	} else {
 		for (ch = 0; ch < 256; ch++) {
-			if (ch > 0x80 || isalnum(ch) || ch == '_') 
+			if (ch >= 0x80 || isalnum(ch) || ch == '_') 
 				charClass[ch] = ccWord;
 		}
 	}
