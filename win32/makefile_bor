@@ -1,7 +1,8 @@
 # Make file for Scintilla on Windows Borland C++ Builder version
 # Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
 # The License.txt file describes the conditions under which this software may be distributed.
-# This makefile is for using Visual C++ and nmake. 
+# This makefile is for using Borland C++ and Borland make. 
+# I test with Borland C++ Builder 3
 # The main makefile uses mingw32 gcc and may be more current than this file.
 
 .SUFFIXES: .cxx
