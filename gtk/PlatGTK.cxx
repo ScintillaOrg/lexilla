@@ -144,7 +144,8 @@ Font::Font() : id(0) {}
 Font::~Font() {}
 
 
-void Font::Create(const char *faceName, int characterSet, int size, bool bold, bool italic) {
+void Font::Create(const char *faceName, int /*characterSet*/, 
+	int size, bool bold, bool italic) {
 	// TODO: take notice of characterSet
 	Release();
 	char fontspec[300];
@@ -755,16 +756,19 @@ int Platform::Maximum(int a, int b) {
 
 //#define TRACE
 
-void Platform::DebugPrintf(const char *format, ...) {
 #ifdef TRACE
+void Platform::DebugPrintf(const char *format, ...) {
 	char buffer[2000];
 	va_list pArguments;
 	va_start(pArguments, format);
 	vsprintf(buffer, format, pArguments);
 	va_end(pArguments);
 	Platform::DebugDisplay(buffer);
-#endif
 }
+#else
+void Platform::DebugPrintf(const char *, ...) {
+}
+#endif
 
 int Platform::Clamp(int val, int minVal, int maxVal) {
 	if (val > maxVal)
