@@ -2597,6 +2597,19 @@ bool Editor::PointInSelMargin(Point pt) {
 	}
 }
 
+void Editor::LineSelection(int lineCurrent_, int lineAnchor_) {
+	if (lineAnchor_ < lineCurrent_) {
+		SetSelection(pdoc->LineStart(lineCurrent_+1),
+		     pdoc->LineStart(lineAnchor_));
+	} else if (lineAnchor_ > lineCurrent_) {
+		SetSelection(pdoc->LineStart(lineCurrent_),
+		     pdoc->LineStart(lineAnchor_+1));
+	} else { // Same line, select it
+		SetSelection(pdoc->LineStart(lineAnchor_ + 1),
+		     pdoc->LineStart(lineAnchor_));
+	}
+}
+
 void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, bool alt) {
 	//Platform::DebugPrintf("Scintilla:ButtonDown %d %d = %d alt=%d\n", curTime, lastClickTime, curTime - lastClickTime, alt);
 	ptMouseLast = pt;
@@ -2606,9 +2619,10 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 
 	bool processed = NotifyMarginClick(pt, shift, ctrl, alt);
 	if (processed)
-		return ;
+		return;
 
-	if (shift) {
+	bool inSelMargin = PointInSelMargin(pt);
+	if (shift & !inSelMargin) {
 		SetSelection(newPos);
 	}
 	if (((curTime - lastClickTime) < Platform::DoubleClickTime()) && Close(pt, lastClick)) {
@@ -2649,21 +2663,28 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 		if (doubleClick)
 			NotifyDoubleClick(pt, shift);
 	} else {	// Single click
-		if (PointInSelMargin(pt)) {
+		if (inSelMargin) {
 			if (ctrl) {
 				SelectAll();
 				lastClickTime = curTime;
-				return ;
+				return;
 			}
-			lineAnchor = LineFromLocation(pt);
-			// While experimenting with folding turn off line selection
 			if (!shift) {
+				lineAnchor = LineFromLocation(pt);
 				// Single click in margin: select whole line
-				SetSelection(pdoc->LineStart(lineAnchor + 1), pdoc->LineStart(lineAnchor));
+				LineSelection(lineAnchor, lineAnchor);
+				SetSelection(pdoc->LineStart(lineAnchor + 1), 
+					pdoc->LineStart(lineAnchor));
 			} else {
-				// Single shift+click in margin: select from anchor to beginning of clicked line
-				SetSelection(pdoc->LineStart(lineAnchor), anchor);
-			}
+				// Single shift+click in margin: select from line anchor to clicked line
+				if (anchor > currentPos)
+					lineAnchor = pdoc->LineFromPosition(anchor-1);
+				else
+					lineAnchor = pdoc->LineFromPosition(anchor);
+				int lineStart = LineFromLocation(pt);
+				LineSelection(lineStart, lineAnchor);
+				//lineAnchor = lineStart; // Keep the same anchor for ButtonMove
+			}			
 			SetDragPosition(invalidPosition);
 			SetMouseCapture(true);
 			selectionType = selLine;
@@ -2718,13 +2739,7 @@ void Editor::ButtonMove(Point pt) {
 			} else {
 				// Continue selecting by line
 				int lineMove = LineFromLocation(pt);
-				if (lineAnchor < lineMove) {
-					SetSelection(pdoc->LineStart(lineMove + 1),
-					             pdoc->LineStart(lineAnchor));
-				} else {
-					SetSelection(pdoc->LineStart(lineMove),
-					             pdoc->LineStart(lineAnchor + 1));
-				}
+				LineSelection(lineMove, lineAnchor);
 			}
 		}
 		EnsureCaretVisible(false);
@@ -4295,6 +4310,7 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 	
 	case SCI_SETMOUSEDOWNCAPTURES:
 		mouseDownCaptures = wParam;
+		break;
 	
 	case SCI_GETMOUSEDOWNCAPTURES:
 		return mouseDownCaptures;

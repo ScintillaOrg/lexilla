@@ -654,7 +654,8 @@ void ScintillaWin::SetMouseCapture(bool on) {
 
 bool ScintillaWin::HaveMouseCapture() {
 	// Cannot just see if GetCapture is this window as the scroll bar also sets capture for the window
-	return capturedMouse && (::GetCapture() == wMain.GetID());
+	return capturedMouse;
+	//return capturedMouse && (::GetCapture() == wMain.GetID());
 }
 
 void ScintillaWin::ScrollText(int linesToMove) {
