@@ -572,9 +572,18 @@ char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, b
 				do { // browse sequentially the rest after the hit
 					brace = strchr(word, '(');
 					if (brace)
-						wordlen = brace - word;
-					else
-						wordlen = strlen(word);
+						do
+							if (--brace < word)
+								break;
+						while (isspace(*brace));
+					else {
+						brace = word + strlen(word);
+						do
+							if (--brace < word)
+								break;
+						while (isspace(*brace));
+					}
+					wordlen = brace - word + 1;
 					newlength = length + wordlen; // stretch the buffer
 					if (length)
 						newlength++;
@@ -589,7 +598,7 @@ char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, b
 					memcpy(buffer + length, word, wordlen);
 					length = newlength;
 					buffer[length] = '\0';
-					if (++pivot >= end)
+					if (++pivot > end)
 						break;
 					word = wordsNoCase[pivot];
 				} while (!strncasecmp(wordStart, word, searchLen));
@@ -603,9 +612,18 @@ char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, b
 						break;                 
 					brace = strchr(word, '(');
 					if (brace)
-						wordlen = brace - word;
-					else
-						wordlen = strlen(word);
+						do
+							if (--brace < word)
+								break;
+						while (isspace(*brace));
+					else {
+						brace = word + strlen(word);
+						do
+							if (--brace < word)
+								break;
+						while (isspace(*brace));
+					}
+					wordlen = brace - word + 1;
 					newlength = length + wordlen; // stretch the buffer
 					if (length)
 						newlength++;
@@ -639,9 +657,18 @@ char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, b
 				do { // browse sequentially the rest after the hit
 					brace = strchr(word, '(');
 					if (brace)
-						wordlen = brace - word;
-					else
-						wordlen = strlen(word);
+						do
+							if (--brace < word)
+								break;
+						while (isspace(*brace));
+					else {
+						brace = word + strlen(word);
+						do
+							if (--brace < word)
+								break;
+						while (isspace(*brace));
+					}
+					wordlen = brace - word + 1;
 					newlength = length + wordlen; // stretch the buffer
 					if (length)
 						newlength++;
@@ -657,7 +684,7 @@ char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, b
 					memcpy(buffer + length, word, wordlen);
 					length = newlength;
 					buffer[length] = '\0';
-					if (++pivot >= end)
+					if (++pivot > end)
 						break;
 					word = words[pivot];
 				} while (!strncmp(wordStart, word, searchLen));
@@ -671,9 +698,18 @@ char *WordList::GetNearestWords(const char *wordStart, int searchLen /*= -1*/, b
 						break;
 					brace = strchr(word, '(');
 					if (brace)
-						wordlen = brace - word;
-					else
-						wordlen = strlen(word);
+						do
+							if (--brace < word)
+								break;
+						while (isspace(*brace));
+					else {
+						brace = word + strlen(word);
+						do
+							if (--brace < word)
+								break;
+						while (isspace(*brace));
+					}
+					wordlen = brace - word + 1;
 					newlength = length + wordlen; // stretch the buffer
 					if (length)
 						newlength++;
