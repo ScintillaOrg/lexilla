@@ -151,45 +151,45 @@ Font::~Font() {}
 static const char *CharacterSetName(int characterSet) {
 	switch (characterSet) {
 	case SC_CHARSET_ANSI:
-		return "iso8859";
+		return "iso8859-*";
 	case SC_CHARSET_DEFAULT:
-		return "iso8859";
+		return "iso8859-*";
 	case SC_CHARSET_BALTIC:
-		return "*";
+		return "*-*";
 	case SC_CHARSET_CHINESEBIG5:
-		return "*";
+		return "*-*";
 	case SC_CHARSET_EASTEUROPE:
-		return "iso8859-2";
+		return "*-2";
 	case SC_CHARSET_GB2312:
-		return "gb2312.1980";
+		return "gb2312.1980-*";
 	case SC_CHARSET_GREEK:
-		return "adobe";
+		return "*-7";
 	case SC_CHARSET_HANGUL:
-		return "ksc5601.1987";
+		return "ksc5601.1987-*";
 	case SC_CHARSET_MAC:
-		return "*";
+		return "*-*";
 	case SC_CHARSET_OEM:
-		return "*";
+		return "*-*";
 	case SC_CHARSET_RUSSIAN:
-		return "*";
+		return "*-r";
 	case SC_CHARSET_SHIFTJIS:
-		return "jisx0208.1983";
+		return "jisx0208.1983-*";
 	case SC_CHARSET_SYMBOL:
-		return "*";
+		return "*-*";
 	case SC_CHARSET_TURKISH:
-		return "*";
+		return "*-*";
 	case SC_CHARSET_JOHAB:
-		return "*";
+		return "*-*";
 	case SC_CHARSET_HEBREW:
-		return "*";
+		return "*-8";
 	case SC_CHARSET_ARABIC:
-		return "*";
+		return "*-6";
 	case SC_CHARSET_VIETNAMESE:
-		return "*";
+		return "*-*";
 	case SC_CHARSET_THAI:
-		return "*";
+		return "*-*";
 	default:
-		return "*";
+		return "*-*";
 	}
 }
 
@@ -221,7 +221,6 @@ void Font::Create(const char *faceName, int characterSet,
 	strcat(fontspec, sizePts);
 	strcat(fontspec, "-*-*-*-*-");
 	strcat(fontspec, CharacterSetName(characterSet));
-	strcat(fontspec, "-*");
 	id = gdk_font_load(fontspec);
 	if (!id) {
 		// Font not available so substitute a reasonable code font

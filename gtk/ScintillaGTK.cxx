@@ -1303,7 +1303,8 @@ static int KeyTranslate(int keyIn) {
 
 gint ScintillaGTK::KeyPress(GtkWidget *widget, GdkEventKey *event) {
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
-	//Platform::DebugPrintf("SC-key: %d %x\n",event->keyval, event->state);
+	//Platform::DebugPrintf("SC-key: %d %x [%s]\n", 
+	//	event->keyval, event->state, (event->length > 0) ? event->string : "empty");
 	bool shift = event->state & GDK_SHIFT_MASK;
 	bool ctrl = event->state & GDK_CONTROL_MASK;
 	bool alt = event->state & GDK_MOD1_MASK;
@@ -1314,6 +1315,9 @@ gint ScintillaGTK::KeyPress(GtkWidget *widget, GdkEventKey *event) {
 		key &= 0x7F;
 	else
 		key = KeyTranslate(key);
+	// Hack for keys between 256 and 511 but makes Hungarian work.
+	if ((key >= GDK_Aogonek) && (key <= GDK_abovedot))
+		key &= 0xff;
 
 	bool consumed = false;
 	int added = sciThis->KeyDown(key, shift, ctrl, alt, &consumed);
