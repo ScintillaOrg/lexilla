@@ -108,11 +108,11 @@ private:
 	char **vals;
 	int size;
 	int used;
+	void EnsureCanAddEntry();
 public:
 	PropSet *superPS;
 	PropSet();
 	~PropSet();
-	void EnsureCanAddEntry();
 	void Set(const char *key, const char *val);
 	void Set(char *keyval);
 	SString Get(const char *key);
@@ -120,8 +120,8 @@ public:
 	SString GetWild(const char *keybase, const char *filename);
 	SString GetNewExpand(const char *keybase, const char *filename);
 	void Clear();
-	void ReadFromMemory(const char *data, int len);
-	void Read(const char *filename);
+	void ReadFromMemory(const char *data, int len, const char *directoryForImports=0);
+	void Read(const char *filename, const char *directoryForImports);
 };
 
 // This is a fixed length list of strings suitable for display  in combo boxes

@@ -97,6 +97,8 @@ void PropSet::Set(const char *key, const char *val) {
 }
 
 void PropSet::Set(char *keyval) {
+    while (isspace(*keyval))
+        keyval++;
 	char *eqat = strchr(keyval, '=');
 	if (eqat) {
 		*eqat = '\0';
@@ -244,29 +246,38 @@ void PropSet::Clear() {
 	used = 0;
 }
 
-void PropSet::ReadFromMemory(const char *data, int len) {
-	if (len > 0) {
-		const char *pd = data;
-		char linebuf[60000];
-		while (GetFullLine(pd, len, linebuf, sizeof(linebuf))) {
-			if (isalpha(linebuf[0]))
-				Set(linebuf);
-		}
-		// If there is a final line:
-		if (isalpha(linebuf[0]))
+void PropSet::ReadFromMemory(const char *data, int len, const char *directoryForImports) {
+	const char *pd = data;
+	char linebuf[60000];
+	bool ifIsTrue = true;
+	while (len > 0) {
+		GetFullLine(pd, len, linebuf, sizeof(linebuf));
+		if (isalpha(linebuf[0]))    // If clause ends with first non-indented line
+			ifIsTrue = true;
+		if (isprefix(linebuf, "if ")) {
+			const char *expr = linebuf + strlen("if") + 1;
+			ifIsTrue = GetInt(expr);
+		} else if (isprefix(linebuf, "import ") && directoryForImports) {
+			char importPath[MAX_PATH];
+			strcpy(importPath, directoryForImports);
+			strcat(importPath, linebuf + strlen("import") + 1);
+			strcat(importPath, ".properties");
+            Read(importPath,directoryForImports);
+		} else if (isalpha(linebuf[0])) {
 			Set(linebuf);
+		} else if (isspace(linebuf[0]) && ifIsTrue) {
+			Set(linebuf);
+		}
 	}
 }
 
-void PropSet::Read(const char *filename) {
-	//printf("Opening properties <%s>\n", filename);
-	Clear();
+void PropSet::Read(const char *filename, const char *directoryForImports) {
 	char propsData[60000];
 	FILE *rcfile = fopen(filename, "rb");
 	if (rcfile) {
 		int lenFile = fread(propsData, 1, sizeof(propsData), rcfile);
 		fclose(rcfile);
-		ReadFromMemory(propsData, lenFile);
+		ReadFromMemory(propsData, lenFile, directoryForImports);
 	} else {
 		//printf("Could not open <%s>\n", filename);
 	}
