@@ -10,6 +10,8 @@
 #include <ctype.h>
 #include <stdio.h>
 
+#include "Platform.h"
+
 #include "PropSet.h"
 #include "Accessor.h"
 #include "KeyWords.h"
