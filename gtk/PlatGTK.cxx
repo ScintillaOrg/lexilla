@@ -38,57 +38,55 @@
 #pragma warning(disable: 4505)
 #endif
 
-typedef struct _logfont {
-    int size;
-    bool bold;
-    bool italic;
-    int characterSet;
-    char faceName[300];
-} LOGFONT;
+struct LOGFONT {
+	int size;
+	bool bold;
+	bool italic;
+	int characterSet;
+	char faceName[300];
+};
 
 #if USE_LOCK
-GMutex *fontMutex = NULL;
+static GMutex *fontMutex = NULL;
 #endif
 
-void initializeGLIBThreads() {
+static void InitializeGLIBThreads() {
 #if USE_LOCK
-    if (!g_thread_supported()) g_thread_init(NULL);
-#endif
-}
-
-void fontMutexAllocate(void) {
-#if USE_LOCK
-    if (!fontMutex) {
-        initializeGLIBThreads();
-        fontMutex = g_mutex_new();
-    }
+	if (!g_thread_supported()) {
+		g_thread_init(NULL);
+	}
 #endif
 }
 
-void fontMutexFree(void) {
+static void FontMutexAllocate() {
 #if USE_LOCK
-    if (fontMutex) {
-        g_mutex_free(fontMutex);
-    }
+	if (!fontMutex) {
+		InitializeGLIBThreads();
+		fontMutex = g_mutex_new();
+	}
 #endif
 }
 
-void fontMutexLock(void) {
+static void FontMutexFree() {
 #if USE_LOCK
-    if (!fontMutex) {
-        /* this is indeed lame, but can be changed later to be put into
-           some kind of scintilla startup function */
-        fontMutexAllocate();
-    }
-    g_mutex_lock(fontMutex);
+	if (fontMutex) {
+		g_mutex_free(fontMutex);
+		fontMutex = NULL;
+	}
 #endif
 }
 
-void fontMutexUnlock(void) {
+static void FontMutexLock() {
 #if USE_LOCK
-    if (fontMutex) {
-        g_mutex_unlock(fontMutex);
-    }
+	g_mutex_lock(fontMutex);
+#endif
+}
+
+static void FontMutexUnlock() {
+#if USE_LOCK
+	if (fontMutex) {
+		g_mutex_unlock(fontMutex);
+	}
 #endif
 }
 
@@ -234,7 +232,7 @@ static const char *CharacterSetName(int characterSet) {
 	}
 }
 
-void GenerateFontSpecStrings(const char *fontName, int characterSet,
+static void GenerateFontSpecStrings(const char *fontName, int characterSet,
                              char *foundary, int foundary_len,
                              char *faceName, int faceName_len,
                              char *charset, int charset_len) {
@@ -279,7 +277,7 @@ void GenerateFontSpecStrings(const char *fontName, int characterSet,
 	}
 }
 
-void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, int size, bool bold, bool italic) {
+static void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, int size, bool bold, bool italic) {
 	memset(&lf, 0, sizeof(lf));
 	lf.size = size;
 	lf.bold = bold;
@@ -293,7 +291,7 @@ void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, int size, b
  * If one font is the same as another, its hash will be the same, but if the hash is the
  * same then they may still be different.
  */
-int HashFont(const char *faceName, int characterSet, int size, bool bold, bool italic) {
+static int HashFont(const char *faceName, int characterSet, int size, bool bold, bool italic) {
 	return
 		size ^
 		(characterSet << 10) ^
@@ -346,7 +344,7 @@ void FontCached::Release() {
 
 FontID FontCached::FindOrCreate(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_) {
 	FontID ret = 0;
-	fontMutexLock();
+	FontMutexLock();
 	int hashFind = HashFont(faceName_, characterSet_, size_, bold_, italic_);
 	for (FontCached *cur=first; cur; cur=cur->next) {
 		if ((cur->hash == hashFind) &&
@@ -363,12 +361,12 @@ FontID FontCached::FindOrCreate(const char *faceName_, int characterSet_, int si
 			ret = fc->id;
 		}
 	}
-	fontMutexUnlock();
+	FontMutexUnlock();
 	return ret;
 }
 
 void FontCached::ReleaseId(FontID id_) {
-	fontMutexLock();
+	FontMutexLock();
 	FontCached **pcur=&first;
 	for (FontCached *cur=first; cur; cur=cur->next) {
 		if (cur->id == id_) {
@@ -383,7 +381,7 @@ void FontCached::ReleaseId(FontID id_) {
 		}
 		pcur=&cur->next;
 	}
-	fontMutexUnlock();
+	FontMutexUnlock();
 }
 
 FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
@@ -1474,4 +1472,12 @@ int Platform::Clamp(int val, int minVal, int maxVal) {
 	if (val < minVal)
 		val = minVal;
 	return val;
+}
+
+void Platform_Initialise() {
+        FontMutexAllocate();
+}
+
+void Platform_Finalise() {
+	FontMutexFree();
 }

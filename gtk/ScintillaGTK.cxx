@@ -1615,10 +1615,14 @@ sptr_t scintilla_send_message(ScintillaObject *sci, unsigned int iMessage, uptr_
 static void scintilla_class_init (ScintillaClass *klass);
 static void scintilla_init (ScintillaObject *sci);
 
+extern void Platform_Initialise();
+extern void Platform_Finalise();
+
 guint scintilla_get_type() {
 	static guint scintilla_type = 0;
 
 	if (!scintilla_type) {
+		Platform_Initialise();
 		static GtkTypeInfo scintilla_info = {
 		    "Scintilla",
 		    sizeof (ScintillaObject),
@@ -1731,3 +1735,8 @@ void scintilla_set_id(ScintillaObject *sci, int id) {
 	ScintillaGTK *psci = reinterpret_cast<ScintillaGTK *>(sci->pscin);
 	psci->ctrlID = id;
 }
+
+void scintilla_release_resources(void) {
+	Platform_Finalise();
+}
+
