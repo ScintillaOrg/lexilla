@@ -180,6 +180,7 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmPython);
 	LINK_LEXER(lmRuby);
 	LINK_LEXER(lmScriptol);
+	LINK_LEXER(lmSpecman);
 	LINK_LEXER(lmSQL);
 	LINK_LEXER(lmTeX);
 	LINK_LEXER(lmVB);
