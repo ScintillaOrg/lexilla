@@ -617,6 +617,7 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 
 	case SCI_COLOURISE:
 		if (lexLanguage == SCLEX_CONTAINER) {
+			pdoc->ModifiedAt(wParam);
 			NotifyStyleToNeeded((lParam == -1) ? pdoc->Length() : lParam);
 		} else {
 			Colourise(wParam, lParam);

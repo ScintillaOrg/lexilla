@@ -134,6 +134,7 @@ public:
 	int MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd=true);
 
 	// Gateways to modifying document
+	void ModifiedAt(int pos);
 	bool DeleteChars(int pos, int len);
 	bool InsertStyledString(int position, char *s, int insertLength);
 	int Undo();
@@ -237,7 +238,6 @@ private:
 	bool IsWordStartAt(int pos);
 	bool IsWordEndAt(int pos);
 	bool IsWordAt(int start, int end);
-	void ModifiedAt(int pos);
 
 	void NotifyModifyAttempt();
 	void NotifySavePoint(bool atSavePoint);
@@ -271,7 +271,7 @@ public:
 		foldLevelNow(0),
 		foldLevelPrev(0) {}
 
-    DocModification(int modificationType_, const Action &act, int linesAdded_=0) :
+	DocModification(int modificationType_, const Action &act, int linesAdded_=0) :
 		modificationType(modificationType_),
 		position(act.position / 2),
 		length(act.lenData),
