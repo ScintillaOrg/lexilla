@@ -99,6 +99,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_MARK_CIRCLEPLUSCONNECTED 19
 #define SC_MARK_CIRCLEMINUS 20
 #define SC_MARK_CIRCLEMINUSCONNECTED 21
+#define SC_MARK_CHARACTER 10000
 #define SC_MARKNUM_FOLDEREND 25
 #define SC_MARKNUM_FOLDEROPENMID 26
 #define SC_MARKNUM_FOLDERMIDTAIL 27
