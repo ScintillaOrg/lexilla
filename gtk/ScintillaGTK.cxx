@@ -1147,8 +1147,9 @@ void ScintillaGTK::Resize(int width, int height) {
 		alloc.height = 0;
 	}
 	gtk_widget_size_allocate(GTK_WIDGET(PWidget(scrollbarv)), &alloc);
-
-	ChangeSize();
+	if (GTK_WIDGET_MAPPED(PWidget(wMain))) {
+		ChangeSize();
+	}
 }
 
 static void SetAdjustmentValue(GtkObject *object, int value) {
