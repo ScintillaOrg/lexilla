@@ -63,10 +63,10 @@ void ScintillaBase::RefreshColourPalette(Palette &pal, bool want) {
 	ct.RefreshColourPalette(pal, want);
 }
 
-void ScintillaBase::AddCharUTF(char *s, unsigned int len) {
+void ScintillaBase::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 	bool acActiveBeforeCharAdded = ac.Active();
 	if (!acActiveBeforeCharAdded || !ac.IsFillUpChar(*s))
-		Editor::AddCharUTF(s, len);
+		Editor::AddCharUTF(s, len, treatAsDBCS);
 	if (acActiveBeforeCharAdded)
 		AutoCompleteChanged(s[0]);
 }

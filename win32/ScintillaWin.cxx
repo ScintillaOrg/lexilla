@@ -410,8 +410,10 @@ static BOOL IsNT() {
 
 sptr_t ScintillaWin::HandleComposition(uptr_t wParam, sptr_t lParam) {
 #ifdef __DMC__
+	// Digital Mars compiler does not include Imm library
 	return 0;
 #else
+	sptr_t ret;
 	if ((lParam & GCS_RESULTSTR) && (IsNT())) {
 		HIMC hIMC = ::ImmGetContext(MainHWND());
 		if (hIMC) {
@@ -436,10 +438,22 @@ sptr_t ScintillaWin::HandleComposition(uptr_t wParam, sptr_t lParam) {
 			}
 			::ImmReleaseContext(MainHWND(), hIMC);
 		}
-		return 0;
+		ret = 0;
 	} else {
-		return ::DefWindowProc(MainHWND(), WM_IME_COMPOSITION, wParam, lParam);
+		ret = ::DefWindowProc(MainHWND(), WM_IME_COMPOSITION, wParam, lParam);
 	}
+	if ((lParam & GCS_RESULTSTR)) {
+		HIMC hIMC = ::ImmGetContext(MainHWND());
+		Point pos = LocationFromPosition(currentPos);
+		COMPOSITIONFORM CompForm;
+		CompForm.dwStyle = CFS_POINT;
+		CompForm.ptCurrentPos.x = pos.x;
+		CompForm.ptCurrentPos.y = pos.y;
+		::ImmSetCompositionWindow(hIMC, &CompForm);
+		::ImmReleaseContext(MainHWND(), hIMC);
+		DropCaret();
+	}
+	return ret;
 #endif
 }
 
@@ -1355,6 +1369,7 @@ DropTarget::DropTarget() {
  */
 void ScintillaWin::ImeStartComposition() {
 #ifndef __DMC__
+	// Digital Mars compiler does not include Imm library
 	if (caret.active) {
 		// Move IME Window to current caret position
 		HIMC hIMC = ::ImmGetContext(MainHWND());
@@ -1405,7 +1420,7 @@ void ScintillaWin::ImeEndComposition() {
 
 void ScintillaWin::AddCharBytes(char b0, char b1) {
 	int inputCodePage = InputCodePage();
-	if (inputCodePage) {
+	if (inputCodePage && IsUnicodeMode()) {
 		char utfval[4]="\0\0\0";
 		char ansiChars[3];
 		ansiChars[0] = b0;
@@ -1417,9 +1432,14 @@ void ScintillaWin::AddCharBytes(char b0, char b1) {
 		UTF8FromUCS2(wcs, 1, utfval, len);
 		utfval[len] = '\0';
 		AddCharUTF(utfval,len);
+	} else if (b1) {
+		char dbcsChars[3];
+		dbcsChars[0] = b0;
+		dbcsChars[1] = b1;
+		dbcsChars[2] = '\0';
+		AddCharUTF(dbcsChars, strlen(dbcsChars), true);
 	} else {
 		AddChar(b0);
-		AddChar(b1);
 	}
 }
 

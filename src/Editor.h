@@ -295,7 +295,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void ChangeSize();
 
 	void AddChar(char ch);
-	virtual void AddCharUTF(char *s, unsigned int len);
+	virtual void AddCharUTF(char *s, unsigned int len, bool treatAsDBCS=false);
 	void ClearSelection();
 	void ClearAll();
     	void ClearDocumentStyle();

@@ -1914,7 +1914,7 @@ void Editor::AddChar(char ch) {
 	AddCharUTF(s, 1);
 }
 
-void Editor::AddCharUTF(char *s, unsigned int len) {
+void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 	bool wasSelection = currentPos != anchor;
 	ClearSelection();
 	if (inOverstrike && !wasSelection) {
@@ -1931,37 +1931,42 @@ void Editor::AddCharUTF(char *s, unsigned int len) {
 	ShowCaretAtCurrentPosition();
 	SetLastXChosen();
 
-	int byte = static_cast<unsigned char>(s[0]);
-	if ((byte < 0xC0) || (1 == len)) {
-		// Handles UTF-8 characters between 0x01 and 0x7F and single byte
-		// characters when not in UTF-8 mode.
-		// Also treats \0 and naked trail bytes 0x80 to 0xBF as valid
-		// characters representing themselves.
+	if (treatAsDBCS) {
+		NotifyChar((static_cast<unsigned char>(s[0]) << 8) | 
+			static_cast<unsigned char>(s[1]));
 	} else {
-		// Unroll 1 to 3 byte UTF-8 sequences.  See reference data at:
-		// http://www.cl.cam.ac.uk/~mgk25/unicode.html
-		// http://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt
-		if (byte < 0xE0) {
-			int byte2 = static_cast<unsigned char>(s[1]);
-			if ((byte2 & 0xC0) == 0x80) {
-				// Two-byte-character lead-byte followed by a trail-byte.
-				byte = (((byte & 0x1F) << 6) | (byte2 & 0x3F));
+		int byte = static_cast<unsigned char>(s[0]);
+		if ((byte < 0xC0) || (1 == len)) {
+			// Handles UTF-8 characters between 0x01 and 0x7F and single byte
+			// characters when not in UTF-8 mode.
+			// Also treats \0 and naked trail bytes 0x80 to 0xBF as valid
+			// characters representing themselves.
+		} else {
+			// Unroll 1 to 3 byte UTF-8 sequences.  See reference data at:
+			// http://www.cl.cam.ac.uk/~mgk25/unicode.html
+			// http://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt
+			if (byte < 0xE0) {
+				int byte2 = static_cast<unsigned char>(s[1]);
+				if ((byte2 & 0xC0) == 0x80) {
+					// Two-byte-character lead-byte followed by a trail-byte.
+					byte = (((byte & 0x1F) << 6) | (byte2 & 0x3F));
+				}
+				// A two-byte-character lead-byte not followed by trail-byte
+				// represents itself.
+			} else if (byte < 0xF0) {
+				int byte2 = static_cast<unsigned char>(s[1]);
+				int byte3 = static_cast<unsigned char>(s[2]);
+				if (((byte2 & 0xC0) == 0x80) && ((byte3 & 0xC0) == 0x80)) {
+					// Three-byte-character lead byte followed by two trail bytes.
+					byte = (((byte & 0x0F) << 12) | ((byte2 & 0x3F) << 6) |
+						(byte3 & 0x3F));
+				}
+				// A three-byte-character lead-byte not followed by two trail-bytes
+				// represents itself.
 			}
-			// A two-byte-character lead-byte not followed by trail-byte
-			// represents itself.
-		} else if (byte < 0xF0) {
-			int byte2 = static_cast<unsigned char>(s[1]);
-			int byte3 = static_cast<unsigned char>(s[2]);
-			if (((byte2 & 0xC0) == 0x80) && ((byte3 & 0xC0) == 0x80)) {
-				// Three-byte-character lead byte followed by two trail bytes.
-				byte = (((byte & 0x0F) << 12) | ((byte2 & 0x3F) << 6) |
-					(byte3 & 0x3F));
-			}
-			// A three-byte-character lead-byte not followed by two trail-bytes
-			// represents itself.
 		}
+		NotifyChar(byte);
 	}
-	NotifyChar(byte);
 }
 
 void Editor::ClearSelection() {
