@@ -1546,6 +1546,9 @@ set void SetWhitespaceChars=2443(, string characters)
 # Reset the set of characters for whitespace and word characters to the defaults.
 fun void SetCharsDefault=2444(,)
 
+# Get currently selected item position in the auto-completion list
+fun int AutoCGetCurrent=2445(,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 
