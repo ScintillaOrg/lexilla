@@ -393,41 +393,15 @@ void WordList::SetFromAllocated() {
 	words = ArrayFromWordList(list, &len, onlyLineEnds);
 }
 
-#ifdef __MINGW32__
-// Shell sort based upon public domain C implementation by Raymond Gardner 1991
-// Used here because of problems with mingw qsort.
-static void SortWordList(char **words, unsigned int len) {
-	unsigned int gap = len / 2;
+int cmpString(const void *a1, const void *a2) {
+    // Can't work out the correct incantation to use modern casts here
+    return strcmp(*(char**)(a1), *(char**)(a2));
+}
 
-	while (gap > 0) {
-		unsigned int i = gap;
-		while (i < len) {
-			unsigned int j = i;
-			char **a = words + j;
-			do {
-				j -= gap;
-				char **b = a;
-				a -= gap;
-				if (strcmp(*a, *b) > 0) {
-					char *tmp = *a;
-					*a = *b;
-					*b = tmp;
-				} else {
-					break;
-				}
-			} while (j >= gap);
-			i++;
-		}
-		gap = gap / 2;
-	}
-}
-#else
-// traditional qsort - hope it works elsewhere...
 static void SortWordList(char **words, unsigned int len) {
-	qsort (reinterpret_cast<void*>(words), len, sizeof(*words),
-		reinterpret_cast<int (*)(const void*, const void*)>(strcmp));
+	qsort(reinterpret_cast<void*>(words), len, sizeof(*words),
+		cmpString);
 }
-#endif
 
 bool WordList::InList(const char *s) {
 	if (0 == words)
