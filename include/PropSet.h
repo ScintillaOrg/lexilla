@@ -11,12 +11,16 @@ bool EqualCaseInsensitive(const char *a, const char *b);
 // Define another string class.
 // While it would be 'better' to use std::string, that doubles the executable size.
 
-inline char *StringDup(const char *s) {
+inline char *StringDup(const char *s, int len=-1) {
 	if (!s)
 		return 0;
-	char *sNew = new char[strlen(s) + 1];
-	if (sNew)
-		strcpy(sNew, s);
+    if (len == -1)
+        len = strlen(s);
+	char *sNew = new char[len + 1];
+    if (sNew) {
+		strncpy(sNew, s, len);
+        sNew[len] = '\0';
+    }
 	return sNew;
 }
 
@@ -103,9 +107,18 @@ public:
 	}
 };
 
+unsigned int HashString(const char *s);
+
+struct Property {
+    unsigned int hash;
+	char *key;
+    char *val;
+    Property() : hash(0), key(0), val(0) {}
+};
+
 class PropSet {
 private:
-	char **vals;
+    Property *properties;
 	int size;
 	int used;
 	void EnsureCanAddEntry();
@@ -116,6 +129,8 @@ public:
 	void Set(const char *key, const char *val);
 	void Set(char *keyval);
 	SString Get(const char *key);
+    SString GetExpanded(const char *key);
+    SString Expand(const char *withvars);
 	int GetInt(const char *key, int defaultValue=0);
 	SString GetWild(const char *keybase, const char *filename);
 	SString GetNewExpand(const char *keybase, const char *filename);
