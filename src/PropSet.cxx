@@ -64,9 +64,9 @@ bool EqualCaseInsensitive(const char *a, const char *b) {
 	return 0 == CompareCaseInsensitive(a, b);
 }
 
-inline unsigned int HashString(const char *s) {
+inline unsigned int HashString(const char *s, int len) {
 	unsigned int ret = 0;
-	while (*s) {
+	while (len--) {
 		ret <<= 4;
 		ret ^= *s;
 		s++;
@@ -85,42 +85,61 @@ PropSet::~PropSet() {
 	Clear();
 }
 
-void PropSet::Set(const char *key, const char *val) {
-	unsigned int hash = HashString(key);
+void PropSet::Set(const char *key, const char *val, int lenKey, int lenVal) {
+	if (!*key)	// Empty keys are not supported
+		return;
+	if (lenKey == -1)
+		lenKey = strlen(key);
+	if (lenVal == -1)
+		lenVal = strlen(val);
+	unsigned int hash = HashString(key, lenKey);
 	for (Property *p = props[hash % hashRoots]; p; p = p->next) {
-		if ((hash == p->hash) && (0 == strcmp(p->key, key))) {
+		if ((hash == p->hash) && 
+			((strlen(p->key) == static_cast<unsigned int>(lenKey)) && 
+				(0 == strncmp(p->key, key, lenKey)))) {
 			// Replace current value
 			delete [](p->val);
-			p->val = StringDup(val);
+			p->val = StringDup(val, lenVal);
 			return ;
 		}
 	}
 	// Not found
 	Property *pNew = new Property;
 	if (pNew) {
-		pNew->hash = HashString(key);
-		pNew->key = StringDup(key);
-		pNew->val = StringDup(val);
+		pNew->hash = hash;
+		pNew->key = StringDup(key, lenKey);
+		pNew->val = StringDup(val, lenVal);
 		pNew->next = props[hash % hashRoots];
 		props[hash % hashRoots] = pNew;
 	}
 }
 
-void PropSet::Set(char *keyval) {
-	while (isspace(*keyval))
-		keyval++;
-	char *eqat = strchr(keyval, '=');
-	if (eqat) {
-		*eqat = '\0';
-		Set(keyval, eqat + 1);
-		*eqat = '=';
-	} else {	// No '=' so assume '=1'
-		Set(keyval, "1");
+void PropSet::Set(const char *keyVal) {
+	while (isspace(*keyVal))
+		keyVal++;
+	const char *endVal = keyVal;
+	while (*endVal && (*endVal != '\n'))
+		endVal++;
+	const char *eqAt = strchr(keyVal, '=');
+	if (eqAt) {
+		Set(keyVal, eqAt + 1, eqAt-keyVal, endVal - eqAt - 1);
+	} else if (*keyVal) {	// No '=' so assume '=1'
+		Set(keyVal, "1", endVal-keyVal, 1);
 	}
 }
 
+void PropSet::SetMultiple(const char *s) {
+	char *eol = strchr(s, '\n');
+	while (eol) {
+		Set(s);
+		s = eol + 1;
+		eol = strchr(s, '\n');
+	}
+	Set(s);
+}
+
 SString PropSet::Get(const char *key) {
-	unsigned int hash = HashString(key);
+	unsigned int hash = HashString(key, strlen(key));
 	for (Property *p = props[hash % hashRoots]; p; p = p->next) {
 		if ((hash == p->hash) && (0 == strcmp(p->key, key))) {
 			return p->val;
@@ -155,8 +174,8 @@ SString PropSet::GetExpanded(const char *key) {
 	return Expand(val.c_str());
 }
 
-SString PropSet::Expand(const char *withvars) {
-	char *base = StringDup(withvars);
+SString PropSet::Expand(const char *withVars) {
+	char *base = StringDup(withVars);
 	char *cpvar = strstr(base, "$(");
 	while (cpvar) {
 		char *cpendvar = strchr(cpvar, ')');
@@ -314,6 +333,34 @@ void PropSet::Clear() {
 		}
 		props[root] = 0;
 	}
+}
+
+char *PropSet::ToString() {
+	unsigned int len=0;
+	for (int r = 0; r < hashRoots; r++) {
+		for (Property *p = props[r]; p; p = p->next) {
+			len += strlen(p->key) + 1;
+			len += strlen(p->val) + 1;
+		}
+	}
+	if (len == 0)
+		len = 1;	// Return as empty string
+	char *ret = new char [len];
+	if (ret) {
+		char *w = ret;
+		for (int root = 0; root < hashRoots; root++) {
+			for (Property *p = props[root]; p; p = p->next) {
+				strcpy(w, p->key);
+				w += strlen(p->key);
+				*w++ = '=';
+				strcpy(w, p->val);
+				w += strlen(p->val);
+				*w++ = '\n';
+			}
+		}
+		ret[len-1] = '\0';
+	}
+	return ret;
 }
 
 /**

@@ -33,15 +33,17 @@ public:
 	PropSet *superPS;
 	PropSet();
 	~PropSet();
-	void Set(const char *key, const char *val);
-	void Set(char *keyval);
+	void Set(const char *key, const char *val, int lenKey=-1, int lenVal=-1);
+	void Set(const char *keyVal);
+	void SetMultiple(const char *s);
 	SString Get(const char *key);
 	SString GetExpanded(const char *key);
-	SString Expand(const char *withvars);
+	SString Expand(const char *withVars);
 	int GetInt(const char *key, int defaultValue=0);
 	SString GetWild(const char *keybase, const char *filename);
 	SString GetNewExpand(const char *keybase, const char *filename);
 	void Clear();
+	char *ToString();	// Caller must delete[] the return value
 	bool GetFirst(char **key, char **val);
 	bool GetNext(char **key, char **val);
 };
