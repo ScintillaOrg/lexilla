@@ -369,6 +369,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void ShowCaretAtCurrentPosition();
 	void DropCaret();
 	void InvalidateCaret();
+	virtual void UpdateSystemCaret();
 
 	void NeedWrapping(int docLineStartWrapping = 0, int docLineEndWrapping = 0x7ffffff);
 	bool WrapLines(bool fullWrap, int priorityWrapLineStart);

@@ -1394,6 +1394,7 @@ void Editor::EnsureCaretVisible(bool useMargin, bool vert, bool horiz) {
 			Redraw();
 		}
 	}
+	UpdateSystemCaret();
 }
 
 void Editor::ShowCaretAtCurrentPosition() {
@@ -1418,6 +1419,10 @@ void Editor::InvalidateCaret() {
 		InvalidateRange(posDrag, posDrag + 1);
 	else
 		InvalidateRange(currentPos, currentPos + 1);
+	UpdateSystemCaret();
+}
+
+void Editor::UpdateSystemCaret() {
 }
 
 void Editor::NeedWrapping(int docLineStartWrapping, int docLineEndWrapping) {

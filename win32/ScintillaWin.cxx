@@ -184,6 +184,7 @@ class ScintillaWin :
 	virtual void SetMouseCapture(bool on);
 	virtual bool HaveMouseCapture();
 	virtual void ScrollText(int linesToMove);
+	virtual void UpdateSystemCaret();
 	virtual void SetVerticalScrollPos();
 	virtual void SetHorizontalScrollPos();
 	virtual bool ModifyScrollBars(int nMax, int nPage);
@@ -251,6 +252,15 @@ public:
 	bool DragIsRectangularOK(CLIPFORMAT fmt) {
 		return drag.rectangular && (fmt == cfColumnSelect);
 	}
+
+private:
+	// For use in creating a system caret
+	bool HasCaretSizeChanged();
+	BOOL CreateSystemCaret();
+	BOOL DestroySystemCaret();
+	HBITMAP sysCaretBitmap;
+	int sysCaretWidth;
+	int sysCaretHeight;
 };
 
 HINSTANCE ScintillaWin::hInstance = 0;
@@ -275,6 +285,10 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	dob.sci = this;
 	ds.sci = this;
 	dt.sci = this;
+
+	sysCaretBitmap = 0;
+	sysCaretWidth = 0;
+	sysCaretHeight = 0;
 
 	Initialise();
 }
@@ -742,6 +756,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			if (!wParam ||
 				!(::IsChild(wThis,wOther) || (wOther == wCT))) {
 				SetFocusState(false);
+				DestroySystemCaret();
 			}
 		}
 		//RealizeWindowPalette(true);
@@ -750,6 +765,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 	case WM_SETFOCUS:
 		SetFocusState(true);
 		RealizeWindowPalette(false);
+		CreateSystemCaret();
 		break;
 
 	case WM_SYSCOLORCHANGE:
@@ -976,6 +992,17 @@ void ScintillaWin::ScrollText(int linesToMove) {
 	::ScrollWindow(MainHWND(), 0,
 		vs.lineHeight * linesToMove, 0, 0);
 	::UpdateWindow(MainHWND());
+}
+
+void ScintillaWin::UpdateSystemCaret() {
+	if (hasFocus) {
+		if (HasCaretSizeChanged()) {
+			DestroySystemCaret();
+			CreateSystemCaret();
+		}
+		Point pos = LocationFromPosition(currentPos);
+		::SetCaretPos(pos.x, pos.y);
+	}
 }
 
 int ScintillaWin::SetScrollInfo(int nBar, LPCSCROLLINFO lpsi, BOOL bRedraw) {
@@ -2100,6 +2127,37 @@ bool ScintillaWin::Unregister() {
 	return result;
 }
 
+bool ScintillaWin::HasCaretSizeChanged() {
+	if (
+		( (0 != vs.caretWidth) && (sysCaretWidth != vs.caretWidth) )
+		|| (0 != vs.lineHeight) && (sysCaretHeight != vs.lineHeight)
+		) {
+		return true;
+	}
+	return false;
+}
+
+BOOL ScintillaWin::CreateSystemCaret() {
+	sysCaretWidth = vs.caretWidth;
+	if (0 == sysCaretWidth) {
+		sysCaretWidth = 1;
+	}
+	sysCaretHeight = vs.lineHeight;
+	sysCaretBitmap = ::CreateBitmap(sysCaretWidth, sysCaretHeight, 1, 1, NULL);
+	BOOL retval = ::CreateCaret(
+		MainHWND(), sysCaretBitmap,
+		sysCaretWidth, sysCaretHeight);
+	::ShowCaret(MainHWND());
+	return retval;
+}
+
+BOOL ScintillaWin::DestroySystemCaret() {
+	::HideCaret(MainHWND());
+	BOOL retval = ::DestroyCaret();
+	::DeleteObject(sysCaretBitmap);
+	return retval;
+}
+ 
 // Take care of 32/64 bit pointers
 #ifdef GetWindowLongPtr
 static void *PointerFromWindow(HWND hWnd) {
