@@ -2417,8 +2417,7 @@ void Editor::DelCharBack(bool allowLineStartDeletion) {
 				SetEmptySelection(pdoc->GetLineIndentPosition(lineCurrentPos));
 				pdoc->EndUndoAction();
 			} else {
-				int newPos = pdoc->DelCharBack(currentPos);
-				SetEmptySelection(newPos);
+				pdoc->DelCharBack(currentPos);
 			}
 		}
 	} else {
@@ -2830,8 +2829,9 @@ void Editor::LineTranspose() {
 			end = startNext;
 			char *thisLine = CopyRange(start, end);
 			pdoc->DeleteChars(start, end - start);
-			pdoc->InsertString(startPrev, thisLine, end - start);
-			MovePositionTo(startPrev + end - start);
+			if (pdoc->InsertString(startPrev, thisLine, end - start)) {
+				MovePositionTo(startPrev + end - start);
+			}
 			delete []thisLine;
 		} else {
 			// Last line so line has no line end
@@ -2839,8 +2839,9 @@ void Editor::LineTranspose() {
 			char *prevEnd = CopyRange(endPrev, start);
 			pdoc->DeleteChars(endPrev, end - endPrev);
 			pdoc->InsertString(startPrev, thisLine, end - start);
-			pdoc->InsertString(startPrev + end - start, prevEnd, start - endPrev);
-			MovePositionTo(startPrev + end - endPrev);
+			if (pdoc->InsertString(startPrev + end - start, prevEnd, start - endPrev)) {
+				MovePositionTo(startPrev + end - endPrev);
+			}
 			delete []thisLine;
 			delete []prevEnd;
 		}
@@ -2849,6 +2850,25 @@ void Editor::LineTranspose() {
 }
 
 void Editor::CancelModes() {}
+
+void Editor::NewLine() {
+	ClearSelection();
+	const char *eol = "\n";
+	if (pdoc->eolMode == SC_EOL_CRLF) {
+		eol = "\r\n";
+	} else if (pdoc->eolMode == SC_EOL_CR) {
+		eol = "\r";
+	} // else SC_EOL_LF -> "\n" already set
+	if (pdoc->InsertString(currentPos, eol)) {
+		SetEmptySelection(currentPos + strlen(eol));
+		while (*eol) {
+			NotifyChar(*eol);
+			eol++;
+		}
+	}
+	SetLastXChosen();
+	EnsureCaretVisible();
+}
 
 int Editor::KeyCommand(unsigned int iMessage) {
 	Point pt = LocationFromPosition(currentPos);
@@ -2993,23 +3013,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		EnsureCaretVisible();
 		break;
 	case SCI_NEWLINE:
-		ClearSelection();
-		if (pdoc->eolMode == SC_EOL_CRLF) {
-			pdoc->InsertString(currentPos, "\r\n");
-			SetEmptySelection(currentPos + 2);
-			NotifyChar('\r');
-			NotifyChar('\n');
-		} else if (pdoc->eolMode == SC_EOL_CR) {
-			pdoc->InsertChar(currentPos, '\r');
-			SetEmptySelection(currentPos + 1);
-			NotifyChar('\r');
-		} else if (pdoc->eolMode == SC_EOL_LF) {
-			pdoc->InsertChar(currentPos, '\n');
-			SetEmptySelection(currentPos + 1);
-			NotifyChar('\n');
-		}
-		SetLastXChosen();
-		EnsureCaretVisible();
+		NewLine();
 		break;
 	case SCI_FORMFEED:
 		AddChar('\f');
@@ -3037,21 +3041,18 @@ int Editor::KeyCommand(unsigned int iMessage) {
 	case SCI_DELWORDLEFT: {
 			int startWord = pdoc->NextWordStart(currentPos, -1);
 			pdoc->DeleteChars(startWord, currentPos - startWord);
-			MovePositionTo(startWord);
 			SetLastXChosen();
 		}
 		break;
 	case SCI_DELWORDRIGHT: {
 			int endWord = pdoc->NextWordStart(currentPos, 1);
 			pdoc->DeleteChars(currentPos, endWord - currentPos);
-			MovePositionTo(currentPos);
 		}
 		break;
 	case SCI_DELLINELEFT: {
 			int line = pdoc->LineFromPosition(currentPos);
 			int start = pdoc->LineStart(line);
 			pdoc->DeleteChars(start, currentPos - start);
-			MovePositionTo(start);
 			SetLastXChosen();
 		}
 		break;
@@ -3059,7 +3060,6 @@ int Editor::KeyCommand(unsigned int iMessage) {
 			int line = pdoc->LineFromPosition(currentPos);
 			int end = pdoc->LineEnd(line);
 			pdoc->DeleteChars(currentPos, end - currentPos);
-			MovePositionTo(currentPos);
 		}
 		break;
 	case SCI_LINECUT: {
@@ -3081,7 +3081,6 @@ int Editor::KeyCommand(unsigned int iMessage) {
 			int start = pdoc->LineStart(line);
 			int end = pdoc->LineStart(line + 1);
 			pdoc->DeleteChars(start, end - start);
-			MovePositionTo(start);
 		}
 		break;
 	case SCI_LINETRANSPOSE:

@@ -535,26 +535,18 @@ void Document::DelChar(int pos) {
 	DeleteChars(pos, LenChar(pos));
 }
 
-int Document::DelCharBackMove(int pos, int len) {
-	if (DeleteChars(pos - len, len)) {
-		return pos - len;
-	} else {
-		return pos;
-	}
-}
-
-int Document::DelCharBack(int pos) {
+void Document::DelCharBack(int pos) {
 	if (pos <= 0) {
-		return pos;
+		return;
 	} else if (IsCrLf(pos - 2)) {
-		return DelCharBackMove(pos, 2);
+		DeleteChars(pos - 2, 2);
 	} else if (SC_CP_UTF8 == dbcsCodePage) {
 		int startChar = MovePositionOutsideChar(pos - 1, -1, false);
-		return DelCharBackMove(pos, pos - startChar);
+		DeleteChars(startChar, pos - startChar);
 	} else if (IsDBCS(pos - 1)) {
-		return DelCharBackMove(pos, 2);
+		DeleteChars(pos - 2, 2);
 	} else {
-		return DelCharBackMove(pos, 1);
+		DeleteChars(pos - 1, 1);
 	}
 }
 

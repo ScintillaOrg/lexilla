@@ -163,7 +163,7 @@ public:
 	bool InsertString(int position, const char *s, int insertLength);
 	void ChangeChar(int pos, char ch);
 	void DelChar(int pos);
-	int DelCharBack(int pos);
+	void DelCharBack(int pos);
 
 	char CharAt(int position) { return cb.CharAt(position); }
 	void GetCharRange(char *buffer, int position, int lengthRetrieve) {
@@ -233,7 +233,6 @@ private:
 	void NotifySavePoint(bool atSavePoint);
 	void NotifyModified(DocModification mh);
 
-	int DelCharBackMove(int pos, int len);
 	int IndentSize() { return indentInChars ? indentInChars : tabInChars; }
 };
 
