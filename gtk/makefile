@@ -20,7 +20,11 @@ CXXFLAGS= -DGTK -DSCI_LEXER
 .cxx.o:
 	$(CC) `gtk-config --cflags` $(INCLUDEDIRS) $(CXXFLAGS) -c $< -o $@
 
-all: $(COMPLIB)
+LEXOBJS	=  LexCPP.o LexHTML.o LexOthers.o LexPerl.o LexPython.o LexSQL.o LexVB.o
+
+# The LEXOBJS have to be treated specially as the functions in them are not called from external code
+
+all: $(COMPLIB) $(LEXOBJS)
 
 $(COMPLIB): Accessor.o KeyWords.o Document.o CallTip.o \
 	ScintillaBase.o ContractionState.o Editor.o PropSet.o PlatGTK.o \
@@ -44,6 +48,20 @@ Indicator.o: Indicator.cxx Platform.h Scintilla.h WinDefs.h \
  Indicator.h
 KeyMap.o: KeyMap.cxx Platform.h Scintilla.h WinDefs.h KeyMap.h
 KeyWords.o: KeyWords.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+ Scintilla.h WinDefs.h SciLexer.h
+LexCPP.o: LexCPP.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+ Scintilla.h WinDefs.h SciLexer.h
+LexHTML.o: LexHTML.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+ Scintilla.h WinDefs.h SciLexer.h
+LexOthers.o: LexOthers.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+ Scintilla.h WinDefs.h SciLexer.h
+LexPerl.o: LexPerl.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+ Scintilla.h WinDefs.h SciLexer.h
+LexPython.o: LexPython.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+ Scintilla.h WinDefs.h SciLexer.h
+LexSQL.o: LexSQL.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+ Scintilla.h WinDefs.h SciLexer.h
+LexVB.o: LexVB.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h WinDefs.h SciLexer.h
 LineMarker.o: LineMarker.cxx Platform.h Scintilla.h WinDefs.h \
  LineMarker.h
