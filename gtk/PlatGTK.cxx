@@ -142,8 +142,32 @@ Font::Font() : id(0) {}
 
 Font::~Font() {}
 
+static const char *CharacterSetName(int characterSet) {
+	switch (characterSet) {
+		case SC_CHARSET_ANSI: return "iso8859";
+		case SC_CHARSET_DEFAULT: return "iso8859";
+		case SC_CHARSET_BALTIC: return "*";
+		case SC_CHARSET_CHINESEBIG5: return "*";
+		case SC_CHARSET_EASTEUROPE: return "*";
+		case SC_CHARSET_GB2312: return "gb2312.1980";
+		case SC_CHARSET_GREEK: return "adobe";
+		case SC_CHARSET_HANGUL: return "ksc5601.1987";
+		case SC_CHARSET_MAC: return "*";
+		case SC_CHARSET_OEM: return "*";
+		case SC_CHARSET_RUSSIAN: return "*";
+		case SC_CHARSET_SHIFTJIS: return "jisx0208.1983";
+		case SC_CHARSET_SYMBOL: return "*";
+		case SC_CHARSET_TURKISH: return "*";
+		case SC_CHARSET_JOHAB: return "*";
+		case SC_CHARSET_HEBREW: return "*";
+		case SC_CHARSET_ARABIC: return "*";
+		case SC_CHARSET_VIETNAMESE: return "*";
+		case SC_CHARSET_THAI: return "*";
+		default: return "*";
+	}
+}
 
-void Font::Create(const char *faceName, int /*characterSet*/, 
+void Font::Create(const char *faceName, int characterSet, 
 	int size, bool bold, bool italic) {
 	// TODO: take notice of characterSet
 	Release();
@@ -163,7 +187,9 @@ void Font::Create(const char *faceName, int /*characterSet*/,
 	char sizePts[100];
 	sprintf(sizePts, "-%0d", size * 10);
 	strcat(fontspec, sizePts);
-	strcat(fontspec, "-*-*-*-*-*-*");
+	strcat(fontspec, "-*-*-*-*-");
+	strcat(fontspec, CharacterSetName(characterSet));
+	strcat(fontspec, "-*");
 	id = gdk_font_load(fontspec);
 	if (!id) {
 		// Font not available so substitute a reasonable code font
