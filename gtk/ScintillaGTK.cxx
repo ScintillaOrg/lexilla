@@ -1099,7 +1099,7 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 		SetSelection(pos, pos);
 		gtk_selection_convert(GTK_WIDGET(PWidget(wMain)), GDK_SELECTION_PRIMARY,
 		                      gdk_atom_intern("STRING", FALSE), event->time);
-	} else if (event->button == 3 && displayPopupMenu) {
+	} else if (event->button == 3) {
 		// PopUp menu
 		// Convert to screen
 		int ox = 0;
