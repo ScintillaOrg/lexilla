@@ -79,13 +79,11 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 
 		// Handle line continuation generically.
 		if (sc.ch == '\\') {
-			if (sc.Match("\\\n")) {
+			if (sc.chNext == '\n' || sc.chNext == '\r') {
 				sc.Forward();
-				continue;
-			}
-			if (sc.Match("\\\r\n")) {
-				sc.Forward();
-				sc.Forward();
+				if (sc.ch == '\r' && sc.chNext == '\n') {
+					sc.Forward();
+				}
 				continue;
 			}
 		}
