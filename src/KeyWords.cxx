@@ -25,9 +25,9 @@ int LexerModule::nextLanguage = SCLEX_AUTOMATIC+1;
 LexerModule::LexerModule(int language_, LexerFunction fnLexer_,
 	const char *languageName_, LexerFunction fnFolder_) :
 	language(language_), 
-	languageName(languageName_), 
 	fnLexer(fnLexer_), 
-	fnFolder(fnFolder_) {
+	fnFolder(fnFolder_), 
+	languageName(languageName_) {
 	next = base;
 	base = this;
 	if (language == SCLEX_AUTOMATIC) {

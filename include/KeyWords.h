@@ -17,7 +17,6 @@ class LexerModule {
 protected:
 	LexerModule *next;
 	int language;
-	const char *languageName;
 	LexerFunction fnLexer;
 	LexerFunction fnFolder;
 	
@@ -25,6 +24,7 @@ protected:
 	static int nextLanguage;
 
 public:
+	const char *languageName;
 	LexerModule(int language_, LexerFunction fnLexer_, 
 		const char *languageName_=0, LexerFunction fnFolder_=0);
 	int GetLanguage() { return language; }
