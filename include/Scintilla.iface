@@ -1452,6 +1452,7 @@ val SCLEX_BAAN=31
 val SCLEX_MATLAB=32
 val SCLEX_SCRIPTOL=33
 val SCLEX_ASM=34
+val SCLEX_CPPNOCASE=35
 
 # When a lexer specifies its language as SCLEX_AUTOMATIC it receives a
 # value assigned in sequence from SCLEX_AUTOMATIC+1.

@@ -52,7 +52,7 @@ static inline bool IsStateString(const int state) {
 }
 
 static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
-                            Accessor &styler) {
+                            Accessor &styler, bool caseSensitive) {
 
 	WordList &keywords = *keywordlists[0];
 	WordList &keywords2 = *keywordlists[1];
@@ -71,7 +71,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 	StyleContext sc(startPos, length, initStyle, styler);
 
 	for (; sc.More(); sc.Forward()) {
-	
+
 		if (sc.atLineStart && (sc.state == SCE_C_STRING)) {
 			// Prevent SCE_C_STRINGEOL from leaking back to previous line
 			sc.SetState(SCE_C_STRING);
@@ -98,7 +98,11 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 		} else if (sc.state == SCE_C_IDENTIFIER) {
 			if (!IsAWordChar(sc.ch) || (sc.ch == '.')) {
 				char s[100];
-				sc.GetCurrent(s, sizeof(s));
+				if (caseSensitive) {
+					sc.GetCurrent(s, sizeof(s));
+				} else {
+					sc.GetCurrentLowered(s, sizeof(s));
+				}
 				if (keywords.InList(s)) {
 					lastWordWasUUID = strcmp(s, "uuid") == 0;
 					sc.ChangeState(SCE_C_WORD);
@@ -141,7 +145,11 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 				sc.ForwardSetState(SCE_C_DEFAULT);
 			} else if (!IsADoxygenChar(sc.ch)) {
 				char s[100];
-				sc.GetCurrent(s, sizeof(s));
+				if (caseSensitive) {
+					sc.GetCurrent(s, sizeof(s));
+				} else {
+					sc.GetCurrentLowered(s, sizeof(s));
+				}
 				if (!isspace(sc.ch) || !keywords3.InList(s+1)) {
 					sc.ChangeState(SCE_C_COMMENTDOCKEYWORDERROR);
 				}
@@ -245,9 +253,9 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 				sc.SetState(SCE_C_OPERATOR);
 			}
 		}
-		
+
 		if (sc.atLineEnd) {
-			// Reset states to begining of colourise so no surprises 
+			// Reset states to begining of colourise so no surprises
 			// if different sets of lines lexed.
 			chPrevNonWhite = ' ';
 			visibleChars = 0;
@@ -262,7 +270,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 }
 
 static bool IsStreamCommentStyle(int style) {
-	return style == SCE_C_COMMENT || 
+	return style == SCE_C_COMMENT ||
 		style == SCE_C_COMMENTDOC ||
 		style == SCE_C_COMMENTDOCKEYWORD ||
 		style == SCE_C_COMMENTDOCKEYWORDERROR;
@@ -354,5 +362,16 @@ static const char * const cppWordLists[] = {
 	0,
 };
 
-LexerModule lmCPP(SCLEX_CPP, ColouriseCppDoc, "cpp", FoldCppDoc, cppWordLists);
-LexerModule lmTCL(SCLEX_TCL, ColouriseCppDoc, "tcl", FoldCppDoc, cppWordLists);
+static void ColouriseCppDocSensitive(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+                            Accessor &styler) {
+	ColouriseCppDoc(startPos, length, initStyle, keywordlists, styler, true);
+}
+
+static void ColouriseCppDocInsensitive(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+                            Accessor &styler) {
+	ColouriseCppDoc(startPos, length, initStyle, keywordlists, styler, false);
+}
+
+LexerModule lmCPP(SCLEX_CPP, ColouriseCppDocSensitive, "cpp", FoldCppDoc, cppWordLists);
+LexerModule lmCPPNoCase(SCLEX_CPPNOCASE, ColouriseCppDocInsensitive, "cppnocase", FoldCppDoc, cppWordLists);
+LexerModule lmTCL(SCLEX_TCL, ColouriseCppDocSensitive, "tcl", FoldCppDoc, cppWordLists);
