@@ -114,6 +114,7 @@ LEXOBJS=\
 	$(DIR_O)\LexPascal.obj \
 	$(DIR_O)\LexPerl.obj \
 	$(DIR_O)\LexPython.obj \
+	$(DIR_O)\LexRuby.obj \		
 	$(DIR_O)\LexSQL.obj \
 	$(DIR_O)\LexVB.obj
 
@@ -235,6 +236,8 @@ $(DIR_O)\LexPascal.obj: ..\src\LexPascal.cxx $(LEX_HEADERS)
 $(DIR_O)\LexPerl.obj: ..\src\LexPerl.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexPython.obj: ..\src\LexPython.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexRuby.obj: ..\src\LexRuby.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexSQL.obj: ..\src\LexSQL.cxx $(LEX_HEADERS)
 

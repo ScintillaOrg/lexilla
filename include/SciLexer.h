@@ -36,6 +36,7 @@
 #define SCLEX_AVE 19
 #define SCLEX_ADA 20
 #define SCLEX_LISP 21
+#define SCLEX_RUBY 22
 #define SCLEX_AUTOMATIC 1000
 #define SCE_P_DEFAULT 0
 #define SCE_P_COMMENTLINE 1

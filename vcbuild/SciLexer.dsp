@@ -178,6 +178,10 @@ SOURCE=..\src\LexPython.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexRuby.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexSQL.cxx
 # End Source File
 # Begin Source File

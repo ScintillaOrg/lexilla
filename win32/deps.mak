@@ -51,7 +51,7 @@ LexerManager.o: ../src/LexerManager.cxx ..\include\SciLexer.h \
 LexHTML.o: ../src/LexHTML.cxx ..\include\Platform.h \
  ..\include\PropSet.h ..\include\SString.h ..\include\Accessor.h \
  ..\include\KeyWords.h ..\include\Scintilla.h ..\include\SciLexer.h
-LexLISP.o: ../src/LexLISP.cxx ..\include\Platform.h \
+LexLisp.o: ../src/LexLisp.cxx ..\include\Platform.h \
  ..\include\PropSet.h ..\include\SString.h ..\include\Accessor.h \
  ..\include\KeyWords.h ..\include\Scintilla.h ..\include\SciLexer.h
 LexLua.o: ../src/LexLua.cxx ..\include\Platform.h ..\include\PropSet.h \
@@ -67,6 +67,9 @@ LexPerl.o: ../src/LexPerl.cxx ..\include\Platform.h \
  ..\include\PropSet.h ..\include\SString.h ..\include\Accessor.h \
  ..\include\KeyWords.h ..\include\Scintilla.h ..\include\SciLexer.h
 LexPython.o: ../src/LexPython.cxx ..\include\Platform.h \
+ ..\include\PropSet.h ..\include\SString.h ..\include\Accessor.h \
+ ..\include\KeyWords.h ..\include\Scintilla.h ..\include\SciLexer.h
+LexRuby.o: ../src/LexRuby.cxx ..\include\Platform.h \
  ..\include\PropSet.h ..\include\SString.h ..\include\Accessor.h \
  ..\include\KeyWords.h ..\include\Scintilla.h ..\include\SciLexer.h
 LexSQL.o: ../src/LexSQL.cxx ..\include\Platform.h ..\include\PropSet.h \

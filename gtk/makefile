@@ -27,7 +27,7 @@ endif
 
 LEXOBJS=LexAda.o LexAVE.o LexConf.o LexCPP.o LexHTML.o \
 	LexLisp.o LexLua.o LexOthers.o LexPascal.o LexPerl.o \
-	LexPython.o LexSQL.o LexVB.o
+	LexPython.o LexRuby.o LexSQL.o LexVB.o
 
 # The LEXOBJS have to be treated specially as the functions in them are not called from external code
 

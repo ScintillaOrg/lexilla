@@ -125,6 +125,7 @@ LEXOBJS=\
 	$(DIR_O)\LexPascal.obj \
 	$(DIR_O)\LexPerl.obj \
 	$(DIR_O)\LexPython.obj \
+	$(DIR_O)\LexRuby.obj \
 	$(DIR_O)\LexSQL.obj \
 	$(DIR_O)\LexVB.obj
 
