@@ -1085,7 +1085,10 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			}
 			break;
 		case SCE_HPHP_SIMPLESTRING:
-			 if (ch == '\'') {
+			if (ch == '\\') {
+				// skip the next char
+				i++;
+			} else if (ch == '\'') {
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_HPHP_DEFAULT;
 			}
