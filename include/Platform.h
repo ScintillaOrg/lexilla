@@ -45,6 +45,7 @@
 #pragma warning(disable: 4800 4244 4309)
 #endif
 #include <windows.h>
+#include <commctrl.h>
 #include <richedit.h>
 #endif
 
