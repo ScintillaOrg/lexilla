@@ -116,7 +116,7 @@ static void ColouriseVBDoc(unsigned int startPos, int length, int initStyle,
 			} else if (sc.ch == '#') {
 				int n = 1;
 				int chSeek = ' ';
-				while (chSeek == ' ' || chSeek == '\t') {
+				while ((n < 100) && (chSeek == ' ' || chSeek == '\t')) {
 					chSeek = sc.GetRelative(n);
 					n++;
 				}
