@@ -1413,8 +1413,8 @@ void Editor::NeedWrapping(int docLineStartWrapping, int docLineEndWrapping) {
 	if (docLastLineToWrap >= pdoc->LinesTotal())
 		docLastLineToWrap = pdoc->LinesTotal()-1;
 	// Wrap lines during idle.
-	if ((wrapState != eWrapNone) && 
-		backgroundWrapEnabled && 
+	if ((wrapState != eWrapNone) &&
+		backgroundWrapEnabled &&
 		(docLastLineToWrap != docLineLastWrapped)) {
 		SetIdle(true);
 	}
@@ -5431,9 +5431,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SETTEXT: {
 			if (lParam == 0)
 				return 0;
+			pdoc->BeginUndoAction();
 			pdoc->DeleteChars(0, pdoc->Length());
 			SetEmptySelection(0);
 			pdoc->InsertString(0, CharPtrFromSPtr(lParam));
+			pdoc->EndUndoAction();
 			return 1;
 		}
 
