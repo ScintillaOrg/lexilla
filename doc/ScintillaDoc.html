@@ -86,7 +86,7 @@ SCI_GETSTYLEBITS
       where two character bytes make up one character. This occurs when a DBCS character from a
       language like Japanese is included in the document or when line ends are marked with the CP/M
       standard of a carriage return followed by a line feed. The INVALID_POSITION constant (-1)
-      represent an invalid position within the document.
+      represents an invalid position within the document.
     </p>
     <p>
        All lines of text in Scintilla are the same height, and this height is calculated from the
@@ -213,7 +213,7 @@ SCI_SEARCHPREV(int flags, char *text)
     </h3>
 <pre>
 SCI_GETVIEWWS
-SCI_SETVIEWWS(bool visisble)
+SCI_SETVIEWWS(bool visible)
 </pre>
     <p>
        White space can be made visible which may useful for languages in which whitespace is
@@ -305,7 +305,7 @@ SCI_STYLESETCHARACTERSET(int stylenumber, int charset)
       window.
     </p>
     <p>
-      SCI_STYLESETCHARACTERSET can set a styel to use a different character set than the default.
+      SCI_STYLESETCHARACTERSET can set a style to use a different character set than the default.
       For example, SCI_STYLESETCHARACTERSET(SCE_C_STRING, SC_CHARSET_RUSSIAN)
       would ensure that strings in Russian would display correctly. 
       This feature currently only works on Windows.
@@ -737,7 +737,7 @@ SCI_ADDREFDOCUMENT(&lt;unused&gt;,document *pdoc)
 SCI_RELEASEDOCUMENT(&lt;unused&gt;,document *pdoc)
 </pre>
     <p>
-       This is to allow simple split views of documents and so applications may maintain mutiple buffer
+       This is to allow simple split views of documents and so applications may maintain multiple buffer
        which may be individually selected into the editor. Each Scintilla has a pointer to a used document. 
        Initially the used document is a default one created when the Scintilla was created. 
        The SCI_GETDOCPOINTER call returns a pointer to the used document. 
@@ -801,7 +801,7 @@ SCI_ENSUREVISIBLE(int line)
     </p>
     <p>
        Each fold point may be either expanded, displaying all its child lines, or 
-       contracted, hding all the child lines. This is per view state and can be 
+       contracted, hiding all the child lines. This is per view state and can be 
        manipulated with SCI_SETFOLDEXPANDED and 
        SCI_GETFOLDEXPANDED. Using SCI_SETFOLDEXPANDED does not
        show or hide any lines but only changes a state flag and the margin markers 
@@ -913,7 +913,7 @@ SCN_SAVEPOINTREACHED(int issavepoint)
 SCI_SETSAVEPOINT
 </pre>
     <p>
-       Sent to the container when the savepoint is entered or left, allowing the container to to
+       Sent to the container when the savepoint is entered or left, allowing the container to
       display a dirty indicator and change its menus. The first parameter is 1 when entering the
       save point, 0 when leaving.
     </p>
