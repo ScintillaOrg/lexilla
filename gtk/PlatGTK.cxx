@@ -1816,6 +1816,11 @@ ListBox *ListBox::Allocate() {
 }
 
 #if GTK_MAJOR_VERSION < 2
+static void UnselectionAC(GtkWidget *, gint, gint,
+                        GdkEventButton *, gpointer p) {
+	int *pi = reinterpret_cast<int *>(p);
+	*pi = -1;
+}
 static void SelectionAC(GtkWidget *, gint row, gint,
                         GdkEventButton *, gpointer p) {
 	int *pi = reinterpret_cast<int *>(p);
@@ -1855,6 +1860,8 @@ void ListBoxX::Create(Window &, int, int, bool) {
 	gtk_container_add(GTK_CONTAINER(PWidget(scroller)), PWidget(list));
 	gtk_clist_set_column_auto_resize(GTK_CLIST(PWidget(list)), 0, TRUE);
 	gtk_clist_set_selection_mode(GTK_CLIST(PWidget(list)), GTK_SELECTION_BROWSE);
+	gtk_signal_connect(GTK_OBJECT(PWidget(list)), "unselect_row",
+	                   GTK_SIGNAL_FUNC(UnselectionAC), &current);
 	gtk_signal_connect(GTK_OBJECT(PWidget(list)), "select_row",
 	                   GTK_SIGNAL_FUNC(SelectionAC), &current);
 	gtk_signal_connect(GTK_OBJECT(PWidget(list)), "button_press_event",
@@ -2089,8 +2096,12 @@ int ListBoxX::Length() {
 
 void ListBoxX::Select(int n) {
 #if GTK_MAJOR_VERSION < 2
-	gtk_clist_select_row(GTK_CLIST(list), n, 0);
-	gtk_clist_moveto(GTK_CLIST(list), n, 0, 0.5, 0.5);
+	if (n == -1) {
+		gtk_clist_unselect_row(GTK_CLIST(list), current, 0);
+	} else {
+		gtk_clist_select_row(GTK_CLIST(list), n, 0);
+		gtk_clist_moveto(GTK_CLIST(list), n, 0, 0.5, 0.5);
+	}
 #else
 	if (n < 0)
 		return;
