@@ -416,7 +416,8 @@ static bool isPHPStringState(int state) {
 	return
 	    (state == SCE_HPHP_HSTRING) ||
 	    (state == SCE_HPHP_SIMPLESTRING) ||
-	    (state == SCE_HPHP_HSTRING_VARIABLE);
+	    (state == SCE_HPHP_HSTRING_VARIABLE) ||
+	    (state == SCE_HPHP_COMPLEX_VARIABLE);
 }
 
 static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
@@ -930,7 +931,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_H_DEFAULT;
 			}
-			if (ch != '#' && !(isascii(ch) && isalnum(ch))) {	// Should check that '#' follows '&', but it is unlikely anyway...
+			if (ch != '#' && !(isascii(ch) && isalnum(ch))	// Should check that '#' follows '&', but it is unlikely anyway...
+				&& ch != '.' && ch != '-' && ch != '_' && ch != ':') { // valid in XML
 				styler.ColourTo(i, SCE_H_TAGUNKNOWN);
 				state = SCE_H_DEFAULT;
 			}
@@ -1499,6 +1501,10 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			if (ch == '\\') {
 				// skip the next char
 				i++;
+			} else if (ch == '$' && ((chPrev == '{' && chPrev2 != '\\' && IsPhpWordStart(chNext))
+				|| (chNext == '{' && IsPhpWordStart(chNext2)))) {
+				styler.ColourTo(i - (chNext == '{' ? 1 : 2), StateToPrint);
+				state = SCE_HPHP_COMPLEX_VARIABLE;
 			} else if (ch == '$' && IsPhpWordStart(chNext)) {
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_HPHP_HSTRING_VARIABLE;
@@ -1520,6 +1526,12 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			if (!IsPhpWordChar(ch)) {
 				styler.ColourTo(i - 1, StateToPrint);
 				i--; // strange but it works
+				state = SCE_HPHP_HSTRING;
+			}
+			break;
+		case SCE_HPHP_COMPLEX_VARIABLE:
+			if (ch == '}') {
+				styler.ColourTo(i, StateToPrint);
 				state = SCE_HPHP_HSTRING;
 			}
 			break;
@@ -1675,7 +1687,8 @@ static void ColouriseHTMLPiece(StyleContext &sc, WordList *keywordlists[]) {
 	} else if (sc.state == SCE_H_ENTITY) {
 		if (sc.ch == ';') {
 			sc.ForwardSetState(SCE_H_DEFAULT);
-		} else if (sc.ch != '#' && (sc.ch < 0x80) && !isalnum(sc.ch)) {	// Should check that '#' follows '&', but it is unlikely anyway...
+		} else if (sc.ch != '#' && (sc.ch < 0x80) && !isalnum(sc.ch)	// Should check that '#' follows '&', but it is unlikely anyway...
+			&& sc.ch != '.' && sc.ch != '-' && sc.ch != '_' && sc.ch != ':') { // valid in XML
 			sc.ChangeState(SCE_H_TAGUNKNOWN);
 			sc.SetState(SCE_H_DEFAULT);
 		}
