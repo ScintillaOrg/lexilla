@@ -53,6 +53,8 @@ LineLayout::LineLayout(int maxLineLength_) :
 	styles(0),
 	indicators(0),
 	positions(0),
+	hsStart(0),
+	hsEnd(0),
 	widthLine(wrapWidthInfinite),
 	lines(1) {
 	Resize(maxLineLength_);
@@ -1684,13 +1686,12 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 			int numCharsInLine = 0;
 			// See if chars, styles, indicators, are all the same
 			bool allSame = true;
-			char styleByte;
-			int styleMask = pdoc->stylingBitsMask;
+			const int styleMask = pdoc->stylingBitsMask;
 			// Check base line layout
 			for (int charInDoc = posLineStart; allSame && (charInDoc < posLineEnd); charInDoc++) {
 				char chDoc = pdoc->CharAt(charInDoc);
-				styleByte = pdoc->StyleAt(charInDoc);
-				if (vstyle.viewEOL || (!IsEOLChar(chDoc != '\r'))) {
+				if (vstyle.viewEOL || (!IsEOLChar(chDoc))) {
+					char styleByte = pdoc->StyleAt(charInDoc);
 					allSame = allSame &&
 					          (ll->styles[numCharsInLine] == static_cast<char>(styleByte & styleMask));
 					allSame = allSame &&
