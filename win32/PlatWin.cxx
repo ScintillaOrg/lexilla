@@ -107,7 +107,7 @@ void Palette::Allocate(Window &) {
 	}
 }
 
-void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, int size, bool bold, bool italic) {
+static void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, int size, bool bold, bool italic) {
 	memset(&lf, 0, sizeof(lf));
 	// The negative is to allow for leading
 	lf.lfHeight = -(abs(size));
@@ -122,7 +122,7 @@ void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, int size, b
  * If one font is the same as another, its hash will be the same, but if the hash is the
  * same then they may still be different.
  */
-int HashFont(const char *faceName, int characterSet, int size, bool bold, bool italic) {
+static int HashFont(const char *faceName, int characterSet, int size, bool bold, bool italic) {
 	return
 		size ^
 		(characterSet << 10) ^
