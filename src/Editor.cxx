@@ -3591,12 +3591,18 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 			vs.styles[wParam].underline = lParam;
 			InvalidateStyleRedraw();
 		}
+		break;
+	case SCI_STYLESETCHARACTERSET:
+		if (wParam <= STYLE_MAX) {
+			vs.styles[wParam].characterSet = lParam;
+			InvalidateStyleRedraw();
+		}
+		break;
 		
 	case SCI_STYLERESETDEFAULT:
 		vs.ResetDefaultStyle();
 		InvalidateStyleRedraw();
 		break;
-
 	case SCI_SETSTYLEBITS:
 		pdoc->SetStylingBits(wParam);
 		break;
@@ -3883,6 +3889,14 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		SetDocPointer(reinterpret_cast<Document *>(lParam));
 		return 0;
 
+	case SCI_ADDREFDOC:
+		(reinterpret_cast<Document *>(lParam))->AddRef();
+		break;
+		
+	case SCI_RELEASEDOC:
+		(reinterpret_cast<Document *>(lParam))->Release();
+		break;
+		
 	case SCI_SETMODEVENTMASK:
 		modEventMask = wParam;
 		return 0;

@@ -280,6 +280,9 @@ fun void StyleResetDefault=2058(,)
 # Set a style to be underlined or not.
 set void StyleSetUnderline=2059(int style, bool underline)
 
+# Set the character set of the font in a style.
+set void StyleSetCharacterSet=2066(int style, int characterSet)
+
 # Set the foreground colour of the selection and whether to use this setting.
 fun void SetSelFore=2067(bool useSetting, colour fore)
 
@@ -700,6 +703,11 @@ get bool SelectionIsRectangle=2372(,)
 set void SetZoom=2373(int zoom,)
 # Retrieve the zoom level.
 get int GetZoom=2374(,)
+
+# Extend life of document.
+fun void AddRefDoc=2375(, int doc)
+# Release a reference to the document, deleting document if it fades to black.
+fun void ReleaseDoc=2376(, int doc)
 
 # Set the focus to this Scintilla widget.
 fun void GrabFocus=2400(,)

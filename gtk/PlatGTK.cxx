@@ -143,7 +143,8 @@ Font::Font() : id(0) {}
 Font::~Font() {}
 
 
-void Font::Create(const char *faceName, int size, bool bold, bool italic) {
+void Font::Create(const char *faceName, int characterSet, int size, bool bold, bool italic) {
+	// TODO: take notice of characterSet
 	Release();
 	char fontspec[300];
 	fontspec[0] = '\0';

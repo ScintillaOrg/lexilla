@@ -128,7 +128,7 @@ Font::Font() {
 Font::~Font() {
 }
 
-void Font::Create(const char *faceName, int size, bool bold, bool italic) {
+void Font::Create(const char *faceName, int characterSet, int size, bool bold, bool italic) {
 	Release();
 	
 	LOGFONT lf;
@@ -137,7 +137,7 @@ void Font::Create(const char *faceName, int size, bool bold, bool italic) {
 	lf.lfHeight = -(abs(size));
 	lf.lfWeight = bold ? FW_BOLD : FW_NORMAL;
 	lf.lfItalic = static_cast<BYTE>(italic ? 1 : 0);
-	lf.lfCharSet = DEFAULT_CHARSET;
+	lf.lfCharSet = characterSet;
 	strcpy(lf.lfFaceName, faceName);
 
 	id = ::CreateFontIndirect(&lf);

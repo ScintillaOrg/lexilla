@@ -15,6 +15,7 @@ public:
 	bool italic;
 	int size;
 	const char *fontName;
+	int characterSet;
 	bool eolFilled;
 	bool underline;
 
@@ -32,7 +33,7 @@ public:
 	Style &operator=(const Style &source);
 	void Clear(Colour fore_, Colour back_,
            	int size_, 
-		const char *fontName_, 
+		const char *fontName_, int characterSet_,
 		bool bold_, bool italic_, bool eolFilled_, bool underline_);
 	bool EquivalentFontTo(const Style *other) const;
 	void Realise(Surface &surface, int zoomLevel, Style *defaultStyle=0);
