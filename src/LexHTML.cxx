@@ -199,6 +199,7 @@ static int classifyTagHTML(unsigned int start, unsigned int end,
 			s[i++] = static_cast<char>(tolower(ch));
 	}
 	s[i] = '\0';
+	bool isScript = false;
 	char chAttr = SCE_H_TAGUNKNOWN;
 	if (s[0] == '!' && s[1] == '-' && s[2] == '-') {	//Comment
 		chAttr = SCE_H_COMMENT;
@@ -210,16 +211,14 @@ static int classifyTagHTML(unsigned int start, unsigned int end,
 	} else {
 		if (keywords.InList(s)) {
 			chAttr = SCE_H_TAG;
-		}
-		if (0 == strcmp(s, "script")) {
-			chAttr = SCE_H_SCRIPT;
+			isScript = 0 == strcmp(s, "script");
 		}
 	}
 	if ((chAttr == SCE_H_TAGUNKNOWN) && !keywords)
 		// No keywords -> all are known
 		chAttr = SCE_H_TAG;
 	styler.ColourTo(end, chAttr);
-	return chAttr;
+	return isScript ? SCE_H_SCRIPT : chAttr;
 }
 
 static void classifyWordHTJS(unsigned int start, unsigned int end,
@@ -578,7 +577,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				|| (inScriptType == eNonHtmlScriptPreProc)) && (
 				((scriptLanguage == eScriptPHP) && (ch == '?')) || 
 				((scriptLanguage != eScriptNone) && !isStringState(state) &&
-					!isCommentASPState(state) && (ch == '%'))
+				 (ch == '%'))
 			) && (chNext == '>')) {
 			if (state == SCE_H_ASPAT) {
 				defaultScript = segIsScriptingIndicator(styler,
@@ -926,8 +925,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			} else if (ch == '\"') {
 				styler.ColourTo(i, statePrintForState(SCE_HJ_DOUBLESTRING, inScriptType));
 				state = SCE_HJ_DEFAULT;
-				i++;
-				ch = chNext;
 			} else if ((inScriptType == eNonHtmlScript) && (ch == '-') && (chNext == '-') && (chNext2 == '>')) {
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_HJ_COMMENTLINE;
@@ -945,8 +942,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			} else if (ch == '\'') {
 				styler.ColourTo(i, statePrintForState(SCE_HJ_SINGLESTRING, inScriptType));
 				state = SCE_HJ_DEFAULT;
-				i++;
-				ch = chNext;
 			} else if ((inScriptType == eNonHtmlScript) && (ch == '-') && (chNext == '-') && (chNext2 == '>')) {
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_HJ_COMMENTLINE;
@@ -1023,8 +1018,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			if (ch == '\"') {
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_HB_DEFAULT;
-				i++;
-				ch = chNext;
 			} else if (ch == '\r' || ch == '\n') {
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_HB_STRINGEOL;
@@ -1263,8 +1256,11 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			///////////// end - PHP state handling
 		}
 
+		// Some of the above terminated their lexeme but since the same character starts
+		// the same class again, only reenter if non empty segment.
+		bool nonEmptySegment = i >= static_cast<int>(styler.GetStartSegment());
 		if (state == SCE_HB_DEFAULT) {    // One of the above succeeded
-			if (ch == '\"') {
+			if ((ch == '\"') && (nonEmptySegment)) {
 				state = SCE_HB_STRING;
 			} else if (ch == '\'') {
 				state = SCE_HB_COMMENTLINE;
@@ -1274,7 +1270,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				styler.ColourTo(i, SCE_HB_DEFAULT);
 			}
 		} else if (state == SCE_HBA_DEFAULT) {    // One of the above succeeded
-			if (ch == '\"') {
+			if ((ch == '\"') && (nonEmptySegment)) {
 				state = SCE_HBA_STRING;
 			} else if (ch == '\'') {
 				state = SCE_HBA_COMMENTLINE;
@@ -1291,15 +1287,14 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					state = SCE_HJ_COMMENT;
 			} else if (ch == '/' && chNext == '/') {
 				state = SCE_HJ_COMMENTLINE;
-			} else if (ch == '\"') {
+			} else if ((ch == '\"') && (nonEmptySegment)) {
 				state = SCE_HJ_DOUBLESTRING;
-			} else if (ch == '\'') {
+			} else if ((ch == '\'')  && (nonEmptySegment)) {
 				state = SCE_HJ_SINGLESTRING;
 			} else if (iswordstart(ch)) {
 				state = SCE_HJ_WORD;
 			} else if (isoperator(ch)) {
 				styler.ColourTo(i, statePrintForState(SCE_HJ_SYMBOLS, inScriptType));
-				//styler.ColourTo(i, SCE_HJ_SYMBOLS);
 			}
 		}
 	}
