@@ -604,6 +604,10 @@ LRESULT ScintillaWin::WndProc(unsigned int iMessage, unsigned long wParam, long 
 	case SCI_GETDIRECTPOINTER:
 		return reinterpret_cast<LRESULT>(this);
 
+	case SCI_GRABFOCUS:
+		::SetFocus(wMain.GetID());
+		break;
+	
 	default:
 	    return ScintillaBase::WndProc(iMessage, wParam, lParam);
 	}
