@@ -47,57 +47,57 @@ CellBuffer.o: CellBuffer.cxx Platform.h Scintilla.h WinDefs.h \
 ContractionState.o: ContractionState.cxx Platform.h ContractionState.h
 Document.o: Document.cxx Platform.h Scintilla.h WinDefs.h CellBuffer.h \
  Document.h
-DocumentAccessor.o: DocumentAccessor.cxx Platform.h PropSet.h Accessor.h \
- DocumentAccessor.h Scintilla.h WinDefs.h
+DocumentAccessor.o: DocumentAccessor.cxx Platform.h PropSet.h SString.h \
+ Accessor.h DocumentAccessor.h Scintilla.h WinDefs.h
 Editor.o: Editor.cxx Platform.h Scintilla.h WinDefs.h \
  ContractionState.h CellBuffer.h KeyMap.h Indicator.h LineMarker.h \
  Style.h ViewStyle.h Document.h Editor.h
 Indicator.o: Indicator.cxx Platform.h Scintilla.h WinDefs.h \
  Indicator.h
 KeyMap.o: KeyMap.cxx Platform.h Scintilla.h WinDefs.h KeyMap.h
-KeyWords.o: KeyWords.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+KeyWords.o: KeyWords.cxx Platform.h PropSet.h SString.h Accessor.h \
+ KeyWords.h Scintilla.h WinDefs.h SciLexer.h
+LexConf.o: LexConf.cxx Platform.h PropSet.h SString.h Accessor.h \
+ KeyWords.h Scintilla.h WinDefs.h SciLexer.h
+LexCPP.o: LexCPP.cxx Platform.h PropSet.h SString.h Accessor.h \
+ KeyWords.h Scintilla.h WinDefs.h SciLexer.h
+LexHTML.o: LexHTML.cxx Platform.h PropSet.h SString.h Accessor.h \
+ KeyWords.h Scintilla.h WinDefs.h SciLexer.h
+LexLua.o: LexLua.cxx Platform.h PropSet.h SString.h Accessor.h \
+ KeyWords.h Scintilla.h WinDefs.h SciLexer.h
+LexOthers.o: LexOthers.cxx Platform.h PropSet.h SString.h Accessor.h \
+ KeyWords.h Scintilla.h WinDefs.h SciLexer.h
+LexPascal.o: LexPascal.cxx Platform.h PropSet.h SString.h Accessor.h \
+ KeyWords.h Scintilla.h WinDefs.h SciLexer.h
+LexPerl.o: LexPerl.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
  Scintilla.h WinDefs.h SciLexer.h
-LexConf.o: LexConf.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
- Scintilla.h WinDefs.h SciLexer.h
-LexCPP.o: LexCPP.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
- Scintilla.h WinDefs.h SciLexer.h
-LexHTML.o: LexHTML.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
- Scintilla.h WinDefs.h SciLexer.h
-LexLua.o: LexLua.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
- Scintilla.h WinDefs.h SciLexer.h
-LexOthers.o: LexOthers.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
- Scintilla.h WinDefs.h SciLexer.h
-LexPascal.o: LexPascal.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
- Scintilla.h WinDefs.h SciLexer.h
-LexPerl.o: LexPerl.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
- Scintilla.h WinDefs.h SciLexer.h
-LexPython.o: LexPython.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
- Scintilla.h WinDefs.h SciLexer.h
-LexSQL.o: LexSQL.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
- Scintilla.h WinDefs.h SciLexer.h
-LexVB.o: LexVB.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
- Scintilla.h WinDefs.h SciLexer.h
+LexPython.o: LexPython.cxx Platform.h PropSet.h SString.h \
+ Accessor.h KeyWords.h Scintilla.h WinDefs.h SciLexer.h
+LexSQL.o: LexSQL.cxx Platform.h PropSet.h SString.h \
+ Accessor.h KeyWords.h Scintilla.h WinDefs.h SciLexer.h
+LexVB.o: LexVB.cxx Platform.h PropSet.h SString.h \
+ Accessor.h KeyWords.h Scintilla.h WinDefs.h SciLexer.h
 LineMarker.o: LineMarker.cxx Platform.h Scintilla.h WinDefs.h \
  LineMarker.h
 PlatGTK.o: PlatGTK.cxx Platform.h Scintilla.h ScintillaWidget.h WinDefs.h
-PropSet.o: PropSet.cxx Platform.h PropSet.h
+PropSet.o: PropSet.cxx Platform.h PropSet.h SString.h
 SciTEBase.o: SciTEBase.cxx Platform.h WinDefs.h SciTE.h PropSet.h \
- Accessor.h KeyWords.h Scintilla.h SciLexer.h SciTEBase.h
+ SString.h Accessor.h KeyWords.h Scintilla.h SciLexer.h SciTEBase.h
 SciTEGTK.o: SciTEGTK.cxx Platform.h WinDefs.h SciTE.h PropSet.h \
- Accessor.h KeyWords.h Scintilla.h SciTEBase.h
+ SString.h Accessor.h KeyWords.h Scintilla.h SciTEBase.h
 ScintillaBase.o: ScintillaBase.cxx Platform.h Scintilla.h WinDefs.h \
- SciLexer.h PropSet.h Accessor.h KeyWords.h ContractionState.h \
+ SciLexer.h PropSet.h SString.h Accessor.h KeyWords.h ContractionState.h \
  CellBuffer.h CallTip.h KeyMap.h Indicator.h LineMarker.h Style.h \
  ViewStyle.h AutoComplete.h Document.h Editor.h ScintillaBase.h
 ScintillaGTK.o: ScintillaGTK.cxx Platform.h Scintilla.h ScintillaWidget.h WinDefs.h \
- SciLexer.h PropSet.h Accessor.h KeyWords.h ContractionState.h \
+ SciLexer.h PropSet.h SString.h Accessor.h KeyWords.h ContractionState.h \
  CellBuffer.h CallTip.h KeyMap.h Indicator.h LineMarker.h Style.h \
  AutoComplete.h ViewStyle.h Document.h Editor.h ScintillaBase.h
 Style.o: Style.cxx Platform.h Style.h
 ViewStyle.o: ViewStyle.cxx Platform.h Scintilla.h WinDefs.h \
  Indicator.h LineMarker.h Style.h ViewStyle.h
-WindowAccessor.o: WindowAccessor.cxx Platform.h PropSet.h Accessor.h \
- WindowAccessor.h Scintilla.h WinDefs.h
+WindowAccessor.o: WindowAccessor.cxx Platform.h PropSet.h SString.h \
+ Accessor.h WindowAccessor.h Scintilla.h WinDefs.h
 
 clean: 
 	rm -f *.o SciTE
