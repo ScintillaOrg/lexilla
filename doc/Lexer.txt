@@ -139,6 +139,12 @@ characters in ASCII for operators, comment markers, etc.
 
 Special case: Folding
 
+Folding may be performed in the lexer function. It is better to use a 
+separate folder function as that avoids some troublesome interaction 
+between styling and folding. The folder function will be run after the
+lexer function if folding is enabled. The rest of this section explains
+how to perform folding within the lexer fucntion.
+
 During initialization, lexers that support folding set
 
     bool fold = styler.GetPropertyInt("fold");
