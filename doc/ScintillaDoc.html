@@ -1155,59 +1155,13 @@ EM_SETTARGETDEVICE
       not be sensibly handled. Unsupported messages have no effect.
     </p>
     <h3>
-       Building Scintilla on Windows
+       Building Scintilla
     </h3>
     <p>
-       Scintilla and SciTE have been developed using Mingw32 GCC 2.9.5 and most testing has
-      occurred on executables produced by this compiler. It may also be compiled with Visual C++
-      which leads to smaller executables. It will no longer build with the older release of Mingw32
-      EGCS 1.1.2 which used a different set of Windows headers to GCC 2.9.5.
-    </p>
-    <p>
-       To compile with GCC, use make on the "makefile" file.<br />
-    </p>
-    <p>
-       To compile with VC++, use nmake on the "makefile_vc" file.
-    </p>
-    <p>
-       To compile with Borland C++ or C++ Builder, use make on the "makefile_bor" file.
-    </p>
-    <p>
-       Scintilla can also be linked into an application statically. To do this, the symbol
-      STATIC_BUILD should be defined and the function Scintilla_RegisterClasses called to
-      initialise Scintilla. The Sc1.exe target in the makefile demonstrates building a statically
-      linked version of SciTE.
-    </p>
-    <p>
-      To build everything, start in the directory that is above both scite and scintilla:<br />
-      <code>
-       cd scintilla\win32<br />
-       make<br />
-       cd ..\..<br />
-       cd scite\win32<br />
-       make<br />
-      </code>
-    </p>
-    <h3>
-       Building Scintilla with GTK+ on Linux
-    </h3>
-    <p>
-       On Linux, Scintilla and SciTE have been built with GCC and linked with GTK+ 1.2x. GTK+ 1.0x
-      will not work (and when it did it was very slow). The current make file only supports static
-      linking between SciTE and Scintilla. The scintilla/gtk/makefile file is used to build Scintilla and 
-      the scite/gtk/makefile file is used to build SciTE. To build and install everything, start in the 
-      directory that is above both scite and scintilla:<br />
-      <code>
-       cd scintilla/gtk<br />
-       make<br />
-       cd ../..<br />
-       cd scite/gtk<br />
-       make<br />
-       make install<br />
-      </code><br />
-       The make install command searches for Gnome, and if found installs SciTE relative to Gnome
-       and places SciTE in the Gnome Applications menu. SciTE can be removed with make uninstall 
-       command.
+       To build Scintilla or SciTE, see the README file present in both the scintilla and 
+       scite directories. For Windows, GCC 2.95.2, Borland C++ or Microsoft Visual C++ can 
+       be used for building. For GTK+, GCC 2.95.2 should be used. Only GTK+ 1.2x is 
+       supported.
     </p>
   </body>
 </html>
