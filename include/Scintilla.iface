@@ -38,14 +38,15 @@
 ##     string -> pointer to const character
 ##     stringresult -> pointer to character
 ##     cells -> pointer to array of cells, each cell containing a style byte and character byte
+##     textrange -> range of a min and a max position with an output string
+##     findtext -> searchrange, text -> foundposition
+##     keymod -> integer containing key in low half and modifiers in high half
+##     formatrange
+## Types no longer used:
+##     findtextex -> searchrange
 ##     charrange -> range of a min and a max position
 ##     charrangeresult -> like charrange, but output param
-##     textrange -> charrange + output string
-##     findtext -> searchrange, text -> foundposition
-##     findtextex -> searchrange
-##     keymod -> integer containing key in low half and modifiers in high half
 ##     countedstring
-##     formatrange
 ##     point -> x,y
 ##     pointresult  -> like point, but output param
 ##     rectangle -> left,top,right,bottom
