@@ -3753,7 +3753,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 			int viewLineStart = MovePositionSoVisible(StartEndDisplayLine(currentPos, true), -1);
 			if ((viewLineStart < currentPos) && (viewLineStart > homePos))
 				homePos = viewLineStart;
-			
+
 			MovePositionTo(homePos);
 			SetLastXChosen();
 		}
@@ -4582,6 +4582,7 @@ void Editor::SetFocusState(bool focusState) {
 	if (hasFocus) {
 		ShowCaretAtCurrentPosition();
 	} else {
+		CancelModes();
 		DropCaret();
 	}
 }
