@@ -58,18 +58,8 @@ public:
 		s = StringAllocate(s_ + first, last - first);
 		sSize = sLen = (s) ? strlen(s) : 0;
 	}
-	SString(int i) : sizeGrowth(sizeGrowthDefault) {
-		char number[32];
-		sprintf(number, "%0d", i);
-		s = StringAllocate(number);
-		sSize = sLen = (s) ? strlen(s) : 0;
-	}
-	SString(double d, int precision) : sizeGrowth(sizeGrowthDefault) {
-		char number[32];
-		sprintf(number, "%.*f", precision, d);
-		s = StringAllocate(number);
-		sSize = sLen = (s) ? strlen(s) : 0;
-	}
+	SString(int i);
+	SString(double d, int precision);
 	~SString() {
 		delete []s;
 		s = 0;
