@@ -181,20 +181,20 @@ gint ScintillaGTK::Realize(GtkWidget *widget, ScintillaGTK *sciThis) {
 		GdkICAttr *attr = sciThis->ic_attr;
 		GdkICAttributesType attrmask = GDK_IC_ALL_REQ;
 		GdkIMStyle style;
-		GdkIMStyle supported_style = GDK_IM_PREEDIT_NONE | 
+		GdkIMStyle supported_style = (GdkIMStyle) (GDK_IM_PREEDIT_NONE | 
 													 GDK_IM_PREEDIT_NOTHING |
 													 GDK_IM_PREEDIT_POSITION |
 													 GDK_IM_STATUS_NONE |
-													 GDK_IM_STATUS_NOTHING;
+													 GDK_IM_STATUS_NOTHING);
 		  
 		if (widget->style && widget->style->font->type != GDK_FONT_FONTSET)
-			supported_style &= ~GDK_IM_PREEDIT_POSITION;
+			supported_style = (GdkIMStyle) ((int) supported_style & ~GDK_IM_PREEDIT_POSITION);
 		  
 		attr->style = style = gdk_im_decide_style (supported_style);
 		attr->client_window = widget->window;
 
 		if ((colormap = gtk_widget_get_colormap (widget)) != gtk_widget_get_default_colormap ()) {
-			attrmask |= GDK_IC_PREEDIT_COLORMAP;
+			attrmask = (GdkICAttributesType) ((int) attrmask | GDK_IC_PREEDIT_COLORMAP);
 			attr->preedit_colormap = colormap;
 		}
 
@@ -205,7 +205,7 @@ gint ScintillaGTK::Realize(GtkWidget *widget, ScintillaGTK *sciThis) {
 				break;
 			}
 
-			attrmask |= GDK_IC_PREEDIT_POSITION_REQ;
+			attrmask = (GdkICAttributesType) ((int) attrmask | GDK_IC_PREEDIT_POSITION_REQ);
 			gdk_window_get_size (widget->window, &width, &height);
 			attr->spot_location.x = 0;
 			attr->spot_location.y = height;
@@ -223,7 +223,7 @@ gint ScintillaGTK::Realize(GtkWidget *widget, ScintillaGTK *sciThis) {
 			g_warning ("Can't create input context.");
 		else {
 			mask = gdk_window_get_events (widget->window);
-			mask |= gdk_ic_get_events (sciThis->ic);
+			mask = (GdkEventMask) ((int) mask | gdk_ic_get_events(sciThis->ic));
 			gdk_window_set_events (widget->window, mask);
 	  
 			if (GTK_WIDGET_HAS_FOCUS (widget))
