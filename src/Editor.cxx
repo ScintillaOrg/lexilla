@@ -41,6 +41,7 @@ Editor::Editor() {
 	printMagnification = 0;
 	printColourMode = SC_PRINT_NORMAL;
 
+	hasFocus = false;
 	hideSelection = false;
 	inOverstrike = false;
 
@@ -608,7 +609,7 @@ void Editor::EnsureCaretVisible(bool useMargin) {
 }
 
 void Editor::ShowCaretAtCurrentPosition() {
-	if (!wMain.HasFocus()) {
+	if (!hasFocus) {
 		caret.active = false;
 		caret.on = false;
 		return ;
@@ -1096,7 +1097,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	}
 
 	surfaceWindow->SetPalette(&palette, true);
-	pixmapLine.SetPalette(&palette, !wMain.HasFocus());
+	pixmapLine.SetPalette(&palette, !hasFocus);
 
 	//Platform::DebugPrintf("Paint: (%3d,%3d) ... (%3d,%3d)\n",
 	//	rcArea.left, rcArea.top, rcArea.right, rcArea.bottom);
@@ -2811,6 +2812,17 @@ void Editor::Tick() {
 	}
 }
 
+void Editor::SetFocusState(bool focusState) {
+	hasFocus = focusState;
+	NotifyFocus(hasFocus);
+	if (hasFocus) {
+		ShowCaretAtCurrentPosition();
+		InvalidateCaret();
+	} else {
+		DropCaret();
+	}
+}
+
 static bool IsIn(int a, int minimum, int maximum) {
 	return (a >= minimum) && (a <= maximum);
 }
@@ -4264,6 +4276,13 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 	
 	case SCI_GETOVERTYPE:
 		return inOverstrike ? TRUE : FALSE;
+	
+	case SCI_SETFOCUS:
+		SetFocusState(wParam);
+		break;
+	
+	case SCI_GETFOCUS:
+		return hasFocus;
 	
 #ifdef MACRO_SUPPORT
 	case SCI_STARTRECORD:

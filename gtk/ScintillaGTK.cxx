@@ -260,13 +260,11 @@ gint ScintillaGTK::CursorMoved(GtkWidget *widget, int xoffset, int yoffset, Scin
 gint ScintillaGTK::FocusIn(GtkWidget *widget, GdkEventFocus * /*event*/, ScintillaGTK *sciThis) {
 	//Platform::DebugPrintf("ScintillaGTK::focus in %x\n", sciThis);
 	GTK_WIDGET_SET_FLAGS(widget, GTK_HAS_FOCUS);
-	sciThis->NotifyFocus(true);
-	sciThis->ShowCaretAtCurrentPosition();
-	sciThis->InvalidateCaret();
+	sciThis->SetFocusState(true);
 
 #ifdef USE_XIM
-  if (sciThis->ic)
-    gdk_im_begin (sciThis->ic, widget->window);
+	if (sciThis->ic)
+		gdk_im_begin(sciThis->ic, widget->window);
 #endif
 
 	return FALSE;
@@ -275,11 +273,10 @@ gint ScintillaGTK::FocusIn(GtkWidget *widget, GdkEventFocus * /*event*/, Scintil
 gint ScintillaGTK::FocusOut(GtkWidget *widget, GdkEventFocus * /*event*/, ScintillaGTK *sciThis) {
 	//Platform::DebugPrintf("ScintillaGTK::focus out %x\n", sciThis);
 	GTK_WIDGET_UNSET_FLAGS(widget, GTK_HAS_FOCUS);
-	sciThis->NotifyFocus(false);
-	sciThis->DropCaret();
+	sciThis->SetFocusState(false);
   
 #ifdef USE_XIM
-  gdk_im_end ();
+	gdk_im_end();
 #endif
   
 	return FALSE;

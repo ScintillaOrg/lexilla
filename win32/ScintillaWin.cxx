@@ -388,7 +388,7 @@ LRESULT ScintillaWin::WndProc(unsigned int iMessage, unsigned long wParam, long 
 		// i.e. if datazoomed out only class structures are visible, when datazooming in the control
 		// structures appear, then eventually the individual statements...)
 		if (wParam & MK_SHIFT) {
-            return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
+            		return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
 		}
 
 		// Either SCROLL or ZOOM. We handle the wheel steppings calculation
@@ -501,14 +501,12 @@ LRESULT ScintillaWin::WndProc(unsigned int iMessage, unsigned long wParam, long 
 		return DLGC_HASSETSEL | DLGC_WANTALLKEYS;
 
 	case WM_KILLFOCUS:
-		NotifyFocus(false);
-		DropCaret();
+		SetFocusState(false);
 		//RealizeWindowPalette(true);
 		break;
 
 	case WM_SETFOCUS:
-		NotifyFocus(true);
-		ShowCaretAtCurrentPosition();
+		SetFocusState(true);
 		RealizeWindowPalette(false);
 		break;
 

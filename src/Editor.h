@@ -61,7 +61,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	Palette palette;
 	int printMagnification;
 	int printColourMode;
-	
+
+	bool hasFocus;
 	bool hideSelection;
 	bool inOverstrike;
 
@@ -285,6 +286,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual void SetTicking(bool on) = 0;
 	virtual void SetMouseCapture(bool on) = 0;
 	virtual bool HaveMouseCapture() = 0;
+	void SetFocusState(bool focusState);
 
 	void CheckForChangeOutsidePaint(Range r);
 	int BraceMatch(int position, int maxReStyle);
