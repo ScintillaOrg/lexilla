@@ -327,6 +327,7 @@ Editor::Editor() {
 	xCaretMargin = 50;
 	horizontalScrollBarVisible = true;
 	scrollWidth = 2000;
+	verticalScrollBarVisible = true;
 	endAtLastLine = true;
 
 	pixmapLine = Surface::Allocate();
@@ -5088,6 +5089,17 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETHSCROLLBAR:
 		return horizontalScrollBarVisible;
+
+	case SCI_SETVSCROLLBAR:
+		if (verticalScrollBarVisible != (wParam != 0)) {
+			verticalScrollBarVisible = wParam != 0;
+			SetScrollBars();
+			ReconfigureScrollBars();
+		}
+		break;
+
+	case SCI_GETVSCROLLBAR:
+		return verticalScrollBarVisible;
 
 	case SCI_SETINDENTATIONGUIDES:
 		vs.viewIndentationGuides = wParam != 0;

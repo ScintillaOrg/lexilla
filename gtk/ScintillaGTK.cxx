@@ -639,7 +639,8 @@ void ScintillaGTK::FullPaint() {
 
 PRectangle ScintillaGTK::GetClientRectangle() {
 	PRectangle rc = wMain.GetClientPosition();
-	rc.right -= scrollBarWidth + 1;
+	if (verticalScrollBarVisible)
+		rc.right -= scrollBarWidth + 1;
 	if (horizontalScrollBarVisible)
 		rc.bottom -= scrollBarHeight + 1;
 	// Move to origin
@@ -1085,6 +1086,9 @@ void ScintillaGTK::Resize(int width, int height) {
 	int horizontalScrollBarHeight = scrollBarWidth;
 	if (!horizontalScrollBarVisible)
 		horizontalScrollBarHeight = 0;
+	int verticalScrollBarHeight = scrollBarHeight;
+	if (!verticalScrollBarVisible)
+		verticalScrollBarHeight = 0;
 
 	GtkAllocation alloc;
 	alloc.x = 0;
@@ -1099,10 +1103,16 @@ void ScintillaGTK::Resize(int width, int height) {
 	}
 	gtk_widget_size_allocate(GTK_WIDGET(PWidget(scrollbarh)), &alloc);
 
-	alloc.x = width - scrollBarWidth;
 	alloc.y = 0;
-	alloc.width = scrollBarWidth;
-	alloc.height = Platform::Maximum(1, height - scrollBarHeight) + 1;
+	if (verticalScrollBarVisible) {
+		alloc.x = width - scrollBarWidth;
+		alloc.width = scrollBarWidth;
+		alloc.height = Platform::Maximum(1, height - scrollBarHeight) + 1;
+	} else {
+		alloc.x = width;
+		alloc.width = 0;
+		alloc.height = 0;
+	}
 	gtk_widget_size_allocate(GTK_WIDGET(PWidget(scrollbarv)), &alloc);
 
 	ChangeSize();

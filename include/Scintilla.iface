@@ -988,6 +988,12 @@ get int GetEndAtLastLine=2278(,)
 # Retrieve the height of a particular line of text in pixels.
 fun int TextHeight=2279(int line,)
 
+# Show or hide the vertical scroll bar.
+set void SetVScrollBar=2280(bool show,)
+
+# Is the vertical scroll bar visible?
+get bool GetVScrollBar=2281(,)
+
 ## Start of key messages
 # Move caret down one line.
 fun void LineDown=2300(,)

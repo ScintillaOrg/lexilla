@@ -902,15 +902,18 @@ bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
 	};
 	sci.fMask = SIF_PAGE | SIF_RANGE;
 	::GetScrollInfo(MainHWND(), SB_VERT, &sci);
+	int vertEndPreferred = nMax;
+	if (!verticalScrollBarVisible)
+		vertEndPreferred = 0;
 	if ((sci.nMin != 0) ||
-		(sci.nMax != nMax) ||
+		(sci.nMax != vertEndPreferred) ||
 	        (sci.nPage != static_cast<unsigned int>(nPage)) ||
 	        (sci.nPos != 0)) {
 		//Platform::DebugPrintf("Scroll info changed %d %d %d %d %d\n",
 		//	sci.nMin, sci.nMax, sci.nPage, sci.nPos, sci.nTrackPos);
 		sci.fMask = SIF_PAGE | SIF_RANGE;
 		sci.nMin = 0;
-		sci.nMax = nMax;
+		sci.nMax = vertEndPreferred;
 		sci.nPage = nPage;
 		sci.nPos = 0;
 		sci.nTrackPos = 1;
