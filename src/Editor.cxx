@@ -3572,12 +3572,8 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 		Redraw();
 		break;
 	
-	case SCI_POSITIONFROMPOINT: {
-			if (lParam == 0)
-				return 0;
-			Point *ppt = reinterpret_cast<Point *>(lParam);
-			return PositionFromLocation(*ppt);
-		}
+	case SCI_POSITIONFROMPOINT:
+		return PositionFromLocation(Point(wParam, lParam));
 
 	case SCI_GOTOLINE:
 		GoToLine(wParam);
