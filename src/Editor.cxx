@@ -2213,20 +2213,24 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 
 void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 	if (!pixmapSelPattern->Initialised()) {
-		pixmapSelPattern->InitPixMap(8, 8, surfaceWindow);
-		// This complex procedure is to reproduce the checker board dithered pattern used by windows
+		const int patternSize=8;
+		pixmapSelPattern->InitPixMap(patternSize, patternSize, surfaceWindow);
+		// This complex procedure is to reproduce the checkerboard dithered pattern used by windows
 		// for scroll bars and Visual Studio for its selection margin. The colour of this pattern is half
 		// way between the chrome colour and the chrome highlight colour making a nice transition
 		// between the window chrome and the content area. And it works in low colour depths.
-		PRectangle rcPattern(0, 0, 8, 8);
+		PRectangle rcPattern(0, 0, patternSize, patternSize);
 
-		// Default to highlight edge colour in case unusual colour scheme chosen
+		// Initialize default colours based on the chrome colour scheme.  Typically the highlight is white.
 		ColourAllocated colourFMFill = vs.selbar.allocated;
 		ColourAllocated colourFMStripes = vs.selbarlight.allocated;
-        if (!(vs.selbarlight.desired == ColourDesired(0xff, 0xff, 0xff))) {
+
+		if (!(vs.selbarlight.desired == ColourDesired(0xff, 0xff, 0xff))) {
 			// User has chosen an unusual chrome colour scheme so just use the highlight edge colour.
-            colourFMFill = vs.selbarlight.allocated;
-        }
+			// (Typically, the highlight colour is white.)
+			colourFMFill = vs.selbarlight.allocated;
+		}
+
 		if (vs.foldmarginColourSet) {
 			// override default fold margin colour
 			colourFMFill = vs.foldmarginColour.allocated;
@@ -2238,9 +2242,10 @@ void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 
 		pixmapSelPattern->FillRectangle(rcPattern, colourFMFill);
 		pixmapSelPattern->PenColour(colourFMStripes);
-		for (int stripe = 0; stripe < 8; stripe++) {
+		for (int stripe = 0; stripe < patternSize; stripe++) {
+			// Alternating 1 pixel stripes is same as checkerboard.
 			pixmapSelPattern->MoveTo(0, stripe * 2);
-			pixmapSelPattern->LineTo(8, stripe * 2 - 8);
+			pixmapSelPattern->LineTo(patternSize, stripe * 2 - patternSize);
 		}
 	}
 
