@@ -527,24 +527,32 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		/////////////////////////////////////
 		// handle the start of PHP pre-processor = Non-HTML
 		else if ((state != SCE_H_ASPAT) && 
-			!isPHPStringState(state) && (state != SCE_HPHP_COMMENT) &&
-			(ch == '<') && (chNext == '?')) {
+				!isPHPStringState(state) && 
+				(state != SCE_HPHP_COMMENT) && 
+				(ch == '<') && 
+				(chNext == '?')) {
 			styler.ColourTo(i - 1, StateToPrint);
 			beforePreProc = state;
 			scriptLanguage = segIsScriptingIndicator(styler, styler.GetStartSegment() + 2, i + 10, eScriptPHP);
 			i++;
 			i += PrintScriptingIndicatorOffset(styler, styler.GetStartSegment() + 2, i + 10);
+
 			if (scriptLanguage == eScriptXML)
 				styler.ColourTo(i, SCE_H_XMLSTART);
 			else
 				styler.ColourTo(i, SCE_H_QUESTION);
+
 			state = StateForScript(scriptLanguage);
+
 			if (inScriptType == eNonHtmlScript)
 				inScriptType = eNonHtmlScriptPreProc;
 			else
 				inScriptType = eNonHtmlPreProc;
+
 			// fold whole script
 			levelCurrent++;
+			if (scriptLanguage == eScriptXML)
+				levelCurrent--; // no folding of the XML first tag (all XML-like tags in this case)
 			// should be better
 			ch = styler.SafeGetCharAt(i);
 			continue;
