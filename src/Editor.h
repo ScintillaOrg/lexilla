@@ -127,7 +127,7 @@ public:
 
 /**
  * Hold a piece of text selected for copying or dragging.
- * The text is expected to hold a terminating '\0'.
+ * The text is expected to hold a terminating '\0' and this is counted in len.
  */
 class SelectionText {
 public:
