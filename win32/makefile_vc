@@ -42,8 +42,16 @@ SOBJS	= $(DIR_O)\ScintillaWin.obj $(DIR_O)\ScintillaBase.obj \
 	$(DIR_O)\Indicator.obj $(DIR_O)\LineMarker.obj $(DIR_O)\Style.obj \
 	$(DIR_O)\ViewStyle.obj $(DIR_O)\AutoComplete.obj
 
-$(COMPONENT): $(SOBJS) ScintRes.res
-	$(LD) /DLL /OUT:$(COMPONENT) $(SOBJS) ScintRes.res $(LDFLAGS)
+LEXOBJS	= $(DIR_O)\LexCPP.obj \
+	$(DIR_O)\LexHTML.obj \
+	$(DIR_O)\LexOthers.obj \
+	$(DIR_O)\LexPerl.obj \
+	$(DIR_O)\LexPython.obj \
+	$(DIR_O)\LexSQL.obj \
+	$(DIR_O)\LexVB.obj
+
+$(COMPONENT): $(SOBJS) $(DIR_O)\ScintRes.res
+	$(LD) /DLL /OUT:$(COMPONENT) $(SOBJS) $(DIR_O)\ScintRes.res $(LDFLAGS)
 	
 LOBJS	= $(DIR_O)\ScintillaWinL.obj $(DIR_O)\ScintillaBaseL.obj \
 	$(DIR_O)\Editor.obj $(DIR_O)\Document.obj \
@@ -52,13 +60,13 @@ LOBJS	= $(DIR_O)\ScintillaWinL.obj $(DIR_O)\ScintillaBaseL.obj \
 	$(DIR_O)\LineMarker.obj $(DIR_O)\Style.obj \
 	$(DIR_O)\ViewStyle.obj $(DIR_O)\AutoComplete.obj \
 	$(DIR_O)\KeyWords.obj $(DIR_O)\Accessor.obj \
-	$(DIR_O)\PropSet.obj
+	$(DIR_O)\PropSet.obj $(LEXOBJS)
 
 $(DIR_O)\ScintRes.res : ScintRes.rc
 	$(RC) /fo$@ $(*B).rc
 
-$(LEXCOMPONENT): $(LOBJS)
-	$(LD) /DLL /OUT:$(LEXCOMPONENT) $(LOBJS) ScintRes.res $(LDFLAGS)
+$(LEXCOMPONENT): $(LOBJS) $(DIR_O)\ScintRes.res
+	$(LD) /DLL /OUT:$(LEXCOMPONENT) $(LOBJS) $(DIR_O)\ScintRes.res $(LDFLAGS)
 	
 $(DIR_O)\Accessor.obj: ..\src\Accessor.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\Scintilla.h
 	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /Fo$@ /c ..\src\$(@B).cxx
@@ -91,6 +99,34 @@ $(DIR_O)\KeyMap.obj: ..\src\KeyMap.cxx ..\include\Platform.h ..\include\Scintill
 	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /Fo$@ /c ..\src\$(@B).cxx
 
 $(DIR_O)\KeyWords.obj: ..\src\KeyWords.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h 
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /Fo$@ /c ..\src\$(@B).cxx
+ 
+$(DIR_O)\LexCPP.obj: ..\src\LexCPP.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h 
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /Fo$@ /c ..\src\$(@B).cxx
+ 
+$(DIR_O)\LexHTML.obj: ..\src\LexHTML.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h 
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /Fo$@ /c ..\src\$(@B).cxx
+ 
+$(DIR_O)\LexOthers.obj: ..\src\LexOthers.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h 
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /Fo$@ /c ..\src\$(@B).cxx
+ 
+$(DIR_O)\LexPerl.obj: ..\src\LexPerl.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h 
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /Fo$@ /c ..\src\$(@B).cxx
+ 
+$(DIR_O)\LexPython.obj: ..\src\LexPython.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h 
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /Fo$@ /c ..\src\$(@B).cxx
+ 
+$(DIR_O)\LexSQL.obj: ..\src\LexSQL.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h 
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /Fo$@ /c ..\src\$(@B).cxx
+ 
+$(DIR_O)\LexVB.obj: ..\src\LexVB.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
  ..\include\Scintilla.h ..\include\SciLexer.h 
 	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /Fo$@ /c ..\src\$(@B).cxx
  
