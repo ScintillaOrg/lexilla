@@ -2226,9 +2226,15 @@ void Editor::Indent(bool forwards) {
 	int lineCurrentPos = pdoc->LineFromPosition(currentPos);
 	if (lineOfAnchor == lineCurrentPos) {
 		ClearSelection();
-		pdoc->InsertChar(currentPos, '\t');
-		//pdoc->InsertChar(currentPos++, '\t');
-		SetEmptySelection(currentPos + 1);
+		if (pdoc->useTabs) {
+			pdoc->InsertChar(currentPos, '\t');
+			SetEmptySelection(currentPos + 1);
+		} else {
+			for (int i=0; i<pdoc->tabInChars; i++){
+				pdoc->InsertChar(currentPos, ' ');
+			}
+			SetEmptySelection(currentPos + pdoc->tabInChars);
+		}
 	} else {
 		int anchorPosOnLine = anchor - pdoc->LineStart(lineOfAnchor);
 		int currentPosPosOnLine = currentPos - pdoc->LineStart(lineCurrentPos);
