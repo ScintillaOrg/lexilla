@@ -215,9 +215,7 @@ static void ColourisePascalDoc(unsigned int startPos, int length, int initStyle,
 	// Fill in the real level of the next line, keeping the current flags as they will be filled in later
 	if (fold) {
 		int flagsNext = styler.LevelAt(lineCurrent) & ~SC_FOLDLEVELNUMBERMASK;
-		//styler.SetLevel(lineCurrent, levelCurrent | flagsNext);
 		styler.SetLevel(lineCurrent, levelPrev | flagsNext);
-
 	}
 }
 
