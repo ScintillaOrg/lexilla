@@ -334,6 +334,8 @@ void Document::ModifiedAt(int pos) {
 
 // Unlike Undo, Redo, and InsertStyledString, the pos argument is a cell number not a char number
 void Document::DeleteChars(int pos, int len) {
+    if ((pos + len) > Length())
+        return;
 	if (cb.IsReadOnly() && enteredReadOnlyCount==0) {
 		enteredReadOnlyCount++;
 		NotifyModifyAttempt();
