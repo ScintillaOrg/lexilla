@@ -527,7 +527,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		/////////////////////////////////////
 		// handle the start of PHP pre-processor = Non-HTML
 		else if ((state != SCE_H_ASPAT) && 
-			!isPHPStringState(state) && 
+			!isPHPStringState(state) && (state != SCE_HPHP_COMMENT) &&
 			(ch == '<') && (chNext == '?')) {
 			styler.ColourTo(i - 1, StateToPrint);
 			beforePreProc = state;
@@ -591,7 +591,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		else if (
 			((inScriptType == eNonHtmlPreProc)
 				|| (inScriptType == eNonHtmlScriptPreProc)) && (
-				((scriptLanguage == eScriptPHP) && (ch == '?') && !isPHPStringState(state)) || 
+				((scriptLanguage == eScriptPHP) && (ch == '?') && !isPHPStringState(state) && (state != SCE_HPHP_COMMENT)) || 
 				((scriptLanguage != eScriptNone) && !isStringState(state) &&
 				 (ch == '%'))
 			) && (chNext == '>')) {
