@@ -1160,10 +1160,10 @@ void ScintillaGTK::Resize(int width, int height) {
 	// These allocations should never produce negative sizes as they would wrap around to huge
 	// unsigned numbers inside GTK+ causing warnings.
 	bool showSBHorizontal = horizontalScrollBarVisible && (wrapState == eWrapNone);
-	int horizontalScrollBarHeight = scrollBarWidth;
+	int horizontalScrollBarHeight = scrollBarHeight;
 	if (!showSBHorizontal)
 		horizontalScrollBarHeight = 0;
-	int verticalScrollBarHeight = scrollBarHeight;
+	int verticalScrollBarHeight = scrollBarWidth;
 	if (!verticalScrollBarVisible)
 		verticalScrollBarHeight = 0;
 
@@ -1573,14 +1573,19 @@ gint ScintillaGTK::Expose(GtkWidget *, GdkEventExpose *ose) {
 	Surface *surfaceWindow = Surface::Allocate();
 	if (surfaceWindow) {
 		surfaceWindow->Init(PWidget(wMain)->window, PWidget(wMain));
+
 		// Fill the corner between the scrollbars
-		PRectangle rcCorner = wMain.GetClientPosition();
-		if (verticalScrollBarVisible)
-			rcCorner.left = rcCorner.right - scrollBarWidth + 1;
-		if (horizontalScrollBarVisible && (wrapState == eWrapNone))
-			rcCorner.top = rcCorner.bottom - scrollBarHeight + 1;
-		surfaceWindow->FillRectangle(rcCorner,
-			vs.styles[STYLE_LINENUMBER].back.allocated);
+		if (verticalScrollBarVisible) {
+			if (horizontalScrollBarVisible && (wrapState == eWrapNone)) {
+				PRectangle rcCorner = wMain.GetClientPosition();
+				rcCorner.left = rcCorner.right - scrollBarWidth + 1;
+				rcCorner.top = rcCorner.bottom - scrollBarHeight + 1;
+				//fprintf(stderr, "Corner %0d,%0d %0d,%0d\n",
+				//rcCorner.left, rcCorner.top, rcCorner.right, rcCorner.bottom);
+				surfaceWindow->FillRectangle(rcCorner,
+					vs.styles[STYLE_LINENUMBER].back.allocated);
+			}
+		}
 
 		Paint(surfaceWindow, rcPaint);
 		surfaceWindow->Release();
