@@ -867,33 +867,41 @@ const char *CharacterSetID(int characterSet);
 #define IS_ACC_OR_CHAR(x) \
 	(IS_CHAR(x)) || (IS_ACC(x))
 
+#define IS_ACC(x) \
+	((x) >= 65103 && (x) <= 65111)
+#define IS_CHAR(x) \
+	((x) >= 0 && (x) <= 128)
+
+#define IS_ACC_OR_CHAR(x) \
+	(IS_CHAR(x)) || (IS_ACC(x))
+
 static int MakeAccent(int key, int acc) {
-	const char *conv[] =	{
-		"aeioun AEIOUN",
-		"ãeiõuñ~ÃEIÕUÑ",
-		"áéíóún'ÁÉÍÓÚN",
-		"àèìòùn`ÀÈÌÒÙN",
-		"âêîôûn^ÂÊÎÔÛN",
-		"äëïöün¨ÄËÏÖÜN"
+	const char *conv[] = {
+		"aeiounc AEIOUNC",
+		"ãeiõuñc~ÃEIÕUÑC",
+		"áéíóúnç'ÁÉÍÓÚNÇ",
+		"àèìòùnc`ÀÈÌÒÙNC",
+		"âêîôûnc^ÂÊÎÔÛNC",
+		"äëïöünc¨ÄËÏÖÜNC"
 	};
 	int idx;
-	for (idx = 0; idx < 13; ++idx) {
+	for (idx = 0; idx < 15; ++idx) {
 		if (char(key) == conv[0][idx]) {
 			break;
 		}
 	}
-	if (idx == 13) {
+	if (idx == 15) {
 		return key;
 	}
-	if (acc == 65107) { // ~
+	if (acc == GDK_dead_tilde) { // ~
 		return int((unsigned char)(conv[1][idx]));
-	} else if (acc == 65105) { // '
+	} else if (acc == GDK_dead_acute) { // '
 		return int((unsigned char)(conv[2][idx]));
-	} else if (acc == 65104) { // `
+	} else if (acc == GDK_dead_grave) { // `
 		return int((unsigned char)(conv[3][idx]));
-	} else if (acc == 65106) { // ^
+	} else if (acc == GDK_dead_circumflex) { // ^
 		return int((unsigned char)(conv[4][idx]));
-	} else if (acc == 65111) { // "
+	} else if (acc == GDK_dead_diaeresis) { // "
 		return int((unsigned char)(conv[5][idx]));
 	}
 	return key;
@@ -905,7 +913,7 @@ int ScintillaGTK::KeyDefault(int key, int modifiers) {
 		char utfVal[4]="\0\0\0";
 		wchar_t wcs[2];
 		if (IS_CHAR(key) && IS_ACC(lastKey)) {
-			key = MakeAccent(key, lastKey);
+			lastKey = key = MakeAccent(key, lastKey);
 		}
 		if (IS_ACC_OR_CHAR(key)) {
 			lastKey = key;
