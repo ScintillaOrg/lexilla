@@ -507,6 +507,9 @@ void ScintillaGTK::Initialise() {
 	parentClass = reinterpret_cast<GtkWidgetClass *>(
 	                  gtk_type_class(gtk_container_get_type()));
 
+#if GTK_MAJOR_VERSION >= 2
+	gtk_widget_set_double_buffered(PWidget(wMain), FALSE);
+#endif
 	GTK_WIDGET_SET_FLAGS(PWidget(wMain), GTK_CAN_FOCUS);
 	GTK_WIDGET_SET_FLAGS(GTK_WIDGET(PWidget(wMain)), GTK_SENSITIVE);
 	gtk_widget_set_events(PWidget(wMain),
