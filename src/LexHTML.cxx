@@ -76,7 +76,7 @@ static int ScriptOfState(int state) {
 		return eScriptJS;
 	} else if ((state >= SCE_HPHP_DEFAULT) && (state <= SCE_HPHP_COMMENTLINE)) {
 		return eScriptPHP;
-	} else if (((state >= SCE_H_SGML_DEFAULT) && (state <= SCE_H_SGML_BLOCK_DEFAULT)) || (state == SCE_H_CDATA)) {
+	} else if ((state >= SCE_H_SGML_DEFAULT) && (state <= SCE_H_SGML_BLOCK_DEFAULT)) {
 		return eScriptSGML;
 	} else if (state == SCE_H_SGML_BLOCK_DEFAULT) {
 		return eScriptSGMLblock;
@@ -365,6 +365,10 @@ static bool InTagState(int state) {
 	       state == SCE_H_DOUBLESTRING || state == SCE_H_SINGLESTRING;
 }
 
+static bool IsCommentState(const int state) {
+	return state == SCE_H_COMMENT || state == SCE_H_SGML_COMMENT;
+}
+
 static bool isLineEnd(char ch) {
 	return ch == '\r' || ch == '\n';
 }
@@ -479,14 +483,15 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					} else if ((ch == '\n') && !((chNext == '\r') && (chNext2 == '\n')) && (chNext != '\n')) {
 						// check if the number of tabs is lower than the level
 						int Findlevel = (levelCurrent & ~SC_FOLDLEVELBASE) * 8;
-						for (int j = 0;Findlevel > 0;j++) {
+						for (int j = 0; Findlevel > 0; j++) {
 							char chTmp = styler.SafeGetCharAt(i + j + 1);
 							if (chTmp == '\t') {
 								Findlevel -= 8;
-							}	else if (chTmp == ' ') {
+							} else if (chTmp == ' ') {
 								Findlevel--;
-							}	else
-							break;
+							} else {
+								break;
+							}
 						}
 
 						if (Findlevel > 0) {
@@ -615,6 +620,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					i++; // place as if it was the next char treated
 					visibleChars++;
 				}
+
 				state = StateForScript(aspScript);
 			}
 			scriptLanguage = eScriptVBS;
@@ -630,13 +636,16 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		// handle the start of SGML language (DTD)
 		else if (((scriptLanguage == eScriptNone) || (scriptLanguage == eScriptXML)) &&
 		         (chPrev == '<') &&
-		         (ch == '!')) {
+		         (ch == '!') &&
+		         (StateToPrint != SCE_H_CDATA) && (!IsCommentState(StateToPrint))) {
 			beforePreProc = state;
 			styler.ColourTo(i - 2, StateToPrint);
 			if ((chNext == '-') && (chNext2 == '-')) {
 				state = SCE_H_COMMENT; // wait for a pending command
 			}
-			else {
+			else if (isWordCdata(i + 1, i + 7, styler)) {
+				state = SCE_H_CDATA;
+			} else {
 				styler.ColourTo(i, SCE_H_SGML_DEFAULT); // <! is default
 				scriptLanguage = eScriptSGML;
 				state = SCE_H_SGML_COMMAND; // wait for a pending command
@@ -710,11 +719,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			if (ch == '<') {
 				// in HTML, fold on tag open and unfold on tag close
 				tagOpened = true;
-				if (chNext == '/') {
-					tagClosing = true;
-				} else {
-					tagClosing = false;
-				}
+				tagClosing = (chNext == '/');
 				styler.ColourTo(i - 1, StateToPrint);
 				if (chNext != '!')
 					state = SCE_H_TAGUNKNOWN;
@@ -772,11 +777,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				if (isWordHSGML(styler.GetStartSegment(), i - 1, keywords6, styler)) {
 					styler.ColourTo(i - 1, StateToPrint);
 					state = SCE_H_SGML_1ST_PARAM;
-				} else if (isWordCdata(styler.GetStartSegment(), i - 1, styler)) {
-					styler.ColourTo(i - 1, SCE_H_CDATA);
-					state = SCE_H_CDATA;
 				} else {
-					styler.ColourTo(i - 1, SCE_H_SGML_ERROR);
 					state = SCE_H_SGML_ERROR;
 				}
 			}
@@ -830,6 +831,13 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			if ((ch == '-') && (chPrev == '-')) {
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_H_SGML_DEFAULT;
+			}
+			break;
+		case SCE_H_CDATA:
+			if ((chPrev2 == ']') && (chPrev == ']') && (ch == '>')) {
+				styler.ColourTo(i, StateToPrint);
+				state = SCE_H_DEFAULT;
+				levelCurrent--;
 			}
 			break;
 		case SCE_H_COMMENT:
