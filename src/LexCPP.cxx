@@ -273,6 +273,7 @@ static bool IsStreamCommentStyle(int style) {
 static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordList *[],
                             Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
+	bool foldPreprocessor = styler.GetPropertyInt("fold.preprocessor") != 0;
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	unsigned int endPos = startPos + length;
 	int visibleChars = 0;
@@ -307,15 +308,15 @@ static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordLis
 				}
 			}
 		}
-		if (style == SCE_C_PREPROCESSOR) {
+		if (foldPreprocessor && (style == SCE_C_PREPROCESSOR)) {
 			if (ch == '#') {
 				unsigned int j=i+1;
 				while ((j<endPos) && IsASpaceOrTab(styler.SafeGetCharAt(j))) {
 					j++;
 				}
-				if (styler.Match(j, "region")) {
+				if (styler.Match(j, "region") || styler.Match(j, "if")) {
 					levelCurrent++;
-				} else if (styler.Match(j, "endregion")) {
+				} else if (styler.Match(j, "end")) {
 					levelCurrent--;
 				}
 			}
