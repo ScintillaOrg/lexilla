@@ -239,7 +239,7 @@ void XPMSet::Add(int id, const char *textForm) {
 	width = -1;
 
 	// Replace if this id already present
-	for (int i = 0; i < maximum; i++) {
+	for (int i = 0; i < len; i++) {
 		if (set[i]->GetId() == id) {
 			set[i]->Init(textForm);
 			return;
