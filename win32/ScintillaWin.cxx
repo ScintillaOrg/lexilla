@@ -491,6 +491,7 @@ static unsigned int SciMessageFromEM(unsigned int iMessage) {
 	case WM_COPY: return SCI_COPY;
 	case WM_CUT: return SCI_CUT;
 	case WM_GETTEXT: return SCI_GETTEXT;
+	case WM_SETTEXT: return SCI_SETTEXT;
 	case WM_GETTEXTLENGTH: return SCI_GETTEXTLENGTH;
 	case WM_PASTE: return SCI_PASTE;
 	case WM_UNDO: return SCI_UNDO;
