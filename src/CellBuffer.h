@@ -2,7 +2,7 @@
 /** @file CellBuffer.h
  ** Manages the text of the document.
  **/
-// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2004 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #ifndef CELLBUFFER_H
@@ -150,12 +150,14 @@ public:
  */
 class CellBuffer {
 private:
-	char *body;
-	int size;
-	int length;
-	int part1len;
-	int gaplen;
-	char *part2body;
+	char *body;		///< The cell buffer itself.
+	int size;		///< Allocated size of the buffer.
+	int length;		///< Total length of the data.
+	int part1len;	///< Length of the first part.
+	int gaplen;		///< Length of the gap between the two parts.
+	char *part2body;	///< The second part of the cell buffer.
+						///< Doesn't point after the gap but set so that
+						///< part2body[position] is consistent with body[position].
 	bool readOnly;
 	int growSize;
 
