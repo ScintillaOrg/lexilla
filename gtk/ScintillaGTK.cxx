@@ -127,6 +127,7 @@ public: 	// Public for scintilla_send_message
 private:
 	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 	virtual void SetTicking(bool on);
+	virtual void SetIdle(bool on);
 	virtual void SetMouseCapture(bool on);
 	virtual bool HaveMouseCapture();
 	void FullPaint();
@@ -209,6 +210,7 @@ private:
 	static void DragDataGet(GtkWidget *widget, GdkDragContext *context,
 	                        GtkSelectionData *selection_data, guint info, guint time);
 	static gint TimeOut(ScintillaGTK *sciThis);
+	static gint IdleCallback(ScintillaGTK *sciThis);
 	static void PopUpCB(ScintillaGTK *sciThis, guint action, GtkWidget *widget);
 
 	gint ExposeTextThis(GtkWidget *widget, GdkEventExpose *ose);
@@ -668,6 +670,23 @@ void ScintillaGTK::SetTicking(bool on) {
 	timer.ticksToWait = caret.period;
 }
 
+void ScintillaGTK::SetIdle(bool on) {
+	if (on) {
+		// Start idler, if it's not running.
+		if (idler.state == false) {
+			idler.state = true;
+			idler.idlerID = reinterpret_cast<IdlerID>
+				(gtk_idle_add((GtkFunction)IdleCallback, this));
+		}
+	} else {
+		// Stop idler, if it's running
+		if (idler.state == true) {
+			idler.state = false;
+			gtk_idle_remove(GPOINTER_TO_UINT(idler.idlerID));
+		}
+	}
+}
+
 void ScintillaGTK::SetMouseCapture(bool on) {
 	if (mouseDownCaptures) {
 		if (on) {
@@ -942,7 +961,7 @@ int ScintillaGTK::KeyDefault(int key, int modifiers) {
 				const char *source =
 					CharacterSetID(vs.styles[STYLE_DEFAULT].characterSet);
 				if (*source) {
-					iconv_t iconvh = iconv_open(source, "UTF8");
+					iconv_t iconvh = iconv_open(source, "UTF-8");
 					if (iconvh != ((iconv_t)(-1))) {
 						char localeVal[4]="\0\0\0";
 						char *pin = utfVal;
@@ -1171,14 +1190,14 @@ void ScintillaGTK::GetGtkSelectionText(const GtkSelectionData *selectionData, Se
 			if (selectionType == GDK_TARGET_STRING) {
 				// Convert to UTF-8
 //fprintf(stderr, "Convert to UTF-8 from %s\n", charSetBuffer);
-				dest = ConvertText(&len, dest, len, "UTF8", charSetBuffer);
+				dest = ConvertText(&len, dest, len, "UTF-8", charSetBuffer);
 				selText.Set(dest, len, isRectangular);
 			}
 		} else {
 			if (selectionType == atomUTF8) {
 //fprintf(stderr, "Convert to locale %s\n", charSetBuffer);
 				// Convert to locale
-				dest = ConvertText(&len, dest, len, charSetBuffer, "UTF8");
+				dest = ConvertText(&len, dest, len, charSetBuffer, "UTF-8");
 				selText.Set(dest, len, isRectangular);
 			}
 		}
@@ -1279,14 +1298,14 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 			if (!IsUnicodeMode()) {
 				// Convert to UTF-8
 	//fprintf(stderr, "Convert to UTF-8 from %s\n", charSetBuffer);
-				tmputf = ConvertText(&len, selBuffer, len, "UTF8", charSetBuffer);
+				tmputf = ConvertText(&len, selBuffer, len, "UTF-8", charSetBuffer);
 				selBuffer = tmputf;
 			}
 		} else if (info == TARGET_STRING) {
 			if (IsUnicodeMode()) {
 	//fprintf(stderr, "Convert to locale %s\n", charSetBuffer);
 				// Convert to locale
-				tmputf = ConvertText(&len, selBuffer, len, charSetBuffer, "UTF8");
+				tmputf = ConvertText(&len, selBuffer, len, charSetBuffer, "UTF-8");
 				selBuffer = tmputf;
 			}
 		}
@@ -1950,6 +1969,19 @@ void ScintillaGTK::DragDataGet(GtkWidget *widget, GdkDragContext *context,
 int ScintillaGTK::TimeOut(ScintillaGTK *sciThis) {
 	sciThis->Tick();
 	return 1;
+}
+
+int ScintillaGTK::IdleCallback(ScintillaGTK *sciThis) {
+	// Idler will be automatically stoped, if there is nothing
+	// to do while idle.
+	bool ret = sciThis->Idle();
+	if (ret == false) {
+		// FIXME: This will remove the idler from GTK, we don't want to 
+		// remove it as it is removed automatically when this function
+		// returns false (although, it should be harmless).
+		sciThis->SetIdle(false);
+	}
+	return ret;
 }
 
 void ScintillaGTK::PopUpCB(ScintillaGTK *sciThis, guint action, GtkWidget *) {
