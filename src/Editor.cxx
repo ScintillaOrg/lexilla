@@ -380,7 +380,7 @@ Editor::Editor() {
 	wrapWidth = LineLayout::wrapWidthInfinite;
 	docLineLastWrapped = -1;
 	docLastLineToWrap = -1;
-	backgroundWrapEnabled = true;
+	backgroundWrapEnabled = false;
 
 	hsStart = -1;
 	hsEnd = -1;
@@ -1466,6 +1466,7 @@ bool Editor::WrapLines(bool fullWrap, int priorityWrapLineStart) {
 			wrapWidth = rcTextArea.Width();
 			// Ensure all of the document is styled.
 			pdoc->EnsureStyledTo(pdoc->Length());
+			RefreshStyleData();
 			AutoSurface surface(this);
 			if (surface) {
 				bool priorityWrap = false;
