@@ -528,6 +528,8 @@ static void ColouriseErrorListLine(
 		// Look for Microsoft <filename>(line) :message
 		// Look for Microsoft <filename>(line,pos)message
 		// Look for CTags \tmessage
+		// Look for Lua 5 traceback \t<filename>:<line>:message
+		bool initialTab = (lineBuffer[0] == '\t');
 		int state = 0;
 		for (unsigned int i = 0; i < lengthLine; i++) {
 			char ch = lineBuffer[i];
@@ -536,17 +538,17 @@ static void ColouriseErrorListLine(
 				chNext = lineBuffer[i+1];
 			if (state == 0) {
 				if (ch == ':') {
-					// May be GCC
+					// May be GCC, or might be Lua 5 (Lua traceback same but with tab prefix)
 					if ((chNext != '\\') && (chNext != '/')) {
 						// This check is not completely accurate as may be on
 						// GTK+ with a file name that includes ':'.
 						state = 1;
 					}
-				} else if ((ch == '(') && Is1To9(chNext)) {
+				} else if ((ch == '(') && Is1To9(chNext) && (!initialTab)) {
 					// May be Microsoft
 					// Check against '0' often removes phone numbers
 					state = 10;
-				} else if (ch == '\t') {
+				} else if ((ch == '\t') && (!initialTab)) {
 					// May be CTags
 					state = 20;
 				}
@@ -599,7 +601,7 @@ static void ColouriseErrorListLine(
 			styler.ColourTo(endPos, SCE_ERR_GCC);
 		} else if ((state == 13) || (state == 14) || (state == 15)) {
 			styler.ColourTo(endPos, SCE_ERR_MS);
-		} else if (((state == 22) || (state == 24)) && (lineBuffer[0] != '\t')) {
+		} else if ((state == 22) || (state == 24)) {
 			styler.ColourTo(endPos, SCE_ERR_CTAG);
 		} else {
 			styler.ColourTo(endPos, SCE_ERR_DEFAULT);
