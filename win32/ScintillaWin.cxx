@@ -705,7 +705,10 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		return HandleComposition(wParam, lParam);
 
 	case WM_IME_CHAR: {
-			AddCharBytes(HIBYTE(wParam), LOBYTE(wParam));
+			if (HIBYTE(wParam) == '\0')
+				AddChar(LOBYTE(wParam));
+			else
+				AddCharBytes(HIBYTE(wParam), LOBYTE(wParam));
 			return 0;
 		}
 
