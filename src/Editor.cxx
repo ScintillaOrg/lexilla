@@ -1062,7 +1062,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		rcTextArea.right -= vs.rightMarginWidth;
 		surfaceWindow->SetClip(rcTextArea);
 		//GTimer *tim=g_timer_new();
-		while (visibleLine <= cs.LinesDisplayed() && yposScreen < rcArea.bottom) {
+		while (visibleLine < cs.LinesDisplayed() && yposScreen < rcArea.bottom) {
 			//g_timer_start(tim);
 			//Platform::DebugPrintf("Painting line %d\n", line);
 
