@@ -34,13 +34,17 @@ public:
 /**
  */
 class LineLayout {
-public:
-	enum validLevel { llInvalid, llPositions, llLines } validity;
+private:
+	friend class LineLayoutCache;
+	int *lineStarts;
+	int lenLineStarts;
 	/// Drawing is only performed for @a maxLineLength characters on each line.
-	int maxLineLength;
 	int lineNumber;
 	bool inCache;
+public:
+	int maxLineLength;
 	int numCharsInLine;
+	enum validLevel { llInvalid, llPositions, llLines } validity;
 	int xHighlightGuide;
 	bool highlightColumn;
 	int selStart;
@@ -55,14 +59,22 @@ public:
 	// Wrapped line support
 	int widthLine;
 	int lines;
-	int maxDisplayLines;
-	int *lineStarts;
 
-	LineLayout(int maxLineLength_ = 8000, int maxDisplayLines=100);
+	LineLayout(int maxLineLength_);
 	virtual ~LineLayout();
 	void Resize(int maxLineLength_);
 	void Free();
 	void Invalidate(validLevel validity_);
+	int LineStart(int line) {
+		if (line <= 0) {
+			return 0;
+		} else if ((line >= lines) || !lineStarts) {
+			return numCharsInLine;
+		} else {
+			return lineStarts[line];
+		}
+	}
+	void SetLineStart(int line, int start);
 };
 
 /**

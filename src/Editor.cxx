@@ -32,12 +32,14 @@ active(false), on(false), period(500) {}
 Timer::Timer() :
 ticking(false), ticksToWait(0), tickerID(0) {}
 
-LineLayout::LineLayout(int maxLineLength_, int maxDisplayLines) :
-	validity(llInvalid),
-	maxLineLength(-1),
+LineLayout::LineLayout(int maxLineLength_) :
+	lineStarts(0),
+	lenLineStarts(0),
 	lineNumber(-1),
 	inCache(false),
+	maxLineLength(-1),
 	numCharsInLine(0),
+	validity(llInvalid),
 	xHighlightGuide(0),
 	highlightColumn(0),
 	selStart(0),
@@ -49,9 +51,7 @@ LineLayout::LineLayout(int maxLineLength_, int maxDisplayLines) :
 	indicators(0),
 	positions(0),
 	widthLine(0),
-	lines(1),
-	maxDisplayLines(maxDisplayLines),
-	lineStarts(0) {
+	lines(1) {
 		Resize(maxLineLength_);
 }
 
@@ -66,7 +66,6 @@ void LineLayout::Resize(int maxLineLength_) {
 		styles = new char[maxLineLength_ + 1];
 		indicators = new char[maxLineLength_ + 1];
 		positions = new int[maxLineLength_ + 1];
-		lineStarts = new int[maxDisplayLines + 1];
 		maxLineLength = maxLineLength_;
 	}
 }
@@ -86,6 +85,25 @@ void LineLayout::Free() {
 
 void LineLayout::Invalidate(validLevel validity_) {
 	validity = validity_;
+}
+
+void LineLayout::SetLineStart(int line, int start) {
+	if ((line >= lenLineStarts) && (line != 0)) {
+		int newMaxLines = line + 20;
+		int *newLineStarts = new int[newMaxLines];
+		if (!newLineStarts) 
+			return;
+		for (int i=0; i<newMaxLines; i++) {
+			if (i < lenLineStarts)
+				newLineStarts[i] = lineStarts[i];
+			else
+				newLineStarts[i] = 0;
+		}
+		delete []lineStarts;
+		lineStarts = newLineStarts;
+		lenLineStarts = newMaxLines;
+	}
+	lineStarts[line] = start;
 }
 
 LineLayoutCache::LineLayoutCache() : 
@@ -434,13 +452,13 @@ Point Editor::LocationFromPosition(int pos) {
 		int posInLine = pos - posLineStart;
 		// In case of very long line put x at arbitrary large position
 		if (posInLine > ll->maxLineLength) {
-			pt.x = ll->positions[ll->maxLineLength] - ll->positions[ll->lineStarts[ll->lines]];
+			pt.x = ll->positions[ll->maxLineLength] - ll->positions[ll->LineStart(ll->lines)];
 		}
 		for (int subLine=0; subLine<ll->lines; subLine++) {
-			if ((posInLine > ll->lineStarts[subLine]) && (posInLine <= ll->lineStarts[subLine+1])) {
-				pt.x = ll->positions[posInLine] - ll->positions[ll->lineStarts[subLine]];
+			if ((posInLine > ll->LineStart(subLine)) && (posInLine <= ll->LineStart(subLine+1))) {
+				pt.x = ll->positions[posInLine] - ll->positions[ll->LineStart(subLine)];
 			}
-			if (posInLine >= ll->lineStarts[subLine]) {
+			if (posInLine >= ll->LineStart(subLine)) {
 				pt.y += vs.lineHeight;
 			}
 		}
@@ -485,8 +503,8 @@ int Editor::PositionFromLocation(Point pt) {
 		int lineStartSet = cs.DisplayFromDoc(lineDoc);
 		int subLine = visibleLine - lineStartSet;
 		if (subLine < ll->lines) {
-			int lineStart = ll->lineStarts[subLine];
-			int lineEnd = ll->lineStarts[subLine+1];
+			int lineStart = ll->LineStart(subLine);
+			int lineEnd = ll->LineStart(subLine+1);
 			int subLineStart = ll->positions[lineStart];
 			for (int i = lineStart; i < lineEnd; i++) {
 				if (pt.x < (((ll->positions[i] + ll->positions[i + 1]) / 2) - subLineStart) ||
@@ -532,8 +550,8 @@ int Editor::PositionFromLocationClose(Point pt) {
 		int lineStartSet = cs.DisplayFromDoc(lineDoc);
 		int subLine = visibleLine - lineStartSet;
 		if (subLine < ll->lines) {
-			int lineStart = ll->lineStarts[subLine];
-			int lineEnd = ll->lineStarts[subLine+1];
+			int lineStart = ll->LineStart(subLine);
+			int lineEnd = ll->LineStart(subLine+1);
 			int subLineStart = ll->positions[lineStart];
 			for (int i = lineStart; i < lineEnd; i++) {
 				if (pt.x < (((ll->positions[i] + ll->positions[i + 1]) / 2) - subLineStart) ||
@@ -564,8 +582,8 @@ int Editor::PositionFromLineX(int lineDoc, int x) {
 		LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
 		retVal = ll->numCharsInLine + posLineStart;
 		int subLine = 0;
-		int lineStart = ll->lineStarts[subLine];
-		int lineEnd = ll->lineStarts[subLine+1];
+		int lineStart = ll->LineStart(subLine);
+		int lineEnd = ll->LineStart(subLine+1);
 		int subLineStart = ll->positions[lineStart];
 		for (int i = lineStart; i < lineEnd; i++) {
 			if (x < (((ll->positions[i] + ll->positions[i + 1]) / 2) - subLineStart) ||
@@ -849,7 +867,7 @@ int Editor::DisplayFromPosition(int pos) {
 		int posInLine = pos - posLineStart;
 		lineDisplay--; // To make up for first increment ahead.
 		for (int subLine=0; subLine<ll->lines; subLine++) {
- 			if (posInLine >= ll->lineStarts[subLine]) {
+ 			if (posInLine >= ll->LineStart(subLine)) {
 				lineDisplay++;
 			}
 		}
@@ -1261,7 +1279,6 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 	if (ll->validity == LineLayout::llInvalid) {
 		ll->widthLine = width;
 		ll->lines = 1;
-		ll->lineStarts[0] = 0;
 		int numCharsInLine = 0;
 		if (vstyle.edgeState == EDGE_BACKGROUND) {
 			ll->edgeColumn = pdoc->FindColumn(line, theEdge);
@@ -1361,7 +1378,6 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 	if (ll->validity == LineLayout::llPositions) {
 		if (width == wrapWidthInfinite) {
 			ll->lines = 1;
-			ll->lineStarts[1] = ll->numCharsInLine;
 			ll->widthLine = ll->positions[ll->numCharsInLine];
 		} else {
 			if (width < 20)	{ // Hard to cope when too narrow, so just assume there is space
@@ -1391,12 +1407,8 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 						}
 					}
 					lastLineStart = lastGoodBreak;
-					if (ll->lines < ll->maxDisplayLines - 2) {
-						ll->lines++;
-						ll->lineStarts[ll->lines] = lastGoodBreak;
-					} else {
-						break;
-					}
+					ll->lines++;
+					ll->SetLineStart(ll->lines, lastGoodBreak);
 					startOffset = ll->positions[lastGoodBreak];
 					p = lastGoodBreak + 1;
 					continue;
@@ -1411,7 +1423,6 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 				p++;
 			}
 			ll->lines++;
-			ll->lineStarts[ll->lines] = ll->numCharsInLine;
 		}
 		ll->validity = LineLayout::llLines;
 	}
@@ -1472,13 +1483,13 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	int posLineEnd = pdoc->LineStart(line + 1);
 
 	int styleMask = pdoc->stylingBitsMask;
-	int startseg = ll->lineStarts[subLine];
+	int startseg = ll->LineStart(subLine);
 	int subLineStart = ll->positions[startseg];
 	int lineStart = 0;
 	int lineEnd = 0;
 	if (subLine < ll->lines) {
-		lineStart = ll->lineStarts[subLine];
-		lineEnd = ll->lineStarts[subLine+1];
+		lineStart = ll->LineStart(subLine);
+		lineEnd = ll->LineStart(subLine+1);
 	}
 	for (int i = lineStart; i < lineEnd; i++) {
 
@@ -1891,9 +1902,9 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 				// Draw the Caret
 				if (lineDoc == lineCaret) {
 					int offset = Platform::Minimum(posCaret - posLineStart, ll->maxLineLength);
-					if ((offset >= ll->lineStarts[subLine]) &&
-						((offset < ll->lineStarts[subLine+1]) || offset == ll->numCharsInLine)) {
-						int xposCaret = ll->positions[offset] - ll->positions[ll->lineStarts[subLine]] + xStart;
+					if ((offset >= ll->LineStart(subLine)) &&
+						((offset < ll->LineStart(subLine+1)) || offset == ll->numCharsInLine)) {
+						int xposCaret = ll->positions[offset] - ll->positions[ll->LineStart(subLine)] + xStart;
 						int widthOverstrikeCaret;
 						if (posCaret == pdoc->Length())	{   // At end of document
 							widthOverstrikeCaret = vs.aveCharWidth;
@@ -2086,7 +2097,7 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 
 			// Copy this line and its styles from the document into local arrays
 			// and determine the x position at which each character starts.
-			LineLayout ll;
+			LineLayout ll(8000);
 			LayoutLine(line, surfaceMeasure, vsPrint, &ll);
 			ll.selStart = -1;
 			ll.selEnd = -1;
