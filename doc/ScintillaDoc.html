@@ -1060,8 +1060,8 @@ struct TextToFind {
      This returns the length of the line, including any line end characters. If <code>line</code>
     is negative or beyond the last line in the document, the result is 0. If you want the length of
     the line not including any end of line characters, use <a class="message"
-    href="#SCI_GETLINENDPOSITION"><code>SCI_GETLINENDPOSITION(line)</code></a> - <a class="message"
-    href="#SCI_GETLINEPOSITION"><code>SCI_GETLINEPOSITION(line)</code></a>.</p>
+    href="#SCI_GETLINEENDPOSITION"><code>SCI_GETLINEENDPOSITION(line)</code></a> - <a class="message"
+    href="#SCI_POSITIONFROMLINE"><code>SCI_POSITIONFROMLINE(line)</code></a>.</p>
     <b id="SCI_GETSELTEXT">SCI_GETSELTEXT(&lt;unused&gt;, char *text)</b><br />
      This copies the currently selected text and a terminating 0 byte to the <code>text</code>
     buffer. The buffer must be at least
@@ -2213,7 +2213,7 @@ struct TextToFind {
     selection margins which make it easy to select ranges of lines. By default, all margins are
     insensitive.</p>
 
-<b id="SCI_SETMARGINLEFT">SCI_SETMARGINLEFT(&lt;unused&gt;, int pixels)</b><br />
+    <p><b id="SCI_SETMARGINLEFT">SCI_SETMARGINLEFT(&lt;unused&gt;, int pixels)</b><br />
      <b id="SCI_GETMARGINLEFT">SCI_GETMARGINLEFT</b><br />
      <b id="SCI_SETMARGINRIGHT">SCI_SETMARGINRIGHT(&lt;unused&gt;, int pixels)</b><br />
      <b id="SCI_GETMARGINRIGHT">SCI_GETMARGINRIGHT</b><br />
@@ -2520,7 +2520,7 @@ struct TextToFind {
      <a class="message" href="#SCI_MARKERGET">SCI_MARKERGET(int line)</a><br />
      <a class="message" href="#SCI_MARKERNEXT">SCI_MARKERNEXT(int lineStart, int
     markerMask)</a><br />
-     <a class="message" href="#SCI_MARKERPREVIOUS(">SCI_MARKERPREVIOUS(int lineStart, int
+     <a class="message" href="#SCI_MARKERPREVIOUS">SCI_MARKERPREVIOUS(int lineStart, int
     markerMask)</a><br />
      <a class="message" href="#SCI_MARKERLINEFROMHANDLE">SCI_MARKERLINEFROMHANDLE(int
     handle)</a><br />
@@ -3051,7 +3051,7 @@ struct TextToFind {
     example of call tip use.</p>
 
     <p>The mouse may be clicked on call tips and this causes a
-    <a class="message" href="#SCN_CALLTIPCLICK">SCN_CALLTIPCLICK</a></code>
+    <code><a class="message" href="#SCN_CALLTIPCLICK">SCN_CALLTIPCLICK</a></code>
     notification to be sent to the container. Small up an down arrows may be displayed within
     a call tip by, respectively, including the characters '\001', or '\002'. This is useful
     for showing that there are overloaded variants of one function name and that the user can
