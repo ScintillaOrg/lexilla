@@ -286,6 +286,8 @@ class SurfaceImpl : public Surface {
 	HBITMAP bitmapOld;
 	HPALETTE paletteOld;
 	int maxWidthMeasure;
+	int maxLenText;
+
 	void BrushColor(ColourAllocated back);
 	void SetFont(Font &font_);
 
@@ -346,6 +348,9 @@ SurfaceImpl::SurfaceImpl() :
 	paletteOld(0) {
 	// Windows 9x has only a 16 bit coordinate system so break after 30000 pixels
 	maxWidthMeasure = IsNT() ? 1000000 : 30000;
+	// There appears to be a 16 bit string length limit in GDI on NT and a limit of
+	// 8192 characters on Windows 95.
+	maxLenText = IsNT() ? 65535 : 8192;
 }
 
 SurfaceImpl::~SurfaceImpl() {
@@ -533,10 +538,8 @@ void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const ch
 		tbuf[tlen] = L'\0';
 		::ExtTextOutW(hdc, rc.left, ybase, ETO_OPAQUE, &rcw, tbuf, tlen, NULL);
 	} else {
-		// There appears to be a 16 bit string length limit in GDI
-		if (len > 65535)
-			len = 65535;
-		::ExtTextOut(hdc, rc.left, ybase, ETO_OPAQUE, &rcw, s, len, NULL);
+		::ExtTextOut(hdc, rc.left, ybase, ETO_OPAQUE, &rcw, s,
+			Platform::Minimum(len, maxLenText), NULL);
 	}
 }
 
@@ -552,10 +555,8 @@ void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const c
 		tbuf[tlen] = L'\0';
 		::ExtTextOutW(hdc, rc.left, ybase, ETO_OPAQUE | ETO_CLIPPED, &rcw, tbuf, tlen, NULL);
 	} else {
-		// There appears to be a 16 bit string length limit in GDI
-		if (len > 65535)
-			len = 65535;
-		::ExtTextOut(hdc, rc.left, ybase, ETO_OPAQUE | ETO_CLIPPED, &rcw, s, len, NULL);
+		::ExtTextOut(hdc, rc.left, ybase, ETO_OPAQUE | ETO_CLIPPED, &rcw, s,
+			Platform::Minimum(len, maxLenText), NULL);
 	}
 }
 
@@ -574,10 +575,8 @@ void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, int ybase, con
 				tbuf[tlen] = L'\0';
 				::ExtTextOutW(hdc, rc.left, ybase, 0, &rcw, tbuf, tlen, NULL);
 			} else {
-				// There appears to be a 16 bit string length limit in GDI
-				if (len > 65535)
-					len = 65535;
-				::ExtTextOut(hdc, rc.left, ybase, 0, &rcw, s, len, NULL);
+				::ExtTextOut(hdc, rc.left, ybase, 0, &rcw, s,
+					Platform::Minimum(len,maxLenText), NULL);
 			}
 			::SetBkMode(hdc, OPAQUE);
 			return;
@@ -594,7 +593,7 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 		tbuf[tlen] = L'\0';
 		::GetTextExtentPoint32W(hdc, tbuf, tlen, &sz);
 	} else {
-		::GetTextExtentPoint32(hdc, s, len, &sz);
+		::GetTextExtentPoint32(hdc, s, Platform::Minimum(len, maxLenText), &sz);
 	}
 	return sz.cx;
 }
@@ -642,7 +641,8 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 			positions[i++] = lastPos;
 		}
 	} else {
-		if (!::GetTextExtentExPoint(hdc, s, len, maxWidthMeasure, &fit, positions, &sz)) {
+		if (!::GetTextExtentExPoint(hdc, s, Platform::Minimum(len, maxLenText),
+			maxWidthMeasure, &fit, positions, &sz)) {
 			// Eeek - a NULL DC or other foolishness could cause this.
 			// The least we can do is set the positions to zero!
 			memset(positions, 0, len * sizeof(*positions));
@@ -1090,7 +1090,7 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 		}
 		int pixId = ltt.Get(pDrawItem->itemID);
 		XPM *pxpm = xset.Get(pixId);
-        if (pDrawItem->itemState & ODS_SELECTED) {
+		if (pDrawItem->itemState & ODS_SELECTED) {
 			::SetBkColor(pDrawItem->hDC, ::GetSysColor(COLOR_HIGHLIGHT));
 			::SetTextColor(pDrawItem->hDC, ::GetSysColor(COLOR_HIGHLIGHTTEXT));
 		} else {
@@ -1106,7 +1106,8 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 				ETO_OPAQUE, &(pDrawItem->rcItem), tbuf, tlen, NULL);
 		} else {
 			::ExtTextOut(pDrawItem->hDC, pDrawItem->rcItem.left+widthPix+1, pDrawItem->rcItem.top,
-				ETO_OPAQUE, &(pDrawItem->rcItem), text, len, NULL);
+				ETO_OPAQUE, &(pDrawItem->rcItem), text,
+				len, NULL);
 		}
 		if (pxpm) {
 			Surface *surfaceItem = Surface::Allocate();
