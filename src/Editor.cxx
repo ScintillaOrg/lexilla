@@ -889,6 +889,12 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int xStart,
 						}
 					}
 				}
+				if (vsDraw.styles[styleMain].underline) {
+					PRectangle rcUL = rcSegment;
+					rcUL.top = rcUL.top + vsDraw.maxAscent + 1;
+					rcUL.bottom = rcUL.top + 1;
+					surface->FillRectangle(rcUL, textFore);
+				}
 			}
 			startseg = i + 1;
 		}
@@ -3580,6 +3586,11 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 			InvalidateStyleRedraw();
 		}
 		break;
+	case SCI_STYLESETUNDERLINE:
+		if (wParam <= STYLE_MAX) {
+			vs.styles[wParam].underline = lParam;
+			InvalidateStyleRedraw();
+		}
 		
 	case SCI_STYLERESETDEFAULT:
 		vs.ResetDefaultStyle();

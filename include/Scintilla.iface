@@ -277,6 +277,9 @@ set void StyleSetEOLFilled=2057(int style, bool filled)
 # Reset the default style to its state at startup
 fun void StyleResetDefault=2058(,)
 
+# Set a style to be underlined or not.
+set void StyleSetUnderline=2059(int style, bool underline)
+
 # Set the foreground colour of the selection and whether to use this setting.
 fun void SetSelFore=2067(bool useSetting, colour fore)
 
@@ -319,6 +322,8 @@ val INDIC_MAX=7
 val INDIC_PLAIN=0
 val INDIC_SQUIGGLE=1
 val INDIC_TT=2
+val INDIC_DIAGONAL=3
+val INDIC_STRIKE=4
 val INDIC0_MASK=32
 val INDIC1_MASK=64
 val INDIC2_MASK=128
