@@ -5,6 +5,7 @@
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
+#include <string.h>
 #include <stdlib.h>
 
 #include "Platform.h"
@@ -151,9 +152,17 @@ void LineMarker::RefreshColourPalette(Palette &pal, bool want) {
 }
 
 void LineMarker::SetXPM(const char *textForm) {
-	delete pxpm;
-	pxpm = new XPM(textForm);
-	markType = SC_MARK_PIXMAP;
+	// Test done is two parts to avoid possibility of overstepping the memory
+	// if memcmp implemented strangely. Must be 4 bytes at least at destination.
+	if ((0 == memcmp(textForm, "/* X", 4)) && (0 == memcmp(textForm, "/* XPM */", 9))) {
+		// It is in text form
+		delete pxpm;
+		pxpm = new XPM(textForm);
+		markType = SC_MARK_PIXMAP;
+	} else {
+		// It is really in line form
+		SetXPM(reinterpret_cast<const char * const *>(textForm));
+	}
 }
 
 void LineMarker::SetXPM(const char * const *linesForm) {

@@ -401,7 +401,7 @@ public:
 	int Find(const char *prefix);
 	void GetValue(int n, char *value, int len);
 	void Sort();
-	void SetTypeXpm(int type, const char **xpm_data);
+	void SetTypeXpm(int type, const char *xpm_data);
 	void SetDoubleClickAction(CallBackAction action, void *data) {
 		doubleClickAction = action;
 		doubleClickActionData = data;

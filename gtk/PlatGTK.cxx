@@ -1141,7 +1141,7 @@ void Window::SetTitle(const char *s) {
 }
 
 struct ListImage {
-	const char **xpm_data;
+	const char *xpm_data;
 	GdkPixmap *pixmap;
 	GdkBitmap *bitmap;
 };
@@ -1289,9 +1289,47 @@ void ListBox::Clear() {
 }
 
 static void init_pixmap(ListImage *li, GtkWidget *window) {
+	const char *textForm = li->xpm_data;
+	const char * const * xpm_lineform = reinterpret_cast<const char * const *>(textForm);
+	const char *xpm_lineformpointers[1000];
+	// The XPM data can be either in atext form as will be read from a file
+	// or in a line form (array of char  *) as will be used for images defined in code.
+	// Test for text form and convert to line form
+	if ((0 == memcmp(textForm, "/* X", 4)) && (0 == memcmp(textForm, "/* XPM */", 9))) {
+		// Test done is two parts to avoid possibility of overstepping the memory 
+		// if memcmp implemented strangely. Must be 4 bytes at least at destination.
+		int countQuotes = 0;
+		int lines=1;
+		for (int j=0; textForm[j] && (countQuotes < 2*lines); j++) {
+			if (textForm[j] == '\"') {
+				if (countQuotes == 0) {
+					const char *info = textForm + j + 1;
+					// Skip width
+					while (*info != ' ')
+						info++;
+					while (*info == ' ')
+						info++;
+					// Add height
+					lines += atoi(info);
+					while (*info != ' ')
+						info++;
+					while (*info == ' ')
+						info++;
+					// Add colours
+					lines += atoi(info);
+				}
+				if ((countQuotes & 1) == 0) {
+					xpm_lineformpointers[countQuotes / 2] = textForm + j + 1;
+				}
+				countQuotes++;
+			}
+		}
+		xpm_lineform = xpm_lineformpointers;
+	}
+
 	li->pixmap = gdk_pixmap_colormap_create_from_xpm_d(NULL
 	             , gtk_widget_get_colormap(window), &(li->bitmap), NULL
-	             , (gchar **) li->xpm_data);
+	             , (gchar **) xpm_lineform);
 	if (NULL == li->pixmap) {
 		if (li->bitmap)
 			gdk_bitmap_unref(li->bitmap);
@@ -1376,7 +1414,7 @@ void ListBox::Sort() {
 #pragma warning(disable: 4127)
 #endif
 
-void ListBox::SetTypeXpm(int type, const char **xpm_data) {
+void ListBox::SetTypeXpm(int type, const char *xpm_data) {
 	ListImage *list_image;
 	g_return_if_fail(xpm_data);
 

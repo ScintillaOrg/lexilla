@@ -510,7 +510,7 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		return ac.dropRestOfWord;
 
 	case SCI_REGISTERIMAGE:
-		ac.lb.SetTypeXpm(wParam, reinterpret_cast<const char **>(lParam));
+		ac.lb.SetTypeXpm(wParam, reinterpret_cast<const char *>(lParam));
 		break;
 
 	case SCI_CALLTIPSHOW: {
