@@ -1231,12 +1231,8 @@ gint ScintillaGTK::Motion(GtkWidget *widget, GdkEventMotion *event) {
 	}
 	//Platform::DebugPrintf("Move %x %x %d %c %d %d\n",
 	//	sciThis,event->window,event->time,event->is_hint? 'h' :'.', x, y);
-	if (state & GDK_BUTTON1_MASK) {
-		Point pt;
-		pt.x = x;
-		pt.y = y;
-		sciThis->ButtonMove(pt);
-	}
+	Point pt(x, y);
+	sciThis->ButtonMove(pt);
 	return FALSE;
 }
 
