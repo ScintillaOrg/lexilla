@@ -12,7 +12,9 @@
 
 #include "Platform.h"
 
+#ifndef PLAT_QT
 #define INCLUDE_DEPRECATED_FEATURES
+#endif
 #include "Scintilla.h"
 
 #include "ContractionState.h"
@@ -2786,9 +2788,11 @@ void Editor::NotifySavePoint(bool isSavePoint) {
 }
 
 void Editor::NotifyModifyAttempt() {
+#ifdef INCLUDE_DEPRECATED_FEATURES
 	SCNotification scn;
 	scn.nmhdr.code = SCN_MODIFYATTEMPTRO;
 	NotifyParent(scn);
+#endif
 }
 
 void Editor::NotifyDoubleClick(Point, bool) {
@@ -5473,10 +5477,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SEARCHPREV:
 		return SearchText(iMessage, wParam, lParam);
 
+#ifdef INCLUDE_DEPRECATED_FEATURES
 	case SCI_SETCARETPOLICY:	// Deprecated
 		caretXPolicy = caretYPolicy = wParam;
 		caretXSlop = caretYSlop = lParam;
 		break;
+#endif
 
 	case SCI_SETXCARETPOLICY:
 		caretXPolicy = wParam;
