@@ -580,8 +580,9 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 			}
 		} else if (state == SCE_PL_WORD) {
 			if ((!iswordchar(chNext) && chNext != '\'')
-				|| (chNext == '.' && chNext2 == '.')) {
+				|| chNext == '.') {
 				// ".." is always an operator if preceded by a SCE_PL_WORD.
+				// "." never used in Perl variable names
 				// Archaic Perl has quotes inside names
 				if (isMatch(styler, lengthDoc, styler.GetStartSegment(), "__DATA__")
 				 || isMatch(styler, lengthDoc, styler.GetStartSegment(), "__END__")) {
@@ -924,3 +925,4 @@ static const char * const perlWordListDesc[] = {
 };
 
 LexerModule lmPerl(SCLEX_PERL, ColourisePerlDoc, "perl", FoldPerlDoc, perlWordListDesc);
+
