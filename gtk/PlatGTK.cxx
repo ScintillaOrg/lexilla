@@ -1371,6 +1371,11 @@ void ListBox::Sort() {
 	gtk_clist_sort(GTK_CLIST(list));
 }
 
+// g_return_if_fail causes unnecessary compiler warning in release compile.
+#ifdef _MSC_VER
+#pragma warning(disable: 4127)
+#endif
+
 void ListBox::SetTypeXpm(int type, const char **xpm_data) {
 	ListImage *list_image;
 	g_return_if_fail(xpm_data);
