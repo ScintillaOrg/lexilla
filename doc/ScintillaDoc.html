@@ -426,8 +426,8 @@
 
     <p><b id="SCI_INSERTTEXT">SCI_INSERTTEXT(int pos, const char *text)</b><br />
      This inserts the zero terminated <code>text</code> string at position <code>pos</code> or at
-    the current position if <code>pos</code> is -1. The current position is set at the end of the
-    inserted text, but it is not scrolled into view.</p>
+    the current position if <code>pos</code> is -1. If the current position is after the insertion point
+    then it is moved along with its surrounding text but no scrolling is performed.</p>
 
     <p><b id="SCI_CLEARALL">SCI_CLEARALL</b><br />
      Unless the document is read-only, this deletes all the text.</p>
