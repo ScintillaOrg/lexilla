@@ -263,6 +263,13 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 	sc.Complete();
 }
 
+static bool IsStreamCommentStyle(int style) {
+	return style == SCE_C_COMMENT || 
+		style == SCE_C_COMMENTDOC ||
+		style == SCE_C_COMMENTDOCKEYWORD ||
+		style == SCE_C_COMMENTDOCKEYWORDERROR;
+}
+
 static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordList *[],
                             Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
@@ -282,11 +289,10 @@ static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordLis
 		style = styleNext;
 		styleNext = styler.StyleAt(i + 1);
 		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
-		if (foldComment &&
-			(style == SCE_C_COMMENT || style == SCE_C_COMMENTDOC)) {
-			if (style != stylePrev) {
+		if (foldComment && IsStreamCommentStyle(style)) {
+			if (!IsStreamCommentStyle(stylePrev)) {
 				levelCurrent++;
-			} else if ((style != styleNext) && !atEOL) {
+			} else if (!IsStreamCommentStyle(styleNext) && !atEOL) {
 				// Comments don't end at end of line and the next character may be unstyled.
 				levelCurrent--;
 			}
