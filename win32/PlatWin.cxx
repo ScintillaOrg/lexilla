@@ -309,7 +309,7 @@ void Surface::Release() {
 }
 
 bool Surface::Initialised() {
-	return hdc;
+	return hdc != 0;
 }
 
 void Surface::Init() {
