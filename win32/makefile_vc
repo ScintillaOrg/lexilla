@@ -53,7 +53,7 @@ LEXOBJS	= $(DIR_O)\LexCPP.obj \
 	$(DIR_O)\LexVB.obj
 
 $(COMPONENT): $(SOBJS) $(DIR_O)\ScintRes.res
-	$(LD) /DLL /OUT:$(COMPONENT) $(SOBJS) $(DIR_O)\ScintRes.res $(LDFLAGS)
+	$(LD) /DLL /OUT:$@ $(SOBJS) $(DIR_O)\ScintRes.res $(LDFLAGS)
 	
 LOBJS	= $(DIR_O)\ScintillaWinL.obj $(DIR_O)\ScintillaBaseL.obj \
 	$(DIR_O)\Editor.obj $(DIR_O)\Document.obj \
@@ -68,7 +68,7 @@ $(DIR_O)\ScintRes.res : ScintRes.rc
 	$(RC) /fo$@ $(*B).rc
 
 $(LEXCOMPONENT): $(LOBJS) $(DIR_O)\ScintRes.res
-	$(LD) /DLL /OUT:$(LEXCOMPONENT) $(LOBJS) $(DIR_O)\ScintRes.res $(LDFLAGS)
+	$(LD) /DLL /OUT:$@ $(LOBJS) $(DIR_O)\ScintRes.res $(LDFLAGS)
 	
 $(DIR_O)\AutoComplete.obj: ..\src\AutoComplete.cxx ..\include\Platform.h ..\src\AutoComplete.h
 	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) /Fo$@ /c ..\src\$(@B).cxx
