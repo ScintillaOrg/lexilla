@@ -918,7 +918,7 @@ set void SetViewEOL=2356(bool visible,)
 get int GetDocPointer=2357(,)
 
 # Change the document object used.
-set void SetDocPointer=2358(int pointer,)
+set void SetDocPointer=2358(,int pointer)
 
 # Set which document modification events are sent to the container.
 set void SetModEventMask=2359(int mask,)
