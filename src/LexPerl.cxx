@@ -498,11 +498,6 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					styler.ColourTo(i - 1, state);
 					state = SCE_PL_DEFAULT;
 				}
-			} else if (state == SCE_PL_REF) {
-				if (isEndVar(ch)) {
-					styler.ColourTo(i - 1, state);
-					state = SCE_PL_DEFAULT;
-				}
 			} else if (state == SCE_PL_REGEX) {
 				if (!quoteUp && !isspace(ch)) {
 					quoteUp = ch;
