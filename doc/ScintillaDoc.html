@@ -286,6 +286,7 @@ SCI_STYLESETSIZE(int stylenumber, int sizeinpoints)
 SCI_STYLESETFONT(int stylenumber, char *fontname)
 SCI_STYLESETEOLFILLED(int stylenumber, bool eolfilled)
 SCI_STYLESETUNDERLINE(int stylenumber, bool underline)
+SCI_STYLESETCHARACTERSET(int stylenumber, int charset)
 </pre>
     <p>
        While the style setting messages mentioned above, change the style numbers associated with
@@ -297,6 +298,12 @@ SCI_STYLESETUNDERLINE(int stylenumber, bool underline)
     <p>
        The EOLFILLED style allows to colourise from the end of the line to the right side of the
       window.
+    </p>
+    <p>
+      SCI_STYLESETCHARACTERSET can set a styel to use a different character set than the default.
+      For example, SCI_STYLESETCHARACTERSET(SCE_C_STRING, SC_CHARSET_RUSSIAN)
+      would ensure that strings in Russian would display corectly. 
+      This feature currently only works on Windows.
     </p>
     <p>
        As well as the 32 fundamental lexer styles, there are also some predefined numbered styles
@@ -424,12 +431,15 @@ SCI_SETUSETABS(bool usetabs)
 SCI_SETLINEINDENTATION(int line, int indentation)
 SCI_GETLINEINDENTATION(int line)
 SCI_GETLINEINDENTPOSITION(int line)
+SCI_GETCOLUMN
 </pre>
     <p>
      The amount of indentation on a line can be discovered and set with SCI_GETLINEINDENTATION and 
      SCI_SETLINEINDENTATION. The indentation is measured in character columns which correspond 
      to the width of space characters. 
      SCI_GETLINEINDENTPOSITION returns the position at the end of indentation of a line.
+     SCI_GETCOLUMN returns the column number of a position within the document taking the width
+     of tabs into account.
     </p>
 <pre>
 SCI_SETCODEPAGE(int codepage)
@@ -703,14 +713,25 @@ EM_FORMATRANGE
 <pre>
 SCI_GETDOCPOINTER
 SCI_SETDOCPOINTER(&lt;unused&gt;,document *pdoc)
+SCI_CREATEDOCUMENT
+SCI_ADDREFDOCUMENT(&lt;unused&gt;,document *pdoc)
+SCI_RELEASEDOCUMENT(&lt;unused&gt;,document *pdoc)
 </pre>
     <p>
-       This is to allow simple split views of documents. Each Scintilla owns one default document
-      and has a pointer to a used document. Initially the used document is the default one. The
-      SCI_GETDOCPOINTER call returns a pointer to the default document. SCI_SETDOCPOINTER sets the
-      used document. SCI_SETDOCPOINTER(0) restores the use of the default document and should
-      always be called before closing the Scintilla that owns the current document (to avoid
-      calling methods on a deleted object).
+       This is to allow simple split views of documents and so applications may maintain mutiple buffer
+       which may be individually selected into the editor. Each Scintilla has a pointer to a used document. 
+       Initially the used document is a default one created when the Scintilla was created. 
+       The SCI_GETDOCPOINTER call returns a pointer to the used document. 
+       SCI_SETDOCPOINTER sets the used document. 
+       SCI_SETDOCPOINTER(0) switches to a new empty document.
+       Before closing down Scintilla make sure all document pointers retrieved are released to avoid 
+       memory leaks. 
+    </p>
+    <p>
+      A new document may be created by SCI_CREATEDOCUMENT which returns a pointer to 
+      the document. This document is not selected into the editor and starts with a reference count
+      of 1. A document may be released with SCI_RELEASEDOCUMENT and have its reference
+      count incremented with SCI_ADDREFDOCUMENT.
     </p>
     <h3>
        Folding
