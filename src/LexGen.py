@@ -142,6 +142,9 @@ def FindModules(lexFile):
 			modules.append(l.split()[1])
 	return modules
 
+def ciCompare(a,b):
+    return a.lower() < b.lower()
+
 def RegenerateAll():
 	root="../../"
 
@@ -152,11 +155,13 @@ def RegenerateAll():
 	lexerModules = []
 	for lexFile in lexFilePaths:
 		lexerModules.extend(FindModules(lexFile))
+	lexerModules.sort(ciCompare)
 
 	# Find all the SciTE properties files
 	otherProps = ["abbrev.properties", "Embedded.properties", "SciTEGlobal.properties", "SciTE.properties"]
 	propFilePaths = glob.glob(root + "scite/src/*.properties")
 	propFiles = [os.path.basename(f) for f in propFilePaths if os.path.basename(f) not in otherProps]
+	propFiles.sort(ciCompare)
 	print propFiles
 
 	# Find all the menu command IDs in the SciTE header
