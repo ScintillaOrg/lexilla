@@ -475,6 +475,7 @@ get colour GetCaretLineBack=2097(,)
 set void SetCaretLineBack=2098(colour back,)
 
 # Set a style to be changeable or not (read only).
+# Experimental feature, currently buggy.
 set void StyleSetChangeable=2099(int style, bool changeable)
 
 # Display a auto-completion list.
