@@ -49,7 +49,8 @@ void CallTip::RefreshColourPalette(Palette &pal, bool want) {
 }
 
 void CallTip::DrawChunk(Surface *surface, int &x, const char *s,
-	int posStart, int posEnd, int ytext, PRectangle rcClient, bool highlight, bool draw) {
+	int posStart, int posEnd, int ytext, PRectangle rcClient,
+	bool highlight, bool draw) {
 	s += posStart;
 	int len = posEnd - posStart;
 	int maxEnd = 0;
@@ -69,6 +70,7 @@ void CallTip::DrawChunk(Surface *surface, int &x, const char *s,
 		if (endSeg > startSeg) {
 			if (s[startSeg] <= '\002') {
 				xEnd = x + widthArrow;
+				offsetMain = xEnd;
 				if (draw) {
 					const int halfWidth = widthArrow / 2 - 3;
 					const int centreX = x + widthArrow / 2 - 1;
@@ -91,9 +93,9 @@ void CallTip::DrawChunk(Surface *surface, int &x, const char *s,
 					} else {
 						// Down arrow
 						Point pts[] = {
-    						Point(centreX - halfWidth, centreY - halfWidth / 2 + 1),
-    						Point(centreX + halfWidth, centreY - halfWidth / 2 + 1),
-    						Point(centreX, centreY + halfWidth - halfWidth / 2 + 1),
+    						Point(centreX - halfWidth, centreY - halfWidth / 2 + 2),
+    						Point(centreX + halfWidth, centreY - halfWidth / 2 + 2),
+    						Point(centreX, centreY + halfWidth - halfWidth / 2 + 2),
 						};
 						surface->Polygon(pts, sizeof(pts) / sizeof(pts[0]),
                  						colourBG.allocated, colourBG.allocated);
@@ -134,7 +136,7 @@ int CallTip::PaintContents(Surface *surfaceWindow, bool draw) {
 	// For each line...
 	// Draw the definition in three parts: before highlight, highlighted, after highlight
 	int ytext = rcClient.top + ascent + 1;
-	rcClient.bottom = rcClient.top + lineHeight + 1;
+	rcClient.bottom = ytext + surfaceWindow->Descent(font) + 1;
 	char *chunkVal = val;
 	bool moreChunks = true;
 	int maxWidth = 0;
@@ -157,9 +159,12 @@ int CallTip::PaintContents(Surface *surfaceWindow, bool draw) {
 
 		int x = 5;
 
-		DrawChunk(surfaceWindow, x, chunkVal, 0, thisStartHighlight, ytext, rcClient, false, draw);
-		DrawChunk(surfaceWindow, x, chunkVal, thisStartHighlight, thisEndHighlight, ytext, rcClient, true, draw);
-		DrawChunk(surfaceWindow, x, chunkVal, thisEndHighlight, chunkLength, ytext, rcClient, false, draw);
+		DrawChunk(surfaceWindow, x, chunkVal, 0, thisStartHighlight,
+			ytext, rcClient, false, draw);
+		DrawChunk(surfaceWindow, x, chunkVal, thisStartHighlight, thisEndHighlight,
+			ytext, rcClient, true, draw);
+		DrawChunk(surfaceWindow, x, chunkVal, thisEndHighlight, chunkLength,
+			ytext, rcClient, false, draw);
 
 		chunkVal = chunkEnd + 1;
 		ytext += lineHeight;
@@ -179,6 +184,7 @@ void CallTip::PaintCT(Surface *surfaceWindow) {
 
 	surfaceWindow->FillRectangle(rcClient, colourBG.allocated);
 
+	offsetMain = 5;
 	PaintContents(surfaceWindow, true);
 
 	// Draw a raised border around the edges of the window
@@ -232,6 +238,7 @@ PRectangle CallTip::CallTipStart(int pos, Point pt, const char *defn,
 	const char *look = val;
 	xUp = -100;
 	xDown = -100;
+	offsetMain = 5;
 	int width = PaintContents(surfaceMeasure, false) + 5;
 	while ((newline = strchr(look, '\n')) != NULL) {
 		look = newline + 1;
@@ -241,7 +248,7 @@ PRectangle CallTip::CallTipStart(int pos, Point pt, const char *defn,
 	// Extra line for border and an empty line at top and bottom
 	int height = lineHeight * numLines - surfaceMeasure->InternalLeading(font) + 2 + 2;
 	delete surfaceMeasure;
-	return PRectangle(pt.x -5, pt.y + 1, pt.x + width - 5, pt.y + 1 + height);
+	return PRectangle(pt.x - offsetMain, pt.y + 1, pt.x + width - offsetMain, pt.y + 1 + height);
 }
 
 void CallTip::CallTipCancel() {

@@ -18,11 +18,12 @@ class CallTip {
 	int xUp;
 	int xDown;
 	int lineHeight;
+	int offsetMain;
 	// Private so CallTip objects can not be copied
 	CallTip(const CallTip &) {}
 	CallTip &operator=(const CallTip &) { return *this; }
-	void DrawChunk(Surface *surface, int &x, const char *s, 
-		int posStart, int posEnd, int ytext, PRectangle rcClient, 
+	void DrawChunk(Surface *surface, int &x, const char *s,
+		int posStart, int posEnd, int ytext, PRectangle rcClient,
 		bool highlight, bool draw);
 	int PaintContents(Surface *surfaceWindow, bool draw);
 
