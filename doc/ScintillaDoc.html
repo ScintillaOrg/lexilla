@@ -408,10 +408,14 @@ SCI_SETBUFFEREDDRAW(bool isbuffered)
     </p>
 <pre>
 SCI_SETTABWIDTH(int widthinchars)
+SCI_SETINDENT(int widthinchars)
+SCI_SETUSETABS(bool usetabs)
 </pre>
     <p>
-       Sets the size of a tab as a multiple of the size of a space character in the style of the
-      first style definition
+       SCI_SETTABWIDTH sets the size of a tab as a multiple of the size of a space character in the style of the
+      first style definition. SCI_SETINDENT sets the size of indentation in terms of characters. 
+      SCI_SETUSETABS determines whether indentation should be created out of a micture of tabs 
+      and space or be based purely on spaces.
     </p>
 <pre>
 SCI_SETCODEPAGE(int codepage)

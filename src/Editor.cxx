@@ -3365,6 +3365,25 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		InvalidateStyleRedraw();
 		break;
 
+	case SCI_GETTABWIDTH:
+		return pdoc->tabInChars;
+	
+	case SCI_SETINDENT:
+		pdoc->indentInChars = wParam;
+		InvalidateStyleRedraw();
+		break;
+		
+	case SCI_GETINDENT:
+		return pdoc->indentInChars;
+
+	case SCI_SETUSETABS:
+		pdoc->useTabs = wParam;
+		InvalidateStyleRedraw();
+		break;
+
+	case SCI_GETUSETABS:
+		return pdoc->useTabs;
+		
 	case SCI_SETCODEPAGE:
 		pdoc->dbcsCodePage = wParam;
 		break;

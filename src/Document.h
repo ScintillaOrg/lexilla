@@ -90,6 +90,8 @@ public:
 	// dbcsCodePage can also be SC_CP_UTF8 to enable UTF-8 mode
 	int dbcsCodePage;
 	int tabInChars;
+	int indentInChars;
+	bool useTabs;
 	
 	Document();
 	virtual ~Document();
@@ -182,10 +184,15 @@ private:
 	bool IsWordChar(unsigned char ch);
 	bool IsWordAt(int start, int end);
 	void ModifiedAt(int pos);
+	
+	int GetLineIndentation(int line);
+	int GetLineIndentPosition(int line);
 		
 	void NotifyModifyAttempt();
 	void NotifySavePoint(bool atSavePoint);
 	void NotifyModified(DocModification mh);
+	
+	int IndentSize() { return indentInChars ? indentInChars : tabInChars; }
 };
 
 // To optimise processing of document modifications by DocWatchers, a hint is passed indicating the 

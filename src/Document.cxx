@@ -34,6 +34,8 @@ Document::Document() {
 	enteredCount = 0;
 	enteredReadOnlyCount = 0;
 	tabInChars = 8;
+	indentInChars = 0;
+	useTabs = true;
 	watchers = 0;
 	lenWatchers = 0;
 }
@@ -501,26 +503,76 @@ int Document::DelCharBack(int pos) {
 	}
 }
 
-void Document::Indent(bool forwards, int lineBottom, int lineTop) {
-	if (forwards) {
-		// Indent by a tab
-		for (int line = lineBottom; line >= lineTop; line--) {
-			InsertChar(LineStart(line), '\t');
+static bool isindentchar(char ch) {
+	return (ch == ' ') || (ch == '\t');
+}
+
+static int NextTab(int pos, int tabSize) {
+	return ((pos / tabSize) + 1) * tabSize;
+}
+
+static void CreateIndentation(char *linebuf, int length, int indent, int tabSize, bool insertSpaces) {
+	length--;	// ensure space for \0
+	if (!insertSpaces) {
+		while ((indent >= tabSize) && (length > 0)) {
+			*linebuf++ = '\t';
+			indent -= tabSize;
+			length--;
 		}
-	} else {
-		// Dedent - suck white space off the front of the line to dedent by equivalent of a tab
-		for (int line = lineBottom; line >= lineTop; line--) {
-			int ispc = 0;
-			while (ispc < tabInChars && cb.CharAt(LineStart(line) + ispc) == ' ')
-				ispc++;
-			int posStartLine = LineStart(line);
-			if (ispc == tabInChars) {
-				DeleteChars(posStartLine, ispc);
-			} else if (cb.CharAt(posStartLine + ispc) == '\t') {
-				DeleteChars(posStartLine, ispc + 1);
-			} else {	// Hit a non-white
-				DeleteChars(posStartLine, ispc);
-			}
+	}
+	while ((indent > 0) && (length > 0)) {
+		*linebuf++ = ' ';
+		indent--;
+		length--;
+	}
+	*linebuf = '\0';
+}
+
+int Document::GetLineIndentation(int line) {
+	int indent = 0;
+	if (line >= 0) {
+		int lineStart = LineStart(line);
+		int length = Length();
+		for (int i=lineStart;i<length;i++) {
+			char ch = cb.CharAt(i);
+			if (ch == ' ')
+				indent++;
+			else if (ch == '\t')
+				indent = NextTab(indent, tabInChars);
+			else 
+				return indent;
+		}
+	}
+	return indent;
+}
+
+int Document::GetLineIndentPosition(int line) {
+	int pos = LineStart(line);
+	int length = Length();
+	while ((pos < length) && isindentchar(cb.CharAt(pos))) {
+		pos++;
+	}
+	return pos;
+}
+
+void Document::Indent(bool forwards, int lineBottom, int lineTop) {
+	char linebuf[1000];
+	// Dedent - suck white space off the front of the line to dedent by equivalent of a tab
+	for (int line = lineBottom; line >= lineTop; line--) {
+		int indentOfLine = GetLineIndentation(line);
+		int indentNew = indentOfLine;
+		if (forwards)
+			indentNew += IndentSize();
+		else
+			indentNew -= IndentSize();
+		if (indentNew < 0)
+			indentNew = 0;
+		if (indentNew != indentOfLine) {
+			CreateIndentation(linebuf, sizeof(linebuf), indentNew, tabInChars, !useTabs);
+			int thisLineStart = LineStart(line);
+			int indentPos = GetLineIndentPosition(line);
+			DeleteChars(thisLineStart, indentPos - thisLineStart);
+			InsertString(thisLineStart, linebuf);
 		}
 	}
 }
