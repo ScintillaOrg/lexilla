@@ -21,6 +21,10 @@
 //                  Added Folding logic for preprocessor blocks triggered by fold.preprocessor=1
 //                  Added Special for #region - #endregion syntax highlight and folding.
 // May 30, 2004   - Fixed issue with continuation lines on If statements.
+// June 5, 2004   - Added comma to Operators for better readability.
+//                  Added fold.compact support set with fold.compact=1
+//                  Changed folding inside of #cs-#ce. Default is no keyword folding inside comment blocks when fold.comment=1
+//                        it will now only happen when fold.comment=2.
 // 
 // Copyright for Scintilla: 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
@@ -60,7 +64,7 @@ static inline bool IsAOperator(char ch) {
 		return false;
 	if (ch == '+' || ch == '-' || ch == '*' || ch == '/' ||
 	    ch == '&' || ch == '^' || ch == '=' || ch == '<' || ch == '>' ||
-	    ch == '(' || ch == ')' || ch == '[' || ch == ']' )
+	    ch == '(' || ch == ')' || ch == '[' || ch == ']' || ch == ',' )
 		return true;
 	return false;
 }
@@ -349,7 +353,7 @@ static int GetStyleFirstWord(unsigned int szLine, Accessor &styler)
 } // GetStyleFirstWord()
 
 //
-// Routine to check the last not comment charater on a line to see if its a continuation
+// Routine to check the last "none comment" character on a line to see if its a continuation
 // 
 static bool IsContinuationLine(unsigned int szLine, Accessor &styler)
 {
@@ -381,6 +385,8 @@ static void FoldAU3Doc(unsigned int startPos, int length, int, WordList *[], Acc
 	int endPos = startPos + length;
 	// get settings from the config files for folding comments and preprocessor lines
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
+	bool foldInComment = styler.GetPropertyInt("fold.comment") == 2;
+	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	bool foldpreprocessor = styler.GetPropertyInt("fold.preprocessor") != 0;
 	// Backtrack to previous line in case need to fix its fold status
 	int lineCurrent = styler.GetLine(startPos);
@@ -391,9 +397,7 @@ static void FoldAU3Doc(unsigned int startPos, int length, int, WordList *[], Acc
 		}
 	}
 	// vars for style of previous/current/next lines 
-	//### int stylech = GetStyleFirstWord(lineCurrent,styler);
 	int style = GetStyleFirstWord(lineCurrent,styler);
-	//### int styleNext = 0;
 	int stylePrev = 0;
 	// find the first previous line without continuation character at the end
 	while ((lineCurrent > 0 && IsContinuationLine(lineCurrent,styler)) ||
@@ -417,7 +421,6 @@ static void FoldAU3Doc(unsigned int startPos, int length, int, WordList *[], Acc
 	if (lineCurrent > 0)
 		levelCurrent = styler.LevelAt(lineCurrent-1) >> 16;
 	int levelNext = levelCurrent;
-	//### int levelPrev = 0;
 	//  
 	int	visibleChars = 0;
 	char chNext = styler.SafeGetCharAt(startPos);
@@ -482,7 +485,9 @@ static void FoldAU3Doc(unsigned int startPos, int length, int, WordList *[], Acc
 			// Folding logic for Keywords
 			// **************************
 			// if a keyword is found on the current line and the line doesn't end with _ (continuation)
-			if (szKeywordlen > 0 && (!(chPrev == '_'))) {
+			//    and we are not inside a commentblock.
+			if (szKeywordlen > 0 && (!(chPrev == '_')) && 
+				((!(IsStreamCommentStyle(style)) || foldInComment)) ) {
 				szKeyword[szKeywordlen] = '\0';
 				// only fold "if" last keyword is "then"  (else its a one line if)
 				if (strcmp(szKeyword,"if") == 0  && ThenFoundLast) {
@@ -563,8 +568,8 @@ static void FoldAU3Doc(unsigned int startPos, int length, int, WordList *[], Acc
 			}
 			int levelUse = levelCurrent;
 			int lev = levelUse | levelNext << 16;
-			//if (visibleChars == 0)
-			//	lev |= SC_FOLDLEVELWHITEFLAG;
+			if (visibleChars == 0 && foldCompact)
+				lev |= SC_FOLDLEVELWHITEFLAG;
 			if (levelUse < levelNext) {
 				lev |= SC_FOLDLEVELHEADERFLAG;
 			}
@@ -576,7 +581,6 @@ static void FoldAU3Doc(unsigned int startPos, int length, int, WordList *[], Acc
 			stylePrev = style;
 			style = styleNext;
 			levelCurrent = levelNext;
-			//###levelPrev = levelCurrent;
 			visibleChars = 0;
 			// if the last character is an Underscore then don't reset since the line continues on the next line.
 			if (!(chPrev == '_')) {
@@ -588,8 +592,10 @@ static void FoldAU3Doc(unsigned int startPos, int length, int, WordList *[], Acc
 			}
 		}
 		// save the last processed character
-		if (!isspacechar(ch))
+		if (!isspacechar(ch)) {
 			chPrev = ch;
+			visibleChars++;
+		}
 	}
 }
 
