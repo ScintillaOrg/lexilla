@@ -1933,12 +1933,12 @@ public:
 	}
 
 	// Use g_module_symbol to get a pointer to the relevant function.
-	virtual Function *FindFunction(const char *name) {
+	virtual Function FindFunction(const char *name) {
 		if (m != NULL) {
 			gpointer fn_address = NULL;
 			gboolean status = g_module_symbol(m, name, &fn_address);
 			if (status)
-				return static_cast<Function*>( fn_address );
+				return static_cast<Function>(fn_address);
 			else
 				return NULL;
 		} else

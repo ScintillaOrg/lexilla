@@ -435,13 +435,13 @@ public:
 class DynamicLibrary {
 public:
 	virtual ~DynamicLibrary() {};
-	
+
 	/// @return Pointer to function "name", or NULL on failure.
-	virtual Function *FindFunction(const char *name) = 0;
-	
+	virtual Function FindFunction(const char *name) = 0;
+
 	/// @return true if the library was loaded successfully.
 	virtual bool IsValid() = 0;
-	
+
 	/// @return An instance of a DynamicLibrary subclass with "modulePath" loaded.
 	static DynamicLibrary *Load(const char *modulePath);
 };
