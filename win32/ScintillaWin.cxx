@@ -360,12 +360,7 @@ static int KeyTranslate(int keyIn) {
 }
 
 LRESULT ScintillaWin::WndPaint(unsigned long wParam) {
-	//CElapsed ce; ce.Begin();
-	//LARGE_INTEGER perfStart;
-	//LARGE_INTEGER perfEnd;
-	//LARGE_INTEGER performanceFreq;
-	//QueryPerformanceFrequency(&performanceFreq);
-	//QueryPerformanceCounter(&perfStart);
+	//ElapsedTime et;
 
 	// Redirect assertions to debug output and save current state
 	bool assertsPopup = Platform::ShowAssertionPopUps(false);
@@ -408,14 +403,7 @@ LRESULT ScintillaWin::WndPaint(unsigned long wParam) {
 	// Restore debug output state
 	Platform::ShowAssertionPopUps(assertsPopup);
 
-	//QueryPerformanceCounter(&perfEnd);
-	//__int64 start = perfStart.QuadPart;
-	//__int64 end = perfEnd.QuadPart;
-	//__int64 freq = performanceFreq.QuadPart;
-	//__int64 dur = end - start;
-	//double per = double(dur) / double(freq);
-	//Platform::DebugPrintf("Paint took %5.03g\n", per);
-	//Platform::DebugPrintf("Paint took %g\n", ce.End());
+	//Platform::DebugPrintf("Paint took %g\n", et.Duration());
 	return 0l;
 }
 
