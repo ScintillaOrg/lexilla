@@ -342,6 +342,9 @@ static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unuse
 					WordList *[], Accessor &styler) {
 	int maxPos = startPos + length;
 	int maxLines = styler.GetLine(maxPos-1);
+						
+	bool foldComment = styler.GetPropertyInt("fold.comment.python");
+	bool foldQuotes = styler.GetPropertyInt("fold.quotes.python");
 
 	// Backtrack to previous non-blank line so we can determine indent level
 	// for any white space lines (needed esp. within triple quoted strings)
@@ -365,10 +368,10 @@ static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unuse
 	int prev_state = SCE_P_DEFAULT & 31;
 	if (lineCurrent >= 1)
 		prev_state = styler.StyleAt(startPos-1) & 31;
-	int prevQuote = ((prev_state == SCE_P_TRIPLE) || (prev_state == SCE_P_TRIPLEDOUBLE));
+	int prevQuote = foldQuotes && ((prev_state == SCE_P_TRIPLE) || (prev_state == SCE_P_TRIPLEDOUBLE));
 	int prevComment = 0;
 	if (lineCurrent >= 1)
-		prevComment = IsCommentLine(lineCurrent - 1, styler);
+		prevComment = foldComment && IsCommentLine(lineCurrent - 1, styler);
 
 	// Process all characters to end of requested range or end of any triple quote
 	// or comment that hangs over the end of the range
@@ -379,10 +382,10 @@ static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unuse
 		int lineNext = lineCurrent + 1;
 		int style = styler.StyleAt(styler.LineStart(lineNext)) & 31;
 		int indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
-		int quote = ((style == SCE_P_TRIPLE) || (style== SCE_P_TRIPLEDOUBLE));
+		int quote = foldQuotes && ((style == SCE_P_TRIPLE) || (style== SCE_P_TRIPLEDOUBLE));
 		int quote_start = (quote && !prevQuote);
 		int quote_continue = (quote && prevQuote);
-		int comment = IsCommentLine(lineCurrent, styler);
+		int comment = foldComment && IsCommentLine(lineCurrent, styler);
 		int comment_start = (comment && !prevComment && 
 			IsCommentLine(lineNext, styler) && (lev > SC_FOLDLEVELBASE));
 		int comment_continue = (comment && prevComment);
