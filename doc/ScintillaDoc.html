@@ -865,15 +865,26 @@ SCI_GETCODEPAGE
 	to disable DBCS support.
     </p>
     <p>
-	On Windows, code page SC_CP_UTF8 (65001) sets Scintilla into
+	Code page SC_CP_UTF8 (65001) sets Scintilla into
 	Unicode mode with the document treated as a sequence of characters
-	expressed in UTF-8. The text is converted to UCS-2 before being
+	expressed in UTF-8. The text is converted to the platform's normal
+	Unicode encoding before being
 	drawn by the OS and can thus display Hebrew, Arabic, Cyrillic, and
 	Han characters. Languages which can use two characters stacked
 	vertically in one horizontal space such as Thai will mostly work
 	but there are som eissues where the characters are drawn
 	separately leading to visual glitches. Bidirectional text is not
 	supported.
+    </p>
+    <p>
+	For GTK+, the locale should be set to a Unicode locale with a call similar to
+	setlocale(LC_CTYPE, "en_US.UTF-8"). Fonts with an "iso10646" registry
+	should be used in a font set. Font sets are a comma separated list of partial
+	font specifications where each partial font specification can be in the form of
+	foundry-fontface-charsetregistry-encoding *OR*
+	fontface-charsetregistry-encoding *OR*
+	foundry-fontface *OR*
+	fontface. An example is "misc-fixed-iso10646-1,*".
     </p>
 <pre>
 SCI_SETWORDCHARS(&lt;unused&gt;, char *chars)
@@ -1899,6 +1910,8 @@ EM_SETTARGETDEVICE
 	For GTK+, GCC 2.95.2 should be used. GTK+ 1.2x and 2.0x are
 	supported.
 	Building for GTK+ 2.0x requires defining GTK2 on the command line.
+	The Visual C++ 6.0 project (.dsp) files are no longer supported but are left
+	in the download for people that are prepared to update them.
     </p>
     <h3>
 	Static linking
@@ -1919,6 +1932,7 @@ EM_SETTARGETDEVICE
 	Ensuring lexers are linked into Scintilla
     </h3>
     <p>
+	The preprocessor symbol SCI_LEXER should be defined for compilation.
 	Depending on the compiler and linker used, the lexers may be stripped
 	out. This is most often caused when building a static library. To ensure
 	the lexers are linked in, the Scintilla_LinkLexers() function may be
