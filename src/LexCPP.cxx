@@ -5,11 +5,11 @@
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
-#include <stdlib.h> 
-#include <string.h> 
-#include <ctype.h> 
-#include <stdio.h> 
-#include <stdarg.h> 
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <stdarg.h>
 
 #include "Platform.h"
 
@@ -51,6 +51,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 	styler.StartAt(startPos);
 	
 	bool fold = styler.GetPropertyInt("fold");
+	bool foldComment = styler.GetPropertyInt("fold.comment");
 	bool stylingWithinPreprocessor = styler.GetPropertyInt("styling.within.preprocessor");
 	int lineCurrent = styler.GetLine(startPos);
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
@@ -117,6 +118,8 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 				}
 			} else if (ch == '/' && chNext == '*') {
 				styler.ColourTo(i-1, state);
+				if (foldComment)
+					levelCurrent++;
 				if (styler.SafeGetCharAt(i + 2) == '*' ||
 					styler.SafeGetCharAt(i + 2) == '!')	// Support of Qt/Doxygen doc. style
 					state = SCE_C_COMMENTDOC;
@@ -160,6 +163,8 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 				lastWordWasUUID = classifyWordCpp(styler.GetStartSegment(), i - 1, keywords, styler);
 				state = SCE_C_DEFAULT;
 				if (ch == '/' && chNext == '*') {
+					if (foldComment)
+						levelCurrent++;
 					if (styler.SafeGetCharAt(i + 2) == '*')
 						state = SCE_C_COMMENTDOC;
 					else
@@ -197,6 +202,8 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 						(styler.GetStartSegment() == static_cast<unsigned int>(startPos))))) {
 						styler.ColourTo(i, state);
 						state = SCE_C_DEFAULT;
+						if(foldComment)
+							levelCurrent--;
 					}
 				}
 			} else if (state == SCE_C_COMMENTDOC) {
@@ -206,6 +213,8 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 						(styler.GetStartSegment() == static_cast<unsigned int>(startPos))))) {
 						styler.ColourTo(i, state);
 						state = SCE_C_DEFAULT;
+						if(foldComment)
+							levelCurrent--;
 					}
 				}
 			} else if (state == SCE_C_COMMENTLINE || state == SCE_C_COMMENTLINEDOC) {
