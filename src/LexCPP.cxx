@@ -331,6 +331,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordList *[],
                             Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment");
+	bool foldCompact = styler.GetPropertyInt("fold.compact", 1);
 	unsigned int lengthDoc = startPos + length;
 	int visibleChars = 0;
 	int lineCurrent = styler.GetLine(startPos);
@@ -364,7 +365,7 @@ static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordLis
 		}
 		if (atEOL) {
 			int lev = levelPrev;
-			if (visibleChars == 0)
+			if (visibleChars == 0 && foldCompact)
 				lev |= SC_FOLDLEVELWHITEFLAG;
 			if ((levelCurrent > levelPrev) && (visibleChars > 0))
 				lev |= SC_FOLDLEVELHEADERFLAG;
