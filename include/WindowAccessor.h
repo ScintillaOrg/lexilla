@@ -4,16 +4,9 @@
 
 class WindowAccessor : public Accessor {
 protected:
-	// bufferSize is a trade off between time taken to copy the characters and SendMessage overhead
-	// slopSize positions the buffer before the desired position in case there is some backtracking
-	enum {bufferSize=4000, slopSize=bufferSize/8};
-	char buf[bufferSize+1];
 	WindowID id;
 	PropSet &props;
-	int startPos;
-	int endPos;
 	int lenDoc;
-	int codePage;	
 
 	char styleBuf[bufferSize];
 	int validLen;
@@ -25,29 +18,7 @@ protected:
 	void Fill(int position);
 public:
 	WindowAccessor(WindowID id_, PropSet &props_) : 
-			id(id_), props(props_), startPos(0x7FFFFFFF), endPos(0), 
-			lenDoc(-1), codePage(0), validLen(0), chFlags(0) {
-	}
-	void SetCodePage(int codePage_) { codePage = codePage_; }
-	char operator[](int position) {
-		if (position < startPos || position >= endPos) {
-			Fill(position);
-		}
-		return buf[position - startPos];
-	}
-	char SafeGetCharAt(int position, char chDefault=' ') {
-		// Safe version of operator[], returning a defined value for invalid position 
-		if (position < startPos || position >= endPos) {
-			Fill(position);
-			if (position < startPos || position >= endPos) {
-				// Position is outside range of document 
-				return chDefault;
-			}
-		}
-		return buf[position - startPos];
-	}
-	bool IsLeadByte(char ch) {
-		return codePage && InternalIsLeadByte(ch);
+		id(id_), props(props_), lenDoc(-1), validLen(0), chFlags(0) {
 	}
 	char StyleAt(int position);
 	int GetLine(int position);

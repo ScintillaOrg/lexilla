@@ -11,11 +11,42 @@ typedef bool (*PFNIsCommentLeader)(Accessor &styler, int pos, int len);
 
 // Interface to data in a Scintilla
 class Accessor {
+protected:
+	enum {extremePosition=0x7FFFFFFF};
+	// bufferSize is a trade off between time taken to copy the characters and retrieval overhead
+	// slopSize positions the buffer before the desired position in case there is some backtracking
+	enum {bufferSize=4000, slopSize=bufferSize/8};
+	char buf[bufferSize+1];
+	int startPos;
+	int endPos;
+	int codePage;	
+
+	virtual bool InternalIsLeadByte(char ch)=0;
+	virtual void Fill(int position)=0;
 public:
-	virtual void SetCodePage(int codePage_)=0;
-	virtual char operator[](int position)=0;
-	virtual char SafeGetCharAt(int position, char chDefault=' ')=0;
-	virtual bool IsLeadByte(char ch)=0;
+	Accessor() : startPos(extremePosition), endPos(0), codePage(0) { }
+	char operator[](int position) {
+		if (position < startPos || position >= endPos) {
+			Fill(position);
+		}
+		return buf[position - startPos];
+	}
+	char SafeGetCharAt(int position, char chDefault=' ') {
+		// Safe version of operator[], returning a defined value for invalid position 
+		if (position < startPos || position >= endPos) {
+			Fill(position);
+			if (position < startPos || position >= endPos) {
+				// Position is outside range of document 
+				return chDefault;
+			}
+		}
+		return buf[position - startPos];
+	}
+	bool IsLeadByte(char ch) {
+		return codePage && InternalIsLeadByte(ch);
+	}
+	void SetCodePage(int codePage_) { codePage = codePage_; }
+
 	virtual char StyleAt(int position)=0;
 	virtual int GetLine(int position)=0;
 	virtual int LineStart(int line)=0;

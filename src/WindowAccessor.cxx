@@ -109,7 +109,7 @@ void WindowAccessor::SetLevel(int line, int level) {
 }
 
 void WindowAccessor::Flush() {
-	startPos = 0x7FFFFFFF;
+	startPos = extremePosition;
 	lenDoc = -1;
 	if (validLen > 0) {
 		Platform::SendScintilla(id, SCI_SETSTYLINGEX, validLen, 

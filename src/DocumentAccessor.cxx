@@ -111,7 +111,7 @@ void DocumentAccessor::SetLevel(int line, int level) {
 }
 
 void DocumentAccessor::Flush() {
-	startPos = 0x7FFFFFFF;
+	startPos = extremePosition;
 	lenDoc = -1;
 	if (validLen > 0) {
 		pdoc->SetStyles(validLen, styleBuf);
