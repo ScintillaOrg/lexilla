@@ -890,6 +890,12 @@ set void SetMouseDwellTime=2264(int periodMilliseconds,)
 # Retrieve the time the mouse must sit still to generate a mouse dwell event
 get int GetMouseDwellTime=2265(,)
 
+# Get position of start of word
+fun int WordStartPosition=2266(position pos,)
+
+# Get position of end of word
+fun int WordEndPosition=2267(position pos,)
+
 ## Start of key messages
 # Move caret down one line.
 fun void LineDown=2300(,)

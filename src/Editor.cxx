@@ -4107,6 +4107,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETMOUSEDWELLTIME:
 		return dwellDelay;
 	
+	case SCI_WORDSTARTPOSITION:
+		return pdoc->ExtendWordSelect(wParam, -1);
+
+	case SCI_WORDENDPOSITION:
+		return pdoc->ExtendWordSelect(wParam, 1);
+	
 	case SCI_GETCOLUMN:
 		return pdoc->GetColumn(wParam);
 
