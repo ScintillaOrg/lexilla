@@ -456,18 +456,23 @@ void UndoHistory::AppendAction(actionType at, int position, char *data, int leng
 			           (position != (actPrevious.position + actPrevious.lenData*2))) {
 				// Insertions must be immediately after to coalesce
 				currentAction++;
-            } else if (!actions[currentAction].mayCoalesce) {
+			} else if (!actions[currentAction].mayCoalesce) {
 				// Not allowed to coalesce if this set
 				currentAction++;
-            } else if ((at == removeAction) && (lengthData == 2)) {
-                if ((position + lengthData * 2) == actPrevious.position) {
-                    ; // Backspace -> OK
-                } else if (position == actPrevious.position) {
-                    ; // Delete -> OK
-                } else {
-				    // Removals must be at same position to coalesce
-				    currentAction++;
-                }
+			} else if (at == removeAction) {
+				if (lengthData == 2) {
+					if ((position + lengthData * 2) == actPrevious.position) {
+						; // Backspace -> OK
+					} else if (position == actPrevious.position) {
+						; // Delete -> OK
+					} else {
+						// Removals must be at same position to coalesce
+						currentAction++;
+					}
+				} else {
+					// Removals must be of one character to coalesce
+					currentAction++;
+				}
 			} else {
 				//Platform::DebugPrintf("action coalesced\n");
 			}
@@ -940,7 +945,6 @@ void CellBuffer::BasicDeleteChars(int position, int deleteLength) {
 			ignoreNL = true; 	// First \n is not real deletion
 		}
 
-
 		char ch = chNext;
 		for (int i = 0; i < deleteLength; i += 2) {
 			chNext = ' ';
@@ -957,7 +961,6 @@ void CellBuffer::BasicDeleteChars(int position, int deleteLength) {
 				lv.Remove(lineRemove);
 				ignoreNL = false; 	// Further \n are not real deletions
 			}
-
 
 			ch = chNext;
 		}
