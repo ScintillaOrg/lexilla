@@ -251,6 +251,10 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				} else {
 					state = SCE_PL_WORD;
 					preferRE = false;
+					if (!iswordchar(chNext)) {  // if length of word == 1 !!!
+						classifyWordPerl(styler.GetStartSegment(), i, keywords, styler);
+						state = SCE_PL_DEFAULT;
+					}
 				}
 			} else if (ch == '#') {
 				styler.ColourTo(i - 1, state);
@@ -348,8 +352,8 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				styler.ColourTo(i, SCE_PL_OPERATOR);
 			}
 		} else if (state == SCE_PL_WORD) {
-			if ((!iswordchar(ch) && ch != '\'')
-			        || (ch == '.' && chNext == '.')) {
+			if ((!iswordchar(chNext) && chNext != '\'')
+				|| (chNext == '.' && chNext2 == '.')) {
 				// ".." is always an operator if preceded by a SCE_PL_WORD.
 				// Archaic Perl has quotes inside names
 				if (isMatch(styler, lengthDoc, styler.GetStartSegment(), "__DATA__")) {
@@ -359,9 +363,11 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					styler.ColourTo(i, SCE_PL_DATASECTION);
 					state = SCE_PL_DATASECTION;
 				} else {
-					if (classifyWordPerl(styler.GetStartSegment(), i - 1, keywords, styler) == SCE_PL_WORD)
+					if (classifyWordPerl(styler.GetStartSegment(), i, keywords, styler) == SCE_PL_WORD)
 						preferRE = true;
 					state = SCE_PL_DEFAULT;
+					ch = ' ';
+/*
 					if (ch == '#') {
 						state = SCE_PL_COMMENTLINE;
 					} else if (ch == '\"') {
@@ -383,6 +389,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 						styler.ColourTo(i, SCE_PL_OPERATOR);
 						state = SCE_PL_DEFAULT;
 					}
+*/
 				}
 			}
 		} else {
