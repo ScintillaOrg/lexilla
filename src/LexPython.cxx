@@ -373,39 +373,39 @@ static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unuse
 			lev = lev + 1;
 		}
 
-		// Skip past any blank lines for next indent level info; we skip also 
+		// Skip past any blank lines for next indent level info; we skip also
 		// comments (all comments, not just those starting in column 0)
 		// which effectively folds them into surrounding code rather
 		// than screwing up folding.
-		
+
 		while (!quote &&
 		        (lineNext < docLines) &&
 		        ((indentNext & SC_FOLDLEVELWHITEFLAG) ||
 		         (lineNext <= docLines && IsCommentLine(lineNext, styler)))) {
-				
+
 			lineNext++;
 			indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
 		}
-		
+
 		const int levelAfterComments = indentNext & SC_FOLDLEVELNUMBERMASK;
 		const int levelBeforeComments = Platform::Maximum(indentCurrentLevel,levelAfterComments);
-		
+
 		// Now set all the indent levels on the lines we skipped
 		// Do this from end to start.  Once we encounter one line
 		// which is indented more than the line after the end of
 		// the comment-block, use the level of the block before
-		
+
 		int skipLine = lineNext;
 		int skipLevel = levelAfterComments;
-		
+
 		while (--skipLine > lineCurrent) {
 			int skipLineIndent = styler.IndentAmount(skipLine, &spaceFlags, NULL);
-			
+
 			if ((skipLineIndent & SC_FOLDLEVELNUMBERMASK) > levelAfterComments)
 				skipLevel = levelBeforeComments;
-			
+
 			int whiteFlag = skipLineIndent & SC_FOLDLEVELWHITEFLAG;
-			
+
 			styler.SetLevel(skipLine, skipLevel | whiteFlag);
 		}
 
@@ -431,7 +431,7 @@ static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unuse
 }
 
 static const char * const pythonWordListDesc[] = {
-	"Python keywords",
+	"Keywords",
 	0
 };
 

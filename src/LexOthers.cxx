@@ -564,9 +564,18 @@ static void ColouriseLatexDoc(unsigned int startPos, int length, int initStyle,
 	styler.ColourTo(lengthDoc, state);
 }
 
-LexerModule lmBatch(SCLEX_BATCH, ColouriseBatchDoc, "batch");
-LexerModule lmDiff(SCLEX_DIFF, ColouriseDiffDoc, "diff");
-LexerModule lmProps(SCLEX_PROPERTIES, ColourisePropsDoc, "props");
-LexerModule lmMake(SCLEX_MAKEFILE, ColouriseMakeDoc, "makefile");
-LexerModule lmErrorList(SCLEX_ERRORLIST, ColouriseErrorListDoc, "errorlist");
-LexerModule lmLatex(SCLEX_LATEX, ColouriseLatexDoc, "latex");
+static const char * const batchWordListDesc[] = {
+	"Keywords",
+	0
+};
+
+static const char * const emptyWordListDesc[] = {
+	0
+};
+
+LexerModule lmBatch(SCLEX_BATCH, ColouriseBatchDoc, "batch", 0, batchWordListDesc);
+LexerModule lmDiff(SCLEX_DIFF, ColouriseDiffDoc, "diff", 0, emptyWordListDesc);
+LexerModule lmProps(SCLEX_PROPERTIES, ColourisePropsDoc, "props", 0, emptyWordListDesc);
+LexerModule lmMake(SCLEX_MAKEFILE, ColouriseMakeDoc, "makefile", 0, emptyWordListDesc);
+LexerModule lmErrorList(SCLEX_ERRORLIST, ColouriseErrorListDoc, "errorlist", 0, emptyWordListDesc);
+LexerModule lmLatex(SCLEX_LATEX, ColouriseLatexDoc, "latex", 0, emptyWordListDesc);
