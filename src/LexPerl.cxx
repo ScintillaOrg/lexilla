@@ -144,7 +144,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 	bool preferRE = true;
 	sooked[sookedpos] = '\0';
 	int state = initStyle;
-	int lengthDoc = startPos + length;
+	unsigned int lengthDoc = startPos + length;
 
 	// If in a long distance lexical state, seek to the beginning  to find quote characters
 	if (state == SCE_PL_HERE_Q || state == SCE_PL_HERE_QQ || state == SCE_PL_HERE_QX) {
@@ -175,7 +175,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 	char chNext = styler[startPos];
 	styler.StartSegment(startPos);
 
-	for (int i = startPos; i < lengthDoc; i++) {
+	for (unsigned int i = startPos; i < lengthDoc; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 		char chNext2 = styler.SafeGetCharAt(i + 2);
@@ -285,16 +285,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 			} else if (ch == '$') {
 				preferRE = false;
 				styler.ColourTo(i - 1, state);
-				if (isalnum(chNext) || chNext == '#' || chNext == '$' || chNext == '_') {
-					state = SCE_PL_SCALAR;
-				} else if (chNext != '{' && chNext != '[') {
-					styler.ColourTo(i, SCE_PL_SCALAR);
-					i++;
-					ch = ' ';
-					chNext = ' ';
-				} else {
-					styler.ColourTo(i, SCE_PL_SCALAR);
-				}
+				state = SCE_PL_SCALAR;
 			} else if (ch == '@') {
 				preferRE = false;
 				styler.ColourTo(i - 1, state);
@@ -476,7 +467,12 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				}
 			} else if (state == SCE_PL_SCALAR) {
 				if (isEndVar(ch)) {
-					styler.ColourTo(i - 1, state);
+					if (i == (styler.GetStartSegment() + 1)) {
+						// Special variable: $(, $_ etc.
+						styler.ColourTo(i, state);
+					} else {
+						styler.ColourTo(i - 1, state);
+					}
 					state = SCE_PL_DEFAULT;
 				}
 			} else if (state == SCE_PL_ARRAY) {
