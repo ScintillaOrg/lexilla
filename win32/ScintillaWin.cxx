@@ -285,6 +285,7 @@ static int KeyTranslate(int keyIn) {
 }
 
 LRESULT ScintillaWin::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
+	//Platform::DebugPrintf("S M:%x WP:%x L:%x\n", iMessage, wParam, lParam);
 	switch (iMessage) {
 
 	case WM_CREATE:
