@@ -1304,7 +1304,8 @@ public:
 	// Use GetProcAddress to get a pointer to the relevant function.
 	virtual Function *FindFunction(const char *name) {
 		if (h != NULL) {
-			return reinterpret_cast<Function*>( ::GetProcAddress(h, name) );
+			return static_cast<Function*>(
+				(void *)(::GetProcAddress(h, name)));
 		} else
 			return NULL;
 	}
