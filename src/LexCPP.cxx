@@ -385,3 +385,4 @@ static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordLis
 }
 
 LexerModule lmCPP(SCLEX_CPP, ColouriseCppDoc, "cpp", FoldCppDoc);
+LexerModule lmTCL(SCLEX_TCL, ColouriseCppDoc, "tcl", FoldCppDoc);
