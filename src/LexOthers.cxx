@@ -44,7 +44,7 @@ static void ColouriseBatchLine(
 	if (lineBuffer[i] == ':') {
 		// Label
 		if (lineBuffer[i + 1] == ':') {
-			// :: is a fake label, similar to REM, see http://www.winmag.com/columns/explorer/2000/21.htm
+			// :: is a fake label, similar to REM, see http://content.techweb.com/winmag/columns/explorer/2000/21.htm
 			styler.ColourTo(endPos, SCE_BAT_COMMENT);
 		} else {	// Real label
 			styler.ColourTo(endPos, SCE_BAT_LABEL);
@@ -346,6 +346,12 @@ static void ColouriseErrorListLine(
 	} else if (0 == strncmp(lineBuffer, "Warning ", strlen("Warning "))) {
 		// Borland warning message
 		styler.ColourTo(endPos, SCE_ERR_BORLAND);
+	} else if (strstr(lineBuffer, "at line " ) &&
+	           strstr(lineBuffer, "at line " ) < lineBuffer + lengthLine &&
+	           strstr(lineBuffer, "file ") &&
+	           strstr(lineBuffer, "file ") < lineBuffer + lengthLine) {
+		// Lua error message
+		styler.ColourTo(endPos, SCE_ERR_LUA);
 	} else if (strstr(lineBuffer, " at " ) &&
 	           strstr(lineBuffer, " at " ) < lineBuffer + lengthLine &&
 	           strstr(lineBuffer, " line ") &&
