@@ -320,20 +320,6 @@ SCI_STYLESETCHARACTERSET(int stylenumber, int charset)
       These can be defined with the SCI_STYLESET* messages.
     </p>
 <pre>
-SCI_SETFORE(int colour)
-SCI_SETBACK(int colour)
-SCI_SETBOLD(bool bold)
-SCI_SETITALIC(bool italic)
-SCI_SETSIZE(int sizeinpoints)
-SCI_SETFONT(char *fontname)
-</pre>
-    <p>
-       These messages are responsible for global default styling and are used when no explicit
-      setting is defined for a style.<br />
-       These messages are deprecated in favour of using the SCI_STYLESET* messages for
-      STYLE_DEFAULT. They will be removed in a future release.
-    </p>
-<pre>
 SCI_SETSELFORE(bool useSelectionForeColour, int colour)
 SCI_SETSELBACK(bool useSelectionBackColour, int colour)
 SCI_SETCARETFORE(int colour)
@@ -389,11 +375,6 @@ SCI_GETMARGINSENSITIVEN(int margin)
        clicks. A click in a sensitive margin will result in a SCN_MARGINCLICK notification being
        sent to the container. Margins that are not sensitive act as selection margins which make it 
        easy to select ranges of lines. 
-    </p>
-    <p>
-       Earlier versions of Scintilla hard coded particular margin types and provided
-       SCI_SETMARGINWIDTH and SCI_SETLINENUMBERWIDTH which are
-       now deprecated.
     </p>
     <h3>
        Other settings
