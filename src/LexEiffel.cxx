@@ -64,11 +64,11 @@ inline bool IsADigit(unsigned int ch) {
 // which just continues the current token or starts an identifier if in default.
 // DBCS treated specially as the second character can be < 0x80 and hence 
 // syntactically significant. UTF-8 avoids this as all trail bytes are >= 0x80
-class ColouriseContext {
+class xColouriseContext {
 	Accessor &styler;
 	int lengthDoc;
 	int currentPos;
-	ColouriseContext& operator=(const ColouriseContext&) {
+	xColouriseContext& operator=(const xColouriseContext&) {
 		return *this;
 	}
 public:
@@ -77,7 +77,7 @@ public:
 	unsigned int ch;
 	unsigned int chNext;
 
-	ColouriseContext(unsigned int startPos, int length,
+	xColouriseContext(unsigned int startPos, int length,
                         int initStyle, Accessor &styler_) : 
 		styler(styler_),
 		lengthDoc(startPos + length),
@@ -139,7 +139,7 @@ static void ColouriseEiffelDoc(unsigned int startPos,
 
 	WordList &keywords = *keywordlists[0];
 
-	ColouriseContext lc(startPos, length, initStyle, styler);
+	xColouriseContext lc(startPos, length, initStyle, styler);
 
 	for (; lc.More(); lc.Forward()) {
 
