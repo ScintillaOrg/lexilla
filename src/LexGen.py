@@ -140,24 +140,39 @@ def FindModules(lexFile):
 			modules.append(l.split()[1])
 	return modules
 
-root="../../"
-lexFilePaths = glob.glob(root + "scintilla/src/Lex*.cxx")
-lexFiles = [os.path.basename(f)[:-4] for f in lexFilePaths]
-print lexFiles
-lexerModules = []
-for lexFile in lexFilePaths:
-	lexerModules.extend(FindModules(lexFile))
-otherProps = ["abbrev.properties", "Embedded.properties", "SciTEGlobal.properties", "SciTE.properties"]
-propFilePaths = glob.glob(root + "scite/src/*.properties")
-propFiles = [os.path.basename(f) for f in propFilePaths if os.path.basename(f) not in otherProps]
-print propFiles
+def RegenerateAll():
+	root="../../"
 
-Regenerate(root + "scintilla/src/KeyWords.cxx", "//", lexerModules)
-Regenerate(root + "scintilla/win32/makefile", "#", lexFiles)
-Regenerate(root + "scintilla/win32/scintilla.mak", "#", lexFiles)
-Regenerate(root + "scintilla/win32/scintilla_vc6.mak", "#", lexFiles)
-RegenerateBinary(root + "scintilla/gtk/makefile", "#", lexFiles)
-Regenerate(root + "scintilla/gtk/scintilla.mak", "#", lexFiles)
-Regenerate(root + "scite/win32/makefile", "#", lexFiles, propFiles)
-Regenerate(root + "scite/win32/scite.mak", "#", lexFiles, propFiles)
-Generate(root + "scite/boundscheck/vcproj.gen", root + "scite/boundscheck/SciTE.vcproj", "#", lexFiles)
+	# Find all the lexer source code files
+	lexFilePaths = glob.glob(root + "scintilla/src/Lex*.cxx")
+	lexFiles = [os.path.basename(f)[:-4] for f in lexFilePaths]
+	print lexFiles
+	lexerModules = []
+	for lexFile in lexFilePaths:
+		lexerModules.extend(FindModules(lexFile))
+
+	# Find all the SciTE properties files
+	otherProps = ["abbrev.properties", "Embedded.properties", "SciTEGlobal.properties", "SciTE.properties"]
+	propFilePaths = glob.glob(root + "scite/src/*.properties")
+	propFiles = [os.path.basename(f) for f in propFilePaths if os.path.basename(f) not in otherProps]
+	print propFiles
+
+	# Find all the menu command IDs in the SciTE header
+	SciTEHeader = file(root + "scite/src/SciTE.h")
+	lines = SciTEHeader.read().split("\n")
+	SciTEHeader.close()
+	ids = [id for id in [l.split()[1] for l in lines if l.startswith("#define")] if id.startswith("IDM_")]
+	#print ids
+
+	Regenerate(root + "scintilla/src/KeyWords.cxx", "//", lexerModules)
+	Regenerate(root + "scintilla/win32/makefile", "#", lexFiles)
+	Regenerate(root + "scintilla/win32/scintilla.mak", "#", lexFiles)
+	Regenerate(root + "scintilla/win32/scintilla_vc6.mak", "#", lexFiles)
+	RegenerateBinary(root + "scintilla/gtk/makefile", "#", lexFiles)
+	Regenerate(root + "scintilla/gtk/scintilla.mak", "#", lexFiles)
+	Regenerate(root + "scite/win32/makefile", "#", lexFiles, propFiles)
+	Regenerate(root + "scite/win32/scite.mak", "#", lexFiles, propFiles)
+	Regenerate(root + "scite/src/SciTEProps.cxx", "//", ids)
+	Generate(root + "scite/boundscheck/vcproj.gen", root + "scite/boundscheck/SciTE.vcproj", "#", lexFiles)
+
+RegenerateAll()
