@@ -165,10 +165,63 @@
 	Fix a crashing bug in indicator display in Scintilla.
       </li>
       <li>
-	Large performance improvement on GTK+ 2.x for long lines.
+	GTK+ version now defaults to building for GTK+ 2 rather than 1.
       </li>
       <li>
-	On Windows SciTE can switch based on activation order rather than buffer number.
+	Mingw make file detects compiler version and avoids options
+	that are cause problems for some versions.
+      </li>
+      <li>
+	Large performance improvement on GTK+ 2 for long lines.
+      </li>
+      <li>
+	Incremental line wrap on GTK+.
+      </li>
+      <li>
+	International text entry works much better on GTK+, with particular
+	improvements for Baltic languages and languages that use 'dead' accents.
+      </li>
+      <li>
+	Unicode clipboard support on GTK+.
+      </li>
+      <li>
+	Indicator type INDIC_BOX draws a rectangle around the text.
+      </li>
+      <li>
+	Clarion language support.
+      </li>
+      <li>
+	YAML language support.
+      </li>
+      <li>
+	MPT LOG language support.
+      </li>
+      <li>
+	On Windows, SciTE can switch based on activation order rather than buffer number.
+      </li>
+      <li>
+	SciTE save.on.deactivate saves all buffers rather than just the current buffer.
+      </li>
+      <li>
+	Lua lexer handles non-ASCII characters correctly.
+      </li>
+      <li>
+	On GTK+ 2, autocompletion uses TreeView rather than deprecated CList.
+      </li>
+      <li>
+	Indicators drawn correctly on wrapped lines.
+      </li>
+      <li>
+	SciTE Incremental Search no longer uses hot keys on Windows.
+      </li>
+      <li>
+	Calltips draw non-ASCII characters correctly rather than as arrows.
+      </li>
+      <li>
+	SciTE crash fixed when going to an error message with empty file name.
+      </li>
+      <li>
+	Bugs fixed in XPM image handling code.
       </li>
     </ul>
     <h3>
