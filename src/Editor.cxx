@@ -2887,29 +2887,41 @@ void Editor::NewLine() {
 	EnsureCaretVisible();
 }
 
-int Editor::KeyCommand(unsigned int iMessage) {
+void Editor::CursorUpOrDown(int direction, bool extend) {
 	Point pt = LocationFromPosition(currentPos);
+	int posNew = PositionFromLocation(
+		Point(lastXChosen, pt.y + direction * vs.lineHeight));
+	if (direction < 0) {
+		// Line wrapping may lead to a location on the same line, so
+		// seek back if that is the case.
+		// There is an equivalent case when moving down which skips 
+		// over a line but as that does not trap the user it is fine.
+		Point ptNew = LocationFromPosition(posNew);
+		while ((posNew > 0) && (pt.y == ptNew.y)) {
+			posNew--;
+			ptNew = LocationFromPosition(posNew);
+		}
+	}
+	MovePositionTo(posNew, extend);
+}
 
+int Editor::KeyCommand(unsigned int iMessage) {
 	switch (iMessage) {
 	case SCI_LINEDOWN:
-		MovePositionTo(PositionFromLocation(
-		                   Point(lastXChosen, pt.y + vs.lineHeight)));
+		CursorUpOrDown(1);
 		break;
 	case SCI_LINEDOWNEXTEND:
-		MovePositionTo(PositionFromLocation(
-		                   Point(lastXChosen, pt.y + vs.lineHeight)), true);
+		CursorUpOrDown(1, true);
 		break;
 	case SCI_LINESCROLLDOWN:
 		ScrollTo(topLine + 1);
 		MoveCaretInsideView();
 		break;
 	case SCI_LINEUP:
-		MovePositionTo(PositionFromLocation(
-		                   Point(lastXChosen, pt.y - vs.lineHeight)));
+		CursorUpOrDown(-1);
 		break;
 	case SCI_LINEUPEXTEND:
-		MovePositionTo(PositionFromLocation(
-		                   Point(lastXChosen, pt.y - vs.lineHeight)), true);
+		CursorUpOrDown(-1, true);
 		break;
 	case SCI_LINESCROLLUP:
 		ScrollTo(topLine - 1);

@@ -400,6 +400,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void LineTranspose();
     	virtual void CancelModes();
 	void NewLine();
+	void CursorUpOrDown(int direction, bool extend=false);
 	virtual int KeyCommand(unsigned int iMessage);
 	virtual int KeyDefault(int /* key */, int /*modifiers*/);
 	int KeyDown(int key, bool shift, bool ctrl, bool alt, bool *consumed=0);
