@@ -582,6 +582,9 @@ set void AutoCSetDropRestOfWord=2270(bool dropRestOfWord,)
 # after the inserted text upon completion.
 get bool AutoCGetDropRestOfWord=2271(,)
 
+# Register an XPM image for use in autocompletion lists.
+fun void RegisterImage=2405(int type, int xpmData)
+
 # Set the number of spaces used for one level of indentation.
 set void SetIndent=2122(int indentSize,)
 

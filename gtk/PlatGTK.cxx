@@ -186,7 +186,6 @@ void Palette::Allocate(Window &w) {
 	delete []successPalette;
 }
 
-
 static const char *CharacterSetName(int characterSet) {
 	switch (characterSet) {
 	case SC_CHARSET_ANSI:
@@ -233,9 +232,9 @@ static const char *CharacterSetName(int characterSet) {
 }
 
 static void GenerateFontSpecStrings(const char *fontName, int characterSet,
-                             char *foundary, int foundary_len,
-                             char *faceName, int faceName_len,
-                             char *charset, int charset_len) {
+                                    char *foundary, int foundary_len,
+                                    char *faceName, int faceName_len,
+                                    char *charset, int charset_len) {
 	// supported font strings include:
 	// foundary-fontface-isoxxx-x
 	// fontface-isoxxx-x
@@ -283,7 +282,7 @@ static void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, int 
 	lf.bold = bold;
 	lf.italic = italic;
 	lf.characterSet = characterSet;
-	strncpy(lf.faceName, faceName, sizeof(lf.faceName)-1);
+	strncpy(lf.faceName, faceName, sizeof(lf.faceName) - 1);
 }
 
 /**
@@ -293,11 +292,11 @@ static void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, int 
  */
 static int HashFont(const char *faceName, int characterSet, int size, bool bold, bool italic) {
 	return
-		size ^
-		(characterSet << 10) ^
-		(bold ? 0x10000000 : 0) ^
-		(italic ? 0x20000000 : 0) ^
-		faceName[0];
+	    size ^
+	    (characterSet << 10) ^
+	    (bold ? 0x10000000 : 0) ^
+	    (italic ? 0x20000000 : 0) ^
+	    faceName[0];
 }
 
 class FontCached : Font {
@@ -309,8 +308,8 @@ class FontCached : Font {
 	~FontCached() {}
 	bool SameAs(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_);
 	virtual void Release();
-        static FontID CreateNewFont(const char *fontName, int characterSet,
-                  int size, bool bold, bool italic);
+	static FontID CreateNewFont(const char *fontName, int characterSet,
+	                            int size, bool bold, bool italic);
 	static FontCached *first;
 public:
 	static FontID FindOrCreate(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_);
@@ -320,7 +319,7 @@ public:
 FontCached *FontCached::first = 0;
 
 FontCached::FontCached(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_) :
-	next(0), usage(0), hash(0) {
+next(0), usage(0), hash(0) {
 	::SetLogFont(lf, faceName_, characterSet_, size_, bold_, italic_);
 	hash = HashFont(faceName_, characterSet_, size_, bold_, italic_);
 	id = CreateNewFont(faceName_, characterSet_, size_, bold_, italic_);
@@ -329,11 +328,11 @@ FontCached::FontCached(const char *faceName_, int characterSet_, int size_, bool
 
 bool FontCached::SameAs(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_) {
 	return
-		lf.size == size_ &&
-		lf.bold == bold_ &&
-		lf.italic == italic_ &&
-		lf.characterSet == characterSet_ &&
-		0 == strcmp(lf.faceName,faceName_);
+	    lf.size == size_ &&
+	    lf.bold == bold_ &&
+	    lf.italic == italic_ &&
+	    lf.characterSet == characterSet_ &&
+	    0 == strcmp(lf.faceName, faceName_);
 }
 
 void FontCached::Release() {
@@ -346,9 +345,9 @@ FontID FontCached::FindOrCreate(const char *faceName_, int characterSet_, int si
 	FontID ret = 0;
 	FontMutexLock();
 	int hashFind = HashFont(faceName_, characterSet_, size_, bold_, italic_);
-	for (FontCached *cur=first; cur; cur=cur->next) {
+	for (FontCached *cur = first; cur; cur = cur->next) {
 		if ((cur->hash == hashFind) &&
-			cur->SameAs(faceName_, characterSet_, size_, bold_, italic_)) {
+		        cur->SameAs(faceName_, characterSet_, size_, bold_, italic_)) {
 			cur->usage++;
 			ret = cur->id;
 		}
@@ -367,8 +366,8 @@ FontID FontCached::FindOrCreate(const char *faceName_, int characterSet_, int si
 
 void FontCached::ReleaseId(FontID id_) {
 	FontMutexLock();
-	FontCached **pcur=&first;
-	for (FontCached *cur=first; cur; cur=cur->next) {
+	FontCached **pcur = &first;
+	for (FontCached *cur = first; cur; cur = cur->next) {
 		if (cur->id == id_) {
 			cur->usage--;
 			if (cur->usage == 0) {
@@ -379,13 +378,13 @@ void FontCached::ReleaseId(FontID id_) {
 			}
 			break;
 		}
-		pcur=&cur->next;
+		pcur = &cur->next;
 	}
 	FontMutexUnlock();
 }
 
 FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
-                  int size, bool bold, bool italic) {
+                                 int size, bool bold, bool italic) {
 	char fontset[1024];
 	char fontspec[300];
 	char foundary[50];
@@ -396,7 +395,7 @@ FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
 	foundary[0] = '\0';
 	faceName[0] = '\0';
 	charset[0] = '\0';
-        FontID newid = 0;
+	FontID newid = 0;
 
 	// If name of the font begins with a '-', assume, that it is
 	// a full fontspec.
@@ -531,7 +530,6 @@ FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
 	return newid;
 }
 
-
 Font::Font() : id(0) {}
 
 Font::~Font() {}
@@ -546,7 +544,6 @@ void Font::Release() {
 		FontCached::ReleaseId(id);
 	id = 0;
 }
-
 
 class SurfaceImpl : public Surface {
 	bool unicodeMode;
@@ -939,8 +936,10 @@ int SurfaceImpl::Ascent(Font &font_) {
 	if (!font_.GetID())
 		return 1;
 #ifdef FAST_WAY
+
 	return PFont(font_)->ascent;
 #else
+
 	gint lbearing;
 	gint rbearing;
 	gint width;
@@ -957,8 +956,10 @@ int SurfaceImpl::Descent(Font &font_) {
 	if (!font_.GetID())
 		return 1;
 #ifdef FAST_WAY
+
 	return PFont(font_)->descent;
 #else
+
 	gint lbearing;
 	gint rbearing;
 	gint width;
@@ -1047,6 +1048,7 @@ void Window::SetPosition(PRectangle rc) {
 	alloc.height = rc.Height();
 	gtk_widget_size_allocate(PWidget(id), &alloc);
 #else
+
 	gtk_widget_set_uposition(id, rc.left, rc.top);
 	gtk_widget_set_usize(id, rc.right - rc.left, rc.bottom - rc.top);
 #endif
@@ -1059,6 +1061,7 @@ void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
 
 	gtk_widget_set_uposition(PWidget(id), rc.left + ox, rc.top + oy);
 #if 0
+
 	GtkAllocation alloc;
 	alloc.x = rc.left + ox;
 	alloc.y = rc.top + oy;
@@ -1066,6 +1069,7 @@ void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
 	alloc.height = rc.bottom - rc.top;
 	gtk_widget_size_allocate(id, &alloc);
 #endif
+
 	gtk_widget_set_usize(PWidget(id), rc.right - rc.left, rc.bottom - rc.top);
 }
 
@@ -1136,10 +1140,28 @@ void Window::SetTitle(const char *s) {
 	gtk_window_set_title(GTK_WINDOW(id), s);
 }
 
-ListBox::ListBox() : list(0), current(0), desiredVisibleRows(5), maxItemCharacters(0),
+struct ListImage {
+	const char **xpm_data;
+	GdkPixmap *pixmap;
+	GdkBitmap *bitmap;
+};
+
+ListBox::ListBox() : list(0), current(0), pixhash(NULL), desiredVisibleRows(5), maxItemCharacters(0),
 doubleClickAction(NULL), doubleClickActionData(NULL) {}
 
-ListBox::~ListBox() {}
+static void list_image_free(gpointer, gpointer value, gpointer) {
+	ListImage *list_image = (ListImage *) value;
+	if (list_image->pixmap)
+		gdk_pixmap_unref(list_image->pixmap);
+	if (list_image->bitmap)
+		gdk_bitmap_unref(list_image->bitmap);
+	g_free(list_image);
+}
+
+ListBox::~ListBox() {
+	g_hash_table_foreach((GHashTable *) pixhash, list_image_free, NULL);
+	g_hash_table_destroy((GHashTable *) pixhash);
+}
 
 static void SelectionAC(GtkWidget *, gint row, gint,
                         GdkEventButton *, gpointer p) {
@@ -1230,8 +1252,10 @@ PRectangle ListBox::GetDesiredRect() {
 		int height;
 
 #if GTK_MAJOR_VERSION < 2
+
 		int ythickness = PWidget(list)->style->klass->ythickness;
 #else
+
 		int ythickness = PWidget(list)->style->ythickness;
 #endif
 		// First calculate height of the clist for our desired visible row count otherwise it tries to expand to the total # of rows
@@ -1262,9 +1286,32 @@ void ListBox::Clear() {
 	maxItemCharacters = 0;
 }
 
-void ListBox::Append(char *s) {
-	char *szs[] = { s, 0};
-	gtk_clist_append(GTK_CLIST(list), szs);
+static void init_pixmap(ListImage *li, GtkWidget *window) {
+	li->pixmap = gdk_pixmap_colormap_create_from_xpm_d(NULL
+	             , gtk_widget_get_colormap(window), &(li->bitmap), NULL
+	             , (gchar **) li->xpm_data);
+	if (NULL == li->pixmap) {
+		if (li->bitmap)
+			gdk_bitmap_unref(li->bitmap);
+		li->bitmap = NULL;
+	}
+}
+
+#define SPACING 5
+
+void ListBox::Append(char *s, int type) {
+	char * szs[] = { s, NULL };
+	ListImage *list_image = NULL;
+	if (type >= 0)
+		list_image = (ListImage *) g_hash_table_lookup((GHashTable *) pixhash
+		             , (gconstpointer) GINT_TO_POINTER(type));
+	int rownum = gtk_clist_append(GTK_CLIST(list), szs);
+	if (list_image) {
+		if (NULL == list_image->pixmap)
+			init_pixmap(list_image, (GtkWidget *) list);
+		gtk_clist_set_pixtext(GTK_CLIST(list), rownum, 0, s, SPACING
+		                      , list_image->pixmap, list_image->bitmap);
+	}
 	size_t len = strlen(s);
 	if (maxItemCharacters < len)
 		maxItemCharacters = len;
@@ -1298,8 +1345,18 @@ int ListBox::Find(const char *prefix) {
 }
 
 void ListBox::GetValue(int n, char *value, int len) {
-	char *text = 0;
-	gtk_clist_get_text(GTK_CLIST(list), n, 0, &text);
+	char *text = NULL;
+	GtkCellType type = gtk_clist_get_cell_type(GTK_CLIST(list), n, 0);
+	switch (type) {
+	case GTK_CELL_TEXT:
+		gtk_clist_get_text(GTK_CLIST(list), n, 0, &text);
+		break;
+	case GTK_CELL_PIXTEXT:
+		gtk_clist_get_pixtext(GTK_CLIST(list), n, 0, &text, NULL, NULL, NULL);
+		break;
+	default:
+		break;
+	}
 	if (text && len > 0) {
 		strncpy(value, text, len);
 		value[len - 1] = '\0';
@@ -1310,6 +1367,24 @@ void ListBox::GetValue(int n, char *value, int len) {
 
 void ListBox::Sort() {
 	gtk_clist_sort(GTK_CLIST(list));
+}
+
+void ListBox::SetTypeXpm(int type, const char **xpm_data) {
+	ListImage *list_image;
+	g_return_if_fail(xpm_data);
+
+	if (NULL == pixhash)
+		pixhash = g_hash_table_new(g_direct_hash, g_direct_equal);
+	else {
+		list_image = (ListImage *) g_hash_table_lookup((GHashTable *) pixhash
+		             , (gconstpointer) GINT_TO_POINTER(type));
+		if (list_image)
+			return;
+	}
+	list_image = g_new0(ListImage, 1);
+	list_image->xpm_data = xpm_data;
+	g_hash_table_insert((GHashTable *) pixhash, GINT_TO_POINTER(type)
+	                    , (gpointer) list_image);
 }
 
 Menu::Menu() : id(0) {}
@@ -1376,6 +1451,7 @@ const char *Platform::DefaultFont() {
 #ifdef G_OS_WIN32
 	return "Lucida Console";
 #else
+
 	return "lucidatypewriter";
 #endif
 }
@@ -1475,7 +1551,7 @@ int Platform::Clamp(int val, int minVal, int maxVal) {
 }
 
 void Platform_Initialise() {
-        FontMutexAllocate();
+	FontMutexAllocate();
 }
 
 void Platform_Finalise() {

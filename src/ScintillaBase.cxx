@@ -509,6 +509,10 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 	case SCI_AUTOCGETDROPRESTOFWORD:
 		return ac.dropRestOfWord;
 
+	case SCI_REGISTERIMAGE:
+		ac.lb.SetTypeXpm(wParam, reinterpret_cast<const char **>(lParam));
+		break;
+
 	case SCI_CALLTIPSHOW: {
 			AutoCompleteCancel();
 			if (!ct.wCallTip.Created()) {

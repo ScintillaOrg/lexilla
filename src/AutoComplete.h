@@ -15,6 +15,7 @@ class AutoComplete {
 	char stopChars[256];
 	char fillUpChars[256];
 	char separator;
+	char typesep; // Type seperator
 
 public:
 	bool ignoreCase;
@@ -47,6 +48,10 @@ public:
 	/// The separator character is used when interpreting the list in SetList
 	void SetSeparator(char separator_);
 	char GetSeparator();
+
+	/// The typesep character is used for seperating the word from the type
+	void SetTypesep(char separator_);
+	char GetTypesep();
 
 	/// The list string contains a sequence of words separated by the separator character
 	void SetList(const char *list);

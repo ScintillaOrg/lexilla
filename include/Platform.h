@@ -377,6 +377,7 @@ private:
 	WindowID list;
 	WindowID scroller;
 	int current;
+	void *pixhash;
 #endif
 	int desiredVisibleRows;
 	unsigned int maxItemCharacters;
@@ -393,13 +394,14 @@ public:
 	void SetVisibleRows(int rows);
 	PRectangle GetDesiredRect();
 	void Clear();
-	void Append(char *s);
+	void Append(char *s, int type = -1);
 	int Length();
 	void Select(int n);
 	int GetSelection();
 	int Find(const char *prefix);
 	void GetValue(int n, char *value, int len);
 	void Sort();
+	void SetTypeXpm(int type, const char **xpm_data);
 	void SetDoubleClickAction(CallBackAction action, void *data) {
 		doubleClickAction = action;
 		doubleClickActionData = data;

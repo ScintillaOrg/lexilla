@@ -826,7 +826,7 @@ void ListBox::Clear() {
 	maxItemCharacters = 0;
 }
 
-void ListBox::Append(char *s) {
+void ListBox::Append(char *s, int) {
 	Window_SendMessage(this, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(s));
 	unsigned int len = static_cast<unsigned int>(strlen(s));
 	if (maxItemCharacters < len)
@@ -869,6 +869,9 @@ void ListBox::GetValue(int n, char *value, int len) {
 
 void ListBox::Sort() {
 	// Windows keeps sorted so no need to sort
+}
+
+void ListBox::SetTypeXpm(int, const char **) {
 }
 
 Menu::Menu() : id(0) {
