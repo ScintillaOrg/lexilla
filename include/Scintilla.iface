@@ -327,6 +327,12 @@ fun void StyleResetDefault=2058(,)
 # Set a style to be underlined or not.
 set void StyleSetUnderline=2059(int style, bool underline)
 
+val SC_CASE_MIXED=0
+val SC_CASE_UPPER=1
+val SC_CASE_LOWER=2
+# Set a style to be mixed case, or to force upper or lower case.
+set void StyleSetCase=2060(int style, int caseForce)
+
 # Set the character set of the font in a style.
 set void StyleSetCharacterSet=2066(int style, int characterSet)
 

@@ -22,6 +22,8 @@ public:
 	int characterSet;
 	bool eolFilled;
 	bool underline;
+	enum ecaseForced {caseMixed, caseUpper, caseLower};
+	ecaseForced caseForce;
 	bool visible;
 
 	Font font;
@@ -40,7 +42,9 @@ public:
 	void Clear(Colour fore_, Colour back_,
 	           int size_,
 	           const char *fontName_, int characterSet_,
-	           bool bold_, bool italic_, bool eolFilled_, bool underline_, bool visible_);
+	           bool bold_, bool italic_, bool eolFilled_, 
+	           bool underline_, ecaseForced caseForce_, bool visible_);
+	void ClearTo(const Style &source);
 	bool EquivalentFontTo(const Style *other) const;
 	void Realise(Surface &surface, int zoomLevel, Style *defaultStyle = 0);
 };

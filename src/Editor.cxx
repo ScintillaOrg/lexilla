@@ -810,6 +810,10 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 			ll.chars[numCharsInLine] = chDoc;
 			ll.styles[numCharsInLine] = static_cast<char>(styleByte & styleMask);
 			ll.indicators[numCharsInLine] = static_cast<char>(styleByte & ~styleMask);
+			if (vstyle.styles[ll.styles[numCharsInLine]].caseForce == Style::caseUpper)
+				ll.chars[numCharsInLine] = static_cast<char>(toupper(chDoc));
+			else if (vstyle.styles[ll.styles[numCharsInLine]].caseForce == Style::caseLower)
+				ll.chars[numCharsInLine] = static_cast<char>(tolower(chDoc));
 			numCharsInLine++;
 		}
 	}
@@ -4319,6 +4323,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_STYLESETUNDERLINE:
 		if (wParam <= STYLE_MAX) {
 			vs.styles[wParam].underline = lParam;
+			InvalidateStyleRedraw();
+		}
+		break;
+	case SCI_STYLESETCASE:
+		if (wParam <= STYLE_MAX) {
+			vs.styles[wParam].caseForce = static_cast<Style::ecaseForced>(lParam);
 			InvalidateStyleRedraw();
 		}
 		break;

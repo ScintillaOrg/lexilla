@@ -16,13 +16,13 @@ Style::Style() {
 	aliasOfDefaultFont = true;
 	Clear(Colour(0, 0, 0), Colour(0xff, 0xff, 0xff),
 	      Platform::DefaultFontSize(), 0, SC_CHARSET_DEFAULT,
-	      false, false, false, false, true);
+	      false, false, false, false, caseMixed, true);
 }
 
 Style::Style(const Style &source) {
 	Clear(Colour(0, 0, 0), Colour(0xff, 0xff, 0xff),
 	      0, 0, 0,
-	      false, false, false, false, true);
+	      false, false, false, false, caseMixed, true);
 	fore.desired = source.fore.desired;
 	back.desired = source.back.desired;
 	characterSet = source.characterSet;
@@ -31,6 +31,7 @@ Style::Style(const Style &source) {
 	size = source.size;
 	eolFilled = source.eolFilled;
 	underline = source.underline;
+	caseForce = source.caseForce;
 	visible = source.visible;
 }
 
@@ -47,7 +48,7 @@ Style &Style::operator=(const Style &source) {
 		return * this;
 	Clear(Colour(0, 0, 0), Colour(0xff, 0xff, 0xff),
 	      0, 0, SC_CHARSET_DEFAULT,
-	      false, false, false, false, true);
+	      false, false, false, false, caseMixed, true);
 	fore.desired = source.fore.desired;
 	back.desired = source.back.desired;
 	characterSet = source.characterSet;
@@ -56,13 +57,15 @@ Style &Style::operator=(const Style &source) {
 	size = source.size;
 	eolFilled = source.eolFilled;
 	underline = source.underline;
+	caseForce = source.caseForce;
 	visible = source.visible;
 	return *this;
 }
 
 void Style::Clear(Colour fore_, Colour back_, int size_,
                   const char *fontName_, int characterSet_,
-                  bool bold_, bool italic_, bool eolFilled_, bool underline_, bool visible_) {
+                  bool bold_, bool italic_, bool eolFilled_, 
+                  bool underline_, ecaseForced caseForce_, bool visible_) {
 	fore.desired = fore_;
 	back.desired = back_;
 	characterSet = characterSet_;
@@ -72,12 +75,28 @@ void Style::Clear(Colour fore_, Colour back_, int size_,
 	fontName = fontName_;
 	eolFilled = eolFilled_;
 	underline = underline_;
+	caseForce = caseForce_;
 	visible = visible_;
 	if (aliasOfDefaultFont)
 		font.SetID(0);
 	else
 		font.Release();
 	aliasOfDefaultFont = false;
+}
+
+void Style::ClearTo(const Style &source) {
+	Clear(
+		source.fore.desired,
+		source.back.desired,
+		source.size,
+		source.fontName,
+		source.characterSet,
+		source.bold,
+		source.italic,
+		source.eolFilled,
+		source.underline,
+		source.caseForce,
+		source.visible);
 }
 
 bool Style::EquivalentFontTo(const Style *other) const {
