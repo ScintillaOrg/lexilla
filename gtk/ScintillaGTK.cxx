@@ -494,24 +494,27 @@ void ScintillaGTK::MainForAll(GtkContainer *container, gboolean include_internal
 }
 
 #ifdef INTERNATIONAL_INPUT
-gint ScintillaGTK::CursorMoved(GtkWidget *widget, int xoffset, int yoffset, ScintillaGTK *sciThis) {
 #if GTK_MAJOR_VERSION < 2
+gint ScintillaGTK::CursorMoved(GtkWidget *widget, int xoffset, int yoffset, ScintillaGTK *sciThis) {
 	if (GTK_WIDGET_HAS_FOCUS(widget) && gdk_im_ready() && sciThis->ic &&
 	        (gdk_ic_get_style (sciThis->ic) & GDK_IM_PREEDIT_POSITION)) {
 		sciThis->ic_attr->spot_location.x = xoffset;
 		sciThis->ic_attr->spot_location.y = yoffset;
 		gdk_ic_set_attr (sciThis->ic, sciThis->ic_attr, GDK_IC_SPOT_LOCATION);
 	}
+	return FALSE;
+}
 #else
+gint ScintillaGTK::CursorMoved(GtkWidget *, int xoffset, int yoffset, ScintillaGTK *sciThis) {
 	GdkRectangle area;
 	area.x = xoffset;
 	area.y = yoffset;
 	area.width = 1;
 	area.height = 1;
 	gtk_im_context_set_cursor_location(sciThis->im_context, &area);
-#endif
 	return FALSE;
 }
+#endif
 #else
 gint ScintillaGTK::CursorMoved(GtkWidget *, int, int, ScintillaGTK *) {
 	return FALSE;
@@ -971,6 +974,7 @@ const char *CharacterSetID(int characterSet);
 #define IS_ACC_OR_CHAR(x) \
 	(IS_CHAR(x)) || (IS_ACC(x))
 
+#ifndef INTERNATIONAL_INPUT
 static int MakeAccent(int key, int acc) {
 	const char *conv[] = {
 		"aeiounc AEIOUNC",
@@ -1002,6 +1006,7 @@ static int MakeAccent(int key, int acc) {
 	}
 	return key;
 }
+#endif
 #endif
 
 int ScintillaGTK::KeyDefault(int key, int modifiers) {
@@ -1801,15 +1806,11 @@ gint ScintillaGTK::KeyRelease(GtkWidget *, GdkEventKey * /*event*/) {
 }
 
 #if GTK_MAJOR_VERSION >= 2
-void ScintillaGTK::Commit(GtkIMContext *context,
-		     char  *str,
-		     ScintillaGTK *sciThis)
-{
+void ScintillaGTK::Commit(GtkIMContext *, char  *str, ScintillaGTK *sciThis) {
 	sciThis->CommitThis(str);
 }
 
-void ScintillaGTK::CommitThis(char *str)
-{
+void ScintillaGTK::CommitThis(char *str) {
 	AddCharUTF(str, strlen(str));
 }
 #endif
