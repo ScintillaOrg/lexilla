@@ -1891,9 +1891,9 @@ void ListBoxX::SetFont(Font &scint_font) {
 		gtk_style_unref(style);
 	}
 #else
-	GtkStyle *styleCurrent = gtk_widget_get_style(GTK_WIDGET(PWidget(list)));
 	if (PFont(scint_font)->pfont) {
 		// Current font is GDK font
+		GtkStyle *styleCurrent = gtk_widget_get_style(GTK_WIDGET(PWidget(list)));
 		GdkFont *fontCurrent = gtk_style_get_font(styleCurrent);
 		if (!gdk_font_equal(fontCurrent, PFont(scint_font)->pfont)) {
 			GtkStyle *styleNew = gtk_style_copy(styleCurrent);
@@ -1903,11 +1903,7 @@ void ListBoxX::SetFont(Font &scint_font) {
 		}
 	} else if (PFont(scint_font)->pfd) {
 		// Current font is Pango font
-		GtkStyle *styleNew = gtk_style_copy(styleCurrent);
-		pango_font_description_free(styleNew->font_desc);
-		styleNew->font_desc = pango_font_description_copy(PFont(scint_font)->pfd);
-		gtk_widget_set_style(GTK_WIDGET(PWidget(list)), styleNew);
-		gtk_style_unref(styleCurrent);
+		gtk_widget_modify_font(PWidget(list), PFont(scint_font)->pfd);
 	}
 #endif
 }
@@ -1950,7 +1946,7 @@ PRectangle ListBoxX::GetDesiredRect() {
 		int ythickness = PWidget(list)->style->ythickness;
 		height = (rows * row_height
 		          + 2 * (ythickness
-		                 + GTK_CONTAINER(PWidget(list))->border_width));
+		                 + GTK_CONTAINER(PWidget(list))->border_width + 1));
 #endif
 		gtk_widget_set_usize(GTK_WIDGET(PWidget(list)), -1, height);
 
