@@ -83,7 +83,7 @@ ScintillaGTK(const ScintillaGTK &) : ScintillaBase() {}
 public:
 	ScintillaGTK(_ScintillaObject *sci_);
 	virtual ~ScintillaGTK();
-	static void ClassInit(GtkWidgetClass *widget_class);
+	static void ClassInit(GtkObjectClass* object_class, GtkWidgetClass *widget_class);
 
 private:
 	virtual void Initialise();
@@ -150,7 +150,7 @@ private:
 	static gint Motion(GtkWidget *widget, GdkEventMotion *event);
 	static gint KeyPress(GtkWidget *widget, GdkEventKey *event);
 	static gint KeyRelease(GtkWidget *widget, GdkEventKey *event);
-	static gint DestroyWindow(GtkWidget *widget, GdkEventAny *event);
+	static void Destroy(GtkObject *object);
 	static void SelectionReceived(GtkWidget *widget, GtkSelectionData *selection_data,
 	                              guint time);
 	static void SelectionGet(GtkWidget *widget, GtkSelectionData *selection_data,
@@ -183,6 +183,7 @@ enum {
 };
 
 static gint scintilla_signals[LAST_SIGNAL] = { 0 };
+static GtkWidgetClass* parent_class = NULL;
 
 GdkAtom ScintillaGTK::clipboard_atom = GDK_NONE;
 
@@ -1332,12 +1333,15 @@ gint ScintillaGTK::KeyRelease(GtkWidget *, GdkEventKey * /*event*/) {
 	return FALSE;
 }
 
-gint ScintillaGTK::DestroyWindow(GtkWidget *widget, GdkEventAny *) {
-	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
-	//Platform::DebugPrintf("Destroying window %x %x\n", sciThis, widget);
+void ScintillaGTK::Destroy(GtkObject* object) {
+	ScintillaGTK *sciThis = ScintillaFromWidget(GTK_WIDGET(object));
+	//Platform::DebugPrintf("Destroying %x %x\n", sciThis, object);
 	sciThis->Finalise();
+      
+	if (GTK_OBJECT_CLASS (parent_class)->destroy)
+		(* GTK_OBJECT_CLASS (parent_class)->destroy) (object);
+
 	delete sciThis;
-	return FALSE;
 }
 
 static void DrawChild(GtkWidget *widget, GdkRectangle *area) {
@@ -1552,11 +1556,13 @@ guint scintilla_get_type() {
 	return scintilla_type;
 }
 
-void ScintillaGTK::ClassInit(GtkWidgetClass *widget_class) {
+void ScintillaGTK::ClassInit(GtkObjectClass* object_class, GtkWidgetClass *widget_class) {
 	// Define default signal handlers for the class:  Could move more
 	// of the signal handlers here (those that currently attached to wDraw
 	// in Initialise() may require coordinate translation?)
-	widget_class->destroy_event = DestroyWindow;
+
+	object_class->destroy = Destroy;  
+
 	widget_class->size_request = SizeRequest;
 	widget_class->size_allocate = SizeAllocate;
 	widget_class->expose_event = ExposeMain;
@@ -1594,6 +1600,8 @@ static void scintilla_class_init(ScintillaClass *klass) {
 	GtkObjectClass *object_class = (GtkObjectClass*) klass;
 	GtkWidgetClass *widget_class = (GtkWidgetClass*) klass;
 
+	parent_class = (GtkWidgetClass*) gtk_type_class (gtk_container_get_type ());
+
 	scintilla_signals[COMMAND_SIGNAL] = gtk_signal_new(
 	                                        "command",
 	                                        GTK_RUN_LAST,
@@ -1618,7 +1626,7 @@ static void scintilla_class_init(ScintillaClass *klass) {
 	klass->command = NULL;
 	klass->notify = NULL;
 
-	ScintillaGTK::ClassInit(widget_class);
+	ScintillaGTK::ClassInit(object_class, widget_class);
 }
 
 static void scintilla_init(ScintillaObject *sci) {
