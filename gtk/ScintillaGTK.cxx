@@ -153,6 +153,9 @@ private:
 	static gint FocusOut(GtkWidget *widget, GdkEventFocus *event);
 	static void SizeRequest(GtkWidget *widget, GtkRequisition *requisition);
 	static void SizeAllocate(GtkWidget *widget, GtkAllocation *allocation);
+#if GTK_MAJOR_VERSION >= 2
+	static void ScrollOver(GtkWidget *widget, GdkEventMotion *event);
+#endif
 	static gint Expose(GtkWidget *widget, GdkEventExpose *ose, ScintillaGTK *sciThis);
 	static gint ExposeMain(GtkWidget *widget, GdkEventExpose *ose);
 	static void Draw(GtkWidget *widget, GdkRectangle *area);
@@ -489,6 +492,15 @@ void ScintillaGTK::SizeAllocate(GtkWidget *widget, GtkAllocation *allocation) {
 #endif
 }
 
+#if GTK_MAJOR_VERSION >= 2
+void ScintillaGTK::ScrollOver(GtkWidget *widget, GdkEventMotion */*event*/) {
+	// Ensure cursor goes back to arrow over scroll bar.
+	GtkWidget *parent = gtk_widget_get_parent(widget);
+	ScintillaGTK *sciThis = ScintillaFromWidget(parent);
+	sciThis->wMain.SetCursor(Window::cursorArrow);
+}
+#endif
+
 void ScintillaGTK::Initialise() {
 	//Platform::DebugPrintf("ScintillaGTK::Initialise\n");
 	parentClass = reinterpret_cast<GtkWidgetClass *>(
@@ -548,6 +560,12 @@ void ScintillaGTK::Initialise() {
 	                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
 
 	SetTicking(true);
+#if GTK_MAJOR_VERSION >= 2
+	gtk_signal_connect(GTK_OBJECT(scrollbarv.GetID()),"motion-notify-event",
+		GTK_SIGNAL_FUNC(ScrollOver), NULL);
+	gtk_signal_connect(GTK_OBJECT(scrollbarh.GetID()),"motion-notify-event",
+		GTK_SIGNAL_FUNC(ScrollOver), NULL);
+#endif
 }
 
 void ScintillaGTK::Finalise() {
