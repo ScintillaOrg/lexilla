@@ -88,7 +88,7 @@ public:
 	}
 	SString &operator=(const SString &source) {
 		if (this != &source) {
-			assign(source.c_str());
+			assign(source.c_str(), source.sLen);
 		}
 		return *this;
 	}
@@ -150,7 +150,8 @@ public:
 	}
 	SString &insert(lenpos_t pos, const char *sOther, lenpos_t sLenOther=measure_length);
 
-	/** Remove @a len characters from the @a pos position, included.
+	/**
+	 * Remove @a len characters from the @a pos position, included.
 	 * Characters at pos + len and beyond replace characters at pos.
 	 * If @a len is 0, or greater than the length of the string
 	 * starting at @a pos, the string is just truncated at @a pos.
