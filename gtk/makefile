@@ -25,8 +25,8 @@ endif
 .cxx.o:
 	$(CC) `gtk-config --cflags` $(INCLUDEDIRS) $(CXXFLAGS) -c $< -o $@
 
-LEXOBJS	=  LexConf.o LexCPP.o LexHTML.o LexLua.o LexOthers.o LexPascal.o \
-	LexPerl.o LexPython.o LexSQL.o LexVB.o
+LEXOBJS	=  LexAVE.o LexConf.o LexCPP.o LexHTML.o LexLua.o LexOthers.o \
+	LexPascal.o LexPerl.o LexPython.o LexSQL.o LexVB.o
 
 # The LEXOBJS have to be treated specially as the functions in them are not called from external code
 
@@ -54,6 +54,8 @@ Indicator.o: Indicator.cxx Platform.h Scintilla.h WinDefs.h \
  Indicator.h
 KeyMap.o: KeyMap.cxx Platform.h Scintilla.h WinDefs.h KeyMap.h
 KeyWords.o: KeyWords.cxx Platform.h PropSet.h SString.h Accessor.h \
+ KeyWords.h Scintilla.h WinDefs.h SciLexer.h
+LexAVE.o: LexAVE.cxx Platform.h PropSet.h SString.h Accessor.h \
  KeyWords.h Scintilla.h WinDefs.h SciLexer.h
 LexConf.o: LexConf.cxx Platform.h PropSet.h SString.h Accessor.h \
  KeyWords.h Scintilla.h WinDefs.h SciLexer.h
@@ -97,5 +99,5 @@ ViewStyle.o: ViewStyle.cxx Platform.h Scintilla.h WinDefs.h \
 WindowAccessor.o: WindowAccessor.cxx Platform.h PropSet.h SString.h \
  Accessor.h WindowAccessor.h Scintilla.h WinDefs.h
 
-clean: 
+clean:
 	rm -f *.o SciTE

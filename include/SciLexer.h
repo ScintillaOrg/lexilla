@@ -31,6 +31,7 @@
 #define SCLEX_DIFF 16
 #define SCLEX_CONF 17
 #define SCLEX_PASCAL 18
+#define SCLEX_AVE 19
 #define SCE_P_DEFAULT 0
 #define SCE_P_COMMENTLINE 1
 #define SCE_P_NUMBER 2

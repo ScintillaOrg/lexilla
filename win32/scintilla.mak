@@ -1,7 +1,7 @@
 # Make file for Scintilla on Windows Visual C++ and Borland C++ version
 # Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 # The License.txt file describes the conditions under which this software may be distributed.
-# This makefile is for using Visual C++ with nmake or Borland C++ with make depending on 
+# This makefile is for using Visual C++ with nmake or Borland C++ with make depending on
 # the setting of the VENDOR macro. If no VENDOR is defined n the command line then
 # the tool used is automatically detected.
 # Usage for Microsoft:
@@ -36,7 +36,7 @@ RC=rc
 LD=link
 
 INCLUDEDIRS=-I ../include -I ../src
-CXXFLAGS=/TP /W4 
+CXXFLAGS=/TP /W4
 # For something scary:/Wp64
 CXXDEBUG=/Zi /Od /MDd -DDEBUG
 CXXNDEBUG=/Ox /MD -DNDEBUG
@@ -47,7 +47,7 @@ LIBS=KERNEL32.lib USER32.lib GDI32.lib IMM32.lib OLE32.LIB
 
 !IFDEF QUIET
 CC=@$(CC)
-CXXDEBUG=$(CXXDEBUG) /nologo 
+CXXDEBUG=$(CXXDEBUG) /nologo
 CXXNDEBUG=$(CXXNDEBUG) /nologo
 LDFLAGS=$(LDFLAGS) /nologo
 !ENDIF
@@ -102,6 +102,7 @@ SOBJS=\
 	$(DIR_O)\ViewStyle.obj
 
 LEXOBJS=\
+	$(DIR_O)\LexAVE.obj \
 	$(DIR_O)\LexConf.obj \
 	$(DIR_O)\LexCPP.obj \
 	$(DIR_O)\LexHTML.obj \
@@ -201,47 +202,51 @@ $(DIR_O)\KeyMap.obj: ..\src\KeyMap.cxx ..\include\Platform.h ..\include\Scintill
 
 $(DIR_O)\KeyWords.obj: ..\src\KeyWords.cxx ..\include\Platform.h ..\include\PropSet.h \
  ..\include\SString.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
+ ..\include\Scintilla.h ..\include\SciLexer.h
 
-$(DIR_O)\LexCPP.obj: ..\src\LexCPP.cxx ..\include\Platform.h ..\include\PropSet.h \
+$(DIR_O)\LexAVE.obj: ..\src\LexAVE.cxx ..\include\Platform.h ..\include\PropSet.h \
  ..\include\SString.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
+ ..\include\Scintilla.h ..\include\SciLexer.h
 
 $(DIR_O)\LexConf.obj: ..\src\LexConf.cxx ..\include\Platform.h ..\include\PropSet.h \
  ..\include\SString.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
+ ..\include\Scintilla.h ..\include\SciLexer.h
+
+$(DIR_O)\LexCPP.obj: ..\src\LexCPP.cxx ..\include\Platform.h ..\include\PropSet.h \
+ ..\include\SString.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h
 
 $(DIR_O)\LexHTML.obj: ..\src\LexHTML.cxx ..\include\Platform.h ..\include\PropSet.h \
  ..\include\SString.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
+ ..\include\Scintilla.h ..\include\SciLexer.h
 
 $(DIR_O)\LexLua.obj: ..\src\LexLua.cxx ..\include\Platform.h ..\include\PropSet.h \
  ..\include\SString.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
+ ..\include\Scintilla.h ..\include\SciLexer.h
 
 $(DIR_O)\LexOthers.obj: ..\src\LexOthers.cxx ..\include\Platform.h ..\include\PropSet.h \
  ..\include\SString.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
+ ..\include\Scintilla.h ..\include\SciLexer.h
 
 $(DIR_O)\LexPerl.obj: ..\src\LexPerl.cxx ..\include\Platform.h ..\include\PropSet.h \
  ..\include\SString.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
+ ..\include\Scintilla.h ..\include\SciLexer.h
 
 $(DIR_O)\LexPascal.obj: ..\src\LexPascal.cxx ..\include\Platform.h ..\include\PropSet.h \
  ..\include\SString.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
+ ..\include\Scintilla.h ..\include\SciLexer.h
 
 $(DIR_O)\LexPython.obj: ..\src\LexPython.cxx ..\include\Platform.h ..\include\PropSet.h \
  ..\include\SString.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
+ ..\include\Scintilla.h ..\include\SciLexer.h
 
 $(DIR_O)\LexSQL.obj: ..\src\LexSQL.cxx ..\include\Platform.h ..\include\PropSet.h \
  ..\include\SString.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
+ ..\include\Scintilla.h ..\include\SciLexer.h
 
 $(DIR_O)\LexVB.obj: ..\src\LexVB.cxx ..\include\Platform.h ..\include\PropSet.h \
  ..\include\SString.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
+ ..\include\Scintilla.h ..\include\SciLexer.h
 
 $(DIR_O)\LineMarker.obj: ..\src\LineMarker.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\LineMarker.h
 
