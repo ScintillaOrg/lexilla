@@ -300,9 +300,9 @@ static void classifyWordHTPHP(unsigned int start, unsigned int end, WordList &ke
 	if (wordIsNumber)
 		chAttr = SCE_HPHP_NUMBER;
 	else {
-		char s[30 + 1];
+		char s[100 + 1];
 		unsigned int i = 0;
-		for (; i < end - start + 1 && i < 30; i++) {
+		for (; i < end - start + 1 && i < 100; i++) {
 			s[i] = static_cast<char>(tolower(styler[start + i]));
 		}
 		s[i] = '\0';
