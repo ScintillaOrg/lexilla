@@ -12,6 +12,9 @@
 //                  Fixed "#comments_end" -> "#comments-end"  
 //                  Fixed Sendkeys in Strings when not terminated with }
 //                  Added support for Sendkey strings that have second parameter e.g. {UP 5} or {a down}
+// April 26, 2004   Fixed # pre-processor statement inside of comment block would invalidly change the color.
+//                  Added logic for #include <xyz.au3> to treat the <> as string
+//                  Added underscore to IsAOperator.
 // Copyright for Scintilla: 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 // Scintilla source code edit control
@@ -54,7 +57,7 @@ static inline bool IsAOperator(char ch) {
 		return false;
 	if (ch == '+' || ch == '-' || ch == '*' || ch == '/' ||
 	    ch == '&' || ch == '^' || ch == '=' || ch == '<' || ch == '>' ||
-	    ch == '(' || ch == ')' || ch == '[' || ch == ']' )
+	    ch == '(' || ch == ')' || ch == '[' || ch == ']' || ch == '_' )
 		return true;
 	return false;
 }
@@ -145,8 +148,14 @@ static void ColouriseAU3Doc(unsigned int startPos,
         {
             case SCE_AU3_COMMENTBLOCK:
             {
-                if (sc.ch == '#') {sc.SetState(SCE_AU3_DEFAULT);}
-				break;
+				if (!IsAWordChar(sc.ch))
+				{
+					if ((strcmp(s, "#ce")==0 || strcmp(s, "#comments-end")==0)) 
+					{sc.SetState(SCE_AU3_COMMENT);}  // set to comment line for the rest of the line
+					else
+					{sc.SetState(SCE_AU3_COMMENTBLOCK);}
+				}
+                break;
 			}
             case SCE_AU3_COMMENT:
             {
@@ -164,15 +173,10 @@ static void ColouriseAU3Doc(unsigned int startPos,
                 {
                     if (!IsTypeCharacter(sc.ch))
                     {
-						if (strcmp(s, "#cs")==0 || strcmp(s, "#comments-start")==0)
+						if (strcmp(s, "#cs")==0 || strcmp(s, "#comments-start")==0 )
 						{
 							sc.ChangeState(SCE_AU3_COMMENTBLOCK);
 							sc.SetState(SCE_AU3_COMMENTBLOCK);
-						}
-						else if (strcmp(s, "#ce")==0 || strcmp(s, "#comments-end")==0) 
-						{
-							sc.ChangeState(SCE_AU3_COMMENTBLOCK);
-							sc.SetState(SCE_AU3_DEFAULT);
 						}
 						else if (keywords.InList(s)) {
 							sc.ChangeState(SCE_AU3_KEYWORD);
@@ -189,6 +193,10 @@ static void ColouriseAU3Doc(unsigned int startPos,
 						else if (keywords5.InList(s)) {
 							sc.ChangeState(SCE_AU3_PREPROCESSOR);
 							sc.SetState(SCE_AU3_DEFAULT);
+							if (strcmp(s, "#include")==0)
+							{
+								si = 3;   // use to determine string start for #inlude <>
+							}
 						}
 						else if (!IsAWordChar(sc.ch)) {
 							sc.ChangeState(SCE_AU3_DEFAULT);
@@ -213,7 +221,7 @@ static void ColouriseAU3Doc(unsigned int startPos,
             {
 				// check for " to end a double qouted string or
 				// check for ' to end a single qouted string 
-	            if ((si == 1 && sc.ch == '\"') || (si == 2 && sc.ch == '\''))
+	            if ((si == 1 && sc.ch == '\"') || (si == 2 && sc.ch == '\'') || (si == 3 && sc.ch == '>'))
 				{
 					sc.ForwardSetState(SCE_AU3_DEFAULT);
 				}
@@ -257,7 +265,11 @@ static void ColouriseAU3Doc(unsigned int startPos,
 					sc.SetState(SCE_AU3_STRING);
 				}
 				// check if next portion is again a sendkey
-				if (sc.atLineEnd) {sc.SetState(SCE_AU3_DEFAULT);}
+				if (sc.atLineEnd) 
+				{
+					sc.SetState(SCE_AU3_DEFAULT);
+					si = 0;  // reset string indicator
+				}
 				if (sc.ch == '{' && sc.chPrev != '{') {sc.SetState(SCE_AU3_SENT);}
 				if (sc.ch == '+' && sc.chNext == '{') {sc.SetState(SCE_AU3_SENT);}
 				if (sc.ch == '!' && sc.chNext == '{') {sc.SetState(SCE_AU3_SENT);}
@@ -282,6 +294,7 @@ static void ColouriseAU3Doc(unsigned int startPos,
             else if (sc.ch == '#') {sc.SetState(SCE_AU3_KEYWORD);}
             else if (sc.ch == '$') {sc.SetState(SCE_AU3_VARIABLE);}
             else if (sc.ch == '@') {sc.SetState(SCE_AU3_KEYWORD);}
+            else if (sc.ch == '<' && si==3) {sc.SetState(SCE_AU3_STRING);}  // string after #include 
             else if (sc.ch == '\"') {
 				sc.SetState(SCE_AU3_STRING);
 				si = 1;	}
