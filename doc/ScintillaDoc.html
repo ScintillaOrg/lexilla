@@ -4477,7 +4477,9 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
 
           <td align="left">Valid for text changes, not for style changes. If we are collecting undo
           information this holds a pointer to the text that is handed to the Undo system, otherwise
-          it is zero.</td>
+          it is zero. For user performed SC_MOD_BEFOREDELETE the text field is 0 and 
+	for user performed SC_MOD_BEFOREINSERT the text field points to an array of cells,
+	not bytes.</td>
         </tr>
 
         <tr>
@@ -4529,7 +4531,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
 
           <td>Text has been inserted into the document.</td>
 
-          <td><code>position, length, linesAdded</code></td>
+          <td><code>position, length, text, linesAdded</code></td>
         </tr>
 
         <tr>
@@ -4539,7 +4541,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
 
           <td>Text has been removed from the document.</td>
 
-          <td><code>position, length, linesAdded</code></td>
+          <td><code>position, length, text, linesAdded</code></td>
         </tr>
 
         <tr>
