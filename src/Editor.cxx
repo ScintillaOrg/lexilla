@@ -3281,6 +3281,7 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 		return pdoc->IsReadOnly();
 
 	case EM_CANPASTE:
+	case SCI_CANPASTE:
 		return 1;
 
 	case EM_CHARFROMPOS: {
