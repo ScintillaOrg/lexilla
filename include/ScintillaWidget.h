@@ -28,7 +28,7 @@ struct _ScintillaObject {
 };
 
 struct _ScintillaClass {
-	GtkFixedClass parent_class;
+	GtkContainerClass parent_class;
 
 	void (* command) (ScintillaObject *ttt);
 	void (* notify) (ScintillaObject *ttt);
