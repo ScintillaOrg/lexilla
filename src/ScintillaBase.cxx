@@ -38,6 +38,7 @@
 ScintillaBase::ScintillaBase() {
 	displayPopupMenu = true;
 	listType = 0;
+	maxListWidth = 0;
 #ifdef SCI_LEXER
 	lexLanguage = SCLEX_CONTAINER;
 	lexCurrent = 0;
@@ -214,7 +215,8 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 			return;
 		}
 	}
-	ac.Start(wMain, idAutoComplete, currentPos, lenEntered, vs.lineHeight, IsUnicodeMode());
+	ac.Start(wMain, idAutoComplete, currentPos, LocationFromPosition(currentPos),
+				lenEntered, vs.lineHeight, IsUnicodeMode());
 
 	PRectangle rcClient = GetClientRectangle();
 	Point pt = LocationFromPosition(currentPos - lenEntered);
@@ -242,7 +244,8 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 	rcac.bottom = Platform::Minimum(rcac.top + heightLB, rcClient.bottom);
 	ac.lb->SetPositionRelative(rcac, wMain);
 	ac.lb->SetFont(vs.styles[STYLE_DEFAULT].font);
-	ac.lb->SetAverageCharWidth(vs.styles[STYLE_DEFAULT].aveCharWidth);
+	unsigned int aveCharWidth = vs.styles[STYLE_DEFAULT].aveCharWidth;
+	ac.lb->SetAverageCharWidth(aveCharWidth);
 	ac.lb->SetDoubleClickAction(AutoCompleteDoubleClick, this);
 
 	ac.SetList(list);
@@ -251,6 +254,8 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 	PRectangle rcList = ac.lb->GetDesiredRect();
 	int heightAlloced = rcList.bottom - rcList.top;
 	widthLB = Platform::Maximum(widthLB, rcList.right - rcList.left);
+	if (maxListWidth != 0)
+		widthLB = Platform::Minimum(widthLB, aveCharWidth*maxListWidth);
 	// Make an allowance for large strings in list
 	rcList.left = pt.x - ac.lb->CaretFromEdge();
 	rcList.right = rcList.left + widthLB;
@@ -558,6 +563,20 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 
 	case SCI_AUTOCGETDROPRESTOFWORD:
 		return ac.dropRestOfWord;
+
+	case SCI_AUTOCSETMAXHEIGHT:
+		ac.lb->SetVisibleRows(wParam);
+		break;
+
+	case SCI_AUTOCGETMAXHEIGHT:
+		return ac.lb->GetVisibleRows();
+
+	case SCI_AUTOCSETMAXWIDTH:
+		maxListWidth = wParam;
+		break;
+
+	case SCI_AUTOCGETMAXWIDTH:
+		return maxListWidth;
 
 	case SCI_REGISTERIMAGE:
 		ac.lb->RegisterImage(wParam, reinterpret_cast<const char *>(lParam));

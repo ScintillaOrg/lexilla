@@ -527,15 +527,6 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 	case WM_COMMAND:
 #ifdef TOTAL_CONTROL
-		if (LoWord(wParam) == idAutoComplete) {
-			int cmd = HiWord(wParam);
-			if (cmd == LBN_DBLCLK) {
-				AutoCompleteCompleted();
-			} else {
-				if (cmd != LBN_SETFOCUS)
-					::SetFocus(MainHWND());
-			}
-		}
 		Command(LoWord(wParam));
 #endif
 		break;
@@ -762,7 +753,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 	case WM_KILLFOCUS: {
 			HWND wOther = reinterpret_cast<HWND>(wParam);
-			HWND wThis = reinterpret_cast<HWND>(wMain.GetID());
+			HWND wThis = MainHWND();
 			HWND wCT = reinterpret_cast<HWND>(ct.wCallTip.GetID());
 			if (!wParam ||
 				!(::IsChild(wThis,wOther) || (wOther == wCT))) {
