@@ -666,6 +666,12 @@ void Editor::InvalidateCaret() {
 		InvalidateRange(currentPos, currentPos + 1);
 }
 
+int Editor::SubstituteMarkerIfEmpty(int markerCheck, int markerDefault) {
+	if (vs.markers[markerCheck].markType == SC_MARK_EMPTY)
+		return markerDefault;
+	return markerCheck;
+}
+
 void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 	if (vs.fixedColumnWidth == 0)
 		return ;
@@ -730,7 +736,13 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 						needWhiteClosure = true;
 				}
 			}
-
+			
+			// Old code does not know about new markers needed to distinguish all cases
+			int folderOpenMid = SubstituteMarkerIfEmpty(SC_MARKNUM_FOLDEROPENMID, 
+				SC_MARKNUM_FOLDEROPEN);
+			int folderEnd = SubstituteMarkerIfEmpty(SC_MARKNUM_FOLDEREND, 
+				SC_MARKNUM_FOLDER);
+			
 			while ((visibleLine < cs.LinesDisplayed()) && yposScreen < rcMargin.bottom) {
 
 				// Decide which fold indicator should be displayed
@@ -744,12 +756,12 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 						if (levelNum == SC_FOLDLEVELBASE)
 							marks |= 1 << SC_MARKNUM_FOLDEROPEN;
 						else 
-							marks |= 1 << SC_MARKNUM_FOLDEROPENMID;
+							marks |= 1 << folderOpenMid;
 					} else {
 						if (levelNum == SC_FOLDLEVELBASE)
 							marks |= 1 << SC_MARKNUM_FOLDER;
 						else
-							marks |= 1 << SC_MARKNUM_FOLDEREND;
+							marks |= 1 << folderEnd;
 					}
 					needWhiteClosure = false;
 				} else if (level & SC_FOLDLEVELWHITEFLAG) {

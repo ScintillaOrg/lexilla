@@ -213,6 +213,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void DropCaret();
 	void InvalidateCaret();
 
+	int SubstituteMarkerIfEmpty(int markerCheck, int markerDefault);
 	void PaintSelMargin(Surface *surface, PRectangle &rc);
         void LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayout &ll);
 	void DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart, 
