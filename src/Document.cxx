@@ -344,11 +344,11 @@ void Document::ModifiedAt(int pos) {
 // SetStyleAt does not change the persistent state of a document
 
 // Unlike Undo, Redo, and InsertStyledString, the pos argument is a cell number not a char number
-void Document::DeleteChars(int pos, int len) {
+bool Document::DeleteChars(int pos, int len) {
 	if (len == 0)
-		return;
+		return false;
 	if ((pos + len) > Length())
-		return;
+		return false;
 	if (cb.IsReadOnly() && enteredReadOnlyCount == 0) {
 		enteredReadOnlyCount++;
 		NotifyModifyAttempt();
@@ -379,9 +379,10 @@ void Document::DeleteChars(int pos, int len) {
 		}
 		enteredCount--;
 	}
+	return !cb.IsReadOnly();
 }
 
-void Document::InsertStyledString(int position, char *s, int insertLength) {
+bool Document::InsertStyledString(int position, char *s, int insertLength) {
 	if (cb.IsReadOnly() && enteredReadOnlyCount == 0) {
 		enteredReadOnlyCount++;
 		NotifyModifyAttempt();
@@ -409,6 +410,7 @@ void Document::InsertStyledString(int position, char *s, int insertLength) {
 		}
 		enteredCount--;
 	}
+	return !cb.IsReadOnly();
 }
 
 int Document::Undo() {
@@ -497,29 +499,31 @@ int Document::Redo() {
 	return newPos;
 }
 
-void Document::InsertChar(int pos, char ch) {
+bool Document::InsertChar(int pos, char ch) {
 	char chs[2];
 	chs[0] = ch;
 	chs[1] = 0;
-	InsertStyledString(pos*2, chs, 2);
+	return InsertStyledString(pos*2, chs, 2);
 }
 
 // Insert a null terminated string
-void Document::InsertString(int position, const char *s) {
-	InsertString(position, s, strlen(s));
+bool Document::InsertString(int position, const char *s) {
+	return InsertString(position, s, strlen(s));
 }
 
 // Insert a string with a length
-void Document::InsertString(int position, const char *s, int insertLength) {
+bool Document::InsertString(int position, const char *s, int insertLength) {
+	bool changed = false;
 	char *sWithStyle = new char[insertLength * 2];
 	if (sWithStyle) {
 		for (int i = 0; i < insertLength; i++) {
 			sWithStyle[i*2] = s[i];
 			sWithStyle[i*2 + 1] = 0;
 		}
-		InsertStyledString(position*2, sWithStyle, insertLength*2);
+		changed = InsertStyledString(position*2, sWithStyle, insertLength*2);
 		delete []sWithStyle;
 	}
+	return changed;
 }
 
 void Document::ChangeChar(int pos, char ch) {
@@ -531,22 +535,26 @@ void Document::DelChar(int pos) {
 	DeleteChars(pos, LenChar(pos));
 }
 
+int Document::DelCharBackMove(int pos, int len) {
+	if (DeleteChars(pos - len, len)) {
+		return pos - len;
+	} else {
+		return pos;
+	}
+}
+
 int Document::DelCharBack(int pos) {
 	if (pos <= 0) {
 		return pos;
 	} else if (IsCrLf(pos - 2)) {
-		DeleteChars(pos - 2, 2);
-		return pos - 2;
+		return DelCharBackMove(pos, 2);
 	} else if (SC_CP_UTF8 == dbcsCodePage) {
 		int startChar = MovePositionOutsideChar(pos - 1, -1, false);
-		DeleteChars(startChar, pos - startChar);
-		return startChar;
+		return DelCharBackMove(pos, pos - startChar);
 	} else if (IsDBCS(pos - 1)) {
-		DeleteChars(pos - 2, 2);
-		return pos - 2;
+		return DelCharBackMove(pos, 2);
 	} else {
-		DeleteChars(pos - 1, 1);
-		return pos - 1;
+		return DelCharBackMove(pos, 1);
 	}
 }
 

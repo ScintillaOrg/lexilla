@@ -2220,8 +2220,9 @@ void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 			}
 		}
 	}
-	pdoc->InsertString(currentPos, s, len);
-	SetEmptySelection(currentPos + len);
+	if (pdoc->InsertString(currentPos, s, len)) {
+		SetEmptySelection(currentPos + len);
+	}
 	EnsureCaretVisible();
 	// Avoid blinking during rapid typing:
 	ShowCaretAtCurrentPosition();
@@ -3456,9 +3457,10 @@ void Editor::DropAt(int position, const char *value, bool moving, bool rectangul
 			SetSelection(position, position);
 		} else {
 			position = MovePositionOutsideChar(position, currentPos - position);
-			pdoc->InsertString(position, value);
+			if (pdoc->InsertString(position, value)) {
+				SetSelection(position + strlen(value), position);
+			}
 			pdoc->EndUndoAction();
-			SetSelection(position + strlen(value), position);
 		}
 	} else if (inDragDrop) {
 		SetSelection(position, position);
@@ -3743,17 +3745,20 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 			if (selStart < selEnd) {
 				if (drag.len) {
 					if (ctrl) {
-						pdoc->InsertString(newPos, drag.s, drag.len);
-						SetSelection(newPos, newPos + drag.len);
+						if (pdoc->InsertString(newPos, drag.s, drag.len)) {
+							SetSelection(newPos, newPos + drag.len);
+						}
 					} else if (newPos < selStart) {
 						pdoc->DeleteChars(selStart, drag.len);
-						pdoc->InsertString(newPos, drag.s, drag.len);
-						SetSelection(newPos, newPos + drag.len);
+						if (pdoc->InsertString(newPos, drag.s, drag.len)) {
+							SetSelection(newPos, newPos + drag.len);
+						}
 					} else if (newPos > selEnd) {
 						pdoc->DeleteChars(selStart, drag.len);
 						newPos -= drag.len;
-						pdoc->InsertString(newPos, drag.s, drag.len);
-						SetSelection(newPos, newPos + drag.len);
+						if (pdoc->InsertString(newPos, drag.s, drag.len)) {
+							SetSelection(newPos, newPos + drag.len);
+						}
 					} else {
 						SetEmptySelection(newPos);
 					}
