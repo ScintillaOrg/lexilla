@@ -118,6 +118,7 @@ LEXOBJS=\
 	$(DIR_O)\LexConf.obj \
 	$(DIR_O)\LexCPP.obj \
 	$(DIR_O)\LexCrontab.obj \
+	$(DIR_O)\LexCSS.obj \
 	$(DIR_O)\LexEiffel.obj \
 	$(DIR_O)\LexFortran.obj \
 	$(DIR_O)\LexHTML.obj \
@@ -254,6 +255,8 @@ $(DIR_O)\LexConf.obj: ..\src\LexConf.cxx $(LEX_HEADERS)
 $(DIR_O)\LexCPP.obj: ..\src\LexCPP.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexCrontab.obj: ..\src\LexCrontab.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexCSS.obj: ..\src\LexCSS.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexEiffel.obj: ..\src\LexEiffel.cxx $(LEX_HEADERS)
 

@@ -3134,6 +3134,7 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	case SCI_LINECUT:
 	case SCI_LINEDELETE:
 	case SCI_LINETRANSPOSE:
+	case SCI_LINEDUPLICATE:
 	case SCI_LOWERCASE:
 	case SCI_UPPERCASE:
 	case SCI_LINESCROLLDOWN:
@@ -3232,6 +3233,22 @@ void Editor::LineTranspose() {
 		}
 
 	}
+}
+
+void Editor::LineDuplicate() {
+	int line = pdoc->LineFromPosition(currentPos);
+	int start = pdoc->LineStart(line);
+	int end = pdoc->LineEnd(line);
+	char *thisLine = CopyRange(start, end);
+	const char *eol = "\n";
+	if (pdoc->eolMode == SC_EOL_CRLF) {
+		eol = "\r\n";
+	} else if (pdoc->eolMode == SC_EOL_CR) {
+		eol = "\r";
+	}
+	pdoc->InsertString(end, eol);
+	pdoc->InsertString(end + strlen(eol), thisLine, end - start);
+	delete []thisLine;
 }
 
 void Editor::CancelModes() {}
@@ -3517,6 +3534,9 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		break;
 	case SCI_LINETRANSPOSE:
 		LineTranspose();
+		break;
+	case SCI_LINEDUPLICATE:
+		LineDuplicate();
 		break;
 	case SCI_LOWERCASE:
 		ChangeCaseOfSelection(false);
@@ -5665,6 +5685,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_LINECUT:
 	case SCI_LINEDELETE:
 	case SCI_LINETRANSPOSE:
+	case SCI_LINEDUPLICATE:
 	case SCI_LOWERCASE:
 	case SCI_UPPERCASE:
 	case SCI_LINESCROLLDOWN:

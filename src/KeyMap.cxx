@@ -127,6 +127,7 @@ const KeyToCommand KeyMap::MapDefault[] = {
     {'L', 			SCI_CTRL,	SCI_LINECUT},
     {'L', 			SCI_CSHIFT,	SCI_LINEDELETE},
     {'T', 			SCI_CTRL,	SCI_LINETRANSPOSE},
+    {'D', 			SCI_CTRL,	SCI_LINEDUPLICATE},
     {'U', 			SCI_CTRL,	SCI_LOWERCASE},
     {'U', 			SCI_CSHIFT,	SCI_UPPERCASE},
     {0,0,0},

@@ -1138,6 +1138,9 @@ fun void LineDelete=2338(,)
 # Switch the current line with the previous.
 fun void LineTranspose=2339(,)
 
+# Duplicate the current line.
+fun void LineDuplicate=2404(,)
+
 # Transform the selection to lower case.
 fun void LowerCase=2340(,)
 
@@ -1476,6 +1479,7 @@ val SCLEX_ASM=34
 val SCLEX_CPPNOCASE=35
 val SCLEX_FORTRAN=36
 val SCLEX_F77=37
+val SCLEX_CSS=38
 
 # When a lexer specifies its language as SCLEX_AUTOMATIC it receives a
 # value assigned in sequence from SCLEX_AUTOMATIC+1.
@@ -1921,6 +1925,21 @@ val SCE_F_PREPROCESSOR=11
 val SCE_F_OPERATOR2=12
 val SCE_F_LABEL=13
 val SCE_F_CONTINUATION=14
+# Lexical states for SCLEX_CSS
+lex CSS=SCLEX_CSS SCE_CSS_
+val SCE_CSS_DEFAULT=0
+val SCE_CSS_TAG=1
+val SCE_CSS_CLASS=2
+val SCE_CSS_PSEUDOCLASS=3
+val SCE_CSS_UNKNOWN_PSEUDOCLASS=4
+val SCE_CSS_OPERATOR=5
+val SCE_CSS_IDENTIFIER=6
+val SCE_CSS_UNKNOWN_IDENTIFIER=7
+val SCE_CSS_VALUE=8
+val SCE_CSS_COMMENT=9
+val SCE_CSS_ID=10
+val SCE_CSS_IMPORTANT=11
+val SCE_CSS_DIRECTIVE=12
 
 # Events
 
