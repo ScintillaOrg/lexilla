@@ -898,7 +898,7 @@ bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
 	sci.fMask = SIF_PAGE | SIF_RANGE;
 	::GetScrollInfo(MainHWND(), SB_VERT, &sci);
 	if ((sci.nMin != 0) || 
-			(sci.nMax != nMax) ||
+		(sci.nMax != nMax) ||
 	        (sci.nPage != static_cast<unsigned int>(nPage)) ||
 	        (sci.nPos != 0)) {
 		//Platform::DebugPrintf("Scroll info changed %d %d %d %d %d\n",
@@ -912,16 +912,31 @@ bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
 		::SetScrollInfo(MainHWND(), SB_VERT, &sci, TRUE);
 		modified = true;
 	}
-	int horizStart = 0;
-	int horizEnd = 2000;
-	int horizEndPreferred = 2000;
+
+	PRectangle rcText = GetTextRectangle();
+	int horizEndPreferred = scrollWidth;
+	if (horizEndPreferred < 0)
+		horizEndPreferred = 0;
 	if (!horizontalScrollBarVisible || (wrapState != eWrapNone))
 		horizEndPreferred = 0;
-	if (!::GetScrollRange(MainHWND(), SB_HORZ, &horizStart, &horizEnd) ||
-	        horizStart != 0 || horizEnd != horizEndPreferred) {
-		::SetScrollRange(MainHWND(), SB_HORZ, 0, horizEndPreferred, TRUE);
-		//Platform::DebugPrintf("Horiz Scroll info changed\n");
+	unsigned int pageWidth = rcText.Width();
+	sci.fMask = SIF_PAGE | SIF_RANGE;
+	::GetScrollInfo(MainHWND(), SB_HORZ, &sci);
+	if ((sci.nMin != 0) || 
+		(sci.nMax != horizEndPreferred) ||
+		(sci.nPage != pageWidth) ||
+	        (sci.nPos != 0)) {
+		sci.fMask = SIF_PAGE | SIF_RANGE;
+		sci.nMin = 0;
+		sci.nMax = horizEndPreferred;
+		sci.nPage = pageWidth;
+		sci.nPos = 0;
+		sci.nTrackPos = 1;
+		::SetScrollInfo(MainHWND(), SB_HORZ, &sci, TRUE);
 		modified = true;
+		if (scrollWidth < static_cast<int>(pageWidth)) {
+			HorizontalScrollTo(0);
+		}
 	}
 	return modified;
 }
@@ -1528,7 +1543,7 @@ void ScintillaWin::HorizontalScrollMessage(WPARAM wParam) {
 	case SB_LINEUP:
 		xPos -= 20;
 		break;
-	case SB_LINEDOWN:
+	case SB_LINEDOWN:	// May move past the logical end
 		xPos += 20;
 		break;
 	case SB_PAGEUP:
@@ -1536,12 +1551,15 @@ void ScintillaWin::HorizontalScrollMessage(WPARAM wParam) {
 		break;
 	case SB_PAGEDOWN:
 		xPos += pageWidth;
+		if (xPos > scrollWidth - rcText.Width()) {	// Hit the end exactly
+			xPos = scrollWidth - rcText.Width();
+		}
 		break;
 	case SB_TOP:
 		xPos = 0;
 		break;
 	case SB_BOTTOM:
-		xPos = 2000;
+		xPos = scrollWidth;
 		break;
 	case SB_THUMBPOSITION:
 		xPos = HiWord(wParam);

@@ -326,6 +326,7 @@ Editor::Editor() {
 	xOffset = 0;
 	xCaretMargin = 50;
 	horizontalScrollBarVisible = true;
+	scrollWidth = 2000;
 
 	pixmapLine = Surface::Allocate();
 	pixmapSelMargin = Surface::Allocate();
@@ -4667,6 +4668,16 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETLAYOUTCACHE:
 		return llc.GetLevel();
+
+	case SCI_SETSCROLLWIDTH:
+		PLATFORM_ASSERT(wParam > 0);
+		if (wParam > 0)
+			scrollWidth = wParam;
+		SetScrollBars();
+		break;
+
+	case SCI_GETSCROLLWIDTH:
+		return scrollWidth;
 
 	case SCI_GETCOLUMN:
 		return pdoc->GetColumn(wParam);

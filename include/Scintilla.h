@@ -359,6 +359,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_CACHE_DOCUMENT 3
 #define SCI_SETLAYOUTCACHE 2272
 #define SCI_GETLAYOUTCACHE 2273
+#define SCI_SETSCROLLWIDTH 2274
+#define SCI_GETSCROLLWIDTH 2275
 #define SCI_LINEDOWN 2300
 #define SCI_LINEDOWNEXTEND 2301
 #define SCI_LINEUP 2302

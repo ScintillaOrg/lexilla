@@ -765,13 +765,13 @@ get int GetDirectFunction=2184(,)
 # the function returned by GetDirectFunction.
 get int GetDirectPointer=2185(,)
 
-# Set to overtype (true) or insert mode
+# Set to overtype (true) or insert mode.
 set void SetOvertype=2186(bool overtype,)
 
 # Returns true if overtype mode is active otherwise false is returned.
 get bool GetOvertype=2187(,)
 
-# Set the width of the insert mode caret
+# Set the width of the insert mode caret.
 set void SetCaretWidth=2188(int pixelWidth,)
 
 # Returns the width of the insert mode caret
@@ -900,25 +900,25 @@ get bool GetBackSpaceUnIndents=2263(,)
 
 val SC_TIME_FOREVER=10000000
 
-# Sets the time the mouse must sit still to generate a mouse dwell event
+# Sets the time the mouse must sit still to generate a mouse dwell event.
 set void SetMouseDwellTime=2264(int periodMilliseconds,)
 
-# Retrieve the time the mouse must sit still to generate a mouse dwell event
+# Retrieve the time the mouse must sit still to generate a mouse dwell event.
 get int GetMouseDwellTime=2265(,)
 
-# Get position of start of word
+# Get position of start of word.
 fun int WordStartPosition=2266(position pos, bool onlyWordCharacters)
 
-# Get position of end of word
+# Get position of end of word.
 fun int WordEndPosition=2267(position pos, bool onlyWordCharacters)
 
 val SC_WRAP_NONE=0
 val SC_WRAP_WORD=1
 
-# Sets whether text is word wrapped
+# Sets whether text is word wrapped.
 set void SetWrapMode=2268(int mode,)
 
-# Retrieve whether text is word wrapped
+# Retrieve whether text is word wrapped.
 get int GetWrapMode=2269(,)
 
 val SC_CACHE_NONE=0
@@ -926,11 +926,17 @@ val SC_CACHE_CARET=1
 val SC_CACHE_PAGE=2
 val SC_CACHE_DOCUMENT=3
 
-# Sets the degree of caching of layout information
+# Sets the degree of caching of layout information.
 set void SetLayoutCache=2272(int mode,)
 
-# Retrieve the degree of caching of layout information
+# Retrieve the degree of caching of layout information.
 get int GetLayoutCache=2273(,)
+
+# Sets the document width assumed for scrolling.
+set void SetScrollWidth=2274(int pixelWidth,)
+
+# Retrieve the document width assumed for scrolling.
+get int GetScrollWidth=2275(,)
 
 ## Start of key messages
 # Move caret down one line.

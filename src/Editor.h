@@ -200,6 +200,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int xOffset;		///< Horizontal scrolled amount in pixels
 	int xCaretMargin;	///< Ensure this many pixels visible on both sides of caret
 	bool horizontalScrollBarVisible;
+	int scrollWidth;
 
 	Surface *pixmapLine;
 	Surface *pixmapSelMargin;

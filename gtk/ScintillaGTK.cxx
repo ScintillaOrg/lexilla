@@ -717,10 +717,15 @@ bool ScintillaGTK::ModifyScrollBars(int nMax, int nPage) {
 		modified = true;
 	}
 
-	if (GTK_ADJUSTMENT(adjustmenth)->upper != 2000 ||
-	        GTK_ADJUSTMENT(adjustmenth)->page_size != 200) {
-		GTK_ADJUSTMENT(adjustmenth)->upper = 2000;
-		GTK_ADJUSTMENT(adjustmenth)->page_size = 200;
+	PRectangle rcText = GetTextRectangle();
+	int horizEndPreferred = scrollWidth;
+	if (horizEndPreferred < 0)
+		horizEndPreferred = 0;
+	unsigned int pageWidth = rcText.Width();
+	if (GTK_ADJUSTMENT(adjustmenth)->upper != horizEndPreferred ||
+	        GTK_ADJUSTMENT(adjustmenth)->page_size != pageWidth) {
+		GTK_ADJUSTMENT(adjustmenth)->upper = horizEndPreferred;
+		GTK_ADJUSTMENT(adjustmenth)->page_size = pageWidth;
 		gtk_adjustment_changed(GTK_ADJUSTMENT(adjustmenth));
 		modified = true;
 	}
