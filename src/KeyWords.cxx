@@ -94,6 +94,11 @@ LexerModule lmNull(SCLEX_NULL, ColouriseNullDoc, "null");
 
 int wxForceScintillaLexers(void) {
   extern LexerModule lmAda;
+  extern LexerModule lmAVE;
+  extern LexerModule lmConf;
+  extern LexerModule lmDiff;
+  extern LexerModule lmLatex;
+  extern LexerModule lmPascal;
   extern LexerModule lmCPP;
   extern LexerModule lmHTML;
   extern LexerModule lmXML;
@@ -109,6 +114,11 @@ int wxForceScintillaLexers(void) {
 
   if (
       &lmAda
+      && &lmAVE
+      && &lmConf
+      && &lmDiff
+      && &lmLatex
+      && &lmPascal
       && &lmCPP
       && &lmHTML
       && &lmXML
