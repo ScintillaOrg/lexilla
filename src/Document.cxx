@@ -884,7 +884,7 @@ bool Document::IsWordStartAt(int pos) {
  * the next character is of a different character class.
  */
 bool Document::IsWordEndAt(int pos) {
-	if (pos < Length() - 1) {
+	if (pos < Length()) {
 		charClassification ccPrev = WordCharClass(CharAt(pos-1));
 		return (ccPrev == ccWord || ccPrev == ccPunctuation) &&
 			(ccPrev != WordCharClass(CharAt(pos)));
