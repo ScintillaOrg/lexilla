@@ -1512,6 +1512,9 @@ void Window::SetCursor(Cursor curs) {
 	case cursorWait:
 		gdkCurs = gdk_cursor_new(GDK_WATCH);
 		break;
+	case cursorHand:
+		gdkCurs = gdk_cursor_new(GDK_HAND2);
+		break;
 	case cursorReverseArrow:
 		gdkCurs = gdk_cursor_new(GDK_RIGHT_PTR);
 		break;
