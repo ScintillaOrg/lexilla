@@ -1002,8 +1002,9 @@ void ScintillaWin::Paste() {
 					if (isRectangular) {
 						PasteRectangular(selStart, putf, len);
 					} else {
-						pdoc->InsertString(currentPos, putf, len);
-						SetEmptySelection(currentPos + len);
+						if (pdoc->InsertString(currentPos, putf, len)) {
+							SetEmptySelection(currentPos + len);
+						}
 					}
 					delete []putf;
 				}
@@ -1639,7 +1640,7 @@ STDMETHODIMP ScintillaWin::DragEnter(LPDATAOBJECT pIDataSource, DWORD grfKeyStat
 }
 
 STDMETHODIMP ScintillaWin::DragOver(DWORD grfKeyState, POINTL pt, PDWORD pdwEffect) {
-	if (!hasOKText) {
+	if (!hasOKText || pdoc->IsReadOnly()) {
 		*pdwEffect = DROPEFFECT_NONE;
 		return S_OK;
 	}
