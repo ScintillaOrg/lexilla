@@ -212,6 +212,10 @@ class ScintillaWin :
 	void RealizeWindowPalette(bool inBackGround);
 	void FullPaint();
 
+	virtual int SetScrollInfo(int nBar, LPCSCROLLINFO lpsi, BOOL bRedraw);
+	virtual bool GetScrollInfo(int nBar, LPSCROLLINFO lpsi);
+	void ChangeScrollPos(int barType, int pos);
+
 public:
 	// Public for benefit of Scintilla_DirectFunction
 	virtual sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
@@ -974,25 +978,33 @@ void ScintillaWin::ScrollText(int linesToMove) {
 	::UpdateWindow(MainHWND());
 }
 
+int ScintillaWin::SetScrollInfo(int nBar, LPCSCROLLINFO lpsi, BOOL bRedraw) {
+	return ::SetScrollInfo(MainHWND(), nBar, lpsi, bRedraw);
+}
+
+bool ScintillaWin::GetScrollInfo(int nBar, LPSCROLLINFO lpsi) {
+	return ::GetScrollInfo(MainHWND(), nBar, lpsi) ? true : false;
+}
+
 // Change the scroll position but avoid repaint if changing to same value
-static void ChangeScrollPos(HWND w, int barType, int pos) {
+void ScintillaWin::ChangeScrollPos(int barType, int pos) {
 	SCROLLINFO sci = {
 		sizeof(sci),0,0,0,0,0,0
 	};
 	sci.fMask = SIF_POS;
-	::GetScrollInfo(w, barType, &sci);
+	GetScrollInfo(barType, &sci);
 	if (sci.nPos != pos) {
 		sci.nPos = pos;
-		::SetScrollInfo(w, barType, &sci, TRUE);
+		SetScrollInfo(barType, &sci, TRUE);
 	}
 }
 
 void ScintillaWin::SetVerticalScrollPos() {
-	ChangeScrollPos(MainHWND(), SB_VERT, topLine);
+	ChangeScrollPos(SB_VERT, topLine);
 }
 
 void ScintillaWin::SetHorizontalScrollPos() {
-	ChangeScrollPos(MainHWND(), SB_HORZ, xOffset);
+	ChangeScrollPos(SB_HORZ, xOffset);
 }
 
 bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
@@ -1001,7 +1013,7 @@ bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
 		sizeof(sci),0,0,0,0,0,0
 	};
 	sci.fMask = SIF_PAGE | SIF_RANGE;
-	::GetScrollInfo(MainHWND(), SB_VERT, &sci);
+	GetScrollInfo(SB_VERT, &sci);
 	int vertEndPreferred = nMax;
 	if (!verticalScrollBarVisible)
 		vertEndPreferred = 0;
@@ -1017,7 +1029,7 @@ bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
 		sci.nPage = nPage;
 		sci.nPos = 0;
 		sci.nTrackPos = 1;
-		::SetScrollInfo(MainHWND(), SB_VERT, &sci, TRUE);
+		SetScrollInfo(SB_VERT, &sci, TRUE);
 		modified = true;
 	}
 
@@ -1029,7 +1041,7 @@ bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
 		horizEndPreferred = 0;
 	unsigned int pageWidth = rcText.Width();
 	sci.fMask = SIF_PAGE | SIF_RANGE;
-	::GetScrollInfo(MainHWND(), SB_HORZ, &sci);
+	GetScrollInfo(SB_HORZ, &sci);
 	if ((sci.nMin != 0) ||
 		(sci.nMax != horizEndPreferred) ||
 		(sci.nPage != pageWidth) ||
@@ -1040,7 +1052,7 @@ bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
 		sci.nPage = pageWidth;
 		sci.nPos = 0;
 		sci.nTrackPos = 1;
-		::SetScrollInfo(MainHWND(), SB_HORZ, &sci, TRUE);
+		SetScrollInfo(SB_HORZ, &sci, TRUE);
 		modified = true;
 		if (scrollWidth < static_cast<int>(pageWidth)) {
 			HorizontalScrollTo(0);
@@ -1620,7 +1632,7 @@ void ScintillaWin::ScrollMessage(WPARAM wParam) {
 	sci.cbSize = sizeof(sci);
 	sci.fMask = SIF_ALL;
 
-	::GetScrollInfo(MainHWND(), SB_VERT, &sci);
+	GetScrollInfo(SB_VERT, &sci);
 
 	//Platform::DebugPrintf("ScrollInfo %d mask=%x min=%d max=%d page=%d pos=%d track=%d\n", b,sci.fMask,
 	//sci.nMin, sci.nMax, sci.nPage, sci.nPos, sci.nTrackPos);
