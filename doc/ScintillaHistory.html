@@ -114,6 +114,11 @@
 	Released on 24 December 2001.
       </li>
       <li>
+	Better localisation support including context menus and most messages.
+	Translations of the SciTE user interface available for Bulgarian,
+	French, German, Italian and Turkish.
+      </li>
+      <li>
 	Can specify a character to use to indicate control characters
 	rather than having them displayed as mnemonics.
       </li>
@@ -125,11 +130,54 @@
 	Scintilla method to find start and end of words.
       </li>
       <li>
+	The output pane of SciTE on Windows is now interactive so command line 
+	utilities that prompt for input or confirmation can be used.
+      </li>
+      <li>
 	SciTE on Windows can choose directory for a "Find in Files"
 	command like the GTK+ version could.
       </li>
       <li>
+	SciTE can now load a set of API files rather than just one file.
+      </li>
+      <li>
+	ElapsedTime class added to Platform for accurate measurement of durations.
+	Used for debugging and for showing the user how long commands take in SciTE.
+      </li>
+      <li>
+	In C++ lexer, document comment keywords no longer have to be at the start 
+	of the line.
+      </li>
+      <li>
+	PHP lexer changed to match keywords case insensitively.
+      </li>
+      <li>
+	SciTE on GTK+ now supports the load.on.activate and save.on.deactivate 
+	properties in an equivalent way to the Windows version.
+      </li>
+       <li>
+	In SciTE the selection is not copied to the find field of the Search and Replace
+	dialogs if it contains end of line characters.
+      </li>
+      <li>
+	SciTE on Windows has a menu item to decide whether to respond to other 
+	instances which are performing their check.if.already.open check.
+      </li>
+	 Scintilla on Windows again supports EM_GETSEL and EM_SETSEL.
+      <li>
+	Problem fixed in Scintilla on Windows where control ID was cached and it could 
+	be changed by external code, so no longer cached.
+      </li>
+      <li>
+	Problems fixed in SciTE on Windows when finding any other open instances at 
+	start up when check.if.already.open is true.
+      </li>
+      <li>
 	Bug fixed with caret movement over folded lines.
+      </li>
+      <li>
+        Another bug fixed with tracking selection in secondary views when performing 
+	modifications.
       </li>
       <li>
       </li>
