@@ -94,7 +94,8 @@ Editor::Editor() {
 
 	targetStart = 0;
 	targetEnd = 0;
-
+	searchFlags = 0;
+	
 	topLine = 0;
 	posTopLine = 0;
 
@@ -2541,6 +2542,25 @@ long Editor::SearchText(
 	return pos;
 }
 
+/**
+ * Search for text in the target range of the document.
+ * @return The position of the found text, -1 if not found.
+ */
+long Editor::SearchInTarget(const char *text, int length) {
+	int lengthFound = length;
+	int pos = pdoc->FindText(targetStart, targetEnd, text,
+	                         searchFlags & SCFIND_MATCHCASE,
+	                         searchFlags & SCFIND_WHOLEWORD,
+	                         searchFlags & SCFIND_WORDSTART,
+	                         searchFlags & SCFIND_REGEXP,
+	                         &lengthFound);
+	if (pos != -1) {
+		targetStart = pos;
+		targetEnd = pos + lengthFound;
+	}
+	return pos;
+}
+
 void Editor::GoToLine(int lineNo) {
 	if (lineNo > pdoc->LinesTotal())
 		lineNo = pdoc->LinesTotal();
@@ -3267,21 +3287,22 @@ void Editor::EnsureLineVisible(int lineDoc) {
 	}
 }
 
-int Editor::ReplaceTarget(bool replacePatterns, const char *text) {
+int Editor::ReplaceTarget(bool replacePatterns, const char *text, int length) {
 	pdoc->BeginUndoAction();
+	if (length == -1)
+		length = strlen(text);
 	if (replacePatterns) {
-		text = pdoc->SubstituteByPosition(text);
+		text = pdoc->SubstituteByPosition(text, &length);
 		if (!text)
 			return 0;
 	}
 	if (targetStart != targetEnd)
 		pdoc->DeleteChars(targetStart, targetEnd - targetStart);
 	targetEnd = targetStart;
-	unsigned int len = strlen(text);
-	pdoc->InsertString(targetStart, text);
-	targetEnd = targetStart + len;
+	pdoc->InsertString(targetStart, text, length);
+	targetEnd = targetStart + length;
 	pdoc->EndUndoAction();
-	return len;
+	return length;
 }
 
 static bool ValidMargin(unsigned long wParam) {
@@ -3619,6 +3640,25 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_REPLACETARGET:
 		PLATFORM_ASSERT(lParam);
 		return ReplaceTarget(wParam, reinterpret_cast<char *>(lParam));
+	
+	case SCI_REPLACETARGETCOUNTED:
+		PLATFORM_ASSERT(lParam);
+		return ReplaceTarget(false, reinterpret_cast<char *>(lParam), wParam);
+	
+	case SCI_REPLACETARGETRECOUNTED:
+		PLATFORM_ASSERT(lParam);
+		return ReplaceTarget(true, reinterpret_cast<char *>(lParam), wParam);
+	
+	case SCI_SEARCHINTARGET:
+		PLATFORM_ASSERT(lParam);
+		return SearchInTarget(reinterpret_cast<char *>(lParam), wParam);
+		
+	case SCI_SETSEARCHFLAGS:
+		searchFlags = wParam;
+		break;
+	
+	case SCI_GETSEARCHFLAGS:
+		return searchFlags;
 
 	case EM_LINESCROLL:
 	case SCI_LINESCROLL:

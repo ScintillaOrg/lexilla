@@ -180,7 +180,7 @@ public:
 	long FindText(int minPos, int maxPos, const char *s, 
 		bool caseSensitive, bool word, bool wordStart, bool regExp, int *length);
 	long FindText(int iMessage, unsigned long wParam, long lParam);
-	const char *SubstituteByPosition(const char *text);
+	const char *SubstituteByPosition(const char *text, int *length);
 	int LinesTotal();
 	
 	void ChangeCase(Range r, bool makeUpperCase);
