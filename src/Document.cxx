@@ -182,7 +182,7 @@ int Document::GetLastChild(int lineParent, int level) {
 	if (lineMaxSubord > lineParent) {
 		if (level > (GetLevel(lineMaxSubord + 1) & SC_FOLDLEVELNUMBERMASK)) {
 			// Have chewed up some whitespace that belongs to a parent so seek back
-			if ((lineMaxSubord > lineParent) && (GetLevel(lineMaxSubord) & SC_FOLDLEVELWHITEFLAG)) {
+			if (GetLevel(lineMaxSubord) & SC_FOLDLEVELWHITEFLAG) {
 				lineMaxSubord--;
 			}
 		}
