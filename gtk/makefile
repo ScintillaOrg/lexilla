@@ -48,6 +48,7 @@ CONFIGFLAGS=gtk-config --cflags
 else
 ifneq (,$(findstring /,$(shell whereis pkg-config)))
 CONFIGFLAGS=pkg-config --cflags gtk+-2.0
+MARSHALLER=scintilla-marshal.o
 else
 CONFIGFLAGS=gtk-config --cflags
 endif
