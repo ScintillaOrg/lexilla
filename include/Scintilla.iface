@@ -1696,6 +1696,7 @@ val SCLEX_ERLANG=53
 val SCLEX_OCTAVE=54
 val SCLEX_MSSQL=55
 val SCLEX_VERILOG=56
+val SCLEX_KIX=57
 
 # When a lexer specifies its language as SCLEX_AUTOMATIC it receives a
 # value assigned in sequence from SCLEX_AUTOMATIC+1.
@@ -2365,7 +2366,6 @@ val SCE_ERLANG_NODE_NAME=13
 val SCE_ERLANG_UNKNOWN=31
 # Lexical states for SCLEX_OCTAVE are identical to MatLab
 lex Octave=SCLEX_OCTAVE SCE_MATLAB_
-
 # Lexical states for SCLEX_MSSQL
 lex MSSQL=SCLEX_MSSQL SCE_MSSQL_
 val SCE_MSSQL_DEFAULT=0
@@ -2398,6 +2398,19 @@ val SCE_V_OPERATOR=10
 val SCE_V_IDENTIFIER=11
 val SCE_V_STRINGEOL=12
 val SCE_V_USER=19
+# Lexical states for SCLEX_KIX
+lex Kix=SCLEX_KIX SCE_KIX_
+val SCE_KIX_DEFAULT=0
+val SCE_KIX_COMMENT=1
+val SCE_KIX_STRING1=2
+val SCE_KIX_STRING2=3
+val SCE_KIX_NUMBER=4
+val SCE_KIX_VAR=5
+val SCE_KIX_MACRO=6
+val SCE_KIX_KEYWORD=7
+val SCE_KIX_FUNCTIONS=8
+val SCE_KIX_OPERATOR=9
+val SCE_KIX_IDENTIFIER=31
 
 # Events
 
