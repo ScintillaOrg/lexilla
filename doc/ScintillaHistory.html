@@ -124,6 +124,33 @@
 	Lua lexer no longer treats '.' as a word character and
 	handles 6 keyword sets.
       </li>
+      <li>
+        WordStartPosition and WordEndPosition take an onlyWordCharacters
+        argument.
+      </li>
+      <li>
+	Compilation fix on Alpha because of 64 bit.
+      </li>
+      <li>
+	Compilation fix for static linking.
+      </li>
+      <li>
+	When whole document line selected, only the last display line gets
+	the extra selected rectangle at the right hand side rather than
+	every display line.
+      </li>
+      <li>
+	Caret disappearing bug fixed for the case that the caret was not on the
+	first display line of a document line.
+      </li>
+      <li>
+	SciTE bug fixed where untitled buffer containing text was sometimes
+	deleted without chance to save.
+      </li>
+      <li>
+	SciTE bug fixed where use.monospaced not working with
+	multiple buffers.
+      </li>
     </ul>
     <h3>
        <a href="scite143.zip">Release 1.43</a>
