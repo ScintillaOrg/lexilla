@@ -60,6 +60,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 	WordList &keywords = *keywordlists[0];
 	WordList &keywords2 = *keywordlists[1];
 	WordList &keywords3 = *keywordlists[2];
+	WordList &keywords4 = *keywordlists[3];
 
 	bool stylingWithinPreprocessor = styler.GetPropertyInt("styling.within.preprocessor") != 0;
 
@@ -111,6 +112,8 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 					sc.ChangeState(SCE_C_WORD);
 				} else if (keywords2.InList(s)) {
 					sc.ChangeState(SCE_C_WORD2);
+				} else if (keywords4.InList(s)) {
+					sc.ChangeState(SCE_C_GLOBALCLASS);
 				}
 				sc.SetState(SCE_C_DEFAULT);
 			}
@@ -597,6 +600,7 @@ static const char * const cppWordLists[] = {
             "Secondary keywords and identifiers",
             "Documentation comment keywords",
             "Fold header keywords",
+            "Global classes and typedefs",
             0,
         };
 
