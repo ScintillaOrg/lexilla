@@ -2,7 +2,7 @@
 /** @file Editor.cxx
  ** Main code for the edit control.
  **/
-// Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2004 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <stdlib.h>
@@ -5237,6 +5237,9 @@ void Editor::SetDocPointer(Document *document) {
 	anchor = 0;
 	targetStart = 0;
 	targetEnd = 0;
+
+	braces[0] = invalidPosition;
+	braces[1] = invalidPosition;
 
 	// Reset the contraction state to fully shown.
 	cs.Clear();
