@@ -230,6 +230,10 @@ SOURCE=..\src\LexMPT.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexMSSQL.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexNsis.cxx
 # End Source File
 # Begin Source File
@@ -279,6 +283,10 @@ SOURCE=..\src\LexTeX.cxx
 # Begin Source File
 
 SOURCE=..\src\LexVB.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexVerilog.cxx
 # End Source File
 # Begin Source File
 
