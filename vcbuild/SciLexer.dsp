@@ -214,6 +214,10 @@ SOURCE=..\src\LexMMIXAL.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexMPT.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexNsis.cxx
 # End Source File
 # Begin Source File
@@ -255,6 +259,10 @@ SOURCE=..\src\LexSQL.cxx
 # Begin Source File
 
 SOURCE=..\src\LexVB.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexYAML.cxx
 # End Source File
 # Begin Source File
 
