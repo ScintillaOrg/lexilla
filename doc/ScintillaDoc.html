@@ -1260,8 +1260,9 @@ SCI_ENSUREVISIBLEENFORCEPOLICY(int line)
 	The fold flags is a set of bit flags set with the SCI_SETFOLDFLAGS 
 	message to determine where folding lines are drawn. 2 is draw above 
 	if expanded, 4 is draw above if not expanded. 8 is draw below if 
-	expanded and 16 is draw below if not expanded. This feature needs 
-	to be redesigned to be sensible.
+	expanded and 16 is draw below if not expanded. 
+	64 is display hexadecimal fold levels in line margin to aid debugging folding.
+	This feature needs to be redesigned to be sensible.
     </p>
     <h3>
        Line Wrapping
