@@ -2,7 +2,7 @@
 /** @file AutoComplete.h
  ** Defines the auto completion list box.
  **/
-// Copyright 1998-2002 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #ifndef AUTOCOMPLETE_H
@@ -20,7 +20,7 @@ class AutoComplete {
 public:
 	bool ignoreCase;
 	bool chooseSingle;
-	ListBox lb;
+	ListBox *lb;
 	int posStart;
 	int startLen;
 	/// Should autocompletion be canceled if editor's currentPos <= startPos?
@@ -35,7 +35,8 @@ public:
 	bool Active();
 
 	/// Display the auto completion list positioned to be near a character position
-	void Start(Window &parent, int ctrlID, int position, int startLen_);
+	void Start(Window &parent, int ctrlID, int position,
+		int startLen_, int lineHeight, bool unicodeMode);
 
 	/// The stop chars are characters which, when typed, cause the auto completion list to disappear
 	void SetStopChars(const char *stopChars_);
