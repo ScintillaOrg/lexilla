@@ -127,6 +127,107 @@
       <li>
 	Released on 10 May 2002.
       </li>
+      <li>
+	SCN_ZOOM notification provided by Scintilla when user changes zoom level.
+	Method to determine width of strings in pixels so that elements can be sized
+	relative to text size.
+	SciTE changed to keep line number column displaying a given 
+	number of characters.
+      </li>
+      <li>
+	The logical width of the document used to determine scroll bar range can be set.
+      </li>
+      <li>
+	Setting to allow vertical scrolling to display last line at top rather than 
+	bottom of window.
+      </li>
+      <li>
+	Read-only mode improved to avoid changing the selection in most cases 
+	when a modification is attempted. Drag and drop cursors display correctly
+	for read-only in some cases.
+      </li>
+      <li>
+	Visual C++ options in make files changed to suit Visual Studio .NET.
+      </li>
+      <li>
+	Set of lexers compiled into Scintilla can now be changed by adding and 
+	removing lexer source files from scintilla/src and running LexGen.py.
+      </li>
+      <li>
+	Scintilla.iface includes feature types for enumerations and lexers.
+      </li>
+      <li>
+	Lua lexer improves handling of literal strings and copes with nested literal strings.
+      </li>
+      <li>
+	Diff lexer changed to treat lines starting with "***" similarly to "---". 
+	Symbolic names defined for lexical classes.
+      </li>
+      <li>
+	nncrontab lexer improved.
+      </li>
+      <li>
+	Automatic close tag feature for XML and HTML in SciTE.
+      </li>
+      <li>
+	Automatic indentation in SciTE improved.
+      </li>
+      <li>
+	Maximum number of buffers available in SciTE increased. May be up to 100 
+	although other restrictions on menu length limit the real maximum.
+      </li>
+      <li>
+	Save a Copy command added to SciTE.
+      </li>
+      <li>
+	Export as TeX command added to SciTE.
+      </li>
+      <li>
+	Export as HTML command in SciTE respects Use Monospaced Font and 
+	background colour settings.
+      </li>
+      <li>
+	Compilation problem on Solaris fixed.
+      </li>
+      <li>
+	Saving of MRU in recent file changed so files open when SciTE quit
+	are remembered.
+      </li>
+      <li>
+	More variants of ctags tags handled by Open Selected Filename in SciTE.
+      </li>
+      <li>
+	Javascript embedded in XML highlighted again.
+      </li>
+      <li>
+	SciTE status bar updated after changing parameters in case they are being
+	displayed in status bar.
+      </li>
+      <li>
+	Crash fixed when handling some multi-byte languages.
+      </li>
+      <li>
+	Crash fixed when replacing end of line characters.
+      </li>
+      <li>
+	Bug in SciTE fixed in multiple buffer mode where automatic loading 
+	turned on could lead to losing file contents. 
+      </li>
+      <li>
+	Bug in SciTE on GTK+ fixed where dismissing dialogs with close box led to 
+	those dialogs never being shown again.
+      </li>
+      <li>
+	Bug in SciTE on Windows fixed where position.tile with default positions
+	led to SciTE being positioned off-screen.
+      </li>
+      <li>
+	Bug fixed in read-only mode, clearing all deletes contraction state data
+	leading to it not being synchronized with text.
+      </li>
+      <li>
+	Crash fixed in SciTE on Windows when tab bar displayed.
+      </li>
     </ul>
     <h3>
        <a href="scite145.zip">Release 1.45</a>
