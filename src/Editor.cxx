@@ -5225,6 +5225,7 @@ void Editor::SetDocPointer(Document *document) {
 	pdoc->AddRef();
 
 	// Ensure all positions within document
+	selType = selStream;
 	currentPos = 0;
 	anchor = 0;
 	targetStart = 0;
