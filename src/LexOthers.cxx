@@ -20,6 +20,14 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
+static bool Is0To9(char ch) {
+	return (ch >= '0') && (ch <= '9');
+}
+
+static bool Is1To9(char ch) {
+	return (ch >= '1') && (ch <= '9');
+}
+
 static inline bool AtEOL(Accessor &styler, unsigned int i) {
 	return (styler[i] == '\n') ||
 		((styler[i] == '\r') && (styler.SafeGetCharAt(i + 1) != '\n'));
@@ -85,7 +93,7 @@ static void ColouriseBatchLine(
 		while (offset < lengthLine) {
 			if (state == SCE_BAT_DEFAULT && lineBuffer[offset] == '%') {
 				styler.ColourTo(startLine + offset - 1, state);
-				if (isdigit(lineBuffer[offset + 1])) {
+				if (Is0To9(lineBuffer[offset + 1])) {
 					styler.ColourTo(startLine + offset + 1, SCE_BAT_IDENTIFIER);
 					offset += 2;
 				} else if (lineBuffer[offset + 1] == '%' &&
@@ -406,7 +414,7 @@ static void ColouriseErrorListLine(
 		// Essential Lahey Fortran error message
 		styler.ColourTo(endPos, SCE_ERR_ELF);
 	} else {
-		// Look for GCC <filename>:<line>: message
+		// Look for GCC <filename>:<line>:message
 		// Look for Microsoft <filename>(line) :message
 		// Look for Microsoft <filename>(line,pos)message
 		// Look for CTags \tmessage
@@ -417,10 +425,10 @@ static void ColouriseErrorListLine(
 			if ((i+1) < lengthLine)
 				chNext = lineBuffer[i+1];
 			if (state == 0) {
-				if ((ch == ':') && isdigit(chNext)) {
+				if ((ch == ':') && Is0To9(chNext)) {
 					// May be GCC
 					state = 1;
-				} else if ((ch == '(') && isdigit(chNext) && (chNext != '0')) {
+				} else if ((ch == '(') && Is1To9(chNext)) {
 					// May be Microsoft
 					// Check againt '0' often removes phone numbers
 					state = 10;
@@ -428,23 +436,23 @@ static void ColouriseErrorListLine(
 					// May be CTags
 					state = 20;
 				}
-			} else if ((state == 1) && isdigit(ch)) {
+			} else if ((state == 1) && Is1To9(ch)) {
 				state = 2;
 			} else if (state == 2) {
-				if ((ch == ':') && ((chNext == ' ') || (chNext == '\t'))) {
+				if (ch == ':') {
 					state = 3;	// :9.*: is GCC
 					break;
-				} else if (!isdigit(ch)) {
+				} else if (!Is0To9(ch)) {
 					state = 99;
 				}
 			} else if (state == 10) {
-				state = isdigit(ch) ? 11 : 99;
+				state = Is0To9(ch) ? 11 : 99;
 			} else if (state == 11) {
 				if (ch == ',') {
 					state = 14;
 				} else if (ch == ')') {
 					state = 12;
-				} else if ((ch != ' ') && !isdigit(ch)) {
+				} else if ((ch != ' ') && !Is0To9(ch)) {
 					state = 99;
 				}
 			} else if (state == 12) {
@@ -456,12 +464,12 @@ static void ColouriseErrorListLine(
 				if (ch == ')') {
 					state = 15;
 					break;
-				} else if ((ch != ' ') && !isdigit(ch)) {
+				} else if ((ch != ' ') && !Is0To9(ch)) {
 					state = 99;
 				}
 			} else if (state == 20) {
 				if ((lineBuffer[i-1] == '\t') &&
-					((ch == '/' && lineBuffer[i+1] == '^') || isdigit(ch))) {
+					((ch == '/' && lineBuffer[i+1] == '^') || Is0To9(ch))) {
 					state = 24;
 					break;
 				} else if ((ch == '/') && (lineBuffer[i+1] == '^')) {
