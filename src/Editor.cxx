@@ -2299,10 +2299,14 @@ void Editor::Indent(bool forwards) {
 			pdoc->InsertChar(currentPos, '\t');
 			SetEmptySelection(currentPos + 1);
 		} else {
-			for (int i = 0; i < pdoc->tabInChars; i++) {
+			int numSpaces = (pdoc->tabInChars) - 
+				(pdoc->GetColumn(currentPos) % (pdoc->tabInChars));
+			if (numSpaces < 1)
+				numSpaces = pdoc->tabInChars;
+			for (int i = 0; i < numSpaces; i++) {
 				pdoc->InsertChar(currentPos, ' ');
 			}
-			SetEmptySelection(currentPos + pdoc->tabInChars);
+			SetEmptySelection(currentPos + numSpaces);
 		}
 	} else {
 		int anchorPosOnLine = anchor - pdoc->LineStart(lineOfAnchor);
