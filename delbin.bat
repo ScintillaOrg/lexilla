@@ -12,3 +12,8 @@ del /S /Q *.ilk
 del /S /Q *.pdb
 del /S /Q *.sbr
 del /S /Q *.idb
+del /S /Q *.ilc
+del /S /Q *.ild
+del /S /Q *.ilf
+del /S /Q *.ils
+del /S /Q *.tds

@@ -720,7 +720,7 @@ int Platform::Maximum(int a, int b) {
 		return b;
 }
 
-#define TRACE
+//#define TRACE
 
 void Platform::DebugPrintf(const char *format, ...) {
 #ifdef TRACE

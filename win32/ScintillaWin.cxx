@@ -437,7 +437,6 @@ LRESULT ScintillaWin::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	case WM_KEYUP:
 		//Platform::DebugPrintf("S keyup %d %x %x\n",iMessage, wParam, lParam);
 		return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
-		break;
 
 	case WM_SETTINGCHANGE:
 		//Platform::DebugPrintf("Setting Changed\n");
