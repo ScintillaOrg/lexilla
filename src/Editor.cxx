@@ -631,7 +631,7 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 			int line = cs.DocFromDisplay(visibleLine);
 			int yposScreen = 0;
 
-			while (line < pdoc->LinesTotal() && yposScreen < rcMargin.bottom) {
+			while ((visibleLine < cs.LinesDisplayed()) && yposScreen < rcMargin.bottom) {
 				int marks = pdoc->GetMark(line);
 				if (pdoc->GetLevel(line) & SC_FOLDLEVELHEADERFLAG) {
 					if (cs.GetExpanded(line)) {
@@ -1607,6 +1607,10 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 		SetScrollBars();
 	}
 
+	if (mh.modificationType & SC_MOD_CHANGEMARKER) {
+		RedrawSelMargin();
+	}
+	
 	// If client wants to see this modification
 	if (mh.modificationType & modEventMask) {
 		if ((mh.modificationType & SC_MOD_CHANGESTYLE) == 0) {
@@ -3277,18 +3281,15 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		break;
 	case SCI_MARKERADD: {
 			int markerID = pdoc->AddMark(wParam, lParam);
-			RedrawSelMargin();
 			return markerID;
 		}
 
 	case SCI_MARKERDELETE:
 		pdoc->DeleteMark(wParam, lParam);
-		RedrawSelMargin();
 		break;
 
 	case SCI_MARKERDELETEALL:
 		pdoc->DeleteAllMarks(static_cast<int>(wParam));
-		RedrawSelMargin();
 		break;
 
 	case SCI_MARKERGET:

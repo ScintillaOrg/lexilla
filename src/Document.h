@@ -132,10 +132,10 @@ public:
 	}
 	char StyleAt(int position) { return cb.StyleAt(position); }
 	int GetMark(int line) { return cb.GetMark(line); }
-	int AddMark(int line, int markerNum) { return cb.AddMark(line, markerNum); }
-	void DeleteMark(int line, int markerNum) { cb.DeleteMark(line, markerNum); }
-	void DeleteMarkFromHandle(int markerHandle) { cb.DeleteMarkFromHandle(markerHandle); }
-	void DeleteAllMarks(int markerNum) { cb.DeleteAllMarks(markerNum); }
+	int AddMark(int line, int markerNum);
+	void DeleteMark(int line, int markerNum);
+	void DeleteMarkFromHandle(int markerHandle);
+	void DeleteAllMarks(int markerNum);
 	int LineFromHandle(int markerHandle) { return cb.LineFromHandle(markerHandle); }
 	int LineStart(int line);
 	int LineEndPosition(int position);
