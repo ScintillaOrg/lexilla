@@ -853,7 +853,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int xStart,
 			} else {
 				rcSegment.left = ll.positions[startseg] + xStart;
 				rcSegment.right = ll.positions[i + 1] + xStart;
-				// Only try do draw if really visible - enhances performance by not calling environment to 
+				// Only try to draw if really visible - enhances performance by not calling environment to 
 				// draw strings that are completely past the right side of the window.
 				if (rcSegment.left <= rcLine.right) {
 					surface->DrawText(rcSegment, textFont,
@@ -1236,20 +1236,27 @@ long Editor::FormatRange(bool draw, FORMATRANGE *pfr) {
 				PRectangle rcNumber = rcLine;
 				rcNumber.right = rcNumber.left + lineNumberWidth;
 				// Right justify
-				rcNumber.left += lineNumberWidth - 
+				rcNumber.left -=  
 					surface->WidthText(vsPrint.styles[STYLE_LINENUMBER].font, number, strlen(number));
 				surface->DrawText(rcNumber, vsPrint.styles[STYLE_LINENUMBER].font,
 				                  ypos + vsPrint.maxAscent, number, strlen(number),
 				                  vsPrint.styles[STYLE_LINENUMBER].fore.allocated, 
 						  vsPrint.styles[STYLE_LINENUMBER].back.allocated);
 			}
+
+			// When printing, the hdc and hdcTarget may be the same, so
+			// changing the state of surfaceMeasure may change the underlying
+			// state of surface. Therefore, any cached state is discarded before 
+			// using each surface.
 			
 			// Copy this line and its styles from the document into local arrays
 			// and determine the x position at which each character starts.
+			surfaceMeasure->FlushCachedState();
 			LineLayout ll;
 			LayoutLine(line, surfaceMeasure, vsPrint, ll);
 			                                
 			// Draw the line
+			surface->FlushCachedState();
 			DrawLine(surface, vsPrint, line, xStart, rcLine, ll);
 
 			ypos += vsPrint.lineHeight;

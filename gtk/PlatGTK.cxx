@@ -486,6 +486,9 @@ void Surface::SetClip(PRectangle rc) {
 	gdk_gc_set_clip_rectangle(gc, &area);
 }
 
+void Surface::FlushCachedState() {
+}
+
 Window::~Window() {
 }
 

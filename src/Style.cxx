@@ -25,17 +25,14 @@ Style::~Style() {
 Style &Style::operator=(const Style &source) {
 	if (this == &source)
 		return *this;
-	// Crash:
-	*(char *)0 = 1;
 	Clear(Colour(0,0,0), Colour(0xff,0xff,0xff),
-	        Platform::DefaultFontSize(), 0,
+	        0, 0,
 		false, false, false);
 	fore.desired = source.fore.desired;
 	back.desired = source.back.desired;
 	bold = source.bold;
 	italic = source.italic;
 	size = source.size;
-	fontName = source.fontName;
 	eolFilled = source.eolFilled;
 	return *this;
 }

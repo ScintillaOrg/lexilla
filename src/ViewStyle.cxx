@@ -53,6 +53,8 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	Init();
 	for (unsigned int sty=0;sty<(sizeof(styles)/sizeof(styles[0]));sty++) {
 		styles[sty] = source.styles[sty];
+		// Can't just copy fontname as its lifetime is relative to its owning ViewStyle
+		styles[sty].fontName = fontNames.Save(source.styles[sty].fontName);
 	}
 	for (int mrk=0;mrk<=MARKER_MAX;mrk++) {
 		markers[mrk] = source.markers[mrk];
@@ -166,9 +168,9 @@ void ViewStyle::RefreshColourPalette(Palette &pal, bool want) {
 void ViewStyle::Refresh(Surface &surface) {
 	selbar.desired = Platform::Chrome();
 	selbarlight.desired = Platform::ChromeHighlight();
-	maxAscent = 1;
-	maxDescent = 1;
 	styles[STYLE_DEFAULT].Realise(surface, zoomLevel);
+	maxAscent = styles[STYLE_DEFAULT].ascent;
+	maxDescent = styles[STYLE_DEFAULT].descent;
 	for (unsigned int i=0;i<(sizeof(styles)/sizeof(styles[0]));i++) {
 		if (i != STYLE_DEFAULT) {
 			styles[i].Realise(surface, zoomLevel, &styles[STYLE_DEFAULT]);
