@@ -621,6 +621,7 @@ bool ScintillaGTK::HaveMouseCapture() {
 
 // Redraw all of text area. This paint will not be abandoned.
 void ScintillaGTK::FullPaint() {
+#if GTK_MAJOR_VERSION < 2
 	paintState = painting;
 	rcPaint = GetClientRectangle();
 	//Platform::DebugPrintf("ScintillaGTK::FullPaint %0d,%0d %0d,%0d\n",
@@ -636,6 +637,9 @@ void ScintillaGTK::FullPaint() {
 		}
 	}
 	paintState = notPainting;
+#else
+	wMain.InvalidateAll();
+#endif
 }
 
 PRectangle ScintillaGTK::GetClientRectangle() {
