@@ -136,8 +136,11 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			if (sc.Match('*', '/')) {
 				sc.Forward();
 				sc.ForwardSetState(SCE_C_DEFAULT);
-			} else if (sc.ch == '@' || sc.ch == '\\') {
-				sc.SetState(SCE_C_COMMENTDOCKEYWORD);
+			} else if (sc.ch == '@' || sc.ch == '\\') { // JavaDoc and Doxygen support
+				// Verify that we have the conditions to mark a comment-doc-keyword
+				if ((IsASpace(sc.chPrev) || sc.chPrev == '*') && (!IsASpace(sc.chNext))) {
+					sc.SetState(SCE_C_COMMENTDOCKEYWORD);
+				}
 			}
 		} else if (sc.state == SCE_C_COMMENTLINE || sc.state == SCE_C_COMMENTLINEDOC) {
 			if (sc.ch == '\r' || sc.ch == '\n') {
