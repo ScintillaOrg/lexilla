@@ -132,6 +132,7 @@ LEXOBJS=\
 	$(DIR_O)\LexCSS.obj \
 	$(DIR_O)\LexEiffel.obj \
 	$(DIR_O)\LexEScript.obj \
+	$(DIR_O)\LexForth.obj \
 	$(DIR_O)\LexFortran.obj \
 	$(DIR_O)\LexHTML.obj \
 	$(DIR_O)\LexLisp.obj \
@@ -290,6 +291,8 @@ $(DIR_O)\LexCSS.obj: ..\src\LexCSS.cxx $(LEX_HEADERS)
 $(DIR_O)\LexEiffel.obj: ..\src\LexEiffel.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexEScript.obj: ..\src\LexEScript.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexForth.obj: ..\src\LexForth.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexFortran.obj: ..\src\LexFortran.cxx $(LEX_HEADERS)
 
