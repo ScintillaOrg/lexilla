@@ -561,7 +561,7 @@ static void ColouriseLatexDoc(unsigned int startPos, int length, int initStyle,
 			}
 		}
 	}
-	styler.ColourTo(lengthDoc, state);
+	styler.ColourTo(lengthDoc-1, state);
 }
 
 static const char * const batchWordListDesc[] = {
