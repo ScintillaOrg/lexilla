@@ -38,7 +38,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 16/May/2003 NH</p>
+    <p>Last edited 29/February/2004 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -96,7 +96,7 @@
         </tr>
 
         <tr>
-          <th align="left">const char*</th>
+          <th align="left">const char *</th>
 
           <td>Arguments point at text that is being passed to Scintilla but not modified. The text
           may be zero terminated or another argument may specify the character count, the
@@ -104,11 +104,12 @@
         </tr>
 
         <tr>
-          <th align="left">char*</th>
+          <th align="left">char *</th>
 
           <td>Arguments point at text buffers that Scintilla will fill with text. In some cases,
           another argument will tell Scintilla the buffer size. In others, you must make sure that
-          the buffer is big enough to hold the requested text.</td>
+          the buffer is big enough to hold the requested text. If a NULL pointer (0) is passed
+	then, for SCI_* calls, the length that should be allocated is returned.</td>
         </tr>
 
         <tr>
@@ -293,10 +294,10 @@
      <a class="message" href="#SCI_GETTEXTRANGE">SCI_GETTEXTRANGE(&lt;unused&gt;, TextRange
     *tr)</a><br />
      <a class="message" href="#SCI_ALLOCATE">SCI_ALLOCATE(int bytes, &lt;unused&gt;)</a><br />
-     <a class="message" href="#SCI_ADDTEXT">SCI_ADDTEXT(int length, char *s)</a><br />
+     <a class="message" href="#SCI_ADDTEXT">SCI_ADDTEXT(int length, const char *s)</a><br />
      <a class="message" href="#SCI_ADDSTYLEDTEXT">SCI_ADDSTYLEDTEXT(int length, cell *s)</a><br />
      <a class="message" href="#SCI_APPENDTEXT">SCI_APPENDTEXT(int length, const char *s)</a><br />
-     <a class="message" href="#SCI_INSERTTEXT">SCI_INSERTTEXT(int pos, char *text)</a><br />
+     <a class="message" href="#SCI_INSERTTEXT">SCI_INSERTTEXT(int pos, const char *text)</a><br />
      <a class="message" href="#SCI_CLEARALL">SCI_CLEARALL</a><br />
      <a class="message" href="#SCI_CLEARDOCUMENTSTYLE">SCI_CLEARDOCUMENTSTYLE</a><br />
      <a class="message" href="#SCI_GETCHARAT">SCI_GETCHARAT(int position)</a><br />
@@ -312,7 +313,9 @@
     terminating 0 character. To collect all the text in a document, use <code>SCI_GETLENGTH</code>
     to get the number of characters in the document (<code>nLen</code>), allocate a character
     buffer of length <code>nLen+1</code> bytes, then call <code>SCI_GETTEXT(nLen+1, char
-    *text)</code>. If you then save the text, you should use <code>SCI_SETSAVEPOINT</code> to mark
+    *text)</code>. If the text argument is 0 then the length that should be allocated to store the
+    entire document is returned.
+    If you then save the text, you should use <code>SCI_SETSAVEPOINT</code> to mark
     the text as unmodified.</p>
 
     <p>See also: <code><a class="message" href="#SCI_GETSELTEXT">SCI_GETSELTEXT</a>, <a
@@ -345,7 +348,8 @@
     href="#SCI_LINELENGTH"><code>SCI_LINELENGTH(int line)</code></a>. The returned value is the
     number of characters copied to the buffer. The returned text includes any end of line
     characters. If you ask for a line number outside the range of lines in the document, 0
-    characters are copied.</p>
+    characters are copied. If the text argument is 0 then the length that should be allocated
+    to store the entire line is returned.</p>
 
     <p>See also: <code><a class="message" href="#SCI_GETCURLINE">SCI_GETCURLINE</a>, <a
     class="message" href="#SCI_GETSELTEXT">SCI_GETSELTEXT</a>, <a class="message"
@@ -912,7 +916,7 @@ struct TextToFind {
     onlyWordCharacters)</a><br />
      <a class="message" href="#SCI_POSITIONBEFORE">SCI_POSITIONBEFORE(int position)</a><br />
      <a class="message" href="#SCI_POSITIONAFTER">SCI_POSITIONAFTER(int position)</a><br />
-     <a class="message" href="#SCI_TEXTWIDTH">SCI_TEXTWIDTH(int styleNumber, char *text)</a><br />
+     <a class="message" href="#SCI_TEXTWIDTH">SCI_TEXTWIDTH(int styleNumber, const char *text)</a><br />
      <a class="message" href="#SCI_TEXTHEIGHT">SCI_TEXTHEIGHT(int line)</a><br />
      <a class="message" href="#SCI_CHOOSECARETX">SCI_CHOOSECARETX</a><br />
     </code>
@@ -1062,7 +1066,8 @@ struct TextToFind {
      This copies the currently selected text and a terminating 0 byte to the <code>text</code>
     buffer. The buffer must be at least
     <code>SCI_GETSELECTIONEND()-SCI_GETSELECTIONSTART()+1</code> bytes long. <br />
-     <br />
+    If the text argument is 0 then the length that should be allocated
+    to store the entire selection is returned.<br />
 
     <p>See also: <code><a class="message" href="#SCI_GETCURLINE">SCI_GETCURLINE</a>, <a
     class="message" href="#SCI_GETLINE">SCI_GETLINE</a>, <a class="message"
@@ -1074,7 +1079,8 @@ struct TextToFind {
      This retrieves the text of the line containing the caret and returns the position within the
     line of the caret. Pass in <code>char* text</code> pointing at a buffer large enough to hold
     the text you wish to retrieve and a terminating 0 character. Set <code>textLen</code> to the
-    length of the buffer.</p>
+    length of the buffer. If the text argument is 0 then the length that should be allocated
+    to store the entire current line is returned.</p>
 
     <p>See also: <code><a class="message" href="#SCI_GETSELTEXT">SCI_GETSELTEXT</a>, <a
     class="message" href="#SCI_GETLINE">SCI_GETLINE</a>, <a class="message"
@@ -1199,7 +1205,7 @@ struct TextToFind {
      If called with a position within a multi byte character will return the position
      of the start/end of that character.</p>
 
-    <p><b id="SCI_TEXTWIDTH">SCI_TEXTWIDTH(int styleNumber, char *text)</b><br />
+    <p><b id="SCI_TEXTWIDTH">SCI_TEXTWIDTH(int styleNumber, const char *text)</b><br />
      This returns the pixel width of a string drawn in the given <code>styleNumber</code> which can
     be used, for example, to decide how wide to make the line number margin in order to display a
     given number of numerals.</p>
@@ -1927,7 +1933,7 @@ struct TextToFind {
      2. Use <code>SCI_STYLECLEARALL</code> to copy this to all styles.<br />
      3. Set the style attributes that make your lexical styles different.</p>
 
-    <p><b id="SCI_STYLESETFONT">SCI_STYLESETFONT(int styleNumber, char *fontName)</b><br />
+    <p><b id="SCI_STYLESETFONT">SCI_STYLESETFONT(int styleNumber, const char *fontName)</b><br />
      <b id="SCI_STYLESETSIZE">SCI_STYLESETSIZE(int styleNumber, int sizeInPoints)</b><br />
      <b id="SCI_STYLESETBOLD">SCI_STYLESETBOLD(int styleNumber, bool bold)</b><br />
      <b id="SCI_STYLESETITALIC">SCI_STYLESETITALIC(int styleNumber, bool italic)</b><br />
@@ -4080,8 +4086,8 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_LOADLEXERLIBRARY">SCI_LOADLEXERLIBRARY(&lt;unused&gt;, char
     *path)</a><br />
      <a class="message" href="#SCI_COLOURISE">SCI_COLOURISE(int start, int end)</a><br />
-     <a class="message" href="#SCI_SETPROPERTY">SCI_SETPROPERTY(char *key, char *value)</a><br />
-     <a class="message" href="#SCI_SETKEYWORDS">SCI_SETKEYWORDS(int keyWordSet, char
+     <a class="message" href="#SCI_SETPROPERTY">SCI_SETPROPERTY(const char *key, const char *value)</a><br />
+     <a class="message" href="#SCI_SETKEYWORDS">SCI_SETKEYWORDS(int keyWordSet, const char
     *keyWordList)</a><br />
     </code>
 
@@ -4095,7 +4101,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <code>SCLEX_AUTOMATIC</code> value; this identifies additional external lexers that Scintilla
     assigns unused lexer numbers to.</p>
 
-    <p><b id="SCI_SETLEXERLANGUAGE">SCI_SETLEXERLANGUAGE(&lt;unused&gt;, char *name)</b><br />
+    <p><b id="SCI_SETLEXERLANGUAGE">SCI_SETLEXERLANGUAGE(&lt;unused&gt;, const char *name)</b><br />
      This message lets you select a lexer by name, and is the only method if you are using an
     external lexer or if you have written a lexer module for a language of your own and do not wish
     to assign it an explicit lexer number. To select an existing lexer, set <code>name</code> to
@@ -4108,7 +4114,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     href="#SCI_GETLEXER"><code>SCI_GETLEXER</code></a> before and after setting the new lexer to
     see if the lexer number changed.</p>
 
-    <p><b id="SCI_LOADLEXERLIBRARY">SCI_LOADLEXERLIBRARY(&lt;unused&gt;, char *path)</b><br />
+    <p><b id="SCI_LOADLEXERLIBRARY">SCI_LOADLEXERLIBRARY(&lt;unused&gt;, const char *path)</b><br />
      Load a lexer implemented in a shared library. This is a .so file on GTK+/Linux or a .DLL file on Windows.
      </p>
 
@@ -4764,9 +4770,9 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     replace them with the Scintilla equivalent.</p>
 <pre>
 WM_GETTEXT(int length, char *text)
-WM_SETTEXT(&lt;unused&gt;, char *text)
+WM_SETTEXT(&lt;unused&gt;, const char *text)
 EM_GETLINE(int line, char *text)
-EM_REPLACESEL(&lt;unused&gt;, char *text)
+EM_REPLACESEL(&lt;unused&gt;, const char *text)
 EM_SETREADONLY
 EM_GETTEXTRANGE(&lt;unused&gt;, TEXTRANGE *tr)
 WM_CUT

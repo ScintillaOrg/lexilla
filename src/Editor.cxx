@@ -5407,7 +5407,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETTEXT: {
 			if (lParam == 0)
-				return 0;
+				return pdoc->Length() + 1;
 			if (wParam == 0)
 				return 0;
 			char *ptr = CharPtrFromSPtr(lParam);
@@ -5475,11 +5475,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return topLine;
 
 	case SCI_GETLINE: {	// Risk of overwriting the end of the buffer
-			if (lParam == 0) {
-				return 0;
-			}
 			int lineStart = pdoc->LineStart(wParam);
 			int lineEnd = pdoc->LineStart(wParam + 1);
+			if (lParam == 0) {
+				return lineEnd - lineStart;
+			}
 			char *ptr = CharPtrFromSPtr(lParam);
 			int iPlace = 0;
 			for (int iChar = lineStart; iChar < lineEnd; iChar++) {
@@ -5511,8 +5511,23 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_GETSELTEXT: {
-			if (lParam == 0)
-				return 0;
+			if (lParam == 0) {
+				if (selType == selStream) {
+					return 1 + SelectionEnd() - SelectionStart();
+				} else {
+					// TODO: why is selLines handled the slow way?
+					int size = 0;
+					int extraCharsPerLine = 0;
+					if (selType != selLines)
+						extraCharsPerLine = (pdoc->eolMode == SC_EOL_CRLF) ? 2 : 1;
+					SelectionLineIterator lineIterator(this);
+					while (lineIterator.Iterate()) {
+						size += lineIterator.endPos + extraCharsPerLine - lineIterator.startPos;
+					}
+
+					return 1 + size;
+				}
+			}
 			SelectionText selectedText;
 			CopySelectionRange(&selectedText);
 			char *ptr = CharPtrFromSPtr(lParam);
@@ -5913,12 +5928,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_GETCURLINE: {
-			if (lParam == 0) {
-				return 0;
-			}
 			int lineCurrentPos = pdoc->LineFromPosition(currentPos);
 			int lineStart = pdoc->LineStart(lineCurrentPos);
 			unsigned int lineEnd = pdoc->LineStart(lineCurrentPos + 1);
+			if (lParam == 0) {
+				return 1 + lineEnd - lineStart;
+			}
 			char *ptr = CharPtrFromSPtr(lParam);
 			unsigned int iPlace = 0;
 			for (unsigned int iChar = lineStart; iChar < lineEnd && iPlace < wParam - 1; iChar++) {

@@ -53,7 +53,7 @@
 ##     position -> integer position in a document
 ##     colour -> colour integer containing red, green and blue bytes.
 ##     string -> pointer to const character
-##     stringresult -> pointer to character
+##     stringresult -> pointer to character, NULL-> return size of result
 ##     cells -> pointer to array of cells, each cell containing a style byte and character byte
 ##     textrange -> range of a min and a max position with an output string
 ##     findtext -> searchrange, text -> foundposition
@@ -74,7 +74,8 @@
 ## argument and retrieve NUL characters. All retrieved strings except for those retrieved
 ## by GetLine also have a NUL appended but client code should calculate the size that
 ## will be returned rather than relying upon the NUL whenever possible. Allow for the
-## extra NUL character when allocating buffers.
+## extra NUL character when allocating buffers. The size to allocate for a stringresult
+## can be determined by calling with a NULL (0) pointer.
 
 cat Basics
 
