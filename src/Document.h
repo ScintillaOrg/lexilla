@@ -141,6 +141,7 @@ public:
 	void SetLineIndentation(int line, int indent);
 	int GetLineIndentPosition(int line);
 	int GetColumn(int position);
+	int FindColumn(int line, int column);
 	void Indent(bool forwards, int lineBottom, int lineTop);
 	void ConvertLineEnds(int eolModeSet);
 	void SetReadOnly(bool set) { cb.SetReadOnly(set); }

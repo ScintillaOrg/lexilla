@@ -987,6 +987,10 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 void DrawTabArrow(Surface *surface, PRectangle rcTab, int ymid) {
 	int ydiff = (rcTab.bottom - rcTab.top) / 2;
 	int xhead = rcTab.right - 1 - ydiff;
+	if (xhead <= rcTab.left) {
+		ydiff -= rcTab.left - xhead - 1;
+		xhead = rcTab.left - 1;
+	}
 	if ((rcTab.left + 2) < (rcTab.right - 1))
 		surface->MoveTo(rcTab.left + 2, ymid);
 	else
@@ -1012,6 +1016,15 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 	ll.lineStarts[0] = 0;
 	int numCharsInLine = 0;
 	int posLineStart = pdoc->LineStart(line);
+	if (vstyle.edgeState == EDGE_BACKGROUND) {
+		ll.edgeColumn = pdoc->FindColumn(line, theEdge);
+		if (ll.edgeColumn >= posLineStart) {
+			ll.edgeColumn -= posLineStart;
+		}
+	} else {
+		ll.edgeColumn = -1;
+	}
+	
 	int posLineEnd = pdoc->LineStart(line + 1);
 	Font &ctrlCharsFont = vstyle.styles[STYLE_CONTROLCHAR].font;
 	char styleByte = 0;
@@ -1399,7 +1412,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	}
 
 	if (vsDraw.edgeState == EDGE_LINE) {
-		int edgeX = ll.edgeColumn * vsDraw.spaceWidth;
+		int edgeX = theEdge * vsDraw.spaceWidth;
 		rcSegment.left = edgeX + xStart;
 		rcSegment.right = rcSegment.left + 1;
 		surface->FillRectangle(rcSegment, vsDraw.edgecolour.allocated);
@@ -1570,8 +1583,6 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 				ll.selEnd = -1;
 				ll.containsCaret = false;
 			}
-			// Need to fix this up so takes account of Unicode and DBCS
-			ll.edgeColumn = theEdge;
 
 			int posLineStart = pdoc->LineStart(lineDoc);
 			int posLineEnd = pdoc->LineStart(lineDoc + 1);
@@ -1814,8 +1825,6 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 			ll.selStart = -1;
 			ll.selEnd = -1;
 			ll.containsCaret = false;
-			// Need to fix this up so takes account of Unicode and DBCS
-			ll.edgeColumn = theEdge;
 
 			PRectangle rcLine;
 			rcLine.left = pfr->rc.left + lineNumberWidth;
