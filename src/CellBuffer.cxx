@@ -404,9 +404,9 @@ void UndoHistory::AppendAction(actionType at, int position, char *data, int leng
 	Platform::DebugPrintf("%% %d action %d %d %d\n", at, position, lengthData, currentAction);
 	Platform::DebugPrintf("^ %d action %d %d\n", actions[currentAction - 1].at, 
 		actions[currentAction - 1].position, actions[currentAction - 1].lenData);
-	if (0 == undoSequenceDepth) {
+	if (currentAction >= 1) {
+		if (0 == undoSequenceDepth) {
 		// Top level actions may not always be coalesced
-		if (currentAction >= 2) {
 			Action &actPrevious = actions[currentAction - 1];
 			// See if current action can be coalesced into previous action
 			// Will work if both are inserts or deletes and position is same
@@ -427,13 +427,13 @@ void UndoHistory::AppendAction(actionType at, int position, char *data, int leng
 			}
 		} else {
 			currentAction++;
-		}
+		} 
+	} else {
+		currentAction++;
 	}
 	actions[currentAction].Create(at, position, data, lengthData);
-	//if ((collectingUndo == undoCollectAutoStart) && (0 == undoSequenceDepth)) {
-		currentAction++;
-		actions[currentAction].Create(startAction);
-	//}
+	currentAction++;
+	actions[currentAction].Create(startAction);
 	maxAction = currentAction;
 }
 
@@ -470,6 +470,7 @@ void UndoHistory::DeleteUndoHistory() {
 		actions[i].Destroy();
 	maxAction = 0;
 	currentAction = 0;
+	actions[currentAction].Create(startAction);
 	savePoint = 0;
 }
 
