@@ -346,7 +346,7 @@ class ListBox : public Window {
 	int current;
 #endif
 	int desiredVisibleRows;
-    size_t maxItemCharacters;
+	unsigned int maxItemCharacters;
 	unsigned int aveCharWidth;
 public:
 	ListBox();

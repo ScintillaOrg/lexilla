@@ -525,7 +525,7 @@ PRectangle Window::GetPosition() {
 }
 
 void Window::SetPosition(PRectangle rc) {
-#if 0
+#if 1
 	//gtk_widget_set_uposition(id, rc.left, rc.top);
 	GtkAllocation alloc;
 	alloc.x = rc.left;
@@ -533,9 +533,10 @@ void Window::SetPosition(PRectangle rc) {
 	alloc.width = rc.Width();
 	alloc.height = rc.Height();
 	gtk_widget_size_allocate(id, &alloc);
-#endif
+#else
 	gtk_widget_set_uposition(id, rc.left, rc.top);
 	gtk_widget_set_usize(id, rc.right - rc.left,rc.bottom - rc.top);
+#endif
 }
 
 void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
@@ -670,12 +671,16 @@ PRectangle ListBox::GetDesiredRect() {
 	// Before any size allocated pretend its 100 wide so not scrolled
 	PRectangle rc(0, 0, 100, 100);
 	if (id) {
+		int rows = Length();
+		if ((rows == 0) || (rows > desiredVisibleRows))
+			rows = desiredVisibleRows;
+		
 		GtkRequisition req;
 		int height;
 
 		// First calculate height of the clist for our desired visible row count otherwise it tries to expand to the total # of rows
-		height = (desired_visible_rows * GTK_CLIST(list)->row_height
-		          + desired_visible_rows + 1
+		height = (rows * GTK_CLIST(list)->row_height
+		          + rows + 1
 		          + 2 * (list->style->klass->ythickness 
 		                 + GTK_CONTAINER(list)->border_width));
 		gtk_widget_set_usize(GTK_WIDGET(list), -1, height);
@@ -686,10 +691,12 @@ PRectangle ListBox::GetDesiredRect() {
 		rc.bottom = req.height;
                 
 		gtk_widget_set_usize(GTK_WIDGET(list), -1, -1);
-        int width = maxItemCharacters;
-        if (width < 12)
-            width = 12;
-	    rc.right = width * 8 + 16;
+		int width = maxItemCharacters;
+		if (width < 12)
+			width = 12;
+		rc.right = width * (aveCharWidth+aveCharWidth/3);
+		if (Length() > rows)
+			rc.right = rc.right + 16;
 	}
 	return rc;
     
