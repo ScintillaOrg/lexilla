@@ -796,7 +796,7 @@ int CellBuffer::LineStart(int line) {
 	if (line < 0)
 		return 0;
 	else if (line > lv.lines)
-		return length;
+		return Length();
 	else
 		return lv.linesData[line].startPosition;
 }
