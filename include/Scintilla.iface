@@ -411,6 +411,18 @@ get int GetLineState=2093(int line,)
 # Retrieve the last line number that has line state.
 get int GetMaxLineState=2094(,)
 
+# Is the background of the line containing the caret in a different colour?
+get bool GetCaretLineVisible=2095(,)
+
+# Dsplay the background of the line containing the caret in a different colour.
+set void SetCaretLineVisible=2096(bool show,)
+
+# Get the colour of the background of the line containing the caret.
+get colour GetCaretLineBack=2097(,)
+
+# Set the colour of the background of the line containing the caret.
+set void SetCaretLineBack=2098(colour back,)
+
 # Display a auto-completion list.
 # The lenEntered parameter indicates how many characters before
 # the caret should be used to provide context.

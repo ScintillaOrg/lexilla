@@ -876,19 +876,23 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	// is taken by an individual character - internal leading gives varying results.
 	Font &ctrlCharsFont = vsDraw.styles[STYLE_CONTROLCHAR].font;
 
-	int marks = 0;
-	Colour markBack = Colour(0, 0, 0);
+	bool overrideBackground = false;
+	Colour background = Colour(0, 0, 0);
+	if (vsDraw.showCaretLineBackground && ll.containsCaret) {
+		overrideBackground = true;
+		background = vsDraw.caretLineBackground.allocated;
+	}
 	if (vsDraw.maskInLine) {
-		marks = pdoc->GetMark(line) & vsDraw.maskInLine;
+		int marks = pdoc->GetMark(line) & vsDraw.maskInLine;
 		if (marks) {
+			overrideBackground = true;
 			for (int markBit = 0; (markBit < 32) && marks; markBit++) {
 				if (marks & 1) {
-					markBack = vsDraw.markers[markBit].back.allocated;
+					background = vsDraw.markers[markBit].back.allocated;
 				}
 				marks >>= 1;
 			}
 		}
-		marks = pdoc->GetMark(line) & vsDraw.maskInLine;
 	}
 
 	bool inIndentation = true;
@@ -924,8 +928,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 				if (vsDraw.selforeset)
 					textFore = vsDraw.selforeground.allocated;
 			} else {
-				if (marks)
-					textBack = markBack;
+				if (overrideBackground)
+					textBack = background;
 				if ((vsDraw.edgeState == EDGE_BACKGROUND) && (i >= ll.edgeColumn) && (ll.chars[i] != '\n') && (ll.chars[i] != '\r'))
 					textBack = vsDraw.edgecolour.allocated;
 			}
@@ -1064,16 +1068,16 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 			surface->FillRectangle(rcSegment, vsDraw.selbackground.allocated);
 		else
 			surface->FillRectangle(rcSegment, vsDraw.selbackground2.allocated);
-	} else if (marks) {
-		surface->FillRectangle(rcSegment, markBack);
+	} else if (overrideBackground) {
+		surface->FillRectangle(rcSegment, background);
 	} else {
 		surface->FillRectangle(rcSegment, vsDraw.styles[ll.styles[ll.numCharsInLine] & styleMask].back.allocated);
 	}
 
 	rcSegment.left = xEol + vsDraw.aveCharWidth + xStart;
 	rcSegment.right = rcLine.right;
-	if (marks) {
-		surface->FillRectangle(rcSegment, markBack);
+	if (overrideBackground) {
+		surface->FillRectangle(rcSegment, background);
 	} else if (vsDraw.styles[ll.styles[ll.numCharsInLine] & styleMask].eolFilled) {
 		surface->FillRectangle(rcSegment, vsDraw.styles[ll.styles[ll.numCharsInLine] & styleMask].back.allocated);
 	} else {
@@ -1223,9 +1227,11 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 
 			ll.selStart = SelectionStart(line);
 			ll.selEnd = SelectionEnd(line);
+			ll.containsCaret = line == lineCaret;
 			if (hideSelection) {
 				ll.selStart = -1;
 				ll.selEnd = -1;
+				ll.containsCaret = false;
 			}
 			// Need to fix this up so takes account of Unicode and DBCS
 			ll.edgeColumn = theEdge;
@@ -1400,7 +1406,8 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 	// Don't show the selection when printing
 	vsPrint.selbackset = false;
 	vsPrint.selforeset = false;
-
+	vsPrint.showCaretLineBackground = false;
+	
 	// Set colours for printing according to users settings
 	for (int sty = 0;sty <= STYLE_MAX;sty++) {
 		if (printColourMode == SC_PRINT_INVERTLIGHT) {
@@ -1469,6 +1476,7 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 			LayoutLine(line, surfaceMeasure, vsPrint, ll);
 			ll.selStart = -1;
 			ll.selEnd = -1;
+			ll.containsCaret = false;
 			// Need to fix this up so takes account of Unicode and DBCS
 			ll.edgeColumn = theEdge;
 
@@ -4183,6 +4191,19 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETMAXLINESTATE:
 		return pdoc->GetMaxLineState();
 
+	case SCI_GETCARETLINEVISIBLE:
+		return vs.showCaretLineBackground;
+	case SCI_SETCARETLINEVISIBLE:
+		vs.showCaretLineBackground = wParam;
+		InvalidateStyleRedraw();
+		break;
+	case SCI_GETCARETLINEBACK:
+		return vs.caretLineBackground.desired.AsLong();
+	case SCI_SETCARETLINEBACK:
+		vs.caretLineBackground.desired = wParam;
+		InvalidateStyleRedraw();
+		break;
+	
 		// Folding messages
 
 	case SCI_VISIBLEFROMDOCLINE:

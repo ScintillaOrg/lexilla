@@ -42,6 +42,7 @@ public:
 	bool highlightColumn;
 	int selStart;
 	int selEnd;
+	bool containsCaret;
 	int edgeColumn;
 	char chars[maxLineLength+1];
 	char styles[maxLineLength+1];

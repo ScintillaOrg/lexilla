@@ -69,6 +69,8 @@ public:
 	bool viewEOL;
 	bool showMarkedLines;
 	ColourPair caretcolour;
+	bool showCaretLineBackground;
+	ColourPair caretLineBackground;
 	ColourPair edgecolour;
 	int edgeState;
 	int caretWidth;
