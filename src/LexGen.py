@@ -98,6 +98,7 @@ print lexerModules
 Regenerate(root + "scintilla/src/KeyWords.cxx", "//", lexerModules)
 Regenerate(root + "scintilla/win32/makefile", "#", lexFiles)
 Regenerate(root + "scintilla/win32/scintilla.mak", "#", lexFiles)
+Regenerate(root + "scintilla/win32/scintilla_vc6.mak", "#", lexFiles)
 Regenerate(root + "scintilla/gtk/makefile", "#", lexFiles, "wb")
 Regenerate(root + "scintilla/gtk/scintilla.mak", "#", lexFiles)
 Regenerate(root + "scite/win32/makefile", "#", lexFiles)
