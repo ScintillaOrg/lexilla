@@ -1410,7 +1410,7 @@ void Editor::LinesSplit(int pixelWidth) {
 				unsigned int posLineStart = pdoc->LineStart(line);
 				LayoutLine(line, surface, vs, ll, pixelWidth);
 				for (int subLine = 1; subLine < ll->lines; subLine++) {
-					pdoc->InsertString(posLineStart + (subLine - 1) * strlen(eol) + 
+					pdoc->InsertString(posLineStart + (subLine - 1) * strlen(eol) +
 						ll->LineStart(subLine), eol);
 					targetEnd += strlen(eol);
 				}
@@ -4857,6 +4857,13 @@ void Editor::SetDocPointer(Document *document) {
 		pdoc = document;
 	}
 	pdoc->AddRef();
+
+	// Ensure all positions within document
+	currentPos = 0;
+	anchor = 0;
+	targetStart = 0;
+	targetEnd = 0;
+
 	// Reset the contraction state to fully shown.
 	cs.Clear();
 	cs.InsertLines(0, pdoc->LinesTotal() - 1);
