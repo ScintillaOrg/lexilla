@@ -58,7 +58,7 @@ public:
 		words(0), wordsNoCase(0), list(0), len(0), onlyLineEnds(onlyLineEnds_), sorted(false) {}
 	~WordList() { Clear(); }
 	operator bool() { return len ? true : false; }
-	const char *operator[](int ind) { return words[ind]; }
+	char *operator[](int ind) { return words[ind]; }
 	void Clear();
 	void Set(const char *s);
 	char *Allocate(int size);
