@@ -187,6 +187,7 @@ class ScintillaWin :
 	virtual bool ModifyScrollBars(int nMax, int nPage);
 	virtual void NotifyChange();
 	virtual void NotifyFocus(bool focus);
+	virtual int GetCtrlID();
 	virtual void NotifyParent(SCNotification scn);
 	virtual void NotifyDoubleClick(Point pt, bool shift);
 	virtual void Copy();
@@ -880,21 +881,25 @@ bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
 
 void ScintillaWin::NotifyChange() {
 	::SendMessage(::GetParent(MainHWND()), WM_COMMAND,
-	        MAKELONG(ctrlID, SCEN_CHANGE),
+	        MAKELONG(GetCtrlID(), SCEN_CHANGE),
 		reinterpret_cast<LPARAM>(MainHWND()));
 }
 
 void ScintillaWin::NotifyFocus(bool focus) {
 	::SendMessage(::GetParent(MainHWND()), WM_COMMAND,
-	        MAKELONG(ctrlID, focus ? SCEN_SETFOCUS : SCEN_KILLFOCUS),
+	        MAKELONG(GetCtrlID(), focus ? SCEN_SETFOCUS : SCEN_KILLFOCUS),
 		reinterpret_cast<LPARAM>(MainHWND()));
+}
+
+int ScintillaWin::GetCtrlID() {
+	return ::GetDlgCtrlID(reinterpret_cast<HWND>(wMain.GetID()));
 }
 
 void ScintillaWin::NotifyParent(SCNotification scn) {
 	scn.nmhdr.hwndFrom = MainHWND();
-	scn.nmhdr.idFrom = ctrlID;
+	scn.nmhdr.idFrom = GetCtrlID();
 	::SendMessage(::GetParent(MainHWND()), WM_NOTIFY,
-	              ctrlID, reinterpret_cast<LPARAM>(&scn));
+	              GetCtrlID(), reinterpret_cast<LPARAM>(&scn));
 }
 
 void ScintillaWin::NotifyDoubleClick(Point pt, bool shift) {
