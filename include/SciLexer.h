@@ -92,6 +92,7 @@
 #define SCE_H_QUESTION 18
 #define SCE_H_VALUE 19
 #define SCE_H_XCCOMMENT 20
+#define SCE_H_SGML 21
 #define SCE_HJ_START 40
 #define SCE_HJ_DEFAULT 41
 #define SCE_HJ_COMMENT 42

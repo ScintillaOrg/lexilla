@@ -1320,6 +1320,8 @@ val SCE_H_QUESTION=18
 val SCE_H_VALUE=19
 # X-Code
 val SCE_H_XCCOMMENT=20
+# SGML
+val SCE_H_SGML=21
 # Embedded Javascript
 val SCE_HJ_START=40
 val SCE_HJ_DEFAULT=41

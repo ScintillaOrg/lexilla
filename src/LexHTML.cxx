@@ -205,6 +205,8 @@ static int classifyTagHTML(unsigned int start, unsigned int end,
 		chAttr = SCE_H_COMMENT;
 	} else if (strcmp(s, "![cdata[") == 0) {	// In lower case because already converted
 		chAttr = SCE_H_CDATA;
+	} else if (s[0] == '!') {
+		chAttr = SCE_H_SGML;
 	} else if (s[0] == '/') {	// Closing tag
 		if (keywords.InList(s + 1))
 			chAttr = SCE_H_TAG;
@@ -536,19 +538,15 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			scriptLanguage = segIsScriptingIndicator(styler, styler.GetStartSegment() + 2, i + 10, eScriptPHP);
 			i++;
 			i += PrintScriptingIndicatorOffset(styler, styler.GetStartSegment() + 2, i + 10);
-
 			if (scriptLanguage == eScriptXML)
 				styler.ColourTo(i, SCE_H_XMLSTART);
 			else
 				styler.ColourTo(i, SCE_H_QUESTION);
-
 			state = StateForScript(scriptLanguage);
-
 			if (inScriptType == eNonHtmlScript)
 				inScriptType = eNonHtmlScriptPreProc;
 			else
 				inScriptType = eNonHtmlPreProc;
-
 			// fold whole script
 			levelCurrent++;
 			if (scriptLanguage == eScriptXML)
@@ -685,6 +683,14 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				tagOpened = false;
 			}
 			break;
+		case SCE_H_SGML:
+			if (ch == '>') {
+				levelCurrent--;
+				styler.ColourTo(i, StateToPrint);
+				state = SCE_H_DEFAULT;
+				tagOpened = false;
+			}
+			break;
 		case SCE_H_ENTITY:
 			if (ch == ';') {
 				styler.ColourTo(i, StateToPrint);
@@ -731,6 +737,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					if (eClass != SCE_H_TAGUNKNOWN) {
 						if (eClass == SCE_H_CDATA) {
 							state = SCE_H_CDATA;
+						} else if (eClass == SCE_H_SGML) {
+							state = SCE_H_SGML;
 						} else {
 							state = SCE_H_OTHER;
 						}
