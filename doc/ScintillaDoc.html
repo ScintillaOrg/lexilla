@@ -745,7 +745,8 @@ SCI_MARKERDELETEHANDLE(int handle)
        The marker symbols currently available are SC_MARK_CIRCLE, SC_MARK_ROUNDRECT, SC_MARK_ARROW,
        SC_MARK_SMALLRECT, SC_MARK_SHORTARROW, SC_MARK_EMPTY, SC_MARK_ARROWDOWN, 
        SC_MARK_MINUS, SC_MARK_PLUS. The SC_MARK_EMPTY symbol is invisible,
-       allowing client code to track the movement of lines.
+       allowing client code to track the movement of lines. Characters can be used as markers by adding 
+       the ASCII value of the character to SC_MARK_CHARACTER.
     </p>
     <p>
        There are also marker symbols available for the folding margin in an flattened tree style:
@@ -1263,6 +1264,15 @@ SCN_KEY
     <p>
        Reports all keys pressed. Used on GTK+ because of some problems with keyboard focus. Not
       sent by Windows version.
+    </p>
+<pre>
+SCEN_SETFOCUS
+SCEN_KILLFOCUS
+</pre>
+    <p>
+       SCEN_SETFOCUS is fired when Scintilla receives focus and SCEN_KILLFOCUS when it loses focus.
+       These notifications are sent using the WM_COMMAND message on Windows and the "Command" signal 
+      on GTK+ as this is the behaviour of the standard edit control.
     </p>
 <pre>
 SCN_MODIFIED
