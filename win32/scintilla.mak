@@ -110,7 +110,9 @@ SOBJS=\
 #**LEXOBJS=\\\n\(\t$(DIR_O)\\\*.obj \\\n\)
 LEXOBJS=\
 	$(DIR_O)\LexAda.obj \
+	$(DIR_O)\LexAPDL.obj \
 	$(DIR_O)\LexAsm.obj \
+	$(DIR_O)\LexAU3.obj \
 	$(DIR_O)\LexAVE.obj \
 	$(DIR_O)\LexBaan.obj \
 	$(DIR_O)\LexBullant.obj \
@@ -262,7 +264,11 @@ $(DIR_O)\KeyWords.obj: ../src/KeyWords.cxx ../include/Platform.h \
 
 $(DIR_O)\LexAda.obj: ..\src\LexAda.cxx $(LEX_HEADERS)
 
+$(DIR_O)\LexAPDL.obj: ..\src\LexAPDL.cxx $(LEX_HEADERS)
+
 $(DIR_O)\LexAsm.obj: ..\src\LexAsm.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexAU3.obj: ..\src\LexAU3.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexAVE.obj: ..\src\LexAVE.cxx $(LEX_HEADERS)
 
