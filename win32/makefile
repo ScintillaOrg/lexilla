@@ -35,14 +35,14 @@ SOBJS	= ScintillaWin.o ScintillaBase.o Editor.o Document.o \
 	ScintRes.o PlatWin.o KeyMap.o Indicator.o LineMarker.o Style.o \
 	ViewStyle.o AutoComplete.o UniConversion.o
 $(COMPONENT): $(SOBJS)
-	$(DLLWRAP) --target i386-mingw32 -o $(COMPONENT) $(SOBJS) $(LDFLAGS) -s --relocatable
+	$(DLLWRAP) --target i386-mingw32 -o $@ $(SOBJS) $(LDFLAGS) -s --relocatable
 	
 LOBJS	= ScintillaWinL.o ScintillaBaseL.o Editor.o Document.o \
 	ContractionState.o CellBuffer.o CallTip.o \
 	ScintRes.o PlatWin.o KeyMap.o Indicator.o LineMarker.o Style.o ViewStyle.o \
 	AutoComplete.o UniConversion.o KeyWords.o DocumentAccessor.o PropSet.o $(LEXOBJS)
 $(LEXCOMPONENT): $(LOBJS)
-	$(DLLWRAP) --target i386-mingw32 -o $(LEXCOMPONENT) $(LOBJS) $(LDFLAGS) -s --relocatable
+	$(DLLWRAP) --target i386-mingw32 -o $@ $(LOBJS) $(LDFLAGS) -s --relocatable
 	
 AutoComplete.o: AutoComplete.cxx Platform.h AutoComplete.h
 CallTip.o: CallTip.cxx Platform.h CallTip.h
@@ -102,14 +102,14 @@ ViewStyle.o: ViewStyle.cxx Platform.h Scintilla.h Indicator.h \
 WindowAccessor.o: DocumentAccessor.cxx Platform.h PropSet.h Accessor.h WindowAccessor.h Scintilla.h
 
 ScintillaBaseL.o:
-	$(CC) $(CXXFLAGS) -D SCI_LEXER -c $< -o ScintillaBaseL.o
+	$(CC) $(CXXFLAGS) -D SCI_LEXER -c $< -o $@
 	
 ScintillaWinS.o:
-	$(CC) $(CXXFLAGS) -D STATIC_BUILD -c $< -o ScintillaWinS.o
+	$(CC) $(CXXFLAGS) -D STATIC_BUILD -c $< -o $@
 	
 ScintillaWinL.o:
-	$(CC) $(CXXFLAGS) -D SCI_LEXER -c $< -o ScintillaWinL.o
+	$(CC) $(CXXFLAGS) -D SCI_LEXER -c $< -o $@
 	
 ScintRes.o:	ScintRes.rc PlatformRes.h
-	windres ScintRes.rc ScintRes.o
+	windres ScintRes.rc $@
 
