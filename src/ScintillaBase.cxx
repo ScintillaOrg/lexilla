@@ -309,14 +309,15 @@ void ScintillaBase::AutoCompleteCompleted(char fillUp/*='\0'*/) {
 }
 
 void ScintillaBase::ContextMenu(Point pt) {
+	bool writable = !WndProc(SCI_GETREADONLY, 0, 0);
 	popup.CreatePopUp();
-	AddToPopUp("Undo", idcmdUndo, pdoc->CanUndo());
-	AddToPopUp("Redo", idcmdRedo, pdoc->CanRedo());
+	AddToPopUp("Undo", idcmdUndo, writable && pdoc->CanUndo());
+	AddToPopUp("Redo", idcmdRedo, writable && pdoc->CanRedo());
 	AddToPopUp("");
-	AddToPopUp("Cut", idcmdCut, currentPos != anchor);
+	AddToPopUp("Cut", idcmdCut, writable && currentPos != anchor);
 	AddToPopUp("Copy", idcmdCopy, currentPos != anchor);
-	AddToPopUp("Paste", idcmdPaste, WndProc(SCI_CANPASTE, 0, 0));
-	AddToPopUp("Delete", idcmdDelete, currentPos != anchor);
+	AddToPopUp("Paste", idcmdPaste, writable && WndProc(SCI_CANPASTE, 0, 0));
+	AddToPopUp("Delete", idcmdDelete, writable && currentPos != anchor);
 	AddToPopUp("");
 	AddToPopUp("Select All", idcmdSelectAll);
 	popup.Show(pt, wMain);
