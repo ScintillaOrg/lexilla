@@ -54,6 +54,8 @@
 
 #if GTK_MAJOR_VERSION < 2
 #define INTERNATIONAL_INPUT
+#else
+#include <iconv.h>
 #endif
 
 #ifdef _MSC_VER
@@ -846,18 +848,43 @@ void ScintillaGTK::NotifyURIDropped(const char *list) {
 
 	NotifyParent(scn);
 }
+const char *CharacterSetID(int characterSet);
 
 int ScintillaGTK::KeyDefault(int key, int modifiers) {
 	if (!(modifiers & SCI_CTRL) && !(modifiers & SCI_ALT)) {
 #if GTK_MAJOR_VERSION >= 2
-		if (IsUnicodeMode() && (key <= 0xFE00)) {
-			char utfval[4]="\0\0\0";
-			wchar_t wcs[2];
-			wcs[0] = gdk_keyval_to_unicode(key);
-			wcs[1] = 0;
-			UTF8FromUCS2(wcs, 1, utfval, 3);
-			AddCharUTF(utfval,strlen(utfval));
-			return 1;
+		char utfVal[4]="\0\0\0";
+		wchar_t wcs[2];
+		wcs[0] = gdk_keyval_to_unicode(key);
+		wcs[1] = 0;
+		UTF8FromUCS2(wcs, 1, utfVal, 3);
+		if (key <= 0xFE00) {
+			if (IsUnicodeMode()) {
+				AddCharUTF(utfVal,strlen(utfVal));
+				return 1;
+			} else {
+				const char *source =
+					CharacterSetID(vs.styles[STYLE_DEFAULT].characterSet);
+				if (*source) {
+					iconv_t iconvh = iconv_open("UTF8", source);
+					if (iconvh != ((iconv_t)(-1))) {
+						char localeVal[4]="\0\0\0";
+						char *pin = utfVal;
+						size_t inLeft = strlen(utfVal);
+						char *pout = localeVal;
+						size_t outLeft = sizeof(localeVal);
+						size_t conversions = iconv(iconvh, &pin, &inLeft, &pout, &outLeft);
+						iconv_close(iconvh);
+						if (conversions != ((size_t)(-1))) {
+							*pout = '\0';
+							for (int i=0; localeVal[i]; i++) {
+								AddChar(localeVal[i]);
+							}
+							return 1;
+						}
+					}
+				}
+			}
 		}
 #endif
 		if (key < 256) {

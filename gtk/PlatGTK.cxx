@@ -720,10 +720,10 @@ public:
 
 #ifdef USE_PANGO
 
-static const char *CharacterSetID(int characterSet) {
+const char *CharacterSetID(int characterSet) {
 	switch (characterSet) {
 	case SC_CHARSET_ANSI:
-		return "ASCII";
+		return "";
 	case SC_CHARSET_DEFAULT:
 		return "LATIN1";
 	case SC_CHARSET_BALTIC:
@@ -1126,11 +1126,11 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 					SetIconv(PFont(font_)->characterSet);
 					utfForm = UTF8FromIconv(iconvh, s, len);
 				}
-				if (!utfForm) {	// DBCS failed so treat as locale
-					gsize w; // stub
-					utfForm = g_locale_to_utf8(s, len, NULL, &w, NULL);
-					useGFree = static_cast<bool>(utfForm);
-				};
+				//~ if (!utfForm) {	// DBCS failed so treat as locale
+					//~ gsize w; // stub
+					//~ utfForm = g_locale_to_utf8(s, len, NULL, &w, NULL);
+					//~ useGFree = static_cast<bool>(utfForm);
+				//~ };
 				if (!utfForm) {	// g_locale_to_utf8 failed so treat as Latin1
 					utfForm = UTF8FromLatin1(s, len);
 				}
@@ -1269,11 +1269,11 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 					bool useGFree = false;
 					SetIconv(PFont(font_)->characterSet);
 					char *utfForm = UTF8FromIconv(iconvh, s, len);
-					if (!utfForm) {	// iconv failed so treat as locale
-						gsize w; // stub
-						utfForm = g_locale_to_utf8(s, len, NULL, &w, NULL);
-						useGFree = static_cast<bool>(utfForm);
-					}
+					//~ if (!utfForm) {	// iconv failed so treat as locale
+						//~ gsize w; // stub
+						//~ utfForm = g_locale_to_utf8(s, len, NULL, &w, NULL);
+						//~ useGFree = static_cast<bool>(utfForm);
+					//~ }
 					if (!utfForm) {
 						utfForm = UTF8FromLatin1(s, len);
 					}
@@ -1368,11 +1368,11 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 					SetIconv(PFont(font_)->characterSet);
 					utfForm = UTF8FromIconv(iconvh, s, len);
 				}
-				if (!utfForm) {	// iconv failed so treat as locale
-					gsize w;
-					utfForm = g_locale_to_utf8(s, len, NULL, &w, NULL);
-					useGFree = static_cast<bool>(utfForm);
-				};
+				//~ if (!utfForm) {	// iconv failed so treat as locale
+					//~ gsize w;
+					//~ utfForm = g_locale_to_utf8(s, len, NULL, &w, NULL);
+					//~ useGFree = static_cast<bool>(utfForm);
+				//~ };
 				if (!utfForm) {	// g_locale_to_utf8 failed so treat as Latin1
 					utfForm = UTF8FromLatin1(s, len);
 				}
