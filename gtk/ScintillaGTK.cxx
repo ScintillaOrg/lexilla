@@ -332,6 +332,7 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	gdk_window_set_background(widget->window, &widget->style->bg[GTK_STATE_NORMAL]);
 	gdk_window_show(widget->window);
 	gdk_cursor_destroy(cursor);
+	widget->style = gtk_style_attach(widget->style, widget->window);
 #ifdef INTERNATIONAL_INPUT
 #if GTK_MAJOR_VERSION < 2
 	if (gdk_im_ready() && (ic_attr = gdk_ic_attr_new()) != NULL) {
