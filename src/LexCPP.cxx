@@ -72,6 +72,8 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 	StyleContext sc(startPos, length, initStyle, styler);
 
 	for (; sc.More(); sc.Forward()) {
+	
+		// Handle line continuation generically.
 		if (sc.ch == '\\') {
 			if (sc.Match("\\\n")) {
 				sc.Forward();
@@ -86,6 +88,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			}
 		}
 
+		// Determine if the current state should terminate.
 		if (sc.state == SCE_C_OPERATOR) {
 			sc.SetState(SCE_C_DEFAULT);
 		} else if (sc.state == SCE_C_NUMBER) {
@@ -176,6 +179,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			}
 		}
 
+		// Determine if a new state should be entered.
 		if (sc.state == SCE_C_DEFAULT) {
 			if (sc.Match('@', '\"')) {
 				sc.SetState(SCE_C_VERBATIM);
@@ -226,6 +230,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 				sc.SetState(SCE_C_OPERATOR);
 			}
 		}
+		
 		if (sc.atLineEnd) {
 			// Reset states to begining of colourise so no surprises 
 			// if different sets of lines lexed.
