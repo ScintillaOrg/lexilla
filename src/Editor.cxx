@@ -5142,19 +5142,6 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_MARKERDEFINE:
 		if (wParam <= MARKER_MAX)
 			vs.markers[wParam].markType = lParam;
-		{
-		static char *stop_xpm = "\
-		static char *stop_xpm[] = {\
-\"4 4 3 1\",\
-\"  c None\",\
-\". c #0000FF\",\
-\"+ c #FFFF00\",\
-\" .. \",\
-\".++.\",\
-\".++.\",\
-\" .. \"};";
-			vs.markers[wParam].SetXPM(stop_xpm);
-		};
 		InvalidateStyleData();
 		RedrawSelMargin();
 		break;

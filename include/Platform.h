@@ -110,13 +110,13 @@ public:
 
 /**
  * In some circumstances, including Win32 in paletted mode and GTK+, each colour
- * must be allocated before use. The desired colours are held in the ColourDesired class, 
+ * must be allocated before use. The desired colours are held in the ColourDesired class,
  * and after allocation the allocation entry is stored in the ColourAllocated class. In other
- * circumstances, such as Win32 in true colour mode, the allocation process just copies 
+ * circumstances, such as Win32 in true colour mode, the allocation process just copies
  * the RGB values from the desired to the allocated class.
  * As each desired colour requires allocation before it can be used, the ColourPair class
  * holds both a ColourDesired and a ColourAllocated
- * The Palette class is responsible for managing the palette of colours which contains a 
+ * The Palette class is responsible for managing the palette of colours which contains a
  * list of ColourPair objects and performs the allocation.
  */
 
@@ -129,31 +129,56 @@ public:
 	ColourDesired(long lcol=0) {
 		co = lcol;
 	}
-	
+
 	ColourDesired(unsigned int red, unsigned int green, unsigned int blue) {
-		co = red | (green << 8) | (blue << 16);
+		Set(red, green, blue);
 	}
-	
+
 	bool operator==(const ColourDesired &other) const {
 		return co == other.co;
 	}
-	
+
 	void Set(long lcol) {
 		co = lcol;
 	}
-	
+
+	void Set(unsigned int red, unsigned int green, unsigned int blue) {
+		co = red | (green << 8) | (blue << 16);
+	}
+
+	static inline unsigned int ValueOfHex(const char ch) {
+		if (ch >= '0' && ch <= '9')
+			return ch - '0';
+		else if (ch >= 'A' && ch <= 'F')
+			return ch - 'A' + 10;
+		else if (ch >= 'a' && ch <= 'f')
+			return ch - 'a' + 10;
+		else
+			return 0;
+	}
+
+	void Set(const char *val) {
+		if (*val == '#') {
+			val++;
+		}
+		unsigned int r = ValueOfHex(val[0]) * 16 + ValueOfHex(val[1]);
+		unsigned int g = ValueOfHex(val[2]) * 16 + ValueOfHex(val[3]);
+		unsigned int b = ValueOfHex(val[4]) * 16 + ValueOfHex(val[5]);
+		Set(r, g, b);
+	}
+
 	long AsLong() const {
 		return co;
 	}
-	
+
 	unsigned int GetRed() {
 		return co & 0xff;
 	}
-	
+
 	unsigned int GetGreen() {
 		return (co >> 8) & 0xff;
 	}
-	
+
 	unsigned int GetBlue() {
 		return (co >> 16) & 0xff;
 	}
@@ -164,17 +189,17 @@ public:
  */
 class ColourAllocated {
 	long coAllocated;
-	
+
 public:
 
 	ColourAllocated(long lcol=0) {
 		coAllocated = lcol;
 	}
-	
+
 	void Set(long lcol) {
 		coAllocated = lcol;
 	}
-	
+
 	long AsLong() const {
 		return coAllocated;
 	}

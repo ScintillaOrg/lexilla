@@ -22,24 +22,6 @@ static const char *NextField(const char *s) {
 	return s;
 }
 
-static int IntFromHexDigit(const char ch) {
-	if (ch >= '0' && ch <= '9')
-		return ch - '0';
-	else if (ch >= 'A' && ch <= 'F')
-		return ch - 'A' + 10;
-	else if (ch >= 'a' && ch <= 'f')
-		return ch - 'a' + 10;
-	else
-		return 0;
-}
-
-static ColourDesired ColourFromString(const char *val) {
-	int r = IntFromHexDigit(val[1]) * 16 + IntFromHexDigit(val[2]);
-	int g = IntFromHexDigit(val[3]) * 16 + IntFromHexDigit(val[4]);
-	int b = IntFromHexDigit(val[5]) * 16 + IntFromHexDigit(val[6]);
-	return ColourDesired(r, g, b);
-}
-
 void XPM::Init(const char * const *linesForm) {
 	height = 1;
 	width = 1;
@@ -66,7 +48,7 @@ void XPM::Init(const char * const *linesForm) {
 		codes[c] = colourDef[0];
 		colourDef += 4;
 		if (*colourDef == '#') {
-			colours[c].desired = ColourFromString(colourDef);
+			colours[c].desired.Set(colourDef);
 		} else {
 			colours[c].desired = ColourDesired(0xff, 0xff, 0xff);
 			codeTransparent = codes[c];
@@ -171,11 +153,13 @@ void LineMarker::RefreshColourPalette(Palette &pal, bool want) {
 void LineMarker::SetXPM(const char *textForm) {
 	delete pxpm;
 	pxpm = new XPM(textForm);
+	markType = SC_MARK_PIXMAP;
 }
 
 void LineMarker::SetXPM(const char * const *linesForm) {
 	delete pxpm;
 	pxpm = new XPM(linesForm);
+	markType = SC_MARK_PIXMAP;
 }
 
 static void DrawBox(Surface *surface, int centreX, int centreY, int armSize, ColourAllocated fore, ColourAllocated back) {
@@ -209,7 +193,7 @@ static void DrawMinus(Surface *surface, int centreX, int centreY, int armSize, C
 }
 
 void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharacter) {
-	if (pxpm) {
+	if ((markType == SC_MARK_PIXMAP) && (pxpm)) {
 		pxpm->Draw(surface, rcWhole);
 		return;
 	}
