@@ -142,6 +142,7 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmCss);
 	LINK_LEXER(lmEiffel);
 	LINK_LEXER(lmEiffelkw);
+	LINK_LEXER(lmESCRIPT);
 	LINK_LEXER(lmFortran);
 	LINK_LEXER(lmF77);
 	LINK_LEXER(lmHTML);
