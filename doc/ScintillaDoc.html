@@ -37,9 +37,11 @@
     </p>
     <p>
        The Windows version of Scintilla is a Windows Control. As such, its primary programming
-      interface is through Windows messages. It responds to many of the messages defined for the
-      standard Edit and Richedit controls as well as a suite of its own for controlling syntax
-      styling, markers, auto-completion and call tips.
+      interface is through Windows messages. Early versions of Scintilla emulated much of the 
+      API defined by the standard Windows Edit and Richedit controls but those APIs are now 
+      deprecated in favour of Scintilla's own, more consistent API. 
+      In addition to messages performing the actions of a normal Edit control, Scintilla 
+      allows control of syntax styling, markers, auto-completion and call tips.
     </p>
     The GTK+ version also uses messages in a similar way to the Windows version. This is different
     to normal GTK+ practice but made it easier to implement rapidly. 
@@ -50,13 +52,13 @@
        Text retrieval and modification.
     </h3>
 <pre>
-WM_GETTEXT(int length, char *text)
-WM_SETTEXT(&lt;unused&gt;, char *text)
-EM_GETLINE(int line, char *text)
-EM_REPLACESEL(&lt;unused&gt;, char *text)
-EM_SETREADONLY
+SCI_GETTEXT(int length, char *text)
+SCI_SETTEXT(&lt;unused&gt;, char *text)
+SCI_GETLINE(int line, char *text)
+SCI_REPLACESEL(&lt;unused&gt;, char *text)
+SCI_SETREADONLY
 SCI_GETREADONLY
-EM_GETTEXTRANGE(&lt;unused&gt;, TEXTRANGE *tr)
+SCI_GETTEXTRANGE(&lt;unused&gt;, TEXTRANGE *tr)
 SCI_ADDTEXT(int length, char *s)
 SCI_ADDSTYLEDTEXT(int length, cell *s)
 SCI_INSERTTEXT(int pos, char *text)
@@ -99,18 +101,19 @@ SCI_GETSTYLEBITS
        Standard commands
     </h3>
 <pre>
-WM_CUT
-WM_COPY
-WM_PASTE
-WM_CLEAR
+SCI_CUT
+SCI_COPY
+SCI_PASTE
+SCI_CLEAR
+SCI_CANPASTE
 </pre>
     <h3>
        Undo and Redo
     </h3>
 <pre>
-WM_UNDO
-EM_CANUNDO
-EM_EMPTYUNDOBUFFER
+SCI_UNDO
+SCI_CANUNDO
+SCI_EMPTYUNDOBUFFER
 SCI_REDO
 SCI_CANREDO
 SCI_SETUNDOCOLLECTION(bool collectUndo)
@@ -130,30 +133,21 @@ SCI_ENDUNDOACTION
        Selection and information
     </h3>
 <pre>
-WM_GETTEXTLENGTH
-EM_GETFIRSTVISIBLELINE
-EM_GETLINECOUNT
-EM_GETMODIFY
-EM_SETMODIFY(bool ismodified)
-EM_GETRECT(RECT *rect)
-EM_GETSEL(int *start, int *end)
-EM_EXGETSEL(&lt;unused&gt;, CHARRANGE *cr)
-EM_SETSEL(int start, int end)
-EM_EXSETSEL(&lt;unused&gt;, CHARRANGE *cr)
-EM_GETSELTEXT(&lt;unused&gt;, char *text)
-EM_LINEFROMCHAR(int position)
-EM_EXLINEFROMCHAR(int position)
-EM_LINEINDEX(int line)
-EM_LINELENGTH(int position)
-EM_SCROLL(int line)
-EM_LINESCROLL(int column, int line)
-EM_SCROLLCARET()
-EM_CANPASTE
-EM_CHARFROMPOS(&lt;unused&gt;, POINT *location)
-SCI_POSITIONFROMPOINT(&lt;unused&gt;, POINT *location)
-EM_POSFROMCHAR(int position, POINT *location)
-EM_SELECTIONTYPE
-EM_HIDESELECTION(bool hide)
+SCI_GETTEXTLENGTH
+SCI_GETFIRSTVISIBLELINE
+SCI_GETLINECOUNT
+SCI_GETMODIFY
+SCI_SETSEL(int start, int end)
+SCI_GETSELTEXT(&lt;unused&gt;, char *text)
+SCI_LINEFROMPOSITION(int position)
+SCI_POSITIONFROMLINE(int line)
+SCI_LINELENGTH(int line)
+SCI_LINESCROLL(int column, int line)
+SCI_SCROLLCARET
+SCI_POSITIONFROMPOINT(int x, int y)
+SCI_POINTXFROMPOSITION(&lt;unused&gt;, int position)
+SCI_POINTYFROMPOSITION(&lt;unused&gt;, int position)
+SCI_HIDESELECTION(bool hide)
 SCI_GETLENGTH
 SCI_SETCURRENTPOS(int position)
 SCI_GETCURRENTPOS
@@ -167,7 +161,6 @@ SCI_SELECTALL
 SCI_GOTOLINE(int line)
 SCI_GOTOPOS(int position)
 SCI_GETCURLINE(int textlen, char *text)
-SCI_LINELENGTH(int line)
 SCI_SETCARETPOLICY(int policy)
 SCI_LINESONSCREEN
 SCI_SELECTIONISRECTANGLE
@@ -179,8 +172,8 @@ SCI_GETHSCROLLBAR
       current position.
     </p>
     <p>
-       EM_SETMODIFY is no longer supported as whether the document is modified is determined by
-      whether the undo position is at the save point.
+       It is not possible to change the modified status as whether the document is modified is 
+       determined by whether the undo position is at the save point.
     </p>
     <p>
        SCI_GETCURLINE retrieves the text of the line containing the caret and returns the position
@@ -195,8 +188,7 @@ SCI_GETHSCROLLBAR
        Searching
     </h3>
 <pre>
-EM_FINDTEXT(int flags, FINDTEXTEX *ft)
-EM_FINDTEXTEX(int flags, FINDTEXTEX *ft)
+SCI_FINDTEXT(int flags, FINDTEXTEX *ft)
 </pre>
     <p>
        Scintilla can find where a string is present in its document.
@@ -344,16 +336,14 @@ SCI_SETCARETPERIOD(int milliseconds)
        Margins
     </h3>
 <pre>
-EM_GETMARGINS 
-EM_SETMARGINS(EC_LEFTMARGIN or EC_RIGHTMARGIN or EC_USEFONTINFO, int val)
+SCI_SETMARGINLEFT(int width)
+SCI_GETMARGINLEFT 
+SCI_SETMARGINRIGHT(int width)
+SCI_GETMARGINRIGHT
 </pre>
     <p>
        Gets or sets the width of the blank margin on both sides of the text. This defaults to one
-      pixel on each side. val contains a left margin size in its low word and a right margin size
-      in its high word. This is also the way that EM_GETMARGINS returns the current setting.
-      EC_LEFTMARGIN and EC_RIGHTMARGIN are bit flags that can be used individually or combined to
-      set both margins at once. EC_USEFONTINFO ignores val and sets both margins to be half the
-      average character width in the current default font.
+      pixel on each side. 
     </p>
 <pre>
 SCI_SETMARGINTYPEN(int margin, SC_MARGIN_SYMBOL | SC_MARGIN_NUMBER)
@@ -729,14 +719,14 @@ SCI_STOPRECORD
        Printing
     </h3>
 <pre>
-EM_FORMATRANGE
+SCI_FORMATRANGE
 SCI_SETPRINTMAGNIFICATION(int magnification)
 SCI_GETPRINTMAGNIFICATION
 SCI_SETPRINTCOLOURMODE(int mode)
 SCI_GETPRINTCOLOURMODE
 </pre>
     <p>
-       On Windows EM_FORMATRANGE can be used to draw the text onto a display context which can
+       On Windows SCI_FORMATRANGE can be used to draw the text onto a display context which can
       include a printer display context.
     </p>
     <p>
@@ -748,6 +738,25 @@ SCI_GETPRINTCOLOURMODE
        with SCI_SETPRINTCOLOURMODE(SC_PRINT_INVERTLIGHT) when printing to give a 
        white background. If intermediate tones are used on screen then black on white print can be 
        chosen with SCI_SETPRINTCOLOURMODE(SC_PRINT_BLACKONWHITE).
+    </p>
+    <h3>
+       Direct Access
+    </h3>
+<pre>
+SCI_GETDIRECTFUNCTION
+SCI_GETDIRECTPOINTER
+</pre>
+    <p>
+      On Windows, the message passing scheme used to communicate between the container and
+      Scintilla is mediated by the operating system SendMessage function which can lead to bad 
+      performance when calling intensively. 
+      To avoid this overhead a pointer to a message handling function inside Scintilla
+      can be retrieved with SCI_GETDIRECTFUNCTION. The first argument to use when calling
+      the returned function is the value retrieved from SCI_GETDIRECTPOINTER. After that go 
+      the message number, wParam, and lParam.
+    </p>
+    <p>
+      This feature also works on GTK+ but has no significant impact on speed.
     </p>
     <h3>
        Multiple Views
@@ -902,7 +911,8 @@ SCI_SETKEYWORDS(int keywordset, char *keywordlist)
     <p>
        Notifications are sent (fired) from the Scintilla control to its container when an event has
       occurred that may interest the container. Notifications are sent using the WM_NOTIFY message
-      with a structure containing information about the event.
+      on Windows and the "notify" signal on GTK+ with a structure containing information 
+      about the event.
     </p>
 <pre>
 SCN_STYLENEEDED(int endstyleneeded)
@@ -968,7 +978,7 @@ SCN_KEY
     </p>
 <pre>
 SCN_MODIFIED
-EN_CHANGE
+SCEN_CHANGE
 SCI_SETMODEVENTMASK(int eventmask)
 SCI_GETMODEVENTMASK
 </pre>
@@ -979,7 +989,8 @@ SCI_GETMODEVENTMASK
     </p>
     <p>
        EN_CHANGE is fired when the text of the document has been changed for any reason. This
-      notification is sent using the WM_COMMAND message as this is the behaviour of the standard
+      notification is sent using the WM_COMMAND message on Windows and the "Command" signal 
+      on GTK+ as this is the behaviour of the standard
       edit control.
     </p>
     <p>
@@ -1013,7 +1024,53 @@ SCN_NEEDSHOWN
       will just ensure each line in the range is visible by calling SCI_ENSUREVISIBLE.
     </p>
     <h3>
-       Edit messages not supported by Scintilla
+       Edit messages currently supported by Scintilla which will be removed in the future.
+    </h3>
+<pre>
+WM_GETTEXT(int length, char *text)
+WM_SETTEXT(&lt;unused&gt;, char *text)
+EM_GETLINE(int line, char *text)
+EM_REPLACESEL(&lt;unused&gt;, char *text)
+EM_SETREADONLY
+EM_GETTEXTRANGE(&lt;unused&gt;, TEXTRANGE *tr)
+WM_CUT
+WM_COPY
+WM_PASTE
+WM_CLEAR
+WM_UNDO
+EM_CANUNDO
+EM_EMPTYUNDOBUFFER
+WM_GETTEXTLENGTH
+EM_GETFIRSTVISIBLELINE
+EM_GETLINECOUNT
+EM_GETMODIFY
+EM_SETMODIFY(bool ismodified)
+EM_GETRECT(RECT *rect)
+EM_GETSEL(int *start, int *end)
+EM_EXGETSEL(&lt;unused&gt;, CHARRANGE *cr)
+EM_SETSEL(int start, int end)
+EM_EXSETSEL(&lt;unused&gt;, CHARRANGE *cr)
+EM_GETSELTEXT(&lt;unused&gt;, char *text)
+EM_LINEFROMCHAR(int position)
+EM_EXLINEFROMCHAR(int position)
+EM_LINEINDEX(int line)
+EM_LINELENGTH(int position)
+EM_SCROLL(int line)
+EM_LINESCROLL(int column, int line)
+EM_SCROLLCARET()
+EM_CANPASTE
+EM_CHARFROMPOS(&lt;unused&gt;, POINT *location)
+EM_POSFROMCHAR(int position, POINT *location)
+EM_SELECTIONTYPE
+EM_HIDESELECTION(bool hide)
+EM_FINDTEXT(int flags, FINDTEXTEX *ft)
+EM_FINDTEXTEX(int flags, FINDTEXTEX *ft)
+EM_GETMARGINS 
+EM_SETMARGINS(EC_LEFTMARGIN or EC_RIGHTMARGIN or EC_USEFONTINFO, int val)
+EM_FORMATRANGE
+</pre>
+    <h3>
+       Edit messages never supported by Scintilla
     </h3>
 <pre>
 EM_GETWORDBREAKPROC EM_GETWORDBREAKPROCEX
