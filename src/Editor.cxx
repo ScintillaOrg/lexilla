@@ -2040,6 +2040,29 @@ void Editor::NotifySavePoint(Document*, void *, bool atSavePoint) {
 	NotifySavePoint(atSavePoint);
 }
 
+// Move a position so it is still after the same character as before the insertion.
+static inline int MovePositionForInsertion(int position, int startInsertion, int length) {
+	if (position > startInsertion) {
+		return position + length;
+	}
+	return position;
+}
+
+// Move a position so it is still after the same character as before the deletion if that
+// character is still present else after the previous surviving character.
+static inline int MovePositionForDeletion(int position, int startDeletion, int length) {
+	if (position > startDeletion) {
+		int endDeletion = startDeletion + length;
+		if (position > endDeletion) {
+			return position - length;
+		} else {
+			return startDeletion;
+		}
+	} else {
+		return position;
+	}
+}
+
 void Editor::NotifyModified(Document*, DocModification mh, void *) {
 	needUpdateUI = true;
 	if (paintState == painting) {
@@ -2055,48 +2078,15 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 		} else {
 			// Move selection and brace highlights
 			if (mh.modificationType & SC_MOD_INSERTTEXT) {
-				if (currentPos > mh.position) {
-					currentPos += mh.length;
-				}
-				if (anchor > mh.position) {
-					anchor += mh.length;
-				}
-				if (braces[0] > mh.position) {
-					braces[0] += mh.length;
-				}
-				if (braces[1] > mh.position) {
-					braces[1] += mh.length;
-				}
+				currentPos = MovePositionForInsertion(currentPos, mh.position, mh.length);
+				anchor = MovePositionForInsertion(anchor, mh.position, mh.length);
+				braces[0] = MovePositionForInsertion(braces[0], mh.position, mh.length);
+				braces[1] = MovePositionForInsertion(braces[1], mh.position, mh.length);
 			} else if (mh.modificationType & SC_MOD_DELETETEXT) {
-				int endPos = mh.position + mh.length;
-				if (currentPos > mh.position) {
-					if (currentPos > endPos) {
-						currentPos -= mh.length;
-					} else {
-						currentPos = endPos;
-					}
-				}
-				if (anchor > mh.position) {
-					if (anchor > endPos) {
-						anchor -= mh.length;
-					} else {
-						anchor = endPos;
-					}
-				}
-				if (braces[0] > mh.position) {
-					if (braces[0] > endPos) {
-						braces[0] -= mh.length;
-					} else {
-						braces[0] = endPos;
-					}
-				}
-				if (braces[1] > mh.position) {
-					if (braces[1] > endPos) {
-						braces[1] -= mh.length;
-					} else {
-						braces[1] = endPos;
-					}
-				}
+				currentPos = MovePositionForDeletion(currentPos, mh.position, mh.length);
+				anchor = MovePositionForDeletion(anchor, mh.position, mh.length);
+				braces[0] = MovePositionForDeletion(braces[0], mh.position, mh.length);
+				braces[1] = MovePositionForDeletion(braces[1], mh.position, mh.length);
 			}
 			if (cs.LinesDisplayed() < cs.LinesInDoc()) {
 				// Some lines are hidden so may need shown.
