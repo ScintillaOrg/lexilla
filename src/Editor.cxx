@@ -4324,6 +4324,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SETWRAPMODE:
 		wrapState = (wParam == SC_WRAP_WORD) ? eWrapWord : eWrapNone;
 		needWrap = true;
+		xOffset = 0;
 		InvalidateStyleRedraw();
 		ReconfigureScrollBars();
 		break;
