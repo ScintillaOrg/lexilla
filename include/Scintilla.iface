@@ -446,6 +446,7 @@ get int GetCaretPeriod=2075(,)
 set void SetCaretPeriod=2076(int periodMilliseconds,)
 
 # Set the set of characters making up words for when moving or selecting by word.
+# First sets deaults like SetCharsDefault.
 set void SetWordChars=2077(, string characters)
 
 # Start a sequence of actions that is undone and redone as a unit.
@@ -1539,6 +1540,7 @@ fun void WordRightEnd=2441(,)
 fun void WordRightEndExtend=2442(,)
 
 # Set the set of characters making up whitespace for when moving or selecting by word.
+# Should be called after SetWordChars.
 set void SetWhitespaceChars=2443(, string characters)
 
 # Reset the set of characters for whitespace and word characters to the defaults.
