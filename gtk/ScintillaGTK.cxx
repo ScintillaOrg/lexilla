@@ -11,6 +11,7 @@
 
 #include "Platform.h"
 
+#include "ScintillaWidget.h"
 #include "Scintilla.h"
 #ifdef SCI_LEXER
 #include "SciLexer.h"

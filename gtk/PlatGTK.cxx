@@ -10,6 +10,7 @@
 
 #include "Platform.h"
 
+#include "ScintillaWidget.h"
 #include "Scintilla.h"
 
 #define LOWORD(x) (x & 0xffff)

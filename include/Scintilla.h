@@ -9,53 +9,15 @@
 // Compile-time configuration options
 #define MACRO_SUPPORT 1  // Comment out to remove macro hooks
 
-#if PLAT_GTK
-#include <gdk/gdk.h>
-#include <gtk/gtkvbox.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#define SCINTILLA(obj)          GTK_CHECK_CAST (obj, scintilla_get_type (), ScintillaObject)
-#define SCINTILLA_CLASS(klass)  GTK_CHECK_CLASS_CAS	T (klass, scintilla_get_type (), ScintillaClass)
-#define IS_SCINTILLA(obj)       GTK_CHECK_TYPE (obj, scintilla_get_type ())
-
-	typedef struct _ScintillaObject ScintillaObject;
-	typedef struct _ScintillaClass  ScintillaClass;
-
-	struct _ScintillaObject
-	{
-		GtkFixed vbox;
-		void *pscin;
-	};
-
-	struct _ScintillaClass
-	{
-		GtkFixedClass parent_class;
-
-		void (* command) (ScintillaObject *ttt);
-		void (* notify) (ScintillaObject *ttt);
-	};
-
-	guint		scintilla_get_type	(void);
-	GtkWidget*	scintilla_new		(void);
-	void		scintilla_set_id	(ScintillaObject *sci,int id);
-	long 		scintilla_send_message	(ScintillaObject *sci,int iMessage,int wParam,int lParam);
-
-#include "WinDefs.h"
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif
-
-#if PLAT_WX
+#if PLAT_WX || PLAT_GTK
 #include "WinDefs.h"
 #endif
 
-// Both GTK and Windows
+#if PLAT_WIN
+#ifdef STATIC_BUILD
+void Scintilla_RegisterClasses(HINSTANCE hInstance);
+#endif
+#endif
 
 #define INVALID_POSITION -1 
 
@@ -444,10 +406,6 @@ struct SCNotification {
 #endif
 #define SCN_MARGINCLICK 2010
 #define SCN_NEEDSHOWN 2011
-
-#ifdef STATIC_BUILD
-void Scintilla_RegisterClasses(HINSTANCE hInstance);
-#endif
 
 // Deprecation section listing all API features that are deprecated and will
 // will be removed completely in a future version.

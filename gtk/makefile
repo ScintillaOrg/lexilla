@@ -65,7 +65,7 @@ LexVB.o: LexVB.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h WinDefs.h SciLexer.h
 LineMarker.o: LineMarker.cxx Platform.h Scintilla.h WinDefs.h \
  LineMarker.h
-PlatGTK.o: PlatGTK.cxx Platform.h Scintilla.h WinDefs.h
+PlatGTK.o: PlatGTK.cxx Platform.h Scintilla.h ScintillaWidget.h WinDefs.h
 PropSet.o: PropSet.cxx Platform.h PropSet.h
 SciTEBase.o: SciTEBase.cxx Platform.h WinDefs.h SciTE.h PropSet.h \
  Accessor.h KeyWords.h Scintilla.h SciLexer.h SciTEBase.h
@@ -75,7 +75,7 @@ ScintillaBase.o: ScintillaBase.cxx Platform.h Scintilla.h WinDefs.h \
  SciLexer.h PropSet.h Accessor.h KeyWords.h ContractionState.h \
  CellBuffer.h CallTip.h KeyMap.h Indicator.h LineMarker.h Style.h \
  ViewStyle.h AutoComplete.h Document.h Editor.h ScintillaBase.h
-ScintillaGTK.o: ScintillaGTK.cxx Platform.h Scintilla.h WinDefs.h \
+ScintillaGTK.o: ScintillaGTK.cxx Platform.h Scintilla.h ScintillaWidget.h WinDefs.h \
  SciLexer.h PropSet.h Accessor.h KeyWords.h ContractionState.h \
  CellBuffer.h CallTip.h KeyMap.h Indicator.h LineMarker.h Style.h \
  AutoComplete.h ViewStyle.h Document.h Editor.h ScintillaBase.h
