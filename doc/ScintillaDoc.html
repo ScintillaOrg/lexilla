@@ -3316,13 +3316,6 @@ SCN_CHARADDED(int charadded)
     auto completion list.
     </p>
 <pre>
-SCN_POSCHANGED(int newPos)
-</pre>
-    <p>
-       Fired when the user moves the cursor to a different position in the text.
-      Can be used by the container to cancel some time consuming thread.
-    </p>
-<pre>
 SCN_SAVEPOINTREACHED
 SCN_SAVEPOINTLEFT
 </pre>
@@ -3541,7 +3534,7 @@ EM_GETMARGINS
 EM_SETMARGINS(EC_LEFTMARGIN or EC_RIGHTMARGIN or EC_USEFONTINFO, int val)
 EM_FORMATRANGE
 </pre>
-
+<p>The SCN_POSCHANGED notification is also deprecated.</p>
 <h2 id="Edit messages never supported by Scintilla">
    Edit messages never supported by Scintilla
 </h2>
