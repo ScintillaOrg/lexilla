@@ -591,6 +591,13 @@ fun void RegisterImage=2405(int type, string xpmData)
 # Clear all the registered XPM images.
 fun void ClearRegisteredImages=2408(,)
 
+# Retrieve the auto-completion list type-separator character.
+get int AutoCGetTypeSeparator=2285(,)
+
+# Change the type-separator character in the string setting up an auto-completion list.
+# Default is '?' but can be changed if items contain '?'.
+set void AutoCSetTypeSeparator=2286(int separatorCharacter,)
+
 # Set the number of spaces used for one level of indentation.
 set void SetIndent=2122(int indentSize,)
 

@@ -518,6 +518,13 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		ac.lb->ClearRegisteredImages();
 		break;
 
+	case SCI_AUTOCSETTYPESEPARATOR:
+		ac.SetTypesep(static_cast<char>(wParam));
+		break;
+
+	case SCI_AUTOCGETTYPESEPARATOR:
+		return ac.GetTypesep();
+
 	case SCI_CALLTIPSHOW: {
 			AutoCompleteCancel();
 			if (!ct.wCallTip.Created()) {
