@@ -4156,16 +4156,20 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		break;
 	case SCI_LINEENDWRAP: {
 			int endPos = MovePositionSoVisible(StartEndDisplayLine(currentPos, false), 1);
-			if (currentPos >= endPos)
-				endPos = pdoc->LineEndPosition(currentPos);
+			int realEndPos = pdoc->LineEndPosition(currentPos);
+			if (endPos > realEndPos      // if moved past visible EOLs
+				|| currentPos >= endPos) // if at end of display line already
+				endPos = realEndPos;
 			MovePositionTo(endPos);
 			SetLastXChosen();
 		}
 		break;
 	case SCI_LINEENDWRAPEXTEND: {
 			int endPos = MovePositionSoVisible(StartEndDisplayLine(currentPos, false), 1);
-			if (currentPos >= endPos)
-				endPos = pdoc->LineEndPosition(currentPos);
+			int realEndPos = pdoc->LineEndPosition(currentPos);
+			if (endPos > realEndPos      // if moved past visible EOLs
+				|| currentPos >= endPos) // if at end of display line already
+				endPos = realEndPos;
 			MovePositionTo(endPos, selStream);
 			SetLastXChosen();
 		}
