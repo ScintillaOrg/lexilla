@@ -380,6 +380,9 @@ bool Document::DeleteChars(int pos, int len) {
 	return !cb.IsReadOnly();
 }
 
+/**
+ * Insert a styled string (char/style pairs) with a length.
+ */
 bool Document::InsertStyledString(int position, char *s, int insertLength) {
 	if (cb.IsReadOnly() && enteredReadOnlyCount == 0) {
 		enteredReadOnlyCount++;
@@ -499,6 +502,9 @@ int Document::Redo() {
 	return newPos;
 }
 
+/**
+ * Insert a single character.
+ */
 bool Document::InsertChar(int pos, char ch) {
 	char chs[2];
 	chs[0] = ch;
@@ -506,12 +512,16 @@ bool Document::InsertChar(int pos, char ch) {
 	return InsertStyledString(pos*2, chs, 2);
 }
 
-// Insert a null terminated string
+/**
+ * Insert a null terminated string.
+ */
 bool Document::InsertString(int position, const char *s) {
 	return InsertString(position, s, strlen(s));
 }
 
-// Insert a string with a length
+/**
+ * Insert a string with a length.
+ */
 bool Document::InsertString(int position, const char *s, size_t insertLength) {
 	bool changed = false;
 	char *sWithStyle = new char[insertLength * 2];
@@ -1178,7 +1188,7 @@ void Document::SetDefaultCharClasses() {
 	}
 }
 
-void Document::SetCharClasses(unsigned char *chars, charClassification newCharClass) {
+void Document::SetCharClasses(const unsigned char *chars, charClassification newCharClass) {
 	// Apply the newCharClass to the specifed chars
 	if (chars) {
 		while (*chars) {

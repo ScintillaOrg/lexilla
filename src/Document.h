@@ -204,7 +204,7 @@ public:
 	void ChangeCase(Range r, bool makeUpperCase);
 
 	void SetDefaultCharClasses();
-	void SetCharClasses(unsigned char *chars, charClassification newCharClass);
+	void SetCharClasses(const unsigned char *chars, charClassification newCharClass);
 	void SetStylingBits(int bits);
 	void StartStyling(int position, char mask);
 	bool SetStyleFor(int length, char style);
