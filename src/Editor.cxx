@@ -1411,7 +1411,7 @@ void Editor::NeedWrapping(int docLineStartWrapping, int docLineEndWrapping) {
 			docLastLineToWrap = pdoc->LinesTotal();
 	}
 	// Wrap lines during idle.
-	if (docLastLineToWrap != docLineLastWrapped) {
+	if (backgroundWrapEnabled && docLastLineToWrap != docLineLastWrapped ) {
 		SetIdle(true);
 	}
 }
