@@ -1304,10 +1304,10 @@ void ScintillaWin::AddCharBytes(char b0, char b1) {
 		UTF8FromUCS2(wcs, 1, utfval, len);
 		utfval[len] = '\0';
 		AddCharUTF(utfval,len);
-    } else {
-        AddChar(b0);
-        AddChar(b1);
-    }
+	} else {
+		AddChar(b0);
+		AddChar(b1);
+	}
 }
 
 void ScintillaWin::GetIntelliMouseParameters() {

@@ -1350,6 +1350,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		// Right column limit indicator
 
 
+
 		PRectangle rcBeyondEOF = rcClient;
 		rcBeyondEOF.left = vs.fixedColumnWidth;
 		rcBeyondEOF.right = rcBeyondEOF.right;
@@ -1549,6 +1550,7 @@ void Editor::SetScrollBarsTo(PRectangle) {
 }
 
 
+
 void Editor::SetScrollBars() {
 	PRectangle rsClient = GetClientRectangle();
 	SetScrollBarsTo(rsClient);
@@ -1577,7 +1579,38 @@ void Editor::AddCharUTF(char *s, unsigned int len) {
 	// Avoid blinking during rapid typing:
 	ShowCaretAtCurrentPosition();
 	SetLastXChosen();
-	NotifyChar(s[0]);
+
+	int byte = static_cast<unsigned char>(s[0]);
+	if ((byte < 0xC0) || (1 == len)) {
+		// Handles UTF-8 characters between 0x01 and 0x7F and single byte 
+		// characters when not in UTF-8 mode. 
+		// Also treats \0 and naked trail bytes 0x80 to 0xBF as valid
+		// characters representing themselves.
+	} else {
+		// Unroll 1 to 3 byte UTF-8 sequences.  See reference data at:
+		// http://www.cl.cam.ac.uk/~mgk25/unicode.html
+		// http://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt
+		if (byte < 0xE0) {
+			int byte2 = static_cast<unsigned char>(s[1]);
+			if ((byte2 & 0xC0) == 0x80) {
+				// Two-byte-character lead-byte followed by a trail-byte.
+				byte = (((byte & 0x1F) << 6) | (byte2 & 0x3F));
+			}
+			// A two-byte-character lead-byte not followed by trail-byte
+			// represents itself.
+		} else if (byte < 0xF0) {
+			int byte2 = static_cast<unsigned char>(s[1]);
+			int byte3 = static_cast<unsigned char>(s[2]);
+			if (((byte2 & 0xC0) == 0x80) && ((byte3 & 0xC0) == 0x80)) {
+				// Three-byte-character lead byte followed by two trail bytes.
+				byte = (((byte & 0x0F) << 12) | ((byte2 & 0x3F) << 6) |
+					(byte3 & 0x3F));
+			}
+			// A three-byte-character lead-byte not followed by two trail-bytes
+			// represents itself.
+		}
+	}
+	NotifyChar(byte);
 }
 
 void Editor::ClearSelection() {
@@ -1753,7 +1786,7 @@ void Editor::NotifyStyleNeeded(Document*, void *, int endStyleNeeded) {
 	NotifyStyleToNeeded(endStyleNeeded);
 }
 
-void Editor::NotifyChar(char ch) {
+void Editor::NotifyChar(int ch) {
 	SCNotification scn;
 	scn.nmhdr.code = SCN_CHARADDED;
 	scn.ch = ch;
@@ -1964,6 +1997,7 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 		}
 
 
+
 		SCNotification scn;
 		scn.nmhdr.code = SCN_MODIFIED;
 		scn.position = mh.position;
@@ -2057,6 +2091,7 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	case SCI_NEWLINE:
 	default:
 		//		printf("Filtered out %ld of macro recording\n", iMessage);
+
 
 
 		return ;
@@ -2262,7 +2297,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		ShowCaretAtCurrentPosition();
 		NotifyUpdateUI();
 		break;
-	case SCI_CANCEL:         	// Cancel any modes - handled in subclass
+	case SCI_CANCEL:          	// Cancel any modes - handled in subclass
 		// Also unselect text
 		CancelModes();
 		break;
@@ -2507,8 +2542,8 @@ void Editor::Indent(bool forwards) {
  * @return The position of the found text, -1 if not found.
  */
 long Editor::FindText(
-    unsigned int iMessage,   	///< Can be @c EM_FINDTEXT or @c EM_FINDTEXTEX or @c SCI_FINDTEXT.
-    unsigned long wParam,   	///< Search modes : @c SCFIND_MATCHCASE, @c SCFIND_WHOLEWORD,
+    unsigned int iMessage,    	///< Can be @c EM_FINDTEXT or @c EM_FINDTEXTEX or @c SCI_FINDTEXT.
+    unsigned long wParam,    	///< Search modes : @c SCFIND_MATCHCASE, @c SCFIND_WHOLEWORD,
     ///< @c SCFIND_WORDSTART or @c SCFIND_REGEXP.
     long lParam) {			///< @c TextToFind structure: The text to search for in the given range.
 
@@ -2550,8 +2585,8 @@ void Editor::SearchAnchor() {
  * @return The position of the found text, -1 if not found.
  */
 long Editor::SearchText(
-    unsigned int iMessage,   	///< Accepts both @c SCI_SEARCHNEXT and @c SCI_SEARCHPREV.
-    unsigned long wParam,   	///< Search modes : @c SCFIND_MATCHCASE, @c SCFIND_WHOLEWORD,
+    unsigned int iMessage,    	///< Accepts both @c SCI_SEARCHNEXT and @c SCI_SEARCHPREV.
+    unsigned long wParam,    	///< Search modes : @c SCFIND_MATCHCASE, @c SCFIND_WHOLEWORD,
     ///< @c SCFIND_WORDSTART or @c SCFIND_REGEXP.
     long lParam) {			///< The text to search for.
 
@@ -2714,6 +2749,7 @@ void Editor::StartDrag() {
 	//SetMouseCapture(true);
 	//DisplayCursor(Window::cursorArrow);
 }
+
 
 
 void Editor::DropAt(int position, const char *value, bool moving, bool rectangular) {
@@ -2927,6 +2963,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 			}
 
 
+
 			SetDragPosition(invalidPosition);
 			SetMouseCapture(true);
 			selectionType = selLine;
@@ -3012,6 +3049,7 @@ void Editor::ButtonMove(Point pt) {
 				DisplayCursor(Window::cursorReverseArrow);
 				return ; 	// No need to test for selection
 			}
+
 
 
 		}
@@ -3783,6 +3821,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		}
 
 
+
 	case EM_SELECTIONTYPE:
 #ifdef SEL_EMPTY
 		if (currentPos == anchor)
@@ -4057,7 +4096,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		pdoc->SetStyleFor(wParam, static_cast<char>(lParam));
 		break;
 
-	case SCI_SETSTYLINGEX:          // Specify a complete styling buffer
+	case SCI_SETSTYLINGEX:           // Specify a complete styling buffer
 		if (lParam == 0)
 			return 0;
 		pdoc->SetStyles(wParam, reinterpret_cast<char *>(lParam));
