@@ -111,7 +111,6 @@ public:
 	undoCollectionType SetUndoCollection(undoCollectionType collectUndo) {
 		return cb.SetUndoCollection(collectUndo);
 	}
-	void AppendUndoStartAction() { cb.AppendUndoStartAction(); }
 	void BeginUndoAction() { cb.BeginUndoAction(); }
 	void EndUndoAction() { cb.EndUndoAction(); }
 	void SetSavePoint();
@@ -123,6 +122,7 @@ public:
 	void InsertChar(int pos, char ch);
 	void InsertString(int position, const char *s);
 	void InsertString(int position, const char *s, int insertLength);
+	void ChangeChar(int pos, char ch);
 	void DelChar(int pos);
 	int DelCharBack(int pos);
 
@@ -138,6 +138,7 @@ public:
 	void DeleteAllMarks(int markerNum);
 	int LineFromHandle(int markerHandle) { return cb.LineFromHandle(markerHandle); }
 	int LineStart(int line);
+	int LineEnd(int line);
 	int LineEndPosition(int position);
 	int VCHomePosition(int position);
 
@@ -153,6 +154,8 @@ public:
 	long FindText(int minPos, int maxPos, const char *s, bool caseSensitive, bool word);
 	long FindText(WORD iMessage,WPARAM wParam,LPARAM lParam);
 	int LinesTotal();
+	
+	void ChangeCase(Range r, bool makeUpperCase);
 	
 	void SetWordChars(unsigned char *chars);
 	void SetStylingBits(int bits);

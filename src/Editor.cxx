@@ -1700,6 +1700,11 @@ void Editor::NotifyMacroRecord(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	case SCI_VCHOMEEXTEND:
 	case SCI_DELWORDLEFT:
 	case SCI_DELWORDRIGHT:
+	case SCI_LINECUT:
+	case SCI_LINEDELETE:
+	case SCI_LINETRANSPOSE:
+	case SCI_LOWERCASE:
+	case SCI_UPPERCASE:
 		break;
 
 	// Filter out all others (display changes, etc)
@@ -1732,6 +1737,60 @@ void Editor::PageMove(int direction, bool extend) {
 		SetVerticalScrollPos();
 	} else {
 		MovePositionTo(newPos, extend);
+	}
+}
+
+void Editor::ChangeCaseOfSelection(bool makeUpperCase) {
+	pdoc->BeginUndoAction();
+	int startCurrent = currentPos;
+	int startAnchor = anchor;
+	if (selType == selRectangle) {
+		int lineStart = pdoc->LineFromPosition(SelectionStart());
+		int lineEnd = pdoc->LineFromPosition(SelectionEnd());
+		for (int line=lineStart; line <= lineEnd; line++) {
+			pdoc->ChangeCase(
+				Range(SelectionStart(line), SelectionEnd(line)), 
+				makeUpperCase);
+		}
+		// Would be nicer to keep the rectangular selection but this is complex
+		selType = selStream;
+		SetSelection(startCurrent, startCurrent);
+	} else {
+		pdoc->ChangeCase(Range(SelectionStart(), SelectionEnd()), 
+			makeUpperCase);
+		SetSelection(startCurrent, startAnchor);
+	}
+	pdoc->EndUndoAction();
+}
+
+
+void Editor::LineTranspose() {
+	int line = pdoc->LineFromPosition(currentPos);
+	if (line > 0) {
+		int startPrev = pdoc->LineStart(line-1);
+		int endPrev = pdoc->LineEnd(line-1);
+		int start = pdoc->LineStart(line);
+		int end = pdoc->LineEnd(line);
+		int startNext = pdoc->LineStart(line+1);
+		if (end < pdoc->Length()) {
+			end = startNext;
+			char *thisLine = CopyRange(start, end);
+			pdoc->DeleteChars(start, end-start);
+			pdoc->InsertString(startPrev, thisLine, end-start);
+			MovePositionTo(startPrev+end-start);
+			delete []thisLine;
+		} else {
+			// Last line so line has no line end
+			char *thisLine = CopyRange(start, end);
+			char *prevEnd = CopyRange(endPrev, start);
+			pdoc->DeleteChars(endPrev, end-endPrev);
+			pdoc->InsertString(startPrev, thisLine, end-start);
+			pdoc->InsertString(startPrev + end-start, prevEnd, start-endPrev);
+			MovePositionTo(startPrev + end-endPrev);
+			delete []thisLine;
+			delete []prevEnd;
+		}
+		
 	}
 }
 
@@ -1909,6 +1968,37 @@ int Editor::KeyCommand(UINT iMessage) {
 			pdoc->DeleteChars(currentPos, endWord - currentPos);
 			MovePositionTo(currentPos);
 		}
+		break;
+	case SCI_LINECUT: {
+			int lineStart = pdoc->LineFromPosition(currentPos);
+			int lineEnd = pdoc->LineFromPosition(anchor);
+			if (lineStart > lineEnd) {
+				int t = lineEnd;
+				lineEnd = lineStart;
+				lineStart = t;
+			}
+			int start = pdoc->LineStart(lineStart);
+			int end = pdoc->LineStart(lineEnd+1);
+			SetSelection(start,end);
+			Cut();
+		}
+		break;
+	case SCI_LINEDELETE: {
+			int line = pdoc->LineFromPosition(currentPos);
+			int start = pdoc->LineStart(line);
+			int end = pdoc->LineStart(line+1);
+			pdoc->DeleteChars(start, end-start);
+			MovePositionTo(start);
+		}
+		break;
+	case SCI_LINETRANSPOSE:
+		LineTranspose();
+		break;
+	case SCI_LOWERCASE:
+		ChangeCaseOfSelection(false);
+		break;
+	case SCI_UPPERCASE:
+		ChangeCaseOfSelection(true);
 		break;
 	}
 	return 0;
@@ -3094,7 +3184,8 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 
 #ifdef INCLUDE_DEPRECATED_FEATURES
 	case SCI_APPENDUNDOSTARTACTION:
-		pdoc->AppendUndoStartAction();
+		// Not just deprecated - now dead
+		//pdoc->AppendUndoStartAction();
 		return 0;
 #endif
 
@@ -3649,6 +3740,11 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	case SCI_ZOOMOUT:
 	case SCI_DELWORDLEFT:
 	case SCI_DELWORDRIGHT:
+	case SCI_LINECUT:
+	case SCI_LINEDELETE:
+	case SCI_LINETRANSPOSE:
+	case SCI_LOWERCASE:
+	case SCI_UPPERCASE:
 		return KeyCommand(iMessage);
 
 	case SCI_BRACEHIGHLIGHT:

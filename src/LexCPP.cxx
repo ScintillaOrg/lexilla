@@ -17,9 +17,10 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-static void classifyWordCpp(unsigned int start, unsigned int end, WordList &keywords, StylingContext &styler) {
+static bool classifyWordCpp(unsigned int start, unsigned int end, WordList &keywords, StylingContext &styler) {
 	char s[100];
 	bool wordIsNumber = isdigit(styler[start]) || (styler[start] == '.');
+	bool wordIsUUID = false;
 	for (unsigned int i = 0; i < end - start + 1 && i < 30; i++) {
 		s[i] = styler[start + i];
 		s[i + 1] = '\0';
@@ -28,10 +29,13 @@ static void classifyWordCpp(unsigned int start, unsigned int end, WordList &keyw
 	if (wordIsNumber)
 		chAttr = SCE_C_NUMBER;
 	else {
-		if (keywords.InList(s))
+		if (keywords.InList(s)) {
 			chAttr = SCE_C_WORD;
+			wordIsUUID = strcmp(s, "uuid") == 0; 
+		}
 	}
 	styler.ColourTo(end, chAttr);
+	return wordIsUUID;
 }
 
 static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[], 
@@ -52,6 +56,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 	unsigned int lengthDoc = startPos + length;
 	int visChars = 0;
 	styler.StartSegment(startPos);
+	bool lastWordWasUUID = false;
 	for (unsigned int i = startPos; i <= lengthDoc; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
@@ -86,7 +91,12 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 		if (state == SCE_C_DEFAULT) {
 			if (iswordstart(ch)) {
 				styler.ColourTo(i-1, state);
-				state = SCE_C_WORD;
+				if (lastWordWasUUID) {
+					state = SCE_C_UUID;
+					lastWordWasUUID = false;
+				} else {
+					state = SCE_C_WORD;
+				}
 			} else if (ch == '/' && chNext == '*') {
 				styler.ColourTo(i-1, state);
 				if (styler.SafeGetCharAt(i + 2) == '*')
@@ -114,7 +124,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			}
 		} else if (state == SCE_C_WORD) {
 			if (!iswordchar(ch)) {
-				classifyWordCpp(styler.GetStartSegment(), i - 1, keywords, styler);
+				lastWordWasUUID = classifyWordCpp(styler.GetStartSegment(), i - 1, keywords, styler);
 				state = SCE_C_DEFAULT;
 				if (ch == '/' && chNext == '*') {
 					if (styler.SafeGetCharAt(i + 2) == '*')
@@ -198,6 +208,11 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 					i++;
 					ch = chNext;
 					chNext = styler.SafeGetCharAt(i + 1);
+				}
+			} else if (state == SCE_C_UUID) {
+				if (ch == '\r' || ch == '\n' || ch == ')') {
+					styler.ColourTo(i-1, state);
+					state = SCE_C_DEFAULT;
 				}
 			}
 			if (state == SCE_C_DEFAULT) {    // One of the above succeeded
