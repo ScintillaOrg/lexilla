@@ -59,6 +59,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 	int levelCurrent = levelPrev;
 
 	int state = initStyle;
+	int styleBeforeLineStart = initStyle;
 	if (state == SCE_C_STRINGEOL)	// Does not leak onto next line
 		state = SCE_C_DEFAULT;
 	char chPrev = ' ';
@@ -187,8 +188,8 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			} else if (state == SCE_C_COMMENT) {
 				if (ch == '/' && chPrev == '*') {
 					if (((i > styler.GetStartSegment() + 2) || (
-					            (initStyle == SCE_C_COMMENT) &&
-					            (styler.GetStartSegment() == static_cast<unsigned int>(startPos))))) {
+					            (styleBeforeLineStart == SCE_C_COMMENT) &&
+					            (i > styler.GetStartSegment())))) {
 						styler.ColourTo(i, state);
 						state = SCE_C_DEFAULT;
 						if (foldComment)
@@ -198,8 +199,8 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			} else if (state == SCE_C_COMMENTDOC) {
 				if (ch == '/' && chPrev == '*') {
 					if (((i > styler.GetStartSegment() + 2) || (
-					            (initStyle == SCE_C_COMMENTDOC) &&
-					            (styler.GetStartSegment() == static_cast<unsigned int>(startPos))))) {
+					            (styleBeforeLineStart == SCE_C_COMMENTDOC) &&
+					            (i > styler.GetStartSegment())))) {
 						styler.ColourTo(i, state);
 						state = SCE_C_DEFAULT;
 						if (foldComment)
@@ -288,6 +289,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 				lineCurrent++;
 				levelPrev = levelCurrent;
 			}
+			styleBeforeLineStart = state;
 			visibleChars = 0;
 		}
 		if (!isspacechar(ch))
