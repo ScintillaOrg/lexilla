@@ -447,7 +447,7 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		break;
 
 	case SCI_AUTOCSETCANCELATSTART:
-		ac.cancelAtStartPos = wParam;
+		ac.cancelAtStartPos = wParam != 0;
 		break;
 
 	case SCI_AUTOCGETCANCELATSTART:
@@ -458,14 +458,14 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		break;
 
 	case SCI_AUTOCSETCHOOSESINGLE:
-		ac.chooseSingle = wParam;
+		ac.chooseSingle = wParam != 0;
 		break;
 
 	case SCI_AUTOCGETCHOOSESINGLE:
 		return ac.chooseSingle;
 
 	case SCI_AUTOCSETIGNORECASE:
-		ac.ignoreCase = wParam;
+		ac.ignoreCase = wParam != 0;
 		break;
 
 	case SCI_AUTOCGETIGNORECASE:
@@ -477,7 +477,7 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		break;
 
 	case SCI_AUTOCSETAUTOHIDE:
-		ac.autoHide = wParam;
+		ac.autoHide = wParam != 0;
 		break;
 
 	case SCI_AUTOCGETAUTOHIDE:
@@ -529,7 +529,7 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		break;
 
 	case SCI_USEPOPUP:
-		displayPopupMenu = wParam;
+		displayPopupMenu = wParam != 0;
 		break;
 
 #ifdef SCI_LEXER

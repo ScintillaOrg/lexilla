@@ -2930,10 +2930,10 @@ long Editor::FindText(
 	TextToFind *ft = reinterpret_cast<TextToFind *>(lParam);
 	int lengthFound = strlen(ft->lpstrText);
 	int pos = pdoc->FindText(ft->chrg.cpMin, ft->chrg.cpMax, ft->lpstrText,
-	                         wParam & SCFIND_MATCHCASE,
-	                         wParam & SCFIND_WHOLEWORD,
-	                         wParam & SCFIND_WORDSTART,
-	                         wParam & SCFIND_REGEXP,
+	                         (wParam & SCFIND_MATCHCASE) != 0,
+	                         (wParam & SCFIND_WHOLEWORD) != 0,
+	                         (wParam & SCFIND_WORDSTART) != 0,
+	                         (wParam & SCFIND_REGEXP) != 0,
 	                         &lengthFound);
 	if (pos != -1) {
 		ft->chrgText.cpMin = pos;
@@ -2973,17 +2973,17 @@ long Editor::SearchText(
 	int lengthFound = strlen(txt);
 	if (iMessage == SCI_SEARCHNEXT) {
 		pos = pdoc->FindText(searchAnchor, pdoc->Length(), txt,
-		                     wParam & SCFIND_MATCHCASE,
-		                     wParam & SCFIND_WHOLEWORD,
-		                     wParam & SCFIND_WORDSTART,
-		                     wParam & SCFIND_REGEXP,
+		                     (wParam & SCFIND_MATCHCASE) != 0,
+		                     (wParam & SCFIND_WHOLEWORD) != 0,
+		                     (wParam & SCFIND_WORDSTART) != 0,
+		                     (wParam & SCFIND_REGEXP) != 0,
 		                     &lengthFound);
 	} else {
 		pos = pdoc->FindText(searchAnchor, 0, txt,
-		                     wParam & SCFIND_MATCHCASE,
-		                     wParam & SCFIND_WHOLEWORD,
-		                     wParam & SCFIND_WORDSTART,
-		                     wParam & SCFIND_REGEXP,
+		                     (wParam & SCFIND_MATCHCASE) != 0,
+		                     (wParam & SCFIND_WHOLEWORD) != 0,
+		                     (wParam & SCFIND_WORDSTART) != 0,
+		                     (wParam & SCFIND_REGEXP) != 0,
 		                     &lengthFound);
 	}
 
@@ -3001,10 +3001,10 @@ long Editor::SearchText(
 long Editor::SearchInTarget(const char *text, int length) {
 	int lengthFound = length;
 	int pos = pdoc->FindText(targetStart, targetEnd, text,
-	                         searchFlags & SCFIND_MATCHCASE,
-	                         searchFlags & SCFIND_WHOLEWORD,
-	                         searchFlags & SCFIND_WORDSTART,
-	                         searchFlags & SCFIND_REGEXP,
+	                         (searchFlags & SCFIND_MATCHCASE) != 0,
+	                         (searchFlags & SCFIND_WHOLEWORD) != 0,
+	                         (searchFlags & SCFIND_WORDSTART) != 0,
+	                         (searchFlags & SCFIND_REGEXP) != 0,
 	                         &lengthFound);
 	if (pos != -1) {
 		targetStart = pos;
@@ -3979,7 +3979,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_SETREADONLY:
-		pdoc->SetReadOnly(wParam);
+		pdoc->SetReadOnly(wParam != 0);
 		return 1;
 
 	case SCI_GETREADONLY:
@@ -4022,12 +4022,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		}
 
 	case SCI_HIDESELECTION:
-		hideSelection = wParam;
+		hideSelection = wParam != 0;
 		Redraw();
 		break;
 
 	case SCI_FORMATRANGE:
-		return FormatRange(wParam, reinterpret_cast<RangeToFormat *>(lParam));
+		return FormatRange(wParam != 0, reinterpret_cast<RangeToFormat *>(lParam));
 
 	case SCI_GETMARGINLEFT:
 		return vs.leftMarginWidth;
@@ -4092,7 +4092,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return 0;
 
 	case SCI_SETUNDOCOLLECTION:
-		pdoc->SetUndoCollection(wParam);
+		pdoc->SetUndoCollection(wParam != 0);
 		return 0;
 
 	case SCI_GETUNDOCOLLECTION:
@@ -4275,7 +4275,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_SETBUFFEREDDRAW:
-		bufferedDraw = wParam;
+		bufferedDraw = wParam != 0;
 		break;
 
 	case SCI_GETBUFFEREDDRAW:
@@ -4299,7 +4299,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return pdoc->indentInChars;
 
 	case SCI_SETUSETABS:
-		pdoc->useTabs = wParam;
+		pdoc->useTabs = wParam != 0;
 		InvalidateStyleRedraw();
 		break;
 
@@ -4317,14 +4317,14 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return pdoc->GetLineIndentPosition(wParam);
 
 	case SCI_SETTABINDENTS:
-		pdoc->tabIndents = wParam;
+		pdoc->tabIndents = wParam != 0;
 		break;
 
 	case SCI_GETTABINDENTS:
 		return pdoc->tabIndents;
 
 	case SCI_SETBACKSPACEUNINDENTS:
-		pdoc->backspaceUnindents = wParam;
+		pdoc->backspaceUnindents = wParam != 0;
 		break;
 
 	case SCI_GETBACKSPACEUNINDENTS:
@@ -4359,7 +4359,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return pdoc->GetColumn(wParam);
 
 	case SCI_SETHSCROLLBAR :
-		horizontalScrollBarVisible = wParam;
+		horizontalScrollBarVisible = wParam != 0;
 		SetScrollBars();
 		ReconfigureScrollBars();
 		break;
@@ -4368,7 +4368,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return horizontalScrollBarVisible;
 
 	case SCI_SETINDENTATIONGUIDES:
-		vs.viewIndentationGuides = wParam;
+		vs.viewIndentationGuides = wParam != 0;
 		Redraw();
 		break;
 
@@ -4396,7 +4396,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return pdoc->dbcsCodePage;
 
 	case SCI_SETUSEPALETTE:
-		palette.allowRealization = wParam;
+		palette.allowRealization = wParam != 0;
 		InvalidateStyleRedraw();
 		break;
 
@@ -4497,7 +4497,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETMARGINSENSITIVEN:
 		if (ValidMargin(wParam)) {
-			vs.ms[wParam].sensitive = lParam;
+			vs.ms[wParam].sensitive = lParam != 0;
 			InvalidateStyleRedraw();
 		}
 		break;
@@ -4527,19 +4527,19 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 	case SCI_STYLESETBOLD:
 		if (wParam <= STYLE_MAX) {
-			vs.styles[wParam].bold = lParam;
+			vs.styles[wParam].bold = lParam != 0;
 			InvalidateStyleRedraw();
 		}
 		break;
 	case SCI_STYLESETITALIC:
 		if (wParam <= STYLE_MAX) {
-			vs.styles[wParam].italic = lParam;
+			vs.styles[wParam].italic = lParam != 0;
 			InvalidateStyleRedraw();
 		}
 		break;
 	case SCI_STYLESETEOLFILLED:
 		if (wParam <= STYLE_MAX) {
-			vs.styles[wParam].eolFilled = lParam;
+			vs.styles[wParam].eolFilled = lParam != 0;
 			InvalidateStyleRedraw();
 		}
 		break;
@@ -4559,7 +4559,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 	case SCI_STYLESETUNDERLINE:
 		if (wParam <= STYLE_MAX) {
-			vs.styles[wParam].underline = lParam;
+			vs.styles[wParam].underline = lParam != 0;
 			InvalidateStyleRedraw();
 		}
 		break;
@@ -4577,13 +4577,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 	case SCI_STYLESETVISIBLE:
 		if (wParam <= STYLE_MAX) {
-			vs.styles[wParam].visible = lParam;
+			vs.styles[wParam].visible = lParam != 0;
 			InvalidateStyleRedraw();
 		}
 		break;
 	case SCI_STYLESETCHANGEABLE:
 		if (wParam <= STYLE_MAX) {
-			vs.styles[wParam].changeable = lParam;
+			vs.styles[wParam].changeable = lParam != 0;
 			InvalidateStyleRedraw();
 		}
 		break;
@@ -4611,7 +4611,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETCARETLINEVISIBLE:
 		return vs.showCaretLineBackground;
 	case SCI_SETCARETLINEVISIBLE:
-		vs.showCaretLineBackground = wParam;
+		vs.showCaretLineBackground = wParam != 0;
 		InvalidateStyleRedraw();
 		break;
 	case SCI_GETCARETLINEBACK:
@@ -4661,7 +4661,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return cs.GetVisible(wParam);
 
 	case SCI_SETFOLDEXPANDED:
-		if (cs.SetExpanded(wParam, lParam)) {
+		if (cs.SetExpanded(wParam, lParam != 0)) {
 			RedrawSelMargin();
 		}
 		break;
@@ -4708,13 +4708,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return LinesOnScreen();
 
 	case SCI_SETSELFORE:
-		vs.selforeset = wParam;
+		vs.selforeset = wParam != 0;
 		vs.selforeground.desired = ColourDesired(lParam);
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETSELBACK:
-		vs.selbackset = wParam;
+		vs.selbackset = wParam != 0;
 		vs.selbackground.desired = ColourDesired(lParam);
 		InvalidateStyleRedraw();
 		break;
@@ -4844,7 +4844,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return vs.viewEOL;
 
 	case SCI_SETVIEWEOL:
-		vs.viewEOL = wParam;
+		vs.viewEOL = wParam != 0;
 		Redraw();
 		break;
 
@@ -4917,14 +4917,14 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return (selType == selRectangle) ? 1 : 0;
 
 	case SCI_SETOVERTYPE:
-		inOverstrike = wParam;
+		inOverstrike = wParam != 0;
 		break;
 
 	case SCI_GETOVERTYPE:
 		return inOverstrike ? 1 : 0;
 
 	case SCI_SETFOCUS:
-		SetFocusState(wParam);
+		SetFocusState(wParam != 0);
 		break;
 
 	case SCI_GETFOCUS:
@@ -4938,7 +4938,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return errorStatus;
 
 	case SCI_SETMOUSEDOWNCAPTURES:
-		mouseDownCaptures = wParam;
+		mouseDownCaptures = wParam != 0;
 		break;
 
 	case SCI_GETMOUSEDOWNCAPTURES:

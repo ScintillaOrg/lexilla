@@ -272,7 +272,7 @@ static int classifyWordHTVB(unsigned int start, unsigned int end, WordList &keyw
 }
 
 static void classifyWordHTPy(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler, char *prevWord, int inScriptType) {
-	bool wordIsNumber = isdigit(styler[start]);
+	bool wordIsNumber = isdigit(styler[start]) != 0;
 	char s[30 + 1];
 	unsigned int i = 0;
 	for (; i < end - start + 1 && i < 30; i++) {
@@ -296,7 +296,7 @@ static void classifyWordHTPy(unsigned int start, unsigned int end, WordList &key
 // Called when in a PHP word
 static void classifyWordHTPHP(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler) {
 	char chAttr = SCE_HPHP_DEFAULT;
-	bool wordIsNumber = isdigit(styler[start]);
+	bool wordIsNumber = isdigit(styler[start]) != 0;
 	if (wordIsNumber)
 		chAttr = SCE_HPHP_NUMBER;
 	else {
@@ -437,9 +437,9 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 
 	int scriptLanguage = ScriptOfState(state);
 
-	const bool foldHTML = styler.GetPropertyInt("fold.html", 0);
+	const bool foldHTML = styler.GetPropertyInt("fold.html", 0) != 0;
 	const bool fold = foldHTML && styler.GetPropertyInt("fold");
-	const bool foldCompact = styler.GetPropertyInt("fold.compact", 1);
+	const bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;

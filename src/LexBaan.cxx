@@ -34,7 +34,7 @@ static void ColouriseBaanDoc(unsigned int startPos, int length, int initStyle, W
 
 	WordList &keywords = *keywordlists[0];
 	WordList &keywords2 = *keywordlists[1];
-	bool stylingWithinPreprocessor = styler.GetPropertyInt("styling.within.preprocessor");
+	bool stylingWithinPreprocessor = styler.GetPropertyInt("styling.within.preprocessor") != 0;
 
 	if (initStyle == SCE_BAAN_STRINGEOL)	// Does not leak onto next line
 		initStyle = SCE_BAAN_DEFAULT;
@@ -132,8 +132,8 @@ static void ColouriseBaanDoc(unsigned int startPos, int length, int initStyle, W
 
 static void FoldBaanDoc(unsigned int startPos, int length, int initStyle, WordList *[],
                             Accessor &styler) {
-	bool foldComment = styler.GetPropertyInt("fold.comment");
-	bool foldCompact = styler.GetPropertyInt("fold.compact", 1);
+	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
+	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	unsigned int endPos = startPos + length;
 	int visibleChars = 0;
 	int lineCurrent = styler.GetLine(startPos);

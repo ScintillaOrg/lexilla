@@ -58,7 +58,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 	WordList &keywords2 = *keywordlists[1];
 	WordList &keywords3 = *keywordlists[2];
 
-	bool stylingWithinPreprocessor = styler.GetPropertyInt("styling.within.preprocessor");
+	bool stylingWithinPreprocessor = styler.GetPropertyInt("styling.within.preprocessor") != 0;
 
 	// Do not leak onto next line
 	if (initStyle == SCE_C_STRINGEOL)
@@ -262,8 +262,8 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 
 static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordList *[],
                             Accessor &styler) {
-	bool foldComment = styler.GetPropertyInt("fold.comment");
-	bool foldCompact = styler.GetPropertyInt("fold.compact", 1);
+	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
+	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	unsigned int endPos = startPos + length;
 	int visibleChars = 0;
 	int lineCurrent = styler.GetLine(startPos);

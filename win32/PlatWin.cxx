@@ -880,7 +880,7 @@ static LARGE_INTEGER frequency;
 
 ElapsedTime::ElapsedTime() {
 	if (!initialisedET) {
-		usePerformanceCounter = ::QueryPerformanceFrequency(&frequency);
+		usePerformanceCounter = ::QueryPerformanceFrequency(&frequency) != 0;
 		initialisedET = true;
 	}
 	if (usePerformanceCounter) {
@@ -946,7 +946,7 @@ void Platform::DebugDisplay(const char *s) {
 }
 
 bool Platform::IsKeyDown(int key) {
-	return ::GetKeyState(key) & 0x80000000;
+	return (::GetKeyState(key) & 0x80000000) != 0;
 }
 
 long Platform::SendScintilla(WindowID w, unsigned int msg, unsigned long wParam, long lParam) {
@@ -954,7 +954,7 @@ long Platform::SendScintilla(WindowID w, unsigned int msg, unsigned long wParam,
 }
 
 bool Platform::IsDBCSLeadByte(int codePage, char ch) {
-	return ::IsDBCSLeadByteEx(codePage, ch);
+	return ::IsDBCSLeadByteEx(codePage, ch) != 0;
 }
 
 // These are utility functions not really tied to a platform

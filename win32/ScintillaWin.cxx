@@ -577,7 +577,9 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		//	Platform::IsKeyDown(VK_CONTROL),
 		//	Platform::IsKeyDown(VK_MENU));
 		ButtonDown(Point::FromLong(lParam), ::GetTickCount(),
-			wParam & MK_SHIFT, wParam & MK_CONTROL, Platform::IsKeyDown(VK_MENU));
+			(wParam & MK_SHIFT) != 0, 
+			(wParam & MK_CONTROL) != 0, 
+			Platform::IsKeyDown(VK_MENU));
 		::SetFocus(MainHWND());
 		break;
 
@@ -586,7 +588,9 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		break;
 
 	case WM_LBUTTONUP:
-		ButtonUp(Point::FromLong(lParam), ::GetTickCount(), wParam & MK_CONTROL);
+		ButtonUp(Point::FromLong(lParam), 
+			::GetTickCount(), 
+			(wParam & MK_CONTROL) != 0);
 		break;
 
 	case WM_SETCURSOR:
@@ -970,7 +974,7 @@ bool ScintillaWin::CanPaste() {
 	if (::IsClipboardFormatAvailable(CF_TEXT))
 		return true;
 	if (IsUnicodeMode())
-		return ::IsClipboardFormatAvailable(CF_UNICODETEXT);
+		return ::IsClipboardFormatAvailable(CF_UNICODETEXT) != 0;
 	return false;
 }
 
@@ -979,7 +983,7 @@ void ScintillaWin::Paste() {
 	int selStart = SelectionStart();
 	ClearSelection();
 	::OpenClipboard(MainHWND());
-	bool isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect);
+	bool isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect) != 0;
 	HGLOBAL hmemUSelection = 0;
 	if (IsUnicodeMode()) {
 		hmemUSelection = ::GetClipboardData(CF_UNICODETEXT);

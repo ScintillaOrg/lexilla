@@ -898,7 +898,7 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 			}
 			// Check for "\n\0" ending to string indicating that selection is rectangular
 #if PLAT_GTK_WIN32
-			bool isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect);
+			bool isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect) != 0;
 #else
 			bool isRectangular = ((selection_data->length > 1) &&
 			                      (ptr[selection_data->length - 1] == 0 && ptr[selection_data->length - 2] == '\n'));
@@ -925,7 +925,7 @@ void ScintillaGTK::ReceivedDrop(GtkSelectionData *selection_data) {
 			char *ptr = reinterpret_cast<char *>(selection_data->data);
 			// 3rd argument is false because the deletion of the moved data is handle by GetSelection
 #if PLAT_GTK_WIN32
-			bool isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect);
+			bool isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect) != 0;
 #else
 			bool isRectangular = ((selection_data->length > 1) &&
 			                      (ptr[selection_data->length - 1] == 0 && ptr[selection_data->length - 2] == '\n'));
@@ -1071,7 +1071,7 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 		return FALSE;
 	}
 
-	bool ctrl = event->state & GDK_CONTROL_MASK;
+	bool ctrl = (event->state & GDK_CONTROL_MASK) != 0;
 
 	gtk_widget_grab_focus(PWidget(wMain));
 	if (event->button == 1) {
@@ -1082,9 +1082,9 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 		// Instead of sending literal modifiers use control instead of alt
 		// This is because all the window managers seem to grab alt + click for moving
 		ButtonDown(pt, event->time,
-		                    event->state & GDK_SHIFT_MASK,
-		                    event->state & GDK_CONTROL_MASK,
-		                    event->state & GDK_CONTROL_MASK);
+		                    (event->state & GDK_SHIFT_MASK) != 0,
+		                    (event->state & GDK_CONTROL_MASK) != 0,
+		                    (event->state & GDK_CONTROL_MASK) != 0);
 	} else if (event->button == 2) {
 		// Grab the primary selection if it exists
 		Position pos = PositionFromLocation(pt);
@@ -1143,7 +1143,7 @@ gint ScintillaGTK::MouseRelease(GtkWidget *widget, GdkEventButton *event) {
 			// If mouse released on scroll bar then the position is relative to the
 			// scrollbar, not the drawing window so just repeat the most recent point.
 			pt = sciThis->ptMouseLast;
-		sciThis->ButtonUp(pt, event->time, event->state & 4);
+		sciThis->ButtonUp(pt, event->time, (event->state & 4) != 0);
 	}
 	return FALSE;
 }
@@ -1306,9 +1306,9 @@ gint ScintillaGTK::KeyPress(GtkWidget *widget, GdkEventKey *event) {
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	//Platform::DebugPrintf("SC-key: %d %x [%s]\n", 
 	//	event->keyval, event->state, (event->length > 0) ? event->string : "empty");
-	bool shift = event->state & GDK_SHIFT_MASK;
-	bool ctrl = event->state & GDK_CONTROL_MASK;
-	bool alt = event->state & GDK_MOD1_MASK;
+	bool shift = (event->state & GDK_SHIFT_MASK) != 0;
+	bool ctrl = (event->state & GDK_CONTROL_MASK) != 0;
+	bool alt = (event->state & GDK_MOD1_MASK) != 0;
 	int key = event->keyval;
 	if (ctrl && (key < 128))
 		key = toupper(key);
@@ -1322,7 +1322,7 @@ gint ScintillaGTK::KeyPress(GtkWidget *widget, GdkEventKey *event) {
 		key = KeyTranslate(key);
 
 	bool consumed = false;
-	int added = sciThis->KeyDown(key, shift, ctrl, alt, &consumed);
+	bool added = sciThis->KeyDown(key, shift, ctrl, alt, &consumed) != 0;
 	if (!consumed)
 		consumed = added;
 	//Platform::DebugPrintf("SK-key: %d %x %x\n",event->keyval, event->state, consumed);

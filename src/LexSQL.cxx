@@ -43,7 +43,7 @@ static void ColouriseSQLDoc(unsigned int startPos, int length,
 
 	styler.StartAt(startPos);
 
-	bool fold = styler.GetPropertyInt("fold");
+	bool fold = styler.GetPropertyInt("fold") != 0;
 	int lineCurrent = styler.GetLine(startPos);
 	int spaceFlags = 0;
 

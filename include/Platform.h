@@ -447,7 +447,7 @@ public:
 
 // Shut up annoying Visual C++ warnings:
 #ifdef _MSC_VER
-#pragma warning(disable: 4244 4309 4514 4710 4800)
+#pragma warning(disable: 4244 4309 4514 4710)
 #endif
 
 #endif
