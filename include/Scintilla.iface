@@ -1363,6 +1363,12 @@ fun void SetXCaretPolicy=2402(int caretPolicy, int caretSlop)
 # The exclusion zone is given in lines.
 fun void SetYCaretPolicy=2403(int caretPolicy, int caretSlop)
 
+# Set printing to line wrapped (true) or not line wrapped.
+set void SetPrintWraps=2406(bool wraps,)
+
+# Is printing line wrapped.
+get bool GetPrintWraps=2407(,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 

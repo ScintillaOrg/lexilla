@@ -285,6 +285,7 @@ Editor::Editor() {
 
 	printMagnification = 0;
 	printColourMode = SC_PRINT_NORMAL;
+	printWraps = true;
 	cursorMode = SC_CURSORNORMAL;
 	controlCharSymbol = 0;	/* Draw the control characters */
 
@@ -2411,7 +2412,7 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 	// Determining width must hapen after fonts have been realised in Refresh
 	int lineNumberWidth = 0;
 	if (lineNumberIndex >= 0) {
-		lineNumberWidth = surface->WidthText(vsPrint.styles[STYLE_LINENUMBER].font,
+		lineNumberWidth = surfaceMeasure->WidthText(vsPrint.styles[STYLE_LINENUMBER].font,
 		                                     "99999" lineNumberPrintSpace, 5 + strlen(lineNumberPrintSpace));
 		vsPrint.ms[lineNumberIndex].width = lineNumberWidth;
 	}
@@ -2420,7 +2421,7 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 	int linePrintLast = linePrintStart + (pfr->rc.bottom - pfr->rc.top) / vsPrint.lineHeight - 1;
 	if (linePrintLast < linePrintStart)
 		linePrintLast = linePrintStart;
-	int linePrintMax = pdoc->LineFromPosition(pfr->chrg.cpMax - 1);
+	int linePrintMax = pdoc->LineFromPosition(pfr->chrg.cpMax);
 	if (linePrintLast > linePrintMax)
 		linePrintLast = linePrintMax;
 	//Platform::DebugPrintf("Formatting lines=[%0d,%0d,%0d] top=%0d bottom=%0d line=%0d %0d\n",
@@ -2440,6 +2441,9 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 
 	int nPrintPos = pfr->chrg.cpMin;
 	int visibleLine = 0;
+	int widthPrint = pfr->rc.Width() - lineNumberWidth;
+	if (!printWraps)
+		widthPrint = LineLayout::wrapWidthInfinite;
 
 	while (lineDoc <= linePrintLast && ypos < pfr->rc.bottom) {
 
@@ -2452,7 +2456,7 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 		// Copy this line and its styles from the document into local arrays
 		// and determine the x position at which each character starts.
 		LineLayout ll(8000);
-		LayoutLine(lineDoc, surfaceMeasure, vsPrint, &ll, pfr->rc.Width() - lineNumberWidth);
+		LayoutLine(lineDoc, surfaceMeasure, vsPrint, &ll, widthPrint);
 
 		ll.selStart = -1;
 		ll.selEnd = -1;
@@ -4960,6 +4964,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETPRINTCOLOURMODE:
 		return printColourMode;
+
+	case SCI_SETPRINTWRAPS:
+		printWraps = wParam != 0;
+		break;
+
+	case SCI_GETPRINTWRAPS:
+		return printWraps;
 
 	case SCI_GETSTYLEAT:
 		if (static_cast<short>(wParam) >= pdoc->Length())
