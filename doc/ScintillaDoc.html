@@ -79,6 +79,7 @@ SCI_GETREADONLY
 SCI_GETTEXTRANGE(&lt;unused&gt;, TEXTRANGE *tr)
 SCI_ADDTEXT(int length, char *s)
 SCI_ADDSTYLEDTEXT(int length, cell *s)
+SCI_APPENDTEXT(int length, char *s)
 SCI_INSERTTEXT(int pos, char *text)
 SCI_CLEARALL
 SCI_CLEARDOCUMENTSTYLE
@@ -120,6 +121,10 @@ SCI_GETSTYLEBITS
 	When wanting to completely restyle the document, for example after choosing a lexer,
 	the SCI_CLEARDOCUMENTSTYLE can be used to clear all styling information and
 	reset the folding state.
+    </p>
+    <p>
+	SCI_APPENDTEXT appends a string to the end of the document
+	without changing the selection range.
     </p>
 <pre>
 SCI_SETTARGETSTART(int pos)
@@ -1053,6 +1058,7 @@ SCI_MARKERDELETEHANDLE(int handle)
 	Markers can be set to pixmaps using the SCI_MARKERDEFINEPIXMAP
 	method. The XPM format is used for the pixmap and it is limited to
 	to pixmaps that use one character per pixel. The data should be null terminated.
+	Pixmaps use the SC_MARK_PIXMAP marker symbol.
     </p>
     <h3>
        Indicators
