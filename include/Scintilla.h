@@ -446,6 +446,11 @@ struct TextToFind {
 	CharacterRange chrgText;
 };
 
+#ifdef PLATFORM_H
+
+// This structure is used in printing and requires some of the graphics types 
+// from Platform.h.  Not needed by most client code.
+
 struct RangeToFormat {
 	SurfaceID hdc;
 	SurfaceID hdcTarget;
@@ -454,8 +459,13 @@ struct RangeToFormat {
 	CharacterRange chrg;
 };
 
+#endif
+
 struct NotifyHeader {
-	WindowID hwndFrom;
+    // hwndFrom is really an environment specifc window handle or pointer
+    // but most clients of Scintilla.h do not have this type visible.
+	//WindowID hwndFrom;
+	void *hwndFrom; 
 	unsigned int idFrom;
 	unsigned int code;
 };
