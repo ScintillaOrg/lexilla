@@ -60,7 +60,7 @@ public:
 	bool GetNext(char **key, char **val);
 
 private:
-	// copy-value semantics not implemented	
+	// copy-value semantics not implemented
 	PropSet(const PropSet &copy);
 	void operator=(const PropSet &assign);
 };
@@ -76,9 +76,11 @@ public:
 	int len;
 	bool onlyLineEnds;	///< Delimited by any white space or only line ends
 	bool sorted;
+	bool sortedNoCase;
 	int starts[256];
 	WordList(bool onlyLineEnds_ = false) :
-		words(0), wordsNoCase(0), list(0), len(0), onlyLineEnds(onlyLineEnds_), sorted(false) {}
+		words(0), wordsNoCase(0), list(0), len(0), onlyLineEnds(onlyLineEnds_),
+		sorted(false), sortedNoCase(false) {}
 	~WordList() { Clear(); }
 	operator bool() { return len ? true : false; }
 	char *operator[](int ind) { return words[ind]; }
