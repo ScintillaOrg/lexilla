@@ -34,8 +34,8 @@ ALL:	$(COMPONENT) $(LEXCOMPONENT) ScintillaWinS.o WindowAccessor.o
 clean:
 	del /q *.exe *.o *.obj *.dll *.res *.map
 
-depend: *.cxx ../src/*.cxx 
-	$(CC) -MM $(CXXFLAGS) *.cxx ../src/*.cxx >depend
+deps:
+	$(CC) -MM $(CXXFLAGS) *.cxx ../src/*.cxx >deps.mak
 
 LEXOBJS	= LexAda.o LexAVE.o LexConf.o LexCPP.o LexHTML.o LexLua.o \
 	LexOthers.o LexPascal.o LexPerl.o LexPython.o LexSQL.o LexVB.o
@@ -55,8 +55,8 @@ LOBJS	= ScintillaWinL.o ScintillaBaseL.o Editor.o Document.o \
 $(LEXCOMPONENT): $(LOBJS)
 	$(DLLWRAP) --target i386-mingw32 -o $@ $(LOBJS) $(LDFLAGS) -s --relocatable
 
-# Automatically generate dependencies for most files with "make depend"
-include depend
+# Automatically generate dependencies for most files with "make deps"
+include deps.mak
 
 # These dependencies are maintained by hand as they do not use the default output name
 ScintillaBaseL.o: ScintillaBase.cxx Platform.h Scintilla.h SciLexer.h \
