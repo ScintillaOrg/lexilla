@@ -11,6 +11,10 @@
 #ifndef SCINTILLA_H
 #define SCINTILLA_H
 
+#if LCCWIN
+typedef BOOL bool;
+#endif
+
 #if PLAT_WIN
 // Return false on failure:
 bool Scintilla_RegisterClasses(void *hInstance);
