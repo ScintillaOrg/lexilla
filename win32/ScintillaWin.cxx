@@ -120,8 +120,8 @@ class ScintillaWin :
 		    HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
 	virtual void StartDrag();
-	virtual LRESULT WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam);
-	virtual LRESULT DefWndProc(UINT iMessage, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT WndProc(unsigned int iMessage, unsigned long wParam, long lParam);
+	virtual LRESULT DefWndProc(unsigned int iMessage, unsigned long wParam, long lParam);
 	virtual void SetTicking(bool on);
 	virtual void SetMouseCapture(bool on);
 	virtual bool HaveMouseCapture();
@@ -258,7 +258,7 @@ static int InputCodePage() {
 	return atoi(sCodePage);
 }
 
-LRESULT ScintillaWin::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
+LRESULT ScintillaWin::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 	switch (iMessage) {
 
 	case WM_CREATE:
@@ -537,23 +537,23 @@ LRESULT ScintillaWin::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
 
 	case WM_ERASEBKGND:
-        return 1;   // Avoid any background erasure as whole window painted. 
+        	return 1;   // Avoid any background erasure as whole window painted. 
 
         // These are not handled in Scintilla and its faster to dispatch them here.
         // Also moves time out to here so profile doesn't count lots of empty message calls.
-    case WM_MOVE:
-    case WM_MOUSEACTIVATE:
+    	case WM_MOVE:
+    	case WM_MOUSEACTIVATE:
 	case WM_NCHITTEST:
-    case WM_NCCALCSIZE:
+    	case WM_NCCALCSIZE:
 	case WM_NCPAINT:
-    case WM_NCMOUSEMOVE:
-    case WM_NCLBUTTONDOWN:
-    case WM_CAPTURECHANGED:
-    case WM_IME_SETCONTEXT:
-    case WM_IME_NOTIFY:
-    case WM_SYSCOMMAND:
-    case WM_WINDOWPOSCHANGING:
-    case WM_WINDOWPOSCHANGED:
+    	case WM_NCMOUSEMOVE:
+    	case WM_NCLBUTTONDOWN:
+    	case WM_CAPTURECHANGED:
+    	case WM_IME_SETCONTEXT:
+    	case WM_IME_NOTIFY:
+    	case WM_SYSCOMMAND:
+    	case WM_WINDOWPOSCHANGING:
+    	case WM_WINDOWPOSCHANGED:
 		return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
 
 	default:
@@ -562,7 +562,7 @@ LRESULT ScintillaWin::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	return 0l;
 }
 
-LRESULT ScintillaWin::DefWndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
+long ScintillaWin::DefWndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 	return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
 }
 
@@ -645,13 +645,13 @@ bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
 
 void ScintillaWin::NotifyChange() {
 	::SendMessage(GetParent(wMain.GetID()), WM_COMMAND,
-	        MAKELONG(wMain.GetDlgCtrlID(), EN_CHANGE), 
+	        MAKELONG(wMain.GetDlgCtrlID(), SCEN_CHANGE), 
 		reinterpret_cast<LPARAM>(wMain.GetID()));
 }
 
 void ScintillaWin::NotifyFocus(bool focus) {
 	::SendMessage(GetParent(wMain.GetID()), WM_COMMAND,
-	        MAKELONG(wMain.GetDlgCtrlID(), focus ? EN_SETFOCUS : EN_KILLFOCUS), 
+	        MAKELONG(wMain.GetDlgCtrlID(), focus ? SCEN_SETFOCUS : SCEN_KILLFOCUS), 
 		reinterpret_cast<LPARAM>(wMain.GetID()));
 }
 
@@ -1507,12 +1507,12 @@ LRESULT PASCAL ScintillaWin::CTWndProc(
 			              reinterpret_cast<LONG>(pCreate->lpCreateParams));
 			return 0;
 		} else {
-            return ::DefWindowProc(hWnd, iMessage, wParam, lParam);
+            		return ::DefWindowProc(hWnd, iMessage, wParam, lParam);
 		}
 	} else {
 		if (iMessage == WM_DESTROY) {
 			SetWindowLong(hWnd, 0, 0);
-            return ::DefWindowProc(hWnd, iMessage, wParam, lParam);
+            		return ::DefWindowProc(hWnd, iMessage, wParam, lParam);
 		} else if (iMessage == WM_PAINT) {
 			PAINTSTRUCT ps;
 			::BeginPaint(hWnd, &ps);
@@ -1523,7 +1523,7 @@ LRESULT PASCAL ScintillaWin::CTWndProc(
 			::EndPaint(hWnd, &ps);
 			return 0;
 		} else {
-            return ::DefWindowProc(hWnd, iMessage, wParam, lParam);
+            		return ::DefWindowProc(hWnd, iMessage, wParam, lParam);
 		}
 	}
 }

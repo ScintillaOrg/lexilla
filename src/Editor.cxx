@@ -11,6 +11,14 @@
 #include "Platform.h"
 
 #include "Scintilla.h"
+
+#if PLAT_WX || PLAT_GTK
+#include "WinDefs.h"
+#define MAKELONG(a, b) ((a) | ((b) << 16))
+#define LOWORD(x) (x & 0xffff)
+#define HIWORD(x) (x >> 16)
+#endif
+
 #include "ContractionState.h"
 #include "SVector.h"
 #include "CellBuffer.h"
@@ -1281,7 +1289,7 @@ Colour InvertedLight(Colour orig) {
 // This is mostly copied from the Paint method but with some things omitted
 // such as the margin markers, line numbers, selection and caret
 // Should be merged back into a combined Draw method.
-long Editor::FormatRange(bool draw, FORMATRANGE *pfr) {
+long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 	if (!pfr)
 		return 0;
 
@@ -1614,7 +1622,7 @@ void Editor::NotifyChar(char ch) {
 		char txt[2];
 		txt[0] = ch;
 		txt[1] = '\0';
-		NotifyMacroRecord(EM_REPLACESEL, 0, (LPARAM) txt);
+		NotifyMacroRecord(SCI_REPLACESEL, 0, reinterpret_cast<long>(txt));
 	}
 #endif
 }
@@ -1819,15 +1827,15 @@ void Editor::NotifyDeleted(Document *, void *) {
 }
 
 #ifdef MACRO_SUPPORT
-void Editor::NotifyMacroRecord(UINT iMessage, WPARAM wParam, LPARAM lParam) {
+void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long lParam) {
 
 	// Enumerates all macroable messages
 	switch (iMessage) {
-	case WM_CUT:
-	case WM_COPY:
-	case WM_PASTE:
-	case WM_CLEAR:
-	case EM_REPLACESEL:
+	case SCI_CUT:
+	case SCI_COPY:
+	case SCI_PASTE:
+	case SCI_CLEAR:
+	case SCI_REPLACESEL:
 	case SCI_ADDTEXT:
 	case SCI_INSERTTEXT:
 	case SCI_CLEARALL:
@@ -1969,7 +1977,7 @@ void Editor::LineTranspose() {
 void Editor::CancelModes() {
 }
 
-int Editor::KeyCommand(UINT iMessage) {
+int Editor::KeyCommand(unsigned int iMessage) {
 	Point pt = LocationFromPosition(currentPos);
 
 	switch (iMessage) {
@@ -2249,12 +2257,12 @@ void Editor::Indent(bool forwards) {
 	}
 }
 
-long Editor::FindText(UINT iMessage, WPARAM wParam, LPARAM lParam) {
-	FINDTEXTEX *ft = reinterpret_cast<FINDTEXTEX *>(lParam);
+long Editor::FindText(unsigned int iMessage, unsigned long wParam, long lParam) {
+	TextToFind *ft = reinterpret_cast<TextToFind *>(lParam);
 	int pos = pdoc->FindText(ft->chrg.cpMin, ft->chrg.cpMax, ft->lpstrText,
-			wParam & FR_MATCHCASE, wParam & FR_WHOLEWORD);
+			wParam & SCFIND_MATCHCASE, wParam & SCFIND_WHOLEWORD);
 	if (pos != -1) {
-		if (iMessage == EM_FINDTEXTEX) {
+		if (iMessage != EM_FINDTEXT) {
 			ft->chrgText.cpMin = pos;
 			ft->chrgText.cpMax = pos + strlen(ft->lpstrText);
 		}
@@ -2278,18 +2286,18 @@ void Editor::SearchAnchor() {
 // Accepts both SCI_SEARCHNEXT and SCI_SEARCHPREV.
 // wParam contains search modes : ORed FR_MATCHCASE and FR_WHOLEWORD.
 // lParam contains the text to search for.
-long Editor::SearchText(UINT iMessage, WPARAM wParam, LPARAM lParam) {
+long Editor::SearchText(unsigned int iMessage, unsigned long wParam, long lParam) {
 	const char *txt = reinterpret_cast<char *>(lParam);
 	int pos;
 
 	if (iMessage == SCI_SEARCHNEXT) {
 		pos = pdoc->FindText(searchAnchor, pdoc->Length(), txt, 
-		                     wParam & FR_MATCHCASE,
-		                     wParam & FR_WHOLEWORD);
+		                     wParam & SCFIND_MATCHCASE,
+		                     wParam & SCFIND_WHOLEWORD);
 	} else {
 		pos = pdoc->FindText(searchAnchor, 0, txt, 
-		                     wParam & FR_MATCHCASE,
-		                     wParam & FR_WHOLEWORD);
+		                     wParam & SCFIND_MATCHCASE,
+		                     wParam & SCFIND_WHOLEWORD);
 	}
 
 	if (pos != -1) {
@@ -2940,12 +2948,12 @@ void Editor::EnsureLineVisible(int line) {
 	}
 }
 
-static bool ValidMargin(WPARAM wParam) {
+static bool ValidMargin(unsigned long wParam) {
 	return wParam < ViewStyle::margins;
 }
 
 
-LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
+long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 	//Platform::DebugPrintf("S start wnd proc %d %d %d\n",iMessage, wParam, lParam);
 
 	// Optional macro recording hook
@@ -2957,6 +2965,7 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	switch (iMessage) {
 
 	case WM_GETTEXT:
+	case SCI_GETTEXT:
 		{
 			if (lParam == 0)
 				return 0;
@@ -2969,6 +2978,7 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		}
 
 	case WM_SETTEXT:
+	case SCI_SETTEXT:
 		{
 			if (lParam == 0)
 				return FALSE;
@@ -2979,33 +2989,35 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		}
 
 	case WM_GETTEXTLENGTH:
+	case SCI_GETTEXTLENGTH:
 		return pdoc->Length();
 
-	case WM_NOTIFY:
-		//Platform::DebugPrintf("S notify %d %d\n", wParam, lParam);
-		break;
-
 	case WM_CUT:
+	case SCI_CUT:
 		Cut();
 		SetLastXChosen();
 		break;
 
 	case WM_COPY:
+	case SCI_COPY:
 		Copy();
 		break;
 
 	case WM_PASTE:
+	case SCI_PASTE:
 		Paste();
 		SetLastXChosen();
 		EnsureCaretVisible();
 		break;
 
 	case WM_CLEAR:
+	case SCI_CLEAR:
 		Clear();
 		SetLastXChosen();
 		break;
 
 	case WM_UNDO:
+	case SCI_UNDO:
 		Undo();
 		SetLastXChosen();
 		break;
@@ -3061,6 +3073,7 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		//			EM_DISPLAYBAND
 
 	case EM_CANUNDO:
+	case SCI_CANUNDO:
 		return pdoc->CanUndo() ? TRUE : FALSE;
 
 	case EM_UNDO:
@@ -3069,10 +3082,12 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case EM_EMPTYUNDOBUFFER:
+	case SCI_EMPTYUNDOBUFFER:
 		pdoc->DeleteUndoHistory();
 		return 0;
 
 	case EM_GETFIRSTVISIBLELINE:
+	case SCI_GETFIRSTVISIBLELINE:
 		return topLine;
 
 	case EM_GETLINE: {
@@ -3081,7 +3096,7 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 			int lineStart = pdoc->LineStart(wParam);
 			int lineEnd = pdoc->LineStart(wParam + 1);
 			char *ptr = reinterpret_cast<char *>(lParam);
-			WORD *pBufSize = reinterpret_cast<WORD *>(lParam);
+			short *pBufSize = reinterpret_cast<short *>(lParam);
 			if (*pBufSize < lineEnd - lineStart) {
 				ptr[0] = '\0'; 	// If no characters copied have to put a NUL into buffer
 				return 0;
@@ -3092,13 +3107,27 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 			return iPlace;
 		}
 
+	case SCI_GETLINE: {
+			if (lParam == 0)
+				return 0;
+			int lineStart = pdoc->LineStart(wParam);
+			int lineEnd = pdoc->LineStart(wParam + 1);
+			char *ptr = reinterpret_cast<char *>(lParam);
+			int iPlace = 0;
+			for (int iChar = lineStart; iChar < lineEnd; iChar++)
+				ptr[iPlace++] = pdoc->CharAt(iChar);
+			return iPlace;
+		}
+
 	case EM_GETLINECOUNT:
+	case SCI_GETLINECOUNT:
 		if (pdoc->LinesTotal() == 0)
 			return 1;
 		else
 			return pdoc->LinesTotal();
 
 	case EM_GETMODIFY:
+	case SCI_GETMODIFY:
 		return !pdoc->IsSavePoint();
 
 	case EM_GETRECT:
@@ -3117,13 +3146,15 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	case EM_EXGETSEL: {
 			if (lParam == 0)
 				return 0;
-			CHARRANGE *pCR = reinterpret_cast<CHARRANGE *>(lParam);
+			CharacterRange *pCR = reinterpret_cast<CharacterRange *>(lParam);
 			pCR->cpMin = SelectionStart();
 			pCR->cpMax = SelectionEnd();
 		}
 		break;
 
-	case EM_SETSEL: {
+	case EM_SETSEL: 
+	case SCI_SETSEL: 
+		{
 			int nStart = static_cast<int>(wParam);
 			int nEnd = static_cast<int>(lParam);
 			if (nEnd < 0)
@@ -3139,7 +3170,7 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	case EM_EXSETSEL: {
 			if (lParam == 0)
 				return 0;
-			CHARRANGE *pCR = reinterpret_cast<CHARRANGE *>(lParam);
+			CharacterRange *pCR = reinterpret_cast<CharacterRange *>(lParam);
 			selType = selStream;
 			if (pCR->cpMax == -1) {
 				SetSelection(pCR->cpMin, pdoc->Length());
@@ -3150,7 +3181,8 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 			return pdoc->LineFromPosition(SelectionStart());
 		}
 
-	case EM_GETSELTEXT: {
+	case EM_GETSELTEXT:
+	case SCI_GETSELTEXT: {
 			if (lParam == 0)
 				return 0;
 			char *ptr = reinterpret_cast<char *>(lParam);
@@ -3176,7 +3208,13 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 			lParam = SelectionStart(); 	// Not specified, but probably OK
 		return pdoc->LineFromPosition(lParam);
 
+	case SCI_LINEFROMPOSITION:
+		if (static_cast<int>(wParam) < 0)
+			return 0;
+		return pdoc->LineFromPosition(wParam);
+
 	case EM_LINEINDEX:
+	case SCI_POSITIONFROMLINE:
 		if (static_cast<int>(wParam) < 0)
 			wParam = pdoc->LineFromPosition(SelectionStart());
 		if (wParam == 0)
@@ -3209,7 +3247,9 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 			return 0;
 		return pdoc->LineStart(wParam + 1) - pdoc->LineStart(wParam);
 
-	case EM_REPLACESEL: {
+	case EM_REPLACESEL: 
+	case SCI_REPLACESEL: 
+		{
 			if (lParam == 0)
 				return 0;
 			pdoc->BeginUndoAction();
@@ -3223,15 +3263,18 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case EM_LINESCROLL:
+	case SCI_LINESCROLL:
 		ScrollTo(topLine + lParam);
 		HorizontalScrollTo(xOffset + wParam * vs.spaceWidth);
 		return TRUE;
 
 	case EM_SCROLLCARET:
+	case SCI_SCROLLCARET:
 		EnsureCaretVisible();
 		break;
 
 	case EM_SETREADONLY:
+	case SCI_SETREADONLY:
 		pdoc->SetReadOnly(wParam);
 		return TRUE;
 
@@ -3263,16 +3306,35 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 			return 0;
 		}
 
+	case SCI_POINTXFROMPOSITION:
+		if (lParam < 0) {
+			return 0;
+		} else {
+			Point pt = LocationFromPosition(lParam);
+			return pt.x;
+		}
+
+	case SCI_POINTYFROMPOSITION:
+		if (lParam < 0) {
+			return 0;
+		} else {
+			Point pt = LocationFromPosition(lParam);
+			return pt.y; 
+		}
+
 	case EM_FINDTEXT:
 		return FindText(iMessage, wParam, lParam);
 
 	case EM_FINDTEXTEX:
+	case SCI_FINDTEXT:
 		return FindText(iMessage, wParam, lParam);
 
-	case EM_GETTEXTRANGE: {
+	case EM_GETTEXTRANGE: 
+	case SCI_GETTEXTRANGE: 
+		{
 			if (lParam == 0)
 				return 0;
-			TEXTRANGE *tr = reinterpret_cast<TEXTRANGE *>(lParam);
+			TextRange *tr = reinterpret_cast<TextRange *>(lParam);
 			int cpMax = tr->chrg.cpMax;
 			if (cpMax == -1)
 				cpMax = pdoc->Length();
@@ -3284,10 +3346,14 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		}
 
 	case EM_SELECTIONTYPE:
+#ifdef SEL_EMPTY
 		if (currentPos == anchor)
 			return SEL_EMPTY;
 		else
 			return SEL_TEXT;
+#else
+		return 0;
+#endif
 
 	case EM_HIDESELECTION:
 		hideSelection = wParam;
@@ -3295,12 +3361,20 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case EM_FORMATRANGE:
-		return FormatRange(wParam, reinterpret_cast<FORMATRANGE *>(lParam));
+	case SCI_FORMATRANGE:
+		return FormatRange(wParam, reinterpret_cast<RangeToFormat *>(lParam));
 
 	case EM_GETMARGINS:
 		return MAKELONG(vs.leftMarginWidth, vs.rightMarginWidth);
+	
+	case SCI_GETMARGINLEFT:
+		return vs.leftMarginWidth;
+	
+	case SCI_GETMARGINRIGHT:
+		return vs.rightMarginWidth;
 		
 	case EM_SETMARGINS:
+#ifdef EC_LEFTMARGIN
 		if (wParam & EC_LEFTMARGIN) {
 			vs.leftMarginWidth = LOWORD(lParam);
 		}
@@ -3311,6 +3385,17 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 			vs.leftMarginWidth = vs.aveCharWidth / 2;
 			vs.rightMarginWidth = vs.aveCharWidth / 2;
 		}
+		InvalidateStyleRedraw();
+#endif
+		break;
+	
+	case SCI_SETMARGINLEFT:
+		vs.leftMarginWidth = lParam;
+		InvalidateStyleRedraw();
+		break;
+	
+	case SCI_SETMARGINRIGHT:
+		vs.rightMarginWidth = lParam;
 		InvalidateStyleRedraw();
 		break;
 	
@@ -3457,7 +3542,7 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	case SCI_GETSTYLEDTEXT: {
 			if (lParam == 0)
 				return 0;
-			TEXTRANGE *tr = reinterpret_cast<TEXTRANGE *>(lParam);
+			TextRange *tr = reinterpret_cast<TextRange *>(lParam);
 			int iPlace = 0;
 			for (int iChar = tr->chrg.cpMin; iChar < tr->chrg.cpMax; iChar++) {
 				tr->lpstrText[iPlace++] = pdoc->CharAt(iChar);
@@ -4050,7 +4135,7 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		break;
 		
 	case SCI_GETDOCPOINTER:
-		return reinterpret_cast<LRESULT>(pdoc);
+		return reinterpret_cast<long>(pdoc);
 
 	case SCI_SETDOCPOINTER:
 		SetDocPointer(reinterpret_cast<Document *>(lParam));
@@ -4059,7 +4144,7 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	case SCI_CREATEDOCUMENT: {
 			Document *doc = new Document();
 			doc->AddRef();
-			return reinterpret_cast<LRESULT>(doc);
+			return reinterpret_cast<long>(doc);
 		}
 		
 	case SCI_ADDREFDOCUMENT:

@@ -9,10 +9,6 @@
 // Compile-time configuration options
 #define MACRO_SUPPORT 1  // Comment out to remove macro hooks
 
-#if PLAT_WX || PLAT_GTK
-#include "WinDefs.h"
-#endif
-
 #if PLAT_WIN
 #ifdef STATIC_BUILD
 void Scintilla_RegisterClasses(HINSTANCE hInstance);
@@ -371,8 +367,8 @@ void Scintilla_RegisterClasses(HINSTANCE hInstance);
 
 // Optional module for macro recording
 #ifdef MACRO_SUPPORT
-typedef void (tMacroRecorder)(UINT iMessage, WPARAM wParam, LPARAM lParam, 
-                              void *userData);
+typedef void (tMacroRecorder)(unsigned int iMessage, unsigned long wParam, 
+	long lParam, void *userData);
 #define SCI_STARTRECORD SCI_OPTIONAL_START + 1
 #define SCI_STOPRECORD SCI_OPTIONAL_START + 2
 #endif
@@ -421,10 +417,49 @@ typedef void (tMacroRecorder)(UINT iMessage, WPARAM wParam, LPARAM lParam,
 #define SCN_MARGINCLICK 2010
 #define SCN_NEEDSHOWN 2011
 
+// For compatibility, these go through the COMMAND notification rather than NOTIFY
+#define SCEN_CHANGE 768
+#define SCEN_SETFOCUS 512
+#define SCEN_KILLFOCUS 256
+
 // End of definitions that could be generated from Scintilla.iface
 
+// These structures are defined to be exactly the same shape as the Win32
+// CHARRANGE, TEXTRANGE, FINDTEXTEX, FORMATRANGE, and NMHDR structs.
+// So older code that treats Scintilla as a RichEdit will work.
+
+struct CharacterRange {
+	long cpMin;
+	long cpMax;
+};
+
+struct TextRange {
+	CharacterRange chrg;
+	char *lpstrText;
+};
+
+struct TextToFind {
+	CharacterRange chrg;
+	char *lpstrText;
+	CharacterRange chrgText;
+};
+
+struct RangeToFormat {
+	SurfaceID hdc;
+	SurfaceID hdcTarget;
+	PRectangle rc;
+	PRectangle rcPage;
+	CharacterRange chrg;
+};
+
+struct NotifyHeader {
+	WindowID hwndFrom;
+	unsigned int idFrom;
+	unsigned int code;
+};
+
 struct SCNotification {
-	NMHDR nmhdr;
+	NotifyHeader nmhdr;
 	int position;			// SCN_STYLENEEDED, SCN_MODIFIED
 	int ch;					// SCN_CHARADDED, SCN_KEY
 	int modifiers;			// SCN_KEY
@@ -444,6 +479,75 @@ struct SCNotification {
 };
 
 #define SC_MASK_FOLDERS ((1<<SC_MARKNUM_FOLDER) | (1<<SC_MARKNUM_FOLDEROPEN))
+
+// Moving from WM_* and EM_*
+#define SCI_CANPASTE	5000
+#define SCI_CANUNDO	5001
+#define SCI_POINTXFROMPOSITION	5034
+#define SCI_POINTYFROMPOSITION	5035
+#define SCI_EMPTYUNDOBUFFER	5003
+#define SCI_GETSEL	5004
+#define SCI_SETSEL	5005
+#define SCI_LINEFROMPOSITION	5006
+#define SCI_FINDTEXT	5036
+#define SCI_FORMATRANGE	5037
+#define SCI_GETFIRSTVISIBLELINE	5007
+#define SCI_GETLINE	5028
+#define SCI_GETLINECOUNT	5008
+//#define SCI_GETMARGINS	(212)
+#define SCI_GETMARGINLEFT	5030
+#define SCI_GETMARGINRIGHT 5031
+#define SCI_SETMARGINLEFT	5032
+#define SCI_SETMARGINRIGHT 5033
+#define SCI_GETMODIFY	5009
+#define SCI_GETSELTEXT	5010
+#define SCI_GETTEXTRANGE	5011
+#define SCI_HIDESELECTION	5012
+#define SCI_POSITIONFROMLINE	5013
+#define SCI_LINESCROLL	5014
+#define SCI_REPLACESEL	5015
+#define SCI_SCROLLCARET	5016
+#define SCI_SETMARGINS	5017
+#define SCI_SETREADONLY	5018
+#define SCI_UNDO	5019
+
+#define SCI_NULL	5020
+#define SCI_CLEAR	5021
+#define SCI_COPY	5022
+#define SCI_CUT	5023
+#define SCI_GETTEXT	5024
+#define SCI_GETTEXTLENGTH	5025
+#define SCI_PASTE	5026
+#define SCI_SETTEXT	5027
+
+#define SCFIND_MATCHCASE	4
+#define SCFIND_WHOLEWORD 2
+#define SCFIND_DOWN 1
+
+// Symbolic key codes
+
+#define SCK_DOWN 40
+#define SCK_UP 38
+#define SCK_LEFT 37
+#define SCK_RIGHT 39
+#define SCK_HOME 36
+#define SCK_END 35
+#define SCK_PRIOR 33
+#define SCK_NEXT 34
+#define SCK_DELETE 46
+#define SCK_INSERT 45
+#define SCK_ESCAPE 27
+#define SCK_BACK 8
+#define SCK_TAB 9
+#define SCK_RETURN 13
+#define SCK_ADD 107
+#define SCK_SUBTRACT 109
+#define SCK_DIVIDE 111
+
+#define SCMOD_SHIFT 16
+#define SCMOD_CTRL 8
+#define SCMOD_ALT 2
+
 
 // Deprecation section listing all API features that are deprecated and will
 // will be removed completely in a future version.

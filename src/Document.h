@@ -165,7 +165,7 @@ public:
 	int NextWordStart(int pos, int delta);
 	int Length() { return cb.Length(); }
 	long FindText(int minPos, int maxPos, const char *s, bool caseSensitive, bool word);
-	long FindText(WORD iMessage,WPARAM wParam,LPARAM lParam);
+	long FindText(int iMessage, unsigned long wParam, long lParam);
 	int LinesTotal();
 	
 	void ChangeCase(Range r, bool makeUpperCase);

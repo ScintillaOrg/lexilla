@@ -76,7 +76,7 @@ void ScintillaBase::Command(int cmdId) {
 		break;
 
 	case idcmdUndo:
-		WndProc(WM_UNDO, 0, 0);
+		WndProc(SCI_UNDO, 0, 0);
 		break;
 
 	case idcmdRedo:
@@ -84,19 +84,19 @@ void ScintillaBase::Command(int cmdId) {
 		break;
 
 	case idcmdCut:
-		WndProc(WM_CUT, 0, 0);
+		WndProc(SCI_CUT, 0, 0);
 		break;
 
 	case idcmdCopy:
-		WndProc(WM_COPY, 0, 0);
+		WndProc(SCI_COPY, 0, 0);
 		break;
 
 	case idcmdPaste:
-		WndProc(WM_PASTE, 0, 0);
+		WndProc(SCI_PASTE, 0, 0);
 		break;
 
 	case idcmdDelete:
-		WndProc(WM_CLEAR, 0, 0);
+		WndProc(SCI_CLEAR, 0, 0);
 		break;
 
 	case idcmdSelectAll:
@@ -105,7 +105,7 @@ void ScintillaBase::Command(int cmdId) {
 	}
 }
 
-int ScintillaBase::KeyCommand(UINT iMessage) {
+int ScintillaBase::KeyCommand(unsigned int iMessage) {
 	// Most key commands cancel autocompletion mode
 	if (ac.Active()) {
 		switch (iMessage) {
@@ -273,7 +273,7 @@ void ScintillaBase::ContextMenu(Point pt) {
 	AddToPopUp("");
 	AddToPopUp("Cut", idcmdCut, currentPos != anchor);
 	AddToPopUp("Copy", idcmdCopy, currentPos != anchor);
-	AddToPopUp("Paste", idcmdPaste, WndProc(EM_CANPASTE, 0, 0));
+	AddToPopUp("Paste", idcmdPaste, WndProc(SCI_CANPASTE, 0, 0));
 	AddToPopUp("Delete", idcmdDelete, currentPos != anchor);
 	AddToPopUp("");
 	AddToPopUp("Select All", idcmdSelectAll);
@@ -315,8 +315,8 @@ void ScintillaBase::NotifyStyleToNeeded(int endStyleNeeded) {
 #ifdef SCI_LEXER
 	if (lexLanguage != SCLEX_CONTAINER) {
 		int endStyled = Platform::SendScintilla(wMain.GetID(), SCI_GETENDSTYLED, 0, 0);
-		int lineEndStyled = Platform::SendScintilla(wMain.GetID(), EM_LINEFROMCHAR, endStyled, 0);
-		endStyled = Platform::SendScintilla(wMain.GetID(), EM_LINEINDEX, lineEndStyled, 0);
+		int lineEndStyled = Platform::SendScintilla(wMain.GetID(), SCI_LINEFROMPOSITION, endStyled, 0);
+		endStyled = Platform::SendScintilla(wMain.GetID(), SCI_POSITIONFROMLINE, lineEndStyled, 0);
 		Colourise(endStyled, endStyleNeeded);
 		return;
 	}
@@ -324,7 +324,7 @@ void ScintillaBase::NotifyStyleToNeeded(int endStyleNeeded) {
 	Editor::NotifyStyleToNeeded(endStyleNeeded);
 }
 
-LRESULT ScintillaBase::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
+long ScintillaBase::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 	switch (iMessage) {
 	case SCI_AUTOCSHOW:
 		AutoCompleteStart(wParam, reinterpret_cast<const char *>(lParam));

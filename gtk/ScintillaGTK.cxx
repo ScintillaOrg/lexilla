@@ -59,9 +59,9 @@ private:
 	virtual void Finalise();
 	virtual void StartDrag();
 public:	// Public for scintilla_send_message
-	virtual LRESULT WndProc(UINT iMessage,WPARAM wParam,LPARAM lParam);
+	virtual long WndProc(unsigned int iMessage, unsigned long wParam, long lParam);
 private:
-	virtual LRESULT DefWndProc(UINT iMessage,WPARAM wParam,LPARAM lParam);
+	virtual long DefWndProc(unsigned int iMessage, unsigned long wParam, long lParam);
 	virtual void SetTicking(bool on);
 	virtual void SetMouseCapture(bool on);
 	virtual bool HaveMouseCapture();
@@ -320,7 +320,7 @@ void ScintillaGTK::StartDrag() {
 		reinterpret_cast<GdkEvent *>(&evbtn));
 }
 
-LRESULT ScintillaGTK::WndProc(UINT iMessage,WPARAM wParam,LPARAM lParam) {
+long ScintillaGTK::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 	switch (iMessage) {
 
 	case SCI_GRABFOCUS:
@@ -333,7 +333,7 @@ LRESULT ScintillaGTK::WndProc(UINT iMessage,WPARAM wParam,LPARAM lParam) {
 	return 0l;
 }
 
-LRESULT ScintillaGTK::DefWndProc(UINT, WPARAM, LPARAM) {
+long ScintillaGTK::DefWndProc(unsigned int, unsigned long, long) {
 	return 0;
 }
 
@@ -464,12 +464,12 @@ void ScintillaGTK::ReconfigureScrollBars() {
 
 void ScintillaGTK::NotifyChange() {
 	gtk_signal_emit(GTK_OBJECT(sci), scintilla_signals[COMMAND_SIGNAL],
-                	MAKELONG(ctrlID, EN_CHANGE), wMain.GetID());
+                	MAKELONG(ctrlID, SCEN_CHANGE), wMain.GetID());
 }
 
 void ScintillaGTK::NotifyFocus(bool focus) {
 	gtk_signal_emit(GTK_OBJECT(sci), scintilla_signals[COMMAND_SIGNAL],
-                	MAKELONG(ctrlID, focus ? EN_SETFOCUS : EN_KILLFOCUS), wMain.GetID());
+                	MAKELONG(ctrlID, focus ? SCEN_SETFOCUS : SCEN_KILLFOCUS), wMain.GetID());
 }
 
 void ScintillaGTK::NotifyParent(SCNotification scn) {
@@ -718,7 +718,7 @@ gint ScintillaGTK::MoveResize(GtkWidget *, GtkAllocation *allocation, ScintillaG
 }
 
 gint ScintillaGTK::Press(GtkWidget *, GdkEventButton *event, ScintillaGTK *sciThis) {
-	//Platform::DebugPrintf("Press %x time=%d state = %x button = %x\n",sciThis,event->time, event->state, event->button);
+	Platform::DebugPrintf("Press %x time=%d state = %x button = %x\n",sciThis,event->time, event->state, event->button);
 	// Do not use GTK+ double click events as Scintilla has its own double click detection
 	if (event->type != GDK_BUTTON_PRESS) 
 		return FALSE;
@@ -821,18 +821,36 @@ gint ScintillaGTK::Motion(GtkWidget *, GdkEventMotion *event, ScintillaGTK *sciT
 // Map the keypad keys to their equivalent functions
 static int KeyTranslate(int keyIn) {
 	switch (keyIn) {
-		case GDK_ISO_Left_Tab:	return GDK_Tab;
-		case GDK_KP_Down:		return GDK_Down;
-		case GDK_KP_Up:			return GDK_Up;
-		case GDK_KP_Left:		return GDK_Left;
-		case GDK_KP_Right:		return GDK_Right;
-		case GDK_KP_Home:		return GDK_Home;
-		case GDK_KP_End:		return GDK_End;
-		case GDK_KP_Page_Up:	return GDK_Page_Up;
-		case GDK_KP_Page_Down:	return GDK_Page_Down;
-		case GDK_KP_Delete:		return GDK_Delete;
-		case GDK_KP_Insert:		return GDK_Insert;
-		case GDK_KP_Enter:		return GDK_Return;
+		case GDK_ISO_Left_Tab:	return SCK_TAB;
+		case GDK_KP_Down:	return SCK_DOWN;
+		case GDK_KP_Up:		return SCK_UP;
+		case GDK_KP_Left:	return SCK_LEFT;
+		case GDK_KP_Right:	return SCK_RIGHT;
+		case GDK_KP_Home:	return SCK_HOME;
+		case GDK_KP_End:	return SCK_END;
+		case GDK_KP_Page_Up:	return SCK_PRIOR;
+		case GDK_KP_Page_Down:	return SCK_NEXT;
+		case GDK_KP_Delete:	return SCK_DELETE;
+		case GDK_KP_Insert:	return SCK_INSERT;
+		case GDK_KP_Enter:	return SCK_RETURN;
+			
+		case GDK_Down:		return SCK_DOWN;
+		case GDK_Up:		return SCK_UP;
+		case GDK_Left:		return SCK_LEFT;
+		case GDK_Right:		return SCK_RIGHT;
+		case GDK_Home:		return SCK_HOME;
+		case GDK_End:		return SCK_END;
+		case GDK_Page_Up:	return SCK_PRIOR;
+		case GDK_Page_Down:	return SCK_NEXT;
+		case GDK_Delete:	return SCK_DELETE;
+		case GDK_Insert:	return SCK_INSERT;
+		case GDK_Escape:	return SCK_ESCAPE;
+		case GDK_BackSpace:	return SCK_BACK;
+		case GDK_Tab:		return SCK_TAB;
+		case GDK_Return:	return SCK_RETURN;
+		case GDK_KP_Add:	return SCK_ADD;
+		case GDK_KP_Subtract:	return SCK_SUBTRACT;
+		case GDK_KP_Divide:	return SCK_DIVIDE;
 		default:				return keyIn;
 	}
 }

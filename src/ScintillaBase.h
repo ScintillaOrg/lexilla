@@ -48,7 +48,7 @@ protected:
 	virtual void AddCharUTF(char *s, unsigned int len);
 	void Command(int cmdId);
 	virtual void CancelModes();
-	virtual int KeyCommand(UINT iMessage);
+	virtual int KeyCommand(unsigned int iMessage);
 	
 	void AutoCompleteStart(int lenEntered, const char *list);
 	void AutoCompleteCancel();
@@ -67,7 +67,7 @@ protected:
 	virtual void NotifyStyleToNeeded(int endStyleNeeded);
 public:
 	// Public so scintilla_send_message can use it
-	virtual LRESULT WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam);
+	virtual long WndProc(unsigned int iMessage, unsigned long wParam, long lParam);
 };
 
 #endif

@@ -196,7 +196,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart, 
 		PRectangle rcLine, LineLayout &ll);
 	void Paint(Surface *surfaceWindow, PRectangle rcArea);
-	long FormatRange(bool draw, FORMATRANGE *pfr);
+	long FormatRange(bool draw, RangeToFormat *pfr);
 
 	virtual void SetVerticalScrollPos() = 0;
 	virtual void SetHorizontalScrollPos() = 0;
@@ -209,7 +209,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual void AddCharUTF(char *s, unsigned int len);
 	void ClearSelection();
 	void ClearAll();
-    void ClearDocumentStyle();
+    	void ClearDocumentStyle();
 	void Cut();
 	void PasteRectangular(int pos, const char *ptr, int len);
 	virtual void Copy() = 0;
@@ -242,14 +242,14 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	
 #ifdef MACRO_SUPPORT
-	void NotifyMacroRecord(UINT iMessage, WPARAM wParam, LPARAM lParam);
+	void NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long lParam);
 #endif
 
 	void PageMove(int direction, bool extend=false);
 	void ChangeCaseOfSelection(bool makeUpperCase);
 	void LineTranspose();
-    virtual void CancelModes();
-	virtual int KeyCommand(UINT iMessage);
+    	virtual void CancelModes();
+	virtual int KeyCommand(unsigned int iMessage);
 	virtual int KeyDefault(int /* key */, int /*modifiers*/);
 	int KeyDown(int key, bool shift, bool ctrl, bool alt);
 
@@ -258,9 +258,9 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	void Indent(bool forwards);
 
-	long FindText(UINT iMessage,WPARAM wParam,LPARAM lParam);
+	long FindText(unsigned int iMessage, unsigned long wParam, long lParam);
 	void SearchAnchor();
-	long SearchText(UINT iMessage,WPARAM wParam,LPARAM lParam);
+	long SearchText(unsigned int iMessage, unsigned long wParam, long lParam);
 	void GoToLine(int lineNo);
 
 	char *CopyRange(int start, int end);
@@ -294,11 +294,11 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void ToggleContraction(int line);
 	void EnsureLineVisible(int line);
 
-	virtual LRESULT DefWndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) = 0;
+	virtual long DefWndProc(unsigned int iMessage, unsigned long wParam, long lParam) = 0;
 	
 public:
 	// Public so scintilla_send_message can use it
-	virtual LRESULT WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam);
+	virtual long WndProc(unsigned int iMessage, unsigned long wParam, long lParam);
 	// Public so scintilla_set_id can use it
 	int ctrlID;	
 };

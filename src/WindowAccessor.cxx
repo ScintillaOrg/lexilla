@@ -36,7 +36,7 @@ bool WindowAccessor::InternalIsLeadByte(char ch) {
 
 void WindowAccessor::Fill(int position) {
 	if (lenDoc == -1)
-		lenDoc = Platform::SendScintilla(id, WM_GETTEXTLENGTH, 0, 0);
+		lenDoc = Platform::SendScintilla(id, SCI_GETTEXTLENGTH, 0, 0);
 	startPos = position - slopSize;
 	if (startPos + bufferSize > lenDoc)
 		startPos = lenDoc - bufferSize;
@@ -46,8 +46,8 @@ void WindowAccessor::Fill(int position) {
 	if (endPos > lenDoc)
 		endPos = lenDoc;
 
-	TEXTRANGE tr = {{startPos, endPos}, buf};
-	Platform::SendScintilla(id, EM_GETTEXTRANGE, 0, reinterpret_cast<LPARAM>(&tr));
+	TextRange tr = {{startPos, endPos}, buf};
+	Platform::SendScintilla(id, SCI_GETTEXTRANGE, 0, reinterpret_cast<long>(&tr));
 }
 
 char WindowAccessor::StyleAt(int position) {
@@ -56,11 +56,11 @@ char WindowAccessor::StyleAt(int position) {
 }
 
 int WindowAccessor::GetLine(int position) {
-	return Platform::SendScintilla(id, EM_LINEFROMCHAR, position, 0);
+	return Platform::SendScintilla(id, SCI_LINEFROMPOSITION, position, 0);
 }
 
 int WindowAccessor::LineStart(int line) {
-	return Platform::SendScintilla(id, EM_LINEINDEX, line, 0);
+	return Platform::SendScintilla(id, SCI_POSITIONFROMLINE, line, 0);
 }
 
 int WindowAccessor::LevelAt(int line) {
@@ -69,7 +69,7 @@ int WindowAccessor::LevelAt(int line) {
 
 int WindowAccessor::Length() { 
 	if (lenDoc == -1) 
-		lenDoc = Platform::SendScintilla(id, WM_GETTEXTLENGTH, 0, 0);
+		lenDoc = Platform::SendScintilla(id, SCI_GETTEXTLENGTH, 0, 0);
 	return lenDoc; 
 }
 
@@ -122,7 +122,7 @@ void WindowAccessor::Flush() {
 	lenDoc = -1;
 	if (validLen > 0) {
 		Platform::SendScintilla(id, SCI_SETSTYLINGEX, validLen, 
-			reinterpret_cast<LPARAM>(styleBuf));
+			reinterpret_cast<long>(styleBuf));
 		validLen = 0;
 	}
 }
