@@ -16,6 +16,7 @@
 #include "SVector.h"
 #include "CellBuffer.h"
 #include "Document.h"
+#include "PosRegExp.h"
 
 // This is ASCII specific but is safe with chars >= 0x80
 inline bool isspacechar(unsigned char ch) {
@@ -742,70 +743,118 @@ bool Document::IsWordAt(int start, int end) {
 	return IsWordStartAt(start) && IsWordEndAt(end);
 }
 
+char Document::DocCharAt(int pos, void *param) {
+	return reinterpret_cast<Document*>(param)->CharAt(pos);
+}
+
 // Find text in document, supporting both forward and backward
 // searches (just pass minPos > maxPos to do a backward search)
 // Has not been tested with backwards DBCS searches yet.
 long Document::FindText(int minPos, int maxPos, const char *s,
-                        bool caseSensitive, bool word, bool wordStart) {
-	bool forward = minPos <= maxPos;
-	int increment = forward ? 1 : -1;
+                        bool caseSensitive, bool word, bool wordStart, bool regExp,
+			int *length) {
+	if (regExp) {
+		char *pat = new char[strlen(s) + 4];
+		if (!pat)
+			return -1;
+		
+		strcpy(pat, "/");
+		int startPos;
+		int endPos;
 
-	// Range endpoints should not be inside DBCS characters, but just in case, move them.
-	int startPos = MovePositionOutsideChar(minPos, increment, false);
-	int endPos = MovePositionOutsideChar(maxPos, increment, false);
-
-	// Compute actual search ranges needed
-	int lengthFind = strlen(s);
-	int endSearch = endPos;
-	if (startPos <= endPos) {
-		endSearch = endPos - lengthFind + 1;
-	}
-	//Platform::DebugPrintf("Find %d %d %s %d\n", startPos, endPos, ft->lpstrText, lengthFind);
-	char firstChar = s[0];
-	if (!caseSensitive)
-		firstChar = static_cast<char>(toupper(firstChar));
-	int pos = startPos;
-	while (forward ? (pos < endSearch) : (pos >= endSearch)) {
-		char ch = CharAt(pos);
-		if (caseSensitive) {
-			if (ch == firstChar) {
-				bool found = true;
-				for (int posMatch = 1; posMatch < lengthFind && found; posMatch++) {
-					ch = CharAt(pos + posMatch);
-					if (ch != s[posMatch])
-						found = false;
-				}
-				if (found) {
-					if ((!word && !wordStart) ||
-					        word && IsWordAt(pos, pos + lengthFind) ||
-					        wordStart && IsWordStartAt(pos))
-						return pos;
-				}
-			}
+		if (minPos <= maxPos) {
+			startPos = minPos;
+			endPos = maxPos;
 		} else {
-			if (toupper(ch) == firstChar) {
-				bool found = true;
-				for (int posMatch = 1; posMatch < lengthFind && found; posMatch++) {
-					ch = CharAt(pos + posMatch);
-					if (toupper(ch) != toupper(s[posMatch]))
-						found = false;
+			startPos = maxPos;
+			endPos = minPos;
+		}
+
+		// Range endpoints should not be inside DBCS characters, but just in case, move them.
+		startPos = MovePositionOutsideChar(startPos, 1, false);
+		endPos = MovePositionOutsideChar(endPos, 1, false);
+
+		strcat(pat, s);
+		strcat(pat, "/");
+		PosRegExp re;
+		if (!caseSensitive)
+			strcat(pat, "i");
+		if (!re.SetExpr(pat)) {
+			delete []pat;
+			return -1;
+		}
+		re.param = this;
+		re.CharAt = DocCharAt;
+		SMatches matches;
+		if (!re.Parse(startPos, 0, endPos, &matches)) {
+			delete []pat;
+			return -1;
+		}
+		*length = matches.e[0] - matches.s[0];
+		delete []pat;
+		return matches.s[0];
+	} else {
+				
+		bool forward = minPos <= maxPos;
+		int increment = forward ? 1 : -1;
+	
+		// Range endpoints should not be inside DBCS characters, but just in case, move them.
+		int startPos = MovePositionOutsideChar(minPos, increment, false);
+		int endPos = MovePositionOutsideChar(maxPos, increment, false);
+	
+		// Compute actual search ranges needed
+		int lengthFind = strlen(s);
+		int endSearch = endPos;
+		if (startPos <= endPos) {
+			endSearch = endPos - lengthFind + 1;
+		}
+		//Platform::DebugPrintf("Find %d %d %s %d\n", startPos, endPos, ft->lpstrText, lengthFind);
+		char firstChar = s[0];
+		if (!caseSensitive)
+			firstChar = static_cast<char>(toupper(firstChar));
+		int pos = startPos;
+		while (forward ? (pos < endSearch) : (pos >= endSearch)) {
+			char ch = CharAt(pos);
+			if (caseSensitive) {
+				if (ch == firstChar) {
+					bool found = true;
+					for (int posMatch = 1; posMatch < lengthFind && found; posMatch++) {
+						ch = CharAt(pos + posMatch);
+						if (ch != s[posMatch])
+							found = false;
+					}
+					if (found) {
+						if ((!word && !wordStart) ||
+							word && IsWordAt(pos, pos + lengthFind) ||
+							wordStart && IsWordStartAt(pos))
+							return pos;
+					}
 				}
-				if (found) {
-					if ((!word && !wordStart) ||
-					        word && IsWordAt(pos, pos + lengthFind) ||
-					        wordStart && IsWordStartAt(pos))
-						return pos;
+			} else {
+				if (toupper(ch) == firstChar) {
+					bool found = true;
+					for (int posMatch = 1; posMatch < lengthFind && found; posMatch++) {
+						ch = CharAt(pos + posMatch);
+						if (toupper(ch) != toupper(s[posMatch]))
+							found = false;
+					}
+					if (found) {
+						if ((!word && !wordStart) ||
+							word && IsWordAt(pos, pos + lengthFind) ||
+							wordStart && IsWordStartAt(pos))
+							return pos;
+					}
 				}
 			}
-		}
-		pos += increment;
-		if (dbcsCodePage) {
-			// Ensure trying to match from start of character
-			pos = MovePositionOutsideChar(pos, increment, false);
+			pos += increment;
+			if (dbcsCodePage) {
+				// Ensure trying to match from start of character
+				pos = MovePositionOutsideChar(pos, increment, false);
+			}
 		}
 	}
 	//Platform::DebugPrintf("Not found\n");
-	return - 1;
+	return -1;
 }
 
 int Document::LinesTotal() {

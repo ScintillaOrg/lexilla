@@ -2458,13 +2458,17 @@ void Editor::Indent(bool forwards) {
 
 long Editor::FindText(unsigned int iMessage, unsigned long wParam, long lParam) {
 	TextToFind *ft = reinterpret_cast<TextToFind *>(lParam);
+	int lengthFound = strlen(ft->lpstrText);
 	int pos = pdoc->FindText(ft->chrg.cpMin, ft->chrg.cpMax, ft->lpstrText,
-	                         wParam & SCFIND_MATCHCASE, wParam & SCFIND_WHOLEWORD,
-	                         wParam & SCFIND_WORDSTART);
+		wParam & SCFIND_MATCHCASE, 
+		wParam & SCFIND_WHOLEWORD,
+		wParam & SCFIND_WORDSTART,
+		wParam & SCFIND_REGEXP,
+		&lengthFound);
 	if (pos != -1) {
 		if (iMessage != EM_FINDTEXT) {
 			ft->chrgText.cpMin = pos;
-			ft->chrgText.cpMax = pos + strlen(ft->lpstrText);
+			ft->chrgText.cpMax = pos + lengthFound;
 		}
 	}
 	return pos;
@@ -2489,21 +2493,25 @@ void Editor::SearchAnchor() {
 long Editor::SearchText(unsigned int iMessage, unsigned long wParam, long lParam) {
 	const char *txt = reinterpret_cast<char *>(lParam);
 	int pos;
-
+	int lengthFound = strlen(txt);
 	if (iMessage == SCI_SEARCHNEXT) {
 		pos = pdoc->FindText(searchAnchor, pdoc->Length(), txt,
-		                     wParam & SCFIND_MATCHCASE,
-		                     wParam & SCFIND_WHOLEWORD,
-		                     wParam & SCFIND_WORDSTART);
+					wParam & SCFIND_MATCHCASE,
+					wParam & SCFIND_WHOLEWORD,
+					wParam & SCFIND_WORDSTART,
+					wParam & SCFIND_REGEXP,
+					&lengthFound);
 	} else {
 		pos = pdoc->FindText(searchAnchor, 0, txt,
-		                     wParam & SCFIND_MATCHCASE,
-		                     wParam & SCFIND_WHOLEWORD,
-		                     wParam & SCFIND_WORDSTART);
+					wParam & SCFIND_MATCHCASE,
+					wParam & SCFIND_WHOLEWORD,
+					wParam & SCFIND_WORDSTART,
+					wParam & SCFIND_REGEXP,
+					&lengthFound);
 	}
 
 	if (pos != -1) {
-		SetSelection(pos, pos + strlen(txt));
+		SetSelection(pos, pos + lengthFound);
 	}
 
 	return pos;

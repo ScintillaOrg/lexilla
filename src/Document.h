@@ -173,7 +173,7 @@ public:
 	int NextWordStart(int pos, int delta);
 	int Length() { return cb.Length(); }
 	long FindText(int minPos, int maxPos, const char *s, 
-		bool caseSensitive, bool word, bool wordStart);
+		bool caseSensitive, bool word, bool wordStart, bool regExp, int *length);
 	long FindText(int iMessage, unsigned long wParam, long lParam);
 	int LinesTotal();
 	
@@ -195,6 +195,8 @@ public:
 	bool RemoveWatcher(DocWatcher *watcher, void *userData);
 	const WatcherWithUserData *GetWatchers() const { return watchers; }
 	int GetLenWatchers() const { return lenWatchers; }
+	
+	static char DocCharAt(int pos, void *param);
 	
 	bool IsWordPartSeparator(char ch);
 	int WordPartLeft(int pos);

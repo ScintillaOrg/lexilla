@@ -107,6 +107,7 @@ SOBJS=\
 	$(DIR_O)\KeyMap.obj \
 	$(DIR_O)\LineMarker.obj \
 	$(DIR_O)\PlatGTK.obj \
+	$(DIR_O)\PosRegExp.obj \
 	$(DIR_O)\ScintillaBase.obj \
 	$(DIR_O)\ScintillaGTK.obj \
 	$(DIR_O)\Style.obj \
@@ -138,6 +139,7 @@ LOBJS=\
 	$(DIR_O)\KeyWords.obj \
 	$(DIR_O)\LineMarker.obj \
 	$(DIR_O)\PlatGTK.obj \
+	$(DIR_O)\PosRegExp.obj \
 	$(DIR_O)\PropSet.obj \
 	$(DIR_O)\ScintillaBaseL.obj \
 	$(DIR_O)\ScintillaGTKL.obj \
@@ -203,8 +205,8 @@ $(DIR_O)\CellBuffer.obj: ..\src\CellBuffer.cxx ..\include\Platform.h ..\include\
 
 $(DIR_O)\ContractionState.obj: ..\src\ContractionState.cxx ..\include\Platform.h ..\src\ContractionState.h
 
-$(DIR_O)\Document.obj: ..\src\Document.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\CellBuffer.h \
- ..\src\Document.h
+$(DIR_O)\Document.obj: ..\src\Document.cxx ..\include\Platform.h ..\include\Scintilla.h ..\include\PosRegExp.h \
+ ..\src\CellBuffer.h ..\src\Document.h
 
 $(DIR_O)\DocumentAccessor.obj: ..\src\DocumentAccessor.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\src\DocumentAccessor.h ..\include\Scintilla.h
 
@@ -252,6 +254,8 @@ $(DIR_O)\LexVB.obj: ..\src\LexVB.cxx ..\include\Platform.h ..\include\PropSet.h 
 $(DIR_O)\LineMarker.obj: ..\src\LineMarker.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\LineMarker.h
 
 $(DIR_O)\PlatWin.obj: PlatWin.cxx ..\include\Platform.h PlatformRes.h ..\src\UniConversion.h
+
+$(DIR_O)\PosRegExp.obj: ..\src\PosRegExp.cxx ..\include\PosRegExp.h
 
 $(DIR_O)\PropSet.obj: ..\src\PropSet.cxx ..\include\Platform.h ..\include\PropSet.h
 
