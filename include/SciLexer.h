@@ -29,6 +29,7 @@
 #define SCLEX_LATEX 14
 #define SCLEX_LUA 15
 #define SCLEX_DIFF 16
+#define SCLEX_CONF 17
 #define SCE_P_DEFAULT 0
 #define SCE_P_COMMENTLINE 1
 #define SCE_P_NUMBER 2
