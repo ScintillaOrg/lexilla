@@ -70,6 +70,7 @@
 ## Client code should ignore definitions containing types it does not understand, except
 ## for possibly #defining the constants
 
+## Line numbers and positions start at 0.
 ## String arguments may contain NUL ('\0') characters where the calls provide a length
 ## argument and retrieve NUL characters. All retrieved strings except for those retrieved
 ## by GetLine also have a NUL appended but client code should calculate the size that
@@ -88,7 +89,7 @@ val SCI_START=2000
 val SCI_OPTIONAL_START=3000
 val SCI_LEXER_START=4000
 
-# Add text to the document.
+# Add text to the document at current position.
 fun void AddText=2001(int length, string text)
 
 # Add array of cells to document.
@@ -103,7 +104,7 @@ fun void ClearAll=2004(,)
 # Set all style bytes to 0, remove all folding information.
 fun void ClearDocumentStyle=2005(,)
 
-# The number of characters in the document.
+# Returns the number of characters in the document.
 get int GetLength=2006(,)
 
 # Returns the character byte at the position.
@@ -2465,6 +2466,7 @@ val SCE_AU3_STRING=7
 val SCE_AU3_OPERATOR=8
 val SCE_AU3_VARIABLE=9
 val SCE_AU3_SENT=10
+val SCE_AU3_PREPROCESSOR=11
 # Lexical states for SCLEX_APDL
 lex APDL=SCLEX_APDL SCE_APDL_
 val SCE_APDL_DEFAULT=0
