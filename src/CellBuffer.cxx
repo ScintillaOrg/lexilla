@@ -460,7 +460,7 @@ void UndoHistory::AppendAction(actionType at, int position, char *data, int leng
 				// Not allowed to coalesce if this set
 				currentAction++;
 			} else if (at == removeAction) {
-				if (lengthData == 2) {
+				if ((lengthData == 1) || (lengthData == 2)){
 					if ((position + lengthData * 2) == actPrevious.position) {
 						; // Backspace -> OK
 					} else if (position == actPrevious.position) {

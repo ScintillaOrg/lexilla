@@ -19,7 +19,7 @@
 
 // This is ASCII specific but is safe with chars >= 0x80
 inline bool isspacechar(unsigned char ch) {
-    return (ch == ' ') || ((ch >= 0x09) && (ch <= 0x0d));
+	return (ch == ' ') || ((ch >= 0x09) && (ch <= 0x0d));
 }
 
 Document::Document() {
@@ -75,27 +75,27 @@ void Document::SetSavePoint() {
 	NotifySavePoint(true);
 }
 
-int Document::AddMark(int line, int markerNum) { 
-	int prev = cb.AddMark(line, markerNum); 
+int Document::AddMark(int line, int markerNum) {
+	int prev = cb.AddMark(line, markerNum);
 	DocModification mh(SC_MOD_CHANGEMARKER, LineStart(line), 0, 0, 0);
 	NotifyModified(mh);
 	return prev;
 }
 
-void Document::DeleteMark(int line, int markerNum) { 
-	cb.DeleteMark(line, markerNum); 
+void Document::DeleteMark(int line, int markerNum) {
+	cb.DeleteMark(line, markerNum);
 	DocModification mh(SC_MOD_CHANGEMARKER, LineStart(line), 0, 0, 0);
 	NotifyModified(mh);
 }
 
-void Document::DeleteMarkFromHandle(int markerHandle) { 
-	cb.DeleteMarkFromHandle(markerHandle); 
+void Document::DeleteMarkFromHandle(int markerHandle) {
+	cb.DeleteMarkFromHandle(markerHandle);
 	DocModification mh(SC_MOD_CHANGEMARKER, 0, 0, 0, 0);
 	NotifyModified(mh);
 }
 
-void Document::DeleteAllMarks(int markerNum) { 
-	cb.DeleteAllMarks(markerNum); 
+void Document::DeleteAllMarks(int markerNum) {
+	cb.DeleteAllMarks(markerNum);
 	DocModification mh(SC_MOD_CHANGEMARKER, 0, 0, 0, 0);
 	NotifyModified(mh);
 }
@@ -138,8 +138,8 @@ int Document::VCHomePosition(int position) {
 		return startText;
 }
 
-int Document::SetLevel(int line, int level) { 
-	int prev = cb.SetLevel(line, level); 
+int Document::SetLevel(int line, int level) {
+	int prev = cb.SetLevel(line, level);
 	if (prev != level) {
 		DocModification mh(SC_MOD_CHANGEFOLD, LineStart(line), 0, 0, 0);
 		mh.line = line;
@@ -153,7 +153,7 @@ int Document::SetLevel(int line, int level) {
 static bool IsSubordinate(int levelStart, int levelTry) {
 	if (levelTry & SC_FOLDLEVELWHITEFLAG)
 		return true;
-	else 
+	else
 		return (levelStart & SC_FOLDLEVELNUMBERMASK) < (levelTry & SC_FOLDLEVELNUMBERMASK);
 }
 
@@ -162,15 +162,15 @@ int Document::GetLastChild(int lineParent, int level) {
 		level = GetLevel(lineParent) & SC_FOLDLEVELNUMBERMASK;
 	int maxLine = LinesTotal();
 	int lineMaxSubord = lineParent;
-	while (lineMaxSubord < maxLine-1) {
-		EnsureStyledTo(LineStart(lineMaxSubord+2));
-		if (!IsSubordinate(level, GetLevel(lineMaxSubord+1)))
+	while (lineMaxSubord < maxLine - 1) {
+		EnsureStyledTo(LineStart(lineMaxSubord + 2));
+		if (!IsSubordinate(level, GetLevel(lineMaxSubord + 1)))
 			break;
 		lineMaxSubord++;
 	}
 	if (lineMaxSubord > lineParent) {
-		if (level > (GetLevel(lineMaxSubord+1) & SC_FOLDLEVELNUMBERMASK)) {
-			// Have chewed up some whitespace that belongs to a parent so seek back 
+		if (level > (GetLevel(lineMaxSubord + 1) & SC_FOLDLEVELNUMBERMASK)) {
+			// Have chewed up some whitespace that belongs to a parent so seek back
 			if ((lineMaxSubord > lineParent) && (GetLevel(lineMaxSubord) & SC_FOLDLEVELWHITEFLAG)) {
 				lineMaxSubord--;
 			}
@@ -181,15 +181,15 @@ int Document::GetLastChild(int lineParent, int level) {
 
 int Document::GetFoldParent(int line) {
 	int level = GetLevel(line);
-	int lineLook = line-1;
+	int lineLook = line - 1;
 	while ((lineLook > 0) && (
-		(!(GetLevel(lineLook) & SC_FOLDLEVELHEADERFLAG)) || 
-		((GetLevel(lineLook) & SC_FOLDLEVELNUMBERMASK) >= level))
-	) {
+	            (!(GetLevel(lineLook) & SC_FOLDLEVELHEADERFLAG)) ||
+	            ((GetLevel(lineLook) & SC_FOLDLEVELNUMBERMASK) >= level))
+	      ) {
 		lineLook--;
 	}
 	if ((GetLevel(lineLook) & SC_FOLDLEVELHEADERFLAG) &&
-		((GetLevel(lineLook) & SC_FOLDLEVELNUMBERMASK) < level)) {
+	        ((GetLevel(lineLook) & SC_FOLDLEVELNUMBERMASK) < level)) {
 		return lineLook;
 	} else {
 		return -1;
@@ -248,12 +248,12 @@ int Document::LenChar(int pos) {
 		if (ch < 0x80)
 			return 1;
 		int len = 2;
-		if (ch >= (0x80+0x40+0x20))
+		if (ch >= (0x80 + 0x40 + 0x20))
 			len = 3;
 		int lengthDoc = Length();
 		if ((pos + len) > lengthDoc)
-			return lengthDoc-pos;
-		else 
+			return lengthDoc -pos;
+		else
 			return len;
 	} else if (IsDBCS(pos)) {
 		return 2;
@@ -299,7 +299,7 @@ int Document::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
 				// ch is a trail byte
 				if (moveDir > 0)
 					pos++;
-				else 
+				else
 					pos--;
 				ch = static_cast<unsigned char>(cb.CharAt(pos));
 			}
@@ -345,9 +345,9 @@ void Document::ModifiedAt(int pos) {
 
 // Unlike Undo, Redo, and InsertStyledString, the pos argument is a cell number not a char number
 void Document::DeleteChars(int pos, int len) {
-    if ((pos + len) > Length())
-        return;
-	if (cb.IsReadOnly() && enteredReadOnlyCount==0) {
+	if ((pos + len) > Length())
+		return ;
+	if (cb.IsReadOnly() && enteredReadOnlyCount == 0) {
 		enteredReadOnlyCount++;
 		NotifyModifyAttempt();
 		enteredReadOnlyCount--;
@@ -356,28 +356,28 @@ void Document::DeleteChars(int pos, int len) {
 		enteredCount++;
 		if (!cb.IsReadOnly()) {
 			NotifyModified(
-                DocModification(
-                    SC_MOD_BEFOREDELETE | SC_PERFORMED_USER, 
-                    pos, len, 
-                    0, 0));
+			    DocModification(
+			        SC_MOD_BEFOREDELETE | SC_PERFORMED_USER,
+			        pos, len,
+			        0, 0));
 			int prevLinesTotal = LinesTotal();
 			bool startSavePoint = cb.IsSavePoint();
-			const char *text = cb.DeleteChars(pos*2, len * 2);
+			const char *text = cb.DeleteChars(pos * 2, len * 2);
 			if (startSavePoint && cb.IsCollectingUndo())
 				NotifySavePoint(!startSavePoint);
 			ModifiedAt(pos);
 			NotifyModified(
-                DocModification(
-                    SC_MOD_DELETETEXT | SC_PERFORMED_USER, 
-                    pos, len, 
-                    LinesTotal() - prevLinesTotal, text));
+			    DocModification(
+			        SC_MOD_DELETETEXT | SC_PERFORMED_USER,
+			        pos, len,
+			        LinesTotal() - prevLinesTotal, text));
 		}
 		enteredCount--;
 	}
 }
 
 void Document::InsertStyledString(int position, char *s, int insertLength) {
-	if (cb.IsReadOnly() && enteredReadOnlyCount==0) {
+	if (cb.IsReadOnly() && enteredReadOnlyCount == 0) {
 		enteredReadOnlyCount++;
 		NotifyModifyAttempt();
 		enteredReadOnlyCount--;
@@ -386,10 +386,10 @@ void Document::InsertStyledString(int position, char *s, int insertLength) {
 		enteredCount++;
 		if (!cb.IsReadOnly()) {
 			NotifyModified(
-                DocModification(
-                    SC_MOD_BEFOREINSERT | SC_PERFORMED_USER, 
-                    position / 2, insertLength / 2, 
-                    0, 0));
+			    DocModification(
+			        SC_MOD_BEFOREINSERT | SC_PERFORMED_USER,
+			        position / 2, insertLength / 2,
+			        0, 0));
 			int prevLinesTotal = LinesTotal();
 			bool startSavePoint = cb.IsSavePoint();
 			const char *text = cb.InsertString(position, s, insertLength);
@@ -397,10 +397,10 @@ void Document::InsertStyledString(int position, char *s, int insertLength) {
 				NotifySavePoint(!startSavePoint);
 			ModifiedAt(position / 2);
 			NotifyModified(
-                DocModification(
-                    SC_MOD_INSERTTEXT | SC_PERFORMED_USER, 
-                    position / 2, insertLength / 2, 
-                    LinesTotal() - prevLinesTotal, text));
+			    DocModification(
+			        SC_MOD_INSERTTEXT | SC_PERFORMED_USER,
+			        position / 2, insertLength / 2,
+			        LinesTotal() - prevLinesTotal, text));
 		}
 		enteredCount--;
 	}
@@ -413,21 +413,21 @@ int Document::Undo() {
 		bool startSavePoint = cb.IsSavePoint();
 		int steps = cb.StartUndo();
 		//Platform::DebugPrintf("Steps=%d\n", steps);
-		for (int step=0; step<steps; step++) {
+		for (int step = 0; step < steps; step++) {
 			int prevLinesTotal = LinesTotal();
 			const Action &action = cb.GetUndoStep();
 			if (action.at == removeAction) {
-			    NotifyModified(DocModification(
-                    SC_MOD_BEFOREINSERT | SC_PERFORMED_UNDO, action));
-            } else {
-			    NotifyModified(DocModification(
-                    SC_MOD_BEFOREDELETE | SC_PERFORMED_UNDO, action));
-            }
+				NotifyModified(DocModification(
+				                   SC_MOD_BEFOREINSERT | SC_PERFORMED_UNDO, action));
+			} else {
+				NotifyModified(DocModification(
+				                   SC_MOD_BEFOREDELETE | SC_PERFORMED_UNDO, action));
+			}
 			cb.PerformUndoStep();
 			int cellPosition = action.position / 2;
 			ModifiedAt(cellPosition);
 			newPos = cellPosition;
-			
+
 			int modFlags = SC_PERFORMED_UNDO;
 			// With undo, an insertion action becomes a deletion notification
 			if (action.at == removeAction) {
@@ -436,12 +436,12 @@ int Document::Undo() {
 			} else {
 				modFlags |= SC_MOD_DELETETEXT;
 			}
-			if (step == steps-1)
+			if (step == steps - 1)
 				modFlags |= SC_LASTSTEPINUNDOREDO;
-			NotifyModified(DocModification(modFlags, cellPosition, action.lenData, 
-				LinesTotal() - prevLinesTotal, action.data));
+			NotifyModified(DocModification(modFlags, cellPosition, action.lenData,
+			                               LinesTotal() - prevLinesTotal, action.data));
 		}
-	
+
 		bool endSavePoint = cb.IsSavePoint();
 		if (startSavePoint != endSavePoint)
 			NotifySavePoint(endSavePoint);
@@ -456,20 +456,20 @@ int Document::Redo() {
 		enteredCount++;
 		bool startSavePoint = cb.IsSavePoint();
 		int steps = cb.StartRedo();
-		for (int step=0; step<steps; step++) {
+		for (int step = 0; step < steps; step++) {
 			int prevLinesTotal = LinesTotal();
 			const Action &action = cb.GetRedoStep();
 			if (action.at == insertAction) {
-			    NotifyModified(DocModification(
-                    SC_MOD_BEFOREINSERT | SC_PERFORMED_REDO, action));
-            } else {
-			    NotifyModified(DocModification(
-                    SC_MOD_BEFOREDELETE | SC_PERFORMED_REDO, action));
-            }
+				NotifyModified(DocModification(
+				                   SC_MOD_BEFOREINSERT | SC_PERFORMED_REDO, action));
+			} else {
+				NotifyModified(DocModification(
+				                   SC_MOD_BEFOREDELETE | SC_PERFORMED_REDO, action));
+			}
 			cb.PerformRedoStep();
 			ModifiedAt(action.position / 2);
 			newPos = action.position / 2;
-			
+
 			int modFlags = SC_PERFORMED_REDO;
 			if (action.at == insertAction) {
 				newPos += action.lenData;
@@ -477,13 +477,13 @@ int Document::Redo() {
 			} else {
 				modFlags |= SC_MOD_DELETETEXT;
 			}
-			if (step == steps-1)
+			if (step == steps - 1)
 				modFlags |= SC_LASTSTEPINUNDOREDO;
 			NotifyModified(
-                DocModification(modFlags, action.position / 2, action.lenData, 
-				LinesTotal() - prevLinesTotal, action.data));
+			    DocModification(modFlags, action.position / 2, action.lenData,
+			                    LinesTotal() - prevLinesTotal, action.data));
 		}
-	
+
 		bool endSavePoint = cb.IsSavePoint();
 		if (startSavePoint != endSavePoint)
 			NotifySavePoint(endSavePoint);
@@ -533,7 +533,7 @@ int Document::DelCharBack(int pos) {
 		DeleteChars(pos - 2, 2);
 		return pos - 2;
 	} else if (SC_CP_UTF8 == dbcsCodePage) {
-		int startChar = MovePositionOutsideChar(pos-1, -1, false);
+		int startChar = MovePositionOutsideChar(pos - 1, -1, false);
 		DeleteChars(startChar, pos - startChar);
 		return startChar;
 	} else if (IsDBCS(pos - 1)) {
@@ -575,13 +575,13 @@ int Document::GetLineIndentation(int line) {
 	if ((line >= 0) && (line < LinesTotal())) {
 		int lineStart = LineStart(line);
 		int length = Length();
-		for (int i=lineStart;i<length;i++) {
+		for (int i = lineStart;i < length;i++) {
 			char ch = cb.CharAt(i);
 			if (ch == ' ')
 				indent++;
 			else if (ch == '\t')
 				indent = NextTab(indent, tabInChars);
-			else 
+			else
 				return indent;
 		}
 	}
@@ -603,8 +603,8 @@ void Document::SetLineIndentation(int line, int indent) {
 }
 
 int Document::GetLineIndentPosition(int line) {
-    if (line < 0)
-        return 0;
+	if (line < 0)
+		return 0;
 	int pos = LineStart(line);
 	int length = Length();
 	while ((pos < length) && isindentchar(cb.CharAt(pos))) {
@@ -617,7 +617,7 @@ int Document::GetColumn(int pos) {
 	int column = 0;
 	int line = LineFromPosition(pos);
 	if ((line >= 0) && (line < LinesTotal())) {
-		for (int i=LineStart(line);i<pos;i++) {
+		for (int i = LineStart(line);i < pos;i++) {
 			char ch = cb.CharAt(i);
 			if (ch == '\t')
 				column = NextTab(column, tabInChars);
@@ -647,7 +647,7 @@ void Document::ConvertLineEnds(int eolModeSet) {
 	BeginUndoAction();
 	for (int pos = 0; pos < Length(); pos++) {
 		if (cb.CharAt(pos) == '\r') {
-			if (cb.CharAt(pos+1) == '\n') {
+			if (cb.CharAt(pos + 1) == '\n') {
 				if (eolModeSet != SC_EOL_CRLF) {
 					DeleteChars(pos, 2);
 					if (eolModeSet == SC_EOL_CR)
@@ -684,7 +684,7 @@ void Document::ConvertLineEnds(int eolModeSet) {
 }
 
 bool Document::IsWordChar(unsigned char ch) {
-	if ((SC_CP_UTF8 == dbcsCodePage) && (ch >0x80))
+	if ((SC_CP_UTF8 == dbcsCodePage) && (ch > 0x80))
 		return true;
 	return wordchars[ch];
 }
@@ -745,21 +745,21 @@ bool Document::IsWordAt(int start, int end) {
 // Find text in document, supporting both forward and backward
 // searches (just pass minPos > maxPos to do a backward search)
 // Has not been tested with backwards DBCS searches yet.
-long Document::FindText(int minPos, int maxPos, const char *s, 
-	bool caseSensitive, bool word, bool wordStart) {
- 	bool forward = minPos <= maxPos;
+long Document::FindText(int minPos, int maxPos, const char *s,
+                        bool caseSensitive, bool word, bool wordStart) {
+	bool forward = minPos <= maxPos;
 	int increment = forward ? 1 : -1;
 
 	// Range endpoints should not be inside DBCS characters, but just in case, move them.
 	int startPos = MovePositionOutsideChar(minPos, increment, false);
 	int endPos = MovePositionOutsideChar(maxPos, increment, false);
- 	
+
 	// Compute actual search ranges needed
 	int lengthFind = strlen(s);
- 	int endSearch = endPos;
- 	if (startPos <= endPos) {
- 		endSearch = endPos - lengthFind + 1;
- 	}
+	int endSearch = endPos;
+	if (startPos <= endPos) {
+		endSearch = endPos - lengthFind + 1;
+	}
 	//Platform::DebugPrintf("Find %d %d %s %d\n", startPos, endPos, ft->lpstrText, lengthFind);
 	char firstChar = s[0];
 	if (!caseSensitive)
@@ -777,9 +777,9 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 				}
 				if (found) {
 					if ((!word && !wordStart) ||
-						word && IsWordAt(pos, pos + lengthFind) ||
-						wordStart && IsWordStartAt(pos))
- 						return pos;
+					        word && IsWordAt(pos, pos + lengthFind) ||
+					        wordStart && IsWordStartAt(pos))
+						return pos;
 				}
 			}
 		} else {
@@ -792,9 +792,9 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 				}
 				if (found) {
 					if ((!word && !wordStart) ||
-						word && IsWordAt(pos, pos + lengthFind) ||
-						wordStart && IsWordStartAt(pos))
- 						return pos;
+					        word && IsWordAt(pos, pos + lengthFind) ||
+					        wordStart && IsWordStartAt(pos))
+						return pos;
 				}
 			}
 		}
@@ -813,7 +813,7 @@ int Document::LinesTotal() {
 }
 
 void Document::ChangeCase(Range r, bool makeUpperCase) {
-	for (int pos=r.start; pos<r.end; pos++) {
+	for (int pos = r.start; pos < r.end; pos++) {
 		char ch = CharAt(pos);
 		if (dbcsCodePage && IsDBCS(pos)) {
 			pos += LenChar(pos);
@@ -851,7 +851,7 @@ void Document::SetWordChars(unsigned char *chars) {
 void Document::SetStylingBits(int bits) {
 	stylingBits = bits;
 	stylingBitsMask = 0;
-	for (int bit=0; bit<stylingBits; bit++) {
+	for (int bit = 0; bit < stylingBits; bit++) {
 		stylingBitsMask <<= 1;
 		stylingBitsMask |= 1;
 	}
@@ -867,8 +867,8 @@ void Document::SetStyleFor(int length, char style) {
 		enteredCount++;
 		int prevEndStyled = endStyled;
 		if (cb.SetStyleFor(stylingPos, length, style, stylingMask)) {
-			DocModification mh(SC_MOD_CHANGESTYLE | SC_PERFORMED_USER, 
-				prevEndStyled, length);
+			DocModification mh(SC_MOD_CHANGESTYLE | SC_PERFORMED_USER,
+			                   prevEndStyled, length);
 			NotifyModified(mh);
 		}
 		stylingPos += length;
@@ -889,8 +889,8 @@ void Document::SetStyles(int length, char *styles) {
 		}
 		endStyled = stylingPos;
 		if (didChange) {
-			DocModification mh(SC_MOD_CHANGESTYLE | SC_PERFORMED_USER, 
-				prevEndStyled, endStyled - prevEndStyled);
+			DocModification mh(SC_MOD_CHANGESTYLE | SC_PERFORMED_USER,
+			                   prevEndStyled, endStyled - prevEndStyled);
 			NotifyModified(mh);
 		}
 		enteredCount--;
