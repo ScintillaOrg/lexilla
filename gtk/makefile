@@ -60,7 +60,7 @@ deps:
 $(COMPLIB): DocumentAccessor.o WindowAccessor.o KeyWords.o StyleContext.o Document.o CallTip.o \
 	ScintillaBase.o ContractionState.o Editor.o PropSet.o PlatGTK.o \
 	KeyMap.o LineMarker.o ScintillaGTK.o CellBuffer.o ViewStyle.o \
-	RESearch.o Style.o Indicator.o AutoComplete.o
+	RESearch.o Style.o Indicator.o AutoComplete.o UniConversion.o
 	$(AR) rc $@ $^
 	$(RANLIB) $@
 
