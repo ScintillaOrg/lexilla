@@ -28,6 +28,14 @@ inline bool IsTypeCharacter(const int ch) {
 	return ch == '%' || ch == '&' || ch == '@' || ch == '!' || ch == '#' || ch == '$';
 }
 
+inline bool IsAWordChar(const int ch) {
+	return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_');
+}
+
+inline bool IsAWordStart(const int ch) {
+	return (ch < 0x80) && (isalnum(ch) || ch == '_');
+}
+
 static void ColouriseVBDoc(unsigned int startPos, int length, int initStyle,
                            WordList *keywordlists[], Accessor &styler, bool vbScriptSyntax) {
 
@@ -44,7 +52,7 @@ static void ColouriseVBDoc(unsigned int startPos, int length, int initStyle,
 		if (sc.state == SCE_B_OPERATOR) {
 			sc.SetState(SCE_B_DEFAULT);
 		} else if (sc.state == SCE_B_KEYWORD) {
-			if (!iswordchar(sc.ch)) {
+			if (!IsAWordChar(sc.ch)) {
 				if (vbScriptSyntax || !IsTypeCharacter(sc.ch)) {
 					if (sc.ch == ']')
 						sc.Forward();
@@ -66,7 +74,7 @@ static void ColouriseVBDoc(unsigned int startPos, int length, int initStyle,
 				}
 			}
 		} else if (sc.state == SCE_B_NUMBER) {
-			if (!iswordchar(sc.ch)) {
+			if (!IsAWordChar(sc.ch)) {
 				sc.SetState(SCE_B_DEFAULT);
 			}
 		} else if (sc.state == SCE_B_STRING) {
@@ -118,9 +126,9 @@ static void ColouriseVBDoc(unsigned int startPos, int length, int initStyle,
 				sc.SetState(SCE_B_NUMBER);
 			} else if (IsADigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext))) {
 				sc.SetState(SCE_B_NUMBER);
-			} else if (iswordstart(sc.ch) || (sc.ch == '[')) {
+			} else if (IsAWordStart(sc.ch) || (sc.ch == '[')) {
 				sc.SetState(SCE_B_KEYWORD);
-			} else if (isoperator(sc.ch) || (sc.ch == '\\')) {
+			} else if (isoperator(static_cast<char>(sc.ch)) || (sc.ch == '\\')) {
 				sc.SetState(SCE_B_OPERATOR);
 			}
 		}
@@ -135,7 +143,7 @@ static void ColouriseVBDoc(unsigned int startPos, int length, int initStyle,
 	sc.Complete();
 }
 
-static void FoldVBDoc(unsigned int startPos, int length, int initStyle,
+static void FoldVBDoc(unsigned int startPos, int length, int,
 						   WordList *[], Accessor &styler) {
 	int endPos = startPos + length;
 
@@ -145,10 +153,6 @@ static void FoldVBDoc(unsigned int startPos, int length, int initStyle,
 		if (lineCurrent > 0) {
 			lineCurrent--;
 			startPos = styler.LineStart(lineCurrent);
-			if (startPos == 0)
-				initStyle = SCE_B_DEFAULT;
-			else
-				initStyle = styler.StyleAt(startPos-1);
 		}
 	}
 	int spaceFlags = 0;
@@ -193,3 +197,4 @@ static void ColouriseVBScriptDoc(unsigned int startPos, int length, int initStyl
 
 LexerModule lmVB(SCLEX_VB, ColouriseVBNetDoc, "vb", FoldVBDoc);
 LexerModule lmVBScript(SCLEX_VBSCRIPT, ColouriseVBScriptDoc, "vbscript", FoldVBDoc);
+
