@@ -2614,6 +2614,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 			// and determine the x position at which each character starts.
 			//ElapsedTime et;
 			if (lineDoc != lineDocPrevious) {
+				ll.Set(0);
 				ll.Set(RetrieveLineLayout(lineDoc));
 				LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
 				lineDocPrevious = lineDoc;
