@@ -360,7 +360,7 @@ void ScintillaBase::CallTipShow(Point pt, const char *defn) {
 									defn,
 									vs.styles[STYLE_DEFAULT].fontName,
 									vs.styles[STYLE_DEFAULT].sizeZoomed,
-									IsUnicodeMode(),
+									CodePage(),
 									wMain);
 	// If the call-tip window would be out of the client
 	// space, adjust so it displays above the text.
