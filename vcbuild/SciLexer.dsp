@@ -154,6 +154,10 @@ SOURCE=..\src\LexHTML.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexLisp.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexLua.cxx
 # End Source File
 # Begin Source File

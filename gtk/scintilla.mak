@@ -115,9 +115,11 @@ SOBJS=\
 	$(DIR_O)\ViewStyle.obj
 
 LEXOBJS=\
+	$(DIR_O)\LexAda.obj \
 	$(DIR_O)\LexConf.obj \
 	$(DIR_O)\LexCPP.obj \
 	$(DIR_O)\LexHTML.obj \
+	$(DIR_O)\LexLisp.obj \
 	$(DIR_O)\LexLua.obj \
 	$(DIR_O)\LexOthers.obj \
 	$(DIR_O)\LexPascal.obj \
@@ -197,6 +199,12 @@ $(DIR_O)\ScintillaGTKS.obj: ScintillaGTK.cxx
 	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -DSTATIC_BUILD -c $(NAMEFLAG)$@ ScintillaGTK.cxx
 
 # Dependencies
+
+# All lexers depend on this set of headers
+LEX_HEADERS=..\include\Platform.h ..\include\PropSet.h \
+ ..\include\SString.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h
+ 
 $(DIR_O)\AutoComplete.obj: ..\src\AutoComplete.cxx ..\include\Platform.h ..\src\AutoComplete.h
 
 $(DIR_O)\CallTip.obj: ..\src\CallTip.cxx ..\include\Platform.h ..\src\CallTip.h
@@ -221,41 +229,38 @@ $(DIR_O)\KeyMap.obj: ..\src\KeyMap.cxx ..\include\Platform.h ..\include\Scintill
 $(DIR_O)\KeyWords.obj: ..\src\KeyWords.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
  ..\include\Scintilla.h ..\include\SciLexer.h 
 
-$(DIR_O)\LexCPP.obj: ..\src\LexCPP.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
+$(DIR_O)\LexAda.obj: ..\src\LexAda.cxx $(LEX_HEADERS)
 
-$(DIR_O)\LexConf.obj: ..\src\LexConf.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
+$(DIR_O)\LexAVE.obj: ..\src\LexAVE.cxx $(LEX_HEADERS)
 
-$(DIR_O)\LexHTML.obj: ..\src\LexHTML.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
+$(DIR_O)\LexConf.obj: ..\src\LexConf.cxx $(LEX_HEADERS)
 
-$(DIR_O)\LexLua.obj: ..\src\LexLua.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
+$(DIR_O)\LexCPP.obj: ..\src\LexCPP.cxx $(LEX_HEADERS)
 
-$(DIR_O)\LexOthers.obj: ..\src\LexOthers.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
+$(DIR_O)\LexHTML.obj: ..\src\LexHTML.cxx $(LEX_HEADERS)
 
-$(DIR_O)\LexPerl.obj: ..\src\LexPerl.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
+$(DIR_O)\LexLisp.obj: ..\src\LexLisp.cxx $(LEX_HEADERS)
 
-$(DIR_O)\LexPascal.obj: ..\src\LexPascal.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
+$(DIR_O)\LexLua.obj: ..\src\LexLua.cxx $(LEX_HEADERS)
 
-$(DIR_O)\LexPython.obj: ..\src\LexPython.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
+$(DIR_O)\LexOthers.obj: ..\src\LexOthers.cxx $(LEX_HEADERS)
 
-$(DIR_O)\LexSQL.obj: ..\src\LexSQL.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
+$(DIR_O)\LexPascal.obj: ..\src\LexPascal.cxx $(LEX_HEADERS)
 
-$(DIR_O)\LexVB.obj: ..\src\LexVB.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
+$(DIR_O)\LexPerl.obj: ..\src\LexPerl.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexPython.obj: ..\src\LexPython.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexSQL.obj: ..\src\LexSQL.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexVB.obj: ..\src\LexVB.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LineMarker.obj: ..\src\LineMarker.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\LineMarker.h
 
 $(DIR_O)\PlatWin.obj: PlatWin.cxx ..\include\Platform.h PlatformRes.h ..\src\UniConversion.h
 
-$(DIR_O)\PropSet.obj: ..\src\PropSet.cxx ..\include\Platform.h ..\include\PropSet.h
+$(DIR_O)\PropSet.obj: ..\src\PropSet.cxx ..\include\Platform.h ..\include\PropSet.h \
+ ..\include\SString.h
 
 $(DIR_O)\RESearch.obj: ..\src\RESearch.cxx ..\src\RESearch.h
 

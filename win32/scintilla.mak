@@ -108,6 +108,7 @@ LEXOBJS=\
 	$(DIR_O)\LexConf.obj \
 	$(DIR_O)\LexCPP.obj \
 	$(DIR_O)\LexHTML.obj \
+	$(DIR_O)\LexLisp.obj \
 	$(DIR_O)\LexLua.obj \
 	$(DIR_O)\LexOthers.obj \
 	$(DIR_O)\LexPascal.obj \
@@ -223,13 +224,15 @@ $(DIR_O)\LexCPP.obj: ..\src\LexCPP.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexHTML.obj: ..\src\LexHTML.cxx $(LEX_HEADERS)
 
+$(DIR_O)\LexLisp.obj: ..\src\LexLisp.cxx $(LEX_HEADERS)
+
 $(DIR_O)\LexLua.obj: ..\src\LexLua.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexOthers.obj: ..\src\LexOthers.cxx $(LEX_HEADERS)
 
-$(DIR_O)\LexPerl.obj: ..\src\LexPerl.cxx $(LEX_HEADERS)
-
 $(DIR_O)\LexPascal.obj: ..\src\LexPascal.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexPerl.obj: ..\src\LexPerl.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexPython.obj: ..\src\LexPython.cxx $(LEX_HEADERS)
 
@@ -241,10 +244,10 @@ $(DIR_O)\LineMarker.obj: ..\src\LineMarker.cxx ..\include\Platform.h ..\include\
 
 $(DIR_O)\PlatWin.obj: PlatWin.cxx ..\include\Platform.h PlatformRes.h ..\src\UniConversion.h
 
-$(DIR_O)\RESearch.obj: ..\src\RESearch.cxx ..\src\RESearch.h
-
 $(DIR_O)\PropSet.obj: ..\src\PropSet.cxx ..\include\Platform.h ..\include\PropSet.h \
  ..\include\SString.h
+
+$(DIR_O)\RESearch.obj: ..\src\RESearch.cxx ..\src\RESearch.h
 
 $(DIR_O)\ScintillaBase.obj: ..\src\ScintillaBase.cxx ..\include\Platform.h ..\include\Scintilla.h \
  ..\src\ContractionState.h ..\src\CellBuffer.h ..\src\CallTip.h ..\src\KeyMap.h ..\src\Indicator.h \

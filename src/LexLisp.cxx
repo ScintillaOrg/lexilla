@@ -66,14 +66,11 @@ static void ColouriseLispDoc(unsigned int startPos, int length, int initStyle, W
 	styler.StartAt(startPos);
 
 	int state = initStyle;
-	int styleBeforeLineStart = initStyle;
 	if (state == SCE_LISP_STRINGEOL)	// Does not leak onto next line
 		state = SCE_LISP_DEFAULT;
 	char chPrev = ' ';
 	char chNext = styler[startPos];
-	char chPrevNonWhite = ' ';
 	unsigned int lengthDoc = startPos + length;
-	int visibleChars = 0;
 	styler.StartSegment(startPos);
 	for (unsigned int i = startPos; i < lengthDoc; i++) {
 		char ch = chNext;
@@ -147,21 +144,12 @@ static void ColouriseLispDoc(unsigned int startPos, int length, int initStyle, W
 			}
 		}
 
-		if (atEOL) {
-			styleBeforeLineStart = state;
-			visibleChars = 0;
-		}
-		if (!isspacechar(ch))
-			visibleChars++;
-
 		chPrev = ch;
-		if (ch != ' ' && ch != '\t')
-			chPrevNonWhite = ch;
 	}
 	styler.ColourTo(lengthDoc - 1, state);
 }
 
-static void FoldLispDoc(unsigned int startPos, int length, int initStyle, WordList *[],
+static void FoldLispDoc(unsigned int startPos, int length, int /* initStyle */, WordList *[],
                             Accessor &styler) {
 	unsigned int lengthDoc = startPos + length;
 	int visibleChars = 0;
@@ -170,11 +158,10 @@ static void FoldLispDoc(unsigned int startPos, int length, int initStyle, WordLi
 	int levelCurrent = levelPrev;
 	char chNext = styler[startPos];
 	int styleNext = styler.StyleAt(startPos);
-	int style = initStyle;
 	for (unsigned int i = startPos; i < lengthDoc; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
-		style = styleNext;
+		int style = styleNext;
 		styleNext = styler.StyleAt(i + 1);
 		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 		if (style == SCE_LISP_OPERATOR) {
