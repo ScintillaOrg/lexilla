@@ -10,6 +10,7 @@
  *      Dept. of Computer Science
  *      York University
  *
+ * Original code available from http://www.cs.yorku.ca/~oz/ 
  * Translation to C++ by Neil Hodgson neilh@scintilla.org
  * Removed all use of register.
  * Converted to modern function prototypes.
@@ -29,6 +30,9 @@
  * Modification history:
  *
  * $Log$
+ * Revision 1.4  2001/04/13 03:52:13  nyamatongwe
+ * Added URL to find original code to comments.
+ *
  * Revision 1.3  2001/04/06 12:24:21  nyamatongwe
  * Made regular expression searching work on a line by line basis, made ^ and
  * $ work, made [set] work, and added a case insensitive option.
