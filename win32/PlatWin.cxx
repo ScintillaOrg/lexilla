@@ -1,5 +1,7 @@
 // Scintilla source code edit control
-// PlatWin.cxx - implementation of platform facilities on Windows
+/** @file PlatWin.cxx
+ ** Implementation of platform facilities on Windows.
+ **/
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
@@ -67,9 +69,11 @@ void Palette::Release() {
 	hpal = 0;
 }
 
-// This method either adds a colour to the list of wanted colours (want==true)
-// or retrieves the allocated colour back to the ColourPair.
-// This is one method to make it easier to keep the code for wanting and retrieving in sync.
+/**
+ * This method either adds a colour to the list of wanted colours (want==true)
+ * or retrieves the allocated colour back to the ColourPair.
+ * This is one method to make it easier to keep the code for wanting and retrieving in sync.
+ */
 void Palette::WantFind(ColourPair &cp, bool want) {
 	if (want) {
 		for (int i=0; i < used; i++) {
@@ -131,9 +135,11 @@ void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, int size, b
 	strcpy(lf.lfFaceName, faceName);
 }
 
-// Create a hash from the parameters for a font to allow easy checking for identity.
-// If one font is the same as another, its hash will be the same, but if the hash is the 
-// same then they may still be different.
+/**
+ * Create a hash from the parameters for a font to allow easy checking for identity.
+ * If one font is the same as another, its hash will be the same, but if the hash is the
+ * same then they may still be different.
+ */
 int HashFont(const char *faceName, int characterSet, int size, bool bold, bool italic) {
     return 
         size ^

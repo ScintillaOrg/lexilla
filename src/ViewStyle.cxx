@@ -1,5 +1,7 @@
 // Scintilla source code edit control
-// ViewStyle.cxx - store information on how the document is to be viewed
+/** @file ViewStyle.cxx
+ ** Store information on how the document is to be viewed.
+ **/
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
