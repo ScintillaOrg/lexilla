@@ -3,11 +3,11 @@
 // Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <stdio.h>
-#include <stdarg.h>
+#include <stdlib.h> 
+#include <string.h> 
+#include <ctype.h> 
+#include <stdio.h> 
+#include <stdarg.h> 
 
 #include "Platform.h"
 
@@ -63,16 +63,33 @@ static int PrintScriptingIndicatorOffset(Accessor &styler, unsigned int start, u
 	return iResult;
 }
 
-static int statePrintForState(int state, int inScriptType)
-{
+static int ScriptOfState(int state, int defaultScript) {
+	int scriptLanguage;
+
+	if ((state >= SCE_HP_START) && (state <= SCE_HP_IDENTIFIER)) {
+		scriptLanguage = eScriptPython;
+	} else if ((state >= SCE_HB_START) && (state <= SCE_HB_STRINGEOL)) {
+		scriptLanguage = eScriptVBS;
+	} else if ((state >= SCE_HJ_START) && (state <= SCE_HJ_STRINGEOL)) {
+		scriptLanguage = eScriptJS;
+	} else if ((state >= SCE_HPHP_DEFAULT) && (state <= SCE_HPHP_STRINGEOL)) {
+		scriptLanguage = eScriptPHP;
+	} else {
+		scriptLanguage = defaultScript;
+	}
+
+	return scriptLanguage;
+}
+
+static int statePrintForState(int state, int inScriptType) {
 	int StateToPrint;
 
 	if ((state >= SCE_HP_START) && (state <= SCE_HP_IDENTIFIER)) {
-		StateToPrint = state + ((inScriptType == eNonHtmlScript)?0:SCE_HA_PYTHON);
+		StateToPrint = state + ((inScriptType == eNonHtmlScript) ? 0 : SCE_HA_PYTHON);
 	} else if ((state >= SCE_HB_START) && (state <= SCE_HB_STRINGEOL)) {
-		StateToPrint = state + ((inScriptType == eNonHtmlScript)?0:SCE_HA_VBS);
+		StateToPrint = state + ((inScriptType == eNonHtmlScript) ? 0 : SCE_HA_VBS);
 	} else if ((state >= SCE_HJ_START) && (state <= SCE_HJ_STRINGEOL)) {
-		StateToPrint = state + ((inScriptType == eNonHtmlScript)?0:SCE_HA_JS);
+		StateToPrint = state + ((inScriptType == eNonHtmlScript) ? 0 : SCE_HA_JS);
 	} else {
 		StateToPrint = state;
 	}
@@ -80,8 +97,7 @@ static int statePrintForState(int state, int inScriptType)
 	return StateToPrint;
 }
 
-static int stateForPrintState(int StateToPrint)
-{
+static int stateForPrintState(int StateToPrint) {
 	int state;
 
 	if ((StateToPrint >= SCE_HPA_START) && (StateToPrint <= SCE_HPA_IDENTIFIER)) {
@@ -286,7 +302,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	styler.StartAt(startPos, 127);
 	char prevWord[200];
 	prevWord[0] = '\0';
-	int scriptLanguage = eScriptJS;
 	int StateToPrint = initStyle;
 	int state = stateForPrintState(StateToPrint);
 
@@ -303,9 +318,11 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	int lineCurrent = styler.GetLine(startPos);
 	if (lineCurrent > 0)
 		lineState = styler.GetLineState(lineCurrent);
-	int inScriptType  = (lineState >> 0) & 0x03; // 2 bits
+	int inScriptType = (lineState >> 0) & 0x03; // 2 bits
 	int defaultScript = (lineState >> 4) & 0x0F; // 4 bits
 	int beforePreProc = (lineState >> 8) & 0xFF; // 8 bits
+
+	int scriptLanguage = ScriptOfState(state, defaultScript);
 
 	bool fold = styler.GetPropertyInt("fold");
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
@@ -322,7 +339,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		char chNext2 = styler.SafeGetCharAt(i + 2);
 
 		// decide what is the current state to print (depending of the script tag)
-		StateToPrint = statePrintForState(state,inScriptType);
+		StateToPrint = statePrintForState(state, inScriptType);
 
 		if (fold && !isspace(ch))
 			visChars++;
@@ -333,6 +350,40 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			chPrev = ' ';
 			i += 1;
 			continue;
+		}
+
+		if (fold) {
+			switch (scriptLanguage) {
+			case eScriptJS:
+			case eScriptPHP:
+			case eScriptVBS:
+				if ((ch == '{') || (ch == '}')) {
+					levelCurrent += (ch == '{') ? 1 : -1;
+				}
+				break;
+			case eScriptPython:
+				if ((ch == ':') && ((chNext == '\n') || (chNext == '\r' && chNext2 == '\n'))) {
+					levelCurrent++;
+				} else if ((ch == '\n') && !((chNext == '\r') && (chNext2 == '\n')) && (chNext != '\n')) {
+					// check if the number of tabs is lower than the level
+					char chTmp = '§';
+					int Findlevel = (levelCurrent & ~SC_FOLDLEVELBASE) * 8;
+					for (int j = 0;Findlevel > 0;j++) {
+						chTmp = styler.SafeGetCharAt(i + j + 1);
+						if (chTmp == '\t') {
+							Findlevel -= 8;
+						}	else if (chTmp == ' ') {
+							Findlevel--;
+						}	else break;
+					}
+
+					if (Findlevel > 0) {
+						levelCurrent -= Findlevel / 8;
+						if (Findlevel % 8) levelCurrent--;
+					}
+				}
+				break;
+			}
 		}
 
 		if ((ch == '\r' && chNext != '\n') || (ch == '\n')) {
@@ -349,13 +400,9 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			}
 			lineCurrent++;
 			styler.SetLineState(lineCurrent,
-			                    ((inScriptType  & 0x03) << 0) |
+			                    ((inScriptType & 0x03) << 0) |
 			                    ((defaultScript & 0x0F) << 4) |
 			                    ((beforePreProc & 0xFF) << 8));
-		}
-
-		if (fold && (ch == '{') || (ch == '}')) {
-			levelCurrent += (ch == '{') ? 1 : -1;
 		}
 
 		// generic end of script processing
@@ -374,10 +421,11 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				break;
 			default :
 				// maybe we should check here if it's a tag and if it's SCRIPT
+
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_H_TAGUNKNOWN;
 				inScriptType = eHtml;
-				i+=2;
+				i += 2;
 				continue;
 				break;
 			}
@@ -405,7 +453,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 
 		// handle the start of ASP pre-processor = Non-HTML
 		if ((ch == '<') && (chNext == '%')) {
-				styler.ColourTo(i - 1, StateToPrint);
+			styler.ColourTo(i - 1, StateToPrint);
 			beforePreProc = state;
 			if (inScriptType == eNonHtmlScript)
 				inScriptType = eNonHtmlScriptPreProc;
@@ -422,6 +470,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				else {
 					i++; // place as if it was the next char treated
 				}
+
 
 				state = StateForScript(defaultScript);
 			}
@@ -755,7 +804,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					} else if (ch == '\'') {
 						state = SCE_HB_COMMENTLINE;
 					} else if (isoperator(ch)) {
-						styler.ColourTo(i, statePrintForState(SCE_HB_DEFAULT,inScriptType));
+						styler.ColourTo(i, statePrintForState(SCE_HB_DEFAULT, inScriptType));
 						state = SCE_HB_DEFAULT;
 					}
 				}
@@ -808,7 +857,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					chPrev = ' ';
 					chNext = styler.SafeGetCharAt(i + 1);
 				} else {
-//					state = statePrintForState(SCE_HP_STRING,inScriptType);
+					//					state = statePrintForState(SCE_HP_STRING,inScriptType);
 					state = SCE_HP_STRING;
 				}
 			} else if (ch == '\'') {
@@ -867,7 +916,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			if (ch == '\r' || ch == '\n') {
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_HP_DEFAULT;
-  		}
+			}
 			break;
 		case SCE_HP_STRING:
 			if (ch == '\\') {
@@ -1004,6 +1053,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		}
 
 
+
 		if (state == SCE_HB_DEFAULT) {    // One of the above succeeded
 			if (ch == '\"') {
 				state = SCE_HB_STRING;
@@ -1048,7 +1098,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		chPrev = ch;
 	}
 
-	StateToPrint = statePrintForState(state,inScriptType);
+	StateToPrint = statePrintForState(state, inScriptType);
 	styler.ColourTo(lengthDoc - 1, StateToPrint);
 
 	// Fill in the real level of the next line, keeping the current flags as they will be filled in later
