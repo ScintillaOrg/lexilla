@@ -601,7 +601,7 @@ bool ScintillaGTK::HaveMouseCapture() {
 // Redraw all of text area. This paint will not be abandoned.
 void ScintillaGTK::FullPaint() {
 	paintState = painting;
-	rcPaint = GetTextRectangle();
+	rcPaint = GetClientRectangle();
 	//Platform::DebugPrintf("ScintillaGTK::FullPaint %0d,%0d %0d,%0d\n",
 	//	rcPaint.left, rcPaint.top, rcPaint.right, rcPaint.bottom);
 	paintingAllText = true;
@@ -632,8 +632,8 @@ PRectangle ScintillaGTK::GetClientRectangle() {
 void ScintillaGTK::SyncPaint(PRectangle rc) {
 	paintState = painting;
 	rcPaint = rc;
-	PRectangle rcText = GetTextRectangle();
-	paintingAllText = rcPaint.Contains(rcText);
+	PRectangle rcClient = GetClientRectangle();
+	paintingAllText = rcPaint.Contains(rcClient);
 	//Platform::DebugPrintf("ScintillaGTK::SyncPaint %0d,%0d %0d,%0d\n",
 	//	rcPaint.left, rcPaint.top, rcPaint.right, rcPaint.bottom);
 	Surface *sw = Surface::Allocate();
@@ -1410,8 +1410,8 @@ gint ScintillaGTK::Expose(GtkWidget *, GdkEventExpose *ose, ScintillaGTK *sciThi
 	sciThis->rcPaint.right = ose->area.x + ose->area.width;
 	sciThis->rcPaint.bottom = ose->area.y + ose->area.height;
 
-	PRectangle rcText = sciThis->GetTextRectangle();
-	sciThis->paintingAllText = sciThis->rcPaint.Contains(rcText);
+	PRectangle rcClient = sciThis->GetClientRectangle();
+	sciThis->paintingAllText = sciThis->rcPaint.Contains(rcClient);
 	Surface *surfaceWindow = Surface::Allocate();
 	if (surfaceWindow) {
 		surfaceWindow->Init((PWidget(sciThis->wMain))->window);
