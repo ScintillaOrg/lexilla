@@ -16,6 +16,7 @@
 #include <windows.h>
 #include <commctrl.h>
 #include <richedit.h>
+#include <windowsx.h>
 
 #include "Platform.h"
 
@@ -1060,7 +1061,7 @@ void ScintillaWin::CreateCallTipWindow(PRectangle) {
 	ct.wCallTip = ::CreateWindow(callClassName, "ACallTip",
 				     WS_VISIBLE | WS_CHILD, 100, 100, 150, 20,
 				     MainHWND(), reinterpret_cast<HMENU>(idCallTip),
-				     reinterpret_cast<HINSTANCE>(::GetWindowLong(MainHWND(),GWL_HINSTANCE)),
+				     GetWindowInstance(MainHWND()),
 				     &ct);
 	ct.wDraw = ct.wCallTip;
 #endif
@@ -1461,7 +1462,7 @@ void ScintillaWin::AddCharBytes(char b0, char b1) {
 		dbcsChars[0] = b0;
 		dbcsChars[1] = b1;
 		dbcsChars[2] = '\0';
-		AddCharUTF(dbcsChars, strlen(dbcsChars), true);
+		AddCharUTF(dbcsChars, 2, true);
 	} else {
 		AddChar(b0);
 	}
@@ -1877,18 +1878,34 @@ bool ScintillaWin::Unregister() {
 	return result;
 }
 
+// Take care of 32/64 bit pointers
+#ifdef GetWindowLongPtr
+static void *PointerFromWindow(HWND hWnd) {
+	return reinterpret_cast<void *>(::GetWindowLongPtr(hWnd, 0));
+}
+static void SetWindowPointer(HWND hWnd, void *ptr) {
+	::SetWindowLongPtr(hWnd, 0, reinterpret_cast<LONG_PTR>(ptr));
+}
+#else
+static void *PointerFromWindow(HWND hWnd) {
+	return reinterpret_cast<void *>(::GetWindowLong(hWnd, 0));
+}
+static void SetWindowPointer(HWND hWnd, void *ptr) {
+	::SetWindowLong(hWnd, 0, reinterpret_cast<LONG>(ptr));
+}
+#endif
+
 sptr_t PASCAL ScintillaWin::CTWndProc(
     HWND hWnd, UINT iMessage, WPARAM wParam, sptr_t lParam) {
 
 	// Find C++ object associated with window.
-	CallTip *ctp = reinterpret_cast<CallTip *>(GetWindowLong(hWnd, 0));
+	CallTip *ctp = reinterpret_cast<CallTip *>(PointerFromWindow(hWnd));
 	// ctp will be zero if WM_CREATE not seen yet
 	if (ctp == 0) {
 		if (iMessage == WM_CREATE) {
 			// Associate CallTip object with window
 			CREATESTRUCT *pCreate = reinterpret_cast<CREATESTRUCT *>(lParam);
-			::SetWindowLong(hWnd, 0,
-			              reinterpret_cast<LONG>(pCreate->lpCreateParams));
+			SetWindowPointer(hWnd, pCreate->lpCreateParams);
 			return 0;
 		} else {
 			return ::DefWindowProc(hWnd, iMessage, wParam, lParam);
@@ -1923,13 +1940,13 @@ sptr_t PASCAL ScintillaWin::SWndProc(
 	//Platform::DebugPrintf("S W:%x M:%x WP:%x L:%x\n", hWnd, iMessage, wParam, lParam);
 
 	// Find C++ object associated with window.
-	ScintillaWin *sci = reinterpret_cast<ScintillaWin *>(::GetWindowLong(hWnd, 0));
+	ScintillaWin *sci = reinterpret_cast<ScintillaWin *>(PointerFromWindow(hWnd));
 	// sci will be zero if WM_CREATE not seen yet
 	if (sci == 0) {
 		if (iMessage == WM_CREATE) {
 			// Create C++ object associated with window
 			sci = new ScintillaWin(hWnd);
-			::SetWindowLong(hWnd, 0, reinterpret_cast<LONG>(sci));
+			SetWindowPointer(hWnd, sci);
 			return sci->WndProc(iMessage, wParam, lParam);
 		} else {
 			return ::DefWindowProc(hWnd, iMessage, wParam, lParam);

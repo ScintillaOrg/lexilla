@@ -16,6 +16,7 @@
 #include <windows.h>
 #include <commctrl.h>
 #include <richedit.h>
+#include <windowsx.h>
 
 #include "Platform.h"
 #include "PlatformRes.h"
@@ -769,8 +770,7 @@ ListBox::~ListBox() {
 }
 
 void ListBox::Create(Window &parent, int ctrlID) {
-	HINSTANCE hinstanceParent = reinterpret_cast<HINSTANCE>(
-		::GetWindowLong(reinterpret_cast<HWND>(parent.GetID()),GWL_HINSTANCE));
+	HINSTANCE hinstanceParent = GetWindowInstance(reinterpret_cast<HWND>(parent.GetID()));
 	id = ::CreateWindowEx(
 		WS_EX_WINDOWEDGE, "listbox", "",
 		WS_CHILD | WS_THICKFRAME | WS_VSCROLL | LBS_NOTIFY,
@@ -816,7 +816,7 @@ void ListBox::Clear() {
 
 void ListBox::Append(char *s) {
 	Window_SendMessage(this, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(s));
-	size_t len = strlen(s);
+	unsigned int len = static_cast<unsigned int>(strlen(s));
 	if (maxItemCharacters < len)
 		maxItemCharacters = len;
 }
@@ -957,6 +957,11 @@ bool Platform::IsKeyDown(int key) {
 
 long Platform::SendScintilla(WindowID w, unsigned int msg, unsigned long wParam, long lParam) {
 	return ::SendMessage(reinterpret_cast<HWND>(w), msg, wParam, lParam);
+}
+
+long Platform::SendScintillaPointer(WindowID w, unsigned int msg, unsigned long wParam, void *lParam) {
+	return ::SendMessage(reinterpret_cast<HWND>(w), msg, wParam, 
+		reinterpret_cast<LPARAM>(lParam));
 }
 
 bool Platform::IsDBCSLeadByte(int codePage, char ch) {
