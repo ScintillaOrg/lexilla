@@ -206,6 +206,10 @@ SOURCE=..\src\LexMatlab.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexNsis.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexOthers.cxx
 # End Source File
 # Begin Source File
@@ -222,11 +226,19 @@ SOURCE=..\src\LexPOV.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexPS.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexPython.cxx
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\LexRuby.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexScriptol.cxx
 # End Source File
 # Begin Source File
 
