@@ -451,12 +451,10 @@ bool PropSet::IncludesVar(const char *value, const char *key) {
 
 SString PropSet::GetExpanded(const char *key) {
 	SString val = Get(key);
-	if (IncludesVar(val.c_str(), key))
-		return val;
-	return Expand(val.c_str());
+	return Expand(val.c_str(), 100, key);
 }
 
-SString PropSet::Expand(const char *withVars, int maxExpands) {
+SString PropSet::Expand(const char *withVars, int maxExpands, const char *blankVar) {
 	char *base = StringDup(withVars);
 	char *cpvar = strstr(base, "$(");
 	while (cpvar && (maxExpands > 0)) {
@@ -466,6 +464,8 @@ SString PropSet::Expand(const char *withVars, int maxExpands) {
 		int lenvar = cpendvar - cpvar - 2;  	// Subtract the $()
 		char *var = StringDup(cpvar + 2, lenvar);
 		SString val = Get(var);
+		if (blankVar && (0 == strcmp(var, blankVar)))
+			val.clear(); // treat blankVar as an empty string (e.g. to block self-reference)
 		if (IncludesVar(val.c_str(), var))
 			break;
 		size_t newlenbase = strlen(base) + val.length() - lenvar;
@@ -588,6 +588,8 @@ SString PropSet::GetNewExpand(const char *keybase, const char *filename) {
 			int lenvar = cpendvar - cpvar - 2;  	// Subtract the $()
 			char *var = StringDup(cpvar + 2, lenvar);
 			SString val = GetWild(var, filename);
+			if (0 == strcmp(var, keybase))
+				val.clear(); // Self-references evaluate to empty string
 			size_t newlenbase = strlen(base) + val.length() - lenvar;
 			char *newbase = new char[newlenbase];
 			strncpy(newbase, base, cpvar - base);
