@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <assert.h>
+#include <limits.h>
 
 #define _WIN32_WINNT  0x0400
 #include <windows.h>
@@ -541,11 +542,16 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		wheelDelta -= static_cast<short>(HiWord(wParam));
 		if (abs(wheelDelta) >= WHEEL_DELTA && linesPerScroll > 0) {
 			int linesToScroll = linesPerScroll;
+			if (linesPerScroll == WHEEL_PAGESCROLL)
+				linesToScroll = LinesOnScreen() - 1;
 			if (linesToScroll == 0) {
 				linesToScroll = 1;
 			}
 			linesToScroll *= (wheelDelta / WHEEL_DELTA);
-			wheelDelta = wheelDelta % WHEEL_DELTA;
+			if (wheelDelta >= 0)
+				wheelDelta = wheelDelta % WHEEL_DELTA;
+			else
+				wheelDelta = - (-wheelDelta % WHEEL_DELTA);
 
 			if (wParam & MK_CONTROL) {
 				// Zoom! We play with the font sizes in the styles.
@@ -1784,7 +1790,7 @@ STDMETHODIMP ScintillaWin::GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM) {
 bool ScintillaWin::Register(HINSTANCE hInstance_) {
 
 	hInstance = hInstance_;
-	bool result = true;
+	bool result;
 #if 0
 	// Register the Scintilla class
 	if (IsNT()) {
@@ -1803,7 +1809,7 @@ bool ScintillaWin::Register(HINSTANCE hInstance_) {
 		wndclass.lpszMenuName = NULL;
 		wndclass.lpszClassName = L"Scintilla";
 		wndclass.hIconSm = 0;
-		::RegisterClassExW(&wndclass);
+		result = ::RegisterClassExW(&wndclass);
 	} else {
 #endif
 		// Register Scintilla as a normal character window
