@@ -219,7 +219,7 @@ void ViewStyle::ResetDefaultStyle() {
 		ColourDesired(0xff,0xff,0xff),
 	        Platform::DefaultFontSize(), fontNames.Save(Platform::DefaultFont()),
 		SC_CHARSET_DEFAULT,
-		false, false, false, false, Style::caseMixed, true);
+		false, false, false, false, Style::caseMixed, true, true);
 }
 
 void ViewStyle::ClearStyles() {

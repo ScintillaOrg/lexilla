@@ -549,11 +549,11 @@ int Editor::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
 	int mask = pdoc->stylingBitsMask;
 	if (moveDir > 0) {
 		while ((pos < pdoc->Length()) &&
-		        (!vs.styles[pdoc->StyleAt(pos - 1) & mask].visible))
+		        (vs.styles[pdoc->StyleAt(pos - 1) & mask].IsProtected()))
 			pos++;
 	} else {
 		while ((pos > 0) &&
-		        (!vs.styles[pdoc->StyleAt(pos - 1) & mask].visible))
+		        (vs.styles[pdoc->StyleAt(pos - 1) & mask].IsProtected()))
 			pos--;
 	}
 	return pos;
@@ -4539,6 +4539,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_STYLESETVISIBLE:
 		if (wParam <= STYLE_MAX) {
 			vs.styles[wParam].visible = lParam;
+			InvalidateStyleRedraw();
+		}
+		break;
+	case SCI_STYLESETCHANGEABLE:
+		if (wParam <= STYLE_MAX) {
+			vs.styles[wParam].changeable = lParam;
 			InvalidateStyleRedraw();
 		}
 		break;

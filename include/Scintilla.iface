@@ -472,6 +472,9 @@ get colour GetCaretLineBack=2097(,)
 # Set the colour of the background of the line containing the caret.
 set void SetCaretLineBack=2098(colour back,)
 
+# Set a style to be changeable or not (read only).
+set void StyleSetChangeable=2099(int style, bool changeable)
+
 # Display a auto-completion list.
 # The lenEntered parameter indicates how many characters before
 # the caret should be used to provide context.
