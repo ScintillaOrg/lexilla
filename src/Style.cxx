@@ -67,8 +67,8 @@ Style &Style::operator=(const Style &source) {
 
 void Style::Clear(ColourDesired fore_, ColourDesired back_, int size_,
                   const char *fontName_, int characterSet_,
-                  bool bold_, bool italic_, bool eolFilled_, 
-                  bool underline_, ecaseForced caseForce_, 
+                  bool bold_, bool italic_, bool eolFilled_,
+                  bool underline_, ecaseForced caseForce_,
 		  bool visible_, bool changeable_, bool hotspot_) {
 	fore.desired = fore_;
 	back.desired = back_;
@@ -102,7 +102,7 @@ void Style::ClearTo(const Style &source) {
 		source.eolFilled,
 		source.underline,
 		source.caseForce,
-		source.visible, 
+		source.visible,
 		source.changeable,
 		source.hotspot);
 }
@@ -122,7 +122,7 @@ bool Style::EquivalentFontTo(const Style *other) const {
 	return strcmp(fontName, other->fontName) == 0;
 }
 
-void Style::Realise(Surface &surface, int zoomLevel, Style *defaultStyle) {
+void Style::Realise(Surface &surface, int zoomLevel, Style *defaultStyle, bool extraFontFlag) {
 	sizeZoomed = size + zoomLevel;
 	if (sizeZoomed <= 2)	// Hangs if sizeZoomed <= 1
 		sizeZoomed = 2;
@@ -137,7 +137,7 @@ void Style::Realise(Surface &surface, int zoomLevel, Style *defaultStyle) {
 	if (aliasOfDefaultFont) {
 		font.SetID(defaultStyle->font.GetID());
 	} else if (fontName) {
-		font.Create(fontName, characterSet, deviceHeight, bold, italic);
+		font.Create(fontName, characterSet, deviceHeight, bold, italic, extraFontFlag);
 	} else {
 		font.SetID(0);
 	}

@@ -112,6 +112,7 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	viewIndentationGuides = source.viewIndentationGuides;
 	viewEOL = source.viewEOL;
 	showMarkedLines = source.showMarkedLines;
+	extraFontFlag = source.extraFontFlag;
 }
 
 ViewStyle::~ViewStyle() {
@@ -193,6 +194,7 @@ void ViewStyle::Init() {
 	viewIndentationGuides = false;
 	viewEOL = false;
 	showMarkedLines = true;
+	extraFontFlag = false;
 }
 
 void ViewStyle::RefreshColourPalette(Palette &pal, bool want) {
@@ -228,13 +230,13 @@ void ViewStyle::RefreshColourPalette(Palette &pal, bool want) {
 void ViewStyle::Refresh(Surface &surface) {
 	selbar.desired = Platform::Chrome();
 	selbarlight.desired = Platform::ChromeHighlight();
-	styles[STYLE_DEFAULT].Realise(surface, zoomLevel);
+	styles[STYLE_DEFAULT].Realise(surface, zoomLevel, NULL, extraFontFlag);
 	maxAscent = styles[STYLE_DEFAULT].ascent;
 	maxDescent = styles[STYLE_DEFAULT].descent;
 	someStylesProtected = false;
 	for (unsigned int i=0;i<(sizeof(styles)/sizeof(styles[0]));i++) {
 		if (i != STYLE_DEFAULT) {
-			styles[i].Realise(surface, zoomLevel, &styles[STYLE_DEFAULT]);
+			styles[i].Realise(surface, zoomLevel, &styles[STYLE_DEFAULT], extraFontFlag);
 			if (maxAscent < styles[i].ascent)
 				maxAscent = styles[i].ascent;
 			if (maxDescent < styles[i].descent)
