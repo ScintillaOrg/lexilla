@@ -125,7 +125,7 @@ SString PropSet::Expand(const char *withvars) {
 }
 
 int PropSet::GetInt(const char *key, int defaultValue) {
-	SString val = Get(key);
+	SString val = GetExpanded(key);
 	if (val.length())
 		return val.value();
 	else
@@ -168,7 +168,7 @@ SString PropSet::GetWild(const char *keybase, const char *filename) {
 					char *cpendvar = strchr(orgkeyfile, ')');
 					if (cpendvar) {
 						*cpendvar = '\0';
-						SString s = Get(orgkeyfile + 2);
+						SString s = GetExpanded(orgkeyfile + 2);
 						*cpendvar = ')';
 						keyfile = strdup(s.c_str());
 					}
