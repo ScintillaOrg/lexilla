@@ -202,8 +202,8 @@ public:
 	void SetWordChars(unsigned char *chars);
 	void SetStylingBits(int bits);
 	void StartStyling(int position, char mask);
-	void SetStyleFor(int length, char style);
-	void SetStyles(int length, char *styles);
+	bool SetStyleFor(int length, char style);
+	bool SetStyles(int length, char *styles);
 	int GetEndStyled() { return endStyled; }
 	bool EnsureStyledTo(int pos);
 	int GetStyleClock() { return styleClock; }
