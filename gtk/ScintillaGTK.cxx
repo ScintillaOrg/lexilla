@@ -71,6 +71,11 @@ class ScintillaGTK : public ScintillaBase {
 	GdkIC *ic;
 	GdkICAttr *ic_attr;
 
+	// Wheel mouse support
+	GTimeVal lastWheelMouseTime;
+	gint lastWheelMouseDirection;       
+	gint wheelMouseIntensity;
+
 	// Private so ScintillaGTK objects can not be copied
 ScintillaGTK(const ScintillaGTK &) : ScintillaBase() {}
 	ScintillaGTK &operator=(const ScintillaGTK &) { return * this; }
@@ -139,6 +144,9 @@ private:
 	static void ScrollHSignal(GtkAdjustment *adj, ScintillaGTK *sciThis);
 	static gint Press(GtkWidget *widget, GdkEventButton *event);
 	static gint MouseRelease(GtkWidget *widget, GdkEventButton *event);
+#ifdef _MSC_VER
+	static gint ScrollEvent(GtkWidget *widget, GdkEventScroll *event);
+#endif
 	static gint Motion(GtkWidget *widget, GdkEventMotion *event);
 	static gint KeyPress(GtkWidget *widget, GdkEventKey *event);
 	static gint KeyRelease(GtkWidget *widget, GdkEventKey *event);
@@ -195,7 +203,8 @@ ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 		pasteBuffer(0), pasteBufferIsRectangular(false),
 		capturedMouse(false), dragWasDropped(false),
 		primarySelectionCopy(0), parentClass(0),
-		ic(NULL), ic_attr(NULL) {
+		ic(NULL), ic_attr(NULL), lastWheelMouseDirection(0),
+		wheelMouseIntensity(0) {
 	sci = sci_;
 	wMain = GTK_WIDGET(sci);
 
@@ -204,7 +213,18 @@ ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 	// contains a rectangular selection, so copy Developer Studio.
 	cfColumnSelect = static_cast<CLIPFORMAT>(
 		::RegisterClipboardFormat("MSDEVColumnSelect"));
+
+  	// Get intellimouse parameters when running on win32; otherwise use
+	// reasonable default     
+#ifndef SPI_GETWHEELSCROLLLINES
+#define SPI_GETWHEELSCROLLLINES   104
 #endif
+	::SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, &ucWheelScrollLines, 0);
+#else
+	ucWheelScrollLines = 4;
+#endif
+	lastWheelMouseTime.tv_sec = 0;
+	lastWheelMouseTime.tv_usec = 0;
 
 	Initialise();
 }
@@ -955,8 +975,8 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, ch
 		// and need some way to mark the clipping as being stream or rectangular,
 		// the terminating \0 is included in the length for rectangular clippings.
 		// All other tested aplications behave benignly by ignoring the \0.
-		// The #ifndef is the responsibility of archaeopteryx.com who say its
-		// needed because on Windows there is already a '\0' at the end.
+		// The #ifndef is here because on Windows cfColumnSelect clip entry is used 
+                // instead as standard indicator of rectangularness (so no need to kludge)
 #ifndef _MSC_VER
 		if (isRectangular)
 			len++;
@@ -1084,7 +1104,7 @@ gint ScintillaGTK::Press(GtkWidget *widget, GdkEventButton *event) {
 		gdk_window_get_origin(sciThis->wMain.GetID()->window, &ox, &oy);
 		sciThis->ContextMenu(Point(pt.x + ox, pt.y + oy));
 	} else if (event->button == 4) {
-		// Wheel scrolling up
+		// Wheel scrolling up (only xwin gtk does it this way)
 		if (ctrl)
 			gtk_adjustment_set_value(GTK_ADJUSTMENT(sciThis->adjustmenth), (
 			                             (sciThis->xOffset) / 2 ) - 6);
@@ -1092,7 +1112,7 @@ gint ScintillaGTK::Press(GtkWidget *widget, GdkEventButton *event) {
 			gtk_adjustment_set_value(GTK_ADJUSTMENT(sciThis->adjustmentv),
 			                         sciThis->topLine - 3);
 	} else if ( event->button == 5 ) {
-		// Wheel scrolling down
+		// Wheel scrolling down (only xwin gtk does it this way)
 		if (ctrl)
 			gtk_adjustment_set_value(GTK_ADJUSTMENT(sciThis->adjustmenth), (
 			                             (sciThis->xOffset) / 2 ) + 6);
@@ -1122,6 +1142,71 @@ gint ScintillaGTK::MouseRelease(GtkWidget *widget, GdkEventButton *event) {
 	}
 	return FALSE;
 }
+
+// win32gtk has a special wheel mouse event for whatever reason and doesn't
+// use the button4/5 trick used under X windows.
+#ifdef _MSC_VER
+gint ScintillaGTK::ScrollEvent(GtkWidget *widget,
+                               GdkEventScroll *event) {
+	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
+
+	if (widget == NULL || event == NULL)
+		return FALSE;
+
+	// Compute amount and direction to scroll (even tho on win32 there is
+	// intensity of scrolling info in the native message, gtk doesn't
+	// support this so we simulate similarly adaptive scrolling)
+	int cLineScroll;
+	int timeDelta = 1000000;
+	GTimeVal curTime;
+	g_get_current_time(&curTime);
+	if (curTime.tv_sec == sciThis->lastWheelMouseTime.tv_sec)
+		timeDelta = curTime.tv_usec - sciThis->lastWheelMouseTime.tv_usec;
+	else if (curTime.tv_sec == sciThis->lastWheelMouseTime.tv_sec + 1) 
+		timeDelta = 1000000 + (curTime.tv_usec - sciThis->lastWheelMouseTime.tv_usec);
+	if ((event->direction == sciThis->lastWheelMouseDirection) && (timeDelta < 250000)) {
+		if (sciThis->wheelMouseIntensity < 12)
+			sciThis->wheelMouseIntensity++;
+		cLineScroll = sciThis->wheelMouseIntensity;
+	} else {
+		cLineScroll = sciThis->ucWheelScrollLines;
+		if (cLineScroll == 0)
+			cLineScroll = 4;
+		sciThis->wheelMouseIntensity = cLineScroll;
+	}
+	if (event->direction == GDK_SCROLL_UP) {
+		cLineScroll *= -1;
+	}
+	g_get_current_time(&sciThis->lastWheelMouseTime);
+	sciThis->lastWheelMouseDirection = event->direction;
+
+	// Note:  Unpatched versions of win32gtk don't set the 'state' value so 
+	// only regular scrolling is supported there.  Also, unpatched win32gtk
+	// issues spurious button 2 mouse events during wheeling, which can cause
+	// problems (a patch for both was submitted by archaeopteryx.com on 13Jun2001)
+
+	// Data zoom not supported
+	if (event->state & GDK_SHIFT_MASK) {
+		return FALSE;
+	}
+
+	// Text font size zoom
+	if (event->state & GDK_CONTROL_MASK) {
+		if (cLineScroll < 0) {
+			sciThis->KeyCommand(SCI_ZOOMIN);
+			return TRUE;
+		} else {
+			sciThis->KeyCommand(SCI_ZOOMOUT);
+			return TRUE;
+		}
+
+	// Regular scrolling
+	} else {
+		sciThis->ScrollTo(sciThis->topLine + cLineScroll);
+		return TRUE;
+	}
+}
+#endif
 
 gint ScintillaGTK::Motion(GtkWidget *widget, GdkEventMotion *event) {
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
@@ -1476,7 +1561,9 @@ void ScintillaGTK::ClassInit(GtkWidgetClass *widget_class) {
 	widget_class->motion_notify_event = Motion;
 	widget_class->button_press_event = Press;
 	widget_class->button_release_event = MouseRelease;
-
+#ifdef _MSC_VER
+	widget_class->scroll_event = ScrollEvent;
+#endif
 	widget_class->key_press_event = KeyPress;
 	widget_class->key_release_event = KeyRelease;
 	widget_class->focus_in_event = FocusIn;
