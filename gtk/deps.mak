@@ -1,8 +1,8 @@
-PlatGTK.o: PlatGTK.cxx \
+PlatGTK.o: PlatGTK.cxx Converter.h \
   ../include/Platform.h \
   ../include/Scintilla.h ../include/ScintillaWidget.h \
   ../src/UniConversion.h ../src/XPM.h
-ScintillaGTK.o: ScintillaGTK.cxx \
+ScintillaGTK.o: ScintillaGTK.cxx Converter.h \
   ../include/Platform.h \
   ../include/Scintilla.h ../include/ScintillaWidget.h \
   ../include/SciLexer.h ../include/PropSet.h ../include/SString.h \
