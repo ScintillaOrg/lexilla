@@ -352,8 +352,8 @@ public:
 		id = id_;
 		return *this;
 	}
-	WindowID GetID() { return id; }
-	bool Created() { return id != 0; }
+	WindowID GetID() const { return id; }
+	bool Created() const { return id != 0; }
 	void Destroy();
 	bool HasFocus();
 	PRectangle GetPosition();
