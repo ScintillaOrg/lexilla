@@ -103,6 +103,7 @@ class ScintillaGTK : public ScintillaBase {
 #if PLAT_GTK_WIN32
 	CLIPFORMAT cfColumnSelect;
 #endif
+
 #ifdef INTERNATIONAL_INPUT
 #if GTK_MAJOR_VERSION < 2
 	// Input context used for supporting internationalized key entry
@@ -112,6 +113,7 @@ class ScintillaGTK : public ScintillaBase {
 	GtkIMContext *im_context;
 #endif
 #endif
+
 	// Wheel mouse support
 	unsigned int linesPerScroll;
 	GTimeVal lastWheelMouseTime;
@@ -153,6 +155,8 @@ private:
 	virtual void NotifyParent(SCNotification scn);
 	void NotifyKey(int key, int modifiers);
 	void NotifyURIDropped(const char *list);
+	bool UseInputMethod() const;
+	const char *CharacterSetID() const;
 	virtual int KeyDefault(int key, int modifiers);
 	virtual void CopyToClipboard(const SelectionText &selectedText);
 	virtual void Copy();
@@ -956,7 +960,29 @@ void ScintillaGTK::NotifyURIDropped(const char *list) {
 
 	NotifyParent(scn);
 }
+
+bool ScintillaGTK::UseInputMethod() const {
+	switch (vs.styles[STYLE_DEFAULT].characterSet) {
+	case SC_CHARSET_CHINESEBIG5:
+	case SC_CHARSET_GB2312:
+	case SC_CHARSET_HANGUL:
+	case SC_CHARSET_SHIFTJIS:
+	case SC_CHARSET_JOHAB:
+	case SC_CHARSET_HEBREW:
+	case SC_CHARSET_ARABIC:
+	case SC_CHARSET_VIETNAMESE:
+	case SC_CHARSET_THAI:
+		return true;
+	default:
+		return false;
+	}
+}
+
 const char *CharacterSetID(int characterSet);
+
+const char *ScintillaGTK::CharacterSetID() const {
+	return ::CharacterSetID(vs.styles[STYLE_DEFAULT].characterSet);
+}
 
 #if GTK_MAJOR_VERSION >= 2
 #define IS_ACC(x) \
@@ -975,7 +1001,6 @@ const char *CharacterSetID(int characterSet);
 #define IS_ACC_OR_CHAR(x) \
 	(IS_CHAR(x)) || (IS_ACC(x))
 
-#ifndef INTERNATIONAL_INPUT
 static int MakeAccent(int key, int acc) {
 	const char *conv[] = {
 		"aeiounc AEIOUNC",
@@ -1008,52 +1033,50 @@ static int MakeAccent(int key, int acc) {
 	return key;
 }
 #endif
-#endif
 
 int ScintillaGTK::KeyDefault(int key, int modifiers) {
 	if (!(modifiers & SCI_CTRL) && !(modifiers & SCI_ALT)) {
-#ifndef INTERNATIONAL_INPUT
 #if GTK_MAJOR_VERSION >= 2
-		char utfVal[4]="\0\0\0";
-		wchar_t wcs[2];
-		if (IS_CHAR(key) && IS_ACC(lastKey)) {
-			lastKey = key = MakeAccent(key, lastKey);
-		}
-		if (IS_ACC_OR_CHAR(key)) {
-			lastKey = key;
-		}
-		wcs[0] = gdk_keyval_to_unicode(key);
-		wcs[1] = 0;
-		UTF8FromUCS2(wcs, 1, utfVal, 3);
-		if (key <= 0xFE00) {
-			if (IsUnicodeMode()) {
-				AddCharUTF(utfVal,strlen(utfVal));
-				return 1;
-			} else {
-				const char *source =
-					CharacterSetID(vs.styles[STYLE_DEFAULT].characterSet);
-				if (*source) {
-					iconv_t iconvh = iconv_open(source, "UTF-8");
-					if (iconvh != ((iconv_t)(-1))) {
-						char localeVal[4]="\0\0\0";
-						char *pin = utfVal;
-						size_t inLeft = strlen(utfVal);
-						char *pout = localeVal;
-						size_t outLeft = sizeof(localeVal);
-						size_t conversions = iconv_adaptor(iconv, iconvh, &pin, &inLeft, &pout, &outLeft);
-						iconv_close(iconvh);
-						if (conversions != ((size_t)(-1))) {
-							*pout = '\0';
-							for (int i=0; localeVal[i]; i++) {
-								AddChar(localeVal[i]);
+		if (!UseInputMethod()) {
+			char utfVal[4]="\0\0\0";
+			wchar_t wcs[2];
+			if (IS_CHAR(key) && IS_ACC(lastKey)) {
+				lastKey = key = MakeAccent(key, lastKey);
+			}
+			if (IS_ACC_OR_CHAR(key)) {
+				lastKey = key;
+			}
+			wcs[0] = gdk_keyval_to_unicode(key);
+			wcs[1] = 0;
+			UTF8FromUCS2(wcs, 1, utfVal, 3);
+			if (key <= 0xFE00) {
+				if (IsUnicodeMode()) {
+					AddCharUTF(utfVal,strlen(utfVal));
+					return 1;
+				} else {
+					const char *source = CharacterSetID();
+					if (*source) {
+						iconv_t iconvh = iconv_open(source, "UTF-8");
+						if (iconvh != ((iconv_t)(-1))) {
+							char localeVal[4]="\0\0\0";
+							char *pin = utfVal;
+							size_t inLeft = strlen(utfVal);
+							char *pout = localeVal;
+							size_t outLeft = sizeof(localeVal);
+							size_t conversions = iconv_adaptor(iconv, iconvh, &pin, &inLeft, &pout, &outLeft);
+							iconv_close(iconvh);
+							if (conversions != ((size_t)(-1))) {
+								*pout = '\0';
+								for (int i=0; localeVal[i]; i++) {
+									AddChar(localeVal[i]);
+								}
+								return 1;
 							}
-							return 1;
 						}
 					}
 				}
 			}
 		}
-#endif
 #endif
 		if (key < 256) {
 			AddChar(key);
@@ -1256,8 +1279,7 @@ void ScintillaGTK::GetGtkSelectionText(const GtkSelectionData *selectionData, Se
 
 #if !PLAT_GTK_WIN32
 	// Possible character set conversion
-	const char *charSetBuffer =
-		CharacterSetID(vs.styles[STYLE_DEFAULT].characterSet);
+	const char *charSetBuffer = CharacterSetID();
 	if (*charSetBuffer) {
 		if (IsUnicodeMode()) {
 			if (selectionType == GDK_TARGET_STRING) {
@@ -1364,8 +1386,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 		size_t len = strlen(selBuffer);
 #if !PLAT_GTK_WIN32
 		// Possible character set conversion
-		const char *charSetBuffer =
-			CharacterSetID(vs.styles[STYLE_DEFAULT].characterSet);
+		const char *charSetBuffer = CharacterSetID();
 		if (info == TARGET_UTF8_STRING) {
 			//fprintf(stderr, "Copy to clipboard as UTF-8\n");
 			if (!IsUnicodeMode()) {
@@ -1759,8 +1780,11 @@ gint ScintillaGTK::KeyThis(GdkEventKey *event) {
 		return true;
 	}
 #if GTK_MAJOR_VERSION >= 2
-	if (gtk_im_context_filter_keypress(im_context, event))
-		return 1;
+	if (UseInputMethod()) {
+		if (gtk_im_context_filter_keypress(im_context, event)) {
+			return 1;
+		}
+	}
 #endif
 
 	bool shift = (event->state & GDK_SHIFT_MASK) != 0;
