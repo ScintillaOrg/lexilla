@@ -628,7 +628,7 @@ void CellBuffer::RoomFor(int insertionLength) {
 	if (gaplen <= insertionLength) {
 		//Platform::DebugPrintf("need room %d %d\n", gaplen, insertionLength);
 		GapTo(length);
-		if (growSize * 4 < size)
+		if (growSize * 6 < size)
 			growSize *= 2;
 		int newSize = size + insertionLength + growSize;
 		//Platform::DebugPrintf("moved gap %d\n", newSize);
