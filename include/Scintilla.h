@@ -332,6 +332,7 @@ typedef long (*SciFnDirect)(long ptr, unsigned int iMessage, unsigned long wPara
 #define SCI_UPPERCASE 2341
 #define SCI_LINESCROLLDOWN 2342
 #define SCI_LINESCROLLUP 2343
+#define SCI_MOVECARETINSIDEVIEW 2401
 #define SCI_LINELENGTH 2350
 #define SCI_BRACEHIGHLIGHT 2351
 #define SCI_BRACEBADLIGHT 2352

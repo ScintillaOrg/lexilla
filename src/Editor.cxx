@@ -3,10 +3,10 @@
 // Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
-#include <stdlib.h> 
-#include <string.h> 
-#include <stdio.h> 
-#include <ctype.h> 
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <ctype.h>
 
 #include "Platform.h"
 
@@ -14,7 +14,7 @@
 
 #if PLAT_WX || PLAT_GTK
 #include "WinDefs.h"
-#endif 
+#endif
 
 #include "ContractionState.h"
 #include "SVector.h"
@@ -110,7 +110,7 @@ Editor::Editor() {
 
 #ifdef MACRO_SUPPORT
 	recordingMacro = 0;
-#endif 
+#endif
 	foldFlags = 0;
 }
 
@@ -308,7 +308,7 @@ int Editor::PositionFromLineX(int line, int x) {
 
 void Editor::RedrawRect(PRectangle rc) {
 	//Platform::DebugPrintf("Redraw %d %d - %d %d\n", rc.left, rc.top, rc.right, rc.bottom);
-	
+
 	// Clip the redraw rectangle into the client area
 	PRectangle rcClient = GetClientRectangle();
 	if (rc.top < rcClient.top)
@@ -319,7 +319,7 @@ void Editor::RedrawRect(PRectangle rc) {
 		rc.left = rcClient.left;
 	if (rc.right > rcClient.right)
 		rc.right = rcClient.right;
-	
+
 	if ((rc.bottom > rc.top) && (rc.right > rc.left)) {
 		wDraw.InvalidateRectangle(rc);
 	}
@@ -562,8 +562,8 @@ void Editor::MoveCaretInsideView() {
 	}
 }
 
-void Editor::EnsureCaretVisible(bool useMargin) {
-    //Platform::DebugPrintf("EnsureCaretVisible %d %s\n", xOffset, useMargin ? " margin" : " ");
+void Editor::EnsureCaretVisible(bool useMargin, bool vert, bool horiz) {
+	//Platform::DebugPrintf("EnsureCaretVisible %d %s\n", xOffset, useMargin ? " margin" : " ");
 	PRectangle rcClient = GetTextRectangle();
 	//int rcClientFullWidth = rcClient.Width();
 	int posCaret = currentPos;
@@ -586,7 +586,7 @@ void Editor::EnsureCaretVisible(bool useMargin) {
 	rcClient.right = rcClient.right - xMargin;
 
 	// Vertical positioning
-	if (!rcClient.Contains(pt) || !rcClient.Contains(ptBottomCaret) || (caretPolicy & CARET_STRICT)) {
+	if (vert && (!rcClient.Contains(pt) || !rcClient.Contains(ptBottomCaret) || (caretPolicy & CARET_STRICT))) {
 		//Platform::DebugPrintf("EnsureCaretVisible move, (%d,%d)(%d,%d)\n", pt.x, pt.y, rcClient.left, rcClient.right);
 		// It should be possible to scroll the window to show the caret,
 		// but this fails to remove the caret on GTK+
@@ -611,23 +611,25 @@ void Editor::EnsureCaretVisible(bool useMargin) {
 	}
 
 	// Horizontal positioning
-	int xOffsetNew = xOffset;
-	if (pt.x < rcClient.left) {
-		xOffsetNew = xOffset - (rcClient.left - pt.x);
-	} else if (((xOffset > 0) && useMargin) || pt.x >= rcClient.right) {
-		xOffsetNew = xOffset + (pt.x - rcClient.right);
-		int xOffsetEOL = xOffset + (ptEOL.x - rcClient.right) - xMargin + 2;
-		//Platform::DebugPrintf("Margin %d %d\n", xOffsetNew, xOffsetEOL);
-		// Ensure don't scroll out into empty space
-		if (xOffsetNew > xOffsetEOL)
-			xOffsetNew = xOffsetEOL;
-	}
-	if (xOffsetNew < 0)
-		xOffsetNew = 0;
-	if (xOffset != xOffsetNew) {
-		xOffset = xOffsetNew;
-		SetHorizontalScrollPos();
-		Redraw();
+	if (horiz) {
+		int xOffsetNew = xOffset;
+		if (pt.x < rcClient.left) {
+			xOffsetNew = xOffset - (rcClient.left - pt.x);
+		} else if (((xOffset > 0) && useMargin) || pt.x >= rcClient.right) {
+			xOffsetNew = xOffset + (pt.x - rcClient.right);
+			int xOffsetEOL = xOffset + (ptEOL.x - rcClient.right) - xMargin + 2;
+			//Platform::DebugPrintf("Margin %d %d\n", xOffsetNew, xOffsetEOL);
+			// Ensure don't scroll out into empty space
+			if (xOffsetNew > xOffsetEOL)
+				xOffsetNew = xOffsetEOL;
+		}
+		if (xOffsetNew < 0)
+			xOffsetNew = 0;
+		if (xOffset != xOffsetNew) {
+			xOffset = xOffsetNew;
+			SetHorizontalScrollPos();
+			Redraw();
+		}
 	}
 }
 
@@ -683,10 +685,10 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 			if (vs.ms[margin].symbol) {
 				/* alternate scheme:
 				if (vs.ms[margin].mask & SC_MASK_FOLDERS)
-					surface->FillRectangle(rcSelMargin, vs.styles[STYLE_DEFAULT].back.allocated); 
+					surface->FillRectangle(rcSelMargin, vs.styles[STYLE_DEFAULT].back.allocated);
 				else
 					// Required because of special way brush is created for selection margin
-					surface->FillRectangle(rcSelMargin, pixmapSelPattern); 
+					surface->FillRectangle(rcSelMargin, pixmapSelPattern);
 				*/
 				if (vs.ms[margin].mask & SC_MASK_FOLDERS)
 					// Required because of special way brush is created for selection margin
@@ -1308,8 +1310,6 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		}
 		//g_timer_destroy(tim);
 
-
-
 		PRectangle rcBeyondEOF = rcClient;
 		rcBeyondEOF.left = vs.fixedColumnWidth;
 		rcBeyondEOF.right = rcBeyondEOF.right;
@@ -1487,7 +1487,6 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 // Empty method is overridden on GTK+ to show / hide scrollbars
 void Editor::ReconfigureScrollBars() {}
 
-
 void Editor::SetScrollBarsTo(PRectangle) {
 	RefreshStyleData();
 
@@ -1506,9 +1505,6 @@ void Editor::SetScrollBarsTo(PRectangle) {
 		Redraw();
 	//Platform::DebugPrintf("end max = %d page = %d\n", nMax, nPage);
 }
-
-
-
 
 void Editor::SetScrollBars() {
 	PRectangle rsClient = GetClientRectangle();
@@ -1669,7 +1665,6 @@ void Editor::DelCharBack() {
 
 void Editor::NotifyFocus(bool) {}
 
-
 void Editor::NotifyStyleToNeeded(int endStyleNeeded) {
 	SCNotification scn;
 	scn.nmhdr.code = SCN_STYLENEEDED;
@@ -1693,7 +1688,7 @@ void Editor::NotifyChar(char ch) {
 		txt[1] = '\0';
 		NotifyMacroRecord(SCI_REPLACESEL, 0, reinterpret_cast<long>(txt));
 	}
-#endif 
+#endif
 }
 
 void Editor::NotifySavePoint(bool isSavePoint) {
@@ -1891,8 +1886,6 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 			NotifyChange();	// Send EN_CHANGE
 		}
 
-
-
 		SCNotification scn;
 		scn.nmhdr.code = SCN_MODIFIED;
 		scn.position = mh.position;
@@ -1920,6 +1913,10 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	case SCI_COPY:
 	case SCI_PASTE:
 	case SCI_CLEAR:
+	case WM_CUT:
+	case WM_COPY:
+	case WM_PASTE:
+	case WM_CLEAR:
 	case SCI_REPLACESEL:
 	case SCI_ADDTEXT:
 	case SCI_INSERTTEXT:
@@ -1942,6 +1939,10 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	case SCI_WORDLEFTEXTEND:
 	case SCI_WORDRIGHT:
 	case SCI_WORDRIGHTEXTEND:
+	case SCI_WORDPARTLEFT:
+	case SCI_WORDPARTLEFTEXTEND:
+	case SCI_WORDPARTRIGHT:
+	case SCI_WORDPARTRIGHTEXTEND:
 	case SCI_HOME:
 	case SCI_HOMEEXTEND:
 	case SCI_LINEEND:
@@ -1976,8 +1977,6 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	default:
 		//		printf("Filtered out %ld of macro recording\n", iMessage);
 
-
-
 		return ;
 	}
 
@@ -1989,7 +1988,7 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	scn.lParam = lParam;
 	NotifyParent(scn);
 }
-#endif 
+#endif
 
 // Force scroll and keep position relative to top of window
 void Editor::PageMove(int direction, bool extend) {
@@ -2031,7 +2030,6 @@ void Editor::ChangeCaseOfSelection(bool makeUpperCase) {
 	pdoc->EndUndoAction();
 }
 
-
 void Editor::LineTranspose() {
 	int line = pdoc->LineFromPosition(currentPos);
 	if (line > 0) {
@@ -2063,7 +2061,6 @@ void Editor::LineTranspose() {
 }
 
 void Editor::CancelModes() {}
-
 
 int Editor::KeyCommand(unsigned int iMessage) {
 	Point pt = LocationFromPosition(currentPos);
@@ -2183,7 +2180,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		ShowCaretAtCurrentPosition();
 		NotifyUpdateUI();
 		break;
-	case SCI_CANCEL:     	// Cancel any modes - handled in subclass
+	case SCI_CANCEL:      	// Cancel any modes - handled in subclass
 		// Also unselect text
 		CancelModes();
 		break;
@@ -2556,8 +2553,6 @@ void Editor::StartDrag() {
 	//DisplayCursor(Window::cursorArrow);
 }
 
-
-
 void Editor::DropAt(int position, const char *value, bool moving, bool rectangular) {
 	//Platform::DebugPrintf("DropAt %d\n", inDragDrop);
 	if (inDragDrop)
@@ -2768,7 +2763,6 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 				//lineAnchor = lineStart; // Keep the same anchor for ButtonMove
 			}
 
-
 			SetDragPosition(invalidPosition);
 			SetMouseCapture(true);
 			selectionType = selLine;
@@ -2802,6 +2796,14 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 void Editor::ButtonMove(Point pt) {
 	//Platform::DebugPrintf("Move %d %d\n", pt.x, pt.y);
 	if (HaveMouseCapture()) {
+
+		// Slow down autoscrolling/selection
+		autoScrollTimer.ticksToWait -= timer.tickSize;
+		if (autoScrollTimer.ticksToWait > 0)
+			return ;
+		autoScrollTimer.ticksToWait = autoScrollDelay;
+
+		// Adjust selection
 		xEndSelect = pt.x - vs.fixedColumnWidth + xOffset;
 		ptMouseLast = pt;
 		int movePos = PositionFromLocation(pt);
@@ -2826,13 +2828,27 @@ void Editor::ButtonMove(Point pt) {
 				LineSelection(lineMove, lineAnchor);
 			}
 		}
-		EnsureCaretVisible(false);
+
+		// Autoscroll
+		PRectangle rcClient = GetClientRectangle();
+		if (pt.y > rcClient.bottom) {
+			int lineMove = LineFromLocation(pt);
+			ScrollTo(lineMove - LinesOnScreen() + 5);
+			Redraw();
+		} else if (pt.y < rcClient.top) {
+			int lineMove = LineFromLocation(pt);
+			ScrollTo(lineMove - 5);
+			Redraw();
+		}
+		EnsureCaretVisible(false, false, true);
+
 	} else {
 		if (vs.fixedColumnWidth > 0) {	// There is a margin
 			if (PointInSelMargin(pt)) {
 				DisplayCursor(Window::cursorReverseArrow);
 				return ; 	// No need to test for selection
 			}
+
 		}
 		// Display regular (drag) cursor over selection
 		if (PointInSelection(pt))
@@ -3133,7 +3149,6 @@ static bool ValidMargin(unsigned long wParam) {
 	return wParam < ViewStyle::margins;
 }
 
-
 long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 	//Platform::DebugPrintf("S start wnd proc %d %d %d\n",iMessage, wParam, lParam);
 
@@ -3141,7 +3156,7 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 #ifdef MACRO_SUPPORT
 	if (recordingMacro)
 		NotifyMacroRecord(iMessage, wParam, lParam);
-#endif 
+#endif
 
 	switch (iMessage) {
 
@@ -3526,18 +3541,15 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 			return len; 	// Not including NUL
 		}
 
-
-
-
 	case EM_SELECTIONTYPE:
 #ifdef SEL_EMPTY
 		if (currentPos == anchor)
 			return SEL_EMPTY;
 		else
 			return SEL_TEXT;
-#else 
+#else
 		return 0;
-#endif 
+#endif
 
 	case EM_HIDESELECTION:
 		hideSelection = wParam;
@@ -3571,7 +3583,7 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 			vs.rightMarginWidth = vs.aveCharWidth / 2;
 		}
 		InvalidateStyleRedraw();
-#endif 
+#endif
 		break;
 
 	case SCI_SETMARGINLEFT:
@@ -3801,7 +3813,7 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 		pdoc->SetStyleFor(wParam, static_cast<char>(lParam));
 		break;
 
-	case SCI_SETSTYLINGEX:      // Specify a complete styling buffer
+	case SCI_SETSTYLINGEX:       // Specify a complete styling buffer
 		if (lParam == 0)
 			return 0;
 		pdoc->SetStyles(wParam, reinterpret_cast<char *>(lParam));
@@ -4420,7 +4432,11 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 	case SCI_STOPRECORD:
 		recordingMacro = 0;
 		return 0;
-#endif 
+#endif
+
+	case SCI_MOVECARETINSIDEVIEW:
+		MoveCaretInsideView();
+		break;
 
 	default:
 		return DefWndProc(iMessage, wParam, lParam);

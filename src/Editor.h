@@ -90,6 +90,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	Caret caret;
 	Timer timer;
+	Timer autoScrollTimer;
+	enum { autoScrollDelay = 200 };
 
 	Point lastClick;
 	unsigned int lastClickTime;
@@ -191,7 +193,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual void ScrollText(int linesToMove);
 	void HorizontalScrollTo(int xPos);
 	void MoveCaretInsideView();
-	void EnsureCaretVisible(bool useMargin=true);
+	void EnsureCaretVisible(bool useMargin=true, bool vert=true, bool horiz=true);
 	void ShowCaretAtCurrentPosition();
 	void DropCaret();
 	void InvalidateCaret();
