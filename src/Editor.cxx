@@ -1348,8 +1348,7 @@ void Editor::ClearSelection() {
 		int lineStart = pdoc->LineFromPosition(SelectionStart());
 		int lineEnd = pdoc->LineFromPosition(SelectionEnd());
 		int startPos = SelectionStart();
-		int line;
-		for (line=lineStart; line <= lineEnd; line++) {
+		for (int line=lineEnd; line >= lineStart; line--) {
 			startPos = SelectionStart(line);
 			unsigned int chars = SelectionEnd(line) - startPos;
 			if (0 != chars) {
@@ -1782,7 +1781,7 @@ void Editor::ChangeCaseOfSelection(bool makeUpperCase) {
 	if (selType == selRectangle) {
 		int lineStart = pdoc->LineFromPosition(SelectionStart());
 		int lineEnd = pdoc->LineFromPosition(SelectionEnd());
-		for (int line=lineStart; line <= lineEnd; line++) {
+		for (int line=lineEnd; line >= lineStart; line--) {
 			pdoc->ChangeCase(
 				Range(SelectionStart(line), SelectionEnd(line)), 
 				makeUpperCase);
