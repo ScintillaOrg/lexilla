@@ -131,10 +131,11 @@ void ContractionState::DeleteLines(int lineDoc, int lineCount) {
 	}
 	int delta = 0;
 	for (int d=0;d<lineCount;d++)
-		if (lines[lineDoc+d].visible)
+		if (lines[lineDoc+d].visible && (lineDoc+d != 0))
 			delta--;
 	for (int i = lineDoc; i < linesInDoc-lineCount; i++) {
-		lines[i].visible = lines[i + lineCount].visible;
+        if (i != 0) // Line zero is always visible
+		    lines[i].visible = lines[i + lineCount].visible;
 		lines[i].expanded = lines[i + lineCount].expanded;
 	}
 	linesInDoc -= lineCount;
@@ -153,6 +154,10 @@ bool ContractionState::GetVisible(int lineDoc) const {
 }
 
 bool ContractionState::SetVisible(int lineDocStart, int lineDocEnd, bool visible) {
+    if (lineDocStart == 0)
+        lineDocStart++;
+    if (lineDocStart > lineDocEnd)
+        return false;
 	if (size == 0) {
 		Grow(linesInDoc + growSize);
 	}

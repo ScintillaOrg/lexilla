@@ -1599,6 +1599,11 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 					}
 				}
 			}
+			if (mh.modificationType & SC_MOD_BEFOREINSERT) {
+				NotifyNeedShown(mh.position, 0);
+            } else if (mh.modificationType & SC_MOD_BEFOREDELETE) {
+				NotifyNeedShown(mh.position, mh.length);
+            }
 			if (mh.linesAdded != 0) {
 
 				// Update contraction state for inserted and removed lines
@@ -1606,7 +1611,6 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 				int lineOfPos = pdoc->LineFromPosition(mh.position);
 				if (mh.linesAdded > 0) {
 					cs.InsertLines(lineOfPos, mh.linesAdded);
-					NotifyNeedShown(mh.position, mh.length);
 				} else {
 					cs.DeleteLines(lineOfPos, -mh.linesAdded);
 				}
