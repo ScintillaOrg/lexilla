@@ -34,10 +34,12 @@ SOBJS	= ScintillaWin.obj ScintillaBase.obj Editor.obj Document.obj \
 $(COMPONENT): $(SOBJS) ScintRes.res
 	$(LD) -Tpd /c c0d32 $(SOBJS), $(COMPONENT), ,$(LDFLAGS), , ScintRes.res
 	
+LEXOBJS	= LexCPP.obj LexHTML.obj LexOthers.obj LexPerl.obj LexPython.obj LexSQL.obj LexVB.obj
+
 LOBJS	= ScintillaWinL.obj ScintillaBaseL.obj Editor.obj Document.obj \
 	ContractionState.obj CellBuffer.obj CallTip.obj \
 	PlatWin.obj KeyMap.obj Indicator.obj LineMarker.obj Style.obj \
-	ViewStyle.obj AutoComplete.obj KeyWords.obj Accessor.obj PropSet.obj
+	ViewStyle.obj AutoComplete.obj KeyWords.obj Accessor.obj PropSet.obj $(LEXOBJS)
 $(LEXCOMPONENT): $(LOBJS)
 	$(LD) -Tpd /c c0d32 $(LOBJS), $(LEXCOMPONENT), ,$(LDFLAGS), , ScintRes.res
 	

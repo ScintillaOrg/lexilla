@@ -29,6 +29,8 @@ ALL:	$(COMPONENT) $(LEXCOMPONENT) ScintillaWinS.o
 clean:
 	del /q *.exe *.o *.obj *.dll *.res *.map
 
+LEXOBJS	=  LexCPP.o LexHTML.o LexOthers.o LexPerl.o LexPython.o LexSQL.o LexVB.o
+
 SOBJS	= ScintillaWin.o ScintillaBase.o Editor.o Document.o \
 	ContractionState.o CellBuffer.o CallTip.o \
 	ScintRes.o PlatWin.o KeyMap.o Indicator.o LineMarker.o Style.o \
@@ -39,7 +41,7 @@ $(COMPONENT): $(SOBJS)
 LOBJS	= ScintillaWinL.o ScintillaBaseL.o Editor.o Document.o \
 	ContractionState.o CellBuffer.o CallTip.o \
 	ScintRes.o PlatWin.o KeyMap.o Indicator.o LineMarker.o Style.o \
-	ViewStyle.o AutoComplete.o KeyWords.o Accessor.o PropSet.o
+	ViewStyle.o AutoComplete.o KeyWords.o Accessor.o PropSet.o $(LEXOBJS)
 $(LEXCOMPONENT): $(LOBJS)
 	$(DLLWRAP) --target i386-mingw32 -o $(LEXCOMPONENT) $(LOBJS) $(LDFLAGS) -s --relocatable
 	
@@ -55,6 +57,20 @@ Editor.o: Editor.cxx Platform.h Scintilla.h ContractionState.h \
  Document.h Editor.h
 Indicator.o: Indicator.cxx Platform.h Scintilla.h Indicator.h
 KeyMap.o: KeyMap.cxx Platform.h Scintilla.h KeyMap.h
+LexCPP.o: LexCPP.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+ Scintilla.h SciLexer.h 
+LexHTML.o: LexHTML.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+ Scintilla.h SciLexer.h 
+LexOthers.o: LexOthers.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+ Scintilla.h SciLexer.h 
+LexPerl.o: LexPerl.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+ Scintilla.h SciLexer.h 
+LexPython.o: LexPython.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+ Scintilla.h SciLexer.h 
+LexSQL.o: LexSQL.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+ Scintilla.h SciLexer.h 
+LexVB.o: LexVB.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+ Scintilla.h SciLexer.h 
 KeyWords.o: KeyWords.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 
 LineMarker.o: LineMarker.cxx Platform.h Scintilla.h LineMarker.h
