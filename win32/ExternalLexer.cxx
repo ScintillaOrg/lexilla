@@ -62,7 +62,7 @@ void DeleteWLStrings(char *strs[]) {
 }
 
 void ExternalLexerModule::Lex(unsigned int startPos, int lengthDoc, int initStyle,
-                              WordList *keywordlists[], Accessor &styler) {
+                              WordList *keywordlists[], Accessor &styler) const {
 	if (!fneLexer)
 		return ;
 
@@ -81,7 +81,7 @@ void ExternalLexerModule::Lex(unsigned int startPos, int lengthDoc, int initStyl
 }
 
 void ExternalLexerModule::Fold(unsigned int startPos, int lengthDoc, int initStyle,
-                               WordList *keywordlists[], Accessor &styler) {
+                               WordList *keywordlists[], Accessor &styler) const {
 	if (!fneFolder)
 		return ;
 

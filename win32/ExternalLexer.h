@@ -31,9 +31,9 @@ public:
 		languageName = name;
 	};
 	virtual void Lex(unsigned int startPos, int lengthDoc, int initStyle,
-					WordList *keywordlists[], Accessor &styler);
+					WordList *keywordlists[], Accessor &styler) const;
 	virtual void Fold(unsigned int startPos, int lengthDoc, int initStyle,
-					WordList *keywordlists[], Accessor &styler);
+					WordList *keywordlists[], Accessor &styler) const;
 	virtual void SetExternal(ExtLexerFunction fLexer, ExtFoldFunction fFolder, int index);
 };
 
