@@ -92,12 +92,12 @@ class Point {
 public:
 	int x;
 	int y;
-	
+
 	Point(int x_=0, int y_=0) : x(x_), y(y_) {
 	}
 
 	// Other automatically defined methods (assignment, copy constructor, destructor) are fine
-	
+
 	static Point FromLong(long lpoint);
 };
 
@@ -119,6 +119,10 @@ public:
 
 	// Other automatically defined methods (assignment, copy constructor, destructor) are fine
 
+	bool operator==(PRectangle &rc) {
+		return (rc.left == left) && (rc.right == right) &&
+			(rc.top == top) && (rc.bottom == bottom);
+	}
 	bool Contains(Point pt) {
 		return (pt.x >= left) && (pt.x <= right) &&
 			(pt.y >= top) && (pt.y <= bottom);
@@ -153,7 +157,7 @@ public:
 	unsigned int GetRed();
 	unsigned int GetGreen();
 	unsigned int GetBlue();
-	
+
 	friend class Surface;
 	friend class Palette;
 };
@@ -193,12 +197,12 @@ class Palette {
 #endif
 public:
 	bool allowRealization;
-	
+
 	Palette();
 	~Palette();
 
 	void Release();
-	
+
 	/**
 	 * This method either adds a colour to the list of wanted colours (want==true)
 	 * or retrieves the allocated colour back to the ColourPair.
@@ -207,7 +211,7 @@ public:
 	void WantFind(ColourPair &cp, bool want);
 
 	void Allocate(Window &w);
-	
+
 	friend class Surface;
 };
 
@@ -280,7 +284,7 @@ private:
 public:
 	Surface();
 	~Surface();
-	
+
 	void Init();
 	void Init(SurfaceID hdc_);
 	void InitPixMap(int width, int height, Surface *surface_);
@@ -311,7 +315,7 @@ public:
 	int ExternalLeading(Font &font_);
 	int Height(Font &font_);
 	int AverageCharWidth(Font &font_);
-	
+
 	int SetPalette(Palette *pal, bool inBackGround);
 	void SetClip(PRectangle rc);
 	void FlushCachedState();
@@ -424,7 +428,7 @@ public:
 	static bool IsKeyDown(int key);
 	static long SendScintilla(
 		WindowID w, unsigned int msg, unsigned long wParam=0, long lParam=0);
-	
+
 	// These are utility functions not really tied to a platform
 	static int Minimum(int a, int b);
 	static int Maximum(int a, int b);
