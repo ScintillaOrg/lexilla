@@ -338,7 +338,7 @@ int Document::Undo() {
 		enteredCount++;
 		bool startSavePoint = cb.IsSavePoint();
 		int steps = cb.StartUndo();
-		Platform::DebugPrintf("Steps=%d\n", steps);
+		//Platform::DebugPrintf("Steps=%d\n", steps);
 		for (int step=0; step<steps; step++) {
 			int prevLinesTotal = LinesTotal();
 			const Action &action = cb.UndoStep();
@@ -349,11 +349,9 @@ int Document::Undo() {
 			int modFlags = SC_PERFORMED_UNDO;
 			// With undo, an insertion action becomes a deletion notification
 			if (action.at == removeAction) {
-		Platform::DebugPrintf("Insert of %d\n", action.lenData);
 				newPos += action.lenData;
 				modFlags |= SC_MOD_INSERTTEXT;
 			} else {
-		Platform::DebugPrintf("Remove of %d\n", action.lenData);
 				modFlags |= SC_MOD_DELETETEXT;
 			}
 			if (step == steps-1)
