@@ -153,6 +153,94 @@
       <li>
         Released on 6 November 2000.
       </li>
+      <li>
+        XIM support for the GTK+ version of Scintilla ensures that more non-English 
+        characters can be typed.
+      </li>
+      <li>
+        Caret may be 1, 2, or 3 pixels wide. 
+      </li>
+      <li>
+        Cursor may be switched to wait image during lengthy processing.
+      </li>
+      <li>
+        Scintilla's internal focus flag is exposed for clients where focus is handled in 
+        complex ways.
+      </li>
+      <li>
+        Error status defined for Scintilla to hold indication that an operation failed and the reason
+        for that failure. No detection yet implemented but clients may start using the interface
+        so as to be ready for when it does.
+      </li>
+      <li>
+        Context sensitive help in SciTE. 
+      </li>
+      <li>
+        CurrentWord property available in SciTE holding the value of the word the 
+        caret is within or near.
+      </li>
+      <li>
+        Apache CONF file lexer.
+      </li>
+      <li>
+        Changes to Python lexer to allow 'as' as a context sensitive keyword and the 
+        string forms starting with u, r, and ur to be recognised.
+      </li>
+      <li>
+        SCN_POSCHANGED notification now working and SCN_PAINTED notification added.
+      </li>
+      <li>
+        Word part movement commands for cursoring between the parts of reallyLongCamelIdentifiers and
+        other_wasy_of_making_words.
+      </li>
+      <li>
+        When text on only one line is selected, Shift+Tab moves to the previous tab stop.
+      </li>
+      <li>
+        Tab control available for Windows version of SciTE listing all the buffers
+        and making it easy to switch between them.
+      </li>
+      <li>
+        SciTE can be set to automatically determine the line ending type from the contents of a
+        file when it is opened. 
+      </li>
+      <li>
+        Dialogs in GTK+ version of SciTE made more modal and have accelerator keys.
+      </li>
+      <li>
+        Find in Files command in GTK+ version of SciTE allows choice of directory.
+      </li>
+      <li>
+        On Windows, multiple files can be opened at once.
+      </li>
+      <li>
+        SciTE source broken up into more files.
+      </li>
+      <li>
+        Scintilla headers made safe for C language, not just C++.
+      </li>
+      <li>
+        New printing modes - force background to white and force default background to white.
+      </li>
+      <li>
+        Automatic unfolding not occurring when Enter pressed at end of line bug fixed.
+      </li>
+      <li>
+        Bugs fixed in line selection.
+      </li>
+      <li>
+        Bug fixed with escapes in PHP strings in the HTML lexer.
+      </li>
+      <li>
+        Bug fixed in SciTE for GTK+ opening files when given full paths.
+      </li>
+      <li>
+        Bug fixed in autocompletion where user backspaces into existing text.
+      </li>
+      <li>
+        Bugs fixed in opening files and ensuring they are saved before running. 
+        A case bug also fixed here.
+      </li>
     </ul>
     <h3>
        <a href="scite132.zip">Release 1.32</a>

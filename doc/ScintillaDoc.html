@@ -122,6 +122,19 @@ SCI_CLEAR
 SCI_CANPASTE
 </pre>
     <h3>
+       Error handling
+    </h3>
+<pre>
+SCI_SETSTATUS
+SCI_GETSTATUS
+</pre>
+    <p>
+      If an error occurs, Scintilla may set an internal error number which can be retrieved 
+      with SCI_GETSTATUS.
+      Not currently used but will be in the future.
+      To clear the error status call SCI_SETSTATUS(0).
+    </p>
+    <h3>
        Undo and Redo
     </h3>
 <pre>
@@ -232,6 +245,31 @@ SCI_SETVIEWWS(bool visible)
       as light arrows pointing to the right.
     </p>
     <h3>
+       Cursor
+    </h3>
+<pre>
+SCI_SETCURSOR
+SCI_GETCURSOR
+</pre>
+    <p>
+       The cursor is normally chosen in a context sensitive way so will be different over
+       the margin than when over the text. When performing a slow action, a wait cursor
+       can be shown by calling SCI_SETCURSOR(SC_CURSORWAIT) and restored 
+       with SCI_SETCURSOR(SC_CURSORNORMAL).
+    </p>
+    <h3>
+       Mouse Capture
+    </h3>
+<pre>
+SCI_SETMOUSEDOWNCAPTURES(bool captures)
+SCI_GETMOUSEDOWNCAPTURES
+</pre>
+    <p>
+       When the mouse is pressed inside Scintilla, it is captured so future mouse movement
+       events are sent to Scintilla. This behaviour may be turned off with 
+       SCI_SETMOUSEDOWNCAPTURES(false).
+    </p>
+    <h3>
        Line endings
     </h3>
 <pre>
@@ -339,6 +377,8 @@ SCI_SETCARETFORE(int colour)
 SCI_GETCARETFORE
 SCI_GETCARETPERIOD
 SCI_SETCARETPERIOD(int milliseconds)
+SCI_GETCARETWIDTH
+SCI_SETCARETWIDTH(int pixels)
 </pre>
     <p>
        The selection is shown by changing the foreground and / or background colours. If one of
@@ -350,7 +390,8 @@ SCI_SETCARETPERIOD(int milliseconds)
        The colour of the caret can be set with SCI_SETCARETFORE. The rate at which the caret blinks
       can be set with SCI_SETCARETPERIOD which determines the time in milliseconds that the caret
       is visible or invisible before changing state. Setting the period to 0 stops the caret
-      blinking.
+      blinking. The width of the caret can be set with SCI_SETCARETWIDTH to a value
+      of 1, 2 or 3 pixels.
     </p>
     <h3>
        Margins
@@ -476,10 +517,18 @@ SCI_SETWORDCHARS(&lt;unused&gt;, char *chars)
     </p>
 <pre>
 SCI_GRABFOCUS
+SCI_SETFOCUS(bool focus)
+SCI_GETFOCUS
 </pre>
     <p>
        On GTK+, focus handling is more complicated than on Windows, so Scintilla can be told with
       this message to grab the focus.
+    </p>
+    <p>
+       The internal focus flag can be set with SCI_SETFOCUS.
+       This is used by clients which have complex focus requirements such as 
+       having their own window which gets the real focus but with the need to indicate that 
+       Scintilla has the logical focus.
     </p>
     <h3>
        Brace highlighting
@@ -704,6 +753,10 @@ SCI_LINEDELETE
 SCI_LINETRANSPOSE
 SCI_LOWERCASE
 SCI_UPPERCASE
+SCI_WORDPARTLEFT
+SCI_WORDPARTLEFTEXTEND
+SCI_WORDPARTRIGHT
+SCI_WORDPARTRIGHTEXTEND
 </pre>
     <p>
        To allow the container application to perform any of the actions available to the user with
@@ -1071,6 +1124,14 @@ SCN_NEEDSHOWN
       is deleted. This message is sent to the container in case it wants to make the line
       visible in some unusual way such as making the whole document visible. Most containers 
       will just ensure each line in the range is visible by calling SCI_ENSUREVISIBLE.
+    </p>
+    <h3>
+<pre>
+SCN_PAINTED
+</pre>
+    <p>
+      Painting has just been done. Useful when you want to update some other widgets
+      based on a change in Scintilla, but want to have the paint occur first to appear more responsive.
     </p>
     <h3>
        Edit messages currently supported by Scintilla which will be removed in the future.
