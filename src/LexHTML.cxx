@@ -370,7 +370,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 
 	// If inside a tag, it may be a script tag, so reread from the start to ensure any language tags are seen
 	if (InTagState(state)) {
-		while ((startPos > 1) && (InTagState(styler.StyleAt(startPos - 1)))) {
+		while ((startPos > 0) && (InTagState(styler.StyleAt(startPos - 1)))) {
 			startPos--;
             length++;
 		}
