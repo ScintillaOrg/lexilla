@@ -898,6 +898,7 @@ struct TextToFind {
      <a class="message" href="#SCI_GETLINEENDPOSITION">SCI_GETLINEENDPOSITION(int line)</a><br />
      <a class="message" href="#SCI_LINELENGTH">SCI_LINELENGTH(int line)</a><br />
      <a class="message" href="#SCI_GETCOLUMN">SCI_GETCOLUMN(int position)</a><br />
+     <a class="message" href="#SCI_FINDCOLUMN">SCI_FINDCOLUMN(int line, int column)</a><br />
      <a class="message" href="#SCI_POSITIONFROMPOINT">SCI_POSITIONFROMPOINT(int x, int y)</a><br />
      <a class="message" href="#SCI_POSITIONFROMPOINTCLOSE">SCI_POSITIONFROMPOINTCLOSE(int x, int
     y)</a><br />
@@ -1225,6 +1226,11 @@ struct TextToFind {
     <code>pos</code>. If there are no tab characters on the line, the return value is the number of
     characters up to the position on the line. In both cases, double byte characters count as a
     single character. This is probably only useful with monospaced fonts.</p>
+
+    <p><b id="SCI_FINDCOLUMN">SCI_FINDCOLUMN(int line, int column)</b><br />
+     This message returns the position of a <code>column</code> on a <code>line</code>
+    taking the width of tabs into account. It treats a multi-byte character as a single column.
+    Column numbers, like lines start at 0.</p>
 
     <p><b id="SCI_POSITIONFROMPOINT">SCI_POSITIONFROMPOINT(int x, int y)</b><br />
      <b id="SCI_POSITIONFROMPOINTCLOSE">SCI_POSITIONFROMPOINTCLOSE(int x, int y)</b><br />

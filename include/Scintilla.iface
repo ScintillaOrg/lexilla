@@ -1595,6 +1595,10 @@ fun void SetLengthForEncode=2448(int bytes,)
 # On error return 0.
 fun int EncodedFromUTF8=2449(string utf8, stringresult encoded)
 
+# Find the position of a column on a line taking into account tabs and 
+# multi-byte characters. If beyond end of line, return line end position.
+fun int FindColumn=2456(int line, int column)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 

@@ -6307,6 +6307,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETCOLUMN:
 		return pdoc->GetColumn(wParam);
 
+	case SCI_FINDCOLUMN:
+		return pdoc->FindColumn(wParam, lParam);
+
 	case SCI_SETHSCROLLBAR :
 		if (horizontalScrollBarVisible != (wParam != 0)) {
 			horizontalScrollBarVisible = wParam != 0;
