@@ -1024,6 +1024,7 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 #ifdef USE_PANGO
 		if (PFont(font_)->pfd) {
 			char *utfForm = 0;
+			bool useGFree = false;
 			if (et == UTF8) {
 				pango_layout_set_text(layout, s, len);
 			} else {
@@ -1031,14 +1032,25 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 					// Convert to utf8
 					utfForm = UTF8FromDBCS(s, len);
 				}
-				if (!utfForm)	// Latin1 or DBCS failed so treat as Latin1
+				if (!utfForm) {	// DBCS failed so treat as locale
+					gsize w; // stub
+					utfForm = g_locale_to_utf8(s, len, NULL, &w, NULL);
+					useGFree = true;
+				};
+				if (!utfForm) {	// g_locale_to_utf8 failed so treat as Latin1
 					utfForm = UTF8FromLatin1(s, len);
+					useGFree = false;
+				}
 				pango_layout_set_text(layout, utfForm, strlen(utfForm));
 			}
 			pango_layout_set_font_description(layout, PFont(font_)->pfd);
 			PangoLayoutLine *pll = pango_layout_get_line(layout,0);
 			gdk_draw_layout_line(drawable, gc, x, ybase, pll);
-			delete []utfForm;
+			if (useGFree) {
+				g_free(utfForm);
+			} else {
+				delete []utfForm;
+			}
 			return;
 		}
 #endif
@@ -1148,8 +1160,8 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 						int i = 0;
 						int iU = 0;
 						while (i < len) {
-							pango_layout_index_to_pos(layout, iU+1, &pos);
 							iU += UTF8Len(utfForm[iU]);
+							pango_layout_index_to_pos(layout, iU, &pos);
 							size_t lenChar = mblen(s+i, MB_CUR_MAX);
 							while (lenChar--) {
 								positions[i++] = PANGO_PIXELS(pos.x);
@@ -1160,17 +1172,28 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 					delete []wctext;
 				}
 				if (wclen < 1 ) {
-					// Either Latin1 or DBCS conversion failed so treat as Latin1.
-					char *utfForm = UTF8FromLatin1(s, len);
+					// Either DBCS conversion failed or is 8 bit string so
+					// try as current locale and if that fails treat as Latin1.
+					gsize w; // stub
+					char *utfForm = g_locale_to_utf8(s, len, NULL, &w, NULL);
+					bool useGFree = true;
+					if (!utfForm) {
+						utfForm = UTF8FromLatin1(s, len);
+						useGFree = false;
+					}
 					pango_layout_set_text(layout, utfForm, strlen(utfForm));
 					int i = 0;
 					int iU = 0;
 					while (i < len) {
-						pango_layout_index_to_pos(layout, iU+1, &pos);
-						iU += UTF8Len(s[i]);
+						iU += UTF8Len(utfForm[iU]);
+						pango_layout_index_to_pos(layout, iU, &pos);
 						positions[i++] = PANGO_PIXELS(pos.x);
 					}
-					delete []utfForm;
+					if (useGFree) {
+						g_free(utfForm);
+					} else {
+						delete []utfForm;
+					}
 				}
 			}
 			if (len == 1) {
@@ -1237,6 +1260,7 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 			char *utfForm = 0;
 			pango_layout_set_font_description(layout, PFont(font_)->pfd);
 			PangoRectangle pos;
+			bool useGFree = false;
 			if (et == UTF8) {
 				pango_layout_set_text(layout, s, len);
 			} else {
@@ -1244,13 +1268,25 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 					// Convert to utf8
 					utfForm = UTF8FromDBCS(s, len);
 				}
-				if (!utfForm)	// Latin1 or DBCS failed so treat as Latin1
+				if (!utfForm) {	// DBCS failed so treat as locale
+					gsize w;
+					utfForm = g_locale_to_utf8(s, len, NULL, &w, NULL);
+					useGFree = true;
+				};
+				if (!utfForm) {	// g_locale_to_utf8 failed so treat as Latin1
 					utfForm = UTF8FromLatin1(s, len);
+					useGFree = false;
+				}
 				pango_layout_set_text(layout, utfForm, strlen(utfForm));
+				// TODO: len = strlen(utfForm)
 			}
 			pango_layout_index_to_pos(layout, len, &pos);
 			int width = PANGO_PIXELS(pos.x);
-			delete []utfForm;
+			if (useGFree) {
+				g_free(utfForm);
+			} else {
+				delete []utfForm;
+			}
 			return width;
 		}
 #endif
