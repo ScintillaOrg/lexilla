@@ -1,5 +1,5 @@
 # Make file for Scintilla on Linux or compatible OS
-# Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
+# Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 # The License.txt file describes the conditions under which this software may be distributed.
 # This makefile assumes GCC 2.95.2 is used and changes will be needed to use other compilers.
 # GNU make does not like \r\n line endings so should be saved to CVS in binary form.
@@ -13,10 +13,8 @@ COMPLIB=../bin/scintilla.a
 vpath %.h ../src ../include
 vpath %.cxx ../src
 
-#CXXFLAGS= -g -DGTK -DSCI_LEXER -Wwrite-strings
 INCLUDEDIRS=-I ../include -I ../src
-XIMFLAGS= -DUSE_XIM
-CXXBASEFLAGS= -DGTK -DSCI_LEXER -W -Wall $(XIMFLAGS)
+CXXBASEFLAGS= -DGTK -DSCI_LEXER -W -Wall
 
 ifdef DEBUG
 CXXFLAGS=-DDEBUG $(CXXBASEFLAGS)
