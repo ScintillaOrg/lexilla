@@ -235,7 +235,8 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 				}
 				sc.Forward();	// Eat the * so it isn't used for the end of the comment
 			} else if (sc.Match('/', '/')) {
-				if (sc.Match("///") || sc.Match("//!"))	// Support of Qt/Doxygen doc. style
+				if ((sc.Match("///") && !sc.Match("////")) || sc.Match("//!"))
+					// Support of Qt/Doxygen doc. style
 					sc.SetState(SCE_C_COMMENTLINEDOC);
 				else
 					sc.SetState(SCE_C_COMMENTLINE);
