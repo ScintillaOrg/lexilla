@@ -98,6 +98,7 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	edgecolour.desired = source.edgecolour.desired;
 	edgeState = source.edgeState;
 	caretWidth = source.caretWidth;
+	someStylesProtected = false;
 	leftMarginWidth = source.leftMarginWidth;
 	rightMarginWidth = source.rightMarginWidth;
 	for (int i=0;i < margins; i++) {
