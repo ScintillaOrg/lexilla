@@ -11,8 +11,8 @@
 
 #include "Platform.h"
 
-#include "ScintillaWidget.h"
 #include "Scintilla.h"
+#include "ScintillaWidget.h"
 
 /* Use fast way of getting char data on win32 to work around problems 
    with gdk_string_extents. */

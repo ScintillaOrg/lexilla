@@ -11,8 +11,8 @@
 
 #include "Platform.h"
 
-#include "ScintillaWidget.h"
 #include "Scintilla.h"
+#include "ScintillaWidget.h"
 #ifdef SCI_LEXER
 #include "SciLexer.h"
 #include "PropSet.h"
@@ -1296,7 +1296,7 @@ gint ScintillaGTK::ExposeCT(GtkWidget *widget, GdkEventExpose * /*ose*/, CallTip
 }
 
 sptr_t ScintillaGTK::DirectFunction(
-    ScintillaGTK *sciThis, unsigned int iMessage, sptr_t wParam, sptr_t lParam) {
+    ScintillaGTK *sciThis, unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	return sciThis->WndProc(iMessage, wParam, lParam);
 }
 

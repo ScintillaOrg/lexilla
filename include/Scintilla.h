@@ -21,11 +21,8 @@ void Scintilla_RegisterClasses(HINSTANCE hInstance);
 // Here should be placed typedefs for uptr_t, an unsigned integer type large enough to
 // hold a pointer and sptr_t, a signed integer large enough to hold a pointer.
 // May need to be changed for 64 bit platforms.
-#ifndef POINTER_TYPES
-#define POINTER_TYPES
 typedef unsigned long uptr_t;
 typedef long sptr_t;
-#endif
 
 typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
