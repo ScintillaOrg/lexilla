@@ -1,8 +1,8 @@
 # Make file for Scintilla on Linux or compatible OS
 # Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
 # The License.txt file describes the conditions under which this software may be distributed.
-# This makefile assumes GCC 2.95.2 is used and changes will
-# be needed to use other compilers.
+# This makefile assumes GCC 2.95.2 is used and changes will be needed to use other compilers.
+# GNU make does not like \r\n line endings so should be saved to CVS in binary form.
 
 .SUFFIXES: .cxx .o .h .a
 CC = g++
