@@ -1266,7 +1266,7 @@ get bool GetMouseDownCaptures=2385(,)
 
 enu CursorShape=SC_CURSOR
 val SC_CURSORNORMAL=-1
-val SC_CURSORWAIT=3
+val SC_CURSORWAIT=4
 # Sets the cursor to one of the SC_CURSOR* values.
 set void SetCursor=2386(int cursorType,)
 # Get cursor type.

@@ -469,7 +469,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_SETMOUSEDOWNCAPTURES 2384
 #define SCI_GETMOUSEDOWNCAPTURES 2385
 #define SC_CURSORNORMAL -1
-#define SC_CURSORWAIT 3
+#define SC_CURSORWAIT 4
 #define SCI_SETCURSOR 2386
 #define SCI_GETCURSOR 2387
 #define SCI_SETCONTROLCHARSYMBOL 2388
