@@ -1331,13 +1331,17 @@ PRectangle ListBoxX::GetDesiredRect() {
 	return rc;
 }
 
+int ListBoxX::CaretFromEdge() {
+	return 4 + xset.GetWidth();
+}
+
 void ListBoxX::Clear() {
 	gtk_clist_clear(GTK_CLIST(list));
 	maxItemCharacters = 0;
 }
 
-static void init_pixmap(ListImage *li, GtkWidget *window) {
-	const char *textForm = li->xpm_data;
+static void init_pixmap(ListImage *list_image, GtkWidget *window) {
+	const char *textForm = list_image->xpm_data;
 	const char * const * xpm_lineform = reinterpret_cast<const char * const *>(textForm);
 	const char **xpm_lineformfromtext = 0;
 	// The XPM data can be either in atext form as will be read from a file
@@ -1350,13 +1354,21 @@ static void init_pixmap(ListImage *li, GtkWidget *window) {
 		xpm_lineform = xpm_lineformfromtext;
 	}
 
-	li->pixmap = gdk_pixmap_colormap_create_from_xpm_d(NULL
-	             , gtk_widget_get_colormap(window), &(li->bitmap), NULL
+	// Drop any existing pixmap/bitmap as data may have changed
+	if (list_image->pixmap)
+		gdk_pixmap_unref(list_image->pixmap);
+	list_image->pixmap = NULL;
+	if (list_image->bitmap)
+		gdk_bitmap_unref(list_image->bitmap);
+	list_image->bitmap = NULL;
+		
+	list_image->pixmap = gdk_pixmap_colormap_create_from_xpm_d(NULL
+	             , gtk_widget_get_colormap(window), &(list_image->bitmap), NULL
 	             , (gchar **) xpm_lineform);
-	if (NULL == li->pixmap) {
-		if (li->bitmap)
-			gdk_bitmap_unref(li->bitmap);
-		li->bitmap = NULL;
+	if (NULL == list_image->pixmap) {
+		if (list_image->bitmap)
+			gdk_bitmap_unref(list_image->bitmap);
+		list_image->bitmap = NULL;
 	}
 	delete []xpm_lineformfromtext;
 }
@@ -1366,9 +1378,10 @@ static void init_pixmap(ListImage *li, GtkWidget *window) {
 void ListBoxX::Append(char *s, int type) {
 	char * szs[] = { s, NULL };
 	ListImage *list_image = NULL;
-	if (type >= 0)
+	if ((type >= 0) && pixhash) {
 		list_image = (ListImage *) g_hash_table_lookup((GHashTable *) pixhash
 		             , (gconstpointer) GINT_TO_POINTER(type));
+	}
 	int rownum = gtk_clist_append(GTK_CLIST(list), szs);
 	if (list_image) {
 		if (NULL == list_image->pixmap)
@@ -1439,25 +1452,33 @@ void ListBoxX::Sort() {
 #endif
 
 void ListBoxX::RegisterImage(int type, const char *xpm_data) {
-	ListImage *list_image;
 	g_return_if_fail(xpm_data);
 
-	// Saved and use the saved copy so caller's copy an disappear.
+	// Saved and use the saved copy so caller's copy can disappear.
 	xset.Add(type, xpm_data);
-	xpm_data = reinterpret_cast<const char *>(xset.Get(type));
+	XPM *pxpm = xset.Get(type);
+	xpm_data = reinterpret_cast<const char *>(pxpm->InLinesForm());
 
-	if (NULL == pixhash)
+	if (!pixhash) {
 		pixhash = g_hash_table_new(g_direct_hash, g_direct_equal);
-	else {
-		list_image = (ListImage *) g_hash_table_lookup((GHashTable *) pixhash
-		             , (gconstpointer) GINT_TO_POINTER(type));
-		if (list_image)
-			return;
 	}
-	list_image = g_new0(ListImage, 1);
-	list_image->xpm_data = xpm_data;
-	g_hash_table_insert((GHashTable *) pixhash, GINT_TO_POINTER(type)
-	                    , (gpointer) list_image);
+	ListImage *list_image = (ListImage *) g_hash_table_lookup((GHashTable *) pixhash,
+		(gconstpointer) GINT_TO_POINTER(type));
+	if (list_image) {
+		// Drop icon already registered
+		if (list_image->pixmap)
+			gdk_pixmap_unref(list_image->pixmap);
+		list_image->pixmap = 0;
+		if (list_image->bitmap)
+			gdk_bitmap_unref(list_image->bitmap);
+		list_image->bitmap = 0;
+		list_image->xpm_data = xpm_data;
+	} else {
+		list_image = g_new0(ListImage, 1);
+		list_image->xpm_data = xpm_data;
+		g_hash_table_insert((GHashTable *) pixhash, GINT_TO_POINTER(type), 
+			(gpointer) list_image);
+	}
 }
 
 void ListBoxX::ClearRegisteredImages() {
