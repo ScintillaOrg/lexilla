@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <assert.h>
 
 #include "Platform.h"
 
@@ -295,7 +296,7 @@ LRESULT ScintillaWin::WndPaint(unsigned long wParam) {
 	paintState = painting;
 	PAINTSTRUCT ps;
 	PAINTSTRUCT* pps;
-
+//assert(wParam);
 	bool IsOcxCtrl = (wParam != 0); // if wParam != 0, it contains 
 								   // a PAINSTRUCT* from the OCX
 	if(IsOcxCtrl)

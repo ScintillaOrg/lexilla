@@ -18,7 +18,13 @@ LDFLAGS = -lkernel32 -luser32 -lgdi32 -limm32 -lole32 -luuid
 # Add -MMD to get dependencies
 #CXXFLAGS = -g -pg -pedantic -Os -fno-exceptions -fvtable-thunks -fno-rtti
 INCLUDEDIRS=-I ../include -I ../src
-CXXFLAGS = -W -Wall -pedantic $(INCLUDEDIRS) -Os -fno-exceptions -fvtable-thunks -fno-rtti 
+CXXBASEFLAGS = -W -Wall -pedantic $(INCLUDEDIRS) -Os -fno-exceptions -fvtable-thunks -fno-rtti 
+
+ifdef DEBUG
+CXXFLAGS=-DDEBUG $(CXXBASEFLAGS)
+else
+CXXFLAGS=-DNDEBUG $(CXXBASEFLAGS)
+endif
 
 .cxx.o:
 	$(CC) $(CXXFLAGS) -c $< -o $@
