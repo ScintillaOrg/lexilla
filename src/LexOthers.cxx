@@ -352,6 +352,10 @@ static void ColouriseErrorListLine(
 	           strstr(lineBuffer, " line ") < lineBuffer + lengthLine) {
 		// perl error message
 		styler.ColourTo(endPos, SCE_ERR_PERL);
+	} else if ((memcmp(lineBuffer, "   at ", 6) == 0) &&
+		strstr(lineBuffer, ":line ")) {
+		// A .NET traceback
+		styler.ColourTo(endPos, SCE_ERR_NET);
 	} else {
 		// Look for <filename>:<line>:message
 		// Look for <filename>(line)message
