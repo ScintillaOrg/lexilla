@@ -1697,8 +1697,12 @@ bool Platform::IsDBCSLeadByte(int /*codePage*/, char /*ch*/) {
 	return false;
 }
 
-int Platform::DBCSCharLength(int codePage, const char *s) {
-	return mblen(s, MB_CUR_MAX)
+int Platform::DBCSCharLength(int /*codePage*/, const char *s) {
+	int bytes = mblen(s, MB_CUR_MAX);
+	if (bytes >= 1)
+		return bytes;
+	else
+		return 1;
 }
 
 int Platform::DBCSCharMaxLength() {
