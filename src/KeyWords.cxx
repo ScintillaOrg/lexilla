@@ -68,8 +68,15 @@ void LexerModule::Lex(unsigned int startPos, int lengthDoc, int initStyle,
 
 void LexerModule::Fold(unsigned int startPos, int lengthDoc, int initStyle,
 	  WordList *keywordlists[], Accessor &styler) {
-	if (fnFolder)
+	if (fnFolder) {
+		int lineCurrent = styler.GetLine(startPos);
+		// Move back one line in case deletion wrecked current line fold state
+		if (lineCurrent > 0) {
+			lineCurrent--;
+			startPos = styler.LineStart(lineCurrent);
+		}
 		fnFolder(startPos, lengthDoc, initStyle, keywordlists, styler);
+	}
 }
 
 static void ColouriseNullDoc(unsigned int startPos, int length, int, WordList *[],

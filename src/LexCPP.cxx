@@ -335,11 +335,6 @@ static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordLis
 	unsigned int endPos = startPos + length;
 	int visibleChars = 0;
 	int lineCurrent = styler.GetLine(startPos);
-	// Move back one line in case deletion wrecked current line fold state
-	if (lineCurrent > 0) {
-		lineCurrent--;
-		startPos = styler.LineStart(lineCurrent);
-	}
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
 	char chNext = styler[startPos];
