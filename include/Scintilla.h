@@ -244,6 +244,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_AUTOCSETDROPRESTOFWORD 2270
 #define SCI_AUTOCGETDROPRESTOFWORD 2271
 #define SCI_REGISTERIMAGE 2405
+#define SCI_CLEARREGISTEREDIMAGES 2408
 #define SCI_SETINDENT 2122
 #define SCI_GETINDENT 2123
 #define SCI_SETUSETABS 2124
