@@ -10,4 +10,5 @@ del /S /Q *.opt
 del /S /Q *.plg
 del /S /Q *.ilk
 del /S /Q *.pdb
+del /S /Q *.sbr
 del /S /Q *.idb
