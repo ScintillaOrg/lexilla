@@ -1701,16 +1701,25 @@ void Window::SetTitle(const char *s) {
 
 struct ListImage {
 	const char *xpm_data;
+#if GTK_MAJOR_VERSION < 2
 	GdkPixmap *pixmap;
 	GdkBitmap *bitmap;
+#else
+	GdkPixbuf *pixbuf;
+#endif
 };
 
 static void list_image_free(gpointer, gpointer value, gpointer) {
 	ListImage *list_image = (ListImage *) value;
+#if GTK_MAJOR_VERSION < 2
 	if (list_image->pixmap)
 		gdk_pixmap_unref(list_image->pixmap);
 	if (list_image->bitmap)
 		gdk_bitmap_unref(list_image->bitmap);
+#else
+	if (list_image->pixbuf)
+		gdk_pixbuf_unref (list_image->pixbuf);
+#endif
 	g_free(list_image);
 }
 
@@ -1720,10 +1729,20 @@ ListBox::ListBox() {
 ListBox::~ListBox() {
 }
 
+#if GTK_MAJOR_VERSION >= 2
+enum {
+	PIXBUF_COLUMN,
+	TEXT_COLUMN,
+	N_COLUMNS
+};
+#endif
+
 class ListBoxX : public ListBox {
 	WindowID list;
 	WindowID scroller;
+#if GTK_MAJOR_VERSION < 2
 	int current;
+#endif
 	void *pixhash;
 	int lineHeight;
 	XPMSet xset;
@@ -1735,8 +1754,11 @@ public:
 	CallBackAction doubleClickAction;
 	void *doubleClickActionData;
 
-	ListBoxX() : list(0), current(0), pixhash(NULL), desiredVisibleRows(5), maxItemCharacters(0),
+	ListBoxX() : list(0), pixhash(NULL), desiredVisibleRows(5), maxItemCharacters(0),
 		doubleClickAction(NULL), doubleClickActionData(NULL) {
+#if GTK_MAJOR_VERSION < 2
+			current = 0;
+#endif
 	}
 	virtual ~ListBoxX() {
 		if (pixhash) {
@@ -1771,11 +1793,13 @@ ListBox *ListBox::Allocate() {
 	return lb;
 }
 
+#if GTK_MAJOR_VERSION < 2
 static void SelectionAC(GtkWidget *, gint row, gint,
                         GdkEventButton *, gpointer p) {
 	int *pi = reinterpret_cast<int *>(p);
 	*pi = row;
 }
+#endif
 
 static gboolean ButtonPress(GtkWidget *, GdkEventButton* ev, gpointer p) {
 	ListBoxX* lb = reinterpret_cast<ListBoxX*>(p);
@@ -1803,6 +1827,7 @@ void ListBoxX::Create(Window &, int, int, bool) {
 	gtk_container_add(GTK_CONTAINER(frame), PWidget(scroller));
 	gtk_widget_show(PWidget(scroller));
 
+#if GTK_MAJOR_VERSION < 2
 	list = gtk_clist_new(1);
 	gtk_widget_show(PWidget(list));
 	gtk_container_add(GTK_CONTAINER(PWidget(scroller)), PWidget(list));
@@ -1813,7 +1838,44 @@ void ListBoxX::Create(Window &, int, int, bool) {
 	gtk_signal_connect(GTK_OBJECT(PWidget(list)), "button_press_event",
 	                   GTK_SIGNAL_FUNC(ButtonPress), this);
 	gtk_clist_set_shadow_type(GTK_CLIST(PWidget(list)), GTK_SHADOW_NONE);
+#else
+	/* Tree and its model */
+	GtkListStore *store =
+		gtk_list_store_new (N_COLUMNS, GDK_TYPE_PIXBUF, G_TYPE_STRING);
 
+	list = gtk_tree_view_new_with_model (GTK_TREE_MODEL(store));
+	GtkTreeSelection *selection =
+		gtk_tree_view_get_selection (GTK_TREE_VIEW (list));
+	gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(list), FALSE);
+	gtk_tree_view_set_reorderable (GTK_TREE_VIEW(list), FALSE);
+
+	/* Columns */
+	GtkTreeViewColumn *column = gtk_tree_view_column_new ();
+	gtk_tree_view_column_set_sizing (column, GTK_TREE_VIEW_COLUMN_AUTOSIZE);
+	gtk_tree_view_column_set_title (column, "Autocomplete");
+	gtk_tree_view_column_set_sort_column_id (column, TEXT_COLUMN);
+
+	GtkCellRenderer *renderer = gtk_cell_renderer_pixbuf_new ();
+	gtk_tree_view_column_pack_start (column, renderer, FALSE);
+	gtk_tree_view_column_add_attribute (column, renderer,
+										"pixbuf", PIXBUF_COLUMN);
+
+	renderer = gtk_cell_renderer_text_new ();
+	gtk_tree_view_column_pack_start (column, renderer, TRUE);
+	gtk_tree_view_column_add_attribute (column, renderer,
+										"text", TEXT_COLUMN);
+
+	gtk_tree_view_append_column (GTK_TREE_VIEW (list), column);
+	gtk_container_add(GTK_CONTAINER(PWidget(scroller)), PWidget(list));
+	gtk_widget_show(PWidget(list));
+
+	gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE(store),
+										  TEXT_COLUMN, GTK_SORT_ASCENDING);
+
+	gtk_signal_connect(GTK_OBJECT(PWidget(list)), "button_press_event",
+	                   GTK_SIGNAL_FUNC(ButtonPress), this);
+#endif
 	gtk_widget_realize(PWidget(id));
 }
 
@@ -1869,18 +1931,27 @@ PRectangle ListBoxX::GetDesiredRect() {
 		GtkRequisition req;
 		int height;
 
+		// First calculate height of the clist for our desired visible
+		// row count otherwise it tries to expand to the total # of rows
 #if GTK_MAJOR_VERSION < 2
-
 		int ythickness = PWidget(list)->style->klass->ythickness;
-#else
-
-		int ythickness = PWidget(list)->style->ythickness;
-#endif
-		// First calculate height of the clist for our desired visible row count otherwise it tries to expand to the total # of rows
 		height = (rows * GTK_CLIST(list)->row_height
 		          + rows + 1
 		          + 2 * (ythickness
 		                 + GTK_CONTAINER(PWidget(list))->border_width));
+#else
+		// Get cell height
+		int row_width=0;
+		int row_height=0;
+		GtkTreeViewColumn * column =
+			gtk_tree_view_get_column (GTK_TREE_VIEW (list), 0);
+		gtk_tree_view_column_cell_get_size (column, NULL,
+			NULL, NULL, &row_width, &row_height);
+		int ythickness = PWidget(list)->style->ythickness;
+		height = (rows * row_height
+		          + 2 * (ythickness
+		                 + GTK_CONTAINER(PWidget(list))->border_width));
+#endif
 		gtk_widget_set_usize(GTK_WIDGET(PWidget(list)), -1, height);
 
 		// Get the size of the scroller because we set usize on the window
@@ -1904,11 +1975,20 @@ int ListBoxX::CaretFromEdge() {
 }
 
 void ListBoxX::Clear() {
+#if GTK_MAJOR_VERSION < 2
 	gtk_clist_clear(GTK_CLIST(list));
+#else
+	GtkTreeModel *model = gtk_tree_view_get_model (GTK_TREE_VIEW (list));
+	gtk_list_store_clear (GTK_LIST_STORE (model));
+#endif
 	maxItemCharacters = 0;
 }
 
+#if GTK_MAJOR_VERSION < 2
 static void init_pixmap(ListImage *list_image, GtkWidget *window) {
+#else
+static void init_pixmap(ListImage *list_image) {
+#endif
 	const char *textForm = list_image->xpm_data;
 	const char * const * xpm_lineform = reinterpret_cast<const char * const *>(textForm);
 	const char **xpm_lineformfromtext = 0;
@@ -1923,6 +2003,7 @@ static void init_pixmap(ListImage *list_image, GtkWidget *window) {
 	}
 
 	// Drop any existing pixmap/bitmap as data may have changed
+#if GTK_MAJOR_VERSION < 2
 	if (list_image->pixmap)
 		gdk_pixmap_unref(list_image->pixmap);
 	list_image->pixmap = NULL;
@@ -1938,18 +2019,25 @@ static void init_pixmap(ListImage *list_image, GtkWidget *window) {
 			gdk_bitmap_unref(list_image->bitmap);
 		list_image->bitmap = NULL;
 	}
+#else
+	if (list_image->pixbuf)
+		gdk_pixbuf_unref (list_image->pixbuf);
+	list_image->pixbuf =
+		gdk_pixbuf_new_from_xpm_data ((const gchar**)xpm_lineform);
+#endif
 	delete []xpm_lineformfromtext;
 }
 
 #define SPACING 5
 
 void ListBoxX::Append(char *s, int type) {
-	char * szs[] = { s, NULL };
 	ListImage *list_image = NULL;
 	if ((type >= 0) && pixhash) {
 		list_image = (ListImage *) g_hash_table_lookup((GHashTable *) pixhash
 		             , (gconstpointer) GINT_TO_POINTER(type));
 	}
+#if GTK_MAJOR_VERSION < 2
+	char * szs[] = { s, NULL };
 	int rownum = gtk_clist_append(GTK_CLIST(list), szs);
 	if (list_image) {
 		if (NULL == list_image->pixmap)
@@ -1957,6 +2045,27 @@ void ListBoxX::Append(char *s, int type) {
 		gtk_clist_set_pixtext(GTK_CLIST(list), rownum, 0, s, SPACING
 		                      , list_image->pixmap, list_image->bitmap);
 	}
+#else
+	GtkTreeIter iter;
+	GtkListStore *store =
+		GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (list)));
+	gtk_list_store_append (GTK_LIST_STORE (store), &iter);
+	if (list_image) {
+		if (NULL == list_image->pixbuf)
+			init_pixmap(list_image);
+		if (list_image->pixbuf) {
+			gtk_list_store_set (GTK_LIST_STORE (store), &iter,
+								PIXBUF_COLUMN, list_image->pixbuf,
+								TEXT_COLUMN, s, -1);
+		} else {
+			gtk_list_store_set (GTK_LIST_STORE (store), &iter,
+								TEXT_COLUMN, s, -1);
+		}
+	} else {
+			gtk_list_store_set (GTK_LIST_STORE (store), &iter,
+								TEXT_COLUMN, s, -1);
+	}
+#endif
 	size_t len = strlen(s);
 	if (maxItemCharacters < len)
 		maxItemCharacters = len;
@@ -1964,20 +2073,83 @@ void ListBoxX::Append(char *s, int type) {
 
 int ListBoxX::Length() {
 	if (id)
+#if GTK_MAJOR_VERSION < 2
 		return GTK_CLIST(list)->rows;
+#else
+		return gtk_tree_model_iter_n_children (gtk_tree_view_get_model
+											   (GTK_TREE_VIEW (list)), NULL);
+#endif
 	return 0;
 }
 
 void ListBoxX::Select(int n) {
+#if GTK_MAJOR_VERSION < 2
 	gtk_clist_select_row(GTK_CLIST(list), n, 0);
 	gtk_clist_moveto(GTK_CLIST(list), n, 0, 0.5, 0.5);
+#else
+	GtkTreeIter iter;
+	GtkTreeModel *model = gtk_tree_view_get_model (GTK_TREE_VIEW(list));
+	GtkTreeSelection *selection =
+		gtk_tree_view_get_selection (GTK_TREE_VIEW(list));
+	bool valid = gtk_tree_model_iter_nth_child (model, &iter, NULL, n);
+	if (valid) {
+		gtk_tree_selection_select_iter (selection, &iter);
+
+		// Move the scrollbar to show the selection.
+		int total = Length();
+		GtkAdjustment *adj =
+			gtk_tree_view_get_vadjustment (GTK_TREE_VIEW(list));
+		gfloat value = ((gfloat)n / total) * (adj->upper - adj->lower)
+							+ adj->lower - adj->page_size / 2;
+
+		// Get cell height
+		int row_width;
+		int row_height;
+		GtkTreeViewColumn * column =
+			gtk_tree_view_get_column (GTK_TREE_VIEW (list), 0);
+		gtk_tree_view_column_cell_get_size (column, NULL, NULL,
+											NULL, &row_width, &row_height);
+
+		int rows = Length();
+		if ((rows == 0) || (rows > desiredVisibleRows))
+			rows = desiredVisibleRows;
+		if (rows & 0x1) {
+			// Odd rows to display -- We are now in the middle.
+			// Align it so that we don't chop off rows.
+			value += (gfloat)row_height / 2.0;
+		}
+		// Clamp it.
+		value = (value < 0)? 0 : value;
+		value = (value > (adj->upper - adj->page_size))?
+					(adj->upper - adj->page_size) : value;
+
+		// Set it.
+		gtk_adjustment_set_value (adj, value);
+	}
+#endif
 }
 
 int ListBoxX::GetSelection() {
+#if GTK_MAJOR_VERSION < 2
 	return current;
+#else
+	GtkTreeIter iter;
+	GtkTreeModel *model;
+	GtkTreeSelection *selection;
+	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (list));
+	if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
+		GtkTreePath *path = gtk_tree_model_get_path (model, &iter);
+		int *indices = gtk_tree_path_get_indices (path);
+		// Don't free indices.
+		if (indices)
+			return indices[0];
+	}
+	return 0;
+#endif
 }
 
 int ListBoxX::Find(const char *prefix) {
+#if GTK_MAJOR_VERSION < 2
 	int count = Length();
 	for (int i = 0; i < count; i++) {
 		char *s = 0;
@@ -1986,11 +2158,29 @@ int ListBoxX::Find(const char *prefix) {
 			return i;
 		}
 	}
+#else
+	GtkTreeIter iter;
+	GtkTreeModel *model =
+		gtk_tree_view_get_model (GTK_TREE_VIEW(list));
+	bool valid = gtk_tree_model_get_iter_first (model, &iter);
+	int i = 0;
+	while (valid)
+	{
+		gchar *s;
+		gtk_tree_model_get (model, &iter, TEXT_COLUMN, &s, -1);
+		if (s && (0 == strncmp(prefix, s, strlen(prefix)))) {
+			return i;
+		}
+		valid = gtk_tree_model_iter_next (model, &iter);
+		i++;
+	}
+#endif
 	return - 1;
 }
 
 void ListBoxX::GetValue(int n, char *value, int len) {
 	char *text = NULL;
+#if GTK_MAJOR_VERSION < 2
 	GtkCellType type = gtk_clist_get_cell_type(GTK_CLIST(list), n, 0);
 	switch (type) {
 	case GTK_CELL_TEXT:
@@ -2002,6 +2192,14 @@ void ListBoxX::GetValue(int n, char *value, int len) {
 	default:
 		break;
 	}
+#else
+	GtkTreeIter iter;
+	GtkTreeModel *model = gtk_tree_view_get_model (GTK_TREE_VIEW(list));
+	bool valid = gtk_tree_model_iter_nth_child (model, &iter, NULL, n);
+	if (valid) {
+		gtk_tree_model_get (model, &iter, TEXT_COLUMN, &text, -1);
+	}
+#endif
 	if (text && len > 0) {
 		strncpy(value, text, len);
 		value[len - 1] = '\0';
@@ -2011,7 +2209,14 @@ void ListBoxX::GetValue(int n, char *value, int len) {
 }
 
 void ListBoxX::Sort() {
+#if GTK_MAJOR_VERSION < 2
 	gtk_clist_sort(GTK_CLIST(list));
+#else
+	GtkTreeModel *model = gtk_tree_view_get_model (GTK_TREE_VIEW(list));
+	gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE(model),
+										  TEXT_COLUMN, GTK_SORT_ASCENDING);
+
+#endif
 }
 
 // g_return_if_fail causes unnecessary compiler warning in release compile.
@@ -2034,12 +2239,18 @@ void ListBoxX::RegisterImage(int type, const char *xpm_data) {
 		(gconstpointer) GINT_TO_POINTER(type));
 	if (list_image) {
 		// Drop icon already registered
+#if GTK_MAJOR_VERSION < 2
 		if (list_image->pixmap)
 			gdk_pixmap_unref(list_image->pixmap);
 		list_image->pixmap = 0;
 		if (list_image->bitmap)
 			gdk_bitmap_unref(list_image->bitmap);
 		list_image->bitmap = 0;
+#else
+		if (list_image->pixbuf)
+			gdk_pixbuf_unref (list_image->pixbuf);
+		list_image->pixbuf = NULL;
+#endif
 		list_image->xpm_data = xpm_data;
 	} else {
 		list_image = g_new0(ListImage, 1);
@@ -2198,6 +2409,15 @@ bool Platform::IsDBCSLeadByte(int /* codePage */, char /* ch */) {
 	return false;
 }
 
+#if GTK_MAJOR_VERSION < 2
+int Platform::DBCSCharLength(int, const char *s) {
+	int bytes = mblen(s, MB_CUR_MAX);
+	if (bytes >= 1)
+		return bytes;
+	else
+		return 1;
+}
+#else
 int Platform::DBCSCharLength(int codePage, const char *s) {
 	if (codePage == 999932) {
 		// Experimental and disabled code - change 999932 to 932 above to
@@ -2216,6 +2436,7 @@ int Platform::DBCSCharLength(int codePage, const char *s) {
 			return 1;
 	}
 }
+#endif
 
 int Platform::DBCSCharMaxLength() {
 	return MB_CUR_MAX;
