@@ -162,14 +162,14 @@ $(LEXCOMPONENT): $(LOBJS) $(DIR_O)\ScintRes.res
 
 !ELSE
 
-$(COMPONENT): $(SOBJS) ScintRes.res
-	$(LD) $(LDFLAGS) -Tpd -c c0d32 $(SOBJS), $@, , $(LIBS), , ScintRes.res
+$(COMPONENT): $(SOBJS) $(DIR_O)\ScintRes.res
+	$(LD) $(LDFLAGS) -Tpd -c c0d32 $(SOBJS), $@, , $(LIBS), , $(DIR_O)\ScintRes.res
 
 $(DIR_O)\ScintRes.res: ScintRes.rc
 	$(RC) $*.rc
 
-$(LEXCOMPONENT): $(LOBJS)
-	$(LD) $(LDFLAGS) -Tpd -c c0d32 $(LOBJS), $@, , $(LIBS), , ScintRes.res
+$(LEXCOMPONENT): $(LOBJS) $(DIR_O)\ScintRes.res
+	$(LD) $(LDFLAGS) -Tpd -c c0d32 $(LOBJS), $@, , $(LIBS), , $(DIR_O)\ScintRes.res
 
 !ENDIF
 
