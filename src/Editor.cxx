@@ -503,6 +503,19 @@ void Editor::HorizontalScrollTo(int xPos) {
 	Redraw();
 }
 
+void Editor::MoveCaretInsideView() {
+	PRectangle rcClient = GetTextRectangle();
+	Point pt = LocationFromPosition(currentPos);
+	if (pt.y < rcClient.top) {
+		MovePositionTo(PositionFromLocation(
+		                   Point(lastXChosen, rcClient.top)));
+	} else if ((pt.y + vs.lineHeight - 1) > rcClient.bottom) {
+		int yOfLastLineFullyDisplayed = rcClient.top + (LinesOnScreen()-1) * vs.lineHeight;
+		MovePositionTo(PositionFromLocation(
+		                   Point(lastXChosen, rcClient.top + yOfLastLineFullyDisplayed)));
+	}
+}
+
 void Editor::EnsureCaretVisible(bool useMargin) {
 	//Platform::DebugPrintf("EnsureCaretVisible %d\n", xOffset);
 	PRectangle rcClient = GetTextRectangle();
@@ -1090,9 +1103,10 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 			
 			// Draw the Caret
 			if (line == lineCaret) {
-				int xposCaret = ll.positions[posCaret - posLineStart] + xStart;
+				int offset = Platform::Minimum(posCaret - posLineStart, LineLayout::maxLineLength);
+				int xposCaret = ll.positions[offset] + xStart;
 				int widthOverstrikeCaret =
-				    ll.positions[posCaret - posLineStart + 1] - ll.positions[posCaret - posLineStart];
+				    ll.positions[offset + 1] - ll.positions[offset];
 				if (posCaret == pdoc->Length())	// At end of document
 					widthOverstrikeCaret = vs.aveCharWidth;
 				if ((posCaret - posLineStart) >= ll.numCharsInLine)	// At end of line
@@ -1829,6 +1843,7 @@ int Editor::KeyCommand(UINT iMessage) {
 		break;
 	case SCI_LINESCROLLDOWN:
 		ScrollTo(topLine + 1);
+		MoveCaretInsideView();
 		break;
 	case SCI_LINEUP:
 		MovePositionTo(PositionFromLocation(
@@ -1840,6 +1855,7 @@ int Editor::KeyCommand(UINT iMessage) {
 		break;
 	case SCI_LINESCROLLUP:
 		ScrollTo(topLine - 1);
+		MoveCaretInsideView();
 		break;
 	case SCI_CHARLEFT:
 		if (SelectionEmpty()) {
