@@ -148,9 +148,7 @@ void ViewStyle::Init() {
 	ms[1].width = 16;
 	ms[1].mask = ~SC_MASK_FOLDERS;
 	ms[2].symbol = true;
-	ms[2].width = 14;	// Nice width for arrows
-	ms[2].mask = SC_MASK_FOLDERS;
-	ms[2].width = 0;	// Nice width for arrows
+	ms[2].width = 0;
 	ms[2].mask = 0;
 	fixedColumnWidth = leftMarginWidth;
 	symbolMargin = false;
