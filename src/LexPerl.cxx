@@ -40,13 +40,15 @@ static bool isSingleCharOp(char ch) {
 }
 
 static inline bool isPerlOperator(char ch) {
-	if (ch == '%' || ch == '^' || ch == '&' || ch == '*' || ch == '\\' ||
+	if (ch == '^' || ch == '&' || ch == '\\' ||
 	        ch == '(' || ch == ')' || ch == '-' || ch == '+' ||
 	        ch == '=' || ch == '|' || ch == '{' || ch == '}' ||
 	        ch == '[' || ch == ']' || ch == ':' || ch == ';' ||
-	        ch == '<' || ch == '>' || ch == ',' || ch == '/' ||
+	        ch == '>' || ch == ',' || 
 	        ch == '?' || ch == '!' || ch == '.' || ch == '~')
 		return true;
+	// these chars are already tested before this call
+	// ch == '%' || ch == '*' || ch == '<' || ch == '/' ||
 	return false;
 }
 
@@ -67,6 +69,7 @@ static inline bool isEndVar(char ch) {
 	return !isalnum(ch) && ch != '#' && ch != '$' &&
 	       ch != '_' && ch != '\'';
 }
+
 
 static inline bool isNonQuote(char ch) {
 	return isalnum(ch) || ch == '_';
@@ -276,7 +279,15 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					numState = PERLNUM_V_VECTOR;
 				}
 			} else if (iswordstart(ch)) {
-				if (ch == 's' && !isNonQuote(chNext)) {
+				if (chPrev == '>' && styler.SafeGetCharAt(i - 2) == '-') {
+					state = SCE_PL_IDENTIFIER;	// part of "->" expr
+					if ((!iswordchar(chNext) && chNext != '\'')
+						|| (chNext == '.' && chNext2 == '.')) {
+						// We need that if length of word == 1!
+						styler.ColourTo(i, SCE_PL_IDENTIFIER);
+						state = SCE_PL_DEFAULT;
+					}
+				} else if (ch == 's' && !isNonQuote(chNext)) {
 					state = SCE_PL_REGSUBST;
 					Quote.New(2);
 				} else if (ch == 'm' && !isNonQuote(chNext)) {
@@ -443,14 +454,45 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 							}
 						}
 						break;
-					// other styles uses the default, preferRE=false
 					case SCE_PL_IDENTIFIER:
+						preferRE = true;
 						if (bkch == '>') {	// inputsymbol
 							preferRE = false;
 							break;
 						}
-					case SCE_PL_POD:
+						// backtrack to find "->" or "::" before identifier
+						while (bk > 0 && styler.StyleAt(bk) == SCE_PL_IDENTIFIER) {
+							bk--;
+						}
+						while (bk > 0) {
+							bkstyle = styler.StyleAt(bk);
+							if (bkstyle == SCE_PL_DEFAULT ||
+							    bkstyle == SCE_PL_COMMENTLINE) {
+							} else if (bkstyle == SCE_PL_OPERATOR) {
+								// gcc 3.2.3 bloats if more compact form used
+								bkch = styler.SafeGetCharAt(bk);
+								if (bkch == '>') { // "->"
+									if (styler.SafeGetCharAt(bk - 1) == '-') {
+										preferRE = false;
+										break;
+									}
+								} else if (bkch == ':') { // "::"
+									if (styler.SafeGetCharAt(bk - 1) == ':') {
+										preferRE = false;
+										break;
+									}
+								}
+							} else {// bare identifier, usually a function
+								// call but perl also uses this for
+								// pseudo-constants (really ambiguous...)
+								break;
+							}
+							bk--;
+						}
+						break;
+					// other styles uses the default, preferRE=false
 					case SCE_PL_WORD:
+					case SCE_PL_POD:
 					case SCE_PL_HERE_Q:
 					case SCE_PL_HERE_QQ:
 					case SCE_PL_HERE_QX:
@@ -593,6 +635,13 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					state = SCE_PL_DEFAULT;
 					ch = ' ';
 				}
+			}
+		} else if (state == SCE_PL_IDENTIFIER) {
+			if ((!iswordchar(chNext) && chNext != '\'')
+				|| chNext == '.') {
+				styler.ColourTo(i, SCE_PL_IDENTIFIER);
+				state = SCE_PL_DEFAULT;
+				ch = ' ';
 			}
 		} else {
 			if (state == SCE_PL_COMMENTLINE) {
@@ -925,4 +974,3 @@ static const char * const perlWordListDesc[] = {
 };
 
 LexerModule lmPerl(SCLEX_PERL, ColourisePerlDoc, "perl", FoldPerlDoc, perlWordListDesc);
-
