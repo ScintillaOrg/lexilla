@@ -343,7 +343,11 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	int scriptLanguage = ScriptOfState(state);
 
 	bool fold = styler.GetPropertyInt("fold");
+	bool foldHTML = styler.GetPropertyInt("fold.html",0);
 	bool foldCompact = styler.GetPropertyInt("fold.compact",1);
+
+	fold = foldHTML && fold;
+
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
 	int visibleChars;
