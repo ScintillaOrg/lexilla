@@ -20,7 +20,7 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-inline bool isEiffelOperator(char ch) {
+inline bool isEiffelOperator(unsigned int ch) {
 	// '.' left out as it is used to make up numbers
 	return ch == '*' || ch == '/' || ch == '\\' || ch == '-' || ch == '+' ||
 	        ch == '(' || ch == ')' || ch == '=' ||
@@ -44,30 +44,62 @@ static void getRangeLowered(unsigned int start,
 	s[i] = '\0';
 }
 
-class LexContext {
+inline bool IsASpace(unsigned int ch) {
+    return (ch == ' ') || ((ch >= 0x09) && (ch <= 0x0d));
+}
+
+inline bool IsAWordChar(unsigned int  ch) {
+	return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_');
+}
+
+inline bool IsAWordStart(unsigned int ch) {
+	return (ch < 0x80) && (isalnum(ch) || ch == '_');
+}
+
+inline bool IsADigit(unsigned int ch) {
+	return (ch >= '0') && (ch <= '9');
+}
+
+// All languages handled so far can treat all characters >= 0x80 as one class
+// which just continues the current token or starts an identifier if in default.
+// DBCS treated specially as the second character can be < 0x80 and hence 
+// syntactically significant. UTF-8 avoids this as all trail bytes are >= 0x80
+class ColouriseContext {
 	Accessor &styler;
 	int lengthDoc;
 	int currentPos;
-	LexContext& operator=(const LexContext&) {
+	ColouriseContext& operator=(const ColouriseContext&) {
 		return *this;
 	}
 public:
 	int state;
-	char ch;
-	char chNext;
+	unsigned int chPrev;
+	unsigned int ch;
+	unsigned int chNext;
 
-	LexContext(unsigned int startPos, int length,
+	ColouriseContext(unsigned int startPos, int length,
                         int initStyle, Accessor &styler_) : 
 		styler(styler_),
 		lengthDoc(startPos + length),
 		currentPos(startPos), 
 		state(initStyle), 
+		chPrev(0),
 		ch(0), 
 		chNext(0) {
 		styler.StartAt(startPos);
 		styler.StartSegment(startPos);
-		ch = styler.SafeGetCharAt(currentPos);
-		chNext = styler.SafeGetCharAt(currentPos+1);
+		int pos = currentPos;
+		ch = static_cast<unsigned char>(styler.SafeGetCharAt(pos));
+		if (styler.IsLeadByte(static_cast<char>(ch))) {
+			pos++;
+			ch = ch << 8;
+			ch |= static_cast<unsigned char>(styler.SafeGetCharAt(pos));
+		}
+		chNext = static_cast<unsigned char>(styler.SafeGetCharAt(pos+1));
+		if (styler.IsLeadByte(static_cast<char>(chNext))) {
+			chNext = chNext << 8;
+			chNext |= static_cast<unsigned char>(styler.SafeGetCharAt(pos+2));
+		}
 	}
 	void Complete() {
 		styler.ColourTo(currentPos - 1, state);
@@ -76,13 +108,15 @@ public:
 		return currentPos <= lengthDoc;
 	}
 	void Forward() {
+		chPrev = ch;
 		currentPos++;
-		ch = chNext;
-		chNext = styler.SafeGetCharAt(currentPos + 1);
-		if (styler.IsLeadByte(ch)) {
+		if (ch >= 0x100)
 			currentPos++;
-			ch = chNext;
-			chNext = styler.SafeGetCharAt(currentPos + 1);
+		ch = chNext;
+		chNext = static_cast<unsigned char>(styler.SafeGetCharAt(currentPos+1));
+		if (styler.IsLeadByte(static_cast<char>(chNext))) {
+			chNext = chNext << 8;
+			chNext |= static_cast<unsigned char>(styler.SafeGetCharAt(currentPos + 2));
 		}
 	}
 	void ChangeState(int state_) {
@@ -105,7 +139,7 @@ static void ColouriseEiffelDoc(unsigned int startPos,
 
 	WordList &keywords = *keywordlists[0];
 
-	LexContext lc(startPos, length, initStyle, styler);
+	ColouriseContext lc(startPos, length, initStyle, styler);
 
 	for (; lc.More(); lc.Forward()) {
 
@@ -116,7 +150,7 @@ static void ColouriseEiffelDoc(unsigned int startPos,
 		} else if (lc.state == SCE_EIFFEL_OPERATOR) {
 			lc.SetState(SCE_EIFFEL_DEFAULT);
 		} else if (lc.state == SCE_EIFFEL_WORD) {
-			if (!iswordchar(lc.ch)) {
+			if (!IsAWordChar(lc.ch)) {
 				char s[100];
 				lc.GetCurrentLowered(s, sizeof(s));
 				if (!keywords.InList(s)) {
@@ -125,7 +159,7 @@ static void ColouriseEiffelDoc(unsigned int startPos,
 				lc.SetState(SCE_EIFFEL_DEFAULT);
 			}
 		} else if (lc.state == SCE_EIFFEL_NUMBER) {
-			if (!iswordchar(lc.ch)) {
+			if (!IsAWordChar(lc.ch)) {
 				lc.SetState(SCE_EIFFEL_DEFAULT);
 			}
 		} else if (lc.state == SCE_EIFFEL_COMMENTLINE) {
@@ -157,9 +191,9 @@ static void ColouriseEiffelDoc(unsigned int startPos,
 				lc.SetState(SCE_EIFFEL_STRING);
 			} else if (lc.ch == '\'') {
 				lc.SetState(SCE_EIFFEL_CHARACTER);
-			} else if (isdigit(lc.ch) || (lc.ch == '.')) {
+			} else if (IsADigit(lc.ch) || (lc.ch == '.')) {
 				lc.SetState(SCE_EIFFEL_NUMBER);
-			} else if (iswordstart(lc.ch)) {
+			} else if (IsAWordStart(lc.ch)) {
 				lc.SetState(SCE_EIFFEL_WORD);
 			} else if (isEiffelOperator(lc.ch)) {
 				lc.SetState(SCE_EIFFEL_OPERATOR);
