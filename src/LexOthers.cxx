@@ -252,6 +252,7 @@ static void ColouriseMakeLine(
     Accessor &styler) {
 
 	unsigned int i = 0;
+        unsigned int lastNonSpace = 0;
 	unsigned int state = SCE_MAKE_DEFAULT;
 	bool bSpecial = false;
 	// Skip initial spaces
@@ -260,11 +261,11 @@ static void ColouriseMakeLine(
 	}
 	if (lineBuffer[i] == '#') {	// Comment
 		styler.ColourTo(endPos, SCE_MAKE_COMMENT);
-		return ;
+		return;
 	}
 	if (lineBuffer[i] == '!') {	// Special directive
 		styler.ColourTo(endPos, SCE_MAKE_PREPROCESSOR);
-		return ;
+		return;
 	}
 	while (i < lengthLine) {
 		if (lineBuffer[i] == '$' && lineBuffer[i + 1] == '(') {
@@ -274,19 +275,29 @@ static void ColouriseMakeLine(
 			styler.ColourTo(startLine + i, state);
 			state = SCE_MAKE_DEFAULT;
 		}
-		if (!bSpecial && state == SCE_MAKE_DEFAULT &&
-		        (lineBuffer[i] == ':' || lineBuffer[i] == '=')) {
-			styler.ColourTo(startLine + i - 1, state);
-			styler.ColourTo(startLine + i, SCE_MAKE_OPERATOR);
-			bSpecial = true;	// Only react to the first '=' or ':' of the line
+		if (!bSpecial) {
+			if (lineBuffer[i] == ':') {
+				styler.ColourTo(startLine + lastNonSpace, SCE_MAKE_TARGET);
+				styler.ColourTo(startLine + i - 1, SCE_MAKE_DEFAULT);
+				styler.ColourTo(startLine + i, SCE_MAKE_OPERATOR);
+				bSpecial = true;	// Only react to the first ':' of the line
+				state = SCE_MAKE_DEFAULT;
+			} else if (lineBuffer[i] == '=') {
+				styler.ColourTo(startLine + lastNonSpace, SCE_MAKE_IDENTIFIER);
+				styler.ColourTo(startLine + i - 1, SCE_MAKE_DEFAULT);
+				styler.ColourTo(startLine + i, SCE_MAKE_OPERATOR);
+				bSpecial = true;	// Only react to the first '=' of the line
+				state = SCE_MAKE_DEFAULT;
+			}
 		}
-
+		if (!isspacechar(lineBuffer[i])) {
+			lastNonSpace = i;
+		}
 		i++;
 	}
 	if (state == SCE_MAKE_IDENTIFIER) {
 		styler.ColourTo(endPos, SCE_MAKE_IDEOL);	// Error, variable reference not ended
-	}
-	else {
+	} else {
 		styler.ColourTo(endPos, SCE_MAKE_DEFAULT);
 	}
 }
