@@ -58,7 +58,6 @@ Editor::Editor() {
 	dwelling = false;
 	ptMouseLast.x = 0;
 	ptMouseLast.y = 0;
-	firstExpose = true;
 	inDragDrop = false;
 	dropWentOutside = false;
 	posDrag = invalidPosition;
@@ -69,9 +68,6 @@ Editor::Editor() {
 	lineAnchor = 0;
 	originalAnchorPos = 0;
 
-	dragChars = 0;
-	lenDrag = 0;
-	dragIsRectangle = false;
 	selType = selStream;
 	xStartSelect = 0;
 	xEndSelect = 0;
@@ -111,15 +107,11 @@ Editor::Editor() {
 
 	modEventMask = SC_MODEVENTMASKALL;
 
-	displayPopupMenu = true;
-
 	pdoc = new Document();
 	pdoc ->AddRef();
 	pdoc->AddWatcher(this, 0);
 
-#ifdef MACRO_SUPPORT
-	recordingMacro = 0;
-#endif 
+	recordingMacro = false;
 	foldFlags = 0;
 }
 
@@ -128,10 +120,6 @@ Editor::~Editor() {
 	pdoc->Release();
 	pdoc = 0;
 	DropGraphics();
-
-	delete []dragChars;
-	dragChars = 0;
-	lenDrag = 0;
 }
 
 void Editor::Finalise() {
@@ -1914,14 +1902,12 @@ void Editor::NotifyChar(int ch) {
 	scn.nmhdr.code = SCN_CHARADDED;
 	scn.ch = ch;
 	NotifyParent(scn);
-#ifdef MACRO_SUPPORT
 	if (recordingMacro) {
 		char txt[2];
 		txt[0] = static_cast<char>(ch);
 		txt[1] = '\0';
 		NotifyMacroRecord(SCI_REPLACESEL, 0, reinterpret_cast<long>(txt));
 	}
-#endif 
 }
 
 void Editor::NotifySavePoint(bool isSavePoint) {
@@ -2147,7 +2133,6 @@ void Editor::NotifyDeleted(Document *, void *) {
 	/* Do nothing */
 }
 
-#ifdef MACRO_SUPPORT
 void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long lParam) {
 
 	// Enumerates all macroable messages
@@ -2233,7 +2218,6 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	scn.lParam = lParam;
 	NotifyParent(scn);
 }
-#endif 
 
 // Force scroll and keep position relative to top of window
 void Editor::PageMove(int direction, bool extend) {
@@ -2797,33 +2781,23 @@ char *Editor::CopyRange(int start, int end) {
 	return text;
 }
 
-int Editor::SelectionRangeLength() {
+void Editor::CopySelectionRange(SelectionText *ss) {
+	char *text = 0;
+	int size = 0;
 	if (selType == selRectangle) {
 		int lineStart = pdoc->LineFromPosition(SelectionStart());
 		int lineEnd = pdoc->LineFromPosition(SelectionEnd());
-		int totalSize = 0;
-		for (int line = lineStart; line <= lineEnd; line++) {
-			totalSize += SelectionEnd(line) - SelectionStart(line) + 1;
+		int line;
+		for (line = lineStart; line <= lineEnd; line++) {
+			size += SelectionEnd(line) - SelectionStart(line) + 1;
 			if (pdoc->eolMode == SC_EOL_CRLF)
-				totalSize++;
+				size++;
 		}
-		return totalSize;
-	} else {
-		return SelectionEnd() - SelectionStart();
-	}
-}
-
-char *Editor::CopySelectionRange() {
-	if (selType == selRectangle) {
-		char *text = 0;
-		int lineStart = pdoc->LineFromPosition(SelectionStart());
-		int lineEnd = pdoc->LineFromPosition(SelectionEnd());
-		int totalSize = SelectionRangeLength();
-		if (totalSize > 0) {
-			text = new char[totalSize + 1];
+		if (size > 0) {
+			text = new char[size + 1];
 			if (text) {
 				int j = 0;
-				for (int line = lineStart; line <= lineEnd; line++) {
+				for (line = lineStart; line <= lineEnd; line++) {
 					for (int i = SelectionStart(line);i < SelectionEnd(line);i++) {
 						text[j++] = pdoc->CharAt(i);
 					}
@@ -2832,24 +2806,14 @@ char *Editor::CopySelectionRange() {
 					if (pdoc->eolMode != SC_EOL_CR)
 						text[j++] = '\n';
 				}
-				text[totalSize] = '\0';
+				text[size] = '\0';
 			}
 		}
-		return text;
 	} else {
-		return CopyRange(SelectionStart(), SelectionEnd());
+		size = SelectionEnd() - SelectionStart();
+		text = CopyRange(SelectionStart(), SelectionEnd());
 	}
-}
-
-void Editor::CopySelectionIntoDrag() {
-	delete []dragChars;
-	dragChars = 0;
-	lenDrag = SelectionRangeLength();
-	dragChars = CopySelectionRange();
-	dragIsRectangle = selType == selRectangle;
-	if (!dragChars) {
-		lenDrag = 0;
-	}
+	ss->Set(text, size, selType == selRectangle);
 }
 
 void Editor::SetDragPosition(int newPos) {
@@ -2878,8 +2842,6 @@ void Editor::StartDrag() {
 	//SetMouseCapture(true);
 	//DisplayCursor(Window::cursorArrow);
 }
-
-
 
 void Editor::DropAt(int position, const char *value, bool moving, bool rectangular) {
 	//Platform::DebugPrintf("DropAt %d\n", inDragDrop);
@@ -3112,7 +3074,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 			if (inDragDrop) {
 				SetMouseCapture(false);
 				SetDragPosition(newPos);
-				CopySelectionIntoDrag();
+				CopySelectionRange(&drag);
 				StartDrag();
 			} else {
 				xStartSelect = pt.x - vs.fixedColumnWidth + xOffset;
@@ -3217,25 +3179,23 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 			int selStart = SelectionStart();
 			int selEnd = SelectionEnd();
 			if (selStart < selEnd) {
-				if (dragChars && lenDrag) {
+				if (drag.len) {
 					if (ctrl) {
-						pdoc->InsertString(newPos, dragChars, lenDrag);
-						SetSelection(newPos, newPos + lenDrag);
+						pdoc->InsertString(newPos, drag.s, drag.len);
+						SetSelection(newPos, newPos + drag.len);
 					} else if (newPos < selStart) {
-						pdoc->DeleteChars(selStart, lenDrag);
-						pdoc->InsertString(newPos, dragChars, lenDrag);
-						SetSelection(newPos, newPos + lenDrag);
+						pdoc->DeleteChars(selStart, drag.len);
+						pdoc->InsertString(newPos, drag.s, drag.len);
+						SetSelection(newPos, newPos + drag.len);
 					} else if (newPos > selEnd) {
-						pdoc->DeleteChars(selStart, lenDrag);
-						newPos -= lenDrag;
-						pdoc->InsertString(newPos, dragChars, lenDrag);
-						SetSelection(newPos, newPos + lenDrag);
+						pdoc->DeleteChars(selStart, drag.len);
+						newPos -= drag.len;
+						pdoc->InsertString(newPos, drag.s, drag.len);
+						SetSelection(newPos, newPos + drag.len);
 					} else {
 						SetEmptySelection(newPos);
 					}
-					delete []dragChars;
-					dragChars = 0;
-					lenDrag = 0;
+					drag.Set(0, 0);
 				}
 				selectionType = selChar;
 			}
@@ -3542,10 +3502,8 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	//Platform::DebugPrintf("S start wnd proc %d %d %d\n",iMessage, wParam, lParam);
 
 	// Optional macro recording hook
-#ifdef MACRO_SUPPORT
 	if (recordingMacro)
 		NotifyMacroRecord(iMessage, wParam, lParam);
-#endif 
 
 	switch (iMessage) {
 
@@ -3777,15 +3735,14 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETSELTEXT: {
 			if (lParam == 0)
 				return 0;
+			SelectionText selectedText;
+			CopySelectionRange(&selectedText);
 			char *ptr = reinterpret_cast<char *>(lParam);
-			int selSize = SelectionRangeLength();
-			char *text = CopySelectionRange();
 			int iChar = 0;
-			if (text) {
-				for (; iChar < selSize; iChar++)
-					ptr[iChar] = text[iChar];
+			if (selectedText.len) {
+				for (; iChar < selectedText.len; iChar++)
+					ptr[iChar] = selectedText.s[iChar];
 				ptr[iChar] = '\0';
-				delete []text;
 			} else {
 				ptr[0] = '\0';
 			}
@@ -4664,10 +4621,6 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_LINESONSCREEN:
 		return LinesOnScreen();
 
-	case SCI_USEPOPUP:
-		displayPopupMenu = wParam;
-		break;
-
 	case SCI_SETSELFORE:
 		vs.selforeset = wParam;
 		vs.selforeground.desired = Colour(lParam);
@@ -4912,15 +4865,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETCURSOR:
 		return cursorMode;
 
-#ifdef MACRO_SUPPORT
 	case SCI_STARTRECORD:
-		recordingMacro = 1;
+		recordingMacro = true;
 		return 0;
 
 	case SCI_STOPRECORD:
-		recordingMacro = 0;
+		recordingMacro = false;
 		return 0;
-#endif 
 
 	case SCI_MOVECARETINSIDEVIEW:
 		MoveCaretInsideView();

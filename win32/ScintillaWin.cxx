@@ -231,7 +231,7 @@ public:
 	friend class DataObject;
 	friend class DropTarget;
 	bool DragIsRectangularOK(CLIPFORMAT fmt) {
-		return dragIsRectangle && (fmt == cfColumnSelect);
+		return drag.rectangular && (fmt == cfColumnSelect);
 	}
 };
 
@@ -1320,34 +1320,33 @@ void ScintillaWin::GetIntelliMouseParameters() {
 }
 
 void ScintillaWin::CopySelTextToClipboard() {
-	int bytes = SelectionRangeLength();
-	char *selChars = CopySelectionRange();
-	if (!selChars)
+	SelectionText selectedText;
+	CopySelectionRange(&selectedText);
+	if (selectedText.len == 0)
 		return;
 
 	HGLOBAL hand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT,
-		bytes + 1);
+		selectedText.len + 1);
 	if (hand) {
 		char *ptr = static_cast<char *>(::GlobalLock(hand));
-		memcpy(ptr, selChars, bytes);
-		ptr[bytes] = '\0';
+		memcpy(ptr, selectedText.s, selectedText.len);
+		ptr[selectedText.len] = '\0';
 		::GlobalUnlock(hand);
 	}
 	::SetClipboardData(CF_TEXT, hand);
 
 	if (IsUnicodeMode()) {
-		int uchars = UCS2Length(selChars, bytes);
+		int uchars = UCS2Length(selectedText.s, selectedText.len);
 		HGLOBAL uhand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT,
 			2 * (uchars + 1));
 		if (uhand) {
 			wchar_t *uptr = static_cast<wchar_t *>(::GlobalLock(uhand));
-			UCS2FromUTF8(selChars, bytes, uptr, uchars);
+			UCS2FromUTF8(selectedText.s, selectedText.len, uptr, uchars);
 			uptr[uchars] = 0;
 			::GlobalUnlock(uhand);
 		}
 		::SetClipboardData(CF_UNICODETEXT, uhand);
 	}
-	delete []selChars;
 }
 
 void ScintillaWin::ScrollMessage(WPARAM wParam) {
@@ -1627,21 +1626,21 @@ STDMETHODIMP ScintillaWin::GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM) {
 
 	HGLOBAL hand;
 	if (pFEIn->cfFormat == CF_UNICODETEXT) {
-		int uchars = UCS2Length(dragChars, lenDrag);
+		int uchars = UCS2Length(drag.s, drag.len);
 		hand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, 2 * (uchars + 1));
 		if (hand) {
 			wchar_t *uptr = static_cast<wchar_t *>(::GlobalLock(hand));
-			UCS2FromUTF8(dragChars, lenDrag, uptr, uchars);
+			UCS2FromUTF8(drag.s, drag.len, uptr, uchars);
 			uptr[uchars] = 0;
 		}
 	} else {
-		hand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, lenDrag + 1);
+		hand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, drag.len + 1);
 		if (hand) {
 			char *ptr = static_cast<char *>(::GlobalLock(hand));
-			for (int i = 0; i < lenDrag; i++) {
-				ptr[i] = dragChars[i];
+			for (int i = 0; i < drag.len; i++) {
+				ptr[i] = drag.s[i];
 			}
-			ptr[lenDrag] = '\0';
+			ptr[drag.len] = '\0';
 		}
 	}
 	::GlobalUnlock(hand);

@@ -30,6 +30,7 @@ protected:
 		idcmdSelectAll=16
 	};
 
+	bool displayPopupMenu;
 	Menu popup;
 	AutoComplete ac;
 

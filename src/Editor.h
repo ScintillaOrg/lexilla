@@ -50,6 +50,26 @@ public:
 	int positions[maxLineLength+1];
 };
 
+class SelectionText {
+public:
+	char *s;
+	int len;
+	bool rectangular;
+	SelectionText() : s(0), len(0), rectangular(false) {}
+	~SelectionText() {
+		Set(0, 0);
+	}
+	void Set(char *s_, int len_, bool rectangular_=false) {
+		delete []s;
+		s = s_;
+		if (s)
+			len = len_;
+		else
+			len = 0;
+		rectangular = rectangular_;
+	}
+};
+
 /**
  */
 class Editor : public DocWatcher {
@@ -68,6 +88,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool stylesValid;	
 	ViewStyle vs;
 	Palette palette;
+
 	int printMagnification;
 	int printColourMode;
 	int cursorMode;
@@ -106,7 +127,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool dwelling;
 	enum { selChar, selWord, selLine } selectionType;
 	Point ptMouseLast;
-	bool firstExpose;
 	bool inDragDrop;
 	bool dropWentOutside;
 	int posDrag;
@@ -135,9 +155,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	
 	int modEventMask;
 	
-	char *dragChars;
-	int lenDrag;
-	bool dragIsRectangle;
+	SelectionText drag;
 	enum { selStream, selRectangle, selRectangleFixed } selType;
 	int xStartSelect;
 	int xEndSelect;
@@ -151,11 +169,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	
 	int searchAnchor;
 
-	int displayPopupMenu;
-
-#ifdef MACRO_SUPPORT
-	int recordingMacro;
-#endif
+	bool recordingMacro;
 
 	int foldFlags;
 	ContractionState cs;
@@ -267,11 +281,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void NotifyModified(Document *document, DocModification mh, void *userData);
 	void NotifyDeleted(Document *document, void *userData);
 	void NotifyStyleNeeded(Document *doc, void *userData, int endPos);
-
-	
-#ifdef MACRO_SUPPORT
 	void NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long lParam);
-#endif
 
 	void PageMove(int direction, bool extend=false);
 	void ChangeCaseOfSelection(bool makeUpperCase);
@@ -293,9 +303,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void GoToLine(int lineNo);
 
 	char *CopyRange(int start, int end);
-	int SelectionRangeLength();
-	char *CopySelectionRange();
-	void CopySelectionIntoDrag();
+	void CopySelectionRange(SelectionText *ss);
 	void SetDragPosition(int newPos);
 	void DisplayCursor(Window::Cursor c);
 	virtual void StartDrag();

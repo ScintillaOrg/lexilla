@@ -52,12 +52,15 @@ class ScintillaGTK : public ScintillaBase {
 	GtkObject *adjustmenth;
 	int scrollBarWidth;
 	int scrollBarHeight;
-	char *pasteBuffer;
-	bool pasteBufferIsRectangular;
+	
+	// Because clipboard access is asynchronous, copyText is created by Copy
+	SelectionText copyText;
+	
+	SelectionText primary;
+	
 	GdkEventButton evbtn;
 	bool capturedMouse;
 	bool dragWasDropped;
-	char *primarySelectionCopy;
 
 	GtkWidgetClass *parentClass;
 
@@ -72,6 +75,7 @@ class ScintillaGTK : public ScintillaBase {
 	GdkICAttr *ic_attr;
 
 	// Wheel mouse support
+	unsigned int linesPerScroll;
 	GTimeVal lastWheelMouseTime;
 	gint lastWheelMouseDirection;       
 	gint wheelMouseIntensity;
@@ -118,7 +122,7 @@ private:
 	virtual void ClaimSelection();
 	void ReceivedSelection(GtkSelectionData *selection_data);
 	void ReceivedDrop(GtkSelectionData *selection_data);
-	void GetSelection(GtkSelectionData *selection_data, guint info, char *text, bool isRectangular);
+	void GetSelection(GtkSelectionData *selection_data, guint info, SelectionText *selected);
 	void UnclaimSelection(GdkEventSelection *selection_event);
 	void Resize(int width, int height);
 
@@ -142,6 +146,7 @@ private:
 
 	static void ScrollSignal(GtkAdjustment *adj, ScintillaGTK *sciThis);
 	static void ScrollHSignal(GtkAdjustment *adj, ScintillaGTK *sciThis);
+	gint PressThis(GdkEventButton *event);
 	static gint Press(GtkWidget *widget, GdkEventButton *event);
 	static gint MouseRelease(GtkWidget *widget, GdkEventButton *event);
 #if PLAT_GTK_WIN32
@@ -201,9 +206,8 @@ static ScintillaGTK *ScintillaFromWidget(GtkWidget *widget) {
 ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 		adjustmentv(0), adjustmenth(0),
 		scrollBarWidth(30), scrollBarHeight(30),
-		pasteBuffer(0), pasteBufferIsRectangular(false),
 		capturedMouse(false), dragWasDropped(false),
-		primarySelectionCopy(0), parentClass(0),
+		parentClass(0),
 		ic(NULL), ic_attr(NULL), lastWheelMouseDirection(0),
 		wheelMouseIntensity(0) {
 	sci = sci_;
@@ -220,7 +224,7 @@ ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 #ifndef SPI_GETWHEELSCROLLLINES
 #define SPI_GETWHEELSCROLLLINES   104
 #endif
-	::SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, &ucWheelScrollLines, 0);
+	::SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, &linesPerScroll, 0);
 #else
 	ucWheelScrollLines = 4;
 #endif
@@ -231,7 +235,6 @@ ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 }
 
 ScintillaGTK::~ScintillaGTK() {
-	delete []primarySelectionCopy;
 }
 
 void ScintillaGTK::RealizeThis(GtkWidget *widget) {
@@ -456,9 +459,6 @@ void ScintillaGTK::Initialise() {
 	//Platform::DebugPrintf("ScintillaGTK::Initialise\n");
 	parentClass = reinterpret_cast<GtkWidgetClass *>(
 	                  gtk_type_class(gtk_container_get_type()));
-
-	pasteBuffer = 0;
-	pasteBufferIsRectangular = false;
 
 	GTK_WIDGET_SET_FLAGS(wMain.GetID(), GTK_CAN_FOCUS);
 	GTK_WIDGET_SET_FLAGS(GTK_WIDGET(wMain.GetID()), GTK_SENSITIVE);
@@ -764,9 +764,7 @@ int ScintillaGTK::KeyDefault(int key, int modifiers) {
 
 void ScintillaGTK::Copy() {
 	if (currentPos != anchor) {
-		delete []pasteBuffer;
-		pasteBuffer = CopySelectionRange();
-		pasteBufferIsRectangular = selType == selRectangle;
+		CopySelectionRange(&copyText);
 		gtk_selection_owner_set(GTK_WIDGET(wMain.GetID()),
 		                        clipboard_atom,
 		                        GDK_CURRENT_TIME);
@@ -829,16 +827,14 @@ void ScintillaGTK::ClaimSelection() {
 		primarySelection = true;
 		gtk_selection_owner_set(GTK_WIDGET(wMain.GetID()),
 		                        GDK_SELECTION_PRIMARY, GDK_CURRENT_TIME);
-		delete []primarySelectionCopy;
-		primarySelectionCopy = NULL;
+		primary.Set(0, 0);
 	} else if (OwnPrimarySelection()) {
-		if (primarySelectionCopy == NULL)
-			gtk_selection_owner_set(NULL, GDK_SELECTION_PRIMARY, GDK_CURRENT_TIME);
 		primarySelection = true;
+		if (primary.s == NULL)
+			gtk_selection_owner_set(NULL, GDK_SELECTION_PRIMARY, GDK_CURRENT_TIME);
 	} else {
-		delete []primarySelectionCopy;
-		primarySelectionCopy = NULL;
 		primarySelection = false;
+		primary.Set(0, 0);
 	}
 }
 
@@ -927,30 +923,21 @@ void ScintillaGTK::ReceivedDrop(GtkSelectionData *selection_data) {
 	Redraw();
 }
 
-// Preprocessor used to avoid warnings here
-#if PLAT_GTK_WIN32
-void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, char *text, bool) 
-#else
-void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, char *text, bool isRectangular) 
-#endif
-{
-	char *selBuffer = text;
-	char *tmpBuffer = NULL; // Buffer to be freed
-
+void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, SelectionText *text) {
 	if (selection_data->selection == GDK_SELECTION_PRIMARY) {
-		if (primarySelectionCopy != NULL) {
-			selBuffer = primarySelectionCopy;
-		} else {
-			tmpBuffer = CopySelectionRange();
-			selBuffer = tmpBuffer;
+		if (primary.s == NULL) {
+			CopySelectionRange(&primary);
 		}
+		text = &primary;
 	}
+
+	char *selBuffer = text->s;
 
 #if PLAT_GTK_WIN32
 	// win32gtk requires \n delimited lines and doesn't work right with
 	// other line formats, so make a copy of the clip text now with 
 	// newlines converted
-	char *tmpstr = new char[strlen(selBuffer) + 1];
+	char *tmpstr = new char[text->len + 1];
 	char *sptr = selBuffer;
 	char *dptr = tmpstr;
 	while (*sptr != '\0') {
@@ -979,7 +966,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, ch
 		// The #if is here because on Windows cfColumnSelect clip entry is used 
                 // instead as standard indicator of rectangularness (so no need to kludge)
 #if PLAT_GTK_WIN32 == 0
-		if (isRectangular)
+		if (text->rectangular)
 			len++;
 #endif
 		gtk_selection_data_set(selection_data, GDK_SELECTION_TYPE_STRING,
@@ -997,7 +984,6 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, ch
 		gdk_free_compound_text(text);
 	}
 
-	delete []tmpBuffer;
 #if PLAT_GTK_WIN32
 	delete []tmpstr;
 #endif
@@ -1008,8 +994,7 @@ void ScintillaGTK::UnclaimSelection(GdkEventSelection *selection_event) {
 	if (selection_event->selection == GDK_SELECTION_PRIMARY) {
 		//Platform::DebugPrintf("UnclaimPrimarySelection\n");
 		if (!OwnPrimarySelection()) {
-			delete []primarySelectionCopy;
-			primarySelectionCopy = NULL;
+			primary.Set(0, 0);
 			primarySelection = false;
 			FullPaint();
 		}
@@ -1053,20 +1038,17 @@ void ScintillaGTK::Resize(int width, int height) {
 	SetScrollBars();
 }
 
-gint ScintillaGTK::Press(GtkWidget *widget, GdkEventButton *event) {
-	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
-	//Platform::DebugPrintf("Press %x time=%d state = %x button = %x\n",sciThis,event->time, event->state, event->button);
+gint ScintillaGTK::PressThis(GdkEventButton *event) {
+	//Platform::DebugPrintf("Press %x time=%d state = %x button = %x\n",this,event->time, event->state, event->button);
 	// Do not use GTK+ double click events as Scintilla has its own double click detection
 	if (event->type != GDK_BUTTON_PRESS)
 		return FALSE;
 
-	sciThis->evbtn = *event;
+	evbtn = *event;
 	Point pt;
 	pt.x = int(event->x);
 	pt.y = int(event->y);
-	if (event->window != widget->window)
-		return FALSE;
-	PRectangle rcClient = sciThis->GetClientRectangle();
+	PRectangle rcClient = GetClientRectangle();
 	//Platform::DebugPrintf("Press %0d,%0d in %0d,%0d %0d,%0d\n",
 	//	pt.x, pt.y, rcClient.left, rcClient.top, rcClient.right, rcClient.bottom);
 	if ((pt.x > rcClient.right) || (pt.y > rcClient.bottom)) {
@@ -1076,52 +1058,59 @@ gint ScintillaGTK::Press(GtkWidget *widget, GdkEventButton *event) {
 
 	bool ctrl = event->state & GDK_CONTROL_MASK;
 
-	gtk_widget_grab_focus(sciThis->wMain.GetID());
+	gtk_widget_grab_focus(wMain.GetID());
 	if (event->button == 1) {
-		//sciThis->ButtonDown(pt, event->time,
+		//ButtonDown(pt, event->time,
 		//	event->state & GDK_SHIFT_MASK,
 		//	event->state & GDK_CONTROL_MASK,
 		//	event->state & GDK_MOD1_MASK);
 		// Instead of sending literal modifiers use control instead of alt
 		// This is because all the window managers seem to grab alt + click for moving
-		sciThis->ButtonDown(pt, event->time,
+		ButtonDown(pt, event->time,
 		                    event->state & GDK_SHIFT_MASK,
 		                    event->state & GDK_CONTROL_MASK,
 		                    event->state & GDK_CONTROL_MASK);
 	} else if (event->button == 2) {
 		// Grab the primary selection if it exists
-		Position pos = sciThis->PositionFromLocation(pt);
-		if (sciThis->OwnPrimarySelection() && sciThis->primarySelectionCopy == NULL)
-			sciThis->primarySelectionCopy = sciThis->CopySelectionRange();
+		Position pos = PositionFromLocation(pt);
+		if (OwnPrimarySelection() && primary.s == NULL)
+			CopySelectionRange(&primary);
 
-		sciThis->SetSelection(pos, pos);
-		gtk_selection_convert(GTK_WIDGET(sciThis->wMain.GetID()), GDK_SELECTION_PRIMARY,
+		SetSelection(pos, pos);
+		gtk_selection_convert(GTK_WIDGET(wMain.GetID()), GDK_SELECTION_PRIMARY,
 		                      gdk_atom_intern("STRING", FALSE), event->time);
-	} else if (event->button == 3 && sciThis->displayPopupMenu) {
+	} else if (event->button == 3 && displayPopupMenu) {
 		// PopUp menu
 		// Convert to screen
 		int ox = 0;
 		int oy = 0;
-		gdk_window_get_origin(sciThis->wMain.GetID()->window, &ox, &oy);
-		sciThis->ContextMenu(Point(pt.x + ox, pt.y + oy));
+		gdk_window_get_origin(wMain.GetID()->window, &ox, &oy);
+		ContextMenu(Point(pt.x + ox, pt.y + oy));
 	} else if (event->button == 4) {
 		// Wheel scrolling up (only xwin gtk does it this way)
 		if (ctrl)
-			gtk_adjustment_set_value(GTK_ADJUSTMENT(sciThis->adjustmenth), (
-			                             (sciThis->xOffset) / 2 ) - 6);
+			gtk_adjustment_set_value(GTK_ADJUSTMENT(adjustmenth), (
+			                             (xOffset) / 2 ) - 6);
 		else
-			gtk_adjustment_set_value(GTK_ADJUSTMENT(sciThis->adjustmentv),
-			                         sciThis->topLine - 3);
+			gtk_adjustment_set_value(GTK_ADJUSTMENT(adjustmentv),
+			                         topLine - 3);
 	} else if ( event->button == 5 ) {
 		// Wheel scrolling down (only xwin gtk does it this way)
 		if (ctrl)
-			gtk_adjustment_set_value(GTK_ADJUSTMENT(sciThis->adjustmenth), (
-			                             (sciThis->xOffset) / 2 ) + 6);
+			gtk_adjustment_set_value(GTK_ADJUSTMENT(adjustmenth), (
+			                             (xOffset) / 2 ) + 6);
 		else
-			gtk_adjustment_set_value(GTK_ADJUSTMENT(sciThis->adjustmentv),
-			                         sciThis->topLine + 3);
+			gtk_adjustment_set_value(GTK_ADJUSTMENT(adjustmentv),
+			                         topLine + 3);
 	}
 	return FALSE;
+}
+
+gint ScintillaGTK::Press(GtkWidget *widget, GdkEventButton *event) {
+	if (event->window != widget->window)
+		return FALSE;
+	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
+	return sciThis->PressThis(event);
 }
 
 gint ScintillaGTK::MouseRelease(GtkWidget *widget, GdkEventButton *event) {
@@ -1170,7 +1159,7 @@ gint ScintillaGTK::ScrollEvent(GtkWidget *widget,
 			sciThis->wheelMouseIntensity++;
 		cLineScroll = sciThis->wheelMouseIntensity;
 	} else {
-		cLineScroll = sciThis->ucWheelScrollLines;
+		cLineScroll = sciThis->linesPerScroll;
 		if (cLineScroll == 0)
 			cLineScroll = 4;
 		sciThis->wheelMouseIntensity = cLineScroll;
@@ -1420,7 +1409,7 @@ void ScintillaGTK::SelectionGet(GtkWidget *widget,
                                 GtkSelectionData *selection_data, guint info, guint) {
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	//Platform::DebugPrintf("Selection get\n");
-	sciThis->GetSelection(selection_data, info, sciThis->pasteBuffer, sciThis->pasteBufferIsRectangular);
+	sciThis->GetSelection(selection_data, info, &sciThis->copyText);
 }
 
 gint ScintillaGTK::SelectionClear(GtkWidget *widget, GdkEventSelection *selection_event) {
@@ -1486,7 +1475,7 @@ void ScintillaGTK::DragDataGet(GtkWidget *widget, GdkDragContext *context,
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	sciThis->dragWasDropped = true;
 	if (sciThis->currentPos != sciThis->anchor) {
-		sciThis->GetSelection(selection_data, info, sciThis->dragChars, sciThis->dragIsRectangle);
+		sciThis->GetSelection(selection_data, info, &sciThis->drag);
 	}
 	if (context->action == GDK_ACTION_MOVE) {
 		int selStart = sciThis->SelectionStart();
