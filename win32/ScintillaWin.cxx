@@ -183,7 +183,6 @@ public:
 HINSTANCE ScintillaWin::hInstance = 0;
 
 ScintillaWin::ScintillaWin(HWND hwnd) {
-::SetThreadLocale(MAKELCID(932, SORT_DEFAULT));
 
 	capturedMouse = false;
 

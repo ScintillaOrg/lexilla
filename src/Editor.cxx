@@ -735,7 +735,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 	int styleMask = pdoc->stylingBitsMask;
 	ll.xHighlightGuide = 0;
 	for (int charInDoc = posLineStart; 
-		charInDoc < posLineEnd && numCharsInLine < LineLayout::maxLineLength - 1; 
+		charInDoc < posLineEnd && numCharsInLine < LineLayout::maxLineLength - 2; 
 		charInDoc++) {
 		char chDoc = pdoc->CharAt(charInDoc);
 		styleByte = pdoc->StyleAt(charInDoc);
@@ -749,11 +749,13 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 	ll.chars[numCharsInLine] = 0;
 	ll.styles[numCharsInLine] = styleByte;	// For eolFilled
 	ll.indicators[numCharsInLine] = 0;
+	ll.indicators[numCharsInLine+1] = 0;
 
 	// Layout the line, determining the position of each character
 	int startseg = 0;
 	int startsegx = 0;
 	ll.positions[0] = 0;
+	ll.positions[numCharsInLine + 1] = 0;
 	unsigned int tabWidth = vstyle.spaceWidth * pdoc->tabInChars;
 	
 	for (int charInLine = 0; charInLine < numCharsInLine; charInLine++) {

@@ -30,8 +30,12 @@ class SVector {
 			return;
 		}
 		size = newSize;
-		for (unsigned int i=0; i<len; i++) {
+        unsigned int i=0;
+		for (; i<len; i++) {
 			newv[i] = v[i];
+		}
+		for (; i<size; i++) {
+			newv[i] = 0;
 		}
 		delete []v;
 		v = newv;

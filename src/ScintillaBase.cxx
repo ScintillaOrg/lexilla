@@ -41,7 +41,12 @@ ScintillaBase::ScintillaBase() {
 #endif
 }
 
-ScintillaBase::~ScintillaBase() {}
+ScintillaBase::~ScintillaBase() {
+#ifdef SCI_LEXER	
+	for (int wl=0;wl<numWordLists;wl++)
+		delete keyWordLists[wl];
+#endif
+}
 
 void ScintillaBase::Finalise() {
 	popup.Destroy();
