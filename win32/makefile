@@ -3,6 +3,8 @@
 # The License.txt file describes the conditions under which this software may be distributed.
 # This makefile assumes the mingw32 version of GCC 2.95.3 is used and changes will
 # be needed to use other compilers.
+# The -fvtable-thunks option is required for older (2.9*) versions of gcc but can be removed
+# safely if using a newer version which may display warning messages.
 
 .SUFFIXES: .cxx
 CC = g++
