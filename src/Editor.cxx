@@ -1394,6 +1394,8 @@ void Editor::InvalidateCaret() {
 }
 
 void Editor::NeedWrapping(int docLineStartWrapping, int docLineEndWrapping) {
+	docLineStartWrapping = Platform::Minimum(docLineStartWrapping, pdoc->LinesTotal()-1);
+	docLineEndWrapping = Platform::Minimum(docLineEndWrapping, pdoc->LinesTotal()-1);
 	bool noWrap = (docLastLineToWrap == docLineLastWrapped);
 	if (docLineLastWrapped > (docLineStartWrapping - 1)) {
 		docLineLastWrapped = docLineStartWrapping - 1;
@@ -1411,7 +1413,9 @@ void Editor::NeedWrapping(int docLineStartWrapping, int docLineEndWrapping) {
 	if (docLastLineToWrap >= pdoc->LinesTotal())
 		docLastLineToWrap = pdoc->LinesTotal()-1;
 	// Wrap lines during idle.
-	if (backgroundWrapEnabled && docLastLineToWrap != docLineLastWrapped ) {
+	if ((wrapState != eWrapNone) && 
+		backgroundWrapEnabled && 
+		(docLastLineToWrap != docLineLastWrapped)) {
 		SetIdle(true);
 	}
 }
@@ -1492,6 +1496,7 @@ bool Editor::WrapLines(bool fullWrap, int priorityWrapLineStart) {
 					firstLineToWrap++;
 					if (!priorityWrap)
 						docLineLastWrapped++;
+					if (firstLineToWrap < pdoc->LinesTotal()) {
 					AutoLineLayout ll(llc, RetrieveLineLayout(firstLineToWrap));
 					int linesWrapped = 1;
 					if (ll) {
@@ -1500,6 +1505,7 @@ bool Editor::WrapLines(bool fullWrap, int priorityWrapLineStart) {
 					}
 					if (cs.SetHeight(firstLineToWrap, linesWrapped)) {
 						wrapOccurred = true;
+						}
 					}
 				}
 				// If wrapping is done, bring it to resting position
