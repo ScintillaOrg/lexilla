@@ -810,7 +810,8 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 	int startsegx = 0;
 	ll.positions[0] = 0;
 	unsigned int tabWidth = vstyle.spaceWidth * pdoc->tabInChars;
-
+	bool lastSegItalics = false;
+	
 	for (int charInLine = 0; charInLine < numCharsInLine; charInLine++) {
 		if ((ll.styles[charInLine] != ll.styles[charInLine + 1]) ||
 		        IsControlCharacter(ll.chars[charInLine]) || IsControlCharacter(ll.chars[charInLine + 1])) {
@@ -825,7 +826,9 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 						// +3 For a blank on front and rounded edge each side:
 						ll.positions[charInLine + 1] = surface->WidthText(ctrlCharsFont, ctrlChar, strlen(ctrlChar)) + 3;
 					}
+					lastSegItalics = false;
 				} else {
+					lastSegItalics = vstyle.styles[ll.styles[charInLine]].italic;
 					int lenSeg = charInLine - startseg + 1;
 					if ((lenSeg == 1) && (' ' == ll.chars[startseg])) {
 						// Over half the segments are single characters and of these about half are space characters.
@@ -846,6 +849,10 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 			startsegx = ll.positions[charInLine + 1];
 			startseg = charInLine + 1;
 		}
+	}
+	// Small hack to make lines that end with italics not cut off the edge of the last character
+	if ((startseg > 0) && lastSegItalics) {
+		ll.positions[startseg] +=2;
 	}
 	ll.numCharsInLine = numCharsInLine;
 }
