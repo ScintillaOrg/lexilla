@@ -422,6 +422,13 @@ get int AutoCGetSeparator=2107(,)
 # Select the item in the auto-completion list that starts with a string.
 fun void AutoCSelect=2108(, string text)
 
+# Should the auto-completion list be cancelled if the user backspaces to a 
+# position before where the box was created. 
+set void AutoCSetCancelAtStart=2110(bool cancel,)
+
+# Retrieve whether auto-completion cancelled by backspacing before start.
+get bool AutoCGetCancelAtStart=2111(,)
+
 # Set the number of spaces used for one level of indentation.
 set void SetIndent=2122(int indentSize,)
 

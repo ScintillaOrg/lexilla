@@ -351,6 +351,13 @@ LRESULT ScintillaBase::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	case SCI_AUTOCSELECT:
 		ac.Select(reinterpret_cast<char *>(lParam));
 		break;
+	
+	case SCI_AUTOCSETCANCELATSTART:
+		ac.cancelAtStartPos = wParam;
+		break;
+	
+	case SCI_AUTOCGETCANCELATSTART:
+		return ac.cancelAtStartPos;
 
 	case SCI_CALLTIPSHOW: {
 			AutoCompleteCancel();

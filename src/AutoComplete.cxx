@@ -16,7 +16,7 @@ AutoComplete::AutoComplete() {
 	posStart = 0;
 	strcpy(stopChars, "");
 	separator = ' ';
-	cancelAtStartPos = false;
+	cancelAtStartPos = true;
 }
 
 AutoComplete::~AutoComplete() {
