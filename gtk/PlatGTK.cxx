@@ -768,9 +768,8 @@ void ListBox::Create(Window &, int) {
 }
 
 void ListBox::SetFont(Font &scint_font) {
-	GtkStyle* style;
-
-	style = gtk_widget_get_style(GTK_WIDGET(PWidget(list)));
+#if GTK_MAJOR_VERSION < 2
+	GtkStyle *style = gtk_widget_get_style(GTK_WIDGET(PWidget(list)));
 	if (!gdk_font_equal(style->font, PFont(scint_font))) {
 		style = gtk_style_copy(style);
 		gdk_font_unref(style->font);
@@ -779,6 +778,16 @@ void ListBox::SetFont(Font &scint_font) {
 		gtk_widget_set_style(GTK_WIDGET(PWidget(list)), style);
 		gtk_style_unref(style);
 	}
+#else
+	GtkStyle *styleCurrent = gtk_widget_get_style(GTK_WIDGET(PWidget(list)));
+	GdkFont *fontCurrent = gtk_style_get_font(styleCurrent);
+	if (!gdk_font_equal(fontCurrent, PFont(scint_font))) {
+		GtkStyle *styleNew = gtk_style_copy(styleCurrent);
+		gtk_style_set_font(styleNew, PFont(scint_font));
+		gtk_widget_set_style(GTK_WIDGET(PWidget(list)), styleNew);
+		gtk_style_unref(styleCurrent);
+	}
+#endif
 }
 
 void ListBox::SetAverageCharWidth(int width) {
@@ -800,10 +809,15 @@ PRectangle ListBox::GetDesiredRect() {
 		GtkRequisition req;
 		int height;
 
+#if GTK_MAJOR_VERSION < 2
+		int ythickness = PWidget(list)->style->klass->ythickness;
+#else
+		int ythickness = PWidget(list)->style->ythickness;
+#endif
 		// First calculate height of the clist for our desired visible row count otherwise it tries to expand to the total # of rows
 		height = (rows * GTK_CLIST(list)->row_height
 		          + rows + 1
-		          + 2 * (PWidget(list)->style->klass->ythickness
+		          + 2 * (ythickness
 		                 + GTK_CONTAINER(PWidget(list))->border_width));
 		gtk_widget_set_usize(GTK_WIDGET(PWidget(list)), -1, height);
 
