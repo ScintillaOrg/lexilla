@@ -57,37 +57,38 @@ CellBuffer.o: CellBuffer.cxx Platform.h Scintilla.h CellBuffer.h
 ContractionState.o: ContractionState.cxx Platform.h ContractionState.h
 Document.o: Document.cxx Platform.h Scintilla.h CellBuffer.h \
  Document.h
-DocumentAccessor.o: DocumentAccessor.cxx Platform.h PropSet.h Accessor.h DocumentAccessor.h Scintilla.h
+DocumentAccessor.o: DocumentAccessor.cxx Platform.h PropSet.h \
+ SString.h Accessor.h DocumentAccessor.h Scintilla.h
 Editor.o: Editor.cxx Platform.h Scintilla.h ContractionState.h \
  CellBuffer.h KeyMap.h Indicator.h LineMarker.h Style.h ViewStyle.h \
  Document.h Editor.h
 Indicator.o: Indicator.cxx Platform.h Scintilla.h Indicator.h
 KeyMap.o: KeyMap.cxx Platform.h Scintilla.h KeyMap.h
-LexConf.o: LexConf.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+LexConf.o: LexConf.cxx Platform.h PropSet.h \
+ SString.h Accessor.h KeyWords.h Scintilla.h SciLexer.h 
+LexCPP.o: LexCPP.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 
-LexCPP.o: LexCPP.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+LexHTML.o: LexHTML.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 
-LexHTML.o: LexHTML.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+LexLua.o: LexLua.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 
-LexLua.o: LexLua.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+LexOthers.o: LexOthers.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 
-LexOthers.o: LexOthers.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+LexPascal.o: LexPascal.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 
-LexPascal.o: LexPascal.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+LexPerl.o: LexPerl.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 
-LexPerl.o: LexPerl.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+LexPython.o: LexPython.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 
-LexPython.o: LexPython.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+LexSQL.o: LexSQL.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 
-LexSQL.o: LexSQL.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+LexVB.o: LexVB.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 
-LexVB.o: LexVB.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
- Scintilla.h SciLexer.h 
-KeyWords.o: KeyWords.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+KeyWords.o: KeyWords.cxx Platform.h PropSet.h SString.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 
 LineMarker.o: LineMarker.cxx Platform.h Scintilla.h LineMarker.h
 PlatWin.o: PlatWin.cxx Platform.h PlatformRes.h UniConversion.h
-PropSet.o: PropSet.cxx Platform.h PropSet.h
+PropSet.o: PropSet.cxx Platform.h PropSet.h SString.h
 ScintillaBase.o: ScintillaBase.cxx Platform.h Scintilla.h \
  ContractionState.h CellBuffer.h CallTip.h KeyMap.h Indicator.h \
  LineMarker.h Style.h ViewStyle.h AutoComplete.h Document.h Editor.h \
@@ -95,7 +96,7 @@ ScintillaBase.o: ScintillaBase.cxx Platform.h Scintilla.h \
 ScintillaBaseL.o: ScintillaBase.cxx Platform.h Scintilla.h SciLexer.h \
  ContractionState.h CellBuffer.h CallTip.h KeyMap.h Indicator.h \
  LineMarker.h Style.h AutoComplete.h ViewStyle.h Document.h Editor.h \
- ScintillaBase.h PropSet.h Accessor.h DocumentAccessor.h KeyWords.h
+ ScintillaBase.h PropSet.h SString.h Accessor.h DocumentAccessor.h KeyWords.h
 ScintillaWin.o: ScintillaWin.cxx Platform.h Scintilla.h \
  ContractionState.h CellBuffer.h CallTip.h KeyMap.h Indicator.h \
  LineMarker.h Style.h AutoComplete.h ViewStyle.h Document.h Editor.h \
@@ -103,7 +104,7 @@ ScintillaWin.o: ScintillaWin.cxx Platform.h Scintilla.h \
 ScintillaWinL.o: ScintillaWin.cxx Platform.h Scintilla.h SciLexer.h \
  ContractionState.h CellBuffer.h CallTip.h KeyMap.h Indicator.h \
  LineMarker.h Style.h AutoComplete.h ViewStyle.h Document.h Editor.h \
- ScintillaBase.h PropSet.h Accessor.h KeyWords.h UniConversion.h
+ ScintillaBase.h PropSet.h SString.h Accessor.h KeyWords.h UniConversion.h
 ScintillaWinS.o: ScintillaWin.cxx Platform.h Scintilla.h \
  ContractionState.h CellBuffer.h CallTip.h KeyMap.h Indicator.h \
  LineMarker.h Style.h AutoComplete.h ViewStyle.h Document.h Editor.h \
@@ -112,7 +113,7 @@ Style.o: Style.cxx Platform.h Style.h
 UniConversion.o: UniConversion.cxx UniConversion.h
 ViewStyle.o: ViewStyle.cxx Platform.h Scintilla.h Indicator.h \
  LineMarker.h Style.h ViewStyle.h
-WindowAccessor.o: DocumentAccessor.cxx Platform.h PropSet.h Accessor.h WindowAccessor.h Scintilla.h
+WindowAccessor.o: DocumentAccessor.cxx Platform.h PropSet.h SString.h Accessor.h WindowAccessor.h Scintilla.h
 
 ScintillaBaseL.o:
 	$(CC) $(CXXFLAGS) -D SCI_LEXER -c $< -o $@
