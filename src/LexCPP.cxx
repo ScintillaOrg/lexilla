@@ -252,4 +252,4 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 	}
 }
 
-static LexerModule lmCPP(SCLEX_CPP, ColouriseCppDoc);
+LexerModule lmCPP(SCLEX_CPP, ColouriseCppDoc);

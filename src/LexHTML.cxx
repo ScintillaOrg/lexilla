@@ -1135,5 +1135,5 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	styler.ColourTo(lengthDoc - 1, state);
 }
 
-static LexerModule lmHTML(SCLEX_HTML, ColouriseHyperTextDoc);
-static LexerModule lmXML(SCLEX_XML, ColouriseHyperTextDoc);
+LexerModule lmHTML(SCLEX_HTML, ColouriseHyperTextDoc);
+LexerModule lmXML(SCLEX_XML, ColouriseHyperTextDoc);

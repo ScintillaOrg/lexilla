@@ -115,4 +115,4 @@ static void ColouriseVBDoc(unsigned int startPos, int length, int initStyle,
 	styler.ColourTo(lengthDoc, state);
 }
 
-static LexerModule lmVB(SCLEX_VB, ColouriseVBDoc);
+LexerModule lmVB(SCLEX_VB, ColouriseVBDoc);

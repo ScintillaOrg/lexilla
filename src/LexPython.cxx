@@ -254,4 +254,4 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 	}
 }
 
-static LexerModule lmPython(SCLEX_PYTHON, ColourisePyDoc);
+LexerModule lmPython(SCLEX_PYTHON, ColourisePyDoc);

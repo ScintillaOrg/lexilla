@@ -485,4 +485,4 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 	styler.ColourTo(lengthDoc, state);
 }
 
-static LexerModule lmPerl(SCLEX_PERL, ColourisePerlDoc);
+LexerModule lmPerl(SCLEX_PERL, ColourisePerlDoc);

@@ -194,7 +194,7 @@ static void ColouriseErrorListDoc(unsigned int startPos, int length, int, WordLi
 		ColouriseErrorListLine(lineBuffer, linePos, startPos + length, styler);
 }
 
-static LexerModule lmProps(SCLEX_PROPERTIES, ColourisePropsDoc);
-static LexerModule lmErrorList(SCLEX_ERRORLIST, ColouriseErrorListDoc);
-static LexerModule lmMake(SCLEX_MAKEFILE, ColouriseMakeDoc);
-static LexerModule lmBatch(SCLEX_BATCH, ColouriseBatchDoc);
+LexerModule lmProps(SCLEX_PROPERTIES, ColourisePropsDoc);
+LexerModule lmErrorList(SCLEX_ERRORLIST, ColouriseErrorListDoc);
+LexerModule lmMake(SCLEX_MAKEFILE, ColouriseMakeDoc);
+LexerModule lmBatch(SCLEX_BATCH, ColouriseBatchDoc);

@@ -153,4 +153,4 @@ static void ColouriseSQLDoc(unsigned int startPos, int length,
 	styler.ColourTo(lengthDoc - 1, state);
 }
 
-static LexerModule lmSQL(SCLEX_SQL, ColouriseSQLDoc);
+LexerModule lmSQL(SCLEX_SQL, ColouriseSQLDoc);
