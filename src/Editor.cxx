@@ -1241,17 +1241,20 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 					widthOverstrikeCaret = 3;
 				if (((caret.active && caret.on) || (posDrag >= 0)) && xposCaret >= 0) {
 					PRectangle rcCaret = rcLine;
+					int caretWidthOffset = 0;
+					if ((offset > 0) && (vs.caretWidth > 1))
+						caretWidthOffset = 1;	// Move back so overlaps both character cells.
 					if (posDrag >= 0) {
-						rcCaret.left = xposCaret;
-						rcCaret.right = xposCaret + 1;
+						rcCaret.left = xposCaret - caretWidthOffset;
+						rcCaret.right = rcCaret.left + vs.caretWidth;
 					} else {
 						if (inOverstrike) {
 							rcCaret.top = rcCaret.bottom - 2;
 							rcCaret.left = xposCaret + 1;
 							rcCaret.right = rcCaret.left + widthOverstrikeCaret - 1;
 						} else {
-							rcCaret.left = xposCaret;
-							rcCaret.right = xposCaret + 1;
+							rcCaret.left = xposCaret - caretWidthOffset;
+							rcCaret.right = rcCaret.left + vs.caretWidth;
 						}
 					}
 					surface->FillRectangle(rcCaret, vs.caretcolour.allocated);
@@ -4065,6 +4068,19 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 
 	case SCI_GETCARETFORE:
 		return vs.caretcolour.desired.AsLong();
+
+	case SCI_SETCARETWIDTH:
+		if (wParam <= 1)
+			vs.caretWidth = 1;
+		else if (wParam >= 3)
+			vs.caretWidth = 3;
+		else
+			vs.caretWidth = wParam;
+		InvalidateStyleRedraw();
+		break;
+
+	case SCI_GETCARETWIDTH:
+		return vs.caretWidth;
 
 	case SCI_ASSIGNCMDKEY:
 		kmap.AssignCmdKey(Platform::LowShortFromLong(wParam),

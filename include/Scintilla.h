@@ -260,6 +260,8 @@ typedef long (*SciFnDirect)(long ptr, unsigned int iMessage, unsigned long wPara
 #define SCI_GETDIRECTPOINTER 2185
 #define SCI_SETOVERTYPE 2186
 #define SCI_GETOVERTYPE 2187
+#define SCI_SETCARETWIDTH 2188
+#define SCI_GETCARETWIDTH 2189
 #define SCI_CALLTIPSHOW 2200
 #define SCI_CALLTIPCANCEL 2201
 #define SCI_CALLTIPACTIVE 2202

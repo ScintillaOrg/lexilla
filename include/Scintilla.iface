@@ -581,13 +581,13 @@ fun int GetLine=2153(int line, stringresult text)
 get int GetLineCount=2154(,)
 
 # Sets the size in pixels of the left margin.
-set void SetMarginLeft=2155(, int width)
+set void SetMarginLeft=2155(, int pixelWidth)
 
 # Returns the size in pixels of the left margin.
 get int GetMarginLeft=2156(,)
 
 # Sets the size in pixels of the right margin.
-set void SetMarginRight=2157(, int width)
+set void SetMarginRight=2157(, int pixelWidth)
 
 # Returns the size in pixels of the right margin.
 get int GetMarginRight=2158(,)
@@ -682,6 +682,12 @@ set void SetOvertype=2186(bool overtype,)
 
 # Returns true if overtype mode is active otherwise false is returned.
 get bool GetOvertype=2187(,)
+
+# Set the width of the insert mode caret
+set void SetCaretWidth=2188(int pixelWidth,)
+
+# Returns the width of the insert mode caret
+get int GetCaretWidth=2189(,)
 
 # Show a call tip containing a definition near position pos.
 fun void CallTipShow=2200(position pos, string definition)
