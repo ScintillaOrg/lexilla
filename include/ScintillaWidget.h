@@ -14,7 +14,7 @@
 #pragma message(__FILE__ "(1) : warning : Scintilla.h should be included before ScintillaWidget.h")
 #pragma message("This will be required in the next version of Scintilla")
 #else
-#warning __FILE__:1: warning: Scintilla.h should be included before ScintillaWidget.h
+#warning Scintilla.h should be included before ScintillaWidget.h
 #warning This will be required in the next version of Scintilla
 #endif
 #include "Scintilla.h"
