@@ -37,15 +37,33 @@ CC=cl
 RC=rc
 LD=link
 
+!IFDEF USE_GTK2
+MARSHALLER=$(DIR_O)\scintilla-marshal.obj
+GTK_TOP= ../../gtk2
+TOP = $(GTK_TOP)
+!INCLUDE $(TOP)/glib/build/win32/make.msc
+
+GTK_INCLUDES= -I$(GTK_TOP)/gtk+ \
+              -I$(GTK_TOP)/gtk+/gdk \
+              -I$(GTK_TOP)/glib/glib \
+              -I$(GTK_TOP)/glib/gmodule \
+              -I$(GTK_TOP)/glib \
+              -I$(GTK_TOP)\libiconv\include \
+              -I$(GTK_TOP)\pango \
+              -I$(GTK_TOP)\atk
+ALL_GTK_LIBS=$(GTK2_LIBS) $(GLIB_LIBS) $(LIBICONV_LIBS)
+!ELSE
 GTK_TOP= ../../win32gtk
 GTK_INCLUDES= -I $(GTK_TOP)/gtk+ -I $(GTK_TOP)/gtk+/gdk -I $(GTK_TOP)/glib -I $(GTK_TOP)/glib/gmodule
-GTK_LIBS=$(GTK_TOP)/gtk+/gtk/gtk-1.3.lib \
-	 $(GTK_TOP)/gtk+/gdk/gdk-1.3.lib \
-	 $(GTK_TOP)/glib/gmodule/gmodule-1.3.lib \
-	 $(GTK_TOP)/glib/glib-1.3.lib
+ALL_GTK_LIBS=$(GTK_TOP)/gtk+/gtk/gtk-1.3.lib \
+       $(GTK_TOP)/gtk+/gdk/gdk-1.3.lib \
+       $(GTK_TOP)/glib/gmodule/gmodule-1.3.lib \
+       $(GTK_TOP)/glib/glib-1.3.lib
+!ENDIF
 
 INCLUDEDIRS=-I ../include -I ../src $(GTK_INCLUDES)
 CXXFLAGS=/TP /W4 -DGTK
+CFLAGS=/W4 -DGTK
 # For something scary:/Wp64
 CXXDEBUG=/Zi /Od /MDd -DDEBUG
 CXXNDEBUG=/Ox /MD -DNDEBUG
@@ -53,7 +71,7 @@ NAMEFLAG=-Fo
 LDFLAGS=/opt:nowin98
 LDDEBUG=/DEBUG
 #LIBS=KERNEL32.lib USER32.lib GDI32.lib IMM32.lib OLE32.LIB
-LIBS=$(GTK_LIBS)
+LIBS=$(ALL_GTK_LIBS)
 
 !IFDEF QUIET
 CC=@$(CC)
@@ -93,7 +111,7 @@ CXXFLAGS=$(CXXFLAGS) $(CXXNDEBUG)
 #ALL:	$(STATIC_LIB) $(COMPONENT) $(LEXCOMPONENT) $(DIR_O)\ScintillaGTKS.obj $(DIR_O)\WindowAccessor.obj
 ALL:	$(STATIC_LIB) $(DIR_O)\ScintillaGTKS.obj $(DIR_O)\WindowAccessor.obj
 
-clean:
+clean::
 	-del /q $(DIR_O)\*.obj $(DIR_O)\*.pdb $(COMPONENT) $(LEXCOMPONENT) $(DIR_O)\*.res $(DIR_BIN)\*.map
 
 SOBJS=\
@@ -108,6 +126,7 @@ SOBJS=\
 	$(DIR_O)\KeyMap.obj \
 	$(DIR_O)\LineMarker.obj \
 	$(DIR_O)\PlatGTK.obj \
+	$(MARSHALLER) \
 	$(DIR_O)\RESearch.obj \
 	$(DIR_O)\PropSet.obj \
 	$(DIR_O)\ScintillaBase.obj \
@@ -180,6 +199,7 @@ LOBJS=\
 	$(DIR_O)\KeyWords.obj \
 	$(DIR_O)\LineMarker.obj \
 	$(DIR_O)\PlatGTK.obj \
+	$(MARSHALLER) \
 	$(DIR_O)\RESearch.obj \
 	$(DIR_O)\PropSet.obj \
 	$(DIR_O)\ScintillaBaseL.obj \
@@ -189,6 +209,7 @@ LOBJS=\
 	$(DIR_O)\UniConversion.obj \
 	$(DIR_O)\ViewStyle.obj \
 	$(DIR_O)\XPM.obj \
+	$(DIR_O)\ExternalLexer.obj \
 	$(LEXOBJS)
 
 !IF "$(VENDOR)"=="MICROSOFT"
@@ -228,6 +249,8 @@ $(LEXCOMPONENT): $(LOBJS)
 	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c $(NAMEFLAG)$@ $<
 {.}.cxx{$(DIR_O)}.obj:
 	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c $(NAMEFLAG)$@ $<
+{.}.c{$(DIR_O)}.obj:
+	$(CC) $(INCLUDEDIRS) $(CFLAGS) -c $(NAMEFLAG)$@ $<
 
 # Some source files are compiled into more than one object because of different conditional compilation
 $(DIR_O)\ScintillaBaseL.obj: ..\src\ScintillaBase.cxx
@@ -264,7 +287,7 @@ $(DIR_O)\Editor.obj: ..\src\Editor.cxx ..\include\Platform.h ..\include\Scintill
  ..\src\Document.h ..\src\Editor.h
 
 $(DIR_O)\ExternalLexer.obj: ..\src\ExternalLexer.cxx ..\include\Platform.h ..\include\Scintilla.h ..\include\SciLexer.h \
- ..\include\PropSet.h ..\include\Accessor.h ..\src\DocumentAccessor.h ..\src\Keywords.h ..\src\ExternalLexer.h
+ ..\include\PropSet.h ..\include\Accessor.h ..\src\DocumentAccessor.h ..\include\Keywords.h ..\src\ExternalLexer.h
 
 $(DIR_O)\Indicator.obj: ..\src\Indicator.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\Indicator.h
 
