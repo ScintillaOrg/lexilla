@@ -71,6 +71,10 @@ public:
 		s = StringDup(s_);
 		ssize = (s) ? strlen(s) : 0;
 	}
+	SString(const char *s_, int first, int last) {
+		s = StringDup(s_ + first, last - first);
+		ssize = (s) ? strlen(s) : 0;
+	}
 	SString(int i) {
 		char number[100];
 		sprintf(number, "%0d", i);
@@ -163,8 +167,10 @@ public:
 		char *t = s;
 		while (t) {
 			t = strchr(t, find);
-			if (t)
+			if (t) {
 				*t = replace;
+				t++;
+			}
 		}
 	}
 	//added by ajkc - 08122000
@@ -183,9 +189,7 @@ public:
 			startPos = 0;
 
 		if (startPos == endPos) {
-			//result += s[startPos];
-			result += "";	// Why? -- Neil
-			return result;
+			return SString("");
 		}
 
 		if (startPos > endPos) {
@@ -193,15 +197,8 @@ public:
 			endPos = startPos;
 			startPos = tmp;
 		}
-
-		//printf("SString: substring startPos %d endPos %d\n",startPos,endPos);
-		for (int i = startPos; i < endPos; i++) {
-			//printf("SString: substring %d: %c\n",i,s[i]);
-			result += s[i];
-		}
-
-		//printf("SString: substring: returning: %s\n", result.c_str());
-		return result;
+		
+		return SString(s, startPos, endPos);
 	}
 	// I don't think this really belongs here -- Neil
 	void correctPath() {
