@@ -4000,6 +4000,22 @@ void Editor::CursorUpOrDown(int direction, selTypes sel) {
 	MovePositionTo(posNew, sel);
 }
 
+void Editor::ParaUpOrDown(int direction, selTypes sel) {
+	int lineDoc, savedPos = currentPos;
+	do {
+		MovePositionTo(direction > 0 ? pdoc->ParaDown(currentPos) : pdoc->ParaUp(currentPos), sel);
+		lineDoc = pdoc->LineFromPosition(currentPos);
+		if (direction > 0) {
+			if (currentPos >= pdoc->Length() && !cs.GetVisible(lineDoc)) {
+				if (sel == noSel) {
+					MovePositionTo(pdoc->LineEndPosition(savedPos));
+				}
+				break;
+			}
+		}
+	} while (!cs.GetVisible(lineDoc));
+}
+
 int Editor::StartEndDisplayLine(int pos, bool start) {
 	RefreshStyleData();
 	int line = pdoc->LineFromPosition(pos);
@@ -4044,10 +4060,10 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		CursorUpOrDown(1, selRectangle);
 		break;
 	case SCI_PARADOWN:
-		MovePositionTo(pdoc->ParaDown(currentPos));
+		ParaUpOrDown(1);
 		break;
 	case SCI_PARADOWNEXTEND:
-		MovePositionTo(pdoc->ParaDown(currentPos), selStream);
+		ParaUpOrDown(1, selStream);
 		break;
 	case SCI_LINESCROLLDOWN:
 		ScrollTo(topLine + 1);
@@ -4063,10 +4079,10 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		CursorUpOrDown(-1, selRectangle);
 		break;
 	case SCI_PARAUP:
-		MovePositionTo(pdoc->ParaUp(currentPos));
+		ParaUpOrDown(-1);
 		break;
 	case SCI_PARAUPEXTEND:
-		MovePositionTo(pdoc->ParaUp(currentPos), selStream);
+		ParaUpOrDown(-1, selStream);
 		break;
 	case SCI_LINESCROLLUP:
 		ScrollTo(topLine - 1);

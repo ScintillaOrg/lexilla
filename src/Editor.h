@@ -455,6 +455,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual void CancelModes();
 	void NewLine();
 	void CursorUpOrDown(int direction, selTypes sel=noSel);
+	void ParaUpOrDown(int direction, selTypes sel=noSel);
 	int StartEndDisplayLine(int pos, bool start);
 	virtual int KeyCommand(unsigned int iMessage);
 	virtual int KeyDefault(int /* key */, int /*modifiers*/);
