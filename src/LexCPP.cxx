@@ -170,7 +170,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 	if (initStyle == SCE_C_STRINGEOL)	// Does not leak onto next line
 		initStyle = SCE_C_DEFAULT;
 
-	char chPrevNonWhite = ' ';
+	int chPrevNonWhite = ' ';
 	int visibleChars = 0;
 	bool lastWordWasUUID = false;
 
@@ -309,7 +309,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 				do {
 					cc.Forward();
 				} while (IsASpace(cc.ch) && cc.More());
-			} else if (isoperator(cc.ch)) {
+			} else if (isoperator(static_cast<char>(cc.ch))) {
 				cc.SetState(SCE_C_OPERATOR);
 			}
 		}

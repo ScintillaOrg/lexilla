@@ -1798,7 +1798,7 @@ void Editor::NotifyChar(int ch) {
 #ifdef MACRO_SUPPORT
 	if (recordingMacro) {
 		char txt[2];
-		txt[0] = ch;
+		txt[0] = static_cast<char>(ch);
 		txt[1] = '\0';
 		NotifyMacroRecord(SCI_REPLACESEL, 0, reinterpret_cast<long>(txt));
 	}
