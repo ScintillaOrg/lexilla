@@ -78,6 +78,7 @@
 	<li>Richard Pecl</li>
 	<li>Edward K. Ream</li>
 	<li>Valery Kondakoff</li>
+	<li>Smári McCarthy</li>
     </ul>
     <p>
        Sponsorship
@@ -107,8 +108,10 @@
 	Bug fixed with scroll bars being invisible on GTK+ 1.2.9.
       </li>
       <li>
-	Scintilla and Scite support search and replace using simple regular 
-	expressions with tagged expressions.
+	Scintilla and Scite support find and replace using simple regular 
+	expressions with tagged expressions. SciTE supports C '\' escapes
+	in the Find and Replace dialogs. 
+	Replace in Selection available in SciTE.
       </li>
       <li>
 	Scintilla and SciTE on GTK+ support file dropping from file managers 
@@ -130,6 +133,19 @@
 	Ada lexer and support added.
       </li>
       <li>
+	Option in both Scintilla and SciTE to treat both left and right margin
+	as equally important when repositioning visible area in response to 
+	caret movement. Default is to prefer visible area positioning which
+	minimises the horizontal scroll position thus favouring the left margin.
+      </li>
+      <li>
+	Caret line highlighting.
+      </li>
+      <li>
+	Commands to delete from the caret to the end of line and 
+	from the caret to the beginningof line.
+      </li>
+      <li>
 	SciTE has commands for inserting and removing block comments and 
 	for inserting stream comments.
       </li>
@@ -144,11 +160,104 @@
 	when used with a companion program that supports these features.
       </li>
       <li>
+	SciTE has an Expand Abbreviation command.
+	Abbreviations are stored in a global abbrev.properties file.
+      </li>
+      <li>
+	SciTE has a Full Screen command to switch between a normal window
+	size and using the full screen. On Windows, the menu bar can be turned
+	off when in full screen mode.
+      </li>
+      <li>
+	SciTE has a Use monospaced font command to switch between the normal 
+	set of fonts and one size of a particular fixed width font.
+      </li>
+      <li>
+	SciTE's use of tabs can be controlled for particular file names 
+	as well as globally.
+      </li>
+      <li>
+	The contents of SciTE's status bar can be defined by a property and 
+	include variables. On Windows, several status bar definitions can be active
+	with a click on the status bar cycling through them.
+      </li>
+      <li>
+	Copy as RTF command in SciTE on Windows to allow pasting
+	styled text into word processors.
+      </li>
+      <li>
+	SciTE can allow the use of non-alphabetic characters in 
+	Complete Symbol lists and can automatically display this autocompletion 
+	list when a trigger character such as '.' is typed.
+	Complete word can be set to pop up when the user is typing a word and
+	there is only one matching word in the document.
+      </li>
+      <li>
+	SciTE lists the imported properties files on a menu to allow rapid 
+	access to them.
+      </li>
+      <li>
+	SciTE on GTK+ improvements to handling accelerator keys and focus 
+	in dialogs. Message boxes respond to key presses without the Alt key as 
+	they have no text entries to accept normal keystrokes.
+      </li>
+      <li>
+	SciTE on GTK+ sets the application icon.
+      </li>
+      <li>
+	SciTE allows setting the colours used to indicate the current
+	error line.
+      </li>
+      <li>
 	Variables within PHP strings have own style. Keyword list updated.
+      </li>
+      <li>
+	Keyword list for Lua updated for Lua 4.0.
+      </li>
+      <li>
+	Bug fixed in rectangular selection where rectangle still appeared
+	selected after using cursor keys to move caret.
       </li>
       <li>
 	Bug fixed in C++ lexer when deleting a '{' controlling a folded range 
 	led to that range becoming permanently invisible.
+      </li>
+      <li>
+	Bug fixed in Batch lexer where comments were not recognised.
+      </li>
+      <li>
+	Bug fixed with undo actions coalescing into steps incorrectly.
+      </li>
+      <li>
+	Bug fixed with Scintilla on GTK+ positioning scroll bars 1 pixel 
+	over the Scintilla window leading to their sides being chopped off.
+      </li>
+      <li>
+	Bugs fixed in SciTE when doing some actions led to the start
+	or end of the file being displayed rather than the current location.
+      </li>
+      <li>
+	Appearance of calltips fixed to look like document text including
+	any zoom factor. Positioned to be outside current line even when 
+	multiple fonts and sizes used.
+      </li>
+      <li>
+	Bug fixed in Scintilla macro support where typing Enter caused both a newline 
+	command and newline character insertion to be recorded.
+      </li>
+      <li>
+	Bug fixed in SciTE on GTK+ where focus was moving 
+	between widgets incorrectly.
+      </li>
+      <li>
+	Bug fixed with fold symbols sometimes not updating when
+	the text changed.
+      </li>
+      <li>
+	Bugs fixed in SciTE's handling of folding commands.
+      </li>
+      <li>
+	Deprecated undo collection enumeration removed from API.
       </li>
     </ul>
     <h3>
