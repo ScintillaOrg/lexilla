@@ -464,7 +464,7 @@ set void AutoCSetIgnoreCase=2115(bool ignoreCase,)
 # Retrieve state of ignore case flag. 
 get bool AutoCGetIgnoreCase=2116(,)
 
-# Retrieve state of ignore case flag. 
+# Display a list of strings and send notification when user chooses one. 
 fun void UserListShow=2117(int listType, string itemList)
 
 # Set the number of spaces used for one level of indentation.
