@@ -568,9 +568,9 @@ void ScintillaGTK::FullPaint() {
 
 PRectangle ScintillaGTK::GetClientRectangle() {
 	PRectangle rc = wMain.GetClientPosition();
-	rc.right -= scrollBarWidth;
+	rc.right -= scrollBarWidth + 1;
 	if (horizontalScrollBarVisible)
-		rc.bottom -= scrollBarHeight;
+		rc.bottom -= scrollBarHeight + 1;
 	// Move to origin
 	rc.right -= rc.left;
 	rc.bottom -= rc.top;
@@ -617,9 +617,9 @@ void ScintillaGTK::ScrollText(int linesToMove) {
 		                gc, wi->window,
 		                0, diff,
 		                0, 0,
-		                rc.Width(), rc.Height() - diff);
+		                rc.Width()-1, rc.Height() - diff);
 		SyncPaint(PRectangle(0, rc.Height() - diff - vs.lineHeight,
-		                     rc.Width(), rc.Height()));
+		                     rc.Width(), rc.Height()+1));
 
 	// Redraw exposed bit : scrolling downwards
 	} else {
@@ -627,7 +627,7 @@ void ScintillaGTK::ScrollText(int linesToMove) {
 		                gc, wi->window,
 		                0, 0,
 		                0, -diff,
-		                rc.Width(), rc.Height() + diff);
+		                rc.Width()-1, rc.Height() + diff);
 		SyncPaint(PRectangle(0, 0, rc.Width(), -diff + vs.lineHeight));
 	}
 
@@ -906,7 +906,6 @@ void ScintillaGTK::Resize(int width, int height) {
 	//Platform::DebugPrintf("Resize %d %d\n", width, height);
 	//printf("Resize %d %d\n", width, height);
 	DropGraphics();
-	GtkAllocation alloc;
 
 	// Not always needed, but some themes can have different sizes of scrollbars
 	scrollBarWidth = GTK_WIDGET(scrollbarv.GetID())->requisition.width;
@@ -918,14 +917,10 @@ void ScintillaGTK::Resize(int width, int height) {
 	if (!horizontalScrollBarVisible)
 		horizontalScrollBarHeight = 0;
 
-	alloc.x = 0;
-	alloc.y = 0;
-	alloc.width = Platform::Maximum(1, width - scrollBarWidth) + 1;
-	alloc.height = Platform::Maximum(1, height - horizontalScrollBarHeight) + 1;
-
+	GtkAllocation alloc;
 	alloc.x = 0;
 	if (horizontalScrollBarVisible) {
-		alloc.y = height - scrollBarHeight + 1;
+		alloc.y = height - scrollBarHeight;
 		alloc.width = Platform::Maximum(1, width - scrollBarWidth) + 1;
 		alloc.height = horizontalScrollBarHeight;
 	} else {
@@ -935,7 +930,7 @@ void ScintillaGTK::Resize(int width, int height) {
 	}
 	gtk_widget_size_allocate(GTK_WIDGET(scrollbarh.GetID()), &alloc);
 
-	alloc.x = width - scrollBarWidth + 1;
+	alloc.x = width - scrollBarWidth;
 	alloc.y = 0;
 	alloc.width = scrollBarWidth;
 	alloc.height = Platform::Maximum(1, height - scrollBarHeight) + 1;
