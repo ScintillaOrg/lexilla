@@ -14,7 +14,7 @@
 #include "Scintilla.h"
 #include "ScintillaWidget.h"
 
-/* Use fast way of getting char data on win32 to work around problems 
+/* Use fast way of getting char data on win32 to work around problems
    with gdk_string_extents. */
 #ifdef G_OS_WIN32
 #define FAST_WAY
@@ -22,8 +22,8 @@
 
 Point Point::FromLong(long lpoint) {
 	return Point(
-		Platform::LowShortFromLong(lpoint), 
-		Platform::HighShortFromLong(lpoint));
+	           Platform::LowShortFromLong(lpoint),
+	           Platform::HighShortFromLong(lpoint));
 }
 
 static GdkColor ColourfromRGB(unsigned int red, unsigned int green, unsigned int blue) {
@@ -97,21 +97,21 @@ void Palette::Release() {
 // This is one method to make it easier to keep the code for wanting and retrieving in sync.
 void Palette::WantFind(ColourPair &cp, bool want) {
 	if (want) {
-		for (int i=0; i < used; i++) {
+		for (int i = 0; i < used; i++) {
 			if (entries[i].desired == cp.desired)
-				return;
+				return ;
 		}
-	
+
 		if (used < numEntries) {
 			entries[used].desired = cp.desired;
 			entries[used].allocated = cp.desired;
 			used++;
 		}
 	} else {
-		for (int i=0; i < used; i++) {
+		for (int i = 0; i < used; i++) {
 			if (entries[i].desired == cp.desired) {
 				cp.allocated = entries[i].allocated;
-				return;
+				return ;
 			}
 		}
 		cp.allocated = cp.desired;
@@ -146,43 +146,62 @@ void Palette::Allocate(Window &w) {
 
 Font::Font() : id(0) {}
 
-
 Font::~Font() {}
 
 static const char *CharacterSetName(int characterSet) {
 	switch (characterSet) {
-		case SC_CHARSET_ANSI: return "iso8859";
-		case SC_CHARSET_DEFAULT: return "iso8859";
-		case SC_CHARSET_BALTIC: return "*";
-		case SC_CHARSET_CHINESEBIG5: return "*";
-		case SC_CHARSET_EASTEUROPE: return "iso8859-2";
-		case SC_CHARSET_GB2312: return "gb2312.1980";
-		case SC_CHARSET_GREEK: return "adobe";
-		case SC_CHARSET_HANGUL: return "ksc5601.1987";
-		case SC_CHARSET_MAC: return "*";
-		case SC_CHARSET_OEM: return "*";
-		case SC_CHARSET_RUSSIAN: return "*";
-		case SC_CHARSET_SHIFTJIS: return "jisx0208.1983";
-		case SC_CHARSET_SYMBOL: return "*";
-		case SC_CHARSET_TURKISH: return "*";
-		case SC_CHARSET_JOHAB: return "*";
-		case SC_CHARSET_HEBREW: return "*";
-		case SC_CHARSET_ARABIC: return "*";
-		case SC_CHARSET_VIETNAMESE: return "*";
-		case SC_CHARSET_THAI: return "*";
-		default: return "*";
+	case SC_CHARSET_ANSI:
+		return "iso8859";
+	case SC_CHARSET_DEFAULT:
+		return "iso8859";
+	case SC_CHARSET_BALTIC:
+		return "*";
+	case SC_CHARSET_CHINESEBIG5:
+		return "*";
+	case SC_CHARSET_EASTEUROPE:
+		return "iso8859-2";
+	case SC_CHARSET_GB2312:
+		return "gb2312.1980";
+	case SC_CHARSET_GREEK:
+		return "adobe";
+	case SC_CHARSET_HANGUL:
+		return "ksc5601.1987";
+	case SC_CHARSET_MAC:
+		return "*";
+	case SC_CHARSET_OEM:
+		return "*";
+	case SC_CHARSET_RUSSIAN:
+		return "*";
+	case SC_CHARSET_SHIFTJIS:
+		return "jisx0208.1983";
+	case SC_CHARSET_SYMBOL:
+		return "*";
+	case SC_CHARSET_TURKISH:
+		return "*";
+	case SC_CHARSET_JOHAB:
+		return "*";
+	case SC_CHARSET_HEBREW:
+		return "*";
+	case SC_CHARSET_ARABIC:
+		return "*";
+	case SC_CHARSET_VIETNAMESE:
+		return "*";
+	case SC_CHARSET_THAI:
+		return "*";
+	default:
+		return "*";
 	}
 }
 
-void Font::Create(const char *faceName, int characterSet, 
-	int size, bool bold, bool italic) {
+void Font::Create(const char *faceName, int characterSet,
+                  int size, bool bold, bool italic) {
 	Release();
 	// If name of the font begins with a '-', assume, that it is
 	// a full fontspec.
-	if (faceName[0] == '-'){
+	if (faceName[0] == '-') {
 		id = gdk_font_load(faceName);
 		if (id)
-			return;
+			return ;
 	}
 	char fontspec[300];
 	fontspec[0] = '\0';
@@ -216,10 +235,9 @@ void Font::Release() {
 		gdk_font_unref(id);
 	id = 0;
 }
-	
+
 Surface::Surface() : unicodeMode(false), drawable(0), gc(0), ppixmap(0),
 x(0), y(0), inited(false), createdGC(false) {}
-
 
 Surface::~Surface() {
 	Release();
@@ -300,8 +318,8 @@ void Surface::Polygon(Point *pts, int npts, Colour fore,
 	// Nasty casts works because Point is exactly same as GdkPoint
 	// Oh no it doesn't...
 	GdkPoint gpts[20];
-	if (npts < static_cast<int>((sizeof(gpts)/sizeof(gpts[0])))) {
-		for (int i=0;i<npts;i++) {
+	if (npts < static_cast<int>((sizeof(gpts) / sizeof(gpts[0])))) {
+		for (int i = 0;i < npts;i++) {
 			gpts[i].x = pts[i].x;
 			gpts[i].y = pts[i].y;
 		}
@@ -377,7 +395,7 @@ void Surface::RoundedRectangle(PRectangle rc, Colour fore, Colour back) {
 		    Point(rc.left, rc.bottom - 2),
 		    Point(rc.left, rc.top + 2),
 		};
-		Polygon(pts, sizeof(pts) / sizeof(pts[0]), fore, back); 
+		Polygon(pts, sizeof(pts) / sizeof(pts[0]), fore, back);
 	} else {
 		RectangleDraw(rc, fore, back);
 	}
@@ -415,9 +433,9 @@ void Surface::DrawText(PRectangle rc, Font &font_, int ybase, const char *s, int
 		gdk_draw_text(drawable, font_.id, gc, rc.left, ybase, s, len);
 }
 
-// On GTK+, exactly same as DrawText 
+// On GTK+, exactly same as DrawText
 void Surface::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len,
-                       Colour fore, Colour back) {
+                              Colour fore, Colour back) {
 	FillRectangle(rc, back);
 	PenColour(fore);
 	if (gc && drawable)
@@ -426,7 +444,7 @@ void Surface::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char 
 
 void Surface::MeasureWidths(Font &font_, const char *s, int len, int *positions) {
 	int totalWidth = 0;
-	for (int i=0;i<len;i++) {
+	for (int i = 0;i < len;i++) {
 		if (font_.id) {
 			int width = gdk_char_width(font_.id, s[i]);
 			totalWidth += width;
@@ -455,16 +473,16 @@ int Surface::WidthChar(Font &font_, char ch) {
 // 1) Call gdk_string_extents with string containing all letters, numbers and punctuation.
 // 2) Use the ascent and descent fields of GdkFont.
 // 3) Call gdk_string_extents with string as 1 but also including accented capitals.
-// Smallest values given by 1 and largest by 3 with 2 in between. 
-// Techniques 1 and 2 sometimes chop off extreme portions of ascenders and 
-// descenders but are mostly OK except for accented characters like Å which are 
+// Smallest values given by 1 and largest by 3 with 2 in between.
+// Techniques 1 and 2 sometimes chop off extreme portions of ascenders and
+// descenders but are mostly OK except for accented characters like Å which are
 // rarely used in code.
 
 // This string contains a good range of characters to test for size.
-const char largeSizeString[]= "ÂÃÅÄ `~!@#$%^&*()-_=+\\|[]{};:\"\'<,>.?/1234567890"
-	"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const char sizeString[]= "`~!@#$%^&*()-_=+\\|[]{};:\"\'<,>.?/1234567890"
-	"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const char largeSizeString[] = "ÂÃÅÄ `~!@#$%^&*()-_=+\\|[]{};:\"\'<,>.?/1234567890"
+                               "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const char sizeString[] = "`~!@#$%^&*()-_=+\\|[]{};:\"\'<,>.?/1234567890"
+                          "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 int Surface::Ascent(Font &font_) {
 	if (!font_.id)
@@ -532,11 +550,9 @@ void Surface::SetClip(PRectangle rc) {
 	gdk_gc_set_clip_rectangle(gc, &area);
 }
 
-void Surface::FlushCachedState() {
-}
+void Surface::FlushCachedState() {}
 
-Window::~Window() {
-}
+Window::~Window() {}
 
 void Window::Destroy() {
 	if (id)
@@ -573,7 +589,7 @@ void Window::SetPosition(PRectangle rc) {
 	gtk_widget_size_allocate(id, &alloc);
 #else
 	gtk_widget_set_uposition(id, rc.left, rc.top);
-	gtk_widget_set_usize(id, rc.right - rc.left,rc.bottom - rc.top);
+	gtk_widget_set_usize(id, rc.right - rc.left, rc.bottom - rc.top);
 #endif
 }
 
@@ -591,7 +607,7 @@ void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
 	alloc.height = rc.bottom - rc.top;
 	gtk_widget_size_allocate(id, &alloc);
 #endif
-	gtk_widget_set_usize(id, rc.right - rc.left,rc.bottom - rc.top);
+	gtk_widget_set_usize(id, rc.right - rc.left, rc.bottom - rc.top);
 }
 
 PRectangle Window::GetClientPosition() {
@@ -654,34 +670,11 @@ ListBox::ListBox() : list(0), current(0), desiredVisibleRows(5), maxItemCharacte
 ListBox::~ListBox() {}
 
 static void SelectionAC(GtkWidget *, gint row, gint,
-	                        GdkEventButton *, gpointer p) {
+                        GdkEventButton *, gpointer p) {
 	int *pi = reinterpret_cast<int *>(p);
 	*pi = row;
 }
 
-//~ void ListBox::Create(Window &, int) {
-	//~ id = gtk_window_new(GTK_WINDOW_POPUP);
-	//~ scroller = gtk_scrolled_window_new(NULL, NULL);
-	//~ gtk_container_set_border_width(GTK_CONTAINER(scroller), 1);
-	//~ gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller),
-	                               //~ GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-
-	//~ list = gtk_clist_new(1);
-	//~ gtk_clist_set_column_auto_resize(GTK_CLIST(list), 0, TRUE);
-	//~ gtk_container_add(GTK_CONTAINER(scroller), list);
-
-	//~ gtk_container_add(GTK_CONTAINER(GetID()), scroller);
-
-	//~ gtk_widget_show(list);
-	//~ gtk_widget_show(scroller);
-
-	//~ gtk_clist_set_selection_mode(GTK_CLIST(list), GTK_SELECTION_BROWSE);
-	//~ gtk_signal_connect(GTK_OBJECT(list), "select_row",
-	                   //~ GTK_SIGNAL_FUNC(SelectionAC), &current);
-	//~ gtk_clist_set_shadow_type(GTK_CLIST(list), GTK_SHADOW_OUT);
-
-	//~ gtk_widget_realize(id);
-//~ }
 void ListBox::Create(Window &, int) {
 	id = gtk_window_new(GTK_WINDOW_POPUP);
 
@@ -694,7 +687,7 @@ void ListBox::Create(Window &, int) {
 	scroller = gtk_scrolled_window_new(NULL, NULL);
 	gtk_container_set_border_width(GTK_CONTAINER(scroller), 0);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller),
-				       GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	                               GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 	gtk_container_add(GTK_CONTAINER(frame), scroller);
 	gtk_widget_show(scroller);
 
@@ -704,11 +697,12 @@ void ListBox::Create(Window &, int) {
 	gtk_clist_set_column_auto_resize(GTK_CLIST(list), 0, TRUE);
 	gtk_clist_set_selection_mode(GTK_CLIST(list), GTK_SELECTION_BROWSE);
 	gtk_signal_connect(GTK_OBJECT(list), "select_row",
-			   GTK_SIGNAL_FUNC(SelectionAC), &current);
+	                   GTK_SIGNAL_FUNC(SelectionAC), &current);
 	gtk_clist_set_shadow_type(GTK_CLIST(list), GTK_SHADOW_NONE);
 
 	gtk_widget_realize(id);
 }
+
 void ListBox::SetFont(Font &scint_font) {
 	GtkStyle* style;
 
@@ -724,7 +718,7 @@ void ListBox::SetFont(Font &scint_font) {
 }
 
 void ListBox::SetAverageCharWidth(int width) {
-    aveCharWidth = width;
+	aveCharWidth = width;
 }
 
 void ListBox::SetVisibleRows(int rows) {
@@ -738,14 +732,14 @@ PRectangle ListBox::GetDesiredRect() {
 		int rows = Length();
 		if ((rows == 0) || (rows > desiredVisibleRows))
 			rows = desiredVisibleRows;
-		
+
 		GtkRequisition req;
 		int height;
 
 		// First calculate height of the clist for our desired visible row count otherwise it tries to expand to the total # of rows
 		height = (rows * GTK_CLIST(list)->row_height
 		          + rows + 1
-		          + 2 * (list->style->klass->ythickness 
+		          + 2 * (list->style->klass->ythickness
 		                 + GTK_CONTAINER(list)->border_width));
 		gtk_widget_set_usize(GTK_WIDGET(list), -1, height);
 
@@ -753,30 +747,30 @@ PRectangle ListBox::GetDesiredRect() {
 		gtk_widget_size_request(GTK_WIDGET(scroller), &req);
 		rc.right = req.width;
 		rc.bottom = req.height;
-                
+
 		gtk_widget_set_usize(GTK_WIDGET(list), -1, -1);
 		int width = maxItemCharacters;
 		if (width < 12)
 			width = 12;
-		rc.right = width * (aveCharWidth+aveCharWidth/3);
+		rc.right = width * (aveCharWidth + aveCharWidth / 3);
 		if (Length() > rows)
 			rc.right = rc.right + 16;
 	}
 	return rc;
-    
+
 }
 
 void ListBox::Clear() {
 	gtk_clist_clear(GTK_CLIST(list));
-    maxItemCharacters = 0;
+	maxItemCharacters = 0;
 }
 
 void ListBox::Append(char *s) {
 	char *szs[] = { s, 0};
 	gtk_clist_append(GTK_CLIST(list), szs);
-    size_t len = strlen(s);
-    if (maxItemCharacters < len)
-        maxItemCharacters = len;
+	size_t len = strlen(s);
+	if (maxItemCharacters < len)
+		maxItemCharacters = len;
 }
 
 int ListBox::Length() {
@@ -820,7 +814,6 @@ void ListBox::Sort() {
 }
 
 Menu::Menu() : id(0) {}
-
 
 void Menu::CreatePopUp() {
 	Destroy();
@@ -875,7 +868,7 @@ bool Platform::IsKeyDown(int) {
 }
 
 long Platform::SendScintilla(
-		WindowID w, unsigned int msg, unsigned long wParam, long lParam) {
+    WindowID w, unsigned int msg, unsigned long wParam, long lParam) {
 	return scintilla_send_message(SCINTILLA(w), msg, wParam, lParam);
 }
 
@@ -907,8 +900,8 @@ void Platform::DebugPrintf(const char *format, ...) {
 	Platform::DebugDisplay(buffer);
 }
 #else
-void Platform::DebugPrintf(const char *, ...) {
-}
+void Platform::DebugPrintf(const char *, ...) {}
+
 #endif
 
 // Not supported for GTK+

@@ -121,7 +121,6 @@ PRectangle CallTip::CallTipStart(int pos, Point pt, const char *defn,
 	Surface surfaceMeasure;
 	surfaceMeasure.Init();
 	int deviceHeight = surfaceMeasure.DeviceHeightFont(size);
-	//int deviceHeight = (size * surfaceMeasure.LogPixelsY()) / 72;
 	font.Create(faceName, SC_CHARSET_DEFAULT, deviceHeight, false, false);
 	if (val)
 		delete []val;
