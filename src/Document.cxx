@@ -33,7 +33,6 @@ Document::Document() {
 	dbcsCodePage = 0;
 	stylingBits = 5;
 	stylingBitsMask = 0x1F;
-	stylingPos = 0;
 	stylingMask = 0;
 	for (int ch = 0; ch < 256; ch++) {
 		wordchars[ch] = isalnum(ch) || ch == '_';
@@ -378,7 +377,7 @@ void Document::DeleteChars(int pos, int len) {
 			const char *text = cb.DeleteChars(pos * 2, len * 2);
 			if (startSavePoint && cb.IsCollectingUndo())
 				NotifySavePoint(!startSavePoint);
-			if (pos < Length())
+			if ((pos < Length()) || (pos == 0))
 				ModifiedAt(pos);
 			else
 				ModifiedAt(pos-1);
@@ -1041,21 +1040,20 @@ void Document::SetStylingBits(int bits) {
 }
 
 void Document::StartStyling(int position, char mask) {
-	stylingPos = position;
 	stylingMask = mask;
+	endStyled = position;
 }
 
 void Document::SetStyleFor(int length, char style) {
 	if (enteredCount == 0) {
 		enteredCount++;
 		int prevEndStyled = endStyled;
-		if (cb.SetStyleFor(stylingPos, length, style, stylingMask)) {
+		if (cb.SetStyleFor(endStyled, length, style, stylingMask)) {
 			DocModification mh(SC_MOD_CHANGESTYLE | SC_PERFORMED_USER,
 			                   prevEndStyled, length);
 			NotifyModified(mh);
 		}
-		stylingPos += length;
-		endStyled = stylingPos;
+		endStyled += length;
 		enteredCount--;
 	}
 }
@@ -1065,12 +1063,11 @@ void Document::SetStyles(int length, char *styles) {
 		enteredCount++;
 		int prevEndStyled = endStyled;
 		bool didChange = false;
-		for (int iPos = 0; iPos < length; iPos++, stylingPos++) {
-			if (cb.SetStyleAt(stylingPos, styles[iPos], stylingMask)) {
+		for (int iPos = 0; iPos < length; iPos++, endStyled++) {
+			if (cb.SetStyleAt(endStyled, styles[iPos], stylingMask)) {
 				didChange = true;
 			}
 		}
-		endStyled = stylingPos;
 		if (didChange) {
 			DocModification mh(SC_MOD_CHANGESTYLE | SC_PERFORMED_USER,
 			                   prevEndStyled, endStyled - prevEndStyled);

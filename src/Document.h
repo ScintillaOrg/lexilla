@@ -82,7 +82,6 @@ private:
 	int refCount;
 	CellBuffer cb;
 	bool wordchars[256];
-	int stylingPos;
 	char stylingMask;
 	int endStyled;
 	int enteredCount;
