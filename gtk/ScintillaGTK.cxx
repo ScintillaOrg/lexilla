@@ -1443,9 +1443,11 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 	// Convert text to utf8 if it isn't already
 	if (text->characterSet != SC_CP_UTF8) {
 		const char *charSet = ::CharacterSetID(text->characterSet);
-		size_t new_len;
-		char* tmputf = ConvertText(&new_len, text->s, text->len, "UTF-8", charSet);
-		text->Set(tmputf, new_len, SC_CP_UTF8, text->rectangular);
+		if (*charSet) {
+			size_t new_len;
+			char* tmputf = ConvertText(&new_len, text->s, text->len, "UTF-8", charSet);
+			text->Set(tmputf, new_len, SC_CP_UTF8, text->rectangular);
+		}
 	}
 
 	// Here is a somewhat evil kludge.
