@@ -388,6 +388,8 @@ static void ColouriseErrorListLine(
 				state = 1;
 			} else if ((state == 0) && (lineBuffer[i] == '(')) {
 				state = 10;
+			} else if ((state == 0) && (lineBuffer[i] == '\t')) {
+				state = 20;
 			} else if ((state == 1) && isdigit(lineBuffer[i])) {
 				state = 2;
 			} else if ((state == 2) && (lineBuffer[i] == ':')) {
@@ -408,12 +410,22 @@ static void ColouriseErrorListLine(
 				break;
 			} else if (((state == 11) || (state == 14)) && !((lineBuffer[i] == ' ') || isdigit(lineBuffer[i]))) {
 				state = 99;
+			} else if ((state == 20) && isdigit(lineBuffer[i])) {
+				state = 24;
+				break;
+			} else if ((state == 20) && ((lineBuffer[i] == '/') && (lineBuffer[i+1] == '^'))) {
+				state = 21;
+			} else if ((state == 21) && ((lineBuffer[i] == '$') && (lineBuffer[i+1] == '/'))) {
+				state = 22;
+				break;		
 			}
 		}
 		if (state == 3) {
 			styler.ColourTo(endPos, SCE_ERR_GCC);
 		} else if ((state == 13) || (state == 14) || (state == 15)) {
 			styler.ColourTo(endPos, SCE_ERR_MS);
+		} else if ((state == 22) || (state == 24)) {
+			styler.ColourTo(endPos, SCE_ERR_CTAG);	
 		} else {
 			styler.ColourTo(endPos, SCE_ERR_DEFAULT);
 		}
