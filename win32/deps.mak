@@ -62,6 +62,9 @@ LexCPP.o: ../src/LexCPP.cxx ../include/Platform.h ../include/PropSet.h \
 LexCrontab.o: ../src/LexCrontab.cxx ../include/Platform.h \
  ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
  ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
+LexCSS.o: ../src/LexCSS.cxx ../include/Platform.h ../include/PropSet.h \
+ ../include/SString.h ../include/Accessor.h ../src/StyleContext.h \
+ ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
 LexEiffel.o: ../src/LexEiffel.cxx ../include/Platform.h \
  ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
  ../src/StyleContext.h ../include/KeyWords.h ../include/Scintilla.h \
