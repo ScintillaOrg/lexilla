@@ -717,25 +717,29 @@ int Document::NextWordStart(int pos, int delta) {
 	return pos;
 }
 
-bool Document::IsWordAt(int start, int end) {
-	int lengthDoc = Length();
-	if (start > 0) {
-		char ch = CharAt(start - 1);
-		if (IsWordChar(ch))
-			return false;
-	}
-	if (end < lengthDoc - 1) {
-		char ch = CharAt(end);
-		if (IsWordChar(ch))
-			return false;
+bool Document::IsWordStartAt(int pos) {
+	if (pos > 0) {
+		return !IsWordChar(CharAt(pos - 1));
 	}
 	return true;
+}
+
+bool Document::IsWordEndAt(int pos) {
+	if (pos < Length() - 1) {
+		return !IsWordChar(CharAt(pos));
+	}
+	return true;
+}
+
+bool Document::IsWordAt(int start, int end) {
+	return IsWordStartAt(start) && IsWordEndAt(end);
 }
 
 // Find text in document, supporting both forward and backward
 // searches (just pass minPos > maxPos to do a backward search)
 // Has not been tested with backwards DBCS searches yet.
-long Document::FindText(int minPos, int maxPos, const char *s, bool caseSensitive, bool word) {
+long Document::FindText(int minPos, int maxPos, const char *s, 
+	bool caseSensitive, bool word, bool wordStart) {
  	bool forward = minPos <= maxPos;
 	int increment = forward ? 1 : -1;
 
@@ -765,8 +769,10 @@ long Document::FindText(int minPos, int maxPos, const char *s, bool caseSensitiv
 						found = false;
 				}
 				if (found) {
-					if ((!word) || IsWordAt(pos, pos + lengthFind))
-						return pos;
+					if ((!word && !wordStart) ||
+						word && IsWordAt(pos, pos + lengthFind) ||
+						wordStart && IsWordStartAt(pos))
+ 						return pos;
 				}
 			}
 		} else {
@@ -778,8 +784,10 @@ long Document::FindText(int minPos, int maxPos, const char *s, bool caseSensitiv
 						found = false;
 				}
 				if (found) {
-					if ((!word) || IsWordAt(pos, pos + lengthFind))
-						return pos;
+					if (!(word && wordStart) ||
+						word && IsWordAt(pos, pos + lengthFind) ||
+						wordStart && IsWordStartAt(pos))
+ 						return pos;
 				}
 			}
 		}

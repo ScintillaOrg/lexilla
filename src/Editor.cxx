@@ -934,8 +934,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 				                         rcSegment.top + vsDraw.maxAscent, ctrlChar, strlen(ctrlChar),
 				                         textBack, textFore);
 				// Manage normal display
-			}
-			else {
+			} else {
 				rcSegment.left = ll.positions[startseg] + xStart;
 				rcSegment.right = ll.positions[i + 1] + xStart;
 				// Only try to draw if really visible - enhances performance by not calling environment to
@@ -2305,7 +2304,8 @@ void Editor::Indent(bool forwards) {
 long Editor::FindText(unsigned int iMessage, unsigned long wParam, long lParam) {
 	TextToFind *ft = reinterpret_cast<TextToFind *>(lParam);
 	int pos = pdoc->FindText(ft->chrg.cpMin, ft->chrg.cpMax, ft->lpstrText,
-	                         wParam & SCFIND_MATCHCASE, wParam & SCFIND_WHOLEWORD);
+	                        wParam & SCFIND_MATCHCASE, wParam & SCFIND_WHOLEWORD,
+				wParam & SCFIND_WORDSTART);
 	if (pos != -1) {
 		if (iMessage != EM_FINDTEXT) {
 			ft->chrgText.cpMin = pos;
@@ -2337,12 +2337,14 @@ long Editor::SearchText(unsigned int iMessage, unsigned long wParam, long lParam
 
 	if (iMessage == SCI_SEARCHNEXT) {
 		pos = pdoc->FindText(searchAnchor, pdoc->Length(), txt,
-		                     wParam & SCFIND_MATCHCASE,
-		                     wParam & SCFIND_WHOLEWORD);
+			wParam & SCFIND_MATCHCASE,
+			wParam & SCFIND_WHOLEWORD,
+			wParam & SCFIND_WORDSTART);
 	} else {
 		pos = pdoc->FindText(searchAnchor, 0, txt,
-		                     wParam & SCFIND_MATCHCASE,
-		                     wParam & SCFIND_WHOLEWORD);
+			wParam & SCFIND_MATCHCASE,
+			wParam & SCFIND_WHOLEWORD,
+			wParam & SCFIND_WORDSTART);
 	}
 
 	if (pos != -1) {
