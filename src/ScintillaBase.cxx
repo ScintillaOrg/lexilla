@@ -491,7 +491,8 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 				PRectangle rc = ct.CallTipStart(currentPos, pt,
 				                                reinterpret_cast<char *>(lParam),
 				                                vs.styles[STYLE_DEFAULT].fontName,
-				                                vs.styles[STYLE_DEFAULT].sizeZoomed);
+				                                vs.styles[STYLE_DEFAULT].sizeZoomed,
+												IsUnicodeMode());
 				// If the call-tip window would be out of the client
 				// space, adjust so it displays above the text.
 				PRectangle rcClient = GetClientRectangle();

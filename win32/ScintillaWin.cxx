@@ -1834,7 +1834,7 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
 		} else if (iMessage == WM_PAINT) {
 			PAINTSTRUCT ps;
 			::BeginPaint(hWnd, &ps);
-			AutoSurface surfaceWindow(ps.hdc);
+			AutoSurface surfaceWindow(ps.hdc, ctp->unicodeMode);
 			if (surfaceWindow) {
 				ctp->PaintCT(surfaceWindow);
 				surfaceWindow->Release();
