@@ -2106,13 +2106,16 @@ void ListBoxX::Select(int n) {
 		gtk_clist_moveto(GTK_CLIST(list), n, 0, 0.5, 0.5);
 	}
 #else
-	if (n < 0)
-		return;
-
 	GtkTreeIter iter;
 	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(list));
 	GtkTreeSelection *selection =
 		gtk_tree_view_get_selection(GTK_TREE_VIEW(list));
+
+	if (n < 0) {
+		gtk_tree_selection_unselect_all(selection);
+		return;
+	}
+
 	bool valid = gtk_tree_model_iter_nth_child(model, &iter, NULL, n);
 	if (valid) {
 		gtk_tree_selection_select_iter(selection, &iter);
@@ -2147,6 +2150,8 @@ void ListBoxX::Select(int n) {
 
 		// Set it.
 		gtk_adjustment_set_value(adj, value);
+	} else {
+		gtk_tree_selection_unselect_all(selection);
 	}
 #endif
 }
@@ -2166,7 +2171,7 @@ int ListBoxX::GetSelection() {
 		if (indices)
 			return indices[0];
 	}
-	return 0;
+	return -1;
 #endif
 }
 
@@ -2196,7 +2201,7 @@ int ListBoxX::Find(const char *prefix) {
 		i++;
 	}
 #endif
-	return - 1;
+	return -1;
 }
 
 void ListBoxX::GetValue(int n, char *value, int len) {
