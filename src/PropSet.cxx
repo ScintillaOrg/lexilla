@@ -258,11 +258,11 @@ void PropSet::ReadFromMemory(const char *data, int len, const char *directoryFor
 			const char *expr = linebuf + strlen("if") + 1;
 			ifIsTrue = GetInt(expr);
 		} else if (isprefix(linebuf, "import ") && directoryForImports) {
-			char importPath[MAX_PATH];
+			char importPath[1024];
 			strcpy(importPath, directoryForImports);
 			strcat(importPath, linebuf + strlen("import") + 1);
 			strcat(importPath, ".properties");
-            Read(importPath,directoryForImports);
+            		Read(importPath,directoryForImports);
 		} else if (isalpha(linebuf[0])) {
 			Set(linebuf);
 		} else if (isspace(linebuf[0]) && ifIsTrue) {
