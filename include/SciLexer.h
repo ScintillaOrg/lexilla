@@ -74,6 +74,7 @@
 #define SCE_H_SCRIPT 14
 #define SCE_H_ASP 15
 #define SCE_H_ASPAT 16
+#define SCE_H_CDATA 17
 // Embedded Javascript
 #define SCE_HJ_START 40
 #define SCE_HJ_DEFAULT 41
