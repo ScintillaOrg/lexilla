@@ -2,7 +2,7 @@
 /** @file ScintillaWin.cxx
  ** Windows specific subclass of ScintillaBase.
  **/
-// Copyright 1998-2002 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <stdlib.h>
@@ -34,6 +34,7 @@
 #include "CallTip.h"
 #include "KeyMap.h"
 #include "Indicator.h"
+#include "XPM.h"
 #include "LineMarker.h"
 #include "Style.h"
 #include "AutoComplete.h"
@@ -1863,7 +1864,7 @@ bool ScintillaWin::Register(HINSTANCE hInstance_) {
 	if (result) {
 		// Register the CallTip class
 		WNDCLASSEX wndclassc;
-		wndclassc.cbSize = sizeof(wndclass);
+		wndclassc.cbSize = sizeof(wndclassc);
 		wndclassc.style = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW;
 		wndclassc.cbClsExtra = 0;
 		wndclassc.cbWndExtra = sizeof(ScintillaWin *);
