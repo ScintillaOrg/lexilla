@@ -149,6 +149,7 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmForth);
 	LINK_LEXER(lmFortran);
 	LINK_LEXER(lmF77);
+	LINK_LEXER(lmGui4Cli);
 	LINK_LEXER(lmHTML);
 	LINK_LEXER(lmXML);
 	LINK_LEXER(lmASP);
