@@ -836,11 +836,14 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 		//     Replace: $(\1-\2)
 		int lineRangeStart = LineFromPosition(startPos);
 		int lineRangeEnd = LineFromPosition(endPos);
+		if ((startPos >= LineEnd(lineRangeStart)) && (lineRangeStart < lineRangeEnd)) {
+			// the start position is at end of line or between line end characters. 
+			lineRangeStart++;
+			startPos = LineStart(lineRangeStart);
+		}
 		int pos = -1;
 		int lenRet = 0;
-		char searchEnd = '\0';
-		if (*s)
-			searchEnd = s[strlen(s) - 1];
+		char searchEnd = s[*length - 1];
 		if (*length == 1) {
 			// These produce empty selections so nudge them on if needed
 			if (s[0] == '^') {
