@@ -373,34 +373,40 @@ static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unuse
 			lev = lev + 1;
 		}
 
-		// Skip past any blank lines for next indent level info; we skip also comments
-		// starting in column 0 which effectively folds them into surrounding code rather
+		// Skip past any blank lines for next indent level info; we skip also 
+		// comments (all comments, not just those starting in column 0)
+		// which effectively folds them into surrounding code rather
 		// than screwing up folding.
-		const int saveIndentNext = indentNext;
+		
 		while (!quote &&
 		        (lineNext < docLines) &&
 		        ((indentNext & SC_FOLDLEVELWHITEFLAG) ||
-		         (lineNext <= docLines && styler[styler.LineStart(lineNext)] == '#'))) {
-
+		         (lineNext <= docLines && IsCommentLine(lineNext, styler)))) {
+				
 			lineNext++;
 			indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
 		}
-
-		// Next compute max indent level of current line and next non-blank line.
-		// This is the level to which we set all the intervening blank or comment lines.
-		const int skip_level = Platform::Maximum(indentCurrentLevel,
-		                       indentNext & SC_FOLDLEVELNUMBERMASK);
-
+		
+		const int levelAfterComments = indentNext & SC_FOLDLEVELNUMBERMASK;
+		const int levelBeforeComments = Platform::Maximum(indentCurrentLevel,levelAfterComments);
+		
 		// Now set all the indent levels on the lines we skipped
-		int skipLine = lineCurrent + 1;
-		int skipIndentNext = saveIndentNext;
-		while (skipLine < lineNext) {
-			int skipLineLevel = skip_level;
-			if (skipIndentNext & SC_FOLDLEVELWHITEFLAG)
-				skipLineLevel = SC_FOLDLEVELWHITEFLAG | skipLineLevel;
-			styler.SetLevel(skipLine, skipLineLevel);
-			skipLine++;
-			skipIndentNext = styler.IndentAmount(skipLine, &spaceFlags, NULL);
+		// Do this from end to start.  Once we encounter one line
+		// which is indented more than the line after the end of
+		// the comment-block, use the level of the block before
+		
+		int skipLine = lineNext;
+		int skipLevel = levelAfterComments;
+		
+		while (--skipLine > lineCurrent) {
+			int skipLineIndent = styler.IndentAmount(skipLine, &spaceFlags, NULL);
+			
+			if ((skipLineIndent & SC_FOLDLEVELNUMBERMASK) > levelAfterComments)
+				skipLevel = levelBeforeComments;
+			
+			int whiteFlag = skipLineIndent & SC_FOLDLEVELWHITEFLAG;
+			
+			styler.SetLevel(skipLine, skipLevel | whiteFlag);
 		}
 
 		// Set fold header on non-quote/non-comment line
