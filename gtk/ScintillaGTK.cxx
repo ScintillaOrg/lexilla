@@ -1705,16 +1705,19 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 
 	gtk_widget_grab_focus(PWidget(wMain));
 	if (event->button == 1) {
-		//ButtonDown(pt, event->time,
-		//	event->state & GDK_SHIFT_MASK,
-		//	event->state & GDK_CONTROL_MASK,
-		//	event->state & GDK_MOD1_MASK);
-		// Instead of sending literal modifiers use control instead of alt
-		// This is because all the window managers seem to grab alt + click for moving
+		// On X, instead of sending literal modifiers use control instead of alt
+		// This is because most X window managers grab alt + click for moving
+#if !PLAT_GTK_WIN32
 		ButtonDown(pt, event->time,
-		                    (event->state & GDK_SHIFT_MASK) != 0,
-		                    (event->state & GDK_CONTROL_MASK) != 0,
-		                    (event->state & GDK_CONTROL_MASK) != 0);
+				    (event->state & GDK_SHIFT_MASK) != 0,
+				    (event->state & GDK_CONTROL_MASK) != 0,
+				    (event->state & GDK_CONTROL_MASK) != 0);
+#else
+		ButtonDown(pt, event->time,
+				    (event->state & GDK_SHIFT_MASK) != 0,
+				    (event->state & GDK_CONTROL_MASK) != 0,
+				    (event->state & GDK_MOD1_MASK) != 0);
+#endif
 	} else if (event->button == 2) {
 		// Grab the primary selection if it exists
 		Position pos = PositionFromLocation(pt);
