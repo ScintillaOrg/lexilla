@@ -53,6 +53,7 @@ typedef void *WindowID;
 typedef void *MenuID;
 typedef void *TickerID;
 typedef void *Function;
+typedef void *IdlerID;
 
 /**
  * A geometric point class.
