@@ -1229,14 +1229,14 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 			if (line == lineCaret) {
 				int offset = Platform::Minimum(posCaret - posLineStart, LineLayout::maxLineLength);
 				int xposCaret = ll.positions[offset] + xStart;
-				int widthOverstrikeCaret = 1;
-                if (posCaret == pdoc->Length())	{   // At end of document
+				int widthOverstrikeCaret;
+				if (posCaret == pdoc->Length())	{   // At end of document
 					widthOverstrikeCaret = vs.aveCharWidth;
-                } else if ((posCaret - posLineStart) >= ll.numCharsInLine) {	// At end of line
+				} else if ((posCaret - posLineStart) >= ll.numCharsInLine) {	// At end of line
 					widthOverstrikeCaret = vs.aveCharWidth;
-                } else {
-				    widthOverstrikeCaret = ll.positions[offset + 1] - ll.positions[offset];
-                }
+				} else {
+					widthOverstrikeCaret = ll.positions[offset + 1] - ll.positions[offset];
+				}
 				if (widthOverstrikeCaret < 3)	// Make sure its visible
 					widthOverstrikeCaret = 3;
 				if (((caret.active && caret.on) || (posDrag >= 0)) && xposCaret >= 0) {
