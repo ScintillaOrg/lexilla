@@ -8,6 +8,11 @@
 
 bool EqualCaseInsensitive(const char *a, const char *b);
 
+#if PLAT_WIN
+#define strcasecmp  stricmp
+#define strncasecmp strnicmp
+#endif
+
 // Define another string class.
 // While it would be 'better' to use std::string, that doubles the executable size.
 
@@ -207,13 +212,14 @@ class WordList {
 public:
 	// Each word contains at least one character - a empty word acts as sentinal at the end.
 	char **words;
+	char **wordsNoCase;
 	char *list;
 	int len;
 	bool onlyLineEnds;	// Delimited by any white space or only line ends
 	bool sorted;
 	int starts[256];
 	WordList(bool onlyLineEnds_ = false) : 
-		words(0), list(0), len(0), onlyLineEnds(onlyLineEnds_), sorted(false) {}
+		words(0), wordsNoCase(0), list(0), len(0), onlyLineEnds(onlyLineEnds_), sorted(false) {}
 	~WordList() { Clear(); }
 	operator bool() { return words ? true : false; }
 	const char *operator[](int ind) { return words[ind]; }
@@ -222,6 +228,12 @@ public:
 	char *Allocate(int size);
 	void SetFromAllocated();
 	bool InList(const char *s);
+	const char *GetNearestWord(const char *wordStart, int searchLen = -1, bool ignoreCase = false);
+	char *GetNearestWords(const char *wordStart, int searchLen = -1, bool ignoreCase = false);
 };
+
+inline bool nonFuncChar(char ch) {
+	return strchr("\t\n\r !\"#$%&'()*+,-./:;<=>?@[\\]^`{|}~", ch) != NULL;
+}
 
 #endif
