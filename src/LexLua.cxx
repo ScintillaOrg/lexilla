@@ -222,7 +222,7 @@ static void ColouriseLuaDoc(unsigned int startPos,
 	styler.ColourTo(lengthDoc - 1, state);
 }
 
-static void FoldLuaDoc(unsigned int startPos, int length, int initStyle, WordList *[],
+static void FoldLuaDoc(unsigned int startPos, int length, int /* initStyle */, WordList *[],
                        Accessor &styler) {
 	unsigned int lengthDoc = startPos + length;
 	int visibleChars = 0;
@@ -231,12 +231,11 @@ static void FoldLuaDoc(unsigned int startPos, int length, int initStyle, WordLis
 	int levelCurrent = levelPrev;
 	char chNext = styler[startPos];
 	int styleNext = styler.StyleAt(startPos);
-	int style = initStyle;
 	char s[10];
 	for (unsigned int i = startPos; i < lengthDoc; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
-		style = styleNext;
+		int style = styleNext;
 		styleNext = styler.StyleAt(i + 1);
 		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 		if (style == SCE_LUA_WORD)
