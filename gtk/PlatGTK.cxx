@@ -56,15 +56,13 @@ struct LOGFONT {
 
 #if USE_LOCK
 static GMutex *fontMutex = NULL;
-#endif
 
 static void InitializeGLIBThreads() {
-#if USE_LOCK
 	if (!g_thread_supported()) {
 		g_thread_init(NULL);
 	}
-#endif
 }
+#endif
 
 static void FontMutexAllocate() {
 #if USE_LOCK
@@ -1119,7 +1117,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 #ifdef USE_PANGO
 		if (PFont(font_)->pfd) {
 			if (len == 1) {
-				int width = PFont(font_)->CharWidth(*s);
+				int width = PFont(font_)->CharWidth(*s, et);
 				if (width) {
 					positions[0] = width;
 					return;
@@ -1137,7 +1135,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 				}
 			} else {
 				int wclen = 0;
-				if (dbcsMode) {
+				if (et == dbcs) {
 					GdkWChar *wctext = new GdkWChar[len + 1];
 					GdkWChar *wcp = wctext;
 					wclen = gdk_mbstowcs(wcp, s, len);
@@ -1176,7 +1174,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 				}
 			}
 			if (len == 1) {
-				PFont(font_)->SetCharWidth(*s, positions[0]);
+				PFont(font_)->SetCharWidth(*s, positions[0], et);
 			}
 			return;
 		}

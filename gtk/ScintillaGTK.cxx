@@ -49,7 +49,7 @@
 #ifdef SCI_LEXER
 #include <glib.h>
 #include <gmodule.h>
-#include "ExternalLexer.h"
+//#include "ExternalLexer.h"
 #endif
 
 #if GTK_MAJOR_VERSION < 2
@@ -616,7 +616,7 @@ sptr_t ScintillaGTK::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 #ifdef SCI_LEXER
 	case SCI_LOADLEXERLIBRARY:
-		LexerManager::GetInstance()->Load(reinterpret_cast<const char*>( wParam ));
+		//LexerManager::GetInstance()->Load(reinterpret_cast<const char*>( wParam ));
 		break;
 #endif
 
