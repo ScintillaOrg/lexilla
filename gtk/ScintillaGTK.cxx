@@ -126,6 +126,7 @@ private:
 	virtual void AddToPopUp(const char *label, int cmd = 0, bool enabled = true);
 	bool OwnPrimarySelection();
 	virtual void ClaimSelection();
+	char *GetGtkSelectionText(const GtkSelectionData *selectionData, unsigned int *len, bool *isRectangular);
 	void ReceivedSelection(GtkSelectionData *selection_data);
 	void ReceivedDrop(GtkSelectionData *selection_data);
 	void GetSelection(GtkSelectionData *selection_data, guint info, SelectionText *selected);
@@ -859,55 +860,81 @@ void ScintillaGTK::ClaimSelection() {
 	}
 }
 
+char *ScintillaGTK::GetGtkSelectionText(const GtkSelectionData *selectionData, 
+	unsigned int* len, bool* isRectangular) {
+	char *dest;
+	unsigned int i;
+	const char *sptr;
+	char *dptr;
+
+	// Return empty string if selection is not a string
+	if (selectionData->type != GDK_TARGET_STRING) {
+		dest = new char[1];
+		strcpy(dest, "");
+		*isRectangular = false;
+		*len = 0;
+		return dest;
+	}
+
+	// Need to convert to correct newline form for this file: win32gtk *always* returns 
+	// only \n line delimiter from clipboard, and linux/unix gtk may also not send the 
+	// form that matches the document (this is probably not effectively standardized by X)
+	dest = new char[(2 * static_cast<unsigned int>(selectionData->length)) + 1];
+	sptr = reinterpret_cast<const char *>(selectionData->data);
+	dptr = dest;
+	for (i = 0; i < static_cast<unsigned int>(selectionData->length) && *sptr != '\0'; i++) {
+		if (*sptr == '\n' || *sptr == '\r') {
+			if (pdoc->eolMode == SC_EOL_CR) {
+				*dptr++ = '\r';
+			}
+			else if (pdoc->eolMode == SC_EOL_LF) {
+				*dptr++ = '\n';
+			}
+			else { // pdoc->eolMode == SC_EOL_CRLF
+				*dptr++ = '\r';
+				*dptr++ = '\n';
+			}
+			if (*sptr == '\r' && i+1 < static_cast<unsigned int>(selectionData->length) && *(sptr+1) == '\n') {
+				i++;
+				sptr++;
+			}
+			sptr++;
+		}
+		else {
+			*dptr++ = *sptr++;
+		}
+	}
+	*dptr++ = '\0';
+
+	*len = (dptr - dest) - 1;
+
+	// Check for "\n\0" ending to string indicating that selection is rectangular
+#if PLAT_GTK_WIN32
+	*isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect) != 0;
+#else
+	*isRectangular = ((selectionData->length > 2) &&
+			  (selectionData->data[selectionData->length - 1] == 0 &&
+			   selectionData->data[selectionData->length - 2] == '\n'));
+#endif
+	return dest;			     
+}
+
 void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 	if (selection_data->type == GDK_TARGET_STRING) {
 		//Platform::DebugPrintf("Received String Selection %x %d\n", selection_data->selection, selection_data->length);
 		if (((selection_data->selection == clipboard_atom) ||
 		        (selection_data->selection == GDK_SELECTION_PRIMARY)) &&
 		        (selection_data->length > 0)) {
-			char *ptr = reinterpret_cast<char *>(selection_data->data);
-			unsigned int len = selection_data->length;
-			unsigned int i;
-			for (i = 0; i < static_cast<unsigned int>(selection_data->length); i++) {
-				if ((len == static_cast<unsigned int>(selection_data->length)) && (0 == ptr[i]))
-					len = i;
-			}                     
-#if PLAT_GTK_WIN32
-			/* Need to convert \n to correct newline form for this file as win32gtk always returns */
-			/* only \n line delimiter from clipboard */
-			char *tmpstr = new char [2 * len];
-			char *dptr = tmpstr;
-			char *sptr = ptr;
-			unsigned int newlen = len;                     
-			for (i = 0; i < len; i++) {
-				if (*sptr == '\n') {
-					if (pdoc->eolMode != SC_EOL_LF)
-						*dptr++ = '\r';
-					if (pdoc->eolMode != SC_EOL_CR)
-						*dptr++ = '\n';
-					if (pdoc->eolMode == SC_EOL_CRLF)
-						newlen++;
-					sptr++;
-				}
-				else {
-					*dptr++ = *sptr++;
-				}
-			}
-			ptr = tmpstr;
-			len = newlen;
-#endif
+			unsigned int len;
+			bool isRectangular;
+			char *ptr = GetGtkSelectionText(selection_data, &len, &isRectangular);
+
 			pdoc->BeginUndoAction();
 			int selStart = SelectionStart();
 			if (selection_data->selection != GDK_SELECTION_PRIMARY) {
 				ClearSelection();
 			}
-			// Check for "\n\0" ending to string indicating that selection is rectangular
-#if PLAT_GTK_WIN32
-			bool isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect) != 0;
-#else
-			bool isRectangular = ((selection_data->length > 1) &&
-			                      (ptr[selection_data->length - 1] == 0 && ptr[selection_data->length - 2] == '\n'));
-#endif
+
 			if (isRectangular) {
 				PasteRectangular(selStart, ptr, len);
 			} else {
@@ -915,9 +942,7 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 				SetEmptySelection(currentPos + len);
 			}
 			pdoc->EndUndoAction();
-#if PLAT_GTK_WIN32
-			delete []tmpstr;
-#endif
+			delete []ptr;
 		}
 	}
 	Redraw();
@@ -927,15 +952,11 @@ void ScintillaGTK::ReceivedDrop(GtkSelectionData *selection_data) {
 	dragWasDropped = true;
 	if (selection_data->type == GDK_TARGET_STRING) {
 		if (selection_data->length > 0) {
-			char *ptr = reinterpret_cast<char *>(selection_data->data);
-			// 3rd argument is false because the deletion of the moved data is handle by GetSelection
-#if PLAT_GTK_WIN32
-			bool isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect) != 0;
-#else
-			bool isRectangular = ((selection_data->length > 1) &&
-			                      (ptr[selection_data->length - 1] == 0 && ptr[selection_data->length - 2] == '\n'));
-#endif
+			unsigned int len;
+			bool isRectangular;
+			char *ptr = GetGtkSelectionText(selection_data, &len, &isRectangular);
 			DropAt(posDrop, ptr, false, isRectangular);
+			delete []ptr;
 		}
 	} else {
 		char *ptr = reinterpret_cast<char *>(selection_data->data);
