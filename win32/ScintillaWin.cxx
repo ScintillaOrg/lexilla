@@ -1467,8 +1467,7 @@ STDMETHODIMP DataObject_QueryGetData(DataObject *pd, FORMATETC *pFE) {
 	}
 
 	bool formatOK = (pFE->cfFormat == CF_TEXT) ||
-		((pFE->cfFormat == CF_UNICODETEXT) && pd->sci->IsUnicodeMode()) ||
-		(pFE->cfFormat == CF_HDROP);
+		((pFE->cfFormat == CF_UNICODETEXT) && pd->sci->IsUnicodeMode());
 	if (!formatOK ||
 	    pFE->ptd != 0 ||
 	    (pFE->dwAspect & DVASPECT_CONTENT) == 0 ||
@@ -2014,8 +2013,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 /// Implement important part of IDataObject
 STDMETHODIMP ScintillaWin::GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM) {
 	bool formatOK = (pFEIn->cfFormat == CF_TEXT) ||
-		((pFEIn->cfFormat == CF_UNICODETEXT) && IsUnicodeMode()) ||
-		(pFEIn->cfFormat == CF_HDROP);
+		((pFEIn->cfFormat == CF_UNICODETEXT) && IsUnicodeMode());
 	if (!formatOK ||
 	    pFEIn->ptd != 0 ||
 	    (pFEIn->dwAspect & DVASPECT_CONTENT) == 0 ||
@@ -2026,11 +2024,6 @@ STDMETHODIMP ScintillaWin::GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM) {
 		return DATA_E_FORMATETC;
 	}
 	pSTM->tymed = TYMED_HGLOBAL;
-	if (pFEIn->cfFormat == CF_HDROP) {
-		pSTM->hGlobal = 0;
-		pSTM->pUnkForRelease = 0;
-		return S_OK;
-	}
 	//Platform::DebugPrintf("DOB GetData OK %d %x %x\n", lenDrag, pFEIn, pSTM);
 
 	HGLOBAL hand;
