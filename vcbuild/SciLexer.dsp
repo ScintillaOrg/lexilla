@@ -210,6 +210,10 @@ SOURCE=..\src\LexPerl.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexPOV.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexPython.cxx
 # End Source File
 # Begin Source File
