@@ -1458,7 +1458,7 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 					number[0] = '\0';
 					if (firstSubLine)
 						sprintf(number, "%d", lineDoc + 1);
-					if (foldFlags & 64)
+					if (foldFlags & SC_FOLDFLAG_LEVELNUMBERS)
 						sprintf(number, "%X", pdoc->GetLevel(lineDoc));
 					PRectangle rcNumber = rcMarker;
 					// Right justify
@@ -2190,18 +2190,60 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 				ll->RestoreBracesHighlight(rangeLine, braces);
 
 				bool expanded = cs.GetExpanded(lineDoc);
-				if ( (expanded && (foldFlags & 2)) || (!expanded && (foldFlags & 4)) ) {
-					if (pdoc->GetLevel(lineDoc) & SC_FOLDLEVELHEADERFLAG) {
+				if ((foldFlags & SC_FOLDFLAG_BOX) == 0) {
+					// Paint the line above the fold
+					if ((expanded && (foldFlags & SC_FOLDFLAG_LINEBEFORE_EXPANDED))
+					     ||
+					     (!expanded && (foldFlags & SC_FOLDFLAG_LINEBEFORE_CONTRACTED))) {
+						if (pdoc->GetLevel(lineDoc) & SC_FOLDLEVELHEADERFLAG) {
+							PRectangle rcFoldLine = rcLine;
+							rcFoldLine.bottom = rcFoldLine.top + 1;
+							surface->FillRectangle(rcFoldLine, vs.styles[STYLE_DEFAULT].fore.allocated);
+						}
+					}
+					// Paint the line below the fold
+					if ((expanded && (foldFlags & SC_FOLDFLAG_LINEAFTER_EXPANDED))
+					     ||
+					     (!expanded && (foldFlags & SC_FOLDFLAG_LINEAFTER_CONTRACTED))) {
+						if (pdoc->GetLevel(lineDoc) & SC_FOLDLEVELHEADERFLAG) {
+							PRectangle rcFoldLine = rcLine;
+							rcFoldLine.top = rcFoldLine.bottom - 1;
+							surface->FillRectangle(rcFoldLine, vs.styles[STYLE_DEFAULT].fore.allocated);
+						}
+					}
+				} else {
+					int FoldLevelCurr = (pdoc->GetLevel(lineDoc) & SC_FOLDLEVELNUMBERMASK) - SC_FOLDLEVELBASE;
+					int FoldLevelPrev = (pdoc->GetLevel(lineDoc-1) & SC_FOLDLEVELNUMBERMASK) - SC_FOLDLEVELBASE;
+					int FoldLevelFlags = (pdoc->GetLevel(lineDoc) & ~SC_FOLDLEVELNUMBERMASK);
+					int indentationStep = (pdoc->indentInChars ? pdoc->indentInChars : pdoc->tabInChars);
+					// Draw line above fold
+					if ((FoldLevelPrev < FoldLevelCurr)
+						||
+						(FoldLevelFlags & SC_FOLDLEVELBOXHEADERFLAG
+							&&
+							(pdoc->GetLevel(lineDoc-1) & SC_FOLDLEVELBOXFOOTERFLAG) == 0)) {
 						PRectangle rcFoldLine = rcLine;
 						rcFoldLine.bottom = rcFoldLine.top + 1;
+						rcFoldLine.left += xStart + FoldLevelCurr * vs.spaceWidth * indentationStep - 1;
 						surface->FillRectangle(rcFoldLine, vs.styles[STYLE_DEFAULT].fore.allocated);
 					}
-				}
-				if ( (expanded && (foldFlags & 8)) || (!expanded && (foldFlags & 16)) ) {
-					if (pdoc->GetLevel(lineDoc) & SC_FOLDLEVELHEADERFLAG) {
+
+					// Line below the fold (or below a contracted fold)
+					if (FoldLevelFlags & SC_FOLDLEVELBOXFOOTERFLAG
+						||
+						(!expanded && (foldFlags & SC_FOLDFLAG_LINEAFTER_CONTRACTED))) {
 						PRectangle rcFoldLine = rcLine;
 						rcFoldLine.top = rcFoldLine.bottom - 1;
+						rcFoldLine.left += xStart + (FoldLevelCurr)* vs.spaceWidth * indentationStep - 1;
 						surface->FillRectangle(rcFoldLine, vs.styles[STYLE_DEFAULT].fore.allocated);
+					}
+
+					PRectangle rcBoxLine = rcLine;
+					// Draw vertical line for every fold level
+					for (int i = 0; i <= FoldLevelCurr; i++) {
+						rcBoxLine.left = xStart + i * vs.spaceWidth * indentationStep - 1;
+						rcBoxLine.right = rcBoxLine.left + 1;
+						surface->FillRectangle(rcBoxLine, vs.styles[STYLE_DEFAULT].fore.allocated);
 					}
 				}
 
@@ -3359,10 +3401,10 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		SetLastXChosen();
 		break;
 	case SCI_PAGEUP:
-		PageMove( -1);
+		PageMove(-1);
 		break;
 	case SCI_PAGEUPEXTEND:
-		PageMove( -1, true);
+		PageMove(-1, true);
 		break;
 	case SCI_PAGEDOWN:
 		PageMove(1);

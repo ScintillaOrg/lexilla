@@ -877,6 +877,10 @@ enu FoldLevel=SC_FOLDLEVEL
 val SC_FOLDLEVELBASE=0x400
 val SC_FOLDLEVELWHITEFLAG=0x1000
 val SC_FOLDLEVELHEADERFLAG=0x2000
+val SC_FOLDLEVELBOXHEADERFLAG=0x4000
+val SC_FOLDLEVELBOXFOOTERFLAG=0x8000
+val SC_FOLDLEVELCONTRACTED=0x10000
+val SC_FOLDLEVELUNINDENT=0x20000
 val SC_FOLDLEVELNUMBERMASK=0x0FFF
 
 # Set the fold level of a line.
@@ -914,7 +918,15 @@ fun void ToggleFold=2231(int line,)
 # Ensure a particular line is visible by expanding any header line hiding it.
 fun void EnsureVisible=2232(int line,)
 
-# Set some debugging options for folding.
+enu FoldFlag=SC_FOLDFLAG_
+val SC_FOLDFLAG_LINEBEFORE_EXPANDED=0x0002
+val SC_FOLDFLAG_LINEBEFORE_CONTRACTED=0x0004
+val SC_FOLDFLAG_LINEAFTER_EXPANDED=0x0008
+val SC_FOLDFLAG_LINEAFTER_CONTRACTED=0x0010
+val SC_FOLDFLAG_LEVELNUMBERS=0x0040
+val SC_FOLDFLAG_BOX=0x0001
+
+# Set some style options for folding.
 fun void SetFoldFlags=2233(int flags,)
 
 # Ensure a particular line is visible by expanding any header line hiding it.

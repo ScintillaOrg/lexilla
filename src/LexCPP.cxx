@@ -20,6 +20,9 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
+#define KEYWORD_BOXHEADER 1
+#define KEYWORD_FOLDCONTRACTED 2
+
 static bool IsOKBeforeRE(const int ch) {
 	return (ch == '(') || (ch == '=') || (ch == ',');
 }
@@ -34,17 +37,17 @@ static inline bool IsAWordStart(const int ch) {
 
 static inline bool IsADoxygenChar(const int ch) {
 	return (islower(ch) || ch == '$' || ch == '@' ||
-		    ch == '\\' || ch == '&' || ch == '<' ||
-			ch == '>' || ch == '#' || ch == '{' ||
-			ch == '}' || ch == '[' || ch == ']');
+	        ch == '\\' || ch == '&' || ch == '<' ||
+	        ch == '>' || ch == '#' || ch == '{' ||
+	        ch == '}' || ch == '[' || ch == ']');
 }
 
 static inline bool IsStateComment(const int state) {
 	return ((state == SCE_C_COMMENT) ||
-		      (state == SCE_C_COMMENTLINE) ||
-		      (state == SCE_C_COMMENTDOC) ||
-		      (state == SCE_C_COMMENTDOCKEYWORD) ||
-		      (state == SCE_C_COMMENTDOCKEYWORDERROR));
+	        (state == SCE_C_COMMENTLINE) ||
+	        (state == SCE_C_COMMENTDOC) ||
+	        (state == SCE_C_COMMENTDOCKEYWORD) ||
+	        (state == SCE_C_COMMENTDOCKEYWORDERROR));
 }
 
 static inline bool IsStateString(const int state) {
@@ -150,7 +153,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 				} else {
 					sc.GetCurrentLowered(s, sizeof(s));
 				}
-				if (!isspace(sc.ch) || !keywords3.InList(s+1)) {
+				if (!isspace(sc.ch) || !keywords3.InList(s + 1)) {
 					sc.ChangeState(SCE_C_COMMENTDOCKEYWORDERROR);
 				}
 				sc.SetState(SCE_C_COMMENTDOC);
@@ -271,12 +274,233 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 
 static bool IsStreamCommentStyle(int style) {
 	return style == SCE_C_COMMENT ||
-		style == SCE_C_COMMENTDOC ||
-		style == SCE_C_COMMENTDOCKEYWORD ||
-		style == SCE_C_COMMENTDOCKEYWORDERROR;
+	       style == SCE_C_COMMENTDOC ||
+	       style == SCE_C_COMMENTDOCKEYWORD ||
+	       style == SCE_C_COMMENTDOCKEYWORDERROR;
 }
 
-static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordList *[],
+static bool matchKeyword(unsigned int start, WordList &keywords, Accessor &styler, int keywordtype) {
+	bool FoundKeyword = false;
+
+	for (unsigned int i = 0;
+	        strlen(keywords[i]) > 0 && !FoundKeyword;
+	        i++) {
+		if (atoi(keywords[i]) == keywordtype) {
+			FoundKeyword = styler.Match(start, ((char *)keywords[i]) + 2);
+		}
+	}
+	return FoundKeyword;
+}
+
+static bool IsCommentLine(int line, Accessor &styler) {
+	unsigned int Pos = styler.LineStart(line);
+	while (styler.GetLine(Pos) == line) {
+		int PosStyle = styler.StyleAt(Pos);
+
+		if (	!IsStreamCommentStyle(PosStyle)
+		        &&
+		        PosStyle != SCE_C_COMMENTLINEDOC
+		        &&
+		        PosStyle != SCE_C_COMMENTLINE
+		        &&
+		        !IsASpace(styler.SafeGetCharAt(Pos))
+		   )
+			return false;
+		Pos++;
+	}
+
+	return true;
+}
+
+static void FoldBoxCppDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+                          Accessor &styler) {
+
+	WordList &keywords4 = *keywordlists[3];
+
+	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
+	bool foldPreprocessor = styler.GetPropertyInt("fold.preprocessor") != 0;
+	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
+	bool firstLine = true;
+	unsigned int endPos = startPos + length;
+	int visibleChars = 0;
+	int lineCurrent = styler.GetLine(startPos);
+	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
+	int levelCurrent = levelPrev;
+	int levelPrevPrev;
+	int levelFlags = 0;
+	int levelUnindent = 0;
+	char chNext = styler[startPos];
+	int styleNext = styler.StyleAt(startPos);
+	int style = initStyle;
+
+	if (lineCurrent == 0) {
+		levelPrevPrev = levelPrev;
+	} else {
+		levelPrevPrev = styler.LevelAt(lineCurrent - 1) & SC_FOLDLEVELNUMBERMASK;
+	}
+
+	for (unsigned int i = startPos; i < endPos; i++) {
+		char ch = chNext;
+		chNext = styler.SafeGetCharAt(i + 1);
+		int stylePrev = style;
+		style = styleNext;
+		styleNext = styler.StyleAt(i + 1);
+
+		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
+
+		if (foldComment && IsStreamCommentStyle(style)) {
+			if (!IsStreamCommentStyle(stylePrev)) {
+				levelCurrent++;
+			} else if (!IsStreamCommentStyle(styleNext) && !atEOL) {
+				// Comments don't end at end of line and the next character may be unstyled.
+				levelCurrent--;
+			}
+		}
+
+		if (foldComment && (style == SCE_C_COMMENTLINE)) {
+			if ((ch == '/') && (chNext == '/')) {
+				char chNext2 = styler.SafeGetCharAt(i + 2);
+				if (chNext2 == '{') {
+					levelCurrent++;
+				} else if (chNext2 == '}') {
+					levelCurrent--;
+				}
+			}
+		}
+
+		if (foldPreprocessor && (style == SCE_C_PREPROCESSOR)) {
+			if (ch == '#') {
+				unsigned int j = i + 1;
+				while ((j < endPos) && IsASpaceOrTab(styler.SafeGetCharAt(j))) {
+					j++;
+				}
+
+				if (styler.Match(j, "region") || styler.Match(j, "if")) {
+					levelCurrent++;
+				} else if (styler.Match(j, "end")) {
+					levelCurrent--;
+				}
+			}
+		}
+
+		if (style == SCE_C_OPERATOR
+		        ||
+		        style == SCE_C_COMMENT
+		        ||
+		        style == SCE_C_COMMENTLINE) {
+
+			if (ch == '{') {
+				levelCurrent++;
+				// Special handling if line has closing brace followed by opening brace.
+				if (levelCurrent == levelPrev) {
+					if (firstLine)
+						levelUnindent = 1;
+					else
+						levelUnindent = -1;
+				}
+			} else if (ch == '}') {
+				levelCurrent--;
+			}
+		}
+
+		/* Check for fold header keyword at beginning of word */
+		if ((style == SCE_C_WORD || style == SCE_C_COMMENT || style == SCE_C_COMMENTLINE)
+		        &&
+		        (style != stylePrev)) {
+			if (matchKeyword(i, keywords4, styler, KEYWORD_BOXHEADER)) {
+				int line;
+				/* Loop backwards all empty or comment lines */
+				for (line = lineCurrent - 1;
+				        line >= 0
+				        &&
+				        levelCurrent == (styler.LevelAt(line) & SC_FOLDLEVELNUMBERMASK)
+				        &&
+				        (styler.LevelAt(line) & SC_FOLDLEVELBOXFOOTERFLAG) == 0
+				        &&
+				        IsCommentLine(line, styler);
+				        line--) {
+					/* just loop backwards */;
+				}
+
+				line++;
+				/* Set Box header flag (if the previous line has no footer line) */
+				if ((styler.LevelAt(line) & SC_FOLDLEVELBOXFOOTERFLAG) == 0) {
+					if (line == lineCurrent) {
+						/* in current line */
+						levelFlags |= SC_FOLDLEVELBOXHEADERFLAG;
+					} else {
+						/* at top of all preceding comment lines */
+						styler.SetLevel(line, styler.LevelAt(line)
+						                | SC_FOLDLEVELBOXHEADERFLAG);
+					}
+				}
+			}
+		}
+
+		if (matchKeyword(i, keywords4, styler, KEYWORD_FOLDCONTRACTED)) {
+			levelFlags |= SC_FOLDLEVELCONTRACTED;
+		}
+
+		if (atEOL) {
+			int lev;
+			// Compute level correction for special case: '} else {'
+			if (levelUnindent < 0) {
+				levelPrev += levelUnindent;
+			} else {
+				levelCurrent += levelUnindent;
+			}
+
+			lev = levelPrev;
+			if (visibleChars == 0 && foldCompact)
+				lev |= SC_FOLDLEVELWHITEFLAG;
+			// Produce additional footer line (e.g. after closed if)
+			if (visibleChars == 0
+			        &&
+			        (levelPrev < levelPrevPrev))
+				lev |= SC_FOLDLEVELBOXFOOTERFLAG;
+			// Produce footer line at line before (special handling for '} else {'
+			if (levelPrev < levelPrevPrev) {
+				styler.SetLevel(lineCurrent - 1,
+				                styler.LevelAt(lineCurrent - 1) | SC_FOLDLEVELBOXFOOTERFLAG);
+			}
+			// Mark the fold header (the line that is always visible)
+			if ((levelCurrent > levelPrev) && (visibleChars > 0))
+				lev |= SC_FOLDLEVELHEADERFLAG;
+			// Show a footer line at end of fold
+			if (levelCurrent < levelPrev)
+				lev |= SC_FOLDLEVELBOXFOOTERFLAG;
+			/* Show a footer line at the end of each procedure (level == SC_FOLDLEVELBASE) */
+			if ((levelPrev == SC_FOLDLEVELBASE)
+			        &&
+			        (levelPrevPrev > SC_FOLDLEVELBASE)
+			        &&
+			        (visibleChars == 0)) {
+				lev |= SC_FOLDLEVELBOXFOOTERFLAG;
+			}
+
+			lev |= levelFlags;
+			if (lev != styler.LevelAt(lineCurrent)) {
+				styler.SetLevel(lineCurrent, lev);
+			}
+
+			lineCurrent++;
+			levelPrevPrev = levelPrev;
+			levelPrev = levelCurrent;
+			levelUnindent = 0;
+			visibleChars = 0;
+			levelFlags = 0;
+			firstLine = false;
+		}
+
+		if (!isspacechar(ch))
+			visibleChars++;
+	}
+	// Fill in the real level of the next line, keeping the current flags as they will be filled in later
+	int flagsNext = styler.LevelAt(lineCurrent) & ~SC_FOLDLEVELNUMBERMASK;
+	styler.SetLevel(lineCurrent, levelPrev | flagsNext);
+}
+
+static void FoldNoBoxCppDoc(unsigned int startPos, int length, int initStyle,
                             Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool foldPreprocessor = styler.GetPropertyInt("fold.preprocessor") != 0;
@@ -316,8 +540,8 @@ static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordLis
 		}
 		if (foldPreprocessor && (style == SCE_C_PREPROCESSOR)) {
 			if (ch == '#') {
-				unsigned int j=i+1;
-				while ((j<endPos) && IsASpaceOrTab(styler.SafeGetCharAt(j))) {
+				unsigned int j = i + 1;
+				while ((j < endPos) && IsASpaceOrTab(styler.SafeGetCharAt(j))) {
 					j++;
 				}
 				if (styler.Match(j, "region") || styler.Match(j, "if")) {
@@ -355,20 +579,34 @@ static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordLis
 	styler.SetLevel(lineCurrent, levelPrev | flagsNext);
 }
 
+static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+                       Accessor &styler) {
+
+	int foldFlags = styler.GetPropertyInt("fold.flags") ;
+	bool foldBox = ((foldFlags & SC_FOLDFLAG_BOX) == SC_FOLDFLAG_BOX);
+
+	if (foldBox) {
+		FoldBoxCppDoc(startPos, length, initStyle, keywordlists, styler);
+	} else {
+		FoldNoBoxCppDoc(startPos, length, initStyle, styler);
+	}
+}
+
 static const char * const cppWordLists[] = {
-	"Primary keywords and identifiers",
-	"Secondary keywords and identifiers",
-	"Documentation comment keywords",
-	0,
-};
+            "Primary keywords and identifiers",
+            "Secondary keywords and identifiers",
+            "Documentation comment keywords",
+            "Fold header keywords",
+            0,
+        };
 
 static void ColouriseCppDocSensitive(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
-                            Accessor &styler) {
+                                     Accessor &styler) {
 	ColouriseCppDoc(startPos, length, initStyle, keywordlists, styler, true);
 }
 
 static void ColouriseCppDocInsensitive(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
-                            Accessor &styler) {
+                                       Accessor &styler) {
 	ColouriseCppDoc(startPos, length, initStyle, keywordlists, styler, false);
 }
 
