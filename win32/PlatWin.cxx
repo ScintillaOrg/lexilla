@@ -10,6 +10,7 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <time.h>
 
 #define _WIN32_WINNT  0x0400
 #include <windows.h>
@@ -870,6 +871,46 @@ void Menu::Show(Point pt, Window &w) {
 		0, pt.x - 4, pt.y, 0, 
 		reinterpret_cast<HWND>(w.GetID()), NULL);
 	Destroy();
+}
+
+static bool initialisedET = false;
+static bool usePerformanceCounter = false;
+static LARGE_INTEGER frequency;
+
+static double Now() {
+	if (usePerformanceCounter) {
+		LARGE_INTEGER timeVal;
+		::QueryPerformanceCounter(&timeVal);
+		return *(reinterpret_cast<double *>(&timeVal));
+	} else {
+		return clock();
+	}
+}
+
+ElapsedTime::ElapsedTime() {
+	if (!initialisedET) {
+		usePerformanceCounter = ::QueryPerformanceFrequency(&frequency);
+		initialisedET = true;
+	}
+	beginTime = Now();
+}
+
+double ElapsedTime::Duration(bool reset) {
+	double endTime = Now();
+	double result;
+	if (usePerformanceCounter) {
+		LARGE_INTEGER lBegin = *(reinterpret_cast<LARGE_INTEGER *>(&beginTime));
+		LARGE_INTEGER lEnd = *(reinterpret_cast<LARGE_INTEGER *>(&endTime));
+		double elapsed = lEnd.QuadPart - lBegin.QuadPart;
+		result = elapsed / static_cast<double>(frequency.QuadPart);
+	} else {
+		double elapsed = endTime - beginTime;
+		result = elapsed / CLOCKS_PER_SEC;
+	}
+	if (reset) {
+		beginTime = endTime;
+	}
+	return result;
 }
 
 ColourDesired Platform::Chrome() {

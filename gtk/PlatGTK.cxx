@@ -886,6 +886,46 @@ void Menu::Show(Point pt, Window &) {
 	gtk_item_factory_popup(reinterpret_cast<GtkItemFactory *>(id), pt.x - 4, pt.y, 3, 0);
 }
 
+static double DoublePack(glong a, glong b) {
+	double d;
+	long *lp = reinterpret_cast<glong *>(&d);
+	lp[0] = a;
+	lp[1] = b;
+	return d;
+}
+
+static void DoubleUnpack(double d, glong &a, glong &b) {
+	long *lp = reinterpret_cast<glong *>(&d);
+	a = lp[0];
+	b = lp[1];
+}
+
+static double Now() {
+	GTimeVal curTime;
+	g_get_current_time(&curTime);
+	return DoublePack(curTime.tv_sec, curTime.tv_usec);
+}
+
+ElapsedTime::ElapsedTime() {
+	beginTime = Now();
+}
+
+double ElapsedTime::Duration(bool reset) {
+	double endTime = Now();
+	GTimeVal tvStart;
+	DoubleUnpack(beginTime, tvStart.tv_sec, tvStart.tv_usec);
+	GTimeVal tvEnd;
+	DoubleUnpack(endTime, tvEnd.tv_sec, tvEnd.tv_usec);
+	double result = tvEnd.tv_sec - tvStart.tv_sec;
+	result *= 1000000;
+	result += tvEnd.tv_usec - tvStart.tv_usec;
+	result /= 1000000;
+	if (reset) {
+		beginTime = endTime;
+	}
+	return result;
+}
+
 ColourDesired Platform::Chrome() {
 	return ColourDesired(0xe0, 0xe0, 0xe0);
 }
