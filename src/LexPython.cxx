@@ -99,7 +99,8 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 	int lineCurrent = styler.GetLine(startPos);
 	if (startPos > 0) {
 		if (lineCurrent > 0) {
-			startPos = styler.LineStart(lineCurrent - 1);
+			lineCurrent--;
+			startPos = styler.LineStart(lineCurrent);
 			if (startPos == 0)
 				initStyle = SCE_P_DEFAULT;
 			else
@@ -139,6 +140,7 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 			} else if (whingeLevel == 4) {
 				chFlags = (spaceFlags & wsTab) ? chBad : chGood;
 			}
+			sc.SetState(sc.state);
 			styler.SetFlags(chFlags, static_cast<char>(sc.state));
 		}
 
@@ -148,7 +150,7 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 			        (sc.state == SCE_P_TRIPLEDOUBLE)) {
 				// Perform colourisation of white space and triple quoted strings at end of each line to allow
 				// tab marking to work inside white space and triple quoted strings
-				sc.ForwardSetState(sc.state);
+				sc.SetState(sc.state);
 			}
 			lineCurrent++;
 			styler.IndentAmount(lineCurrent, &spaceFlags, IsPyComment);
@@ -159,6 +161,8 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 			if (!sc.More())
 				break;
 		}
+
+		bool needEOLCheck = false;
 
 		// Check for a state end
 		if (sc.state == SCE_P_OPERATOR) {
@@ -212,8 +216,10 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 				sc.Forward();
 			} else if ((sc.state == SCE_P_STRING) && (sc.ch == '\"')) {
 				sc.ForwardSetState(SCE_P_DEFAULT);
+				needEOLCheck = true;
 			} else if ((sc.state == SCE_P_CHARACTER) && (sc.ch == '\'')) {
 				sc.ForwardSetState(SCE_P_DEFAULT);
+				needEOLCheck = true;
 			}
 		} else if (sc.state == SCE_P_TRIPLE) {
 			if (sc.ch == '\\') {
@@ -222,6 +228,7 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 				sc.Forward();
 				sc.Forward();
 				sc.ForwardSetState(SCE_P_DEFAULT);
+				needEOLCheck = true;
 			}
 		} else if (sc.state == SCE_P_TRIPLEDOUBLE) {
 			if (sc.ch == '\\') {
@@ -230,7 +237,16 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 				sc.Forward();
 				sc.Forward();
 				sc.ForwardSetState(SCE_P_DEFAULT);
+				needEOLCheck = true;
 			}
+		}
+
+		// State exit code may have moved on to end of line
+		if (needEOLCheck && sc.atLineEnd) {
+			lineCurrent++;
+			styler.IndentAmount(lineCurrent, &spaceFlags, IsPyComment);
+			if (!sc.More())
+				break;
 		}
 
 		// Check for a new state starting character
