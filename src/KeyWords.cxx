@@ -157,6 +157,7 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmLout);
 	LINK_LEXER(lmLua);
 	LINK_LEXER(lmMatlab);
+	LINK_LEXER(lmOctave);
 	LINK_LEXER(lmMETAPOST);
 	LINK_LEXER(lmMMIXAL);
 	LINK_LEXER(lmLot);
