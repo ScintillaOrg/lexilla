@@ -2526,10 +2526,11 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		indStart[indica] = 0;
 
 	for (int indicPos = lineStart; indicPos <= lineEnd; indicPos++) {
-		if ((indicPos == lineEnd) || (ll->indicators[indicPos] != ll->indicators[indicPos + 1])) {
+		if ((indicPos == lineStart) || (indicPos == lineEnd) ||
+			(ll->indicators[indicPos] != ll->indicators[indicPos + 1])) {
 			int mask = 1 << pdoc->stylingBits;
 			for (int indicnum = 0; mask < 0x100; indicnum++) {
-				if ((indicPos == lineEnd)) {
+				if ((indicPos == lineStart) || (indicPos == lineEnd)) {
 					indStart[indicnum] = ll->positions[indicPos];
 				} else if ((ll->indicators[indicPos + 1] & mask) && !(ll->indicators[indicPos] & mask)) {
 					indStart[indicnum] = ll->positions[indicPos + 1];
