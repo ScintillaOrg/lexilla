@@ -110,7 +110,7 @@ LexerModule lmNull(SCLEX_NULL, ColouriseNullDoc, "null");
 // Taken from wxWindow's stc.cpp. Walter.
 
 int wxForceScintillaLexers(void) {
-	Scintilla_LinkLexers();
+	return Scintilla_LinkLexers();
 }
 
 int Scintilla_LinkLexers() {
