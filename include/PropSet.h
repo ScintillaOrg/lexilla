@@ -45,6 +45,7 @@ public:
 	~PropSet();
 	void Set(const char *key, const char *val, int lenKey=-1, int lenVal=-1);
 	void Set(const char *keyVal);
+	void Unset(const char *key, int lenKey=-1);
 	void SetMultiple(const char *s);
 	SString Get(const char *key);
 	SString GetExpanded(const char *key);

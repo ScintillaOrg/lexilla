@@ -383,6 +383,33 @@ void PropSet::Set(const char *keyVal) {
 	}
 }
 
+void PropSet::Unset(const char *key, int lenKey) {
+	if (!*key)	// Empty keys are not supported
+		return;
+	if (lenKey == -1)
+		lenKey = static_cast<int>(strlen(key));
+	unsigned int hash = HashString(key, lenKey);
+	Property *pPrev = NULL;
+	for (Property *p = props[hash % hashRoots]; p; p = p->next) {
+		if ((hash == p->hash) &&
+			((strlen(p->key) == static_cast<unsigned int>(lenKey)) &&
+				(0 == strncmp(p->key, key, lenKey)))) {
+			if (pPrev)
+				pPrev->next = p->next;
+			else
+				props[hash % hashRoots] = p->next;
+			if (p == enumnext)
+				enumnext = p->next; // Not that anyone should mix enum and Set / Unset.
+			delete [](p->key);
+			delete [](p->val);
+			delete p;
+			return;
+		} else {
+			pPrev = p;
+		}
+	}
+}
+
 void PropSet::SetMultiple(const char *s) {
 	const char *eol = strchr(s, '\n');
 	while (eol) {
