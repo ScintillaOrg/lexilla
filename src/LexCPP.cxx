@@ -32,10 +32,6 @@ static inline bool IsAWordStart(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '_');
 }
 
-static inline bool IsASpaceOrTab(const int ch) {
-	return (ch == ' ') || (ch == '\t');
-}
-
 static inline bool IsADoxygenChar(const int ch) {
 	return (islower(ch) || ch == '$' || ch == '@' ||
 		    ch == '\\' || ch == '&' || ch == '<' ||
@@ -274,15 +270,6 @@ static bool IsStreamCommentStyle(int style) {
 		style == SCE_C_COMMENTDOCKEYWORDERROR;
 }
 
-static bool MatchString(Accessor &styler, int pos, const char *s) {
-	for (int i=0; *s; i++) {
-		if (*s != styler.SafeGetCharAt(pos+i))
-			return false;
-		s++;
-	}
-	return true;
-}
-
 static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordList *[],
                             Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
@@ -326,9 +313,9 @@ static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordLis
 				while ((j<endPos) && IsASpaceOrTab(styler.SafeGetCharAt(j))) {
 					j++;
 				}
-				if (MatchString(styler, j, "region")) {
+				if (styler.Match(j, "region")) {
 					levelCurrent++;
-				} else if (MatchString(styler, j, "endregion")) {
+				} else if (styler.Match(j, "endregion")) {
 					levelCurrent--;
 				}
 			}

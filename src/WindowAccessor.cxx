@@ -45,6 +45,15 @@ void WindowAccessor::Fill(int position) {
 	Platform::SendScintilla(id, SCI_GETTEXTRANGE, 0, reinterpret_cast<long>(&tr));
 }
 
+bool WindowAccessor::Match(int pos, const char *s) {
+	for (int i=0; *s; i++) {
+		if (*s != SafeGetCharAt(pos+i))
+			return false;
+		s++;
+	}
+	return true;
+}
+
 char WindowAccessor::StyleAt(int position) {
 	return static_cast<char>(Platform::SendScintilla(
 		id, SCI_GETSTYLEAT, position, 0));
