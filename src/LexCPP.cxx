@@ -245,7 +245,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 				// Skip whitespace between # and preprocessor word
 				do {
 					sc.Forward();
-				} while ((sc.ch == ' ') && (sc.ch == '\t') && sc.More());
+				} while ((sc.ch == ' ' || sc.ch == '\t') && sc.More());
 				if (sc.atLineEnd) {
 					sc.SetState(SCE_C_DEFAULT);
 				}
