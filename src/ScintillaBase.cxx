@@ -1,5 +1,7 @@
 // Scintilla source code edit control
-// ScintillaBase.cxx - an enhanced subclass of Editor with calltips, autocomplete and context menu
+/** @file ScintillaBase.cxx
+ ** An enhanced subclass of Editor with calltips, autocomplete and context menu.
+ **/
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 

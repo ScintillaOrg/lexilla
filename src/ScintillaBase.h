@@ -1,17 +1,22 @@
 // Scintilla source code edit control
-// ScintillaBase.h - defines an enhanced subclass of Editor with calltips, autocomplete and context menu
+/** @file ScintillaBase.h
+ ** Defines an enhanced subclass of Editor with calltips, autocomplete and context menu.
+ **/
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #ifndef SCINTILLABASE_H
 #define SCINTILLABASE_H
 
+/**
+ */
 class ScintillaBase : public Editor {
 	// Private so ScintillaBase objects can not be copied
 	ScintillaBase(const ScintillaBase &) : Editor() {}
 	ScintillaBase &operator=(const ScintillaBase &) { return *this; }
+
 protected:
-	// Enumeration of commands and child windows
+	/** Enumeration of commands and child windows. */
 	enum {
 		idCallTip=1,
 		idAutoComplete=2,
@@ -30,8 +35,8 @@ protected:
 
 	CallTip ct;
 
-	int listType;			// 0 is an autocomplete list
-	SString userListSelected;	// Receives listbox selected string
+	int listType;			///< 0 is an autocomplete list
+	SString userListSelected;	///< Receives listbox selected string
 	
 #ifdef SCI_LEXER
 	int lexLanguage;
