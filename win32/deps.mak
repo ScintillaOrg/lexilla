@@ -3,11 +3,11 @@ ExternalLexer.o: ExternalLexer.cxx ../include/Platform.h \
  ../include/Accessor.h ../src/DocumentAccessor.h ../include/KeyWords.h \
  ExternalLexer.h
 PlatWin.o: PlatWin.cxx ../include/Platform.h PlatformRes.h \
- ../src/UniConversion.h
+ ../src/UniConversion.h ../src/XPM.h
 ScintillaWin.o: ScintillaWin.cxx ../include/Platform.h \
  ../include/Scintilla.h ../include/SString.h ../src/ContractionState.h \
  ../src/SVector.h ../src/CellBuffer.h ../src/CallTip.h ../src/KeyMap.h \
- ../src/Indicator.h ../src/LineMarker.h ../src/Style.h \
+ ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h ../src/Style.h \
  ../src/AutoComplete.h ../src/ViewStyle.h ../src/Document.h \
  ../src/Editor.h ../src/ScintillaBase.h ../src/UniConversion.h
 AutoComplete.o: ../src/AutoComplete.cxx ../include/Platform.h \
@@ -27,7 +27,7 @@ DocumentAccessor.o: ../src/DocumentAccessor.cxx ../include/Platform.h \
  ../include/Scintilla.h ../src/Document.h
 Editor.o: ../src/Editor.cxx ../include/Platform.h \
  ../include/Scintilla.h ../src/ContractionState.h ../src/SVector.h \
- ../src/CellBuffer.h ../src/KeyMap.h ../src/Indicator.h \
+ ../src/CellBuffer.h ../src/KeyMap.h ../src/Indicator.h ../src/XPM.h \
  ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
  ../src/Document.h ../src/Editor.h
 Indicator.o: ../src/Indicator.cxx ../include/Platform.h \
@@ -44,8 +44,8 @@ LexAsm.o: ../src/LexAsm.cxx ../include/Platform.h ../include/PropSet.h \
  ../include/SString.h ../include/Accessor.h ../src/StyleContext.h \
  ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
 LexAVE.o: ../src/LexAVE.cxx ../include/Platform.h ../include/PropSet.h \
- ../include/SString.h ../include/Accessor.h ../include/KeyWords.h \
- ../include/Scintilla.h ../include/SciLexer.h
+ ../include/SString.h ../include/Accessor.h ../src/StyleContext.h \
+ ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
 LexBaan.o: ../src/LexBaan.cxx ../include/Platform.h \
  ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
  ../src/StyleContext.h ../include/KeyWords.h ../include/Scintilla.h \
@@ -111,14 +111,14 @@ LexVB.o: ../src/LexVB.cxx ../include/Platform.h ../include/PropSet.h \
  ../include/SString.h ../include/Accessor.h ../src/StyleContext.h \
  ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
 LineMarker.o: ../src/LineMarker.cxx ../include/Platform.h \
- ../include/Scintilla.h ../src/LineMarker.h
+ ../include/Scintilla.h ../src/XPM.h ../src/LineMarker.h
 PropSet.o: ../src/PropSet.cxx ../include/Platform.h \
  ../include/PropSet.h ../include/SString.h
 RESearch.o: ../src/RESearch.cxx ../src/RESearch.h
 ScintillaBase.o: ../src/ScintillaBase.cxx ../include/Platform.h \
  ../include/Scintilla.h ../include/PropSet.h ../include/SString.h \
  ../src/ContractionState.h ../src/SVector.h ../src/CellBuffer.h \
- ../src/CallTip.h ../src/KeyMap.h ../src/Indicator.h \
+ ../src/CallTip.h ../src/KeyMap.h ../src/Indicator.h ../src/XPM.h \
  ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
  ../src/AutoComplete.h ../src/Document.h ../src/Editor.h \
  ../src/ScintillaBase.h
@@ -129,8 +129,9 @@ StyleContext.o: ../src/StyleContext.cxx ../include/Platform.h \
  ../src/StyleContext.h
 UniConversion.o: ../src/UniConversion.cxx ../src/UniConversion.h
 ViewStyle.o: ../src/ViewStyle.cxx ../include/Platform.h \
- ../include/Scintilla.h ../src/Indicator.h ../src/LineMarker.h \
- ../src/Style.h ../src/ViewStyle.h
+ ../include/Scintilla.h ../src/Indicator.h ../src/XPM.h \
+ ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h
 WindowAccessor.o: ../src/WindowAccessor.cxx ../include/Platform.h \
  ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
  ../include/WindowAccessor.h ../include/Scintilla.h
+XPM.o: ../src/XPM.cxx ../include/Platform.h ../src/XPM.h
