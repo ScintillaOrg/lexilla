@@ -179,7 +179,13 @@ void LineLayoutCache::AllocateForLevel(int linesOnScreen, int linesInDoc) {
 	}
 	if (lengthForLevel > size) {
 		Deallocate();
-	} else if (lengthForLevel != length) {
+	} else {
+		if (lengthForLevel < length) {
+			for (int i=lengthForLevel; i<length; i++) {
+				delete cache[i];
+				cache[i] = 0;
+			}
+		}
 		Invalidate(LineLayout::llInvalid);
 	}
 	if (!cache) {
@@ -3950,6 +3956,7 @@ void Editor::SetDocPointer(Document *document) {
 	// Reset the contraction state to fully shown.
 	cs.Clear();
 	cs.InsertLines(0, pdoc->LinesTotal() - 1);
+	llc.Deallocate();
 	NeedWrapping();
 
 	pdoc->AddWatcher(this, 0);

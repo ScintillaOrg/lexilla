@@ -93,10 +93,10 @@ class LineLayoutCache {
 	int styleClock;
 	void Allocate(int length_);
 	void AllocateForLevel(int linesOnScreen, int linesInDoc);
-	void Deallocate();
 public:
 	LineLayoutCache();
 	virtual ~LineLayoutCache();
+	void Deallocate();
 	enum { 
 		llcNone=SC_CACHE_NONE, 
 		llcCaret=SC_CACHE_CARET, 
