@@ -254,7 +254,10 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				} else {
 					state = SCE_PL_WORD;
 					preferRE = false;
-					if (!iswordchar(chNext)) {  // if length of word == 1 !!!
+					if ((!iswordchar(chNext) && chNext != '\'')
+						|| (chNext == '.' && chNext2 == '.')) {
+						// We need that if length of word == 1!
+						// This test is copied from the SCE_PL_WORD handler.
 						classifyWordPerl(styler.GetStartSegment(), i, keywords, styler);
 						state = SCE_PL_DEFAULT;
 					}
