@@ -39,7 +39,7 @@ clean:
 deps:
 	$(CC) -MM `gtk-config --cflags` $(CXXFLAGS) *.cxx ../src/*.cxx >deps.mak
 
-$(COMPLIB): DocumentAccessor.o WindowAccessor.o KeyWords.o Document.o CallTip.o \
+$(COMPLIB): DocumentAccessor.o WindowAccessor.o KeyWords.o StyleContext.o Document.o CallTip.o \
 	ScintillaBase.o ContractionState.o Editor.o PropSet.o PlatGTK.o \
 	KeyMap.o LineMarker.o ScintillaGTK.o CellBuffer.o ViewStyle.o \
 	RESearch.o Style.o Indicator.o AutoComplete.o

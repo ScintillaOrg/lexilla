@@ -150,6 +150,7 @@ LOBJS=\
 	$(DIR_O)\ScintillaBaseL.obj \
 	$(DIR_O)\ScintillaGTKL.obj \
 	$(DIR_O)\Style.obj \
+	$(DIR_O)\StyleContext.obj \
 	$(DIR_O)\UniConversion.obj \
 	$(DIR_O)\ViewStyle.obj \
 	$(LEXOBJS)
@@ -207,7 +208,7 @@ $(DIR_O)\ScintillaGTKS.obj: ScintillaGTK.cxx
 # All lexers depend on this set of headers
 LEX_HEADERS=..\include\Platform.h ..\include\PropSet.h \
  ..\include\SString.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h
+ ..\include\Scintilla.h ..\include\SciLexer.h ..\src\StyleContext.h
  
 $(DIR_O)\AutoComplete.obj: ..\src\AutoComplete.cxx ..\include\Platform.h ..\src\AutoComplete.h
 
@@ -294,6 +295,8 @@ $(DIR_O)\ScintillaWinS.obj: ScintillaWin.cxx ..\include\Platform.h ..\include\Sc
  ..\src\ScintillaBase.h ..\src\UniConversion.h
 
 $(DIR_O)\Style.obj: ..\src\Style.cxx ..\include\Platform.h ..\src\Style.h
+
+$(DIR_O)\StyleContext.obj: ..\src\StyleContext.cxx ..\include\Platform.h ..\include\Accessor.h ..\include\PropSet.h ..\src\StyleContext.h
 
 $(DIR_O)\ViewStyle.obj: ..\src\ViewStyle.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\Indicator.h \
  ..\src\LineMarker.h ..\src\Style.h ..\src\ViewStyle.h

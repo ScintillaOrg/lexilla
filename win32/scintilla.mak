@@ -140,6 +140,7 @@ LOBJS=\
 	$(DIR_O)\ScintillaBaseL.obj \
 	$(DIR_O)\ScintillaWinL.obj \
 	$(DIR_O)\Style.obj \
+	$(DIR_O)\StyleContext.obj \
 	$(DIR_O)\UniConversion.obj \
 	$(DIR_O)\ViewStyle.obj \
 	$(LEXOBJS)
@@ -191,7 +192,7 @@ $(DIR_O)\ScintillaWinS.obj: ScintillaWin.cxx
 # All lexers depend on this set of headers
 LEX_HEADERS=..\include\Platform.h ..\include\PropSet.h \
  ..\include\SString.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h
+ ..\include\Scintilla.h ..\include\SciLexer.h ..\src\StyleContext.h
 
 $(DIR_O)\AutoComplete.obj: ..\src\AutoComplete.cxx ..\include\Platform.h ..\src\AutoComplete.h
 
