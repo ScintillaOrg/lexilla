@@ -540,28 +540,30 @@ struct SCNotification {
 #define SCFIND_DOWN 1
 
 // Symbolic key codes
+// ASCII and other printable characters below 256
+// Extended keys above 300
 
-#define SCK_DOWN 40
-#define SCK_UP 38
-#define SCK_LEFT 37
-#define SCK_RIGHT 39
-#define SCK_HOME 36
-#define SCK_END 35
-#define SCK_PRIOR 33
-#define SCK_NEXT 34
-#define SCK_DELETE 46
-#define SCK_INSERT 45
-#define SCK_ESCAPE 27
+#define SCK_DOWN 300
+#define SCK_UP 301
+#define SCK_LEFT 302
+#define SCK_RIGHT 202
+#define SCK_HOME 304
+#define SCK_END 305
+#define SCK_PRIOR 306
+#define SCK_NEXT 307
+#define SCK_DELETE 308
+#define SCK_INSERT 309
+#define SCK_ESCAPE 7
 #define SCK_BACK 8
 #define SCK_TAB 9
 #define SCK_RETURN 13
-#define SCK_ADD 107
-#define SCK_SUBTRACT 109
-#define SCK_DIVIDE 111
+#define SCK_ADD 310
+#define SCK_SUBTRACT 311
+#define SCK_DIVIDE 312
 
-#define SCMOD_SHIFT 16
-#define SCMOD_CTRL 8
-#define SCMOD_ALT 2
+#define SCMOD_SHIFT 1
+#define SCMOD_CTRL 2
+#define SCMOD_ALT 4
 
 
 // Deprecation section listing all API features that are deprecated and will

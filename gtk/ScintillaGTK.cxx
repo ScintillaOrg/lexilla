@@ -864,7 +864,7 @@ static int KeyTranslate(int keyIn) {
 }
 
 gint ScintillaGTK::KeyPress(GtkWidget *, GdkEventKey *event, ScintillaGTK *sciThis) {
-	//Platform::DebugPrintf("SC-key: %d %x %x\n",event->keyval, event->state, GTK_WIDGET_FLAGS(widget));
+	//Platform::DebugPrintf("SC-key: %d %x %x\n",event->keyval, event->state);
 	bool shift = event->state & GDK_SHIFT_MASK;
 	bool ctrl = event->state & GDK_CONTROL_MASK;
 	bool alt = event->state & GDK_MOD1_MASK;
