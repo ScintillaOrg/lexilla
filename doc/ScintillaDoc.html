@@ -310,8 +310,9 @@ SCI_STYLESETCHARACTERSET(int stylenumber, int charset)
     </p>
     <p>
        As well as the 32 fundamental lexer styles, there are also some predefined numbered styles
-      starting at 32, STYLE_DEFAULT, STYLE_LINENUMBER, STYLE_BRACELIGHT, STYLE_BRACEBAD, and
-      STYLE_CONTROLCHAR. These can be defined with the SCI_STYLESET* messages.
+      starting at 32, STYLE_DEFAULT, STYLE_LINENUMBER, STYLE_BRACELIGHT, STYLE_BRACEBAD, 
+      STYLE_CONTROLCHAR, and STYLE_INDENTGUIDE. 
+      These can be defined with the SCI_STYLESET* messages.
     </p>
 <pre>
 SCI_SETFORE(int colour)
@@ -503,6 +504,25 @@ SCI_BRACEMATCH(int position, int maxReStyle)
       match only occurs if the style of the matching brace is the same as the starting brace or the
       matching brace is beyond the end of styling. Nested braces are handled correctly. The
       maxReStyle parameter must currently be 0.
+    </p>
+    <h3>
+       Indentation Guides
+    </h3>
+<pre>
+SCI_SETINDENTATIONGUIDES(bool view)
+SCI_GETINDENTATIONGUIDES
+SCI_SETHIGHLIGHTGUIDE(int column)
+SCI_GETHIGHLIGHTGUIDE
+</pre>
+    <p>
+       Indentation guides are dotted vertical lines that appear within indentation whitespace
+       every indent size columns. They make it easy to see which constructs line up especially 
+       when they extend over multiple pages. Style 37 is used to specify the foreground and
+       background colour of the indentation guides.
+    </p>
+    <p>
+       When brace highlighting occurs, the indentation guide corresponding to the braces may be
+       highlighted with the brace highlighting style, 34.
     </p>
     <h3>
        Markers
