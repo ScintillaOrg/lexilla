@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
-#define assert(c) ((c) ? (void)(0) : Platform::Assert(#c, __FILE__, __LINE__))
 
 #include <glib.h>
 #include <gdk/gdk.h>
@@ -1448,8 +1447,13 @@ void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
 	int ox = 0;
 	int oy = 0;
 	gdk_window_get_origin(PWidget(relativeTo.id)->window, &ox, &oy);
-
-	gtk_widget_set_uposition(PWidget(id), rc.left + ox, rc.top + oy);
+	ox += rc.left;
+	if (ox < 0)
+		ox = 0;
+	oy += rc.top;
+	if (oy < 0)
+		oy = 0;
+	gtk_widget_set_uposition(PWidget(id), ox, oy);
 #if 0
 
 	GtkAllocation alloc;
@@ -1459,7 +1463,6 @@ void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
 	alloc.height = rc.bottom - rc.top;
 	gtk_widget_size_allocate(id, &alloc);
 #endif
-
 	gtk_widget_set_usize(PWidget(id), rc.right - rc.left, rc.bottom - rc.top);
 }
 
