@@ -87,27 +87,27 @@ public:
 		sSize = 0;
 		sLen = 0;
 	}
-	void clear(void) {
+	void clear() {
 		if (s) {
 			*s = '\0';
 		}
 		sLen = 0;
 	}
 	/** Size of buffer. */
-	lenpos_t size(void) const {
+	lenpos_t size() const {
 		if (s)
 			return sSize;
 		else
 			return 0;
 	}
 	/** Size of string in buffer. */
-	int length() const {
+	lenpos_t length() const {
 		return sLen;
 	}
 	SString &assign(const char *sOther, lenpos_t sSize_=measure_length) {
 		if (!sOther) {
 			sSize_ = 0;
-		} else if (sSize_ == 0) {
+		} else if (sSize_ == measure_length) {
 			sSize_ = strlen(sOther);
 		}
 		if (sSize > 0 && sSize_ <= sSize) {	// Does not allocate new buffer if the current is big enough
@@ -193,7 +193,7 @@ public:
 		if (!sOther) {
 			return *this;
 		}
-		if (sLenOther == 0) {
+		if (sLenOther == measure_length) {
 			sLenOther = strlen(sOther);
 		}
 		int lenSep = 0;
@@ -229,7 +229,7 @@ public:
 		if (!sOther) {
 			return *this;
 		}
-		if (sLenOther == 0) {
+		if (sLenOther == measure_length) {
 			sLenOther = strlen(sOther);
 		}
 		lenpos_t lenNew = sLen + sLenOther;
@@ -266,7 +266,7 @@ public:
 		else
 			return 0;
 	}
-	int search(const char *sFind, lenpos_t start = 0) {
+	int search(const char *sFind, lenpos_t start=0) {
 		if (start < sLen) {
 			const char *sFound = strstr(s + start, sFind);
 			if (sFound) {
@@ -320,7 +320,7 @@ public:
 		if (s == 0) {
 			return 0;
 		}
-		if (len == 0) {
+		if (len == measure_length) {
 			len = strlen(s);
 		}
 		char *sNew = new char[len + 1];
