@@ -558,7 +558,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 		int ui=0;
 		const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
 		int i=0;
-		while (i<fit) {
+		while (ui<fit) {
 			unsigned char uch = us[i];
 			positions[i++] = poses[ui];
 			if (uch >= 0x80) {
