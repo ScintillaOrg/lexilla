@@ -215,7 +215,161 @@
 	Released on 4 April 2005.
 	</li>
 	<li>
+	Autocompletion on Windows changed to use popup window, be faster,
+	allow choice of maximum width and height, and to highlight only the text of the 
+	selected item rather than both the text and icon if any.
+	</li>
+	<li>
+	Extra items can be added to the context menu in SciTE.
+	</li>
+	<li>
+	Character wrap mode in Scintilla helps East Asian languages.
+	</li>
+	<li>
 	Lexer added for Haskell.
+	</li>
+	<li>
+	Objective Caml support.
+	</li>
+	<li>
+	BlitzBasic and PureBasic support.
+	</li>
+	<li>
+	CSS support updated to handle CSS2.
+	</li>
+	<li>
+	C++ lexer is more selective about document comment keywords.
+	</li>
+	<li>
+	AutoIt 3 lexer improved.
+	</li>
+	<li>
+	NSIS support updated for line continuations, box comments, SectionGroup and 
+	PageEx, and with more up-to-date properties.
+	</li>
+	<li>
+	Clarion lexer updated to perform folding and have more styles.
+	</li>
+	<li>
+	SQL lexer gains second set of keywords.
+	</li>
+	<li>
+	ErrorList lexer recognises Borland Delphi error messages.
+	</li>
+	<li>
+	Method added for determining number of visual lines occupied by a document
+	line due to wrapping.
+	</li>
+	<li>
+	Sticky caret mode does not modify the preferred caret x position when typing 
+	and may be useful for typing columns of text.
+	</li>
+	<li>
+	Dwell end notification sent when scroll occurs.
+	</li>
+	<li>
+	On GTK+, Scintilla requisition height is screen height rather than large fixed value.
+	</li>
+	<li>
+	Case insensitive autocompletion prefers exact case match.
+	</li>
+	<li>
+	SCI_PARADOWN and SCI_PARAUP treat lines containing only white
+	space as empty and handle text hidden by folding.
+	</li>
+	<li>
+	Scintilla on Windows supports WM_PRINTCLIENT although there are some 
+	limitations.
+	</li>
+	<li>
+	SCN_AUTOCSELECTION notification sent when user selects from autoselection list.
+	</li>
+	<li>
+	SciTE's standard properties file sets buffers to 10, uses Pango fonts on GTK+ and
+	has dropped several languages to make the menu fit on screen.
+	</li>
+	<li>
+	SciTE's encoding cookie detection loosened so that common XML files will load
+	in UTF-8 if that is their declared encoding.
+	</li>
+	<li>
+	SciTE on GTK+ changes menus and toolbars to not be detachable unless turned
+	on with a property. Menus no longer tear off. The toolbar may be set to use the 
+	default theme icons rather than SciTE's set. Changed key for View | End of Line 
+	because of a conflict. Language menu can contain more items.
+	</li>
+	<li>
+	SciTE on GTK+ 2.x allows the height and width of the file open file chooser to 
+	be set, for the show hidden files check box to be set from an option and for it
+	to be opened in the directory of the current file explicitly.
+	</li>
+	<li>
+	Scintilla lexers should no longer see bits in style bytes that are outside the set
+	they modify so should be able to correctly lex documents where the container 
+	has used indicators.
+	</li>
+	<li>
+	SciTE no longer asks to save before performing a revert.
+	</li>
+	<li>
+	SciTE director interface adds a reloadproperties command to reload properties
+	from files.
+	</li>
+	<li>
+	Allow build on CYGWIN platform.
+	</li>
+	<li>
+	Allow use from LccWin compiler.
+	</li>
+	<li>
+	SCI_COLOURISE for SCLEX_CONTAINER causes a 
+	SCN_STYLENEEDED notification.
+	</li>
+	<li>
+	Bugs fixed in lexing of HTML/ASP/JScript.
+	</li>
+	<li>
+	Fix for folding becoming confused.
+	</li>
+	<li>
+	Fixes for Japanese Input Method Editor on Windows.
+	</li>
+	<li>
+	Fixed buffer size bug avoided when typing long words by making buffer bigger.
+	</li>
+	<li>
+	Undo after automatic indentation more sensible.
+	</li>
+	<li>
+	SciTE menus on GTK+ uses Shift and Ctrl rather than old style abbreviations.
+	</li>
+	<li>
+	Searching bugs fixed.
+	</li>
+	<li>
+	Colours reallocated when changing image using SCI_REGISTERIMAGE.
+	</li>
+	<li>
+	Undo of automatic indentation more reasonable.
+	</li>
+	<li>
+	Crashing bug fixed on AMD64.
+	</li>
+	<li>
+	SciTE crashing bug fixed when position.height or position.width not set.
+	</li>
+	<li>
+	Crashing bug on GTK+ fixed when setting cursor and window is NULL.
+	</li>
+	<li>
+	Crashing bug on GTK+ preedit window fixed.
+	</li>
+	<li>
+	SciTE crashing bug fixed in incremental search on Windows ME.
+	</li>
+	<li>
+	SciTE on Windows has a optional find and replace dialogs that can search through 
+	all buffers and search within a particular style number.
 	</li>
     </ul>
     <h3>
