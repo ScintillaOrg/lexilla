@@ -1859,9 +1859,6 @@ void ListBoxX::Create(Window &, int, int, bool) {
 	gtk_container_add(GTK_CONTAINER(PWidget(scroller)), PWidget(list));
 	gtk_widget_show(PWidget(list));
 
-	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(store),
-										  TEXT_COLUMN, GTK_SORT_ASCENDING);
-
 	gtk_signal_connect(GTK_OBJECT(PWidget(list)), "button_press_event",
 	                   GTK_SIGNAL_FUNC(ButtonPress), this);
 #endif
