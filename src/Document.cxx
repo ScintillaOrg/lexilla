@@ -524,7 +524,7 @@ bool Document::InsertString(int position, const char *s, size_t insertLength) {
 			sWithStyle[i*2] = s[i];
 			sWithStyle[i*2 + 1] = 0;
 		}
-		changed = InsertStyledString(position*2, sWithStyle, 
+		changed = InsertStyledString(position*2, sWithStyle,
 			static_cast<int>(insertLength*2));
 		delete []sWithStyle;
 	}
@@ -745,7 +745,7 @@ int Document::ExtendWordSelect(int pos, int delta, bool onlyWordCharacters) {
 }
 
 /**
- * Find the start of the next word in either a forward (delta >= 0) or backwards direction 
+ * Find the start of the next word in either a forward (delta >= 0) or backwards direction
  * (delta < 0).
  * This is looking for a transition between character classes although there is also some
  * additional movement to transit white space.
@@ -798,7 +798,7 @@ bool Document::IsWordEndAt(int pos) {
 }
 
 /**
- * Check that the given range is has transitions between character classes at both 
+ * Check that the given range is has transitions between character classes at both
  * ends and where the characters on the inside are word or punctuation characters.
  */
 bool Document::IsWordAt(int start, int end) {
@@ -872,8 +872,8 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 		//     Replace: $(\1-\2)
 		int lineRangeStart = LineFromPosition(startPos);
 		int lineRangeEnd = LineFromPosition(endPos);
-		if ((increment == 1) && 
-			(startPos >= LineEnd(lineRangeStart)) && 
+		if ((increment == 1) &&
+			(startPos >= LineEnd(lineRangeStart)) &&
 			(lineRangeStart < lineRangeEnd)) {
 			// the start position is at end of line or between line end characters.
 			lineRangeStart++;
@@ -1078,7 +1078,7 @@ void Document::SetWordChars(unsigned char *chars) {
 		}
 	} else {
 		for (ch = 0; ch < 256; ch++) {
-			if (ch >= 0x80 || isalnum(ch) || ch == '_') 
+			if (ch >= 0x80 || isalnum(ch) || ch == '_')
 				charClass[ch] = ccWord;
 		}
 	}
@@ -1103,6 +1103,7 @@ bool Document::SetStyleFor(int length, char style) {
 		return false;
 	} else {
 		enteredCount++;
+		style &= stylingMask;
 		int prevEndStyled = endStyled;
 		if (cb.SetStyleFor(endStyled, length, style, stylingMask)) {
 			DocModification mh(SC_MOD_CHANGESTYLE | SC_PERFORMED_USER,
