@@ -10,6 +10,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "Platform.h"
+
 #include "Accessor.h"
 #include "StyleContext.h"
 #include "PropSet.h"
