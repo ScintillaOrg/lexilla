@@ -57,7 +57,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 	int visChars = 0;
 	styler.StartSegment(startPos);
 	bool lastWordWasUUID = false;
-	for (unsigned int i = startPos; i <= lengthDoc; i++) {
+	for (unsigned int i = startPos; i < lengthDoc; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 
