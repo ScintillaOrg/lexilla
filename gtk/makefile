@@ -27,7 +27,8 @@ endif
 .cxx.o:
 	$(CC) `gtk-config --cflags` $(INCLUDEDIRS) $(CXXFLAGS) -c $< -o $@
 
-LEXOBJS	=  LexCPP.o LexHTML.o LexLua.o LexOthers.o LexPerl.o LexPython.o LexSQL.o LexVB.o LexConf.o
+LEXOBJS	=  LexConf.o LexCPP.o LexHTML.o LexLua.o LexOthers.o LexPascal.o \
+	LexPerl.o LexPython.o LexSQL.o LexVB.o
 
 # The LEXOBJS have to be treated specially as the functions in them are not called from external code
 
@@ -56,6 +57,8 @@ Indicator.o: Indicator.cxx Platform.h Scintilla.h WinDefs.h \
 KeyMap.o: KeyMap.cxx Platform.h Scintilla.h WinDefs.h KeyMap.h
 KeyWords.o: KeyWords.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h WinDefs.h SciLexer.h
+LexConf.o: LexConf.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+ Scintilla.h WinDefs.h SciLexer.h
 LexCPP.o: LexCPP.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h WinDefs.h SciLexer.h
 LexHTML.o: LexHTML.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
@@ -64,6 +67,8 @@ LexLua.o: LexLua.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h WinDefs.h SciLexer.h
 LexOthers.o: LexOthers.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h WinDefs.h SciLexer.h
+LexPascal.o: LexPascal.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+ Scintilla.h WinDefs.h SciLexer.h
 LexPerl.o: LexPerl.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h WinDefs.h SciLexer.h
 LexPython.o: LexPython.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
@@ -71,8 +76,6 @@ LexPython.o: LexPython.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
 LexSQL.o: LexSQL.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h WinDefs.h SciLexer.h
 LexVB.o: LexVB.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
- Scintilla.h WinDefs.h SciLexer.h
-LexConf.o: LexConf.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h WinDefs.h SciLexer.h
 LineMarker.o: LineMarker.cxx Platform.h Scintilla.h WinDefs.h \
  LineMarker.h

@@ -102,15 +102,16 @@ SOBJS=\
 	$(DIR_O)\ViewStyle.obj
 
 LEXOBJS=\
+	$(DIR_O)\LexConf.obj \
 	$(DIR_O)\LexCPP.obj \
 	$(DIR_O)\LexHTML.obj \
 	$(DIR_O)\LexLua.obj \
 	$(DIR_O)\LexOthers.obj \
+	$(DIR_O)\LexPascal.obj \
 	$(DIR_O)\LexPerl.obj \
 	$(DIR_O)\LexPython.obj \
 	$(DIR_O)\LexSQL.obj \
-	$(DIR_O)\LexVB.obj \
-	$(DIR_O)\LexConf.obj
+	$(DIR_O)\LexVB.obj
 
 LOBJS=\
 	$(DIR_O)\AutoComplete.obj \
@@ -200,6 +201,12 @@ $(DIR_O)\KeyMap.obj: ..\src\KeyMap.cxx ..\include\Platform.h ..\include\Scintill
 $(DIR_O)\KeyWords.obj: ..\src\KeyWords.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
  ..\include\Scintilla.h ..\include\SciLexer.h 
 
+$(DIR_O)\LexCPP.obj: ..\src\LexCPP.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h 
+
+$(DIR_O)\LexConf.obj: ..\src\LexConf.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h 
+
 $(DIR_O)\LexHTML.obj: ..\src\LexHTML.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
  ..\include\Scintilla.h ..\include\SciLexer.h 
 
@@ -212,6 +219,9 @@ $(DIR_O)\LexOthers.obj: ..\src\LexOthers.cxx ..\include\Platform.h ..\include\Pr
 $(DIR_O)\LexPerl.obj: ..\src\LexPerl.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
  ..\include\Scintilla.h ..\include\SciLexer.h 
 
+$(DIR_O)\LexPascal.obj: ..\src\LexPascal.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h 
+
 $(DIR_O)\LexPython.obj: ..\src\LexPython.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
  ..\include\Scintilla.h ..\include\SciLexer.h 
 
@@ -219,9 +229,6 @@ $(DIR_O)\LexSQL.obj: ..\src\LexSQL.cxx ..\include\Platform.h ..\include\PropSet.
  ..\include\Scintilla.h ..\include\SciLexer.h 
 
 $(DIR_O)\LexVB.obj: ..\src\LexVB.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
- ..\include\Scintilla.h ..\include\SciLexer.h 
-
-$(DIR_O)\LexConf.obj: ..\src\LexConf.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
  ..\include\Scintilla.h ..\include\SciLexer.h 
 
 $(DIR_O)\LineMarker.obj: ..\src\LineMarker.cxx ..\include\Platform.h ..\include\Scintilla.h ..\src\LineMarker.h

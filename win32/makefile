@@ -34,7 +34,8 @@ ALL:	$(COMPONENT) $(LEXCOMPONENT) ScintillaWinS.o WindowAccessor.o
 clean:
 	del /q *.exe *.o *.obj *.dll *.res *.map
 
-LEXOBJS	=  LexCPP.o LexHTML.o LexLua.o LexOthers.o LexPerl.o LexPython.o LexSQL.o LexVB.o LexConf.o
+LEXOBJS	=  LexConf.o LexCPP.o LexHTML.o LexLua.o LexOthers.o LexPascal.o \
+	LexPerl.o LexPython.o LexSQL.o LexVB.o
 
 SOBJS	= ScintillaWin.o ScintillaBase.o Editor.o Document.o \
 	ContractionState.o CellBuffer.o CallTip.o \
@@ -62,6 +63,8 @@ Editor.o: Editor.cxx Platform.h Scintilla.h ContractionState.h \
  Document.h Editor.h
 Indicator.o: Indicator.cxx Platform.h Scintilla.h Indicator.h
 KeyMap.o: KeyMap.cxx Platform.h Scintilla.h KeyMap.h
+LexConf.o: LexConf.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+ Scintilla.h SciLexer.h 
 LexCPP.o: LexCPP.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 
 LexHTML.o: LexHTML.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
@@ -70,6 +73,8 @@ LexLua.o: LexLua.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 
 LexOthers.o: LexOthers.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 
+LexPascal.o: LexPascal.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+ Scintilla.h SciLexer.h 
 LexPerl.o: LexPerl.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 
 LexPython.o: LexPython.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
@@ -77,8 +82,6 @@ LexPython.o: LexPython.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
 LexSQL.o: LexSQL.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 
 LexVB.o: LexVB.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
- Scintilla.h SciLexer.h 
-LexConf.o: LexConf.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 
 KeyWords.o: KeyWords.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h SciLexer.h 
