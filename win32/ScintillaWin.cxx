@@ -140,7 +140,7 @@ public:
  */
 class ScintillaWin :
 	public ScintillaBase {
-
+		
 	bool lastKeyDownConsumed;
 
 	bool capturedMouse;
@@ -177,7 +177,6 @@ class ScintillaWin :
 	virtual void StartDrag();
 	sptr_t WndPaint(uptr_t wParam);
 	sptr_t HandleComposition(uptr_t wParam, sptr_t lParam);
-	virtual sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 	virtual void SetTicking(bool on);
 	virtual void SetMouseCapture(bool on);
@@ -212,6 +211,9 @@ class ScintillaWin :
 	void FullPaint();
 
 public:
+	// Public for benefit of Scintilla_DirectFunction
+	virtual sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
+
 	/// Implement IUnknown
 	STDMETHODIMP QueryInterface(REFIID riid, PVOID *ppv);
 	STDMETHODIMP_(ULONG)AddRef();
@@ -1931,6 +1933,11 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
 }
 
 sptr_t ScintillaWin::DirectFunction(
+    ScintillaWin *sci, UINT iMessage, uptr_t wParam, sptr_t lParam) {
+	return sci->WndProc(iMessage, wParam, lParam);
+}
+
+extern "C" __declspec(dllexport) sptr_t __stdcall Scintilla_DirectFunction(
     ScintillaWin *sci, UINT iMessage, uptr_t wParam, sptr_t lParam) {
 	return sci->WndProc(iMessage, wParam, lParam);
 }

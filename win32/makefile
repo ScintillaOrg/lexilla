@@ -49,16 +49,16 @@ SOBJS	= ScintillaWin.o ScintillaBase.o Editor.o Document.o \
 	ContractionState.o CellBuffer.o CallTip.o \
 	ScintRes.o PlatWin.o KeyMap.o Indicator.o LineMarker.o RESearch.o \
 	Style.o ViewStyle.o AutoComplete.o UniConversion.o PropSet.o
-$(COMPONENT): $(SOBJS)
-	$(DLLWRAP) --target i386-mingw32 -o $@ $(SOBJS) $(LDFLAGS) -s --relocatable
+$(COMPONENT): $(SOBJS) Scintilla.def
+	$(DLLWRAP) --add-stdcall-alias --target i386-mingw32 -o $@ $(SOBJS) $(LDFLAGS) -s --relocatable
 
 LOBJS	= ScintillaWinL.o ScintillaBaseL.o Editor.o Document.o \
 	ContractionState.o CellBuffer.o CallTip.o \
 	ScintRes.o PlatWin.o KeyMap.o Indicator.o LineMarker.o RESearch.o \
 	Style.o ViewStyle.o AutoComplete.o UniConversion.o KeyWords.o \
 	DocumentAccessor.o PropSet.o ExternalLexer.o StyleContext.o $(LEXOBJS)
-$(LEXCOMPONENT): $(LOBJS)
-	$(DLLWRAP) --target i386-mingw32 -o $@ $(LOBJS) $(LDFLAGS) -s --relocatable
+$(LEXCOMPONENT): $(LOBJS) Scintilla.def
+	$(DLLWRAP) --add-stdcall-alias --target i386-mingw32 -o $@ $(LOBJS) $(LDFLAGS) -s --relocatable
 
 # Automatically generate dependencies for most files with "make deps"
 include deps.mak

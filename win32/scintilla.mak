@@ -159,10 +159,10 @@ $(DIR_O)\ScintRes.res : ScintRes.rc
 !IF "$(VENDOR)"=="MICROSOFT"
 
 $(COMPONENT): $(SOBJS) $(DIR_O)\ScintRes.res
-	$(LD) $(LDFLAGS) -DLL -OUT:$@ $** $(LIBS)
+	$(LD) $(LDFLAGS) -DEF:Scintilla.def -DLL -OUT:$@ $** $(LIBS)
 
 $(LEXCOMPONENT): $(LOBJS) $(DIR_O)\ScintRes.res
-	$(LD) $(LDFLAGS) -DLL -OUT:$@ $** $(LIBS)
+	$(LD) $(LDFLAGS) -DEF:Scintilla.def -DLL -OUT:$@ $** $(LIBS)
 
 !ELSE
 
