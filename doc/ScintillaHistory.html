@@ -112,11 +112,83 @@
 	Released on 5 November 2001.
       </li>
       <li>
+        Changed Platform.h to not include platform	headers. This lessens likelihood and impact of
+	name clashes from system headers and also speeds up compilation. 
+	Renamed DrawText to DrawTextNoClip to avoid name clash.
+      </li>
+      <li>
+        Changed way word functions work to treat a sequence of punctuation as
+	a word. This is more sensible and also more compatible with other editors.
+      </li>
+      <li>
+        Cursor changes over the margins and selection on GTK+ platform.
+      </li>
+      <li>
+        SC_MARK_BACKGROUND is a marker that only changes the line's background colour.
+      </li>
+      <li>
 	Enhanced Visual Basic lexer handles character date and octal literals, 
 	and bracketed keywords for VB.NET. There are two VB lexers, vb and vbscript
 	with type indication characters like ! and $ allowed at the end of identifiers 
 	in vb but not vbscript. Lexer states now separate from those used for C++ and 
 	names start with SCE_B.
+      </li>
+      <li>
+         Lexer added for Bullant language.
+      </li>
+      <li>
+         The horizontal scroll position, xOffset, is now exposed through the API.
+      </li>
+      <li>
+         The SCN_POSCHANGED notification is deprecated as it was causing confusion. 
+	 Use SCN_UPDATEUI  instead.
+      </li>
+      <li>
+         Compilation problems fixed for some versions of gcc.
+      </li>
+      <li>
+        Support for WM_GETTEXT restored on Windows.
+      </li>
+      <li>
+        Double clicking on an autocompletion list entry works on GTK+.
+      </li>
+      <li>
+        Bug fixed with case insensitive sorts for autocompletion lists.
+      </li>
+      <li>
+        Bug fixed with tracking selection in secondary views when performing modifications.
+      </li>
+      <li>
+        SciTE's abbreviation expansion feature will now indent expansions to the current 
+	indentation level if indent.automatic is on.
+      </li>
+      <li>
+        SciTE allows setting up of parameters to commands from a dialog and can also
+       show this dialog automatically to prompt for arguments when running a command.
+      </li>
+      <li>
+        SciTE's Language menu (formerly Options | Use Lexer) is now defined by the 
+	menu.language property rather than being hardcoded.
+      </li>
+      <li>
+        The user interface of SciTE can be localised to a particular language by editing 
+	a locale.properties file.
+      </li>
+      <li>
+        On Windows, SciTE will try to move to the front when opening a new file from
+	the shell and using check.if.already.open.
+      </li>
+      <li>
+        SciTE can display the file name and directory in the title bar in the form
+	"file @ directory" when title.full.path=2.
+      </li>
+      <li>
+        The SciTE time.commands property reports the time taken by a command as well 
+	as its status when completed.
+      </li>
+      <li>
+        The SciTE find.files property is now a list separated by '|' characters and this list is 
+	added into the Files pull down of the Find in Files dialog.
       </li>
     </ul>
     <h3>
