@@ -71,9 +71,12 @@ static int classifyTagHTML(unsigned int start, unsigned int end,
 			s[i++] = static_cast<char>(tolower(ch));
 	}
 	s[i] = '\0';
+Platform::DebugPrintf("Classify =%s=\n", s);
 	char chAttr = SCE_H_TAGUNKNOWN;
 	if (s[0] == '!' && s[1] == '-' && s[2] == '-') {	//Comment
 		chAttr = SCE_H_COMMENT;
+	} else if (strcmp(s, "![cdata[") == 0) {	// In lower case because already converted
+		chAttr = SCE_H_CDATA;
 	} else if (s[0] == '/') {	// Closing tag
 		if (keywords.InList(s + 1))
 			chAttr = SCE_H_TAG;
@@ -354,6 +357,11 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				styler.ColourTo(i, state);
 				state = SCE_H_DEFAULT;
 			}
+		} else if (state == SCE_H_CDATA) {
+			if ((ch == '>') && (chPrev == ']') && (chPrev2 == ']')) {
+				styler.ColourTo(i, state);
+				state = SCE_H_DEFAULT;
+			}
 		} else if (state == SCE_H_ENTITY) {
 			if (ch == ';') {
 				styler.ColourTo(i, state);
@@ -364,7 +372,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				state = SCE_H_DEFAULT;
 			}
 		} else if (state == SCE_H_TAGUNKNOWN) {
-			if (!ishtmlwordchar(ch) && ch != '/' && ch != '-') {
+			if (!ishtmlwordchar(ch) && ch != '/' && ch != '-' && ch != '[') {
 				int eClass = classifyTagHTML(styler.GetStartSegment(), i - 1, keywords, styler);
 				lastTagWasScript = eClass == SCE_H_SCRIPT;
 				if (lastTagWasScript) {
@@ -386,6 +394,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				} else {
 					if (eClass == SCE_H_COMMENT) {
 						state = SCE_H_COMMENT;
+					} else if (eClass == SCE_H_CDATA) {
+						state = SCE_H_CDATA;
 					} else {
 						state = SCE_H_OTHER;
 					}
