@@ -331,23 +331,22 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	int lineCurrent = styler.GetLine(startPos);
 	if (lineCurrent > 0)
 		lineState = styler.GetLineState(lineCurrent);
-	int inScriptType = (lineState >> 0) & 0x03; // 2 bits
-	int defaultScript = (lineState >> 4) & 0x0F; // 4 bits
-	int beforePreProc = (lineState >> 8) & 0xFF; // 8 bits
+	int inScriptType  = (lineState >> 0) & 0x03; // 2 bits of scripting type
+	bool tagOpened    = (lineState >> 2) & 0x01; // 1 bit to know if we are in an opened tag
+	bool tagClosing   = (lineState >> 3) & 0x01; // 1 bit to know if we are in a closing tag
+	int defaultScript = (lineState >> 4) & 0x0F; // 4 bits of script name
+	int beforePreProc = (lineState >> 8) & 0xFF; // 8 bits of state
 
 	//	int scriptLanguage = ScriptOfState(state,defaultScript);
 	int scriptLanguage = ScriptOfState(state);
 
 	bool fold = styler.GetPropertyInt("fold");
-//	bool wrapFold = styler.GetPropertyInt("fold.wrap");
+	bool wrapFold = styler.GetPropertyInt("fold.wrap",0);
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
 	int visibleChars;
 
-//	if (!wrapFold)
-		visibleChars = 0;
-//	else
-//		visibleChars = 1;
+	visibleChars = 0;
 
 	char chPrev = ' ';
 	char ch = ' ';
@@ -370,8 +369,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			continue;
 		}
 
-//		if (!isspacechar(ch) && fold && !wrapFold)
-		if (!isspacechar(ch) && fold)
+		if ((!isspacechar(ch) || wrapFold) && fold)
 			visibleChars++;
 
 		// decide what is the current state to print (depending of the script tag)
@@ -426,14 +424,16 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					lev |= SC_FOLDLEVELWHITEFLAG;
 				if ((levelCurrent > levelPrev) && (visibleChars > 0))
 					lev |= SC_FOLDLEVELHEADERFLAG;
-//				if (wrapFold)
-//					visibleChars = 0;
+
 				styler.SetLevel(lineCurrent, lev);
+				visibleChars = 0;
 				levelPrev = levelCurrent;
 			}
 			lineCurrent++;
 			styler.SetLineState(lineCurrent,
-			                    ((inScriptType & 0x03) << 0) |
+			                    ((inScriptType  & 0x03) << 0) |
+								((tagOpened     & 0x01) << 2) |
+								((tagClosing    & 0x01) << 3) |
 			                    ((defaultScript & 0x0F) << 4) |
 			                    ((beforePreProc & 0xFF) << 8));
 		}
@@ -569,15 +569,18 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		case SCE_H_DEFAULT:
 			if (ch == '<') {
 				// in HTML, fold on tag open and unfold on tag close
-				if (chNext == '/')
-					levelCurrent--;
-				else
-					levelCurrent++;
+				tagOpened = true;
+				if (chNext == '/') {
+					tagClosing = true;
+				} else {
+					tagClosing = false;
+				}
 
 				styler.ColourTo(i - 1, StateToPrint);
 				if (chNext == '!' && chNext2 == '-' && styler.SafeGetCharAt(i + 3) == '-') {
 					// should be better
 					i += 3;
+					levelCurrent++;
 					state = SCE_H_COMMENT;
 				} else
 					state = SCE_H_TAGUNKNOWN;
@@ -592,12 +595,14 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				levelCurrent--;
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_H_DEFAULT;
+				tagOpened = false;
 			}
 			break;
 		case SCE_H_CDATA:
 			if ((ch == '>') && (chPrev == ']') && (chPrev2 == ']')) {
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_H_DEFAULT;
+				tagOpened = false;
 			}
 			break;
 		case SCE_H_ENTITY:
@@ -625,9 +630,13 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					} else {
 						state = SCE_H_DEFAULT;
 					}
+					tagOpened = false;
+					if (tagClosing)
+						levelCurrent--;
+					else
+						levelCurrent++;
+					tagClosing = false;
 			    } else if (ch == '/' && chNext == '>') {
-					// disable folding on self-closing tags
-					levelCurrent--;
 					if (eClass == SCE_H_TAGUNKNOWN) {
 					    styler.ColourTo(i + 1, SCE_H_TAGUNKNOWN);
 					} else {
@@ -637,6 +646,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				    i++;
 				    ch = chNext;
 				    state = SCE_H_DEFAULT;
+					tagOpened = false;
 				} else {
 					if (eClass != SCE_H_TAGUNKNOWN) {
 						if (eClass == SCE_H_CDATA) {
@@ -664,6 +674,12 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					} else {
 						state = SCE_H_DEFAULT;
 					}
+					tagOpened = false;
+					if (tagClosing)
+						levelCurrent--;
+					else
+						levelCurrent++;
+					tagClosing = false;
 				} else if (ch == '=') {
 					styler.ColourTo(i, SCE_H_OTHER);
 					state = SCE_H_VALUE;
@@ -681,6 +697,12 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				} else {
 					state = SCE_H_DEFAULT;
 				}
+				tagOpened = false;
+				if (tagClosing)
+					levelCurrent--;
+				else
+					levelCurrent++;
+				tagClosing = false;
 			} else if (ch == '\"') {
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_H_DOUBLESTRING;
@@ -691,13 +713,12 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_H_VALUE;
 			} else if (ch == '/' && chNext == '>') {
-				// disable folding on self-closing tags
-				levelCurrent--;
 				styler.ColourTo(i - 1, StateToPrint);
 				styler.ColourTo(i + 1, SCE_H_TAGEND);
 				i++;
 				ch = chNext;
 				state = SCE_H_DEFAULT;
+				tagOpened = false;
 			} else if (ch == '?' && chNext == '>') {
 				styler.ColourTo(i - 1, StateToPrint);
 				styler.ColourTo(i + 1, SCE_H_XMLEND);
@@ -747,6 +768,12 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 						} else {
 							state = SCE_H_DEFAULT;
 						}
+						tagOpened = false;
+						if (tagClosing)
+							levelCurrent--;
+						else
+							levelCurrent++;
+						tagClosing = false;
 					} else {
 						state = SCE_H_OTHER;
 					}
