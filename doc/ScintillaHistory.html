@@ -84,6 +84,7 @@
 	<li>Serge A. Baranov</li>
 	<li>Xavier Nodet</li>
 	<li>Willy Devaux</li>
+	<li>David Clain</li>
     </ul>
     <p>
        Sponsorship
@@ -110,7 +111,161 @@
 	Released on 22 August 2001.
       </li>
       <li>
-	Flattened tree control style folding margin.
+	Windows version requires msvcrt.dll to be available so will not work
+	on original Windows 95 version 1. msvcrt.dll is installed
+	by almost everything including Internet Explorer so should be available.
+      </li>
+      <li>
+	Flattened tree control style folding margin. The SciTE fold.plus option is
+	now fold.symbols and has more values for the new styles.
+      </li>
+      <li>
+	Mouse dwell events are generated when the user hold the mouse steady
+	over Scintilla.
+      </li>
+      <li>
+      PositionFromPointClose is like PositionFromPoint but returns 
+      INVALID_POSITION when point outside window or after end of line.
+      </li>
+      <li>
+      Input of Hungarian and Russian characters in GTK+ version works by
+      truncating input to 8 bits if in the range of normal characters.
+      </li>
+      <li>
+      Better choices for font descriptors on GTK+ for most character sets.
+      </li>
+      <li>
+      GTK+ Scintilla is detroyed upon receiving destroy signal rather than 
+      destroy_event signal.
+      </li>
+      <li>
+      Style setting that force upper or lower case text.
+      </li>
+      <li>
+      Keywords can be prefix based so ^GTK_ will treat all words that start
+      with GTK_ as keywords.
+      </li>
+      <li>
+      Horizontal scrolling can be jumpy.
+      </li>
+      <li>
+      GetSelText places a '\0' in the buffer if the selection is empty..
+      </li>
+      <li>
+      EnsureVisible split into two methods EnsureVisible which will not scroll to show 
+      the line and EnsureVisibleEnforcePolicy which may scroll.
+      </li>
+      <li>
+      Python folder is able to fold multi-line comments and triple quoted strings.
+      </li>
+      <li>
+      C++ lexer handles keywords before '.' like "this.x" in Java as keywords. 
+      Compact folding mode option chooses whether blank lines after a structure are
+      folded with that structure.
+      </li>
+      <li>
+      Ruby lexer handles multi-line comments.
+      </li>
+      <li>
+      VB has folder.
+      </li>
+      <li>
+      PHP lexer has an operator style, handles "&lt;?" and "&gt;>" inside strings
+      and some comments.
+      </li>
+      <li>
+      TCL lexer which is just an alias for the C++ lexer so does not really 
+      understand TCL syntax.
+      </li>
+      <li>
+      Error lines lexer has styles for Lua error messages and .NET stack traces.
+      </li>
+      <li>
+      Makefile lexer has a target style.
+      </li>
+      <li>
+      Lua lexer handles some [[]] string literals.
+      </li>
+      <li>
+      HTML and XML lexer have a SCE_H_SGML state for tags that 
+      start with "&lt;!".
+      </li>
+      <li>
+      Fixed Scintilla bugs with folding. When modifications were performed near 
+      folded regions and no unfolding occurred when it should have. Deleting a 
+      fold causing character sometimes failed to update fold information correctly.
+      </li>
+      <li>
+      Better support for Scintilla on GTK+ for Win32 including separate 
+      PLAT_GTK_WIN32 definition and correct handling of rectangular selection 
+      with clipboard operations.
+      </li>
+      <li>
+      SciTE has a Tools | Switch Pane (Ctrl+F6) command to switch focus between 
+      edit and output panes.
+      </li>
+      <li>
+      SciTE option output.scroll allows automatic scrolling of output pane to 
+      be turned off.
+      </li>
+      <li>
+      Commands can be typed into the SciTE output panes similar to a shell window.
+      </li>
+      <li>
+      SciTE properties magnification and output magnification set initial zoom levels.
+      </li>
+      <li>
+      Option for SciTE comment block command to place comments at start of line.
+      </li>
+      <li>
+       SciTE for Win32 has an option to minimize to the tray rather than teh task bar.
+      </li>
+      <li>
+      Close button on SciTE tool bar for Win32.
+      </li>
+      <li>
+      SciTE compiles with GCC 3.0.
+      </li>
+      <li>
+      SciTE's automatic indentation of C++ handles braces without preceding keyword 
+      correctly.
+      </li>
+      <li>
+      Bug fixed with GetLine method writing past the end of where it should.
+      </li>
+      <li>
+      Bug fixed with mouse drag automatic scrolling when some lines were folded.
+      </li>
+      <li>
+      Bug fixed because caret XEven setting was inverted.
+      </li>
+      <li>
+      Bug fixed where caret was initially visible even though window was not focussed.
+      </li>
+      <li>
+      Bug fixed where some file names could end with "\\" which caused slow
+      downs on Windows 9x.
+      </li>
+      <li>
+      On Win32, SciTE Replace dialog starts with focus on replacement text.
+      </li>
+      <li>
+      SciTE Go to dialog displays correct current line.
+      </li>
+      <li>
+      Fixed bug with SciTE opening multiple files at once.
+      </li>
+      <li>
+      Fixed bug with Unicode key values reported to container truncated.
+      </li>
+      <li>
+      Fixed bug with unnecessary save point notifications.
+      </li>
+      <li>
+      Fixed bugs with indenting and unindenting at start of line.
+      </li>
+      <li>
+      Monospace Font setting behaves more consistently.
       </li>
     </ul>
     <h3>
