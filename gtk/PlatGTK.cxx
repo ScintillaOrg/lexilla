@@ -39,6 +39,14 @@
 #define USE_PANGO 1
 #include <iconv.h>
 const iconv_t iconvhBad = (iconv_t)(-1);
+// Since various versions of iconv can not agree on whether the src argument
+// is char ** or const char ** provide a templatised adaptor.
+template<typename T>
+size_t iconv_adaptor(size_t(*f_iconv)(iconv_t, T, size_t *, char **, size_t *),
+		iconv_t cd, char** src, size_t *srcleft,
+		char **dst, size_t *dstleft) {
+	return f_iconv(cd, (T)src, srcleft, dst, dstleft);
+}
 #endif
 
 #ifdef _MSC_VER
@@ -1038,7 +1046,7 @@ static char *UTF8FromIconv(iconv_t iconvh, const char *s, int len) {
 		size_t inLeft = len;
 		char *pout = utfForm;
 		size_t outLeft = len*3+1;
-		size_t conversions = iconv(iconvh, &pin, &inLeft, &pout, &outLeft);
+		size_t conversions = iconv_adaptor(iconv, iconvh, &pin, &inLeft, &pout, &outLeft);
 		if (conversions != ((size_t)(-1))) {
 			*pout = '\0';
 			return utfForm;
@@ -1055,7 +1063,7 @@ static size_t MultiByteLenFromIconv(iconv_t iconvh, const char *s, size_t len) {
 		size_t inLeft = lenMB;
 		char *pout = wcForm;
 		size_t outLeft = 2;
-		size_t conversions = iconv(iconvh, &pin, &inLeft, &pout, &outLeft);
+		size_t conversions = iconv_adaptor(iconv, iconvh, &pin, &inLeft, &pout, &outLeft);
 		if (conversions != ((size_t)(-1))) {
 			return lenMB;
 		}

@@ -58,6 +58,14 @@
 
 #if !PLAT_GTK_WIN32
 #include <iconv.h>
+// Since various versions of iconv can not agree on whether the src argument
+// is char ** or const char ** provide a templatised adaptor.
+template<typename T>
+size_t iconv_adaptor(size_t(*f_iconv)(iconv_t, T, size_t *, char **, size_t *),
+		iconv_t cd, char** src, size_t *srcleft,
+		char **dst, size_t *dstleft) {
+	return f_iconv(cd, (T)src, srcleft, dst, dstleft);
+}
 #endif
 
 #ifdef _MSC_VER
@@ -969,7 +977,7 @@ int ScintillaGTK::KeyDefault(int key, int modifiers) {
 						size_t inLeft = strlen(utfVal);
 						char *pout = localeVal;
 						size_t outLeft = sizeof(localeVal);
-						size_t conversions = iconv(iconvh, &pin, &inLeft, &pout, &outLeft);
+						size_t conversions = iconv_adaptor(iconv, iconvh, &pin, &inLeft, &pout, &outLeft);
 						iconv_close(iconvh);
 						if (conversions != ((size_t)(-1))) {
 							*pout = '\0';
@@ -1107,7 +1115,7 @@ static char *ConvertText(size_t *lenResult, char *s, size_t len, const char *cha
 		size_t inLeft = len;
 		char *pout = destForm;
 		size_t outLeft = len*3+1;
-		size_t conversions = iconv(iconvh, &pin, &inLeft, &pout, &outLeft);
+		size_t conversions = iconv_adaptor(iconv, iconvh, &pin, &inLeft, &pout, &outLeft);
 		if (conversions == ((size_t)(-1))) {
 fprintf(stderr, "iconv failed for %s\n", static_cast<char *>(s));
 			delete []destForm;
