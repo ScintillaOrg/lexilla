@@ -12,7 +12,6 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <fcntl.h>
 
 #include "Platform.h"
 
