@@ -134,6 +134,9 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int caretPolicy;
 	int caretSlop;
 
+	int visiblePolicy;
+	int visibleSlop;
+	
 	int searchAnchor;
 
 	int displayPopupMenu;

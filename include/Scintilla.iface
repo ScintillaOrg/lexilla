@@ -1030,6 +1030,13 @@ fun void WordPartRight=2392(,)
 # Move to the next change in capitalistion extending selection to new caret position.
 fun void WordPartRightExtend=2393(,)
 
+# Constants for use with SetVisiblePolicy
+val VISIBLE_SLOP=0x01
+#val VISIBLE_CENTER=0x02
+val VISIBLE_STRICT=0x04
+# Set the way the display area is determined when a particular line is to be moved to.
+fun void SetVisiblePolicy=2394(int visiblePolicy, int visibleSlop)
+
 # Set the focus to this Scintilla widget.
 # GTK+ Specific
 fun void GrabFocus=2400(,)

@@ -192,7 +192,8 @@ SCI_SELECTALL
 SCI_GOTOLINE(int line)
 SCI_GOTOPOS(int position)
 SCI_GETCURLINE(int textlen, char *text)
-SCI_SETCARETPOLICY(int policy)
+SCI_SETCARETPOLICY(int policy, int slop)
+SCI_SETVISIBLEPOLICY(int policy, int slop)
 SCI_LINESONSCREEN
 SCI_SELECTIONISRECTANGLE
 SCI_SETHSCROLLBAR(bool visible)
@@ -213,7 +214,10 @@ SCI_GETHSCROLLBAR
     <p>
       SCI_SETCARETPOLICY can be set to a combination of the flags CARET_SLOP, 
       CARET_CENTER, and CARET_STRICT to change the automatic vertical positioning of the view
-      when ensuring a position is visible.
+      when ensuring a position is visible. SCI_SETVISIBLEPOLICY is a similar function that 
+      determines how the vertical positioning is determined when SCI_ENSUREVISIBLE is
+      called. It takes VISIBLE_SLOP, VISIBLE_CENTER, and VISIBLE_STRICT flags 
+      for the policy parameter.
     </p>
     <h3>
        Searching

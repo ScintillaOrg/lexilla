@@ -75,6 +75,9 @@ Editor::Editor() {
 	caretPolicy = CARET_SLOP;
 	caretSlop = 0;
 
+	visiblePolicy = VISIBLE_SLOP;
+	visibleSlop = 0;
+	
 	searchAnchor = 0;
 
 	ucWheelScrollLines = 0;
@@ -3148,6 +3151,24 @@ void Editor::EnsureLineVisible(int line) {
 		SetScrollBars();
 		Redraw();
 	}
+	if (visiblePolicy & VISIBLE_SLOP) {
+		if ((topLine > line) || ((visiblePolicy & VISIBLE_STRICT) && (topLine + visibleSlop > line))) {
+			SetTopLine(Platform::Clamp(line - visibleSlop, 0, MaxScrollPos()));
+			SetVerticalScrollPos();
+			Redraw();
+		} else if ((line > topLine + LinesOnScreen() - 1) ||
+		           ((visiblePolicy & VISIBLE_STRICT) && (line > topLine + LinesOnScreen() - 1 - visibleSlop))) {
+			SetTopLine(Platform::Clamp(line - LinesOnScreen() + 1 + visibleSlop, 0, MaxScrollPos()));
+			SetVerticalScrollPos();
+			Redraw();
+		}
+	} else {
+		if ((topLine > line) || (line > topLine + LinesOnScreen() - 1) || (visiblePolicy & VISIBLE_STRICT)) {
+			SetTopLine(Platform::Clamp(line - LinesOnScreen() / 2 + 1, 0, MaxScrollPos()));
+			SetVerticalScrollPos();
+			Redraw();
+		}
+	}
 }
 
 static bool ValidMargin(unsigned long wParam) {
@@ -4180,6 +4201,11 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 		caretSlop = lParam;
 		break;
 
+	case SCI_SETVISIBLEPOLICY:
+		visiblePolicy = wParam;
+		visibleSlop = lParam;
+		break;
+	
 	case SCI_LINESONSCREEN:
 		return LinesOnScreen();
 
