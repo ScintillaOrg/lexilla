@@ -2,10 +2,9 @@
 /** @file LexNsis.cxx
  ** Lexer for NSIS
  **/
-// Copyright 2003, 2004 by Angelo Mandato <angelo@spaceblue.com>
-// Last Updated: 01/29/2004
+// Copyright 2003, 2004 by Angelo Mandato <angelo [at] spaceblue [dot] com>
+// Last Updated: 02/22/2004
 // The License.txt file describes the conditions under which this software may be distributed.
-
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -38,7 +37,7 @@
 #define SCE_NSIS_IFDEFINEDEF 11
 #define SCE_NSIS_MACRODEF 12
 #define SCE_NSIS_STRINGVAR 13
-#define SCE_NSIS_NUMBER 14 // NEW option
+#define SCE_NSIS_NUMBER 14
 */
 
 static bool isNsisNumber(char ch)
@@ -60,7 +59,7 @@ static int NsisCmp( char *s1, char *s2, bool bIgnoreCase )
 {
   if( bIgnoreCase )
      return CompareCaseInsensitive( s1, s2);
- 
+
   return strcmp( s1, s2 );
 }
 
@@ -198,7 +197,7 @@ static int classifyWordNsis(unsigned int start, unsigned int end, WordList *keyw
         break;
       }
 	  }
-    
+
     if( bHasSimpleNsisNumber )
       return SCE_NSIS_NUMBER;
   }
@@ -223,16 +222,11 @@ static void ColouriseNsisDoc(unsigned int startPos, int length, int, WordList *k
 	for( i = startPos; i < nLengthDoc; i++ )
 	{
 		cCurrChar = styler.SafeGetCharAt( i );
-		char cNextChar = styler.SafeGetCharAt( i+1, EOF );
+		char cNextChar = styler.SafeGetCharAt(i+1);
 
 		switch(state)
 		{
 			case SCE_NSIS_DEFAULT:
-        if( cNextChar == EOF )
-        {
-          styler.ColourTo(i,SCE_NSIS_DEFAULT);
-			    break;
-        }
 				if( cCurrChar == ';' || cCurrChar == '#' ) // we have a comment line
 				{
 					styler.ColourTo(i-1, state );
@@ -278,7 +272,7 @@ static void ColouriseNsisDoc(unsigned int startPos, int length, int, WordList *k
 				}
 				break;
 			case SCE_NSIS_COMMENT:
-				if( cNextChar == '\n' || cNextChar == '\r' || cNextChar == EOF )
+				if( cNextChar == '\n' || cNextChar == '\r' )
         {
 				  styler.ColourTo(i,state);
           state = SCE_NSIS_DEFAULT;
@@ -386,7 +380,7 @@ static void ColouriseNsisDoc(unsigned int startPos, int length, int, WordList *k
       // Covers "${TEST}..."
       else if( bClassicVarInString && cNextChar == '}' )
       {
-        styler.ColourTo( i, SCE_NSIS_STRINGVAR);
+        styler.ColourTo( i+1, SCE_NSIS_STRINGVAR);
 				bClassicVarInString = false;
       }
 
@@ -406,8 +400,20 @@ static void ColouriseNsisDoc(unsigned int startPos, int length, int, WordList *k
 		}
 	}
 
-  if( state == SCE_NSIS_COMMENT )
-		styler.ColourTo(i,state);
+  // Colourise remaining document
+  switch( state )
+  {
+    case SCE_NSIS_COMMENT:
+    case SCE_NSIS_STRINGDQ:
+    case SCE_NSIS_STRINGLQ:
+    case SCE_NSIS_STRINGRQ:
+    case SCE_NSIS_VARIABLE:
+    case SCE_NSIS_STRINGVAR:
+      styler.ColourTo(nLengthDoc-1,state); break;
+
+    default:
+      styler.ColourTo(nLengthDoc-1,SCE_NSIS_DEFAULT); break;
+  }
 }
 
 static void FoldNsisDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler)
@@ -443,7 +449,7 @@ static void FoldNsisDoc(unsigned int startPos, int length, int, WordList *[], Ac
         bArg1 = false;
       }
     }
-  
+
     if( chCurr == '\n' )
     {
       // If we are on a new line...
