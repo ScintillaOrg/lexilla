@@ -21,7 +21,7 @@ inline char MakeUpperCase(char ch) {
 	if (ch < 'a' || ch > 'z')
 		return ch;
 	else
-		return ch - 'a' + 'A';
+		return static_cast<char>(ch - 'a' + 'A');
 }
 
 int CompareCaseInsensitive(const char *a, const char *b) {

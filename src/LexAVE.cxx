@@ -32,7 +32,6 @@ static void ColouriseAveDoc(unsigned int startPos, int length, int initStyle, Wo
 	int state = initStyle;
 	if (state == SCE_AVE_STRINGEOL)	// Does not leak onto next line
 		state = SCE_AVE_DEFAULT;
-	char chPrev = ' ';
 	char chNext = styler[startPos];
 	unsigned int lengthDoc = startPos + length;
 	int visibleChars = 0;
@@ -65,7 +64,6 @@ static void ColouriseAveDoc(unsigned int startPos, int length, int initStyle, Wo
 			visibleChars++;
 		if (styler.IsLeadByte(ch)) {
 			chNext = styler.SafeGetCharAt(i + 2);
-			chPrev = ' ';
 			i += 1;
 			continue;
 		}
