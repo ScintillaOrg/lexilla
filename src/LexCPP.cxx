@@ -56,7 +56,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 	char chPrev = ' ';
 	char chNext = styler[startPos];
 	unsigned int lengthDoc = startPos + length;
-	int visChars = 0;
+	int visibleChars = 0;
 	styler.StartSegment(startPos);
 	bool lastWordWasUUID = false;
 	for (unsigned int i = startPos; i < lengthDoc; i++) {
@@ -64,6 +64,8 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 		chNext = styler.SafeGetCharAt(i + 1);
 
 		if ((ch == '\r' && chNext != '\n') || (ch == '\n')) {
+			// Trigger on CR only (Mac style) or either on LF from CR+LF (Dos/Win) or on LF alone (Unix)
+			// Avoid triggering two times on Dos/Win
 			// End of line
 			if (state == SCE_C_STRINGEOL) {
 				styler.ColourTo(i, state);
@@ -71,18 +73,18 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			}
 			if (fold) {
 				int lev = levelPrev;
-				if (visChars == 0)
+				if (visibleChars == 0)
 					lev |= SC_FOLDLEVELWHITEFLAG;
-				if ((levelCurrent > levelPrev) && (visChars > 0))
+				if ((levelCurrent > levelPrev) && (visibleChars > 0))
 					lev |= SC_FOLDLEVELHEADERFLAG;
 				styler.SetLevel(lineCurrent, lev);
 				lineCurrent++;
-				visChars = 0;
 				levelPrev = levelCurrent;
 			}
+			visibleChars = 0;
 		}
 		if (!isspace(ch))
-			visChars++;
+			visibleChars++;
 
 		if (styler.IsLeadByte(ch)) {
 			chNext = styler.SafeGetCharAt(i + 2);
@@ -115,7 +117,8 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			} else if (ch == '\'') {
 				styler.ColourTo(i-1, state);
 				state = SCE_C_CHARACTER;
-			} else if (ch == '#') {
+			} else if (ch == '#' && visibleChars == 1) {
+				// Preprocessor commands are alone on their line
 				styler.ColourTo(i-1, state);
 				state = SCE_C_PREPROCESSOR;
 				// Skip whitespace between # and preprocessor word

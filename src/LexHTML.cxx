@@ -330,7 +330,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	bool fold = styler.GetPropertyInt("fold");
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
-	int visChars = 0;
+	int visibleChars = 0;
 
 	char chPrev = ' ';
 	char ch = ' ';
@@ -351,7 +351,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		}
 
 		if (fold && !isspace(ch))
-			visChars++;
+			visibleChars++;
 
 		// handle script folding
 		if (fold) {
@@ -392,15 +392,17 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		StateToPrint = statePrintForState(state, inScriptType);
 
 		if ((ch == '\r' && chNext != '\n') || (ch == '\n')) {
+			// Trigger on CR only (Mac style) or either on LF from CR+LF (Dos/Win) or on LF alone (Unix)
+			// Avoid triggering two times on Dos/Win
 			// New line -> record any line state onto /next/ line
 			if (fold) {
 				int lev = levelPrev;
-				if (visChars == 0)
+				if (visibleChars == 0)
 					lev |= SC_FOLDLEVELWHITEFLAG;
-				if ((levelCurrent > levelPrev) && (visChars > 0))
+				if ((levelCurrent > levelPrev) && (visibleChars > 0))
 					lev |= SC_FOLDLEVELHEADERFLAG;
 				styler.SetLevel(lineCurrent, lev);
-				visChars = 0;
+				visibleChars = 0;
 				levelPrev = levelCurrent;
 			}
 			lineCurrent++;
@@ -527,7 +529,10 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		case SCE_H_DEFAULT:
 			if (ch == '<') {
 				styler.ColourTo(i - 1, StateToPrint);
-				state = SCE_H_TAGUNKNOWN;
+				if (chNext == '!' && chNext2 == '-' && styler.SafeGetCharAt(i + 3) == '-')
+					state = SCE_H_COMMENT;
+				else
+					state = SCE_H_TAGUNKNOWN;
 			} else if (ch == '&') {
 				styler.ColourTo(i - 1, SCE_H_DEFAULT);
 				state = SCE_H_ENTITY;
@@ -573,6 +578,10 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				} else {
 					if (eClass == SCE_H_COMMENT) {
 						state = SCE_H_COMMENT;
+						if ((ch == '>') && (chPrev == '-') && (chPrev2 == '-')) {
+							styler.ColourTo(i, state);
+							state = SCE_H_DEFAULT;
+						}
 					} else if (eClass == SCE_H_CDATA) {
 						state = SCE_H_CDATA;
 					} else {
