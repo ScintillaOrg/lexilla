@@ -883,7 +883,7 @@ bool WordList::InList(const char *s) {
  * The length of the word to compare is passed too.
  * Letter case can be ignored or preserved (default).
  */
-const char *WordList::GetNearestWord(const char *wordStart, int searchLen /*= -1*/, bool ignoreCase /*= false*/, SString wordCharacters /*='/0' */, int wordIndex /*= -1 */) {
+const char *WordList::GetNearestWord(const char *wordStart, int searchLen, bool ignoreCase /*= false*/, SString wordCharacters /*='/0' */, int wordIndex /*= -1 */) {
 	int start = 0; // lower bound of the api array block to search
 	int end = len - 1; // upper bound of the api array block to search
 	int pivot; // index of api array element just being compared
@@ -901,36 +901,32 @@ const char *WordList::GetNearestWord(const char *wordStart, int searchLen /*= -1
 			pivot = (start + end) >> 1;
 			word = wordsNoCase[pivot];
 			cond = CompareNCaseInsensitive(wordStart, word, searchLen);
-			if (!cond && (!wordCharacters.contains(word[searchLen]))) {
-				// Found a word in a binary fashion. Now checks if a specific index was requested
-				if (wordIndex < 0)
-					return word; // result must not be freed with free()
-
-				// Finds first word in a series of equal words
-				int first = pivot;
-				end = pivot - 1;
-				while (start <= end) {
-					pivot = (start + end) >> 1;
-					word = wordsNoCase[pivot];
-					cond = CompareNCaseInsensitive(wordStart, word, searchLen);
-					if (!cond && (!wordCharacters.contains(word[searchLen]))) {
-						// Found another word
-						first = pivot;
-						end = pivot - 1;
-					}
-					else if (cond > 0)
-						start = pivot + 1;
-					else if (cond <= 0)
-						break;
+			if (!cond) {
+				// find first word
+				start = pivot;
+				while (start > 0 && !CompareNCaseInsensitive(wordStart, wordsNoCase[start-1], searchLen)) {
+					start--;
 				}
-
-				// Gets the word at the requested index
-				word = wordsNoCase[first + wordIndex];
-				return word;
+				// find last word
+				end = pivot;
+				while (end < len-1 && !CompareNCaseInsensitive(wordStart, wordsNoCase[end+1], searchLen)) {
+					end++;
+				}
+				
+				// Finds first word in a series of equal words
+				for (pivot = start; pivot <= end; pivot++) {
+					word = wordsNoCase[pivot];
+					if (!wordCharacters.contains(word[searchLen])) {
+						if (wordIndex <= 0) // Checks if a specific index was requested
+							return word; // result must not be freed with free()
+						wordIndex--;
+					}
+				}
+				return NULL;
 			}
 			else if (cond > 0)
 				start = pivot + 1;
-			else if (cond <= 0)
+			else if (cond < 0)
 				end = pivot - 1;
 		}
 	} else { // preserve the letter case
@@ -938,36 +934,34 @@ const char *WordList::GetNearestWord(const char *wordStart, int searchLen /*= -1
 			pivot = (start + end) >> 1;
 			word = words[pivot];
 			cond = strncmp(wordStart, word, searchLen);
-			if (!cond && (!wordCharacters.contains(word[searchLen]))) {
-				// Found a word in a binary fashion. Now checks if a specific index was requested
-				if (wordIndex < 0)
-					return word; // result must not be freed with free()
-
-				// Finds first word in a series of equal words
-				int first = pivot;
-				end = pivot - 1;
-				while (start <= end) {
-					pivot = (start + end) >> 1;
-					word = words[pivot];
-					cond = strncmp(wordStart, word, searchLen);
-					if (!cond && (!wordCharacters.contains(word[searchLen]))) {
-						// Found another word
-						first = pivot;
-						end = pivot - 1;
-					}
-					else if (cond > 0)
-						start = pivot + 1;
-					else if (cond <= 0)
-						break;
+			if (!cond) {
+				// find first word
+				start = pivot;
+				while (start > 0 && !strncmp(wordStart, words[start-1], searchLen)) {
+					start--;
 				}
-
-				// Gets the word at the requested index
-				word = words[first + wordIndex];
-				return word;
+				// find last word
+				end = pivot;
+				while (end < len-1 && !strncmp(wordStart, words[end+1], searchLen)) {
+					end++;
+				}
+				
+				// Finds first word in a series of equal words
+				pivot = start;
+				while (pivot <= end) {
+					word = words[pivot];
+					if (!wordCharacters.contains(word[searchLen])) {
+						if (wordIndex <= 0) // Checks if a specific index was requested
+							return word; // result must not be freed with free()
+						wordIndex--;
+					}
+					pivot++;
+				}
+				return NULL;
 			}
 			else if (cond > 0)
 				start = pivot + 1;
-			else if (cond <= 0)
+			else if (cond < 0)
 				end = pivot - 1;
 		}
 	}
@@ -1012,7 +1006,7 @@ static unsigned int LengthWord(const char *word, char otherSeparator) {
  */
 char *WordList::GetNearestWords(
     const char *wordStart,
-    int searchLen /*= -1*/,
+    int searchLen,
     bool ignoreCase /*= false*/,
     char otherSeparator /*= '\0'*/,
     bool exactLen /*=false*/) {
@@ -1046,10 +1040,10 @@ char *WordList::GetNearestWords(
 					(0 == CompareNCaseInsensitive(wordStart,
 						wordsNoCase[pivot], searchLen))) {
 					wordlen = LengthWord(wordsNoCase[pivot], otherSeparator) + 1;
-					if (exactLen && wordlen != LengthWord(wordStart, otherSeparator) + 1)
-						break;
-					wordsNear.append(wordsNoCase[pivot], wordlen, ' ');
 					++pivot;
+					if (exactLen && wordlen != LengthWord(wordStart, otherSeparator) + 1)
+						continue;
+					wordsNear.append(wordsNoCase[pivot-1], wordlen, ' ');
 				}
 				return wordsNear.detach();
 			} else if (cond < 0) {
@@ -1074,10 +1068,10 @@ char *WordList::GetNearestWords(
 					(0 == strncmp(wordStart,
 						words[pivot], searchLen))) {
 					wordlen = LengthWord(words[pivot], otherSeparator) + 1;
-					if (exactLen && wordlen != LengthWord(wordStart, otherSeparator) + 1)
-						break;
-					wordsNear.append(words[pivot], wordlen, ' ');
 					++pivot;
+					if (exactLen && wordlen != LengthWord(wordStart, otherSeparator) + 1)
+						continue;
+					wordsNear.append(words[pivot-1], wordlen, ' ');
 				}
 				return wordsNear.detach();
 			} else if (cond < 0) {
