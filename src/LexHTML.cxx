@@ -35,13 +35,24 @@ static inline bool IsAWordStart(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '_');
 }
 
-static script_type segIsScriptingIndicator(Accessor &styler, unsigned int start, unsigned int end, script_type prevValue) {
-	char s[30 + 1];
-	unsigned int i = 0;
-	for (; i < end - start + 1 && i < 30; i++) {
-		s[i] = static_cast<char>(tolower(styler[start + i]));
+static inline int MakeLowerCase(int ch) {
+	if (ch < 'A' || ch > 'Z')
+		return ch;
+	else
+		return ch - 'A' + 'a';
+}
+
+static void GetTextSegment(Accessor &styler, unsigned int start, unsigned int end, char *s, size_t len) {
+	size_t i = 0;
+	for (; (i < end - start + 1) && (i < len-1); i++) {
+		s[i] = static_cast<char>(MakeLowerCase(styler[start + i]));
 	}
 	s[i] = '\0';
+}
+
+static script_type segIsScriptingIndicator(Accessor &styler, unsigned int start, unsigned int end, script_type prevValue) {
+	char s[100];
+	GetTextSegment(styler, start, end, s, sizeof(s));
 	//Platform::DebugPrintf("Scripting indicator [%s]\n", s);
 	if (strstr(s, "src"))	// External script
 		return eScriptNone;
@@ -63,12 +74,8 @@ static script_type segIsScriptingIndicator(Accessor &styler, unsigned int start,
 
 static int PrintScriptingIndicatorOffset(Accessor &styler, unsigned int start, unsigned int end) {
 	int iResult = 0;
-	char s[30 + 1];
-	unsigned int i = 0;
-	for (; i < end - start + 1 && i < 30; i++) {
-		s[i] = static_cast<char>(tolower(styler[start + i]));
-	}
-	s[i] = '\0';
+	char s[100];
+	GetTextSegment(styler, start, end, s, sizeof(s));
 	if (0 == strncmp(s, "php", 3)) {
 		iResult = 3;
 	}
@@ -183,12 +190,8 @@ static void classifyAttribHTML(unsigned int start, unsigned int end, WordList &k
 	if (wordIsNumber) {
 		chAttr = SCE_H_NUMBER;
 	} else {
-		char s[30 + 1];
-		unsigned int i = 0;
-		for (; i < end - start + 1 && i < 30; i++) {
-			s[i] = static_cast<char>(tolower(styler[start + i]));
-		}
-		s[i] = '\0';
+		char s[100];
+		GetTextSegment(styler, start, end, s, sizeof(s));
 		if (keywords.InList(s))
 			chAttr = SCE_H_ATTRIBUTE;
 	}
@@ -207,7 +210,7 @@ static int classifyTagHTML(unsigned int start, unsigned int end,
 	for (unsigned int cPos = start; cPos <= end && i < 30; cPos++) {
 		char ch = styler[cPos];
 		if ((ch != '<') && (ch != '/')) {
-			s[i++] = caseSensitive ? ch : static_cast<char>(tolower(ch));
+			s[i++] = caseSensitive ? ch : static_cast<char>(MakeLowerCase(ch));
 		}
 	}
 
@@ -270,12 +273,8 @@ static int classifyWordHTVB(unsigned int start, unsigned int end, WordList &keyw
 	if (wordIsNumber)
 		chAttr = SCE_HB_NUMBER;
 	else {
-		char s[30 + 1];
-		unsigned int i = 0;
-		for (; i < end - start + 1 && i < 30; i++) {
-			s[i] = static_cast<char>(tolower(styler[start + i]));
-		}
-		s[i] = '\0';
+		char s[100];
+		GetTextSegment(styler, start, end, s, sizeof(s));
 		if (keywords.InList(s)) {
 			chAttr = SCE_HB_WORD;
 			if (strcmp(s, "rem") == 0)
@@ -318,12 +317,8 @@ static void classifyWordHTPHP(unsigned int start, unsigned int end, WordList &ke
 	if (wordIsNumber)
 		chAttr = SCE_HPHP_NUMBER;
 	else {
-		char s[100 + 1];
-		unsigned int i = 0;
-		for (; i < end - start + 1 && i < 100; i++) {
-			s[i] = static_cast<char>(tolower(styler[start + i]));
-		}
-		s[i] = '\0';
+		char s[100];
+		GetTextSegment(styler, start, end, s, sizeof(s));
 		if (keywords.InList(s))
 			chAttr = SCE_HPHP_WORD;
 	}
@@ -610,9 +605,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			case SCE_H_SINGLESTRING:
 			case SCE_HJ_COMMENT:
 			case SCE_HJ_COMMENTDOC:
-				// SCE_HJ_COMMENTLINE removed as this is a common thing done to hide
-				// the end of script marker from some JS interpreters.
-				case SCE_HJ_COMMENTLINE:
+			//case SCE_HJ_COMMENTLINE: // removed as this is a common thing done to hide
+			// the end of script marker from some JS interpreters.
 			case SCE_HJ_DOUBLESTRING:
 			case SCE_HJ_SINGLESTRING:
 			case SCE_HJ_REGEX:
@@ -622,6 +616,19 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			case SCE_HP_TRIPLEDOUBLE:
 				break;
 			default :
+				// check if the closing tag is a script tag
+				if (state == SCE_HJ_COMMENTLINE) {
+					char tag[7]; // room for the <script> tag
+					char chr;	// current char
+					int j=0;	
+					chr = styler.SafeGetCharAt(i+2);
+					while (j < 6 && !isspacechar(chr)) {
+						tag[j++] = static_cast<char>(MakeLowerCase(chr));
+						chr = styler.SafeGetCharAt(i+2+j);
+					}
+					tag[j] = '\0';
+					if (strcmp(tag, "script") != 0) break;
+				}
 				// closing tag of the script (it's a closing HTML tag anyway)
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_H_TAGUNKNOWN;
