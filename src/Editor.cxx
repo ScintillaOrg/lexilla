@@ -1366,10 +1366,17 @@ bool Editor::WrapLines() {
 void Editor::LinesJoin() {
 	if (!RangeContainsProtected(targetStart, targetEnd)) {
 		pdoc->BeginUndoAction();
+		bool prevNonWS = true;
 		for (int pos = targetStart; pos < targetEnd; pos++) {
 			if (IsEOLChar(pdoc->CharAt(pos))) {
 				targetEnd -= pdoc->LenChar(pos);
 				pdoc->DelChar(pos);
+				if (prevNonWS) {
+					// Ensure at least one space separating previous lines
+					pdoc->InsertChar(pos, ' ');
+				}
+			} else {
+				prevNonWS = pdoc->CharAt(pos) != ' ';
 			}
 		}
 		pdoc->EndUndoAction();
@@ -1403,7 +1410,8 @@ void Editor::LinesSplit(int pixelWidth) {
 				unsigned int posLineStart = pdoc->LineStart(line);
 				LayoutLine(line, surface, vs, ll, pixelWidth);
 				for (int subLine = 1; subLine < ll->lines; subLine++) {
-					pdoc->InsertString(posLineStart + subLine - 1 + ll->LineStart(subLine), eol);
+					pdoc->InsertString(posLineStart + (subLine - 1) * strlen(eol) + 
+						ll->LineStart(subLine), eol);
 					targetEnd += strlen(eol);
 				}
 			}
@@ -4494,6 +4502,9 @@ void Editor::SetHotSpotRange(Point *pt) {
 
 		// Only invalidate the range if the hotspot range has changed...
 		if (hsStart_ != hsStart || hsEnd_ != hsEnd) {
+			if (hsStart != -1) {
+				InvalidateRange(hsStart, hsEnd);
+			}
 			hsStart = hsStart_;
 			hsEnd = hsEnd_;
 			InvalidateRange(hsStart, hsEnd);
