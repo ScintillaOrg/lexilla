@@ -150,6 +150,7 @@ void Font::Release() {
 }
 
 Surface::Surface() :
+	unicodeMode(false),
 	hdc(0), 	hdcOwned(false),
 	pen(0), 	penOld(0), 
 	brush(0), brushOld(0), 

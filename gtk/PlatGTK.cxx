@@ -176,8 +176,8 @@ void Font::Release() {
 		gdk_font_unref(id);
 	id = 0;
 }
-
-Surface::Surface() : drawable(0), gc(0), ppixmap(0),
+	
+Surface::Surface() : unicodeMode(false), drawable(0), gc(0), ppixmap(0),
 x(0), y(0), inited(false), createdGC(false) {}
 
 
