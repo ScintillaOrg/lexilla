@@ -142,7 +142,15 @@ SOURCE=..\src\LexAda.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexAPDL.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexAsm.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexAU3.cxx
 # End Source File
 # Begin Source File
 
@@ -151,6 +159,10 @@ SOURCE=..\src\LexAVE.cxx
 # Begin Source File
 
 SOURCE=..\src\LexBaan.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexBash.cxx
 # End Source File
 # Begin Source File
 
