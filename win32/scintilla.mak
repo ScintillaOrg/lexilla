@@ -107,6 +107,7 @@ SOBJS=\
 LEXOBJS=\
 	$(DIR_O)\LexAda.obj \
 	$(DIR_O)\LexAVE.obj \
+	$(DIR_O)\LexBullant.obj \
 	$(DIR_O)\LexConf.obj \
 	$(DIR_O)\LexCPP.obj \
 	$(DIR_O)\LexCrontab.obj \
@@ -228,6 +229,8 @@ $(DIR_O)\KeyWords.obj: ..\src\KeyWords.cxx ..\include\Platform.h ..\include\Prop
 $(DIR_O)\LexAda.obj: ..\src\LexAda.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexAVE.obj: ..\src\LexAVE.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexBullant.obj: ..\src\LexBullant.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexConf.obj: ..\src\LexConf.cxx $(LEX_HEADERS)
 

@@ -80,7 +80,7 @@ static void ColouriseBullantDoc(unsigned int startPos, int length, int initStyle
 	char chNext = styler[startPos];
 	unsigned int lengthDoc = startPos + length;
 	int visibleChars = 0;
-	int blockChange = 0;
+	//int blockChange = 0;
 	styler.StartSegment(startPos);
 	int endFoundThisLine = 0;
 	for (unsigned int i = startPos; i < lengthDoc; i++) {

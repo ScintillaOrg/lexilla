@@ -39,7 +39,7 @@ deps:
 
 LEXOBJS=LexAda.o LexAVE.o LexConf.o LexCPP.o LexCrontab.o LexEiffel.o LexHTML.o \
 	LexLisp.o LexLua.o LexOthers.o LexPascal.o LexPerl.o \
-	LexPython.o LexRuby.o LexSQL.o LexVB.o
+	LexPython.o LexRuby.o LexSQL.o LexVB.o LexBullant.o
 
 SOBJS	= ScintillaWin.o ScintillaBase.o Editor.o Document.o \
 	ContractionState.o CellBuffer.o CallTip.o \

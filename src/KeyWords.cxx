@@ -128,6 +128,7 @@ int wxForceScintillaLexers(void) {
   extern LexerModule lmSQL;
   extern LexerModule lmVB;
   extern LexerModule lmXML;
+  extern LexerModule lmBullant;
 
   if (
       &lmAda
@@ -153,6 +154,7 @@ int wxForceScintillaLexers(void) {
       && &lmLISP
       && &lmLua
       && &lmNull
+      && &lmBullant
       )
     {
       return 1;
