@@ -473,13 +473,13 @@ void ScintillaGTK::NotifyKey(int key, int modifiers) {
 }
 
 int ScintillaGTK::KeyDefault(int key, int modifiers) {
-	if (!(modifiers & SCI_CTRL) && !(modifiers & SCI_ALT) && (key < 128)) {
+	if (!(modifiers & SCI_CTRL) && !(modifiers & SCI_ALT) && (key < 256)) {
 		AddChar(key);
 	} else {
 		// Pass up to container in case it is an accelerator
 		NotifyKey(key, modifiers);
 	}
-	//Platform::DebugPrintf("SK-key: %d %x %x\n",event->keyval, event->state, GTK_WIDGET_FLAGS(widget));
+	//Platform::DebugPrintf("SK-key: %d %x %x\n",key, modifiers);
 	return 1;
 }
 
