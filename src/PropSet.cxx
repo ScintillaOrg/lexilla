@@ -33,14 +33,10 @@ static inline bool IsLetter(char ch) {
 int CompareCaseInsensitive(const char *a, const char *b) {
 	while (*a && *b) {
 		if (*a != *b) {
-			if (IsLetter(*a) && IsLetter(*b)) {
-				char upperA = MakeUpperCase(*a);
-				char upperB = MakeUpperCase(*b);
-				if (upperA != upperB)
-					return upperA - upperB;
-			} else {
-				return *a - *b;
-			}
+			char upperA = MakeUpperCase(*a);
+			char upperB = MakeUpperCase(*b);
+			if (upperA != upperB)
+				return upperA - upperB;
 		}
 		a++;
 		b++;
@@ -52,14 +48,10 @@ int CompareCaseInsensitive(const char *a, const char *b) {
 int CompareNCaseInsensitive(const char *a, const char *b, int len) {
 	while (*a && *b && len) {
 		if (*a != *b) {
-			if (IsLetter(*a) && IsLetter(*b)) {
-				char upperA = MakeUpperCase(*a);
-				char upperB = MakeUpperCase(*b);
-				if (upperA != upperB)
-					return upperA - upperB;
-			} else {
-				return *a - *b;
-			}
+			char upperA = MakeUpperCase(*a);
+			char upperB = MakeUpperCase(*b);
+			if (upperA != upperB)
+				return upperA - upperB;
 		}
 		a++;
 		b++;
