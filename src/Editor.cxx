@@ -2211,24 +2211,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	}
 }
 
-void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
-	//Platform::DebugPrintf("Paint:%1d (%3d,%3d) ... (%3d,%3d)\n",
-	//	paintingAllText, rcArea.left, rcArea.top, rcArea.right, rcArea.bottom);
-
-	RefreshStyleData();
-
-	PRectangle rcClient = GetClientRectangle();
-	//Platform::DebugPrintf("Client: (%3d,%3d) ... (%3d,%3d)   %d\n",
-	//	rcClient.left, rcClient.top, rcClient.right, rcClient.bottom);
-
-	if (WrapLines()) {
-		// The wrapping process has changed the height of some lines so abandon this
-		// paint for a complete repaint.
-		if (AbandonPaint()) {
-			return;
-		}
-	}
-
+void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 	if (!pixmapSelPattern->Initialised()) {
 		pixmapSelPattern->InitPixMap(8, 8, surfaceWindow);
 		// This complex procedure is to reproduce the checker board dithered pattern used by windows
@@ -2238,27 +2221,21 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		PRectangle rcPattern(0, 0, 8, 8);
 
 		// Default to highlight edge colour in case unusual colour scheme chosen
-		ColourAllocated colourFMFill = vs.selbarlight.allocated;
+		ColourAllocated colourFMFill = vs.selbar.allocated;
 		ColourAllocated colourFMStripes = vs.selbarlight.allocated;
-		if (vs.foldmarginColourSet && !vs.foldmarginHighlightColourSet) {
-			// Only Fold Margin Colour Set
+        if (!(vs.selbarlight.desired == ColourDesired(0xff, 0xff, 0xff))) {
+			// User has chosen an unusual chrome colour scheme so just use the highlight edge colour.
+            colourFMFill = vs.selbarlight.allocated;
+        }
+		if (vs.foldmarginColourSet) {
+			// override default fold margin colour
 			colourFMFill = vs.foldmarginColour.allocated;
-			colourFMStripes = vs.selbarlight.allocated;
-		} else if (!vs.foldmarginColourSet && vs.foldmarginHighlightColourSet) {
-			// Only Fold Margin Highlight Colour Set
-			colourFMFill = vs.selbar.allocated;
-			colourFMStripes = vs.foldmarginHighlightColour.allocated;
-		} else if (vs.foldmarginColourSet && vs.foldmarginHighlightColourSet) {
-			// Both Fold Margin Colour and Fold Margin Highlight Colour Set
-			colourFMFill = vs.foldmarginColour.allocated;
-			colourFMStripes = vs.foldmarginHighlightColour.allocated;
-		} else if (!vs.foldmarginColourSet && !vs.foldmarginHighlightColourSet) {
-			// Neither Fold Margin Colour nor Fold Margin Highlight Colour is Set so take Default [2/9/2003 16:54]
-			if (vs.selbarlight.desired == ColourDesired(0xff, 0xff, 0xff)) {
-				colourFMFill = vs.selbar.allocated;
-				colourFMStripes = vs.selbarlight.allocated;
-			}
 		}
+		if (vs.foldmarginHighlightColourSet) {
+			// override default fold margin highlight colour
+			colourFMStripes = vs.foldmarginHighlightColour.allocated;
+		}
+
 		pixmapSelPattern->FillRectangle(rcPattern, colourFMFill);
 		pixmapSelPattern->PenColour(colourFMStripes);
 		for (int stripe = 0; stripe < 8; stripe++) {
@@ -2266,6 +2243,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 			pixmapSelPattern->LineTo(8, stripe * 2 - 8);
 		}
 	}
+
 	if (!pixmapIndentGuide->Initialised()) {
 		// 1 extra pixel in height so can handle odd/even positions and so produce a continuous line
 		pixmapIndentGuide->InitPixMap(1, vs.lineHeight + 1, surfaceWindow);
@@ -2285,12 +2263,26 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 
 	if (bufferedDraw) {
 		if (!pixmapLine->Initialised()) {
+            PRectangle rcClient = GetClientRectangle();
 			pixmapLine->InitPixMap(rcClient.Width(), rcClient.Height(),
 			                       surfaceWindow);
 			pixmapSelMargin->InitPixMap(vs.fixedColumnWidth,
 			                            rcClient.Height(), surfaceWindow);
 		}
 	}
+}
+
+void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
+	//Platform::DebugPrintf("Paint:%1d (%3d,%3d) ... (%3d,%3d)\n",
+	//	paintingAllText, rcArea.left, rcArea.top, rcArea.right, rcArea.bottom);
+
+	RefreshStyleData();
+
+    RefreshPixMaps(surfaceWindow);
+
+	PRectangle rcClient = GetClientRectangle();
+	//Platform::DebugPrintf("Client: (%3d,%3d) ... (%3d,%3d)   %d\n",
+	//	rcClient.left, rcClient.top, rcClient.right, rcClient.bottom);
 
 	surfaceWindow->SetPalette(&palette, true);
 	pixmapLine->SetPalette(&palette, !hasFocus);
@@ -2319,6 +2311,14 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	}
 
 	PaintSelMargin(surfaceWindow, rcArea);
+
+	if (WrapLines()) {
+		// The wrapping process has changed the height of some lines so abandon this
+		// paint for a complete repaint.
+		if (AbandonPaint()) {
+			return;
+		}
+	}
 
 	PRectangle rcRightMargin = rcClient;
 	rcRightMargin.left = rcRightMargin.right - vs.rightMarginWidth;

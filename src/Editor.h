@@ -362,6 +362,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 		bool overrideBackground, ColourAllocated background);
 	void DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart,
 		PRectangle rcLine, LineLayout *ll, int subLine=0);
+    void RefreshPixMaps(Surface *surfaceWindow);
 	void Paint(Surface *surfaceWindow, PRectangle rcArea);
 	long FormatRange(bool draw, RangeToFormat *pfr);
 	int TextWidth(int style, const char *text);
