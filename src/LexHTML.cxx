@@ -314,7 +314,7 @@ static void classifyWordHTPy(unsigned int start, unsigned int end, WordList &key
 // Called when in a PHP word
 static void classifyWordHTPHP(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler) {
 	char chAttr = SCE_HPHP_DEFAULT;
-	bool wordIsNumber = IsADigit(styler[start]);
+	bool wordIsNumber = IsADigit(styler[start]) || (styler[start] == '.' && start+1 <= end && IsADigit(styler[start+1]));
 	if (wordIsNumber)
 		chAttr = SCE_HPHP_NUMBER;
 	else {
@@ -1495,7 +1495,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			}
 			break;
 		case SCE_HPHP_NUMBER:
-			if (!IsADigit(ch)) {
+			if (!IsADigit(ch) && ch != '.' && ch != 'e' && ch != 'E' && (ch != '-' || (chPrev != 'e' && chPrev != 'E'))) {
 				styler.ColourTo(i - 1, SCE_HPHP_NUMBER);
 				if (isoperator(ch))
 					state = SCE_HPHP_OPERATOR;
@@ -1567,7 +1567,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		case SCE_HPHP_OPERATOR:
 		case SCE_HPHP_DEFAULT:
 			styler.ColourTo(i - 1, StateToPrint);
-			if (IsADigit(ch)) {
+			if (IsADigit(ch) || (ch == '.' && IsADigit(chNext))) {
 				state = SCE_HPHP_NUMBER;
 			} else if (iswordstart(ch)) {
 				state = SCE_HPHP_WORD;
