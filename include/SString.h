@@ -48,98 +48,84 @@ inline char *StringDup(
  **/
 class SString {
 	char *s;			///< The C string
-	int ssize;	///< The size of the buffer, less 1: ie. the maximum size of the string
-	int slen;	///< The size of the string in s
-
-	/// Minimum growth size when appending strings
-	enum { sizingGranularity = 64 };
+	int sSize;	///< The size of the buffer, less 1: ie. the maximum size of the string
+	int sLen;	///< The size of the string in s
+	int sizeGrowth;	///< Minimum growth size when appending strings
+	enum { sizeGrowthDefault = 64 };
 
 public:
-	typedef const char* const_iterator;
 	typedef int size_type;
 
-	SString() {
-		s = 0;
-		ssize = 0;
-		slen = 0;
+	SString() : s(0), sSize(0), sLen(0), sizeGrowth(sizeGrowthDefault) {
 	}
-	SString(const SString &source) {
+	SString(const SString &source) : sizeGrowth(sizeGrowthDefault) {
 		s = StringDup(source.s);
-		ssize = slen = (s) ? strlen(s) : 0;
+		sSize = sLen = (s) ? strlen(s) : 0;
 	}
-	SString(const char *s_) {
+	SString(const char *s_) : sizeGrowth(sizeGrowthDefault) {
 		s = StringDup(s_);
-		ssize = slen = (s) ? strlen(s) : 0;
+		sSize = sLen = (s) ? strlen(s) : 0;
 	}
-	SString(const char *s_, int first, int last) {
+	SString(const char *s_, int first, int last) : sizeGrowth(sizeGrowthDefault) {
 		s = StringDup(s_ + first, last - first);
-		ssize = slen = (s) ? strlen(s) : 0;
+		sSize = sLen = (s) ? strlen(s) : 0;
 	}
-	SString(int i) {
+	SString(int i) : sizeGrowth(sizeGrowthDefault) {
 		char number[32];
 		sprintf(number, "%0d", i);
 		s = StringDup(number);
-		ssize = slen = (s) ? strlen(s) : 0;
+		sSize = sLen = (s) ? strlen(s) : 0;
 	}
 	~SString() {
 		delete []s;
 		s = 0;
-		ssize = 0;
-		slen = 0;
+		sSize = 0;
+		sLen = 0;
 	}
 	void clear(void) {
 		if (s) {
 			*s = '\0';
 		}
-		slen = 0;
-	}
-	const char* begin(void) const {
-		return s;
-	}
-	const char* end(void) const {
-		return &s[slen];	// Point after the last character
+		sLen = 0;
 	}
 	/** Size of buffer. */
 	size_type size(void) const {	///<
 		if (s)
-			return ssize;
+			return sSize;
 		else
 			return 0;
 	}
 	/** Size of string in buffer. */
 	int length() const {
-		return slen;
+		return sLen;
 	}
-	SString &assign(const char* sother, int size_ = -1) {
-		if (!sother) {
-			size_ = 0;
+	SString &assign(const char* sOther, int sSize_ = -1) {
+		if (!sOther) {
+			sSize_ = 0;
 		}
-		if (size_ < 0) {
-			size_ = strlen(sother);
+		if (sSize_ < 0) {
+			sSize_ = strlen(sOther);
 		}
-		if (ssize > 0 && size_ <= ssize) {	// Does not allocate new buffer if the current is big enough
-			if (s && size_) {
-			strncpy(s, sother, size_);
+		if (sSize > 0 && sSize_ <= sSize) {	// Does not allocate new buffer if the current is big enough
+			if (s && sSize_) {
+				strncpy(s, sOther, sSize_);
 			}
-			s[size_] = '\0';
-			slen = size_;
+			s[sSize_] = '\0';
+			sLen = sSize_;
 		} else {
 			delete []s;
-			s = StringDup(sother, size_);
+			s = StringDup(sOther, sSize_);
 			if (s) {
-			ssize = size_;	// Allow buffer bigger than real string, thus providing space to grow
-				slen = strlen(s);
+				sSize = sSize_;	// Allow buffer bigger than real string, thus providing space to grow
+				sLen = strlen(s);
 			} else {
-				ssize = slen = 0;
+				sSize = sLen = 0;
 			}
 		}
 		return *this;
 	}
-	SString &assign(const SString& sother, int size_ = -1) {
-		return assign(sother.s, size_);
-	}
-	SString &assign(const_iterator ibeg, const_iterator iend) {
-		return assign(ibeg, iend - ibeg);
+	SString &assign(const SString& sOther, int sSize_ = -1) {
+		return assign(sOther.s, sSize_);
 	}
 	SString &operator=(const char *source) {
 		return assign(source);
@@ -150,25 +136,25 @@ public:
 		}
 		return *this;
 	}
-	bool operator==(const SString &other) const {
-		if ((s == 0) && (other.s == 0))
+	bool operator==(const SString &sOther) const {
+		if ((s == 0) && (sOther.s == 0))
 			return true;
-		if ((s == 0) || (other.s == 0))
+		if ((s == 0) || (sOther.s == 0))
 			return false;
-		return strcmp(s, other.s) == 0;
+		return strcmp(s, sOther.s) == 0;
 	}
-	bool operator!=(const SString &other) const {
-		return !operator==(other);
+	bool operator!=(const SString &sOther) const {
+		return !operator==(sOther);
 	}
-	bool operator==(const char *sother) const {
-		if ((s == 0) && (sother == 0))
+	bool operator==(const char *sOther) const {
+		if ((s == 0) && (sOther == 0))
 			return true;
-		if ((s == 0) || (sother == 0))
+		if ((s == 0) || (sOther == 0))
 			return false;
-		return strcmp(s, sother) == 0;
+		return strcmp(s, sOther) == 0;
 	}
-	bool operator!=(const char *sother) const {
-		return !operator==(sother);
+	bool operator!=(const char *sOther) const {
+		return !operator==(sOther);
 	}
 	bool contains(char ch) {
 		if (s && *s)
@@ -176,66 +162,77 @@ public:
 		else
 			return false;
 	}
+	void setsizegrowth(int sizeGrowth_) {
+		sizeGrowth = sizeGrowth_;
+	}
 	const char *c_str() const {
 		if (s)
 			return s;
 		else
 			return "";
 	}
+	/** Give ownership of buffer to caller which must use delete[] to free buffer. */
+	char *detach() {
+		char *sRet = s;
+		s = 0;
+		sSize = 0;
+		sLen = 0;
+		return sRet;
+	}
 	char operator[](int i) const {
-		if (s && i < ssize)	// Or < slen? Depends on the use, both are OK
+		if (s && i < sSize)	// Or < sLen? Depends on the use, both are OK
 			return s[i];
 		else
 			return '\0';
 	}
-	SString &append(const char* sother, int lenOther=-1, char sep=0) {
-		if (lenOther < 0)
-			lenOther = strlen(sother);
+	SString &append(const char* sOther, int sLenOther=-1, char sep=0) {
+		if (sLenOther < 0)
+			sLenOther = strlen(sOther);
 		int lenSep = 0;
-		if (slen && sep)	// Only add a separator if not empty
+		if (sLen && sep)	// Only add a separator if not empty
 			lenSep = 1;
-		int lenNew = slen + lenOther + lenSep;
-		if (lenNew + 1 < ssize) {
+		int lenNew = sLen + sLenOther + lenSep;
+		if (lenNew + 1 < sSize) {
 			// Conservative about growing the buffer: don't do it, unless really needed
 			if (lenSep) {
-				s[slen] = sep;
-				slen++;
+				s[sLen] = sep;
+				sLen++;
 			}
-			strncpy(&s[slen], sother, lenOther);
-			s[slen + lenOther] = '\0';
-			slen += lenOther;
+			strncpy(&s[sLen], sOther, sLenOther);
+			s[sLen + sLenOther] = '\0';
+			sLen += sLenOther;
 		} else {
 			// Grow the buffer bigger than really needed, to have room for other appends
-			char *sNew = new char[lenNew + sizingGranularity + 1];
+			char *sNew = new char[lenNew + sizeGrowth + 1];
 			if (sNew) {
 				if (s) {
-					memcpy(sNew, s, slen);
+					memcpy(sNew, s, sLen);
 					delete []s;
 				}
 				s = sNew;
-				ssize = lenNew + sizingGranularity;
+				sSize = lenNew + sizeGrowth;
 				if (lenSep) {
-					s[slen] = sep;
-					slen++;
+					s[sLen] = sep;
+					sLen++;
 				}
-				strncpy(&s[slen], sother, lenOther);
-				sNew[slen + lenOther] = '\0';
-				slen += lenOther;
+				strncpy(&s[sLen], sOther, sLenOther);
+				sNew[sLen + sLenOther] = '\0';
+				sLen += sLenOther;
 			}
 		}
 		return *this;
 	}
-	SString &operator +=(const char *sother) {
-		return append(sother, -1);
+	SString &operator +=(const char *sOther) {
+		return append(sOther, -1);
 	}
-	SString &operator +=(const SString &sother) {
-		return append(sother.s, sother.ssize);
+	SString &operator +=(const SString &sOther) {
+		return append(sOther.s, sOther.sSize);
 	}
 	SString &operator +=(char ch) {
 		return append(&ch, 1);
 	}
-	SString &appendwithseparator(const char* sother, char sep) {
-		return append(sother, strlen(sother), sep);
+	SString &appendwithseparator(const char* sOther, char sep) {
+		return append(sOther, strlen(sOther), sep);
 	}
 	int value() const {
 		if (s)
@@ -252,14 +249,6 @@ public:
 				t++;
 			}
 		}
-	}
-	// I don't think this really belongs here -- Neil
-	void correctPath() {
-#ifdef unix
-		substitute('\\', '/');
-#else
-		substitute('/', '\\');
-#endif
 	}
 };
 

@@ -560,48 +560,6 @@ static unsigned int LengthWord(const char *word, char otherSeparator) {
 }
 
 /**
- * Accumulate words in a space separated string
- */
-class WordAccumulator {
-	/// How many characters will be pre-allocated (to avoid buffer reallocation on each new word)
-	enum {wordChunk = 1000};
-	/// Length of the returned buffer of words (string)
-	unsigned int length; 
-	/// Allocated size of the buffer
-	unsigned int size;
-public:
-	/// Buffer for the words returned - this must be freed by client using delete[].
-	char *buffer; 
-	WordAccumulator() : length(0), size(wordChunk), buffer(0) {
-		buffer = new char[size];
-		if (buffer)
-			buffer[0] = '\0';
-	}
-	void Append(const char *word, unsigned int wordLen) {
-		if (!buffer)
-			return;
-		unsigned int newLength = length + wordLen; // stretch the buffer
-		if (length)
-			newLength++;
-		if (newLength >= size) {
-			unsigned int newSize = (((newLength+1) / wordChunk) + 1) * wordChunk;
-			char *newBuffer = new char[newSize];
-			if (!newBuffer)
-				return;
-			memcpy(newBuffer, buffer, length);
-			delete []buffer;
-			buffer = newBuffer;
-			size = newSize;
-		}
-		if (length) // append a new entry
-			buffer[length++] = ' ';
-		memcpy(buffer + length, word, wordLen);
-		length = newLength;
-		buffer[length] = '\0';
-	}
-};
-
-/**
  * Returns elements (first words of them) of the wordlist array which have
  * the same beginning as the passed string.
  * The length of the word to compare is passed too.
@@ -617,7 +575,8 @@ char *WordList::GetNearestWords(
 	bool ignoreCase /*= false*/, 
 	char otherSeparator /*= '\0'*/) {
 	int wordlen; // length of the word part (before the '(' brace) of the api array element
-	WordAccumulator wordsNear;
+	SString wordsNear;
+	wordsNear.setsizegrowth(1000);
 	int start = 0; // lower bound of the api array block to search
 	int end = len - 1; // upper bound of the api array block to search
 	int pivot; // index of api array element just being compared
@@ -640,7 +599,7 @@ char *WordList::GetNearestWords(
 				oldpivot = pivot;
 				do { // browse sequentially the rest after the hit
 					wordlen = LengthWord(word, otherSeparator) + 1;
-					wordsNear.Append(word, wordlen);
+					wordsNear.append(word, wordlen, ' ');
 					if (++pivot > end)
 						break;
 					word = wordsNoCase[pivot];
@@ -654,9 +613,9 @@ char *WordList::GetNearestWords(
 					if (CompareNCaseInsensitive(wordStart, word, searchLen))
 						break;
 					wordlen = LengthWord(word, otherSeparator) + 1;
-					wordsNear.Append(word, wordlen);
+					wordsNear.append(word, wordlen, ' ');
 				}
-				return wordsNear.buffer;
+				return wordsNear.detach();
 			}
 			else if (cond < 0)
 				end = pivot - 1;
@@ -672,7 +631,7 @@ char *WordList::GetNearestWords(
 				oldpivot = pivot;
 				do { // browse sequentially the rest after the hit
 					wordlen = LengthWord(word, otherSeparator) + 1;
-					wordsNear.Append(word, wordlen);
+					wordsNear.append(word, wordlen, ' ');
 					if (++pivot > end)
 						break;
 					word = words[pivot];
@@ -686,9 +645,9 @@ char *WordList::GetNearestWords(
 					if (strncmp(wordStart, word, searchLen))
 						break;
 					wordlen = LengthWord(word, otherSeparator) + 1;
-					wordsNear.Append(word, wordlen);
+					wordsNear.append(word, wordlen, ' ');
 				}
-				return wordsNear.buffer;
+				return wordsNear.detach();
 			}
 			else if (cond < 0)
 				end = pivot - 1;
@@ -696,6 +655,5 @@ char *WordList::GetNearestWords(
 				start = pivot + 1;
 		}
 	}
-	delete []wordsNear.buffer;
 	return NULL;
 }
