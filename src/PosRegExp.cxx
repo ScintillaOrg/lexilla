@@ -5,6 +5,10 @@
 
 #include "PosRegExp.h"
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4244)
+#endif
+
 //Up: /[A-Z \x80-\x9f \xf0 ]/x
 //Lo: /[a-z \xa0-\xaf \xe0-\xef \xf1 ]/x
 //Wd: /[\d _ A-Z a-z \xa0-\xaf \xe0-\xf1 \x80-\x9f]/x
