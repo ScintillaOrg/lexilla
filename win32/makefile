@@ -1,7 +1,7 @@
 # Make file for Scintilla on Windows
 # Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 # The License.txt file describes the conditions under which this software may be distributed.
-# This makefile assumes the mingw32 version of GCC 2.95.2 is used and changes will
+# This makefile assumes the mingw32 version of GCC 2.95.3 is used and changes will
 # be needed to use other compilers.
 
 .SUFFIXES: .cxx
