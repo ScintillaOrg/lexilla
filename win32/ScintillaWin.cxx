@@ -2026,8 +2026,8 @@ bool Scintilla_RegisterClasses(void *hInstance) {
 	bool result = ScintillaWin::Register(reinterpret_cast<HINSTANCE>(hInstance));
 #ifdef SCI_LEXER
 	Scintilla_LinkLexers();
-	//LexerManager *lexMan = LexerManager::GetInstance();
-	//lexMan->Load();
+	LexerManager *lexMan = LexerManager::GetInstance();
+	lexMan->Load();
 #endif
 	return result;
 }
