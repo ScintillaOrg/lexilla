@@ -30,6 +30,9 @@
  * Modification history:
  *
  * $Log$
+ * Revision 1.9  2003/03/21 10:36:08  nyamatongwe
+ * Detect patterns too long in regular expression search.
+ *
  * Revision 1.8  2003/03/04 10:53:59  nyamatongwe
  * Patch from Jakub to optionally implement more POSIX compatible regular
  * expressions. \(..\) changes to (..)
@@ -345,6 +348,7 @@ const char *RESearch::Compile(const char *pat, int length, bool caseSensitive, b
 	char *mp=nfa;          /* nfa pointer       */
 	char *lp;              /* saved pointer..   */
 	char *sp=nfa;          /* another one..     */
+    char *mpMax = mp + MAXNFA - BITBLK - 10;
 
 	int tagi = 0;          /* tag stack index   */
 	int tagc = 1;          /* actual tag count  */
@@ -362,6 +366,8 @@ const char *RESearch::Compile(const char *pat, int length, bool caseSensitive, b
 
 	const char *p=pat;               /* pattern pointer   */
 	for (int i=0; i<length; i++, p++) {
+		if (mp > mpMax)
+			return badpat("Pattern too long");
 		lp = mp;
 		switch(*p) {
 
