@@ -305,7 +305,7 @@ int Editor::PositionFromLocation(Point pt) {
 			for (int i = lineStart; i < lineEnd; i++) {
 				if (pt.x < (((ll.positions[i] + ll.positions[i + 1]) / 2) - subLineStart) ||
 					ll.chars[i] == '\r' || ll.chars[i] == '\n') {
-					return i + posLineStart;
+					return pdoc->MovePositionOutsideChar(i + posLineStart, 1);
 				}
 			}
 			return lineEnd + posLineStart;
@@ -350,7 +350,7 @@ int Editor::PositionFromLocationClose(Point pt) {
 			for (int i = lineStart; i < lineEnd; i++) {
 				if (pt.x < (((ll.positions[i] + ll.positions[i + 1]) / 2) - subLineStart) ||
 					ll.chars[i] == '\r' || ll.chars[i] == '\n') {
-					return i + posLineStart;
+					return pdoc->MovePositionOutsideChar(i + posLineStart, 1);
 				}
 			}
 		}
@@ -359,6 +359,8 @@ int Editor::PositionFromLocationClose(Point pt) {
 	return INVALID_POSITION;
 }
 
+// Find the document position corresponding to an x coordinate on a particular document line.
+// Ensure is between whole characters when document is in multi-byte or UTF-8 mode.
 int Editor::PositionFromLineX(int lineDoc, int x) {
 	RefreshStyleData();
 	if (lineDoc >= pdoc->LinesTotal())
@@ -377,7 +379,7 @@ int Editor::PositionFromLineX(int lineDoc, int x) {
 		for (int i = lineStart; i < lineEnd; i++) {
 			if (x < (((ll.positions[i] + ll.positions[i + 1]) / 2) - subLineStart) ||
 				ll.chars[i] == '\r' || ll.chars[i] == '\n') {
-				return i + posLineStart;
+				return pdoc->MovePositionOutsideChar(i + posLineStart, 1);
 			}
 		}
 
@@ -1540,6 +1542,8 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		double durLayout = 0.0;
 		double durPaint = 0.0;
 		double durCopy = 0.0;
+		int lineDocPrevious = -1;	// Used to avoid laying out one document line multiple times
+		LineLayout ll;
 		while (visibleLine < cs.LinesDisplayed() && yposScreen < rcArea.bottom) {
 
 			int lineDoc = cs.DocFromDisplay(visibleLine);
@@ -1551,9 +1555,11 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 
 			// Copy this line and its styles from the document into local arrays
 			// and determine the x position at which each character starts.
-			LineLayout ll;
 			ElapsedTime et;
-			LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
+			if (lineDoc != lineDocPrevious) {
+				LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
+				lineDocPrevious = lineDoc;
+			}
 			durLayout += et.Duration(true);
 
 			ll.selStart = SelectionStart(lineDoc);
