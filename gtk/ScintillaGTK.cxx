@@ -1195,7 +1195,7 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 		else
 			SetAdjustmentValue(adjustmentv, topLine + 3);
 	}
-	return FALSE;
+	return TRUE;
 }
 
 gint ScintillaGTK::Press(GtkWidget *widget, GdkEventButton *event) {
