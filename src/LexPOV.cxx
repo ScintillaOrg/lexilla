@@ -53,7 +53,7 @@ static void ColourisePOVDoc(unsigned int startPos, int length, int initStyle, Wo
 
 	StyleContext sc(startPos, length, initStyle, styler);
 
-	bool caseSensitive = styler.GetPropertyInt("case.sensitive", 1) != 0;
+	bool caseSensitive = styler.GetPropertyInt("pov.case.sensitive", 1) != 0;
 
 	for (; sc.More(); sc.Forward()) {
 
