@@ -195,26 +195,29 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 
 		if (HereDoc.State == 1 && isEOLChar(ch)) {
 			// Begin of here-doc (the line after the here-doc delimiter):
+			// Lexically, the here-doc starts from the next line after the >>, but the
+			// first line of here-doc seem to follow the style of the last EOL sequence
 			HereDoc.State = 2;
-			styler.ColourTo(i - 1, state);
 			if (HereDoc.Quoted) {
 				if (state == SCE_PL_HERE_DELIM) {
 					// Missing quote at end of string! We are stricter than perl.
+					// Colour here-doc anyway while marking this bit as an error.
 					state = SCE_PL_ERROR;
-				} else {
-					switch (HereDoc.Quote) {
-					case '\'':
-						state = SCE_PL_HERE_Q ;
-						break;
-					case '"':
-						state = SCE_PL_HERE_QQ;
-						break;
-					case '`':
-						state = SCE_PL_HERE_QX;
-						break;
-					}
+				}
+				styler.ColourTo(i - 1, state);
+				switch (HereDoc.Quote) {
+				case '\'':
+					state = SCE_PL_HERE_Q ;
+					break;
+				case '"':
+					state = SCE_PL_HERE_QQ;
+					break;
+				case '`':
+					state = SCE_PL_HERE_QX;
+					break;
 				}
 			} else {
+				styler.ColourTo(i - 1, state);
 				switch (HereDoc.Quote) {
 				case '\\':
 					state = SCE_PL_HERE_Q ;
@@ -398,8 +401,15 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				// There must be no space between the << and the identifier.
 				// (If you put a space it will be treated as a null identifier,
 				// which is valid, and matches the first empty line.)
+				// (This is deprecated, -w warns of this syntax)
 				// The terminating string must appear by itself (unquoted and with no
 				// surrounding whitespace) on the terminating line.
+				//
+				// From Bash info:
+				// ---------------
+				// Specifier format is: <<[-]WORD
+				// Optional '-' is for removal of leading tabs from here-doc.
+				// Whitespace acceptable after <<[-] operator.
 				//
 				if (HereDoc.State == 0) { // '<<' encountered
 					HereDoc.State = 1;
@@ -416,11 +426,17 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 						i++;
 						ch = chNext;
 						chNext = chNext2;
-					} else if (isalnum(chNext) || chNext == '_') { // an unquoted here-doc delimiter
-					}
-					else if (isspacechar(chNext)) { // deprecated here-doc delimiter || TODO: left shift operator
-					}
-					else { // TODO: ???
+					} else if (isdigit(chNext)) { // left shift operator if next char is a digit
+						styler.ColourTo(i, SCE_PL_OPERATOR);
+						state = SCE_PL_DEFAULT;
+						HereDoc.State = 0;
+					} else if (isalpha(chNext) || chNext == '_') { // an unquoted here-doc delimiter
+						// single word identifier, no special handling
+					} else if (isspacechar(chNext)) { // deprecated here-doc delimiter || left shift operator
+						styler.ColourTo(i, SCE_PL_OPERATOR);
+						state = SCE_PL_DEFAULT;
+						HereDoc.State = 0;
+					} else { // TODO: ???
 					}
 
 				} else if (HereDoc.State == 1) { // collect the delimiter
