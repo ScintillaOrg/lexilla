@@ -37,6 +37,8 @@
 
 #if GTK_MAJOR_VERSION >= 2
 #define USE_PANGO 1
+#include <iconv.h>
+const iconv_t iconvhBad = (iconv_t)(-1);
 #endif
 
 #ifdef _MSC_VER
@@ -106,6 +108,7 @@ public:
 	GdkFont *pfont;
 #ifdef USE_PANGO
 	PangoFontDescription *pfd;
+	int characterSet;
 #endif
 	FontHandle(GdkFont *pfont_) {
 		et = singleByte;
@@ -113,15 +116,17 @@ public:
 		pfont = pfont_;
 #ifdef USE_PANGO
 		pfd = 0;
+		characterSet = -1;
 #endif
 		ResetWidths(et);
 	}
 #ifdef USE_PANGO
-	FontHandle(PangoFontDescription *pfd_) {
+	FontHandle(PangoFontDescription *pfd_, int characterSet_) {
 		et = singleByte;
 		ascent = 0;
 		pfont = 0;
 		pfd = pfd_;
+		characterSet = characterSet_;
 		ResetWidths(et);
 	}
 #endif
@@ -496,7 +501,7 @@ FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
 			pango_font_description_set_size(pfd, size * PANGO_SCALE);
 			pango_font_description_set_weight(pfd, bold ? PANGO_WEIGHT_BOLD : PANGO_WEIGHT_NORMAL);
 			pango_font_description_set_style(pfd, italic ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
-			return new FontHandle(pfd);
+			return new FontHandle(pfd, characterSet);
 		}
 	}
 #endif
@@ -664,6 +669,9 @@ class SurfaceImpl : public Surface {
 #ifdef USE_PANGO
 	PangoContext *pcontext;
 	PangoLayout *layout;
+	iconv_t iconvh;
+	int characterSet;
+	void SetIconv(int characterSet_);
 #endif
 public:
 	SurfaceImpl();
@@ -710,10 +718,71 @@ public:
 	void SetDBCSMode(int codePage);
 };
 
+#ifdef USE_PANGO
+
+static const char *CharacterSetID(int characterSet) {
+	switch (characterSet) {
+	case SC_CHARSET_ANSI:
+		return "ASCII";
+	case SC_CHARSET_DEFAULT:
+		return "LATIN1";
+	case SC_CHARSET_BALTIC:
+		return "BALTIC";
+	case SC_CHARSET_CHINESEBIG5:
+		return "BIG-5";
+	case SC_CHARSET_EASTEUROPE:
+		return "ISO8859-2";
+	case SC_CHARSET_GB2312:
+		return "GB2312";
+	case SC_CHARSET_GREEK:
+		return "ISO8859-7";
+	case SC_CHARSET_HANGUL:
+		return "";
+	case SC_CHARSET_MAC:
+		return "MACINTOSH";
+	case SC_CHARSET_OEM:
+		return "ASCII";
+	case SC_CHARSET_RUSSIAN:
+		return "KOI8-R";
+	case SC_CHARSET_SHIFTJIS:
+		return "SHIFT-JIS";
+	case SC_CHARSET_SYMBOL:
+		return "";
+	case SC_CHARSET_TURKISH:
+		return "ISO8859-9";
+	case SC_CHARSET_JOHAB:
+		return "JOHAB";
+	case SC_CHARSET_HEBREW:
+		return "ISO8859-8";
+	case SC_CHARSET_ARABIC:
+		return "ISO8859-6";
+	case SC_CHARSET_VIETNAMESE:
+		return "";
+	case SC_CHARSET_THAI:
+		return "ISO8859-1";
+	default:
+		return "";
+	}
+}
+
+void SurfaceImpl::SetIconv(int characterSet_) {
+	if (characterSet != characterSet_) {
+		if (iconvh != iconvhBad)
+			iconv_close(iconvh);
+		iconvh = iconvhBad;
+		characterSet = characterSet_;
+		const char *source = CharacterSetID(characterSet);
+		if (*source) {
+			iconvh = iconv_open("UTF8", source);
+		}
+	}
+}
+#endif
+
 SurfaceImpl::SurfaceImpl() : et(singleByte), drawable(0), gc(0), ppixmap(0),
 x(0), y(0), inited(false), createdGC(false)
 #ifdef USE_PANGO
-, pcontext(0), layout(0)
+, pcontext(0), layout(0), iconvh(iconvhBad), characterSet(-1)
 #endif
 {
 }
@@ -723,6 +792,7 @@ SurfaceImpl::~SurfaceImpl() {
 }
 
 void SurfaceImpl::Release() {
+	et = singleByte;
 	drawable = 0;
 	if (createdGC) {
 		createdGC = false;
@@ -739,6 +809,10 @@ void SurfaceImpl::Release() {
 	if (pcontext)
 		g_object_unref(pcontext);
 	pcontext = 0;
+	if (iconvh != iconvhBad)
+		iconv_close(iconvh);
+	iconvh = iconvhBad;
+	characterSet = -1;
 #endif
 	x = 0;
 	y = 0;
@@ -957,6 +1031,22 @@ static size_t UTF8Len(char ch) {
 }
 
 #ifdef USE_PANGO
+static char *UTF8FromIconv(iconv_t iconvh, const char *s, int len) {
+	if (iconvh != ((iconv_t)(-1))) {
+		char *utfForm = new char[len*3+1];
+		char *pin = const_cast<char *>(s);
+		size_t inLeft = len;
+		char *pout = utfForm;
+		size_t outLeft = len*3+1;
+		size_t conversions = iconv(iconvh, &pin, &inLeft, &pout, &outLeft);
+		if (conversions != ((size_t)(-1))) {
+			*pout = '\0';
+			return utfForm;
+		}
+		delete []utfForm;
+	}
+	return 0;
+}
 
 static char *UTF8FromLatin1(const char *s, int len) {
 	char *utfForm = new char[len*2+1];
@@ -1032,14 +1122,17 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 					// Convert to utf8
 					utfForm = UTF8FromDBCS(s, len);
 				}
+				if (!utfForm) {	// DBCS failed so treat as iconv
+					SetIconv(PFont(font_)->characterSet);
+					utfForm = UTF8FromIconv(iconvh, s, len);
+				}
 				if (!utfForm) {	// DBCS failed so treat as locale
 					gsize w; // stub
 					utfForm = g_locale_to_utf8(s, len, NULL, &w, NULL);
-					useGFree = true;
+					useGFree = static_cast<bool>(utfForm);
 				};
 				if (!utfForm) {	// g_locale_to_utf8 failed so treat as Latin1
 					utfForm = UTF8FromLatin1(s, len);
-					useGFree = false;
 				}
 				pango_layout_set_text(layout, utfForm, strlen(utfForm));
 			}
@@ -1172,14 +1265,17 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 					delete []wctext;
 				}
 				if (wclen < 1 ) {
-					// Either DBCS conversion failed or is 8 bit string so
-					// try as current locale and if that fails treat as Latin1.
-					gsize w; // stub
-					char *utfForm = g_locale_to_utf8(s, len, NULL, &w, NULL);
-					bool useGFree = true;
+					// Either Latin1 or DBCS conversion failed so treat as Latin1.
+					bool useGFree = false;
+					SetIconv(PFont(font_)->characterSet);
+					char *utfForm = UTF8FromIconv(iconvh, s, len);
+					if (!utfForm) {	// iconv failed so treat as locale
+						gsize w; // stub
+						utfForm = g_locale_to_utf8(s, len, NULL, &w, NULL);
+						useGFree = static_cast<bool>(utfForm);
+					}
 					if (!utfForm) {
 						utfForm = UTF8FromLatin1(s, len);
-						useGFree = false;
 					}
 					pango_layout_set_text(layout, utfForm, strlen(utfForm));
 					int i = 0;
@@ -1268,17 +1364,20 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 					// Convert to utf8
 					utfForm = UTF8FromDBCS(s, len);
 				}
-				if (!utfForm) {	// DBCS failed so treat as locale
+				if (!utfForm) {	// DBCS failed so treat as iconv
+					SetIconv(PFont(font_)->characterSet);
+					utfForm = UTF8FromIconv(iconvh, s, len);
+				}
+				if (!utfForm) {	// iconv failed so treat as locale
 					gsize w;
 					utfForm = g_locale_to_utf8(s, len, NULL, &w, NULL);
-					useGFree = true;
+					useGFree = static_cast<bool>(utfForm);
 				};
 				if (!utfForm) {	// g_locale_to_utf8 failed so treat as Latin1
 					utfForm = UTF8FromLatin1(s, len);
-					useGFree = false;
 				}
 				pango_layout_set_text(layout, utfForm, strlen(utfForm));
-				// TODO: len = strlen(utfForm)
+				len = strlen(utfForm)
 			}
 			pango_layout_index_to_pos(layout, len, &pos);
 			int width = PANGO_PIXELS(pos.x);
