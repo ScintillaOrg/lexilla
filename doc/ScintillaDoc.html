@@ -2872,6 +2872,7 @@ struct TextToFind {
      <a class="message" href="#SCI_AUTOCGETSEPARATOR">SCI_AUTOCGETSEPARATOR</a><br />
      <a class="message" href="#SCI_AUTOCSELECT">SCI_AUTOCSELECT(&lt;unused&gt;, const char
     *select)</a><br />
+     <a class="message" href="#SCI_AUTOCGETCURRENT">SCI_AUTOCGETCURRENT</a><br />
      <a class="message" href="#SCI_AUTOCSETCANCELATSTART">SCI_AUTOCSETCANCELATSTART(bool
     cancel)</a><br />
      <a class="message" href="#SCI_AUTOCGETCANCELATSTART">SCI_AUTOCGETCANCELATSTART</a><br />
@@ -2937,6 +2938,7 @@ struct TextToFind {
     <code>SCI_AUTOCSHOW</code> list. The default is the space character.</p>
 
     <p><b id="SCI_AUTOCSELECT">SCI_AUTOCSELECT(&lt;unused&gt;, const char *select)</b><br />
+     <b id="SCI_AUTOCGETCURRENT">SCI_AUTOCGETCURRENT</b><br />
      This message selects an item in the autocompletion list. It searches the list of words for the
     first that matches <code>select</code>. By default, comparisons are case sensitive, but you can
     change this with <a class="message"
@@ -2945,7 +2947,9 @@ struct TextToFind {
     will match "Frederick" if this is the first item in the list that begins with "Fred". If an
     item is found, it is selected. If the item is not found, the autocompletion list closes if
     auto-hide is true (see <a class="message"
-    href="#SCI_AUTOCSETAUTOHIDE"><code>SCI_AUTOCSETAUTOHIDE</code></a>).</p>
+    href="#SCI_AUTOCSETAUTOHIDE"><code>SCI_AUTOCSETAUTOHIDE</code></a>).<br />
+    The current selection can be retrieved with <code>SCI_AUTOCGETCURRENT</code>
+    </p>
 
     <p><b id="SCI_AUTOCSETCANCELATSTART">SCI_AUTOCSETCANCELATSTART(bool cancel)</b><br />
      <b id="SCI_AUTOCGETCANCELATSTART">SCI_AUTOCGETCANCELATSTART</b><br />
