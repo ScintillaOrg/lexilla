@@ -240,8 +240,7 @@ void LexerManager::EnumerateLexers() {
 	}
 
 	SString sPattern(sPath);
-
-	sPattern.append("*.lexer");
+	sPattern += "*.lexer";
 
 	hFind = FindFirstFile(sPattern.c_str(), &FindFileData);
 	if (hFind != INVALID_HANDLE_VALUE) {
