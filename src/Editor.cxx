@@ -4282,7 +4282,8 @@ void Editor::Indent(bool forwards) {
 			        pdoc->tabIndents) {
 				int indentation = pdoc->GetLineIndentation(lineCurrentPos);
 				int indentationStep = (pdoc->indentInChars ? pdoc->indentInChars : pdoc->tabInChars);
-				pdoc->SetLineIndentation(lineCurrentPos, indentation + indentationStep);
+				//~ pdoc->SetLineIndentation(lineCurrentPos, indentation + indentationStep);
+				pdoc->SetLineIndentation(lineCurrentPos, indentation + indentationStep - indentation % indentationStep);
 				SetEmptySelection(pdoc->GetLineIndentPosition(lineCurrentPos));
 			} else {
 				if (pdoc->useTabs) {
