@@ -513,10 +513,10 @@ const char *WordList::GetNearestWord(const char *wordStart, int searchLen /*= -1
 			cond = strncasecmp(wordStart, word, searchLen);
 			if (!cond && nonFuncChar(word[searchLen])) // maybe there should be a "non-word character" test here?
 				return word; // result must not be freed with free()
+			else if (cond >= 0)
+				start = pivot + 1;
 			else if (cond < 0)
 				end = pivot - 1;
-			else if (cond > 0)
-				start = pivot + 1;
 		}
 	else // preserve the letter case
 		while (start <= end) { // binary searching loop
