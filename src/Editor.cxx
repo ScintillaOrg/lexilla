@@ -2366,7 +2366,9 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		if (AbandonPaint()) {
 			return;
 		}
+		RefreshPixMaps(surfaceWindow);	// In case pixmaps invalidated by scrollbar change
 	}
+	PLATFORM_ASSERT(pixmapSelPattern->Initialised());
 
 	PRectangle rcRightMargin = rcClient;
 	rcRightMargin.left = rcRightMargin.right - vs.rightMarginWidth;
@@ -2395,6 +2397,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		Surface *surface = surfaceWindow;
 		if (bufferedDraw) {
 			surface = pixmapLine;
+			PLATFORM_ASSERT(pixmapLine->Initialised());
 		}
 		surface->SetUnicodeMode(IsUnicodeMode());
 		surface->SetDBCSMode(CodePage());
