@@ -65,7 +65,6 @@ public:
 		Accessor(id_,props_,offset_), validLen(0), chFlags(0) {}
 	void StartAt(unsigned int start, char chMask=31);
 	void SetFlags(char chFlags_, char chWhile_) {chFlags = chFlags_; chWhile = chWhile_; };
-	void ColourSegment(unsigned int start, unsigned int end, int chAttr);
 	unsigned int GetStartSegment() { return startSeg; }
 	void StartSegment(unsigned int pos);
 	void ColourTo(unsigned int pos, int chAttr);

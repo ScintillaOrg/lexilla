@@ -63,35 +63,31 @@ void StylingContext::StartAt(unsigned int start, char chMask) {
 	Platform::SendScintilla(id, SCI_STARTSTYLING, start, chMask);
 }
 
-void StylingContext::ColourSegment(unsigned int start, unsigned int end, int chAttr) {
-	// Only perform styling if non empty range
-	if (end != start - 1) {
-		if (end < start) {
-			Platform::DebugPrintf("Bad colour positions %d - %d\n", start, end);
-		}
-
-		if (validLen + (end - start + 1) >= bufferSize)
-			Flush();
-		if (validLen + (end - start + 1) >= bufferSize) {
-			// Too big for buffer so send directly
-			Platform::SendScintilla(id, SCI_SETSTYLING, end - start + 1, chAttr);
-		} else {
-			if (chAttr != chWhile)
-				chFlags = 0;
-			chAttr |= chFlags;
-			for (unsigned int i = start; i <= end; i++) {
-				styleBuf[validLen++] = chAttr;
-			}
-		}
-	}
-}
-
 void StylingContext::StartSegment(unsigned int pos) {
 	startSeg = pos;
 }
 
 void StylingContext::ColourTo(unsigned int pos, int chAttr) {
-	ColourSegment(startSeg, pos, chAttr);
+	// Only perform styling if non empty range
+	if (pos != startSeg - 1) {
+		if (pos < startSeg) {
+			Platform::DebugPrintf("Bad colour positions %d - %d\n", startSeg, pos);
+		}
+
+		if (validLen + (pos - startSeg + 1) >= bufferSize)
+			Flush();
+		if (validLen + (pos - startSeg + 1) >= bufferSize) {
+			// Too big for buffer so send directly
+			Platform::SendScintilla(id, SCI_SETSTYLING, pos - startSeg + 1, chAttr);
+		} else {
+			if (chAttr != chWhile)
+				chFlags = 0;
+			chAttr |= chFlags;
+			for (unsigned int i = startSeg; i <= pos; i++) {
+				styleBuf[validLen++] = chAttr;
+			}
+		}
+	}
 	startSeg = pos+1;
 }
 
