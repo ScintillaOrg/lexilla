@@ -30,6 +30,9 @@
  * Modification history:
  *
  * $Log$
+ * Revision 1.7  2002/09/28 00:33:28  nyamatongwe
+ * Fixed problem with character ranges caused by expansion to 8 bits.
+ *
  * Revision 1.6  2001/04/29 13:32:10  nyamatongwe
  * Addition of new target methods - versions of ReplaceTarget that take counted
  * strings to allow for nulls, SearchInTarget and Get/SetSearchFlags to use a
@@ -685,7 +688,7 @@ static char chrtyp[MAXCHR] = {
 
 #define ANYSKIP	2 	/* [CLO] ANY END ...	     */
 #define CHRSKIP	3	/* [CLO] CHR chr END ...     */
-#define CCLSKIP 18	/* [CLO] CCL 16bytes END ... */
+#define CCLSKIP 34	/* [CLO] CCL 32bytes END ... */
 
 int RESearch::PMatch(CharacterIndexer &ci, int lp, int endp, char *ap) {
 	int op, c, n;
