@@ -78,7 +78,7 @@ private:
 	virtual void SetVerticalScrollPos();
 	virtual void SetHorizontalScrollPos();
 	virtual bool ModifyScrollBars(int nMax, int nPage);
-	void ScintillaGTK::ReconfigureScrollBars();
+	void ReconfigureScrollBars();
 	virtual void NotifyChange();
 	virtual void NotifyFocus(bool focus);
 	virtual void NotifyParent(SCNotification scn);
@@ -504,7 +504,7 @@ void ScintillaGTK::SetTicking(bool on) {
 	if (timer.ticking != on) {
 		timer.ticking = on;
 		if (timer.ticking) {
-			timer.tickerID = gtk_timeout_add(timer.tickSize, TimeOut, this);
+                        timer.tickerID = gtk_timeout_add(timer.tickSize, (GtkFunction)TimeOut, this);
 		} else {
 			gtk_timeout_remove(timer.tickerID);
 		}
@@ -1243,8 +1243,10 @@ guint scintilla_get_type() {
     		sizeof (ScintillaClass),
     		(GtkClassInitFunc) scintilla_class_init,
     		(GtkObjectInitFunc) scintilla_init,
-    		(GtkArgSetFunc) NULL,
-    		(GtkArgGetFunc) NULL,
+    		//(GtkArgSetFunc) NULL,
+    		//(GtkArgGetFunc) NULL,
+		(gpointer) NULL,
+		(gpointer) NULL,
     		0
 		};
 

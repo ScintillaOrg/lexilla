@@ -315,7 +315,11 @@ void PropSet::ReadFromMemory(const char *data, int len, const char *directoryFor
 
 void PropSet::Read(const char *filename, const char *directoryForImports) {
 	char propsData[60000];
+#ifdef __vms
+	FILE *rcfile = fopen(filename, "r");
+#else
 	FILE *rcfile = fopen(filename, "rb");
+#endif
 	if (rcfile) {
 		int lenFile = fread(propsData, 1, sizeof(propsData), rcfile);
 		fclose(rcfile);

@@ -43,3 +43,47 @@ void LexerModule::Colourise(unsigned int startPos, int lengthDoc, int initStyle,
 		styler.ColourTo(startPos + lengthDoc - 1, 0);
 	}
 }
+
+#ifdef __vms
+
+// The following code forces a reference to all of the Scintilla lexers.
+// If we don't do something like this, then the linker tends to "optimize"
+// them away. (eric@sourcegear.com)
+
+// Taken from wxWindow's stc.cpp. Walter.
+
+int wxForceScintillaLexers(void) {
+  extern LexerModule lmCPP;
+  extern LexerModule lmHTML;
+  extern LexerModule lmXML;
+  extern LexerModule lmProps;
+  extern LexerModule lmErrorList;
+  extern LexerModule lmMake;
+  extern LexerModule lmBatch;
+  extern LexerModule lmPerl;
+  extern LexerModule lmPython;
+  extern LexerModule lmSQL;
+  extern LexerModule lmVB;
+
+  if (
+      &lmCPP
+      && &lmHTML
+      && &lmXML
+      && &lmProps
+      && &lmErrorList
+      && &lmMake
+      && &lmBatch
+      && &lmPerl
+      && &lmPython
+      && &lmSQL
+      && &lmVB
+      )
+    {
+      return 1;
+    }
+  else
+    {
+      return 0;
+    }
+}
+#endif
