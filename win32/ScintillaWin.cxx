@@ -171,10 +171,13 @@ class ScintillaWin :
 	static sptr_t PASCAL CTWndProc(
 		    HWND hWnd, UINT iMessage, WPARAM wParam, sptr_t lParam);
 
+	enum { invalidTimerID, standardTimerID, idleTimerID };
+
 	virtual void StartDrag();
 	sptr_t WndPaint(uptr_t wParam);
 	sptr_t HandleComposition(uptr_t wParam, sptr_t lParam);
 	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
+	virtual bool SetIdle(bool on);
 	virtual void SetTicking(bool on);
 	virtual void SetMouseCapture(bool on);
 	virtual bool HaveMouseCapture();
@@ -282,6 +285,7 @@ void ScintillaWin::Initialise() {
 void ScintillaWin::Finalise() {
 	ScintillaBase::Finalise();
 	SetTicking(false);
+	SetIdle(false);
 	::RevokeDragDrop(MainHWND());
 	::OleUninitialize();
 }
@@ -577,7 +581,14 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		return 0;
 
 	case WM_TIMER:
-		Tick();
+		if (wParam == standardTimerID && timer.ticking) {
+			Tick();
+		} else if (wParam == idleTimerID && idler.state) {
+			if (!Idle())
+				SetIdle(false);
+		} else {
+			return 1;
+		}
 		break;
 
 	case WM_GETMINMAXINFO:
@@ -887,17 +898,31 @@ void ScintillaWin::SetTicking(bool on) {
 	if (timer.ticking != on) {
 		timer.ticking = on;
 		if (timer.ticking) {
-			timer.tickerID = reinterpret_cast<TickerID>(1);
-			if (::SetTimer(MainHWND(), reinterpret_cast<uptr_t>(timer.tickerID), timer.tickSize, NULL) == 0) {
-				timer.ticking = false;
-				timer.tickerID = 0; 
-			}
+			timer.tickerID = ::SetTimer(MainHWND(), standardTimerID, timer.tickSize, NULL)
+				? reinterpret_cast<TickerID>(standardTimerID) : 0;
 		} else {
 			::KillTimer(MainHWND(), reinterpret_cast<uptr_t>(timer.tickerID));
 			timer.tickerID = 0;
 		}
 	}
 	timer.ticksToWait = caret.period;
+}
+
+bool ScintillaWin::SetIdle(bool on) {
+	// On Win32 the Idler is implemented as a Timer on the Scintilla window.  This
+	// takes advantage of the fact that WM_TIMER messages are very low priority,
+	// and are only posted when the message queue is empty, i.e. during idle time.
+	if (idler.state != on) {
+		if (on) {
+			idler.idlerID = ::SetTimer(MainHWND(), idleTimerID, 20, NULL)
+				? reinterpret_cast<IdlerID>(idleTimerID) : 0;
+		} else {
+			::KillTimer(MainHWND(), reinterpret_cast<uptr_t>(idler.idlerID));
+			idler.idlerID = 0;
+		}
+		idler.state = idler.idlerID != 0;
+	}
+	return idler.state;
 }
 
 void ScintillaWin::SetMouseCapture(bool on) {

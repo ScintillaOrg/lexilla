@@ -380,6 +380,7 @@ Editor::Editor() {
 	wrapWidth = LineLayout::wrapWidthInfinite;
 	docLineLastWrapped = -1;
 	docLastLineToWrap = -1;
+	backgroundWrapEnabled = true;
 
 	hsStart = -1;
 	hsEnd = -1;
@@ -1426,11 +1427,12 @@ void Editor::NeedWrapping(int docLineStartWrapping, int docLineEndWrapping) {
 // condition is called only from idler).
 // Return true if wrapping occurred.
 bool Editor::WrapLines(bool fullWrap, int priorityWrapLineStart) {
-	// If there are any pending wraps do them during idle.
+	// If there are any pending wraps, do them during idle if possible.
 	if (wrapState != eWrapNone) {
 		if (docLineLastWrapped < docLastLineToWrap) {
-			if (!SetIdle(true)) {
-				// If platform does not have Idle events, perform full wrap
+			if (!(backgroundWrapEnabled && SetIdle(true))) {
+				// Background wrapping is disabled, or idle processing
+				// not supported.  A full wrap is required.
 				fullWrap = true;
 			}
 		}
@@ -1441,9 +1443,6 @@ bool Editor::WrapLines(bool fullWrap, int priorityWrapLineStart) {
 			// No priority wrap pending
 			return false;
 		}
-	} else {
-		// If there is no wrap, disable the idle call.
-		SetIdle(false);
 	}
 	int goodTopLine = topLine;
 	bool wrapOccurred = false;
@@ -5050,17 +5049,24 @@ void Editor::Tick() {
 
 bool Editor::Idle() {
 
-	bool idleDone = false;
-	// Wrap lines during idle.
-	WrapLines(false, -1);
-	// No more wrapping
-	if (docLineLastWrapped == docLastLineToWrap)
-		idleDone = true;
+	bool idleDone;
+
+	bool wrappingDone = (wrapState == eWrapNone) || (!backgroundWrapEnabled);
+
+	if (!wrappingDone) {
+		// Wrap lines during idle.
+		WrapLines(false, -1);
+		// No more wrapping
+		if (docLineLastWrapped == docLastLineToWrap)
+			wrappingDone = true;
+	}
 
 	// Add more idle things to do here, but make sure idleDone is
 	// set correctly before the function returns. returning
 	// false will stop calling this idle funtion until SetIdle() is
 	// called again.
+
+	idleDone = wrappingDone; // && thatDone && theOtherThingDone...
 
 	return !idleDone;
 }
