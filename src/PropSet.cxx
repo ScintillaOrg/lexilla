@@ -94,19 +94,26 @@ SString PropSet::Get(const char *key) {
 	}
 }
 
+static bool IncludesVar(const char *value, const char *key) {
+	const char *var = strstr(value, "$(");
+	while (var) {
+		if (isprefix(var+2, key) && (var[2 + strlen(key)] == ')')) {
+			// Found $(key) which would lead to an infinite loop so exit
+			return true;
+		}
+		var = strstr(var + 2, ")");
+		if (var)
+			var = strstr(var + 1, "$(");
+	}
+	return false;
+}
+
 SString PropSet::GetExpanded(const char *key) {
 	SString val = Get(key);
-    const char *var = strstr(val.c_str(), "$(");
-    while (var) {
-        if (isprefix(var+2, key) && (var[2 + strlen(key)] == ')')) {
-            // Found $(key) which would lead to an infinite loop so exit
-            return val;
-        }
-        var = strstr(var + 2, ")");
-        if (var)
-            var = strstr(var + 1, "$(");
-    }
-	return Expand(val.c_str());
+	if (IncludesVar(val.c_str(), key)) 
+		return val;
+	else
+		return Expand(val.c_str());
 }
 
 SString PropSet::Expand(const char *withvars) {
@@ -226,6 +233,8 @@ SString PropSet::GetWild(const char *keybase, const char *filename) {
 	}
 }
 
+// GetNewExpand does not use Expand as it has to use GetWild with the filename for each 
+// variable reference found.
 SString PropSet::GetNewExpand(const char *keybase, const char *filename) {
 	char *base = StringDup(GetWild(keybase, filename).c_str());
 	char *cpvar = strstr(base, "$(");
