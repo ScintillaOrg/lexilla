@@ -86,6 +86,12 @@ public:
 		s = 0;
 		ssize = 0;
 	}
+	void clear(void) {
+		if (s) {
+			*s = '\0';
+		}
+		ssize = 0;
+	}
 	SString &operator=(const SString &source) {
 		if (this != &source) {
 			delete []s;
