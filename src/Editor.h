@@ -45,7 +45,7 @@ public:
 	enum { wrapWidthInfinite = 0x7ffffff };
 	int maxLineLength;
 	int numCharsInLine;
-	enum validLevel { llInvalid, llPositions, llLines } validity;
+	enum validLevel { llInvalid, llCheckTextAndStyle, llPositions, llLines } validity;
 	int xHighlightGuide;
 	bool highlightColumn;
 	int selStart;
@@ -307,6 +307,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int LineFromLocation(Point pt);
 	void SetTopLine(int topLineNew);
 
+	bool AbandonPaint();
 	void RedrawRect(PRectangle rc);
 	void Redraw();
 	void RedrawSelMargin();
