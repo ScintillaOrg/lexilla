@@ -712,21 +712,28 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 			int visibleLine = topLine;
 			int line = cs.DocFromDisplay(visibleLine);
 			int yposScreen = 0;
-			bool needWhiteClosure = false;
+
+			// Work out whether the top line is whitespace located after a 
+			// lessening of fold level which implies a 'fold tail' but which should not
+			// be displayed until the last of a sequence of whitespace.
+			bool needWhiteClosure = false;	
 			int level = pdoc->GetLevel(line);
 			if (level & SC_FOLDLEVELWHITEFLAG) {
-				int lineBack = line-1;
-				while ((lineBack > 0) && (level & SC_FOLDLEVELWHITEFLAG)) {
+				int lineBack = line;
+				int levelPrev = level;
+				while ((lineBack > 0) && (levelPrev & SC_FOLDLEVELWHITEFLAG)) {
 					lineBack--;
-					level = pdoc->GetLevel(lineBack);
+					levelPrev = pdoc->GetLevel(lineBack);
 				}
-				if (!(level & SC_FOLDLEVELHEADERFLAG) && (lineBack > 0)) {
-					int levelPrev = pdoc->GetLevel(lineBack-1);
+				if (!(levelPrev & SC_FOLDLEVELHEADERFLAG)) {
 					if ((level & SC_FOLDLEVELNUMBERMASK) < (levelPrev & SC_FOLDLEVELNUMBERMASK))
 						needWhiteClosure = true;
 				}
 			}
+
 			while ((visibleLine < cs.LinesDisplayed()) && yposScreen < rcMargin.bottom) {
+
+				// Decide which fold indicator should be displayed
 				level = pdoc->GetLevel(line);
 				int levelNext = pdoc->GetLevel(line+1);
 				int marks = pdoc->GetMark(line);
@@ -772,6 +779,7 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 						marks |= 1 << SC_MARKNUM_FOLDERSUB;
 					}
 				}
+
 				marks &= vs.ms[margin].mask;
 				PRectangle rcMarker = rcSelMargin;
 				rcMarker.top = yposScreen;
