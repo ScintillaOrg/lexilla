@@ -1,6 +1,6 @@
 // Scintilla source code edit control
 // PlatGTK.cxx - implementation of platform facilities on GTK+/Linux
-// Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2004 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <string.h>
@@ -37,16 +37,7 @@
 
 #if GTK_MAJOR_VERSION >= 2
 #define USE_PANGO 1
-#include <iconv.h>
-const iconv_t iconvhBad = (iconv_t)(-1);
-// Since various versions of iconv can not agree on whether the src argument
-// is char ** or const char ** provide a templatised adaptor.
-template<typename T>
-size_t iconv_adaptor(size_t(*f_iconv)(iconv_t, T, size_t *, char **, size_t *),
-		iconv_t cd, char** src, size_t *srcleft,
-		char **dst, size_t *dstleft) {
-	return f_iconv(cd, (T)src, srcleft, dst, dstleft);
-}
+#include "Converter.h"
 #endif
 
 #ifdef _MSC_VER
@@ -677,9 +668,9 @@ class SurfaceImpl : public Surface {
 #ifdef USE_PANGO
 	PangoContext *pcontext;
 	PangoLayout *layout;
-	iconv_t iconvh;
+	Converter conv;
 	int characterSet;
-	void SetIconv(int characterSet_);
+	void SetConverter(int characterSet_);
 #endif
 public:
 	SurfaceImpl();
@@ -773,16 +764,10 @@ const char *CharacterSetID(int characterSet) {
 
 #ifdef USE_PANGO
 
-void SurfaceImpl::SetIconv(int characterSet_) {
+void SurfaceImpl::SetConverter(int characterSet_) {
 	if (characterSet != characterSet_) {
-		if (iconvh != iconvhBad)
-			iconv_close(iconvh);
-		iconvh = iconvhBad;
 		characterSet = characterSet_;
-		const char *source = CharacterSetID(characterSet);
-		if (*source) {
-			iconvh = iconv_open("UTF-8", source);
-		}
+		conv.Open("UTF-8", CharacterSetID(characterSet));
 	}
 }
 #endif
@@ -790,7 +775,7 @@ void SurfaceImpl::SetIconv(int characterSet_) {
 SurfaceImpl::SurfaceImpl() : et(singleByte), drawable(0), gc(0), ppixmap(0),
 x(0), y(0), inited(false), createdGC(false)
 #ifdef USE_PANGO
-, pcontext(0), layout(0), iconvh(iconvhBad), characterSet(-1)
+, pcontext(0), layout(0), characterSet(-1)
 #endif
 {
 }
@@ -817,9 +802,7 @@ void SurfaceImpl::Release() {
 	if (pcontext)
 		g_object_unref(pcontext);
 	pcontext = 0;
-	if (iconvh != iconvhBad)
-		iconv_close(iconvh);
-	iconvh = iconvhBad;
+	conv.Close();
 	characterSet = -1;
 #endif
 	x = 0;
@@ -1039,14 +1022,14 @@ static size_t UTF8Len(char ch) {
 }
 
 #ifdef USE_PANGO
-static char *UTF8FromIconv(iconv_t iconvh, const char *s, int len) {
-	if (iconvh != ((iconv_t)(-1))) {
+static char *UTF8FromIconv(const Converter &conv, const char *s, int len) {
+	if (conv) {
 		char *utfForm = new char[len*3+1];
 		char *pin = const_cast<char *>(s);
 		size_t inLeft = len;
 		char *pout = utfForm;
 		size_t outLeft = len*3+1;
-		size_t conversions = iconv_adaptor(iconv, iconvh, &pin, &inLeft, &pout, &outLeft);
+		size_t conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
 		if (conversions != ((size_t)(-1))) {
 			*pout = '\0';
 			return utfForm;
@@ -1056,14 +1039,16 @@ static char *UTF8FromIconv(iconv_t iconvh, const char *s, int len) {
 	return 0;
 }
 
-static size_t MultiByteLenFromIconv(iconv_t iconvh, const char *s, size_t len) {
+// Work out how many bytes are in a character by trying to convert using iconv,
+// returning the first length that succeeds.
+static size_t MultiByteLenFromIconv(const Converter &conv, const char *s, size_t len) {
 	for (size_t lenMB=1; (lenMB<4) && (lenMB <= len); lenMB++) {
 		char wcForm[2];
 		char *pin = const_cast<char *>(s);
 		size_t inLeft = lenMB;
 		char *pout = wcForm;
 		size_t outLeft = 2;
-		size_t conversions = iconv_adaptor(iconv, iconvh, &pin, &inLeft, &pout, &outLeft);
+		size_t conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
 		if (conversions != ((size_t)(-1))) {
 			return lenMB;
 		}
@@ -1154,8 +1139,8 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 				pango_layout_set_text(layout, s, len);
 			} else {
 				if (!utfForm) {
-					SetIconv(PFont(font_)->characterSet);
-					utfForm = UTF8FromIconv(iconvh, s, len);
+					SetConverter(PFont(font_)->characterSet);
+					utfForm = UTF8FromIconv(conv, s, len);
 				}
 				if (!utfForm) {	// iconv failed so try DBCS if DBCS mode
 					if (et == dbcs) {
@@ -1279,14 +1264,13 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 			} else {
 				int positionsCalculated = 0;
 				if (et == dbcs) {
-					SetIconv(PFont(font_)->characterSet);
-					char *utfForm = UTF8FromIconv(iconvh, s, len);
+					SetConverter(PFont(font_)->characterSet);
+					char *utfForm = UTF8FromIconv(conv, s, len);
 					if (utfForm) {
 						// Convert to UTF-8 so can ask Pango for widths, then
 						// Loop through UTF-8 and DBCS forms, taking account of different
 						// character byte lengths.
-						iconv_t iconvhMeasure =
-							iconv_open("UCS-2", CharacterSetID(characterSet));
+						Converter convMeasure("UCS-2", CharacterSetID(characterSet));
 						pango_layout_set_text(layout, utfForm, strlen(utfForm));
 						int i = 0;
 						int utfIndex = 0;
@@ -1296,7 +1280,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 							int position = PANGO_PIXELS(pos.x);
 							int utfIndexNext = pango_layout_iter_get_index (iter);
 							while (utfIndex < utfIndexNext) {
-								size_t lenChar = MultiByteLenFromIconv(iconvhMeasure, s+i, len-i);
+								size_t lenChar = MultiByteLenFromIconv(convMeasure, s+i, len-i);
 								//size_t lenChar = mblen(s+i, MB_CUR_MAX);
 								while (lenChar--) {
 									positions[i++] = position;
@@ -1307,14 +1291,13 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 						}
 						pango_layout_iter_free (iter);
 						delete []utfForm;
-						iconv_close(iconvhMeasure);
 					}
 				}
 				if (positionsCalculated < 1 ) {
 					// Either Latin1 or DBCS conversion failed so treat as Latin1.
 					bool useGFree = false;
-					SetIconv(PFont(font_)->characterSet);
-					char *utfForm = UTF8FromIconv(iconvh, s, len);
+					SetConverter(PFont(font_)->characterSet);
+					char *utfForm = UTF8FromIconv(conv, s, len);
 					if (!utfForm) {
 						utfForm = UTF8FromLatin1(s, len);
 					}
@@ -1406,8 +1389,8 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 					utfForm = UTF8FromDBCS(s, len);
 				}
 				if (!utfForm) {	// DBCS failed so treat as iconv
-					SetIconv(PFont(font_)->characterSet);
-					utfForm = UTF8FromIconv(iconvh, s, len);
+					SetConverter(PFont(font_)->characterSet);
+					utfForm = UTF8FromIconv(conv, s, len);
 				}
 				if (!utfForm) {	// g_locale_to_utf8 failed so treat as Latin1
 					utfForm = UTF8FromLatin1(s, len);
@@ -2407,10 +2390,8 @@ int Platform::DBCSCharLength(int codePage, const char *s) {
 		// Experimental and disabled code - change 999932 to 932 above to
 		// enable locale avoiding but expensive character length determination.
 		// Avoid locale with explicit use of iconv
-		iconv_t iconvhMeasure =
-			iconv_open("UCS-2", CharacterSetID(SC_CHARSET_SHIFTJIS));
-		size_t lenChar = MultiByteLenFromIconv(iconvhMeasure, s, strlen(s));
-		iconv_close(iconvhMeasure);
+		Converter convMeasure("UCS-2", CharacterSetID(SC_CHARSET_SHIFTJIS));
+		size_t lenChar = MultiByteLenFromIconv(convMeasure, s, strlen(s));
 		return lenChar;
 	} else {
 		int bytes = mblen(s, MB_CUR_MAX);

@@ -1,6 +1,6 @@
 // Scintilla source code edit control
 // ScintillaGTK.cxx - GTK+ specific subclass of ScintillaBase
-// Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2004 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <stdlib.h>
@@ -55,15 +55,7 @@
 #define INTERNATIONAL_INPUT
 
 #if !PLAT_GTK_WIN32
-#include <iconv.h>
-// Since various versions of iconv can not agree on whether the src argument
-// is char ** or const char ** provide a templatised adaptor.
-template<typename T>
-size_t iconv_adaptor(size_t(*f_iconv)(iconv_t, T, size_t *, char **, size_t *),
-		iconv_t cd, char** src, size_t *srcleft,
-		char **dst, size_t *dstleft) {
-	return f_iconv(cd, (T)src, srcleft, dst, dstleft);
-}
+#include "Converter.h"
 #endif
 
 #ifdef _MSC_VER
@@ -1056,15 +1048,14 @@ int ScintillaGTK::KeyDefault(int key, int modifiers) {
 				} else {
 					const char *source = CharacterSetID();
 					if (*source) {
-						iconv_t iconvh = iconv_open(source, "UTF-8");
-						if (iconvh != ((iconv_t)(-1))) {
+						Converter conv(source, "UTF-8");
+						if (conv) {
 							char localeVal[4]="\0\0\0";
 							char *pin = utfVal;
 							size_t inLeft = strlen(utfVal);
 							char *pout = localeVal;
 							size_t outLeft = sizeof(localeVal);
-							size_t conversions = iconv_adaptor(iconv, iconvh, &pin, &inLeft, &pout, &outLeft);
-							iconv_close(iconvh);
+							size_t conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
 							if (conversions != ((size_t)(-1))) {
 								*pout = '\0';
 								for (int i=0; localeVal[i]; i++) {
@@ -1195,14 +1186,14 @@ void ScintillaGTK::ClaimSelection() {
 static char *ConvertText(size_t *lenResult, char *s, size_t len, const char *charSetDest, const char *charSetSource) {
 	*lenResult = 0;
 	char *destForm = 0;
-	iconv_t iconvh = iconv_open(charSetDest, charSetSource);
-	if (iconvh != ((iconv_t)(-1))) {
+	Converter conv(charSetDest, charSetSource);
+	if (conv) {
 		destForm = new char[len*3+1];
 		char *pin = s;
 		size_t inLeft = len;
 		char *pout = destForm;
 		size_t outLeft = len*3+1;
-		size_t conversions = iconv_adaptor(iconv, iconvh, &pin, &inLeft, &pout, &outLeft);
+		size_t conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
 		if (conversions == ((size_t)(-1))) {
 fprintf(stderr, "iconv failed for %s\n", static_cast<char *>(s));
 			delete []destForm;
@@ -1212,7 +1203,6 @@ fprintf(stderr, "iconv failed for %s\n", static_cast<char *>(s));
 			*pout = '\0';
 			*lenResult = pout - destForm;
 		}
-		iconv_close(iconvh);
 	} else {
 //fprintf(stderr, "Can not iconv %s %s\n", charSetDest, charSetSource);
 	}
