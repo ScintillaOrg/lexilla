@@ -43,8 +43,23 @@ public:
 		back = ColourDesired(0xff,0xff,0xff);
 		pxpm = NULL;
 	}
+	LineMarker(const LineMarker &) {
+		// Defined to avoid pxpm being blindly copied, not as real copy constructor
+		markType = SC_MARK_CIRCLE;
+		fore = ColourDesired(0,0,0);
+		back = ColourDesired(0xff,0xff,0xff);
+		pxpm = NULL;
+	}
 	~LineMarker() {
 		delete pxpm;
+	}
+	LineMarker &operator=(const LineMarker &) {
+		// Defined to avoid pxpm being blindly copied, not as real assignment operator
+		markType = SC_MARK_CIRCLE;
+		fore = ColourDesired(0,0,0);
+		back = ColourDesired(0xff,0xff,0xff);
+		pxpm = NULL;
+		return *this;
 	}
 	void RefreshColourPalette(Palette &pal, bool want);
 	void SetXPM(const char *textForm);
