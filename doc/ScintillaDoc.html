@@ -220,8 +220,6 @@ SCI_LINEFROMPOSITION(int position)
 SCI_POSITIONFROMLINE(int line)
 SCI_GETLINEENDPOSITION(int line)
 SCI_LINELENGTH(int line)
-SCI_LINESCROLL(int column, int line)
-SCI_SCROLLCARET
 SCI_POSITIONFROMPOINT(int x, int y)
 SCI_POSITIONFROMPOINTCLOSE(int x, int y)
 SCI_POINTXFROMPOSITION(&lt;unused&gt;, int position)
@@ -240,12 +238,8 @@ SCI_SELECTALL
 SCI_GOTOLINE(int line)
 SCI_GOTOPOS(int position)
 SCI_GETCURLINE(int textlen, char *text)
-SCI_SETCARETPOLICY(int policy, int slop)
-SCI_SETVISIBLEPOLICY(int policy, int slop)
 SCI_LINESONSCREEN
 SCI_SELECTIONISRECTANGLE
-SCI_SETHSCROLLBAR(bool visible)
-SCI_GETHSCROLLBAR
 SCI_MOVECARETINSIDEVIEW
 </pre>
     <p>
@@ -260,6 +254,24 @@ SCI_MOVECARETINSIDEVIEW
        SCI_GETCURLINE retrieves the text of the line containing the caret and returns the position
       within the line of the caret.
     </p>
+    <p>
+    SCI_POSITIONFROMPOINT finds the closest character position to a point and
+    SCI_POSITIONFROMPOINTCLOSE is similar but returns -1 if the point is 
+    outside the window or not close to any characters.
+    </p>
+    <h3>
+       Scrolling and automatic scrolling
+    </h3>
+<pre>
+SCI_LINESCROLL(int column, int line)
+SCI_SCROLLCARET
+SCI_SETCARETPOLICY(int policy, int slop)
+SCI_SETVISIBLEPOLICY(int policy, int slop)
+SCI_SETHSCROLLBAR(bool visible)
+SCI_GETHSCROLLBAR
+SCI_GETXOFFSET
+SCI_SETXOFFSET(int xoffset)
+</pre>
     <p>
       SCI_SETCARETPOLICY can be set to a combination of the flags CARET_SLOP
       and CARET_STRICT to change the automatic vertical positioning of the view
@@ -278,9 +290,7 @@ SCI_MOVECARETINSIDEVIEW
       for the policy parameter.
     </p>
     <p>
-    SCI_POSITIONFROMPOINT finds the closes character position to a point and
-    SCI_POSITIONFROMPOINTCLOSE is similar but returns -1 if the point is 
-    outside the window or not close to any characters.
+      The xoffset is the horizontal scroll position in pixels.
     </p>
     <h3>
        Searching
@@ -744,7 +754,9 @@ SCI_MARKERDELETEHANDLE(int handle)
     <p>
        The marker symbols currently available are SC_MARK_CIRCLE, SC_MARK_ROUNDRECT, SC_MARK_ARROW,
        SC_MARK_SMALLRECT, SC_MARK_SHORTARROW, SC_MARK_EMPTY, SC_MARK_ARROWDOWN, 
-       SC_MARK_MINUS, SC_MARK_PLUS. The SC_MARK_EMPTY symbol is invisible,
+       SC_MARK_MINUS, SC_MARK_PLUS. The SC_MARK_BACKGROUND marker changes the background colour
+       of the line only.
+       The SC_MARK_EMPTY symbol is invisible,
        allowing client code to track the movement of lines. Characters can be used as markers by adding 
        the ASCII value of the character to SC_MARK_CHARACTER.
     </p>
@@ -1093,7 +1105,8 @@ SCI_ENSUREVISIBLEENFORCEPOLICY(int line)
        indentation and in C++ by brace characters. This hierarchy can be represented
        within a Scintilla document object by attaching a numeric level to each line. 
        The initial level of a file is SC_FOLDLEVELBASE to allow unsigned arithmetic
-       on levels.
+       on levels. The SC_FOLDLEVELNUMBERMASK constant can be used to mask
+       out the other bits to reveal the fold level number.
        There 
        are also two bit flags associated with each line. SC_FOLDLEVELWHITEFLAG
        indicates that the line is blank and allows to be treated slightly different then its 
