@@ -378,7 +378,10 @@ void Document::DeleteChars(int pos, int len) {
 			const char *text = cb.DeleteChars(pos * 2, len * 2);
 			if (startSavePoint && cb.IsCollectingUndo())
 				NotifySavePoint(!startSavePoint);
-			ModifiedAt(pos);
+			if (pos < Length())
+				ModifiedAt(pos);
+			else
+				ModifiedAt(pos-1);
 			NotifyModified(
 			    DocModification(
 			        SC_MOD_DELETETEXT | SC_PERFORMED_USER,
