@@ -331,6 +331,14 @@ static int InputCodePage() {
 	return atoi(sCodePage);
 }
 
+#ifndef VK_OEM_2
+static const VK_OEM_2=0xbf;
+static const VK_OEM_3=0xc0;
+static const VK_OEM_4=0xdb;
+static const VK_OEM_5=0xdc;
+static const VK_OEM_6=0xdd;
+#endif
+
 /** Map the key codes to their equivalent SCK_ form. */
 static int KeyTranslate(int keyIn) {
 //PLATFORM_ASSERT(!keyIn);
