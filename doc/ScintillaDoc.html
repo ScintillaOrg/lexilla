@@ -243,6 +243,7 @@ SCI_SELECTIONISRECTANGLE
 SCI_MOVECARETINSIDEVIEW
 SCI_WORDENDPOSITION(int position, bool onlyWordCharacters)
 SCI_WORDSTARTPOSITION(int position, bool onlyWordCharacters)
+SCI_TEXTWIDTH(int stylenumber, char *text)
 </pre>
     <p>
 	Scintilla maintains a selection which stretches between two points, the anchor and the
@@ -260,6 +261,13 @@ SCI_WORDSTARTPOSITION(int position, bool onlyWordCharacters)
 	SCI_POSITIONFROMPOINT finds the closest character position to a point and
 	SCI_POSITIONFROMPOINTCLOSE is similar but returns -1 if the point is 
 	outside the window or not close to any characters.
+    </p>
+    <p>
+	SCI_POINTXFROMPOSITION and SCI_POINTYFROMPOSITION
+	can be used to find the pixel location of text on the display. 
+	SCI_TEXTWIDTH can be used to find the pixel width of a string which 
+	can be used, for example, to decide how wide to make the line number
+	margin in order to display a given number of numerals.
     </p>
     <p>
 	SCI_WORDENDPOSITION and SCI_WORDSTARTPOSITION can be used to find 
@@ -1600,6 +1608,16 @@ SC_TIME_FOREVER
 	SCI_DWELLSTART.
 	If set to SC_TIME_FOREVER, the default, no dwell events will be 
 	generated.
+    </p>
+<pre>
+SCN_ZOOM
+</pre>
+    <p>
+	SCN_ZOOM is generated when the user zooms the display
+	using the keyboard or the SCI_SETZOOM method is called.
+	This notification can be used to recalculate positions, such as the
+	width of the line number margin to maintain sizes in terms of characters
+	rather than pixels.
     </p>
     <h3>
 	Edit messages currently supported by Scintilla which will be 
