@@ -576,9 +576,10 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 #ifdef TOTAL_CONTROL
 		if (displayPopupMenu) {
 			ContextMenu(Point::FromLong(lParam));
+			return 0;
 		}
 #endif
-		break;
+		return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
 
 	case EM_CANPASTE:
 		return CanPaste();
