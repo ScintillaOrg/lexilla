@@ -66,3 +66,6 @@ VS .NET: 	nmake -f scite.mak
 Borland:	make -fscite.mak
 
 An executable SciTE will now be in scite\bin.
+
+The Visual C++ 6.0 project (.dsp) files are no longer supported but are left
+in the download for people that are prepared to update them.
