@@ -436,6 +436,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_CURSORWAIT 3
 #define SCI_SETCURSOR 2386
 #define SCI_GETCURSOR 2387
+#define SCI_SETCONTROLCHARSYMBOL 2388
+#define SCI_GETCONTROLCHARSYMBOL 2389
 #define SCI_WORDPARTLEFT 2390
 #define SCI_WORDPARTLEFTEXTEND 2391
 #define SCI_WORDPARTRIGHT 2392
@@ -532,7 +534,7 @@ struct TextToFind {
 
 #ifdef PLATFORM_H
 
-// This structure is used in printing and requires some of the graphics types 
+// This structure is used in printing and requires some of the graphics types
 // from Platform.h.  Not needed by most client code.
 
 struct RangeToFormat {
@@ -549,7 +551,7 @@ struct NotifyHeader {
 	// hwndFrom is really an environment specifc window handle or pointer
 	// but most clients of Scintilla.h do not have this type visible.
 	//WindowID hwndFrom;
-	void *hwndFrom; 
+	void *hwndFrom;
 	unsigned int idFrom;
 	unsigned int code;
 };

@@ -53,10 +53,10 @@
 ## Client code should ignore definitions containing types it does not understand, except
 ## for possibly #defining the constants
 
-## String arguments may contain NUL ('\0') characters where the calls provide a length 
-## argument and retrieve NUL characters. All retrieved strings except for those retrieved 
-## by GetLine also have a NUL appended but client code should calculate the size that 
-## will be returned rather than relying upon the NUL whenever possible. Allow for the  
+## String arguments may contain NUL ('\0') characters where the calls provide a length
+## argument and retrieve NUL characters. All retrieved strings except for those retrieved
+## by GetLine also have a NUL appended but client code should calculate the size that
+## will be returned rather than relying upon the NUL whenever possible. Allow for the
 ## extra NUL character when allocating buffers.
 
 cat Basics
@@ -144,7 +144,7 @@ set void SetViewWS=2021(int viewWS,)
 # Find the position from a point within the window.
 fun int PositionFromPoint=2022(int x, int y)
 
-# Find the position from a point within the window but return 
+# Find the position from a point within the window but return
 # INVALID_POSITION if not close to text.
 fun int PositionFromPointClose=2023(int x, int y)
 
@@ -761,14 +761,14 @@ set void SetCaretWidth=2188(int pixelWidth,)
 # Returns the width of the insert mode caret
 get int GetCaretWidth=2189(,)
 
-# Sets the position that starts the target which is used for updating the 
+# Sets the position that starts the target which is used for updating the
 # document without affecting the scroll position.
 set void SetTargetStart=2190(position pos,)
 
 # Get the position that starts the target.
 get position GetTargetStart=2191(,)
 
-# Sets the position that ends the target which is used for updating the 
+# Sets the position that ends the target which is used for updating the
 # document without affecting the scroll position.
 set void SetTargetEnd=2192(position pos,)
 
@@ -782,7 +782,7 @@ fun int ReplaceTarget=2194(int length, string text)
 
 # Replace the target text with the argument text after \d processing.
 # Text is counted so it can contain nulls.
-# Looks for \d where d is between 1 and 9 and replaces these with the strings 
+# Looks for \d where d is between 1 and 9 and replaces these with the strings
 # matched in the last search operation which were surrounded by \( and \).
 # Returns the length of the replacement text including any change
 # caused by processing the \d patterns.
@@ -1168,6 +1168,12 @@ set void SetCursor=2386(int cursorType,)
 # Get cursor type
 get int GetCursor=2387(,)
 
+# Change the way control characters are displayed:
+# If symbol is < 32, keep the drawn way, else, use the given character
+set void SetControlCharSymbol=2388(int symbol,)
+# Get the way control characters are displayed
+get int GetControlCharSymbol=2389(,)
+
 # Move to the previous change in capitalistion
 fun void WordPartLeft=2390(,)
 # Move to the previous change in capitalistion extending selection to new caret position.
@@ -1305,7 +1311,7 @@ val SCLEX_ASP=29
 val SCLEX_PHP=30
 val SCLEX_BAAN=31
 
-# When a lexer specifies its language as SCLEX_AUTOMATIC it receives a 
+# When a lexer specifies its language as SCLEX_AUTOMATIC it receives a
 # value assigned in sequence from SCLEX_AUTOMATIC+1.
 val SCLEX_AUTOMATIC=1000
 # Lexical states for SCLEX_PYTHON

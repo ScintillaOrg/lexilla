@@ -15,7 +15,7 @@ public:
 	bool active;
 	bool on;
 	int period;
-		
+
 	Caret();
 };
 
@@ -27,7 +27,7 @@ public:
 	int ticksToWait;
 	enum {tickSize = 100};
 	int tickerID;
-		
+
 	Timer();
 };
 
@@ -85,20 +85,21 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	/** Style resources may be expensive to allocate so are cached between uses.
 	 * When a style attribute is changed, this cache is flushed. */
-	bool stylesValid;	
+	bool stylesValid;
 	ViewStyle vs;
 	Palette palette;
 
 	int printMagnification;
 	int printColourMode;
 	int cursorMode;
+	int controlCharSymbol;
 
 	bool hasFocus;
 	bool hideSelection;
 	bool inOverstrike;
 	int errorStatus;
 	bool mouseDownCaptures;
-	
+
 	/** In bufferedDraw mode, graphics operations are drawn to a pixmap and then copied to
 	 * the screen. This avoids flashing but is about 30% slower. */
 	bool bufferedDraw;
@@ -106,7 +107,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int xOffset;		///< Horizontal scrolled amount in pixels
 	int xCaretMargin;	///< Ensure this many pixels visible on both sides of caret
 	bool horizontalScrollBarVisible;
-	
+
 	Surface *pixmapLine;
 	Surface *pixmapSelMargin;
 	Surface *pixmapSelPattern;
@@ -141,32 +142,32 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int searchFlags;
 	int topLine;
 	int posTopLine;
-	
+
 	bool needUpdateUI;
 	Position braces[2];
 	int bracesMatchStyle;
 	int highlightGuideColumn;
-	
+
 	int theEdge;
 
 	enum { notPainting, painting, paintAbandoned } paintState;
 	PRectangle rcPaint;
 	bool paintingAllText;
-	
+
 	int modEventMask;
-	
+
 	SelectionText drag;
 	enum { selStream, selRectangle, selRectangleFixed } selType;
 	int xStartSelect;
 	int xEndSelect;
 	bool primarySelection;
-	
+
 	int caretPolicy;
 	int caretSlop;
 
 	int visiblePolicy;
 	int visibleSlop;
-	
+
 	int searchAnchor;
 
 	bool recordingMacro;
@@ -189,7 +190,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	virtual PRectangle GetClientRectangle();
 	PRectangle GetTextRectangle();
-	
+
 	int LinesOnScreen();
 	int LinesToScroll();
 	int MaxScrollPos();
@@ -200,13 +201,13 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int PositionFromLineX(int line, int x);
 	int LineFromLocation(Point pt);
 	void SetTopLine(int topLineNew);
-	
+
 	void RedrawRect(PRectangle rc);
 	void Redraw();
 	void RedrawSelMargin();
 	PRectangle RectangleFromRange(int start, int end);
 	void InvalidateRange(int start, int end);
-	
+
 	int CurrentPosition();
 	bool SelectionEmpty();
 	int SelectionStart(int line=-1);
@@ -231,7 +232,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int SubstituteMarkerIfEmpty(int markerCheck, int markerDefault);
 	void PaintSelMargin(Surface *surface, PRectangle &rc);
         void LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayout &ll);
-	void DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart, 
+	void DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart,
 		PRectangle rcLine, LineLayout &ll);
 	void Paint(Surface *surfaceWindow, PRectangle rcArea);
 	long FormatRange(bool draw, RangeToFormat *pfr);
@@ -276,7 +277,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool NotifyMarginClick(Point pt, bool shift, bool ctrl, bool alt);
 	void NotifyNeedShown(int pos, int len);
 	void NotifyDwelling(Point pt, bool state);
-	
+
 	void NotifyModifyAttempt(Document *document, void *userData);
 	void NotifySavePoint(Document *document, void *userData, bool atSavePoint);
 	void NotifyModified(Document *document, DocModification mh, void *userData);
@@ -329,16 +330,16 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void CheckForChangeOutsidePaint(Range r);
 	int BraceMatch(int position, int maxReStyle);
 	void SetBraceHighlight(Position pos0, Position pos1, int matchStyle);
-	
+
 	void SetDocPointer(Document *document);
-	
+
 	void Expand(int &line, bool doExpand);
 	void ToggleContraction(int line);
 	void EnsureLineVisible(int lineDoc, bool enforcePolicy);
 	int ReplaceTarget(bool replacePatterns, const char *text, int length=-1);
 
 	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) = 0;
-	
+
 public:
 	// Public so scintilla_send_message can use it
 	virtual sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);

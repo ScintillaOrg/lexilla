@@ -40,6 +40,7 @@ Editor::Editor() {
 	printMagnification = 0;
 	printColourMode = SC_PRINT_NORMAL;
 	cursorMode = SC_CURSORNORMAL;
+	controlCharSymbol = 0;	/* Draw the control characters */
 
 	hasFocus = false;
 	hideSelection = false;
@@ -87,7 +88,7 @@ Editor::Editor() {
 	pixmapSelPattern = Surface::Allocate();
 	pixmapIndentGuide = Surface::Allocate();
 	pixmapIndentGuideHighlight = Surface::Allocate();
-	
+
 	currentPos = 0;
 	anchor = 0;
 
@@ -284,7 +285,7 @@ int Editor::PositionFromLocation(Point pt) {
 		surface->Init();
 		surface->SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
 		unsigned int posLineStart = pdoc->LineStart(line);
-	
+
 		LineLayout ll;
 		LayoutLine(line, surface, vs, ll);
 		for (int i = 0; i < ll.numCharsInLine; i++) {
@@ -324,7 +325,7 @@ int Editor::PositionFromLocationClose(Point pt) {
 		surface->Init();
 		surface->SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
 		unsigned int posLineStart = pdoc->LineStart(line);
-	
+
 		LineLayout ll;
 		LayoutLine(line, surface, vs, ll);
 		for (int i = 0; i < ll.numCharsInLine; i++) {
@@ -350,7 +351,7 @@ int Editor::PositionFromLineX(int line, int x) {
 		surface->Init();
 		surface->SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
 		unsigned int posLineStart = pdoc->LineStart(line);
-	
+
 		LineLayout ll;
 		LayoutLine(line, surface, vs, ll);
 		for (int i = 0; i < ll.numCharsInLine; i++) {
@@ -360,7 +361,7 @@ int Editor::PositionFromLineX(int line, int x) {
 				return i + posLineStart;
 			}
 		}
-		
+
 		delete surface;
 		return ll.numCharsInLine + posLineStart;
 	}
@@ -648,7 +649,7 @@ void Editor::EnsureCaretVisible(bool useMargin, bool vert, bool horiz) {
 	// If we scroll the display, we use a minimum amount of xMargin.
 	int offsetLeft = rcClient.left + xMargin;
 	int offsetRight = rcClient.right - xMargin;
-	// If we are in XJUMPS mode, then when the margin is reached, the 
+	// If we are in XJUMPS mode, then when the margin is reached, the
 	// offset jumps so that it won't need to move agin for a while.
 	if (!(caretPolicy & CARET_XJUMPS)) {
 		rcClient.left = offsetLeft;
@@ -779,10 +780,10 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 			int line = cs.DocFromDisplay(visibleLine);
 			int yposScreen = 0;
 
-			// Work out whether the top line is whitespace located after a 
+			// Work out whether the top line is whitespace located after a
 			// lessening of fold level which implies a 'fold tail' but which should not
 			// be displayed until the last of a sequence of whitespace.
-			bool needWhiteClosure = false;	
+			bool needWhiteClosure = false;
 			int level = pdoc->GetLevel(line);
 			if (level & SC_FOLDLEVELWHITEFLAG) {
 				int lineBack = line;
@@ -796,13 +797,13 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 						needWhiteClosure = true;
 				}
 			}
-			
+
 			// Old code does not know about new markers needed to distinguish all cases
-			int folderOpenMid = SubstituteMarkerIfEmpty(SC_MARKNUM_FOLDEROPENMID, 
+			int folderOpenMid = SubstituteMarkerIfEmpty(SC_MARKNUM_FOLDEROPENMID,
 				SC_MARKNUM_FOLDEROPEN);
-			int folderEnd = SubstituteMarkerIfEmpty(SC_MARKNUM_FOLDEREND, 
+			int folderEnd = SubstituteMarkerIfEmpty(SC_MARKNUM_FOLDEREND,
 				SC_MARKNUM_FOLDER);
-			
+
 			while ((visibleLine < cs.LinesDisplayed()) && yposScreen < rcMargin.bottom) {
 
 				// Decide which fold indicator should be displayed
@@ -815,7 +816,7 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 					if (cs.GetExpanded(line)) {
 						if (levelNum == SC_FOLDLEVELBASE)
 							marks |= 1 << SC_MARKNUM_FOLDEROPEN;
-						else 
+						else
 							marks |= 1 << folderOpenMid;
 					} else {
 						if (levelNum == SC_FOLDLEVELBASE)
@@ -977,10 +978,14 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 					if (ll.chars[charInLine] == '\t') {
 						ll.positions[charInLine + 1] = ((((startsegx + 2) /
 						                                  tabWidth) + 1) * tabWidth) - startsegx;
-					} else {
+					} else if (controlCharSymbol < 32) {
 						const char *ctrlChar = ControlCharacterString(ll.chars[charInLine]);
 						// +3 For a blank on front and rounded edge each side:
 						ll.positions[charInLine + 1] = surface->WidthText(ctrlCharsFont, ctrlChar, strlen(ctrlChar)) + 3;
+					} else {
+						char cc[2] = { controlCharSymbol, '\0' };
+						surface->MeasureWidths(ctrlCharsFont, cc, 1,
+											   ll.positions + startseg + 1);
 					}
 					lastSegItalics = false;
 				} else {	// Regular character
@@ -1129,24 +1134,32 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 				} else if (IsControlCharacter(ll.chars[i])) {
 					// Manage control character display
 					inIndentation = false;
-					const char *ctrlChar = ControlCharacterString(ll.chars[i]);
-					surface->FillRectangle(rcSegment, textBack);
-					int normalCharHeight = surface->Ascent(ctrlCharsFont) -
-							       surface->InternalLeading(ctrlCharsFont);
-					PRectangle rcCChar = rcSegment;
-					rcCChar.left = rcCChar.left + 1;
-					rcCChar.top = rcSegment.top + vsDraw.maxAscent - normalCharHeight;
-					rcCChar.bottom = rcSegment.top + vsDraw.maxAscent + 1;
-					PRectangle rcCentral = rcCChar;
-					rcCentral.top++;
-					rcCentral.bottom--;
-					surface->FillRectangle(rcCentral, textFore);
-					PRectangle rcChar = rcCChar;
-					rcChar.left++;
-					rcChar.right--;
-					surface->DrawTextClipped(rcChar, ctrlCharsFont,
-								 rcSegment.top + vsDraw.maxAscent, ctrlChar, strlen(ctrlChar),
-								 textBack, textFore);
+					if (controlCharSymbol < 32) {
+						// Draw the character
+						const char *ctrlChar = ControlCharacterString(ll.chars[i]);
+						surface->FillRectangle(rcSegment, textBack);
+						int normalCharHeight = surface->Ascent(ctrlCharsFont) -
+									   surface->InternalLeading(ctrlCharsFont);
+						PRectangle rcCChar = rcSegment;
+						rcCChar.left = rcCChar.left + 1;
+						rcCChar.top = rcSegment.top + vsDraw.maxAscent - normalCharHeight;
+						rcCChar.bottom = rcSegment.top + vsDraw.maxAscent + 1;
+						PRectangle rcCentral = rcCChar;
+						rcCentral.top++;
+						rcCentral.bottom--;
+						surface->FillRectangle(rcCentral, textFore);
+						PRectangle rcChar = rcCChar;
+						rcChar.left++;
+						rcChar.right--;
+						surface->DrawTextClipped(rcChar, ctrlCharsFont,
+									 rcSegment.top + vsDraw.maxAscent, ctrlChar, strlen(ctrlChar),
+									 textBack, textFore);
+					} else {
+						char cc[2] = { controlCharSymbol, '\0' };
+						surface->DrawTextNoClip(rcSegment, ctrlCharsFont,
+										  rcSegment.top + vsDraw.maxAscent,
+										  cc, 1, textBack, textFore);
+					}
 				} else {
 					// Manage normal display
 					surface->DrawTextNoClip(rcSegment, textFont,
@@ -1736,8 +1749,8 @@ void Editor::AddCharUTF(char *s, unsigned int len) {
 
 	int byte = static_cast<unsigned char>(s[0]);
 	if ((byte < 0xC0) || (1 == len)) {
-		// Handles UTF-8 characters between 0x01 and 0x7F and single byte 
-		// characters when not in UTF-8 mode. 
+		// Handles UTF-8 characters between 0x01 and 0x7F and single byte
+		// characters when not in UTF-8 mode.
 		// Also treats \0 and naked trail bytes 0x80 to 0xBF as valid
 		// characters representing themselves.
 	} else {
@@ -3277,7 +3290,7 @@ void Editor::Tick() {
 			InvalidateCaret();
 		}
 	}
-	if ((dwellDelay < SC_TIME_FOREVER) && 
+	if ((dwellDelay < SC_TIME_FOREVER) &&
 		(ticksToDwell > 0) &&
 		(!HaveMouseCapture())) {
 		ticksToDwell -= timer.tickSize;
@@ -4110,16 +4123,16 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		dwellDelay = wParam;
 		ticksToDwell = dwellDelay;
 		break;
-	
+
 	case SCI_GETMOUSEDWELLTIME:
 		return dwellDelay;
-	
+
 	case SCI_WORDSTARTPOSITION:
 		return pdoc->ExtendWordSelect(wParam, -1);
 
 	case SCI_WORDENDPOSITION:
 		return pdoc->ExtendWordSelect(wParam, 1);
-	
+
 	case SCI_GETCOLUMN:
 		return pdoc->GetColumn(wParam);
 
@@ -4709,6 +4722,14 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETCURSOR:
 		return cursorMode;
+
+	case SCI_SETCONTROLCHARSYMBOL:
+		controlCharSymbol = wParam;
+		break;
+
+	case SCI_GETCONTROLCHARSYMBOL:
+		return controlCharSymbol;
+		break;
 
 	case SCI_STARTRECORD:
 		recordingMacro = true;
