@@ -5942,7 +5942,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_SETWORDCHARS: {
-			pdoc->SetDefaultCharClasses();
+			pdoc->SetDefaultCharClasses(false);
 			if (lParam == 0)
 				return 0;
 			pdoc->SetCharClasses(reinterpret_cast<unsigned char *>(lParam), Document::ccWord);
@@ -5957,7 +5957,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_SETCHARSDEFAULT:
-		pdoc->SetDefaultCharClasses();
+		pdoc->SetDefaultCharClasses(true);
 		break;
 
 	case SCI_GETLENGTH:

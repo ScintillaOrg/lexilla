@@ -203,7 +203,7 @@ public:
 
 	void ChangeCase(Range r, bool makeUpperCase);
 
-	void SetDefaultCharClasses();
+	void SetDefaultCharClasses(bool includeWordClass);
 	void SetCharClasses(const unsigned char *chars, charClassification newCharClass);
 	void SetStylingBits(int bits);
 	void StartStyling(int position, char mask);

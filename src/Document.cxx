@@ -50,7 +50,7 @@ Document::Document() {
 	stylingBits = 5;
 	stylingBitsMask = 0x1F;
 	stylingMask = 0;
-	SetDefaultCharClasses();
+	SetDefaultCharClasses(true);
 	endStyled = 0;
 	styleClock = 0;
 	enteredCount = 0;
@@ -1174,14 +1174,14 @@ void Document::ChangeCase(Range r, bool makeUpperCase) {
 	}
 }
 
-void Document::SetDefaultCharClasses() {
+void Document::SetDefaultCharClasses(bool includeWordClass) {
 	// Initialize all char classes to default values
 	for (int ch = 0; ch < 256; ch++) {
 		if (ch == '\r' || ch == '\n')
 			charClass[ch] = ccNewLine;
 		else if (ch < 0x20 || ch == ' ')
 			charClass[ch] = ccSpace;
-		else if (ch >= 0x80 || isalnum(ch) || ch == '_')
+		else if (includeWordClass && (ch >= 0x80 || isalnum(ch) || ch == '_'))
 			charClass[ch] = ccWord;
 		else
 			charClass[ch] = ccPunctuation;
