@@ -333,6 +333,11 @@ static bool IsCommentLine(int line, Accessor &styler) {
 	return false;
 }
 
+static bool IsQuoteLine(int line, Accessor &styler) {
+	int style = styler.StyleAt(styler.LineStart(line)) & 31;
+	return ((style == SCE_P_TRIPLE) || (style== SCE_P_TRIPLEDOUBLE));
+}
+
 static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unused*/,
 					WordList *[], Accessor &styler) {
 	int maxPos = startPos + length;
@@ -348,11 +353,10 @@ static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unuse
 	while (lineCurrent > 0) {
 		lineCurrent--;
 		indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, NULL);
-		if (!(indentCurrent & SC_FOLDLEVELWHITEFLAG)) {
-			if (!IsCommentLine(lineCurrent, styler)) {
-				break;
-			}
-		}
+		if (!(indentCurrent & SC_FOLDLEVELWHITEFLAG) &&
+			(!IsCommentLine(lineCurrent, styler)) &&
+			(!IsQuoteLine(lineCurrent, styler)))
+			break;
 	}
 	int indentCurrentLevel = indentCurrent & SC_FOLDLEVELNUMBERMASK;
 	
@@ -375,8 +379,6 @@ static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unuse
 		int lineNext = lineCurrent + 1;
 		int style = styler.StyleAt(styler.LineStart(lineNext)) & 31;
 		int indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
-		if (indentNext & SC_FOLDLEVELWHITEFLAG)
-			indentNext = SC_FOLDLEVELWHITEFLAG | indentCurrentLevel;
 		int quote = ((style == SCE_P_TRIPLE) || (style== SCE_P_TRIPLEDOUBLE));
 		int quote_start = (quote && !prevQuote);
 		int quote_continue = (quote && prevQuote);
@@ -384,6 +386,12 @@ static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unuse
 		int comment_start = (comment && !prevComment && 
 			IsCommentLine(lineNext, styler) && (lev > SC_FOLDLEVELBASE));
 		int comment_continue = (comment && prevComment);
+		if ((!quote || !prevQuote) && !comment)
+			indentCurrentLevel = indentCurrent & SC_FOLDLEVELNUMBERMASK;
+		if (quote)
+			indentNext = indentCurrentLevel;
+		if (indentNext & SC_FOLDLEVELWHITEFLAG)
+			indentNext = SC_FOLDLEVELWHITEFLAG | indentCurrentLevel;
 
 		if (quote_start) {
 			// Place fold point at start of triple quoted string
@@ -408,11 +416,12 @@ static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unuse
 		while (!quote &&
 		       ((indentNext & SC_FOLDLEVELWHITEFLAG) || styler[styler.LineStart(lineNext)] == '#') &&
 		       (lineNext < maxLines)) {
-			styler.SetLevel(lineNext, Platform::Maximum(indentCurrent, indentNext));
+			int level = Platform::Maximum(indentCurrent, indentNext);
+			if (indentNext & SC_FOLDLEVELWHITEFLAG)
+				level = SC_FOLDLEVELWHITEFLAG | indentCurrentLevel;
+			styler.SetLevel(lineNext, level);
 			lineNext++;
 			indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
-			if (indentNext & SC_FOLDLEVELWHITEFLAG)
-				indentNext = SC_FOLDLEVELWHITEFLAG | indentCurrentLevel;
 		}
 
 		// Set fold header on non-quote/non-comment line
@@ -428,7 +437,6 @@ static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unuse
 		// Set fold level for this line and move to next line
 		styler.SetLevel(lineCurrent, lev);
 		indentCurrent = indentNext;
-		indentCurrentLevel = indentCurrent & SC_FOLDLEVELNUMBERMASK;
 		lineCurrent = lineNext;
 	}
 
