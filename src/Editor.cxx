@@ -4348,10 +4348,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return dwellDelay;
 
 	case SCI_WORDSTARTPOSITION:
-		return pdoc->ExtendWordSelect(wParam, -1);
+		return pdoc->ExtendWordSelect(wParam, -1, lParam != 0);
 
 	case SCI_WORDENDPOSITION:
-		return pdoc->ExtendWordSelect(wParam, 1);
+		return pdoc->ExtendWordSelect(wParam, 1, lParam != 0);
 
 	case SCI_SETWRAPMODE:
 		wrapState = (wParam == SC_WRAP_WORD) ? eWrapWord : eWrapNone;

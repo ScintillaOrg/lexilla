@@ -906,10 +906,10 @@ set void SetMouseDwellTime=2264(int periodMilliseconds,)
 get int GetMouseDwellTime=2265(,)
 
 # Get position of start of word
-fun int WordStartPosition=2266(position pos,)
+fun int WordStartPosition=2266(position pos, bool onlyWordCharacters)
 
 # Get position of end of word
-fun int WordEndPosition=2267(position pos,)
+fun int WordEndPosition=2267(position pos, bool onlyWordCharacters)
 
 val SC_WRAP_NONE=0
 val SC_WRAP_WORD=1

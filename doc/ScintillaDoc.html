@@ -241,8 +241,8 @@ SCI_GETCURLINE(int textlen, char *text)
 SCI_LINESONSCREEN
 SCI_SELECTIONISRECTANGLE
 SCI_MOVECARETINSIDEVIEW
-SCI_WORDENDPOSITION(int position)
-SCI_WORDSTARTPOSITION(int position)
+SCI_WORDENDPOSITION(int position, bool onlyWordCharacters)
+SCI_WORDSTARTPOSITION(int position, bool onlyWordCharacters)
 </pre>
     <p>
 	Scintilla maintains a selection which stretches between two points, the anchor and the
