@@ -262,7 +262,7 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 	}
 	rcList.bottom = rcList.top + heightAlloced;
 	ac.lb->SetPositionRelative(rcList, wMain);
-	ac.Show();
+	ac.Show(true);
 	if (lenEntered != 0) {
 		AutoCompleteMoveToCurrentWord();
 	}
@@ -312,25 +312,31 @@ void ScintillaBase::AutoCompleteCompleted() {
 	selected[0] = '\0';
 	if (item != -1) {
 		ac.lb->GetValue(item, selected, sizeof(selected));
-	}
-	ac.Cancel();
-	if (item == -1)
-		return;
-
-	if (listType > 0) {
-		userListSelected = selected;
-		SCNotification scn;
-		scn.nmhdr.code = SCN_USERLISTSELECTION;
-		scn.message = 0;
-		scn.wParam = listType;
-		scn.listType = listType;
-		scn.lParam = 0;
-		scn.text = userListSelected.c_str();
-		NotifyParent(scn);
+	} else {
+		ac.Cancel();
 		return;
 	}
 
+	ac.Show(false);
+
+	listSelected = selected;
+	SCNotification scn;
+	scn.nmhdr.code = listType > 0 ? SCN_USERLISTSELECTION : SCN_AUTOCSELECTION;
+	scn.message = 0;
+	scn.wParam = listType;
+	scn.listType = listType;
 	Position firstPos = ac.posStart - ac.startLen;
+	scn.lParam = firstPos;
+	scn.text = listSelected.c_str();
+	NotifyParent(scn);
+
+	if (!ac.Active())
+		return;
+	ac.Cancel();
+
+	if (listType > 0)
+		return;
+
 	Position endPos = currentPos;
 	if (ac.dropRestOfWord)
 		endPos = pdoc->ExtendWordSelect(endPos, 1, true);

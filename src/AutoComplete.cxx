@@ -118,9 +118,10 @@ void AutoComplete::SetList(const char *list) {
 	}
 }
 
-void AutoComplete::Show() {
-	lb->Show();
-	lb->Select(0);
+void AutoComplete::Show(bool show) {
+	lb->Show(show);
+	if (show)
+		lb->Select(0);
 }
 
 void AutoComplete::Cancel() {

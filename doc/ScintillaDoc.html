@@ -38,7 +38,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 29/May/2004 NH</p>
+    <p>Last edited 9/March/2005 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -2876,7 +2876,7 @@ struct TextToFind {
 
     <h2 id="Autocompletion">Autocompletion</h2>
 
-    <p>Autocompletion displays a list box showing likely identifiers based upon the users typing.
+    <p>Autocompletion displays a list box showing likely identifiers based upon the user's typing.
     The user chooses the currently selected item by pressing the tab character or another character
     that is a member of the fillup character set defined with <code>SCI_AUTOCSETFILLUPS</code>.
     Autocompletion is triggered by your application. For example, in C if you detect that the user
@@ -2886,6 +2886,12 @@ struct TextToFind {
     the choice to a reasonable list. As yet another alternative, you could define a key code to
     activate the list.</p>
 
+    <p>When the user makes a selection from the list the container is sent a <code><a class="message"
+    href="#SCN_AUTOCSELECTION">SCN_AUTOCSELECTION</a></code> <a class="jump"
+    href="#Notifications">notification message</a>. On return from the notification Scintilla will insert 
+     the selected text unless the autocompletion list has been cancelled, for example by the container sending
+     <code><a class="message" href="#SCI_AUTOCCANCEL">SCI_AUTOCCANCEL</a></code>.</p>
+    
     <p>To make use of autocompletion you must monitor each character added to the document. See
     <code>SciTEBase::CharAdded()</code> in SciTEBase.cxx for an example of autocompletion.</p>
     <code><a class="message" href="#SCI_AUTOCSHOW">SCI_AUTOCSHOW(int lenEntered, const char
@@ -3042,7 +3048,8 @@ struct TextToFind {
     effect.<br />
      o When the user makes a selection you are sent a <code><a class="message"
     href="#SCN_USERLISTSELECTION">SCN_USERLISTSELECTION</a></code> <a class="jump"
-    href="#Notifications">notification message</a>.</p>
+    href="#Notifications">notification message</a> rather than <code><a class="message"
+    href="#SCN_AUTOCSELECTION">SCN_AUTOCSELECTION</a></code>.</p>
 
     <p>BEWARE: if you have set fillup characters or stop characters, these will still be active
     with the user list, and may result in items being selected or the user list cancelled due to
@@ -4315,7 +4322,7 @@ struct SCNotification {
     int ch;             // SCN_CHARADDED, SCN_KEY
     int modifiers;      // SCN_KEY, SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK
     int modificationType; // SCN_MODIFIED
-    const char *text;   // SCN_MODIFIED
+    const char *text;   // SCN_MODIFIED, SCN_USERLISTSELECTION, SCN_AUTOCSELECTION
     int length;         // SCN_MODIFIED
     int linesAdded;     // SCN_MODIFIED
     int message;        // SCN_MACRORECORD
@@ -4325,7 +4332,7 @@ struct SCNotification {
     int foldLevelNow;   // SCN_MODIFIED
     int foldLevelPrev;  // SCN_MODIFIED
     int margin;         // SCN_MARGINCLICK
-    int listType;       // SCN_USERLISTSELECTION
+    int listType;       // SCN_USERLISTSELECTION, SCN_AUTOCSELECTION
     int x;              // SCN_DWELLSTART, SCN_DWELLEND
     int y;              // SCN_DWELLSTART, SCN_DWELLEND
 };
@@ -4354,6 +4361,7 @@ struct SCNotification {
      <a class="message" href="#SCN_HOTSPOTCLICK">SCN_HOTSPOTCLICK</a><br />
      <a class="message" href="#SCN_HOTSPOTDOUBLECLICK">SCN_HOTSPOTDOUBLECLICK</a><br />
      <a class="message" href="#SCN_CALLTIPCLICK">SCN_CALLTIPCLICK</a><br />
+     <a class="message" href="#SCN_AUTOCSELECTION">SCN_AUTOCSELECTION</a><br />
     </code>
 
     <p>The following <code>SCI_*</code> messages are associated with these notifications:</p>
@@ -4478,8 +4486,8 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
           <td align="left">Valid for text changes, not for style changes. If we are collecting undo
           information this holds a pointer to the text that is handed to the Undo system, otherwise
           it is zero. For user performed SC_MOD_BEFOREDELETE the text field is 0 and 
-	for user performed SC_MOD_BEFOREINSERT the text field points to an array of cells,
-	not bytes.</td>
+		  for user performed SC_MOD_BEFOREINSERT the text field points to an array of cells,
+	 	  not bytes.</td>
         </tr>
 
         <tr>
@@ -4889,6 +4897,35 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     function name is overloaded with different arguments.
     The <code>position</code> field is set to 1 if the click is in an up arrow,
     2 if in a down arrow, and 0 if elsewhere.</p>
+
+    <p><b id="SCN_AUTOCSELECTION">SCN_AUTOCSELECTION</b><br />
+     The user has selected an item in an <a class="jump" href="#Autocompletion">autocompletion list</a>. The
+     notification is sent before the selection is inserted. Automatic insertion can be cancelled by sending a 
+     <code><a class="message" href="#SCI_AUTOCCANCEL">SCI_AUTOCCANCEL</a></code> message
+     before returning from the notification. The <code>SCNotification</code> fields used are:</p>
+
+    <table cellpadding="1" cellspacing="2" border="0" summary="Autocompletion list notification">
+      <tbody>
+        <tr>
+          <th align="left">Field</th>
+
+          <th align="left">Usage</th>
+        </tr>
+      </tbody>
+
+      <tbody valign="top">
+        <tr>
+          <td align="left"><code>lParam</code></td>
+
+          <td align="left">The start position of the word being completed.</td>
+        </tr>
+        <tr>
+          <td align="left"><code>text</code></td>
+
+          <td align="left">The text of the selection.</td>
+        </tr>
+      </tbody>
+    </table>
 
     <h2 id="DeprecatedMessages">Deprecated messages and notifications</h2>
 

@@ -57,7 +57,7 @@ public:
 	/// The list string contains a sequence of words separated by the separator character
 	void SetList(const char *list);
 
-	void Show();
+	void Show(bool show);
 	void Cancel();
 
 	/// Move the current list element by delta, scrolling appropriately

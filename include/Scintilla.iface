@@ -2633,6 +2633,7 @@ evt void Zoom=2018(void)
 evt void HotSpotClick=2019(int modifiers, int position)
 evt void HotSpotDoubleClick=2020(int modifiers, int position)
 evt void CallTipClick=2021(int position)
+evt void AutoCSelection=2022(string text)
 
 cat Deprecated
 
