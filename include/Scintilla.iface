@@ -905,6 +905,9 @@ fun int VisibleFromDocLine=2220(int line,)
 # Find the document line of a display line taking hidden lines into account.
 fun int DocLineFromVisible=2221(int lineDisplay,)
 
+# The number of display lines needed to wrap a document line
+fun int WrapCount=2235(int line,)
+
 enu FoldLevel=SC_FOLDLEVEL
 val SC_FOLDLEVELBASE=0x400
 val SC_FOLDLEVELWHITEFLAG=0x1000
@@ -1596,7 +1599,7 @@ fun void SetLengthForEncode=2448(int bytes,)
 # On error return 0.
 fun int EncodedFromUTF8=2449(string utf8, stringresult encoded)
 
-# Find the position of a column on a line taking into account tabs and 
+# Find the position of a column on a line taking into account tabs and
 # multi-byte characters. If beyond end of line, return line end position.
 fun int FindColumn=2456(int line, int column)
 

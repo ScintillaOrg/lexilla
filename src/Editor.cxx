@@ -5572,6 +5572,18 @@ int Editor::CodePage() const {
 		return 0;
 }
 
+int Editor::WrapCount(int line) {
+	AutoSurface surface(this);
+	AutoLineLayout ll(llc, RetrieveLineLayout(line));
+
+	if (surface && ll) {
+		LayoutLine(line, surface, vs, ll, wrapWidth);
+		return ll->lines;
+	} else {
+		return 1;
+	}
+}
+
 static bool ValidMargin(unsigned long wParam) {
 	return wParam < ViewStyle::margins;
 }
@@ -6641,6 +6653,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_DOCLINEFROMVISIBLE:
 		return cs.DocFromDisplay(wParam);
+
+	case SCI_WRAPCOUNT:
+		return WrapCount(wParam);
 
 	case SCI_SETFOLDLEVEL: {
 			int prev = pdoc->SetLevel(wParam, lParam);

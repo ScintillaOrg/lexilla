@@ -787,7 +787,7 @@ struct TextToFind {
     unless the document is read-only.</p>
 
     <p>On X, the clipboard is asynchronous and may require several messages between
-    the destination and source applications. Data from SCI_PASTE will not arrive in the 
+    the destination and source applications. Data from SCI_PASTE will not arrive in the
     document immediately.</p>
 
      <b id="SCI_COPYRANGE">SCI_COPYRANGE(int start, int end)</b><br />
@@ -2323,8 +2323,8 @@ struct TextToFind {
     horizontal space, such as Thai, will mostly work but there are some issues where the characters
     are drawn separately leading to visual glitches. Bi-directional text is not supported.</p>
 
-    <p>On Windows, code page can be set to 932 (Japanese Shift-JIS), 936 (Simplified Chinese GBK), 
-    949 (Korean), and 950 (Traditional Chinese Big5) although these may require installation of language 
+    <p>On Windows, code page can be set to 932 (Japanese Shift-JIS), 936 (Simplified Chinese GBK),
+    949 (Korean), and 950 (Traditional Chinese Big5) although these may require installation of language
     specific support.</p>
 
     <p>On GTK+, code page <code>SC_CP_DBCS</code> (1) sets Scintilla into
@@ -2888,10 +2888,10 @@ struct TextToFind {
 
     <p>When the user makes a selection from the list the container is sent a <code><a class="message"
     href="#SCN_AUTOCSELECTION">SCN_AUTOCSELECTION</a></code> <a class="jump"
-    href="#Notifications">notification message</a>. On return from the notification Scintilla will insert 
+    href="#Notifications">notification message</a>. On return from the notification Scintilla will insert
      the selected text unless the autocompletion list has been cancelled, for example by the container sending
      <code><a class="message" href="#SCI_AUTOCCANCEL">SCI_AUTOCCANCEL</a></code>.</p>
-    
+
     <p>To make use of autocompletion you must monitor each character added to the document. See
     <code>SciTEBase::CharAdded()</code> in SciTEBase.cxx for an example of autocompletion.</p>
     <code><a class="message" href="#SCI_AUTOCSHOW">SCI_AUTOCSHOW(int lenEntered, const char
@@ -3599,10 +3599,10 @@ struct RangeToFormat {
      into the print rectangle. If you set <code>SC_WRAP_NONE</code>, each line of text
      generates one line of output and the line is truncated if it is too long to fit
      into the print area.<br />
-     <code>SC_WRAP_WORD</code> tries to wrap only between words as indicated by 
-     white space or style changes although if a word is longer than a line, it will be wrapped before 
-     the line end. <code>SC_WRAP_CHAR</code> is preferred to 
-     <code>SC_WRAP_WORD</code> for Asian languages where there is no white space 
+     <code>SC_WRAP_WORD</code> tries to wrap only between words as indicated by
+     white space or style changes although if a word is longer than a line, it will be wrapped before
+     the line end. <code>SC_WRAP_CHAR</code> is preferred to
+     <code>SC_WRAP_WORD</code> for Asian languages where there is no white space
      between words.</p>
 
     <h2 id="DirectAccess">Direct access</h2>
@@ -3730,7 +3730,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     The best way to see how this is done is to search the SciTE source code for the messages used
     in this section of the documentation and see how they are used. You will also need to use
     markers and a folding margin to complete your folding implementation.
-    The <code>"fold"</code> property should be set to <code>"1"</code> with 
+    The <code>"fold"</code> property should be set to <code>"1"</code> with
     <code>SCI_SETPROPERTY("fold", "1")</code> to enable folding. </p>
     <code><a class="message" href="#SCI_VISIBLEFROMDOCLINE">SCI_VISIBLEFROMDOCLINE(int
     docLine)</a><br />
@@ -3910,6 +3910,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_GETLAYOUTCACHE">SCI_GETLAYOUTCACHE</a><br />
      <a class="message" href="#SCI_LINESSPLIT">SCI_LINESSPLIT</a><br />
      <a class="message" href="#SCI_LINESJOIN">SCI_LINESJOIN</a><br />
+     <a class="message" href="#SCI_WRAPCOUNT">SCI_WRAPCOUNT(int docLine)</a><br />
     </code>
 
     <p>By default, Scintilla does not wrap lines of text. If you enable line wrapping, lines wider
@@ -3944,13 +3945,13 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 
     <p><b id="SCI_SETWRAPMODE">SCI_SETWRAPMODE(int wrapMode)</b><br />
      <b id="SCI_GETWRAPMODE">SCI_GETWRAPMODE</b><br />
-     Set wrapMode to <code>SC_WRAP_WORD</code> (1) to enable wrapping 
-     on word boundaries, <code>SC_WRAP_CHAR</code> (2) to enable wrapping 
-     between any characters, and to <code>SC_WRAP_NONE</code> (0) to disable line 
-     wrapping. <code>SC_WRAP_CHAR</code> is preferred to 
-     <code>SC_WRAP_WORD</code> for Asian languages where there is no white space 
+     Set wrapMode to <code>SC_WRAP_WORD</code> (1) to enable wrapping
+     on word boundaries, <code>SC_WRAP_CHAR</code> (2) to enable wrapping
+     between any characters, and to <code>SC_WRAP_NONE</code> (0) to disable line
+     wrapping. <code>SC_WRAP_CHAR</code> is preferred to
+     <code>SC_WRAP_WORD</code> for Asian languages where there is no white space
      between words.</p>
-    
+
 
     <p><b id="SCI_SETWRAPVISUALFLAGS">SCI_SETWRAPVISUALFLAGS(int wrapVisualFlags)</b><br />
      <b id="SCI_GETWRAPVISUALFLAGS">SCI_GETWRAPVISUALFLAGS</b><br />
@@ -4099,6 +4100,10 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      removing line end characters.
      Where this would lead to no space between words, an extra space is inserted.
      </p>
+
+    <p><b id="SCI_WRAPCOUNT">SCI_WRAPCOUNT(int docLine)</b><br />
+    Document lines can occupy more than one display line if they wrap and this
+    returns the number of display lines needed to wrap a document line.</p>
 
     <h2 id="Zooming">Zooming</h2>
 
@@ -4416,7 +4421,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
     href="#SCI_SETREADONLY">SCI_SETREADONLY</a></code>.</p>
 
     <p><b id="SCN_KEY">SCN_KEY</b><br />
-     Reports all keys pressed but not consumed by Scintilla. Used on GTK+ because of 
+     Reports all keys pressed but not consumed by Scintilla. Used on GTK+ because of
      some problems with keyboard focus and is not sent by the Windows version. <code>SCNotification.ch</code> holds the key code and
     <code>SCNotification.modifiers</code> holds the modifiers. This notification is sent if the
     modifiers include <code>SCMOD_ALT</code> or <code>SCMOD_CTRL</code> and the key code is less
@@ -4485,7 +4490,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
 
           <td align="left">Valid for text changes, not for style changes. If we are collecting undo
           information this holds a pointer to the text that is handed to the Undo system, otherwise
-          it is zero. For user performed SC_MOD_BEFOREDELETE the text field is 0 and 
+          it is zero. For user performed SC_MOD_BEFOREDELETE the text field is 0 and
 		  for user performed SC_MOD_BEFOREINSERT the text field points to an array of cells,
 	 	  not bytes.</td>
         </tr>
@@ -4900,7 +4905,7 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
 
     <p><b id="SCN_AUTOCSELECTION">SCN_AUTOCSELECTION</b><br />
      The user has selected an item in an <a class="jump" href="#Autocompletion">autocompletion list</a>. The
-     notification is sent before the selection is inserted. Automatic insertion can be cancelled by sending a 
+     notification is sent before the selection is inserted. Automatic insertion can be cancelled by sending a
      <code><a class="message" href="#SCI_AUTOCCANCEL">SCI_AUTOCCANCEL</a></code> message
      before returning from the notification. The <code>SCNotification</code> fields used are:</p>
 

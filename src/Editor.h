@@ -516,6 +516,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void GetHotSpotRange(int& hsStart, int& hsEnd);
 
 	int CodePage() const;
+	int WrapCount(int line);
 
 	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) = 0;
 
