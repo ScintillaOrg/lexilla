@@ -104,6 +104,95 @@
       </li>
     </ul>
     <h3>
+       <a href="scite140.zip">Release 1.40</a>
+    </h3>
+    <ul>
+      <li>
+	Released on 23 September 2001.
+      </li>
+      <li>
+	Removal of emulation of Win32 RichEdit control in core of Scintilla.
+	<em>This change may be incompatible with existing client code.</em>
+	Some emulation still done in Windows platform layer.
+      </li>
+      <li>
+	SGML support in the HTML/XML lexer.
+      </li>
+      <li>
+	SciTE's "Stop Executing" command will terminate GUI programs on 
+	Windows NT and Windows 2000.
+      </li>
+      <li>
+	StyleContext class helps construct lexers that are simple and accurate. 
+	Used in the C++, Eiffel, and Python lexers.
+      </li>
+      <li>
+	Clipboard operations in GTK+ version convert between platform '\n' line endings and
+	currently chosen line endings.
+      </li>
+      <li>
+	Any character in range 0..255 can be used as a marker. 
+	This can be used to support numbered bookmarks, for example.
+      </li>
+      <li>
+	The default scripting language for ASP can be set.
+      </li>
+      <li>
+	New lexer and other support for crontab files used with the nncron scheduler.
+      </li>
+      <li>
+	Folding of Python improved.
+      </li>
+      <li>
+	The ` character is treated as a Python operator.
+      </li>
+      <li>
+	Line continuations ("\" at end of line) handled inside Python strings.
+      </li>
+      <li>
+	More consistent handling of line continuation ('\' at end of line) in 
+	C++ lexer. 
+	This fixes macro definitions that span more than one line.
+      </li>
+      <li>
+	C++ lexer can understand Doxygen keywords in doc comments.
+      </li>
+      <li>
+	SciTE on Windows allows choosing to open the "open" dialog on the directory 
+	of the current file rather than in the default directory.
+      </li>
+      <li>
+	SciTE on Windows handles command line arguments in "check.if.already.open" 
+	correctly when the current directory of the new instance is different to the
+	already open instance of SciTE.
+      </li>
+      <li>
+	"cwd" command (change working directory) defined for SciTE director interface.
+      </li>
+      <li>
+	SciTE "Export As HTML" produces better, more compliant, and shorter files.
+      </li>
+      <li>
+	SciTE on Windows allows several options for determining default file name
+	for exported files.
+      </li>
+      <li>
+	Automatic indentation of Python in SciTE fixed.
+      </li>
+      <li>
+	Exported HTML can support folding.
+      </li>
+      <li>
+	Bug fixed in SCI_GETTEXT macro command of director interface.
+      </li>
+      <li>
+	Cursor leak fixed on GTK+.
+      </li>
+      <li>
+	During SciTE shutdown, "identity" messages are no longer sent over the director interface.
+      </li>
+    </ul>
+    <h3>
        <a href="scite139.zip">Release 1.39</a>
     </h3>
     <ul>
