@@ -169,6 +169,7 @@
 	<li>Pescuma</li>
 	<li>Pavol Bosik</li>
 	<li>Johannes Schmid</li>
+	<li>Blair McGlashan</li>
     </ul>
     <p>
        Images used in GTK+ version
@@ -193,7 +194,7 @@
 	command.mode is a better way to specify tool command options in SciTE.
 	</li>
 	<li>
-	Wrapped lines can contain continuation markers.
+	Continuation markers can be displayed so that you can see which lines are wrapped.
 	</li>
 	<li>
 	Lexer for Gui4Cli language.
@@ -205,7 +206,20 @@
 	Lexer for Specman E language.
 	</li>
 	<li>
-	Perl treats "." not as part of an identifier.
+	Lexer for AutoIt3 language.
+	</li>
+	<li>
+	Lexer for APDL language.
+	</li>
+	<li>
+	Lexer for Bash language. Also reasonable for other Unix shells.
+	</li>
+	<li>
+	SciTE can load lexers implemented in external shared libraries.
+	</li>
+	<li>
+	Perl treats "." not as part of an identifier and interprets '/' and '->'
+	correctly in more circumstances.
 	</li>
 	<li>
 	PHP recognises variables within strings.
@@ -214,7 +228,16 @@
 	NSIS has properties "nsis.uservars" and "nsis.ignorecase".
 	</li>
 	<li>
+	MSSQL lexer adds keyword list for operators and stored procedures,
+	defines '(', ')', and ',' as operators and changes some other details.
+	</li>
+	<li>
 	Input method preedit window on GTK+ 2 may support some Asian languages.
+	</li>
+	<li>
+	Platform interface adds an extra platform-specific flag to Font::Create.
+	Used on wxWidgets to choose antialiased text display but may be used for
+	any task that a platform needs.
 	</li>
 	<li>
 	OnBeforeSave method added to Extension interface.
@@ -226,6 +249,9 @@
 	<li>
 	Visual Studio .NET project file now in VS .NET 2003 format so can not be used
 	directly in VS .NET 2002.
+	</li>
+	<li>
+	Scintilla can be built with GTK+ 2 on Windows.
 	</li>
 	<li>
 	Updated RPM spec for SciTE on GTK+.
@@ -241,15 +267,38 @@
 	SciTE abbreviations now use the longest possible match rather than the shortest.
 	</li>
 	<li>
+	Autocompletion does not remove prefix when actioned with no choice selected.
+	</li>
+	<li>
+	Autocompletion cancels when moving beyond the start position, not at the start position.
+	</li>
+	<li>
 	SciTE now shows only calltips for functions that match exactly, not
 	those that match as a prefix.
+	</li>
+	<li>
+	SciTE can repair box comment sections where some lines were added without
+	the box comment middle line prefix.
 	</li>
 	<li>
 	Alt+ works in user.shortcuts on Windows.
 	</li>
 	<li>
+	SciTE on GTK+ enables replace in selection for rectangular selections.
+	</li>
+	<li>
 	Key bindings for command.shortcut implemented in a way that doesn't break
 	when the menus are localised.
+	</li>
+	<li>
+	Drawing of background on GTK+ faster as theme drawing disabled.
+	</li>
+	<li>
+	On GTK+, calltips are moved back onto the screen if they extend beyond the screen bounds.
+	</li>
+	<li>
+	On Windows, the Scintilla object is destroyed on WM_NCDESTROY rather than
+	WM_DESTROY which arrives earlier. This fixes some problems when Scintilla was subclassed.
 	</li>
 	<li>
 	The zorder switching feature removed due to number of crashing bugs.
@@ -259,6 +308,27 @@
 	</li>
 	<li>
 	Bug fixed with primary selection on GTK+.
+	</li>
+	<li>
+	On GTK+ 2, copied or cut text can still be pasted after the Scintilla widget is destroyed.
+	</li>
+	<li>
+	Styling change not visible problem fixed when line was cached.
+	</li>
+	<li>
+	Bug in SciTE on Windows fixed where clipboard commands stopped working.
+	</li>
+	<li>
+	Crashing bugs in display fixed in line layout cache.
+	</li>
+	<li>
+	Crashing bug may be fixed on AMD64 processor on GTK+.
+	</li>
+	<li>
+	Rare hanging crash fixed in Python lexer.
+	</li>
+	<li>
+	Display bugs fixed with DBCS characters on GTK+.
 	</li>
 	<li>
 	Autocompletion lists on GTK+ 2 are not sorted by the ListModel as the
@@ -271,7 +341,7 @@
 	Sizing bug fixed on GTK+ when window resized while unmapped.
 	</li>
 	<li>
-	Text drawing bug fixed on GTK+ with non-Pango fonts and long strings.
+	Text drawing crashing bug fixed on GTK+ with non-Pango fonts and long strings.
 	</li>
 	<li>
 	Fixed some issues if characters are unsigned.
