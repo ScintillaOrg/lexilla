@@ -1186,11 +1186,11 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 					gdk_draw_text_wc(drawable, PFont(font_)->pfont, gc,
 							 x, ybase, wcp, lenDraw);
 					wclen -= lenDraw;
-					wcp += lenDraw;
 					if (wclen > 0) {	// Avoid next calculation if possible as may be expensive
 						x += gdk_text_width_wc(PFont(font_)->pfont,
 								       wcp, lenDraw);
 					}
+					wcp += lenDraw;
 				}
 			}
 		}
@@ -1200,10 +1200,10 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 				gdk_draw_text(drawable, PFont(font_)->pfont, gc,
 				              x, ybase, s, lenDraw);
 				len -= lenDraw;
-				s += lenDraw;
 				if (len > 0) {	// Avoid next calculation if possible as may be expensive
 					x += gdk_text_width(PFont(font_)->pfont, s, lenDraw);
 				}
+				s += lenDraw;
 			}
 		}
 	}
