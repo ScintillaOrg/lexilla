@@ -49,6 +49,7 @@
 class FontHandle {
 public:
 	int ascent;
+	int width[128];
 	GdkFont *pfont;
 #ifdef USE_PANGO
 	PangoFontDescription *pfd;
@@ -59,12 +60,18 @@ public:
 #ifdef USE_PANGO
 		pfd = 0;
 #endif
+		for (int i=0;i<128;i++) {
+			width[i] = 0;
+		}
 	}
 #ifdef USE_PANGO
 	FontHandle(PangoFontDescription *pfd_) {
 		ascent = 0;
 		pfont = 0;
 		pfd = pfd_;
+		for (int i=0;i<128;i++) {
+			width[i] = 0;
+		}
 	}
 #endif
 	~FontHandle() {
@@ -1070,10 +1077,15 @@ void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const c
 	DrawTextBase(rc, font_, ybase, s, len, fore);
 }
 
-// On GTK+, exactly same as DrawTextNoClip
 void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len,
                                   ColourAllocated fore) {
-	DrawTextBase(rc, font_, ybase, s, len, fore);
+	// Avoid drawing spaces in transparent mode
+	for (int i=0;i<len;i++) {
+		if (s[i] != ' ') {
+			DrawTextBase(rc, font_, ybase, s, len, fore);
+			return;
+		}
+	}
 }
 
 void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positions) {
@@ -1081,6 +1093,10 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 		int totalWidth = 0;
 #ifdef USE_PANGO
 		if (PFont(font_)->pfd) {
+			if (len == 1 && (static_cast<unsigned char>(*s) <= 127) && PFont(font_)->width[*s]) {
+				positions[0] = PFont(font_)->width[*s];
+				return;
+			}
 			PangoRectangle pos;
 			pango_layout_set_font_description(layout, PFont(font_)->pfd);
 			if (unicodeMode) {
@@ -1130,6 +1146,9 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 					}
 					delete []utfForm;
 				}
+			}
+			if (len == 1 && (static_cast<unsigned char>(*s) <= 127)) {
+				PFont(font_)->width[*s] = positions[0];
 			}
 			return;
 		}
