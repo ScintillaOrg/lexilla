@@ -4625,7 +4625,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_GETDOCPOINTER:
-		return reinterpret_cast<long>(pdoc);
+		return reinterpret_cast<sptr_t>(pdoc);
 
 	case SCI_SETDOCPOINTER:
 		SetDocPointer(reinterpret_cast<Document *>(lParam));
@@ -4634,7 +4634,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_CREATEDOCUMENT: {
 			Document *doc = new Document();
 			doc->AddRef();
-			return reinterpret_cast<long>(doc);
+			return reinterpret_cast<sptr_t>(doc);
 		}
 
 	case SCI_ADDREFDOCUMENT:

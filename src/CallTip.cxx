@@ -118,22 +118,22 @@ void CallTip::PaintCT(Surface *surfaceWindow) {
 
 PRectangle CallTip::CallTipStart(int pos, Point pt, const char *defn,
                                  const char *faceName, int size) {
-	Surface *surfaceMeasure=Surface::Allocate();
-	if (!surfaceMeasure)
-		return PRectangle();
-	surfaceMeasure->Init();
-	int deviceHeight = surfaceMeasure->DeviceHeightFont(size);
-	font.Create(faceName, SC_CHARSET_DEFAULT, deviceHeight, false, false);
 	if (val)
 		delete []val;
 	val = new char[strlen(defn) + 1];
 	if (!val)
 		return PRectangle();
 	strcpy(val, defn);
+	Surface *surfaceMeasure=Surface::Allocate();
+	if (!surfaceMeasure)
+		return PRectangle();
+	surfaceMeasure->Init();
 	startHighlight = 0;
 	endHighlight = 0;
 	inCallTipMode = true;
 	posStartCallTip = pos;
+	int deviceHeight = surfaceMeasure->DeviceHeightFont(size);
+	font.Create(faceName, SC_CHARSET_DEFAULT, deviceHeight, false, false);
 	// Look for multiple lines in the text
 	// Only support \n here - simply means container must avoid \r!
 	int width = 0;
@@ -151,6 +151,7 @@ PRectangle CallTip::CallTipStart(int pos, Point pt, const char *defn,
 	int lineHeight = surfaceMeasure->Height(font);
 	// Extra line for border and an empty line at top and bottom
 	int height = lineHeight * numLines - surfaceMeasure->InternalLeading(font) + 2 + 2;
+	delete surfaceMeasure;
 	return PRectangle(pt.x -5, pt.y + 1, pt.x + width - 5, pt.y + 1 + height);
 }
 
