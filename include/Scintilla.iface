@@ -1476,10 +1476,10 @@ set void SetSelectionMode=2422(int mode,)
 # Get the mode of the current selection.
 get int GetSelectionMode=2423(,)
 
-# Retrieve the position of the start of the selection at the given line (INVALID_POSITION of no selection on this line).
+# Retrieve the position of the start of the selection at the given line (INVALID_POSITION if no selection on this line).
 fun position GetLineSelStartPosition=2424(int line,)
 
-# Retrieve the position of the end of the selection at the given line (INVALID_POSITION of no selection on this line).
+# Retrieve the position of the end of the selection at the given line (INVALID_POSITION if no selection on this line).
 fun position GetLineSelEndPosition=2425(int line,)
 
 
