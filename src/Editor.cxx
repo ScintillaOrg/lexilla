@@ -3494,7 +3494,9 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 			} else {
 				cs.DeleteLines(lineOfPos, -mh.linesAdded);
 			}
-			CheckModificationForWrap(mh);
+		}
+		CheckModificationForWrap(mh);
+		if (mh.linesAdded != 0) {
 			// Avoid scrolling of display if change before current display
 			if (mh.position < posTopLine) {
 				int newTop = Platform::Clamp(topLine + mh.linesAdded, 0, MaxScrollPos());
@@ -6166,8 +6168,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETMARGINWIDTHN:
 		if (ValidMargin(wParam)) {
-			vs.ms[wParam].width = lParam;
-			InvalidateStyleRedraw();
+			// Short-circuit if the width is unchanged, to avoid unnecessary redraw.
+			if (vs.ms[wParam].width != lParam) {
+				vs.ms[wParam].width = lParam;
+				InvalidateStyleRedraw();
+			}
 		}
 		break;
 
