@@ -343,6 +343,10 @@ static void ColouriseMakeDoc(unsigned int startPos, int length, int, WordList *[
 	}
 }
 
+static bool strstart(char *haystack, char *needle) {
+	return strncmp(haystack, needle, strlen(needle)) == 0;
+}
+
 static void ColouriseErrorListLine(
     char *lineBuffer,
     unsigned int lengthLine,
@@ -367,10 +371,17 @@ static void ColouriseErrorListLine(
 		styler.ColourTo(endPos, SCE_ERR_PYTHON);
 	} else if (strstr(lineBuffer, " in ") && strstr(lineBuffer, " on line ")) {
 		styler.ColourTo(endPos, SCE_ERR_PHP);
-	} else if (0 == strncmp(lineBuffer, "Error ", strlen("Error "))) {
+	} else if ((strstart(lineBuffer, "Error ") ||
+		strstart(lineBuffer, "Warning ")) &&
+		strstr(lineBuffer, " at (") &&
+		strstr(lineBuffer, ") : ") &&
+		(strstr(lineBuffer, " at (") < strstr(lineBuffer, ") : "))) {
+		// Intel Fortran Compiler error/warning message
+		styler.ColourTo(endPos, SCE_ERR_IFC);
+	} else if (strstart(lineBuffer, "Error ")) {
 		// Borland error message
 		styler.ColourTo(endPos, SCE_ERR_BORLAND);
-	} else if (0 == strncmp(lineBuffer, "Warning ", strlen("Warning "))) {
+	} else if (strstart(lineBuffer, "Warning ")) {
 		// Borland warning message
 		styler.ColourTo(endPos, SCE_ERR_BORLAND);
 	} else if (strstr(lineBuffer, "at line " ) &&
@@ -389,6 +400,10 @@ static void ColouriseErrorListLine(
 		strstr(lineBuffer, ":line ")) {
 		// A .NET traceback
 		styler.ColourTo(endPos, SCE_ERR_NET);
+	} else if (strstart(lineBuffer, "Line ") &&
+		strstr(lineBuffer, ", file ")) {
+		// Essential Lahey Fortran error message
+		styler.ColourTo(endPos, SCE_ERR_ELF);
 	} else {
 		// Look for GCC <filename>:<line>:message
 		// Look for Microsoft <filename>(line)message
