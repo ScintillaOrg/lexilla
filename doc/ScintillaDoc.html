@@ -1513,6 +1513,9 @@ SCEN_KILLFOCUS
 	These notifications are sent using the WM_COMMAND message on 
 	Windows and the "Command" signal on GTK+ as this is the behaviour 
 	of the standard edit control.
+	The SET and KILL values are flipped over from the Windows edit 
+	control and as clients depend on these constants, this will not be changed
+	to be compatible.
     </p>
 <pre>
 SCN_MODIFIED

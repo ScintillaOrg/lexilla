@@ -1334,7 +1334,9 @@ val SC_MOD_BEFOREDELETE=0x800
 val SC_MODEVENTMASKALL=0xF77
 
 # For compatibility, these go through the COMMAND notification rather than NOTIFY
-# and have exactly the same values as the EN_* constants.
+# and should have had exactly the same values as the EN_* constants.
+# Unfortunately the SETFOCUS and KILLFOCUS are flipped over from EN_*
+# As clients depend on these constants, this will not be changed.
 val SCEN_CHANGE=768
 val SCEN_SETFOCUS=512
 val SCEN_KILLFOCUS=256
