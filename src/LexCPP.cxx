@@ -24,7 +24,7 @@ static bool IsOKBeforeRE(const int ch) {
 	return (ch == '(') || (ch == '=') || (ch == ',');
 }
 
-inline bool IsAWordChar(const int ch) {
+static inline bool IsAWordChar(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_');
 }
 
