@@ -68,22 +68,17 @@ static int PrintScriptingIndicatorOffset(Accessor &styler, unsigned int start, u
 }
 
 static int ScriptOfState(int state) {
-	int scriptLanguage;
-
 	if ((state >= SCE_HP_START) && (state <= SCE_HP_IDENTIFIER)) {
-		scriptLanguage = eScriptPython;
+		return eScriptPython;
 	} else if ((state >= SCE_HB_START) && (state <= SCE_HB_STRINGEOL)) {
-		scriptLanguage = eScriptVBS;
+		return eScriptVBS;
 	} else if ((state >= SCE_HJ_START) && (state <= SCE_HJ_REGEX)) {
-		scriptLanguage = eScriptJS;
+		return eScriptJS;
 	} else if ((state >= SCE_HPHP_DEFAULT) && (state <= SCE_HPHP_COMMENTLINE)) {
-		scriptLanguage = eScriptPHP;
+		return eScriptPHP;
 	} else {
-		//		scriptLanguage = defaultScript;
-		scriptLanguage = eScriptNone;
+		return eScriptNone;
 	}
-
-	return scriptLanguage;
 }
 
 static int statePrintForState(int state, int inScriptType) {
@@ -374,21 +369,29 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	if (InTagState(state)) {
 		while ((startPos > 0) && (InTagState(styler.StyleAt(startPos - 1)))) {
 			startPos--;
-            length++;
+			length++;
 		}
 		state = SCE_H_DEFAULT;
 	}
 	styler.StartAt(startPos, 127);
 
-	int lineState = eScriptVBS;
 	int lineCurrent = styler.GetLine(startPos);
-	if (lineCurrent > 0)
+	int lineState = 0;
+	if (lineCurrent > 0) {
 		lineState = styler.GetLineState(lineCurrent);
+	} else {
+		lineState = eScriptJS << 8;	// Default client script is JavaScript
+		if (styler.GetPropertyInt("asp.default.to.vbs"))
+			lineState |= eScriptVBS << 4;
+		else	// Default ASP script to JavaScript for compatibbility with old versions
+			lineState |= eScriptJS << 4;
+	}
 	int inScriptType  = (lineState >> 0) & 0x03; // 2 bits of scripting type
 	bool tagOpened    = (lineState >> 2) & 0x01; // 1 bit to know if we are in an opened tag
 	bool tagClosing   = (lineState >> 3) & 0x01; // 1 bit to know if we are in a closing tag
-	int defaultScript = (lineState >> 4) & 0x0F; // 4 bits of script name
-	int beforePreProc = (lineState >> 8) & 0xFF; // 8 bits of state
+	int aspScript = (lineState >> 4) & 0x0F; // 4 bits of script name
+	int clientScript = (lineState >> 8) & 0x0F; // 4 bits of script name
+	int beforePreProc = (lineState >> 12) & 0xFF; // 8 bits of state
 
 	int scriptLanguage = ScriptOfState(state);
 
@@ -487,11 +490,12 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			}
 			lineCurrent++;
 			styler.SetLineState(lineCurrent,
-			                    ((inScriptType  & 0x03) << 0) |
-								((tagOpened     & 0x01) << 2) |
-								((tagClosing    & 0x01) << 3) |
-			                    ((defaultScript & 0x0F) << 4) |
-			                    ((beforePreProc & 0xFF) << 8));
+				((inScriptType  & 0x03) << 0) |
+				((tagOpened     & 0x01) << 2) |
+				((tagClosing    & 0x01) << 3) |
+				((aspScript & 0x0F) << 4) |
+				((clientScript & 0x0F) << 8) |
+				((beforePreProc & 0xFF) << 12));
 		}
 
 		// generic end of script processing
@@ -519,6 +523,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				state = SCE_H_TAGUNKNOWN;
 				inScriptType = eHtml;
 				scriptLanguage = eScriptNone;
+				clientScript = eScriptJS;
 				i += 2;
 				// unfold closing script
 				levelCurrent--;
@@ -580,7 +585,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					i++; // place as if it was the next char treated
 				}
 
-				state = StateForScript(defaultScript);
+				state = StateForScript(aspScript);
 			}
 			scriptLanguage = eScriptVBS;
 			styler.ColourTo(i, SCE_H_ASP);
@@ -600,8 +605,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				 (ch == '%'))
 			) && (chNext == '>')) {
 			if (state == SCE_H_ASPAT) {
-				defaultScript = segIsScriptingIndicator(styler,
-					styler.GetStartSegment(), i - 1, defaultScript);
+				aspScript = segIsScriptingIndicator(styler,
+					styler.GetStartSegment(), i - 1, aspScript);
 			}
 			// Bounce out of any ASP mode
 			switch (state) {
@@ -706,7 +711,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				int eClass = classifyTagHTML(styler.GetStartSegment(), i - 1, keywords, styler);
 				if (eClass == SCE_H_SCRIPT) {
 					inScriptType = eNonHtmlScript;
-					scriptLanguage = defaultScript;
+					scriptLanguage = clientScript;
 					eClass = SCE_H_TAG;
 				}
 				if (ch == '>') {
@@ -724,14 +729,14 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					tagClosing = false;
 			    } else if (ch == '/' && chNext == '>') {
 					if (eClass == SCE_H_TAGUNKNOWN) {
-					    styler.ColourTo(i + 1, SCE_H_TAGUNKNOWN);
+						styler.ColourTo(i + 1, SCE_H_TAGUNKNOWN);
 					} else {
-					    styler.ColourTo(i - 1, StateToPrint);
-					    styler.ColourTo(i + 1, SCE_H_TAGEND);
+						styler.ColourTo(i - 1, StateToPrint);
+						styler.ColourTo(i + 1, SCE_H_TAGEND);
 					}
-				    i++;
-				    ch = chNext;
-				    state = SCE_H_DEFAULT;
+					i++;
+					ch = chNext;
+					state = SCE_H_DEFAULT;
 					tagOpened = false;
 				} else {
 					if (eClass != SCE_H_TAGUNKNOWN) {
@@ -750,7 +755,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			if (!ishtmlwordchar(ch) && ch != '/' && ch != '-') {
 				if (inScriptType == eNonHtmlScript) {
 					int scriptLanguagePrev = scriptLanguage;
-					scriptLanguage = segIsScriptingIndicator(styler, styler.GetStartSegment(), i - 1, scriptLanguage);
+					clientScript = segIsScriptingIndicator(styler, styler.GetStartSegment(), i - 1, scriptLanguage);
+					scriptLanguage = clientScript;
 					if ((scriptLanguagePrev != scriptLanguage) && (scriptLanguage == eScriptNone))
 						inScriptType = eHtml;
 				}
