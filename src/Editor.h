@@ -261,7 +261,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	enum selTypes { noSel, selStream, selRectangle, selLines };
 	selTypes selType;
 	bool moveExtendsSelection;
-	int xEndSelect;		///< x position of end of rectangular selection by mouse.
+	int xStartSelect;	///< x position of start of rectangular selection
+	int xEndSelect;		///< x position of end of rectangular selection
 	bool primarySelection;
 
 	int caretXPolicy;
@@ -333,7 +334,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void SetSelection(int currentPos_);
 	void SetEmptySelection(int currentPos_);
 	bool RangeContainsProtected(int start, int end) const;
-	bool SelectionContainsProtected() const;
+	bool SelectionContainsProtected();
 	int MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd=true);
 	int MovePositionTo(int newPos, selTypes sel=noSel, bool ensureVisible=true);
 	int MovePositionSoVisible(int pos, int moveDir);

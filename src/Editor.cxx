@@ -322,7 +322,8 @@ Editor::Editor() {
 
 	selType = selStream;
 	moveExtendsSelection = false;
-	xEndSelect = -1;
+	xStartSelect = 0;
+	xEndSelect = 0;
 	primarySelection = true;
 
 	caretXPolicy = CARET_SLOP | CARET_EVEN;
@@ -415,6 +416,10 @@ void Editor::InvalidateStyleData() {
 	palette.Release();
 	DropGraphics();
 	llc.Invalidate(LineLayout::llInvalid);
+	if (selType == selRectangle) {
+		xStartSelect = XFromPosition(anchor);
+		xEndSelect = XFromPosition(currentPos);
+	}
 }
 
 void Editor::InvalidateStyleRedraw() {
@@ -560,17 +565,10 @@ public:
 		selEnd = ed->SelectionEnd();
 		lineStart = ed->pdoc->LineFromPosition(selStart);
 		lineEnd = ed->pdoc->LineFromPosition(selEnd);
-		int xStartSelect = ed->XFromPosition(ed->anchor);
-		// Take the x value from the mouse move
-		int xEndSelect = ed->xEndSelect;
-		// If -1, it is a keyboard selection, compute it from current position.
-		if (xEndSelect == -1) {
-			xEndSelect = ed->XFromPosition(ed->currentPos);
-		}
 		// Left of rectangle
-		minX = Platform::Minimum(xStartSelect, xEndSelect);
+		minX = Platform::Minimum(ed->xStartSelect, ed->xEndSelect);
 		// Right of rectangle
-		maxX = Platform::Maximum(xStartSelect, xEndSelect);
+		maxX = Platform::Maximum(ed->xStartSelect, ed->xEndSelect);
 		Reset();
 	}
 	~SelectionLineIterator() {}
@@ -896,6 +894,10 @@ void Editor::SetSelection(int currentPos_, int anchor_) {
 		currentPos = currentPos_;
 		anchor = anchor_;
 	}
+	if (selType == selRectangle) {
+		xStartSelect = XFromPosition(anchor);
+		xEndSelect = XFromPosition(currentPos);
+	}
 	ClaimSelection();
 }
 
@@ -905,13 +907,16 @@ void Editor::SetSelection(int currentPos_) {
 		InvalidateSelection(currentPos_, currentPos_);
 		currentPos = currentPos_;
 	}
+	if (selType == selRectangle) {
+		xStartSelect = XFromPosition(anchor);
+		xEndSelect = XFromPosition(currentPos);
+	}
 	ClaimSelection();
 }
 
 void Editor::SetEmptySelection(int currentPos_) {
 	selType = selStream;
 	moveExtendsSelection = false;
-	xEndSelect = -1;
 	SetSelection(currentPos_, currentPos_);
 }
 
@@ -931,13 +936,27 @@ bool Editor::RangeContainsProtected(int start, int end) const {
 	return false;
 }
 
-bool Editor::SelectionContainsProtected() const {
-	// TODO: make support rectangular selection
-	return RangeContainsProtected(anchor, currentPos);
+bool Editor::SelectionContainsProtected() {
+	// DONE, but untested...: make support rectangular selection
+	bool scp = false;
+	if (selType == selStream) {
+		scp = RangeContainsProtected(anchor, currentPos);
+	} else {
+		SelectionLineIterator lineIterator(this);
+		while (lineIterator.Iterate()) {
+			if (RangeContainsProtected(lineIterator.startPos, lineIterator.endPos)) {
+				scp = true;
+				break;
+			}
+		}
+	}
+	return scp;
 }
 
+/**
+ * Asks document to find a good position and then moves out of any invisible positions.
+ */
 int Editor::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
-	// Asks document to find a good position and then moves out of any invisible positions
 	pos = pdoc->MovePositionOutsideChar(pos, moveDir, checkLineEnd);
 	if (vs.ProtectionActive()) {
 		int mask = pdoc->stylingBitsMask;
@@ -999,7 +1018,7 @@ int Editor::MovePositionSoVisible(int pos, int moveDir) {
 
 /**
  * Choose the x position that the caret will try to stick to
- * as it is moves up and down.
+ * as it moves up and down.
  */
 void Editor::SetLastXChosen() {
 	Point pt = LocationFromPosition(currentPos);
@@ -2574,6 +2593,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		//ElapsedTime etWhole;
 		int lineDocPrevious = -1;	// Used to avoid laying out one document line multiple times
 		AutoLineLayout ll(llc, 0);
+		SelectionLineIterator lineIterator(this);
 		while (visibleLine < cs.LinesDisplayed() && yposScreen < rcArea.bottom) {
 
 			int lineDoc = cs.DocFromDisplay(visibleLine);
@@ -2597,7 +2617,6 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 					ll->selStart = SelectionStart();
 					ll->selEnd = SelectionEnd();
 				} else {
-					SelectionLineIterator lineIterator(this);
 					lineIterator.SetAt(lineDoc);
 					ll->selStart = lineIterator.startPos;
 					ll->selEnd = lineIterator.endPos;
@@ -4540,52 +4559,61 @@ void Editor::DropAt(int position, const char *value, bool moving, bool rectangul
 	}
 }
 
-static int BeforeInOrAfter(int val, int minim, int maxim) {
-	if (val < minim)
-		return -1;
-	else if (val > maxim)
-		return 1;
-	else
-		return 0;
-}
-
+/**
+ * @return -1 if given position is before the selection,
+ *          1 if position is after the selection,
+ *          0 if position is inside the selection,
+ */
 int Editor::PositionInSelection(int pos) {
 	pos = MovePositionOutsideChar(pos, currentPos - pos);
+	if (pos < SelectionStart()) {
+		return -1;
+	}
+	if (pos > SelectionEnd()) {
+		return 1;
+	}
 	if (selType == selStream) {
-		if (currentPos > anchor) {
-			return BeforeInOrAfter(pos, anchor, currentPos);
-		} else if (currentPos < anchor) {
-			return BeforeInOrAfter(pos, currentPos, anchor);
-		}
+		return 0;
 	} else {
-		if (pos < SelectionStart()) {
-			return -1;
-		}
-		if (pos > SelectionEnd()) {
-			return 1;
-		}
 		SelectionLineIterator lineIterator(this);
 		lineIterator.SetAt(pdoc->LineFromPosition(pos));
-		return BeforeInOrAfter(pos, lineIterator.startPos, lineIterator.endPos);
+		if (pos < lineIterator.startPos) {
+			return -1;
+		} else if (pos > lineIterator.endPos) {
+			return 1;
+		} else {
+			return 0;
+		}
 	}
-	return 1;	// Just to avoid a stupid warning from VC++: "warning C4715: not all control paths return a value"!
 }
 
 bool Editor::PointInSelection(Point pt) {
-	// TODO: fix up for rectangular selection
 	int pos = PositionFromLocation(pt);
 	if (0 == PositionInSelection(pos)) {
-		if (pos == SelectionStart()) {
+		// Probably inside, but we must make a finer test
+		int selStart, selEnd;
+		if (selType == selStream) {
+			selStart = SelectionStart();
+			selEnd = SelectionEnd();
+		} else {
+			SelectionLineIterator lineIterator(this);
+			lineIterator.SetAt(pdoc->LineFromPosition(pos));
+			selStart = lineIterator.startPos;
+			selEnd = lineIterator.endPos;
+		}
+		if (pos == selStart) {
 			// see if just before selection
 			Point locStart = LocationFromPosition(pos);
-			if (pt.x < locStart.x)
+			if (pt.x < locStart.x) {
 				return false;
+			}
 		}
-		if (pos == SelectionEnd()) {
+		if (pos == selEnd) {
 			// see if just after selection
 			Point locEnd = LocationFromPosition(pos);
-			if (pt.x > locEnd.x)
+			if (pt.x > locEnd.x) {
 				return false;
+			}
 		}
 		return true;
 	}
@@ -4725,9 +4753,11 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 			} else {
 				SetDragPosition(invalidPosition);
 				SetMouseCapture(true);
-				if (!shift)
+				if (!shift) {
 					SetEmptySelection(newPos);
+				}
 				selType = alt ? selRectangle : selStream;
+				xStartSelect = xEndSelect = pt.x - vs.fixedColumnWidth + xOffset;
 				selectionType = selChar;
 				originalAnchorPos = currentPos;
 			}
@@ -4744,7 +4774,7 @@ bool Editor::PositionIsHotspot(int position) {
 
 bool Editor::PointIsHotspot(Point pt) {
 	int pos = PositionFromLocationClose(pt);
-	if(pos == INVALID_POSITION)
+	if (pos == INVALID_POSITION)
 		return false;
 	return PositionIsHotspot(pos);
 }
@@ -4801,9 +4831,6 @@ void Editor::ButtonMove(Point pt) {
 			return;
 		autoScrollTimer.ticksToWait = autoScrollDelay;
 
-		// While dragging to make rectangular selection, we don't want the current
-		// position to jump to the end of smaller or empty lines.
-		xEndSelect = pt.x - vs.fixedColumnWidth + xOffset;
 		// Adjust selection
 		int movePos = PositionFromLocation(pt);
 		movePos = MovePositionOutsideChar(movePos, currentPos - movePos);
@@ -4827,6 +4854,9 @@ void Editor::ButtonMove(Point pt) {
 				LineSelection(lineMove, lineAnchor);
 			}
 		}
+		// While dragging to make rectangular selection, we don't want the current
+		// position to jump to the end of smaller or empty lines.
+		xEndSelect = pt.x - vs.fixedColumnWidth + xOffset;
 
 		// Autoscroll
 		PRectangle rcClient = GetClientRectangle();
@@ -4878,8 +4908,6 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 		}
 		ptMouseLast = pt;
 		SetMouseCapture(false);
-		// Now we rely on the current pos to compute rectangular selection
-		xEndSelect = -1;
 		int newPos = PositionFromLocation(pt);
 		newPos = MovePositionOutsideChar(newPos, currentPos - newPos);
 		if (inDragDrop) {
@@ -4914,6 +4942,9 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 				SetSelection(newPos);
 			}
 		}
+		// Now we rely on the current pos to compute rectangular selection
+		xStartSelect = XFromPosition(anchor);
+		xEndSelect = XFromPosition(currentPos);
 		lastClickTime = curTime;
 		lastClick = pt;
 		lastXChosen = pt.x;
@@ -6592,7 +6623,6 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 				moveExtendsSelection = !moveExtendsSelection || (selType != selStream);
 				selType = selStream;
 			}
-			xEndSelect = -1;
 			InvalidateSelection(currentPos, anchor);
 		}
 	case SCI_GETSELECTIONMODE:
