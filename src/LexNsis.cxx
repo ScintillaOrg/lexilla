@@ -2,8 +2,8 @@
 /** @file LexNsis.cxx
  ** Lexer for NSIS
  **/
-// Copyright 2003, 2004 by Angelo Mandato <angelo [at] spaceblue [dot] com>
-// Last Updated: 02/26/2005
+// Copyright 2003 - 2005 by Angelo Mandato <angelo [at] spaceblue [dot] com>
+// Last Updated: 03/13/2005
 // The License.txt file describes the conditions under which this software may be distributed.
 #include <stdlib.h>
 #include <string.h>
@@ -102,7 +102,7 @@ static int NsisCmp( char *s1, char *s2, bool bIgnoreCase )
   return strcmp( s1, s2 );
 }
 
-static int calculateFoldNsis(unsigned int start, unsigned int end, int foldlevel, Accessor &styler, bool bElse )
+static int calculateFoldNsis(unsigned int start, unsigned int end, int foldlevel, Accessor &styler, bool bElse, bool foldUtilityCmd )
 {
   int style = styler.StyleAt(end);
 
@@ -110,12 +110,22 @@ static int calculateFoldNsis(unsigned int start, unsigned int end, int foldlevel
   if( end - start > 20 )
     return foldlevel;
 
-  // Check the style at this point, if it is not valid, then return zero
-  if( style != SCE_NSIS_FUNCTIONDEF && style != SCE_NSIS_SECTIONDEF &&
-      style != SCE_NSIS_SUBSECTIONDEF && style != SCE_NSIS_IFDEFINEDEF &&
-      style != SCE_NSIS_MACRODEF && style != SCE_NSIS_SECTIONGROUP &&
-      style != SCE_NSIS_PAGEEX )
-        return foldlevel;
+  if( foldUtilityCmd )
+  {
+    // Check the style at this point, if it is not valid, then return zero
+    if( style != SCE_NSIS_FUNCTIONDEF && style != SCE_NSIS_SECTIONDEF &&
+        style != SCE_NSIS_SUBSECTIONDEF && style != SCE_NSIS_IFDEFINEDEF &&
+        style != SCE_NSIS_MACRODEF && style != SCE_NSIS_SECTIONGROUP &&
+        style != SCE_NSIS_PAGEEX )
+          return foldlevel;
+  }
+  else
+  { 
+    if( style != SCE_NSIS_FUNCTIONDEF && style != SCE_NSIS_SECTIONDEF &&
+        style != SCE_NSIS_SUBSECTIONDEF && style != SCE_NSIS_SECTIONGROUP &&
+        style != SCE_NSIS_PAGEEX )
+          return foldlevel;
+  }
 
   int newFoldlevel = foldlevel;
   bool bIgnoreCase = false;
@@ -524,19 +534,7 @@ static void ColouriseNsisDoc(unsigned int startPos, int length, int, WordList *k
 	}
 
   // Colourise remaining document
-  switch( state )
-  {
-    case SCE_NSIS_COMMENT:
-    case SCE_NSIS_STRINGDQ:
-    case SCE_NSIS_STRINGLQ:
-    case SCE_NSIS_STRINGRQ:
-    case SCE_NSIS_VARIABLE:
-    case SCE_NSIS_STRINGVAR:
-      styler.ColourTo(nLengthDoc-1,state); break;
-
-    default:
-      styler.ColourTo(nLengthDoc-1,SCE_NSIS_DEFAULT); break;
-  }
+	styler.ColourTo(nLengthDoc-1,state);
 }
 
 static void FoldNsisDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler)
@@ -546,6 +544,7 @@ static void FoldNsisDoc(unsigned int startPos, int length, int, WordList *[], Ac
 		return;
 
   bool foldAtElse = styler.GetPropertyInt("fold.at.else", 0) == 1;
+  bool foldUtilityCmd = styler.GetPropertyInt("nsis.foldutilcmd", 1) == 1;
   bool blockComment = false;
 
   int lineCurrent = styler.GetLine(startPos);
@@ -581,7 +580,7 @@ static void FoldNsisDoc(unsigned int startPos, int length, int, WordList *[], Ac
       blockComment = true;
     }
 
-    if( bArg1 && chCurr != '\n' && !blockComment)
+    if( bArg1 && !blockComment)
     {
       if( nWordStart == -1 && (isNsisLetter(chCurr) || chCurr == '!') )
       {
@@ -589,11 +588,11 @@ static void FoldNsisDoc(unsigned int startPos, int length, int, WordList *[], Ac
       }
       else if( isNsisLetter(chCurr) == false && nWordStart > -1 )
       {
-        int newLevel = calculateFoldNsis( nWordStart, i-1, levelNext, styler, foldAtElse );
+        int newLevel = calculateFoldNsis( nWordStart, i-1, levelNext, styler, foldAtElse, foldUtilityCmd );
 
         if( newLevel == levelNext )
         {
-          if( foldAtElse )
+          if( foldAtElse && foldUtilityCmd )
           {
             if( NsisNextLineHasElse(i, startPos + length, styler) )
               levelNext--;
@@ -607,7 +606,7 @@ static void FoldNsisDoc(unsigned int startPos, int length, int, WordList *[], Ac
 
     if( chCurr == '\n' )
     {
-      if( bArg1 && foldAtElse && !blockComment )
+      if( bArg1 && foldAtElse && foldUtilityCmd && !blockComment )
       {
         if( NsisNextLineHasElse(i, startPos + length, styler) )
           levelNext--;
