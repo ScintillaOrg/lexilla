@@ -44,7 +44,7 @@ else
 ifdef GTK1
 CONFIGFLAGS=gtk-config --cflags
 else
-ifneq (,$(findstring /,$(shell whereis -b pkg-config)))
+ifneq (,$(findstring /,$(shell whereis pkg-config)))
 CONFIGFLAGS=pkg-config --cflags gtk+-2.0
 else
 CONFIGFLAGS=gtk-config --cflags
