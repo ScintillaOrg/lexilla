@@ -366,7 +366,7 @@ static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unuse
 
 	// Process all characters to end of requested range or end of any triple quote
 	// or comment that hangs over the end of the range
-	for (int i = startPos; i < lengthDoc && ((lineCurrent < maxLines) || prevQuote || prevComment); i++) {
+	for (int i = startPos; i < lengthDoc && ((lineCurrent <= maxLines) || prevQuote || prevComment); i++) {
 
 		// Next character
 		char ch = chNext;
@@ -384,7 +384,8 @@ static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unuse
 			int quote_start = (quote && !prevQuote);
 			int quote_continue = (quote && prevQuote);
 			int comment = IsCommentLine(lineCurrent, styler);
-			int comment_start = (comment && !prevComment && IsCommentLine(lineNext, styler));
+			int comment_start = (comment && !prevComment && 
+				IsCommentLine(lineNext, styler) && (lev > SC_FOLDLEVELBASE));
 			int comment_continue = (comment && prevComment);
 
 			if (quote_start) {
