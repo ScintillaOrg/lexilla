@@ -319,5 +319,12 @@ static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordLis
 	styler.SetLevel(lineCurrent, levelPrev | flagsNext);
 }
 
-LexerModule lmCPP(SCLEX_CPP, ColouriseCppDoc, "cpp", FoldCppDoc);
-LexerModule lmTCL(SCLEX_TCL, ColouriseCppDoc, "tcl", FoldCppDoc);
+static const char * const cppWordLists[] = {
+	"Primary keywords and identifiers",
+	"Secondary keywords and identifiers",
+	"Documentation comment keywords",
+	0,
+};
+
+LexerModule lmCPP(SCLEX_CPP, ColouriseCppDoc, "cpp", FoldCppDoc, cppWordLists);
+LexerModule lmTCL(SCLEX_TCL, ColouriseCppDoc, "tcl", FoldCppDoc, cppWordLists);

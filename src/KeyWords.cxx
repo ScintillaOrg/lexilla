@@ -23,10 +23,12 @@ const LexerModule *LexerModule::base = 0;
 int LexerModule::nextLanguage = SCLEX_AUTOMATIC+1;
 
 LexerModule::LexerModule(int language_, LexerFunction fnLexer_,
-	const char *languageName_, LexerFunction fnFolder_) :
+	const char *languageName_, LexerFunction fnFolder_,
+	const char * const wordListDescriptions_[]) :
 	language(language_), 
 	fnLexer(fnLexer_), 
 	fnFolder(fnFolder_), 
+	wordListDescriptions(wordListDescriptions_), 
 	languageName(languageName_) {
 	next = base;
 	base = this;
@@ -36,6 +38,31 @@ LexerModule::LexerModule(int language_, LexerFunction fnLexer_,
 	}
 }
 
+int LexerModule::GetNumWordLists() const {
+	if (wordListDescriptions == NULL) {
+		return -1;
+	} else {
+		int numWordLists = 0;
+
+		while (wordListDescriptions[numWordLists]) {
+			++numWordLists;
+		}
+
+		return numWordLists;
+	}
+}
+
+const char * LexerModule::GetWordListDescription(int index) const {
+	static const char *emptyStr = "";
+
+	PLATFORM_ASSERT(index < GetNumWordLists());
+	if (index >= GetNumWordLists()) {
+		return emptyStr;
+	} else {
+		return wordListDescriptions[index];
+ 	}
+}
+ 
 const LexerModule *LexerModule::Find(int language) {
 	const LexerModule *lm = base;
 	while (lm) {

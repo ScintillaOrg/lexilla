@@ -1851,7 +1851,17 @@ static void ColourisePHPDoc(unsigned int startPos, int length, int initStyle, Wo
 	sc.Complete();
 }
 
-LexerModule lmHTML(SCLEX_HTML, ColouriseHyperTextDoc, "hypertext");
-LexerModule lmXML(SCLEX_XML, ColouriseHyperTextDoc, "xml");
-LexerModule lmASP(SCLEX_ASP, ColouriseASPDoc, "asp");
-LexerModule lmPHP(SCLEX_PHP, ColourisePHPDoc, "php");
+static const char * const htmlWordListDesc[] = {
+	"HTML elements and attributes",
+	"JavaScript keywords",
+	"VBScript keywords",
+	"Python keywords",
+	"PHP keywords",
+	"SGML and DTD keywords",
+	0,
+};
+
+LexerModule lmHTML(SCLEX_HTML, ColouriseHyperTextDoc, "hypertext", 0, htmlWordListDesc);
+LexerModule lmXML(SCLEX_XML, ColouriseHyperTextDoc, "xml", 0, htmlWordListDesc);
+LexerModule lmASP(SCLEX_ASP, ColouriseASPDoc, "asp", 0, htmlWordListDesc);
+LexerModule lmPHP(SCLEX_PHP, ColourisePHPDoc, "php", 0, htmlWordListDesc);
