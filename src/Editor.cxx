@@ -371,7 +371,7 @@ Editor::Editor() {
 	wrapWidth = LineLayout::wrapWidthInfinite;
 	docLineLastWrapped = -1;
 
-	llc.SetLevel(LineLayoutCache::llcDocument);
+	llc.SetLevel(LineLayoutCache::llcCaret);
 }
 
 Editor::~Editor() {
