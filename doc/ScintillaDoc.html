@@ -38,7 +38,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 9/March/2005 NH</p>
+    <p>Last edited 3/April/2005 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -4545,7 +4545,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
           information this holds a pointer to the text that is handed to the Undo system, otherwise
           it is zero. For user performed SC_MOD_BEFOREDELETE the text field is 0 and
 		  for user performed SC_MOD_BEFOREINSERT the text field points to an array of cells,
-	 	  not bytes.</td>
+	 	  not bytes and the length is the number of cells.</td>
         </tr>
 
         <tr>
@@ -4573,7 +4573,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
 
     <p>The <code>SCNotification.modificationType</code> field has bits set to tell you what has
     been done. The <code>SC_MOD_*</code> bits correspond to actions. The
-    <code>SC_PREFORMED_*</code> bits tell you if the action was done by the user, or the result of
+    <code>SC_PERFORMED_*</code> bits tell you if the action was done by the user, or the result of
     Undo or Redo of a previous action.</p>
 
     <table cellpadding="1" cellspacing="2" border="0" summary="Modify notification type flags">
@@ -4687,7 +4687,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
 
           <td>Text is about to be inserted into the document.</td>
 
-          <td><code>position, length</code></td>
+          <td><code>position, if performed by user then text in cells, length in cells</code></td>
         </tr>
 
         <tr>
