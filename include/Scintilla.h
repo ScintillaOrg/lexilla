@@ -440,12 +440,6 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_SEARCHANCHOR 2366
 #define SCI_SEARCHNEXT 2367
 #define SCI_SEARCHPREV 2368
-#define CARET_SLOP 0x01
-#define CARET_CENTER 0x02
-#define CARET_STRICT 0x04
-#define CARET_XEVEN 0x08
-#define CARET_XJUMPS 0x10
-#define SCI_SETCARETPOLICY 2369
 #define SCI_LINESONSCREEN 2370
 #define SCI_USEPOPUP 2371
 #define SCI_SELECTIONISRECTANGLE 2372
@@ -479,6 +473,12 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_SETXOFFSET 2397
 #define SCI_GETXOFFSET 2398
 #define SCI_GRABFOCUS 2400
+#define CARET_SLOP 0x01
+#define CARET_STRICT 0x04
+#define CARET_JUMPS 0x10
+#define CARET_EVEN 0x08
+#define SCI_SETXCARETPOLICY 2402
+#define SCI_SETYCARETPOLICY 2403
 #define SCI_STARTRECORD 3001
 #define SCI_STOPRECORD 3002
 #define SCI_SETLEXER 4001
@@ -612,6 +612,11 @@ struct SCNotification {
 // To enable these features define INCLUDE_DEPRECATED_FEATURES
 
 #ifdef INCLUDE_DEPRECATED_FEATURES
+
+#define SCI_SETCARETPOLICY 2369
+#define CARET_CENTER 0x02
+#define CARET_XEVEN 0x08
+#define CARET_XJUMPS 0x10
 
 #define SCN_POSCHANGED 2012
 #define SCN_CHECKBRACE 2007

@@ -35,11 +35,11 @@
 ## Features may be removed but they will go through a period of deprecation
 ## before removal which is signalled by moving them into the Deprecated category.
 ##
-## enu has the syntax enu<ws><enumeration>=<prefix>[<ws><prefix>]* where all the val 
-## features in this file starting with a given <prefix> are considered part of the 
+## enu has the syntax enu<ws><enumeration>=<prefix>[<ws><prefix>]* where all the val
+## features in this file starting with a given <prefix> are considered part of the
 ## enumeration.
 ##
-## lex has the syntax lex<ws><name>=<lexerVal><ws><prefix>[<ws><prefix>]* 
+## lex has the syntax lex<ws><name>=<lexerVal><ws><prefix>[<ws><prefix>]*
 ## where name is a reasonably capitalised (Python, XML) identifier or UI name,
 ## lexerVal is the val used to specify the lexer, and the list of prefixes is similar
 ## to enu. The name may not be the same as that used within the lexer so the lexerVal
@@ -86,37 +86,37 @@ val SCI_START=2000
 val SCI_OPTIONAL_START=3000
 val SCI_LEXER_START=4000
 
-# Add text to the document
+# Add text to the document.
 fun void AddText=2001(int length, string text)
 
-# Add array of cells to document
+# Add array of cells to document.
 fun void AddStyledText=2002(int length, cells c)
 
-# Insert string at a position
+# Insert string at a position.
 fun void InsertText=2003(position pos, string text)
 
-# Delete all text in the document
+# Delete all text in the document.
 fun void ClearAll=2004(,)
 
-# Set all style bytes to 0, remove all folding information
+# Set all style bytes to 0, remove all folding information.
 fun void ClearDocumentStyle=2005(,)
 
-# The number of characters in the document
+# The number of characters in the document.
 get int GetLength=2006(,)
 
-# Returns the character byte at the position
+# Returns the character byte at the position.
 get int GetCharAt=2007(position pos,)
 
-# Returns the position of the caret
+# Returns the position of the caret.
 get position GetCurrentPos=2008(,)
 
-# Returns the position of the opposite end of the selection to the caret
+# Returns the position of the opposite end of the selection to the caret.
 get position GetAnchor=2009(,)
 
-# Returns the style byte at the position
+# Returns the style byte at the position.
 get int GetStyleAt=2010(position pos,)
 
-# Redoes the next action on the undo history
+# Redoes the next action on the undo history.
 fun void Redo=2011(,)
 
 # Choose between collecting actions into the undo
@@ -134,10 +134,10 @@ fun void SetSavePoint=2014(,)
 # Returns the number of bytes in the buffer not including terminating nulls.
 fun int GetStyledText=2015(, textrange tr)
 
-# Are there any redoable actions in the undo history.
+# Are there any redoable actions in the undo history?
 fun bool CanRedo=2016(,)
 
-# Retrieve the line number at which a particular marker is located
+# Retrieve the line number at which a particular marker is located.
 fun int MarkerLineFromHandle=2017(int handle,)
 
 # Delete a marker.
@@ -197,23 +197,21 @@ get int GetEOLMode=2030(,)
 set void SetEOLMode=2031(int eolMode,)
 
 # Set the current styling position to pos and the styling mask to mask.
-# The styling mask can be used to protect some bits in each styling byte from
-# modification.
+# The styling mask can be used to protect some bits in each styling byte from modification.
 fun void StartStyling=2032(position pos, int mask)
 
 # Change style from current styling position for length characters to a style
 # and move the current styling position to after this newly styled segment.
 fun void SetStyling=2033(int length, int style)
 
-# Is drawing done first into a buffer or direct to the screen.
+# Is drawing done first into a buffer or direct to the screen?
 get bool GetBufferedDraw=2034(,)
 
 # If drawing is buffered then each line of text is drawn into a bitmap buffer
 # before drawing it to the screen to avoid flicker.
 set void SetBufferedDraw=2035(bool buffered,)
 
-# Change the visible size of a tab to be a multiple of the width of a space
-# character.
+# Change the visible size of a tab to be a multiple of the width of a space character.
 set void SetTabWidth=2036(int tabWidth,)
 
 # Retrieve the visible size of a tab.
@@ -227,7 +225,7 @@ val SC_CP_UTF8=65001
 # The SC_CP_UTF8 value can be used to enter Unicode mode.
 set void SetCodePage=2037(int codePage,)
 
-# In palette mode, Scintilla uses the environments palette calls to display
+# In palette mode, Scintilla uses the environment's palette calls to display
 # more colours. This may lead to ugly displays.
 set void SetUsePalette=2039(bool usePalette,)
 
@@ -243,7 +241,7 @@ val SC_MARK_ARROWDOWN=6
 val SC_MARK_MINUS=7
 val SC_MARK_PLUS=8
 
-# Shapes used for outlining column
+# Shapes used for outlining column.
 val SC_MARK_VLINE=9
 val SC_MARK_LCORNER=10
 val SC_MARK_TCORNER=11
@@ -258,13 +256,13 @@ val SC_MARK_CIRCLEPLUSCONNECTED=19
 val SC_MARK_CIRCLEMINUS=20
 val SC_MARK_CIRCLEMINUSCONNECTED=21
 
-# Invisible mark that only sets the line background color
+# Invisible mark that only sets the line background color.
 val SC_MARK_BACKGROUND=22
 
 val SC_MARK_CHARACTER=10000
 
 enu MarkerOutline=SC_MARKNUM_
-# Markers used for outlining column
+# Markers used for outlining column.
 val SC_MARKNUM_FOLDEREND=25
 val SC_MARKNUM_FOLDEROPENMID=26
 val SC_MARKNUM_FOLDERMIDTAIL=27
@@ -287,10 +285,10 @@ fun void MarkerSetBack=2042(int markerNumber, colour back)
 # Add a marker to a line, returning an ID which can be used to find or delete the marker.
 fun int MarkerAdd=2043(int line, int markerNumber)
 
-# Delete a marker from a line
+# Delete a marker from a line.
 fun void MarkerDelete=2044(int line, int markerNumber)
 
-# Delete all markers with a particular number from all lines
+# Delete all markers with a particular number from all lines.
 fun void MarkerDeleteAll=2045(int markerNumber,)
 
 # Get a bit mask of all the markers set on a line.
@@ -435,8 +433,7 @@ get int GetCaretPeriod=2075(,)
 # Get the time in milliseconds that the caret is on and off. 0 = steady on.
 set void SetCaretPeriod=2076(int periodMilliseconds,)
 
-# Set the set of characters making up words for when moving or selecting
-# by word.
+# Set the set of characters making up words for when moving or selecting by word.
 set void SetWordChars=2077(, string characters)
 
 # Start a sequence of actions that is undone and redone as a unit.
@@ -470,8 +467,8 @@ set void IndicSetFore=2082(int indic, colour fore)
 # Retrieve the foreground colour of an indicator.
 get colour IndicGetFore=2083(int indic,)
 
-# Divide each styling byte into lexical class bits (default:5) and indicator
-# bits (default:3). If a lexer requires more than 32 lexical states, then this
+# Divide each styling byte into lexical class bits (default: 5) and indicator
+# bits (default: 3). If a lexer requires more than 32 lexical states, then this
 # is used to expand the possible states.
 set void SetStyleBits=2090(int bits,)
 
@@ -490,7 +487,7 @@ get int GetMaxLineState=2094(,)
 # Is the background of the line containing the caret in a different colour?
 get bool GetCaretLineVisible=2095(,)
 
-# Dsplay the background of the line containing the caret in a different colour.
+# Display the background of the line containing the caret in a different colour.
 set void SetCaretLineVisible=2096(bool show,)
 
 # Get the colour of the background of the line containing the caret.
@@ -514,8 +511,7 @@ fun void AutoCCancel=2101(,)
 # Is there an auto-completion list visible?
 fun bool AutoCActive=2102(,)
 
-# Retrieve the position of the caret when the auto-completion list was
-# displayed.
+# Retrieve the position of the caret when the auto-completion list was displayed.
 fun position AutoCPosStart=2103(,)
 
 # User has selected an item so remove the list and insert the selection.
@@ -524,8 +520,8 @@ fun void AutoCComplete=2104(,)
 # Define a set of character that when typed cancel the auto-completion list.
 fun void AutoCStops=2105(, string characterSet)
 
-# Change the separator character in the string setting up an auto-completion
-# list. Default is space but can be changed if items contain space.
+# Change the separator character in the string setting up an auto-completion list.
+# Default is space but can be changed if items contain space.
 set void AutoCSetSeparator=2106(int separatorCharacter,)
 
 # Retrieve the auto-completion list separator character.
@@ -541,7 +537,7 @@ set void AutoCSetCancelAtStart=2110(bool cancel,)
 # Retrieve whether auto-completion cancelled by backspacing before start.
 get bool AutoCGetCancelAtStart=2111(,)
 
-# Define a set of characters that when typed will cause the autocompletion to 
+# Define a set of characters that when typed will cause the autocompletion to
 # choose the selected item.
 set void AutoCSetFillUps=2112(, string characterSet)
 
@@ -560,16 +556,18 @@ get bool AutoCGetIgnoreCase=2116(,)
 # Display a list of strings and send notification when user chooses one.
 fun void UserListShow=2117(int listType, string itemList)
 
-# Set whether or not autocompletion is hidden automatically when nothing matches
+# Set whether or not autocompletion is hidden automatically when nothing matches.
 set void AutoCSetAutoHide=2118(bool autoHide,)
 
-# Retrieve whether or not autocompletion is hidden automatically when nothing matches
+# Retrieve whether or not autocompletion is hidden automatically when nothing matches.
 get bool AutoCGetAutoHide=2119(,)
 
-# Set whether or not autocompletion deletes any word characters after the inserted text upon completion
+# Set whether or not autocompletion deletes any word characters
+# after the inserted text upon completion.
 set void AutoCSetDropRestOfWord=2270(bool dropRestOfWord,)
 
-# Retrieve whether or not autocompletion deletes any word characters after the inserted text upon completion
+# Retrieve whether or not autocompletion deletes any word characters
+# after the inserted text upon completion.
 get bool AutoCGetDropRestOfWord=2271(,)
 
 # Set the number of spaces used for one level of indentation.
@@ -679,7 +677,7 @@ val SCFIND_REGEXP=0x00200000
 # Find some text in the document.
 fun position FindText=2150(int flags, findtext ft)
 
-# On Windows will draw the document into a display context such as a printer.
+# On Windows, will draw the document into a display context such as a printer.
 fun void FormatRange=2151(bool draw, formatrange fr)
 
 # Retrieve the line at the top of the display.
@@ -751,7 +749,7 @@ fun void Null=2172(,)
 # Will a paste succeed?
 fun bool CanPaste=2173(,)
 
-# Are there any undoable actions in the undo history.
+# Are there any undoable actions in the undo history?
 fun bool CanUndo=2174(,)
 
 # Delete the undo history.
@@ -798,7 +796,7 @@ get bool GetOvertype=2187(,)
 # Set the width of the insert mode caret.
 set void SetCaretWidth=2188(int pixelWidth,)
 
-# Returns the width of the insert mode caret
+# Returns the width of the insert mode caret.
 get int GetCaretWidth=2189(,)
 
 # Sets the position that starts the target which is used for updating the
@@ -833,10 +831,10 @@ fun int ReplaceTargetRE=2195(int length, string text)
 # Returns length of range or -1 for failure in which case target is not moved.
 fun int SearchInTarget=2197(int length, string text)
 
-# Set the search flags used by SearchInTarget
+# Set the search flags used by SearchInTarget.
 set void SetSearchFlags=2198(int flags,)
 
-# Get the search flags used by SearchInTarget
+# Get the search flags used by SearchInTarget.
 get int GetSearchFlags=2199(,)
 
 # Show a call tip containing a definition near position pos.
@@ -904,20 +902,20 @@ fun void ToggleFold=2231(int line,)
 # Ensure a particular line is visible by expanding any header line hiding it.
 fun void EnsureVisible=2232(int line,)
 
-# Set some debugging options for folding
+# Set some debugging options for folding.
 fun void SetFoldFlags=2233(int flags,)
 
 # Ensure a particular line is visible by expanding any header line hiding it.
 # Use the currently set visibility policy to determine which range to display.
 fun void EnsureVisibleEnforcePolicy=2234(int line,)
 
-# Sets whether a tab pressed when caret is within indentation indents
+# Sets whether a tab pressed when caret is within indentation indents.
 set void SetTabIndents=2260(bool tabIndents,)
 
 # Does a tab pressed when caret is within indentation indent?
 get bool GetTabIndents=2261(,)
 
-# Sets whether a backspace pressed when caret is within indentation unindents
+# Sets whether a backspace pressed when caret is within indentation unindents.
 set void SetBackSpaceUnIndents=2262(bool bsUnIndents,)
 
 # Does a backspace pressed when caret is within indentation unindent?
@@ -966,20 +964,20 @@ set void SetScrollWidth=2274(int pixelWidth,)
 get int GetScrollWidth=2275(,)
 
 # Measure the pixel width of some text in a particular style.
-# Nul terminated text argument. 
+# Nul terminated text argument.
 # Does not handle tab or control characters.
 fun int TextWidth=2276(int style, string text)
 
-# Sets the scroll range so that maximum scroll position has 
-# the last line at the bottom of the view (default). 
+# Sets the scroll range so that maximum scroll position has
+# the last line at the bottom of the view (default).
 # Setting this to false allows scrolling one page below the last line.
 set void SetEndAtLastLine=2277(bool endAtLastLine,)
 
-# Retrieve whether the maximum scroll position has the last 
-# line at the bottom of the view. 
+# Retrieve whether the maximum scroll position has the last
+# line at the bottom of the view.
 get int GetEndAtLastLine=2278(,)
 
-# Retrieve the height of a particular line of text in pixels. 
+# Retrieve the height of a particular line of text in pixels.
 fun int TextHeight=2279(int line,)
 
 ## Start of key messages
@@ -1064,8 +1062,7 @@ fun void Cancel=2325(,)
 # Delete the selection or if no selection, the character before the caret.
 fun void DeleteBack=2326(,)
 
-# If selection is empty or all on one line replace the selection with a tab
-# character.
+# If selection is empty or all on one line replace the selection with a tab character.
 # If more than one line selected, indent the lines.
 fun void Tab=2327(,)
 
@@ -1119,17 +1116,17 @@ fun void LineScrollDown=2342(,)
 fun void LineScrollUp=2343(,)
 
 # Delete the selection or if no selection, the character before the caret.
-# Will not delete the chraacter before at the start of a line.
+# Will not delete the character before at the start of a line.
 fun void DeleteBackNotLine=2344(,)
 
-# Move the caret inside current view if it's not there already
+# Move the caret inside current view if it's not there already.
 fun void MoveCaretInsideView=2401(,)
 
-# How many characters are on a line, not including end of line characters.
+# How many characters are on a line, not including end of line characters?
 fun int LineLength=2350(int line,)
 
 # Highlight the characters at two positions.
-fun void BraceHighlight=2351(position pos1,position pos2)
+fun void BraceHighlight=2351(position pos1, position pos2)
 
 # Highlight the character at a position indicating there is no matching brace.
 fun void BraceBadLight=2352(position pos,)
@@ -1137,10 +1134,10 @@ fun void BraceBadLight=2352(position pos,)
 # Find the position of a matching brace or INVALID_POSITION if no match.
 fun position BraceMatch=2353(position pos,)
 
-# Are the end of line characters visible.
+# Are the end of line characters visible?
 get bool GetViewEOL=2355(,)
 
-# Make the end of line characters visible or invisible
+# Make the end of line characters visible or invisible.
 set void SetViewEOL=2356(bool visible,)
 
 # Retrieve a pointer to the document object.
@@ -1188,24 +1185,6 @@ fun int SearchNext=2367(int flags, string text)
 # Does not ensure the selection is visible.
 fun int SearchPrev=2368(int flags, string text)
 
-# Show caret within N lines of edge when it's scrolled to view
-# If CARET_SLOP not set then centre caret on screen when it's
-# scrolled to view
-val CARET_SLOP=0x01
-# Value not used
-val CARET_CENTER=0x02
-# If CARET_SLOP also set then reposition whenever outside slop border
-# If CARET_SLOP not set then recentre even when visible
-val CARET_STRICT=0x04
-# If CARET_XEVEN set then both left and right margins are given equal weight
-# rather than favouring left following behaviour.
-val CARET_XEVEN=0x08
-# If CARET_XJUMPS set then when caret reaches the margin the display jumps
-# enough to leave the caret solidly within the display.
-val CARET_XJUMPS=0x10
-# Set the way the line the caret is on is kept visible.
-fun void SetCaretPolicy=2369(int caretPolicy, int caretSlop)
-
 # Retrieves the number of lines completely visible.
 get int LinesOnScreen=2370(,)
 
@@ -1213,7 +1192,7 @@ get int LinesOnScreen=2370(,)
 # the wrong mouse button.
 fun void UsePopUp=2371(bool allowPopUp,)
 
-# Is the selection a rectangular. The alternative is the more common stream selection.
+# Is the selection rectangular? The alternative is the more common stream selection.
 get bool SelectionIsRectangle=2372(,)
 
 # Set the zoom level. This number of points is added to the size of all fonts.
@@ -1233,63 +1212,98 @@ fun void ReleaseDocument=2377(, int doc)
 # Get which document modification events are sent to the container.
 get int GetModEventMask=2378(,)
 
-# Change internal focus flag
+# Change internal focus flag.
 set void SetFocus=2380(bool focus,)
-# Get internal focus flag
+# Get internal focus flag.
 get bool GetFocus=2381(,)
 
-# Change error status - 0 = OK
+# Change error status - 0 = OK.
 set void SetStatus=2382(int statusCode,)
-# Get error status
+# Get error status.
 get int GetStatus=2383(,)
 
-# Set whether the mouse is captured when its button is pressed
+# Set whether the mouse is captured when its button is pressed.
 set void SetMouseDownCaptures=2384(bool captures,)
-# Get whether mouse gets captured
+# Get whether mouse gets captured.
 get bool GetMouseDownCaptures=2385(,)
 
 enu CursorShape=SC_CURSOR
 val SC_CURSORNORMAL=-1
 val SC_CURSORWAIT=3
-# Sets the cursor to one of the SC_CURSOR* values
+# Sets the cursor to one of the SC_CURSOR* values.
 set void SetCursor=2386(int cursorType,)
-# Get cursor type
+# Get cursor type.
 get int GetCursor=2387(,)
 
 # Change the way control characters are displayed:
-# If symbol is < 32, keep the drawn way, else, use the given character
+# If symbol is < 32, keep the drawn way, else, use the given character.
 set void SetControlCharSymbol=2388(int symbol,)
-# Get the way control characters are displayed
+# Get the way control characters are displayed.
 get int GetControlCharSymbol=2389(,)
 
-# Move to the previous change in capitalistion
+# Move to the previous change in capitalisation.
 fun void WordPartLeft=2390(,)
-# Move to the previous change in capitalistion extending selection to new caret position.
+# Move to the previous change in capitalisation extending selection
+# to new caret position.
 fun void WordPartLeftExtend=2391(,)
-# Move to the change next in capitalistion
+# Move to the change next in capitalisation.
 fun void WordPartRight=2392(,)
-# Move to the next change in capitalistion extending selection to new caret position.
+# Move to the next change in capitalisation extending selection
+# to new caret position.
 fun void WordPartRightExtend=2393(,)
 
-# Constants for use with SetVisiblePolicy, similar to SetCaretPolicy
+# Constants for use with SetVisiblePolicy, similar to SetCaretPolicy.
 val VISIBLE_SLOP=0x01
 val VISIBLE_STRICT=0x04
-# Set the way the display area is determined when a particular line is to be moved to.
+# Set the way the display area is determined when a particular line
+# is to be moved to by Find, FindNext, GotoLine, etc.
 fun void SetVisiblePolicy=2394(int visiblePolicy, int visibleSlop)
 
-# Delete back from the current position to the start of the line
+# Delete back from the current position to the start of the line.
 fun void DelLineLeft=2395(,)
 
-# Delete forwards from the current position to the end of the line
+# Delete forwards from the current position to the end of the line.
 fun void DelLineRight=2396(,)
 
-# Get and Set the xOffset (ie, horizonal scroll position)
+# Get and Set the xOffset (ie, horizonal scroll position).
 set void SetXOffset=2397(int newOffset,)
 get int GetXOffset=2398(,)
 
 # Set the focus to this Scintilla widget.
-# GTK+ Specific
+# GTK+ Specific.
 fun void GrabFocus=2400(,)
+
+enu CaretPolicy = CARET_
+# Caret policy, used by SetXCaretPolicy and SetYCaretPolicy.
+# If CARET_SLOP is set, we can define a slop value: caretSlop.
+# This value defines an unwanted zone (UZ) where the caret is... unwanted.
+# This zone is defined as a number of pixels near the vertical margins,
+# and as a number of lines near the horizontal margins.
+# By keeping the caret away from the edges, it is seen within its context,
+# so it is likely that the identifier that the caret is on can be completely seen,
+# and that the current line is seen with some of the lines following it which are
+# often dependent on that line.
+val CARET_SLOP=0x01
+# If CARET_STRICT is set, the policy is enforced... strictly.
+# The caret is centred on the display if slop is not set,
+# and cannot go in the UZ if slop is set.
+val CARET_STRICT=0x04
+# If CARET_JUMPS is set, the display is moved more energetically
+# so the caret can move in the same direction longer before the policy is applied again.
+val CARET_JUMPS=0x10
+# If CARET_EVEN is not set, instead of having symmetrical UZs,
+# the left and bottom UZs are extended up to right and top UZs respectively.
+# This way, we favour the displaying of useful information: the begining of lines,
+# where most code reside, and the lines after the caret, eg. the body of a function.
+val CARET_EVEN=0x08
+
+# Set the way the caret is kept visible when going sideway.
+# The exclusion zone is given in pixels.
+fun void SetXCaretPolicy=2402(int caretPolicy, int caretSlop)
+
+# Set the way the line the caret is on is kept visible.
+# The exclusion zone is given in lines.
+fun void SetYCaretPolicy=2403(int caretPolicy, int caretSlop)
 
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
@@ -1316,7 +1330,7 @@ set void SetKeyWords=4005(int keywordSet, string keyWords)
 set void SetLexerLanguage=4006(, string language)
 
 # Notifications
-# Type of modification and the action which caused the modification
+# Type of modification and the action which caused the modification.
 # These are defined as a bit mask to make it easy to specify which notifications are wanted.
 # One bit is set from each of SC_MOD_* and SC_PERFORMED_*.
 enu ModificationFlags=SC_MOD_ SC_PERFORMED_ SC_LAST
@@ -1341,9 +1355,9 @@ val SCEN_CHANGE=768
 val SCEN_SETFOCUS=512
 val SCEN_KILLFOCUS=256
 
-# Symbolic key codes and modifier flags
-# ASCII and other printable characters below 256
-# Extended keys above 300
+# Symbolic key codes and modifier flags.
+# ASCII and other printable characters below 256.
+# Extended keys above 300.
 
 enu Keys=SCK_
 val SCK_DOWN=300
@@ -1818,6 +1832,13 @@ evt void Zoom=2018(void)
 
 cat Deprecated
 
+# CARET_POLICY changed in 1.47
+fun void SetCaretPolicy=2369(int caretPolicy, int caretSlop)
+val CARET_CENTER=0x02
+val CARET_XEVEN=0x08
+val CARET_XJUMPS=0x10
+
 # The old name for SCN_UPDATEUI
 val SCN_CHECKBRACE=2007
 evt void PosChanged=2012(int position)
+

@@ -77,7 +77,7 @@ public:
 		}
 	}
 	void SetLineStart(int line, int start);
-	void SetBracesHighlight(Range rangeLine, Position braces[], 
+	void SetBracesHighlight(Range rangeLine, Position braces[],
 		char bracesMatchStyle, int xHighlight);
 	void RestoreBracesHighlight(Range rangeLine, Position braces[]);
 };
@@ -97,16 +97,16 @@ public:
 	LineLayoutCache();
 	virtual ~LineLayoutCache();
 	void Deallocate();
-	enum { 
-		llcNone=SC_CACHE_NONE, 
-		llcCaret=SC_CACHE_CARET, 
-		llcPage=SC_CACHE_PAGE, 
+	enum {
+		llcNone=SC_CACHE_NONE,
+		llcCaret=SC_CACHE_CARET,
+		llcPage=SC_CACHE_PAGE,
 		llcDocument=SC_CACHE_DOCUMENT
 	};
 	void Invalidate(LineLayout::validLevel validity_);
 	void SetLevel(int level_);
 	int GetLevel() { return level; }
-	LineLayout *Retrieve(int lineNumber, int lineCaret, int maxChars, int styleClock_, 
+	LineLayout *Retrieve(int lineNumber, int lineCaret, int maxChars, int styleClock_,
 		int linesOnScreen, int linesInDoc);
 	void Dispose(LineLayout *ll);
 };
@@ -259,8 +259,11 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int xEndSelect;
 	bool primarySelection;
 
-	int caretPolicy;
-	int caretSlop;
+	int caretXPolicy;
+	int caretXSlop;	///< Ensure this many pixels visible on both sides of caret
+
+	int caretYPolicy;
+	int caretYSlop;	///< Ensure this many lines visible on both sides of caret
 
 	int visiblePolicy;
 	int visibleSlop;
@@ -338,7 +341,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int SubstituteMarkerIfEmpty(int markerCheck, int markerDefault);
 	void PaintSelMargin(Surface *surface, PRectangle &rc);
 	LineLayout *RetrieveLineLayout(int lineNumber);
-	void LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayout *ll, 
+	void LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayout *ll,
 		int width=LineLayout::wrapWidthInfinite);
 	void DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart,
 		PRectangle rcLine, LineLayout *ll, int subLine=0);
