@@ -46,7 +46,7 @@
 #define _WIN32_WINNT  0x0400 // Otherwise some required stuff gets ifdef'd out
 // Vassili Bourdo: shut up annoying Visual C++ warnings:
 #ifdef _MSC_VER
-#pragma warning(disable: 4800 4244 4309)
+#pragma warning(disable: 4244 4309 4710 4800)
 #endif
 #include <windows.h>
 #include <commctrl.h>
