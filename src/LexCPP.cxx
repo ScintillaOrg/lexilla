@@ -56,7 +56,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 
 	WordList &keywords = *keywordlists[0];
 	WordList &keywords2 = *keywordlists[1];
-//	WordList &keywords3 = *keywordlists[2];
+	WordList &keywords3 = *keywordlists[2];
 
 	bool stylingWithinPreprocessor = styler.GetPropertyInt("styling.within.preprocessor");
 
@@ -126,11 +126,30 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			if (sc.Match('*', '/')) {
 				sc.Forward();
 				sc.ForwardSetState(SCE_C_DEFAULT);
+			} else if ((sc.ch == '@' || sc.ch == '\\') && (noDocChars == 0)) {
+				sc.SetState(SCE_C_COMMENTDOCKEYWORD);
+			} else if (sc.atLineEnd) {
+				noDocChars = 0;
+			} else if (!isspace(sc.ch)) {
+				noDocChars++;
 			}
 		} else if (sc.state == SCE_C_COMMENTLINE || sc.state == SCE_C_COMMENTLINEDOC) {
 			if (sc.atLineEnd) {
 				sc.SetState(SCE_C_DEFAULT);
 				visibleChars = 0;
+			}
+		} else if (sc.state == SCE_C_COMMENTDOCKEYWORD) {
+			if (sc.Match('*', '/')) {
+				sc.ChangeState(SCE_C_COMMENTDOCKEYWORDERROR);
+				sc.Forward();
+				sc.ForwardSetState(SCE_C_DEFAULT);
+			} else if (!IsADoxygenChar(sc.ch)) {
+				char s[100];
+				sc.GetCurrent(s, sizeof(s));
+				if (!isspace(sc.ch) || !keywords3.InList(s+1)) {
+					sc.ChangeState(SCE_C_COMMENTDOCKEYWORDERROR);
+				}
+				sc.SetState(SCE_C_COMMENTDOC);
 			}
 		} else if (sc.state == SCE_C_STRING) {
 			if (sc.ch == '\\') {
@@ -199,11 +218,12 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 					sc.SetState(SCE_C_IDENTIFIER);
 				}
 			} else if (sc.Match('/', '*')) {
-				noDocChars = 0;
-				if (sc.Match("/**") || sc.Match("/*!"))	// Support of Qt/Doxygen doc. style
+				if (sc.Match("/**") || sc.Match("/*!")) {	// Support of Qt/Doxygen doc. style
+					noDocChars = -1;
 					sc.SetState(SCE_C_COMMENTDOC);
-				else
+				} else {
 					sc.SetState(SCE_C_COMMENT);
+				}
 				sc.Forward();	// Eat the * so it isn't used for the end of the comment
 			} else if (sc.Match('/', '/')) {
 				if (sc.Match("///") || sc.Match("//!"))	// Support of Qt/Doxygen doc. style
