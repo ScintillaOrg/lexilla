@@ -95,7 +95,7 @@ static void ColouriseNullDoc(unsigned int startPos, int length, int, WordList *[
 	}
 }
 
-const LexerModule lmNull(SCLEX_NULL, ColouriseNullDoc, "null");
+LexerModule lmNull(SCLEX_NULL, ColouriseNullDoc, "null");
 
 #ifdef __vms
 #define LINK_LEXERS

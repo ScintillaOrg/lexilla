@@ -185,4 +185,4 @@ static void ColouriseAveDoc(unsigned int startPos, int length, int initStyle, Wo
 	}
 }
 
-const LexerModule lmAVE(SCLEX_AVE, ColouriseAveDoc, "ave");
+LexerModule lmAVE(SCLEX_AVE, ColouriseAveDoc, "ave");
