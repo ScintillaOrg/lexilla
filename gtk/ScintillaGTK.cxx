@@ -544,7 +544,7 @@ void ScintillaGTK::AddToPopUp(const char *label, int cmd, bool enabled) {
 }
 
 bool ScintillaGTK::OwnPrimarySelection() {
-	return (gdk_selection_owner_get(GDK_SELECTION_PRIMARY) \
+	return (gdk_selection_owner_get(GDK_SELECTION_PRIMARY)
 		== GTK_WIDGET(wDraw.GetID())->window);
 }
 
