@@ -456,6 +456,7 @@ void ScintillaGTK::Initialise() {
 						{ "STRING", 0, TARGET_STRING },
 						{ "TEXT",   0, TARGET_TEXT },
 						{ "COMPOUND_TEXT", 0, TARGET_COMPOUND_TEXT },
+						{ "text/uri-list", 0, 0 },
 					};
 	static const gint n_targets = sizeof(targets) / sizeof(targets[0]);
 
@@ -824,11 +825,17 @@ void ScintillaGTK::ReceivedDrop(GtkSelectionData *selection_data) {
 	if (selection_data->type == GDK_TARGET_STRING) {
 		if (selection_data->length > 0) {
 			char *ptr = reinterpret_cast<char *>(selection_data->data);
+printf("Text: %s\n", ptr);
 			// 3rd argument is false because the deletion of the moved data is handle by GetSelection
 			bool isRectangular = ((selection_data->length > 1) && 
 				(ptr[selection_data->length-1] == 0 && ptr[selection_data->length-2] == '\n'));
 			DropAt(posDrop, ptr, false, isRectangular);
 		}
+	} else {
+		char *ptr = reinterpret_cast<char *>(selection_data->data);
+printf("Drop: %ld %d\n", selection_data->type, selection_data->length);
+printf("URI: %s\n", selection_data->data);
+		pdoc->InsertString(currentPos, ptr);
 	}
 	Redraw();
 }
