@@ -668,15 +668,6 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 #endif
 		return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);
 
-	case EM_CANPASTE:
-		return CanPaste();
-
-	case EM_SCROLL: {
-			int topStart = topLine;
-			ScrollMessage(wParam);
-			return MAKELONG(topLine - topStart, TRUE);
-		}
-
 	case WM_INPUTLANGCHANGE:
 		//::SetThreadLocale(LOWORD(lParam));
 		return ::DefWindowProc(wMain.GetID(), iMessage, wParam, lParam);

@@ -296,7 +296,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	void Indent(bool forwards);
 
-	long FindText(unsigned int iMessage, unsigned long wParam, long lParam);
+	long FindText(unsigned long wParam, long lParam);
 	void SearchAnchor();
 	long SearchText(unsigned int iMessage, unsigned long wParam, long lParam);
 	long SearchInTarget(const char *text, int length);
