@@ -170,6 +170,18 @@ void AutoComplete::Select(const char *word) {
 				--pivot;
 			}
 			location = pivot;
+			if (ignoreCase) {
+				// Check for exact-case match
+				for (; pivot <= end; pivot++) {
+					lb->GetValue(pivot, item, maxItemLen);
+					if (!strncmp(word, item, lenWord)) {
+						location = pivot;
+						break;
+					}
+					if (CompareNCaseInsensitive(word, item, lenWord))
+						break;
+				}
+			}
 		} else if (cond < 0) {
 			end = pivot - 1;
 		} else if (cond > 0) {
