@@ -1424,7 +1424,11 @@ gint ScintillaGTK::KeyRelease(GtkWidget *, GdkEventKey * /*event*/) {
 }
 
 void ScintillaGTK::Destroy(GtkObject* object) {
-	ScintillaGTK *sciThis = ScintillaFromWidget(GTK_WIDGET(object));
+	ScintillaObject *scio = reinterpret_cast<ScintillaObject *>(object);
+	// This avoids a double destruction - don't know why this happens
+	if (!scio->pscin)
+		return;
+	ScintillaGTK *sciThis = reinterpret_cast<ScintillaGTK *>(scio->pscin);
 	//Platform::DebugPrintf("Destroying %x %x\n", sciThis, object);
 	sciThis->Finalise();
 
@@ -1432,6 +1436,7 @@ void ScintillaGTK::Destroy(GtkObject* object) {
 		(* GTK_OBJECT_CLASS (parent_class)->destroy) (object);
 
 	delete sciThis;
+	scio->pscin = 0;
 }
 
 static void DrawChild(GtkWidget *widget, GdkRectangle *area) {
