@@ -1625,12 +1625,15 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 		bool lastSegItalics = false;
 		Font &ctrlCharsFont = vstyle.styles[STYLE_CONTROLCHAR].font;
 
+		bool isControlNext = IsControlCharacter(ll->chars[0]);
 		for (int charInLine = 0; charInLine < numCharsInLine; charInLine++) {
+			bool isControl = isControlNext;
+			isControlNext = IsControlCharacter(ll->chars[charInLine + 1]);
 			if ((ll->styles[charInLine] != ll->styles[charInLine + 1]) ||
-				IsControlCharacter(ll->chars[charInLine]) || IsControlCharacter(ll->chars[charInLine + 1])) {
+				isControl || isControlNext) {
 				ll->positions[startseg] = 0;
 				if (vstyle.styles[ll->styles[charInLine]].visible) {
-					if (IsControlCharacter(ll->chars[charInLine])) {
+					if (isControl) {
 						if (ll->chars[charInLine] == '\t') {
 							ll->positions[charInLine + 1] = ((((startsegx + 2) /
 											  tabWidth) + 1) * tabWidth) - startsegx;
@@ -1645,12 +1648,13 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 						}
 						lastSegItalics = false;
 					} else {	// Regular character
-						lastSegItalics = vstyle.styles[ll->styles[charInLine]].italic;
 						int lenSeg = charInLine - startseg + 1;
 						if ((lenSeg == 1) && (' ' == ll->chars[startseg])) {
+							lastSegItalics = false;
 							// Over half the segments are single characters and of these about half are space characters.
 							ll->positions[charInLine + 1] = vstyle.styles[ll->styles[charInLine]].spaceWidth;
 						} else {
+							lastSegItalics = vstyle.styles[ll->styles[charInLine]].italic;
 							surface->MeasureWidths(vstyle.styles[ll->styles[charInLine]].font, ll->chars + startseg,
 									       lenSeg, ll->positions + startseg + 1);
 						}
@@ -1806,7 +1810,6 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 			rcSegment.right = ll->positions[i + 1] + xStart - subLineStart;
 			// Only try to draw if really visible - enhances performance by not calling environment to
 			// draw strings that are completely past the right side of the window.
-			//if (rcSegment.left <= rcLine.right) {
 			if ((rcSegment.left <= rcLine.right) && (rcSegment.right >= rcLine.left)) {
 				int styleMain = ll->styles[i];
 				ColourAllocated textBack = vsDraw.styles[styleMain].back.allocated;
