@@ -35,7 +35,7 @@ clean:
 	del /q *.exe *.o *.obj *.dll *.res *.map
 
 depend: *.cxx ../src/*.cxx 
-	g++ -MM $(CXXFLAGS) *.cxx ../src/*.cxx >depend
+	$(CC) -MM $(CXXFLAGS) *.cxx ../src/*.cxx >depend
 
 LEXOBJS	= LexAda.o LexAVE.o LexConf.o LexCPP.o LexHTML.o LexLua.o \
 	LexOthers.o LexPascal.o LexPerl.o LexPython.o LexSQL.o LexVB.o
