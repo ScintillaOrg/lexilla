@@ -399,7 +399,10 @@ int Surface::WidthText(Font &font_, const char *s, int len) {
 }
 
 int Surface::WidthChar(Font &font_, char ch) {
-	return gdk_char_width(font_.id, ch);
+	if (font_.id)
+		return gdk_char_width(font_.id, ch);
+	else
+		return 1;
 }
 
 // Three possible strategies for determining ascent and descent of font:
@@ -418,6 +421,8 @@ const char sizeString[]= "`~!@#$%^&*()-_=+\\|[]{};:\"\'<,>.?/1234567890"
 	"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 int Surface::Ascent(Font &font_) {
+	if (!font_.id)
+		return 1;
 #ifdef FAST_WAY
 	return font_.id->ascent;
 #else
@@ -434,6 +439,8 @@ int Surface::Ascent(Font &font_) {
 }
 
 int Surface::Descent(Font &font_) {
+	if (!font_.id)
+		return 1;
 #ifdef FAST_WAY
 	return font_.id->descent;
 #else
@@ -462,7 +469,10 @@ int Surface::Height(Font &font_) {
 }
 
 int Surface::AverageCharWidth(Font &font_) {
-	return gdk_char_width(font_.id, 'n');
+	if (font_.id)
+		return gdk_char_width(font_.id, 'n');
+	else
+		return 1;
 }
 
 int Surface::SetPalette(Palette *, bool) {
