@@ -3975,6 +3975,8 @@ void Editor::NewLine() {
 	}
 	SetLastXChosen();
 	EnsureCaretVisible();
+	// Avoid blinking during rapid typing:
+	ShowCaretAtCurrentPosition();
 }
 
 void Editor::CursorUpOrDown(int direction, selTypes sel) {
