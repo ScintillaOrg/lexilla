@@ -133,6 +133,7 @@ static void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, int 
 	lf.lfItalic = static_cast<BYTE>(italic ? 1 : 0);
 	lf.lfCharSet = static_cast<BYTE>(characterSet);
 	strncpy(lf.lfFaceName, faceName, sizeof(lf.lfFaceName));
+	lf.lfQuality = NONANTIALIASED_QUALITY;
 }
 
 /**
@@ -964,6 +965,7 @@ int ListBoxX::CaretFromEdge() {
 void ListBoxX::Clear() {
 	::SendMessage(lb, LB_RESETCONTENT, 0, 0);
 	maxItemCharacters = 0;
+	ltt.Clear();
 }
 
 void ListBoxX::Append(char *s, int type) {
@@ -972,7 +974,7 @@ void ListBoxX::Append(char *s, int type) {
 	if (maxItemCharacters < len)
 		maxItemCharacters = len;
 	int count = ::SendMessage(lb, LB_GETCOUNT, 0, 0);
-	ltt.Add(count, type);
+	ltt.Add(count-1, type);
 }
 
 int ListBoxX::Length() {
