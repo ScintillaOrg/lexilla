@@ -10,12 +10,13 @@
 #include "Scintilla.h"
 #include "LineMarker.h"
 
-static void DrawBox(Surface *surface, int centreX, int centreY, int armSize) {
-	surface->MoveTo(centreX - armSize, centreY - armSize);
-	surface->LineTo(centreX + armSize, centreY - armSize);
-	surface->LineTo(centreX + armSize, centreY + armSize);
-	surface->LineTo(centreX - armSize, centreY + armSize);
-	surface->LineTo(centreX - armSize, centreY - armSize);
+static void DrawBox(Surface *surface, int centreX, int centreY, int armSize, Colour fore, Colour back) {
+	PRectangle rc;
+	rc.left = centreX - armSize;
+	rc.top = centreY - armSize;
+	rc.right = centreX + armSize + 1;
+	rc.bottom = centreY + armSize + 1;
+	surface->RectangleDraw(rc, back, fore);
 }
 
 static void DrawCircle(Surface *surface, int centreX, int centreY, int armSize, Colour fore, Colour back) {
@@ -27,16 +28,16 @@ static void DrawCircle(Surface *surface, int centreX, int centreY, int armSize, 
 	surface->Ellipse(rcCircle, back, fore);
 }
 
-static void DrawPlus(Surface *surface, int centreX, int centreY, int armSize) {
-	surface->MoveTo(centreX - armSize + 2, centreY);
-	surface->LineTo(centreX + armSize - 2 + 1, centreY);
-	surface->MoveTo(centreX, centreY - armSize + 2);
-	surface->LineTo(centreX, centreY + armSize - 2 + 1);
+static void DrawPlus(Surface *surface, int centreX, int centreY, int armSize, Colour fore) {
+	PRectangle rcV(centreX, centreY - armSize + 2, centreX + 1, centreY + armSize - 2 + 1);
+	surface->FillRectangle(rcV, fore);
+	PRectangle rcH(centreX - armSize + 2, centreY, centreX + armSize - 2 + 1, centreY+1);
+	surface->FillRectangle(rcH, fore);
 }
 
-static void DrawMinus(Surface *surface, int centreX, int centreY, int armSize) {
-	surface->MoveTo(centreX - armSize + 2, centreY);
-	surface->LineTo(centreX + armSize - 2 + 1, centreY);
+static void DrawMinus(Surface *surface, int centreX, int centreY, int armSize, Colour fore) {
+	PRectangle rcH(centreX - armSize + 2, centreY, centreX + armSize - 2 + 1, centreY+1);
+	surface->FillRectangle(rcH, fore);
 }
 
 void LineMarker::Draw(Surface *surface, PRectangle &rcWhole) {
@@ -50,6 +51,7 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole) {
 	int centreY = (rc.bottom + rc.top) / 2;
 	int dimOn2 = minDim / 2;
 	int dimOn4 = minDim / 4;
+	int blobSize = dimOn2-1;
 	int armSize = dimOn2-2;
 	if (rc.Width() > (rc.Height() * 2)) {
 		// Wide column is line number so move to left to try to avoid overlapping number
@@ -160,73 +162,73 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole) {
 		
 	} else if (markType == SC_MARK_BOXPLUS) {
 		surface->PenColour(back.allocated);
-		DrawBox(surface, centreX, centreY, armSize);
-		DrawPlus(surface, centreX, centreY, armSize);
+		DrawBox(surface, centreX, centreY, blobSize, fore.allocated, back.allocated);
+		DrawPlus(surface, centreX, centreY, blobSize, back.allocated);
 		
 	} else if (markType == SC_MARK_BOXPLUSCONNECTED) {
 		surface->PenColour(back.allocated);
-		DrawBox(surface, centreX, centreY, armSize);
-		DrawPlus(surface, centreX, centreY, armSize);
+		DrawBox(surface, centreX, centreY, blobSize, fore.allocated, back.allocated);
+		DrawPlus(surface, centreX, centreY, blobSize, back.allocated);
 		
-		surface->MoveTo(centreX, centreY + armSize);
+		surface->MoveTo(centreX, centreY + blobSize);
 		surface->LineTo(centreX, rcWhole.bottom);
 		
 		surface->MoveTo(centreX, rcWhole.top);
-		surface->LineTo(centreX, centreY - armSize);
+		surface->LineTo(centreX, centreY - blobSize);
 		
 	} else if (markType == SC_MARK_BOXMINUS) {
 		surface->PenColour(back.allocated);
-		DrawBox(surface, centreX, centreY, armSize);
-		DrawMinus(surface, centreX, centreY, armSize);
+		DrawBox(surface, centreX, centreY, blobSize, fore.allocated, back.allocated);
+		DrawMinus(surface, centreX, centreY, blobSize, back.allocated);
 		
-		surface->MoveTo(centreX, centreY + armSize);
+		surface->MoveTo(centreX, centreY + blobSize);
 		surface->LineTo(centreX, rcWhole.bottom);
 		
 	} else if (markType == SC_MARK_BOXMINUSCONNECTED) {
 		surface->PenColour(back.allocated);
-		DrawBox(surface, centreX, centreY, armSize);
-		DrawMinus(surface, centreX, centreY, armSize);
+		DrawBox(surface, centreX, centreY, blobSize, fore.allocated, back.allocated);
+		DrawMinus(surface, centreX, centreY, blobSize, back.allocated);
 		
-		surface->MoveTo(centreX, centreY + armSize);
+		surface->MoveTo(centreX, centreY + blobSize);
 		surface->LineTo(centreX, rcWhole.bottom);
 		
 		surface->MoveTo(centreX, rcWhole.top);
-		surface->LineTo(centreX, centreY - armSize);
+		surface->LineTo(centreX, centreY - blobSize);
 		
 	} else if (markType == SC_MARK_CIRCLEPLUS) {
-		DrawCircle(surface, centreX, centreY, armSize, fore.allocated, back.allocated);
+		DrawCircle(surface, centreX, centreY, blobSize, fore.allocated, back.allocated);
 		surface->PenColour(back.allocated);
-		DrawPlus(surface, centreX, centreY, armSize);
+		DrawPlus(surface, centreX, centreY, blobSize, back.allocated);
 		
 	} else if (markType == SC_MARK_CIRCLEPLUSCONNECTED) {
-		DrawCircle(surface, centreX, centreY, armSize, fore.allocated, back.allocated);
+		DrawCircle(surface, centreX, centreY, blobSize, fore.allocated, back.allocated);
 		surface->PenColour(back.allocated);
-		DrawPlus(surface, centreX, centreY, armSize);
+		DrawPlus(surface, centreX, centreY, blobSize, back.allocated);
 		
-		surface->MoveTo(centreX, centreY + armSize);
+		surface->MoveTo(centreX, centreY + blobSize);
 		surface->LineTo(centreX, rcWhole.bottom);
 		
 		surface->MoveTo(centreX, rcWhole.top);
-		surface->LineTo(centreX, centreY - armSize);
+		surface->LineTo(centreX, centreY - blobSize);
 		
 	} else if (markType == SC_MARK_CIRCLEMINUS) {
-		DrawCircle(surface, centreX, centreY, armSize, fore.allocated, back.allocated);
+		DrawCircle(surface, centreX, centreY, blobSize, fore.allocated, back.allocated);
 		surface->PenColour(back.allocated);
-		DrawMinus(surface, centreX, centreY, armSize);
+		DrawMinus(surface, centreX, centreY, blobSize, back.allocated);
 		
-		surface->MoveTo(centreX, centreY + armSize);
+		surface->MoveTo(centreX, centreY + blobSize);
 		surface->LineTo(centreX, rcWhole.bottom);
 		
 	} else if (markType == SC_MARK_CIRCLEMINUSCONNECTED) {
-		DrawCircle(surface, centreX, centreY, armSize, fore.allocated, back.allocated);
+		DrawCircle(surface, centreX, centreY, blobSize, fore.allocated, back.allocated);
 		surface->PenColour(back.allocated);
-		DrawMinus(surface, centreX, centreY, armSize);
+		DrawMinus(surface, centreX, centreY, blobSize, back.allocated);
 		
-		surface->MoveTo(centreX, centreY + armSize);
+		surface->MoveTo(centreX, centreY + blobSize);
 		surface->LineTo(centreX, rcWhole.bottom);
 		
 		surface->MoveTo(centreX, rcWhole.top);
-		surface->LineTo(centreX, centreY - armSize);
+		surface->LineTo(centreX, centreY - blobSize);
 		
 	} else { // SC_MARK_SHORTARROW
 		Point pts[] = {
