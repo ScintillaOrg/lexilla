@@ -4737,10 +4737,12 @@ EM_SETTARGETDEVICE
     <h2 id="BuildingScintilla">Building Scintilla</h2>
 
     <p>To build Scintilla or SciTE, see the README file present in both the Scintilla and SciTE
-    directories. For Windows, GCC 2.95.3, Borland C++ or Microsoft Visual Studio .NET can be used
+    directories. For Windows, GCC 3.2, Borland C++ or Microsoft Visual Studio .NET can be used
     for building. There is a make file for building Scintilla but not SciTE with Visual C++ 6 at
-    scintilla/win32/scintilla_vc6.mak. For GTK+, GCC 2.95.2 should be used. GTK+ 1.2x and 2.0x are
-    supported. Building for GTK+ 2.0x requires defining GTK2 on the command line.</p>
+    scintilla/win32/scintilla_vc6.mak. For GTK+, GCC 3.1 should be used. GTK+ 1.2x and 2.0x are
+    supported. The version of GTK+ installed should be detected automatically.
+    When both GTK+ 1 and GTK+ 2 are present, building for GTK+ 1.x requires defining GTK1
+    on the command line.</p>
 
     <h3>Static linking</h3>
 
