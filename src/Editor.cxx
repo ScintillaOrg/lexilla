@@ -1021,9 +1021,6 @@ void Editor::EnsureCaretVisible(bool useMargin, bool vert, bool horiz) {
 						yMarginB = linesOnScreen - yMarginT - 1;
 					}
 				}
-				if (bJump) {
-					yMoveT = Platform::Clamp(caretYSlop * 3, 1, halfScreen);
-				}
 				yMoveT = yMarginT;
 				if (bEven) {
 					if (bJump) {
