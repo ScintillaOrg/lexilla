@@ -41,6 +41,7 @@
 #include "Editor.h"
 #include "SString.h"
 #include "ScintillaBase.h"
+#include "UniConversion.h"
 
 #include "gtk/gtksignal.h"
 #include "gtk/gtkmarshal.h"
@@ -169,6 +170,7 @@ private:
 	static gint ScrollEvent(GtkWidget *widget, GdkEventScroll *event);
 #endif
 	static gint Motion(GtkWidget *widget, GdkEventMotion *event);
+	gint KeyThis(GdkEventKey *event);
 	static gint KeyPress(GtkWidget *widget, GdkEventKey *event);
 	static gint KeyRelease(GtkWidget *widget, GdkEventKey *event);
 	static void Destroy(GtkObject *object);
@@ -827,9 +829,26 @@ void ScintillaGTK::NotifyURIDropped(const char *list) {
 }
 
 int ScintillaGTK::KeyDefault(int key, int modifiers) {
-	if (!(modifiers & SCI_CTRL) && !(modifiers & SCI_ALT) && (key < 256)) {
-		AddChar(key);
-		return 1;
+	if (!(modifiers & SCI_CTRL) && !(modifiers & SCI_ALT)) {
+#if GTK_MAJOR_VERSION >= 2
+		if (IsUnicodeMode() && (key <= 0xFE00)) {
+			char utfval[4]="\0\0\0";
+			wchar_t wcs[2];
+			wcs[0] = gdk_keyval_to_unicode(key);
+			wcs[1] = 0;
+			UTF8FromUCS2(wcs, 1, utfval, 3);
+			AddCharUTF(utfval,strlen(utfval));
+			return 1;
+		}
+#endif
+		if (key < 256) {
+			AddChar(key);
+			return 1;
+		} else {
+			// Pass up to container in case it is an accelerator
+			NotifyKey(key, modifiers);
+			return 0;
+		}
 	} else {
 		// Pass up to container in case it is an accelerator
 		NotifyKey(key, modifiers);
@@ -1416,8 +1435,7 @@ static int KeyTranslate(int keyIn) {
 	}
 }
 
-gint ScintillaGTK::KeyPress(GtkWidget *widget, GdkEventKey *event) {
-	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
+gint ScintillaGTK::KeyThis(GdkEventKey *event) {
 	//Platform::DebugPrintf("SC-key: %d %x [%s]\n",
 	//	event->keyval, event->state, (event->length > 0) ? event->string : "empty");
 	bool shift = (event->state & GDK_SHIFT_MASK) != 0;
@@ -1430,23 +1448,30 @@ gint ScintillaGTK::KeyPress(GtkWidget *widget, GdkEventKey *event) {
 		key &= 0x7F;
 	// Hack for keys over 256 and below command keys but makes Hungarian work.
 	// This will have to change for Unicode
+	else if (key >= 0xFE00)
+		key = KeyTranslate(key);
+	else if (IsUnicodeMode())
+		;	// No operation
 	else if ((key >= 0x100) && (key < 0x1000))
 		key &= 0xff;
-	else
-		key = KeyTranslate(key);
 
 	bool consumed = false;
-	bool added = sciThis->KeyDown(key, shift, ctrl, alt, &consumed) != 0;
+	bool added = KeyDown(key, shift, ctrl, alt, &consumed) != 0;
 	if (!consumed)
 		consumed = added;
 	//Platform::DebugPrintf("SK-key: %d %x %x\n",event->keyval, event->state, consumed);
 	if (event->keyval == 0xffffff && event->length > 0) {
-		sciThis->ClearSelection();
-		if (sciThis->pdoc->InsertString(sciThis->CurrentPosition(), event->string)) {
-			sciThis->MovePositionTo(sciThis->CurrentPosition() + event->length);
+		ClearSelection();
+		if (pdoc->InsertString(CurrentPosition(), event->string)) {
+			MovePositionTo(CurrentPosition() + event->length);
 		}
 	}
 	return consumed;
+}
+
+gint ScintillaGTK::KeyPress(GtkWidget *widget, GdkEventKey *event) {
+	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
+	return sciThis->KeyThis(event);
 }
 
 gint ScintillaGTK::KeyRelease(GtkWidget *, GdkEventKey * /*event*/) {
