@@ -150,7 +150,8 @@ int Document::VCHomePosition(int position) {
 int Document::SetLevel(int line, int level) {
 	int prev = cb.SetLevel(line, level);
 	if (prev != level) {
-		DocModification mh(SC_MOD_CHANGEFOLD, LineStart(line), 0, 0, 0);
+		DocModification mh(SC_MOD_CHANGEFOLD | SC_MOD_CHANGEMARKER, 
+			LineStart(line), 0, 0, 0);
 		mh.line = line;
 		mh.foldLevelNow = level;
 		mh.foldLevelPrev = prev;
