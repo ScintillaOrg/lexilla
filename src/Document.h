@@ -120,6 +120,10 @@ public:
 	void EndUndoAction() { cb.EndUndoAction(); }
 	void SetSavePoint();
 	bool IsSavePoint() { return cb.IsSavePoint(); }
+
+	int GetLineIndentation(int line);
+	void SetLineIndentation(int line, int indent);
+	int GetLineIndentPosition(int line);
 	void Indent(bool forwards, int lineBottom, int lineTop);
 	void ConvertLineEnds(int eolModeSet);
 	void SetReadOnly(bool set) { cb.SetReadOnly(set); }
@@ -185,9 +189,6 @@ private:
 	bool IsWordAt(int start, int end);
 	void ModifiedAt(int pos);
 	
-	int GetLineIndentation(int line);
-	int GetLineIndentPosition(int line);
-		
 	void NotifyModifyAttempt();
 	void NotifySavePoint(bool atSavePoint);
 	void NotifyModified(DocModification mh);

@@ -530,7 +530,7 @@ static void CreateIndentation(char *linebuf, int length, int indent, int tabSize
 
 int Document::GetLineIndentation(int line) {
 	int indent = 0;
-	if (line >= 0) {
+	if ((line >= 0) && (line < LinesTotal())) {
 		int lineStart = LineStart(line);
 		int length = Length();
 		for (int i=lineStart;i<length;i++) {
@@ -546,6 +546,20 @@ int Document::GetLineIndentation(int line) {
 	return indent;
 }
 
+void Document::SetLineIndentation(int line, int indent) {
+	int indentOfLine = GetLineIndentation(line);
+	if (indent < 0)
+		indent = 0;
+	if (indent != indentOfLine) {
+		char linebuf[1000];
+		CreateIndentation(linebuf, sizeof(linebuf), indent, tabInChars, !useTabs);
+		int thisLineStart = LineStart(line);
+		int indentPos = GetLineIndentPosition(line);
+		DeleteChars(thisLineStart, indentPos - thisLineStart);
+		InsertString(thisLineStart, linebuf);
+	}
+}
+
 int Document::GetLineIndentPosition(int line) {
 	int pos = LineStart(line);
 	int length = Length();
@@ -556,24 +570,13 @@ int Document::GetLineIndentPosition(int line) {
 }
 
 void Document::Indent(bool forwards, int lineBottom, int lineTop) {
-	char linebuf[1000];
 	// Dedent - suck white space off the front of the line to dedent by equivalent of a tab
 	for (int line = lineBottom; line >= lineTop; line--) {
 		int indentOfLine = GetLineIndentation(line);
-		int indentNew = indentOfLine;
 		if (forwards)
-			indentNew += IndentSize();
+			SetLineIndentation(line, indentOfLine + IndentSize());
 		else
-			indentNew -= IndentSize();
-		if (indentNew < 0)
-			indentNew = 0;
-		if (indentNew != indentOfLine) {
-			CreateIndentation(linebuf, sizeof(linebuf), indentNew, tabInChars, !useTabs);
-			int thisLineStart = LineStart(line);
-			int indentPos = GetLineIndentPosition(line);
-			DeleteChars(thisLineStart, indentPos - thisLineStart);
-			InsertString(thisLineStart, linebuf);
-		}
+			SetLineIndentation(line, indentOfLine - IndentSize());
 	}
 }
 

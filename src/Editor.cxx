@@ -3384,6 +3384,16 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	case SCI_GETUSETABS:
 		return pdoc->useTabs;
 		
+	case SCI_SETLINEINDENTATION:
+		pdoc->SetLineIndentation(wParam, lParam);
+		break;
+		
+	case SCI_GETLINEINDENTATION:
+		return pdoc->GetLineIndentation(wParam);
+		
+	case SCI_GETLINEINDENTPOSITION:
+		return pdoc->GetLineIndentPosition(wParam);
+		
 	case SCI_SETCODEPAGE:
 		pdoc->dbcsCodePage = wParam;
 		break;

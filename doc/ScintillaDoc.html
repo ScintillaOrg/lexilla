@@ -418,6 +418,17 @@ SCI_SETUSETABS(bool usetabs)
       and space or be based purely on spaces.
     </p>
 <pre>
+SCI_SETLINEINDENTATION(int line, int indentation)
+SCI_GETLINEINDENTATION(int line)
+SCI_GETLINEINDENTPOSITION(int line)
+</pre>
+    <p>
+     The amount of indentation on a line can be discovered and set with SCI_GETLINEINDENTATION and 
+     SCI_SETLINEINDENTATION. The indnetation is measuered in character columns which correspond 
+     to the width of space characters. 
+     SCI_GETLINEINDENTPOSITION returns the position at the end of indentation of a line.
+    </p>
+<pre>
 SCI_SETCODEPAGE(int codepage)
 </pre>
     <p>
