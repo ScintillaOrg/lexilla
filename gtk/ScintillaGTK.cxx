@@ -154,7 +154,7 @@ private:
 	static void SizeRequest(GtkWidget *widget, GtkRequisition *requisition);
 	static void SizeAllocate(GtkWidget *widget, GtkAllocation *allocation);
 #if GTK_MAJOR_VERSION >= 2
-	static void ScrollOver(GtkWidget *widget, GdkEventMotion *event);
+	static gint ScrollOver(GtkWidget *widget, GdkEventMotion *event);
 #endif
 	static gint Expose(GtkWidget *widget, GdkEventExpose *ose, ScintillaGTK *sciThis);
 	static gint ExposeMain(GtkWidget *widget, GdkEventExpose *ose);
@@ -493,11 +493,12 @@ void ScintillaGTK::SizeAllocate(GtkWidget *widget, GtkAllocation *allocation) {
 }
 
 #if GTK_MAJOR_VERSION >= 2
-void ScintillaGTK::ScrollOver(GtkWidget *widget, GdkEventMotion */*event*/) {
+gint ScintillaGTK::ScrollOver(GtkWidget *widget, GdkEventMotion */*event*/) {
 	// Ensure cursor goes back to arrow over scroll bar.
 	GtkWidget *parent = gtk_widget_get_parent(widget);
 	ScintillaGTK *sciThis = ScintillaFromWidget(parent);
 	sciThis->wMain.SetCursor(Window::cursorArrow);
+	return FALSE;
 }
 #endif
 
@@ -1196,12 +1197,16 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 		gtk_selection_convert(GTK_WIDGET(PWidget(wMain)), GDK_SELECTION_PRIMARY,
 		                      gdk_atom_intern("STRING", FALSE), event->time);
 	} else if (event->button == 3) {
-		// PopUp menu
-		// Convert to screen
-		int ox = 0;
-		int oy = 0;
-		gdk_window_get_origin(PWidget(wMain)->window, &ox, &oy);
-		ContextMenu(Point(pt.x + ox, pt.y + oy));
+		if (displayPopupMenu) {
+			// PopUp menu
+			// Convert to screen
+			int ox = 0;
+			int oy = 0;
+			gdk_window_get_origin(PWidget(wMain)->window, &ox, &oy);
+			ContextMenu(Point(pt.x + ox, pt.y + oy));
+		} else {
+			return FALSE;
+		}
 	} else if (event->button == 4) {
 		// Wheel scrolling up (only xwin gtk does it this way)
 		if (ctrl)
