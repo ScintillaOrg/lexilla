@@ -1048,6 +1048,21 @@ static char *UTF8FromIconv(iconv_t iconvh, const char *s, int len) {
 	return 0;
 }
 
+static size_t MultiByteLenFromIconv(iconv_t iconvh, const char *s, size_t len) {
+	for (size_t lenMB=1; (lenMB<4) && (lenMB <= len); lenMB++) {
+		char wcForm[2];
+		char *pin = const_cast<char *>(s);
+		size_t inLeft = lenMB;
+		char *pout = wcForm;
+		size_t outLeft = 2;
+		size_t conversions = iconv(iconvh, &pin, &inLeft, &pout, &outLeft);
+		if (conversions != ((size_t)(-1))) {
+			return lenMB;
+		}
+	}
+	return 1;
+}
+
 static char *UTF8FromLatin1(const char *s, int len) {
 	char *utfForm = new char[len*2+1];
 	size_t lenU = 0;
@@ -1100,6 +1115,18 @@ static char *UTF8FromDBCS(const char *s, int len) {
 	return utfForm;
 }
 
+static size_t UTF8CharLength(const char *s) {
+	const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
+	unsigned char ch = *us;
+	if (ch < 0x80) {
+		return 1;
+	} else if (ch < 0x80 + 0x40 + 0x20) {
+		return 2;
+	} else {
+		return 3;
+	}
+}
+
 #endif
 
 // On GTK+, wchar_t is 4 bytes
@@ -1118,20 +1145,17 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 			if (et == UTF8) {
 				pango_layout_set_text(layout, s, len);
 			} else {
-				if (et == dbcs) {
-					// Convert to utf8
-					utfForm = UTF8FromDBCS(s, len);
-				}
-				if (!utfForm) {	// DBCS failed so treat as iconv
+				if (!utfForm) {
 					SetIconv(PFont(font_)->characterSet);
 					utfForm = UTF8FromIconv(iconvh, s, len);
 				}
-				//~ if (!utfForm) {	// DBCS failed so treat as locale
-					//~ gsize w; // stub
-					//~ utfForm = g_locale_to_utf8(s, len, NULL, &w, NULL);
-					//~ useGFree = static_cast<bool>(utfForm);
-				//~ };
-				if (!utfForm) {	// g_locale_to_utf8 failed so treat as Latin1
+				if (!utfForm) {	// iconv failed so try DBCS if DBCS mode
+					if (et == dbcs) {
+						// Convert to utf8
+						utfForm = UTF8FromDBCS(s, len);
+					}
+				}
+				if (!utfForm) {	// iconv and DBCS failed so treat as Latin1
 					utfForm = UTF8FromLatin1(s, len);
 				}
 				pango_layout_set_text(layout, utfForm, strlen(utfForm));
@@ -1245,36 +1269,40 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 				}
 				pango_layout_iter_free (iter);
 			} else {
-				int wclen = 0;
+				int positionsCalculated = 0;
 				if (et == dbcs) {
-					GdkWChar *wctext = new GdkWChar[len + 1];
-					GdkWChar *wcp = wctext;
-					wclen = gdk_mbstowcs(wcp, s, len);
-					if (wclen >= 1 ) {
+					SetIconv(PFont(font_)->characterSet);
+					char *utfForm = UTF8FromIconv(iconvh, s, len);
+					if (utfForm) {
 						// Convert to UTF-8 so can ask Pango for widths, then
 						// Loop through UTF-8 and DBCS forms, taking account of different
 						// character byte lengths.
-						char *utfForm = UTF8FromGdkWChar(wctext, wclen);
+						iconv_t iconvhMeasure =
+							iconv_open("UCS-2", CharacterSetID(characterSet));
 						pango_layout_set_text(layout, utfForm, strlen(utfForm));
 						int i = 0;
+						int utfIndex = 0;
 						PangoLayoutIter *iter = pango_layout_get_iter (layout);
 						while (pango_layout_iter_next_cluster (iter)) {
-							size_t lenChar = mblen(s+i, MB_CUR_MAX);
 							pango_layout_iter_get_cluster_extents (iter, NULL, &pos);
 							int position = PANGO_PIXELS(pos.x);
-							// TODO: measure number of bytes of the DBCS input 
-							// in the cluster just measured and set that number of elements 
-							// of positions.
-							while (lenChar--) {
-								positions[i++] = position;
+							int utfIndexNext = pango_layout_iter_get_index (iter);
+							while (utfIndex < utfIndexNext) {
+								size_t lenChar = MultiByteLenFromIconv(iconvhMeasure, s+i, len-i);
+								//size_t lenChar = mblen(s+i, MB_CUR_MAX);
+								while (lenChar--) {
+									positions[i++] = position;
+									positionsCalculated++;
+								}
+								utfIndex += UTF8CharLength(utfForm+utfIndex);
 							}
 						}
 						pango_layout_iter_free (iter);
 						delete []utfForm;
+						iconv_close(iconvhMeasure);
 					}
-					delete []wctext;
 				}
-				if (wclen < 1 ) {
+				if (positionsCalculated < 1 ) {
 					// Either Latin1 or DBCS conversion failed so treat as Latin1.
 					bool useGFree = false;
 					SetIconv(PFont(font_)->characterSet);
@@ -1373,11 +1401,6 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 					SetIconv(PFont(font_)->characterSet);
 					utfForm = UTF8FromIconv(iconvh, s, len);
 				}
-				//~ if (!utfForm) {	// iconv failed so treat as locale
-					//~ gsize w;
-					//~ utfForm = g_locale_to_utf8(s, len, NULL, &w, NULL);
-					//~ useGFree = static_cast<bool>(utfForm);
-				//~ };
 				if (!utfForm) {	// g_locale_to_utf8 failed so treat as Latin1
 					utfForm = UTF8FromLatin1(s, len);
 				}
@@ -1534,7 +1557,7 @@ void SurfaceImpl::SetUnicodeMode(bool unicodeMode_) {
 }
 
 void SurfaceImpl::SetDBCSMode(int codePage) {
-	if (codePage == SC_CP_DBCS)
+	if (codePage && (codePage != SC_CP_UTF8))
 		et = dbcs;
 }
 
@@ -2171,20 +2194,32 @@ long Platform::SendScintillaPointer(
 	                              reinterpret_cast<sptr_t>(lParam));
 }
 
-bool Platform::IsDBCSLeadByte(int /*codePage*/, char /*ch*/) {
+bool Platform::IsDBCSLeadByte(int /* codePage */, char /* ch */) {
 	return false;
 }
 
-int Platform::DBCSCharLength(int /*codePage*/, const char *s) {
-	int bytes = mblen(s, MB_CUR_MAX);
-	if (bytes >= 1)
-		return bytes;
-	else
-		return 1;
+int Platform::DBCSCharLength(int codePage, const char *s) {
+	if (codePage == 999932) {
+		// Experimental and disabled code - change 999932 to 932 above to
+		// enable locale avoiding but expensive character length determination.
+		// Avoid locale with explicit use of iconv
+		iconv_t iconvhMeasure =
+			iconv_open("UCS-2", CharacterSetID(SC_CHARSET_SHIFTJIS));
+		size_t lenChar = MultiByteLenFromIconv(iconvhMeasure, s, strlen(s));
+		iconv_close(iconvhMeasure);
+		return lenChar;
+	} else {
+		int bytes = mblen(s, MB_CUR_MAX);
+		if (bytes >= 1)
+			return bytes;
+		else
+			return 1;
+	}
 }
 
 int Platform::DBCSCharMaxLength() {
 	return MB_CUR_MAX;
+	//return 2;
 }
 
 // These are utility functions not really tied to a platform
