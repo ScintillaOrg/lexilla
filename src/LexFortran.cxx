@@ -50,7 +50,7 @@ unsigned int GetContinuedPos(unsigned int pos, Accessor &styler) {
 }
 /***************************************/
 static void ColouriseFortranDoc(unsigned int startPos, int length, int initStyle,
-					WordList *keywordlists[], Accessor &styler, bool isFixFormat) {
+			WordList *keywordlists[], Accessor &styler, bool isFixFormat) {
 	WordList &keywords = *keywordlists[0];
 	WordList &keywords2 = *keywordlists[1];
 	WordList &keywords3 = *keywordlists[2];
@@ -143,7 +143,7 @@ static void ColouriseFortranDoc(unsigned int startPos, int length, int initStyle
 				}
 				sc.SetState(SCE_F_DEFAULT);
 			}
-		} else if (sc.state == SCE_F_COMMENT) {
+		} else if (sc.state == SCE_F_COMMENT || sc.state == SCE_F_PREPROCESSOR) {
 			if (sc.ch == '\r' || sc.ch == '\n') {
 				sc.SetState(SCE_F_DEFAULT);
 			}
@@ -193,7 +193,11 @@ static void ColouriseFortranDoc(unsigned int startPos, int length, int initStyle
 		// Determine if a new state should be entered.
 		if (sc.state == SCE_F_DEFAULT) {
 			if (sc.ch == '!') {
-				sc.SetState(SCE_F_COMMENT);
+				if (sc.chNext == '$') {
+					sc.SetState(SCE_F_PREPROCESSOR);
+				} else {
+					sc.SetState(SCE_F_COMMENT);
+				}
 			} else if ((!isFixFormat) && IsADigit(sc.ch) && numNonBlank == 1) {
 				sc.SetState(SCE_F_LABEL);
 			} else if (IsADigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext))) {
@@ -302,9 +306,7 @@ static void FoldFortranDoc(unsigned int startPos, int length, int initStyle,
 				s[k] = '\0';
 				// Handle the forall and where statement and structure.
 				if (strcmp(s, "forall") == 0 || strcmp(s, "where") == 0) {
-					if (strcmp(prevWord, "end") == 0) {
-						levelCurrent--;
-					} else {
+					if (strcmp(prevWord, "end") != 0) {
 						j = i + 1;
 						char chBrace = '(', chSeek = ')', ch1 = styler.SafeGetCharAt(j);
 						// Find the position of the first (
