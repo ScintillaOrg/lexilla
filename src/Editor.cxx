@@ -5692,7 +5692,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			if (lParam == 0)
 				return 0;
 			int insertPos = wParam;
-			if (static_cast<short>(wParam) == -1)
+			if (static_cast<int>(wParam) == -1)
 				insertPos = CurrentPosition();
 			int newCurrent = CurrentPosition();
 			char *sz = CharPtrFromSPtr(lParam);
@@ -5812,7 +5812,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return printWrapState;
 
 	case SCI_GETSTYLEAT:
-		if (static_cast<short>(wParam) >= pdoc->Length())
+		if (static_cast<int>(wParam) >= pdoc->Length())
 			return 0;
 		else
 			return pdoc->StyleAt(wParam);
