@@ -1325,7 +1325,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 #endif
 		gtk_selection_data_set(selection_data,
 					(info == TARGET_STRING) ?
-						GDK_SELECTION_TYPE_STRING : atomUTF8,
+					static_cast<GdkAtom>(GDK_SELECTION_TYPE_STRING) : atomUTF8,
 		                       8, reinterpret_cast<unsigned char *>(selBuffer),
 		                       len);
 	} else if ((info == TARGET_TEXT) || (info == TARGET_COMPOUND_TEXT)) {

@@ -718,8 +718,6 @@ public:
 	void SetDBCSMode(int codePage);
 };
 
-#ifdef USE_PANGO
-
 const char *CharacterSetID(int characterSet) {
 	switch (characterSet) {
 	case SC_CHARSET_ANSI:
@@ -764,6 +762,8 @@ const char *CharacterSetID(int characterSet) {
 		return "";
 	}
 }
+
+#ifdef USE_PANGO
 
 void SurfaceImpl::SetIconv(int characterSet_) {
 	if (characterSet != characterSet_) {
