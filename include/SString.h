@@ -52,7 +52,21 @@ class SString {
 	int sLen;	///< The size of the string in s
 	int sizeGrowth;	///< Minimum growth size when appending strings
 	enum { sizeGrowthDefault = 64 };
-
+	bool grow(int lenNew) {
+		while (sizeGrowth * 6 < lenNew)
+			sizeGrowth *= 2;
+		char *sNew = new char[lenNew + sizeGrowth + 1];
+		if (sNew) {
+			if (s) {
+				memcpy(sNew, s, sLen);
+				delete []s;
+			}
+			s = sNew;
+			s[sLen] = '\0';
+			sSize = lenNew + sizeGrowth;
+		}
+		return sNew != 0;
+	}
 public:
 	typedef int size_type;
 
@@ -192,33 +206,15 @@ public:
 		if (sLen && sep)	// Only add a separator if not empty
 			lenSep = 1;
 		int lenNew = sLen + sLenOther + lenSep;
-		if (lenNew + 1 < sSize) {
-			// Conservative about growing the buffer: don't do it, unless really needed
+		// Conservative about growing the buffer: don't do it, unless really needed
+		if ((lenNew + 1 < sSize) || (grow(lenNew))) {
 			if (lenSep) {
 				s[sLen] = sep;
 				sLen++;
 			}
 			strncpy(&s[sLen], sOther, sLenOther);
-			s[sLen + sLenOther] = '\0';
 			sLen += sLenOther;
-		} else {
-			// Grow the buffer bigger than really needed, to have room for other appends
-			char *sNew = new char[lenNew + sizeGrowth + 1];
-			if (sNew) {
-				if (s) {
-					memcpy(sNew, s, sLen);
-					delete []s;
-				}
-				s = sNew;
-				sSize = lenNew + sizeGrowth;
-				if (lenSep) {
-					s[sLen] = sep;
-					sLen++;
-				}
-				strncpy(&s[sLen], sOther, sLenOther);
-				sNew[sLen + sLenOther] = '\0';
-				sLen += sLenOther;
-			}
+			s[sLen] = '\0';
 		}
 		return *this;
 	}
@@ -238,23 +234,14 @@ public:
 		if (sLenOther < 0)
 			sLenOther = strlen(sOther);
 		int lenNew = sLen + sLenOther;
-		if (lenNew + 1 >= sSize) {
-			// Conservative about growing the buffer: don't do it, unless really needed
-			char *sNew = new char[lenNew + sizeGrowth + 1];
-			if (!sNew)
-				return *this;
-			if (s) {
-				memcpy(sNew, s, sLen+1);
-				delete []s;
-			}
-			s = sNew;
-			sSize = lenNew + sizeGrowth;
+		// Conservative about growing the buffer: don't do it, unless really needed
+		if ((lenNew + 1 < sSize) || (grow(lenNew))) {
+			int moveChars = sLen-pos;
+			for (int i=moveChars; i>=0; i--)
+				s[lenNew-moveChars+i] = s[pos+i];
+			memcpy(s + pos, sOther, sLenOther);
+			sLen += sLenOther;
 		}
-		int moveChars = sLen-pos;
-		for (int i=moveChars; i>=0; i--)
-			s[lenNew-moveChars+i] = s[pos+i];
-		memcpy(s + pos, sOther, sLenOther);
-		sLen += sLenOther;
 		return *this;
 	}
 	void remove(int pos, int len=1) {
