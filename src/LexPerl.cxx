@@ -135,8 +135,14 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 		startPos = styler.LineStart(styler.GetLine(startPos));
 		state = styler.StyleAt(startPos - 1);
 	}
-	if (state == SCE_PL_REGEX || state == SCE_PL_REGSUBST
-	        || state == SCE_PL_LONGQUOTE || state == SCE_PL_STRING_Q) {
+	if ( state == SCE_PL_STRING_Q
+	|| state == SCE_PL_STRING_QQ
+	|| state == SCE_PL_STRING_QX
+	|| state == SCE_PL_STRING_QR
+	|| state == SCE_PL_STRING_QW
+	|| state == SCE_PL_REGEX
+	|| state == SCE_PL_REGSUBST
+	) {
 		while ((startPos > 1) && (styler.StyleAt(startPos - 1) == state)) {
 			startPos--;
 		}
@@ -228,7 +234,10 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					i++;
 					chNext = chNext2;
 				} else if (ch == 'q' && (chNext == 'q' || chNext == 'r' || chNext == 'w' || chNext == 'x') && !isalnum(chNext2)) {
-					state = SCE_PL_LONGQUOTE;
+					if      (chNext == 'q') state = SCE_PL_STRING_QQ;
+					else if (chNext == 'x') state = SCE_PL_STRING_QX;
+					else if (chNext == 'r') state = SCE_PL_STRING_QR;
+					else if (chNext == 'w') state = SCE_PL_STRING_QW;
 					i++;
 					chNext = chNext2;
 					quotes = 0;
@@ -523,7 +532,9 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					styler.ColourTo(i - 1, state);
 					state = SCE_PL_DEFAULT;
 				}
-			} else if (state == SCE_PL_REGEX) {
+			} else if (state == SCE_PL_REGEX
+				|| state == SCE_PL_STRING_QR
+				) {
 				if (!quoteUp && !isspace(ch)) {
 					quoteUp = ch;
 					quoteDown = opposite(ch);
@@ -621,7 +632,11 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 						}
 					}
 				}
-			} else if (state == SCE_PL_LONGQUOTE || state == SCE_PL_STRING_Q) {
+			} else if (state == SCE_PL_STRING_Q
+				|| state == SCE_PL_STRING_QQ
+				|| state == SCE_PL_STRING_QX
+				|| state == SCE_PL_STRING_QW
+				) {
 				if (!quoteDown && !isspace(ch)) {
 					quoteUp = ch;
 					quoteDown = opposite(quoteUp);

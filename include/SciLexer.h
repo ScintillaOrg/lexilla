@@ -184,6 +184,10 @@
 #define SCE_PL_HERE_QQ 24
 #define SCE_PL_HERE_QX 25
 #define SCE_PL_STRING_Q 26
+#define SCE_PL_STRING_QQ 27
+#define SCE_PL_STRING_QX 28
+#define SCE_PL_STRING_QR 29
+#define SCE_PL_STRING_QW 30
 #define SCE_L_DEFAULT 0
 #define SCE_L_COMMAND 1
 #define SCE_L_TAG 2
