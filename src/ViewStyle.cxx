@@ -2,7 +2,7 @@
 /** @file ViewStyle.cxx
  ** Store information on how the document is to be viewed.
  **/
-// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <string.h>
@@ -11,6 +11,7 @@
 
 #include "Scintilla.h"
 #include "Indicator.h"
+#include "XPM.h"
 #include "LineMarker.h"
 #include "Style.h"
 #include "ViewStyle.h"
