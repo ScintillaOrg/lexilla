@@ -898,6 +898,8 @@ struct TextToFind {
      <a class="message" href="#SCI_SELECTIONISRECTANGLE">SCI_SELECTIONISRECTANGLE</a><br />
      <a class="message" href="#SCI_SETSELECTIONMODE">SCI_SETSELECTIONMODE</a><br />
      <a class="message" href="#SCI_GETSELECTIONMODE">SCI_GETSELECTIONMODE</a><br />
+     <a class="message" href="#SCI_GETLINESELSTARTPOSITION">SCI_GETLINESELSTARTPOSITION(int line)</a><br />
+     <a class="message" href="#SCI_GETLINESELENDPOSITION">SCI_GETLINESELENDPOSITION(int line)</a><br />
      <a class="message" href="#SCI_MOVECARETINSIDEVIEW">SCI_MOVECARETINSIDEVIEW</a><br />
      <a class="message" href="#SCI_WORDENDPOSITION">SCI_WORDENDPOSITION(int position, bool
     onlyWordCharacters)</a><br />
@@ -1088,6 +1090,11 @@ struct TextToFind {
      until the mode is cancelled by a call with same value or with <code>SCI_CANCEL</code>.
      The get function returns the current mode even if the selection was made by mouse
      or with regular extended moves.</p>
+
+    <p><b id="SCI_GETLINESELSTARTPOSITION">SCI_GETLINESELSTARTPOSITION(int line)</b><br />
+    <b id="SCI_GETLINESELENDPOSITION">SCI_GETLINESELENDPOSITION(int line)</b><br />
+    Retrieve the position of the start and end of the selection at the given line with
+    INVALID_POSITION returned if no selection on this line.</p>
 
     <p><b id="SCI_MOVECARETINSIDEVIEW">SCI_MOVECARETINSIDEVIEW</b><br />
      If the caret is off the top or bottom of the view, it is moved to the nearest line that is
@@ -2029,6 +2036,7 @@ struct TextToFind {
      <a class="message" href="#SCI_SETHOTSPOTACTIVEFORE">SCI_SETHOTSPOTACTIVEFORE</a><br />
      <a class="message" href="#SCI_SETHOTSPOTACTIVEBACK">SCI_SETHOTSPOTACTIVEBACK</a><br />
      <a class="message" href="#SCI_SETHOTSPOTACTIVEUNDERLINE">SCI_SETHOTSPOTACTIVEUNDERLINE</a><br />
+     <a class="message" href="#SCI_SETHOTSPOTSINGLELINE">SCI_SETHOTSPOTSINGLELINE</a><br />
      <a class="message" href="#SCI_SETCONTROLCHARSYMBOL">SCI_SETCONTROLCHARSYMBOL(int
     symbol)</a><br />
      <a class="message" href="#SCI_GETCONTROLCHARSYMBOL">SCI_GETCONTROLCHARSYMBOL</a><br />
@@ -2081,8 +2089,10 @@ struct TextToFind {
      <b id="SCI_SETHOTSPOTACTIVEBACK">SCI_SETHOTSPOTACTIVEBACK(bool useHotSpotBackColour, int <a class="jump"
     href="#colour">colour</a>)</b><br />
      <b id="SCI_SETHOTSPOTACTIVEUNDERLINE">SCI_SETHOTSPOTACTIVEUNDERLINE(bool underline,)</b><br />
+     <b id="SCI_SETHOTSPOTSINGLELINE">SCI_SETHOTSPOTSINGLELINE(bool singleLine,)</b><br />
      While the cursor hovers over text in a style with the hotspot attribute set,
-     the default colouring can be modified and an underline drawn with these settings.</p>
+     the default colouring can be modified and an underline drawn with these settings.
+     Single line mode stops a hotspot from wrapping onto next line.</p>
 
     <p><b id="SCI_SETCONTROLCHARSYMBOL">SCI_SETCONTROLCHARSYMBOL(int symbol)</b><br />
      <b id="SCI_GETCONTROLCHARSYMBOL">SCI_GETCONTROLCHARSYMBOL</b><br />
@@ -3165,6 +3175,16 @@ struct TextToFind {
         </tr>
 
         <tr>
+          <td><code>SCI_WORDLEFTEND</code></td>
+
+          <td><code>SCI_WORDLEFTENDEXTEND</code></td>
+
+          <td><code>SCI_WORDRIGHTEND</code></td>
+
+          <td><code>SCI_WORDRIGHTENDEXTEND</code></td>
+        </tr>
+
+        <tr>
           <td><code>SCI_WORDPARTLEFT</code></td>
 
           <td><code>SCI_WORDPARTLEFTEXTEND</code></td>
@@ -3248,6 +3268,19 @@ struct TextToFind {
           <td><code>SCI_PAGEDOWNEXTEND</code></td>
 
           <td><code>SCI_PAGEDOWNRECTEXTEND</code></td>
+        </tr>
+
+
+        <tr>
+          <td><code>SCI_STUTTEREDPAGEUP</code></td>
+
+          <td><code>SCI_STUTTEREDPAGEUPEXTEND</code></td>
+        </tr>
+
+        <tr>
+          <td><code>SCI_STUTTEREDPAGEDOWN</code></td>
+
+          <td><code>SCI_STUTTEREDPAGEDOWNEXTEND</code></td>
         </tr>
 
         <tr>
