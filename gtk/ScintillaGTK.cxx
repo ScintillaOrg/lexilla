@@ -849,7 +849,13 @@ void ScintillaGTK::ReceivedDrop(GtkSelectionData *selection_data) {
 	Redraw();
 }
 
-void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, char *text, bool isRectangular) {
+// Preprocessor used to avoid warnings here
+#ifdef _MSC_VER
+void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, char *text, bool) 
+#else
+void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, char *text, bool isRectangular) 
+#endif
+{
 	char *selBuffer = text;
 	char *tmpBuffer = NULL; // Buffer to be freed
 

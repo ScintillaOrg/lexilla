@@ -48,6 +48,9 @@ class LexContext {
 	Accessor &styler;
 	int lengthDoc;
 	int currentPos;
+	LexContext& operator=(const LexContext&) {
+		return *this;
+	}
 public:
 	int state;
 	char ch;

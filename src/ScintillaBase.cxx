@@ -466,7 +466,6 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 
 	case SCI_AUTOCGETAUTOHIDE:
 		return ac.autoHide;
-		break;
 
 	case SCI_CALLTIPSHOW: {
 			AutoCompleteCancel();

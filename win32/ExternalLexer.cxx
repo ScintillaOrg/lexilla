@@ -242,13 +242,12 @@ void LexerManager::EnumerateLexers() {
 	if (hFind != INVALID_HANDLE_VALUE) {
 		//Found the first file...
 		BOOL found = TRUE;
-		LexerLibrary *lib = NULL;
 		SString to_open;
 
 		while (found) {
 			to_open.assign(sPath);
 			to_open += FindFileData.cFileName;
-			lib = new LexerLibrary(to_open.c_str());
+			LexerLibrary *lib = new LexerLibrary(to_open.c_str());
 			if (NULL != first) {
 				last->next = lib;
 				last = lib;
