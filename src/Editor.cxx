@@ -672,7 +672,7 @@ int Editor::LineFromLocation(Point pt) {
 
 void Editor::SetTopLine(int topLineNew) {
 	topLine = topLineNew;
-	posTopLine = pdoc->LineStart(topLine);
+	posTopLine = pdoc->LineStart(cs.DocFromDisplay(topLine));
 }
 
 static inline bool IsEOLChar(char ch) {
