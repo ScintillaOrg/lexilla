@@ -381,6 +381,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_TEXTHEIGHT 2279
 #define SCI_SETVSCROLLBAR 2280
 #define SCI_GETVSCROLLBAR 2281
+#define SCI_APPENDTEXT 2282
 #define SCI_LINEDOWN 2300
 #define SCI_LINEDOWNEXTEND 2301
 #define SCI_LINEUP 2302

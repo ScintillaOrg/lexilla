@@ -4768,6 +4768,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			return 0;
 		}
 
+	case SCI_APPENDTEXT:
+		pdoc->InsertString(pdoc->Length(), CharPtrFromSPtr(lParam), wParam);
+		return 0;
+
 	case SCI_CLEARALL:
 		ClearAll();
 		return 0;

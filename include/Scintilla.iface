@@ -998,6 +998,11 @@ set void SetVScrollBar=2280(bool show,)
 # Is the vertical scroll bar visible?
 get bool GetVScrollBar=2281(,)
 
+# Append a string to the end of the document without changing the selection.
+fun void AppendText=2282(int length, string text)
+
+## New messages go here
+
 ## Start of key messages
 # Move caret down one line.
 fun void LineDown=2300(,)
