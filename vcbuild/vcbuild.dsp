@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "VCBUILD_EXPORTS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /MD /W3 /GX- /O2 /I "..\include" /I "..\src" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "SCI_LEXER" /FD /c
+# ADD CPP /nologo /MD /W3 /O2 /I "..\include" /I "..\src" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "SCI_LEXER" /FD /c
 # SUBTRACT CPP /YX /Yc /Yu
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
@@ -69,8 +69,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "VCBUILD_EXPORTS" /Yu"stdafx.h" /FD /GZ  /c
-# ADD CPP /nologo /MD /W3 /Gm /GX- /ZI /Od /I "..\include" /I "..\src" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "SCI_LEXER" /FD /GZ  /c
+# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "VCBUILD_EXPORTS" /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /MD /W3 /Gm /ZI /Od /I "..\include" /I "..\src" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "SCI_LEXER" /FD /GZ /c
 # SUBTRACT CPP /YX /Yc /Yu
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
@@ -131,6 +131,34 @@ SOURCE=..\src\KeyMap.cxx
 # Begin Source File
 
 SOURCE=..\src\KeyWords.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexCPP.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexHTML.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexOthers.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexPerl.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexPython.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexSQL.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexVB.cxx
 # End Source File
 # Begin Source File
 
