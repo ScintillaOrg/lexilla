@@ -301,4 +301,4 @@ static void ColouriseLuaDoc(unsigned int startPos,
     styler.ColourTo(lengthDoc - 1, state);
 }
 
-LexerModule lmLua(SCLEX_LUA, ColouriseLuaDoc);
+LexerModule lmLua(SCLEX_LUA, ColouriseLuaDoc, "lua");

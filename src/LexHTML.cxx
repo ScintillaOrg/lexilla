@@ -1314,6 +1314,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	}
 }
 
-LexerModule lmHTML(SCLEX_HTML, ColouriseHyperTextDoc);
-LexerModule lmXML(SCLEX_XML, ColouriseHyperTextDoc);
+LexerModule lmHTML(SCLEX_HTML, ColouriseHyperTextDoc, "hypertext");
+LexerModule lmXML(SCLEX_XML, ColouriseHyperTextDoc, "xml");
 

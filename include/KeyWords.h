@@ -14,6 +14,7 @@ typedef void (*LexerFunction)(unsigned int startPos, int lengthDoc, int initStyl
  * module appropriate to a particular language.
  */
 class LexerModule {
+protected:
 	LexerModule *next;
 	int language;
 	const char *languageName;
@@ -27,9 +28,9 @@ public:
 	LexerModule(int language_, LexerFunction fnLexer_, 
 		const char *languageName_=0, LexerFunction fnFolder_=0);
 	int GetLanguage() { return language; }
-	void Lex(unsigned int startPos, int lengthDoc, int initStyle,
+	virtual void Lex(unsigned int startPos, int lengthDoc, int initStyle,
                   WordList *keywordlists[], Accessor &styler);
-	void Fold(unsigned int startPos, int lengthDoc, int initStyle,
+	virtual void Fold(unsigned int startPos, int lengthDoc, int initStyle,
                   WordList *keywordlists[], Accessor &styler);
 	static LexerModule *Find(int language);
 	static LexerModule *Find(const char *languageName);

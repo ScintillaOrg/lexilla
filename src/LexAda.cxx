@@ -196,4 +196,4 @@ static void ColouriseAdaDoc(unsigned int startPos, int length, int initStyle,
 //	}
 }
 
-LexerModule lmAda(SCLEX_ADA, ColouriseAdaDoc);
+LexerModule lmAda(SCLEX_ADA, ColouriseAdaDoc, "ada");

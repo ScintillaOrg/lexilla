@@ -155,4 +155,4 @@ static void ColouriseSQLDoc(unsigned int startPos, int length,
 	styler.ColourTo(lengthDoc - 1, state);
 }
 
-LexerModule lmSQL(SCLEX_SQL, ColouriseSQLDoc);
+LexerModule lmSQL(SCLEX_SQL, ColouriseSQLDoc, "sql");

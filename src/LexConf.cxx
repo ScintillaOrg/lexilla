@@ -174,4 +174,4 @@ static void ColouriseConfDoc(unsigned int startPos, int length, int, WordList *k
 	}
 }
 
-LexerModule lmConf(SCLEX_CONF, ColouriseConfDoc);
+LexerModule lmConf(SCLEX_CONF, ColouriseConfDoc, "conf");
