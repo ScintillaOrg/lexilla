@@ -223,7 +223,8 @@ SCI_MOVECARETINSIDEVIEW
       determines the number of line at top and botom of the view where the caret should not
       go. If CARET_SLOP is off then the caret is centred within the view. When 
       CARET_STRICT is set then caret policy is rechecked even if the caret is completely 
-      visible.
+      visible. If CARET_XEVEN is set then both the left and right margins are treated
+      equally whereas if it is not set then displaying text to the left is preferred.
       SCI_SETVISIBLEPOLICY is a similar function that 
       determines how the vertical positioning is determined when SCI_ENSUREVISIBLE is
       called. It takes VISIBLE_SLOP and VISIBLE_STRICT flags 
@@ -776,6 +777,8 @@ SCI_VCHOME
 SCI_VCHOMEEXTEND
 SCI_DELWORDLEFT
 SCI_DELWORDRIGHT
+SCI_DELLINELEFT
+SCI_DELLINERIGHT
 SCI_LINESCROLLDOWN
 SCI_LINESCROLLUP
 SCI_LINECUT
