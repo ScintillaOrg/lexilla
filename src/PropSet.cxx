@@ -2,14 +2,14 @@
 /** @file PropSet.cxx
  ** A Java style properties file module.
  **/
-// Copyright 1998-2002 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 // Maintain a dictionary of properties
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
+//#include <ctype.h>
 #include <stdio.h>
 
 #include "Platform.h"
@@ -28,6 +28,10 @@ static inline char MakeUpperCase(char ch) {
 
 static inline bool IsLetter(char ch) {
 	return ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z'));
+}
+
+inline bool IsASpace(unsigned int ch) {
+    return (ch == ' ') || ((ch >= 0x09) && (ch <= 0x0d));
 }
 
 int CompareCaseInsensitive(const char *a, const char *b) {
@@ -119,7 +123,7 @@ void PropSet::Set(const char *key, const char *val, int lenKey, int lenVal) {
 }
 
 void PropSet::Set(const char *keyVal) {
-	while (isspace(*keyVal))
+	while (IsASpace(*keyVal))
 		keyVal++;
 	const char *endVal = keyVal;
 	while (*endVal && (*endVal != '\n'))
@@ -626,7 +630,7 @@ static unsigned int LengthWord(const char *word, char otherSeparator) {
 	if (endWord > word) {
 		endWord--;	// Back from the '(', ':', or '\0'
 		// Move backwards over any spaces
-		while ((endWord > word) && (isspace(*endWord))) {
+		while ((endWord > word) && (IsASpace(*endWord))) {
 			endWord--;
 		}
 	}
