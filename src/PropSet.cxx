@@ -24,6 +24,8 @@ bool EqualCaseInsensitive(const char *a, const char *b) {
 #endif
 }
 
+SString::size_type SString::npos = -1;
+
 inline unsigned int HashString(const char *s) {
     unsigned int ret = 0;
     while (*s) {
