@@ -220,7 +220,7 @@ public:
 	bool IsWordPartSeparator(char ch);
 	int WordPartLeft(int pos);
 	int WordPartRight(int pos);
-	int ExtendStyleRange(int pos, int delta);
+	int ExtendStyleRange(int pos, int delta, bool singleLine = false);
 	int ParaUp(int pos);
 	int ParaDown(int pos);
 

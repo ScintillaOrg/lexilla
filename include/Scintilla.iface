@@ -1440,6 +1440,9 @@ set void SetHotspotActiveBack=2411(bool useSetting, colour back)
 # Enable / Disable underlining active hotspots.
 set void SetHotspotActiveUnderline=2412(bool underline,)
 
+# Limit hotspots to single line so hotspots on two lines don't merge.
+set void SetHotspotSingleLine=2421(bool singleLine,)
+
 # Move caret between paragraphs (delimited by empty lines)
 fun void ParaDown=2413(,)
 fun void ParaDownExtend=2414(,)

@@ -1335,14 +1335,18 @@ int Document::WordPartRight(int pos) {
 	return pos;
 }
 
-int Document::ExtendStyleRange(int pos, int delta) {
+bool IsLineEndChar(char c) {
+	return (c == '\n' || c == '\r');
+}
+
+int Document::ExtendStyleRange(int pos, int delta, bool singleLine) {
 	int sStart = cb.StyleAt(pos);
 	if (delta < 0) {
-		while (pos > 0 && (cb.StyleAt(pos) == sStart))
+		while (pos > 0 && (cb.StyleAt(pos) == sStart) && (!singleLine || !IsLineEndChar(cb.CharAt(pos))) )
 			pos--;
 		pos++;
 	} else {
-		while (pos < (Length()) && (cb.StyleAt(pos) == sStart))
+		while (pos < (Length()) && (cb.StyleAt(pos) == sStart) && (!singleLine || !IsLineEndChar(cb.CharAt(pos))) )
 			pos++;
 	}
 	return pos;

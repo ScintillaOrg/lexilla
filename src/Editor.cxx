@@ -1963,7 +1963,7 @@ ColourAllocated Editor::TextBackground(ViewStyle &vsDraw, bool overrideBackgroun
 		        (i >= ll->edgeColumn) &&
 		        !IsEOLChar(ll->chars[i]))
 			return vsDraw.edgecolour.allocated;
-		if (inHotspot)
+		if (inHotspot && vsDraw.hotspotBackgroundSet)
 			return vsDraw.hotspotBackground.allocated;
 		if (overrideBackground)
 			return background;
@@ -4567,7 +4567,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 		//Platform::DebugPrintf("Double click: %d - %d\n", anchor, currentPos);
 		if (doubleClick) {
 			NotifyDoubleClick(pt, shift);
-			if (PositionIsHotspot(newPos))
+			if (PointIsHotspot(newPos))
 				NotifyHotSpotDoubleClicked(newPos, shift, ctrl, alt);
 		}
 	} else {	// Single click
@@ -4599,7 +4599,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 			SetMouseCapture(true);
 			selectionType = selLine;
 		} else {
-			if (PositionIsHotspot(newPos)) {
+			if (PointIsHotspot(pt)) {
 				NotifyHotSpotClicked(newPos, shift, ctrl, alt);
 			}
 			if (!shift) {
@@ -4633,7 +4633,9 @@ bool Editor::PositionIsHotspot(int position) {
 }
 
 bool Editor::PointIsHotspot(Point pt) {
-	int pos = PositionFromLocation(pt);
+	int pos = PositionFromLocationClose(pt);
+	if(pos == INVALID_POSITION)
+		return false;
 	return PositionIsHotspot(pos);
 }
 
@@ -4644,8 +4646,8 @@ void Editor::SetHotSpotRange(Point *pt) {
 		// If we don't limit this to word characters then the
 		// range can encompass more than the run range and then
 		// the underline will not be drawn properly.
-		int hsStart_ = pdoc->ExtendStyleRange(pos, -1);
-		int hsEnd_ = pdoc->ExtendStyleRange(pos, 1);
+		int hsStart_ = pdoc->ExtendStyleRange(pos, -1, vs.hotspotSingleLine);
+		int hsEnd_ = pdoc->ExtendStyleRange(pos, 1, vs.hotspotSingleLine);
 
 		// Only invalidate the range if the hotspot range has changed...
 		if (hsStart_ != hsStart || hsEnd_ != hsEnd) {
@@ -6529,6 +6531,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETHOTSPOTACTIVEUNDERLINE:
 		vs.hotspotUnderline = wParam != 0;
+		InvalidateStyleRedraw();
+		break;
+
+	case SCI_SETHOTSPOTSINGLELINE:
+		vs.hotspotSingleLine = wParam != 0;
 		InvalidateStyleRedraw();
 		break;
 
