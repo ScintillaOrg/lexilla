@@ -3,6 +3,7 @@
 # The License.txt file describes the conditions under which this software may be distributed.
 # This makefile assumes GCC 2.95.2 is used and changes will be needed to use other compilers.
 # GNU make does not like \r\n line endings so should be saved to CVS in binary form.
+# To build for GTK+ 2, define GTK2 on the make command line.
 
 .SUFFIXES: .cxx .o .h .a
 CC = g++
