@@ -352,6 +352,11 @@ static int KeyTranslate(int keyIn) {
 		case VK_ADD:		return SCK_ADD;
 		case VK_SUBTRACT:	return SCK_SUBTRACT;
 		case VK_DIVIDE:		return SCK_DIVIDE;
+		case VK_OEM_2:		return '/';
+		case VK_OEM_3:		return '`';
+		case VK_OEM_4:		return '[';
+		case VK_OEM_5:		return '\\';
+		case VK_OEM_6:		return ']';
 		default:			return keyIn;
 	}
 }
