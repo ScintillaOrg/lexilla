@@ -64,7 +64,7 @@ static void ColourisePSDoc(
     WordList &keywords5 = *keywordlists[4];
 
     StyleContext sc(startPos, length, initStyle, styler);
-   
+
     bool tokenizing = styler.GetPropertyInt("ps.tokenize") != 0;
     int pslevel = styler.GetPropertyInt("ps.level", 3);
     int lineCurrent = styler.GetLine(startPos);
@@ -289,7 +289,7 @@ static void FoldPSDoc(unsigned int startPos, int length, int initStyle, WordList
     int levelNext = levelCurrent;
     char chNext = styler[startPos];
     int styleNext = styler.StyleAt(startPos);
-    int style = initStyle;
+    int style;
     for (unsigned int i = startPos; i < endPos; i++) {
         char ch = chNext;
         chNext = styler.SafeGetCharAt(i + 1);
