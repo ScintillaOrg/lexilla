@@ -62,7 +62,6 @@ void ScintillaBase::AddCharUTF(char *s, unsigned int len) {
 	bool acActiveBeforeCharAdded = ac.Active();
 	if (!acActiveBeforeCharAdded || !ac.IsFillUpChar(*s))
 		Editor::AddCharUTF(s, len);
-	Editor::AddCharUTF(s, len);
 	if (acActiveBeforeCharAdded)
 		AutoCompleteChanged(s[0]);
 }

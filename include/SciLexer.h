@@ -57,7 +57,7 @@
 #define SCE_C_IDENTIFIER 11
 #define SCE_C_STRINGEOL 12
 
-// Lexical states for SCLEX_HTML, SCLEX_xML
+// Lexical states for SCLEX_HTML, SCLEX_XML
 #define SCE_H_DEFAULT 0
 #define SCE_H_TAG 1
 #define SCE_H_TAGUNKNOWN 2
@@ -78,6 +78,8 @@
 #define SCE_H_ASPAT 16
 #define SCE_H_CDATA 17
 #define SCE_H_QUESTION 18
+// More HTML
+#define SCE_H_VALUE 19
 // Embedded Javascript
 #define SCE_HJ_START 40
 #define SCE_HJ_DEFAULT 41

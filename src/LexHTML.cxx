@@ -115,9 +115,13 @@ static int stateForPrintState(int StateToPrint) {
 	return state;
 }
 
-static void classifyAttribHTML(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler) {
-	bool wordIsNumber = isdigit(styler[start]) || (styler[start] == '.') ||
+static inline bool IsNumber(unsigned int start, Accessor &styler) {
+	return isdigit(styler[start]) || (styler[start] == '.') ||
 	                    (styler[start] == '-') || (styler[start] == '#');
+}
+
+static void classifyAttribHTML(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler) {
+	bool wordIsNumber = IsNumber(start, styler);
 	char chAttr = SCE_H_ATTRIBUTEUNKNOWN;
 	if (wordIsNumber) {
 		chAttr = SCE_H_NUMBER;
@@ -603,6 +607,9 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					} else {
 						state = SCE_H_DEFAULT;
 					}
+				} else if (ch == '=') {
+					styler.ColourTo(i, SCE_H_OTHER);
+					state = SCE_H_VALUE;
 				} else {
 					state = SCE_H_OTHER;
 				}
@@ -623,6 +630,9 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			} else if (ch == '\'') {
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_H_SINGLESTRING;
+			} else if (ch == '=') {
+				styler.ColourTo(i, StateToPrint);
+				state = SCE_H_VALUE;
 			} else if (ch == '/' && chNext == '>') {
 				styler.ColourTo(i - 1, StateToPrint);
 				styler.ColourTo(i + 1, SCE_H_TAGEND);
@@ -656,6 +666,32 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				}
 				styler.ColourTo(i, SCE_H_SINGLESTRING);
 				state = SCE_H_OTHER;
+			}
+			break;
+		case SCE_H_VALUE:
+			if (!ishtmlwordchar(ch)) {
+				if (ch == '\"') {
+					// Should really test for being first character
+					state = SCE_H_DOUBLESTRING;
+				} else if (ch == '\'') {
+					state = SCE_H_SINGLESTRING;
+				} else {
+					if (IsNumber(styler.GetStartSegment(), styler)) {
+						styler.ColourTo(i - 1, SCE_H_NUMBER);
+					} else {
+						styler.ColourTo(i - 1, StateToPrint);
+					}
+					if (ch == '>') {
+						styler.ColourTo(i, SCE_H_TAG);
+						if (inScriptType == eNonHtmlScript) {
+							state = StateForScript(scriptLanguage);
+						} else {
+							state = SCE_H_DEFAULT;
+						}
+					} else {
+						state = SCE_H_OTHER;
+					}
+				}
 			}
 			break;
 		case SCE_HJ_DEFAULT:
