@@ -616,7 +616,11 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		return lexLanguage;
 
 	case SCI_COLOURISE:
-		Colourise(wParam, lParam);
+		if (lexLanguage == SCLEX_CONTAINER) {
+			NotifyStyleToNeeded((lParam == -1) ? pdoc->Length() : lParam);
+		} else {
+			Colourise(wParam, lParam);
+		}
 		Redraw();
 		break;
 
