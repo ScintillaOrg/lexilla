@@ -132,8 +132,7 @@
 #define VK_RETURN GDK_Return
 #define VK_ADD GDK_KP_Add
 #define VK_SUBTRACT GDK_KP_Subtract
-//TODO:
-#define VK_MULTIPLY GDK_KP_Subtract
+#define VK_DIVIDE GDK_KP_Divide
 #endif
 
 #if PLAT_WX
@@ -154,7 +153,7 @@
 #define VK_ADD          WXK_ADD
 #define VK_SUBTRACT     WXK_SUBTRACT
 //TODO:
-#define VK_MULTIPLY WXK_SUBTRACT
+#define VK_DIVIDE	WXK_DIVIDE
 
 // Are these needed any more
 #define LPSTR char *
