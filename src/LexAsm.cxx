@@ -29,7 +29,7 @@ static inline bool IsAWordChar(const int ch) {
 
 static inline bool IsAWordStart(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '.');
-} 
+}
 
 inline bool isAsmOperator(char ch) {
 	if (isalnum(ch))
@@ -37,7 +37,7 @@ inline bool isAsmOperator(char ch) {
 	// '.' left out as it is used to make up numbers
 	if (ch == '*' || ch == '/' || ch == '-' || ch == '+' ||
 		ch == '(' || ch == ')' || ch == '=' ||
-		ch == '[' || ch == ']' || ch == '<' || 
+		ch == '[' || ch == ']' || ch == '<' ||
 		ch == '>' || ch == ',' ||
 		ch == '.' || ch == '%' || ch == ':')
 		return true;
@@ -52,10 +52,10 @@ static void ColouriseAsmDoc(unsigned int startPos, int length, int initStyle, Wo
 	WordList &registers = *keywordlists[2];
 	WordList &directive = *keywordlists[3];
 	WordList &directiveOperand = *keywordlists[4];
-	
+
 	StyleContext sc(startPos, length, initStyle, styler);
 
-	for (; sc.More(); sc.Forward()) 
+	for (; sc.More(); sc.Forward())
 	{
 		// Handle line continuation generically.
 		if (sc.ch == '\\') {
@@ -79,9 +79,9 @@ static void ColouriseAsmDoc(unsigned int startPos, int length, int initStyle, Wo
 			}
 		} else if (sc.state == SCE_ASM_IDENTIFIER) {
 			if (!IsAWordChar(sc.ch) ) {
-			char s[100]; 
+			char s[100];
 			sc.GetCurrentLowered(s, sizeof(s));
-			
+
 			if (cpuInstruction.InList(s)) {
 				sc.ChangeState(SCE_ASM_CPUINSTRUCTION);
 			} else if (mathInstruction.InList(s)) {
@@ -110,8 +110,8 @@ static void ColouriseAsmDoc(unsigned int startPos, int length, int initStyle, Wo
 			} else if (sc.atLineEnd) {
 				sc.ForwardSetState(SCE_ASM_DEFAULT);
 			}
-		} 
-		
+		}
+
 		// Determine if a new state should be entered.
 		else if (sc.state == SCE_ASM_DEFAULT) {
 			if (sc.ch == ';'){
@@ -123,11 +123,11 @@ static void ColouriseAsmDoc(unsigned int startPos, int length, int initStyle, Wo
 			} else if (sc.Match('\"')) {
 				sc.SetState(SCE_ASM_STRING);
 			}
-		} 
-		
+		}
+
 	}
 	sc.Complete();
 }
 
-LexerModule lmAsm(SCLEX_ASM, ColouriseAsmDoc, "Asm");
+LexerModule lmAsm(SCLEX_ASM, ColouriseAsmDoc, "asm");
 
