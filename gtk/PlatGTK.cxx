@@ -148,7 +148,7 @@ static const char *CharacterSetName(int characterSet) {
 		case SC_CHARSET_DEFAULT: return "iso8859";
 		case SC_CHARSET_BALTIC: return "*";
 		case SC_CHARSET_CHINESEBIG5: return "*";
-		case SC_CHARSET_EASTEUROPE: return "*";
+		case SC_CHARSET_EASTEUROPE: return "iso8859-2";
 		case SC_CHARSET_GB2312: return "gb2312.1980";
 		case SC_CHARSET_GREEK: return "adobe";
 		case SC_CHARSET_HANGUL: return "ksc5601.1987";
@@ -171,6 +171,13 @@ void Font::Create(const char *faceName, int characterSet,
 	int size, bool bold, bool italic) {
 	// TODO: take notice of characterSet
 	Release();
+	// If name of the font begins with a '-', assume, that it is
+	// a full fontspec.
+	if (faceName[0] == '-'){
+		id = gdk_font_load(faceName);
+		if (id)
+			return;
+	}
 	char fontspec[300];
 	fontspec[0] = '\0';
 	strcat(fontspec, "-*-");
