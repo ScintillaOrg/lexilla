@@ -1,7 +1,7 @@
 // Scintilla source code edit control
 /** @file LexPython.cxx
  ** Lexer for Python.
- **/ 
+ **/
 // Copyright 1998-2002 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
@@ -42,7 +42,7 @@ static bool IsPyStringStart(int ch, int chNext, int chNext2) {
 }
 
 /* Return the state to use for the string starting at i; *nextIndex will be set to the first index following the quote(s) */
-static int GetPyStringState(Accessor &styler, int i, int *nextIndex) {
+static int GetPyStringState(Accessor &styler, int i, unsigned int *nextIndex) {
 	char ch = styler.SafeGetCharAt(i);
 	char chNext = styler.SafeGetCharAt(i + 1);
 
@@ -263,7 +263,7 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 			} else if (sc.ch == '#') {
 				sc.SetState(sc.chNext == '#' ? SCE_P_COMMENTBLOCK : SCE_P_COMMENTLINE);
 			} else if (IsPyStringStart(sc.ch, sc.chNext, sc.GetRelative(2))) {
-				int nextIndex = 0;
+				unsigned int nextIndex = 0;
 				sc.SetState(GetPyStringState(styler, sc.currentPos, &nextIndex));
 				while (nextIndex > (sc.currentPos + 1)) {
 					sc.Forward();
@@ -429,5 +429,5 @@ static const char * const pythonWordListDesc[] = {
 	0
 };
 
-LexerModule lmPython(SCLEX_PYTHON, ColourisePyDoc, "python", FoldPyDoc, 
+LexerModule lmPython(SCLEX_PYTHON, ColourisePyDoc, "python", FoldPyDoc,
 					 pythonWordListDesc);
