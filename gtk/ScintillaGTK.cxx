@@ -2405,8 +2405,8 @@ static void scintilla_init(ScintillaObject *sci);
 extern void Platform_Initialise();
 extern void Platform_Finalise();
 
-guint scintilla_get_type() {
-	static guint scintilla_type = 0;
+GtkType scintilla_get_type() {
+	static GtkType scintilla_type = 0;
 
 	if (!scintilla_type) {
 		Platform_Initialise();
