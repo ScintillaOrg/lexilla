@@ -288,7 +288,14 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 			} else if (ch == '$') {
 				preferRE = false;
 				styler.ColourTo(i - 1, state);
-				state = SCE_PL_SCALAR;
+				if ((chNext == '{') || isspacechar(chNext)) {
+					styler.ColourTo(i, SCE_PL_SCALAR);
+				} else {
+					state = SCE_PL_SCALAR;
+					i++;
+					ch = chNext;
+					chNext = chNext2;
+				}
 			} else if (ch == '@') {
 				preferRE = false;
 				styler.ColourTo(i - 1, state);
