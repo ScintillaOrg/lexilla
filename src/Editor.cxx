@@ -1544,7 +1544,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 			int numCharsInLine = 0;
 			// See if chars, styles, indicators, are all the same
 			bool allSame = true;
-			char styleByte = 0;
+			char styleByte;
 			int styleMask = pdoc->stylingBitsMask;
 			// Check base line layout
 			for (int charInDoc = posLineStart; allSame && (charInDoc < posLineEnd); charInDoc++) {
