@@ -4,7 +4,14 @@
 // by Jos van der Zande, jvdzande@yahoo.com 
 //
 // Changes:
-//
+// March 28, 2004 - Added the standard Folding code
+// April 21, 2004 - Added Preprosessor Table + Syntax Highlighting
+//                  Fixed Number highlighting
+//                  Changed default isoperator to IsAOperator to have a better match to AutoIt3
+//                  Fixed "#comments_start" -> "#comments-start"  
+//                  Fixed "#comments_end" -> "#comments-end"  
+//                  Fixed Sendkeys in Strings when not terminated with }
+//                  Added support for Sendkey strings that have second parameter e.g. {UP 5} or {a down}
 // Copyright for Scintilla: 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 // Scintilla source code edit control
@@ -34,13 +41,86 @@ static inline bool IsTypeCharacter(const int ch)
 }
 static inline bool IsAWordChar(const int ch)
 {
-    return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_' || ch == '-');
+    return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '-');
 }
 
 static inline bool IsAWordStart(const int ch)
 {
-    return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '@' || ch == '#' || ch == '{' || ch == '+' || ch == '!' || ch == '#' || ch == '^');
+    return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '@' || ch == '#' || ch == '$');
 }
+
+static inline bool IsAOperator(char ch) {
+	if (isascii(ch) && isalnum(ch))
+		return false;
+	if (ch == '+' || ch == '-' || ch == '*' || ch == '/' ||
+	    ch == '&' || ch == '^' || ch == '=' || ch == '<' || ch == '>' ||
+	    ch == '(' || ch == ')' || ch == '[' || ch == ']' )
+		return true;
+	return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// GetSendKey() filters the portion before and after a/multiple space(s)
+// and return the first portion to be looked-up in the table
+// also check if the second portion is valid... (up,down.on.off,toggle or a number)
+///////////////////////////////////////////////////////////////////////////////
+
+static int GetSendKey(const char *szLine, char *szKey)
+{
+	int		nFlag	= 0;
+	int		nKeyPos	= 0;
+	int		nSpecPos= 0;
+	int		nSpecNum= 1;
+	int		nPos	= 0;
+	char	cTemp;
+	char	szSpecial[100];
+
+	// split the portion of the sendkey in the part before and after the spaces
+	while ( ( (cTemp = szLine[nPos]) != '\0'))
+	{
+		if ((cTemp == ' ') && (nFlag == 0) ) // get the stuff till first space
+		{
+			nFlag = 1;
+			// Add } to the end of the first bit for table lookup later.
+			szKey[nKeyPos++] = '}';
+		}
+		else if (cTemp == ' ')
+		{
+			// skip other spaces 
+		}
+		else if (nFlag == 0)
+		{
+			// save first portion into var till space or } is hit
+			szKey[nKeyPos++] = cTemp;
+		}
+		else if ((nFlag == 1) && (cTemp != '}'))
+		{
+			// Save second portion into var...
+			szSpecial[nSpecPos++] = cTemp;
+			// check if Second portion is all numbers for repeat fuction
+			if (isdigit(cTemp) == false) {nSpecNum = 0;} 
+		}
+		nPos++;									// skip to next char
+
+	} // End While
+
+
+	// Check if the second portion is either a number or one of these keywords
+	szKey[nKeyPos] = '\0';
+	szSpecial[nSpecPos] = '\0';
+	if (strcmp(szSpecial,"down")==0    || strcmp(szSpecial,"up")==0  ||
+		strcmp(szSpecial,"on")==0      || strcmp(szSpecial,"off")==0 || 
+		strcmp(szSpecial,"toggle")==0  || nSpecNum == 1 )
+	{
+		nFlag = 0;
+	}
+	else
+	{
+		nFlag = 1;
+	}
+	return nFlag;  // 1 is bad, 0 is good
+
+} // GetSendKey()
 
 static void ColouriseAU3Doc(unsigned int startPos, 
 							int length, int initStyle,
@@ -51,12 +131,13 @@ static void ColouriseAU3Doc(unsigned int startPos,
     WordList &keywords2 = *keywordlists[1];
     WordList &keywords3 = *keywordlists[2];
     WordList &keywords4 = *keywordlists[3];
+    WordList &keywords5 = *keywordlists[4];
     styler.StartAt(startPos);
 
     StyleContext sc(startPos, length, initStyle, styler);
-	char si,sk;
+	char si;     // string indicator "=1 '=2
 	si=0;
-	sk=0;
+	//$$$
     for (; sc.More(); sc.Forward()) {
 		char s[100];
 		sc.GetCurrentLowered(s, sizeof(s));
@@ -83,12 +164,12 @@ static void ColouriseAU3Doc(unsigned int startPos,
                 {
                     if (!IsTypeCharacter(sc.ch))
                     {
-						if (strcmp(s, "#cs")==0 || strcmp(s, "#comments_start")==0)
+						if (strcmp(s, "#cs")==0 || strcmp(s, "#comments-start")==0)
 						{
 							sc.ChangeState(SCE_AU3_COMMENTBLOCK);
 							sc.SetState(SCE_AU3_COMMENTBLOCK);
 						}
-						else if (strcmp(s, "#ce")==0 || strcmp(s, "#comments_end")==0) 
+						else if (strcmp(s, "#ce")==0 || strcmp(s, "#comments-end")==0) 
 						{
 							sc.ChangeState(SCE_AU3_COMMENTBLOCK);
 							sc.SetState(SCE_AU3_DEFAULT);
@@ -96,15 +177,17 @@ static void ColouriseAU3Doc(unsigned int startPos,
 						else if (keywords.InList(s)) {
 							sc.ChangeState(SCE_AU3_KEYWORD);
 							sc.SetState(SCE_AU3_DEFAULT);
-							//sc.SetState(SCE_AU3_KEYWORD);
 						}
 						else if (keywords2.InList(s)) {
 							sc.ChangeState(SCE_AU3_FUNCTION);
 							sc.SetState(SCE_AU3_DEFAULT);
-							//sc.SetState(SCE_AU3_FUNCTION);
 						}
 						else if (keywords3.InList(s)) {
 							sc.ChangeState(SCE_AU3_MACRO);
+							sc.SetState(SCE_AU3_DEFAULT);
+						}
+						else if (keywords5.InList(s)) {
+							sc.ChangeState(SCE_AU3_PREPROCESSOR);
 							sc.SetState(SCE_AU3_DEFAULT);
 						}
 						else if (!IsAWordChar(sc.ch)) {
@@ -128,15 +211,14 @@ static void ColouriseAU3Doc(unsigned int startPos,
             }
             case SCE_AU3_STRING:
             {
-				sk = 0;
-				// check for " in and single qouted string
-	            if (si == 1){
-					if (sc.ch == '\"'){sc.ForwardSetState(SCE_AU3_DEFAULT);}}
-				// check for ' in and double qouted string
-                if (si == 2){
-					if (sc.ch == '\''){sc.ForwardSetState(SCE_AU3_DEFAULT);}}
+				// check for " to end a double qouted string or
+				// check for ' to end a single qouted string 
+	            if ((si == 1 && sc.ch == '\"') || (si == 2 && sc.ch == '\''))
+				{
+					sc.ForwardSetState(SCE_AU3_DEFAULT);
+				}
                 if (sc.atLineEnd) {sc.SetState(SCE_AU3_DEFAULT);}
-				// find Sendkeys in an STRING
+				// find Sendkeys in a STRING
 				if (sc.ch == '{') {sc.SetState(SCE_AU3_SENT);}
 				if (sc.ch == '+' && sc.chNext == '{') {sc.SetState(SCE_AU3_SENT);}
 				if (sc.ch == '!' && sc.chNext == '{') {sc.SetState(SCE_AU3_SENT);}
@@ -147,11 +229,24 @@ static void ColouriseAU3Doc(unsigned int startPos,
             
             case SCE_AU3_SENT:
             {
-				// Sent key string ended 
-				if (sk == 1) 
+				// Send key string ended 
+				if (sc.chPrev == '}' && sc.ch != '}') 
 				{
-					// set color to SENTKEY when valid sentkey .. else set to comment to show its wrong
-					if (keywords4.InList(s)) 
+					// set color to SENDKEY when valid sendkey .. else set back to regular string
+					char sk[100];
+					// split {111 222} and return {111} and check if 222 is valid.
+					// if return code = 1 then invalid 222 so must be string
+					if (GetSendKey(s,sk))   
+					{
+						sc.ChangeState(SCE_AU3_STRING);
+					}
+					// if single char between {?} then its ok as sendkey for a single character
+					else if (strlen(sk) == 3)  
+					{
+						sc.ChangeState(SCE_AU3_SENT);
+					}
+					// if sendkey {111} is in table then ok as sendkey
+					else if (keywords4.InList(sk)) 
 					{
 						sc.ChangeState(SCE_AU3_SENT);
 					}
@@ -160,39 +255,32 @@ static void ColouriseAU3Doc(unsigned int startPos,
 						sc.ChangeState(SCE_AU3_STRING);
 					}
 					sc.SetState(SCE_AU3_STRING);
-					sk=0;
 				}
-				// check if next portion is again a sentkey
+				// check if next portion is again a sendkey
 				if (sc.atLineEnd) {sc.SetState(SCE_AU3_DEFAULT);}
-				if (sc.ch == '{') {sc.SetState(SCE_AU3_SENT);}
+				if (sc.ch == '{' && sc.chPrev != '{') {sc.SetState(SCE_AU3_SENT);}
 				if (sc.ch == '+' && sc.chNext == '{') {sc.SetState(SCE_AU3_SENT);}
 				if (sc.ch == '!' && sc.chNext == '{') {sc.SetState(SCE_AU3_SENT);}
 				if (sc.ch == '^' && sc.chNext == '{') {sc.SetState(SCE_AU3_SENT);}
 				if (sc.ch == '#' && sc.chNext == '{') {sc.SetState(SCE_AU3_SENT);}
 				// check to see if the string ended...
-				// check for " in and single qouted string
-	            if (si == 1){
-					if (sc.ch == '\"'){sc.ForwardSetState(SCE_AU3_DEFAULT);}}
-				// check for ' in and double qouted string
-                if (si == 2){
-					if (sc.ch == '\''){sc.ForwardSetState(SCE_AU3_DEFAULT);}}
+				// Sentkey string isn't complete but the string ended....
+				if ((si == 1 && sc.ch == '\"') || (si == 2 && sc.ch == '\''))
+				{
+					sc.ChangeState(SCE_AU3_STRING);
+					sc.ForwardSetState(SCE_AU3_DEFAULT);
+				}
 				break;
             }
         }  //switch (sc.state)
 
         // Determine if a new state should be entered:
-        if (sc.state == SCE_AU3_SENT)
-        {
-			if (sc.ch == '}' && sc.chNext != '}') 
-			{
-				sk = 1;
-			}			
-		}
+
 		if (sc.state == SCE_AU3_DEFAULT)
         {
             if (sc.ch == ';') {sc.SetState(SCE_AU3_COMMENT);}
             else if (sc.ch == '#') {sc.SetState(SCE_AU3_KEYWORD);}
-            else if (IsAWordStart(sc.ch)) {sc.SetState(SCE_AU3_KEYWORD);}
+            else if (sc.ch == '$') {sc.SetState(SCE_AU3_VARIABLE);}
             else if (sc.ch == '@') {sc.SetState(SCE_AU3_KEYWORD);}
             else if (sc.ch == '\"') {
 				sc.SetState(SCE_AU3_STRING);
@@ -200,10 +288,9 @@ static void ColouriseAU3Doc(unsigned int startPos,
             else if (sc.ch == '\'') {
 				sc.SetState(SCE_AU3_STRING);
 				si = 2;	}
-            else if (sc.ch == '$') {sc.SetState(SCE_AU3_VARIABLE);}
             else if (IsADigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext))) {sc.SetState(SCE_AU3_NUMBER);}
-            //else if (IsAWordStart(sc.ch)) {sc.SetState(SCE_AU3_KEYWORD);}
-            else if (isoperator(static_cast<char>(sc.ch)) || (sc.ch == '\\')) {sc.SetState(SCE_AU3_OPERATOR);}
+            else if (IsAOperator(static_cast<char>(sc.ch))) {sc.SetState(SCE_AU3_OPERATOR);}
+            else if (IsAWordStart(sc.ch)) {sc.SetState(SCE_AU3_KEYWORD);}
 			else if (sc.atLineEnd) {sc.SetState(SCE_AU3_DEFAULT);}
         }
     }      //for (; sc.More(); sc.Forward())
@@ -256,7 +343,6 @@ static void FoldAU3Doc(unsigned int startPos, int length, int, WordList *[], Acc
 }
 
 
-
 //
 
 static const char * const AU3WordLists[] = {
@@ -264,6 +350,7 @@ static const char * const AU3WordLists[] = {
     "#autoit functions",
     "#autoit macros",
     "#autoit Sent keys",
+    "#autoit Pre-processors",
     0
 };
 LexerModule lmAU3(SCLEX_AU3, ColouriseAU3Doc, "au3", FoldAU3Doc , AU3WordLists);
