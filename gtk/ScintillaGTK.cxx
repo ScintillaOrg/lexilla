@@ -1326,7 +1326,7 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 		if ((atomSought == atomUTF8) && (selection_data->length <= 0)) {
 			atomSought = atomString;
 			gtk_selection_convert(GTK_WIDGET(PWidget(wMain)),
-					      atomClipboard, atomSought, GDK_CURRENT_TIME);
+					      selection_data->selection, atomSought, GDK_CURRENT_TIME);
 		} else if ((selection_data->length > 0) &&
 			((selection_data->type == GDK_TARGET_STRING) || (selection_data->type == atomUTF8))) {
 			SelectionText selText;
