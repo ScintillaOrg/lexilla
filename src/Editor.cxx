@@ -1907,24 +1907,26 @@ void Editor::DelChar() {
 	ShowCaretAtCurrentPosition();
 }
 
-void Editor::DelCharBack() {
+void Editor::DelCharBack(bool allowLineStartDeletion) {
 	if (currentPos == anchor) {
 		int lineCurrentPos = pdoc->LineFromPosition(currentPos);
-		if (pdoc->GetColumn(currentPos) <= pdoc->GetLineIndentation(lineCurrentPos) &&
-			pdoc->GetColumn(currentPos) > 0 && pdoc->backspaceUnindents) {
-			pdoc->BeginUndoAction();
-			int indentation = pdoc->GetLineIndentation(lineCurrentPos);
-			int indentationStep = (pdoc->indentInChars ? pdoc->indentInChars : pdoc->tabInChars);
-			if (indentation % indentationStep == 0) {
-				pdoc->SetLineIndentation(lineCurrentPos, indentation - indentationStep);
+		if (allowLineStartDeletion || (pdoc->LineStart(lineCurrentPos) != currentPos)) {
+			if (pdoc->GetColumn(currentPos) <= pdoc->GetLineIndentation(lineCurrentPos) &&
+				pdoc->GetColumn(currentPos) > 0 && pdoc->backspaceUnindents) {
+				pdoc->BeginUndoAction();
+				int indentation = pdoc->GetLineIndentation(lineCurrentPos);
+				int indentationStep = (pdoc->indentInChars ? pdoc->indentInChars : pdoc->tabInChars);
+				if (indentation % indentationStep == 0) {
+					pdoc->SetLineIndentation(lineCurrentPos, indentation - indentationStep);
+				} else {
+					pdoc->SetLineIndentation(lineCurrentPos, indentation - (indentation % indentationStep));
+				}
+				SetEmptySelection(pdoc->GetLineIndentPosition(lineCurrentPos));
+				pdoc->EndUndoAction();
 			} else {
-				pdoc->SetLineIndentation(lineCurrentPos, indentation - (indentation % indentationStep));
+				int newPos = pdoc->DelCharBack(currentPos);
+				SetEmptySelection(newPos);
 			}
-			SetEmptySelection(pdoc->GetLineIndentPosition(lineCurrentPos));
-			pdoc->EndUndoAction();
-		} else {
-			int newPos = pdoc->DelCharBack(currentPos);
-			SetEmptySelection(newPos);
 		}
 	} else {
 		ClearSelection();
@@ -2246,6 +2248,9 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	case SCI_LINETRANSPOSE:
 	case SCI_LOWERCASE:
 	case SCI_UPPERCASE:
+	case SCI_LINESCROLLDOWN:
+	case SCI_LINESCROLLUP:
+	case SCI_DELETEBACKNOTLINE:
 		break;
 
 		// Filter out all others like display changes.  Also, newlines are redundant
@@ -2460,7 +2465,12 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		CancelModes();
 		break;
 	case SCI_DELETEBACK:
-		DelCharBack();
+		DelCharBack(true);
+		SetLastXChosen();
+		EnsureCaretVisible();
+		break;
+	case SCI_DELETEBACKNOTLINE:
+		DelCharBack(false);
 		SetLastXChosen();
 		EnsureCaretVisible();
 		break;
@@ -4575,6 +4585,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_WORDPARTLEFTEXTEND:
 	case SCI_WORDPARTRIGHT:
 	case SCI_WORDPARTRIGHTEXTEND:
+	case SCI_DELETEBACKNOTLINE:
 		return KeyCommand(iMessage);
 
 	case SCI_BRACEHIGHLIGHT:

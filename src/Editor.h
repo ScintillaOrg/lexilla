@@ -258,7 +258,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void Undo();
 	void Redo();
 	void DelChar();
-	void DelCharBack();
+	void DelCharBack(bool allowLineStartDeletion);
 	virtual void ClaimSelection() = 0;
 
 	virtual void NotifyChange() = 0;

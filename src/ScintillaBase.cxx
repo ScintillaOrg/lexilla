@@ -137,7 +137,12 @@ int ScintillaBase::KeyCommand(unsigned int iMessage) {
 			AutoCompleteMove(5000);
 			return 0;
 		case SCI_DELETEBACK:
-			DelCharBack();
+			DelCharBack(true);
+			AutoCompleteChanged();
+			EnsureCaretVisible();
+			return 0;
+		case SCI_DELETEBACKNOTLINE:
+			DelCharBack(false);
 			AutoCompleteChanged();
 			EnsureCaretVisible();
 			return 0;
@@ -160,11 +165,12 @@ int ScintillaBase::KeyCommand(unsigned int iMessage) {
 		    (iMessage != SCI_CHARRIGHT) &&
 		    (iMessage != SCI_CHARLEFTEXTEND) &&
 		    (iMessage != SCI_EDITTOGGLEOVERTYPE) &&
-		    (iMessage != SCI_DELETEBACK)
+		    (iMessage != SCI_DELETEBACK) &&
+		    (iMessage != SCI_DELETEBACKNOTLINE)
 		) {
 			ct.CallTipCancel();
 		}
-		if (iMessage == SCI_DELETEBACK) {
+		if ((iMessage == SCI_DELETEBACK) || (iMessage == SCI_DELETEBACKNOTLINE)) {
 			if (currentPos <= ct.posStartCallTip) {
 				ct.CallTipCancel();
 			}

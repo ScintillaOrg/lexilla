@@ -388,6 +388,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_UPPERCASE 2341
 #define SCI_LINESCROLLDOWN 2342
 #define SCI_LINESCROLLUP 2343
+#define SCI_DELETEBACKNOTLINE 2344
 #define SCI_MOVECARETINSIDEVIEW 2401
 #define SCI_LINELENGTH 2350
 #define SCI_BRACEHIGHLIGHT 2351

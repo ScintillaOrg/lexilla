@@ -1032,6 +1032,10 @@ fun void LineScrollDown=2342(,)
 # Scroll the document up, keeping the caret visible.
 fun void LineScrollUp=2343(,)
 
+# Delete the selection or if no selection, the character before the caret.
+# Will not delete the chraacter before at the start of a line.
+fun void DeleteBackNotLine=2344(,)
+
 # Move the caret inside current view if it's not there already
 fun void MoveCaretInsideView=2401(,)
 
