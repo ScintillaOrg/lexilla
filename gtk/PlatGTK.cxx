@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <gdk/gdk.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 
@@ -14,11 +15,14 @@
 
 #include "Scintilla.h"
 #include "ScintillaWidget.h"
+#include "UniConversion.h"
 
 /* Use fast way of getting char data on win32 to work around problems
    with gdk_string_extents. */
-#ifdef G_OS_WIN32
 #define FAST_WAY
+
+#ifdef G_OS_WIN32
+#define snprintf _snprintf
 #endif
 
 #ifdef _MSC_VER
@@ -29,7 +33,7 @@
 // X has a 16 bit coordinate space, so stop drawing here to avoid wrapping
 static const int maxCoordinate = 32000;
 
-static GdkFont *PFont(Font &f)  {
+static GdkFont *PFont(Font &f) {
 	return reinterpret_cast<GdkFont *>(f.GetID());
 }
 
@@ -72,7 +76,7 @@ void Palette::WantFind(ColourPair &cp, bool want) {
 	if (want) {
 		for (int i = 0; i < used; i++) {
 			if (entries[i].desired == cp.desired)
-				return ;
+				return;
 		}
 
 		if (used < numEntries) {
@@ -84,7 +88,7 @@ void Palette::WantFind(ColourPair &cp, bool want) {
 		for (int i = 0; i < used; i++) {
 			if (entries[i].desired == cp.desired) {
 				cp.allocated = entries[i].allocated;
-				return ;
+				return;
 			}
 		}
 		cp.allocated.Set(cp.desired.AsLong());
@@ -94,8 +98,8 @@ void Palette::WantFind(ColourPair &cp, bool want) {
 void Palette::Allocate(Window &w) {
 	if (allocatedPalette) {
 		gdk_colormap_free_colors(gtk_widget_get_colormap(PWidget(w)),
-		        reinterpret_cast<GdkColor *>(allocatedPalette),
-			allocatedLen);
+		                         reinterpret_cast<GdkColor *>(allocatedPalette),
+		                         allocatedLen);
 		delete [](reinterpret_cast<GdkColor *>(allocatedPalette));
 		allocatedPalette = 0;
 		allocatedLen = 0;
@@ -171,39 +175,194 @@ static const char *CharacterSetName(int characterSet) {
 	}
 }
 
-void Font::Create(const char *faceName, int characterSet,
+void GenerateFontSpecStrings(const char *fontName, int characterSet,
+                             char *foundary, int foundary_len,
+                             char *faceName, int faceName_len,
+                             char *charset, int charset_len) {
+	// supported font strings include:
+	// foundary-fontface-isoxxx-x
+	// fontface-isoxxx-x
+	// foundary-fontface
+	// fontface
+	if (strchr(fontName, '-')) {
+		char tmp[300];
+		char *d1 = NULL, *d2 = NULL, *d3 = NULL;
+		strncpy(tmp, fontName, sizeof(tmp) - 1);
+		d1 = strchr(tmp, '-');
+		// we know the first dash exists
+		d2 = strchr(d1 + 1, '-');
+		if (d2)
+			d3 = strchr(d2 + 1, '-');
+		if (d3) {
+			// foundary-fontface-isoxxx-x
+			*d2 = '\0';
+			foundary[0] = '-';
+			foundary[1] = '\0';
+			strncpy(faceName, tmp, foundary_len - 1);
+			strncpy(charset, d2 + 1, charset_len - 1);
+		} else if (d2) {
+			// fontface-isoxxx-x
+			*d1 = '\0';
+			strcpy(foundary, "-*-");
+			strncpy(faceName, tmp, faceName_len - 1);
+			strncpy(charset, d1 + 1, charset_len - 1);
+		} else {
+			// foundary-fontface
+			foundary[0] = '-';
+			foundary[1] = '\0';
+			strncpy(faceName, tmp, faceName_len - 1);
+			strncpy(charset, CharacterSetName(characterSet), charset_len - 1);
+		}
+	} else {
+		strncpy(foundary, "-*-", foundary_len);
+		strncpy(faceName, fontName, faceName_len - 1);
+		strncpy(charset, CharacterSetName(characterSet), charset_len - 1);
+	}
+}
+
+void Font::Create(const char *fontName, int characterSet,
                   int size, bool bold, bool italic) {
 	Release();
+	char fontset[1024];
+	char fontspec[300];
+	char foundary[50];
+	char faceName[100];
+	char charset[50];
+	fontset[0] = '\0';
+	fontspec[0] = '\0';
+	foundary[0] = '\0';
+	faceName[0] = '\0';
+	charset[0] = '\0';
+
 	// If name of the font begins with a '-', assume, that it is
 	// a full fontspec.
-	if (faceName[0] == '-') {
-		id = gdk_font_load(faceName);
-		if (id)
-			return ;
+	if (fontName[0] == '-') {
+		if (strchr(fontName, ',')) {
+			id = gdk_fontset_load(fontName);
+		} else {
+			id = gdk_font_load(fontName);
+		}
+		if (!id) {
+			// Font not available so substitute a reasonable code font
+			// iso8859 appears to only allow western characters.
+			id = gdk_font_load("-*-*-*-*-*-*-*-*-*-*-*-*-iso8859-*");
+		}
+		return;
 	}
-	char fontspec[300];
-	fontspec[0] = '\0';
-	strcat(fontspec, "-*-");
-	strcat(fontspec, faceName);
-	if (bold)
-		strcat(fontspec, "-bold");
-	else
-		strcat(fontspec, "-medium");
-	if (italic)
-		strcat(fontspec, "-i");
-	else
-		strcat(fontspec, "-r");
-	strcat(fontspec, "-*-*-*");
-	char sizePts[100];
-	sprintf(sizePts, "-%0d", size * 10);
-	strcat(fontspec, sizePts);
-	strcat(fontspec, "-*-*-*-*-");
-	strcat(fontspec, CharacterSetName(characterSet));
+
+	// it's not a full fontspec, build one.
+
+	// This supports creating a FONT_SET
+	// in a method that allows us to also set size, slant and
+	// weight for the fontset.  The expected input is multiple
+	// partial fontspecs seperated by comma
+	// eg. adobe-courier-iso10646-1,*-courier-iso10646-1,*-*-*-*
+	if (strchr(fontName, ',')) {
+		// build a fontspec and use gdk_fontset_load
+		int remaining = sizeof(fontset);
+		char fontNameCopy[1024];
+		strncpy(fontNameCopy, fontName, sizeof(fontNameCopy) - 1);
+		char *fn = fontNameCopy;
+		char *fp = strchr(fn, ',');
+		for (;;) {
+			const char *spec = "%s%s%s%s-*-*-*-%0d-*-*-*-*-%s";
+			if (fontset[0] != '\0') {
+				// if this is not the first font in the list,
+				// append a comma seperator
+				spec = ",%s%s%s%s-*-*-*-%0d-*-*-*-*-%s";
+			}
+
+			if (fp)
+				*fp = '\0'; // nullify the comma
+			GenerateFontSpecStrings(fn, characterSet,
+			                        foundary, sizeof(foundary),
+			                        faceName, sizeof(faceName),
+			                        charset, sizeof(charset));
+
+			snprintf(fontspec,
+			         sizeof(fontspec) - 1,
+			         spec,
+			         foundary, faceName,
+			         bold ? "-bold" : "-medium",
+			         italic ? "-i" : "-r",
+			         size * 10,
+			         charset);
+
+			// if this is the first font in the list, and
+			// we are doing italic, add an oblique font
+			// to the list
+			if (italic && fontset[0] == '\0') {
+				strncat(fontset, fontspec, remaining - 1);
+				remaining -= strlen(fontset);
+
+				snprintf(fontspec,
+				         sizeof(fontspec) - 1,
+				         ",%s%s%s-o-*-*-*-%0d-*-*-*-*-%s",
+				         foundary, faceName,
+				         bold ? "-bold" : "-medium",
+				         size * 10,
+				         charset);
+			}
+
+			strncat(fontset, fontspec, remaining - 1);
+			remaining -= strlen(fontset);
+
+			if (!fp)
+				break;
+
+			fn = fp + 1;
+			fp = strchr(fn, ',');
+		}
+
+		id = gdk_fontset_load(fontset);
+		if (id)
+			return;
+
+		// if fontset load failed, fall through, we'll use
+		// the last font entry and continue to try and
+		// get something that matches
+	}
+
+	// single fontspec support
+
+	GenerateFontSpecStrings(fontName, characterSet,
+	                        foundary, sizeof(foundary),
+	                        faceName, sizeof(faceName),
+	                        charset, sizeof(charset));
+
+	snprintf(fontspec,
+	         sizeof(fontspec) - 1,
+	         "%s%s%s%s-*-*-*-%0d-*-*-*-*-%s",
+	         foundary, faceName,
+	         bold ? "-bold" : "-medium",
+	         italic ? "-i" : "-r",
+	         size * 10,
+	         charset);
 	id = gdk_font_load(fontspec);
+	if (!id) {
+		// some fonts have oblique, not italic
+		snprintf(fontspec,
+		         sizeof(fontspec) - 1,
+		         "%s%s%s%s-*-*-*-%0d-*-*-*-*-%s",
+		         foundary, faceName,
+		         bold ? "-bold" : "-medium",
+		         italic ? "-o" : "-r",
+		         size * 10,
+		         charset);
+		id = gdk_font_load(fontspec);
+	}
+	if (!id) {
+		snprintf(fontspec,
+		         sizeof(fontspec) - 1,
+		         "-*-*-*-*-*-*-*-%0d-*-*-*-*-%s",
+		         size * 10,
+		         charset);
+		id = gdk_font_load(fontspec);
+	}
 	if (!id) {
 		// Font not available so substitute a reasonable code font
 		// iso8859 appears to only allow western characters.
-		id = gdk_font_load("*-*-*-*-*-*-*-*-*-*-*-*-iso8859-*");
+		id = gdk_font_load("-*-*-*-*-*-*-*-*-*-*-*-*-iso8859-*");
 	}
 }
 
@@ -342,15 +501,17 @@ void SurfaceImpl::MoveTo(int x_, int y_) {
 }
 
 void SurfaceImpl::LineTo(int x_, int y_) {
-	gdk_draw_line(drawable, gc,
-	              x, y,
-	              x_, y_);
+	if (drawable && gc) {
+		gdk_draw_line(drawable, gc,
+		              x, y,
+		              x_, y_);
+	}
 	x = x_;
 	y = y_;
 }
 
 void SurfaceImpl::Polygon(Point *pts, int npts, ColourAllocated fore,
-                      ColourAllocated back) {
+                          ColourAllocated back) {
 	GdkPoint gpts[20];
 	if (npts < static_cast<int>((sizeof(gpts) / sizeof(gpts[0])))) {
 		for (int i = 0;i < npts;i++) {
@@ -418,15 +579,15 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAl
 	if (((rc.right - rc.left) > 4) && ((rc.bottom - rc.top) > 4)) {
 		// Approximate a round rect with some cut off corners
 		Point pts[] = {
-		    Point(rc.left + 2, rc.top),
-		    Point(rc.right - 2, rc.top),
-		    Point(rc.right, rc.top + 2),
-		    Point(rc.right, rc.bottom - 2),
-		    Point(rc.right - 2, rc.bottom),
-		    Point(rc.left + 2, rc.bottom),
-		    Point(rc.left, rc.bottom - 2),
-		    Point(rc.left, rc.top + 2),
-		};
+		                  Point(rc.left + 2, rc.top),
+		                  Point(rc.right - 2, rc.top),
+		                  Point(rc.right, rc.top + 2),
+		                  Point(rc.right, rc.bottom - 2),
+		                  Point(rc.right - 2, rc.bottom),
+		                  Point(rc.left + 2, rc.bottom),
+		                  Point(rc.left, rc.bottom - 2),
+		                  Point(rc.left, rc.top + 2),
+		              };
 		Polygon(pts, sizeof(pts) / sizeof(pts[0]), fore, back);
 	} else {
 		RectangleDraw(rc, fore, back);
@@ -459,30 +620,52 @@ void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	}
 }
 
+#define MAX_US_LEN 5000
+
 void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len,
-                       ColourAllocated fore, ColourAllocated back) {
+                                 ColourAllocated fore, ColourAllocated back) {
 	FillRectangle(rc, back);
 	PenColour(fore);
 	if (gc && drawable) {
 		// Draw text as a series of segments to avoid limitations in X servers
-		// TODO: make this DBCS and UTF-8 safe by not splitting multibyte characters
 		const int segmentLength = 1000;
 		int x = rc.left;
-		while ((len > 0) && (x < maxCoordinate)) {
-			int lenDraw = Platform::Minimum(len, segmentLength);
-			gdk_draw_text(drawable, PFont(font_), gc, x, ybase, s, lenDraw);
-			len -= lenDraw;
-			if (len > 0) {
-				x += gdk_text_width(PFont(font_), s, lenDraw);
+		if (unicodeMode) {
+			GdkWChar wctext[MAX_US_LEN];
+			GdkWChar *wcp = (GdkWChar *) & wctext;
+			size_t wclen = UCS2FromUTF8(s, len, (wchar_t *)wctext,
+			                            sizeof(wctext) / sizeof(GdkWChar) - 1);
+			wctext[wclen] = L'\0';
+			int lenDraw;
+			while ((wclen > 0) && (x < maxCoordinate)) {
+				lenDraw = Platform::Minimum(wclen, segmentLength);
+				gdk_draw_text_wc(drawable, PFont(font_), gc,
+				                 x, ybase, wcp, lenDraw);
+				wclen -= lenDraw;
+				if (wclen > 0) {
+					x += gdk_text_width_wc(PFont(font_),
+					                       wcp, lenDraw);
+				}
+				wcp += lenDraw;
 			}
-			s += lenDraw;
+		} else {
+			while ((len > 0) && (x < maxCoordinate)) {
+				int lenDraw = Platform::Minimum(len, segmentLength);
+				gdk_draw_text(drawable, PFont(font_), gc,
+				              x, ybase, s, lenDraw);
+				len -= lenDraw;
+				if (len > 0) {
+					x += gdk_text_width(PFont(font_), s, lenDraw);
+				}
+				s += lenDraw;
+			}
 		}
 	}
 }
 
 // On GTK+, exactly same as DrawTextNoClip
 void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len,
-                              ColourAllocated fore, ColourAllocated back) {
+                                  ColourAllocated fore, ColourAllocated back) {
 	DrawTextNoClip(rc, font_, ybase, s, len, fore, back);
 }
 
@@ -490,10 +673,47 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 	if (font_.GetID()) {
 		int totalWidth = 0;
 		GdkFont *gf = PFont(font_);
-		for (int i = 0; i < len; i++) {
-			int width = gdk_char_width(gf, s[i]);
-			totalWidth += width;
-			positions[i] = totalWidth;
+		if (unicodeMode) {
+			GdkWChar wctext[MAX_US_LEN];
+			size_t wclen = UCS2FromUTF8(s, len, (wchar_t *)wctext, sizeof(wctext) / sizeof(GdkWChar) - 1);
+			wctext[wclen] = L'\0';
+			int poses[MAX_US_LEN];
+			size_t i;
+			for (i = 0; i < wclen; i++) {
+				int width = gdk_char_width_wc(gf, wctext[i]);
+				totalWidth += width;
+				poses[i] = totalWidth;
+			}
+			// map widths back to utf-8 input string
+			size_t ui = 0;
+			i = 0;
+			const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
+			unsigned char uch;
+			while (ui < wclen) {
+				uch = us[i];
+				positions[i++] = poses[ui];
+				if (uch >= 0x80) {
+					if (uch < (0x80 + 0x40 + 0x20)) {
+						positions[i++] = poses[ui];
+					} else {
+						positions[i++] = poses[ui];
+						positions[i++] = poses[ui];
+					}
+				}
+				ui++;
+			}
+			int lastPos = 0;
+			if (i > 0)
+				lastPos = positions[i - 1];
+			while (i < static_cast<size_t>(len)) {
+				positions[i++] = lastPos;
+			}
+		} else {
+			for (int i = 0; i < len; i++) {
+				int width = gdk_char_width(gf, s[i]);
+				totalWidth += width;
+				positions[i] = totalWidth;
+			}
 		}
 	} else {
 		for (int i = 0; i < len; i++) {
@@ -503,10 +723,18 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 }
 
 int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
-	if (font_.GetID())
-		return gdk_text_width(PFont(font_), s, len);
-	else
+	if (font_.GetID()) {
+		if (unicodeMode) {
+			GdkWChar wctext[MAX_US_LEN];
+			size_t wclen = UCS2FromUTF8(s, len, (wchar_t *)wctext, sizeof(wctext) / sizeof(GdkWChar) - 1);
+			wctext[wclen] = L'\0';
+			int width = gdk_text_width_wc(PFont(font_), wctext, wclen);
+			return width;
+		} else
+			return gdk_text_width(PFont(font_), s, len);
+	} else {
 		return 1;
+	}
 }
 
 int SurfaceImpl::WidthChar(Font &font_, char ch) {
@@ -544,7 +772,7 @@ int SurfaceImpl::Ascent(Font &font_) {
 	gint descent;
 
 	gdk_string_extents(PFont(font_), sizeString,
-	                   &lbearing, &rbearing, &width, &ascent, &descent);
+					   &lbearing, &rbearing, &width, &ascent, &descent);
 	return ascent;
 #endif
 }
@@ -562,7 +790,7 @@ int SurfaceImpl::Descent(Font &font_) {
 	gint descent;
 
 	gdk_string_extents(PFont(font_), sizeString,
-	                   &lbearing, &rbearing, &width, &ascent, &descent);
+					   &lbearing, &rbearing, &width, &ascent, &descent);
 	return descent;
 #endif
 }
@@ -600,7 +828,7 @@ void SurfaceImpl::SetClip(PRectangle rc) {
 void SurfaceImpl::FlushCachedState() {}
 
 void SurfaceImpl::SetUnicodeMode(bool unicodeMode_) {
-	unicodeMode=unicodeMode_;
+	unicodeMode = unicodeMode_;
 }
 
 Surface *Surface::Allocate() {
@@ -733,7 +961,7 @@ void Window::SetTitle(const char *s) {
 }
 
 ListBox::ListBox() : list(0), current(0), desiredVisibleRows(5), maxItemCharacters(0),
-	doubleClickAction(NULL), doubleClickActionData(NULL) {}
+doubleClickAction(NULL), doubleClickActionData(NULL) {}
 
 ListBox::~ListBox() {}
 
@@ -851,7 +1079,6 @@ PRectangle ListBox::GetDesiredRect() {
 			rc.right = rc.right + 16;
 	}
 	return rc;
-
 }
 
 void ListBox::Clear() {
@@ -981,6 +1208,7 @@ int Platform::DefaultFontSize() {
 #ifdef G_OS_WIN32
 	return 10;
 #else
+
 	return 12;
 #endif
 }
@@ -1005,8 +1233,8 @@ long Platform::SendScintilla(
 
 long Platform::SendScintillaPointer(
     WindowID w, unsigned int msg, unsigned long wParam, void *lParam) {
-	return scintilla_send_message(SCINTILLA(w), msg, wParam, 
-	    reinterpret_cast<sptr_t>(lParam));
+	return scintilla_send_message(SCINTILLA(w), msg, wParam,
+	                              reinterpret_cast<sptr_t>(lParam));
 }
 
 bool Platform::IsDBCSLeadByte(int /*codePage*/, char /*ch*/) {
