@@ -942,7 +942,7 @@ int ScintillaGTK::KeyDefault(int key, int modifiers) {
 				const char *source =
 					CharacterSetID(vs.styles[STYLE_DEFAULT].characterSet);
 				if (*source) {
-					iconv_t iconvh = iconv_open("UTF8", source);
+					iconv_t iconvh = iconv_open(source, "UTF8");
 					if (iconvh != ((iconv_t)(-1))) {
 						char localeVal[4]="\0\0\0";
 						char *pin = utfVal;
@@ -1681,8 +1681,10 @@ gint ScintillaGTK::KeyThis(GdkEventKey *event) {
 		key = KeyTranslate(key);
 	else if (IsUnicodeMode())
 		;	// No operation
+#if GTK_MAJOR_VERSION < 2
 	else if ((key >= 0x100) && (key < 0x1000))
 		key &= 0xff;
+#endif
 
 	bool consumed = false;
 	bool added = KeyDown(key, shift, ctrl, alt, &consumed) != 0;
