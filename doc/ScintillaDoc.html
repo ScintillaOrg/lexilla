@@ -713,7 +713,7 @@ SCI_NULL
       these messages. To fit the parameters into a message, the first argument contains the key
       code in the low word and the key modifiers (possibly shift and control) in the high word. The
       key code is from the VK_* enumeration, and the modifiers are a combination of zero or more of
-      SHIFT_PRESSED and LEFT_CTRL_PRESSED. SCI_NULL does nthing and is the
+      SHIFT_PRESSED and LEFT_CTRL_PRESSED. SCI_NULL does nothing and is the
       value assigned to keys that perform no action.
     </p>
     <h3>
@@ -1016,7 +1016,7 @@ SCI_GETMODEVENTMASK
       change occurred and whether this changed the number of lines in the document.
     </p>
     <p>
-       EN_CHANGE is fired when the text of the document has been changed for any reason. This
+       SCEN_CHANGE is fired when the text of the document has been changed for any reason. This
       notification is sent using the WM_COMMAND message on Windows and the "Command" signal 
       on GTK+ as this is the behaviour of the standard
       edit control.
