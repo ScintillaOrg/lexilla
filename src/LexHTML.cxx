@@ -63,7 +63,8 @@ static int PrintScriptingIndicatorOffset(Accessor &styler, unsigned int start, u
 	return iResult;
 }
 
-static int ScriptOfState(int state, int defaultScript) {
+//static int ScriptOfState(int state,int defaultScript)
+static int ScriptOfState(int state) {
 	int scriptLanguage;
 
 	if ((state >= SCE_HP_START) && (state <= SCE_HP_IDENTIFIER)) {
@@ -75,7 +76,8 @@ static int ScriptOfState(int state, int defaultScript) {
 	} else if ((state >= SCE_HPHP_DEFAULT) && (state <= SCE_HPHP_STRINGEOL)) {
 		scriptLanguage = eScriptPHP;
 	} else {
-		scriptLanguage = defaultScript;
+		//		scriptLanguage = defaultScript;
+		scriptLanguage = eScriptNone;
 	}
 
 	return scriptLanguage;
@@ -322,7 +324,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	int defaultScript = (lineState >> 4) & 0x0F; // 4 bits
 	int beforePreProc = (lineState >> 8) & 0xFF; // 8 bits
 
-	int scriptLanguage = ScriptOfState(state, defaultScript);
+	//	int scriptLanguage = ScriptOfState(state,defaultScript);
+	int scriptLanguage = ScriptOfState(state);
 
 	bool fold = styler.GetPropertyInt("fold");
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
@@ -330,19 +333,15 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	int visChars = 0;
 
 	char chPrev = ' ';
-	char chPrev2 = ' ';
+	char ch = ' ';
 	styler.StartSegment(startPos);
 	int lengthDoc = startPos + length;
 	for (int i = startPos; i < lengthDoc; i++) {
-		char ch = styler[i];
+		char chPrev2 = chPrev;
+		chPrev = ch;
+		ch = styler[i];
 		char chNext = styler.SafeGetCharAt(i + 1);
 		char chNext2 = styler.SafeGetCharAt(i + 2);
-
-		// decide what is the current state to print (depending of the script tag)
-		StateToPrint = statePrintForState(state, inScriptType);
-
-		if (fold && !isspace(ch))
-			visChars++;
 
 		// Handle DBCS codepages
 		if (styler.IsLeadByte(ch)) {
@@ -352,11 +351,16 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			continue;
 		}
 
+		if (fold && !isspace(ch))
+			visChars++;
+
+		// handle script folding
 		if (fold) {
 			switch (scriptLanguage) {
 			case eScriptJS:
 			case eScriptPHP:
-			case eScriptVBS:
+				//not currently supported				case eScriptVBS:
+
 				if ((ch == '{') || (ch == '}')) {
 					levelCurrent += (ch == '{') ? 1 : -1;
 				}
@@ -366,10 +370,9 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					levelCurrent++;
 				} else if ((ch == '\n') && !((chNext == '\r') && (chNext2 == '\n')) && (chNext != '\n')) {
 					// check if the number of tabs is lower than the level
-					char chTmp = '§';
 					int Findlevel = (levelCurrent & ~SC_FOLDLEVELBASE) * 8;
 					for (int j = 0;Findlevel > 0;j++) {
-						chTmp = styler.SafeGetCharAt(i + j + 1);
+						char chTmp = styler.SafeGetCharAt(i + j + 1);
 						if (chTmp == '\t') {
 							Findlevel -= 8;
 						}	else if (chTmp == ' ') {
@@ -385,6 +388,9 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				break;
 			}
 		}
+
+		// decide what is the current state to print (depending of the script tag)
+		StateToPrint = statePrintForState(state, inScriptType);
 
 		if ((ch == '\r' && chNext != '\n') || (ch == '\n')) {
 			// New line -> record any line state onto /next/ line
@@ -406,7 +412,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		}
 
 		// generic end of script processing
-		if ((inScriptType == eNonHtmlScript) && (ch == '<') && (chNext == '/')) {
+		else if ((inScriptType == eNonHtmlScript) && (ch == '<') && (chNext == '/')) {
 			// Check if it's the end of the script tag (or any other HTML tag)
 			switch (state) {
 				// in these cases, you can embed HTML tags (to confirm !!!!!!!!!!!!!!!!!!!!!!)
@@ -425,6 +431,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_H_TAGUNKNOWN;
 				inScriptType = eHtml;
+				scriptLanguage = eScriptNone;
 				i += 2;
 				continue;
 				break;
@@ -433,7 +440,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 
 		/////////////////////////////////////
 		// handle the start of PHP pre-processor = Non-HTML
-		if ((ch == '<') && (chNext == '?')) {
+		else if ((ch == '<') && (chNext == '?')) {
 			styler.ColourTo(i - 1, StateToPrint);
 			beforePreProc = state;
 			scriptLanguage = segIsScriptingIndicator(styler, styler.GetStartSegment() + 2, i + 10, eScriptPHP);
@@ -452,7 +459,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		}
 
 		// handle the start of ASP pre-processor = Non-HTML
-		if ((ch == '<') && (chNext == '%')) {
+		else if ((ch == '<') && (chNext == '%')) {
 			styler.ColourTo(i - 1, StateToPrint);
 			beforePreProc = state;
 			if (inScriptType == eNonHtmlScript)
@@ -479,7 +486,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		}
 
 		// handle the end of a pre-processor = Non-HTML
-		if (((inScriptType == eNonHtmlPreProc) || (inScriptType == eNonHtmlScriptPreProc)) && ((ch == '?') || (ch == '%')) && (chNext == '>')) {
+		else if (((inScriptType == eNonHtmlPreProc) || (inScriptType == eNonHtmlScriptPreProc)) && ((ch == '?') || (ch == '%')) && (chNext == '>')) {
 			if (state == SCE_H_ASPAT) {
 				defaultScript = segIsScriptingIndicator(styler, styler.GetStartSegment(), i - 1, defaultScript);
 			}
@@ -513,6 +520,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				inScriptType = eNonHtmlScript;
 			else
 				inScriptType = eHtml;
+			scriptLanguage = eScriptNone;
 			continue;
 		}
 		/////////////////////////////////////
@@ -1064,8 +1072,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			} else if (isoperator(ch)) {
 				styler.ColourTo(i, SCE_HB_DEFAULT);
 			}
-		}
-		if (state == SCE_HBA_DEFAULT) {    // One of the above succeeded
+		} else if (state == SCE_HBA_DEFAULT) {    // One of the above succeeded
 			if (ch == '\"') {
 				state = SCE_HBA_STRING;
 			} else if (ch == '\'') {
@@ -1075,8 +1082,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			} else if (isoperator(ch)) {
 				styler.ColourTo(i, SCE_HBA_DEFAULT);
 			}
-		}
-		if (state == SCE_HJ_DEFAULT) {    // One of the above succeeded
+		} else if (state == SCE_HJ_DEFAULT) {    // One of the above succeeded
 			if (ch == '/' && chNext == '*') {
 				if (styler.SafeGetCharAt(i + 2) == '*')
 					state = SCE_HJ_COMMENTDOC;
@@ -1094,8 +1100,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				styler.ColourTo(i, SCE_HJ_SYMBOLS);
 			}
 		}
-		chPrev2 = chPrev;
-		chPrev = ch;
 	}
 
 	StateToPrint = statePrintForState(state, inScriptType);
