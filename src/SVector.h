@@ -94,13 +94,13 @@ public:
 		size = 0;
 		len = 0;
 	}
-	void SetLength(int newLen) {
+	void SetLength(unsigned int newLength) {
 		if (newLength > len) {
 			if (newLength >= size) {
 				SizeTo(newLength);
 			}
 		}
-		len = newLen;
+		len = newLength;
 	}
 	int Length() const {
 		return len;
