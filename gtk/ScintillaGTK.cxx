@@ -897,8 +897,9 @@ void ScintillaGTK::AddToPopUp(const char *label, int cmd, bool enabled) {
 }
 
 bool ScintillaGTK::OwnPrimarySelection() {
-	return (gdk_selection_owner_get(GDK_SELECTION_PRIMARY)
-	        == GTK_WIDGET(PWidget(wMain))->window);
+	return ((gdk_selection_owner_get(GDK_SELECTION_PRIMARY)
+		== GTK_WIDGET(PWidget(wMain))->window) &&
+			(GTK_WIDGET(PWidget(wMain))->window != NULL));
 }
 
 void ScintillaGTK::ClaimSelection() {
