@@ -620,7 +620,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				if (state == SCE_HJ_COMMENTLINE) {
 					char tag[7]; // room for the <script> tag
 					char chr;	// current char
-					int j=0;	
+					int j=0;
 					chr = styler.SafeGetCharAt(i+2);
 					while (j < 6 && !isspacechar(chr)) {
 						tag[j++] = static_cast<char>(MakeLowerCase(chr));
@@ -1962,6 +1962,12 @@ static void ColourisePHPDoc(unsigned int startPos, int length, int initStyle, Wo
 	sc.Complete();
 }
 
+static void ColourisePHPScriptDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+                                               Accessor &styler) {
+	if(startPos == 0) initStyle = SCE_HPHP_DEFAULT;
+		ColouriseHyperTextDoc(startPos,length,initStyle,keywordlists,styler);
+}
+
 static const char * const htmlWordListDesc[] = {
 	"HTML elements and attributes",
 	"JavaScript keywords",
@@ -1972,8 +1978,19 @@ static const char * const htmlWordListDesc[] = {
 	0,
 };
 
+static const char * const phpscriptWordListDesc[] = {
+	"", //Unused
+	"", //Unused
+	"", //Unused
+	"", //Unused
+	"PHP keywords",
+	"", //Unused
+	0,
+};
+
 LexerModule lmHTML(SCLEX_HTML, ColouriseHyperTextDoc, "hypertext", 0, htmlWordListDesc);
 LexerModule lmXML(SCLEX_XML, ColouriseHyperTextDoc, "xml", 0, htmlWordListDesc);
 // SCLEX_ASP and SCLEX_PHP should not be used in new code: use SCLEX_HTML instead.
 LexerModule lmASP(SCLEX_ASP, ColouriseASPDoc, "asp", 0, htmlWordListDesc);
 LexerModule lmPHP(SCLEX_PHP, ColourisePHPDoc, "php", 0, htmlWordListDesc);
+LexerModule lmPHPSCRIPT(SCLEX_PHPSCRIPT, ColourisePHPScriptDoc, "phpscript", 0, phpscriptWordListDesc);

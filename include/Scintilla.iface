@@ -1780,6 +1780,7 @@ val SCLEX_CAML=65
 val SCLEX_BLITZBASIC=66
 val SCLEX_PUREBASIC=67
 val SCLEX_HASKELL=68
+val SCLEX_PHPSCRIPT=69
 
 # When a lexer specifies its language as SCLEX_AUTOMATIC it receives a
 # value assigned in sequence from SCLEX_AUTOMATIC+1.
