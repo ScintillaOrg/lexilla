@@ -40,7 +40,8 @@ Editor::Editor() {
 
 	printMagnification = 0;
 	printColourMode = SC_PRINT_NORMAL;
-
+	cursorMode = SC_CURSORNORMAL;
+	
 	hasFocus = false;
 	hideSelection = false;
 	inOverstrike = false;
@@ -2470,12 +2471,18 @@ void Editor::SetDragPosition(int newPos) {
 	}
 }
 
+void Editor::DisplayCursor(Window::Cursor c) {
+	if (cursorMode == SC_CURSORNORMAL) 
+		wDraw.SetCursor(c);
+	else 
+		wDraw.SetCursor(static_cast<Window::Cursor>(cursorMode));
+}
+
 void Editor::StartDrag() {
 	// Always handled by subclasses
 	//SetMouseCapture(true);
-	//wDraw.SetCursor(Window::cursorArrow);
+	//DisplayCursor(Window::cursorArrow);
 }
-
 
 void Editor::DropAt(int position, const char *value, bool moving, bool rectangular) {
 	//Platform::DebugPrintf("DropAt %d\n", inDragDrop);
@@ -2746,16 +2753,16 @@ void Editor::ButtonMove(Point pt) {
 	} else {
 		if (vs.fixedColumnWidth > 0) {	// There is a margin
 			if (PointInSelMargin(pt)) {
-				wDraw.SetCursor(Window::cursorReverseArrow);
+				DisplayCursor(Window::cursorReverseArrow);
 				return ; 	// No need to test for selection
 			}
 
 		}
 		// Display regular (drag) cursor over selection
 		if (PointInSelection(pt))
-			wDraw.SetCursor(Window::cursorArrow);
+			DisplayCursor(Window::cursorArrow);
 		else
-			wDraw.SetCursor(Window::cursorText);
+			DisplayCursor(Window::cursorText);
 	}
 
 }
@@ -2764,9 +2771,9 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 	//Platform::DebugPrintf("ButtonUp %d\n", HaveMouseCapture());
 	if (HaveMouseCapture()) {
 		if (PointInSelMargin(pt)) {
-			wDraw.SetCursor(Window::cursorReverseArrow);
+			DisplayCursor(Window::cursorReverseArrow);
 		} else {
-			wDraw.SetCursor(Window::cursorText);
+			DisplayCursor(Window::cursorText);
 		}
 		xEndSelect = pt.x - vs.fixedColumnWidth + xOffset;
 		ptMouseLast = pt;
@@ -4314,6 +4321,13 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 	
 	case SCI_GETMOUSEDOWNCAPTURES:
 		return mouseDownCaptures;
+	
+	case SCI_SETCURSOR:
+		cursorMode = wParam;
+		break;
+	
+	case SCI_GETCURSOR:
+		return cursorMode;
 	
 #ifdef MACRO_SUPPORT
 	case SCI_STARTRECORD:

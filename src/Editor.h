@@ -61,6 +61,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	Palette palette;
 	int printMagnification;
 	int printColourMode;
+	int cursorMode;
 
 	bool hasFocus;
 	bool hideSelection;
@@ -273,6 +274,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	char *CopySelectionRange();
 	void CopySelectionIntoDrag();
 	void SetDragPosition(int newPos);
+	void DisplayCursor(Window::Cursor c);
 	virtual void StartDrag();
 	void DropAt(int position, const char *value, bool moving, bool rectangular);
 	// PositionInSelection returns 0 if position in selection, -1 if position before selection, and 1 if after.

@@ -452,18 +452,18 @@ LRESULT ScintillaWin::WndProc(unsigned int iMessage, unsigned long wParam, long 
 	case WM_SETCURSOR:
 		if (LoWord(lParam) == HTCLIENT) {
 			if (inDragDrop) {
-				wDraw.SetCursor(Window::cursorUp);
+				DisplayCursor(Window::cursorUp);
 			} else {
 				// Display regular (drag) cursor over selection
 				POINT pt;
 				::GetCursorPos(&pt);
 				::ScreenToClient(wMain.GetID(), &pt);
 				if (PointInSelMargin(Point(pt.x, pt.y))) {
-					wDraw.SetCursor(Window::cursorReverseArrow);
+					DisplayCursor(Window::cursorReverseArrow);
 				} else if (PointInSelection(Point(pt.x, pt.y))) {
-					wDraw.SetCursor(Window::cursorArrow);
+					DisplayCursor(Window::cursorArrow);
 				} else {
-					wDraw.SetCursor(Window::cursorText);
+					DisplayCursor(Window::cursorText);
 				}
 			}
 			return TRUE;

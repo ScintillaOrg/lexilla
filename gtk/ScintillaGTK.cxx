@@ -1026,7 +1026,7 @@ gint ScintillaGTK::DestroyWindow(GtkWidget *, ScintillaGTK *sciThis) {
 
 gint ScintillaGTK::Expose(GtkWidget *, GdkEventExpose *ose, ScintillaGTK *sciThis) {
 	if (sciThis->firstExpose) {
-		sciThis->wDraw.SetCursor(Window::cursorText);
+		sciThis->DisplayCursor(Window::cursorText);
 		sciThis->firstExpose = false;
 	}
 	
