@@ -428,6 +428,7 @@ SCI_STYLESETEOLFILLED(int stylenumber, bool eolfilled)
 SCI_STYLESETUNDERLINE(int stylenumber, bool underline)
 SCI_STYLESETCHARACTERSET(int stylenumber, int charset)
 SCI_STYLESETVISIBLE(int stylenumber, bool visible)
+SCI_STYLESETCASE(int stylenumber, SC_CASE_MIXED or SC_CASE_UPPER or SC_CASE_LOWER)
 </pre>
     <p>
        While the style setting messages mentioned above, change the style numbers associated with
@@ -466,6 +467,10 @@ SC_CHARSET_HANGUL, and SC_CHARSET_SHIFTJIS.
       starting at 32, STYLE_DEFAULT, STYLE_LINENUMBER, STYLE_BRACELIGHT, STYLE_BRACEBAD, 
       STYLE_CONTROLCHAR, and STYLE_INDENTGUIDE. 
       These can be defined with the SCI_STYLESET* messages.
+    </p>
+    <p>
+      SCI_STYLESETCASE can force text to be displayed in upper case
+      (SC_CASE_UPPER) or lower case (SC_CASE_LOWER).
     </p>
     <h3>
        Caret and Selection styles
