@@ -273,11 +273,6 @@ void ScintillaWin::Initialise() {
 	// no effect.  If the app hasnt, we really shouldnt ask them to call
 	// it just so this internal feature works.
 	::OleInitialize(NULL);
-
-#ifdef SCI_LEXER
-	LexerManager *lexMan = LexerManager::GetInstance();
-	lexMan->Load();
-#endif
 }
 
 void ScintillaWin::Finalise() {
@@ -1924,6 +1919,10 @@ extern void Platform_Finalise();
 void Scintilla_RegisterClasses(void *hInstance) {
 	Platform_Initialise(hInstance);
 	ScintillaWin::Register(reinterpret_cast<HINSTANCE>(hInstance));
+#ifdef SCI_LEXER
+	LexerManager *lexMan = LexerManager::GetInstance();
+	lexMan->Load();
+#endif
 }
 
 // This function is externally visible so it can be called from container when building statically.
