@@ -315,7 +315,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				sooked[sookedpos] = '\0';
 			} else if (ch == '-'
 			           && isSingleCharOp(chNext)
-			           && !isalnum((chNext2 = styler.SafeGetCharAt(2)))) {
+			           && !isalnum((chNext2 = styler.SafeGetCharAt(i+2)))) {
 				styler.ColourTo(i - 1, state);
 				styler.ColourTo(i + 1, SCE_PL_WORD);
 				state = SCE_PL_DEFAULT;
