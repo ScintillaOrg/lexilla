@@ -23,6 +23,22 @@ static inline bool isspacechar(unsigned char ch) {
 	return (ch == ' ') || ((ch >= 0x09) && (ch <= 0x0d));
 }
 
+static inline bool IsPunctuation(char ch) {
+	return isascii(ch) && ispunct(ch);
+}
+
+static inline bool IsADigit(char ch) {
+	return isascii(ch) && isdigit(ch);
+}
+
+static inline bool IsLowerCase(char ch) {
+	return isascii(ch) && islower(ch);
+}
+
+static inline bool IsUpperCase(char ch) {
+	return isascii(ch) && isupper(ch);
+}
+
 Document::Document() {
 	refCount = 0;
 #ifdef unix
@@ -1022,12 +1038,13 @@ void Document::ChangeCase(Range r, bool makeUpperCase) {
 		if (dbcsCodePage && (len > 1)) {
 			pos += len;
 		} else {
-			char ch = CharAt(pos);			if (makeUpperCase) {
-				if (islower(ch)) {
+			char ch = CharAt(pos);
+			if (makeUpperCase) {
+				if (IsLowerCase(ch)) {
 					ChangeChar(pos, static_cast<char>(MakeUpperCase(ch)));
 				}
 			} else {
-				if (isupper(ch)) {
+				if (IsUpperCase(ch)) {
 					ChangeChar(pos, static_cast<char>(MakeLowerCase(ch)));
 				}
 			}
@@ -1192,7 +1209,7 @@ void Document::NotifyModified(DocModification mh) {
 }
 
 bool Document::IsWordPartSeparator(char ch) {
-	return ispunct(ch) && (WordCharClass(ch) == ccWord);
+	return (WordCharClass(ch) == ccWord) && IsPunctuation(ch);
 }
 
 int Document::WordPartLeft(int pos) {
@@ -1207,31 +1224,38 @@ int Document::WordPartLeft(int pos) {
 		if (pos > 0) {
 			startChar = cb.CharAt(pos);
 			--pos;
-			if (islower(startChar)) {
-				while (pos > 0 && islower(cb.CharAt(pos)))
+			if (IsLowerCase(startChar)) {
+				while (pos > 0 && IsLowerCase(cb.CharAt(pos)))
 					--pos;
-				if (!isupper(cb.CharAt(pos)) && !islower(cb.CharAt(pos)))
+				if (!IsUpperCase(cb.CharAt(pos)) && !IsLowerCase(cb.CharAt(pos)))
 					++pos;
-			} else if (isupper(startChar)) {
-				while (pos > 0 && isupper(cb.CharAt(pos)))
+			} else if (IsUpperCase(startChar)) {
+				while (pos > 0 && IsUpperCase(cb.CharAt(pos)))
 					--pos;
-				if (!isupper(cb.CharAt(pos)))
+				if (!IsUpperCase(cb.CharAt(pos)))
 					++pos;
-			} else if (isdigit(startChar)) {
-				while (pos > 0 && isdigit(cb.CharAt(pos)))
+			} else if (IsADigit(startChar)) {
+				while (pos > 0 && IsADigit(cb.CharAt(pos)))
 					--pos;
-				if (!isdigit(cb.CharAt(pos)))
+				if (!IsADigit(cb.CharAt(pos)))
 					++pos;
-			} else if (ispunct(startChar)) {
-				while (pos > 0 && ispunct(cb.CharAt(pos)))
+			} else if (IsPunctuation(startChar)) {
+				while (pos > 0 && IsPunctuation(cb.CharAt(pos)))
 					--pos;
-				if (!ispunct(cb.CharAt(pos)))
+				if (!IsPunctuation(cb.CharAt(pos)))
 					++pos;
 			} else if (isspacechar(startChar)) {
 				while (pos > 0 && isspacechar(cb.CharAt(pos)))
 					--pos;
 				if (!isspacechar(cb.CharAt(pos)))
 					++pos;
+			} else if (!isascii(startChar)) {
+				while (pos > 0 && !isascii(cb.CharAt(pos)))
+					--pos;
+				if (isascii(cb.CharAt(pos)))
+					++pos;
+			} else {
+				++pos;
 			}
 		}
 	}
@@ -1246,29 +1270,34 @@ int Document::WordPartRight(int pos) {
 			++pos;
 		startChar = cb.CharAt(pos);
 	}
-	if (islower(startChar)) {
-		while (pos < length && islower(cb.CharAt(pos)))
+	if (!isascii(startChar)) {
+		while (pos < length && !isascii(cb.CharAt(pos)))
 			++pos;
-	} else if (isupper(startChar)) {
-		if (islower(cb.CharAt(pos + 1))) {
+	} else if (IsLowerCase(startChar)) {
+		while (pos < length && IsLowerCase(cb.CharAt(pos)))
 			++pos;
-			while (pos < length && islower(cb.CharAt(pos)))
+	} else if (IsUpperCase(startChar)) {
+		if (IsLowerCase(cb.CharAt(pos + 1))) {
+			++pos;
+			while (pos < length && IsLowerCase(cb.CharAt(pos)))
 				++pos;
 		} else {
-			while (pos < length && isupper(cb.CharAt(pos)))
+			while (pos < length && IsUpperCase(cb.CharAt(pos)))
 				++pos;
 		}
-		if (islower(cb.CharAt(pos)) && isupper(cb.CharAt(pos - 1)))
+		if (IsLowerCase(cb.CharAt(pos)) && IsUpperCase(cb.CharAt(pos - 1)))
 			--pos;
-	} else if (isdigit(startChar)) {
-		while (pos < length && isdigit(cb.CharAt(pos)))
+	} else if (IsADigit(startChar)) {
+		while (pos < length && IsADigit(cb.CharAt(pos)))
 			++pos;
-	} else if (ispunct(startChar)) {
-		while (pos < length && ispunct(cb.CharAt(pos)))
+	} else if (IsPunctuation(startChar)) {
+		while (pos < length && IsPunctuation(cb.CharAt(pos)))
 			++pos;
 	} else if (isspacechar(startChar)) {
 		while (pos < length && isspacechar(cb.CharAt(pos)))
 			++pos;
+	} else {
+		++pos;
 	}
 	return pos;
 }
