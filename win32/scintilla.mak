@@ -67,7 +67,7 @@ CXXFLAGS=-P -tWM -w -w-prc -w-inl -RT- -x-
 CXXDEBUG=-v -DDEBUG
 CXXNDEBUG=-O1 -DNDEBUG
 NAMEFLAG=-o
-LDFLAGS=
+LDFLAGS=/Gn /x
 LDDEBUG=-v
 LIBS=import32 cw32mt
 
