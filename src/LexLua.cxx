@@ -75,7 +75,12 @@ static void ColouriseLuaDoc(unsigned int startPos,
 	char chNext = styler[startPos];
 	unsigned int lengthDoc = startPos + length;
 	bool firstChar = true;
-	int literalString = 0;
+
+	/* Must initialize the literalString level, if we are inside such a string.
+	 * Note: this isn't enough, because literal strings can be nested,
+	 * we should go back to see at what level we are...
+	 */
+	int literalString = (initStyle == SCE_LUA_LITERALSTRING) ? 1 : 0;
 
 	styler.StartSegment(startPos);
 	for (unsigned int i = startPos; i <= lengthDoc; i++) {
