@@ -1686,6 +1686,10 @@ unsigned int Platform::DoubleClickTime() {
 	return 500; 	// Half a second
 }
 
+bool Platform::MouseButtonBounce() {
+	return true;
+}
+
 void Platform::DebugDisplay(const char *s) {
 	printf("%s", s);
 }

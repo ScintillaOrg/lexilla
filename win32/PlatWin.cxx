@@ -1281,6 +1281,10 @@ unsigned int Platform::DoubleClickTime() {
 	return ::GetDoubleClickTime();
 }
 
+bool Platform::MouseButtonBounce() {
+	return false;
+}
+
 void Platform::DebugDisplay(const char *s) {
 	::OutputDebugString(s);
 }

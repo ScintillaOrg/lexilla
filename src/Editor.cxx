@@ -4338,7 +4338,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 		SetEmptySelection(newPos);
 		bool doubleClick = false;
 		// Stop mouse button bounce changing selection type
-		if (curTime != lastClickTime) {
+		if (!Platform::MouseButtonBounce() || curTime != lastClickTime) {
 			if (selectionType == selChar) {
 				selectionType = selWord;
 				doubleClick = true;
