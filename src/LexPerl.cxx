@@ -262,12 +262,14 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				styler.ColourTo(i - 1, state);
 				if (isalpha(chNext) || chNext == '#' || chNext == '$' || chNext == '_') {
 					state = SCE_PL_HASH;
-				} else if (chNext != '{' && chNext != '[') {
+				// } else if (chNext != '{' && chNext != '[') {
+				} else if (chNext == '{') {
 					styler.ColourTo(i, SCE_PL_HASH);
-					i++;
-					ch = ' ';
+					// i++;
+					// ch = ' ';
 				} else {
-					styler.ColourTo(i, SCE_PL_HASH);
+					// styler.ColourTo(i, SCE_PL_HASH);
+					styler.ColourTo(i, SCE_PL_OPERATOR);
 				}
 			} else if (ch == '*') {
 				styler.ColourTo(i - 1, state);
