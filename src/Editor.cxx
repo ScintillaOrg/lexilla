@@ -1061,7 +1061,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 						// +3 For a blank on front and rounded edge each side:
 						ll.positions[charInLine + 1] = surface->WidthText(ctrlCharsFont, ctrlChar, strlen(ctrlChar)) + 3;
 					} else {
-						char cc[2] = { controlCharSymbol, '\0' };
+						char cc[2] = { static_cast<char>(controlCharSymbol), '\0' };
 						surface->MeasureWidths(ctrlCharsFont, cc, 1,
 											   ll.positions + startseg + 1);
 					}
@@ -1295,7 +1295,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 									 rcSegment.top + vsDraw.maxAscent, ctrlChar, strlen(ctrlChar),
 									 textBack, textFore);
 					} else {
-						char cc[2] = { controlCharSymbol, '\0' };
+						char cc[2] = { static_cast<char>(controlCharSymbol), '\0' };
 						surface->DrawTextNoClip(rcSegment, ctrlCharsFont,
 										  rcSegment.top + vsDraw.maxAscent,
 										  cc, 1, textBack, textFore);
@@ -4913,7 +4913,6 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETCONTROLCHARSYMBOL:
 		return controlCharSymbol;
-		break;
 
 	case SCI_STARTRECORD:
 		recordingMacro = true;
