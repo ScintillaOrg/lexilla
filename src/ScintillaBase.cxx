@@ -320,7 +320,7 @@ void ScintillaBase::AutoCompleteCompleted() {
 	ac.Show(false);
 
 	listSelected = selected;
-	SCNotification scn;
+	SCNotification scn = {0};
 	scn.nmhdr.code = listType > 0 ? SCN_USERLISTSELECTION : SCN_AUTOCSELECTION;
 	scn.message = 0;
 	scn.wParam = listType;
@@ -384,7 +384,7 @@ void ScintillaBase::CallTipShow(Point pt, const char *defn) {
 }
 
 void ScintillaBase::CallTipClick() {
-	SCNotification scn;
+	SCNotification scn = {0};
 	scn.nmhdr.code = SCN_CALLTIPCLICK;
 	scn.position = ct.clickPlace;
 	NotifyParent(scn);

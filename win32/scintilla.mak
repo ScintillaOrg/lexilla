@@ -52,7 +52,7 @@ CC=bcc32
 RC=brcc32 -r
 LD=ilink32
 
-CXXFLAGS=-P -tWM -w -w-prc -w-inl -RT- -x-
+CXXFLAGS=-P -tWM -w -w-prc -w-inl -w-pin -RT- -x-
 # Above turns off warnings for clarfying parentheses and inlines with for not expanded
 CXXDEBUG=-Od -v -DDEBUG
 CXXNDEBUG=-O1 -DNDEBUG
