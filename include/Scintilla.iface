@@ -481,6 +481,21 @@ get bool GetUsePalette=2139(,)
 # In read-only mode?
 get bool GetReadOnly=2140(,)
 
+# Sets the position of the caret.
+set void SetCurrentPos=2141(position pos,)
+
+# Sets the position that starts the selection - this becomes the anchor.
+set void SetSelectionStart=2142(position pos,)
+
+# Returns the position at the start of the selection.
+get position GetSelectionStart=2143(,)
+
+# Sets the position that ends the selection - this becomes the currentPosition.
+set void SetSelectionEnd=2144(position pos,)
+
+# Returns the position at the end of the selection.
+get position GetSelectionEnd=2145(,)
+
 # Show a call tip containing a definition near position pos.
 fun void CallTipShow=2200(position pos, string definition)
 

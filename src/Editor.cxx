@@ -3320,12 +3320,34 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	case SCI_GETCHARAT:
 		return pdoc->CharAt(wParam);
 
+	case SCI_SETCURRENTPOS:
+		SetSelection(wParam, anchor);
+		break;
+
 	case SCI_GETCURRENTPOS:
 		return currentPos;
+
+	case SCI_SETANCHOR:
+		SetSelection(currentPos, wParam);
+		break;
 
 	case SCI_GETANCHOR:
 		return anchor;
 
+	case SCI_SETSELECTIONSTART:
+		SetSelection(Platform::Maximum(currentPos, wParam), wParam);
+		break;
+	
+	case SCI_GETSELECTIONSTART:
+		return Platform::Minimum(anchor, currentPos);
+	
+	case SCI_SETSELECTIONEND:
+		SetSelection(wParam, Platform::Minimum(anchor, wParam));
+		break;
+		
+	case SCI_GETSELECTIONEND:
+		return Platform::Maximum(anchor, currentPos);
+	
 	case SCI_GETSTYLEAT:
 		if (static_cast<short>(wParam) >= pdoc->Length())
 			return 0;
@@ -3385,10 +3407,6 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		SetEmptySelection(wParam);
 		EnsureCaretVisible();
 		Redraw();
-		break;
-
-	case SCI_SETANCHOR:
-		SetSelection(currentPos, wParam);
 		break;
 
 	case SCI_GETCURLINE: {
