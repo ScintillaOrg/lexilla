@@ -235,6 +235,9 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				} else if (ch == 'q' && !isalnum(chNext)) {
 					state = SCE_PL_STRING_Q;
 					Quote.New(1);
+				} else if (ch == 'y' && !isalnum(chNext)) {
+					state = SCE_PL_REGSUBST;
+					Quote.New(2);
 				} else if (ch == 't' && chNext == 'r' && !isalnum(chNext2)) {
 					state = SCE_PL_REGSUBST;
 					Quote.New(2);
