@@ -38,6 +38,9 @@ public:
 };
 
 class Editor : public DocWatcher {
+	// Private so Editor objects can not be copied
+	Editor(const Editor &) : DocWatcher() {}
+	Editor &operator=(const Editor &) { return *this; }
 protected:	// ScintillaBase subclass needs access to much of Editor
 
 	// On GTK+, Scintilla is a container widget holding two scroll bars and a drawing area

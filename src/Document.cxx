@@ -634,11 +634,9 @@ long Document::FindText(int minPos, int maxPos, const char *s, bool caseSensitiv
  	
 	// Compute actual search ranges needed
 	int lengthFind = strlen(s);
- 	int endSearch = 0;
+ 	int endSearch = endPos;
  	if (startPos <= endPos) {
  		endSearch = endPos - lengthFind + 1;
- 	} else {
- 		endSearch = endPos;
  	}
 	//Platform::DebugPrintf("Find %d %d %s %d\n", startPos, endPos, ft->lpstrText, lengthFind);
 	char firstChar = s[0];

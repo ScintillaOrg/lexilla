@@ -387,7 +387,7 @@ LRESULT ScintillaBase::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		break;
 		
 	case SCI_SETKEYWORDS:
-		if ((wParam >= 0) && (wParam < numWordLists)) {
+		if (wParam < numWordLists) {
 			keyWordLists[wParam]->Clear();
 			keyWordLists[wParam]->Set(reinterpret_cast<const char *>(lParam));
 		}

@@ -74,7 +74,7 @@ private:
 	CellBuffer cb;
 	bool wordchars[256];
 	int stylingPos;
-	int stylingMask;
+	char stylingMask;
 	int endStyled;
 	int enteredCount;
 	int enteredReadOnlyCount;

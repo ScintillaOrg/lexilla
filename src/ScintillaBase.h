@@ -7,6 +7,9 @@
 #define SCINTILLABASE_H
 
 class ScintillaBase : public Editor {
+	// Private so ScintillaBase objects can not be copied
+	ScintillaBase(const ScintillaBase &) : Editor() {}
+	ScintillaBase &operator=(const ScintillaBase &) { return *this; }
 protected:
 	// Enumeration of commands and child windows
 	enum {

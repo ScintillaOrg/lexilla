@@ -101,7 +101,7 @@ void DocumentAccessor::ColourTo(unsigned int pos, int chAttr) {
 			Flush();
 		if (validLen + (pos - startSeg + 1) >= bufferSize) {
 			// Too big for buffer so send directly
-			pdoc->SetStyleFor(pos - startSeg + 1, chAttr);
+			pdoc->SetStyleFor(pos - startSeg + 1, static_cast<char>(chAttr));
 		} else {
 			if (chAttr != chWhile)
 				chFlags = 0;

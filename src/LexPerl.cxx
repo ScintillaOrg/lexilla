@@ -67,16 +67,6 @@ static bool isMatch(Accessor &styler, int lengthDoc, int pos, const char *val) {
 	return true;
 }
 
-static bool isOKQuote(char ch) {
-	if (isalnum(ch))
-		return false;
-	if (isspace(ch))
-		return false;
-	if (iscntrl(ch))
-		return false;
-	return true;
-}
-
 static char opposite(char ch) {
 	if (ch == '(')
 		return ')';

@@ -3,6 +3,9 @@
 // The License.txt file describes the conditions under which this software may be distributed.
 
 class WindowAccessor : public Accessor {
+	// Private so WindowAccessor objects can not be copied
+	WindowAccessor(const WindowAccessor &source) : Accessor(), props(source.props) {}
+	WindowAccessor &operator=(const WindowAccessor &) { return *this; }
 protected:
 	WindowID id;
 	PropSet &props;
@@ -18,7 +21,8 @@ protected:
 	void Fill(int position);
 public:
 	WindowAccessor(WindowID id_, PropSet &props_) : 
-		id(id_), props(props_), lenDoc(-1), validLen(0), chFlags(0) {
+		Accessor(), id(id_), props(props_), 
+		lenDoc(-1), validLen(0), chFlags(0) {
 	}
 	~WindowAccessor();
 	char StyleAt(int position);

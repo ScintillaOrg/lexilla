@@ -376,7 +376,7 @@ bool WordList::InList(const char *s) {
 		for (int i = 0; words[i][0]; i++)
 			len++;
 		SortWordList(words, len);
-		for (int k = 0; k < (sizeof(starts) / sizeof(starts[0])); k++)
+		for (unsigned int k = 0; k < (sizeof(starts) / sizeof(starts[0])); k++)
 			starts[k] = -1;
 		for (int l = len - 1; l >= 0; l--) {
 			unsigned char indexChar = words[l][0];

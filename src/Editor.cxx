@@ -189,7 +189,7 @@ bool IsControlCharacter(char ch) {
 	return ch >= 0 && ch < ' ';
 }
 
-const char *ControlCharacterString(char ch) {
+const char *ControlCharacterString(unsigned char ch) {
 	const char *reps[] = {
 	    "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL",
 	    "BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI",
@@ -488,7 +488,7 @@ void Editor::ScrollTo(int line) {
 	}
 }
 
-void Editor::ScrollText(int linesToMove) {
+void Editor::ScrollText(int /* linesToMove */) {
 	//Platform::DebugPrintf("Editor::ScrollText %d\n", linesToMove);
 	Redraw();
 }
@@ -1019,13 +1019,11 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	}
 	//Platform::DebugPrintf("start display %d, offset = %d\n", pdoc->Length(), xOffset);
 
-	Surface *surface = 0;
 	if (rcArea.right > vs.fixedColumnWidth) {
 
+		Surface *surface = surfaceWindow;
 		if (bufferedDraw) {
 			surface = &pixmapLine;
-		} else {
-			surface = surfaceWindow;
 		}
 		surface->SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
 
@@ -2651,7 +2649,7 @@ int Editor::BraceMatch(int position, int /*maxReStyle*/) {
 	position = position + direction;
 	while ((position >= 0) && (position < pdoc->Length())) {
 		char chAtPos = pdoc->CharAt(position);
-		char styAtPos = pdoc->StyleAt(position) & pdoc->stylingBitsMask;
+		char styAtPos = static_cast<char>(pdoc->StyleAt(position) & pdoc->stylingBitsMask);
 		if ((position > pdoc->GetEndStyled()) || (styAtPos == styBrace)) {
 			if (chAtPos == chBrace)
 				depth++;
@@ -2761,7 +2759,7 @@ void Editor::EnsureLineVisible(int line) {
 }
 
 static bool ValidMargin(WPARAM wParam) {
-	return (wParam >= 0 && wParam < ViewStyle::margins);
+	return wParam < ViewStyle::margins;
 }
 
 

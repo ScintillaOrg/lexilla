@@ -5,6 +5,9 @@
 class Document;
 
 class DocumentAccessor : public Accessor {
+	// Private so DocumentAccessor objects can not be copied
+	DocumentAccessor(const DocumentAccessor &source) : Accessor(), props(source.props) {}
+	DocumentAccessor &operator=(const DocumentAccessor &) { return *this; }
 protected:
 	Document *pdoc;
 	PropSet &props;
@@ -20,7 +23,8 @@ protected:
 	void Fill(int position);
 public:
 	DocumentAccessor(Document *pdoc_, PropSet &props_) : 
-		pdoc(pdoc_), props(props_), lenDoc(-1), validLen(0), chFlags(0) {
+		Accessor(), pdoc(pdoc_), props(props_), 
+		lenDoc(-1), validLen(0), chFlags(0) {
 	}
 	~DocumentAccessor();
 	char StyleAt(int position);

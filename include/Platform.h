@@ -308,6 +308,7 @@ protected:
 	WindowID id;
 public:
 	Window() : id(0) {}
+	Window(const Window &source) : id(source.id) {}
 	virtual ~Window();
 	Window &operator=(WindowID id_) {
 		id = id_;

@@ -105,7 +105,7 @@ void WindowAccessor::ColourTo(unsigned int pos, int chAttr) {
 				chFlags = 0;
 			chAttr |= chFlags;
 			for (unsigned int i = startSeg; i <= pos; i++) {
-				styleBuf[validLen++] = chAttr;
+				styleBuf[validLen++] = static_cast<char>(chAttr);
 			}
 		}
 	}
