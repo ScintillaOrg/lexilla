@@ -101,9 +101,6 @@ LexVB.o: ../src/LexVB.cxx ../include/Platform.h ../include/PropSet.h \
  ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
 LineMarker.o: ../src/LineMarker.cxx ../include/Platform.h \
  ../include/Scintilla.h ../src/LineMarker.h
-ListLexers.o: ../src/ListLexers.cxx ../include/Platform.h \
- ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
- ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
 PropSet.o: ../src/PropSet.cxx ../include/Platform.h \
  ../include/PropSet.h ../include/SString.h
 RESearch.o: ../src/RESearch.cxx ../src/RESearch.h
