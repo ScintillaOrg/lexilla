@@ -57,7 +57,7 @@
 
 #define INTERNATIONAL_INPUT
 
-#if !PLAT_GTK_WIN32
+#if !PLAT_GTK_WIN32 || GTK_MAJOR_VERSION >= 2
 #include "Converter.h"
 #endif
 
@@ -209,6 +209,8 @@ private:
 	static void PreeditChanged(GtkIMContext *context, ScintillaGTK *sciThis);
 	void PreeditChangedThis();
 #endif
+	static gint StyleSetText(GtkWidget *widget, GtkStyle *previous, void*);
+	static gint RealizeText(GtkWidget *widget, void*);
 	static void Destroy(GtkObject *object);
 	static void SelectionReceived(GtkWidget *widget, GtkSelectionData *selection_data,
 	                              guint time);
@@ -401,6 +403,10 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	wPreeditDraw = gtk_drawing_area_new();
 	gtk_signal_connect(GTK_OBJECT(PWidget(wPreeditDraw)), "expose_event",
 			   GtkSignalFunc(ExposePreedit), this);
+	gtk_signal_connect_after(GTK_OBJECT(PWidget(wText)), "style_set",
+				 GtkSignalFunc(ScintillaGTK::StyleSetText), NULL);
+	gtk_signal_connect_after(GTK_OBJECT(PWidget(wText)), "realize",
+				 GtkSignalFunc(ScintillaGTK::RealizeText), NULL);
 	gtk_container_add(GTK_CONTAINER(PWidget(wPreedit)), PWidget(wPreeditDraw));
 	gtk_widget_realize(PWidget(wPreedit));
 	gtk_widget_realize(PWidget(wPreeditDraw));
@@ -1933,6 +1939,18 @@ void ScintillaGTK::PreeditChangedThis() {
 	pango_attr_list_unref(attrs);
 }
 #endif
+
+gint ScintillaGTK::StyleSetText(GtkWidget *widget, GtkStyle *, void*) {
+	if (widget->window != NULL)
+		gdk_window_set_back_pixmap(widget->window, NULL, FALSE);
+	return FALSE;
+}
+
+gint ScintillaGTK::RealizeText(GtkWidget *widget, void*) {
+	if (widget->window != NULL)
+		gdk_window_set_back_pixmap(widget->window, NULL, FALSE);
+	return FALSE;
+}
 
 void ScintillaGTK::Destroy(GtkObject* object) {
 	ScintillaObject *scio = reinterpret_cast<ScintillaObject *>(object);
