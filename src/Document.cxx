@@ -266,7 +266,7 @@ int Document::LenChar(int pos) {
 		return 1;
 	}
 }
-#include <assert.h>
+
 // Normalise a position so that it is not halfway through a two byte character.
 // This can occur in two situations -
 // When lines are terminated with \r\n pairs which should be treated as one character.
@@ -280,7 +280,7 @@ int Document::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
 	if (pos >= Length())
 		return Length();
 
-	// assert pos > 0 && pos < Length()
+	// PLATFORM_ASSERT(pos > 0 && pos < Length());
 	if (checkLineEnd && IsCrLf(pos - 1)) {
 		if (moveDir > 0)
 			return pos + 1;

@@ -1065,11 +1065,15 @@ void Editor::ScrollTo(int line, bool moveThumb) {
 		SetTopLine(topLineNew);
 		ShowCaretAtCurrentPosition();
 		// Perform redraw rather than scroll if many lines would be redrawn anyway.
+#ifndef UNDER_CE
 		if (abs(linesToMove) <= 10) {
 			ScrollText(linesToMove);
 		} else {
 			Redraw();
 		}
+#else
+		Redraw();
+#endif
 		if (moveThumb) {
 			SetVerticalScrollPos();
 		}
