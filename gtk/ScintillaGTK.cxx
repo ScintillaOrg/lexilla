@@ -42,6 +42,11 @@
 #include "ScintillaBase.h"
 
 #include "gtk/gtksignal.h"
+#include "gtk/gtkmarshal.h"
+
+#if GTK_MAJOR_VERSION < 2
+#define INTERNATIONAL_INPUT
+#endif
 
 #ifdef _MSC_VER
 // Constant conditional expressions are because of GTK+ headers
@@ -75,11 +80,11 @@ class ScintillaGTK : public ScintillaBase {
 #if PLAT_GTK_WIN32
 	CLIPFORMAT cfColumnSelect;
 #endif
-
+#ifdef INTERNATIONAL_INPUT
 	// Input context used for supporting internationalized key entry
 	GdkIC *ic;
 	GdkICAttr *ic_attr;
-
+#endif
 	// Wheel mouse support
 	unsigned int linesPerScroll;
 	GTimeVal lastWheelMouseTime;
@@ -219,7 +224,11 @@ ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 		scrollBarWidth(30), scrollBarHeight(30),
 		capturedMouse(false), dragWasDropped(false),
 		parentClass(0),
-		ic(NULL), ic_attr(NULL), lastWheelMouseDirection(0),
+#ifdef INTERNATIONAL_INPUT
+		ic(NULL),
+		ic_attr(NULL),
+#endif
+		lastWheelMouseDirection(0),
 		wheelMouseIntensity(0) {
 	sci = sci_;
 	wMain = GTK_WIDGET(sci);
@@ -269,7 +278,7 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	gdk_window_set_background(widget->window, &widget->style->bg[GTK_STATE_NORMAL]);
 	gdk_window_show(widget->window);
 	gdk_cursor_destroy(cursor);
-
+#ifdef INTERNATIONAL_INPUT
 	if (gdk_im_ready() && (ic_attr = gdk_ic_attr_new()) != NULL) {
 		gint width, height;
 		GdkColormap *colormap;
@@ -315,9 +324,9 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 		}
 		ic = gdk_ic_new(attr, attrmask);
 
-		if (ic == NULL)
+		if (ic == NULL) {
 			g_warning("Can't create input context.");
-		else {
+		} else {
 			mask = gdk_window_get_events(widget->window);
 			mask = (GdkEventMask) ((int) mask | gdk_ic_get_events(ic));
 			gdk_window_set_events(widget->window, mask);
@@ -326,6 +335,7 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 				gdk_im_begin(ic, widget->window);
 		}
 	}
+#endif
 	gtk_widget_realize(PWidget(scrollbarv));
 	gtk_widget_realize(PWidget(scrollbarh));
 }
@@ -342,6 +352,7 @@ void ScintillaGTK::UnRealizeThis(GtkWidget *widget) {
 	GTK_WIDGET_UNSET_FLAGS(widget, GTK_REALIZED);
 	gtk_widget_unrealize(PWidget(scrollbarv));
 	gtk_widget_unrealize(PWidget(scrollbarh));
+#ifdef INTERNATIONAL_INPUT
 	if (ic) {
 		gdk_ic_destroy(ic);
 		ic = NULL;
@@ -350,10 +361,9 @@ void ScintillaGTK::UnRealizeThis(GtkWidget *widget) {
 		gdk_ic_attr_destroy(ic_attr);
 		ic_attr = NULL;
 	}
+#endif
 	if (GTK_WIDGET_CLASS(parentClass)->unrealize)
 		GTK_WIDGET_CLASS(parentClass)->unrealize(widget);
-	//gdk_window_destroy(widget->window);
-	//widget->window = 0;
 
 	Finalise();
 }
@@ -399,6 +409,7 @@ void ScintillaGTK::UnMap(GtkWidget *widget) {
 	sciThis->UnMapThis();
 }
 
+#ifdef INTERNATIONAL_INPUT
 gint ScintillaGTK::CursorMoved(GtkWidget *widget, int xoffset, int yoffset, ScintillaGTK *sciThis) {
 	if (GTK_WIDGET_HAS_FOCUS(widget) && gdk_im_ready() && sciThis->ic &&
 	        (gdk_ic_get_style (sciThis->ic) & GDK_IM_PREEDIT_POSITION)) {
@@ -408,6 +419,11 @@ gint ScintillaGTK::CursorMoved(GtkWidget *widget, int xoffset, int yoffset, Scin
 	}
 	return FALSE;
 }
+#else
+gint ScintillaGTK::CursorMoved(GtkWidget *, int, int, ScintillaGTK *) {
+	return FALSE;
+}
+#endif
 
 gint ScintillaGTK::FocusIn(GtkWidget *widget, GdkEventFocus * /*event*/) {
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
@@ -415,8 +431,10 @@ gint ScintillaGTK::FocusIn(GtkWidget *widget, GdkEventFocus * /*event*/) {
 	GTK_WIDGET_SET_FLAGS(widget, GTK_HAS_FOCUS);
 	sciThis->SetFocusState(true);
 
+#ifdef INTERNATIONAL_INPUT
 	if (sciThis->ic)
 		gdk_im_begin(sciThis->ic, widget->window);
+#endif
 
 	return FALSE;
 }
@@ -427,7 +445,9 @@ gint ScintillaGTK::FocusOut(GtkWidget *widget, GdkEventFocus * /*event*/) {
 	GTK_WIDGET_UNSET_FLAGS(widget, GTK_HAS_FOCUS);
 	sciThis->SetFocusState(false);
 
+#ifdef INTERNATIONAL_INPUT
 	gdk_im_end();
+#endif
 
 	return FALSE;
 }
@@ -442,8 +462,6 @@ void ScintillaGTK::SizeRequest(GtkWidget *widget, GtkRequisition *requisition) {
 }
 
 void ScintillaGTK::SizeAllocate(GtkWidget *widget, GtkAllocation *allocation) {
-	//Platform::DebugPrintf(stderr, "size_allocate %p %0d,%0d %0d,%0d\n", widget,
-	//	widget->allocation.x, widget->allocation.y, allocation->width, allocation->height);
 	widget->allocation = *allocation;
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	if (GTK_WIDGET_REALIZED(widget))
@@ -455,6 +473,7 @@ void ScintillaGTK::SizeAllocate(GtkWidget *widget, GtkAllocation *allocation) {
 
 	sciThis->Resize(allocation->width, allocation->height);
 
+#ifdef INTERNATIONAL_INPUT
 	if (sciThis->ic && (gdk_ic_get_style (sciThis->ic) & GDK_IM_PREEDIT_POSITION)) {
 		gint width, height;
 
@@ -464,6 +483,7 @@ void ScintillaGTK::SizeAllocate(GtkWidget *widget, GtkAllocation *allocation) {
 
 		gdk_ic_set_attr(sciThis->ic, sciThis->ic_attr, GDK_IC_PREEDIT_AREA);
 	}
+#endif
 }
 
 void ScintillaGTK::Initialise() {
@@ -822,10 +842,15 @@ void ScintillaGTK::AddToPopUp(const char *label, int cmd, bool enabled) {
 	char fulllabel[200];
 	strcpy(fulllabel, "/");
 	strcat(fulllabel, label);
+	GtkItemFactoryCallback menuSig = GtkItemFactoryCallback(PopUpCB);
 	GtkItemFactoryEntry itemEntry = {
 	    fulllabel, NULL,
-	    GTK_SIGNAL_FUNC(ScintillaGTK::PopUpCB), cmd,
-	    const_cast<gchar *>(label[0] ? "<Item>" : "<Separator>")
+	    menuSig,
+	    cmd,
+	    const_cast<gchar *>(label[0] ? "<Item>" : "<Separator>"), 
+#if GTK_MAJOR_VERSION >= 2
+	    NULL
+#endif
 	};
 	gtk_item_factory_create_item(GTK_ITEM_FACTORY(popup.GetID()),
 	                             &itemEntry, this, 1);
@@ -1425,6 +1450,15 @@ gint ScintillaGTK::Expose(GtkWidget *, GdkEventExpose *ose, ScintillaGTK *sciThi
 	}
 	sciThis->paintState = notPainting;
 
+#if GTK_MAJOR_VERSION >= 2
+	gtk_container_propagate_expose(GTK_CONTAINER(PWidget(sciThis->wMain)),
+					PWidget(sciThis->scrollbarh),
+					ose);
+	gtk_container_propagate_expose(GTK_CONTAINER(PWidget(sciThis->wMain)),
+					PWidget(sciThis->scrollbarv),
+					ose);
+#endif
+
 	return FALSE;
 }
 
@@ -1598,7 +1632,9 @@ void ScintillaGTK::ClassInit(GtkObjectClass* object_class, GtkWidgetClass *widge
 	widget_class->size_request = SizeRequest;
 	widget_class->size_allocate = SizeAllocate;
 	widget_class->expose_event = ExposeMain;
+#if GTK_MAJOR_VERSION < 2
 	widget_class->draw = Draw;
+#endif
 
 	widget_class->motion_notify_event = Motion;
 	widget_class->button_press_event = Press;
@@ -1628,33 +1664,40 @@ void ScintillaGTK::ClassInit(GtkObjectClass* object_class, GtkWidgetClass *widge
 	widget_class->unmap = UnMap;
 }
 
+#if GTK_MAJOR_VERSION < 2
+#define GTK_CLASS_TYPE(c) (c->type)
+#define SIG_MARSHAL gtk_marshal_NONE__INT_POINTER
+#else
+#define SIG_MARSHAL gtk_marshal_NONE__INT_INT
+#endif
+
 static void scintilla_class_init(ScintillaClass *klass) {
 	GtkObjectClass *object_class = (GtkObjectClass*) klass;
 	GtkWidgetClass *widget_class = (GtkWidgetClass*) klass;
 
-	parent_class = (GtkWidgetClass*) gtk_type_class (gtk_container_get_type ());
+	parent_class = (GtkWidgetClass*) gtk_type_class(gtk_container_get_type());
 
 	scintilla_signals[COMMAND_SIGNAL] = gtk_signal_new(
 	                                        "command",
 	                                        GTK_RUN_LAST,
-	                                        object_class->type,
+	                                        GTK_CLASS_TYPE(object_class),
 	                                        GTK_SIGNAL_OFFSET(ScintillaClass, command),
-	                                        gtk_marshal_NONE__INT_POINTER,
+	                                        SIG_MARSHAL,
 	                                        GTK_TYPE_NONE,
 	                                        2, GTK_TYPE_INT, GTK_TYPE_POINTER);
 
 	scintilla_signals[NOTIFY_SIGNAL] = gtk_signal_new(
-	                                       "notify",
+	                                       SCINTILLA_NOTIFY,
 	                                       GTK_RUN_LAST,
-	                                       object_class->type,
+	                                       GTK_CLASS_TYPE(object_class),
 	                                       GTK_SIGNAL_OFFSET(ScintillaClass, notify),
-	                                       gtk_marshal_NONE__INT_POINTER,
+	                                       SIG_MARSHAL,
 	                                       GTK_TYPE_NONE,
 	                                       2, GTK_TYPE_INT, GTK_TYPE_POINTER);
-
+#if GTK_MAJOR_VERSION < 2
 	gtk_object_class_add_signals(object_class,
 	                             reinterpret_cast<unsigned int *>(scintilla_signals), LAST_SIGNAL);
-
+#endif
 	klass->command = NULL;
 	klass->notify = NULL;
 

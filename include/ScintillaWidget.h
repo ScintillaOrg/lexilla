@@ -39,6 +39,12 @@ GtkWidget*	scintilla_new		(void);
 void		scintilla_set_id	(ScintillaObject *sci,int id);
 sptr_t	scintilla_send_message	(ScintillaObject *sci,unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
+#if GTK_MAJOR_VERSION < 2
+#define SCINTILLA_NOTIFY "notify"
+#else
+#define SCINTILLA_NOTIFY "sci-notify"
+#endif
+
 #ifdef __cplusplus
 }
 #endif
