@@ -362,6 +362,9 @@ void ScintillaBase::Colourise(int start, int end) {
 		end = lengthDoc;
 	int len = end - start;
 
+	PLATFORM_ASSERT(len >= 0);
+	PLATFORM_ASSERT(start + len <= lengthDoc);
+
 	//WindowAccessor styler(wMain.GetID(), props);
 	DocumentAccessor styler(pdoc, props, wMain.GetID());
 

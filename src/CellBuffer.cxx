@@ -751,6 +751,8 @@ bool CellBuffer::SetStyleAt(int position, char style, char mask) {
 bool CellBuffer::SetStyleFor(int position, int lengthStyle, char style, char mask) {
 	int bytePos = position * 2 + 1;
 	bool changed = false;
+	PLATFORM_ASSERT(lengthStyle == 0 ||
+		(lengthStyle > 0 && lengthStyle + position < length));
 	while (lengthStyle--) {
 		char curVal = ByteAt(bytePos);
 		if ((curVal & mask) != style) {
