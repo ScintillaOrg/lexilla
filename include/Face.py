@@ -97,4 +97,11 @@ class Face:
 							"Category": currentCategory, 
 							"Value": value }
 						self.order.append(name)
+					elif featureType == "enu" or featureType == "lex":
+						name, value = string.split(featureVal, "=", 1)
+						self.features[name] = { 
+							"FeatureType": featureType, 
+							"Category": currentCategory, 
+							"Value": value }
+						self.order.append(name)
 
