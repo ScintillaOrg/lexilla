@@ -17,7 +17,11 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-inline bool isPerlOperator(char ch) {
+static inline bool isEOLChar(char ch) {
+	return (ch == '\r') || (ch == '\n');
+}
+
+static inline bool isPerlOperator(char ch) {
 	if (isalnum(ch))
 		return false;
 	// '.' left out as it is used to make up numbers
@@ -49,7 +53,7 @@ static int classifyWordPerl(unsigned int start, unsigned int end, WordList &keyw
 	return chAttr;
 }
 
-static bool isEndVar(char ch) {
+static inline bool isEndVar(char ch) {
 	return !isalnum(ch) && ch != '#' && ch != '$' &&
 	       ch != '_' && ch != '\'';
 }
@@ -88,8 +92,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 
 	WordList &keywords = *keywordlists[0];
 
-	class HereDocCls
-	{
+	class HereDocCls {
 		public:
 		int  State;		// 0: '<<' encountered
 					// 1: collect the delimiter
@@ -98,8 +101,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 		bool Quoted;		// true if Quote in ('\'','"','`')
 		int  DelimiterLength;	// strlen(Delimiter)
 		char Delimiter[256];	// the Delimiter, 256: sizeof PL_tokenbuf
-		HereDocCls()
-		{
+		HereDocCls() {
 			State = 0;
 			DelimiterLength = 0;
 			Delimiter[0] = '\0';
@@ -155,7 +157,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 			continue;
 		}
 
-		if (HereDoc.State == 1 && (ch == '\r' || ch == '\n')) {
+		if (HereDoc.State == 1 && isEOLChar(ch)) {
 			// Begin of here-doc (the line after the here-doc delimiter):
 			HereDoc.State = 2;
 			styler.ColourTo(i - 1, state);
@@ -163,16 +165,14 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				if (state == SCE_PL_HERE_DELIM) {
 					// Missing quote at end of string! We are stricter than perl.
 					state = SCE_PL_ERROR;
-				}
-				else {
+				} else {
 					switch (HereDoc.Quote) {
 						case '\'': state = SCE_PL_HERE_Q ; break;
 						case  '"': state = SCE_PL_HERE_QQ; break;
 						case  '`': state = SCE_PL_HERE_QX; break;
 					}
 				}
-			}
-			else {
+			} else {
 				switch (HereDoc.Quote) {
 					case '\\': state = SCE_PL_HERE_Q ; break;
 					default  : state = SCE_PL_HERE_QQ;
@@ -281,12 +281,13 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				quoteDown = '/';
 				quotes = 1;
 				quoteRep = 1;
-
 			} else if (ch == '<' && chNext == '<') {
 				styler.ColourTo(i - 1, state);
 				state = SCE_PL_HERE_DELIM;
 				HereDoc.State = 0;
-			} else if (ch == '=' && (chPrev == '\r' || chPrev == '\n') && isalpha(chNext)) {
+			} else if (ch == '='
+				&& isalpha(chNext)
+				&& ((startPos == 0) || isEOLChar(chPrev))) {
 				styler.ColourTo(i - 1, state);
 				state = SCE_PL_POD;
 				quotes = 0;
@@ -333,7 +334,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 			}
 		} else {
 			if (state == SCE_PL_COMMENTLINE) {
-				if (ch == '\r' || ch == '\n') {
+				if (isEOLChar(ch)) {
 					styler.ColourTo(i - 1, state);
 					state = SCE_PL_DEFAULT;
 				}
@@ -420,10 +421,10 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				}
 			} else if (HereDoc.State == 2) {
 			// state == SCE_PL_HERE_Q || state == SCE_PL_HERE_QQ || state == SCE_PL_HERE_QX
-				if ((chPrev == '\n' || chPrev == '\r') && isMatch(styler, lengthDoc, i, HereDoc.Delimiter)) {
+				if (isEOLChar(chPrev) && isMatch(styler, lengthDoc, i, HereDoc.Delimiter)) {
 					i += HereDoc.DelimiterLength;
 					chNext = styler.SafeGetCharAt(i);
-					if (chNext == '\n' || chNext == '\r') {
+					if (isEOLChar(chNext)) {
 						styler.ColourTo(i - 1, state);
 						state = SCE_PL_DEFAULT;
 						HereDoc.State = 0;
@@ -468,7 +469,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					chNext = styler.SafeGetCharAt(i + 1);
 				}
 			} else if (state == SCE_PL_POD) {
-				if (ch == '=' && (chPrev == '\r' || chPrev == '\n')) {
+				if (ch == '=' && isEOLChar(chPrev)) {
 					if (isMatch(styler, lengthDoc, i, "=cut")) {
 						styler.ColourTo(i - 1 + 4, state);
 						i += 4;
