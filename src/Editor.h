@@ -58,6 +58,10 @@ public:
 	int *positions;
 	char bracePreviousStyles[2];
 
+	// Hotspot support
+	int hsStart;
+	int hsEnd;
+
 	// Wrapped line support
 	int widthLine;
 	int lines;
@@ -248,6 +252,10 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int foldFlags;
 	ContractionState cs;
 
+	// Hotspot support
+	int hsStart;
+	int hsEnd;
+
 	// Wrapping support
 	enum { eWrapNone, eWrapWord } wrapState;
 	int wrapWidth;
@@ -321,7 +329,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	LineLayout *RetrieveLineLayout(int lineNumber);
 	void LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayout *ll,
 		int width=LineLayout::wrapWidthInfinite);
-	ColourAllocated TextBackground(ViewStyle &vsDraw, bool overrideBackground, ColourAllocated background, bool inSelection, int styleMain, int i, LineLayout *ll);
+	ColourAllocated TextBackground(ViewStyle &vsDraw, bool overrideBackground, ColourAllocated background, bool inSelection, bool inHotspot, int styleMain, int i, LineLayout *ll);
 	void DrawIndentGuide(Surface *surface, int lineVisible, int lineHeight, int start, PRectangle rcSegment, bool highlight);
 	void DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, LineLayout *ll,
 		int line, int lineEnd, int xStart, int subLine, int subLineStart,
@@ -368,6 +376,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void NotifySavePoint(bool isSavePoint);
 	void NotifyModifyAttempt();
 	virtual void NotifyDoubleClick(Point pt, bool shift);
+	void NotifyHotSpotClicked(int position, bool shift, bool ctrl, bool alt);
+	void NotifyHotSpotDoubleClicked(int position, bool shift, bool ctrl, bool alt);
 	void NotifyUpdateUI();
 	void NotifyPainted();
 	bool NotifyMarginClick(Point pt, bool shift, bool ctrl, bool alt);
@@ -439,6 +449,11 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void ToggleContraction(int line);
 	void EnsureLineVisible(int lineDoc, bool enforcePolicy);
 	int ReplaceTarget(bool replacePatterns, const char *text, int length=-1);
+
+	bool PositionIsHotspot(int position);
+	bool PointIsHotspot(Point pt);
+	void SetHotSpotRange(Point *pt);
+	void GetHotSpotRange(int& hsStart, int& hsEnd);
 
 	int CodePage() const;
 

@@ -615,6 +615,8 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 					DisplayCursor(Window::cursorReverseArrow);
 				} else if (PointInSelection(Point(pt.x, pt.y))) {
 					DisplayCursor(Window::cursorArrow);
+				} else if (PointIsHotspot(Point(pt.x, pt.y))) {
+					DisplayCursor(Window::cursorHand);
 				} else {
 					DisplayCursor(Window::cursorText);
 				}
@@ -667,7 +669,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		return DLGC_HASSETSEL | DLGC_WANTALLKEYS;
 
 	case WM_KILLFOCUS:
-		if (!IsChild(reinterpret_cast<HWND>(wMain.GetID()), 
+		if (!IsChild(reinterpret_cast<HWND>(wMain.GetID()),
 			reinterpret_cast<HWND>(wParam))) {
 			SetFocusState(false);
 		}
@@ -832,6 +834,12 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 	case SCI_GRABFOCUS:
 		::SetFocus(MainHWND());
 		break;
+
+#ifdef SCI_LEXER
+	case SCI_LOADLEXERLIBRARY:
+		//LexerManager::GetInstance()->Load(reinterpret_cast<const char*>(lParam));
+		break;
+#endif
 
 	default:
 		return ScintillaBase::WndProc(iMessage, wParam, lParam);
@@ -1993,8 +2001,8 @@ bool Scintilla_RegisterClasses(void *hInstance) {
 	bool result = ScintillaWin::Register(reinterpret_cast<HINSTANCE>(hInstance));
 #ifdef SCI_LEXER
 	Scintilla_LinkLexers();
-	LexerManager *lexMan = LexerManager::GetInstance();
-	lexMan->Load();
+	//LexerManager *lexMan = LexerManager::GetInstance();
+	//lexMan->Load();
 #endif
 	return result;
 }

@@ -1316,3 +1316,16 @@ int Document::WordPartRight(int pos) {
 	}
 	return pos;
 }
+
+int Document::ExtendStyleRange(int pos, int delta) {
+	int sStart = cb.StyleAt(pos);
+	if (delta < 0) {
+		while (pos > 0 && (cb.StyleAt(pos) == sStart))
+			pos--;
+		pos++;
+	} else {
+		while (pos < (Length()) && (cb.StyleAt(pos) == sStart))
+			pos++;
+	}
+	return pos;
+}

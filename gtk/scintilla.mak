@@ -38,7 +38,7 @@ RC=rc
 LD=link
 
 GTK_TOP= ../../win32gtk
-GTK_INCLUDES= -I $(GTK_TOP)/gtk+ -I $(GTK_TOP)/gtk+/gdk -I $(GTK_TOP)/glib
+GTK_INCLUDES= -I $(GTK_TOP)/gtk+ -I $(GTK_TOP)/gtk+/gdk -I $(GTK_TOP)/glib -I $(GTK_TOP)/glib/gmodule
 GTK_LIBS=$(GTK_TOP)/gtk+/gtk/gtk-1.3.lib \
 	 $(GTK_TOP)/gtk+/gdk/gdk-1.3.lib \
 	 $(GTK_TOP)/glib/gmodule/gmodule-1.3.lib \

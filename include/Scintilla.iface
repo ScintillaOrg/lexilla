@@ -412,6 +412,9 @@ set void StyleSetCase=2060(int style, int caseForce)
 # Set the character set of the font in a style.
 set void StyleSetCharacterSet=2066(int style, int characterSet)
 
+# Set a style to be a hotspot or not.
+set void StyleSetHotSpot=2409(int style, bool hotspot)
+
 # Set the foreground colour of the selection and whether to use this setting.
 fun void SetSelFore=2067(bool useSetting, colour fore)
 
@@ -1424,6 +1427,15 @@ set void SetPrintWrapMode=2406(int mode,)
 # Is printing line wrapped.
 get int GetPrintWrapMode=2407(,)
 
+# Set a fore colour for active hotspots.
+set void SetHotspotActiveFore=2410(bool useSetting, colour fore)
+
+# Set a back colour for active hotspots.
+set void SetHotspotActiveBack=2411(bool useSetting, colour back)
+
+# Enable / Disable underlining active hotspots.
+set void SetHotspotActiveUnderline=2412(bool underline,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 
@@ -1447,6 +1459,9 @@ set void SetKeyWords=4005(int keywordSet, string keyWords)
 
 # Set the lexing language of the document based on string name.
 set void SetLexerLanguage=4006(, string language)
+
+# Load a lexer library (dll / so)
+fun void LoadLexerLibrary=4007(, string path)
 
 # Notifications
 # Type of modification and the action which caused the modification.
@@ -2047,6 +2062,8 @@ evt void URIDropped=2015(string text)
 evt void DwellStart=2016(int position)
 evt void DwellEnd=2017(int position)
 evt void Zoom=2018(void)
+evt void HotSpotClick=2019(int modifiers, int position)
+evt void HotSpotDoubleClick=2020(int modifiers, int position)
 
 cat Deprecated
 

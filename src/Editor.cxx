@@ -364,7 +364,7 @@ Editor::Editor() {
 	modEventMask = SC_MODEVENTMASKALL;
 
 	pdoc = new Document();
-	pdoc ->AddRef();
+	pdoc->AddRef();
 	pdoc->AddWatcher(this, 0);
 
 	recordingMacro = false;
@@ -373,6 +373,9 @@ Editor::Editor() {
 	wrapState = eWrapNone;
 	wrapWidth = LineLayout::wrapWidthInfinite;
 	docLineLastWrapped = -1;
+
+	hsStart = -1;
+	hsEnd = -1;
 
 	llc.SetLevel(LineLayoutCache::llcCaret);
 }
@@ -496,7 +499,7 @@ const char *ControlCharacterString(unsigned char ch) {
 class AutoLineLayout {
 	LineLayoutCache &llc;
 	LineLayout *ll;
-	AutoLineLayout &operator=(const AutoLineLayout &) { return *this; }
+	AutoLineLayout &operator=(const AutoLineLayout &) { return * this; }
 public:
 	AutoLineLayout(LineLayoutCache &llc_, LineLayout *ll_) : llc(llc_), ll(ll_) {}
 	~AutoLineLayout() {
@@ -1845,7 +1848,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 }
 
 ColourAllocated Editor::TextBackground(ViewStyle &vsDraw, bool overrideBackground,
-                                       ColourAllocated background, bool inSelection, int styleMain, int i, LineLayout *ll) {
+                                       ColourAllocated background, bool inSelection, bool inHotspot, int styleMain, int i, LineLayout *ll) {
 	if (inSelection) {
 		if (vsDraw.selbackset) {
 			if (primarySelection)
@@ -1858,6 +1861,8 @@ ColourAllocated Editor::TextBackground(ViewStyle &vsDraw, bool overrideBackgroun
 		        (i >= ll->edgeColumn) &&
 		        !IsEOLChar(ll->chars[i]))
 			return vsDraw.edgecolour.allocated;
+		if (inHotspot)
+			return vsDraw.hotspotBackground.allocated;
 		if (overrideBackground)
 			return background;
 	}
@@ -1990,7 +1995,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 			if ((rcSegment.left <= rcLine.right) && (rcSegment.right >= rcLine.left)) {
 				int styleMain = ll->styles[i];
 				bool inSelection = (iDoc >= ll->selStart) && (iDoc < ll->selEnd) && (ll->selStart != ll->selEnd);
-				ColourAllocated textBack = TextBackground(vsDraw, overrideBackground, background, inSelection, styleMain, i, ll);
+				bool inHotspot = (ll->hsStart != -1) && (iDoc >= ll->hsStart) && (iDoc < ll->hsEnd);
+				ColourAllocated textBack = TextBackground(vsDraw, overrideBackground, background, inSelection, inHotspot, styleMain, i, ll);
 				if (ll->chars[i] == '\t') {
 					// Tab display
 					if (drawWhitespaceBackground &&
@@ -2050,11 +2056,17 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 				int styleMain = ll->styles[i];
 				ColourAllocated textFore = vsDraw.styles[styleMain].fore.allocated;
 				Font &textFont = vsDraw.styles[styleMain].font;
+				//hotspot foreground
+				if (ll->hsStart != -1 && iDoc >= ll->hsStart && iDoc < hsEnd) {
+					if (vsDraw.hotspotForegroundSet)
+						textFore = vsDraw.hotspotForeground.allocated;
+				}
 				bool inSelection = (iDoc >= ll->selStart) && (iDoc < ll->selEnd) && (ll->selStart != ll->selEnd);
 				if (inSelection && (vsDraw.selforeset)) {
 					textFore = vsDraw.selforeground.allocated;
 				}
-				ColourAllocated textBack = TextBackground(vsDraw, overrideBackground, background, inSelection, styleMain, i, ll);
+				bool inHotspot = (ll->hsStart != -1) && (iDoc >= ll->hsStart) && (iDoc < ll->hsEnd);
+				ColourAllocated textBack = TextBackground(vsDraw, overrideBackground, background, inSelection, inHotspot, styleMain, i, ll);
 				if (ll->chars[i] == '\t') {
 					// Tab display
 					if (!twoPhaseDraw) {
@@ -2161,7 +2173,15 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 						}
 					}
 				}
-				if (vsDraw.styles[styleMain].underline) {
+				if (ll->hsStart != -1 && vsDraw.hotspotUnderline && iDoc >= ll->hsStart && iDoc < ll->hsEnd ) {
+					PRectangle rcUL = rcSegment;
+					rcUL.top = rcUL.top + vsDraw.maxAscent + 1;
+					rcUL.bottom = rcUL.top + 1;
+					if (vsDraw.hotspotForegroundSet)
+						surface->FillRectangle(rcUL, vsDraw.hotspotForeground.allocated);
+					else
+						surface->FillRectangle(rcUL, textFore);
+				} else if (vsDraw.styles[styleMain].underline) {
 					PRectangle rcUL = rcSegment;
 					rcUL.top = rcUL.top + vsDraw.maxAscent + 1;
 					rcUL.bottom = rcUL.top + 1;
@@ -2213,7 +2233,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 
 void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 	if (!pixmapSelPattern->Initialised()) {
-		const int patternSize=8;
+		const int patternSize = 8;
 		pixmapSelPattern->InitPixMap(patternSize, patternSize, surfaceWindow, wMain.GetID());
 		// This complex procedure is to reproduce the checkerboard dithered pattern used by windows
 		// for scroll bars and Visual Studio for its selection margin. The colour of this pattern is half
@@ -2404,6 +2424,8 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 					ll->selEnd = -1;
 					ll->containsCaret = false;
 				}
+
+				GetHotSpotRange(ll->hsStart, ll->hsEnd);
 
 				PRectangle rcLine = rcClient;
 				rcLine.top = ypos;
@@ -3087,6 +3109,24 @@ void Editor::NotifyDoubleClick(Point, bool) {
 	NotifyParent(scn);
 }
 
+void Editor::NotifyHotSpotDoubleClicked(int position, bool shift, bool ctrl, bool alt) {
+	SCNotification scn;
+	scn.nmhdr.code = SCN_HOTSPOTDOUBLECLICK;
+	scn.position = position;
+	scn.modifiers = (shift ? SCI_SHIFT : 0) | (ctrl ? SCI_CTRL : 0) |
+	                (alt ? SCI_ALT : 0);
+	NotifyParent(scn);
+}
+
+void Editor::NotifyHotSpotClicked(int position, bool shift, bool ctrl, bool alt) {
+	SCNotification scn;
+	scn.nmhdr.code = SCN_HOTSPOTCLICK;
+	scn.position = position;
+	scn.modifiers = (shift ? SCI_SHIFT : 0) | (ctrl ? SCI_CTRL : 0) |
+	                (alt ? SCI_ALT : 0);
+	NotifyParent(scn);
+}
+
 void Editor::NotifyUpdateUI() {
 	SCNotification scn;
 	scn.nmhdr.code = SCN_UPDATEUI;
@@ -3710,7 +3750,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		ShowCaretAtCurrentPosition();
 		NotifyUpdateUI();
 		break;
-	case SCI_CANCEL:           	// Cancel any modes - handled in subclass
+	case SCI_CANCEL:            	// Cancel any modes - handled in subclass
 		// Also unselect text
 		CancelModes();
 		break;
@@ -3987,7 +4027,7 @@ void Editor::Indent(bool forwards) {
  * @return The position of the found text, -1 if not found.
  */
 long Editor::FindText(
-    uptr_t wParam,     	///< Search modes : @c SCFIND_MATCHCASE, @c SCFIND_WHOLEWORD,
+    uptr_t wParam,      	///< Search modes : @c SCFIND_MATCHCASE, @c SCFIND_WHOLEWORD,
     ///< @c SCFIND_WORDSTART, @c SCFIND_REGEXP or @c SCFIND_POSIX.
     sptr_t lParam) {			///< @c TextToFind structure: The text to search for in the given range.
 
@@ -4028,8 +4068,8 @@ void Editor::SearchAnchor() {
  * @return The position of the found text, -1 if not found.
  */
 long Editor::SearchText(
-    unsigned int iMessage,     	///< Accepts both @c SCI_SEARCHNEXT and @c SCI_SEARCHPREV.
-    uptr_t wParam,     	///< Search modes : @c SCFIND_MATCHCASE, @c SCFIND_WHOLEWORD,
+    unsigned int iMessage,      	///< Accepts both @c SCI_SEARCHNEXT and @c SCI_SEARCHPREV.
+    uptr_t wParam,      	///< Search modes : @c SCFIND_MATCHCASE, @c SCFIND_WHOLEWORD,
     ///< @c SCFIND_WORDSTART or @c SCFIND_REGEXP.
     sptr_t lParam) {			///< The text to search for.
 
@@ -4370,8 +4410,11 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 			SetEmptySelection(currentPos);
 		}
 		//Platform::DebugPrintf("Double click: %d - %d\n", anchor, currentPos);
-		if (doubleClick)
+		if (doubleClick) {
 			NotifyDoubleClick(pt, shift);
+			if (PositionIsHotspot(newPos))
+				NotifyHotSpotDoubleClicked(newPos, shift, ctrl, alt);
+		}
 	} else {	// Single click
 		if (inSelMargin) {
 			selType = selStream;
@@ -4401,6 +4444,9 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 			SetMouseCapture(true);
 			selectionType = selLine;
 		} else {
+			if (PositionIsHotspot(newPos)) {
+				NotifyHotSpotClicked(newPos, shift, ctrl, alt);
+			}
 			if (!shift) {
 				inDragDrop = PointInSelection(pt);
 			}
@@ -4425,6 +4471,50 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 	lastClickTime = curTime;
 	lastXChosen = pt.x;
 	ShowCaretAtCurrentPosition();
+}
+
+bool Editor::PositionIsHotspot(int position) {
+	return vs.styles[pdoc->StyleAt(position)].hotspot;
+}
+
+bool Editor::PointIsHotspot(Point pt) {
+	int pos = PositionFromLocation(pt);
+	return PositionIsHotspot(pos);
+}
+
+void Editor::SetHotSpotRange(Point *pt) {
+	if (pt) {
+		int pos = PositionFromLocation(*pt);
+
+		// If we don't limit this to word characters then the
+		// range can encompass more than the run range and then
+		// the underline will not be drawn properly.
+		int hsStart_ = pdoc->ExtendStyleRange(pos, -1);
+		int hsEnd_ = pdoc->ExtendStyleRange(pos, 1);
+
+		// Only invalidate the range if the hotspot range has changed...
+		if (hsStart_ != hsStart || hsEnd_ != hsEnd) {
+			hsStart = hsStart_;
+			hsEnd = hsEnd_;
+			InvalidateRange(hsStart, hsEnd);
+		}
+	} else {
+		if (hsStart != -1) {
+			int hsStart_ = hsStart;
+			int hsEnd_ = hsEnd;
+			hsStart = -1;
+			hsEnd = -1;
+			InvalidateRange(hsStart_, hsEnd_);
+		} else {
+			hsStart = -1;
+			hsEnd = -1;
+		}
+	}
+}
+
+void Editor::GetHotSpotRange(int& hsStart_, int& hsEnd_) {
+	hsStart_ = hsStart;
+	hsEnd_ = hsEnd;
 }
 
 void Editor::ButtonMove(Point pt) {
@@ -4471,7 +4561,7 @@ void Editor::ButtonMove(Point pt) {
 		if (pt.y > rcClient.bottom) {
 			int lineMove = cs.DisplayFromDoc(LineFromLocation(pt));
 			if (lineMove < 0) {
-				lineMove = cs.DisplayFromDoc(pdoc->LinesTotal()-1);
+				lineMove = cs.DisplayFromDoc(pdoc->LinesTotal() - 1);
 			}
 			ScrollTo(lineMove - LinesOnScreen() + 5);
 			Redraw();
@@ -4482,6 +4572,9 @@ void Editor::ButtonMove(Point pt) {
 		}
 		EnsureCaretVisible(false, false, true);
 
+		if (hsStart != -1 && !PositionIsHotspot(movePos))
+			SetHotSpotRange(NULL);
+
 	} else {
 		if (vs.fixedColumnWidth > 0) {	// There is a margin
 			if (PointInSelMargin(pt)) {
@@ -4490,10 +4583,15 @@ void Editor::ButtonMove(Point pt) {
 			}
 		}
 		// Display regular (drag) cursor over selection
-		if (PointInSelection(pt))
+		if (PointInSelection(pt)) {
 			DisplayCursor(Window::cursorArrow);
-		else
+		} else if (PointIsHotspot(pt)) {
+			DisplayCursor(Window::cursorHand);
+			SetHotSpotRange(&pt);
+		} else {
 			DisplayCursor(Window::cursorText);
+			SetHotSpotRange(NULL);
+		}
 	}
 
 }
@@ -4505,6 +4603,7 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 			DisplayCursor(Window::cursorReverseArrow);
 		} else {
 			DisplayCursor(Window::cursorText);
+			SetHotSpotRange(NULL);
 		}
 		xEndSelect = pt.x - vs.fixedColumnWidth + xOffset;
 		ptMouseLast = pt;
@@ -5381,7 +5480,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		pdoc->SetStyleFor(wParam, static_cast<char>(lParam));
 		break;
 
-	case SCI_SETSTYLINGEX:            // Specify a complete styling buffer
+	case SCI_SETSTYLINGEX:             // Specify a complete styling buffer
 		if (lParam == 0)
 			return 0;
 		pdoc->SetStyles(wParam, CharPtrFromSPtr(lParam));
@@ -5773,6 +5872,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			InvalidateStyleRedraw();
 		}
 		break;
+	case SCI_STYLESETHOTSPOT:
+		if (wParam <= STYLE_MAX) {
+			vs.styles[wParam].hotspot = lParam != 0;
+			InvalidateStyleRedraw();
+		}
+		break;
 
 	case SCI_STYLERESETDEFAULT:
 		vs.ResetDefaultStyle();
@@ -5881,7 +5986,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return SearchText(iMessage, wParam, lParam);
 
 #ifdef INCLUDE_DEPRECATED_FEATURES
-	case SCI_SETCARETPOLICY: 	// Deprecated
+	case SCI_SETCARETPOLICY:  	// Deprecated
 		caretXPolicy = caretYPolicy = wParam;
 		caretXSlop = caretYSlop = lParam;
 		break;
@@ -6205,6 +6310,23 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SETFOLDMARGINHICOLOUR:
 		vs.foldmarginHighlightColourSet = wParam != 0;
 		vs.foldmarginHighlightColour.desired = ColourDesired(lParam);
+		InvalidateStyleRedraw();
+		break;
+
+	case SCI_SETHOTSPOTACTIVEFORE:
+		vs.hotspotForegroundSet = wParam != 0;
+		vs.hotspotForeground.desired = ColourDesired(lParam);
+		InvalidateStyleRedraw();
+		break;
+
+	case SCI_SETHOTSPOTACTIVEBACK:
+		vs.hotspotBackgroundSet = wParam != 0;
+		vs.hotspotBackground.desired = ColourDesired(lParam);
+		InvalidateStyleRedraw();
+		break;
+
+	case SCI_SETHOTSPOTACTIVEUNDERLINE:
+		vs.hotspotUnderline = wParam != 0;
 		InvalidateStyleRedraw();
 		break;
 

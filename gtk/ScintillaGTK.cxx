@@ -46,6 +46,12 @@
 #include "gtk/gtksignal.h"
 #include "gtk/gtkmarshal.h"
 
+#ifdef SCI_LEXER
+#include <glib.h>
+#include <gmodule.h>
+#include "ExternalLexer.h"
+#endif
+
 #if GTK_MAJOR_VERSION < 2
 #define INTERNATIONAL_INPUT
 #endif
@@ -607,6 +613,12 @@ sptr_t ScintillaGTK::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 	case SCI_GETDIRECTPOINTER:
 		return reinterpret_cast<sptr_t>(this);
+
+#ifdef SCI_LEXER
+	case SCI_LOADLEXERLIBRARY:
+		LexerManager::GetInstance()->Load(reinterpret_cast<const char*>( wParam ));
+		break;
+#endif
 
 	default:
 		return ScintillaBase::WndProc(iMessage, wParam, lParam);

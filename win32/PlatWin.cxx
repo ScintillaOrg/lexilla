@@ -806,6 +806,9 @@ void Window::SetCursor(Cursor curs) {
 	case cursorVert:
 		::SetCursor(::LoadCursor(NULL,IDC_SIZENS));
 		break;
+	case cursorHand:
+		::SetCursor(::LoadCursor(NULL,IDC_HAND));
+		break;
 	case cursorReverseArrow: {
 			if (!hinstPlatformRes)
 				hinstPlatformRes = ::GetModuleHandle("Scintilla");

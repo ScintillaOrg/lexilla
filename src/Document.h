@@ -220,6 +220,7 @@ public:
 	bool IsWordPartSeparator(char ch);
 	int WordPartLeft(int pos);
 	int WordPartRight(int pos);
+	int ExtendStyleRange(int pos, int delta);
 
 private:
 	charClassification WordCharClass(unsigned char ch);
