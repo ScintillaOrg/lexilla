@@ -133,7 +133,6 @@ static void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, int 
 	lf.lfItalic = static_cast<BYTE>(italic ? 1 : 0);
 	lf.lfCharSet = static_cast<BYTE>(characterSet);
 	strncpy(lf.lfFaceName, faceName, sizeof(lf.lfFaceName));
-	lf.lfQuality = NONANTIALIASED_QUALITY;
 }
 
 /**
@@ -308,6 +307,7 @@ public:
 
 	void DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
 	void DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
+	void DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore);
 	void MeasureWidths(Font &font_, const char *s, int len, int *positions);
 	int WidthText(Font &font_, const char *s, int len);
 	int WidthChar(Font &font_, char ch);
@@ -545,6 +545,26 @@ void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const c
 			len = 65535;
 		::ExtTextOut(hdc, rc.left, ybase, ETO_OPAQUE | ETO_CLIPPED, &rcw, s, len, NULL);
 	}
+}
+
+void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len,
+	ColourAllocated fore) {
+	SetFont(font_);
+	::SetTextColor(hdc, fore.AsLong());
+	::SetBkMode(hdc, TRANSPARENT);
+	RECT rcw = RectFromPRectangle(rc);
+	if (unicodeMode) {
+		wchar_t tbuf[MAX_US_LEN];
+		int tlen = UCS2FromUTF8(s, len, tbuf, sizeof(tbuf)/sizeof(wchar_t)-1);
+		tbuf[tlen] = L'\0';
+		::ExtTextOutW(hdc, rc.left, ybase, 0, &rcw, tbuf, tlen, NULL);
+	} else {
+		// There appears to be a 16 bit string length limit in GDI
+		if (len > 65535)
+			len = 65535;
+		::ExtTextOut(hdc, rc.left, ybase, 0, &rcw, s, len, NULL);
+	}
+	::SetBkMode(hdc, OPAQUE);
 }
 
 int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
