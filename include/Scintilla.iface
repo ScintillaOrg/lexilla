@@ -1359,14 +1359,14 @@ val SCK_ADD=310
 val SCK_SUBTRACT=311
 val SCK_DIVIDE=312
 
-val KeyMod=SCMOD_
+enu KeyMod=SCMOD_
 val SCMOD_SHIFT=1
 val SCMOD_CTRL=2
 val SCMOD_ALT=4
 
 ################################################
 # For SciLexer.h
-val Lexer=SCLEX_
+enu Lexer=SCLEX_
 val SCLEX_CONTAINER=0
 val SCLEX_NULL=1
 val SCLEX_PYTHON=2
