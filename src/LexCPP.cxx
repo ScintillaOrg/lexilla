@@ -115,12 +115,17 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 				}
 			} else if (ch == '/' && chNext == '*') {
 				styler.ColourTo(i-1, state);
-				if (styler.SafeGetCharAt(i + 2) == '*')
+				if (styler.SafeGetCharAt(i + 2) == '*' ||
+					styler.SafeGetCharAt(i + 2) == '!')	// Support of Qt/Doxygen doc. style
 					state = SCE_C_COMMENTDOC;
 				else
 					state = SCE_C_COMMENT;
 			} else if (ch == '/' && chNext == '/') {
 				styler.ColourTo(i-1, state);
+				if (styler.SafeGetCharAt(i + 2) == '/' ||
+					styler.SafeGetCharAt(i + 2) == '!')	// Support of Qt/Doxygen doc. style
+					state = SCE_C_COMMENTLINEDOC;
+				else
 				state = SCE_C_COMMENTLINE;
 			} else if (ch == '/' && isOKBeforeRE(chPrevNonWhite)) {
 				styler.ColourTo(i-1, state);
@@ -201,7 +206,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 						state = SCE_C_DEFAULT;
 					}
 				}
-			} else if (state == SCE_C_COMMENTLINE) {
+			} else if (state == SCE_C_COMMENTLINE || state == SCE_C_COMMENTLINEDOC) {
 				if (ch == '\r' || ch == '\n') {
 					styler.ColourTo(i-1, state);
 					state = SCE_C_DEFAULT;
