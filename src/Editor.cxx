@@ -548,11 +548,11 @@ void Editor::MoveCaretInsideView() {
 	}
 }
 
+
 void Editor::EnsureCaretVisible(bool useMargin) {
 	//Platform::DebugPrintf("EnsureCaretVisible %d\n", xOffset);
 	PRectangle rcClient = GetTextRectangle();
-	int rcClientFullWidth = rcClient.Width();
-	bool forceHZero = false;
+	//int rcClientFullWidth = rcClient.Width();
 	int posCaret = currentPos;
 	if (posDrag >= 0)
 		posCaret = posDrag;
@@ -567,19 +567,14 @@ void Editor::EnsureCaretVisible(bool useMargin) {
 	if (!useMargin)
 		xMargin = 2;
 
-	// Ensure certain amount of text visible on both sides of caretSo move if caret just on edge
+	// Ensure certain amount of text visible on both sides of caret
+	// So move if caret just on edge
 	rcClient.left = rcClient.left + xMargin;
 	rcClient.right = rcClient.right - xMargin;
 
-	// If scrolled horizontally, check whether scrolling back to col 0 would
-	// still leave the caret on screen; do this if so since it's nicer
-	// to be able to see the start of lines
-	if (xOffset > 0 && pt.x >= 0 && pt.x <= rcClientFullWidth - xMargin) {
-		forceHZero = true;
-	}
-
-	if (!rcClient.Contains(pt) || !rcClient.Contains(ptBottomCaret) || (caretPolicy & CARET_STRICT) || (forceHZero)) {
-		//Platform::DebugPrintf("EnsureCaretVisible move, (%d,%d) (%d,%d)\n", pt.x, pt.y, rcClient.left, rcClient.right);
+	// Vertical positioning
+	if (!rcClient.Contains(pt) || !rcClient.Contains(ptBottomCaret) || (caretPolicy & CARET_STRICT)) {
+		//Platform::DebugPrintf("EnsureCaretVisible move, (%d,%d)(%d,%d)\n", pt.x, pt.y, rcClient.left, rcClient.right);
 		// It should be possible to scroll the window to show the caret,
 		// but this fails to remove the caret on GTK+
 		if (caretPolicy & CARET_SLOP) {
@@ -600,26 +595,26 @@ void Editor::EnsureCaretVisible(bool useMargin) {
 				Redraw();
 			}
 		}
-		int xOffsetNew = xOffset;
-		if (forceHZero) {
-			xOffsetNew = 0;
-		} else if (pt.x < rcClient.left) {
-			xOffsetNew = xOffset - (rcClient.left - pt.x);
-		} else if (pt.x >= rcClient.right) {
-			xOffsetNew = xOffset + (pt.x - rcClient.right);
-			int xOffsetEOL = xOffset + (ptEOL.x - rcClient.right) - xMargin + 2;
-			//Platform::DebugPrintf("Margin %d %d\n", xOffsetNew, xOffsetEOL);
-			// Ensure don't scroll out into empty space
-			if (xOffsetNew > xOffsetEOL)
-				xOffsetNew = xOffsetEOL;
-		}
-		if (xOffsetNew < 0)
-			xOffsetNew = 0;
-		if (xOffset != xOffsetNew) {
-			xOffset = xOffsetNew;
-			SetHorizontalScrollPos();
-			Redraw();
-		}
+	}
+
+	// Horizontal positioning
+	int xOffsetNew = xOffset;
+	if (pt.x < rcClient.left) {
+		xOffsetNew = xOffset - (rcClient.left - pt.x);
+	} else if (xOffset > 0 || pt.x >= rcClient.right) {
+		xOffsetNew = xOffset + (pt.x - rcClient.right);
+		int xOffsetEOL = xOffset + (ptEOL.x - rcClient.right) - xMargin + 2;
+		//Platform::DebugPrintf("Margin %d %d\n", xOffsetNew, xOffsetEOL);
+		// Ensure don't scroll out into empty space
+		if (xOffsetNew > xOffsetEOL)
+			xOffsetNew = xOffsetEOL;
+	}
+	if (xOffsetNew < 0)
+		xOffsetNew = 0;
+	if (xOffset != xOffsetNew) {
+		xOffset = xOffsetNew;
+		SetHorizontalScrollPos();
+		Redraw();
 	}
 }
 
@@ -1301,6 +1296,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		//g_timer_destroy(tim);
 
 
+
 		PRectangle rcBeyondEOF = rcClient;
 		rcBeyondEOF.left = vs.fixedColumnWidth;
 		rcBeyondEOF.right = rcBeyondEOF.right;
@@ -1497,6 +1493,7 @@ void Editor::SetScrollBarsTo(PRectangle) {
 		Redraw();
 	//Platform::DebugPrintf("end max = %d page = %d\n", nMax, nPage);
 }
+
 
 
 
@@ -1882,6 +1879,7 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 		}
 
 
+
 		SCNotification scn;
 		scn.nmhdr.code = SCN_MODIFIED;
 		scn.position = mh.position;
@@ -1964,6 +1962,7 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 		// Filter out all others (display changes, etc)
 	default:
 		//		printf("Filtered out %ld of macro recording\n", iMessage);
+
 
 
 		return ;
@@ -2171,7 +2170,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		ShowCaretAtCurrentPosition();
 		NotifyUpdateUI();
 		break;
-	case SCI_CANCEL:    	// Cancel any modes - handled in subclass
+	case SCI_CANCEL:     	// Cancel any modes - handled in subclass
 		// Also unselect text
 		CancelModes();
 		break;
@@ -2327,8 +2326,8 @@ void Editor::Indent(bool forwards) {
 				pdoc->InsertChar(currentPos, '\t');
 				SetEmptySelection(currentPos + 1);
 			} else {
-				int numSpaces = (pdoc->tabInChars) - 
-					(pdoc->GetColumn(currentPos) % (pdoc->tabInChars));
+				int numSpaces = (pdoc->tabInChars) -
+				                (pdoc->GetColumn(currentPos) % (pdoc->tabInChars));
 				if (numSpaces < 1)
 					numSpaces = pdoc->tabInChars;
 				for (int i = 0; i < numSpaces; i++) {
@@ -2337,8 +2336,8 @@ void Editor::Indent(bool forwards) {
 				SetEmptySelection(currentPos + numSpaces);
 			}
 		} else {
-			int newColumn = ((pdoc->GetColumn(currentPos)-1) / pdoc->tabInChars) * 
-				pdoc->tabInChars;
+			int newColumn = ((pdoc->GetColumn(currentPos) - 1) / pdoc->tabInChars) *
+			                pdoc->tabInChars;
 			if (newColumn < 0)
 				newColumn = 0;
 			int newPos = currentPos;
@@ -2538,6 +2537,7 @@ void Editor::StartDrag() {
 	//SetMouseCapture(true);
 	//DisplayCursor(Window::cursorArrow);
 }
+
 
 
 void Editor::DropAt(int position, const char *value, bool moving, bool rectangular) {
@@ -2749,6 +2749,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 				//lineAnchor = lineStart; // Keep the same anchor for ButtonMove
 			}
 
+
 			SetDragPosition(invalidPosition);
 			SetMouseCapture(true);
 			selectionType = selLine;
@@ -2813,6 +2814,7 @@ void Editor::ButtonMove(Point pt) {
 				DisplayCursor(Window::cursorReverseArrow);
 				return ; 	// No need to test for selection
 			}
+
 
 
 		}
@@ -3510,6 +3512,7 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 
 
 
+
 	case EM_SELECTIONTYPE:
 #ifdef SEL_EMPTY
 		if (currentPos == anchor)
@@ -3782,7 +3785,7 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 		pdoc->SetStyleFor(wParam, static_cast<char>(lParam));
 		break;
 
-	case SCI_SETSTYLINGEX:     // Specify a complete styling buffer
+	case SCI_SETSTYLINGEX:      // Specify a complete styling buffer
 		if (lParam == 0)
 			return 0;
 		pdoc->SetStyles(wParam, reinterpret_cast<char *>(lParam));
