@@ -33,6 +33,16 @@ public:
 
 /**
  */
+class Idler {
+public:
+	bool state;
+	IdlerID idlerID;
+
+	Idler();
+};
+
+/**
+ */
 class LineLayout {
 private:
 	friend class LineLayoutCache;
@@ -208,6 +218,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	Timer autoScrollTimer;
 	enum { autoScrollDelay = 200 };
 
+	Idler idler;
+
 	Point lastClick;
 	unsigned int lastClickTime;
 	int dwellDelay;
@@ -273,6 +285,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	enum { eWrapNone, eWrapWord } wrapState;
 	int wrapWidth;
 	int docLineLastWrapped;
+	int docLastLineToWrap;
 
 	Document *pdoc;
 
@@ -451,7 +464,9 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void ButtonUp(Point pt, unsigned int curTime, bool ctrl);
 
 	void Tick();
+	bool Idle();
 	virtual void SetTicking(bool on) = 0;
+	virtual void SetIdle(bool on) = 0;
 	virtual void SetMouseCapture(bool on) = 0;
 	virtual bool HaveMouseCapture() = 0;
 	void SetFocusState(bool focusState);

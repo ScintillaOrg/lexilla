@@ -35,6 +35,9 @@ active(false), on(false), period(500) {}
 Timer::Timer() :
 ticking(false), ticksToWait(0), tickerID(0) {}
 
+Idler::Idler() :
+state(false), idlerID(0) {}
+
 LineLayout::LineLayout(int maxLineLength_) :
 	lineStarts(0),
 	lenLineStarts(0),
@@ -375,6 +378,7 @@ Editor::Editor() {
 	wrapState = eWrapNone;
 	wrapWidth = LineLayout::wrapWidthInfinite;
 	docLineLastWrapped = -1;
+	docLastLineToWrap = -1;
 
 	hsStart = -1;
 	hsEnd = -1;
@@ -387,6 +391,7 @@ Editor::~Editor() {
 	pdoc->Release();
 	pdoc = 0;
 	DropGraphics();
+	/* 	SetIdle(false) must be called in a platform independent way */
 	delete pixmapLine;
 	delete pixmapSelMargin;
 	delete pixmapSelPattern;
@@ -395,6 +400,7 @@ Editor::~Editor() {
 }
 
 void Editor::Finalise() {
+	SetIdle(false);
 	CancelModes();
 }
 
