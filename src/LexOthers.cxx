@@ -361,6 +361,7 @@ static void ColouriseErrorListLine(
     //		unsigned int startLine,
     unsigned int endPos,
     Accessor &styler) {
+	const int unRecognized = 99;
 	if (lineBuffer[0] == '>') {
 		// Command or return status
 		styler.ColourTo(endPos, SCE_ERR_CMD);
@@ -425,9 +426,13 @@ static void ColouriseErrorListLine(
 			if ((i+1) < lengthLine)
 				chNext = lineBuffer[i+1];
 			if (state == 0) {
-				if ((ch == ':') && Is0To9(chNext)) {
+				if (ch == ':') {
 					// May be GCC
-					state = 1;
+					if ((chNext != '\\') && (chNext != '/')) {
+						// This check is not completely accurate as may be on
+						// GTK+ with a file name that includes ':'.
+						state = 1;
+					}
 				} else if ((ch == '(') && Is1To9(chNext)) {
 					// May be Microsoft
 					// Check againt '0' often removes phone numbers
@@ -436,36 +441,36 @@ static void ColouriseErrorListLine(
 					// May be CTags
 					state = 20;
 				}
-			} else if ((state == 1) && Is1To9(ch)) {
-				state = 2;
+			} else if (state == 1) {
+				state = Is1To9(ch) ? 2 : unRecognized;
 			} else if (state == 2) {
 				if (ch == ':') {
 					state = 3;	// :9.*: is GCC
 					break;
 				} else if (!Is0To9(ch)) {
-					state = 99;
+					state = unRecognized;
 				}
 			} else if (state == 10) {
-				state = Is0To9(ch) ? 11 : 99;
+				state = Is0To9(ch) ? 11 : unRecognized;
 			} else if (state == 11) {
 				if (ch == ',') {
 					state = 14;
 				} else if (ch == ')') {
 					state = 12;
 				} else if ((ch != ' ') && !Is0To9(ch)) {
-					state = 99;
+					state = unRecognized;
 				}
 			} else if (state == 12) {
 				if ((ch == ' ') && (chNext == ':'))
 					state = 13;
 				else
-					state = 99;
+					state = unRecognized;
 			} else if (state == 14) {
 				if (ch == ')') {
 					state = 15;
 					break;
 				} else if ((ch != ' ') && !Is0To9(ch)) {
-					state = 99;
+					state = unRecognized;
 				}
 			} else if (state == 20) {
 				if ((lineBuffer[i-1] == '\t') &&
