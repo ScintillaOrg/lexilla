@@ -1,5 +1,9 @@
-// LexLua.cxx - lexer for Lua language
-// Written by Paul Winwood
+// Scintilla source code edit control
+/** @file LexLua.cxx
+ ** Lexer for Lua language.
+ **
+ ** Written by Paul Winwood.
+ **/
 
 #include <stdlib.h>
 #include <string.h>

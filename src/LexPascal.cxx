@@ -1,11 +1,14 @@
-// SciTE - Scintilla based Text Editor
-// LexPascal.cxx - lexer for Pascal
+// Scintilla source code edit control
+/** @file LexPascal.cxx
+ ** Lexer for Pascal.
+ ** Written by Laurent le Tynevez
+ **/
 
-#include <stdlib.h> 
-#include <string.h> 
-#include <ctype.h> 
-#include <stdio.h> 
-#include <stdarg.h> 
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <stdarg.h>
 
 #include "Platform.h"
 
@@ -40,12 +43,12 @@ static int classifyWordPascal(unsigned int start, unsigned int end, WordList &ke
 	return lev;
 }
 
-static void ColourisePascalDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[], 
+static void ColourisePascalDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
 	Accessor &styler) {
 	WordList &keywords = *keywordlists[0];
-	
+
 	styler.StartAt(startPos);
-	
+
 	bool fold = styler.GetPropertyInt("fold");
 	int lineCurrent = styler.GetLine(startPos);
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
@@ -100,8 +103,8 @@ static void ColourisePascalDoc(unsigned int startPos, int length, int initStyle,
 			} else if (ch == '{' && chNext != '$' && chNext != '&') {
 				styler.ColourTo(i-1, state);
 				state = SCE_C_COMMENT;
-			} else if (ch == '(' && chNext == '*' 
-						&& styler.SafeGetCharAt(i + 2) != '$' 
+			} else if (ch == '(' && chNext == '*'
+						&& styler.SafeGetCharAt(i + 2) != '$'
 						&& styler.SafeGetCharAt(i + 2) != '&') {
 				styler.ColourTo(i-1, state);
 				state = SCE_C_COMMENTDOC;
@@ -120,7 +123,7 @@ static void ColourisePascalDoc(unsigned int startPos, int length, int initStyle,
 			} else if (isoperator(ch)) {
 				styler.ColourTo(i-1, state);
 				styler.ColourTo(i, SCE_C_OPERATOR);
-			
+
 			}
 		} else if (state == SCE_C_IDENTIFIER) {
 			if (!iswordchar(ch)) {
@@ -129,8 +132,8 @@ static void ColourisePascalDoc(unsigned int startPos, int length, int initStyle,
 				chNext = styler.SafeGetCharAt(i + 1);
 				if (ch == '{' && chNext != '$' && chNext != '&') {
 					state = SCE_C_COMMENT;
-				} else if (ch == '(' && chNext == '*' 
-						&& styler.SafeGetCharAt(i + 2) != '$' 
+				} else if (ch == '(' && chNext == '*'
+						&& styler.SafeGetCharAt(i + 2) != '$'
 						&& styler.SafeGetCharAt(i + 2) != '&') {
 					styler.ColourTo(i-1, state);
 					state = SCE_C_COMMENTDOC;
@@ -164,7 +167,7 @@ static void ColourisePascalDoc(unsigned int startPos, int length, int initStyle,
 			} else if (state == SCE_C_COMMENTDOC) {
 				if (ch == ')' && chPrev == '*') {
 					if (((i > styler.GetStartSegment() + 2) || (
-						(initStyle == SCE_C_COMMENTDOC) && 
+						(initStyle == SCE_C_COMMENTDOC) &&
 						(styler.GetStartSegment() == static_cast<unsigned int>(startPos))))) {
 							styler.ColourTo(i, state);
 							state = SCE_C_DEFAULT;
@@ -214,7 +217,7 @@ static void ColourisePascalDoc(unsigned int startPos, int length, int initStyle,
 		int flagsNext = styler.LevelAt(lineCurrent) & ~SC_FOLDLEVELNUMBERMASK;
 		//styler.SetLevel(lineCurrent, levelCurrent | flagsNext);
 		styler.SetLevel(lineCurrent, levelPrev | flagsNext);
-		
+
 	}
 }
 

@@ -1,4 +1,4 @@
-// SciTE - Scintilla based Text Editor
+// Scintilla source code edit control
 /** @file LexCPP.cxx
  ** Lexer for C++, C, Java, and Javascript.
  **/
@@ -32,7 +32,7 @@ static bool classifyWordCpp(unsigned int start, unsigned int end, WordList &keyw
 	else {
 		if (keywords.InList(s)) {
 			chAttr = SCE_C_WORD;
-			wordIsUUID = strcmp(s, "uuid") == 0; 
+			wordIsUUID = strcmp(s, "uuid") == 0;
 		}
 	}
 	styler.ColourTo(end, chAttr);
@@ -43,13 +43,13 @@ static bool isOKBeforeRE(char ch) {
 	return (ch == '(') || (ch == '=') || (ch == ',');
 }
 
-static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[], 
+static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
 	Accessor &styler) {
-	
+
 	WordList &keywords = *keywordlists[0];
-	
+
 	styler.StartAt(startPos);
-	
+
 	bool fold = styler.GetPropertyInt("fold");
 	bool foldComment = styler.GetPropertyInt("fold.comment");
 	bool stylingWithinPreprocessor = styler.GetPropertyInt("styling.within.preprocessor");
@@ -198,7 +198,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			} else if (state == SCE_C_COMMENT) {
 				if (ch == '/' && chPrev == '*') {
 					if (((i > styler.GetStartSegment() + 2) || (
-						(initStyle == SCE_C_COMMENT) && 
+						(initStyle == SCE_C_COMMENT) &&
 						(styler.GetStartSegment() == static_cast<unsigned int>(startPos))))) {
 						styler.ColourTo(i, state);
 						state = SCE_C_DEFAULT;
@@ -209,7 +209,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			} else if (state == SCE_C_COMMENTDOC) {
 				if (ch == '/' && chPrev == '*') {
 					if (((i > styler.GetStartSegment() + 2) || (
-						(initStyle == SCE_C_COMMENTDOC) && 
+						(initStyle == SCE_C_COMMENTDOC) &&
 						(styler.GetStartSegment() == static_cast<unsigned int>(startPos))))) {
 						styler.ColourTo(i, state);
 						state = SCE_C_DEFAULT;
@@ -293,7 +293,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 		int flagsNext = styler.LevelAt(lineCurrent) & ~SC_FOLDLEVELNUMBERMASK;
 		//styler.SetLevel(lineCurrent, levelCurrent | flagsNext);
 		styler.SetLevel(lineCurrent, levelPrev | flagsNext);
-		
+
 	}
 }
 

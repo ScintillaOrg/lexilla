@@ -18,7 +18,7 @@
 Point Point::FromLong(long lpoint) {
 	return Point(static_cast<short>(LOWORD(lpoint)), static_cast<short>(HIWORD(lpoint)));
 }
-	
+
 static RECT RectFromPRectangle(PRectangle prc) {
 	RECT rc = {prc.left, prc.top, prc.right, prc.bottom};
 	return rc;
@@ -80,7 +80,7 @@ void Palette::WantFind(ColourPair &cp, bool want) {
 			if (entries[i].desired == cp.desired)
 				return;
 		}
-	
+
 		if (used < numEntries) {
 			entries[used].desired = cp.desired;
 			entries[used].allocated = cp.desired;
@@ -112,9 +112,9 @@ void Palette::Allocate(Window &) {
 			logpal->palPalEntry[iPal].peRed   = static_cast<BYTE>(desired.GetRed());
 			logpal->palPalEntry[iPal].peGreen = static_cast<BYTE>(desired.GetGreen());
 			logpal->palPalEntry[iPal].peBlue  = static_cast<BYTE>(desired.GetBlue());
-			entries[iPal].allocated = 
+			entries[iPal].allocated =
 				PALETTERGB(desired.GetRed(), desired.GetGreen(), desired.GetBlue());
-			// PC_NOCOLLAPSE means exact colours allocated even when in background this means other windows 
+			// PC_NOCOLLAPSE means exact colours allocated even when in background this means other windows
 			// are less likely to get their colours and also flashes more when switching windows
 			logpal->palPalEntry[iPal].peFlags = PC_NOCOLLAPSE;
 			// 0 allows approximate colours when in background, yielding moe colours to other windows
@@ -141,7 +141,7 @@ void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, int size, b
  * same then they may still be different.
  */
 int HashFont(const char *faceName, int characterSet, int size, bool bold, bool italic) {
-    return 
+    return
         size ^
         (characterSet << 10) ^
         (bold ? 0x10000000 : 0) ^
@@ -158,7 +158,7 @@ class FontCached : Font {
 	~FontCached() {}
 	bool SameAs(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_);
 	virtual void Release();
-		
+
 	static FontCached *first;
 public:
 	static FontID FindOrCreate(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_);
@@ -167,7 +167,7 @@ public:
 
 FontCached *FontCached::first = 0;
 
-FontCached::FontCached(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_) : 
+FontCached::FontCached(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_) :
     next(0), usage(0), hash(0) {
     SetLogFont(lf, faceName_, characterSet_, size_, bold_, italic_);
     hash = HashFont(faceName_, characterSet_, size_, bold_, italic_);
@@ -176,7 +176,7 @@ FontCached::FontCached(const char *faceName_, int characterSet_, int size_, bool
 }
 
 bool FontCached::SameAs(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_) {
-	return 
+	return
         (lf.lfHeight == -(abs(size_))) &&
 		(lf.lfWeight == (bold_ ? FW_BOLD : FW_NORMAL)) &&
 		(lf.lfItalic == static_cast<BYTE>(italic_ ? 1 : 0)) &&
@@ -193,7 +193,7 @@ void FontCached::Release() {
 FontID FontCached::FindOrCreate(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_) {
     int hashFind = HashFont(faceName_, characterSet_, size_, bold_, italic_);
 	for (FontCached *cur=first; cur; cur=cur->next) {
-        if ((cur->hash == hashFind) && 
+        if ((cur->hash == hashFind) &&
             cur->SameAs(faceName_, characterSet_, size_, bold_, italic_)) {
 			cur->usage++;
 			return cur->id;
@@ -238,7 +238,7 @@ Font::~Font() {
 void Font::Create(const char *faceName, int characterSet, int size, bool bold, bool italic) {
 #ifndef FONTS_CACHED
 	Release();
-	
+
 	LOGFONT lf;
     SetLogFont(lf, faceName, characterSet, size, bold, italic);
     id = ::CreateFontIndirect(&lf);
@@ -261,9 +261,9 @@ void Font::Release() {
 Surface::Surface() :
 	unicodeMode(false),
 	hdc(0), 	hdcOwned(false),
-	pen(0), 	penOld(0), 
-	brush(0), brushOld(0), 
-	font(0), 	fontOld(0), 
+	pen(0), 	penOld(0),
+	brush(0), brushOld(0),
+	font(0), 	fontOld(0),
 	bitmap(0), bitmapOld(0),
 	paletteOld(0) {
 }
@@ -434,7 +434,7 @@ void Surface::Ellipse(PRectangle rc, Colour fore, Colour back) {
 }
 
 void Surface::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
-	::BitBlt(hdc, rc.left, rc.top, rc.Width(), rc.Height(), 
+	::BitBlt(hdc, rc.left, rc.top, rc.Width(), rc.Height(),
 		surfaceSource.hdc, from.x, from.y, SRCCOPY);
 }
 
@@ -498,7 +498,7 @@ void Surface::MeasureWidths(Font &font_, const char *s, int len, int *positions)
 			// Likely to have failed because on Windows 9x where function not available
 			// So measure the character widths by measuring each initial substring
 			// Turns a linear operation into a qudratic but seems fast enough on test files
-			for (int widthSS=0; widthSS < tlen; widthSS++) { 
+			for (int widthSS=0; widthSS < tlen; widthSS++) {
 				::GetTextExtentPoint32W(hdc, tbuf, widthSS+1, &sz);
 				poses[widthSS] = sz.cx;
 			}
@@ -591,7 +591,7 @@ int Surface::SetPalette(Palette *pal, bool inBackGround) {
 	}
 	return changes;
 }
-		
+
 void Surface::SetClip(PRectangle rc) {
 	::IntersectClipRect(hdc, rc.left, rc.top, rc.right, rc.bottom);
 }
@@ -652,7 +652,7 @@ void Window::InvalidateRectangle(PRectangle rc) {
 }
 
 void Window::SetFont(Font &font) {
-	SendMessage(WM_SETFONT, 
+	SendMessage(WM_SETFONT,
 		reinterpret_cast<WPARAM>(font.GetID()), 0);
 }
 
@@ -718,7 +718,7 @@ void ListBox::Create(Window &parent, int ctrlID) {
 	id = ::CreateWindowEx(
                 WS_EX_WINDOWEDGE, "listbox", "",
        		WS_CHILD | WS_THICKFRAME | WS_VSCROLL | LBS_SORT | LBS_NOTIFY,
-       		100,100, 150,80, parent.GetID(), reinterpret_cast<HMENU>(ctrlID), 
+       		100,100, 150,80, parent.GetID(), reinterpret_cast<HMENU>(ctrlID),
 		parent.GetInstance(), 0);
 }
 
@@ -776,7 +776,7 @@ int ListBox::GetSelection() {
 }
 
 int ListBox::Find(const char *prefix) {
-	return SendMessage(LB_FINDSTRING, static_cast<WPARAM>(-1), 
+	return SendMessage(LB_FINDSTRING, static_cast<WPARAM>(-1),
         reinterpret_cast<LPARAM>(prefix));
 }
 
@@ -896,7 +896,7 @@ void Platform::Assert(const char *c, const char *file, int line) {
 	char buffer[2000];
 	sprintf(buffer, "Assertion [%s] failed at %s %d", c, file, line);
 	if (assertionPopUps) {
-		int idButton = ::MessageBox(0, buffer, "Assertion failure", 
+		int idButton = ::MessageBox(0, buffer, "Assertion failure",
 			MB_ABORTRETRYIGNORE|MB_ICONHAND|MB_SETFOREGROUND|MB_TASKMODAL);
 		if (idButton == IDRETRY) {
 			::DebugBreak();

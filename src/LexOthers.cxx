@@ -1,4 +1,4 @@
-// SciTE - Scintilla based Text Editor
+// Scintilla source code edit control
 /** @file LexOthers.cxx
  ** Lexers for batch files, diff results, properties files, make files and error lists.
  ** Also lexer for LaTeX documents.

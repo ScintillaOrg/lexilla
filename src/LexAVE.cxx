@@ -2,14 +2,14 @@
 /** @file LexAVE.cxx
  ** Lexer for Avenue.
  **/
-// Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
-#include <stdlib.h> 
-#include <string.h> 
-#include <ctype.h> 
-#include <stdio.h> 
-#include <stdarg.h> 
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <stdarg.h>
 
 #include "Platform.h"
 
@@ -19,13 +19,13 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-static void ColouriseAveDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[], 
+static void ColouriseAveDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
 	Accessor &styler) {
-	
+
 	WordList &keywords = *keywordlists[0];
-	
+
 	styler.StartAt(startPos);
-	
+
 	bool fold = styler.GetPropertyInt("fold");
 	int lineCurrent = styler.GetLine(startPos);
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
@@ -82,7 +82,7 @@ static void ColouriseAveDoc(unsigned int startPos, int length, int initStyle, Wo
 				state = SCE_AVE_STRING;
 			} else if (ch == '#') {
 				styler.ColourTo(i-1, state);
-				state = SCE_AVE_ENUM; 
+				state = SCE_AVE_ENUM;
 			} else if (isoperator(ch) ) {
 				styler.ColourTo(i-1, state);
 				styler.ColourTo(i, SCE_AVE_OPERATOR);
@@ -115,7 +115,7 @@ static void ColouriseAveDoc(unsigned int startPos, int length, int initStyle, Wo
 				styler.ColourTo(i-1, SCE_AVE_STRINGEOL);
 				state = SCE_AVE_STRINGEOL;
 			}
-		} 
+		}
 		if ((state == SCE_AVE_IDENTIFIER)) {
 			if (!iswordchar(ch) || ch == '.' ) {
 				char s[100];
@@ -131,39 +131,39 @@ static void ColouriseAveDoc(unsigned int startPos, int length, int initStyle, Wo
 				if (isdigit(s[0]))
 					chAttr = SCE_AVE_NUMBER;
 				else {
-					if ((strcmp(s, "for") == 0) || (strcmp(s, "if") == 0) || (strcmp(s, "while") == 0))	
+					if ((strcmp(s, "for") == 0) || (strcmp(s, "if") == 0) || (strcmp(s, "while") == 0))
 					{
 						levelCurrent +=1;
 						chAttr = SCE_AVE_STATEMENT;
 					}
 
-					if (strcmp(s, "end") == 0)	
+					if (strcmp(s, "end") == 0)
 					{
 						levelCurrent -=1;
 						chAttr = SCE_AVE_STATEMENT;
 					}
-						
+
 					if ( (strcmp(s, "then") == 0) ||  (strcmp(s, "else") == 0)       || (strcmp(s, "break") == 0) ||
-						(strcmp(s, "each") == 0) || 
+						(strcmp(s, "each") == 0) ||
 						(strcmp(s, "exit") == 0) ||  (strcmp(s, "continue") == 0) || (strcmp(s, "return") == 0) ||
-						(strcmp(s, "by") == 0)   ||  (strcmp(s, "in") == 0)          || (strcmp(s, "elseif") == 0))	
+						(strcmp(s, "by") == 0)   ||  (strcmp(s, "in") == 0)          || (strcmp(s, "elseif") == 0))
 					{
 						chAttr = SCE_AVE_STATEMENT;
 					}
 
-					if ((strcmp(s, "av") == 0) || (strcmp(s, "self") == 0))	
+					if ((strcmp(s, "av") == 0) || (strcmp(s, "self") == 0))
 					{
 						chAttr = SCE_AVE_KEYWORD;
 					}
-							
-					if (keywords.InList(s)) 
+
+					if (keywords.InList(s))
 					{
-						chAttr = SCE_AVE_WORD;						
+						chAttr = SCE_AVE_WORD;
 					}
 				}
 				styler.ColourTo(end, chAttr);
 				state = SCE_AVE_DEFAULT;
-				
+
 				if (ch == '\'') {
 					state = SCE_AVE_COMMENT;
 				} else if (ch == '\"') {
@@ -172,7 +172,7 @@ static void ColouriseAveDoc(unsigned int startPos, int length, int initStyle, Wo
 					styler.ColourTo(i, SCE_AVE_OPERATOR);
 				}
 			}
-		} 
+		}
 
 	}
 	styler.ColourTo(lengthDoc - 1, state);
@@ -181,7 +181,7 @@ static void ColouriseAveDoc(unsigned int startPos, int length, int initStyle, Wo
 	if (fold) {
 		int flagsNext = styler.LevelAt(lineCurrent) & ~SC_FOLDLEVELNUMBERMASK;
 		styler.SetLevel(lineCurrent, levelPrev | flagsNext);
-		
+
 	}
 }
 

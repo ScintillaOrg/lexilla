@@ -1,15 +1,15 @@
-// SciTE - Scintilla based Text Editor
+// Scintilla source code edit control
 /** @file LexPython.cxx
  ** Lexer for Python.
  **/
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
-#include <stdlib.h> 
-#include <string.h> 
-#include <ctype.h> 
-#include <stdio.h> 
-#include <stdarg.h> 
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <stdarg.h>
 
 #include "Platform.h"
 
@@ -139,7 +139,7 @@ static int GetPyStringState(Accessor &styler, int i, int *nextIndex) {
 	}
 }
 
-static void ColourisePyDoc(unsigned int startPos, int length, int initStyle, 
+static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 						   WordList *keywordlists[], Accessor &styler) {
 
 	int lengthDoc = startPos + length;
@@ -152,16 +152,16 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 			startPos = styler.LineStart(lineCurrent);
 			if (startPos == 0)
 				initStyle = SCE_P_DEFAULT;
-			else 
+			else
 				initStyle = styler.StyleAt(startPos-1);
 		}
 	}
-	
+
 	// Python uses a different mask because bad indentation is marked by oring with 32
 	styler.StartAt(startPos, 127);
-	
+
 	WordList &keywords = *keywordlists[0];
-	
+
 	bool fold = styler.GetPropertyInt("fold");
 	int whingeLevel = styler.GetPropertyInt("tab.timmy.whinge.level");
 	char prevWord[200];
@@ -173,7 +173,7 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 	int state = initStyle & 31;
 
 	int indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, IsPyComment);
-	if ((state == SCE_P_TRIPLE) || (state == SCE_P_TRIPLEDOUBLE)) 
+	if ((state == SCE_P_TRIPLE) || (state == SCE_P_TRIPLEDOUBLE))
 		indentCurrent |= SC_FOLDLEVELWHITEFLAG;
 
 	int nextIndex = 0;
@@ -183,7 +183,7 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 	styler.StartSegment(startPos);
 	bool atStartLine = true;
 	for (int i = startPos; i < lengthDoc; i++) {
-	
+
 		if (atStartLine) {
 			char chBad = static_cast<char>(64);
 			char chGood = static_cast<char>(0);
@@ -200,11 +200,11 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 			styler.SetFlags(chFlags, static_cast<char>(state));
 			atStartLine = false;
 		}
-		
+
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 		char chNext2 = styler.SafeGetCharAt(i + 2);
-		
+
 		if ((ch == '\r' && chNext != '\n') || (ch == '\n') || (i == lengthDoc)) {
 			if ((state == SCE_P_DEFAULT) || (state == SCE_P_TRIPLE) || (state == SCE_P_TRIPLEDOUBLE)) {
 				// Perform colourisation of white space and triple quoted strings at end of each line to allow
@@ -214,7 +214,7 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 
 			int lev = indentCurrent;
 			int indentNext = styler.IndentAmount(lineCurrent + 1, &spaceFlags, IsPyComment);
-			if ((state == SCE_P_TRIPLE) || (state == SCE_P_TRIPLEDOUBLE)) 
+			if ((state == SCE_P_TRIPLE) || (state == SCE_P_TRIPLEDOUBLE))
 				indentNext |= SC_FOLDLEVELWHITEFLAG;
 			if (!(indentCurrent & SC_FOLDLEVELWHITEFLAG)) {
 				// Only non whitespace lines can be headers

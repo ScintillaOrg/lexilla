@@ -1,4 +1,4 @@
-// SciTE - Scintilla based Text Editor
+// Scintilla source code edit control
 /** @file LexHTML.cxx
  ** Lexer for HTML.
  **/
@@ -449,7 +449,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			case SCE_H_SINGLESTRING:
 			case SCE_HJ_COMMENT:
 			case SCE_HJ_COMMENTDOC:
-			// SCE_HJ_COMMENTLINE removed as this is a common thing done to hide 
+			// SCE_HJ_COMMENTLINE removed as this is a common thing done to hide
 			// the end of script marker from some JS interpreters.
 			//case SCE_HJ_COMMENTLINE:
 			case SCE_HJ_DOUBLESTRING:

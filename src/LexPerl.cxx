@@ -1,4 +1,4 @@
-// SciTE - Scintilla based Text Editor
+// Scintilla source code edit control
 /** @file LexPerl.cxx
  ** Lexer for subset of Perl.
  **/
