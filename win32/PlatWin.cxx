@@ -147,7 +147,7 @@ FontCached *FontCached::first = 0;
 
 FontCached::FontCached(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_) :
 	next(0), usage(0), hash(0) {
-	SetLogFont(lf, faceName_, characterSet_, size_, bold_, italic_);
+	::SetLogFont(lf, faceName_, characterSet_, size_, bold_, italic_);
 	hash = HashFont(faceName_, characterSet_, size_, bold_, italic_);
 	id = ::CreateFontIndirect(&lf);
 	usage = 1;
@@ -217,7 +217,7 @@ void Font::Create(const char *faceName, int characterSet, int size, bool bold, b
 	Release();
 #ifndef FONTS_CACHED
 	LOGFONT lf;
-	SetLogFont(lf, faceName, characterSet, size, bold, italic);
+	::SetLogFont(lf, faceName, characterSet, size, bold, italic);
 	id = ::CreateFontIndirect(&lf);
 #else
 	id = FontCached::FindOrCreate(faceName, characterSet, size, bold, italic);
@@ -740,11 +740,11 @@ void Window::SetCursor(Cursor curs) {
 		break;
 	case cursorReverseArrow: {
 			if (!hinstPlatformRes)
-				hinstPlatformRes = GetModuleHandle("Scintilla");
+				hinstPlatformRes = ::GetModuleHandle("Scintilla");
 			if (!hinstPlatformRes)
-				hinstPlatformRes = GetModuleHandle("SciLexer");
+				hinstPlatformRes = ::GetModuleHandle("SciLexer");
 			if (!hinstPlatformRes)
-				hinstPlatformRes = GetModuleHandle(NULL);
+				hinstPlatformRes = ::GetModuleHandle(NULL);
 			::SetCursor(::LoadCursor(hinstPlatformRes, MAKEINTRESOURCE(IDC_MARGIN)));
 		}
 		break;
@@ -798,7 +798,7 @@ PRectangle ListBox::GetDesiredRect() {
 		width = 12;
 	rcDesired.right = rcDesired.left + width * (aveCharWidth+aveCharWidth/3);
 	if (Length() > rows)
-		rcDesired.right = rcDesired.right + GetSystemMetrics(SM_CXVSCROLL);
+		rcDesired.right = rcDesired.right + ::GetSystemMetrics(SM_CXVSCROLL);
 	return rcDesired;
 }
 
