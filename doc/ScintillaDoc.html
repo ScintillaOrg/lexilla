@@ -2057,6 +2057,8 @@ struct TextToFind {
      <a class="message" href="#SCI_SETMARGINRIGHT">SCI_SETMARGINRIGHT(&lt;unused&gt;, int
     pixels)</a><br />
      <a class="message" href="#SCI_GETMARGINRIGHT">SCI_GETMARGINRIGHT</a><br />
+     <a class="message" href="#SCI_SETFOLDMARGINCOLOUR">SCI_SETFOLDMARGINCOLOUR(bool useSetting, int colour)</a><br />
+     <a class="message" href="#SCI_SETFOLDMARGINHICOLOUR">SCI_SETFOLDMARGINHICOLOUR(bool useSetting, int colour)</a><br />
     </code>
 
     <p><b id="SCI_SETMARGINTYPEN">SCI_SETMARGINTYPEN(int margin, int iType)</b><br />
@@ -2111,12 +2113,18 @@ struct TextToFind {
     selection margins which make it easy to select ranges of lines. By default, all margins are
     insensitive.</p>
 
-    <p><b id="SCI_SETMARGINLEFT">SCI_SETMARGINLEFT(&lt;unused&gt;, int pixels)</b><br />
+<b id="SCI_SETMARGINLEFT">SCI_SETMARGINLEFT(&lt;unused&gt;, int pixels)</b><br />
      <b id="SCI_GETMARGINLEFT">SCI_GETMARGINLEFT</b><br />
      <b id="SCI_SETMARGINRIGHT">SCI_SETMARGINRIGHT(&lt;unused&gt;, int pixels)</b><br />
      <b id="SCI_GETMARGINRIGHT">SCI_GETMARGINRIGHT</b><br />
      These messages set and get the width of the blank margin on both sides of the text in pixels.
     The default is to one pixel on each side.</p>
+
+    <p><b id="SCI_SETFOLDMARGINCOLOUR">SCI_SETFOLDMARGINCOLOUR(bool useSetting, int colour)</b><br />
+     <b id="SCI_SETFOLDMARGINHICOLOUR">SCI_SETFOLDMARGINHICOLOUR(bool useSetting, int colour)</b><br />
+     These messages allow changing the colour of the fold margin and fold margin highlight.
+     On windows the fold margin colour defaults to ::GetSysColor(COLOR_3DFACE) and the fold margin highlight
+     colour to ::GetSysColor(COLOR_3DHIGHLIGHT).</p>
 
     <h2 id="OtherSettings">Other settings</h2>
     <code><a class="message" href="#SCI_SETUSEPALETTE">SCI_SETUSEPALETTE(bool
