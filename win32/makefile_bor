@@ -15,7 +15,7 @@ LEXCOMPONENT = ..\bin\SciLexer.dll
 
 LDFLAGS = import32 cw32mt
 INCLUDEDIRS=-I../include -I../src
-CXXFLAGS = -P -tWM -w -RT- -x- -v
+CXXFLAGS = -P -O1 -tWM -w -w-prc -RT- -x- -v
 
 .cxx.obj:
 	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c $*.cxx
