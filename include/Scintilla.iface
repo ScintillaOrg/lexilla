@@ -3,7 +3,7 @@
 ## This file defines the interface to Scintilla
 
 ## A line starting with ## is a pure comment and should be stripped by readers.
-## A line statring with #!! is for future shbang use
+## A line starting with #!! is for future shbang use
 ## A line starting with # followed by a space is a documentation comment and refers 
 ## to the next feature definition.
 
@@ -99,7 +99,7 @@ fun int GetStyledText=2015(, textrange tr)
 # Are there any redoable actions in the undo history.
 fun bool CanRedo=2016(,)
 
-# Retrieve the line number at which a paticular marker is located
+# Retrieve the line number at which a particular marker is located
 fun int MarkerLineFromHandle=2017(int handle,)
 
 # Delete a marker.
@@ -117,7 +117,7 @@ fun void GotoLine=2024(int line,)
 # Set caret to a position and ensure it is visible.
 fun void GotoPos=2025(position pos,)
 
-# Set the selection anchr to a position. The anchor is the opposite
+# Set the selection anchor to a position. The anchor is the opposite
 # end of the selection from the caret.
 fun void SetAnchor=2026(position posAnchor,)
 
@@ -234,7 +234,7 @@ set void SetMarginMaskN=2244(int margin, int mask)
 # Retrieve the marker mask of a margin.
 get int GetMarginMaskN=2245(int margin,)
 
-# Make a margin sensititve or insensitive to mouse clicks.
+# Make a margin sensitive or insensitive to mouse clicks.
 set void SetMarginSensitiveN=2246(int margin, bool sensitive)
 
 # Retrieve the mouse click sensitivity of a margin.
@@ -400,7 +400,7 @@ set void SetLineIndentation=2126(int line, int indentSize)
 # Retrieve the number of columns that a line is indented.
 get int GetLineIndentation=2127(int line,)
 
-# Retrieve the position before the first non indentatin character on a line.
+# Retrieve the position before the first non indentation character on a line.
 get position GetLineIndentPosition=2128(int line,)
 
 # Show or hide the horizontal scroll bar
@@ -449,7 +449,7 @@ get int GetFoldLevel=2223(int line,)
 # Find the last child line of a header line.
 get int GetLastChild=2224(int line,)
 
-# Find the parent line of a child line line.
+# Find the parent line of a child line.
 get int GetFoldParent=2225(int line,)
 
 # Make a range of lines visible.
@@ -596,7 +596,7 @@ fun void LineCut=2337(,)
 # Delete the line containing the caret.
 fun void LineDelete=2338(,)
 
-# Switch the currrent line with the previous.
+# Switch the current line with the previous.
 fun void LineTranspose=2339(,)
 
 # Transform the selection to lower case.
@@ -612,7 +612,7 @@ fun void LineScrollDown=2342(,)
 fun void LineScrollUp=2343(,)
 
 # How many characters are on a line, not including end of line characters.
-fun int LineLength=2350(ine line,)
+fun int LineLength=2350(int line,)
 
 # Highlight the characters at two positions.
 fun void BraceHighlight=2351(position pos1,position pos2)
@@ -620,7 +620,7 @@ fun void BraceHighlight=2351(position pos1,position pos2)
 # Highlight the character at a position indicating there is no matching brace.
 fun void BraceBadLight=2352(position pos,)
 
-# Fnd the position of a matching brace or INVALID_POSITION if no match.
+# Find the position of a matching brace or INVALID_POSITION if no match.
 fun position BraceMatch=2353(position pos,)
 
 # Are the end of line characters visible.
@@ -708,10 +708,10 @@ set void SetLexer=4001(int lexer,)
 # Retrieve the lexing language of the document. 
 get int GetLexer=4002(,)
 
-# Colourise a segment of teh document using the current lexing language.
+# Colourise a segment of the document using the current lexing language.
 fun void Colourise=4003(position start, position end)
 
-# Setup a value that may be used by a lexer for some optional feature.
+# Set up a value that may be used by a lexer for some optional feature.
 set void SetProperty=4004(string key, string value)
 
 # Set up the key words used by the lexer.
@@ -910,7 +910,7 @@ fun void EM_EmptyUndoBuffer=205(,)
 # Retrieve the selection range.
 fun void EM_ExGetSel=1076(,charrange cr)
 
-# Retriev ethe line number of a position in the document.
+# Retrieve the line number of a position in the document.
 get int EM_ExLineFromChar=1078(,position pos)
 
 # Select a range of text.

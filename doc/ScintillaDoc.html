@@ -415,7 +415,7 @@ SCI_SETUSETABS(bool usetabs)
     <p>
        SCI_SETTABWIDTH sets the size of a tab as a multiple of the size of a space character in the style of the
       first style definition. SCI_SETINDENT sets the size of indentation in terms of characters. 
-      SCI_SETUSETABS determines whether indentation should be created out of a micture of tabs 
+      SCI_SETUSETABS determines whether indentation should be created out of a mixture of tabs 
       and space or be based purely on spaces.
     </p>
 <pre>
@@ -425,7 +425,7 @@ SCI_GETLINEINDENTPOSITION(int line)
 </pre>
     <p>
      The amount of indentation on a line can be discovered and set with SCI_GETLINEINDENTATION and 
-     SCI_SETLINEINDENTATION. The indnetation is measuered in character columns which correspond 
+     SCI_SETLINEINDENTATION. The indentation is measured in character columns which correspond 
      to the width of space characters. 
      SCI_GETLINEINDENTPOSITION returns the position at the end of indentation of a line.
     </p>
@@ -502,7 +502,7 @@ SCI_MARKERDELETEHANDLE(int handle)
        Markers appear in the selection margin to the left of the text. They are small geometric
       symbols often used in debuggers to indicate breakpoints and the current line. If the
       selection margin is set to zero width then the background colour of the whole line is changed
-      instead. There may be upto 32 marker symbols defined and each line has a set of these markers
+      instead. There may be up to 32 marker symbols defined and each line has a set of these markers
       associated with it. The markers are drawn in the order of their numbers. Markers try to move
       with their text by tracking where the start of their line moves. When a line is deleted, its
       markers are combined, by an or operation, with the markers of the previous line. The
@@ -762,7 +762,7 @@ SCI_ENSUREVISIBLE(int line)
        manipulated with SCI_SETFOLDEXPANDED and 
        SCI_GETFOLDEXPANDED. Using SCI_SETFOLDEXPANDED does not
        show or hide any lines but only changes a state flag and the margin markers 
-       that show the contractrion state. SCI_TOGGLEFOLD performs the expansion 
+       that show the contraction state. SCI_TOGGLEFOLD performs the expansion 
        or contraction of a fold point in the manner normally expected. 
     </p>
     <p>
@@ -781,7 +781,7 @@ SCI_GETZOOM
 </pre>
     <p>
     The text can be made larger and smaller by using SCI_ZOOMIN and SCI_ZOOMOUT.
-    The zoom level can be retreived by SCI_GETZOOM and set by SCI_SETZOOM. The zoom factors 
+    The zoom level can be retrieved by SCI_GETZOOM and set by SCI_SETZOOM. The zoom factors 
     may range from -10 to + 20 and is added to each styles point size. The calculated point size never 
     goes below 2.
     </p>
@@ -801,7 +801,7 @@ SCI_SETEDGECOLOUR(int colour)
       vertical line can be displayed at the specified column number (EDGE_LINE) or characters after
       that column can be displayed with a specified background colour (EDGE_BACKGROUND). The
       vertical line works well for monospaced fonts but not for proportional fonts which should use
-      EDGE_BACKGROUND. The defaullt is to not have any form of long line marking (EDGE_NONE).
+      EDGE_BACKGROUND. The default is to not have any form of long line marking (EDGE_NONE).
     </p>
     <h3>
     	Lexer
@@ -816,7 +816,7 @@ SCI_SETKEYWORDS(int keywordset, char *keywordlist)
     <p>
       If the SciLexer version of Scintilla is used, then lexing support for some programming languages
       is included. A particular lexer may be chosen from the SCLEX* enumeration and it is invoked
-      automatically to dtyle the coument as required. 
+      automatically to style the document as required. 
       If the lexer is set to SCLEX_CONTAINER then the container is notified to perform styling 
       as is the case with the standard Scintilla.DLL version. Styling may be requested for a range
       of the document by using SCI_COLOURISE.
@@ -824,7 +824,7 @@ SCI_SETKEYWORDS(int keywordset, char *keywordlist)
     <p>
       Settings can be communicated to the lexers using SCI_SETPROPERTY. Currently the "fold"
       property is defined for the SCLEX_PYTHON, SCLEX_CPP, and SCLEX_SQL lexers to 
-      set the fold stucture if set to "1". SCLEX_PYTHON understands "tab.timmy.whinge.level"
+      set the fold structure if set to "1". SCLEX_PYTHON understands "tab.timmy.whinge.level"
       as a setting that determines how to indicate bad indentation. Many languages style a set of keywords
       distinctly from other words. Some languages, such as HTML may contain embedded languages,
       VBScript and Javascript are common for HTML. SCI_SETKEYWORDS specifies the keywords
@@ -972,21 +972,15 @@ EM_GETIMEOPTIONS EM_SETIMEOPTIONS
 EM_GETOPTIONS EM_SETOPTIONS
 EM_GETPUNCTUATION EM_SETPUNCTUATION
 EM_GETTHUMB
-</pre>
-    <p>
-       Scintilla tries to be a superset of the standard windows Edit and Richedit controls wherever
-      that makes sense. As it is not intended for use in a word processor, some edit messages can
-      not be sensibly handled. Unsupported messages have no effect.
-    </p>
-<pre>
 EM_GETEVENTMASK
 EM_SETEVENTMASK
 EM_DISPLAYBAND
 EM_SETTARGETDEVICE
 </pre>
     <p>
-       To support printing better and control the notifications fired, these messages should be
-      supported but are not yet.
+       Scintilla tries to be a superset of the standard windows Edit and Richedit controls wherever
+      that makes sense. As it is not intended for use in a word processor, some edit messages can
+      not be sensibly handled. Unsupported messages have no effect.
     </p>
     <h3>
        Building Scintilla on Windows
