@@ -3520,7 +3520,10 @@ LRESULT Editor::WndProc(UINT iMessage, WPARAM wParam, LPARAM lParam) {
 		caretSlop = lParam;
 		break;
 
-#ifdef INCLUDE_DEPRECATED_FEATURES
+	case SCI_LINESONSCREEN:
+		return LinesOnScreen();
+
+  #ifdef INCLUDE_DEPRECATED_FEATURES
 	case SCI_SETFORE:
 		vs.styles[STYLE_DEFAULT].fore.desired = Colour(wParam);
 		InvalidateStyleRedraw();

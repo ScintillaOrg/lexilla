@@ -311,6 +311,7 @@ extern "C" {
                            // OR this with CARET_SLOP to reposition whenever outside slop border
 
 #define SCI_SETCARETPOLICY SCI_START + 369
+#define SCI_LINESONSCREEN SCI_START + 370
 
 // GTK+ Specific
 #define SCI_GRABFOCUS SCI_START + 400

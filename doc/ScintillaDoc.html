@@ -166,6 +166,7 @@ SCI_SETANCHOR(int position)
 SCI_GETCURLINE(int textlen, char *text)
 SCI_LINELENGTH(int line)
 SCI_SETCARETPOLICY(int policy)
+SCI_LINESONSCREEN
 </pre>
     <p>
        Scintilla maintains a selection which stretches between two points, the anchor and the
@@ -245,6 +246,8 @@ SCI_GETENDSTYLED
 SCI_STARTSTYLING(int position, int mask)
 SCI_SETSTYLING(int length, int style)
 SCI_SETSTYLINGEX(int length, stylesequence *s)
+SCI_SETLINESTATE(int line, int value)
+SCI_GETLINESTATE(int line)
 </pre>
     <p>
        Scintilla keeps a record of the last character that is likely to be styled correctly. This
@@ -252,6 +255,7 @@ SCI_SETSTYLINGEX(int length, stylesequence *s)
       to the text of the document before it. Before drawing text, this position is checked to see
       if any styling is needed and a notification message sent to the container if so. The
       container can send SCI_GETENDSTYLED to work out where it needs to start styling.
+      Scintilla will always ask to style whole lines.
     </p>
     <p>
        To perform the actual styling, SCI_STARTSTYLING is sent with the position to start at and a
@@ -261,7 +265,12 @@ SCI_SETSTYLINGEX(int length, stylesequence *s)
       syntax errors and using indicators to show where these are. After SCI_STARTSTYLING, multiple
       SCI_SETSTYLING messages are sent for each lexical entity to be styled.
     </p>
-    <h3>
+    <p>
+      As well as the 8 bits of lexical state stored for each character there is also an integer stored 
+      for each line. This can be used for longer lived parse states such as what the current scripting
+      language is in an ASP page.
+    </p>
+       <h3>
        Style Definition
     </h3>
 <pre>

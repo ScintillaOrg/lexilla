@@ -10,6 +10,12 @@
     <meta name="Description"
     content="www.scintilla.org is the home of the Scintilla editing component and SciTE text editor application." />
     <meta name="Date.Modified" content="20000227" />
+    <script>
+   	function IsRemote() {
+		var loc = '' + window.location;
+		return loc.indexOf('http:') != -1;
+   	}
+   </script>
     <title>
       Scintilla and SciTE
     </title>
@@ -65,8 +71,13 @@
         <td>
           <font size="4"> <a href="SciTEImage.html">Screenshot</a>&nbsp;&nbsp; <a
           href="ScintillaDownload.html">Download</a>&nbsp;&nbsp; <a href="ScintillaDoc.html">
-          Documentation</a>&nbsp;&nbsp; <a href="ScintillaToDo.html">Bugs</a>&nbsp;&nbsp; <a
-          href="SciTEDoc.html">SciTE</a>&nbsp;&nbsp; <a href="ScintillaHistory.html">
+          Documentation</a>&nbsp;&nbsp; <a href="ScintillaToDo.html">Bugs</a>&nbsp;&nbsp; 
+<script type="text/javascript" language="JavaScript"><!--
+if (IsRemote()) {
+    document.write('<a href="SciTEDoc.html">SciTE</a>&nbsp;&nbsp; ');
+}
+//--></script>
+	  <a href="ScintillaHistory.html">
           History</a>&nbsp;&nbsp; <a href="ScintillaRelated.html">Related</a>&nbsp;&nbsp;</font>
         </td>
       </tr>
@@ -130,11 +141,9 @@
     </p>
 <script type="text/javascript" language="JavaScript">
 <!--
-//document.write(window.location);
 document.write('There is a <a href="https://sourceforge.net/project/?group_id=2439">Scintilla project page<\/a>');
 document.write(' hosted on ');
-var loc = '' + window.location
-if (loc.indexOf('http:') != -1) {
+if (IsRemote()) {
     document.write('<a href="http://sourceforge.net">');
     document.write('<img src="http://sourceforge.net/sflogo.php?group_id=2439&type=1" width="88" height="31" border="0" /><\/a> ');
 } else {
