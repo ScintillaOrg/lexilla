@@ -170,6 +170,88 @@
       </li>
     </ul>
     <h3>
+       <a href="http://prdownloads.sourceforge.net/scintilla/scite159.zip?download">Release 1.59</a>
+    </h3>
+    <ul>
+	<li>
+	Released on 19 February 2004.
+	</li>
+	<li>
+	SciTE Options and Language menus reduced in length by commenting
+	out some languages. Languages can be enabled by editing the global
+	properties file.
+	</li>
+	<li>
+	Verilog language supported.
+	</li>
+	<li>
+	Lexer for Microsoft dialect of SQL. SciTE properties file available from extras page.
+	</li>
+	<li>
+	Perl lexer disambiguates '/' better.
+	</li>
+	<li>
+	NSIS lexer improved with a lexical class for numbers, option for ignoring case
+	of keywords, and folds only occurring when folding keyword first on line.
+	</li>
+	<li>
+	PowerBasic lexer improved with styles for constants and assembler and
+	folding improvements.
+	</li>
+	<li>
+	On GTK+, input method support only invoked for Asian languages and not
+	European languages as the old European keyboard code works better.
+	</li>
+	<li>
+	Scintilla can be requested to allocate a certain amount and so avoid repeated
+	reallocations and memory inefficiencies. SciTE uses this and so should require
+	less memory.
+	</li>
+	<li>
+	SciTE's "toggle current fold" works when invoked on child line as well as
+	fold header.
+	</li>
+	<li>
+	SciTE output pane scrolling can be set to not scroll back to start after
+	completion of command.
+	</li>
+	<li>
+	SciTE has a $(SessionPath) property.
+	</li>
+	<li>
+	SciTE on Windows can use VK_* codes for keys in user.shortcuts.
+	</li>
+	<li>
+	Stack overwrite bug fixed in SciTE's command to move to the end of a
+	preprocessor conditional.
+	</li>
+	<li>
+	Bug fixed where vertical selection appeared to select a different set of characters
+	then would be used by, for example, a copy.
+	</li>
+	<li>
+	SciTE memory leak fixed in fold state remembering.
+	</li>
+	<li>
+	Bug fixed where changing the style of some text outside the
+	standard StyleNeeded notification would not be visible.
+	</li>
+	<li>
+	On GTK+ 2 g_iconv is used in preference to iconv, as it is provided by GTK+
+	so should avoid problems finding the iconv library.
+	</li>
+	<li>
+	On GTK+ fixed a style reference count bug.
+	</li>
+	<li>
+	Memory corruption bug fixed with GetSelText.
+	</li>
+	<li>
+	On Windows Scintilla deletes memory on WM_NCDESTROY rather than
+	the earlier WM_DESTROY to avoid problems when the window is subclassed.
+	</li>
+    </ul>
+    <h3>
        <a href="http://prdownloads.sourceforge.net/scintilla/scite158.zip?download">Release 1.58</a>
     </h3>
     <ul>
