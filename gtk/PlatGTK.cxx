@@ -26,6 +26,9 @@
 #pragma warning(disable: 4505)
 #endif
 
+// X has a 16 bit coordinate space, so stop drawing here to avoid wrapping
+static const int maxCoordinate = 32000;
+
 static GdkFont *PFont(Font &f)  {
 	return reinterpret_cast<GdkFont *>(f.GetID());
 }
@@ -379,7 +382,7 @@ void SurfaceImpl::RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAlloc
 
 void SurfaceImpl::FillRectangle(PRectangle rc, ColourAllocated back) {
 	PenColour(back);
-	if (drawable && (rc.left < 32000)) {	// Protect against out of range
+	if (drawable && (rc.left < maxCoordinate)) {	// Protect against out of range
 		gdk_draw_rectangle(drawable, gc, 1,
 		                   rc.left, rc.top,
 		                   rc.right - rc.left, rc.bottom - rc.top);
@@ -460,29 +463,42 @@ void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const ch
                        ColourAllocated fore, ColourAllocated back) {
 	FillRectangle(rc, back);
 	PenColour(fore);
-	if (gc && drawable)
-		gdk_draw_text(drawable, PFont(font_), gc, rc.left, ybase, s, len);
+	if (gc && drawable) {
+		// Draw text as a series of segments to avoid limitations in X servers
+		// TODO: make this DBCS and UTF-8 safe by not splitting multibyte characters
+		const int segmentLength = 1000;
+		int x = rc.left;
+		while ((len > 0) && (x < maxCoordinate)) {
+			int lenDraw = Platform::Minimum(len, segmentLength);
+			gdk_draw_text(drawable, PFont(font_), gc, x, ybase, s, lenDraw);
+			len -= lenDraw;
+			if (len > 0) {
+				x += gdk_text_width(PFont(font_), s, lenDraw);
+			}
+			s += lenDraw;
+		}
+	}
 }
 
 // On GTK+, exactly same as DrawTextNoClip
 void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len,
                               ColourAllocated fore, ColourAllocated back) {
-	FillRectangle(rc, back);
-	PenColour(fore);
-	if (gc && drawable)
-		gdk_draw_text(drawable, PFont(font_), gc, rc.left, ybase, s, len);
+	DrawTextNoClip(rc, font_, ybase, s, len, fore, back);
 }
 
 void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positions) {
-	int totalWidth = 0;
-	for (int i = 0;i < len;i++) {
-		if (font_.GetID()) {
-			int width = gdk_char_width(PFont(font_), s[i]);
+	if (font_.GetID()) {
+		int totalWidth = 0;
+		GdkFont *gf = PFont(font_);
+		for (int i = 0; i < len; i++) {
+			int width = gdk_char_width(gf, s[i]);
 			totalWidth += width;
-		} else {
-			totalWidth++;
+			positions[i] = totalWidth;
 		}
-		positions[i] = totalWidth;
+	} else {
+		for (int i = 0; i < len; i++) {
+			positions[i] = i + 1;
+		}
 	}
 }
 
