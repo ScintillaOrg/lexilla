@@ -36,13 +36,13 @@ static void ColouriseBatchLine(
 	unsigned int i = 0;
 	unsigned int state = SCE_BAT_DEFAULT;
 
-	while (isspacechar(lineBuffer[i]) && (i < lengthLine)) {	// Skip initial spaces
+	while ((i < lengthLine) && isspacechar(lineBuffer[i])) {	// Skip initial spaces
 		i++;
 	}
 	if (lineBuffer[i] == '@') {	// Hide command (ECHO OFF)
 		styler.ColourTo(startLine + i, SCE_BAT_HIDE);
 		i++;
-		while (isspacechar(lineBuffer[i]) && (i < lengthLine)) {	// Skip next spaces
+		while ((i < lengthLine) && isspacechar(lineBuffer[i])) {	// Skip next spaces
 			i++;
 		}
 	}
@@ -141,9 +141,6 @@ static void ColouriseBatchDoc(
 		lineBuffer[linePos++] = styler[i];
 		if (AtEOL(styler, i) || (linePos >= sizeof(lineBuffer) - 1)) {
 			// End of line (or of line buffer) met, colourise it
-			if (styler[i + 1] == '\n') {
-				lineBuffer[linePos++] = styler[++i];
-			}
 			lineBuffer[linePos] = '\0';
 			ColouriseBatchLine(lineBuffer, linePos, startLine, i, keywords, styler);
 			linePos = 0;
@@ -269,7 +266,7 @@ static void ColouriseMakeLine(
 	unsigned int state = SCE_MAKE_DEFAULT;
 	bool bSpecial = false;
 	// Skip initial spaces
-	while (isspacechar(lineBuffer[i]) && (i < lengthLine)) {
+	while ((i < lengthLine) && isspacechar(lineBuffer[i])) {
 		i++;
 	}
 	if (lineBuffer[i] == '#') {	// Comment
@@ -364,15 +361,15 @@ static void ColouriseErrorListLine(
 		// Borland warning message
 		styler.ColourTo(endPos, SCE_ERR_BORLAND);
 	} else if (strstr(lineBuffer, "at line " ) &&
-	           strstr(lineBuffer, "at line " ) < lineBuffer + lengthLine &&
+	           (strstr(lineBuffer, "at line " ) < (lineBuffer + lengthLine)) &&
 	           strstr(lineBuffer, "file ") &&
-	           strstr(lineBuffer, "file ") < lineBuffer + lengthLine) {
+	           (strstr(lineBuffer, "file ") < (lineBuffer + lengthLine))) {
 		// Lua error message
 		styler.ColourTo(endPos, SCE_ERR_LUA);
 	} else if (strstr(lineBuffer, " at " ) &&
-	           strstr(lineBuffer, " at " ) < lineBuffer + lengthLine &&
+	           (strstr(lineBuffer, " at " ) < (lineBuffer + lengthLine)) &&
 	           strstr(lineBuffer, " line ") &&
-	           strstr(lineBuffer, " line ") < lineBuffer + lengthLine) {
+	           (strstr(lineBuffer, " line ") < (lineBuffer + lengthLine))) {
 		// perl error message
 		styler.ColourTo(endPos, SCE_ERR_PERL);
 	} else if ((memcmp(lineBuffer, "   at ", 6) == 0) &&
@@ -385,26 +382,26 @@ static void ColouriseErrorListLine(
 		// Look for <filename>(line,pos)message
 		int state = 0;
 		for (unsigned int i = 0; i < lengthLine; i++) {
-			if (state == 0 && lineBuffer[i] == ':' && isdigit(lineBuffer[i + 1])) {
+			if ((state == 0) && (lineBuffer[i] == ':') && isdigit(lineBuffer[i + 1])) {
 				state = 1;
-			} else if (state == 0 && lineBuffer[i] == '(') {
+			} else if ((state == 0) && (lineBuffer[i] == '(')) {
 				state = 10;
-			} else if (state == 1 && isdigit(lineBuffer[i])) {
+			} else if ((state == 1) && isdigit(lineBuffer[i])) {
 				state = 2;
-			} else if (state == 2 && lineBuffer[i] == ':') {
+			} else if ((state == 2) && (lineBuffer[i] == ':')) {
 				state = 3;
 				break;
-			} else if (state == 2 && !isdigit(lineBuffer[i])) {
+			} else if ((state == 2) && !isdigit(lineBuffer[i])) {
 				state = 99;
-			} else if (state == 10 && isdigit(lineBuffer[i])) {
+			} else if ((state == 10) && isdigit(lineBuffer[i])) {
 				state = 11;
-			} else if (state == 11 && lineBuffer[i] == ',') {
+			} else if ((state == 11) && (lineBuffer[i] == ',')) {
 				state = 14;
-			} else if (state == 11 && lineBuffer[i] == ')') {
+			} else if ((state == 11) && (lineBuffer[i] == ')')) {
 				state = 12;
-			} else if (state == 12 && lineBuffer[i] == ':') {
+			} else if ((state == 12) && (lineBuffer[i] == ':')) {
 				state = 13;
-			} else if (state == 14 && lineBuffer[i] == ')') {
+			} else if ((state == 14) && (lineBuffer[i] == ')')) {
 				state = 15;
 				break;
 			} else if (((state == 11) || (state == 14)) && !((lineBuffer[i] == ' ') || isdigit(lineBuffer[i]))) {
