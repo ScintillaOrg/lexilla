@@ -635,7 +635,7 @@ void Editor::EnsureCaretVisible(bool useMargin, bool vert, bool horiz) {
 		int xOffsetNew = xOffset;
 		if (pt.x < rcClient.left) {
 			xOffsetNew = xOffset - (offsetLeft - pt.x);
-		} else if (((caretPolicy & CARET_XEVEN) && ((xOffset > 0) && useMargin)) || pt.x >= rcClient.right) {
+		} else if ((!(caretPolicy & CARET_XEVEN) && ((xOffset > 0) && useMargin)) || pt.x >= rcClient.right) {
 			xOffsetNew = xOffset + (pt.x - offsetRight);
 			int xOffsetEOL = xOffset + (ptEOL.x - offsetRight) - xMargin + 2;
 			//Platform::DebugPrintf("Margin %d %d\n", xOffsetNew, xOffsetEOL);
