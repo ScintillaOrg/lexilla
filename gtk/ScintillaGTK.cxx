@@ -156,7 +156,7 @@ private:
 #if GTK_MAJOR_VERSION >= 2
 	static gint ScrollOver(GtkWidget *widget, GdkEventMotion *event);
 #endif
-	static gint Expose(GtkWidget *widget, GdkEventExpose *ose, ScintillaGTK *sciThis);
+	gint Expose(GtkWidget *widget, GdkEventExpose *ose);
 	static gint ExposeMain(GtkWidget *widget, GdkEventExpose *ose);
 	static void Draw(GtkWidget *widget, GdkRectangle *area);
 
@@ -669,9 +669,9 @@ void ScintillaGTK::FullPaint() {
 PRectangle ScintillaGTK::GetClientRectangle() {
 	PRectangle rc = wMain.GetClientPosition();
 	if (verticalScrollBarVisible)
-		rc.right -= scrollBarWidth + 1;
+		rc.right -= scrollBarWidth;
 	if (horizontalScrollBarVisible && (wrapState == eWrapNone))
-		rc.bottom -= scrollBarHeight + 1;
+		rc.bottom -= scrollBarHeight;
 	// Move to origin
 	rc.right -= rc.left;
 	rc.bottom -= rc.top;
@@ -1500,42 +1500,49 @@ gint ScintillaGTK::ExposeMain(GtkWidget *widget, GdkEventExpose *ose) {
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	//Platform::DebugPrintf("Expose Main %0d,%0d %0d,%0d\n",
 	//ose->area.x, ose->area.y, ose->area.width, ose->area.height);
-	return Expose(widget, ose, sciThis);
+	return sciThis->Expose(widget, ose);
 }
 
-gint ScintillaGTK::Expose(GtkWidget *, GdkEventExpose *ose, ScintillaGTK *sciThis) {
-	//Platform::DebugPrintf("Expose %0d,%0d %0d,%0d\n",
+gint ScintillaGTK::Expose(GtkWidget *, GdkEventExpose *ose) {
+	//fprintf(stderr, "Expose %0d,%0d %0d,%0d\n",
 	//ose->area.x, ose->area.y, ose->area.width, ose->area.height);
 
-	sciThis->paintState = painting;
+	paintState = painting;
 
-	sciThis->rcPaint.left = ose->area.x;
-	sciThis->rcPaint.top = ose->area.y;
-	sciThis->rcPaint.right = ose->area.x + ose->area.width;
-	sciThis->rcPaint.bottom = ose->area.y + ose->area.height;
+	rcPaint.left = ose->area.x;
+	rcPaint.top = ose->area.y;
+	rcPaint.right = ose->area.x + ose->area.width;
+	rcPaint.bottom = ose->area.y + ose->area.height;
 
-	PRectangle rcClient = sciThis->GetClientRectangle();
-	sciThis->paintingAllText = sciThis->rcPaint.Contains(rcClient);
+	PRectangle rcClient = GetClientRectangle();
+	paintingAllText = rcPaint.Contains(rcClient);
 	Surface *surfaceWindow = Surface::Allocate();
 	if (surfaceWindow) {
-		surfaceWindow->Init((PWidget(sciThis->wMain))->window);
-		sciThis->Paint(surfaceWindow, sciThis->rcPaint);
+		surfaceWindow->Init((PWidget(wMain))->window);
+		// Fill the corner between the scrollbars
+		PRectangle rcCorner = wMain.GetClientPosition();
+		if (verticalScrollBarVisible)
+			rcCorner.left = rcCorner.right - scrollBarWidth + 1;
+		if (horizontalScrollBarVisible && (wrapState == eWrapNone))
+			rcCorner.top = rcCorner.bottom - scrollBarHeight + 1;
+		surfaceWindow->FillRectangle(rcCorner,
+			vs.styles[STYLE_LINENUMBER].back.allocated);
+
+		Paint(surfaceWindow, rcPaint);
 		surfaceWindow->Release();
 		delete surfaceWindow;
 	}
-	if (sciThis->paintState == paintAbandoned) {
+	if (paintState == paintAbandoned) {
 		// Painting area was insufficient to cover new styling or brace highlight positions
-		sciThis->FullPaint();
+		FullPaint();
 	}
-	sciThis->paintState = notPainting;
+	paintState = notPainting;
 
 #if GTK_MAJOR_VERSION >= 2
-	gtk_container_propagate_expose(GTK_CONTAINER(PWidget(sciThis->wMain)),
-					PWidget(sciThis->scrollbarh),
-					ose);
-	gtk_container_propagate_expose(GTK_CONTAINER(PWidget(sciThis->wMain)),
-					PWidget(sciThis->scrollbarv),
-					ose);
+	gtk_container_propagate_expose(
+		GTK_CONTAINER(PWidget(wMain)), PWidget(scrollbarh), ose);
+	gtk_container_propagate_expose(
+		GTK_CONTAINER(PWidget(wMain)), PWidget(scrollbarv), ose);
 #endif
 
 	return FALSE;
