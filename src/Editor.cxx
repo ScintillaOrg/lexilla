@@ -112,14 +112,14 @@ void LineLayout::SetBracesHighlight(Range rangeLine, Position braces[],
 		int braceOffset = braces[0] - rangeLine.start;
 		if (braceOffset < numCharsInLine) {
 			bracePreviousStyles[0] = styles[braceOffset];
-			styles[braceOffset] = static_cast<char>(bracesMatchStyle);
+			styles[braceOffset] = bracesMatchStyle;
 		}
 	}
 	if (rangeLine.ContainsCharacter(braces[1])) {
 		int braceOffset = braces[1] - rangeLine.start;
 		if (braceOffset < numCharsInLine) {
 			bracePreviousStyles[1] = styles[braceOffset];
-			styles[braceOffset] = static_cast<char>(bracesMatchStyle);
+			styles[braceOffset] = bracesMatchStyle;
 		}
 	}
 	if ((braces[0] >= rangeLine.start && braces[1] <= rangeLine.end) ||
@@ -1899,8 +1899,8 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 
 				Range rangeLine(pdoc->LineStart(lineDoc), pdoc->LineStart(lineDoc + 1));
 				// Highlight the current braces if any
-				ll->SetBracesHighlight(rangeLine, braces, 
-					bracesMatchStyle, highlightGuideColumn * vs.spaceWidth);
+				ll->SetBracesHighlight(rangeLine, braces, static_cast<char>(bracesMatchStyle),
+					highlightGuideColumn * vs.spaceWidth);
 	
 				// Draw the line
 				DrawLine(surface, vs, lineDoc, visibleLine, xStart, rcLine, ll, subLine);
