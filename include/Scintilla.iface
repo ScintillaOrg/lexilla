@@ -1024,7 +1024,7 @@ set void SetWrapVisualFlagsLocation=2462(int wrapVisualFlagsLocation,)
 get int GetWrapVisualFlagsLocation=2463(,)
 
 # Set the start indent for wrapped lines.
-fun void SetWrapStartIndent=2464(int indent,)
+set void SetWrapStartIndent=2464(int indent,)
 
 # Retrive the start indent for wrapped lines.
 get int GetWrapStartIndent=2465(,)
