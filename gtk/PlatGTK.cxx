@@ -659,30 +659,56 @@ static void SelectionAC(GtkWidget *, gint row, gint,
 	*pi = row;
 }
 
+//~ void ListBox::Create(Window &, int) {
+	//~ id = gtk_window_new(GTK_WINDOW_POPUP);
+	//~ scroller = gtk_scrolled_window_new(NULL, NULL);
+	//~ gtk_container_set_border_width(GTK_CONTAINER(scroller), 1);
+	//~ gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller),
+	                               //~ GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+
+	//~ list = gtk_clist_new(1);
+	//~ gtk_clist_set_column_auto_resize(GTK_CLIST(list), 0, TRUE);
+	//~ gtk_container_add(GTK_CONTAINER(scroller), list);
+
+	//~ gtk_container_add(GTK_CONTAINER(GetID()), scroller);
+
+	//~ gtk_widget_show(list);
+	//~ gtk_widget_show(scroller);
+
+	//~ gtk_clist_set_selection_mode(GTK_CLIST(list), GTK_SELECTION_BROWSE);
+	//~ gtk_signal_connect(GTK_OBJECT(list), "select_row",
+	                   //~ GTK_SIGNAL_FUNC(SelectionAC), &current);
+	//~ gtk_clist_set_shadow_type(GTK_CLIST(list), GTK_SHADOW_OUT);
+
+	//~ gtk_widget_realize(id);
+//~ }
 void ListBox::Create(Window &, int) {
 	id = gtk_window_new(GTK_WINDOW_POPUP);
+
+	GtkWidget* frame = gtk_frame_new(NULL);
+	gtk_widget_show (frame);
+	gtk_container_add(GTK_CONTAINER(GetID()), frame);
+	gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_OUT);
+	gtk_container_set_border_width(GTK_CONTAINER(frame), 0);
+
 	scroller = gtk_scrolled_window_new(NULL, NULL);
-	gtk_container_set_border_width(GTK_CONTAINER(scroller), 1);
+	gtk_container_set_border_width(GTK_CONTAINER(scroller), 0);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller),
-	                               GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-
-	list = gtk_clist_new(1);
-	gtk_clist_set_column_auto_resize(GTK_CLIST(list), 0, TRUE);
-	gtk_container_add(GTK_CONTAINER(scroller), list);
-
-	gtk_container_add(GTK_CONTAINER(GetID()), scroller);
-
-	gtk_widget_show(list);
+				       GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_container_add(GTK_CONTAINER(frame), scroller);
 	gtk_widget_show(scroller);
 
+	list = gtk_clist_new(1);
+	gtk_widget_show(list);
+	gtk_container_add(GTK_CONTAINER(scroller), list);
+	gtk_clist_set_column_auto_resize(GTK_CLIST(list), 0, TRUE);
 	gtk_clist_set_selection_mode(GTK_CLIST(list), GTK_SELECTION_BROWSE);
 	gtk_signal_connect(GTK_OBJECT(list), "select_row",
-	                   GTK_SIGNAL_FUNC(SelectionAC), &current);
-	gtk_clist_set_shadow_type(GTK_CLIST(list), GTK_SHADOW_OUT);
+			   GTK_SIGNAL_FUNC(SelectionAC), &current);
+	gtk_clist_set_shadow_type(GTK_CLIST(list), GTK_SHADOW_NONE);
 
 	gtk_widget_realize(id);
 }
-
 void ListBox::SetFont(Font &scint_font) {
 	GtkStyle* style;
 

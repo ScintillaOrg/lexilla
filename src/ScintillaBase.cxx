@@ -36,22 +36,22 @@
 
 ScintillaBase::ScintillaBase() {
 	listType = 0;
-#ifdef SCI_LEXER	
+#ifdef SCI_LEXER
 	lexLanguage = SCLEX_CONTAINER;
-	for (int wl=0;wl<numWordLists;wl++)
+	for (int wl = 0;wl < numWordLists;wl++)
 		keyWordLists[wl] = new WordList;
 #endif
 }
 
 ScintillaBase::~ScintillaBase() {
-#ifdef SCI_LEXER	
-	for (int wl=0;wl<numWordLists;wl++)
+#ifdef SCI_LEXER
+	for (int wl = 0;wl < numWordLists;wl++)
 		delete keyWordLists[wl];
 #endif
 }
 
 void ScintillaBase::Finalise() {
-    Editor::Finalise();
+	Editor::Finalise();
 	popup.Destroy();
 }
 
@@ -72,10 +72,12 @@ void ScintillaBase::Command(int cmdId) {
 
 	switch (cmdId) {
 
-	case idAutoComplete: 	// Nothing to do
+	case idAutoComplete:  	// Nothing to do
+
 		break;
 
-	case idCallTip: 	// Nothing to do
+	case idCallTip:  	// Nothing to do
+
 		break;
 
 	case idcmdUndo:
@@ -185,13 +187,13 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 				pdoc->InsertString(currentPos, list + lenEntered);
 				SetEmptySelection(currentPos + strlen(list + lenEntered));
 			}
-			return;
+			return ;
 		}
 	}
 	ac.Start(wMain, idAutoComplete, currentPos, lenEntered);
 
 	PRectangle rcClient = GetClientRectangle();
-	Point pt = LocationFromPosition(currentPos-lenEntered);
+	Point pt = LocationFromPosition(currentPos - lenEntered);
 
 	int heightLB = 100;
 	int widthLB = 100;
@@ -202,8 +204,8 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 	}
 	PRectangle rcac;
 	rcac.left = pt.x - 5;
-	if (pt.y >= rcClient.bottom - heightLB && // Wont fit below.
-	    pt.y >= (rcClient.bottom + rcClient.top) / 2) { // and there is more room above.
+	if (pt.y >= rcClient.bottom - heightLB &&  // Wont fit below.
+	        pt.y >= (rcClient.bottom + rcClient.top) / 2) { // and there is more room above.
 		rcac.top = pt.y - heightLB;
 		if (rcac.top < 0) {
 			heightLB += rcac.top;
@@ -227,8 +229,8 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 	// Make an allowance for large strings in list
 	rcList.left = pt.x - 5;
 	rcList.right = rcList.left + widthLB;
-	if (pt.y >= rcClient.bottom - heightLB && // Wont fit below.
-	    pt.y >= (rcClient.bottom + rcClient.top) / 2) { // and there is more room above.
+	if (pt.y >= rcClient.bottom - heightLB &&  // Wont fit below.
+	        pt.y >= (rcClient.bottom + rcClient.top) / 2) { // and there is more room above.
 		rcList.top = pt.y - heightAlloced;
 	} else {
 		rcList.top = pt.y + vs.lineHeight;
@@ -238,7 +240,7 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 	ac.Show();
 	if (lenEntered != 0) {
 		AutoCompleteMoveToCurrentWord();
-	}		
+	}
 }
 
 void ScintillaBase::AutoCompleteCancel() {
@@ -280,7 +282,7 @@ void ScintillaBase::AutoCompleteCompleted(char fillUp/*='\0'*/) {
 		ac.lb.GetValue(item, selected, sizeof(selected));
 	}
 	ac.Cancel();
-	
+
 	if (listType > 0) {
 		userListSelected = selected;
 		SCNotification scn;
@@ -290,12 +292,12 @@ void ScintillaBase::AutoCompleteCompleted(char fillUp/*='\0'*/) {
 		scn.lParam = 0;
 		scn.text = userListSelected.c_str();
 		NotifyParent(scn);
-		return;
+		return ;
 	}
-	
+
 	Position firstPos = ac.posStart - ac.startLen;
 	if (currentPos < firstPos)
-		return;
+		return ;
 	if (currentPos != firstPos) {
 		pdoc->DeleteChars(firstPos, currentPos - firstPos);
 	}
@@ -349,7 +351,7 @@ void ScintillaBase::Colourise(int start, int end) {
 	if (start > 0)
 		styleStart = styler.StyleAt(start - 1);
 	styler.SetCodePage(pdoc->dbcsCodePage);
-	
+
 	LexerModule::Colourise(start, len, styleStart, lexLanguage, keyWordLists, styler);
 	styler.Flush();
 }
@@ -362,7 +364,7 @@ void ScintillaBase::NotifyStyleToNeeded(int endStyleNeeded) {
 		int lineEndStyled = WndProc(SCI_LINEFROMPOSITION, endStyled, 0);
 		endStyled = WndProc(SCI_POSITIONFROMLINE, lineEndStyled, 0);
 		Colourise(endStyled, endStyleNeeded);
-		return;
+		return ;
 	}
 #endif
 	Editor::NotifyStyleToNeeded(endStyleNeeded);
@@ -399,15 +401,15 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 	case SCI_AUTOCSTOPS:
 		ac.SetStopChars(reinterpret_cast<char *>(lParam));
 		break;
-		
+
 	case SCI_AUTOCSELECT:
 		ac.Select(reinterpret_cast<char *>(lParam));
 		break;
-	
+
 	case SCI_AUTOCSETCANCELATSTART:
 		ac.cancelAtStartPos = wParam;
 		break;
-	
+
 	case SCI_AUTOCGETCANCELATSTART:
 		return ac.cancelAtStartPos;
 
@@ -421,14 +423,14 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 
 	case SCI_AUTOCGETCHOOSESINGLE:
 		return ac.chooseSingle;
-		
+
 	case SCI_AUTOCSETIGNORECASE:
 		ac.ignoreCase = wParam;
 		break;
-		
+
 	case SCI_AUTOCGETIGNORECASE:
 		return ac.ignoreCase;
-		
+
 	case SCI_USERLISTSHOW:
 		listType = wParam;
 		AutoCompleteStart(0, reinterpret_cast<const char *>(lParam));
@@ -437,9 +439,12 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 	case SCI_CALLTIPSHOW: {
 			AutoCompleteCancel();
 			if (!ct.wCallTip.Created()) {
-				PRectangle rc = ct.CallTipStart(currentPos, LocationFromPosition(wParam),
+				Point pt = LocationFromPosition(wParam);
+				pt.y += vs.lineHeight;
+				PRectangle rc = ct.CallTipStart(currentPos, pt,
 				                                reinterpret_cast<char *>(lParam),
-				                                vs.styles[STYLE_DEFAULT].fontName, vs.styles[STYLE_DEFAULT].size);
+				                                vs.styles[STYLE_DEFAULT].fontName,
+				                                vs.styles[STYLE_DEFAULT].sizeZoomed);
 				// If the call-tip window would be out of the client
 				// space, adjust so it displays above the text.
 				PRectangle rcClient = GetClientRectangle();
@@ -474,25 +479,25 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		ct.colourBG = Colour(wParam);
 		InvalidateStyleRedraw();
 		break;
-		
+
 #ifdef SCI_LEXER
 	case SCI_SETLEXER:
 		lexLanguage = wParam;
 		break;
-		
+
 	case SCI_GETLEXER:
 		return lexLanguage;
-		
+
 	case SCI_COLOURISE:
 		Colourise(wParam, lParam);
 		Redraw();
 		break;
-		
+
 	case SCI_SETPROPERTY:
-		props.Set(reinterpret_cast<const char *>(wParam), 
-			reinterpret_cast<const char *>(lParam));
+		props.Set(reinterpret_cast<const char *>(wParam),
+		          reinterpret_cast<const char *>(lParam));
 		break;
-		
+
 	case SCI_SETKEYWORDS:
 		if (wParam < numWordLists) {
 			keyWordLists[wParam]->Clear();

@@ -25,6 +25,7 @@ public:
 	bool visible;
 
 	Font font;
+	int sizeZoomed;
 	unsigned int lineHeight;
 	unsigned int ascent;
 	unsigned int descent;
@@ -37,11 +38,11 @@ public:
 	~Style();
 	Style &operator=(const Style &source);
 	void Clear(Colour fore_, Colour back_,
-           	int size_, 
-		const char *fontName_, int characterSet_,
-		bool bold_, bool italic_, bool eolFilled_, bool underline_, bool visible_);
+	           int size_,
+	           const char *fontName_, int characterSet_,
+	           bool bold_, bool italic_, bool eolFilled_, bool underline_, bool visible_);
 	bool EquivalentFontTo(const Style *other) const;
-	void Realise(Surface &surface, int zoomLevel, Style *defaultStyle=0);
+	void Realise(Surface &surface, int zoomLevel, Style *defaultStyle = 0);
 };
 
 #endif
