@@ -406,7 +406,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 						chNext = chNext2;
 					} else if (isalnum(chNext) || chNext == '_') { // an unquoted here-doc delimiter
 					}
-					else if (isspace(chNext)) { // deprecated here-doc delimiter || TODO: left shift operator
+					else if (isspacechar(chNext)) { // deprecated here-doc delimiter || TODO: left shift operator
 					}
 					else { // TODO: ???
 					}
@@ -493,7 +493,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 			} else if (state == SCE_PL_REGEX
 				|| state == SCE_PL_STRING_QR
 				) {
-				if (!Quote.Up && !isspace(ch)) {
+				if (!Quote.Up && !isspacechar(ch)) {
 					Quote.Open(ch);
 				} else if (ch == '\\' && Quote.Up != '\\') {
 					// SG: Is it save to skip *every* escaped char?
@@ -527,7 +527,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					}
 				}
 			} else if (state == SCE_PL_REGSUBST) {
-				if (!Quote.Up && !isspace(ch)) {
+				if (!Quote.Up && !isspacechar(ch)) {
 					Quote.Open(ch);
 				} else if (ch == '\\' && Quote.Up != '\\') {
 					// SG: Is it save to skip *every* escaped char?
@@ -549,7 +549,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 						*
 						* Eric Promislow   ericp@activestate.com  Aug 9,2000
 						*/
-						if (isspace(ch)) {
+						if (isspacechar(ch)) {
 							// Keep going
 						}
 						else if (isalnum(ch)) {
@@ -592,7 +592,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				|| state == SCE_PL_CHARACTER
 				|| state == SCE_PL_BACKTICKS
 				) {
-				if (!Quote.Down && !isspace(ch)) {
+				if (!Quote.Down && !isspacechar(ch)) {
 					Quote.Open(ch);
 				} else if (ch == '\\' && Quote.Up != '\\') {
 					i++;

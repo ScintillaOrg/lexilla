@@ -73,7 +73,7 @@ static void ColouriseVBDoc(unsigned int startPos, int length, int initStyle,
 			}
 			visibleChars = 0;
 		}
-		if (!isspace(ch))
+		if (!isspacechar(ch))
 			visibleChars++;
 
 		if (state == SCE_C_DEFAULT) {

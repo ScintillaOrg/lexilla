@@ -364,7 +364,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			continue;
 		}
 
-		if (fold && !isspace(ch))
+		if (fold && !isspacechar(ch))
 			visibleChars++;
 
 		// handle script folding

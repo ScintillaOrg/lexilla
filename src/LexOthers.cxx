@@ -22,11 +22,11 @@ static void ColouriseBatchLine(char *lineBuffer, int startLine, int endLine, Acc
 	for (unsigned int i = 0; i < 4; i++) {
 		lineBuffer[i] = tolower(lineBuffer[i]);
 	}
-	if (0 == strncmp(lineBuffer, "rem", 3) && isspace(lineBuffer[3])) {
+	if (0 == strncmp(lineBuffer, "rem", 3) && isspacechar(lineBuffer[3])) {
 		styler.ColourTo(endLine, 1);
-	} else if (0 == strncmp(lineBuffer, "set", 3) && isspace(lineBuffer[3])) {
+	} else if (0 == strncmp(lineBuffer, "set", 3) && isspacechar(lineBuffer[3])) {
 		styler.ColourTo(endLine, 2);
-	} else if (0 == strncmp(lineBuffer, "if", 2) && isspace(lineBuffer[2])) {
+	} else if (0 == strncmp(lineBuffer, "if", 2) && isspacechar(lineBuffer[2])) {
 		styler.ColourTo(endLine, 2);
 	} else if (lineBuffer[0] == ':') {
 		if (lineBuffer[1] == ':') {	// Fake label, similar to REM, see http://www.winmag.com/columns/explorer/2000/21.htm
@@ -66,7 +66,7 @@ static void ColouriseBatchDoc(unsigned int startPos, int length, int, WordList *
 	styler.StartSegment(startPos);
 	unsigned int linePos = 0, startLine = startPos;
 	for (unsigned int i = startPos; i < startPos + length; i++) {
-		if (linePos != 0 || !isspace(styler[i])) {	// Skip initial spaces
+		if (linePos != 0 || !isspacechar(styler[i])) {	// Skip initial spaces
 			lineBuffer[linePos++] = static_cast<char>(tolower(styler[i]));
 		}
 		if (styler[i] == '\r' || styler[i] == '\n' || (linePos >= sizeof(lineBuffer) - 1)) {
@@ -132,7 +132,7 @@ static void ColourisePropsLine(char *lineBuffer,
 							  unsigned int endPos, 
 							  Accessor &styler) {
 	unsigned int i = 0;
-	while (isspace(lineBuffer[i]) && (i < lengthLine))	// Skip initial spaces
+	while (isspacechar(lineBuffer[i]) && (i < lengthLine))	// Skip initial spaces
 		i++;
 	if (lineBuffer[i] == '#' || lineBuffer[i] == '!' || lineBuffer[i] == ';') {
 		styler.ColourTo(endPos, 1);
@@ -184,7 +184,7 @@ static void ColouriseMakeLine(char *lineBuffer,
 	unsigned int i = 0, state = 0;
 	bool bSpecial = false;
 	// Skip initial spaces
-	while (isspace(lineBuffer[i]) && (i < lengthLine))
+	while (isspacechar(lineBuffer[i]) && (i < lengthLine))
 		i++;
 	if (lineBuffer[i] == '#') {
 		styler.ColourTo(endPos, 1);

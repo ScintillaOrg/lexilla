@@ -84,7 +84,7 @@ static void ColourisePascalDoc(unsigned int startPos, int length, int initStyle,
 			}
 			visibleChars = 0;
 		}
-		if (!isspace(ch))
+		if (!isspacechar(ch))
 			visibleChars++;
 
 		if (styler.IsLeadByte(ch)) {
