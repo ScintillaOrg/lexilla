@@ -1046,6 +1046,10 @@ fun void LinesJoin=2288(,)
 # where possible.
 fun void LinesSplit=2289(int pixelWidth,)
 
+# Set the colours used as a chequerboard pattern in the fold margin
+fun void SetFoldMarginColour=2290(bool useSetting, colour back)
+fun void SetFoldMarginHiColour=2291(bool useSetting, colour fore)
+
 ## New messages go here
 
 ## Start of key messages
