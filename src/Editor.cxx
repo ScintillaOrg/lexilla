@@ -2263,6 +2263,22 @@ int Editor::KeyCommand(unsigned int iMessage) {
 	case SCI_UPPERCASE:
 		ChangeCaseOfSelection(true);
 		break;
+	case SCI_WORDPARTLEFT:
+		MovePositionTo(MovePositionSoVisible(pdoc->WordPartLeft(currentPos), -1));
+		SetLastXChosen();
+		break;
+	case SCI_WORDPARTLEFTEXTEND:
+		MovePositionTo(MovePositionSoVisible(pdoc->WordPartLeft(currentPos), -1), true);
+		SetLastXChosen();
+		break;
+	case SCI_WORDPARTRIGHT:
+		MovePositionTo(MovePositionSoVisible(pdoc->WordPartRight(currentPos), 1));
+		SetLastXChosen();
+		break;
+	case SCI_WORDPARTRIGHTEXTEND:
+		MovePositionTo(MovePositionSoVisible(pdoc->WordPartRight(currentPos), 1), true);
+		SetLastXChosen();
+		break;
 	}
 	return 0;
 }
@@ -4224,6 +4240,10 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 	case SCI_UPPERCASE:
 	case SCI_LINESCROLLDOWN:
 	case SCI_LINESCROLLUP:
+	case SCI_WORDPARTLEFT:
+	case SCI_WORDPARTLEFTEXTEND:
+	case SCI_WORDPARTRIGHT:
+	case SCI_WORDPARTRIGHTEXTEND:
 		return KeyCommand(iMessage);
 
 	case SCI_BRACEHIGHLIGHT:

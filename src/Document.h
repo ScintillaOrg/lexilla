@@ -188,6 +188,10 @@ public:
 	const WatcherWithUserData *GetWatchers() const { return watchers; }
 	int GetLenWatchers() const { return lenWatchers; }
 	
+	bool IsWordPartSeparator(char ch);
+	int WordPartLeft(int pos);
+	int WordPartRight(int pos);
+
 private:
 	bool IsDBCS(int pos);
 	bool IsWordChar(unsigned char ch);

@@ -1015,6 +1015,15 @@ set void SetCursor=2386(int cursorType,)
 # Get cursor type
 get int GetCursor=2387(,)
 
+# Move to the previous change in capitalistion
+fun void WordPartLeft=2390(,)
+# Move to the previous change in capitalistion extending selection to new caret position.
+fun void WordPartLeftExtend=2391(,)
+# Move to the change next in capitalistion
+fun void WordPartRight=2392(,)
+# Move to the next change in capitalistion extending selection to new caret position.
+fun void WordPartRightExtend=2393(,)
+
 # Set the focus to this Scintilla widget.
 # GTK+ Specific
 fun void GrabFocus=2400(,)

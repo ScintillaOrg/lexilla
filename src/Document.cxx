@@ -958,3 +958,86 @@ void Document::NotifyModified(DocModification mh) {
 		watchers[i].watcher->NotifyModified(this, mh, watchers[i].userData);
 	}
 }
+
+bool Document::IsWordPartSeparator(char ch) {
+	return ispunct(ch) && IsWordChar(ch);
+}
+
+int Document::WordPartLeft(int pos) {
+	if (pos > 0) {
+		--pos;
+		char startChar = cb.CharAt(pos);
+		if (IsWordPartSeparator(startChar)) {
+			while (pos > 0 && IsWordPartSeparator(cb.CharAt(pos))) {
+				--pos;
+			}
+			startChar = cb.CharAt(pos);
+		}
+		if (pos > 0) {
+			startChar = cb.CharAt(pos);
+			--pos;
+			if (islower(startChar)) {
+				while (pos > 0 && islower(cb.CharAt(pos)))
+					--pos;
+				if (!isupper(cb.CharAt(pos)) && !islower(cb.CharAt(pos)))
+					++pos;
+			} else if (isupper(startChar)) {
+				while (pos > 0 && isupper(cb.CharAt(pos)))
+					--pos;
+				if (!isupper(cb.CharAt(pos)))
+					++pos;
+			} else if (isdigit(startChar)) {
+				while (pos > 0 && isdigit(cb.CharAt(pos)))
+					--pos;
+				if (!isdigit(cb.CharAt(pos)))
+					++pos;
+			} else if (ispunct(startChar)) {
+				while (pos > 0 && ispunct(cb.CharAt(pos)))
+					--pos;
+				if (!ispunct(cb.CharAt(pos)))
+					++pos;
+			} else if (isspace(startChar)) {
+				while (pos > 0 && isspace(cb.CharAt(pos)))
+					--pos;
+				if (!isspace(cb.CharAt(pos)))
+					++pos;
+			}
+		}
+	}
+	return pos;
+}
+
+int Document::WordPartRight(int pos) {
+	char startChar = cb.CharAt(pos);
+	int length = Length();
+	if (IsWordPartSeparator(startChar)) {
+		while (pos < length && IsWordPartSeparator(cb.CharAt(pos)))
+			++pos;
+		startChar = cb.CharAt(pos);
+	}
+	if (islower(startChar)) {
+		while (pos < length && islower(cb.CharAt(pos)))
+			++pos;
+	} else if (isupper(startChar)) {
+		if (islower(cb.CharAt(pos + 1))) {
+			++pos;
+			while (pos < length && islower(cb.CharAt(pos)))
+				++pos;
+		} else {
+			while (pos < length && isupper(cb.CharAt(pos)))
+				++pos;
+		}
+		if (islower(cb.CharAt(pos)) && isupper(cb.CharAt(pos - 1)))
+			--pos;
+	} else if (isdigit(startChar)) {
+		while (pos < length && isdigit(cb.CharAt(pos)))
+			++pos;
+	} else if (ispunct(startChar)) {
+		while (pos < length && ispunct(cb.CharAt(pos)))
+			++pos;
+	} else if (isspace(startChar)) {
+		while (pos < length && isspace(cb.CharAt(pos)))
+			++pos;
+	}
+	return pos;
+}

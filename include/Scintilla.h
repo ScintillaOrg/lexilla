@@ -376,6 +376,10 @@ typedef long (*SciFnDirect)(long ptr, unsigned int iMessage, unsigned long wPara
 #define SC_CURSORWAIT 3
 #define SCI_SETCURSOR 2386
 #define SCI_GETCURSOR 2387
+#define SCI_WORDPARTLEFT 2390
+#define SCI_WORDPARTLEFTEXTEND 2391
+#define SCI_WORDPARTRIGHT 2392
+#define SCI_WORDPARTRIGHTEXTEND 2393
 #define SCI_GRABFOCUS 2400
 #define SCI_STARTRECORD 3001
 #define SCI_STOPRECORD 3002
