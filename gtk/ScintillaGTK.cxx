@@ -123,7 +123,7 @@ class ScintillaGTK : public ScintillaBase {
 public:
 	ScintillaGTK(_ScintillaObject *sci_);
 	virtual ~ScintillaGTK();
-	static void ClassInit(GtkObjectClass* object_class, GtkWidgetClass *widget_class);
+	static void ClassInit(GtkObjectClass* object_class, GtkWidgetClass *widget_class, GtkContainerClass *container_class);
 
 private:
 	virtual void Initialise();
@@ -183,6 +183,8 @@ private:
 	gint Expose(GtkWidget *widget, GdkEventExpose *ose);
 	static gint ExposeMain(GtkWidget *widget, GdkEventExpose *ose);
 	static void Draw(GtkWidget *widget, GdkRectangle *area);
+	void ForAll(GtkCallback callback, gpointer callback_data);
+	static void MainForAll(GtkContainer *container, gboolean include_internals, GtkCallback callback, gpointer callback_data);
 
 	static void ScrollSignal(GtkAdjustment *adj, ScintillaGTK *sciThis);
 	static void ScrollHSignal(GtkAdjustment *adj, ScintillaGTK *sciThis);
@@ -454,6 +456,20 @@ void ScintillaGTK::UnMapThis() {
 void ScintillaGTK::UnMap(GtkWidget *widget) {
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	sciThis->UnMapThis();
+}
+
+void ScintillaGTK::ForAll(GtkCallback callback, gpointer callback_data) {
+	(*callback) (PWidget(wText), callback_data);
+	(*callback) (PWidget(scrollbarv), callback_data);
+	(*callback) (PWidget(scrollbarh), callback_data);
+}
+
+void ScintillaGTK::MainForAll(GtkContainer *container, gboolean include_internals, GtkCallback callback, gpointer callback_data) {
+	ScintillaGTK *sciThis = ScintillaFromWidget((GtkWidget *)container);
+
+	if (callback != NULL && include_internals) {
+		sciThis->ForAll(callback, callback_data);
+	}
 }
 
 #ifdef INTERNATIONAL_INPUT
@@ -2065,7 +2081,7 @@ guint scintilla_get_type() {
 	return scintilla_type;
 }
 
-void ScintillaGTK::ClassInit(GtkObjectClass* object_class, GtkWidgetClass *widget_class) {
+void ScintillaGTK::ClassInit(GtkObjectClass* object_class, GtkWidgetClass *widget_class, GtkContainerClass *container_class) {
 	// Define default signal handlers for the class:  Could move more
 	// of the signal handlers here (those that currently attached to wDraw
 	// in Initialise() may require coordinate translation?)
@@ -2107,6 +2123,8 @@ void ScintillaGTK::ClassInit(GtkObjectClass* object_class, GtkWidgetClass *widge
 	widget_class->unrealize = UnRealize;
 	widget_class->map = Map;
 	widget_class->unmap = UnMap;
+
+	container_class->forall = MainForAll;
 }
 
 #if GTK_MAJOR_VERSION < 2
@@ -2121,6 +2139,7 @@ void ScintillaGTK::ClassInit(GtkObjectClass* object_class, GtkWidgetClass *widge
 static void scintilla_class_init(ScintillaClass *klass) {
 	GtkObjectClass *object_class = (GtkObjectClass*) klass;
 	GtkWidgetClass *widget_class = (GtkWidgetClass*) klass;
+	GtkContainerClass *container_class = (GtkContainerClass*) klass;
 
 	parent_class = (GtkWidgetClass*) gtk_type_class(gtk_container_get_type());
 
@@ -2148,7 +2167,7 @@ static void scintilla_class_init(ScintillaClass *klass) {
 	klass->command = NULL;
 	klass->notify = NULL;
 
-	ScintillaGTK::ClassInit(object_class, widget_class);
+	ScintillaGTK::ClassInit(object_class, widget_class, container_class);
 }
 
 static void scintilla_init(ScintillaObject *sci) {
