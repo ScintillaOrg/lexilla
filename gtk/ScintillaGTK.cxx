@@ -679,7 +679,9 @@ void ScintillaGTK::FullPaint() {
 	}
 	paintState = notPainting;
 #else
-	wMain.InvalidateAll();
+	rcPaint = GetClientRectangle();
+	wMain.InvalidateRectangle(rcPaint);
+	//wMain.InvalidateAll();
 #endif
 }
 
@@ -728,7 +730,6 @@ void ScintillaGTK::ScrollText(int linesToMove) {
 	//	rc.left, rc.top, rc.right, rc.bottom);
 	GtkWidget *wi = PWidget(wMain);
 	GdkGC *gc = gdk_gc_new(wi->window);
-	GdkEvent* event;
 
 	// Set up gc so we get GraphicsExposures from gdk_draw_pixmap
 	//  which calls XCopyArea
@@ -754,7 +755,9 @@ void ScintillaGTK::ScrollText(int linesToMove) {
 		SyncPaint(PRectangle(0, 0, rc.Width(), -diff));
 	}
 
+#if GTK_MAJOR_VERSION < 2
 	// Look for any graphics expose
+	GdkEvent* event;
 	while ((event = gdk_event_get_graphics_expose(wi->window)) != NULL) {
 		gtk_widget_event(wi, event);
 		if (event->expose.count == 0) {
@@ -763,6 +766,7 @@ void ScintillaGTK::ScrollText(int linesToMove) {
 		}
 		gdk_event_free(event);
 	}
+#endif
 
 	gdk_gc_unref(gc);
 }
@@ -909,8 +913,9 @@ void ScintillaGTK::CreateCallTipWindow(PRectangle rc) {
 	gtk_drawing_area_size(GTK_DRAWING_AREA(PWidget(ct.wDraw)),
 	                      rc.Width(), rc.Height());
 	ct.wDraw.Show();
-	gtk_widget_set_usize(PWidget(ct.wCallTip), rc.Width(), rc.Height());
-	//gtk_widget_queue_resize(PWidget(ct.wCallTip));
+	ct.wCallTip.Show();
+	//gtk_widget_set_usize(PWidget(ct.wCallTip), rc.Width(), rc.Height());
+	gdk_window_resize(PWidget(ct.wCallTip)->window, rc.Width(), rc.Height());
 }
 
 void ScintillaGTK::AddToPopUp(const char *label, int cmd, bool enabled) {
