@@ -264,7 +264,7 @@ static void ColouriseMakeLine(
     Accessor &styler) {
 
 	unsigned int i = 0;
-        unsigned int lastNonSpace = 0;
+	int lastNonSpace = -1;
 	unsigned int state = SCE_MAKE_DEFAULT;
 	bool bSpecial = false;
 	// Skip initial spaces
@@ -291,13 +291,15 @@ static void ColouriseMakeLine(
 			if (lineBuffer[i] == ':') {
 				// We should check that no colouring was made since the beginning of the line,
 				// to avoid colouring stuff like /OUT:file
-				styler.ColourTo(startLine + lastNonSpace, SCE_MAKE_TARGET);
+				if (lastNonSpace >= 0)
+					styler.ColourTo(startLine + lastNonSpace, SCE_MAKE_TARGET);
 				styler.ColourTo(startLine + i - 1, SCE_MAKE_DEFAULT);
 				styler.ColourTo(startLine + i, SCE_MAKE_OPERATOR);
 				bSpecial = true;	// Only react to the first ':' of the line
 				state = SCE_MAKE_DEFAULT;
 			} else if (lineBuffer[i] == '=') {
-				styler.ColourTo(startLine + lastNonSpace, SCE_MAKE_IDENTIFIER);
+				if (lastNonSpace >= 0)
+					styler.ColourTo(startLine + lastNonSpace, SCE_MAKE_IDENTIFIER);
 				styler.ColourTo(startLine + i - 1, SCE_MAKE_DEFAULT);
 				styler.ColourTo(startLine + i, SCE_MAKE_OPERATOR);
 				bSpecial = true;	// Only react to the first '=' of the line
@@ -415,7 +417,7 @@ static void ColouriseErrorListLine(
 				break;
 			} else if (((state == 11) || (state == 14)) && !((lineBuffer[i] == ' ') || isdigit(lineBuffer[i]))) {
 				state = 99;
-			} else if ((state == 20) && (lineBuffer[i-1] == '\t') && 
+			} else if ((state == 20) && (lineBuffer[i-1] == '\t') &&
 				((lineBuffer[i] == '/' && lineBuffer[i+1] == '^') || isdigit(lineBuffer[i]))) {
 				state = 24;
 				break;
@@ -423,7 +425,7 @@ static void ColouriseErrorListLine(
 				state = 21;
 			} else if ((state == 21) && ((lineBuffer[i] == '$') && (lineBuffer[i+1] == '/'))) {
 				state = 22;
-				break;		
+				break;
 			}
 		}
 		if (state == 3) {
@@ -431,7 +433,7 @@ static void ColouriseErrorListLine(
 		} else if ((state == 13) || (state == 14) || (state == 15)) {
 			styler.ColourTo(endPos, SCE_ERR_MS);
 		} else if (((state == 22) || (state == 24)) && (lineBuffer[0] != '\t')) {
-			styler.ColourTo(endPos, SCE_ERR_CTAG);	
+			styler.ColourTo(endPos, SCE_ERR_CTAG);
 		} else {
 			styler.ColourTo(endPos, SCE_ERR_DEFAULT);
 		}
