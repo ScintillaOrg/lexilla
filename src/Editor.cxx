@@ -4631,7 +4631,8 @@ char *Editor::CopyRange(int start, int end) {
 }
 
 void Editor::CopySelectionFromRange(SelectionText *ss, int start, int end) {
-	ss->Set(CopyRange(start, end), end - start + 1, pdoc->dbcsCodePage, false);
+	ss->Set(CopyRange(start, end), end - start + 1, 
+		pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false);
 }
 
 void Editor::CopySelectionRange(SelectionText *ss) {
@@ -4673,7 +4674,8 @@ void Editor::CopySelectionRange(SelectionText *ss) {
 				text[size] = '\0';
 			}
 		}
- 		ss->Set(text, size + 1, pdoc->dbcsCodePage, selType == selRectangle);
+ 		ss->Set(text, size + 1, pdoc->dbcsCodePage, 
+			vs.styles[STYLE_DEFAULT].characterSet, selType == selRectangle);
 	}
 }
 
@@ -4681,13 +4683,15 @@ void Editor::CopyRangeToClipboard(int start, int end) {
 	start = pdoc->ClampPositionIntoDocument(start);
 	end = pdoc->ClampPositionIntoDocument(end);
 	SelectionText selectedText;
-	selectedText.Set(CopyRange(start, end), end - start + 1, pdoc->dbcsCodePage);
+	selectedText.Set(CopyRange(start, end), end - start + 1, 
+		pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false);
 	CopyToClipboard(selectedText);
 }
 
 void Editor::CopyText(int length, const char *text) {
 	SelectionText selectedText;
-	selectedText.Copy(text, length, pdoc->dbcsCodePage);
+	selectedText.Copy(text, length, 
+		pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false);
 	CopyToClipboard(selectedText);
 }
 
@@ -5161,7 +5165,7 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 					} else {
 						SetEmptySelection(newPos);
 					}
-					drag.Set(0, 0, 0);
+					drag.Free();
 				}
 				selectionType = selChar;
 			}

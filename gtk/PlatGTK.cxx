@@ -1026,8 +1026,25 @@ static size_t UTF8Len(char ch) {
 		return 3;
 }
 
+char *UTF8FromLatin1(const char *s, int &len) {
+	char *utfForm = new char[len*2+1];
+	size_t lenU = 0;
+	for (int i=0;i<len;i++) {
+		unsigned int uch = static_cast<unsigned char>(s[i]);
+		if (uch < 0x80) {
+			utfForm[lenU++] = uch;
+		} else {
+			utfForm[lenU++] = static_cast<char>(0xC0 | (uch >> 6));
+			utfForm[lenU++] = static_cast<char>(0x80 | (uch & 0x3f));
+		}
+	}
+	utfForm[lenU] = '\0';
+	len = lenU;
+	return utfForm;
+}
+
 #ifdef USE_PANGO
-static char *UTF8FromIconv(const Converter &conv, const char *s, int len) {
+static char *UTF8FromIconv(const Converter &conv, const char *s, int &len) {
 	if (conv) {
 		char *utfForm = new char[len*3+1];
 		char *pin = const_cast<char *>(s);
@@ -1037,6 +1054,7 @@ static char *UTF8FromIconv(const Converter &conv, const char *s, int len) {
 		size_t conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
 		if (conversions != ((size_t)(-1))) {
 			*pout = '\0';
+			len = pout - utfForm;
 			return utfForm;
 		}
 		delete []utfForm;
@@ -1061,22 +1079,6 @@ static size_t MultiByteLenFromIconv(const Converter &conv, const char *s, size_t
 	return 1;
 }
 
-static char *UTF8FromLatin1(const char *s, int len) {
-	char *utfForm = new char[len*2+1];
-	size_t lenU = 0;
-	for (int i=0;i<len;i++) {
-		unsigned int uch = static_cast<unsigned char>(s[i]);
-		if (uch < 0x80) {
-			utfForm[lenU++] = uch;
-		} else {
-			utfForm[lenU++] = static_cast<char>(0xC0 | (uch >> 6));
-			utfForm[lenU++] = static_cast<char>(0x80 | (uch & 0x3f));
-		}
-	}
-	utfForm[lenU] = '\0';
-	return utfForm;
-}
-
 static char *UTF8FromGdkWChar(GdkWChar *wctext, int wclen) {
 	char *utfForm = new char[wclen*3+1];	// Maximum of 3 UTF-8 bytes per character
 	size_t lenU = 0;
@@ -1097,7 +1099,7 @@ static char *UTF8FromGdkWChar(GdkWChar *wctext, int wclen) {
 	return utfForm;
 }
 
-static char *UTF8FromDBCS(const char *s, int len) {
+static char *UTF8FromDBCS(const char *s, int &len) {
 	GdkWChar *wctext = new GdkWChar[len + 1];
 	GdkWChar *wcp = wctext;
 	int wclen = gdk_mbstowcs(wcp, s, len);
@@ -1110,6 +1112,7 @@ static char *UTF8FromDBCS(const char *s, int len) {
 
 	char *utfForm = UTF8FromGdkWChar(wctext, wclen);
 	delete []wctext;
+	len = strlen(utfForm);
 	return utfForm;
 }
 
@@ -1156,7 +1159,7 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 				if (!utfForm) {	// iconv and DBCS failed so treat as Latin1
 					utfForm = UTF8FromLatin1(s, len);
 				}
-				pango_layout_set_text(layout, utfForm, strlen(utfForm));
+				pango_layout_set_text(layout, utfForm, len);
 			}
 			pango_layout_set_font_description(layout, PFont(font_)->pfd);
 			PangoLayoutLine *pll = pango_layout_get_line(layout,0);
@@ -1311,7 +1314,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 					if (!utfForm) {
 						utfForm = UTF8FromLatin1(s, len);
 					}
-					pango_layout_set_text(layout, utfForm, strlen(utfForm));
+					pango_layout_set_text(layout, utfForm, len);
 					int i = 0;
 					PangoLayoutIter *iter = pango_layout_get_iter (layout);
 					while (pango_layout_iter_next_cluster (iter)) {
@@ -1412,8 +1415,7 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 				if (!utfForm) {	// g_locale_to_utf8 failed so treat as Latin1
 					utfForm = UTF8FromLatin1(s, len);
 				}
-				pango_layout_set_text(layout, utfForm, strlen(utfForm));
-				len = strlen(utfForm);
+				pango_layout_set_text(layout, utfForm, len);
 			}
 			PangoLayoutLine *pangoLine = pango_layout_get_line(layout, 0);
 			pango_layout_line_get_extents(pangoLine, NULL, &pos);
