@@ -963,11 +963,13 @@ fun int SearchNext=2367(int flags, string text)
 fun int SearchPrev=2368(int flags, string text)
 
 # Show caret within N lines of edge when it's scrolled to view
+# If CARET_SLOP not set then centre caret on screen when it's 
+# scrolled to view
 val CARET_SLOP=0x01
-# Center caret on screen when it's scrolled to view
+# Value not used
 val CARET_CENTER=0x02
-# OR this with CARET_CENTER to reposition even when visible, or
-# OR this with CARET_SLOP to reposition whenever outside slop border
+# If CARET_SLOP also set then reposition whenever outside slop border
+# If CARET_SLOP not set then recentre even when visible
 val CARET_STRICT=0x04
 # Set the way the line the caret is on is kept visible.
 fun void SetCaretPolicy=2369(int caretPolicy, int caretSlop)
@@ -1030,9 +1032,8 @@ fun void WordPartRight=2392(,)
 # Move to the next change in capitalistion extending selection to new caret position.
 fun void WordPartRightExtend=2393(,)
 
-# Constants for use with SetVisiblePolicy
+# Constants for use with SetVisiblePolicy, similar to SetCaretPolicy 
 val VISIBLE_SLOP=0x01
-val VISIBLE_CENTER=0x02
 val VISIBLE_STRICT=0x04
 # Set the way the display area is determined when a particular line is to be moved to.
 fun void SetVisiblePolicy=2394(int visiblePolicy, int visibleSlop)

@@ -383,7 +383,6 @@ typedef long (*SciFnDirect)(long ptr, unsigned int iMessage, unsigned long wPara
 #define SCI_WORDPARTRIGHT 2392
 #define SCI_WORDPARTRIGHTEXTEND 2393
 #define VISIBLE_SLOP 0x01
-#define VISIBLE_CENTER 0x02
 #define VISIBLE_STRICT 0x04
 #define SCI_SETVISIBLEPOLICY 2394
 #define SCI_GRABFOCUS 2400
