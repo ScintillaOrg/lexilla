@@ -104,6 +104,12 @@ public:
 		return (right > other.left) && (left < other.right) &&
 			(bottom > other.top) && (top < other.bottom);
 	}
+	void Move(int xDelta, int yDelta) {
+		left += xDelta;
+		top += yDelta;
+		right += xDelta;
+		bottom += yDelta;
+	}
 	int Width() { return right - left; }
 	int Height() { return bottom - top; }
 };

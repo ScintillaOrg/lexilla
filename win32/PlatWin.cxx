@@ -769,10 +769,13 @@ void Window::SetPositionRelative(PRectangle rc, Window w) {
 	if (style & WS_POPUP) {
 		RECT rcOther;
 		::GetWindowRect(reinterpret_cast<HWND>(w.GetID()), &rcOther);
-		rc.top += rcOther.top;
-		rc.left += rcOther.left;
-		rc.bottom += rcOther.top;
-		rc.right += rcOther.left;
+		rc.Move(rcOther.left, rcOther.top);
+		if (rc.left < 0) {
+			rc.Move(-rc.left,0);
+		}
+		if (rc.top < 0) {
+			rc.Move(0,-rc.top);
+		}
 	}
 	SetPosition(rc);
 }
