@@ -1,5 +1,7 @@
 // SciTE - Scintilla based Text Editor
-// PropSet.cxx - a java style properties file module
+/** @file PropSet.cxx
+ ** A Java style properties file module.
+ **/
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
@@ -443,9 +445,10 @@ bool WordList::InList(const char *s) {
 }
 
 /**
- * Returns an element (complete) of the wordlist array which has the beginning
- * the same as the passed string. The length of the word to compare is passed
- * too. Letter case can be ignored or preserved (default).
+ * Returns an element (complete) of the wordlist array which has
+ * the same beginning as the passed string.
+ * The length of the word to compare is passed too.
+ * Letter case can be ignored or preserved (default).
  */
 const char *WordList::GetNearestWord(const char *wordStart, int searchLen /*= -1*/, bool ignoreCase /*= false*/) {
 	int start = 0; // lower bound of the api array block to search
@@ -489,8 +492,9 @@ const char *WordList::GetNearestWord(const char *wordStart, int searchLen /*= -1
 
 /**
  * Returns elements (first words of them) of the wordlist array which have
- * the beginning the same as the passed string. The length of the word to
- * compare is passed too. Letter case can be ignored or preserved (default).
+ * the same beginning as the passed string.
+ * The length of the word to compare is passed too.
+ * Letter case can be ignored or preserved (default).
  * If there are more words meeting the condition they are returned all of
  * them in the ascending order separated with spaces.
  *

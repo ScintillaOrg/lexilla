@@ -1,20 +1,26 @@
 // Scintilla source code edit control
-// Document.h - text document that handles notifications, DBCS, styling, words and end of line
+/** @file Document.h
+ ** Text document that handles notifications, DBCS, styling, words and end of line.
+ **/
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #ifndef DOCUMENT_H
 #define DOCUMENT_H
 
-// A Position is a position within a document between two characters or at the beginning or end.
-// Sometimes used as a character index where it identifies the character after the position.
+/**
+ * A Position is a position within a document between two characters or at the beginning or end.
+ * Sometimes used as a character index where it identifies the character after the position.
+ */
 typedef int Position;
 const Position invalidPosition = -1;
 
-// The range class represents a range of text in a document.
-// The two values are not sorted as one end may be more significant than the other
-// as is the case for the selection where the end position is the position of the caret.
-// If either position is invalidPosition then the range is invalid and most operations will fail.
+/**
+ * The range class represents a range of text in a document.
+ * The two values are not sorted as one end may be more significant than the other
+ * as is the case for the selection where the end position is the position of the caret.
+ * If either position is invalidPosition then the range is invalid and most operations will fail.
+ */
 class Range {
 public:
 	Position start;
@@ -55,10 +61,12 @@ public:
 class DocWatcher;
 class DocModification;
 
+/**
+ */
 class Document {
 
 public:
-	// Used to pair watcher pointer with user data
+	/** Used to pair watcher pointer with user data. */
 	class WatcherWithUserData {
 	public:
 		DocWatcher *watcher;
@@ -87,7 +95,7 @@ public:
 	int stylingBitsMask;
 	
 	int eolMode;
-	// dbcsCodePage can also be SC_CP_UTF8 to enable UTF-8 mode
+	/// Can also be SC_CP_UTF8 to enable UTF-8 mode
 	int dbcsCodePage;
 	int tabInChars;
 	int indentInChars;
@@ -207,16 +215,18 @@ private:
 	int IndentSize() { return indentInChars ? indentInChars : tabInChars; }
 };
 
-// To optimise processing of document modifications by DocWatchers, a hint is passed indicating the 
-// scope of the change.
-// If the DocWatcher is a document view then this can be used to optimise screen updating.
+/**
+ * To optimise processing of document modifications by DocWatchers, a hint is passed indicating the
+ * scope of the change.
+ * If the DocWatcher is a document view then this can be used to optimise screen updating.
+ */
 class DocModification {
 public:
   	int modificationType;
 	int position;
  	int length;
- 	int linesAdded;	// Negative if lines deleted
- 	const char *text;	// Only valid for changes to text, not for changes to style
+ 	int linesAdded;	/**< Negative if lines deleted. */
+ 	const char *text;	/**< Only valid for changes to text, not for changes to style. */
  	int line;
 	int foldLevelNow;
 	int foldLevelPrev;
@@ -243,8 +253,10 @@ public:
 		foldLevelPrev(0) {}
 };
 
-// A class that wants to receive notifications from a Document must be derived from DocWatcher 
-// and implement the notification methods. It can then be added to the watcher list with AddWatcher.
+/**
+ * A class that wants to receive notifications from a Document must be derived from DocWatcher
+ * and implement the notification methods. It can then be added to the watcher list with AddWatcher.
+ */
 class DocWatcher {
 public:
 	virtual ~DocWatcher() {}

@@ -1,5 +1,7 @@
 // Scintilla source code edit control
-// Document.cxx - text document that handles notifications, DBCS, styling, words and end of line
+/** @file Document.cxx
+ ** Text document that handles notifications, DBCS, styling, words and end of line.
+ **/
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 

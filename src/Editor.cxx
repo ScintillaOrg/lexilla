@@ -1,5 +1,7 @@
 // Scintilla source code edit control
-// Editor.cxx - main code for the edit control
+/** @file Editor.cxx
+ ** Main code for the edit control.
+ **/
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
@@ -778,6 +780,11 @@ void DrawTabArrow(Surface *surface, PRectangle rcTab, int ymid) {
 	surface->LineTo(xhead, ymid + ydiff);
 }
 
+/**
+ * Fill in the LineLayout data for the given line.
+ * Copy the given @a line and its styles from the document into local arrays.
+ * Also determine the x position at which each character starts.
+ */
 void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayout &ll) {
 	int numCharsInLine = 0;
 	int posLineStart = pdoc->LineStart(line);
@@ -786,9 +793,11 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 	char styleByte = 0;
 	int styleMask = pdoc->stylingBitsMask;
 	ll.xHighlightGuide = 0;
+	// If the line is very long, limit the treatment to a length that should fit in the viewport
 	if (posLineEnd > (posLineStart + LineLayout::maxLineLength)) {
 		posLineEnd = posLineStart + LineLayout::maxLineLength;
 	}
+	// Fill base line layout
 	for (int charInDoc = posLineStart; charInDoc < posLineEnd; charInDoc++) {
 		char chDoc = pdoc->CharAt(charInDoc);
 		styleByte = pdoc->StyleAt(charInDoc);
@@ -806,8 +815,8 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 
 	// Layout the line, determining the position of each character,
 	// with an extra element at the end for the end of the line.
-	int startseg = 0;
-	int startsegx = 0;
+	int startseg = 0;	// Start of the current segment, in char. number
+	int startsegx = 0;	// Start of the current segment, in pixels
 	ll.positions[0] = 0;
 	unsigned int tabWidth = vstyle.spaceWidth * pdoc->tabInChars;
 	bool lastSegItalics = false;
@@ -827,7 +836,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 						ll.positions[charInLine + 1] = surface->WidthText(ctrlCharsFont, ctrlChar, strlen(ctrlChar)) + 3;
 					}
 					lastSegItalics = false;
-				} else {
+				} else {	// Regular character
 					lastSegItalics = vstyle.styles[ll.styles[charInLine]].italic;
 					int lenSeg = charInLine - startseg + 1;
 					if ((lenSeg == 1) && (' ' == ll.chars[startseg])) {
@@ -835,7 +844,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 						ll.positions[charInLine + 1] = vstyle.styles[ll.styles[charInLine]].spaceWidth;
 					} else {
 						surface->MeasureWidths(vstyle.styles[ll.styles[charInLine]].font, ll.chars + startseg,
-						                       charInLine - startseg + 1, ll.positions + startseg + 1);
+						                       lenSeg, ll.positions + startseg + 1);
 					}
 				}
 			} else {    // invisible
@@ -1140,7 +1149,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 
 	int screenLinePaintFirst = rcArea.top / vs.lineHeight;
 	// The area to be painted plus one extra line is styled.
-	// The extra line is to determine when a style change, such as statrting a comment flows on to other lines.
+	// The extra line is to determine when a style change, such as starting a comment flows on to other lines.
 	int lineStyleLast = topLine + (rcArea.bottom - 1) / vs.lineHeight + 1;
 	//Platform::DebugPrintf("Paint lines = %d .. %d\n", topLine + screenLinePaintFirst, lineStyleLast);
 	int endPosPaint = pdoc->Length();
@@ -1177,6 +1186,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	}
 	//Platform::DebugPrintf("start display %d, offset = %d\n", pdoc->Length(), xOffset);
 
+	// Do the painting
 	if (rcArea.right > vs.fixedColumnWidth) {
 
 		Surface *surface = surfaceWindow;
@@ -1199,10 +1209,26 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		rcTextArea.left = vs.fixedColumnWidth;
 		rcTextArea.right -= vs.rightMarginWidth;
 		surfaceWindow->SetClip(rcTextArea);
+
+		// Loop on visible lines
 		//GTimer *tim=g_timer_new();
 		while (visibleLine < cs.LinesDisplayed() && yposScreen < rcArea.bottom) {
 			//g_timer_start(tim);
 			//Platform::DebugPrintf("Painting line %d\n", line);
+
+			// Copy this line and its styles from the document into local arrays
+			// and determine the x position at which each character starts.
+			LineLayout ll;
+			LayoutLine(line, surface, vs, ll);
+
+			ll.selStart = SelectionStart(line);
+			ll.selEnd = SelectionEnd(line);
+			if (hideSelection) {
+				ll.selStart = -1;
+				ll.selEnd = -1;
+			}
+			// Need to fix this up so takes account of Unicode and DBCS
+			ll.edgeColumn = theEdge;
 
 			int posLineStart = pdoc->LineStart(line);
 			int posLineEnd = pdoc->LineStart(line + 1);
@@ -1211,11 +1237,6 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 			PRectangle rcLine = rcClient;
 			rcLine.top = ypos;
 			rcLine.bottom = ypos + vs.lineHeight;
-
-			// Copy this line and its styles from the document into local arrays
-			// and determine the x position at which each character starts.
-			LineLayout ll;
-			LayoutLine(line, surface, vs, ll);
 
 			// Highlight the current braces if any
 			if ((braces[0] >= posLineStart) && (braces[0] < posLineEnd)) {
@@ -1232,15 +1253,6 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 			        (braces[1] >= posLineStart && braces[0] <= posLineEnd)) {
 				ll.xHighlightGuide = highlightGuideColumn * vs.spaceWidth;
 			}
-
-			ll.selStart = SelectionStart(line);
-			ll.selEnd = SelectionEnd(line);
-			if (hideSelection) {
-				ll.selStart = -1;
-				ll.selEnd = -1;
-			}
-			// Need to fix this up so takes account of Unicode and DBCS
-			ll.edgeColumn = theEdge;
 
 			// Draw the line
 			if (cs.GetVisible(line))
@@ -1320,6 +1332,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		}
 		//g_timer_destroy(tim);
 
+		// Right column limit indicator
 		PRectangle rcBeyondEOF = rcClient;
 		rcBeyondEOF.left = vs.fixedColumnWidth;
 		rcBeyondEOF.right = rcBeyondEOF.right;
@@ -1444,6 +1457,21 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 
 		while (line <= linePrintLast && ypos < pfr->rc.bottom) {
 
+			// When printing, the hdc and hdcTarget may be the same, so
+			// changing the state of surfaceMeasure may change the underlying
+			// state of surface. Therefore, any cached state is discarded before
+			// using each surface.
+			surfaceMeasure->FlushCachedState();
+
+			// Copy this line and its styles from the document into local arrays
+			// and determine the x position at which each character starts.
+			LineLayout ll;
+			LayoutLine(line, surfaceMeasure, vsPrint, ll);
+			ll.selStart = -1;
+			ll.selEnd = -1;
+			// Need to fix this up so takes account of Unicode and DBCS
+			ll.edgeColumn = theEdge;
+
 			PRectangle rcLine;
 			rcLine.left = pfr->rc.left + lineNumberWidth;
 			rcLine.top = ypos;
@@ -1463,21 +1491,6 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 				                  vsPrint.styles[STYLE_LINENUMBER].fore.allocated,
 				                  vsPrint.styles[STYLE_LINENUMBER].back.allocated);
 			}
-
-			// When printing, the hdc and hdcTarget may be the same, so
-			// changing the state of surfaceMeasure may change the underlying
-			// state of surface. Therefore, any cached state is discarded before
-			// using each surface.
-
-			// Copy this line and its styles from the document into local arrays
-			// and determine the x position at which each character starts.
-			surfaceMeasure->FlushCachedState();
-			LineLayout ll;
-			LayoutLine(line, surfaceMeasure, vsPrint, ll);
-			ll.selStart = -1;
-			ll.selEnd = -1;
-			// Need to fix this up so takes account of Unicode and DBCS
-			ll.edgeColumn = theEdge;
 
 			// Draw the line
 			surface->FlushCachedState();
@@ -3269,7 +3282,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		SetLastXChosen();
 		break;
 
-		// Edit control mesages
+		// Edit control messages
 
 		// Not supported (no-ops):
 		//		EM_GETWORDBREAKPROC

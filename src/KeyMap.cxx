@@ -1,5 +1,7 @@
 // Scintilla source code edit control
-// KeyMap.cxx  - defines a mapping between keystrokes and commands
+/** @file KeyMap.cxx 
+ ** Defines a mapping between keystrokes and commands.
+ **/
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 

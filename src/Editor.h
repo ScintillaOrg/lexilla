@@ -1,11 +1,15 @@
 // Scintilla source code edit control
-// Editor.h - defines the main editor class
+/** @file Editor.h
+ ** Defines the main editor class.
+ **/
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #ifndef EDITOR_H
 #define EDITOR_H
 
+/**
+ */
 class Caret {
 public:
 	bool active;
@@ -15,8 +19,9 @@ public:
 	Caret();
 };
 
+/**
+ */
 class Timer {
-
 public:
 	bool ticking;
 	int ticksToWait;
@@ -26,9 +31,11 @@ public:
 	Timer();
 };
 
+/**
+ */
 class LineLayout {
 public:
-	// Drawing is only performed for maxLineLength characters on each line.
+	/// Drawing is only performed for @a maxLineLength characters on each line.
 	enum {maxLineLength = 4000};
 	int numCharsInLine;
 	int xHighlightGuide;
@@ -42,18 +49,21 @@ public:
 	int positions[maxLineLength+1];
 };
 
+/**
+ */
 class Editor : public DocWatcher {
 	// Private so Editor objects can not be copied
 	Editor(const Editor &) : DocWatcher() {}
 	Editor &operator=(const Editor &) { return *this; }
+
 protected:	// ScintillaBase subclass needs access to much of Editor
 
-	// On GTK+, Scintilla is a container widget holding two scroll bars
-	// whereas on Windows there is just one window with both scroll bars turned on.
-	Window wMain;	// The Scintilla parent window
+	/** On GTK+, Scintilla is a container widget holding two scroll bars
+	 * whereas on Windows there is just one window with both scroll bars turned on. */
+	Window wMain;	///< The Scintilla parent window
 
-	// Style resources may be expensive to allocate so are cached between uses.
-	// When a style attribute is changed, this cache is flushed.
+	/** Style resources may be expensive to allocate so are cached between uses.
+	 * When a style attribute is changed, this cache is flushed. */
 	bool stylesValid;	
 	ViewStyle vs;
 	Palette palette;
@@ -67,12 +77,12 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int errorStatus;
 	bool mouseDownCaptures;
 	
-	// In bufferedDraw mode, graphics operations are drawn to a pixmap and then copied to 
-	// the screen. This avoids flashing but is about 30% slower.
+	/** In bufferedDraw mode, graphics operations are drawn to a pixmap and then copied to
+	 * the screen. This avoids flashing but is about 30% slower. */
 	bool bufferedDraw;
 
-	int xOffset;				// Horizontal scrolled amount in pixels
-	int xCaretMargin;	// Ensure this many pixels visible on both sides of caret
+	int xOffset;		///< Horizontal scrolled amount in pixels
+	int xCaretMargin;	///< Ensure this many pixels visible on both sides of caret
 	bool horizontalScrollBarVisible;
 	
 	Surface pixmapLine;
@@ -82,7 +92,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	Surface pixmapIndentGuideHighlight;
 	// Intellimouse support - currently only implemented for Windows
 	unsigned int ucWheelScrollLines;
-	int cWheelDelta; //wheel delta from roll
+	int cWheelDelta; ///< Wheel delta from roll
 
 	KeyMap kmap;
 
@@ -282,8 +292,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void DisplayCursor(Window::Cursor c);
 	virtual void StartDrag();
 	void DropAt(int position, const char *value, bool moving, bool rectangular);
-	// PositionInSelection returns 0 if position in selection, -1 if position before selection, and 1 if after.
-	// Before means either before any line of selection or before selection on its line, with a similar meaning to after
+	/** PositionInSelection returns 0 if position in selection, -1 if position before selection, and 1 if after.
+	 * Before means either before any line of selection or before selection on its line, with a similar meaning to after. */
 	int PositionInSelection(int pos);
 	bool PointInSelection(Point pt);
 	bool PointInSelMargin(Point pt);

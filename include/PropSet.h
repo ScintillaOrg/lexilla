@@ -1,5 +1,7 @@
-// SciTE - Scintilla based Text Editor
-// PropSet.h - a java style properties file module
+// Scintilla source code edit control
+/** @file PropSet.h
+ ** A Java style properties file module.
+ **/
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
@@ -19,6 +21,8 @@ struct Property {
 	Property() : hash(0), key(0), val(0), next(0) {}
 };
 
+/**
+ */
 class PropSet {
 private:
 	enum { hashRoots=31 };
@@ -38,14 +42,16 @@ public:
 	void Clear();
 };
 
+/**
+ */
 class WordList {
 public:
-	// Each word contains at least one character - a empty word acts as sentinal at the end.
+	// Each word contains at least one character - a empty word acts as sentinel at the end.
 	char **words;
 	char **wordsNoCase;
 	char *list;
 	int len;
-	bool onlyLineEnds;	// Delimited by any white space or only line ends
+	bool onlyLineEnds;	///< Delimited by any white space or only line ends
 	bool sorted;
 	int starts[256];
 	WordList(bool onlyLineEnds_ = false) : 

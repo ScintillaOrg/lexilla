@@ -1,5 +1,7 @@
 // Scintilla source code edit control
-// SciLexer - interface to the added lexer functions in the SciLexer version of the edit control
+/** @file SciLexer.h
+ ** Interface to the added lexer functions in the SciLexer version of the edit control.
+ **/
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 

@@ -1,5 +1,7 @@
 // Scintilla source code edit control
-// CellBuffer.cxx - manages a buffer of cells
+/** @file CellBuffer.cxx
+ ** Manages a buffer of cells.
+ **/
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 

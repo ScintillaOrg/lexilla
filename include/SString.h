@@ -1,8 +1,9 @@
 // SciTE - Scintilla based Text Editor
-// SString.h - a simple string class
+/** @file SString.h
+ ** A simple string class.
+ **/
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
-/** @file **/
 
 #ifndef SSTRING_H
 #define SSTRING_H
@@ -16,11 +17,12 @@ bool EqualCaseInsensitive(const char *a, const char *b);
 // While it would be 'better' to use std::string, that doubles the executable size.
 // An SString may contain embedded nul characters.
 
-/** Duplicate a C string.
+/**
+ * Duplicate a C string.
  * Allocate memory of the given size, or big enough to fit the string if length isn't given;
  * then copy the given string in the allocated memory.
  * @return the pointer to the new string
- **/
+ */
 inline char *StringDup(
 	const char *s,	///< The string to duplicate
 	int len=-1)		///< The length of memory to allocate. Optional.
@@ -37,7 +39,8 @@ inline char *StringDup(
 	return sNew;
 }
 
-/** A simple string class.
+/**
+ * @brief A simple string class.
  * Hold the length of the string for quick operations,
  * can have a buffer bigger than the string to avoid too many memory allocations and copies.
  * May have embedded zeroes as a result of @a substitute, but rely too heavily on C string
@@ -96,13 +99,15 @@ public:
 	const char* end(void) const {
 		return &s[slen];	// Point after the last character
 	}
-	size_type size(void) const {	// Size of buffer
+	/** Size of buffer. */
+	size_type size(void) const {	///<
 		if (s)
 			return ssize;
 		else
 			return 0;
 	}
-	int length() const {	// Size of string in buffer
+	/** Size of string in buffer. */
+	int length() const {
 		return slen;
 	}
 	SString &assign(const char* sother, int size_ = -1) {
