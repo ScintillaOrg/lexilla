@@ -467,6 +467,7 @@ void Editor::SetSelection(int currentPos_) {
 }
 
 void Editor::SetEmptySelection(int currentPos_) {
+	selType = selStream;
 	SetSelection(currentPos_, currentPos_);
 }
 
@@ -2878,13 +2879,13 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 				CopySelectionIntoDrag();
 				StartDrag();
 			} else {
-				selType = alt ? selRectangle : selStream;
 				xStartSelect = pt.x - vs.fixedColumnWidth + xOffset;
 				xEndSelect = pt.x - vs.fixedColumnWidth + xOffset;
 				SetDragPosition(invalidPosition);
 				SetMouseCapture(true);
 				if (!shift)
 					SetEmptySelection(newPos);
+				selType = alt ? selRectangle : selStream;
 				selectionType = selChar;
 				originalAnchorPos = currentPos;
 			}
