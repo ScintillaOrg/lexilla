@@ -25,12 +25,15 @@ inline bool isLuaOperator(char ch) {
 		ch == '{' || ch == '}' || ch == '~' ||
 		ch == '[' || ch == ']' || ch == ';' ||
 		ch == '<' || ch == '>' || ch == ',' ||
-		ch == '^' || ch == '.' )
+		ch == '.' || ch == '^' || ch == '%' || ch == ':')
 			return true;
 	return false;
 }
 
-static void classifyWordLua(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler)
+static void classifyWordLua(unsigned int start,
+							unsigned int end,
+							WordList	&keywords,
+							Accessor	&styler)
 {
     char s[100];
     bool wordIsNumber = isdigit(styler[start]) || (styler[start] == '.');
@@ -127,6 +130,11 @@ static void ColouriseLuaDoc(unsigned int startPos,
 			{
 			    styler.ColourTo(i-1, state);
 			    state = SCE_LUA_PREPROCESSOR;
+			}
+			else if (ch == '#' && firstChar)	// Should be only on the first line of the file! Cannot be tested here
+			{
+				styler.ColourTo(i-1, state);
+				state = SCE_LUA_COMMENTLINE;
 			}
 		    else if (isLuaOperator(ch))
 			{
