@@ -3164,6 +3164,9 @@ void Editor::SetScrollBars() {
 	int nMax = MaxScrollPos();
 	int nPage = LinesOnScreen();
 	bool modified = ModifyScrollBars(nMax + nPage - 1, nPage);
+	if (modified) {
+		DwellEnd(true);
+	}
 
 	// TODO: ensure always showing as many lines as possible
 	// May not be, if, for example, window made larger
