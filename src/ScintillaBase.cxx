@@ -283,11 +283,11 @@ void ScintillaBase::ContextMenu(Point pt) {
 void ScintillaBase::CancelModes() {
 	AutoCompleteCancel();
 	ct.CallTipCancel();
-    Editor::CancelModes();
+	Editor::CancelModes();
 }
 
 void ScintillaBase::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, bool alt) {
-    CancelModes();
+	CancelModes();
 	Editor::ButtonDown(pt, curTime, shift, ctrl, alt);
 }
 

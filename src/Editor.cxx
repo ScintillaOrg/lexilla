@@ -117,7 +117,7 @@ Editor::~Editor() {
 }
 
 void Editor::Finalise() {
-    CancelModes();
+	CancelModes();
 }
 
 void Editor::DropGraphics() {
@@ -1960,7 +1960,6 @@ void Editor::LineTranspose() {
 }
 
 void Editor::CancelModes() {
-	SetEmptySelection(currentPos);
 }
 
 int Editor::KeyCommand(UINT iMessage) {

@@ -47,7 +47,7 @@ protected:
 	
 	virtual void AddCharUTF(char *s, unsigned int len);
 	void Command(int cmdId);
-    virtual void CancelModes();
+	virtual void CancelModes();
 	virtual int KeyCommand(UINT iMessage);
 	
 	void AutoCompleteStart(int lenEntered, const char *list);

@@ -659,7 +659,8 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, ch
 }
 
 void ScintillaGTK::UnclaimSelection(GdkEventSelection *selection_event) {
-	if (selection_event->selection == GDK_SELECTION_PRIMARY) {
+	if ((selection_event->selection == GDK_SELECTION_PRIMARY) && 
+		!OwnPrimarySelection()) {
 		delete [] primarySelectionCopy;
 		primarySelectionCopy = NULL;
 		primarySelection = false;
@@ -718,6 +719,10 @@ gint ScintillaGTK::MoveResize(GtkWidget *, GtkAllocation *allocation, ScintillaG
 
 gint ScintillaGTK::Press(GtkWidget *, GdkEventButton *event, ScintillaGTK *sciThis) {
 	//Platform::DebugPrintf("Press %x time=%d state = %x button = %x\n",sciThis,event->time, event->state, event->button);
+	// Do not use GTK+ double click events as Scintilla has its own double click detection
+	if (event->type != GDK_BUTTON_PRESS) 
+		return FALSE;
+	
 	sciThis->evbtn = *event;
 	Point pt;
 	pt.x = int(event->x);
