@@ -2,7 +2,7 @@
 /** @file LexSQL.cxx
  ** Lexer for SQL.
  **/
-// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2002 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <stdlib.h>
