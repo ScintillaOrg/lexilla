@@ -540,6 +540,12 @@ set void AutoCSetAutoHide=2118(bool autoHide,)
 # Retrieve whether or not autocompletion is hidden automatically when nothing matches
 get bool AutoCGetAutoHide=2119(,)
 
+# Set whether or not autocompletion deletes any word characters after the inserted text upon completion
+set void AutoCSetDropRestOfWord=2270(bool dropRestOfWord,)
+
+# Retrieve whether or not autocompletion deletes any word characters after the inserted text upon completion
+get bool AutoCGetDropRestOfWord=2271(,)
+
 # Set the number of spaces used for one level of indentation.
 set void SetIndent=2122(int indentSize,)
 

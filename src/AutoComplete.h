@@ -25,6 +25,7 @@ public:
 	/// Should autocompletion be canceled if editor's currentPos <= startPos?
 	bool cancelAtStartPos;
 	bool autoHide;
+	bool dropRestOfWord;
 
 	AutoComplete();
 	~AutoComplete();

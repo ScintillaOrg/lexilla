@@ -307,14 +307,18 @@ void ScintillaBase::AutoCompleteCompleted(char fillUp/*='\0'*/) {
 		scn.lParam = 0;
 		scn.text = userListSelected.c_str();
 		NotifyParent(scn);
-		return ;
+		return;
 	}
 
 	Position firstPos = ac.posStart - ac.startLen;
-	if (currentPos < firstPos)
-		return ;
-	if (currentPos != firstPos) {
-		pdoc->DeleteChars(firstPos, currentPos - firstPos);
+	Position endPos = currentPos;
+	if (ac.dropRestOfWord)
+		endPos = pdoc->ExtendWordSelect(endPos, 1, true);
+	if (endPos < firstPos)
+		return;
+	pdoc->BeginUndoAction();
+	if (endPos != firstPos) {
+		pdoc->DeleteChars(firstPos, endPos - firstPos);
 	}
 	SetEmptySelection(ac.posStart);
 	if (item != -1) {
@@ -324,6 +328,7 @@ void ScintillaBase::AutoCompleteCompleted(char fillUp/*='\0'*/) {
 		pdoc->InsertString(firstPos, piece.c_str());
 		SetEmptySelection(firstPos + piece.length());
 	}
+	pdoc->EndUndoAction();
 }
 
 void ScintillaBase::ContextMenu(Point pt) {
@@ -404,7 +409,7 @@ void ScintillaBase::NotifyStyleToNeeded(int endStyleNeeded) {
 		int lineEndStyled = WndProc(SCI_LINEFROMPOSITION, endStyled, 0);
 		endStyled = WndProc(SCI_POSITIONFROMLINE, lineEndStyled, 0);
 		Colourise(endStyled, endStyleNeeded);
-		return ;
+		return;
 	}
 #endif
 	Editor::NotifyStyleToNeeded(endStyleNeeded);
@@ -482,6 +487,13 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 
 	case SCI_AUTOCGETAUTOHIDE:
 		return ac.autoHide;
+
+	case SCI_AUTOCSETDROPRESTOFWORD:
+		ac.dropRestOfWord = wParam != 0;
+		break;
+
+	case SCI_AUTOCGETDROPRESTOFWORD:
+		return ac.dropRestOfWord;
 
 	case SCI_CALLTIPSHOW: {
 			AutoCompleteCancel();

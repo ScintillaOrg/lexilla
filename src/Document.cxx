@@ -722,13 +722,16 @@ Document::charClassification Document::WordCharClass(unsigned char ch) {
  * Used by commmands that want to select whole words.
  * Finds the start of word at pos when delta < 0 or the end of the word when delta >= 0.
  */
-int Document::ExtendWordSelect(int pos, int delta) {
+int Document::ExtendWordSelect(int pos, int delta, bool onlyWordCharacters) {
+	charClassification ccStart = ccWord;
 	if (delta < 0) {
-		charClassification ccStart = WordCharClass(cb.CharAt(pos-1));
+		if (!onlyWordCharacters)
+			ccStart = WordCharClass(cb.CharAt(pos-1));
 		while (pos > 0 && (WordCharClass(cb.CharAt(pos - 1)) == ccStart))
 			pos--;
 	} else {
-		charClassification ccStart = WordCharClass(cb.CharAt(pos));
+		if (!onlyWordCharacters)
+			ccStart = WordCharClass(cb.CharAt(pos));
 		while (pos < (Length()) && (WordCharClass(cb.CharAt(pos)) == ccStart))
 			pos++;
 	}

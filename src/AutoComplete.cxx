@@ -22,7 +22,8 @@ AutoComplete::AutoComplete() :
 	posStart(0),
 	startLen(0),
 	cancelAtStartPos(true),
-	autoHide(true) {
+	autoHide(true),
+	dropRestOfWord(false)	{
 	stopChars[0] = '\0';
 	fillUpChars[0] = '\0';
 }
