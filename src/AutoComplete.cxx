@@ -90,7 +90,6 @@ void AutoComplete::SetList(const char *list) {
 		}
 		delete []words;
 	}
-	//lb.Sort();
 }
 
 void AutoComplete::Show() {
