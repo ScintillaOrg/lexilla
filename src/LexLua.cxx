@@ -39,7 +39,7 @@ static inline bool IsANumberChar(const int ch) {
              ch == '.' || ch == '-' || ch == '+');
 }
 
-static inline bool IsLuaOperator(char ch) {
+static inline bool IsLuaOperator(int ch) {
 	if (ch >= 0x80 || isalnum(ch)) {
 		return false;
 	}
