@@ -9,11 +9,13 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
-// PLAT_GTK = GTK+ on Linux, PLAT_WIN = Win32 API on Win32 OS
+// PLAT_GTK = GTK+ on Linux or Win32
+// PLAT_GTK_WIN32 is defined additionally when running PLAT_GTK under Win32
+// PLAT_WIN = Win32 API on Win32 OS
 // PLAT_WX is wxWindows on any supported platform
-// Could also have PLAT_GTKWIN = GTK+ on Win32 OS in future
 
 #define PLAT_GTK 0
+#define PLAT_GTK_WIN32 0
 #define PLAT_WIN 0
 #define PLAT_WX  0
 
@@ -24,6 +26,11 @@
 #elif defined(GTK)
 #undef PLAT_GTK
 #define PLAT_GTK 1
+
+#ifdef _MSC_VER
+#undef PLAT_GTK_WIN32
+#define PLAT_GTK_WIN32 1
+#endif
 
 #else
 #undef PLAT_WIN

@@ -10,7 +10,7 @@
 #include <time.h>
 
 #include "Platform.h"
-#ifdef _MSC_VER
+#if PLAT_GTK_WIN32
 #include "Windows.h"
 #endif
 
@@ -63,7 +63,7 @@ class ScintillaGTK : public ScintillaBase {
 
 	static GdkAtom clipboard_atom;
  
-#ifdef _MSC_VER       
+#if PLAT_GTK_WIN32
 	CLIPFORMAT cfColumnSelect;
 #endif
 
@@ -144,7 +144,7 @@ private:
 	static void ScrollHSignal(GtkAdjustment *adj, ScintillaGTK *sciThis);
 	static gint Press(GtkWidget *widget, GdkEventButton *event);
 	static gint MouseRelease(GtkWidget *widget, GdkEventButton *event);
-#ifdef _MSC_VER
+#if PLAT_GTK_WIN32
 	static gint ScrollEvent(GtkWidget *widget, GdkEventScroll *event);
 #endif
 	static gint Motion(GtkWidget *widget, GdkEventMotion *event);
@@ -208,7 +208,7 @@ ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 	sci = sci_;
 	wMain = GTK_WIDGET(sci);
 
-#ifdef _MSC_VER       
+#if PLAT_GTK_WIN32       
  	// There does not seem to be a real standard for indicating that the clipboard
 	// contains a rectangular selection, so copy Developer Studio.
 	cfColumnSelect = static_cast<CLIPFORMAT>(
@@ -769,7 +769,7 @@ void ScintillaGTK::Copy() {
 		gtk_selection_owner_set(GTK_WIDGET(wMain.GetID()),
 		                        clipboard_atom,
 		                        GDK_CURRENT_TIME);
-#ifdef _MSC_VER              
+#if PLAT_GTK_WIN32              
 		if (selType == selRectangle) {
 			::OpenClipboard(NULL);
 			::SetClipboardData(cfColumnSelect, 0);
@@ -854,7 +854,7 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 				if ((len == static_cast<unsigned int>(selection_data->length)) && (0 == ptr[i]))
 					len = i;
 			}                     
-#ifdef _MSC_VER
+#if PLAT_GTK_WIN32
 			/* Need to convert \n to correct newline form for this file as win32gtk always returns */
 			/* only \n line delimiter from clipboard */
 			char *tmpstr = new char [2 * len];
@@ -884,11 +884,11 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 				ClearSelection();
 			}
 			// Check for "\n\0" ending to string indicating that selection is rectangular
-#ifndef _MSC_VER
+#if PLAT_GTK_WIN32
+			bool isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect);
+#else
 			bool isRectangular = ((selection_data->length > 1) &&
 			                      (ptr[selection_data->length - 1] == 0 && ptr[selection_data->length - 2] == '\n'));
-#else
-			bool isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect);
 #endif
 			if (isRectangular) {
 				PasteRectangular(selStart, ptr, len);
@@ -897,7 +897,7 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 				SetEmptySelection(currentPos + len);
 			}
 			pdoc->EndUndoAction();
-#ifdef _MSC_VER
+#if PLAT_GTK_WIN32
 			delete []tmpstr;
 #endif
 		}
@@ -911,11 +911,11 @@ void ScintillaGTK::ReceivedDrop(GtkSelectionData *selection_data) {
 		if (selection_data->length > 0) {
 			char *ptr = reinterpret_cast<char *>(selection_data->data);
 			// 3rd argument is false because the deletion of the moved data is handle by GetSelection
-#ifndef _MSC_VER                     
+#if PLAT_GTK_WIN32
+			bool isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect);
+#else
 			bool isRectangular = ((selection_data->length > 1) &&
 			                      (ptr[selection_data->length - 1] == 0 && ptr[selection_data->length - 2] == '\n'));
-#else
-			bool isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect);
 #endif
 			DropAt(posDrop, ptr, false, isRectangular);
 		}
@@ -927,7 +927,7 @@ void ScintillaGTK::ReceivedDrop(GtkSelectionData *selection_data) {
 }
 
 // Preprocessor used to avoid warnings here
-#ifdef _MSC_VER
+#if PLAT_GTK_WIN32
 void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, char *text, bool) 
 #else
 void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, char *text, bool isRectangular) 
@@ -945,7 +945,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, ch
 		}
 	}
 
-#ifdef _MSC_VER
+#if PLAT_GTK_WIN32
 	// win32gtk requires \n delimited lines and doesn't work right with
 	// other line formats, so make a copy of the clip text now with 
 	// newlines converted
@@ -975,9 +975,9 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, ch
 		// and need some way to mark the clipping as being stream or rectangular,
 		// the terminating \0 is included in the length for rectangular clippings.
 		// All other tested aplications behave benignly by ignoring the \0.
-		// The #ifndef is here because on Windows cfColumnSelect clip entry is used 
+		// The #if is here because on Windows cfColumnSelect clip entry is used 
                 // instead as standard indicator of rectangularness (so no need to kludge)
-#ifndef _MSC_VER
+#if PLAT_GTK_WIN32 == 0
 		if (isRectangular)
 			len++;
 #endif
@@ -997,7 +997,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, ch
 	}
 
 	delete []tmpBuffer;
-#ifdef _MSC_VER
+#if PLAT_GTK_WIN32
 	delete []tmpstr;
 #endif
 }
@@ -1145,7 +1145,7 @@ gint ScintillaGTK::MouseRelease(GtkWidget *widget, GdkEventButton *event) {
 
 // win32gtk has a special wheel mouse event for whatever reason and doesn't
 // use the button4/5 trick used under X windows.
-#ifdef _MSC_VER
+#if PLAT_GTK_WIN32
 gint ScintillaGTK::ScrollEvent(GtkWidget *widget,
                                GdkEventScroll *event) {
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
@@ -1565,7 +1565,7 @@ void ScintillaGTK::ClassInit(GtkWidgetClass *widget_class) {
 	widget_class->motion_notify_event = Motion;
 	widget_class->button_press_event = Press;
 	widget_class->button_release_event = MouseRelease;
-#ifdef _MSC_VER
+#if PLAT_GTK_WIN32
 	widget_class->scroll_event = ScrollEvent;
 #endif
 	widget_class->key_press_event = KeyPress;

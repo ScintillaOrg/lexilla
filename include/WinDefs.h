@@ -8,6 +8,16 @@
 #ifndef WINDEFS_H
 #define WINDEFS_H
 
+/* Running GTK version on win32 */
+#if PLAT_GTK_WIN32
+#include "Windows.h"
+#include "Richedit.h"
+
+/* Name conflicts */
+#undef DrawText
+#undef FindText
+#else
+
 #define WORD short
 #define WPARAM unsigned long
 #define LPARAM long
@@ -181,5 +191,7 @@ struct FORMATRANGE {
 //#define MAKELONG(a, b) ((a) | ((b) << 16))
 //#define LOWORD(x) (x & 0xffff)
 //#define HIWORD(x) (x >> 16)
+
+#endif /* !_MSC_VER */
 
 #endif
