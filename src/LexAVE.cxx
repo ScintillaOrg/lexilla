@@ -17,11 +17,6 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-/*
-static bool isOKBeforeRE(char ch) {
-	return (ch == '(') || (ch == '=') || (ch == ',');
-}
-*/
 static void ColouriseAveDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[], 
 	Accessor &styler) {
 	
@@ -30,17 +25,15 @@ static void ColouriseAveDoc(unsigned int startPos, int length, int initStyle, Wo
 	styler.StartAt(startPos);
 	
 	bool fold = styler.GetPropertyInt("fold");
-//	bool stylingWithinPreprocessor = styler.GetPropertyInt("styling.within.preprocessor");
 	int lineCurrent = styler.GetLine(startPos);
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
 
 	int state = initStyle;
-	if (state == SCE_C_STRINGEOL)	// Does not leak onto next line
-		state = SCE_C_DEFAULT;
+	if (state == SCE_AVE_STRINGEOL)	// Does not leak onto next line
+		state = SCE_AVE_DEFAULT;
 	char chPrev = ' ';
 	char chNext = styler[startPos];
-//	char chPrevNonWhite = ' ';
 	unsigned int lengthDoc = startPos + length;
 	int visibleChars = 0;
 	styler.StartSegment(startPos);
@@ -52,9 +45,9 @@ static void ColouriseAveDoc(unsigned int startPos, int length, int initStyle, Wo
 			// Trigger on CR only (Mac style) or either on LF from CR+LF (Dos/Win) or on LF alone (Unix)
 			// Avoid triggering two times on Dos/Win
 			// End of line
-			if (state == SCE_C_STRINGEOL) {
+			if (state == SCE_AVE_STRINGEOL) {
 				styler.ColourTo(i, state);
-				state = SCE_C_DEFAULT;
+				state = SCE_AVE_DEFAULT;
 			}
 			if (fold) {
 				int lev = levelPrev;
@@ -77,65 +70,37 @@ static void ColouriseAveDoc(unsigned int startPos, int length, int initStyle, Wo
 			continue;
 		}
 
-		if (state == SCE_C_DEFAULT) {
-			if (iswordstart(ch) || (ch == '.')) {
+		if (state == SCE_AVE_DEFAULT) {
+			if (iswordstart(ch) || (ch == '.') )  {
 				styler.ColourTo(i-1, state);
-				state = SCE_C_IDENTIFIER;
+				state = SCE_AVE_IDENTIFIER;
 			} else if (ch == '\'') {
 				styler.ColourTo(i-1, state);
-				state = SCE_C_COMMENTLINE;
+				state = SCE_AVE_COMMENT;
 			} else if (ch == '\"') {
 				styler.ColourTo(i-1, state);
-				state = SCE_C_STRING;
+				state = SCE_AVE_STRING;
+			} else if (ch == '#') {
+				styler.ColourTo(i-1, state);
+				state = SCE_AVE_ENUM; 
 			} else if (isoperator(ch) ) {
 				styler.ColourTo(i-1, state);
-				styler.ColourTo(i, SCE_C_OPERATOR);
-			}
-		} 
-	 	else if (state == SCE_C_IDENTIFIER) {
-			if (!iswordchar(ch) || ch == '.' ) {
-				char s[100];
-				unsigned int start = styler.GetStartSegment();
-				unsigned int end = i - 1;
-				for (unsigned int ii = 0; ii < end - start + 1 && ii < 30; ii++) 	{
-					s[ii] = styler[start + ii];
-					s[ii + 1] = '\0';
-				}
-				char chAttr = SCE_C_IDENTIFIER;
-				if (isdigit(s[0]) || (s[0] == '.'))
-					chAttr = SCE_C_NUMBER;
-				else {
-					if (keywords.InList(s)) 
-					{
-						chAttr = SCE_C_WORD;
-						if (strcmp(s, "for") == 0)	levelCurrent +=1;
-						if (strcmp(s, "if") == 0)	levelCurrent +=1;
-						//if (strcmp(s, "elseif") == 0)	levelCurrent +=1;
-						if (strcmp(s, "while") == 0)	levelCurrent +=1;
-						if (strcmp(s, "end") == 0)	{
-							levelCurrent -=1;
-						}
-					}
-				}
-				styler.ColourTo(end, chAttr);
-				state = SCE_C_DEFAULT;
-				
-				if (ch == '\'') {
-					state = SCE_C_COMMENTLINE;
-				} else if (ch == '\"') {
-					state = SCE_C_STRING;
-				} else if (isoperator(ch)) {
-					styler.ColourTo(i, SCE_C_OPERATOR);
-				}
-			}
-		} 
-	  	else if (state == SCE_C_COMMENTLINE) {
-			if (ch == '\r' || ch == '\n') {
-				styler.ColourTo(i-1, state);
-				state = SCE_C_DEFAULT;
+				styler.ColourTo(i, SCE_AVE_OPERATOR);
 			}
 		}
-		else if (state == SCE_C_STRING) {
+	  	else if (state == SCE_AVE_COMMENT) {
+			if (ch == '\r' || ch == '\n') {
+				styler.ColourTo(i-1, state);
+				state = SCE_AVE_DEFAULT;
+			}
+		}
+	  	else if (state == SCE_AVE_ENUM) {
+			if (isoperator(ch)  || ch == ' ' || ch == '\'' || ch == '\r' || ch == '\n') {
+				styler.ColourTo(i-1, state);
+				state = SCE_AVE_DEFAULT;
+			}
+		}
+		else if (state == SCE_AVE_STRING) {
 			if (ch == '\"') {
 				if (chNext == '\"') {
 					i++;
@@ -144,20 +109,77 @@ static void ColouriseAveDoc(unsigned int startPos, int length, int initStyle, Wo
 				} else
 				{
 					styler.ColourTo(i, state);
-					state = SCE_C_DEFAULT;
+					state = SCE_AVE_DEFAULT;
 				}
 			} else if (chNext == '\r' || chNext == '\n') {
-				styler.ColourTo(i-1, SCE_C_STRINGEOL);
-				state = SCE_C_STRINGEOL;
+				styler.ColourTo(i-1, SCE_AVE_STRINGEOL);
+				state = SCE_AVE_STRINGEOL;
 			}
 		} 
+		if ((state == SCE_AVE_IDENTIFIER)) {
+			if (!iswordchar(ch) || ch == '.' ) {
+				char s[100];
+				unsigned int start = styler.GetStartSegment();
+				unsigned int end = i - 1;
+				for (unsigned int ii = 0; ii < end - start + 1 && ii < 30; ii++) 	{
+					s[ii] = static_cast<char>(tolower(styler[start + ii]));
+					s[ii + 1] = '\0';
+				}
+
+				char chAttr = SCE_AVE_IDENTIFIER;
+
+				if (isdigit(s[0]))
+					chAttr = SCE_AVE_NUMBER;
+				else {
+					if ((strcmp(s, "for") == 0) || (strcmp(s, "if") == 0) || (strcmp(s, "while") == 0))	
+					{
+						levelCurrent +=1;
+						chAttr = SCE_AVE_STATEMENT;
+					}
+
+					if (strcmp(s, "end") == 0)	
+					{
+						levelCurrent -=1;
+						chAttr = SCE_AVE_STATEMENT;
+					}
+						
+					if ( (strcmp(s, "then") == 0) ||  (strcmp(s, "else") == 0)       || (strcmp(s, "break") == 0) ||
+						(strcmp(s, "each") == 0) || 
+						(strcmp(s, "exit") == 0) ||  (strcmp(s, "continue") == 0) || (strcmp(s, "return") == 0) ||
+						(strcmp(s, "by") == 0)   ||  (strcmp(s, "in") == 0)          || (strcmp(s, "elseif") == 0))	
+					{
+						chAttr = SCE_AVE_STATEMENT;
+					}
+
+					if ((strcmp(s, "av") == 0) || (strcmp(s, "self") == 0))	
+					{
+						chAttr = SCE_AVE_KEYWORD;
+					}
+							
+					if (keywords.InList(s)) 
+					{
+						chAttr = SCE_AVE_WORD;						
+					}
+				}
+				styler.ColourTo(end, chAttr);
+				state = SCE_AVE_DEFAULT;
+				
+				if (ch == '\'') {
+					state = SCE_AVE_COMMENT;
+				} else if (ch == '\"') {
+					state = SCE_AVE_STRING;
+				} else if (isoperator(ch)) {
+					styler.ColourTo(i, SCE_AVE_OPERATOR);
+				}
+			}
+		} 
+
 	}
 	styler.ColourTo(lengthDoc - 1, state);
 
 	// Fill in the real level of the next line, keeping the current flags as they will be filled in later
 	if (fold) {
 		int flagsNext = styler.LevelAt(lineCurrent) & ~SC_FOLDLEVELNUMBERMASK;
-		//styler.SetLevel(lineCurrent, levelCurrent | flagsNext);
 		styler.SetLevel(lineCurrent, levelPrev | flagsNext);
 		
 	}
