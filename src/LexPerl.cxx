@@ -600,6 +600,10 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					quoteUp = ch;
 					quoteDown = opposite(quoteUp);
 					quotes++;
+				} else if (ch == '\\' && quoteUp != '\\') {
+					i++;
+					ch = chNext;
+					chNext = styler.SafeGetCharAt(i + 1);
 				} else if (ch == quoteDown) {
 					quotes--;
 					if (quotes == 0) {
