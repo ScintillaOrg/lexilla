@@ -3043,6 +3043,10 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	case SCI_LINESCROLLDOWN:
 	case SCI_LINESCROLLUP:
 	case SCI_DELETEBACKNOTLINE:
+	case SCI_HOMEDISPLAY:
+	case SCI_HOMEDISPLAYEXTEND:
+	case SCI_LINEENDDISPLAY:
+	case SCI_LINEENDDISPLAYEXTEND:
 		break;
 
 		// Filter out all others like display changes.  Also, newlines are redundant
@@ -3171,6 +3175,39 @@ void Editor::CursorUpOrDown(int direction, bool extend) {
 		}
 	}
 	MovePositionTo(posNew, extend);
+}
+
+int Editor::StartEndDisplayLine(int pos, bool start) {
+	RefreshStyleData();
+	int line = pdoc->LineFromPosition(pos);
+	AutoSurface surface(IsUnicodeMode());
+	LineLayout *ll = RetrieveLineLayout(line);
+	int posRet = INVALID_POSITION;
+	if (surface && ll) {
+		unsigned int posLineStart = pdoc->LineStart(line);
+		LayoutLine(line, surface, vs, ll, wrapWidth);
+		int posInLine = pos - posLineStart;
+		if (posInLine <= ll->maxLineLength) {
+			for (int subLine=0; subLine<ll->lines; subLine++) {
+				if ((posInLine >= ll->LineStart(subLine)) && (posInLine <= ll->LineStart(subLine+1))) {
+					if (start) {
+						posRet = ll->LineStart(subLine) + posLineStart;
+					} else {
+						if (subLine == ll->lines - 1)
+							posRet = ll->LineStart(subLine+1) + posLineStart;
+						else
+							posRet = ll->LineStart(subLine+1) + posLineStart - 1;
+					}
+				}
+			}
+		}
+	}
+	llc.Dispose(ll);
+	if (posRet == INVALID_POSITION) {
+		return pos;
+	} else {
+		return posRet;
+	}
 }
 
 int Editor::KeyCommand(unsigned int iMessage) {
@@ -3405,6 +3442,26 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		break;
 	case SCI_WORDPARTRIGHTEXTEND:
 		MovePositionTo(MovePositionSoVisible(pdoc->WordPartRight(currentPos), 1), true);
+		SetLastXChosen();
+		break;
+	case SCI_HOMEDISPLAY:
+		MovePositionTo(MovePositionSoVisible(
+			StartEndDisplayLine(currentPos, true), -1));
+		SetLastXChosen();
+		break;
+	case SCI_HOMEDISPLAYEXTEND:
+		MovePositionTo(MovePositionSoVisible(
+			StartEndDisplayLine(currentPos, true), -1), true);
+		SetLastXChosen();
+		break;
+	case SCI_LINEENDDISPLAY:
+		MovePositionTo(MovePositionSoVisible(
+			StartEndDisplayLine(currentPos, false), 1));
+		SetLastXChosen();
+		break;
+	case SCI_LINEENDDISPLAYEXTEND:
+		MovePositionTo(MovePositionSoVisible(
+			StartEndDisplayLine(currentPos, false), 1), true);
 		SetLastXChosen();
 		break;
 	}
@@ -5479,6 +5536,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_WORDPARTRIGHT:
 	case SCI_WORDPARTRIGHTEXTEND:
 	case SCI_DELETEBACKNOTLINE:
+	case SCI_HOMEDISPLAY:
+	case SCI_HOMEDISPLAYEXTEND:
+	case SCI_LINEENDDISPLAY:
+	case SCI_LINEENDDISPLAYEXTEND:
 		return KeyCommand(iMessage);
 
 	case SCI_BRACEHIGHLIGHT:

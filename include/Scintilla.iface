@@ -1119,6 +1119,20 @@ fun void LineScrollUp=2343(,)
 # Will not delete the character before at the start of a line.
 fun void DeleteBackNotLine=2344(,)
 
+# Move caret to first position on display line.
+fun void HomeDisplay=2345(,)
+
+# Move caret to first position on display line extending selection to 
+# new caret position.
+fun void HomeDisplayExtend=2346(,)
+
+# Move caret to last position on display line.
+fun void LineEndDisplay=2347(,)
+
+# Move caret to last position on display line extending selection to new 
+# caret position.
+fun void LineEndDisplayExtend=2348(,)
+
 # Move the caret inside current view if it's not there already.
 fun void MoveCaretInsideView=2401(,)
 
