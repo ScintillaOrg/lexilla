@@ -1594,6 +1594,7 @@ void Editor::SelectAll() {
 
 void Editor::Undo() {
 	if (pdoc->CanUndo()) {
+        InvalidateCaret();
 		int newPos = pdoc->Undo();
 		SetEmptySelection(newPos);
 		EnsureCaretVisible();
