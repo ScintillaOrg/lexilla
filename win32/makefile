@@ -37,8 +37,9 @@ clean:
 deps:
 	$(CC) -MM $(CXXFLAGS) *.cxx ../src/*.cxx >deps.mak
 
-LEXOBJS	= LexAda.o LexAVE.o LexConf.o LexCPP.o LexHTML.o LexLua.o \
-	LexOthers.o LexPascal.o LexPerl.o LexPython.o LexSQL.o LexVB.o
+LEXOBJS=LexAda.o LexAVE.o LexConf.o LexCPP.o LexHTML.o \
+	LexLisp.o LexLua.o LexOthers.o LexPascal.o LexPerl.o \
+	LexPython.o LexSQL.o LexVB.o
 
 SOBJS	= ScintillaWin.o ScintillaBase.o Editor.o Document.o \
 	ContractionState.o CellBuffer.o CallTip.o \
