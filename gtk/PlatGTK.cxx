@@ -758,9 +758,9 @@ bool SurfaceImpl::Initialised() {
 #endif
 
 void SurfaceImpl::Init(WindowID WID_NAME) {
-	PLATFORM_ASSERT(wid);
 	Release();
 #ifdef USE_PANGO
+	PLATFORM_ASSERT(wid);
 	pcontext = gtk_widget_create_pango_context(PWidget(wid));
 	PLATFORM_ASSERT(pcontext);
 	layout = pango_layout_new(pcontext);
@@ -770,11 +770,11 @@ void SurfaceImpl::Init(WindowID WID_NAME) {
 }
 
 void SurfaceImpl::Init(SurfaceID sid, WindowID WID_NAME) {
-	PLATFORM_ASSERT(wid);
 	PLATFORM_ASSERT(sid);
 	GdkDrawable *drawable_ = reinterpret_cast<GdkDrawable *>(sid);
 	Release();
 #ifdef USE_PANGO
+	PLATFORM_ASSERT(wid);
 	pcontext = gtk_widget_create_pango_context(PWidget(wid));
 	layout = pango_layout_new(pcontext);
 #endif
@@ -785,12 +785,12 @@ void SurfaceImpl::Init(SurfaceID sid, WindowID WID_NAME) {
 }
 
 void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID WID_NAME) {
-	PLATFORM_ASSERT(wid);
 	PLATFORM_ASSERT(surface_);
 	Release();
 	SurfaceImpl *surfImpl = static_cast<SurfaceImpl *>(surface_);
 	PLATFORM_ASSERT(surfImpl->drawable);
 #ifdef USE_PANGO
+	PLATFORM_ASSERT(wid);
 	pcontext = gtk_widget_create_pango_context(PWidget(wid));
 	PLATFORM_ASSERT(pcontext);
 	layout = pango_layout_new(pcontext);
