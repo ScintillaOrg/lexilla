@@ -125,7 +125,101 @@
 	Released on 9 September 2002.
       </li>
       <li>
-	.
+	Improved Pascal lexer with context sensitive keywords
+	and separate folder which handles  //{ and //} folding comments and
+	{$region} and {$end} folding directives.
+	The "case" statement now folds correctly.
+      </li>
+      <li>
+	C++ lexer correctly handles comments on preprocessor lines.
+      </li>
+      <li>
+	New commands for moving to beginning and end of display lines when in line
+	wrap mode. Key bindings added for these commands.
+      </li>
+      <li>
+	New marker symbols that look like ">>>" and "..." which can be used for
+	interactive shell prompts for Python.
+      </li>
+      <li>
+	The foreground and background colours of visible whitespace can be chosen
+	independent of the colours chosen for the lexical class of that whitespace.
+      </li>
+      <li>
+	Per line data optimised by using an exponential allocation scheme.
+      </li>
+      <li>
+	SciTE API file loading optimised.
+      </li>
+      <li>
+	SciTE for GTK+ subsystem 2 documented. The exit status of commands
+	is decoded into more understandable fields.
+      </li>
+      <li>
+	SciTE find dialog remembers previous find string when there is no selection.
+	Find in Selection button disabled when selection is rectangular as command
+	did not work.
+      </li>
+      <li>
+	Shift+Enter made equivalent to Enter to avoid users having to let go of
+	the shift key when typing. Avoids the possibility of entering single carriage
+	returns in a file that contains CR+LF line ends.
+      </li>
+      <li>
+	Autocompletion does not immediately disappear when the length parameter
+	to SCI_AUTOCSHOW is 0.
+      </li>
+      <li>
+	SciTE focuses on the editor pane when File | New executed and when the
+	output pane is closed with F8. Double clicking on a non-highlighted output
+	pane line selects the word under the cursor rather than seeking the next
+	highlighted line.
+      </li>
+      <li>
+	SciTE director interface implements an "askproperty" command.
+      </li>
+      <li>
+	SciTE's Export as LaTeX output improved.
+      </li>
+      <li>
+	Better choice of autocompletion displaying above the caret rather then
+	below when that is more sensible.
+      </li>
+      <li>
+	Bug fixed where context menu would not be completely visible if invoked
+	when cursor near bottom or left of screen.
+      </li>
+      <li>
+	Crashing bug fixed when displaying long strings on GTK+ caused failure of X server
+	by displaying long text in segments.
+      </li>
+      <li>
+	Crashing bug fixed on GTK+ when a Scintilla window was removed from its parent
+	but was still the selection owner.
+      </li>
+      <li>
+	Bug fixed on Windows in Unicode mode where not all characters on a line
+	were displayed when that line contained some characters not in ASCII.
+      </li>
+      <li>
+	Crashing bug fixed in SciTE on Windows with clearing output while running command.
+      </li>
+      <li>
+	Bug fixed in SciTE for GTK+ with command completion not detected when
+	no output was produced by the command.
+      </li>
+      <li>
+	Bug fixed in SciTE for Windows where menus were not shown translated.
+      </li>
+      <li>
+	Bug fixed where words failed to display in line wrapping mode with visible
+	line ends.
+      </li>
+      <li>
+	Bug fixed in SciTE where files opened from a session file were not closed.
+      </li>
+      <li>
+	Cosmetic flicker fixed when using Ctrl+Up and Ctrl+Down with some caret policies.
       </li>
     </ul>
     <h3>
