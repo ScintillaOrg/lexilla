@@ -1097,7 +1097,7 @@ void ScintillaGTK::Resize(int width, int height) {
 		alloc.width = Platform::Maximum(1, width - scrollBarWidth) + 1;
 		alloc.height = horizontalScrollBarHeight;
 	} else {
-		alloc.y = height;
+		alloc.y = -scrollBarHeight;
 		alloc.width = 0;
 		alloc.height = 0;
 	}
@@ -1109,7 +1109,7 @@ void ScintillaGTK::Resize(int width, int height) {
 		alloc.width = scrollBarWidth;
 		alloc.height = Platform::Maximum(1, height - scrollBarHeight) + 1;
 	} else {
-		alloc.x = width;
+		alloc.x = -scrollBarWidth;
 		alloc.width = 0;
 		alloc.height = 0;
 	}
