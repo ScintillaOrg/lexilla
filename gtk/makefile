@@ -7,6 +7,13 @@
 .SUFFIXES: .cxx .o .h .a
 CC = g++
 AR = ar
+RANLIB = touch
+
+ifeq ($(OSTYPE),darwin)
+CC = c++
+AR = ar
+RANLIB = ranlib
+endif
 
 COMPLIB=../bin/scintilla.a
 
@@ -44,6 +51,7 @@ $(COMPLIB): DocumentAccessor.o WindowAccessor.o KeyWords.o StyleContext.o Docume
 	KeyMap.o LineMarker.o ScintillaGTK.o CellBuffer.o ViewStyle.o \
 	RESearch.o Style.o Indicator.o AutoComplete.o
 	$(AR) rc $@ $^
+	$(RANLIB) $@
 
 # Automatically generate header dependencies with "make deps"
 include deps.mak
