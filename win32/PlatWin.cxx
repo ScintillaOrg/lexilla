@@ -236,9 +236,8 @@ Font::~Font() {
 #define FONTS_CACHED
 
 void Font::Create(const char *faceName, int characterSet, int size, bool bold, bool italic) {
-#ifndef FONTS_CACHED
 	Release();
-
+#ifndef FONTS_CACHED
 	LOGFONT lf;
 	SetLogFont(lf, faceName, characterSet, size, bold, italic);
 	id = ::CreateFontIndirect(&lf);
