@@ -807,7 +807,7 @@ gint ScintillaGTK::KeyPress(GtkWidget *, GdkEventKey *event, ScintillaGTK *sciTh
 	int key = event->keyval;
 	if (ctrl && (key < 128))
 		key = toupper(key);
-	else if (key >= GDK_KP_Multiply && key <= GDK_KP_9) 
+	else if (!ctrl && (key >= GDK_KP_Multiply && key <= GDK_KP_9)) 
 		key &= 0x7F;
 	else	
 		key = KeyTranslate(key);
