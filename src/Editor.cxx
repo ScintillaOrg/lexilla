@@ -901,9 +901,9 @@ int Editor::MovePositionTo(int newPos, bool extend, bool ensureVisible) {
 	} else {
 		SetEmptySelection(newPos);
 	}
+	ShowCaretAtCurrentPosition();
 	if (ensureVisible)
 		EnsureCaretVisible();
-	ShowCaretAtCurrentPosition();
 	NotifyMove(newPos);
 	return 0;
 }
@@ -1149,9 +1149,9 @@ void Editor::EnsureCaretVisible(bool useMargin, bool vert, bool horiz) {
 		}
 		newTopLine = Platform::Clamp(newTopLine, 0, MaxScrollPos());
 		if (newTopLine != topLine) {
+			Redraw();
 			SetTopLine(newTopLine);
 			SetVerticalScrollPos();
-			Redraw();
 		}
 	}
 
