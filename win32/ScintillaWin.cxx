@@ -458,7 +458,7 @@ sptr_t ScintillaWin::HandleComposition(uptr_t wParam, sptr_t lParam) {
 	} else {
 		ret = ::DefWindowProc(MainHWND(), WM_IME_COMPOSITION, wParam, lParam);
 	}
-	if ((lParam & GCS_RESULTSTR)) {
+	if ((lParam & GCS_RESULTSTR) && (!IsNT())) {
 		HIMC hIMC = ::ImmGetContext(MainHWND());
 		Point pos = LocationFromPosition(currentPos);
 		COMPOSITIONFORM CompForm;
