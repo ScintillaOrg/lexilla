@@ -26,7 +26,8 @@ static int classifyWordVB(unsigned int start, unsigned int end, WordList &keywor
 	bool wordIsNumber = isdigit(styler[start]) || (styler[start] == '.') ||
 		(styler[start] == '&' && tolower(styler[start+1]) == 'h');
 #endif /* OLD PL 2000/05/18 */
-	for (unsigned int i = 0; i < end - start + 1 && i < 30; i++) {
+	unsigned int i;
+	for (i = 0; i < end - start + 1 && i < 30; i++) {
 		s[i] = static_cast<char>(tolower(styler[start + i]));
 #ifdef OLD /* PL 2000/05/18 -- Little optimization */
 		s[i + 1] = '\0';

@@ -1962,9 +1962,13 @@ int Editor::KeyCommand(UINT iMessage) {
 		break;
 	case SCI_TAB:
 		Indent(true);
+		SetLastXChosen();
+		EnsureCaretVisible();
 		break;
 	case SCI_BACKTAB:
 		Indent(false);
+		SetLastXChosen();
+		EnsureCaretVisible();
 		break;
 	case SCI_NEWLINE:
 		ClearSelection();
