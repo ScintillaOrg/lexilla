@@ -1169,6 +1169,10 @@ fun void DelLineLeft=2395(,)
 # Delete forwards from the current position to the end of the line
 fun void DelLineRight=2396(,)
 
+# Get and Set the xOffset (ie, horizonal scroll position)
+set void SetXOffset=2397(int newOffset,)
+get int GetXOffset=2398(,)
+
 # Set the focus to this Scintilla widget.
 # GTK+ Specific
 fun void GrabFocus=2400(,)

@@ -3700,6 +3700,14 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		HorizontalScrollTo(xOffset + wParam * vs.spaceWidth);
 		return TRUE;
 
+	case SCI_SETXOFFSET:
+		xOffset = wParam;
+		Redraw();
+		break;
+
+	case SCI_GETXOFFSET:
+		return xOffset;
+
 	case SCI_SCROLLCARET:
 		EnsureCaretVisible();
 		break;
