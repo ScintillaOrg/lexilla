@@ -449,39 +449,71 @@ bool PropSet::IncludesVar(const char *value, const char *key) {
 	return false;
 }
 
-SString PropSet::GetExpanded(const char *key) {
-	SString val = Get(key);
-	return Expand(val.c_str(), 100, key);
+
+// There is some inconsistency between GetExpanded("foo") and Expand("$(foo)").
+// A solution is to keep a stack of variables that have been expanded, so that
+// recursive expansions can be skipped.  For now I'll just use the C++ stack
+// for that, through a recursive function and a simple chain of pointers.
+
+struct VarChain {
+	VarChain(const char*var_=NULL, const VarChain *link_=NULL): var(var_), link(link_) {}
+
+	bool contains(const char *testVar) const {
+		return (var && (0 == strcmp(var, testVar))) 
+			|| (link && link->contains(testVar));
+	}
+
+	const char *var;
+	const VarChain *link;
+};
+
+static int ExpandAllInPlace(PropSet &props, SString &withVars, int maxExpands, const VarChain &blankVars = VarChain()) {
+	int varStart = withVars.search("$(");
+	while ((varStart >= 0) && (maxExpands > 0)) {
+		int varEnd = withVars.search(")", varStart+2);
+		if (varEnd < 0) {
+			break;
+		}
+
+		// For consistency, when we see '$(ab$(cde))', expand the inner variable first,
+		// regardless whether there is actually a degenerate variable named 'ab$(cde'.
+		int innerVarStart = withVars.search("$(", varStart+2);
+		while ((innerVarStart > varStart) && (innerVarStart < varEnd)) {
+			varStart = innerVarStart;
+			innerVarStart = withVars.search("$(", varStart+2);
+		}
+
+		SString var(withVars.c_str(), varStart + 2, varEnd);
+		SString val = props.Get(var.c_str());
+
+		if (blankVars.contains(var.c_str())) {
+			val.clear(); // treat blankVar as an empty string (e.g. to block self-reference)
+		}
+
+		if (--maxExpands >= 0) {
+			maxExpands = ExpandAllInPlace(props, val, maxExpands, VarChain(var.c_str(), &blankVars));
+		}
+
+		withVars.remove(varStart, varEnd-varStart+1);
+		withVars.insert(varStart, val.c_str(), val.length());
+
+		varStart = withVars.search("$(");
+	}
+
+	return maxExpands;
 }
 
-SString PropSet::Expand(const char *withVars, int maxExpands, const char *blankVar) {
-	char *base = StringDup(withVars);
-	char *cpvar = strstr(base, "$(");
-	while (cpvar && (maxExpands > 0)) {
-		char *cpendvar = strchr(cpvar, ')');
-		if (!cpendvar)
-			break;
-		int lenvar = cpendvar - cpvar - 2;  	// Subtract the $()
-		char *var = StringDup(cpvar + 2, lenvar);
-		SString val = Get(var);
-		if (blankVar && (0 == strcmp(var, blankVar)))
-			val.clear(); // treat blankVar as an empty string (e.g. to block self-reference)
-		if (IncludesVar(val.c_str(), var))
-			break;
-		size_t newlenbase = strlen(base) + val.length() - lenvar;
-		char *newbase = new char[newlenbase];
-		strncpy(newbase, base, cpvar - base);
-		strcpy(newbase + (cpvar - base), val.c_str());
-		strcpy(newbase + (cpvar - base) + val.length(), cpendvar + 1);
-		delete []var;
-		delete []base;
-		base = newbase;
-		cpvar = strstr(base, "$(");
-		maxExpands--;
-	}
-	SString sret = base;
-	delete []base;
-	return sret;
+
+SString PropSet::GetExpanded(const char *key) {
+	SString val = Get(key);
+	ExpandAllInPlace(*this, val, 100, VarChain(key));
+	return val;
+}
+
+SString PropSet::Expand(const char *withVars, int maxExpands) {
+	SString val = withVars;
+	ExpandAllInPlace(*this, val, maxExpands);
+	return val;
 }
 
 int PropSet::GetInt(const char *key, int defaultValue) {
@@ -575,6 +607,8 @@ SString PropSet::GetWild(const char *keybase, const char *filename) {
 		return "";
 	}
 }
+
+
 
 // GetNewExpand does not use Expand as it has to use GetWild with the filename for each
 // variable reference found.
