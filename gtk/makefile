@@ -20,7 +20,7 @@ CXXFLAGS= -DGTK -DSCI_LEXER -W -Wall
 .cxx.o:
 	$(CC) `gtk-config --cflags` $(INCLUDEDIRS) $(CXXFLAGS) -c $< -o $@
 
-LEXOBJS	=  LexCPP.o LexHTML.o LexOthers.o LexPerl.o LexPython.o LexSQL.o LexVB.o
+LEXOBJS	=  LexCPP.o LexHTML.o LexLua.o LexOthers.o LexPerl.o LexPython.o LexSQL.o LexVB.o
 
 # The LEXOBJS have to be treated specially as the functions in them are not called from external code
 
@@ -52,6 +52,8 @@ KeyWords.o: KeyWords.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
 LexCPP.o: LexCPP.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h WinDefs.h SciLexer.h
 LexHTML.o: LexHTML.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
+ Scintilla.h WinDefs.h SciLexer.h
+LexLua.o: LexLua.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h WinDefs.h SciLexer.h
 LexOthers.o: LexOthers.cxx Platform.h PropSet.h Accessor.h KeyWords.h \
  Scintilla.h WinDefs.h SciLexer.h

@@ -35,7 +35,7 @@ SOBJS	= ScintillaWin.obj ScintillaBase.obj Editor.obj Document.obj \
 $(COMPONENT): $(SOBJS) ScintRes.res
 	$(LD) -Tpd /c c0d32 $(SOBJS), $@, ,$(LDFLAGS), , ScintRes.res
 	
-LEXOBJS	= LexCPP.obj LexHTML.obj LexOthers.obj LexPerl.obj LexPython.obj LexSQL.obj LexVB.obj
+LEXOBJS	= LexCPP.obj LexHTML.obj LexLua.obj LexOthers.obj LexPerl.obj LexPython.obj LexSQL.obj LexVB.obj
 
 LOBJS	= ScintillaWinL.obj ScintillaBaseL.obj Editor.obj Document.obj \
 	ContractionState.obj CellBuffer.obj CallTip.obj \
@@ -83,6 +83,10 @@ LexCPP.obj: ..\src\LexCPP.cxx ..\include\Platform.h ..\include\PropSet.h ..\incl
 	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$@
  
 LexHTML.obj: ..\src\LexHTML.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
+ ..\include\Scintilla.h ..\include\SciLexer.h 
+	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$@
+ 
+LexLua.obj: ..\src\LexLua.cxx ..\include\Platform.h ..\include\PropSet.h ..\include\Accessor.h ..\include\KeyWords.h \
  ..\include\Scintilla.h ..\include\SciLexer.h 
 	$(CC) $(INCLUDEDIRS) $(CXXFLAGS) -c ..\src\$*.cxx -o$@
  

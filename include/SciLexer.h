@@ -23,6 +23,7 @@
 #define SCLEX_BATCH 12
 #define SCLEX_XCODE 13
 #define SCLEX_LATEX 14
+#define SCLEX_LUA 15
 
 // Lexical states for SCLEX_PYTHON
 #define SCE_P_DEFAULT 0
@@ -171,12 +172,27 @@
 #define SCE_PL_LONGQUOTE 19
 #define SCE_PL_BACKTICKS 20
 #define SCE_PL_DATASECTION 21
-    
+ 
 // Lexical states for SCLEX_LATEX
 #define SCE_L_DEFAULT 0
 #define SCE_L_COMMAND 1
 #define SCE_L_TAG 2
 #define SCE_L_MATH 3
 #define SCE_L_COMMENT 4
+
+// Lexical states for SCLEX_LUA
+#define SCE_LUA_DEFAULT 0
+#define SCE_LUA_COMMENT 1
+#define SCE_LUA_COMMENTLINE 2
+#define SCE_LUA_COMMENTDOC 3
+#define SCE_LUA_NUMBER 4
+#define SCE_LUA_WORD 5
+#define SCE_LUA_STRING 6
+#define SCE_LUA_CHARACTER 7
+#define SCE_LUA_LITERALSTRING 8
+#define SCE_LUA_PREPROCESSOR 9
+#define SCE_LUA_OPERATOR 10
+#define SCE_LUA_IDENTIFIER 11
+#define SCE_LUA_STRINGEOL 12
 
 #endif
