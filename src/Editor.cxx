@@ -3,10 +3,10 @@
 // Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <ctype.h>
+#include <stdlib.h> 
+#include <string.h> 
+#include <stdio.h> 
+#include <ctype.h> 
 
 #include "Platform.h"
 
@@ -41,13 +41,13 @@ Editor::Editor() {
 	printMagnification = 0;
 	printColourMode = SC_PRINT_NORMAL;
 	cursorMode = SC_CURSORNORMAL;
-	
+
 	hasFocus = false;
 	hideSelection = false;
 	inOverstrike = false;
 	errorStatus = 0;
 	mouseDownCaptures = true;
-	
+
 	bufferedDraw = true;
 
 	lastClickTime = 0;
@@ -939,7 +939,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 				                         rcSegment.top + vsDraw.maxAscent, ctrlChar, strlen(ctrlChar),
 				                         textBack, textFore);
 				// Manage normal display
-			} else {
+			}
+			else {
 				rcSegment.left = ll.positions[startseg] + xStart;
 				rcSegment.right = ll.positions[i + 1] + xStart;
 				// Only try to draw if really visible - enhances performance by not calling environment to
@@ -1288,6 +1289,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		}
 		//g_timer_destroy(tim);
 
+
 		PRectangle rcBeyondEOF = rcClient;
 		rcBeyondEOF.left = vs.fixedColumnWidth;
 		rcBeyondEOF.right = rcBeyondEOF.right;
@@ -1301,6 +1303,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 				surfaceWindow->FillRectangle(rcBeyondEOF, vs.edgecolour.allocated);
 			}
 		}
+		NotifyPainted();
 	}
 }
 
@@ -1354,8 +1357,8 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 	// Don't show the selection when printing
 	vsPrint.selbackset = false;
 	vsPrint.selforeset = false;
-	
-	// Set colours for printing according to users settings 
+
+	// Set colours for printing according to users settings
 	for (int sty = 0;sty <= STYLE_MAX;sty++) {
 		if (printColourMode == SC_PRINT_INVERTLIGHT) {
 			vsPrint.styles[sty].fore.desired = InvertedLight(vsPrint.styles[sty].fore.desired);
@@ -1363,11 +1366,11 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 		} else if (printColourMode == SC_PRINT_BLACKONWHITE) {
 			vsPrint.styles[sty].fore.desired = Colour(0, 0, 0);
 			vsPrint.styles[sty].back.desired = Colour(0xff, 0xff, 0xff);
-		} else if (printColourMode == SC_PRINT_COLOURONWHITE) { 
-			vsPrint.styles[sty].back.desired = Colour(0xff, 0xff, 0xff); 
+		} else if (printColourMode == SC_PRINT_COLOURONWHITE) {
+			vsPrint.styles[sty].back.desired = Colour(0xff, 0xff, 0xff);
 		} else if (printColourMode == SC_PRINT_COLOURONWHITEDEFAULTBG) {
 			if (sty <= STYLE_DEFAULT) {
-				vsPrint.styles[sty].back.desired = Colour(0xff, 0xff, 0xff); 
+				vsPrint.styles[sty].back.desired = Colour(0xff, 0xff, 0xff);
 			}
 		}
 	}
@@ -1483,6 +1486,7 @@ void Editor::SetScrollBarsTo(PRectangle) {
 		Redraw();
 	//Platform::DebugPrintf("end max = %d page = %d\n", nMax, nPage);
 }
+
 
 
 void Editor::SetScrollBars() {
@@ -1609,7 +1613,7 @@ void Editor::SelectAll() {
 
 void Editor::Undo() {
 	if (pdoc->CanUndo()) {
-        InvalidateCaret();
+		InvalidateCaret();
 		int newPos = pdoc->Undo();
 		SetEmptySelection(newPos);
 		EnsureCaretVisible();
@@ -1696,6 +1700,12 @@ void Editor::NotifyDoubleClick(Point, bool) {
 void Editor::NotifyUpdateUI() {
 	SCNotification scn;
 	scn.nmhdr.code = SCN_UPDATEUI;
+	NotifyParent(scn);
+}
+
+void Editor::NotifyPainted() {
+	SCNotification scn;
+	scn.nmhdr.code = SCN_PAINTED;
 	NotifyParent(scn);
 }
 
@@ -1860,6 +1870,7 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 			NotifyChange();	// Send EN_CHANGE
 		}
 
+
 		SCNotification scn;
 		scn.nmhdr.code = SCN_MODIFIED;
 		scn.position = mh.position;
@@ -1942,6 +1953,7 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 		// Filter out all others (display changes, etc)
 	default:
 		//		printf("Filtered out %ld of macro recording\n", iMessage);
+
 
 		return ;
 	}
@@ -2148,7 +2160,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		ShowCaretAtCurrentPosition();
 		NotifyUpdateUI();
 		break;
-	case SCI_CANCEL:   	// Cancel any modes - handled in subclass
+	case SCI_CANCEL:    	// Cancel any modes - handled in subclass
 		// Also unselect text
 		CancelModes();
 		break;
@@ -2320,8 +2332,8 @@ void Editor::Indent(bool forwards) {
 long Editor::FindText(unsigned int iMessage, unsigned long wParam, long lParam) {
 	TextToFind *ft = reinterpret_cast<TextToFind *>(lParam);
 	int pos = pdoc->FindText(ft->chrg.cpMin, ft->chrg.cpMax, ft->lpstrText,
-	                        wParam & SCFIND_MATCHCASE, wParam & SCFIND_WHOLEWORD,
-				wParam & SCFIND_WORDSTART);
+	                         wParam & SCFIND_MATCHCASE, wParam & SCFIND_WHOLEWORD,
+	                         wParam & SCFIND_WORDSTART);
 	if (pos != -1) {
 		if (iMessage != EM_FINDTEXT) {
 			ft->chrgText.cpMin = pos;
@@ -2353,14 +2365,14 @@ long Editor::SearchText(unsigned int iMessage, unsigned long wParam, long lParam
 
 	if (iMessage == SCI_SEARCHNEXT) {
 		pos = pdoc->FindText(searchAnchor, pdoc->Length(), txt,
-			wParam & SCFIND_MATCHCASE,
-			wParam & SCFIND_WHOLEWORD,
-			wParam & SCFIND_WORDSTART);
+		                     wParam & SCFIND_MATCHCASE,
+		                     wParam & SCFIND_WHOLEWORD,
+		                     wParam & SCFIND_WORDSTART);
 	} else {
 		pos = pdoc->FindText(searchAnchor, 0, txt,
-			wParam & SCFIND_MATCHCASE,
-			wParam & SCFIND_WHOLEWORD,
-			wParam & SCFIND_WORDSTART);
+		                     wParam & SCFIND_MATCHCASE,
+		                     wParam & SCFIND_WHOLEWORD,
+		                     wParam & SCFIND_WORDSTART);
 	}
 
 	if (pos != -1) {
@@ -2473,9 +2485,9 @@ void Editor::SetDragPosition(int newPos) {
 }
 
 void Editor::DisplayCursor(Window::Cursor c) {
-	if (cursorMode == SC_CURSORNORMAL) 
+	if (cursorMode == SC_CURSORNORMAL)
 		wDraw.SetCursor(c);
-	else 
+	else
 		wDraw.SetCursor(static_cast<Window::Cursor>(cursorMode));
 }
 
@@ -2484,6 +2496,7 @@ void Editor::StartDrag() {
 	//SetMouseCapture(true);
 	//DisplayCursor(Window::cursorArrow);
 }
+
 
 void Editor::DropAt(int position, const char *value, bool moving, bool rectangular) {
 	//Platform::DebugPrintf("DropAt %d\n", inDragDrop);
@@ -2607,14 +2620,14 @@ bool Editor::PointInSelMargin(Point pt) {
 
 void Editor::LineSelection(int lineCurrent_, int lineAnchor_) {
 	if (lineAnchor_ < lineCurrent_) {
-		SetSelection(pdoc->LineStart(lineCurrent_+1),
-		     pdoc->LineStart(lineAnchor_));
+		SetSelection(pdoc->LineStart(lineCurrent_ + 1),
+		             pdoc->LineStart(lineAnchor_));
 	} else if (lineAnchor_ > lineCurrent_) {
 		SetSelection(pdoc->LineStart(lineCurrent_),
-		     pdoc->LineStart(lineAnchor_+1));
+		             pdoc->LineStart(lineAnchor_ + 1));
 	} else { // Same line, select it
 		SetSelection(pdoc->LineStart(lineAnchor_ + 1),
-		     pdoc->LineStart(lineAnchor_));
+		             pdoc->LineStart(lineAnchor_));
 	}
 }
 
@@ -2627,7 +2640,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 
 	bool processed = NotifyMarginClick(pt, shift, ctrl, alt);
 	if (processed)
-		return;
+		return ;
 
 	bool inSelMargin = PointInSelMargin(pt);
 	if (shift & !inSelMargin) {
@@ -2675,24 +2688,25 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 			if (ctrl) {
 				SelectAll();
 				lastClickTime = curTime;
-				return;
+				return ;
 			}
 			if (!shift) {
 				lineAnchor = LineFromLocation(pt);
 				// Single click in margin: select whole line
 				LineSelection(lineAnchor, lineAnchor);
-				SetSelection(pdoc->LineStart(lineAnchor + 1), 
-					pdoc->LineStart(lineAnchor));
+				SetSelection(pdoc->LineStart(lineAnchor + 1),
+				             pdoc->LineStart(lineAnchor));
 			} else {
 				// Single shift+click in margin: select from line anchor to clicked line
 				if (anchor > currentPos)
-					lineAnchor = pdoc->LineFromPosition(anchor-1);
+					lineAnchor = pdoc->LineFromPosition(anchor - 1);
 				else
 					lineAnchor = pdoc->LineFromPosition(anchor);
 				int lineStart = LineFromLocation(pt);
 				LineSelection(lineStart, lineAnchor);
 				//lineAnchor = lineStart; // Keep the same anchor for ButtonMove
-			}			
+			}
+
 			SetDragPosition(invalidPosition);
 			SetMouseCapture(true);
 			selectionType = selLine;
@@ -2757,6 +2771,7 @@ void Editor::ButtonMove(Point pt) {
 				DisplayCursor(Window::cursorReverseArrow);
 				return ; 	// No need to test for selection
 			}
+
 
 		}
 		// Display regular (drag) cursor over selection
@@ -3452,6 +3467,7 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 		}
 
 
+
 	case EM_SELECTIONTYPE:
 #ifdef SEL_EMPTY
 		if (currentPos == anchor)
@@ -3724,7 +3740,7 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 		pdoc->SetStyleFor(wParam, static_cast<char>(lParam));
 		break;
 
-	case SCI_SETSTYLINGEX:    // Specify a complete styling buffer
+	case SCI_SETSTYLINGEX:     // Specify a complete styling buffer
 		if (lParam == 0)
 			return 0;
 		pdoc->SetStyles(wParam, reinterpret_cast<char *>(lParam));
@@ -4298,39 +4314,39 @@ long Editor::WndProc(unsigned int iMessage, unsigned long wParam, long lParam) {
 	case SCI_SETOVERTYPE:
 		inOverstrike = wParam;
 		break;
-	
+
 	case SCI_GETOVERTYPE:
 		return inOverstrike ? TRUE : FALSE;
-	
+
 	case SCI_SETFOCUS:
 		SetFocusState(wParam);
 		break;
-	
+
 	case SCI_GETFOCUS:
 		return hasFocus;
-	
+
 	case SCI_SETSTATUS:
 		errorStatus = wParam;
 		break;
-	
+
 	case SCI_GETSTATUS:
 		return errorStatus;
-	
+
 	case SCI_SETMOUSEDOWNCAPTURES:
 		mouseDownCaptures = wParam;
 		break;
-	
+
 	case SCI_GETMOUSEDOWNCAPTURES:
 		return mouseDownCaptures;
-	
+
 	case SCI_SETCURSOR:
 		cursorMode = wParam;
 		DisplayCursor(Window::cursorText);
 		break;
-	
+
 	case SCI_GETCURSOR:
 		return cursorMode;
-	
+
 #ifdef MACRO_SUPPORT
 	case SCI_STARTRECORD:
 		recordingMacro = 1;

@@ -237,6 +237,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void NotifyModifyAttempt();
 	virtual void NotifyDoubleClick(Point pt, bool shift);
 	void NotifyUpdateUI();
+	void NotifyPainted();
 	bool NotifyMarginClick(Point pt, bool shift, bool ctrl, bool alt);
 	void NotifyNeedShown(int pos, int len);
 	
