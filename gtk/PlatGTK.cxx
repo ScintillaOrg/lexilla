@@ -9,6 +9,7 @@
 #include <stddef.h>
 
 #include <glib.h>
+#include <gmodule.h>
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
@@ -1916,6 +1917,41 @@ ElapsedTime::ElapsedTime() {
 	g_get_current_time(&curTime);
 	bigBit = curTime.tv_sec;
 	littleBit = curTime.tv_usec;
+}
+
+class DynamicLibraryImpl : public DynamicLibrary {
+protected:
+	GModule* m;
+public:
+	DynamicLibraryImpl(const char *modulePath) {
+		m = g_module_open(modulePath, G_MODULE_BIND_LAZY);
+	}
+
+	virtual ~DynamicLibraryImpl() {
+		if (m != NULL)
+			g_module_close(m);
+	}
+
+	// Use g_module_symbol to get a pointer to the relevant function.
+	virtual Function *FindFunction(const char *name) {
+		if (m != NULL) {
+			gpointer fn_address = NULL;
+			gboolean status = g_module_symbol(m, name, &fn_address);
+			if (status)
+				return static_cast<Function*>( fn_address );
+			else
+				return NULL;
+		} else
+			return NULL;
+	}
+
+	virtual bool IsValid() {
+		return m != NULL;
+	}
+};
+
+DynamicLibrary *DynamicLibrary::Load(const char *modulePath) {
+	return static_cast<DynamicLibrary *>( new DynamicLibraryImpl(modulePath) );
 }
 
 double ElapsedTime::Duration(bool reset) {

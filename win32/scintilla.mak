@@ -226,10 +226,10 @@ $(DIR_O)\Editor.obj: ../src/Editor.cxx ../include/Platform.h \
  ../src/CellBuffer.h ../src/KeyMap.h ../src/Indicator.h \
  ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
  ../src/Document.h ../src/Editor.h ../src/XPM.h
-$(DIR_O)\ExternalLexer.obj: ExternalLexer.cxx ../include/Platform.h \
+$(DIR_O)\ExternalLexer.obj: ../src/ExternalLexer.cxx ../include/Platform.h \
  ../include/SciLexer.h ../include/PropSet.h ../include/SString.h \
  ../include/Accessor.h ../src/DocumentAccessor.h ../include/KeyWords.h \
- ExternalLexer.h
+ ../src/ExternalLexer.h
 $(DIR_O)\Indicator.obj: ../src/Indicator.cxx ../include/Platform.h \
  ../include/Scintilla.h ../src/Indicator.h
 $(DIR_O)\KeyMap.obj: ../src/KeyMap.cxx ../include/Platform.h \

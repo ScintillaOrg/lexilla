@@ -842,7 +842,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 #ifdef SCI_LEXER
 	case SCI_LOADLEXERLIBRARY:
-		//LexerManager::GetInstance()->Load(reinterpret_cast<const char*>(lParam));
+		LexerManager::GetInstance()->Load(reinterpret_cast<const char*>(lParam));
 		break;
 #endif
 
@@ -2026,8 +2026,6 @@ bool Scintilla_RegisterClasses(void *hInstance) {
 	bool result = ScintillaWin::Register(reinterpret_cast<HINSTANCE>(hInstance));
 #ifdef SCI_LEXER
 	Scintilla_LinkLexers();
-	LexerManager *lexMan = LexerManager::GetInstance();
-	lexMan->Load();
 #endif
 	return result;
 }

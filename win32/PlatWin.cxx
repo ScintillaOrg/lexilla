@@ -1288,6 +1288,36 @@ double ElapsedTime::Duration(bool reset) {
 	return result;
 }
 
+class DynamicLibraryImpl : public DynamicLibrary {
+protected:
+	HMODULE h;
+public:
+	DynamicLibraryImpl(const char *modulePath) {
+		h = ::LoadLibrary(modulePath);
+	}
+
+	virtual ~DynamicLibraryImpl() {
+		if (h != NULL)
+			::FreeLibrary(h);
+	}
+
+	// Use GetProcAddress to get a pointer to the relevant function.
+	virtual Function *FindFunction(const char *name) {
+		if (h != NULL) {
+			return reinterpret_cast<Function*>( ::GetProcAddress(h, name) );
+		} else
+			return NULL;
+	}
+
+	virtual bool IsValid() {
+		return h != NULL;
+	}
+};
+
+DynamicLibrary *DynamicLibrary::Load(const char *modulePath) {
+	return static_cast<DynamicLibrary *>( new DynamicLibraryImpl(modulePath) );
+}
+
 ColourDesired Platform::Chrome() {
 	return ::GetSysColor(COLOR_3DFACE);
 }
