@@ -3126,7 +3126,7 @@ void Editor::ButtonMove(Point pt) {
 				SetSelection(movePos);
 			} else if (selectionType == selWord) {
 				// Continue selecting by word
-				if (currentPos > originalAnchorPos) {	// Moved forward
+				if (movePos >= originalAnchorPos) {	// Moved forward
 					SetSelection(pdoc->ExtendWordSelect(movePos, 1),
 					             pdoc->ExtendWordSelect(originalAnchorPos, -1));
 				} else {	// Moved backward
