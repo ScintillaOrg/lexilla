@@ -35,7 +35,7 @@
 ## Features may be removed but they will go through a period of deprecation
 ## before removal which is signalled by moving them into the Deprecated category.
 ##
-## enu has the syntax enu<ws><numeration>=<prefix>[<ws><prefix>]* where all the val 
+## enu has the syntax enu<ws><enumeration>=<prefix>[<ws><prefix>]* where all the val 
 ## features in this file starting with a given <prefix> are considered part of the 
 ## enumeration.
 ##
