@@ -116,6 +116,7 @@ LEXOBJS=\
 	$(DIR_O)\LexAVE.obj \
 	$(DIR_O)\LexBaan.obj \
 	$(DIR_O)\LexBullant.obj \
+	$(DIR_O)\LexCLW.obj \
 	$(DIR_O)\LexConf.obj \
 	$(DIR_O)\LexCPP.obj \
 	$(DIR_O)\LexCrontab.obj \
@@ -258,6 +259,8 @@ $(DIR_O)\LexAVE.obj: ..\src\LexAVE.cxx $(LEX_HEADERS)
 $(DIR_O)\LexBaan.obj: ..\src\LexBaan.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexBullant.obj: ..\src\LexBullant.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexCLW.obj: ..\src\LexCLW.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexConf.obj: ..\src\LexConf.cxx $(LEX_HEADERS)
 
