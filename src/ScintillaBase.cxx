@@ -372,8 +372,10 @@ void ScintillaBase::Colourise(int start, int end) {
 	if (lexCurrent) {	// Should always succeed as null lexer should always be available
 		lexCurrent->Lex(start, len, styleStart, keyWordLists, styler);
 		styler.Flush();
-		lexCurrent->Fold(start, len, styleStart, keyWordLists, styler);
-		styler.Flush();
+		if (styler.GetPropertyInt("fold")) {
+			lexCurrent->Fold(start, len, styleStart, keyWordLists, styler);
+			styler.Flush();
+		}
 	}
 }
 #endif
