@@ -482,9 +482,13 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 										break;
 									}
 								}
-							} else {// bare identifier, usually a function
-								// call but perl also uses this for
-								// pseudo-constants (really ambiguous...)
+							} else {// bare identifier, usually a function call but Perl
+								// optimizes them as pseudo-constants, then the next
+								// '/' will be a divide; favour divide over regex
+								// if there is a whitespace after the '/'
+								if (isspacechar(chNext)) {
+									preferRE = false;
+								}
 								break;
 							}
 							bk--;
@@ -974,3 +978,4 @@ static const char * const perlWordListDesc[] = {
 };
 
 LexerModule lmPerl(SCLEX_PERL, ColourisePerlDoc, "perl", FoldPerlDoc, perlWordListDesc);
+
