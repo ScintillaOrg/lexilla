@@ -114,7 +114,7 @@ static void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, int 
 	lf.lfWeight = bold ? FW_BOLD : FW_NORMAL;
 	lf.lfItalic = static_cast<BYTE>(italic ? 1 : 0);
 	lf.lfCharSet = static_cast<BYTE>(characterSet);
-	strcpy(lf.lfFaceName, faceName);
+	strncpy(lf.lfFaceName, faceName, sizeof(lf.lfFaceName));
 }
 
 /**
@@ -347,7 +347,7 @@ void SurfaceImpl::Release() {
 	bitmap = 0;
 	if (paletteOld) {
 		// Fonts are not deleted as they are owned by a Palette object
-		::SelectPalette(reinterpret_cast<HDC>(hdc), 
+		::SelectPalette(reinterpret_cast<HDC>(hdc),
 			reinterpret_cast<HPALETTE>(paletteOld), TRUE);
 		paletteOld = 0;
 	}
@@ -482,14 +482,14 @@ void SurfaceImpl::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated b
 }
 
 void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
-	::BitBlt(hdc, 
+	::BitBlt(hdc,
 		rc.left, rc.top, rc.Width(), rc.Height(),
 		static_cast<SurfaceImpl &>(surfaceSource).hdc, from.x, from.y, SRCCOPY);
 }
 
 #define MAX_US_LEN 5000
 
-void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len, 
+void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len,
 	ColourAllocated fore, ColourAllocated back) {
 	SetFont(font_);
 	::SetTextColor(hdc, fore.AsLong());
@@ -502,13 +502,13 @@ void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const ch
 		::ExtTextOutW(hdc, rc.left, ybase, ETO_OPAQUE, &rcw, tbuf, tlen, NULL);
 	} else {
 		// There appears to be a 16 bit string length limit in GDI
-		if (len > 65535)	
+		if (len > 65535)
 			len = 65535;
 		::ExtTextOut(hdc, rc.left, ybase, ETO_OPAQUE, &rcw, s, len, NULL);
 	}
 }
 
-void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, 
+void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len,
 	ColourAllocated fore, ColourAllocated back) {
 	SetFont(font_);
 	::SetTextColor(hdc, fore.AsLong());
@@ -521,7 +521,7 @@ void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const c
 		::ExtTextOutW(hdc, rc.left, ybase, ETO_OPAQUE | ETO_CLIPPED, &rcw, tbuf, tlen, NULL);
 	} else {
 		// There appears to be a 16 bit string length limit in GDI
-		if (len > 65535)	
+		if (len > 65535)
 			len = 65535;
 		::ExtTextOut(hdc, rc.left, ybase, ETO_OPAQUE | ETO_CLIPPED, &rcw, s, len, NULL);
 	}
@@ -653,7 +653,7 @@ int SurfaceImpl::SetPalette(Palette *pal, bool inBackGround) {
 	paletteOld = 0;
 	int changes = 0;
 	if (pal->allowRealization) {
-		paletteOld = ::SelectPalette(hdc, 
+		paletteOld = ::SelectPalette(hdc,
 			reinterpret_cast<HPALETTE>(pal->hpal), inBackGround);
 		changes = ::RealizePalette(hdc);
 	}
@@ -698,7 +698,7 @@ PRectangle Window::GetPosition() {
 }
 
 void Window::SetPosition(PRectangle rc) {
-	::SetWindowPos(reinterpret_cast<HWND>(id), 
+	::SetWindowPos(reinterpret_cast<HWND>(id),
 		0, rc.left, rc.top, rc.Width(), rc.Height(), 0);
 }
 
@@ -786,9 +786,9 @@ void ListBox::Create(Window &parent, int ctrlID) {
 	id = ::CreateWindowEx(
 		WS_EX_WINDOWEDGE, "listbox", "",
 		WS_CHILD | WS_THICKFRAME | WS_VSCROLL | LBS_NOTIFY,
-		100,100, 150,80, reinterpret_cast<HWND>(parent.GetID()), 
+		100,100, 150,80, reinterpret_cast<HWND>(parent.GetID()),
 		reinterpret_cast<HMENU>(ctrlID),
-		hinstanceParent, 
+		hinstanceParent,
 		0);
 }
 
@@ -886,8 +886,8 @@ void Menu::Destroy() {
 }
 
 void Menu::Show(Point pt, Window &w) {
-	::TrackPopupMenu(reinterpret_cast<HMENU>(id), 
-		0, pt.x - 4, pt.y, 0, 
+	::TrackPopupMenu(reinterpret_cast<HMENU>(id),
+		0, pt.x - 4, pt.y, 0,
 		reinterpret_cast<HWND>(w.GetID()), NULL);
 	Destroy();
 }
@@ -972,7 +972,7 @@ long Platform::SendScintilla(WindowID w, unsigned int msg, unsigned long wParam,
 }
 
 long Platform::SendScintillaPointer(WindowID w, unsigned int msg, unsigned long wParam, void *lParam) {
-	return ::SendMessage(reinterpret_cast<HWND>(w), msg, wParam, 
+	return ::SendMessage(reinterpret_cast<HWND>(w), msg, wParam,
 		reinterpret_cast<LPARAM>(lParam));
 }
 
