@@ -692,7 +692,7 @@ fun position FindText=2150(int flags, findtext ft)
 # On Windows, will draw the document into a display context such as a printer.
 fun void FormatRange=2151(bool draw, formatrange fr)
 
-# Retrieve the line at the top of the display.
+# Retrieve the display line at the top of the display.
 get int GetFirstVisibleLine=2152(,)
 
 # Retrieve the contents of a line.
