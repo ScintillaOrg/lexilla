@@ -210,6 +210,10 @@ SOURCE=..\src\LexMatlab.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexMetapost.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexMMIXAL.cxx
 # End Source File
 # Begin Source File
@@ -255,6 +259,10 @@ SOURCE=..\src\LexScriptol.cxx
 # Begin Source File
 
 SOURCE=..\src\LexSQL.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexTeX.cxx
 # End Source File
 # Begin Source File
 
