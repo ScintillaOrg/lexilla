@@ -182,9 +182,10 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int LinesOnScreen();
 	int LinesToScroll();
 	int MaxScrollPos();
-	Point LocationFromPosition(unsigned int pos);
-	int XFromPosition(unsigned int pos);
+	Point LocationFromPosition(int pos);
+	int XFromPosition(int pos);
 	int PositionFromLocation(Point pt);
+	int PositionFromLocationClose(Point pt);
 	int PositionFromLineX(int line, int x);
 	int LineFromLocation(Point pt);
 	void SetTopLine(int topLineNew);
@@ -308,6 +309,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool PointInSelection(Point pt);
 	bool PointInSelMargin(Point pt);
 	void LineSelection(int lineCurrent_, int lineAnchor_);
+	void DwellEnd();
 	virtual void ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, bool alt);
 	void ButtonMove(Point pt);
 	void ButtonUp(Point pt, unsigned int curTime, bool ctrl);

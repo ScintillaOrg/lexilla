@@ -134,6 +134,10 @@ set void SetViewWS=2021(int viewWS,)
 # Find the position from a point within the window.
 fun int PositionFromPoint=2022(int x, int y)
 
+# Find the position from a point within the window but return 
+# INVALID_POSITION if not close to text.
+fun int PositionFromPointClose=2023(int x, int y)
+
 # Set caret to start of a line and ensure it is visible.
 fun void GotoLine=2024(int line,)
 

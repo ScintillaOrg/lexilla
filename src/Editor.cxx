@@ -231,15 +231,17 @@ const char *ControlCharacterString(unsigned char ch) {
 	}
 }
 
-Point Editor::LocationFromPosition(unsigned int pos) {
+Point Editor::LocationFromPosition(int pos) {
+	Point pt;
 	RefreshStyleData();
+	if (pos == INVALID_POSITION)
+		return pt;
 	int line = pdoc->LineFromPosition(pos);
 	int lineVisible = cs.DisplayFromDoc(line);
 	//Platform::DebugPrintf("line=%d\n", line);
 	Surface surface;
 	surface.Init();
 	surface.SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
-	Point pt;
 	pt.y = (lineVisible - topLine) * vs.lineHeight;  	// + half a lineheight?
 	unsigned int posLineStart = pdoc->LineStart(line);
 	LineLayout ll;
@@ -253,7 +255,7 @@ Point Editor::LocationFromPosition(unsigned int pos) {
 	return pt;
 }
 
-int Editor::XFromPosition(unsigned int pos) {
+int Editor::XFromPosition(int pos) {
 	Point pt = LocationFromPosition(pos);
 	return pt.x - vs.fixedColumnWidth + xOffset;
 }
@@ -278,7 +280,6 @@ int Editor::PositionFromLocation(Point pt) {
 		return 0;
 	if (line >= pdoc->LinesTotal())
 		return pdoc->Length();
-	//Platform::DebugPrintf("Position of (%d,%d) line = %d top=%d\n", pt.x, pt.y, line, topLine);
 	Surface surface;
 	surface.Init();
 	surface.SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
@@ -294,6 +295,42 @@ int Editor::PositionFromLocation(Point pt) {
 	}
 
 	return ll.numCharsInLine + posLineStart;
+}
+
+// Like PositionFromLocation but INVALID_POSITION returned when not near any text.
+int Editor::PositionFromLocationClose(Point pt) {
+	RefreshStyleData();
+	PRectangle rcClient = GetTextRectangle();
+	if (!rcClient.Contains(pt))
+		return INVALID_POSITION;
+	if (pt.x < vs.fixedColumnWidth)
+		return INVALID_POSITION;
+	if (pt.y < 0)
+		return INVALID_POSITION;
+	pt.x = pt.x - vs.fixedColumnWidth + xOffset;
+	int line = cs.DocFromDisplay(pt.y / vs.lineHeight + topLine);
+	if (pt.y < 0) {	// Division rounds towards 0
+		line = cs.DocFromDisplay((pt.y - (vs.lineHeight - 1)) / vs.lineHeight + topLine);
+	}
+	if (line < 0)
+		return INVALID_POSITION;
+	if (line >= pdoc->LinesTotal())
+		return INVALID_POSITION;
+	Surface surface;
+	surface.Init();
+	surface.SetUnicodeMode(SC_CP_UTF8 == pdoc->dbcsCodePage);
+	unsigned int posLineStart = pdoc->LineStart(line);
+
+	LineLayout ll;
+	LayoutLine(line, &surface, vs, ll);
+	for (int i = 0; i < ll.numCharsInLine; i++) {
+		if (pt.x < ((ll.positions[i] + ll.positions[i + 1]) / 2) ||
+		        ll.chars[i] == '\r' || ll.chars[i] == '\n') {
+			return i + posLineStart;
+		}
+	}
+
+	return INVALID_POSITION;
 }
 
 int Editor::PositionFromLineX(int line, int x) {
@@ -400,7 +437,6 @@ int Editor::SelectionStart(int line) {
 			return -1;
 		} else {
 			int minX = Platform::Minimum(xStartSelect, xEndSelect);
-			//return PositionFromLineX(line, minX + vs.fixedColumnWidth - xOffset);
 			return PositionFromLineX(line, minX);
 		}
 	}
@@ -657,7 +693,7 @@ void Editor::ShowCaretAtCurrentPosition() {
 	if (!hasFocus) {
 		caret.active = false;
 		caret.on = false;
-		return ;
+		return;
 	}
 	caret.active = true;
 	caret.on = true;
@@ -684,13 +720,13 @@ int Editor::SubstituteMarkerIfEmpty(int markerCheck, int markerDefault) {
 
 void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 	if (vs.fixedColumnWidth == 0)
-		return ;
+		return;
 
 	PRectangle rcMargin = GetClientRectangle();
 	rcMargin.right = vs.fixedColumnWidth;
 
 	if (!rc.Intersects(rcMargin))
-		return ;
+		return;
 
 	Surface *surface;
 	if (bufferedDraw) {
@@ -1273,7 +1309,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		// Either styling or NotifyUpdateUI noticed that painting is needed
 		// outside the current painting rectangle
 		//Platform::DebugPrintf("Abandoning paint\n");
-		return ;
+		return;
 	}
 	//Platform::DebugPrintf("start display %d, offset = %d\n", pdoc->Length(), xOffset);
 
@@ -1627,8 +1663,6 @@ void Editor::SetScrollBarsTo(PRectangle) {
 	//Platform::DebugPrintf("end max = %d page = %d\n", nMax, nPage);
 }
 
-
-
 void Editor::SetScrollBars() {
 	PRectangle rsClient = GetClientRectangle();
 	SetScrollBarsTo(rsClient);
@@ -1748,7 +1782,7 @@ void Editor::Cut() {
 
 void Editor::PasteRectangular(int pos, const char *ptr, int len) {
 	if (pdoc->IsReadOnly()) {
-		return ;
+		return;
 	}
 	currentPos = pos;
 	int insertPos = currentPos;
@@ -1950,7 +1984,7 @@ void Editor::NotifyNeedShown(int pos, int len) {
 void Editor::NotifyDwelling(Point pt, bool state) {
 	SCNotification scn;
 	scn.nmhdr.code = state ? SCN_DWELLSTART : SCN_DWELLEND;
-	scn.position = PositionFromLocation(pt);
+	scn.position = PositionFromLocationClose(pt);
 	scn.x = pt.x;
 	scn.y = pt.y;
 	NotifyParent(scn);
@@ -2181,10 +2215,7 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	case SCI_NEWLINE:
 	default:
 		//		printf("Filtered out %ld of macro recording\n", iMessage);
-
-
-
-		return ;
+		return;
 	}
 
 	// Send notification
@@ -2530,6 +2561,7 @@ int Editor::KeyDefault(int, int) {
 }
 
 int Editor::KeyDown(int key, bool shift, bool ctrl, bool alt, bool *consumed) {
+	DwellEnd();
 	int modifiers = (shift ? SCI_SHIFT : 0) | (ctrl ? SCI_CTRL : 0) |
 	                (alt ? SCI_ALT : 0);
 	int msg = kmap.Find(key, modifiers);
@@ -2975,6 +3007,14 @@ void Editor::LineSelection(int lineCurrent_, int lineAnchor_) {
 	}
 }
 
+void Editor::DwellEnd() {
+	ticksToDwell = dwellDelay;
+	if (dwelling && (dwellDelay < SC_TIME_FOREVER)) {
+		dwelling = false;
+		NotifyDwelling(ptMouseLast, dwelling);
+	}
+}
+
 void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, bool alt) {
 	//Platform::DebugPrintf("Scintilla:ButtonDown %d %d = %d alt=%d\n", curTime, lastClickTime, curTime - lastClickTime, alt);
 	ptMouseLast = pt;
@@ -2984,7 +3024,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 
 	bool processed = NotifyMarginClick(pt, shift, ctrl, alt);
 	if (processed)
-		return ;
+		return;
 
 	bool inSelMargin = PointInSelMargin(pt);
 	if (shift & !inSelMargin) {
@@ -3033,7 +3073,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 			if (ctrl) {
 				SelectAll();
 				lastClickTime = curTime;
-				return ;
+				return;
 			}
 			if (!shift) {
 				lineAnchor = LineFromLocation(pt);
@@ -3084,11 +3124,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 
 void Editor::ButtonMove(Point pt) {
 	if ((ptMouseLast.x != pt.x) || (ptMouseLast.y != pt.y)) {
-		ticksToDwell = dwellDelay;
-		if (dwelling && (dwellDelay < SC_TIME_FOREVER)) {
-			dwelling = false;
-			NotifyDwelling(ptMouseLast, dwelling);
-		}
+		DwellEnd();
 	}
 	ptMouseLast = pt;
 	//Platform::DebugPrintf("Move %d %d\n", pt.x, pt.y);
@@ -3097,7 +3133,7 @@ void Editor::ButtonMove(Point pt) {
 		// Slow down autoscrolling/selection
 		autoScrollTimer.ticksToWait -= timer.tickSize;
 		if (autoScrollTimer.ticksToWait > 0)
-			return ;
+			return;
 		autoScrollTimer.ticksToWait = autoScrollDelay;
 
 		// Adjust selection
@@ -3142,11 +3178,8 @@ void Editor::ButtonMove(Point pt) {
 		if (vs.fixedColumnWidth > 0) {	// There is a margin
 			if (PointInSelMargin(pt)) {
 				DisplayCursor(Window::cursorReverseArrow);
-				return ; 	// No need to test for selection
+				return; 	// No need to test for selection
 			}
-
-
-
 		}
 		// Display regular (drag) cursor over selection
 		if (PointInSelection(pt))
@@ -3224,7 +3257,9 @@ void Editor::Tick() {
 			InvalidateCaret();
 		}
 	}
-	if ((dwellDelay < SC_TIME_FOREVER) && (ticksToDwell > 0)) {
+	if ((dwellDelay < SC_TIME_FOREVER) && 
+		(ticksToDwell > 0) &&
+		(!HaveMouseCapture())) {
 		ticksToDwell -= timer.tickSize;
 		if (ticksToDwell <= 0) {
 			dwelling = true;
@@ -3260,7 +3295,7 @@ void Editor::CheckForChangeOutsidePaint(Range r) {
 	if (paintState == painting && !paintingAllText) {
 		//Platform::DebugPrintf("Checking range in paint %d-%d\n", r.start, r.end);
 		if (!r.Valid())
-			return ;
+			return;
 
 		PRectangle rcText = GetTextRectangle();
 		// Determine number of lines displayed including a possible partially displayed last line
@@ -3272,7 +3307,7 @@ void Editor::CheckForChangeOutsidePaint(Range r) {
 		if (!IsOverlap(topLine, bottomLine, lineRangeStart, lineRangeEnd)) {
 			//Platform::DebugPrintf("No overlap (%d-%d) with window(%d-%d)\n",
 			//		lineRangeStart, lineRangeEnd, topLine, bottomLine);
-			return ;
+			return;
 		}
 
 		// Assert rcPaint contained within or equal to rcText
@@ -3284,7 +3319,7 @@ void Editor::CheckForChangeOutsidePaint(Range r) {
 				//Platform::DebugPrintf("Change (%d-%d) in top npv(%d-%d)\n",
 				//	lineRangeStart, lineRangeEnd, topLine, paintTopLine);
 				paintState = paintAbandoned;
-				return ;
+				return;
 			}
 		}
 		if (rcPaint.bottom < rcText.bottom) {
@@ -3295,7 +3330,7 @@ void Editor::CheckForChangeOutsidePaint(Range r) {
 				//Platform::DebugPrintf("Change (%d-%d) in bottom npv(%d-%d)\n",
 				//	lineRangeStart, lineRangeEnd, paintBottomLine, bottomLine);
 				paintState = paintAbandoned;
-				return ;
+				return;
 			}
 		}
 	}
@@ -4154,6 +4189,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_POSITIONFROMPOINT:
 		return PositionFromLocation(Point(wParam, lParam));
+
+	case SCI_POSITIONFROMPOINTCLOSE:
+		return PositionFromLocationClose(Point(wParam, lParam));
 
 	case SCI_GOTOLINE:
 		GoToLine(wParam);
