@@ -668,12 +668,13 @@ void ScintillaGTK::NotifyKey(int key, int modifiers) {
 int ScintillaGTK::KeyDefault(int key, int modifiers) {
 	if (!(modifiers & SCI_CTRL) && !(modifiers & SCI_ALT) && (key < 256)) {
 		AddChar(key);
+		return 1;
 	} else {
 		// Pass up to container in case it is an accelerator
 		NotifyKey(key, modifiers);
+		return 0;
 	}
 	//Platform::DebugPrintf("SK-key: %d %x %x\n",key, modifiers);
-	return 1;
 }
 
 void ScintillaGTK::Copy() {
@@ -1047,7 +1048,7 @@ static int KeyTranslate(int keyIn) {
 }
 
 gint ScintillaGTK::KeyPress(GtkWidget *, GdkEventKey *event, ScintillaGTK *sciThis) {
-	//Platform::DebugPrintf("SC-key: %d %x %x\n",event->keyval, event->state, GTK_WIDGET_FLAG(sciThis));
+	//Platform::DebugPrintf("SC-key: %d %x\n",event->keyval, event->state);
 	bool shift = event->state & GDK_SHIFT_MASK;
 	bool ctrl = event->state & GDK_CONTROL_MASK;
 	bool alt = event->state & GDK_MOD1_MASK;
@@ -1060,10 +1061,10 @@ gint ScintillaGTK::KeyPress(GtkWidget *, GdkEventKey *event, ScintillaGTK *sciTh
 		key = KeyTranslate(key);
 
 	bool consumed = false;
-	sciThis->KeyDown(key, shift, ctrl, alt, &consumed);
-	//Platform::DebugPrintf("SK-key: %d %x %x\n",event->keyval, event->state, GTK_WIDGET_FLAGS(widget));
-	//if (consumed)
-	//	gtk_signal_emit_stop_by_name(GTK_OBJECT(w), "key_press_event");
+	int added = sciThis->KeyDown(key, shift, ctrl, alt, &consumed);
+	if (!consumed)
+		consumed = added;
+	//Platform::DebugPrintf("SK-key: %d %x %x\n",event->keyval, event->state, consumed);
 	return consumed;
 }
 
