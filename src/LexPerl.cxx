@@ -383,7 +383,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				// any slash found, so no longer need to track preferRE state.
 				// Find first previous significant lexed element and interpret.
 				bool preferRE = false;
-				unsigned int bk = i - 1;
+				unsigned int bk = (i > 0)? i - 1: 0;
 				char bkch;
 				styler.Flush();
 				while ((bk > 0) && (styler.StyleAt(bk) == SCE_PL_DEFAULT ||
