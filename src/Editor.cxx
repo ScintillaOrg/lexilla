@@ -285,7 +285,7 @@ Editor::Editor() {
 
 	printMagnification = 0;
 	printColourMode = SC_PRINT_NORMAL;
-	printWraps = true;
+	printWrapState = eWrapWord;
 	cursorMode = SC_CURSORNORMAL;
 	controlCharSymbol = 0;	/* Draw the control characters */
 
@@ -2442,7 +2442,7 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 	int nPrintPos = pfr->chrg.cpMin;
 	int visibleLine = 0;
 	int widthPrint = pfr->rc.Width() - lineNumberWidth;
-	if (!printWraps)
+	if (printWrapState == eWrapNone)
 		widthPrint = LineLayout::wrapWidthInfinite;
 
 	while (lineDoc <= linePrintLast && ypos < pfr->rc.bottom) {
@@ -2484,7 +2484,7 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 			}
 		}
 
-		if (draw && lineNumberWidth && 
+		if (draw && lineNumberWidth &&
 			(ypos + vsPrint.lineHeight <= pfr->rc.bottom) &&
 			(visibleLine >= 0)) {
 			char number[100];
@@ -2517,7 +2517,7 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 				visibleLine++;
 				if (iwl == ll.lines-1)
 					nPrintPos = pdoc->LineStart(lineDoc + 1);
-				else 
+				else
 					nPrintPos += ll.LineStart(iwl+1) - ll.LineStart(iwl);
 			}
 		}
@@ -4965,12 +4965,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETPRINTCOLOURMODE:
 		return printColourMode;
 
-	case SCI_SETPRINTWRAPS:
-		printWraps = wParam != 0;
+	case SCI_SETPRINTWRAPMODE:
+		printWrapState = (wParam == SC_WRAP_WORD) ? eWrapWord : eWrapNone;
 		break;
 
-	case SCI_GETPRINTWRAPS:
-		return printWraps;
+	case SCI_GETPRINTWRAPMODE:
+		return printWrapState;
 
 	case SCI_GETSTYLEAT:
 		if (static_cast<short>(wParam) >= pdoc->Length())

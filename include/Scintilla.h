@@ -505,8 +505,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define CARET_EVEN 0x08
 #define SCI_SETXCARETPOLICY 2402
 #define SCI_SETYCARETPOLICY 2403
-#define SCI_SETPRINTWRAPS 2406
-#define SCI_GETPRINTWRAPS 2407
+#define SCI_SETPRINTWRAPMODE 2406
+#define SCI_GETPRINTWRAPMODE 2407
 #define SCI_STARTRECORD 3001
 #define SCI_STOPRECORD 3002
 #define SCI_SETLEXER 4001

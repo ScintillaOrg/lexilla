@@ -184,7 +184,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	int printMagnification;
 	int printColourMode;
-	bool printWraps;
+	int printWrapState;
 	int cursorMode;
 	int controlCharSymbol;
 
