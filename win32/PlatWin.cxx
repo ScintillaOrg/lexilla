@@ -293,7 +293,7 @@ void Surface::FillRectangle(PRectangle rc, Colour back) {
 }
 
 void Surface::FillRectangle(PRectangle rc, Surface &surfacePattern) {
-	HBRUSH br = 0;
+	HBRUSH br;
 	if (surfacePattern.bitmap)
 		br = ::CreatePatternBrush(surfacePattern.bitmap);
 	else	// Something is wrong so display in red
@@ -330,7 +330,7 @@ int UCS2FromUTF8(const char *s, int len, wchar_t *tbuf, int tlen) {
 	int ui=0;
 	const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
 	int i=0;
-	while (i<len) {
+	while ((i<len) && (ui<tlen)) {
 		unsigned char ch = us[i++];
 		if (ch < 0x80) {
 			tbuf[ui] = ch;

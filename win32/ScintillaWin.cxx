@@ -57,6 +57,8 @@
 
 // GCC has trouble with the standard COM ABI so do it the old C way with explicit vtables.
 
+const char callClassName[] = "CallTip";
+
 class ScintillaWin; 	// Forward declaration for COM interface subobjects
 
 class FormatEnumerator {
@@ -102,7 +104,9 @@ class ScintillaWin :
 	static HINSTANCE hInstance;
 
 	ScintillaWin(HWND hwnd);
+	ScintillaWin(const ScintillaWin &) : ScintillaBase() {}
 	virtual ~ScintillaWin();
+	ScintillaWin &operator=(const ScintillaWin &) { return *this; }
 
 	virtual void Initialise();
 	virtual void Finalise();
@@ -528,7 +532,7 @@ void ScintillaWin::SetHorizontalScrollPos() {
 bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
 	bool modified = false;
 	SCROLLINFO sci = {
-	    sizeof(sci)
+	    sizeof(sci),0,0,0,0,0,0
 	};
 	sci.fMask = SIF_PAGE | SIF_RANGE;
 	::GetScrollInfo(wMain.GetID(), SB_VERT, &sci);
@@ -617,14 +621,14 @@ void UTF8FromUCS2(wchar_t *uptr, unsigned int tlen, char *putf, int len) {
 	for (unsigned int i = 0; i < tlen && uptr[i]; i++) {
 		unsigned int uch = uptr[i];
 		if (uch < 0x80) {
-			putf[k++] = uch;
+			putf[k++] = static_cast<char>(uch);
 		} else if (uch < 0x800) {
-			putf[k++] = 0xC0 | (uch >> 6);
-			putf[k++] = 0x80 | (uch & 0x3f);
+			putf[k++] = static_cast<char>(0xC0 | (uch >> 6));
+			putf[k++] = static_cast<char>(0x80 | (uch & 0x3f));
 		} else {
-			putf[k++] = 0xE0 | (uch >> 12);
-			putf[k++] = 0x80 | ((uch >> 6) & 0x3f);
-			putf[k++] = 0x80 | (uch & 0x3f);
+			putf[k++] = static_cast<char>(0xE0 | (uch >> 12));
+			putf[k++] = static_cast<char>(0x80 | ((uch >> 6) & 0x3f));
+			putf[k++] = static_cast<char>(0x80 | (uch & 0x3f));
 		}
 	}
 	putf[len] = '\0';
@@ -991,7 +995,7 @@ void ScintillaWin::ImeStartComposition() {
 			// Since the style creation code has been made platform independent,
 			// The logfont for the IME is recreated here.
 			int styleHere = (pdoc->StyleAt(currentPos)) & 31;
-			LOGFONT lf = {0};
+			LOGFONT lf = {0,0,0,0,0,0,0,0,0,0,0,0,0,""};
 			int sizeZoomed = vs.styles[styleHere].size + vs.zoomLevel;
 			if (sizeZoomed <= 2)	// Hangs if sizeZoomed <= 1
 				sizeZoomed = 2;
@@ -1242,12 +1246,11 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 
 	SetDragPosition(invalidPosition);
 
-	STGMEDIUM medium;
+	STGMEDIUM medium={0,{0},0};
 	HRESULT hr = S_OK;
 
 	wchar_t *udata = 0;
 	char *data = 0;
-	int dataLen = 0;
 
 	if (SC_CP_UTF8 == pdoc->dbcsCodePage) {
 		FORMATETC fmtu = {CF_UNICODETEXT, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
@@ -1256,7 +1259,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 			udata = static_cast<wchar_t *>(::GlobalLock(medium.hGlobal));
 			int tlen = ::GlobalSize(medium.hGlobal);
 			// Convert UCS-2 to UTF-8
-			dataLen = UTF8Length(udata, tlen/2);
+			int dataLen = UTF8Length(udata, tlen/2);
 			data = new char[dataLen+1];
 			if (data) {
 				UTF8FromUCS2(udata, tlen/2, data, dataLen);
@@ -1282,7 +1285,6 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 	
 	POINT rpt = {pt.x, pt.y};
 	::ScreenToClient(wMain.GetID(), &rpt);
-	Point npt(rpt.x, rpt.y);
 	int movePos = PositionFromLocation(Point(rpt.x, rpt.y));
 
 	DropAt(movePos, data, *pdwEffect == DROPEFFECT_MOVE, hrRectangular == S_OK);
