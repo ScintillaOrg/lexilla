@@ -1243,7 +1243,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		}
 	}
 
-	bool inIndentation = true;
+	bool inIndentation = subLine == 0;	// Do not handle indentation except on first subline.
 	int indentWidth = pdoc->indentInChars * vsDraw.spaceWidth;
 	if (indentWidth == 0)
 		indentWidth = pdoc->tabInChars * vsDraw.spaceWidth;
@@ -1359,7 +1359,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 								if (vsDraw.viewWhitespace != wsInvisible) {
 									if (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways) {
 										int xmid = (ll.positions[cpos + startseg] + ll.positions[cpos + startseg + 1]) / 2;
-										PRectangle rcDot(xmid + xStart, rcSegment.top + vsDraw.lineHeight / 2, 0, 0);
+										PRectangle rcDot(xmid + xStart  - subLineStart, rcSegment.top + vsDraw.lineHeight / 2, 0, 0);
 										rcDot.right = rcDot.left + 1;
 										rcDot.bottom = rcDot.top + 1;
 										surface->FillRectangle(rcDot, textFore);
@@ -1421,7 +1421,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	int xEol = ll.positions[lineEnd] - subLineStart;
 	rcSegment.left = xEol + xStart;
 	rcSegment.right = xEol + vsDraw.aveCharWidth + xStart;
-	bool eolInSelection = (posLineEnd > ll.selStart) && (posLineEnd <= ll.selEnd) && (ll.selStart != ll.selEnd);
+	bool eolInSelection = (subLine == (ll.lines-1)) &&
+		(posLineEnd > ll.selStart) && (posLineEnd <= ll.selEnd) && (ll.selStart != ll.selEnd);
 	if (eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1)) {
 		if (primarySelection)
 			surface->FillRectangle(rcSegment, vsDraw.selbackground.allocated);
