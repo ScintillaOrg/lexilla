@@ -1291,6 +1291,9 @@ fun void DelLineRight=2396(,)
 set void SetXOffset=2397(int newOffset,)
 get int GetXOffset=2398(,)
 
+# Set the last x chosen value to be the caret x position
+fun void ChooseCaretX=2399(,)
+
 # Set the focus to this Scintilla widget.
 # GTK+ Specific.
 fun void GrabFocus=2400(,)

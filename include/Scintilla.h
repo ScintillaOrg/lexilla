@@ -480,6 +480,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_DELLINERIGHT 2396
 #define SCI_SETXOFFSET 2397
 #define SCI_GETXOFFSET 2398
+#define SCI_CHOOSECARETX 2399
 #define SCI_GRABFOCUS 2400
 #define CARET_SLOP 0x01
 #define CARET_STRICT 0x04

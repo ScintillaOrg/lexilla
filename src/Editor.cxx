@@ -1555,15 +1555,15 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 				char chDoc = pdoc->CharAt(charInDoc);
 				styleByte = pdoc->StyleAt(charInDoc);
 				if (vstyle.viewEOL || ((chDoc != '\r') && (chDoc != '\n'))) {
-					allSame = allSame && 
+					allSame = allSame &&
 						(ll->styles[numCharsInLine] == static_cast<char>(styleByte & styleMask));
-					allSame = allSame && 
+					allSame = allSame &&
 						(ll->indicators[numCharsInLine] == static_cast<char>(styleByte & ~styleMask));
 					if (vstyle.styles[ll->styles[numCharsInLine]].caseForce == Style::caseUpper)
-						allSame = allSame && 
+						allSame = allSame &&
 							(ll->chars[numCharsInLine] == static_cast<char>(toupper(chDoc)));
 					else if (vstyle.styles[ll->styles[numCharsInLine]].caseForce == Style::caseLower)
-						allSame = allSame && 
+						allSame = allSame &&
 							(ll->chars[numCharsInLine] == static_cast<char>(tolower(chDoc)));
 					else
 						allSame = allSame &&
@@ -4658,6 +4658,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETXOFFSET:
 		return xOffset;
+
+	case SCI_CHOOSECARETX:
+		SetLastXChosen();
+		break;
 
 	case SCI_SCROLLCARET:
 		EnsureCaretVisible();
