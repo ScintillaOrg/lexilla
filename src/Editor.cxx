@@ -4403,6 +4403,9 @@ void Editor::ButtonMove(Point pt) {
 		PRectangle rcClient = GetClientRectangle();
 		if (pt.y > rcClient.bottom) {
 			int lineMove = cs.DisplayFromDoc(LineFromLocation(pt));
+			if (lineMove < 0) {
+				lineMove = cs.DisplayFromDoc(pdoc->LinesTotal()-1);
+			}
 			ScrollTo(lineMove - LinesOnScreen() + 5);
 			Redraw();
 		} else if (pt.y < rcClient.top) {
