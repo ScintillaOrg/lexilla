@@ -1538,6 +1538,8 @@ fun void WordRightEnd=2441(,)
 # Move caret right one word, position cursor at end of word, extending selection to new caret position.
 fun void WordRightEndExtend=2442(,)
 
+# Set the set of characters making up whitespace for when moving or selecting by word.
+set void SetWhitespaceChars=2443(, string characters)
 
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)

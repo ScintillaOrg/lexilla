@@ -2217,6 +2217,8 @@ struct TextToFind {
      <a class="message" href="#SCI_GETCODEPAGE">SCI_GETCODEPAGE</a><br />
      <a class="message" href="#SCI_SETWORDCHARS">SCI_SETWORDCHARS(&lt;unused&gt;, const char
     *chars)</a><br />
+	 <a class="message" href="#SCI_SETWHITESPACECHARS">SCI_SETWHITESPACECHARS(&lt;unused&gt;, const char
+    *chars)</a><br />
      <a class="message" href="#SCI_GRABFOCUS">SCI_GRABFOCUS</a><br />
      <a class="message" href="#SCI_SETFOCUS">SCI_SETFOCUS(bool focus)</a><br />
      <a class="message" href="#SCI_GETFOCUS">SCI_GETFOCUS</a><br />
@@ -2307,6 +2309,13 @@ struct TextToFind {
     alphanumeric and '_', is used. For example, if you don't allow '_' in your set of characters
     use:<br />
      <code>SCI_SETWORDCHARS(0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")</code>;</p>
+
+    <p><b id="SCI_SETWHITESPACECHARS">SCI_SETWHITESPACECHARS(&lt;unused&gt;, const char *chars)</b><br />
+     Similar to <code>SCI_SETWORDCHARS</code>, this message allows the user to define which chars Scintilla considers
+	as whitespace.  If <code>chars</code> is null then the default set, space and all char codes less than
+	0x20, are used.  Setting the whitespace chars allows the user to fine-tune Scintilla's behaviour doing
+	such things as moving the cursor to the start or end of a word; for example, by defining punctuation chars
+	as whitespace, they will be skipped over when the user presses ctrl+left or ctrl+right.
 
     <p><b id="SCI_GRABFOCUS">SCI_GRABFOCUS</b><br />
      <b id="SCI_SETFOCUS">SCI_SETFOCUS(bool focus)</b><br />

@@ -87,11 +87,12 @@ public:
 			userData = 0;
 		}
 	};
+	
+	enum charClassification { ccSpace, ccNewLine, ccWord, ccPunctuation };
 
 private:
 	int refCount;
 	CellBuffer cb;
-	enum charClassification { ccSpace, ccNewLine, ccWord, ccPunctuation };
 	charClassification charClass[256];
 	char stylingMask;
 	int endStyled;
@@ -199,8 +200,9 @@ public:
 	int LinesTotal();
 
 	void ChangeCase(Range r, bool makeUpperCase);
-
-	void SetWordChars(unsigned char *chars);
+	
+	void SetDefaultCharClasses();
+	void SetCharClasses(unsigned char *chars, charClassification newCharClass);
 	void SetStylingBits(int bits);
 	void StartStyling(int position, char mask);
 	bool SetStyleFor(int length, char style);

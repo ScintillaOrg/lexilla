@@ -1122,7 +1122,7 @@ This way, we favour the displaying of useful information: the begining of lines,
 where most code reside, and the lines after the caret, eg. the body of a function.
 
      |        |       |      |                                            |
-slop | strict | jumps | even | Caret can go to the margin                 | When reaching limit (caret going out of
+slop | strict | jumps | even | Caret can go to the margin                 | When reaching limitÝ(caret going out of
      |        |       |      |                                            | visibility or going into the UZ) display is...
 -----+--------+-------+------+--------------------------------------------+--------------------------------------------------------------
   0  |   0    |   0   |   0  | Yes                                        | moved to put caret on top/on right
@@ -5733,7 +5733,14 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SETWORDCHARS: {
 			if (lParam == 0)
 				return 0;
-			pdoc->SetWordChars(reinterpret_cast<unsigned char *>(lParam));
+			pdoc->SetCharClasses(reinterpret_cast<unsigned char *>(lParam), Document::ccWord);
+		}
+		break;
+
+	case SCI_SETWHITESPACECHARS: {
+			if (lParam == 0)
+				return 0;
+			pdoc->SetCharClasses(reinterpret_cast<unsigned char *>(lParam), Document::ccSpace);
 		}
 		break;
 
