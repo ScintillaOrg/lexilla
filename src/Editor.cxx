@@ -3354,6 +3354,10 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	case SCI_HOMEEXTEND:
 	case SCI_LINEEND:
 	case SCI_LINEENDEXTEND:
+	case SCI_HOMEWRAP:
+	case SCI_HOMEWRAPEXTEND:
+	case SCI_LINEENDWRAP:
+	case SCI_LINEENDWRAPEXTEND:
 	case SCI_DOCUMENTSTART:
 	case SCI_DOCUMENTSTARTEXTEND:
 	case SCI_DOCUMENTEND:
@@ -3370,6 +3374,8 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long
 	case SCI_FORMFEED:
 	case SCI_VCHOME:
 	case SCI_VCHOMEEXTEND:
+	case SCI_VCHOMEWRAP:
+	case SCI_VCHOMEWRAPEXTEND:
 	case SCI_DELWORDLEFT:
 	case SCI_DELWORDRIGHT:
 	case SCI_DELLINELEFT:
@@ -3638,6 +3644,38 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		MovePositionTo(pdoc->LineEndPosition(currentPos), true);
 		SetLastXChosen();
 		break;
+	case SCI_HOMEWRAP: {
+			int homePos = MovePositionSoVisible(StartEndDisplayLine(currentPos, true), -1);
+			if (currentPos <= homePos)
+				homePos = pdoc->LineStart(pdoc->LineFromPosition(currentPos));
+			MovePositionTo(homePos);
+			SetLastXChosen();
+		}
+		break;
+	case SCI_HOMEWRAPEXTEND: {
+			int homePos = MovePositionSoVisible(StartEndDisplayLine(currentPos, true), -1);
+			if (currentPos <= homePos)
+				homePos = pdoc->LineStart(pdoc->LineFromPosition(currentPos));
+			MovePositionTo(homePos, true);
+			SetLastXChosen();
+		}
+		break;
+	case SCI_LINEENDWRAP: {
+			int endPos = MovePositionSoVisible(StartEndDisplayLine(currentPos, false), 1);
+			if (currentPos >= endPos)
+				endPos = pdoc->LineEndPosition(currentPos);
+			MovePositionTo(endPos);
+			SetLastXChosen();
+		}
+		break;
+	case SCI_LINEENDWRAPEXTEND: {
+			int endPos = MovePositionSoVisible(StartEndDisplayLine(currentPos, false), 1);
+			if (currentPos >= endPos)
+				endPos = pdoc->LineEndPosition(currentPos);
+			MovePositionTo(endPos, true);
+			SetLastXChosen();
+		}
+		break;
 	case SCI_DOCUMENTSTART:
 		MovePositionTo(0);
 		SetLastXChosen();
@@ -3709,6 +3747,26 @@ int Editor::KeyCommand(unsigned int iMessage) {
 	case SCI_VCHOMEEXTEND:
 		MovePositionTo(pdoc->VCHomePosition(currentPos), true);
 		SetLastXChosen();
+		break;
+	case SCI_VCHOMEWRAP: {
+			int homePos = pdoc->VCHomePosition(currentPos);
+			int viewLineStart = MovePositionSoVisible(StartEndDisplayLine(currentPos, true), -1);
+			if ((viewLineStart < currentPos) && (viewLineStart > homePos))
+				homePos = viewLineStart;
+			
+			MovePositionTo(homePos);
+			SetLastXChosen();
+		}
+		break;
+	case SCI_VCHOMEWRAPEXTEND: {
+			int homePos = pdoc->VCHomePosition(currentPos);
+			int viewLineStart = MovePositionSoVisible(StartEndDisplayLine(currentPos, true), -1);
+			if ((viewLineStart < currentPos) && (viewLineStart > homePos))
+				homePos = viewLineStart;
+
+			MovePositionTo(homePos, true);
+			SetLastXChosen();
+		}
 		break;
 	case SCI_ZOOMIN:
 		if (vs.zoomLevel < 20) {
@@ -5937,6 +5995,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_HOMEEXTEND:
 	case SCI_LINEEND:
 	case SCI_LINEENDEXTEND:
+	case SCI_HOMEWRAP:
+	case SCI_HOMEWRAPEXTEND:
+	case SCI_LINEENDWRAP:
+	case SCI_LINEENDWRAPEXTEND:
 	case SCI_DOCUMENTSTART:
 	case SCI_DOCUMENTSTARTEXTEND:
 	case SCI_DOCUMENTEND:
@@ -5954,6 +6016,8 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_FORMFEED:
 	case SCI_VCHOME:
 	case SCI_VCHOMEEXTEND:
+	case SCI_VCHOMEWRAP:
+	case SCI_VCHOMEWRAPEXTEND:
 	case SCI_ZOOMIN:
 	case SCI_ZOOMOUT:
 	case SCI_DELWORDLEFT:
