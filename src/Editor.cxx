@@ -3237,6 +3237,9 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 		lastClickTime = curTime;
 		lastClick = pt;
 		lastXChosen = pt.x;
+		if (selType == selStream) {
+			SetLastXChosen();
+		}
 		inDragDrop = false;
 		EnsureCaretVisible(false);
 	}
