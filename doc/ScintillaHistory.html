@@ -125,25 +125,69 @@
 	Released on 1 August 2002.
       </li>
       <li>
+	Support for GTK+ 2 in Scintilla. International input methods not supported on GTK+2.
+      </li>
+      <li>
 	Line wrapping performance improved greatly.
       </li>
       <li>
-	
+	Extra fold points for C, C++, Java, ... for fold comments //{ .. //} and
+	#if / #ifdef .. #endif and the #region .. #endregion feature of C#.
       </li>
       <li>
-	
+	Scintilla method to find the height in pixels of a lin. Currently returns the 
+	same result for every line as all lines are same height.
       </li>
       <li>
-	
+	SciTE automatically recognises Unicode files based 
+	on their Byte Order Marks and switches to Unicode mode. 
+	On Windows, where SciTE supports Unicode display, this 
+	allows display of non European characters.
+	The file is saved back into the same character encoding unless 
+	the user decides to switch using the File | Encoding menu.
       </li>
       <li>
-	
+	Handling of character input changed so that a fillup character, typically '('
+	displays a calltip when an autocompletion list was being displayed.
       </li>
       <li>
-	
+	Multiline strings lexed better for C++ and Lua.
       </li>
       <li>
-	
+	Regular expressions in JavaScript within hypertext files are lexed better.
+      </li>
+      <li>
+	The SciTE strip.trailing.spaces setting now works on the buffer so the 
+	buffer in memory and the file on disk are the same after a save is performed.
+      </li>
+      <li>
+	The SciTE expand abbreviation command again allows '|' characters
+	in expansions to be quoted by using '||'.
+      </li>
+      <li>
+	Autocompletion can automatically "fill up" when one of a set of characters is 
+	type with the autocomplete.&lt;lexer&gt;.fillups property.
+      </li>
+      <li>
+	New predefined properties in SciTE, SelectionStartColumn, SelectionStartLine,
+	SelectionEndColumn, SelectionEndLine can be used to integrate with other 
+	applications.
+      </li>
+      <li>
+	SciTE on Windows keeps status line more current.
+      </li>
+      <li>
+	File saving fixed in SciTE to ensure files are not closed when they can not be 
+	saved because of file permissions. Also fixed a problem with buffers that caused
+	files to not be saved.
+      </li>
+      <li>
+	SciTE bug fixed where monospace mode not remembered when saving files.
+	Some searching options now remembered when switching files.
+      </li>
+      <li>
+	SciTE on Linux now waits on child termination when it shuts a child down 
+	to avoid zombies.
       </li>
       <li>
 	
