@@ -327,7 +327,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int MovePositionSoVisible(int pos, int moveDir);
 	void SetLastXChosen();
 
-	void ScrollTo(int line);
+	void ScrollTo(int line, bool moveThumb=true);
 	virtual void ScrollText(int linesToMove);
 	void HorizontalScrollTo(int xPos);
 	void MoveCaretInsideView(bool ensureVisible=true);

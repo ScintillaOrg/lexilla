@@ -880,7 +880,7 @@ void Editor::SetLastXChosen() {
 	lastXChosen = pt.x;
 }
 
-void Editor::ScrollTo(int line) {
+void Editor::ScrollTo(int line, bool moveThumb) {
 	int topLineNew = Platform::Clamp(line, 0, MaxScrollPos());
 	if (topLineNew != topLine) {
 		// Try to optimise small scrolls
@@ -893,7 +893,9 @@ void Editor::ScrollTo(int line) {
 		} else {
 			Redraw();
 		}
-		SetVerticalScrollPos();
+		if (moveThumb) {
+			SetVerticalScrollPos();
+		}
 	}
 }
 
