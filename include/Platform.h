@@ -405,7 +405,7 @@ public:
 		return static_cast<short>(x & 0xffff);
 	}
 	static void DebugPrintf(const char *format, ...);
-	static void ShowAssertionPopUps(bool assertionPopUps_);
+	static bool ShowAssertionPopUps(bool assertionPopUps_);
 	static void Assert(const char *c, const char *file, int line);
 	static int Clamp(int val, int minVal, int maxVal);
 };

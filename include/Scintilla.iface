@@ -1003,6 +1003,11 @@ set void SetStatus=2382(int statusCode,)
 # Get error status
 get int GetStatus=2383(,)
 
+# Set whether the mouse is captured when its button is pressed
+set void SetMouseDownCaptures=2384(bool captures,)
+# Get whether mouse gets captured
+get bool GetMouseDownCaptures=2385(,)
+
 # Set the focus to this Scintilla widget.
 # GTK+ Specific
 fun void GrabFocus=2400(,)

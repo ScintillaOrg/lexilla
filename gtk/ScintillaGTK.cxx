@@ -473,10 +473,12 @@ void ScintillaGTK::SetTicking(bool on) {
 }
 
 void ScintillaGTK::SetMouseCapture(bool on) {
-	if (on) {
-		gtk_grab_add(GTK_WIDGET(wDraw.GetID()));
-	} else {
-		gtk_grab_remove(GTK_WIDGET(wDraw.GetID()));
+	if (mouseDownCaptures) {
+		if (on) {
+			gtk_grab_add(GTK_WIDGET(wDraw.GetID()));
+		} else {
+			gtk_grab_remove(GTK_WIDGET(wDraw.GetID()));
+		}
 	}
 	capturedMouse = on;
 }
