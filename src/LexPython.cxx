@@ -337,7 +337,6 @@ static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unuse
 					WordList *[], Accessor &styler) {
 	int maxPos = startPos + length;
 	int maxLines = styler.GetLine(maxPos-1);
-	int lengthDoc = styler.Length();
 
 	// Backtrack to previous non-blank line so we can determine indent level
 	// for any white space lines (needed esp. within triple quoted strings)
@@ -346,14 +345,18 @@ static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unuse
 	int spaceFlags = 0;
 	int lineCurrent = styler.GetLine(startPos);
 	int indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, NULL);
-	bool first = true;
-	while ((startPos > 0) && (lineCurrent > 0) && (first || indentCurrent & SC_FOLDLEVELWHITEFLAG)) {
+	while (lineCurrent > 0) {
 		lineCurrent--;
-		startPos = styler.LineStart(lineCurrent);
 		indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, NULL);
-		first = false;
+		if (!(indentCurrent & SC_FOLDLEVELWHITEFLAG)) {
+			if (!IsCommentLine(lineCurrent, styler)) {
+				break;
+			}
+		}
 	}
-
+	int indentCurrentLevel = indentCurrent & SC_FOLDLEVELNUMBERMASK;
+	
+	startPos = styler.LineStart(lineCurrent);
 	// Set up initial state
 	int prev_state = SCE_P_DEFAULT & 31;
 	if (lineCurrent >= 1)
@@ -362,76 +365,69 @@ static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unuse
 	int prevComment = 0;
 	if (lineCurrent >= 1)
 		prevComment = IsCommentLine(lineCurrent - 1, styler);
-	char chNext = styler[startPos];
 
 	// Process all characters to end of requested range or end of any triple quote
 	// or comment that hangs over the end of the range
-	for (int i = startPos; i < lengthDoc && ((lineCurrent <= maxLines) || prevQuote || prevComment); i++) {
+	while ((lineCurrent <= maxLines) || prevQuote || prevComment) {
 
-		// Next character
-		char ch = chNext;
-		chNext = styler.SafeGetCharAt(i + 1);
+		// Gather info
+		int lev = indentCurrent;
+		int lineNext = lineCurrent + 1;
+		int style = styler.StyleAt(styler.LineStart(lineNext)) & 31;
+		int indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
+		if (indentNext & SC_FOLDLEVELWHITEFLAG)
+			indentNext = SC_FOLDLEVELWHITEFLAG | indentCurrentLevel;
+		int quote = ((style == SCE_P_TRIPLE) || (style== SCE_P_TRIPLEDOUBLE));
+		int quote_start = (quote && !prevQuote);
+		int quote_continue = (quote && prevQuote);
+		int comment = IsCommentLine(lineCurrent, styler);
+		int comment_start = (comment && !prevComment && 
+			IsCommentLine(lineNext, styler) && (lev > SC_FOLDLEVELBASE));
+		int comment_continue = (comment && prevComment);
 
-		// Process line change (also if reach very end of document)
-		if ((ch == '\r' && chNext != '\n') || (ch == '\n') || (i == lengthDoc-1)) {
-
-			// Gather info
-			int lev = indentCurrent;
-			int style = styler.StyleAt(i) & 31;
-			int lineNext = lineCurrent + 1;
-			int indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
-			int quote = ((style == SCE_P_TRIPLE) || (style== SCE_P_TRIPLEDOUBLE));
-			int quote_start = (quote && !prevQuote);
-			int quote_continue = (quote && prevQuote);
-			int comment = IsCommentLine(lineCurrent, styler);
-			int comment_start = (comment && !prevComment && 
-				IsCommentLine(lineNext, styler) && (lev > SC_FOLDLEVELBASE));
-			int comment_continue = (comment && prevComment);
-
-			if (quote_start) {
-				// Place fold point at start of triple quoted string
-				lev |= SC_FOLDLEVELHEADERFLAG;
-			} else if (quote_continue || prevQuote) {
-				// Add level to rest of lines in the string
-				lev = lev + 1;
-			} else if (comment_start) {
-				// Place fold point at start of a block of comments
-				lev |= SC_FOLDLEVELHEADERFLAG;
-			} else if (comment_continue) {
-				// Add level to rest of lines in the block
-				lev = lev + 1;
-			}
-
-			// Skip past any blank lines for next indent level info; we skip also comments
-			// starting in column 0 which effectively folds them into surrounding code
-			// rather than screwing up folding.  Then set indent level on the lines
-			// we skipped to be same as maximum of current and next indent.  This approach
-			// does a reasonable job of collapsing white space into surrounding code
-			// without getting confused by white space at the start of an indented level.
-			while (!quote &&
-			       ((indentNext & SC_FOLDLEVELWHITEFLAG) || styler[styler.LineStart(lineNext)] == '#') &&
-			       (lineNext < maxLines)) {
-				styler.SetLevel(lineNext, Platform::Maximum(indentCurrent, indentNext));
-				lineNext++;
-				indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
-			}
-
-			// Set fold header on non-quote/non-comment line
-			if (!quote && !comment && !(indentCurrent & SC_FOLDLEVELWHITEFLAG) ) {
-				if ((indentCurrent & SC_FOLDLEVELNUMBERMASK) < (indentNext & SC_FOLDLEVELNUMBERMASK))
-					lev |= SC_FOLDLEVELHEADERFLAG;
-			}
-
-			// Keep track of triple quote and block comment state of previous line
-			prevQuote = quote;
-			prevComment = comment_start || comment_continue;
-
-			// Set fold level for this line and move to next line
-			styler.SetLevel(lineCurrent, lev);
-			indentCurrent = indentNext;
-			lineCurrent = lineNext;
-			i = styler.LineStart(lineNext);
+		if (quote_start) {
+			// Place fold point at start of triple quoted string
+			lev |= SC_FOLDLEVELHEADERFLAG;
+		} else if (quote_continue || prevQuote) {
+			// Add level to rest of lines in the string
+			lev = lev + 1;
+		} else if (comment_start) {
+			// Place fold point at start of a block of comments
+			lev |= SC_FOLDLEVELHEADERFLAG;
+		} else if (comment_continue) {
+			// Add level to rest of lines in the block
+			lev = lev + 1;
 		}
+
+		// Skip past any blank lines for next indent level info; we skip also comments
+		// starting in column 0 which effectively folds them into surrounding code
+		// rather than screwing up folding.  Then set indent level on the lines
+		// we skipped to be same as maximum of current and next indent.  This approach
+		// does a reasonable job of collapsing white space into surrounding code
+		// without getting confused by white space at the start of an indented level.
+		while (!quote &&
+		       ((indentNext & SC_FOLDLEVELWHITEFLAG) || styler[styler.LineStart(lineNext)] == '#') &&
+		       (lineNext < maxLines)) {
+			styler.SetLevel(lineNext, Platform::Maximum(indentCurrent, indentNext));
+			lineNext++;
+			indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
+		}
+
+		// Set fold header on non-quote/non-comment line
+		if (!quote && !comment && !(indentCurrent & SC_FOLDLEVELWHITEFLAG) ) {
+			if ((indentCurrent & SC_FOLDLEVELNUMBERMASK) < (indentNext & SC_FOLDLEVELNUMBERMASK))
+				lev |= SC_FOLDLEVELHEADERFLAG;
+		}
+
+		// Keep track of triple quote and block comment state of previous line
+		prevQuote = quote;
+		prevComment = comment_start || comment_continue;
+
+		// Set fold level for this line and move to next line
+		styler.SetLevel(lineCurrent, lev);
+		indentCurrent = indentNext;
+		indentCurrentLevel = indentCurrent & SC_FOLDLEVELNUMBERMASK;
+		lineCurrent = lineNext;
 	}
 
 	// Make sure last line indent level is set too
