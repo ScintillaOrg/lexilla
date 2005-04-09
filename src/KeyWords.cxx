@@ -191,6 +191,7 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmScriptol);
 	LINK_LEXER(lmSpecman);
 	LINK_LEXER(lmSQL);
+	LINK_LEXER(lmTADS3);
 	LINK_LEXER(lmTeX);
 	LINK_LEXER(lmVB);
 	LINK_LEXER(lmVBScript);
