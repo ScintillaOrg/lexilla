@@ -1163,8 +1163,8 @@ void ScintillaWin::Paste() {
 	if (!::OpenClipboard(MainHWND()))
 		return;
 	pdoc->BeginUndoAction();
-	int selStart = SelectionStart();
 	ClearSelection();
+	int selStart = SelectionStart();
 	bool isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect) != 0;
 
 	// Always use CF_UNICODETEXT if available

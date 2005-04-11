@@ -1458,10 +1458,10 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 			GetGtkSelectionText(selection_data, selText);
 
 			pdoc->BeginUndoAction();
-			int selStart = SelectionStart();
 			if (selection_data->selection != GDK_SELECTION_PRIMARY) {
 				ClearSelection();
 			}
+			int selStart = SelectionStart();
 
 			if (selText.rectangular) {
 				PasteRectangular(selStart, selText.s, selText.len);
