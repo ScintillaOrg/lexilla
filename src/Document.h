@@ -262,13 +262,13 @@ public:
 	int foldLevelPrev;
 
 	DocModification(int modificationType_, int position_=0, int length_=0,
-		int linesAdded_=0, const char *text_=0) :
+		int linesAdded_=0, const char *text_=0, int line_=0) :
 		modificationType(modificationType_),
 		position(position_),
 		length(length_),
 		linesAdded(linesAdded_),
 		text(text_),
-		line(0),
+		line(line_),
 		foldLevelNow(0),
 		foldLevelPrev(0) {}
 

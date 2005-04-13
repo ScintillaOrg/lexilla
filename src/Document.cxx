@@ -103,14 +103,14 @@ void Document::SetSavePoint() {
 
 int Document::AddMark(int line, int markerNum) {
 	int prev = cb.AddMark(line, markerNum);
-	DocModification mh(SC_MOD_CHANGEMARKER, LineStart(line), 0, 0, 0);
+	DocModification mh(SC_MOD_CHANGEMARKER, LineStart(line), 0, 0, 0, line);
 	NotifyModified(mh);
 	return prev;
 }
 
 void Document::DeleteMark(int line, int markerNum) {
 	cb.DeleteMark(line, markerNum);
-	DocModification mh(SC_MOD_CHANGEMARKER, LineStart(line), 0, 0, 0);
+	DocModification mh(SC_MOD_CHANGEMARKER, LineStart(line), 0, 0, 0, line);
 	NotifyModified(mh);
 }
 
