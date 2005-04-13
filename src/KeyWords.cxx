@@ -187,6 +187,7 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmPOV);
 	LINK_LEXER(lmPS);
 	LINK_LEXER(lmPython);
+	LINK_LEXER(lmREBOL);
 	LINK_LEXER(lmRuby);
 	LINK_LEXER(lmScriptol);
 	LINK_LEXER(lmSpecman);
