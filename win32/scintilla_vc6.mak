@@ -152,6 +152,7 @@ LEXOBJS=\
 	$(DIR_O)\LexPOV.obj \
 	$(DIR_O)\LexPS.obj \
 	$(DIR_O)\LexPython.obj \
+	$(DIR_O)\LexRebol.obj \
 	$(DIR_O)\LexRuby.obj \
 	$(DIR_O)\LexScriptol.obj \
 	$(DIR_O)\LexSpecman.obj \
@@ -352,6 +353,8 @@ $(DIR_O)\LexPOV.obj: ..\src\LexPOV.cxx $(LEX_HEADERS)
 $(DIR_O)\LexPS.obj: ..\src\LexPS.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexPython.obj: ..\src\LexPython.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexRebol.obj: ..\src\LexRebol.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexRuby.obj: ..\src\LexRuby.cxx $(LEX_HEADERS)
 
