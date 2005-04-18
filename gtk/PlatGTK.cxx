@@ -2343,8 +2343,12 @@ void Menu::Show(Point pt, Window &) {
 	if ((pt.y + requisition.height) > screenHeight) {
 		pt.y = screenHeight - requisition.height;
 	}
+#if GTK_MAJOR_VERSION >= 2
 	gtk_item_factory_popup(factory, pt.x - 4, pt.y - 4, 3, 
 		gtk_get_current_event_time());
+#else
+	gtk_item_factory_popup(factory, pt.x - 4, pt.y - 4, 3, 0);
+#endif
 }
 
 ElapsedTime::ElapsedTime() {
