@@ -883,6 +883,68 @@ bool WordList::InList(const char *s) {
 	return false;
 }
 
+/** similar to InList, but word s can be a substring of keyword.
+ * eg. the keyword define is defined as def~ine. This means the word must start
+ * with def to be a keyword, but also defi, defin and define are valid.
+ * The marker is ~ in this case.
+ */
+bool WordList::InListAbbreviated(const char *s, const char marker) {
+	if (0 == words)
+		return false;
+	if (!sorted) {
+		sorted = true;
+		SortWordList(words, len);
+		for (unsigned int k = 0; k < (sizeof(starts) / sizeof(starts[0])); k++)
+			starts[k] = -1;
+		for (int l = len - 1; l >= 0; l--) {
+			unsigned char indexChar = words[l][0];
+			starts[indexChar] = l;
+		}
+	}
+	unsigned char firstChar = s[0];
+	int j = starts[firstChar];
+	if (j >= 0) {
+		while (words[j][0] == firstChar) {
+			bool isSubword = false;
+			int start = 1;
+			if (words[j][1] == marker) {
+				isSubword = true;
+				start++;
+			}
+			if (s[1] == words[j][start]) {
+				const char *a = words[j] + start;
+				const char *b = s + 1;
+				while (*a && *a == *b) {
+					a++;
+					if (*a == marker) {
+						isSubword = true;
+						a++;
+					}
+					b++;
+				}
+				if ((!*a || isSubword) && !*b)
+					return true;
+			}
+			j++;
+		}
+	}
+	j = starts['^'];
+	if (j >= 0) {
+		while (words[j][0] == '^') {
+			const char *a = words[j] + 1;
+			const char *b = s;
+			while (*a && *a == *b) {
+				a++;
+				b++;
+			}
+			if (!*a)
+				return true;
+			j++;
+		}
+	}
+	return false;
+}
+
 /**
  * Returns an element (complete) of the wordlist array which has
  * the same beginning as the passed string.
