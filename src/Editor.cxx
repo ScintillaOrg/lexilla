@@ -362,7 +362,7 @@ Editor::Editor() {
 	topLine = 0;
 	posTopLine = 0;
 
-	lengthForEncode = 0;
+	lengthForEncode = -1;
 
 	needUpdateUI = true;
 	braces[0] = invalidPosition;

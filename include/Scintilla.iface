@@ -1606,7 +1606,7 @@ fun void Allocate=2446(int bytes,)
 fun int TargetAsUTF8=2447(, stringresult s)
 
 # Set the length of the utf8 argument for calling EncodedFromUTF8.
-# Set to 0 and the string will be measured to the first nul.
+# Set to -1 and the string will be measured to the first nul.
 fun void SetLengthForEncode=2448(int bytes,)
 
 # Translates a UTF8 string into the document encoding.
