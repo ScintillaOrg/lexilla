@@ -1078,7 +1078,7 @@ set void SetEndAtLastLine=2277(bool endAtLastLine,)
 
 # Retrieve whether the maximum scroll position has the last
 # line at the bottom of the view.
-get int GetEndAtLastLine=2278(,)
+get bool GetEndAtLastLine=2278(,)
 
 # Retrieve the height of a particular line of text in pixels.
 fun int TextHeight=2279(int line,)
