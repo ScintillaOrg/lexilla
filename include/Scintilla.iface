@@ -1673,7 +1673,7 @@ val SC_LASTSTEPINUNDOREDO=0x100
 val SC_MOD_CHANGEMARKER=0x200
 val SC_MOD_BEFOREINSERT=0x400
 val SC_MOD_BEFOREDELETE=0x800
-val SC_MODEVENTMASKALL=0xF77
+val SC_MODEVENTMASKALL=0xF7F
 
 # For compatibility, these go through the COMMAND notification rather than NOTIFY
 # and should have had exactly the same values as the EN_* constants.

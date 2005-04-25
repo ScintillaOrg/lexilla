@@ -622,7 +622,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_MOD_CHANGEMARKER 0x200
 #define SC_MOD_BEFOREINSERT 0x400
 #define SC_MOD_BEFOREDELETE 0x800
-#define SC_MODEVENTMASKALL 0xF77
+#define SC_MODEVENTMASKALL 0xF7F
 #define SCEN_CHANGE 768
 #define SCEN_SETFOCUS 512
 #define SCEN_KILLFOCUS 256
