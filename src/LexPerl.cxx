@@ -519,9 +519,13 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				unsigned int fw = i + 1;
 				while (fw < lengthDoc) {
 					char fwch = styler.SafeGetCharAt(fw);
-					if (isEOLChar(fwch) || isspacechar(fwch))
+					if (fwch == ' ') {
+						if (styler.SafeGetCharAt(fw-1) != '\\' ||
+						    styler.SafeGetCharAt(fw-2) != '\\')
 						break;
-					else if (fwch == '>') {
+					} else if (isEOLChar(fwch) || isspacechar(fwch)) {
+						break;
+					} else if (fwch == '>') {
 						if ((fw - i) == 2 &&	// '<=>' case
 						    styler.SafeGetCharAt(fw-1) == '=') {
 							styler.ColourTo(fw, SCE_PL_OPERATOR);
