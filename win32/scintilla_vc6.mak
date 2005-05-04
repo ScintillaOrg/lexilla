@@ -155,6 +155,7 @@ LEXOBJS=\
 	$(DIR_O)\LexRebol.obj \
 	$(DIR_O)\LexRuby.obj \
 	$(DIR_O)\LexScriptol.obj \
+	$(DIR_O)\LexSmalltalk.obj \
 	$(DIR_O)\LexSpecman.obj \
 	$(DIR_O)\LexSQL.obj \
 	$(DIR_O)\LexTADS3.obj \
@@ -359,6 +360,8 @@ $(DIR_O)\LexRebol.obj: ..\src\LexRebol.cxx $(LEX_HEADERS)
 $(DIR_O)\LexRuby.obj: ..\src\LexRuby.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexScriptol.obj: ..\src\LexScriptol.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexSmalltalk.obj: ..\src\LexSmalltalk.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexSpecman.obj: ..\src\LexSpecman.cxx $(LEX_HEADERS)
 
