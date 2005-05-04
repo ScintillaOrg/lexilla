@@ -10,6 +10,7 @@
 	20050206 Added cast for IsLeadByte().
 	20050209 Changes to "external" build support.
 	20050306 Fix for 1st-char-in-doc "corner" case.
+	20050502 Fix for [harmless] one-past-the-end coloring.
 */
 
 #include <stdlib.h>
@@ -180,7 +181,8 @@ void ColouriseCamlDoc(
 
 	// foreach char in range...
 	unsigned int i = startPos;
-	for (unsigned int endPos = startPos + length; i < endPos; i += chSkip) {
+	const unsigned int endPos = startPos + length;
+	for (; i < endPos; i += chSkip) {
 		// set up [per-char] state info
 		int ch = chNext;
 		chNext = static_cast<unsigned char>(styler.SafeGetCharAt(i + 1));
@@ -362,7 +364,9 @@ void ColouriseCamlDoc(
 		chLast = ch;
 	}
 
-	// do terminal char coloring (JIC)
+	// do any required terminal char coloring (JIC)
+	if (i >= endPos)
+		i = endPos - 1;
 	styler.ColourTo(i, state);
 //	styler.Flush();	// (is this always done by calling code?)
 }
