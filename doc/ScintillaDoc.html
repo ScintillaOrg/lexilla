@@ -2797,6 +2797,15 @@ struct TextToFind {
     href="#SCI_STARTSTYLING"><code>SCI_STARTSTYLING</code></a> with a <code>INDICS_MASK</code> mask
     and <a class="message" href="#SCI_SETSTYLING"><code>SCI_SETSTYLING</code></a> with the values
     <code>INDIC0_MASK</code>, <code>INDIC1_MASK</code> and <code>INDIC2_MASK</code>.</p>
+	
+	<p>IMPORTANT: if you are using indicators in a buffer that has a lexer active
+	(see <a class="message" href="#SCI_SETLEXER"><code>SCI_SETLEXER</code></a>),
+	you must save lexing state information before setting any indicators and restore it afterwards.
+	Use <a class="message" href="#SCI_GETENDSTYLED"><code>SCI_GETENDSTYLED</code></a>
+	to retrieve the current "styled to" position and
+	<a class="message" href="#SCI_STARTSTYLING"><code>SCI_STARTSTYLING</code></a>
+	to reset the styling position and mask (<code>0x1f </code> in the default layout of 5 style bits and 3 indicator bits)
+	when you are done.</p>
 
     <p>The number of bits used for styles can be altered with <a class="message"
     href="#SCI_SETSTYLEBITS"><code>SCI_SETSTYLEBITS</code></a> from 0 to 7 bits. The remaining bits
@@ -4666,7 +4675,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
 
           <td align="center">0x100</td>
 
-          <td>This is the final step in an Undo or Redo that has several sections.</td>
+          <td>This is the final step in an Undo or Redo.</td>
 
           <td>None</td>
         </tr>
