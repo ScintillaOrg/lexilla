@@ -2536,35 +2536,34 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	}
 
 	// Draw indicators
-	int indStart[INDIC_MAX + 1] = {0};
-	for (int indica = 0; indica <= INDIC_MAX; indica++)
-		indStart[indica] = 0;
-
-	for (int indicPos = lineStart; indicPos <= lineEnd; indicPos++) {
-		if ((indicPos == lineStart) || (indicPos == lineEnd) ||
-			(ll->indicators[indicPos] != ll->indicators[indicPos + 1])) {
-			int mask = 1 << pdoc->stylingBits;
-			for (int indicnum = 0; mask < 0x100; indicnum++) {
-				if ((indicPos == lineStart) || (indicPos == lineEnd)) {
-					indStart[indicnum] = ll->positions[indicPos];
-				} else if ((ll->indicators[indicPos + 1] & mask) && !(ll->indicators[indicPos] & mask)) {
-					indStart[indicnum] = ll->positions[indicPos + 1];
-				}
-				if ((ll->indicators[indicPos] & mask) &&
-					((indicPos == lineEnd) || !(ll->indicators[indicPos + 1] & mask))) {
-					int endIndicator = indicPos;
-					if (endIndicator >= lineEnd)
-						endIndicator = lineEnd-1;
+	// foreach indicator...
+	for (int indicnum = 0, mask = 1 << pdoc->stylingBits; mask < 0x100; indicnum++) {
+		int startPos = -1;
+		// foreach style pos in line...
+		for (int indicPos = lineStart; indicPos <= lineEnd; indicPos++) {
+			// look for starts...
+			if (startPos < 0) {
+				// NOT in indicator run, looking for START
+				if (indicPos < lineEnd && (ll->indicators[indicPos] & mask))
+					startPos = indicPos;
+			}
+			// ... or ends
+			if (startPos >= 0) {
+				// IN indicator run, looking for END
+				if (indicPos >= lineEnd || !(ll->indicators[indicPos] & mask)) {
+					// AT end of indicator run, DRAW it!
 					PRectangle rcIndic(
-						indStart[indicnum] + xStart - subLineStart,
+						ll->positions[startPos] + xStart - subLineStart,
 						rcLine.top + vsDraw.maxAscent,
-						ll->positions[endIndicator + 1] + xStart - subLineStart,
+						ll->positions[indicPos] + xStart - subLineStart,
 						rcLine.top + vsDraw.maxAscent + 3);
 					vsDraw.indicators[indicnum].Draw(surface, rcIndic, rcLine);
+					// RESET control var
+					startPos = -1;
 				}
-				mask = mask << 1;
 			}
 		}
+		mask <<= 1;
 	}
 	// End of the drawing of the current line
 	if (!twoPhaseDraw) {
