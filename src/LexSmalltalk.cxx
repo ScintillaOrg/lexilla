@@ -246,7 +246,6 @@ static void handleLetter(StyleContext& sc)
 
     ident[0] = static_cast<char>(sc.ch);
     il = 1;
-    doubleColonPresent;
     while (isAlphaNumeric(sc.chNext)) {
         ident[il++] = static_cast<char>(sc.chNext);
         sc.Forward();
