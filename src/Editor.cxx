@@ -29,6 +29,37 @@
 #include "Document.h"
 #include "Editor.h"
 
+/*
+	return whether this modification represents an operation that
+	may reasonably be deferred (not done now OR [possibly] at all)
+*/
+static bool CanDeferToLastStep(const DocModification& mh) {
+	if (mh.modificationType & (SC_MOD_BEFOREINSERT|SC_MOD_BEFOREDELETE))
+		return true;	// CAN skip
+	if (!(mh.modificationType & (SC_PERFORMED_UNDO|SC_PERFORMED_REDO)))
+		return false;	// MUST do
+	if (mh.modificationType & SC_MULTISTEPUNDOREDO)
+		return true;	// CAN skip
+	return false;		// PRESUMABLY must do
+}
+
+static bool CanEliminate(const DocModification& mh) {
+	return
+		(mh.modificationType & (SC_MOD_BEFOREINSERT|SC_MOD_BEFOREDELETE)) != 0;
+}
+
+/*
+	return whether this modification represents the FINAL step
+	in a [possibly lengthy] multi-step Undo/Redo sequence
+*/
+static bool IsLastStep(const DocModification& mh) {
+	return 
+		(mh.modificationType & (SC_PERFORMED_UNDO|SC_PERFORMED_REDO)) != 0
+		&& (mh.modificationType & SC_MULTISTEPUNDOREDO) != 0
+		&& (mh.modificationType & SC_LASTSTEPINUNDOREDO) != 0
+		&& (mh.modificationType & SC_MULTILINEUNDOREDO) != 0;
+}
+
 Caret::Caret() :
 active(false), on(false), period(500) {}
 
@@ -3385,7 +3416,8 @@ void Editor::Undo() {
 	if (pdoc->CanUndo()) {
 		InvalidateCaret();
 		int newPos = pdoc->Undo();
-		SetEmptySelection(newPos);
+		if (newPos >= 0)
+			SetEmptySelection(newPos);
 		EnsureCaretVisible();
 	}
 }
@@ -3393,7 +3425,8 @@ void Editor::Undo() {
 void Editor::Redo() {
 	if (pdoc->CanRedo()) {
 		int newPos = pdoc->Redo();
-		SetEmptySelection(newPos);
+		if (newPos >= 0)
+			SetEmptySelection(newPos);
 		EnsureCaretVisible();
 	}
 }
@@ -3578,8 +3611,7 @@ void Editor::NotifySavePoint(Document*, void *, bool atSavePoint) {
 }
 
 void Editor::CheckModificationForWrap(DocModification mh) {
-	if ((mh.modificationType & SC_MOD_INSERTTEXT) ||
-	        (mh.modificationType & SC_MOD_DELETETEXT)) {
+	if (mh.modificationType & (SC_MOD_INSERTTEXT|SC_MOD_DELETETEXT)) {
 		llc.Invalidate(LineLayout::llCheckTextAndStyle);
 		if (wrapState != eWrapNone) {
 			int lineDoc = pdoc->LineFromPosition(mh.position);
@@ -3673,7 +3705,7 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 		CheckModificationForWrap(mh);
 		if (mh.linesAdded != 0) {
 			// Avoid scrolling of display if change before current display
-			if (mh.position < posTopLine) {
+			if (mh.position < posTopLine && !CanDeferToLastStep(mh)) {
 				int newTop = Platform::Clamp(topLine + mh.linesAdded, 0, MaxScrollPos());
 				if (newTop != topLine) {
 					SetTopLine(newTop);
@@ -3684,19 +3716,19 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 			//Platform::DebugPrintf("** %x Doc Changed\n", this);
 			// TODO: could invalidate from mh.startModification to end of screen
 			//InvalidateRange(mh.position, mh.position + mh.length);
-			if (paintState == notPainting) {
+			if (paintState == notPainting && !CanDeferToLastStep(mh)) {
 				Redraw();
 			}
 		} else {
 			//Platform::DebugPrintf("** %x Line Changed %d .. %d\n", this,
 			//	mh.position, mh.position + mh.length);
-			if (paintState == notPainting) {
+			if (paintState == notPainting && mh.length && !CanEliminate(mh)) {
 				InvalidateRange(mh.position, mh.position + mh.length);
 			}
 		}
 	}
 
-	if (mh.linesAdded != 0) {
+	if (mh.linesAdded != 0 && !CanDeferToLastStep(mh)) {
 		SetScrollBars();
 	}
 
@@ -3704,6 +3736,12 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 		if (paintState == notPainting) {
 			RedrawSelMargin();
 		}
+	}
+
+	// NOW pay the piper WRT "deferred" visual updates
+	if (IsLastStep(mh)) {
+		SetScrollBars();
+		Redraw();
 	}
 
 	// If client wants to see this modification
@@ -5461,8 +5499,8 @@ void Editor::SetDocPointer(Document *document) {
 	NeedWrapping();
 
 	pdoc->AddWatcher(this, 0);
-	Redraw();
 	SetScrollBars();
+	Redraw();
 }
 
 /**
@@ -5691,7 +5729,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_CANUNDO:
-		return pdoc->CanUndo() ? 1 : 0;
+		return (pdoc->CanUndo() && !pdoc->IsReadOnly()) ? 1 : 0;
 
 	case SCI_EMPTYUNDOBUFFER:
 		pdoc->DeleteUndoHistory();
@@ -6120,7 +6158,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		}
 
 	case SCI_CANREDO:
-		return pdoc->CanRedo() ? 1 : 0;
+		return (pdoc->CanRedo() && !pdoc->IsReadOnly()) ? 1 : 0;
 
 	case SCI_MARKERLINEFROMHANDLE:
 		return pdoc->LineFromHandle(wParam);
