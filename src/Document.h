@@ -235,6 +235,8 @@ public:
 	int IndentSize() { return actualIndentInChars; }
 
 private:
+	void CheckReadOnly();
+
 	charClassification WordCharClass(unsigned char ch);
 	bool IsWordStartAt(int pos);
 	bool IsWordEndAt(int pos);
