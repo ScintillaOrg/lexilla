@@ -38,7 +38,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 11/April/2005 NH</p>
+    <p>Last edited 7/May/2005 RBR</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -2798,7 +2798,7 @@ struct TextToFind {
     and <a class="message" href="#SCI_SETSTYLING"><code>SCI_SETSTYLING</code></a> with the values
     <code>INDIC0_MASK</code>, <code>INDIC1_MASK</code> and <code>INDIC2_MASK</code>.</p>
 	
-	<p>IMPORTANT: if you are using indicators in a buffer that has a lexer active
+	<p>If you are using indicators in a buffer that has a lexer active
 	(see <a class="message" href="#SCI_SETLEXER"><code>SCI_SETLEXER</code></a>),
 	you must save lexing state information before setting any indicators and restore it afterwards.
 	Use <a class="message" href="#SCI_GETENDSTYLED"><code>SCI_GETENDSTYLED</code></a>
@@ -4671,6 +4671,16 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         </tr>
 
         <tr>
+          <td align="left"><code>SC_MULTISTEPUNDOREDO</code></td>
+
+          <td align="center">0x80</td>
+
+          <td>This is part of a multi-step Undo or Redo.</td>
+
+          <td>None</td>
+        </tr>
+
+        <tr>
           <td align="left"><code>SC_LASTSTEPINUNDOREDO</code></td>
 
           <td align="center">0x100</td>
@@ -4711,9 +4721,19 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         </tr>
 
         <tr>
+          <td align="left"><code>SC_MULTILINEUNDOREDO</code></td>
+
+          <td align="center">0x1000</td>
+
+          <td>This is part of an Undo or Redo with multi-line changes.</td>
+
+          <td>None</td>
+        </tr>
+
+        <tr>
           <td align="left"><code>SC_MODEVENTMASKALL</code></td>
 
-          <td align="center">0xf77</td>
+          <td align="center">0x1fff</td>
 
           <td>This is a mask for all valid flags. This is the default mask state set by <a
           class="message" href="#SCI_SETMODEVENTMASK"><code>SCI_SETMODEVENTMASK</code></a>.</td>
@@ -4746,9 +4766,10 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
     used by <code>SCN_MODIFIED</code>: <code>SC_MOD_INSERTTEXT</code>,
     <code>SC_MOD_DELETETEXT</code>, <code>SC_MOD_CHANGESTYLE</code>,
     <code>SC_MOD_CHANGEFOLD</code>, <code>SC_PERFORMED_USER</code>, <code>SC_PERFORMED_UNDO</code>,
-    <code>SC_PERFORMED_REDO</code>, <code>SC_LASTSTEPINUNDOREDO</code>,
-    <code>SC_MOD_CHANGEMARKER</code>, <code>SC_MOD_BEFOREINSERT</code>,
-    <code>SC_MOD_BEFOREDELETE</code>, and <code>SC_MODEVENTMASKALL</code>.</p>
+    <code>SC_PERFORMED_REDO</code>, <code>SC_MULTISTEPUNDOREDO</code>,
+    <code>SC_LASTSTEPINUNDOREDO</code>, <code>SC_MOD_CHANGEMARKER</code>,
+    <code>SC_MOD_BEFOREINSERT</code>, <code>SC_MOD_BEFOREDELETE</code>,
+    <code>SC_MULTILINEUNDOREDO</code>, and <code>SC_MODEVENTMASKALL</code>.</p>
 
     <p><b id="SCEN_SETFOCUS">SCEN_SETFOCUS</b><br />
      <b id="SCEN_KILLFOCUS">SCEN_KILLFOCUS</b><br />
