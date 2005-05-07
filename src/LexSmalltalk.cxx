@@ -207,35 +207,7 @@ static inline void handleBinSel(StyleContext& sc)
         sc.Forward();
 }
 
-static const char* SpecialKwSelectors[] = {
-    "ifTrue:",
-    "ifFalse:",
-    "whileTrue:",
-    "whileFalse:",
-    "ifNil:",
-    "ifNotNil:",
-    NULL
-};
-
-static const char* SpecialUnarySelectors[] = {
-    "whileTrue",
-    "whileFalse",
-    "repeat",
-    NULL
-};
-
-static inline bool isSpecialSelector(const char* sel, const char** sels)
-{
-    int i;
-    
-    for (i = 0; sels[i] != NULL; i++) {
-        if (!strcmp(sel, sels[i]))
-            return true;
-    }
-    return false;
-}
-
-static void handleLetter(StyleContext& sc)
+static void handleLetter(StyleContext& sc, WordList* specialSelectorList)
 {
     char ident[256];
     int il;
@@ -262,16 +234,12 @@ static void handleLetter(StyleContext& sc)
         doubleColonPresent = false;
     ident[il] = 0;
     
-    if (doubleColonPresent) {
-        if (isSpecialSelector(ident, SpecialKwSelectors))
+    if (specialSelectorList->InList(ident))
             state = SCE_ST_SPEC_SEL;
-        else
+    else if (doubleColonPresent)
             state = SCE_ST_KWSEND;
-    }
     else if (isUpper(ident[0]))
         state = SCE_ST_GLOBAL;
-    else if (isSpecialSelector(ident, SpecialUnarySelectors))
-        state = SCE_ST_SPEC_SEL;
     else {
         if (!strcmp(ident, "self"))
             state = SCE_ST_SELF;
@@ -288,7 +256,7 @@ static void handleLetter(StyleContext& sc)
     sc.ChangeState(state);
 }
 
-static void colorizeSmalltalkDoc(unsigned int startPos, int length, int initStyle, WordList *[], Accessor &styler)
+static void colorizeSmalltalkDoc(unsigned int startPos, int length, int initStyle, WordList *wordLists[], Accessor &styler)
 {
     StyleContext sc(startPos, length, initStyle, styler);
 
@@ -328,7 +296,7 @@ static void colorizeSmalltalkDoc(unsigned int startPos, int length, int initStyl
         else if (isDecDigit(ch))
             handleNumeric(sc);
         else if (isLetter(ch))
-            handleLetter(sc);
+            handleLetter(sc, wordLists[0]);
         else if (isBinSel(ch)) {
             if (ch == '-' && isDecDigit(sc.chNext))
                 handleNumeric(sc);
@@ -341,4 +309,9 @@ static void colorizeSmalltalkDoc(unsigned int startPos, int length, int initStyl
     sc.Complete();
 }
 
-LexerModule lmSmalltalk(SCLEX_SMALLTALK, colorizeSmalltalkDoc, "smalltalk");
+static const char* const smalltalkWordListDesc[] = {
+    "Special selectors",
+    0
+};
+
+LexerModule lmSmalltalk(SCLEX_SMALLTALK, colorizeSmalltalkDoc, "smalltalk", NULL, smalltalkWordListDesc);
