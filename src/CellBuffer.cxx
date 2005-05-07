@@ -1024,7 +1024,7 @@ void CellBuffer::DeleteUndoHistory() {
 }
 
 bool CellBuffer::CanUndo() {
-	return (!readOnly) && (uh.CanUndo());
+	return uh.CanUndo();
 }
 
 int CellBuffer::StartUndo() {
@@ -1052,7 +1052,7 @@ void CellBuffer::PerformUndoStep() {
 }
 
 bool CellBuffer::CanRedo() {
-	return (!readOnly) && (uh.CanRedo());
+	return uh.CanRedo();
 }
 
 int CellBuffer::StartRedo() {
