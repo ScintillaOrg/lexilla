@@ -1512,7 +1512,10 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			}
 			break;
 		case SCE_HPHP_NUMBER:
-			if (!IsADigit(ch) && ch != '.' && ch != 'e' && ch != 'E' && (ch != '-' || (chPrev != 'e' && chPrev != 'E'))) {
+			// recognize bases 8,10 or 16 integers OR floating-point numbers
+			if (!IsADigit(ch)
+				&& strchr(".xXabcdefABCDEF", ch) == NULL
+				&& ((ch != '-' && ch != '+') || (chPrev != 'e' && chPrev != 'E'))) {
 				styler.ColourTo(i - 1, SCE_HPHP_NUMBER);
 				if (isoperator(ch))
 					state = SCE_HPHP_OPERATOR;
