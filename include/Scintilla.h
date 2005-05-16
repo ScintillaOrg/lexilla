@@ -174,6 +174,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_CHARSET_ARABIC 178
 #define SC_CHARSET_VIETNAMESE 163
 #define SC_CHARSET_THAI 222
+#define SC_CHARSET_8859_15 1000
 #define SCI_STYLECLEARALL 2050
 #define SCI_STYLESETFORE 2051
 #define SCI_STYLESETBACK 2052

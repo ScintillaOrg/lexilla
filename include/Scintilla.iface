@@ -375,6 +375,7 @@ val SC_CHARSET_HEBREW=177
 val SC_CHARSET_ARABIC=178
 val SC_CHARSET_VIETNAMESE=163
 val SC_CHARSET_THAI=222
+val SC_CHARSET_8859_15=1000
 
 # Clear all the styles and make equivalent to the global default style.
 set void StyleClearAll=2050(,)
