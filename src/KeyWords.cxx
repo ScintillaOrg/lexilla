@@ -153,6 +153,7 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmEiffelkw);
 	LINK_LEXER(lmErlang);
 	LINK_LEXER(lmESCRIPT);
+	LINK_LEXER(lmFlagShip);
 	LINK_LEXER(lmForth);
 	LINK_LEXER(lmFortran);
 	LINK_LEXER(lmF77);

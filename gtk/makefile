@@ -65,9 +65,9 @@ endif
 LEXOBJS=\
 LexAda.o LexAPDL.o LexAsm.o LexAsn1.o LexAU3.o LexAVE.o LexBaan.o LexBash.o \
 LexBasic.o LexBullant.o LexCaml.o LexCLW.o LexConf.o LexCPP.o LexCrontab.o \
-LexCSS.o LexEiffel.o LexErlang.o LexEScript.o LexForth.o LexFortran.o \
-LexGui4Cli.o LexHaskell.o LexHTML.o LexKix.o LexLisp.o LexLout.o LexLua.o \
-LexMatlab.o LexMetapost.o LexMMIXAL.o LexMPT.o LexMSSQL.o LexNsis.o \
+LexCSS.o LexEiffel.o LexErlang.o LexEScript.o LexFlagShip.o LexForth.o \
+LexFortran.o LexGui4Cli.o LexHaskell.o LexHTML.o LexKix.o LexLisp.o LexLout.o \
+LexLua.o LexMatlab.o LexMetapost.o LexMMIXAL.o LexMPT.o LexMSSQL.o LexNsis.o \
 LexOthers.o LexPascal.o LexPB.o LexPerl.o LexPOV.o LexPS.o LexPython.o \
 LexRebol.o LexRuby.o LexScriptol.o LexSmalltalk.o LexSpecman.o LexSQL.o \
 LexTADS3.o LexTeX.o LexVB.o LexVerilog.o LexVHDL.o LexYAML.o

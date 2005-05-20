@@ -158,6 +158,7 @@ LEXOBJS=\
 	$(DIR_O)\LexEiffel.obj \
 	$(DIR_O)\LexErlang.obj \
 	$(DIR_O)\LexEScript.obj \
+	$(DIR_O)\LexFlagShip.obj \
 	$(DIR_O)\LexForth.obj \
 	$(DIR_O)\LexFortran.obj \
 	$(DIR_O)\LexGui4Cli.obj \
@@ -345,6 +346,8 @@ $(DIR_O)\LexEiffel.obj: ..\src\LexEiffel.cxx $(LEX_HEADERS)
 $(DIR_O)\LexErlang.obj: ..\src\LexErlang.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexEScript.obj: ..\src\LexEScript.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexFlagShip.obj: ..\src\LexFlagShip.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexForth.obj: ..\src\LexForth.cxx $(LEX_HEADERS)
 
