@@ -126,11 +126,12 @@ LEXOBJS=\
 	$(DIR_O)\LexConf.obj \
 	$(DIR_O)\LexCPP.obj \
 	$(DIR_O)\LexCrontab.obj \
+	$(DIR_O)\LexCsound.obj \
 	$(DIR_O)\LexCSS.obj \
 	$(DIR_O)\LexEiffel.obj \
 	$(DIR_O)\LexErlang.obj \
 	$(DIR_O)\LexEScript.obj \
-	$(DIR_O)\LexFlagShip.obj \
+	$(DIR_O)\LexFlagship.obj \
 	$(DIR_O)\LexForth.obj \
 	$(DIR_O)\LexFortran.obj \
 	$(DIR_O)\LexGui4Cli.obj \
@@ -304,6 +305,8 @@ $(DIR_O)\LexCPP.obj: ..\src\LexCPP.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexCrontab.obj: ..\src\LexCrontab.cxx $(LEX_HEADERS)
 
+$(DIR_O)\LexCsound.obj: ..\src\LexCsound.cxx $(LEX_HEADERS)
+
 $(DIR_O)\LexCSS.obj: ..\src\LexCSS.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexEiffel.obj: ..\src\LexEiffel.cxx $(LEX_HEADERS)
@@ -312,7 +315,7 @@ $(DIR_O)\LexErlang.obj: ..\src\LexErlang.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexEScript.obj: ..\src\LexEScript.cxx $(LEX_HEADERS)
 
-$(DIR_O)\LexFlagShip.obj: ..\src\LexFlagShip.cxx $(LEX_HEADERS)
+$(DIR_O)\LexFlagship.obj: ..\src\LexFlagship.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexForth.obj: ..\src\LexForth.cxx $(LEX_HEADERS)
 
