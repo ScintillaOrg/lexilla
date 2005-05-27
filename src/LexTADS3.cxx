@@ -44,24 +44,6 @@
  * "You see << isKnown? '{iobj/him} lying' : 'nothing' >> on the ground. "
  *                       ----------
  *
- * TO DO
- *
- * top level blocks can have one of two forms
- *
- * cave : DarkRoom 'small cave' 'small cave'
- *     "There is barely enough room to stand in this small cave. "
- * ;
- *
- * or
- *
- * cave : DarkRoom {
- *     'small cave'
- *     'small cave'
- *     "There is barely enough room to stand in this small cave. "
- * }
- *
- * currently only the latter form is folded.
- *
  * LINKS
  * http://www.tads.org/
  */
@@ -112,12 +94,8 @@ static inline bool IsAHexDigit(const int ch) {
 }
 
 static inline bool IsABracket(const int ch) {
-	return ch == '(' || ch == '{' || ch == '['
-		|| ch == ')' || ch == '}' || ch == ']';
-}
-
-static inline bool IsAMsgParamChar(int ch) {
-	return isalpha(ch) || isspace(ch) || ch == '/' || ch == '\'' || ch == '\\';
+	return ch == '{' || ch == '[' || ch == '('
+		|| ch == '}' || ch == ']' || ch == ')';
 }
 
 static inline bool IsAnHTMLChar(int ch) {
@@ -125,7 +103,7 @@ static inline bool IsAnHTMLChar(int ch) {
 }
 
 static inline bool IsADirectiveChar(int ch) {
-	return isalnum(ch) || isspace(ch) || ch == '-';
+	return isalnum(ch) || isspace(ch) || ch == '-' || ch == '/';
 }
 
 static inline bool IsANumberStart(StyleContext &sc) {
@@ -147,16 +125,20 @@ inline static void ColouriseTADS3Bracket(StyleContext &sc) {
 
 static void ColouriseTADSHTMLString(StyleContext &sc) {
 	int initState = sc.state;
-	int quoteChar = sc.ch;
+	int chQuote = sc.ch;
+	int chString = chQuote == '"'? '\'': '"';
 	sc.SetState(SCE_T3_HTML_STRING);
 	sc.Forward();
 
 	while (sc.More()) {
-		if (sc.Match('\\', static_cast<char>(quoteChar))) {
+		if (sc.Match('\\', static_cast<char>(chQuote))
+			|| sc.Match('\\', static_cast<char>(chString))) {
 			sc.Forward(2);
-		}
-		if (sc.ch == quoteChar || IsEOL(sc.ch)) {
+		} else if (sc.ch == chQuote || IsEOL(sc.ch)) {
 			sc.ForwardSetState(initState);
+			return;
+		} else if (sc.ch == chString) {
+			sc.SetState(initState);
 			return;
 		}
 		sc.Forward();
@@ -176,6 +158,8 @@ static void ColouriseTADS3HTMLTagStart(StyleContext &sc) {
 
 static void ColouriseTADS3HTMLTag(StyleContext &sc) {
 	int initState = sc.state;
+	int chQuote = '\'';
+	int chString = '"';
 	switch (initState) {
 		case SCE_T3_S_STRING:
 			ColouriseTADS3HTMLTagStart(sc);
@@ -184,6 +168,8 @@ static void ColouriseTADS3HTMLTag(StyleContext &sc) {
 		case SCE_T3_D_STRING:
 			ColouriseTADS3HTMLTagStart(sc);
 			sc.SetState(SCE_T3_S_H_DEFAULT);
+			chQuote = '"';
+			chString = '\'';
 			break;
 		case SCE_T3_X_S_STRING:
 			ColouriseTADS3HTMLTagStart(sc);
@@ -192,18 +178,24 @@ static void ColouriseTADS3HTMLTag(StyleContext &sc) {
 		case SCE_T3_X_D_STRING:
 			ColouriseTADS3HTMLTagStart(sc);
 			sc.SetState(SCE_T3_X_D_H_DEFAULT);
+			chQuote = '"';
+			chString = '\'';
 			break;
 		case SCE_T3_S_H_DEFAULT:
 			initState = SCE_T3_S_STRING;
 			break;
 		case SCE_T3_D_H_DEFAULT:
 			initState = SCE_T3_D_STRING;
+			chQuote = '"';
+			chString = '\'';
 			break;
 		case SCE_T3_X_S_H_DEFAULT:
 			initState = SCE_T3_X_S_STRING;
 			break;
 		case SCE_T3_X_D_H_DEFAULT:
 			initState = SCE_T3_X_D_STRING;
+			chQuote = '"';
+			chString = '\'';
 			break;
 	}
 
@@ -217,8 +209,11 @@ static void ColouriseTADS3HTMLTag(StyleContext &sc) {
 			sc.SetState(SCE_T3_HTML_TAG);
 			sc.ForwardSetState(initState);
 			return;
+		} else if (sc.ch == chQuote) {
+			sc.SetState(initState);
+			return;
 		}
-		if (sc.ch == '\'' || sc.ch == '"') {
+		if (sc.ch == chString) {
 			ColouriseTADSHTMLString(sc);
 		} else if (sc.ch == '=') {
 			ColouriseTADS3Operator(sc);
@@ -265,10 +260,12 @@ static void ColouriseTADS3Keyword(StyleContext &sc,
 
 static void ColouriseTADS3MsgParam(StyleContext &sc) {
 	int initState = sc.state;
+	int chQuote = '"';
 	switch (initState) {
 		case SCE_T3_S_STRING:
 			sc.SetState(SCE_T3_S_MSG_PARAM);
 			sc.Forward();
+			chQuote = '\'';
 			break;
 		case SCE_T3_D_STRING:
 			sc.SetState(SCE_T3_D_MSG_PARAM);
@@ -277,6 +274,7 @@ static void ColouriseTADS3MsgParam(StyleContext &sc) {
 		case SCE_T3_X_S_STRING:
 			sc.SetState(SCE_T3_X_S_MSG_PARAM);
 			sc.Forward();
+			chQuote = '\'';
 			break;
 		case SCE_T3_X_D_STRING:
 			sc.SetState(SCE_T3_X_D_MSG_PARAM);
@@ -284,41 +282,40 @@ static void ColouriseTADS3MsgParam(StyleContext &sc) {
 			break;
 		case SCE_T3_S_MSG_PARAM:
 			initState = SCE_T3_S_STRING;
+			chQuote = '\'';
 			break;
 		case SCE_T3_D_MSG_PARAM:
 			initState = SCE_T3_D_STRING;
 			break;
 		case SCE_T3_X_S_MSG_PARAM:
 			initState = SCE_T3_X_S_STRING;
+			chQuote = '\'';
 			break;
 		case SCE_T3_X_D_MSG_PARAM:
 			initState = SCE_T3_X_D_STRING;
 			break;
 	}
-	while (sc.More() && IsAMsgParamChar(sc.ch)) {
+	while (sc.More() && sc.ch != '}' && sc.ch != chQuote) {
 		if (sc.ch == '\\') {
-			if (initState == SCE_T3_D_STRING) {
-				break;
-			} else if (sc.chNext != '\'') {
-				break;
-			}
+			sc.Forward();
 		}
 		sc.Forward();
 	}
-	if (sc.ch == '}' || !sc.More()) {
-		sc.ForwardSetState(initState);
+	if (sc.ch == chQuote) {
+		sc.SetState(initState);
 	} else {
-		sc.ChangeState(initState);
-		sc.Forward();
+		sc.ForwardSetState(initState);
 	}
 }
 
 static void ColouriseTADS3LibDirective(StyleContext &sc) {
 	int initState = sc.state;
+	int chQuote = '"';
 	switch (initState) {
 		case SCE_T3_S_STRING:
 			sc.SetState(SCE_T3_S_LIB_DIRECTIVE);
 			sc.Forward(2);
+			chQuote = '\'';
 			break;
 		case SCE_T3_D_STRING:
 			sc.SetState(SCE_T3_D_LIB_DIRECTIVE);
@@ -327,6 +324,7 @@ static void ColouriseTADS3LibDirective(StyleContext &sc) {
 		case SCE_T3_X_S_STRING:
 			sc.SetState(SCE_T3_X_S_LIB_DIRECTIVE);
 			sc.Forward(2);
+			chQuote = '\'';
 			break;
 		case SCE_T3_X_D_STRING:
 			sc.SetState(SCE_T3_X_D_LIB_DIRECTIVE);
@@ -334,12 +332,14 @@ static void ColouriseTADS3LibDirective(StyleContext &sc) {
 			break;
 		case SCE_T3_S_LIB_DIRECTIVE:
 			initState = SCE_T3_S_STRING;
+			chQuote = '\'';
 			break;
 		case SCE_T3_D_LIB_DIRECTIVE:
 			initState = SCE_T3_D_STRING;
 			break;
 		case SCE_T3_X_S_LIB_DIRECTIVE:
 			initState = SCE_T3_X_S_STRING;
+			chQuote = '\'';
 			break;
 		case SCE_T3_X_D_LIB_DIRECTIVE:
 			initState = SCE_T3_X_D_STRING;
@@ -350,6 +350,8 @@ static void ColouriseTADS3LibDirective(StyleContext &sc) {
 	};
 	if (sc.ch == '>' || !sc.More()) {
 		sc.ForwardSetState(initState);
+	} else if (sc.ch == chQuote) {
+		sc.SetState(initState);
 	} else {
 		sc.ChangeState(initState);
 		sc.Forward();
@@ -357,11 +359,11 @@ static void ColouriseTADS3LibDirective(StyleContext &sc) {
 }
 
 static void ColouriseTADS3String(StyleContext &sc) {
-	int quoteChar = sc.ch;
+	int chQuote = sc.ch;
 	int initState = sc.state;
 	switch (sc.state) {
 		case SCE_T3_DEFAULT:
-			if (quoteChar == '"') {
+			if (chQuote == '"') {
 				sc.SetState(SCE_T3_D_STRING);
 			} else {
 				sc.SetState(SCE_T3_S_STRING);
@@ -369,7 +371,7 @@ static void ColouriseTADS3String(StyleContext &sc) {
 			sc.Forward();
 			break;
 		case SCE_T3_X_DEFAULT:
-			if (quoteChar == '"') {
+			if (chQuote == '"') {
 				sc.SetState(SCE_T3_X_D_STRING);
 			} else {
 				sc.SetState(SCE_T3_X_S_STRING);
@@ -377,27 +379,27 @@ static void ColouriseTADS3String(StyleContext &sc) {
 			sc.Forward();
 			break;
 		case SCE_T3_S_STRING:
-			quoteChar = '\'';
+			chQuote = '\'';
 			initState = SCE_T3_DEFAULT;
 			break;
 		case SCE_T3_D_STRING:
-			quoteChar = '"';
+			chQuote = '"';
 			initState = SCE_T3_DEFAULT;
 			break;
 		case SCE_T3_X_S_STRING:
-			quoteChar = '\'';
+			chQuote = '\'';
 			initState = SCE_T3_X_DEFAULT;
 			break;
 		case SCE_T3_X_D_STRING:
-			quoteChar = '"';
+			chQuote = '"';
 			initState = SCE_T3_X_DEFAULT;
 			break;
 	}
 	while (sc.More()) {
-		if (sc.Match('\\', static_cast<char>(quoteChar))) {
+		if (sc.Match('\\', static_cast<char>(chQuote))) {
 			sc.Forward(2);
 		}
-		if (sc.ch == quoteChar) {
+		if (sc.ch == chQuote) {
 			sc.ForwardSetState(initState);
 			return;
 		}
@@ -619,6 +621,57 @@ static void ColouriseTADS3Doc(unsigned int startPos, int length, int initStyle,
 	sc.Complete();
 }
 
+/*
+ TADS3 has two styles of top level block (TLB). Eg
+
+ // default style
+ silverKey : Key 'small silver key' 'small silver key'
+	"A small key glints in the sunlight. "
+ ;
+
+ and
+
+ silverKey : Key {
+	'small silver key'
+    'small silver key'
+	"A small key glints in the sunlight. "
+ }
+
+ Some constructs mandate one or the other, but usually the author has may choose
+ either.
+
+ T3_SEENSTART is used to indicate that a braceless TLB has been (potentially)
+ seen and is also used to match the closing ';' of the default style.
+
+ T3_EXPECTINGIDENTIFIER and T3_EXPECTINGPUNCTUATION are used to keep track of
+ what characters may be seen without incrementing the block level.  The general
+ pattern is identifier <punc> identifier, acceptable punctuation characters
+ are ':', ',', '(' and ')'.  No attempt is made to ensure that punctuation
+ characters are syntactically correct, eg parentheses match. A ')' always
+ signifies the start of a block.  We just need to check if it is followed by a
+ '{', in which case we let the brace handling code handle the folding level.
+
+ expectingIdentifier == false && expectingIdentifier == false
+ Before the start of a TLB.
+
+ expectingIdentifier == true && expectingIdentifier == true
+ Currently in an identifier.  Will accept identifier or punctuation.
+
+ expectingIdentifier == true && expectingIdentifier == false
+ Just seen a punctuation character & now waiting for an identifier to start.
+
+ expectingIdentifier == false && expectingIdentifier == truee
+ We were in an identifier and have seen space.  Now waiting to see a punctuation
+ character
+
+ Space, comments & preprocessor directives are always acceptable and are
+ equivalent.
+*/
+
+static const int T3_SEENSTART = 1 << 12;
+static const int T3_EXPECTINGIDENTIFIER = 1 << 13;
+static const int T3_EXPECTINGPUNCTUATION = 1 << 14;
+
 static inline bool IsStreamCommentStyle(int style) {
 	return style == SCE_T3_BLOCK_COMMENT
 		|| style == SCE_T3_X_BLOCK_COMMENT;
@@ -630,26 +683,69 @@ static inline bool IsStringTransition(int s1, int s2) {
 			return s2 != s1
 				&& s2 != SCE_T3_S_LIB_DIRECTIVE
 				&& s2 != SCE_T3_S_MSG_PARAM
-				&& s2 != SCE_T3_HTML_TAG;
+				&& s2 != SCE_T3_HTML_TAG
+				&& s2 != SCE_T3_HTML_STRING;
 		case SCE_T3_D_STRING:
 			return s2 != s1
 				&& s2 != SCE_T3_D_LIB_DIRECTIVE
 				&& s2 != SCE_T3_D_MSG_PARAM
 				&& s2 != SCE_T3_HTML_TAG
-				&& s2 != SCE_T3_X_DEFAULT;
+				&& s2 != SCE_T3_X_DEFAULT
+				&& s2 != SCE_T3_HTML_STRING;
 		case SCE_T3_X_S_STRING:
 			return s2 != s1
 				&& s2 != SCE_T3_X_S_LIB_DIRECTIVE
 				&& s2 != SCE_T3_X_S_MSG_PARAM
-				&& s2 != SCE_T3_HTML_TAG;
+				&& s2 != SCE_T3_HTML_TAG
+				&& s2 != SCE_T3_HTML_STRING;
 		case SCE_T3_X_D_STRING:
 			return s2 != s1
 				&& s2 != SCE_T3_X_D_LIB_DIRECTIVE
 				&& s2 != SCE_T3_X_D_MSG_PARAM
-				&& s2 != SCE_T3_HTML_TAG;
+				&& s2 != SCE_T3_HTML_TAG
+				&& s2 != SCE_T3_HTML_STRING;
 		default:
 			return false;
 	}
+}
+
+static inline bool IsATADS3Punctuation(const int ch) {
+	return ch == ':' || ch == ',' || ch == '(' || ch == ')';
+}
+
+static inline bool IsAnIdentifier(const int ch, const int style) {
+	return IsAWordChar(ch) && style == SCE_T3_DEFAULT
+		|| style == SCE_T3_USER1
+		|| style == SCE_T3_USER2
+		|| ch == '.' && style == SCE_T3_DEFAULT;
+}
+
+static inline bool IsSpaceEquivalent(const int ch, const int style) {
+	return isspace(ch)
+		|| style == SCE_T3_BLOCK_COMMENT
+		|| style == SCE_T3_LINE_COMMENT
+		|| style == SCE_T3_PREPROCESSOR;
+}
+
+static char peekAhead(unsigned int startPos, unsigned int endPos,
+					  Accessor &styler) {
+	for (unsigned int i = startPos; i < endPos; i++) {
+		int style = styler.StyleAt(i);
+		char ch = styler[i];
+		if (!IsSpaceEquivalent(ch, style)) {
+			if (IsAnIdentifier(ch, style)) {
+				return 'a';
+			}
+			if (IsATADS3Punctuation(ch)) {
+				return ':';
+			}
+			if (ch == '{') {
+				return '{';
+			}
+			return '*';
+		}
+	}
+	return ' ';
 }
 
 static void FoldTADS3Doc(unsigned int startPos, int length, int initStyle,
@@ -659,23 +755,107 @@ static void FoldTADS3Doc(unsigned int startPos, int length, int initStyle,
 	int levelCurrent = SC_FOLDLEVELBASE;
 	if (lineCurrent > 0)
 		levelCurrent = styler.LevelAt(lineCurrent-1) >> 16;
+	int seenStart = levelCurrent & T3_SEENSTART;
+	int expectingIdentifier = levelCurrent & T3_EXPECTINGIDENTIFIER;
+	int expectingPunctuation = levelCurrent & T3_EXPECTINGPUNCTUATION;
+	levelCurrent &= SC_FOLDLEVELNUMBERMASK;
 	int levelMinCurrent = levelCurrent;
 	int levelNext = levelCurrent;
 	char chNext = styler[startPos];
 	int styleNext = styler.StyleAt(startPos);
 	int style = initStyle;
+	char ch = chNext;
+	int stylePrev = style;
+	bool redo = false;
 	for (unsigned int i = startPos; i < endPos; i++) {
-		char ch = chNext;
-		chNext = styler.SafeGetCharAt(i + 1);
-		int stylePrev = style;
-		style = styleNext;
-		styleNext = styler.StyleAt(i + 1);
+		if (redo) {
+			redo = false;
+			i--;
+		} else {
+			ch = chNext;
+			chNext = styler.SafeGetCharAt(i + 1);
+			stylePrev = style;
+			style = styleNext;
+			styleNext = styler.StyleAt(i + 1);
+		}
 		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
-		if (IsStreamCommentStyle(style)) {
+
+		if (levelNext == SC_FOLDLEVELBASE) {
+			if (IsSpaceEquivalent(ch, style)) {
+				if (expectingPunctuation) {
+					expectingIdentifier = 0;
+				}
+				if (style == SCE_T3_BLOCK_COMMENT) {
+					levelNext++;
+				}
+			} else if (ch == '{') {
+				levelNext++;
+				seenStart = 0;
+			} else if (ch == '\'' || ch == '"' || ch == '[') {
+				levelNext++;
+				redo = true;
+			} else if (ch == ';') {
+				seenStart = 0;
+				expectingIdentifier = 0;
+				expectingPunctuation = 0;
+			} else if (expectingIdentifier && expectingPunctuation) {
+				if (IsATADS3Punctuation(ch)) {
+					if (ch == ')' && peekAhead(i+1, endPos, styler) != '{') {
+						levelNext++;
+					} else {
+						expectingPunctuation = 0;
+					}
+				} else if (!IsAnIdentifier(ch, style)) {
+					levelNext++;
+				}
+			} else if (expectingIdentifier && !expectingPunctuation) {
+				if (!IsAnIdentifier(ch, style)) {
+					levelNext++;
+				} else {
+					expectingPunctuation = T3_EXPECTINGPUNCTUATION;
+				}
+			} else if (!expectingIdentifier && expectingPunctuation) {
+				if (!IsATADS3Punctuation(ch)) {
+					levelNext++;
+				} else {
+					if (ch == ')' && peekAhead(i+1, endPos, styler) != '{') {
+						levelNext++;
+					} else {
+						expectingIdentifier = T3_EXPECTINGIDENTIFIER;
+						expectingPunctuation = 0;
+					}
+				}
+			} else if (!expectingIdentifier && !expectingPunctuation) {
+				if (IsAnIdentifier(ch, style)) {
+					seenStart = T3_SEENSTART;
+					expectingIdentifier = T3_EXPECTINGIDENTIFIER;
+					expectingPunctuation = T3_EXPECTINGPUNCTUATION;
+				}
+			}
+
+			if (levelNext != SC_FOLDLEVELBASE && style != SCE_T3_BLOCK_COMMENT) {
+				expectingIdentifier = 0;
+				expectingPunctuation = 0;
+			}
+
+		} else if (levelNext == SC_FOLDLEVELBASE+1 && seenStart
+				   && ch == ';' && style == SCE_T3_OPERATOR ) {
+			levelNext--;
+			seenStart = 0;
+		} else if (IsStreamCommentStyle(style)) {
 			if (!IsStreamCommentStyle(stylePrev)) {
 				levelNext++;
 			} else if (!IsStreamCommentStyle(styleNext) && !atEOL) {
 				// Comments don't end at end of line and the next character may be unstyled.
+				levelNext--;
+			}
+		} else if (ch == '\'' || ch == '"') {
+			if (IsStringTransition(style, stylePrev)) {
+				if (levelMinCurrent > levelNext) {
+					levelMinCurrent = levelNext;
+				}
+				levelNext++;
+			} else if (IsStringTransition(style, styleNext)) {
 				levelNext--;
 			}
 		} else if (style == SCE_T3_BRACKET) {
@@ -689,19 +869,35 @@ static void FoldTADS3Doc(unsigned int startPos, int length, int initStyle,
 			} else if (ch == '}' || ch == ']') {
 				levelNext--;
 			}
-		} else if ((ch == '\'' || ch == '"')) {
-			if (IsStringTransition(style, stylePrev)) {
-				if (levelMinCurrent > levelNext) {
-					levelMinCurrent = levelNext;
-				}
-				levelNext++;
-			} else if (IsStringTransition(style, styleNext)) {
-				levelNext--;
-			}
 		}
 
 		if (atEOL) {
-			int lev = levelMinCurrent | levelNext << 16;
+			if (seenStart && levelNext == SC_FOLDLEVELBASE) {
+				switch (peekAhead(i+1, endPos, styler)) {
+					case ' ':
+					case '{':
+						break;
+					case '*':
+						levelNext++;
+						break;
+					case 'a':
+						if (expectingPunctuation) {
+							levelNext++;
+						}
+						break;
+					case ':':
+						if (expectingIdentifier) {
+							levelNext++;
+						}
+						break;
+				}
+				if (levelNext != SC_FOLDLEVELBASE) {
+					expectingIdentifier = 0;
+					expectingPunctuation = 0;
+				}
+			}
+			int lev = levelMinCurrent | (levelNext | expectingIdentifier
+				| expectingPunctuation | seenStart) << 16;
 			if (levelMinCurrent < levelNext)
 				lev |= SC_FOLDLEVELHEADERFLAG;
 			if (lev != styler.LevelAt(lineCurrent)) {
@@ -717,7 +913,6 @@ static void FoldTADS3Doc(unsigned int startPos, int length, int initStyle,
 static const char * const tads3WordList[] = {
 	"TADS3 Keywords",
 	"User defined 1",
-	"User defined 2",
 	0
 };
 
