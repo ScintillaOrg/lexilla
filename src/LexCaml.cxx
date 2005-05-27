@@ -11,6 +11,7 @@
 	20050209 Changes to "external" build support.
 	20050306 Fix for 1st-char-in-doc "corner" case.
 	20050502 Fix for [harmless] one-past-the-end coloring.
+	20050515 Refined numeric token recognition logic.
 */
 
 #include <stdlib.h>
@@ -31,6 +32,7 @@
 //	Since the Microsoft __iscsym[f] funcs are not ANSI...
 inline int  iscaml(int c) {return isalnum(c) || c == '_';}
 inline int iscamlf(int c) {return isalpha(c) || c == '_';}
+inline int iscamld(int c) {return isdigit(c) || c == '_';}
 
 #ifdef BUILD_AS_EXTERNAL_LEXER
 /*
@@ -291,23 +293,24 @@ void ColouriseCamlDoc(
 		case SCE_CAML_NUMBER:
 			// [try to] interpret as [additional] numeric literal char
 			// N.B. - improperly accepts "extra" digits in base 2 or 8 literals
-			if (isdigit(ch) || ch == '_'
-				|| ((chBase == 'x' || chBase == 'X') && isxdigit(ch)))
+			if (iscamld(ch) || ((chBase == 'x' || chBase == 'X') && isxdigit(ch)))
 				break;
 			// how about an integer suffix?
-			if ((ch == 'l' || ch == 'L' || ch == 'n')
-				&& (isdigit(chLast) || chLast == '_'))
+			if ((ch == 'l' || ch == 'L' || ch == 'n')&& (iscamld(chLast)
+				|| ((chBase == 'x' || chBase == 'X') && isxdigit(chLast))))
 				break;
 			// or a floating-point literal?
-			if (ch == '.' && (isdigit(chLast) || chLast == '_'))
-				break;
-			// with an exponent? (I)
-			if ((ch == 'e' || ch == 'E')
-				&& (isdigit(chLast) || chLast == '_' || chLast == '.'))
-				break;
-			// with an exponent? (II)
-			if ((ch == '+' || ch == '-') && (chLast == 'e' || chLast == 'E'))
-				break;
+			if (chBase == 'd') {
+				// with a decimal point?
+				if (ch == '.' && iscamld(chLast))
+					break;
+				// with an exponent? (I)
+				if ((ch == 'e' || ch == 'E') && (iscamld(chLast) || chLast == '.'))
+					break;
+				// with an exponent? (II)
+				if ((ch == '+' || ch == '-') && (chLast == 'e' || chLast == 'E'))
+					break;
+			}
 			// it looks like we have run out of number
 			state2 = SCE_CAML_DEFAULT, chNext = ch, chSkip--;
 			break;
