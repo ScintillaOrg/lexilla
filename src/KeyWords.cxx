@@ -148,6 +148,7 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmCPPNoCase);
 	LINK_LEXER(lmTCL);
 	LINK_LEXER(lmNncrontab);
+	LINK_LEXER(lmCsound);
 	LINK_LEXER(lmCss);
 	LINK_LEXER(lmEiffel);
 	LINK_LEXER(lmEiffelkw);
