@@ -1118,7 +1118,7 @@ PRectangle ListBoxX::GetDesiredRect() {
 	HDC hdc = ::GetDC(lb);
 	HFONT oldFont = SelectFont(hdc, fontCopy);
 	SIZE textSize = {0, 0};
-	int len = strlen(widestItem);
+	int len = widestItem ? strlen(widestItem) : 0;
 	if (unicodeMode) {
 		wchar_t tbuf[MAX_US_LEN];
 		int tlen = UCS2FromUTF8(widestItem, len, tbuf, sizeof(tbuf)/sizeof(wchar_t)-1);
