@@ -198,6 +198,10 @@ SOURCE=..\src\LexCrontab.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexCsound.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexCSS.cxx
 # End Source File
 # Begin Source File
@@ -211,6 +215,10 @@ SOURCE=..\src\LexErlang.cxx
 # Begin Source File
 
 SOURCE=..\src\LexEScript.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexFlagship.cxx
 # End Source File
 # Begin Source File
 
@@ -302,6 +310,10 @@ SOURCE=..\src\LexPython.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexRebol.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexRuby.cxx
 # End Source File
 # Begin Source File
@@ -310,11 +322,19 @@ SOURCE=..\src\LexScriptol.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexSmalltalk.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexSpecman.cxx
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\LexSQL.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexTADS3.cxx
 # End Source File
 # Begin Source File
 
