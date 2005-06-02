@@ -1227,11 +1227,9 @@ int Document::LinesTotal() {
 }
 
 void Document::ChangeCase(Range r, bool makeUpperCase) {
-	for (int pos = r.start; pos < r.end; pos++) {
+	for (int pos = r.start; pos < r.end;) {
 		int len = LenChar(pos);
-		if (dbcsCodePage && (len > 1)) {
-			pos += len;
-		} else {
+		if (len == 1) {
 			char ch = CharAt(pos);
 			if (makeUpperCase) {
 				if (IsLowerCase(ch)) {
@@ -1243,6 +1241,7 @@ void Document::ChangeCase(Range r, bool makeUpperCase) {
 				}
 			}
 		}
+		pos += len;
 	}
 }
 
