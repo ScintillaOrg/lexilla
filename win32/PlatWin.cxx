@@ -1121,9 +1121,9 @@ PRectangle ListBoxX::GetDesiredRect() {
 	int len = widestItem ? strlen(widestItem) : 0;
 	if (unicodeMode) {
 		wchar_t tbuf[MAX_US_LEN];
-		int tlen = UCS2FromUTF8(widestItem, len, tbuf, sizeof(tbuf)/sizeof(wchar_t)-1);
-		tbuf[tlen] = L'\0';
-		::GetTextExtentPoint32W(hdc, tbuf, tlen, &textSize);
+		len = UCS2FromUTF8(widestItem, len, tbuf, sizeof(tbuf)/sizeof(wchar_t)-1);
+		tbuf[len] = L'\0';
+		::GetTextExtentPoint32W(hdc, tbuf, len, &textSize);
 	} else {
 		::GetTextExtentPoint32(hdc, widestItem, len, &textSize);
 	}
@@ -1132,8 +1132,10 @@ PRectangle ListBoxX::GetDesiredRect() {
 	maxCharWidth = tm.tmMaxCharWidth;
 	SelectFont(hdc, oldFont);
 	::ReleaseDC(lb, hdc);
-	if (textSize.cx > width)
-		width = textSize.cx;
+
+	int widthDesired = Platform::Maximum(textSize.cx, (len + 1) * tm.tmAveCharWidth);
+	if (width < widthDesired)
+		width = widthDesired;
 
 	rcDesired.right = rcDesired.left + TextOffset() + width + (TextInset.x * 2);
 	if (Length() > rows)
