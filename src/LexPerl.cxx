@@ -938,7 +938,7 @@ static void FoldPerlDoc(unsigned int startPos, int length, int, WordList *[],
 	int styleNext = styler.StyleAt(startPos);
 	// Used at end of line to determine if the line was a package definition
 	bool isPackageLine = false;
-    bool isPodHeading = false;
+	bool isPodHeading = false;
 	for (unsigned int i = startPos; i < endPos; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
@@ -971,8 +971,8 @@ static void FoldPerlDoc(unsigned int startPos, int length, int, WordList *[],
 					levelCurrent++;
 				else if (styler.Match(i, "=cut"))
 					levelCurrent--;
-                else if (styler.Match(i, "=head"))
-                    isPodHeading = true;
+				else if (styler.Match(i, "=head"))
+					isPodHeading = true;
 			}
 		}
 		// Custom package folding
@@ -991,12 +991,12 @@ static void FoldPerlDoc(unsigned int startPos, int length, int, WordList *[],
 			if (lev != styler.LevelAt(lineCurrent)) {
 				styler.SetLevel(lineCurrent, lev);
 			}
-            if (isPodHeading) {
-                lev = styler.LevelAt(lineCurrent) - 1;
-                lev |= SC_FOLDLEVELHEADERFLAG;
-                styler.SetLevel(lineCurrent, lev);
-                isPodHeading = false;
-            }
+			if (isPodHeading) {
+				lev = styler.LevelAt(lineCurrent) - 1;
+				lev |= SC_FOLDLEVELHEADERFLAG;
+				styler.SetLevel(lineCurrent, lev);
+				isPodHeading = false;
+			}
 			// Check if line was a package declaration
 			// because packages need "special" treatment
 			if (isPackageLine) {
