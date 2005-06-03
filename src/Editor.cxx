@@ -931,6 +931,13 @@ int Editor::SelectionEnd() {
 	return Platform::Maximum(currentPos, anchor);
 }
 
+void Editor::SetRectangularRange() {
+	if (selType == selRectangle) {
+		xStartSelect = XFromPosition(anchor);
+		xEndSelect = XFromPosition(currentPos);
+	}
+}
+
 void Editor::InvalidateSelection(int currentPos_, int anchor_) {
 	int firstAffected = anchor;
 	if (firstAffected > currentPos)
@@ -958,10 +965,7 @@ void Editor::SetSelection(int currentPos_, int anchor_) {
 		currentPos = currentPos_;
 		anchor = anchor_;
 	}
-	if (selType == selRectangle) {
-		xStartSelect = XFromPosition(anchor);
-		xEndSelect = XFromPosition(currentPos);
-	}
+	SetRectangularRange();
 	ClaimSelection();
 }
 
@@ -971,10 +975,7 @@ void Editor::SetSelection(int currentPos_) {
 		InvalidateSelection(currentPos_, currentPos_);
 		currentPos = currentPos_;
 	}
-	if (selType == selRectangle) {
-		xStartSelect = XFromPosition(anchor);
-		xEndSelect = XFromPosition(currentPos);
-	}
+	SetRectangularRange();
 	ClaimSelection();
 }
 
@@ -5070,9 +5071,9 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 					SetEmptySelection(newPos);
 				}
 				selType = alt ? selRectangle : selStream;
-				xStartSelect = xEndSelect = pt.x - vs.fixedColumnWidth + xOffset;
 				selectionType = selChar;
 				originalAnchorPos = currentPos;
+				SetRectangularRange();
 			}
 		}
 	}
@@ -5266,9 +5267,7 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 				SetSelection(newPos);
 			}
 		}
-		// Now we rely on the current pos to compute rectangular selection
-		xStartSelect = XFromPosition(anchor);
-		xEndSelect = XFromPosition(currentPos);
+		SetRectangularRange();
 		lastClickTime = curTime;
 		lastClick = pt;
 		lastXChosen = pt.x;
