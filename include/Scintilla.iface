@@ -1658,6 +1658,17 @@ set void SetLexerLanguage=4006(, string language)
 # Load a lexer library (dll / so).
 fun void LoadLexerLibrary=4007(, string path)
 
+# Retrieve a "property" value previously set with SetProperty.
+fun int GetProperty=4008(string key, stringresult buf)
+
+# Retrieve a "property" value previously set with SetProperty,
+# with "$()" variable replacement on returned buffer.
+fun int GetPropertyExpanded=4009(string key, stringresult buf)
+
+# Retrieve a "property" value previously set with SetProperty,
+# interpreted as an int AFTER any "$()" variable replacement.
+get int GetPropertyInt=4010(string key,)
+
 # Notifications
 # Type of modification and the action which caused the modification.
 # These are defined as a bit mask to make it easy to specify which notifications are wanted.

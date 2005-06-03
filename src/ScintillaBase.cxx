@@ -655,6 +655,31 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		          reinterpret_cast<const char *>(lParam));
 		break;
 
+	case SCI_GETPROPERTY: {
+			SString val = props.Get(reinterpret_cast<const char *>(wParam));
+			const int n = val.length();
+			if (lParam != 0) {
+				char *ptr = reinterpret_cast<char *>(lParam);
+				memcpy(ptr, val.c_str(), n);
+				ptr[n] = '\0';	// terminate
+			}
+			return n;	// Not including NUL
+		}
+
+	case SCI_GETPROPERTYEXPANDED: {
+			SString val = props.GetExpanded(reinterpret_cast<const char *>(wParam));
+			const int n = val.length();
+			if (lParam != 0) {
+				char *ptr = reinterpret_cast<char *>(lParam);
+				memcpy(ptr, val.c_str(), n);
+				ptr[n] = '\0';	// terminate
+			}
+			return n;	// Not including NUL
+		}
+
+	case SCI_GETPROPERTYINT:
+		return props.GetInt(reinterpret_cast<const char *>(wParam), lParam);
+
 	case SCI_SETKEYWORDS:
 		if (wParam < numWordLists) {
 			keyWordLists[wParam]->Clear();
