@@ -350,6 +350,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool SelectionEmpty();
 	int SelectionStart();
 	int SelectionEnd();
+	void SetRectangularRange();
 	void InvalidateSelection(int currentPos_, int anchor_);
 	void SetSelection(int currentPos_, int anchor_);
 	void SetSelection(int currentPos_);
