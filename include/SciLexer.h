@@ -263,6 +263,7 @@
 #define SCE_PL_STRING_QX 28
 #define SCE_PL_STRING_QR 29
 #define SCE_PL_STRING_QW 30
+#define SCE_PL_POD_VERB 31
 #define SCE_B_DEFAULT 0
 #define SCE_B_COMMENT 1
 #define SCE_B_NUMBER 2

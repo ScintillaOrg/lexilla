@@ -2,8 +2,8 @@
 /** @file LexPerl.cxx
  ** Lexer for subset of Perl.
  **/
-// Lexical analysis fixes by Kein-Hong Man <mkh@pl.jaring.my> 2003-2004
-// Copyright 1998-2004 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2005 by Neil Hodgson <neilh@scintilla.org>
+// Lexical analysis fixes by Kein-Hong Man <mkh@pl.jaring.my>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <stdlib.h>
@@ -497,6 +497,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					// other styles uses the default, preferRE=false
 					case SCE_PL_WORD:
 					case SCE_PL_POD:
+					case SCE_PL_POD_VERB:
 					case SCE_PL_HERE_Q:
 					case SCE_PL_HERE_QQ:
 					case SCE_PL_HERE_QX:
@@ -755,15 +756,25 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					}
 					chNext = styler.SafeGetCharAt(i + 1);
 				}
-			} else if (state == SCE_PL_POD) {
-				if (ch == '=' && isEOLChar(chPrev)) {
-					if (isMatch(styler, lengthDoc, i, "=cut")) {
-						styler.ColourTo(i - 1 + 4, state);
-						i += 4;
-						state = SCE_PL_DEFAULT;
-						ch = styler.SafeGetCharAt(i);
-						//chNext = styler.SafeGetCharAt(i + 1);
-						goto restartLexer;
+			} else if (state == SCE_PL_POD
+				|| state == SCE_PL_POD_VERB) {
+				if (isEOLChar(chPrev)) {
+					if (ch ==' ' || ch == '\t') {
+						styler.ColourTo(i - 1, state);
+						state = SCE_PL_POD_VERB;
+					} else {
+						styler.ColourTo(i - 1, state);
+						state = SCE_PL_POD;
+						if (ch == '=') {
+							if (isMatch(styler, lengthDoc, i, "=cut")) {
+								styler.ColourTo(i - 1 + 4, state);
+								i += 4;
+								state = SCE_PL_DEFAULT;
+								ch = styler.SafeGetCharAt(i);
+								//chNext = styler.SafeGetCharAt(i + 1);
+								goto restartLexer;
+							}
+						}
 					}
 				}
 			} else if (state == SCE_PL_SCALAR	// variable names
@@ -967,7 +978,7 @@ static void FoldPerlDoc(unsigned int startPos, int length, int, WordList *[],
 		if (foldPOD && atLineStart) {
 			int stylePrevCh = (i) ? styler.StyleAt(i - 1):SCE_PL_DEFAULT;
 			if (style == SCE_PL_POD) {
-				if (stylePrevCh != SCE_PL_POD)
+				if (stylePrevCh != SCE_PL_POD && stylePrevCh != SCE_PL_POD_VERB)
 					levelCurrent++;
 				else if (styler.Match(i, "=cut"))
 					levelCurrent--;
