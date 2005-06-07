@@ -966,6 +966,9 @@ public:
 		pdoc(pdoc_), end(end_) {
 	}
 
+	virtual ~DocumentIndexer() {
+	}
+
 	virtual char CharAt(int index) {
 		if (index < 0 || index >= end)
 			return 0;
