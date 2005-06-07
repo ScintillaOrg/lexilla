@@ -29,6 +29,8 @@ public:
 	LexerModule(int language_, LexerFunction fnLexer_, 
 		const char *languageName_=0, LexerFunction fnFolder_=0,
 		const char * const wordListDescriptions_[] = NULL);
+	virtual ~LexerModule() {
+	}
 	int GetLanguage() const { return language; }
 
 	// -1 is returned if no WordList information is available
