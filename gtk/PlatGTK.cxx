@@ -1467,10 +1467,12 @@ int SurfaceImpl::WidthChar(Font &font_, char ch) {
 // rarely used in code.
 
 // This string contains a good range of characters to test for size.
-const char largeSizeString[] = "бцед `~!@#$%^&*()-_=+\\|[]{};:\"\'<,>.?/1234567890"
-                               "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+//const char largeSizeString[] = "бцед `~!@#$%^&*()-_=+\\|[]{};:\"\'<,>.?/1234567890"
+//                               "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+#ifndef FAST_WAY
 const char sizeString[] = "`~!@#$%^&*()-_=+\\|[]{};:\"\'<,>.?/1234567890"
                           "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+#endif
 
 int SurfaceImpl::Ascent(Font &font_) {
 	if (!(font_.GetID()))
