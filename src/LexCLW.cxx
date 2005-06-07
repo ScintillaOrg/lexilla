@@ -42,7 +42,8 @@ static char CharacterUpper(char chChar) {
 static void StringUpper(char *szString) {
 
 	while (*szString) {
-		*szString++ = CharacterUpper(*szString);
+		*szString = CharacterUpper(*szString);
+		szString++;
 	}
 }
 
