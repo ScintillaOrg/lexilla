@@ -1325,7 +1325,7 @@ void ListBoxX::SetList(const char *list, char separator, char typesep) {
 		int count = lti.Count();
 		::SendMessage(lb, LB_INITSTORAGE, count, 0);
 		for (int j=0; j<count; j++) {
-			::SendMessage(lb, LB_ADDSTRING, 0, 0);
+			::SendMessage(lb, LB_ADDSTRING, 0, j+1);
 		}
 	}
 	SetRedraw(true);
