@@ -144,6 +144,9 @@ static void ColouriseBashDoc(unsigned int startPos, int length, int initStyle,
 		char *Delimiter;	// the Delimiter, 256: sizeof PL_tokenbuf
 		HereDocCls() {
 			State = 0;
+			Quote = 0;
+			Quoted = false;
+			Indent = 0;
 			DelimiterLength = 0;
 			Delimiter = new char[HERE_DELIM_MAX];
 			Delimiter[0] = '\0';
