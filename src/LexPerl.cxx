@@ -44,7 +44,7 @@ static inline bool isPerlOperator(char ch) {
 	        ch == '(' || ch == ')' || ch == '-' || ch == '+' ||
 	        ch == '=' || ch == '|' || ch == '{' || ch == '}' ||
 	        ch == '[' || ch == ']' || ch == ':' || ch == ';' ||
-	        ch == '>' || ch == ',' || 
+	        ch == '>' || ch == ',' ||
 	        ch == '?' || ch == '!' || ch == '.' || ch == '~')
 		return true;
 	// these chars are already tested before this call
@@ -133,8 +133,8 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 		char *Delimiter;	// the Delimiter, 256: sizeof PL_tokenbuf
 		HereDocCls() {
 			State = 0;
-			Quote = 0;
-			Quoted = false;
+            Quote = 0;
+            Quoted = false;
 			DelimiterLength = 0;
 			Delimiter = new char[HERE_DELIM_MAX];
 			Delimiter[0] = '\0';
@@ -934,6 +934,19 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 	styler.ColourTo(lengthDoc - 1, state);
 }
 
+static bool IsCommentLine(int line, Accessor &styler) {
+	int pos = styler.LineStart(line);
+	int eol_pos = styler.LineStart(line + 1) - 1;
+	for (int i = pos; i < eol_pos; i++) {
+		char ch = styler[i];
+		if (ch == '#')
+			return true;
+		else if (ch != ' ' && ch != '\t')
+			return false;
+	}
+	return false;
+}
+
 static void FoldPerlDoc(unsigned int startPos, int length, int, WordList *[],
                             Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
@@ -944,7 +957,9 @@ static void FoldPerlDoc(unsigned int startPos, int length, int, WordList *[],
 	unsigned int endPos = startPos + length;
 	int visibleChars = 0;
 	int lineCurrent = styler.GetLine(startPos);
-	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
+	int levelPrev = SC_FOLDLEVELBASE;
+	if (lineCurrent > 0)
+		levelPrev = styler.LevelAt(lineCurrent - 1) >> 16;
 	int levelCurrent = levelPrev;
 	char chNext = styler[startPos];
 	char chPrev = styler.SafeGetCharAt(startPos - 1);
@@ -959,16 +974,16 @@ static void FoldPerlDoc(unsigned int startPos, int length, int, WordList *[],
 		styleNext = styler.StyleAt(i + 1);
 		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 		bool atLineStart = isEOLChar(chPrev) || i == 0;
-		if (foldComment && (style == SCE_PL_COMMENTLINE)) {
-			if ((ch == '/') && (chNext == '/')) {
-				char chNext2 = styler.SafeGetCharAt(i + 2);
-				if (chNext2 == '{') {
-					levelCurrent++;
-				} else if (chNext2 == '}') {
-					levelCurrent--;
-				}
-			}
-		}
+        // Comment folding
+		if (foldComment && atEOL && IsCommentLine(lineCurrent, styler))
+        {
+            if (!IsCommentLine(lineCurrent - 1, styler)
+                && IsCommentLine(lineCurrent + 1, styler))
+                levelCurrent++;
+            else if (IsCommentLine(lineCurrent - 1, styler)
+                     && !IsCommentLine(lineCurrent+1, styler))
+                levelCurrent--;
+        }
 		if (style == SCE_C_OPERATOR) {
 			if (ch == '{') {
 				levelCurrent++;
@@ -986,7 +1001,14 @@ static void FoldPerlDoc(unsigned int startPos, int length, int, WordList *[],
 					levelCurrent--;
 				else if (styler.Match(i, "=head"))
 					isPodHeading = true;
-			}
+			} else if (style == SCE_PL_DATASECTION) {
+                if (ch == '=' && isalpha(chNext) && levelCurrent == SC_FOLDLEVELBASE)
+                    levelCurrent++;
+                else if (styler.Match(i, "=cut") && levelCurrent > SC_FOLDLEVELBASE)
+                    levelCurrent--;
+                else if (styler.Match(i, "=head"))
+					isPodHeading = true;
+            }
 		}
 		// Custom package folding
 		if (foldPackage && atLineStart) {
@@ -997,25 +1019,25 @@ static void FoldPerlDoc(unsigned int startPos, int length, int, WordList *[],
 
 		if (atEOL) {
 			int lev = levelPrev;
+			if (isPodHeading) {
+                lev = levelPrev - 1;
+                lev |= SC_FOLDLEVELHEADERFLAG;
+                isPodHeading = false;
+			}
+			// Check if line was a package declaration
+			// because packages need "special" treatment
+			if (isPackageLine) {
+				lev = SC_FOLDLEVELBASE | SC_FOLDLEVELHEADERFLAG;
+				levelCurrent = SC_FOLDLEVELBASE + 1;
+				isPackageLine = false;
+			}
+            lev |= levelCurrent << 16;
 			if (visibleChars == 0 && foldCompact)
 				lev |= SC_FOLDLEVELWHITEFLAG;
 			if ((levelCurrent > levelPrev) && (visibleChars > 0))
 				lev |= SC_FOLDLEVELHEADERFLAG;
 			if (lev != styler.LevelAt(lineCurrent)) {
 				styler.SetLevel(lineCurrent, lev);
-			}
-			if (isPodHeading) {
-				lev = styler.LevelAt(lineCurrent) - 1;
-				lev |= SC_FOLDLEVELHEADERFLAG;
-				styler.SetLevel(lineCurrent, lev);
-				isPodHeading = false;
-			}
-			// Check if line was a package declaration
-			// because packages need "special" treatment
-			if (isPackageLine) {
-				styler.SetLevel(lineCurrent, SC_FOLDLEVELBASE | SC_FOLDLEVELHEADERFLAG);
-				levelCurrent = SC_FOLDLEVELBASE + 1;
-				isPackageLine = false;
 			}
 			lineCurrent++;
 			levelPrev = levelCurrent;
