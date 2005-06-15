@@ -3688,7 +3688,7 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 			// Some lines are hidden so may need shown.
 			// TODO: check if the modified area is hidden.
 			if (mh.modificationType & SC_MOD_BEFOREINSERT) {
-				NotifyNeedShown(mh.position, mh.length);
+				NotifyNeedShown(mh.position, 0);
 			} else if (mh.modificationType & SC_MOD_BEFOREDELETE) {
 				NotifyNeedShown(mh.position, mh.length);
 			}
