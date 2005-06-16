@@ -254,9 +254,14 @@ void LineVector::Remove(int pos) {
 		linesData[i] = linesData[i + 1];
 	}
 	if (levels) {
+		// Move up following lines but merge header flag from this line
+		// to line before to avoid a temporary disappearence causing expansion.
+		int firstHeader = levels[pos] & SC_FOLDLEVELHEADERFLAG;
 		for (int j = pos; j < lines; j++) {
 			levels[j] = levels[j + 1];
 		}
+		if (pos > 0)
+			levels[pos-1] |= firstHeader;
 	}
 	lines--;
 }
