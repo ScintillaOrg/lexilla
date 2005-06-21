@@ -771,11 +771,21 @@ void Window::SetPositionRelative(PRectangle rc, Window w) {
 		RECT rcOther;
 		::GetWindowRect(reinterpret_cast<HWND>(w.GetID()), &rcOther);
 		rc.Move(rcOther.left, rcOther.top);
-		if (rc.left < 0) {
-			rc.Move(-rc.left,0);
+
+		// Retrieve desktop bounds and make sure window popup's origin isn't left-top of the screen.
+		RECT rcDesktop = {0, 0, 0, 0};
+#ifdef SM_XVIRTUALSCREEN
+		rcDesktop.left = ::GetSystemMetrics(SM_XVIRTUALSCREEN);
+		rcDesktop.top = ::GetSystemMetrics(SM_YVIRTUALSCREEN);
+		rcDesktop.right = rcDesktop.left + ::GetSystemMetrics(SM_CXVIRTUALSCREEN);
+		rcDesktop.bottom = rcDesktop.top + ::GetSystemMetrics(SM_CYVIRTUALSCREEN);
+#endif
+
+		if (rc.left < rcDesktop.left) {
+			rc.Move(rcDesktop.left - rc.left,0);
 		}
-		if (rc.top < 0) {
-			rc.Move(0,-rc.top);
+		if (rc.top < rcDesktop.top) {
+			rc.Move(0,rcDesktop.top - rc.top);
 		}
 	}
 	SetPosition(rc);
