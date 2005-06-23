@@ -424,6 +424,8 @@ static bool isPHPStringState(int state) {
 
 static int FindPhpStringDelimiter(char *phpStringDelimiter, const int phpStringDelimiterSize, int i, const int lengthDoc, Accessor &styler) {
 	int j;
+	while (i < lengthDoc && (styler[i] == ' ' || styler[i] == '\t'))
+		i++;
 	phpStringDelimiter[0] = '\n';
 	for (j = i; j < lengthDoc && styler[j] != '\n' && styler[j] != '\r'; j++) {
 		if (j - i < phpStringDelimiterSize - 2)
