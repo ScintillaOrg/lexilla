@@ -41,6 +41,7 @@ ScintillaBase::ScintillaBase() {
 	maxListWidth = 0;
 #ifdef SCI_LEXER
 	lexLanguage = SCLEX_CONTAINER;
+	performingStyle = false;
 	lexCurrent = 0;
 	for (int wl = 0;wl < numWordLists;wl++)
 		keyWordLists[wl] = new WordList;
@@ -469,16 +470,24 @@ void ScintillaBase::Colourise(int start, int end) {
 #endif
 
 void ScintillaBase::NotifyStyleToNeeded(int endStyleNeeded) {
+	if (!performingStyle) {
+		// Protect against reentrance, which may occur, for example, when
+		// fold points are discovered while performing styling and the folding
+		// code looks for child lines which may trigger styling.
+		performingStyle = true;
 #ifdef SCI_LEXER
-	if (lexLanguage != SCLEX_CONTAINER) {
-		int endStyled = WndProc(SCI_GETENDSTYLED, 0, 0);
-		int lineEndStyled = WndProc(SCI_LINEFROMPOSITION, endStyled, 0);
-		endStyled = WndProc(SCI_POSITIONFROMLINE, lineEndStyled, 0);
-		Colourise(endStyled, endStyleNeeded);
-		return;
-	}
+		if (lexLanguage != SCLEX_CONTAINER) {
+			int endStyled = WndProc(SCI_GETENDSTYLED, 0, 0);
+			int lineEndStyled = WndProc(SCI_LINEFROMPOSITION, endStyled, 0);
+			endStyled = WndProc(SCI_POSITIONFROMLINE, lineEndStyled, 0);
+			Colourise(endStyled, endStyleNeeded);
+			performingStyle = false;
+			return;
+		}
 #endif
-	Editor::NotifyStyleToNeeded(endStyleNeeded);
+		Editor::NotifyStyleToNeeded(endStyleNeeded);
+		performingStyle = false;
+	}
 }
 
 sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
