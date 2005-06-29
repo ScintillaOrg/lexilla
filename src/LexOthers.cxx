@@ -489,11 +489,17 @@ static int RecogniseErrorListLine(const char *lineBuffer, unsigned int lengthLin
 	} else if (lineBuffer[0] == '!') {
 		return SCE_ERR_DIFF_CHANGED;
 	} else if (lineBuffer[0] == '+') {
-		return SCE_ERR_DIFF_ADDITION;
-	} else if (lineBuffer[0] == '-' && lineBuffer[1] == '-' && lineBuffer[2] == '-') {
-		return SCE_ERR_DIFF_MESSAGE;
+		if (strstart(lineBuffer, "+++ ")) {
+			return SCE_ERR_DIFF_MESSAGE;
+		} else {
+			return SCE_ERR_DIFF_ADDITION;
+		}
 	} else if (lineBuffer[0] == '-') {
-		return SCE_ERR_DIFF_DELETION;
+		if (strstart(lineBuffer, "--- ")) {
+			return SCE_ERR_DIFF_MESSAGE;
+		} else {
+			return SCE_ERR_DIFF_DELETION;
+		}
 	} else if (strstart(lineBuffer, "cf90-")) {
 		// Absoft Pro Fortran 90/95 v8.2 error and/or warning message
 		return SCE_ERR_ABSF;
