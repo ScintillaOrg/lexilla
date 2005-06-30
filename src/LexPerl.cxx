@@ -133,8 +133,8 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 		char *Delimiter;	// the Delimiter, 256: sizeof PL_tokenbuf
 		HereDocCls() {
 			State = 0;
-            Quote = 0;
-            Quoted = false;
+			Quote = 0;
+			Quoted = false;
 			DelimiterLength = 0;
 			Delimiter = new char[HERE_DELIM_MAX];
 			Delimiter[0] = '\0';
@@ -146,24 +146,24 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 	HereDocCls HereDoc;	// TODO: FIFO for stacked here-docs
 
 	class QuoteCls {
-		public:
-		int  Rep;
-		int  Count;
+	public:
+		int Rep;
+		int Count;
 		char Up;
 		char Down;
 		QuoteCls() {
 			this->New(1);
 		}
 		void New(int r) {
-			Rep   = r;
+			Rep = r;
 			Count = 0;
-			Up    = '\0';
-			Down  = '\0';
+			Up = '\0';
+			Down = '\0';
 		}
 		void Open(char u) {
 			Count++;
-			Up    = u;
-			Down  = opposite(Up);
+			Up = u;
+			Down = opposite(Up);
 		}
 	};
 	QuoteCls Quote;
@@ -187,18 +187,18 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 		state = styler.StyleAt(startPos - 1);
 	}
 	if ( state == SCE_PL_STRING_Q
-	|| state == SCE_PL_STRING_QQ
-	|| state == SCE_PL_STRING_QX
-	|| state == SCE_PL_STRING_QR
-	|| state == SCE_PL_STRING_QW
-	|| state == SCE_PL_REGEX
-	|| state == SCE_PL_REGSUBST
-	|| state == SCE_PL_STRING
-	|| state == SCE_PL_BACKTICKS
-	|| state == SCE_PL_CHARACTER
-	|| state == SCE_PL_NUMBER
-	|| state == SCE_PL_IDENTIFIER
-	) {
+	        || state == SCE_PL_STRING_QQ
+	        || state == SCE_PL_STRING_QX
+	        || state == SCE_PL_STRING_QR
+	        || state == SCE_PL_STRING_QW
+	        || state == SCE_PL_REGEX
+	        || state == SCE_PL_REGSUBST
+	        || state == SCE_PL_STRING
+	        || state == SCE_PL_BACKTICKS
+	        || state == SCE_PL_CHARACTER
+	        || state == SCE_PL_NUMBER
+	        || state == SCE_PL_IDENTIFIER
+	   ) {
 		while ((startPos > 1) && (styler.StyleAt(startPos - 1) == state)) {
 			startPos--;
 		}
@@ -269,7 +269,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 
 		if (state == SCE_PL_DEFAULT) {
 			if (isdigit(ch) || (isdigit(chNext) &&
-				(ch == '.' || ch == 'v'))) {
+			                    (ch == '.' || ch == 'v'))) {
 				state = SCE_PL_NUMBER;
 				numState = PERLNUM_DECIMAL;
 				dotCount = 0;
@@ -284,7 +284,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				if (chPrev == '>' && styler.SafeGetCharAt(i - 2) == '-') {
 					state = SCE_PL_IDENTIFIER;	// part of "->" expr
 					if ((!iswordchar(chNext) && chNext != '\'')
-						|| (chNext == '.' && chNext2 == '.')) {
+					        || (chNext == '.' && chNext2 == '.')) {
 						// We need that if length of word == 1!
 						styler.ColourTo(i, SCE_PL_IDENTIFIER);
 						state = SCE_PL_DEFAULT;
@@ -314,14 +314,14 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					i++;
 					chNext = chNext2;
 					Quote.New(1);
-				} else if (ch == 'x' && (chNext == '=' ||	// repetition
-					   (chNext != '_' && !isalnum(chNext)) ||
-					   (isdigit(chPrev) && isdigit(chNext)))) {
+				} else if (ch == 'x' && (chNext == '=' || 	// repetition
+				                         (chNext != '_' && !isalnum(chNext)) ||
+				                         (isdigit(chPrev) && isdigit(chNext)))) {
 					styler.ColourTo(i, SCE_PL_OPERATOR);
 				} else {
 					state = SCE_PL_WORD;
 					if ((!iswordchar(chNext) && chNext != '\'')
-						|| (chNext == '.' && chNext2 == '.')) {
+					        || (chNext == '.' && chNext2 == '.')) {
 						// We need that if length of word == 1!
 						// This test is copied from the SCE_PL_WORD handler.
 						classifyWordPerl(styler.GetStartSegment(), i, keywords, styler);
@@ -364,7 +364,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				}
 			} else if (ch == '@') {
 				if (isalpha(chNext) || chNext == '#' || chNext == '$'
-						    || chNext == '_' || chNext == '+') {
+				        || chNext == '_' || chNext == '+') {
 					state = SCE_PL_ARRAY;
 				} else if (chNext != '{' && chNext != '[') {
 					styler.ColourTo(i, SCE_PL_ARRAY);
@@ -401,7 +401,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				char bkch;
 				styler.Flush();
 				while ((bk > 0) && (styler.StyleAt(bk) == SCE_PL_DEFAULT ||
-					styler.StyleAt(bk) == SCE_PL_COMMENTLINE)) {
+				                    styler.StyleAt(bk) == SCE_PL_COMMENTLINE)) {
 					bk--;
 				}
 				if (bk == 0) {
@@ -447,10 +447,10 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 								}
 								bkstyle = styler.StyleAt(bk);
 								if (bkstyle == SCE_PL_SCALAR
-								 || bkstyle == SCE_PL_ARRAY
-								 || bkstyle == SCE_PL_HASH
-								 || bkstyle == SCE_PL_SYMBOLTABLE
-								 || bkstyle == SCE_PL_OPERATOR) {
+								        || bkstyle == SCE_PL_ARRAY
+								        || bkstyle == SCE_PL_HASH
+								        || bkstyle == SCE_PL_SYMBOLTABLE
+								        || bkstyle == SCE_PL_OPERATOR) {
 									preferRE = false;
 								}
 							}
@@ -496,7 +496,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 							bk--;
 						}
 						break;
-					// other styles uses the default, preferRE=false
+						// other styles uses the default, preferRE=false
 					case SCE_PL_WORD:
 					case SCE_PL_POD:
 					case SCE_PL_POD_VERB:
@@ -525,11 +525,11 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					if (fwch == ' ') {
 						if (styler.SafeGetCharAt(fw-1) != '\\' ||
 						    styler.SafeGetCharAt(fw-2) != '\\')
-						break;
+							break;
 					} else if (isEOLChar(fwch) || isspacechar(fwch)) {
 						break;
 					} else if (fwch == '>') {
-						if ((fw - i) == 2 &&	// '<=>' case
+						if ((fw - i) == 2 && 	// '<=>' case
 						    styler.SafeGetCharAt(fw-1) == '=') {
 							styler.ColourTo(fw, SCE_PL_OPERATOR);
 						} else {
@@ -633,12 +633,12 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 			}
 		} else if (state == SCE_PL_WORD) {
 			if ((!iswordchar(chNext) && chNext != '\'')
-				|| chNext == '.') {
+			        || chNext == '.') {
 				// ".." is always an operator if preceded by a SCE_PL_WORD.
 				// "." never used in Perl variable names
 				// Archaic Perl has quotes inside names
 				if (isMatch(styler, lengthDoc, styler.GetStartSegment(), "__DATA__")
-				 || isMatch(styler, lengthDoc, styler.GetStartSegment(), "__END__")) {
+				        || isMatch(styler, lengthDoc, styler.GetStartSegment(), "__END__")) {
 					styler.ColourTo(i, SCE_PL_DATASECTION);
 					state = SCE_PL_DATASECTION;
 				} else {
@@ -649,7 +649,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 			}
 		} else if (state == SCE_PL_IDENTIFIER) {
 			if ((!iswordchar(chNext) && chNext != '\'')
-				|| chNext == '.') {
+			        || chNext == '.') {
 				styler.ColourTo(i, SCE_PL_IDENTIFIER);
 				state = SCE_PL_DEFAULT;
 				ch = ' ';
@@ -705,7 +705,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					} else if (isalpha(chNext) || chNext == '_') {
 						// an unquoted here-doc delimiter, no special handling
 					} else if (isspacechar(chNext) || isdigit(chNext) || chNext == '\\'
-						|| chNext == '=' || chNext == '$' || chNext == '@') {
+					           || chNext == '=' || chNext == '$' || chNext == '@') {
 						// left shift << or <<= operator cases
 						styler.ColourTo(i, SCE_PL_OPERATOR);
 						state = SCE_PL_DEFAULT;
@@ -759,7 +759,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					chNext = styler.SafeGetCharAt(i + 1);
 				}
 			} else if (state == SCE_PL_POD
-				|| state == SCE_PL_POD_VERB) {
+			           || state == SCE_PL_POD_VERB) {
 				if (isEOLChar(chPrev)) {
 					if (ch ==' ' || ch == '\t') {
 						styler.ColourTo(i - 1, state);
@@ -780,9 +780,9 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					}
 				}
 			} else if (state == SCE_PL_SCALAR	// variable names
-				|| state == SCE_PL_ARRAY
-				|| state == SCE_PL_HASH
-				|| state == SCE_PL_SYMBOLTABLE) {
+			           || state == SCE_PL_ARRAY
+			           || state == SCE_PL_HASH
+			           || state == SCE_PL_SYMBOLTABLE) {
 				if (ch == ':' && chNext == ':') {	// skip ::
 					i++;
 					ch = chNext;
@@ -790,7 +790,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				}
 				else if (isEndVar(ch)) {
 					if ((state == SCE_PL_SCALAR || state == SCE_PL_ARRAY)
-					    && i == (styler.GetStartSegment() + 1)) {
+					        && i == (styler.GetStartSegment() + 1)) {
 						// Special variable: $(, $_ etc.
 						styler.ColourTo(i, state);
 						state = SCE_PL_DEFAULT;
@@ -801,8 +801,8 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					}
 				}
 			} else if (state == SCE_PL_REGEX
-				|| state == SCE_PL_STRING_QR
-				) {
+			           || state == SCE_PL_STRING_QR
+			          ) {
 				if (!Quote.Up && !isspacechar(ch)) {
 					Quote.Open(ch);
 				} else if (ch == '\\' && Quote.Up != '\\') {
@@ -895,13 +895,13 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					}
 				}
 			} else if (state == SCE_PL_STRING_Q
-				|| state == SCE_PL_STRING_QQ
-				|| state == SCE_PL_STRING_QX
-				|| state == SCE_PL_STRING_QW
-				|| state == SCE_PL_STRING
-				|| state == SCE_PL_CHARACTER
-				|| state == SCE_PL_BACKTICKS
-				) {
+			           || state == SCE_PL_STRING_QQ
+			           || state == SCE_PL_STRING_QX
+			           || state == SCE_PL_STRING_QW
+			           || state == SCE_PL_STRING
+			           || state == SCE_PL_CHARACTER
+			           || state == SCE_PL_BACKTICKS
+			          ) {
 				if (!Quote.Down && !isspacechar(ch)) {
 					Quote.Open(ch);
 				} else if (ch == '\\' && Quote.Up != '\\') {
@@ -939,7 +939,8 @@ static bool IsCommentLine(int line, Accessor &styler) {
 	int eol_pos = styler.LineStart(line + 1) - 1;
 	for (int i = pos; i < eol_pos; i++) {
 		char ch = styler[i];
-		if (ch == '#')
+		int style = styler.StyleAt(i);
+		if (ch == '#' && style == SCE_PL_COMMENTLINE)
 			return true;
 		else if (ch != ' ' && ch != '\t')
 			return false;
@@ -948,7 +949,7 @@ static bool IsCommentLine(int line, Accessor &styler) {
 }
 
 static void FoldPerlDoc(unsigned int startPos, int length, int, WordList *[],
-                            Accessor &styler) {
+                        Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	// Custom folding of POD and packages
@@ -974,16 +975,15 @@ static void FoldPerlDoc(unsigned int startPos, int length, int, WordList *[],
 		styleNext = styler.StyleAt(i + 1);
 		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 		bool atLineStart = isEOLChar(chPrev) || i == 0;
-        // Comment folding
-		if (foldComment && atEOL && IsCommentLine(lineCurrent, styler))
-        {
-            if (!IsCommentLine(lineCurrent - 1, styler)
-                && IsCommentLine(lineCurrent + 1, styler))
-                levelCurrent++;
-            else if (IsCommentLine(lineCurrent - 1, styler)
-                     && !IsCommentLine(lineCurrent+1, styler))
-                levelCurrent--;
-        }
+		// Comment folding
+		if (foldComment && atEOL && IsCommentLine(lineCurrent, styler)) {
+			if (!IsCommentLine(lineCurrent - 1, styler)
+			        && IsCommentLine(lineCurrent + 1, styler))
+				levelCurrent++;
+			else if (IsCommentLine(lineCurrent - 1, styler)
+			     && !IsCommentLine(lineCurrent+1, styler))
+				levelCurrent--;
+		}
 		if (style == SCE_C_OPERATOR) {
 			if (ch == '{') {
 				levelCurrent++;
@@ -1002,13 +1002,17 @@ static void FoldPerlDoc(unsigned int startPos, int length, int, WordList *[],
 				else if (styler.Match(i, "=head"))
 					isPodHeading = true;
 			} else if (style == SCE_PL_DATASECTION) {
-                if (ch == '=' && isalpha(chNext) && levelCurrent == SC_FOLDLEVELBASE)
-                    levelCurrent++;
-                else if (styler.Match(i, "=cut") && levelCurrent > SC_FOLDLEVELBASE)
-                    levelCurrent--;
-                else if (styler.Match(i, "=head"))
+				if (ch == '=' && isalpha(chNext) && levelCurrent == SC_FOLDLEVELBASE)
+					levelCurrent++;
+				else if (styler.Match(i, "=cut") && levelCurrent > SC_FOLDLEVELBASE)
+					levelCurrent--;
+				else if (styler.Match(i, "=head"))
 					isPodHeading = true;
-            }
+				// if package used or unclosed brace, level > SC_FOLDLEVELBASE!
+				// reset needed as level test is vs. SC_FOLDLEVELBASE
+				else if (styler.Match(i, "__END__"))
+					levelCurrent = SC_FOLDLEVELBASE;
+			}
 		}
 		// Custom package folding
 		if (foldPackage && atLineStart) {
@@ -1020,9 +1024,9 @@ static void FoldPerlDoc(unsigned int startPos, int length, int, WordList *[],
 		if (atEOL) {
 			int lev = levelPrev;
 			if (isPodHeading) {
-                lev = levelPrev - 1;
-                lev |= SC_FOLDLEVELHEADERFLAG;
-                isPodHeading = false;
+				lev = levelPrev - 1;
+				lev |= SC_FOLDLEVELHEADERFLAG;
+				isPodHeading = false;
 			}
 			// Check if line was a package declaration
 			// because packages need "special" treatment
@@ -1031,7 +1035,7 @@ static void FoldPerlDoc(unsigned int startPos, int length, int, WordList *[],
 				levelCurrent = SC_FOLDLEVELBASE + 1;
 				isPackageLine = false;
 			}
-            lev |= levelCurrent << 16;
+			lev |= levelCurrent << 16;
 			if (visibleChars == 0 && foldCompact)
 				lev |= SC_FOLDLEVELWHITEFLAG;
 			if ((levelCurrent > levelPrev) && (visibleChars > 0))
