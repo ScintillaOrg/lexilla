@@ -31,19 +31,6 @@
  * These embedded constructs influence the output and formatting and are an
  * important part of a program and require highlighting.
  *
- * Because strings, html tags, library directives, message parameters, and
- * interpolated expressions may span multiple lines it is necessary to have
- * multiple states for a single construct so that the surrounding context can be
- * known.  This is important if scanning starts part way through a source file.
- *
- * States that have a Single quoted string context have _S_ in the name
- * States that have a Double quoted string context have _D_ in the name
- * States that have an interpolated eXpression context have _X_ in the name
- * eg SCE_T3_X_S_MSG_PARAM is a message parameter in a single quoted string
- * that is part of an interpolated expression.
- * "You see << isKnown? '{iobj/him} lying' : 'nothing' >> on the ground. "
- *                       ----------
- *
  * LINKS
  * http://www.tads.org/
  */
@@ -63,10 +50,11 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-static unsigned int endPos;
+static const int T3_SINGLE_QUOTE = 1;
+static const int T3_INT_EXPRESSION = 2;
 
-static inline bool IsEOL(const int ch) {
-	return ch == '\r' || ch == '\n';
+static inline bool IsEOL(const int ch, const int chNext) {
+	return (ch == '\r' && chNext != '\n') || (ch == '\n');
 }
 
 static inline bool IsASpaceOrTab(const int ch) {
@@ -74,13 +62,15 @@ static inline bool IsASpaceOrTab(const int ch) {
 }
 
 static inline bool IsATADS3Operator(const int ch) {
-	return ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '|'
-		|| ch == '!' || ch == ':' || ch == '?' || ch == '@' || ch == ';'
-		|| ch == '&' || ch == '<' || ch == '>' || ch == '=';
+	return ch == '=' || ch == '{' || ch == '}' || ch == '(' || ch == ')'
+		|| ch == '[' || ch == ']' || ch == ',' || ch == ':' || ch == ';'
+		|| ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '%'
+		|| ch == '?' || ch == '!' || ch == '<' || ch == '>' || ch == '|'
+		|| ch == '@' || ch == '&' || ch == '~';
 }
 
 static inline bool IsAWordChar(const int ch) {
-	return isalnum(ch) || ch == '_';
+	return isalnum(ch) || ch == '_' || ch == '.';
 }
 
 static inline bool IsAWordStart(const int ch) {
@@ -91,11 +81,6 @@ static inline bool IsAHexDigit(const int ch) {
 	int lch = tolower(ch);
 	return isdigit(lch) || lch == 'a' || lch == 'b' || lch == 'c'
 		|| lch == 'd' || lch == 'e' || lch == 'f';
-}
-
-static inline bool IsABracket(const int ch) {
-	return ch == '{' || ch == '[' || ch == '('
-		|| ch == '}' || ch == ']' || ch == ')';
 }
 
 static inline bool IsAnHTMLChar(int ch) {
@@ -117,31 +102,44 @@ inline static void ColouriseTADS3Operator(StyleContext &sc) {
 	sc.ForwardSetState(initState);
 }
 
-inline static void ColouriseTADS3Bracket(StyleContext &sc) {
-	int initState = sc.state;
-	sc.SetState(SCE_T3_BRACKET);
-	sc.ForwardSetState(initState);
-}
-
-static void ColouriseTADSHTMLString(StyleContext &sc) {
-	int initState = sc.state;
+static void ColouriseTADSHTMLString(StyleContext &sc, int &lineState) {
+	int endState = sc.state;
 	int chQuote = sc.ch;
+	if (endState == SCE_T3_HTML_STRING) {
+		if (lineState&T3_SINGLE_QUOTE) {
+			endState = SCE_T3_S_STRING;
+			chQuote = '"';
+		} else if (lineState&T3_INT_EXPRESSION) {
+			endState = SCE_T3_X_STRING;
+			chQuote = '\'';
+		} else {
+			endState = SCE_T3_D_STRING;
+			chQuote = '\'';
+		}
+	} else {
+		sc.SetState(SCE_T3_HTML_STRING);
+		sc.Forward();
+	}
 	int chString = chQuote == '"'? '\'': '"';
-	sc.SetState(SCE_T3_HTML_STRING);
-	sc.Forward();
 
 	while (sc.More()) {
+		if (IsEOL(sc.ch, sc.chNext)) {
+			return;
+		}
+		if (sc.ch == chQuote) {
+			sc.ForwardSetState(endState);
+			return;
+		}
+		if (sc.ch == chString) {
+			sc.SetState(endState);
+			return;
+		}
 		if (sc.Match('\\', static_cast<char>(chQuote))
 			|| sc.Match('\\', static_cast<char>(chString))) {
 			sc.Forward(2);
-		} else if (sc.ch == chQuote || IsEOL(sc.ch)) {
-			sc.ForwardSetState(initState);
-			return;
-		} else if (sc.ch == chString) {
-			sc.SetState(initState);
-			return;
+		} else {
+			sc.Forward();
 		}
-		sc.Forward();
 	}
 }
 
@@ -156,65 +154,56 @@ static void ColouriseTADS3HTMLTagStart(StyleContext &sc) {
 	}
 }
 
-static void ColouriseTADS3HTMLTag(StyleContext &sc) {
-	int initState = sc.state;
-	int chQuote = '\'';
-	int chString = '"';
-	switch (initState) {
+static void ColouriseTADS3HTMLTag(StyleContext &sc, int &lineState) {
+	int endState = sc.state;
+	int chQuote = '"';
+	int chString = '\'';
+	switch (endState) {
 		case SCE_T3_S_STRING:
 			ColouriseTADS3HTMLTagStart(sc);
-			sc.SetState(SCE_T3_S_H_DEFAULT);
+			sc.SetState(SCE_T3_HTML_DEFAULT);
+			chQuote = '\'';
+			chString = '"';
 			break;
 		case SCE_T3_D_STRING:
+		case SCE_T3_X_STRING:
 			ColouriseTADS3HTMLTagStart(sc);
-			sc.SetState(SCE_T3_S_H_DEFAULT);
-			chQuote = '"';
-			chString = '\'';
+			sc.SetState(SCE_T3_HTML_DEFAULT);
 			break;
-		case SCE_T3_X_S_STRING:
-			ColouriseTADS3HTMLTagStart(sc);
-			sc.SetState(SCE_T3_X_S_H_DEFAULT);
-			break;
-		case SCE_T3_X_D_STRING:
-			ColouriseTADS3HTMLTagStart(sc);
-			sc.SetState(SCE_T3_X_D_H_DEFAULT);
-			chQuote = '"';
-			chString = '\'';
-			break;
-		case SCE_T3_S_H_DEFAULT:
-			initState = SCE_T3_S_STRING;
-			break;
-		case SCE_T3_D_H_DEFAULT:
-			initState = SCE_T3_D_STRING;
-			chQuote = '"';
-			chString = '\'';
-			break;
-		case SCE_T3_X_S_H_DEFAULT:
-			initState = SCE_T3_X_S_STRING;
-			break;
-		case SCE_T3_X_D_H_DEFAULT:
-			initState = SCE_T3_X_D_STRING;
-			chQuote = '"';
-			chString = '\'';
+		case SCE_T3_HTML_DEFAULT:
+			if (lineState&T3_SINGLE_QUOTE) {
+				endState = SCE_T3_S_STRING;
+				chQuote = '\'';
+				chString = '"';
+			} else if (lineState&T3_INT_EXPRESSION) {
+				endState = SCE_T3_X_STRING;
+			} else {
+				endState = SCE_T3_D_STRING;
+			}
 			break;
 	}
 
 	while (sc.More()) {
+		if (IsEOL(sc.ch, sc.chNext)) {
+			return;
+		}
 		if (sc.Match('/', '>')) {
 			sc.SetState(SCE_T3_HTML_TAG);
 			sc.Forward(2);
-			sc.SetState(initState);
+			sc.SetState(endState);
 			return;
-		} else if (sc.ch == '>') {
+		}
+		if (sc.ch == '>') {
 			sc.SetState(SCE_T3_HTML_TAG);
-			sc.ForwardSetState(initState);
+			sc.ForwardSetState(endState);
 			return;
-		} else if (sc.ch == chQuote) {
-			sc.SetState(initState);
+		}
+		if (sc.ch == chQuote) {
+			sc.SetState(endState);
 			return;
 		}
 		if (sc.ch == chString) {
-			ColouriseTADSHTMLString(sc);
+			ColouriseTADSHTMLString(sc, lineState);
 		} else if (sc.ch == '=') {
 			ColouriseTADS3Operator(sc);
 		} else {
@@ -224,128 +213,106 @@ static void ColouriseTADS3HTMLTag(StyleContext &sc) {
 }
 
 static void ColouriseTADS3Keyword(StyleContext &sc,
-										 WordList *keywordlists[]) {
-	static char s[250];
+							WordList *keywordlists[], 	unsigned int endPos) {
+	char s[250];
 	WordList &keywords = *keywordlists[0];
 	WordList &userwords1 = *keywordlists[1];
 	WordList &userwords2 = *keywordlists[2];
+	WordList &userwords3 = *keywordlists[3];
 	int initState = sc.state;
-	sc.SetState(SCE_T3_KEYWORD);
-	while (sc.More() && (IsAWordChar(sc.ch) || sc.ch == '.')) {
+	sc.SetState(SCE_T3_IDENTIFIER);
+	while (sc.More() && (IsAWordChar(sc.ch))) {
 		sc.Forward();
 	}
 	sc.GetCurrent(s, sizeof(s));
-	if (userwords1.InList(s)) {
-		sc.ChangeState(SCE_T3_USER1);
-	} else if (userwords2.InList(s)) {
-		sc.ChangeState(SCE_T3_USER2);
-	} else if (keywords.InList(s)) {
-		// state already correct
-	} else if ( strcmp(s, "is") == 0 || strcmp(s, "not") == 0) {
+	if ( strcmp(s, "is") == 0 || strcmp(s, "not") == 0) {
 		// have to find if "in" is next
 		int n = 1;
 		while (n + sc.currentPos < endPos && IsASpaceOrTab(sc.GetRelative(n)))
 			n++;
 		if (sc.GetRelative(n) == 'i' && sc.GetRelative(n+1) == 'n') {
 			sc.Forward(n+2);
-		} else {
-			sc.ChangeState(initState);
+			sc.ChangeState(SCE_T3_KEYWORD);
 		}
-	} else {
-		sc.ChangeState(initState);
+	} else if (keywords.InList(s)) {
+		sc.ChangeState(SCE_T3_KEYWORD);
+	} else if (userwords3.InList(s)) {
+		sc.ChangeState(SCE_T3_USER3);
+	} else if (userwords2.InList(s)) {
+		sc.ChangeState(SCE_T3_USER2);
+	} else if (userwords1.InList(s)) {
+		sc.ChangeState(SCE_T3_USER1);
 	}
-
 	sc.SetState(initState);
 }
 
-static void ColouriseTADS3MsgParam(StyleContext &sc) {
-	int initState = sc.state;
+static void ColouriseTADS3MsgParam(StyleContext &sc, int &lineState) {
+	int endState = sc.state;
 	int chQuote = '"';
-	switch (initState) {
+	switch (endState) {
 		case SCE_T3_S_STRING:
-			sc.SetState(SCE_T3_S_MSG_PARAM);
+			sc.SetState(SCE_T3_MSG_PARAM);
 			sc.Forward();
 			chQuote = '\'';
 			break;
 		case SCE_T3_D_STRING:
-			sc.SetState(SCE_T3_D_MSG_PARAM);
+		case SCE_T3_X_STRING:
+			sc.SetState(SCE_T3_MSG_PARAM);
 			sc.Forward();
 			break;
-		case SCE_T3_X_S_STRING:
-			sc.SetState(SCE_T3_X_S_MSG_PARAM);
-			sc.Forward();
-			chQuote = '\'';
-			break;
-		case SCE_T3_X_D_STRING:
-			sc.SetState(SCE_T3_X_D_MSG_PARAM);
-			sc.Forward();
-			break;
-		case SCE_T3_S_MSG_PARAM:
-			initState = SCE_T3_S_STRING;
-			chQuote = '\'';
-			break;
-		case SCE_T3_D_MSG_PARAM:
-			initState = SCE_T3_D_STRING;
-			break;
-		case SCE_T3_X_S_MSG_PARAM:
-			initState = SCE_T3_X_S_STRING;
-			chQuote = '\'';
-			break;
-		case SCE_T3_X_D_MSG_PARAM:
-			initState = SCE_T3_X_D_STRING;
+		case SCE_T3_MSG_PARAM:
+			if (lineState&T3_SINGLE_QUOTE) {
+				endState = SCE_T3_S_STRING;
+				chQuote = '\'';
+			} else if (lineState&T3_INT_EXPRESSION) {
+				endState = SCE_T3_X_STRING;
+			} else {
+				endState = SCE_T3_D_STRING;
+			}
 			break;
 	}
 	while (sc.More() && sc.ch != '}' && sc.ch != chQuote) {
+		if (IsEOL(sc.ch, sc.chNext)) {
+			return;
+		}
 		if (sc.ch == '\\') {
 			sc.Forward();
 		}
 		sc.Forward();
 	}
 	if (sc.ch == chQuote) {
-		sc.SetState(initState);
+		sc.SetState(endState);
 	} else {
-		sc.ForwardSetState(initState);
+		sc.ForwardSetState(endState);
 	}
 }
 
-static void ColouriseTADS3LibDirective(StyleContext &sc) {
+static void ColouriseTADS3LibDirective(StyleContext &sc, int &lineState) {
 	int initState = sc.state;
 	int chQuote = '"';
 	switch (initState) {
 		case SCE_T3_S_STRING:
-			sc.SetState(SCE_T3_S_LIB_DIRECTIVE);
+			sc.SetState(SCE_T3_LIB_DIRECTIVE);
 			sc.Forward(2);
 			chQuote = '\'';
 			break;
 		case SCE_T3_D_STRING:
-			sc.SetState(SCE_T3_D_LIB_DIRECTIVE);
+			sc.SetState(SCE_T3_LIB_DIRECTIVE);
 			sc.Forward(2);
 			break;
-		case SCE_T3_X_S_STRING:
-			sc.SetState(SCE_T3_X_S_LIB_DIRECTIVE);
-			sc.Forward(2);
-			chQuote = '\'';
-			break;
-		case SCE_T3_X_D_STRING:
-			sc.SetState(SCE_T3_X_D_LIB_DIRECTIVE);
-			sc.Forward(2);
-			break;
-		case SCE_T3_S_LIB_DIRECTIVE:
-			initState = SCE_T3_S_STRING;
-			chQuote = '\'';
-			break;
-		case SCE_T3_D_LIB_DIRECTIVE:
-			initState = SCE_T3_D_STRING;
-			break;
-		case SCE_T3_X_S_LIB_DIRECTIVE:
-			initState = SCE_T3_X_S_STRING;
-			chQuote = '\'';
-			break;
-		case SCE_T3_X_D_LIB_DIRECTIVE:
-			initState = SCE_T3_X_D_STRING;
+		case SCE_T3_LIB_DIRECTIVE:
+			if (lineState&T3_SINGLE_QUOTE) {
+				initState = SCE_T3_S_STRING;
+				chQuote = '\'';
+			} else {
+				initState = SCE_T3_D_STRING;
+			}
 			break;
 	}
 	while (sc.More() && IsADirectiveChar(sc.ch)) {
+		if (IsEOL(sc.ch, sc.chNext)) {
+			return;
+		}
 		sc.Forward();
 	};
 	if (sc.ch == '>' || !sc.More()) {
@@ -358,105 +325,101 @@ static void ColouriseTADS3LibDirective(StyleContext &sc) {
 	}
 }
 
-static void ColouriseTADS3String(StyleContext &sc) {
+static void ColouriseTADS3String(StyleContext &sc, int &lineState) {
 	int chQuote = sc.ch;
-	int initState = sc.state;
+	int endState = sc.state;
 	switch (sc.state) {
 		case SCE_T3_DEFAULT:
-			if (chQuote == '"') {
-				sc.SetState(SCE_T3_D_STRING);
-			} else {
-				sc.SetState(SCE_T3_S_STRING);
-			}
-			sc.Forward();
-			break;
 		case SCE_T3_X_DEFAULT:
 			if (chQuote == '"') {
-				sc.SetState(SCE_T3_X_D_STRING);
+				if (sc.state == SCE_T3_DEFAULT) {
+					sc.SetState(SCE_T3_D_STRING);
+				} else {
+					sc.SetState(SCE_T3_X_STRING);
+				}
+				lineState &= ~T3_SINGLE_QUOTE;
 			} else {
-				sc.SetState(SCE_T3_X_S_STRING);
+				sc.SetState(SCE_T3_S_STRING);
+				lineState |= T3_SINGLE_QUOTE;
 			}
 			sc.Forward();
 			break;
 		case SCE_T3_S_STRING:
 			chQuote = '\'';
-			initState = SCE_T3_DEFAULT;
+			endState = lineState&T3_INT_EXPRESSION ?
+				SCE_T3_X_DEFAULT : SCE_T3_DEFAULT;
 			break;
 		case SCE_T3_D_STRING:
 			chQuote = '"';
-			initState = SCE_T3_DEFAULT;
+			endState = SCE_T3_DEFAULT;
 			break;
-		case SCE_T3_X_S_STRING:
-			chQuote = '\'';
-			initState = SCE_T3_X_DEFAULT;
-			break;
-		case SCE_T3_X_D_STRING:
+		case SCE_T3_X_STRING:
 			chQuote = '"';
-			initState = SCE_T3_X_DEFAULT;
+			endState = SCE_T3_X_DEFAULT;
 			break;
 	}
 	while (sc.More()) {
-		if (sc.Match('\\', static_cast<char>(chQuote))) {
-			sc.Forward(2);
-		}
-		if (sc.ch == chQuote) {
-			sc.ForwardSetState(initState);
+		if (IsEOL(sc.ch, sc.chNext)) {
 			return;
 		}
-		if (sc.ch == '{') {
-			ColouriseTADS3MsgParam(sc);
-		} else if (sc.state == SCE_T3_D_STRING && sc.Match('<', '<')) {
+		if (sc.ch == chQuote) {
+			sc.ForwardSetState(endState);
+			return;
+		}
+		if (sc.state == SCE_T3_D_STRING && sc.Match('<', '<')) {
+			lineState |= T3_INT_EXPRESSION;
 			sc.SetState(SCE_T3_X_DEFAULT);
 			sc.Forward(2);
 			return;
+		}
+		if (sc.Match('\\', static_cast<char>(chQuote))) {
+			sc.Forward(2);
+		} else if (sc.ch == '{') {
+			ColouriseTADS3MsgParam(sc, lineState);
 		} else if (sc.Match('<', '.')) {
-			ColouriseTADS3LibDirective(sc);
+			ColouriseTADS3LibDirective(sc, lineState);
 		} else if (sc.ch == '<') {
-			ColouriseTADS3HTMLTag(sc);
+			ColouriseTADS3HTMLTag(sc, lineState);
 		} else {
 			sc.Forward();
 		}
 	}
 }
 
-static void ColouriseTADS3Comment(StyleContext &sc, const int initState,
-								  const int endState) {
-	if (sc.state != initState) {
-		sc.SetState(initState);
-	}
-	for (; sc.More(); sc.Forward()) {
+static void ColouriseTADS3Comment(StyleContext &sc, int endState) {
+	sc.SetState(SCE_T3_BLOCK_COMMENT);
+	while (sc.More()) {
+		if (IsEOL(sc.ch, sc.chNext)) {
+			return;
+		}
 		if (sc.Match('*', '/')) {
 			sc.Forward(2);
 			sc.SetState(endState);
 			return;
 		}
+		sc.Forward();
 	}
 }
 
-static void ColouriseToEndOfLine(StyleContext &sc, const int initState,
-								 const int endState) {
-	if (sc.state != initState) {
-		sc.SetState(initState);
-	}
-	for (; sc.More(); sc.Forward()) {
+static void ColouriseToEndOfLine(StyleContext &sc, int initState, int endState) {
+	sc.SetState(initState);
+	while (sc.More()) {
 		if (sc.ch == '\\') {
-			if (IsEOL(sc.chNext)) {
-				sc.Forward();
-				if (sc.ch == '\r' && sc.chNext == '\n') {
-					sc.Forward();
-				}
-				continue;
+			sc.Forward();
+			if (IsEOL(sc.ch, sc.chNext)) {
+					return;
 			}
 		}
-		if (IsEOL(sc.ch)) {
+		if (IsEOL(sc.ch, sc.chNext)) {
 			sc.SetState(endState);
 			return;
 		}
+		sc.Forward();
 	}
 }
 
 static void ColouriseTADS3Number(StyleContext &sc) {
-	int initState = sc.state;
+	int endState = sc.state;
 	bool inHexNumber = false;
 	bool seenE = false;
 	bool seenDot = sc.ch == '.';
@@ -468,7 +431,7 @@ static void ColouriseTADS3Number(StyleContext &sc) {
 		inHexNumber = true;
 		sc.Forward();
 	}
-	for (; sc.More(); sc.Forward()) {
+	while (sc.More()) {
 		if (inHexNumber) {
 			if (!IsAHexDigit(sc.ch)) {
 				break;
@@ -486,128 +449,106 @@ static void ColouriseTADS3Number(StyleContext &sc) {
 				break;
 			}
 		}
+		sc.Forward();
 	}
-	sc.SetState(initState);
+	sc.SetState(endState);
 }
 
 static void ColouriseTADS3Doc(unsigned int startPos, int length, int initStyle,
 							   WordList *keywordlists[], Accessor &styler) {
 	int visibleChars = 0;
 	int bracketLevel = 0;
-	endPos = startPos + length;
+	int lineState = 0;
+	unsigned int endPos = startPos + length;
+	int lineCurrent = styler.GetLine(startPos);
+	if (lineCurrent > 0) {
+		lineState = styler.GetLineState(lineCurrent-1);
+	}
 	StyleContext sc(startPos, length, initStyle, styler);
 
 	while (sc.More()) {
 
-		if (IsEOL(sc.ch)) {
+		if (IsEOL(sc.ch, sc.chNext)) {
+			styler.SetLineState(lineCurrent, lineState);
+			lineCurrent++;
 			visibleChars = 0;
 			sc.Forward();
-			continue;
+			if (sc.ch == '\n') {
+				sc.Forward();
+			}
 		}
 
 		switch(sc.state) {
 			case SCE_T3_PREPROCESSOR:
 			case SCE_T3_LINE_COMMENT:
-				ColouriseToEndOfLine(sc, sc.state, SCE_T3_DEFAULT);
-				break;
-			case SCE_T3_X_PREPROCESSOR:
-			case SCE_T3_X_LINE_COMMENT:
-				ColouriseToEndOfLine(sc, sc.state, SCE_T3_X_DEFAULT);
+				ColouriseToEndOfLine(sc, sc.state, lineState&T3_INT_EXPRESSION ?
+					SCE_T3_X_DEFAULT : SCE_T3_DEFAULT);
 				break;
 			case SCE_T3_S_STRING:
 			case SCE_T3_D_STRING:
-			case SCE_T3_X_S_STRING:
-			case SCE_T3_X_D_STRING:
-				ColouriseTADS3String(sc);
+			case SCE_T3_X_STRING:
+				ColouriseTADS3String(sc, lineState);
 				visibleChars++;
 				break;
-			case SCE_T3_S_MSG_PARAM:
-			case SCE_T3_D_MSG_PARAM:
-			case SCE_T3_X_S_MSG_PARAM:
-			case SCE_T3_X_D_MSG_PARAM:
-				ColouriseTADS3MsgParam(sc);
+			case SCE_T3_MSG_PARAM:
+				ColouriseTADS3MsgParam(sc, lineState);
 				break;
-			case SCE_T3_S_LIB_DIRECTIVE:
-			case SCE_T3_D_LIB_DIRECTIVE:
-			case SCE_T3_X_S_LIB_DIRECTIVE:
-			case SCE_T3_X_D_LIB_DIRECTIVE:
-				ColouriseTADS3LibDirective(sc);
+			case SCE_T3_LIB_DIRECTIVE:
+				ColouriseTADS3LibDirective(sc, lineState);
 				break;
-			case SCE_T3_S_H_DEFAULT:
-			case SCE_T3_D_H_DEFAULT:
-			case SCE_T3_X_S_H_DEFAULT:
-			case SCE_T3_X_D_H_DEFAULT:
-				ColouriseTADS3HTMLTag(sc);
+			case SCE_T3_HTML_DEFAULT:
+				ColouriseTADS3HTMLTag(sc, lineState);
+				break;
+			case SCE_T3_HTML_STRING:
+				ColouriseTADSHTMLString(sc, lineState);
 				break;
 			case SCE_T3_BLOCK_COMMENT:
-				ColouriseTADS3Comment(sc, SCE_T3_BLOCK_COMMENT, SCE_T3_DEFAULT);
-				break;
-			case SCE_T3_X_BLOCK_COMMENT:
-				ColouriseTADS3Comment(sc, SCE_T3_X_BLOCK_COMMENT, SCE_T3_X_DEFAULT);
+				ColouriseTADS3Comment(sc, lineState&T3_INT_EXPRESSION ?
+					SCE_T3_X_DEFAULT : SCE_T3_DEFAULT);
 				break;
 			case SCE_T3_DEFAULT:
-				if (IsASpaceOrTab(sc.ch)) {
-					sc.Forward();
-				} else if (sc.ch == '#' && visibleChars == 0) {
-					ColouriseToEndOfLine(sc, SCE_T3_PREPROCESSOR, SCE_T3_DEFAULT);
-				} else if (sc.Match('/', '*')) {
-					ColouriseTADS3Comment(sc, SCE_T3_BLOCK_COMMENT, SCE_T3_DEFAULT);
-					visibleChars++;
-				} else if (sc.Match('/', '/')) {
-					ColouriseToEndOfLine(sc, SCE_T3_LINE_COMMENT, SCE_T3_DEFAULT);
-				} else if (sc.ch == '\'' || sc.ch == '"') {
-					ColouriseTADS3String(sc);
-					visibleChars++;
-				} else if (IsATADS3Operator(sc.ch)) {
-					ColouriseTADS3Operator(sc);
-					visibleChars++;
-				} else if (IsANumberStart(sc)) {
-					ColouriseTADS3Number(sc);
-					visibleChars++;
-				} else if (IsABracket(sc.ch)) {
-					ColouriseTADS3Bracket(sc);
-					visibleChars++;
-				} else if (IsAWordStart(sc.ch)) {
-					ColouriseTADS3Keyword(sc, keywordlists);
-					visibleChars++;
-				} else {
-					sc.Forward();
-					visibleChars++;
-				}
-				break;
 			case SCE_T3_X_DEFAULT:
 				if (IsASpaceOrTab(sc.ch)) {
 					sc.Forward();
 				} else if (sc.ch == '#' && visibleChars == 0) {
-					ColouriseToEndOfLine(sc, SCE_T3_X_PREPROCESSOR, SCE_T3_X_DEFAULT);
+					ColouriseToEndOfLine(sc, SCE_T3_PREPROCESSOR, sc.state);
 				} else if (sc.Match('/', '*')) {
-					ColouriseTADS3Comment(sc, SCE_T3_X_BLOCK_COMMENT, SCE_T3_X_DEFAULT);
+					ColouriseTADS3Comment(sc, sc.state);
 					visibleChars++;
 				} else if (sc.Match('/', '/')) {
-					ColouriseToEndOfLine(sc, SCE_T3_X_LINE_COMMENT, SCE_T3_X_DEFAULT);
-				} else if (sc.ch == '\'' || sc.ch == '"') {
-					ColouriseTADS3String(sc);
+					ColouriseToEndOfLine(sc, SCE_T3_LINE_COMMENT, sc.state);
+				} else if (sc.ch == '"') {
+					bracketLevel = 0;
+					ColouriseTADS3String(sc, lineState);
 					visibleChars++;
-				} else if (bracketLevel == 0 && sc.Match('>', '>')) {
+				} else if (sc.ch == '\'') {
+					ColouriseTADS3String(sc, lineState);
+					visibleChars++;
+				} else if (sc.state == SCE_T3_X_DEFAULT && bracketLevel == 0
+						   && sc.Match('>', '>')) {
 					sc.Forward(2);
 					sc.SetState(SCE_T3_D_STRING);
+					lineState &= ~(T3_SINGLE_QUOTE|T3_INT_EXPRESSION);
 				} else if (IsATADS3Operator(sc.ch)) {
+					if (sc.state == SCE_T3_X_DEFAULT) {
+						if (sc.ch == '(') {
+							bracketLevel++;
+						} else if (sc.ch == ')') {
+							bracketLevel--;
+						}
+					}
 					ColouriseTADS3Operator(sc);
 					visibleChars++;
 				} else if (IsANumberStart(sc)) {
 					ColouriseTADS3Number(sc);
 					visibleChars++;
-				} else if (IsABracket(sc.ch)) {
-					if (sc.ch == '(') {
-						bracketLevel++;
-					} else if (sc.ch == ')') {
-						bracketLevel && bracketLevel--;
-					}
-					ColouriseTADS3Bracket(sc);
-					visibleChars++;
 				} else if (IsAWordStart(sc.ch)) {
-					ColouriseTADS3Keyword(sc, keywordlists);
+					ColouriseTADS3Keyword(sc, keywordlists, endPos);
 					visibleChars++;
+				} else if (sc.Match("...")) {
+					sc.SetState(SCE_T3_IDENTIFIER);
+					sc.Forward(3);
+					sc.SetState(SCE_T3_DEFAULT);
 				} else {
 					sc.Forward();
 					visibleChars++;
@@ -633,7 +574,7 @@ static void ColouriseTADS3Doc(unsigned int startPos, int length, int initStyle,
 
  silverKey : Key {
 	'small silver key'
-    'small silver key'
+	'small silver key'
 	"A small key glints in the sunlight. "
  }
 
@@ -672,52 +613,25 @@ static const int T3_SEENSTART = 1 << 12;
 static const int T3_EXPECTINGIDENTIFIER = 1 << 13;
 static const int T3_EXPECTINGPUNCTUATION = 1 << 14;
 
-static inline bool IsStreamCommentStyle(int style) {
-	return style == SCE_T3_BLOCK_COMMENT
-		|| style == SCE_T3_X_BLOCK_COMMENT;
-}
-
 static inline bool IsStringTransition(int s1, int s2) {
-	switch (s1) {
-		case SCE_T3_S_STRING:
-			return s2 != s1
-				&& s2 != SCE_T3_S_LIB_DIRECTIVE
-				&& s2 != SCE_T3_S_MSG_PARAM
-				&& s2 != SCE_T3_HTML_TAG
-				&& s2 != SCE_T3_HTML_STRING;
-		case SCE_T3_D_STRING:
-			return s2 != s1
-				&& s2 != SCE_T3_D_LIB_DIRECTIVE
-				&& s2 != SCE_T3_D_MSG_PARAM
-				&& s2 != SCE_T3_HTML_TAG
-				&& s2 != SCE_T3_X_DEFAULT
-				&& s2 != SCE_T3_HTML_STRING;
-		case SCE_T3_X_S_STRING:
-			return s2 != s1
-				&& s2 != SCE_T3_X_S_LIB_DIRECTIVE
-				&& s2 != SCE_T3_X_S_MSG_PARAM
-				&& s2 != SCE_T3_HTML_TAG
-				&& s2 != SCE_T3_HTML_STRING;
-		case SCE_T3_X_D_STRING:
-			return s2 != s1
-				&& s2 != SCE_T3_X_D_LIB_DIRECTIVE
-				&& s2 != SCE_T3_X_D_MSG_PARAM
-				&& s2 != SCE_T3_HTML_TAG
-				&& s2 != SCE_T3_HTML_STRING;
-		default:
-			return false;
-	}
+	return s1 != s2
+		&& (s1 == SCE_T3_S_STRING || s1 == SCE_T3_X_STRING
+			|| s1 == SCE_T3_D_STRING && s2 != SCE_T3_X_DEFAULT)
+		&& s2 != SCE_T3_LIB_DIRECTIVE
+		&& s2 != SCE_T3_MSG_PARAM
+		&& s2 != SCE_T3_HTML_TAG
+		&& s2 != SCE_T3_HTML_STRING;
 }
 
 static inline bool IsATADS3Punctuation(const int ch) {
 	return ch == ':' || ch == ',' || ch == '(' || ch == ')';
 }
 
-static inline bool IsAnIdentifier(const int ch, const int style) {
-	return IsAWordChar(ch) && style == SCE_T3_DEFAULT
+static inline bool IsAnIdentifier(const int style) {
+	return style == SCE_T3_IDENTIFIER
 		|| style == SCE_T3_USER1
 		|| style == SCE_T3_USER2
-		|| ch == '.' && style == SCE_T3_DEFAULT;
+		|| style == SCE_T3_USER3;
 }
 
 static inline bool IsSpaceEquivalent(const int ch, const int style) {
@@ -733,7 +647,7 @@ static char peekAhead(unsigned int startPos, unsigned int endPos,
 		int style = styler.StyleAt(i);
 		char ch = styler[i];
 		if (!IsSpaceEquivalent(ch, style)) {
-			if (IsAnIdentifier(ch, style)) {
+			if (IsAnIdentifier(style)) {
 				return 'a';
 			}
 			if (IsATADS3Punctuation(ch)) {
@@ -778,7 +692,7 @@ static void FoldTADS3Doc(unsigned int startPos, int length, int initStyle,
 			style = styleNext;
 			styleNext = styler.StyleAt(i + 1);
 		}
-		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
+		bool atEOL = IsEOL(ch, chNext);
 
 		if (levelNext == SC_FOLDLEVELBASE) {
 			if (IsSpaceEquivalent(ch, style)) {
@@ -793,7 +707,9 @@ static void FoldTADS3Doc(unsigned int startPos, int length, int initStyle,
 				seenStart = 0;
 			} else if (ch == '\'' || ch == '"' || ch == '[') {
 				levelNext++;
-				redo = true;
+				if (seenStart) {
+					redo = true;
+				}
 			} else if (ch == ';') {
 				seenStart = 0;
 				expectingIdentifier = 0;
@@ -805,11 +721,11 @@ static void FoldTADS3Doc(unsigned int startPos, int length, int initStyle,
 					} else {
 						expectingPunctuation = 0;
 					}
-				} else if (!IsAnIdentifier(ch, style)) {
+				} else if (!IsAnIdentifier(style)) {
 					levelNext++;
 				}
 			} else if (expectingIdentifier && !expectingPunctuation) {
-				if (!IsAnIdentifier(ch, style)) {
+				if (!IsAnIdentifier(style)) {
 					levelNext++;
 				} else {
 					expectingPunctuation = T3_EXPECTINGPUNCTUATION;
@@ -826,7 +742,7 @@ static void FoldTADS3Doc(unsigned int startPos, int length, int initStyle,
 					}
 				}
 			} else if (!expectingIdentifier && !expectingPunctuation) {
-				if (IsAnIdentifier(ch, style)) {
+				if (IsAnIdentifier(style)) {
 					seenStart = T3_SEENSTART;
 					expectingIdentifier = T3_EXPECTINGIDENTIFIER;
 					expectingPunctuation = T3_EXPECTINGPUNCTUATION;
@@ -842,10 +758,10 @@ static void FoldTADS3Doc(unsigned int startPos, int length, int initStyle,
 				   && ch == ';' && style == SCE_T3_OPERATOR ) {
 			levelNext--;
 			seenStart = 0;
-		} else if (IsStreamCommentStyle(style)) {
-			if (!IsStreamCommentStyle(stylePrev)) {
+		} else if (style == SCE_T3_BLOCK_COMMENT) {
+			if (stylePrev != SCE_T3_BLOCK_COMMENT) {
 				levelNext++;
-			} else if (!IsStreamCommentStyle(styleNext) && !atEOL) {
+			} else if (styleNext != SCE_T3_BLOCK_COMMENT && !atEOL) {
 				// Comments don't end at end of line and the next character may be unstyled.
 				levelNext--;
 			}
@@ -858,7 +774,7 @@ static void FoldTADS3Doc(unsigned int startPos, int length, int initStyle,
 			} else if (IsStringTransition(style, styleNext)) {
 				levelNext--;
 			}
-		} else if (style == SCE_T3_BRACKET) {
+		} else if (style == SCE_T3_OPERATOR) {
 			if (ch == '{' || ch == '[') {
 				// Measure the minimum before a '{' to allow
 				// folding on "} else {"
@@ -913,6 +829,8 @@ static void FoldTADS3Doc(unsigned int startPos, int length, int initStyle,
 static const char * const tads3WordList[] = {
 	"TADS3 Keywords",
 	"User defined 1",
+	"User defined 2",
+	"User defined 3",
 	0
 };
 
