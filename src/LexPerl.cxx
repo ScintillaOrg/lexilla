@@ -290,8 +290,12 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					numState = PERLNUM_V_VECTOR;
 				}
 			} else if (iswordstart(ch)) {
+                // if immediately prefixed by '::', always a bareword
+                state = SCE_PL_WORD;
+                if (styler.SafeGetCharAt(i - 1) == ':' && styler.SafeGetCharAt(i - 2) == ':') {
+                    state = SCE_PL_IDENTIFIER;
+                }
                 // first check for possible quote-like delimiter
-                state = SCE_PL_IDENTIFIER;
                 bool dblchar = false;
 				if (ch == 's' && !isNonQuote(chNext)) {
 					state = SCE_PL_REGSUBST;
@@ -321,68 +325,74 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
                            (isdigit(chPrev) && isdigit(chNext)))) {
                     state = SCE_PL_OPERATOR;
                 }
-                // if quote-like delimiter found, attempt to disambiguate
+                // for quote-like delimiters, attempt to disambiguate
                 // to select for bareword, change state -> SCE_PL_IDENTIFIER
-                if (state != SCE_PL_IDENTIFIER) {
-                    if (i > 0) {
-                        unsigned int j = i - 1;
-                        bool moreback = false;      // true if passed newline/comments
-                        bool brace = false;         // true if opening brace found
-                        char ch2;
-                        styler.Flush();
-                        // first look backwards past whitespace/comments
-                        while ((j > 0) && (styler.StyleAt(j) == SCE_PL_DEFAULT
-                               || styler.StyleAt(j) == SCE_PL_COMMENTLINE)) {
-                            if (isEOLChar(styler.SafeGetCharAt(j))
-                                || styler.StyleAt(j) == SCE_PL_COMMENTLINE)
-                                moreback = true;
-                            j--;
+                // also helps to disambiguate keywords/barewords
+                if (i > 0) {
+                    unsigned int j = i - 1;
+                    bool moreback = false;      // true if passed newline/comments
+                    bool brace = false;         // true if opening brace found
+                    char ch2;
+                    styler.Flush();
+                    // first look backwards past whitespace/comments
+                    while ((j > 0) && (styler.StyleAt(j) == SCE_PL_DEFAULT
+                           || styler.StyleAt(j) == SCE_PL_COMMENTLINE)) {
+                        if (isEOLChar(styler.SafeGetCharAt(j))
+                            || styler.StyleAt(j) == SCE_PL_COMMENTLINE)
+                            moreback = true;
+                        j--;
+                    }
+                    if (styler.StyleAt(j) != SCE_PL_DEFAULT
+                        && styler.StyleAt(j) != SCE_PL_COMMENTLINE) {
+                        ch2 = styler.SafeGetCharAt(j);
+                        if (!moreback && ch2 == '{') {
+                            // {bareword: possible variable spec
+                            brace = true;
+                        } else if ((ch2 == '&')
+                                // &bareword: subroutine call
+                                || (ch2 == '>' && j >= 1
+                                    && styler.SafeGetCharAt(j - 1) == '-')
+                                // ->bareword: part of variable spec
+                                || (styler.StyleAt(j) == SCE_PL_WORD && j >= 2
+                                    && styler.Match(j - 2, "sub"))) {
+                                // sub bareword: subroutine declaration
+                            state = SCE_PL_IDENTIFIER;
                         }
-                        if (styler.StyleAt(j) != SCE_PL_DEFAULT
-                            && styler.StyleAt(j) != SCE_PL_COMMENTLINE) {
-                            ch2 = styler.SafeGetCharAt(j);
-                            if (!moreback && ch2 == '{') {
-                                // {bareword: possible variable spec
-                                brace = true;
-                            } else if ((ch2 == '&')
-                                    // &bareword: subroutine call
-                                    || (ch2 == '>' && j >= 1
-                                        && styler.SafeGetCharAt(j - 1) == '-')
-                                    // ->bareword: part of variable spec
-                                    || (styler.StyleAt(j) == SCE_PL_WORD && j >= 2
-                                        && styler.Match(j - 2, "sub"))) {
-                                    // sub bareword: subroutine declaration
+                    }
+                    // next look forward past tabs/spaces only
+                    // skip past word first
+                    j = i;
+                    while (iswordchar(styler.SafeGetCharAt(j + 1))) j++;
+                    if (j + 1 < lengthDoc) {
+                        do {
+                            ch2 = styler.SafeGetCharAt(++j);
+                        } while ((j + 1 < lengthDoc) && (ch2 == ' ' || ch2 == '\t'));
+                        if (ch2 != ' ' && ch2 != '\t') {
+                            if ((brace && ch2 == '}')
+                             // {bareword}: variable spec
+                             || (ch2 == '=' && j + 1 < lengthDoc
+                                 && styler.SafeGetCharAt(j + 1) == '>')) {
+                             // bareword=>: hash literal
                                 state = SCE_PL_IDENTIFIER;
-                            }
-                        }
-                        // next look forward past tabs/spaces only
-                        j = i;
-                        if (dblchar) j++;
-                        if (state != SCE_PL_IDENTIFIER && j + 1 < lengthDoc) {
-                            do {
-                                ch2 = styler.SafeGetCharAt(++j);
-                            } while ((j + 1 < lengthDoc) && (ch2 == ' ' || ch2 == '\t'));
-                            if (ch2 != ' ' && ch2 != '\t') {
-                                if ((brace && ch2 == '}')
-                                 // {bareword}: variable spec
-                                 || (ch2 == '=' && j + 1 < lengthDoc
-                                     && styler.SafeGetCharAt(j + 1) == '>')) {
-                                 // bareword=>: hash literal
-                                    state = SCE_PL_IDENTIFIER;
-                                }
                             }
                         }
                     }
                 }
-                if (state == SCE_PL_IDENTIFIER) {
-                    state = SCE_PL_WORD;
+                // if enters with a state of SCE_PL_IDENTIFIER, it has no chance
+                // of becoming a keyword; otherwise it might be a keyword
+                if (state == SCE_PL_IDENTIFIER || state == SCE_PL_WORD) {
                     if ((!iswordchar(chNext) && chNext != '\'')
                         || (chNext == '.' && chNext2 == '.')) {
                         // We need that if length of word == 1!
                         // This test is copied from the SCE_PL_WORD handler.
-                        classifyWordPerl(styler.GetStartSegment(), i, keywords, styler);
+                        if (state == SCE_PL_WORD) {
+                            classifyWordPerl(styler.GetStartSegment(), i, keywords, styler);
+                        } else {
+                            styler.ColourTo(i, SCE_PL_IDENTIFIER);
+                        }
                         state = SCE_PL_DEFAULT;
                     }
+                // either quote-like operators or repetition operator
                 } else {
                     if (state == SCE_PL_OPERATOR) {
                         // repetition operator 'x'
