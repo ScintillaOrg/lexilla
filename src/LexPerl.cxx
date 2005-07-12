@@ -29,6 +29,10 @@
 #define PERLNUM_V_VECTOR 7
 #define PERLNUM_BAD 8
 
+#define BACK_NONE 0         // lookback state for bareword disambiguation:
+#define BACK_OPERATOR 1     // whitespace/comments are insignificant
+#define BACK_KEYWORD 2      // operators/keywords are needed for disambiguation
+
 #define HERE_DELIM_MAX 256
 
 static inline bool isEOLChar(char ch) {
@@ -55,17 +59,13 @@ static inline bool isPerlOperator(char ch) {
 	return false;
 }
 
-static int classifyWordPerl(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler) {
+static bool isPerlKeyword(unsigned int start, unsigned int end, WordList &keywords, Accessor &styler) {
 	char s[100];
-	for (unsigned int i = 0; i < end - start + 1 && i < 30; i++) {
-		s[i] = styler[start + i];
-		s[i + 1] = '\0';
-	}
-	char chAttr = SCE_PL_IDENTIFIER;
-	if (keywords.InList(s))
-		chAttr = SCE_PL_WORD;
-	styler.ColourTo(end, chAttr);
-	return chAttr;
+    unsigned int i, len = end - start;
+    if (len > 30) { len = 30; }
+	for (i = 0; i < len; i++, start++) s[i] = styler[start];
+    s[i] = '\0';
+	return keywords.InList(s);
 }
 
 static inline bool isEndVar(char ch) {
@@ -205,6 +205,22 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 		state = SCE_PL_DEFAULT;
 	}
 
+    // lookback at start of lexing to set proper state for backflag
+    // after this, they are updated when elements are lexed
+    int backflag = BACK_NONE;
+    unsigned int backPos = startPos;
+    if (backPos > 0) {
+        backPos--;
+        int sty = SCE_PL_DEFAULT;
+        while ((backPos > 0) && (sty = styler.StyleAt(backPos),
+               sty == SCE_PL_DEFAULT || sty == SCE_PL_COMMENTLINE))
+            backPos--;
+        if (sty == SCE_PL_OPERATOR)
+            backflag = BACK_OPERATOR;
+        else if (sty == SCE_PL_WORD)
+            backflag = BACK_KEYWORD;
+    }
+
 	styler.StartAt(startPos);
 	char chPrev = styler.SafeGetCharAt(startPos - 1);
 	if (startPos == 0)
@@ -271,6 +287,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 			if (isdigit(ch) || (isdigit(chNext) &&
 				(ch == '.' || ch == 'v'))) {
 				state = SCE_PL_NUMBER;
+                backflag = BACK_NONE;
 				numState = PERLNUM_DECIMAL;
 				dotCount = 0;
 				if (ch == '0') {	// hex,bin,octal
@@ -292,11 +309,11 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 			} else if (iswordstart(ch)) {
                 // if immediately prefixed by '::', always a bareword
                 state = SCE_PL_WORD;
-                if (styler.SafeGetCharAt(i - 1) == ':' && styler.SafeGetCharAt(i - 2) == ':') {
+                if (chPrev == ':' && styler.SafeGetCharAt(i - 2) == ':') {
                     state = SCE_PL_IDENTIFIER;
                 }
+                unsigned int kw = i + 1;
                 // first check for possible quote-like delimiter
-                bool dblchar = false;
 				if (ch == 's' && !isNonQuote(chNext)) {
 					state = SCE_PL_REGSUBST;
 					Quote.New(2);
@@ -312,99 +329,111 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				} else if (ch == 't' && chNext == 'r' && !isNonQuote(chNext2)) {
 					state = SCE_PL_REGSUBST;
 					Quote.New(2);
-                    dblchar = true;
+                    kw++;
 				} else if (ch == 'q' && (chNext == 'q' || chNext == 'r' || chNext == 'w' || chNext == 'x') && !isNonQuote(chNext2)) {
 					if      (chNext == 'q') state = SCE_PL_STRING_QQ;
 					else if (chNext == 'x') state = SCE_PL_STRING_QX;
 					else if (chNext == 'r') state = SCE_PL_STRING_QR;
 					else if (chNext == 'w') state = SCE_PL_STRING_QW;
 					Quote.New(1);
-                    dblchar = true;
+                    kw++;
 				} else if (ch == 'x' && (chNext == '=' ||	// repetition
                            (chNext != '_' && !isalnum(chNext)) ||
                            (isdigit(chPrev) && isdigit(chNext)))) {
                     state = SCE_PL_OPERATOR;
                 }
-                // for quote-like delimiters, attempt to disambiguate
+                // if potentially a keyword, scan forward and grab word, then check
+                // if it's really one; if yes, disambiguation test is performed
+                // otherwise it is always a bareword and we skip a lot of scanning
+                // note: keywords assumed to be limited to [_a-zA-Z] only
+                if (state == SCE_PL_WORD) {
+                    while (iswordstart(styler.SafeGetCharAt(kw))) kw++;
+                    if (!isPerlKeyword(styler.GetStartSegment(), kw, keywords, styler)) {
+                        state = SCE_PL_IDENTIFIER;
+                    }
+                }
+                // if already SCE_PL_IDENTIFIER, then no ambiguity, skip this
+                // for quote-like delimiters/keywords, attempt to disambiguate
                 // to select for bareword, change state -> SCE_PL_IDENTIFIER
-                // also helps to disambiguate keywords/barewords
-                if (i > 0) {
-                    unsigned int j = i - 1;
+                if (state != SCE_PL_IDENTIFIER && i > 0) {
+                    unsigned int j = i;
                     bool moreback = false;      // true if passed newline/comments
                     bool brace = false;         // true if opening brace found
                     char ch2;
-                    styler.Flush();
-                    // first look backwards past whitespace/comments
-                    while ((j > 0) && (styler.StyleAt(j) == SCE_PL_DEFAULT
-                           || styler.StyleAt(j) == SCE_PL_COMMENTLINE)) {
-                        if (isEOLChar(styler.SafeGetCharAt(j))
-                            || styler.StyleAt(j) == SCE_PL_COMMENTLINE)
-                            moreback = true;
-                        j--;
-                    }
-                    if (styler.StyleAt(j) != SCE_PL_DEFAULT
-                        && styler.StyleAt(j) != SCE_PL_COMMENTLINE) {
+                    // first look backwards past whitespace/comments for EOLs
+                    // if BACK_NONE, neither operator nor keyword, so skip test
+                    if (backflag != BACK_NONE) {
+                        while (--j > backPos) {
+                            if (isEOLChar(styler.SafeGetCharAt(j)))
+                                moreback = true;
+                        }
                         ch2 = styler.SafeGetCharAt(j);
-                        if (!moreback && ch2 == '{') {
+                        if (ch2 == '{' && !moreback) {
                             // {bareword: possible variable spec
                             brace = true;
                         } else if ((ch2 == '&')
                                 // &bareword: subroutine call
-                                || (ch2 == '>' && j >= 1
-                                    && styler.SafeGetCharAt(j - 1) == '-')
+                                || (ch2 == '>' && styler.SafeGetCharAt(j - 1) == '-')
                                 // ->bareword: part of variable spec
-                                || (styler.StyleAt(j) == SCE_PL_WORD && j >= 2
-                                    && styler.Match(j - 2, "sub"))) {
+                                || (ch2 == 'b' && styler.Match(j - 2, "su"))) {
                                 // sub bareword: subroutine declaration
+                                // (implied BACK_KEYWORD, no keywords end in 'sub'!)
                             state = SCE_PL_IDENTIFIER;
                         }
-                    }
-                    // next look forward past tabs/spaces only
-                    // skip past word first
-                    j = i;
-                    while (iswordchar(styler.SafeGetCharAt(j + 1))) j++;
-                    if (j + 1 < lengthDoc) {
-                        do {
-                            ch2 = styler.SafeGetCharAt(++j);
-                        } while ((j + 1 < lengthDoc) && (ch2 == ' ' || ch2 == '\t'));
-                        if (ch2 != ' ' && ch2 != '\t') {
-                            if ((brace && ch2 == '}')
+                        // if status still ambiguous, look forward after word past
+                        // tabs/spaces only; if ch2 isn't one of '[{(,' it can never
+                        // match anything, so skip the whole thing
+                        j = kw;
+                        if (state != SCE_PL_IDENTIFIER
+                            && (ch2 == '{' || ch2 == '(' || ch2 == '['|| ch2 == ',')
+                            && kw < lengthDoc) {
+                            while (ch2 = styler.SafeGetCharAt(j),
+                                   (ch2 == ' ' || ch2 == '\t') && j < lengthDoc) {
+                                j++;
+                            }
+                            if ((ch2 == '}' && brace)
                              // {bareword}: variable spec
-                             || (ch2 == '=' && j + 1 < lengthDoc
-                                 && styler.SafeGetCharAt(j + 1) == '>')) {
-                             // bareword=>: hash literal
+                             || (ch2 == '=' && styler.SafeGetCharAt(j + 1) == '>')) {
+                             // [{(, bareword=>: hash literal
                                 state = SCE_PL_IDENTIFIER;
                             }
                         }
                     }
                 }
-                // if enters with a state of SCE_PL_IDENTIFIER, it has no chance
-                // of becoming a keyword; otherwise it might be a keyword
-                if (state == SCE_PL_IDENTIFIER || state == SCE_PL_WORD) {
+                backflag = BACK_NONE;
+                // an identifier or bareword
+                if (state == SCE_PL_IDENTIFIER) {
                     if ((!iswordchar(chNext) && chNext != '\'')
                         || (chNext == '.' && chNext2 == '.')) {
                         // We need that if length of word == 1!
                         // This test is copied from the SCE_PL_WORD handler.
-                        if (state == SCE_PL_WORD) {
-                            classifyWordPerl(styler.GetStartSegment(), i, keywords, styler);
-                        } else {
-                            styler.ColourTo(i, SCE_PL_IDENTIFIER);
-                        }
+                        styler.ColourTo(i, SCE_PL_IDENTIFIER);
                         state = SCE_PL_DEFAULT;
                     }
-                // either quote-like operators or repetition operator
-                } else {
-                    if (state == SCE_PL_OPERATOR) {
-                        // repetition operator 'x'
-                        styler.ColourTo(i, SCE_PL_OPERATOR);
-                        state = SCE_PL_DEFAULT;
+                // a keyword
+                } else if (state == SCE_PL_WORD) {
+                    i = kw - 1;
+                    if (ch == '_' && chNext == '_' &&
+                        (isMatch(styler, lengthDoc, styler.GetStartSegment(), "__DATA__")
+                      || isMatch(styler, lengthDoc, styler.GetStartSegment(), "__END__"))) {
+                        styler.ColourTo(i, SCE_PL_DATASECTION);
+                        state = SCE_PL_DATASECTION;
                     } else {
-                        // quote-like delimiter, skip one char if double-char delimiter
-                        if (dblchar) {
-                            i++;
-                            chNext = chNext2;
-                        }
+                        styler.ColourTo(i, SCE_PL_WORD);
+                        state = SCE_PL_DEFAULT;
+                        backflag = BACK_KEYWORD;
+                        backPos = i;
                     }
+                    ch = styler.SafeGetCharAt(i);
+                    chNext = styler.SafeGetCharAt(i + 1);
+                // a repetition operator 'x'
+                } else if (state == SCE_PL_OPERATOR) {
+                    styler.ColourTo(i, SCE_PL_OPERATOR);
+                    state = SCE_PL_DEFAULT;
+                // quote-like delimiter, skip one char if double-char delimiter
+                } else {
+                    i = kw - 1;
+                    chNext = styler.SafeGetCharAt(i + 1);
                 }
 			} else if (ch == '#') {
 				state = SCE_PL_COMMENTLINE;
@@ -412,6 +441,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				state = SCE_PL_STRING;
 				Quote.New(1);
 				Quote.Open(ch);
+                backflag = BACK_NONE;
 			} else if (ch == '\'') {
 				if (chPrev == '&') {
 					// Archaic call
@@ -421,10 +451,12 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					Quote.New(1);
 					Quote.Open(ch);
 				}
+                backflag = BACK_NONE;
 			} else if (ch == '`') {
 				state = SCE_PL_BACKTICKS;
 				Quote.New(1);
 				Quote.Open(ch);
+                backflag = BACK_NONE;
 			} else if (ch == '$') {
 				if ((chNext == '{') || isspacechar(chNext)) {
 					styler.ColourTo(i, SCE_PL_SCALAR);
@@ -440,6 +472,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 						chNext = chNext2;
 					}
 				}
+                backflag = BACK_NONE;
 			} else if (ch == '@') {
 				if (isalpha(chNext) || chNext == '#' || chNext == '$'
 					|| chNext == '_' || chNext == '+' || chNext == '-') {
@@ -449,6 +482,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				} else {
 					styler.ColourTo(i, SCE_PL_ARRAY);
 				}
+                backflag = BACK_NONE;
 			} else if (ch == '%') {
 				if (isalpha(chNext) || chNext == '#' || chNext == '$'
                     || chNext == '_' || chNext == '!' || chNext == '^') {
@@ -461,6 +495,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				} else {
 					styler.ColourTo(i, SCE_PL_OPERATOR);
 				}
+                backflag = BACK_NONE;
 			} else if (ch == '*') {
                 char strch[2];
                 strch[0] = chNext;
@@ -481,6 +516,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					}
 					styler.ColourTo(i, SCE_PL_OPERATOR);
 				}
+                backflag = BACK_NONE;
 			} else if (ch == '/' || (ch == '<' && chNext == '<')) {
 				// Explicit backward peeking to set a consistent preferRE for
 				// any slash found, so no longer need to track preferRE state.
@@ -626,6 +662,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
                         styler.ColourTo(i, SCE_PL_OPERATOR);
                     }
                 }
+                backflag = BACK_NONE;
 			} else if (ch == '<') {
 				// looks forward for matching > on same line
 				unsigned int fw = i + 1;
@@ -651,10 +688,12 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					fw++;
 				}
 				styler.ColourTo(i, SCE_PL_OPERATOR);
+                backflag = BACK_NONE;
 			} else if (ch == '='	// POD
 			           && isalpha(chNext)
 			           && (isEOLChar(chPrev))) {
 				state = SCE_PL_POD;
+                backflag = BACK_NONE;
 				//sookedpos = 0;
 				//sooked[sookedpos] = '\0';
 			} else if (ch == '-'	// file test operators
@@ -665,6 +704,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				i++;
 				ch = chNext;
 				chNext = chNext2;
+                backflag = BACK_NONE;
 			} else if (isPerlOperator(ch)) {
 				if (ch == '.' && chNext == '.') { // .. and ...
 					i++;
@@ -674,6 +714,8 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					chNext = styler.SafeGetCharAt(i + 1);
 				}
 				styler.ColourTo(i, SCE_PL_OPERATOR);
+                backflag = BACK_OPERATOR;
+                backPos = i;
 			} else {
 				// keep colouring defaults to make restart easier
 				styler.ColourTo(i, SCE_PL_DEFAULT);
@@ -710,7 +752,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				if (numState == PERLNUM_VECTOR || numState == PERLNUM_V_VECTOR) {
 					if (isalpha(ch)) {
 						if (dotCount == 0) { // change to word
-							state = SCE_PL_WORD;
+							state = SCE_PL_IDENTIFIER;
 						} else { // vector then word
 							goto numAtEnd;
 						}
@@ -755,25 +797,8 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				state = SCE_PL_DEFAULT;
 				goto restartLexer;
 			}
-		} else if (state == SCE_PL_WORD) {
-			if ((!iswordchar(chNext) && chNext != '\'')
-				|| chNext == '.') {
-				// ".." is always an operator if preceded by a SCE_PL_WORD.
-				// "." never used in Perl variable names
-				// Archaic Perl has quotes inside names
-				if (isMatch(styler, lengthDoc, styler.GetStartSegment(), "__DATA__")
-				 || isMatch(styler, lengthDoc, styler.GetStartSegment(), "__END__")) {
-					styler.ColourTo(i, SCE_PL_DATASECTION);
-					state = SCE_PL_DATASECTION;
-				} else {
-					classifyWordPerl(styler.GetStartSegment(), i, keywords, styler);
-					state = SCE_PL_DEFAULT;
-					ch = ' ';
-				}
-			}
 		} else if (state == SCE_PL_IDENTIFIER) {
-			if ((!iswordchar(chNext) && chNext != '\'')
-				|| chNext == '.') {
+			if (!iswordstart(chNext) && chNext != '\'') {
 				styler.ColourTo(i, SCE_PL_IDENTIFIER);
 				state = SCE_PL_DEFAULT;
 				ch = ' ';
@@ -855,6 +880,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					}
 
 				} else if (HereDoc.State == 1) { // collect the delimiter
+                    backflag = BACK_NONE;
 					if (HereDoc.Quoted) { // a quoted here-doc delimiter
 						if (ch == HereDoc.Quote) { // closing quote => end of delimiter
 							styler.ColourTo(i, state);
@@ -893,6 +919,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					if (isEOLChar(ch)) {
 						styler.ColourTo(i - 1, state);
 						state = SCE_PL_DEFAULT;
+                        backflag = BACK_NONE;
 						HereDoc.State = 0;
 						goto restartLexer;
 					}
