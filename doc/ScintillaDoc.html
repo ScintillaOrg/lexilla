@@ -38,7 +38,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 3/June/2005 RBR</p>
+    <p>Last edited 15/July/2005 RBR</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -1125,9 +1125,9 @@ struct TextToFind {
     <p><b id="SCI_SETSELECTIONMODE">SCI_SETSELECTIONMODE(int mode)</b><br />
     <b id="SCI_GETSELECTIONMODE">SCI_GETSELECTIONMODE</b><br />
     The two functions set and get the selection mode, which can be
-     stream (<code>SC_SEL_STREAM</code>=1) or
-     rectangular (<code>SC_SEL_RECTANGLE</code>=2)
-     or by lines (<code>SC_SEL_LINES</code>=3).
+     stream (<code>SC_SEL_STREAM</code>=0) or
+     rectangular (<code>SC_SEL_RECTANGLE</code>=1)
+     or by lines (<code>SC_SEL_LINES</code>=2).
      When set in these modes, regular caret moves will extend or reduce the selection,
      until the mode is cancelled by a call with same value or with <code>SCI_CANCEL</code>.
      The get function returns the current mode even if the selection was made by mouse
