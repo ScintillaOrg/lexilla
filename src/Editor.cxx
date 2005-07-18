@@ -3243,15 +3243,21 @@ void Editor::AddChar(char ch) {
 void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 	bool wasSelection = currentPos != anchor;
 	ClearSelection();
+	bool charReplaceAction = false;
 	if (inOverstrike && !wasSelection && !RangeContainsProtected(currentPos, currentPos + 1)) {
 		if (currentPos < (pdoc->Length())) {
 			if (!IsEOLChar(pdoc->CharAt(currentPos))) {
+				charReplaceAction = true;
+				pdoc->BeginUndoAction();
 				pdoc->DelChar(currentPos);
 			}
 		}
 	}
 	if (pdoc->InsertString(currentPos, s, len)) {
 		SetEmptySelection(currentPos + len);
+	}
+	if (charReplaceAction) {
+		pdoc->EndUndoAction();
 	}
 	EnsureCaretVisible();
 	// Avoid blinking during rapid typing:
