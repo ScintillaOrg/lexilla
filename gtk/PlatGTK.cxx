@@ -286,6 +286,8 @@ static const char *CharacterSetName(int characterSet) {
 		return "*-*";
 	case SC_CHARSET_RUSSIAN:
 		return "*-r";
+	case SC_CHARSET_CYRILLIC:
+		return "*-cp1251";
 	case SC_CHARSET_SHIFTJIS:
 		return "jisx0208.1983-*";
 	case SC_CHARSET_SYMBOL:
@@ -744,6 +746,8 @@ const char *CharacterSetID(int characterSet) {
 		return "ASCII";
 	case SC_CHARSET_RUSSIAN:
 		return "KOI8-R";
+	case SC_CHARSET_CYRILLIC:
+		return "CP1251";
 	case SC_CHARSET_SHIFTJIS:
 		return "SHIFT-JIS";
 	case SC_CHARSET_SYMBOL:
