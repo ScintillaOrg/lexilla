@@ -680,7 +680,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		}
 
 		// handle the start of ASP pre-processor = Non-HTML
-		else if (!isCommentASPState(state) && (ch == '<') && (chNext == '%')) {
+		else if (!isCommentASPState(state) && (ch == '<') && (chNext == '%') && !isPHPStringState(state)) {
 			styler.ColourTo(i - 1, StateToPrint);
 			beforePreProc = state;
 			if (inScriptType == eNonHtmlScript)
