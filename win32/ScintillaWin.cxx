@@ -1832,6 +1832,8 @@ void ScintillaWin::HorizontalScrollMessage(WPARAM wParam) {
 void ScintillaWin::RealizeWindowPalette(bool inBackGround) {
 	RefreshStyleData();
 	HDC hdc = ::GetDC(MainHWND());
+	// Select a stock font to prevent warnings from BoundsChecker
+	::SelectObject(hdc, GetStockFont(DEFAULT_GUI_FONT));
 	AutoSurface surfaceWindow(hdc, this);
 	if (surfaceWindow) {
 		int changes = surfaceWindow->SetPalette(&palette, inBackGround);
