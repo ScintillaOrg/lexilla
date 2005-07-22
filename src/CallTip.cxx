@@ -104,12 +104,11 @@ void CallTip::DrawChunk(Surface *surface, int &x, const char *s,
 						surface->Polygon(pts, sizeof(pts) / sizeof(pts[0]),
                  						colourBG.allocated, colourBG.allocated);
 					}
-				} else {
-					if (s[startSeg] == '\001') {
-						rectUp = rcClient;
-					} else {
-						rectDown = rcClient;
-					}
+				}
+				if (s[startSeg] == '\001') {
+					rectUp = rcClient;
+				} else if (s[startSeg] == '\002') {
+					rectDown = rcClient;
 				}
 			} else {
 				xEnd = x + surface->WidthText(font, s+startSeg, endSeg - startSeg);
