@@ -139,6 +139,7 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmBash);
 	LINK_LEXER(lmBlitzBasic);
 	LINK_LEXER(lmPureBasic);
+	LINK_LEXER(lmFreeBasic);
 	LINK_LEXER(lmBullant);
 	LINK_LEXER(lmCaml);
 	LINK_LEXER(lmClw);
