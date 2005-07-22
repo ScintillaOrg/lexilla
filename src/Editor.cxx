@@ -452,6 +452,7 @@ void Editor::DropGraphics() {
 	pixmapSelMargin->Release();
 	pixmapSelPattern->Release();
 	pixmapIndentGuide->Release();
+	pixmapIndentGuideHighlight->Release();
 }
 
 void Editor::InvalidateStyleData() {
