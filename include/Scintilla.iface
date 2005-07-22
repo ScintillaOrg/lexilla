@@ -1802,6 +1802,7 @@ val SCLEX_REBOL=71
 val SCLEX_SMALLTALK=72
 val SCLEX_FLAGSHIP=73
 val SCLEX_CSOUND=74
+val SCLEX_FREEBASIC=75
 
 # When a lexer specifies its language as SCLEX_AUTOMATIC it receives a
 # value assigned in sequence from SCLEX_AUTOMATIC+1.
