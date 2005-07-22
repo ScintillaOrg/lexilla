@@ -1543,7 +1543,7 @@ void ListBoxX::Paint(HDC hDC) {
 	Point extent = GetClientExtent();
 	HBITMAP hBitmap = ::CreateCompatibleBitmap(hDC, extent.x, extent.y);
 	HDC bitmapDC = ::CreateCompatibleDC(hDC);
-	SelectBitmap(bitmapDC, hBitmap);
+	HBITMAP hBitmapOld = SelectBitmap(bitmapDC, hBitmap);
 	// The list background is mainly erased during painting, but can be a small
 	// unpainted area when at the end of a non-integrally sized list with a
 	// vertical scroll bar
@@ -1552,6 +1552,9 @@ void ListBoxX::Paint(HDC hDC) {
 	// Paint the entire client area and vertical scrollbar
 	::SendMessage(lb, WM_PRINT, reinterpret_cast<WPARAM>(bitmapDC), PRF_CLIENT|PRF_NONCLIENT);
 	::BitBlt(hDC, 0, 0, extent.x, extent.y, bitmapDC, 0, 0, SRCCOPY);
+	// Select a stock brush to prevent warnings from BoundsChecker
+	::SelectObject(bitmapDC, GetStockFont(WHITE_BRUSH));
+	SelectBitmap(bitmapDC, hBitmapOld);
 	::DeleteDC(bitmapDC);
 	::DeleteObject(hBitmap);
 }
