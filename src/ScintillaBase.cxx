@@ -442,52 +442,53 @@ void ScintillaBase::SetLexerLanguage(const char *languageName) {
 }
 
 void ScintillaBase::Colourise(int start, int end) {
-	int lengthDoc = pdoc->Length();
-	if (end == -1)
-		end = lengthDoc;
-	int len = end - start;
-
-	PLATFORM_ASSERT(len >= 0);
-	PLATFORM_ASSERT(start + len <= lengthDoc);
-
-	//WindowAccessor styler(wMain.GetID(), props);
-	DocumentAccessor styler(pdoc, props, wMain.GetID());
-
-	int styleStart = 0;
-	if (start > 0)
-		styleStart = styler.StyleAt(start - 1);
-	styler.SetCodePage(pdoc->dbcsCodePage);
-
-	if (lexCurrent && (len > 0)) {	// Should always succeed as null lexer should always be available
-		lexCurrent->Lex(start, len, styleStart, keyWordLists, styler);
-		styler.Flush();
-		if (styler.GetPropertyInt("fold")) {
-			lexCurrent->Fold(start, len, styleStart, keyWordLists, styler);
-			styler.Flush();
-		}
-	}
-}
-#endif
-
-void ScintillaBase::NotifyStyleToNeeded(int endStyleNeeded) {
 	if (!performingStyle) {
 		// Protect against reentrance, which may occur, for example, when
 		// fold points are discovered while performing styling and the folding
 		// code looks for child lines which may trigger styling.
 		performingStyle = true;
-#ifdef SCI_LEXER
-		if (lexLanguage != SCLEX_CONTAINER) {
-			int endStyled = WndProc(SCI_GETENDSTYLED, 0, 0);
-			int lineEndStyled = WndProc(SCI_LINEFROMPOSITION, endStyled, 0);
-			endStyled = WndProc(SCI_POSITIONFROMLINE, lineEndStyled, 0);
-			Colourise(endStyled, endStyleNeeded);
-			performingStyle = false;
-			return;
+
+		int lengthDoc = pdoc->Length();
+		if (end == -1)
+			end = lengthDoc;
+		int len = end - start;
+
+		PLATFORM_ASSERT(len >= 0);
+		PLATFORM_ASSERT(start + len <= lengthDoc);
+
+		//WindowAccessor styler(wMain.GetID(), props);
+		DocumentAccessor styler(pdoc, props, wMain.GetID());
+
+		int styleStart = 0;
+		if (start > 0)
+			styleStart = styler.StyleAt(start - 1);
+		styler.SetCodePage(pdoc->dbcsCodePage);
+
+		if (lexCurrent && (len > 0)) {	// Should always succeed as null lexer should always be available
+			lexCurrent->Lex(start, len, styleStart, keyWordLists, styler);
+			styler.Flush();
+			if (styler.GetPropertyInt("fold")) {
+				lexCurrent->Fold(start, len, styleStart, keyWordLists, styler);
+				styler.Flush();
+			}
 		}
-#endif
-		Editor::NotifyStyleToNeeded(endStyleNeeded);
+
 		performingStyle = false;
 	}
+}
+#endif
+
+void ScintillaBase::NotifyStyleToNeeded(int endStyleNeeded) {
+#ifdef SCI_LEXER
+	if (lexLanguage != SCLEX_CONTAINER) {
+		int endStyled = WndProc(SCI_GETENDSTYLED, 0, 0);
+		int lineEndStyled = WndProc(SCI_LINEFROMPOSITION, endStyled, 0);
+		endStyled = WndProc(SCI_POSITIONFROMLINE, lineEndStyled, 0);
+		Colourise(endStyled, endStyleNeeded);
+		return;
+	}
+#endif
+	Editor::NotifyStyleToNeeded(endStyleNeeded);
 }
 
 sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
