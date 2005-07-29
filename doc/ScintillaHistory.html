@@ -227,6 +227,85 @@
 	<li>
 	FreeBasic support.
 	</li>
+	<li>
+	SciTE on Windows handles command line arguments 
+	"-" (read standard input into buffer), 
+	"--" (read standard input into output pane) and 
+	"-@" (read file names from standard input and open each). 
+	</li>
+	<li>
+	SciTE includes a simple implementation of Find in Files which is used if no find.command is set.
+	</li>
+	<li>
+	SciTE can close tabs with a mouse middle click.
+	</li>
+	<li>
+	SciTE includes a save.all.for.build setting.
+	</li>
+	<li>
+	MSSQL support includes folder.
+	</li>
+	<li>
+	Batch file lexer understands more of the syntax and the behaviour of builtin commands.
+	</li>
+	<li>
+	Perl lexer better handles here docs; disambiguates barewords, quote-like delimiters, and repetition operators;
+	handles Pods after __END__; recognises numbers better; and handles some typeglob special variables.
+	</li>
+	<li>
+	Lisp adds more lexical states.
+	</li>
+	<li>
+	PHP allows spaces after &lt;&lt;&lt;.
+	</li>
+	<li>
+	TADS3 has simplified its states and recognizes identifiers.
+	</li>
+	<li>
+	Avenue lexer folds elseif better.
+	</li>
+	<li>
+	Error lexer treats lines starting with '+++' and '---' as separate
+	styles from '+' and '-' as they indicate file names in diffs.
+	</li>
+	<li>
+	SciTE error recogniser handles file paths in extra explanatory lines from MSVC
+	and in '+++' and '---' lines from diff.
+	</li>
+	<li>
+	Bugs fixed in SciTE and Scintilla folding behaviour when text pasted before 
+	folded text caused unnecessary 
+	unfolding and cutting text could lead to text being irretrievably hidden.
+	</li>
+	<li>
+	SciTE on Windows uses correct font for dialogs and better font for tab bar 
+	allowing better localisation
+	</li>
+	<li>
+	When Windows is used with a secondary monitor before the primary
+	monitor, autocompletion lists are not forced onto the primary monitor.
+	</li>
+	<li>
+	Scintilla calltip bug fixed where down arrow setting wrong value in notification
+	if not in first line. SciTE bug fixed where second arrow only shown on multiple line
+	calltip and was therefore misinterpreting the notification value.
+	</li>
+	<li>
+	Lexers will no longer be reentered recursively during, for example, fold level setting.
+	</li>
+	<li>
+	Undo of typing in overwrite mode undoes one character at a time rather than requiring a removal 
+	and addition step for each character.
+	</li>
+	<li>
+	EM_EXSETSEL(0,-1) fixed.
+	</li>
+	<li>
+	Bug fixed where part of a rectangular selection was not shown as selected.
+	</li>
+	<li>
+	Autocomplete window size fixed.
+	</li>
     </ul>
     <h3>
        <a href="http://prdownloads.sourceforge.net/scintilla/scite164.zip?download">Release 1.64</a>
@@ -294,7 +373,7 @@
 	Undo and redo can cause SCN_MODIFYATTEMPTRO notifications.
 	</li>
 	<li>
-	Indicators display correctly when they atrt at the second character on a line.
+	Indicators display correctly when they start at the second character on a line.
 	</li>
 	<li>
 	SciTE Export As HTML uses standards compliant CSS.
@@ -307,6 +386,9 @@
 	</li>
 	<li>
 	Fixed problem with character set conversion when pasting on GTK+.
+	</li>
+	<li>
+	SciTE default character set changed from ANSI_CHARSET to DEFAULT_CHARSET.
 	</li>
 	<li>
 	Fixed crash when creating empty autocompletion list.
