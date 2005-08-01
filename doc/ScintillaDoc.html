@@ -38,7 +38,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 27/July/2005 RBR</p>
+    <p>Last edited 31/July/2005 RBR</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -4290,7 +4290,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_SETPROPERTY">SCI_SETPROPERTY(const char *key, const char *value)</a><br />
      <a class="message" href="#SCI_GETPROPERTY">SCI_GETPROPERTY(const char *key, char *value)</a><br />
      <a class="message" href="#SCI_GETPROPERTYEXPANDED">SCI_GETPROPERTYEXPANDED(const char *key, char *value)</a><br />
-     <a class="message" href="#SCI_GETPROPERTYINT">SCI_GETPROPERTYINT(const char *key)</a><br />
+     <a class="message" href="#SCI_GETPROPERTYINT">SCI_GETPROPERTYINT(const char *key, int default)</a><br />
      <a class="message" href="#SCI_SETKEYWORDS">SCI_SETKEYWORDS(int keyWordSet, const char
     *keyWordList)</a><br />
     </code>
@@ -4372,9 +4372,10 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <p>If the value argument is 0 then the length that should be allocated to store the value (including any indicated keyword replacement)
     is returned; again, the terminating 0 is not included.</p>
 
-    <p><b id="SCI_GETPROPERTYINT">SCI_GETPROPERTYINT(const char *key)</b><br />
+    <p><b id="SCI_GETPROPERTYINT">SCI_GETPROPERTYINT(const char *key, int default)</b><br />
     Lookup a keyword:value pair using the specified key; if found, interpret the value as an integer and return it.
-    If not found (or the value is not a number) then return 0.</p>
+    If not found (or the value is an empty string) then return the supplied default.  If the keyword:value pair is found but is not
+    a number, then return 0.</p>
 
     <p>Note that  "keyword replacement" as described in <a class="message" href="#SCI_SETPROPERTY">
     <code>SCI_SETPROPERTY</code></a> will be performed before any numeric interpretation.</p>
