@@ -1258,6 +1258,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 	if (font_.GetID()) {
 		int totalWidth = 0;
 #ifdef USE_PANGO
+		const int lenPositions = len;
 		if (PFont(font_)->pfd) {
 			if (len == 1) {
 				int width = PFont(font_)->CharWidth(*s, et);
@@ -1271,17 +1272,21 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 			if (et == UTF8) {
 				// Simple and direct as UTF-8 is native Pango encoding
 				pango_layout_set_text(layout, s, len);
-				PangoLayoutIter *iter = pango_layout_get_iter (layout);
+				PangoLayoutIter *iter = pango_layout_get_iter(layout);
+				pango_layout_iter_get_cluster_extents(iter, NULL, &pos);
 				int i = 0;
-				while (pango_layout_iter_next_cluster (iter)) {
+				while (pango_layout_iter_next_cluster(iter)) {
 					pango_layout_iter_get_cluster_extents(iter, NULL, &pos);
 					int position = PANGO_PIXELS(pos.x);
-					int curIndex = pango_layout_iter_get_index (iter);
+					int curIndex = pango_layout_iter_get_index(iter);
 					while (i < curIndex) {
 						positions[i++] = position;
 					}
 				}
-				pango_layout_iter_free (iter);
+				while (i < lenPositions)
+					positions[i++] = PANGO_PIXELS(pos.x + pos.width);
+				pango_layout_iter_free(iter);
+				PLATFORM_ASSERT(i == lenPositions);
 			} else {
 				int positionsCalculated = 0;
 				if (et == dbcs) {
@@ -1295,11 +1300,12 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 						pango_layout_set_text(layout, utfForm, strlen(utfForm));
 						int i = 0;
 						int utfIndex = 0;
-						PangoLayoutIter *iter = pango_layout_get_iter (layout);
-						while (pango_layout_iter_next_cluster (iter)) {
+						PangoLayoutIter *iter = pango_layout_get_iter(layout);
+						pango_layout_iter_get_cluster_extents(iter, NULL, &pos);
+						while (pango_layout_iter_next_cluster(iter)) {
 							pango_layout_iter_get_cluster_extents (iter, NULL, &pos);
 							int position = PANGO_PIXELS(pos.x);
-							int utfIndexNext = pango_layout_iter_get_index (iter);
+							int utfIndexNext = pango_layout_iter_get_index(iter);
 							while (utfIndex < utfIndexNext) {
 								size_t lenChar = MultiByteLenFromIconv(convMeasure, s+i, len-i);
 								//size_t lenChar = mblen(s+i, MB_CUR_MAX);
@@ -1310,8 +1316,11 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 								utfIndex += UTF8CharLength(utfForm+utfIndex);
 							}
 						}
-						pango_layout_iter_free (iter);
+						while (i < lenPositions)
+							positions[i++] = PANGO_PIXELS(pos.x + pos.width);
+						pango_layout_iter_free(iter);
 						delete []utfForm;
+						PLATFORM_ASSERT(i == lenPositions);
 					}
 				}
 				if (positionsCalculated < 1 ) {
@@ -1324,17 +1333,21 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 					}
 					pango_layout_set_text(layout, utfForm, len);
 					int i = 0;
-					PangoLayoutIter *iter = pango_layout_get_iter (layout);
-					while (pango_layout_iter_next_cluster (iter)) {
+					PangoLayoutIter *iter = pango_layout_get_iter(layout);
+					pango_layout_iter_get_cluster_extents(iter, NULL, &pos);
+					while (pango_layout_iter_next_cluster(iter)) {
 						pango_layout_iter_get_cluster_extents(iter, NULL, &pos);
 						positions[i++] = PANGO_PIXELS(pos.x);
 					}
+					while (i < lenPositions)
+						positions[i++] = PANGO_PIXELS(pos.x + pos.width);
 					pango_layout_iter_free(iter);
 					if (useGFree) {
 						g_free(utfForm);
 					} else {
 						delete []utfForm;
 					}
+					PLATFORM_ASSERT(i == lenPositions);
 				}
 			}
 			if (len == 1) {
