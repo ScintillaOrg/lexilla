@@ -22,15 +22,18 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-static inline bool IsAWordChar(const int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '.');
+// Extended to accept accented characters
+static inline bool IsAWordChar(int ch) {
+	return ch >= 0x80 ||
+	       (isalnum(ch) || ch == '.' || ch == '_');
 }
 
-static inline bool IsAWordStart(const int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '_');
+static inline bool IsAWordStart(int ch) {
+	return ch >= 0x80 ||
+	       (isalpha(ch) || ch == '_');
 }
 
-static inline bool IsANumberChar(const int ch) {
+static inline bool IsANumberChar(int ch) {
 	// Not exactly following number definition (several dots are seen as OK, etc.)
 	// but probably enough in most cases.
 	return (ch < 0x80) &&
@@ -83,7 +86,7 @@ static void ColouriseLuaDoc(
 	}
 
 	// Do not leak onto next line
-	if (initStyle == SCE_LUA_STRINGEOL || initStyle == SCE_LUA_COMMENTLINE) {
+	if (initStyle == SCE_LUA_STRINGEOL || initStyle == SCE_LUA_COMMENTLINE || initStyle == SCE_LUA_PREPROCESSOR) {
 		initStyle = SCE_LUA_DEFAULT;
 	}
 
@@ -161,11 +164,11 @@ static void ColouriseLuaDoc(
 				}
 				sc.SetState(SCE_LUA_DEFAULT);
 			}
-		} else if (sc.state == SCE_LUA_COMMENTLINE ) {
+		} else if (sc.state == SCE_LUA_COMMENTLINE) {
 			if (sc.atLineEnd) {
 				sc.ForwardSetState(SCE_LUA_DEFAULT);
 			}
-		} else if (sc.state == SCE_LUA_PREPROCESSOR ) {
+		} else if (sc.state == SCE_LUA_PREPROCESSOR) {
 			if (sc.atLineEnd) {
 				sc.ForwardSetState(SCE_LUA_DEFAULT);
 			}
@@ -266,7 +269,7 @@ static void FoldLuaDoc(unsigned int startPos, int length, int /* initStyle */, W
 		styleNext = styler.StyleAt(i + 1);
 		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 		if (style == SCE_LUA_WORD) {
-			if (ch == 'i' || ch == 'd' || ch == 'f' || ch == 'e') {
+			if (ch == 'i' || ch == 'd' || ch == 'f' || ch == 'e' || ch == 'r' || ch == 'u') {
 				for (unsigned int j = 0; j < 8; j++) {
 					if (!iswordchar(styler[i + j])) {
 						break;
@@ -275,10 +278,10 @@ static void FoldLuaDoc(unsigned int startPos, int length, int /* initStyle */, W
 					s[j + 1] = '\0';
 				}
 
-				if ((strcmp(s, "if") == 0) || (strcmp(s, "do") == 0) || (strcmp(s, "function") == 0)) {
+				if ((strcmp(s, "if") == 0) || (strcmp(s, "do") == 0) || (strcmp(s, "function") == 0) || (strcmp(s, "repeat") == 0)) {
 					levelCurrent++;
 				}
-				if ((strcmp(s, "end") == 0) || (strcmp(s, "elseif") == 0)) {
+				if ((strcmp(s, "end") == 0) || (strcmp(s, "elseif") == 0) || (strcmp(s, "until") == 0)) {
 					levelCurrent--;
 				}
 			}
@@ -286,6 +289,12 @@ static void FoldLuaDoc(unsigned int startPos, int length, int /* initStyle */, W
 			if (ch == '{' || ch == '(') {
 				levelCurrent++;
 			} else if (ch == '}' || ch == ')') {
+				levelCurrent--;
+			}
+		} else if (style == SCE_LUA_LITERALSTRING || style == SCE_LUA_COMMENT) {
+			if (ch == '[') {
+				levelCurrent++;
+			} else if (ch == ']') {
 				levelCurrent--;
 			}
 		}
@@ -320,8 +329,10 @@ static const char * const luaWordListDesc[] = {
 	"Basic functions",
 	"String, (table) & math functions",
 	"(coroutines), I/O & system facilities",
-	"XXX",
-	"XXX",
+	"user1",
+	"user2",
+	"user3",
+	"user4",
 	0
 };
 
