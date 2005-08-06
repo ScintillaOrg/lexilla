@@ -329,6 +329,8 @@ char *SContainer::StringAllocate(const char *s, lenpos_t len) {
 
 // End SString functions
 
+bool PropSet::caseSensitiveFilenames = false;
+
 PropSet::PropSet() {
 	superPS = 0;
 	for (int root = 0; root < hashRoots; root++)
@@ -536,15 +538,22 @@ bool isprefix(const char *target, const char *prefix) {
 		return true;
 }
 
-static bool IsSuffixCaseInsensitive(const char *target, const char *suffix) {
+static bool IsSuffix(const char *target, const char *suffix, bool caseSensitive) {
 	size_t lentarget = strlen(target);
 	size_t lensuffix = strlen(suffix);
 	if (lensuffix > lentarget)
 		return false;
+	if (caseSensitive) {
+		for (int i = static_cast<int>(lensuffix) - 1; i >= 0; i--) {
+			if (target[i + lentarget - lensuffix] != suffix[i])
+				return false;
+		}
+	} else {
 	for (int i = static_cast<int>(lensuffix) - 1; i >= 0; i--) {
 		if (MakeUpperCase(target[i + lentarget - lensuffix]) !=
 		        MakeUpperCase(suffix[i]))
 			return false;
+	}
 	}
 	return true;
 }
@@ -577,7 +586,7 @@ SString PropSet::GetWild(const char *keybase, const char *filename) {
 					char delchr = *del;
 					*del = '\0';
 					if (*keyfile == '*') {
-						if (IsSuffixCaseInsensitive(filename, keyfile + 1)) {
+						if (IsSuffix(filename, keyfile + 1, caseSensitiveFilenames)) {
 							*del = delchr;
 							delete []keyptr;
 							return p->val;
