@@ -5298,7 +5298,9 @@ void Editor::Tick() {
 		if (timer.ticksToWait <= 0) {
 			caret.on = !caret.on;
 			timer.ticksToWait = caret.period;
-			InvalidateCaret();
+			if (caret.active) {
+				InvalidateCaret();
+			}
 		}
 	}
 	if ((dwellDelay < SC_TIME_FOREVER) &&
