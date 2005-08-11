@@ -983,7 +983,7 @@ static void ColouriseErrorListLine(
 }
 
 static void ColouriseErrorListDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler) {
-	char lineBuffer[1024];
+	char lineBuffer[10000];
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
 	unsigned int linePos = 0;
