@@ -103,6 +103,11 @@ void XPM::Init(const char * const *linesForm) {
 	height = atoi(line0);
 	line0 = NextField(line0);
 	nColours = atoi(line0);
+	line0 = NextField(line0);
+	if (atoi(line0) != 1) {
+		// Only one char per pixel is supported
+		return;
+	}
 	codes = new char[nColours];
 	colours = new ColourPair[nColours];
 
