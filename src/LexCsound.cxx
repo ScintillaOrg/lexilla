@@ -82,7 +82,7 @@ static void ColouriseCsoundDoc(unsigned int startPos, int length, int initStyle,
 		} else if (sc.state == SCE_CSOUND_IDENTIFIER) {
 			if (!IsAWordChar(sc.ch) ) {
 				char s[100];
-				sc.GetCurrentLowered(s, sizeof(s));
+				sc.GetCurrent(s, sizeof(s));
 
 				if (opcode.InList(s)) {
 					sc.ChangeState(SCE_CSOUND_OPCODE);
