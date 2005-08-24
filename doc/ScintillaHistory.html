@@ -226,9 +226,71 @@
 	Released on 26 August 2005.
 	</li>
 	<li>
-	xxx support.
+	SciTE Find in Files dialog has options for matching case and whole words which are
+	enabled when the internal find command is used.
+	</li>
+	<li>
+	SciTE output pane can display automatic completion after "$(" typed. 
+	An initial ">" on a line is ignored when Enter pressed.
+	</li>
+	<li>
+	C++ lexer recognises keywords within line doc comments. It continues styles over line
+	end characters more consistently so that eolfilled style can be used for preprocessor lines
+	and line comments.
+	</li>
+	<li>
+	VB lexer improves handling of file numbers and date literals.
+	</li>
+	<li>
+	Lua folder handles repeat until, nested comments and nested strings.
+	</li>
+	<li>
+	POV lexer improves handling of comment lines.
+	</li>
+	<li>
+	Bug fixed with text display on GTK+ with Pango 1.8.
+	</li>
+	<li>
+	Caret painting avoided when not focused.
+	</li>
+	<li>
+	SciTE on GTK+ handles file names used to reference properties as case-sensitive.
+	</li>
+	<li>
+	SciTE on GTK+ Save As and Export commands set the file name field. 
+	On GTK+ the Export commands modify the file name in the same way as on Windows.
+	</li>
+	<li>
+	Fixed SciTE problem where confirmation was not displaying when closing a file where all
+	contents had been deleted.
+	</li>
+	<li>
+	Middle click on SciTE tab now closes correct buffer on Windows when tool bar is visible.
+	</li>
+	<li>
+	SciTE bugs fixed where files contained in directory that includes '.' character.
+	</li>
+	<li>
+	SciTE bug fixed where import in user options was reading file from directory of 
+	global options.
+	</li>
+	<li>
+	SciTE calltip bug fixed where single line calltips had arrow displayed incorrectly.
+	</li>
+	<li>
+	SciTE folding bug fixed where empty lines were shown for no reason.
+	</li>
+	<li>
+	Bug fixed where 2 byte per pixel XPM images caused crash although they are still not 
+	displayed.
+	</li>
+	<li>
+	Autocompletion list size tweaked.
 	</li>
     </ul>
+    <h3>
+       <a href="http://prdownloads.sourceforge.net/scintilla/scite165.zip?download">Release 1.65</a>
+    </h3>
     <ul>
 	<li>
 	Released on 1 August 2005.
