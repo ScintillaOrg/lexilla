@@ -275,9 +275,9 @@ LineLayout *LineLayoutCache::Retrieve(int lineNumber, int lineCaret, int maxChar
 		pos = 0;
 	} else if (level == llcPage) {
 		if (lineNumber == lineCaret) {
-			pos = length;
+			pos = 0;
 		} else {
-			pos = lineNumber % length;
+			pos = 1 + (lineNumber % (length - 1));
 		}
 	} else if (level == llcDocument) {
 		pos = lineNumber;
