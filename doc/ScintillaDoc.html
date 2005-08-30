@@ -452,7 +452,9 @@
      <b id="SCI_GETSTYLEBITS">SCI_GETSTYLEBITS</b><br />
      This pair of routines sets and reads back the number of bits in each cell to use for styling,
     to a maximum of 7 style bits. The remaining bits can be used as indicators. The standard
-    setting is <code>SCI_SETSTYLEBITS(5)</code>.</p>
+    setting is <code>SCI_SETSTYLEBITS(5)</code>.
+    The number of styling bits needed by the current lexer can be found with 
+    <a class="message" href="#SCI_GETSTYLEBITSNEEDED">SCI_GETSTYLEBITSNEEDED</a>.</p>
 
     <p><b id="TextRange">TextRange</b> and <b id="CharacterRange">CharacterRange</b><br />
      These structures are defined to be exactly the same shape as the Win32 <code>TEXTRANGE</code>
@@ -4293,6 +4295,8 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_GETPROPERTYINT">SCI_GETPROPERTYINT(const char *key, int default)</a><br />
      <a class="message" href="#SCI_SETKEYWORDS">SCI_SETKEYWORDS(int keyWordSet, const char
     *keyWordList)</a><br />
+     <a class="message" href="#SCI_GETSTYLEBITSNEEDED">SCI_GETSTYLEBITSNEEDED</a>
+    <br />
     </code>
 
     <p><b id="SCI_SETLEXER">SCI_SETLEXER(int lexer)</b><br />
@@ -4401,6 +4405,11 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     lexer that colours keywords and you could change languages by changing the keywords in set 0.
     There is nothing to stop you building your own keyword lists into the lexer, but this means
     that the lexer must be rebuilt if more keywords are added.</p>
+
+    <p><b id="SCI_GETSTYLEBITSNEEDED">SCI_GETSTYLEBITSNEEDED</b><br />
+     Retrieve the number of bits the current lexer needs for styling. This should normally be the argument
+     to <a class="message" href="#SCI_SETSTYLEBITS">SCI_SETSTYLEBITS</a>.
+     </p>
 
     <h2 id="Notifications">Notifications</h2>
 

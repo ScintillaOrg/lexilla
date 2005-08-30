@@ -689,7 +689,6 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 
 	case SCI_GETPROPERTYINT:
 		return props.GetInt(reinterpret_cast<const char *>(wParam), lParam);
-
 	case SCI_SETKEYWORDS:
 		if (wParam < numWordLists) {
 			keyWordLists[wParam]->Clear();
@@ -701,6 +700,8 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		SetLexerLanguage(reinterpret_cast<const char *>(lParam));
 		break;
 
+	case SCI_GETSTYLEBITSNEEDED:
+		return lexCurrent ? lexCurrent->GetStyleBitsNeeded() : 5;
 #endif
 
 	default:
