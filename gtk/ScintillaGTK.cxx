@@ -1340,9 +1340,9 @@ void ScintillaGTK::CreateCallTipWindow(PRectangle rc) {
 	gtk_drawing_area_size(GTK_DRAWING_AREA(PWidget(ct.wDraw)),
 	                      rc.Width(), rc.Height());
 	ct.wDraw.Show();
-	//ct.wCallTip.Show();
-	//gtk_widget_set_usize(PWidget(ct.wCallTip), rc.Width(), rc.Height());
-	gdk_window_resize(PWidget(ct.wCallTip)->window, rc.Width(), rc.Height());
+	if (PWidget(ct.wCallTip)->window) {
+		gdk_window_resize(PWidget(ct.wCallTip)->window, rc.Width(), rc.Height());
+	}
 }
 
 void ScintillaGTK::AddToPopUp(const char *label, int cmd, bool enabled) {
