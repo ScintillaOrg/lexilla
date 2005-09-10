@@ -1309,19 +1309,22 @@ bool Document::SetStyles(int length, char *styles) {
 		return false;
 	} else {
 		enteredCount++;
-		int prevEndStyled = endStyled;
 		bool didChange = false;
-		int lastChange = 0;
+		int startMod = 0;
+		int endMod = 0;
 		for (int iPos = 0; iPos < length; iPos++, endStyled++) {
 			PLATFORM_ASSERT(endStyled < Length());
 			if (cb.SetStyleAt(endStyled, styles[iPos], stylingMask)) {
+				if (!didChange) {
+					startMod = endStyled;
+				}
 				didChange = true;
-				lastChange = iPos;
+				endMod = endStyled;
 			}
 		}
 		if (didChange) {
 			DocModification mh(SC_MOD_CHANGESTYLE | SC_PERFORMED_USER,
-			                   prevEndStyled, lastChange);
+			                   startMod, endMod - startMod + 1);
 			NotifyModified(mh);
 		}
 		enteredCount--;
