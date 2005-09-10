@@ -769,6 +769,7 @@ bool CellBuffer::SetStyleFor(int position, int lengthStyle, char style, char mas
 
 const char *CellBuffer::DeleteChars(int position, int deleteLength) {
 	// InsertString and DeleteChars are the bottleneck though which all changes occur
+	PLATFORM_ASSERT(deleteLength > 0);
 	char *data = 0;
 	if (!readOnly) {
 		if (collectingUndo) {
@@ -875,6 +876,7 @@ void CellBuffer::BasicInsertString(int position, char *s, int insertLength) {
 	//Platform::DebugPrintf("Inserting at %d for %d\n", position, insertLength);
 	if (insertLength == 0)
 		return ;
+	PLATFORM_ASSERT(insertLength > 0);
 	RoomFor(insertLength);
 	GapTo(position);
 
