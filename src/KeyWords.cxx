@@ -32,8 +32,8 @@ LexerModule::LexerModule(int language_,
 	fnLexer(fnLexer_),
 	fnFolder(fnFolder_),
 	wordListDescriptions(wordListDescriptions_),
-	languageName(languageName_),
-	styleBits(styleBits_) {
+	styleBits(styleBits_),
+	languageName(languageName_) {
 	next = base;
 	base = this;
 	if (language == SCLEX_AUTOMATIC) {
