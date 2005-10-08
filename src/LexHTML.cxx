@@ -751,7 +751,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		              || (inScriptType == eNonHtmlScriptPreProc)) && (
 		                 ((scriptLanguage == eScriptPHP) && (ch == '?') && !isPHPStringState(state) && (state != SCE_HPHP_COMMENT)) ||
 		                 ((scriptLanguage != eScriptNone) && !isStringState(state) &&
-		                  (ch == '%'))
+		                  ((ch == '%') || (ch == '?')))
 		             ) && (chNext == '>')) ||
 		         ((scriptLanguage == eScriptSGML) && (ch == '>') && (state != SCE_H_SGML_COMMENT))) {
 			if (state == SCE_H_ASPAT) {
