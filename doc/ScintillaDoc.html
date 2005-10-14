@@ -1109,8 +1109,10 @@ struct TextToFind {
     <p><b id="SCI_GETCURLINE">SCI_GETCURLINE(int textLen, char *text)</b><br />
      This retrieves the text of the line containing the caret and returns the position within the
     line of the caret. Pass in <code>char* text</code> pointing at a buffer large enough to hold
-    the text you wish to retrieve and a terminating 0 character. Set <code>textLen</code> to the
-    length of the buffer. If the text argument is 0 then the length that should be allocated
+    the text you wish to retrieve and a terminating 0 character. 
+    Set <code>textLen</code> to the
+    length of the buffer which must be at least 1 to hold the terminating 0 character.
+    If the text argument is 0 then the length that should be allocated
     to store the entire current line is returned.</p>
 
     <p>See also: <code><a class="message" href="#SCI_GETSELTEXT">SCI_GETSELTEXT</a>, <a
