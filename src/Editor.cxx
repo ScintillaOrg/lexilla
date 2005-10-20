@@ -6206,6 +6206,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			if (lParam == 0) {
 				return 1 + lineEnd - lineStart;
 			}
+			PLATFORM_ASSERT(wParam > 0);
 			char *ptr = CharPtrFromSPtr(lParam);
 			unsigned int iPlace = 0;
 			for (unsigned int iChar = lineStart; iChar < lineEnd && iPlace < wParam - 1; iChar++) {
