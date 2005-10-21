@@ -109,7 +109,7 @@ static void ColouriseSQLDoc(unsigned int startPos, int length,
 
 	bool fold = styler.GetPropertyInt("fold") != 0;
 	bool sqlBackslashEscapes = styler.GetPropertyInt("sql.backslash.escapes", 0) != 0;
-	bool sqlBackticksString = styler.GetPropertyInt("sql.backticks.string", 0) != 0;
+	bool sqlBackticksIdentifier = styler.GetPropertyInt("sql.backticks.identifier", 0) != 0;
 	int lineCurrent = styler.GetLine(startPos);
 	int spaceFlags = 0;
 
@@ -170,9 +170,12 @@ static void ColouriseSQLDoc(unsigned int startPos, int length,
 			} else if (ch == '\'') {
 				styler.ColourTo(i - 1, state);
 				state = SCE_SQL_CHARACTER;
-			} else if (ch == '"' || (sqlBackticksString && ch == 0x60)) {
+			} else if (ch == '"') { 
 				styler.ColourTo(i - 1, state);
 				state = SCE_SQL_STRING;
+			} else if (ch == 0x60 && sqlBackticksIdentifier) { 
+				styler.ColourTo(i - 1, state);
+				state = SCE_SQL_QUOTEDIDENTIFIER;
 			} else if (isoperator(ch)) {
 				styler.ColourTo(i - 1, state);
 				styler.ColourTo(i, SCE_SQL_OPERATOR);
@@ -193,8 +196,10 @@ static void ColouriseSQLDoc(unsigned int startPos, int length,
 					state = SCE_SQL_COMMENTLINEDOC;
 				} else if (ch == '\'') {
 					state = SCE_SQL_CHARACTER;
-				} else if (ch == '"' || (sqlBackticksString && ch == 0x60)) {
+				} else if (ch == '"') {
 					state = SCE_SQL_STRING;
+				} else if (ch == 0x60 && sqlBackticksIdentifier) {
+					state = SCE_SQL_QUOTEDIDENTIFIER;
 				} else if (isoperator(ch)) {
 					styler.ColourTo(i, SCE_SQL_OPERATOR);
 				}
@@ -262,8 +267,20 @@ static void ColouriseSQLDoc(unsigned int startPos, int length,
 					chNext = styler.SafeGetCharAt(i + 1);
 				}
 			} else if (state == SCE_SQL_STRING) {
-				if (ch == '"' || (sqlBackticksString && ch == 0x60)) {
+				if (ch == '"') {
 					if (chNext == '"') {
+						i++;
+					} else {
+						styler.ColourTo(i, state);
+						state = SCE_SQL_DEFAULT;
+						i++;
+					}
+					ch = chNext;
+					chNext = styler.SafeGetCharAt(i + 1);
+				}
+			} else if (state == SCE_SQL_QUOTEDIDENTIFIER) {
+				if (ch == 0x60) {
+					if (chNext == 0x60) {
 						i++;
 					} else {
 						styler.ColourTo(i, state);
@@ -291,8 +308,10 @@ static void ColouriseSQLDoc(unsigned int startPos, int length,
 					state = SCE_SQL_SQLPLUS_PROMPT;
 				} else if (ch == '\'') {
 					state = SCE_SQL_CHARACTER;
-				} else if (ch == '"' || (sqlBackticksString && ch == 0x60)) {
+				} else if (ch == '"') {
 					state = SCE_SQL_STRING;
+				} else if (ch == 0x60 && sqlBackticksIdentifier) {
+					state = SCE_SQL_QUOTEDIDENTIFIER;
 				} else if (iswordstart(ch)) {
 					state = SCE_SQL_WORD;
 				} else if (isoperator(ch)) {
