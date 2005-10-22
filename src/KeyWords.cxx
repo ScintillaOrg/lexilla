@@ -22,9 +22,9 @@
 const LexerModule *LexerModule::base = 0;
 int LexerModule::nextLanguage = SCLEX_AUTOMATIC+1;
 
-LexerModule::LexerModule(int language_, 
+LexerModule::LexerModule(int language_,
 	LexerFunction fnLexer_,
-	const char *languageName_, 
+	const char *languageName_,
 	LexerFunction fnFolder_,
 	const char * const wordListDescriptions_[],
 	int styleBits_) :
