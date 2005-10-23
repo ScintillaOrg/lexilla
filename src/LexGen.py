@@ -159,9 +159,38 @@ def FindModules(lexFile):
 			l = l.replace("(", " ")
 			modules.append(l.split()[1])
 	return modules
+	
+knownIrregularProperties = [
+	"fold",
+	"styling.within.preprocessor",
+	"tab.timmy.whinge.level",
+	"asp.default.language",
+	"html.tags.case.sensitive",
+	"ps.level",
+	"ps.tokenize",
+	"sql.backslash.escapes",
+	"nsis.uservars",
+	"nsis.ignorecase"
+]
+
+def FindProperties(lexFile):
+	properties = set()
+	f = open(lexFile)
+	for l in f.readlines():
+		if "GetProperty" in l:
+			l = l.strip()
+			if not l.startswith("//"):	# Drop comments
+				propertyName = l.split("\"")[1]
+				if propertyName.lower() == propertyName:
+					# Only allow lower case property names
+					if propertyName in knownIrregularProperties or \
+						propertyName.startswith("fold.") or \
+						propertyName.startswith("lexer."):
+						properties.add(propertyName)
+	return properties
 
 def ciCompare(a,b):
-	return a.lower() < b.lower()
+	return cmp(a.lower(), b.lower())
 
 def RegenerateAll():
 	root="../../"
@@ -171,9 +200,14 @@ def RegenerateAll():
 	lexFiles = [os.path.basename(f)[:-4] for f in lexFilePaths]
 	print lexFiles
 	lexerModules = []
+	lexerProperties = set()
 	for lexFile in lexFilePaths:
 		lexerModules.extend(FindModules(lexFile))
+		lexerProperties.update(FindProperties(lexFile))
 	lexerModules.sort(ciCompare)
+	lexerProperties.remove("fold.comment.python")
+	lexerProperties = list(lexerProperties)
+	lexerProperties.sort(ciCompare)
 
 	# Find all the SciTE properties files
 	otherProps = ["abbrev.properties", "Embedded.properties", "SciTEGlobal.properties", "SciTE.properties"]
@@ -200,7 +234,7 @@ def RegenerateAll():
 	Regenerate(root + "scintilla/gtk/scintilla.mak", "#", NATIVE, lexFiles)
 	Regenerate(root + "scite/win32/makefile", "#", NATIVE, lexFiles, propFiles)
 	Regenerate(root + "scite/win32/scite.mak", "#", NATIVE, lexFiles, propFiles)
-	Regenerate(root + "scite/src/SciTEProps.cxx", "//", NATIVE, ids)
+	Regenerate(root + "scite/src/SciTEProps.cxx", "//", NATIVE, lexerProperties, ids)
 	Generate(root + "scite/boundscheck/vcproj.gen",
 	         root + "scite/boundscheck/SciTE.vcproj", "#", NATIVE, lexFiles)
 	
