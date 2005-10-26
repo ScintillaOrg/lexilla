@@ -3777,7 +3777,7 @@ void Editor::NotifyDeleted(Document *, void *) {
 	/* Do nothing */
 }
 
-void Editor::NotifyMacroRecord(unsigned int iMessage, unsigned long wParam, long lParam) {
+void Editor::NotifyMacroRecord(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	// Enumerates all macroable messages
 	switch (iMessage) {
