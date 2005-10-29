@@ -875,13 +875,19 @@ void Editor::Redraw() {
 	//wMain.InvalidateAll();
 }
 
-void Editor::RedrawSelMargin() {
+void Editor::RedrawSelMargin(int line) {
 	if (!AbandonPaint()) {
 		if (vs.maskInLine) {
 			Redraw();
 		} else {
 			PRectangle rcSelMargin = GetClientRectangle();
 			rcSelMargin.right = vs.fixedColumnWidth;
+			if (line != -1) {
+				int position = pdoc->LineStart(line);
+				PRectangle rcLine = RectangleFromRange(position, position);
+				rcSelMargin.top = rcLine.top;
+				rcSelMargin.bottom = rcLine.bottom;
+			}
 			wMain.InvalidateRectangle(rcSelMargin);
 		}
 	}
@@ -3742,7 +3748,7 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 
 	if (mh.modificationType & SC_MOD_CHANGEMARKER) {
 		if (paintState == notPainting) {
-			RedrawSelMargin();
+			RedrawSelMargin(mh.line);
 		}
 	}
 
