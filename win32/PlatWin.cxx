@@ -42,6 +42,26 @@ static void *PointerFromWindow(HWND hWnd) {
 static void SetWindowPointer(HWND hWnd, void *ptr) {
 	::SetWindowLong(hWnd, 0, reinterpret_cast<LONG>(ptr));
 }
+
+#ifndef GWLP_USERDATA
+#define GWLP_USERDATA GWL_USERDATA
+#endif
+
+#ifndef GWLP_WNDPROC
+#define GWLP_WNDPROC GWL_WNDPROC
+#endif
+
+#ifndef LONG_PTR
+#define LONG_PTR LONG
+#endif
+
+static LONG_PTR SetWindowLongPtr(HWND hWnd, int nIndex, LONG_PTR dwNewLong) {
+	return ::SetWindowLong(hWnd, nIndex, dwNewLong);
+}
+
+static LONG_PTR GetWindowLongPtr(HWND hWnd, int nIndex) {
+	return ::GetWindowLong(hWnd, nIndex);
+}
 #endif
 
 static CRITICAL_SECTION crPlatformLock;
@@ -1015,7 +1035,7 @@ class ListBoxX : public ListBox {
 	void CentreItem(int);
 	void Paint(HDC);
 	void Erase(HDC);
-	static long PASCAL ControlWndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
+	static LRESULT PASCAL ControlWndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
 	static const Point ItemInset;	// Padding around whole item
 	static const Point TextInset;	// Padding around text
@@ -1055,8 +1075,8 @@ public:
 	}
 	virtual void SetList(const char *list, char separator, char typesep);
 	void Draw(DRAWITEMSTRUCT *pDrawItem);
-	long WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
-	static long PASCAL StaticWndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
+	LRESULT WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
+	static LRESULT PASCAL StaticWndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 };
 
 const Point ListBoxX::ItemInset(0, 0);
@@ -1560,7 +1580,7 @@ void ListBoxX::Paint(HDC hDC) {
 	::DeleteObject(hBitmap);
 }
 
-long PASCAL ListBoxX::ControlWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT PASCAL ListBoxX::ControlWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	switch (uMsg) {
 	case WM_ERASEBKGND:
 		return TRUE;
@@ -1602,7 +1622,7 @@ long PASCAL ListBoxX::ControlWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 		return 0;
 	}
 
-	WNDPROC prevWndProc = reinterpret_cast<WNDPROC>(GetWindowLong(hWnd, GWL_USERDATA));
+	WNDPROC prevWndProc = reinterpret_cast<WNDPROC>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 	if (prevWndProc) {
 		return ::CallWindowProc(prevWndProc, hWnd, uMsg, wParam, lParam);
 	} else {
@@ -1610,7 +1630,7 @@ long PASCAL ListBoxX::ControlWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 	}
 }
 
-long ListBoxX::WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam) {
+LRESULT ListBoxX::WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	switch (iMessage) {
 	case WM_CREATE: {
 			HINSTANCE hinstanceParent = GetWindowInstance(reinterpret_cast<HWND>(parent->GetID()));
@@ -1624,8 +1644,8 @@ long ListBoxX::WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam) {
 				reinterpret_cast<HMENU>(ctrlID),
 				hinstanceParent,
 				0);
-			WNDPROC prevWndProc = reinterpret_cast<WNDPROC>(::SetWindowLong(lb, GWL_WNDPROC, reinterpret_cast<LONG>(ControlWndProc)));
-			::SetWindowLong(lb, GWL_USERDATA, reinterpret_cast<LONG>(prevWndProc));
+			WNDPROC prevWndProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtr(lb, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(ControlWndProc)));
+			::SetWindowLongPtr(lb, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(prevWndProc));
 		}
 		break;
 
@@ -1715,7 +1735,7 @@ long ListBoxX::WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	return 0;
 }
 
-long PASCAL ListBoxX::StaticWndProc(
+LRESULT PASCAL ListBoxX::StaticWndProc(
     HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	if (iMessage == WM_CREATE) {
 		CREATESTRUCT *pCreate = reinterpret_cast<CREATESTRUCT *>(lParam);

@@ -718,7 +718,7 @@ struct NotifyHeader {
 	// but most clients of Scintilla.h do not have this type visible.
 	//WindowID hwndFrom;
 	void *hwndFrom;
-	unsigned int idFrom;
+	uptr_t idFrom;
 	unsigned int code;
 };
 
