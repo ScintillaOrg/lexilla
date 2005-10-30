@@ -176,6 +176,7 @@ public:
 	char StyleAt(int position) { return cb.StyleAt(position); }
 	int GetMark(int line) { return cb.GetMark(line); }
 	int AddMark(int line, int markerNum);
+	void AddMarkSet(int line, int valueSet);
 	void DeleteMark(int line, int markerNum);
 	void DeleteMarkFromHandle(int markerHandle);
 	void DeleteAllMarks(int markerNum);

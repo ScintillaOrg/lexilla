@@ -108,6 +108,15 @@ int Document::AddMark(int line, int markerNum) {
 	return prev;
 }
 
+void Document::AddMarkSet(int line, int valueSet) {
+	unsigned int m = valueSet;
+	for (int i = 0; m; i++, m >>= 1)
+		if (m & 1)
+			cb.AddMark(line, i);
+	DocModification mh(SC_MOD_CHANGEMARKER, LineStart(line), 0, 0, 0, line);
+	NotifyModified(mh);
+}
+
 void Document::DeleteMark(int line, int markerNum) {
 	cb.DeleteMark(line, markerNum);
 	DocModification mh(SC_MOD_CHANGEMARKER, LineStart(line), 0, 0, 0, line);

@@ -6530,6 +6530,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			int markerID = pdoc->AddMark(wParam, lParam);
 			return markerID;
 		}
+	case SCI_MARKERADDSET:
+		if (lParam != 0)
+			pdoc->AddMarkSet(wParam, lParam);
+		break;
 
 	case SCI_MARKERDELETE:
 		pdoc->DeleteMark(wParam, lParam);
