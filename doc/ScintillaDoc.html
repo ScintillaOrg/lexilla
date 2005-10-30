@@ -38,7 +38,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 31/July/2005 RBR</p>
+    <p>Last edited 30/October/2005 RBR</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -2569,6 +2569,7 @@ struct TextToFind {
      <a class="message" href="#SCI_MARKERSETBACK">SCI_MARKERSETBACK(int markerNumber, int
     colour)</a><br />
      <a class="message" href="#SCI_MARKERADD">SCI_MARKERADD(int line, int markerNumber)</a><br />
+     <a class="message" href="#SCI_MARKERADDSET">SCI_MARKERADDSET(int line, int markerMask)</a><br />
      <a class="message" href="#SCI_MARKERDELETE">SCI_MARKERDELETE(int line, int
     markerNumber)</a><br />
      <a class="message" href="#SCI_MARKERDELETEALL">SCI_MARKERDELETEALL(int markerNumber)</a><br />
@@ -2754,6 +2755,16 @@ struct TextToFind {
     href="#SCI_MARKERDELETEHANDLE"><code>SCI_MARKERDELETEHANDLE</code></a> to delete the marker
     based on its handle. The message does not check the value of markerNumber, nor does it
     check if the line already contains the marker.</p>
+
+    <p><b id="SCI_MARKERADDSET">SCI_MARKERADDSET(int line, int markerMask)</b><br />
+     This message can add one or more markers to a line with a single call, specified in the same "one-bit-per-marker" 32-bit integer format returned by
+    <a class="message" href="#SCI_MARKERGET"><code>SCI_MARKERGET</code></a>
+    (and used by the mask-based marker search functions
+    <a class="message" href="#SCI_MARKERNEXT"><code>SCI_MARKERNEXT</code></a> and
+    <a class="message" href="#SCI_MARKERPREVIOUS"><code>SCI_MARKERPREVIOUS</code></a>).
+    As with
+    <a class="message" href="#SCI_MARKERADD"><code>SCI_MARKERADD</code></a>, no check is made
+    to see if any of the markers are already present on the targeted line.</p>
 
     <p><b id="SCI_MARKERDELETE">SCI_MARKERDELETE(int line, int markerNumber)</b><br />
      This searches the given line number for the given marker number and deletes it if it is
