@@ -5082,7 +5082,7 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     <p>On GTK+, the following functions create a Scintilla widget, communicate with it and allow 
     resources to be released after all Scintilla widgets hace been destroyed.</p>
     <code><a class="message" href="#scintilla_new">GtkWidget *scintilla_new()</a><br />
-     <a class="message" href="#scintilla_set_id">void scintilla_set_id(ScintillaObject *sci, int id)</a><br />
+     <a class="message" href="#scintilla_set_id">void scintilla_set_id(ScintillaObject *sci, uptr_t id)</a><br />
      <a class="message" href="#scintilla_send_message">sptr_t scintilla_send_message(ScintillaObject *sci,unsigned int iMessage, uptr_t wParam, sptr_t lParam)</a><br />
      <a class="message" href="#scintilla_release_resources">void scintilla_release_resources()</a><br />
      </code>
@@ -5091,7 +5091,7 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     Create a new Scintilla widget. The returned pointer can be added to a container and displayed in the same way as other 
     widgets.</p>
 
-    <p><b id="scintilla_set_id">void scintilla_set_id(ScintillaObject *sci, int id)</b></b><br />
+    <p><b id="scintilla_set_id">void scintilla_set_id(ScintillaObject *sci, uptr_t id)</b></b><br />
     Set the control ID which will be used in the idFrom field of the NotifyHeader structure of all
     notifications for this instance. When an application creates multiple Scintilla widgets, this allows
     the source of each notification to be found. The value should be small, preferrably less than 16 bits,
