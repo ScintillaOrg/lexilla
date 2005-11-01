@@ -715,9 +715,9 @@ struct RangeToFormat {
 #endif
 
 struct NotifyHeader {
-	// hwndFrom is really an environment specifc window handle or pointer
+	// Compatible with Windows NMHDR.
+	// hwndFrom is really an environment specific window handle or pointer
 	// but most clients of Scintilla.h do not have this type visible.
-	//WindowID hwndFrom;
 	void *hwndFrom;
 	uptr_t idFrom;
 	unsigned int code;
