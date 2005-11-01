@@ -38,7 +38,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 30/October/2005 RBR</p>
+    <p>Last edited 2/November/2005 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -78,7 +78,10 @@
 
     <p>In the descriptions that follow, the messages are described as function calls with zero, one
     or two arguments. These two arguments are the standard <code>wParam</code> and
-    <code>lParam</code> familiar to Windows programmers. Although the commands only use the
+    <code>lParam</code> familiar to Windows programmers. These parameters are integers that 
+    are large enough to hold pointers, and the return value is also an integer large enough to contain a 
+    pointer.
+    Although the commands only use the
     arguments described, because all messages have two arguments whether Scintilla uses them or
     not, it is strongly recommended that any unused arguments are set to 0. This allows future
     enhancement of messages without the risk of breaking existing code. Common argument types
@@ -100,7 +103,7 @@
         </tr>
 
         <tr>
-          <th align="left">const char *</th>
+          <th align="left">const&nbsp;char&nbsp;*</th>
 
           <td>Arguments point at text that is being passed to Scintilla but not modified. The text
           may be zero terminated or another argument may specify the character count, the
@@ -242,13 +245,15 @@
         <tr>
           <td>o <a class="toc" href="#Notifications">Notifications</a></td>
 
-          <td>o <a class="toc" href="#DeprecatedMessages">Deprecated messages</a></td>
+          <td>o <a class="toc" href="#GTK">GTK+</a></td>
 
-          <td>o <a class="toc" href="#EditMessagesNeverSupportedByScintilla">Edit messages never
-          supported by Scintilla</a></td>
+          <td>o <a class="toc" href="#DeprecatedMessages">Deprecated messages</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#EditMessagesNeverSupportedByScintilla">Edit messages never
+          supported by Scintilla</a></td>
+	  
           <td>o <a class="toc" href="#BuildingScintilla">Building Scintilla</a></td>
         </tr>
       </tbody>
@@ -4433,7 +4438,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 <pre id="SCNotification">
 struct NotifyHeader {   // This matches the Win32 NMHDR structure
     void *hwndFrom;     // environment specific window handle/pointer
-    unsigned int idFrom;// CtrlID of the window issuing the notification
+    uptr_t idFrom;	// CtrlID of the window issuing the notification
     unsigned int code;  // The SCN_* notification code
 };
 
@@ -4497,7 +4502,8 @@ struct SCNotification {
     </code>
 
     <p>The following additional notifications are sent using the <code>WM_COMMAND</code> message on
-    Windows and the "Command" signal on GTK+ to emulate the Windows Edit control:</p>
+    Windows and the "Command" signal on GTK+. This emulates the Windows Edit control. Only the lower
+    16 bits of the control's ID is passed in these notifications.</p>
     <code><a class="message" href="#SCEN_CHANGE">SCEN_CHANGE</a><br />
      <a class="message" href="#SCEN_SETFOCUS">SCEN_SETFOCUS</a><br />
      <a class="message" href="#SCEN_KILLFOCUS">SCEN_KILLFOCUS</a><br />
@@ -5071,6 +5077,31 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
         </tr>
       </tbody>
     </table>
+
+    <h2 id="GTK">GTK+</h2>
+    <p>On GTK+, the following functions create a Scintilla widget, communicate with it and allow 
+    resources to be released after all Scintilla widgets hace been destroyed.</p>
+    <code><a class="message" href="#scintilla_new">GtkWidget *scintilla_new()</a><br />
+     <a class="message" href="#scintilla_set_id">void scintilla_set_id(ScintillaObject *sci, int id)</a><br />
+     <a class="message" href="#scintilla_send_message">sptr_t scintilla_send_message(ScintillaObject *sci,unsigned int iMessage, uptr_t wParam, sptr_t lParam)</a><br />
+     <a class="message" href="#scintilla_release_resources">void scintilla_release_resources()</a><br />
+     </code>
+     
+    <p><b id="scintilla_new">GtkWidget *scintilla_new()</b></b><br />
+    Create a new Scintilla widget. The returned pointer can be added to a container and displayed in the same way as other 
+    widgets.</p>
+
+    <p><b id="scintilla_set_id">void scintilla_set_id(ScintillaObject *sci, int id)</b></b><br />
+    Set the control ID which will be used in the idFrom field of the NotifyHeader structure of all
+    notifications for this instance. When an application creates multiple Scintilla widgets, this allows
+    the source of each notification to be found. The value should be small, preferrably less than 16 bits,
+    rather than a pointer as some of the functions will only transmit 16 or 32 bits.</p>
+
+    <p><b id="scintilla_send_message">sptr_t scintilla_send_message(ScintillaObject *sci,unsigned int iMessage, uptr_t wParam, sptr_t lParam)</b></b><br />
+    The main entry point allows sending any of the messages described in this document.</p>
+
+    <p><b id="scintilla_release_resources">void scintilla_release_resources()</b></b><br />
+    Call this to free any remaining resources after all the Scintilla widgets have been destroyed.</p>
 
     <h2 id="DeprecatedMessages">Deprecated messages and notifications</h2>
 
