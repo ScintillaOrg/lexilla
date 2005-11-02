@@ -2538,7 +2538,7 @@ GtkWidget* scintilla_new() {
 	return GTK_WIDGET(gtk_type_new(scintilla_get_type()));
 }
 
-void scintilla_set_id(ScintillaObject *sci, int id) {
+void scintilla_set_id(ScintillaObject *sci, uptr_t id) {
 	ScintillaGTK *psci = reinterpret_cast<ScintillaGTK *>(sci->pscin);
 	psci->ctrlID = id;
 }
