@@ -2677,7 +2677,7 @@ void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 	if (bufferedDraw) {
 		if (!pixmapLine->Initialised()) {
 			PRectangle rcClient = GetClientRectangle();
-			pixmapLine->InitPixMap(rcClient.Width(), rcClient.Height(),
+			pixmapLine->InitPixMap(rcClient.Width(), vs.lineHeight,
 			                       surfaceWindow, wMain.GetID());
 			pixmapSelMargin->InitPixMap(vs.fixedColumnWidth,
 			                            rcClient.Height(), surfaceWindow, wMain.GetID());
