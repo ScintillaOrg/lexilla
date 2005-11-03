@@ -672,7 +672,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				::ScreenToClient(MainHWND(), &pt);
 				if (PointInSelMargin(Point(pt.x, pt.y))) {
 					DisplayCursor(Window::cursorReverseArrow);
-				} else if (PointInSelection(Point(pt.x, pt.y))) {
+				} else if (PointInSelection(Point(pt.x, pt.y)) && !SelectionEmpty()) {
 					DisplayCursor(Window::cursorArrow);
 				} else if (PointIsHotspot(Point(pt.x, pt.y))) {
 					DisplayCursor(Window::cursorHand);
@@ -1709,7 +1709,7 @@ void ScintillaWin::AddCharBytes(char b0, char b1) {
 		unsigned int len = UTF8Length(wcs, 1);
 		UTF8FromUCS2(wcs, 1, utfval, len);
 		utfval[len] = '\0';
-		AddCharUTF(utfval,len);
+		AddCharUTF(utfval, len ? len : 1);
 	} else if (b0) {
 		char dbcsChars[3];
 		dbcsChars[0] = b0;
@@ -2096,7 +2096,7 @@ STDMETHODIMP ScintillaWin::GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM) {
 			memcpy(static_cast<char *>(text.ptr), drag.s, drag.len);
 		}
 	}
-	pSTM->hGlobal = text.Unlock();
+	pSTM->hGlobal = text ? text.Unlock() : 0;
 	pSTM->pUnkForRelease = 0;
 	return S_OK;
 }
