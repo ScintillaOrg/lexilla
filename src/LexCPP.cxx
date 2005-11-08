@@ -56,6 +56,23 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 	int visibleChars = 0;
 	bool lastWordWasUUID = false;
 	int styleBeforeDCKeyword = SCE_C_DEFAULT;
+	bool continuationLine = false;
+
+	if (initStyle == SCE_C_PREPROCESSOR) {
+		// Set continuationLine if last character of previous line is '\'
+		int lineCurrent = styler.GetLine(startPos);
+		if (lineCurrent > 0) {
+			int chBack = styler.SafeGetCharAt(startPos-1, 0);
+			int chBack2 = styler.SafeGetCharAt(startPos-2, 0);
+			int lineEndChar = '!';
+			if (chBack2 == '\r' && chBack == '\n') {
+				lineEndChar = styler.SafeGetCharAt(startPos-3, 0);
+			} else if (chBack == '\n' || chBack == '\r') {
+				lineEndChar = chBack2;
+			}
+			continuationLine = lineEndChar == '\\';
+		}
+	}
 
 	StyleContext sc(startPos, length, initStyle, styler);
 
@@ -81,6 +98,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 				if (sc.ch == '\r' && sc.chNext == '\n') {
 					sc.Forward();
 				}
+				continuationLine = true;
 				continue;
 			}
 		}
@@ -116,7 +134,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 				}
 				break;
 			case SCE_C_PREPROCESSOR:
-				if (sc.atLineStart) {
+				if (sc.atLineStart && !continuationLine) {
 					sc.SetState(SCE_C_DEFAULT);
 				} else if (stylingWithinPreprocessor) {
 					if (IsASpace(sc.ch)) {
@@ -291,6 +309,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			chPrevNonWhite = sc.ch;
 			visibleChars++;
 		}
+		continuationLine = false;
 	}
 	sc.Complete();
 }
