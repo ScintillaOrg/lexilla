@@ -530,7 +530,7 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAl
 	::RoundRect(hdc,
 		rc.left + 1, rc.top,
 		rc.right - 1, rc.bottom,
-		8, 8 );
+		8, 8);
 }
 
 void SurfaceImpl::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
