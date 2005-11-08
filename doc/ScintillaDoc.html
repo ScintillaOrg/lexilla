@@ -3870,7 +3870,9 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <code>SC_FOLDLEVELBASE</code> (1024) to allow unsigned arithmetic on folding levels. There are
     two addition flag bits. <code>SC_FOLDLEVELWHITEFLAG</code> indicates that the line is blank and
     allows it to be treated slightly different then its level may indicate. For example, blank
-    lines should generally not be fold points. <code>SC_FOLDLEVELHEADERFLAG</code> indicates that
+    lines should generally not be fold points and will be considered part of the preceding section even though 
+    they may have a lesser fold level. 
+    <code>SC_FOLDLEVELHEADERFLAG</code> indicates that
     the line is a header (fold point).</p>
 
     <p>Use <code>SCI_GETFOLDLEVEL(line) &amp; SC_FOLDLEVELNUMBERMASK</code> to get the fold level
