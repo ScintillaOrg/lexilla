@@ -219,6 +219,8 @@ class ScintillaWin :
 	virtual bool GetScrollInfo(int nBar, LPSCROLLINFO lpsi);
 	void ChangeScrollPos(int barType, int pos);
 
+	void InsertPasteText(const char *text, int len, int selStart, bool isRectangular);
+
 public:
 	// Public for benefit of Scintilla_DirectFunction
 	virtual sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
@@ -1198,6 +1200,25 @@ public:
 	}
 };
 
+void ScintillaWin::InsertPasteText(const char *text, int len, int selStart, bool isRectangular) {
+	if (isRectangular) {
+		PasteRectangular(selStart, text, len);
+	} else {
+		if (convertPastes) {
+			// Convert line endings of the paste into our local line-endings mode
+			char *convertedString = Document::TransformLineEnds(&len, text, len, pdoc->eolMode);
+			if (pdoc->InsertString(currentPos, convertedString, len)) {
+				SetEmptySelection(currentPos + len);
+			}
+			delete []convertedString;
+		} else {
+			if (pdoc->InsertString(currentPos, text, len)) {
+				SetEmptySelection(currentPos + len);
+			}
+		}
+	}
+}
+
 void ScintillaWin::Paste() {
 	if (!::OpenClipboard(MainHWND()))
 		return;
@@ -1236,13 +1257,7 @@ void ScintillaWin::Paste() {
 			}
 
 			if (putf) {
-				if (isRectangular) {
-					PasteRectangular(selStart, putf, len);
-				} else {
-					if (pdoc->InsertString(currentPos, putf, len)) {
-						SetEmptySelection(currentPos + len);
-					}
-				}
+				InsertPasteText(putf, len, selStart, isRectangular);
 				delete []putf;
 			}
 		}
@@ -1276,20 +1291,12 @@ void ScintillaWin::Paste() {
 
 					delete []uptr;
 
-					if (isRectangular) {
-						PasteRectangular(selStart, putf, mlen);
-					} else {
-						pdoc->InsertString(currentPos, putf, mlen);
-						SetEmptySelection(currentPos + mlen);
+					if (putf) {
+						InsertPasteText(putf, mlen, selStart, isRectangular);
+						delete []putf;
 					}
-					delete []putf;
 				} else {
-					if (isRectangular) {
-						PasteRectangular(selStart, ptr, len);
-					} else {
-						pdoc->InsertString(currentPos, ptr, len);
-						SetEmptySelection(currentPos + len);
-					}
+					InsertPasteText(ptr, len, selStart, isRectangular);
 				}
 			}
 			memSelection.Unlock();

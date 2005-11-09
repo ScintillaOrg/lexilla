@@ -798,6 +798,8 @@ struct TextToFind {
      <a class="message" href="#SCI_COPYRANGE">SCI_COPYRANGE(int start, int end)</a><br />
      <a class="message" href="#SCI_COPYTEXT">SCI_COPYTEXT(int length,
      const char *text)</a><br />
+     <a class="message" href="#SCI_SETPASTECONVERTENDINGS">SCI_SETPASTECONVERTENDINGS(bool convert)</a><br />
+     <a class="message" href="#SCI_GETPASTECONVERTENDINGS">SCI_GETPASTECONVERTENDINGS</a><br />
     </code>
 
     <p><b id="SCI_CUT">SCI_CUT</b><br />
@@ -824,6 +826,13 @@ struct TextToFind {
     <p><code>SCI_COPYRANGE</code> copies a range of text from the document to
     the system clipboard and <code>SCI_COPYTEXT</code> copies a supplied piece of
     text to the system clipboard.</p>
+
+    <p><b id="SCI_SETPASTECONVERTENDINGS">SCI_SETPASTECONVERTENDINGS(bool convert)</b><br />
+     <b id="SCI_GETPASTECONVERTENDINGS">SCI_GETPASTECONVERTENDINGS</b><br />
+     If this property is set then when text is pasted any line ends are converted to match the document's
+     end of line mode as set with 
+     <a class="message" href="#SCI_SETEOLMODE">SCI_SETEOLMODE</a>.
+     Currently only changeable on Windows. On GTK+ pasted text is always converted.</p>
 
     <h2 id="ErrorHandling">Error handling</h2>
 
@@ -1727,11 +1736,11 @@ struct TextToFind {
     this can be changed with the <code>SCI_SETEOLMODE</code> message. You can also convert the
     entire document to one of these line endings with <code>SCI_CONVERTEOLS</code>. Finally, you
     can choose to display the line endings with <code>SCI_SETVIEWEOL</code>.</p>
-    <code><a class="message" href="#">SCI_SETEOLMODE(int eolMode)</a><br />
-     <a class="message" href="#">SCI_GETEOLMODE</a><br />
-     <a class="message" href="#">SCI_CONVERTEOLS(int eolMode)</a><br />
-     <a class="message" href="#">SCI_SETVIEWEOL(bool visible)</a><br />
-     <a class="message" href="#">SCI_GETVIEWEOL</a><br />
+    <code><a class="message" href="#SCI_SETEOLMODE">SCI_SETEOLMODE(int eolMode)</a><br />
+     <a class="message" href="#SCI_GETEOLMODE">SCI_GETEOLMODE</a><br />
+     <a class="message" href="#SCI_CONVERTEOLS">SCI_CONVERTEOLS(int eolMode)</a><br />
+     <a class="message" href="#SCI_SETVIEWEOL">SCI_SETVIEWEOL(bool visible)</a><br />
+     <a class="message" href="#SCI_GETVIEWEOL">SCI_GETVIEWEOL</a><br />
     </code>
 
     <p><b id="SCI_SETEOLMODE">SCI_SETEOLMODE(int eolMode)</b><br />

@@ -424,6 +424,8 @@ Editor::Editor() {
 	wrapVisualStartIndent = 0;
 	actualWrapVisualStartIndent = 0;
 
+	convertPastes = true;
+
 	hsStart = -1;
 	hsEnd = -1;
 
@@ -7240,6 +7242,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		vs.hotspotSingleLine = wParam != 0;
 		InvalidateStyleRedraw();
 		break;
+
+	case SCI_SETPASTECONVERTENDINGS:
+		convertPastes = wParam != 0;
+		break;
+
+	case SCI_GETPASTECONVERTENDINGS:
+		return convertPastes ? 1 : 0;
 
 	default:
 		return DefWndProc(iMessage, wParam, lParam);

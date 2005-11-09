@@ -312,6 +312,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int wrapVisualStartIndent;
 	int actualWrapVisualStartIndent;
 
+	bool convertPastes;
+
 	Document *pdoc;
 
 	Editor();

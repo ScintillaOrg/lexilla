@@ -1632,6 +1632,12 @@ set void SetCaretSticky=2458(bool useCaretStickyBehaviour,)
 # Switch between sticky and non-sticky: meant to be bound to a key.
 fun void ToggleCaretSticky=2459(,)
 
+# Enable/Disable convert-on-paste for line endings
+set void SetPasteConvertEndings=2467(bool convert,)
+
+# Get convert-on-paste setting
+get bool GetPasteConvertEndings=2468(,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 
