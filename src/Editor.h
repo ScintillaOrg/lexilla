@@ -454,7 +454,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void PageMove(int direction, selTypes sel=noSel, bool stuttered = false);
 	void ChangeCaseOfSelection(bool makeUpperCase);
 	void LineTranspose();
-	void LineDuplicate();
+	void Duplicate(bool forLine);
 	virtual void CancelModes();
 	void NewLine();
 	void CursorUpOrDown(int direction, selTypes sel=noSel);

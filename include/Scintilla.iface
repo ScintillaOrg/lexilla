@@ -1638,6 +1638,9 @@ set void SetPasteConvertEndings=2467(bool convert,)
 # Get convert-on-paste setting
 get bool GetPasteConvertEndings=2468(,)
 
+# Duplicate the selection. If selection empty duplicate the line containing the caret.
+fun void SelectionDuplicate=2469(,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 

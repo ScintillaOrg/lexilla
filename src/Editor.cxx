@@ -3886,6 +3886,7 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 	case SCI_LINEENDRECTEXTEND:
 	case SCI_PAGEUPRECTEXTEND:
 	case SCI_PAGEDOWNRECTEXTEND:
+	case SCI_SELECTIONDUPLICATE:
 		break;
 
 	// Filter out all others like display changes. Also, newlines are redundant
@@ -3999,15 +4000,26 @@ void Editor::LineTranspose() {
 	}
 }
 
-void Editor::LineDuplicate() {
-	int line = pdoc->LineFromPosition(currentPos);
-	int start = pdoc->LineStart(line);
-	int end = pdoc->LineEnd(line);
-	char *thisLine = CopyRange(start, end);
-	const char *eol = StringFromEOLMode(pdoc->eolMode);
-	pdoc->InsertString(end, eol);
-	pdoc->InsertString(end + istrlen(eol), thisLine, end - start);
-	delete []thisLine;
+void Editor::Duplicate(bool forLine) {
+	int start = SelectionStart();
+	int end = SelectionEnd();
+	if (start == end) {
+		forLine = true;
+	}
+	if (forLine) {
+		int line = pdoc->LineFromPosition(currentPos);
+		start = pdoc->LineStart(line);
+		end = pdoc->LineEnd(line);
+	}
+	char *text = CopyRange(start, end);
+	if (forLine) {
+		const char *eol = StringFromEOLMode(pdoc->eolMode);
+		pdoc->InsertString(end, eol);
+		pdoc->InsertString(end + istrlen(eol), text, end - start);
+	} else {
+		pdoc->InsertString(end, text, end - start);
+	}
+	delete []text;
 }
 
 void Editor::CancelModes() {
@@ -4455,7 +4467,10 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		LineTranspose();
 		break;
 	case SCI_LINEDUPLICATE:
-		LineDuplicate();
+		Duplicate(true);
+		break;
+	case SCI_SELECTIONDUPLICATE:
+		Duplicate(false);
 		break;
 	case SCI_LOWERCASE:
 		ChangeCaseOfSelection(false);
@@ -7013,6 +7028,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_LINEENDRECTEXTEND:
 	case SCI_PAGEUPRECTEXTEND:
 	case SCI_PAGEDOWNRECTEXTEND:
+	case SCI_SELECTIONDUPLICATE:
 		return KeyCommand(iMessage);
 
 	case SCI_BRACEHIGHLIGHT:
