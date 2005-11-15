@@ -147,6 +147,8 @@ class ScintillaWin :
 	unsigned int linesPerScroll;	///< Intellimouse support
 	int wheelDelta; ///< Wheel delta from roll
 
+	HRGN hRgnUpdate;
+
 	bool hasOKText;
 
 	CLIPFORMAT cfColumnSelect;
@@ -183,6 +185,7 @@ class ScintillaWin :
 	virtual void SetTicking(bool on);
 	virtual void SetMouseCapture(bool on);
 	virtual bool HaveMouseCapture();
+	virtual bool PaintContains(PRectangle rc);
 	virtual void ScrollText(int linesToMove);
 	virtual void UpdateSystemCaret();
 	virtual void SetVerticalScrollPos();
@@ -276,6 +279,8 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	capturedMouse = false;
 	linesPerScroll = 0;
 	wheelDelta = 0;   // Wheel delta from roll
+
+	hRgnUpdate = 0;
 
 	hasOKText = false;
 
@@ -409,9 +414,12 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 
 	bool IsOcxCtrl = (wParam != 0); // if wParam != 0, it contains
 								   // a PAINSTRUCT* from the OCX
+	PLATFORM_ASSERT(hRgnUpdate == NULL);
+	hRgnUpdate = ::CreateRectRgn(0, 0, 0, 0);
 	if (IsOcxCtrl) {
 		pps = reinterpret_cast<PAINTSTRUCT*>(wParam);
 	} else {
+		::GetUpdateRgn(MainHWND(), hRgnUpdate, FALSE);
 		pps = &ps;
 		::BeginPaint(MainHWND(), pps);
 	}
@@ -428,6 +436,11 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 		Paint(surfaceWindow, rcPaint);
 		surfaceWindow->Release();
 	}
+	if (hRgnUpdate) {
+		::DeleteRgn(hRgnUpdate);
+		hRgnUpdate = 0;
+	}
+
 	if(!IsOcxCtrl)
 		::EndPaint(MainHWND(), pps);
 	if (paintState == paintAbandoned) {
@@ -987,6 +1000,30 @@ bool ScintillaWin::HaveMouseCapture() {
 	// Cannot just see if GetCapture is this window as the scroll bar also sets capture for the window
 	return capturedMouse;
 	//return capturedMouse && (::GetCapture() == MainHWND());
+}
+
+bool ScintillaWin::PaintContains(PRectangle rc) {
+	bool contains = true;
+	if (paintState == painting) {
+		if (!rcPaint.Contains(rc)) {
+			contains = false;
+		} else {
+			// In bounding rectangle so check more accurately using region
+			HRGN hRgnRange = ::CreateRectRgn(rc.left, rc.top, rc.right, rc.bottom);
+			if (hRgnRange) {
+				HRGN hRgnDest = ::CreateRectRgn(0, 0, 0, 0);
+				if (hRgnDest) {
+					int combination = ::CombineRgn(hRgnDest, hRgnRange, hRgnUpdate, RGN_DIFF);
+					if (combination != NULLREGION) {
+						contains = false;
+					}
+					::DeleteRgn(hRgnDest);
+				}
+				::DeleteRgn(hRgnRange);
+			}
+		}
+	}
+	return contains;
 }
 
 void ScintillaWin::ScrollText(int linesToMove) {

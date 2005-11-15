@@ -3749,8 +3749,13 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 	}
 
 	if (mh.modificationType & SC_MOD_CHANGEMARKER) {
-		if (paintState == notPainting) {
-			RedrawSelMargin(mh.line);
+		if ((paintState == notPainting) || !PaintContainsMargin()) {
+			if (mh.modificationType & SC_MOD_CHANGEFOLD) {
+				// Fold changes can affect the drawing of following lines so redraw whole margin
+				RedrawSelMargin();
+			} else {
+				RedrawSelMargin(mh.line);
+			}
 		}
 	}
 
@@ -5372,16 +5377,14 @@ void Editor::SetFocusState(bool focusState) {
 	}
 }
 
-static bool IsIn(int a, int minimum, int maximum) {
-	return (a >= minimum) && (a <= maximum);
+bool Editor::PaintContains(PRectangle rc) {
+	return rcPaint.Contains(rc);
 }
 
-static bool IsOverlap(int mina, int maxa, int minb, int maxb) {
-	return
-	    IsIn(mina, minb, maxb) ||
-	    IsIn(maxa, minb, maxb) ||
-	    IsIn(minb, mina, maxa) ||
-	    IsIn(maxb, mina, maxa);
+bool Editor::PaintContainsMargin() {
+	PRectangle rcSelMargin = GetClientRectangle();
+	rcSelMargin.right = vs.fixedColumnWidth;
+	return PaintContains(rcSelMargin);
 }
 
 void Editor::CheckForChangeOutsidePaint(Range r) {
@@ -5390,41 +5393,17 @@ void Editor::CheckForChangeOutsidePaint(Range r) {
 		if (!r.Valid())
 			return;
 
+		PRectangle rcRange = RectangleFromRange(r.start, r.end);
 		PRectangle rcText = GetTextRectangle();
-		// Determine number of lines displayed including a possible partially displayed last line
-		int linesDisplayed = (rcText.bottom - rcText.top - 1) / vs.lineHeight + 1;
-		int bottomLine = topLine + linesDisplayed - 1;
-
-		int lineRangeStart = cs.DisplayFromDoc(pdoc->LineFromPosition(r.start));
-		int lineRangeEnd = cs.DisplayFromDoc(pdoc->LineFromPosition(r.end));
-		if (!IsOverlap(topLine, bottomLine, lineRangeStart, lineRangeEnd)) {
-			//Platform::DebugPrintf("No overlap (%d-%d) with window(%d-%d)\n",
-			//		lineRangeStart, lineRangeEnd, topLine, bottomLine);
-			return;
+		if (rcRange.top < rcText.top) {
+			rcRange.top = rcText.top;
+		}
+		if (rcRange.bottom > rcText.bottom) {
+			rcRange.bottom = rcText.bottom;
 		}
 
-		// Assert rcPaint contained within or equal to rcText
-		if (rcPaint.top > rcText.top) {
-			// does range intersect rcText.top .. rcPaint.top
-			int paintTopLine = ((rcPaint.top - rcText.top - 1) / vs.lineHeight) + topLine;
-			// paintTopLine is the top line of the paint rectangle or the line just above if that line is completely inside the paint rectangle
-			if (IsOverlap(topLine, paintTopLine, lineRangeStart, lineRangeEnd)) {
-				//Platform::DebugPrintf("Change (%d-%d) in top npv(%d-%d)\n",
-				//	lineRangeStart, lineRangeEnd, topLine, paintTopLine);
-				AbandonPaint();
-				return;
-			}
-		}
-		if (rcPaint.bottom < rcText.bottom) {
-			// does range intersect rcPaint.bottom .. rcText.bottom
-			int paintBottomLine = ((rcPaint.bottom - rcText.top - 1) / vs.lineHeight + 1) + topLine;
-			// paintTopLine is the bottom line of the paint rectangle or the line just below if that line is completely inside the paint rectangle
-			if (IsOverlap(paintBottomLine, bottomLine, lineRangeStart, lineRangeEnd)) {
-				//Platform::DebugPrintf("Change (%d-%d) in bottom npv(%d-%d)\n",
-				//	lineRangeStart, lineRangeEnd, paintBottomLine, bottomLine);
-				AbandonPaint();
-				return;
-			}
+		if (!PaintContains(rcRange)) {
+			AbandonPaint();
 		}
 	}
 }
