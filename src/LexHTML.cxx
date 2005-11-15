@@ -668,11 +668,9 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				inScriptType = eNonHtmlScriptPreProc;
 			else
 				inScriptType = eNonHtmlPreProc;
-			// fold whole script
-			if (foldHTMLPreprocessor){
+			// Fold whole script, but not if the XML first tag (all XML-like tags in this case)
+			if (foldHTMLPreprocessor && (scriptLanguage != eScriptXML)) {
 				levelCurrent++;
-				if (scriptLanguage == eScriptXML)
-					levelCurrent--; // no folding of the XML first tag (all XML-like tags in this case)
 			}
 			// should be better
 			ch = styler.SafeGetCharAt(i);
@@ -796,10 +794,11 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				inScriptType = eNonHtmlScript;
 			else
 				inScriptType = eHtml;
-			scriptLanguage = eScriptNone;
-			// unfold all scripting languages
-			if (foldHTMLPreprocessor)
+			// Unfold all scripting languages, except for XML tag
+			if (foldHTMLPreprocessor && (scriptLanguage != eScriptXML)) {
 				levelCurrent--;
+			}
+			scriptLanguage = eScriptNone;
 			continue;
 		}
 		/////////////////////////////////////
