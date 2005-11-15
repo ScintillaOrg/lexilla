@@ -5113,10 +5113,10 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     the source of each notification to be found. The value should be small, preferrably less than 16 bits,
     rather than a pointer as some of the functions will only transmit 16 or 32 bits.</p>
 
-    <p><b id="scintilla_send_message">sptr_t scintilla_send_message(ScintillaObject *sci,unsigned int iMessage, uptr_t wParam, sptr_t lParam)</b></b><br />
+    <p><b id="scintilla_send_message">sptr_t scintilla_send_message(ScintillaObject *sci,unsigned int iMessage, uptr_t wParam, sptr_t lParam)</b><br />
     The main entry point allows sending any of the messages described in this document.</p>
 
-    <p><b id="scintilla_release_resources">void scintilla_release_resources()</b></b><br />
+    <p><b id="scintilla_release_resources">void scintilla_release_resources()</b><br />
     Call this to free any remaining resources after all the Scintilla widgets have been destroyed.</p>
 
     <h2 id="DeprecatedMessages">Deprecated messages and notifications</h2>
