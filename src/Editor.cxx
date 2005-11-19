@@ -2970,6 +2970,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 			visibleLine++;
 			//gdk_flush();
 		}
+		ll.Set(0);
 		//if (durPaint < 0.00000001)
 		//	durPaint = 0.00000001;
 
