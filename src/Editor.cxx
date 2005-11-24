@@ -188,7 +188,7 @@ void LineLayout::RestoreBracesHighlight(Range rangeLine, Position braces[]) {
 
 LineLayoutCache::LineLayoutCache() :
 	level(0), length(0), size(0), cache(0),
-	allInvalidated(false), styleClock(-1) {
+	allInvalidated(false), styleClock(-1), useCount(0) {
 	Allocate(0);
 }
 
@@ -197,6 +197,7 @@ LineLayoutCache::~LineLayoutCache() {
 }
 
 void LineLayoutCache::Allocate(int length_) {
+	PLATFORM_ASSERT(cache == NULL);
 	allInvalidated = false;
 	length = length_;
 	size = length;
@@ -211,6 +212,7 @@ void LineLayoutCache::Allocate(int length_) {
 }
 
 void LineLayoutCache::AllocateForLevel(int linesOnScreen, int linesInDoc) {
+	PLATFORM_ASSERT(useCount == 0);
 	int lengthForLevel = 0;
 	if (level == llcCaret) {
 		lengthForLevel = 1;
@@ -221,23 +223,28 @@ void LineLayoutCache::AllocateForLevel(int linesOnScreen, int linesInDoc) {
 	}
 	if (lengthForLevel > size) {
 		Deallocate();
-	} else if (lengthForLevel < length) {
-		for (int i = lengthForLevel; i < length; i++) {
-			delete cache[i];
-			cache[i] = 0;
-		}
-	}
-	if (!cache) {
 		Allocate(lengthForLevel);
+	} else {
+		if (lengthForLevel < length) {
+			for (int i = lengthForLevel; i < length; i++) {
+				delete cache[i];
+				cache[i] = 0;
+			}
+		}
+		length = lengthForLevel;
 	}
+	PLATFORM_ASSERT(length == lengthForLevel);
+	PLATFORM_ASSERT(cache != NULL || length == 0);
 }
 
 void LineLayoutCache::Deallocate() {
+	PLATFORM_ASSERT(useCount == 0);
 	for (int i = 0; i < length; i++)
 		delete cache[i];
 	delete []cache;
 	cache = 0;
 	length = 0;
+	size = 0;
 }
 
 void LineLayoutCache::Invalidate(LineLayout::validLevel validity_) {
@@ -283,6 +290,7 @@ LineLayout *LineLayoutCache::Retrieve(int lineNumber, int lineCaret, int maxChar
 		pos = lineNumber;
 	}
 	if (pos >= 0) {
+		PLATFORM_ASSERT(useCount == 0);
 		if (cache && (pos < length)) {
 			if (cache[pos]) {
 				if ((cache[pos]->lineNumber != lineNumber) ||
@@ -298,6 +306,7 @@ LineLayout *LineLayoutCache::Retrieve(int lineNumber, int lineCaret, int maxChar
 				cache[pos]->lineNumber = lineNumber;
 				cache[pos]->inCache = true;
 				ret = cache[pos];
+				useCount++;
 			}
 		}
 	}
@@ -315,7 +324,9 @@ void LineLayoutCache::Dispose(LineLayout *ll) {
 	if (ll) {
 		if (!ll->inCache) {
 			delete ll;
-		}
+		} else {
+			useCount--;
+ 		}
 	}
 }
 

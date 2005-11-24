@@ -105,6 +105,7 @@ class LineLayoutCache {
 	LineLayout **cache;
 	bool allInvalidated;
 	int styleClock;
+	int useCount;
 	void Allocate(int length_);
 	void AllocateForLevel(int linesOnScreen, int linesInDoc);
 public:
