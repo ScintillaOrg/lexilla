@@ -4546,7 +4546,9 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
      This is sent when the user types an ordinary text character (as opposed to a command
     character) that is entered into the text. The container can use this to decide to display a <a
     class="jump" href="#CallTips">call tip</a> or an <a class="jump" href="#Autocompletion">auto
-    completion list</a>. The character is in <code>SCNotification.ch</code>.</p>
+    completion list</a>. The character is in <code>SCNotification.ch</code>.
+	This notification is sent before the character has been styled so processing that depends on
+	styling should instead be performed in the SCN_UPDATEUI notification.</p>
 
     <p><b id="SCN_SAVEPOINTREACHED">SCN_SAVEPOINTREACHED</b><br />
      <b id="SCN_SAVEPOINTLEFT">SCN_SAVEPOINTLEFT</b><br />
