@@ -2,7 +2,7 @@
 /** @file LexHTML.cxx
  ** Lexer for HTML.
  **/
-// Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2005 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <stdlib.h>
@@ -503,12 +503,28 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	char chPrev = ' ';
 	char ch = ' ';
 	char chPrevNonWhite = ' ';
+	// look back to set chPrevNonWhite properly for better regex colouring
+	if (scriptLanguage == eScriptJS && startPos > 0) {
+		int back = startPos;
+		int style = 0;
+		while (--back) {
+			style = styler.StyleAt(back);
+			if (style < SCE_HJ_DEFAULT || style > SCE_HJ_COMMENTDOC)
+				// includes SCE_HJ_COMMENT & SCE_HJ_COMMENTLINE
+				break;
+		}
+		if (style == SCE_HJ_SYMBOLS) {
+			chPrevNonWhite = styler.SafeGetCharAt(back);
+		}
+	}
+
 	styler.StartSegment(startPos);
 	const int lengthDoc = startPos + length;
 	for (int i = startPos; i < lengthDoc; i++) {
 		const char chPrev2 = chPrev;
 		chPrev = ch;
-		if (ch != ' ' && ch != '\t')
+		if (!isspacechar(ch) && state != SCE_HJ_COMMENT &&
+			state != SCE_HJ_COMMENTLINE && state != SCE_HJ_COMMENTDOC)
 			chPrevNonWhite = ch;
 		ch = styler[i];
 		char chNext = styler.SafeGetCharAt(i + 1);
@@ -1236,12 +1252,14 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			if (ch == '/' && chPrev == '*') {
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_HJ_DEFAULT;
+				ch = ' ';
 			}
 			break;
 		case SCE_HJ_COMMENTLINE:
 			if (ch == '\r' || ch == '\n') {
 				styler.ColourTo(i - 1, statePrintForState(SCE_HJ_COMMENTLINE, inScriptType));
 				state = SCE_HJ_DEFAULT;
+				ch = ' ';
 			}
 			break;
 		case SCE_HJ_DOUBLESTRING:
@@ -1289,6 +1307,13 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			break;
 		case SCE_HJ_REGEX:
 			if (ch == '\r' || ch == '\n' || ch == '/') {
+				if (ch == '/') {
+					while (chNext < 0x80 && islower(chNext)) {   // gobble regex flags
+						i++;
+						ch = chNext;
+						chNext = styler.SafeGetCharAt(i + 1);
+					}
+				}
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_HJ_DEFAULT;
 			} else if (ch == '\\') {
