@@ -2823,6 +2823,8 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 			//ElapsedTime et;
 			if (lineDoc != lineDocPrevious) {
 				ll.Set(0);
+				// For rectangular selection this accesses the layout cache so should be after layout returned.
+				lineIterator.SetAt(lineDoc);	
 				ll.Set(RetrieveLineLayout(lineDoc));
 				LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
 				lineDocPrevious = lineDoc;
@@ -2834,7 +2836,6 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 					ll->selStart = SelectionStart();
 					ll->selEnd = SelectionEnd();
 				} else {
-					lineIterator.SetAt(lineDoc);
 					ll->selStart = lineIterator.startPos;
 					ll->selEnd = lineIterator.endPos;
 				}
