@@ -989,7 +989,7 @@ ListItemData *LineToItem::Append(const char *text, int imageIndex) {
 	return item;
 }
 
-const char ListBoxX_ClassName[] = "ListBoxX";
+const TCHAR ListBoxX_ClassName[] = TEXT("ListBoxX");
 
 ListBox::ListBox() {
 }
@@ -1983,6 +1983,7 @@ void Platform::Assert(const char *c, const char *file, int line) {
 	} else {
 		strcat(buffer, "\r\n");
 		Platform::DebugDisplay(buffer);
+		::DebugBreak();
 		abort();
 	}
 }

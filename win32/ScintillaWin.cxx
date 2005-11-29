@@ -91,8 +91,8 @@ extern void Platform_Finalise();
 
 // GCC has trouble with the standard COM ABI so do it the old C way with explicit vtables.
 
-const char scintillaClassName[] = "Scintilla";
-const char callClassName[] = "CallTip";
+const TCHAR scintillaClassName[] = TEXT("Scintilla");
+const TCHAR callClassName[] = TEXT("CallTip");
 
 class ScintillaWin; 	// Forward declaration for COM interface subobjects
 
@@ -287,7 +287,7 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	// There does not seem to be a real standard for indicating that the clipboard
 	// contains a rectangular selection, so copy Developer Studio.
 	cfColumnSelect = static_cast<CLIPFORMAT>(
-		::RegisterClipboardFormat("MSDEVColumnSelect"));
+		::RegisterClipboardFormat(TEXT("MSDEVColumnSelect")));
 
 	wMain = hwnd;
 
