@@ -1942,10 +1942,11 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 			bool allSame = true;
 			const int styleMask = pdoc->stylingBitsMask;
 			// Check base line layout
+			char styleByte = 0;
 			for (int charInDoc = posLineStart; allSame && (charInDoc < posLineEnd); charInDoc++) {
 				char chDoc = pdoc->CharAt(charInDoc);
+				styleByte = pdoc->StyleAt(charInDoc);
 				if (vstyle.viewEOL || (!IsEOLChar(chDoc))) {
-					char styleByte = pdoc->StyleAt(charInDoc);
 					allSame = allSame &&
 					          (ll->styles[numCharsInLine] == static_cast<char>(styleByte & styleMask));
 					allSame = allSame &&
@@ -1962,6 +1963,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 					numCharsInLine++;
 				}
 			}
+			allSame = allSame && (ll->styles[numCharsInLine] == styleByte);	// For eolFilled
 			if (allSame) {
 				ll->validity = LineLayout::llPositions;
 			} else {
