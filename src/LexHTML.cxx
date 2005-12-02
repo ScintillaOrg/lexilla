@@ -1308,7 +1308,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		case SCE_HJ_REGEX:
 			if (ch == '\r' || ch == '\n' || ch == '/') {
 				if (ch == '/') {
-					while (chNext < 0x80 && islower(chNext)) {   // gobble regex flags
+					while (isascii(chNext) && islower(chNext)) {   // gobble regex flags
 						i++;
 						ch = chNext;
 						chNext = styler.SafeGetCharAt(i + 1);
