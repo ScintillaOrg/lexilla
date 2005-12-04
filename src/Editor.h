@@ -64,6 +64,7 @@ public:
 	int edgeColumn;
 	char *chars;
 	unsigned char *styles;
+	int styleBitsSet;
 	char *indicators;
 	int *positions;
 	char bracePreviousStyles[2];

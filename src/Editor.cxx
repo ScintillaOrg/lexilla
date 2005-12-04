@@ -85,6 +85,7 @@ LineLayout::LineLayout(int maxLineLength_) :
 	edgeColumn(0),
 	chars(0),
 	styles(0),
+	styleBitsSet(0),
 	indicators(0),
 	positions(0),
 	hsStart(0),
@@ -1929,39 +1930,39 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 		posLineEnd = posLineStart + ll->maxLineLength;
 	}
 	if (ll->validity == LineLayout::llCheckTextAndStyle) {
-		int lineLength = 0;
-		for (int cid = posLineStart; cid < posLineEnd; cid++) {
-			char chDoc = pdoc->CharAt(cid);
-			if (vstyle.viewEOL || (!IsEOLChar(chDoc))) {
-				lineLength++;
+		int lineLength = posLineEnd - posLineStart;
+		if (!vstyle.viewEOL) {
+			int cid = posLineEnd - 1;
+			while ((cid > posLineStart) && IsEOLChar(pdoc->CharAt(cid))) {
+				cid--;
+				lineLength--;
 			}
 		}
 		if (lineLength == ll->numCharsInLine) {
-			int numCharsInLine = 0;
 			// See if chars, styles, indicators, are all the same
 			bool allSame = true;
 			const int styleMask = pdoc->stylingBitsMask;
 			// Check base line layout
 			char styleByte = 0;
-			for (int charInDoc = posLineStart; allSame && (charInDoc < posLineEnd); charInDoc++) {
+			int numCharsInLine = 0;
+			while (numCharsInLine < lineLength) {
+				int charInDoc = numCharsInLine + posLineStart;
 				char chDoc = pdoc->CharAt(charInDoc);
 				styleByte = pdoc->StyleAt(charInDoc);
-				if (vstyle.viewEOL || (!IsEOLChar(chDoc))) {
+				allSame = allSame &&
+					        (ll->styles[numCharsInLine] == static_cast<unsigned char>(styleByte & styleMask));
+				allSame = allSame &&
+					        (ll->indicators[numCharsInLine] == static_cast<char>(styleByte & ~styleMask));
+				if (vstyle.styles[ll->styles[numCharsInLine]].caseForce == Style::caseMixed)
 					allSame = allSame &&
-					          (ll->styles[numCharsInLine] == static_cast<char>(styleByte & styleMask));
+						        (ll->chars[numCharsInLine] == chDoc);
+				else if (vstyle.styles[ll->styles[numCharsInLine]].caseForce == Style::caseLower)
 					allSame = allSame &&
-					          (ll->indicators[numCharsInLine] == static_cast<char>(styleByte & ~styleMask));
-					if (vstyle.styles[ll->styles[numCharsInLine]].caseForce == Style::caseUpper)
-						allSame = allSame &&
-						          (ll->chars[numCharsInLine] == static_cast<char>(toupper(chDoc)));
-					else if (vstyle.styles[ll->styles[numCharsInLine]].caseForce == Style::caseLower)
-						allSame = allSame &&
-						          (ll->chars[numCharsInLine] == static_cast<char>(tolower(chDoc)));
-					else
-						allSame = allSame &&
-						          (ll->chars[numCharsInLine] == chDoc);
-					numCharsInLine++;
-				}
+						        (ll->chars[numCharsInLine] == static_cast<char>(tolower(chDoc)));
+				else	// Style::caseUpper
+					allSame = allSame &&
+						        (ll->chars[numCharsInLine] == static_cast<char>(toupper(chDoc)));
+				numCharsInLine++;
 			}
 			allSame = allSame && (ll->styles[numCharsInLine] == styleByte);	// For eolFilled
 			if (allSame) {
@@ -1988,10 +1989,12 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 
 		char styleByte = 0;
 		int styleMask = pdoc->stylingBitsMask;
+		ll->styleBitsSet = 0;
 		// Fill base line layout
 		for (int charInDoc = posLineStart; charInDoc < posLineEnd; charInDoc++) {
 			char chDoc = pdoc->CharAt(charInDoc);
 			styleByte = pdoc->StyleAt(charInDoc);
+			ll->styleBitsSet |= styleByte;
 			if (vstyle.viewEOL || (!IsEOLChar(chDoc))) {
 				ll->chars[numCharsInLine] = chDoc;
 				ll->styles[numCharsInLine] = static_cast<char>(styleByte & styleMask);
@@ -2018,6 +2021,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 		bool lastSegItalics = false;
 		Font &ctrlCharsFont = vstyle.styles[STYLE_CONTROLCHAR].font;
 
+		int ctrlCharWidth[32] = {0};
 		bool isControlNext = IsControlCharacter(ll->chars[0]);
 		for (int charInLine = 0; charInLine < numCharsInLine; charInLine++) {
 			bool isControl = isControlNext;
@@ -2031,9 +2035,13 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 							ll->positions[charInLine + 1] = ((((startsegx + 2) /
 							                                   tabWidth) + 1) * tabWidth) - startsegx;
 						} else if (controlCharSymbol < 32) {
-							const char *ctrlChar = ControlCharacterString(ll->chars[charInLine]);
-							// +3 For a blank on front and rounded edge each side:
-							ll->positions[charInLine + 1] = surface->WidthText(ctrlCharsFont, ctrlChar, istrlen(ctrlChar)) + 3;
+							if (ctrlCharWidth[ll->chars[charInLine]] == 0) {
+								const char *ctrlChar = ControlCharacterString(ll->chars[charInLine]);
+								// +3 For a blank on front and rounded edge each side:
+								ctrlCharWidth[ll->chars[charInLine]] =
+									surface->WidthText(ctrlCharsFont, ctrlChar, istrlen(ctrlChar)) + 3;
+							}
+							ll->positions[charInLine + 1] = ctrlCharWidth[ll->chars[charInLine]];
 						} else {
 							char cc[2] = { static_cast<char>(controlCharSymbol), '\0' };
 							surface->MeasureWidths(ctrlCharsFont, cc, 1,
@@ -2422,6 +2430,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 						}
 					}
 				}
+			} else if (rcSegment.left > rcLine.right) {
+				break;
 			}
 			startseg = i + 1;
 		}
@@ -2584,6 +2594,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 					rcUL.bottom = rcUL.top + 1;
 					surface->FillRectangle(rcUL, textFore);
 				}
+			} else if (rcSegment.left > rcLine.right) {
+				break;
 			}
 			startseg = i + 1;
 		}
@@ -2592,6 +2604,10 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	// Draw indicators
 	// foreach indicator...
 	for (int indicnum = 0, mask = 1 << pdoc->stylingBits; mask < 0x100; indicnum++) {
+		if (!(mask & ll->styleBitsSet)) {
+			mask <<= 1;
+			continue;
+		}
 		int startPos = -1;
 		// foreach style pos in line...
 		for (int indicPos = lineStart; indicPos <= lineEnd; indicPos++) {
