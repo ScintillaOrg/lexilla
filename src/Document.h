@@ -234,6 +234,7 @@ public:
 	int ParaUp(int pos);
 	int ParaDown(int pos);
 	int IndentSize() { return actualIndentInChars; }
+	int BraceMatch(int position, int maxReStyle);
 
 private:
 	void CheckReadOnly();

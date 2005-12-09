@@ -53,7 +53,7 @@ static bool CanEliminate(const DocModification& mh) {
 	in a [possibly lengthy] multi-step Undo/Redo sequence
 */
 static bool IsLastStep(const DocModification& mh) {
-	return 
+	return
 		(mh.modificationType & (SC_PERFORMED_UNDO|SC_PERFORMED_REDO)) != 0
 		&& (mh.modificationType & SC_MULTISTEPUNDOREDO) != 0
 		&& (mh.modificationType & SC_LASTSTEPINUNDOREDO) != 0
@@ -2840,7 +2840,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 			if (lineDoc != lineDocPrevious) {
 				ll.Set(0);
 				// For rectangular selection this accesses the layout cache so should be after layout returned.
-				lineIterator.SetAt(lineDoc);	
+				lineIterator.SetAt(lineDoc);
 				ll.Set(RetrieveLineLayout(lineDoc));
 				LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
 				lineDocPrevious = lineDoc;
@@ -5439,60 +5439,6 @@ void Editor::CheckForChangeOutsidePaint(Range r) {
 	}
 }
 
-char BraceOpposite(char ch) {
-	switch (ch) {
-	case '(':
-		return ')';
-	case ')':
-		return '(';
-	case '[':
-		return ']';
-	case ']':
-		return '[';
-	case '{':
-		return '}';
-	case '}':
-		return '{';
-	case '<':
-		return '>';
-	case '>':
-		return '<';
-	default:
-		return '\0';
-	}
-}
-
-// TODO: should be able to extend styled region to find matching brace
-// TODO: may need to make DBCS safe
-// so should be moved into Document
-int Editor::BraceMatch(int position, int /*maxReStyle*/) {
-	char chBrace = pdoc->CharAt(position);
-	char chSeek = BraceOpposite(chBrace);
-	if (chSeek == '\0')
-		return - 1;
-	char styBrace = static_cast<char>(
-	                    pdoc->StyleAt(position) & pdoc->stylingBitsMask);
-	int direction = -1;
-	if (chBrace == '(' || chBrace == '[' || chBrace == '{' || chBrace == '<')
-		direction = 1;
-	int depth = 1;
-	position = position + direction;
-	while ((position >= 0) && (position < pdoc->Length())) {
-		char chAtPos = pdoc->CharAt(position);
-		char styAtPos = static_cast<char>(pdoc->StyleAt(position) & pdoc->stylingBitsMask);
-		if ((position > pdoc->GetEndStyled()) || (styAtPos == styBrace)) {
-			if (chAtPos == chBrace)
-				depth++;
-			if (chAtPos == chSeek)
-				depth--;
-			if (depth == 0)
-				return position;
-		}
-		position = position + direction;
-	}
-	return - 1;
-}
-
 void Editor::SetBraceHighlight(Position pos0, Position pos1, int matchStyle) {
 	if ((pos0 != braces[0]) || (pos1 != braces[1]) || (matchStyle != bracesMatchStyle)) {
 		if ((braces[0] != pos0) || (matchStyle != bracesMatchStyle)) {
@@ -7052,7 +6998,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_BRACEMATCH:
 		// wParam is position of char to find brace for,
 		// lParam is maximum amount of text to restyle to find it
-		return BraceMatch(wParam, lParam);
+		return pdoc->BraceMatch(wParam, lParam);
 
 	case SCI_GETVIEWEOL:
 		return vs.viewEOL;

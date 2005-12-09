@@ -509,7 +509,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual bool PaintContains(PRectangle rc);
 	bool PaintContainsMargin();
 	void CheckForChangeOutsidePaint(Range r);
-	int BraceMatch(int position, int maxReStyle);
 	void SetBraceHighlight(Position pos0, Position pos1, int matchStyle);
 
 	void SetDocPointer(Document *document);
