@@ -210,6 +210,7 @@
 	<li>Oliver Yeoh</li>
 	<li>Eric Promislow</li>
 	<li>Joseph Galbraith</li>
+	<li>Jeffrey Ren</li>
     </ul>
     <p>
        Images used in GTK+ version
@@ -235,7 +236,7 @@
 	enabled when the internal find command is used.
 	</li>
 	<li>
-	SciTE output pane can display automatic completion after "$(" typed. 
+	SciTE output pane can display automatic completion after "$(" typed.
 	An initial ">" on a line is ignored when Enter pressed.
 	</li>
 	<li>
@@ -265,7 +266,7 @@
 	SciTE on GTK+ handles file names used to reference properties as case-sensitive.
 	</li>
 	<li>
-	SciTE on GTK+ Save As and Export commands set the file name field. 
+	SciTE on GTK+ Save As and Export commands set the file name field.
 	On GTK+ the Export commands modify the file name in the same way as on Windows.
 	</li>
 	<li>
@@ -279,7 +280,7 @@
 	SciTE bugs fixed where files contained in directory that includes '.' character.
 	</li>
 	<li>
-	SciTE bug fixed where import in user options was reading file from directory of 
+	SciTE bug fixed where import in user options was reading file from directory of
 	global options.
 	</li>
 	<li>
@@ -289,7 +290,7 @@
 	SciTE folding bug fixed where empty lines were shown for no reason.
 	</li>
 	<li>
-	Bug fixed where 2 byte per pixel XPM images caused crash although they are still not 
+	Bug fixed where 2 byte per pixel XPM images caused crash although they are still not
 	displayed.
 	</li>
 	<li>
@@ -307,10 +308,10 @@
 	FreeBasic support.
 	</li>
 	<li>
-	SciTE on Windows handles command line arguments 
-	"-" (read standard input into buffer), 
-	"--" (read standard input into output pane) and 
-	"-@" (read file names from standard input and open each). 
+	SciTE on Windows handles command line arguments
+	"-" (read standard input into buffer),
+	"--" (read standard input into output pane) and
+	"-@" (read file names from standard input and open each).
 	</li>
 	<li>
 	SciTE includes a simple implementation of Find in Files which is used if no find.command is set.
@@ -352,12 +353,12 @@
 	and in '+++' and '---' lines from diff.
 	</li>
 	<li>
-	Bugs fixed in SciTE and Scintilla folding behaviour when text pasted before 
-	folded text caused unnecessary 
+	Bugs fixed in SciTE and Scintilla folding behaviour when text pasted before
+	folded text caused unnecessary
 	unfolding and cutting text could lead to text being irretrievably hidden.
 	</li>
 	<li>
-	SciTE on Windows uses correct font for dialogs and better font for tab bar 
+	SciTE on Windows uses correct font for dialogs and better font for tab bar
 	allowing better localisation
 	</li>
 	<li>
@@ -373,7 +374,7 @@
 	Lexers will no longer be re-entered recursively during, for example, fold level setting.
 	</li>
 	<li>
-	Undo of typing in overwrite mode undoes one character at a time rather than requiring a removal 
+	Undo of typing in overwrite mode undoes one character at a time rather than requiring a removal
 	and addition step for each character.
 	</li>
 	<li>
@@ -416,7 +417,7 @@
 	lines with a colour.
 	</li>
 	<li>
-	Performance improved for some large undo and redo operations and modification flags 
+	Performance improved for some large undo and redo operations and modification flags
 	added in notifications.
 	</li>
 	<li>
@@ -476,7 +477,7 @@
 	Autocomplete window size made larger under some conditions to make truncation less common.
 	</li>
 	<li>
-	Bug fixed where changing case of a selection did not affect initial character of lines 
+	Bug fixed where changing case of a selection did not affect initial character of lines
 	in multi-byte encodings.
 	</li>
 	<li>
@@ -492,7 +493,7 @@
 	</li>
 	<li>
 	Autocompletion on Windows changed to use popup window, be faster,
-	allow choice of maximum width and height, and to highlight only the text of the 
+	allow choice of maximum width and height, and to highlight only the text of the
 	selected item rather than both the text and icon if any.
 	</li>
 	<li>
@@ -524,7 +525,7 @@
 	lines so that the eolfilled style can be applied to them.
 	</li>
 	<li>
-	NSIS support updated for line continuations, box comments, SectionGroup and 
+	NSIS support updated for line continuations, box comments, SectionGroup and
 	PageEx, and with more up-to-date properties.
 	</li>
 	<li>
@@ -541,7 +542,7 @@
 	line due to wrapping.
 	</li>
 	<li>
-	Sticky caret mode does not modify the preferred caret x position when typing 
+	Sticky caret mode does not modify the preferred caret x position when typing
 	and may be useful for typing columns of text.
 	</li>
 	<li>
@@ -558,7 +559,7 @@
 	space as empty and handle text hidden by folding.
 	</li>
 	<li>
-	Scintilla on Windows supports WM_PRINTCLIENT although there are some 
+	Scintilla on Windows supports WM_PRINTCLIENT although there are some
 	limitations.
 	</li>
 	<li>
@@ -574,19 +575,19 @@
 	</li>
 	<li>
 	SciTE on GTK+ changes menus and toolbars to not be detachable unless turned
-	on with a property. Menus no longer tear off. The toolbar may be set to use the 
-	default theme icons rather than SciTE's set. Changed key for View | End of Line 
+	on with a property. Menus no longer tear off. The toolbar may be set to use the
+	default theme icons rather than SciTE's set. Changed key for View | End of Line
 	because of a conflict. Language menu can contain more items.
 	</li>
 	<li>
-	SciTE on GTK+ 2.x allows the height and width of the file open file chooser to 
+	SciTE on GTK+ 2.x allows the height and width of the file open file chooser to
 	be set, for the show hidden files check box to be set from an option and for it
-	to be opened in the directory of the current file explicitly. Enter key works in 
+	to be opened in the directory of the current file explicitly. Enter key works in
 	save chooser.
 	</li>
 	<li>
 	Scintilla lexers should no longer see bits in style bytes that are outside the set
-	they modify so should be able to correctly lex documents where the container 
+	they modify so should be able to correctly lex documents where the container
 	has used indicators.
 	</li>
 	<li>
@@ -603,7 +604,7 @@
 	Allow use from LccWin compiler.
 	</li>
 	<li>
-	SCI_COLOURISE for SCLEX_CONTAINER causes a 
+	SCI_COLOURISE for SCLEX_CONTAINER causes a
 	SCN_STYLENEEDED notification.
 	</li>
 	<li>
@@ -613,7 +614,7 @@
 	Fix for folding becoming confused.
 	</li>
 	<li>
-	On Windows, fixes for Japanese Input Method Editor and for 8 bit Katakana 
+	On Windows, fixes for Japanese Input Method Editor and for 8 bit Katakana
 	characters.
 	</li>
 	<li>
@@ -644,7 +645,7 @@
 	Undo of automatic indentation more reasonable.
 	</li>
 	<li>
-	High processor usage fixed in background wrapping under some 
+	High processor usage fixed in background wrapping under some
 	circumstances.
 	</li>
 	<li>
@@ -663,7 +664,7 @@
 	SciTE crashing bug fixed in incremental search on Windows ME.
 	</li>
 	<li>
-	SciTE on Windows has a optional find and replace dialogs that can search through 
+	SciTE on Windows has a optional find and replace dialogs that can search through
 	all buffers and search within a particular style number.
 	</li>
     </ul>
