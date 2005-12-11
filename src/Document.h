@@ -278,7 +278,7 @@ public:
 
 	DocModification(int modificationType_, const Action &act, int linesAdded_=0) :
 		modificationType(modificationType_),
-		position(act.position / 2),
+		position(act.position),
 		length(act.lenData),
 		linesAdded(linesAdded_),
 		text(act.data),

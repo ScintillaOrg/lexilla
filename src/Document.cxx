@@ -451,7 +451,7 @@ int Document::Undo() {
 									SC_MOD_BEFOREDELETE | SC_PERFORMED_UNDO, action));
 				}
 				cb.PerformUndoStep();
-				int cellPosition = action.position / 2;
+				int cellPosition = action.position;
 				ModifiedAt(cellPosition);
 				newPos = cellPosition;
 
@@ -506,8 +506,8 @@ int Document::Redo() {
 									SC_MOD_BEFOREDELETE | SC_PERFORMED_REDO, action));
 				}
 				cb.PerformRedoStep();
-				ModifiedAt(action.position / 2);
-				newPos = action.position / 2;
+				ModifiedAt(action.position);
+				newPos = action.position;
 
 				int modFlags = SC_PERFORMED_REDO;
 				if (action.at == insertAction) {
@@ -527,7 +527,7 @@ int Document::Redo() {
 						modFlags |= SC_MULTILINEUNDOREDO;
 				}
 				NotifyModified(
-					DocModification(modFlags, action.position / 2, action.lenData,
+					DocModification(modFlags, action.position, action.lenData,
 									linesAdded, action.data));
 			}
 
