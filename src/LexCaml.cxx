@@ -232,7 +232,7 @@ void ColouriseCamlDoc(
 					// length is believable as keyword, [re-]construct token
 					char t[24];
 					for (int i = -n; i < 0; i++)
-						t[n + i] = sc.GetRelative(i);
+						t[n + i] = static_cast<char>(sc.GetRelative(i));
 					t[n] = '\0';
 					// special-case "_" token as KEYWORD
 					if ((n == 1 && sc.chPrev == '_') || keywords.InList(t))
