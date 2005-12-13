@@ -12,6 +12,9 @@
 	20050306 Fix for 1st-char-in-doc "corner" case.
 	20050502 Fix for [harmless] one-past-the-end coloring.
 	20050515 Refined numeric token recognition logic.
+	20051125 Added 2nd "optional" keywords class.
+	20051129 Support "magic" (read-only) comments for RCaml.
+	20051204 Swtich to using StyleContext infrastructure.
 */
 
 #include <stdlib.h>
@@ -33,6 +36,11 @@
 inline int  iscaml(int c) {return isalnum(c) || c == '_';}
 inline int iscamlf(int c) {return isalpha(c) || c == '_';}
 inline int iscamld(int c) {return isdigit(c) || c == '_';}
+
+static const int baseT[24] = {
+	0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* A - L */
+	0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0,16	/* M - X */
+};
 
 #ifdef BUILD_AS_EXTERNAL_LEXER
 /*
@@ -166,125 +174,113 @@ void ColouriseCamlDoc(
 	Accessor &styler)
 {
 	// initialize styler
-	styler.StartAt(startPos);
-	styler.StartSegment(startPos);
+	StyleContext sc(startPos, length, initStyle, styler);
 	// set up [initial] state info (terminating states that shouldn't "bleed")
-	int state = initStyle, nesting = 0;
-	if (state < SCE_CAML_STRING)
-		state = SCE_CAML_DEFAULT;
-	if (state >= SCE_CAML_COMMENT)
-		nesting = state - SCE_CAML_COMMENT;
-	int chLast = startPos? static_cast<unsigned char>(styler[startPos - 1]): ' ';
-	int chNext = static_cast<unsigned char>(styler[startPos]);
+	int nesting = 0;
+	if (sc.state < SCE_CAML_STRING)
+		sc.state = SCE_CAML_DEFAULT;
+	if (sc.state >= SCE_CAML_COMMENT)
+		nesting = (sc.state & 0x0f) - SCE_CAML_COMMENT;
 
-	int chBase = 'd', chToken = 0, chLit = 0, chSkip;
-	WordList& keywords = *keywordlists[0];
+	int chBase = 0, chToken = 0, chLit = 0;
+	WordList& keywords  = *keywordlists[0];
 	WordList& keywords2 = *keywordlists[1];
+	WordList& keywords3 = *keywordlists[2];
+	const int useMagic = styler.GetPropertyInt("lexer.caml.magic", 0);
 
 	// foreach char in range...
-	unsigned int i = startPos;
-	const unsigned int endPos = startPos + length;
-	for (; i < endPos; i += chSkip) {
+	while (sc.More()) {
 		// set up [per-char] state info
-		int ch = chNext;
-		chNext = static_cast<unsigned char>(styler.SafeGetCharAt(i + 1));
-		int state2 = -1;	// (ASSUME no state change)
-		int chColor = i - 1;// (ASSUME standard coloring range)
-		chSkip = 1;			// (ASSUME scanner "eats" 1 char)
-
-		// this may be the correct thing to do... or not
-		if (styler.IsLeadByte(static_cast<char>(ch))) {
-			chNext = static_cast<unsigned char>(styler.SafeGetCharAt(i + 2)),
-				chSkip++;
-			continue;
-		}
+		int state2 = -1;		// (ASSUME no state change)
+		int chColor = sc.currentPos - 1;// (ASSUME standard coloring range)
+		bool advance = true;	// (ASSUME scanner "eats" 1 char)
 
 		// step state machine
-		switch (state) {
+		switch (sc.state & 0x0f) {
 		case SCE_CAML_DEFAULT:
+			chToken = sc.currentPos;	// save [possible] token start (JIC)
 			// it's wide open; what do we have?
-			if (iscamlf(ch))
-				state2 = SCE_CAML_IDENTIFIER, chToken = i;
-			else if (ch == '`')
-				state2 = SCE_CAML_TAGNAME, chToken = i;
-			else if (ch == '#' && isdigit(chNext))
-				state2 = SCE_CAML_LINENUM, chToken = i;
-			else if (isdigit(ch)) {
-				state2 = SCE_CAML_NUMBER,
-					chBase = strchr("xXoObB", chNext)? chNext: 'd';
-				if (chBase != 'd')
-					ch = chNext,
-						chNext = static_cast<unsigned char>(styler.SafeGetCharAt(i + 2)),
-						chSkip++;
-			} else if (ch == '\'')	/* (char literal?) */
-				state2 = SCE_CAML_CHAR, chToken = i, chLit = 0;
-			else if (ch == '\"')
+			if (iscamlf(sc.ch))
+				state2 = SCE_CAML_IDENTIFIER;
+			else if (sc.Match('`'))
+				state2 = SCE_CAML_TAGNAME;
+			else if (sc.Match('#') && isdigit(sc.chNext))
+				state2 = SCE_CAML_LINENUM;
+			else if (isdigit(sc.ch)) {
+				state2 = SCE_CAML_NUMBER, chBase = 10;
+				if (sc.ch == '0' && strchr("bBoOxX", sc.chNext))
+					chBase = baseT[tolower(sc.chNext) - 'a'], sc.Forward();
+			} else if (sc.Match('\''))	/* (char literal?) */
+				state2 = SCE_CAML_CHAR, chLit = 0;
+			else if (sc.Match('\"'))
 				state2 = SCE_CAML_STRING;
-			else if (ch == '(' && chNext == '*')
+			else if (sc.Match('(', '*'))
 				state2 = SCE_CAML_COMMENT,
-					ch = ' ',	// (make SURE "(*)" isn't seen as a closed comment)
-					chNext = static_cast<unsigned char>(styler.SafeGetCharAt(i + 2)),
-					chSkip++, nesting = 0;
+					sc.ch = ' ',	// (make SURE "(*)" isn't seen as a closed comment)
+					sc.Forward();
 			else if (strchr("!?~"		/* Caml "prefix-symbol" */
 					"=<>@^|&+-*/$%"		/* Caml "infix-symbol" */
-					"()[]{};,:.#", ch))	/* Caml "bracket" or ;,:.# */
-				state2 = SCE_CAML_OPERATOR, chToken = i;
+					"()[]{};,:.#", sc.ch))	/* Caml "bracket" or ;,:.# */
+				state2 = SCE_CAML_OPERATOR;
 			break;
 
 		case SCE_CAML_IDENTIFIER:
 			// [try to] interpret as [additional] identifier char
-			if (!(iscaml(ch) || ch == '\'')) {
-				const int n = i - chToken;
+			if (!(iscaml(sc.ch) || sc.Match('\''))) {
+				const int n = sc.currentPos - chToken;
 				if (n < 24) {
 					// length is believable as keyword, [re-]construct token
 					char t[24];
-					int p = 0;
-					for (int q = chToken; p < n; p++, q++)
-						t[p] = styler[q];
-					t[p] = '\0';
+					for (int i = -n; i < 0; i++)
+						t[n + i] = sc.GetRelative(i);
+					t[n] = '\0';
 					// special-case "_" token as KEYWORD
-					if ((n == 1 && chLast == '_') || keywords.InList(t))
-						state = SCE_CAML_KEYWORD;
+					if ((n == 1 && sc.chPrev == '_') || keywords.InList(t))
+						sc.ChangeState(SCE_CAML_KEYWORD);
 					else if (keywords2.InList(t))
-						state = SCE_CAML_KEYWORD2;
+						sc.ChangeState(SCE_CAML_KEYWORD2);
+					else if (keywords3.InList(t))
+						sc.ChangeState(SCE_CAML_KEYWORD3);
 				}
-				state2 = SCE_CAML_DEFAULT, chNext = ch, chSkip--;
+				state2 = SCE_CAML_DEFAULT, advance = false;
 			}
 			break;
 
 		case SCE_CAML_TAGNAME:
 			// [try to] interpret as [additional] tagname char
-			if (!(iscaml(ch) || ch == '\''))
-				state2 = SCE_CAML_DEFAULT, chNext = ch, chSkip--;
+			if (!(iscaml(sc.ch) || sc.Match('\'')))
+				state2 = SCE_CAML_DEFAULT, advance = false;
 			break;
 
 		/*case SCE_CAML_KEYWORD:
 		case SCE_CAML_KEYWORD2:
+		case SCE_CAML_KEYWORD3:
 			// [try to] interpret as [additional] keyword char
 			if (!iscaml(ch))
-				state2 = SCE_CAML_DEFAULT, chNext = ch, chSkip--;
+				state2 = SCE_CAML_DEFAULT, advance = false;
 			break;*/
 
 		case SCE_CAML_LINENUM:
 			// [try to] interpret as [additional] linenum directive char
-			if (!isdigit(ch))
-				state2 = SCE_CAML_DEFAULT, chNext = ch, chSkip--;
+			if (!isdigit(sc.ch))
+				state2 = SCE_CAML_DEFAULT, advance = false;
 			break;
 
 		case SCE_CAML_OPERATOR: {
 			// [try to] interpret as [additional] operator char
 			const char* o = 0;
-			if (iscaml(ch) || isspace(ch)			/* ident or whitespace */
-				|| ((o = strchr(")]};,\'\"`#", ch)) != 0)/* "termination" chars */
-				|| !strchr("!$%&*+-./:<=>?@^|~", ch)/* "operator" chars */) {
+			if (iscaml(sc.ch) || isspace(sc.ch)		   /* ident or whitespace */
+				|| (o = strchr(")]};,\'\"`#", sc.ch),o)/* "termination" chars */
+				|| !strchr("!$%&*+-./:<=>?@^|~", sc.ch)/* "operator" chars */) {
 				// check for INCLUSIVE termination
-				if (o && strchr(")]};,", ch)) {
-					if ((ch == ')' && chLast == '(') || (ch == ']' && chLast == '['))
+				if (o && strchr(")]};,", sc.ch)) {
+					if ((sc.Match(')') && sc.chPrev == '(')
+						|| (sc.Match(']') && sc.chPrev == '['))
 						// special-case "()" and "[]" tokens as KEYWORDS
-						state = SCE_CAML_KEYWORD;
+						sc.ChangeState(SCE_CAML_KEYWORD);
 					chColor++;
 				} else
-					chNext = ch, chSkip--;
+					advance = false;
 				state2 = SCE_CAML_DEFAULT;
 			}
 			break;
@@ -293,85 +289,89 @@ void ColouriseCamlDoc(
 		case SCE_CAML_NUMBER:
 			// [try to] interpret as [additional] numeric literal char
 			// N.B. - improperly accepts "extra" digits in base 2 or 8 literals
-			if (iscamld(ch) || ((chBase == 'x' || chBase == 'X') && isxdigit(ch)))
+			if (iscamld(sc.ch) || IsADigit(sc.ch, chBase))
 				break;
 			// how about an integer suffix?
-			if ((ch == 'l' || ch == 'L' || ch == 'n')&& (iscamld(chLast)
-				|| ((chBase == 'x' || chBase == 'X') && isxdigit(chLast))))
+			if ((sc.Match('l') || sc.Match('L') || sc.Match('n'))
+				&& (iscamld(sc.chPrev) || IsADigit(sc.chPrev, chBase)))
 				break;
 			// or a floating-point literal?
-			if (chBase == 'd') {
+			if (chBase == 10) {
 				// with a decimal point?
-				if (ch == '.' && iscamld(chLast))
+				if (sc.Match('.') && iscamld(sc.chPrev))
 					break;
 				// with an exponent? (I)
-				if ((ch == 'e' || ch == 'E') && (iscamld(chLast) || chLast == '.'))
+				if ((sc.Match('e') || sc.Match('E'))
+					&& (iscamld(sc.chPrev) || sc.chPrev == '.'))
 					break;
 				// with an exponent? (II)
-				if ((ch == '+' || ch == '-') && (chLast == 'e' || chLast == 'E'))
+				if ((sc.Match('+') || sc.Match('-'))
+					&& (sc.chPrev == 'e' || sc.chPrev == 'E'))
 					break;
 			}
 			// it looks like we have run out of number
-			state2 = SCE_CAML_DEFAULT, chNext = ch, chSkip--;
+			state2 = SCE_CAML_DEFAULT, advance = false;
 			break;
 
 		case SCE_CAML_CHAR:
 			// [try to] interpret as [additional] char literal char
-			if (ch == '\\') {
+			if (sc.Match('\\')) {
 				chLit = 1;	// (definitely IS a char literal)
-				if (chLast == '\\')
-					ch = ' ';	// (so termination test isn't fooled)
+				if (sc.chPrev == '\\')
+					sc.ch = ' ';	// (so termination test isn't fooled)
 			// should we be terminating - one way or another?
-			} else if ((ch == '\'' && chLast != '\\') || ch == '\r' || ch == '\n') {
+			} else if ((sc.Match('\'') && sc.chPrev != '\\') || sc.atLineEnd) {
 				state2 = SCE_CAML_DEFAULT;
-				if (ch == '\'')
+				if (sc.Match('\''))
 					chColor++;
 				else
-					state = SCE_CAML_IDENTIFIER;
+					sc.ChangeState(SCE_CAML_IDENTIFIER);
 			// ... maybe a char literal, maybe not
-			} else if (chLit < 1 && i - chToken >= 2)
-				state = SCE_CAML_IDENTIFIER, chNext = ch, chSkip--;
+			} else if (chLit < 1 && sc.currentPos - chToken >= 2)
+				sc.ChangeState(SCE_CAML_IDENTIFIER), advance = false;
 			break;
 
 		case SCE_CAML_STRING:
 			// [try to] interpret as [additional] string literal char
-			if (ch == '\\' && chLast == '\\')
-				ch = ' ';	// (so '\\' doesn't cause us trouble)
-			else if (ch == '\"' && chLast != '\\')
+			if (sc.Match('\\') && sc.chPrev == '\\')
+				sc.ch = ' ';	// (so '\\' doesn't cause us trouble)
+			else if (sc.Match('\"') && sc.chPrev != '\\')
 				state2 = SCE_CAML_DEFAULT, chColor++;
 			break;
 
 		case SCE_CAML_COMMENT:
-		case SCE_CAML_COMMENT+1:
-		case SCE_CAML_COMMENT+2:
-		case SCE_CAML_COMMENT+3:
+		case SCE_CAML_COMMENT1:
+		case SCE_CAML_COMMENT2:
+		case SCE_CAML_COMMENT3:
 			// we're IN a comment - does this start a NESTED comment?
-			if (ch == '(' && chNext == '*')
-				state2 = state + 1,
-					ch = ' ',	// (make SURE "(*)" isn't seen as a closed comment)
-					chNext = static_cast<unsigned char>(styler.SafeGetCharAt(i + 2)),
-					chSkip++, nesting++;
+			if (sc.Match('(', '*'))
+				state2 = sc.state + 1, chToken = sc.currentPos,
+					sc.ch = ' ',	// (make SURE "(*)" isn't seen as a closed comment)
+					sc.Forward(), nesting++;
 			// [try to] interpret as [additional] comment char
-			else if (ch == ')' && chLast == '*')
-				state2 = nesting? (state - 1): SCE_CAML_DEFAULT, chColor++, nesting--;
+			else if (sc.Match(')') && sc.chPrev == '*') {
+				if (nesting)
+					state2 = (sc.state & 0x0f) - 1, chToken = 0, nesting--;
+				else
+					state2 = SCE_CAML_DEFAULT;
+				chColor++;
+			// enable "magic" (read-only) comment AS REQUIRED
+			} else if (useMagic && sc.currentPos - chToken == 4
+				&& sc.Match('c') && sc.chPrev == 'r' && sc.GetRelative(-2) == '@')
+				sc.state |= 0x10;	// (switch to read-only comment style)
 			break;
 		}
 
 		// handle state change and char coloring as required
-		if (state2 >= 0) {
-			// (1st char will NOT be colored until AT LEAST 2nd char)
-			if (chColor >= 0)
-				styler.ColourTo(chColor, state);
-			state = state2;
-		}
-		chLast = ch;
+		if (state2 >= 0)
+			styler.ColourTo(chColor, sc.state), sc.ChangeState(state2);
+		// move to next char UNLESS re-scanning current char
+		if (advance)
+			sc.Forward();
 	}
 
 	// do any required terminal char coloring (JIC)
-	if (i >= endPos)
-		i = endPos - 1;
-	styler.ColourTo(i, state);
-//	styler.Flush();	// (is this always done by calling code?)
+	sc.Complete();
 }
 
 #ifdef BUILD_AS_EXTERNAL_LEXER
@@ -390,6 +390,7 @@ void FoldCamlDoc(
 static const char * const camlWordListDesc[] = {
 	"Keywords",		// primary Objective Caml keywords
 	"Keywords2",	// "optional" keywords (typically from Pervasives)
+	"Keywords3",	// "optional" keywords (typically typenames)
 	0
 };
 
