@@ -202,13 +202,13 @@ void ColouriseCamlDoc(
 			// it's wide open; what do we have?
 			if (iscamlf(sc.ch))
 				state2 = SCE_CAML_IDENTIFIER;
-			else if (sc.Match('`'))
+			else if (sc.Match('`') && isalpha(sc.chNext))
 				state2 = SCE_CAML_TAGNAME;
 			else if (sc.Match('#') && isdigit(sc.chNext))
 				state2 = SCE_CAML_LINENUM;
 			else if (isdigit(sc.ch)) {
 				state2 = SCE_CAML_NUMBER, chBase = 10;
-				if (sc.ch == '0' && strchr("bBoOxX", sc.chNext))
+				if (sc.Match('0') && strchr("bBoOxX", sc.chNext))
 					chBase = baseT[tolower(sc.chNext) - 'a'], sc.Forward();
 			} else if (sc.Match('\''))	/* (char literal?) */
 				state2 = SCE_CAML_CHAR, chLit = 0;
