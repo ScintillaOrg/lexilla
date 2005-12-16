@@ -230,8 +230,71 @@
 	Released on 16 December 2005.
 	</li>
 	<li>
-	Feature.
+	Scintilla checks the paint region more accurately when seeing if an area is being
+	repainted. Platform layer implementations may need to change for this to take
+	effect. This fixes some drawing and styling bugs. Also optimized some parts of
+	marker code to only redraw the line of the marker rather than whole of the margin.
 	</li>
+	<li>
+	Quoted identifier style for SQL. SQL folding performed more simply.
+	</li>
+	<li>
+	Ruby lexer improved to better handle here documents and non-ASCII
+	characters.
+	</li>
+	<li>
+	Scintilla API provided to reveal how many style bits are needed for the
+	current lexer.
+	</li>
+	<li>
+	Scintilla API for adding a set of markers to a line.
+	</li>
+	<li>
+	Convention defined for property names to be used by lexers and folders
+	so they can be automatically discovered and forwarded from containers.
+	</li>
+	<li>
+	Default bookmark in SciTE changed to a blue sphere image.
+	</li>
+	<li>
+	SciTE stores the time of last asking for a save separately for each buffer
+	which fixes bugs with automatic reloading.
+	</li>
+	<li>
+	Kid template language better handled by HTML lexer by finishing ASP Python
+	mode when a ?> is found.
+	</li>
+	<li>
+	64-bit compatibility improved. One change that may affect user code is that
+	the notification message header changed to include a pointer-sized id field
+	to match the current Windows definition.
+	</li>
+	<li>
+	Bug fixed where Scintilla created pixmap buffers that were too large leading
+	to failures when many instances used.
+	</li>
+	<li>
+	SciTE HTML exporter no longer honours monospaced font setting.
+	</li>
+	<li>
+	SciTE bug fixed for commands that operate on files with empty extensions.
+	</li>
+	<li>
+	SciTE on Windows bug fixed in the display of a non-ASCII search string
+	which can not be found.
+	</li>
+	<li>
+	Bug fixed when styling C++ continued preprocessor lines.
+	</li>
+	<li>
+	SciTE bug fixed when compiled with NO_EXTENSIONS and
+	closing one file closes the application.
+	</li>
+	<li>
+	SciTE crash fixed for error messages that look like Lua messages but aren't
+	in the same order.
+	</li>
+    </ul>
     <h3>
        <a href="http://prdownloads.sourceforge.net/scintilla/scite166.zip?download">Release 1.66</a>
     </h3>
