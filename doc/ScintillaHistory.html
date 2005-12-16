@@ -243,11 +243,27 @@
 	characters.
 	</li>
 	<li>
+	Lua lexer supports long string and block comment syntax from Lua 5.1.
+	</li>
+	<li>
+	Bash lexer handles here documents better.
+	</li>
+	<li>
+	JavaScript regex lexing better both for JavaScript files and when embedded in
+	HTML.
+	</li>
+	<li>
 	Scintilla API provided to reveal how many style bits are needed for the
 	current lexer.
 	</li>
 	<li>
+	Selection duplicate added.
+	</li>
+	<li>
 	Scintilla API for adding a set of markers to a line.
+	</li>
+	<li>
+	DBCS encodings work on Windows 9x.
 	</li>
 	<li>
 	Convention defined for property names to be used by lexers and folders
@@ -261,8 +277,15 @@
 	which fixes bugs with automatic reloading.
 	</li>
 	<li>
+	On Windows, pasted text has line ends converted to current preference.
+	GTK+ already did this.
+	</li>
+	<li>
 	Kid template language better handled by HTML lexer by finishing ASP Python
 	mode when a ?> is found.
+	</li>
+	<li>
+	SciTE counts number of characters in a rectangular selection correctly.
 	</li>
 	<li>
 	64-bit compatibility improved. One change that may affect user code is that
@@ -270,21 +293,63 @@
 	to match the current Windows definition.
 	</li>
 	<li>
+	Empty ranges can no longer be dragged.
+	</li>
+	<li>
+	Crash fixed when calls made that use layout inside the painted notification.
+	</li>
+	<li>
 	Bug fixed where Scintilla created pixmap buffers that were too large leading
 	to failures when many instances used.
+	</li>
+	<li>
+	SciTE sets the directory of a new file to the directory of the currently
+	active file.
+	</li>
+	<li>
+	SciTE allows choosing a code page for the output pane.
 	</li>
 	<li>
 	SciTE HTML exporter no longer honours monospaced font setting.
 	</li>
 	<li>
+	Line layout cache in page mode caches the line of the caret. An assertion is
+	now used to ensure that the layout reentrancy problem that caused this
+	is easier to find.
+	</li>
+	<li>
+	Speed optimized for long lines and lines containing many control characters.
+	</li>
+	<li>
+	Bug fixed in brace matching in DBCS files where byte inside character
+	is same as brace.
+	</li>
+	<li>
+	Indent command does not indent empty lines.
+	</li>
+	<li>
 	SciTE bug fixed for commands that operate on files with empty extensions.
+	</li>
+	<li>
+	SciTE bug fixed where monospaced option was copied for subsequently opened files.
 	</li>
 	<li>
 	SciTE on Windows bug fixed in the display of a non-ASCII search string
 	which can not be found.
 	</li>
 	<li>
+	Bugs fixed with nested calls displaying a new calltip while one is already
+	displayed.
+	</li>
+	<li>
+	Bug fixed when styling PHP strings.
+	</li>
+	<li>
 	Bug fixed when styling C++ continued preprocessor lines.
+	</li>
+	<li>
+	SciTE bug fixed where opening file from recently used list reset choice of
+	language.
 	</li>
 	<li>
 	SciTE bug fixed when compiled with NO_EXTENSIONS and
@@ -293,6 +358,11 @@
 	<li>
 	SciTE crash fixed for error messages that look like Lua messages but aren't
 	in the same order.
+	</li>
+	<li>
+	Remaining fold box support deprecated . The symbols SC_FOLDLEVELBOXHEADERFLAG,
+   SC_FOLDLEVELBOXFOOTERFLAG, SC_FOLDLEVELCONTRACTED,
+   SC_FOLDLEVELUNINDENT, and SC_FOLDFLAG_BOX are deprecated.
 	</li>
     </ul>
     <h3>
