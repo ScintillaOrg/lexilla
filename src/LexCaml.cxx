@@ -202,7 +202,7 @@ void ColouriseCamlDoc(
 			// it's wide open; what do we have?
 			if (iscamlf(sc.ch))
 				state2 = SCE_CAML_IDENTIFIER;
-			else if (sc.Match('`') && isalpha(sc.chNext))
+			else if (sc.Match('`') && iscamlf(sc.chNext))
 				state2 = SCE_CAML_TAGNAME;
 			else if (sc.Match('#') && isdigit(sc.chNext))
 				state2 = SCE_CAML_LINENUM;
