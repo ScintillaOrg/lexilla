@@ -78,8 +78,8 @@
 
     <p>In the descriptions that follow, the messages are described as function calls with zero, one
     or two arguments. These two arguments are the standard <code>wParam</code> and
-    <code>lParam</code> familiar to Windows programmers. These parameters are integers that 
-    are large enough to hold pointers, and the return value is also an integer large enough to contain a 
+    <code>lParam</code> familiar to Windows programmers. These parameters are integers that
+    are large enough to hold pointers, and the return value is also an integer large enough to contain a
     pointer.
     Although the commands only use the
     arguments described, because all messages have two arguments whether Scintilla uses them or
@@ -253,7 +253,7 @@
         <tr>
           <td>o <a class="toc" href="#EditMessagesNeverSupportedByScintilla">Edit messages never
           supported by Scintilla</a></td>
-	  
+
           <td>o <a class="toc" href="#BuildingScintilla">Building Scintilla</a></td>
         </tr>
       </tbody>
@@ -458,7 +458,7 @@
      This pair of routines sets and reads back the number of bits in each cell to use for styling,
     to a maximum of 7 style bits. The remaining bits can be used as indicators. The standard
     setting is <code>SCI_SETSTYLEBITS(5)</code>.
-    The number of styling bits needed by the current lexer can be found with 
+    The number of styling bits needed by the current lexer can be found with
     <a class="message" href="#SCI_GETSTYLEBITSNEEDED">SCI_GETSTYLEBITSNEEDED</a>.</p>
 
     <p><b id="TextRange">TextRange</b> and <b id="CharacterRange">CharacterRange</b><br />
@@ -490,7 +490,7 @@ struct TextRange {
      <code>SCI_ENCODEDFROMUTF8</code> converts a UTF-8 string into the document's
      encoding which is useful for taking the results of a find dialog, for example, and receiving
      a string of bytes that can be searched for in the document. Since the text can contain nul bytes,
-     the <code>SCI_SETLENGTHFORENCODE</code> method can be used to set the 
+     the <code>SCI_SETLENGTHFORENCODE</code> method can be used to set the
      length that will be converted. If set to -1, the length is determined by finding a nul byte.
      The length of the converted string is returned.
     </p>
@@ -830,7 +830,7 @@ struct TextToFind {
     <p><b id="SCI_SETPASTECONVERTENDINGS">SCI_SETPASTECONVERTENDINGS(bool convert)</b><br />
      <b id="SCI_GETPASTECONVERTENDINGS">SCI_GETPASTECONVERTENDINGS</b><br />
      If this property is set then when text is pasted any line ends are converted to match the document's
-     end of line mode as set with 
+     end of line mode as set with
      <a class="message" href="#SCI_SETEOLMODE">SCI_SETEOLMODE</a>.
      Currently only changeable on Windows. On GTK+ pasted text is always converted.</p>
 
@@ -1123,7 +1123,7 @@ struct TextToFind {
     <p><b id="SCI_GETCURLINE">SCI_GETCURLINE(int textLen, char *text)</b><br />
      This retrieves the text of the line containing the caret and returns the position within the
     line of the caret. Pass in <code>char* text</code> pointing at a buffer large enough to hold
-    the text you wish to retrieve and a terminating 0 character. 
+    the text you wish to retrieve and a terminating 0 character.
     Set <code>textLen</code> to the
     length of the buffer which must be at least 1 to hold the terminating 0 character.
     If the text argument is 0 then the length that should be allocated
@@ -2042,7 +2042,7 @@ struct TextToFind {
     <code>SC_CHARSET_TURKISH</code>, and <code>SC_CHARSET_VIETNAMESE</code>.</p>
 
     <p>The character sets supported on GTK+ are:<br />
-     <code>SC_CHARSET_ANSI</code>, <code>SC_CHARSET_CYRILLIC</code> (code page 1251), 
+     <code>SC_CHARSET_ANSI</code>, <code>SC_CHARSET_CYRILLIC</code> (code page 1251),
      <code>SC_CHARSET_EASTEUROPE</code>,
     <code>SC_CHARSET_GB2312</code>, <code>SC_CHARSET_HANGUL</code>,
     <code>SC_CHARSET_RUSSIAN</code> (KOI8-R), <code>SC_CHARSET_SHIFTJIS</code>, and
@@ -2827,7 +2827,7 @@ struct TextToFind {
     href="#SCI_STARTSTYLING"><code>SCI_STARTSTYLING</code></a> with a <code>INDICS_MASK</code> mask
     and <a class="message" href="#SCI_SETSTYLING"><code>SCI_SETSTYLING</code></a> with the values
     <code>INDIC0_MASK</code>, <code>INDIC1_MASK</code> and <code>INDIC2_MASK</code>.</p>
-	
+
 	<p>If you are using indicators in a buffer that has a lexer active
 	(see <a class="message" href="#SCI_SETLEXER"><code>SCI_SETLEXER</code></a>),
 	you must save lexing state information before setting any indicators and restore it afterwards.
@@ -3463,7 +3463,7 @@ struct TextToFind {
 
           <td><code>SCI_BACKTAB</code></td>
         </tr>
-	
+
         <tr>
           <td><code>SCI_SELECTIONDUPLICATE</code></td>
 
@@ -3884,8 +3884,8 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <code>SC_FOLDLEVELBASE</code> (1024) to allow unsigned arithmetic on folding levels. There are
     two addition flag bits. <code>SC_FOLDLEVELWHITEFLAG</code> indicates that the line is blank and
     allows it to be treated slightly different then its level may indicate. For example, blank
-    lines should generally not be fold points and will be considered part of the preceding section even though 
-    they may have a lesser fold level. 
+    lines should generally not be fold points and will be considered part of the preceding section even though
+    they may have a lesser fold level.
     <code>SC_FOLDLEVELHEADERFLAG</code> indicates that
     the line is a header (fold point).</p>
 
@@ -4642,7 +4642,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
           <td align="left"><code>line</code></td>
 
           <td align="left">The line number at which a fold level or marker change occurred. This is
-          0 if unused.</td>
+          0 if unused and may be -1 if more than one line changed.</td>
         </tr>
 
         <tr>
@@ -5097,16 +5097,16 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     </table>
 
     <h2 id="GTK">GTK+</h2>
-    <p>On GTK+, the following functions create a Scintilla widget, communicate with it and allow 
+    <p>On GTK+, the following functions create a Scintilla widget, communicate with it and allow
     resources to be released after all Scintilla widgets hace been destroyed.</p>
     <code><a class="message" href="#scintilla_new">GtkWidget *scintilla_new()</a><br />
      <a class="message" href="#scintilla_set_id">void scintilla_set_id(ScintillaObject *sci, uptr_t id)</a><br />
      <a class="message" href="#scintilla_send_message">sptr_t scintilla_send_message(ScintillaObject *sci,unsigned int iMessage, uptr_t wParam, sptr_t lParam)</a><br />
      <a class="message" href="#scintilla_release_resources">void scintilla_release_resources()</a><br />
      </code>
-     
+
     <p><b id="scintilla_new">GtkWidget *scintilla_new()</b></b><br />
-    Create a new Scintilla widget. The returned pointer can be added to a container and displayed in the same way as other 
+    Create a new Scintilla widget. The returned pointer can be added to a container and displayed in the same way as other
     widgets.</p>
 
     <p><b id="scintilla_set_id">void scintilla_set_id(ScintillaObject *sci, uptr_t id)</b></b><br />
