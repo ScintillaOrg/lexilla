@@ -810,6 +810,9 @@ int Editor::PositionFromLocationClose(Point pt) {
 					return pdoc->MovePositionOutsideChar(i + posLineStart, 1);
 				}
 			}
+			if (pt.x < (ll->positions[lineEnd] - subLineStart)) {
+				return pdoc->MovePositionOutsideChar(lineEnd + posLineStart, 1);
+			}
 		}
 	}
 
