@@ -764,7 +764,9 @@ struct TextToFind {
 
     <p><b id="SCI_REPLACETARGET">SCI_REPLACETARGET(int length, const char *text)</b><br />
      If <code>length</code> is -1, <code>text</code> is a zero terminated string, otherwise
-    <code>length</code> sets the number of character to replace the target with. The return value
+    <code>length</code> sets the number of character to replace the target with.
+	 After replacement, the target range refers to the replacement text.
+	 The return value
     is the length of the replacement string.<br />
     Note that the recommanded way to delete text in the document is to set the target to the text to be removed,
     and to perform a replace target with an empty string.</p>
@@ -774,7 +776,9 @@ struct TextToFind {
     <code>text</code> is a zero terminated string, otherwise <code>length</code> is the number of
     characters to use. The replacement string is formed from the text string with any sequences of
     <code>\1</code> through <code>\9</code> replaced by tagged matches from the most recent regular
-    expression search. The return value is the length of the replacement string.</p>
+    expression search.
+	 After replacement, the target range refers to the replacement text.
+	 The return value is the length of the replacement string.</p>
 
     <p>See also: <a class="message" href="#SCI_FINDTEXT"><code>SCI_FINDTEXT</code></a></p>
 
