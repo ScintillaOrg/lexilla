@@ -3786,6 +3786,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      4. <code>pDoc</code> is set as the new document for the window.<br />
      5. If <code>pDoc</code> was 0, a new, empty document is created and attached to the
     window.</p>
+     6. If <code>pDoc</code> was not 0, its reference count is increased by 1.</p>
 
     <p><b id="SCI_CREATEDOCUMENT">SCI_CREATEDOCUMENT</b><br />
      This message creates a new, empty document and returns a pointer to it. This document is not
