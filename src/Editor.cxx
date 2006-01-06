@@ -2724,7 +2724,6 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	//	paintingAllText, rcArea.left, rcArea.top, rcArea.right, rcArea.bottom);
 
 	RefreshStyleData();
-
 	RefreshPixMaps(surfaceWindow);
 
 	PRectangle rcClient = GetClientRectangle();
@@ -2755,6 +2754,8 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	if (needUpdateUI) {
 		NotifyUpdateUI();
 		needUpdateUI = false;
+		RefreshStyleData();
+		RefreshPixMaps(surfaceWindow);
 	}
 
 	// Call priority lines wrap on a window of lines which are likely
