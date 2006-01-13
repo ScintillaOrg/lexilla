@@ -558,21 +558,54 @@ const int MAX_US_LEN = 10000;
 void SurfaceImpl::DrawTextCommon(PRectangle rc, Font &font_, int ybase, const char *s, int len, UINT fuOptions) {
 	SetFont(font_);
 	RECT rcw = RectFromPRectangle(rc);
-	if (unicodeMode) {
-		wchar_t tbuf[MAX_US_LEN];
-		int tlen = UCS2FromUTF8(s, len, tbuf, MAX_US_LEN);
-		::ExtTextOutW(hdc, rc.left, ybase, fuOptions, &rcw, tbuf, tlen, NULL);
-	} else if (IsNT() || (codePage==0) || win9xACPSame) {
-		::ExtTextOutA(hdc, rc.left, ybase, fuOptions, &rcw, s,
-			Platform::Minimum(len, maxLenText), NULL);
+	SIZE sz={0,0};
+	int pos = 0;
+	int x = rc.left;
+
+	// Text drawing may fail if the text is too big.
+	// If it does fail, slice up into segments and draw each segment.
+	const int maxSegmentLength = 0x200;
+
+	if ((!unicodeMode) && (IsNT() || (codePage==0) || win9xACPSame)) {
+		// Use ANSI calls
+		int lenDraw = Platform::Minimum(len, maxLenText);
+		if (!::ExtTextOutA(hdc, x, ybase, fuOptions, &rcw, s, lenDraw, NULL)) {
+			while (lenDraw > pos) {
+				int seglen = Platform::Minimum(maxSegmentLength, lenDraw - pos);
+				if (!::ExtTextOutA(hdc, x, ybase, fuOptions, &rcw, s+pos, seglen, NULL)) {
+					PLATFORM_ASSERT(false);
+					return;
+				}
+				::GetTextExtentPoint32A(hdc, s+pos, seglen, &sz);
+				x += sz.cx;
+				pos += seglen;
+			}
+		}
 	} else {
-		// Support Asian string display in 9x English
+		// Use Unicode calls
 		wchar_t tbuf[MAX_US_LEN];
-		int tlen = ::MultiByteToWideChar(codePage, 0, s, len, NULL, 0);
-		if (tlen > MAX_US_LEN)
-			tlen = MAX_US_LEN;
-		::MultiByteToWideChar(codePage, 0, s, len, tbuf, tlen);
-		::ExtTextOutW(hdc, rc.left, ybase, fuOptions, &rcw, tbuf, tlen, NULL);
+		int tlen;
+		if (unicodeMode) {
+			tlen = UCS2FromUTF8(s, len, tbuf, MAX_US_LEN);
+		} else {
+			// Support Asian string display in 9x English
+			tlen = ::MultiByteToWideChar(codePage, 0, s, len, NULL, 0);
+			if (tlen > MAX_US_LEN)
+				tlen = MAX_US_LEN;
+			::MultiByteToWideChar(codePage, 0, s, len, tbuf, tlen);
+		}
+		if (!::ExtTextOutW(hdc, x, ybase, fuOptions, &rcw, tbuf, tlen, NULL)) {
+			while (tlen > pos) {
+				int seglen = Platform::Minimum(maxSegmentLength, tlen - pos);
+				if (!::ExtTextOutW(hdc, x, ybase, fuOptions, &rcw, tbuf+pos, seglen, NULL)) {
+					PLATFORM_ASSERT(false);
+					return;
+				}
+				::GetTextExtentPoint32W(hdc, tbuf+pos, seglen, &sz);
+				x += sz.cx;
+				pos += seglen;
+			}
+		}
 	}
 }
 
@@ -612,7 +645,7 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 		int tlen = UCS2FromUTF8(s, len, tbuf, MAX_US_LEN);
 		::GetTextExtentPoint32W(hdc, tbuf, tlen, &sz);
 	} else if (IsNT() || (codePage==0) || win9xACPSame) {
-		::GetTextExtentPoint32(hdc, s, Platform::Minimum(len, maxLenText), &sz);
+		::GetTextExtentPoint32A(hdc, s, Platform::Minimum(len, maxLenText), &sz);
 	} else {
 		// Support Asian string display in 9x English
 		wchar_t tbuf[MAX_US_LEN];
@@ -1415,9 +1448,9 @@ Point ListBoxX::MinTrackSize() const {
 }
 
 Point ListBoxX::MaxTrackSize() const {
-	PRectangle rc(0, 0, 
+	PRectangle rc(0, 0,
 		maxCharWidth * maxItemCharacters + TextInset.x * 2 +
-		 TextOffset() + ::GetSystemMetrics(SM_CXVSCROLL), 
+		 TextOffset() + ::GetSystemMetrics(SM_CXVSCROLL),
 		ItemHeight() * lti.Count());
 	AdjustWindowRect(&rc);
 	return Point(rc.Width(), rc.Height());
