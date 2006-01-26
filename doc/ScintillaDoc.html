@@ -2422,8 +2422,8 @@ struct TextToFind {
     <p><b id="SCI_GRABFOCUS">SCI_GRABFOCUS</b><br />
      <b id="SCI_SETFOCUS">SCI_SETFOCUS(bool focus)</b><br />
      <b id="SCI_GETFOCUS">SCI_GETFOCUS</b><br />
-     On GTK+, focus handling is more complicated than on Windows, so Scintilla can be told with
-    this message to grab the focus.</p>
+     Scintilla can be told to grab the focus with this message. This is needed more on GTK+ where
+	 focus handling is more complicated than on Windows.</p>
 
     <p>The internal focus flag can be set with <code>SCI_SETFOCUS</code>. This is used by clients
     that have complex focus requirements such as having their own window that gets the real focus
