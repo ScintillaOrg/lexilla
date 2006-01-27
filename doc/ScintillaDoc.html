@@ -3543,7 +3543,8 @@ struct TextToFind {
 
     <p><b id="SCI_NULL">SCI_NULL</b><br />
      The <code>SCI_NULL</code> does nothing and is the value assigned to keys that perform no
-    action.</p>
+    action. SCI_NULL ensures that keys do not propagate to the parent window as that may
+    cause focus to move. If you want the standard platform behaviour use the constant 0 instead.</p>
 
     <h2 id="PopupEditMenu">Popup edit menu</h2>
 
