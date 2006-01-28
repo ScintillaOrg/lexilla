@@ -137,6 +137,7 @@ LEXOBJS=\
 	$(DIR_O)\LexGui4Cli.obj \
 	$(DIR_O)\LexHaskell.obj \
 	$(DIR_O)\LexHTML.obj \
+	$(DIR_O)\LexInno.obj \
 	$(DIR_O)\LexKix.obj \
 	$(DIR_O)\LexLisp.obj \
 	$(DIR_O)\LexLout.obj \
@@ -326,6 +327,8 @@ $(DIR_O)\LexGui4Cli.obj: ..\src\LexGui4Cli.cxx $(LEX_HEADERS)
 $(DIR_O)\LexHaskell.obj: ..\src\LexHaskell.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexHTML.obj: ..\src\LexHTML.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexInno.obj: ..\src\LexInno.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexKix.obj: ..\src\LexKix.cxx $(LEX_HEADERS)
 

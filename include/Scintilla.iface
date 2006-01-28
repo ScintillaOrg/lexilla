@@ -1446,7 +1446,6 @@ get int GetXOffset=2398(,)
 fun void ChooseCaretX=2399(,)
 
 # Set the focus to this Scintilla widget.
-# GTK+ Specific.
 fun void GrabFocus=2400(,)
 
 enu CaretPolicy = CARET_
@@ -1819,6 +1818,7 @@ val SCLEX_SMALLTALK=72
 val SCLEX_FLAGSHIP=73
 val SCLEX_CSOUND=74
 val SCLEX_FREEBASIC=75
+val SCLEX_INNOSETUP=76
 
 # When a lexer specifies its language as SCLEX_AUTOMATIC it receives a
 # value assigned in sequence from SCLEX_AUTOMATIC+1.
@@ -2877,6 +2877,21 @@ val SCE_CSOUND_KRATE_VAR=12
 val SCE_CSOUND_IRATE_VAR=13
 val SCE_CSOUND_GLOBAL_VAR=14
 val SCE_CSOUND_STRINGEOL=15
+# Lexical states for SCLEX_INNOSETUP
+lex Inno=SCLEX_INNOSETUP SCE_INNO_
+val SCE_INNO_DEFAULT=0
+val SCE_INNO_COMMENT=1
+val SCE_INNO_KEYWORD=2
+val SCE_INNO_PARAMETER=3
+val SCE_INNO_SECTION=4
+val SCE_INNO_PREPROC=5
+val SCE_INNO_PREPROC_INLINE=6
+val SCE_INNO_COMMENT_PASCAL=7
+val SCE_INNO_KEYWORD_PASCAL=8
+val SCE_INNO_KEYWORD_USER=9
+val SCE_INNO_STRING_DOUBLE=10
+val SCE_INNO_STRING_SINGLE=11
+val SCE_INNO_IDENTIFIER=12
 
 # Events
 
