@@ -603,7 +603,7 @@ static void ColourisePropsLine(
 				i++;
 			if ((i < lengthLine) && (lineBuffer[i] == '=')) {
 				styler.ColourTo(startLine + i - 1, SCE_PROPS_DEFAULT);
-				styler.ColourTo(startLine + i, 3);
+				styler.ColourTo(startLine + i, SCE_PROPS_ASSIGNMENT);
 				styler.ColourTo(endPos, SCE_PROPS_DEFAULT);
 			} else {
 				styler.ColourTo(endPos, SCE_PROPS_DEFAULT);
