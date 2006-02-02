@@ -1676,6 +1676,7 @@ void Editor::LinesSplit(int pixelWidth) {
 					targetEnd += static_cast<int>(strlen(eol));
 				}
 			}
+			lineEnd = pdoc->LineFromPosition(targetEnd);
 		}
 		pdoc->EndUndoAction();
 	}
