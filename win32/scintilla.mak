@@ -146,6 +146,7 @@ LEXOBJS=\
 	$(DIR_O)\LexMPT.obj \
 	$(DIR_O)\LexMSSQL.obj \
 	$(DIR_O)\LexNsis.obj \
+	$(DIR_O)\LexOpal.obj \
 	$(DIR_O)\LexOthers.obj \
 	$(DIR_O)\LexPascal.obj \
 	$(DIR_O)\LexPB.obj \
@@ -347,6 +348,8 @@ $(DIR_O)\LexMPT.obj: ..\src\LexMPT.cxx $(LEX_HEADERS)
 $(DIR_O)\LexMSSQL.obj: ..\src\LexMSSQL.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexNsis.obj: ..\src\LexNsis.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexOpal.obj: ..\src\LexOpal.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexOthers.obj: ..\src\LexOthers.cxx $(LEX_HEADERS)
 
