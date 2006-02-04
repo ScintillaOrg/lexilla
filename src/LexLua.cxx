@@ -51,7 +51,8 @@ static inline bool IsLuaOperator(int ch) {
 		ch == '{' || ch == '}' || ch == '~' ||
 		ch == '[' || ch == ']' || ch == ';' ||
 		ch == '<' || ch == '>' || ch == ',' ||
-		ch == '.' || ch == '^' || ch == '%' || ch == ':') {
+		ch == '.' || ch == '^' || ch == '%' || ch == ':' ||
+		ch == '#') {
 		return true;
 	}
 	return false;
