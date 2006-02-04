@@ -38,7 +38,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 2/November/2005 NH</p>
+    <p>Last edited 4/February/2006 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -1915,14 +1915,25 @@ struct TextToFind {
         </tr>
 
         <tr>
+          <th align="left"><code>STYLE_CALLTIP</code></th>
+
+          <td>38</td>
+
+          <td> Call tips normally use the font attributes defined by <code>STYLE_DEFAULT</code>.
+          Use of <a class="message" href="#SCI_CALLTIPUSESTYLE"><code>SCI_CALLTIPUSESTYLE</code></a>
+	  causes call tips to use this style instead. Only the font face name, font size,
+          foreground and background colours and character set attributes are used.</td>
+        </tr>
+
+        <tr>
           <th align="left"><code>STYLE_LASTPREDEFINED</code></th>
 
           <td>39</td>
 
           <td>To make it easier for client code to discover the range of styles that are
           predefined, this is set to the style number of the last predefined style. This is
-          currently set to 39 and the last style with an identifier is 37, which reserves space for
-          future predefined styles.</td>
+          currently set to 39 and the last style with an identifier is 38, which reserves space
+          for one future predefined style.</td>
         </tr>
 
         <tr>
@@ -3159,9 +3170,16 @@ struct TextToFind {
     <h2 id="CallTips">Call tips</h2>
 
     <p>Call tips are small windows displaying the arguments to a function and are displayed after
-    the user has typed the name of the function. There is some interaction between call tips and
-    autocompletion lists in that showing a call tip cancels any active autocompletion list, and
-    vice versa.</p>
+    the user has typed the name of the function. They normally display characters using the font
+    facename, size and character set defined by
+    <code><a class="message" href="#StyleDefinition">STYLE_DEFAULT</a></code>. You can choose to
+    use <code><a class="message" href="#StyleDefinition">STYLE_CALLTIP</a></code> to define the
+    facename, size, foreground and background colours and character set with
+    <code><a class="message" href="#SCI_CALLTIPUSESTYLE">SCI_CALLTIPUSESTYLE</a></code>.
+    This also enables support for Tab characters.
+
+    There is some interaction between call tips and autocompletion lists in that showing a
+    call tip cancels any active autocompletion list, and vice versa.</p>
 
     <p>Call tips can highlight part of the text within them. You could use this to highlight the
     current argument to a function by counting the number of commas (or whatever separator your
@@ -3192,17 +3210,22 @@ struct TextToFind {
      <a class="message" href="#SCI_CALLTIPSETBACK">SCI_CALLTIPSETBACK(int colour)</a><br />
      <a class="message" href="#SCI_CALLTIPSETFORE">SCI_CALLTIPSETFORE(int colour)</a><br />
      <a class="message" href="#SCI_CALLTIPSETFOREHLT">SCI_CALLTIPSETFOREHLT(int colour)</a><br />
+     <a class="message" href="#SCI_CALLTIPUSESTYLE">SCI_CALLTIPUSESTYLE(int tabsize)</a><br />
     </code>
-
-
 
     <p><b id="SCI_CALLTIPSHOW">SCI_CALLTIPSHOW(int posStart, const char *definition)</b><br />
      This message starts the process by displaying the call tip window. If a call tip is already
     active, this has no effect.<br />
      <code>posStart</code> is the position in the document at which to align the call tip. The call
-    tip text is aligned to start 1 line below this character.<br />
+    tip text is aligned to start 1 line below this character unless you have included up and/or
+    down arrows in the call tip text in which case the tip is aligned to the right-hand edge of
+    the rightmost arrow. The assumption is that you will start the text with something like
+    "\001 1 of 3 \002".<br />
      <code>definition</code> is the call tip text. This can contain multiple lines separated by
-    '\n' (Line Feed, ASCII code 10) characters.</p>
+    '\n' (Line Feed, ASCII code 10) characters. Do not include '\r' (Carriage Return, ASCII
+     code 13), as this will most likely print as an empty box. '\t' (Tab, ASCII code 9) is
+     supported if you set a tabsize with
+    <code><a class="message" href="#SCI_CALLTIPUSESTYLE">SCI_CALLTIPUSESTYLE</a></code>.<br /></p>
 
     <p><b id="SCI_CALLTIPCANCEL">SCI_CALLTIPCANCEL</b><br />
      This message cancels any displayed call tip. Scintilla will also cancel call tips for you if
@@ -3233,14 +3256,24 @@ struct TextToFind {
 
     <p><b id="SCI_CALLTIPSETBACK">SCI_CALLTIPSETBACK(int colour)</b><br />
      The background colour of call tips can be set with this message; the default colour is white.
-    It is not a good idea to set a dark colour as the background as the unselected text is drawn in
-    mid gray and the selected text in a dark blue.</p>
+    It is not a good idea to set a dark colour as the background as the default colour for normal
+    calltip text is mid gray and the defaultcolour for highlighted text is dark blue. This also
+    sets the background colour of <code>STYLE_CALLTIP</code>.</p>
 
     <p><b id="SCI_CALLTIPSETFORE">SCI_CALLTIPSETFORE(int colour)</b><br />
-     The colour of call tip text can be set with this message; the default colour is mid gray.</p>
+     The colour of call tip text can be set with this message; the default colour is mid gray.
+    This also sets the foreground colour of <code>STYLE_CALLTIP</code>.</p>
 
     <p><b id="SCI_CALLTIPSETFOREHLT">SCI_CALLTIPSETFOREHLT(int colour)</b><br />
-     The colour of highlighted call tip text can be set with this message; the default colour is dark blue.</p>
+     The colour of highlighted call tip text can be set with this message; the default colour
+    is dark blue.</p>
+
+    <p><b id="SCI_CALLTIPUSESTYLE">SCI_CALLTIPUSESTYLE(int tabsize)</b><br />
+     This message changes the style used for call tips from <code>STYLE_DEFAULT</code> to
+    <code>STYLE_CALLTIP</code> and sets a tab size in screen pixels. If <code>tabsize</code> is
+    less than 1, Tab characters are not treated specially. Once this call has been used, the
+    call tip foreground and background colours are also taken from the style.</p>
+
 
     <h2 id="KeyboardCommands">Keyboard commands</h2>
 

@@ -154,6 +154,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define STYLE_BRACEBAD 35
 #define STYLE_CONTROLCHAR 36
 #define STYLE_INDENTGUIDE 37
+#define STYLE_CALLTIP 38
 #define STYLE_LASTPREDEFINED 39
 #define STYLE_MAX 127
 #define SC_CHARSET_ANSI 0
@@ -358,6 +359,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_CALLTIPSETBACK 2205
 #define SCI_CALLTIPSETFORE 2206
 #define SCI_CALLTIPSETFOREHLT 2207
+#define SCI_CALLTIPUSESTYLE 2212
 #define SCI_VISIBLEFROMDOCLINE 2220
 #define SCI_DOCLINEFROMVISIBLE 2221
 #define SCI_WRAPCOUNT 2235

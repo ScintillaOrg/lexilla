@@ -368,12 +368,19 @@ int ScintillaBase::AutoCompleteGetCurrent() {
 void ScintillaBase::CallTipShow(Point pt, const char *defn) {
 	AutoCompleteCancel();
 	pt.y += vs.lineHeight;
+	// If container knows about STYLE_CALLTIP then use it in place of the
+	// STYLE_DEFAULT for the face name, size and character set. Also use it
+	// for the foreground and background colour.
+	int ctStyle = ct.UseStyleCallTip() ? STYLE_CALLTIP : STYLE_DEFAULT;
+	if (ct.UseStyleCallTip()) {
+		ct.SetForeBack(vs.styles[STYLE_CALLTIP].fore, vs.styles[STYLE_CALLTIP].back);
+	}
 	PRectangle rc = ct.CallTipStart(currentPos, pt,
 		defn,
-		vs.styles[STYLE_DEFAULT].fontName,
-		vs.styles[STYLE_DEFAULT].sizeZoomed,
+		vs.styles[ctStyle].fontName,
+		vs.styles[ctStyle].sizeZoomed,
 		CodePage(),
-		vs.styles[STYLE_DEFAULT].characterSet,
+		vs.styles[ctStyle].characterSet,
 		wMain);
 	// If the call-tip window would be out of the client
 	// space, adjust so it displays above the text.
@@ -624,16 +631,23 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 
 	case SCI_CALLTIPSETBACK:
 		ct.colourBG = ColourDesired(wParam);
+		vs.styles[STYLE_CALLTIP].fore = ct.colourBG;
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_CALLTIPSETFORE:
 		ct.colourUnSel = ColourDesired(wParam);
+		vs.styles[STYLE_CALLTIP].fore = ct.colourUnSel;
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_CALLTIPSETFOREHLT:
 		ct.colourSel = ColourDesired(wParam);
+		InvalidateStyleRedraw();
+		break;
+
+	case SCI_CALLTIPUSESTYLE:
+		ct.SetTabSize((int)wParam);
 		InvalidateStyleRedraw();
 		break;
 

@@ -278,6 +278,10 @@ void ViewStyle::ClearStyles() {
 		}
 	}
 	styles[STYLE_LINENUMBER].back.desired = Platform::Chrome();
+
+	// Set call tip fore/back to match the values previously set for call tips
+	styles[STYLE_CALLTIP].back.desired = ColourDesired(0xff, 0xff, 0xff);
+	styles[STYLE_CALLTIP].fore.desired = ColourDesired(0x80, 0x80, 0x80);
 }
 
 void ViewStyle::SetStyleFontName(int styleIndex, const char *name) {
