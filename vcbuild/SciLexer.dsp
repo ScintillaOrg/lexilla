@@ -242,6 +242,10 @@ SOURCE=..\src\LexHTML.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexInno.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexKix.cxx
 # End Source File
 # Begin Source File
@@ -279,6 +283,10 @@ SOURCE=..\src\LexMSSQL.cxx
 # Begin Source File
 
 SOURCE=..\src\LexNsis.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexOpal.cxx
 # End Source File
 # Begin Source File
 
