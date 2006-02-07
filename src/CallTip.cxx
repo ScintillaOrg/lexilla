@@ -14,7 +14,7 @@
 #include "CallTip.h"
 
 static const int insetX = 5;    // text inset in x from calltip border
-const int widthArrow = 14;
+static const int widthArrow = 14;
 
 CallTip::CallTip() {
 	wCallTip = 0;
