@@ -328,6 +328,7 @@
 #define SCE_PROPS_SECTION 2
 #define SCE_PROPS_ASSIGNMENT 3
 #define SCE_PROPS_DEFVAL 4
+#define SCE_PROPS_KEY 5
 #define SCE_L_DEFAULT 0
 #define SCE_L_COMMAND 1
 #define SCE_L_TAG 2
