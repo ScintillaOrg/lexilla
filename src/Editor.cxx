@@ -4854,7 +4854,7 @@ void Editor::CopyRangeToClipboard(int start, int end) {
 
 void Editor::CopyText(int length, const char *text) {
 	SelectionText selectedText;
-	selectedText.Copy(text, length,
+	selectedText.Copy(text, length + 1,
 		pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false);
 	CopyToClipboard(selectedText);
 }
