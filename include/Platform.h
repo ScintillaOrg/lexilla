@@ -236,12 +236,15 @@ class Window;	// Forward declaration for Palette
  */
 class Palette {
 	int used;
-	enum {numEntries = 100};
-	ColourPair entries[numEntries];
+	int size;
+	ColourPair *entries;
 #if PLAT_GTK
 	void *allocatedPalette; // GdkColor *
 	int allocatedLen;
 #endif
+	// Private so Palette objects can not be copied
+	Palette(const Palette &) {}
+	Palette &operator=(const Palette &) { return *this; }
 public:
 #if PLAT_WIN
 	void *hpal;

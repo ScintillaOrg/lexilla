@@ -85,10 +85,14 @@ Palette::Palette() {
 	used = 0;
 	allowRealization = false;
 	hpal = 0;
+	size = 100;
+	entries = new ColourPair[size];
 }
 
 Palette::~Palette() {
 	Release();
+	delete []entries;
+	entries = 0;
 }
 
 void Palette::Release() {
@@ -96,6 +100,9 @@ void Palette::Release() {
 	if (hpal)
 		::DeleteObject(hpal);
 	hpal = 0;
+	delete []entries;
+	size = 100;
+	entries = new ColourPair[size];
 }
 
 /**
@@ -110,11 +117,20 @@ void Palette::WantFind(ColourPair &cp, bool want) {
 				return;
 		}
 
-		if (used < numEntries) {
-			entries[used].desired = cp.desired;
-			entries[used].allocated.Set(cp.desired.AsLong());
-			used++;
+		if (used >= size) {
+			int sizeNew = size * 2;
+			ColourPair *entriesNew = new ColourPair[sizeNew];
+			for (int j=0; j<size; j++) {
+				entriesNew[j] = entries[j];
+			}
+			delete []entries;
+			entries = entriesNew;
+			size = sizeNew;
 		}
+
+		entries[used].desired = cp.desired;
+		entries[used].allocated.Set(cp.desired.AsLong());
+		used++;
 	} else {
 		for (int i=0; i < used; i++) {
 			if (entries[i].desired == cp.desired) {

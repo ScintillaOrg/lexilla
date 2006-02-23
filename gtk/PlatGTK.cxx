@@ -192,10 +192,14 @@ Palette::Palette() {
 	allowRealization = false;
 	allocatedPalette = 0;
 	allocatedLen = 0;
+	size = 100;
+	entries = new ColourPair[size];
 }
 
 Palette::~Palette() {
 	Release();
+	delete []entries;
+	entries = 0;
 }
 
 void Palette::Release() {
@@ -203,6 +207,9 @@ void Palette::Release() {
 	delete [](reinterpret_cast<GdkColor *>(allocatedPalette));
 	allocatedPalette = 0;
 	allocatedLen = 0;
+	delete []entries;
+	size = 100;
+	entries = new ColourPair[size];
 }
 
 // This method either adds a colour to the list of wanted colours (want==true)
@@ -210,18 +217,27 @@ void Palette::Release() {
 // This is one method to make it easier to keep the code for wanting and retrieving in sync.
 void Palette::WantFind(ColourPair &cp, bool want) {
 	if (want) {
-		for (int i = 0; i < used; i++) {
+		for (int i=0; i < used; i++) {
 			if (entries[i].desired == cp.desired)
 				return;
 		}
 
-		if (used < numEntries) {
-			entries[used].desired = cp.desired;
-			entries[used].allocated.Set(cp.desired.AsLong());
-			used++;
+		if (used >= size) {
+			int sizeNew = size * 2;
+			ColourPair *entriesNew = new ColourPair[sizeNew];
+			for (int j=0; j<size; j++) {
+				entriesNew[j] = entries[j];
+			}
+			delete []entries;
+			entries = entriesNew;
+			size = sizeNew;
 		}
+
+		entries[used].desired = cp.desired;
+		entries[used].allocated.Set(cp.desired.AsLong());
+		used++;
 	} else {
-		for (int i = 0; i < used; i++) {
+		for (int i=0; i < used; i++) {
 			if (entries[i].desired == cp.desired) {
 				cp.allocated = entries[i].allocated;
 				return;
@@ -2367,7 +2383,7 @@ void Menu::Show(Point pt, Window &) {
 		pt.y = screenHeight - requisition.height;
 	}
 #if GTK_MAJOR_VERSION >= 2
-	gtk_item_factory_popup(factory, pt.x - 4, pt.y - 4, 3, 
+	gtk_item_factory_popup(factory, pt.x - 4, pt.y - 4, 3,
 		gtk_get_current_event_time());
 #else
 	gtk_item_factory_popup(factory, pt.x - 4, pt.y - 4, 3, 0);
