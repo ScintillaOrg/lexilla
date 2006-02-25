@@ -82,7 +82,8 @@ clean:
 deps:
 	$(CC) -MM `$(CONFIGFLAGS)` $(CXXFLAGS) *.cxx ../src/*.cxx >deps.mak
 
-$(COMPLIB): DocumentAccessor.o WindowAccessor.o KeyWords.o StyleContext.o Document.o CallTip.o \
+$(COMPLIB): DocumentAccessor.o WindowAccessor.o KeyWords.o StyleContext.o \
+	CharClassify.o Document.o CallTip.o \
 	ScintillaBase.o ContractionState.o Editor.o ExternalLexer.o PropSet.o PlatGTK.o \
 	KeyMap.o LineMarker.o ScintillaGTK.o CellBuffer.o ViewStyle.o \
 	RESearch.o Style.o Indicator.o AutoComplete.o UniConversion.o XPM.o \

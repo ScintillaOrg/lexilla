@@ -174,7 +174,13 @@
  *	matches:	foo-foo fo-fo fob-fob foobar-foobar ...
  */
 
+#include "CharClassify.h"
 #include "RESearch.h"
+
+// Shut up annoying Visual C++ warnings:
+#ifdef _MSC_VER
+#pragma warning(disable: 4514)
+#endif
 
 #define OKP     1
 #define NOP     0
@@ -206,7 +212,15 @@ const char bitarr[] = {1,2,4,8,16,32,64,'\200'};
 
 #define badpat(x)	(*nfa = END, x)
 
-RESearch::RESearch() {
+/*
+ * character classification table for word boundary operators BOW
+ * and EOW is passed in by the creator of this object (Scintilla
+ * Document). The Document default state is that word chars are:
+ * 0-9,a-z, A-Z and _
+ */
+
+RESearch::RESearch(CharClassify *charClassTable) {
+	charClass = charClassTable;
 	Init();
 }
 
@@ -287,7 +301,7 @@ const char *RESearch::Compile(const char *pat, int length, bool caseSensitive, b
 	char *mp=nfa;          /* nfa pointer       */
 	char *lp;              /* saved pointer..   */
 	char *sp=nfa;          /* another one..     */
-    char *mpMax = mp + MAXNFA - BITBLK - 10;
+	char *mpMax = mp + MAXNFA - BITBLK - 10;
 
 	int tagi = 0;          /* tag stack index   */
 	int tagc = 1;          /* actual tag count  */
@@ -624,33 +638,6 @@ int RESearch::Execute(CharacterIndexer &ci, int lp, int endp) {
 
 extern void re_fail(char *,char);
 
-/*
- * character classification table for word boundary operators BOW
- * and EOW. the reason for not using ctype macros is that we can
- * let the user add into our own table. see RESearch::ModifyWord. This table
- * is not in the bitset form, since we may wish to extend it in the
- * future for other character classifications.
- *
- *	TRUE for 0-9 A-Z a-z _
- */
-static char chrtyp[MAXCHR] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
-	0, 0, 0, 0, 0, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 0, 0, 0, 0, 1, 0, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 0, 0, 0, 0, 0
-	};
-
-#define inascii(x)	(0177&(x))
-#define iswordc(x) 	chrtyp[inascii(x)]
 #define isinset(x,y) 	((x)[((y)&BLKIND)>>3] & bitarr[(y)&BITIND])
 
 /*
@@ -754,35 +741,6 @@ int RESearch::PMatch(CharacterIndexer &ci, int lp, int endp, char *ap) {
 			return NOTFOUND;
 		}
 	return lp;
-}
-
-/*
- * RESearch::ModifyWord:
- *	add new characters into the word table to change RESearch::Execute's
- *	understanding of what a word should look like. Note that we
- *	only accept additions into the word definition.
- *
- *	If the string parameter is 0 or null string, the table is
- *	reset back to the default containing A-Z a-z 0-9 _. [We use
- *	the compact bitset representation for the default table]
- */
-
-static char deftab[16] = {
-	0, 0, 0, 0, 0, 0, '\377', 003, '\376', '\377', '\377', '\207',
-	'\376', '\377', '\377', 007
-};
-
-void RESearch::ModifyWord(char *s) {
-	int i;
-
-	if (!s || !*s) {
-		for (i = 0; i < MAXCHR; i++)
-			if (!isinset(deftab,i))
-				iswordc(i) = 0;
-	}
-	else
-		while(*s)
-			iswordc(*s++) = 1;
 }
 
 /*

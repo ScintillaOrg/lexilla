@@ -37,6 +37,7 @@
 #include "Style.h"
 #include "AutoComplete.h"
 #include "ViewStyle.h"
+#include "CharClassify.h"
 #include "Document.h"
 #include "Editor.h"
 #include "SString.h"

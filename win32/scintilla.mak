@@ -91,6 +91,7 @@ SOBJS=\
 	$(DIR_O)\CallTip.obj \
 	$(DIR_O)\CellBuffer.obj \
 	$(DIR_O)\ContractionState.obj \
+	$(DIR_O)\CharClassify.obj \
 	$(DIR_O)\Document.obj \
 	$(DIR_O)\Editor.obj \
 	$(DIR_O)\Indicator.obj \
@@ -174,6 +175,7 @@ LOBJS=\
 	$(DIR_O)\CallTip.obj \
 	$(DIR_O)\CellBuffer.obj \
 	$(DIR_O)\ContractionState.obj \
+	$(DIR_O)\CharClassify.obj \
 	$(DIR_O)\Document.obj \
 	$(DIR_O)\DocumentAccessor.obj \
 	$(DIR_O)\Editor.obj \
@@ -248,18 +250,19 @@ $(DIR_O)\CellBuffer.obj: ../src/CellBuffer.cxx ../include/Platform.h \
  ../include/Scintilla.h ../src/SVector.h ../src/CellBuffer.h
 $(DIR_O)\ContractionState.obj: ../src/ContractionState.cxx ../include/Platform.h \
  ../src/ContractionState.h
+$(DIR_O)\CharClassify.obj: ../src/CharClassify.cxx ../src/CharClassify.h
 $(DIR_O)\Document.obj: ../src/Document.cxx ../include/Platform.h \
  ../include/Scintilla.h ../src/SVector.h ../src/CellBuffer.h \
- ../src/Document.h ../src/RESearch.h
+  ../src/CharClassify.h ../src/Document.h ../src/RESearch.h
 $(DIR_O)\DocumentAccessor.obj: ../src/DocumentAccessor.cxx ../include/Platform.h \
  ../include/PropSet.h ../include/SString.h ../src/SVector.h \
  ../include/Accessor.h ../src/DocumentAccessor.h ../src/CellBuffer.h \
- ../include/Scintilla.h ../src/Document.h
+ ../include/Scintilla.h ../src/CharClassify.h ../src/Document.h
 $(DIR_O)\Editor.obj: ../src/Editor.cxx ../include/Platform.h \
  ../include/Scintilla.h ../src/ContractionState.h ../src/SVector.h \
  ../src/CellBuffer.h ../src/KeyMap.h ../src/Indicator.h \
  ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
- ../src/Document.h ../src/Editor.h ../src/XPM.h
+ ../src/CharClassify.h ../src/Document.h ../src/Editor.h ../src/XPM.h
 $(DIR_O)\ExternalLexer.obj: ../src/ExternalLexer.cxx ../include/Platform.h \
  ../include/SciLexer.h ../include/PropSet.h ../include/SString.h \
  ../include/Accessor.h ../src/DocumentAccessor.h ../include/KeyWords.h \
@@ -404,27 +407,30 @@ $(DIR_O)\ScintillaBase.obj: ../src/ScintillaBase.cxx ../include/Platform.h \
  ../src/ContractionState.h ../src/SVector.h ../src/CellBuffer.h \
  ../src/CallTip.h ../src/KeyMap.h ../src/Indicator.h \
  ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
- ../src/AutoComplete.h ../src/Document.h ../src/Editor.h \
+ ../src/AutoComplete.h ../src/CharClassify.h ../src/Document.h ../src/Editor.h \
  ../src/ScintillaBase.h ../src/XPM.h
 $(DIR_O)\ScintillaBaseL.obj: ..\src\ScintillaBase.cxx ..\include\Platform.h ..\include\Scintilla.h ..\include\SciLexer.h \
  ..\src\ContractionState.h ..\src\CellBuffer.h ..\src\CallTip.h ..\src\KeyMap.h ..\src\Indicator.h \
- ..\src\LineMarker.h ..\src\Style.h ..\src\AutoComplete.h ..\src\ViewStyle.h ..\src\Document.h ..\src\Editor.h \
+ ..\src\LineMarker.h ..\src\Style.h ..\src\AutoComplete.h ..\src\ViewStyle.h ../src/CharClassify.h \
+ ..\src\Document.h ..\src\Editor.h \
  ..\src\ScintillaBase.h ..\include\PropSet.h ..\include\SString.h ..\include\Accessor.h \
  ..\src\DocumentAccessor.h ..\include\KeyWords.h ../src/XPM.h
 $(DIR_O)\ScintillaWin.obj: ScintillaWin.cxx ../include/Platform.h \
  ../include/Scintilla.h ../include/SString.h ../src/ContractionState.h \
  ../src/SVector.h ../src/CellBuffer.h ../src/CallTip.h ../src/KeyMap.h \
  ../src/Indicator.h ../src/LineMarker.h ../src/Style.h \
- ../src/AutoComplete.h ../src/ViewStyle.h ../src/Document.h \
+ ../src/AutoComplete.h ../src/ViewStyle.h ../src/CharClassify.h ../src/Document.h \
  ../src/Editor.h ../src/ScintillaBase.h ../src/UniConversion.h ../src/XPM.h
 $(DIR_O)\ScintillaWinL.obj: ScintillaWin.cxx ..\include\Platform.h ..\include\Scintilla.h ..\include\SciLexer.h \
  ..\src\ContractionState.h ..\src\CellBuffer.h ..\src\CallTip.h ..\src\KeyMap.h ..\src\Indicator.h \
- ..\src\LineMarker.h ..\src\Style.h ..\src\AutoComplete.h ..\src\ViewStyle.h ..\src\Document.h ..\src\Editor.h \
+ ..\src\LineMarker.h ..\src\Style.h ..\src\AutoComplete.h ..\src\ViewStyle.h ../src/CharClassify.h \
+ ..\src\Document.h ..\src\Editor.h \
  ..\src\ScintillaBase.h ..\include\PropSet.h \
  ..\include\SString.h ..\include\Accessor.h ..\include\KeyWords.h ..\src\UniConversion.h ../src/XPM.h
 $(DIR_O)\ScintillaWinS.obj: ScintillaWin.cxx ..\include\Platform.h ..\include\Scintilla.h \
  ..\src\ContractionState.h ..\src\CellBuffer.h ..\src\CallTip.h ..\src\KeyMap.h ..\src\Indicator.h \
- ..\src\LineMarker.h ..\src\Style.h ..\src\AutoComplete.h ..\src\ViewStyle.h ..\src\Document.h ..\src\Editor.h \
+ ..\src\LineMarker.h ..\src\Style.h ..\src\AutoComplete.h ..\src\ViewStyle.h ../src/CharClassify.h \
+ ..\src\Document.h ..\src\Editor.h \
  ..\src\ScintillaBase.h ..\src\UniConversion.h
 $(DIR_O)\Style.obj: ../src/Style.cxx ../include/Platform.h ../include/Scintilla.h \
  ../src/Style.h

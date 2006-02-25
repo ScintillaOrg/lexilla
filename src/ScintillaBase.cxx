@@ -31,6 +31,7 @@
 #include "Style.h"
 #include "ViewStyle.h"
 #include "AutoComplete.h"
+#include "CharClassify.h"
 #include "Document.h"
 #include "Editor.h"
 #include "ScintillaBase.h"

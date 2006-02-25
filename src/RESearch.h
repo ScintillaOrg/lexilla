@@ -18,7 +18,7 @@
 #define BITBLK	MAXCHR/CHRBIT
 
 class CharacterIndexer {
-public: 
+public:
 	virtual char CharAt(int index)=0;
 	virtual ~CharacterIndexer() {
 	}
@@ -27,7 +27,7 @@ public:
 class RESearch {
 
 public:
-	RESearch();
+	RESearch(CharClassify *charClassTable);
 	~RESearch();
 	void Init();
 	void Clear();
@@ -36,7 +36,6 @@ public:
 	void ChSetWithCase(char c, bool caseSensitive);
 	const char *Compile(const char *pat, int length, bool caseSensitive, bool posix);
 	int Execute(CharacterIndexer &ci, int lp, int endp);
-	void ModifyWord(char *s);
 	int Substitute(CharacterIndexer &ci, char *src, char *dst);
 
 	enum {MAXTAG=10};
@@ -57,6 +56,10 @@ private:
 	char bittab[BITBLK];		/* bit table for CCL */
 						/* pre-set bits...   */
 	int failure;
+	CharClassify *charClass;
+	bool iswordc(unsigned char x) {
+		return charClass->IsWord(x);
+	}
 };
 
 #endif
