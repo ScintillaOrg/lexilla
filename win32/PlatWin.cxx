@@ -64,9 +64,14 @@ static LONG_PTR GetWindowLongPtr(HWND hWnd, int nIndex) {
 }
 #endif
 
+typedef BOOL (WINAPI *AlphaBlendSig)(HDC, int, int, int, int, HDC, int, int, int, int, BLENDFUNCTION);
+
 static CRITICAL_SECTION crPlatformLock;
 static HINSTANCE hinstPlatformRes = 0;
 static bool onNT = false;
+static HMODULE hDLLImage = 0;
+static AlphaBlendSig AlphaBlendFn = 0;
+
 
 bool IsNT() {
 	return onNT;
@@ -355,6 +360,8 @@ public:
 	void FillRectangle(PRectangle rc, ColourAllocated back);
 	void FillRectangle(PRectangle rc, Surface &surfacePattern);
 	void RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back);
+	void AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated fill, int alphaFill,
+		ColourAllocated outline, int alphaOutline, int flags);
 	void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back);
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource);
 
@@ -555,6 +562,79 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAl
 		rc.left + 1, rc.top,
 		rc.right - 1, rc.bottom,
 		8, 8);
+}
+
+// Plot a point into a DWORD buffer symetrically to all 4 qudrants
+static void AllFour(DWORD *pixels, int width, int height, int x, int y, DWORD val) {
+	pixels[y*width+x] = val;
+	pixels[y*width+width-1-x] = val;
+	pixels[(height-1-y)*width+x] = val;
+	pixels[(height-1-y)*width+width-1-x] = val;
+}
+
+#ifndef AC_SRC_OVER
+#define AC_SRC_OVER                 0x00
+#endif
+#ifndef AC_SRC_ALPHA
+#define AC_SRC_ALPHA		0x01
+#endif
+
+void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated fill, int alphaFill,
+		ColourAllocated outline, int alphaOutline, int /* flags*/ ) {
+	if (AlphaBlendFn) {
+		HDC hMemDC = ::CreateCompatibleDC(reinterpret_cast<HDC>(hdc));
+		int width = rc.Width();
+		int height = rc.Height();
+		// Ensure not distorted too much by corners when small
+		cornerSize = Platform::Minimum(cornerSize, (Platform::Minimum(width, height) / 2) - 2);
+		BITMAPINFO bpih = {sizeof(BITMAPINFOHEADER), width, height, 1, 32, BI_RGB, 0, 0, 0, 0, 0};
+		void *image = 0;
+		HBITMAP hbmMem = CreateDIBSection(reinterpret_cast<HDC>(hMemDC), &bpih,
+			DIB_RGB_COLORS, &image, NULL, 0);
+
+		HBITMAP hbmOld = SelectBitmap(hMemDC, hbmMem);
+
+		byte pixVal[4] = {0};
+		DWORD valEmpty = *(reinterpret_cast<DWORD *>(pixVal));
+		pixVal[0] = static_cast<byte>(GetBValue(fill.AsLong()) * alphaFill / 255);
+		pixVal[1] = static_cast<byte>(GetGValue(fill.AsLong()) * alphaFill / 255);
+		pixVal[2] = static_cast<byte>(GetRValue(fill.AsLong()) * alphaFill / 255);
+		pixVal[3] = static_cast<byte>(alphaFill);
+		DWORD valFill = *(reinterpret_cast<DWORD *>(pixVal));
+		pixVal[0] = static_cast<byte>(GetBValue(outline.AsLong()) * alphaOutline / 255);
+		pixVal[1] = static_cast<byte>(GetGValue(outline.AsLong()) * alphaOutline / 255);
+		pixVal[2] = static_cast<byte>(GetRValue(outline.AsLong()) * alphaOutline / 255);
+		pixVal[3] = static_cast<byte>(alphaOutline);
+		DWORD valOutline = *(reinterpret_cast<DWORD *>(pixVal));
+		DWORD *pixels = reinterpret_cast<DWORD *>(image);
+		for (int y=0; y<height; y++) {
+			for (int x=0; x<width; x++) {
+				if ((x==0) || (x==width-1) || (y == 0) || (y == height-1)) {
+					pixels[y*width+x] = valOutline;
+				} else {
+					pixels[y*width+x] = valFill;
+				}
+			}
+		}
+		for (int c=0;c<cornerSize; c++) {
+			for (int x=0;x<c+1; x++) {
+				AllFour(pixels, width, height, x, c-x, valEmpty);
+			}
+		}
+		for (int x=1;x<cornerSize; x++) {
+			AllFour(pixels, width, height, x, cornerSize-x, valOutline);
+		}
+
+		BLENDFUNCTION merge = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
+
+		AlphaBlendFn(reinterpret_cast<HDC>(hdc), rc.left, rc.top, width, height, hMemDC, 0, 0, width, height, merge);
+
+		SelectBitmap(hMemDC, hbmOld);
+		::DeleteObject(hbmMem);
+		::DeleteObject(hMemDC);
+	} else {
+		RectangleDraw(rc, outline, fill);
+	}
 }
 
 void SurfaceImpl::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
@@ -2081,6 +2161,12 @@ void Platform_Initialise(void *hInstance) {
 	onNT = osv.dwPlatformId == VER_PLATFORM_WIN32_NT;
 	::InitializeCriticalSection(&crPlatformLock);
 	hinstPlatformRes = reinterpret_cast<HINSTANCE>(hInstance);
+	if (!hDLLImage) {
+		hDLLImage = ::LoadLibrary(TEXT("Msimg32"));
+	}
+	if (hDLLImage) {
+		AlphaBlendFn = (AlphaBlendSig)::GetProcAddress(hDLLImage, "AlphaBlend");
+	}
 	ListBoxX_Register();
 }
 

@@ -131,6 +131,17 @@
         </tr>
 
         <tr>
+          <th align="left" id="alpha">alpha</th>
+
+          <td>Translucency is set using an alpha value.
+		    Alpha ranges from 0 (SC_ALPHA_TRANSPARENT) which is completely transparent to
+			 255 (SC_ALPHA_OPAQUE) which is opaque. The value 256 (SC_ALPHA_NOALPHA)
+			 is opaque and uses code that is not alpha-aware and may be faster. Not all platforms support
+			 translucency and only some Scintilla features implement translucency.
+			 The default alpha value for most features is SC_ALPHA_NOALPHA.</td>
+        </tr>
+
+        <tr>
           <th align="left">&lt;unused&gt;</th>
 
           <td>This is an unused argument. Setting it to 0 will ensure compatibility with future
@@ -2110,6 +2121,8 @@ struct TextToFind {
      <a class="message" href="#SCI_GETCARETLINEVISIBLE">SCI_GETCARETLINEVISIBLE</a><br />
      <a class="message" href="#SCI_SETCARETLINEBACK">SCI_SETCARETLINEBACK(int colour)</a><br />
      <a class="message" href="#SCI_GETCARETLINEBACK">SCI_GETCARETLINEBACK</a><br />
+     <a class="message" href="#SCI_SETCARETLINEBACKALPHA">SCI_SETCARETLINEBACKALPHA(int alpha)</a><br />
+     <a class="message" href="#SCI_GETCARETLINEBACKALPHA">SCI_GETCARETLINEBACKALPHA</a><br />
      <a class="message" href="#SCI_SETCARETPERIOD">SCI_SETCARETPERIOD(int milliseconds)</a><br />
      <a class="message" href="#SCI_GETCARETPERIOD">SCI_GETCARETPERIOD</a><br />
      <a class="message" href="#SCI_SETCARETWIDTH">SCI_SETCARETWIDTH(int pixels)</a><br />
@@ -2146,13 +2159,20 @@ struct TextToFind {
      <b id="SCI_SETCARETLINEBACK">SCI_SETCARETLINEBACK(int <a class="jump"
     href="#colour">colour</a>)</b><br />
      <b id="SCI_GETCARETLINEBACK">SCI_GETCARETLINEBACK</b><br />
+     <b id="SCI_SETCARETLINEBACKALPHA">SCI_SETCARETLINEBACKALPHA(int <a class="jump" href="#alpha">alpha</a>)</b><br />
+     <b id="SCI_GETCARETLINEBACKALPHA">SCI_GETCARETLINEBACKALPHA</b><br />
      You can choose to make the background colour of the line containing the caret different with
     these messages. To do this, set the desired background colour with
     <code>SCI_SETCARETLINEBACK</code>, then use <code>SCI_SETCARETLINEVISIBLE(true)</code> to
     enable the effect. You can cancel the effect with <code>SCI_SETCARETLINEVISIBLE(false)</code>.
     The two <code>SCI_GETCARET*</code> functions return the state and the colour. This form of
     background colouring has highest priority when a line has markers that would otherwise change
-    the background colour.</p>
+    the background colour.
+	 The caret line may also be drawn translucently which allows other background colours to show
+	 through. This is done by setting the alpha (translucency) value by calling
+	 SCI_SETCARETLINEBACKALPHA. When the alpha is not SC_ALPHA_NOALPHA,
+	 the caret line is drawn after all other features so will affect the colour of all other features.
+	</p>
 
     <p><b id="SCI_SETCARETPERIOD">SCI_SETCARETPERIOD(int milliseconds)</b><br />
      <b id="SCI_GETCARETPERIOD">SCI_GETCARETPERIOD</b><br />
@@ -2939,6 +2959,15 @@ struct TextToFind {
           <td align="center">6</td>
 
           <td>A rectangle around the text.</td>
+        </tr>
+
+        <tr>
+          <td align="left"><code>INDIC_ROUNDBOX</code></td>
+
+          <td align="center">6</td>
+
+          <td>A rectangle with rounded corners around the text using translucent drawing with the
+		     interior more transparent than the border.</td>
         </tr>
       </tbody>
     </table>

@@ -12,7 +12,7 @@
 #include <assert.h>
 #include <limits.h>
 
-#define _WIN32_WINNT  0x0400
+#define _WIN32_WINNT  0x0500
 #include <windows.h>
 #include <commctrl.h>
 #include <richedit.h>
@@ -494,7 +494,7 @@ sptr_t ScintillaWin::HandleComposition(uptr_t wParam, sptr_t lParam) {
 			::ImmReleaseContext(MainHWND(), hIMC);
 		}
 		return 0;
-	} 
+	}
 	return ::DefWindowProc(MainHWND(), WM_IME_COMPOSITION, wParam, lParam);
 #endif
 }
@@ -1792,7 +1792,7 @@ void ScintillaWin::CopyToClipboard(const SelectionText &selectedText) {
 					selectedText.characterSet, selectedText.codePage);
 		uniText.Allocate(2 * selectedText.len);
 		if (uniText) {
-			::MultiByteToWideChar(cpSrc, 0, selectedText.s, selectedText.len, 
+			::MultiByteToWideChar(cpSrc, 0, selectedText.s, selectedText.len,
 				static_cast<wchar_t *>(uniText.ptr), selectedText.len);
 		}
 	}
@@ -1806,7 +1806,7 @@ void ScintillaWin::CopyToClipboard(const SelectionText &selectedText) {
 			GlobalMemory ansiText;
 			ansiText.Allocate(selectedText.len);
 			if (ansiText) {
-				::WideCharToMultiByte(CP_ACP, 0, static_cast<wchar_t *>(uniText.ptr), -1, 
+				::WideCharToMultiByte(CP_ACP, 0, static_cast<wchar_t *>(uniText.ptr), -1,
 					static_cast<char *>(ansiText.ptr), selectedText.len, NULL, NULL);
 				ansiText.SetClip(CF_TEXT);
 			}
@@ -1945,7 +1945,7 @@ static bool CompareDevCap(HDC hdc, HDC hOtherDC, int nIndex) {
 
 bool ScintillaWin::IsCompatibleDC(HDC hOtherDC) {
 	HDC hdc = ::GetDC(MainHWND());
-	bool isCompatible = 
+	bool isCompatible =
 		CompareDevCap(hdc, hOtherDC, TECHNOLOGY) &&
 		CompareDevCap(hdc, hOtherDC, LOGPIXELSY) &&
 		CompareDevCap(hdc, hOtherDC, LOGPIXELSX) &&
@@ -2256,7 +2256,7 @@ BOOL ScintillaWin::DestroySystemCaret() {
 	}
 	return retval;
 }
- 
+
 // Take care of 32/64 bit pointers
 #ifdef GetWindowLongPtr
 static void *PointerFromWindow(HWND hWnd) {

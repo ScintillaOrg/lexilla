@@ -475,6 +475,7 @@ val INDIC_DIAGONAL=3
 val INDIC_STRIKE=4
 val INDIC_HIDDEN=5
 val INDIC_BOX=6
+val INDIC_ROUNDBOX=7
 val INDIC0_MASK=0x20
 val INDIC1_MASK=0x40
 val INDIC2_MASK=0x80
@@ -1643,6 +1644,16 @@ get bool GetPasteConvertEndings=2468(,)
 
 # Duplicate the selection. If selection empty duplicate the line containing the caret.
 fun void SelectionDuplicate=2469(,)
+
+val SC_ALPHA_TRANSPARENT=0
+val SC_ALPHA_OPAQUE=255
+val SC_ALPHA_NOALPHA=256
+
+# Set background alpha of the caret line.
+set void SetCaretLineBackAlpha=2470(int alpha,)
+
+# Get the background alpha of the caret line.
+get int GetCaretLineBackAlpha=2471(,)
 
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)

@@ -2295,7 +2295,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	// the color for the highest numbered one is used.
 	bool overrideBackground = false;
 	ColourAllocated background;
-	if (caret.active && vsDraw.showCaretLineBackground && ll->containsCaret) {
+	if (caret.active && vsDraw.showCaretLineBackground && (vsDraw.caretLineAlpha == SC_ALPHA_NOALPHA) && ll->containsCaret) {
 		overrideBackground = true;
 		background = vsDraw.caretLineBackground.allocated;
 	}
@@ -2652,6 +2652,13 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		rcSegment.left = edgeX + xStart;
 		rcSegment.right = rcSegment.left + 1;
 		surface->FillRectangle(rcSegment, vsDraw.edgecolour.allocated);
+	}
+
+	if (caret.active && vsDraw.showCaretLineBackground && (vsDraw.caretLineAlpha != SC_ALPHA_NOALPHA) && ll->containsCaret) {
+		rcSegment.left = xStart;
+		rcSegment.right = rcLine.right - 1;
+		surface->AlphaRectangle(rcSegment, 0, vsDraw.caretLineBackground.allocated, vsDraw.caretLineAlpha, 
+			vsDraw.caretLineBackground.allocated, vsDraw.caretLineAlpha, 0);
 	}
 }
 
@@ -6721,6 +6728,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return vs.caretLineBackground.desired.AsLong();
 	case SCI_SETCARETLINEBACK:
 		vs.caretLineBackground.desired = wParam;
+		InvalidateStyleRedraw();
+		break;
+	case SCI_GETCARETLINEBACKALPHA:
+		return vs.caretLineAlpha;
+	case SCI_SETCARETLINEBACKALPHA:
+		vs.caretLineAlpha = wParam;
 		InvalidateStyleRedraw();
 		break;
 
