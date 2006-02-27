@@ -29,11 +29,7 @@ class RESearch {
 public:
 	RESearch(CharClassify *charClassTable);
 	~RESearch();
-	void Init();
-	void Clear();
 	bool GrabMatches(CharacterIndexer &ci);
-	void ChSet(char c);
-	void ChSetWithCase(char c, bool caseSensitive);
 	const char *Compile(const char *pat, int length, bool caseSensitive, bool posix);
 	int Execute(CharacterIndexer &ci, int lp, int endp);
 	int Substitute(CharacterIndexer &ci, char *src, char *dst);
@@ -47,14 +43,18 @@ public:
 	char *pat[MAXTAG];
 
 private:
+	void Init();
+	void Clear();
+	void ChSet(char c);
+	void ChSetWithCase(char c, bool caseSensitive);
+
 	int PMatch(CharacterIndexer &ci, int lp, int endp, char *ap);
 
 	int bol;
-	int  tagstk[MAXTAG];             /* subpat tag stack..*/
-	char nfa[MAXNFA];		/* automaton..       */
+	int  tagstk[MAXTAG]; /* subpat tag stack */
+	char nfa[MAXNFA];    /* automaton */
 	int sta;
-	char bittab[BITBLK];		/* bit table for CCL */
-						/* pre-set bits...   */
+	char bittab[BITBLK]; /* bit table for CCL pre-set bits */
 	int failure;
 	CharClassify *charClass;
 	bool iswordc(unsigned char x) {
