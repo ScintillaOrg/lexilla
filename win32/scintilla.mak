@@ -162,6 +162,7 @@ LEXOBJS=\
 	$(DIR_O)\LexSpecman.obj \
 	$(DIR_O)\LexSQL.obj \
 	$(DIR_O)\LexTADS3.obj \
+	$(DIR_O)\LexTCL.obj \
 	$(DIR_O)\LexTeX.obj \
 	$(DIR_O)\LexVB.obj \
 	$(DIR_O)\LexVerilog.obj \
@@ -381,6 +382,8 @@ $(DIR_O)\LexSpecman.obj: ..\src\LexSpecman.cxx $(LEX_HEADERS)
 $(DIR_O)\LexSQL.obj: ..\src\LexSQL.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexTADS3.obj: ..\src\LexTADS3.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexTCL.obj: ..\src\LexTCL.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexTeX.obj: ..\src\LexTeX.cxx $(LEX_HEADERS)
 

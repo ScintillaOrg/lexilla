@@ -350,6 +350,10 @@ SOURCE=..\src\LexTADS3.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexTCL.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexTeX.cxx
 # End Source File
 # Begin Source File
