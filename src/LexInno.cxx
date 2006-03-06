@@ -62,7 +62,7 @@ static void ColouriseInnoDoc(unsigned int startPos, int length, int, WordList *k
 				if (ch == ';' && isBOLWS) {
 					// Start of a comment
 					state = SCE_INNO_COMMENT;
-				} else if (ch == '[' && isBOL) {
+				} else if (ch == '[' && isBOLWS) {
 					// Start of a section name
 					bufferCount = 0;
 					state = SCE_INNO_SECTION;
@@ -72,7 +72,8 @@ static void ColouriseInnoDoc(unsigned int startPos, int length, int, WordList *k
 				} else if (ch == '{' && chNext == '#') {
 					// Start of a preprocessor inline directive
 					state = SCE_INNO_PREPROC_INLINE;
-				} else if (ch == '{' && (chNext == ' ' || chNext == '\t')) {
+				} else if ((ch == '{' && (chNext == ' ' || chNext == '\t'))
+					   || (ch == '(' && chNext == '*')) {
 					// Start of a Pascal comment
 					state = SCE_INNO_COMMENT_PASCAL;
 				} else if (ch == '"') {
@@ -81,7 +82,7 @@ static void ColouriseInnoDoc(unsigned int startPos, int length, int, WordList *k
 				} else if (ch == '\'') {
 					// Start of a single-quote string
 					state = SCE_INNO_STRING_SINGLE;
-				} else if (isascii(ch) && isalpha(ch)) {
+				} else if (isascii(ch) && (isalpha(ch) || (ch == '_'))) {
 					// Start of an identifier
 					bufferCount = 0;
 					buffer[bufferCount++] = static_cast<char>(tolower(ch));
@@ -100,17 +101,17 @@ static void ColouriseInnoDoc(unsigned int startPos, int length, int, WordList *k
 				break;
 
 			case SCE_INNO_IDENTIFIER:
-				if (isascii(ch) && isalnum(ch)) {
+				if (isascii(ch) && (isalnum(ch) || (ch == '_'))) {
 					buffer[bufferCount++] = static_cast<char>(tolower(ch));
 				} else {
 					state = SCE_INNO_DEFAULT;
 					buffer[bufferCount] = '\0';
 
-					// Check if the buffer contains a keyword or parameter
-					if (ch == ':' && parameterKeywords.InList(buffer)) {
-						styler.ColourTo(i-1,SCE_INNO_PARAMETER);
-					} else if (standardKeywords.InList(buffer)) {
+					// Check if the buffer contains a keyword
+					if (standardKeywords.InList(buffer)) {
 						styler.ColourTo(i-1,SCE_INNO_KEYWORD);
+					} else if (parameterKeywords.InList(buffer)) {
+						styler.ColourTo(i-1,SCE_INNO_PARAMETER);
 					} else if (pascalKeywords.InList(buffer)) {
 						styler.ColourTo(i-1,SCE_INNO_KEYWORD_PASCAL);
 					} else if (userKeywords.InList(buffer)) {
@@ -136,7 +137,7 @@ static void ColouriseInnoDoc(unsigned int startPos, int length, int, WordList *k
 					} else {
 						styler.ColourTo(i,SCE_INNO_DEFAULT);
 					}
-				} else if (isascii(ch) && isalpha(ch)) {
+				} else if (isascii(ch) && (isalnum(ch) || (ch == '_'))) {
 					buffer[bufferCount++] = static_cast<char>(tolower(ch));
 				} else {
 					state = SCE_INNO_DEFAULT;
@@ -193,7 +194,7 @@ static void ColouriseInnoDoc(unsigned int startPos, int length, int, WordList *k
 				break;
 
 			case SCE_INNO_COMMENT_PASCAL:
-				if (ch == '}') {
+				if (ch == '}' || (ch == ')' && chPrev == '*')) {
 					state = SCE_INNO_DEFAULT;
 					styler.ColourTo(i,SCE_INNO_COMMENT_PASCAL);
 				} else if (isEOL) {
