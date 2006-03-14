@@ -285,7 +285,7 @@ LineLayout *LineLayoutCache::Retrieve(int lineNumber, int lineCaret, int maxChar
 	} else if (level == llcPage) {
 		if (lineNumber == lineCaret) {
 			pos = 0;
-		} else {
+		} else if (length > 1) {
 			pos = 1 + (lineNumber % (length - 1));
 		}
 	} else if (level == llcDocument) {
@@ -2657,7 +2657,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	if (caret.active && vsDraw.showCaretLineBackground && (vsDraw.caretLineAlpha != SC_ALPHA_NOALPHA) && ll->containsCaret) {
 		rcSegment.left = xStart;
 		rcSegment.right = rcLine.right - 1;
-		surface->AlphaRectangle(rcSegment, 0, vsDraw.caretLineBackground.allocated, vsDraw.caretLineAlpha, 
+		surface->AlphaRectangle(rcSegment, 0, vsDraw.caretLineBackground.allocated, vsDraw.caretLineAlpha,
 			vsDraw.caretLineBackground.allocated, vsDraw.caretLineAlpha, 0);
 	}
 }
