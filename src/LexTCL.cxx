@@ -43,8 +43,9 @@ static void ColouriseTCLDoc(unsigned int startPos, int length, int , WordList *k
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool commentLevel = false;
     bool subBrace = false; // substitution begin with a brace ${.....}
-	enum tLineState {LS_DEFAULT, LS_OPEN_COMMENT, LS_OPEN_DOUBLE_QUOTE, LS_COMMENT_BOX, LS_MASK_STATE = 0xf,
+	enum tLineState {LS_DEFAULT, LS_OPEN_COMMENT, LS_OPEN_DOUBLE_QUOTE, LS_COMMENT_BOX, LS_MASK_STATE = 0xf, 
         LS_COMMAND_EXPECTED = 16, LS_BRACE_ONLY = 32 } lineState = LS_DEFAULT;
+	bool prevSlash = false;
 	int currentLevel = 0;
     bool expected = 0;
     bool subParen = 0;
@@ -81,21 +82,23 @@ static void ColouriseTCLDoc(unsigned int startPos, int length, int , WordList *k
     StyleContext sc(startPos, length, SCE_TCL_DEFAULT, styler);
 	for (; ; sc.Forward()) {
 next:
-        if (sc.ch=='\r')
+        if (sc.ch=='\r' && sc.chNext == '\n') // only ignore \r on PC process on the mac 
             continue;
         bool atEnd = !sc.More();  // make sure we coloured the last word
         if (lineState != LS_DEFAULT) {
+            sc.SetState(SCE_TCL_DEFAULT);
             if (lineState == LS_OPEN_COMMENT)
                 sc.SetState(SCE_TCL_COMMENTLINE);
             else if (lineState == LS_OPEN_DOUBLE_QUOTE)
                 sc.SetState(SCE_TCL_IN_QUOTE);
-            else if (lineState == LS_COMMENT_BOX)
-                sc.SetState((sc.ch == '#' || sc.chNext=='#') ? SCE_TCL_COMMENT_BOX : SCE_TCL_DEFAULT);
+            else if (lineState == LS_COMMENT_BOX && (sc.ch == '#' || (sc.ch == ' ' && sc.chNext=='#')))
+                sc.SetState(SCE_TCL_COMMENT_BOX);
             lineState = LS_DEFAULT;
         }
         if (subBrace) { // ${ overrides every thing even \ except }
             if (sc.ch == '}') {
                 subBrace = false;
+                sc.SetState(SCE_TCL_OPERATOR);
                 sc.ForwardSetState(SCE_TCL_DEFAULT);
                 goto next;
             }
@@ -163,7 +166,7 @@ next:
                         sc.ChangeState(SCE_TCL_WORD7);
                     } else if (keywords9.InList(s)) {
                         sc.ChangeState(SCE_TCL_WORD8);
-                    }
+                    } 
                 }
                 expected = false;
                 sc.SetState(quote ? SCE_TCL_IN_QUOTE : SCE_TCL_DEFAULT);
@@ -198,15 +201,14 @@ next:
 			// Update the line state, so it can be seen by next line
 			if (sc.state == SCE_TCL_IN_QUOTE)
 				lineState = LS_OPEN_DOUBLE_QUOTE;
-            else
-            {
-			    if (sc.chPrev == '\\') {
+			else {
+			     if (prevSlash) {
 				    if (isComment(sc.state))
 					    lineState = LS_OPEN_COMMENT;
                 } else if (sc.state == SCE_TCL_COMMENT_BOX)
                     lineState = LS_COMMENT_BOX;
 			}
-            styler.SetLineState(currentLine,
+            styler.SetLineState(currentLine, 
                 (subBrace ? LS_BRACE_ONLY : 0) |
                 (expected ? LS_COMMAND_EXPECTED : 0)  | lineState);
             if (lineState == LS_COMMENT_BOX)
@@ -215,15 +217,18 @@ next:
                 sc.ForwardSetState(SCE_TCL_IN_QUOTE);
             else
                 sc.ForwardSetState(SCE_TCL_DEFAULT);
+			prevSlash = false;
 			previousLevel = currentLevel;
 			goto next;
 		}
 
-		if (sc.chPrev == '\\') {
+		if (prevSlash) {
+            prevSlash = false;
             if (sc.ch == '#' && IsANumberChar(sc.chNext))
                 sc.ForwardSetState(SCE_TCL_NUMBER);
-			continue;
+            continue;
 		}
+        prevSlash = sc.ch == '\\';
         if (isComment(sc.state))
             continue;
 		if (sc.atLineStart) {
@@ -243,7 +248,7 @@ next:
 		case SCE_TCL_IN_QUOTE:
 			if (sc.ch == '"') {
 				sc.ForwardSetState(SCE_TCL_DEFAULT);
-				visibleChars = true; // necessary for a " as the first and only character on a line
+				visibleChars = true; // necessary if a " is the first and only character on a line
 				goto next;
 			} else if (sc.ch == '[' || sc.ch == ']' || sc.ch == '$') {
 				sc.SetState(SCE_TCL_OPERATOR);
@@ -251,20 +256,10 @@ next:
                 sc.ForwardSetState(SCE_TCL_IN_QUOTE);
 				goto next;
 			}
-        case SCE_TCL_COMMENT:
-        case SCE_TCL_COMMENTLINE:
-        case SCE_TCL_BLOCK_COMMENT:
-			continue;
-		case SCE_TCL_OPERATOR:
+            continue;
+        case SCE_TCL_OPERATOR:
 			sc.SetState(SCE_TCL_DEFAULT);
 			break;
-        case SCE_TCL_COMMENT_BOX:
-             if (sc.atLineStart && sc.chNext!='#')
-             {
-                 sc.SetState(SCE_TCL_DEFAULT);
-                 break;
-             }
-             continue;
 		}
 
 		if (sc.ch == '#') {
@@ -273,13 +268,10 @@ next:
 					sc.SetState(SCE_TCL_COMMENT);
 			} else {
                 sc.SetState(SCE_TCL_COMMENTLINE);
-                if (sc.atLineStart)
-                {
-                    if (sc.chNext == '~')
-                        sc.SetState(SCE_TCL_BLOCK_COMMENT);
-                    else if (sc.chNext == '#' || sc.chNext == '-')
+                if (sc.chNext == '~')
+                    sc.SetState(SCE_TCL_BLOCK_COMMENT);
+                if (sc.atLineStart && (sc.chNext == '#' || sc.chNext == '-'))
                         sc.SetState(SCE_TCL_COMMENT_BOX);
-                }
             }
         }
 
@@ -287,15 +279,16 @@ next:
 			visibleChars = true;
 		}
 
-		if (sc.ch == '\\')
-			continue;
+		if (sc.ch == '\\') {
+			prevSlash = true;
+			continue;		
+		}
 
 		// Determine if a new state should be entered.
 		if (sc.state == SCE_TCL_DEFAULT) {
             if (IsAWordStart(sc.ch)) {
 				sc.SetState(SCE_TCL_IDENTIFIER);
-			} else if (IsADigit(sc.ch) && !IsAWordChar(sc.chPrev))
-			{
+			} else if (IsADigit(sc.ch) && !IsAWordChar(sc.chPrev)) {
 				sc.SetState(SCE_TCL_NUMBER);
 			} else {
 				switch (sc.ch) {
@@ -325,14 +318,17 @@ next:
                     subParen = 0;
                     if (sc.chNext != '{') {
                         sc.SetState(SCE_TCL_SUBSTITUTION);
-                    }
+                    } 
                     else {
-                        sc.SetState(SCE_TCL_SUB_BRACE);  // {
+                        sc.SetState(SCE_TCL_OPERATOR);  // $
+                        sc.Forward();  // {
+                        sc.ForwardSetState(SCE_TCL_SUB_BRACE);
                         subBrace = true;
                     }
                     break;
                 case '#':
-                    if ((isspacechar(static_cast<unsigned char>(sc.chPrev))||isoperator(static_cast<unsigned char>(sc.chPrev))) && IsADigit(sc.chNext,0x10))
+                    if ((isspacechar(static_cast<unsigned char>(sc.chPrev))||
+                            isoperator(static_cast<char>(sc.chPrev))) && IsADigit(sc.chNext,0x10))
                         sc.SetState(SCE_TCL_NUMBER);
                     break;
                 case '-':
