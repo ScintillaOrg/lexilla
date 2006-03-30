@@ -242,6 +242,8 @@ static void FoldSQLDoc(unsigned int startPos, int length, int initStyle,
                             WordList *[], Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
+	bool foldOnlyBegin = styler.GetPropertyInt("fold.sql.only.begin", 0) != 0;
+
 	unsigned int endPos = startPos + length;
 	int visibleChars = 0;
 	int lineCurrent = styler.GetLine(startPos);
@@ -305,7 +307,7 @@ static void FoldSQLDoc(unsigned int startPos, int length, int initStyle,
 			} else {
 				s[j] = '\0';
 			}
-			if (strcmp(s, "if") == 0 || strcmp(s, "loop") == 0) {
+			if ((!foldOnlyBegin) && (strcmp(s, "if") == 0 || strcmp(s, "loop") == 0)) {
 				if (endFound) {
 					// ignore
 					endFound = false;
