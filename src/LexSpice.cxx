@@ -2,7 +2,7 @@
 /** @file LexSpice.cxx
  ** Lexer for Spice
  **/
-// Copyright 2006 by Fabien Proriol <proriol.fabien.dev@saint-pal.com>
+// Copyright 2006 by Fabien Proriol
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <stdlib.h>
