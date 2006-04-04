@@ -1516,6 +1516,20 @@ void ScintillaGTK::ReceivedDrop(GtkSelectionData *selection_data) {
 
 
 void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, SelectionText *text) {
+#if PLAT_GTK_WIN32
+	// Many native win32 programs require \n line endings, so make a copy of
+	// the clip text now with newlines converted.  Use { } to hide symbols
+	// from code below
+	SelectionText *newline_normalized = NULL;
+	{
+		int tmpstr_len;
+		char *tmpstr = Document::TransformLineEnds(&tmpstr_len, text->s, text->len, SC_EOL_LF);
+		newline_normalized = new SelectionText();
+		newline_normalized->Set(tmpstr, tmpstr_len, SC_CP_UTF8, 0, text->rectangular);
+		text = newline_normalized;
+	}
+#endif
+
 #if GTK_MAJOR_VERSION >= 2
 	// Convert text to utf8 if it isn't already
 	SelectionText *converted = 0;
@@ -1555,15 +1569,6 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 #else /* Gtk 1 */
 	char *selBuffer = text->s;
 
-#if PLAT_GTK_WIN32
-
-	// Many native win32 programs require \n line endings,
-	 // so make a copy of the clip text now with newlines converted
-
-	int new_len;
-	char *tmpstr = Document::TransformLineEnds(&new_len, selBuffer, text->len, SC_EOL_LF);
-	selBuffer = tmpstr;
-#endif
 	char *tmputf = 0;
 	if ((info == TARGET_UTF8_STRING) || (info == TARGET_STRING)) {
 		int len = strlen(selBuffer);
@@ -1617,10 +1622,11 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 	}
 
 	delete []tmputf;
-#if PLAT_GTK_WIN32
-	delete []tmpstr;
-#endif
 #endif /* Gtk >= 2 */
+
+#if PLAT_GTK_WIN32
+	delete newline_normalized;
+#endif
 }
 
 #ifdef USE_GTK_CLIPBOARD
