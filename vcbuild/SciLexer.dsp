@@ -342,6 +342,10 @@ SOURCE=..\src\LexSpecman.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexSpice.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexSQL.cxx
 # End Source File
 # Begin Source File
