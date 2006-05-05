@@ -367,11 +367,11 @@ static int InputCodePage() {
 }
 
 #ifndef VK_OEM_2
-static const VK_OEM_2=0xbf;
-static const VK_OEM_3=0xc0;
-static const VK_OEM_4=0xdb;
-static const VK_OEM_5=0xdc;
-static const VK_OEM_6=0xdd;
+static const int VK_OEM_2=0xbf;
+static const int VK_OEM_3=0xc0;
+static const int VK_OEM_4=0xdb;
+static const int VK_OEM_5=0xdc;
+static const int VK_OEM_6=0xdd;
 #endif
 
 /** Map the key codes to their equivalent SCK_ form. */
@@ -650,10 +650,13 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 
 	case WM_LBUTTONDOWN: {
+#ifndef __DMC__
+		// Digital Mars compiler does not include Imm library
 		// For IME, set the composition string as the result string.
 		HIMC hIMC = ::ImmGetContext(MainHWND());
 		::ImmNotifyIME(hIMC, NI_COMPOSITIONSTR, CPS_COMPLETE, 0);
 		::ImmReleaseContext(MainHWND(), hIMC);
+#endif
 		//
 		//Platform::DebugPrintf("Buttdown %d %x %x %x %x %x\n",iMessage, wParam, lParam,
 		//	Platform::IsKeyDown(VK_SHIFT),
