@@ -90,8 +90,8 @@ SOBJS=\
 	$(DIR_O)\AutoComplete.obj \
 	$(DIR_O)\CallTip.obj \
 	$(DIR_O)\CellBuffer.obj \
-	$(DIR_O)\ContractionState.obj \
 	$(DIR_O)\CharClassify.obj \
+	$(DIR_O)\ContractionState.obj \
 	$(DIR_O)\Document.obj \
 	$(DIR_O)\Editor.obj \
 	$(DIR_O)\Indicator.obj \
@@ -176,8 +176,8 @@ LOBJS=\
 	$(DIR_O)\AutoComplete.obj \
 	$(DIR_O)\CallTip.obj \
 	$(DIR_O)\CellBuffer.obj \
-	$(DIR_O)\ContractionState.obj \
 	$(DIR_O)\CharClassify.obj \
+	$(DIR_O)\ContractionState.obj \
 	$(DIR_O)\Document.obj \
 	$(DIR_O)\DocumentAccessor.obj \
 	$(DIR_O)\Editor.obj \
@@ -250,9 +250,9 @@ $(DIR_O)\CallTip.obj: ../src/CallTip.cxx ../include/Platform.h \
  ../include/Scintilla.h ../src/CallTip.h
 $(DIR_O)\CellBuffer.obj: ../src/CellBuffer.cxx ../include/Platform.h \
  ../include/Scintilla.h ../src/SVector.h ../src/CellBuffer.h
+$(DIR_O)\CharClassify.obj: ../src/CharClassify.cxx ../src/CharClassify.h
 $(DIR_O)\ContractionState.obj: ../src/ContractionState.cxx ../include/Platform.h \
  ../src/ContractionState.h
-$(DIR_O)\CharClassify.obj: ../src/CharClassify.cxx ../src/CharClassify.h
 $(DIR_O)\Document.obj: ../src/Document.cxx ../include/Platform.h \
  ../include/Scintilla.h ../src/SVector.h ../src/CellBuffer.h \
   ../src/CharClassify.h ../src/Document.h ../src/RESearch.h

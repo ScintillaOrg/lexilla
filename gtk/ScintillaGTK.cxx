@@ -1508,7 +1508,7 @@ void ScintillaGTK::ReceivedDrop(GtkSelectionData *selection_data) {
 			DropAt(posDrop, selText.s, false, selText.rectangular);
 		}
 	} else if (selection_data->length > 0) {
-	    fprintf(stderr, "ReceivedDrop other %p\n", static_cast<void *>(selection_data->type));
+	    //~ fprintf(stderr, "ReceivedDrop other %p\n", static_cast<void *>(selection_data->type));
 	}
 	Redraw();
 }
