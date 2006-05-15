@@ -60,27 +60,7 @@ static void ColouriseSQLDoc(unsigned int startPos, int length, int initStyle, Wo
 	bool sqlBackslashEscapes = styler.GetPropertyInt("sql.backslash.escapes", 0) != 0;
 	bool sqlBackticksIdentifier = styler.GetPropertyInt("lexer.sql.backticks.identifier", 0) != 0;
 	int styleBeforeDCKeyword = SCE_SQL_DEFAULT;
-	bool fold = styler.GetPropertyInt("fold") != 0;
-	int lineCurrent = styler.GetLine(startPos);
-
 	for (; sc.More(); sc.Forward()) {
-		// Fold based on indentation
-		if (sc.atLineStart) {
-			int spaceFlags = 0;
-			int indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags);
-			int level = indentCurrent;
-			if (!(indentCurrent & SC_FOLDLEVELWHITEFLAG)) {
-				// Only non whitespace lines can be headers
-				int indentNext = styler.IndentAmount(lineCurrent + 1, &spaceFlags);
-				if (indentCurrent < (indentNext & ~SC_FOLDLEVELWHITEFLAG)) {
-					level |= SC_FOLDLEVELHEADERFLAG;
-				}
-			}
-			if (fold) {
-				styler.SetLevel(lineCurrent, level);
-			}
-		}
-
 		// Determine if the current state should terminate.
 		switch (sc.state) {
 		case SCE_SQL_OPERATOR:
