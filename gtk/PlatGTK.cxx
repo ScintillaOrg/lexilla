@@ -1016,6 +1016,8 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAl
 	}
 }
 
+#if GTK_MAJOR_VERSION >= 2
+
 // Plot a point into a guint32 buffer symetrically to all 4 qudrants
 static void AllFour(guint32 *pixels, int stride, int width, int height, int x, int y, guint32 val) {
 	pixels[y*stride+x] = val;
@@ -1035,6 +1037,8 @@ static unsigned int GetGValue(unsigned int co) {
 static unsigned int GetBValue(unsigned int co) {
 	return co & 0xff;
 }
+
+#endif
 
 #if GTK_MAJOR_VERSION < 2
 void SurfaceImpl::AlphaRectangle(PRectangle rc, int , ColourAllocated , int , ColourAllocated outline, int , int ) {
@@ -2011,17 +2015,18 @@ void ListBoxX::Create(Window &, int, Point, int, bool) {
 
 #if GTK_MAJOR_VERSION < 2
 	list = gtk_clist_new(1);
-	gtk_widget_show(PWidget(list));
-	gtk_container_add(GTK_CONTAINER(PWidget(scroller)), PWidget(list));
-	gtk_clist_set_column_auto_resize(GTK_CLIST(PWidget(list)), 0, TRUE);
-	gtk_clist_set_selection_mode(GTK_CLIST(PWidget(list)), GTK_SELECTION_BROWSE);
-	gtk_signal_connect(GTK_OBJECT(PWidget(list)), "unselect_row",
+	GtkWidget *wid = PWidget(list);	// No code inside the GTK_OBJECT macro
+	gtk_widget_show(wid);
+	gtk_container_add(GTK_CONTAINER(PWidget(scroller)), wid);
+	gtk_clist_set_column_auto_resize(GTK_CLIST(wid), 0, TRUE);
+	gtk_clist_set_selection_mode(GTK_CLIST(wid), GTK_SELECTION_BROWSE);
+	gtk_signal_connect(GTK_OBJECT(wid), "unselect_row",
 	                   GTK_SIGNAL_FUNC(UnselectionAC), &current);
-	gtk_signal_connect(GTK_OBJECT(PWidget(list)), "select_row",
+	gtk_signal_connect(GTK_OBJECT(wid), "select_row",
 	                   GTK_SIGNAL_FUNC(SelectionAC), &current);
-	gtk_signal_connect(GTK_OBJECT(PWidget(list)), "button_press_event",
+	gtk_signal_connect(GTK_OBJECT(wid), "button_press_event",
 	                   GTK_SIGNAL_FUNC(ButtonPress), this);
-	gtk_clist_set_shadow_type(GTK_CLIST(PWidget(list)), GTK_SHADOW_NONE);
+	gtk_clist_set_shadow_type(GTK_CLIST(wid), GTK_SHADOW_NONE);
 #else
 	/* Tree and its model */
 	GtkListStore *store =
@@ -2055,11 +2060,12 @@ void ListBoxX::Create(Window &, int, Point, int, bool) {
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
 	if (g_object_class_find_property(G_OBJECT_GET_CLASS(list), "fixed-height-mode"))
 		g_object_set(G_OBJECT(list), "fixed-height-mode", TRUE, NULL);
-	gtk_container_add(GTK_CONTAINER(PWidget(scroller)), PWidget(list));
-	gtk_widget_show(PWidget(list));
 
-	gtk_signal_connect(GTK_OBJECT(PWidget(list)), "button_press_event",
-	                   GTK_SIGNAL_FUNC(ButtonPress), this);
+	GtkWidget *wid = PWidget(list);	// No code inside the G_OBJECT macro
+	gtk_container_add(GTK_CONTAINER(PWidget(scroller)), wid);
+	gtk_widget_show(wid);
+	g_signal_connect(G_OBJECT(wid), "button_press_event",
+	                   G_CALLBACK(ButtonPress), this);
 #endif
 	gtk_widget_realize(PWidget(id));
 }
@@ -2479,7 +2485,11 @@ void Menu::CreatePopUp() {
 
 void Menu::Destroy() {
 	if (id)
+#if GTK_MAJOR_VERSION < 2
 		gtk_object_unref(GTK_OBJECT(id));
+#else
+		g_object_unref(G_OBJECT(id));
+#endif
 	id = 0;
 }
 
