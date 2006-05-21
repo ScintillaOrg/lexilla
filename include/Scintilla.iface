@@ -316,6 +316,9 @@ fun void MarkerDefinePixmap=2049(int markerNumber, string pixmap)
 # Add a set of markers to a line.
 fun void MarkerAddSet=2466(int line, int set)
 
+# Set the alpha used for a marker that is drawn in the text area, not the margin.
+fun void MarkerSetAlpha=2476(int markerNumber, int alpha)
+
 enu MarginType=SC_MARGIN_
 val SC_MARGIN_SYMBOL=0
 val SC_MARGIN_NUMBER=1
@@ -430,6 +433,12 @@ fun void SetSelFore=2067(bool useSetting, colour fore)
 
 # Set the background colour of the selection and whether to use this setting.
 fun void SetSelBack=2068(bool useSetting, colour back)
+
+# Get the alpha of the selection.
+get int GetSelAlpha=2477(,)
+
+# Set the alpha of the selection.
+set void SetSelAlpha=2478(int alpha,)
 
 # Set the foreground colour of the caret.
 set void SetCaretFore=2069(colour fore,)

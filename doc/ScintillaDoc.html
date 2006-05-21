@@ -2114,6 +2114,8 @@ struct TextToFind {
     colour)</a><br />
      <a class="message" href="#SCI_SETSELBACK">SCI_SETSELBACK(bool useSelectionBackColour, int
     colour)</a><br />
+     <a class="message" href="#SCI_SETSELALPHA">SCI_SETSELALPHA(int alpha)</a><br />
+     <a class="message" href="#SCI_GETSELALPHA">SCI_GETSELALPHA</a><br />
      <a class="message" href="#SCI_SETCARETFORE">SCI_SETCARETFORE(int colour)</a><br />
      <a class="message" href="#SCI_GETCARETFORE">SCI_GETCARETFORE</a><br />
      <a class="message" href="#SCI_SETCARETLINEVISIBLE">SCI_SETCARETLINEVISIBLE(bool
@@ -2147,6 +2149,10 @@ struct TextToFind {
     you provide is used if you set <code>useSelection*Colour</code> to <code>true</code>. If it is
     set to <code>false</code>, the default colour colouring is used and the <code>colour</code>
     argument has no effect.</p>
+     <p><b id="SCI_SETSELALPHA">SCI_SETSELALPHA(int <a class="jump" href="#alpha">alpha</a>)</b><br />
+     <b id="SCI_GETSELALPHA">SCI_GETSELALPHA</b><br />
+     The selection background can be drawn translucently in the selection background colour by
+     setting an alpha value.</p>
 
     <p><b id="SCI_SETCARETFORE">SCI_SETCARETFORE(int <a class="jump"
     href="#colour">colour</a>)</b><br />
@@ -2617,6 +2623,8 @@ struct TextToFind {
     colour)</a><br />
      <a class="message" href="#SCI_MARKERSETBACK">SCI_MARKERSETBACK(int markerNumber, int
     colour)</a><br />
+     <a class="message" href="#SCI_MARKERSETALPHA">SCI_MARKERSETALPHA(int markerNumber, int
+    alpha)</a><br />
      <a class="message" href="#SCI_MARKERADD">SCI_MARKERADD(int line, int markerNumber)</a><br />
      <a class="message" href="#SCI_MARKERADDSET">SCI_MARKERADDSET(int line, int markerMask)</a><br />
      <a class="message" href="#SCI_MARKERDELETE">SCI_MARKERDELETE(int line, int
@@ -2790,6 +2798,11 @@ struct TextToFind {
      <b id="SCI_MARKERSETBACK">SCI_MARKERSETBACK(int markerNumber, int <a class="jump"
     href="#colour">colour</a>)</b><br />
      These two messages set the foreground and background colour of a marker number.</p>
+     <p><b id="SCI_MARKERSETALPHA">SCI_MARKERSETALPHA(int markerNumber, int <a class="jump"
+    href="#alpha">alpha</a>)</b><br />
+     When markers are drawn in the content area, either because there is no margin for them or
+     they are of SC_MARK_BACKGROUND type, they may be drawn translucently by
+     setting an alpha value.</p>
 
     <p><b id="SCI_MARKERADD">SCI_MARKERADD(int line, int markerNumber)</b><br />
      This message adds marker number <code>markerNumber</code> to a line. The message returns -1 if

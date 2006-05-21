@@ -53,6 +53,7 @@ public:
 	bool selbackset;
 	ColourPair selbackground;
 	ColourPair selbackground2;
+	int selAlpha;
 	bool whitespaceForegroundSet;
 	ColourPair whitespaceForeground;
 	bool whitespaceBackgroundSet;
