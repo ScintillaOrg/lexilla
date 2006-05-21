@@ -2584,8 +2584,11 @@ const char *Platform::DefaultFont() {
 #ifdef G_OS_WIN32
 	return "Lucida Console";
 #else
-
+#ifdef USE_PANGO
+	return "!Sans";
+#else
 	return "lucidatypewriter";
+#endif
 #endif
 }
 
@@ -2593,7 +2596,6 @@ int Platform::DefaultFontSize() {
 #ifdef G_OS_WIN32
 	return 10;
 #else
-
 	return 12;
 #endif
 }
