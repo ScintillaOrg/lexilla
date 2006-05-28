@@ -2150,14 +2150,15 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 	}
 }
 
+ColourAllocated Editor::SelectionBackground(ViewStyle &vsDraw) {
+	return primarySelection ? vsDraw.selbackground.allocated : vsDraw.selbackground2.allocated;
+}
+
 ColourAllocated Editor::TextBackground(ViewStyle &vsDraw, bool overrideBackground,
                                        ColourAllocated background, bool inSelection, bool inHotspot, int styleMain, int i, LineLayout *ll) {
 	if (inSelection) {
 		if (vsDraw.selbackset && (vsDraw.selAlpha == SC_ALPHA_NOALPHA)) {
-			if (primarySelection)
-				return vsDraw.selbackground.allocated;
-			else
-				return vsDraw.selbackground2.allocated;
+			return SelectionBackground(vsDraw);
 		}
 	} else {
 		if ((vsDraw.edgeState == EDGE_BACKGROUND) &&
@@ -2225,6 +2226,12 @@ void Editor::DrawWrapMarker(Surface *surface, PRectangle rcPlace,
 	                y - 2 * dy);
 }
 
+static void SimpleAlphaRectangle(Surface *surface, PRectangle rc, ColourAllocated fill, int alpha) {
+	if (alpha != SC_ALPHA_NOALPHA) {
+		surface->AlphaRectangle(rc, 0, fill, alpha, fill, alpha, 0);
+	}
+}
+
 void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, LineLayout *ll,
                      int line, int lineEnd, int xStart, int subLine, int subLineStart,
                      bool overrideBackground, ColourAllocated background,
@@ -2241,15 +2248,17 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 	bool eolInSelection = (subLine == (ll->lines - 1)) &&
 	                      (posLineEnd > ll->selStart) && (posLineEnd <= ll->selEnd) && (ll->selStart != ll->selEnd);
 
-	if (eolInSelection && vsDraw.selbackset && (vsDraw.selAlpha == SC_ALPHA_NOALPHA) && (line < pdoc->LinesTotal() - 1)) {
-		if (primarySelection)
-			surface->FillRectangle(rcSegment, vsDraw.selbackground.allocated);
-		else
-			surface->FillRectangle(rcSegment, vsDraw.selbackground2.allocated);
-	} else if (overrideBackground) {
-		surface->FillRectangle(rcSegment, background);
+	if (eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1) && (vsDraw.selAlpha == SC_ALPHA_NOALPHA)) {
+		surface->FillRectangle(rcSegment, SelectionBackground(vsDraw));
 	} else {
-		surface->FillRectangle(rcSegment, vsDraw.styles[ll->styles[ll->numCharsInLine] & styleMask].back.allocated);
+		if (overrideBackground) {
+			surface->FillRectangle(rcSegment, background);
+		} else {
+			surface->FillRectangle(rcSegment, vsDraw.styles[ll->styles[ll->numCharsInLine] & styleMask].back.allocated);
+		}
+		if (eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1) && (vsDraw.selAlpha != SC_ALPHA_NOALPHA)) {
+			SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw), vsDraw.selAlpha);
+		}
 	}
 
 	rcSegment.left = xEol + vsDraw.aveCharWidth + xStart;
@@ -2274,12 +2283,6 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 			rcPlace.left = rcPlace.right - vsDraw.aveCharWidth;
 		}
 		DrawWrapMarker(surface, rcPlace, true, wrapColour);
-	}
-}
-
-static void SimpleAlphaRectangle(Surface *surface, PRectangle rc, ColourAllocated fill, int alpha) {
-	if (alpha != SC_ALPHA_NOALPHA) {
-		surface->AlphaRectangle(rc, 0, fill, alpha, fill, alpha, 0);
 	}
 }
 
@@ -2660,8 +2663,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		if (startPosSel < endPosSel) {
 			rcSegment.left = xStart + ll->positions[startPosSel - posLineStart] - subLineStart;
 			rcSegment.right = xStart + ll->positions[endPosSel - posLineStart] - subLineStart;
-			SimpleAlphaRectangle(surface, rcSegment,
-				primarySelection ? vsDraw.selbackground.allocated : vsDraw.selbackground2.allocated, vsDraw.selAlpha);
+			SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw), vsDraw.selAlpha);
 		}
 	}
 
