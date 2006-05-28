@@ -71,7 +71,7 @@ public:
 	bool hotspotUnderline;
 	bool hotspotSingleLine;
 	/// Margins are ordered: Line Numbers, Selection Margin, Spacing Margin
-	enum { margins=3 };
+	enum { margins=5 };
 	int leftMarginWidth;	///< Spacing margin on left of text
 	int rightMarginWidth;	///< Spacing margin on left of text
 	bool symbolMargin;

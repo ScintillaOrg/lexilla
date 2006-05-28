@@ -17,7 +17,7 @@
 #include "ViewStyle.h"
 
 MarginStyle::MarginStyle() :
-	symbol(false), width(16), mask(0xffffffff), sensitive(false) {
+	symbol(false), width(0), mask(0), sensitive(false) {
 }
 
 // A list of the fontnames - avoids wasting space in each style

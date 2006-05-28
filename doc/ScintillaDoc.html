@@ -2228,7 +2228,7 @@ struct TextToFind {
 
     <h2 id="Margins">Margins</h2>
 
-    <p>There may be up to three margins to the left of the text display, plus a gap either side of
+    <p>There may be up to five margins to the left of the text display, plus a gap either side of
     the text. Each margin can be set to display either symbols or line numbers with <a
     class="message" href="#SCI_SETMARGINTYPEN"><code>SCI_SETMARGINTYPEN</code></a>. The markers
     that can be displayed in each margin are set with <a class="message"
@@ -2239,7 +2239,7 @@ struct TextToFind {
     href="#SCN_MARGINCLICK"><code>SCN_MARGINCLICK</code></a> notification to the container or
     selects a line of text.</p>
 
-    <p>The margins are numbered 0 to 2. Using a margin number outside the valid range has no
+    <p>The margins are numbered 0 to 4. Using a margin number outside the valid range has no
     effect. By default, margin 0 is set to display line numbers, but is given a width of 0, so it
     is hidden. Margin 1 is set to display non-folding symbols and is given a width of 16 pixels, so
     it is visible. Margin 2 is set to display the folding symbols, but is given a width of 0, so it
@@ -2269,10 +2269,10 @@ struct TextToFind {
 
     <p><b id="SCI_SETMARGINTYPEN">SCI_SETMARGINTYPEN(int margin, int iType)</b><br />
      <b id="SCI_GETMARGINTYPEN">SCI_GETMARGINTYPEN(int margin)</b><br />
-     These two routines set and get the type of a margin. The margin argument should be 0, 1 or 2.
+     These two routines set and get the type of a margin. The margin argument should be 0, 1, 2, 3 or 4.
     You can use the predefined constants <code>SC_MARGIN_SYMBOL</code> (0) and
     <code>SC_MARGIN_NUMBER</code> (1) to set a margin as either a line number or a symbol margin.
-    By convention, margin 0 is used for line numbers and the other two are used for symbols.</p>
+    By convention, margin 0 is used for line numbers and the next two are used for symbols.</p>
 
     <p><b id="SCI_SETMARGINWIDTHN">SCI_SETMARGINWIDTHN(int margin, int pixelWidth)</b><br />
      <b id="SCI_GETMARGINWIDTHN">SCI_GETMARGINWIDTHN(int margin)</b><br />
@@ -2312,7 +2312,7 @@ struct TextToFind {
     <p><b id="SCI_SETMARGINSENSITIVEN">SCI_SETMARGINSENSITIVEN(int margin, bool
     sensitive)</b><br />
      <b id="SCI_GETMARGINSENSITIVEN">SCI_GETMARGINSENSITIVEN(int margin)</b><br />
-     Each of the three margins can be set sensitive or insensitive to mouse clicks. A click in a
+     Each of the five margins can be set sensitive or insensitive to mouse clicks. A click in a
     sensitive margin sends a <a class="message"
     href="#SCN_MARGINCLICK"><code>SCN_MARGINCLICK</code></a> <a class="jump"
     href="#Notifications">notification</a> to the container. Margins that are not sensitive act as
