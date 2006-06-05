@@ -2404,7 +2404,9 @@ struct TextToFind {
      Scintilla has some support for Japanese, Chinese and Korean DBCS. Use this message with
     <code>codePage</code> set to the code page number to set Scintilla to use code page information
     to ensure double byte characters are treated as one character rather than two. This also stops
-    the caret from moving between the two bytes in a double byte character. Call with
+    the caret from moving between the two bytes in a double byte character.
+	Do not use this message to choose between different single byte character sets: it doesn't do that.
+	Call with
     <code>codePage</code> set to zero to disable DBCS support. The default is
     <code>SCI_SETCODEPAGE(0)</code>.</p>
 
