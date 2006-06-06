@@ -328,7 +328,7 @@ void LineLayoutCache::Dispose(LineLayout *ll) {
 			delete ll;
 		} else {
 			useCount--;
- 		}
+		}
 	}
 }
 
@@ -1591,14 +1591,14 @@ bool Editor::WrapLines(bool fullWrap, int priorityWrapLineStart) {
 					if (!priorityWrap)
 						docLineLastWrapped++;
 					if (firstLineToWrap < pdoc->LinesTotal()) {
-					AutoLineLayout ll(llc, RetrieveLineLayout(firstLineToWrap));
-					int linesWrapped = 1;
-					if (ll) {
-						LayoutLine(firstLineToWrap, surface, vs, ll, wrapWidth);
-						linesWrapped = ll->lines;
-					}
-					if (cs.SetHeight(firstLineToWrap, linesWrapped)) {
-						wrapOccurred = true;
+						AutoLineLayout ll(llc, RetrieveLineLayout(firstLineToWrap));
+						int linesWrapped = 1;
+						if (ll) {
+							LayoutLine(firstLineToWrap, surface, vs, ll, wrapWidth);
+							linesWrapped = ll->lines;
+						}
+						if (cs.SetHeight(firstLineToWrap, linesWrapped)) {
+							wrapOccurred = true;
 						}
 					}
 				}
@@ -4898,7 +4898,7 @@ void Editor::CopySelectionRange(SelectionText *ss) {
 				text[size] = '\0';
 			}
 		}
- 		ss->Set(text, size + 1, pdoc->dbcsCodePage,
+		ss->Set(text, size + 1, pdoc->dbcsCodePage,
 			vs.styles[STYLE_DEFAULT].characterSet, selType == selRectangle);
 	}
 }
@@ -6371,15 +6371,15 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETWRAPMODE:
 		switch (wParam) {
-			case SC_WRAP_WORD:
-				wrapState = eWrapWord;
-				break;
-			case SC_WRAP_CHAR:
-				wrapState = eWrapChar;
-				break;
-			default:
-				wrapState = eWrapNone;
-				break;
+		case SC_WRAP_WORD:
+			wrapState = eWrapWord;
+			break;
+		case SC_WRAP_CHAR:
+			wrapState = eWrapChar;
+			break;
+		default:
+			wrapState = eWrapNone;
+			break;
 		}
 		xOffset = 0;
 		InvalidateStyleRedraw();
