@@ -322,6 +322,8 @@ fun void MarkerSetAlpha=2476(int markerNumber, int alpha)
 enu MarginType=SC_MARGIN_
 val SC_MARGIN_SYMBOL=0
 val SC_MARGIN_NUMBER=1
+val SC_MARGIN_BACK=2
+val SC_MARGIN_FORE=3
 
 # Set a margin to be either numeric or symbolic.
 set void SetMarginTypeN=2240(int margin, int marginType)

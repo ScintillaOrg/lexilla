@@ -17,7 +17,7 @@
 #include "ViewStyle.h"
 
 MarginStyle::MarginStyle() :
-	symbol(false), width(0), mask(0), sensitive(false) {
+	style(SC_MARGIN_SYMBOL), width(0), mask(0), sensitive(false) {
 }
 
 // A list of the fontnames - avoids wasting space in each style
@@ -175,13 +175,13 @@ void ViewStyle::Init() {
 
 	leftMarginWidth = 1;
 	rightMarginWidth = 1;
-	ms[0].symbol = false;
+	ms[0].style = SC_MARGIN_NUMBER;
 	ms[0].width = 0;
 	ms[0].mask = 0;
-	ms[1].symbol = true;
+	ms[1].style = SC_MARGIN_SYMBOL;
 	ms[1].width = 16;
 	ms[1].mask = ~SC_MASK_FOLDERS;
-	ms[2].symbol = true;
+	ms[2].style = SC_MARGIN_SYMBOL;
 	ms[2].width = 0;
 	ms[2].mask = 0;
 	fixedColumnWidth = leftMarginWidth;
@@ -189,7 +189,7 @@ void ViewStyle::Init() {
 	maskInLine = 0xffffffff;
 	for (int margin=0; margin < margins; margin++) {
 		fixedColumnWidth += ms[margin].width;
-		symbolMargin = symbolMargin || ms[margin].symbol;
+		symbolMargin = symbolMargin || (ms[margin].style != SC_MARGIN_NUMBER);
 		if (ms[margin].width > 0)
 			maskInLine &= ~ms[margin].mask;
 	}
@@ -260,7 +260,7 @@ void ViewStyle::Refresh(Surface &surface) {
 	maskInLine = 0xffffffff;
 	for (int margin=0; margin < margins; margin++) {
 		fixedColumnWidth += ms[margin].width;
-		symbolMargin = symbolMargin || ms[margin].symbol;
+		symbolMargin = symbolMargin || (ms[margin].style != SC_MARGIN_NUMBER);
 		if (ms[margin].width > 0)
 			maskInLine &= ~ms[margin].mask;
 	}

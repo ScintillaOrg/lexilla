@@ -1721,7 +1721,7 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 			rcSelMargin.left = rcSelMargin.right;
 			rcSelMargin.right = rcSelMargin.left + vs.ms[margin].width;
 
-			if (vs.ms[margin].symbol) {
+			if (vs.ms[margin].style != SC_MARGIN_NUMBER) {
 				/* alternate scheme:
 				if (vs.ms[margin].mask & SC_MASK_FOLDERS)
 					surface->FillRectangle(rcSelMargin, vs.styles[STYLE_DEFAULT].back.allocated);
@@ -1732,8 +1732,21 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 				if (vs.ms[margin].mask & SC_MASK_FOLDERS)
 					// Required because of special way brush is created for selection margin
 					surface->FillRectangle(rcSelMargin, *pixmapSelPattern);
-				else
-					surface->FillRectangle(rcSelMargin, vs.styles[STYLE_LINENUMBER].back.allocated);
+				else {
+					ColourAllocated colour;
+					switch (vs.ms[margin].style) {
+					case SC_MARGIN_BACK:
+						colour = vs.styles[STYLE_DEFAULT].back.allocated;
+						break;
+					case SC_MARGIN_FORE:
+						colour = vs.styles[STYLE_DEFAULT].fore.allocated;
+						break;
+					default:
+						colour = vs.styles[STYLE_LINENUMBER].back.allocated;
+						break;
+					}
+					surface->FillRectangle(rcSelMargin, colour);
+				}
 			} else {
 				surface->FillRectangle(rcSelMargin, vs.styles[STYLE_LINENUMBER].back.allocated);
 			}
@@ -1840,7 +1853,7 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 				PRectangle rcMarker = rcSelMargin;
 				rcMarker.top = yposScreen;
 				rcMarker.bottom = yposScreen + vs.lineHeight;
-				if (!vs.ms[margin].symbol) {
+				if (vs.ms[margin].style == SC_MARGIN_NUMBER) {
 					char number[100];
 					number[0] = '\0';
 					if (firstSubLine)
@@ -2131,7 +2144,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 					continue;
 				}
 				if (p > 0) {
-					if (wrapState == eWrapChar){
+					if (wrapState == eWrapChar) {
 						lastGoodBreak = pdoc->MovePositionOutsideChar(p + posLineStart, -1)
 												- posLineStart;
 						p = pdoc->MovePositionOutsideChar(p + 1 + posLineStart, 1) - posLineStart;
@@ -2210,7 +2223,7 @@ void Editor::DrawWrapMarker(Surface *surface, PRectangle rcPlace,
 		    surface->LineTo(xBase + xDir * xRelative, yBase + yDir * yRelative);
 		}
 	};
-	Relative rel = {surface, x0, xStraight?1:-1, y0, yStraight?1:-1};
+	Relative rel = {surface, x0, xStraight ? 1 : -1, y0, yStraight ? 1 : -1};
 
 	// arrow head
 	rel.MoveTo(xa, y);
@@ -3114,7 +3127,7 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 	// Printing supports only the line number margin.
 	int lineNumberIndex = -1;
 	for (int margin = 0; margin < ViewStyle::margins; margin++) {
-		if ((!vsPrint.ms[margin].symbol) && (vsPrint.ms[margin].width > 0)) {
+		if ((vsPrint.ms[margin].style == SC_MARGIN_NUMBER) && (vsPrint.ms[margin].width > 0)) {
 			lineNumberIndex = margin;
 		} else {
 			vsPrint.ms[margin].width = 0;
@@ -6357,7 +6370,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return pdoc->ExtendWordSelect(wParam, 1, lParam != 0);
 
 	case SCI_SETWRAPMODE:
-		switch(wParam){
+		switch (wParam) {
 			case SC_WRAP_WORD:
 				wrapState = eWrapWord;
 				break;
@@ -6603,14 +6616,14 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETMARGINTYPEN:
 		if (ValidMargin(wParam)) {
-			vs.ms[wParam].symbol = (lParam == SC_MARGIN_SYMBOL);
+			vs.ms[wParam].style = lParam;
 			InvalidateStyleRedraw();
 		}
 		break;
 
 	case SCI_GETMARGINTYPEN:
 		if (ValidMargin(wParam))
-			return vs.ms[wParam].symbol ? SC_MARGIN_SYMBOL : SC_MARGIN_NUMBER;
+			return vs.ms[wParam].style;
 		else
 			return 0;
 

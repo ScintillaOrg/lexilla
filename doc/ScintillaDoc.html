@@ -2272,7 +2272,10 @@ struct TextToFind {
      These two routines set and get the type of a margin. The margin argument should be 0, 1, 2, 3 or 4.
     You can use the predefined constants <code>SC_MARGIN_SYMBOL</code> (0) and
     <code>SC_MARGIN_NUMBER</code> (1) to set a margin as either a line number or a symbol margin.
-    By convention, margin 0 is used for line numbers and the next two are used for symbols.</p>
+    By convention, margin 0 is used for line numbers and the next two are used for symbols. You can
+    also use the constants <code>SC_MARGIN_BACK</code> (2) and <code>SC_MARGIN_FORE</code> (3) for
+    symbol margins that set their background colour to match the STYLE_DEFAULT background and
+    foreground colours.</p>
 
     <p><b id="SCI_SETMARGINWIDTHN">SCI_SETMARGINWIDTHN(int margin, int pixelWidth)</b><br />
      <b id="SCI_GETMARGINWIDTHN">SCI_GETMARGINWIDTHN(int margin)</b><br />
@@ -2405,8 +2408,8 @@ struct TextToFind {
     <code>codePage</code> set to the code page number to set Scintilla to use code page information
     to ensure double byte characters are treated as one character rather than two. This also stops
     the caret from moving between the two bytes in a double byte character.
-	Do not use this message to choose between different single byte character sets: it doesn't do that.
-	Call with
+    Do not use this message to choose between different single byte character sets: it doesn't do that.
+    Call with
     <code>codePage</code> set to zero to disable DBCS support. The default is
     <code>SCI_SETCODEPAGE(0)</code>.</p>
 

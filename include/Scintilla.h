@@ -141,6 +141,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_MARKERSETALPHA 2476
 #define SC_MARGIN_SYMBOL 0
 #define SC_MARGIN_NUMBER 1
+#define SC_MARGIN_BACK 2
+#define SC_MARGIN_FORE 3
 #define SCI_SETMARGINTYPEN 2240
 #define SCI_GETMARGINTYPEN 2241
 #define SCI_SETMARGINWIDTHN 2242
