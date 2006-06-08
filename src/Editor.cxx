@@ -429,9 +429,8 @@ Editor::Editor() {
 
 	wrapState = eWrapNone;
 	wrapWidth = LineLayout::wrapWidthInfinite;
-	docLineLastWrapped = -1;
-	docLastLineToWrap = -1;
-	backgroundWrapEnabled = true;
+	wrapStart = wrapLineLarge;
+	wrapEnd = wrapLineLarge;
 	wrapVisualFlags = 0;
 	wrapVisualFlagsLocation = 0;
 	wrapVisualStartIndent = 0;
@@ -1487,29 +1486,18 @@ void Editor::InvalidateCaret() {
 void Editor::UpdateSystemCaret() {
 }
 
-void Editor::NeedWrapping(int docLineStartWrapping, int docLineEndWrapping) {
-	docLineStartWrapping = Platform::Minimum(docLineStartWrapping, pdoc->LinesTotal()-1);
-	docLineEndWrapping = Platform::Minimum(docLineEndWrapping, pdoc->LinesTotal()-1);
-	bool noWrap = (docLastLineToWrap == docLineLastWrapped);
-	if (docLineLastWrapped > (docLineStartWrapping - 1)) {
-		docLineLastWrapped = docLineStartWrapping - 1;
-		if (docLineLastWrapped < -1)
-			docLineLastWrapped = -1;
+void Editor::NeedWrapping(int docLineStart, int docLineEnd) {
+	docLineStart = Platform::Clamp(docLineStart, 0, pdoc->LinesTotal());
+	if (wrapStart > docLineStart) {
+		wrapStart = docLineStart;
 		llc.Invalidate(LineLayout::llPositions);
 	}
-	if (noWrap) {
-		docLastLineToWrap = docLineEndWrapping;
-	} else if (docLastLineToWrap < docLineEndWrapping) {
-		docLastLineToWrap = docLineEndWrapping + 1;
+	if (wrapEnd < docLineEnd) {
+		wrapEnd = docLineEnd;
 	}
-	if (docLastLineToWrap < -1)
-		docLastLineToWrap = -1;
-	if (docLastLineToWrap >= pdoc->LinesTotal())
-		docLastLineToWrap = pdoc->LinesTotal()-1;
+	wrapEnd = Platform::Clamp(wrapEnd, 0, pdoc->LinesTotal());
 	// Wrap lines during idle.
-	if ((wrapState != eWrapNone) &&
-		backgroundWrapEnabled &&
-		(docLastLineToWrap != docLineLastWrapped)) {
+	if ((wrapState != eWrapNone) && (wrapEnd != wrapStart)) {
 		SetIdle(true);
 	}
 }
@@ -1518,33 +1506,33 @@ void Editor::NeedWrapping(int docLineStartWrapping, int docLineEndWrapping) {
 // fullwrap: if true, all lines which need wrapping will be done,
 //           in this single call.
 // priorityWrapLineStart: If greater than zero, all lines starting from
-//           here to 100 lines past will be wrapped (even if there are
+//           here to 1 page + 100 lines past will be wrapped (even if there are
 //           more lines under wrapping process in idle).
-// If it is neither fullwrap, nor priorityWrap, then 100 lines will be
+// If it is neither fullwrap, nor priorityWrap, then 1 page + 100 lines will be
 // wrapped, if there are any wrapping going on in idle. (Generally this
 // condition is called only from idler).
 // Return true if wrapping occurred.
 bool Editor::WrapLines(bool fullWrap, int priorityWrapLineStart) {
 	// If there are any pending wraps, do them during idle if possible.
+	int linesInOneCall = LinesOnScreen() + 100;
 	if (wrapState != eWrapNone) {
-		if (docLineLastWrapped < docLastLineToWrap) {
-			if (!(backgroundWrapEnabled && SetIdle(true))) {
-				// Background wrapping is disabled, or idle processing
-				// not supported.  A full wrap is required.
+		if (wrapStart < wrapEnd) {
+			if (!SetIdle(true)) {
+				// Idle processing not supported so full wrap required.
 				fullWrap = true;
 			}
 		}
 		if (!fullWrap && priorityWrapLineStart >= 0 &&
 			// .. and if the paint window is outside pending wraps
-			(((priorityWrapLineStart + 100) < docLineLastWrapped) ||
-			 (priorityWrapLineStart > docLastLineToWrap))) {
+			(((priorityWrapLineStart + linesInOneCall) < wrapStart) ||
+			 (priorityWrapLineStart > wrapEnd))) {
 			// No priority wrap pending
 			return false;
 		}
 	}
 	int goodTopLine = topLine;
 	bool wrapOccurred = false;
-	if (docLineLastWrapped < pdoc->LinesTotal()) {
+	if (wrapStart <= pdoc->LinesTotal()) {
 		if (wrapState == eWrapNone) {
 			if (wrapWidth != LineLayout::wrapWidthInfinite) {
 				wrapWidth = LineLayout::wrapWidthInfinite;
@@ -1553,8 +1541,11 @@ bool Editor::WrapLines(bool fullWrap, int priorityWrapLineStart) {
 				}
 				wrapOccurred = true;
 			}
-			docLineLastWrapped = 0x7ffffff;
+			wrapStart = wrapLineLarge;
+			wrapEnd = wrapLineLarge;
 		} else {
+			if (wrapEnd >= pdoc->LinesTotal())
+				wrapEnd = pdoc->LinesTotal();
 			//ElapsedTime et;
 			int lineDocTop = cs.DocFromDisplay(topLine);
 			int subLineTop = topLine - cs.DisplayFromDoc(lineDocTop);
@@ -1568,44 +1559,42 @@ bool Editor::WrapLines(bool fullWrap, int priorityWrapLineStart) {
 			AutoSurface surface(this);
 			if (surface) {
 				bool priorityWrap = false;
-				int lastLineToWrap = docLastLineToWrap;
-				int firstLineToWrap = docLineLastWrapped;
+				int lastLineToWrap = wrapEnd;
+				int lineToWrap = wrapStart;
 				if (!fullWrap) {
 					if (priorityWrapLineStart >= 0) {
 						// This is a priority wrap.
-						firstLineToWrap = priorityWrapLineStart;
-						lastLineToWrap = firstLineToWrap + 100;
+						lineToWrap = priorityWrapLineStart;
+						lastLineToWrap = priorityWrapLineStart + linesInOneCall;
 						priorityWrap = true;
 					} else {
 						// This is idle wrap.
-						lastLineToWrap = docLineLastWrapped + 100;
+						lastLineToWrap = wrapStart + linesInOneCall;
 					}
-					if (lastLineToWrap >= docLastLineToWrap)
-						lastLineToWrap = docLastLineToWrap;
+					if (lastLineToWrap >= wrapEnd)
+						lastLineToWrap = wrapEnd;
 				} // else do a fullWrap.
 
-				// printf("Wraplines: full = %d, priorityStart = %d (wrapping: %d to %d)\n", fullWrap, priorityWrapLineStart, firstLineToWrap, lastLineToWrap);
-				// printf("Pending wraps: %d to %d\n", docLineLastWrapped, docLastLineToWrap);
-				while (firstLineToWrap < lastLineToWrap) {
-					firstLineToWrap++;
-					if (!priorityWrap)
-						docLineLastWrapped++;
-					if (firstLineToWrap < pdoc->LinesTotal()) {
-						AutoLineLayout ll(llc, RetrieveLineLayout(firstLineToWrap));
-						int linesWrapped = 1;
-						if (ll) {
-							LayoutLine(firstLineToWrap, surface, vs, ll, wrapWidth);
-							linesWrapped = ll->lines;
-						}
-						if (cs.SetHeight(firstLineToWrap, linesWrapped)) {
-							wrapOccurred = true;
-						}
+				// Platform::DebugPrintf("Wraplines: full = %d, priorityStart = %d (wrapping: %d to %d)\n", fullWrap, priorityWrapLineStart, lineToWrap, lastLineToWrap);
+				// Platform::DebugPrintf("Pending wraps: %d to %d\n", wrapStart, wrapEnd);
+				while (lineToWrap < lastLineToWrap) {
+					AutoLineLayout ll(llc, RetrieveLineLayout(lineToWrap));
+					int linesWrapped = 1;
+					if (ll) {
+						LayoutLine(lineToWrap, surface, vs, ll, wrapWidth);
+						linesWrapped = ll->lines;
 					}
+					if (cs.SetHeight(lineToWrap, linesWrapped)) {
+						wrapOccurred = true;
+					}
+					lineToWrap++;
 				}
+				if (!priorityWrap)
+					wrapStart = lineToWrap;
 				// If wrapping is done, bring it to resting position
-				if (docLineLastWrapped > docLastLineToWrap) {
-					docLineLastWrapped = -1;
-					docLastLineToWrap = -1;
+				if (wrapStart >= wrapEnd) {
+					wrapStart = wrapLineLarge;
+					wrapEnd = wrapLineLarge;
 				}
 			}
 			goodTopLine = cs.DisplayFromDoc(lineDocTop);
@@ -3727,19 +3716,8 @@ void Editor::CheckModificationForWrap(DocModification mh) {
 		llc.Invalidate(LineLayout::llCheckTextAndStyle);
 		if (wrapState != eWrapNone) {
 			int lineDoc = pdoc->LineFromPosition(mh.position);
-			if (mh.linesAdded <= 0) {
-				AutoSurface surface(this);
-				AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
-				if (surface && ll) {
-					LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
-					if (cs.GetHeight(lineDoc) != ll->lines) {
-						NeedWrapping(lineDoc - 1, lineDoc + 1);
-						Redraw();
-					}
-				}
-			} else {
-				NeedWrapping(lineDoc, lineDoc + 1 + mh.linesAdded);
-			}
+			int lines = Platform::Maximum(0, mh.linesAdded);
+			NeedWrapping(lineDoc, lineDoc + lines + 1);
 		}
 	}
 }
@@ -3782,6 +3760,7 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 				InvalidateRange(mh.position, mh.position + mh.length);
 			}
 		}
+		llc.Invalidate(LineLayout::llCheckTextAndStyle);
 	} else {
 		// Move selection and brace highlights
 		if (mh.modificationType & SC_MOD_INSERTTEXT) {
@@ -5442,13 +5421,13 @@ bool Editor::Idle() {
 
 	bool idleDone;
 
-	bool wrappingDone = (wrapState == eWrapNone) || (!backgroundWrapEnabled);
+	bool wrappingDone = wrapState == eWrapNone;
 
 	if (!wrappingDone) {
 		// Wrap lines during idle.
 		WrapLines(false, -1);
 		// No more wrapping
-		if (docLineLastWrapped == docLastLineToWrap)
+		if (wrapStart == wrapEnd)
 			wrappingDone = true;
 	}
 

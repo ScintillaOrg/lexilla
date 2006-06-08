@@ -305,10 +305,10 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	// Wrapping support
 	enum { eWrapNone, eWrapWord, eWrapChar } wrapState;
-	bool backgroundWrapEnabled;
+	enum { wrapLineLarge = 0x7ffffff };
 	int wrapWidth;
-	int docLineLastWrapped;
-	int docLastLineToWrap;
+	int wrapStart;
+	int wrapEnd;
 	int wrapVisualFlags;
 	int wrapVisualFlagsLocation;
 	int wrapVisualStartIndent;
@@ -377,7 +377,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void InvalidateCaret();
 	virtual void UpdateSystemCaret();
 
-	void NeedWrapping(int docLineStartWrapping = 0, int docLineEndWrapping = 0x7ffffff);
+	void NeedWrapping(int docLineStart = 0, int docLineEnd = wrapLineLarge);
 	bool WrapLines(bool fullWrap, int priorityWrapLineStart);
 	void LinesJoin();
 	void LinesSplit(int pixelWidth);
