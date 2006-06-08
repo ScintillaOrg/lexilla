@@ -797,10 +797,11 @@ void ScintillaGTK::StartDrag() {
 }
 
 #ifdef USE_CONVERTER
-static char *ConvertText(int *lenResult, char *s, size_t len, const char *charSetDest, const char *charSetSource) {
+static char *ConvertText(int *lenResult, char *s, size_t len, const char *charSetDest, 
+	const char *charSetSource, bool transliterations) {
 	*lenResult = 0;
 	char *destForm = 0;
-	Converter conv(charSetDest, charSetSource);
+	Converter conv(charSetDest, charSetSource, transliterations);
 	if (conv) {
 		destForm = new char[len*3+1];
 		char *pin = s;
@@ -848,7 +849,7 @@ int ScintillaGTK::TargetAsUTF8(char *text) {
 				pdoc->GetCharRange(s, targetStart, targetLength);
 //~ fprintf(stderr, "    \"%s\"\n", s);
 				if (text) {
-					char *tmputf = ConvertText(&targetLength, s, targetLength, "UTF-8", charSetBuffer);
+					char *tmputf = ConvertText(&targetLength, s, targetLength, "UTF-8", charSetBuffer, false);
 					memcpy(text, tmputf, targetLength);
 					delete []tmputf;
 //~ fprintf(stderr, "    \"%s\"\n", text);
@@ -885,7 +886,7 @@ int ScintillaGTK::EncodedFromUTF8(char *utf8, char *encoded) {
 		if (*charSetBuffer) {
 //~ fprintf(stderr, "Encode %s %d\n", charSetBuffer, inputLength);
 			int outLength = 0;
-			char *tmpEncoded = ConvertText(&outLength, utf8, inputLength, charSetBuffer, "UTF-8");
+			char *tmpEncoded = ConvertText(&outLength, utf8, inputLength, charSetBuffer, "UTF-8", true);
 			if (tmpEncoded) {
 //~ fprintf(stderr, "    \"%s\"\n", tmpEncoded);
 				if (encoded) {
@@ -1411,7 +1412,7 @@ void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, Selectio
 		if (!IsUnicodeMode() && *charSetBuffer) {
 //fprintf(stderr, "Convert to locale %s\n", CharacterSetID());
 				// Convert to locale
-				dest = ConvertText(&len, selText.s, selText.len, charSetBuffer, "UTF-8");
+				dest = ConvertText(&len, selText.s, selText.len, charSetBuffer, "UTF-8", true);
 				selText.Set(dest, len, pdoc->dbcsCodePage,
 					vs.styles[STYLE_DEFAULT].characterSet, selText.rectangular);
 		}
@@ -1496,7 +1497,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 		const char *charSet = ::CharacterSetID(text->characterSet);
 		if (*charSet) {
 			int new_len;
-			char* tmputf = ConvertText(&new_len, text->s, text->len, "UTF-8", charSet);
+			char* tmputf = ConvertText(&new_len, text->s, text->len, "UTF-8", charSet, false);
 			converted = new SelectionText();
 			converted->Set(tmputf, new_len, SC_CP_UTF8, 0, text->rectangular);
 			text = converted;
@@ -1539,14 +1540,14 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 			if (text->codePage != SC_CP_UTF8) {
 				// Convert to UTF-8
 	//fprintf(stderr, "Convert to UTF-8 from %s\n", charSetBuffer);
-				tmputf = ConvertText(&len, selBuffer, len, "UTF-8", charSetBuffer);
+				tmputf = ConvertText(&len, selBuffer, len, "UTF-8", charSetBuffer, false);
 				selBuffer = tmputf;
 			}
 		} else if (info == TARGET_STRING) {
 			if (text->codePage == SC_CP_UTF8) {
 	//fprintf(stderr, "Convert to locale %s\n", charSetBuffer);
 				// Convert to locale
-				tmputf = ConvertText(&len, selBuffer, len, charSetBuffer, "UTF-8");
+				tmputf = ConvertText(&len, selBuffer, len, charSetBuffer, "UTF-8", true);
 				selBuffer = tmputf;
 			}
 		}
@@ -2037,7 +2038,7 @@ void ScintillaGTK::CommitThis(char *utfVal) {
 	} else {
 		const char *source = CharacterSetID();
 		if (*source) {
-			Converter conv(source, "UTF-8");
+			Converter conv(source, "UTF-8", true);
 			if (conv) {
 				char localeVal[4]="\0\0\0";
 				char *pin = utfVal;

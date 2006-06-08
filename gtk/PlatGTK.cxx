@@ -794,7 +794,7 @@ const char *CharacterSetID(int characterSet) {
 void SurfaceImpl::SetConverter(int characterSet_) {
 	if (characterSet != characterSet_) {
 		characterSet = characterSet_;
-		conv.Open("UTF-8", CharacterSetID(characterSet));
+		conv.Open("UTF-8", CharacterSetID(characterSet), false);
 	}
 }
 #endif
@@ -1400,7 +1400,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 						// Convert to UTF-8 so can ask Pango for widths, then
 						// Loop through UTF-8 and DBCS forms, taking account of different
 						// character byte lengths.
-						Converter convMeasure("UCS-2", CharacterSetID(characterSet));
+						Converter convMeasure("UCS-2", CharacterSetID(characterSet), false);
 						pango_layout_set_text(layout, utfForm, strlen(utfForm));
 						int i = 0;
 						int utfIndex = 0;
@@ -2632,7 +2632,6 @@ bool Platform::IsDBCSLeadByte(int /* codePage */, char /* ch */) {
 	return false;
 }
 
-#if GTK_MAJOR_VERSION < 2
 int Platform::DBCSCharLength(int, const char *s) {
 	int bytes = mblen(s, MB_CUR_MAX);
 	if (bytes >= 1)
@@ -2640,24 +2639,6 @@ int Platform::DBCSCharLength(int, const char *s) {
 	else
 		return 1;
 }
-#else
-int Platform::DBCSCharLength(int codePage, const char *s) {
-	if (codePage == 999932) {
-		// Experimental and disabled code - change 999932 to 932 above to
-		// enable locale avoiding but expensive character length determination.
-		// Avoid locale with explicit use of iconv
-		Converter convMeasure("UCS-2", CharacterSetID(SC_CHARSET_SHIFTJIS));
-		size_t lenChar = MultiByteLenFromIconv(convMeasure, s, strlen(s));
-		return lenChar;
-	} else {
-		int bytes = mblen(s, MB_CUR_MAX);
-		if (bytes >= 1)
-			return bytes;
-		else
-			return 1;
-	}
-}
-#endif
 
 int Platform::DBCSCharMaxLength() {
 	return MB_CUR_MAX;
