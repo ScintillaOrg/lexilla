@@ -2022,7 +2022,8 @@ struct TextToFind {
     only the first 32 characters of the name are used and the name is not case sensitive. For
     internal caching, Scintilla tracks fonts by name and does care about the casing of font names,
     so please be consistent. On GTK+ 2.x, either GDK or Pango can be used to display text.
-    Pango antialiases text and works well with Unicode but GDK is faster.
+    Pango antialiases text, works well with Unicode and is better supported in recent versions of GTK+
+    but GDK is faster.
     Prepend a '!' character to the font name to use Pango.</p>
 
     <p><b id="SCI_STYLESETUNDERLINE">SCI_STYLESETUNDERLINE(int styleNumber, bool
@@ -2418,23 +2419,25 @@ struct TextToFind {
     normal Unicode encoding before being drawn by the OS and thus can display Hebrew, Arabic,
     Cyrillic, and Han characters. Languages which can use two characters stacked vertically in one
     horizontal space, such as Thai, will mostly work but there are some issues where the characters
-    are drawn separately leading to visual glitches. Bi-directional text is not supported.</p>
+    are drawn separately leading to visual glitches. Bi-directional text is not supported. Characters outside the 
+    Basic Multilingual Plane are unlikely to work.</p>
 
     <p>On Windows, code page can be set to 932 (Japanese Shift-JIS), 936 (Simplified Chinese GBK),
-    949 (Korean), and 950 (Traditional Chinese Big5) although these may require installation of language
-    specific support.</p>
+    949 (Korean Unified Hangul Code), 950 (Traditional Chinese Big5), or 1361 (Korean Johab)
+    although these may require installation of language specific support.</p>
 
     <p>On GTK+, code page <code>SC_CP_DBCS</code> (1) sets Scintilla into
     multi byte character mode as is required for Japanese language processing with
     the EUC encoding.</p>
 
-    <p>For GTK+, the locale should be set to a Unicode locale with a call similar to
+    <p>For GTK+ 1.x, the locale should be set to a Unicode locale with a call similar to
     <code>setlocale(LC_CTYPE, "en_US.UTF-8")</code>. Fonts with an <code>"iso10646"</code> registry
     should be used in a font set. Font sets are a comma separated list of partial font
     specifications where each partial font specification can be in the form:
     <code>foundry-fontface-charsetregistry-encoding</code> or
     <code>fontface-charsetregistry-encoding</code> or <code>foundry-fontface</code> or
-    <code>fontface</code>. An example is <code>"misc-fixed-iso10646-1,*"</code>.</p>
+    <code>fontface</code>. An example is <code>"misc-fixed-iso10646-1,*"</code>.
+    On GTK+ 2.x, Pango fonts should be used rather than font sets.</p>
 
     <p>Setting <code>codePage</code> to a non-zero value that is not <code>SC_CP_UTF8</code> is
     operating system dependent.</p>
