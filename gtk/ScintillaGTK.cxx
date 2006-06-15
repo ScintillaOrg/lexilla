@@ -154,6 +154,7 @@ private:
 	virtual void StartDrag();
 	int TargetAsUTF8(char *text);
 	int EncodedFromUTF8(char *utf8, char *encoded);
+	virtual bool ValidCodePage(int codePage) const;
 public: 	// Public for scintilla_send_message
 	virtual sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 private:
@@ -905,6 +906,10 @@ int ScintillaGTK::EncodedFromUTF8(char *utf8, char *encoded) {
 	}
 	// Fail
 	return 0;
+}
+
+bool ScintillaGTK::ValidCodePage(int codePage) const {
+	return codePage == 0 || codePage == SC_CP_UTF8 || codePage == SC_CP_DBCS;
 }
 
 sptr_t ScintillaGTK::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
