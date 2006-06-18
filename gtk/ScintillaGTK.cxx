@@ -113,6 +113,7 @@ class ScintillaGTK : public ScintillaBase {
 	static GdkAtom atomUTF8;
 	static GdkAtom atomString;
 	static GdkAtom atomUriList;
+	static GdkAtom atomDROPFILES_DND;
 	GdkAtom atomSought;
 
 #if PLAT_GTK_WIN32
@@ -302,6 +303,7 @@ GdkAtom ScintillaGTK::atomClipboard = 0;
 GdkAtom ScintillaGTK::atomUTF8 = 0;
 GdkAtom ScintillaGTK::atomString = 0;
 GdkAtom ScintillaGTK::atomUriList = 0;
+GdkAtom ScintillaGTK::atomDROPFILES_DND = 0;
 
 static const GtkTargetEntry clipboardTargets[] = {
 	{ "text/uri-list", 0, TARGET_URI },
@@ -1460,7 +1462,7 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 
 void ScintillaGTK::ReceivedDrop(GtkSelectionData *selection_data) {
 	dragWasDropped = true;
-	if (selection_data->type == atomUriList) {
+	if (selection_data->type == atomUriList || selection_data->type == atomDROPFILES_DND) {
 		char *ptr = new char[selection_data->length + 1];
 		ptr[selection_data->length] = '\0';
 		memcpy(ptr, selection_data->data, selection_data->length);
@@ -2507,6 +2509,7 @@ void ScintillaGTK::ClassInit(OBJECT_CLASS* object_class, GtkWidgetClass *widget_
 	atomUTF8 = gdk_atom_intern("UTF8_STRING", FALSE);
 	atomString = GDK_SELECTION_TYPE_STRING;
 	atomUriList = gdk_atom_intern("text/uri-list", FALSE);
+	atomDROPFILES_DND = gdk_atom_intern("DROPFILES_DND", FALSE);
 
 	// Define default signal handlers for the class:  Could move more
 	// of the signal handlers here (those that currently attached to wDraw
