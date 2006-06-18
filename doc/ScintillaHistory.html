@@ -238,9 +238,32 @@
 	Released on 20 June 2006.
 	</li>
 	<li>
-	SciTE supports.
+	On GTK+, character set conversion is performed using an option that allows approximate conversions rather
+	than failures when a character can not be converted. This may lead to similar characters being inserted or 
+	when no similar character is available a '?' may be inserted.
 	</li>
-    <ul>
+	<li>
+	On GTK+, the internationalised IM (Input Method) feature is used for all typed input for all character sets.
+	</li>
+	<li>
+	Scintilla has new margin types SC_MARGIN_BACK and SC_MARGIN_FORE that use the default
+	style's background and foreground colours (normally white and black) as the background to the margin.
+	</li>
+	<li>
+	Scintilla/GTK+ allows file drops on Windows when drop is of type DROPFILES_DND
+	as well as text/uri-list.
+	</li>
+	<li>
+	Code page can only be set to one of the listed valid values.
+	</li>
+	<li>
+	Text wrapping fixed for cases where insertion was not wide enough to trigger
+	wrapping before being styled but was after styling.
+	</li>
+	<li>
+	SciTE find marks are removed before printing or exporting to avoid producing incorrect styles.
+	</li>
+    </ul>
     <h3>
        <a href="http://prdownloads.sourceforge.net/scintilla/scite169.zip?download">Release 1.69</a>
     </h3>
