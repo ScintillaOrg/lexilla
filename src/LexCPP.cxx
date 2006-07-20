@@ -28,11 +28,11 @@ static bool IsOKBeforeRE(int ch) {
 }
 
 static inline bool IsAWordChar(int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_');
+	return (ch >= 0x80) || (isalnum(ch) || ch == '.' || ch == '_');
 }
 
 static inline bool IsAWordStart(int ch) {
-	return (ch < 0x80) && (isalpha(ch) || ch == '_');
+	return (ch >= 0x80) || (isalpha(ch) || ch == '_');
 }
 
 static inline bool IsADoxygenChar(int ch) {
