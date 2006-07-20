@@ -4546,7 +4546,7 @@ struct NotifyHeader {   // This matches the Win32 NMHDR structure
 struct SCNotification {
     struct NotifyHeader nmhdr;
     int position;
-    // SCN_STYLENEEDED, SCN_MODIFIED, SCN_DWELLSTART,
+    // SCN_STYLENEEDED, SCN_DOUBLECLICK, SCN_MODIFIED, SCN_DWELLSTART,
     // SCN_DWELLEND, SCN_CALLTIPCLICK,
     // SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK
     int ch;             // SCN_CHARADDED, SCN_KEY
@@ -4558,7 +4558,7 @@ struct SCNotification {
     int message;        // SCN_MACRORECORD
     uptr_t wParam;      // SCN_MACRORECORD
     sptr_t lParam;      // SCN_MACRORECORD
-    int line;           // SCN_MODIFIED
+    int line;           // SCN_MODIFIED, SCN_DOUBLECLICK
     int foldLevelNow;   // SCN_MODIFIED
     int foldLevelPrev;  // SCN_MODIFIED
     int margin;         // SCN_MARGINCLICK
@@ -4656,7 +4656,8 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
     than 256.</p>
 
     <p><b id="SCN_DOUBLECLICK">SCN_DOUBLECLICK</b><br />
-     The mouse button was double clicked in editor. There is no additional information.</p>
+     The mouse button was double clicked in editor. The <code>position</code> field is set to the text position of the
+    double click and the <code>line</code> field is set to the line of the double click.</p>
 
     <p><b id="SCN_UPDATEUI">SCN_UPDATEUI</b><br />
      Either the text or styling of the document has changed or the selection range has changed. Now
