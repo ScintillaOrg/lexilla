@@ -371,7 +371,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
                         if (ch2 == '{' && !moreback) {
                             // {bareword: possible variable spec
                             brace = true;
-                        } else if ((ch2 == '&')
+                        } else if ((ch2 == '&' && styler.SafeGetCharAt(j - 1) != '&')
                                 // &bareword: subroutine call
                                 || (ch2 == '>' && styler.SafeGetCharAt(j - 1) == '-')
                                 // ->bareword: part of variable spec
@@ -462,7 +462,8 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 					styler.ColourTo(i, SCE_PL_SCALAR);
 				} else {
 					state = SCE_PL_SCALAR;
-					if (chNext == '`' && chNext2 == '`') {
+					if ((chNext == '`' && chNext2 == '`')
+                     || (chNext == ':' && chNext2 == ':')) {
 						i += 2;
 						ch = styler.SafeGetCharAt(i);
 						chNext = styler.SafeGetCharAt(i + 1);
@@ -477,6 +478,11 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 				if (isalpha(chNext) || chNext == '#' || chNext == '$'
 					|| chNext == '_' || chNext == '+' || chNext == '-') {
 					state = SCE_PL_ARRAY;
+                } else if (chNext == ':' && chNext2 == ':') {
+                    state = SCE_PL_ARRAY;
+                    i += 2;
+                    ch = styler.SafeGetCharAt(i);
+                    chNext = styler.SafeGetCharAt(i + 1);
 				} else if (chNext != '{' && chNext != '[') {
 					styler.ColourTo(i, SCE_PL_ARRAY);
 				} else {
@@ -490,6 +496,11 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
                     i++;
                     ch = chNext;
                     chNext = chNext2;
+                } else if (chNext == ':' && chNext2 == ':') {
+                    state = SCE_PL_HASH;
+                    i += 2;
+                    ch = styler.SafeGetCharAt(i);
+                    chNext = styler.SafeGetCharAt(i + 1);
 				} else if (chNext == '{') {
 					styler.ColourTo(i, SCE_PL_HASH);
 				} else {
@@ -500,7 +511,12 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
                 char strch[2];
                 strch[0] = chNext;
                 strch[1] = '\0';
-				if (isalpha(chNext) || chNext == '_' ||
+                if (chNext == ':' && chNext2 == ':') {
+                    state = SCE_PL_SYMBOLTABLE;
+                    i += 2;
+                    ch = styler.SafeGetCharAt(i);
+                    chNext = styler.SafeGetCharAt(i + 1);
+				} else if (isalpha(chNext) || chNext == '_' ||
                     NULL != strstr("^/|,\\\";#%^:?<>)[]", strch)) {
 					state = SCE_PL_SYMBOLTABLE;
                     i++;
