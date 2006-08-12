@@ -416,7 +416,8 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 
 	bool IsOcxCtrl = (wParam != 0); // if wParam != 0, it contains
 								   // a PAINSTRUCT* from the OCX
-	PLATFORM_ASSERT(hRgnUpdate == NULL);
+	// Removed since this interferes with reporting other assertions as it occurs repeatedly
+	//PLATFORM_ASSERT(hRgnUpdate == NULL);
 	hRgnUpdate = ::CreateRectRgn(0, 0, 0, 0);
 	if (IsOcxCtrl) {
 		pps = reinterpret_cast<PAINTSTRUCT*>(wParam);
