@@ -239,7 +239,49 @@
 	Released on 21 August 2006.
 	</li>
 	<li>
-	Features.
+	On GTK+ drag and drop defaults to move rather than copy.
+	</li>
+	<li>
+	Double click notification includes line and position.
+	</li>
+	<li>
+	VB lexer bugs fixed for preprocessor directive below a comment or some other states and
+	to use string not closed style back to the starting quote when there are internal doubled quotes.
+	</li>
+	<li>
+	C++ lexer allows identifiers to contain '$' and non-ASCII characters such as UTF-8.
+	The '$' character can be disallowed with lexer.cpp.allow.dollars=0.
+	</li>
+	<li>
+	Perl lexer allows UTF-8 identifiers and has some other small improvements.
+	</li>
+	<li>
+	SciTE's $(CurrentWord) uses word.characters.&lt;filepattern&gt; to define the word
+	rather than a hardcoded list of word characters.
+	</li>
+	<li>
+	SciTE Export as HTML adds encoding information for UTF-8 file and fixes DOCTYPE.
+	</li>
+	<li>
+	SciTE session and .recent files default to the user properties directory rather than global
+	properties directory.
+	</li>
+	<li>
+	Left and right scroll events handled correctly on GTK+ and horizontal scroll bar has more sensible
+	distances for page and arrow clicks.
+	</li>
+	<li>
+	SciTE on GTK+ tab bar fixed to work on recent versions of GTK+.
+	</li>
+	<li>
+	On GTK+, if the approximate character set conversion is unavailable, a second attempt is made
+	without approximations. This may allow keyboard input and paste to work on older systems.
+	</li>
+	<li>
+	SciTE on GTK+ can redefine the Insert key.
+	</li>
+	<li>
+	SciTE scripting interface bug fixed where some string properties could not be changed.
 	</li>
     </ul>
     <h3>
