@@ -669,7 +669,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCK_SUBTRACT 311
 #define SCK_DIVIDE 312
 #define SCK_WIN 313
-#define SCK_MENU 314
+#define SCK_RWIN 314
+#define SCK_MENU 315
 #define SCMOD_NORM 0
 #define SCMOD_SHIFT 1
 #define SCMOD_CTRL 2

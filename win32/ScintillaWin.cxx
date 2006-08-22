@@ -397,6 +397,7 @@ static int KeyTranslate(int keyIn) {
 		case VK_SUBTRACT:	return SCK_SUBTRACT;
 		case VK_DIVIDE:		return SCK_DIVIDE;
 		case VK_LWIN:		return SCK_WIN;
+		case VK_RWIN:		return SCK_RWIN;
 		case VK_APPS:		return SCK_MENU;
 		case VK_OEM_2:		return '/';
 		case VK_OEM_3:		return '`';
