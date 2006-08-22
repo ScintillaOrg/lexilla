@@ -2329,14 +2329,17 @@ void ScintillaGTK::DragBegin(GtkWidget *, GdkDragContext *) {
 }
 
 gboolean ScintillaGTK::DragMotion(GtkWidget *widget, GdkDragContext *context,
-                                  gint x, gint y, guint dragtime) {
+                                 gint x, gint y, guint dragtime) {
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
-	//Platform::DebugPrintf("DragMotion %d %d %x %x %x\n", x, y,
-	//	context->actions, context->suggested_action, sciThis);
 	Point npt(x, y);
 	sciThis->inDragDrop = true;
 	sciThis->SetDragPosition(sciThis->PositionFromLocation(npt));
-	gdk_drag_status(context, context->suggested_action, dragtime);
+	GdkDragAction preferredAction = context->suggested_action;
+	if (context->actions == static_cast<GdkDragAction>
+		(GDK_ACTION_COPY | GDK_ACTION_MOVE)) {
+		preferredAction = GDK_ACTION_MOVE;
+	}
+	gdk_drag_status(context, preferredAction, dragtime);
 	return FALSE;
 }
 
