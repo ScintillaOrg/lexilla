@@ -1945,6 +1945,10 @@ static int KeyTranslate(int keyIn) {
 		return SCK_SUBTRACT;
 	case GDK_KP_Divide:
 		return SCK_DIVIDE;
+	case GDK_Super_L:
+		return SCK_WIN;
+	case GDK_Menu:
+		return SCK_MENU;
 	default:
 		return keyIn;
 	}
