@@ -116,6 +116,8 @@ public:
 		if (ch != static_cast<unsigned char>(*s))
 			return false;
 		s++;
+		if (!*s)
+			return true;
 		if (chNext != static_cast<unsigned char>(*s))
 			return false;
 		s++;
