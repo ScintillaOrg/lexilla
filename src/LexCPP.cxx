@@ -396,9 +396,9 @@ static void FoldNoBoxCppDoc(unsigned int startPos, int length, int initStyle,
 		styleNext = styler.StyleAt(i + 1);
 		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 		if (foldComment && IsStreamCommentStyle(style)) {
-			if (!IsStreamCommentStyle(stylePrev)) {
+			if (!IsStreamCommentStyle(stylePrev) && (stylePrev != SCE_C_COMMENTLINEDOC)) {
 				levelNext++;
-			} else if (!IsStreamCommentStyle(styleNext) && !atEOL) {
+			} else if (!IsStreamCommentStyle(styleNext) && (styleNext != SCE_C_COMMENTLINEDOC) && !atEOL) {
 				// Comments don't end at end of line and the next character may be unstyled.
 				levelNext--;
 			}
