@@ -195,6 +195,9 @@ static int classifyWordNsis(unsigned int start, unsigned int end, WordList *keyw
   if( NsisCmp(s, "!else", bIgnoreCase ) == 0 ) // ||  NsisCmp(s, "!ifndef", bIgnoreCase) == 0 ||  NsisCmp(s, "!endif", bIgnoreCase) == 0 )
 		return SCE_NSIS_IFDEFINEDEF;
 
+  if( NsisCmp(s, "!if", bIgnoreCase ) == 0 )
+		return SCE_NSIS_IFDEFINEDEF;
+
   if( NsisCmp(s, "SectionGroup", bIgnoreCase) == 0 || NsisCmp(s, "SectionGroupEnd", bIgnoreCase) == 0 ) // Covers SectionGroup and SectionGroupEnd
     return SCE_NSIS_SECTIONGROUP;
 
