@@ -862,10 +862,10 @@ struct TextToFind {
     <p>Scintilla has multiple level undo and redo. It will continue to collect undoable actions
     until memory runs out. Scintilla saves actions that change the document. Scintilla does not
     save caret and selection movements, view scrolling and the like. Sequences of typing or
-    deleting are compressed into single actions to make it easier to undo and redo at a sensible
-    level of detail. Sequences of actions can be combined into actions that are undone as a unit.
+    deleting are compressed into single transactions to make it easier to undo and redo at a sensible
+    level of detail. Sequences of actions can be combined into transactions that are undone as a unit.
     These sequences occur between <code>SCI_BEGINUNDOACTION</code> and
-    <code>SCI_ENDUNDOACTION</code> messages. These sequences can be nested and only the top-level
+    <code>SCI_ENDUNDOACTION</code> messages. These transactions can be nested and only the top-level
     sequences are undone as units.</p>
     <code><a class="message" href="#SCI_UNDO">SCI_UNDO</a><br />
      <a class="message" href="#SCI_CANUNDO">SCI_CANUNDO</a><br />
@@ -2419,7 +2419,7 @@ struct TextToFind {
     normal Unicode encoding before being drawn by the OS and thus can display Hebrew, Arabic,
     Cyrillic, and Han characters. Languages which can use two characters stacked vertically in one
     horizontal space, such as Thai, will mostly work but there are some issues where the characters
-    are drawn separately leading to visual glitches. Bi-directional text is not supported. Characters outside the 
+    are drawn separately leading to visual glitches. Bi-directional text is not supported. Characters outside the
     Basic Multilingual Plane are unlikely to work.</p>
 
     <p>On Windows, code page can be set to 932 (Japanese Shift-JIS), 936 (Simplified Chinese GBK),
@@ -4841,7 +4841,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
 
           <td align="center">0x80</td>
 
-          <td>This is part of a multi-step Undo or Redo.</td>
+          <td>This is part of a multi-step Undo or Redo transaction.</td>
 
           <td>None</td>
         </tr>
@@ -4851,7 +4851,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
 
           <td align="center">0x100</td>
 
-          <td>This is the final step in an Undo or Redo.</td>
+          <td>This is the final step in an Undo or Redo transaction.</td>
 
           <td>None</td>
         </tr>
@@ -4892,6 +4892,21 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
           <td align="center">0x1000</td>
 
           <td>This is part of an Undo or Redo with multi-line changes.</td>
+
+          <td>None</td>
+        </tr>
+
+        <tr>
+          <td align="left"><code>SC_STARTACTION</code></td>
+
+          <td align="center">0x2000</td>
+
+          <td>This is set on a SC_PERFORMED_USER action when it is the
+	  first or only step in an undo transaction. This can be used to integrate the Scintilla
+	  undo stack with an undo stack in the container application by adding a Scintilla
+	  action to the container's stack for the currently opened container transaction or
+	  to open a new container transaction if there is no open container transaction.
+	  </td>
 
           <td>None</td>
         </tr>
