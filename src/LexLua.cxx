@@ -149,7 +149,10 @@ static void ColouriseLuaDoc(
 			// We stop the number definition on non-numerical non-dot non-eE non-sign non-hexdigit char
 			if (!IsANumberChar(sc.ch)) {
 				sc.SetState(SCE_LUA_DEFAULT);
-			}
+			} else if (sc.ch == '-' || sc.ch == '+') {
+                                if (sc.chPrev != 'E' && sc.chPrev != 'e')
+                                        sc.SetState(SCE_LUA_DEFAULT);
+                        }
 		} else if (sc.state == SCE_LUA_IDENTIFIER) {
 			if (!IsAWordChar(sc.ch) || sc.Match('.', '.')) {
 				char s[100];
