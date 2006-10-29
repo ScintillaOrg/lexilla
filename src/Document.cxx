@@ -684,6 +684,8 @@ int Document::GetColumn(int pos) {
 				return column;
 			} else if (ch == '\n') {
 				return column;
+			} else if (i >= Length()) {
+				return column;
 			} else {
 				column++;
 				i = MovePositionOutsideChar(i + 1, 1);
