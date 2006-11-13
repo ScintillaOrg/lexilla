@@ -172,14 +172,14 @@ static void ColouriseInnoDoc(unsigned int startPos, int length, int, WordList *k
 			case SCE_INNO_STRING_DOUBLE:
 				if (ch == '"' || isEOL) {
 					state = SCE_INNO_DEFAULT;
-					styler.ColourTo(i,SCE_INNO_DEFAULT);
+					styler.ColourTo(i,SCE_INNO_STRING_DOUBLE);
 				}
 				break;
 
 			case SCE_INNO_STRING_SINGLE:
 				if (ch == '\'' || isEOL) {
 					state = SCE_INNO_DEFAULT;
-					styler.ColourTo(i,SCE_INNO_DEFAULT);
+					styler.ColourTo(i,SCE_INNO_STRING_SINGLE);
 				}
 				break;
 
