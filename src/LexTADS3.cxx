@@ -2,12 +2,8 @@
 /** @file LexTADS3.cxx
  ** Lexer for TADS3.
  **/
-/* Copyright 2005 by Michael Cartmell
- * Parts copyright 1998-2002 by Neil Hodgson <neilh@scintilla.org>
- * In particular FoldTADS3Doc is derived from FoldCppDoc
- * The License.txt file describes the conditions under which this software may
- * be distributed.
- */
+// Copyright 1998-2006 by Neil Hodgson <neilh@scintilla.org>
+// The License.txt file describes the conditions under which this software may be distributed.
 
 /*
  * TADS3 is a language designed by Michael J. Roberts for the writing of text
