@@ -745,7 +745,7 @@ const char *CharacterSetID(int characterSet) {
 	case SC_CHARSET_ANSI:
 		return "";
 	case SC_CHARSET_DEFAULT:
-		return "LATIN1";
+		return "ISO-8859-1";
 	case SC_CHARSET_BALTIC:
 		return "ISO-8859-13";
 	case SC_CHARSET_CHINESEBIG5:
