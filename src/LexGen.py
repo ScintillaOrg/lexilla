@@ -4,7 +4,7 @@
 # Regenerate the Scintilla and SciTE source files that list
 # all the lexers and all the properties files.
 # Should be run whenever a new lexer is added or removed.
-# Requires Python 2.1 or later
+# Requires Python 2.4 or later
 # Most files are regenerated in place with templates stored in comments.
 # The VS .NET project file is generated into a different file as the
 # VS .NET environment will not retain comments when modifying the file.
@@ -159,7 +159,7 @@ def FindModules(lexFile):
 			l = l.replace("(", " ")
 			modules.append(l.split()[1])
 	return modules
-	
+
 knownIrregularProperties = [
 	"fold",
 	"styling.within.preprocessor",
@@ -237,5 +237,5 @@ def RegenerateAll():
 	Regenerate(root + "scite/src/SciTEProps.cxx", "//", NATIVE, lexerProperties, ids)
 	Generate(root + "scite/boundscheck/vcproj.gen",
 	         root + "scite/boundscheck/SciTE.vcproj", "#", NATIVE, lexFiles)
-	
+
 RegenerateAll()
