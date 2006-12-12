@@ -1311,7 +1311,7 @@ fun void LineCopy=2455(,)
 # Move the caret inside current view if it's not there already.
 fun void MoveCaretInsideView=2401(,)
 
-# How many characters are on a line, not including end of line characters?
+# How many characters are on a line, including end of line characters?
 fun int LineLength=2350(int line,)
 
 # Highlight the characters at two positions.
