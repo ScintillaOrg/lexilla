@@ -1807,7 +1807,15 @@ gint ScintillaGTK::ScrollEvent(GtkWidget *widget,
 	// Compute amount and direction to scroll (even tho on win32 there is
 	// intensity of scrolling info in the native message, gtk doesn't
 	// support this so we simulate similarly adaptive scrolling)
+	// Note that this is disabled on OS X (Darwin) where the X11 server already has
+	// and adaptive scrolling algorithm that fights with this one
 	int cLineScroll;
+#if defined(__MWERKS__) || defined(__APPLE_CPP__) || defined(__APPLE_CC__)
+	cLineScroll = sciThis->linesPerScroll;
+	if (cLineScroll == 0)
+		cLineScroll = 4;
+	sciThis->wheelMouseIntensity = cLineScroll;
+#else
 	int timeDelta = 1000000;
 	GTimeVal curTime;
 	g_get_current_time(&curTime);
@@ -1825,6 +1833,7 @@ gint ScintillaGTK::ScrollEvent(GtkWidget *widget,
 			cLineScroll = 4;
 		sciThis->wheelMouseIntensity = cLineScroll;
 	}
+#endif
 	if (event->direction == GDK_SCROLL_UP || event->direction == GDK_SCROLL_LEFT) {
 		cLineScroll *= -1;
 	}
@@ -1841,7 +1850,7 @@ gint ScintillaGTK::ScrollEvent(GtkWidget *widget,
 		return FALSE;
 	}
 
-    // Horizontal scrolling
+	// Horizontal scrolling
 	if (event->direction == GDK_SCROLL_LEFT || event->direction == GDK_SCROLL_RIGHT) {
 		sciThis->HorizontalScrollTo(sciThis->xOffset + cLineScroll);
 
