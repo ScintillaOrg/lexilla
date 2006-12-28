@@ -2117,6 +2117,8 @@ struct TextToFind {
     colour)</a><br />
      <a class="message" href="#SCI_SETSELALPHA">SCI_SETSELALPHA(int alpha)</a><br />
      <a class="message" href="#SCI_GETSELALPHA">SCI_GETSELALPHA</a><br />
+     <a class="message" href="#SCI_SETSELEOLFILLED">SCI_SETSELEOLFILLED(bool filled)</a><br />
+     <a class="message" href="#SCI_GETSELEOLFILLED">SCI_GETSELEOLFILLED</a><br />
      <a class="message" href="#SCI_SETCARETFORE">SCI_SETCARETFORE(int colour)</a><br />
      <a class="message" href="#SCI_GETCARETFORE">SCI_GETCARETFORE</a><br />
      <a class="message" href="#SCI_SETCARETLINEVISIBLE">SCI_SETCARETLINEVISIBLE(bool
@@ -2154,6 +2156,10 @@ struct TextToFind {
      <b id="SCI_GETSELALPHA">SCI_GETSELALPHA</b><br />
      The selection can be drawn translucently in the selection background colour by
      setting an alpha value.</p>
+
+     <p><b id="SCI_SETSELEOLFILLED">SCI_SETSELEOLFILLED(bool filled)</b><br />
+     <b id="SCI_GETSELEOLFILLED">SCI_GETSELEOLFILLED</b><br />
+     The selection can be drawn up to the right hand border by setting this property.</p>
 
     <p><b id="SCI_SETCARETFORE">SCI_SETCARETFORE(int <a class="jump"
     href="#colour">colour</a>)</b><br />

@@ -442,6 +442,12 @@ get int GetSelAlpha=2477(,)
 # Set the alpha of the selection.
 set void SetSelAlpha=2478(int alpha,)
 
+# Is the selection end of line filled?
+get bool GetSelEOLFilled=2479(,)
+
+# Set the selection to have its end of line filled or not.
+set void SetSelEOLFilled=2480(bool filled,)
+
 # Set the foreground colour of the caret.
 set void SetCaretFore=2069(colour fore,)
 
