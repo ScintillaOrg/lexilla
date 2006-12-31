@@ -225,7 +225,7 @@ void LineVector::InsertValue(int pos, int value) {
 		} else if (pos == (lines - 1)) {	// Last line will not be a folder
 			levels[pos] = SC_FOLDLEVELBASE;
 		} else {
-			levels[pos] = levels[pos - 1];
+			levels[pos] = levels[pos - 1] & ~SC_FOLDLEVELWHITEFLAG;
 		}
 	}
 }
