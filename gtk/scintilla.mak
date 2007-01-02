@@ -62,7 +62,7 @@ ALL_GTK_LIBS=$(GTK_TOP)/gtk+/gtk/gtk-1.3.lib \
 !ENDIF
 
 INCLUDEDIRS=-I ../include -I ../src $(GTK_INCLUDES)
-CXXFLAGS=/TP /W4 -DGTK
+CXXFLAGS=/TP /W4 -DGTK -D_CRT_SECURE_NO_DEPRECATE=1
 CFLAGS=/W4 -DGTK
 # For something scary:/Wp64
 CXXDEBUG=/Zi /Od /MDd -DDEBUG
