@@ -360,10 +360,9 @@ void Document::CheckReadOnly() {
 	}
 }
 
-// Document only modified by gateways DeleteChars, InsertStyledString, Undo, Redo, and SetStyleAt.
+// Document only modified by gateways DeleteChars, InsertString, Undo, Redo, and SetStyleAt.
 // SetStyleAt does not change the persistent state of a document
 
-// Unlike Undo, Redo, and InsertStyledString, the pos argument is a cell number not a char number
 bool Document::DeleteChars(int pos, int len) {
 	if (len == 0)
 		return false;
@@ -383,7 +382,7 @@ bool Document::DeleteChars(int pos, int len) {
 			int prevLinesTotal = LinesTotal();
 			bool startSavePoint = cb.IsSavePoint();
 			bool startSequence = false;
-			const char *text = cb.DeleteChars(pos * 2, len * 2, startSequence);
+			const char *text = cb.DeleteChars(pos, len, startSequence);
 			if (startSavePoint && cb.IsCollectingUndo())
 				NotifySavePoint(!startSavePoint);
 			if ((pos < Length()) || (pos == 0))
@@ -402,9 +401,12 @@ bool Document::DeleteChars(int pos, int len) {
 }
 
 /**
- * Insert a styled string (char/style pairs) with a length.
+ * Insert a string with a length.
  */
-bool Document::InsertStyledString(int position, char *s, int insertLength) {
+bool Document::InsertString(int position, const char *s, int insertLength) {
+	if (insertLength <= 0) {
+		return false;
+	}
 	CheckReadOnly();
 	if (enteredCount != 0) {
 		return false;
@@ -414,7 +416,7 @@ bool Document::InsertStyledString(int position, char *s, int insertLength) {
 			NotifyModified(
 			    DocModification(
 			        SC_MOD_BEFOREINSERT | SC_PERFORMED_USER,
-			        position / 2, insertLength / 2,
+			        position, insertLength,
 			        0, s));
 			int prevLinesTotal = LinesTotal();
 			bool startSavePoint = cb.IsSavePoint();
@@ -422,11 +424,11 @@ bool Document::InsertStyledString(int position, char *s, int insertLength) {
 			const char *text = cb.InsertString(position, s, insertLength, startSequence);
 			if (startSavePoint && cb.IsCollectingUndo())
 				NotifySavePoint(!startSavePoint);
-			ModifiedAt(position / 2);
+			ModifiedAt(position);
 			NotifyModified(
 			    DocModification(
 			        SC_MOD_INSERTTEXT | SC_PERFORMED_USER | (startSequence?SC_STARTACTION:0),
-			        position / 2, insertLength / 2,
+			        position, insertLength,
 			        LinesTotal() - prevLinesTotal, text));
 		}
 		enteredCount--;
@@ -548,37 +550,16 @@ int Document::Redo() {
  * Insert a single character.
  */
 bool Document::InsertChar(int pos, char ch) {
-	char chs[2];
+	char chs[1];
 	chs[0] = ch;
-	chs[1] = 0;
-	return InsertStyledString(pos*2, chs, 2);
+	return InsertString(pos, chs, 1);
 }
 
 /**
  * Insert a null terminated string.
  */
-bool Document::InsertString(int position, const char *s) {
+bool Document::InsertCString(int position, const char *s) {
 	return InsertString(position, s, strlen(s));
-}
-
-/**
- * Insert a string with a length.
- */
-bool Document::InsertString(int position, const char *s, size_t insertLength) {
-	bool changed = false;
-	if (insertLength > 0) {
-		char *sWithStyle = new char[insertLength * 2];
-		if (sWithStyle) {
-			for (size_t i = 0; i < insertLength; i++) {
-				sWithStyle[i*2] = s[i];
-				sWithStyle[i*2 + 1] = 0;
-			}
-			changed = InsertStyledString(position*2, sWithStyle,
-				static_cast<int>(insertLength*2));
-			delete []sWithStyle;
-		}
-	}
-	return changed;
 }
 
 void Document::ChangeChar(int pos, char ch) {
@@ -657,7 +638,7 @@ void Document::SetLineIndentation(int line, int indent) {
 		int indentPos = GetLineIndentPosition(line);
 		BeginUndoAction();
 		DeleteChars(thisLineStart, indentPos - thisLineStart);
-		InsertString(thisLineStart, linebuf);
+		InsertCString(thisLineStart, linebuf);
 		EndUndoAction();
 	}
 }

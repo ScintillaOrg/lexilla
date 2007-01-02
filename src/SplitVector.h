@@ -175,7 +175,7 @@ public:
 	}
 	
 	/// Insert text into the buffer from an array.
-	void InsertFromArray(int positionToInsert, T s[], int positionFrom, int insertLength) {
+	void InsertFromArray(int positionToInsert, const T s[], int positionFrom, int insertLength) {
 		if (insertLength > 0) {
 			if ((positionToInsert < 0) || (positionToInsert > lengthBody)) {
 				return;

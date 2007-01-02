@@ -358,7 +358,7 @@ void ScintillaBase::AutoCompleteCompleted() {
 	SetEmptySelection(ac.posStart);
 	if (item != -1) {
 		SString piece = selected;
-		pdoc->InsertString(firstPos, piece.c_str());
+		pdoc->InsertCString(firstPos, piece.c_str());
 		SetEmptySelection(firstPos + static_cast<int>(piece.length()));
 	}
 	pdoc->EndUndoAction();

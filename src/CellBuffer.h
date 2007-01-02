@@ -147,7 +147,8 @@ public:
  */
 class CellBuffer {
 private:
-	SplitVector<char> body;
+	SplitVector<char> substance;
+	SplitVector<char> style;
 	bool readOnly;
 
 	bool collectingUndo;
@@ -156,10 +157,6 @@ private:
 	LineVector lv;
 
 	SVector lineStates;
-
-	char ByteAt(int position) {
-		return body.ValueAt(position);
-	}
 
 public:
 
@@ -171,18 +168,17 @@ public:
 	void GetCharRange(char *buffer, int position, int lengthRetrieve);
 	char StyleAt(int position);
 
-	int ByteLength();
 	int Length();
 	void Allocate(int newSize);
 	int Lines();
 	int LineStart(int line);
 	int LineFromPosition(int pos) { return lv.LineFromPosition(pos); }
-	const char *InsertString(int position, char *s, int insertLength, bool &startSequence);
+	const char *InsertString(int position, const char *s, int insertLength, bool &startSequence);
 
 	/// Setting styles for positions outside the range of the buffer is safe and has no effect.
 	/// @return true if the style of a character is changed.
-	bool SetStyleAt(int position, char style, char mask='\377');
-	bool SetStyleFor(int position, int length, char style, char mask);
+	bool SetStyleAt(int position, char styleValue, char mask='\377');
+	bool SetStyleFor(int position, int length, char styleValue, char mask);
 
 	const char *DeleteChars(int position, int deleteLength, bool &startSequence);
 
@@ -203,7 +199,7 @@ public:
 	int LineFromHandle(int markerHandle);
 
 	/// Actions without undo
-	void BasicInsertString(int position, char *s, int insertLength);
+	void BasicInsertString(int position, const char *s, int insertLength);
 	void BasicDeleteChars(int position, int deleteLength);
 
 	bool SetUndoCollection(bool collectUndo);
@@ -231,7 +227,5 @@ public:
 	int GetLevel(int line);
 	void ClearLevels();
 };
-
-#define CELL_SIZE	2
 
 #endif
