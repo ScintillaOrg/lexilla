@@ -95,6 +95,8 @@ public:
 
 	/// Retrieve the character at a particular position.
 	/// Retrieving positions outside the range of the buffer returns 0.
+	/// The assertions here are disabled since calling code can be 
+	/// simpler if out of range access works and returns 0.
 	T ValueAt(int position) const {
 		if (position < part1Length) {
 			//PLATFORM_ASSERT(position >= 0);
@@ -163,7 +165,11 @@ public:
 	/// Insert a number of elements into the buffer setting their value.
 	/// Inserting at positions outside the current range fails.
 	void InsertValue(int position, int insertLength, T v) {
+		PLATFORM_ASSERT((position >= 0) && (position <= lengthBody));
 		if (insertLength > 0) {
+			if ((position < 0) || (position > lengthBody)) {
+				return;
+			}
 			RoomFor(insertLength);
 			GapTo(position);
 			for (int i = 0; i < insertLength; i++)
@@ -176,6 +182,7 @@ public:
 	
 	/// Insert text into the buffer from an array.
 	void InsertFromArray(int positionToInsert, const T s[], int positionFrom, int insertLength) {
+		PLATFORM_ASSERT((positionToInsert >= 0) && (positionToInsert <= lengthBody));
 		if (insertLength > 0) {
 			if ((positionToInsert < 0) || (positionToInsert > lengthBody)) {
 				return;
@@ -191,6 +198,7 @@ public:
 
 	/// Delete one element from the buffer.
 	void Delete(int position) {
+		PLATFORM_ASSERT((position >= 0) && (position < lengthBody));
 		if ((position < 0) || (position >= lengthBody)) {
 			return;
 		}
