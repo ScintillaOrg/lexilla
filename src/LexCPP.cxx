@@ -371,8 +371,8 @@ static bool IsStreamCommentStyle(int style) {
 // Store both the current line's fold level and the next lines in the
 // level store to make it easy to pick up with each increment
 // and to make it possible to fiddle the current level for "} else {".
-static void FoldNoBoxCppDoc(unsigned int startPos, int length, int initStyle,
-                            Accessor &styler) {
+static void FoldCppDoc(unsigned int startPos, int length, int initStyle, 
+					   WordList *[], Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool foldPreprocessor = styler.GetPropertyInt("fold.preprocessor") != 0;
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
@@ -459,11 +459,6 @@ static void FoldNoBoxCppDoc(unsigned int startPos, int length, int initStyle,
 		if (!IsASpace(ch))
 			visibleChars++;
 	}
-}
-
-static void FoldCppDoc(unsigned int startPos, int length, int initStyle, WordList *[],
-                       Accessor &styler) {
-	FoldNoBoxCppDoc(startPos, length, initStyle, styler);
 }
 
 static const char * const cppWordLists[] = {
