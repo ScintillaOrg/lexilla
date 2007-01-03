@@ -225,8 +225,8 @@ int LineVector::LineFromPosition(int pos) {
 }
 
 int LineVector::MarkValue(int line) {
-	if (markers.Length() && markers.ValueAt(line))
-		return markers.ValueAt(line)->MarkValue();
+	if (markers.Length() && markers[line])
+		return markers[line]->MarkValue();
 	else
 		return 0;
 }
@@ -733,12 +733,8 @@ void CellBuffer::BasicInsertString(int position, const char *s, int insertLength
 	int lineInsert = lv.LineFromPosition(position) + 1;
 	// Point all the lines after the insertion point further along in the buffer
 	lv.InsertText(lineInsert-1, insertLength);
-	char chPrev = ' ';
-	if ((position - 1) >= 0)
-		chPrev = substance.ValueAt(position - 1);
-	char chAfter = ' ';
-	if ((position + insertLength) < substance.Length())
-		chAfter = substance.ValueAt(position + insertLength);
+	char chPrev = substance.ValueAt(position - 1);
+	char chAfter = substance.ValueAt(position + insertLength);
 	if (chPrev == '\r' && chAfter == '\n') {
 		// Splitting up a crlf pair at position
 		lv.InsertLine(lineInsert, position);
@@ -784,13 +780,9 @@ void CellBuffer::BasicDeleteChars(int position, int deleteLength) {
 
 		int lineRemove = lv.LineFromPosition(position) + 1;
 		lv.InsertText(lineRemove-1, - (deleteLength));
-		char chPrev = ' ';
-		if (position >= 1)
-			chPrev = substance.ValueAt(position - 1);
+		char chPrev = substance.ValueAt(position - 1);
 		char chBefore = chPrev;
-		char chNext = ' ';
-		if (position < substance.Length())
-			chNext = substance.ValueAt(position);
+		char chNext = substance.ValueAt(position);
 		bool ignoreNL = false;
 		if (chPrev == '\r' && chNext == '\n') {
 			// Move back one
@@ -801,9 +793,7 @@ void CellBuffer::BasicDeleteChars(int position, int deleteLength) {
 
 		char ch = chNext;
 		for (int i = 0; i < deleteLength; i++) {
-			chNext = ' ';
-			if ((position + i + 1) < substance.Length())
-				chNext = substance.ValueAt(position + i + 1);
+			chNext = substance.ValueAt(position + i + 1);
 			if (ch == '\r') {
 				if (chNext != '\n') {
 					lv.RemoveLine(lineRemove);
@@ -820,9 +810,7 @@ void CellBuffer::BasicDeleteChars(int position, int deleteLength) {
 		}
 		// May have to fix up end if last deletion causes cr to be next to lf
 		// or removes one of a crlf pair
-		char chAfter = ' ';
-		if ((position + deleteLength) < substance.Length())
-			chAfter = substance.ValueAt(position + deleteLength);
+		char chAfter = substance.ValueAt(position + deleteLength);
 		if (chBefore == '\r' && chAfter == '\n') {
 			// Using lineRemove-1 as cr ended line before start of deletion
 			lv.RemoveLine(lineRemove - 1);
