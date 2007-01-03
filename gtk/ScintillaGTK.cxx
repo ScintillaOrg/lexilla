@@ -1991,10 +1991,8 @@ gboolean ScintillaGTK::KeyThis(GdkEventKey *event) {
 	// This will have to change for Unicode
 	else if (key >= 0xFE00)
 		key = KeyTranslate(key);
-	else if (IsUnicodeMode())
-		;	// No operation
 #if GTK_MAJOR_VERSION < 2
-	else if ((key >= 0x100) && (key < 0x1000))
+	else if (!IsUnicodeMode() && (key >= 0x100) && (key < 0x1000))
 		key &= 0xff;
 #endif
 
