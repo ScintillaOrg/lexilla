@@ -3631,11 +3631,13 @@ void Editor::NotifyModifyAttempt() {
 	NotifyParent(scn);
 }
 
-void Editor::NotifyDoubleClick(Point pt, bool) {
+void Editor::NotifyDoubleClick(Point pt, bool shift, bool ctrl, bool alt) {
 	SCNotification scn = {0};
 	scn.nmhdr.code = SCN_DOUBLECLICK;
 	scn.line = LineFromLocation(pt);
 	scn.position = PositionFromLocationClose(pt);
+	scn.modifiers = (shift ? SCI_SHIFT : 0) | (ctrl ? SCI_CTRL : 0) |
+	                (alt ? SCI_ALT : 0);
 	NotifyParent(scn);
 }
 
@@ -5151,7 +5153,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 		}
 		//Platform::DebugPrintf("Double click: %d - %d\n", anchor, currentPos);
 		if (doubleClick) {
-			NotifyDoubleClick(pt, shift);
+			NotifyDoubleClick(pt, shift, ctrl, alt);
 			if (PositionIsHotspot(newPos))
 				NotifyHotSpotDoubleClicked(newPos, shift, ctrl, alt);
 		}

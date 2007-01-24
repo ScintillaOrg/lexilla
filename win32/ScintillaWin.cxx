@@ -199,7 +199,7 @@ class ScintillaWin :
 	virtual void NotifyFocus(bool focus);
 	virtual int GetCtrlID();
 	virtual void NotifyParent(SCNotification scn);
-	virtual void NotifyDoubleClick(Point pt, bool shift);
+	virtual void NotifyDoubleClick(Point pt, bool shift, bool ctrl, bool alt);
 	virtual void Copy();
 	virtual bool CanPaste();
 	virtual void Paste();
@@ -1168,9 +1168,9 @@ void ScintillaWin::NotifyParent(SCNotification scn) {
 	              GetCtrlID(), reinterpret_cast<LPARAM>(&scn));
 }
 
-void ScintillaWin::NotifyDoubleClick(Point pt, bool shift) {
+void ScintillaWin::NotifyDoubleClick(Point pt, bool shift, bool ctrl, bool alt) {
 	//Platform::DebugPrintf("ScintillaWin Double click 0\n");
-	ScintillaBase::NotifyDoubleClick(pt, shift);
+	ScintillaBase::NotifyDoubleClick(pt, shift, ctrl, alt);
 	// Send myself a WM_LBUTTONDBLCLK, so the container can handle it too.
 	::SendMessage(MainHWND(),
 			  WM_LBUTTONDBLCLK,
