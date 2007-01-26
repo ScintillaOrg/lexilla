@@ -97,7 +97,8 @@ private:
 	char stylingMask;
 	int endStyled;
 	int styleClock;
-	int enteredCount;
+	int enteredModification;
+	int enteredStyling;
 	int enteredReadOnlyCount;
 
 	WatcherWithUserData *watchers;
