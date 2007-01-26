@@ -1320,15 +1320,14 @@ bool Document::SetStyles(int length, char *styles) {
 	}
 }
 
-bool Document::EnsureStyledTo(int pos) {
-	if (pos > GetEndStyled()) {
+void Document::EnsureStyledTo(int pos) {
+	if ((enteredCount == 0) && (pos > GetEndStyled())) {
 		IncrementStyleClock();
 		// Ask the watchers to style, and stop as soon as one responds.
 		for (int i = 0; pos > GetEndStyled() && i < lenWatchers; i++) {
 			watchers[i].watcher->NotifyStyleNeeded(this, watchers[i].userData, pos);
 		}
 	}
-	return pos <= GetEndStyled();
 }
 
 void Document::IncrementStyleClock() {
