@@ -6775,7 +6775,73 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			InvalidateStyleRedraw();
 		}
 		break;
+	case SCI_STYLEGETFORE:
+		if (wParam <= STYLE_MAX)
+			return vs.styles[wParam].fore.desired.AsLong();
+		else
+			return 0; 
+	case SCI_STYLEGETBACK:
+		if (wParam <= STYLE_MAX)
+			return vs.styles[wParam].back.desired.AsLong();
+		else
+			return 0;
+	case SCI_STYLEGETBOLD:
+		if (wParam <= STYLE_MAX)
+			return vs.styles[wParam].bold ? 1 : 0;
+		else
+			return 0;
+	case SCI_STYLEGETITALIC:
+		if (wParam <= STYLE_MAX)
+			return vs.styles[wParam].italic ? 1 : 0;
+		else
+			return 0;
+	case SCI_STYLEGETEOLFILLED:
+		if (wParam <= STYLE_MAX)
+			return vs.styles[wParam].eolFilled ? 1 : 0;
+		else
+			return 0;
+	case SCI_STYLEGETSIZE:
+		if (wParam <= STYLE_MAX)
+			return vs.styles[wParam].size;
+		else
+			return 0;
+	case SCI_STYLEGETFONT:
+		if (lParam == 0)
+			return strlen(vs.styles[wParam].fontName);
 
+		if (wParam <= STYLE_MAX)
+			strcpy(CharPtrFromSPtr(lParam), vs.styles[wParam].fontName);
+		break;
+	case SCI_STYLEGETUNDERLINE:
+		if (wParam <= STYLE_MAX)
+			return vs.styles[wParam].underline ? 1 : 0;
+		else
+			return 0;
+	case SCI_STYLEGETCASE:
+		if (wParam <= STYLE_MAX)
+			return static_cast<int>(vs.styles[wParam].caseForce);
+		else
+			return 0;
+	case SCI_STYLEGETCHARACTERSET:
+		if (wParam <= STYLE_MAX)
+			return vs.styles[wParam].characterSet;
+		else
+			return 0;
+	case SCI_STYLEGETVISIBLE:
+		if (wParam <= STYLE_MAX)
+			return vs.styles[wParam].visible ? 1 : 0;
+		else
+			return 0;
+	case SCI_STYLEGETCHANGEABLE:
+		if (wParam <= STYLE_MAX)
+			return vs.styles[wParam].changeable ? 1 : 0;
+		else
+			return 0;
+	case SCI_STYLEGETHOTSPOT:
+		if (wParam <= STYLE_MAX)
+			return vs.styles[wParam].hotspot ? 1 : 0;
+		else
+			return 0;
 	case SCI_STYLERESETDEFAULT:
 		vs.ResetDefaultStyle();
 		InvalidateStyleRedraw();
@@ -7312,21 +7378,33 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		InvalidateStyleRedraw();
 		break;
 
+	case SCI_GETHOTSPOTACTIVEFORE:
+		return vs.hotspotForeground.desired.AsLong();
+
 	case SCI_SETHOTSPOTACTIVEBACK:
 		vs.hotspotBackgroundSet = wParam != 0;
 		vs.hotspotBackground.desired = ColourDesired(lParam);
 		InvalidateStyleRedraw();
 		break;
 
+	case SCI_GETHOTSPOTACTIVEBACK:
+		return vs.hotspotBackground.desired.AsLong();
+
 	case SCI_SETHOTSPOTACTIVEUNDERLINE:
 		vs.hotspotUnderline = wParam != 0;
 		InvalidateStyleRedraw();
 		break;
 
+	case SCI_GETHOTSPOTACTIVEUNDERLINE:
+		return vs.hotspotUnderline ? 1 : 0;
+
 	case SCI_SETHOTSPOTSINGLELINE:
 		vs.hotspotSingleLine = wParam != 0;
 		InvalidateStyleRedraw();
 		break;
+
+	case SCI_GETHOTSPOTSINGLELINE:
+		return vs.hotspotSingleLine ? 1 : 0;
 
 	case SCI_SETPASTECONVERTENDINGS:
 		convertPastes = wParam != 0;
