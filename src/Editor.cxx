@@ -4074,32 +4074,24 @@ void Editor::ChangeCaseOfSelection(bool makeUpperCase) {
 void Editor::LineTranspose() {
 	int line = pdoc->LineFromPosition(currentPos);
 	if (line > 0) {
+		pdoc->BeginUndoAction();
 		int startPrev = pdoc->LineStart(line - 1);
 		int endPrev = pdoc->LineEnd(line - 1);
 		int start = pdoc->LineStart(line);
 		int end = pdoc->LineEnd(line);
-		int startNext = pdoc->LineStart(line + 1);
-		if (end < pdoc->Length()) {
-			end = startNext;
-			char *thisLine = CopyRange(start, end);
-			pdoc->DeleteChars(start, end - start);
-			if (pdoc->InsertString(startPrev, thisLine, end - start)) {
-				MovePositionTo(startPrev + end - start);
-			}
-			delete []thisLine;
-		} else {
-			// Last line so line has no line end
-			char *thisLine = CopyRange(start, end);
-			char *prevEnd = CopyRange(endPrev, start);
-			pdoc->DeleteChars(endPrev, end - endPrev);
-			pdoc->InsertString(startPrev, thisLine, end - start);
-			if (pdoc->InsertString(startPrev + end - start, prevEnd, start - endPrev)) {
-				MovePositionTo(startPrev + end - endPrev);
-			}
-			delete []thisLine;
-			delete []prevEnd;
+		char *line1 = CopyRange(startPrev, endPrev);
+		int len1 = endPrev - startPrev;
+		char *line2 = CopyRange(start, end);
+		int len2 = end - start;
+		if (pdoc->DeleteChars(start, len2)) {
+			pdoc->DeleteChars(startPrev, len1);
+			pdoc->InsertString(startPrev, line2, len2);
+			pdoc->InsertString(start - len1 + len2, line1, len1);
+			MovePositionTo(start - len1 + len2);
 		}
-
+		delete []line1;
+		delete []line2;
+		pdoc->EndUndoAction();
 	}
 }
 
