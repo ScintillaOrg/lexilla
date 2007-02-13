@@ -672,7 +672,7 @@ int Document::GetColumn(int pos) {
 				return column;
 			} else {
 				column++;
-				i = MovePositionOutsideChar(i + 1, 1);
+				i = MovePositionOutsideChar(i + 1, 1, false);
 			}
 		}
 	}
@@ -694,7 +694,7 @@ int Document::FindColumn(int line, int column) {
 				return position;
 			} else {
 				columnCurrent++;
-				position = MovePositionOutsideChar(position + 1, 1);
+				position = MovePositionOutsideChar(position + 1, 1, false);
 			}
 		}
 	}
