@@ -3173,16 +3173,17 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 	vsPrint.styles[STYLE_LINENUMBER].back.desired = ColourDesired(0xff, 0xff, 0xff);
 
 	vsPrint.Refresh(*surfaceMeasure);
-	// Ensure colours are set up
-	vsPrint.RefreshColourPalette(palette, true);
-	vsPrint.RefreshColourPalette(palette, false);
 	// Determining width must hapen after fonts have been realised in Refresh
 	int lineNumberWidth = 0;
 	if (lineNumberIndex >= 0) {
 		lineNumberWidth = surfaceMeasure->WidthText(vsPrint.styles[STYLE_LINENUMBER].font,
 		                  "99999" lineNumberPrintSpace, 5 + istrlen(lineNumberPrintSpace));
 		vsPrint.ms[lineNumberIndex].width = lineNumberWidth;
+		vsPrint.Refresh(*surfaceMeasure);	// Recalculate fixedColumnWidth
 	}
+	// Ensure colours are set up
+	vsPrint.RefreshColourPalette(palette, true);
+	vsPrint.RefreshColourPalette(palette, false);
 
 	int linePrintStart = pdoc->LineFromPosition(pfr->chrg.cpMin);
 	int linePrintLast = linePrintStart + (pfr->rc.bottom - pfr->rc.top) / vsPrint.lineHeight - 1;
@@ -3201,14 +3202,14 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 	// Ensure we are styled to where we are formatting.
 	pdoc->EnsureStyledTo(endPosPrint);
 
-	int xStart = vsPrint.fixedColumnWidth + pfr->rc.left + lineNumberWidth;
+	int xStart = vsPrint.fixedColumnWidth + pfr->rc.left;
 	int ypos = pfr->rc.top;
 
 	int lineDoc = linePrintStart;
 
 	int nPrintPos = pfr->chrg.cpMin;
 	int visibleLine = 0;
-	int widthPrint = pfr->rc.Width() - lineNumberWidth;
+	int widthPrint = pfr->rc.Width() - vsPrint.fixedColumnWidth;
 	if (printWrapState == eWrapNone)
 		widthPrint = LineLayout::wrapWidthInfinite;
 
@@ -3230,7 +3231,7 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 		ll.containsCaret = false;
 
 		PRectangle rcLine;
-		rcLine.left = pfr->rc.left + lineNumberWidth;
+		rcLine.left = pfr->rc.left;
 		rcLine.top = ypos;
 		rcLine.right = pfr->rc.right - 1;
 		rcLine.bottom = ypos + vsPrint.lineHeight;
@@ -3259,7 +3260,7 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 			PRectangle rcNumber = rcLine;
 			rcNumber.right = rcNumber.left + lineNumberWidth;
 			// Right justify
-			rcNumber.left -= surfaceMeasure->WidthText(
+			rcNumber.left = rcNumber.right - surfaceMeasure->WidthText(
 			                     vsPrint.styles[STYLE_LINENUMBER].font, number, istrlen(number));
 			surface->FlushCachedState();
 			surface->DrawTextNoClip(rcNumber, vsPrint.styles[STYLE_LINENUMBER].font,
