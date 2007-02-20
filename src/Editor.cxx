@@ -4022,7 +4022,10 @@ void Editor::PageMove(int direction, selTypes sel, bool stuttered) {
 	// I consider only the caretYSlop, and ignore the caretYPolicy-- is that a problem?
 	int currentLine = pdoc->LineFromPosition(currentPos);
 	int topStutterLine = topLine + caretYSlop;
-	int bottomStutterLine = topLine + LinesToScroll() - caretYSlop;
+	int bottomStutterLine =
+		pdoc->LineFromPosition(PositionFromLocation(
+		Point(lastXChosen, direction * vs.lineHeight * LinesToScroll())))
+		- caretYSlop - 1;
 
 	if (stuttered && (direction < 0 && currentLine > topStutterLine)) {
 		topLineNew = topLine;
