@@ -1125,7 +1125,7 @@ void Editor::ScrollTo(int line, bool moveThumb) {
 		ShowCaretAtCurrentPosition();
 		// Perform redraw rather than scroll if many lines would be redrawn anyway.
 #ifndef UNDER_CE
-		if (abs(linesToMove) <= 10) {
+		if ((abs(linesToMove) <= 10) && (paintState == notPainting)) {
 			ScrollText(linesToMove);
 		} else {
 			Redraw();
