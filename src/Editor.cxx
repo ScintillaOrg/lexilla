@@ -1627,6 +1627,7 @@ void Editor::LinesJoin() {
 				if (prevNonWS) {
 					// Ensure at least one space separating previous lines
 					pdoc->InsertChar(pos, ' ');
+					targetEnd++;
 				}
 			} else {
 				prevNonWS = pdoc->CharAt(pos) != ' ';
