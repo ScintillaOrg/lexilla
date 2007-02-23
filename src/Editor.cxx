@@ -2374,6 +2374,10 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		lineEnd = ll->LineStart(subLine + 1);
 	}
 
+	ColourAllocated wrapColour = vsDraw.styles[STYLE_DEFAULT].fore.allocated;
+	if (vsDraw.whitespaceForegroundSet)
+		wrapColour = vsDraw.whitespaceForeground.allocated;
+
 	bool drawWrapMarkEnd = false;
 
 	if (wrapVisualFlags & SC_WRAPVISUALFLAG_END) {
@@ -2411,7 +2415,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 				else
 					rcPlace.right = rcPlace.left + vsDraw.aveCharWidth;
 
-				DrawWrapMarker(surface, rcPlace, false, vsDraw.whitespaceForeground.allocated);
+				DrawWrapMarker(surface, rcPlace, false, wrapColour);
 			}
 
 			xStart += actualWrapVisualStartIndent * vsDraw.aveCharWidth;
@@ -2478,7 +2482,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	if (twoPhaseDraw) {
 		DrawEOL(surface, vsDraw, rcLine, ll, line, lineEnd,
 		        xStart, subLine, subLineStart, overrideBackground, background,
-		        drawWrapMarkEnd, vsDraw.whitespaceForeground.allocated);
+		        drawWrapMarkEnd, wrapColour);
 	}
 
 	inIndentation = subLine == 0;	// Do not handle indentation except on first subline.
@@ -2677,7 +2681,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	if (!twoPhaseDraw) {
 		DrawEOL(surface, vsDraw, rcLine, ll, line, lineEnd,
 		        xStart, subLine, subLineStart, overrideBackground, background,
-		        drawWrapMarkEnd, vsDraw.whitespaceForeground.allocated);
+		        drawWrapMarkEnd, wrapColour);
 	}
 	if ((vsDraw.selAlpha != SC_ALPHA_NOALPHA) && (ll->selStart >= 0) && (ll->selEnd >= 0)) {
 		int startPosSel = (ll->selStart < posLineStart) ? posLineStart : ll->selStart;
