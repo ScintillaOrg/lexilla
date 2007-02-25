@@ -2401,7 +2401,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 			rcPlace.right = rcPlace.left + actualWrapVisualStartIndent * vsDraw.aveCharWidth;
 
 			// default bgnd here..
-			surface->FillRectangle(rcSegment, vsDraw.styles[STYLE_DEFAULT].back.allocated);
+			surface->FillRectangle(rcSegment, overrideBackground ? background :
+				vsDraw.styles[STYLE_DEFAULT].back.allocated);
 
 			// main line style would be below but this would be inconsistent with end markers
 			// also would possibly not be the style at wrap point
