@@ -105,8 +105,9 @@ void DocumentAccessor::StartSegment(unsigned int pos) {
 void DocumentAccessor::ColourTo(unsigned int pos, int chAttr) {
 	// Only perform styling if non empty range
 	if (pos != startSeg - 1) {
+		PLATFORM_ASSERT(pos >= startSeg);
 		if (pos < startSeg) {
-			Platform::DebugPrintf("Bad colour positions %d - %d\n", startSeg, pos);
+			return;
 		}
 
 		if (validLen + (pos - startSeg + 1) >= bufferSize)
