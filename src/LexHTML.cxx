@@ -863,7 +863,9 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_H_SGML_SIMPLESTRING;
 			} else if ((ch == '-') && (chPrev == '-')) {
-				styler.ColourTo(i - 2, StateToPrint);
+				if (static_cast<int>(styler.GetStartSegment()) <= (i - 2)) {
+					styler.ColourTo(i - 2, StateToPrint);
+				}
 				state = SCE_H_SGML_COMMENT;
 			} else if (isascii(ch) && isalpha(ch) && (chPrev == '%')) {
 				styler.ColourTo(i - 2, StateToPrint);
