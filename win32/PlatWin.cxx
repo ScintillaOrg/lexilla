@@ -633,7 +633,9 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated 
 		::DeleteObject(hbmMem);
 		::DeleteObject(hMemDC);
 	} else {
-		RectangleDraw(rc, outline, fill);
+		BrushColor(outline);
+		RECT rcw = RectFromPRectangle(rc);
+		FrameRect(hdc, &rcw, brush);
 	}
 }
 
