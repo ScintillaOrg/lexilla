@@ -156,6 +156,7 @@ class ScintillaWin :
 
 	CLIPFORMAT cfColumnSelect;
 
+	HRESULT hrOle;
 	DropSource ds;
 	DataObject dob;
 	DropTarget dt;
@@ -293,6 +294,8 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	cfColumnSelect = static_cast<CLIPFORMAT>(
 		::RegisterClipboardFormat(TEXT("MSDEVColumnSelect")));
 
+	hrOle = E_FAIL;
+
 	wMain = hwnd;
 
 	dob.sci = this;
@@ -312,7 +315,7 @@ void ScintillaWin::Initialise() {
 	// Initialize COM.  If the app has already done this it will have
 	// no effect.  If the app hasnt, we really shouldnt ask them to call
 	// it just so this internal feature works.
-	::OleInitialize(NULL);
+	hrOle = ::OleInitialize(NULL);
 }
 
 void ScintillaWin::Finalise() {
@@ -321,7 +324,9 @@ void ScintillaWin::Finalise() {
 	SetIdle(false);
 	DestroySystemCaret();
 	::RevokeDragDrop(MainHWND());
-	::OleUninitialize();
+	if (SUCCEEDED(hrOle)) {
+		::OleUninitialize();
+	}
 }
 
 HWND ScintillaWin::MainHWND() {
