@@ -2486,6 +2486,13 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		        drawWrapMarkEnd, wrapColour);
 	}
 
+	if (vsDraw.edgeState == EDGE_LINE) {
+		int edgeX = theEdge * vsDraw.spaceWidth;
+		rcSegment.left = edgeX + xStart;
+		rcSegment.right = rcSegment.left + 1;
+		surface->FillRectangle(rcSegment, vsDraw.edgecolour.allocated);
+	}
+
 	inIndentation = subLine == 0;	// Do not handle indentation except on first subline.
 	startseg = ll->LineStart(subLine);
 	// Foreground drawing loop
@@ -2692,13 +2699,6 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 			rcSegment.right = xStart + ll->positions[endPosSel - posLineStart] - subLineStart;
 			SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw), vsDraw.selAlpha);
 		}
-	}
-
-	if (vsDraw.edgeState == EDGE_LINE) {
-		int edgeX = theEdge * vsDraw.spaceWidth;
-		rcSegment.left = edgeX + xStart;
-		rcSegment.right = rcSegment.left + 1;
-		surface->FillRectangle(rcSegment, vsDraw.edgecolour.allocated);
 	}
 
 	// Draw any translucent whole line states
