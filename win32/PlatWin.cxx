@@ -2163,8 +2163,8 @@ void Platform_Initialise(void *hInstance) {
 	onNT = osv.dwPlatformId == VER_PLATFORM_WIN32_NT;
 	::InitializeCriticalSection(&crPlatformLock);
 	hinstPlatformRes = reinterpret_cast<HINSTANCE>(hInstance);
-	// This may be called from DllMain, in which case the call to LoadLibrary and
-	// FreeLibrary in Platform_Finalise are bad because they can upset the DLL load order.
+	// This may be called from DllMain, in which case the call to LoadLibrary
+	// is bad because it can upset the DLL load order.
 	if (!hDLLImage) {
 		hDLLImage = ::LoadLibrary(TEXT("Msimg32"));
 	}
