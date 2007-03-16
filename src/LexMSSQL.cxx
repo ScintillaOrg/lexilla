@@ -308,7 +308,7 @@ static void FoldMSSQLDoc(unsigned int startPos, int length, int, WordList *[], A
 		}
         if (style == SCE_MSSQL_STATEMENT) {
             // Folding between begin and end
-            if (ch == 'b' || ch == 'e') {
+            if (ch == 'b' || ch == 'e' || ch=='B' || ch=='E') {
                 for (unsigned int j = 0; j < 5; j++) {
 					if (!iswordchar(styler[i + j])) {
 						break;
@@ -316,10 +316,10 @@ static void FoldMSSQLDoc(unsigned int startPos, int length, int, WordList *[], A
 					s[j] = styler[i + j];
 					s[j + 1] = '\0';
                 }
-				if (strcmp(s, "begin") == 0) {
+				if (CompareCaseInsensitive(s, "begin") == 0) {
 					levelCurrent++;
 				}
-				if (strcmp(s, "end") == 0) {
+				if (CompareCaseInsensitive(s, "end") == 0) {
 					levelCurrent--;
 				}
             }
