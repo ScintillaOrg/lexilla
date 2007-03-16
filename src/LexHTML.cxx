@@ -1602,8 +1602,9 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_HPHP_HSTRING_VARIABLE;
 			} else if (styler.Match(i, phpStringDelimiter)) {
-				if ((strlen(phpStringDelimiter) > 1) && (i + static_cast<int>(strlen(phpStringDelimiter)) < lengthDoc))
-					i += strlen(phpStringDelimiter) - 1;
+				const int psdLength = strlen(phpStringDelimiter);
+				if ((psdLength > 1) && ((i + psdLength) < lengthDoc))
+					i += psdLength - 1;
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_HPHP_DEFAULT;
 			}
