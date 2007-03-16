@@ -307,19 +307,19 @@ static void FoldMSSQLDoc(unsigned int startPos, int length, int, WordList *[], A
 			inComment = (style == SCE_MSSQL_COMMENT);
 		}
         if (style == SCE_MSSQL_STATEMENT) {
-            // Folding between begin and end
-            if (ch == 'b' || ch == 'e' || ch=='B' || ch=='E') {
+            // Folding between begin or case and end
+            if (ch == 'b' || ch == 'B' || ch == 'c' || ch == 'C' || ch == 'e' || ch == 'E') {
                 for (unsigned int j = 0; j < 5; j++) {
 					if (!iswordchar(styler[i + j])) {
 						break;
 					}
-					s[j] = styler[i + j];
+					s[j] = static_cast<char>(tolower(styler[i + j]));
 					s[j + 1] = '\0';
                 }
-				if (CompareCaseInsensitive(s, "begin") == 0) {
+				if ((strcmp(s, "begin") == 0) || (strcmp(s, "case") == 0)) {
 					levelCurrent++;
 				}
-				if (CompareCaseInsensitive(s, "end") == 0) {
+				if (strcmp(s, "end") == 0) {
 					levelCurrent--;
 				}
             }
