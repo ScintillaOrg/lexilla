@@ -257,8 +257,6 @@ void RESearch::Init() {
 		pat[i] = 0;
 	for (int j = 0; j < BITBLK; j++)
 		bittab[j] = 0;
-	for (int k=0; k<MAXNFA; k++)
-		nfa[k] = 0;
 }
 
 void RESearch::Clear() {
