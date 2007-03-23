@@ -42,6 +42,7 @@
 // Sep 27, 2005   - Fixed the SentKey lexing logic in case of multiple sentkeys.
 // Mar 12, 2006   - Fixed issue with <> coloring as String in stead of Operator in rare occasions.
 // Apr  8, 2006   - Added support for AutoIt3 Standard UDF library (SCE_AU3_UDF)
+// Mar  9, 2007   - Fixed bug with + following a String getting the wrong Color.
 //
 // Copyright for Scintilla: 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
@@ -424,6 +425,7 @@ static void ColouriseAU3Doc(unsigned int startPos,
 				{
 					sc.ForwardSetState(SCE_AU3_DEFAULT);
 					si=0;
+					break;
 				}
                 if (sc.atLineEnd)
 				{
@@ -433,6 +435,7 @@ static void ColouriseAU3Doc(unsigned int startPos,
 					if (!IsContinuationLine(lineCurrent,styler)) 
 					{
 						sc.SetState(SCE_AU3_DEFAULT);
+						break;
 					}
 				}
 				// find Sendkeys in a STRING
