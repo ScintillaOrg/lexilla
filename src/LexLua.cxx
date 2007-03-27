@@ -169,8 +169,6 @@ static void ColouriseLuaDoc(
 					sc.ChangeState(SCE_LUA_WORD5);
 				} else if (keywords6.InList(s)) {
 					sc.ChangeState(SCE_LUA_WORD6);
-				} else if (keywords6.InList(s)) {
-					sc.ChangeState(SCE_LUA_WORD6);
 				} else if (keywords7.InList(s)) {
 					sc.ChangeState(SCE_LUA_WORD7);
 				} else if (keywords8.InList(s)) {
