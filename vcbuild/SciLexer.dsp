@@ -190,15 +190,15 @@ SOURCE=..\src\LexCLW.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexCmake.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexConf.cxx
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\LexCPP.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\LexD.cxx
 # End Source File
 # Begin Source File
 
@@ -211,6 +211,10 @@ SOURCE=..\src\LexCsound.cxx
 # Begin Source File
 
 SOURCE=..\src\LexCSS.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexD.cxx
 # End Source File
 # Begin Source File
 
