@@ -16,8 +16,10 @@
 #include "SVector.h"
 #include "SplitVector.h"
 #include "Partitioning.h"
+#include "RunStyles.h"
 #include "CellBuffer.h"
 #include "CharClassify.h"
+#include "Decoration.h"
 #include "Document.h"
 #include "RESearch.h"
 

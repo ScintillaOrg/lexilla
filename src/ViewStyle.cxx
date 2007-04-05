@@ -10,6 +10,9 @@
 #include "Platform.h"
 
 #include "Scintilla.h"
+#include "SplitVector.h"
+#include "Partitioning.h"
+#include "RunStyles.h"
 #include "Indicator.h"
 #include "XPM.h"
 #include "LineMarker.h"

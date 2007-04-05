@@ -83,10 +83,10 @@ deps:
 	$(CC) -MM `$(CONFIGFLAGS)` $(CXXFLAGS) *.cxx ../src/*.cxx >deps.mak
 
 $(COMPLIB): DocumentAccessor.o WindowAccessor.o KeyWords.o StyleContext.o \
-	CharClassify.o Document.o CallTip.o \
+	CharClassify.o Decoration.o Document.o CallTip.o \
 	ScintillaBase.o ContractionState.o Editor.o ExternalLexer.o PropSet.o PlatGTK.o \
 	KeyMap.o LineMarker.o ScintillaGTK.o CellBuffer.o ViewStyle.o \
-	RESearch.o Style.o Indicator.o AutoComplete.o UniConversion.o XPM.o \
+	RESearch.o RunStyles.o Style.o Indicator.o AutoComplete.o UniConversion.o XPM.o \
 	$(MARSHALLER) $(LEXOBJS)
 	$(AR) rc $@ $^
 	$(RANLIB) $@

@@ -526,7 +526,7 @@ fun void BeginUndoAction=2078(,)
 fun void EndUndoAction=2079(,)
 
 enu IndicatorStyle=INDIC_
-val INDIC_MAX=7
+val INDIC_MAX=31
 val INDIC_PLAIN=0
 val INDIC_SQUIGGLE=1
 val INDIC_TT=2
@@ -1725,6 +1725,36 @@ set void SetCaretLineBackAlpha=2470(int alpha,)
 
 # Get the background alpha of the caret line.
 get int GetCaretLineBackAlpha=2471(,)
+
+# Set the indicator used for IndicatorFillRange and IndicatorClearRange
+set void SetIndicatorCurrent=2500(int indicator,)
+
+# Get the current indicator
+get int GetIndicatorCurrent=2501(,)
+
+# Set the value used for IndicatorFillRange
+set void SetIndicatorValue=2502(int value,)
+
+# Get the current indicator vaue
+get int GetIndicatorValue=2503(,)
+
+# Turn a indicator on over a range.
+fun void IndicatorFillRange=2504(int position, int fillLength)
+
+# Turn a indicator off over a range.
+fun void IndicatorClearRange=2505(int position, int clearLength)
+
+# Are any indicators present at position?
+fun int IndicatorAllOnFor=2506(int position,)
+
+# What value does a particular indicator have at at a position?
+fun int IndicatorValueAt=2507(int indicator, int position)
+
+# Where does a particular indicator start?
+fun int IndicatorStart=2508(int indicator, int position)
+
+# Where does a particular indicator end?
+fun int IndicatorEnd=2509(int indicator, int position)
 
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
@@ -3098,6 +3128,8 @@ evt void HotSpotClick=2019(int modifiers, int position)
 evt void HotSpotDoubleClick=2020(int modifiers, int position)
 evt void CallTipClick=2021(int position)
 evt void AutoCSelection=2022(string text)
+evt void IndicatorClick=2023(int modifiers, int position)
+evt void IndicatorRelease=2024(int modifiers, int position)
 
 cat Deprecated
 

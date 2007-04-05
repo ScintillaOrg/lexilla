@@ -32,6 +32,7 @@
 #include "SVector.h"
 #include "SplitVector.h"
 #include "Partitioning.h"
+#include "RunStyles.h"
 #include "CellBuffer.h"
 #include "CallTip.h"
 #include "KeyMap.h"
@@ -42,6 +43,7 @@
 #include "AutoComplete.h"
 #include "ViewStyle.h"
 #include "CharClassify.h"
+#include "Decoration.h"
 #include "Document.h"
 #include "Editor.h"
 #include "ScintillaBase.h"
@@ -740,7 +742,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		} else {
 			if (IsUnicodeMode()) {
 				char utfval[4];
-				wchar_t wcs[2] = {wParam, 0};
+				wchar_t wcs[2] = {static_cast<wchar_t>(wParam), 0};
 				unsigned int len = UTF8Length(wcs, 1);
 				UTF8FromUCS2(wcs, 1, utfval, len);
 				AddCharUTF(utfval, len);

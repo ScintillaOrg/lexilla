@@ -122,6 +122,8 @@ public:
 	bool tabIndents;
 	bool backspaceUnindents;
 
+	DecorationList decorations;
+
 	Document();
 	virtual ~Document();
 

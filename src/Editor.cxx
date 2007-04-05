@@ -23,12 +23,14 @@
 #include "Partitioning.h"
 #include "CellBuffer.h"
 #include "KeyMap.h"
+#include "RunStyles.h"
 #include "Indicator.h"
 #include "XPM.h"
 #include "LineMarker.h"
 #include "Style.h"
 #include "ViewStyle.h"
 #include "CharClassify.h"
+#include "Decoration.h"
 #include "Document.h"
 #include "Editor.h"
 
@@ -2308,6 +2310,73 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 	}
 }
 
+void Editor::DrawIndicators(Surface *surface, ViewStyle &vsDraw, int line, int xStart,
+                      PRectangle rcLine, LineLayout *ll, int subLine, int lineEnd, bool under) {
+	// Draw decorators
+	const int posLineStart = pdoc->LineStart(line);
+	const int lineStart = ll->LineStart(subLine);
+	const int subLineStart = ll->positions[lineStart];
+	const int posLineEnd = posLineStart + lineEnd;
+
+	if (!under) {
+		// Draw indicators
+		// foreach indicator...
+		for (int indicnum = 0, mask = 1 << pdoc->stylingBits; mask < 0x100; indicnum++) {
+			if (!(mask & ll->styleBitsSet)) {
+				mask <<= 1;
+				continue;
+			}
+			int startPos = -1;
+			// foreach style pos in line...
+			for (int indicPos = lineStart; indicPos <= lineEnd; indicPos++) {
+				// look for starts...
+				if (startPos < 0) {
+					// NOT in indicator run, looking for START
+					if (indicPos < lineEnd && (ll->indicators[indicPos] & mask))
+						startPos = indicPos;
+				}
+				// ... or ends
+				if (startPos >= 0) {
+					// IN indicator run, looking for END
+					if (indicPos >= lineEnd || !(ll->indicators[indicPos] & mask)) {
+						// AT end of indicator run, DRAW it!
+						PRectangle rcIndic(
+							ll->positions[startPos] + xStart - subLineStart,
+							rcLine.top + vsDraw.maxAscent,
+							ll->positions[indicPos] + xStart - subLineStart,
+							rcLine.top + vsDraw.maxAscent + 3);
+						vsDraw.indicators[indicnum].Draw(surface, rcIndic, rcLine);
+						// RESET control var
+						startPos = -1;
+					}
+				}
+			}
+			mask <<= 1;
+		}
+	}
+
+	for (Decoration *deco=pdoc->decorations.root; deco; deco = deco->next) {
+		if (under == (deco->indicator >= 16)) {
+			int startPos = posLineStart + subLineStart;
+			if (!deco->rs.ValueAt(startPos)) {
+				startPos = deco->rs.EndRun(startPos);
+			}
+			while ((startPos < posLineEnd) && (deco->rs.ValueAt(startPos))) {
+				int endPos = deco->rs.EndRun(startPos);
+				if (endPos > posLineEnd)
+					endPos = posLineEnd;
+				PRectangle rcIndic(
+					ll->positions[startPos - posLineStart] + xStart - subLineStart,
+					rcLine.top + vsDraw.maxAscent,
+					ll->positions[endPos - posLineStart] + xStart - subLineStart,
+					rcLine.top + vsDraw.maxAscent + 3);
+				vsDraw.indicators[deco->indicator].Draw(surface, rcIndic, rcLine);
+				startPos = deco->rs.EndRun(endPos);
+			}
+		}
+	}
+}
+
 void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart,
                       PRectangle rcLine, LineLayout *ll, int subLine) {
 
@@ -2486,6 +2555,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		        drawWrapMarkEnd, wrapColour);
 	}
 
+	DrawIndicators(surface, vsDraw, line, xStart, rcLine, ll, subLine, lineEnd, true);
+
 	if (vsDraw.edgeState == EDGE_LINE) {
 		int edgeX = theEdge * vsDraw.spaceWidth;
 		rcSegment.left = edgeX + xStart;
@@ -2651,40 +2722,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		}
 	}
 
-	// Draw indicators
-	// foreach indicator...
-	for (int indicnum = 0, mask = 1 << pdoc->stylingBits; mask < 0x100; indicnum++) {
-		if (!(mask & ll->styleBitsSet)) {
-			mask <<= 1;
-			continue;
-		}
-		int startPos = -1;
-		// foreach style pos in line...
-		for (int indicPos = lineStart; indicPos <= lineEnd; indicPos++) {
-			// look for starts...
-			if (startPos < 0) {
-				// NOT in indicator run, looking for START
-				if (indicPos < lineEnd && (ll->indicators[indicPos] & mask))
-					startPos = indicPos;
-			}
-			// ... or ends
-			if (startPos >= 0) {
-				// IN indicator run, looking for END
-				if (indicPos >= lineEnd || !(ll->indicators[indicPos] & mask)) {
-					// AT end of indicator run, DRAW it!
-					PRectangle rcIndic(
-						ll->positions[startPos] + xStart - subLineStart,
-						rcLine.top + vsDraw.maxAscent,
-						ll->positions[indicPos] + xStart - subLineStart,
-						rcLine.top + vsDraw.maxAscent + 3);
-					vsDraw.indicators[indicnum].Draw(surface, rcIndic, rcLine);
-					// RESET control var
-					startPos = -1;
-				}
-			}
-		}
-		mask <<= 1;
-	}
+	DrawIndicators(surface, vsDraw, line, xStart, rcLine, ll, subLine, lineEnd, false);
+
 	// End of the drawing of the current line
 	if (!twoPhaseDraw) {
 		DrawEOL(surface, vsDraw, rcLine, ll, line, lineEnd,
@@ -3678,6 +3717,18 @@ void Editor::NotifyPainted() {
 	NotifyParent(scn);
 }
 
+void Editor::NotifyIndicatorClick(bool click, int position, bool shift, bool ctrl, bool alt) {
+	int mask = pdoc->decorations.AllOnFor(position);
+	if ((click && mask) || pdoc->decorations.clickNotified) {
+		SCNotification scn = {0};
+		pdoc->decorations.clickNotified = click;
+		scn.nmhdr.code = click ? SCN_INDICATORCLICK : SCN_INDICATORRELEASE;
+		scn.modifiers = (shift ? SCI_SHIFT : 0) | (ctrl ? SCI_CTRL : 0) | (alt ? SCI_ALT : 0);
+		scn.position = position;
+		NotifyParent(scn);
+	}
+}
+
 bool Editor::NotifyMarginClick(Point pt, bool shift, bool ctrl, bool alt) {
 	int marginClicked = -1;
 	int x = 0;
@@ -3798,11 +3849,13 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 			anchor = MovePositionForInsertion(anchor, mh.position, mh.length);
 			braces[0] = MovePositionForInsertion(braces[0], mh.position, mh.length);
 			braces[1] = MovePositionForInsertion(braces[1], mh.position, mh.length);
+			pdoc->decorations.InsertSpace(mh.position, mh.length);
 		} else if (mh.modificationType & SC_MOD_DELETETEXT) {
 			currentPos = MovePositionForDeletion(currentPos, mh.position, mh.length);
 			anchor = MovePositionForDeletion(anchor, mh.position, mh.length);
 			braces[0] = MovePositionForDeletion(braces[0], mh.position, mh.length);
 			braces[1] = MovePositionForDeletion(braces[1], mh.position, mh.length);
+			pdoc->decorations.DeleteRange(mh.position, mh.length);
 		}
 		if (cs.LinesDisplayed() < cs.LinesInDoc()) {
 			// Some lines are hidden so may need shown.
@@ -5116,6 +5169,8 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 	if (processed)
 		return;
 
+	NotifyIndicatorClick(true, newPos, shift, ctrl, alt);
+
 	bool inSelMargin = PointInSelMargin(pt);
 	if (shift & !inSelMargin) {
 		SetSelection(newPos);
@@ -5370,6 +5425,7 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 		SetMouseCapture(false);
 		int newPos = PositionFromLocation(pt);
 		newPos = MovePositionOutsideChar(newPos, currentPos - newPos);
+		NotifyIndicatorClick(false, newPos, false, false, false);
 		if (inDragDrop) {
 			int selStart = SelectionStart();
 			int selEnd = SelectionEnd();
@@ -7078,6 +7134,39 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_INDICGETFORE:
 		return (wParam <= INDIC_MAX) ? vs.indicators[wParam].fore.desired.AsLong() : 0;
+
+	case SCI_SETINDICATORCURRENT:
+		pdoc->decorations.SetCurrentIndicator(wParam);
+		break;
+	case SCI_GETINDICATORCURRENT:
+		return pdoc->decorations.GetCurrentIndicator();
+	case SCI_SETINDICATORVALUE:
+		pdoc->decorations.SetCurrentValue(wParam);
+		break;
+	case SCI_GETINDICATORVALUE:
+		return pdoc->decorations.GetCurrentValue();
+
+	case SCI_INDICATORFILLRANGE:
+		pdoc->decorations.FillRange(wParam, pdoc->decorations.GetCurrentValue(), lParam);
+		InvalidateRange(wParam, wParam + lParam);
+		break;
+
+	case SCI_INDICATORCLEARRANGE:
+		pdoc->decorations.FillRange(wParam, 0, lParam);
+		InvalidateRange(wParam, wParam + lParam);
+		break;
+
+	case SCI_INDICATORALLONFOR:
+		return pdoc->decorations.AllOnFor(wParam);
+
+	case SCI_INDICATORVALUEAT:
+		return pdoc->decorations.ValueAt(wParam, lParam);
+
+	case SCI_INDICATORSTART:
+		return pdoc->decorations.Start(wParam, lParam);
+
+	case SCI_INDICATOREND:
+		return pdoc->decorations.End(wParam, lParam);
 
 	case SCI_LINEDOWN:
 	case SCI_LINEDOWNEXTEND:

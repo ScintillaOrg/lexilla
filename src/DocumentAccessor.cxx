@@ -18,9 +18,11 @@
 #include "DocumentAccessor.h"
 #include "SplitVector.h"
 #include "Partitioning.h"
+#include "RunStyles.h"
 #include "CellBuffer.h"
 #include "Scintilla.h"
 #include "CharClassify.h"
+#include "Decoration.h"
 #include "Document.h"
 
 DocumentAccessor::~DocumentAccessor() {

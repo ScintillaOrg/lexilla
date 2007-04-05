@@ -39,6 +39,8 @@
 #include "Style.h"
 #include "AutoComplete.h"
 #include "ViewStyle.h"
+#include "RunStyles.h"
+#include "Decoration.h"
 #include "CharClassify.h"
 #include "Document.h"
 #include "Editor.h"
