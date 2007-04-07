@@ -190,3 +190,7 @@ int DocumentAccessor::IndentAmount(int line, int *flags, PFNIsCommentLeader pfnI
 		return indent;
 }
 
+void DocumentAccessor::IndicatorFill(int start, int end, int indicator, int value) {
+	pdoc->decorations.SetCurrentIndicator(indicator);
+	pdoc->DecorationFillRange(start, value, end - start);
+}

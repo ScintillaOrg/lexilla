@@ -1340,6 +1340,17 @@ void Document::IncrementStyleClock() {
 	}
 }
 
+void Document::DecorationFillRange(int position, int value, int fillLength) {
+	if (decorations.FillRange(position, value, fillLength)) {
+		DocModification mh(SC_MOD_CHANGESTYLE | SC_PERFORMED_USER,
+							position, fillLength);
+		NotifyModified(mh);
+	} else {
+		DocModification mh(SC_MOD_CHANGESTYLE | SC_PERFORMED_USER,
+							position, fillLength);
+	}
+}
+
 bool Document::AddWatcher(DocWatcher *watcher, void *userData) {
 	for (int i = 0; i < lenWatchers; i++) {
 		if ((watchers[i].watcher == watcher) &&

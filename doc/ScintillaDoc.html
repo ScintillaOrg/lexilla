@@ -2134,7 +2134,7 @@ struct TextToFind {
     it was not selected. When there is no selection, the current insertion point is marked by the
     text caret. This is a vertical line that is normally blinking on and off to attract the users
     attention.</p>
-    <code><a class="message" href="#SCI_SETSELFORE">SCI_SETSELFORE(bool useSelectionForeColour, 
+    <code><a class="message" href="#SCI_SETSELFORE">SCI_SETSELFORE(bool useSelectionForeColour,
     int <a class="jump" href="#colour">colour<a>)</a><br />
     <a class="message" href="#SCI_SETSELBACK">SCI_SETSELBACK(bool useSelectionBackColour,
     int <a class="jump" href="#colour">colour<a>)</a><br />
@@ -2155,7 +2155,7 @@ struct TextToFind {
     <a class="message" href="#SCI_GETCARETPERIOD">SCI_GETCARETPERIOD</a><br />
     <a class="message" href="#SCI_SETCARETWIDTH">SCI_SETCARETWIDTH(int pixels)</a><br />
     <a class="message" href="#SCI_GETCARETWIDTH">SCI_GETCARETWIDTH</a><br />
-    <a class="message" href="#SCI_SETHOTSPOTACTIVEFORE">SCI_SETHOTSPOTACTIVEFORE(bool useSetting, 
+    <a class="message" href="#SCI_SETHOTSPOTACTIVEFORE">SCI_SETHOTSPOTACTIVEFORE(bool useSetting,
     int <a class="jump" href="#colour">colour<a>)</a><br />
     <a class="message" href="#SCI_GETHOTSPOTACTIVEFORE">SCI_GETHOTSPOTACTIVEFORE</a><br />
     <a class="message" href="#SCI_SETHOTSPOTACTIVEBACK">SCI_SETHOTSPOTACTIVEBACK(bool useSetting,
@@ -3046,6 +3046,60 @@ struct TextToFind {
      <code>SCI_INDICSETFORE(1, 0xff0000);</code> (light blue)<br />
      <code>SCI_INDICSETFORE(2, 0x0000ff);</code> (light red)</p>
 
+    <h2 id="Extended Indicators">Extended Indicators</h2>
+    <p>Incorporating indicators within style bytes has proved limiting so Scintilla is changing to store
+    indicators separately from style bytes. The following APIs should be used for new code and existing
+    code should be updated to use these APIs rather than style bytes. After the transition is complete,
+    indicators within style bytes will be removed so that all the bits in each style byte can be used for
+    lexical states.</p>
+    <p>Up to 32 indicators may be used. Lexers should use indicators 3 to 7 and containers
+    8 to 31 to ensure they do not conflict. Indicators 0, 1, and 2 are the existing style byte indicators and should
+    be avoided in the transition period.
+    Extended indicators are stored in a format similar to run length encoding which is efficient in both
+    speed and storage for sparse information.</p>
+    <p>An indicator may store different values for each range but currently all values are drawn the same.
+    In the future, it may be possible to draw different values in different styles.</p>
+    <p>
+    <b id="SCI_SETINDICATORCURRENT">SCI_SETINDICATORCURRENT(int indicator)</b><br />
+    <b id="SCI_GETINDICATORCURRENT">SCI_GETINDICATORCURRENT</b><br />
+    These two messages set and get the indicator that will be affected by calls to
+    <a class="jump" href="#SCI_INDICATORFILLRANGE">SCI_INDICATORFILLRANGE</a> and
+    <a class="jump" href="#SCI_INDICATORCLEARRANGE">SCI_INDICATORCLEARRANGE</a>.
+    </p>
+
+    <p>
+    <b id="SCI_SETINDICATORVALUE">SCI_SETINDICATORVALUE(int value)</b><br />
+    <b id="SCI_GETINDICATORVALUE">SCI_GETINDICATORVALUE</b><br />
+    These two messages set and get the value that will be set by calls to
+    <a class="jump" href="#SCI_INDICATORFILLRANGE">SCI_INDICATORFILLRANGE</a>.
+    </p>
+
+    <p>
+    <b id="SCI_INDICATORFILLRANGE">SCI_INDICATORFILLRANGE(int position, int fillLength)</b><br />
+    <b id="SCI_INDICATORCLEARRANGE">SCI_INDICATORCLEARRANGE(int position, int clearLength)</b><br />
+    These two messages fill or clear a range for the current indicator.
+    <code>SCI_INDICATORFILLRANGE</code> fills with the
+    the current value.
+    </p>
+
+    <p>
+    <b id="SCI_INDICATORALLONFOR">SCI_INDICATORALLONFOR(int position)</b><br />
+    Retrieve a bitmap value representing which indicators are non-zero at a position.
+    </p>
+
+    <p>
+    <b id="SCI_INDICATORVALUEAT">SCI_INDICATORVALUEAT(int indicator, int position)</b><br />
+    Retrieve the value of a particular indicator at a position.
+    </p>
+
+    <p>
+    <b id="SCI_INDICATORSTART">SCI_INDICATORSTART(int indicator, int position)</b><br />
+    <b id="SCI_INDICATOREND">SCI_INDICATOREND(int indicator, int position)</b><br />
+    Find the start or end of a range with one value from a position within the range.
+    Can be used to iterate through the document to discover all the indicator positions.
+    </p>
+
+
     <h2 id="Autocompletion">Autocompletion</h2>
 
     <p>Autocompletion displays a list box showing likely identifiers based upon the user's typing.
@@ -3642,9 +3696,9 @@ struct TextToFind {
      <code>SCK_ADD</code>, <code>SCK_BACK</code>, <code>SCK_DELETE</code>, <code>SCK_DIVIDE</code>,
     <code>SCK_DOWN</code>, <code>SCK_END</code>, <code>SCK_ESCAPE</code>, <code>SCK_HOME</code>,
     <code>SCK_INSERT</code>, <code>SCK_LEFT</code>, <code>SCK_MENU</code>, <code>SCK_NEXT</code> (Page Down),
-    <code>SCK_PRIOR</code> (Page Up), <code>SCK_RETURN</code>, <code>SCK_RIGHT</code>, 
+    <code>SCK_PRIOR</code> (Page Up), <code>SCK_RETURN</code>, <code>SCK_RIGHT</code>,
     <code>SCK_RWIN</code>,
-    <code>SCK_SUBTRACT</code>, <code>SCK_TAB</code>, <code>SCK_UP</code>, and 
+    <code>SCK_SUBTRACT</code>, <code>SCK_TAB</code>, <code>SCK_UP</code>, and
     <code>SCK_WIN</code>.</p>
 
     <p>The modifiers are a combination of zero or more of <code>SCMOD_ALT</code>,

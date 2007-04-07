@@ -104,20 +104,21 @@ void DecorationList::SetCurrentIndicator(int indicator) {
 }
 
 void DecorationList::SetCurrentValue(int value) {
-	currentValue = value;
+	currentValue = value ? value : 1;
 }
 
-void DecorationList::FillRange(int position, int value, int fillLength) {
+bool DecorationList::FillRange(int position, int value, int fillLength) {
 	if (!current) {
 		current = DecorationFromIndicator(currentIndicator);
 		if (!current) {
 			current = Create(currentIndicator, lengthDocument);
 		}
 	}
-	current->rs.FillRange(position, value, fillLength);
+	bool changed = current->rs.FillRange(position, value, fillLength);
 	if (current->Empty()) {
 		Delete(currentIndicator);
 	}
+	return changed;
 }
 
 void DecorationList::InsertSpace(int position, int insertLength) {

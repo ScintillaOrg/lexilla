@@ -54,4 +54,5 @@ public:
 	void ColourTo(unsigned int pos, int chAttr);
 	void SetLevel(int line, int level);
 	int IndentAmount(int line, int *flags, PFNIsCommentLeader pfnIsCommentLeader = 0);
+	void IndicatorFill(int start, int end, int indicator, int value);
 };

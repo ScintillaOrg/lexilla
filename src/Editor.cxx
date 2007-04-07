@@ -7147,13 +7147,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return pdoc->decorations.GetCurrentValue();
 
 	case SCI_INDICATORFILLRANGE:
-		pdoc->decorations.FillRange(wParam, pdoc->decorations.GetCurrentValue(), lParam);
-		InvalidateRange(wParam, wParam + lParam);
+		pdoc->DecorationFillRange(wParam, pdoc->decorations.GetCurrentValue(), lParam);
 		break;
 
 	case SCI_INDICATORCLEARRANGE:
-		pdoc->decorations.FillRange(wParam, 0, lParam);
-		InvalidateRange(wParam, wParam + lParam);
+		pdoc->DecorationFillRange(wParam, 0, lParam);
 		break;
 
 	case SCI_INDICATORALLONFOR:

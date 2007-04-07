@@ -24,7 +24,8 @@ public:
 	int FindNextChange(int position, int end);
 	int StartRun(int position);
 	int EndRun(int position);
-	void FillRange(int position, int value, int fillLength);
+	// Returns true if some values may have changed
+	bool FillRange(int position, int value, int fillLength);
 	void InsertSpace(int position, int insertLength);
 	void DeleteAll();
 	void DeleteRange(int position, int deleteLength);

@@ -41,7 +41,8 @@ public:
 	void SetCurrentValue(int value);
 	int GetCurrentValue() { return currentValue; }
 
-	void FillRange(int position, int value, int fillLength);
+	// Returns true if some values may have changed
+	bool FillRange(int position, int value, int fillLength);
 
 	void InsertSpace(int position, int insertLength);
 	void DeleteRange(int position, int deleteLength);

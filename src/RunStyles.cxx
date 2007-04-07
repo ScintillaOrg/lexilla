@@ -106,11 +106,17 @@ int RunStyles::EndRun(int position) {
 	return starts->PositionFromPartition(starts->PartitionFromPosition(position) + 1);
 }
 
-void RunStyles::FillRange(int position, int value, int fillLength) {
+bool RunStyles::FillRange(int position, int value, int fillLength) {
 	int end = position + fillLength;
-	SplitRun(end);
 	int runStart = RunFromPosition(position);
-	if (styles->ValueAt(runStart) != value) {
+	if (styles->ValueAt(runStart) == value) {
+		if (end <= starts->PositionFromPartition(runStart + 1)) {
+			// Whole range is already same as value
+			return false;
+		}
+		SplitRun(end);
+	} else {
+		SplitRun(end);
 		SplitRun(position);
 		runStart = RunFromPosition(position);
 		styles->SetValueAt(runStart, value);
@@ -123,6 +129,7 @@ void RunStyles::FillRange(int position, int value, int fillLength) {
 	runEnd = RunFromPosition(end);
 	RemoveRunIfSameAsPrevious(runEnd);
 	RemoveRunIfSameAsPrevious(runStart);
+	return true;
 }
 
 void RunStyles::InsertSpace(int position, int insertLength) {

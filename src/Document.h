@@ -218,6 +218,7 @@ public:
 	void EnsureStyledTo(int pos);
 	int GetStyleClock() { return styleClock; }
 	void IncrementStyleClock();
+	void DecorationFillRange(int position, int value, int fillLength);
 
 	int SetLineState(int line, int state) { return cb.SetLineState(line, state); }
 	int GetLineState(int line) { return cb.GetLineState(line); }

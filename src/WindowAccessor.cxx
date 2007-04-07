@@ -176,3 +176,12 @@ int WindowAccessor::IndentAmount(int line, int *flags, PFNIsCommentLeader pfnIsC
 		return indent;
 }
 
+void WindowAccessor::IndicatorFill(int start, int end, int indicator, int value) {
+	Platform::SendScintilla(id, SCI_SETINDICATORCURRENT, indicator);
+	if (value) {
+		Platform::SendScintilla(id, SCI_SETINDICATORVALUE, value);
+		Platform::SendScintilla(id, SCI_INDICATORFILLRANGE, start, end - start);
+	} else {
+		Platform::SendScintilla(id, SCI_INDICATORCLEARRANGE, start, end - start);
+	}
+}
