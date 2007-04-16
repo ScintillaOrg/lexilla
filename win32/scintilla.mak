@@ -137,6 +137,7 @@ LEXOBJS=\
 	$(DIR_O)\LexFlagship.obj \
 	$(DIR_O)\LexForth.obj \
 	$(DIR_O)\LexFortran.obj \
+	$(DIR_O)\LexGAP.obj \
 	$(DIR_O)\LexGui4Cli.obj \
 	$(DIR_O)\LexHaskell.obj \
 	$(DIR_O)\LexHTML.obj \
@@ -344,6 +345,8 @@ $(DIR_O)\LexFlagship.obj: ..\src\LexFlagship.cxx $(LEX_HEADERS)
 $(DIR_O)\LexForth.obj: ..\src\LexForth.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexFortran.obj: ..\src\LexFortran.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexGAP.obj: ..\src\LexGAP.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexGui4Cli.obj: ..\src\LexGui4Cli.cxx $(LEX_HEADERS)
 
