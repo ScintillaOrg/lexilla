@@ -27,14 +27,16 @@ int RunStyles::RunFromPosition(int position) {
 }
 
 // If there is no run boundary at position, insert one continuing style.
-void RunStyles::SplitRun(int position) {
+int RunStyles::SplitRun(int position) {
 	int run = RunFromPosition(position);
 	int posRun = starts->PositionFromPartition(run);
 	if (posRun < position) {
 		int runStyle = ValueAt(position);
-		starts->InsertPartition(run+1, position);
-		styles->InsertValue(run+1, 1, runStyle);
+		run++;
+		starts->InsertPartition(run, position);
+		styles->InsertValue(run, 1, runStyle);
 	}
+	return run;
 }
 
 void RunStyles::RemoveRun(int run) {
@@ -106,22 +108,31 @@ int RunStyles::EndRun(int position) {
 	return starts->PositionFromPartition(starts->PartitionFromPosition(position) + 1);
 }
 
-bool RunStyles::FillRange(int position, int value, int fillLength) {
+bool RunStyles::FillRange(int &position, int value, int &fillLength) {
 	int end = position + fillLength;
-	int runStart = RunFromPosition(position);
-	if (styles->ValueAt(runStart) == value) {
-		if (end <= starts->PositionFromPartition(runStart + 1)) {
-			// Whole range is already same as value
+	int runEnd = RunFromPosition(end);
+	if (styles->ValueAt(runEnd) == value) {
+		// End already has value so trim range.
+		end = starts->PositionFromPartition(runEnd);
+		if (position >= end) {
+			// Whole range is already same as value so no action
 			return false;
 		}
-		SplitRun(end);
+		fillLength = end - position;
 	} else {
-		SplitRun(end);
-		SplitRun(position);
-		runStart = RunFromPosition(position);
-		styles->SetValueAt(runStart, value);
+		runEnd = SplitRun(end);
 	}
-	int runEnd = RunFromPosition(end);
+	int runStart = RunFromPosition(position);
+	if (styles->ValueAt(runStart) == value) {
+		// Start is in expected value so trim range.
+		runStart++;
+		position = starts->PositionFromPartition(runStart); 
+		fillLength = end - position;
+	} else {
+		runStart = SplitRun(position);
+		runEnd++;
+	}
+	styles->SetValueAt(runStart, value);
 	// Remove each old run over the range
 	for (int run=runStart+1; run<runEnd; run++) {
 		RemoveRun(runStart+1);
@@ -178,10 +189,8 @@ void RunStyles::DeleteRange(int position, int deleteLength) {
 		// Deleting from inside one run
 		starts->InsertText(runStart, -deleteLength);
 	} else {
-		SplitRun(position);
-		SplitRun(end);
-		runStart = RunFromPosition(position);
-		runEnd = RunFromPosition(end);
+		runStart = SplitRun(position);
+		runEnd = SplitRun(end);
 		starts->InsertText(runStart, -deleteLength);
 		// Remove each old run over the range
 		for (int run=runStart; run<runEnd; run++) {

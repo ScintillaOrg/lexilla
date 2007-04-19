@@ -12,7 +12,7 @@ public:
 	Partitioning *starts;
 	SplitVector<int> *styles;
 	int RunFromPosition(int position);
-	void SplitRun(int position);
+	int SplitRun(int position);
 	void RemoveRun(int run);
 	void RemoveRunIfEmpty(int run);
 	void RemoveRunIfSameAsPrevious(int run);
@@ -25,7 +25,7 @@ public:
 	int StartRun(int position);
 	int EndRun(int position);
 	// Returns true if some values may have changed
-	bool FillRange(int position, int value, int fillLength);
+	bool FillRange(int &position, int value, int &fillLength);
 	void InsertSpace(int position, int insertLength);
 	void DeleteAll();
 	void DeleteRange(int position, int deleteLength);

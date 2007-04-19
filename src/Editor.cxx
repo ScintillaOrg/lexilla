@@ -3831,8 +3831,10 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 	if (paintState == painting) {
 		CheckForChangeOutsidePaint(Range(mh.position, mh.position + mh.length));
 	}
-	if (mh.modificationType & SC_MOD_CHANGESTYLE) {
-		pdoc->IncrementStyleClock();
+	if (mh.modificationType & (SC_MOD_CHANGESTYLE|SC_MOD_CHANGEINDICATOR)) {
+		if (mh.modificationType & SC_MOD_CHANGESTYLE) {
+			pdoc->IncrementStyleClock();
+		}
 		if (paintState == notPainting) {
 			if (mh.position < pdoc->LineStart(topLine)) {
 				// Styling performed before this view
@@ -3841,7 +3843,9 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 				InvalidateRange(mh.position, mh.position + mh.length);
 			}
 		}
-		llc.Invalidate(LineLayout::llCheckTextAndStyle);
+		if (mh.modificationType & SC_MOD_CHANGESTYLE) {
+			llc.Invalidate(LineLayout::llCheckTextAndStyle);
+		}
 	} else {
 		// Move selection and brace highlights
 		if (mh.modificationType & SC_MOD_INSERTTEXT) {
@@ -3925,7 +3929,7 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 
 	// If client wants to see this modification
 	if (mh.modificationType & modEventMask) {
-		if ((mh.modificationType & SC_MOD_CHANGESTYLE) == 0) {
+		if ((mh.modificationType & (SC_MOD_CHANGESTYLE|SC_MOD_CHANGEINDICATOR)) == 0) {
 			// Real modification made to text of document.
 			NotifyChange();	// Send EN_CHANGE
 		}

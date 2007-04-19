@@ -677,7 +677,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_MOD_BEFOREDELETE 0x800
 #define SC_MULTILINEUNDOREDO 0x1000
 #define SC_STARTACTION 0x2000
-#define SC_MODEVENTMASKALL 0x2FFF
+#define SC_MOD_CHANGEINDICATOR 0x4000
+#define SC_MODEVENTMASKALL 0x6FFF
 #define SCEN_CHANGE 768
 #define SCEN_SETFOCUS 512
 #define SCEN_KILLFOCUS 256

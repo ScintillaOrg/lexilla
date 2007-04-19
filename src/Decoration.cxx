@@ -107,7 +107,7 @@ void DecorationList::SetCurrentValue(int value) {
 	currentValue = value ? value : 1;
 }
 
-bool DecorationList::FillRange(int position, int value, int fillLength) {
+bool DecorationList::FillRange(int &position, int value, int &fillLength) {
 	if (!current) {
 		current = DecorationFromIndicator(currentIndicator);
 		if (!current) {

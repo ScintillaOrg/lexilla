@@ -42,7 +42,7 @@ public:
 	int GetCurrentValue() { return currentValue; }
 
 	// Returns true if some values may have changed
-	bool FillRange(int position, int value, int fillLength);
+	bool FillRange(int &position, int value, int &fillLength);
 
 	void InsertSpace(int position, int insertLength);
 	void DeleteRange(int position, int deleteLength);

@@ -1344,12 +1344,9 @@ void Document::IncrementStyleClock() {
 
 void Document::DecorationFillRange(int position, int value, int fillLength) {
 	if (decorations.FillRange(position, value, fillLength)) {
-		DocModification mh(SC_MOD_CHANGESTYLE | SC_PERFORMED_USER,
+		DocModification mh(SC_MOD_CHANGEINDICATOR | SC_PERFORMED_USER,
 							position, fillLength);
 		NotifyModified(mh);
-	} else {
-		DocModification mh(SC_MOD_CHANGESTYLE | SC_PERFORMED_USER,
-							position, fillLength);
 	}
 }
 
