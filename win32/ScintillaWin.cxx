@@ -2007,11 +2007,9 @@ STDMETHODIMP ScintillaWin::DragEnter(LPDATAOBJECT pIDataSource, DWORD grfKeyStat
                                      POINTL, PDWORD pdwEffect) {
 	if (pIDataSource == NULL)
 		return E_POINTER;
-	if (IsUnicodeMode()) {
-		FORMATETC fmtu = {CF_UNICODETEXT, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
-		HRESULT hrHasUText = pIDataSource->QueryGetData(&fmtu);
-		hasOKText = (hrHasUText == S_OK);
-	}
+	FORMATETC fmtu = {CF_UNICODETEXT, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
+	HRESULT hrHasUText = pIDataSource->QueryGetData(&fmtu);
+	hasOKText = (hrHasUText == S_OK);
 	if (!hasOKText) {
 		FORMATETC fmte = {CF_TEXT, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 		HRESULT hrHasText = pIDataSource->QueryGetData(&fmte);
@@ -2078,22 +2076,38 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 	SetDragPosition(invalidPosition);
 
 	STGMEDIUM medium={0,{0},0};
-	HRESULT hr = S_OK;
 
 	char *data = 0;
 	bool dataAllocated = false;
 
-	if (IsUnicodeMode()) {
-		FORMATETC fmtu = {CF_UNICODETEXT, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
-		hr = pIDataSource->GetData(&fmtu, &medium);
-		if (SUCCEEDED(hr) && medium.hGlobal) {
-			wchar_t *udata = static_cast<wchar_t *>(::GlobalLock(medium.hGlobal));
+	FORMATETC fmtu = {CF_UNICODETEXT, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
+	HRESULT hr = pIDataSource->GetData(&fmtu, &medium);
+	if (SUCCEEDED(hr) && medium.hGlobal) {
+		wchar_t *udata = static_cast<wchar_t *>(::GlobalLock(medium.hGlobal));
+		if (IsUnicodeMode()) {
 			int tlen = ::GlobalSize(medium.hGlobal);
-			// Convert UCS-2 to UTF-8
+			// Convert UTF-16 to UTF-8
 			int dataLen = UTF8Length(udata, tlen/2);
 			data = new char[dataLen+1];
 			if (data) {
 				UTF8FromUTF16(udata, tlen/2, data, dataLen);
+				dataAllocated = true;
+			}
+		} else {
+			// Convert UTF-16 to ANSI
+			//
+			// Default Scintilla behavior in Unicode mode
+			// CF_UNICODETEXT available, but not in Unicode mode
+			// Convert from Unicode to current Scintilla code page
+			UINT cpDest = CodePageFromCharSet(
+				vs.styles[STYLE_DEFAULT].characterSet, pdoc->dbcsCodePage);
+			int tlen = ::WideCharToMultiByte(cpDest, 0, udata, -1,
+				NULL, 0, NULL, NULL) - 1; // subtract 0 terminator
+			data = new char[tlen + 1];
+			if (data) {
+				memset(data, 0, (tlen+1));
+				::WideCharToMultiByte(cpDest, 0, udata, -1,
+						data, tlen + 1, NULL, NULL);
 				dataAllocated = true;
 			}
 		}
