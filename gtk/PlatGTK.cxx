@@ -1293,7 +1293,7 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 				len = maxLengthTextRun-1;
 			int wclen;
 			if (et == UTF8) {
-				wclen = UCS2FromUTF8(s, len,
+				wclen = UTF16FromUTF8(s, len,
 					static_cast<wchar_t *>(static_cast<void *>(wctext)), maxLengthTextRun - 1);
 			} else {	// dbcs, so convert using current locale
 				char sMeasure[maxLengthTextRun];
@@ -1468,7 +1468,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 				len = maxLengthTextRun-1;
 			int wclen;
 			if (et == UTF8) {
-				wclen = UCS2FromUTF8(s, len,
+				wclen = UTF16FromUTF8(s, len,
 					static_cast<wchar_t *>(static_cast<void *>(wctext)), maxLengthTextRun - 1);
 			} else {	// dbcsMode, so convert using current locale
 				char sDraw[maxLengthTextRun];
@@ -1554,7 +1554,7 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 #endif
 		if (et == UTF8) {
 			GdkWChar wctext[maxLengthTextRun];
-			size_t wclen = UCS2FromUTF8(s, len, static_cast<wchar_t *>(static_cast<void *>(wctext)),
+			size_t wclen = UTF16FromUTF8(s, len, static_cast<wchar_t *>(static_cast<void *>(wctext)),
 				sizeof(wctext) / sizeof(GdkWChar) - 1);
 			wctext[wclen] = L'\0';
 			return gdk_text_width_wc(PFont(font_)->pfont, wctext, wclen);

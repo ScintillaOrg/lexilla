@@ -487,7 +487,7 @@ sptr_t ScintillaWin::HandleComposition(uptr_t wParam, sptr_t lParam) {
 			if (IsUnicodeMode()) {
 				char utfval[maxLenInputIME * 3];
 				unsigned int len = UTF8Length(wcs, wides);
-				UTF8FromUCS2(wcs, wides, utfval, len);
+				UTF8FromUTF16(wcs, wides, utfval, len);
 				utfval[len] = '\0';
 				AddCharUTF(utfval, len);
 			} else {
@@ -725,7 +725,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				//char utfval[4];
 				//wchar_t wcs[2] = {wParam, 0};
 				//unsigned int len = UTF8Length(wcs, 1);
-				//UTF8FromUCS2(wcs, 1, utfval, len);
+				//UTF8FromUTF16(wcs, 1, utfval, len);
 				//AddCharUTF(utfval, len);
 				AddCharBytes('\0', LOBYTE(wParam));
 			} else {
@@ -744,7 +744,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				char utfval[4];
 				wchar_t wcs[2] = {static_cast<wchar_t>(wParam), 0};
 				unsigned int len = UTF8Length(wcs, 1);
-				UTF8FromUCS2(wcs, 1, utfval, len);
+				UTF8FromUTF16(wcs, 1, utfval, len);
 				AddCharUTF(utfval, len);
 				return 1;
 			} else {
@@ -1301,7 +1301,7 @@ void ScintillaWin::Paste() {
 				len = UTF8Length(uptr, bytes / 2);
 				putf = new char[len + 1];
 				if (putf) {
-					UTF8FromUCS2(uptr, bytes / 2, putf, len);
+					UTF8FromUTF16(uptr, bytes / 2, putf, len);
 				}
 			} else {
 				// CF_UNICODETEXT available, but not in Unicode mode
@@ -1346,8 +1346,8 @@ void ScintillaWin::Paste() {
 					unsigned int mlen = UTF8Length(uptr, ulen);
 					char *putf = new char[mlen + 1];
 					if (putf) {
-						// CP_UTF8 not available on Windows 95, so use UTF8FromUCS2()
-						UTF8FromUCS2(uptr, ulen, putf, mlen);
+						// CP_UTF8 not available on Windows 95, so use UTF8FromUTF16()
+						UTF8FromUTF16(uptr, ulen, putf, mlen);
 					}
 
 					delete []uptr;
@@ -1775,7 +1775,7 @@ void ScintillaWin::AddCharBytes(char b0, char b1) {
 			::MultiByteToWideChar(inputCodePage, 0, ansiChars, 1, wcs, 1);
 		}
 		unsigned int len = UTF8Length(wcs, 1);
-		UTF8FromUCS2(wcs, 1, utfval, len);
+		UTF8FromUTF16(wcs, 1, utfval, len);
 		utfval[len] = '\0';
 		AddCharUTF(utfval, len ? len : 1);
 	} else if (b0) {
@@ -1803,10 +1803,10 @@ void ScintillaWin::CopyToClipboard(const SelectionText &selectedText) {
 
 	// Default Scintilla behaviour in Unicode mode
 	if (IsUnicodeMode()) {
-		int uchars = UCS2Length(selectedText.s, selectedText.len);
+		int uchars = UTF16Length(selectedText.s, selectedText.len);
 		uniText.Allocate(2 * uchars);
 		if (uniText) {
-			UCS2FromUTF8(selectedText.s, selectedText.len, static_cast<wchar_t *>(uniText.ptr), uchars);
+			UTF16FromUTF8(selectedText.s, selectedText.len, static_cast<wchar_t *>(uniText.ptr), uchars);
 		}
 	} else {
 		// Not Unicode mode
@@ -2093,7 +2093,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 			int dataLen = UTF8Length(udata, tlen/2);
 			data = new char[dataLen+1];
 			if (data) {
-				UTF8FromUCS2(udata, tlen/2, data, dataLen);
+				UTF8FromUTF16(udata, tlen/2, data, dataLen);
 				dataAllocated = true;
 			}
 		}
@@ -2153,10 +2153,10 @@ STDMETHODIMP ScintillaWin::GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM) {
 
 	GlobalMemory text;
 	if (pFEIn->cfFormat == CF_UNICODETEXT) {
-		int uchars = UCS2Length(drag.s, drag.len);
+		int uchars = UTF16Length(drag.s, drag.len);
 		text.Allocate(2 * uchars);
 		if (text) {
-			UCS2FromUTF8(drag.s, drag.len, static_cast<wchar_t *>(text.ptr), uchars);
+			UTF16FromUTF8(drag.s, drag.len, static_cast<wchar_t *>(text.ptr), uchars);
 		}
 	} else {
 		text.Allocate(drag.len);

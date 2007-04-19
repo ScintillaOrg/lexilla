@@ -266,7 +266,9 @@ int Document::LenChar(int pos) {
 		if (ch < 0x80)
 			return 1;
 		int len = 2;
-		if (ch >= (0x80 + 0x40 + 0x20))
+		if (ch >= (0x80 + 0x40 + 0x20 + 0x10))
+			len = 4;
+		else if (ch >= (0x80 + 0x40 + 0x20))
 			len = 3;
 		int lengthDoc = Length();
 		if ((pos + len) > lengthDoc)

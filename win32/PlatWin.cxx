@@ -684,7 +684,7 @@ void SurfaceImpl::DrawTextCommon(PRectangle rc, Font &font_, int ybase, const ch
 		wchar_t tbuf[MAX_US_LEN];
 		int tlen;
 		if (unicodeMode) {
-			tlen = UCS2FromUTF8(s, len, tbuf, MAX_US_LEN);
+			tlen = UTF16FromUTF8(s, len, tbuf, MAX_US_LEN);
 		} else {
 			// Support Asian string display in 9x English
 			tlen = ::MultiByteToWideChar(codePage, 0, s, len, NULL, 0);
@@ -740,7 +740,7 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 	SIZE sz={0,0};
 	if (unicodeMode) {
 		wchar_t tbuf[MAX_US_LEN];
-		int tlen = UCS2FromUTF8(s, len, tbuf, MAX_US_LEN);
+		int tlen = UTF16FromUTF8(s, len, tbuf, MAX_US_LEN);
 		::GetTextExtentPoint32W(hdc, tbuf, tlen, &sz);
 	} else if (IsNT() || (codePage==0) || win9xACPSame) {
 		::GetTextExtentPoint32A(hdc, s, Platform::Minimum(len, maxLenText), &sz);
@@ -760,7 +760,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 	int fit = 0;
 	if (unicodeMode) {
 		wchar_t tbuf[MAX_US_LEN];
-		int tlen = UCS2FromUTF8(s, len, tbuf, MAX_US_LEN);
+		int tlen = UTF16FromUTF8(s, len, tbuf, MAX_US_LEN);
 		int poses[MAX_US_LEN];
 		fit = tlen;
 		if (!::GetTextExtentExPointW(hdc, tbuf, tlen, maxWidthMeasure, &fit, poses, &sz)) {
@@ -778,14 +778,17 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 		int i=0;
 		while (ui<fit) {
 			unsigned char uch = us[i];
-			positions[i++] = poses[ui];
-			if (uch >= 0x80) {
-				if (uch < (0x80 + 0x40 + 0x20)) {
-					positions[i++] = poses[ui];
-				} else {
-					positions[i++] = poses[ui];
-					positions[i++] = poses[ui];
-				}
+			unsigned int lenChar = 1;
+			if (uch >= (0x80 + 0x40 + 0x20 + 0x10)) {
+				lenChar = 4;
+				ui++;
+			} else if (uch >= (0x80 + 0x40 + 0x20)) {
+				lenChar = 3;
+			} else if (uch >= (0x80)) {
+				lenChar = 2;
+			}
+			for (unsigned int bytePos=0; bytePos<lenChar; bytePos++) {
+				positions[i++] = poses[ui];
 			}
 			ui++;
 		}
@@ -1312,7 +1315,7 @@ PRectangle ListBoxX::GetDesiredRect() {
 	int len = widestItem ? strlen(widestItem) : 0;
 	if (unicodeMode) {
 		wchar_t tbuf[MAX_US_LEN];
-		len = UCS2FromUTF8(widestItem, len, tbuf, sizeof(tbuf)/sizeof(wchar_t)-1);
+		len = UTF16FromUTF8(widestItem, len, tbuf, sizeof(tbuf)/sizeof(wchar_t)-1);
 		tbuf[len] = L'\0';
 		::GetTextExtentPoint32W(hdc, tbuf, len, &textSize);
 	} else {
@@ -1431,7 +1434,7 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 
 		if (unicodeMode) {
 			wchar_t tbuf[MAX_US_LEN];
-			int tlen = UCS2FromUTF8(text, len, tbuf, sizeof(tbuf)/sizeof(wchar_t)-1);
+			int tlen = UTF16FromUTF8(text, len, tbuf, sizeof(tbuf)/sizeof(wchar_t)-1);
 			tbuf[tlen] = L'\0';
 			::DrawTextW(pDrawItem->hDC, tbuf, tlen, &rcText, DT_NOPREFIX|DT_END_ELLIPSIS|DT_SINGLELINE|DT_NOCLIP);
 		} else {
