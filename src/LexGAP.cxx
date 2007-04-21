@@ -24,10 +24,10 @@
 
 static inline bool IsGAPOperator(char ch) {
 	if (isalnum(ch)) return false;
-	if (ch == '+' || ch == '-' || ch == '*' || ch == '/' || 
-		ch == '^' || ch == ',' || ch == '!' || ch == '.' || 
-		ch == '=' || ch == '<' || ch == '>' || ch == '(' || 
-		ch == ')' || ch == ';' || ch == '[' || ch == ']' || 
+	if (ch == '+' || ch == '-' || ch == '*' || ch == '/' ||
+		ch == '^' || ch == ',' || ch == '!' || ch == '.' ||
+		ch == '=' || ch == '<' || ch == '>' || ch == '(' ||
+		ch == ')' || ch == ';' || ch == '[' || ch == ']' ||
 		ch == '{' || ch == '}' || ch == ':' )
 		return true;
 	return false;
@@ -43,25 +43,25 @@ static void GetRange(unsigned int start, unsigned int end, Accessor &styler, cha
 }
 
 static void ColouriseGAPDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[], Accessor &styler) {
-	
+
 	WordList &keywords1 = *keywordlists[0];
 	WordList &keywords2 = *keywordlists[1];
 	WordList &keywords3 = *keywordlists[2];
 	WordList &keywords4 = *keywordlists[3];
-	
+
 	// Do not leak onto next line
-	if (initStyle == SCE_GAP_STRINGEOL) initStyle = SCE_GAP_DEFAULT;	
-	
+	if (initStyle == SCE_GAP_STRINGEOL) initStyle = SCE_GAP_DEFAULT;
+
 	StyleContext sc(startPos, length, initStyle, styler);
-	
+
 	for (; sc.More(); sc.Forward()) {
-		
+
 		// Prevent SCE_GAP_STRINGEOL from leaking back to previous line
 		if ( sc.atLineStart ) {
 			if (sc.state == SCE_GAP_STRING) sc.SetState(SCE_GAP_STRING);
 			if (sc.state == SCE_GAP_CHAR) sc.SetState(SCE_GAP_CHAR);
 		}
-		
+
 		// Handle line continuation generically
 		if (sc.ch == '\\' ) {
 			if (sc.chNext == '\n' || sc.chNext == '\r') {
@@ -72,15 +72,15 @@ static void ColouriseGAPDoc(unsigned int startPos, int length, int initStyle, Wo
 				continue;
 			}
 		}
-		
+
 		// Determine if the current state should terminate
 		switch (sc.state) {
 			case SCE_GAP_OPERATOR :
 				sc.SetState(SCE_GAP_DEFAULT);
 				break;
-				
-			case SCE_GAP_NUMBER :  
-				if (!IsADigit(sc.ch)) {    
+
+			case SCE_GAP_NUMBER :
+				if (!IsADigit(sc.ch)) {
 					if (sc.ch == '\\') {
 						if (!sc.atLineEnd) {
 							if (!IsADigit(sc.chNext)) {
@@ -94,7 +94,7 @@ static void ColouriseGAPDoc(unsigned int startPos, int length, int initStyle, Wo
 					else sc.SetState(SCE_GAP_DEFAULT);
 				}
 				break;
-				
+
 			case SCE_GAP_IDENTIFIER :
 				if (!(iswordstart(static_cast<char>(sc.ch)) || sc.ch == '$')) {
 					if (sc.ch == '\\') sc.Forward();
@@ -114,44 +114,44 @@ static void ColouriseGAPDoc(unsigned int startPos, int length, int initStyle, Wo
 					}
 				}
 				break;
-				
+
 			case SCE_GAP_COMMENT :
 				if (sc.atLineEnd) {
 					sc.SetState(SCE_GAP_DEFAULT);
 				}
 				break;
-				
+
 			case SCE_GAP_STRING:
 				if (sc.atLineEnd) {
 					sc.ChangeState(SCE_GAP_STRINGEOL);
 				} else if (sc.ch == '\\') {
-					if (sc.chNext == '\"') {
+					if (sc.chNext == '\"' || sc.chNext == '\'' || sc.chNext == '\\') {
 						sc.Forward();
 					}
 				} else if (sc.ch == '\"') {
 					sc.ForwardSetState(SCE_GAP_DEFAULT);
 				}
 				break;
-				
+
 			case SCE_GAP_CHAR:
 				if (sc.atLineEnd) {
 					sc.ChangeState(SCE_GAP_STRINGEOL);
 				} else if (sc.ch == '\\') {
-					if (sc.chNext == '\'') {
+					if (sc.chNext == '\"' || sc.chNext == '\'' || sc.chNext == '\\') {
 						sc.Forward();
 					}
 				} else if (sc.ch == '\'') {
 					sc.ForwardSetState(SCE_GAP_DEFAULT);
 				}
-				break;				
-				
+				break;
+
 			case SCE_GAP_STRINGEOL:
 				if (sc.atLineStart) {
 					sc.SetState(SCE_GAP_DEFAULT);
 				}
 				break;
 		}
-		
+
 		// Determine if a new state should be entered
 		if (sc.state == SCE_GAP_DEFAULT) {
 			if (IsGAPOperator(static_cast<char>(sc.ch))) {
@@ -170,7 +170,7 @@ static void ColouriseGAPDoc(unsigned int startPos, int length, int initStyle, Wo
 				sc.SetState(SCE_GAP_CHAR);
 			}
 		}
-		
+
 	}
 	sc.Complete();
 }
@@ -247,7 +247,7 @@ static void FoldGAPDoc( unsigned int startPos, int length, int initStyle,   Word
 static const char * const GAPWordListDesc[] = {
 	"Keywords 1",
 	"Keywords 2",
-	"Keywords 3 (unused)",  
+	"Keywords 3 (unused)",
 	"Keywords 4 (unused)",
 	0
 };
