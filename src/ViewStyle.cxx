@@ -129,10 +129,13 @@ void ViewStyle::Init() {
 	ResetDefaultStyle();
 
 	indicators[0].style = INDIC_SQUIGGLE;
+	indicators[0].under = false;
 	indicators[0].fore = ColourDesired(0, 0x7f, 0);
 	indicators[1].style = INDIC_TT;
+	indicators[1].under = false;
 	indicators[1].fore = ColourDesired(0, 0, 0xff);
 	indicators[2].style = INDIC_PLAIN;
+	indicators[2].under = false;
 	indicators[2].fore = ColourDesired(0xff, 0, 0);
 
 	lineHeight = 1;

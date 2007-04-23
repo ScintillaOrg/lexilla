@@ -3036,6 +3036,12 @@ struct TextToFind {
      <code>SCI_INDICSETFORE(1, 0xff0000);</code> (light blue)<br />
      <code>SCI_INDICSETFORE(2, 0x0000ff);</code> (light red)</p>
 
+    <p><b id="SCI_INDICSETUNDER">SCI_INDICSETUNDER(int indicatorNumber, bool under)</b><br />
+     <b id="SCI_INDICGETUNDER">SCI_INDICGETUNDER(int indicatorNumber)</b><br />
+     These two messages set and get whether an indicator is drawn under text or over(default).
+     Drawing under text works only for modern indicators when <a class="message" href="#SCI_SETTWOPHASEDRAW">two phase drawing</a>
+     is enabled.</p>
+
     <h3 id="Modern Indicators">Modern Indicators</h3>
 
     <p>Modern indicators are stored in a format similar to run length encoding which is efficient in both

@@ -2356,7 +2356,7 @@ void Editor::DrawIndicators(Surface *surface, ViewStyle &vsDraw, int line, int x
 	}
 
 	for (Decoration *deco=pdoc->decorations.root; deco; deco = deco->next) {
-		if (under == (deco->indicator >= 16)) {
+		if (under == vsDraw.indicators[deco->indicator].under) {
 			int startPos = posLineStart + subLineStart;
 			if (!deco->rs.ValueAt(startPos)) {
 				startPos = deco->rs.EndRun(startPos);
@@ -7137,6 +7137,16 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_INDICGETFORE:
 		return (wParam <= INDIC_MAX) ? vs.indicators[wParam].fore.desired.AsLong() : 0;
+
+	case SCI_INDICSETUNDER:
+		if (wParam <= INDIC_MAX) {
+			vs.indicators[wParam].under = lParam != 0;
+			InvalidateStyleRedraw();
+		}
+		break;
+
+	case SCI_INDICGETUNDER:
+		return (wParam <= INDIC_MAX) ? vs.indicators[wParam].under : 0;
 
 	case SCI_SETINDICATORCURRENT:
 		pdoc->decorations.SetCurrentIndicator(wParam);
