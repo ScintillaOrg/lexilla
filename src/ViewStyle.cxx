@@ -25,11 +25,15 @@ MarginStyle::MarginStyle() :
 
 // A list of the fontnames - avoids wasting space in each style
 FontNames::FontNames() {
+    size = 8;
+    names = new char *[size];
 	max = 0;
 }
 
 FontNames::~FontNames() {
 	Clear();
+    delete []names;
+    names = 0;
 }
 
 void FontNames::Clear() {
@@ -47,6 +51,17 @@ const char *FontNames::Save(const char *name) {
 			return names[i];
 		}
 	}
+    if (max >= size) {
+        // Grow array
+        int sizeNew = size * 2;
+        char **namesNew = new char *[sizeNew];
+    	for (int j=0;j<max;j++) {
+            namesNew[j] = names[j];
+        }
+        delete []names;
+        names = namesNew;
+        size = sizeNew;
+    }
 	names[max] = new char[strlen(name) + 1];
 	strcpy(names[max], name);
 	max++;

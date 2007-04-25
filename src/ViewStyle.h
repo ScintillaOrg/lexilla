@@ -23,7 +23,8 @@ public:
  */
 class FontNames {
 private:
-	char *names[STYLE_MAX + 1];
+	char **names;
+	int size;
 	int max;
 
 public:
