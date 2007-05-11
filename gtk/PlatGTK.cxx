@@ -1053,7 +1053,7 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int , ColourAllocated , int , Co
 #else
 void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated fill, int alphaFill,
 		ColourAllocated outline, int alphaOutline, int flags) {
-	if (gc && drawable) {
+	if (gc && drawable && rc.Width() > 0) {
 		int width = rc.Width();
 		int height = rc.Height();
 		// Ensure not distorted too much by corners when small
@@ -2609,7 +2609,7 @@ bool Platform::MouseButtonBounce() {
 }
 
 void Platform::DebugDisplay(const char *s) {
-	printf("%s", s);
+	fprintf(stderr, "%s", s);
 }
 
 bool Platform::IsKeyDown(int) {

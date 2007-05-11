@@ -581,7 +581,7 @@ static void AllFour(DWORD *pixels, int width, int height, int x, int y, DWORD va
 
 void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated fill, int alphaFill,
 		ColourAllocated outline, int alphaOutline, int /* flags*/ ) {
-	if (AlphaBlendFn) {
+	if (AlphaBlendFn && rc.Width() > 0) {
 		HDC hMemDC = ::CreateCompatibleDC(reinterpret_cast<HDC>(hdc));
 		int width = rc.Width();
 		int height = rc.Height();
