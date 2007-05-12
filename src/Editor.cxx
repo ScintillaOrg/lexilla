@@ -362,7 +362,7 @@ Editor::Editor() {
 	dwelling = false;
 	ptMouseLast.x = 0;
 	ptMouseLast.y = 0;
-	inDragDrop = false;
+	inDragDrop = ddNone;
 	dropWentOutside = false;
 	posDrag = invalidPosition;
 	posDrop = invalidPosition;
@@ -5000,6 +5000,13 @@ void Editor::DisplayCursor(Window::Cursor c) {
 		wMain.SetCursor(static_cast<Window::Cursor>(cursorMode));
 }
 
+bool Editor::DragThreshold(Point ptStart, Point ptNow) {
+	int xMove = ptStart.x - ptNow.x;
+	int yMove = ptStart.y - ptNow.y;
+	int distanceSquared = xMove * xMove + yMove * yMove;
+	return distanceSquared > 16;
+}
+
 void Editor::StartDrag() {
 	// Always handled by subclasses
 	//SetMouseCapture(true);
@@ -5007,8 +5014,8 @@ void Editor::StartDrag() {
 }
 
 void Editor::DropAt(int position, const char *value, bool moving, bool rectangular) {
-	//Platform::DebugPrintf("DropAt %d\n", inDragDrop);
-	if (inDragDrop)
+	//Platform::DebugPrintf("DropAt %d %d\n", inDragDrop, position);
+	if (inDragDrop == ddDragging)
 		dropWentOutside = false;
 
 	int positionWasInSelection = PositionInSelection(position);
@@ -5016,7 +5023,7 @@ void Editor::DropAt(int position, const char *value, bool moving, bool rectangul
 	bool positionOnEdgeOfSelection =
 	    (position == SelectionStart()) || (position == SelectionEnd());
 
-	if ((!inDragDrop) || !(0 == positionWasInSelection) ||
+	if ((inDragDrop != ddDragging) || !(0 == positionWasInSelection) ||
 	        (positionOnEdgeOfSelection && !moving)) {
 
 		int selStart = SelectionStart();
@@ -5025,7 +5032,7 @@ void Editor::DropAt(int position, const char *value, bool moving, bool rectangul
 		pdoc->BeginUndoAction();
 
 		int positionAfterDeletion = position;
-		if (inDragDrop && moving) {
+		if ((inDragDrop == ddDragging) && moving) {
 			// Remove dragged out text
 			if (rectangular || selType == selLines) {
 				SelectionLineIterator lineIterator(this);
@@ -5059,7 +5066,7 @@ void Editor::DropAt(int position, const char *value, bool moving, bool rectangul
 			}
 			pdoc->EndUndoAction();
 		}
-	} else if (inDragDrop) {
+	} else if (inDragDrop == ddDragging) {
 		SetEmptySelection(position);
 	}
 }
@@ -5161,11 +5168,11 @@ void Editor::DwellEnd(bool mouseMoved) {
 }
 
 void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, bool alt) {
-	//Platform::DebugPrintf("Scintilla:ButtonDown %d %d = %d alt=%d\n", curTime, lastClickTime, curTime - lastClickTime, alt);
+	//Platform::DebugPrintf("ButtonDown %d %d = %d alt=%d %d\n", curTime, lastClickTime, curTime - lastClickTime, alt, inDragDrop);
 	ptMouseLast = pt;
 	int newPos = PositionFromLocation(pt);
 	newPos = MovePositionOutsideChar(newPos, currentPos - newPos);
-	inDragDrop = false;
+	inDragDrop = ddNone;
 	moveExtendsSelection = false;
 
 	bool processed = NotifyMarginClick(pt, shift, ctrl, alt);
@@ -5250,16 +5257,14 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 				NotifyHotSpotClicked(newPos, shift, ctrl, alt);
 			}
 			if (!shift) {
-				inDragDrop = PointInSelection(pt) && !SelectionEmpty();
+				if (PointInSelection(pt) && !SelectionEmpty())
+					inDragDrop = ddInitial;
+				else
+					inDragDrop = ddNone;
 			}
-			if (inDragDrop) {
-				SetMouseCapture(false);
-				SetDragPosition(newPos);
-				CopySelectionRange(&drag);
-				StartDrag();
-			} else {
+			SetMouseCapture(true);
+			if (inDragDrop != ddInitial) {
 				SetDragPosition(invalidPosition);
-				SetMouseCapture(true);
 				if (!shift) {
 					SetEmptySelection(newPos);
 				}
@@ -5328,6 +5333,20 @@ void Editor::ButtonMove(Point pt) {
 	if ((ptMouseLast.x != pt.x) || (ptMouseLast.y != pt.y)) {
 		DwellEnd(true);
 	}
+
+	int movePos = PositionFromLocation(pt);
+	movePos = MovePositionOutsideChar(movePos, currentPos - movePos);
+
+	if (inDragDrop == ddInitial) {
+		if (DragThreshold(ptMouseLast, pt)) {
+			SetMouseCapture(false);
+			SetDragPosition(movePos);
+			CopySelectionRange(&drag);
+			StartDrag();
+		}
+		return;
+	}
+
 	ptMouseLast = pt;
 	//Platform::DebugPrintf("Move %d %d\n", pt.x, pt.y);
 	if (HaveMouseCapture()) {
@@ -5339,8 +5358,6 @@ void Editor::ButtonMove(Point pt) {
 		autoScrollTimer.ticksToWait = autoScrollDelay;
 
 		// Adjust selection
-		int movePos = PositionFromLocation(pt);
-		movePos = MovePositionOutsideChar(movePos, currentPos - movePos);
 		if (posDrag >= 0) {
 			SetDragPosition(movePos);
 		} else {
@@ -5416,7 +5433,13 @@ void Editor::ButtonMove(Point pt) {
 }
 
 void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
-	//Platform::DebugPrintf("ButtonUp %d\n", HaveMouseCapture());
+	//Platform::DebugPrintf("ButtonUp %d %d\n", HaveMouseCapture(), inDragDrop);
+	int newPos = PositionFromLocation(pt);
+	newPos = MovePositionOutsideChar(newPos, currentPos - newPos);
+	if (inDragDrop == ddInitial) {
+		inDragDrop = ddNone;
+		SetEmptySelection(newPos);
+	}
 	if (HaveMouseCapture()) {
 		if (PointInSelMargin(pt)) {
 			DisplayCursor(Window::cursorReverseArrow);
@@ -5429,7 +5452,7 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 		int newPos = PositionFromLocation(pt);
 		newPos = MovePositionOutsideChar(newPos, currentPos - newPos);
 		NotifyIndicatorClick(false, newPos, false, false, false);
-		if (inDragDrop) {
+		if (inDragDrop == ddDragging) {
 			int selStart = SelectionStart();
 			int selEnd = SelectionEnd();
 			if (selStart < selEnd) {
@@ -5468,7 +5491,7 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 		if (selType == selStream) {
 			SetLastXChosen();
 		}
-		inDragDrop = false;
+		inDragDrop = ddNone;
 		EnsureCaretVisible(false);
 	}
 }

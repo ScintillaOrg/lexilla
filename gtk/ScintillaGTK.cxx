@@ -156,6 +156,7 @@ private:
 	virtual void Initialise();
 	virtual void Finalise();
 	virtual void DisplayCursor(Window::Cursor c);
+	virtual bool DragThreshold(Point ptStart, Point ptNow);
 	virtual void StartDrag();
 	int TargetAsUTF8(char *text);
 	int EncodedFromUTF8(char *utf8, char *encoded);
@@ -788,8 +789,18 @@ void ScintillaGTK::DisplayCursor(Window::Cursor c) {
 		wText.SetCursor(static_cast<Window::Cursor>(cursorMode));
 }
 
+bool ScintillaGTK::DragThreshold(Point ptStart, Point ptNow) {
+#if GTK_MAJOR_VERSION < 2
+	return Editor::DragThreshold(ptStart, ptNow);
+#else
+	return gtk_drag_check_threshold(GTK_WIDGET(PWidget(wMain)),
+		ptStart.x, ptStart.y, ptNow.x, ptNow.y);
+#endif
+}
+
 void ScintillaGTK::StartDrag() {
 	dragWasDropped = false;
+	inDragDrop = ddDragging;
 	static const GtkTargetEntry targets[] = {
 	    { "UTF8_STRING", 0, TARGET_UTF8_STRING },
 	    { "STRING", 0, TARGET_STRING },
@@ -2345,7 +2356,6 @@ gboolean ScintillaGTK::DragMotion(GtkWidget *widget, GdkDragContext *context,
                                  gint x, gint y, guint dragtime) {
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	Point npt(x, y);
-	sciThis->inDragDrop = true;
 	sciThis->SetDragPosition(sciThis->PositionFromLocation(npt));
 	GdkDragAction preferredAction = context->suggested_action;
 	if (context->actions == static_cast<GdkDragAction>
@@ -2369,6 +2379,7 @@ void ScintillaGTK::DragEnd(GtkWidget *widget, GdkDragContext * /*context*/) {
 		sciThis->SetEmptySelection(sciThis->posDrag);
 	sciThis->SetDragPosition(invalidPosition);
 	//Platform::DebugPrintf("DragEnd %x %d\n", sciThis, sciThis->dragWasDropped);
+	sciThis->inDragDrop = ddNone;
 }
 
 gboolean ScintillaGTK::Drop(GtkWidget *widget, GdkDragContext * /*context*/,

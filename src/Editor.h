@@ -246,7 +246,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool dwelling;
 	enum { selChar, selWord, selLine } selectionType;
 	Point ptMouseLast;
-	bool inDragDrop;
+	enum { ddNone, ddInitial, ddDragging } inDragDrop;
 	bool dropWentOutside;
 	int posDrag;
 	int posDrop;
@@ -415,7 +415,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual void AddCharUTF(char *s, unsigned int len, bool treatAsDBCS=false);
 	void ClearSelection();
 	void ClearAll();
-    	void ClearDocumentStyle();
+	void ClearDocumentStyle();
 	void Cut();
 	void PasteRectangular(int pos, const char *ptr, int len);
 	virtual void Copy() = 0;
@@ -489,6 +489,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void CopyText(int length, const char *text);
 	void SetDragPosition(int newPos);
 	virtual void DisplayCursor(Window::Cursor c);
+	virtual bool DragThreshold(Point ptStart, Point ptNow);
 	virtual void StartDrag();
 	void DropAt(int position, const char *value, bool moving, bool rectangular);
 	/** PositionInSelection returns 0 if position in selection, -1 if position before selection, and 1 if after.

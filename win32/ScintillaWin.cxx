@@ -183,6 +183,7 @@ class ScintillaWin :
 
 	enum { invalidTimerID, standardTimerID, idleTimerID };
 
+	virtual bool DragThreshold(Point ptStart, Point ptNow);
 	virtual void StartDrag();
 	sptr_t WndPaint(uptr_t wParam);
 	sptr_t HandleComposition(uptr_t wParam, sptr_t lParam);
@@ -224,6 +225,7 @@ class ScintillaWin :
 	void FullPaint();
 	void FullPaintDC(HDC dc);
 	bool IsCompatibleDC(HDC dc);
+	DWORD EffectFromState(DWORD grfKeyState);
 
 	virtual int SetScrollInfo(int nBar, LPCSCROLLINFO lpsi, BOOL bRedraw);
 	virtual bool GetScrollInfo(int nBar, LPSCROLLINFO lpsi);
@@ -335,7 +337,15 @@ HWND ScintillaWin::MainHWND() {
 	return reinterpret_cast<HWND>(wMain.GetID());
 }
 
+bool ScintillaWin::DragThreshold(Point ptStart, Point ptNow) {
+	int xMove = abs(ptStart.x - ptNow.x);
+	int yMove = abs(ptStart.y - ptNow.y);
+	return (xMove > ::GetSystemMetrics(SM_CXDRAG)) ||
+		(yMove > ::GetSystemMetrics(SM_CYDRAG));
+}
+
 void ScintillaWin::StartDrag() {
+	inDragDrop = ddDragging;
 	DWORD dwEffect = 0;
 	dropWentOutside = true;
 	IDataObject *pDataObject = reinterpret_cast<IDataObject *>(&dob);
@@ -352,7 +362,7 @@ void ScintillaWin::StartDrag() {
 			ClearSelection();
 		}
 	}
-	inDragDrop = false;
+	inDragDrop = ddNone;
 	SetDragPosition(invalidPosition);
 }
 
@@ -696,7 +706,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 	case WM_SETCURSOR:
 		if (LoWord(lParam) == HTCLIENT) {
-			if (inDragDrop) {
+			if (inDragDrop == ddDragging) {
 				DisplayCursor(Window::cursorUp);
 			} else {
 				// Display regular (drag) cursor over selection
@@ -868,8 +878,8 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		capturedMouse = false;
 		return 0;
 
-        // These are not handled in Scintilla and its faster to dispatch them here.
-        // Also moves time out to here so profile doesn't count lots of empty message calls.
+	// These are not handled in Scintilla and its faster to dispatch them here.
+	// Also moves time out to here so profile doesn't count lots of empty message calls.
 
 	case WM_MOVE:
 	case WM_MOUSEACTIVATE:
@@ -1978,6 +1988,20 @@ bool ScintillaWin::IsCompatibleDC(HDC hOtherDC) {
 	return isCompatible;
 }
 
+DWORD ScintillaWin::EffectFromState(DWORD grfKeyState) {
+	// These are the Wordpad semantics.
+	DWORD dwEffect;
+	if (inDragDrop == ddDragging)	// Internal defaults to move
+		dwEffect = DROPEFFECT_MOVE;
+	else
+		dwEffect = DROPEFFECT_COPY;
+	if (grfKeyState & MK_ALT)
+		dwEffect = DROPEFFECT_MOVE;
+	if (grfKeyState & MK_CONTROL)
+		dwEffect = DROPEFFECT_COPY;
+	return dwEffect;
+}
+
 /// Implement IUnknown
 STDMETHODIMP ScintillaWin::QueryInterface(REFIID riid, PVOID *ppv) {
 	*ppv = NULL;
@@ -2020,14 +2044,7 @@ STDMETHODIMP ScintillaWin::DragEnter(LPDATAOBJECT pIDataSource, DWORD grfKeyStat
 		return S_OK;
 	}
 
-	if (inDragDrop)	// Internal defaults to move
-		*pdwEffect = DROPEFFECT_MOVE;
-	else
-		*pdwEffect = DROPEFFECT_COPY;
-	if (grfKeyState & MK_ALT)
-		*pdwEffect = DROPEFFECT_MOVE;
-	if (grfKeyState & MK_CONTROL)
-		*pdwEffect = DROPEFFECT_COPY;
+	*pdwEffect = EffectFromState(grfKeyState);
 	return S_OK;
 }
 
@@ -2037,15 +2054,8 @@ STDMETHODIMP ScintillaWin::DragOver(DWORD grfKeyState, POINTL pt, PDWORD pdwEffe
 		return S_OK;
 	}
 
-	// These are the Wordpad semantics.
-	if (inDragDrop)	// Internal defaults to move
-		*pdwEffect = DROPEFFECT_MOVE;
-	else
-		*pdwEffect = DROPEFFECT_COPY;
-	if (grfKeyState & MK_ALT)
-		*pdwEffect = DROPEFFECT_MOVE;
-	if (grfKeyState & MK_CONTROL)
-		*pdwEffect = DROPEFFECT_COPY;
+	*pdwEffect = EffectFromState(grfKeyState);
+
 	// Update the cursor.
 	POINT rpt = {pt.x, pt.y};
 	::ScreenToClient(MainHWND(), &rpt);
@@ -2061,14 +2071,7 @@ STDMETHODIMP ScintillaWin::DragLeave() {
 
 STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
                                 POINTL pt, PDWORD pdwEffect) {
-	if (inDragDrop)	// Internal defaults to move
-		*pdwEffect = DROPEFFECT_MOVE;
-	else
-		*pdwEffect = DROPEFFECT_COPY;
-	if (grfKeyState & MK_ALT)
-		*pdwEffect = DROPEFFECT_MOVE;
-	if (grfKeyState & MK_CONTROL)
-		*pdwEffect = DROPEFFECT_COPY;
+	*pdwEffect = EffectFromState(grfKeyState);
 
 	if (pIDataSource == NULL)
 		return E_POINTER;
