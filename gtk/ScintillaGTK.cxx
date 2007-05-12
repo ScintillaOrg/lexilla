@@ -260,8 +260,9 @@ private:
 	static gint SelectionNotify(GtkWidget *widget, GdkEventSelection *selection_event);
 #endif
 	static void DragBegin(GtkWidget *widget, GdkDragContext *context);
+	gboolean DragMotionThis(GdkDragContext *context, gint x, gint y, guint dragtime);
 	static gboolean DragMotion(GtkWidget *widget, GdkDragContext *context,
-	                           gint x, gint y, guint time);
+	                           gint x, gint y, guint dragtime);
 	static void DragLeave(GtkWidget *widget, GdkDragContext *context,
 	                      guint time);
 	static void DragEnd(GtkWidget *widget, GdkDragContext *context);
@@ -2353,18 +2354,28 @@ void ScintillaGTK::DragBegin(GtkWidget *, GdkDragContext *) {
 	//Platform::DebugPrintf("DragBegin\n");
 }
 
-gboolean ScintillaGTK::DragMotion(GtkWidget *widget, GdkDragContext *context,
+gboolean ScintillaGTK::DragMotionThis(GdkDragContext *context,
                                  gint x, gint y, guint dragtime) {
-	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	Point npt(x, y);
-	sciThis->SetDragPosition(sciThis->PositionFromLocation(npt));
+	SetDragPosition(PositionFromLocation(npt));
 	GdkDragAction preferredAction = context->suggested_action;
-	if (context->actions == static_cast<GdkDragAction>
+	int pos = PositionFromLocation(npt);
+	if ((inDragDrop == ddDragging) && (0 == PositionInSelection(pos))) {
+		// Avoid dragging selection onto itself as that produces a move
+		// with no real effect but which creates undo actions.
+		preferredAction = static_cast<GdkDragAction>(0);
+	} else if (context->actions == static_cast<GdkDragAction>
 		(GDK_ACTION_COPY | GDK_ACTION_MOVE)) {
 		preferredAction = GDK_ACTION_MOVE;
 	}
 	gdk_drag_status(context, preferredAction, dragtime);
 	return FALSE;
+}
+
+gboolean ScintillaGTK::DragMotion(GtkWidget *widget, GdkDragContext *context,
+                                 gint x, gint y, guint dragtime) {
+	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
+	return sciThis->DragMotionThis(context, x, y, dragtime);
 }
 
 void ScintillaGTK::DragLeave(GtkWidget *widget, GdkDragContext * /*context*/, guint) {
