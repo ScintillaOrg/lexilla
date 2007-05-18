@@ -787,7 +787,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 			} else if (uch >= (0x80)) {
 				lenChar = 2;
 			}
-			for (unsigned int bytePos=0; bytePos<lenChar; bytePos++) {
+			for (unsigned int bytePos=0; (bytePos<lenChar) && (i<len); bytePos++) {
 				positions[i++] = poses[ui];
 			}
 			ui++;
