@@ -2176,7 +2176,7 @@ ColourAllocated Editor::TextBackground(ViewStyle &vsDraw, bool overrideBackgroun
 			return vsDraw.edgecolour.allocated;
 		if (inHotspot && vsDraw.hotspotBackgroundSet)
 			return vsDraw.hotspotBackground.allocated;
-		if (overrideBackground)
+		if (overrideBackground && (styleMain != STYLE_BRACELIGHT) && (styleMain != STYLE_BRACEBAD))
 			return background;
 	}
 	return vsDraw.styles[styleMain].back.allocated;
