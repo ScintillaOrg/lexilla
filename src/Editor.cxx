@@ -1441,6 +1441,10 @@ void Editor::EnsureCaretVisible(bool useMargin, bool vert, bool horiz) {
 			xOffsetNew = pt.x + xOffset - rcClient.left;
 		} else if (pt.x + xOffset >= rcClient.right + xOffsetNew) {
 			xOffsetNew = pt.x + xOffset - rcClient.right + 1;
+			if (vs.caretStyle == CARETSTYLE_BLOCK) {
+				// Ensure we can see a good portion of the block caret
+				xOffsetNew += vs.aveCharWidth;
+			}
 		}
 		if (xOffsetNew < 0) {
 			xOffsetNew = 0;
@@ -2766,6 +2770,61 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	}
 }
 
+void Editor::DrawBlockCaret(Surface *surface, ViewStyle &vsDraw, LineLayout *ll, int subLine, int xStart, int offset, int posCaret, PRectangle rcCaret) {
+
+	int lineStart = ll->LineStart(subLine);
+	int posBefore = posCaret;
+	int posAfter = MovePositionOutsideChar(posCaret+1, 1);
+	int numCharsToDraw = posAfter - posCaret;
+
+	// Work out where the starting and ending offsets are. We need to
+	// see if the previous character shares horizontal space, such as a
+	// glyph / combining character. If so we'll need to draw that too.
+	int offsetFirstChar = offset;
+	int offsetLastChar = offset + (posAfter - posCaret);
+	while ((offsetLastChar - numCharsToDraw) >= lineStart) {
+		if ((ll->positions[offsetLastChar] - ll->positions[offsetLastChar - numCharsToDraw]) > 0) {
+			// The char does not share horizontal space
+			break;
+		}
+		// Char shares horizontal space, update the numChars to draw
+		// Update posBefore to point to the prev char
+		posBefore = MovePositionOutsideChar(posBefore-1, -1);
+		numCharsToDraw = posAfter - posBefore;
+		offsetFirstChar = offset - (posCaret - posBefore);
+	}
+
+	// See if the next character shares horizontal space, if so we'll
+	// need to draw that too.
+	numCharsToDraw = offsetLastChar - offsetFirstChar;
+	while ((offsetLastChar < ll->LineStart(subLine + 1)) && (offsetLastChar <= ll->numCharsInLine)) {
+		// Update posAfter to point to the 2nd next char, this is where
+		// the next character ends, and 2nd next begins. We'll need
+		// to compare these two
+		posBefore = posAfter;
+		posAfter = MovePositionOutsideChar(posAfter+1, 1);
+		offsetLastChar = offset + (posAfter - posCaret);
+		if ((ll->positions[offsetLastChar] - ll->positions[offsetLastChar - (posAfter - posBefore)]) > 0) {
+			// The char does not share horizontal space
+			break;
+		}
+		// Char shares horizontal space, update the numChars to draw
+		numCharsToDraw = offsetLastChar - offsetFirstChar;
+	}
+
+	// We now know what to draw, update the caret drawing rectangle
+	rcCaret.left = ll->positions[offsetFirstChar] - ll->positions[ll->LineStart(subLine)] + xStart;
+	rcCaret.right = ll->positions[offsetFirstChar+numCharsToDraw] - ll->positions[ll->LineStart(subLine)] + xStart;
+
+	// This character is where the caret block is, we override the colours
+	// (inversed) for drawing the caret here.
+	int styleMain = ll->styles[offsetFirstChar];
+	surface->DrawTextClipped(rcCaret, vsDraw.styles[styleMain].font,
+				 rcCaret.top + vsDraw.maxAscent, ll->chars + offsetFirstChar,
+				 numCharsToDraw, vsDraw.styles[styleMain].back.allocated,
+				 vsDraw.caretcolour.allocated);
+}
+
 void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 	if (!pixmapSelPattern->Initialised()) {
 		const int patternSize = 8;
@@ -3067,35 +3126,57 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 							if (lineStart != 0)	// Wrapped
 								xposCaret += actualWrapVisualStartIndent * vs.aveCharWidth;
 						}
-						int widthOverstrikeCaret;
-						if (posCaret == pdoc->Length())	{   // At end of document
-							widthOverstrikeCaret = vs.aveCharWidth;
-						} else if ((posCaret - rangeLine.start) >= ll->numCharsInLine) {	// At end of line
-							widthOverstrikeCaret = vs.aveCharWidth;
-						} else {
-							widthOverstrikeCaret = ll->positions[offset + 1] - ll->positions[offset];
-						}
-						if (widthOverstrikeCaret < 3)	// Make sure its visible
-							widthOverstrikeCaret = 3;
-						if (((caret.active && caret.on) || (posDrag >= 0)) && xposCaret >= 0) {
-							PRectangle rcCaret = rcLine;
+						if ((xposCaret >= 0) && (vs.caretWidth > 0) && (vs.caretStyle != CARETSTYLE_INVISIBLE) &&
+						    ((posDrag >= 0) || (caret.active && caret.on))) {
+							bool caretAtEOF = false;
+							bool caretAtEOL = false;
+							bool drawBlockCaret = false;
+							int widthOverstrikeCaret;
 							int caretWidthOffset = 0;
-							if ((offset > 0) && (vs.caretWidth > 1))
+							PRectangle rcCaret = rcLine;
+
+							if (posCaret == pdoc->Length())	{   // At end of document
+								caretAtEOF = true;
+								widthOverstrikeCaret = vs.aveCharWidth;
+							} else if ((posCaret - rangeLine.start) >= ll->numCharsInLine) {	// At end of line
+								caretAtEOL = true;
+								widthOverstrikeCaret = vs.aveCharWidth;
+							} else {
+								widthOverstrikeCaret = ll->positions[offset + 1] - ll->positions[offset];
+							}
+							if (widthOverstrikeCaret < 3)	// Make sure its visible
+								widthOverstrikeCaret = 3;
+
+							if (offset > 0)
 								caretWidthOffset = 1;	// Move back so overlaps both character cells.
 							if (posDrag >= 0) {
+								/* Dragging text, use a line caret */
 								rcCaret.left = xposCaret - caretWidthOffset;
 								rcCaret.right = rcCaret.left + vs.caretWidth;
-							} else {
-								if (inOverstrike) {
-									rcCaret.top = rcCaret.bottom - 2;
-									rcCaret.left = xposCaret + 1;
-									rcCaret.right = rcCaret.left + widthOverstrikeCaret - 1;
+							} else if (inOverstrike) {
+								/* Overstrike (insert mode), use a modified bar caret */
+								rcCaret.top = rcCaret.bottom - 2;
+								rcCaret.left = xposCaret + 1;
+								rcCaret.right = rcCaret.left + widthOverstrikeCaret - 1;
+							} else if (vs.caretStyle == CARETSTYLE_BLOCK) {
+								/* Block caret */
+								rcCaret.left = xposCaret;
+								if (!caretAtEOL && !caretAtEOF && (ll->chars[offset] != '\t') && !(IsControlCharacter(ll->chars[offset]))) {
+									drawBlockCaret = true;
+									rcCaret.right = xposCaret + widthOverstrikeCaret;
 								} else {
-									rcCaret.left = xposCaret - caretWidthOffset;
-									rcCaret.right = rcCaret.left + vs.caretWidth;
+									rcCaret.right = xposCaret + vs.aveCharWidth;
 								}
+							} else {
+								/* Line caret */
+								rcCaret.left = xposCaret - caretWidthOffset;
+								rcCaret.right = rcCaret.left + vs.caretWidth;
 							}
-							surface->FillRectangle(rcCaret, vs.caretcolour.allocated);
+							if (drawBlockCaret) {
+								DrawBlockCaret(surface, vs, ll, subLine, xStart, offset, posCaret, rcCaret);
+							} else {
+								surface->FillRectangle(rcCaret, vs.caretcolour.allocated);
+							}
 						}
 					}
 				}
@@ -7113,6 +7194,18 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETCARETFORE:
 		return vs.caretcolour.desired.AsLong();
+
+	case SCI_SETCARETSTYLE:
+		if (wParam >= CARETSTYLE_INVISIBLE && wParam <= CARETSTYLE_BLOCK)
+			vs.caretStyle = wParam;
+		else
+			/* Default to the line caret */
+			vs.caretStyle = CARETSTYLE_LINE;
+		InvalidateStyleRedraw();
+		break;
+
+	case SCI_GETCARETSTYLE:
+		return vs.caretStyle;
 
 	case SCI_SETCARETWIDTH:
 		if (wParam <= 0)

@@ -91,6 +91,7 @@ public:
 	int caretLineAlpha;
 	ColourPair edgecolour;
 	int edgeState;
+	int caretStyle;
 	int caretWidth;
 	bool someStylesProtected;
 	bool extraFontFlag;

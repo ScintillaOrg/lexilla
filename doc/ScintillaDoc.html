@@ -2158,6 +2158,8 @@ struct TextToFind {
     <a class="message" href="#SCI_GETCARETLINEBACKALPHA">SCI_GETCARETLINEBACKALPHA</a><br />
     <a class="message" href="#SCI_SETCARETPERIOD">SCI_SETCARETPERIOD(int milliseconds)</a><br />
     <a class="message" href="#SCI_GETCARETPERIOD">SCI_GETCARETPERIOD</a><br />
+    <a class="message" href="#SCI_SETCARETSTYLE">SCI_SETCARETSTYLE(int style)</a><br />
+    <a class="message" href="#SCI_GETCARETSTYLE">SCI_GETCARETSTYLE</a><br />
     <a class="message" href="#SCI_SETCARETWIDTH">SCI_SETCARETWIDTH(int pixels)</a><br />
     <a class="message" href="#SCI_GETCARETWIDTH">SCI_GETCARETWIDTH</a><br />
     <a class="message" href="#SCI_SETHOTSPOTACTIVEFORE">SCI_SETHOTSPOTACTIVEFORE(bool useSetting,
@@ -2228,12 +2230,26 @@ struct TextToFind {
     state. Setting the period to 0 stops the caret blinking. The default value is 500 milliseconds.
     <code>SCI_GETCARETPERIOD</code> returns the current setting.</p>
 
+    <p><b id="SCI_SETCARETSTYLE">SCI_SETCARETSTYLE(int style)</b><br />
+     <b id="SCI_GETCARETSTYLE">SCI_GETCARETSTYLE</b><br />
+     The style of the caret can be set with <code>SCI_SETCARETSTYLE</code> to be a line caret
+    (CARETSTYLE_LINE=1), a block caret (CARETSTYLE_BLOCK=2) or to not draw at all
+    (CARETSTYLE_INVISIBLE=0). The default value is the line caret (CARETSTYLE_LINE=1).
+    You can determine the current caret style setting using <code>SCI_GETCARETSTYLE</code>.</p>
+
+    <p>The block character draws most combining and multibyte character sequences successfully,
+    though some fonts like Thai Fonts (and possibly others) can sometimes appear strange when
+    the cursor is positioned at these characters, which may result in only drawing a part of the
+    cursor character sequence. This is most notable on Windows platforms.</p>
+
     <p><b id="SCI_SETCARETWIDTH">SCI_SETCARETWIDTH(int pixels)</b><br />
      <b id="SCI_GETCARETWIDTH">SCI_GETCARETWIDTH</b><br />
-     The width of the caret can be set with <code>SCI_SETCARETWIDTH</code> to a value of 0, 1, 2 or
-    3 pixels. The default width is 1 pixel. You can read back the current width with
+     The width of the line caret can be set with <code>SCI_SETCARETWIDTH</code> to a value of
+    0, 1, 2 or 3 pixels. The default width is 1 pixel. You can read back the current width with
     <code>SCI_GETCARETWIDTH</code>. A width of 0 makes the caret invisible (added at version
-    1.50).</p>
+    1.50), similar to setting the caret style to CARETSTYLE_INVISIBLE (though not interchangable).
+    This setting only affects the width of the cursor when the cursor style is set to line caret
+    mode, it does not affect the width for a block caret.</p>
 
     <p><b id="SCI_SETHOTSPOTACTIVEFORE">SCI_SETHOTSPOTACTIVEFORE(bool useHotSpotForeColour, int <a class="jump"
     href="#colour">colour</a>)</b><br />

@@ -399,6 +399,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 		PRectangle rcLine, LineLayout *ll, int subLine, int lineEnd, bool under);
 	void DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart,
 		PRectangle rcLine, LineLayout *ll, int subLine=0);
+	void DrawBlockCaret(Surface *surface, ViewStyle &vsDraw, LineLayout *ll, int subLine, int xStart, int offset, int posCaret, PRectangle rcCaret);
 	void RefreshPixMaps(Surface *surfaceWindow);
 	void Paint(Surface *surfaceWindow, PRectangle rcArea);
 	long FormatRange(bool draw, RangeToFormat *pfr);

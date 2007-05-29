@@ -118,6 +118,7 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	caretLineAlpha = source.caretLineAlpha;
 	edgecolour.desired = source.edgecolour.desired;
 	edgeState = source.edgeState;
+	caretStyle = source.caretStyle;
 	caretWidth = source.caretWidth;
 	someStylesProtected = false;
 	leftMarginWidth = source.leftMarginWidth;
@@ -186,6 +187,7 @@ void ViewStyle::Init() {
 	caretLineAlpha = SC_ALPHA_NOALPHA;
 	edgecolour.desired = ColourDesired(0xc0, 0xc0, 0xc0);
 	edgeState = EDGE_NONE;
+	caretStyle = CARETSTYLE_LINE;
 	caretWidth = 1;
 	someStylesProtected = false;
 
