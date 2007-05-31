@@ -211,7 +211,7 @@ static void FoldGAPDoc( unsigned int startPos, int length, int initStyle,   Word
 		styleNext = styler.StyleAt(i + 1);
 		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 
-		if (stylePrev == SCE_GAP_DEFAULT && style == SCE_GAP_KEYWORD) {
+		if (stylePrev != SCE_GAP_KEYWORD && style == SCE_GAP_KEYWORD) {
 			// Store last word start point.
 			lastStart = i;
 		}
