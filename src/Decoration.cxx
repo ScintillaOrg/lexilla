@@ -17,6 +17,10 @@
 #include "RunStyles.h"
 #include "Decoration.h"
 
+#ifdef SCI_NAMESPACE
+using namespace Scintilla;
+#endif
+
 Decoration::Decoration(int indicator_) : next(0), indicator(indicator_) {
 }
 

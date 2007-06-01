@@ -20,6 +20,10 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
+#ifdef SCI_NAMESPACE
+using namespace Scintilla;
+#endif
+
 #define SET_LOWER "abcdefghijklmnopqrstuvwxyz"
 #define SET_UPPER "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #define SET_DIGITS "0123456789"

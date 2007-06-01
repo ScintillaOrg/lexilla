@@ -20,6 +20,10 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
+#ifdef SCI_NAMESPACE
+using namespace Scintilla;
+#endif
+
 enum kwType { kwOther, kwClass, kwDef, kwImport };
 static const int indicatorWhitespace = 1;
 

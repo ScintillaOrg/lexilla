@@ -46,6 +46,10 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
+#ifdef SCI_NAMESPACE
+using namespace Scintilla;
+#endif
+
 static const int T3_SINGLE_QUOTE = 1;
 static const int T3_INT_EXPRESSION = 2;
 static const int T3_INT_EXPRESSION_IN_TAG = 4;

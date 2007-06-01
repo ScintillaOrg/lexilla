@@ -8,6 +8,10 @@
 #ifndef DOCUMENT_H
 #define DOCUMENT_H
 
+#ifdef SCI_NAMESPACE
+namespace Scintilla {
+#endif
+
 /**
  * A Position is a position within a document between two characters or at the beginning or end.
  * Sometimes used as a character index where it identifies the character after the position.
@@ -304,5 +308,9 @@ public:
 	virtual void NotifyDeleted(Document *doc, void *userData) = 0;
 	virtual void NotifyStyleNeeded(Document *doc, void *userData, int endPos) = 0;
 };
+
+#ifdef SCI_NAMESPACE
+}
+#endif
 
 #endif

@@ -8,6 +8,10 @@
 #ifndef EDITOR_H
 #define EDITOR_H
 
+#ifdef SCI_NAMESPACE
+namespace Scintilla {
+#endif
+
 /**
  */
 class Caret {
@@ -584,5 +588,9 @@ public:
 		return surf;
 	}
 };
+
+#ifdef SCI_NAMESPACE
+}
+#endif
 
 #endif

@@ -40,6 +40,10 @@
 #include "Editor.h"
 #include "ScintillaBase.h"
 
+#ifdef SCI_NAMESPACE
+using namespace Scintilla;
+#endif
+
 ScintillaBase::ScintillaBase() {
 	displayPopupMenu = true;
 	listType = 0;

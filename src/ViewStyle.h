@@ -8,6 +8,10 @@
 #ifndef VIEWSTYLE_H
 #define VIEWSTYLE_H
 
+#ifdef SCI_NAMESPACE
+namespace Scintilla {
+#endif
+
 /**
  */
 class MarginStyle {
@@ -107,5 +111,9 @@ public:
 	void SetStyleFontName(int styleIndex, const char *name);
 	bool ProtectionActive() const;
 };
+
+#ifdef SCI_NAMESPACE
+}
+#endif
 
 #endif

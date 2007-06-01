@@ -23,6 +23,10 @@
 #include "Document.h"
 #include "RESearch.h"
 
+#ifdef SCI_NAMESPACE
+using namespace Scintilla;
+#endif
+
 // This is ASCII specific but is safe with chars >= 0x80
 static inline bool isspacechar(unsigned char ch) {
 	return (ch == ' ') || ((ch >= 0x09) && (ch <= 0x0d));

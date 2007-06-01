@@ -9,6 +9,10 @@
 #ifndef RESEARCH_H
 #define RESEARCH_H
 
+#ifdef SCI_NAMESPACE
+namespace Scintilla {
+#endif
+
 /*
  * The following defines are not meant to be changeable.
  * They are for readability only.
@@ -62,6 +66,10 @@ private:
 		return charClass->IsWord(x);
 	}
 };
+
+#ifdef SCI_NAMESPACE
+}
+#endif
 
 #endif
 

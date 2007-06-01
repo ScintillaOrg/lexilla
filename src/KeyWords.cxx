@@ -19,6 +19,10 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
+#ifdef SCI_NAMESPACE
+using namespace Scintilla;
+#endif
+
 const LexerModule *LexerModule::base = 0;
 int LexerModule::nextLanguage = SCLEX_AUTOMATIC+1;
 

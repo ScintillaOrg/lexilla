@@ -744,6 +744,10 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 // CHARRANGE, TEXTRANGE, FINDTEXTEX, FORMATRANGE, and NMHDR structs.
 // So older code that treats Scintilla as a RichEdit will work.
 
+#ifdef SCI_NAMESPACE
+namespace Scintilla {
+#endif
+
 struct CharacterRange {
 	long cpMin;
 	long cpMax;
@@ -804,6 +808,10 @@ struct SCNotification {
 	int x;			// SCN_DWELLSTART, SCN_DWELLEND
 	int y;		// SCN_DWELLSTART, SCN_DWELLEND
 };
+
+#ifdef SCI_NAMESPACE
+}
+#endif
 
 // Deprecation section listing all API features that are deprecated and will
 // will be removed completely in a future version.

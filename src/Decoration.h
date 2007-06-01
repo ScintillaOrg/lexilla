@@ -7,6 +7,10 @@
 #ifndef DECORATION_H
 #define DECORATION_H
 
+#ifdef SCI_NAMESPACE
+namespace Scintilla {
+#endif
+
 class Decoration {
 public:
 	Decoration *next;
@@ -52,5 +56,9 @@ public:
 	int Start(int indicator, int position);
 	int End(int indicator, int position);
 };
+
+#ifdef SCI_NAMESPACE
+}
+#endif
 
 #endif

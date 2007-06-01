@@ -15,6 +15,10 @@
 
 #include "PropSet.h"
 
+#ifdef SCI_NAMESPACE
+using namespace Scintilla;
+#endif
+
 // The comparison and case changing functions here assume ASCII
 // or extended ASCII such as the normal Windows code page.
 

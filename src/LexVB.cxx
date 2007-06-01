@@ -20,6 +20,10 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
+#ifdef SCI_NAMESPACE
+using namespace Scintilla;
+#endif
+
 // Internal state, highlighted as number
 #define SCE_B_FILENUMBER SCE_B_DEFAULT+100
 

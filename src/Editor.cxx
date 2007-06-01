@@ -34,6 +34,10 @@
 #include "Document.h"
 #include "Editor.h"
 
+#ifdef SCI_NAMESPACE
+using namespace Scintilla;
+#endif
+
 /*
 	return whether this modification represents an operation that
 	may reasonably be deferred (not done now OR [possibly] at all)
@@ -594,6 +598,10 @@ public:
 	}
 };
 
+#ifdef SCI_NAMESPACE
+namespace Scintilla {
+#endif
+
 /**
  * Allows to iterate through the lines of a selection.
  * Althought it can be called for a stream selection, in most cases
@@ -671,6 +679,10 @@ public:
 		return startPos != INVALID_POSITION;
 	}
 };
+
+#ifdef SCI_NAMESPACE
+}
+#endif
 
 Point Editor::LocationFromPosition(int pos) {
 	Point pt;
@@ -5343,6 +5355,14 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 				else
 					inDragDrop = ddNone;
 			}
+#ifdef __APPLE__
+			// we need to additionaly check if the mouse moved before we
+			// decide that we can in fact start a drag session.  Currently
+			// only OSX will return anything but true.
+			if (inDragDrop == ddInitial && !Platform::WaitMouseMoved(pt)) {
+				inDragDrop = ddNone;
+			}
+#endif
 			SetMouseCapture(true);
 			if (inDragDrop != ddInitial) {
 				SetDragPosition(invalidPosition);

@@ -206,6 +206,10 @@
 #pragma warning(disable: 4514)
 #endif
 
+#ifdef SCI_NAMESPACE
+using namespace Scintilla;
+#endif
+
 #define OKP     1
 #define NOP     0
 

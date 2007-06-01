@@ -211,16 +211,17 @@ def RegenerateAll():
 
 	# Find all the SciTE properties files
 	otherProps = ["abbrev.properties", "Embedded.properties", "SciTEGlobal.properties", "SciTE.properties"]
-	propFilePaths = glob.glob(root + "scite/src/*.properties")
-	propFiles = [os.path.basename(f) for f in propFilePaths if os.path.basename(f) not in otherProps]
-	propFiles.sort(ciCompare)
-	print propFiles
+        if os.path.exists(root + "scite"):
+            propFilePaths = glob.glob(root + "scite/src/*.properties")
+            propFiles = [os.path.basename(f) for f in propFilePaths if os.path.basename(f) not in otherProps]
+            propFiles.sort(ciCompare)
+            print propFiles
 
-	# Find all the menu command IDs in the SciTE header
-	SciTEHeader = file(root + "scite/src/SciTE.h")
-	lines = SciTEHeader.read().split("\n")
-	SciTEHeader.close()
-	ids = [id for id in [l.split()[1] for l in lines if l.startswith("#define")] if id.startswith("IDM_")]
+            # Find all the menu command IDs in the SciTE header
+            SciTEHeader = file(root + "scite/src/SciTE.h")
+            lines = SciTEHeader.read().split("\n")
+            SciTEHeader.close()
+            ids = [id for id in [l.split()[1] for l in lines if l.startswith("#define")] if id.startswith("IDM_")]
 	#print ids
 
 	Regenerate(root + "scintilla/src/KeyWords.cxx", "//", NATIVE, lexerModules)
@@ -232,10 +233,12 @@ def RegenerateAll():
 	# Windows).
 	Regenerate(root + "scintilla/gtk/makefile", "#", LF, lexFiles)
 	Regenerate(root + "scintilla/gtk/scintilla.mak", "#", NATIVE, lexFiles)
-	Regenerate(root + "scite/win32/makefile", "#", NATIVE, lexFiles, propFiles)
-	Regenerate(root + "scite/win32/scite.mak", "#", NATIVE, lexFiles, propFiles)
-	Regenerate(root + "scite/src/SciTEProps.cxx", "//", NATIVE, lexerProperties, ids)
-	Generate(root + "scite/boundscheck/vcproj.gen",
+	Regenerate(root + "scintilla/macosx/makefile", "#", LF, lexFiles)
+        if os.path.exists(root + "scite"):
+            Regenerate(root + "scite/win32/makefile", "#", NATIVE, lexFiles, propFiles)
+            Regenerate(root + "scite/win32/scite.mak", "#", NATIVE, lexFiles, propFiles)
+            Regenerate(root + "scite/src/SciTEProps.cxx", "//", NATIVE, lexerProperties, ids)
+            Generate(root + "scite/boundscheck/vcproj.gen",
 	         root + "scite/boundscheck/SciTE.vcproj", "#", NATIVE, lexFiles)
 
 RegenerateAll()

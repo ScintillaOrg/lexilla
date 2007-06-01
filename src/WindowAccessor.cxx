@@ -17,6 +17,10 @@
 #include "WindowAccessor.h"
 #include "Scintilla.h"
 
+#ifdef SCI_NAMESPACE
+using namespace Scintilla;
+#endif
+
 WindowAccessor::~WindowAccessor() {
 }
 

@@ -25,6 +25,10 @@
 #include "Decoration.h"
 #include "Document.h"
 
+#ifdef SCI_NAMESPACE
+using namespace Scintilla;
+#endif
+
 DocumentAccessor::~DocumentAccessor() {
 }
 

@@ -19,6 +19,10 @@
 #include "Style.h"
 #include "ViewStyle.h"
 
+#ifdef SCI_NAMESPACE
+using namespace Scintilla;
+#endif
+
 MarginStyle::MarginStyle() :
 	style(SC_MARGIN_SYMBOL), width(0), mask(0), sensitive(false) {
 }

@@ -8,6 +8,10 @@
 #ifndef INDICATOR_H
 #define INDICATOR_H
 
+#ifdef SCI_NAMESPACE
+namespace Scintilla {
+#endif
+
 /**
  */
 class Indicator {
@@ -19,5 +23,9 @@ public:
 	}
 	void Draw(Surface *surface, const PRectangle &rc, const PRectangle &rcLine);
 };
+
+#ifdef SCI_NAMESPACE
+}
+#endif
 
 #endif

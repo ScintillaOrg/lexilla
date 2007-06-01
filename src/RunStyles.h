@@ -7,6 +7,10 @@
 /// Styling buffer using one element for each run rather than using
 /// a filled buffer.
 
+#ifdef SCI_NAMESPACE
+namespace Scintilla {
+#endif
+
 class RunStyles {
 public:
 	Partitioning *starts;
@@ -30,3 +34,7 @@ public:
 	void DeleteAll();
 	void DeleteRange(int position, int deleteLength);
 };
+
+#ifdef SCI_NAMESPACE
+}
+#endif
