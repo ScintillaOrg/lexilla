@@ -1775,6 +1775,12 @@ fun int IndicatorStart=2508(int indicator, int position)
 # Where does a particular indicator end?
 fun int IndicatorEnd=2509(int indicator, int position)
 
+# Set number of entries in position cache
+set void SetPositionCache=2514(int size,)
+
+# How many entries are allocated to the position cache?
+get int GetPositionCache=2515(,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 

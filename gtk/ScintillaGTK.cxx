@@ -43,6 +43,7 @@
 #include "Decoration.h"
 #include "CharClassify.h"
 #include "Document.h"
+#include "PositionCache.h"
 #include "Editor.h"
 #include "SString.h"
 #include "ScintillaBase.h"

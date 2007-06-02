@@ -402,6 +402,10 @@ SOURCE=..\win32\PlatWin.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\PositionCache.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\PropSet.cxx
 # End Source File
 # Begin Source File

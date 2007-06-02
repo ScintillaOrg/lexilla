@@ -1,9 +1,7 @@
-PlatGTK.o: PlatGTK.cxx  \
-   ../include/Platform.h \
+PlatGTK.o: PlatGTK.cxx \
   ../include/Scintilla.h ../include/ScintillaWidget.h \
   ../src/UniConversion.h ../src/XPM.h Converter.h
-ScintillaGTK.o: ScintillaGTK.cxx  \
-   ../include/Platform.h \
+ScintillaGTK.o: ScintillaGTK.cxx \
   ../include/Scintilla.h ../include/ScintillaWidget.h \
   ../include/SciLexer.h ../include/PropSet.h ../include/SString.h \
   ../include/Accessor.h ../include/KeyWords.h ../src/ContractionState.h \
@@ -11,9 +9,10 @@ ScintillaGTK.o: ScintillaGTK.cxx  \
   ../src/CellBuffer.h ../src/CallTip.h ../src/KeyMap.h ../src/Indicator.h \
   ../src/XPM.h ../src/LineMarker.h ../src/Style.h ../src/AutoComplete.h \
   ../src/ViewStyle.h ../src/RunStyles.h ../src/Decoration.h \
-  ../src/CharClassify.h ../src/Document.h ../src/Editor.h \
-  ../include/SString.h ../src/ScintillaBase.h ../src/UniConversion.h \
-  scintilla-marshal.h ../src/ExternalLexer.h Converter.h
+  ../src/CharClassify.h ../src/Document.h ../src/PositionCache.h \
+  ../src/Editor.h ../include/SString.h ../src/ScintillaBase.h \
+  ../src/UniConversion.h scintilla-marshal.h ../src/ExternalLexer.h \
+  Converter.h
 AutoComplete.o: ../src/AutoComplete.cxx ../include/Platform.h \
   ../include/PropSet.h ../include/SString.h ../src/AutoComplete.h
 CallTip.o: ../src/CallTip.cxx ../include/Platform.h \
@@ -43,7 +42,8 @@ Editor.o: ../src/Editor.cxx ../include/Platform.h ../include/Scintilla.h \
   ../src/Partitioning.h ../src/CellBuffer.h ../src/KeyMap.h \
   ../src/RunStyles.h ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h \
   ../src/Style.h ../src/ViewStyle.h ../src/CharClassify.h \
-  ../src/Decoration.h ../src/Document.h ../src/Editor.h
+  ../src/Decoration.h ../src/Document.h ../src/PositionCache.h \
+  ../src/Editor.h
 ExternalLexer.o: ../src/ExternalLexer.cxx ../include/Platform.h \
   ../include/Scintilla.h ../include/SciLexer.h ../include/PropSet.h \
   ../include/SString.h ../include/Accessor.h ../src/DocumentAccessor.h \
@@ -137,6 +137,9 @@ LexFortran.o: ../src/LexFortran.cxx ../include/Platform.h \
   ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
   ../src/StyleContext.h ../include/KeyWords.h ../include/Scintilla.h \
   ../include/SciLexer.h
+LexGAP.o: ../src/LexGAP.cxx ../include/Platform.h ../include/PropSet.h \
+  ../include/SString.h ../include/Accessor.h ../src/StyleContext.h \
+  ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
 LexGui4Cli.o: ../src/LexGui4Cli.cxx ../include/Platform.h \
   ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
   ../src/StyleContext.h ../include/KeyWords.h ../include/Scintilla.h \
@@ -260,6 +263,13 @@ LexYAML.o: ../src/LexYAML.cxx ../include/Platform.h ../include/PropSet.h \
   ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
 LineMarker.o: ../src/LineMarker.cxx ../include/Platform.h \
   ../include/Scintilla.h ../src/XPM.h ../src/LineMarker.h
+PositionCache.o: ../src/PositionCache.cxx ../include/Platform.h \
+  ../include/Scintilla.h ../src/ContractionState.h ../src/SVector.h \
+  ../src/SplitVector.h ../src/Partitioning.h ../src/CellBuffer.h \
+  ../src/KeyMap.h ../src/RunStyles.h ../src/Indicator.h ../src/XPM.h \
+  ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
+  ../src/CharClassify.h ../src/Decoration.h ../src/Document.h \
+  ../src/PositionCache.h
 PropSet.o: ../src/PropSet.cxx ../include/Platform.h ../include/PropSet.h \
   ../include/SString.h
 RESearch.o: ../src/RESearch.cxx ../src/CharClassify.h ../src/RESearch.h
@@ -274,7 +284,8 @@ ScintillaBase.o: ../src/ScintillaBase.cxx ../include/Platform.h \
   ../src/CellBuffer.h ../src/CallTip.h ../src/KeyMap.h ../src/Indicator.h \
   ../src/XPM.h ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
   ../src/AutoComplete.h ../src/CharClassify.h ../src/Decoration.h \
-  ../src/Document.h ../src/Editor.h ../src/ScintillaBase.h
+  ../src/Document.h ../src/PositionCache.h ../src/Editor.h \
+  ../src/ScintillaBase.h
 StyleContext.o: ../src/StyleContext.cxx ../include/Platform.h \
   ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
   ../src/StyleContext.h

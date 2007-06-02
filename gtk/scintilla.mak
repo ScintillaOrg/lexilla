@@ -128,6 +128,7 @@ SOBJS=\
 	$(DIR_O)\KeyMap.obj \
 	$(DIR_O)\LineMarker.obj \
 	$(DIR_O)\PlatGTK.obj \
+	$(DIR_O)\PositionCache.obj \
 	$(MARSHALLER) \
 	$(DIR_O)\RESearch.obj \
 	$(DIR_O)\RunStyles.obj \
@@ -222,6 +223,7 @@ LOBJS=\
 	$(DIR_O)\KeyWords.obj \
 	$(DIR_O)\LineMarker.obj \
 	$(DIR_O)\PlatGTK.obj \
+	$(DIR_O)\PositionCache.obj \
 	$(MARSHALLER) \
 	$(DIR_O)\RESearch.obj \
 	$(DIR_O)\RunStyles.obj \
@@ -324,7 +326,7 @@ $(DIR_O)\Editor.obj: ../src/Editor.cxx ../include/Platform.h ../include/Scintill
   ../src/Partitioning.h ../src/CellBuffer.h ../src/KeyMap.h \
   ../src/RunStyles.h ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h \
   ../src/Style.h ../src/ViewStyle.h ../src/CharClassify.h \
-  ../src/Document.h ../src/Editor.h
+  ../src/Document.h ../src/Editor.h ../src/PositionCache.h
 
 $(DIR_O)\ExternalLexer.obj: ../src/ExternalLexer.cxx ../include/Platform.h \
   ../include/Scintilla.h ../include/SciLexer.h ../include/PropSet.h \
@@ -477,6 +479,13 @@ $(DIR_O)\LineMarker.obj: ../src/LineMarker.cxx ../include/Platform.h \
 
 $(DIR_O)\PlatGTK.obj: PlatGTK.cxx ../include/Platform.h \
   ../src/UniConversion.h ../src/XPM.h
+
+$(DIR_O)\PositionCache.obj: ../src/Editor.cxx ../include/Platform.h ../include/Scintilla.h \
+  ../src/ContractionState.h ../src/SVector.h ../src/SplitVector.h \
+  ../src/Partitioning.h ../src/CellBuffer.h ../src/KeyMap.h \
+  ../src/RunStyles.h ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h \
+  ../src/Style.h ../src/ViewStyle.h ../src/CharClassify.h \
+  ../src/Decoration.h ../src/Document.h ../src/Editor.h ../src/PositionCache.h
 
 $(DIR_O)\PropSet.obj: ../src/PropSet.cxx ../include/Platform.h ../include/PropSet.h \
   ../include/SString.h

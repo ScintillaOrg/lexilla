@@ -657,6 +657,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_INDICATORVALUEAT 2507
 #define SCI_INDICATORSTART 2508
 #define SCI_INDICATOREND 2509
+#define SCI_SETPOSITIONCACHE 2514
+#define SCI_GETPOSITIONCACHE 2515
 #define SCI_STARTRECORD 3001
 #define SCI_STOPRECORD 3002
 #define SCI_SETLEXER 4001

@@ -64,14 +64,14 @@ LexTADS3.o LexTCL.o LexTeX.o LexVB.o LexVerilog.o LexVHDL.o LexYAML.o
 
 SOBJS	= ScintillaWin.o ScintillaBase.o Editor.o CharClassify.o Decoration.o \
 	Document.o ContractionState.o CellBuffer.o CallTip.o \
-	ScintRes.o PlatWin.o KeyMap.o Indicator.o LineMarker.o RESearch.o RunStyles.o \
+	ScintRes.o PlatWin.o PositionCache.o KeyMap.o Indicator.o LineMarker.o RESearch.o RunStyles.o \
 	Style.o ViewStyle.o AutoComplete.o UniConversion.o PropSet.o XPM.o
 $(COMPONENT): $(SOBJS) Scintilla.def
 	$(DLLWRAP) --add-stdcall-alias --target i386-mingw32 -o $@ $(SOBJS) $(LDFLAGS) -s --relocatable
 
 LOBJS	= ScintillaWinL.o ScintillaBaseL.o Editor.o CharClassify.o Decoration.o \
 	Document.o ContractionState.o CellBuffer.o CallTip.o \
-	ScintRes.o PlatWin.o KeyMap.o Indicator.o LineMarker.o RESearch.o RunStyles.o \
+	ScintRes.o PlatWin.o PositionCache.o KeyMap.o Indicator.o LineMarker.o RESearch.o RunStyles.o \
 	Style.o ViewStyle.o AutoComplete.o UniConversion.o KeyWords.o \
 	DocumentAccessor.o PropSet.o ExternalLexer.o StyleContext.o XPM.o $(LEXOBJS)
 $(LEXCOMPONENT): $(LOBJS) Scintilla.def
