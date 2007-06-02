@@ -1740,10 +1740,10 @@ val CARETSTYLE_LINE=1
 val CARETSTYLE_BLOCK=2
 
 # Set the style of the caret to be drawn.
-set void SetCaretStyle=2950(int caretStyle,)
+set void SetCaretStyle=2512(int caretStyle,)
 
 # Returns the current style of the caret.
-get int GetCaretStyle=2951(,)
+get int GetCaretStyle=2513(,)
 
 # Set the indicator used for IndicatorFillRange and IndicatorClearRange
 set void SetIndicatorCurrent=2500(int indicator,)
