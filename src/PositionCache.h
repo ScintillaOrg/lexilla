@@ -112,9 +112,9 @@ public:
 class BreakFinder {
 	// If a whole run is longer than lengthStartSubdivision then subdivide
 	// into smaller runs at spaces or punctuation.
-	enum { lengthStartSubdivision = 10 };
+	enum { lengthStartSubdivision = 300 };
 	// Try to make each subdivided run lengthEachSubdivision or shorter.
-	enum { lengthEachSubdivision = 5 };
+	enum { lengthEachSubdivision = 100 };
 	LineLayout *ll;
 	int lineStart;
 	int lineEnd;
