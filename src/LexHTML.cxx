@@ -19,6 +19,7 @@
 #include "KeyWords.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+#include "CharacterSet.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -106,16 +107,16 @@ static script_type ScriptOfState(int state) {
 }
 
 static int statePrintForState(int state, script_mode inScriptType) {
-	int StateToPrint;
+	int StateToPrint = state;
 
-	if ((state >= SCE_HP_START) && (state <= SCE_HP_IDENTIFIER)) {
-		StateToPrint = state + ((inScriptType == eNonHtmlScript) ? 0 : SCE_HA_PYTHON);
-	} else if ((state >= SCE_HB_START) && (state <= SCE_HB_STRINGEOL)) {
-		StateToPrint = state + ((inScriptType == eNonHtmlScript) ? 0 : SCE_HA_VBS);
-	} else if ((state >= SCE_HJ_START) && (state <= SCE_HJ_REGEX)) {
-		StateToPrint = state + ((inScriptType == eNonHtmlScript) ? 0 : SCE_HA_JS);
-	} else {
-		StateToPrint = state;
+	if (state >= SCE_HJ_START) {
+		if ((state >= SCE_HP_START) && (state <= SCE_HP_IDENTIFIER)) {
+			StateToPrint = state + ((inScriptType == eNonHtmlScript) ? 0 : SCE_HA_PYTHON);
+		} else if ((state >= SCE_HB_START) && (state <= SCE_HB_STRINGEOL)) {
+			StateToPrint = state + ((inScriptType == eNonHtmlScript) ? 0 : SCE_HA_VBS);
+		} else if ((state >= SCE_HJ_START) && (state <= SCE_HJ_REGEX)) {
+			StateToPrint = state + ((inScriptType == eNonHtmlScript) ? 0 : SCE_HA_JS);
+		}
 	}
 
 	return StateToPrint;
@@ -520,6 +521,10 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	const bool foldHTMLPreprocessor = foldHTML && styler.GetPropertyInt("fold.html.preprocessor", 1);
 	const bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	const bool caseSensitive = styler.GetPropertyInt("html.tags.case.sensitive", 0) != 0;
+
+	const CharacterSet setHTMLWord(CharacterSet::setAlphaNum, ".-_:!#", 0x80, true);
+	const CharacterSet setTagContinue(CharacterSet::setAlphaNum, ".-_:!#[", 0x80, true);
+	const CharacterSet setAttributeContinue(CharacterSet::setAlphaNum, ".-_:!#/", 0x80, true);
 
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
@@ -932,7 +937,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				}
 				// find the length of the word
 				int size = 1;
-				while (ishtmlwordchar(styler.SafeGetCharAt(i + size)))
+				while (setHTMLWord.Contains(styler.SafeGetCharAt(i + size)))
 					size++;
 				styler.ColourTo(i + size - 1, StateToPrint);
 				i += size - 1;
@@ -1020,7 +1025,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			}
 			break;
 		case SCE_H_TAGUNKNOWN:
-			if (!ishtmlwordchar(ch) && !((ch == '/') && (chPrev == '<')) && ch != '[') {
+			if (!setTagContinue.Contains(ch) && !((ch == '/') && (chPrev == '<'))) {
 				int eClass = classifyTagHTML(styler.GetStartSegment(),
 					i - 1, keywords, styler, tagDontFold, caseSensitive, isXml);
 				if (eClass == SCE_H_SCRIPT) {
@@ -1072,7 +1077,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			}
 			break;
 		case SCE_H_ATTRIBUTE:
-			if (!ishtmlwordchar(ch) && ch != '/' && ch != '-') {
+			if (!setAttributeContinue.Contains(ch)) {
 				if (inScriptType == eNonHtmlScript) {
 					int scriptLanguagePrev = scriptLanguage;
 					clientScript = segIsScriptingIndicator(styler, styler.GetStartSegment(), i - 1, scriptLanguage);
@@ -1145,7 +1150,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				i++;
 				ch = chNext;
 				state = SCE_H_DEFAULT;
-			} else if (ishtmlwordchar(ch)) {
+			} else if (setHTMLWord.Contains(ch)) {
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_H_ATTRIBUTE;
 			}
@@ -1169,7 +1174,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			}
 			break;
 		case SCE_H_VALUE:
-			if (!ishtmlwordchar(ch)) {
+			if (!setHTMLWord.Contains(ch)) {
 				if (ch == '\"' && chPrev == '=') {
 					// Should really test for being first character
 					state = SCE_H_DOUBLESTRING;
