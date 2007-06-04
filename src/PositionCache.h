@@ -8,6 +8,10 @@
 #ifndef POSITIONCACHE_H
 #define POSITIONCACHE_H
 
+#ifdef SCI_NAMESPACE
+namespace Scintilla {
+#endif
+
 static inline bool IsEOLChar(char ch) {
 	return (ch == '\r') || (ch == '\n');
 }
@@ -150,5 +154,9 @@ public:
 inline bool IsSpaceOrTab(int ch) {
 	return ch == ' ' || ch == '\t';
 }
+
+#ifdef SCI_NAMESPACE
+}
+#endif
 
 #endif

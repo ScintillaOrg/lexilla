@@ -31,6 +31,10 @@
 #include "Document.h"
 #include "PositionCache.h"
 
+#ifdef SCI_NAMESPACE
+using namespace Scintilla;
+#endif
+
 static inline bool IsControlCharacter(int ch) {
 	// iscntrl returns true for lots of chars > 127 which are displayable
 	return ch >= 0 && ch < ' ';
