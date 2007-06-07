@@ -107,7 +107,7 @@ static void ColourisePSDoc(
                     sc.SetState(SCE_C_DEFAULT);
             } else if (sc.atLineEnd) {
                 sc.SetState(SCE_C_DEFAULT);
-            } else if (IsAWhitespaceChar(sc.ch)) {
+            } else if (IsAWhitespaceChar(sc.ch) && sc.ch != '\r') {
                 sc.ChangeState(SCE_PS_COMMENT);
             }
         } else if (sc.state == SCE_PS_NUMBER) {
