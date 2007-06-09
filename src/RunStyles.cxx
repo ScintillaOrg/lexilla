@@ -130,11 +130,13 @@ bool RunStyles::FillRange(int &position, int value, int &fillLength) {
 	if (styles->ValueAt(runStart) == value) {
 		// Start is in expected value so trim range.
 		runStart++;
-		position = starts->PositionFromPartition(runStart); 
+		position = starts->PositionFromPartition(runStart);
 		fillLength = end - position;
 	} else {
-		runStart = SplitRun(position);
-		runEnd++;
+		if (starts->PositionFromPartition(runStart) < position) {
+			runStart = SplitRun(position);
+			runEnd++;
+		}
 	}
 	styles->SetValueAt(runStart, value);
 	// Remove each old run over the range
