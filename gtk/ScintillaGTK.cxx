@@ -782,6 +782,24 @@ void ScintillaGTK::Initialise() {
 	                  GTK_DEST_DEFAULT_ALL, clipboardPasteTargets, nClipboardPasteTargets,
 	                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
 
+	// Set caret period based on GTK settings
+	gboolean blinkOn = false;
+	if (g_object_class_find_property(G_OBJECT_GET_CLASS(
+			G_OBJECT(gtk_settings_get_default())), "gtk-cursor-blink")) {
+		g_object_get(G_OBJECT(
+			gtk_settings_get_default()), "gtk-cursor-blink", &blinkOn, NULL);
+	}
+	if (blinkOn &&
+		g_object_class_find_property(G_OBJECT_GET_CLASS(
+			G_OBJECT(gtk_settings_get_default())), "gtk-cursor-blink-time")) {
+		gint value;
+		g_object_get(G_OBJECT(
+			gtk_settings_get_default()), "gtk-cursor-blink-time", &value, NULL);
+		caret.period = gint(value / 1.75);
+	} else {
+		caret.period = 0;
+	}
+
 	SetTicking(true);
 }
 
