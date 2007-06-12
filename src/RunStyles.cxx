@@ -138,14 +138,16 @@ bool RunStyles::FillRange(int &position, int value, int &fillLength) {
 			runEnd++;
 		}
 	}
-	styles->SetValueAt(runStart, value);
-	// Remove each old run over the range
-	for (int run=runStart+1; run<runEnd; run++) {
-		RemoveRun(runStart+1);
+	if (runStart < runEnd) {
+		styles->SetValueAt(runStart, value);
+		// Remove each old run over the range
+		for (int run=runStart+1; run<runEnd; run++) {
+			RemoveRun(runStart+1);
+		}
+		runEnd = RunFromPosition(end);
+		RemoveRunIfSameAsPrevious(runEnd);
+		RemoveRunIfSameAsPrevious(runStart);
 	}
-	runEnd = RunFromPosition(end);
-	RemoveRunIfSameAsPrevious(runEnd);
-	RemoveRunIfSameAsPrevious(runStart);
 	return true;
 }
 
