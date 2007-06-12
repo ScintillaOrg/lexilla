@@ -326,7 +326,15 @@ SOURCE=..\src\LexPerl.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexPLM.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexPOV.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexProgress.cxx
 # End Source File
 # Begin Source File
 

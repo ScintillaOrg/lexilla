@@ -158,7 +158,9 @@ LEXOBJS=\
 	$(DIR_O)\LexPascal.obj \
 	$(DIR_O)\LexPB.obj \
 	$(DIR_O)\LexPerl.obj \
+	$(DIR_O)\LexPLM.obj \
 	$(DIR_O)\LexPOV.obj \
+	$(DIR_O)\LexProgress.obj \
 	$(DIR_O)\LexPS.obj \
 	$(DIR_O)\LexPython.obj \
 	$(DIR_O)\LexRebol.obj \
@@ -388,7 +390,11 @@ $(DIR_O)\LexPB.obj: ..\src\LexPB.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexPerl.obj: ..\src\LexPerl.cxx $(LEX_HEADERS)
 
+$(DIR_O)\LexPLM.obj: ..\src\LexPLM.cxx $(LEX_HEADERS)
+
 $(DIR_O)\LexPOV.obj: ..\src\LexPOV.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexProgress.obj: ..\src\LexProgress.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexPS.obj: ..\src\LexPS.cxx $(LEX_HEADERS)
 
