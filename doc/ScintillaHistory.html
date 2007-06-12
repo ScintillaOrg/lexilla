@@ -248,6 +248,81 @@
       </li>
     </ul>
     <h3>
+       <a href="http://prdownloads.sourceforge.net/scintilla/scite173.zip?download">Release 1.74</a>
+    </h3>
+    <ul>
+	<li>
+	Released on 15 June 2007.
+	</li>
+	<li>
+	OS X support.
+	</li>
+	<li>
+	Indicators changed to be a separate data structure allowing more indicators. Storing indicators in high bits
+	of styling bytes is deprecated and will be removed in the next version.
+	</li>
+	<li>
+	Unicode support extended to all Unicode characters not just the Basic Multilingual Plane.
+	</li>
+	<li>
+	Performance improved on wide lines by breaking long runs in a single style into shorter segments.
+	</li>
+	<li>
+	Performance improved by caching layout of short text segments.
+	</li>
+	<li>
+	Caret may be displayed as a block.
+	</li>
+	<li>
+	Lexer added for GAP.
+	</li>
+	<li>
+	Lexer added for PL/M.
+	</li>
+	<li>
+	Lexer added for Progress.
+	</li>
+	<li>
+	SciTE session files have changed format to be like other SciTE .properties files
+	and now use the extension .session.
+	Bookmarks and folds may optionally be saved in session files.
+	</li>
+	<li>
+	On GTK+, copying to the clipboard does not include the text/urilist type since this caused problems when
+	pasting into Open Office.
+	</li>
+	<li>
+	On GTK+, Scintilla defaults caret blink rate to platform preference.
+	</li>
+	<li>
+	Dragging does not start until the mouse has been dragged a certain amount.
+	This stops spurious drags when just clicking inside the selection.
+	</li>
+	<li>
+	Bug fixed where brace highlight not shown when caret line background set.
+	</li>
+	<li>
+	Bug fixed in Ruby lexer where out of bounds access could occur.
+	</li>
+	<li>
+	Bug fixed in XML folding where tags were not being folded because they are singletons in HTML.
+	</li>
+	<li>
+	SciTE hang fixed when using UNC path with directory properties feature.
+	</li>
+	<li>
+	Bug on Windows fixed by examining dropped text for Unicode even in non-Unicode mode so it
+	can work shen source only provides Unicode or when using an encoding different from the
+	system default.
+	</li>
+	<li>
+	SciTE bug on GTK+ fixed where Stop Executing did not work when more than a single process started.
+	</li>
+	<li>
+	Minor line end fix to PostScript lexer.
+	</li>
+    </ul>
+    <h3>
        <a href="http://prdownloads.sourceforge.net/scintilla/scite173.zip?download">Release 1.73</a>
     </h3>
     <ul>
