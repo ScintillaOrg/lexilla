@@ -782,6 +782,7 @@ void ScintillaGTK::Initialise() {
 	                  GTK_DEST_DEFAULT_ALL, clipboardPasteTargets, nClipboardPasteTargets,
 	                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
 
+#if GLIB_MAJOR_VERSION >= 2
 	// Set caret period based on GTK settings
 	gboolean blinkOn = false;
 	if (g_object_class_find_property(G_OBJECT_GET_CLASS(
@@ -799,6 +800,7 @@ void ScintillaGTK::Initialise() {
 	} else {
 		caret.period = 0;
 	}
+#endif
 
 	SetTicking(true);
 }
