@@ -1383,8 +1383,11 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 					pango_layout_iter_get_cluster_extents(iter, NULL, &pos);
 					int position = PANGO_PIXELS(pos.x);
 					int curIndex = pango_layout_iter_get_index(iter);
+					int places = curIndex - i;
+					int distance = position - positions[i-1];
 					while (i < curIndex) {
-						positions[i++] = position;
+						positions[i] = position - (curIndex - 1 - i) * distance / places;
+						i++;
 					}
 				}
 				while (i < lenPositions)
@@ -1436,12 +1439,19 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 						utfForm = UTF8FromLatin1(s, len);
 					}
 					pango_layout_set_text(layout, utfForm, len);
-					int i = 0;
 					PangoLayoutIter *iter = pango_layout_get_iter(layout);
 					pango_layout_iter_get_cluster_extents(iter, NULL, &pos);
+					int i = 0;
 					while (pango_layout_iter_next_cluster(iter)) {
 						pango_layout_iter_get_cluster_extents(iter, NULL, &pos);
-						positions[i++] = PANGO_PIXELS(pos.x);
+						int position = PANGO_PIXELS(pos.x);
+						int curIndex = pango_layout_iter_get_index(iter);
+						int places = curIndex - i;
+						int distance = position - positions[i-1];
+						while (i < curIndex) {
+							positions[i] = position - (curIndex - 1 - i) * distance / places;
+							i++;
+						}
 					}
 					while (i < lenPositions)
 						positions[i++] = PANGO_PIXELS(pos.x + pos.width);
