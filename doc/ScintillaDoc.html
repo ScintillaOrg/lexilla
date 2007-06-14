@@ -4220,6 +4220,8 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_GETWRAPSTARTINDENT">SCI_GETWRAPSTARTINDENT</a><br />
      <a class="message" href="#SCI_SETLAYOUTCACHE">SCI_SETLAYOUTCACHE(int cacheMode)</a><br />
      <a class="message" href="#SCI_GETLAYOUTCACHE">SCI_GETLAYOUTCACHE</a><br />
+     <a class="message" href="#SCI_SETPOSITIONCACHE">SCI_SETPOSITIONCACHE(int size)</a><br />
+     <a class="message" href="#SCI_GETPOSITIONCACHE">SCI_GETPOSITIONCACHE</a><br />
      <a class="message" href="#SCI_LINESSPLIT">SCI_LINESSPLIT(int pixelWidth)</a><br />
      <a class="message" href="#SCI_LINESJOIN">SCI_LINESJOIN</a><br />
      <a class="message" href="#SCI_WRAPCOUNT">SCI_WRAPCOUNT(int docLine)</a><br />
@@ -4400,6 +4402,12 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
       </tbody>
     </table>
     <br />
+
+    <p><b id="SCI_SETPOSITIONCACHE">SCI_SETPOSITIONCACHE(int size)</b><br />
+     <b id="SCI_GETPOSITIONCACHE">SCI_GETPOSITIONCACHE</b><br />
+     The position cache stores position information for short runs of text
+     so that their layout can be determined more quickly if the run recurs.
+     The size in entries of this cache can be set with <code>SCI_SETPOSITIONCACHE</code>.</p>
 
     <p><b id="SCI_LINESSPLIT">SCI_LINESSPLIT(int pixelWidth)</b><br />
      Split a range of lines indicated by the target into lines that are at most pixelWidth wide.

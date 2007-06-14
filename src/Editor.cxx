@@ -6379,7 +6379,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return llc.GetLevel();
 
 	case SCI_SETPOSITIONCACHE:
-		posCache.SetSize(0x400);
+		posCache.SetSize(wParam);
 		break;
 
 	case SCI_GETPOSITIONCACHE:
