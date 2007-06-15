@@ -1386,6 +1386,10 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 					int places = curIndex - i;
 					int distance = position - positions[i-1];
 					while (i < curIndex) {
+						// Evenly distribute space among bytes of this cluster.
+						// Would be better to find number of characters and then
+						// divide evenly between characters with each byte of a character
+						// being at the same position.
 						positions[i] = position - (curIndex - 1 - i) * distance / places;
 						i++;
 					}
@@ -1442,16 +1446,22 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 					PangoLayoutIter *iter = pango_layout_get_iter(layout);
 					pango_layout_iter_get_cluster_extents(iter, NULL, &pos);
 					int i = 0;
+					int positionStart = 0;
+					int clusterStart = 0;
+					// Each Latin1 input character may take 1 or 2 bytes in UTF-8
+					// and groups of up to 3 may be represented as ligatures.
 					while (pango_layout_iter_next_cluster(iter)) {
 						pango_layout_iter_get_cluster_extents(iter, NULL, &pos);
 						int position = PANGO_PIXELS(pos.x);
-						int curIndex = pango_layout_iter_get_index(iter);
-						int places = curIndex - i;
-						int distance = position - positions[i-1];
-						while (i < curIndex) {
-							positions[i] = position - (curIndex - 1 - i) * distance / places;
-							i++;
+						int distance = position - positionStart;
+						int clusterEnd = pango_layout_iter_get_index(iter);
+						int ligatureLength = g_utf8_strlen(utfForm + clusterStart, clusterEnd - clusterStart);
+						PLATFORM_ASSERT(ligatureLength > 0 && ligatureLength <= 3);
+						for (int charInLig=0; charInLig<ligatureLength; charInLig++) {
+							positions[i++] = position - (ligatureLength - 1 - charInLig) * distance / ligatureLength;
 						}
+						positionStart = position;
+						clusterStart = clusterEnd;
 					}
 					while (i < lenPositions)
 						positions[i++] = PANGO_PIXELS(pos.x + pos.width);
