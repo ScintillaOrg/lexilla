@@ -351,6 +351,7 @@
 	SciTE session files have changed format to be like other SciTE .properties files
 	and now use the extension .session.
 	Bookmarks and folds may optionally be saved in session files.
+	Session files created with previous versions of SciTE will not load into this version.
 	</li>
 	<li>
 	SciTE's extension and scripting interfaces add OnKey, OnDwellStart, and OnClose methods.
@@ -376,7 +377,13 @@
 	Bug fixed in XML folding where tags were not being folded because they are singletons in HTML.
 	</li>
 	<li>
+	Bug fixed when many font names used.
+	</li>
+	<li>
 	Layout bug fixed on GTK+ where fonts have ligatures available.
+	</li>
+	<li>
+	Bug fixed with SCI_LINETRANSPOSE on a blank line.
 	</li>
 	<li>
 	SciTE hang fixed when using UNC path with directory properties feature.
@@ -388,6 +395,9 @@
 	</li>
 	<li>
 	SciTE bug on GTK+ fixed where Stop Executing did not work when more than a single process started.
+	</li>
+	<li>
+	SciTE bug on GTK+ fixed where mouse wheel was not switching between buffers.
 	</li>
 	<li>
 	Minor line end fix to PostScript lexer.
