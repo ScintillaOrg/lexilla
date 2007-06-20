@@ -38,7 +38,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 4/February/2006 NH</p>
+    <p>Last edited 20/June/2007 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -281,7 +281,7 @@
     information. The combination of a character byte and a style byte is called a cell. Style bytes
     are interpreted an index into an array of styles.
     Style bytes may be split into an index and a set of indicator bits
-    but this use is discouraged and indicators sould now use
+    but this use is discouraged and indicators should now use
     <a class="message" href ="#SCI_INDICATORFILLRANGE">SCI_INDICATORFILLRANGE</a>
     and related calls.
     The default split is with the index in the low 5 bits and 3 high bits as <a class="jump"
@@ -3072,15 +3072,15 @@ struct TextToFind {
     <b id="SCI_SETINDICATORCURRENT">SCI_SETINDICATORCURRENT(int indicator)</b><br />
     <b id="SCI_GETINDICATORCURRENT">SCI_GETINDICATORCURRENT</b><br />
     These two messages set and get the indicator that will be affected by calls to
-    <a class="jump" href="#SCI_INDICATORFILLRANGE">SCI_INDICATORFILLRANGE</a> and
-    <a class="jump" href="#SCI_INDICATORCLEARRANGE">SCI_INDICATORCLEARRANGE</a>.
+    <a class="message" href="#SCI_INDICATORFILLRANGE">SCI_INDICATORFILLRANGE</a> and
+    <a class="message" href="#SCI_INDICATORCLEARRANGE">SCI_INDICATORCLEARRANGE</a>.
     </p>
 
     <p>
     <b id="SCI_SETINDICATORVALUE">SCI_SETINDICATORVALUE(int value)</b><br />
     <b id="SCI_GETINDICATORVALUE">SCI_GETINDICATORVALUE</b><br />
     These two messages set and get the value that will be set by calls to
-    <a class="jump" href="#SCI_INDICATORFILLRANGE">SCI_INDICATORFILLRANGE</a>.
+    <a class="message" href="#SCI_INDICATORFILLRANGE">SCI_INDICATORFILLRANGE</a>.
     </p>
 
     <p>
