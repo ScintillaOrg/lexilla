@@ -749,28 +749,28 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 	case WM_CHAR:
 		if (((wParam >= 128) || !iscntrl(wParam)) || !lastKeyDownConsumed) {
-            if (::IsWindowUnicode(MainHWND())) {
-			    wchar_t wcs[2] = {wParam, 0};
-                if (IsUnicodeMode()) {
-				    // For a wide character version of the window:
-				    char utfval[4];
-				    unsigned int len = UTF8Length(wcs, 1);
-				    UTF8FromUTF16(wcs, 1, utfval, len);
-				    AddCharUTF(utfval, len);
-                } else {
-    				UINT cpDest = CodePageFromCharSet(
-	    				vs.styles[STYLE_DEFAULT].characterSet, pdoc->dbcsCodePage);
-				    char inBufferCP[20];
-				    int size = ::WideCharToMultiByte(cpDest,
-					    0, wcs, 1, inBufferCP, sizeof(inBufferCP) - 1, 0, 0);
-				    AddCharUTF(inBufferCP, size);
-                }
+			if (::IsWindowUnicode(MainHWND())) {
+				wchar_t wcs[2] = {wParam, 0};
+				if (IsUnicodeMode()) {
+					// For a wide character version of the window:
+					char utfval[4];
+					unsigned int len = UTF8Length(wcs, 1);
+					UTF8FromUTF16(wcs, 1, utfval, len);
+					AddCharUTF(utfval, len);
+				} else {
+					UINT cpDest = CodePageFromCharSet(
+						vs.styles[STYLE_DEFAULT].characterSet, pdoc->dbcsCodePage);
+					char inBufferCP[20];
+					int size = ::WideCharToMultiByte(cpDest,
+						0, wcs, 1, inBufferCP, sizeof(inBufferCP) - 1, 0, 0);
+					AddCharUTF(inBufferCP, size);
+				}
 			} else {
-                if (IsUnicodeMode()) {
-    			    AddCharBytes('\0', LOBYTE(wParam));
-                } else {
-    				AddChar(LOBYTE(wParam));
-                }
+				if (IsUnicodeMode()) {
+					AddCharBytes('\0', LOBYTE(wParam));
+				} else {
+					AddChar(LOBYTE(wParam));
+				}
 			}
 		}
 		return 0;
