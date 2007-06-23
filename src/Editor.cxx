@@ -3238,6 +3238,7 @@ void Editor::AddChar(char ch) {
 	AddCharUTF(s, 1);
 }
 
+// AddCharUTF inserts an array of bytes which may or may not be in UTF-8.
 void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 	bool wasSelection = currentPos != anchor;
 	ClearSelection();
