@@ -5662,6 +5662,89 @@ static char *CharPtrFromSPtr(sptr_t lParam) {
 	return reinterpret_cast<char *>(lParam);
 }
 
+void Editor::StyleSetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
+	vs.EnsureStyle(wParam);
+	switch (iMessage) {
+	case SCI_STYLESETFORE:
+		vs.styles[wParam].fore.desired = ColourDesired(lParam);
+		break;
+	case SCI_STYLESETBACK:
+		vs.styles[wParam].back.desired = ColourDesired(lParam);
+		break;
+	case SCI_STYLESETBOLD:
+		vs.styles[wParam].bold = lParam != 0;
+		break;
+	case SCI_STYLESETITALIC:
+		vs.styles[wParam].italic = lParam != 0;
+		break;
+	case SCI_STYLESETEOLFILLED:
+		vs.styles[wParam].eolFilled = lParam != 0;
+		break;
+	case SCI_STYLESETSIZE:
+		vs.styles[wParam].size = lParam;
+		break;
+	case SCI_STYLESETFONT:
+		if (lParam != 0) {
+			vs.SetStyleFontName(wParam, CharPtrFromSPtr(lParam));
+		}
+		break;
+	case SCI_STYLESETUNDERLINE:
+		vs.styles[wParam].underline = lParam != 0;
+		break;
+	case SCI_STYLESETCASE:
+		vs.styles[wParam].caseForce = static_cast<Style::ecaseForced>(lParam);
+		break;
+	case SCI_STYLESETCHARACTERSET:
+		vs.styles[wParam].characterSet = lParam;
+		break;
+	case SCI_STYLESETVISIBLE:
+		vs.styles[wParam].visible = lParam != 0;
+		break;
+	case SCI_STYLESETCHANGEABLE:
+		vs.styles[wParam].changeable = lParam != 0;
+		break;
+	case SCI_STYLESETHOTSPOT:
+		vs.styles[wParam].hotspot = lParam != 0;
+		break;
+	}
+	InvalidateStyleRedraw();
+}
+
+sptr_t Editor::StyleGetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
+	vs.EnsureStyle(wParam);
+	switch (iMessage) {
+	case SCI_STYLEGETFORE:
+		return vs.styles[wParam].fore.desired.AsLong();
+	case SCI_STYLEGETBACK:
+		return vs.styles[wParam].back.desired.AsLong();
+	case SCI_STYLEGETBOLD:
+		return vs.styles[wParam].bold ? 1 : 0;
+	case SCI_STYLEGETITALIC:
+		return vs.styles[wParam].italic ? 1 : 0;
+	case SCI_STYLEGETEOLFILLED:
+		return vs.styles[wParam].eolFilled ? 1 : 0;
+	case SCI_STYLEGETSIZE:
+		return vs.styles[wParam].size;
+	case SCI_STYLEGETFONT:
+		if (lParam != 0)
+			strcpy(CharPtrFromSPtr(lParam), vs.styles[wParam].fontName);
+		return strlen(vs.styles[wParam].fontName);
+	case SCI_STYLEGETUNDERLINE:
+		return vs.styles[wParam].underline ? 1 : 0;
+	case SCI_STYLEGETCASE:
+		return static_cast<int>(vs.styles[wParam].caseForce);
+	case SCI_STYLEGETCHARACTERSET:
+		return vs.styles[wParam].characterSet;
+	case SCI_STYLEGETVISIBLE:
+		return vs.styles[wParam].visible ? 1 : 0;
+	case SCI_STYLEGETCHANGEABLE:
+		return vs.styles[wParam].changeable ? 1 : 0;
+	case SCI_STYLEGETHOTSPOT:
+		return vs.styles[wParam].hotspot ? 1 : 0;
+	}
+	return 0;
+}
+
 sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	//Platform::DebugPrintf("S start wnd proc %d %d %d\n",iMessage, wParam, lParam);
 
@@ -6406,7 +6489,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_TEXTWIDTH:
-		PLATFORM_ASSERT(wParam <= STYLE_MAX);
+		PLATFORM_ASSERT(wParam <= vs.stylesSize);
 		PLATFORM_ASSERT(lParam);
 		return TextWidth(wParam, CharPtrFromSPtr(lParam));
 
@@ -6635,157 +6718,42 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_STYLESETFORE:
-		if (wParam <= STYLE_MAX) {
-			vs.styles[wParam].fore.desired = ColourDesired(lParam);
-			InvalidateStyleRedraw();
-		}
-		break;
 	case SCI_STYLESETBACK:
-		if (wParam <= STYLE_MAX) {
-			vs.styles[wParam].back.desired = ColourDesired(lParam);
-			InvalidateStyleRedraw();
-		}
-		break;
 	case SCI_STYLESETBOLD:
-		if (wParam <= STYLE_MAX) {
-			vs.styles[wParam].bold = lParam != 0;
-			InvalidateStyleRedraw();
-		}
-		break;
 	case SCI_STYLESETITALIC:
-		if (wParam <= STYLE_MAX) {
-			vs.styles[wParam].italic = lParam != 0;
-			InvalidateStyleRedraw();
-		}
-		break;
 	case SCI_STYLESETEOLFILLED:
-		if (wParam <= STYLE_MAX) {
-			vs.styles[wParam].eolFilled = lParam != 0;
-			InvalidateStyleRedraw();
-		}
-		break;
 	case SCI_STYLESETSIZE:
-		if (wParam <= STYLE_MAX) {
-			vs.styles[wParam].size = lParam;
-			InvalidateStyleRedraw();
-		}
-		break;
 	case SCI_STYLESETFONT:
-		if (lParam == 0)
-			return 0;
-		if (wParam <= STYLE_MAX) {
-			vs.SetStyleFontName(wParam, CharPtrFromSPtr(lParam));
-			InvalidateStyleRedraw();
-		}
-		break;
 	case SCI_STYLESETUNDERLINE:
-		if (wParam <= STYLE_MAX) {
-			vs.styles[wParam].underline = lParam != 0;
-			InvalidateStyleRedraw();
-		}
-		break;
 	case SCI_STYLESETCASE:
-		if (wParam <= STYLE_MAX) {
-			vs.styles[wParam].caseForce = static_cast<Style::ecaseForced>(lParam);
-			InvalidateStyleRedraw();
-		}
-		break;
 	case SCI_STYLESETCHARACTERSET:
-		if (wParam <= STYLE_MAX) {
-			vs.styles[wParam].characterSet = lParam;
-			InvalidateStyleRedraw();
-		}
-		break;
 	case SCI_STYLESETVISIBLE:
-		if (wParam <= STYLE_MAX) {
-			vs.styles[wParam].visible = lParam != 0;
-			InvalidateStyleRedraw();
-		}
-		break;
 	case SCI_STYLESETCHANGEABLE:
-		if (wParam <= STYLE_MAX) {
-			vs.styles[wParam].changeable = lParam != 0;
-			InvalidateStyleRedraw();
-		}
-		break;
 	case SCI_STYLESETHOTSPOT:
-		if (wParam <= STYLE_MAX) {
-			vs.styles[wParam].hotspot = lParam != 0;
-			InvalidateStyleRedraw();
-		}
+		StyleSetMessage(iMessage, wParam, lParam);
 		break;
-	case SCI_STYLEGETFORE:
-		if (wParam <= STYLE_MAX)
-			return vs.styles[wParam].fore.desired.AsLong();
-		else
-			return 0;
-	case SCI_STYLEGETBACK:
-		if (wParam <= STYLE_MAX)
-			return vs.styles[wParam].back.desired.AsLong();
-		else
-			return 0;
-	case SCI_STYLEGETBOLD:
-		if (wParam <= STYLE_MAX)
-			return vs.styles[wParam].bold ? 1 : 0;
-		else
-			return 0;
-	case SCI_STYLEGETITALIC:
-		if (wParam <= STYLE_MAX)
-			return vs.styles[wParam].italic ? 1 : 0;
-		else
-			return 0;
-	case SCI_STYLEGETEOLFILLED:
-		if (wParam <= STYLE_MAX)
-			return vs.styles[wParam].eolFilled ? 1 : 0;
-		else
-			return 0;
-	case SCI_STYLEGETSIZE:
-		if (wParam <= STYLE_MAX)
-			return vs.styles[wParam].size;
-		else
-			return 0;
-	case SCI_STYLEGETFONT:
-		if (lParam == 0)
-			return strlen(vs.styles[wParam].fontName);
 
-		if (wParam <= STYLE_MAX)
-			strcpy(CharPtrFromSPtr(lParam), vs.styles[wParam].fontName);
-		break;
+	case SCI_STYLEGETFORE:
+	case SCI_STYLEGETBACK:
+	case SCI_STYLEGETBOLD:
+	case SCI_STYLEGETITALIC:
+	case SCI_STYLEGETEOLFILLED:
+	case SCI_STYLEGETSIZE:
+	case SCI_STYLEGETFONT:
 	case SCI_STYLEGETUNDERLINE:
-		if (wParam <= STYLE_MAX)
-			return vs.styles[wParam].underline ? 1 : 0;
-		else
-			return 0;
 	case SCI_STYLEGETCASE:
-		if (wParam <= STYLE_MAX)
-			return static_cast<int>(vs.styles[wParam].caseForce);
-		else
-			return 0;
 	case SCI_STYLEGETCHARACTERSET:
-		if (wParam <= STYLE_MAX)
-			return vs.styles[wParam].characterSet;
-		else
-			return 0;
 	case SCI_STYLEGETVISIBLE:
-		if (wParam <= STYLE_MAX)
-			return vs.styles[wParam].visible ? 1 : 0;
-		else
-			return 0;
 	case SCI_STYLEGETCHANGEABLE:
-		if (wParam <= STYLE_MAX)
-			return vs.styles[wParam].changeable ? 1 : 0;
-		else
-			return 0;
 	case SCI_STYLEGETHOTSPOT:
-		if (wParam <= STYLE_MAX)
-			return vs.styles[wParam].hotspot ? 1 : 0;
-		else
-			return 0;
+		return StyleGetMessage(iMessage, wParam, lParam);
+
 	case SCI_STYLERESETDEFAULT:
 		vs.ResetDefaultStyle();
 		InvalidateStyleRedraw();
 		break;
 	case SCI_SETSTYLEBITS:
+		vs.EnsureStyle((1 << wParam) - 1);
 		pdoc->SetStylingBits(wParam);
 		break;
 

@@ -1271,11 +1271,7 @@ void Document::SetCharClasses(const unsigned char *chars, CharClassify::cc newCh
 
 void Document::SetStylingBits(int bits) {
 	stylingBits = bits;
-	stylingBitsMask = 0;
-	for (int bit = 0; bit < stylingBits; bit++) {
-		stylingBitsMask <<= 1;
-		stylingBitsMask |= 1;
-	}
+	stylingBitsMask = (1 << stylingBits) - 1;
 }
 
 void Document::StartStyling(int position, char mask) {
