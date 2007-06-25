@@ -472,8 +472,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	WordList &keywords5 = *keywordlists[4];
 	WordList &keywords6 = *keywordlists[5]; // SGML (DTD) keywords
 
-	// Lexer for HTML requires more lexical states (7 bits worth) than most lexers
-	styler.StartAt(startPos, STYLE_MAX);
+	// Lexer for HTML requires more lexical states (8 bits worth) than most lexers
+	styler.StartAt(startPos, static_cast<char>(STYLE_MAX));
 	char prevWord[200];
 	prevWord[0] = '\0';
 	char phpStringDelimiter[200]; // PHP is not limited in length, we are
@@ -495,7 +495,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		length++;
 		state = styler.StyleAt(startPos);
 	}
-	styler.StartAt(startPos, STYLE_MAX);
+	styler.StartAt(startPos, static_cast<char>(STYLE_MAX));
 
 	int lineCurrent = styler.GetLine(startPos);
 	int lineState;
@@ -1934,8 +1934,8 @@ static void ColouriseASPPiece(StyleContext &sc, WordList *keywordlists[]) {
 
 static void ColouriseASPDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
                                   Accessor &styler) {
-	// Lexer for HTML requires more lexical states (7 bits worth) than most lexers
-	StyleContext sc(startPos, length, initStyle, styler, 0x7f);
+	// Lexer for HTML requires more lexical states (8 bits worth) than most lexers
+	StyleContext sc(startPos, length, initStyle, styler, static_cast<char>(STYLE_MAX));
 	for (; sc.More(); sc.Forward()) {
 		ColouriseASPPiece(sc, keywordlists);
 	}
@@ -2026,8 +2026,8 @@ static void ColourisePHPPiece(StyleContext &sc, WordList *keywordlists[]) {
 
 static void ColourisePHPDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
                                   Accessor &styler) {
-	// Lexer for HTML requires more lexical states (7 bits worth) than most lexers
-	StyleContext sc(startPos, length, initStyle, styler, 0x7f);
+	// Lexer for HTML requires more lexical states (8 bits worth) than most lexers
+	StyleContext sc(startPos, length, initStyle, styler, static_cast<char>(STYLE_MAX));
 	for (; sc.More(); sc.Forward()) {
 		ColourisePHPPiece(sc, keywordlists);
 	}
@@ -2060,9 +2060,9 @@ static const char * const phpscriptWordListDesc[] = {
 	0,
 };
 
-LexerModule lmHTML(SCLEX_HTML, ColouriseHTMLDoc, "hypertext", 0, htmlWordListDesc, 7);
-LexerModule lmXML(SCLEX_XML, ColouriseXMLDoc, "xml", 0, htmlWordListDesc, 7);
+LexerModule lmHTML(SCLEX_HTML, ColouriseHTMLDoc, "hypertext", 0, htmlWordListDesc, 8);
+LexerModule lmXML(SCLEX_XML, ColouriseXMLDoc, "xml", 0, htmlWordListDesc, 8);
 // SCLEX_ASP and SCLEX_PHP should not be used in new code: use SCLEX_HTML instead.
-LexerModule lmASP(SCLEX_ASP, ColouriseASPDoc, "asp", 0, htmlWordListDesc, 7);
-LexerModule lmPHP(SCLEX_PHP, ColourisePHPDoc, "php", 0, htmlWordListDesc, 7);
-LexerModule lmPHPSCRIPT(SCLEX_PHPSCRIPT, ColourisePHPScriptDoc, "phpscript", 0, phpscriptWordListDesc, 7);
+LexerModule lmASP(SCLEX_ASP, ColouriseASPDoc, "asp", 0, htmlWordListDesc, 8);
+LexerModule lmPHP(SCLEX_PHP, ColourisePHPDoc, "php", 0, htmlWordListDesc, 8);
+LexerModule lmPHPSCRIPT(SCLEX_PHPSCRIPT, ColourisePHPScriptDoc, "phpscript", 0, phpscriptWordListDesc, 8);

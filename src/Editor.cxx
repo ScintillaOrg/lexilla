@@ -3035,7 +3035,7 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 	vsPrint.showCaretLineBackground = false;
 
 	// Set colours for printing according to users settings
-	for (int sty = 0;sty <= STYLE_MAX;sty++) {
+	for (size_t sty = 0;sty < vsPrint.stylesSize;sty++) {
 		if (printColourMode == SC_PRINT_INVERTLIGHT) {
 			vsPrint.styles[sty].fore.desired = InvertedLight(vsPrint.styles[sty].fore.desired);
 			vsPrint.styles[sty].back.desired = InvertedLight(vsPrint.styles[sty].back.desired);
@@ -6489,7 +6489,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_TEXTWIDTH:
-		PLATFORM_ASSERT(wParam <= vs.stylesSize);
+		PLATFORM_ASSERT(wParam < vs.stylesSize);
 		PLATFORM_ASSERT(lParam);
 		return TextWidth(wParam, CharPtrFromSPtr(lParam));
 
