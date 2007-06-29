@@ -5102,14 +5102,6 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 				else
 					inDragDrop = ddNone;
 			}
-#ifdef __APPLE__
-			// we need to additionaly check if the mouse moved before we
-			// decide that we can in fact start a drag session.  Currently
-			// only OSX will return anything but true.
-			if (inDragDrop == ddInitial && !Platform::WaitMouseMoved(pt)) {
-				inDragDrop = ddNone;
-			}
-#endif
 			SetMouseCapture(true);
 			if (inDragDrop != ddInitial) {
 				SetDragPosition(invalidPosition);

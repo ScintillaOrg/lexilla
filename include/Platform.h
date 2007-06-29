@@ -500,9 +500,6 @@ public:
 	static int DefaultFontSize();
 	static unsigned int DoubleClickTime();
 	static bool MouseButtonBounce();
-#ifdef __APPLE__
-	static bool WaitMouseMoved(Point pt);
-#endif
 	static void DebugDisplay(const char *s);
 	static bool IsKeyDown(int key);
 	static long SendScintilla(
