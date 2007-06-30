@@ -146,6 +146,10 @@ SOURCE=..\src\KeyWords.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexAbaqus.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexAda.cxx
 # End Source File
 # Begin Source File
