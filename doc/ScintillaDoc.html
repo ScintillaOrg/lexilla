@@ -1337,6 +1337,8 @@ struct TextToFind {
      <a class="message" href="#SCI_SETXOFFSET">SCI_SETXOFFSET(int xOffset)</a><br />
      <a class="message" href="#SCI_SETSCROLLWIDTH">SCI_SETSCROLLWIDTH(int pixelWidth)</a><br />
      <a class="message" href="#SCI_GETSCROLLWIDTH">SCI_GETSCROLLWIDTH</a><br />
+     <a class="message" href="#SCI_SETSCROLLWIDTHTRACKING">SCI_SETSCROLLWIDTHTRACKING(bool tracking)</a><br />
+     <a class="message" href="#SCI_GETSCROLLWIDTHTRACKING">SCI_GETSCROLLWIDTHTRACKING</a><br />
      <a class="message" href="#SCI_SETENDATLASTLINE">SCI_SETENDATLASTLINE(bool
     endAtLastLine)</a><br />
      <a class="message" href="#SCI_GETENDATLASTLINE">SCI_GETENDATLASTLINE</a><br />
@@ -1643,7 +1645,14 @@ struct TextToFind {
      For performance, Scintilla does not measure the display width of the document to determine
      the properties of the horizontal scroll bar. Instead, an assumed width is used.
      These messages set and get the document width in pixels assumed by Scintilla.
-     The default value is 2000.</p>
+     The default value is 2000.
+     To ensure the width of the currently visible lines can be scrolled use
+     <a class="message" href="#SCI_SETSCROLLWIDTHTRACKING"><code>SCI_SETSCROLLWIDTHTRACKING</code></a></p>
+
+    <p><b id="SCI_SETSCROLLWIDTHTRACKING">SCI_SETSCROLLWIDTHTRACKING(bool tracking)</b><br />
+     <b id="SCI_GETSCROLLWIDTHTRACKING">SCI_GETSCROLLWIDTHTRACKING</b><br />
+     If scroll width tracking is enabled then the scroll width is adjusted to ensure that all of the lines currently
+     displayed can be completely scrolled. This mode never adjusts the scroll width to be narrower.</p>
 
     <p><b id="SCI_SETENDATLASTLINE">SCI_SETENDATLASTLINE(bool endAtLastLine)</b><br />
      <b id="SCI_GETENDATLASTLINE">SCI_GETENDATLASTLINE</b><br />

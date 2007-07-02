@@ -138,6 +138,8 @@ Editor::Editor() {
 	xCaretMargin = 50;
 	horizontalScrollBarVisible = true;
 	scrollWidth = 2000;
+	trackLineWidth = false;
+	lineWidthMaxSeen = 0;
 	verticalScrollBarVisible = true;
 	endAtLastLine = true;
 	caretSticky = false;
@@ -1205,7 +1207,7 @@ void Editor::EnsureCaretVisible(bool useMargin, bool vert, bool horiz) {
 			xOffset = xOffsetNew;
 			if (xOffsetNew > 0) {
 				PRectangle rcText = GetTextRectangle();
-				if (horizontalScrollBarVisible == true &&
+				if (horizontalScrollBarVisible &&
 				        rcText.Width() + xOffset > scrollWidth) {
 					scrollWidth = xOffset + rcText.Width();
 					SetScrollBars();
@@ -2948,6 +2950,9 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 
 			yposScreen += vs.lineHeight;
 			visibleLine++;
+
+			lineWidthMaxSeen = Platform::Maximum(
+				lineWidthMaxSeen, ll->positions[ll->numCharsInLine]);
 			//gdk_flush();
 		}
 		ll.Set(0);
@@ -5353,6 +5358,10 @@ void Editor::Tick() {
 			}
 		}
 	}
+	if (horizontalScrollBarVisible && trackLineWidth && (lineWidthMaxSeen > scrollWidth)) {
+		scrollWidth = lineWidthMaxSeen;
+		SetScrollBars();
+	}
 	if ((dwellDelay < SC_TIME_FOREVER) &&
 	        (ticksToDwell > 0) &&
 	        (!HaveMouseCapture())) {
@@ -6464,6 +6473,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SETSCROLLWIDTH:
 		PLATFORM_ASSERT(wParam > 0);
 		if ((wParam > 0) && (wParam != static_cast<unsigned int >(scrollWidth))) {
+			lineWidthMaxSeen = 0;
 			scrollWidth = wParam;
 			SetScrollBars();
 		}
@@ -6471,6 +6481,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETSCROLLWIDTH:
 		return scrollWidth;
+
+	case SCI_SETSCROLLWIDTHTRACKING:
+		trackLineWidth = wParam != 0;
+		break;
+
+	case SCI_GETSCROLLWIDTHTRACKING:
+		return trackLineWidth;
 
 	case SCI_LINESJOIN:
 		LinesJoin();

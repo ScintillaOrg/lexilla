@@ -136,6 +136,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int xCaretMargin;	///< Ensure this many pixels visible on both sides of caret
 	bool horizontalScrollBarVisible;
 	int scrollWidth;
+	bool trackLineWidth;
+	int lineWidthMaxSeen;
 	bool verticalScrollBarVisible;
 	bool endAtLastLine;
 	bool caretSticky;

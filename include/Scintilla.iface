@@ -1143,6 +1143,12 @@ set void SetScrollWidth=2274(int pixelWidth,)
 # Retrieve the document width assumed for scrolling.
 get int GetScrollWidth=2275(,)
 
+# Sets whether the maximum width line displayed is used to set scroll width.
+set void SetScrollWidthTracking=2516(bool tracking,)
+
+# Retrieve whether the scroll width tracks wide lines.
+get bool GetScrollWidthTracking=2517(,)
+
 # Measure the pixel width of some text in a particular style.
 # NUL terminated text argument.
 # Does not handle tab or control characters.
