@@ -368,19 +368,19 @@ typedef void (*CallBackAction)(void*);
 class Window {
 protected:
 	WindowID id;
-#ifdef PLAT_MACOSX
+#if PLAT_MACOSX
 	void *windowRef;
 	void *control;
 #endif
 public:
 	Window() : id(0), cursorLast(cursorInvalid) {
-#ifdef PLAT_MACOSX
+#if PLAT_MACOSX
 	  windowRef = 0;
 	  control = 0;
 #endif
 	}
 	Window(const Window &source) : id(source.id), cursorLast(cursorInvalid) {
-#ifdef PLAT_MACOSX
+#if PLAT_MACOSX
 	  windowRef = 0;
 	  control = 0;
 #endif
@@ -405,7 +405,7 @@ public:
 	enum Cursor { cursorInvalid, cursorText, cursorArrow, cursorUp, cursorWait, cursorHoriz, cursorVert, cursorReverseArrow, cursorHand };
 	void SetCursor(Cursor curs);
 	void SetTitle(const char *s);
-#ifdef PLAT_MACOSX
+#if PLAT_MACOSX
 	void SetWindow(void *ref) { windowRef = ref; };
 	void SetControl(void *_control) { control = _control; };
 #endif
