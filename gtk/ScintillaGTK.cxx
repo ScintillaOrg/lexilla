@@ -198,6 +198,7 @@ private:
 	void ReceivedDrop(GtkSelectionData *selection_data);
 	static void GetSelection(GtkSelectionData *selection_data, guint info, SelectionText *selected);
 #ifdef USE_GTK_CLIPBOARD
+	void StoreOnClipboard(SelectionText *clipText);
 	static void ClipboardGetSelection(GtkClipboard* clip, GtkSelectionData *selection_data, guint info, void *data);
 	static void ClipboardClearSelection(GtkClipboard* clip, void *data);
 #endif
@@ -1291,17 +1292,9 @@ void ScintillaGTK::CopyToClipboard(const SelectionText &selectedText) {
 				atomClipboard,
 				GDK_CURRENT_TIME);
 #else
-	GtkClipboard *clipBoard;
-	clipBoard = gtk_widget_get_clipboard(GTK_WIDGET(PWidget(wMain)), atomClipboard);
-	if (clipBoard == NULL) // Occurs if widget isn't in a toplevel
-		return;
-
 	SelectionText *clipText = new SelectionText();
 	clipText->Copy(selectedText);
-
-	gtk_clipboard_set_with_data(clipBoard, clipboardCopyTargets, nClipboardCopyTargets,
-				    ClipboardGetSelection, ClipboardClearSelection, clipText);
-
+	StoreOnClipboard(clipText);
 #endif
 }
 
@@ -1313,17 +1306,9 @@ void ScintillaGTK::Copy() {
 		                        atomClipboard,
 		                        GDK_CURRENT_TIME);
 #else
-		GtkClipboard *clipBoard;
-		clipBoard = gtk_widget_get_clipboard(GTK_WIDGET(PWidget(wMain)), atomClipboard);
-		if (clipBoard == NULL) // Occurs if widget isn't in a toplevel
-			return;
-
 		SelectionText *clipText = new SelectionText();
 		CopySelectionRange(clipText);
-
-		gtk_clipboard_set_with_data(clipBoard, clipboardCopyTargets, nClipboardCopyTargets,
-					    ClipboardGetSelection, ClipboardClearSelection, clipText);
-
+		StoreOnClipboard(clipText);
 #endif
 #if PLAT_GTK_WIN32
 		if (selType == selRectangle) {
@@ -1639,6 +1624,18 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 }
 
 #ifdef USE_GTK_CLIPBOARD
+void ScintillaGTK::StoreOnClipboard(SelectionText *clipText) {
+	GtkClipboard *clipBoard = 
+		gtk_widget_get_clipboard(GTK_WIDGET(PWidget(wMain)), atomClipboard);
+	if (clipBoard == NULL) // Occurs if widget isn't in a toplevel
+		return;
+
+	if (gtk_clipboard_set_with_data(clipBoard, clipboardCopyTargets, nClipboardCopyTargets,
+				    ClipboardGetSelection, ClipboardClearSelection, clipText)) {
+		gtk_clipboard_set_can_store(clipBoard, clipboardCopyTargets, nClipboardCopyTargets);
+	}
+}
+
 void ScintillaGTK::ClipboardGetSelection(GtkClipboard *, GtkSelectionData *selection_data, guint info, void *data) {
 	GetSelection(selection_data, info, static_cast<SelectionText*>(data));
 }
