@@ -3698,13 +3698,11 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 			anchor = MovePositionForInsertion(anchor, mh.position, mh.length);
 			braces[0] = MovePositionForInsertion(braces[0], mh.position, mh.length);
 			braces[1] = MovePositionForInsertion(braces[1], mh.position, mh.length);
-			pdoc->decorations.InsertSpace(mh.position, mh.length);
 		} else if (mh.modificationType & SC_MOD_DELETETEXT) {
 			currentPos = MovePositionForDeletion(currentPos, mh.position, mh.length);
 			anchor = MovePositionForDeletion(anchor, mh.position, mh.length);
 			braces[0] = MovePositionForDeletion(braces[0], mh.position, mh.length);
 			braces[1] = MovePositionForDeletion(braces[1], mh.position, mh.length);
-			pdoc->decorations.DeleteRange(mh.position, mh.length);
 		}
 		if (cs.LinesDisplayed() < cs.LinesInDoc()) {
 			// Some lines are hidden so may need shown.

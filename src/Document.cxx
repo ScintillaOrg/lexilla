@@ -1407,6 +1407,11 @@ void Document::NotifySavePoint(bool atSavePoint) {
 }
 
 void Document::NotifyModified(DocModification mh) {
+	if (mh.modificationType & SC_MOD_INSERTTEXT) {
+		decorations.InsertSpace(mh.position, mh.length);
+	} else if (mh.modificationType & SC_MOD_DELETETEXT) {
+		decorations.DeleteRange(mh.position, mh.length);
+	}
 	for (int i = 0; i < lenWatchers; i++) {
 		watchers[i].watcher->NotifyModified(this, mh, watchers[i].userData);
 	}
