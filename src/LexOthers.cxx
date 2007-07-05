@@ -818,7 +818,7 @@ static bool strstart(const char *haystack, const char *needle) {
 	return strncmp(haystack, needle, strlen(needle)) == 0;
 }
 
-static int RecogniseErrorListLine(const char *lineBuffer, unsigned int lengthLine) {
+static int RecogniseErrorListLine(const char *lineBuffer, unsigned int lengthLine, int &startValue) {
 	if (lineBuffer[0] == '>') {
 		// Command or return status
 		return SCE_ERR_CMD;
@@ -934,6 +934,7 @@ static int RecogniseErrorListLine(const char *lineBuffer, unsigned int lengthLin
 			} else if (state == stGccDigit) {	// <filename>:<line>
 				if (ch == ':') {
 					state = stGcc;	// :9.*: is GCC
+					startValue = i + 1;
 					break;
 				} else if (!Is0To9(ch)) {
 					state = stUnrecognized;
@@ -1009,8 +1010,16 @@ static void ColouriseErrorListLine(
     char *lineBuffer,
     unsigned int lengthLine,
     unsigned int endPos,
-    Accessor &styler) {
-	styler.ColourTo(endPos, RecogniseErrorListLine(lineBuffer, lengthLine));
+    Accessor &styler,
+	bool valueSeparate) {
+	int startValue = -1;
+	int style = RecogniseErrorListLine(lineBuffer, lengthLine, startValue);
+	if (valueSeparate && (startValue >= 0)) {
+		styler.ColourTo(endPos - (lengthLine - startValue), style);
+		styler.ColourTo(endPos, SCE_ERR_VALUE);
+	} else {
+		styler.ColourTo(endPos, style);
+	}
 }
 
 static void ColouriseErrorListDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler) {
@@ -1018,17 +1027,18 @@ static void ColouriseErrorListDoc(unsigned int startPos, int length, int, WordLi
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
 	unsigned int linePos = 0;
+	bool valueSeparate = styler.GetPropertyInt("lexer.errorlist.value.separate", 0) != 0;
 	for (unsigned int i = startPos; i < startPos + length; i++) {
 		lineBuffer[linePos++] = styler[i];
 		if (AtEOL(styler, i) || (linePos >= sizeof(lineBuffer) - 1)) {
 			// End of line (or of line buffer) met, colourise it
 			lineBuffer[linePos] = '\0';
-			ColouriseErrorListLine(lineBuffer, linePos, i, styler);
+			ColouriseErrorListLine(lineBuffer, linePos, i, styler, valueSeparate);
 			linePos = 0;
 		}
 	}
 	if (linePos > 0) {	// Last line does not have ending characters
-		ColouriseErrorListLine(lineBuffer, linePos, startPos + length - 1, styler);
+		ColouriseErrorListLine(lineBuffer, linePos, startPos + length - 1, styler, valueSeparate);
 	}
 }
 
