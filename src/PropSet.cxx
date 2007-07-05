@@ -865,7 +865,7 @@ bool WordList::InList(const char *s) {
 	unsigned char firstChar = s[0];
 	int j = starts[firstChar];
 	if (j >= 0) {
-		while (words[j][0] == firstChar) {
+		while ((unsigned char)words[j][0] == firstChar) {
 			if (s[1] == words[j][1]) {
 				const char *a = words[j] + 1;
 				const char *b = s + 1;
