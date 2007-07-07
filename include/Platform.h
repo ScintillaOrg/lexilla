@@ -405,6 +405,7 @@ public:
 	enum Cursor { cursorInvalid, cursorText, cursorArrow, cursorUp, cursorWait, cursorHoriz, cursorVert, cursorReverseArrow, cursorHand };
 	void SetCursor(Cursor curs);
 	void SetTitle(const char *s);
+	PRectangle GetMonitorRect(Point pt);
 #if PLAT_MACOSX
 	void SetWindow(void *ref) { windowRef = ref; };
 	void SetControl(void *_control) { control = _control; };

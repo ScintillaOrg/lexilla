@@ -231,6 +231,9 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 
 	PRectangle rcClient = GetClientRectangle();
 	Point pt = LocationFromPosition(currentPos - lenEntered);
+	PRectangle rcPopupBounds = wMain.GetMonitorRect(pt);
+	if (rcPopupBounds.Height() == 0)
+		rcPopupBounds = rcClient;
 
 	int heightLB = 100;
 	int widthLB = 100;
@@ -241,18 +244,18 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 	}
 	PRectangle rcac;
 	rcac.left = pt.x - ac.lb->CaretFromEdge();
-	if (pt.y >= rcClient.bottom - heightLB &&  // Wont fit below.
-	        pt.y >= (rcClient.bottom + rcClient.top) / 2) { // and there is more room above.
+	if (pt.y >= rcPopupBounds.bottom - heightLB &&  // Wont fit below.
+	        pt.y >= (rcPopupBounds.bottom + rcPopupBounds.top) / 2) { // and there is more room above.
 		rcac.top = pt.y - heightLB;
-		if (rcac.top < 0) {
-			heightLB += rcac.top;
-			rcac.top = 0;
+		if (rcac.top < rcPopupBounds.top) {
+			heightLB -= (rcPopupBounds.top - rcac.top);
+			rcac.top = rcPopupBounds.top;
 		}
 	} else {
 		rcac.top = pt.y + vs.lineHeight;
 	}
 	rcac.right = rcac.left + widthLB;
-	rcac.bottom = Platform::Minimum(rcac.top + heightLB, rcClient.bottom);
+	rcac.bottom = Platform::Minimum(rcac.top + heightLB, rcPopupBounds.bottom);
 	ac.lb->SetPositionRelative(rcac, wMain);
 	ac.lb->SetFont(vs.styles[STYLE_DEFAULT].font);
 	unsigned int aveCharWidth = vs.styles[STYLE_DEFAULT].aveCharWidth;
@@ -270,8 +273,8 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 	// Make an allowance for large strings in list
 	rcList.left = pt.x - ac.lb->CaretFromEdge();
 	rcList.right = rcList.left + widthLB;
-	if (((pt.y + vs.lineHeight) >= (rcClient.bottom - heightAlloced)) &&  // Wont fit below.
-	        ((pt.y + vs.lineHeight / 2) >= (rcClient.bottom + rcClient.top) / 2)) { // and there is more room above.
+	if (((pt.y + vs.lineHeight) >= (rcPopupBounds.bottom - heightAlloced)) &&  // Wont fit below.
+	        ((pt.y + vs.lineHeight / 2) >= (rcPopupBounds.bottom + rcPopupBounds.top) / 2)) { // and there is more room above.
 		rcList.top = pt.y - heightAlloced;
 	} else {
 		rcList.top = pt.y + vs.lineHeight;

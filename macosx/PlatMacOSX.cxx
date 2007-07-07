@@ -1059,6 +1059,10 @@ void Window::SetTitle(const char *s) {
     CFRelease(title);
 }
 
+PRectangle Window::GetMonitorRect(Point) {
+	return PRectangle();
+}
+
 ListBox::ListBox() {}
 
 ListBox::~ListBox() {}
