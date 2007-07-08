@@ -1874,10 +1874,11 @@ void Window::SetTitle(const char *s) {
 	gtk_window_set_title(GTK_WINDOW(id), s);
 }
 
-/* Returns rectangle of monitor pt is on, both rect and pt are in Window's 
+/* Returns rectangle of monitor pt is on, both rect and pt are in Window's
    gdk window coordinates */
 PRectangle Window::GetMonitorRect(Point pt) {
 	gint x_offset, y_offset;
+	pt = pt;
 
 	gdk_window_get_origin(PWidget(id)->window, &x_offset, &y_offset);
 
