@@ -149,11 +149,11 @@ void Document::DeleteAllMarks(int markerNum) {
 	NotifyModified(mh);
 }
 
-int Document::LineStart(int line) {
+int Document::LineStart(int line) const {
 	return cb.LineStart(line);
 }
 
-int Document::LineEnd(int line) {
+int Document::LineEnd(int line) const {
 	if (line == LinesTotal() - 1) {
 		return LineStart(line + 1);
 	} else {
@@ -652,7 +652,7 @@ void Document::SetLineIndentation(int line, int indent) {
 	}
 }
 
-int Document::GetLineIndentPosition(int line) {
+int Document::GetLineIndentPosition(int line) const {
 	if (line < 0)
 		return 0;
 	int pos = LineStart(line);
@@ -793,7 +793,7 @@ void Document::ConvertLineEnds(int eolModeSet) {
 	EndUndoAction();
 }
 
-bool Document::IsWhiteLine(int line) {
+bool Document::IsWhiteLine(int line) const {
 	int currentChar = LineStart(line);
 	int endLine = LineEnd(line);
 	while (currentChar < endLine) {
@@ -1238,7 +1238,7 @@ const char *Document::SubstituteByPosition(const char *text, int *length) {
 	return substituted;
 }
 
-int Document::LinesTotal() {
+int Document::LinesTotal() const {
 	return cb.Lines();
 }
 

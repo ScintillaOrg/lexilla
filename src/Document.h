@@ -160,7 +160,7 @@ public:
 
 	int GetLineIndentation(int line);
 	void SetLineIndentation(int line, int indent);
-	int GetLineIndentPosition(int line);
+	int GetLineIndentPosition(int line) const;
 	int GetColumn(int position);
 	int FindColumn(int line, int column);
 	void Indent(bool forwards, int lineBottom, int lineTop);
@@ -187,8 +187,8 @@ public:
 	void DeleteMarkFromHandle(int markerHandle);
 	void DeleteAllMarks(int markerNum);
 	int LineFromHandle(int markerHandle) { return cb.LineFromHandle(markerHandle); }
-	int LineStart(int line);
-	int LineEnd(int line);
+	int LineStart(int line) const;
+	int LineEnd(int line) const;
 	int LineEndPosition(int position);
 	int VCHomePosition(int position);
 
@@ -202,13 +202,13 @@ public:
 	int ExtendWordSelect(int pos, int delta, bool onlyWordCharacters=false);
 	int NextWordStart(int pos, int delta);
 	int NextWordEnd(int pos, int delta);
-	int Length() { return cb.Length(); }
+	int Length() const { return cb.Length(); }
 	void Allocate(int newSize) { cb.Allocate(newSize); }
 	long FindText(int minPos, int maxPos, const char *s,
 		bool caseSensitive, bool word, bool wordStart, bool regExp, bool posix, int *length);
 	long FindText(int iMessage, unsigned long wParam, long lParam);
 	const char *SubstituteByPosition(const char *text, int *length);
-	int LinesTotal();
+	int LinesTotal() const;
 
 	void ChangeCase(Range r, bool makeUpperCase);
 
@@ -237,7 +237,7 @@ public:
 	int WordPartLeft(int pos);
 	int WordPartRight(int pos);
 	int ExtendStyleRange(int pos, int delta, bool singleLine = false);
-	bool IsWhiteLine(int line);
+	bool IsWhiteLine(int line) const;
 	int ParaUp(int pos);
 	int ParaDown(int pos);
 	int IndentSize() { return actualIndentInChars; }

@@ -563,7 +563,7 @@ CellBuffer::CellBuffer() {
 CellBuffer::~CellBuffer() {
 }
 
-char CellBuffer::CharAt(int position) {
+char CellBuffer::CharAt(int position) const {
 	return substance.ValueAt(position);
 }
 
@@ -653,7 +653,7 @@ const char *CellBuffer::DeleteChars(int position, int deleteLength, bool &startS
 	return data;
 }
 
-int CellBuffer::Length() {
+int CellBuffer::Length() const {
 	return substance.Length();
 }
 
@@ -662,11 +662,11 @@ void CellBuffer::Allocate(int newSize) {
 	style.ReAllocate(newSize);
 }
 
-int CellBuffer::Lines() {
+int CellBuffer::Lines() const {
 	return lv.Lines();
 }
 
-int CellBuffer::LineStart(int line) {
+int CellBuffer::LineStart(int line) const {
 	if (line < 0)
 		return 0;
 	else if (line >= Lines())
