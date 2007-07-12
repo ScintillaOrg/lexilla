@@ -727,11 +727,17 @@ set void SetHScrollBar=2130(bool show,)
 # Is the horizontal scroll bar visible?
 get bool GetHScrollBar=2131(,)
 
+enu IndentView=SC_IV_
+val SC_IV_NONE=0
+val SC_IV_REAL=1
+val SC_IV_LOOKFORWARD=2
+val SC_IV_LOOKBOTH=3
+
 # Show or hide indentation guides.
-set void SetIndentationGuides=2132(bool show,)
+set void SetIndentationGuides=2132(int indentView,)
 
 # Are the indentation guides visible?
-get bool GetIndentationGuides=2133(,)
+get int GetIndentationGuides=2133(,)
 
 # Set the highlighted indentation guide column.
 # 0 = no highlighted guide.

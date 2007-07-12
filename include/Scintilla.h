@@ -298,6 +298,10 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_GETCOLUMN 2129
 #define SCI_SETHSCROLLBAR 2130
 #define SCI_GETHSCROLLBAR 2131
+#define SC_IV_NONE 0
+#define SC_IV_REAL 1
+#define SC_IV_LOOKFORWARD 2
+#define SC_IV_LOOKBOTH 3
 #define SCI_SETINDENTATIONGUIDES 2132
 #define SCI_GETINDENTATIONGUIDES 2133
 #define SCI_SETHIGHLIGHTGUIDE 2134

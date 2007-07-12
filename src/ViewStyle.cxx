@@ -229,7 +229,7 @@ void ViewStyle::Init(size_t stylesSize_) {
 	}
 	zoomLevel = 0;
 	viewWhitespace = wsInvisible;
-	viewIndentationGuides = false;
+	viewIndentationGuides = ivNone;
 	viewEOL = false;
 	showMarkedLines = true;
 	extraFontFlag = false;

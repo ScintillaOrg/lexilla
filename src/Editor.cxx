@@ -2286,7 +2286,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 				// Normal text display
 				surface->FillRectangle(rcSegment, textBack);
 				if (vsDraw.viewWhitespace != wsInvisible ||
-				        (inIndentation && vsDraw.viewIndentationGuides)) {
+					(inIndentation && vsDraw.viewIndentationGuides == ivReal)) {
 					for (int cpos = 0; cpos <= i - startseg; cpos++) {
 						if (ll->chars[cpos + startseg] == ' ') {
 							if (drawWhitespaceBackground &&
@@ -2361,12 +2361,13 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 						textBack = vsDraw.whitespaceBackground.allocated;
 					surface->FillRectangle(rcSegment, textBack);
 				}
-				if ((vsDraw.viewWhitespace != wsInvisible) || ((inIndentation && vsDraw.viewIndentationGuides))) {
+				if ((vsDraw.viewWhitespace != wsInvisible) || 
+					(inIndentation && vsDraw.viewIndentationGuides != ivNone)) {
 					if (vsDraw.whitespaceForegroundSet)
 						textFore = vsDraw.whitespaceForeground.allocated;
 					surface->PenColour(textFore);
 				}
-				if (inIndentation && vsDraw.viewIndentationGuides) {
+				if (inIndentation && vsDraw.viewIndentationGuides == ivReal) {
 					for (int xIG = ll->positions[i] / indentWidth * indentWidth; xIG < ll->positions[i + 1]; xIG += indentWidth) {
 						if (xIG >= ll->positions[i] && xIG > 0) {
 							DrawIndentGuide(surface, lineVisible, vsDraw.lineHeight, xIG + xStart, rcSegment,
@@ -2426,7 +2427,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 					}
 				}
 				if (vsDraw.viewWhitespace != wsInvisible ||
-				        (inIndentation && vsDraw.viewIndentationGuides)) {
+				        (inIndentation && vsDraw.viewIndentationGuides != ivNone)) {
 					for (int cpos = 0; cpos <= i - startseg; cpos++) {
 						if (ll->chars[cpos + startseg] == ' ') {
 							if (vsDraw.viewWhitespace != wsInvisible) {
@@ -2446,7 +2447,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 									surface->FillRectangle(rcDot, textFore);
 								}
 							}
-							if (inIndentation && vsDraw.viewIndentationGuides) {
+							if (inIndentation && vsDraw.viewIndentationGuides == ivReal) {
 								int startSpace = ll->positions[cpos + startseg];
 								if (startSpace > 0 && (startSpace % indentWidth == 0)) {
 									DrawIndentGuide(surface, lineVisible, vsDraw.lineHeight, startSpace + xStart, rcSegment,
@@ -2475,6 +2476,49 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 			}
 		} else if (rcSegment.left > rcLine.right) {
 			break;
+		}
+	}
+	if ((vsDraw.viewIndentationGuides == ivLookForward || vsDraw.viewIndentationGuides == ivLookBoth)
+		&& (subLine == 0)) {
+		int indentSpace = pdoc->GetLineIndentation(line);
+		// Find the most recent line with some text
+		
+		int lineLastWithText = line;
+		while (lineLastWithText > 0 && pdoc->IsWhiteLine(lineLastWithText)) {
+			lineLastWithText--;
+		}
+		if (lineLastWithText < line) {
+			// This line is empty, so use indentation of last line with text
+			int indentLastWithText = pdoc->GetLineIndentation(lineLastWithText);
+			int isFoldHeader = pdoc->GetLevel(lineLastWithText) & SC_FOLDLEVELHEADERFLAG;
+			if (isFoldHeader) {
+				// Level is one more level than parent
+				indentLastWithText += pdoc->IndentSize();
+			}
+			if (vsDraw.viewIndentationGuides == ivLookForward) {
+				// In viLookForward mode, previous line only used if it is a fold header
+				if (isFoldHeader) {
+					indentSpace = Platform::Maximum(indentSpace, indentLastWithText);
+				}
+			} else {	// viLookBoth
+				indentSpace = Platform::Maximum(indentSpace, indentLastWithText);
+			}
+		}
+		
+		int lineNextWithText = line;
+		while (lineNextWithText < pdoc->LinesTotal() && pdoc->IsWhiteLine(lineNextWithText)) {
+			lineNextWithText++;
+		}
+		if (lineNextWithText > line) {
+			// This line is empty, so use indentation of last line with text
+			indentSpace = Platform::Maximum(indentSpace, 
+				pdoc->GetLineIndentation(lineNextWithText));
+		}
+
+		for (int indentPos=pdoc->IndentSize(); indentPos < indentSpace; indentPos += pdoc->IndentSize()) {
+			int xIndent = indentPos * vsDraw.spaceWidth;
+			DrawIndentGuide(surface, lineVisible, vsDraw.lineHeight, xIndent + xStart, rcSegment,
+			                (ll->xHighlightGuide == xIndent));
 		}
 	}
 
@@ -3030,7 +3074,7 @@ long Editor::FormatRange(bool draw, RangeToFormat *pfr) {
 	vsPrint.showMarkedLines = false;
 	vsPrint.fixedColumnWidth = 0;
 	vsPrint.zoomLevel = printMagnification;
-	vsPrint.viewIndentationGuides = false;
+	vsPrint.viewIndentationGuides = ivNone;
 	// Don't show the selection when printing
 	vsPrint.selbackset = false;
 	vsPrint.selforeset = false;
@@ -6557,7 +6601,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return verticalScrollBarVisible;
 
 	case SCI_SETINDENTATIONGUIDES:
-		vs.viewIndentationGuides = wParam != 0;
+		vs.viewIndentationGuides = IndentView(wParam);
 		Redraw();
 		break;
 

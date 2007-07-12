@@ -38,6 +38,8 @@ public:
 	const char *Save(const char *name);
 };
 
+enum IndentView {ivNone, ivReal, ivLookForward, ivLookBoth};
+
 enum WhiteSpaceVisibility {wsInvisible=0, wsVisibleAlways=1, wsVisibleAfterIndent=2};
 
 /**
@@ -87,7 +89,7 @@ public:
 	int fixedColumnWidth;
 	int zoomLevel;
 	WhiteSpaceVisibility viewWhitespace;
-	bool viewIndentationGuides;
+	IndentView viewIndentationGuides;
 	bool viewEOL;
 	bool showMarkedLines;
 	ColourPair caretcolour;

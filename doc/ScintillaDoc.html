@@ -2658,13 +2658,46 @@ struct TextToFind {
     <p><b id="SCI_GETLINEINDENTPOSITION">SCI_GETLINEINDENTPOSITION(int line)</b><br />
      This returns the position at the end of indentation of a line.</p>
 
-    <p><b id="SCI_SETINDENTATIONGUIDES">SCI_SETINDENTATIONGUIDES(bool view)</b><br />
+    <p><b id="SCI_SETINDENTATIONGUIDES">SCI_SETINDENTATIONGUIDES(int indentView)</b><br />
      <b id="SCI_GETINDENTATIONGUIDES">SCI_GETINDENTATIONGUIDES</b><br />
      Indentation guides are dotted vertical lines that appear within indentation white space every
     indent size columns. They make it easy to see which constructs line up especially when they
     extend over multiple pages. Style <a class="message"
     href="#StyleDefinition"><code>STYLE_INDENTGUIDE</code></a> (37) is used to specify the
     foreground and background colour of the indentation guides.</p>
+
+    <p>There are 4 indentation guide views.
+    SC_IV_NONE turns the feature off but the other 3 states determine how far the guides appear on
+    empty lines.
+    <table border="0" summary="Search flags">
+      <tbody>
+        <tr>
+          <td><code>SC_IV_NONE</code></td>
+          <td>No indentation guides are shown.</td>
+        </tr>
+
+        <tr>
+          <td><code>SC_IV_REAL</code></td>
+          <td>Indentation guides are shown inside real indentation white space.</td>
+        </tr>
+
+        <tr>
+          <td><code>SC_IV_LOOKFORWARD</code></td>
+          <td>Indentation guides are shown beyond the actual indentation up to the level of the
+	next non-empty line.
+	If the previous non-empty line was a fold header then indentation guides are shown for
+	one more level of indent than that line. This setting is good for Python.</td>
+        </tr>
+
+        <tr>
+          <td><code>SC_IV_LOOKBOTH</code></td>
+          <td>Indentation guides are shown beyond the actual indentation up to the level of the
+	next non-empty line or previous non-empty line whichever is the greater.
+	This setting is good for most languages.</td>
+        </tr>
+
+    </table>
+    </p>
 
     <p><b id="SCI_SETHIGHLIGHTGUIDE">SCI_SETHIGHLIGHTGUIDE(int column)</b><br />
      <b id="SCI_GETHIGHLIGHTGUIDE">SCI_GETHIGHLIGHTGUIDE</b><br />
