@@ -2903,7 +2903,9 @@ struct TextToFind {
     <p><b id="SCI_MARKERDEFINEPIXMAP">SCI_MARKERDEFINEPIXMAP(int markerNumber, const char
     *xpm)</b><br />
      Markers can be set to pixmaps with this message. The XPM format is used for the pixmap and it
-    is limited to pixmaps that use one character per pixel. The data should be null terminated.
+    is limited to pixmaps that use one character per pixel with no named colours.
+    The transparent colour may be named 'None'.
+    The data should be null terminated.
     Pixmaps use the <code>SC_MARK_PIXMAP</code> marker symbol. You can find the full description of
     the XPM format <a class="jump" href="http://koala.ilog.fr/lehors/xpm.html">here</a>.</p>
 
