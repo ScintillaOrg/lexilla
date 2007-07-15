@@ -133,6 +133,10 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 
 	WordList &keywords = *keywordlists[0];
 
+    // keywords that forces /PATTERN/ at all times
+    WordList reWords;
+    reWords.Set("elsif if split while");
+
 	class HereDocCls {
 	public:
 		int State;		// 0: '<<' encountered
@@ -577,6 +581,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
                 bool hereDocSpace = false;      // these are for corner case:
                 bool hereDocScalar = false;     // SCALAR [whitespace] '<<'
 				unsigned int bk = (i > 0)? i - 1: 0;
+                unsigned int bkend;
 				char bkch;
 				styler.Flush();
                 if (styler.StyleAt(bk) == SCE_PL_DEFAULT)
@@ -659,13 +664,14 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
                                     preferRE = false;
                                     break;
 								}
-							} else {// bare identifier, usually a function call but Perl
-								// optimizes them as pseudo-constants, then the next
-								// '/' will be a divide; favour divide over regex
-								// if there is a whitespace after the '/'
-								if (isspacechar(chNext)) {
-									preferRE = false;
-								}
+							} else {
+                                // bare identifier, if '/', /PATTERN/ unless digit/space immediately after '/'
+								if (!isHereDoc &&
+                                    (isspacechar(chNext) || isdigit(chNext)))
+                                    preferRE = false;
+								// HERE docs cannot have a space after the >>
+                                if (isspacechar(chNext))
+                                    preferRE = false;
 								break;
 							}
 							bk--;
@@ -674,8 +680,24 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
                     case SCE_PL_SCALAR:     // for $var<< case
                         hereDocScalar = true;
                         break;
-					// other styles uses the default, preferRE=false
+                    // for HERE docs, always true for preferRE
 					case SCE_PL_WORD:
+                        preferRE = true;
+                        if (isHereDoc)
+                            break;
+                        // adopt heuristics similar to vim-style rules:
+                        // keywords always forced as /PATTERN/: split, if, elsif, while
+                        // everything else /PATTERN/ unless digit/space immediately after '/'
+                        bkend = bk + 1;
+						while (bk > 0 && styler.StyleAt(bk-1) == SCE_PL_WORD) {
+							bk--;
+						}
+                        if (isPerlKeyword(bk, bkend, reWords, styler))
+                            break;
+                        if (isspacechar(chNext) || isdigit(chNext))
+                            preferRE = false;
+                        break;
+					// other styles uses the default, preferRE=false
 					case SCE_PL_POD:
 					case SCE_PL_POD_VERB:
 					case SCE_PL_HERE_Q:
@@ -1185,22 +1207,26 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
             } else if (state == SCE_PL_FORMAT_IDENT) {
                 // occupies different HereDoc states to avoid clashing with HERE docs
                 if (HereDoc.State == 0) {
-                    if (chNext != ' ' && chNext != '\t') {
+                    if ((isascii(ch) && isalpha(ch)) || ch == '_'   // probable identifier
+                        || ch == '=') {                             // no identifier
+                        HereDoc.State = 3;
+                        HereDoc.Quoted = false; // whitespace flag
+                    } else if (ch == ' ' || ch == '\t') {
                         styler.ColourTo(i, SCE_PL_DEFAULT);
-                        if ((isascii(chNext) && isalpha(chNext)) || chNext == '_'    // probable identifier
-                            || chNext == '=') {                 // no identifier
-                            HereDoc.State = 3;
-                        } else {
-                            state = SCE_PL_DEFAULT;
-                            HereDoc.State = 0;
-                        }
+                    } else {
+                        state = SCE_PL_DEFAULT;
+                        HereDoc.State = 0;
+                        goto restartLexer;
                     }
-                } else if (HereDoc.State == 3) {
+                }
+                if (HereDoc.State == 3) {   // with just a '=', state goes 0->3->4
                     if (ch == '=') {
                         styler.ColourTo(i, SCE_PL_FORMAT_IDENT);
                         state = SCE_PL_DEFAULT;
                         HereDoc.State = 4;
-                    } else if (isEOLChar(ch)) {
+                    } else if (ch == ' ' || ch == '\t') {
+                        HereDoc.Quoted = true;
+                    } else if (isEOLChar(ch) || (HereDoc.Quoted && ch != '=')) {
                         // abandon format, restart from after 'format'
                         i = backPos + 1;
                         ch = styler.SafeGetCharAt(i);
