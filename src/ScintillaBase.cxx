@@ -183,7 +183,7 @@ int ScintillaBase::KeyCommand(unsigned int iMessage) {
 		    (iMessage != SCI_CHARLEFT) &&
 		    (iMessage != SCI_CHARLEFTEXTEND) &&
 		    (iMessage != SCI_CHARRIGHT) &&
-		    (iMessage != SCI_CHARLEFTEXTEND) &&
+		    (iMessage != SCI_CHARRIGHTEXTEND) &&
 		    (iMessage != SCI_EDITTOGGLEOVERTYPE) &&
 		    (iMessage != SCI_DELETEBACK) &&
 		    (iMessage != SCI_DELETEBACKNOTLINE)
