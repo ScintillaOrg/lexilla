@@ -424,7 +424,7 @@ void PropSet::SetMultiple(const char *s) {
 	Set(s);
 }
 
-SString PropSet::Get(const char *key) {
+SString PropSet::Get(const char *key) const {
 	unsigned int hash = HashString(key, strlen(key));
 	for (Property *p = props[hash % hashRoots]; p; p = p->next) {
 		if ((hash == p->hash) && (0 == strcmp(p->key, key))) {
@@ -437,20 +437,6 @@ SString PropSet::Get(const char *key) {
 	} else {
 		return "";
 	}
-}
-
-bool PropSet::IncludesVar(const char *value, const char *key) {
-	const char *var = strstr(value, "$(");
-	while (var) {
-		if (isprefix(var + 2, key) && (var[2 + strlen(key)] == ')')) {
-			// Found $(key) which would lead to an infinite loop so exit
-			return true;
-		}
-		var = strstr(var + 2, ")");
-		if (var)
-			var = strstr(var + 1, "$(");
-	}
-	return false;
 }
 
 // There is some inconsistency between GetExpanded("foo") and Expand("$(foo)").
@@ -470,7 +456,7 @@ struct VarChain {
 	const VarChain *link;
 };
 
-static int ExpandAllInPlace(PropSet &props, SString &withVars, int maxExpands, const VarChain &blankVars = VarChain()) {
+static int ExpandAllInPlace(const PropSet &props, SString &withVars, int maxExpands, const VarChain &blankVars = VarChain()) {
 	int varStart = withVars.search("$(");
 	while ((varStart >= 0) && (maxExpands > 0)) {
 		int varEnd = withVars.search(")", varStart+2);
@@ -506,19 +492,19 @@ static int ExpandAllInPlace(PropSet &props, SString &withVars, int maxExpands, c
 	return maxExpands;
 }
 
-SString PropSet::GetExpanded(const char *key) {
+SString PropSet::GetExpanded(const char *key) const {
 	SString val = Get(key);
 	ExpandAllInPlace(*this, val, 100, VarChain(key));
 	return val;
 }
 
-SString PropSet::Expand(const char *withVars, int maxExpands) {
+SString PropSet::Expand(const char *withVars, int maxExpands) const {
 	SString val = withVars;
 	ExpandAllInPlace(*this, val, maxExpands);
 	return val;
 }
 
-int PropSet::GetInt(const char *key, int defaultValue) {
+int PropSet::GetInt(const char *key, int defaultValue) const {
 	SString val = GetExpanded(key);
 	if (val.length())
 		return val.value();
@@ -555,7 +541,7 @@ void PropSet::Clear() {
 	}
 }
 
-char *PropSet::ToString() {
+char *PropSet::ToString() const {
 	size_t len=0;
 	for (int r = 0; r < hashRoots; r++) {
 		for (Property *p = props[r]; p; p = p->next) {

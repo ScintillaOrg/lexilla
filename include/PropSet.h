@@ -42,7 +42,6 @@ protected:
 		}
 		return ret;
 	}
-	static bool IncludesVar(const char *value, const char *key);
 
 public:
 	PropSet *superPS;
@@ -52,12 +51,12 @@ public:
 	void Set(const char *keyVal);
 	void Unset(const char *key, int lenKey=-1);
 	void SetMultiple(const char *s);
-	SString Get(const char *key);
-	SString GetExpanded(const char *key);
-	SString Expand(const char *withVars, int maxExpands=100);
-	int GetInt(const char *key, int defaultValue=0);
+	SString Get(const char *key) const;
+	SString GetExpanded(const char *key) const;
+	SString Expand(const char *withVars, int maxExpands=100) const;
+	int GetInt(const char *key, int defaultValue=0) const;
 	void Clear();
-	char *ToString();	// Caller must delete[] the return value
+	char *ToString() const;	// Caller must delete[] the return value
 
 private:
 	// copy-value semantics not implemented
