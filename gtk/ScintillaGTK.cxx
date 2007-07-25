@@ -26,10 +26,11 @@
 #include "Accessor.h"
 #include "KeyWords.h"
 #endif
-#include "ContractionState.h"
 #include "SVector.h"
 #include "SplitVector.h"
 #include "Partitioning.h"
+#include "RunStyles.h"
+#include "ContractionState.h"
 #include "CellBuffer.h"
 #include "CallTip.h"
 #include "KeyMap.h"
@@ -39,7 +40,6 @@
 #include "Style.h"
 #include "AutoComplete.h"
 #include "ViewStyle.h"
-#include "RunStyles.h"
 #include "Decoration.h"
 #include "CharClassify.h"
 #include "Document.h"
@@ -1625,7 +1625,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 
 #ifdef USE_GTK_CLIPBOARD
 void ScintillaGTK::StoreOnClipboard(SelectionText *clipText) {
-	GtkClipboard *clipBoard = 
+	GtkClipboard *clipBoard =
 		gtk_widget_get_clipboard(GTK_WIDGET(PWidget(wMain)), atomClipboard);
 	if (clipBoard == NULL) // Occurs if widget isn't in a toplevel
 		return;
