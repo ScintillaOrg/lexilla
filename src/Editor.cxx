@@ -2915,8 +2915,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 				// Draw the Caret
 				if (lineDoc == lineCaret) {
 					int offset = Platform::Minimum(posCaret - rangeLine.start, ll->maxLineLength);
-					if ((offset >= ll->LineStart(subLine)) &&
-					        ((offset < ll->LineStart(subLine + 1)) || offset == ll->numCharsInLine)) {
+					if (ll->InLine(offset, subLine)) {
 						int xposCaret = ll->positions[offset] - ll->positions[ll->LineStart(subLine)] + xStart;
 
 						if (actualWrapVisualStartIndent != 0) {
@@ -2945,7 +2944,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 							if (widthOverstrikeCaret < 3)	// Make sure its visible
 								widthOverstrikeCaret = 3;
 
-							if (offset > 0)
+							if (offset > ll->LineStart(subLine))
 								caretWidthOffset = 1;	// Move back so overlaps both character cells.
 							if (posDrag >= 0) {
 								/* Dragging text, use a line caret */

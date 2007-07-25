@@ -126,6 +126,11 @@ int LineLayout::LineLastVisible(int line) const {
 	}
 }
 
+bool LineLayout::InLine(int offset, int line) const {
+	return ((offset >= LineStart(line)) && (offset < LineStart(line + 1)) || 
+		((offset == numCharsInLine) && (line == (lines-1))));
+}
+
 void LineLayout::SetLineStart(int line, int start) {
 	if ((line >= lenLineStarts) && (line != 0)) {
 		int newMaxLines = line + 20;
