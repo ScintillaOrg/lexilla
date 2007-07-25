@@ -299,6 +299,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual void UpdateSystemCaret();
 
 	void NeedWrapping(int docLineStart = 0, int docLineEnd = wrapLineLarge);
+	bool WrapOneLine(Surface *surface, int lineToWrap);
 	bool WrapLines(bool fullWrap, int priorityWrapLineStart);
 	void LinesJoin();
 	void LinesSplit(int pixelWidth);

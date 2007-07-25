@@ -1264,6 +1264,16 @@ void Editor::NeedWrapping(int docLineStart, int docLineEnd) {
 	}
 }
 
+bool Editor::WrapOneLine(Surface *surface, int lineToWrap) {
+	AutoLineLayout ll(llc, RetrieveLineLayout(lineToWrap));
+	int linesWrapped = 1;
+	if (ll) {
+		LayoutLine(lineToWrap, surface, vs, ll, wrapWidth);
+		linesWrapped = ll->lines;
+	}
+	return cs.SetHeight(lineToWrap, linesWrapped);
+}
+
 // Check if wrapping needed and perform any needed wrapping.
 // fullwrap: if true, all lines which need wrapping will be done,
 //           in this single call.
@@ -1340,13 +1350,7 @@ bool Editor::WrapLines(bool fullWrap, int priorityWrapLineStart) {
 				// Platform::DebugPrintf("Wraplines: full = %d, priorityStart = %d (wrapping: %d to %d)\n", fullWrap, priorityWrapLineStart, lineToWrap, lastLineToWrap);
 				// Platform::DebugPrintf("Pending wraps: %d to %d\n", wrapStart, wrapEnd);
 				while (lineToWrap < lastLineToWrap) {
-					AutoLineLayout ll(llc, RetrieveLineLayout(lineToWrap));
-					int linesWrapped = 1;
-					if (ll) {
-						LayoutLine(lineToWrap, surface, vs, ll, wrapWidth);
-						linesWrapped = ll->lines;
-					}
-					if (cs.SetHeight(lineToWrap, linesWrapped)) {
+					if (WrapOneLine(surface, lineToWrap)) {
 						wrapOccurred = true;
 					}
 					lineToWrap++;
@@ -3305,6 +3309,14 @@ void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 	}
 	if (charReplaceAction) {
 		pdoc->EndUndoAction();
+	}
+	// If in wrap mode rewrap current line so EnsureCaretVisible has accurate information
+	if (wrapState != eWrapNone) {
+		AutoSurface surface(this);
+		if (surface) {
+			WrapOneLine(surface, pdoc->LineFromPosition(currentPos));
+		}
+		SetScrollBars();
 	}
 	EnsureCaretVisible();
 	// Avoid blinking during rapid typing:
