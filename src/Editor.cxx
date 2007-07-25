@@ -17,13 +17,13 @@
 #endif
 #include "Scintilla.h"
 
-#include "ContractionState.h"
-#include "SVector.h"
 #include "SplitVector.h"
 #include "Partitioning.h"
+#include "RunStyles.h"
+#include "ContractionState.h"
+#include "SVector.h"
 #include "CellBuffer.h"
 #include "KeyMap.h"
-#include "RunStyles.h"
 #include "Indicator.h"
 #include "XPM.h"
 #include "LineMarker.h"
