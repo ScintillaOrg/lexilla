@@ -113,7 +113,6 @@ void Document::SetSavePoint() {
 int Document::AddMark(int line, int markerNum) {
 	int prev = cb.AddMark(line, markerNum);
 	DocModification mh(SC_MOD_CHANGEMARKER, LineStart(line), 0, 0, 0, line);
-	mh.line = line;
 	NotifyModified(mh);
 	return prev;
 }
@@ -124,14 +123,12 @@ void Document::AddMarkSet(int line, int valueSet) {
 		if (m & 1)
 			cb.AddMark(line, i);
 	DocModification mh(SC_MOD_CHANGEMARKER, LineStart(line), 0, 0, 0, line);
-	mh.line = line;
 	NotifyModified(mh);
 }
 
 void Document::DeleteMark(int line, int markerNum) {
 	cb.DeleteMark(line, markerNum);
 	DocModification mh(SC_MOD_CHANGEMARKER, LineStart(line), 0, 0, 0, line);
-	mh.line = line;
 	NotifyModified(mh);
 }
 
@@ -191,8 +188,7 @@ int Document::SetLevel(int line, int level) {
 	int prev = cb.SetLevel(line, level);
 	if (prev != level) {
 		DocModification mh(SC_MOD_CHANGEFOLD | SC_MOD_CHANGEMARKER,
-		                   LineStart(line), 0, 0, 0);
-		mh.line = line;
+		                   LineStart(line), 0, 0, 0, line);
 		mh.foldLevelNow = level;
 		mh.foldLevelPrev = prev;
 		NotifyModified(mh);
@@ -1335,11 +1331,17 @@ void Document::EnsureStyledTo(int pos) {
 	}
 }
 
-void Document::IncrementStyleClock() {
-	styleClock++;
-	if (styleClock > 0x100000) {
-		styleClock = 0;
+int Document::SetLineState(int line, int state) { 
+	int statePrevious = cb.SetLineState(line, state);
+	if (state != statePrevious) {
+		DocModification mh(SC_MOD_CHANGELINESTATE, 0, 0, 0, 0, line);
+		NotifyModified(mh);
 	}
+	return statePrevious;
+}
+
+void Document::IncrementStyleClock() {
+	styleClock = (styleClock + 1) % 0x100000;
 }
 
 void Document::DecorationFillRange(int position, int value, int fillLength) {

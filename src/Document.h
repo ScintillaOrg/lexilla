@@ -224,7 +224,7 @@ public:
 	void IncrementStyleClock();
 	void DecorationFillRange(int position, int value, int fillLength);
 
-	int SetLineState(int line, int state) { return cb.SetLineState(line, state); }
+	int SetLineState(int line, int state);
 	int GetLineState(int line) { return cb.GetLineState(line); }
 	int GetMaxLineState() { return cb.GetMaxLineState(); }
 

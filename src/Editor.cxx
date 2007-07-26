@@ -3731,6 +3731,15 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 	if (paintState == painting) {
 		CheckForChangeOutsidePaint(Range(mh.position, mh.position + mh.length));
 	}
+	if (mh.modificationType & SC_MOD_CHANGELINESTATE) {
+		if (paintState == painting) {
+			CheckForChangeOutsidePaint(
+				Range(pdoc->LineStart(mh.line), pdoc->LineStart(mh.line+1)));
+		} else {
+			// Could check that change is before last visible line.
+			Redraw();
+		}
+	}
 	if (mh.modificationType & (SC_MOD_CHANGESTYLE|SC_MOD_CHANGEINDICATOR)) {
 		if (mh.modificationType & SC_MOD_CHANGESTYLE) {
 			pdoc->IncrementStyleClock();
