@@ -1863,7 +1863,9 @@ struct TextToFind {
      As well as the 8 bits of lexical state stored for each character there is also an integer
     stored for each line. This can be used for longer lived parse states such as what the current
     scripting language is in an ASP page. Use <code>SCI_SETLINESTATE</code> to set the integer
-    value and <code>SCI_GETLINESTATE</code> to get the value.</p>
+    value and <code>SCI_GETLINESTATE</code> to get the value.
+    Changing the value produces a <a class="message" href="#SC_MOD_CHANGELINESTATE">SC_MOD_CHANGELINESTATE</a> notification.
+    </p>
 
     <p><b id="SCI_GETMAXLINESTATE">SCI_GETMAXLINESTATE</b><br />
      This returns the last line that has any line state.</p>
@@ -5079,6 +5081,17 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
           <td>An indicator has been added or removed from a range of text.</td>
 
           <td><code>position, length</code></td>
+        </tr>
+
+        <tr>
+          <td align="left"><code id="SC_MOD_CHANGELINESTATE">SC_MOD_CHANGELINESTATE</code></td>
+
+          <td align="center">0x8000</td>
+
+          <td>A line state has changed because <a class="message" href="#SCI_SETLINESTATE">SCI_SETLINESTATE</a>
+	  was called.</td>
+
+          <td><code>line</code></td>
         </tr>
 
         <tr>
