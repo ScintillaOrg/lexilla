@@ -1069,7 +1069,7 @@ bool ScintillaWin::HaveMouseCapture() {
 
 bool ScintillaWin::PaintContains(PRectangle rc) {
 	bool contains = true;
-	if (paintState == painting) {
+	if ((paintState == painting) && (!rc.Empty())) {
 		if (!rcPaint.Contains(rc)) {
 			contains = false;
 		} else {

@@ -5471,7 +5471,11 @@ void Editor::SetFocusState(bool focusState) {
 }
 
 bool Editor::PaintContains(PRectangle rc) {
-	return rcPaint.Contains(rc);
+	if (rc.Empty()) {
+		return true;
+	} else {
+		return rcPaint.Contains(rc);
+	}
 }
 
 bool Editor::PaintContainsMargin() {

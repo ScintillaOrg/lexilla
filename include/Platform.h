@@ -122,6 +122,9 @@ public:
 	}
 	int Width() { return right - left; }
 	int Height() { return bottom - top; }
+	bool Empty() { 
+		return (Height() <= 0) || (Width() <= 0);
+	}
 };
 
 /**
