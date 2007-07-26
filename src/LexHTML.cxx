@@ -71,8 +71,15 @@ static script_type segIsScriptingIndicator(Accessor &styler, unsigned int start,
 		return eScriptJS;
 	if (strstr(s, "php"))
 		return eScriptPHP;
-	if (strstr(s, "xml"))
+	if (strstr(s, "xml")) {
+		const char *xml = strstr(s, "xml");
+		for (const char *t=s; t<xml; t++) {
+			if (!IsASpace(*t)) {
+				return prevValue;
+			}
+		}
 		return eScriptXML;
+	}
 
 	return prevValue;
 }
