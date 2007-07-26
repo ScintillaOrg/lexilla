@@ -45,6 +45,7 @@ void ContractionState::Clear() {
 	heights = 0;
 	delete displayLines;
 	displayLines = 0;
+	linesInDocument = 1;
 }
 
 int ContractionState::LinesInDoc() const {
