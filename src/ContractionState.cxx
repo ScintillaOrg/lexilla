@@ -45,7 +45,6 @@ void ContractionState::Clear() {
 	heights = 0;
 	delete displayLines;
 	displayLines = 0;
-	linesInDocument = 1;
 }
 
 int ContractionState::LinesInDoc() const {
@@ -223,7 +222,9 @@ bool ContractionState::SetHeight(int lineDoc, int height) {
 }
 
 void ContractionState::ShowAll() {
+	int lines = LinesInDoc();
 	Clear();
+	linesInDocument = lines;
 }
 
 // Debugging checks
