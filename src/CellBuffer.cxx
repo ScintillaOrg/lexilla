@@ -13,7 +13,6 @@
 #include "Platform.h"
 
 #include "Scintilla.h"
-#include "SVector.h"
 #include "SplitVector.h"
 #include "Partitioning.h"
 #include "CellBuffer.h"
@@ -726,6 +725,20 @@ int CellBuffer::LineFromHandle(int markerHandle) {
 
 // Without undo
 
+void CellBuffer::InsertLine(int line, int position) {
+	lv.InsertLine(line, position);
+	if (lineStates.Length()) {
+		lineStates.Insert(line, 0);
+	}
+}
+
+void CellBuffer::RemoveLine(int line) {
+	lv.RemoveLine(line);
+	if (lineStates.Length()) {
+		lineStates.Delete(line);
+	}
+}
+
 void CellBuffer::BasicInsertString(int position, const char *s, int insertLength) {
 	if (insertLength == 0)
 		return;
@@ -741,21 +754,21 @@ void CellBuffer::BasicInsertString(int position, const char *s, int insertLength
 	char chAfter = substance.ValueAt(position + insertLength);
 	if (chPrev == '\r' && chAfter == '\n') {
 		// Splitting up a crlf pair at position
-		lv.InsertLine(lineInsert, position);
+		InsertLine(lineInsert, position);
 		lineInsert++;
 	}
 	char ch = ' ';
 	for (int i = 0; i < insertLength; i++) {
 		ch = s[i];
 		if (ch == '\r') {
-			lv.InsertLine(lineInsert, (position + i) + 1);
+			InsertLine(lineInsert, (position + i) + 1);
 			lineInsert++;
 		} else if (ch == '\n') {
 			if (chPrev == '\r') {
 				// Patch up what was end of line
 				lv.SetLineStart(lineInsert - 1, (position + i) + 1);
 			} else {
-				lv.InsertLine(lineInsert, (position + i) + 1);
+				InsertLine(lineInsert, (position + i) + 1);
 				lineInsert++;
 			}
 		}
@@ -765,7 +778,7 @@ void CellBuffer::BasicInsertString(int position, const char *s, int insertLength
 	if (chAfter == '\n') {
 		if (ch == '\r') {
 			// End of line already in buffer so drop the newly created one
-			lv.RemoveLine(lineInsert - 1);
+			RemoveLine(lineInsert - 1);
 		}
 	}
 }
@@ -800,13 +813,13 @@ void CellBuffer::BasicDeleteChars(int position, int deleteLength) {
 			chNext = substance.ValueAt(position + i + 1);
 			if (ch == '\r') {
 				if (chNext != '\n') {
-					lv.RemoveLine(lineRemove);
+					RemoveLine(lineRemove);
 				}
 			} else if (ch == '\n') {
 				if (ignoreNL) {
 					ignoreNL = false; 	// Further \n are real deletions
 				} else {
-					lv.RemoveLine(lineRemove);
+					RemoveLine(lineRemove);
 				}
 			}
 
@@ -817,7 +830,7 @@ void CellBuffer::BasicDeleteChars(int position, int deleteLength) {
 		char chAfter = substance.ValueAt(position + deleteLength);
 		if (chBefore == '\r' && chAfter == '\n') {
 			// Using lineRemove-1 as cr ended line before start of deletion
-			lv.RemoveLine(lineRemove - 1);
+			RemoveLine(lineRemove - 1);
 			lv.SetLineStart(lineRemove - 1, position + 1);
 		}
 	}
@@ -892,12 +905,14 @@ void CellBuffer::PerformRedoStep() {
 }
 
 int CellBuffer::SetLineState(int line, int state) {
+	lineStates.EnsureLength(line + 1);
 	int stateOld = lineStates[line];
 	lineStates[line] = state;
 	return stateOld;
 }
 
 int CellBuffer::GetLineState(int line) {
+	lineStates.EnsureLength(line + 1);
 	return lineStates[line];
 }
 

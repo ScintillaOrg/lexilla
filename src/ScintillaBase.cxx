@@ -24,7 +24,6 @@
 #include "Partitioning.h"
 #include "RunStyles.h"
 #include "ContractionState.h"
-#include "SVector.h"
 #include "CellBuffer.h"
 #include "CallTip.h"
 #include "KeyMap.h"

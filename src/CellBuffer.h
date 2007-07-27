@@ -160,7 +160,7 @@ private:
 
 	LineVector lv;
 
-	SVector lineStates;
+	SplitVector<int> lineStates;
 
 public:
 
@@ -177,6 +177,8 @@ public:
 	int Lines() const;
 	int LineStart(int line) const;
 	int LineFromPosition(int pos) { return lv.LineFromPosition(pos); }
+	void InsertLine(int line, int position);
+	void RemoveLine(int line);
 	const char *InsertString(int position, const char *s, int insertLength, bool &startSequence);
 
 	/// Setting styles for positions outside the range of the buffer is safe and has no effect.

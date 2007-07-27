@@ -18,7 +18,6 @@
 #include "Partitioning.h"
 #include "RunStyles.h"
 #include "ContractionState.h"
-#include "SVector.h"
 #include "CellBuffer.h"
 #include "KeyMap.h"
 #include "Indicator.h"

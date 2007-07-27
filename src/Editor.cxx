@@ -21,7 +21,6 @@
 #include "Partitioning.h"
 #include "RunStyles.h"
 #include "ContractionState.h"
-#include "SVector.h"
 #include "CellBuffer.h"
 #include "KeyMap.h"
 #include "Indicator.h"
@@ -4110,6 +4109,7 @@ void Editor::NewLine() {
 		}
 	}
 	SetLastXChosen();
+	SetScrollBars();
 	EnsureCaretVisible();
 	// Avoid blinking during rapid typing:
 	ShowCaretAtCurrentPosition();
