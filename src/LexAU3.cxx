@@ -44,6 +44,7 @@
 // Apr  8, 2006   - Added support for AutoIt3 Standard UDF library (SCE_AU3_UDF)
 // Mar  9, 2007   - Fixed bug with + following a String getting the wrong Color.
 // Jun 20, 2007   - Fixed Commentblock issue when LF's are used as EOL.
+// Jul 26, 2007   - Fixed #endregion undetected bug.
 //
 // Copyright for Scintilla: 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
@@ -700,7 +701,7 @@ static void FoldAU3Doc(unsigned int startPos, int length, int, WordList *[], Acc
 	// vars for getting first word to check for keywords
 	bool FirstWordStart = false;
 	bool FirstWordEnd = false;
-	char szKeyword[10]="";
+	char szKeyword[11]="";
 	int	 szKeywordlen = 0;
 	char szThen[5]="";
 	int	 szThenlen = 0;
@@ -730,7 +731,7 @@ static void FoldAU3Doc(unsigned int startPos, int length, int, WordList *[], Acc
 				szKeyword[szKeywordlen] = '\0';
 			}
 			else {
-				if (szKeywordlen < 9) {
+				if (szKeywordlen < 10) {
 				szKeyword[szKeywordlen++] = static_cast<char>(tolower(ch));
 				}
 			}
