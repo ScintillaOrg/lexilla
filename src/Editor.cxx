@@ -5666,8 +5666,10 @@ int Editor::ReplaceTarget(bool replacePatterns, const char *text, int length) {
 		length = istrlen(text);
 	if (replacePatterns) {
 		text = pdoc->SubstituteByPosition(text, &length);
-		if (!text)
+		if (!text) {
+			pdoc->EndUndoAction();
 			return 0;
+		}
 	}
 	if (targetStart != targetEnd)
 		pdoc->DeleteChars(targetStart, targetEnd - targetStart);
