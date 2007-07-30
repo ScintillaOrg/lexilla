@@ -471,6 +471,7 @@ void UndoHistory::BeginUndoAction() {
 }
 
 void UndoHistory::EndUndoAction() {
+	PLATFORM_ASSERT(undoSequenceDepth > 0);
 	EnsureUndoRoom();
 	undoSequenceDepth--;
 	if (0 == undoSequenceDepth) {
