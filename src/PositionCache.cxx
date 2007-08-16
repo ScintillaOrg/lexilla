@@ -126,7 +126,7 @@ int LineLayout::LineLastVisible(int line) const {
 }
 
 bool LineLayout::InLine(int offset, int line) const {
-	return ((offset >= LineStart(line)) && (offset < LineStart(line + 1)) || 
+	return ((offset >= LineStart(line)) && (offset < LineStart(line + 1)) ||
 		((offset == numCharsInLine) && (line == (lines-1))));
 }
 
@@ -345,7 +345,7 @@ void LineLayoutCache::Dispose(LineLayout *ll) {
 }
 
 void BreakFinder::Insert(int val) {
-	if (val > nextBreak) {
+	if (val >= nextBreak) {
 		for (unsigned int j = 0; j<saeLen; j++) {
 			if (val == selAndEdge[j]) {
 				return;
