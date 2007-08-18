@@ -643,7 +643,7 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 
 	case SCI_CALLTIPSETBACK:
 		ct.colourBG = ColourDesired(wParam);
-		vs.styles[STYLE_CALLTIP].fore = ct.colourBG;
+		vs.styles[STYLE_CALLTIP].back = ct.colourBG;
 		InvalidateStyleRedraw();
 		break;
 
