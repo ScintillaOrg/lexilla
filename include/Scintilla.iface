@@ -1318,6 +1318,9 @@ fun void DelWordLeft=2335(,)
 # Delete the word to the right of the caret.
 fun void DelWordRight=2336(,)
 
+# Delete the word to the right of the caret, but not the trailing non-word characters.
+fun void DelWordRightEnd=2518(,)
+
 # Cut the line containing the caret.
 fun void LineCut=2337(,)
 

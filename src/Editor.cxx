@@ -3933,6 +3933,7 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 	case SCI_VCHOMEWRAPEXTEND:
 	case SCI_DELWORDLEFT:
 	case SCI_DELWORDRIGHT:
+	case SCI_DELWORDRIGHTEND:
 	case SCI_DELLINELEFT:
 	case SCI_DELLINERIGHT:
 	case SCI_LINECOPY:
@@ -4491,6 +4492,11 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		break;
 	case SCI_DELWORDRIGHT: {
 			int endWord = pdoc->NextWordStart(currentPos, 1);
+			pdoc->DeleteChars(currentPos, endWord - currentPos);
+		}
+		break;
+	case SCI_DELWORDRIGHTEND: {
+			int endWord = pdoc->NextWordEnd(currentPos, 1);
 			pdoc->DeleteChars(currentPos, endWord - currentPos);
 		}
 		break;
@@ -7171,6 +7177,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_ZOOMOUT:
 	case SCI_DELWORDLEFT:
 	case SCI_DELWORDRIGHT:
+	case SCI_DELWORDRIGHTEND:
 	case SCI_DELLINELEFT:
 	case SCI_DELLINERIGHT:
 	case SCI_LINECOPY:
