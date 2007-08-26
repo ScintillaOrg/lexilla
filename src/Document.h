@@ -142,6 +142,7 @@ public:
 
 	// Gateways to modifying document
 	void ModifiedAt(int pos);
+	void CheckReadOnly();
 	bool DeleteChars(int pos, int len);
 	bool InsertString(int position, const char *s, int insertLength);
 	int Undo();
@@ -244,8 +245,6 @@ public:
 	int BraceMatch(int position, int maxReStyle);
 
 private:
-	void CheckReadOnly();
-
 	CharClassify::cc WordCharClass(unsigned char ch);
 	bool IsWordStartAt(int pos);
 	bool IsWordEndAt(int pos);

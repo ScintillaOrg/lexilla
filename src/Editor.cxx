@@ -3413,6 +3413,7 @@ void Editor::ClearDocumentStyle() {
 }
 
 void Editor::Cut() {
+	pdoc->CheckReadOnly();
 	if (!pdoc->IsReadOnly() && !SelectionContainsProtected()) {
 		Copy();
 		ClearSelection();
