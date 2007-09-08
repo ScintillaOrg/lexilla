@@ -166,6 +166,10 @@ SOURCE=..\src\LexAsn1.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexASY.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexAU3.cxx
 # End Source File
 # Begin Source File
