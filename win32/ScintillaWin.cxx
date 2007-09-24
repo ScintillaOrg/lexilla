@@ -776,7 +776,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 	case WM_UNICHAR:
 		if (wParam == UNICODE_NOCHAR) {
-			return 1;
+			return IsUnicodeMode() ? 1 : 0;
 		} else if (lastKeyDownConsumed) {
 			return 1;
 		} else {
