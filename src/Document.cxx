@@ -287,6 +287,55 @@ int Document::LenChar(int pos) {
 	}
 }
 
+static bool IsTrailByte(int ch) {
+	return (ch >= 0x80) && (ch < (0x80 + 0x40));
+}
+
+static int BytesFromLead(int leadByte) {
+	if (leadByte > 0xF4) {
+		// Characters longer than 4 bytes not possible in current UTF-8
+		return 0;
+	} else if (leadByte >= 0xF0) {
+		return 4;
+	} else if (leadByte >= 0xE0) {
+		return 3;
+	} else if (leadByte >= 0xC2) {
+		return 2;
+	}
+	return 0;
+}
+
+bool Document::InGoodUTF8(int pos, int &start, int &end) {
+	int lead = pos;
+	while ((lead>0) && (pos-lead < 4) && IsTrailByte(static_cast<unsigned char>(cb.CharAt(lead-1))))
+		lead--;
+	start = 0;
+	if (lead > 0) {
+		start = lead-1;
+	}
+	int leadByte = static_cast<unsigned char>(cb.CharAt(start));
+	int bytes = BytesFromLead(leadByte);
+	if (bytes == 0) {
+		return false;
+	} else {
+		int trailBytes = bytes - 1;
+		int len = pos - lead + 1;
+		if (len > trailBytes)
+			// pos too far from lead
+			return false;
+		// Check that there are enough trails for this lead
+		int trail = pos + 1;
+		while ((trail-lead<trailBytes) && (trail < Length())) {
+			if (!IsTrailByte(static_cast<unsigned char>(cb.CharAt(trail)))) {
+				return false;
+			}
+			trail++;
+		}
+		end = start + bytes;
+		return true;
+	}
+}
+
 // Normalise a position so that it is not halfway through a two byte character.
 // This can occur in two situations -
 // When lines are terminated with \r\n pairs which should be treated as one character.
@@ -313,13 +362,14 @@ int Document::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
 	if (dbcsCodePage) {
 		if (SC_CP_UTF8 == dbcsCodePage) {
 			unsigned char ch = static_cast<unsigned char>(cb.CharAt(pos));
-			while ((pos > 0) && (pos < Length()) && (ch >= 0x80) && (ch < (0x80 + 0x40))) {
-				// ch is a trail byte
+			int startUTF = pos;
+			int endUTF = pos;
+			if (IsTrailByte(ch) && InGoodUTF8(pos, startUTF, endUTF)) {
+				// ch is a trail byte within a UTF-8 character
 				if (moveDir > 0)
-					pos++;
+					pos = endUTF;
 				else
-					pos--;
-				ch = static_cast<unsigned char>(cb.CharAt(pos));
+					pos = startUTF;
 			}
 		} else {
 			// Anchor DBCS calculations at start of line because start of line can

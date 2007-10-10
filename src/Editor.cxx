@@ -1684,6 +1684,61 @@ LineLayout *Editor::RetrieveLineLayout(int lineNumber) {
 	        LinesOnScreen() + 1, pdoc->LinesTotal());
 }
 
+static bool GoodTrailByte(int v) {
+	return (v >= 0x80) && (v < 0xc0);
+}
+
+bool BadUTF(const char *s, int len, int &trailBytes) {
+	if (trailBytes) {
+		trailBytes--;
+		return false;
+	}
+	const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
+	if (*us < 0x80) {
+		// Single bytes easy
+		return false;
+	} else if (*us > 0xF4) {
+		// Characters longer than 4 bytes not possible in current UTF-8
+		return true;
+	} else if (*us >= 0xF0) {
+		// 4 bytes
+		if (len < 4)
+			return true;
+		if (GoodTrailByte(us[1]) && GoodTrailByte(us[2]) && GoodTrailByte(us[3])) {
+			trailBytes = 3;
+			return false;
+		} else {
+			return true;
+		}
+	} else if (*us >= 0xE0) {
+		// 3 bytes
+		if (len < 3)
+			return true;
+		if (GoodTrailByte(us[1]) && GoodTrailByte(us[2])) {
+			trailBytes = 2;
+			return false;
+		} else {
+			return true;
+		}
+	} else if (*us >= 0xC2) {
+		// 2 bytes
+		if (len < 2)
+			return true;
+		if (GoodTrailByte(us[1])) {
+			trailBytes = 1;
+			return false;
+		} else {
+			return true;
+		}
+	} else if (*us >= 0xC0) {
+		// Overlong encoding
+		return true;
+	} else {
+		// Trail byte
+		return true;
+	}
+}
+
 /**
  * Fill in the LineLayout data for the given line.
  * Copy the given @a line and its styles from the document into local arrays.
@@ -1795,11 +1850,15 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 
 		int ctrlCharWidth[32] = {0};
 		bool isControlNext = IsControlCharacter(ll->chars[0]);
+		int trailBytes = 0;
+		bool isBadUTFNext = IsUnicodeMode() && BadUTF(ll->chars, numCharsInLine, trailBytes);
 		for (int charInLine = 0; charInLine < numCharsInLine; charInLine++) {
 			bool isControl = isControlNext;
 			isControlNext = IsControlCharacter(ll->chars[charInLine + 1]);
+			bool isBadUTF = isBadUTFNext;
+			isBadUTFNext = IsUnicodeMode() && BadUTF(ll->chars + charInLine + 1, numCharsInLine - charInLine - 1, trailBytes);
 			if ((ll->styles[charInLine] != ll->styles[charInLine + 1]) ||
-			        isControl || isControlNext) {
+			        isControl || isControlNext || isBadUTF || isBadUTFNext) {
 				ll->positions[startseg] = 0;
 				if (vstyle.styles[ll->styles[charInLine]].visible) {
 					if (isControl) {
@@ -1820,6 +1879,11 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 							        ll->positions + startseg + 1);
 						}
 						lastSegItalics = false;
+					} else if (isBadUTF) {
+						char hexits[3];
+						sprintf(hexits, "%2X", ll->chars[charInLine] & 0xff);
+						ll->positions[charInLine + 1] =
+						    surface->WidthText(ctrlCharsFont, hexits, istrlen(hexits)) + 3;
 					} else {	// Regular character
 						int lenSeg = charInLine - startseg + 1;
 						if ((lenSeg == 1) && (' ' == ll->chars[startseg])) {
@@ -2133,6 +2197,30 @@ void Editor::DrawIndicators(Surface *surface, ViewStyle &vsDraw, int line, int x
 	}
 }
 
+void DrawTextBlob(Surface *surface, ViewStyle &vsDraw, PRectangle rcSegment,
+				  const char *s, ColourAllocated textBack, ColourAllocated textFore, bool twoPhaseDraw) {
+	if (!twoPhaseDraw) {
+		surface->FillRectangle(rcSegment, textBack);
+	}
+	Font &ctrlCharsFont = vsDraw.styles[STYLE_CONTROLCHAR].font;
+	int normalCharHeight = surface->Ascent(ctrlCharsFont) -
+	        surface->InternalLeading(ctrlCharsFont);
+	PRectangle rcCChar = rcSegment;
+	rcCChar.left = rcCChar.left + 1;
+	rcCChar.top = rcSegment.top + vsDraw.maxAscent - normalCharHeight;
+	rcCChar.bottom = rcSegment.top + vsDraw.maxAscent + 1;
+	PRectangle rcCentral = rcCChar;
+	rcCentral.top++;
+	rcCentral.bottom--;
+	surface->FillRectangle(rcCentral, textFore);
+	PRectangle rcChar = rcCChar;
+	rcChar.left++;
+	rcChar.right--;
+	surface->DrawTextClipped(rcChar, ctrlCharsFont,
+	        rcSegment.top + vsDraw.maxAscent, s, istrlen(s),
+	        textBack, textFore);
+}
+
 void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart,
         PRectangle rcLine, LineLayout *ll, int subLine) {
 
@@ -2251,7 +2339,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	// Does not take margin into account but not significant
 	int xStartVisible = subLineStart - xStart;
 
-	BreakFinder bfBack(ll, lineStart, lineEnd, posLineStart, xStartVisible);
+	BreakFinder bfBack(ll, lineStart, lineEnd, posLineStart, IsUnicodeMode(), xStartVisible);
 	int next = bfBack.First();
 
 	// Background drawing loop
@@ -2326,7 +2414,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 
 	inIndentation = subLine == 0;	// Do not handle indentation except on first subline.
 	// Foreground drawing loop
-	BreakFinder bfFore(ll, lineStart, lineEnd, posLineStart, xStartVisible);
+	BreakFinder bfFore(ll, lineStart, lineEnd, posLineStart, IsUnicodeMode(), xStartVisible);
 	next = bfFore.First();
 
 	while (next < lineEnd) {
@@ -2391,31 +2479,17 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 				if (controlCharSymbol < 32) {
 					// Draw the character
 					const char *ctrlChar = ControlCharacterString(ll->chars[i]);
-					if (!twoPhaseDraw) {
-						surface->FillRectangle(rcSegment, textBack);
-					}
-					int normalCharHeight = surface->Ascent(ctrlCharsFont) -
-					        surface->InternalLeading(ctrlCharsFont);
-					PRectangle rcCChar = rcSegment;
-					rcCChar.left = rcCChar.left + 1;
-					rcCChar.top = rcSegment.top + vsDraw.maxAscent - normalCharHeight;
-					rcCChar.bottom = rcSegment.top + vsDraw.maxAscent + 1;
-					PRectangle rcCentral = rcCChar;
-					rcCentral.top++;
-					rcCentral.bottom--;
-					surface->FillRectangle(rcCentral, textFore);
-					PRectangle rcChar = rcCChar;
-					rcChar.left++;
-					rcChar.right--;
-					surface->DrawTextClipped(rcChar, ctrlCharsFont,
-					        rcSegment.top + vsDraw.maxAscent, ctrlChar, istrlen(ctrlChar),
-					        textBack, textFore);
+					DrawTextBlob(surface, vsDraw, rcSegment, ctrlChar, textBack, textFore, twoPhaseDraw);
 				} else {
 					char cc[2] = { static_cast<char>(controlCharSymbol), '\0' };
 					surface->DrawTextNoClip(rcSegment, ctrlCharsFont,
 					        rcSegment.top + vsDraw.maxAscent,
 					        cc, 1, textBack, textFore);
 				}
+			} else if ((i == startseg) && (static_cast<unsigned char>(ll->chars[i]) >= 0x80) && IsUnicodeMode()) {
+				char hexits[3];
+				sprintf(hexits, "%2X", ll->chars[i] & 0xff);
+				DrawTextBlob(surface, vsDraw, rcSegment, hexits, textBack, textFore, twoPhaseDraw);
 			} else {
 				// Normal text display
 				if (vsDraw.styles[styleMain].visible) {

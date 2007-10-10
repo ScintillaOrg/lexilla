@@ -124,15 +124,18 @@ class BreakFinder {
 	int lineStart;
 	int lineEnd;
 	int posLineStart;
+	bool utf8;
 	int nextBreak;
-	int selAndEdge[5];
+	int *selAndEdge;
+	unsigned int saeSize;
 	unsigned int saeLen;
 	unsigned int saeCurrentPos;
 	int saeNext;
 	int subBreak;
 	void Insert(int val);
 public:
-	BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posLineStart_, int xStart);
+	BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posLineStart_, bool utf8_, int xStart);
+	~BreakFinder();
 	int First();
 	int Next();
 };

@@ -138,6 +138,7 @@ public:
 	int ClampPositionIntoDocument(int pos);
 	bool IsCrLf(int pos);
 	int LenChar(int pos);
+	bool InGoodUTF8(int pos, int &start, int &end);
 	int MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd=true);
 
 	// Gateways to modifying document
