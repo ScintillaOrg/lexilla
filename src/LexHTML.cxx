@@ -676,10 +676,13 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			case SCE_HJ_COMMENTDOC:
 			//case SCE_HJ_COMMENTLINE: // removed as this is a common thing done to hide
 			// the end of script marker from some JS interpreters.
+			case SCE_HB_COMMENTLINE:
+			case SCE_HBA_COMMENTLINE:
 			case SCE_HJ_DOUBLESTRING:
 			case SCE_HJ_SINGLESTRING:
 			case SCE_HJ_REGEX:
 			case SCE_HB_STRING:
+			case SCE_HBA_STRING:
 			case SCE_HP_STRING:
 			case SCE_HP_TRIPLE:
 			case SCE_HP_TRIPLEDOUBLE:
