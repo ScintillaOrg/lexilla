@@ -901,7 +901,9 @@ static int RecogniseErrorListLine(const char *lineBuffer, unsigned int lengthLin
 		// Microsoft: <filename>(<line>,<column>)<message>
 		// CTags: \t<message>
 		// Lua 5 traceback: \t<filename>:<line>:<message>
+		// Lua 5.1: <exe>: <filename>:<line>:<message>
 		bool initialTab = (lineBuffer[0] == '\t');
+		bool initialColonPart = false;
 		enum { stInitial,
 			stGccStart, stGccDigit, stGcc,
 			stMsStart, stMsDigit, stMsBracket, stMsVc, stMsDigitComma, stMsDotNet,
@@ -916,10 +918,12 @@ static int RecogniseErrorListLine(const char *lineBuffer, unsigned int lengthLin
 			if (state == stInitial) {
 				if (ch == ':') {
 					// May be GCC, or might be Lua 5 (Lua traceback same but with tab prefix)
-					if ((chNext != '\\') && (chNext != '/')) {
+					if ((chNext != '\\') && (chNext != '/') && (chNext != ' ')) {
 						// This check is not completely accurate as may be on
 						// GTK+ with a file name that includes ':'.
-						state = stGccStart;
+						state = stGccStart;						
+					} else if (chNext == ' ') { // indicates a Lua 5.1 error message
+						initialColonPart = true;
 					}
 				} else if ((ch == '(') && Is1To9(chNext) && (!initialTab)) {
 					// May be Microsoft
@@ -995,7 +999,7 @@ static int RecogniseErrorListLine(const char *lineBuffer, unsigned int lengthLin
 			}
 		}
 		if (state == stGcc) {
-			return SCE_ERR_GCC;
+			return initialColonPart ? SCE_ERR_LUA : SCE_ERR_GCC;
 		} else if ((state == stMsVc) || (state == stMsDotNet)) {
 			return SCE_ERR_MS;
 		} else if ((state == stCtagsStringDollar) || (state == stCtags)) {
