@@ -1990,6 +1990,7 @@ val SCLEX_PLM=82
 val SCLEX_PROGRESS=83
 val SCLEX_ABAQUS=84
 val SCLEX_ASYMPTOTE=85
+val SCLEX_R=86
 
 # When a lexer specifies its language as SCLEX_AUTOMATIC it receives a
 # value assigned in sequence from SCLEX_AUTOMATIC+1.
@@ -3241,6 +3242,20 @@ val SCE_ASY_IDENTIFIER=8
 val SCE_ASY_STRINGEOL=9
 val SCE_ASY_COMMENTLINEDOC=10
 val SCE_ASY_WORD2=11
+# Lexical states for SCLEX_R
+lex R=SCLEX_R SCE_R_
+val SCE_R_DEFAULT=0
+val SCE_R_COMMENT=1
+val SCE_R_KWORD=2
+val SCE_R_BASEKWORD=3
+val SCE_R_OTHERKWORD=4
+val SCE_R_NUMBER=5
+val SCE_R_STRING=6
+val SCE_R_STRING2=7
+val SCE_R_OPERATOR=8
+val SCE_R_IDENTIFIER=9
+val SCE_R_INFIX=10
+val SCE_R_INFIXEOL=11
 
 # Events
 

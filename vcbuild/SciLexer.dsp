@@ -354,6 +354,10 @@ SOURCE=..\src\LexPython.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexR.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexRebol.cxx
 # End Source File
 # Begin Source File
