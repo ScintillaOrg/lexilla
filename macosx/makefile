@@ -6,7 +6,7 @@
 # GNU make does not like \r\n line endings so should be saved to CVS in binary form.
 
 .SUFFIXES: .cxx .c .o .h .a
-CC = c++
+CC = g++
 CCOMP = gcc
 LIBTOOL = libtool
 
@@ -15,7 +15,8 @@ GCC_MAJOR    := $(shell $(CC) -v 2>&1 | \
 
 # We call it "libscintilla" so when you add it to a Project Builder project,
 # Project Builder will link it correctly.
-COMPLIB=../bin/libscintilla.a
+STATICLIB=../bin/libscintilla.a
+DYNAMICLIB=../bin/libscintilla.dylib
 
 vpath %.h ../src ../include
 vpath %.cxx ../src
@@ -27,8 +28,12 @@ ifeq ($(GCC_MAJOR),3)
 # on a 10.3 or older PPC box
 ARCHFLAGS=-arch ppc -faltivec -mcpu=7400 -mtune=7400 -mpowerpc -mpowerpc-gfxopt
 else
-ARCHFLAGS=-isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386
-LDFLAGS=/usr/include/Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386
+ifndef NATIVE
+ARCH_BASE_FLAGS=/Developer/SDKs/MacOSX10.4u.sdk -arch ppc -arch i386
+ARCHFLAGS=-isysroot $(ARCH_BASE_FLAGS)
+LINK_FLAGS=-Wl,-syslibroot,$(ARCH_BASE_FLAGS)
+DYN_FLAGS=$(LINK_FLAGS) -framework Carbon -bundle
+endif
 endif
 
 OPTIONS=-Wall -Wno-missing-braces -Wno-char-subscripts -DSCI_NAMESPACE -DMACOSX -DSCI_LEXER
@@ -67,22 +72,29 @@ LexVB.o LexVerilog.o LexVHDL.o LexYAML.o
 
 # The LEXOBJS have to be treated specially as the functions in them are not called from external code
 
-all: $(COMPLIB) $(LEXOBJS)
+all: $(STATICLIB) $(LEXOBJS)
+
+shared: $(DYNAMICLIB) $(LEXOBJS)
 
 clean:
 	rm -f *.o $(COMPLIB)
 
 deps:
-	$(CC) -MM $(CXXFLAGS) *.cxx ../src/*.cxx >deps.mak
+	$(CC) -MM -DSCI_NAMESPACE -DMACOSX -DSCI_LEXER  $(CXXFLAGS) $(INCLUDEDIRS) *.cxx ../src/*.cxx >deps.mak
 
-$(COMPLIB): DocumentAccessor.o WindowAccessor.o KeyWords.o StyleContext.o \
+COMPLIB=DocumentAccessor.o WindowAccessor.o KeyWords.o StyleContext.o \
 	CharClassify.o Decoration.o Document.o CallTip.o PositionCache.o \
 	ScintillaBase.o ContractionState.o Editor.o ExternalLexer.o PropSet.o PlatMacOSX.o \
 	KeyMap.o LineMarker.o ScintillaMacOSX.o CellBuffer.o ViewStyle.o \
 	RESearch.o RunStyles.o Style.o Indicator.o AutoComplete.o UniConversion.o XPM.o \
         TCarbonEvent.o TView.o ScintillaCallTip.o \
 	$(LEXOBJS)
-	$(LIBTOOL) -o $@ $^
+
+$(STATICLIB): $(COMPLIB) 
+	$(LIBTOOL) -static -o $@ $^
+
+$(DYNAMICLIB): $(COMPLIB) 
+	$(CC) -dynamic -o $@ $(DYN_FLAGS) $^
 
 # Generate header files from Scintilla.iface
 ../include/Scintilla_gen.h: ../include/HFacer.py ../include/Face.py ../include/Scintilla.iface

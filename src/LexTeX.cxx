@@ -280,14 +280,14 @@ static void ColouriseTeXDoc(
 }
 
 
-static inline bool isnumber(int ch) {
+static inline bool isNumber(int ch) {
 	return
       (ch == '0') || (ch == '1') || (ch == '2') || 
       (ch == '3') || (ch == '4') || (ch == '5') || 
       (ch == '6') || (ch == '7') || (ch == '8') || (ch == '9');
 }
 
-static inline bool iswordchar(int ch) {
+static inline bool isWordChar(int ch) {
 	return ((ch >= 'a') && (ch <= 'z')) || ((ch >= 'A') && (ch <= 'Z'));
 }
 
@@ -303,7 +303,7 @@ static int ParseTeXCommand(unsigned int pos, Accessor &styler, char *command)
   }
 
   // find end
-     while(iswordchar(ch) && !isnumber(ch) && ch!='_' && ch!='.' && length<100){
+     while(isWordChar(ch) && !isNumber(ch) && ch!='_' && ch!='.' && length<100){
           command[length]=ch;
           length++;
           ch=styler.SafeGetCharAt(pos+length+1);
