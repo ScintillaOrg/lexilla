@@ -90,10 +90,10 @@ COMPLIB=DocumentAccessor.o WindowAccessor.o KeyWords.o StyleContext.o \
         TCarbonEvent.o TView.o ScintillaCallTip.o \
 	$(LEXOBJS)
 
-$(STATICLIB): $(COMPLIB) 
+$(STATICLIB): $(COMPLIB)
 	$(LIBTOOL) -static -o $@ $^
 
-$(DYNAMICLIB): $(COMPLIB) 
+$(DYNAMICLIB): $(COMPLIB)
 	$(CC) -dynamic -o $@ $(DYN_FLAGS) $^
 
 # Generate header files from Scintilla.iface
