@@ -735,7 +735,7 @@ void CellBuffer::InsertLine(int line, int position) {
 
 void CellBuffer::RemoveLine(int line) {
 	lv.RemoveLine(line);
-	if (lineStates.Length()) {
+	if (lineStates.Length() > line) {
 		lineStates.Delete(line);
 	}
 }
