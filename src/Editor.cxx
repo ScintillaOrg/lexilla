@@ -225,8 +225,8 @@ void Editor::DropGraphics() {
 
 void Editor::InvalidateStyleData() {
 	stylesValid = false;
-	palette.Release();
 	DropGraphics();
+	palette.Release();
 	llc.Invalidate(LineLayout::llInvalid);
 	posCache.Clear();
 	if (selType == selRectangle) {
@@ -2770,6 +2770,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	//Platform::DebugPrintf("Paint:%1d (%3d,%3d) ... (%3d,%3d)\n",
 	//	paintingAllText, rcArea.left, rcArea.top, rcArea.right, rcArea.bottom);
 
+	pixmapLine->Release();
 	RefreshStyleData();
 	RefreshPixMaps(surfaceWindow);
 
@@ -2799,10 +2800,17 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	pdoc->EnsureStyledTo(endPosPaint);
 	bool paintAbandonedByStyling = paintState == paintAbandoned;
 	if (needUpdateUI) {
+		// Deselect palette by selecting a temporary palette
+		Palette palTemp;
+		surfaceWindow->SetPalette(&palTemp, true);
+
 		NotifyUpdateUI();
 		needUpdateUI = false;
+
 		RefreshStyleData();
 		RefreshPixMaps(surfaceWindow);
+		surfaceWindow->SetPalette(&palette, true);
+		pixmapLine->SetPalette(&palette, !hasFocus);
 	}
 
 	// Call priority lines wrap on a window of lines which are likely
