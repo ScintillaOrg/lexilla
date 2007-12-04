@@ -78,7 +78,7 @@
 #pragma warning(disable: 4505)
 #endif
 
-#if GTK_CHECK_VERSION(2,2,0)
+#if GTK_CHECK_VERSION(2,6,0)
 #define USE_GTK_CLIPBOARD
 #endif
 
