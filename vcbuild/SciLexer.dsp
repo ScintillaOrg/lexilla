@@ -290,6 +290,10 @@ SOURCE=..\src\LexLua.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexMagik.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexMatlab.cxx
 # End Source File
 # Begin Source File
