@@ -1934,10 +1934,15 @@ void ScintillaWin::HorizontalScrollMessage(WPARAM wParam) {
 		xPos = scrollWidth;
 		break;
 	case SB_THUMBPOSITION:
-		xPos = HiWord(wParam);
-		break;
-	case SB_THUMBTRACK:
-		xPos = HiWord(wParam);
+	case SB_THUMBTRACK: {
+			// Do NOT use wParam, its 16 bit and not enough for very long lines. Its still possible to overflow the 32 bit but you have to try harder =]
+			SCROLLINFO si;
+			si.cbSize = sizeof(si);
+			si.fMask = SIF_TRACKPOS;
+			if (GetScrollInfo(SB_HORZ, &si)) {
+				xPos = si.nTrackPos;
+			}
+		}
 		break;
 	}
 	HorizontalScrollTo(xPos);
