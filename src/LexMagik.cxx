@@ -21,8 +21,6 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-#include "windows.h"
-
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
 #endif
