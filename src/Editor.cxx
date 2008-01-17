@@ -5396,11 +5396,11 @@ void Editor::ButtonMove(Point pt) {
 			if (lineMove < 0) {
 				lineMove = cs.DisplayFromDoc(pdoc->LinesTotal() - 1);
 			}
-			ScrollTo(lineMove - LinesOnScreen() + 5);
+			ScrollTo(lineMove - LinesOnScreen() + 1);
 			Redraw();
 		} else if (pt.y < rcClient.top) {
 			int lineMove = cs.DisplayFromDoc(LineFromLocation(pt));
-			ScrollTo(lineMove - 5);
+			ScrollTo(lineMove - 1);
 			Redraw();
 		}
 		EnsureCaretVisible(false, false, true);
