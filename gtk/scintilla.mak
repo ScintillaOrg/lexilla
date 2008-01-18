@@ -193,6 +193,7 @@ LEXOBJS=\
 	$(DIR_O)\LexPerl.obj \
 	$(DIR_O)\LexPLM.obj \
 	$(DIR_O)\LexPOV.obj \
+	$(DIR_O)\LexPowerShell.obj \
 	$(DIR_O)\LexProgress.obj \
 	$(DIR_O)\LexPS.obj \
 	$(DIR_O)\LexPython.obj \
@@ -452,6 +453,8 @@ $(DIR_O)\LexPerl.obj: ..\src\LexPerl.cxx $(LEX_HEADERS)
 $(DIR_O)\LexPLM.obj: ..\src\LexPLM.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexPOV.obj: ..\src\LexPOV.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexPowerShell.obj: ..\src\LexPowerShell.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexProgress.obj: ..\src\LexProgress.cxx $(LEX_HEADERS)
 

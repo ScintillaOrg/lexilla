@@ -346,6 +346,10 @@ SOURCE=..\src\LexPOV.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexPowerShell.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexProgress.cxx
 # End Source File
 # Begin Source File
