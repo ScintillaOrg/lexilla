@@ -1400,7 +1400,7 @@ void Editor::LinesJoin() {
 	}
 }
 
-const char *StringFromEOLMode(int eolMode) {
+const char *Editor::StringFromEOLMode(int eolMode) {
 	if (eolMode == SC_EOL_CRLF) {
 		return "\r\n";
 	} else if (eolMode == SC_EOL_CR) {
@@ -3494,6 +3494,12 @@ void Editor::ClearDocumentStyle() {
 	pdoc->ClearLevels();
 }
 
+void Editor::CopyAllowLine() {
+	SelectionText selectedText;
+	CopySelectionRange(&selectedText, true);
+	CopyToClipboard(selectedText);
+}
+
 void Editor::Cut() {
 	pdoc->CheckReadOnly();
 	if (!pdoc->IsReadOnly() && !SelectionContainsProtected()) {
@@ -4044,6 +4050,7 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 	case SCI_PAGEUPRECTEXTEND:
 	case SCI_PAGEDOWNRECTEXTEND:
 	case SCI_SELECTIONDUPLICATE:
+	case SCI_COPYALLOWLINE:
 		break;
 
 		// Filter out all others like display changes. Also, newlines are redundant
@@ -4910,14 +4917,37 @@ char *Editor::CopyRange(int start, int end) {
 	return text;
 }
 
-void Editor::CopySelectionFromRange(SelectionText *ss, int start, int end) {
-	ss->Set(CopyRange(start, end), end - start + 1,
-	        pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false);
+void Editor::CopySelectionFromRange(SelectionText *ss, bool allowLineCopy, int start, int end) {
+	bool isLine = allowLineCopy && (start == end);
+	if (isLine) {
+		int currentLine = pdoc->LineFromPosition(currentPos);
+		start = pdoc->LineStart(currentLine);
+		end = pdoc->LineEnd(currentLine);
+
+		char *text = CopyRange(start, end);
+		int textLen = text ? strlen(text) : 0;
+		// include room for \r\n\0
+		textLen += 3;
+		char *textWithEndl = new char[textLen];
+		textWithEndl[0] = '\0';
+		if (text)
+			strncat(textWithEndl, text, textLen);
+		if (pdoc->eolMode != SC_EOL_LF)
+			strncat(textWithEndl, "\r", textLen);
+		if (pdoc->eolMode != SC_EOL_CR)
+			strncat(textWithEndl, "\n", textLen);
+		ss->Set(textWithEndl, strlen(textWithEndl),
+			pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false, true);
+		delete []text;
+	} else {
+		ss->Set(CopyRange(start, end), end - start + 1,
+			pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false, false);
+	}
 }
 
-void Editor::CopySelectionRange(SelectionText *ss) {
+void Editor::CopySelectionRange(SelectionText *ss, bool allowLineCopy) {
 	if (selType == selStream) {
-		CopySelectionFromRange(ss, SelectionStart(), SelectionEnd());
+		CopySelectionFromRange(ss, allowLineCopy, SelectionStart(), SelectionEnd());
 	} else {
 		char *text = 0;
 		int size = 0;
@@ -4955,7 +4985,7 @@ void Editor::CopySelectionRange(SelectionText *ss) {
 			}
 		}
 		ss->Set(text, size + 1, pdoc->dbcsCodePage,
-		        vs.styles[STYLE_DEFAULT].characterSet, selType == selRectangle);
+			vs.styles[STYLE_DEFAULT].characterSet, selType == selRectangle, selType == selLines);
 	}
 }
 
@@ -4964,14 +4994,14 @@ void Editor::CopyRangeToClipboard(int start, int end) {
 	end = pdoc->ClampPositionIntoDocument(end);
 	SelectionText selectedText;
 	selectedText.Set(CopyRange(start, end), end - start + 1,
-	        pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false);
+		pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false, false);
 	CopyToClipboard(selectedText);
 }
 
 void Editor::CopyText(int length, const char *text) {
 	SelectionText selectedText;
 	selectedText.Copy(text, length + 1,
-	        pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false);
+		pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false, false);
 	CopyToClipboard(selectedText);
 }
 
@@ -5946,6 +5976,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_COPY:
 		Copy();
+		break;
+
+	case SCI_COPYALLOWLINE:
+		CopyAllowLine();
 		break;
 
 	case SCI_COPYRANGE:
