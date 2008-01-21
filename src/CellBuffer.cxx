@@ -729,6 +729,7 @@ int CellBuffer::LineFromHandle(int markerHandle) {
 void CellBuffer::InsertLine(int line, int position) {
 	lv.InsertLine(line, position);
 	if (lineStates.Length()) {
+		lineStates.EnsureLength(line);
 		lineStates.Insert(line, 0);
 	}
 }
