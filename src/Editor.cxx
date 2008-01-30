@@ -719,19 +719,26 @@ void Editor::SetRectangularRange() {
 	}
 }
 
-void Editor::InvalidateSelection(int currentPos_, int anchor_) {
-	int firstAffected = anchor;
-	if (firstAffected > currentPos)
-		firstAffected = currentPos;
-	if (firstAffected > anchor_)
-		firstAffected = anchor_;
+void Editor::InvalidateSelection(int currentPos_, int anchor_, bool invalidateWholeSelection) {
+	if (anchor != anchor_ || selType == selRectangle) {
+		invalidateWholeSelection = true;
+	}
+	int firstAffected = currentPos;
+	if (invalidateWholeSelection) {
+		if (firstAffected > anchor)
+			firstAffected = anchor;
+		if (firstAffected > anchor_)
+			firstAffected = anchor_;
+	}
 	if (firstAffected > currentPos_)
 		firstAffected = currentPos_;
-	int lastAffected = anchor;
-	if (lastAffected < currentPos)
-		lastAffected = currentPos;
-	if (lastAffected < anchor_)
-		lastAffected = anchor_;
+	int lastAffected = currentPos;
+	if (invalidateWholeSelection) {
+		if (lastAffected < anchor)
+			lastAffected = anchor;
+		if (lastAffected < anchor_)
+			lastAffected = anchor_;
+	}
 	if (lastAffected < (currentPos_ + 1))	// +1 ensures caret repainted
 		lastAffected = (currentPos_ + 1);
 	needUpdateUI = true;
@@ -742,7 +749,7 @@ void Editor::SetSelection(int currentPos_, int anchor_) {
 	currentPos_ = pdoc->ClampPositionIntoDocument(currentPos_);
 	anchor_ = pdoc->ClampPositionIntoDocument(anchor_);
 	if ((currentPos != currentPos_) || (anchor != anchor_)) {
-		InvalidateSelection(currentPos_, anchor_);
+		InvalidateSelection(currentPos_, anchor_, true);
 		currentPos = currentPos_;
 		anchor = anchor_;
 	}
@@ -753,7 +760,7 @@ void Editor::SetSelection(int currentPos_, int anchor_) {
 void Editor::SetSelection(int currentPos_) {
 	currentPos_ = pdoc->ClampPositionIntoDocument(currentPos_);
 	if (currentPos != currentPos_) {
-		InvalidateSelection(currentPos_, currentPos_);
+		InvalidateSelection(currentPos_, anchor, false);
 		currentPos = currentPos_;
 	}
 	SetRectangularRange();
@@ -7442,7 +7449,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 				moveExtendsSelection = !moveExtendsSelection || (selType != selStream);
 				selType = selStream;
 			}
-			InvalidateSelection(currentPos, anchor);
+			InvalidateSelection(currentPos, anchor, true);
 		}
 	case SCI_GETSELECTIONMODE:
 		switch (selType) {
