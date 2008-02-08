@@ -445,6 +445,9 @@ static void FoldCppDoc(unsigned int startPos, int length, int initStyle,
 			visibleChars = 0;
 		}
 	}
+	if ((unsigned)styler.Length() == endPos) {
+		styler.SetLevel(lineCurrent, levelCurrent);
+	}
 }
 
 static const char * const cppWordLists[] = {
