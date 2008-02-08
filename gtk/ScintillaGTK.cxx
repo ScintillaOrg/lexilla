@@ -1511,8 +1511,8 @@ void ScintillaGTK::ReceivedDrop(GtkSelectionData *selection_data) {
 
 void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, SelectionText *text) {
 #if PLAT_GTK_WIN32
-	// Many native win32 programs require \n line endings, so make a copy of
-	// the clip text now with newlines converted.  Use { } to hide symbols
+	// GDK on Win32 expands any \n into \r\n, so make a copy of
+	// the clip text now with newlines converted to \n.  Use { } to hide symbols
 	// from code below
 	SelectionText *newline_normalized = NULL;
 	{
