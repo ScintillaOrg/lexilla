@@ -2389,8 +2389,10 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 						if (ll->chars[cpos + startseg] == ' ') {
 							if (drawWhitespaceBackground &&
 							        (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways)) {
-								PRectangle rcSpace(ll->positions[cpos + startseg] + xStart, rcSegment.top,
-								        ll->positions[cpos + startseg + 1] + xStart, rcSegment.bottom);
+								PRectangle rcSpace(ll->positions[cpos + startseg] + xStart - subLineStart, 
+										rcSegment.top,
+								        ll->positions[cpos + startseg + 1] + xStart - subLineStart, 
+										rcSegment.bottom);
 								surface->FillRectangle(rcSpace, vsDraw.whitespaceBackground.allocated);
 							}
 						} else {
