@@ -364,17 +364,29 @@
 	Perl lexer handles defined-or operator "//".
 	</li>
 	<li>
+	Octave lexer fixes "!=" operator.
+	</li>
+	<li>
+	Optimized selection change drawing to not redraw as much when not needed.
+	</li>
+	<li>
+	SciTE on GTK+ no longer echoes Lua commands so is same as on Windows.
+	</li>
+	<li>
+	Automatic vertical scrolling limited to one line at a time so is not too fast.
+	</li>
+	<li>
 	Crash fixed when line states set beyond end of line states. This occurred when lexers did not
 	set a line state for each line.
+	</li>
+	<li>
+	Crash in SciTE on Windows fixed when search for 513 character string fails.
 	</li>
 	<li>
 	SciTE disables translucent features on Windows 9x due to crashes reported when using translucency.
 	</li>
 	<li>
 	Bug fixed where whitespace background was not seen on wrapped lines.
-	</li>
-	<li>
-	Octave lexer fixes "!=" operator.
 	</li>
     </ul>
     <h3>
