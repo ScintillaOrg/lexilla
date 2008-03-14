@@ -331,6 +331,51 @@
 	<li>
 	Released on 16 March 2008.
 	</li>
+	<li>
+	Support for PowerShell.
+	</li>
+	<li>
+	Lexer added for Magik.
+	</li>
+	<li>
+	Director extension working on GTK+.
+	</li>
+	<li>
+	Director extension may set focus to SciTE through "focus:" message on GTK+.
+	</li>
+	<li>
+	C++ folder handles final line better in some cases.
+	</li>
+	<li>
+	SCI_COPYALLOWLINE added which is similar to SCI_COPY except that if the selection is empty then
+	the line holding the caret is copied. On Windows an extra clipboard format allows pasting this as a whole
+	line before the current selection. This behaviour is compatible with Visual Studio.
+	</li>
+	<li>
+	On Windows, the horizontal scroll bar can handle wider files.
+	</li>
+	<li>
+	On Windows, a system palette leak was fixed. Should not affect many as palette mode is rarely used.
+	</li>
+	<li>
+	Install command on GTK+ no longer tries to set explicit owner.
+	</li>
+	<li>
+	Perl lexer handles defined-or operator "//".
+	</li>
+	<li>
+	Crash fixed when line states set beyond end of line states. This occurred when lexers did not
+	set a line state for each line.
+	</li>
+	<li>
+	SciTE disables translucent features on Windows 9x due to crashes reported when using translucency.
+	</li>
+	<li>
+	Bug fixed where whitespace background was not seen on wrapped lines.
+	</li>
+	<li>
+	Octave lexer fixes "!=" operator.
+	</li>
     </ul>
     <h3>
        <a href="http://prdownloads.sourceforge.net/scintilla/scite175.zip?download">Release 1.75</a>
