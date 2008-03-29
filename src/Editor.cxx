@@ -2099,13 +2099,6 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 
 	rcSegment.left = xEol + vsDraw.aveCharWidth + xStart;
 	rcSegment.right = rcLine.right;
-	if (overrideBackground) {
-		surface->FillRectangle(rcSegment, background);
-	} else if (vsDraw.styles[ll->styles[ll->numCharsInLine] & styleMask].eolFilled) {
-		surface->FillRectangle(rcSegment, vsDraw.styles[ll->styles[ll->numCharsInLine] & styleMask].back.allocated);
-	} else {
-		surface->FillRectangle(rcSegment, vsDraw.styles[STYLE_DEFAULT].back.allocated);
-	}
 
 	if (vsDraw.selEOLFilled && eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1) && (vsDraw.selAlpha == SC_ALPHA_NOALPHA)) {
 		surface->FillRectangle(rcSegment, SelectionBackground(vsDraw));
