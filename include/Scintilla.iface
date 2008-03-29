@@ -516,7 +516,7 @@ get int GetCaretPeriod=2075(,)
 set void SetCaretPeriod=2076(int periodMilliseconds,)
 
 # Set the set of characters making up words for when moving or selecting by word.
-# First sets deaults like SetCharsDefault.
+# First sets defaults like SetCharsDefault.
 set void SetWordChars=2077(, string characters)
 
 # Start a sequence of actions that is undone and redone as a unit.
