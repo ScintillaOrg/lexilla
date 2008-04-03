@@ -1536,7 +1536,7 @@ fun void ChooseCaretX=2399(,)
 # Set the focus to this Scintilla widget.
 fun void GrabFocus=2400(,)
 
-enu CaretPolicy = CARET_
+enu CaretPolicy=CARET_
 # Caret policy, used by SetXCaretPolicy and SetYCaretPolicy.
 # If CARET_SLOP is set, we can define a slop value: caretSlop.
 # This value defines an unwanted zone (UZ) where the caret is... unwanted.
