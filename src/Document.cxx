@@ -173,7 +173,7 @@ int Document::LineEndPosition(int position) {
 int Document::VCHomePosition(int position) {
 	int line = LineFromPosition(position);
 	int startPosition = LineStart(line);
-	int endLine = LineStart(line + 1) - 1;
+	int endLine = LineEnd(line);
 	int startText = startPosition;
 	while (startText < endLine && (cb.CharAt(startText) == ' ' || cb.CharAt(startText) == '\t' ) )
 		startText++;
@@ -1380,7 +1380,7 @@ void Document::EnsureStyledTo(int pos) {
 	}
 }
 
-int Document::SetLineState(int line, int state) { 
+int Document::SetLineState(int line, int state) {
 	int statePrevious = cb.SetLineState(line, state);
 	if (state != statePrevious) {
 		DocModification mh(SC_MOD_CHANGELINESTATE, 0, 0, 0, 0, line);
