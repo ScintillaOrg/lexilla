@@ -273,7 +273,7 @@ static void ColouriseBashDoc(unsigned int startPos, int length, int initStyle,
 				ch = chNext;
 				chNext = chNext2;
 				styler.ColourTo(i, SCE_SH_IDENTIFIER);
-			} else if (isdigit(ch)) {
+			} else if (isascii(ch) && isdigit(ch)) {
 				state = SCE_SH_NUMBER;
 				numBase = BASH_BASE_DECIMAL;
 				if (ch == '0') {	// hex,octal
