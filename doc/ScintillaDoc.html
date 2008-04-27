@@ -3978,6 +3978,7 @@ struct RangeToFormat {
     <h2 id="DirectAccess">Direct access</h2>
     <code><a class="message" href="#SCI_GETDIRECTFUNCTION">SCI_GETDIRECTFUNCTION</a><br />
      <a class="message" href="#SCI_GETDIRECTPOINTER">SCI_GETDIRECTPOINTER</a><br />
+     <a class="message" href="#SCI_GETCHARACTERPOINTER">SCI_GETCHARACTERPOINTER</a><br />
     </code>
 
     <p>On Windows, the message-passing scheme used to communicate between the container and
@@ -4021,6 +4022,25 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      This returns a pointer to data that identifies which Scintilla window is in use. You must call
     this once for each Scintilla window you create. When you call the direct function, you must
     pass in the direct pointer associated with the target window.</p>
+
+    <p><b id="SCI_GETCHARACTERPOINTER">SCI_GETCHARACTERPOINTER</b><br />
+     This moves the gap within Scintilla so that the text of the document is stored consecutively
+     and ensures there is a NUL character after the text, then returns a pointer to the first character.
+     Applications may then pass this to a function that accepts a character pointer such as a regular
+     expression search or a parser. The pointer should <em>not</em> be written to as that may desynchoronize
+     the internal state of Scintilla. </p>
+     <p>Since any action in Scintilla may change its internal state
+     this pointer becomes invalid after any call or by allowing user interface activity. The application
+     should reacquire the pointer after making any call or performing any user-interface calls such
+     as modifying a progress indicator.</p>
+     <p>This call takes similar time to inserting a character at the end of the document and this may
+     include moving the document contents. Specifically, all the characters after the document gap
+     are moved to before the gap. This compacted state should persist over calls and user interface
+     actions that do not change the document contents so reacquiring the pointer afterwards is very
+     quick. If this call is used to implement a global replace operation, then each replacement will
+     move the gap so if <code>SCI_GETCHARACTERPOINTER</code> is called after
+     each replacement then the operation will become O(n^2) rather than O(n). Instead, all
+     matches should be found and remembered, then all the replacements performed.</p>
 
     <h2 id="MultipleViews">Multiple views</h2>
 

@@ -7579,6 +7579,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETPASTECONVERTENDINGS:
 		return convertPastes ? 1 : 0;
 
+	case SCI_GETCHARACTERPOINTER:
+		return reinterpret_cast<sptr_t>(pdoc->BufferPointer());
+
 	default:
 		return DefWndProc(iMessage, wParam, lParam);
 	}

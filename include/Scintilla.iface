@@ -1800,6 +1800,10 @@ get int GetPositionCache=2515(,)
 # Copy the selection, if selection empty copy the line with the caret
 fun void CopyAllowLine=2519(,)
 
+# Compact the document buffer and return a read-only pointer to the
+# characters in the document.
+get int GetCharacterPointer=2520(,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 

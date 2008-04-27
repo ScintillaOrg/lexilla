@@ -159,6 +159,7 @@ public:
 	void EndUndoAction() { cb.EndUndoAction(); }
 	void SetSavePoint();
 	bool IsSavePoint() { return cb.IsSavePoint(); }
+	const char *BufferPointer() { return cb.BufferPointer(); }
 
 	int GetLineIndentation(int line);
 	void SetLineIndentation(int line, int indent);
