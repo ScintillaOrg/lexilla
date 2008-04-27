@@ -4024,14 +4024,14 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     pass in the direct pointer associated with the target window.</p>
 
     <p><b id="SCI_GETCHARACTERPOINTER">SCI_GETCHARACTERPOINTER</b><br />
-     This moves the gap within Scintilla so that the text of the document is stored consecutively
-     and ensures there is a NUL character after the text, then returns a pointer to the first character.
+     Move the gap within Scintilla so that the text of the document is stored consecutively
+     and ensure there is a NUL character after the text, then return a pointer to the first character.
      Applications may then pass this to a function that accepts a character pointer such as a regular
      expression search or a parser. The pointer should <em>not</em> be written to as that may desynchronize
-     the internal state of Scintilla. </p>
+     the internal state of Scintilla.</p>
      <p>Since any action in Scintilla may change its internal state
      this pointer becomes invalid after any call or by allowing user interface activity. The application
-     should reacquire the pointer after making any call or performing any user-interface calls such
+     should reacquire the pointer after making any call to Scintilla or performing any user-interface calls such
      as modifying a progress indicator.</p>
      <p>This call takes similar time to inserting a character at the end of the document and this may
      include moving the document contents. Specifically, all the characters after the document gap
