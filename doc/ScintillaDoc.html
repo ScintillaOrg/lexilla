@@ -4027,7 +4027,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      This moves the gap within Scintilla so that the text of the document is stored consecutively
      and ensures there is a NUL character after the text, then returns a pointer to the first character.
      Applications may then pass this to a function that accepts a character pointer such as a regular
-     expression search or a parser. The pointer should <em>not</em> be written to as that may desynchoronize
+     expression search or a parser. The pointer should <em>not</em> be written to as that may desynchronize
      the internal state of Scintilla. </p>
      <p>Since any action in Scintilla may change its internal state
      this pointer becomes invalid after any call or by allowing user interface activity. The application
