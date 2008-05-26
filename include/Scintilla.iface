@@ -104,7 +104,7 @@ fun void ClearAll=2004(,)
 # Set all style bytes to 0, remove all folding information.
 fun void ClearDocumentStyle=2005(,)
 
-# Returns the number of characters in the document.
+# Returns the number of bytes in the document.
 get int GetLength=2006(,)
 
 # Returns the character byte at the position.
