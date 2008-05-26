@@ -249,7 +249,7 @@ static void classifyAttribHTML(unsigned int start, unsigned int end, WordList &k
 
 static int classifyTagHTML(unsigned int start, unsigned int end,
                            WordList &keywords, Accessor &styler, bool &tagDontFold,
-			   bool caseSensitive, bool isXml) {
+			   bool caseSensitive, bool isXml, bool allowScripts) {
 	char s[30 + 2];
 	// Copy after the '<'
 	unsigned int i = 0;
@@ -292,7 +292,7 @@ static int classifyTagHTML(unsigned int start, unsigned int end,
 		isScript = 0 == strcmp(s, "script");
 	}
 	styler.ColourTo(end, chAttr);
-	return isScript ? SCE_H_SCRIPT : chAttr;
+	return allowScripts && isScript ? SCE_H_SCRIPT : chAttr;
 }
 
 static void classifyWordHTJS(unsigned int start, unsigned int end,
@@ -542,6 +542,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	const bool foldHTMLPreprocessor = foldHTML && styler.GetPropertyInt("fold.html.preprocessor", 1);
 	const bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	const bool caseSensitive = styler.GetPropertyInt("html.tags.case.sensitive", 0) != 0;
+	const bool allowScripts = styler.GetPropertyInt("lexer.xml.allow.scripts", 1) != 0;
 
 	const CharacterSet setHTMLWord(CharacterSet::setAlphaNum, ".-_:!#", 0x80, true);
 	const CharacterSet setTagContinue(CharacterSet::setAlphaNum, ".-_:!#[", 0x80, true);
@@ -1050,7 +1051,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		case SCE_H_TAGUNKNOWN:
 			if (!setTagContinue.Contains(ch) && !((ch == '/') && (chPrev == '<'))) {
 				int eClass = classifyTagHTML(styler.GetStartSegment(),
-					i - 1, keywords, styler, tagDontFold, caseSensitive, isXml);
+					i - 1, keywords, styler, tagDontFold, caseSensitive, isXml, allowScripts);
 				if (eClass == SCE_H_SCRIPT) {
 					if (!tagClosing) {
 						inScriptType = eNonHtmlScript;
