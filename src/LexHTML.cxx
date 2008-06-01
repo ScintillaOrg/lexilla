@@ -29,7 +29,7 @@ using namespace Scintilla;
 #define SCE_HA_VBS (SCE_HBA_START - SCE_HB_START)
 #define SCE_HA_PYTHON (SCE_HPA_START - SCE_HP_START)
 
-enum script_type { eScriptNone = 0, eScriptJS, eScriptVBS, eScriptPython, eScriptPHP, eScriptXML, eScriptSGML, eScriptSGMLblock };
+enum script_type { eScriptNone = 0, eScriptJS, eScriptVBS, eScriptPython, eScriptPHP, eScriptXML, eScriptSGML, eScriptSGMLblock, eScriptComment };
 enum script_mode { eHtml = 0, eNonHtmlScript, eNonHtmlPreProc, eNonHtmlScriptPreProc };
 
 static inline bool IsAWordChar(const int ch) {
@@ -273,26 +273,23 @@ static int classifyTagHTML(unsigned int start, unsigned int end,
 	//now we can remove the trailing space
 	s[i] = '\0';
 
-	bool isScript = false;
+	// No keywords -> all are known
+	// Name of a closing tag starts at s + 1
 	char chAttr = SCE_H_TAGUNKNOWN;
 	if (s[0] == '!') {
 		chAttr = SCE_H_SGML_DEFAULT;
-	} else if (s[0] == '/') {	// Closing tag
-		if (keywords.InList(s + 1))
-			chAttr = SCE_H_TAG;
-	} else {
-		if (keywords.InList(s)) {
-			chAttr = SCE_H_TAG;
-			isScript = 0 == strcmp(s, "script");
-		}
-	}
-	if ((chAttr == SCE_H_TAGUNKNOWN) && !keywords) {
-		// No keywords -> all are known
+	} else if (!keywords || keywords.InList(s[0] == '/' ? s + 1 : s)) {
 		chAttr = SCE_H_TAG;
-		isScript = 0 == strcmp(s, "script");
 	}
 	styler.ColourTo(end, chAttr);
-	return allowScripts && isScript ? SCE_H_SCRIPT : chAttr;
+	if (chAttr == SCE_H_TAG) {
+		if (allowScripts && 0 == strcmp(s, "script")) {
+			chAttr = SCE_H_SCRIPT;
+		} else if (!isXml && 0 == strcmp(s, "comment")) {
+			chAttr = SCE_H_COMMENT;
+		}
+	}
+	return chAttr;
 }
 
 static void classifyWordHTJS(unsigned int start, unsigned int end,
@@ -410,6 +407,9 @@ static int StateForScript(script_type scriptLanguage) {
 		break;
 	case eScriptSGML:
 		Result = SCE_H_SGML_DEFAULT;
+		break;
+	case eScriptComment:
+		Result = SCE_H_COMMENT;
 		break;
 	default :
 		Result = SCE_HJ_START;
@@ -536,6 +536,10 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	int beforePreProc = (lineState >> 12) & 0xFF; // 8 bits of state
 
 	script_type scriptLanguage = ScriptOfState(state);
+	// If eNonHtmlScript coincides with SCE_H_COMMENT, assume eScriptComment
+	if (inScriptType == eNonHtmlScript && state == SCE_H_COMMENT) {
+		scriptLanguage = eScriptComment;
+	}
 
 	const bool foldHTML = styler.GetPropertyInt("fold.html", 0) != 0;
 	const bool fold = foldHTML && styler.GetPropertyInt("fold", 0);
@@ -690,16 +694,15 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				break;
 			default :
 				// check if the closing tag is a script tag
-				if (state == SCE_HJ_COMMENTLINE || isXml) {
-					char tag[7]; // room for the <script> tag
-					int j = 0;
-					char chr = styler.SafeGetCharAt(i+2);
-					while (j < 6 && !IsASpace(chr)) {
-						tag[j++] = static_cast<char>(MakeLowerCase(chr));
-						chr = styler.SafeGetCharAt(i+2+j);
-					}
-					tag[j] = '\0';
-					if (strcmp(tag, "script") != 0) break;
+				if (const char *tag =
+						state == SCE_HJ_COMMENTLINE || isXml ? "script" :
+						state == SCE_H_COMMENT ? "comment" : 0) {
+					int j = i + 2;
+					int chr;
+					do {
+						chr = static_cast<int>(*tag++);
+					} while (chr != 0 && chr == MakeLowerCase(styler.SafeGetCharAt(j++)));
+					if (chr != 0) break;
 				}
 				// closing tag of the script (it's a closing HTML tag anyway)
 				styler.ColourTo(i - 1, StateToPrint);
@@ -1006,7 +1009,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			}
 			break;
 		case SCE_H_COMMENT:
-			if ((chPrev2 == '-') && (chPrev == '-') && (ch == '>')) {
+			if ((scriptLanguage != eScriptComment) && (chPrev2 == '-') && (chPrev == '-') && (ch == '>')) {
 				styler.ColourTo(i, StateToPrint);
 				state = SCE_H_DEFAULT;
 				levelCurrent--;
@@ -1052,15 +1055,14 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			if (!setTagContinue.Contains(ch) && !((ch == '/') && (chPrev == '<'))) {
 				int eClass = classifyTagHTML(styler.GetStartSegment(),
 					i - 1, keywords, styler, tagDontFold, caseSensitive, isXml, allowScripts);
-				if (eClass == SCE_H_SCRIPT) {
+				if (eClass == SCE_H_SCRIPT || eClass == SCE_H_COMMENT) {
 					if (!tagClosing) {
 						inScriptType = eNonHtmlScript;
-						scriptLanguage = clientScript;
-						eClass = SCE_H_TAG;
+						scriptLanguage = eClass == SCE_H_SCRIPT ? clientScript : eScriptComment;
 					} else {
 						scriptLanguage = eScriptNone;
-						eClass = SCE_H_TAG;
 					}
+					eClass = SCE_H_TAG;
 				}
 				if (ch == '>') {
 					styler.ColourTo(i, eClass);
