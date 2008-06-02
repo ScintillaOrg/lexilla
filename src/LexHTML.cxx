@@ -470,10 +470,15 @@ static bool isPHPStringState(int state) {
 }
 
 static int FindPhpStringDelimiter(char *phpStringDelimiter, const int phpStringDelimiterSize, int i, const int lengthDoc, Accessor &styler) {
-	int j;
+	int j = i;
+	while (j < lengthDoc && (styler[j] != '\r' && styler[j] != '\n'))
+		j++;
+	phpStringDelimiter[0] = styler.SafeGetCharAt(j);
+	if ((phpStringDelimiter[0] == '\r') && (styler.SafeGetCharAt(j + 1) == '\n'))
+		phpStringDelimiter[0] = '\n';
+
 	while (i < lengthDoc && (styler[i] == ' ' || styler[i] == '\t'))
 		i++;
-	phpStringDelimiter[0] = '\n';
 	for (j = i; j < lengthDoc && styler[j] != '\n' && styler[j] != '\r'; j++) {
 		if (j - i < phpStringDelimiterSize - 2)
 			phpStringDelimiter[j-i+1] = styler[j];
@@ -481,7 +486,7 @@ static int FindPhpStringDelimiter(char *phpStringDelimiter, const int phpStringD
 			i++;
 	}
 	phpStringDelimiter[j-i+1] = '\0';
-	return j;
+	return j - 1;
 }
 
 static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
