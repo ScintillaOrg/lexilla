@@ -4808,6 +4808,7 @@ struct SCNotification {
      <a class="message" href="#SCN_INDICATORRELEASE">SCN_INDICATORRELEASE</a><br />
      <a class="message" href="#SCN_CALLTIPCLICK">SCN_CALLTIPCLICK</a><br />
      <a class="message" href="#SCN_AUTOCSELECTION">SCN_AUTOCSELECTION</a><br />
+     <a class="message" href="#SCN_AUTOCCANCELLED">SCN_AUTOCCANCELLED</a><br />
     </code>
 
     <p>The following <code>SCI_*</code> messages are associated with these notifications:</p>
@@ -5442,6 +5443,10 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
         </tr>
       </tbody>
     </table>
+
+    <p><b id="SCN_AUTOCCANCELLED">SCN_AUTOCCANCELLED</b><br />
+     The user has cancelled an <a class="jump" href="#Autocompletion">autocompletion list</a>.
+     There is no other information in SCNotification.
 
     <h2 id="GTK">GTK+</h2>
     <p>On GTK+, the following functions create a Scintilla widget, communicate with it and allow
