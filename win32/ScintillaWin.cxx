@@ -728,6 +728,11 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			(wParam & MK_CONTROL) != 0);
 		break;
 
+	case WM_RBUTTONDOWN:
+		if (!PointInSelection(Point::FromLong(lParam)))
+			SetEmptySelection(PositionFromLocation(Point::FromLong(lParam)));
+		break;
+
 	case WM_SETCURSOR:
 		if (LoWord(lParam) == HTCLIENT) {
 			if (inDragDrop == ddDragging) {
