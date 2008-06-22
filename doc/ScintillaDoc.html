@@ -1880,8 +1880,8 @@ struct TextToFind {
     <h2 id="StyleDefinition">Style definition</h2>
 
     <p>While the style setting messages mentioned above change the style numbers associated with
-    text, these messages define how those style numbers are interpreted visually. There are 128
-    lexer styles that can be set, numbered 0 to <code>STYLEMAX</code> (127). Unless you use <a
+    text, these messages define how those style numbers are interpreted visually. There are 256
+    lexer styles that can be set, numbered 0 to <code>STYLE_MAX</code> (255). Unless you use <a
     class="message" href="#SCI_SETSTYLEBITS"><code>SCI_SETSTYLEBITS</code></a> to change the number
     of style bits, styles 0 to 31 are used to set the text attributes. There are also some
     predefined numbered styles starting at 32, The following <code>STYLE_</code>* constants are
@@ -1977,7 +1977,7 @@ struct TextToFind {
         <tr>
           <th align="left"><code>STYLE_MAX</code></th>
 
-          <td>127</td>
+          <td>255</td>
 
           <td>This is not a style but is the number of the maximum style that can be set. Styles
           between <code>STYLE_LASTPREDEFINED</code> and <code>STYLE_MAX</code> would be appropriate
