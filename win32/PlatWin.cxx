@@ -77,6 +77,10 @@ bool IsNT() {
 	return onNT;
 }
 
+#ifdef SCI_NAMESPACE
+using namespace Scintilla;
+#endif
+
 Point Point::FromLong(long lpoint) {
 	return Point(static_cast<short>(LOWORD(lpoint)), static_cast<short>(HIWORD(lpoint)));
 }
@@ -219,7 +223,7 @@ FontCached *FontCached::first = 0;
 
 FontCached::FontCached(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_) :
 	next(0), usage(0), hash(0) {
-	::SetLogFont(lf, faceName_, characterSet_, size_, bold_, italic_);
+	SetLogFont(lf, faceName_, characterSet_, size_, bold_, italic_);
 	hash = HashFont(faceName_, characterSet_, size_, bold_, italic_);
 	id = ::CreateFontIndirectA(&lf);
 	usage = 1;
@@ -296,7 +300,7 @@ void Font::Create(const char *faceName, int characterSet, int size,
 	Release();
 #ifndef FONTS_CACHED
 	LOGFONT lf;
-	::SetLogFont(lf, faceName, characterSet, size, bold, italic);
+	SetLogFont(lf, faceName, characterSet, size, bold, italic);
 	id = ::CreateFontIndirect(&lf);
 #else
 	id = FontCached::FindOrCreate(faceName, characterSet, size, bold, italic);
@@ -313,6 +317,10 @@ void Font::Release() {
 #endif
 	id = 0;
 }
+
+#ifdef SCI_NAMESPACE
+namespace Scintilla {
+#endif
 
 class SurfaceImpl : public Surface {
 	bool unicodeMode;
@@ -386,6 +394,10 @@ public:
 	void SetUnicodeMode(bool unicodeMode_);
 	void SetDBCSMode(int codePage_);
 };
+
+#ifdef SCI_NAMESPACE
+} //namespace Scintilla
+#endif
 
 SurfaceImpl::SurfaceImpl() :
 	unicodeMode(false),

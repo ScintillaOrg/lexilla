@@ -4806,7 +4806,7 @@ long Editor::FindText(
 	        (wParam & SCFIND_WHOLEWORD) != 0,
 	        (wParam & SCFIND_WORDSTART) != 0,
 	        (wParam & SCFIND_REGEXP) != 0,
-	        (wParam & SCFIND_POSIX) != 0,
+	        wParam,
 	        &lengthFound);
 	if (pos != -1) {
 		ft->chrgText.cpMin = pos;
@@ -4850,7 +4850,7 @@ long Editor::SearchText(
 		        (wParam & SCFIND_WHOLEWORD) != 0,
 		        (wParam & SCFIND_WORDSTART) != 0,
 		        (wParam & SCFIND_REGEXP) != 0,
-		        (wParam & SCFIND_POSIX) != 0,
+		        wParam,
 		        &lengthFound);
 	} else {
 		pos = pdoc->FindText(searchAnchor, 0, txt,
@@ -4858,7 +4858,7 @@ long Editor::SearchText(
 		        (wParam & SCFIND_WHOLEWORD) != 0,
 		        (wParam & SCFIND_WORDSTART) != 0,
 		        (wParam & SCFIND_REGEXP) != 0,
-		        (wParam & SCFIND_POSIX) != 0,
+		        wParam,
 		        &lengthFound);
 	}
 
@@ -4880,7 +4880,7 @@ long Editor::SearchInTarget(const char *text, int length) {
 	        (searchFlags & SCFIND_WHOLEWORD) != 0,
 	        (searchFlags & SCFIND_WORDSTART) != 0,
 	        (searchFlags & SCFIND_REGEXP) != 0,
-	        (searchFlags & SCFIND_POSIX) != 0,
+	        searchFlags,
 	        &lengthFound);
 	if (pos != -1) {
 		targetStart = pos;

@@ -99,6 +99,10 @@ extern void Platform_Finalise();
 const TCHAR scintillaClassName[] = TEXT("Scintilla");
 const TCHAR callClassName[] = TEXT("CallTip");
 
+#ifdef SCI_NAMESPACE
+using namespace Scintilla;
+#endif
+
 class ScintillaWin; 	// Forward declaration for COM interface subobjects
 
 /**
@@ -2247,7 +2251,7 @@ bool ScintillaWin::Register(HINSTANCE hInstance_) {
 		WNDCLASSEXW wndclass;
 		wndclass.cbSize = sizeof(wndclass);
 		wndclass.style = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW;
-		wndclass.lpfnWndProc = ::ScintillaWin::SWndProc;
+		wndclass.lpfnWndProc = ScintillaWin::SWndProc;
 		wndclass.cbClsExtra = 0;
 		wndclass.cbWndExtra = sizeof(ScintillaWin *);
 		wndclass.hInstance = hInstance;
@@ -2264,7 +2268,7 @@ bool ScintillaWin::Register(HINSTANCE hInstance_) {
 		WNDCLASSEX wndclass;
 		wndclass.cbSize = sizeof(wndclass);
 		wndclass.style = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW;
-		wndclass.lpfnWndProc = ::ScintillaWin::SWndProc;
+		wndclass.lpfnWndProc = ScintillaWin::SWndProc;
 		wndclass.cbClsExtra = 0;
 		wndclass.cbWndExtra = sizeof(ScintillaWin *);
 		wndclass.hInstance = hInstance;
