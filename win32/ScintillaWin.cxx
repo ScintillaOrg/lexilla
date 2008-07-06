@@ -2430,7 +2430,11 @@ sptr_t ScintillaWin::DirectFunction(
 	return sci->WndProc(iMessage, wParam, lParam);
 }
 
-extern "C" __declspec(dllexport) sptr_t __stdcall Scintilla_DirectFunction(
+extern "C"
+#ifndef STATIC_BUILD
+__declspec(dllexport)
+#endif
+sptr_t __stdcall Scintilla_DirectFunction(
     ScintillaWin *sci, UINT iMessage, uptr_t wParam, sptr_t lParam) {
 	return sci->WndProc(iMessage, wParam, lParam);
 }
