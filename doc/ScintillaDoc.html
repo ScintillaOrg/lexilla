@@ -515,7 +515,10 @@ struct TextRange {
     <h2 id="Searching">Searching</h2>
     <p>
     There are methods to search for text and for regular expressions. The regular expression support
-    is limited and should only be used for simple cases and initial development.
+    is limited and should only be used for simple cases and initial development. A different regular expression
+    library can be <a class="jump" href="#AlternativeRegEx">integrated into Scintilla</a>
+    or can be called from the container using direct access to the buffer contents through
+    <a class="jump" href="#SCI_GETCHARACTERPOINTER">SCI_GETCHARACTERPOINTER</a>.
     </p>
     <code><a class="message" href="#SCI_FINDTEXT">SCI_FINDTEXT(int flags, TextToFind
     *ttf)</a><br />
@@ -5611,6 +5614,16 @@ EM_SETTARGETDEVICE
     following the patterns of other lexers. The important thing is to include
     <code>LINK_LEXER(lmMyLexer);</code> to correspond with the <code>LexerModule
     lmMyLexer(...);</code> in your lexer source code.</p>
+
+    <h3>Building with an alternative Regular Expression implementation</h3>
+
+ <p id="AlternativeRegEx">A simple interface provides support for switching the Regular Expressions engine at
+ compile time. You must implement <code>RegexSearchBase</code> for your chosen engine,
+ look at the built-in implementation <code>BuiltinRegex</code> to see how this is done.
+ You then need to implement the factory method <code>CreateRegexSearch</code>
+ to create an instance of your class. You must disable the built-in implementation by defining
+ <code>SCI_OWNREGEX</code>.</p>
+
   </body>
 </html>
 
