@@ -268,7 +268,7 @@ static int classifyTagHTML(unsigned int start, unsigned int end,
 	// if the current language is XML, I can fold any tag
 	// if the current language is HTML, I don't want to fold certain tags (input, meta, etc.)
 	//...to find it in the list of no-container-tags
-	tagDontFold = (!isXml) && (NULL != strstr("meta link img area br hr input ",s));
+	tagDontFold = (!isXml) && (NULL != strstr("meta link img area br hr input ", s));
 
 	//now we can remove the trailing space
 	s[i] = '\0';
@@ -469,23 +469,50 @@ static bool isPHPStringState(int state) {
 	    (state == SCE_HPHP_COMPLEX_VARIABLE);
 }
 
-static int FindPhpStringDelimiter(char *phpStringDelimiter, const int phpStringDelimiterSize, int i, const int lengthDoc, Accessor &styler) {
-	int j = i;
-	while (j < lengthDoc && (styler[j] != '\r' && styler[j] != '\n'))
-		j++;
-	phpStringDelimiter[0] = styler.SafeGetCharAt(j);
-	if ((phpStringDelimiter[0] == '\r') && (styler.SafeGetCharAt(j + 1) == '\n'))
-		phpStringDelimiter[0] = '\n';
+static int FindPhpStringDelimiter(char *phpStringDelimiter, const int phpStringDelimiterSize, int i, const int lengthDoc, Accessor &styler, bool &isSimpleString) {
+	int j;
+	const int beginning = i - 1;
+	bool isValidSimpleString = false;
 
 	while (i < lengthDoc && (styler[i] == ' ' || styler[i] == '\t'))
 		i++;
-	for (j = i; j < lengthDoc && styler[j] != '\n' && styler[j] != '\r'; j++) {
+
+	char ch = styler.SafeGetCharAt(i);
+	const char chNext = styler.SafeGetCharAt(i + 1);
+	if (!IsPhpWordStart(ch)) {
+		if (ch == '\'' && IsPhpWordStart(chNext)) {
+			i++;
+			ch = chNext;
+			isSimpleString = true;
+		} else {
+			phpStringDelimiter[0] = '\0';
+			return beginning;
+		}
+	}
+	phpStringDelimiter[0] = ch;
+	i++;
+
+	for (j = i; j < lengthDoc && !isLineEnd(styler[j]); j++) {
+		if (!IsPhpWordChar(styler[j])) {
+			if (isSimpleString && (styler[j] == '\'') && isLineEnd(styler.SafeGetCharAt(j + 1))) {
+				isValidSimpleString = true;
+				j++;
+				break;
+			} else {
+				phpStringDelimiter[0] = '\0';
+				return beginning;
+			}
+		}
 		if (j - i < phpStringDelimiterSize - 2)
 			phpStringDelimiter[j-i+1] = styler[j];
 		else
 			i++;
 	}
-	phpStringDelimiter[j-i+1] = '\0';
+	if (isSimpleString && !isValidSimpleString) {
+		phpStringDelimiter[0] = '\0';
+		return beginning;
+	}
+	phpStringDelimiter[j-i+1 - (isSimpleString ? 1 : 0)] = '\0';
 	return j - 1;
 }
 
@@ -516,7 +543,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		state = SCE_H_DEFAULT;
 	}
 	// String can be heredoc, must find a delimiter first
-	while (startPos > 0 && isPHPStringState(state) && state != SCE_HPHP_SIMPLESTRING) {
+	while (startPos > 0 && isPHPStringState(state)) {
 		startPos--;
 		length++;
 		state = styler.StyleAt(startPos);
@@ -696,6 +723,10 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			case SCE_HP_STRING:
 			case SCE_HP_TRIPLE:
 			case SCE_HP_TRIPLEDOUBLE:
+			case SCE_HPHP_HSTRING:
+			case SCE_HPHP_SIMPLESTRING:
+			case SCE_HPHP_COMMENT:
+			case SCE_HPHP_COMMENTLINE:
 				break;
 			default :
 				// check if the closing tag is a script tag
@@ -1077,7 +1108,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 						state = SCE_H_DEFAULT;
 					}
 					tagOpened = false;
-					if (!tagDontFold){
+					if (!tagDontFold) {
 						if (tagClosing) {
 							levelCurrent--;
 						} else {
@@ -1125,8 +1156,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 						state = SCE_H_DEFAULT;
 					}
 					tagOpened = false;
-					if (!tagDontFold){
-						if (tagClosing){
+					if (!tagDontFold) {
+						if (tagClosing) {
 							levelCurrent--;
 						} else {
 							levelCurrent++;
@@ -1151,8 +1182,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					state = SCE_H_DEFAULT;
 				}
 				tagOpened = false;
-				if (!tagDontFold){
-					if (tagClosing){
+				if (!tagDontFold) {
+					if (tagClosing) {
 						levelCurrent--;
 					} else {
 						levelCurrent++;
@@ -1225,8 +1256,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 							state = SCE_H_DEFAULT;
 						}
 						tagOpened = false;
-						if (!tagDontFold){
-							if (tagClosing){
+						if (!tagDontFold) {
+							if (tagClosing) {
 								levelCurrent--;
 							} else {
 								levelCurrent++;
@@ -1585,10 +1616,12 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					state = SCE_HPHP_HSTRING;
 					strcpy(phpStringDelimiter, "\"");
 				} else if (styler.Match(i, "<<<")) {
-					state = SCE_HPHP_HSTRING;
-					i = FindPhpStringDelimiter(phpStringDelimiter, sizeof(phpStringDelimiter), i + 3, lengthDoc, styler);
+					bool isSimpleString = false;
+					i = FindPhpStringDelimiter(phpStringDelimiter, sizeof(phpStringDelimiter), i + 3, lengthDoc, styler, isSimpleString);
+					if (strlen(phpStringDelimiter)) state = (isSimpleString ? SCE_HPHP_SIMPLESTRING : SCE_HPHP_HSTRING);
 				} else if (ch == '\'') {
 					state = SCE_HPHP_SIMPLESTRING;
+					strcpy(phpStringDelimiter, "\'");
 				} else if (ch == '$' && IsPhpWordStart(chNext)) {
 					state = SCE_HPHP_VARIABLE;
 				} else if (IsOperator(ch)) {
@@ -1643,26 +1676,46 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_HPHP_HSTRING_VARIABLE;
 			} else if (styler.Match(i, phpStringDelimiter)) {
+				if (phpStringDelimiter[0] == '\"') {
+					styler.ColourTo(i, StateToPrint);
+					state = SCE_HPHP_DEFAULT;
+				} else if (isLineEnd(chPrev)) {
 				const int psdLength = strlen(phpStringDelimiter);
-				if ((psdLength > 1) && ((i + psdLength) < lengthDoc))
-					i += psdLength - 1;
-				styler.ColourTo(i, StateToPrint);
-				state = SCE_HPHP_DEFAULT;
+					const char chAfterPsd = styler.SafeGetCharAt(i + psdLength);
+					const char chAfterPsd2 = styler.SafeGetCharAt(i + psdLength + 1);
+					if (isLineEnd(chAfterPsd) ||
+						(chAfterPsd == ';' && isLineEnd(chAfterPsd2))) {
+							i += (((i + psdLength) < lengthDoc) ? psdLength : lengthDoc) - 1;
+						styler.ColourTo(i, StateToPrint);
+						state = SCE_HPHP_DEFAULT;
+					}
+				}
 			}
 			break;
 		case SCE_HPHP_SIMPLESTRING:
-			if (ch == '\\') {
-				// skip the next char
-				i++;
-			} else if (ch == '\'') {
-				styler.ColourTo(i, StateToPrint);
-				state = SCE_HPHP_DEFAULT;
+			if (phpStringDelimiter[0] == '\'') {
+				if (ch == '\\') {
+					// skip the next char
+					i++;
+				} else if (ch == '\'') {
+					styler.ColourTo(i, StateToPrint);
+					state = SCE_HPHP_DEFAULT;
+				}
+			} else if (isLineEnd(chPrev) && styler.Match(i, phpStringDelimiter)) {
+				const int psdLength = strlen(phpStringDelimiter);
+				const char chAfterPsd = styler.SafeGetCharAt(i + psdLength);
+				const char chAfterPsd2 = styler.SafeGetCharAt(i + psdLength + 1);
+				if (isLineEnd(chAfterPsd) ||
+				(chAfterPsd == ';' && isLineEnd(chAfterPsd2))) {
+					i += (((i + psdLength) < lengthDoc) ? psdLength : lengthDoc) - 1;
+					styler.ColourTo(i, StateToPrint);
+					state = SCE_HPHP_DEFAULT;
+				}
 			}
 			break;
 		case SCE_HPHP_HSTRING_VARIABLE:
-			if (!IsPhpWordChar(ch)) {
-				styler.ColourTo(i - 1, StateToPrint);
-				i--; // strange but it works
+			if (!IsPhpWordChar(chNext)) {
+				styler.ColourTo(i, StateToPrint);
 				state = SCE_HPHP_HSTRING;
 			}
 			break;
@@ -1691,10 +1744,12 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				state = SCE_HPHP_HSTRING;
 				strcpy(phpStringDelimiter, "\"");
 			} else if (styler.Match(i, "<<<")) {
-				state = SCE_HPHP_HSTRING;
-				i = FindPhpStringDelimiter(phpStringDelimiter, sizeof(phpStringDelimiter), i + 3, lengthDoc, styler);
+				bool isSimpleString = false;
+				i = FindPhpStringDelimiter(phpStringDelimiter, sizeof(phpStringDelimiter), i + 3, lengthDoc, styler, isSimpleString);
+				if (strlen(phpStringDelimiter)) state = (isSimpleString ? SCE_HPHP_SIMPLESTRING : SCE_HPHP_HSTRING);
 			} else if (ch == '\'') {
 				state = SCE_HPHP_SIMPLESTRING;
+				strcpy(phpStringDelimiter, "\'");
 			} else if (ch == '$' && IsPhpWordStart(chNext)) {
 				state = SCE_HPHP_VARIABLE;
 			} else if (IsOperator(ch)) {
@@ -1750,8 +1805,24 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		}
 	}
 
-	StateToPrint = statePrintForState(state, inScriptType);
+	switch (state) {
+	case SCE_HJ_WORD:
+		classifyWordHTJS(styler.GetStartSegment(), lengthDoc - 1, keywords2, styler, inScriptType);
+		break;
+	case SCE_HB_WORD:
+		classifyWordHTVB(styler.GetStartSegment(), lengthDoc - 1, keywords3, styler, inScriptType);
+		break;
+	case SCE_HP_WORD:
+		classifyWordHTPy(styler.GetStartSegment(), lengthDoc - 1, keywords4, styler, prevWord, inScriptType);
+		break;
+	case SCE_HPHP_WORD:
+		classifyWordHTPHP(styler.GetStartSegment(), lengthDoc - 1, keywords5, styler);
+		break;
+	default:
+		StateToPrint = statePrintForState(state, inScriptType);
 		styler.ColourTo(lengthDoc - 1, StateToPrint);
+		break;
+	}
 
 	// Fill in the real level of the next line, keeping the current flags as they will be filled in later
 	if (fold) {
@@ -1763,13 +1834,13 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 static void ColouriseXMLDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
                                   Accessor &styler) {
 	// Passing in true because we're lexing XML
-	ColouriseHyperTextDoc(startPos, length, initStyle, keywordlists,styler, true);
+	ColouriseHyperTextDoc(startPos, length, initStyle, keywordlists, styler, true);
 }
 
 static void ColouriseHTMLDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
                                   Accessor &styler) {
 	// Passing in false because we're notlexing XML
-	ColouriseHyperTextDoc(startPos, length, initStyle, keywordlists,styler, false);
+	ColouriseHyperTextDoc(startPos, length, initStyle, keywordlists, styler, false);
 }
 
 static bool isASPScript(int state) {
@@ -2066,9 +2137,10 @@ static void ColourisePHPDoc(unsigned int startPos, int length, int initStyle, Wo
 }
 
 static void ColourisePHPScriptDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
-                                               Accessor &styler) {
-	if(startPos == 0) initStyle = SCE_HPHP_DEFAULT;
-		ColouriseHTMLDoc(startPos,length,initStyle,keywordlists,styler);
+        Accessor &styler) {
+	if (startPos == 0)
+		initStyle = SCE_HPHP_DEFAULT;
+	ColouriseHTMLDoc(startPos, length, initStyle, keywordlists, styler);
 }
 
 static const char * const htmlWordListDesc[] = {
