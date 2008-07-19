@@ -491,9 +491,13 @@ static void ColouriseDiffLine(char *lineBuffer, int endLine, Accessor &styler) {
 	// otherwise it is considered a comment (Only in..., Binary file...)
 	if (0 == strncmp(lineBuffer, "diff ", 5)) {
 		styler.ColourTo(endLine, SCE_DIFF_COMMAND);
-	} else if (0 == strncmp(lineBuffer, "--- ", 4)) {
+	} else if (0 == strncmp(lineBuffer, "Index: ", 7)) {  // For subversion's diff
+		styler.ColourTo(endLine, SCE_DIFF_COMMAND);
+	} else if (0 == strncmp(lineBuffer, "---", 3)) {
 		// In a context diff, --- appears in both the header and the position markers
-		if (atoi(lineBuffer+4) && !strchr(lineBuffer, '/'))
+		if (lineBuffer[3] == ' ' && atoi(lineBuffer + 4) && !strchr(lineBuffer, '/'))
+			styler.ColourTo(endLine, SCE_DIFF_POSITION);
+		else if (lineBuffer[3] == '\r' || lineBuffer[3] == '\n')
 			styler.ColourTo(endLine, SCE_DIFF_POSITION);
 		else
 			styler.ColourTo(endLine, SCE_DIFF_HEADER);
@@ -526,6 +530,8 @@ static void ColouriseDiffLine(char *lineBuffer, int endLine, Accessor &styler) {
 		styler.ColourTo(endLine, SCE_DIFF_DELETED);
 	} else if (lineBuffer[0] == '+' || lineBuffer[0] == '>') {
 		styler.ColourTo(endLine, SCE_DIFF_ADDED);
+	} else if (lineBuffer[0] == '!') {
+		styler.ColourTo(endLine, SCE_DIFF_CHANGED);
 	} else if (lineBuffer[0] != ' ') {
 		styler.ColourTo(endLine, SCE_DIFF_COMMENT);
 	} else {
@@ -552,25 +558,24 @@ static void ColouriseDiffDoc(unsigned int startPos, int length, int, WordList *[
 	}
 }
 
-static void FoldDiffDoc(unsigned int startPos, int length, int, WordList*[], Accessor &styler) {
+static void FoldDiffDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler) {
 	int curLine = styler.GetLine(startPos);
-	int prevLevel = SC_FOLDLEVELBASE;
-	if (curLine > 0)
-		prevLevel = styler.LevelAt(curLine-1);
-
 	int curLineStart = styler.LineStart(curLine);
-	do {
-		int nextLevel = prevLevel;
-		if (prevLevel & SC_FOLDLEVELHEADERFLAG)
-			nextLevel = (prevLevel & SC_FOLDLEVELNUMBERMASK) + 1;
+	int prevLevel = curLine > 0 ? styler.LevelAt(curLine - 1) : SC_FOLDLEVELBASE;
+	int nextLevel;
 
+	do {
 		int lineType = styler.StyleAt(curLineStart);
 		if (lineType == SCE_DIFF_COMMAND)
+			nextLevel = SC_FOLDLEVELBASE | SC_FOLDLEVELHEADERFLAG;
+		else if (lineType == SCE_DIFF_HEADER)
 			nextLevel = (SC_FOLDLEVELBASE + 1) | SC_FOLDLEVELHEADERFLAG;
-		else if (lineType == SCE_DIFF_HEADER) {
+		else if (lineType == SCE_DIFF_POSITION && styler[curLineStart] != '-')
 			nextLevel = (SC_FOLDLEVELBASE + 2) | SC_FOLDLEVELHEADERFLAG;
-		} else if (lineType == SCE_DIFF_POSITION)
-			nextLevel = (SC_FOLDLEVELBASE + 3) | SC_FOLDLEVELHEADERFLAG;
+		else if (prevLevel & SC_FOLDLEVELHEADERFLAG)
+			nextLevel = (prevLevel & SC_FOLDLEVELNUMBERMASK) + 1;
+		else
+			nextLevel = prevLevel;
 
 		if ((nextLevel & SC_FOLDLEVELHEADERFLAG) && (nextLevel == prevLevel))
 			styler.SetLevel(curLine-1, prevLevel & ~SC_FOLDLEVELHEADERFLAG);
@@ -581,7 +586,6 @@ static void FoldDiffDoc(unsigned int startPos, int length, int, WordList*[], Acc
 		curLineStart = styler.LineStart(++curLine);
 	} while (static_cast<int>(startPos) + length > curLineStart);
 }
-
 
 static void ColourisePropsLine(
     char *lineBuffer,
