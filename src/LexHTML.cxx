@@ -542,11 +542,15 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		}
 		state = SCE_H_DEFAULT;
 	}
-	// String can be heredoc, must find a delimiter first
-	while (startPos > 0 && isPHPStringState(state)) {
-		startPos--;
-		length++;
-		state = styler.StyleAt(startPos);
+	// String can be heredoc, must find a delimiter first. Reread from beginning of line containing the string, to get the correct lineState
+	if (isPHPStringState(state)) {
+		while (startPos > 0 && (isPHPStringState(state) || !isLineEnd(styler[startPos - 1]))) {
+			startPos--;
+			length++;
+			state = styler.StyleAt(startPos);
+		}
+		if (startPos == 0)
+			state = SCE_H_DEFAULT;
 	}
 	styler.StartAt(startPos, static_cast<char>(STYLE_MAX));
 
