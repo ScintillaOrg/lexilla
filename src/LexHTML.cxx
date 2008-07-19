@@ -1644,12 +1644,9 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			}
 			break;
 		case SCE_HPHP_VARIABLE:
-			if (!IsPhpWordChar(ch)) {
-				styler.ColourTo(i - 1, SCE_HPHP_VARIABLE);
-				if (IsOperator(ch))
-					state = SCE_HPHP_OPERATOR;
-				else
-					state = SCE_HPHP_DEFAULT;
+			if (!IsPhpWordChar(chNext)) {
+				styler.ColourTo(i, SCE_HPHP_VARIABLE);
+				state = SCE_HPHP_DEFAULT;
 			}
 			break;
 		case SCE_HPHP_COMMENT:
