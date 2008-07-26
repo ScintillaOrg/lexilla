@@ -771,7 +771,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			beforePreProc = state;
 			i++;
 			visibleChars++;
-			i += PrintScriptingIndicatorOffset(styler, styler.GetStartSegment() + 2, i + 10);
+			i += PrintScriptingIndicatorOffset(styler, styler.GetStartSegment() + 2, i + 6);
 			if (scriptLanguage == eScriptXML)
 				styler.ColourTo(i, SCE_H_XMLSTART);
 			else
