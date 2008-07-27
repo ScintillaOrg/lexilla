@@ -283,6 +283,7 @@ private:
 	HBITMAP sysCaretBitmap;
 	int sysCaretWidth;
 	int sysCaretHeight;
+	bool keysAlwaysUnicode;
 };
 
 HINSTANCE ScintillaWin::hInstance = 0;
@@ -319,6 +320,8 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	sysCaretBitmap = 0;
 	sysCaretWidth = 0;
 	sysCaretHeight = 0;
+
+	keysAlwaysUnicode = false;
 
 	Initialise();
 }
@@ -763,7 +766,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 	case WM_CHAR:
 		if (((wParam >= 128) || !iscntrl(wParam)) || !lastKeyDownConsumed) {
-			if (::IsWindowUnicode(MainHWND())) {
+			if (::IsWindowUnicode(MainHWND()) || keysAlwaysUnicode) {
 				wchar_t wcs[2] = {wParam, 0};
 				if (IsUnicodeMode()) {
 					// For a wide character version of the window:
@@ -1010,6 +1013,13 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 	case SCI_GRABFOCUS:
 		::SetFocus(MainHWND());
 		break;
+
+	case SCI_SETKEYSUNICODE:
+		keysAlwaysUnicode = wParam != 0;
+		break;
+
+	case SCI_GETKEYSUNICODE:
+		return keysAlwaysUnicode;
 
 #ifdef SCI_LEXER
 	case SCI_LOADLEXERLIBRARY:

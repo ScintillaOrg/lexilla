@@ -1804,6 +1804,12 @@ fun void CopyAllowLine=2519(,)
 # characters in the document.
 get int GetCharacterPointer=2520(,)
 
+# Always interpret keyboard input as Unicode
+set void SetKeysUnicode=2521(bool keysUnicode,)
+
+# Are keys always interpreted as Unicode?
+get bool GetKeysUnicode=2522(,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 

@@ -2431,6 +2431,8 @@ struct TextToFind {
      <a class="message" href="#SCI_GETTWOPHASEDRAW">SCI_GETTWOPHASEDRAW</a><br />
      <a class="message" href="#SCI_SETCODEPAGE">SCI_SETCODEPAGE(int codePage)</a><br />
      <a class="message" href="#SCI_GETCODEPAGE">SCI_GETCODEPAGE</a><br />
+     <a class="message" href="#SCI_SETKEYSUNICODE">SCI_SETKEYSUNICODE(bool keysUnicode)</a><br />
+     <a class="message" href="#SCI_GETKEYSUNICODE">SCI_GETKEYSUNICODE</a><br />
      <a class="message" href="#SCI_SETWORDCHARS">SCI_SETWORDCHARS(&lt;unused&gt;, const char
     *chars)</a><br />
      <a class="message" href="#SCI_SETWHITESPACECHARS">SCI_SETWHITESPACECHARS(&lt;unused&gt;, const char
@@ -2526,6 +2528,12 @@ struct TextToFind {
 
     <p>Setting <code>codePage</code> to a non-zero value that is not <code>SC_CP_UTF8</code> is
     operating system dependent.</p>
+
+    <p><b id="SCI_SETKEYSUNICODE">SCI_SETKEYSUNICODE(bool keysUnicode)</b><br />
+     <b id="SCI_GETKEYSUNICODE">SCI_GETKEYSUNICODE</b><br />
+     On Windows, character keys are normally handled differently depending on whether Scintilla is a wide
+     or narrow character window with character messages treated as Unicode when wide and as 8 bit otherwise.
+     Set this property to always treat as Unicode. This option is needed for Delphi.</p>
 
     <p><b id="SCI_SETWORDCHARS">SCI_SETWORDCHARS(&lt;unused&gt;, const char *chars)</b><br />
      Scintilla has several functions that operate on words, which are defined to be contiguous
