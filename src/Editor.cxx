@@ -3497,6 +3497,7 @@ void Editor::ClearDocumentStyle() {
 	pdoc->SetStyleFor(pdoc->Length(), 0);
 	cs.ShowAll();
 	pdoc->ClearLevels();
+	pdoc->decorations.ClearAll();
 }
 
 void Editor::CopyAllowLine() {
