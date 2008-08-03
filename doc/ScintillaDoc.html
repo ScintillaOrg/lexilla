@@ -4178,7 +4178,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      The first two messages mark a range of lines as visible or invisible and then redraw the
     display. The third message reports on the visible state of a line and returns 1 if it is
     visible and 0 if it is not visible. These messages have no effect on fold levels or fold
-    flags.</p>
+    flags. The first line can not be hidden.</p>
 
     <p><b id="SCI_SETFOLDLEVEL">SCI_SETFOLDLEVEL(int line, int level)</b><br />
      <b id="SCI_GETFOLDLEVEL">SCI_GETFOLDLEVEL(int line)</b><br />
