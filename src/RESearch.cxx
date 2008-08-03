@@ -853,6 +853,8 @@ int RESearch::PMatch(CharacterIndexer &ci, int lp, int endp, char *ap) {
 				return NOTFOUND;
 			break;
 		case CCL:
+			if (lp >= endp)
+				return NOTFOUND;
 			c = ci.CharAt(lp++);
 			if (!isinset(ap,c))
 				return NOTFOUND;
