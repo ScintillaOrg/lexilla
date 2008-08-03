@@ -58,7 +58,6 @@ static void ColouriseBatchLine(
     Accessor &styler) {
 
 	unsigned int offset = 0;	// Line Buffer Offset
-	unsigned int enVarEnd;		// Environment Variable End point
 	unsigned int cmdLoc;		// External Command / Program Location
 	char wordBuffer[81];		// Word Buffer - large to catch long paths
 	unsigned int wbl;		// Word Buffer Length
@@ -111,39 +110,6 @@ static void ColouriseBatchLine(
 	if (lineBuffer[offset] == '@') {
 		styler.ColourTo(startLine + offset, SCE_BAT_HIDE);
 		offset++;
-	// Check for Argument (%n) or Environment Variable (%x...%)
-	} else if (lineBuffer[offset] == '%') {
-		enVarEnd = offset + 1;
-		// Search end of word for second % (can be a long path)
-		while ((enVarEnd < lengthLine) &&
-			(!isspacechar(lineBuffer[enVarEnd])) &&
-			(lineBuffer[enVarEnd] != '%') &&
-			(!IsBOperator(lineBuffer[enVarEnd])) &&
-			(!IsBSeparator(lineBuffer[enVarEnd]))) {
-			enVarEnd++;
-		}
-		// Check for Argument (%n)
-		if ((Is0To9(lineBuffer[offset + 1])) &&
-			(lineBuffer[enVarEnd] != '%')) {
-			// Colorize Argument
-			styler.ColourTo(startLine + offset + 1, SCE_BAT_IDENTIFIER);
-			offset += 2;
-			// Check for External Command / Program
-			if (offset < lengthLine && !isspacechar(lineBuffer[offset])) {
-				cmdLoc = offset;
-			}
-		// Check for Environment Variable (%x...%)
-		} else if ((lineBuffer[offset + 1] != '%') &&
-			(lineBuffer[enVarEnd] == '%')) {
-			offset = enVarEnd;
-			// Colorize Environment Variable
-			styler.ColourTo(startLine + offset, SCE_BAT_IDENTIFIER);
-			offset++;
-			// Check for External Command / Program
-			if (offset < lengthLine && !isspacechar(lineBuffer[offset])) {
-				cmdLoc = offset;
-			}
-		}
 	}
 	// Skip next spaces
 	while ((offset < lengthLine) && (isspacechar(lineBuffer[offset]))) {
@@ -350,8 +316,8 @@ static void ColouriseBatchLine(
 				(!IsBSeparator(wordBuffer[wbo]))) {
 				wbo++;
 			}
-			// Check for Argument (%n)
-			if ((Is0To9(wordBuffer[1])) &&
+			// Check for Argument (%n) or (%*)
+			if (((Is0To9(wordBuffer[1])) || (wordBuffer[1] == '*')) &&
 				(wordBuffer[wbo] != '%')) {
 				// Check for External Command / Program
 				if (cmdLoc == offset - wbl) {
@@ -361,6 +327,17 @@ static void ColouriseBatchLine(
 				styler.ColourTo(startLine + offset - 1 - (wbl - 2), SCE_BAT_IDENTIFIER);
 				// Reset Offset to re-process remainder of word
 				offset -= (wbl - 2);
+			// Check for Expanded Argument (%~...) / Variable (%%~...)
+			} else if (((wbl > 1) && (wordBuffer[1] == '~')) ||
+				((wbl > 2) && (wordBuffer[1] == '%') && (wordBuffer[2] == '~'))) {
+				// Check for External Command / Program
+				if (cmdLoc == offset - wbl) {
+					cmdLoc = offset - (wbl - wbo);
+				}
+				// Colorize Expanded Argument / Variable
+				styler.ColourTo(startLine + offset - 1 - (wbl - wbo), SCE_BAT_IDENTIFIER);
+				// Reset Offset to re-process remainder of word
+				offset -= (wbl - wbo);
 			// Check for Environment Variable (%x...%)
 			} else if ((wordBuffer[1] != '%') &&
 				(wordBuffer[wbo] == '%')) {
