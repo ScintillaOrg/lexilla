@@ -39,8 +39,6 @@ public:
 	DecorationList();
 	~DecorationList();
 
-	void ClearAll();
-
 	void SetCurrentIndicator(int indicator);
 	int GetCurrentIndicator() { return currentIndicator; }
 

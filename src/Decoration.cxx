@@ -101,14 +101,6 @@ void DecorationList::Delete(int indicator) {
 	}
 }
 
-void DecorationList::ClearAll() {
-	for (Decoration *deco=root; deco; deco = deco->next) {
-		int position = 0;
-		int length = deco->rs.Length();
-		deco->rs.FillRange(position, 0, length);
-	}
-}
-
 void DecorationList::SetCurrentIndicator(int indicator) {
 	currentIndicator = indicator;
 	current = DecorationFromIndicator(indicator);

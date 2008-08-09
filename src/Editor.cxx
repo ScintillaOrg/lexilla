@@ -3493,11 +3493,14 @@ void Editor::ClearAll() {
 }
 
 void Editor::ClearDocumentStyle() {
+	for (int i=0; i < INDIC_CONTAINER; i++) {
+		pdoc->decorations.SetCurrentIndicator(i);
+		pdoc->DecorationFillRange(0, 0, pdoc->Length());
+	}
 	pdoc->StartStyling(0, '\377');
 	pdoc->SetStyleFor(pdoc->Length(), 0);
 	cs.ShowAll();
 	pdoc->ClearLevels();
-	pdoc->decorations.ClearAll();
 }
 
 void Editor::CopyAllowLine() {
