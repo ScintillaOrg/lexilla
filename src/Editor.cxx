@@ -3493,9 +3493,15 @@ void Editor::ClearAll() {
 }
 
 void Editor::ClearDocumentStyle() {
-	for (int i=0; i < INDIC_CONTAINER; i++) {
-		pdoc->decorations.SetCurrentIndicator(i);
-		pdoc->DecorationFillRange(0, 0, pdoc->Length());
+	Decoration *deco = pdoc->decorations.root;
+	while (deco) {
+		// Save next in case deco deleted
+		Decoration *decoNext = deco->next;
+		if (deco->indicator < INDIC_CONTAINER) {
+			pdoc->decorations.SetCurrentIndicator(deco->indicator);
+			pdoc->DecorationFillRange(0, 0, pdoc->Length());
+		}
+		deco = decoNext;
 	}
 	pdoc->StartStyling(0, '\377');
 	pdoc->SetStyleFor(pdoc->Length(), 0);
