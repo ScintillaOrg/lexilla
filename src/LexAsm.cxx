@@ -149,7 +149,7 @@ static void ColouriseAsmDoc(unsigned int startPos, int length, int initStyle, Wo
 		if (sc.state == SCE_ASM_DEFAULT) {
 			if (sc.ch == ';'){
 				sc.SetState(SCE_ASM_COMMENT);
-			} else if (isdigit(sc.ch) || (sc.ch == '.' && isdigit(sc.chNext))) {
+			} else if (isascii(sc.ch) && (isdigit(sc.ch) || (sc.ch == '.' && isascii(sc.chNext) && isdigit(sc.chNext)))) {
 				sc.SetState(SCE_ASM_NUMBER);
 			} else if (IsAWordStart(sc.ch)) {
 				sc.SetState(SCE_ASM_IDENTIFIER);
