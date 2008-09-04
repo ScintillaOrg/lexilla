@@ -2566,7 +2566,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		// Find the most recent line with some text
 
 		int lineLastWithText = line;
-		while (lineLastWithText > 0 && pdoc->IsWhiteLine(lineLastWithText)) {
+		while (lineLastWithText > Platform::Maximum(line-20, 0) && pdoc->IsWhiteLine(lineLastWithText)) {
 			lineLastWithText--;
 		}
 		if (lineLastWithText < line) {
@@ -2588,7 +2588,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		}
 
 		int lineNextWithText = line;
-		while (lineNextWithText < pdoc->LinesTotal() && pdoc->IsWhiteLine(lineNextWithText)) {
+		while (lineNextWithText < Platform::Minimum(line+20, pdoc->LinesTotal()) && pdoc->IsWhiteLine(lineNextWithText)) {
 			lineNextWithText++;
 		}
 		if (lineNextWithText > line) {
