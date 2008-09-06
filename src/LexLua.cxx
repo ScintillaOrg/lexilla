@@ -243,6 +243,29 @@ static void ColouriseLuaDoc(
 			}
 		}
 	}
+
+	if (setWord.Contains(sc.chPrev)) {
+		char s[100];
+		sc.GetCurrent(s, sizeof(s));
+		if (keywords.InList(s)) {
+			sc.ChangeState(SCE_LUA_WORD);
+		} else if (keywords2.InList(s)) {
+			sc.ChangeState(SCE_LUA_WORD2);
+		} else if (keywords3.InList(s)) {
+			sc.ChangeState(SCE_LUA_WORD3);
+		} else if (keywords4.InList(s)) {
+			sc.ChangeState(SCE_LUA_WORD4);
+		} else if (keywords5.InList(s)) {
+			sc.ChangeState(SCE_LUA_WORD5);
+		} else if (keywords6.InList(s)) {
+			sc.ChangeState(SCE_LUA_WORD6);
+		} else if (keywords7.InList(s)) {
+			sc.ChangeState(SCE_LUA_WORD7);
+		} else if (keywords8.InList(s)) {
+			sc.ChangeState(SCE_LUA_WORD8);
+		}
+	}
+
 	sc.Complete();
 }
 
