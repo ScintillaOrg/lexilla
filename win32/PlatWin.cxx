@@ -663,7 +663,7 @@ void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 		static_cast<SurfaceImpl &>(surfaceSource).hdc, from.x, from.y, SRCCOPY);
 }
 
-// Buffer to hold size strings and string position arrays without always allocating on heap.
+// Buffer to hold strings and string position arrays without always allocating on heap.
 // May sometimes have string too long to allocate on stack. So use a fixed stack-allocated buffer
 // when less than safe size otherwise allocate on heap and free automatically.
 template<typename T, int lengthStandard>
