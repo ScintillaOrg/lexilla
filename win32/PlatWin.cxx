@@ -687,7 +687,19 @@ public:
 };
 
 const int stackBufferLength = 10000;
-typedef VarBuffer<wchar_t, stackBufferLength> TextWide;
+typedef VarBuffer<wchar_t, stackBufferLength> TextWideT;
+class TextWide : public TextWideT {
+public:
+	int tlen;
+	TextWide(const char *s, int len, bool unicodeMode, int codePage=0) : TextWideT(len) {
+		if (unicodeMode) {
+			tlen = UTF16FromUTF8(s, len, buffer, len);
+		} else {
+			// Support Asian string display in 9x English
+			tlen = ::MultiByteToWideChar(codePage, 0, s, len, buffer, len);
+		}
+	}
+};
 typedef VarBuffer<int, stackBufferLength> TextPositions;
 
 void SurfaceImpl::DrawTextCommon(PRectangle rc, Font &font_, int ybase, const char *s, int len, UINT fuOptions) {
@@ -718,17 +730,10 @@ void SurfaceImpl::DrawTextCommon(PRectangle rc, Font &font_, int ybase, const ch
 		}
 	} else {
 		// Use Unicode calls
-		TextWide tbuf(len);
-		int tlen;
-		if (unicodeMode) {
-			tlen = UTF16FromUTF8(s, len, tbuf.buffer, len);
-		} else {
-			// Support Asian string display in 9x English
-			tlen = ::MultiByteToWideChar(codePage, 0, s, len, tbuf.buffer, len);
-		}
-		if (!::ExtTextOutW(hdc, x, ybase, fuOptions, &rcw, tbuf.buffer, tlen, NULL)) {
-			while (tlen > pos) {
-				int seglen = Platform::Minimum(maxSegmentLength, tlen - pos);
+		const TextWide tbuf(s, len, unicodeMode, codePage);
+		if (!::ExtTextOutW(hdc, x, ybase, fuOptions, &rcw, tbuf.buffer, tbuf.tlen, NULL)) {
+			while (tbuf.tlen > pos) {
+				int seglen = Platform::Minimum(maxSegmentLength, tbuf.tlen - pos);
 				if (!::ExtTextOutW(hdc, x, ybase, fuOptions, &rcw, tbuf.buffer+pos, seglen, NULL)) {
 					PLATFORM_ASSERT(false);
 					return;
@@ -772,17 +777,11 @@ void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, int ybase, con
 int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 	SetFont(font_);
 	SIZE sz={0,0};
-	if (unicodeMode) {
-		TextWide tbuf(len);
-		int tlen = UTF16FromUTF8(s, len, tbuf.buffer, len);
-		::GetTextExtentPoint32W(hdc, tbuf.buffer, tlen, &sz);
-	} else if (IsNT() || (codePage==0) || win9xACPSame) {
+	if ((!unicodeMode) && (IsNT() || (codePage==0) || win9xACPSame)) {
 		::GetTextExtentPoint32A(hdc, s, Platform::Minimum(len, maxLenText), &sz);
 	} else {
-		// Support Asian string display in 9x English
-		TextWide tbuf(len);
-		int tlen = ::MultiByteToWideChar(codePage, 0, s, len, tbuf.buffer, len);
-		::GetTextExtentPoint32W(hdc, tbuf.buffer, tlen, &sz);
+		const TextWide tbuf(s, len, unicodeMode, codePage);
+		::GetTextExtentPoint32W(hdc, tbuf.buffer, tbuf.tlen, &sz);
 	}
 	return sz.cx;
 }
@@ -792,15 +791,14 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 	SIZE sz={0,0};
 	int fit = 0;
 	if (unicodeMode) {
-		TextWide tbuf(len);
-		int tlen = UTF16FromUTF8(s, len, tbuf.buffer, len);
-		TextPositions poses(tlen);
-		fit = tlen;
-		if (!::GetTextExtentExPointW(hdc, tbuf.buffer, tlen, maxWidthMeasure, &fit, poses.buffer, &sz)) {
+		const TextWide tbuf(s, len, unicodeMode, codePage);
+		TextPositions poses(tbuf.tlen);
+		fit = tbuf.tlen;
+		if (!::GetTextExtentExPointW(hdc, tbuf.buffer, tbuf.tlen, maxWidthMeasure, &fit, poses.buffer, &sz)) {
 			// Likely to have failed because on Windows 9x where function not available
 			// So measure the character widths by measuring each initial substring
 			// Turns a linear operation into a qudratic but seems fast enough on test files
-			for (int widthSS=0; widthSS < tlen; widthSS++) {
+			for (int widthSS=0; widthSS < tbuf.tlen; widthSS++) {
 				::GetTextExtentPoint32W(hdc, tbuf.buffer, widthSS+1, &sz);
 				poses.buffer[widthSS] = sz.cx;
 			}
@@ -857,10 +855,9 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 		}
 	} else {
 		// Support Asian string display in 9x English
-		TextWide tbuf(len);
-		int tlen = ::MultiByteToWideChar(codePage, 0, s, len, tbuf.buffer, len);
-		TextPositions poses(tlen);
-		for (int widthSS=0; widthSS<tlen; widthSS++) {
+		const TextWide tbuf(s, len, unicodeMode, codePage);
+		TextPositions poses(tbuf.tlen);
+		for (int widthSS=0; widthSS<tbuf.tlen; widthSS++) {
 			::GetTextExtentPoint32W(hdc, tbuf.buffer, widthSS+1, &sz);
 			poses.buffer[widthSS] = sz.cx;
 		}
@@ -1385,9 +1382,8 @@ PRectangle ListBoxX::GetDesiredRect() {
 	SIZE textSize = {0, 0};
 	int len = widestItem ? strlen(widestItem) : 0;
 	if (unicodeMode) {
-		TextWide tbuf(len);
-		len = UTF16FromUTF8(widestItem, len, tbuf.buffer, len);
-		::GetTextExtentPoint32W(hdc, tbuf.buffer, len, &textSize);
+		const TextWide tbuf(widestItem, len, unicodeMode);
+		::GetTextExtentPoint32W(hdc, tbuf.buffer, tbuf.tlen, &textSize);
 	} else {
 		::GetTextExtentPoint32A(hdc, widestItem, len, &textSize);
 	}
@@ -1503,9 +1499,8 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 		::InsetRect(&rcText, TextInset.x, TextInset.y);
 
 		if (unicodeMode) {
-			TextWide tbuf(len);
-			int tlen = UTF16FromUTF8(text, len, tbuf.buffer, len);
-			::DrawTextW(pDrawItem->hDC, tbuf.buffer, tlen, &rcText, DT_NOPREFIX|DT_END_ELLIPSIS|DT_SINGLELINE|DT_NOCLIP);
+			const TextWide tbuf(text, len, unicodeMode);
+			::DrawTextW(pDrawItem->hDC, tbuf.buffer, tbuf.tlen, &rcText, DT_NOPREFIX|DT_END_ELLIPSIS|DT_SINGLELINE|DT_NOCLIP);
 		} else {
 			::DrawTextA(pDrawItem->hDC, text, len, &rcText, DT_NOPREFIX|DT_END_ELLIPSIS|DT_SINGLELINE|DT_NOCLIP);
 		}
