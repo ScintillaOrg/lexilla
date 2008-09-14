@@ -687,11 +687,11 @@ public:
 };
 
 const int stackBufferLength = 10000;
-typedef VarBuffer<wchar_t, stackBufferLength> TextWideT;
-class TextWide : public TextWideT {
+class TextWide : public VarBuffer<wchar_t, stackBufferLength> {
 public:
 	int tlen;
-	TextWide(const char *s, int len, bool unicodeMode, int codePage=0) : TextWideT(len) {
+	TextWide(const char *s, int len, bool unicodeMode, int codePage=0) :
+		VarBuffer<wchar_t, stackBufferLength>(len) {
 		if (unicodeMode) {
 			tlen = UTF16FromUTF8(s, len, buffer, len);
 		} else {
