@@ -194,19 +194,14 @@ static void ColouriseCssDoc(unsigned int startPos, int length, int initStyle, Wo
 				s2++;
 			switch (sc.state) {
 			case SCE_CSS_IDENTIFIER:
-				if (!keywords.InList(s2)) {
-					if (keywords2.InList(s2)) {
-						sc.ChangeState(SCE_CSS_IDENTIFIER2);
-					} else {
-						sc.ChangeState(SCE_CSS_UNKNOWN_IDENTIFIER);
-					}
-				}
-				break;
+			case SCE_CSS_IDENTIFIER2:
 			case SCE_CSS_UNKNOWN_IDENTIFIER:
 				if (keywords.InList(s2))
 					sc.ChangeState(SCE_CSS_IDENTIFIER);
 				else if (keywords2.InList(s2))
 					sc.ChangeState(SCE_CSS_IDENTIFIER2);
+				else
+					sc.ChangeState(SCE_CSS_UNKNOWN_IDENTIFIER);
 				break;
 			case SCE_CSS_PSEUDOCLASS:
 				if (!pseudoClasses.InList(s2))
