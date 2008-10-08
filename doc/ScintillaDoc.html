@@ -4698,6 +4698,10 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     interpreted as integers. Search the lexer sources for <code>GetPropertyInt</code> to see how
     properties are used.</p>
 
+    <p>There is a convention for naming properties used by lexers so that the set of properties can be found by scripts.
+    Property names should start with "lexer.&lt;lexer&gt;." or "fold.&lt;lexer&gt;." when they apply to one
+    lexer or start with "lexer." or "fold." if they apply to multiple lexers.</p>
+
     <p><b id="SCI_GETPROPERTY">SCI_GETPROPERTY(const char *key, char *value)</b><br />
     Lookup a keyword:value pair using the specified key; if found, copy the value to the user-supplied
     buffer and return the length (not including the terminating 0).  If not found, copy an empty string
