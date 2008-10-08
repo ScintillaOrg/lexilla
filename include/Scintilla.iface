@@ -2008,6 +2008,7 @@ val SCLEX_R=86
 val SCLEX_MAGIK=87
 val SCLEX_POWERSHELL=88
 val SCLEX_MYSQL=89
+val SCLEX_PO=90
 
 # When a lexer specifies its language as SCLEX_AUTOMATIC it receives a
 # value assigned in sequence from SCLEX_AUTOMATIC+1.
@@ -3329,6 +3330,17 @@ val SCE_MYSQL_QUOTEDIDENTIFIER=17
 val SCE_MYSQL_USER1=18
 val SCE_MYSQL_USER2=19
 val SCE_MYSQL_USER3=20
+# Lexical state for SCLEX_PO
+lex Po=SCLEX_PO SCE_PO_
+val SCE_PO_DEFAULT=0
+val SCE_PO_COMMENT=1
+val SCE_PO_MSGID=2
+val SCE_PO_MSGID_TEXT=3
+val SCE_PO_MSGSTR=4
+val SCE_PO_MSGSTR_TEXT=5
+val SCE_PO_MSGCTXT=6
+val SCE_PO_MSGCTXT_TEXT=7
+val SCE_PO_FUZZY=8
 
 # Events
 
