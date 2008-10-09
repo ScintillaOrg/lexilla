@@ -28,7 +28,12 @@ using namespace Scintilla;
 
 
 static inline bool IsAWordChar(const unsigned int ch) {
-	return (isalnum(ch) || ch == '-' || ch == '_' || ch >= 161); // _ is not in fact correct CSS word-character
+	/* FIXME:
+	 * The CSS spec allows "ISO 10646 characters U+00A1 and higher" to be treated as word chars.
+	 * Unfortunately, we are only getting string bytes here, and not full unicode characters. We cannot guarantee
+	 * that our byte is between U+0080 - U+00A0 (to return false), so we have to allow all characters U+0080 and higher
+	 */
+	return ch >= 0x80 || isalnum(ch) || ch == '-' || ch == '_';
 }
 
 inline bool IsCssOperator(const int ch) {
