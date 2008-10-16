@@ -331,6 +331,123 @@
       </li>
     </ul>
     <h3>
+       <a href="http://prdownloads.sourceforge.net/scintilla/scite177.zip?download">Release 1.77</a>
+    </h3>
+    <ul>
+	<li>
+	Released on 18 October 2008.
+	</li>
+	<li>
+	Direct temporary access to Scintilla's text buffer to allow simple efficient interfacing
+	to libraries like regular expression libraries.
+	</li>
+	<li>
+	Scintilla on Windows can interpret keys as Unicode even when a narrow character 
+	window with SCI_SETKEYSUNICODE.
+	</li>
+	<li>
+	Notification sent when autocompletion cancelled.
+	</li>
+	<li>
+	Lexer for gettext .po files added.
+	</li>
+	<li>
+	Abaqus lexer handles program structure more correctly.
+	</li>
+	<li>
+	C++ lexer allows mixed case doc comment tags.
+	</li>
+	<li>
+	CSS lexer updated and works with non-ASCII.
+	</li>
+	<li>
+	Diff lexer adds style for changed lines, handles subversion diffs better and 
+	fixes styling and folding for lines containing chunk dividers ("---").
+	</li>
+	<li>
+	Haskell lexer allows hexadecimal literals.
+	</li>
+	<li>
+	HTML lexer improves PHP and JavaScript folding. 
+	PHP heredocs, nowdocs, strings and comments processed more accurately.
+	Internet Explorer's non-standard &gt;comment&lt; tag supported.
+	Script recognition in XML can be controlled with lexer.xml.allow.scripts property.
+	</li>
+	<li>
+	Lua lexer styles last character correctly.
+	</li>
+	<li>
+	Perl lexer update.
+	</li>
+	<li>
+	Comment folding implemented for Ruby.
+	</li>
+	<li>
+	Better TeX folding.
+	</li>
+	<li>
+	Verilog lexer updated.
+	</li>
+	<li>
+	Windows Batch file lexer handles %~ and %*.
+	</li>
+	<li>
+	YAML lexer allows non-ASCII text.
+	</li>
+	<li>
+	SciTE on GTK+ implements "Replace in Buffers" in advanced mode.
+	</li>
+	<li>
+	The extender OnBeforeSave method can override the default file saving behaviour by retuning true.
+	</li>
+	<li>
+	Window position and recent files list may be saved into the session file.
+	</li>
+	<li>
+	Right button press outside the selection moves the caret.
+	</li>
+	<li>
+	SciTE load.on.activate works when closing a document reveals a changed document.
+	</li>
+	<li>
+	SciTE bug fixed where eol.mode not used for initial buffer.
+	</li>
+	<li>
+	SciTE bug fixed where a file could be saved as the same name as another 
+	buffer leading to confusing behaviour.
+	</li>
+	<li>
+	Fixed display bug for long lines in same style on Windows.
+	</li>
+	<li>
+	Fixed SciTE crash when finding matching preprocessor command used on some files.
+	</li>
+	<li>
+	Drawing performance improved for files with many blank lines.
+	</li>
+	<li>
+	Folding bugs fixed where changing program text produced a decrease in fold level on a fold header line.
+	</li>
+	<li>
+	Clearing document style now clears all indicators.
+	</li>
+	<li>
+	SciTE's embedded Lua updated to 5.1.4.
+	</li>
+	<li>
+	SciTE will compile with versions of GTK+ before 2.8 again.
+	</li>
+	<li>
+	SciTE on GTK+ bug fixed where multiple files not opened.
+	</li>
+	<li>
+	Bug fixed with SCI_VCHOMEWRAP and SCI_VCHOMEWRAPEXTEND on white last line.
+	</li>
+	<li>
+	Regular expression bug fixed where "^[^(]+$" matched empty lines.
+	</li>
+    </ul>
+    <h3>
        <a href="http://prdownloads.sourceforge.net/scintilla/scite176.zip?download">Release 1.76</a>
     </h3>
     <ul>
