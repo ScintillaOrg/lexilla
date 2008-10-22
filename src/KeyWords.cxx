@@ -159,6 +159,7 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmClw);
 	LINK_LEXER(lmClwNoCase);
 	LINK_LEXER(lmCmake);
+	LINK_LEXER(lmCOBOL);
 	LINK_LEXER(lmConf);
 	LINK_LEXER(lmCPP);
 	LINK_LEXER(lmCPPNoCase);
@@ -221,7 +222,9 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmSpecman);
 	LINK_LEXER(lmSpice);
 	LINK_LEXER(lmSQL);
+	LINK_LEXER(lmTACL);
 	LINK_LEXER(lmTADS3);
+	LINK_LEXER(lmTAL);
 	LINK_LEXER(lmTCL);
 	LINK_LEXER(lmTeX);
 	LINK_LEXER(lmVB);

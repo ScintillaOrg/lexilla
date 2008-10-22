@@ -206,6 +206,10 @@ SOURCE=..\src\LexCmake.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexCOBOL.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexConf.cxx
 # End Source File
 # Begin Source File
@@ -399,6 +403,14 @@ SOURCE=..\src\LexSQL.cxx
 # Begin Source File
 
 SOURCE=..\src\LexTADS3.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexTACL.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LexTAL.cxx
 # End Source File
 # Begin Source File
 

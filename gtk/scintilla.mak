@@ -158,6 +158,7 @@ LEXOBJS=\
 	$(DIR_O)\LexCaml.obj \
 	$(DIR_O)\LexCLW.obj \
 	$(DIR_O)\LexCmake.obj \
+	$(DIR_O)\LexCOBOL.obj \
 	$(DIR_O)\LexConf.obj \
 	$(DIR_O)\LexCPP.obj \
 	$(DIR_O)\LexCrontab.obj \
@@ -206,7 +207,9 @@ LEXOBJS=\
 	$(DIR_O)\LexSpecman.obj \
 	$(DIR_O)\LexSpice.obj \
 	$(DIR_O)\LexSQL.obj \
+	$(DIR_O)\LexTACL.obj \
 	$(DIR_O)\LexTADS3.obj \
+	$(DIR_O)\LexTAL.obj \
 	$(DIR_O)\LexTCL.obj \
 	$(DIR_O)\LexTeX.obj \
 	$(DIR_O)\LexVB.obj \
@@ -385,6 +388,8 @@ $(DIR_O)\LexCLW.obj: ..\src\LexCLW.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexCmake.obj: ..\src\LexCmake.cxx $(LEX_HEADERS)
 
+$(DIR_O)\LexCOBOL.obj: ..\src\LexCOBOL.cxx $(LEX_HEADERS)
+
 $(DIR_O)\LexConf.obj: ..\src\LexConf.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexCPP.obj: ..\src\LexCPP.cxx $(LEX_HEADERS)
@@ -481,7 +486,11 @@ $(DIR_O)\LexSpice.obj: ..\src\LexSpice.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexSQL.obj: ..\src\LexSQL.cxx $(LEX_HEADERS)
 
+$(DIR_O)\LexTACL.obj: ..\src\LexTACL.cxx $(LEX_HEADERS)
+
 $(DIR_O)\LexTADS3.obj: ..\src\LexTADS3.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexTAL.obj: ..\src\LexTAL.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexTCL.obj: ..\src\LexTCL.cxx $(LEX_HEADERS)
 
