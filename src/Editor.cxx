@@ -2693,8 +2693,15 @@ void Editor::DrawBlockCaret(Surface *surface, ViewStyle &vsDraw, LineLayout *ll,
 	}
 
 	// We now know what to draw, update the caret drawing rectangle
-	rcCaret.left = ll->positions[offsetFirstChar] - ll->positions[ll->LineStart(subLine)] + xStart;
-	rcCaret.right = ll->positions[offsetFirstChar+numCharsToDraw] - ll->positions[ll->LineStart(subLine)] + xStart;
+	rcCaret.left = ll->positions[offsetFirstChar] - ll->positions[lineStart] + xStart;
+	rcCaret.right = ll->positions[offsetFirstChar+numCharsToDraw] - ll->positions[lineStart] + xStart;
+
+	// Adjust caret position to take into account any word wrapping symbols.
+	if ((actualWrapVisualStartIndent != 0) && (lineStart != 0)) {
+		int wordWrapCharWidth = actualWrapVisualStartIndent * vs.aveCharWidth;
+		rcCaret.left += wordWrapCharWidth;
+		rcCaret.right += wordWrapCharWidth;
+	}
 
 	// This character is where the caret block is, we override the colours
 	// (inversed) for drawing the caret here.
