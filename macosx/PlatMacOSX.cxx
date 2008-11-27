@@ -321,7 +321,7 @@ void SurfaceImpl::Polygon(Scintilla::Point *pts, int npts, ColourAllocated fore,
     CGContextDrawPath( gc, kCGPathFillStroke );
 
     // Deallocate memory
-    delete points;
+    delete [] points;
     points = NULL;
 }
 
