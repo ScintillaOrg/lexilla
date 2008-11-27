@@ -277,7 +277,7 @@
 
     <h2 id="TextRetrievalAndModification">Text retrieval and modification</h2>
 
-    <p>Each character in a Scintilla document is followed by an associated byte of styling
+    <p>Each byte in a Scintilla document is followed by an associated byte of styling
     information. The combination of a character byte and a style byte is called a cell. Style bytes
     are interpreted an index into an array of styles.
     Style bytes may be split into an index and a set of indicator bits
@@ -291,6 +291,9 @@
     can be altered with <a class="message"
     href="#SCI_SETSTYLEBITS"><code>SCI_SETSTYLEBITS</code></a> up to a maximum of 7 bits.
     The remaining bits can be used for indicators.</p>
+
+    <p>In this document, 'character' normally refers to a byte even when multi-byte characters are used.
+    Lengths measure the numbers of bytes, not the amount of characters in those bytes.</p>
 
     <p>Positions within the Scintilla document refer to a character or the gap before that
     character. The first character in a document is 0, the second 1 and so on. If a document
@@ -1004,7 +1007,7 @@ struct TextToFind {
 
     <p><b id="SCI_GETTEXTLENGTH">SCI_GETTEXTLENGTH</b><br />
      <b id="SCI_GETLENGTH">SCI_GETLENGTH</b><br />
-     Both these messages return the length of the document in characters.</p>
+     Both these messages return the length of the document in bytes.</p>
 
     <p><b id="SCI_GETLINECOUNT">SCI_GETLINECOUNT</b><br />
      This returns the number of lines in the document. An empty document contains 1 line. A
