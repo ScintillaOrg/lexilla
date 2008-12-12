@@ -88,6 +88,10 @@
 #define OBJECT_CLASS GObjectClass
 #endif
 
+#ifdef SCI_NAMESPACE
+using namespace Scintilla;
+#endif
+
 extern char *UTF8FromLatin1(const char *s, int &len);
 
 class ScintillaGTK : public ScintillaBase {

@@ -41,6 +41,10 @@
 #pragma warning(disable: 4505)
 #endif
 
+#ifdef SCI_NAMESPACE
+using namespace Scintilla;
+#endif
+
 enum encodingType { singleByte, UTF8, dbcs};
 
 struct LOGFONT {
