@@ -390,6 +390,10 @@ SOURCE=..\src\LexSmalltalk.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexSorcus.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexSpecman.cxx
 # End Source File
 # Begin Source File
