@@ -1658,15 +1658,17 @@ const char *BuiltinRegex::SubstituteByPosition(Document* doc, const char *text, 
 #ifndef SCI_OWNREGEX
 
 #ifdef SCI_NAMESPACE
-namespace Scintilla {
-#endif
+
+RegexSearchBase *Scintilla::CreateRegexSearch(CharClassify *charClassTable) {
+	return new BuiltinRegex(charClassTable);
+}
+
+#else
 
 RegexSearchBase *CreateRegexSearch(CharClassify *charClassTable) {
 	return new BuiltinRegex(charClassTable);
 }
 
-#ifdef SCI_NAMESPACE
-}
 #endif
 
 #endif
