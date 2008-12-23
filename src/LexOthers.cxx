@@ -770,7 +770,7 @@ static void FoldPropsDoc(unsigned int startPos, int length, int, WordList *[], A
 		lev = SC_FOLDLEVELBASE;
 	}
 	int flagsNext = styler.LevelAt(lineCurrent);
-	styler.SetLevel(lineCurrent, lev | flagsNext & ~SC_FOLDLEVELNUMBERMASK);
+	styler.SetLevel(lineCurrent, lev | (flagsNext & ~SC_FOLDLEVELNUMBERMASK));
 }
 
 static void ColouriseMakeLine(
