@@ -569,7 +569,7 @@ static void ColourisePerlDoc(unsigned int startPos, int length, int initStyle,
 						sc.Forward(ws_skip + 1);
 						HereDoc.Quote = delim_ch;
 						HereDoc.Quoted = true;
-					} else if (ws_skip == 0 && setNonHereDoc.Contains(sc.chNext)
+					} else if ((ws_skip == 0 && setNonHereDoc.Contains(sc.chNext))
 							   || ws_skip > 0) {
 						// left shift << or <<= operator cases
 						// restore position if operator

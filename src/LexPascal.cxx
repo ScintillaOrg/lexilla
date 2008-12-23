@@ -405,8 +405,8 @@ static unsigned int SkipWhiteSpace(unsigned int currentPos, unsigned int endPos,
 	CharacterSet setWord(CharacterSet::setAlphaNum, "_");
 	unsigned int j = currentPos + 1;
 	char ch = styler.SafeGetCharAt(j);
-	while ((j < endPos) && (IsASpaceOrTab(ch) || ch == '\r' || ch == '\n') || 
-		IsStreamCommentStyle(styler.StyleAt(j)) || (includeChars && setWord.Contains(ch))) {
+	while ((j < endPos) && (IsASpaceOrTab(ch) || ch == '\r' || ch == '\n' || 
+		IsStreamCommentStyle(styler.StyleAt(j)) || (includeChars && setWord.Contains(ch)))) {
 		j++;
 		ch = styler.SafeGetCharAt(j);
 	}
@@ -473,8 +473,8 @@ static void ClassifyPascalWordFoldPoint(int &levelCurrent, int &lineFoldStateCur
 		bool ignoreKeyword = true;
 		unsigned int j = lastStart - 1;
 		char ch = styler.SafeGetCharAt(j);
-		while ((j >= startPos) && (IsASpaceOrTab(ch) || ch == '\r' || ch == '\n') || 
-			IsStreamCommentStyle(styler.StyleAt(j))) {
+		while ((j >= startPos) && (IsASpaceOrTab(ch) || ch == '\r' || ch == '\n' || 
+			IsStreamCommentStyle(styler.StyleAt(j)))) {
 			j--;
 			ch = styler.SafeGetCharAt(j);
 		}
