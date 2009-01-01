@@ -208,6 +208,7 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmPLM);
 	LINK_LEXER(lmPo);
 	LINK_LEXER(lmPOV);
+	LINK_LEXER(lmPowerPro);
 	LINK_LEXER(lmPowerShell);
 	LINK_LEXER(lmProgress);
 	LINK_LEXER(lmProps);
