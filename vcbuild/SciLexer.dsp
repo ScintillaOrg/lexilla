@@ -242,10 +242,6 @@ SOURCE=..\src\LexErlang.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\LexEScript.cxx
-# End Source File
-# Begin Source File
-
 SOURCE=..\src\LexFlagship.cxx
 # End Source File
 # Begin Source File
