@@ -136,6 +136,10 @@ LexCsound.o: ../src/LexCsound.cxx ../include/Platform.h \
 LexD.o: ../src/LexD.cxx ../include/Platform.h ../include/PropSet.h \
   ../include/SString.h ../include/Accessor.h ../src/StyleContext.h \
   ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
+LexEScript.o: ../src/LexEScript.cxx ../include/Platform.h \
+  ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
+  ../src/StyleContext.h ../include/KeyWords.h ../include/Scintilla.h \
+  ../include/SciLexer.h
 LexEiffel.o: ../src/LexEiffel.cxx ../include/Platform.h \
   ../include/PropSet.h ../include/SString.h ../include/Accessor.h \
   ../src/StyleContext.h ../include/KeyWords.h ../include/Scintilla.h \
