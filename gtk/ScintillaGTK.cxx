@@ -2498,6 +2498,8 @@ gint ScintillaGTK::ExposeCT(GtkWidget *widget, GdkEventExpose * /*ose*/, CallTip
 	Surface *surfaceWindow = Surface::Allocate();
 	if (surfaceWindow) {
 		surfaceWindow->Init(widget->window, widget);
+		surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == ctip->codePage);
+		surfaceWindow->SetDBCSMode(ctip->codePage);
 		ctip->PaintCT(surfaceWindow);
 		surfaceWindow->Release();
 		delete surfaceWindow;
