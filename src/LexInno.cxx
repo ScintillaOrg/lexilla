@@ -144,7 +144,7 @@ static void ColouriseInnoDoc(unsigned int startPos, int length, int, WordList *k
 					// Check if the buffer contains a section name
 					if (sectionKeywords.InList(buffer)) {
 						styler.ColourTo(i,SCE_INNO_SECTION);
-						isCode = !strcmpi(buffer, "code");
+						isCode = !CompareCaseInsensitive(buffer, "code");
 					} else {
 						styler.ColourTo(i,SCE_INNO_DEFAULT);
 					}
