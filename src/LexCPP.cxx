@@ -77,6 +77,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 	bool lastWordWasUUID = false;
 	int styleBeforeDCKeyword = SCE_C_DEFAULT;
 	bool continuationLine = false;
+	bool isIncludePreprocessor = false;
 
 	if (initStyle == SCE_C_PREPROCESSOR) {
 		// Set continuationLine if last character of previous line is '\'
@@ -118,6 +119,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			// if different sets of lines lexed.
 			visibleChars = 0;
 			lastWordWasUUID = false;
+			isIncludePreprocessor = false;
 		}
 
 		// Handle line continuation generically.
@@ -230,6 +232,11 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 			case SCE_C_STRING:
 				if (sc.atLineEnd) {
 					sc.ChangeState(SCE_C_STRINGEOL);
+				} else if (isIncludePreprocessor) {
+					if (sc.ch == '>') {
+						sc.ForwardSetState(SCE_C_DEFAULT);
+						isIncludePreprocessor = false;
+					}
 				} else if (sc.ch == '\\') {
 					if (sc.chNext == '\"' || sc.chNext == '\'' || sc.chNext == '\\') {
 						sc.Forward();
@@ -321,6 +328,9 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 				sc.SetState(SCE_C_REGEX);	// JavaScript's RegEx
 			} else if (sc.ch == '\"') {
 				sc.SetState(SCE_C_STRING);
+				isIncludePreprocessor = false;	// ensure that '>' won't end the string
+			} else if (isIncludePreprocessor && sc.ch == '<') {
+				sc.SetState(SCE_C_STRING);
 			} else if (sc.ch == '\'') {
 				sc.SetState(SCE_C_CHARACTER);
 			} else if (sc.ch == '#' && visibleChars == 0) {
@@ -332,6 +342,8 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 				} while ((sc.ch == ' ' || sc.ch == '\t') && sc.More());
 				if (sc.atLineEnd) {
 					sc.SetState(SCE_C_DEFAULT);
+				} else if (sc.Match("include")) {
+					isIncludePreprocessor = true;
 				}
 			} else if (isoperator(static_cast<char>(sc.ch))) {
 				sc.SetState(SCE_C_OPERATOR);
