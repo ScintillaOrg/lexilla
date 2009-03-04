@@ -322,6 +322,10 @@ SOURCE=..\src\LexMySQL.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\LexNimrod.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\LexNsis.cxx
 # End Source File
 # Begin Source File
