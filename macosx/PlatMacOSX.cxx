@@ -1628,7 +1628,7 @@ void ListBoxImpl::GetValue(int n, char *value, int len) {
     } else {
         value[0] = '\0';
     }
-    delete text;
+    delete []text;
 }
 
 void ListBoxImpl::Sort() {
