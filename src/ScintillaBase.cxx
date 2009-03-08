@@ -386,6 +386,8 @@ void ScintillaBase::AutoCompleteCompleted() {
 }
 
 int ScintillaBase::AutoCompleteGetCurrent() {
+	if (!ac.Active())
+		return -1;
 	return ac.lb->GetSelection();
 }
 
