@@ -178,6 +178,7 @@ LEXOBJS=\
 	$(DIR_O)\LexRuby.obj \
 	$(DIR_O)\LexScriptol.obj \
 	$(DIR_O)\LexSmalltalk.obj \
+	$(DIR_O)\LexSML.obj \
 	$(DIR_O)\LexSorcus.obj \
 	$(DIR_O)\LexSpecman.obj \
 	$(DIR_O)\LexSpice.obj \
@@ -439,6 +440,8 @@ $(DIR_O)\LexRuby.obj: ..\src\LexRuby.cxx $(LEX_HEADERS)
 $(DIR_O)\LexScriptol.obj: ..\src\LexScriptol.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexSmalltalk.obj: ..\src\LexSmalltalk.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexSML.obj: ..\src\LexSML.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexSorcus.obj: ..\src\LexSorcus.cxx $(LEX_HEADERS)
 
