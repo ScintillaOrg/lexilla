@@ -640,6 +640,9 @@ static void ColourisePoDoc(unsigned int startPos, int length, int, WordList *[],
 	}
 }
 
+static inline bool isassignchar(unsigned char ch) {
+	return (ch == '=') || (ch == ':');
+}
 
 static void ColourisePropsLine(
     char *lineBuffer,
@@ -658,14 +661,14 @@ static void ColourisePropsLine(
 			styler.ColourTo(endPos, SCE_PROPS_SECTION);
 		} else if (lineBuffer[i] == '@') {
 			styler.ColourTo(startLine + i, SCE_PROPS_DEFVAL);
-			if (lineBuffer[++i] == '=')
+			if (isassignchar(lineBuffer[i++]))
 				styler.ColourTo(startLine + i, SCE_PROPS_ASSIGNMENT);
 			styler.ColourTo(endPos, SCE_PROPS_DEFAULT);
 		} else {
 			// Search for the '=' character
-			while ((i < lengthLine) && (lineBuffer[i] != '='))
+			while ((i < lengthLine) && !isassignchar(lineBuffer[i]))
 				i++;
-			if ((i < lengthLine) && (lineBuffer[i] == '=')) {
+			if ((i < lengthLine) && isassignchar(lineBuffer[i])) {
 				styler.ColourTo(startLine + i - 1, SCE_PROPS_KEY);
 				styler.ColourTo(startLine + i, SCE_PROPS_ASSIGNMENT);
 				styler.ColourTo(endPos, SCE_PROPS_DEFAULT);
