@@ -102,6 +102,8 @@ public:
 	int caretWidth;
 	bool someStylesProtected;
 	bool extraFontFlag;
+	int extraAscent;
+	int extraDescent;
 
 	ViewStyle();
 	ViewStyle(const ViewStyle &source);

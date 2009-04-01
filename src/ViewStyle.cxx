@@ -139,6 +139,8 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	viewEOL = source.viewEOL;
 	showMarkedLines = source.showMarkedLines;
 	extraFontFlag = source.extraFontFlag;
+	extraAscent = source.extraAscent;
+	extraDescent = source.extraDescent;
 }
 
 ViewStyle::~ViewStyle() {
@@ -233,6 +235,8 @@ void ViewStyle::Init(size_t stylesSize_) {
 	viewEOL = false;
 	showMarkedLines = true;
 	extraFontFlag = false;
+	extraAscent = 0;
+	extraDescent = 0;
 }
 
 void ViewStyle::RefreshColourPalette(Palette &pal, bool want) {
@@ -284,6 +288,8 @@ void ViewStyle::Refresh(Surface &surface) {
 			someStylesProtected = true;
 		}
 	}
+	maxAscent += extraAscent;
+	maxDescent += extraDescent;
 
 	lineHeight = maxAscent + maxDescent;
 	aveCharWidth = styles[STYLE_DEFAULT].aveCharWidth;

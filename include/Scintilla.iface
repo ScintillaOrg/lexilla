@@ -1816,6 +1816,18 @@ set void IndicSetAlpha=2523(int indicator, int alpha)
 # Get the alpha fill colour of the given indicator.
 get int IndicGetAlpha=2524(int indicator,)
 
+# Set extra ascent for each line
+set void SetExtraAscent=2525(int extraAscent,)
+
+# Get extra ascent for each line
+get int GetExtraAscent=2526(,)
+
+# Set extra descent for each line
+set void SetExtraDescent=2527(int extraDescent,)
+
+# Get extra descent for each line
+get int GetExtraDescent=2528(,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 

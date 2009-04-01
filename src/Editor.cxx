@@ -7610,6 +7610,22 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETCHARACTERPOINTER:
 		return reinterpret_cast<sptr_t>(pdoc->BufferPointer());
 
+	case SCI_SETEXTRAASCENT:
+		vs.extraAscent = wParam;
+		InvalidateStyleRedraw();
+		break;
+
+	case SCI_GETEXTRAASCENT:
+		return vs.extraAscent;
+
+	case SCI_SETEXTRADESCENT:
+		vs.extraDescent = wParam;
+		InvalidateStyleRedraw();
+		break;
+
+	case SCI_GETEXTRADESCENT:
+		return vs.extraDescent;
+
 	default:
 		return DefWndProc(iMessage, wParam, lParam);
 	}

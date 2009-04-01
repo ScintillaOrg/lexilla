@@ -1680,8 +1680,12 @@ struct TextToFind {
     useWhitespaceForeColour, int colour)</a><br />
      <a class="message" href="#SCI_SETWHITESPACEBACK">SCI_SETWHITESPACEBACK(bool
     useWhitespaceBackColour, int colour)</a><br />
+     <a class="message" href="#SCI_SETEXTRAASCENT">SCI_SETEXTRAASCENT(int extraAscent)</a><br />
+     <a class="message" href="#SCI_GETEXTRAASCENT">SCI_GETEXTRAASCENT</a><br />
+     <a class="message" href="#SCI_SETEXTRADESCENT">SCI_SETEXTRADESCENT(int extraDescent)</a><br />
+     <a class="message" href="#SCI_GETEXTRADESCENT">SCI_GETEXTRADESCENT</a><br />
     </code>
-
+ 
     <p><b id="SCI_SETVIEWWS">SCI_SETVIEWWS(int wsMode)</b><br />
      <b id="SCI_GETVIEWWS">SCI_GETVIEWWS</b><br />
      White space can be made visible which may useful for languages in which white space is
@@ -1730,6 +1734,19 @@ struct TextToFind {
     foreground and/or background colour of all visible white space can be set globally, overriding
     the lexer's colours with <code>SCI_SETWHITESPACEFORE</code> and
     <code>SCI_SETWHITESPACEBACK</code>.</p>
+
+    <p>
+     <b id="SCI_SETEXTRAASCENT">SCI_SETEXTRAASCENT(int extraAscent)</b><br />
+     <b id="SCI_GETEXTRAASCENT">SCI_GETEXTRAASCENT</b><br />
+     <b id="SCI_SETEXTRADESCENT">SCI_SETEXTRADESCENT(int extraDescent)</b><br />
+     <b id="SCI_GETEXTRADESCENT">SCI_GETEXTRADESCENT</b><br />
+     Text is drawn with the base of each character on a 'baseline'. The height of a line is found from the maximum 
+     that any style extends above the baseline (its 'ascent'), added to the maximum that any style extends below the 
+     baseline (its 'descent').
+     Space may be added to the maximum ascent (<code>SCI_SETEXTRAASCENT</code>) and the 
+     maximum descent (<code>SCI_SETEXTRADESCENT</code>) to allow for more space between lines.
+     This may done to make the text easier to read or to accomodate underlines or highlights.
+    <p>
 
     <h2 id="Cursor">Cursor</h2>
 
