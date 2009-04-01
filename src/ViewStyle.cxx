@@ -322,7 +322,7 @@ void ViewStyle::AllocStyles(size_t sizeNew) {
 void ViewStyle::EnsureStyle(size_t index) {
 	if (index >= stylesSize) {
 		size_t sizeNew = stylesSize * 2;
-		while (sizeNew < index)
+		while (sizeNew <= index)
 			sizeNew *= 2;
 		AllocStyles(sizeNew);
 	}
