@@ -107,18 +107,19 @@ def UpdateFile(filename, updated):
         infile = open(filename, "rb")
     except IOError:	# File is not there yet
         out = open(filename, "wb")
-        out.write(updated)
+        out.write(updated.encode('utf-8'))
         out.close()
-        print "New", filename
+        print("New %s" % filename)
         return
     original = infile.read()
     infile.close()
+    original = original.decode('utf-8')
     if updated != original:
         os.unlink(filename)
         out = open(filename, "wb")
-        out.write(updated)
+        out.write(updated.encode('utf-8'))
         out.close()
-        print "Changed", filename
+        print("Changed %s " % filename)
     #~ else:
         #~ print "Unchanged", filename
 
@@ -134,7 +135,7 @@ def Generate(inpath, outpath, commentPrefix, eolType, *lists):
     try:
         infile = open(inpath, "r")
     except IOError:
-        print "Can not open", inpath
+        print("Can not open %s" % inpath)
         return
     original = infile.read()
     infile.close()
@@ -174,7 +175,7 @@ knownIrregularProperties = [
 ]
 
 def FindProperties(lexFile):
-    properties = set()
+    properties = {}
     f = open(lexFile)
     for l in f.readlines():
         if "GetProperty" in l:
@@ -186,11 +187,20 @@ def FindProperties(lexFile):
                     if propertyName in knownIrregularProperties or \
                         propertyName.startswith("fold.") or \
                         propertyName.startswith("lexer."):
-                        properties.add(propertyName)
+                        properties[propertyName] = 1
     return properties
 
 def ciCompare(a,b):
     return cmp(a.lower(), b.lower())
+
+def ciKey(a):
+    return a.lower()
+    
+def sortListInsensitive(l):
+    try:    # Try key function
+        l.sort(key=ciKey)
+    except TypeError:    # Earlier version of Python, so use comparison function
+        l.sort(ciCompare)
 
 def RegenerateAll():
     root="../../"
@@ -198,24 +208,25 @@ def RegenerateAll():
     # Find all the lexer source code files
     lexFilePaths = glob.glob(root + "scintilla/src/Lex*.cxx")
     lexFiles = [os.path.basename(f)[:-4] for f in lexFilePaths]
-    print lexFiles
+    print(lexFiles)
     lexerModules = []
-    lexerProperties = set()
+    lexerProperties = {}
     for lexFile in lexFilePaths:
         lexerModules.extend(FindModules(lexFile))
-        lexerProperties.update(FindProperties(lexFile))
-    lexerModules.sort(ciCompare)
-    lexerProperties.remove("fold.comment.python")
-    lexerProperties = list(lexerProperties)
-    lexerProperties.sort(ciCompare)
+        for k in FindProperties(lexFile).keys():
+            lexerProperties[k] = 1
+    sortListInsensitive(lexerModules)
+    del lexerProperties["fold.comment.python"]
+    lexerProperties = list(lexerProperties.keys())
+    sortListInsensitive(lexerProperties)
 
     # Find all the SciTE properties files
     otherProps = ["abbrev.properties", "Embedded.properties", "SciTEGlobal.properties", "SciTE.properties"]
     if os.path.exists(root + "scite"):
         propFilePaths = glob.glob(root + "scite/src/*.properties")
         propFiles = [os.path.basename(f) for f in propFilePaths if os.path.basename(f) not in otherProps]
-        propFiles.sort(ciCompare)
-        print propFiles
+        sortListInsensitive(propFiles)
+        print(propFiles)
 
     Regenerate(root + "scintilla/src/KeyWords.cxx", "//", NATIVE, lexerModules)
     Regenerate(root + "scintilla/win32/makefile", "#", NATIVE, lexFiles)
