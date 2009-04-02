@@ -6819,6 +6819,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		InvalidateStyleData();
 		RedrawSelMargin();
 		break;
+
+	case SCI_MARKERSYMBOLDEFINED:
+		if (wParam <= MARKER_MAX)
+			return vs.markers[wParam].markType;
+		else
+			return 0;
+
 	case SCI_MARKERSETFORE:
 		if (wParam <= MARKER_MAX)
 			vs.markers[wParam].fore.desired = ColourDesired(lParam);

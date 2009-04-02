@@ -677,6 +677,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_GETEXTRAASCENT 2526
 #define SCI_SETEXTRADESCENT 2527
 #define SCI_GETEXTRADESCENT 2528
+#define SCI_MARKERSYMBOLDEFINED 2529
 #define SCI_STARTRECORD 3001
 #define SCI_STOPRECORD 3002
 #define SCI_SETLEXER 4001

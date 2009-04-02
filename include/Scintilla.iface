@@ -269,6 +269,7 @@ val SC_MARK_ARROWS=24
 val SC_MARK_PIXMAP=25
 val SC_MARK_FULLRECT=26
 val SC_MARK_LEFTRECT=27
+val SC_MARK_AVAILABLE=28
 
 val SC_MARK_CHARACTER=10000
 
@@ -1827,6 +1828,9 @@ set void SetExtraDescent=2527(int extraDescent,)
 
 # Get extra descent for each line
 get int GetExtraDescent=2528(,)
+
+# Which symbol was defined for markerNumber with MarkerDefine
+fun int MarkerSymbolDefined=2529(int markerNumber,)
 
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
