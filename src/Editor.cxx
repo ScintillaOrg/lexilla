@@ -4536,6 +4536,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 			SetLastXChosen();
 		}
 		EnsureCaretVisible();
+		ShowCaretAtCurrentPosition();		// Avoid blinking
 		break;
 	case SCI_BACKTAB:
 		Indent(false);
@@ -4543,6 +4544,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 			SetLastXChosen();
 		}
 		EnsureCaretVisible();
+		ShowCaretAtCurrentPosition();		// Avoid blinking
 		break;
 	case SCI_NEWLINE:
 		NewLine();
