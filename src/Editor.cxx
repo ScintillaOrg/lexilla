@@ -3961,6 +3961,7 @@ void Editor::NotifyModified(Document*, DocModification mh, void *) {
 		scn.line = mh.line;
 		scn.foldLevelNow = mh.foldLevelNow;
 		scn.foldLevelPrev = mh.foldLevelPrev;
+		scn.token = mh.token;
 		NotifyParent(scn);
 	}
 }
@@ -7634,6 +7635,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETEXTRADESCENT:
 		return vs.extraDescent;
+
+	case SCI_ADDUNDOACTION:
+		pdoc->AddUndoAction(wParam);
+		break;
 
 	default:
 		return DefWndProc(iMessage, wParam, lParam);

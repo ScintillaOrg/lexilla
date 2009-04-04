@@ -424,6 +424,9 @@ void UndoHistory::AppendAction(actionType at, int position, char *data, int leng
 			} else if (!actions[currentAction].mayCoalesce) {
 				// Not allowed to coalesce if this set
 				currentAction++;
+			} else if (at == containerAction) {
+				// Not allowed to coalesce container actions
+				currentAction++;
 			} else if (at == removeAction) {
 				if ((lengthData == 1) || (lengthData == 2)){
 					if ((position + lengthData) == actPrevious.position) {
@@ -860,6 +863,11 @@ void CellBuffer::BeginUndoAction() {
 
 void CellBuffer::EndUndoAction() {
 	uh.EndUndoAction();
+}
+
+void CellBuffer::AddUndoAction(int token) {
+	bool startSequence;
+	uh.AppendAction(containerAction, token, 0, 0, startSequence);
 }
 
 void CellBuffer::DeleteUndoHistory() {

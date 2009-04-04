@@ -503,21 +503,27 @@ int Document::Undo() {
 				if (action.at == removeAction) {
 					NotifyModified(DocModification(
 									SC_MOD_BEFOREINSERT | SC_PERFORMED_UNDO, action));
+				} else if (action.at == containerAction) {
+					DocModification dm(SC_MOD_CONTAINER | SC_PERFORMED_UNDO);
+					dm.token = action.position;
+					NotifyModified(dm);
 				} else {
 					NotifyModified(DocModification(
 									SC_MOD_BEFOREDELETE | SC_PERFORMED_UNDO, action));
 				}
 				cb.PerformUndoStep();
 				int cellPosition = action.position;
-				ModifiedAt(cellPosition);
-				newPos = cellPosition;
+				if (action.at != containerAction) {
+					ModifiedAt(cellPosition);
+					newPos = cellPosition;
+				}
 
 				int modFlags = SC_PERFORMED_UNDO;
 				// With undo, an insertion action becomes a deletion notification
 				if (action.at == removeAction) {
 					newPos += action.lenData;
 					modFlags |= SC_MOD_INSERTTEXT;
-				} else {
+				} else if (action.at == insertAction) {
 					modFlags |= SC_MOD_DELETETEXT;
 				}
 				if (steps > 1)
@@ -558,19 +564,25 @@ int Document::Redo() {
 				if (action.at == insertAction) {
 					NotifyModified(DocModification(
 									SC_MOD_BEFOREINSERT | SC_PERFORMED_REDO, action));
+				} else if (action.at == containerAction) {
+					DocModification dm(SC_MOD_CONTAINER | SC_PERFORMED_REDO);
+					dm.token = action.position;
+					NotifyModified(dm);
 				} else {
 					NotifyModified(DocModification(
 									SC_MOD_BEFOREDELETE | SC_PERFORMED_REDO, action));
 				}
 				cb.PerformRedoStep();
-				ModifiedAt(action.position);
-				newPos = action.position;
+				if (action.at != containerAction) {
+					ModifiedAt(action.position);
+					newPos = action.position;
+				}
 
 				int modFlags = SC_PERFORMED_REDO;
 				if (action.at == insertAction) {
 					newPos += action.lenData;
 					modFlags |= SC_MOD_INSERTTEXT;
-				} else {
+				} else if (action.at == removeAction) {
 					modFlags |= SC_MOD_DELETETEXT;
 				}
 				if (steps > 1)

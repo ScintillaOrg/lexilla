@@ -119,6 +119,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_MARK_PIXMAP 25
 #define SC_MARK_FULLRECT 26
 #define SC_MARK_LEFTRECT 27
+#define SC_MARK_AVAILABLE 28
 #define SC_MARK_CHARACTER 10000
 #define SC_MARKNUM_FOLDEREND 25
 #define SC_MARKNUM_FOLDEROPENMID 26
@@ -678,6 +679,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_SETEXTRADESCENT 2527
 #define SCI_GETEXTRADESCENT 2528
 #define SCI_MARKERSYMBOLDEFINED 2529
+#define SCI_ADDUNDOACTION 2560
 #define SCI_STARTRECORD 3001
 #define SCI_STOPRECORD 3002
 #define SCI_SETLEXER 4001
@@ -708,7 +710,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_STARTACTION 0x2000
 #define SC_MOD_CHANGEINDICATOR 0x4000
 #define SC_MOD_CHANGELINESTATE 0x8000
-#define SC_MODEVENTMASKALL 0xFFFF
+#define SC_MOD_CONTAINER 0x40000
+#define SC_MODEVENTMASKALL 0x7FFFF
 #define SCEN_CHANGE 768
 #define SCEN_SETFOCUS 512
 #define SCEN_KILLFOCUS 256
@@ -831,6 +834,7 @@ struct SCNotification {
 	int listType;	/* SCN_USERLISTSELECTION */
 	int x;			/* SCN_DWELLSTART, SCN_DWELLEND */
 	int y;		/* SCN_DWELLSTART, SCN_DWELLEND */
+	int token;		/* SCN_MODIFIED with SC_MOD_CONTAINER */
 };
 
 #ifdef SCI_NAMESPACE

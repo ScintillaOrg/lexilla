@@ -1832,6 +1832,9 @@ get int GetExtraDescent=2528(,)
 # Which symbol was defined for markerNumber with MarkerDefine
 fun int MarkerSymbolDefined=2529(int markerNumber,)
 
+# Add a container action to the undo stack
+fun void AddUndoAction=2560(int token,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 
@@ -1897,7 +1900,9 @@ val SC_MULTILINEUNDOREDO=0x1000
 val SC_STARTACTION=0x2000
 val SC_MOD_CHANGEINDICATOR=0x4000
 val SC_MOD_CHANGELINESTATE=0x8000
-val SC_MODEVENTMASKALL=0xFFFF
+
+val SC_MOD_CONTAINER=0x40000
+val SC_MODEVENTMASKALL=0x7FFFF
 
 # For compatibility, these go through the COMMAND notification rather than NOTIFY
 # and should have had exactly the same values as the EN_* constants.

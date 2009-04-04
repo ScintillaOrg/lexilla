@@ -173,6 +173,7 @@ public:
 	bool IsCollectingUndo() { return cb.IsCollectingUndo(); }
 	void BeginUndoAction() { cb.BeginUndoAction(); }
 	void EndUndoAction() { cb.EndUndoAction(); }
+	void AddUndoAction(int token) { cb.AddUndoAction(token); }
 	void SetSavePoint();
 	bool IsSavePoint() { return cb.IsSavePoint(); }
 	const char *BufferPointer() { return cb.BufferPointer(); }
@@ -288,6 +289,7 @@ public:
  	int line;
 	int foldLevelNow;
 	int foldLevelPrev;
+	int token;
 
 	DocModification(int modificationType_, int position_=0, int length_=0,
 		int linesAdded_=0, const char *text_=0, int line_=0) :
@@ -298,7 +300,8 @@ public:
 		text(text_),
 		line(line_),
 		foldLevelNow(0),
-		foldLevelPrev(0) {}
+		foldLevelPrev(0),
+		token(0) {}
 
 	DocModification(int modificationType_, const Action &act, int linesAdded_=0) :
 		modificationType(modificationType_),
@@ -308,7 +311,8 @@ public:
 		text(act.data),
 		line(0),
 		foldLevelNow(0),
-		foldLevelPrev(0) {}
+		foldLevelPrev(0),
+		token(0) {}
 };
 
 /**

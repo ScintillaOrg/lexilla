@@ -899,6 +899,7 @@ struct TextToFind {
      <a class="message" href="#SCI_GETUNDOCOLLECTION">SCI_GETUNDOCOLLECTION</a><br />
      <a class="message" href="#SCI_BEGINUNDOACTION">SCI_BEGINUNDOACTION</a><br />
      <a class="message" href="#SCI_ENDUNDOACTION">SCI_ENDUNDOACTION</a><br />
+     <a class="message" href="#SCI_ADDUNDOACTION">SCI_ADDUNDOACTION(int token)</a><br />
     </code>
 
     <p><b id="SCI_UNDO">SCI_UNDO</b><br />
@@ -945,6 +946,24 @@ struct TextToFind {
     you want to undo all as one operation but that you have to generate as several operations.
     Alternatively, you can use these to mark a set of operations that you do not want to have
     combined with the preceding or following operations if they are undone.</p>
+
+    <p><b id="SCI_ADDUNDOACTION">SCI_ADDUNDOACTION(int token)</b><br />
+     The container can add its own actions into the undo stack by calling 
+     <code>SCI_ADDUNDOACTION</code> and an <code>SCN_MODIFIED</code> 
+     notification will be sent to the container with the 
+     <a class="message" href="#SC_MOD_CONTAINER"><code>SC_MOD_CONTAINER</code></a>
+     flag when it is time to undo (<code>SC_PERFORMED_UNDO</code>) or 
+     redo (<code>SC_PERFORMED_REDO</code>) the action. The token argument supplied is 
+     returned in the <code>token</code> field of the notification.</p>
+     <p>For example, if the container wanted to allow undo and redo of a 'toggle bookmark' command then
+     it could call <code>SCI_ADDUNDOACTION(line)</code> each time the command is performed.
+     Then when it receives a notification to undo or redo it toggles a bookmark on the line given by
+     the token field. If there are different types of commands or parameters that need to be stored into the undo
+     stack then the container should maintain a stack of its own for the document and use the current
+     position in that stack as the argument to <code>SCI_ADDUNDOACTION(line)</code>.
+     <code>SCI_ADDUNDOACTION</code> commands are not combined together 
+     into a single undo transaction unless grouped with <code>SCI_BEGINUNDOACTION</code>
+     and <code>SCI_ENDUNDOACTION</code>.</p>
 
     <h2 id="SelectionAndInformation">Selection and information</h2>
 
@@ -5209,9 +5228,21 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         </tr>
 
         <tr>
+          <td align="left"><code id="SC_MOD_CONTAINER">SC_MOD_CONTAINER</code></td>
+
+          <td align="center">0x40000</td>
+
+          <td>This is set on for actions that the container stored into the undo stack with 
+	  <a class="message" href="#SCI_ADDUNDOACTION"><code>SCI_ADDUNDOACTION</code></a>.
+          </td>
+
+          <td>token</td>
+        </tr>
+
+        <tr>
           <td align="left"><code>SC_MODEVENTMASKALL</code></td>
 
-          <td align="center">0x1fff</td>
+          <td align="center">0x7FFFF</td>
 
           <td>This is a mask for all valid flags. This is the default mask state set by <a
           class="message" href="#SCI_SETMODEVENTMASK"><code>SCI_SETMODEVENTMASK</code></a>.</td>

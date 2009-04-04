@@ -83,7 +83,7 @@ public:
 	int LineFromHandle(int markerHandle);
 };
 
-enum actionType { insertAction, removeAction, startAction };
+enum actionType { insertAction, removeAction, startAction, containerAction };
 
 /**
  * Actions are used to store all the information required to perform one undo/redo step.
@@ -213,6 +213,7 @@ public:
 	bool IsCollectingUndo();
 	void BeginUndoAction();
 	void EndUndoAction();
+	void AddUndoAction(int token);
 	void DeleteUndoHistory();
 
 	/// To perform an undo, StartUndo is called to retrieve the number of steps, then UndoStep is
