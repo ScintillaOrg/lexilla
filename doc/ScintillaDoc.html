@@ -14,10 +14,10 @@
     <style type="text/css">
 <!--
 /*<![CDATA[*/
-    CODE { font-family: "Courier New", monospace; }
+    CODE { font-weight: bold; font-family: Consolas,Bitstream Vera Sans Mono,Courier New,monospace; }
     A:visited { color: blue; }
     A:hover { text-decoration: underline ! important; }
-    A.message { text-decoration: none; font-family: "Courier New", monospace; }
+    A.message { text-decoration: none; font-weight: bold; font-family: Consolas,Bitstream Vera Sans Mono,Courier New,monospace; }
     A.toc { text-decoration: none; }
     A.jump { text-decoration: none; }
 /*]]>*/
@@ -521,7 +521,7 @@ struct TextRange {
     is limited and should only be used for simple cases and initial development. A different regular expression
     library can be <a class="jump" href="#AlternativeRegEx">integrated into Scintilla</a>
     or can be called from the container using direct access to the buffer contents through
-    <a class="jump" href="#SCI_GETCHARACTERPOINTER">SCI_GETCHARACTERPOINTER</a>.
+    <a class="message" href="#SCI_GETCHARACTERPOINTER">SCI_GETCHARACTERPOINTER</a>.
     </p>
     <code><a class="message" href="#SCI_FINDTEXT">SCI_FINDTEXT(int flags, TextToFind
     *ttf)</a><br />
