@@ -58,6 +58,8 @@ def CopyWithInsertion(input, commentPrefix, retainDefs, eolType, *lists):
             if retainDefs:
                 output.append(line)
             definition = line[len(commentPrefix + "**"):]
+            if (commentPrefix == "<!--") and (" -->" in definition):
+                definition = definition.replace(" -->", "")
             listid = 0
             if definition[0] in string.digits:
                 listid = int(definition[:1])
@@ -133,12 +135,13 @@ def Generate(inpath, outpath, commentPrefix, eolType, *lists):
     #print "generate '%s' -> '%s' (comment prefix: %r, eols: %r)"\
     #      % (inpath, outpath, commentPrefix, eolType)
     try:
-        infile = open(inpath, "r")
+        infile = open(inpath, "rb")
     except IOError:
         print("Can not open %s" % inpath)
         return
     original = infile.read()
     infile.close()
+    original = original.decode('utf-8')
     updated = CopyWithInsertion(original, commentPrefix,
         inpath == outpath, eolType, *lists)
     UpdateFile(outpath, updated)
@@ -190,6 +193,27 @@ def FindProperties(lexFile):
                         properties[propertyName] = 1
     return properties
 
+def FindPropertyDocumentation(lexFile):
+    documents = {}
+    f = open(lexFile)
+    name = ""
+    for l in f.readlines():
+        l = l.strip()
+        if "// property " in l:
+            propertyName = l.split()[2]
+            if propertyName.lower() == propertyName:
+                # Only allow lower case property names
+                name = propertyName
+                documents[name] = ""
+        elif name:
+            if l.startswith("//"):
+                if documents[name]:
+                    documents[name] += " "
+                documents[name] += l[2:].strip()
+            else:
+                name = ""
+    return documents
+
 def ciCompare(a,b):
     return cmp(a.lower(), b.lower())
 
@@ -211,15 +235,28 @@ def RegenerateAll():
     print(lexFiles)
     lexerModules = []
     lexerProperties = {}
+    propertyDocuments = {}
     for lexFile in lexFilePaths:
         lexerModules.extend(FindModules(lexFile))
         for k in FindProperties(lexFile).keys():
             lexerProperties[k] = 1
+        documents = FindPropertyDocumentation(lexFile)
+        for k in documents.keys():
+            propertyDocuments[k] = documents[k]
     sortListInsensitive(lexerModules)
     del lexerProperties["fold.comment.python"]
     lexerProperties = list(lexerProperties.keys())
     sortListInsensitive(lexerProperties)
 
+    # Generate HTML to document each property
+    # This is done because tags can not be safely put inside comments in HTML
+    documentProperties = list(propertyDocuments.keys())
+    sortListInsensitive(documentProperties)
+    propertiesHTML = []
+    for k in documentProperties:
+        propertiesHTML.append("\t<tr>\n\t<td>%s</td>\n\t<td>%s</td>\n\t</tr>" % 
+            (k, propertyDocuments[k]))
+        
     # Find all the SciTE properties files
     otherProps = ["abbrev.properties", "Embedded.properties", "SciTEGlobal.properties", "SciTE.properties"]
     if os.path.exists(root + "scite"):
@@ -242,6 +279,7 @@ def RegenerateAll():
         Regenerate(root + "scite/win32/makefile", "#", NATIVE, lexFiles, propFiles)
         Regenerate(root + "scite/win32/scite.mak", "#", NATIVE, lexFiles, propFiles)
         Regenerate(root + "scite/src/SciTEProps.cxx", "//", NATIVE, lexerProperties)
+        Regenerate(root + "scite/doc/SciTEDoc.html", "<!--", NATIVE, propertiesHTML)
         Generate(root + "scite/boundscheck/vcproj.gen",
          root + "scite/boundscheck/SciTE.vcproj", "#", NATIVE, lexFiles)
 
