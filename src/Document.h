@@ -95,7 +95,7 @@ extern RegexSearchBase* CreateRegexSearch(CharClassify *charClassTable);
 
 /**
  */
-class Document {
+class Document : PerLine {
 
 public:
 	/** Used to pair watcher pointer with user data. */
@@ -110,7 +110,6 @@ public:
 	};
 
 	enum charClassification { ccSpace, ccNewLine, ccWord, ccPunctuation };
-
 private:
 	int refCount;
 	CellBuffer cb;
@@ -124,6 +123,10 @@ private:
 
 	WatcherWithUserData *watchers;
 	int lenWatchers;
+
+	// ldSize is not real data - it is for dimensions and loops
+	enum lineData { ldMarkers, ldLevels, ldState, ldMargin, ldAnnotation, ldSize };	
+	PerLine *perLineData[ldSize];
 
 	bool matchesValid;
 	RegexSearchBase* regex;
@@ -149,6 +152,9 @@ public:
 
 	int AddRef();
 	int Release();
+
+	virtual void InsertLine(int line);
+	virtual void RemoveLine(int line);
 
 	int LineFromPosition(int pos);
 	int ClampPositionIntoDocument(int pos);
@@ -200,21 +206,21 @@ public:
 		cb.GetCharRange(buffer, position, lengthRetrieve);
 	}
 	char StyleAt(int position) { return cb.StyleAt(position); }
-	int GetMark(int line) { return cb.GetMark(line); }
+	int GetMark(int line);
 	int AddMark(int line, int markerNum);
 	void AddMarkSet(int line, int valueSet);
 	void DeleteMark(int line, int markerNum);
 	void DeleteMarkFromHandle(int markerHandle);
 	void DeleteAllMarks(int markerNum);
-	int LineFromHandle(int markerHandle) { return cb.LineFromHandle(markerHandle); }
+	int LineFromHandle(int markerHandle);
 	int LineStart(int line) const;
 	int LineEnd(int line) const;
 	int LineEndPosition(int position);
 	int VCHomePosition(int position);
 
 	int SetLevel(int line, int level);
-	int GetLevel(int line) { return cb.GetLevel(line); }
-	void ClearLevels() { cb.ClearLevels(); }
+	int GetLevel(int line);
+	void ClearLevels();
 	int GetLastChild(int lineParent, int level=-1);
 	int GetFoldParent(int line);
 
@@ -245,8 +251,30 @@ public:
 	void DecorationFillRange(int position, int value, int fillLength);
 
 	int SetLineState(int line, int state);
-	int GetLineState(int line) { return cb.GetLineState(line); }
-	int GetMaxLineState() { return cb.GetMaxLineState(); }
+	int GetLineState(int line);
+	int GetMaxLineState();
+
+	bool MarginMultipleStyles(int line);
+	const char *MarginText(int line);
+	int MarginStyle(int line);
+	const char *MarginStyles(int line);
+	void MarginSetStyle(int line, int style);
+	void MarginSetStyles(int line, const char *styles);
+	void MarginSetText(int line, const char *text);
+	int MarginLength(int line) const;
+	void MarginClearAll();
+
+	bool AnnotationAny() const;
+	bool AnnotationMultipleStyles(int line);
+	const char *AnnotationText(int line);
+	const char *AnnotationStyles(int line);
+	int AnnotationStyle(int line);
+	void AnnotationSetText(int line, const char *text);
+	void AnnotationSetStyle(int line, int style);
+	void AnnotationSetStyles(int line, const char *styles);
+	int AnnotationLength(int line) const;
+	int AnnotationLines(int line) const;
+	void AnnotationClearAll();
 
 	bool AddWatcher(DocWatcher *watcher, void *userData);
 	bool RemoveWatcher(DocWatcher *watcher, void *userData);
@@ -289,6 +317,7 @@ public:
  	int line;
 	int foldLevelNow;
 	int foldLevelPrev;
+	int annotationLinesAdded;
 	int token;
 
 	DocModification(int modificationType_, int position_=0, int length_=0,
@@ -301,6 +330,7 @@ public:
 		line(line_),
 		foldLevelNow(0),
 		foldLevelPrev(0),
+		annotationLinesAdded(0),
 		token(0) {}
 
 	DocModification(int modificationType_, const Action &act, int linesAdded_=0) :
@@ -312,6 +342,7 @@ public:
 		line(0),
 		foldLevelNow(0),
 		foldLevelPrev(0),
+		annotationLinesAdded(0),
 		token(0) {}
 };
 

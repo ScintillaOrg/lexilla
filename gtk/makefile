@@ -85,7 +85,7 @@ deps:
 	$(CC) -MM $(CONFIGFLAGS) $(CXXFLAGS) *.cxx ../src/*.cxx | sed -e 's/\/usr.* //' | grep [a-zA-Z] >deps.mak
 
 $(COMPLIB): DocumentAccessor.o WindowAccessor.o KeyWords.o StyleContext.o \
-	CharClassify.o Decoration.o Document.o CallTip.o \
+	CharClassify.o Decoration.o Document.o PerLine.o CallTip.o \
 	ScintillaBase.o ContractionState.o Editor.o ExternalLexer.o PropSet.o PlatGTK.o \
 	KeyMap.o LineMarker.o PositionCache.o ScintillaGTK.o CellBuffer.o ViewStyle.o \
 	RESearch.o RunStyles.o Style.o Indicator.o AutoComplete.o UniConversion.o XPM.o \

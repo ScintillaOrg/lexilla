@@ -100,6 +100,7 @@ SOBJS=\
 	$(DIR_O)\Indicator.obj \
 	$(DIR_O)\KeyMap.obj \
 	$(DIR_O)\LineMarker.obj \
+	$(DIR_O)\PerLine.obj \
 	$(DIR_O)\PlatWin.obj \
 	$(DIR_O)\PositionCache.obj \
 	$(DIR_O)\PropSet.obj \
@@ -210,6 +211,7 @@ LOBJS=\
 	$(DIR_O)\KeyMap.obj \
 	$(DIR_O)\KeyWords.obj \
 	$(DIR_O)\LineMarker.obj \
+	$(DIR_O)\PerLine.obj \
 	$(DIR_O)\PlatWin.obj \
 	$(DIR_O)\PositionCache.obj \
 	$(DIR_O)\RunStyles.obj \

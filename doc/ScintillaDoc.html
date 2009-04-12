@@ -199,69 +199,71 @@
         <tr>
           <td>o <a class="toc" href="#Margins">Margins</a></td>
 
-          <td>o <a class="toc" href="#OtherSettings">Other settings</a></td>
+          <td>o <a class="toc" href="#Annotations">Annotations</a></td>
 
-          <td>o <a class="toc" href="#BraceHighlighting">Brace highlighting</a></td>
+          <td>o <a class="toc" href="#OtherSettings">Other settings</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#BraceHighlighting">Brace highlighting</a></td>
+
           <td>o <a class="toc" href="#TabsAndIndentationGuides">Tabs and Indentation
           Guides</a></td>
 
           <td>o <a class="toc" href="#Markers">Markers</a></td>
-
-          <td>o <a class="toc" href="#Indicators">Indicators</a></td>
         </tr>
 
         <tr>
-          <td>o <a class="toc" href="#Autocompletion">Autocompletion</a></td>
+          <td>o <a class="toc" href="#Indicators">Indicators</a></td>
+
+	<td>o <a class="toc" href="#Autocompletion">Autocompletion</a></td>
 
           <td>o <a class="toc" href="#UserLists">User lists</a></td>
-
-          <td>o <a class="toc" href="#CallTips">Call tips</a></td>
         </tr>
 
         <tr>
-          <td>o <a class="toc" href="#KeyboardCommands">Keyboard commands</a></td>
+          <td>o <a class="toc" href="#CallTips">Call tips</a></td>
+
+	<td>o <a class="toc" href="#KeyboardCommands">Keyboard commands</a></td>
 
           <td>o <a class="toc" href="#KeyBindings">Key bindings</a></td>
-
-          <td>o <a class="toc" href="#PopupEditMenu">Popup edit menu</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#PopupEditMenu">Popup edit menu</a></td>
+	  
           <td>o <a class="toc" href="#MacroRecording">Macro recording</a></td>
 
           <td>o <a class="toc" href="#Printing">Printing</a></td>
-
-          <td>o <a class="toc" href="#DirectAccess">Direct access</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#DirectAccess">Direct access</a></td>
+	  
           <td>o <a class="toc" href="#MultipleViews">Multiple views</a></td>
 
           <td>o <a class="toc" href="#Folding">Folding</a></td>
-
-          <td>o <a class="toc" href="#LineWrapping">Line wrapping</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#LineWrapping">Line wrapping</a></td>
+	
           <td>o <a class="toc" href="#Zooming">Zooming</a></td>
 
           <td>o <a class="toc" href="#LongLines">Long lines</a></td>
-
-          <td>o <a class="toc" href="#Lexer">Lexer</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#Lexer">Lexer</a></td>
+	  
           <td>o <a class="toc" href="#Notifications">Notifications</a></td>
 
           <td>o <a class="toc" href="#GTK">GTK+</a></td>
-
-          <td>o <a class="toc" href="#DeprecatedMessages">Deprecated messages</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#DeprecatedMessages">Deprecated messages</a></td>
+	  
           <td>o <a class="toc" href="#EditMessagesNeverSupportedByScintilla">Edit messages never
           supported by Scintilla</a></td>
 
@@ -2369,6 +2371,10 @@ struct TextToFind {
     is hidden. Margin 1 is set to display non-folding symbols and is given a width of 16 pixels, so
     it is visible. Margin 2 is set to display the folding symbols, but is given a width of 0, so it
     is hidden. Of course, you can set the margins to be whatever you wish.</p>
+    
+    <p>Styled text margins used to show revision and blame information:</p>
+    <p><img src="styledmargin.png" alt="Styled text margins used to show revision and blame information" /></p>
+
     <code><a class="message" href="#SCI_SETMARGINTYPEN">SCI_SETMARGINTYPEN(int margin, int
     type)</a><br />
      <a class="message" href="#SCI_GETMARGINTYPEN">SCI_GETMARGINTYPEN(int margin)</a><br />
@@ -2390,6 +2396,15 @@ struct TextToFind {
      <a class="message" href="#SCI_GETMARGINRIGHT">SCI_GETMARGINRIGHT</a><br />
      <a class="message" href="#SCI_SETFOLDMARGINCOLOUR">SCI_SETFOLDMARGINCOLOUR(bool useSetting, int colour)</a><br />
      <a class="message" href="#SCI_SETFOLDMARGINHICOLOUR">SCI_SETFOLDMARGINHICOLOUR(bool useSetting, int colour)</a><br />
+     <a class="message" href="#SCI_MARGINSETTEXT">SCI_MARGINSETTEXT(int line, char *text)</a><br />
+     <a class="message" href="#SCI_MARGINGETTEXT">SCI_MARGINGETTEXT(int line, char *text)</a><br />
+     <a class="message" href="#SCI_MARGINSETSTYLE">SCI_MARGINSETSTYLE(int line, int style)</a><br />
+     <a class="message" href="#SCI_MARGINGETSTYLE">SCI_MARGINGETSTYLE(int line)</a><br />
+     <a class="message" href="#SCI_MARGINSETSTYLES">SCI_MARGINSETSTYLES(int line, char *styles)</a><br />
+     <a class="message" href="#SCI_MARGINGETSTYLES">SCI_MARGINGETSTYLES(int line, char *styles)</a><br />
+     <a class="message" href="#SCI_MARGINTEXTCLEARALL">SCI_MARGINTEXTCLEARALL</a><br />
+     <a class="message" href="#SCI_MARGINSETSTYLEOFFSET">SCI_MARGINSETSTYLEOFFSET(int style)</a><br />
+     <a class="message" href="#SCI_MARGINGETSTYLEOFFSET">SCI_MARGINGETSTYLEOFFSET</a><br />
     </code>
 
     <p><b id="SCI_SETMARGINTYPEN">SCI_SETMARGINTYPEN(int margin, int iType)</b><br />
@@ -2397,6 +2412,8 @@ struct TextToFind {
      These two routines set and get the type of a margin. The margin argument should be 0, 1, 2, 3 or 4.
     You can use the predefined constants <code>SC_MARGIN_SYMBOL</code> (0) and
     <code>SC_MARGIN_NUMBER</code> (1) to set a margin as either a line number or a symbol margin.
+    A margin with application defined text may use <code>SC_MARGIN_TEXT</code> (4) or
+    <code>SC_MARGIN_RTEXT</code> (5) to right justify the text.
     By convention, margin 0 is used for line numbers and the next two are used for symbols. You can
     also use the constants <code>SC_MARGIN_BACK</code> (2) and <code>SC_MARGIN_FORE</code> (3) for
     symbol margins that set their background colour to match the STYLE_DEFAULT background and
@@ -2459,6 +2476,128 @@ struct TextToFind {
      These messages allow changing the colour of the fold margin and fold margin highlight.
      On Windows the fold margin colour defaults to ::GetSysColor(COLOR_3DFACE) and the fold margin highlight
      colour to ::GetSysColor(COLOR_3DHIGHLIGHT).</p>
+
+    <p>
+     <b id="SCI_MARGINSETTEXT">SCI_MARGINSETTEXT(int line, char *text)</b><br />
+     <b id="SCI_MARGINGETTEXT">SCI_MARGINGETTEXT(int line, char *text)</b><br />
+     <b id="SCI_MARGINSETSTYLE">SCI_MARGINSETSTYLE(int line, int style)</b><br />
+     <b id="SCI_MARGINGETSTYLE">SCI_MARGINGETSTYLE(int line)</b><br />
+     <b id="SCI_MARGINSETSTYLES">SCI_MARGINSETSTYLES(int line, char *styles)</b><br />
+     <b id="SCI_MARGINGETSTYLES">SCI_MARGINGETSTYLES(int line, char *styles)</b><br />
+     <b id="SCI_MARGINTEXTCLEARALL">SCI_MARGINTEXTCLEARALL</b><br />
+     Text margins are created with the type SC_MARGIN_TEXT or SC_MARGIN_RTEXT. 
+     A different string may be set for each line with <code>SCI_MARGINSETTEXT</code>.
+     The whole of the text margin on a line may be displayed in a particular style with 
+     <code>SCI_MARGINSETSTYLE</code> or each character may be individually styled with 
+     <code>SCI_MARGINSETSTYLES</code> which uses an array of bytes with each byte setting the style
+     of the corresponding text byte simlar to <code>SCI_SETSTYLINGEX</code>.
+     Setting a text margin will cause a 
+     <a class="message" href="#SC_MOD_CHANGEMARGIN"><code>SC_MOD_CHANGEMARGIN</code></a>
+     notification to be sent.
+    </p>
+    <p>
+     <b id="SCI_MARGINSETSTYLEOFFSET">SCI_MARGINSETSTYLEOFFSET(int style)</b><br />
+     <b id="SCI_MARGINGETSTYLEOFFSET">SCI_MARGINGETSTYLEOFFSET</b><br />
+    Margin styles may be completely separated from standard text styles by setting a style offset. For example, 
+    <code>SCI_MARGINSETSTYLEOFFSET(256)</code> would allow the margin styles to be numbered from
+    256 upto 511 so they do not overlap styles set by lexers. Each style number set with <code>SCI_MARGINSETSTYLE</code>
+    or <code>SCI_MARGINSETSTYLES</code> has the offset added before looking up the style.
+    </p>
+
+    <h2 id="Annotations">Annotations</h2>
+
+    <p>Annotations are read-only lines of text underneath each line of editable text.
+    An annotation may consist of multiple lines separated by '\n'. 
+    Annotations can be used to display an assembler version of code for debugging or to show diagnostic messages inline or to 
+    line up different versions of text in a merge tool.</p>
+    <p>Annotations used for inline diagnostics:</p>
+    <p><img src="annotations.png" alt="Annotations used for inline diagnostics" /></p>
+
+    <code>
+     <a class="message" href="#SCI_ANNOTATIONSETTEXT">SCI_ANNOTATIONSETTEXT(int line, char *text)</a><br />
+     <a class="message" href="#SCI_ANNOTATIONGETTEXT">SCI_ANNOTATIONGETTEXT(int line, char *text)</a><br />
+     <a class="message" href="#SCI_ANNOTATIONSETSTYLE">SCI_ANNOTATIONSETSTYLE(int line, int style)</a><br />
+     <a class="message" href="#SCI_ANNOTATIONGETSTYLE">SCI_ANNOTATIONGETSTYLE(int line)</a><br />
+     <a class="message" href="#SCI_ANNOTATIONSETSTYLES">SCI_ANNOTATIONSETSTYLES(int line, char *styles)</a><br />
+     <a class="message" href="#SCI_ANNOTATIONGETSTYLES">SCI_ANNOTATIONGETSTYLES(int line, char *styles)</a><br />
+     <a class="message" href="#SCI_ANNOTATIONGETLINES">SCI_ANNOTATIONGETLINES(int line)</a><br />
+     <a class="message" href="#SCI_ANNOTATIONCLEARALL">SCI_ANNOTATIONCLEARALL</a><br />
+     <a class="message" href="#SCI_ANNOTATIONSETVISIBLE">SCI_ANNOTATIONSETVISIBLE(int visible)</a><br />
+     <a class="message" href="#SCI_ANNOTATIONGETVISIBLE">SCI_ANNOTATIONGETVISIBLE</a><br />
+     <a class="message" href="#SCI_ANNOTATIONSETSTYLEOFFSET">SCI_ANNOTATIONSETSTYLEOFFSET(int style)</a><br />
+     <a class="message" href="#SCI_ANNOTATIONGETSTYLEOFFSET">SCI_ANNOTATIONGETSTYLEOFFSET</a><br />
+    </code>
+
+    <p>
+     <b id="SCI_ANNOTATIONSETTEXT">SCI_ANNOTATIONSETTEXT(int line, char *text)</b><br />
+     <b id="SCI_ANNOTATIONGETTEXT">SCI_ANNOTATIONGETTEXT(int line, char *text)</b><br />
+     <b id="SCI_ANNOTATIONSETSTYLE">SCI_ANNOTATIONSETSTYLE(int line, int style)</b><br />
+     <b id="SCI_ANNOTATIONGETSTYLE">SCI_ANNOTATIONGETSTYLE(int line)</b><br />
+     <b id="SCI_ANNOTATIONSETSTYLES">SCI_ANNOTATIONSETSTYLES(int line, char *styles)</b><br />
+     <b id="SCI_ANNOTATIONGETSTYLES">SCI_ANNOTATIONGETSTYLES(int line, char *styles)</b><br />
+     <b id="SCI_ANNOTATIONGETLINES">SCI_ANNOTATIONGETLINES(int line)</b><br />
+     <b id="SCI_ANNOTATIONCLEARALL">SCI_ANNOTATIONCLEARALL</b><br />
+     A different string may be set for each line with <code>SCI_ANNOTATIONSETTEXT</code>.
+     To clear annotations call <code>SCI_ANNOTATIONSETTEXT</code> with a NULL pointer.
+     The whole of the text ANNOTATION on a line may be displayed in a particular style with 
+     <code>SCI_ANNOTATIONSETSTYLE</code> or each character may be individually styled with 
+     <code>SCI_ANNOTATIONSETSTYLES</code> which uses an array of bytes with each byte setting the style
+     of the corresponding text byte simlar to <code>SCI_SETSTYLINGEX</code>. The text must be set first as it
+     specifies how long the annotation is so how many bytes of styling to read.
+     Setting an annotation will cause a 
+     <a class="message" href="#SC_MOD_CHANGEANNOTATION"><code>SC_MOD_CHANGEANNOTATION</code></a>
+     notification to be sent.
+    </p>
+    <p>
+    The number of lines annotating a line can be retrieved with <code>SCI_ANNOTATIONGETLINES</code>.
+    All the lines can be cleared of annotations with <code>SCI_ANNOTATIONCLEARALL</code>
+    which is equivalent to clearing each line (setting to 0) and then deleting other memory used for this feature.
+    </p>
+    <p>
+     <b id="SCI_ANNOTATIONSETVISIBLE">SCI_ANNOTATIONSETVISIBLE(int visible)</b><br />
+     <b id="SCI_ANNOTATIONGETVISIBLE">SCI_ANNOTATIONGETVISIBLE</b><br />
+     Annotations can be made visible in a view and there is a choice of display style when visible.
+     The two messages set and get the annotation display mode. The <code>visible</code> 
+     argument can be one of:</p>
+
+    <table cellpadding="1" cellspacing="2" border="0" summary="Annotation visibility">
+      <tbody valign="top">
+        <tr>
+          <th align="left"><code>ANNOTATION_HIDDEN</code></th>
+
+          <td>0</td>
+
+          <td>Annotations are not displayed.</td>
+        </tr>
+
+        <tr>
+          <th align="left"><code>ANNOTATION_STANDARD</code></th>
+
+          <td>1</td>
+
+          <td>Annotations are drawn left justified with no adornment.</td>
+        </tr>
+
+        <tr>
+          <th align="left"><code>ANNOTATION_BOXED</code></th>
+
+          <td>2</td>
+
+          <td>Annotations are indented 40 pixels and are surrounded by a box.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    </p>
+    <p>
+     <b id="SCI_ANNOTATIONSETSTYLEOFFSET">SCI_ANNOTATIONSETSTYLEOFFSET(int style)</b><br />
+     <b id="SCI_ANNOTATIONGETSTYLEOFFSET">SCI_ANNOTATIONGETSTYLEOFFSET</b><br />
+    Annotation styles may be completely separated from standard text styles by setting a style offset. For example, 
+    <code>SCI_ANNOTATIONSETSTYLEOFFSET(512)</code> would allow the annotation styles to be numbered from
+    512 upto 767 so they do not overlap styles set by lexers (or margins if margins offset is 256). 
+    Each style number set with <code>SCI_ANNOTATIONSETSTYLE</code>
+    or <code>SCI_ANNOTATIONSETSTYLES</code> has the offset added before looking up the style.
+    </p>
 
     <h2 id="OtherSettings">Other settings</h2>
     <code><a class="message" href="#SCI_SETUSEPALETTE">SCI_SETUSEPALETTE(bool
@@ -5198,6 +5337,26 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
 
           <td>A line state has changed because <a class="message" href="#SCI_SETLINESTATE">SCI_SETLINESTATE</a>
           was called.</td>
+
+          <td><code>line</code></td>
+        </tr>
+
+        <tr>
+          <td align="left"><code id="SC_MOD_CHANGEMARGIN">SC_MOD_CHANGEMARGIN</code></td>
+
+          <td align="center">0x10000</td>
+
+          <td>A text margin has changed.</td>
+
+          <td><code>line</code></td>
+        </tr>
+
+        <tr>
+          <td align="left"><code id="SC_MOD_CHANGEANNOTATION">SC_MOD_CHANGEANNOTATION</code></td>
+
+          <td align="center">0x20000</td>
+
+          <td>An annotation has changed.</td>
 
           <td><code>line</code></td>
         </tr>

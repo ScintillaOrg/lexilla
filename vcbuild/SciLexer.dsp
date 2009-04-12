@@ -458,6 +458,10 @@ SOURCE=..\src\LineMarker.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\PerLine.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\win32\PlatWin.cxx
 # End Source File
 # Begin Source File

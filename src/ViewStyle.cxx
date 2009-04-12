@@ -141,6 +141,9 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	extraFontFlag = source.extraFontFlag;
 	extraAscent = source.extraAscent;
 	extraDescent = source.extraDescent;
+	marginStyleOffset = source.marginStyleOffset;
+	annotationVisible = source.annotationVisible;
+	annotationStyleOffset = source.annotationStyleOffset;
 }
 
 ViewStyle::~ViewStyle() {
@@ -237,6 +240,9 @@ void ViewStyle::Init(size_t stylesSize_) {
 	extraFontFlag = false;
 	extraAscent = 0;
 	extraDescent = 0;
+	marginStyleOffset = 0;
+	annotationVisible = ANNOTATION_HIDDEN;
+	annotationStyleOffset = 0;
 }
 
 void ViewStyle::RefreshColourPalette(Palette &pal, bool want) {
@@ -363,3 +369,8 @@ void ViewStyle::SetStyleFontName(int styleIndex, const char *name) {
 bool ViewStyle::ProtectionActive() const {
 	return someStylesProtected;
 }
+
+bool ViewStyle::ValidStyle(size_t styleIndex) const {
+	return styleIndex < stylesSize;
+}
+

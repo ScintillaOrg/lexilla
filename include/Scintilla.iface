@@ -326,6 +326,8 @@ val SC_MARGIN_SYMBOL=0
 val SC_MARGIN_NUMBER=1
 val SC_MARGIN_BACK=2
 val SC_MARGIN_FORE=3
+val SC_MARGIN_TEXT=4
+val SC_MARGIN_RTEXT=5
 
 # Set a margin to be either numeric or symbolic.
 set void SetMarginTypeN=2240(int margin, int marginType)
@@ -1832,6 +1834,74 @@ get int GetExtraDescent=2528(,)
 # Which symbol was defined for markerNumber with MarkerDefine
 fun int MarkerSymbolDefined=2529(int markerNumber,)
 
+# Set the text in the text margin for a line
+set void MarginSetText=2530(int line, string text)
+
+# Get the text in the text margin for a line
+get int MarginGetText=2531(int line, stringresult text)
+
+# Set the style number for the text margin for a line
+set void MarginSetStyle=2532(int line, int style)
+
+# Get the style number for the text margin for a line
+get int MarginGetStyle=2533(int line,)
+
+# Set the style in the text margin for a line
+set void MarginSetStyles=2534(int line, string styles)
+
+# Get the styles in the text margin for a line
+get int MarginGetStyles=2535(int line, stringresult styles)
+
+# Clear the margin text on all lines
+fun void MarginTextClearAll=2536(,)
+
+# Get the start of the range of style numbers used for margin text
+set void MarginSetStyleOffset=2537(int style,)
+
+# Get the start of the range of style numbers used for margin text
+get int MarginGetStyleOffset=2538(,)
+
+# Set the annotation text for a line
+set void AnnotationSetText=2540(int line, string text)
+
+# Get the annotation text for a line
+get int AnnotationGetText=2541(int line, stringresult text)
+
+# Set the style number for the annotations for a line
+set void AnnotationSetStyle=2542(int line, int style)
+
+# Get the style number for the annotations for a line
+get int AnnotationGetStyle=2543(int line,)
+
+# Set the annotation styles for a line
+set void AnnotationSetStyles=2544(int line, string styles)
+
+# Get the annotation styles for a line
+get int AnnotationGetStyles=2545(int line, stringresult styles)
+
+# Get the number of annotation lines for a line
+get int AnnotationGetLines=2546(int line,)
+
+# Clear the annotations from all lines
+fun void AnnotationClearAll=2547(,)
+
+enu AnnotationVisible=ANNOTATION_
+val ANNOTATION_HIDDEN=0
+val ANNOTATION_STANDARD=1
+val ANNOTATION_BOXED=2
+
+# Set the visibility for the annotations for a view
+set void AnnotationSetVisible=2548(int visible,)
+
+# Get the visibility for the annotations for a view
+get int AnnotationGetVisible=2549(,)
+
+# Get the start of the range of style numbers used for annotations
+set void AnnotationSetStyleOffset=2550(int style,)
+
+# Get the start of the range of style numbers used for annotations
+get int AnnotationGetStyleOffset=2551(,)
+
 # Add a container action to the undo stack
 fun void AddUndoAction=2560(int token,)
 
@@ -1900,7 +1970,8 @@ val SC_MULTILINEUNDOREDO=0x1000
 val SC_STARTACTION=0x2000
 val SC_MOD_CHANGEINDICATOR=0x4000
 val SC_MOD_CHANGELINESTATE=0x8000
-
+val SC_MOD_CHANGEMARGIN=0x10000
+val SC_MOD_CHANGEANNOTATION=0x20000
 val SC_MOD_CONTAINER=0x40000
 val SC_MODEVENTMASKALL=0x7FFFF
 
