@@ -135,6 +135,14 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 	WordList &keywords = *keywordlists[0];
 	WordList &keywords2 = *keywordlists[1];
 
+	// property tab.timmy.whinge.level
+	//	For Python code, checks whether indenting is consistent. 
+	//	The default, 0 turns off indentation checking, 
+	//	1 checks whether each line is potentially inconsistent with the previous line, 
+	//	2 checks whether any space characters occur before a tab character in the indentation, 
+	//	3 checks whether any spaces are in the indentation, and 
+	//	4 checks for any tab characters in the indentation.
+	//	1 is a good level to use. 
 	const int whingeLevel = styler.GetPropertyInt("tab.timmy.whinge.level");
 
 	// property lexer.python.literals.binary
@@ -399,7 +407,13 @@ static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unuse
 	const int maxPos = startPos + length;
 	const int maxLines = styler.GetLine(maxPos - 1);             // Requested last line
 	const int docLines = styler.GetLine(styler.Length() - 1);  // Available last line
+
+	// property fold.comment.python
+	//	This option enables folding multi-line comments when using the Python lexer.
 	const bool foldComment = styler.GetPropertyInt("fold.comment.python") != 0;
+
+	// property fold.quotes.python
+	//	This option enables folding multi-line quoted strings when using the Python lexer.
 	const bool foldQuotes = styler.GetPropertyInt("fold.quotes.python") != 0;
 
 	// Backtrack to previous non-blank line so we can determine indent level

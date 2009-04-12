@@ -1184,8 +1184,15 @@ static void FoldPerlDoc(unsigned int startPos, int length, int, WordList *[],
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	// Custom folding of POD and packages
+
+	// property fold.perl.pod 
+	//	Enable folding Pod blocks when using the Perl lexer. 
 	bool foldPOD = styler.GetPropertyInt("fold.perl.pod", 1) != 0;
+
+	// property fold.perl.package 
+	//	Enable folding packages when using the Perl lexer. 
 	bool foldPackage = styler.GetPropertyInt("fold.perl.package", 1) != 0;
+
 	unsigned int endPos = startPos + length;
 	int visibleChars = 0;
 	int lineCurrent = styler.GetLine(startPos);

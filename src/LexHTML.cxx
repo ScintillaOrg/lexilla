@@ -574,6 +574,10 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	} else {
 		// Default client and ASP scripting language is JavaScript
 		lineState = eScriptJS << 8;
+
+		// property asp.default.language 
+		//	Script in ASP code is initially assumed to be in JavaScript. 
+		//	To change this to VBScript set asp.default.language to 2. Python is 3.
 		lineState |= styler.GetPropertyInt("asp.default.language", eScriptJS) << 4;
 	}
 	script_mode inScriptType = script_mode((lineState >> 0) & 0x03); // 2 bits of scripting mode
@@ -590,13 +594,37 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		scriptLanguage = eScriptComment;
 	}
 
+	// property fold.html 
+	//	Folding is turned on or off for HTML and XML files with this option. 
+	//	The fold option must also be on for folding to occur.
 	const bool foldHTML = styler.GetPropertyInt("fold.html", 0) != 0;
+
 	const bool fold = foldHTML && styler.GetPropertyInt("fold", 0);
+
+	// property fold.html.preprocessor 
+	//	Folding is turned on or off for scripts embedded in HTML files with this option. 
+	//	The default is on.
 	const bool foldHTMLPreprocessor = foldHTML && styler.GetPropertyInt("fold.html.preprocessor", 1);
+
 	const bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
+
+	// property fold.hypertext.comment 
+	//	Allow folding for comments in scripts embedded in HTML. 
+	//	The default is off. 
 	const bool foldComment = fold && styler.GetPropertyInt("fold.hypertext.comment", 0) != 0;
+
+	// property fold.hypertext.heredoc 
+	//	Allow folding for heredocs in scripts embedded in HTML. 
+	//	The default is off.  
 	const bool foldHeredoc = fold && styler.GetPropertyInt("fold.hypertext.heredoc", 0) != 0;
+
+	// property html.tags.case.sensitive 
+	//	For XML and HTML, setting this property to 1 will make tags match in a case 
+	//	sensitive way which is the expected behaviour for XML and XHTML. 
 	const bool caseSensitive = styler.GetPropertyInt("html.tags.case.sensitive", 0) != 0;
+
+	// property lexer.xml.allow.scripts 
+	//	Set to 0 to disable scripts in XML.  
 	const bool allowScripts = styler.GetPropertyInt("lexer.xml.allow.scripts", 1) != 0;
 
 	const CharacterSet setHTMLWord(CharacterSet::setAlphaNum, ".-_:!#", 0x80, true);
