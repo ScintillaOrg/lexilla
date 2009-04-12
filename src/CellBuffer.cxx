@@ -17,169 +17,20 @@
 #include "Partitioning.h"
 #include "CellBuffer.h"
 
-#ifdef SCI_NAMESPACE
-using namespace Scintilla;
-#endif
-
-MarkerHandleSet::MarkerHandleSet() {
-	root = 0;
-}
-
-MarkerHandleSet::~MarkerHandleSet() {
-	MarkerHandleNumber *mhn = root;
-	while (mhn) {
-		MarkerHandleNumber *mhnToFree = mhn;
-		mhn = mhn->next;
-		delete mhnToFree;
-	}
-	root = 0;
-}
-
-int MarkerHandleSet::Length() const {
-	int c = 0;
-	MarkerHandleNumber *mhn = root;
-	while (mhn) {
-		c++;
-		mhn = mhn->next;
-	}
-	return c;
-}
-
-int MarkerHandleSet::NumberFromHandle(int handle) const {
-	MarkerHandleNumber *mhn = root;
-	while (mhn) {
-		if (mhn->handle == handle) {
-			return mhn->number;
-		}
-		mhn = mhn->next;
-	}
-	return - 1;
-}
-
-int MarkerHandleSet::MarkValue() const {
-	unsigned int m = 0;
-	MarkerHandleNumber *mhn = root;
-	while (mhn) {
-		m |= (1 << mhn->number);
-		mhn = mhn->next;
-	}
-	return m;
-}
-
-bool MarkerHandleSet::Contains(int handle) const {
-	MarkerHandleNumber *mhn = root;
-	while (mhn) {
-		if (mhn->handle == handle) {
-			return true;
-		}
-		mhn = mhn->next;
-	}
-	return false;
-}
-
-bool MarkerHandleSet::InsertHandle(int handle, int markerNum) {
-	MarkerHandleNumber *mhn = new MarkerHandleNumber;
-	if (!mhn)
-		return false;
-	mhn->handle = handle;
-	mhn->number = markerNum;
-	mhn->next = root;
-	root = mhn;
-	return true;
-}
-
-void MarkerHandleSet::RemoveHandle(int handle) {
-	MarkerHandleNumber **pmhn = &root;
-	while (*pmhn) {
-		MarkerHandleNumber *mhn = *pmhn;
-		if (mhn->handle == handle) {
-			*pmhn = mhn->next;
-			delete mhn;
-			return;
-		}
-		pmhn = &((*pmhn)->next);
-	}
-}
-
-bool MarkerHandleSet::RemoveNumber(int markerNum) {
-	bool performedDeletion = false;
-	MarkerHandleNumber **pmhn = &root;
-	while (*pmhn) {
-		MarkerHandleNumber *mhn = *pmhn;
-		if (mhn->number == markerNum) {
-			*pmhn = mhn->next;
-			delete mhn;
-			performedDeletion = true;
-		} else {
-			pmhn = &((*pmhn)->next);
-		}
-	}
-	return performedDeletion;
-}
-
-void MarkerHandleSet::CombineWith(MarkerHandleSet *other) {
-	MarkerHandleNumber **pmhn = &root;
-	while (*pmhn) {
-		pmhn = &((*pmhn)->next);
-	}
-	*pmhn = other->root;
-	other->root = 0;
-}
-
 LineVector::LineVector() : starts(256) {
-	handleCurrent = 1;
-
 	Init();
 }
 
 LineVector::~LineVector() {
 	starts.DeleteAll();
-	for (int line = 0; line < markers.Length(); line++) {
-		delete markers[line];
-		markers[line] = 0;
-	}
-	markers.DeleteAll();
-	levels.DeleteAll();
 }
 
 void LineVector::Init() {
 	starts.DeleteAll();
-	for (int line = 0; line < markers.Length(); line++) {
-		delete markers[line];
-		markers[line] = 0;
-	}
-	markers.DeleteAll();
-	levels.DeleteAll();
 }
 
-void LineVector::ExpandLevels(int sizeNew) {
-	levels.InsertValue(levels.Length(), sizeNew - levels.Length(), SC_FOLDLEVELBASE);
-}
-
-void LineVector::ClearLevels() {
-	levels.DeleteAll();
-}
-
-int LineVector::SetLevel(int line, int level) {
-	int prev = 0;
-	if ((line >= 0) && (line < Lines())) {
-		if (!levels.Length()) {
-			ExpandLevels(Lines() + 1);
-		}
-		prev = levels[line];
-		if (prev != level) {
-			levels[line] = level;
-		}
-	}
-	return prev;
-}
-
-int LineVector::GetLevel(int line) {
-	if (levels.Length() && (line >= 0) && (line < Lines())) {
-		return levels[line];
-	} else {
-		return SC_FOLDLEVELBASE;
-	}
+void LineVector::SetPerLine(PerLine *pl) {
+	perLine = pl;
 }
 
 void LineVector::InsertText(int line, int delta) {
@@ -188,15 +39,8 @@ void LineVector::InsertText(int line, int delta) {
 
 void LineVector::InsertLine(int line, int position) {
 	starts.InsertPartition(line, position);
-	if (markers.Length()) {
-		markers.Insert(line, 0);
-	}
-	if (levels.Length()) {
-		int level = SC_FOLDLEVELBASE;
-		if ((line > 0) && (line < Lines())) {
-			level = levels[line-1] & ~SC_FOLDLEVELWHITEFLAG;
-		}
-		levels.InsertValue(line, 1, level);
+	if (perLine) {
+		perLine->InsertLine(line);
 	}
 }
 
@@ -206,101 +50,13 @@ void LineVector::SetLineStart(int line, int position) {
 
 void LineVector::RemoveLine(int line) {
 	starts.RemovePartition(line);
-	// Retain the markers from the deleted line by oring them into the previous line
-	if (markers.Length()) {
-		if (line > 0) {
-			MergeMarkers(line - 1);
-		}
-		markers.Delete(line);
-	}
-	if (levels.Length()) {
-		// Move up following lines but merge header flag from this line
-		// to line before to avoid a temporary disappearence causing expansion.
-		int firstHeader = levels[line] & SC_FOLDLEVELHEADERFLAG;
-		levels.Delete(line);
-		if (line > 0)
-			levels[line-1] |= firstHeader;
+	if (perLine) {
+		perLine->RemoveLine(line);
 	}
 }
 
 int LineVector::LineFromPosition(int pos) {
 	return starts.PartitionFromPosition(pos);
-}
-
-int LineVector::MarkValue(int line) {
-	if (markers.Length() && markers[line])
-		return markers[line]->MarkValue();
-	else
-		return 0;
-}
-
-int LineVector::AddMark(int line, int markerNum) {
-	handleCurrent++;
-	if (!markers.Length()) {
-		// No existing markers so allocate one element per line
-		markers.InsertValue(0, Lines(), 0);
-	}
-	if (!markers[line]) {
-		// Need new structure to hold marker handle
-		markers[line] = new MarkerHandleSet();
-		if (!markers[line])
-			return - 1;
-	}
-	markers[line]->InsertHandle(handleCurrent, markerNum);
-
-	return handleCurrent;
-}
-
-void LineVector::MergeMarkers(int pos) {
-	if (markers[pos + 1] != NULL) {
-		if (markers[pos] == NULL)
-			markers[pos] = new MarkerHandleSet;
-		markers[pos]->CombineWith(markers[pos + 1]);
-		delete markers[pos + 1];
-		markers[pos + 1] = NULL;
-	}
-}
-
-void LineVector::DeleteMark(int line, int markerNum, bool all) {
-	if (markers.Length() && markers[line]) {
-		if (markerNum == -1) {
-			delete markers[line];
-			markers[line] = NULL;
-		} else {
-			bool performedDeletion = markers[line]->RemoveNumber(markerNum);
-			while (all && performedDeletion) {
-				performedDeletion = markers[line]->RemoveNumber(markerNum);
-			}
-			if (markers[line]->Length() == 0) {
-				delete markers[line];
-				markers[line] = NULL;
-			}
-		}
-	}
-}
-
-void LineVector::DeleteMarkFromHandle(int markerHandle) {
-	int line = LineFromHandle(markerHandle);
-	if (line >= 0) {
-		markers[line]->RemoveHandle(markerHandle);
-		if (markers[line]->Length() == 0) {
-			delete markers[line];
-			markers[line] = NULL;
-		}
-	}
-}
-
-int LineVector::LineFromHandle(int markerHandle) {
-	if (markers.Length()) {
-		for (int line = 0; line < Lines(); line++) {
-			if (markers[line]) {
-				if (markers[line]->Contains(markerHandle)) {
-					return line;
-				}
-			}
-		}
-	}
-	return -1;
 }
 
 Action::Action() {
@@ -669,6 +425,10 @@ void CellBuffer::Allocate(int newSize) {
 	style.ReAllocate(newSize);
 }
 
+void CellBuffer::SetPerLine(PerLine *pl) {
+	lv.SetPerLine(pl);
+}
+
 int CellBuffer::Lines() const {
 	return lv.Lines();
 }
@@ -698,54 +458,14 @@ bool CellBuffer::IsSavePoint() {
 	return uh.IsSavePoint();
 }
 
-int CellBuffer::AddMark(int line, int markerNum) {
-	if ((line >= 0) && (line < Lines())) {
-		return lv.AddMark(line, markerNum);
-	}
-	return - 1;
-}
-
-void CellBuffer::DeleteMark(int line, int markerNum) {
-	if ((line >= 0) && (line < Lines())) {
-		lv.DeleteMark(line, markerNum, false);
-	}
-}
-
-void CellBuffer::DeleteMarkFromHandle(int markerHandle) {
-	lv.DeleteMarkFromHandle(markerHandle);
-}
-
-int CellBuffer::GetMark(int line) {
-	if ((line >= 0) && (line < Lines()))
-		return lv.MarkValue(line);
-	return 0;
-}
-
-void CellBuffer::DeleteAllMarks(int markerNum) {
-	for (int line = 0; line < Lines(); line++) {
-		lv.DeleteMark(line, markerNum, true);
-	}
-}
-
-int CellBuffer::LineFromHandle(int markerHandle) {
-	return lv.LineFromHandle(markerHandle);
-}
-
 // Without undo
 
 void CellBuffer::InsertLine(int line, int position) {
 	lv.InsertLine(line, position);
-	if (lineStates.Length()) {
-		lineStates.EnsureLength(line);
-		lineStates.Insert(line, 0);
-	}
 }
 
 void CellBuffer::RemoveLine(int line) {
 	lv.RemoveLine(line);
-	if (lineStates.Length() > line) {
-		lineStates.Delete(line);
-	}
 }
 
 void CellBuffer::BasicInsertString(int position, const char *s, int insertLength) {
@@ -918,30 +638,3 @@ void CellBuffer::PerformRedoStep() {
 	uh.CompletedRedoStep();
 }
 
-int CellBuffer::SetLineState(int line, int state) {
-	lineStates.EnsureLength(line + 1);
-	int stateOld = lineStates[line];
-	lineStates[line] = state;
-	return stateOld;
-}
-
-int CellBuffer::GetLineState(int line) {
-	lineStates.EnsureLength(line + 1);
-	return lineStates[line];
-}
-
-int CellBuffer::GetMaxLineState() {
-	return lineStates.Length();
-}
-
-int CellBuffer::SetLevel(int line, int level) {
-	return lv.SetLevel(line, level);
-}
-
-int CellBuffer::GetLevel(int line) {
-	return lv.GetLevel(line);
-}
-
-void CellBuffer::ClearLevels() {
-	lv.ClearLevels();
-}
