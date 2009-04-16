@@ -666,10 +666,8 @@ void ScintillaMacOSX::SetPasteboardData(PasteboardRef &theClipboard, const Selec
     }
     data = CFStringCreateExternalRepresentation ( kCFAllocatorDefault, string, kCFStringEncodingUnicode, 0 );
     if (data) {
-        // Fixes http://bugs.activestate.com/show_bug.cgi?id=81340.
-        // See the bug for details
         PasteboardPutItemFlavor( theClipboard, (PasteboardItemID)1, 
-                                CFSTR("public.utf16-external-plain-text"),
+                                CFSTR("public.utf16-plain-text"),
                                 data, 0 );
         CFRelease(data);
         data = NULL;
