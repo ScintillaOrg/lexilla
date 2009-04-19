@@ -705,6 +705,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_ANNOTATIONGETVISIBLE 2549
 #define SCI_ANNOTATIONSETSTYLEOFFSET 2550
 #define SCI_ANNOTATIONGETSTYLEOFFSET 2551
+#define UNDO_MAY_COALESCE 1
 #define SCI_ADDUNDOACTION 2560
 #define SCI_STARTRECORD 3001
 #define SCI_STOPRECORD 3002

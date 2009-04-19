@@ -901,7 +901,7 @@ struct TextToFind {
      <a class="message" href="#SCI_GETUNDOCOLLECTION">SCI_GETUNDOCOLLECTION</a><br />
      <a class="message" href="#SCI_BEGINUNDOACTION">SCI_BEGINUNDOACTION</a><br />
      <a class="message" href="#SCI_ENDUNDOACTION">SCI_ENDUNDOACTION</a><br />
-     <a class="message" href="#SCI_ADDUNDOACTION">SCI_ADDUNDOACTION(int token)</a><br />
+     <a class="message" href="#SCI_ADDUNDOACTION">SCI_ADDUNDOACTION(int token, int flags)</a><br />
     </code>
 
     <p><b id="SCI_UNDO">SCI_UNDO</b><br />
@@ -949,7 +949,7 @@ struct TextToFind {
     Alternatively, you can use these to mark a set of operations that you do not want to have
     combined with the preceding or following operations if they are undone.</p>
 
-    <p><b id="SCI_ADDUNDOACTION">SCI_ADDUNDOACTION(int token)</b><br />
+    <p><b id="SCI_ADDUNDOACTION">SCI_ADDUNDOACTION(int token, int flags)</b><br />
      The container can add its own actions into the undo stack by calling 
      <code>SCI_ADDUNDOACTION</code> and an <code>SCN_MODIFIED</code> 
      notification will be sent to the container with the 
@@ -958,7 +958,7 @@ struct TextToFind {
      redo (<code>SC_PERFORMED_REDO</code>) the action. The token argument supplied is 
      returned in the <code>token</code> field of the notification.</p>
      <p>For example, if the container wanted to allow undo and redo of a 'toggle bookmark' command then
-     it could call <code>SCI_ADDUNDOACTION(line)</code> each time the command is performed.
+     it could call <code>SCI_ADDUNDOACTION(line, 0)</code> each time the command is performed.
      Then when it receives a notification to undo or redo it toggles a bookmark on the line given by
      the token field. If there are different types of commands or parameters that need to be stored into the undo
      stack then the container should maintain a stack of its own for the document and use the current
@@ -967,6 +967,11 @@ struct TextToFind {
      into a single undo transaction unless grouped with <code>SCI_BEGINUNDOACTION</code>
      and <code>SCI_ENDUNDOACTION</code>.</p>
 
+     <p>The flags argument can be <code>UNDO_MAY_COALESCE</code> (1) if the container action may be 
+     coalesced along with any insertion and deletion actions into a single compound action, otherwise 0.
+     Coalescing treats coalescible container actions as transparent so will still only group together insertions that 
+     look like typing or deletions that look like multiple uses of the Backspace or Delete keys.
+     </p>
     <h2 id="SelectionAndInformation">Selection and information</h2>
 
     <p>Scintilla maintains a selection that stretches between two points, the anchor and the

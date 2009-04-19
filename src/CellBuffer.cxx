@@ -154,7 +154,7 @@ void UndoHistory::EnsureUndoRoom() {
 }
 
 void UndoHistory::AppendAction(actionType at, int position, char *data, int lengthData,
-	bool &startSequence) {
+	bool &startSequence, bool mayCoalesce) {
 	EnsureUndoRoom();
 	//Platform::DebugPrintf("%% %d action %d %d %d\n", at, position, lengthData, currentAction);
 	//Platform::DebugPrintf("^ %d action %d %d\n", actions[currentAction - 1].at,
@@ -166,28 +166,35 @@ void UndoHistory::AppendAction(actionType at, int position, char *data, int leng
 	if (currentAction >= 1) {
 		if (0 == undoSequenceDepth) {
 			// Top level actions may not always be coalesced
-			Action &actPrevious = actions[currentAction - 1];
+			int targetAct = -1;
+			const Action *actPrevious = &(actions[currentAction + targetAct]);
+			// Container actions may forward the coalesce state of Scintilla Actions.
+			while ((actPrevious->at == containerAction) && actPrevious->mayCoalesce) {
+				targetAct--;
+				actPrevious = &(actions[currentAction + targetAct]);
+			}
 			// See if current action can be coalesced into previous action
 			// Will work if both are inserts or deletes and position is same
-			if (at != actPrevious.at) {
-				currentAction++;
-			} else if (currentAction == savePoint) {
-				currentAction++;
-			} else if ((at == insertAction) &&
-			           (position != (actPrevious.position + actPrevious.lenData))) {
-				// Insertions must be immediately after to coalesce
+			if (currentAction == savePoint) {
 				currentAction++;
 			} else if (!actions[currentAction].mayCoalesce) {
 				// Not allowed to coalesce if this set
 				currentAction++;
-			} else if (at == containerAction) {
-				// Not allowed to coalesce container actions
+			} else if (!mayCoalesce || !actPrevious->mayCoalesce) {
+				currentAction++;
+			} else if (at == containerAction || actions[currentAction].at == containerAction) {
+				;	// A coalescible containerAction
+			} else if ((at != actPrevious->at) && (actPrevious->at != startAction)) {
+				currentAction++;
+			} else if ((at == insertAction) &&
+			           (position != (actPrevious->position + actPrevious->lenData))) {
+				// Insertions must be immediately after to coalesce
 				currentAction++;
 			} else if (at == removeAction) {
 				if ((lengthData == 1) || (lengthData == 2)){
-					if ((position + lengthData) == actPrevious.position) {
+					if ((position + lengthData) == actPrevious->position) {
 						; // Backspace -> OK
-					} else if (position == actPrevious.position) {
+					} else if (position == actPrevious->position) {
 						; // Delete -> OK
 					} else {
 						// Removals must be at same position to coalesce
@@ -210,7 +217,7 @@ void UndoHistory::AppendAction(actionType at, int position, char *data, int leng
 		currentAction++;
 	}
 	startSequence = oldCurrentAction != currentAction;
-	actions[currentAction].Create(at, position, data, lengthData);
+	actions[currentAction].Create(at, position, data, lengthData, mayCoalesce);
 	currentAction++;
 	actions[currentAction].Create(startAction);
 	maxAction = currentAction;
@@ -585,9 +592,9 @@ void CellBuffer::EndUndoAction() {
 	uh.EndUndoAction();
 }
 
-void CellBuffer::AddUndoAction(int token) {
+void CellBuffer::AddUndoAction(int token, bool mayCoalesce) {
 	bool startSequence;
-	uh.AppendAction(containerAction, token, 0, 0, startSequence);
+	uh.AppendAction(containerAction, token, 0, 0, startSequence, mayCoalesce);
 }
 
 void CellBuffer::DeleteUndoHistory() {

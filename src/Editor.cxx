@@ -8006,7 +8006,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return vs.annotationStyleOffset;
 
 	case SCI_ADDUNDOACTION:
-		pdoc->AddUndoAction(wParam);
+		pdoc->AddUndoAction(wParam, lParam & UNDO_MAY_COALESCE);
 		break;
 
 	default:

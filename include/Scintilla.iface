@@ -1902,8 +1902,10 @@ set void AnnotationSetStyleOffset=2550(int style,)
 # Get the start of the range of style numbers used for annotations
 get int AnnotationGetStyleOffset=2551(,)
 
+val UNDO_MAY_COALESCE=1
+
 # Add a container action to the undo stack
-fun void AddUndoAction=2560(int token,)
+fun void AddUndoAction=2560(int token, int flags)
 
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)

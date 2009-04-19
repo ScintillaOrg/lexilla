@@ -179,7 +179,7 @@ public:
 	bool IsCollectingUndo() { return cb.IsCollectingUndo(); }
 	void BeginUndoAction() { cb.BeginUndoAction(); }
 	void EndUndoAction() { cb.EndUndoAction(); }
-	void AddUndoAction(int token) { cb.AddUndoAction(token); }
+	void AddUndoAction(int token, bool mayCoalesce) { cb.AddUndoAction(token, mayCoalesce); }
 	void SetSavePoint();
 	bool IsSavePoint() { return cb.IsSavePoint(); }
 	const char *BufferPointer() { return cb.BufferPointer(); }

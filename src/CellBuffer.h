@@ -101,7 +101,7 @@ public:
 	UndoHistory();
 	~UndoHistory();
 
-	void AppendAction(actionType at, int position, char *data, int length, bool &startSequence);
+	void AppendAction(actionType at, int position, char *data, int length, bool &startSequence, bool mayCoalesce=true);
 
 	void BeginUndoAction();
 	void EndUndoAction();
@@ -185,7 +185,7 @@ public:
 	bool IsCollectingUndo();
 	void BeginUndoAction();
 	void EndUndoAction();
-	void AddUndoAction(int token);
+	void AddUndoAction(int token, bool mayCoalesce);
 	void DeleteUndoHistory();
 
 	/// To perform an undo, StartUndo is called to retrieve the number of steps, then UndoStep is
