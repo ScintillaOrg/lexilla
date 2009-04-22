@@ -1214,7 +1214,7 @@ bool Document::SetStyleFor(int length, char style) {
 	}
 }
 
-bool Document::SetStyles(int length, char *styles) {
+bool Document::SetStyles(int length, const char *styles) {
 	if (enteredStyling != 0) {
 		return false;
 	} else {
@@ -1269,25 +1269,10 @@ int Document::GetMaxLineState() {
 	return static_cast<LineState*>(perLineData[ldState])->GetMaxLineState(); 
 }
 
-bool Document::MarginMultipleStyles(int line) {
-	return static_cast<LineAnnotation*>(perLineData[ldMargin])->MultipleStyles(line); 
-}
-
-const char *Document::MarginText(int line) {
-	return static_cast<LineAnnotation*>(perLineData[ldMargin])->Text(line); 
-}
-
-int Document::MarginStyle(int line) {
-	return static_cast<LineAnnotation*>(perLineData[ldMargin])->Style(line); 
-}
-
-const char *Document::MarginStyles(int line) {
-	return static_cast<LineAnnotation*>(perLineData[ldMargin])->Styles(line); 
-}
-
 StyledText Document::MarginStyledText(int line) {
-	return StyledText(MarginLength(line), MarginText(line), 
-		MarginMultipleStyles(line), MarginStyle(line), MarginStyles(line));
+	LineAnnotation *pla = static_cast<LineAnnotation*>(perLineData[ldMargin]);
+	return StyledText(pla->Length(line), pla->Text(line), 
+		pla->MultipleStyles(line), pla->Style(line), pla->Styles(line));
 }
 
 void Document::MarginSetText(int line, const char *text) {
@@ -1300,7 +1285,7 @@ void Document::MarginSetStyle(int line, int style) {
 	static_cast<LineAnnotation*>(perLineData[ldMargin])->SetStyle(line, style); 
 }
 
-void Document::MarginSetStyles(int line, const char *styles) {
+void Document::MarginSetStyles(int line, const unsigned char *styles) {
 	static_cast<LineAnnotation*>(perLineData[ldMargin])->SetStyles(line, styles); 
 }
 
@@ -1320,25 +1305,10 @@ bool Document::AnnotationAny() const {
 	return static_cast<LineAnnotation*>(perLineData[ldAnnotation])->AnySet(); 
 }
 
-bool Document::AnnotationMultipleStyles(int line) {
-	return static_cast<LineAnnotation*>(perLineData[ldAnnotation])->MultipleStyles(line); 
-}
-
-const char *Document::AnnotationText(int line) {
-	return static_cast<LineAnnotation*>(perLineData[ldAnnotation])->Text(line); 
-}
-
-int Document::AnnotationStyle(int line) {
-	return static_cast<LineAnnotation*>(perLineData[ldAnnotation])->Style(line); 
-}
-
-const char *Document::AnnotationStyles(int line) {
-	return static_cast<LineAnnotation*>(perLineData[ldAnnotation])->Styles(line); 
-}
-
 StyledText Document::AnnotationStyledText(int line) {
-	return StyledText(AnnotationLength(line), AnnotationText(line), 
-		AnnotationMultipleStyles(line), AnnotationStyle(line), AnnotationStyles(line));
+	LineAnnotation *pla = static_cast<LineAnnotation*>(perLineData[ldAnnotation]);
+	return StyledText(pla->Length(line), pla->Text(line), 
+		pla->MultipleStyles(line), pla->Style(line), pla->Styles(line));
 }
 
 void Document::AnnotationSetText(int line, const char *text) {
@@ -1354,7 +1324,7 @@ void Document::AnnotationSetStyle(int line, int style) {
 	static_cast<LineAnnotation*>(perLineData[ldAnnotation])->SetStyle(line, style); 
 }
 
-void Document::AnnotationSetStyles(int line, const char *styles) {
+void Document::AnnotationSetStyles(int line, const unsigned char *styles) {
 	static_cast<LineAnnotation*>(perLineData[ldAnnotation])->SetStyles(line, styles); 
 }
 

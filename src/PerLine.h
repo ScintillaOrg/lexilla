@@ -93,11 +93,11 @@ public:
 	bool MultipleStyles(int line) const;
 	int Style(int line);
 	const char *Text(int line) const;
-	const char *Styles(int line) const;
+	const unsigned char *Styles(int line) const;
 	void SetText(int line, const char *text);
 	void ClearAll();
 	void SetStyle(int line, int style);
-	void SetStyles(int line, const char *styles);
+	void SetStyles(int line, const unsigned char *styles);
 	int Length(int line) const;
 	int Lines(int line) const;
 };

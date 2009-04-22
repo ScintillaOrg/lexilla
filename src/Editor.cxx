@@ -1459,54 +1459,27 @@ static int istrlen(const char *s) {
 	return static_cast<int>(strlen(s));
 }
 
-bool ValidStyledText(ViewStyle &vs, int styleOffset, const StyledText &st) {
+bool ValidStyledText(ViewStyle &vs, size_t styleOffset, const StyledText &st) {
 	if (st.multipleStyles) {
 		for (size_t iStyle=0;iStyle<st.length; iStyle++) {
-			if (!vs.ValidStyle(static_cast<size_t>(styleOffset + st.styles[iStyle])))
+			if (!vs.ValidStyle(styleOffset + st.styles[iStyle]))
 				return false;
 		}
 	} else {
-		if (!vs.ValidStyle(static_cast<size_t>(styleOffset + st.style)))
+		if (!vs.ValidStyle(styleOffset + st.style))
 			return false;
 	}
 	return true;
 }
 
-struct LineSegment {
-	const char *s;
-	int len;
-};
-
-class LineEnumerator {
-public:
-	const char *s;
-	int len;
-	LineEnumerator(const char *s_, size_t len_) : s(s_), len(len_) {
-	}
-	LineSegment Next() {
-		LineSegment ret;
-		ret.s = s;
-		int cur = 0;
-		while ((cur < len) && (s[cur] != '\n'))
-			cur++;
-		ret.len = cur;
-		s += cur + 1;
-		len -= cur + 1;
-		return ret;
-	}
-	bool Finished() const {
-		return len <= 0;
-	}
-};
-
 static int WidthStyledText(Surface *surface, ViewStyle &vs, int styleOffset,
-	const char *text, const char *styles, size_t len) {
+	const char *text, const unsigned char *styles, size_t len) {
 	int width = 0;
 	size_t start = 0;
 	while (start < len) {
-		int style = styles[start];
+		size_t style = styles[start];
 		size_t endSegment = start;
-		while ((endSegment < len-1) && (styles[endSegment+1] == style))
+		while ((endSegment+1 < len) && (static_cast<size_t>(styles[endSegment+1]) == style))
 			endSegment++;
 		width += surface->WidthText(vs.styles[style+styleOffset].font, text + start, endSegment - start + 1);
 		start = endSegment + 1;
@@ -1515,20 +1488,19 @@ static int WidthStyledText(Surface *surface, ViewStyle &vs, int styleOffset,
 }
 
 static int WidestLineWidth(Surface *surface, ViewStyle &vs, int styleOffset, const StyledText &st) {
-	size_t styleStart = 0;
-	LineEnumerator le(st.text, st.length);
 	int widthMax = 0;
-	while (!le.Finished()) {
-		LineSegment ls = le.Next();
+	size_t start = 0;
+	while (start < st.length) {
+		size_t lenLine = st.LineLength(start);
 		int widthSubLine;
 		if (st.multipleStyles) {
-			widthSubLine = WidthStyledText(surface, vs, styleOffset, ls.s, st.styles + styleStart, ls.len);
-			styleStart += ls.len + 1;
+			widthSubLine = WidthStyledText(surface, vs, styleOffset, st.text + start, st.styles + start, lenLine);
 		} else {
-			widthSubLine = surface->WidthText(vs.styles[styleOffset + st.style].font, ls.s, ls.len);
+			widthSubLine = surface->WidthText(vs.styles[styleOffset + st.style].font, st.text + start, lenLine);
 		}
 		if (widthSubLine > widthMax)
 			widthMax = widthSubLine;
+		start += lenLine + 1;
 	}
 	return widthMax;
 }
@@ -1748,20 +1720,16 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 					        vs.styles[STYLE_LINENUMBER].back.allocated);
 				} else if (vs.ms[margin].style == SC_MARGIN_TEXT || vs.ms[margin].style == SC_MARGIN_RTEXT) {
 					if (firstSubLine) {
-						StyledText marginStyledText  = pdoc->MarginStyledText(lineDoc);
-						if (marginStyledText.text && ValidStyledText(vs, vs.marginStyleOffset, marginStyledText)) {
-							if (marginStyledText.multipleStyles) {
-								surface->FillRectangle(rcMarker, 
-									vs.styles[marginStyledText.styles[0]+vs.marginStyleOffset].back.allocated);
-							} else {
-								surface->FillRectangle(rcMarker, vs.styles[marginStyledText.style].back.allocated);
-							}
+						const StyledText stMargin  = pdoc->MarginStyledText(lineDoc);
+						if (stMargin.text && ValidStyledText(vs, vs.marginStyleOffset, stMargin)) {
+							surface->FillRectangle(rcMarker, 
+								vs.styles[stMargin.StyleAt(0)+vs.marginStyleOffset].back.allocated);
 							if (vs.ms[margin].style == SC_MARGIN_RTEXT) {
-								int width = WidestLineWidth(surface, vs, vs.marginStyleOffset, marginStyledText);
+								int width = WidestLineWidth(surface, vs, vs.marginStyleOffset, stMargin);
 								rcMarker.left = rcMarker.right - width - 3;
 							}
 							DrawStyledText(surface, vs, vs.marginStyleOffset, rcMarker, rcMarker.top + vs.maxAscent, 
-								marginStyledText, 0, marginStyledText.length);
+								stMargin, 0, stMargin.length);
 						}
 					}
 				}
@@ -2352,24 +2320,12 @@ void Editor::DrawAnnotation(Surface *surface, ViewStyle &vsDraw, int line, int x
 	int indent = pdoc->GetLineIndentation(line) * vsDraw.spaceWidth;
 	PRectangle rcSegment = rcLine;
 	int annotationLine = subLine - ll->lines;
-	StyledText annotationStyledText  = pdoc->AnnotationStyledText(line);
-	int annotationStyle = annotationStyledText.style + vsDraw.annotationStyleOffset;
-	if (annotationStyledText.multipleStyles) {
-		for (size_t iStyle=0;iStyle<annotationStyledText.length; iStyle++) {
-			if (!vsDraw.ValidStyle(static_cast<size_t>(
-				vsDraw.annotationStyleOffset + annotationStyledText.styles[iStyle])))
-				return;
-		}
-	} else {
-		if (!vsDraw.ValidStyle(static_cast<size_t>(annotationStyle)))
-			return;
-	}
-	if (annotationStyledText.text) {
+	const StyledText stAnnotation  = pdoc->AnnotationStyledText(line);
+	if (stAnnotation.text && ValidStyledText(vsDraw, vsDraw.annotationStyleOffset, stAnnotation)) {
 		surface->FillRectangle(rcSegment, vsDraw.styles[0].back.allocated);
-
 		if (vs.annotationVisible == ANNOTATION_BOXED) {
 			// Only care about calculating width if need to draw box
-			int widthAnnotation = WidestLineWidth(surface, vsDraw, vsDraw.annotationStyleOffset, annotationStyledText);
+			int widthAnnotation = WidestLineWidth(surface, vsDraw, vsDraw.annotationStyleOffset, stAnnotation);
 			widthAnnotation += vsDraw.spaceWidth * 2; // Margins
 			rcSegment.left = xStart + indent;
 			rcSegment.right = rcSegment.left + widthAnnotation;
@@ -2378,28 +2334,22 @@ void Editor::DrawAnnotation(Surface *surface, ViewStyle &vsDraw, int line, int x
 			rcSegment.left = xStart;
 		}
 		const int annotationLines = pdoc->AnnotationLines(line);
-		LineEnumerator le(annotationStyledText.text, annotationStyledText.length);
-		LineSegment ls = le.Next();
 		size_t start = 0;
-		size_t lengthAnnotation = ls.len;
+		size_t lengthAnnotation = stAnnotation.LineLength(start);
 		int lineInAnnotation = 0;
-		while ((lineInAnnotation < annotationLine) && !le.Finished()) {
-			start += ls.len + 1;
-			ls = le.Next();
-			lengthAnnotation = ls.len;
+		while ((lineInAnnotation < annotationLine) && (start < stAnnotation.length)) {
+			start += lengthAnnotation + 1;
+			lengthAnnotation = stAnnotation.LineLength(start);
 			lineInAnnotation++;
 		}
 		PRectangle rcText = rcSegment;
 		if (vs.annotationVisible == ANNOTATION_BOXED) {
-			if (annotationStyledText.multipleStyles) {
-				surface->FillRectangle(rcText, vsDraw.styles[annotationStyledText.styles[start] + vsDraw.annotationStyleOffset].back.allocated);
-			} else {
-				surface->FillRectangle(rcText, vsDraw.styles[annotationStyle].back.allocated);
-			}
+			surface->FillRectangle(rcText, 
+				vsDraw.styles[stAnnotation.StyleAt(start) + vsDraw.annotationStyleOffset].back.allocated);
 			rcText.left += vsDraw.spaceWidth;
 		}
 		DrawStyledText(surface, vsDraw, vsDraw.annotationStyleOffset, rcText, rcText.top + vsDraw.maxAscent, 
-			annotationStyledText, start, lengthAnnotation);
+			stAnnotation, start, lengthAnnotation);
 		if (vs.annotationVisible == ANNOTATION_BOXED) {
 			surface->MoveTo(rcSegment.left, rcSegment.top);
 			surface->LineTo(rcSegment.left, rcSegment.bottom);
@@ -7895,36 +7845,38 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_MARGINGETTEXT: {
-			const char *text = pdoc->MarginText(wParam);
+			const StyledText st = pdoc->MarginStyledText(wParam);
 			if (lParam) {
-				if (text)
-					memcpy(CharPtrFromSPtr(lParam), text, pdoc->MarginLength(wParam));
+				if (st.text)
+					memcpy(CharPtrFromSPtr(lParam), st.text, st.length);
 				else
 					strcpy(CharPtrFromSPtr(lParam), "");
 			}
-			return text ? pdoc->MarginLength(wParam) : 0;
+			return st.length;
 		}
 
 	case SCI_MARGINSETSTYLE:
 		pdoc->MarginSetStyle(wParam, lParam);
 		break;
 
-	case SCI_MARGINGETSTYLE:
-		return pdoc->MarginStyle(wParam);
+	case SCI_MARGINGETSTYLE: {
+			const StyledText st = pdoc->MarginStyledText(wParam);
+			return st.style;
+		}
 
 	case SCI_MARGINSETSTYLES:
-		pdoc->MarginSetStyles(wParam, CharPtrFromSPtr(lParam));
+		pdoc->MarginSetStyles(wParam, reinterpret_cast<const unsigned char *>(lParam));
 		break;
 
 	case SCI_MARGINGETSTYLES: {
-			const char *styles = pdoc->MarginStyles(wParam);
+			const StyledText st = pdoc->MarginStyledText(wParam);
 			if (lParam) {
-				if (styles)
-					memcpy(CharPtrFromSPtr(lParam), styles, pdoc->MarginLength(wParam));
+				if (st.styles)
+					memcpy(CharPtrFromSPtr(lParam), st.styles, st.length);
 				else
 					strcpy(CharPtrFromSPtr(lParam), "");
 			}
-			return styles ? pdoc->MarginLength(wParam) : 0;
+			return st.styles ? st.length : 0;
 		}
 
 	case SCI_MARGINTEXTCLEARALL:
@@ -7936,36 +7888,38 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_ANNOTATIONGETTEXT: {
-			const char *text = pdoc->AnnotationText(wParam);
+			const StyledText st = pdoc->AnnotationStyledText(wParam);
 			if (lParam) {
-				if (text)
-					memcpy(CharPtrFromSPtr(lParam), text, pdoc->AnnotationLength(wParam));
+				if (st.text)
+					memcpy(CharPtrFromSPtr(lParam), st.text, st.length);
 				else
 					strcpy(CharPtrFromSPtr(lParam), "");
 			}
-			return text ? pdoc->AnnotationLength(wParam) : 0;
+			return st.length;
 		}
 
-	case SCI_ANNOTATIONGETSTYLE:
-		return pdoc->AnnotationStyle(wParam);
+	case SCI_ANNOTATIONGETSTYLE: {
+			const StyledText st = pdoc->AnnotationStyledText(wParam);
+			return st.style;
+		}
 
 	case SCI_ANNOTATIONSETSTYLE:
 		pdoc->AnnotationSetStyle(wParam, lParam);
 		break;
 
 	case SCI_ANNOTATIONSETSTYLES:
-		pdoc->AnnotationSetStyles(wParam, CharPtrFromSPtr(lParam));
+		pdoc->AnnotationSetStyles(wParam, reinterpret_cast<const unsigned char *>(lParam));
 		break;
 
 	case SCI_ANNOTATIONGETSTYLES: {
-			const char *styles = pdoc->AnnotationStyles(wParam);
+			const StyledText st = pdoc->AnnotationStyledText(wParam);
 			if (lParam) {
-				if (styles)
-					memcpy(CharPtrFromSPtr(lParam), styles, pdoc->AnnotationLength(wParam));
+				if (st.styles)
+					memcpy(CharPtrFromSPtr(lParam), st.styles, st.length);
 				else
 					strcpy(CharPtrFromSPtr(lParam), "");
 			}
-			return styles ? pdoc->AnnotationLength(wParam) : 0;
+			return st.styles ? st.length : 0;
 		}
 
 	case SCI_ANNOTATIONGETLINES:

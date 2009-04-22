@@ -97,10 +97,21 @@ struct StyledText {
 	size_t length;
 	const char *text;
 	bool multipleStyles;
-	int style;
-	const char *styles;
-	StyledText(	size_t length_, const char *text_, bool multipleStyles_, int style_, const char *styles_) : 
+	size_t style;
+	const unsigned char *styles;
+	StyledText(	size_t length_, const char *text_, bool multipleStyles_, int style_, const unsigned char *styles_) : 
 		length(length_), text(text_), multipleStyles(multipleStyles_), style(style_), styles(styles_) {
+	}
+	// Return number of bytes from start to before '\n' or end of text.
+	// Return 1 when start is outside text
+	size_t LineLength(size_t start) const {
+		size_t cur = start;
+		while ((cur < length) && (text[cur] != '\n'))
+			cur++;
+		return cur-start;
+	}
+	size_t StyleAt(size_t i) const {
+		return multipleStyles ? styles[i] : style;
 	}
 };
 
@@ -254,7 +265,7 @@ public:
 	void SetStylingBits(int bits);
 	void StartStyling(int position, char mask);
 	bool SetStyleFor(int length, char style);
-	bool SetStyles(int length, char *styles);
+	bool SetStyles(int length, const char *styles);
 	int GetEndStyled() { return endStyled; }
 	void EnsureStyledTo(int pos);
 	int GetStyleClock() { return styleClock; }
@@ -265,26 +276,18 @@ public:
 	int GetLineState(int line);
 	int GetMaxLineState();
 
-	bool MarginMultipleStyles(int line);
-	const char *MarginText(int line);
-	int MarginStyle(int line);
-	const char *MarginStyles(int line);
 	StyledText MarginStyledText(int line);
 	void MarginSetStyle(int line, int style);
-	void MarginSetStyles(int line, const char *styles);
+	void MarginSetStyles(int line, const unsigned char *styles);
 	void MarginSetText(int line, const char *text);
 	int MarginLength(int line) const;
 	void MarginClearAll();
 
 	bool AnnotationAny() const;
-	bool AnnotationMultipleStyles(int line);
-	const char *AnnotationText(int line);
-	const char *AnnotationStyles(int line);
-	int AnnotationStyle(int line);
 	StyledText AnnotationStyledText(int line);
 	void AnnotationSetText(int line, const char *text);
 	void AnnotationSetStyle(int line, int style);
-	void AnnotationSetStyles(int line, const char *styles);
+	void AnnotationSetStyles(int line, const unsigned char *styles);
 	int AnnotationLength(int line) const;
 	int AnnotationLines(int line) const;
 	void AnnotationClearAll();

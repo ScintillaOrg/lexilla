@@ -377,9 +377,9 @@ const char *LineAnnotation::Text(int line) const {
 		return 0;
 }
 
-const char *LineAnnotation::Styles(int line) const {
+const unsigned char *LineAnnotation::Styles(int line) const {
 	if (annotations.Length() && (line < annotations.Length()) && annotations[line] && MultipleStyles(line))
-		return annotations[line] + sizeof(AnnotationHeader) + Length(line);
+		return reinterpret_cast<unsigned char *>(annotations[line] + sizeof(AnnotationHeader) + Length(line));
 	else
 		return 0;
 }
@@ -428,7 +428,7 @@ void LineAnnotation::SetStyle(int line, int style) {
 	reinterpret_cast<AnnotationHeader *>(annotations[line])->style = static_cast<short>(style);
 }
 
-void LineAnnotation::SetStyles(int line, const char *styles) {
+void LineAnnotation::SetStyles(int line, const unsigned char *styles) {
 	annotations.EnsureLength(line+1);
 	if (!annotations[line]) {
 		annotations[line] = AllocateAnnotation(0, IndividualStyles);
