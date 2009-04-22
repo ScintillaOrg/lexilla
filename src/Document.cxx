@@ -1285,6 +1285,11 @@ const char *Document::MarginStyles(int line) {
 	return static_cast<LineAnnotation*>(perLineData[ldMargin])->Styles(line); 
 }
 
+StyledText Document::MarginStyledText(int line) {
+	return StyledText(MarginLength(line), MarginText(line), 
+		MarginMultipleStyles(line), MarginStyle(line), MarginStyles(line));
+}
+
 void Document::MarginSetText(int line, const char *text) {
 	static_cast<LineAnnotation*>(perLineData[ldMargin])->SetText(line, text); 
 	DocModification mh(SC_MOD_CHANGEMARGIN, LineStart(line), 0, 0, 0, line);
@@ -1329,6 +1334,11 @@ int Document::AnnotationStyle(int line) {
 
 const char *Document::AnnotationStyles(int line) {
 	return static_cast<LineAnnotation*>(perLineData[ldAnnotation])->Styles(line); 
+}
+
+StyledText Document::AnnotationStyledText(int line) {
+	return StyledText(AnnotationLength(line), AnnotationText(line), 
+		AnnotationMultipleStyles(line), AnnotationStyle(line), AnnotationStyles(line));
 }
 
 void Document::AnnotationSetText(int line, const char *text) {

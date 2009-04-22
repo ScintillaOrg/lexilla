@@ -93,6 +93,17 @@ public:
 /// Factory function for RegexSearchBase
 extern RegexSearchBase* CreateRegexSearch(CharClassify *charClassTable);
 
+struct StyledText {
+	size_t length;
+	const char *text;
+	bool multipleStyles;
+	int style;
+	const char *styles;
+	StyledText(	size_t length_, const char *text_, bool multipleStyles_, int style_, const char *styles_) : 
+		length(length_), text(text_), multipleStyles(multipleStyles_), style(style_), styles(styles_) {
+	}
+};
+
 /**
  */
 class Document : PerLine {
@@ -258,6 +269,7 @@ public:
 	const char *MarginText(int line);
 	int MarginStyle(int line);
 	const char *MarginStyles(int line);
+	StyledText MarginStyledText(int line);
 	void MarginSetStyle(int line, int style);
 	void MarginSetStyles(int line, const char *styles);
 	void MarginSetText(int line, const char *text);
@@ -269,6 +281,7 @@ public:
 	const char *AnnotationText(int line);
 	const char *AnnotationStyles(int line);
 	int AnnotationStyle(int line);
+	StyledText AnnotationStyledText(int line);
 	void AnnotationSetText(int line, const char *text);
 	void AnnotationSetStyle(int line, int style);
 	void AnnotationSetStyles(int line, const char *styles);

@@ -1459,27 +1459,109 @@ static int istrlen(const char *s) {
 	return static_cast<int>(strlen(s));
 }
 
-void DrawStyledText(Surface *surface, ViewStyle &vs, int styleOffset, PRectangle rcText, int ascent, 
-	const char *text, const char *styles, int length) {
+bool ValidStyledText(ViewStyle &vs, int styleOffset, const StyledText &st) {
+	if (st.multipleStyles) {
+		for (size_t iStyle=0;iStyle<st.length; iStyle++) {
+			if (!vs.ValidStyle(static_cast<size_t>(styleOffset + st.styles[iStyle])))
+				return false;
+		}
+	} else {
+		if (!vs.ValidStyle(static_cast<size_t>(styleOffset + st.style)))
+			return false;
+	}
+	return true;
+}
 
-	int x = rcText.left;
-	int i = 0;
-	while (i < length) {
-		int end = i;
-		int style = styles[i];
-		while (end < length-1 && styles[end+1] == style)
-			end++;
-		style += styleOffset;
-		int width = surface->WidthText(vs.styles[style].font, text + i, end - i + 1);
-		PRectangle rcSegment = rcText;
-		rcSegment.left = x;
-		rcSegment.right = x + width + 1;
-		surface->DrawTextNoClip(rcSegment, vs.styles[style].font,
-				ascent, text + i, end - i + 1,
+struct LineSegment {
+	const char *s;
+	int len;
+};
+
+class LineEnumerator {
+public:
+	const char *s;
+	int len;
+	LineEnumerator(const char *s_, size_t len_) : s(s_), len(len_) {
+	}
+	LineSegment Next() {
+		LineSegment ret;
+		ret.s = s;
+		int cur = 0;
+		while ((cur < len) && (s[cur] != '\n'))
+			cur++;
+		ret.len = cur;
+		s += cur + 1;
+		len -= cur + 1;
+		return ret;
+	}
+	bool Finished() const {
+		return len <= 0;
+	}
+};
+
+static int WidthStyledText(Surface *surface, ViewStyle &vs, int styleOffset,
+	const char *text, const char *styles, size_t len) {
+	int width = 0;
+	size_t start = 0;
+	while (start < len) {
+		int style = styles[start];
+		size_t endSegment = start;
+		while ((endSegment < len-1) && (styles[endSegment+1] == style))
+			endSegment++;
+		width += surface->WidthText(vs.styles[style+styleOffset].font, text + start, endSegment - start + 1);
+		start = endSegment + 1;
+	}
+	return width;
+}
+
+static int WidestLineWidth(Surface *surface, ViewStyle &vs, int styleOffset, const StyledText &st) {
+	const char *styles = st.styles;
+	LineEnumerator le(st.text, st.length);
+	int widthMax = 0;
+	while (!le.Finished()) {
+		LineSegment ls = le.Next();
+		int widthSubLine;
+		if (st.multipleStyles) {
+			widthSubLine = WidthStyledText(surface, vs, styleOffset, ls.s, styles, ls.len);
+			styles += ls.len + 1;
+		} else {
+			widthSubLine = surface->WidthText(vs.styles[styleOffset + st.style].font, ls.s, ls.len);
+		}
+		if (widthSubLine > widthMax)
+			widthMax = widthSubLine;
+	}
+	return widthMax;
+}
+
+void DrawStyledText(Surface *surface, ViewStyle &vs, int styleOffset, PRectangle rcText, int ascent, 
+	const StyledText &st, size_t start, size_t length) {
+
+	if (st.multipleStyles) {
+		int x = rcText.left;
+		size_t i = 0;
+		while (i < length) {
+			size_t end = i;
+			int style = st.styles[i + start];
+			while (end < length-1 && st.styles[start+end+1] == style)
+				end++;
+			style += styleOffset;
+			int width = surface->WidthText(vs.styles[style].font, st.text + start + i, end - i + 1);
+			PRectangle rcSegment = rcText;
+			rcSegment.left = x;
+			rcSegment.right = x + width + 1;
+			surface->DrawTextNoClip(rcSegment, vs.styles[style].font,
+					ascent, st.text + start + i, end - i + 1,
+					vs.styles[style].fore.allocated,
+					vs.styles[style].back.allocated);
+			x += width;
+			i = end + 1;
+		}
+	} else {
+		int style = st.style + styleOffset;
+		surface->DrawTextNoClip(rcText, vs.styles[style].font,
+				rcText.top + vs.maxAscent, st.text, st.length,
 				vs.styles[style].fore.allocated,
 				vs.styles[style].back.allocated);
-		x += width;
-		i = end + 1;
 	}
 }
 
@@ -1666,34 +1748,20 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 					        vs.styles[STYLE_LINENUMBER].back.allocated);
 				} else if (vs.ms[margin].style == SC_MARGIN_TEXT || vs.ms[margin].style == SC_MARGIN_RTEXT) {
 					if (firstSubLine) {
-						const char *marginText = pdoc->MarginText(lineDoc);
-						int lengthMargin = pdoc->MarginLength(lineDoc);
-						if (marginText) {
-							if (pdoc->MarginMultipleStyles(lineDoc)) {
-								const char *marginStyles = pdoc->MarginStyles(lineDoc);
-								for (size_t iStyle=0;iStyle<static_cast<size_t>(lengthMargin); iStyle++) {
-									if (!vs.ValidStyle(static_cast<size_t>(
-										vs.marginStyleOffset + marginStyles[iStyle])))
-										return;
-								}
+						StyledText marginStyledText  = pdoc->MarginStyledText(lineDoc);
+						if (marginStyledText.text && ValidStyledText(vs, vs.marginStyleOffset, marginStyledText)) {
+							if (marginStyledText.multipleStyles) {
 								surface->FillRectangle(rcMarker, 
-									vs.styles[marginStyles[0]+vs.marginStyleOffset].back.allocated);
-								DrawStyledText(surface, vs, vs.marginStyleOffset, rcMarker, rcMarker.top + vs.maxAscent, 
-									marginText, marginStyles, lengthMargin);
+									vs.styles[marginStyledText.styles[0]+vs.marginStyleOffset].back.allocated);
 							} else {
-								int style = pdoc->MarginStyle(lineDoc) + vs.marginStyleOffset;
-								if (!vs.ValidStyle(static_cast<size_t>(style)))
-									return;
-								surface->FillRectangle(rcMarker, vs.styles[style].back.allocated);
-								if (vs.ms[margin].style == SC_MARGIN_RTEXT) {
-									int width = surface->WidthText(vs.styles[style].font, marginText, istrlen(marginText));
-									rcMarker.left = rcMarker.right - width - 3;
-								}
-								surface->DrawTextNoClip(rcMarker, vs.styles[style].font,
-										rcMarker.top + vs.maxAscent, marginText, lengthMargin,
-										vs.styles[style].fore.allocated,
-										vs.styles[style].back.allocated);
+								surface->FillRectangle(rcMarker, vs.styles[marginStyledText.style].back.allocated);
 							}
+							if (vs.ms[margin].style == SC_MARGIN_RTEXT) {
+								int width = WidestLineWidth(surface, vs, vs.marginStyleOffset, marginStyledText);
+								rcMarker.left = rcMarker.right - width - 3;
+							}
+							DrawStyledText(surface, vs, vs.marginStyleOffset, rcMarker, rcMarker.top + vs.maxAscent, 
+								marginStyledText, 0, marginStyledText.length);
 						}
 					}
 				}
@@ -2279,107 +2347,30 @@ void DrawTextBlob(Surface *surface, ViewStyle &vsDraw, PRectangle rcSegment,
 	        textBack, textFore);
 }
 
-struct LineSegment {
-	const char *s;
-	int len;
-};
-
-class LineEnumerator {
-public:
-	const char *s;
-	int len;
-	LineEnumerator(const char *s_, size_t len_) : s(s_), len(len_) {
-	}
-	LineSegment Next() {
-		LineSegment ret;
-		ret.s = s;
-		int cur = 0;
-		while ((cur < len) && (s[cur] != '\n'))
-			cur++;
-		ret.len = cur;
-		s += cur + 1;
-		len -= cur + 1;
-		return ret;
-	}
-	bool Finished() const {
-		return len <= 0;
-	}
-};
-
-static int WidthStyledText(Surface *surface, ViewStyle &vs, int styleOffset,
-	const char *text, const char *styles, size_t len) {
-	int width = 0;
-	size_t start = 0;
-	while (start < len) {
-		int style = styles[start];
-		size_t endSegment = start;
-		while ((endSegment < len-1) && (styles[endSegment+1] == style))
-			endSegment++;
-		width += surface->WidthText(vs.styles[style+styleOffset].font, text + start, endSegment - start + 1);
-		start = endSegment + 1;
-	}
-	return width;
-}
-
-static int WidestLineWidth(Surface *surface, ViewStyle &vs, int styleOffset,
-	const char *text, const char *styles, size_t len) {
-	LineEnumerator le(text, len);
-	int widthComment = 0;
-	while (!le.Finished()) {
-		LineSegment ls = le.Next();
-		int widthSubLine = WidthStyledText(surface, vs, styleOffset, ls.s, styles, ls.len);
-		if (widthSubLine > widthComment)
-			widthComment = widthSubLine;
-		styles += ls.len;
-	}
-	return widthComment;
-}
-
-static int WidestLineWidth(Surface *surface, const char *text, size_t len, Font &font) {
-	LineEnumerator le(text, len);
-	int widthComment = 0;
-	while (!le.Finished()) {
-		LineSegment ls = le.Next();
-		int widthSubLine = surface->WidthText(font, ls.s, ls.len);
-		if (widthSubLine > widthComment)
-			widthComment = widthSubLine;
-	}
-	return widthComment;
-}
-
 void Editor::DrawAnnotation(Surface *surface, ViewStyle &vsDraw, int line, int xStart,
     PRectangle rcLine, LineLayout *ll, int subLine) {
 	int indent = pdoc->GetLineIndentation(line) * vsDraw.spaceWidth;
 	PRectangle rcSegment = rcLine;
 	int annotationLine = subLine - ll->lines;
-	int annotationStyle = pdoc->AnnotationStyle(line) + vsDraw.annotationStyleOffset;
-	const char *annotationText = pdoc->AnnotationText(line);
-	const char *annotationStyles = pdoc->AnnotationStyles(line);
-	int lengthAnnotation = pdoc->AnnotationLength(line);
-	const bool multipleStyles = pdoc->AnnotationMultipleStyles(line);
-	if (multipleStyles) {
-		for (size_t iStyle=0;iStyle<static_cast<size_t>(lengthAnnotation); iStyle++) {
+	StyledText annotationStyledText  = pdoc->AnnotationStyledText(line);
+	int annotationStyle = annotationStyledText.style + vsDraw.annotationStyleOffset;
+	if (annotationStyledText.multipleStyles) {
+		for (size_t iStyle=0;iStyle<annotationStyledText.length; iStyle++) {
 			if (!vsDraw.ValidStyle(static_cast<size_t>(
-				vsDraw.annotationStyleOffset + annotationStyles[iStyle])))
+				vsDraw.annotationStyleOffset + annotationStyledText.styles[iStyle])))
 				return;
 		}
 	} else {
 		if (!vsDraw.ValidStyle(static_cast<size_t>(annotationStyle)))
 			return;
 	}
-	if (annotationText) {
+	if (annotationStyledText.text) {
 		surface->FillRectangle(rcSegment, vsDraw.styles[0].back.allocated);
 
 		if (vs.annotationVisible == ANNOTATION_BOXED) {
 			// Only care about calculating width if need to draw box
-			int widthAnnotation;
-			if (multipleStyles) {
-				widthAnnotation = WidestLineWidth(surface, vsDraw, vsDraw.annotationStyleOffset,
-					annotationText, annotationStyles, lengthAnnotation);
-			} else {
-				widthAnnotation = WidestLineWidth(surface, annotationText, lengthAnnotation, vsDraw.styles[annotationStyle].font);
-			}
-			widthAnnotation += 16; // Margin
+			int widthAnnotation = WidestLineWidth(surface, vsDraw, vsDraw.annotationStyleOffset, annotationStyledText);
+			widthAnnotation += vsDraw.spaceWidth * 2; // Margins
 			rcSegment.left = xStart + indent;
 			rcSegment.right = rcSegment.left + widthAnnotation;
 			surface->PenColour(vsDraw.styles[vsDraw.annotationStyleOffset].fore.allocated);
@@ -2387,36 +2378,28 @@ void Editor::DrawAnnotation(Surface *surface, ViewStyle &vsDraw, int line, int x
 			rcSegment.left = xStart;
 		}
 		const int annotationLines = pdoc->AnnotationLines(line);
-		LineEnumerator le(annotationText, lengthAnnotation);
+		LineEnumerator le(annotationStyledText.text, annotationStyledText.length);
 		LineSegment ls = le.Next();
-		annotationText = ls.s;
-		lengthAnnotation = ls.len;
+		size_t start = 0;
+		size_t lengthAnnotation = ls.len;
 		int lineInAnnotation = 0;
 		while ((lineInAnnotation < annotationLine) && !le.Finished()) {
-			annotationStyles += ls.len;
+			start += ls.len + 1;
 			ls = le.Next();
-			annotationText = ls.s;
 			lengthAnnotation = ls.len;
 			lineInAnnotation++;
 		}
 		PRectangle rcText = rcSegment;
 		if (vs.annotationVisible == ANNOTATION_BOXED) {
-			if (multipleStyles) {
-				surface->FillRectangle(rcText, vsDraw.styles[annotationStyles[0] + vsDraw.annotationStyleOffset].back.allocated);
+			if (annotationStyledText.multipleStyles) {
+				surface->FillRectangle(rcText, vsDraw.styles[annotationStyledText.styles[start] + vsDraw.annotationStyleOffset].back.allocated);
 			} else {
 				surface->FillRectangle(rcText, vsDraw.styles[annotationStyle].back.allocated);
 			}
-			rcText.left += 8;
+			rcText.left += vsDraw.spaceWidth;
 		}
-		if (multipleStyles) {
-			DrawStyledText(surface, vsDraw, vsDraw.annotationStyleOffset, rcText, rcText.top + vsDraw.maxAscent, 
-				annotationText, annotationStyles, lengthAnnotation);
-		} else {
-			surface->DrawTextNoClip(rcText, vsDraw.styles[annotationStyle].font,
-					rcLine.top + vsDraw.maxAscent, annotationText, lengthAnnotation,
-					vsDraw.styles[annotationStyle].fore.allocated,
-					vsDraw.styles[annotationStyle].back.allocated);
-		}
+		DrawStyledText(surface, vsDraw, vsDraw.annotationStyleOffset, rcText, rcText.top + vsDraw.maxAscent, 
+			annotationStyledText, start, lengthAnnotation);
 		if (vs.annotationVisible == ANNOTATION_BOXED) {
 			surface->MoveTo(rcSegment.left, rcSegment.top);
 			surface->LineTo(rcSegment.left, rcSegment.bottom);
@@ -3017,7 +3000,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	//Platform::DebugPrintf("Paint lines = %d .. %d\n", topLine + screenLinePaintFirst, lineStyleLast);
 	int endPosPaint = pdoc->Length();
 	if (lineStyleLast < cs.LinesDisplayed())
-		endPosPaint = pdoc->LineStart(cs.DocFromDisplay(lineStyleLast + 1));
+		endPosPaint = pdoc->LineStart(cs.DocFromDisplay(lineStyleLast) + 1);
 
 	int xStart = vs.fixedColumnWidth - xOffset;
 	int ypos = 0;
@@ -3707,6 +3690,8 @@ void Editor::ClearAll() {
 	}
 	if (!pdoc->IsReadOnly()) {
 		cs.Clear();
+		pdoc->AnnotationClearAll();
+		pdoc->MarginClearAll();
 	}
 	pdoc->EndUndoAction();
 	anchor = 0;
