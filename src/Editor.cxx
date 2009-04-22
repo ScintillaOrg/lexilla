@@ -1515,15 +1515,15 @@ static int WidthStyledText(Surface *surface, ViewStyle &vs, int styleOffset,
 }
 
 static int WidestLineWidth(Surface *surface, ViewStyle &vs, int styleOffset, const StyledText &st) {
-	const char *styles = st.styles;
+	size_t styleStart = 0;
 	LineEnumerator le(st.text, st.length);
 	int widthMax = 0;
 	while (!le.Finished()) {
 		LineSegment ls = le.Next();
 		int widthSubLine;
 		if (st.multipleStyles) {
-			widthSubLine = WidthStyledText(surface, vs, styleOffset, ls.s, styles, ls.len);
-			styles += ls.len + 1;
+			widthSubLine = WidthStyledText(surface, vs, styleOffset, ls.s, st.styles + styleStart, ls.len);
+			styleStart += ls.len + 1;
 		} else {
 			widthSubLine = surface->WidthText(vs.styles[styleOffset + st.style].font, ls.s, ls.len);
 		}
