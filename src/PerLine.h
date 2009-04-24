@@ -5,6 +5,13 @@
 // Copyright 1998-2009 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
+#ifndef PERLINE_H
+#define PERLINE_H
+
+#ifdef SCI_NAMESPACE
+namespace Scintilla {
+#endif
+	
 /**
  * This holds the marker identifier and the marker type to display.
  * MarkerHandleNumbers are members of lists.
@@ -102,3 +109,8 @@ public:
 	int Lines(int line) const;
 };
 
+#ifdef SCI_NAMESPACE
+}
+#endif
+
+#endif
