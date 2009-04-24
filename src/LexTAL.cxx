@@ -23,6 +23,10 @@
 #include "SciLexer.h"
 #include "StyleContext.h"
 
+#ifdef SCI_NAMESPACE
+using namespace Scintilla;
+#endif
+
 inline bool isTALoperator(char ch)
 	{
 	return ch == '\'' || ch == '@' || ch == '#' || isoperator(ch);
