@@ -138,11 +138,15 @@ int Document::GetMark(int line) {
 }
 
 int Document::AddMark(int line, int markerNum) {
-	int prev = static_cast<LineMarkers*>(perLineData[ldMarkers])->
-		AddMark(line, markerNum, LinesTotal());
-	DocModification mh(SC_MOD_CHANGEMARKER, LineStart(line), 0, 0, 0, line);
-	NotifyModified(mh);
-	return prev;
+	if (line <= LinesTotal()) {
+		int prev = static_cast<LineMarkers*>(perLineData[ldMarkers])->
+			AddMark(line, markerNum, LinesTotal());
+		DocModification mh(SC_MOD_CHANGEMARKER, LineStart(line), 0, 0, 0, line);
+		NotifyModified(mh);
+		return prev;
+	} else {
+		return 0;
+	}
 }
 
 void Document::AddMarkSet(int line, int valueSet) {
