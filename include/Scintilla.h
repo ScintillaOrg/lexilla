@@ -398,10 +398,6 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_FOLDLEVELBASE 0x400
 #define SC_FOLDLEVELWHITEFLAG 0x1000
 #define SC_FOLDLEVELHEADERFLAG 0x2000
-#define SC_FOLDLEVELBOXHEADERFLAG 0x4000
-#define SC_FOLDLEVELBOXFOOTERFLAG 0x8000
-#define SC_FOLDLEVELCONTRACTED 0x10000
-#define SC_FOLDLEVELUNINDENT 0x20000
 #define SC_FOLDLEVELNUMBERMASK 0x0FFF
 #define SCI_SETFOLDLEVEL 2222
 #define SCI_GETFOLDLEVEL 2223
@@ -419,7 +415,6 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_FOLDFLAG_LINEAFTER_EXPANDED 0x0008
 #define SC_FOLDFLAG_LINEAFTER_CONTRACTED 0x0010
 #define SC_FOLDFLAG_LEVELNUMBERS 0x0040
-#define SC_FOLDFLAG_BOX 0x0001
 #define SCI_SETFOLDFLAGS 2233
 #define SCI_ENSUREVISIBLEENFORCEPOLICY 2234
 #define SCI_SETTABINDENTS 2260
@@ -871,7 +866,7 @@ struct SCNotification {
 }
 #endif
 
-/* Deprecation section listing all API features that are deprecated and will
+/* Deprecation section listing all API features that are deprecated and
  * will be removed completely in a future version.
  * To enable these features define INCLUDE_DEPRECATED_FEATURES */
 
@@ -881,6 +876,12 @@ struct SCNotification {
 #define CARET_CENTER 0x02
 #define CARET_XEVEN 0x08
 #define CARET_XJUMPS 0x10
+
+#define SC_FOLDFLAG_BOX 0x0001
+#define SC_FOLDLEVELBOXHEADERFLAG 0x4000
+#define SC_FOLDLEVELBOXFOOTERFLAG 0x8000
+#define SC_FOLDLEVELCONTRACTED 0x10000
+#define SC_FOLDLEVELUNINDENT 0x20000
 
 #define SCN_POSCHANGED 2012
 #define SCN_CHECKBRACE 2007

@@ -3102,7 +3102,9 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 				ll->RestoreBracesHighlight(rangeLine, braces);
 
 				bool expanded = cs.GetExpanded(lineDoc);
+#ifdef INCLUDE_DEPRECATED_FEATURES
 				if ((foldFlags & SC_FOLDFLAG_BOX) == 0) {
+#endif
 					// Paint the line above the fold
 					if ((expanded && (foldFlags & SC_FOLDFLAG_LINEBEFORE_EXPANDED))
 					        ||
@@ -3123,6 +3125,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 							surface->FillRectangle(rcFoldLine, vs.styles[STYLE_DEFAULT].fore.allocated);
 						}
 					}
+#ifdef INCLUDE_DEPRECATED_FEATURES
 				} else {
 					int FoldLevelCurr = (pdoc->GetLevel(lineDoc) & SC_FOLDLEVELNUMBERMASK) - SC_FOLDLEVELBASE;
 					int FoldLevelPrev = (pdoc->GetLevel(lineDoc - 1) & SC_FOLDLEVELNUMBERMASK) - SC_FOLDLEVELBASE;
@@ -3158,6 +3161,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 						surface->FillRectangle(rcBoxLine, vs.styles[STYLE_DEFAULT].fore.allocated);
 					}
 				}
+#endif
 
 				// Draw the Caret
 				if (lineDoc == lineCaret) {
