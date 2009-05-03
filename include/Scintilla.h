@@ -850,7 +850,7 @@ struct SCNotification {
 	int ch;		/* SCN_CHARADDED, SCN_KEY */
 	int modifiers;	/* SCN_KEY */
 	int modificationType;	/* SCN_MODIFIED */
-	const char *text;	// SCN_MODIFIED, SCN_USERLISTSELECTION, SCN_AUTOCSELECTION */
+	const char *text;	/* SCN_MODIFIED, SCN_USERLISTSELECTION, SCN_AUTOCSELECTION */
 	int length;		/* SCN_MODIFIED */
 	int linesAdded;	/* SCN_MODIFIED */
 	int message;	/* SCN_MACRORECORD */
