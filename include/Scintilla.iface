@@ -1907,6 +1907,13 @@ val UNDO_MAY_COALESCE=1
 # Add a container action to the undo stack
 fun void AddUndoAction=2560(int token, int flags)
 
+# Find the position of a character from a point within the window.
+fun position CharPositionFromPoint=2561(int x, int y)
+
+# Find the position of a character from a point within the window.
+# Return INVALID_POSITION if not close to text.
+fun position CharPositionFromPointClose=2562(int x, int y)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 

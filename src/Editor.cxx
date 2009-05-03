@@ -480,20 +480,31 @@ void Editor::SetTopLine(int topLineNew) {
 	posTopLine = pdoc->LineStart(cs.DocFromDisplay(topLine));
 }
 
-int Editor::PositionFromLocation(Point pt) {
+int Editor::PositionFromLocation(Point pt, bool canReturnInvalid, bool charPosition) {
 	RefreshStyleData();
+	if (canReturnInvalid) {
+		PRectangle rcClient = GetTextRectangle();
+		if (!rcClient.Contains(pt))
+			return INVALID_POSITION;
+		if (pt.x < vs.fixedColumnWidth)
+			return INVALID_POSITION;
+		if (pt.y < 0)
+			return INVALID_POSITION;
+	}
 	pt.x = pt.x - vs.fixedColumnWidth + xOffset;
 	int visibleLine = pt.y / vs.lineHeight + topLine;
 	if (pt.y < 0) {	// Division rounds towards 0
 		visibleLine = (pt.y - (vs.lineHeight - 1)) / vs.lineHeight + topLine;
 	}
-	if (visibleLine < 0)
+	if (!canReturnInvalid && (visibleLine < 0))
 		visibleLine = 0;
 	int lineDoc = cs.DocFromDisplay(visibleLine);
+	if (canReturnInvalid && (lineDoc < 0))
+		return INVALID_POSITION;
 	if (lineDoc >= pdoc->LinesTotal())
-		return pdoc->Length();
+		return canReturnInvalid ? INVALID_POSITION : pdoc->Length();
 	unsigned int posLineStart = pdoc->LineStart(lineDoc);
-	int retVal = posLineStart;
+	int retVal = canReturnInvalid ? INVALID_POSITION : posLineStart;
 	AutoSurface surface(this);
 	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
 	if (surface && ll) {
@@ -511,68 +522,29 @@ int Editor::PositionFromLocation(Point pt) {
 			}
 			int i = ll->FindBefore(pt.x + subLineStart, lineStart, lineEnd);
 			while (i < lineEnd) {
-				if ((pt.x + subLineStart) < ((ll->positions[i] + ll->positions[i + 1]) / 2)) {
-					return pdoc->MovePositionOutsideChar(i + posLineStart, 1);
+				if (charPosition) {
+					if ((pt.x + subLineStart) < (ll->positions[i + 1])) {
+						return pdoc->MovePositionOutsideChar(i + posLineStart, 1);
+					}
+				} else {
+					if ((pt.x + subLineStart) < ((ll->positions[i] + ll->positions[i + 1]) / 2)) {
+						return pdoc->MovePositionOutsideChar(i + posLineStart, 1);
+					}
 				}
 				i++;
 			}
-			return lineEnd + posLineStart;
+			if (canReturnInvalid) {
+				if (pt.x < (ll->positions[lineEnd] - subLineStart)) {
+					return pdoc->MovePositionOutsideChar(lineEnd + posLineStart, 1);
+				}
+			} else {
+				return lineEnd + posLineStart;
+			}
 		}
-		retVal = ll->numCharsInLine + posLineStart;
+		if (!canReturnInvalid)
+			return ll->numCharsInLine + posLineStart;
 	}
 	return retVal;
-}
-
-// Like PositionFromLocation but INVALID_POSITION returned when not near any text.
-int Editor::PositionFromLocationClose(Point pt) {
-	RefreshStyleData();
-	PRectangle rcClient = GetTextRectangle();
-	if (!rcClient.Contains(pt))
-		return INVALID_POSITION;
-	if (pt.x < vs.fixedColumnWidth)
-		return INVALID_POSITION;
-	if (pt.y < 0)
-		return INVALID_POSITION;
-	pt.x = pt.x - vs.fixedColumnWidth + xOffset;
-	int visibleLine = pt.y / vs.lineHeight + topLine;
-	if (pt.y < 0) {	// Division rounds towards 0
-		visibleLine = (pt.y - (vs.lineHeight - 1)) / vs.lineHeight + topLine;
-	}
-	int lineDoc = cs.DocFromDisplay(visibleLine);
-	if (lineDoc < 0)
-		return INVALID_POSITION;
-	if (lineDoc >= pdoc->LinesTotal())
-		return INVALID_POSITION;
-	AutoSurface surface(this);
-	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
-	if (surface && ll) {
-		LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
-		unsigned int posLineStart = pdoc->LineStart(lineDoc);
-		int lineStartSet = cs.DisplayFromDoc(lineDoc);
-		int subLine = visibleLine - lineStartSet;
-		if (subLine < ll->lines) {
-			int lineStart = ll->LineStart(subLine);
-			int lineEnd = ll->LineLastVisible(subLine);
-			int subLineStart = ll->positions[lineStart];
-
-			if (actualWrapVisualStartIndent != 0) {
-				if (lineStart != 0)	// Wrapped
-					pt.x -= actualWrapVisualStartIndent * vs.aveCharWidth;
-			}
-			int i = ll->FindBefore(pt.x + subLineStart, lineStart, lineEnd);
-			while (i < lineEnd) {
-				if ((pt.x + subLineStart) < ((ll->positions[i] + ll->positions[i + 1]) / 2)) {
-					return pdoc->MovePositionOutsideChar(i + posLineStart, 1);
-				}
-				i++;
-			}
-			if (pt.x < (ll->positions[lineEnd] - subLineStart)) {
-				return pdoc->MovePositionOutsideChar(lineEnd + posLineStart, 1);
-			}
-		}
-	}
-
-	return INVALID_POSITION;
 }
 
 /**
@@ -3847,7 +3819,7 @@ void Editor::NotifyDoubleClick(Point pt, bool shift, bool ctrl, bool alt) {
 	SCNotification scn = {0};
 	scn.nmhdr.code = SCN_DOUBLECLICK;
 	scn.line = LineFromLocation(pt);
-	scn.position = PositionFromLocationClose(pt);
+	scn.position = PositionFromLocation(pt, true);
 	scn.modifiers = (shift ? SCI_SHIFT : 0) | (ctrl ? SCI_CTRL : 0) |
 	        (alt ? SCI_ALT : 0);
 	NotifyParent(scn);
@@ -3928,7 +3900,7 @@ void Editor::NotifyNeedShown(int pos, int len) {
 void Editor::NotifyDwelling(Point pt, bool state) {
 	SCNotification scn = {0};
 	scn.nmhdr.code = state ? SCN_DWELLSTART : SCN_DWELLEND;
-	scn.position = PositionFromLocationClose(pt);
+	scn.position = PositionFromLocation(pt, true);
 	scn.x = pt.x;
 	scn.y = pt.y;
 	NotifyParent(scn);
@@ -5511,7 +5483,7 @@ bool Editor::PositionIsHotspot(int position) {
 }
 
 bool Editor::PointIsHotspot(Point pt) {
-	int pos = PositionFromLocationClose(pt);
+	int pos = PositionFromLocation(pt, true);
 	if (pos == INVALID_POSITION)
 		return false;
 	return PositionIsHotspot(pos);
@@ -6679,10 +6651,16 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_POSITIONFROMPOINT:
-		return PositionFromLocation(Point(wParam, lParam));
+		return PositionFromLocation(Point(wParam, lParam), false, false);
 
 	case SCI_POSITIONFROMPOINTCLOSE:
-		return PositionFromLocationClose(Point(wParam, lParam));
+		return PositionFromLocation(Point(wParam, lParam), true, false);
+
+	case SCI_CHARPOSITIONFROMPOINT:
+		return PositionFromLocation(Point(wParam, lParam), false, true);
+
+	case SCI_CHARPOSITIONFROMPOINTCLOSE:
+		return PositionFromLocation(Point(wParam, lParam), true, true);
 
 	case SCI_GOTOLINE:
 		GoToLine(wParam);

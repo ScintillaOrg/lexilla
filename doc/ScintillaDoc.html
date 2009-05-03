@@ -1007,6 +1007,9 @@ struct TextToFind {
      <a class="message" href="#SCI_POSITIONFROMPOINT">SCI_POSITIONFROMPOINT(int x, int y)</a><br />
      <a class="message" href="#SCI_POSITIONFROMPOINTCLOSE">SCI_POSITIONFROMPOINTCLOSE(int x, int
     y)</a><br />
+     <a class="message" href="#SCI_CHARPOSITIONFROMPOINT">SCI_CHARPOSITIONFROMPOINT(int x, int y)</a><br />
+     <a class="message" href="#SCI_CHARPOSITIONFROMPOINTCLOSE">SCI_CHARPOSITIONFROMPOINTCLOSE(int x, int
+    y)</a><br />
      <a class="message" href="#SCI_POINTXFROMPOSITION">SCI_POINTXFROMPOSITION(&lt;unused&gt;, int
     position)</a><br />
      <a class="message" href="#SCI_POINTYFROMPOSITION">SCI_POINTYFROMPOSITION(&lt;unused&gt;, int
@@ -1342,6 +1345,13 @@ struct TextToFind {
      <code>SCI_POSITIONFROMPOINT</code> finds the closest character position to a point and
     <code>SCI_POSITIONFROMPOINTCLOSE</code> is similar but returns -1 if the point is outside the
     window or not close to any characters.</p>
+
+    <p><b id="SCI_CHARPOSITIONFROMPOINT">SCI_CHARPOSITIONFROMPOINT(int x, int y)</b><br />
+     <b id="SCI_CHARPOSITIONFROMPOINTCLOSE">SCI_CHARPOSITIONFROMPOINTCLOSE(int x, int y)</b><br />
+     <code>SCI_CHARPOSITIONFROMPOINT</code> finds the closest character to a point and
+    <code>SCI_CHARPOSITIONFROMPOINTCLOSE</code> is similar but returns -1 if the point is outside the
+    window or not close to any characters. This is similar to the previous methods but finds characters rather than 
+    inter-character positions.</p>
 
     <p><b id="SCI_POINTXFROMPOSITION">SCI_POINTXFROMPOSITION(&lt;unused&gt;, int pos)</b><br />
      <b id="SCI_POINTYFROMPOSITION">SCI_POINTYFROMPOSITION(&lt;unused&gt;, int pos)</b><br />

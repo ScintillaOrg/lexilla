@@ -260,8 +260,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int MaxScrollPos();
 	Point LocationFromPosition(int pos);
 	int XFromPosition(int pos);
-	int PositionFromLocation(Point pt);
-	int PositionFromLocationClose(Point pt);
+	int PositionFromLocation(Point pt, bool canReturnInvalid=false, bool charPosition=false);
 	int PositionFromLineX(int line, int x);
 	int LineFromLocation(Point pt);
 	void SetTopLine(int topLineNew);
