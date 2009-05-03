@@ -504,7 +504,7 @@ int Editor::PositionFromLocation(Point pt, bool canReturnInvalid, bool charPosit
 	if (lineDoc >= pdoc->LinesTotal())
 		return canReturnInvalid ? INVALID_POSITION : pdoc->Length();
 	unsigned int posLineStart = pdoc->LineStart(lineDoc);
-	int retVal = canReturnInvalid ? INVALID_POSITION : posLineStart;
+	int retVal = canReturnInvalid ? INVALID_POSITION : static_cast<int>(posLineStart);
 	AutoSurface surface(this);
 	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
 	if (surface && ll) {
