@@ -125,7 +125,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool hasFocus;
 	bool hideSelection;
 	bool inOverstrike;
-	int errorStatus;
 	bool mouseDownCaptures;
 
 	/** In bufferedDraw mode, graphics operations are drawn to a pixmap and then copied to
@@ -478,6 +477,8 @@ public:
 	virtual sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 	// Public so scintilla_set_id can use it.
 	int ctrlID;
+	// Public so COM methods for drag and drop can set it.
+	int errorStatus;
 	friend class AutoSurface;
 	friend class SelectionLineIterator;
 };

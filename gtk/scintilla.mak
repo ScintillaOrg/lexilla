@@ -62,7 +62,7 @@ ALL_GTK_LIBS=$(GTK_TOP)/gtk+/gtk/gtk-1.3.lib \
 !ENDIF
 
 INCLUDEDIRS=-I ../include -I ../src $(GTK_INCLUDES)
-CXXFLAGS=/TP /W4 -DGTK -D_CRT_SECURE_NO_DEPRECATE=1
+CXXFLAGS=/TP /W4 -EHsc -DGTK -D_CRT_SECURE_NO_DEPRECATE=1
 CFLAGS=/W4 -DGTK
 # For something scary:/Wp64
 CXXDEBUG=/Zi /Od /MDd -DDEBUG
@@ -90,7 +90,7 @@ LD=ilink32
 
 INCLUDEDIRS=-I../include -I../src
 CXXFLAGS =  -v
-CXXFLAGS=-P -tWM -w -w-prc -w-inl -RT- -x-
+CXXFLAGS=-P -tWM -w -w-prc -w-inl -RT- -x
 # Above turns off warnings for clarfying parentheses and inlines with for not expanded
 CXXDEBUG=-v -DDEBUG
 CXXNDEBUG=-O1 -DNDEBUG

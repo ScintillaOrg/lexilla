@@ -2021,12 +2021,16 @@ static void SelectionAC(GtkWidget *, gint row, gint,
 #endif
 
 static gboolean ButtonPress(GtkWidget *, GdkEventButton* ev, gpointer p) {
-	ListBoxX* lb = reinterpret_cast<ListBoxX*>(p);
-	if (ev->type == GDK_2BUTTON_PRESS && lb->doubleClickAction != NULL) {
-		lb->doubleClickAction(lb->doubleClickActionData);
-		return TRUE;
-	}
+	try {
+		ListBoxX* lb = reinterpret_cast<ListBoxX*>(p);
+		if (ev->type == GDK_2BUTTON_PRESS && lb->doubleClickAction != NULL) {
+			lb->doubleClickAction(lb->doubleClickActionData);
+			return TRUE;
+		}
 
+	} catch (...) {
+		// No pointer back to Scintilla to save status
+	}
 	return FALSE;
 }
 

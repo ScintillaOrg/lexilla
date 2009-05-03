@@ -1809,53 +1809,57 @@ void ListBoxX::Paint(HDC hDC) {
 }
 
 LRESULT PASCAL ListBoxX::ControlWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	switch (uMsg) {
-	case WM_ERASEBKGND:
-		return TRUE;
+	try {
+		switch (uMsg) {
+		case WM_ERASEBKGND:
+			return TRUE;
 
-	case WM_PAINT: {
-			PAINTSTRUCT ps;
-			HDC hDC = ::BeginPaint(hWnd, &ps);
-			ListBoxX *lbx = reinterpret_cast<ListBoxX *>(PointerFromWindow(::GetParent(hWnd)));
-			if (lbx)
-				lbx->Paint(hDC);
-			::EndPaint(hWnd, &ps);
-		}
-		return 0;
-
-	case WM_MOUSEACTIVATE:
-		// This prevents the view activating when the scrollbar is clicked
-		return MA_NOACTIVATE;
-
-	case WM_LBUTTONDOWN: {
-			// We must take control of selection to prevent the ListBox activating
-			// the popup
-			LRESULT lResult = ::SendMessage(hWnd, LB_ITEMFROMPOINT, 0, lParam);
-			int item = LOWORD(lResult);
-			if (HIWORD(lResult) == 0 && item >= 0) {
-				::SendMessage(hWnd, LB_SETCURSEL, item, 0);
+		case WM_PAINT: {
+				PAINTSTRUCT ps;
+				HDC hDC = ::BeginPaint(hWnd, &ps);
+				ListBoxX *lbx = reinterpret_cast<ListBoxX *>(PointerFromWindow(::GetParent(hWnd)));
+				if (lbx)
+					lbx->Paint(hDC);
+				::EndPaint(hWnd, &ps);
 			}
-		}
-		return 0;
+			return 0;
 
-	case WM_LBUTTONUP:
-		return 0;
+		case WM_MOUSEACTIVATE:
+			// This prevents the view activating when the scrollbar is clicked
+			return MA_NOACTIVATE;
 
-	case WM_LBUTTONDBLCLK: {
-			ListBoxX *lbx = reinterpret_cast<ListBoxX *>(PointerFromWindow(::GetParent(hWnd)));
-			if (lbx) {
-				lbx->OnDoubleClick();
+		case WM_LBUTTONDOWN: {
+				// We must take control of selection to prevent the ListBox activating
+				// the popup
+				LRESULT lResult = ::SendMessage(hWnd, LB_ITEMFROMPOINT, 0, lParam);
+				int item = LOWORD(lResult);
+				if (HIWORD(lResult) == 0 && item >= 0) {
+					::SendMessage(hWnd, LB_SETCURSEL, item, 0);
+				}
 			}
-		}
-		return 0;
-	}
+			return 0;
 
-	WNDPROC prevWndProc = reinterpret_cast<WNDPROC>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-	if (prevWndProc) {
-		return ::CallWindowProc(prevWndProc, hWnd, uMsg, wParam, lParam);
-	} else {
-		return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+		case WM_LBUTTONUP:
+			return 0;
+
+		case WM_LBUTTONDBLCLK: {
+				ListBoxX *lbx = reinterpret_cast<ListBoxX *>(PointerFromWindow(::GetParent(hWnd)));
+				if (lbx) {
+					lbx->OnDoubleClick();
+				}
+			}
+			return 0;
+		}
+
+		WNDPROC prevWndProc = reinterpret_cast<WNDPROC>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+		if (prevWndProc) {
+			return ::CallWindowProc(prevWndProc, hWnd, uMsg, wParam, lParam);
+		} else {
+			return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+		}
+	} catch (...) {
 	}
+	return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
 LRESULT ListBoxX::WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam) {
