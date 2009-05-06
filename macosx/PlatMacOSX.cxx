@@ -69,7 +69,7 @@ void Scintilla::Palette::Allocate(Window &/*w*/) {
     // OS X always runs in thousands or millions of colours
 }
 
-Font::Font() : id(0) {}
+Font::Font() : fid(0) {}
 
 Font::~Font() { Release(); }
 
@@ -79,7 +79,7 @@ void Font::Create(const char *faceName, int /*characterSet*/,
     // TODO: How should I handle the characterSet request?
     Release();
 
-    id = new QuartzTextStyle();
+    fid = new QuartzTextStyle();
 
     // Find the font
     QuartzFont font( faceName, strlen( faceName ) );
@@ -91,20 +91,20 @@ void Font::Create(const char *faceName, int /*characterSet*/,
 
     // Actually set the attributes
     QuartzTextStyleAttribute* attributes[] = { &font, &textSize, &isBold, &isItalic };
-    reinterpret_cast<QuartzTextStyle*>( id )->setAttributes( attributes, sizeof( attributes ) / sizeof( *attributes ) );
+    reinterpret_cast<QuartzTextStyle*>( fid )->setAttributes( attributes, sizeof( attributes ) / sizeof( *attributes ) );
 
     //ATSStyleRenderingOptions rendering = kATSStyleNoAntiAliasing;
-    //reinterpret_cast<QuartzTextStyle*>( id )->setAttribute( kATSUStyleRenderingOptionsTag, sizeof( rendering ), &rendering );
+    //reinterpret_cast<QuartzTextStyle*>( fid )->setAttribute( kATSUStyleRenderingOptionsTag, sizeof( rendering ), &rendering );
 
     // TODO: Why do I have to manually set this?
-    reinterpret_cast<QuartzTextStyle*>( id )->setFontFeature( kLigaturesType, kCommonLigaturesOffSelector );
+    reinterpret_cast<QuartzTextStyle*>( fid )->setFontFeature( kLigaturesType, kCommonLigaturesOffSelector );
 }
 
 void Font::Release() {
-    if (id)
-            delete reinterpret_cast<QuartzTextStyle*>( id );
+    if (fid)
+            delete reinterpret_cast<QuartzTextStyle*>( fid );
 
-    id = 0;
+    fid = 0;
 }
 
 SurfaceImpl::SurfaceImpl() {
@@ -843,12 +843,12 @@ void Window::Destroy() {
     if (windowRef) {
         DisposeWindow(reinterpret_cast<WindowRef>( windowRef ));
     }
-    id = 0;
+    wid = 0;
 }
 
 bool Window::HasFocus() {
     // TODO: Test this
-    return HIViewSubtreeContainsFocus( reinterpret_cast<HIViewRef>( id ) );
+    return HIViewSubtreeContainsFocus( reinterpret_cast<HIViewRef>( wid ) );
 }
 
 PRectangle Window::GetPosition() {
@@ -856,9 +856,9 @@ PRectangle Window::GetPosition() {
     PRectangle rc(0, 0, 1000, 1000);
 
     // The frame rectangle gives the position of this view inside the parent view
-    if (id) {
+    if (wid) {
         HIRect controlFrame;
-        HIViewGetFrame( reinterpret_cast<HIViewRef>( id ), &controlFrame );
+        HIViewGetFrame( reinterpret_cast<HIViewRef>( wid ), &controlFrame );
         rc = CGRectToPRectangle( controlFrame );
     }
 
@@ -867,11 +867,11 @@ PRectangle Window::GetPosition() {
 
 void Window::SetPosition(PRectangle rc) {
     // Moves this view inside the parent view
-    if ( id )
+    if ( wid )
     {
         // Set the frame on the view, the function handles the rest
         CGRect r = PRectangleToCGRect( rc );
-        HIViewSetFrame( reinterpret_cast<HIViewRef>( id ), &r );
+        HIViewSetFrame( reinterpret_cast<HIViewRef>( wid ), &r );
     }
 }
 
@@ -917,8 +917,8 @@ PRectangle Window::GetClientPosition() {
 }
 
 void Window::Show(bool show) {
-    if ( id ) {
-        HIViewSetVisible( reinterpret_cast<HIViewRef>( id ), show );
+    if ( wid ) {
+        HIViewSetVisible( reinterpret_cast<HIViewRef>( wid ), show );
     }
     // this is necessary for calltip/listbox
     if (windowRef) {
@@ -932,19 +932,19 @@ void Window::Show(bool show) {
 }
 
 void Window::InvalidateAll() {
-    if ( id ) {
-        HIViewSetNeedsDisplay( reinterpret_cast<HIViewRef>( id ), true );
+    if ( wid ) {
+        HIViewSetNeedsDisplay( reinterpret_cast<HIViewRef>( wid ), true );
     }
 }
 
 void Window::InvalidateRectangle(PRectangle rc) {
-    if (id) {
+    if (wid) {
         // Create a rectangular region
         RgnHandle region = NewRgn();
         SetRectRgn( region, rc.left, rc.top, rc.right, rc.bottom );
 
         // Make that region invalid
-        HIViewSetNeedsDisplayInRegion( reinterpret_cast<HIViewRef>( id ), region, true );
+        HIViewSetNeedsDisplayInRegion( reinterpret_cast<HIViewRef>( wid ), region, true );
         DisposeRgn( region );
     }
 }
@@ -954,7 +954,7 @@ void Window::SetFont(Font &) {
 }
 
 void Window::SetCursor(Cursor curs) {
-    if (id) {
+    if (wid) {
         // TODO: This isn't really implemented correctly. I should be using
         // mouse tracking rectangles to only set the mouse cursor when it is over the control
         ThemeCursor cursor;
@@ -987,7 +987,7 @@ void Window::SetCursor(Cursor curs) {
 }
 
 void Window::SetTitle(const char *s) {
-    WindowRef window = GetControlOwner(reinterpret_cast<HIViewRef>( id ));
+    WindowRef window = GetControlOwner(reinterpret_cast<HIViewRef>( wid ));
     CFStringRef title = CFStringCreateWithCString(kCFAllocatorDefault, s, kCFStringEncodingMacRoman);
     SetWindowTitleWithCFString(window, title);
     CFRelease(title);
@@ -1206,7 +1206,7 @@ void ListBoxImpl::Create(Window &/*parent*/, int /*ctrlID*/, Scintilla::Point /*
                    GetEventTypeCount( kWindowEvents ),
                    kWindowEvents, this, &eventHandler );
 
-    id = lb;
+    wid = lb;
     SetControlVisibility(lb, true, true);
     SetControl(lb);
     SetWindow(outWindow);
@@ -1644,7 +1644,7 @@ void ListBoxImpl::ClearRegisteredImages() {
     xset.Clear();
 }
 
-Menu::Menu() : id(0) { }
+Menu::Menu() : mid(0) { }
 
 void Menu::CreatePopUp() {
     // TODO: Could I just feed a constant menu ID parameter, or does
@@ -1652,14 +1652,14 @@ void Menu::CreatePopUp() {
     static int nextMenuID = 1;
     Destroy();
     OSStatus err;
-    err = CreateNewMenu( nextMenuID++, 0, reinterpret_cast<MenuRef*>( &id ) );
+    err = CreateNewMenu( nextMenuID++, 0, reinterpret_cast<MenuRef*>( &mid ) );
 }
 
 void Menu::Destroy() {
-    if ( id != NULL )
+    if ( mid != NULL )
     {
-        ReleaseMenu( reinterpret_cast<MenuRef>( id ) );
-        id = NULL;
+        ReleaseMenu( reinterpret_cast<MenuRef>( mid ) );
+        mid = NULL;
     }
 }
 
@@ -1671,7 +1671,7 @@ void Menu::Show(Point pt, Window &) {
     globalPoint.h = pt.x;
     globalPoint.v = pt.y;
     OSStatus err;
-    err = ContextualMenuSelect( reinterpret_cast<MenuRef>( id ), globalPoint,
+    err = ContextualMenuSelect( reinterpret_cast<MenuRef>( mid ), globalPoint,
                                 false, kCMHelpItemRemoveHelp, NULL,
                                 NULL, &userSelection,
                                 &menuId,
@@ -1719,8 +1719,8 @@ ColourDesired Platform::ChromeHighlight() {
 
 static Str255 PlatformDefaultFontName;
 const char *Platform::DefaultFont() {
-    long id = HighShortFromLong(GetScriptVariable(smCurrentScript, smScriptAppFondSize));
-    FMGetFontFamilyName(id, PlatformDefaultFontName);
+    long fid = HighShortFromLong(GetScriptVariable(smCurrentScript, smScriptAppFondSize));
+    FMGetFontFamilyName(fid, PlatformDefaultFontName);
     char* defaultFontName = (char*) PlatformDefaultFontName;
     defaultFontName[defaultFontName[0]+1] = 0;
     ++defaultFontName;
