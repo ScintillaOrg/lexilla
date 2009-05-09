@@ -1503,7 +1503,7 @@ void DrawStyledText(Surface *surface, ViewStyle &vs, int styleOffset, PRectangle
 	} else {
 		int style = st.style + styleOffset;
 		surface->DrawTextNoClip(rcText, vs.styles[style].font,
-				rcText.top + vs.maxAscent, st.text, st.length,
+				rcText.top + vs.maxAscent, st.text + start, length,
 				vs.styles[style].fore.allocated,
 				vs.styles[style].back.allocated);
 	}
