@@ -40,7 +40,6 @@
 
 #elif defined(__APPLE__)
 #define SCI_NAMESPACE
-#define SCI_LEXER
 
 #undef PLAT_MACOSX
 #define PLAT_MACOSX 1
