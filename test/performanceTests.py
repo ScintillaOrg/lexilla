@@ -17,7 +17,7 @@ class TestPerformance(unittest.TestCase):
 	def testAddLine(self):
 		data = (string.ascii_letters + string.digits + "\n").encode('utf-8')
 		start = time.time()
-		for i in range(500):
+		for i in range(1000):
 			self.ed.AddText(len(data), data)
 			self.assertEquals(self.ed.LineCount, i + 2)
 		end = time.time()
@@ -29,7 +29,7 @@ class TestPerformance(unittest.TestCase):
 	def testAddLineMiddle(self):
 		data = (string.ascii_letters + string.digits + "\n").encode('utf-8')
 		start = time.time()
-		for i in range(500):
+		for i in range(1000):
 			self.ed.AddText(len(data), data)
 			self.assertEquals(self.ed.LineCount, i + 2)
 		end = time.time()
@@ -41,7 +41,6 @@ class TestPerformance(unittest.TestCase):
 	def testHuge(self):
 		data = (string.ascii_letters + string.digits + "\n").encode('utf-8')
 		data = data * 100000
-		print("len is", len(data))
 		start = time.time()
 		self.ed.AddText(len(data), data)
 		end = time.time()
@@ -56,7 +55,7 @@ class TestPerformance(unittest.TestCase):
 		insert = (string.digits + "\n").encode('utf-8')
 		self.ed.AddText(len(data), data)
 		start = time.time()
-		for i in range(500):
+		for i in range(1000):
 			self.ed.InsertText(0, insert)
 		end = time.time()
 		duration = end - start
@@ -70,7 +69,7 @@ class TestPerformance(unittest.TestCase):
 		insert = (string.digits + "\n").encode('utf-8')
 		self.ed.AddText(len(data), data)
 		start = time.time()
-		for i in range(500):
+		for i in range(1000):
 			self.ed.TargetStart = i * len(insert)
 			self.ed.TargetEnd = self.ed.TargetStart + len(oneLine)
 			self.ed.ReplaceTarget(len(insert), insert)
