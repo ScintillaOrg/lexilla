@@ -1,0 +1,1011 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 45;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
+		271D1F9D0FA7236900FD601F /* LexAbaqus.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F580FA7236900FD601F /* LexAbaqus.cxx */; };
+		271D1F9E0FA7236900FD601F /* LexAda.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F590FA7236900FD601F /* LexAda.cxx */; };
+		271D1F9F0FA7236900FD601F /* LexAPDL.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F5A0FA7236900FD601F /* LexAPDL.cxx */; };
+		271D1FA00FA7236900FD601F /* LexAsm.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F5B0FA7236900FD601F /* LexAsm.cxx */; };
+		271D1FA10FA7236900FD601F /* LexAsn1.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F5C0FA7236900FD601F /* LexAsn1.cxx */; };
+		271D1FA20FA7236900FD601F /* LexASY.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F5D0FA7236900FD601F /* LexASY.cxx */; };
+		271D1FA30FA7236900FD601F /* LexAU3.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F5E0FA7236900FD601F /* LexAU3.cxx */; };
+		271D1FA40FA7236900FD601F /* LexAVE.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F5F0FA7236900FD601F /* LexAVE.cxx */; };
+		271D1FA50FA7236900FD601F /* LexBaan.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F600FA7236900FD601F /* LexBaan.cxx */; };
+		271D1FA60FA7236900FD601F /* LexBasic.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F610FA7236900FD601F /* LexBasic.cxx */; };
+		271D1FA70FA7236900FD601F /* LexBullant.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F620FA7236900FD601F /* LexBullant.cxx */; };
+		271D1FA80FA7236900FD601F /* LexCaml.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F630FA7236900FD601F /* LexCaml.cxx */; };
+		271D1FA90FA7236900FD601F /* LexCLW.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F640FA7236900FD601F /* LexCLW.cxx */; };
+		271D1FAA0FA7236900FD601F /* LexCmake.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F650FA7236900FD601F /* LexCmake.cxx */; };
+		271D1FAB0FA7236900FD601F /* LexCOBOL.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F660FA7236900FD601F /* LexCOBOL.cxx */; };
+		271D1FAC0FA7236900FD601F /* LexConf.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F670FA7236900FD601F /* LexConf.cxx */; };
+		271D1FAD0FA7236900FD601F /* LexCrontab.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F680FA7236900FD601F /* LexCrontab.cxx */; };
+		271D1FAE0FA7236900FD601F /* LexCsound.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F690FA7236900FD601F /* LexCsound.cxx */; };
+		271D1FAF0FA7236900FD601F /* LexD.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F6A0FA7236900FD601F /* LexD.cxx */; };
+		271D1FB00FA7236900FD601F /* LexEiffel.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F6B0FA7236900FD601F /* LexEiffel.cxx */; };
+		271D1FB10FA7236900FD601F /* LexErlang.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F6C0FA7236900FD601F /* LexErlang.cxx */; };
+		271D1FB20FA7236900FD601F /* LexEScript.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F6D0FA7236900FD601F /* LexEScript.cxx */; };
+		271D1FB30FA7236900FD601F /* LexFlagship.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F6E0FA7236900FD601F /* LexFlagship.cxx */; };
+		271D1FB40FA7236900FD601F /* LexForth.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F6F0FA7236900FD601F /* LexForth.cxx */; };
+		271D1FB50FA7236900FD601F /* LexFortran.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F700FA7236900FD601F /* LexFortran.cxx */; };
+		271D1FB60FA7236900FD601F /* LexGAP.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F710FA7236900FD601F /* LexGAP.cxx */; };
+		271D1FB80FA7236900FD601F /* LexGui4Cli.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F730FA7236900FD601F /* LexGui4Cli.cxx */; };
+		271D1FB90FA7236900FD601F /* LexHaskell.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F740FA7236900FD601F /* LexHaskell.cxx */; };
+		271D1FBA0FA7236900FD601F /* LexInno.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F750FA7236900FD601F /* LexInno.cxx */; };
+		271D1FBB0FA7236900FD601F /* LexKix.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F760FA7236900FD601F /* LexKix.cxx */; };
+		271D1FBC0FA7236900FD601F /* LexLisp.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F770FA7236900FD601F /* LexLisp.cxx */; };
+		271D1FBD0FA7236900FD601F /* LexLout.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F780FA7236900FD601F /* LexLout.cxx */; };
+		271D1FBE0FA7236900FD601F /* LexMagik.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F790FA7236900FD601F /* LexMagik.cxx */; };
+		271D1FBF0FA7236900FD601F /* LexMatlab.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F7A0FA7236900FD601F /* LexMatlab.cxx */; };
+		271D1FC00FA7236900FD601F /* LexMetapost.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F7B0FA7236900FD601F /* LexMetapost.cxx */; };
+		271D1FC10FA7236900FD601F /* LexMMIXAL.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F7C0FA7236900FD601F /* LexMMIXAL.cxx */; };
+		271D1FC20FA7236900FD601F /* LexMPT.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F7D0FA7236900FD601F /* LexMPT.cxx */; };
+		271D1FC30FA7236900FD601F /* LexNimrod.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F7E0FA7236900FD601F /* LexNimrod.cxx */; };
+		271D1FC40FA7236900FD601F /* LexNsis.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F7F0FA7236900FD601F /* LexNsis.cxx */; };
+		271D1FC50FA7236900FD601F /* LexOpal.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F800FA7236900FD601F /* LexOpal.cxx */; };
+		271D1FC60FA7236900FD601F /* LexOthers.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F810FA7236900FD601F /* LexOthers.cxx */; };
+		271D1FC70FA7236900FD601F /* LexPascal.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F820FA7236900FD601F /* LexPascal.cxx */; };
+		271D1FC80FA7236900FD601F /* LexPB.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F830FA7236900FD601F /* LexPB.cxx */; };
+		271D1FC90FA7236900FD601F /* LexPLM.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F840FA7236900FD601F /* LexPLM.cxx */; };
+		271D1FCA0FA7236900FD601F /* LexPOV.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F850FA7236900FD601F /* LexPOV.cxx */; };
+		271D1FCB0FA7236900FD601F /* LexPowerPro.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F860FA7236900FD601F /* LexPowerPro.cxx */; };
+		271D1FCC0FA7236900FD601F /* LexPowerShell.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F870FA7236900FD601F /* LexPowerShell.cxx */; };
+		271D1FCD0FA7236900FD601F /* LexProgress.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F880FA7236900FD601F /* LexProgress.cxx */; };
+		271D1FCE0FA7236900FD601F /* LexPS.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F890FA7236900FD601F /* LexPS.cxx */; };
+		271D1FCF0FA7236900FD601F /* LexR.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F8A0FA7236900FD601F /* LexR.cxx */; };
+		271D1FD00FA7236900FD601F /* LexRebol.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F8B0FA7236900FD601F /* LexRebol.cxx */; };
+		271D1FD10FA7236900FD601F /* LexRuby.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F8C0FA7236900FD601F /* LexRuby.cxx */; };
+		271D1FD20FA7236900FD601F /* LexScriptol.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F8D0FA7236900FD601F /* LexScriptol.cxx */; };
+		271D1FD30FA7236900FD601F /* LexSmalltalk.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F8E0FA7236900FD601F /* LexSmalltalk.cxx */; };
+		271D1FD40FA7236900FD601F /* LexSML.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F8F0FA7236900FD601F /* LexSML.cxx */; };
+		271D1FD50FA7236900FD601F /* LexSorcus.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F900FA7236900FD601F /* LexSorcus.cxx */; };
+		271D1FD60FA7236900FD601F /* LexSpecman.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F910FA7236900FD601F /* LexSpecman.cxx */; };
+		271D1FD70FA7236900FD601F /* LexSpice.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F920FA7236900FD601F /* LexSpice.cxx */; };
+		271D1FD80FA7236900FD601F /* LexTACL.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F930FA7236900FD601F /* LexTACL.cxx */; };
+		271D1FD90FA7236900FD601F /* LexTADS3.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F940FA7236900FD601F /* LexTADS3.cxx */; };
+		271D1FDA0FA7236900FD601F /* LexTAL.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F950FA7236900FD601F /* LexTAL.cxx */; };
+		271D1FDB0FA7236900FD601F /* LexTCL.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F960FA7236900FD601F /* LexTCL.cxx */; };
+		271D1FDC0FA7236900FD601F /* LexTeX.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F970FA7236900FD601F /* LexTeX.cxx */; };
+		271D1FDD0FA7236900FD601F /* LexVB.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F980FA7236900FD601F /* LexVB.cxx */; };
+		271D1FDE0FA7236900FD601F /* LexVerilog.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F990FA7236900FD601F /* LexVerilog.cxx */; };
+		271D1FDF0FA7236900FD601F /* LexVHDL.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F9A0FA7236900FD601F /* LexVHDL.cxx */; };
+		271D1FE00FA7236900FD601F /* LexYAML.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F9B0FA7236900FD601F /* LexYAML.cxx */; };
+		271D1FE10FA7236900FD601F /* PerLine.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 271D1F9C0FA7236900FD601F /* PerLine.cxx */; };
+		271FA52C0F850BE20033D021 /* AppController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 271FA52B0F850BE20033D021 /* AppController.mm */; };
+		272133530F9732D2006BE49A /* ScintillaView.h in Headers */ = {isa = PBXBuildFile; fileRef = 274A05980F85FB2600B2D3B7 /* ScintillaView.h */; };
+		272133590F973324006BE49A /* ScintillaCocoa.mm in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC1C0F85E96F00638A46 /* ScintillaCocoa.mm */; };
+		2721335A0F973324006BE49A /* AutoComplete.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC1E0F85E9C000638A46 /* AutoComplete.cxx */; };
+		2721335B0F973324006BE49A /* CallTip.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC1F0F85E9C000638A46 /* CallTip.cxx */; };
+		2721335C0F973324006BE49A /* CellBuffer.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC200F85E9C000638A46 /* CellBuffer.cxx */; };
+		2721335D0F973324006BE49A /* CharClassify.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC210F85E9C000638A46 /* CharClassify.cxx */; };
+		2721335E0F973324006BE49A /* ContractionState.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC220F85E9C000638A46 /* ContractionState.cxx */; };
+		2721335F0F973324006BE49A /* Decoration.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC230F85E9C000638A46 /* Decoration.cxx */; };
+		272133600F973324006BE49A /* Document.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC240F85E9C000638A46 /* Document.cxx */; };
+		272133610F973324006BE49A /* DocumentAccessor.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC250F85E9C000638A46 /* DocumentAccessor.cxx */; };
+		272133620F973324006BE49A /* Editor.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC260F85E9C000638A46 /* Editor.cxx */; };
+		272133630F973324006BE49A /* ExternalLexer.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC270F85E9C000638A46 /* ExternalLexer.cxx */; };
+		272133640F973324006BE49A /* Indicator.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC280F85E9C000638A46 /* Indicator.cxx */; };
+		272133650F973324006BE49A /* KeyMap.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC290F85E9C000638A46 /* KeyMap.cxx */; };
+		272133660F973324006BE49A /* KeyWords.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC2A0F85E9C000638A46 /* KeyWords.cxx */; };
+		272133670F973324006BE49A /* LexCPP.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC2B0F85E9C000638A46 /* LexCPP.cxx */; };
+		272133680F973324006BE49A /* LexCSS.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC2C0F85E9C000638A46 /* LexCSS.cxx */; };
+		272133690F973324006BE49A /* LexHTML.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC2D0F85E9C000638A46 /* LexHTML.cxx */; };
+		2721336A0F973324006BE49A /* LexLua.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC2E0F85E9C000638A46 /* LexLua.cxx */; };
+		2721336B0F973324006BE49A /* LexMSSQL.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC2F0F85E9C000638A46 /* LexMSSQL.cxx */; };
+		2721336C0F973324006BE49A /* LexMySQL.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC300F85E9C000638A46 /* LexMySQL.cxx */; };
+		2721336D0F973324006BE49A /* LexPerl.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC310F85E9C000638A46 /* LexPerl.cxx */; };
+		2721336E0F973324006BE49A /* LexPython.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC320F85E9C000638A46 /* LexPython.cxx */; };
+		2721336F0F973324006BE49A /* LexSQL.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC330F85E9C000638A46 /* LexSQL.cxx */; };
+		272133700F973324006BE49A /* LineMarker.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC340F85E9C000638A46 /* LineMarker.cxx */; };
+		272133710F973324006BE49A /* PositionCache.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC350F85E9C000638A46 /* PositionCache.cxx */; };
+		272133720F973324006BE49A /* PropSet.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC360F85E9C000638A46 /* PropSet.cxx */; };
+		272133730F973324006BE49A /* RESearch.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC370F85E9C000638A46 /* RESearch.cxx */; };
+		272133740F973324006BE49A /* RunStyles.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC380F85E9C000638A46 /* RunStyles.cxx */; };
+		272133750F973324006BE49A /* ScintillaBase.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC390F85E9C000638A46 /* ScintillaBase.cxx */; };
+		272133760F973324006BE49A /* Style.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC3A0F85E9C000638A46 /* Style.cxx */; };
+		272133770F973324006BE49A /* StyleContext.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC3B0F85E9C000638A46 /* StyleContext.cxx */; };
+		272133780F973324006BE49A /* UniConversion.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC3C0F85E9C000638A46 /* UniConversion.cxx */; };
+		272133790F973324006BE49A /* ViewStyle.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC3D0F85E9C000638A46 /* ViewStyle.cxx */; };
+		2721337A0F973324006BE49A /* WindowAccessor.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC3E0F85E9C000638A46 /* WindowAccessor.cxx */; };
+		2721337B0F973324006BE49A /* XPM.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFC3F0F85E9C000638A46 /* XPM.cxx */; };
+		2721337C0F973324006BE49A /* LexBash.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 27EDFCA60F85EA0F00638A46 /* LexBash.cxx */; };
+		2721337D0F973324006BE49A /* PlatCocoa.mm in Sources */ = {isa = PBXBuildFile; fileRef = 274A05630F85F18900B2D3B7 /* PlatCocoa.mm */; };
+		2721337E0F973324006BE49A /* ScintillaView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 274A05990F85FB2600B2D3B7 /* ScintillaView.mm */; };
+		272133BE0F97354B006BE49A /* Scintilla.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 272133480F9731CB006BE49A /* Scintilla.framework */; };
+		272133C10F973581006BE49A /* Scintilla.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 272133480F9731CB006BE49A /* Scintilla.framework */; };
+		2721342E0F974971006BE49A /* mac_cursor_busy.png in Resources */ = {isa = PBXBuildFile; fileRef = 2721342C0F974971006BE49A /* mac_cursor_busy.png */; };
+		2721342F0F974971006BE49A /* mac_cursor_flipped.png in Resources */ = {isa = PBXBuildFile; fileRef = 2721342D0F974971006BE49A /* mac_cursor_flipped.png */; };
+		274CDFE60F9DBA4E00B64ADC /* TestData.sql in Resources */ = {isa = PBXBuildFile; fileRef = 274CDFE50F9DBA4E00B64ADC /* TestData.sql */; };
+		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
+		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
+		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		272133C30F97361C006BE49A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 272133470F9731CB006BE49A;
+			remoteInfo = Scintilla;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		272133C20F973596006BE49A /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				272133C10F973581006BE49A /* Scintilla.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
+		1DDD58150DA1D0A300B32029 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		271D1F580FA7236900FD601F /* LexAbaqus.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexAbaqus.cxx; path = ../../src/LexAbaqus.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F590FA7236900FD601F /* LexAda.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexAda.cxx; path = ../../src/LexAda.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F5A0FA7236900FD601F /* LexAPDL.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexAPDL.cxx; path = ../../src/LexAPDL.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F5B0FA7236900FD601F /* LexAsm.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexAsm.cxx; path = ../../src/LexAsm.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F5C0FA7236900FD601F /* LexAsn1.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexAsn1.cxx; path = ../../src/LexAsn1.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F5D0FA7236900FD601F /* LexASY.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexASY.cxx; path = ../../src/LexASY.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F5E0FA7236900FD601F /* LexAU3.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexAU3.cxx; path = ../../src/LexAU3.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F5F0FA7236900FD601F /* LexAVE.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexAVE.cxx; path = ../../src/LexAVE.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F600FA7236900FD601F /* LexBaan.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexBaan.cxx; path = ../../src/LexBaan.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F610FA7236900FD601F /* LexBasic.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexBasic.cxx; path = ../../src/LexBasic.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F620FA7236900FD601F /* LexBullant.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexBullant.cxx; path = ../../src/LexBullant.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F630FA7236900FD601F /* LexCaml.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexCaml.cxx; path = ../../src/LexCaml.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F640FA7236900FD601F /* LexCLW.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexCLW.cxx; path = ../../src/LexCLW.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F650FA7236900FD601F /* LexCmake.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexCmake.cxx; path = ../../src/LexCmake.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F660FA7236900FD601F /* LexCOBOL.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexCOBOL.cxx; path = ../../src/LexCOBOL.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F670FA7236900FD601F /* LexConf.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexConf.cxx; path = ../../src/LexConf.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F680FA7236900FD601F /* LexCrontab.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexCrontab.cxx; path = ../../src/LexCrontab.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F690FA7236900FD601F /* LexCsound.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexCsound.cxx; path = ../../src/LexCsound.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F6A0FA7236900FD601F /* LexD.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexD.cxx; path = ../../src/LexD.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F6B0FA7236900FD601F /* LexEiffel.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexEiffel.cxx; path = ../../src/LexEiffel.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F6C0FA7236900FD601F /* LexErlang.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexErlang.cxx; path = ../../src/LexErlang.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F6D0FA7236900FD601F /* LexEScript.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexEScript.cxx; path = ../../src/LexEScript.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F6E0FA7236900FD601F /* LexFlagship.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexFlagship.cxx; path = ../../src/LexFlagship.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F6F0FA7236900FD601F /* LexForth.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexForth.cxx; path = ../../src/LexForth.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F700FA7236900FD601F /* LexFortran.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexFortran.cxx; path = ../../src/LexFortran.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F710FA7236900FD601F /* LexGAP.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexGAP.cxx; path = ../../src/LexGAP.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F730FA7236900FD601F /* LexGui4Cli.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexGui4Cli.cxx; path = ../../src/LexGui4Cli.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F740FA7236900FD601F /* LexHaskell.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexHaskell.cxx; path = ../../src/LexHaskell.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F750FA7236900FD601F /* LexInno.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexInno.cxx; path = ../../src/LexInno.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F760FA7236900FD601F /* LexKix.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexKix.cxx; path = ../../src/LexKix.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F770FA7236900FD601F /* LexLisp.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexLisp.cxx; path = ../../src/LexLisp.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F780FA7236900FD601F /* LexLout.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexLout.cxx; path = ../../src/LexLout.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F790FA7236900FD601F /* LexMagik.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexMagik.cxx; path = ../../src/LexMagik.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F7A0FA7236900FD601F /* LexMatlab.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexMatlab.cxx; path = ../../src/LexMatlab.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F7B0FA7236900FD601F /* LexMetapost.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexMetapost.cxx; path = ../../src/LexMetapost.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F7C0FA7236900FD601F /* LexMMIXAL.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexMMIXAL.cxx; path = ../../src/LexMMIXAL.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F7D0FA7236900FD601F /* LexMPT.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexMPT.cxx; path = ../../src/LexMPT.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F7E0FA7236900FD601F /* LexNimrod.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexNimrod.cxx; path = ../../src/LexNimrod.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F7F0FA7236900FD601F /* LexNsis.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexNsis.cxx; path = ../../src/LexNsis.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F800FA7236900FD601F /* LexOpal.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexOpal.cxx; path = ../../src/LexOpal.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F810FA7236900FD601F /* LexOthers.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexOthers.cxx; path = ../../src/LexOthers.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F820FA7236900FD601F /* LexPascal.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexPascal.cxx; path = ../../src/LexPascal.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F830FA7236900FD601F /* LexPB.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexPB.cxx; path = ../../src/LexPB.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F840FA7236900FD601F /* LexPLM.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexPLM.cxx; path = ../../src/LexPLM.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F850FA7236900FD601F /* LexPOV.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexPOV.cxx; path = ../../src/LexPOV.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F860FA7236900FD601F /* LexPowerPro.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexPowerPro.cxx; path = ../../src/LexPowerPro.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F870FA7236900FD601F /* LexPowerShell.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexPowerShell.cxx; path = ../../src/LexPowerShell.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F880FA7236900FD601F /* LexProgress.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexProgress.cxx; path = ../../src/LexProgress.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F890FA7236900FD601F /* LexPS.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexPS.cxx; path = ../../src/LexPS.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F8A0FA7236900FD601F /* LexR.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexR.cxx; path = ../../src/LexR.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F8B0FA7236900FD601F /* LexRebol.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexRebol.cxx; path = ../../src/LexRebol.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F8C0FA7236900FD601F /* LexRuby.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexRuby.cxx; path = ../../src/LexRuby.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F8D0FA7236900FD601F /* LexScriptol.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexScriptol.cxx; path = ../../src/LexScriptol.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F8E0FA7236900FD601F /* LexSmalltalk.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexSmalltalk.cxx; path = ../../src/LexSmalltalk.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F8F0FA7236900FD601F /* LexSML.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexSML.cxx; path = ../../src/LexSML.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F900FA7236900FD601F /* LexSorcus.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexSorcus.cxx; path = ../../src/LexSorcus.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F910FA7236900FD601F /* LexSpecman.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexSpecman.cxx; path = ../../src/LexSpecman.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F920FA7236900FD601F /* LexSpice.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexSpice.cxx; path = ../../src/LexSpice.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F930FA7236900FD601F /* LexTACL.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexTACL.cxx; path = ../../src/LexTACL.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F940FA7236900FD601F /* LexTADS3.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexTADS3.cxx; path = ../../src/LexTADS3.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F950FA7236900FD601F /* LexTAL.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexTAL.cxx; path = ../../src/LexTAL.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F960FA7236900FD601F /* LexTCL.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexTCL.cxx; path = ../../src/LexTCL.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F970FA7236900FD601F /* LexTeX.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexTeX.cxx; path = ../../src/LexTeX.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F980FA7236900FD601F /* LexVB.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexVB.cxx; path = ../../src/LexVB.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F990FA7236900FD601F /* LexVerilog.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexVerilog.cxx; path = ../../src/LexVerilog.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F9A0FA7236900FD601F /* LexVHDL.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexVHDL.cxx; path = ../../src/LexVHDL.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F9B0FA7236900FD601F /* LexYAML.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexYAML.cxx; path = ../../src/LexYAML.cxx; sourceTree = SOURCE_ROOT; };
+		271D1F9C0FA7236900FD601F /* PerLine.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PerLine.cxx; path = ../../src/PerLine.cxx; sourceTree = SOURCE_ROOT; };
+		271D1FE20FA7238400FD601F /* PerLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PerLine.h; path = ../../src/PerLine.h; sourceTree = SOURCE_ROOT; };
+		271FA52A0F850BE20033D021 /* AppController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppController.h; sourceTree = "<group>"; };
+		271FA52B0F850BE20033D021 /* AppController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AppController.mm; sourceTree = "<group>"; wrapsLines = 0; };
+		272133480F9731CB006BE49A /* Scintilla.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Scintilla.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		272133490F9731CB006BE49A /* Scintilla-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Scintilla-Info.plist"; sourceTree = "<group>"; };
+		2721342C0F974971006BE49A /* mac_cursor_busy.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = mac_cursor_busy.png; path = ../res/mac_cursor_busy.png; sourceTree = SOURCE_ROOT; };
+		2721342D0F974971006BE49A /* mac_cursor_flipped.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = mac_cursor_flipped.png; path = ../res/mac_cursor_flipped.png; sourceTree = SOURCE_ROOT; };
+		274A05630F85F18900B2D3B7 /* PlatCocoa.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = PlatCocoa.mm; path = ../PlatCocoa.mm; sourceTree = SOURCE_ROOT; };
+		274A05980F85FB2600B2D3B7 /* ScintillaView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScintillaView.h; path = ../ScintillaView.h; sourceTree = SOURCE_ROOT; };
+		274A05990F85FB2600B2D3B7 /* ScintillaView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ScintillaView.mm; path = ../ScintillaView.mm; sourceTree = SOURCE_ROOT; };
+		274CDFE50F9DBA4E00B64ADC /* TestData.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = TestData.sql; sourceTree = SOURCE_ROOT; };
+		27EDFC100F85E95000638A46 /* PlatCocoa.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PlatCocoa.h; path = ../PlatCocoa.h; sourceTree = SOURCE_ROOT; };
+		27EDFC110F85E95000638A46 /* QuartzTextLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = QuartzTextLayout.h; path = ../QuartzTextLayout.h; sourceTree = SOURCE_ROOT; };
+		27EDFC120F85E95000638A46 /* QuartzTextStyle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = QuartzTextStyle.h; path = ../QuartzTextStyle.h; sourceTree = SOURCE_ROOT; };
+		27EDFC130F85E95000638A46 /* QuartzTextStyleAttribute.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = QuartzTextStyleAttribute.h; path = ../QuartzTextStyleAttribute.h; sourceTree = SOURCE_ROOT; };
+		27EDFC140F85E95000638A46 /* ScintillaCocoa.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScintillaCocoa.h; path = ../ScintillaCocoa.h; sourceTree = SOURCE_ROOT; };
+		27EDFC1C0F85E96F00638A46 /* ScintillaCocoa.mm */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.cpp.objcpp; name = ScintillaCocoa.mm; path = ../ScintillaCocoa.mm; sourceTree = SOURCE_ROOT; tabWidth = 2; usesTabs = 0; wrapsLines = 0; };
+		27EDFC1E0F85E9C000638A46 /* AutoComplete.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AutoComplete.cxx; path = ../../src/AutoComplete.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC1F0F85E9C000638A46 /* CallTip.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CallTip.cxx; path = ../../src/CallTip.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC200F85E9C000638A46 /* CellBuffer.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CellBuffer.cxx; path = ../../src/CellBuffer.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC210F85E9C000638A46 /* CharClassify.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CharClassify.cxx; path = ../../src/CharClassify.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC220F85E9C000638A46 /* ContractionState.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContractionState.cxx; path = ../../src/ContractionState.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC230F85E9C000638A46 /* Decoration.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Decoration.cxx; path = ../../src/Decoration.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC240F85E9C000638A46 /* Document.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Document.cxx; path = ../../src/Document.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC250F85E9C000638A46 /* DocumentAccessor.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DocumentAccessor.cxx; path = ../../src/DocumentAccessor.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC260F85E9C000638A46 /* Editor.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Editor.cxx; path = ../../src/Editor.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC270F85E9C000638A46 /* ExternalLexer.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ExternalLexer.cxx; path = ../../src/ExternalLexer.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC280F85E9C000638A46 /* Indicator.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Indicator.cxx; path = ../../src/Indicator.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC290F85E9C000638A46 /* KeyMap.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = KeyMap.cxx; path = ../../src/KeyMap.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC2A0F85E9C000638A46 /* KeyWords.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = KeyWords.cxx; path = ../../src/KeyWords.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC2B0F85E9C000638A46 /* LexCPP.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexCPP.cxx; path = ../../src/LexCPP.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC2C0F85E9C000638A46 /* LexCSS.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexCSS.cxx; path = ../../src/LexCSS.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC2D0F85E9C000638A46 /* LexHTML.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexHTML.cxx; path = ../../src/LexHTML.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC2E0F85E9C000638A46 /* LexLua.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexLua.cxx; path = ../../src/LexLua.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC2F0F85E9C000638A46 /* LexMSSQL.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexMSSQL.cxx; path = ../../src/LexMSSQL.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC300F85E9C000638A46 /* LexMySQL.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexMySQL.cxx; path = ../../src/LexMySQL.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC310F85E9C000638A46 /* LexPerl.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexPerl.cxx; path = ../../src/LexPerl.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC320F85E9C000638A46 /* LexPython.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexPython.cxx; path = ../../src/LexPython.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC330F85E9C000638A46 /* LexSQL.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexSQL.cxx; path = ../../src/LexSQL.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC340F85E9C000638A46 /* LineMarker.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LineMarker.cxx; path = ../../src/LineMarker.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC350F85E9C000638A46 /* PositionCache.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PositionCache.cxx; path = ../../src/PositionCache.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC360F85E9C000638A46 /* PropSet.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PropSet.cxx; path = ../../src/PropSet.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC370F85E9C000638A46 /* RESearch.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RESearch.cxx; path = ../../src/RESearch.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC380F85E9C000638A46 /* RunStyles.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RunStyles.cxx; path = ../../src/RunStyles.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC390F85E9C000638A46 /* ScintillaBase.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScintillaBase.cxx; path = ../../src/ScintillaBase.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC3A0F85E9C000638A46 /* Style.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Style.cxx; path = ../../src/Style.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC3B0F85E9C000638A46 /* StyleContext.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StyleContext.cxx; path = ../../src/StyleContext.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC3C0F85E9C000638A46 /* UniConversion.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UniConversion.cxx; path = ../../src/UniConversion.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC3D0F85E9C000638A46 /* ViewStyle.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ViewStyle.cxx; path = ../../src/ViewStyle.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC3E0F85E9C000638A46 /* WindowAccessor.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WindowAccessor.cxx; path = ../../src/WindowAccessor.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC3F0F85E9C000638A46 /* XPM.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XPM.cxx; path = ../../src/XPM.cxx; sourceTree = SOURCE_ROOT; };
+		27EDFC620F85E9DA00638A46 /* Accessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Accessor.h; path = ../../include/Accessor.h; sourceTree = SOURCE_ROOT; };
+		27EDFC630F85E9DA00638A46 /* KeyWords.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KeyWords.h; path = ../../include/KeyWords.h; sourceTree = SOURCE_ROOT; };
+		27EDFC640F85E9DA00638A46 /* Platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Platform.h; path = ../../include/Platform.h; sourceTree = SOURCE_ROOT; };
+		27EDFC650F85E9DA00638A46 /* PropSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PropSet.h; path = ../../include/PropSet.h; sourceTree = SOURCE_ROOT; };
+		27EDFC660F85E9DA00638A46 /* SciLexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SciLexer.h; path = ../../include/SciLexer.h; sourceTree = SOURCE_ROOT; };
+		27EDFC670F85E9DA00638A46 /* Scintilla.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Scintilla.h; path = ../../include/Scintilla.h; sourceTree = SOURCE_ROOT; };
+		27EDFC680F85E9DA00638A46 /* SString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SString.h; path = ../../include/SString.h; sourceTree = SOURCE_ROOT; };
+		27EDFC690F85E9DA00638A46 /* WindowAccessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WindowAccessor.h; path = ../../include/WindowAccessor.h; sourceTree = SOURCE_ROOT; };
+		27EDFC720F85E9FF00638A46 /* AutoComplete.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AutoComplete.h; path = ../../src/AutoComplete.h; sourceTree = SOURCE_ROOT; };
+		27EDFC730F85E9FF00638A46 /* CallTip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CallTip.h; path = ../../src/CallTip.h; sourceTree = SOURCE_ROOT; };
+		27EDFC740F85E9FF00638A46 /* CellBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CellBuffer.h; path = ../../src/CellBuffer.h; sourceTree = SOURCE_ROOT; };
+		27EDFC750F85E9FF00638A46 /* CharacterSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CharacterSet.h; path = ../../src/CharacterSet.h; sourceTree = SOURCE_ROOT; };
+		27EDFC760F85E9FF00638A46 /* CharClassify.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CharClassify.h; path = ../../src/CharClassify.h; sourceTree = SOURCE_ROOT; };
+		27EDFC770F85E9FF00638A46 /* ContractionState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ContractionState.h; path = ../../src/ContractionState.h; sourceTree = SOURCE_ROOT; };
+		27EDFC780F85E9FF00638A46 /* Decoration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Decoration.h; path = ../../src/Decoration.h; sourceTree = SOURCE_ROOT; };
+		27EDFC790F85E9FF00638A46 /* Document.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Document.h; path = ../../src/Document.h; sourceTree = SOURCE_ROOT; };
+		27EDFC7A0F85E9FF00638A46 /* DocumentAccessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DocumentAccessor.h; path = ../../src/DocumentAccessor.h; sourceTree = SOURCE_ROOT; };
+		27EDFC7B0F85E9FF00638A46 /* Editor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Editor.h; path = ../../src/Editor.h; sourceTree = SOURCE_ROOT; };
+		27EDFC7C0F85E9FF00638A46 /* ExternalLexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ExternalLexer.h; path = ../../src/ExternalLexer.h; sourceTree = SOURCE_ROOT; };
+		27EDFC7D0F85E9FF00638A46 /* Indicator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Indicator.h; path = ../../src/Indicator.h; sourceTree = SOURCE_ROOT; };
+		27EDFC7E0F85E9FF00638A46 /* KeyMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KeyMap.h; path = ../../src/KeyMap.h; sourceTree = SOURCE_ROOT; };
+		27EDFC7F0F85E9FF00638A46 /* LineMarker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LineMarker.h; path = ../../src/LineMarker.h; sourceTree = SOURCE_ROOT; };
+		27EDFC800F85E9FF00638A46 /* Partitioning.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Partitioning.h; path = ../../src/Partitioning.h; sourceTree = SOURCE_ROOT; };
+		27EDFC810F85E9FF00638A46 /* PositionCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PositionCache.h; path = ../../src/PositionCache.h; sourceTree = SOURCE_ROOT; };
+		27EDFC820F85E9FF00638A46 /* RESearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RESearch.h; path = ../../src/RESearch.h; sourceTree = SOURCE_ROOT; };
+		27EDFC830F85E9FF00638A46 /* RunStyles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RunStyles.h; path = ../../src/RunStyles.h; sourceTree = SOURCE_ROOT; };
+		27EDFC840F85E9FF00638A46 /* ScintillaBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScintillaBase.h; path = ../../src/ScintillaBase.h; sourceTree = SOURCE_ROOT; };
+		27EDFC850F85E9FF00638A46 /* SplitVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SplitVector.h; path = ../../src/SplitVector.h; sourceTree = SOURCE_ROOT; };
+		27EDFC860F85E9FF00638A46 /* Style.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Style.h; path = ../../src/Style.h; sourceTree = SOURCE_ROOT; };
+		27EDFC870F85E9FF00638A46 /* StyleContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StyleContext.h; path = ../../src/StyleContext.h; sourceTree = SOURCE_ROOT; };
+		27EDFC880F85E9FF00638A46 /* SVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SVector.h; path = ../../src/SVector.h; sourceTree = SOURCE_ROOT; };
+		27EDFC890F85E9FF00638A46 /* UniConversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UniConversion.h; path = ../../src/UniConversion.h; sourceTree = SOURCE_ROOT; };
+		27EDFC8A0F85E9FF00638A46 /* ViewStyle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ViewStyle.h; path = ../../src/ViewStyle.h; sourceTree = SOURCE_ROOT; };
+		27EDFC8B0F85E9FF00638A46 /* XPM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XPM.h; path = ../../src/XPM.h; sourceTree = SOURCE_ROOT; };
+		27EDFCA60F85EA0F00638A46 /* LexBash.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexBash.cxx; path = ../../src/LexBash.cxx; sourceTree = SOURCE_ROOT; };
+		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
+		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		32CA4F630368D1EE00C91783 /* ScintillaTest_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScintillaTest_Prefix.pch; sourceTree = "<group>"; };
+		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8D1107320486CEB800E47090 /* ScintillaTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ScintillaTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		272133460F9731CB006BE49A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8D11072E0486CEB800E47090 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				272133BE0F97354B006BE49A /* Scintilla.framework in Frameworks */,
+				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		080E96DDFE201D6D7F000001 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				271FA52A0F850BE20033D021 /* AppController.h */,
+				271FA52B0F850BE20033D021 /* AppController.mm */,
+			);
+			name = Classes;
+			sourceTree = "<group>";
+		};
+		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
+			);
+			name = "Linked Frameworks";
+			sourceTree = "<group>";
+		};
+		1058C7A2FEA54F0111CA2CBB /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				29B97324FDCFA39411CA2CEA /* AppKit.framework */,
+				13E42FB307B3F0F600E4EEF1 /* CoreData.framework */,
+				29B97325FDCFA39411CA2CEA /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		19C28FACFE9D520D11CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8D1107320486CEB800E47090 /* ScintillaTest.app */,
+				272133480F9731CB006BE49A /* Scintilla.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		274A05B40F85FE3900B2D3B7 /* Cocoa */ = {
+			isa = PBXGroup;
+			children = (
+				27EDFC100F85E95000638A46 /* PlatCocoa.h */,
+				27EDFC110F85E95000638A46 /* QuartzTextLayout.h */,
+				27EDFC120F85E95000638A46 /* QuartzTextStyle.h */,
+				27EDFC130F85E95000638A46 /* QuartzTextStyleAttribute.h */,
+				27EDFC140F85E95000638A46 /* ScintillaCocoa.h */,
+				27EDFC1C0F85E96F00638A46 /* ScintillaCocoa.mm */,
+				274A05980F85FB2600B2D3B7 /* ScintillaView.h */,
+				274A05990F85FB2600B2D3B7 /* ScintillaView.mm */,
+				274A05630F85F18900B2D3B7 /* PlatCocoa.mm */,
+			);
+			name = Cocoa;
+			sourceTree = "<group>";
+		};
+		27EDFCA80F85EA1800638A46 /* Scintilla */ = {
+			isa = PBXGroup;
+			children = (
+				274A05B40F85FE3900B2D3B7 /* Cocoa */,
+				27EDFCAA0F85EA3C00638A46 /* Source Files */,
+				27EDFCA90F85EA1F00638A46 /* Header Files */,
+			);
+			name = Scintilla;
+			sourceTree = "<group>";
+		};
+		27EDFCA90F85EA1F00638A46 /* Header Files */ = {
+			isa = PBXGroup;
+			children = (
+				271D1FE20FA7238400FD601F /* PerLine.h */,
+				27EDFC690F85E9DA00638A46 /* WindowAccessor.h */,
+				27EDFC720F85E9FF00638A46 /* AutoComplete.h */,
+				27EDFC730F85E9FF00638A46 /* CallTip.h */,
+				27EDFC740F85E9FF00638A46 /* CellBuffer.h */,
+				27EDFC750F85E9FF00638A46 /* CharacterSet.h */,
+				27EDFC760F85E9FF00638A46 /* CharClassify.h */,
+				27EDFC770F85E9FF00638A46 /* ContractionState.h */,
+				27EDFC780F85E9FF00638A46 /* Decoration.h */,
+				27EDFC790F85E9FF00638A46 /* Document.h */,
+				27EDFC7A0F85E9FF00638A46 /* DocumentAccessor.h */,
+				27EDFC7B0F85E9FF00638A46 /* Editor.h */,
+				27EDFC7C0F85E9FF00638A46 /* ExternalLexer.h */,
+				27EDFC7D0F85E9FF00638A46 /* Indicator.h */,
+				27EDFC7E0F85E9FF00638A46 /* KeyMap.h */,
+				27EDFC7F0F85E9FF00638A46 /* LineMarker.h */,
+				27EDFC800F85E9FF00638A46 /* Partitioning.h */,
+				27EDFC810F85E9FF00638A46 /* PositionCache.h */,
+				27EDFC820F85E9FF00638A46 /* RESearch.h */,
+				27EDFC830F85E9FF00638A46 /* RunStyles.h */,
+				27EDFC840F85E9FF00638A46 /* ScintillaBase.h */,
+				27EDFC850F85E9FF00638A46 /* SplitVector.h */,
+				27EDFC860F85E9FF00638A46 /* Style.h */,
+				27EDFC870F85E9FF00638A46 /* StyleContext.h */,
+				27EDFC880F85E9FF00638A46 /* SVector.h */,
+				27EDFC890F85E9FF00638A46 /* UniConversion.h */,
+				27EDFC8A0F85E9FF00638A46 /* ViewStyle.h */,
+				27EDFC8B0F85E9FF00638A46 /* XPM.h */,
+				27EDFC620F85E9DA00638A46 /* Accessor.h */,
+				27EDFC630F85E9DA00638A46 /* KeyWords.h */,
+				27EDFC640F85E9DA00638A46 /* Platform.h */,
+				27EDFC650F85E9DA00638A46 /* PropSet.h */,
+				27EDFC660F85E9DA00638A46 /* SciLexer.h */,
+				27EDFC670F85E9DA00638A46 /* Scintilla.h */,
+				27EDFC680F85E9DA00638A46 /* SString.h */,
+			);
+			name = "Header Files";
+			sourceTree = "<group>";
+		};
+		27EDFCAA0F85EA3C00638A46 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				271D1F580FA7236900FD601F /* LexAbaqus.cxx */,
+				271D1F590FA7236900FD601F /* LexAda.cxx */,
+				271D1F5A0FA7236900FD601F /* LexAPDL.cxx */,
+				271D1F5B0FA7236900FD601F /* LexAsm.cxx */,
+				271D1F5C0FA7236900FD601F /* LexAsn1.cxx */,
+				271D1F5D0FA7236900FD601F /* LexASY.cxx */,
+				271D1F5E0FA7236900FD601F /* LexAU3.cxx */,
+				271D1F5F0FA7236900FD601F /* LexAVE.cxx */,
+				271D1F600FA7236900FD601F /* LexBaan.cxx */,
+				271D1F610FA7236900FD601F /* LexBasic.cxx */,
+				271D1F620FA7236900FD601F /* LexBullant.cxx */,
+				271D1F630FA7236900FD601F /* LexCaml.cxx */,
+				271D1F640FA7236900FD601F /* LexCLW.cxx */,
+				271D1F650FA7236900FD601F /* LexCmake.cxx */,
+				271D1F660FA7236900FD601F /* LexCOBOL.cxx */,
+				271D1F670FA7236900FD601F /* LexConf.cxx */,
+				271D1F680FA7236900FD601F /* LexCrontab.cxx */,
+				271D1F690FA7236900FD601F /* LexCsound.cxx */,
+				271D1F6A0FA7236900FD601F /* LexD.cxx */,
+				271D1F6B0FA7236900FD601F /* LexEiffel.cxx */,
+				271D1F6C0FA7236900FD601F /* LexErlang.cxx */,
+				271D1F6D0FA7236900FD601F /* LexEScript.cxx */,
+				271D1F6E0FA7236900FD601F /* LexFlagship.cxx */,
+				271D1F6F0FA7236900FD601F /* LexForth.cxx */,
+				271D1F700FA7236900FD601F /* LexFortran.cxx */,
+				271D1F710FA7236900FD601F /* LexGAP.cxx */,
+				271D1F730FA7236900FD601F /* LexGui4Cli.cxx */,
+				271D1F740FA7236900FD601F /* LexHaskell.cxx */,
+				271D1F750FA7236900FD601F /* LexInno.cxx */,
+				271D1F760FA7236900FD601F /* LexKix.cxx */,
+				271D1F770FA7236900FD601F /* LexLisp.cxx */,
+				271D1F780FA7236900FD601F /* LexLout.cxx */,
+				271D1F790FA7236900FD601F /* LexMagik.cxx */,
+				271D1F7A0FA7236900FD601F /* LexMatlab.cxx */,
+				271D1F7B0FA7236900FD601F /* LexMetapost.cxx */,
+				271D1F7C0FA7236900FD601F /* LexMMIXAL.cxx */,
+				271D1F7D0FA7236900FD601F /* LexMPT.cxx */,
+				271D1F7E0FA7236900FD601F /* LexNimrod.cxx */,
+				271D1F7F0FA7236900FD601F /* LexNsis.cxx */,
+				271D1F800FA7236900FD601F /* LexOpal.cxx */,
+				271D1F810FA7236900FD601F /* LexOthers.cxx */,
+				271D1F820FA7236900FD601F /* LexPascal.cxx */,
+				271D1F830FA7236900FD601F /* LexPB.cxx */,
+				271D1F840FA7236900FD601F /* LexPLM.cxx */,
+				271D1F850FA7236900FD601F /* LexPOV.cxx */,
+				271D1F860FA7236900FD601F /* LexPowerPro.cxx */,
+				271D1F870FA7236900FD601F /* LexPowerShell.cxx */,
+				271D1F880FA7236900FD601F /* LexProgress.cxx */,
+				271D1F890FA7236900FD601F /* LexPS.cxx */,
+				271D1F8A0FA7236900FD601F /* LexR.cxx */,
+				271D1F8B0FA7236900FD601F /* LexRebol.cxx */,
+				271D1F8C0FA7236900FD601F /* LexRuby.cxx */,
+				271D1F8D0FA7236900FD601F /* LexScriptol.cxx */,
+				271D1F8E0FA7236900FD601F /* LexSmalltalk.cxx */,
+				271D1F8F0FA7236900FD601F /* LexSML.cxx */,
+				271D1F900FA7236900FD601F /* LexSorcus.cxx */,
+				271D1F910FA7236900FD601F /* LexSpecman.cxx */,
+				271D1F920FA7236900FD601F /* LexSpice.cxx */,
+				271D1F930FA7236900FD601F /* LexTACL.cxx */,
+				271D1F940FA7236900FD601F /* LexTADS3.cxx */,
+				271D1F950FA7236900FD601F /* LexTAL.cxx */,
+				271D1F960FA7236900FD601F /* LexTCL.cxx */,
+				271D1F970FA7236900FD601F /* LexTeX.cxx */,
+				271D1F980FA7236900FD601F /* LexVB.cxx */,
+				271D1F990FA7236900FD601F /* LexVerilog.cxx */,
+				271D1F9A0FA7236900FD601F /* LexVHDL.cxx */,
+				271D1F9B0FA7236900FD601F /* LexYAML.cxx */,
+				271D1F9C0FA7236900FD601F /* PerLine.cxx */,
+				27EDFC1E0F85E9C000638A46 /* AutoComplete.cxx */,
+				27EDFC1F0F85E9C000638A46 /* CallTip.cxx */,
+				27EDFC200F85E9C000638A46 /* CellBuffer.cxx */,
+				27EDFC210F85E9C000638A46 /* CharClassify.cxx */,
+				27EDFC220F85E9C000638A46 /* ContractionState.cxx */,
+				27EDFC230F85E9C000638A46 /* Decoration.cxx */,
+				27EDFC240F85E9C000638A46 /* Document.cxx */,
+				27EDFC250F85E9C000638A46 /* DocumentAccessor.cxx */,
+				27EDFC260F85E9C000638A46 /* Editor.cxx */,
+				27EDFC270F85E9C000638A46 /* ExternalLexer.cxx */,
+				27EDFC280F85E9C000638A46 /* Indicator.cxx */,
+				27EDFC290F85E9C000638A46 /* KeyMap.cxx */,
+				27EDFC2A0F85E9C000638A46 /* KeyWords.cxx */,
+				27EDFC2B0F85E9C000638A46 /* LexCPP.cxx */,
+				27EDFC2C0F85E9C000638A46 /* LexCSS.cxx */,
+				27EDFC2D0F85E9C000638A46 /* LexHTML.cxx */,
+				27EDFC2E0F85E9C000638A46 /* LexLua.cxx */,
+				27EDFC2F0F85E9C000638A46 /* LexMSSQL.cxx */,
+				27EDFC300F85E9C000638A46 /* LexMySQL.cxx */,
+				27EDFC310F85E9C000638A46 /* LexPerl.cxx */,
+				27EDFC320F85E9C000638A46 /* LexPython.cxx */,
+				27EDFC330F85E9C000638A46 /* LexSQL.cxx */,
+				27EDFC340F85E9C000638A46 /* LineMarker.cxx */,
+				27EDFC350F85E9C000638A46 /* PositionCache.cxx */,
+				27EDFC360F85E9C000638A46 /* PropSet.cxx */,
+				27EDFC370F85E9C000638A46 /* RESearch.cxx */,
+				27EDFC380F85E9C000638A46 /* RunStyles.cxx */,
+				27EDFC390F85E9C000638A46 /* ScintillaBase.cxx */,
+				27EDFC3A0F85E9C000638A46 /* Style.cxx */,
+				27EDFC3B0F85E9C000638A46 /* StyleContext.cxx */,
+				27EDFC3C0F85E9C000638A46 /* UniConversion.cxx */,
+				27EDFC3D0F85E9C000638A46 /* ViewStyle.cxx */,
+				27EDFC3E0F85E9C000638A46 /* WindowAccessor.cxx */,
+				27EDFC3F0F85E9C000638A46 /* XPM.cxx */,
+				27EDFCA60F85EA0F00638A46 /* LexBash.cxx */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		29B97314FDCFA39411CA2CEA /* ScintillaTest */ = {
+			isa = PBXGroup;
+			children = (
+				27EDFCA80F85EA1800638A46 /* Scintilla */,
+				080E96DDFE201D6D7F000001 /* Classes */,
+				29B97315FDCFA39411CA2CEA /* Other Sources */,
+				29B97317FDCFA39411CA2CEA /* Resources */,
+				29B97323FDCFA39411CA2CEA /* Frameworks */,
+				19C28FACFE9D520D11CA2CBB /* Products */,
+				272133490F9731CB006BE49A /* Scintilla-Info.plist */,
+			);
+			name = ScintillaTest;
+			sourceTree = "<group>";
+		};
+		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
+			isa = PBXGroup;
+			children = (
+				32CA4F630368D1EE00C91783 /* ScintillaTest_Prefix.pch */,
+				29B97316FDCFA39411CA2CEA /* main.m */,
+			);
+			name = "Other Sources";
+			sourceTree = "<group>";
+		};
+		29B97317FDCFA39411CA2CEA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				274CDFE50F9DBA4E00B64ADC /* TestData.sql */,
+				2721342C0F974971006BE49A /* mac_cursor_busy.png */,
+				2721342D0F974971006BE49A /* mac_cursor_flipped.png */,
+				8D1107310486CEB800E47090 /* Info.plist */,
+				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
+				1DDD58140DA1D0A300B32029 /* MainMenu.xib */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
+				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		272133430F9731CB006BE49A /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				272133530F9732D2006BE49A /* ScintillaView.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		272133470F9731CB006BE49A /* Scintilla */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2721334C0F9731CC006BE49A /* Build configuration list for PBXNativeTarget "Scintilla" */;
+			buildPhases = (
+				272133430F9731CB006BE49A /* Headers */,
+				272133440F9731CB006BE49A /* Resources */,
+				272133450F9731CB006BE49A /* Sources */,
+				272133460F9731CB006BE49A /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Scintilla;
+			productName = Scintilla;
+			productReference = 272133480F9731CB006BE49A /* Scintilla.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		8D1107260486CEB800E47090 /* ScintillaTest */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "ScintillaTest" */;
+			buildPhases = (
+				8D1107290486CEB800E47090 /* Resources */,
+				8D11072C0486CEB800E47090 /* Sources */,
+				8D11072E0486CEB800E47090 /* Frameworks */,
+				272133C20F973596006BE49A /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				272133C40F97361C006BE49A /* PBXTargetDependency */,
+			);
+			name = ScintillaTest;
+			productInstallPath = "$(HOME)/Applications";
+			productName = ScintillaTest;
+			productReference = 8D1107320486CEB800E47090 /* ScintillaTest.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		29B97313FDCFA39411CA2CEA /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "ScintillaTest" */;
+			compatibilityVersion = "Xcode 3.1";
+			hasScannedForEncodings = 1;
+			mainGroup = 29B97314FDCFA39411CA2CEA /* ScintillaTest */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8D1107260486CEB800E47090 /* ScintillaTest */,
+				272133470F9731CB006BE49A /* Scintilla */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		272133440F9731CB006BE49A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2721342E0F974971006BE49A /* mac_cursor_busy.png in Resources */,
+				2721342F0F974971006BE49A /* mac_cursor_flipped.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8D1107290486CEB800E47090 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
+				1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */,
+				274CDFE60F9DBA4E00B64ADC /* TestData.sql in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		272133450F9731CB006BE49A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				272133590F973324006BE49A /* ScintillaCocoa.mm in Sources */,
+				2721335A0F973324006BE49A /* AutoComplete.cxx in Sources */,
+				2721335B0F973324006BE49A /* CallTip.cxx in Sources */,
+				2721335C0F973324006BE49A /* CellBuffer.cxx in Sources */,
+				2721335D0F973324006BE49A /* CharClassify.cxx in Sources */,
+				2721335E0F973324006BE49A /* ContractionState.cxx in Sources */,
+				2721335F0F973324006BE49A /* Decoration.cxx in Sources */,
+				272133600F973324006BE49A /* Document.cxx in Sources */,
+				272133610F973324006BE49A /* DocumentAccessor.cxx in Sources */,
+				272133620F973324006BE49A /* Editor.cxx in Sources */,
+				272133630F973324006BE49A /* ExternalLexer.cxx in Sources */,
+				272133640F973324006BE49A /* Indicator.cxx in Sources */,
+				272133650F973324006BE49A /* KeyMap.cxx in Sources */,
+				272133660F973324006BE49A /* KeyWords.cxx in Sources */,
+				272133670F973324006BE49A /* LexCPP.cxx in Sources */,
+				272133680F973324006BE49A /* LexCSS.cxx in Sources */,
+				272133690F973324006BE49A /* LexHTML.cxx in Sources */,
+				2721336A0F973324006BE49A /* LexLua.cxx in Sources */,
+				2721336B0F973324006BE49A /* LexMSSQL.cxx in Sources */,
+				2721336C0F973324006BE49A /* LexMySQL.cxx in Sources */,
+				2721336D0F973324006BE49A /* LexPerl.cxx in Sources */,
+				2721336E0F973324006BE49A /* LexPython.cxx in Sources */,
+				2721336F0F973324006BE49A /* LexSQL.cxx in Sources */,
+				272133700F973324006BE49A /* LineMarker.cxx in Sources */,
+				272133710F973324006BE49A /* PositionCache.cxx in Sources */,
+				272133720F973324006BE49A /* PropSet.cxx in Sources */,
+				272133730F973324006BE49A /* RESearch.cxx in Sources */,
+				272133740F973324006BE49A /* RunStyles.cxx in Sources */,
+				272133750F973324006BE49A /* ScintillaBase.cxx in Sources */,
+				272133760F973324006BE49A /* Style.cxx in Sources */,
+				272133770F973324006BE49A /* StyleContext.cxx in Sources */,
+				272133780F973324006BE49A /* UniConversion.cxx in Sources */,
+				272133790F973324006BE49A /* ViewStyle.cxx in Sources */,
+				2721337A0F973324006BE49A /* WindowAccessor.cxx in Sources */,
+				2721337B0F973324006BE49A /* XPM.cxx in Sources */,
+				2721337C0F973324006BE49A /* LexBash.cxx in Sources */,
+				2721337D0F973324006BE49A /* PlatCocoa.mm in Sources */,
+				2721337E0F973324006BE49A /* ScintillaView.mm in Sources */,
+				271D1F9D0FA7236900FD601F /* LexAbaqus.cxx in Sources */,
+				271D1F9E0FA7236900FD601F /* LexAda.cxx in Sources */,
+				271D1F9F0FA7236900FD601F /* LexAPDL.cxx in Sources */,
+				271D1FA00FA7236900FD601F /* LexAsm.cxx in Sources */,
+				271D1FA10FA7236900FD601F /* LexAsn1.cxx in Sources */,
+				271D1FA20FA7236900FD601F /* LexASY.cxx in Sources */,
+				271D1FA30FA7236900FD601F /* LexAU3.cxx in Sources */,
+				271D1FA40FA7236900FD601F /* LexAVE.cxx in Sources */,
+				271D1FA50FA7236900FD601F /* LexBaan.cxx in Sources */,
+				271D1FA60FA7236900FD601F /* LexBasic.cxx in Sources */,
+				271D1FA70FA7236900FD601F /* LexBullant.cxx in Sources */,
+				271D1FA80FA7236900FD601F /* LexCaml.cxx in Sources */,
+				271D1FA90FA7236900FD601F /* LexCLW.cxx in Sources */,
+				271D1FAA0FA7236900FD601F /* LexCmake.cxx in Sources */,
+				271D1FAB0FA7236900FD601F /* LexCOBOL.cxx in Sources */,
+				271D1FAC0FA7236900FD601F /* LexConf.cxx in Sources */,
+				271D1FAD0FA7236900FD601F /* LexCrontab.cxx in Sources */,
+				271D1FAE0FA7236900FD601F /* LexCsound.cxx in Sources */,
+				271D1FAF0FA7236900FD601F /* LexD.cxx in Sources */,
+				271D1FB00FA7236900FD601F /* LexEiffel.cxx in Sources */,
+				271D1FB10FA7236900FD601F /* LexErlang.cxx in Sources */,
+				271D1FB20FA7236900FD601F /* LexEScript.cxx in Sources */,
+				271D1FB30FA7236900FD601F /* LexFlagship.cxx in Sources */,
+				271D1FB40FA7236900FD601F /* LexForth.cxx in Sources */,
+				271D1FB50FA7236900FD601F /* LexFortran.cxx in Sources */,
+				271D1FB60FA7236900FD601F /* LexGAP.cxx in Sources */,
+				271D1FB80FA7236900FD601F /* LexGui4Cli.cxx in Sources */,
+				271D1FB90FA7236900FD601F /* LexHaskell.cxx in Sources */,
+				271D1FBA0FA7236900FD601F /* LexInno.cxx in Sources */,
+				271D1FBB0FA7236900FD601F /* LexKix.cxx in Sources */,
+				271D1FBC0FA7236900FD601F /* LexLisp.cxx in Sources */,
+				271D1FBD0FA7236900FD601F /* LexLout.cxx in Sources */,
+				271D1FBE0FA7236900FD601F /* LexMagik.cxx in Sources */,
+				271D1FBF0FA7236900FD601F /* LexMatlab.cxx in Sources */,
+				271D1FC00FA7236900FD601F /* LexMetapost.cxx in Sources */,
+				271D1FC10FA7236900FD601F /* LexMMIXAL.cxx in Sources */,
+				271D1FC20FA7236900FD601F /* LexMPT.cxx in Sources */,
+				271D1FC30FA7236900FD601F /* LexNimrod.cxx in Sources */,
+				271D1FC40FA7236900FD601F /* LexNsis.cxx in Sources */,
+				271D1FC50FA7236900FD601F /* LexOpal.cxx in Sources */,
+				271D1FC60FA7236900FD601F /* LexOthers.cxx in Sources */,
+				271D1FC70FA7236900FD601F /* LexPascal.cxx in Sources */,
+				271D1FC80FA7236900FD601F /* LexPB.cxx in Sources */,
+				271D1FC90FA7236900FD601F /* LexPLM.cxx in Sources */,
+				271D1FCA0FA7236900FD601F /* LexPOV.cxx in Sources */,
+				271D1FCB0FA7236900FD601F /* LexPowerPro.cxx in Sources */,
+				271D1FCC0FA7236900FD601F /* LexPowerShell.cxx in Sources */,
+				271D1FCD0FA7236900FD601F /* LexProgress.cxx in Sources */,
+				271D1FCE0FA7236900FD601F /* LexPS.cxx in Sources */,
+				271D1FCF0FA7236900FD601F /* LexR.cxx in Sources */,
+				271D1FD00FA7236900FD601F /* LexRebol.cxx in Sources */,
+				271D1FD10FA7236900FD601F /* LexRuby.cxx in Sources */,
+				271D1FD20FA7236900FD601F /* LexScriptol.cxx in Sources */,
+				271D1FD30FA7236900FD601F /* LexSmalltalk.cxx in Sources */,
+				271D1FD40FA7236900FD601F /* LexSML.cxx in Sources */,
+				271D1FD50FA7236900FD601F /* LexSorcus.cxx in Sources */,
+				271D1FD60FA7236900FD601F /* LexSpecman.cxx in Sources */,
+				271D1FD70FA7236900FD601F /* LexSpice.cxx in Sources */,
+				271D1FD80FA7236900FD601F /* LexTACL.cxx in Sources */,
+				271D1FD90FA7236900FD601F /* LexTADS3.cxx in Sources */,
+				271D1FDA0FA7236900FD601F /* LexTAL.cxx in Sources */,
+				271D1FDB0FA7236900FD601F /* LexTCL.cxx in Sources */,
+				271D1FDC0FA7236900FD601F /* LexTeX.cxx in Sources */,
+				271D1FDD0FA7236900FD601F /* LexVB.cxx in Sources */,
+				271D1FDE0FA7236900FD601F /* LexVerilog.cxx in Sources */,
+				271D1FDF0FA7236900FD601F /* LexVHDL.cxx in Sources */,
+				271D1FE00FA7236900FD601F /* LexYAML.cxx in Sources */,
+				271D1FE10FA7236900FD601F /* PerLine.cxx in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8D11072C0486CEB800E47090 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D11072D0486CEB800E47090 /* main.m in Sources */,
+				271FA52C0F850BE20033D021 /* AppController.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		272133C40F97361C006BE49A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 272133470F9731CB006BE49A /* Scintilla */;
+			targetProxy = 272133C30F97361C006BE49A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		089C165CFE840E0CC02AAC07 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				089C165DFE840E0CC02AAC07 /* English */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		1DDD58140DA1D0A300B32029 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1DDD58150DA1D0A300B32029 /* English */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		2721334A0F9731CB006BE49A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					SCI_NAMESPACE,
+					SCI_LEXER,
+				);
+				INFOPLIST_FILE = "Scintilla-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Scintilla;
+			};
+			name = Debug;
+		};
+		2721334B0F9731CB006BE49A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					SCI_NAMESPACE,
+					SCI_LEXER,
+				);
+				INFOPLIST_FILE = "Scintilla-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Scintilla;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		C01FCF4B08A954540054247B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = ScintillaTest_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					SCI_NAMESPACE,
+					SCI_LEXER,
+				);
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../SciTest/build/Development\"",
+				);
+				PRODUCT_NAME = ScintillaTest;
+			};
+			name = Debug;
+		};
+		C01FCF4C08A954540054247B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = ScintillaTest_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					SCI_NAMESPACE,
+					SCI_LEXER,
+				);
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../SciTest/build/Development\"",
+				);
+				PRODUCT_NAME = ScintillaTest;
+			};
+			name = Release;
+		};
+		C01FCF4F08A954540054247B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PREBINDING = NO;
+				SDKROOT = macosx10.5;
+			};
+			name = Debug;
+		};
+		C01FCF5008A954540054247B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PREBINDING = NO;
+				SDKROOT = macosx10.5;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2721334C0F9731CC006BE49A /* Build configuration list for PBXNativeTarget "Scintilla" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2721334A0F9731CB006BE49A /* Debug */,
+				2721334B0F9731CB006BE49A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "ScintillaTest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C01FCF4B08A954540054247B /* Debug */,
+				C01FCF4C08A954540054247B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "ScintillaTest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C01FCF4F08A954540054247B /* Debug */,
+				C01FCF5008A954540054247B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 29B97313FDCFA39411CA2CEA /* Project object */;
+}
