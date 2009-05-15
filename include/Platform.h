@@ -3,7 +3,7 @@
  ** Interface to platform facilities. Also includes some basic utilities.
  ** Implemented in PlatGTK.cxx for GTK+/Linux, PlatWin.cxx for Windows, and PlatWX.cxx for wxWindows.
  **/
-// Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2009 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #ifndef PLATFORM_H
@@ -19,13 +19,8 @@
 #define PLAT_MACOSX 0
 #define PLAT_WIN 0
 #define PLAT_WX  0
-#define PLAT_FOX 0
 
-#if defined(FOX)
-#undef PLAT_FOX
-#define PLAT_FOX 1
-
-#elif defined(__WX__)
+#if defined(__WX__)
 #undef PLAT_WX
 #define PLAT_WX  1
 
