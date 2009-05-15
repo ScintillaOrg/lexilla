@@ -3557,26 +3557,3 @@ evt void IndicatorClick=2023(int modifiers, int position)
 evt void IndicatorRelease=2024(int modifiers, int position)
 evt void AutoCCancelled=2025(void)
 evt void AutoCCharDeleted=2026(void)
-
-cat Deprecated
-
-# CARET_POLICY changed in 1.47
-fun void SetCaretPolicy=2369(int caretPolicy, int caretSlop)
-val CARET_CENTER=0x02
-val CARET_XEVEN=0x08
-val CARET_XJUMPS=0x10
-
-# The old name for SCN_UPDATEUI
-val SCN_CHECKBRACE=2007
-evt void PosChanged=2012(int position)
-
-# Box folding support
-val SC_FOLDFLAG_BOX=0x0001
-val SC_FOLDLEVELBOXHEADERFLAG=0x4000
-val SC_FOLDLEVELBOXFOOTERFLAG=0x8000
-val SC_FOLDLEVELCONTRACTED=0x10000
-val SC_FOLDLEVELUNINDENT=0x20000
-
-# SCLEX_HTML should be used in preference to these.
-val SCLEX_ASP=29
-val SCLEX_PHP=30

@@ -12,9 +12,6 @@
 
 #include "Platform.h"
 
-#ifndef PLAT_QT
-#define INCLUDE_DEPRECATED_FEATURES
-#endif
 #include "Scintilla.h"
 
 #include "SplitVector.h"
@@ -818,7 +815,6 @@ int Editor::MovePositionTo(int newPos, selTypes sel, bool ensureVisible) {
 	if (ensureVisible) {
 		EnsureCaretVisible();
 	}
-	NotifyMove(newPos);
 	return 0;
 }
 
@@ -3074,66 +3070,26 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 				ll->RestoreBracesHighlight(rangeLine, braces);
 
 				bool expanded = cs.GetExpanded(lineDoc);
-#ifdef INCLUDE_DEPRECATED_FEATURES
-				if ((foldFlags & SC_FOLDFLAG_BOX) == 0) {
-#endif
-					// Paint the line above the fold
-					if ((expanded && (foldFlags & SC_FOLDFLAG_LINEBEFORE_EXPANDED))
-					        ||
-					        (!expanded && (foldFlags & SC_FOLDFLAG_LINEBEFORE_CONTRACTED))) {
-						if (pdoc->GetLevel(lineDoc) & SC_FOLDLEVELHEADERFLAG) {
-							PRectangle rcFoldLine = rcLine;
-							rcFoldLine.bottom = rcFoldLine.top + 1;
-							surface->FillRectangle(rcFoldLine, vs.styles[STYLE_DEFAULT].fore.allocated);
-						}
-					}
-					// Paint the line below the fold
-					if ((expanded && (foldFlags & SC_FOLDFLAG_LINEAFTER_EXPANDED))
-					        ||
-					        (!expanded && (foldFlags & SC_FOLDFLAG_LINEAFTER_CONTRACTED))) {
-						if (pdoc->GetLevel(lineDoc) & SC_FOLDLEVELHEADERFLAG) {
-							PRectangle rcFoldLine = rcLine;
-							rcFoldLine.top = rcFoldLine.bottom - 1;
-							surface->FillRectangle(rcFoldLine, vs.styles[STYLE_DEFAULT].fore.allocated);
-						}
-					}
-#ifdef INCLUDE_DEPRECATED_FEATURES
-				} else {
-					int FoldLevelCurr = (pdoc->GetLevel(lineDoc) & SC_FOLDLEVELNUMBERMASK) - SC_FOLDLEVELBASE;
-					int FoldLevelPrev = (pdoc->GetLevel(lineDoc - 1) & SC_FOLDLEVELNUMBERMASK) - SC_FOLDLEVELBASE;
-					int FoldLevelFlags = (pdoc->GetLevel(lineDoc) & ~SC_FOLDLEVELNUMBERMASK) & ~(0xFFF0000);
-					int indentationStep = pdoc->IndentSize();
-					// Draw line above fold
-					if ((FoldLevelPrev < FoldLevelCurr)
-					        ||
-					        (FoldLevelFlags & SC_FOLDLEVELBOXHEADERFLAG
-					         &&
-					         (pdoc->GetLevel(lineDoc - 1) & SC_FOLDLEVELBOXFOOTERFLAG) == 0)) {
+				// Paint the line above the fold
+				if ((expanded && (foldFlags & SC_FOLDFLAG_LINEBEFORE_EXPANDED))
+					||
+					(!expanded && (foldFlags & SC_FOLDFLAG_LINEBEFORE_CONTRACTED))) {
+					if (pdoc->GetLevel(lineDoc) & SC_FOLDLEVELHEADERFLAG) {
 						PRectangle rcFoldLine = rcLine;
 						rcFoldLine.bottom = rcFoldLine.top + 1;
-						rcFoldLine.left += xStart + FoldLevelCurr * vs.spaceWidth * indentationStep - 1;
 						surface->FillRectangle(rcFoldLine, vs.styles[STYLE_DEFAULT].fore.allocated);
-					}
-
-					// Line below the fold (or below a contracted fold)
-					if (FoldLevelFlags & SC_FOLDLEVELBOXFOOTERFLAG
-					        ||
-					        (!expanded && (foldFlags & SC_FOLDFLAG_LINEAFTER_CONTRACTED))) {
-						PRectangle rcFoldLine = rcLine;
-						rcFoldLine.top = rcFoldLine.bottom - 1;
-						rcFoldLine.left += xStart + (FoldLevelCurr) * vs.spaceWidth * indentationStep - 1;
-						surface->FillRectangle(rcFoldLine, vs.styles[STYLE_DEFAULT].fore.allocated);
-					}
-
-					PRectangle rcBoxLine = rcLine;
-					// Draw vertical line for every fold level
-					for (int i = 0; i <= FoldLevelCurr; i++) {
-						rcBoxLine.left = xStart + i * vs.spaceWidth * indentationStep - 1;
-						rcBoxLine.right = rcBoxLine.left + 1;
-						surface->FillRectangle(rcBoxLine, vs.styles[STYLE_DEFAULT].fore.allocated);
 					}
 				}
-#endif
+				// Paint the line below the fold
+				if ((expanded && (foldFlags & SC_FOLDFLAG_LINEAFTER_EXPANDED))
+					||
+					(!expanded && (foldFlags & SC_FOLDFLAG_LINEAFTER_CONTRACTED))) {
+					if (pdoc->GetLevel(lineDoc) & SC_FOLDLEVELHEADERFLAG) {
+						PRectangle rcFoldLine = rcLine;
+						rcFoldLine.top = rcFoldLine.bottom - 1;
+						surface->FillRectangle(rcFoldLine, vs.styles[STYLE_DEFAULT].fore.allocated);
+					}
+				}
 
 				// Draw the Caret
 				if (lineDoc == lineCaret) {
@@ -3916,13 +3872,6 @@ void Editor::NotifyZoom() {
 void Editor::NotifyModifyAttempt(Document*, void *) {
 	//Platform::DebugPrintf("** Modify Attempt\n");
 	NotifyModifyAttempt();
-}
-
-void Editor::NotifyMove(int position) {
-	SCNotification scn = {0};
-	scn.nmhdr.code = SCN_POSCHANGED;
-	scn.position = position;
-	NotifyParent(scn);
 }
 
 void Editor::NotifySavePoint(Document*, void *, bool atSavePoint) {
@@ -7274,13 +7223,6 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SEARCHNEXT:
 	case SCI_SEARCHPREV:
 		return SearchText(iMessage, wParam, lParam);
-
-#ifdef INCLUDE_DEPRECATED_FEATURES
-	case SCI_SETCARETPOLICY:  	// Deprecated
-		caretXPolicy = caretYPolicy = wParam;
-		caretXSlop = caretYSlop = lParam;
-		break;
-#endif
 
 	case SCI_SETXCARETPOLICY:
 		caretXPolicy = wParam;

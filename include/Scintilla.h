@@ -871,26 +871,4 @@ struct SCNotification {
 }
 #endif
 
-/* Deprecation section listing all API features that are deprecated and
- * will be removed completely in a future version.
- * To enable these features define INCLUDE_DEPRECATED_FEATURES */
-
-#ifdef INCLUDE_DEPRECATED_FEATURES
-
-#define SCI_SETCARETPOLICY 2369
-#define CARET_CENTER 0x02
-#define CARET_XEVEN 0x08
-#define CARET_XJUMPS 0x10
-
-#define SC_FOLDFLAG_BOX 0x0001
-#define SC_FOLDLEVELBOXHEADERFLAG 0x4000
-#define SC_FOLDLEVELBOXFOOTERFLAG 0x8000
-#define SC_FOLDLEVELCONTRACTED 0x10000
-#define SC_FOLDLEVELUNINDENT 0x20000
-
-#define SCN_POSCHANGED 2012
-#define SCN_CHECKBRACE 2007
-
-#endif
-
 #endif
