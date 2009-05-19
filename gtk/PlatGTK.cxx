@@ -1057,6 +1057,19 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int , ColourAllocated , int , Co
 	}
 }
 #else
+
+static guint32 u32FromRGBA(guint8 r, guint8 g, guint8 b, guint8 a) {
+	union {
+		guint8 pixVal[4];
+		guint32 val;
+	} converter;
+	converter.pixVal[0] = r;
+	converter.pixVal[1] = g;
+	converter.pixVal[2] = b;
+	converter.pixVal[3] = a;
+	return converter.val;
+}
+
 void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated fill, int alphaFill,
 		ColourAllocated outline, int alphaOutline, int flags) {
 	if (gc && drawable && rc.Width() > 0) {
@@ -1067,18 +1080,11 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated 
 		// Make a 32 bit deep pixbuf with alpha
 		GdkPixbuf *pixalpha = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, width, height);
 
-		guint8 pixVal[4] = {0};
-		guint32 valEmpty = *(reinterpret_cast<guint32 *>(pixVal));
-		pixVal[0] = GetRValue(fill.AsLong());
-		pixVal[1] = GetGValue(fill.AsLong());
-		pixVal[2] = GetBValue(fill.AsLong());
-		pixVal[3] = alphaFill;
-		guint32 valFill = *(reinterpret_cast<guint32 *>(pixVal));
-		pixVal[0] = GetRValue(outline.AsLong());
-		pixVal[1] = GetGValue(outline.AsLong());
-		pixVal[2] = GetBValue(outline.AsLong());
-		pixVal[3] = alphaOutline;
-		guint32 valOutline = *(reinterpret_cast<guint32 *>(pixVal));
+		guint32 valEmpty = u32FromRGBA(0,0,0,0);
+		guint32 valFill = u32FromRGBA(GetRValue(fill.AsLong()), 
+			GetGValue(fill.AsLong()), GetBValue(fill.AsLong()), alphaFill);
+		guint32 valOutline = u32FromRGBA(GetRValue(outline.AsLong()), 
+			GetGValue(outline.AsLong()), GetBValue(outline.AsLong()), alphaOutline);
 		guint32 *pixels = reinterpret_cast<guint32 *>(gdk_pixbuf_get_pixels(pixalpha));
 		int stride = gdk_pixbuf_get_rowstride(pixalpha) / 4;
 		for (int yr=0; yr<height; yr++) {
@@ -1106,6 +1112,7 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated 
 		g_object_unref(pixalpha);
 	}
 }
+
 #endif
 
 void SurfaceImpl::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
