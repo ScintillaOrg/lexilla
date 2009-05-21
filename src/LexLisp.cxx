@@ -100,6 +100,9 @@ static void ColouriseLispDoc(unsigned int startPos, int length, int initStyle, W
 				styler.ColourTo(i - 1, state);
 				radix = -1;
 				state = SCE_LISP_MACRO_DISPATCH;
+			} else if (ch == ':' && isLispwordstart(chNext)) {
+				styler.ColourTo(i - 1, state);
+				state = SCE_LISP_SYMBOL;
 			} else if (isLispwordstart(ch)) {
 				styler.ColourTo(i - 1, state);
 				state = SCE_LISP_IDENTIFIER;
