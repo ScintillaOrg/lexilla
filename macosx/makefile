@@ -36,7 +36,7 @@ DYN_FLAGS=$(LINK_FLAGS) -framework Carbon -bundle
 endif
 endif
 
-OPTIONS=-Wall -Wno-missing-braces -Wno-char-subscripts -DMACOSX -DSCI_LEXER
+OPTIONS=-Wall -Wno-missing-braces -Wno-char-subscripts -DSCI_NAMESPACE -DMACOSX -DSCI_LEXER
 
 #DEBUG = 1
 
@@ -86,7 +86,7 @@ clean:
 	rm -f *.o $(COMPLIB)
 
 deps:
-	$(CC) -MM -DMACOSX -DSCI_LEXER  $(CXXFLAGS) $(INCLUDEDIRS) *.cxx ../src/*.cxx >deps.mak
+	$(CC) -MM -DSCI_NAMESPACE -DMACOSX -DSCI_LEXER  $(CXXFLAGS) $(INCLUDEDIRS) *.cxx ../src/*.cxx >deps.mak
 
 COMPLIB=DocumentAccessor.o WindowAccessor.o KeyWords.o StyleContext.o \
 	CharClassify.o Decoration.o Document.o CallTip.o PositionCache.o \
