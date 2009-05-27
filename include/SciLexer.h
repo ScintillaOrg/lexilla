@@ -155,7 +155,7 @@
 #define SCE_D_NUMBER 5
 #define SCE_D_WORD 6
 #define SCE_D_WORD2 7
-#define SCE_D_WORD3 8
+#define SCE_D_WORD5 8
 #define SCE_D_TYPEDEF 9
 #define SCE_D_STRING 10
 #define SCE_D_STRINGEOL 11
@@ -167,9 +167,8 @@
 #define SCE_D_COMMENTDOCKEYWORDERROR 17
 #define SCE_D_STRINGB 18
 #define SCE_D_STRINGR 19
-#define SCE_D_WORD5 20
-#define SCE_D_WORD6 21
-#define SCE_D_WORD7 22
+#define SCE_D_WORD6 20
+#define SCE_D_WORD7 21
 #define SCE_TCL_DEFAULT 0
 #define SCE_TCL_COMMENT 1
 #define SCE_TCL_COMMENTLINE 2
