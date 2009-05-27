@@ -24,18 +24,17 @@ class TestLexers(unittest.TestCase):
 		self.ed.EmptyUndoBuffer()
 
 	def AsStyled(self):
-		data = io.StringIO()
-		len = 0
+		text = self.ed.Contents()
+		data = io.BytesIO()
 		prevStyle = -1
 		for o in range(self.ed.Length):
-			styleNow = self.ed.GetStyleAt(len)
+			styleNow = self.ed.GetStyleAt(o)
 			if styleNow != prevStyle:
 				styleBuf = "{%0d}" % styleNow
-				data.write(styleBuf)
+				data.write(styleBuf.encode('utf-8'))
 				prevStyle = styleNow
-			data.write(chr(self.ed.GetCharAt(len)))
-			len += 1
-		return data.getvalue( )
+			data.write(text[o:o+1])
+		return data.getvalue()
 
 	def LexExample(self, name, lexerName, keywords=None):
 		if keywords is None:
@@ -52,13 +51,16 @@ class TestLexers(unittest.TestCase):
 		nameNew = nameExample +".new"
 		with open(nameExample, "rb") as f:
 			prog = f.read()
+		BOM = b"\xEF\xBB\xBF"
+		if prog.startswith(BOM):
+			prog = prog[len(BOM):]
 		lenDocument = len(prog)
 		self.ed.AddText(lenDocument, prog)
 		self.ed.Colourise(0, lenDocument)
 		self.assertEquals(self.ed.EndStyled, lenDocument)
 		with open(namePrevious, "rb") as f:
 			prevStyled = f.read()
-		progStyled = self.AsStyled().encode('utf-8')
+		progStyled = self.AsStyled()
 		if progStyled != prevStyled:
 			with open(nameNew, "wb") as f:
 				f.write(progStyled)
@@ -75,7 +77,7 @@ class TestLexers(unittest.TestCase):
 			self.ed.StartStyling(lineStart, mask)
 			self.assertEquals(self.ed.EndStyled, lineStart)
 			self.ed.Colourise(0, lenDocument)
-			progStyled = self.AsStyled().encode('utf-8')
+			progStyled = self.AsStyled()
 			if progStyled != prevStyled:
 				with open(nameNew, "wb") as f:
 					f.write(progStyled)
@@ -101,6 +103,11 @@ class TestLexers(unittest.TestCase):
 
 	def testVB(self):
 		self.LexExample("x.vb", b"vb", [b"as dim or string"])
+
+	def testD(self):
+		self.LexExample("x.d", b"d", 
+			[b"keyword1", b"keyword2", b"", b"keyword4", b"keyword5",
+			b"keyword6", b"keyword7"])
 
 if __name__ == '__main__':
 	XiteWin.main("lexTests")
