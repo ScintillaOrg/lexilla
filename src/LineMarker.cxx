@@ -154,7 +154,7 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 		rcSmall.bottom = rc.bottom - 2;
 		surface->RectangleDraw(rcSmall, fore.allocated, back.allocated);
 
-	} else if (markType == SC_MARK_EMPTY || markType == SC_MARK_BACKGROUND) {
+	} else if (markType == SC_MARK_EMPTY || markType == SC_MARK_BACKGROUND || markType == SC_MARK_UNDERLINE) {
 		// An invisible marker so don't draw anything
 
 	} else if (markType == SC_MARK_VLINE) {

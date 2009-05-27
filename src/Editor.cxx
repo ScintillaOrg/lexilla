@@ -2532,6 +2532,18 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		surface->FillRectangle(rcSegment, vsDraw.edgecolour.allocated);
 	}
 
+	// Draw underline mark as part of background if not transparent
+	int marks = pdoc->GetMark(line);
+	for (int markBit = 0; (markBit < 32) && marks; markBit++) {
+		if ((marks & 1) && (vsDraw.markers[markBit].markType == SC_MARK_UNDERLINE) &&
+		    (vsDraw.markers[markBit].alpha == SC_ALPHA_NOALPHA)) {
+			PRectangle rcUnderline = rcLine;
+			rcUnderline.top = rcUnderline.bottom - 2;
+			surface->FillRectangle(rcUnderline, vsDraw.markers[markBit].back.allocated);
+		}
+		marks >>= 1;
+	}
+
 	inIndentation = subLine == 0;	// Do not handle indentation except on first subline.
 	// Foreground drawing loop
 	BreakFinder bfFore(ll, lineStart, lineEnd, posLineStart, IsUnicodeMode(), xStartVisible);
@@ -2748,10 +2760,14 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	if (caret.active && vsDraw.showCaretLineBackground && ll->containsCaret) {
 		SimpleAlphaRectangle(surface, rcSegment, vsDraw.caretLineBackground.allocated, vsDraw.caretLineAlpha);
 	}
-	int marks = pdoc->GetMark(line);
+	marks = pdoc->GetMark(line);
 	for (int markBit = 0; (markBit < 32) && marks; markBit++) {
 		if ((marks & 1) && (vsDraw.markers[markBit].markType == SC_MARK_BACKGROUND)) {
 			SimpleAlphaRectangle(surface, rcSegment, vsDraw.markers[markBit].back.allocated, vsDraw.markers[markBit].alpha);
+		} else if ((marks & 1) && (vsDraw.markers[markBit].markType == SC_MARK_UNDERLINE)) {
+			PRectangle rcUnderline = rcSegment;
+			rcUnderline.top = rcUnderline.bottom - 2;
+			SimpleAlphaRectangle(surface, rcUnderline, vsDraw.markers[markBit].back.allocated, vsDraw.markers[markBit].alpha);
 		}
 		marks >>= 1;
 	}
