@@ -967,7 +967,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				if (lParam == 0) {
 					return 0;
 				}
-				CharacterRange *pCR = reinterpret_cast<CharacterRange *>(lParam);
+				Sci_CharacterRange *pCR = reinterpret_cast<Sci_CharacterRange *>(lParam);
 				pCR->cpMin = SelectionStart();
 				pCR->cpMax = SelectionEnd();
 			}
@@ -995,7 +995,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				if (lParam == 0) {
 					return 0;
 				}
-				CharacterRange *pCR = reinterpret_cast<CharacterRange *>(lParam);
+				Sci_CharacterRange *pCR = reinterpret_cast<Sci_CharacterRange *>(lParam);
 				selType = selStream;
 				if (pCR->cpMin == 0 && pCR->cpMax == -1) {
 					SetSelection(pCR->cpMin, pdoc->Length());

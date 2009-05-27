@@ -805,38 +805,44 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 namespace Scintilla {
 #endif
 
-struct CharacterRange {
+struct Sci_CharacterRange {
 	long cpMin;
 	long cpMax;
 };
 
-struct TextRange {
-	struct CharacterRange chrg;
+struct Sci_TextRange {
+	struct Sci_CharacterRange chrg;
 	char *lpstrText;
 };
 
-struct TextToFind {
-	struct CharacterRange chrg;
+struct Sci_TextToFind {
+	struct Sci_CharacterRange chrg;
 	char *lpstrText;
-	struct CharacterRange chrgText;
+	struct Sci_CharacterRange chrgText;
 };
+
+#define CharacterRange Sci_CharacterRange
+#define TextRange Sci_TextRange
+#define TextToFind Sci_TextToFind
 
 #ifdef PLATFORM_H
 
 /* This structure is used in printing and requires some of the graphics types
  * from Platform.h.  Not needed by most client code. */
 
-struct RangeToFormat {
+struct Sci_RangeToFormat {
 	SurfaceID hdc;
 	SurfaceID hdcTarget;
 	PRectangle rc;
 	PRectangle rcPage;
-	CharacterRange chrg;
+	Sci_CharacterRange chrg;
 };
+
+#define RangeToFormat Sci_RangeToFormat
 
 #endif
 
-struct NotifyHeader {
+struct Sci_NotifyHeader {
 	/* Compatible with Windows NMHDR.
 	 * hwndFrom is really an environment specific window handle or pointer
 	 * but most clients of Scintilla.h do not have this type visible. */
@@ -845,8 +851,10 @@ struct NotifyHeader {
 	unsigned int code;
 };
 
+#define NotifyHeader Sci_NotifyHeader
+
 struct SCNotification {
-	struct NotifyHeader nmhdr;
+	struct Sci_NotifyHeader nmhdr;
 	int position;	/* SCN_STYLENEEDED, SCN_MODIFIED, SCN_DWELLSTART, SCN_DWELLEND */
 	int ch;		/* SCN_CHARADDED, SCN_KEY */
 	int modifiers;	/* SCN_KEY */
