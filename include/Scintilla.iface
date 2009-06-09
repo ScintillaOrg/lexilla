@@ -1131,6 +1131,17 @@ set void SetWrapStartIndent=2464(int indent,)
 # Retrive the start indent for wrapped lines.
 get int GetWrapStartIndent=2465(,)
 
+enu WrapIndentMode=SC_WRAPINDENT_
+val SC_WRAPINDENT_FIXED=0
+val SC_WRAPINDENT_SAME=1
+val SC_WRAPINDENT_INDENT=2
+
+# Sets how wrapped sublines are placed. Default is fixed.
+set void SetWrapIndentMode=2472(int mode,)
+
+# Retrieve how wrapped sublines are placed. Default is fixed.
+get int GetWrapIndentMode=2473(,)
+
 enu LineCache=SC_CACHE_
 val SC_CACHE_NONE=0
 val SC_CACHE_CARET=1

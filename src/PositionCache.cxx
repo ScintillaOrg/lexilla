@@ -61,7 +61,8 @@ LineLayout::LineLayout(int maxLineLength_) :
 	hsStart(0),
 	hsEnd(0),
 	widthLine(wrapWidthInfinite),
-	lines(1) {
+	lines(1),
+	wrapIndent(0) {
 	Resize(maxLineLength_);
 }
 

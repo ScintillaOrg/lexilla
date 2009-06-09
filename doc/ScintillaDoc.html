@@ -9,7 +9,7 @@
     <meta name="generator" content="SciTE" />
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 
-    <title>Scintilla and SciTE</title>
+    <title>Scintilla Documentation</title>
 
     <style type="text/css">
 <!--
@@ -38,7 +38,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 28/April/2009 NH</p>
+    <p>Last edited 9/June/2009 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -878,8 +878,34 @@ struct TextToFind {
     <p><b id="SCI_SETSTATUS">SCI_SETSTATUS(int status)</b><br />
      <b id="SCI_GETSTATUS">SCI_GETSTATUS</b><br />
      If an error occurs, Scintilla may set an internal error number that can be retrieved with
-    <code>SCI_GETSTATUS</code>. Not currently used but will be in the future. To clear the error
-    status call <code>SCI_SETSTATUS(0)</code>.</p>
+    <code>SCI_GETSTATUS</code>. 
+    To clear the error status call <code>SCI_SETSTATUS(0)</code>.
+    The currently defined statuses are:
+
+    <table cellpadding="1" cellspacing="2" border="0" summary="Status values">
+      <tbody valign="top">
+        <tr>
+          <th align="left">SC_STATUS_OK</th>
+          <td>0</td>
+          <td>No failures</td>
+        </tr>
+
+        <tr>
+          <th align="left">SC_STATUS_FAILURE</th>
+          <td>1</td>
+          <td>Generic failure</td>
+        </tr>
+
+        <tr>
+          <th align="left">SC_STATUS_BADALLOC</th>
+          <td>2</td>
+          <td>Memory is exhausted</td>
+        </tr>
+
+      </tbody>
+    </table>
+
+    </p>
 
     <h2 id="UndoAndRedo">Undo and Redo</h2>
 
@@ -4527,6 +4553,8 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_GETWRAPVISUALFLAGS">SCI_GETWRAPVISUALFLAGS</a><br />
      <a class="message" href="#SCI_SETWRAPVISUALFLAGSLOCATION">SCI_SETWRAPVISUALFLAGSLOCATION(int wrapVisualFlagsLocation)</a><br />
      <a class="message" href="#SCI_GETWRAPVISUALFLAGSLOCATION">SCI_GETWRAPVISUALFLAGSLOCATION</a><br />
+     <a class="message" href="#SCI_SETWRAPINDENTMODE">SCI_SETWRAPINDENTMODE(int indentMode)</a><br />
+     <a class="message" href="#SCI_GETWRAPINDENTMODE">SCI_GETWRAPINDENTMODE</a><br />
      <a class="message" href="#SCI_SETWRAPSTARTINDENT">SCI_SETWRAPSTARTINDENT(int indent)</a><br />
      <a class="message" href="#SCI_GETWRAPSTARTINDENT">SCI_GETWRAPSTARTINDENT</a><br />
      <a class="message" href="#SCI_SETLAYOUTCACHE">SCI_SETLAYOUTCACHE(int cacheMode)</a><br />
@@ -4546,7 +4574,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 
         <p>For wrapped lines Scintilla can draw visual flags (little arrows) at end of a a subline of a
         wrapped line and at begin of the next subline. These can be enabled individually, but if Scintilla
-        draws the visual flag at begin of the next subline this subline will be indented by one char.
+        draws the visual flag at the beginning of the next subline this subline will be indented by one char.
         Independent from drawing a visual flag at the begin the subline can have an indention.</p>
 
     <p>Much of the time used by Scintilla is spent on laying out and drawing text. The same text
@@ -4617,7 +4645,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 
     <p><b id="SCI_SETWRAPVISUALFLAGSLOCATION">SCI_SETWRAPVISUALFLAGSLOCATION(int wrapVisualFlagsLocation)</b><br />
      <b id="SCI_GETWRAPVISUALFLAGSLOCATION">SCI_GETWRAPVISUALFLAGSLOCATION</b><br />
-                You can set wether the visual flags to indicate a line is wrapped are drawn near the border or near the text.
+                You can set whether the visual flags to indicate a line is wrapped are drawn near the border or near the text.
                 Bits set in wrapVisualFlagsLocation set the location to near the text for the corresponding visual flag.
 
     <table cellpadding="1" cellspacing="2" border="0" summary="Wrap visual flags locations">
@@ -4645,7 +4673,45 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
         <tr>
           <td align="left"><code>SC_WRAPVISUALFLAGLOC_START_BY_TEXT</code></td>
           <td align="center">2</td>
-          <td>Visual flag at begin of subline drawn near text</td>
+          <td>Visual flag at beginning of subline drawn near text</td>
+        </tr>
+      </tbody>
+    </table>
+    </p>
+
+    <p><b id="SCI_SETWRAPINDENTMODE">SCI_SETWRAPINDENTMODE(int indentMode)</b><br />
+     <b id="SCI_GETWRAPINDENTMODE">SCI_GETWRAPINDENTMODE</b><br />
+                Wrapped sublines can be indented to the position of their first subline or one more indent level.
+	  The default is <code>SC_WRAPINDENT_FIXED</code>.
+                The modes are:
+
+    <table cellpadding="1" cellspacing="2" border="0" summary="Wrap visual flags locations">
+      <tbody>
+        <tr>
+          <th align="left">Symbol</th>
+          <th>Value</th>
+          <th align="left">Effect</th>
+        </tr>
+      </tbody>
+
+      <tbody valign="top">
+        <tr>
+          <td align="left"><code>SC_WRAPINDENT_FIXED</code></td>
+          <td align="center">0</td>
+          <td>Wrapped sublines aligned to left of window plus amount set by  
+	  <a class="message" href="#SCI_SETWRAPSTARTINDENT">SCI_SETWRAPSTARTINDENT</a></td>
+        </tr>
+
+        <tr>
+          <td align="left"><code>SC_WRAPINDENT_SAME</code></td>
+          <td align="center">1</td>
+          <td>Wrapped sublines are aligned to first subline indent</td>
+        </tr>
+
+        <tr>
+          <td align="left"><code>SC_WRAPINDENT_INDENT</code></td>
+          <td align="center">2</td>
+          <td>Wrapped sublines are aligned to first subline indent plus one more level of indentation</td>
         </tr>
       </tbody>
     </table>
