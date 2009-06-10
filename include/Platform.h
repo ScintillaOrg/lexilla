@@ -19,8 +19,13 @@
 #define PLAT_MACOSX 0
 #define PLAT_WIN 0
 #define PLAT_WX  0
+#define PLAT_FOX 0
 
-#if defined(__WX__)
+#if defined(FOX)
+#undef PLAT_FOX
+#define PLAT_FOX 1
+
+#elif defined(__WX__)
 #undef PLAT_WX
 #define PLAT_WX  1
 
