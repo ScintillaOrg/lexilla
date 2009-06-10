@@ -175,6 +175,7 @@ public:
 	int AddRef();
 	int Release();
 
+	virtual void Init();
 	virtual void InsertLine(int line);
 	virtual void RemoveLine(int line);
 

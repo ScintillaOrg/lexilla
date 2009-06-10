@@ -100,6 +100,13 @@ Document::~Document() {
 	regex = 0;
 }
 
+void Document::Init() {
+	for (int j=0; j<ldSize; j++) {
+		if (perLineData[j])
+			perLineData[j]->Init();
+	}
+}
+
 void Document::InsertLine(int line) {
 	for (int j=0; j<ldSize; j++) {
 		if (perLineData[j])
