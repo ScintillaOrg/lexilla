@@ -251,7 +251,9 @@ void LineLevels::RemoveLine(int line) {
 		// to line before to avoid a temporary disappearence causing expansion.
 		int firstHeader = levels[line] & SC_FOLDLEVELHEADERFLAG;
 		levels.Delete(line);
-		if (line > 0)
+		if (line == levels.Length()-1) // Last line loses the header flag
+			levels[line-1] &= ~SC_FOLDLEVELHEADERFLAG;
+		else if (line > 0)
 			levels[line-1] |= firstHeader;
 	}
 }
