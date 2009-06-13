@@ -1964,6 +1964,9 @@ class ListBoxX : public ListBox {
 	int current;
 #endif
 	void *pixhash;
+#if GTK_MAJOR_VERSION >= 2
+        GtkCellRenderer* pixbuf_renderer;
+#endif
 	int lineHeight;
 	XPMSet xset;
 	bool unicodeMode;
@@ -1978,6 +1981,9 @@ public:
 		doubleClickAction(NULL), doubleClickActionData(NULL) {
 #if GTK_MAJOR_VERSION < 2
 			current = 0;
+#endif
+#if GTK_MAJOR_VERSION >= 2
+			pixbuf_renderer = 0;
 #endif
 	}
 	virtual ~ListBoxX() {
@@ -2115,12 +2121,13 @@ void ListBoxX::Create(Window &, int, Point, int, bool) {
 	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
 	gtk_tree_view_column_set_title(column, "Autocomplete");
 
-	GtkCellRenderer *renderer = gtk_cell_renderer_pixbuf_new();
-	gtk_tree_view_column_pack_start(column, renderer, FALSE);
-	gtk_tree_view_column_add_attribute(column, renderer,
+	pixbuf_renderer = gtk_cell_renderer_pixbuf_new();
+	gtk_cell_renderer_set_fixed_size(pixbuf_renderer, 0, -1);
+	gtk_tree_view_column_pack_start(column, pixbuf_renderer, FALSE);
+	gtk_tree_view_column_add_attribute(column, pixbuf_renderer,
 										"pixbuf", PIXBUF_COLUMN);
-
-	renderer = gtk_cell_renderer_text_new();
+	
+	GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
 	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer), 1);
 	gtk_tree_view_column_pack_start(column, renderer, TRUE);
 	gtk_tree_view_column_add_attribute(column, renderer,
@@ -2222,6 +2229,12 @@ PRectangle ListBoxX::GetDesiredRect() {
 }
 
 int ListBoxX::CaretFromEdge() {
+#if GTK_MAJOR_VERSION >= 2
+	gint renderer_width, renderer_height;
+	gtk_cell_renderer_get_fixed_size(pixbuf_renderer, &renderer_width,
+						&renderer_height);
+	return 4 + renderer_width;
+#endif
 	return 4 + xset.GetWidth();
 }
 
@@ -2308,6 +2321,14 @@ void ListBoxX::Append(char *s, int type) {
 			gtk_list_store_set(GTK_LIST_STORE(store), &iter,
 								PIXBUF_COLUMN, list_image->pixbuf,
 								TEXT_COLUMN, s, -1);
+
+			gint pixbuf_width = gdk_pixbuf_get_width(list_image->pixbuf);
+			gint renderer_height, renderer_width;
+			gtk_cell_renderer_get_fixed_size(pixbuf_renderer, 
+								&renderer_width, &renderer_height);
+			if (pixbuf_width > renderer_width)
+				gtk_cell_renderer_set_fixed_size(pixbuf_renderer,
+								pixbuf_width, -1);
 		} else {
 			gtk_list_store_set(GTK_LIST_STORE(store), &iter,
 								TEXT_COLUMN, s, -1);
