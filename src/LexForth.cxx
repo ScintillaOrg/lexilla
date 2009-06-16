@@ -94,6 +94,8 @@ static void ColouriseForthDoc(unsigned int startPos, int length, int initStyle, 
 			if (sc.state == SCE_FORTH_NUMBER) {
 				if (IsASpaceChar(sc.ch)) {
 					sc.SetState(SCE_FORTH_DEFAULT);
+				} else if (!IsANumChar(sc.ch)) {
+					sc.ChangeState(SCE_FORTH_IDENTIFIER);
 				}
 			}
 		}else if (sc.state == SCE_FORTH_STRING) {
