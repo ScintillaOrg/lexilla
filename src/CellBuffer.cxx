@@ -62,7 +62,7 @@ void LineVector::RemoveLine(int line) {
 	}
 }
 
-int LineVector::LineFromPosition(int pos) {
+int LineVector::LineFromPosition(int pos) const {
 	return starts.PartitionFromPosition(pos);
 }
 
