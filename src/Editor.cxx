@@ -2154,6 +2154,30 @@ static void SimpleAlphaRectangle(Surface *surface, PRectangle rc, ColourAllocate
 	}
 }
 
+void DrawTextBlob(Surface *surface, ViewStyle &vsDraw, PRectangle rcSegment,
+				  const char *s, ColourAllocated textBack, ColourAllocated textFore, bool twoPhaseDraw) {
+	if (!twoPhaseDraw) {
+		surface->FillRectangle(rcSegment, textBack);
+	}
+	Font &ctrlCharsFont = vsDraw.styles[STYLE_CONTROLCHAR].font;
+	int normalCharHeight = surface->Ascent(ctrlCharsFont) -
+	        surface->InternalLeading(ctrlCharsFont);
+	PRectangle rcCChar = rcSegment;
+	rcCChar.left = rcCChar.left + 1;
+	rcCChar.top = rcSegment.top + vsDraw.maxAscent - normalCharHeight;
+	rcCChar.bottom = rcSegment.top + vsDraw.maxAscent + 1;
+	PRectangle rcCentral = rcCChar;
+	rcCentral.top++;
+	rcCentral.bottom--;
+	surface->FillRectangle(rcCentral, textFore);
+	PRectangle rcChar = rcCChar;
+	rcChar.left++;
+	rcChar.right--;
+	surface->DrawTextClipped(rcChar, ctrlCharsFont,
+	        rcSegment.top + vsDraw.maxAscent, s, istrlen(s),
+	        textBack, textFore);
+}
+
 void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, LineLayout *ll,
         int line, int lineEnd, int xStart, int subLine, int subLineStart,
         bool overrideBackground, ColourAllocated background,
@@ -2281,30 +2305,6 @@ void Editor::DrawIndicators(Surface *surface, ViewStyle &vsDraw, int line, int x
 			}
 		}
 	}
-}
-
-void DrawTextBlob(Surface *surface, ViewStyle &vsDraw, PRectangle rcSegment,
-				  const char *s, ColourAllocated textBack, ColourAllocated textFore, bool twoPhaseDraw) {
-	if (!twoPhaseDraw) {
-		surface->FillRectangle(rcSegment, textBack);
-	}
-	Font &ctrlCharsFont = vsDraw.styles[STYLE_CONTROLCHAR].font;
-	int normalCharHeight = surface->Ascent(ctrlCharsFont) -
-	        surface->InternalLeading(ctrlCharsFont);
-	PRectangle rcCChar = rcSegment;
-	rcCChar.left = rcCChar.left + 1;
-	rcCChar.top = rcSegment.top + vsDraw.maxAscent - normalCharHeight;
-	rcCChar.bottom = rcSegment.top + vsDraw.maxAscent + 1;
-	PRectangle rcCentral = rcCChar;
-	rcCentral.top++;
-	rcCentral.bottom--;
-	surface->FillRectangle(rcCentral, textFore);
-	PRectangle rcChar = rcCChar;
-	rcChar.left++;
-	rcChar.right--;
-	surface->DrawTextClipped(rcChar, ctrlCharsFont,
-	        rcSegment.top + vsDraw.maxAscent, s, istrlen(s),
-	        textBack, textFore);
 }
 
 void Editor::DrawAnnotation(Surface *surface, ViewStyle &vsDraw, int line, int xStart,
