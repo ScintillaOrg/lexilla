@@ -113,6 +113,12 @@ static void ColouriseMySQLDoc(unsigned int startPos, int length, int initStyle, 
         if (!IsAWordChar(sc.ch))
         {
           CheckForKeyword(sc, keywordlists);
+          
+          // Additional check for function keywords needed.
+          // A function name must be followed by an opening parenthesis.
+          if (sc.state == SCE_MYSQL_FUNCTION && sc.ch != '(')
+            sc.ChangeState(SCE_MYSQL_DEFAULT);
+            
           sc.SetState(SCE_MYSQL_DEFAULT);
         }
         break;
@@ -256,7 +262,14 @@ static void ColouriseMySQLDoc(unsigned int startPos, int length, int initStyle, 
   // Do a final check for keywords if we currently have an identifier, to highlight them
   // also at the end of a line.
   if (sc.state == SCE_MYSQL_IDENTIFIER)
+  {
     CheckForKeyword(sc, keywordlists);
+
+    // Additional check for function keywords needed.
+    // A function name must be followed by an opening parenthesis.
+    if (sc.state == SCE_MYSQL_FUNCTION && sc.ch != '(')
+      sc.ChangeState(SCE_MYSQL_DEFAULT);
+  }
 	
   sc.Complete();
 }
@@ -273,6 +286,23 @@ static bool IsStreamCommentStyle(int style)
 
 //--------------------------------------------------------------------------------------------------
 
+/**
+ * Code copied from StyleContext and modified to work here. Should go into Accessor as a
+ * companion to Match()...
+ */
+bool MatchIgnoreCase(Accessor &styler, int currentPos, const char *s)
+{
+  for (int n = 0; *s; n++)
+  {
+    if (*s != tolower(styler.SafeGetCharAt(currentPos + n)))
+      return false;
+    s++;
+  }
+  return true;
+}
+
+//--------------------------------------------------------------------------------------------------
+
 // Store both the current line's fold level and the next lines in the
 // level store to make it easy to pick up with each increment.
 static void FoldMySQLDoc(unsigned int startPos, int length, int initStyle, WordList *[], Accessor &styler)
@@ -281,8 +311,6 @@ static void FoldMySQLDoc(unsigned int startPos, int length, int initStyle, WordL
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	bool foldOnlyBegin = styler.GetPropertyInt("fold.sql.only.begin", 0) != 0;
 
-  StyleContext sc(startPos, length, initStyle, styler);
-  
 	int visibleChars = 0;
 	int lineCurrent = styler.GetLine(startPos);
 	int levelCurrent = SC_FOLDLEVELBASE;
@@ -296,13 +324,17 @@ static void FoldMySQLDoc(unsigned int startPos, int length, int initStyle, WordL
   bool endFound = false;
 	bool whenFound = false;
 	bool elseFound = false;
-	
-  for (unsigned int i = startPos; sc.More(); i++, sc.Forward())
+
+  char nextChar = styler.SafeGetCharAt(startPos);
+  for (unsigned int i = startPos; length > 0; i++, length--)
   {
 		int stylePrev = style;
 		style = styleNext;
 		styleNext = styler.StyleAt(i + 1);
-		bool atEOL = (sc.ch == '\r' && sc.chNext != '\n') || (sc.ch == '\n');
+    
+    char currentChar = nextChar;
+    nextChar = styler.SafeGetCharAt(i + 1);
+		bool atEOL = (currentChar == '\r' && nextChar != '\n') || (currentChar == '\n');
 	
     switch (style)
     {
@@ -329,7 +361,7 @@ static void FoldMySQLDoc(unsigned int startPos, int length, int initStyle, WordL
           // Not really a standard, but we add support for single line comments
           // with special curly braces syntax as foldable comments too.
           // MySQL needs -- comments to be followed by space or control char
-          if (sc.Match('-', '-'))
+          if (styler.Match(startPos, "--"))
           {
             char chNext2 = styler.SafeGetCharAt(i + 2);
             char chNext3 = styler.SafeGetCharAt(i + 3);
@@ -349,10 +381,10 @@ static void FoldMySQLDoc(unsigned int startPos, int length, int initStyle, WordL
             levelNext--;
         break;
       case SCE_MYSQL_OPERATOR:
-        if (sc.ch == '(')
+        if (currentChar == '(')
           levelNext++;
         else
-          if (sc.ch == ')')
+          if (currentChar == ')')
             levelNext--;
         break;
       case SCE_MYSQL_MAJORKEYWORD:
@@ -362,12 +394,12 @@ static void FoldMySQLDoc(unsigned int startPos, int length, int initStyle, WordL
         // Reserved and other keywords.
         if (style != stylePrev)
         {
-          bool beginFound = sc.MatchIgnoreCase("begin");
-          bool ifFound = sc.MatchIgnoreCase("if");
-          bool thenFound = sc.MatchIgnoreCase("then");
-          bool whileFound = sc.MatchIgnoreCase("while");
-          bool loopFound = sc.MatchIgnoreCase("loop");
-          bool repeatFound = sc.MatchIgnoreCase("repeat");
+          bool beginFound = MatchIgnoreCase(styler, startPos, "begin");
+          bool ifFound = MatchIgnoreCase(styler, startPos, "if");
+          bool thenFound = MatchIgnoreCase(styler, startPos, "then");
+          bool whileFound = MatchIgnoreCase(styler, startPos, "while");
+          bool loopFound = MatchIgnoreCase(styler, startPos, "loop");
+          bool repeatFound = MatchIgnoreCase(styler, startPos, "repeat");
           
           if (!foldOnlyBegin && endFound && (ifFound || whileFound || loopFound))
           {
@@ -381,7 +413,7 @@ static void FoldMySQLDoc(unsigned int startPos, int length, int initStyle, WordL
             // will be increased later, if not, then at eol.
           }
           else
-            if (!foldOnlyBegin && sc.MatchIgnoreCase("else"))
+            if (!foldOnlyBegin && MatchIgnoreCase(styler, startPos, "else"))
             {
               levelNext--;
               elseFound = true;
@@ -398,7 +430,7 @@ static void FoldMySQLDoc(unsigned int startPos, int length, int initStyle, WordL
                 if (ifFound)
                   elseFound = false;
                 else
-                  if (sc.MatchIgnoreCase("when"))
+                  if (MatchIgnoreCase(styler, startPos, "when"))
                     whenFound = true;
                   else
                   {
@@ -413,7 +445,7 @@ static void FoldMySQLDoc(unsigned int startPos, int length, int initStyle, WordL
                           levelNext++;
                       }
                       else
-                        if (sc.MatchIgnoreCase("end"))
+                        if (MatchIgnoreCase(styler, startPos, "end"))
                         {
                           // Multiple "end" in a row are counted multiple times!
                           if (endFound)
@@ -463,7 +495,7 @@ static void FoldMySQLDoc(unsigned int startPos, int length, int initStyle, WordL
 			whenFound = false;
 		}
     
-		if (!isspacechar(static_cast<char>(sc.ch)))
+		if (!isspacechar(currentChar))
 			visibleChars++;
 	}
 }
