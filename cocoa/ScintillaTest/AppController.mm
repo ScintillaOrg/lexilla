@@ -8,11 +8,6 @@
  */
 
 #import "AppController.h"
-#import "ScintillaView.h"
-
-#include "Scintilla.h"
-
-using namespace Scintilla;
 
 const char major_keywords[] =
   "accessible add all alter analyze and as asc asensitive "
@@ -207,6 +202,11 @@ const char user_keywords[] = // Definition of own keywords, not used by MySQL.
   
   // Uncomment if you wanna see auto wrapping in action.
   //[mEditor setGeneralProperty: SCI_SETWRAPMODE parameter: SC_WRAP_WORD value: 0];
+  
+  InfoBar* infoBar = [[[InfoBar alloc] initWithFrame: NSMakeRect(0, 0, 400, 0)] autorelease];
+  [infoBar setDisplay: IBShowAll];
+  [mEditor setInfoBar: infoBar top: NO];
+  [mEditor setStatusText: @"Operation complete"];
 }
 
 @end

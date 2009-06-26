@@ -10,6 +10,11 @@
 
 #import <Cocoa/Cocoa.h>
 
+#import "Platform.h"
+#import "Scintilla.h"
+#import "SciLexer.h"
+
+#import "InfoBarCommunicator.h"
 #import "ScintillaCocoa.h"
 
 @class ScintillaView;
@@ -21,7 +26,7 @@
 @interface InnerView : NSView <NSTextInput>
 {
 @private
-  Scintilla::ScintillaView* mOwner;
+  ScintillaView* mOwner;
   NSCursor* mCurrentCursor;
   NSTrackingRectTag mCurrentTrackingRect;
 
@@ -38,7 +43,7 @@
 @property (retain) ScintillaView* owner;
 @end
 
-@interface ScintillaView : NSView
+@interface ScintillaView : NSView <InfoBarCommunicator>
 {
 @private
   // The back end is kind of a controller and model in one.
@@ -50,12 +55,20 @@
   
   NSScroller* mHorizontalScroller;
   NSScroller* mVerticalScroller;
+  
+  // Area to display additional controls (e.g. zoom info, caret position, status info).
+  NSView <InfoBarCommunicator>* mInfoBar;
+  BOOL mInfoBarAtTop;
+  int mInitialInfoBarWidth;
 }
 
 - (void) dealloc;
 - (void) layout;
 
 - (void) sendNotification: (NSString*) notificationName;
+- (void) notify: (NotificationType) type message: (NSString*) message location: (NSPoint) location
+          value: (float) value;
+- (void) setCallback: (id <InfoBarCommunicator>) callback;
 
 // Scroller handling
 - (BOOL) setVerticalScrollRange: (int) range page: (int) page;
@@ -71,9 +84,14 @@
 - (void) setString: (NSString*) aString;
 - (void) setEditable: (BOOL) editable;
 
+// Native call through to the backend.
++ (sptr_t) directCall: (ScintillaView*) sender message: (unsigned int) message wParam: (uptr_t) wParam
+               lParam: (sptr_t) lParam;
+
 // Back end properties getters and setters.
 - (void) setGeneralProperty: (int) property parameter: (long) parameter value: (long) value;
 - (long) getGeneralProperty: (int) property parameter: (long) parameter;
+- (long) getGeneralProperty: (int) property parameter: (long) parameter extra: (long) extra;
 - (void) setColorProperty: (int) property parameter: (long) parameter value: (NSColor*) value;
 - (void) setColorProperty: (int) property parameter: (long) parameter fromHTML: (NSString*) fromHTML;
 - (NSColor*) getColorProperty: (int) property parameter: (long) parameter;
@@ -83,6 +101,9 @@
 - (NSString*) getStringProperty: (int) property parameter: (long) parameter;
 - (void) setLexerProperty: (NSString*) name value: (NSString*) value;
 - (NSString*) getLexerProperty: (NSString*) name;
+
+- (void) setInfoBar: (NSView <InfoBarCommunicator>*) aView top: (BOOL) top;
+- (void) setStatusText: (NSString*) text;
 
 @property Scintilla::ScintillaCocoa* backend;
 

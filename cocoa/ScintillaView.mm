@@ -36,8 +36,8 @@ static NSCursor* waitCursor;
     mCurrentTrackingRect = 0;
     mMarkedTextRange = NSMakeRange(NSNotFound, 0);
     
-    [self registerForDraggedTypes:[NSArray arrayWithObjects:
-                                   NSStringPboardType, NSHTMLPboardType, NSFilenamesPboardType, nil]];
+    [self registerForDraggedTypes: [NSArray arrayWithObjects:
+                                   NSStringPboardType, ScintillaRecPboardType, NSFilenamesPboardType, nil]];
   }
   
   return self;
@@ -129,8 +129,9 @@ static NSCursor* waitCursor;
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Windows uses a client coordinate system where the upper left corner is the origin in a window.
- * We have to adjust for that. However by returning YES here, we are already done with that.
+ * Windows uses a client coordinate system where the upper left corner is the origin in a window
+ * (and so does Scintilla). We have to adjust for that. However by returning YES here, we are 
+ * already done with that.
  * Note that because of returning YES here most coordinates we use now (e.g. for painting,
  * invalidating rectangles etc.) are given with +Y pointing down!
  */
@@ -194,7 +195,7 @@ static NSCursor* waitCursor;
 
 - (void) doCommandBySelector: (SEL) selector
 {
-  if ([self respondsToSelector:@selector(selector)])
+  if ([self respondsToSelector: @selector(selector)])
     [self performSelector: selector withObject: nil];
 }
 
@@ -489,6 +490,45 @@ static NSCursor* waitCursor;
   mOwner.backend->DraggingExited(sender);
 }
 
+//--------------------------------------------------------------------------------------------------
+
+// NSResponder actions.
+
+- (void) selectAll: (id) sender
+{
+  mOwner.backend->SelectAll();
+}
+
+- (void) deleteBackward: (id) sender
+{
+  mOwner.backend->DeleteBackward();
+}
+
+- (void) cut: (id) sender
+{
+  mOwner.backend->Cut();
+}
+
+- (void) copy: (id) sender
+{
+  mOwner.backend->Copy();
+}
+
+- (void) paste: (id) sender
+{
+  mOwner.backend->Paste();
+}
+
+- (void) undo: (id) sender
+{
+  mOwner.backend->Undo();
+}
+
+- (void) redo: (id) sender
+{
+  mOwner.backend->Redo();
+}
+
 @end
 
 //--------------------------------------------------------------------------------------------------
@@ -499,7 +539,8 @@ static NSCursor* waitCursor;
 
 /**
  * ScintiallView is a composite control made from an NSView and an embedded NSView that is
- * used as canvas for the output (by the backend, using its CGContext), plus two scrollers.
+ * used as canvas for the output (by the backend, using its CGContext), plus other elements
+ * (scrollers, info bar).
  */
 
 //--------------------------------------------------------------------------------------------------
@@ -537,6 +578,37 @@ static NSCursor* waitCursor;
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Called by a connected compontent (usually the info bar) if something changed there.
+ *
+ * @param type The type of the notification.
+ * @param message Carries the new status message if the type is a status message change.
+ * @param location Carries the new location (e.g. caret) if the type is a caret change or similar type.
+ * @param location Carries the new zoom value if the type is a zoom change.
+ */
+- (void) notify: (NotificationType) type message: (NSString*) message location: (NSPoint) location
+          value: (float) value
+{
+  switch (type)
+  {
+    case IBNZoomChanged:
+      // Compute point increase/decrease based on default font size.
+      int fontSize = [self getGeneralProperty: SCI_STYLEGETSIZE parameter: STYLE_DEFAULT];
+      int zoom = (int) (fontSize * (value - 1));
+      [self setGeneralProperty: SCI_SETZOOM parameter: zoom value: 0];
+      break;
+  };
+}
+
+//--------------------------------------------------------------------------------------------------
+
+- (void) setCallback: (id <InfoBarCommunicator>) callback
+{
+  // Not used. Only here to satisfy protocol.
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Notification function used by Scintilla to call us back (e.g. for handling clicks on the 
  * folder margin or changes in the editor).
  */
@@ -567,6 +639,19 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
           // There can be more than one modification carried by one notification.
           if (scn->modificationType & (SC_MOD_INSERTTEXT | SC_MOD_DELETETEXT))
             [editor sendNotification: NSTextDidChangeNotification];
+          break;
+        case SCN_ZOOM:
+          // A zoom change happend. Notify info bar if there is one.
+          float zoom = [editor getGeneralProperty: SCI_GETZOOM parameter: 0];
+          int fontSize = [editor getGeneralProperty: SCI_STYLEGETSIZE parameter: STYLE_DEFAULT];
+          float factor = (zoom / fontSize) + 1;
+          [editor->mInfoBar notify: IBNZoomChanged message: nil location: NSZeroPoint value: factor];
+          break;
+        case SCN_UPDATEUI:
+          // Triggered whenever changes in the UI state need to be reflected.
+          // These can be: caret changes, selection changes etc.
+          NSPoint caretPosition = editor->mBackend->GetCaretPosition();
+          [editor->mInfoBar notify: IBNCaretChanged message: nil location: caretPosition value: 0];
           break;
       }
       break;
@@ -642,6 +727,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
  */
 - (void) dealloc
 {
+  [mInfoBar release];
   delete mBackend;
   [super dealloc];
 }
@@ -661,16 +747,23 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Used to position and size the parts of the editor (content + scrollers).
+ * Used to position and size the parts of the editor (content, scrollers, info bar).
  */
 - (void) layout
 {
   int scrollerWidth = [NSScroller scrollerWidth];
 
   NSSize size = [self frame].size;
-  NSPoint hScrollerOrigin = {0, 0};
-  NSPoint vScrollerOrigin = {size.width - scrollerWidth, 0};
+  NSRect hScrollerRect = {0, 0, size.width, scrollerWidth};
+  NSRect vScrollerRect = {size.width - scrollerWidth, 0, scrollerWidth, size.height};
+  NSRect barFrame = {0, size.height - scrollerWidth, size.width, scrollerWidth};
+  BOOL infoBarVisible = mInfoBar != nil && ![mInfoBar isHidden];
   
+  // Horizontal offset of the content. Almost always 0 unless the vertical scroller
+  // is on the left side.
+  int contentX = 0;
+  
+  // Vertical scroller frame calculation.
   if (![mVerticalScroller isHidden])
   {
     // Consider user settings (left vs right vertical scrollbar).
@@ -678,27 +771,75 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
                    isEqualToString: @"left"];
     if (isLeft)
     {
-      vScrollerOrigin.x = 0;
-      hScrollerOrigin.x = scrollerWidth;
+      vScrollerRect.origin.x = 0;
+      hScrollerRect.origin.x = scrollerWidth;
+      contentX = scrollerWidth;
     };
     
     size.width -= scrollerWidth;
+    hScrollerRect.size.width -= scrollerWidth;
   }
+  
+  // Same for horizontal scroller.
   if (![mHorizontalScroller isHidden])
   {
+    // Make room for the h-scroller.
     size.height -= scrollerWidth;
-    vScrollerOrigin.y += scrollerWidth;
+    vScrollerRect.size.height -= scrollerWidth;
+    vScrollerRect.origin.y += scrollerWidth;
   };
   
-  NSRect contentRect = {hScrollerOrigin.x, vScrollerOrigin.y, size.width, size.height};
+  // Info bar frame.
+  if (infoBarVisible)
+  {
+    // Initial value already is as if the bar is at top.
+    if (mInfoBarAtTop)
+    {
+      vScrollerRect.size.height -= scrollerWidth;
+      size.height -= scrollerWidth;
+    }
+    else
+    {
+      // Layout info bar and h-scroller side by side in a friendly manner.
+      int nativeWidth = mInitialInfoBarWidth;
+      int remainingWidth = barFrame.size.width;
+      
+      barFrame.origin.y = 0;
+
+      if ([mHorizontalScroller isHidden])
+      {
+        // H-scroller is not visible, so take the full space.
+        vScrollerRect.origin.y += scrollerWidth;
+        vScrollerRect.size.height -= scrollerWidth;
+        size.height -= scrollerWidth;
+      }
+      else
+      {
+        // If the left offset of the h-scroller is > 0 then the v-scroller is on the left side.
+        // In this case we take the full width, otherwise what has been given to the h-scroller 
+        // and content up to now.
+        if (hScrollerRect.origin.x == 0)
+          remainingWidth = size.width;
+
+        // Note: remainingWidth can become < 0, which hides the scroller.
+        remainingWidth -= nativeWidth;
+
+        hScrollerRect.origin.x = nativeWidth;
+        hScrollerRect.size.width = remainingWidth;
+        barFrame.size.width = nativeWidth;
+      }
+    }
+  }
+  
+  NSRect contentRect = {contentX, vScrollerRect.origin.y, size.width, size.height};
   [mContent setFrame: contentRect];
   
+  if (infoBarVisible)
+    [mInfoBar setFrame: barFrame];
   if (![mHorizontalScroller isHidden])
-    [mHorizontalScroller setFrame: NSMakeRect(hScrollerOrigin.x, hScrollerOrigin.y, size.width, 
-                                              scrollerWidth)];
+    [mHorizontalScroller setFrame: hScrollerRect];
   if (![mVerticalScroller isHidden])
-    [mVerticalScroller setFrame: NSMakeRect(vScrollerOrigin.x, vScrollerOrigin.y, scrollerWidth, 
-                                            size.height)];
+    [mVerticalScroller setFrame: vScrollerRect];
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -835,7 +976,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
   
   char *buffer(0);
   const int length = mBackend->WndProc(SCI_GETLENGTH, 0, 0);
-  if ( length > 0 )
+  if (length > 0)
   {
     buffer = new char[length + 1];
     try
@@ -881,6 +1022,28 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
   return mContent;
 }
 
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Direct call into the backend to allow uninterpreted access to it. The values to be passed in and
+ * the result heavily depend on the message that is used for the call. Refer to the Scintilla
+ * documentation to learn what can be used here.
+ */
++ (sptr_t) directCall: (ScintillaView*) sender message: (unsigned int) message wParam: (uptr_t) wParam
+               lParam: (sptr_t) lParam
+{
+  return ScintillaCocoa::DirectFunction(sender->mBackend, message, wParam, lParam);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * This is a helper method to set a property in the backend, with native parameters.
+ *
+ * @param property Main property like SCI_STYLESETFORE for which a value is to get.
+ * @param parameter Additional info for this property like a parameter or index.
+ * @param value The value to be set.
+ */
 - (void) setEditorProperty: (int) property wParam: (long) parameter lParam: (long) value
 {
   mBackend->WndProc(property, parameter, value);
@@ -927,6 +1090,17 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 - (long) getGeneralProperty: (int) property parameter: (long) parameter
 {
   return mBackend->WndProc(property, parameter, 0);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Very similar to getGeneralProperty:parameter, but allows to specify an additional value
+ * which certain actions require.
+ */
+- (long) getGeneralProperty: (int) property parameter: (long) parameter extra: (long) extra
+{
+  return mBackend->WndProc(property, parameter, extra);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1007,7 +1181,6 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
   return result;
 }
 
-
 //--------------------------------------------------------------------------------------------------
 
 /**
@@ -1017,7 +1190,6 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 {
   mBackend->WndProc(property, parameter, (sptr_t) value);
 }
-
 
 //--------------------------------------------------------------------------------------------------
 
@@ -1074,6 +1246,48 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
   const char* rawName = [name UTF8String];
   const char* result = (const char*) mBackend->WndProc(SCI_SETPROPERTY, (sptr_t) rawName, 0);
   return [NSString stringWithUTF8String: result];
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Sets the new control which is displayed as info bar at the top or bottom of the editor.
+ * Set newBar to nil if you want to hide the bar again.
+ * When aligned to bottom position then the info bar and the horizontal scroller share the available
+ * space. The info bar will then only get the width it is currently set to less a minimal amount
+ * reserved for the scroller. At the top position it gets the full width of the control.
+ * The info bar's height is set to the height of the scrollbar.
+ */
+- (void) setInfoBar: (NSView <InfoBarCommunicator>*) newBar top: (BOOL) top
+{
+  if (mInfoBar != newBar)
+  {
+    [mInfoBar removeFromSuperview];
+    
+    mInfoBar = newBar;
+    mInfoBarAtTop = top;
+    if (mInfoBar != nil)
+    {
+      [self addSubview: mInfoBar];
+      [mInfoBar setCallback: self];
+      
+      // Keep the initial width as reference for layout changes.
+      mInitialInfoBarWidth = [mInfoBar frame].size.width;
+    }
+    
+    [self layout];
+  }
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Sets the edit's info bar status message. This call only has an effect if there is an info bar.
+ */
+- (void) setStatusText: (NSString*) text
+{
+  if (mInfoBar != nil)
+    [mInfoBar notify: IBNStatusChanged message: text location: NSZeroPoint value: 0];
 }
 
 @end

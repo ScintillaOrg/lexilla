@@ -8,7 +8,12 @@
  */
 
 #import <Cocoa/Cocoa.h>
+
+#define SCI_LEXER
+#define SCI_NAMESPACE
+
 #import "ScintillaView.h"
+#import "InfoBar.h"
 
 @interface AppController : NSObject {
   IBOutlet NSBox *mEditHost;

@@ -3,7 +3,7 @@
  *
  * Mike Lischke <mlischke@sun.com>
  *
- * Based on ScintillaCocoa.h
+ * Based on ScintillaMacOSX.h
  * Original code by Evan Jones on Sun Sep 01 2002.
  *  Contributors:
  *  Shane Caraveo, ActiveState
@@ -19,16 +19,13 @@
 #include <ctype.h>
 #include <time.h>
 
-#include "Platform.h"
-#include "Scintilla.h"
-#include "PlatCocoa.h"
-
 #ifdef SCI_LEXER
 #include "SciLexer.h"
 #include "PropSet.h"
 #include "Accessor.h"
 #include "KeyWords.h"
 #endif
+
 #include "SVector.h"
 #include "SplitVector.h"
 #include "Partitioning.h"
@@ -49,12 +46,11 @@
 #include "PositionCache.h"
 #include "Editor.h"
 #include "SString.h"
-#include "ScintillaBase.h"
 //#include "ScintillaCallTip.h"
 
-#import <Cocoa/Cocoa.h>
+#include "ScintillaBase.h"
 
-#import <Carbon/Carbon.h> // Temporary
+extern "C" NSString* ScintillaRecPboardType;
 
 @class ScintillaView;
 
@@ -141,14 +137,13 @@ public:
   bool SetIdle(bool on);
   void SetMouseCapture(bool on);
   bool HaveMouseCapture();
-//    virtual void ScrollText(int linesToMove);
   void SetVerticalScrollPos();
   void SetHorizontalScrollPos();
   bool ModifyScrollBars(int nMax, int nPage);
   void Resize();
   void DoScroll(float position, NSScrollerPart part, bool horizontal);
     
-  // Notifications.
+  // Notifications for the owner.
   void NotifyChange();
   void NotifyFocus(bool focus);
   void NotifyParent(SCNotification scn);
@@ -166,6 +161,8 @@ public:
   virtual void AddToPopUp(const char *label, int cmd = 0, bool enabled = true);
   virtual void ClaimSelection();
 
+  NSPoint GetCaretPosition();
+  
   static sptr_t DirectFunction(ScintillaCocoa *sciThis, unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
   void TimerFired(NSTimer* timer);
@@ -188,6 +185,13 @@ public:
   void DraggingExited(id <NSDraggingInfo> info);
   bool PerformDragOperation(id <NSDraggingInfo> info);
   void DragScroll();
+  
+  // Promote some methods needed for NSResponder actions.
+  virtual void SelectAll();
+  void DeleteBackward();
+  virtual void Cut();
+  virtual void Undo();
+  virtual void Redo();
   
   //    virtual OSStatus ContextualMenuClick( HIPoint& location );
 //

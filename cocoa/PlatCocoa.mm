@@ -12,6 +12,8 @@
  * This file is dual licensed under LGPL v2.1 and the Scintilla license (http://www.scintilla.org/License.txt).
  */
 
+#import <ScintillaView.h>
+
 #include "PlatCocoa.h"
 
 #include <cstring>
@@ -24,8 +26,6 @@
 #include "XPM.h"
 
 #import <Foundation/NSGeometry.h>
-
-#import <ScintillaView.h>
 
 #import <Carbon/Carbon.h> // Temporary
 
@@ -221,7 +221,6 @@ void SurfaceImpl::Release()
   bitmapHeight = 0;
   x = 0;
   y = 0;
-  //inited = false;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1955,6 +1954,8 @@ unsigned int Platform::DoubleClickTime()
 {
   float threshold = [[NSUserDefaults standardUserDefaults] floatForKey: 
                      @"com.apple.mouse.doubleClickThreshold"];
+  if (threshold == 0)
+    threshold = 0.5;
   return static_cast<unsigned int>(threshold / kEventDurationMillisecond);
 }
 
@@ -1963,29 +1964,6 @@ unsigned int Platform::DoubleClickTime()
 bool Platform::MouseButtonBounce()
 {
   return false;
-}
-
-//--------------------------------------------------------------------------------------------------
-
-bool Platform::IsKeyDown(int keyCode)
-{
-  return false;
-  // TODO: Map Scintilla/Windows key codes to Mac OS X key codes
-  // TODO: Do I need this?
-  /*
-   // Inspired by code at: http://www.sover.net/~jams/Morgan/docs/GameInputMethods.txt
-   
-   // Get the keys
-   KeyMap keys;
-   GetKeys( keys );
-   
-   // Calculate the key map index
-   long keyMapIndex = keys[keyCode/8];
-   // Calculate the individual bit to check
-   short bitToCheck = keyCode % 8;
-   // Check the status of the key
-   return ( keyMapIndex >> bitToCheck ) & 0x01;
-   */
 }
 
 //--------------------------------------------------------------------------------------------------

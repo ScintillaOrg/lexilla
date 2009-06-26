@@ -14,10 +14,12 @@
  * This file is dual licensed under LGPL v2.1 and the Scintilla license (http://www.scintilla.org/License.txt).
  */
 
-#include "ScintillaCocoa.h"
-#include "ScintillaView.h"
+#import <Cocoa/Cocoa.h>
 
-#include <Carbon/Carbon.h> // Temporary
+#import <Carbon/Carbon.h> // Temporary
+
+#include "ScintillaView.h"
+#include "PlatCocoa.h"
 
 using namespace Scintilla;
 
@@ -636,6 +638,21 @@ void ScintillaCocoa::ClaimSelection()
 
 // -------------------------------------------------------------------------------------------------
 
+/**
+ * Returns the current caret position (which is tracked as an offset into the entire text string)
+ * to a row:column pair. The result is zero-based.
+ */
+NSPoint ScintillaCocoa::GetCaretPosition()
+{
+  NSPoint result;
+
+  result.y = pdoc->LineFromPosition(currentPos);
+  result.x = currentPos - pdoc->LineStart(result.y);
+  return result;
+}
+
+// -------------------------------------------------------------------------------------------------
+
 #pragma segment Drag
 
 /**
@@ -908,7 +925,7 @@ bool ScintillaCocoa::GetPasteboardData(NSPasteboard* board, SelectionText* selec
     {
       char* text = (char*) [data UTF8String];
       bool rectangular = bestType == ScintillaRecPboardType;
-      selectedText->Copy(text, strlen(text) + 1, 0, 0, rectangular, false);
+      selectedText->Copy(text, strlen(text), 0, 0, rectangular, false);
     }
     return true;
   }
@@ -979,7 +996,7 @@ void ScintillaCocoa::SetVerticalScrollPos()
 {
   ScintillaView* topContainer = TopContainer();
   
-  // Convert absolute coordinate into the range [0..1]. Keep in mind that the visibile area
+  // Convert absolute coordinate into the range [0..1]. Keep in mind that the visible area
   // does *not* belong to the scroll range.
   float relativePosition = (float) topLine / MaxScrollPos();
   [topContainer setVerticalScrollPosition: relativePosition];
@@ -992,7 +1009,7 @@ void ScintillaCocoa::SetHorizontalScrollPos()
   ScintillaView* topContainer = TopContainer();
   PRectangle textRect = GetTextRectangle();
   
-  // Convert absolute coordinate into the range [0..1]. Keep in mind that the visibile area
+  // Convert absolute coordinate into the range [0..1]. Keep in mind that the visible area
   // does *not* belong to the scroll range.
   float relativePosition = (float) xOffset / (scrollWidth - textRect.Width());
   [topContainer setHorizontalScrollPosition: relativePosition];
@@ -1015,12 +1032,20 @@ bool ScintillaCocoa::ModifyScrollBars(int nMax, int nPage)
   NSRect bounds = [container frame];
   ScintillaView* topContainer = TopContainer();
 
+  // Set page size to the same value as the scroll range to hide the scrollbar.
   int scrollRange = lineHeight * (nMax + 1); // +1 because the caller subtracted one.
-  int pageSize = bounds.size.height;
+  int pageSize;
+  if (verticalScrollBarVisible)
+    pageSize = bounds.size.height;
+  else
+    pageSize = scrollRange;
   bool verticalChange = [topContainer setVerticalScrollRange: scrollRange page: pageSize];
   
   scrollRange = scrollWidth;
-  pageSize = bounds.size.width;
+  if (horizontalScrollBarVisible)
+    pageSize = bounds.size.width;
+  else
+    pageSize = scrollRange;
   bool horizontalChange = [topContainer setHorizontalScrollRange: scrollRange page: pageSize];
   
   return verticalChange || horizontalChange;
@@ -1349,6 +1374,7 @@ void ScintillaCocoa::MouseDown(NSEvent* event)
 void ScintillaCocoa::MouseMove(NSEvent* event)
 {
   lastMouseEvent = event;
+  
   ButtonMove(ConvertPoint([event locationInWindow]));
 }
 
@@ -1368,7 +1394,6 @@ void ScintillaCocoa::MouseWheel(NSEvent* event)
 {
   bool command = ([event modifierFlags] & NSCommandKeyMask) != 0;
   bool shift = ([event modifierFlags] & NSShiftKeyMask) != 0;
-  int lineHeight = WndProc(SCI_TEXTHEIGHT, 0, 0);
   int delta;
   if (shift)
     delta = 10 * [event deltaX]; // Arbitrary scale factor.
@@ -1396,6 +1421,35 @@ void ScintillaCocoa::MouseWheel(NSEvent* event)
       HorizontalScrollTo(xOffset - delta);
     else
       ScrollTo(topLine - delta, true);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+// Helper methods for NSResponder actions.
+
+void ScintillaCocoa::SelectAll()
+{
+  Editor::SelectAll();
+}
+
+void ScintillaCocoa::DeleteBackward()
+{
+  KeyDown(SCK_BACK, false, false, false, nil);
+}
+
+void ScintillaCocoa::Cut()
+{
+  Editor::Cut();
+}
+
+void ScintillaCocoa::Undo()
+{
+  Editor::Undo();
+}
+
+void ScintillaCocoa::Redo()
+{
+  Editor::Undo();
 }
 
 //--------------------------------------------------------------------------------------------------
