@@ -382,7 +382,11 @@
 </ul>
 	</li>
 	<li>
-	Cocoa platform included.
+	Cocoa platform added.
+	</li>
+	<li>
+	Names of struct types in Scintilla.h now start with "Sci_" to avoid possible clashes with platform
+	definitions. Currently, the old names still work but these will be phased out.
 	</li>
 	<li>
 	When lines are wrapped, subsequent lines may be indented to match the indent of the initial line,
@@ -407,6 +411,9 @@
 	<li>
 	Lisp lexer treats '[', ']', '{', and '}' as balanced delimiters which is common usage. Feature #2794989.<br />
 	It treats keyword argument names as being equivalent to symbols. Feature #2794901.
+	</li>
+	<li>
+	Pascal lexer bug fixed to prevent hang when 'interface' near beginning of file. Bug #2802863.
 	</li>
 	<li>
 	XML lexer fixes bug where Unicode entities like '&amp;—' were broken into fragments. Bug #2804760.
