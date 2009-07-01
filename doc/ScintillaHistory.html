@@ -403,6 +403,9 @@
 	Batch file lexer understands variables surrounded by '!'.
 	</li>
 	<li>
+	CAML lexer also supports SML.
+	</li>
+	<li>
 	D lexer handles string and numeric literals more accurately. Feature #2793782.
 	</li>
 	<li>
@@ -414,6 +417,10 @@
 	</li>
 	<li>
 	Pascal lexer bug fixed to prevent hang when 'interface' near beginning of file. Bug #2802863.
+	</li>
+	<li>
+	Perl lexer bug fixed where previous lexical states persisted causing "/" special case styling and
+	subroutine prototype styling to not be correct. Bug #2809168.
 	</li>
 	<li>
 	XML lexer fixes bug where Unicode entities like '&amp;—' were broken into fragments. Bug #2804760.
