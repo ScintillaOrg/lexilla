@@ -2224,7 +2224,7 @@ void ScintillaGTK::PreeditChangedThis() {
 			gint x, y;
 			gdk_window_get_origin((PWidget(wText))->window, &x, &y);
 
-			Point pt = LocationFromPosition(sel.MainCaret());
+			Point pt = PointMainCaret();
 			if (pt.x < 0)
 				pt.x = 0;
 			if (pt.y < 0)
@@ -2311,7 +2311,7 @@ void ScintillaGTK::Draw(GtkWidget *widget, GdkRectangle *area) {
 		}
 
 #ifdef INTERNATIONAL_INPUT
-		Point pt = sciThis->LocationFromPosition(sciThis->sel.MainCaret());
+		Point pt = sciThis->PointMainCaret();
 		pt.y += sciThis->vs.lineHeight - 2;
 		if (pt.x < 0) pt.x = 0;
 		if (pt.y < 0) pt.y = 0;

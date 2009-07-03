@@ -258,6 +258,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int LinesToScroll();
 	int MaxScrollPos();
 	SelectionPosition ClampPositionIntoDocument(SelectionPosition sp) const;
+	Point LocationFromPosition(SelectionPosition pos);
 	Point LocationFromPosition(int pos);
 	int XFromPosition(int pos);
 	int XFromPosition(SelectionPosition sp);
@@ -295,6 +296,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int MovePositionTo(int newPos, Selection::selTypes sel=Selection::noSel, bool ensureVisible=true);
 	SelectionPosition MovePositionSoVisible(SelectionPosition pos, int moveDir);
 	SelectionPosition MovePositionSoVisible(int pos, int moveDir);
+	Point PointMainCaret();
 	void SetLastXChosen();
 
 	void ScrollTo(int line, bool moveThumb=true);

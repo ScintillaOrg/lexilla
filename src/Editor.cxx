@@ -355,12 +355,12 @@ SelectionPosition Editor::ClampPositionIntoDocument(SelectionPosition sp) const 
 	}
 }
 
-Point Editor::LocationFromPosition(int pos) {
+Point Editor::LocationFromPosition(SelectionPosition pos) {
 	Point pt;
 	RefreshStyleData();
-	if (pos == INVALID_POSITION)
+	if (pos.Position() == INVALID_POSITION)
 		return pt;
-	int line = pdoc->LineFromPosition(pos);
+	int line = pdoc->LineFromPosition(pos.Position());
 	int lineVisible = cs.DisplayFromDoc(line);
 	//Platform::DebugPrintf("line=%d\n", line);
 	AutoSurface surface(this);
@@ -371,7 +371,7 @@ Point Editor::LocationFromPosition(int pos) {
 		pt.x = 0;
 		unsigned int posLineStart = pdoc->LineStart(line);
 		LayoutLine(line, surface, vs, ll, wrapWidth);
-		int posInLine = pos - posLineStart;
+		int posInLine = pos.Position() - posLineStart;
 		// In case of very long line put x at arbitrary large position
 		if (posInLine > ll->maxLineLength) {
 			pt.x = ll->positions[ll->maxLineLength] - ll->positions[ll->LineStart(ll->lines)];
@@ -392,7 +392,12 @@ Point Editor::LocationFromPosition(int pos) {
 		}
 		pt.x += vs.fixedColumnWidth - xOffset;
 	}
+	pt.x += pos.VirtualSpace() * vs.spaceWidth;
 	return pt;
+}
+
+Point Editor::LocationFromPosition(int pos) {
+	return LocationFromPosition(SelectionPosition(pos));
 }
 
 int Editor::XFromPosition(int pos) {
@@ -401,8 +406,8 @@ int Editor::XFromPosition(int pos) {
 }
 
 int Editor::XFromPosition(SelectionPosition sp) {
-	Point pt = LocationFromPosition(sp.Position());
-	return pt.x + sp.VirtualSpace() * vs.spaceWidth - vs.fixedColumnWidth + xOffset;
+	Point pt = LocationFromPosition(sp);
+	return pt.x - vs.fixedColumnWidth + xOffset;
 }
 
 int Editor::LineFromLocation(Point pt) {
@@ -896,12 +901,16 @@ SelectionPosition Editor::MovePositionSoVisible(int pos, int moveDir) {
 	return MovePositionSoVisible(SelectionPosition(pos), moveDir);
 }
 
+Point Editor::PointMainCaret() {
+	return LocationFromPosition(sel.Range(sel.Main()).caret);
+}
+
 /**
  * Choose the x position that the caret will try to stick to
  * as it moves up and down.
  */
 void Editor::SetLastXChosen() {
-	Point pt = LocationFromPosition(sel.MainCaret());
+	Point pt = PointMainCaret();
 	lastXChosen = pt.x;
 }
 
@@ -946,7 +955,7 @@ void Editor::HorizontalScrollTo(int xPos) {
 
 void Editor::MoveCaretInsideView(bool ensureVisible) {
 	PRectangle rcClient = GetTextRectangle();
-	Point pt = LocationFromPosition(sel.MainCaret());
+	Point pt = PointMainCaret();
 	if (pt.y < rcClient.top) {
 		MovePositionTo(SPositionFromLocation(
 		            Point(lastXChosen, rcClient.top)),
@@ -4521,7 +4530,7 @@ void Editor::NewLine() {
 }
 
 void Editor::CursorUpOrDown(int direction, Selection::selTypes selt) {
-	Point pt = LocationFromPosition(sel.MainCaret());
+	Point pt = PointMainCaret();
 	int lineDoc = pdoc->LineFromPosition(sel.MainCaret());
 	Point ptStartLine = LocationFromPosition(pdoc->LineStart(lineDoc));
 	int subLine = (pt.y - ptStartLine.y) / vs.lineHeight;

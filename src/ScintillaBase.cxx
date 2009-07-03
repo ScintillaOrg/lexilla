@@ -226,7 +226,7 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 			return;
 		}
 	}
-	ac.Start(wMain, idAutoComplete, sel.MainCaret(), LocationFromPosition(sel.MainCaret()),
+	ac.Start(wMain, idAutoComplete, sel.MainCaret(), PointMainCaret(),
 				lenEntered, vs.lineHeight, IsUnicodeMode());
 
 	PRectangle rcClient = GetClientRectangle();
@@ -240,7 +240,7 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 	if (pt.x >= rcClient.right - widthLB) {
 		HorizontalScrollTo(xOffset + pt.x - rcClient.right + widthLB);
 		Redraw();
-		pt = LocationFromPosition(sel.MainCaret());
+		pt = PointMainCaret();
 	}
 	PRectangle rcac;
 	rcac.left = pt.x - ac.lb->CaretFromEdge();

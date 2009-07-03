@@ -524,7 +524,7 @@ sptr_t ScintillaWin::HandleComposition(uptr_t wParam, sptr_t lParam) {
 				}
 			}
 			// Set new position after converted
-			Point pos = LocationFromPosition(sel.MainCaret());
+			Point pos = PointMainCaret();
 			COMPOSITIONFORM CompForm;
 			CompForm.dwStyle = CFS_POINT;
 			CompForm.ptCurrentPos.x = pos.x;
@@ -904,7 +904,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				Point pt = Point::FromLong(lParam);
 				if ((pt.x == -1) && (pt.y == -1)) {
 					// Caused by keyboard so display menu near caret
-					pt = LocationFromPosition(sel.MainCaret());
+					pt = PointMainCaret();
 					POINT spt = {pt.x, pt.y};
 					::ClientToScreen(MainHWND(), &spt);
 					pt = Point(spt.x, spt.y);
@@ -1136,7 +1136,7 @@ void ScintillaWin::UpdateSystemCaret() {
 			DestroySystemCaret();
 			CreateSystemCaret();
 		}
-		Point pos = LocationFromPosition(sel.MainCaret());
+		Point pos = PointMainCaret();
 		::SetCaretPos(pos.x, pos.y);
 	}
 }
@@ -1817,7 +1817,7 @@ void ScintillaWin::ImeStartComposition() {
 	if (caret.active) {
 		// Move IME Window to current caret position
 		HIMC hIMC = ::ImmGetContext(MainHWND());
-		Point pos = LocationFromPosition(sel.MainCaret());
+		Point pos = PointMainCaret();
 		COMPOSITIONFORM CompForm;
 		CompForm.dwStyle = CFS_POINT;
 		CompForm.ptCurrentPos.x = pos.x;
