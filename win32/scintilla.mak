@@ -1,5 +1,5 @@
 # Make file for Scintilla on Windows Visual C++ and Borland C++ version
-# Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
+# Copyright 1998-2009 by Neil Hodgson <neilh@scintilla.org>
 # The License.txt file describes the conditions under which this software may be distributed.
 # This makefile is for using Visual C++ with nmake or Borland C++ with make depending on
 # the setting of the VENDOR macro. If no VENDOR is defined n the command line then
@@ -210,6 +210,7 @@ LOBJS=\
 	$(DIR_O)\KeyMap.obj \
 	$(DIR_O)\KeyWords.obj \
 	$(DIR_O)\LineMarker.obj \
+	$(DIR_O)\PerLine.obj \
 	$(DIR_O)\PlatWin.obj \
 	$(DIR_O)\PositionCache.obj \
 	$(DIR_O)\PropSet.obj \
@@ -223,7 +224,6 @@ LOBJS=\
 	$(DIR_O)\UniConversion.obj \
 	$(DIR_O)\ViewStyle.obj \
 	$(DIR_O)\XPM.obj \
-	$(DIR_O)\PerLine.obj \
 	$(LEXOBJS)
 
 $(DIR_O)\ScintRes.res : ScintRes.rc
