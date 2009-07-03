@@ -105,6 +105,7 @@ SOBJS=\
 	$(DIR_O)\RunStyles.obj \
 	$(DIR_O)\ScintillaBase.obj \
 	$(DIR_O)\ScintillaWin.obj \
+	$(DIR_O)\Selection.obj \
 	$(DIR_O)\Style.obj \
 	$(DIR_O)\UniConversion.obj \
 	$(DIR_O)\ViewStyle.obj \
@@ -216,6 +217,7 @@ LOBJS=\
 	$(DIR_O)\RunStyles.obj \
 	$(DIR_O)\ScintillaBaseL.obj \
 	$(DIR_O)\ScintillaWinL.obj \
+	$(DIR_O)\Selection.obj \
 	$(DIR_O)\Style.obj \
 	$(DIR_O)\StyleContext.obj \
 	$(DIR_O)\UniConversion.obj \
@@ -299,7 +301,7 @@ $(DIR_O)\Editor.obj: ../src/Editor.cxx ../include/Platform.h ../include/Scintill
   ../src/Partitioning.h ../src/CellBuffer.h ../src/KeyMap.h \
   ../src/RunStyles.h ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h \
   ../src/Style.h ../src/ViewStyle.h ../src/CharClassify.h \
-  ../src/Decoration.h ../src/Document.h ../src/Editor.h ../src/PositionCache.h
+  ../src/Decoration.h ../src/Document.h ../src/Editor.h ../src/Selection.h ../src/PositionCache.h
 $(DIR_O)\ExternalLexer.obj: ../src/ExternalLexer.cxx ../include/Platform.h \
   ../include/Scintilla.h ../include/SciLexer.h ../include/PropSet.h \
   ../include/SString.h ../include/Accessor.h ../src/DocumentAccessor.h \
@@ -484,7 +486,7 @@ $(DIR_O)\PositionCache.obj: ../src/Editor.cxx ../include/Platform.h ../include/S
   ../src/Partitioning.h ../src/CellBuffer.h ../src/KeyMap.h \
   ../src/RunStyles.h ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h \
   ../src/Style.h ../src/ViewStyle.h ../src/CharClassify.h \
-  ../src/Decoration.h ../src/Document.h ../src/Editor.h ../src/PositionCache.h
+  ../src/Decoration.h ../src/Document.h ../src/Editor.h ../src/Selection.h ../src/PositionCache.h
 $(DIR_O)\PropSet.obj: ../src/PropSet.cxx ../include/Platform.h ../include/PropSet.h \
   ../include/SString.h
 $(DIR_O)\RESearch.obj: ../src/RESearch.cxx ../src/CharClassify.h ../src/RESearch.h
@@ -498,7 +500,7 @@ $(DIR_O)\ScintillaBase.obj: ../src/ScintillaBase.cxx ../include/Platform.h \
   ../src/CallTip.h ../src/KeyMap.h ../src/Indicator.h ../src/XPM.h \
   ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
   ../src/AutoComplete.h ../src/CharClassify.h ../src/Decoration.h \
-  ../src/Document.h ../src/Editor.h ../src/ScintillaBase.h
+  ../src/Document.h ../src/Editor.h ../src/Selection.h ../src/ScintillaBase.h
 $(DIR_O)\ScintillaBaseL.obj: ../src/ScintillaBase.cxx ../include/Platform.h \
   ../include/Scintilla.h ../include/PropSet.h ../include/SString.h \
   ../src/ContractionState.h ../src/SVector.h ../src/SplitVector.h \
@@ -506,7 +508,7 @@ $(DIR_O)\ScintillaBaseL.obj: ../src/ScintillaBase.cxx ../include/Platform.h \
   ../src/CallTip.h ../src/KeyMap.h ../src/Indicator.h ../src/XPM.h \
   ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
   ../src/AutoComplete.h ../src/CharClassify.h ../src/Decoration.h \
-  ../src/Document.h ../src/Editor.h ../src/ScintillaBase.h
+  ../src/Document.h ../src/Editor.h ../src/Selection.h ../src/ScintillaBase.h
 $(DIR_O)\ScintillaWin.obj: ScintillaWin.cxx ../include/Platform.h \
   ../include/Scintilla.h ../include/SString.h ../src/ContractionState.h \
   ../src/SVector.h ../src/SplitVector.h ../src/Partitioning.h \
@@ -514,7 +516,7 @@ $(DIR_O)\ScintillaWin.obj: ScintillaWin.cxx ../include/Platform.h \
   ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h ../src/Style.h \
   ../src/AutoComplete.h ../src/ViewStyle.h ../src/CharClassify.h \
   ../src/Decoration.h ../src/Document.h ../src/Editor.h \
-  ../src/ScintillaBase.h ../src/UniConversion.h
+  ../src/ScintillaBase.h ../src/Selection.h ../src/UniConversion.h
 $(DIR_O)\ScintillaWinS.obj: ScintillaWin.cxx ../include/Platform.h \
   ../include/Scintilla.h ../include/SString.h ../src/ContractionState.h \
   ../src/SVector.h ../src/SplitVector.h ../src/Partitioning.h \
@@ -522,7 +524,7 @@ $(DIR_O)\ScintillaWinS.obj: ScintillaWin.cxx ../include/Platform.h \
   ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h ../src/Style.h \
   ../src/AutoComplete.h ../src/ViewStyle.h ../src/CharClassify.h \
   ../src/Decoration.h ../src/Document.h ../src/Editor.h \
-  ../src/ScintillaBase.h ../src/UniConversion.h
+  ../src/ScintillaBase.h ../src/Selection.h ../src/UniConversion.h
 $(DIR_O)\ScintillaWinL.obj: ScintillaWin.cxx ../include/Platform.h \
   ../include/Scintilla.h ../include/SString.h ../src/ContractionState.h \
   ../src/SVector.h ../src/SplitVector.h ../src/Partitioning.h \
@@ -530,7 +532,9 @@ $(DIR_O)\ScintillaWinL.obj: ScintillaWin.cxx ../include/Platform.h \
   ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h ../src/Style.h \
   ../src/AutoComplete.h ../src/ViewStyle.h ../src/CharClassify.h \
   ../src/Decoration.h ../src/Document.h ../src/Editor.h \
-  ../src/ScintillaBase.h ../src/UniConversion.h
+  ../src/ScintillaBase.h ../src/Selection.h ../src/UniConversion.h
+$(DIR_O)\Selection.obj: ../src/Selection.cxx ../include/Platform.h ../include/Scintilla.h \
+  ../src/Selection.h
 $(DIR_O)\Style.obj: ../src/Style.cxx ../include/Platform.h ../include/Scintilla.h \
   ../src/Style.h
 $(DIR_O)\StyleContext.obj: ../src/StyleContext.cxx ../include/Platform.h \

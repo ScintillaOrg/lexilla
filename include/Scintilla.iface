@@ -1637,8 +1637,9 @@ enu SelectionMode=SC_SEL_
 val SC_SEL_STREAM=0
 val SC_SEL_RECTANGLE=1
 val SC_SEL_LINES=2
+val SC_SEL_THIN=3
 
-# Set the selection mode to stream (SC_SEL_STREAM) or rectangular (SC_SEL_RECTANGLE) or
+# Set the selection mode to stream (SC_SEL_STREAM) or rectangular (SC_SEL_RECTANGLE/SC_SEL_THIN) or
 # by lines (SC_SEL_LINES).
 set void SetSelectionMode=2422(int mode,)
 
@@ -1925,6 +1926,74 @@ fun position CharPositionFromPoint=2561(int x, int y)
 # Find the position of a character from a point within the window.
 # Return INVALID_POSITION if not close to text.
 fun position CharPositionFromPointClose=2562(int x, int y)
+
+# Set whether the caret will show on multiple lines for a rectangular selection
+set void SetMultiLineCaret=2563(bool multiLine,)
+
+# Whether the caret will show on multiple lines for a rectangular selection
+get bool GetMultiLineCaret=2564(,)
+
+# Set whether the multiline caret will blink
+set void SetMultiLineCaretBlinks=2565(bool multiLineBlinks,)
+
+# Whether the multiline caret will blink
+get bool GetMultiLineCaretBlinks=2566(,)
+
+# How many selections are there?
+get int GetSelections=2570(,)
+
+# Add a selection
+fun void ClearSelections=2571(,)
+
+# Set a simple selection
+fun int SetSelection=2572(int currentPos,int anchor)
+
+# Add a selection
+fun int AddSelection=2573(int currentPos,int anchor)
+
+# Set the main selection
+set void SetMainSelection=2574(int selection,)
+
+# Which selection is the main selection
+get int GetMainSelection=2575(,)
+
+set void SetSelectionNCaret=2576(int selection, position pos)
+get position GetSelectionNCaret=2577(int selection,)
+set void SetSelectionNAnchor=2578(int selection, position posAnchor)
+get position GetSelectionNAnchor=2579(int selection,)
+set void SetSelectionNCaretVirtualSpace=2580(int selection, int space)
+get int GetSelectionNCaretVirtualSpace=2581(int selection,)
+set void SetSelectionNAnchorVirtualSpace=2582(int selection, int space)
+get int GetSelectionNAnchorVirtualSpace=2583(int selection,)
+
+# Sets the position that starts the selection - this becomes the anchor.
+set void SetSelectionNStart=2584(int selection, position pos)
+
+# Returns the position at the start of the selection.
+get position GetSelectionNStart=2585(,)
+
+# Sets the position that ends the selection - this becomes the currentPosition.
+set void SetSelectionNEnd=2586(position pos,)
+
+# Returns the position at the end of the selection.
+get position GetSelectionNEnd=2587(,)
+
+set void SetRectangularSelectionCaret=2588(position pos,)
+get position GetRectangularSelectionCaret=2589(,)
+set void SetRectangularSelectionAnchor=2590(position posAnchor,)
+get position GetRectangularSelectionAnchor=2591(,)
+set void SetRectangularSelectionCaretVirtualSpace=2592(int space,)
+get int GetRectangularSelectionCaretVirtualSpace=2593(,)
+set void SetRectangularSelectionAnchorVirtualSpace=2594(int space,)
+get int GetRectangularSelectionAnchorVirtualSpace=2595(,)
+
+enu VirtualSpace=SCVS_
+val SCVS_NONE=0
+val SCVS_RECTANGULARSELECTION=1
+val SCVS_USERACCESSIBLE=2
+
+set void SetVirtualSpaceOptions=2596(int virtualSpace,)
+get int GetVirtualSpaceOptions=2597(,)
 
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)

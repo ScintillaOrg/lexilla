@@ -28,6 +28,7 @@
 #include "CharClassify.h"
 #include "Decoration.h"
 #include "Document.h"
+#include "Selection.h"
 #include "PositionCache.h"
 
 #ifdef SCI_NAMESPACE
@@ -46,11 +47,11 @@ LineLayout::LineLayout(int maxLineLength_) :
 	inCache(false),
 	maxLineLength(-1),
 	numCharsInLine(0),
+	numCharsBeforeEOL(0),
 	validity(llInvalid),
 	xHighlightGuide(0),
 	highlightColumn(0),
-	selStart(0),
-	selEnd(0),
+	psel(NULL),
 	containsCaret(false),
 	edgeColumn(0),
 	chars(0),
@@ -115,12 +116,7 @@ int LineLayout::LineLastVisible(int line) const {
 	if (line < 0) {
 		return 0;
 	} else if ((line >= lines-1) || !lineStarts) {
-		int startLine = LineStart(line);
-		int endLine = numCharsInLine;
-		while ((endLine > startLine) && IsEOLChar(chars[endLine-1])) {
-			endLine--;
-		}
-		return endLine;
+		return numCharsBeforeEOL;
 	} else {
 		return lineStarts[line+1];
 	}
@@ -412,9 +408,13 @@ BreakFinder::BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posL
 		nextBreak--;
 	}
 
-	if (ll->selStart != ll->selEnd) {
-		Insert(ll->selStart - posLineStart - 1);
-		Insert(ll->selEnd - posLineStart - 1);
+	for (size_t r=0; r<ll->psel->Count(); r++) {
+		SelectionPosition spStart;
+		SelectionPosition spEnd;
+		if (ll->psel->Range(r).Intersect(posLineStart, posLineStart + lineEnd, spStart, spEnd)) {
+			Insert(spStart.Position() - posLineStart - 1);
+			Insert(spEnd.Position() - posLineStart - 1);
+		}
 	}
 
 	Insert(ll->edgeColumn - 1);

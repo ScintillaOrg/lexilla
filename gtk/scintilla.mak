@@ -135,6 +135,7 @@ SOBJS=\
 	$(DIR_O)\PropSet.obj \
 	$(DIR_O)\ScintillaBase.obj \
 	$(DIR_O)\ScintillaGTK.obj \
+	$(DIR_O)\Selection.obj \
 	$(DIR_O)\Style.obj \
 	$(DIR_O)\UniConversion.obj \
 	$(DIR_O)\ViewStyle.obj \
@@ -245,6 +246,7 @@ LOBJS=\
 	$(DIR_O)\PropSet.obj \
 	$(DIR_O)\ScintillaBaseL.obj \
 	$(DIR_O)\ScintillaGTKL.obj \
+	$(DIR_O)\Selection.obj \
 	$(DIR_O)\Style.obj \
 	$(DIR_O)\StyleContext.obj \
 	$(DIR_O)\UniConversion.obj \
@@ -341,7 +343,7 @@ $(DIR_O)\Editor.obj: ../src/Editor.cxx ../include/Platform.h ../include/Scintill
   ../src/Partitioning.h ../src/CellBuffer.h ../src/KeyMap.h \
   ../src/RunStyles.h ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h \
   ../src/Style.h ../src/ViewStyle.h ../src/CharClassify.h \
-  ../src/Document.h ../src/Editor.h ../src/PositionCache.h
+  ../src/Document.h ../src/Editor.h ../src/Selection.h ../src/PositionCache.h
 
 $(DIR_O)\ExternalLexer.obj: ../src/ExternalLexer.cxx ../include/Platform.h \
   ../include/Scintilla.h ../include/SciLexer.h ../include/PropSet.h \
@@ -530,7 +532,7 @@ $(DIR_O)\PositionCache.obj: ../src/Editor.cxx ../include/Platform.h ../include/S
   ../src/Partitioning.h ../src/CellBuffer.h ../src/KeyMap.h \
   ../src/RunStyles.h ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h \
   ../src/Style.h ../src/ViewStyle.h ../src/CharClassify.h \
-  ../src/Decoration.h ../src/Document.h ../src/Editor.h ../src/PositionCache.h
+  ../src/Decoration.h ../src/Document.h ../src/Editor.h ../src/Selection.h ../src/PositionCache.h
 
 $(DIR_O)\PropSet.obj: ../src/PropSet.cxx ../include/Platform.h ../include/PropSet.h \
   ../include/SString.h
@@ -548,7 +550,7 @@ $(DIR_O)\ScintillaBase.obj: ../src/ScintillaBase.cxx ../include/Platform.h \
   ../src/CallTip.h ../src/KeyMap.h ../src/Indicator.h ../src/XPM.h \
   ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
   ../src/AutoComplete.h ../src/CharClassify.h ../src/Document.h \
-  ../src/Editor.h ../src/ScintillaBase.h
+  ../src/Editor.h ../src/Selection.h ../src/ScintillaBase.h
 
 $(DIR_O)\ScintillaBaseL.obj: ../src/ScintillaBase.cxx ../include/Platform.h \
   ../include/Scintilla.h ../include/PropSet.h ../include/SString.h \
@@ -557,7 +559,7 @@ $(DIR_O)\ScintillaBaseL.obj: ../src/ScintillaBase.cxx ../include/Platform.h \
   ../src/CallTip.h ../src/KeyMap.h ../src/Indicator.h ../src/XPM.h \
   ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
   ../src/AutoComplete.h ../src/CharClassify.h ../src/Document.h \
-  ../src/Editor.h ../src/ScintillaBase.h
+  ../src/Editor.h ../src/Selection.h ../src/ScintillaBase.h
 
 $(DIR_O)\ScintillaGTK.obj: ScintillaGTK.cxx ../include/Platform.h \
   ../include/Scintilla.h ../include/SString.h ../src/ContractionState.h \
@@ -566,7 +568,7 @@ $(DIR_O)\ScintillaGTK.obj: ScintillaGTK.cxx ../include/Platform.h \
   ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h ../src/Style.h \
   ../src/AutoComplete.h ../src/ViewStyle.h ../src/CharClassify.h \
   ../src/Document.h ../src/Editor.h ../src/ScintillaBase.h \
-  ../src/UniConversion.h
+  ../src/Selection.h ../src/UniConversion.h
 
 $(DIR_O)\ScintillaGTKL.obj: ScintillaGTK.cxx ../include/Platform.h \
   ../include/Scintilla.h ../include/SString.h ../src/ContractionState.h \
@@ -575,7 +577,7 @@ $(DIR_O)\ScintillaGTKL.obj: ScintillaGTK.cxx ../include/Platform.h \
   ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h ../src/Style.h \
   ../src/AutoComplete.h ../src/ViewStyle.h ../src/CharClassify.h \
   ../src/Document.h ../src/Editor.h ../src/ScintillaBase.h \
-  ../src/UniConversion.h
+  ../src/Selection.h ../src/UniConversion.h
 
 $(DIR_O)\ScintillaGTKS.obj: ScintillaGTK.cxx ../include/Platform.h \
   ../include/Scintilla.h ../include/SString.h ../src/ContractionState.h \
@@ -584,7 +586,10 @@ $(DIR_O)\ScintillaGTKS.obj: ScintillaGTK.cxx ../include/Platform.h \
   ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h ../src/Style.h \
   ../src/AutoComplete.h ../src/ViewStyle.h ../src/CharClassify.h \
   ../src/Document.h ../src/Editor.h ../src/ScintillaBase.h \
-  ../src/UniConversion.h
+  ../src/Selection.h ../src/UniConversion.h
+
+$(DIR_O)\Selection.obj: ../src/Selection.cxx ../include/Platform.h ../include/Scintilla.h \
+  ../src/Selection.h
 
 $(DIR_O)\Style.obj: ../src/Style.cxx ../include/Platform.h ../include/Scintilla.h \
   ../src/Style.h

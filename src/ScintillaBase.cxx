@@ -36,6 +36,7 @@
 #include "CharClassify.h"
 #include "Decoration.h"
 #include "Document.h"
+#include "Selection.h"
 #include "PositionCache.h"
 #include "Editor.h"
 #include "ScintillaBase.h"
@@ -190,7 +191,7 @@ int ScintillaBase::KeyCommand(unsigned int iMessage) {
 			ct.CallTipCancel();
 		}
 		if ((iMessage == SCI_DELETEBACK) || (iMessage == SCI_DELETEBACKNOTLINE)) {
-			if (currentPos <= ct.posStartCallTip) {
+			if (sel.MainCaret() <= ct.posStartCallTip) {
 				ct.CallTipCancel();
 			}
 		}
@@ -212,24 +213,24 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 			const char *typeSep = strchr(list, ac.GetTypesep());
 			size_t lenInsert = (typeSep) ? (typeSep-list) : strlen(list);
 			if (ac.ignoreCase) {
-				SetEmptySelection(currentPos - lenEntered);
-				pdoc->DeleteChars(currentPos, lenEntered);
-				SetEmptySelection(currentPos);
-				pdoc->InsertString(currentPos, list, lenInsert);
-				SetEmptySelection(currentPos + lenInsert);
+				SetEmptySelection(sel.MainCaret() - lenEntered);
+				pdoc->DeleteChars(sel.MainCaret(), lenEntered);
+				SetEmptySelection(sel.MainCaret());
+				pdoc->InsertString(sel.MainCaret(), list, lenInsert);
+				SetEmptySelection(sel.MainCaret() + lenInsert);
 			} else {
-				SetEmptySelection(currentPos);
-				pdoc->InsertString(currentPos, list + lenEntered, lenInsert - lenEntered);
-				SetEmptySelection(currentPos + lenInsert - lenEntered);
+				SetEmptySelection(sel.MainCaret());
+				pdoc->InsertString(sel.MainCaret(), list + lenEntered, lenInsert - lenEntered);
+				SetEmptySelection(sel.MainCaret() + lenInsert - lenEntered);
 			}
 			return;
 		}
 	}
-	ac.Start(wMain, idAutoComplete, currentPos, LocationFromPosition(currentPos),
+	ac.Start(wMain, idAutoComplete, sel.MainCaret(), LocationFromPosition(sel.MainCaret()),
 				lenEntered, vs.lineHeight, IsUnicodeMode());
 
 	PRectangle rcClient = GetClientRectangle();
-	Point pt = LocationFromPosition(currentPos - lenEntered);
+	Point pt = LocationFromPosition(sel.MainCaret() - lenEntered);
 	PRectangle rcPopupBounds = wMain.GetMonitorRect(pt);
 	if (rcPopupBounds.Height() == 0)
 		rcPopupBounds = rcClient;
@@ -239,7 +240,7 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 	if (pt.x >= rcClient.right - widthLB) {
 		HorizontalScrollTo(xOffset + pt.x - rcClient.right + widthLB);
 		Redraw();
-		pt = LocationFromPosition(currentPos);
+		pt = LocationFromPosition(sel.MainCaret());
 	}
 	PRectangle rcac;
 	rcac.left = pt.x - ac.lb->CaretFromEdge();
@@ -305,7 +306,7 @@ void ScintillaBase::AutoCompleteMoveToCurrentWord() {
 	char wordCurrent[1000];
 	int i;
 	int startWord = ac.posStart - ac.startLen;
-	for (i = startWord; i < currentPos && i - startWord < 1000; i++)
+	for (i = startWord; i < sel.MainCaret() && i - startWord < 1000; i++)
 		wordCurrent[i - startWord] = pdoc->CharAt(i);
 	wordCurrent[Platform::Minimum(i - startWord, 999)] = '\0';
 	ac.Select(wordCurrent);
@@ -322,9 +323,9 @@ void ScintillaBase::AutoCompleteCharacterAdded(char ch) {
 }
 
 void ScintillaBase::AutoCompleteCharacterDeleted() {
-	if (currentPos < ac.posStart - ac.startLen) {
+	if (sel.MainCaret() < ac.posStart - ac.startLen) {
 		AutoCompleteCancel();
-	} else if (ac.cancelAtStartPos && (currentPos <= ac.posStart)) {
+	} else if (ac.cancelAtStartPos && (sel.MainCaret() <= ac.posStart)) {
 		AutoCompleteCancel();
 	} else {
 		AutoCompleteMoveToCurrentWord();
@@ -367,7 +368,7 @@ void ScintillaBase::AutoCompleteCompleted() {
 	if (listType > 0)
 		return;
 
-	Position endPos = currentPos;
+	Position endPos = sel.MainCaret();
 	if (ac.dropRestOfWord)
 		endPos = pdoc->ExtendWordSelect(endPos, 1, true);
 	if (endPos < firstPos)
@@ -401,7 +402,7 @@ void ScintillaBase::CallTipShow(Point pt, const char *defn) {
 	if (ct.UseStyleCallTip()) {
 		ct.SetForeBack(vs.styles[STYLE_CALLTIP].fore, vs.styles[STYLE_CALLTIP].back);
 	}
-	PRectangle rc = ct.CallTipStart(currentPos, pt,
+	PRectangle rc = ct.CallTipStart(sel.MainCaret(), pt,
 		defn,
 		vs.styles[ctStyle].fontName,
 		vs.styles[ctStyle].sizeZoomed,
@@ -436,10 +437,10 @@ void ScintillaBase::ContextMenu(Point pt) {
 		AddToPopUp("Undo", idcmdUndo, writable && pdoc->CanUndo());
 		AddToPopUp("Redo", idcmdRedo, writable && pdoc->CanRedo());
 		AddToPopUp("");
-		AddToPopUp("Cut", idcmdCut, writable && currentPos != anchor);
-		AddToPopUp("Copy", idcmdCopy, currentPos != anchor);
+		AddToPopUp("Cut", idcmdCut, writable && !sel.Empty());
+		AddToPopUp("Copy", idcmdCopy, !sel.Empty());
 		AddToPopUp("Paste", idcmdPaste, writable && WndProc(SCI_CANPASTE, 0, 0));
-		AddToPopUp("Delete", idcmdDelete, writable && currentPos != anchor);
+		AddToPopUp("Delete", idcmdDelete, writable && !sel.Empty());
 		AddToPopUp("");
 		AddToPopUp("Select All", idcmdSelectAll);
 		popup.Show(pt, wMain);

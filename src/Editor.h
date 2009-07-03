@@ -143,6 +143,10 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool verticalScrollBarVisible;
 	bool endAtLastLine;
 	bool caretSticky;
+	bool multiLineCaret;
+	bool multiLineCaretBlinks;
+
+	int virtualSpaceOptions;
 
 	Surface *pixmapLine;
 	Surface *pixmapSelMargin;
@@ -176,8 +180,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int lastXChosen;
 	int lineAnchor;
 	int originalAnchorPos;
-	int currentPos;
-	int anchor;
 	int targetStart;
 	int targetEnd;
 	int searchFlags;
@@ -199,11 +201,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int modEventMask;
 
 	SelectionText drag;
-	enum selTypes { noSel, selStream, selRectangle, selLines };
-	selTypes selType;
-	bool moveExtendsSelection;
-	int xStartSelect;	///< x position of start of rectangular selection
-	int xEndSelect;		///< x position of end of rectangular selection
+	Selection sel;
 	bool primarySelection;
 
 	int caretXPolicy;
@@ -259,9 +257,13 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int LinesOnScreen();
 	int LinesToScroll();
 	int MaxScrollPos();
+	SelectionPosition ClampPositionIntoDocument(SelectionPosition sp) const;
 	Point LocationFromPosition(int pos);
 	int XFromPosition(int pos);
+	int XFromPosition(SelectionPosition sp);
+	SelectionPosition SPositionFromLocation(Point pt, bool canReturnInvalid=false, bool charPosition=false, bool virtualSpace=true);
 	int PositionFromLocation(Point pt, bool canReturnInvalid=false, bool charPosition=false);
+	SelectionPosition SPositionFromLineX(int lineDoc, int x);
 	int PositionFromLineX(int line, int x);
 	int LineFromLocation(Point pt);
 	void SetTopLine(int topLineNew);
@@ -278,15 +280,21 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int SelectionStart();
 	int SelectionEnd();
 	void SetRectangularRange();
-	void InvalidateSelection(int currentPos_, int anchor_, bool invalidateWholeSelection);
+	void InvalidateSelection(SelectionRange newMain, bool invalidateWholeSelection=false);
+	void SetSelection(SelectionPosition currentPos_, SelectionPosition anchor_);
 	void SetSelection(int currentPos_, int anchor_);
+	void SetSelection(SelectionPosition currentPos_);
 	void SetSelection(int currentPos_);
+	void SetEmptySelection(SelectionPosition currentPos_);
 	void SetEmptySelection(int currentPos_);
 	bool RangeContainsProtected(int start, int end) const;
 	bool SelectionContainsProtected();
 	int MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd=true) const;
-	int MovePositionTo(int newPos, selTypes sel=noSel, bool ensureVisible=true);
-	int MovePositionSoVisible(int pos, int moveDir);
+	SelectionPosition MovePositionOutsideChar(SelectionPosition pos, int moveDir, bool checkLineEnd=true) const;
+	int MovePositionTo(SelectionPosition newPos, Selection::selTypes sel=Selection::noSel, bool ensureVisible=true);
+	int MovePositionTo(int newPos, Selection::selTypes sel=Selection::noSel, bool ensureVisible=true);
+	SelectionPosition MovePositionSoVisible(SelectionPosition pos, int moveDir);
+	SelectionPosition MovePositionSoVisible(int pos, int moveDir);
 	void SetLastXChosen();
 
 	void ScrollTo(int line, bool moveThumb=true);
@@ -324,8 +332,10 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void DrawAnnotation(Surface *surface, ViewStyle &vsDraw, int line, int xStart,
         PRectangle rcLine, LineLayout *ll, int subLine);
 	void DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart,
-		PRectangle rcLine, LineLayout *ll, int subLine=0);
+		PRectangle rcLine, LineLayout *ll, int subLine);
 	void DrawBlockCaret(Surface *surface, ViewStyle &vsDraw, LineLayout *ll, int subLine, int xStart, int offset, int posCaret, PRectangle rcCaret);
+	void DrawCarets(Surface *surface, ViewStyle &vsDraw, int line, int xStart,
+		PRectangle rcLine, LineLayout *ll, int subLine);
 	void RefreshPixMaps(Surface *surfaceWindow);
 	void Paint(Surface *surfaceWindow, PRectangle rcArea);
 	long FormatRange(bool draw, Sci_RangeToFormat *pfr);
@@ -344,7 +354,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void ClearAll();
 	void ClearDocumentStyle();
 	void Cut();
-	void PasteRectangular(int pos, const char *ptr, int len);
+	void PasteRectangular(SelectionPosition pos, const char *ptr, int len);
 	virtual void Copy() = 0;
 	virtual void CopyAllowLine();
 	virtual bool CanPaste();
@@ -384,14 +394,14 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void NotifyStyleNeeded(Document *doc, void *userData, int endPos);
 	void NotifyMacroRecord(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
-	void PageMove(int direction, selTypes sel=noSel, bool stuttered = false);
+	void PageMove(int direction, Selection::selTypes sel=Selection::noSel, bool stuttered = false);
 	void ChangeCaseOfSelection(bool makeUpperCase);
 	void LineTranspose();
 	void Duplicate(bool forLine);
 	virtual void CancelModes();
 	void NewLine();
-	void CursorUpOrDown(int direction, selTypes sel=noSel);
-	void ParaUpOrDown(int direction, selTypes sel=noSel);
+	void CursorUpOrDown(int direction, Selection::selTypes sel=Selection::noSel);
+	void ParaUpOrDown(int direction, Selection::selTypes sel=Selection::noSel);
 	int StartEndDisplayLine(int pos, bool start);
 	virtual int KeyCommand(unsigned int iMessage);
 	virtual int KeyDefault(int /* key */, int /*modifiers*/);
@@ -410,7 +420,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	virtual void CopyToClipboard(const SelectionText &selectedText) = 0;
 	char *CopyRange(int start, int end);
-	void CopySelectionFromRange(SelectionText *ss, bool allowLineCopy, int start, int end);
 	void CopySelectionRange(SelectionText *ss, bool allowLineCopy=false);
 	void CopyRangeToClipboard(int start, int end);
 	void CopyText(int length, const char *text);
@@ -419,9 +428,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual bool DragThreshold(Point ptStart, Point ptNow);
 	virtual void StartDrag();
 	void DropAt(int position, const char *value, bool moving, bool rectangular);
-	/** PositionInSelection returns 0 if position in selection, -1 if position before selection, and 1 if after.
-	 * Before means either before any line of selection or before selection on its line, with a similar meaning to after. */
-	int PositionInSelection(int pos);
+	/** PositionInSelection returns true if position in selection. */
+	bool PositionInSelection(int pos);
 	bool PointInSelection(Point pt);
 	bool PointInSelMargin(Point pt);
 	void LineSelection(int lineCurrent_, int lineAnchor_);

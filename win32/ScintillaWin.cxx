@@ -45,6 +45,7 @@
 #include "CharClassify.h"
 #include "Decoration.h"
 #include "Document.h"
+#include "Selection.h"
 #include "PositionCache.h"
 #include "Editor.h"
 #include "ScintillaBase.h"
@@ -238,7 +239,7 @@ class ScintillaWin :
 	virtual bool GetScrollInfo(int nBar, LPSCROLLINFO lpsi);
 	void ChangeScrollPos(int barType, int pos);
 
-	void InsertPasteText(const char *text, int len, int selStart, bool isRectangular, bool isLine);
+	void InsertPasteText(const char *text, int len, SelectionPosition selStart, bool isRectangular, bool isLine);
 
 public:
 	// Public for benefit of Scintilla_DirectFunction
@@ -523,7 +524,7 @@ sptr_t ScintillaWin::HandleComposition(uptr_t wParam, sptr_t lParam) {
 				}
 			}
 			// Set new position after converted
-			Point pos = LocationFromPosition(currentPos);
+			Point pos = LocationFromPosition(sel.MainCaret());
 			COMPOSITIONFORM CompForm;
 			CompForm.dwStyle = CFS_POINT;
 			CompForm.ptCurrentPos.x = pos.x;
@@ -903,7 +904,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				Point pt = Point::FromLong(lParam);
 				if ((pt.x == -1) && (pt.y == -1)) {
 					// Caused by keyboard so display menu near caret
-					pt = LocationFromPosition(currentPos);
+					pt = LocationFromPosition(sel.MainCaret());
 					POINT spt = {pt.x, pt.y};
 					::ClientToScreen(MainHWND(), &spt);
 					pt = Point(spt.x, spt.y);
@@ -996,7 +997,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 					return 0;
 				}
 				Sci_CharacterRange *pCR = reinterpret_cast<Sci_CharacterRange *>(lParam);
-				selType = selStream;
+				sel.selType = Selection::selStream;
 				if (pCR->cpMin == 0 && pCR->cpMax == -1) {
 					SetSelection(pCR->cpMin, pdoc->Length());
 				} else {
@@ -1135,7 +1136,7 @@ void ScintillaWin::UpdateSystemCaret() {
 			DestroySystemCaret();
 			CreateSystemCaret();
 		}
-		Point pos = LocationFromPosition(currentPos);
+		Point pos = LocationFromPosition(sel.MainCaret());
 		::SetCaretPos(pos.x, pos.y);
 	}
 }
@@ -1259,7 +1260,7 @@ void ScintillaWin::NotifyDoubleClick(Point pt, bool shift, bool ctrl, bool alt) 
 
 void ScintillaWin::Copy() {
 	//Platform::DebugPrintf("Copy\n");
-	if (currentPos != anchor) {
+	if (!sel.Empty()) {
 		SelectionText selectedText;
 		CopySelectionRange(&selectedText);
 		CopyToClipboard(selectedText);
@@ -1321,7 +1322,7 @@ public:
 	}
 };
 
-void ScintillaWin::InsertPasteText(const char *text, int len, int selStart, bool isRectangular, bool isLine) {
+void ScintillaWin::InsertPasteText(const char *text, int len, SelectionPosition selStart, bool isRectangular, bool isLine) {
 	if (isRectangular) {
 		PasteRectangular(selStart, text, len);
 	} else {
@@ -1332,7 +1333,7 @@ void ScintillaWin::InsertPasteText(const char *text, int len, int selStart, bool
 			text = convertedText;
 		}
 		if (isLine) {
-			int insertPos = pdoc->LineStart(pdoc->LineFromPosition(currentPos));
+			int insertPos = pdoc->LineStart(pdoc->LineFromPosition(sel.MainCaret()));
 			pdoc->InsertString(insertPos, text, len);
 			// add the newline if necessary
 			if ((len > 0) && (text[len-1] != '\n' && text[len-1] != '\r')) {
@@ -1340,11 +1341,11 @@ void ScintillaWin::InsertPasteText(const char *text, int len, int selStart, bool
 				pdoc->InsertString(insertPos + len, endline, strlen(endline));
 				len += strlen(endline);
 			}
-			if (currentPos == insertPos) {
-				SetEmptySelection(currentPos + len);
+			if (sel.MainCaret() == insertPos) {
+				SetEmptySelection(sel.MainCaret() + len);
 			}
-		} else if (pdoc->InsertString(currentPos, text, len)) {
-			SetEmptySelection(currentPos + len);
+		} else if (pdoc->InsertString(sel.MainCaret(), text, len)) {
+			SetEmptySelection(sel.MainCaret() + len);
 		}
 		delete []convertedText;
 	}
@@ -1356,7 +1357,7 @@ void ScintillaWin::Paste() {
 	pdoc->BeginUndoAction();
 	bool isLine = SelectionEmpty() && (::IsClipboardFormatAvailable(cfLineSelect) != 0);
 	ClearSelection();
-	int selStart = SelectionStart();
+	SelectionPosition selStart = sel.Range(sel.Main()).Start();
 	bool isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect) != 0;
 
 	// Always use CF_UNICODETEXT if available
@@ -1816,7 +1817,7 @@ void ScintillaWin::ImeStartComposition() {
 	if (caret.active) {
 		// Move IME Window to current caret position
 		HIMC hIMC = ::ImmGetContext(MainHWND());
-		Point pos = LocationFromPosition(currentPos);
+		Point pos = LocationFromPosition(sel.MainCaret());
 		COMPOSITIONFORM CompForm;
 		CompForm.dwStyle = CFS_POINT;
 		CompForm.ptCurrentPos.x = pos.x;
@@ -1828,7 +1829,7 @@ void ScintillaWin::ImeStartComposition() {
 		if (stylesValid) {
 			// Since the style creation code has been made platform independent,
 			// The logfont for the IME is recreated here.
-			int styleHere = (pdoc->StyleAt(currentPos)) & 31;
+			int styleHere = (pdoc->StyleAt(sel.MainCaret())) & 31;
 			LOGFONTA lf = {0,0,0,0,0,0,0,0,0,0,0,0,0, ""};
 			int sizeZoomed = vs.styles[styleHere].size + vs.zoomLevel;
 			if (sizeZoomed <= 2)	// Hangs if sizeZoomed <= 1

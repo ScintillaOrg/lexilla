@@ -239,6 +239,7 @@ public:
 	int LineStart(int line) const;
 	int LineEnd(int line) const;
 	int LineEndPosition(int position) const;
+	bool IsLineEndPosition(int position) const;
 	int VCHomePosition(int position) const;
 
 	int SetLevel(int line, int level);

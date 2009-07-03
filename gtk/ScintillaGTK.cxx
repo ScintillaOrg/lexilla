@@ -44,6 +44,7 @@
 #include "Decoration.h"
 #include "CharClassify.h"
 #include "Document.h"
+#include "Selection.h"
 #include "PositionCache.h"
 #include "Editor.h"
 #include "SString.h"
@@ -1345,7 +1346,7 @@ void ScintillaGTK::CopyToClipboard(const SelectionText &selectedText) {
 }
 
 void ScintillaGTK::Copy() {
-	if (currentPos != anchor) {
+	if (!sel.Empty()) {
 #ifndef USE_GTK_CLIPBOARD
 		CopySelectionRange(&copyText);
 		gtk_selection_owner_set(GTK_WIDGET(PWidget(wMain)),
@@ -1357,7 +1358,7 @@ void ScintillaGTK::Copy() {
 		StoreOnClipboard(clipText);
 #endif
 #if PLAT_GTK_WIN32
-		if (selType == selRectangle) {
+		if (sel.IsRectangular()) {
 			::OpenClipboard(NULL);
 			::SetClipboardData(cfColumnSelect, 0);
 			::CloseClipboard();
@@ -1433,7 +1434,7 @@ bool ScintillaGTK::OwnPrimarySelection() {
 void ScintillaGTK::ClaimSelection() {
 	// X Windows has a 'primary selection' as well as the clipboard.
 	// Whenever the user selects some text, we become the primary selection
-	if (currentPos != anchor && GTK_WIDGET_REALIZED(GTK_WIDGET(PWidget(wMain)))) {
+	if (!sel.Empty() && GTK_WIDGET_REALIZED(GTK_WIDGET(PWidget(wMain)))) {
 		primarySelection = true;
 		gtk_selection_owner_set(GTK_WIDGET(PWidget(wMain)),
 		                        GDK_SELECTION_PRIMARY, GDK_CURRENT_TIME);
@@ -1520,10 +1521,11 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 				int selStart = SelectionStart();
 
 				if (selText.rectangular) {
-					PasteRectangular(selStart, selText.s, selText.len);
+					PasteRectangular(SelectionPosition(selStart), selText.s, selText.len);
 				} else {
-					pdoc->InsertString(currentPos, selText.s, selText.len);
-					SetEmptySelection(currentPos + selText.len);
+					int caretMain = sel.MainCaret();
+					pdoc->InsertString(caretMain, selText.s, selText.len);
+					SetEmptySelection(caretMain + selText.len);
 				}
 				pdoc->EndUndoAction();
 				EnsureCaretVisible();
@@ -2222,7 +2224,7 @@ void ScintillaGTK::PreeditChangedThis() {
 			gint x, y;
 			gdk_window_get_origin((PWidget(wText))->window, &x, &y);
 
-			Point pt = LocationFromPosition(currentPos);
+			Point pt = LocationFromPosition(sel.MainCaret());
 			if (pt.x < 0)
 				pt.x = 0;
 			if (pt.y < 0)
@@ -2309,7 +2311,7 @@ void ScintillaGTK::Draw(GtkWidget *widget, GdkRectangle *area) {
 		}
 
 #ifdef INTERNATIONAL_INPUT
-		Point pt = sciThis->LocationFromPosition(sciThis->currentPos);
+		Point pt = sciThis->LocationFromPosition(sciThis->sel.MainCaret());
 		pt.y += sciThis->vs.lineHeight - 2;
 		if (pt.x < 0) pt.x = 0;
 		if (pt.y < 0) pt.y = 0;
@@ -2569,7 +2571,7 @@ void ScintillaGTK::DragDataGet(GtkWidget *widget, GdkDragContext *context,
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	try {
 		sciThis->dragWasDropped = true;
-		if (sciThis->currentPos != sciThis->anchor) {
+		if (!sciThis->sel.Empty()) {
 			sciThis->GetSelection(selection_data, info, &sciThis->drag);
 		}
 		if (context->action == GDK_ACTION_MOVE) {

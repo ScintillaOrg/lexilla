@@ -494,6 +494,10 @@ SOURCE=..\win32\ScintRes.rc
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\Selection.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\Style.cxx
 # End Source File
 # Begin Source File

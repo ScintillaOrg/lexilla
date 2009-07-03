@@ -217,6 +217,10 @@ int Document::LineEndPosition(int position) const {
 	return LineEnd(LineFromPosition(position));
 }
 
+bool Document::IsLineEndPosition(int position) const {
+	return LineEnd(LineFromPosition(position)) == position;
+}
+
 int Document::VCHomePosition(int position) const {
 	int line = LineFromPosition(position);
 	int startPosition = LineStart(line);
