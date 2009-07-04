@@ -3919,31 +3919,13 @@ void Editor::DelCharBack(bool allowLineStartDeletion) {
 				sel.ClearVirtualSpace(r);
 			}
 		}
-		/*
-		if (!RangeContainsProtected(sel.MainCaret() - 1, sel.MainCaret())) {
-			int lineCurrentPos = pdoc->LineFromPosition(sel.MainCaret());
-			if (allowLineStartDeletion || (pdoc->LineStart(lineCurrentPos) != sel.MainCaret())) {
-				if (pdoc->GetColumn(sel.MainCaret()) <= pdoc->GetLineIndentation(lineCurrentPos) &&
-				        pdoc->GetColumn(sel.MainCaret()) > 0 && pdoc->backspaceUnindents) {
-					pdoc->BeginUndoAction();
-					int indentation = pdoc->GetLineIndentation(lineCurrentPos);
-					int indentationStep = pdoc->IndentSize();
-					if (indentation % indentationStep == 0) {
-						pdoc->SetLineIndentation(lineCurrentPos, indentation - indentationStep);
-					} else {
-						pdoc->SetLineIndentation(lineCurrentPos, indentation - (indentation % indentationStep));
-					}
-					SetEmptySelection(pdoc->GetLineIndentPosition(lineCurrentPos));
-					pdoc->EndUndoAction();
-				} else {
-					pdoc->DelCharBack(sel.MainCaret());
-				}
-			}
-		}
-		*/
 	} else {
 		ClearSelection();
-		SetEmptySelection(sel.MainCaret());
+		if (sel.IsRectangular()) {
+			sel.selType = Selection::selThin;
+			sel.Rectangular() = SelectionRange(sel.Rectangular().caret, sel.Range(0).anchor);
+		}
+		//SetEmptySelection(sel.MainCaret());
 	}
 	if (undoBracketNeeded) 
 		pdoc->EndUndoAction();
@@ -5527,7 +5509,7 @@ void Editor::DwellEnd(bool mouseMoved) {
 void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, bool alt) {
 	//Platform::DebugPrintf("ButtonDown %d %d = %d alt=%d %d\n", curTime, lastClickTime, curTime - lastClickTime, alt, inDragDrop);
 	ptMouseLast = pt;
-	SelectionPosition newPos = SPositionFromLocation(pt);
+	SelectionPosition newPos = SPositionFromLocation(pt, false, false, (virtualSpaceOptions & SCVS_USERACCESSIBLE) != 0);
 	newPos = MovePositionOutsideChar(newPos, sel.MainCaret() - newPos.Position());
 	inDragDrop = ddNone;
 	sel.SetMoveExtends(false);
@@ -5700,7 +5682,7 @@ void Editor::ButtonMove(Point pt) {
 		DwellEnd(true);
 	}
 
-	SelectionPosition movePos = SPositionFromLocation(pt);
+	SelectionPosition movePos = SPositionFromLocation(pt, false, false, (virtualSpaceOptions & SCVS_USERACCESSIBLE) != 0);
 	movePos = MovePositionOutsideChar(movePos, sel.MainCaret() - movePos.Position());
 
 	if (inDragDrop == ddInitial) {
@@ -5805,7 +5787,7 @@ void Editor::ButtonMove(Point pt) {
 
 void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 	//Platform::DebugPrintf("ButtonUp %d %d\n", HaveMouseCapture(), inDragDrop);
-	SelectionPosition newPos = SPositionFromLocation(pt);
+	SelectionPosition newPos = SPositionFromLocation(pt, false, false, (virtualSpaceOptions & SCVS_USERACCESSIBLE) != 0);
 	newPos = MovePositionOutsideChar(newPos, sel.MainCaret() - newPos.Position());
 	if (inDragDrop == ddInitial) {
 		inDragDrop = ddNone;
