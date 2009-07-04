@@ -689,18 +689,20 @@ void Editor::SetRectangularRange() {
 		// Right of rectangle
 		int maxX = Platform::Maximum(xAnchor, xCaret);
 		sel.EmptyRanges();
-		if (anchorTop) {
-			for (int line=lineStart; line<=lineEnd; line++) {
-				SelectionPosition spMin(SPositionFromLineX(line, minX));
-				SelectionPosition spMax(SPositionFromLineX(line, maxX));
-				sel.AddSelection(spMin, spMax, anchorLeft);
+		int increment = 1;
+		if (!anchorTop) {
+			increment = -1;
+			lineEnd = lineStart;
+			lineStart = pdoc->LineFromPosition(selEnd.Position());
+		}
+		for (int line=lineStart; line != lineEnd+increment; line += increment) {
+			SelectionPosition spMin(SPositionFromLineX(line, minX));
+			SelectionPosition spMax(SPositionFromLineX(line, maxX));
+			if ((virtualSpaceOptions & SCVS_RECTANGULARSELECTION) == 0) {
+				spMin.SetVirtualSpace(0);				
+				spMax.SetVirtualSpace(0);				
 			}
-		} else {
-			for (int line=lineEnd; line>=lineStart; line--) {
-				SelectionPosition spMin(SPositionFromLineX(line, minX));
-				SelectionPosition spMax(SPositionFromLineX(line, maxX));
-				sel.AddSelection(spMin, spMax, anchorLeft);
-			}
+			sel.AddSelection(spMin, spMax, anchorLeft);
 		}
 	}
 }
@@ -5506,10 +5508,15 @@ void Editor::DwellEnd(bool mouseMoved) {
 	}
 }
 
+static bool AllowVirtualSpace(int	virtualSpaceOptions, bool rectangular) {
+	return ((virtualSpaceOptions & SCVS_USERACCESSIBLE) != 0)
+		|| (rectangular && ((virtualSpaceOptions & SCVS_RECTANGULARSELECTION) != 0));
+}
+
 void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, bool alt) {
 	//Platform::DebugPrintf("ButtonDown %d %d = %d alt=%d %d\n", curTime, lastClickTime, curTime - lastClickTime, alt, inDragDrop);
 	ptMouseLast = pt;
-	SelectionPosition newPos = SPositionFromLocation(pt, false, false, (virtualSpaceOptions & SCVS_USERACCESSIBLE) != 0);
+	SelectionPosition newPos = SPositionFromLocation(pt, false, false, AllowVirtualSpace(virtualSpaceOptions, alt));
 	newPos = MovePositionOutsideChar(newPos, sel.MainCaret() - newPos.Position());
 	inDragDrop = ddNone;
 	sel.SetMoveExtends(false);
@@ -5682,7 +5689,8 @@ void Editor::ButtonMove(Point pt) {
 		DwellEnd(true);
 	}
 
-	SelectionPosition movePos = SPositionFromLocation(pt, false, false, (virtualSpaceOptions & SCVS_USERACCESSIBLE) != 0);
+	SelectionPosition movePos = SPositionFromLocation(pt, false, false, 
+		AllowVirtualSpace(virtualSpaceOptions, sel.IsRectangular()));
 	movePos = MovePositionOutsideChar(movePos, sel.MainCaret() - movePos.Position());
 
 	if (inDragDrop == ddInitial) {
@@ -5787,7 +5795,8 @@ void Editor::ButtonMove(Point pt) {
 
 void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 	//Platform::DebugPrintf("ButtonUp %d %d\n", HaveMouseCapture(), inDragDrop);
-	SelectionPosition newPos = SPositionFromLocation(pt, false, false, (virtualSpaceOptions & SCVS_USERACCESSIBLE) != 0);
+	SelectionPosition newPos = SPositionFromLocation(pt, false, false, 
+		AllowVirtualSpace(virtualSpaceOptions, sel.IsRectangular()));
 	newPos = MovePositionOutsideChar(newPos, sel.MainCaret() - newPos.Position());
 	if (inDragDrop == ddInitial) {
 		inDragDrop = ddNone;
