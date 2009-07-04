@@ -2498,7 +2498,7 @@ gboolean ScintillaGTK::DragMotionThis(GdkDragContext *context,
 		SetDragPosition(PositionFromLocation(npt));
 		GdkDragAction preferredAction = context->suggested_action;
 		int pos = PositionFromLocation(npt);
-		if ((inDragDrop == ddDragging) && (0 == PositionInSelection(pos))) {
+		if ((inDragDrop == ddDragging) && (PositionInSelection(pos))) {
 			// Avoid dragging selection onto itself as that produces a move
 			// with no real effect but which creates undo actions.
 			preferredAction = static_cast<GdkDragAction>(0);
