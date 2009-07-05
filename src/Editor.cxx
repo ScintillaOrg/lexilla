@@ -882,7 +882,7 @@ int Editor::MovePositionTo(int newPos, Selection::selTypes selt, bool ensureVisi
 
 SelectionPosition Editor::MovePositionSoVisible(SelectionPosition pos, int moveDir) {
 	pos = ClampPositionIntoDocument(pos);
-	//pos = MovePositionOutsideChar(pos, moveDir);
+	pos = MovePositionOutsideChar(pos, moveDir);
 	int lineDoc = pdoc->LineFromPosition(pos.Position());
 	if (cs.GetVisible(lineDoc)) {
 		return pos;
