@@ -1518,10 +1518,10 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 				if (selection_data->selection != GDK_SELECTION_PRIMARY) {
 					ClearSelection();
 				}
-				int selStart = SelectionStart();
+				SelectionPosition selStart = SelectionStart();
 
 				if (selText.rectangular) {
-					PasteRectangular(SelectionPosition(selStart), selText.s, selText.len);
+					PasteRectangular(selStart, selText.s, selText.len);
 				} else {
 					int caretMain = sel.MainCaret();
 					pdoc->InsertString(caretMain, selText.s, selText.len);
@@ -1820,7 +1820,7 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 #endif
 		} else if (event->button == 2) {
 			// Grab the primary selection if it exists
-			Position pos = PositionFromLocation(pt);
+			SelectionPosition pos = SPositionFromLocation(pt);
 			if (OwnPrimarySelection() && primary.s == NULL)
 				CopySelectionRange(&primary);
 
@@ -2495,10 +2495,11 @@ gboolean ScintillaGTK::DragMotionThis(GdkDragContext *context,
                                  gint x, gint y, guint dragtime) {
 	try {
 		Point npt(x, y);
-		SetDragPosition(PositionFromLocation(npt));
+		SetDragPosition(SPositionFromLocation(npt, false, false, 
+			((virtualSpaceOptions & SCVS_USERACCESSIBLE) != 0)));
 		GdkDragAction preferredAction = context->suggested_action;
-		int pos = PositionFromLocation(npt);
-		if ((inDragDrop == ddDragging) && (PositionInSelection(pos))) {
+		SelectionPosition pos = SPositionFromLocation(npt);
+		if ((inDragDrop == ddDragging) && (PositionInSelection(pos.Position()))) {
 			// Avoid dragging selection onto itself as that produces a move
 			// with no real effect but which creates undo actions.
 			preferredAction = static_cast<GdkDragAction>(0);
@@ -2522,7 +2523,7 @@ gboolean ScintillaGTK::DragMotion(GtkWidget *widget, GdkDragContext *context,
 void ScintillaGTK::DragLeave(GtkWidget *widget, GdkDragContext * /*context*/, guint) {
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	try {
-		sciThis->SetDragPosition(invalidPosition);
+		sciThis->SetDragPosition(SelectionPosition(invalidPosition));
 		//Platform::DebugPrintf("DragLeave %x\n", sciThis);
 	} catch (...) {
 		sciThis->errorStatus = SC_STATUS_FAILURE;
@@ -2535,7 +2536,7 @@ void ScintillaGTK::DragEnd(GtkWidget *widget, GdkDragContext * /*context*/) {
 		// If drag did not result in drop here or elsewhere
 		if (!sciThis->dragWasDropped)
 			sciThis->SetEmptySelection(sciThis->posDrag);
-		sciThis->SetDragPosition(invalidPosition);
+		sciThis->SetDragPosition(SelectionPosition(invalidPosition));
 		//Platform::DebugPrintf("DragEnd %x %d\n", sciThis, sciThis->dragWasDropped);
 		sciThis->inDragDrop = ddNone;
 	} catch (...) {
@@ -2548,7 +2549,7 @@ gboolean ScintillaGTK::Drop(GtkWidget *widget, GdkDragContext * /*context*/,
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	try {
 		//Platform::DebugPrintf("Drop %x\n", sciThis);
-		sciThis->SetDragPosition(invalidPosition);
+		sciThis->SetDragPosition(SelectionPosition(invalidPosition));
 	} catch (...) {
 		sciThis->errorStatus = SC_STATUS_FAILURE;
 	}
@@ -2560,7 +2561,7 @@ void ScintillaGTK::DragDataReceived(GtkWidget *widget, GdkDragContext * /*contex
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	try {
 		sciThis->ReceivedDrop(selection_data);
-		sciThis->SetDragPosition(invalidPosition);
+		sciThis->SetDragPosition(SelectionPosition(invalidPosition));
 	} catch (...) {
 		sciThis->errorStatus = SC_STATUS_FAILURE;
 	}
@@ -2575,18 +2576,19 @@ void ScintillaGTK::DragDataGet(GtkWidget *widget, GdkDragContext *context,
 			sciThis->GetSelection(selection_data, info, &sciThis->drag);
 		}
 		if (context->action == GDK_ACTION_MOVE) {
-			int selStart = sciThis->SelectionStart();
-			int selEnd = sciThis->SelectionEnd();
+			SelectionPosition selStart = sciThis->SelectionStart();
+			SelectionPosition selEnd = sciThis->SelectionEnd();
 			if (sciThis->posDrop > selStart) {
 				if (sciThis->posDrop > selEnd)
-					sciThis->posDrop = sciThis->posDrop - (selEnd - selStart);
+					sciThis->posDrop.Add(-((selEnd.Position() - selStart.Position())));
 				else
 					sciThis->posDrop = selStart;
-				sciThis->posDrop = sciThis->pdoc->ClampPositionIntoDocument(sciThis->posDrop);
+				sciThis->posDrop = SelectionPosition(
+					sciThis->pdoc->ClampPositionIntoDocument(sciThis->posDrop.Position()));
 			}
 			sciThis->ClearSelection();
 		}
-		sciThis->SetDragPosition(invalidPosition);
+		sciThis->SetDragPosition(SelectionPosition(invalidPosition));
 	} catch (...) {
 		sciThis->errorStatus = SC_STATUS_FAILURE;
 	}
