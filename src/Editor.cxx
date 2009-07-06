@@ -711,9 +711,10 @@ void Editor::InvalidateSelection(SelectionRange newMain, bool invalidateWholeSel
 	if (sel.Count() > 1 || !(sel.RangeMain().anchor == newMain.anchor) || sel.IsRectangular()) {
 		invalidateWholeSelection = true;
 	}
-	int firstAffected = newMain.Start().Position();
+	int firstAffected = Platform::Minimum(sel.RangeMain().Start().Position(), newMain.Start().Position());
 	// +1 for lastAffected ensures caret repainted
 	int lastAffected = Platform::Maximum(newMain.caret.Position()+1, newMain.anchor.Position());
+	lastAffected = Platform::Maximum(lastAffected, sel.RangeMain().End().Position());
 	if (invalidateWholeSelection) {
 		for (size_t r=0; r<sel.Count(); r++) {
 			firstAffected = Platform::Minimum(firstAffected, sel.Range(r).caret.Position());
