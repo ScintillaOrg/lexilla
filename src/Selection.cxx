@@ -70,6 +70,26 @@ int SelectionRange::Length() const {
 	}
 }
 
+#ifdef NEEDED
+// Like Length but takes virtual space into account
+int SelectionRange::Width() const {
+	SelectionPosition first;
+	SelectionPosition last;
+	if (anchor > caret) {
+		first = caret;
+		last = anchor;
+	} else {
+		first = anchor;
+		last = caret;
+	}
+	if (first.Position() == last.Position()) {
+		return last.VirtualSpace() - first.VirtualSpace();
+	} else {
+		return last.Position() - first.Position() + last.VirtualSpace();
+	}
+}
+#endif
+
 bool SelectionRange::Contains(int pos) const {
 	if (anchor > caret)
 		return (pos >= caret.Position()) && (pos <= anchor.Position());

@@ -109,8 +109,8 @@ Editor::Editor() {
 	ptMouseLast.y = 0;
 	inDragDrop = ddNone;
 	dropWentOutside = false;
-	posDrag = invalidPosition;
-	posDrop = invalidPosition;
+	posDrag = SelectionPosition(invalidPosition);
+	posDrop = SelectionPosition(invalidPosition);
 	selectionType = selChar;
 
 	lastXChosen = 0;
@@ -663,12 +663,12 @@ bool Editor::SelectionEmpty() {
 	return sel.Empty();
 }
 
-int Editor::SelectionStart() {
-	return sel.RangeMain().Start().Position();
+SelectionPosition Editor::SelectionStart() {
+	return sel.RangeMain().Start();
 }
 
-int Editor::SelectionEnd() {
-	return sel.RangeMain().End().Position();
+SelectionPosition Editor::SelectionEnd() {
+	return sel.RangeMain().End();
 }
 
 void Editor::SetRectangularRange() {
@@ -808,24 +808,7 @@ bool Editor::SelectionContainsProtected() {
  * Asks document to find a good position and then moves out of any invisible positions.
  */
 int Editor::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) const {
-	pos = pdoc->MovePositionOutsideChar(pos, moveDir, checkLineEnd);
-	if (vs.ProtectionActive()) {
-		int mask = pdoc->stylingBitsMask;
-		if (moveDir > 0) {
-			if ((pos > 0) && vs.styles[pdoc->StyleAt(pos - 1) & mask].IsProtected()) {
-				while ((pos < pdoc->Length()) &&
-				        (vs.styles[pdoc->StyleAt(pos) & mask].IsProtected()))
-					pos++;
-			}
-		} else if (moveDir < 0) {
-			if (vs.styles[pdoc->StyleAt(pos) & mask].IsProtected()) {
-				while ((pos > 0) &&
-				        (vs.styles[pdoc->StyleAt(pos - 1) & mask].IsProtected()))
-					pos--;
-			}
-		}
-	}
-	return pos;
+	return MovePositionOutsideChar(SelectionPosition(pos), moveDir, checkLineEnd).Position();
 }
 
 SelectionPosition Editor::MovePositionOutsideChar(SelectionPosition pos, int moveDir, bool checkLineEnd) const {
@@ -852,9 +835,9 @@ SelectionPosition Editor::MovePositionOutsideChar(SelectionPosition pos, int mov
 }
 
 int Editor::MovePositionTo(SelectionPosition newPos, Selection::selTypes selt, bool ensureVisible) {
-	//int delta = newPos.Position() - sel.MainCaret();
+	int delta = newPos.Position() - sel.MainCaret();
 	newPos = ClampPositionIntoDocument(newPos);
-	//newPos = MovePositionOutsideChar(newPos, delta);
+	newPos = MovePositionOutsideChar(newPos, delta);
 	if (!sel.IsRectangular() && (selt == Selection::selRectangle)) {
 		// Switching to rectangular
 		SelectionRange rangeMain = sel.RangeMain();
@@ -1038,14 +1021,14 @@ void Editor::EnsureCaretVisible(bool useMargin, bool vert, bool horiz) {
 	//Platform::DebugPrintf("EnsureCaretVisible %d %s\n", xOffset, useMargin ? " margin" : " ");
 	PRectangle rcClient = GetTextRectangle();
 	//int rcClientFullWidth = rcClient.Width();
-	int posCaret = sel.MainCaret();
-	if (posDrag >= 0) {
+	SelectionPosition posCaret = sel.RangeMain().caret;
+	if (posDrag.IsValid()) {
 		posCaret = posDrag;
 	}
 	Point pt = LocationFromPosition(posCaret);
 	Point ptBottomCaret = pt;
 	ptBottomCaret.y += vs.lineHeight - 1;
-	int lineCaret = DisplayFromPosition(posCaret);
+	int lineCaret = DisplayFromPosition(posCaret.Position());
 	bool bSlop, bStrict, bJump, bEven;
 
 	// Vertical positioning
@@ -1282,8 +1265,8 @@ void Editor::DropCaret() {
 }
 
 void Editor::InvalidateCaret() {
-	if (posDrag >= 0) {
-		InvalidateRange(posDrag, posDrag + 1);
+	if (posDrag.IsValid()) {
+		InvalidateRange(posDrag.Position(), posDrag.Position() + 1);
 	} else {
 		for (size_t r=0; r<sel.Count(); r++) {
 			InvalidateRange(sel.Range(r).caret.Position(), sel.Range(r).caret.Position() + 1);
@@ -3051,16 +3034,16 @@ void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 void Editor::DrawCarets(Surface *surface, ViewStyle &vsDraw, int lineDoc, int xStart,
         PRectangle rcLine, LineLayout *ll, int subLine) {
 	// When drag is active it is the only caret drawn
-	bool drawDrag = posDrag != INVALID_POSITION;
+	bool drawDrag = posDrag.IsValid();
 	if (hideSelection && !drawDrag)
 		return;
 	Range rangeLine(pdoc->LineStart(lineDoc), pdoc->LineStart(lineDoc + 1));
 	// For each selection draw
 	for (size_t r=0; (r<sel.Count()) || drawDrag; r++) {
 		const bool mainCaret = r == sel.Main();
-		const int posCaret = (drawDrag ? posDrag : sel.Range(r).caret.Position());
-		const int offset = posCaret - rangeLine.start;
-		const int virtualOffset = drawDrag ? 0 : sel.Range(r).caret.VirtualSpace() * vsDraw.spaceWidth;
+		const SelectionPosition posCaret = (drawDrag ? posDrag : sel.Range(r).caret);
+		const int offset = posCaret.Position() - rangeLine.start;
+		const int virtualOffset = posCaret.VirtualSpace() * vsDraw.spaceWidth;
 		if (ll->InLine(offset, subLine) && offset <= ll->numCharsInLine) {
 			int xposCaret = ll->positions[offset] + virtualOffset - ll->positions[ll->LineStart(subLine)] + xStart;
 			if (ll->wrapIndent != 0) {
@@ -3069,7 +3052,7 @@ void Editor::DrawCarets(Surface *surface, ViewStyle &vsDraw, int lineDoc, int xS
 					xposCaret += ll->wrapIndent;
 			}
 			if ((xposCaret >= 0) && (vsDraw.caretWidth > 0) && (vsDraw.caretStyle != CARETSTYLE_INVISIBLE) &&
-			        ((posDrag >= 0) || ((caret.active && caret.on) || (!multiLineCaretBlinks && !mainCaret)))) {
+			        ((posDrag.IsValid()) || ((caret.active && caret.on) || (!multiLineCaretBlinks && !mainCaret)))) {
 				bool caretAtEOF = false;
 				bool caretAtEOL = false;
 				bool drawBlockCaret = false;
@@ -3077,10 +3060,10 @@ void Editor::DrawCarets(Surface *surface, ViewStyle &vsDraw, int lineDoc, int xS
 				int caretWidthOffset = 0;
 				PRectangle rcCaret = rcLine;
 
-				if (posCaret == pdoc->Length())	{   // At end of document
+				if (posCaret.Position() == pdoc->Length())	{   // At end of document
 					caretAtEOF = true;
 					widthOverstrikeCaret = vsDraw.aveCharWidth;
-				} else if ((posCaret - rangeLine.start) >= ll->numCharsInLine) {	// At end of line
+				} else if ((posCaret.Position() - rangeLine.start) >= ll->numCharsInLine) {	// At end of line
 					caretAtEOL = true;
 					widthOverstrikeCaret = vsDraw.aveCharWidth;
 				} else {
@@ -3091,7 +3074,7 @@ void Editor::DrawCarets(Surface *surface, ViewStyle &vsDraw, int lineDoc, int xS
 
 				if (offset > ll->LineStart(subLine))
 					caretWidthOffset = 1;	// Move back so overlaps both character cells.
-				if (posDrag >= 0) {
+				if (posDrag.IsValid()) {
 					/* Dragging text, use a line caret */
 					rcCaret.left = xposCaret - caretWidthOffset;
 					rcCaret.right = rcCaret.left + vsDraw.caretWidth;
@@ -3115,7 +3098,7 @@ void Editor::DrawCarets(Surface *surface, ViewStyle &vsDraw, int lineDoc, int xS
 					rcCaret.right = rcCaret.left + vsDraw.caretWidth;
 				}
 				if (drawBlockCaret) {
-					DrawBlockCaret(surface, vsDraw, ll, subLine, xStart, offset, posCaret, rcCaret);
+					DrawBlockCaret(surface, vsDraw, ll, subLine, xStart, offset, posCaret.Position(), rcCaret);
 				} else {
 					surface->FillRectangle(rcCaret, mainCaret ? vsDraw.caretcolour.allocated : vsDraw.selbackground2.allocated);
 				}
@@ -3225,10 +3208,10 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 
 		int visibleLine = topLine + screenLinePaintFirst;
 
-		int posCaret = sel.MainCaret();
-		if (posDrag >= 0)
+		SelectionPosition posCaret = sel.RangeMain().caret;
+		if (posDrag.IsValid())
 			posCaret = posDrag;
-		int lineCaret = pdoc->LineFromPosition(posCaret);
+		int lineCaret = pdoc->LineFromPosition(posCaret.Position());
 
 		// Remove selection margin from drawing area so text will not be drawn
 		// on it in unbuffered mode.
@@ -3610,6 +3593,17 @@ void Editor::ChangeSize() {
 	}
 }
 
+int Editor::InsertSpace(int position, unsigned int spaces) {
+		if (spaces > 0) {
+			char *spaceText = new char[spaces];
+			memset(spaceText, ' ', spaces);
+			pdoc->InsertString(position, spaceText, spaces);
+			position += spaces;
+			delete []spaceText;
+		}
+		return position;
+}
+
 void Editor::AddChar(char ch) {
 	char s[2];
 	s[0] = ch;
@@ -3642,14 +3636,7 @@ void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 					}
 				}
 			}
-			const unsigned int spaces = sel.Range(r).caret.VirtualSpace();
-			if (spaces > 0) {
-				char *spaceText = new char[spaces];
-				memset(spaceText, ' ', spaces);
-				pdoc->InsertString(positionInsert, spaceText, spaces);
-				positionInsert += spaces;
-				delete []spaceText;
-			}
+			positionInsert = InsertSpace(positionInsert, sel.Range(r).caret.VirtualSpace());
 			if (pdoc->InsertString(positionInsert, s, len)) {
 				sel.Range(r).caret.SetPosition(positionInsert + len);
 				sel.Range(r).anchor.SetPosition(positionInsert + len);
@@ -4466,23 +4453,23 @@ void Editor::LineTranspose() {
 
 void Editor::Duplicate(bool forLine) {
 	// TODO: multiple selection by duplicating each selection
-	int start = SelectionStart();
-	int end = SelectionEnd();
+	SelectionPosition start = SelectionStart();
+	SelectionPosition end = SelectionEnd();
 	if (sel.Empty()) {
 		forLine = true;
 	}
 	if (forLine) {
 		int line = pdoc->LineFromPosition(sel.MainCaret());
-		start = pdoc->LineStart(line);
-		end = pdoc->LineEnd(line);
+		start = SelectionPosition(pdoc->LineStart(line));
+		end = SelectionPosition(pdoc->LineEnd(line));
 	}
-	char *text = CopyRange(start, end);
+	char *text = CopyRange(start.Position(), end.Position());
 	if (forLine) {
 		const char *eol = StringFromEOLMode(pdoc->eolMode);
-		pdoc->InsertCString(end, eol);
-		pdoc->InsertString(end + istrlen(eol), text, end - start);
+		pdoc->InsertCString(end.Position(), eol);
+		pdoc->InsertString(end.Position() + istrlen(eol), text, SelectionRange(end, start).Length());
 	} else {
-		pdoc->InsertString(end, text, end - start);
+		pdoc->InsertString(end.Position(), text, SelectionRange(end, start).Length());
 	}
 	delete []text;
 }
@@ -4958,15 +4945,15 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		}
 		break;
 	case SCI_LINECOPY: {
-			int lineStart = pdoc->LineFromPosition(SelectionStart());
-			int lineEnd = pdoc->LineFromPosition(SelectionEnd());
+			int lineStart = pdoc->LineFromPosition(SelectionStart().Position());
+			int lineEnd = pdoc->LineFromPosition(SelectionEnd().Position());
 			CopyRangeToClipboard(pdoc->LineStart(lineStart),
 			        pdoc->LineStart(lineEnd + 1));
 		}
 		break;
 	case SCI_LINECUT: {
-			int lineStart = pdoc->LineFromPosition(SelectionStart());
-			int lineEnd = pdoc->LineFromPosition(SelectionEnd());
+			int lineStart = pdoc->LineFromPosition(SelectionStart().Position());
+			int lineEnd = pdoc->LineFromPosition(SelectionEnd().Position());
 			int start = pdoc->LineStart(lineStart);
 			int end = pdoc->LineStart(lineEnd + 1);
 			SetSelection(start, end);
@@ -5176,7 +5163,7 @@ long Editor::FindText(
  * operation is self-contained.
  */
 void Editor::SearchAnchor() {
-	searchAnchor = SelectionStart();
+	searchAnchor = SelectionStart().Position();
 }
 
 /**
@@ -5344,12 +5331,12 @@ void Editor::CopyText(int length, const char *text) {
 	CopyToClipboard(selectedText);
 }
 
-void Editor::SetDragPosition(int newPos) {
-	if (newPos >= 0) {
+void Editor::SetDragPosition(SelectionPosition newPos) {
+	if (newPos.Position() >= 0) {
 		newPos = MovePositionOutsideChar(newPos, 1);
 		posDrop = newPos;
 	}
-	if (posDrag != newPos) {
+	if (!(posDrag == newPos)) {
 		caret.on = true;
 		SetTicking(true);
 		InvalidateCaret();
@@ -5378,12 +5365,12 @@ void Editor::StartDrag() {
 	//DisplayCursor(Window::cursorArrow);
 }
 
-void Editor::DropAt(int position, const char *value, bool moving, bool rectangular) {
+void Editor::DropAt(SelectionPosition position, const char *value, bool moving, bool rectangular) {
 	//Platform::DebugPrintf("DropAt %d %d\n", inDragDrop, position);
 	if (inDragDrop == ddDragging)
 		dropWentOutside = false;
 
-	bool positionWasInSelection = PositionInSelection(position);
+	bool positionWasInSelection = PositionInSelection(position.Position());
 
 	bool positionOnEdgeOfSelection =
 	    (position == SelectionStart()) || (position == SelectionEnd());
@@ -5391,27 +5378,27 @@ void Editor::DropAt(int position, const char *value, bool moving, bool rectangul
 	if ((inDragDrop != ddDragging) || !(positionWasInSelection) ||
 	        (positionOnEdgeOfSelection && !moving)) {
 
-		int selStart = SelectionStart();
-		int selEnd = SelectionEnd();
+		SelectionPosition selStart = SelectionStart();
+		SelectionPosition selEnd = SelectionEnd();
 
 		pdoc->BeginUndoAction();
 
-		int positionAfterDeletion = position;
+		SelectionPosition positionAfterDeletion = position;
 		if ((inDragDrop == ddDragging) && moving) {
 			// Remove dragged out text
 			if (rectangular || sel.selType == Selection::selLines) {
 				for (size_t r=0; r<sel.Count(); r++) {
-					if (position >= sel.Range(r).Start().Position()) {
-						if (position > sel.Range(r).End().Position()) {
-							positionAfterDeletion -= sel.Range(r).End().Position() - sel.Range(r).Start().Position();
+					if (position >= sel.Range(r).Start()) {
+						if (position > sel.Range(r).End()) {
+							positionAfterDeletion.Add(-sel.Range(r).Length());
 						} else {
-							positionAfterDeletion -= position - sel.Range(r).Start().Position();
+							positionAfterDeletion.Add(-SelectionRange(position, sel.Range(r).Start()).Length());
 						}
 					}
 				}
 			} else {
 				if (position > selStart) {
-					positionAfterDeletion -= selEnd - selStart;
+					positionAfterDeletion.Add(-SelectionRange(selEnd, selStart).Length());
 				}
 			}
 			ClearSelection();
@@ -5424,9 +5411,12 @@ void Editor::DropAt(int position, const char *value, bool moving, bool rectangul
 			// Should try to select new rectangle but it may not be a rectangle now so just select the drop position
 			SetEmptySelection(position);
 		} else {
-			position = MovePositionOutsideChar(position, sel.MainCaret() - position);
-			if (pdoc->InsertCString(position, value)) {
-				SetSelection(position + istrlen(value), position);
+			position = MovePositionOutsideChar(position, sel.MainCaret() - position.Position());
+			position = SelectionPosition(InsertSpace(position.Position(), position.VirtualSpace()));
+			if (pdoc->InsertCString(position.Position(), value)) {
+				SelectionPosition posAfterInsertion = position;
+				posAfterInsertion.Add(istrlen(value));
+				SetSelection(posAfterInsertion, position);
 			}
 			pdoc->EndUndoAction();
 		}
@@ -5595,7 +5585,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 				//lineAnchor = lineStart; // Keep the same anchor for ButtonMove
 			}
 
-			SetDragPosition(invalidPosition);
+			SetDragPosition(SelectionPosition(invalidPosition));
 			SetMouseCapture(true);
 			selectionType = selLine;
 		} else {
@@ -5610,7 +5600,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 			}
 			SetMouseCapture(true);
 			if (inDragDrop != ddInitial) {
-				SetDragPosition(invalidPosition);
+				SetDragPosition(SelectionPosition(invalidPosition));
 				if (ctrl) {
 					InvalidateSelection(SelectionRange(newPos), true);
 					sel.AddSelection(newPos);
@@ -5696,7 +5686,7 @@ void Editor::ButtonMove(Point pt) {
 	if (inDragDrop == ddInitial) {
 		if (DragThreshold(ptMouseLast, pt)) {
 			SetMouseCapture(false);
-			SetDragPosition(movePos.Position());
+			SetDragPosition(movePos);
 			CopySelectionRange(&drag);
 			StartDrag();
 		}
@@ -5714,8 +5704,8 @@ void Editor::ButtonMove(Point pt) {
 		autoScrollTimer.ticksToWait = autoScrollDelay;
 
 		// Adjust selection
-		if (posDrag >= 0) {
-			SetDragPosition(movePos.Position());
+		if (posDrag.IsValid()) {
+			SetDragPosition(movePos);
 		} else {
 			if (selectionType == selChar) {
 				if (sel.IsRectangular()) {
@@ -5813,21 +5803,21 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 		SetMouseCapture(false);
 		NotifyIndicatorClick(false, newPos.Position(), false, false, false);
 		if (inDragDrop == ddDragging) {
-			int selStart = SelectionStart();
-			int selEnd = SelectionEnd();
+			SelectionPosition selStart = SelectionStart();
+			SelectionPosition selEnd = SelectionEnd();
 			if (selStart < selEnd) {
 				if (drag.len) {
 					if (ctrl) {
 						if (pdoc->InsertString(newPos.Position(), drag.s, drag.len)) {
 							SetSelection(newPos.Position(), newPos.Position() + drag.len);
 						}
-					} else if (newPos.Position() < selStart) {
-						pdoc->DeleteChars(selStart, drag.len);
+					} else if (newPos < selStart) {
+						pdoc->DeleteChars(selStart.Position(), drag.len);
 						if (pdoc->InsertString(newPos.Position(), drag.s, drag.len)) {
 							SetSelection(newPos.Position(), newPos.Position() + drag.len);
 						}
-					} else if (newPos.Position() > selEnd) {
-						pdoc->DeleteChars(selStart, drag.len);
+					} else if (newPos > selEnd) {
+						pdoc->DeleteChars(selStart.Position(), drag.len);
 						newPos.Add(-drag.len);
 						if (pdoc->InsertString(newPos.Position(), drag.s, drag.len)) {
 							SetSelection(newPos.Position(), newPos.Position() + drag.len);
@@ -6421,7 +6411,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETSELTEXT: {
 			if (lParam == 0) {
 				if (sel.selType == Selection::selStream) {
-					return 1 + SelectionEnd() - SelectionStart();
+					return 1 + SelectionEnd().Position() - SelectionStart().Position();
 				} else {
 					// TODO: why is selLines handled the slow way?
 					int size = 0;
@@ -6455,7 +6445,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_POSITIONFROMLINE:
 		if (static_cast<int>(wParam) < 0)
-			wParam = pdoc->LineFromPosition(SelectionStart());
+			wParam = pdoc->LineFromPosition(SelectionStart().Position());
 		if (wParam == 0)
 			return 0; 	// Even if there is no text, there is a first line that starts at 0
 		if (static_cast<int>(wParam) > pdoc->LinesTotal())

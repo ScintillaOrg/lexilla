@@ -378,7 +378,7 @@ void ScintillaWin::StartDrag() {
 		}
 	}
 	inDragDrop = ddNone;
-	SetDragPosition(invalidPosition);
+	SetDragPosition(SelectionPosition(invalidPosition));
 }
 
 // Avoid warnings everywhere for old style casts by concentrating them here
@@ -948,7 +948,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 		case EM_LINEFROMCHAR:
 			if (static_cast<int>(wParam) < 0) {
-				wParam = SelectionStart();
+				wParam = SelectionStart().Position();
 			}
 			return pdoc->LineFromPosition(wParam);
 
@@ -957,20 +957,20 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 		case EM_GETSEL:
 			if (wParam) {
-				*reinterpret_cast<int *>(wParam) = SelectionStart();
+				*reinterpret_cast<int *>(wParam) = SelectionStart().Position();
 			}
 			if (lParam) {
-				*reinterpret_cast<int *>(lParam) = SelectionEnd();
+				*reinterpret_cast<int *>(lParam) = SelectionEnd().Position();
 			}
-			return MAKELONG(SelectionStart(), SelectionEnd());
+			return MAKELONG(SelectionStart().Position(), SelectionEnd().Position());
 
 		case EM_EXGETSEL: {
 				if (lParam == 0) {
 					return 0;
 				}
 				Sci_CharacterRange *pCR = reinterpret_cast<Sci_CharacterRange *>(lParam);
-				pCR->cpMin = SelectionStart();
-				pCR->cpMax = SelectionEnd();
+				pCR->cpMin = SelectionStart().Position();
+				pCR->cpMax = SelectionEnd().Position();
 			}
 			break;
 
@@ -1004,7 +1004,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 					SetSelection(pCR->cpMin, pCR->cpMax);
 				}
 				EnsureCaretVisible();
-				return pdoc->LineFromPosition(SelectionStart());
+				return pdoc->LineFromPosition(SelectionStart().Position());
 			}
 
 		case SCI_GETDIRECTFUNCTION:
@@ -2164,7 +2164,8 @@ STDMETHODIMP ScintillaWin::DragOver(DWORD grfKeyState, POINTL pt, PDWORD pdwEffe
 		// Update the cursor.
 		POINT rpt = {pt.x, pt.y};
 		::ScreenToClient(MainHWND(), &rpt);
-		SetDragPosition(PositionFromLocation(Point(rpt.x, rpt.y)));
+		SetDragPosition(SPositionFromLocation(Point(rpt.x, rpt.y), false, false, 
+			((virtualSpaceOptions & SCVS_USERACCESSIBLE) != 0)));
 
 		return S_OK;
 	} catch (...) {
@@ -2175,7 +2176,7 @@ STDMETHODIMP ScintillaWin::DragOver(DWORD grfKeyState, POINTL pt, PDWORD pdwEffe
 
 STDMETHODIMP ScintillaWin::DragLeave() {
 	try {
-		SetDragPosition(invalidPosition);
+		SetDragPosition(SelectionPosition(invalidPosition));
 		return S_OK;
 	} catch (...) {
 		errorStatus = SC_STATUS_FAILURE;
@@ -2191,7 +2192,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 		if (pIDataSource == NULL)
 			return E_POINTER;
 
-		SetDragPosition(invalidPosition);
+		SetDragPosition(SelectionPosition(invalidPosition));
 
 		STGMEDIUM medium={0,{0},0};
 
@@ -2249,7 +2250,8 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 
 		POINT rpt = {pt.x, pt.y};
 		::ScreenToClient(MainHWND(), &rpt);
-		int movePos = PositionFromLocation(Point(rpt.x, rpt.y));
+		SelectionPosition movePos = SPositionFromLocation(Point(rpt.x, rpt.y), false, false, 
+			((virtualSpaceOptions & SCVS_USERACCESSIBLE) != 0));
 
 		DropAt(movePos, data, *pdwEffect == DROPEFFECT_MOVE, hrRectangular == S_OK);
 

@@ -51,6 +51,9 @@ public:
 	void Add(int increment) {
 		position = position + increment;
 	}
+	bool IsValid() const {
+		return position >= 0;
+	}
 };
 
 struct SelectionRange {
@@ -69,6 +72,7 @@ struct SelectionRange {
 		return anchor == caret;
 	}
 	int Length() const;
+	// int Width() const;	// Like Length but takes virtual space into account
 	bool operator ==(const SelectionRange &other) const {
 		return caret == other.caret && anchor == other.anchor;
 	}

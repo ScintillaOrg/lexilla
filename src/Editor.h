@@ -175,8 +175,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	Point ptMouseLast;
 	enum { ddNone, ddInitial, ddDragging } inDragDrop;
 	bool dropWentOutside;
-	int posDrag;
-	int posDrop;
+	SelectionPosition posDrag;
+	SelectionPosition posDrop;
 	int lastXChosen;
 	int lineAnchor;
 	int originalAnchorPos;
@@ -278,8 +278,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	int CurrentPosition();
 	bool SelectionEmpty();
-	int SelectionStart();
-	int SelectionEnd();
+	SelectionPosition SelectionStart();
+	SelectionPosition SelectionEnd();
 	void SetRectangularRange();
 	void InvalidateSelection(SelectionRange newMain, bool invalidateWholeSelection=false);
 	void SetSelection(SelectionPosition currentPos_, SelectionPosition anchor_);
@@ -350,6 +350,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void SetScrollBars();
 	void ChangeSize();
 
+	int InsertSpace(int position, unsigned int spaces);
 	void AddChar(char ch);
 	virtual void AddCharUTF(char *s, unsigned int len, bool treatAsDBCS=false);
 	void ClearSelection();
@@ -425,11 +426,11 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void CopySelectionRange(SelectionText *ss, bool allowLineCopy=false);
 	void CopyRangeToClipboard(int start, int end);
 	void CopyText(int length, const char *text);
-	void SetDragPosition(int newPos);
+	void SetDragPosition(SelectionPosition newPos);
 	virtual void DisplayCursor(Window::Cursor c);
 	virtual bool DragThreshold(Point ptStart, Point ptNow);
 	virtual void StartDrag();
-	void DropAt(int position, const char *value, bool moving, bool rectangular);
+	void DropAt(SelectionPosition position, const char *value, bool moving, bool rectangular);
 	/** PositionInSelection returns true if position in selection. */
 	bool PositionInSelection(int pos);
 	bool PointInSelection(Point pt);
