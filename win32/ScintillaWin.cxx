@@ -2164,8 +2164,7 @@ STDMETHODIMP ScintillaWin::DragOver(DWORD grfKeyState, POINTL pt, PDWORD pdwEffe
 		// Update the cursor.
 		POINT rpt = {pt.x, pt.y};
 		::ScreenToClient(MainHWND(), &rpt);
-		SetDragPosition(SPositionFromLocation(Point(rpt.x, rpt.y), false, false, 
-			((virtualSpaceOptions & SCVS_USERACCESSIBLE) != 0)));
+		SetDragPosition(SPositionFromLocation(Point(rpt.x, rpt.y), false, false, UserVirtualSpace()));
 
 		return S_OK;
 	} catch (...) {
@@ -2250,8 +2249,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 
 		POINT rpt = {pt.x, pt.y};
 		::ScreenToClient(MainHWND(), &rpt);
-		SelectionPosition movePos = SPositionFromLocation(Point(rpt.x, rpt.y), false, false, 
-			((virtualSpaceOptions & SCVS_USERACCESSIBLE) != 0));
+		SelectionPosition movePos = SPositionFromLocation(Point(rpt.x, rpt.y), false, false, UserVirtualSpace()); 
 
 		DropAt(movePos, data, *pdwEffect == DROPEFFECT_MOVE, hrRectangular == S_OK);
 

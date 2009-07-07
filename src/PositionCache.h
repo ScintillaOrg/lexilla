@@ -66,6 +66,7 @@ public:
 		char bracesMatchStyle, int xHighlight);
 	void RestoreBracesHighlight(Range rangeLine, Position braces[]);
 	int FindBefore(int x, int lower, int upper) const;
+	int EndLineStyle() const;
 };
 
 /**

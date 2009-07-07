@@ -197,6 +197,10 @@ int LineLayout::FindBefore(int x, int lower, int upper) const {
 	return lower;
 }
 
+int LineLayout::EndLineStyle() const {
+	return styles[numCharsBeforeEOL > 0 ? numCharsBeforeEOL-1 : 0];
+}
+
 LineLayoutCache::LineLayoutCache() :
 	level(0), length(0), size(0), cache(0),
 	allInvalidated(false), styleClock(-1), useCount(0) {

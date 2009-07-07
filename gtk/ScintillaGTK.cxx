@@ -2495,8 +2495,7 @@ gboolean ScintillaGTK::DragMotionThis(GdkDragContext *context,
                                  gint x, gint y, guint dragtime) {
 	try {
 		Point npt(x, y);
-		SetDragPosition(SPositionFromLocation(npt, false, false, 
-			((virtualSpaceOptions & SCVS_USERACCESSIBLE) != 0)));
+		SetDragPosition(SPositionFromLocation(npt, false, false, UserVirtualSpace()));
 		GdkDragAction preferredAction = context->suggested_action;
 		SelectionPosition pos = SPositionFromLocation(npt);
 		if ((inDragDrop == ddDragging) && (PositionInSelection(pos.Position()))) {

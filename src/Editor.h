@@ -276,6 +276,9 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	PRectangle RectangleFromRange(int start, int end);
 	void InvalidateRange(int start, int end);
 
+	bool UserVirtualSpace() const {
+		return ((virtualSpaceOptions & SCVS_USERACCESSIBLE) != 0);
+	}
 	int CurrentPosition();
 	bool SelectionEmpty();
 	SelectionPosition SelectionStart();

@@ -473,7 +473,7 @@ SelectionPosition Editor::SPositionFromLocation(Point pt, bool canReturnInvalid,
 				i++;
 			}
 			if (virtualSpace) {
-				const int spaceWidth = static_cast<int>(vs.spaceWidth);
+				const int spaceWidth = static_cast<int>(vs.styles[ll->EndLineStyle()].spaceWidth);
 				int spaceOffset = (pt.x + subLineStart - ll->positions[lineEnd] + spaceWidth / 2) / 
 					spaceWidth;
 				return SelectionPosition(lineEnd + posLineStart, spaceOffset);
@@ -564,7 +564,7 @@ SelectionPosition Editor::SPositionFromLineX(int lineDoc, int x) {
 			}
 			i++;
 		}
-		const int spaceWidth = static_cast<int>(vs.spaceWidth);
+		const int spaceWidth = static_cast<int>(vs.styles[ll->EndLineStyle()].spaceWidth);
 		int spaceOffset = (x + subLineStart - ll->positions[lineEnd] + spaceWidth / 2) / spaceWidth;
 		return SelectionPosition(lineEnd + posLineStart, spaceOffset);
 	}
@@ -2238,8 +2238,10 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 	PRectangle rcSegment = rcLine;
 
 	int virtualSpace = 0;
-	if (subLine == (ll->lines - 1)) 
-		virtualSpace = sel.VirtualSpaceFor(pdoc->LineEnd(line)) * vsDraw.spaceWidth;
+	if (subLine == (ll->lines - 1)) {
+		const int spaceWidth = static_cast<int>(vsDraw.styles[ll->EndLineStyle()].spaceWidth);
+		virtualSpace = sel.VirtualSpaceFor(pdoc->LineEnd(line)) * spaceWidth;
+	}
 
 	// Fill in a PRectangle representing the end of line characters
 	int xEol = ll->positions[lineEnd] - subLineStart;
@@ -2863,8 +2865,9 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 			SelectionPosition spEnd;
 			if (sel.Range(r).Intersect(posLineStart, posLineStart + lineEnd, spStart, spEnd)) {
 				if (!(spStart == spEnd)) {
-					rcSegment.left = xStart + ll->positions[spStart.Position() - posLineStart] - subLineStart + spStart.VirtualSpace() * vsDraw.spaceWidth;
-					rcSegment.right = xStart + ll->positions[spEnd.Position() - posLineStart] - subLineStart + spEnd.VirtualSpace() * vsDraw.spaceWidth;
+					const int spaceWidth = static_cast<int>(vsDraw.styles[ll->EndLineStyle()].spaceWidth);
+					rcSegment.left = xStart + ll->positions[spStart.Position() - posLineStart] - subLineStart + spStart.VirtualSpace() * spaceWidth;
+					rcSegment.right = xStart + ll->positions[spEnd.Position() - posLineStart] - subLineStart + spEnd.VirtualSpace() * spaceWidth;
 					rcSegment.left = Platform::Maximum(rcSegment.left, rcLine.left);
 					rcSegment.right = Platform::Minimum(rcSegment.right, rcLine.right);
 					SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw), 
@@ -3044,7 +3047,8 @@ void Editor::DrawCarets(Surface *surface, ViewStyle &vsDraw, int lineDoc, int xS
 		const bool mainCaret = r == sel.Main();
 		const SelectionPosition posCaret = (drawDrag ? posDrag : sel.Range(r).caret);
 		const int offset = posCaret.Position() - rangeLine.start;
-		const int virtualOffset = posCaret.VirtualSpace() * vsDraw.spaceWidth;
+		const int spaceWidth = static_cast<int>(vsDraw.styles[ll->EndLineStyle()].spaceWidth);
+		const int virtualOffset = posCaret.VirtualSpace() * spaceWidth;
 		if (ll->InLine(offset, subLine) && offset <= ll->numCharsInLine) {
 			int xposCaret = ll->positions[offset] + virtualOffset - ll->positions[ll->LineStart(subLine)] + xStart;
 			if (ll->wrapIndent != 0) {
@@ -3777,10 +3781,12 @@ void Editor::PasteRectangular(SelectionPosition pos, const char *ptr, int len) {
 	}
 	sel.Clear();
 	sel.RangeMain() = SelectionRange(pos, pos);
-	int xInsert = XFromPosition(sel.RangeMain().caret);
 	int line = pdoc->LineFromPosition(sel.MainCaret());
-	bool prevCr = false;
 	pdoc->BeginUndoAction();
+	sel.RangeMain().caret = SelectionPosition(
+		InsertSpace(sel.RangeMain().caret.Position(), sel.RangeMain().caret.VirtualSpace()));
+	int xInsert = XFromPosition(sel.RangeMain().caret);
+	bool prevCr = false;
 	for (int i = 0; i < len; i++) {
 		if (IsEOLChar(ptr[i])) {
 			if ((ptr[i] == '\r') || (!prevCr))
@@ -4508,10 +4514,10 @@ void Editor::CursorUpOrDown(int direction, Selection::selTypes selt) {
 	int subLine = (pt.y - ptStartLine.y) / vs.lineHeight;
 	int commentLines = vs.annotationVisible ? pdoc->AnnotationLines(lineDoc) : 0;
 	SelectionPosition posNew = SPositionFromLocation(
-	            Point(lastXChosen, pt.y + direction * vs.lineHeight));
+	            Point(lastXChosen, pt.y + direction * vs.lineHeight), false, false, UserVirtualSpace());
 	if ((direction > 0) && (subLine >= (cs.GetHeight(lineDoc) - 1 - commentLines))) {
 		posNew = SPositionFromLocation(
-	            Point(lastXChosen, pt.y + (commentLines + 1) * vs.lineHeight));
+	            Point(lastXChosen, pt.y + (commentLines + 1) * vs.lineHeight), false, false, UserVirtualSpace());
 	}
 	if (direction < 0) {
 		// Line wrapping may lead to a location on the same line, so
@@ -5407,7 +5413,7 @@ void Editor::DropAt(SelectionPosition position, const char *value, bool moving, 
 		position = positionAfterDeletion;
 
 		if (rectangular) {
-			PasteRectangular(SelectionPosition(position), value, istrlen(value));
+			PasteRectangular(position, value, istrlen(value));
 			pdoc->EndUndoAction();
 			// Should try to select new rectangle but it may not be a rectangle now so just select the drop position
 			SetEmptySelection(position);
