@@ -225,7 +225,6 @@ void Editor::InvalidateStyleData() {
 	palette.Release();
 	llc.Invalidate(LineLayout::llInvalid);
 	posCache.Clear();
-	SetRectangularRange();
 }
 
 void Editor::InvalidateStyleRedraw() {
@@ -258,6 +257,7 @@ void Editor::RefreshStyleData() {
 				wrapAddIndent = vs.aveCharWidth; // must indent to show start visual
 		}
 		SetScrollBars();
+		SetRectangularRange();
 	}
 }
 
@@ -3077,7 +3077,7 @@ void Editor::DrawCarets(Surface *surface, ViewStyle &vsDraw, int lineDoc, int xS
 				if (widthOverstrikeCaret < 3)	// Make sure its visible
 					widthOverstrikeCaret = 3;
 
-				if (offset > ll->LineStart(subLine))
+				if (posCaret > SelectionPosition(ll->LineStart(subLine) + rangeLine.start))
 					caretWidthOffset = 1;	// Move back so overlaps both character cells.
 				if (posDrag.IsValid()) {
 					/* Dragging text, use a line caret */

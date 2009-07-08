@@ -113,6 +113,7 @@ bool SelectionRange::ContainsCharacter(int posCharacter) const {
 
 bool SelectionRange::Intersect(int start, int end, SelectionPosition &selStart, SelectionPosition &selEnd) const {
 	SelectionPosition spEnd(end, 100000);	// Large amount of virtual space
+	SelectionPosition spStart(start);
 	SelectionPosition first;
 	SelectionPosition last;
 	if (anchor > caret) {
@@ -122,7 +123,7 @@ bool SelectionRange::Intersect(int start, int end, SelectionPosition &selStart, 
 		first = anchor;
 		last = caret;
 	}
-	if ((first < spEnd) && (last.Position() > start)) {
+	if ((first < spEnd) && (last > spStart)) {
 		if (start > first.Position()) 
 			selStart = SelectionPosition(start);
 		else 
