@@ -392,7 +392,7 @@ Point Editor::LocationFromPosition(SelectionPosition pos) {
 		}
 		pt.x += vs.fixedColumnWidth - xOffset;
 	}
-	pt.x += pos.VirtualSpace() * vs.spaceWidth;
+	pt.x += pos.VirtualSpace() * static_cast<int>(vs.styles[ll->EndLineStyle()].spaceWidth);
 	return pt;
 }
 
