@@ -111,30 +111,20 @@ bool SelectionRange::ContainsCharacter(int posCharacter) const {
 		return (posCharacter >= anchor.Position()) && (posCharacter < caret.Position());
 }
 
-bool SelectionRange::Intersect(int start, int end, SelectionPosition &selStart, SelectionPosition &selEnd) const {
-	SelectionPosition spEnd(end, 100000);	// Large amount of virtual space
-	SelectionPosition spStart(start);
-	SelectionPosition first;
-	SelectionPosition last;
-	if (anchor > caret) {
-		first = caret;
-		last = anchor;
+SelectionSegment SelectionRange::Intersect(SelectionSegment check) const {
+	SelectionSegment inOrder(caret, anchor);
+	if ((inOrder.start <= check.end) || (inOrder.end >= check.start)) {
+		SelectionSegment portion = check;
+		if (portion.start < inOrder.start)
+			portion.start = inOrder.start;
+		if (portion.end > inOrder.end)
+			portion.end = inOrder.end;
+		if (portion.start > portion.end)
+			return SelectionSegment();
+		else
+			return portion;
 	} else {
-		first = anchor;
-		last = caret;
-	}
-	if ((first < spEnd) && (last > spStart)) {
-		if (start > first.Position()) 
-			selStart = SelectionPosition(start);
-		else 
-			selStart = first;
-		if (spEnd < last) 
-			selEnd = SelectionPosition(end);
-		else 
-			selEnd = last;
-		return true;
-	} else {
-		return false;
+		return SelectionSegment();
 	}
 }
 

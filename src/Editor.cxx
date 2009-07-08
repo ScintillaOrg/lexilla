@@ -2234,6 +2234,7 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
         bool overrideBackground, ColourAllocated background,
         bool drawWrapMarkEnd, ColourAllocated wrapColour) {
 
+	const int posLineStart = pdoc->LineStart(line);
 	int styleMask = pdoc->stylingBitsMask;
 	PRectangle rcSegment = rcLine;
 
@@ -2249,8 +2250,21 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 	if (virtualSpace) {
 		rcSegment.left = xEol + xStart;
 		rcSegment.right = xEol + xStart + virtualSpace;
-		// TODO: draw selection where needed
 		surface->FillRectangle(rcSegment, vsDraw.styles[ll->styles[ll->numCharsInLine] & styleMask].back.allocated);
+		if (!hideSelection && vsDraw.selAlpha == SC_ALPHA_NOALPHA) {
+			SelectionSegment virtualSpaceRange(SelectionPosition(pdoc->LineEnd(line)), SelectionPosition(pdoc->LineEnd(line), sel.VirtualSpaceFor(pdoc->LineEnd(line))));
+			for (size_t r=0; r<sel.Count(); r++) {
+				SelectionSegment portion = sel.Range(r).Intersect(virtualSpaceRange);
+				if (!portion.Empty()) {
+					const int spaceWidth = static_cast<int>(vsDraw.styles[ll->EndLineStyle()].spaceWidth);
+					rcSegment.left = xStart + ll->positions[portion.start.Position() - posLineStart] - subLineStart + portion.start.VirtualSpace() * spaceWidth;
+					rcSegment.right = xStart + ll->positions[portion.end.Position() - posLineStart] - subLineStart + portion.end.VirtualSpace() * spaceWidth;
+					rcSegment.left = Platform::Maximum(rcSegment.left, rcLine.left);
+					rcSegment.right = Platform::Minimum(rcSegment.right, rcLine.right);
+					surface->FillRectangle(rcSegment, SelectionBackground(vsDraw));
+				}
+			}
+		}
 	}
 
 	int posAfterLineEnd = pdoc->LineStart(line + 1);
@@ -2860,19 +2874,21 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	}
 	if (!hideSelection && vsDraw.selAlpha != SC_ALPHA_NOALPHA) {
 		// For each selection draw
+		int virtualSpaces = 0;
+		if (subLine == (ll->lines - 1)) {
+			virtualSpaces = sel.VirtualSpaceFor(pdoc->LineEnd(line));
+		}
+		SelectionSegment virtualSpaceRange(SelectionPosition(posLineStart), SelectionPosition(posLineStart + lineEnd, virtualSpaces));
 		for (size_t r=0; r<sel.Count(); r++) {
-			SelectionPosition spStart;
-			SelectionPosition spEnd;
-			if (sel.Range(r).Intersect(posLineStart, posLineStart + lineEnd, spStart, spEnd)) {
-				if (!(spStart == spEnd)) {
-					const int spaceWidth = static_cast<int>(vsDraw.styles[ll->EndLineStyle()].spaceWidth);
-					rcSegment.left = xStart + ll->positions[spStart.Position() - posLineStart] - subLineStart + spStart.VirtualSpace() * spaceWidth;
-					rcSegment.right = xStart + ll->positions[spEnd.Position() - posLineStart] - subLineStart + spEnd.VirtualSpace() * spaceWidth;
-					rcSegment.left = Platform::Maximum(rcSegment.left, rcLine.left);
-					rcSegment.right = Platform::Minimum(rcSegment.right, rcLine.right);
-					SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw), 
-						(r == sel.Main()) ? vsDraw.selAlpha : vsDraw.selAlpha / 2);
-				}
+			SelectionSegment portion = sel.Range(r).Intersect(virtualSpaceRange);
+			if (!portion.Empty()) {
+				const int spaceWidth = static_cast<int>(vsDraw.styles[ll->EndLineStyle()].spaceWidth);
+				rcSegment.left = xStart + ll->positions[portion.start.Position() - posLineStart] - subLineStart + portion.start.VirtualSpace() * spaceWidth;
+				rcSegment.right = xStart + ll->positions[portion.end.Position() - posLineStart] - subLineStart + portion.end.VirtualSpace() * spaceWidth;
+				rcSegment.left = Platform::Maximum(rcSegment.left, rcLine.left);
+				rcSegment.right = Platform::Minimum(rcSegment.right, rcLine.right);
+				SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw), 
+					(r == sel.Main()) ? vsDraw.selAlpha : vsDraw.selAlpha / 2);
 			}
 		}
 	}
@@ -7842,13 +7858,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		}
 	case SCI_GETLINESELSTARTPOSITION:
 	case SCI_GETLINESELENDPOSITION: {
+			SelectionSegment segmentLine(SelectionPosition(pdoc->LineStart(wParam)), 
+				SelectionPosition(pdoc->LineEnd(wParam)));
 			for (size_t r=0; r<sel.Count(); r++) {
-				int posLineStart = pdoc->LineStart(wParam);
-				int posLineEnd = pdoc->LineEnd(wParam);
-				SelectionPosition spStart;
-				SelectionPosition spEnd;
-				if (sel.Range(r).Intersect(posLineStart, posLineEnd, spStart, spEnd)) {
-					return (iMessage == SCI_GETLINESELSTARTPOSITION) ? spStart.Position() : spEnd.Position();
+				SelectionSegment portion = sel.Range(r).Intersect(segmentLine);
+				if (portion.start.IsValid()) {
+					return (iMessage == SCI_GETLINESELSTARTPOSITION) ? portion.start.Position() : portion.end.Position();
 				}
 			}
 			return INVALID_POSITION;

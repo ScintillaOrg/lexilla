@@ -56,6 +56,26 @@ public:
 	}
 };
 
+// Ordered range to make drawing simpler
+struct SelectionSegment {	
+	SelectionPosition start;
+	SelectionPosition end;
+	SelectionSegment() {
+	}
+	SelectionSegment(SelectionPosition a, SelectionPosition b) {
+		if (a < b) {
+			start = a;
+			end = b;
+		} else {
+			start = b;
+			end = a;
+		}
+	}
+	bool Empty() const {
+		return start == end;
+	}
+};
+
 struct SelectionRange {
 	SelectionPosition caret;
 	SelectionPosition anchor;
@@ -87,7 +107,7 @@ struct SelectionRange {
 	bool Contains(int pos) const;
 	bool Contains(SelectionPosition sp) const;
 	bool ContainsCharacter(int posCharacter) const;
-	bool Intersect(int start, int end, SelectionPosition &selStart, SelectionPosition &selEnd) const;
+	SelectionSegment Intersect(SelectionSegment check) const;
 	SelectionPosition Start() const {
 		return (anchor < caret) ? anchor : caret;
 	}
