@@ -477,10 +477,10 @@ set void StyleSetCharacterSet=2066(int style, int characterSet)
 # Set a style to be a hotspot or not.
 set void StyleSetHotSpot=2409(int style, bool hotspot)
 
-# Set the foreground colour of the selection and whether to use this setting.
+# Set the foreground colour of the main and additional selections and whether to use this setting.
 fun void SetSelFore=2067(bool useSetting, colour fore)
 
-# Set the background colour of the selection and whether to use this setting.
+# Set the background colour of the main and additional selections and whether to use this setting.
 fun void SetSelBack=2068(bool useSetting, colour back)
 
 # Get the alpha of the selection.
@@ -1994,6 +1994,26 @@ val SCVS_USERACCESSIBLE=2
 
 set void SetVirtualSpaceOptions=2596(int virtualSpace,)
 get int GetVirtualSpaceOptions=2597(,)
+
+# Set the foreground colour of additional selections.
+# Must have previously called SetSelFore with non-zero first argument for this to have an effect.
+set void SetAdditionalSelFore=2600(colour fore,)
+
+# Set the background colour of additional selections.
+# Must have previously called SetSelBack with non-zero first argument for this to have an effect.
+set void SetAdditionalSelBack=2601(colour back,)
+
+# Set the alpha of the selection.
+set void SetAdditionalSelAlpha=2602(int alpha,)
+
+# Get the alpha of the selection.
+get int GetAdditionalSelAlpha=2603(,)
+
+# Set the foreground colour of additional carets.
+set void SetAdditionalCaretFore=2604(colour fore,)
+
+# Get the foreground colour of additional carets.
+get colour GetAdditionalCaretFore=2605(,)
 
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)

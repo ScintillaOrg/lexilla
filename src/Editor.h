@@ -324,8 +324,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	LineLayout *RetrieveLineLayout(int lineNumber);
 	void LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayout *ll,
 		int width=LineLayout::wrapWidthInfinite);
-	ColourAllocated SelectionBackground(ViewStyle &vsDraw);
-	ColourAllocated TextBackground(ViewStyle &vsDraw, bool overrideBackground, ColourAllocated background, bool inSelection, bool inHotspot, int styleMain, int i, LineLayout *ll);
+	ColourAllocated SelectionBackground(ViewStyle &vsDraw, bool main);
+	ColourAllocated TextBackground(ViewStyle &vsDraw, bool overrideBackground, ColourAllocated background, int inSelection, bool inHotspot, int styleMain, int i, LineLayout *ll);
 	void DrawIndentGuide(Surface *surface, int lineVisible, int lineHeight, int start, PRectangle rcSegment, bool highlight);
 	void DrawWrapMarker(Surface *surface, PRectangle rcPlace, bool isEndMarker, ColourAllocated wrapColour);
 	void DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, LineLayout *ll,
@@ -338,7 +338,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
         PRectangle rcLine, LineLayout *ll, int subLine);
 	void DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart,
 		PRectangle rcLine, LineLayout *ll, int subLine);
-	void DrawBlockCaret(Surface *surface, ViewStyle &vsDraw, LineLayout *ll, int subLine, int xStart, int offset, int posCaret, PRectangle rcCaret);
+	void DrawBlockCaret(Surface *surface, ViewStyle &vsDraw, LineLayout *ll, int subLine, 
+		int xStart, int offset, int posCaret, PRectangle rcCaret, ColourAllocated caretColour);
 	void DrawCarets(Surface *surface, ViewStyle &vsDraw, int line, int xStart,
 		PRectangle rcLine, LineLayout *ll, int subLine);
 	void RefreshPixMaps(Surface *surfaceWindow);

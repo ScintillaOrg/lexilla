@@ -314,20 +314,20 @@ void Selection::AddSelection(SelectionPosition spStartPos, SelectionPosition spE
 	nRanges++;
 }
 
-bool Selection::CharacterInSelection(int posCharacter) const {
+int Selection::CharacterInSelection(int posCharacter) const {
 	for (size_t i=0; i<nRanges; i++) {
 		if (ranges[i].ContainsCharacter(posCharacter))
-			return true;
+			return i == mainRange ? 1 : 2;
 	}
-	return false;
+	return 0;
 }
 
-bool Selection::InSelectionForEOL(int pos) const {
+int Selection::InSelectionForEOL(int pos) const {
 	for (size_t i=0; i<nRanges; i++) {
 		if (!ranges[i].Empty() && (pos > ranges[i].Start().Position()) && (pos <= ranges[i].End().Position()))
-			return true;
+			return i == mainRange ? 1 : 2;
 	}
-	return false;
+	return 0;
 }
 
 int Selection::VirtualSpaceFor(int pos) const {

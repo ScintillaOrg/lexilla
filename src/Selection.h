@@ -84,6 +84,8 @@ struct SelectionRange {
 	}
 	SelectionRange(SelectionPosition single) : caret(single), anchor(single) {
 	}
+	SelectionRange(int single) : caret(single), anchor(single) {
+	}
 	SelectionRange(SelectionPosition caret_, SelectionPosition anchor_) : caret(caret_), anchor(anchor_) {
 	}
 	SelectionRange(int caret_, int anchor_) : caret(caret_), anchor(anchor_) {
@@ -152,8 +154,8 @@ public:
 	void TrimSelection(SelectionPosition startPos, SelectionPosition endPos);
 	void AddSelection(SelectionPosition spPos);
 	void AddSelection(SelectionPosition spStartPos, SelectionPosition spEndPos, bool anchorLeft);
-	bool CharacterInSelection(int posCharacter) const;
-	bool InSelectionForEOL(int pos) const;
+	int CharacterInSelection(int posCharacter) const;
+	int InSelectionForEOL(int pos) const;
 	int VirtualSpaceFor(int pos) const;
 	void Clear();
 	void EmptyRanges();

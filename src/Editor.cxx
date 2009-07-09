@@ -2123,15 +2123,21 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 	}
 }
 
-ColourAllocated Editor::SelectionBackground(ViewStyle &vsDraw) {
-	return primarySelection ? vsDraw.selbackground.allocated : vsDraw.selbackground2.allocated;
+ColourAllocated Editor::SelectionBackground(ViewStyle &vsDraw, bool main) {
+	return primarySelection ? 
+		(main ? vsDraw.selbackground.allocated : vsDraw.selAdditionalBackground.allocated) : 
+		vsDraw.selbackground2.allocated;
 }
 
 ColourAllocated Editor::TextBackground(ViewStyle &vsDraw, bool overrideBackground,
-        ColourAllocated background, bool inSelection, bool inHotspot, int styleMain, int i, LineLayout *ll) {
-	if (inSelection) {
+        ColourAllocated background, int inSelection, bool inHotspot, int styleMain, int i, LineLayout *ll) {
+	if (inSelection == 1) {
 		if (vsDraw.selbackset && (vsDraw.selAlpha == SC_ALPHA_NOALPHA)) {
-			return SelectionBackground(vsDraw);
+			return SelectionBackground(vsDraw, true);
+		}
+	} else if (inSelection == 2) {
+		if (vsDraw.selbackset && (vsDraw.selAdditionalAlpha == SC_ALPHA_NOALPHA)) {
+			return SelectionBackground(vsDraw, false);
 		}
 	} else {
 		if ((vsDraw.edgeState == EDGE_BACKGROUND) &&
@@ -2251,40 +2257,44 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 		rcSegment.left = xEol + xStart;
 		rcSegment.right = xEol + xStart + virtualSpace;
 		surface->FillRectangle(rcSegment, vsDraw.styles[ll->styles[ll->numCharsInLine] & styleMask].back.allocated);
-		if (!hideSelection && vsDraw.selAlpha == SC_ALPHA_NOALPHA) {
+		if (!hideSelection && ((vsDraw.selAlpha == SC_ALPHA_NOALPHA) || (vsDraw.selAdditionalAlpha == SC_ALPHA_NOALPHA))) {
 			SelectionSegment virtualSpaceRange(SelectionPosition(pdoc->LineEnd(line)), SelectionPosition(pdoc->LineEnd(line), sel.VirtualSpaceFor(pdoc->LineEnd(line))));
 			for (size_t r=0; r<sel.Count(); r++) {
-				SelectionSegment portion = sel.Range(r).Intersect(virtualSpaceRange);
-				if (!portion.Empty()) {
-					const int spaceWidth = static_cast<int>(vsDraw.styles[ll->EndLineStyle()].spaceWidth);
-					rcSegment.left = xStart + ll->positions[portion.start.Position() - posLineStart] - subLineStart + portion.start.VirtualSpace() * spaceWidth;
-					rcSegment.right = xStart + ll->positions[portion.end.Position() - posLineStart] - subLineStart + portion.end.VirtualSpace() * spaceWidth;
-					rcSegment.left = Platform::Maximum(rcSegment.left, rcLine.left);
-					rcSegment.right = Platform::Minimum(rcSegment.right, rcLine.right);
-					surface->FillRectangle(rcSegment, SelectionBackground(vsDraw));
+				int alpha =	(r == sel.Main()) ? vsDraw.selAlpha : vsDraw.selAdditionalAlpha;
+				if (alpha == SC_ALPHA_NOALPHA) {
+					SelectionSegment portion = sel.Range(r).Intersect(virtualSpaceRange);
+					if (!portion.Empty()) {
+						const int spaceWidth = static_cast<int>(vsDraw.styles[ll->EndLineStyle()].spaceWidth);
+						rcSegment.left = xStart + ll->positions[portion.start.Position() - posLineStart] - subLineStart + portion.start.VirtualSpace() * spaceWidth;
+						rcSegment.right = xStart + ll->positions[portion.end.Position() - posLineStart] - subLineStart + portion.end.VirtualSpace() * spaceWidth;
+						rcSegment.left = Platform::Maximum(rcSegment.left, rcLine.left);
+						rcSegment.right = Platform::Minimum(rcSegment.right, rcLine.right);
+						surface->FillRectangle(rcSegment, SelectionBackground(vsDraw, r == sel.Main()));
+					}
 				}
 			}
 		}
 	}
 
 	int posAfterLineEnd = pdoc->LineStart(line + 1);
-	bool eolInSelection = (subLine == (ll->lines - 1)) && sel.InSelectionForEOL(posAfterLineEnd);
+	int eolInSelection = (subLine == (ll->lines - 1)) ? sel.InSelectionForEOL(posAfterLineEnd) : 0;
+	int alpha = (eolInSelection == 1) ? vsDraw.selAlpha : vsDraw.selAdditionalAlpha;
 
 	for (int eolPos=ll->numCharsBeforeEOL; eolPos<ll->numCharsInLine; eolPos++) {
 		rcSegment.left = xStart + ll->positions[eolPos] + virtualSpace;
 		rcSegment.right = xStart + ll->positions[eolPos+1] + virtualSpace;
 		const char *ctrlChar = ControlCharacterString(ll->chars[eolPos]);
-		bool inSelection = false;
+		int inSelection = 0;
 		bool inHotspot = false;
 		int styleMain = ll->styles[eolPos];
 		ColourAllocated textBack = TextBackground(vsDraw, overrideBackground, background, inSelection, inHotspot, styleMain, eolPos, ll);
 		ColourAllocated textFore = vsDraw.styles[styleMain].fore.allocated;
 		if (!hideSelection && eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1)) {
-			if (vsDraw.selAlpha == SC_ALPHA_NOALPHA) {
-				surface->FillRectangle(rcSegment, SelectionBackground(vsDraw));
+			if (alpha == SC_ALPHA_NOALPHA) {
+				surface->FillRectangle(rcSegment, SelectionBackground(vsDraw, eolInSelection == 1));
 			} else {
 				surface->FillRectangle(rcSegment, textBack);
-				SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw), vsDraw.selAlpha);
+				SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw, eolInSelection == 1), alpha);
 			}
 		} else {
 			surface->FillRectangle(rcSegment, textBack);
@@ -2295,24 +2305,24 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 	rcSegment.left = ll->positions[ll->numCharsInLine] + xStart + virtualSpace;
 	rcSegment.right = ll->positions[ll->numCharsInLine] + vsDraw.aveCharWidth + xStart + virtualSpace;
 
-	if (!hideSelection && eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1) && (vsDraw.selAlpha == SC_ALPHA_NOALPHA)) {
-		surface->FillRectangle(rcSegment, SelectionBackground(vsDraw));
+	if (!hideSelection && eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1) && (alpha == SC_ALPHA_NOALPHA)) {
+		surface->FillRectangle(rcSegment, SelectionBackground(vsDraw, eolInSelection == 1));
 	} else {
 		if (overrideBackground) {
 			surface->FillRectangle(rcSegment, background);
 		} else {
 			surface->FillRectangle(rcSegment, vsDraw.styles[ll->styles[ll->numCharsInLine] & styleMask].back.allocated);
 		}
-		if (!hideSelection && eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1) && (vsDraw.selAlpha != SC_ALPHA_NOALPHA)) {
-			SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw), vsDraw.selAlpha);
+		if (!hideSelection && eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1) && (alpha != SC_ALPHA_NOALPHA)) {
+			SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw, eolInSelection == 1), alpha);
 		}
 	}
 
 	rcSegment.left = ll->positions[ll->numCharsInLine] + vsDraw.aveCharWidth + xStart + virtualSpace;
 	rcSegment.right = rcLine.right;
 
-	if (!hideSelection && vsDraw.selEOLFilled && eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1) && (vsDraw.selAlpha == SC_ALPHA_NOALPHA)) {
-		surface->FillRectangle(rcSegment, SelectionBackground(vsDraw));
+	if (!hideSelection && vsDraw.selEOLFilled && eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1) && (alpha == SC_ALPHA_NOALPHA)) {
+		surface->FillRectangle(rcSegment, SelectionBackground(vsDraw, eolInSelection == 1));
 	} else {
 		if (overrideBackground) {
 			surface->FillRectangle(rcSegment, background);
@@ -2321,8 +2331,8 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 		} else {
 			surface->FillRectangle(rcSegment, vsDraw.styles[STYLE_DEFAULT].back.allocated);
 		}
-		if (vsDraw.selEOLFilled && eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1) && (vsDraw.selAlpha != SC_ALPHA_NOALPHA)) {
-			SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw), vsDraw.selAlpha);
+		if (vsDraw.selEOLFilled && eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1) && (alpha != SC_ALPHA_NOALPHA)) {
+			SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw, eolInSelection == 1), alpha);
 		}
 	}
 
@@ -2607,7 +2617,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 			rcSegment.right = Platform::Minimum(rcSegment.right, rcLine.right);
 
 			int styleMain = ll->styles[i];
-			const bool inSelection = !hideSelection && sel.CharacterInSelection(iDoc);
+			const int inSelection = hideSelection ? 0 : sel.CharacterInSelection(iDoc);
 			bool inHotspot = (ll->hsStart != -1) && (iDoc >= ll->hsStart) && (iDoc < ll->hsEnd);
 			ColourAllocated textBack = TextBackground(vsDraw, overrideBackground, background, inSelection, inHotspot, styleMain, i, ll);
 			if (ll->chars[i] == '\t') {
@@ -2700,9 +2710,9 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 				if (vsDraw.hotspotForegroundSet)
 					textFore = vsDraw.hotspotForeground.allocated;
 			}
-			const bool inSelection = !hideSelection && sel.CharacterInSelection(iDoc);
+			const int inSelection = hideSelection ? 0 : sel.CharacterInSelection(iDoc);
 			if (inSelection && (vsDraw.selforeset)) {
-				textFore = vsDraw.selforeground.allocated;
+				textFore = (inSelection == 1) ? vsDraw.selforeground.allocated : vsDraw.selAdditionalForeground.allocated;
 			}
 			bool inHotspot = (ll->hsStart != -1) && (iDoc >= ll->hsStart) && (iDoc < ll->hsEnd);
 			ColourAllocated textBack = TextBackground(vsDraw, overrideBackground, background, inSelection, inHotspot, styleMain, i, ll);
@@ -2872,7 +2882,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		        xStart, subLine, subLineStart, overrideBackground, background,
 		        drawWrapMarkEnd, wrapColour);
 	}
-	if (!hideSelection && vsDraw.selAlpha != SC_ALPHA_NOALPHA) {
+	if (!hideSelection && ((vsDraw.selAlpha != SC_ALPHA_NOALPHA) || (vsDraw.selAdditionalAlpha != SC_ALPHA_NOALPHA))) {
 		// For each selection draw
 		int virtualSpaces = 0;
 		if (subLine == (ll->lines - 1)) {
@@ -2880,15 +2890,17 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		}
 		SelectionSegment virtualSpaceRange(SelectionPosition(posLineStart), SelectionPosition(posLineStart + lineEnd, virtualSpaces));
 		for (size_t r=0; r<sel.Count(); r++) {
-			SelectionSegment portion = sel.Range(r).Intersect(virtualSpaceRange);
-			if (!portion.Empty()) {
-				const int spaceWidth = static_cast<int>(vsDraw.styles[ll->EndLineStyle()].spaceWidth);
-				rcSegment.left = xStart + ll->positions[portion.start.Position() - posLineStart] - subLineStart + portion.start.VirtualSpace() * spaceWidth;
-				rcSegment.right = xStart + ll->positions[portion.end.Position() - posLineStart] - subLineStart + portion.end.VirtualSpace() * spaceWidth;
-				rcSegment.left = Platform::Maximum(rcSegment.left, rcLine.left);
-				rcSegment.right = Platform::Minimum(rcSegment.right, rcLine.right);
-				SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw), 
-					(r == sel.Main()) ? vsDraw.selAlpha : vsDraw.selAlpha / 2);
+			int alpha =	(r == sel.Main()) ? vsDraw.selAlpha : vsDraw.selAdditionalAlpha;
+			if (alpha != SC_ALPHA_NOALPHA) {
+				SelectionSegment portion = sel.Range(r).Intersect(virtualSpaceRange);
+				if (!portion.Empty()) {
+					const int spaceWidth = static_cast<int>(vsDraw.styles[ll->EndLineStyle()].spaceWidth);
+					rcSegment.left = xStart + ll->positions[portion.start.Position() - posLineStart] - subLineStart + portion.start.VirtualSpace() * spaceWidth;
+					rcSegment.right = xStart + ll->positions[portion.end.Position() - posLineStart] - subLineStart + portion.end.VirtualSpace() * spaceWidth;
+					rcSegment.left = Platform::Maximum(rcSegment.left, rcLine.left);
+					rcSegment.right = Platform::Minimum(rcSegment.right, rcLine.right);
+					SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw, r == sel.Main()), alpha);
+				}
 			}
 		}
 	}
@@ -2923,7 +2935,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	}
 }
 
-void Editor::DrawBlockCaret(Surface *surface, ViewStyle &vsDraw, LineLayout *ll, int subLine, int xStart, int offset, int posCaret, PRectangle rcCaret) {
+void Editor::DrawBlockCaret(Surface *surface, ViewStyle &vsDraw, LineLayout *ll, int subLine, 
+							int xStart, int offset, int posCaret, PRectangle rcCaret, ColourAllocated caretColour) {
 
 	int lineStart = ll->LineStart(subLine);
 	int posBefore = posCaret;
@@ -2982,7 +2995,7 @@ void Editor::DrawBlockCaret(Surface *surface, ViewStyle &vsDraw, LineLayout *ll,
 	surface->DrawTextClipped(rcCaret, vsDraw.styles[styleMain].font,
 	        rcCaret.top + vsDraw.maxAscent, ll->chars + offsetFirstChar,
 	        numCharsToDraw, vsDraw.styles[styleMain].back.allocated,
-	        vsDraw.caretcolour.allocated);
+	        caretColour);
 }
 
 void Editor::RefreshPixMaps(Surface *surfaceWindow) {
@@ -3118,10 +3131,11 @@ void Editor::DrawCarets(Surface *surface, ViewStyle &vsDraw, int lineDoc, int xS
 					rcCaret.left = xposCaret - caretWidthOffset;
 					rcCaret.right = rcCaret.left + vsDraw.caretWidth;
 				}
+				ColourAllocated caretColour = mainCaret ? vsDraw.caretcolour.allocated : vsDraw.additionalCaretColour.allocated;
 				if (drawBlockCaret) {
-					DrawBlockCaret(surface, vsDraw, ll, subLine, xStart, offset, posCaret.Position(), rcCaret);
+					DrawBlockCaret(surface, vsDraw, ll, subLine, xStart, offset, posCaret.Position(), rcCaret, caretColour);
 				} else {
-					surface->FillRectangle(rcCaret, mainCaret ? vsDraw.caretcolour.allocated : vsDraw.selbackground2.allocated);
+					surface->FillRectangle(rcCaret, caretColour);
 				}
 			}
 		}
@@ -3415,6 +3429,7 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 	vsPrint.selbackset = false;
 	vsPrint.selforeset = false;
 	vsPrint.selAlpha = SC_ALPHA_NOALPHA;
+	vsPrint.selAdditionalAlpha = SC_ALPHA_NOALPHA;
 	vsPrint.whitespaceBackgroundSet = false;
 	vsPrint.whitespaceForegroundSet = false;
 	vsPrint.showCaretLineBackground = false;
@@ -3796,7 +3811,7 @@ void Editor::PasteRectangular(SelectionPosition pos, const char *ptr, int len) {
 		return;
 	}
 	sel.Clear();
-	sel.RangeMain() = SelectionRange(pos, pos);
+	sel.RangeMain() = SelectionRange(pos);
 	int line = pdoc->LineFromPosition(sel.MainCaret());
 	pdoc->BeginUndoAction();
 	sel.RangeMain().caret = SelectionPosition(
@@ -5075,76 +5090,79 @@ int Editor::GetWhitespaceVisible() {
 }
 
 void Editor::Indent(bool forwards) {
-	//Platform::DebugPrintf("INdent %d\n", forwards);
-	int lineOfAnchor = pdoc->LineFromPosition(sel.MainAnchor());
-	int lineCurrentPos = pdoc->LineFromPosition(sel.MainCaret());
-	if (lineOfAnchor == lineCurrentPos) {
-		if (forwards) {
-			pdoc->BeginUndoAction();
-			ClearSelection();
-			if (pdoc->GetColumn(sel.MainCaret()) <= pdoc->GetColumn(pdoc->GetLineIndentPosition(lineCurrentPos)) &&
-			        pdoc->tabIndents) {
-				int indentation = pdoc->GetLineIndentation(lineCurrentPos);
-				int indentationStep = pdoc->IndentSize();
-				pdoc->SetLineIndentation(lineCurrentPos, indentation + indentationStep - indentation % indentationStep);
-				SetEmptySelection(pdoc->GetLineIndentPosition(lineCurrentPos));
-			} else {
-				if (pdoc->useTabs) {
-					pdoc->InsertChar(sel.MainCaret(), '\t');
-					SetEmptySelection(sel.MainCaret() + 1);
-				} else {
-					int numSpaces = (pdoc->tabInChars) -
-					        (pdoc->GetColumn(sel.MainCaret()) % (pdoc->tabInChars));
-					if (numSpaces < 1)
-						numSpaces = pdoc->tabInChars;
-					for (int i = 0; i < numSpaces; i++) {
-						pdoc->InsertChar(sel.MainCaret() + i, ' ');
-					}
-					SetEmptySelection(sel.MainCaret() + numSpaces);
-				}
-			}
-			pdoc->EndUndoAction();
-		} else {
-			if (pdoc->GetColumn(sel.MainCaret()) <= pdoc->GetLineIndentation(lineCurrentPos) &&
-			        pdoc->tabIndents) {
+	for (size_t r=0; r<sel.Count(); r++) {
+		int lineOfAnchor = pdoc->LineFromPosition(sel.Range(r).anchor.Position());
+		int caretPosition = sel.Range(r).caret.Position();
+		int lineCurrentPos = pdoc->LineFromPosition(caretPosition);
+		if (lineOfAnchor == lineCurrentPos) {
+			if (forwards) {
 				pdoc->BeginUndoAction();
-				int indentation = pdoc->GetLineIndentation(lineCurrentPos);
-				int indentationStep = pdoc->IndentSize();
-				pdoc->SetLineIndentation(lineCurrentPos, indentation - indentationStep);
-				SetEmptySelection(pdoc->GetLineIndentPosition(lineCurrentPos));
+				pdoc->DeleteChars(sel.Range(r).Start().Position(), sel.Range(r).Length()); 
+				caretPosition = sel.Range(r).caret.Position();
+				if (pdoc->GetColumn(caretPosition) <= pdoc->GetColumn(pdoc->GetLineIndentPosition(lineCurrentPos)) &&
+						pdoc->tabIndents) {
+					int indentation = pdoc->GetLineIndentation(lineCurrentPos);
+					int indentationStep = pdoc->IndentSize();
+					pdoc->SetLineIndentation(lineCurrentPos, indentation + indentationStep - indentation % indentationStep);
+					sel.Range(r) = SelectionRange(pdoc->GetLineIndentPosition(lineCurrentPos));
+				} else {
+					if (pdoc->useTabs) {
+						pdoc->InsertChar(caretPosition, '\t');
+						sel.Range(r) = SelectionRange(caretPosition+1);
+					} else {
+						int numSpaces = (pdoc->tabInChars) -
+								(pdoc->GetColumn(caretPosition) % (pdoc->tabInChars));
+						if (numSpaces < 1)
+							numSpaces = pdoc->tabInChars;
+						for (int i = 0; i < numSpaces; i++) {
+							pdoc->InsertChar(caretPosition + i, ' ');
+						}
+						sel.Range(r) = SelectionRange(caretPosition+numSpaces);
+					}
+				}
 				pdoc->EndUndoAction();
 			} else {
-				int newColumn = ((pdoc->GetColumn(sel.MainCaret()) - 1) / pdoc->tabInChars) *
-				        pdoc->tabInChars;
-				if (newColumn < 0)
-					newColumn = 0;
-				int newPos = sel.MainCaret();
-				while (pdoc->GetColumn(newPos) > newColumn)
-					newPos--;
-				SetEmptySelection(newPos);
+				if (pdoc->GetColumn(caretPosition) <= pdoc->GetLineIndentation(lineCurrentPos) &&
+						pdoc->tabIndents) {
+					pdoc->BeginUndoAction();
+					int indentation = pdoc->GetLineIndentation(lineCurrentPos);
+					int indentationStep = pdoc->IndentSize();
+					pdoc->SetLineIndentation(lineCurrentPos, indentation - indentationStep);
+					SetEmptySelection(pdoc->GetLineIndentPosition(lineCurrentPos));
+					pdoc->EndUndoAction();
+				} else {
+					int newColumn = ((pdoc->GetColumn(caretPosition) - 1) / pdoc->tabInChars) *
+							pdoc->tabInChars;
+					if (newColumn < 0)
+						newColumn = 0;
+					int newPos = caretPosition;
+					while (pdoc->GetColumn(newPos) > newColumn)
+						newPos--;
+					sel.Range(r) = SelectionRange(newPos);
+				}
 			}
-		}
-	} else {
-		int anchorPosOnLine = sel.MainAnchor() - pdoc->LineStart(lineOfAnchor);
-		int currentPosPosOnLine = sel.MainCaret() - pdoc->LineStart(lineCurrentPos);
-		// Multiple lines selected so indent / dedent
-		int lineTopSel = Platform::Minimum(lineOfAnchor, lineCurrentPos);
-		int lineBottomSel = Platform::Maximum(lineOfAnchor, lineCurrentPos);
-		if (pdoc->LineStart(lineBottomSel) == sel.MainAnchor() || pdoc->LineStart(lineBottomSel) == sel.MainCaret())
-			lineBottomSel--;  	// If not selecting any characters on a line, do not indent
-		pdoc->BeginUndoAction();
-		pdoc->Indent(forwards, lineBottomSel, lineTopSel);
-		pdoc->EndUndoAction();
-		if (lineOfAnchor < lineCurrentPos) {
-			if (currentPosPosOnLine == 0)
-				SetSelection(pdoc->LineStart(lineCurrentPos), pdoc->LineStart(lineOfAnchor));
-			else
-				SetSelection(pdoc->LineStart(lineCurrentPos + 1), pdoc->LineStart(lineOfAnchor));
-		} else {
-			if (anchorPosOnLine == 0)
-				SetSelection(pdoc->LineStart(lineCurrentPos), pdoc->LineStart(lineOfAnchor));
-			else
-				SetSelection(pdoc->LineStart(lineCurrentPos), pdoc->LineStart(lineOfAnchor + 1));
+		} else {	// Multiline
+			int anchorPosOnLine = sel.Range(r).anchor.Position() - pdoc->LineStart(lineOfAnchor);
+			int currentPosPosOnLine = caretPosition - pdoc->LineStart(lineCurrentPos);
+			// Multiple lines selected so indent / dedent
+			int lineTopSel = Platform::Minimum(lineOfAnchor, lineCurrentPos);
+			int lineBottomSel = Platform::Maximum(lineOfAnchor, lineCurrentPos);
+			if (pdoc->LineStart(lineBottomSel) == sel.Range(r).anchor.Position() || pdoc->LineStart(lineBottomSel) == caretPosition)
+				lineBottomSel--;  	// If not selecting any characters on a line, do not indent
+			pdoc->BeginUndoAction();
+			pdoc->Indent(forwards, lineBottomSel, lineTopSel);
+			pdoc->EndUndoAction();
+			if (lineOfAnchor < lineCurrentPos) {
+				if (currentPosPosOnLine == 0)
+					sel.Range(r) = SelectionRange(pdoc->LineStart(lineCurrentPos), pdoc->LineStart(lineOfAnchor));
+				else
+					sel.Range(r) = SelectionRange(pdoc->LineStart(lineCurrentPos + 1), pdoc->LineStart(lineOfAnchor));
+			} else {
+				if (anchorPosOnLine == 0)
+					sel.Range(r) = SelectionRange(pdoc->LineStart(lineCurrentPos), pdoc->LineStart(lineOfAnchor));
+				else
+					sel.Range(r) = SelectionRange(pdoc->LineStart(lineCurrentPos), pdoc->LineStart(lineOfAnchor + 1));
+			}
 		}
 	}
 }
@@ -5638,7 +5656,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 				sel.selType = alt ? Selection::selRectangle : Selection::selStream;
 				selectionType = selChar;
 				originalAnchorPos = sel.MainCaret();
-				sel.Rectangular() = SelectionRange(newPos, newPos);
+				sel.Rectangular() = SelectionRange(newPos);
 				SetRectangularRange();
 			}
 		}
@@ -7477,12 +7495,14 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SETSELFORE:
 		vs.selforeset = wParam != 0;
 		vs.selforeground.desired = ColourDesired(lParam);
+		vs.selAdditionalForeground.desired = ColourDesired(lParam);
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETSELBACK:
 		vs.selbackset = wParam != 0;
 		vs.selbackground.desired = ColourDesired(lParam);
+		vs.selAdditionalBackground.desired = ColourDesired(lParam);
 		InvalidateStyleRedraw();
 		break;
 
@@ -8252,6 +8272,32 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETVIRTUALSPACEOPTIONS:
 		return virtualSpaceOptions;
+
+	case SCI_SETADDITIONALSELFORE:
+		vs.selAdditionalForeground.desired = ColourDesired(wParam);
+		InvalidateStyleRedraw();
+		break;
+
+	case SCI_SETADDITIONALSELBACK:
+		vs.selAdditionalBackground.desired = ColourDesired(wParam);
+		InvalidateStyleRedraw();
+		break;
+
+	case SCI_SETADDITIONALSELALPHA:
+		vs.selAdditionalAlpha = wParam;
+		InvalidateStyleRedraw();
+		break;
+
+	case SCI_GETADDITIONALSELALPHA:
+		return vs.selAdditionalAlpha;
+	
+	case SCI_SETADDITIONALCARETFORE:
+		vs.additionalCaretColour.desired = ColourDesired(wParam);
+		InvalidateStyleRedraw();
+		break;
+
+	case SCI_GETADDITIONALCARETFORE:
+		return vs.additionalCaretColour.desired.AsLong();
 
 	default:
 		return DefWndProc(iMessage, wParam, lParam);
