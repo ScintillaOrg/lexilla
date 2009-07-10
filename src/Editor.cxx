@@ -3909,6 +3909,8 @@ void Editor::DelChar() {
 }
 
 void Editor::DelCharBack(bool allowLineStartDeletion) {
+	if (sel.IsRectangular())
+		allowLineStartDeletion = false;
 	const bool undoBracketNeeded = (sel.Count() > 1) || !sel.Empty();
 	if (undoBracketNeeded) 
 		pdoc->BeginUndoAction();
