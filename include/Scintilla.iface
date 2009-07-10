@@ -1942,7 +1942,7 @@ get bool GetMultiLineCaretBlinks=2566(,)
 # How many selections are there?
 get int GetSelections=2570(,)
 
-# Add a selection
+# Clear selections to a single empty stream selection
 fun void ClearSelections=2571(,)
 
 # Set a simple selection
