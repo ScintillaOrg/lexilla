@@ -1415,7 +1415,7 @@ bool Editor::WrapLines(bool fullWrap, int priorityWrapLineStart) {
 
 void Editor::LinesJoin() {
 	if (!RangeContainsProtected(targetStart, targetEnd)) {
-		pdoc->BeginUndoAction();
+		UndoGroup ug(pdoc);
 		bool prevNonWS = true;
 		for (int pos = targetStart; pos < targetEnd; pos++) {
 			if (IsEOLChar(pdoc->CharAt(pos))) {
@@ -1430,7 +1430,6 @@ void Editor::LinesJoin() {
 				prevNonWS = pdoc->CharAt(pos) != ' ';
 			}
 		}
-		pdoc->EndUndoAction();
 	}
 }
 
@@ -1453,7 +1452,7 @@ void Editor::LinesSplit(int pixelWidth) {
 		int lineStart = pdoc->LineFromPosition(targetStart);
 		int lineEnd = pdoc->LineFromPosition(targetEnd);
 		const char *eol = StringFromEOLMode(pdoc->eolMode);
-		pdoc->BeginUndoAction();
+		UndoGroup ug(pdoc);
 		for (int line = lineStart; line <= lineEnd; line++) {
 			AutoSurface surface(this);
 			AutoLineLayout ll(llc, RetrieveLineLayout(line));
@@ -1468,7 +1467,6 @@ void Editor::LinesSplit(int pixelWidth) {
 			}
 			lineEnd = pdoc->LineFromPosition(targetEnd);
 		}
-		pdoc->EndUndoAction();
 	}
 }
 
@@ -3649,46 +3647,44 @@ void Editor::AddChar(char ch) {
 
 // AddCharUTF inserts an array of bytes which may or may not be in UTF-8.
 void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
-	const bool undoBracketNeeded = (sel.Count() > 1) || !sel.Empty() || inOverstrike;
-	if (undoBracketNeeded) 
-		pdoc->BeginUndoAction();
-	for (size_t r=0; r<sel.Count(); r++) {
-		if (!RangeContainsProtected(sel.Range(r).Start().Position(), 
-			sel.Range(r).End().Position())) {
-			int positionInsert = sel.Range(r).Start().Position();
-			if (!sel.Range(r).Empty()) {
-				if (sel.Range(r).Length()) {
-					pdoc->DeleteChars(positionInsert, sel.Range(r).Length());
-					sel.ClearVirtualSpace(r);
-				} else {
-					// Range is all virtual so collapse to start of virtual space
-					sel.Range(r).MinimizeVirtualSpace();
-				}
-			} else if (inOverstrike) {
-				if (positionInsert < pdoc->Length()) {
-					if (!IsEOLChar(pdoc->CharAt(positionInsert))) {
-						pdoc->DelChar(positionInsert);
+	{
+		UndoGroup ug(pdoc, (sel.Count() > 1) || !sel.Empty() || inOverstrike);
+		for (size_t r=0; r<sel.Count(); r++) {
+			if (!RangeContainsProtected(sel.Range(r).Start().Position(), 
+				sel.Range(r).End().Position())) {
+				int positionInsert = sel.Range(r).Start().Position();
+				if (!sel.Range(r).Empty()) {
+					if (sel.Range(r).Length()) {
+						pdoc->DeleteChars(positionInsert, sel.Range(r).Length());
 						sel.ClearVirtualSpace(r);
+					} else {
+						// Range is all virtual so collapse to start of virtual space
+						sel.Range(r).MinimizeVirtualSpace();
+					}
+				} else if (inOverstrike) {
+					if (positionInsert < pdoc->Length()) {
+						if (!IsEOLChar(pdoc->CharAt(positionInsert))) {
+							pdoc->DelChar(positionInsert);
+							sel.ClearVirtualSpace(r);
+						}
 					}
 				}
-			}
-			positionInsert = InsertSpace(positionInsert, sel.Range(r).caret.VirtualSpace());
-			if (pdoc->InsertString(positionInsert, s, len)) {
-				sel.Range(r).caret.SetPosition(positionInsert + len);
-				sel.Range(r).anchor.SetPosition(positionInsert + len);
-			}
-			sel.ClearVirtualSpace(r);
-			// If in wrap mode rewrap current line so EnsureCaretVisible has accurate information
-			if (wrapState != eWrapNone) {
-				AutoSurface surface(this);
-				if (surface) {
-					WrapOneLine(surface, pdoc->LineFromPosition(positionInsert));
+				positionInsert = InsertSpace(positionInsert, sel.Range(r).caret.VirtualSpace());
+				if (pdoc->InsertString(positionInsert, s, len)) {
+					sel.Range(r).caret.SetPosition(positionInsert + len);
+					sel.Range(r).anchor.SetPosition(positionInsert + len);
+				}
+				sel.ClearVirtualSpace(r);
+				// If in wrap mode rewrap current line so EnsureCaretVisible has accurate information
+				if (wrapState != eWrapNone) {
+					AutoSurface surface(this);
+					if (surface) {
+						WrapOneLine(surface, pdoc->LineFromPosition(positionInsert));
+					}
 				}
 			}
 		}
 	}
-	if (undoBracketNeeded) 
-		pdoc->EndUndoAction();
 	if (wrapState != eWrapNone) {
 		SetScrollBars();
 	}
@@ -3743,7 +3739,7 @@ void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 }
 
 void Editor::ClearSelection() {
-	pdoc->BeginUndoAction();
+	UndoGroup ug(pdoc);
 	for (size_t r=0; r<sel.Count(); r++) {
 		if (!sel.Range(r).Empty()) {
 			if (!RangeContainsProtected(sel.Range(r).Start().Position(), 
@@ -3754,21 +3750,20 @@ void Editor::ClearSelection() {
 			}
 		}
 	}
-	pdoc->EndUndoAction();
-
 }
 
 void Editor::ClearAll() {
-	pdoc->BeginUndoAction();
-	if (0 != pdoc->Length()) {
-		pdoc->DeleteChars(0, pdoc->Length());
+	{
+		UndoGroup ug(pdoc);
+		if (0 != pdoc->Length()) {
+			pdoc->DeleteChars(0, pdoc->Length());
+		}
+		if (!pdoc->IsReadOnly()) {
+			cs.Clear();
+			pdoc->AnnotationClearAll();
+			pdoc->MarginClearAll();
+		}
 	}
-	if (!pdoc->IsReadOnly()) {
-		cs.Clear();
-		pdoc->AnnotationClearAll();
-		pdoc->MarginClearAll();
-	}
-	pdoc->EndUndoAction();
 	sel.Clear();
 	SetTopLine(0);
 	SetVerticalScrollPos();
@@ -3813,7 +3808,7 @@ void Editor::PasteRectangular(SelectionPosition pos, const char *ptr, int len) {
 	sel.Clear();
 	sel.RangeMain() = SelectionRange(pos);
 	int line = pdoc->LineFromPosition(sel.MainCaret());
-	pdoc->BeginUndoAction();
+	UndoGroup ug(pdoc);
 	sel.RangeMain().caret = SelectionPosition(
 		InsertSpace(sel.RangeMain().caret.Position(), sel.RangeMain().caret.VirtualSpace()));
 	int xInsert = XFromPosition(sel.RangeMain().caret);
@@ -3843,7 +3838,6 @@ void Editor::PasteRectangular(SelectionPosition pos, const char *ptr, int len) {
 			prevCr = false;
 		}
 	}
-	pdoc->EndUndoAction();
 	SetEmptySelection(pos);
 }
 
@@ -3852,12 +3846,9 @@ bool Editor::CanPaste() {
 }
 
 void Editor::Clear() {
-	const bool undoBracketNeeded = (sel.Count() > 1) || !sel.Empty();
+	UndoGroup ug(pdoc);
 	// If multiple selections, don't delete EOLS
-	if (undoBracketNeeded) 
-		pdoc->BeginUndoAction();
 	if (sel.Empty()) {
-		pdoc->BeginUndoAction();
 		for (size_t r=0; r<sel.Count(); r++) {
 			if (!RangeContainsProtected(sel.Range(r).caret.Position(), sel.Range(r).caret.Position() + 1)) {
 				if ((sel.Count() == 1) || !IsEOLChar(pdoc->CharAt(sel.Range(r).caret.Position()))) {
@@ -3868,12 +3859,9 @@ void Editor::Clear() {
 				sel.ClearVirtualSpace(r);
 			}
 		}
-		pdoc->EndUndoAction();
 	} else {
 		ClearSelection();
 	}
-	if (undoBracketNeeded) 
-		pdoc->EndUndoAction();
 }
 
 void Editor::SelectAll() {
@@ -3911,9 +3899,7 @@ void Editor::DelChar() {
 void Editor::DelCharBack(bool allowLineStartDeletion) {
 	if (sel.IsRectangular())
 		allowLineStartDeletion = false;
-	const bool undoBracketNeeded = (sel.Count() > 1) || !sel.Empty();
-	if (undoBracketNeeded) 
-		pdoc->BeginUndoAction();
+	UndoGroup ug(pdoc, (sel.Count() > 1) || !sel.Empty());
 	if (sel.Empty()) {
 		for (size_t r=0; r<sel.Count(); r++) {
 			if (!RangeContainsProtected(sel.Range(r).caret.Position(), sel.Range(r).caret.Position() + 1)) {
@@ -3925,8 +3911,7 @@ void Editor::DelCharBack(bool allowLineStartDeletion) {
 					if (allowLineStartDeletion || (pdoc->LineStart(lineCurrentPos) != sel.Range(r).caret.Position())) {
 						if (pdoc->GetColumn(sel.Range(r).caret.Position()) <= pdoc->GetLineIndentation(lineCurrentPos) &&
 						        pdoc->GetColumn(sel.Range(r).caret.Position()) > 0 && pdoc->backspaceUnindents) {
-							if (!undoBracketNeeded)
-								pdoc->BeginUndoAction();
+							UndoGroup ugInner(pdoc, !ug.Needed());
 							int indentation = pdoc->GetLineIndentation(lineCurrentPos);
 							int indentationStep = pdoc->IndentSize();
 							if (indentation % indentationStep == 0) {
@@ -3937,8 +3922,6 @@ void Editor::DelCharBack(bool allowLineStartDeletion) {
 							// SetEmptySelection
 							sel.Range(r) = SelectionRange(pdoc->GetLineIndentPosition(lineCurrentPos), 
 								pdoc->GetLineIndentPosition(lineCurrentPos));
-							if (!undoBracketNeeded)
-								pdoc->EndUndoAction();
 						} else {
 							pdoc->DelCharBack(sel.Range(r).caret.Position());
 						}
@@ -3956,8 +3939,6 @@ void Editor::DelCharBack(bool allowLineStartDeletion) {
 		}
 		//SetEmptySelection(sel.MainCaret());
 	}
-	if (undoBracketNeeded) 
-		pdoc->EndUndoAction();
 	// Avoid blinking during rapid typing:
 	ShowCaretAtCurrentPosition();
 }
@@ -4457,7 +4438,7 @@ void Editor::PageMove(int direction, Selection::selTypes selt, bool stuttered) {
 }
 
 void Editor::ChangeCaseOfSelection(bool makeUpperCase) {
-	pdoc->BeginUndoAction();
+	UndoGroup ug(pdoc);
 	for (size_t r=0; r<sel.Count(); r++) {
 		SelectionRange current = sel.Range(r);
 		pdoc->ChangeCase(Range(current.Start().Position(), current.End().Position()),
@@ -4465,13 +4446,12 @@ void Editor::ChangeCaseOfSelection(bool makeUpperCase) {
 		// Automatic movement cuts off last character so reset to exactly the same as it was.
 		sel.Range(r) = current;
 	}
-	pdoc->EndUndoAction();
 }
 
 void Editor::LineTranspose() {
 	int line = pdoc->LineFromPosition(sel.MainCaret());
 	if (line > 0) {
-		pdoc->BeginUndoAction();
+		UndoGroup ug(pdoc);
 		int startPrev = pdoc->LineStart(line - 1);
 		int endPrev = pdoc->LineEnd(line - 1);
 		int start = pdoc->LineStart(line);
@@ -4487,31 +4467,32 @@ void Editor::LineTranspose() {
 		MovePositionTo(SelectionPosition(start - len1 + len2));
 		delete []line1;
 		delete []line2;
-		pdoc->EndUndoAction();
 	}
 }
 
 void Editor::Duplicate(bool forLine) {
-	// TODO: multiple selection by duplicating each selection
-	SelectionPosition start = SelectionStart();
-	SelectionPosition end = SelectionEnd();
 	if (sel.Empty()) {
 		forLine = true;
 	}
-	if (forLine) {
-		int line = pdoc->LineFromPosition(sel.MainCaret());
-		start = SelectionPosition(pdoc->LineStart(line));
-		end = SelectionPosition(pdoc->LineEnd(line));
+	UndoGroup ug(pdoc, sel.Count() > 1);
+	for (size_t r=0; r<sel.Count(); r++) {
+		SelectionPosition start = sel.Range(r).Start();
+		SelectionPosition end = sel.Range(r).End();
+		if (forLine) {
+			int line = pdoc->LineFromPosition(sel.Range(r).caret.Position());
+			start = SelectionPosition(pdoc->LineStart(line));
+			end = SelectionPosition(pdoc->LineEnd(line));
+		}
+		char *text = CopyRange(start.Position(), end.Position());
+		if (forLine) {
+			const char *eol = StringFromEOLMode(pdoc->eolMode);
+			pdoc->InsertCString(end.Position(), eol);
+			pdoc->InsertString(end.Position() + istrlen(eol), text, SelectionRange(end, start).Length());
+		} else {
+			pdoc->InsertString(end.Position(), text, SelectionRange(end, start).Length());
+		}
+		delete []text;
 	}
-	char *text = CopyRange(start.Position(), end.Position());
-	if (forLine) {
-		const char *eol = StringFromEOLMode(pdoc->eolMode);
-		pdoc->InsertCString(end.Position(), eol);
-		pdoc->InsertString(end.Position() + istrlen(eol), text, SelectionRange(end, start).Length());
-	} else {
-		pdoc->InsertString(end.Position(), text, SelectionRange(end, start).Length());
-	}
-	delete []text;
 }
 
 void Editor::CancelModes() {
@@ -5098,7 +5079,7 @@ void Editor::Indent(bool forwards) {
 		int lineCurrentPos = pdoc->LineFromPosition(caretPosition);
 		if (lineOfAnchor == lineCurrentPos) {
 			if (forwards) {
-				pdoc->BeginUndoAction();
+				UndoGroup ug(pdoc);
 				pdoc->DeleteChars(sel.Range(r).Start().Position(), sel.Range(r).Length()); 
 				caretPosition = sel.Range(r).caret.Position();
 				if (pdoc->GetColumn(caretPosition) <= pdoc->GetColumn(pdoc->GetLineIndentPosition(lineCurrentPos)) &&
@@ -5122,16 +5103,14 @@ void Editor::Indent(bool forwards) {
 						sel.Range(r) = SelectionRange(caretPosition+numSpaces);
 					}
 				}
-				pdoc->EndUndoAction();
 			} else {
 				if (pdoc->GetColumn(caretPosition) <= pdoc->GetLineIndentation(lineCurrentPos) &&
 						pdoc->tabIndents) {
-					pdoc->BeginUndoAction();
+					UndoGroup ug(pdoc);
 					int indentation = pdoc->GetLineIndentation(lineCurrentPos);
 					int indentationStep = pdoc->IndentSize();
 					pdoc->SetLineIndentation(lineCurrentPos, indentation - indentationStep);
 					SetEmptySelection(pdoc->GetLineIndentPosition(lineCurrentPos));
-					pdoc->EndUndoAction();
 				} else {
 					int newColumn = ((pdoc->GetColumn(caretPosition) - 1) / pdoc->tabInChars) *
 							pdoc->tabInChars;
@@ -5151,9 +5130,10 @@ void Editor::Indent(bool forwards) {
 			int lineBottomSel = Platform::Maximum(lineOfAnchor, lineCurrentPos);
 			if (pdoc->LineStart(lineBottomSel) == sel.Range(r).anchor.Position() || pdoc->LineStart(lineBottomSel) == caretPosition)
 				lineBottomSel--;  	// If not selecting any characters on a line, do not indent
-			pdoc->BeginUndoAction();
-			pdoc->Indent(forwards, lineBottomSel, lineTopSel);
-			pdoc->EndUndoAction();
+			{
+				UndoGroup ug(pdoc);
+				pdoc->Indent(forwards, lineBottomSel, lineTopSel);
+			}
 			if (lineOfAnchor < lineCurrentPos) {
 				if (currentPosPosOnLine == 0)
 					sel.Range(r) = SelectionRange(pdoc->LineStart(lineCurrentPos), pdoc->LineStart(lineOfAnchor));
@@ -5424,7 +5404,7 @@ void Editor::DropAt(SelectionPosition position, const char *value, bool moving, 
 		SelectionPosition selStart = SelectionStart();
 		SelectionPosition selEnd = SelectionEnd();
 
-		pdoc->BeginUndoAction();
+		UndoGroup ug(pdoc);
 
 		SelectionPosition positionAfterDeletion = position;
 		if ((inDragDrop == ddDragging) && moving) {
@@ -5450,7 +5430,6 @@ void Editor::DropAt(SelectionPosition position, const char *value, bool moving, 
 
 		if (rectangular) {
 			PasteRectangular(position, value, istrlen(value));
-			pdoc->EndUndoAction();
 			// Should try to select new rectangle but it may not be a rectangle now so just select the drop position
 			SetEmptySelection(position);
 		} else {
@@ -5461,7 +5440,6 @@ void Editor::DropAt(SelectionPosition position, const char *value, bool moving, 
 				posAfterInsertion.Add(istrlen(value));
 				SetSelection(posAfterInsertion, position);
 			}
-			pdoc->EndUndoAction();
 		}
 	} else if (inDragDrop == ddDragging) {
 		SetEmptySelection(position);
@@ -6176,13 +6154,12 @@ void Editor::EnsureLineVisible(int lineDoc, bool enforcePolicy) {
 }
 
 int Editor::ReplaceTarget(bool replacePatterns, const char *text, int length) {
-	pdoc->BeginUndoAction();
+	UndoGroup ug(pdoc);
 	if (length == -1)
 		length = istrlen(text);
 	if (replacePatterns) {
 		text = pdoc->SubstituteByPosition(text, &length);
 		if (!text) {
-			pdoc->EndUndoAction();
 			return 0;
 		}
 	}
@@ -6191,7 +6168,6 @@ int Editor::ReplaceTarget(bool replacePatterns, const char *text, int length) {
 	targetEnd = targetStart;
 	pdoc->InsertString(targetStart, text, length);
 	targetEnd = targetStart + length;
-	pdoc->EndUndoAction();
 	return length;
 }
 
@@ -6354,11 +6330,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SETTEXT: {
 			if (lParam == 0)
 				return 0;
-			pdoc->BeginUndoAction();
+			UndoGroup ug(pdoc);
 			pdoc->DeleteChars(0, pdoc->Length());
 			SetEmptySelection(0);
 			pdoc->InsertCString(0, CharPtrFromSPtr(lParam));
-			pdoc->EndUndoAction();
 			return 1;
 		}
 
@@ -6507,11 +6482,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_REPLACESEL: {
 			if (lParam == 0)
 				return 0;
-			pdoc->BeginUndoAction();
+			UndoGroup ug(pdoc);
 			ClearSelection();
 			char *replacement = CharPtrFromSPtr(lParam);
 			pdoc->InsertCString(sel.MainCaret(), replacement);
-			pdoc->EndUndoAction();
 			SetEmptySelection(sel.MainCaret() + istrlen(replacement));
 			EnsureCaretVisible();
 		}

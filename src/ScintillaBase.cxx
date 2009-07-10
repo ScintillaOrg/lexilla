@@ -373,7 +373,7 @@ void ScintillaBase::AutoCompleteCompleted() {
 		endPos = pdoc->ExtendWordSelect(endPos, 1, true);
 	if (endPos < firstPos)
 		return;
-	pdoc->BeginUndoAction();
+	UndoGroup ug(pdoc);
 	if (endPos != firstPos) {
 		pdoc->DeleteChars(firstPos, endPos - firstPos);
 	}
@@ -383,7 +383,6 @@ void ScintillaBase::AutoCompleteCompleted() {
 		pdoc->InsertCString(firstPos, piece.c_str());
 		SetEmptySelection(firstPos + static_cast<int>(piece.length()));
 	}
-	pdoc->EndUndoAction();
 }
 
 int ScintillaBase::AutoCompleteGetCurrent() {

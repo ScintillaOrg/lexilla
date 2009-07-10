@@ -1357,7 +1357,7 @@ void ScintillaWin::InsertPasteText(const char *text, int len, SelectionPosition 
 void ScintillaWin::Paste() {
 	if (!::OpenClipboard(MainHWND()))
 		return;
-	pdoc->BeginUndoAction();
+	UndoGroup ug(pdoc);
 	bool isLine = SelectionEmpty() && (::IsClipboardFormatAvailable(cfLineSelect) != 0);
 	ClearSelection();
 	SelectionPosition selStart = sel.Range(sel.Main()).Start();
@@ -1439,7 +1439,6 @@ void ScintillaWin::Paste() {
 		}
 	}
 	::CloseClipboard();
-	pdoc->EndUndoAction();
 	NotifyChange();
 	Redraw();
 }

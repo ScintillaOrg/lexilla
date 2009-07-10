@@ -761,10 +761,9 @@ void Document::SetLineIndentation(int line, int indent) {
 		CreateIndentation(linebuf, sizeof(linebuf), indent, tabInChars, !useTabs);
 		int thisLineStart = LineStart(line);
 		int indentPos = GetLineIndentPosition(line);
-		BeginUndoAction();
+		UndoGroup ug(this);
 		DeleteChars(thisLineStart, indentPos - thisLineStart);
 		InsertCString(thisLineStart, linebuf);
-		EndUndoAction();
 	}
 }
 
@@ -871,7 +870,7 @@ char *Document::TransformLineEnds(int *pLenOut, const char *s, size_t len, int e
 }
 
 void Document::ConvertLineEnds(int eolModeSet) {
-	BeginUndoAction();
+	UndoGroup ug(this);
 
 	for (int pos = 0; pos < Length(); pos++) {
 		if (cb.CharAt(pos) == '\r') {
@@ -906,7 +905,6 @@ void Document::ConvertLineEnds(int eolModeSet) {
 		}
 	}
 
-	EndUndoAction();
 }
 
 bool Document::IsWhiteLine(int line) const {

@@ -1514,7 +1514,7 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 				SelectionText selText;
 				GetGtkSelectionText(selection_data, selText);
 
-				pdoc->BeginUndoAction();
+				UndoGroup ug(pdoc);
 				if (selection_data->selection != GDK_SELECTION_PRIMARY) {
 					ClearSelection();
 				}
@@ -1527,7 +1527,6 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 					pdoc->InsertString(caretMain, selText.s, selText.len);
 					SetEmptySelection(caretMain + selText.len);
 				}
-				pdoc->EndUndoAction();
 				EnsureCaretVisible();
 			}
 		}
