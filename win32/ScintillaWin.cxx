@@ -1344,8 +1344,11 @@ void ScintillaWin::InsertPasteText(const char *text, int len, SelectionPosition 
 			if (sel.MainCaret() == insertPos) {
 				SetEmptySelection(sel.MainCaret() + len);
 			}
-		} else if (pdoc->InsertString(sel.MainCaret(), text, len)) {
-			SetEmptySelection(sel.MainCaret() + len);
+		} else {
+			selStart = SelectionPosition(InsertSpace(selStart.Position(), selStart.VirtualSpace()));
+			if (pdoc->InsertString(selStart.Position(), text, len)) {
+				SetEmptySelection(selStart.Position() + len);
+			}
 		}
 		delete []convertedText;
 	}
