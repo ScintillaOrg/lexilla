@@ -334,12 +334,12 @@ HIPoint ScintillaMacOSX::GetLocalPoint(::Point pt)
 }
 
 void ScintillaMacOSX::StartDrag() {
-    if (currentPos == anchor) return;
+    if (sel.Empty()) return;
 
     // calculate the bounds of the selection
         PRectangle client = GetTextRectangle();
-    int selStart = SelectionStart();
-    int selEnd = SelectionEnd();
+    int selStart = sel.RangeMain().Start().Position();
+    int selEnd = sel.RangeMain().End().Position();
     int startLine = pdoc->LineFromPosition(selStart);
     int endLine = pdoc->LineFromPosition(selEnd);
     Point pt;
@@ -565,12 +565,12 @@ void ScintillaMacOSX::DragScroll()
   scrollSpeed = (lines); \
   scrollTicks = 2000;
 
-    if (posDrag == invalidPosition) {
+    if (!posDrag.IsValid()) {
         RESET_SCROLL_TIMER(1);
         return;
     }
     Point dragMouse = LocationFromPosition(posDrag);
-    int line = pdoc->LineFromPosition(posDrag);
+    int line = pdoc->LineFromPosition(posDrag.Position());
     int currentVisibleLine = cs.DisplayFromDoc(line);
     int lastVisibleLine = Platform::Minimum(topLine + LinesOnScreen() - 1, pdoc->LinesTotal() - 1);
 
@@ -589,7 +589,7 @@ void ScintillaMacOSX::DragScroll()
         }
     }
 
-    SetDragPosition(PositionFromLocation(dragMouse));
+    SetDragPosition(SPositionFromLocation(dragMouse));
 
 #undef RESET_SCROLL_TIMER
 }
@@ -603,7 +603,7 @@ bool ScintillaMacOSX::DragWithin(DragRef inDrag )
     }
 
     Point pt = GetDragPoint (inDrag);
-    SetDragPosition(PositionFromLocation(pt));
+    SetDragPosition(SPositionFromLocation(pt));
     SetDragCursor(inDrag);
 
     return true;
@@ -612,7 +612,7 @@ bool ScintillaMacOSX::DragWithin(DragRef inDrag )
 bool ScintillaMacOSX::DragLeave(DragRef inDrag )
 {
     HideDragHilite( inDrag );
-    SetDragPosition(invalidPosition);
+    SetDragPosition(SelectionPosition(invalidPosition));
     WndProc(SCI_SETCURSOR, Window::cursorArrow, 0);
     return true;
 }
@@ -849,7 +849,7 @@ OSStatus ScintillaMacOSX::DragReceive(DragRef inDrag )
         GetDragAttributes( inDrag, &attributes );
         bool moving = true;
     
-        int position = PositionFromLocation(GetDragPoint(inDrag));
+        SelectionPosition position = SPositionFromLocation(GetDragPoint(inDrag));
         if ( attributes & kDragInsideSenderWindow ) {
             GetDragModifiers(inDrag, NULL, NULL, &modifiers);
             switch (modifiers & ~btnState)  // Filter out btnState (on for drop)
@@ -1457,7 +1457,7 @@ pascal OSStatus ScintillaMacOSX::CommandEventHandler( EventHandlerCallRef /*inCa
 
 bool ScintillaMacOSX::HasSelection()
 {
-    return ( SelectionEnd() - SelectionStart() > 0 );
+    return ( !sel.Empty() );
 }
 
 bool ScintillaMacOSX::CanUndo()
@@ -1484,7 +1484,7 @@ void ScintillaMacOSX::CopyToClipboard(const SelectionText &selectedText) {
 
 void ScintillaMacOSX::Copy()
 {
-    if (currentPos != anchor) {
+    if (!sel.Empty()) {
 #ifdef EXT_INPUT
         ExtInput::stop (GetViewRef()); 
 #endif
@@ -1534,11 +1534,11 @@ void ScintillaMacOSX::Paste(bool forceRectangular)
     pdoc->BeginUndoAction();
     ClearSelection();
     if (selectedText.rectangular) {
-        int selStart = SelectionStart();
+        SelectionPosition selStart = sel.RangeMain().Start();
         PasteRectangular(selStart, selectedText.s, selectedText.len);
     } else 
-    if ( pdoc->InsertString( currentPos, selectedText.s, selectedText.len ) ) {
-        SetEmptySelection( currentPos + selectedText.len );
+    if ( pdoc->InsertString( sel.RangeMain().caret.Position(), selectedText.s, selectedText.len ) ) {
+        SetEmptySelection( sel.RangeMain().caret.Position() + selectedText.len );
     }
 
     pdoc->EndUndoAction();
@@ -1976,8 +1976,8 @@ OSStatus ScintillaMacOSX::TextInput( TCarbonEvent& event )
             AddCharUTF( buffer, usedBufferLength );
         } else {
             // WARNING: This is an untested code path as with my US keyboard, I only enter a single character at a time
-            if (pdoc->InsertString(currentPos, buffer, usedBufferLength)) {
-                SetEmptySelection(currentPos + usedBufferLength);
+            if (pdoc->InsertString(sel.RangeMain().caret.Position(), buffer, usedBufferLength)) {
+                SetEmptySelection(sel.RangeMain().caret.Position() + usedBufferLength);
             }
         }
 
