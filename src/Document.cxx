@@ -1376,8 +1376,6 @@ bool Document::AddWatcher(DocWatcher *watcher, void *userData) {
 			return false;
 	}
 	WatcherWithUserData *pwNew = new WatcherWithUserData[lenWatchers + 1];
-	if (!pwNew)
-		return false;
 	for (int j = 0; j < lenWatchers; j++)
 		pwNew[j] = watchers[j];
 	pwNew[lenWatchers].watcher = watcher;
@@ -1398,8 +1396,6 @@ bool Document::RemoveWatcher(DocWatcher *watcher, void *userData) {
 				lenWatchers = 0;
 			} else {
 				WatcherWithUserData *pwNew = new WatcherWithUserData[lenWatchers];
-				if (!pwNew)
-					return false;
 				for (int j = 0; j < lenWatchers - 1; j++) {
 					pwNew[j] = (j < i) ? watchers[j] : watchers[j + 1];
 				}

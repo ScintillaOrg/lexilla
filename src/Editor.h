@@ -78,14 +78,11 @@ public:
 	}
 	void Copy(const char *s_, int len_, int codePage_, int characterSet_, bool rectangular_, bool lineCopy_) {
 		delete []s;
+		s = 0;
 		s = new char[len_];
-		if (s) {
-			len = len_;
-			for (int i = 0; i < len_; i++) {
-				s[i] = s_[i];
-			}
-		} else {
-			len = 0;
+		len = len_;
+		for (int i = 0; i < len_; i++) {
+			s[i] = s_[i];
 		}
 		codePage = codePage_;
 		characterSet = characterSet_;

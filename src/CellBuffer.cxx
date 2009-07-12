@@ -150,8 +150,6 @@ void UndoHistory::EnsureUndoRoom() {
 		// Run out of undo nodes so extend the array
 		int lenActionsNew = lenActions * 2;
 		Action *actionsNew = new Action[lenActionsNew];
-		if (!actionsNew)
-			return;
 		for (int act = 0; act <= currentAction; act++)
 			actionsNew[act].Grab(&actions[act]);
 		delete []actions;
