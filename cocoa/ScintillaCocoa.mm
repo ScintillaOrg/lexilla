@@ -445,7 +445,7 @@ void ScintillaCocoa::CopyToClipboard(const SelectionText &selectedText)
 
 void ScintillaCocoa::Copy()
 {
-  if (currentPos != anchor)
+  if (!sel.Empty())
   {
     SelectionText selectedText;
     CopySelectionRange(&selectedText);
@@ -491,12 +491,12 @@ void ScintillaCocoa::Paste(bool forceRectangular)
   ClearSelection();
   if (selectedText.rectangular)
   {
-    int selStart = SelectionStart();
+    SelectionPosition selStart = sel.RangeMain().Start();
     PasteRectangular(selStart, selectedText.s, selectedText.len);
   }
   else 
-    if (pdoc->InsertString(currentPos, selectedText.s, selectedText.len))
-      SetEmptySelection(currentPos + selectedText.len);
+    if (pdoc->InsertString(sel.RangeMain().caret.Position(), selectedText.s, selectedText.len))
+      SetEmptySelection(sel.RangeMain().caret.Position() + selectedText.len);
   
   pdoc->EndUndoAction();
   
@@ -646,8 +646,8 @@ NSPoint ScintillaCocoa::GetCaretPosition()
 {
   NSPoint result;
 
-  result.y = pdoc->LineFromPosition(currentPos);
-  result.x = currentPos - pdoc->LineStart(result.y);
+  result.y = pdoc->LineFromPosition(sel.RangeMain().caret.Position());
+  result.x = sel.RangeMain().caret.Position() - pdoc->LineStart(result.y);
   return result;
 }
 
@@ -660,7 +660,7 @@ NSPoint ScintillaCocoa::GetCaretPosition()
  */
 void ScintillaCocoa::DragScroll()
 {
-  if (posDrag == invalidPosition)
+  if (!posDrag.IsValid())
   {
     scrollSpeed = 1;
     scrollTicks = 2000;
@@ -668,7 +668,7 @@ void ScintillaCocoa::DragScroll()
   }
 
   // TODO: does not work for wrapped lines, fix it.
-  int line = pdoc->LineFromPosition(posDrag);
+  int line = pdoc->LineFromPosition(posDrag.Position());
   int currentVisibleLine = cs.DisplayFromDoc(line);
   int lastVisibleLine = Platform::Minimum(topLine + LinesOnScreen(), cs.LinesDisplayed()) - 2;
     
@@ -705,7 +705,7 @@ void ScintillaCocoa::DragScroll()
  */
 void ScintillaCocoa::StartDrag()
 {
-  if (currentPos == anchor)
+  if (sel.Empty())
     return;
 
   // Put the data to be dragged on the drag pasteboard.
@@ -715,7 +715,7 @@ void ScintillaCocoa::StartDrag()
   SetPasteboardData(pasteboard, selectedText);
   
   // Prepare drag image.
-  PRectangle localRectangle = RectangleFromRange(SelectionStart(), SelectionEnd());
+  PRectangle localRectangle = RectangleFromRange(sel.RangeMain().Start().Position(), sel.RangeMain().End().Position());
   NSRect selectionRectangle = PRectangleToNSRect(localRectangle);
   
   NSView* content = ContentView();
@@ -820,7 +820,7 @@ NSDragOperation ScintillaCocoa::DraggingUpdated(id <NSDraggingInfo> info)
   // Convert the drag location from window coordinates to view coordinates and 
   // from there to a text position to finally set the drag position.
   Point location = ConvertPoint([info draggingLocation]);
-  SetDragPosition(PositionFromLocation(location));
+  SetDragPosition(SPositionFromLocation(location));
   
   NSDragOperation sourceDragMask = [info draggingSourceOperationMask];
   if (sourceDragMask == NSDragOperationNone)
@@ -845,7 +845,7 @@ NSDragOperation ScintillaCocoa::DraggingUpdated(id <NSDraggingInfo> info)
  */
 void ScintillaCocoa::DraggingExited(id <NSDraggingInfo> info)
 {
-  SetDragPosition(invalidPosition);
+  SetDragPosition(SelectionPosition(invalidPosition));
   inDragDrop = ddNone;
 }
 
@@ -1187,7 +1187,7 @@ void ScintillaCocoa::NotifyURIDropped(const char *uri)
 
 bool ScintillaCocoa::HasSelection()
 {
-  return (SelectionEnd() - SelectionStart()) > 0;
+  return !sel.Empty();
 }
 
 //--------------------------------------------------------------------------------------------------
