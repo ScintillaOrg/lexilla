@@ -5271,12 +5271,10 @@ char *Editor::CopyRange(int start, int end) {
 	if (start < end) {
 		int len = end - start;
 		text = new char[len + 1];
-		if (text) {
-			for (int i = 0; i < len; i++) {
-				text[i] = pdoc->CharAt(start + i);
-			}
-			text[len] = '\0';
+		for (int i = 0; i < len; i++) {
+			text[i] = pdoc->CharAt(start + i);
 		}
+		text[len] = '\0';
 	}
 	return text;
 }
@@ -6198,19 +6196,17 @@ void Editor::AddStyledText(char *buffer, int appendLength) {
 	// The buffer consists of alternating character bytes and style bytes
 	size_t textLength = appendLength / 2;
 	char *text = new char[textLength];
-	if (text) {
-		size_t i;
-		for (i = 0;i < textLength;i++) {
-			text[i] = buffer[i*2];
-		}
-		pdoc->InsertString(CurrentPosition(), text, textLength);
-		for (i = 0;i < textLength;i++) {
-			text[i] = buffer[i*2+1];
-		}
-		pdoc->StartStyling(CurrentPosition(), static_cast<char>(0xff));
-		pdoc->SetStyles(textLength, text);
-		delete []text;
+	size_t i;
+	for (i = 0;i < textLength;i++) {
+		text[i] = buffer[i*2];
 	}
+	pdoc->InsertString(CurrentPosition(), text, textLength);
+	for (i = 0;i < textLength;i++) {
+		text[i] = buffer[i*2+1];
+	}
+	pdoc->StartStyling(CurrentPosition(), static_cast<char>(0xff));
+	pdoc->SetStyles(textLength, text);
+	delete []text;
 	SetEmptySelection(sel.MainCaret() + textLength);
 }
 

@@ -1760,8 +1760,6 @@ const char *BuiltinRegex::SubstituteByPosition(Document* doc, const char *text, 
 		}
 	}
 	substituted = new char[lenResult + 1];
-	if (!substituted)
-		return 0;
 	char *o = substituted;
 	for (int j = 0; j < *length; j++) {
 		if (text[j] == '\\') {

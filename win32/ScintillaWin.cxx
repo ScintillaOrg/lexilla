@@ -1375,9 +1375,7 @@ void ScintillaWin::Paste() {
 				unsigned int bytes = memUSelection.Size();
 				len = UTF8Length(uptr, bytes / 2);
 				putf = new char[len + 1];
-				if (putf) {
-					UTF8FromUTF16(uptr, bytes / 2, putf, len);
-				}
+				UTF8FromUTF16(uptr, bytes / 2, putf, len);
 			} else {
 				// CF_UNICODETEXT available, but not in Unicode mode
 				// Convert from Unicode to current Scintilla code page
@@ -1386,16 +1384,12 @@ void ScintillaWin::Paste() {
 				len = ::WideCharToMultiByte(cpDest, 0, uptr, -1,
 				                            NULL, 0, NULL, NULL) - 1; // subtract 0 terminator
 				putf = new char[len + 1];
-				if (putf) {
-					::WideCharToMultiByte(cpDest, 0, uptr, -1,
+				::WideCharToMultiByte(cpDest, 0, uptr, -1,
 					                      putf, len + 1, NULL, NULL);
-				}
 			}
 
-			if (putf) {
-				InsertPasteText(putf, len, selStart, isRectangular, isLine);
-				delete []putf;
-			}
+			InsertPasteText(putf, len, selStart, isRectangular, isLine);
+			delete []putf;
 		}
 		memUSelection.Unlock();
 	} else {
@@ -2209,10 +2203,8 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 				// Convert UTF-16 to UTF-8
 				int dataLen = UTF8Length(udata, tlen/2);
 				data = new char[dataLen+1];
-				if (data) {
-					UTF8FromUTF16(udata, tlen/2, data, dataLen);
-					dataAllocated = true;
-				}
+				UTF8FromUTF16(udata, tlen/2, data, dataLen);
+				dataAllocated = true;
 			} else {
 				// Convert UTF-16 to ANSI
 				//
@@ -2224,12 +2216,10 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 				int tlen = ::WideCharToMultiByte(cpDest, 0, udata, -1,
 					NULL, 0, NULL, NULL) - 1; // subtract 0 terminator
 				data = new char[tlen + 1];
-				if (data) {
-					memset(data, 0, (tlen+1));
-					::WideCharToMultiByte(cpDest, 0, udata, -1,
-							data, tlen + 1, NULL, NULL);
-					dataAllocated = true;
-				}
+				memset(data, 0, (tlen+1));
+				::WideCharToMultiByte(cpDest, 0, udata, -1,
+						data, tlen + 1, NULL, NULL);
+				dataAllocated = true;
 			}
 		}
 

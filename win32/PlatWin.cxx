@@ -1555,36 +1555,34 @@ void ListBoxX::SetList(const char *list, char separator, char typesep) {
 	Clear();
 	int size = strlen(list) + 1;
 	char *words = new char[size];
-	if (words) {
-		lti.SetWords(words);
-		memcpy(words, list, size);
-		char *startword = words;
-		char *numword = NULL;
-		int i = 0;
-		for (; words[i]; i++) {
-			if (words[i] == separator) {
-				words[i] = '\0';
-				if (numword)
-					*numword = '\0';
-				AppendListItem(startword, numword);
-				startword = words + i + 1;
-				numword = NULL;
-			} else if (words[i] == typesep) {
-				numword = words + i;
-			}
-		}
-		if (startword) {
+	lti.SetWords(words);
+	memcpy(words, list, size);
+	char *startword = words;
+	char *numword = NULL;
+	int i = 0;
+	for (; words[i]; i++) {
+		if (words[i] == separator) {
+			words[i] = '\0';
 			if (numword)
 				*numword = '\0';
 			AppendListItem(startword, numword);
+			startword = words + i + 1;
+			numword = NULL;
+		} else if (words[i] == typesep) {
+			numword = words + i;
 		}
+	}
+	if (startword) {
+		if (numword)
+			*numword = '\0';
+		AppendListItem(startword, numword);
+	}
 
-		// Finally populate the listbox itself with the correct number of items
-		int count = lti.Count();
-		::SendMessage(lb, LB_INITSTORAGE, count, 0);
-		for (int j=0; j<count; j++) {
-			::SendMessage(lb, LB_ADDSTRING, 0, j+1);
-		}
+	// Finally populate the listbox itself with the correct number of items
+	int count = lti.Count();
+	::SendMessage(lb, LB_INITSTORAGE, count, 0);
+	for (int j=0; j<count; j++) {
+		::SendMessage(lb, LB_ADDSTRING, 0, j+1);
 	}
 	SetRedraw(true);
 }
