@@ -1837,7 +1837,6 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 			// On X, instead of sending literal modifiers use the user specified
 			// modifier, defaulting to control instead of alt.
 			// This is because most X window managers grab alt + click for moving
-fprintf(stderr, "state=%x %x\n", event->state, event->state & GDK_MOD4_MASK);
 			ButtonDown(pt, event->time,
 			        (event->state & GDK_SHIFT_MASK) != 0,
 			        (event->state & GDK_CONTROL_MASK) != 0,
