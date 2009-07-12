@@ -2122,9 +2122,9 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 }
 
 ColourAllocated Editor::SelectionBackground(ViewStyle &vsDraw, bool main) {
-	return primarySelection ? 
-		(main ? vsDraw.selbackground.allocated : vsDraw.selAdditionalBackground.allocated) : 
-		vsDraw.selbackground2.allocated;
+	return main ? 
+		(primarySelection ? vsDraw.selbackground.allocated : vsDraw.selbackground2.allocated) : 
+		vsDraw.selAdditionalBackground.allocated;
 }
 
 ColourAllocated Editor::TextBackground(ViewStyle &vsDraw, bool overrideBackground,
@@ -2258,7 +2258,7 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 		if (!hideSelection && ((vsDraw.selAlpha == SC_ALPHA_NOALPHA) || (vsDraw.selAdditionalAlpha == SC_ALPHA_NOALPHA))) {
 			SelectionSegment virtualSpaceRange(SelectionPosition(pdoc->LineEnd(line)), SelectionPosition(pdoc->LineEnd(line), sel.VirtualSpaceFor(pdoc->LineEnd(line))));
 			for (size_t r=0; r<sel.Count(); r++) {
-				int alpha =	(r == sel.Main()) ? vsDraw.selAlpha : vsDraw.selAdditionalAlpha;
+				int alpha = (r == sel.Main()) ? vsDraw.selAlpha : vsDraw.selAdditionalAlpha;
 				if (alpha == SC_ALPHA_NOALPHA) {
 					SelectionSegment portion = sel.Range(r).Intersect(virtualSpaceRange);
 					if (!portion.Empty()) {
@@ -2888,7 +2888,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		}
 		SelectionSegment virtualSpaceRange(SelectionPosition(posLineStart), SelectionPosition(posLineStart + lineEnd, virtualSpaces));
 		for (size_t r=0; r<sel.Count(); r++) {
-			int alpha =	(r == sel.Main()) ? vsDraw.selAlpha : vsDraw.selAdditionalAlpha;
+			int alpha = (r == sel.Main()) ? vsDraw.selAlpha : vsDraw.selAdditionalAlpha;
 			if (alpha != SC_ALPHA_NOALPHA) {
 				SelectionSegment portion = sel.Range(r).Intersect(virtualSpaceRange);
 				if (!portion.Empty()) {
@@ -7484,6 +7484,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETSELALPHA:
 		vs.selAlpha = wParam;
+		vs.selAdditionalAlpha = wParam;
 		InvalidateStyleRedraw();
 		break;
 
