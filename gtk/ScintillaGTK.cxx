@@ -117,6 +117,7 @@ class ScintillaGTK : public ScintillaBase {
 	bool capturedMouse;
 	bool dragWasDropped;
 	int lastKey;
+	int rectangularSelectionModifier;
 
 	GtkWidgetClass *parentClass;
 
@@ -347,7 +348,7 @@ ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 		adjustmentv(0), adjustmenth(0),
 		scrollBarWidth(30), scrollBarHeight(30),
 		capturedMouse(false), dragWasDropped(false),
-		lastKey(0), parentClass(0),
+		lastKey(0), rectangularSelectionModifier(SCMOD_CTRL), parentClass(0),
 #ifdef INTERNATIONAL_INPUT
 #if GTK_MAJOR_VERSION < 2
 		ic(NULL),
@@ -361,6 +362,12 @@ ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 		rgnUpdate(0) {
 	sci = sci_;
 	wMain = GTK_WIDGET(sci);
+
+#if PLAT_GTK_WIN32
+	rectangularSelectionModifier = SCMOD_ALT;
+#else
+	rectangularSelectionModifier = SCMOD_CTRL;
+#endif
 
 #if PLAT_GTK_WIN32
  	// There does not seem to be a real standard for indicating that the clipboard
@@ -1020,6 +1027,13 @@ sptr_t ScintillaGTK::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			return EncodedFromUTF8(reinterpret_cast<char*>(wParam),
 			        reinterpret_cast<char*>(lParam));
 
+		case SCI_SETRECTANGULARSELECTIONMODIFIER:
+			rectangularSelectionModifier = wParam;
+			break;
+		
+		case SCI_GETRECTANGULARSELECTIONMODIFIER:
+			return rectangularSelectionModifier;
+		
 		default:
 			return ScintillaBase::WndProc(iMessage, wParam, lParam);
 		}
@@ -1523,9 +1537,10 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 				if (selText.rectangular) {
 					PasteRectangular(selStart, selText.s, selText.len);
 				} else {
-					int caretMain = sel.MainCaret();
-					pdoc->InsertString(caretMain, selText.s, selText.len);
-					SetEmptySelection(caretMain + selText.len);
+					selStart = SelectionPosition(InsertSpace(selStart.Position(), selStart.VirtualSpace()));
+					if (pdoc->InsertString(selStart.Position(),selText.s, selText.len)) {
+						SetEmptySelection(selStart.Position() + selText.len);
+					}
 				}
 				EnsureCaretVisible();
 			}
@@ -1781,6 +1796,21 @@ static void SetAdjustmentValue(GtkObject *object, int value) {
 	gtk_adjustment_set_value(adjustment, value);
 }
 
+static int modifierTranslated(int sciModifier) {
+	switch (sciModifier) {
+		case SCMOD_SHIFT:
+			return GDK_SHIFT_MASK;
+		case SCMOD_CTRL:
+			return GDK_CONTROL_MASK;
+		case SCMOD_ALT:
+			return GDK_MOD1_MASK;
+		case SCMOD_SUPER:
+			return GDK_MOD4_MASK;
+		default: 
+			return 0;
+	}
+}
+
 gint ScintillaGTK::PressThis(GdkEventButton *event) {
 	try {
 		//Platform::DebugPrintf("Press %x time=%d state = %x button = %x\n",this,event->time, event->state, event->button);
@@ -1804,19 +1834,14 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 
 		gtk_widget_grab_focus(PWidget(wMain));
 		if (event->button == 1) {
-			// On X, instead of sending literal modifiers use control instead of alt
+			// On X, instead of sending literal modifiers use the user specified
+			// modifier, defaulting to control instead of alt.
 			// This is because most X window managers grab alt + click for moving
-#if !PLAT_GTK_WIN32
+fprintf(stderr, "state=%x %x\n", event->state, event->state & GDK_MOD4_MASK);
 			ButtonDown(pt, event->time,
 			        (event->state & GDK_SHIFT_MASK) != 0,
 			        (event->state & GDK_CONTROL_MASK) != 0,
-			        (event->state & GDK_CONTROL_MASK) != 0);
-#else
-			ButtonDown(pt, event->time,
-			        (event->state & GDK_SHIFT_MASK) != 0,
-			        (event->state & GDK_CONTROL_MASK) != 0,
-			        (event->state & GDK_MOD1_MASK) != 0);
-#endif
+			        (event->state & modifierTranslated(rectangularSelectionModifier)) != 0);
 		} else if (event->button == 2) {
 			// Grab the primary selection if it exists
 			SelectionPosition pos = SPositionFromLocation(pt);

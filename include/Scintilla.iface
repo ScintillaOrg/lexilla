@@ -1995,6 +1995,16 @@ val SCVS_USERACCESSIBLE=2
 set void SetVirtualSpaceOptions=2596(int virtualSpace,)
 get int GetVirtualSpaceOptions=2597(,)
 
+# On GTK+, allow selecting the modifier key to use for mouse-based
+# rectangular selection. Often the window manager requires Alt+Mouse Drag
+# for moving windows.
+# Valid values are SCMOD_CTRL(default), SCMOD_ALT, or SCMOD_SUPER.
+
+set void SetRectangularSelectionModifier=2598(int modifier,)
+
+# Get the modifier key used for rectangular selection.
+get int GetRectangularSelectionModifier=2599(,)
+
 # Set the foreground colour of additional selections.
 # Must have previously called SetSelFore with non-zero first argument for this to have an effect.
 set void SetAdditionalSelFore=2600(colour fore,)
@@ -2124,6 +2134,7 @@ val SCMOD_NORM=0
 val SCMOD_SHIFT=1
 val SCMOD_CTRL=2
 val SCMOD_ALT=4
+val SCMOD_SUPER=8
 
 ################################################
 # For SciLexer.h
