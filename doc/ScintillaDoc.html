@@ -174,100 +174,106 @@
         <tr>
           <td>o <a class="toc" href="#SelectionAndInformation">Selection and information</a></td>
 
+          <td>o <a class="toc" href="#DiscontiguousSelectionAndVirtualSpace">Discontiguous Selection and Virtual Space</a></td>
+
           <td>o <a class="toc" href="#ScrollingAndAutomaticScrolling">Scrolling and automatic
           scrolling</a></td>
-
-          <td>o <a class="toc" href="#WhiteSpace">White space</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#WhiteSpace">White space</a></td>
+
           <td>o <a class="toc" href="#Cursor">Cursor</a></td>
 
           <td>o <a class="toc" href="#MouseCapture">Mouse capture</a></td>
-
-          <td>o <a class="toc" href="#LineEndings">Line endings</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#LineEndings">Line endings</a></td>
+
           <td>o <a class="toc" href="#Styling">Styling</a></td>
 
           <td>o <a class="toc" href="#StyleDefinition">Style definition</a></td>
-
-          <td>o <a class="toc" href="#CaretAndSelectionStyles">Caret, selection, and hotspot styles</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#CaretAndSelectionStyles">Caret, selection, and hotspot styles</a></td>
+
           <td>o <a class="toc" href="#Margins">Margins</a></td>
 
           <td>o <a class="toc" href="#Annotations">Annotations</a></td>
-
-          <td>o <a class="toc" href="#OtherSettings">Other settings</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#OtherSettings">Other settings</a></td>
+
           <td>o <a class="toc" href="#BraceHighlighting">Brace highlighting</a></td>
 
           <td>o <a class="toc" href="#TabsAndIndentationGuides">Tabs and Indentation
           Guides</a></td>
-
-          <td>o <a class="toc" href="#Markers">Markers</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#Markers">Markers</a></td>
+
           <td>o <a class="toc" href="#Indicators">Indicators</a></td>
 
 	<td>o <a class="toc" href="#Autocompletion">Autocompletion</a></td>
-
-          <td>o <a class="toc" href="#UserLists">User lists</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#UserLists">User lists</a></td>
+
           <td>o <a class="toc" href="#CallTips">Call tips</a></td>
 
 	<td>o <a class="toc" href="#KeyboardCommands">Keyboard commands</a></td>
-
-          <td>o <a class="toc" href="#KeyBindings">Key bindings</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#KeyBindings">Key bindings</a></td>
+
           <td>o <a class="toc" href="#PopupEditMenu">Popup edit menu</a></td>
 	  
           <td>o <a class="toc" href="#MacroRecording">Macro recording</a></td>
-
-          <td>o <a class="toc" href="#Printing">Printing</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#Printing">Printing</a></td>
+
           <td>o <a class="toc" href="#DirectAccess">Direct access</a></td>
 	  
           <td>o <a class="toc" href="#MultipleViews">Multiple views</a></td>
-
-          <td>o <a class="toc" href="#Folding">Folding</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#Folding">Folding</a></td>
+
           <td>o <a class="toc" href="#LineWrapping">Line wrapping</a></td>
 	
           <td>o <a class="toc" href="#Zooming">Zooming</a></td>
-
-          <td>o <a class="toc" href="#LongLines">Long lines</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#LongLines">Long lines</a></td>
+
           <td>o <a class="toc" href="#Lexer">Lexer</a></td>
 	  
           <td>o <a class="toc" href="#Notifications">Notifications</a></td>
-
-          <td>o <a class="toc" href="#GTK">GTK+</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#GTK">GTK+</a></td>
+
           <td>o <a class="toc" href="#DeprecatedMessages">Deprecated messages</a></td>
 	  
           <td>o <a class="toc" href="#EditMessagesNeverSupportedByScintilla">Edit messages never
           supported by Scintilla</a></td>
 
+        </tr>
+
+        <tr>
           <td>o <a class="toc" href="#BuildingScintilla">Building Scintilla</a></td>
+
         </tr>
       </tbody>
     </table>
@@ -1394,6 +1400,18 @@ struct TextToFind {
      Scintilla remembers the x value of the last position horizontally moved to explicitly by the
     user and this value is then used when moving vertically such as by using the up and down keys.
     This message sets the current x position of the caret as the remembered value.</p>
+
+    <h2 id="DiscontiguousSelectionAndVirtualSpace">Discontiguous Selection and Virtual Space</h2>
+
+    <p>
+    Additional selections may be made by holding down the Ctrl key while dragging with the mouse. 
+    The most recent selection is the main selection and determines which part of the document is shown automatically.
+    </p>
+
+    <p>
+    Virtual space is space beyond the end of each line. The caret may be moved into virtual space but no real space will be 
+    added to the document until there is some text typed or some other text insertion command is used.
+    </p>
 
     <h2 id="ScrollingAndAutomaticScrolling">Scrolling and automatic scrolling</h2>
     <code><a class="message" href="#SCI_LINESCROLL">SCI_LINESCROLL(int column, int line)</a><br />
