@@ -10,6 +10,16 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#include <string>
+
+// With Borland C++ 5.5, including <string> includes Windows.h leading to defining
+// FindText to FindTextA which makes calls here to Document::FindText fail.
+#ifdef __BORLANDC__
+#ifdef FindText
+#undef FindText
+#endif
+#endif
+
 #include "Platform.h"
 
 #include "Scintilla.h"
@@ -3628,14 +3638,12 @@ void Editor::ChangeSize() {
 }
 
 int Editor::InsertSpace(int position, unsigned int spaces) {
-		if (spaces > 0) {
-			char *spaceText = new char[spaces];
-			memset(spaceText, ' ', spaces);
-			pdoc->InsertString(position, spaceText, spaces);
-			position += spaces;
-			delete []spaceText;
-		}
-		return position;
+	if (spaces > 0) {
+		std::string spaceText(spaces, ' ');
+		pdoc->InsertString(position, spaceText.c_str(), spaces);
+		position += spaces;
+	}
+	return position;
 }
 
 void Editor::AddChar(char ch) {
