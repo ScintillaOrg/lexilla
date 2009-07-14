@@ -1979,7 +1979,7 @@ set void SetSelectionNStart=2584(int selection, position pos)
 get position GetSelectionNStart=2585(,)
 
 # Sets the position that ends the selection - this becomes the currentPosition.
-set void SetSelectionNEnd=2586(position pos,)
+set void SetSelectionNEnd=2586(int selection, position pos,)
 
 # Returns the position at the end of the selection.
 get position GetSelectionNEnd=2587(,)
@@ -1998,7 +1998,7 @@ val SCVS_NONE=0
 val SCVS_RECTANGULARSELECTION=1
 val SCVS_USERACCESSIBLE=2
 
-set void SetVirtualSpaceOptions=2596(int virtualSpace,)
+set void SetVirtualSpaceOptions=2596(int virtualSpaceOptions,)
 get int GetVirtualSpaceOptions=2597(,)
 
 # On GTK+, allow selecting the modifier key to use for mouse-based

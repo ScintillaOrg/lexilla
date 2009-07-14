@@ -174,7 +174,7 @@
         <tr>
           <td>o <a class="toc" href="#SelectionAndInformation">Selection and information</a></td>
 
-          <td>o <a class="toc" href="#DiscontiguousSelectionAndVirtualSpace">Discontiguous Selection and Virtual Space</a></td>
+          <td>o <a class="toc" href="#MultipleSelectionAndVirtualSpace">Multiple Selection and Virtual Space</a></td>
 
           <td>o <a class="toc" href="#ScrollingAndAutomaticScrolling">Scrolling and automatic
           scrolling</a></td>
@@ -1240,12 +1240,15 @@ struct TextToFind {
     <b id="SCI_GETSELECTIONMODE">SCI_GETSELECTIONMODE</b><br />
     The two functions set and get the selection mode, which can be
      stream (<code>SC_SEL_STREAM</code>=0) or
-     rectangular (<code>SC_SEL_RECTANGLE</code>=1)
-     or by lines (<code>SC_SEL_LINES</code>=2).
+     rectangular (<code>SC_SEL_RECTANGLE</code>=1) or
+     by lines (<code>SC_SEL_LINES</code>=2)
+     or thin rectangular (<code>SC_SEL_THIN</code>=3).
      When set in these modes, regular caret moves will extend or reduce the selection,
      until the mode is cancelled by a call with same value or with <code>SCI_CANCEL</code>.
      The get function returns the current mode even if the selection was made by mouse
-     or with regular extended moves.</p>
+     or with regular extended moves.
+     <code>SC_SEL_THIN</code> is the mode after a rectangular selection has been typed into and ensures
+     that no characters are selected.</p>
 
     <p><b id="SCI_GETLINESELSTARTPOSITION">SCI_GETLINESELSTARTPOSITION(int line)</b><br />
     <b id="SCI_GETLINESELENDPOSITION">SCI_GETLINESELENDPOSITION(int line)</b><br />
@@ -1401,17 +1404,181 @@ struct TextToFind {
     user and this value is then used when moving vertically such as by using the up and down keys.
     This message sets the current x position of the caret as the remembered value.</p>
 
-    <h2 id="DiscontiguousSelectionAndVirtualSpace">Discontiguous Selection and Virtual Space</h2>
+    <h2 id="MultipleSelectionAndVirtualSpace">Multiple Selection and Virtual Space</h2>
+
+    <code>
+     <a class="message" href="#SCI_SETMULTIPLESELECTION">SCI_SETMULTIPLESELECTION(bool multipleSelection)</a><br />
+     <a class="message" href="#SCI_GETMULTIPLESELECTION">SCI_GETMULTIPLESELECTION</a><br />
+     <a class="message" href="#SCI_SETADDITIONALSELECTIONTYPING">SCI_SETADDITIONALSELECTIONTYPING(bool additionalSelectionTyping)</a><br />
+     <a class="message" href="#SCI_GETADDITIONALSELECTIONTYPING">SCI_GETADDITIONALSELECTIONTYPING</a><br />
+     <a class="message" href="#SCI_SETVIRTUALSPACEOPTIONS">SCI_SETVIRTUALSPACEOPTIONS(int virtualSpaceOptions)</a><br />
+     <a class="message" href="#SCI_GETVIRTUALSPACEOPTIONS">SCI_GETVIRTUALSPACEOPTIONS</a><br />
+     <a class="message" href="#SCI_SETRECTANGULARSELECTIONMODIFIER">SCI_SETRECTANGULARSELECTIONMODIFIER(int modifier)</a><br />
+     <a class="message" href="#SCI_GETRECTANGULARSELECTIONMODIFIER">SCI_GETRECTANGULARSELECTIONMODIFIER</a><br />
+     <br />
+
+     <a class="message" href="#SCI_GETSELECTIONS">SCI_GETSELECTIONS</a><br />
+     <a class="message" href="#SCI_CLEARSELECTIONS">SCI_CLEARSELECTIONS</a><br />
+     <a class="message" href="#SCI_SETSELECTION">SCI_SETSELECTION(int caret, int anchor)</a><br />
+     <a class="message" href="#SCI_ADDSELECTION">SCI_ADDSELECTION(int caret, int anchor)</a><br />
+     <a class="message" href="#SCI_SETMAINSELECTION">SCI_SETMAINSELECTION(int selection)</a><br />
+     <a class="message" href="#SCI_GETMAINSELECTION">SCI_GETMAINSELECTION</a><br />
+     <br />
+
+     <a class="message" href="#SCI_SETSELECTIONNCARET">SCI_SETSELECTIONNCARET(int selection, int pos)</a><br />
+     <a class="message" href="#SCI_GETSELECTIONNCARET">SCI_GETSELECTIONNCARET(int selection)</a><br />
+     <a class="message" href="#SCI_SETSELECTIONNCARETVIRTUALSPACE">SCI_SETSELECTIONNCARETVIRTUALSPACE(int selection, int space)</a><br />
+     <a class="message" href="#SCI_GETSELECTIONNCARETVIRTUALSPACE">SCI_GETSELECTIONNCARETVIRTUALSPACE(int selection)</a><br />
+     <a class="message" href="#SCI_SETSELECTIONNANCHOR">SCI_SETSELECTIONNANCHOR(int selection, int posAnchor)</a><br />
+     <a class="message" href="#SCI_GETSELECTIONNANCHOR">SCI_GETSELECTIONNANCHOR(int selection)</a><br />
+     <a class="message" href="#SCI_SETSELECTIONNANCHORVIRTUALSPACE">SCI_SETSELECTIONNANCHORVIRTUALSPACE(int selection, int space)</a><br />
+     <a class="message" href="#SCI_GETSELECTIONNANCHORVIRTUALSPACE">SCI_GETSELECTIONNANCHORVIRTUALSPACE(int selection)</a><br />
+     <a class="message" href="#SCI_SETSELECTIONNSTART">SCI_SETSELECTIONNSTART(int selection, int pos)</a><br />
+     <a class="message" href="#SCI_GETSELECTIONNSTART">SCI_GETSELECTIONNSTART(int selection)</a><br />
+     <a class="message" href="#SCI_SETSELECTIONNEND">SCI_SETSELECTIONNEND(int selection, int pos)</a><br />
+     <a class="message" href="#SCI_GETSELECTIONNEND">SCI_GETSELECTIONNEND(int selection)</a><br />
+     <br />
+
+     <a class="message" href="#SCI_SETRECTANGULARSELECTIONCARET">SCI_SETRECTANGULARSELECTIONCARET(int pos)</a><br />
+     <a class="message" href="#SCI_GETRECTANGULARSELECTIONCARET">SCI_GETRECTANGULARSELECTIONCARET</a><br />
+     <a class="message" href="#SCI_SETRECTANGULARSELECTIONCARETVIRTUALSPACE">SCI_SETRECTANGULARSELECTIONCARETVIRTUALSPACE(int space)</a><br />
+     <a class="message" href="#SCI_GETRECTANGULARSELECTIONCARETVIRTUALSPACE">SCI_GETRECTANGULARSELECTIONCARETVIRTUALSPACE</a><br />
+     <a class="message" href="#SCI_SETRECTANGULARSELECTIONANCHOR">SCI_SETRECTANGULARSELECTIONANCHOR(int posAnchor)</a><br />
+     <a class="message" href="#SCI_GETRECTANGULARSELECTIONANCHOR">SCI_GETRECTANGULARSELECTIONANCHOR</a><br />
+     <a class="message" href="#SCI_SETRECTANGULARSELECTIONANCHORVIRTUALSPACE">SCI_SETRECTANGULARSELECTIONANCHORVIRTUALSPACE(int space)</a><br />
+     <a class="message" href="#SCI_GETRECTANGULARSELECTIONANCHORVIRTUALSPACE">SCI_GETRECTANGULARSELECTIONANCHORVIRTUALSPACE</a><br />
+     <br />
+
+     <a class="message" href="#SCI_SETADDITIONALSELALPHA">SCI_SETADDITIONALSELALPHA(int alpha)</a><br />
+     <a class="message" href="#SCI_GETADDITIONALSELALPHA">SCI_GETADDITIONALSELALPHA</a><br />
+     <a class="message" href="#SCI_SETADDITIONALSELFORE">SCI_SETADDITIONALSELFORE(int <a class="jump" href="#colour">colour<a>)</a><br />
+     <a class="message" href="#SCI_SETADDITIONALSELBACK">SCI_SETADDITIONALSELBACK(int <a class="jump" href="#colour">colour<a>)</a><br />
+     <a class="message" href="#SCI_SETADDITIONALCARETFORE">SCI_SETADDITIONALCARETFORE(int <a class="jump" href="#colour">colour<a>)</a><br />
+     <a class="message" href="#SCI_GETADDITIONALCARETFORE">SCI_GETADDITIONALCARETFORE</a><br />
+     <a class="message" href="#SCI_SETADDITIONALCARETSBLINK">SCI_SETADDITIONALCARETSBLINK(bool additionalCaretsBlink)</a><br />
+     <a class="message" href="#SCI_GETADDITIONALCARETSBLINK">SCI_GETADDITIONALCARETSBLINK</a><br />
 
     <p>
-    Additional selections may be made by holding down the Ctrl key while dragging with the mouse. 
+    There may be multiple selections active at one time. 
+    More selections are made by holding down the Ctrl key while dragging with the mouse. 
     The most recent selection is the main selection and determines which part of the document is shown automatically.
+    Any selection apart from the main selection is called an additional selection.
+    </p>
+
+    <p>
+    Rectangular selections are handled as multiple selections although the original rectangular range is remembered so that
+    subsequent operations may be handled differently for rectangular selections. For example, pasting a rectangular selection
+    places each piece in a vertical column.
     </p>
 
     <p>
     Virtual space is space beyond the end of each line. The caret may be moved into virtual space but no real space will be 
     added to the document until there is some text typed or some other text insertion command is used.
     </p>
+
+    <p>
+    <b id="SCI_SETMULTIPLESELECTION">SCI_SETMULTIPLESELECTION(bool multipleSelection)</b><br />
+    <b id="SCI_GETMULTIPLESELECTION">SCI_GETMULTIPLESELECTION</b><br />
+     Enable or disable multiple selection.</p>
+
+    <p>
+    <b id="SCI_SETADDITIONALSELECTIONTYPING">SCI_SETADDITIONALSELECTIONTYPING(bool additionalSelectionTyping)</b><br />
+    <b id="SCI_GETADDITIONALSELECTIONTYPING">SCI_GETADDITIONALSELECTIONTYPING</b><br />
+     Whether typing, backspace, or delete works with multiple selections simultaneously.</p>
+
+    <p>
+    <b id="SCI_SETVIRTUALSPACEOPTIONS">SCI_SETVIRTUALSPACEOPTIONS(int virtualSpace)</b><br />
+    <b id="SCI_GETVIRTUALSPACEOPTIONS">SCI_GETVIRTUALSPACEOPTIONS</b><br />
+     Virtual space can be enabled or disabled for rectangular selections or in other circumstances or in both. 
+     There are two bit flags <code>SCVS_RECTANGULARSELECTION</code>=1 and 
+     <code>SCVS_USERACCESSIBLE</code>=2 which can be set independently.
+     <code>SCVS_NONE</code>=0, the default, disables all use of virtual space.</p>
+
+    <p>
+    <b id="SCI_SETRECTANGULARSELECTIONMODIFIER">SCI_SETRECTANGULARSELECTIONMODIFIER(int modifier)</b><br />
+    <b id="SCI_GETRECTANGULARSELECTIONMODIFIER">SCI_GETRECTANGULARSELECTIONMODIFIER</b><br />
+     On GTK+, the key used to indicate that a rectangular selection should be created when combined with a mouse drag can be set.
+     The three possible values are <code>SCMOD_CTRL</code>=2 (default), <code>SCMOD_ALT</code>=4 or <code>SCMOD_SUPER</code>=8.
+     Since <code>SCMOD_ALT</code> is often already used by a window manager, the window manager may need configuring to allow this choice.
+     <code>SCMOD_SUPER</code> is often a system dependent modifier key such as the Left Windows key on a Windows keyboard or the 
+     Command key on a Mac.</p>
+
+    <p>
+    <b id="SCI_GETSELECTIONS">SCI_GETSELECTIONS</b><br />
+     Return the number of selections currently active.</p>
+     
+    <p>
+    <b id="SCI_CLEARSELECTIONS">SCI_CLEARSELECTIONS</b><br />
+     Set a single empty selection at 0 as the only selection.</p>
+
+    <p>
+    <b id="SCI_SETSELECTION">SCI_SETSELECTION(int caret, int anchor)</b><br />
+     Set a single selection from <code>anchor</code> to <code>caret</code> as the only selection.</p>
+
+    <p>
+    <b id="SCI_ADDSELECTION">SCI_ADDSELECTION(int caret, int anchor)</b><br />
+     Add a new selection from <code>anchor</code> to <code>caret</code> as the main selection retaining all other 
+     selections as additional selections.</p>
+
+    <p>
+    <b id="SCI_SETMAINSELECTION">SCI_SETMAINSELECTION(int selection)</b><br />
+    <b id="SCI_GETMAINSELECTION">SCI_GETMAINSELECTION</b><br />
+     One of the selections is the main selection which is used to determine what range of text is automatically visible.
+     The main selection may be displayed in different colours or with a differently styled caret.
+     Only an already existing selection can be made main.</p>
+
+    <p>
+     <b id="SCI_SETSELECTIONNCARET">SCI_SETSELECTIONNCARET(int selection, int pos)</b><br />
+     <b id="SCI_GETSELECTIONNCARET">SCI_GETSELECTIONNCARET(int selection)</b><br />
+     <b id="SCI_SETSELECTIONNCARETVIRTUALSPACE">SCI_SETSELECTIONNCARETVIRTUALSPACE(int selection, int space)</b><br />
+     <b id="SCI_GETSELECTIONNCARETVIRTUALSPACE">SCI_GETSELECTIONNCARETVIRTUALSPACE(int selection)</b><br />
+     <b id="SCI_SETSELECTIONNANCHOR">SCI_SETSELECTIONNANCHOR(int selection, int posAnchor)</b><br />
+     <b id="SCI_GETSELECTIONNANCHOR">SCI_GETSELECTIONNANCHOR(int selection)</b><br />
+     <b id="SCI_SETSELECTIONNANCHORVIRTUALSPACE">SCI_SETSELECTIONNANCHORVIRTUALSPACE(int selection, int space)</b><br />
+     <b id="SCI_GETSELECTIONNANCHORVIRTUALSPACE">SCI_GETSELECTIONNANCHORVIRTUALSPACE(int selection)</b><br />
+     Set or query the position and amount of virtual space for the caret and anchor of each already existing selection.</p>
+
+    <p>
+     <b id="SCI_SETSELECTIONNSTART">SCI_SETSELECTIONNSTART(int selection, int pos)</b><br />
+     <b id="SCI_GETSELECTIONNSTART">SCI_GETSELECTIONNSTART(int selection)</b><br />
+     <b id="SCI_SETSELECTIONNEND">SCI_SETSELECTIONNEND(int selection, int pos)</b><br />
+     <b id="SCI_GETSELECTIONNEND">SCI_GETSELECTIONNEND(int selection)</b><br />
+     Set or query the start and end position of each already existing selection.
+     Mostly of use to query each range for its text.</p>
+
+    <p>
+     <b id="SCI_SETRECTANGULARSELECTIONCARET">SCI_SETRECTANGULARSELECTIONCARET(int pos)</b><br />
+     <b id="SCI_GETRECTANGULARSELECTIONCARET">SCI_GETRECTANGULARSELECTIONCARET</b><br />
+     <b id="SCI_SETRECTANGULARSELECTIONCARETVIRTUALSPACE">SCI_SETRECTANGULARSELECTIONCARETVIRTUALSPACE(int space)</b><br />
+     <b id="SCI_GETRECTANGULARSELECTIONCARETVIRTUALSPACE">SCI_GETRECTANGULARSELECTIONCARETVIRTUALSPACE</b><br />
+     <b id="SCI_SETRECTANGULARSELECTIONANCHOR">SCI_SETRECTANGULARSELECTIONANCHOR(int posAnchor)</b><br />
+     <b id="SCI_GETRECTANGULARSELECTIONANCHOR">SCI_GETRECTANGULARSELECTIONANCHOR</b><br />
+     <b id="SCI_SETRECTANGULARSELECTIONANCHORVIRTUALSPACE">SCI_SETRECTANGULARSELECTIONANCHORVIRTUALSPACE(int space)</b><br />
+     <b id="SCI_GETRECTANGULARSELECTIONANCHORVIRTUALSPACE">SCI_GETRECTANGULARSELECTIONANCHORVIRTUALSPACE</b><br />
+     Set or query the position and amount of virtual space for the caret and anchor of the rectangular selection.
+     After setting the rectangular selection, this is broken down into multiple selections, one for each line.</p>
+
+    <p>
+     <b id="SCI_SETADDITIONALSELALPHA">SCI_SETADDITIONALSELALPHA(int alpha)</b><br />
+     <b id="SCI_GETADDITIONALSELALPHA">SCI_GETADDITIONALSELALPHA</b><br />
+     <b id="SCI_SETADDITIONALSELFORE">SCI_SETADDITIONALSELFORE(int <a class="jump" href="#colour">colour<a>)</b><br />
+     <b id="SCI_SETADDITIONALSELBACK">SCI_SETADDITIONALSELBACK(int <a class="jump" href="#colour">colour<a>)</b><br />
+     Modify the appearence of additional selections so that they can be differentiated from the main selection which has its appearence set with
+     <a class="message" href="#SCI_SETSELALPHA"><code>SCI_SETSELALPHA</code></a>,
+     <a class="message" href="#SCI_GETSELALPHA"><code>SCI_GETSELALPHA</code></a>,
+     <a class="message" href="#SCI_SETSELFORE"><code>SCI_SETSELFORE</code></a>, and
+     <a class="message" href="#SCI_SETSELBACK"><code>SCI_SETSELBACK</code></a>.</p>
+
+    <p>
+     <b id="SCI_SETADDITIONALCARETFORE">SCI_SETADDITIONALCARETFORE(int <a class="jump" href="#colour">colour<a>)</b><br />
+     <b id="SCI_GETADDITIONALCARETFORE">SCI_GETADDITIONALCARETFORE</b><br />
+     <b id="SCI_SETADDITIONALCARETSBLINK">SCI_SETADDITIONALCARETSBLINK(bool additionalCaretsBlink)</b><br />
+     <b id="SCI_GETADDITIONALCARETSBLINK">SCI_GETADDITIONALCARETSBLINK</b><br />
+     Modify the appearence of additional carets so that they can be differentiated from the main caret which has its appearence set with
+     <a class="message" href="#SCI_SETCARETFORE"><code>SCI_SETCARETFORE</code></a>,
+     <a class="message" href="#SCI_GETCARETFORE"><code>SCI_GETCARETFORE</code></a>,
+     <a class="message" href="#SCI_SETCARETPERIOD"><code>SCI_SETCARETPERIOD</code></a>, and
+     <a class="message" href="#SCI_GETCARETPERIOD"><code>SCI_GETCARETPERIOD</code></a>.</p>
 
     <h2 id="ScrollingAndAutomaticScrolling">Scrolling and automatic scrolling</h2>
     <code><a class="message" href="#SCI_LINESCROLL">SCI_LINESCROLL(int column, int line)</a><br />
