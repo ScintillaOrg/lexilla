@@ -13,6 +13,8 @@
 #include <assert.h>
 #include <limits.h>
 
+#include <vector>
+
 #define _WIN32_WINNT  0x0500
 #include <windows.h>
 #include <commctrl.h>

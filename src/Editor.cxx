@@ -11,6 +11,7 @@
 #include <ctype.h>
 
 #include <string>
+#include <vector>
 
 // With Borland C++ 5.5, including <string> includes Windows.h leading to defining
 // FindText to FindTextA which makes calls here to Document::FindText fail.
@@ -146,8 +147,9 @@ Editor::Editor() {
 	verticalScrollBarVisible = true;
 	endAtLastLine = true;
 	caretSticky = false;
-	multiLineCaret = false;
-	multiLineCaretBlinks = true;
+	multipleSelection = false;
+	additionalSelectionTyping = false;
+	additionalCaretsBlink = true;
 	virtualSpaceOptions = SCVS_NONE;
 	virtualSpaceOptions = SCVS_USERACCESSIBLE;
 
@@ -3104,7 +3106,7 @@ void Editor::DrawCarets(Surface *surface, ViewStyle &vsDraw, int lineDoc, int xS
 					xposCaret += ll->wrapIndent;
 			}
 			if ((xposCaret >= 0) && (vsDraw.caretWidth > 0) && (vsDraw.caretStyle != CARETSTYLE_INVISIBLE) &&
-			        ((posDrag.IsValid()) || ((caret.active && caret.on) || (!multiLineCaretBlinks && !mainCaret)))) {
+			        ((posDrag.IsValid()) || ((caret.active && caret.on) || (!additionalCaretsBlink && !mainCaret)))) {
 				bool caretAtEOF = false;
 				bool caretAtEOL = false;
 				bool drawBlockCaret = false;
@@ -3663,8 +3665,18 @@ void Editor::AddChar(char ch) {
 	AddCharUTF(s, 1);
 }
 
+void Editor::FilterSelections() {
+	if (!additionalSelectionTyping && (sel.Count() > 1)) {
+		SelectionRange rangeOnly = sel.RangeMain();
+		InvalidateSelection(rangeOnly, true);
+		sel.EmptyRanges();
+		sel.AddSelection(rangeOnly);
+	}
+}
+
 // AddCharUTF inserts an array of bytes which may or may not be in UTF-8.
 void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
+	FilterSelections();
 	{
 		UndoGroup ug(pdoc, (sel.Count() > 1) || !sel.Empty() || inOverstrike);
 		for (size_t r=0; r<sel.Count(); r++) {
@@ -3757,6 +3769,7 @@ void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 }
 
 void Editor::ClearSelection() {
+	FilterSelections();
 	UndoGroup ug(pdoc);
 	for (size_t r=0; r<sel.Count(); r++) {
 		if (!sel.Range(r).Empty()) {
@@ -3915,6 +3928,7 @@ void Editor::DelChar() {
 }
 
 void Editor::DelCharBack(bool allowLineStartDeletion) {
+	FilterSelections();
 	if (sel.IsRectangular())
 		allowLineStartDeletion = false;
 	UndoGroup ug(pdoc, (sel.Count() > 1) || !sel.Empty());
@@ -3928,7 +3942,7 @@ void Editor::DelCharBack(bool allowLineStartDeletion) {
 					int lineCurrentPos = pdoc->LineFromPosition(sel.Range(r).caret.Position());
 					if (allowLineStartDeletion || (pdoc->LineStart(lineCurrentPos) != sel.Range(r).caret.Position())) {
 						if (pdoc->GetColumn(sel.Range(r).caret.Position()) <= pdoc->GetLineIndentation(lineCurrentPos) &&
-						        pdoc->GetColumn(sel.Range(r).caret.Position()) > 0 && pdoc->backspaceUnindents) {
+								pdoc->GetColumn(sel.Range(r).caret.Position()) > 0 && pdoc->backspaceUnindents) {
 							UndoGroup ugInner(pdoc, !ug.Needed());
 							int indentation = pdoc->GetLineIndentation(lineCurrentPos);
 							int indentationStep = pdoc->IndentSize();
@@ -5638,7 +5652,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 			SetMouseCapture(true);
 			if (inDragDrop != ddInitial) {
 				SetDragPosition(SelectionPosition(invalidPosition));
-				if (ctrl) {
+				if (ctrl && multipleSelection) {
 					InvalidateSelection(SelectionRange(newPos), true);
 					sel.AddSelection(newPos);
 				} else if (!shift) {
@@ -5749,9 +5763,10 @@ void Editor::ButtonMove(Point pt) {
 					sel.Rectangular() = SelectionRange(movePos, sel.Rectangular().anchor);
 					SetSelection(movePos, sel.RangeMain().anchor);
 				} else if (sel.Count() > 1) {
-					sel.TrimSelection(sel.RangeMain().anchor, movePos);
-					sel.RangeMain() = SelectionRange(movePos, sel.RangeMain().anchor);
-					InvalidateSelection(SelectionRange(movePos, sel.RangeMain().anchor), true);
+					SelectionRange range(movePos, sel.RangeMain().anchor);
+					sel.TrimSelection(range);
+					sel.RangeMain() = range;
+					InvalidateSelection(range, true);
 				} else {
 					SetSelection(movePos, sel.RangeMain().anchor);
 				}
@@ -8123,21 +8138,29 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		pdoc->AddUndoAction(wParam, lParam & UNDO_MAY_COALESCE);
 		break;
 
-	case SCI_SETMULTILINECARET:
-		multiLineCaret = wParam != 0;
+	case SCI_SETMULTIPLESELECTION:
+		multipleSelection = wParam != 0;
 		InvalidateCaret();
 		break;
 
-	case SCI_GETMULTILINECARET:
-		return multiLineCaret;
+	case SCI_GETMULTIPLESELECTION:
+		return multipleSelection;
 
-	case SCI_SETMULTILINECARETBLINKS:
-		multiLineCaretBlinks = wParam != 0;
+	case SCI_SETADDITIONALSELECTIONTYPING:
+		additionalSelectionTyping = wParam != 0;
 		InvalidateCaret();
 		break;
 
-	case SCI_GETMULTILINECARETBLINKS:
-		return multiLineCaretBlinks;
+	case SCI_GETADDITIONALSELECTIONTYPING:
+		return additionalSelectionTyping;
+
+	case SCI_SETADDITIONALCARETSBLINK:
+		additionalCaretsBlink = wParam != 0;
+		InvalidateCaret();
+		break;
+
+	case SCI_GETADDITIONALCARETSBLINK:
+		return additionalCaretsBlink;
 
 	case SCI_GETSELECTIONS:
 		return sel.Count();

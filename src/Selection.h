@@ -116,19 +116,17 @@ struct SelectionRange {
 	SelectionPosition End() const {
 		return (anchor < caret) ? caret : anchor;
 	}
-	bool Trim(SelectionPosition startPos, SelectionPosition endPos);
+	bool Trim(SelectionRange range);
 	// If range is all virtual collapse to start of virtual space
 	void MinimizeVirtualSpace();
 };
 
 class Selection {
-	SelectionRange *ranges;
+	std::vector<SelectionRange> ranges;
 	SelectionRange rangeRectangular;
-	size_t allocated;
 	size_t nRanges;
 	size_t mainRange;
 	bool moveExtends;
-	void Allocate();
 public:
 	enum selTypes { noSel, selStream, selRectangle, selLines, selThin };
 	selTypes selType;
@@ -151,7 +149,8 @@ public:
 	SelectionPosition Last() const;
 	int Length() const;
 	void MovePositions(bool insertion, int startChange, int length);
-	void TrimSelection(SelectionPosition startPos, SelectionPosition endPos);
+	void TrimSelection(SelectionRange range);
+	void AddSelection(SelectionRange range);
 	void AddSelection(SelectionPosition spPos);
 	void AddSelection(SelectionPosition spStartPos, SelectionPosition spEndPos, bool anchorLeft);
 	int CharacterInSelection(int posCharacter) const;

@@ -7,6 +7,8 @@
 
 #include <stdlib.h>
 
+#include <vector>
+
 #include "Platform.h"
 
 #include "Scintilla.h"
@@ -128,13 +130,9 @@ SelectionSegment SelectionRange::Intersect(SelectionSegment check) const {
 	}
 }
 
-bool SelectionRange::Trim(SelectionPosition startPos, SelectionPosition endPos) {
-	SelectionPosition startRange = startPos;
-	SelectionPosition endRange = endPos;
-	if (startPos > endPos) {
-		startRange = endPos;
-		endRange = startPos;
-	}
+bool SelectionRange::Trim(SelectionRange range) {
+	SelectionPosition startRange = range.Start();
+	SelectionPosition endRange = range.End();
 	SelectionPosition start = Start();
 	SelectionPosition end = End();
 	PLATFORM_ASSERT(start <= end);
@@ -178,24 +176,11 @@ void SelectionRange::MinimizeVirtualSpace() {
 	}
 }
 
-void Selection::Allocate() {
-	if (nRanges >= allocated) {
-		size_t allocateNew = (allocated + 1) * 2;
-		SelectionRange *rangesNew = new SelectionRange[allocateNew];
-		for (size_t r=0; r<Count(); r++)
-			rangesNew[r] = ranges[r];
-		delete []ranges;
-		ranges = rangesNew;
-		allocated = allocateNew;
-	}
-}
-
-Selection::Selection() : ranges(0), allocated(0), nRanges(0), mainRange(0), moveExtends(false), selType(selStream) {
+Selection::Selection() : ranges(0), nRanges(0), mainRange(0), moveExtends(false), selType(selStream) {
 	AddSelection(SelectionPosition(0));
 }
 
 Selection::~Selection() {
-	delete []ranges;
 }
 
 bool Selection::IsRectangular() const {
@@ -281,9 +266,9 @@ void Selection::MovePositions(bool insertion, int startChange, int length) {
 	}
 }
 
-void Selection::TrimSelection(SelectionPosition startPos, SelectionPosition endPos) {
+void Selection::TrimSelection(SelectionRange range) {
 	for (size_t i=0; i<nRanges;) {
-		if ((i != mainRange) && (ranges[i].Trim(startPos, endPos))) {
+		if ((i != mainRange) && (ranges[i].Trim(range))) {
 			// Trimmed to empty so remove
 			for (size_t j=i;j<nRanges-1;j++) {
 				ranges[j] = ranges[j+1];
@@ -297,21 +282,23 @@ void Selection::TrimSelection(SelectionPosition startPos, SelectionPosition endP
 	}
 }
 
-void Selection::AddSelection(SelectionPosition spPos) {
-	Allocate();
-	TrimSelection(spPos, spPos);
-	ranges[nRanges] = SelectionRange(spPos);
+void Selection::AddSelection(SelectionRange range) {
+	ranges.resize(nRanges + 1);
+	TrimSelection(range);
+	ranges[nRanges] = range;
 	mainRange = nRanges;
 	nRanges++;
 }
 
+void Selection::AddSelection(SelectionPosition spPos) {
+	AddSelection(SelectionRange(spPos, spPos));
+}
+
 void Selection::AddSelection(SelectionPosition spStartPos, SelectionPosition spEndPos, bool anchorLeft) {
-	Allocate();
-	TrimSelection(spStartPos, spEndPos);
-	ranges[nRanges].caret = anchorLeft ? spEndPos : spStartPos;
-	ranges[nRanges].anchor = anchorLeft ? spStartPos : spEndPos;
-	mainRange = nRanges;
-	nRanges++;
+	if (anchorLeft)
+		AddSelection(SelectionRange(spEndPos, spStartPos));
+	else
+		AddSelection(SelectionRange(spStartPos, spEndPos));
 }
 
 int Selection::CharacterInSelection(int posCharacter) const {

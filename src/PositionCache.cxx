@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#include <vector>
+
 #include "Platform.h"
 
 #include "Scintilla.h"

@@ -1927,17 +1927,23 @@ fun position CharPositionFromPoint=2561(int x, int y)
 # Return INVALID_POSITION if not close to text.
 fun position CharPositionFromPointClose=2562(int x, int y)
 
-# Set whether the caret will show on multiple lines for a rectangular selection
-set void SetMultiLineCaret=2563(bool multiLine,)
+# Set whether multiple selections can be made
+set void SetMultipleSelection=2563(bool multipleSelection,)
 
-# Whether the caret will show on multiple lines for a rectangular selection
-get bool GetMultiLineCaret=2564(,)
+# Whether multiple selections can be made
+get bool GetMultipleSelection=2564(,)
 
-# Set whether the multiline caret will blink
-set void SetMultiLineCaretBlinks=2565(bool multiLineBlinks,)
+# Set whether typing can be performed into multiple selections
+set void SetAdditionalSelectionTyping=2565(bool additionalSelectionTyping,)
 
-# Whether the multiline caret will blink
-get bool GetMultiLineCaretBlinks=2566(,)
+# Whether typing can be performed into multiple selections
+get bool GetAdditionalSelectionTyping=2566(,)
+
+# Set whether additional carets will blink
+set void SetAdditionalCaretsBlink=2567(bool additionalCaretsBlink,)
+
+# Whether additional carets will blink
+get bool GetAdditionalCaretsBlink=2568(,)
 
 # How many selections are there?
 get int GetSelections=2570(,)

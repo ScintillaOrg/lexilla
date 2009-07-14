@@ -140,8 +140,9 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool verticalScrollBarVisible;
 	bool endAtLastLine;
 	bool caretSticky;
-	bool multiLineCaret;
-	bool multiLineCaretBlinks;
+	bool multipleSelection;
+	bool additionalSelectionTyping;
+	bool additionalCaretsBlink;
 
 	int virtualSpaceOptions;
 
@@ -351,6 +352,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void SetScrollBars();
 	void ChangeSize();
 
+	void FilterSelections();
 	int InsertSpace(int position, unsigned int spaces);
 	void AddChar(char ch);
 	virtual void AddCharUTF(char *s, unsigned int len, bool treatAsDBCS=false);
