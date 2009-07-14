@@ -10,6 +10,8 @@
 #include <ctype.h>
 #include <time.h>
 
+#include <vector>
+
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 
