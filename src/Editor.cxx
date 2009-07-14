@@ -2249,18 +2249,21 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
         bool drawWrapMarkEnd, ColourAllocated wrapColour) {
 
 	const int posLineStart = pdoc->LineStart(line);
-	int styleMask = pdoc->stylingBitsMask;
+	const int styleMask = pdoc->stylingBitsMask;
 	PRectangle rcSegment = rcLine;
 
+	const bool lastSubLine = subLine == (ll->lines - 1);
 	int virtualSpace = 0;
-	if (subLine == (ll->lines - 1)) {
+	if (lastSubLine) {
 		const int spaceWidth = static_cast<int>(vsDraw.styles[ll->EndLineStyle()].spaceWidth);
 		virtualSpace = sel.VirtualSpaceFor(pdoc->LineEnd(line)) * spaceWidth;
 	}
 
 	// Fill in a PRectangle representing the end of line characters
+
 	int xEol = ll->positions[lineEnd] - subLineStart;
 
+	// Fill the virtual space and show selections within it
 	if (virtualSpace) {
 		rcSegment.left = xEol + xStart;
 		rcSegment.right = xEol + xStart + virtualSpace;
@@ -2288,30 +2291,36 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 	int eolInSelection = (subLine == (ll->lines - 1)) ? sel.InSelectionForEOL(posAfterLineEnd) : 0;
 	int alpha = (eolInSelection == 1) ? vsDraw.selAlpha : vsDraw.selAdditionalAlpha;
 
-	for (int eolPos=ll->numCharsBeforeEOL; eolPos<ll->numCharsInLine; eolPos++) {
-		rcSegment.left = xStart + ll->positions[eolPos] + virtualSpace;
-		rcSegment.right = xStart + ll->positions[eolPos+1] + virtualSpace;
-		const char *ctrlChar = ControlCharacterString(ll->chars[eolPos]);
-		int inSelection = 0;
-		bool inHotspot = false;
-		int styleMain = ll->styles[eolPos];
-		ColourAllocated textBack = TextBackground(vsDraw, overrideBackground, background, inSelection, inHotspot, styleMain, eolPos, ll);
-		ColourAllocated textFore = vsDraw.styles[styleMain].fore.allocated;
-		if (!hideSelection && eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1)) {
-			if (alpha == SC_ALPHA_NOALPHA) {
-				surface->FillRectangle(rcSegment, SelectionBackground(vsDraw, eolInSelection == 1));
+	// Draw the [CR], [LF], or [CR][LF] blobs if visible line ends are on
+	int blobsWidth = 0;
+	if (lastSubLine) {
+		for (int eolPos=ll->numCharsBeforeEOL; eolPos<ll->numCharsInLine; eolPos++) {
+			rcSegment.left = xStart + ll->positions[eolPos] - subLineStart + virtualSpace;
+			rcSegment.right = xStart + ll->positions[eolPos+1] - subLineStart + virtualSpace;
+			blobsWidth += rcSegment.Width();
+			const char *ctrlChar = ControlCharacterString(ll->chars[eolPos]);
+			int inSelection = 0;
+			bool inHotspot = false;
+			int styleMain = ll->styles[eolPos];
+			ColourAllocated textBack = TextBackground(vsDraw, overrideBackground, background, inSelection, inHotspot, styleMain, eolPos, ll);
+			ColourAllocated textFore = vsDraw.styles[styleMain].fore.allocated;
+			if (!hideSelection && eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1)) {
+				if (alpha == SC_ALPHA_NOALPHA) {
+					surface->FillRectangle(rcSegment, SelectionBackground(vsDraw, eolInSelection == 1));
+				} else {
+					surface->FillRectangle(rcSegment, textBack);
+					SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw, eolInSelection == 1), alpha);
+				}
 			} else {
 				surface->FillRectangle(rcSegment, textBack);
-				SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw, eolInSelection == 1), alpha);
 			}
-		} else {
-			surface->FillRectangle(rcSegment, textBack);
+			DrawTextBlob(surface, vsDraw, rcSegment, ctrlChar, textBack, textFore, twoPhaseDraw);
 		}
-		DrawTextBlob(surface, vsDraw, rcSegment, ctrlChar, textBack, textFore, twoPhaseDraw);
 	}
 
-	rcSegment.left = ll->positions[ll->numCharsInLine] + xStart + virtualSpace;
-	rcSegment.right = ll->positions[ll->numCharsInLine] + vsDraw.aveCharWidth + xStart + virtualSpace;
+	// Draw the eol-is-selected rectangle
+	rcSegment.left = xEol + xStart + virtualSpace + blobsWidth;
+	rcSegment.right = xEol + xStart + virtualSpace + blobsWidth + vsDraw.aveCharWidth;
 
 	if (!hideSelection && eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1) && (alpha == SC_ALPHA_NOALPHA)) {
 		surface->FillRectangle(rcSegment, SelectionBackground(vsDraw, eolInSelection == 1));
@@ -2326,7 +2335,8 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 		}
 	}
 
-	rcSegment.left = ll->positions[ll->numCharsInLine] + vsDraw.aveCharWidth + xStart + virtualSpace;
+	// Fill the remainder of the line
+	rcSegment.left = xEol + xStart + virtualSpace + blobsWidth + vsDraw.aveCharWidth;
 	rcSegment.right = rcLine.right;
 
 	if (!hideSelection && vsDraw.selEOLFilled && eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1) && (alpha == SC_ALPHA_NOALPHA)) {
@@ -3078,15 +3088,15 @@ void Editor::DrawCarets(Surface *surface, ViewStyle &vsDraw, int lineDoc, int xS
 	bool drawDrag = posDrag.IsValid();
 	if (hideSelection && !drawDrag)
 		return;
-	Range rangeLine(pdoc->LineStart(lineDoc), pdoc->LineStart(lineDoc + 1));
+	const int posLineStart = pdoc->LineStart(lineDoc);
 	// For each selection draw
 	for (size_t r=0; (r<sel.Count()) || drawDrag; r++) {
 		const bool mainCaret = r == sel.Main();
 		const SelectionPosition posCaret = (drawDrag ? posDrag : sel.Range(r).caret);
-		const int offset = posCaret.Position() - rangeLine.start;
+		const int offset = posCaret.Position() - posLineStart;
 		const int spaceWidth = static_cast<int>(vsDraw.styles[ll->EndLineStyle()].spaceWidth);
 		const int virtualOffset = posCaret.VirtualSpace() * spaceWidth;
-		if (ll->InLine(offset, subLine) && offset <= ll->numCharsInLine) {
+		if (ll->InLine(offset, subLine) && offset <= ll->numCharsBeforeEOL) {
 			int xposCaret = ll->positions[offset] + virtualOffset - ll->positions[ll->LineStart(subLine)] + xStart;
 			if (ll->wrapIndent != 0) {
 				int lineStart = ll->LineStart(subLine);
@@ -3105,7 +3115,7 @@ void Editor::DrawCarets(Surface *surface, ViewStyle &vsDraw, int lineDoc, int xS
 				if (posCaret.Position() == pdoc->Length())	{   // At end of document
 					caretAtEOF = true;
 					widthOverstrikeCaret = vsDraw.aveCharWidth;
-				} else if ((posCaret.Position() - rangeLine.start) >= ll->numCharsInLine) {	// At end of line
+				} else if ((posCaret.Position() - posLineStart) >= ll->numCharsInLine) {	// At end of line
 					caretAtEOL = true;
 					widthOverstrikeCaret = vsDraw.aveCharWidth;
 				} else {
@@ -3114,7 +3124,7 @@ void Editor::DrawCarets(Surface *surface, ViewStyle &vsDraw, int lineDoc, int xS
 				if (widthOverstrikeCaret < 3)	// Make sure its visible
 					widthOverstrikeCaret = 3;
 
-				if (posCaret > SelectionPosition(ll->LineStart(subLine) + rangeLine.start))
+				if (posCaret > SelectionPosition(ll->LineStart(subLine) + posLineStart))
 					caretWidthOffset = 1;	// Move back so overlaps both character cells.
 				if (posDrag.IsValid()) {
 					/* Dragging text, use a line caret */
