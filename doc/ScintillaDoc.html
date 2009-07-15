@@ -38,7 +38,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 29/June/2009 NH</p>
+    <p>Last edited 15/July/2009 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -1463,6 +1463,8 @@ struct TextToFind {
     More selections are made by holding down the Ctrl key while dragging with the mouse. 
     The most recent selection is the main selection and determines which part of the document is shown automatically.
     Any selection apart from the main selection is called an additional selection.
+    The calls in the previous section operate on the main selection.
+    There is always at least one selection.
     </p>
 
     <p>
@@ -1518,7 +1520,9 @@ struct TextToFind {
     <p>
     <b id="SCI_ADDSELECTION">SCI_ADDSELECTION(int caret, int anchor)</b><br />
      Add a new selection from <code>anchor</code> to <code>caret</code> as the main selection retaining all other 
-     selections as additional selections.</p>
+     selections as additional selections.
+     Since there is always at least one selection, to set a list of selections, the first selection should be
+     added with <code>SCI_SETSELECTION</code> and later selections added with <code>SCI_ADDSELECTION</code></p>
 
     <p>
     <b id="SCI_SETMAINSELECTION">SCI_SETMAINSELECTION(int selection)</b><br />
