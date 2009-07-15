@@ -19,6 +19,8 @@
 #include <ctype.h>
 #include <time.h>
 
+#include <vector>
+
 #ifdef SCI_LEXER
 #include "SciLexer.h"
 #include "PropSet.h"
