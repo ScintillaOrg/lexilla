@@ -16,6 +16,8 @@
 #include <ctype.h>
 #include <time.h>
 
+#include <vector>
+
 #include "Platform.h"
 #include "Scintilla.h"
 #include "PlatMacOSX.h"
