@@ -124,7 +124,6 @@ struct SelectionRange {
 class Selection {
 	std::vector<SelectionRange> ranges;
 	SelectionRange rangeRectangular;
-	size_t nRanges;
 	size_t mainRange;
 	bool moveExtends;
 public:
@@ -142,7 +141,6 @@ public:
 	void SetMain(size_t r);
 	SelectionRange &Range(size_t r);
 	SelectionRange &RangeMain();
-	void ClearVirtualSpace(size_t r);
 	bool MoveExtends() const;
 	void SetMoveExtends(bool moveExtends_);
 	bool Empty() const;
@@ -150,14 +148,13 @@ public:
 	int Length() const;
 	void MovePositions(bool insertion, int startChange, int length);
 	void TrimSelection(SelectionRange range);
+	void SetSelection(SelectionRange range);
 	void AddSelection(SelectionRange range);
 	void AddSelection(SelectionPosition spPos);
-	void AddSelection(SelectionPosition spStartPos, SelectionPosition spEndPos, bool anchorLeft);
 	int CharacterInSelection(int posCharacter) const;
 	int InSelectionForEOL(int pos) const;
 	int VirtualSpaceFor(int pos) const;
 	void Clear();
-	void EmptyRanges();
 };
 
 #ifdef SCI_NAMESPACE

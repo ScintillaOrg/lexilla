@@ -687,34 +687,20 @@ void Editor::SetRectangularRange() {
 	if (sel.IsRectangular()) {
 		int xAnchor = XFromPosition(sel.Rectangular().anchor);
 		int xCaret = XFromPosition(sel.Rectangular().caret);
-		bool anchorTop = sel.Rectangular().anchor < sel.Rectangular().caret;
-		bool anchorLeft = xAnchor < xCaret;
 		if (sel.selType == Selection::selThin) {
 			xCaret = xAnchor;
 		}
-		SelectionPosition selStart = sel.Rectangular().Start();
-		SelectionPosition selEnd = sel.Rectangular().End();
-		int lineStart = pdoc->LineFromPosition(selStart.Position());
-		int lineEnd = pdoc->LineFromPosition(selEnd.Position());
-		// Left of rectangle
-		int minX = Platform::Minimum(xAnchor, xCaret);
-		// Right of rectangle
-		int maxX = Platform::Maximum(xAnchor, xCaret);
-		sel.EmptyRanges();
-		int increment = 1;
-		if (!anchorTop) {
-			increment = -1;
-			lineEnd = lineStart;
-			lineStart = pdoc->LineFromPosition(selEnd.Position());
-		}
-		for (int line=lineStart; line != lineEnd+increment; line += increment) {
-			SelectionPosition spMin(SPositionFromLineX(line, minX));
-			SelectionPosition spMax(SPositionFromLineX(line, maxX));
-			if ((virtualSpaceOptions & SCVS_RECTANGULARSELECTION) == 0) {
-				spMin.SetVirtualSpace(0);				
-				spMax.SetVirtualSpace(0);				
-			}
-			sel.AddSelection(spMin, spMax, anchorLeft);
+		int lineAnchor = pdoc->LineFromPosition(sel.Rectangular().anchor.Position());
+		int lineCaret = pdoc->LineFromPosition(sel.Rectangular().caret.Position());
+		int increment = (lineCaret > lineAnchor) ? 1 : -1;
+		for (int line=lineAnchor; line != lineCaret+increment; line += increment) {
+			SelectionRange range(SPositionFromLineX(line, xCaret), SPositionFromLineX(line, xAnchor));
+			if ((virtualSpaceOptions & SCVS_RECTANGULARSELECTION) == 0)
+				range.ClearVirtualSpace();
+			if (line == lineAnchor)
+				sel.SetSelection(range);
+			else
+				sel.AddSelection(range);
 		}
 	}
 }
@@ -3669,8 +3655,7 @@ void Editor::FilterSelections() {
 	if (!additionalSelectionTyping && (sel.Count() > 1)) {
 		SelectionRange rangeOnly = sel.RangeMain();
 		InvalidateSelection(rangeOnly, true);
-		sel.EmptyRanges();
-		sel.AddSelection(rangeOnly);
+		sel.SetSelection(rangeOnly);
 	}
 }
 
@@ -3686,7 +3671,7 @@ void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 				if (!sel.Range(r).Empty()) {
 					if (sel.Range(r).Length()) {
 						pdoc->DeleteChars(positionInsert, sel.Range(r).Length());
-						sel.ClearVirtualSpace(r);
+						sel.Range(r).ClearVirtualSpace();
 					} else {
 						// Range is all virtual so collapse to start of virtual space
 						sel.Range(r).MinimizeVirtualSpace();
@@ -3695,7 +3680,7 @@ void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 					if (positionInsert < pdoc->Length()) {
 						if (!IsEOLChar(pdoc->CharAt(positionInsert))) {
 							pdoc->DelChar(positionInsert);
-							sel.ClearVirtualSpace(r);
+							sel.Range(r).ClearVirtualSpace();
 						}
 					}
 				}
@@ -3704,7 +3689,7 @@ void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 					sel.Range(r).caret.SetPosition(positionInsert + len);
 					sel.Range(r).anchor.SetPosition(positionInsert + len);
 				}
-				sel.ClearVirtualSpace(r);
+				sel.Range(r).ClearVirtualSpace();
 				// If in wrap mode rewrap current line so EnsureCaretVisible has accurate information
 				if (wrapState != eWrapNone) {
 					AutoSurface surface(this);
@@ -3777,7 +3762,7 @@ void Editor::ClearSelection() {
 				sel.Range(r).End().Position())) {
 				pdoc->DeleteChars(sel.Range(r).Start().Position(), 
 					sel.Range(r).Length());
-				sel.ClearVirtualSpace(r);
+				sel.Range(r).ClearVirtualSpace();
 			}
 		}
 	}
@@ -3884,10 +3869,10 @@ void Editor::Clear() {
 			if (!RangeContainsProtected(sel.Range(r).caret.Position(), sel.Range(r).caret.Position() + 1)) {
 				if ((sel.Count() == 1) || !IsEOLChar(pdoc->CharAt(sel.Range(r).caret.Position()))) {
 					pdoc->DelChar(sel.Range(r).caret.Position());
-					sel.ClearVirtualSpace(r);
+					sel.Range(r).ClearVirtualSpace();
 				}  // else multiple selection so don't eat line ends
 			} else {
-				sel.ClearVirtualSpace(r);
+				sel.Range(r).ClearVirtualSpace();
 			}
 		}
 	} else {
@@ -3960,7 +3945,7 @@ void Editor::DelCharBack(bool allowLineStartDeletion) {
 					}
 				}
 			} else {
-				sel.ClearVirtualSpace(r);
+				sel.Range(r).ClearVirtualSpace();
 			}
 		}
 	} else {
@@ -8171,13 +8156,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_SETSELECTION:
-		sel.Clear();
-		sel.RangeMain() = SelectionRange(wParam, lParam);
+		sel.SetSelection(SelectionRange(wParam, lParam));
 		Redraw();
 		break;
 
 	case SCI_ADDSELECTION:
-		sel.AddSelection(SelectionPosition(wParam), SelectionPosition(lParam), false);
+		sel.AddSelection(SelectionRange(wParam, lParam));
 		Redraw();
 		break;
 
