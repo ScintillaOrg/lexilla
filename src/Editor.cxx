@@ -6441,33 +6441,21 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_GETSELTEXT: {
-			if (lParam == 0) {
-				if (sel.selType == Selection::selStream) {
-					return 1 + SelectionEnd().Position() - SelectionStart().Position();
-				} else {
-					// TODO: why is selLines handled the slow way?
-					int size = 0;
-					int extraCharsPerLine = 0;
-					if (sel.selType != Selection::selLines)
-						extraCharsPerLine = (pdoc->eolMode == SC_EOL_CRLF) ? 2 : 1;
-					for (size_t r=0; r<sel.Count(); r++) {
-						size += sel.Range(r).Length() + extraCharsPerLine;
-					}
-
-					return 1 + size;
-				}
-			}
 			SelectionText selectedText;
 			CopySelectionRange(&selectedText);
-			char *ptr = CharPtrFromSPtr(lParam);
-			int iChar = 0;
-			if (selectedText.len) {
-				for (; iChar < selectedText.len; iChar++)
-					ptr[iChar] = selectedText.s[iChar];
+			if (lParam == 0) {
+				return selectedText.len;
 			} else {
-				ptr[0] = '\0';
+				char *ptr = CharPtrFromSPtr(lParam);
+				int iChar = 0;
+				if (selectedText.len) {
+					for (; iChar < selectedText.len; iChar++)
+						ptr[iChar] = selectedText.s[iChar];
+				} else {
+					ptr[0] = '\0';
+				}
+				return iChar;
 			}
-			return iChar;
 		}
 
 	case SCI_LINEFROMPOSITION:
