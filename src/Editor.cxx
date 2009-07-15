@@ -3766,6 +3766,7 @@ void Editor::ClearSelection() {
 			}
 		}
 	}
+	sel.RemoveDuplicates();
 }
 
 void Editor::ClearAll() {
@@ -3878,6 +3879,7 @@ void Editor::Clear() {
 	} else {
 		ClearSelection();
 	}
+	sel.RemoveDuplicates();
 }
 
 void Editor::SelectAll() {
@@ -3956,6 +3958,7 @@ void Editor::DelCharBack(bool allowLineStartDeletion) {
 		}
 		//SetEmptySelection(sel.MainCaret());
 	}
+	sel.RemoveDuplicates();
 	// Avoid blinking during rapid typing:
 	ShowCaretAtCurrentPosition();
 }
@@ -6444,7 +6447,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			SelectionText selectedText;
 			CopySelectionRange(&selectedText);
 			if (lParam == 0) {
-				return selectedText.len;
+				return selectedText.len + 1;
 			} else {
 				char *ptr = CharPtrFromSPtr(lParam);
 				int iChar = 0;

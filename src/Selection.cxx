@@ -310,3 +310,21 @@ void Selection::Clear() {
 	ranges[mainRange].Reset();
 	rangeRectangular.Reset();
 }
+
+void Selection::RemoveDuplicates() {
+	for (size_t i=0; i<ranges.size()-1; i++) {
+		if (ranges[i].Empty()) {
+			size_t j=i+1;
+			while (j<ranges.size()) {
+				if (ranges[i] == ranges[j]) {
+					ranges.erase(ranges.begin() + j);
+					if (mainRange >= j)
+						mainRange--;
+				} else {
+					j++;
+				}
+			}
+		}
+	}
+}
+

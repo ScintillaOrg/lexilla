@@ -155,6 +155,7 @@ public:
 	int InSelectionForEOL(int pos) const;
 	int VirtualSpaceFor(int pos) const;
 	void Clear();
+	void RemoveDuplicates();
 };
 
 #ifdef SCI_NAMESPACE
