@@ -151,7 +151,6 @@ Editor::Editor() {
 	additionalSelectionTyping = false;
 	additionalCaretsBlink = true;
 	virtualSpaceOptions = SCVS_NONE;
-	virtualSpaceOptions = SCVS_USERACCESSIBLE;
 
 	pixmapLine = Surface::Allocate();
 	pixmapSelMargin = Surface::Allocate();
