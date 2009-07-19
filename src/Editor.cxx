@@ -5639,16 +5639,18 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 			SetMouseCapture(true);
 			if (inDragDrop != ddInitial) {
 				SetDragPosition(SelectionPosition(invalidPosition));
-				if (ctrl && multipleSelection) {
-					InvalidateSelection(SelectionRange(newPos), true);
-					sel.AddSelection(newPos);
-				} else if (!shift) {
-					InvalidateSelection(SelectionRange(newPos), true);
-					if (sel.Count() > 1) 
-						Redraw();
-					sel.Clear();
-					sel.selType = alt ? Selection::selRectangle : Selection::selStream;
-					SetSelection(newPos, newPos);
+				if (!shift) {
+					if (ctrl && multipleSelection) {
+						InvalidateSelection(SelectionRange(newPos), true);
+						sel.AddSelection(newPos);
+					} else {
+						InvalidateSelection(SelectionRange(newPos), true);
+						if (sel.Count() > 1) 
+							Redraw();
+						sel.Clear();
+						sel.selType = alt ? Selection::selRectangle : Selection::selStream;
+						SetSelection(newPos, newPos);
+					}
 				}
 				sel.selType = alt ? Selection::selRectangle : Selection::selStream;
 				selectionType = selChar;
