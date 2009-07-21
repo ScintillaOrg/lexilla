@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		11AF56931009F8180033F27F /* Selection.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 11AF56911009F8180033F27F /* Selection.cxx */; };
 		11AF56941009F8180033F27F /* Selection.h in Headers */ = {isa = PBXBuildFile; fileRef = 11AF56921009F8180033F27F /* Selection.h */; };
+		11D0FF101015DE4900FBD26D /* PropSetSimple.h in Headers */ = {isa = PBXBuildFile; fileRef = 11D0FF0F1015DE4900FBD26D /* PropSetSimple.h */; };
 		2744E4DC0FC1682C00E85C33 /* AutoComplete.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 2744E4CF0FC1682C00E85C33 /* AutoComplete.cxx */; };
 		2744E4DD0FC1682C00E85C33 /* CallTip.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 2744E4D00FC1682C00E85C33 /* CallTip.cxx */; };
 		2744E4DE0FC1682C00E85C33 /* CellBuffer.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 2744E4D10FC1682C00E85C33 /* CellBuffer.cxx */; };
@@ -130,7 +131,6 @@
 		2791F3E60FC1A3AE009DBCF9 /* KeyWords.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E4840FC1678600E85C33 /* KeyWords.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2791F3E70FC1A3AE009DBCF9 /* PropSet.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E4860FC1678600E85C33 /* PropSet.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2791F3E80FC1A3AE009DBCF9 /* ScintillaWidget.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E48A0FC1678600E85C33 /* ScintillaWidget.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		2791F3E90FC1A3AE009DBCF9 /* SString.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E48B0FC1678600E85C33 /* SString.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2791F3EA0FC1A3AE009DBCF9 /* WindowAccessor.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E48C0FC1678600E85C33 /* WindowAccessor.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2791F3EB0FC1A3BD009DBCF9 /* AutoComplete.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E4990FC1681200E85C33 /* AutoComplete.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2791F3EC0FC1A3BD009DBCF9 /* CallTip.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E49A0FC1681200E85C33 /* CallTip.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -173,6 +173,7 @@
 		1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		11AF56911009F8180033F27F /* Selection.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Selection.cxx; path = ../../src/Selection.cxx; sourceTree = SOURCE_ROOT; };
 		11AF56921009F8180033F27F /* Selection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Selection.h; path = ../../src/Selection.h; sourceTree = SOURCE_ROOT; };
+		11D0FF0F1015DE4900FBD26D /* PropSetSimple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PropSetSimple.h; path = ../../src/PropSetSimple.h; sourceTree = SOURCE_ROOT; };
 		2744E4830FC1678600E85C33 /* Accessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Accessor.h; path = ../../include/Accessor.h; sourceTree = SOURCE_ROOT; };
 		2744E4840FC1678600E85C33 /* KeyWords.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KeyWords.h; path = ../../include/KeyWords.h; sourceTree = SOURCE_ROOT; };
 		2744E4850FC1678600E85C33 /* Platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Platform.h; path = ../../include/Platform.h; sourceTree = SOURCE_ROOT; };
@@ -180,7 +181,6 @@
 		2744E4870FC1678600E85C33 /* SciLexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SciLexer.h; path = ../../include/SciLexer.h; sourceTree = SOURCE_ROOT; };
 		2744E4880FC1678600E85C33 /* Scintilla.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Scintilla.h; path = ../../include/Scintilla.h; sourceTree = SOURCE_ROOT; };
 		2744E48A0FC1678600E85C33 /* ScintillaWidget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScintillaWidget.h; path = ../../include/ScintillaWidget.h; sourceTree = SOURCE_ROOT; };
-		2744E48B0FC1678600E85C33 /* SString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SString.h; path = ../../include/SString.h; sourceTree = SOURCE_ROOT; };
 		2744E48C0FC1678600E85C33 /* WindowAccessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WindowAccessor.h; path = ../../include/WindowAccessor.h; sourceTree = SOURCE_ROOT; };
 		2744E4990FC1681200E85C33 /* AutoComplete.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AutoComplete.h; path = ../../src/AutoComplete.h; sourceTree = SOURCE_ROOT; };
 		2744E49A0FC1681200E85C33 /* CallTip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CallTip.h; path = ../../src/CallTip.h; sourceTree = SOURCE_ROOT; };
@@ -577,6 +577,7 @@
 		2744E4970FC167E400E85C33 /* Header Files */ = {
 			isa = PBXGroup;
 			children = (
+				11D0FF0F1015DE4900FBD26D /* PropSetSimple.h */,
 				2744E59D0FC168A100E85C33 /* InfoBar.h */,
 				2744E5AB0FC168B200E85C33 /* InfoBarCommunicator.h */,
 				2744E59E0FC168A100E85C33 /* PlatCocoa.h */,
@@ -591,7 +592,6 @@
 				2744E4870FC1678600E85C33 /* SciLexer.h */,
 				2744E4880FC1678600E85C33 /* Scintilla.h */,
 				2744E48A0FC1678600E85C33 /* ScintillaWidget.h */,
-				2744E48B0FC1678600E85C33 /* SString.h */,
 				2744E48C0FC1678600E85C33 /* WindowAccessor.h */,
 			);
 			name = "Header Files";
@@ -675,9 +675,9 @@
 				2791F3C80FC19F71009DBCF9 /* SciLexer.h in Headers */,
 				2791F3C90FC19F71009DBCF9 /* Scintilla.h in Headers */,
 				2791F3E80FC1A3AE009DBCF9 /* ScintillaWidget.h in Headers */,
-				2791F3E90FC1A3AE009DBCF9 /* SString.h in Headers */,
 				2791F3EA0FC1A3AE009DBCF9 /* WindowAccessor.h in Headers */,
 				11AF56941009F8180033F27F /* Selection.h in Headers */,
+				11D0FF101015DE4900FBD26D /* PropSetSimple.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
