@@ -90,12 +90,12 @@ include deps.mak
 ScintillaBaseL.o: ScintillaBase.cxx Platform.h Scintilla.h SciLexer.h \
  ContractionState.h CellBuffer.h CallTip.h KeyMap.h Indicator.h \
  LineMarker.h Style.h AutoComplete.h ViewStyle.h Document.h Editor.h \
- ScintillaBase.h PropSet.h SString.h Accessor.h DocumentAccessor.h \
+ ScintillaBase.h PropSet.h Accessor.h DocumentAccessor.h \
  KeyWords.h ExternalLexer.h PerLine.h
 ScintillaWinL.o: ScintillaWin.cxx Platform.h Scintilla.h SciLexer.h \
  ContractionState.h CellBuffer.h CallTip.h KeyMap.h Indicator.h \
  LineMarker.h Style.h AutoComplete.h ViewStyle.h Document.h Editor.h \
- ScintillaBase.h PropSet.h SString.h Accessor.h KeyWords.h \
+ ScintillaBase.h PropSet.h Accessor.h KeyWords.h \
  ExternalLexer.h UniConversion.h PerLine.h
 ScintillaWinS.o: ScintillaWin.cxx Platform.h Scintilla.h \
  ContractionState.h CellBuffer.h CallTip.h KeyMap.h Indicator.h \
