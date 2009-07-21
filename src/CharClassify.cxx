@@ -5,6 +5,7 @@
 // Copyright 2006 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
+#include <stdlib.h>
 #include <ctype.h>
 
 #include "CharClassify.h"
