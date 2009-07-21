@@ -328,3 +328,7 @@ void Selection::RemoveDuplicates() {
 	}
 }
 
+void Selection::RotateMain() {
+	mainRange = (mainRange + 1) % ranges.size();
+}
+

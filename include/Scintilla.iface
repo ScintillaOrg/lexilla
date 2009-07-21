@@ -2031,6 +2031,12 @@ set void SetAdditionalCaretFore=2604(colour fore,)
 # Get the foreground colour of additional carets.
 get colour GetAdditionalCaretFore=2605(,)
 
+# Set the main selection to the next selection.
+fun void RotateSelection=2606(,)
+
+# Swap that caret and anchor of the main selection.
+fun void SwapMainAnchorCaret=2607(,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 

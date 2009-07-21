@@ -8289,6 +8289,16 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETADDITIONALCARETFORE:
 		return vs.additionalCaretColour.desired.AsLong();
 
+	case SCI_ROTATESELECTION:
+		sel.RotateMain();
+		InvalidateSelection(sel.RangeMain(), true);
+		break;
+
+	case SCI_SWAPMAINANCHORCARET:
+		InvalidateSelection(sel.RangeMain());
+		sel.RangeMain() = SelectionRange(sel.RangeMain().anchor, sel.RangeMain().caret);
+		break;
+
 	default:
 		return DefWndProc(iMessage, wParam, lParam);
 	}

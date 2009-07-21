@@ -156,6 +156,7 @@ public:
 	int VirtualSpaceFor(int pos) const;
 	void Clear();
 	void RemoveDuplicates();
+	void RotateMain();
 };
 
 #ifdef SCI_NAMESPACE
