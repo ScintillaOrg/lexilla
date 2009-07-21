@@ -16,6 +16,7 @@
 
 #include "Scintilla.h"
 #include "PropSet.h"
+#include "PropSetSimple.h"
 #ifdef SCI_LEXER
 #include "SciLexer.h"
 #include "Accessor.h"
@@ -706,24 +707,23 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		break;
 
 	case SCI_GETPROPERTY: {
-			SString val = props.Get(reinterpret_cast<const char *>(wParam));
-			const int n = val.length();
+			const char *val = props.Get(reinterpret_cast<const char *>(wParam));
+			const int n = strlen(val);
 			if (lParam != 0) {
 				char *ptr = reinterpret_cast<char *>(lParam);
-				memcpy(ptr, val.c_str(), n);
-				ptr[n] = '\0';	// terminate
+				strcpy(ptr, val);
 			}
 			return n;	// Not including NUL
 		}
 
 	case SCI_GETPROPERTYEXPANDED: {
-			SString val = props.GetExpanded(reinterpret_cast<const char *>(wParam));
-			const int n = val.length();
+			char *val = props.Expanded(reinterpret_cast<const char *>(wParam));
+			const int n = strlen(val);
 			if (lParam != 0) {
 				char *ptr = reinterpret_cast<char *>(lParam);
-				memcpy(ptr, val.c_str(), n);
-				ptr[n] = '\0';	// terminate
+				strcpy(ptr, val);
 			}
+			delete []val;
 			return n;	// Not including NUL
 		}
 
