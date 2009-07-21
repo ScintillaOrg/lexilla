@@ -352,7 +352,6 @@ void ScintillaBase::AutoCompleteCompleted() {
 
 	ac.Show(false);
 
-	listSelected = selected;
 	SCNotification scn = {0};
 	scn.nmhdr.code = listType > 0 ? SCN_USERLISTSELECTION : SCN_AUTOCSELECTION;
 	scn.message = 0;
@@ -360,7 +359,7 @@ void ScintillaBase::AutoCompleteCompleted() {
 	scn.listType = listType;
 	Position firstPos = ac.posStart - ac.startLen;
 	scn.lParam = firstPos;
-	scn.text = listSelected.c_str();
+	scn.text = selected;
 	NotifyParent(scn);
 
 	if (!ac.Active())
@@ -381,9 +380,8 @@ void ScintillaBase::AutoCompleteCompleted() {
 	}
 	SetEmptySelection(ac.posStart);
 	if (item != -1) {
-		SString piece = selected;
-		pdoc->InsertCString(firstPos, piece.c_str());
-		SetEmptySelection(firstPos + static_cast<int>(piece.length()));
+		pdoc->InsertCString(firstPos, selected);
+		SetEmptySelection(firstPos + static_cast<int>(strlen(selected)));
 	}
 }
 

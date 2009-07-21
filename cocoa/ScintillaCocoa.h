@@ -48,7 +48,6 @@
 #include "Selection.h"
 #include "PositionCache.h"
 #include "Editor.h"
-#include "SString.h"
 //#include "ScintillaCallTip.h"
 
 #include "ScintillaBase.h"

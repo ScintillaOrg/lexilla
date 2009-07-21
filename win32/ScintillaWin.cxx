@@ -13,6 +13,7 @@
 #include <assert.h>
 #include <limits.h>
 
+#include <string>
 #include <vector>
 
 #define _WIN32_WINNT  0x0500
@@ -24,7 +25,6 @@
 #include "Platform.h"
 
 #include "Scintilla.h"
-#include "SString.h"
 #ifdef SCI_LEXER
 #include "SciLexer.h"
 #include "PropSet.h"
