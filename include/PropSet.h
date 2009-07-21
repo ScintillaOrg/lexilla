@@ -16,6 +16,7 @@ class PropertyGet {
 public:
 	virtual char *ToString() const=0;	// Caller must delete[] the return value
 	virtual int GetInt(const char *key, int defaultValue=0) const=0;
+	virtual ~PropertyGet() {}
 };
 
 #ifdef SCI_NAMESPACE
