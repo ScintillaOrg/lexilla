@@ -10,6 +10,7 @@
 #include <ctype.h>
 #include <time.h>
 
+#include <string>
 #include <vector>
 
 #include <gtk/gtk.h>
