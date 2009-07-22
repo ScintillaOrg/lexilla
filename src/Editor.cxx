@@ -8217,6 +8217,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			sel.Clear();
 		sel.selType = Selection::selRectangle;
 		sel.Rectangular().caret.SetPosition(wParam);
+		SetRectangularRange();
 		Redraw();
 		break;
 
@@ -8228,6 +8229,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			sel.Clear();
 		sel.selType = Selection::selRectangle;
 		sel.Rectangular().anchor.SetPosition(wParam);
+		SetRectangularRange();
 		Redraw();
 		break;
 
