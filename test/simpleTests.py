@@ -888,6 +888,133 @@ class TestAnnotation(unittest.TestCase):
 		self.assertEquals(self.ed.AnnotationGetVisible(), 2)
 		self.ed.AnnotationSetVisible(0)
 
+class TestMultiSelection(unittest.TestCase):
+
+	def setUp(self):
+		self.xite = XiteWin.xiteFrame
+		self.ed = self.xite.ed
+		self.ed.ClearAll()
+		self.ed.EmptyUndoBuffer()
+		# 3 lines of 3 characters
+		t = b"xxx\nxxx\nxxx"
+		self.ed.AddText(len(t), t)
+
+	def testSelectionCleared(self):
+		self.ed.ClearSelections()
+		self.assertEquals(self.ed.Selections, 1)
+		self.assertEquals(self.ed.MainSelection, 0)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 0)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 0)
+
+	def test1Selection(self):
+		self.ed.SetSelection(1, 2)
+		self.assertEquals(self.ed.Selections, 1)
+		self.assertEquals(self.ed.MainSelection, 0)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 1)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 2)
+		self.assertEquals(self.ed.GetSelectionNStart(0), 1)
+		self.assertEquals(self.ed.GetSelectionNEnd(0), 2)
+		self.ed.SwapMainAnchorCaret()
+		self.assertEquals(self.ed.Selections, 1)
+		self.assertEquals(self.ed.MainSelection, 0)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 2)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 1)
+
+	def test1SelectionReversed(self):
+		self.ed.SetSelection(2, 1)
+		self.assertEquals(self.ed.Selections, 1)
+		self.assertEquals(self.ed.MainSelection, 0)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 2)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 1)
+		self.assertEquals(self.ed.GetSelectionNStart(0), 1)
+		self.assertEquals(self.ed.GetSelectionNEnd(0), 2)
+
+	def test1SelectionByStartEnd(self):
+		self.ed.SetSelectionNStart(0, 2)
+		self.ed.SetSelectionNEnd(0, 3)
+		self.assertEquals(self.ed.Selections, 1)
+		self.assertEquals(self.ed.MainSelection, 0)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 2)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 3)
+		self.assertEquals(self.ed.GetSelectionNStart(0), 2)
+		self.assertEquals(self.ed.GetSelectionNEnd(0), 3)
+
+	def test2Selections(self):
+		self.ed.SetSelection(1, 2)
+		self.ed.AddSelection(4, 5)
+		self.assertEquals(self.ed.Selections, 2)
+		self.assertEquals(self.ed.MainSelection, 1)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 1)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 2)
+		self.assertEquals(self.ed.GetSelectionNCaret(1), 4)
+		self.assertEquals(self.ed.GetSelectionNAnchor(1), 5)
+		self.assertEquals(self.ed.GetSelectionNStart(0), 1)
+		self.assertEquals(self.ed.GetSelectionNEnd(0), 2)
+		self.ed.MainSelection = 0
+		self.assertEquals(self.ed.MainSelection, 0)
+		self.ed.RotateSelection()
+		self.assertEquals(self.ed.MainSelection, 1)
+
+	def testRectangularSelection(self):
+		self.ed.RectangularSelectionAnchor = 1
+		self.assertEquals(self.ed.RectangularSelectionAnchor, 1)
+		self.ed.RectangularSelectionCaret = 10
+		self.assertEquals(self.ed.RectangularSelectionCaret, 10)
+		self.assertEquals(self.ed.Selections, 3)
+		self.assertEquals(self.ed.MainSelection, 2)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 1)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 2)
+		self.assertEquals(self.ed.GetSelectionNAnchor(1), 5)
+		self.assertEquals(self.ed.GetSelectionNCaret(1), 6)
+		self.assertEquals(self.ed.GetSelectionNAnchor(2), 9)
+		self.assertEquals(self.ed.GetSelectionNCaret(2), 10)
+
+	def testVirtualSpace(self):
+		self.ed.SetSelection(3, 7)
+		self.ed.SetSelectionNCaretVirtualSpace(0, 3)
+		self.assertEquals(self.ed.GetSelectionNCaretVirtualSpace(0), 3)
+		self.ed.SetSelectionNAnchorVirtualSpace(0, 2)
+		self.assertEquals(self.ed.GetSelectionNAnchorVirtualSpace(0), 2)
+		# Does not check that virtual space is valid by being at end of line
+		self.ed.SetSelection(1, 1)
+		self.ed.SetSelectionNCaretVirtualSpace(0, 3)
+		self.assertEquals(self.ed.GetSelectionNCaretVirtualSpace(0), 3)
+
+	def testRectangularVirtualSpace(self):
+		self.ed.VirtualSpaceOptions=1
+		self.ed.RectangularSelectionAnchor = 3
+		self.assertEquals(self.ed.RectangularSelectionAnchor, 3)
+		self.ed.RectangularSelectionCaret = 7
+		self.assertEquals(self.ed.RectangularSelectionCaret, 7)
+		self.ed.RectangularSelectionAnchorVirtualSpace = 1
+		self.assertEquals(self.ed.RectangularSelectionAnchorVirtualSpace, 1)
+		self.ed.RectangularSelectionCaretVirtualSpace = 10
+		self.assertEquals(self.ed.RectangularSelectionCaretVirtualSpace, 10)
+		self.assertEquals(self.ed.Selections, 2)
+		self.assertEquals(self.ed.MainSelection, 1)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 3)
+		self.assertEquals(self.ed.GetSelectionNAnchorVirtualSpace(0), 1)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 3)
+		self.assertEquals(self.ed.GetSelectionNCaretVirtualSpace(0), 10)
+
+	def testRectangularVirtualSpaceOptionOff(self):
+		# Same as previous test but virtual space option off so no virtual space in result
+		self.ed.VirtualSpaceOptions=0
+		self.ed.RectangularSelectionAnchor = 3
+		self.assertEquals(self.ed.RectangularSelectionAnchor, 3)
+		self.ed.RectangularSelectionCaret = 7
+		self.assertEquals(self.ed.RectangularSelectionCaret, 7)
+		self.ed.RectangularSelectionAnchorVirtualSpace = 1
+		self.assertEquals(self.ed.RectangularSelectionAnchorVirtualSpace, 1)
+		self.ed.RectangularSelectionCaretVirtualSpace = 10
+		self.assertEquals(self.ed.RectangularSelectionCaretVirtualSpace, 10)
+		self.assertEquals(self.ed.Selections, 2)
+		self.assertEquals(self.ed.MainSelection, 1)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 3)
+		self.assertEquals(self.ed.GetSelectionNAnchorVirtualSpace(0), 0)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 3)
+		self.assertEquals(self.ed.GetSelectionNCaretVirtualSpace(0), 0)
+
 #~ import os
 #~ for x in os.getenv("PATH").split(";"):
 	#~ n = "scilexer.dll"
