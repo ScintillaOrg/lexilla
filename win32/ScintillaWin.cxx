@@ -1436,7 +1436,6 @@ void ScintillaWin::Paste() {
 		}
 	}
 	::CloseClipboard();
-	NotifyChange();
 	Redraw();
 }
 
