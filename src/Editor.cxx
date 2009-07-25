@@ -3768,6 +3768,7 @@ void Editor::ClearSelection() {
 		}
 	}
 	sel.RemoveDuplicates();
+	ClaimSelection();
 }
 
 void Editor::ClearAll() {
