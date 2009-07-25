@@ -1614,18 +1614,19 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 	// All other tested aplications behave benignly by ignoring the \0.
 	// The #if is here because on Windows cfColumnSelect clip entry is used
 	// instead as standard indicator of rectangularness (so no need to kludge)
-	int len = strlen(text->s);
+	const char *textData = text->s ? text->s : "";
+	int len = strlen(textData);
 #if PLAT_GTK_WIN32 == 0
 	if (text->rectangular)
 		len++;
 #endif
 
 	if (info == TARGET_UTF8_STRING) {
-		gtk_selection_data_set_text(selection_data, text->s, len);
+		gtk_selection_data_set_text(selection_data, textData, len);
 	} else {
 		gtk_selection_data_set(selection_data,
 			static_cast<GdkAtom>(GDK_SELECTION_TYPE_STRING),
-			8, reinterpret_cast<unsigned char *>(text->s), len);
+			8, reinterpret_cast<const unsigned char *>(textData), len);
 	}
 	delete converted;
 
