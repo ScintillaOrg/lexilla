@@ -156,7 +156,7 @@ void SelectionRange::MinimizeVirtualSpace() {
 	}
 }
 
-Selection::Selection() : mainRange(0), moveExtends(false), selType(selStream) {
+Selection::Selection() : mainRange(0), moveExtends(false), selType(selStream), tentativeMain(false) {
 	AddSelection(SelectionPosition(0));
 }
 
@@ -270,8 +270,19 @@ void Selection::AddSelection(SelectionRange range) {
 	mainRange = ranges.size() - 1;
 }
 
-void Selection::AddSelection(SelectionPosition spPos) {
-	AddSelection(SelectionRange(spPos, spPos));
+void Selection::TentativeSelection(SelectionRange range) {
+	if (!tentativeMain) {
+		rangesSaved = ranges;
+	}
+	ranges = rangesSaved;
+	AddSelection(range);
+	TrimSelection(ranges[mainRange]);
+	tentativeMain = true;
+}
+
+void Selection::CommitTentative() {
+	rangesSaved.clear();
+	tentativeMain = false;
 }
 
 int Selection::CharacterInSelection(int posCharacter) const {

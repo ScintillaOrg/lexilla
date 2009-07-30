@@ -5644,8 +5644,9 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 				SetDragPosition(SelectionPosition(invalidPosition));
 				if (!shift) {
 					if (ctrl && multipleSelection) {
-						InvalidateSelection(SelectionRange(newPos), true);
-						sel.AddSelection(newPos);
+						SelectionRange range(newPos);
+						sel.TentativeSelection(range);
+						InvalidateSelection(range, true);
 					} else {
 						InvalidateSelection(SelectionRange(newPos), true);
 						if (sel.Count() > 1) 
@@ -5756,8 +5757,7 @@ void Editor::ButtonMove(Point pt) {
 					SetSelection(movePos, sel.RangeMain().anchor);
 				} else if (sel.Count() > 1) {
 					SelectionRange range(movePos, sel.RangeMain().anchor);
-					sel.TrimSelection(range);
-					sel.RangeMain() = range;
+					sel.TentativeSelection(range);
 					InvalidateSelection(range, true);
 				} else {
 					SetSelection(movePos, sel.RangeMain().anchor);
@@ -5883,6 +5883,7 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 					SetSelection(newPos, sel.RangeMain().anchor);
 				}
 			}
+			sel.CommitTentative();
 		}
 		SetRectangularRange();
 		lastClickTime = curTime;

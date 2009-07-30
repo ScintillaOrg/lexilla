@@ -123,9 +123,11 @@ struct SelectionRange {
 
 class Selection {
 	std::vector<SelectionRange> ranges;
+	std::vector<SelectionRange> rangesSaved;
 	SelectionRange rangeRectangular;
 	size_t mainRange;
 	bool moveExtends;
+	bool tentativeMain;
 public:
 	enum selTypes { noSel, selStream, selRectangle, selLines, selThin };
 	selTypes selType;
@@ -150,13 +152,15 @@ public:
 	void TrimSelection(SelectionRange range);
 	void SetSelection(SelectionRange range);
 	void AddSelection(SelectionRange range);
-	void AddSelection(SelectionPosition spPos);
+	void TentativeSelection(SelectionRange range);
+	void CommitTentative();
 	int CharacterInSelection(int posCharacter) const;
 	int InSelectionForEOL(int pos) const;
 	int VirtualSpaceFor(int pos) const;
 	void Clear();
 	void RemoveDuplicates();
 	void RotateMain();
+	bool Tentative() const { return tentativeMain; }
 };
 
 #ifdef SCI_NAMESPACE
