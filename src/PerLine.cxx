@@ -188,11 +188,14 @@ int LineMarkers::AddMark(int line, int markerNum, int lines) {
 		// No existing markers so allocate one element per line
 		markers.InsertValue(0, lines, 0);
 	}
+	if (line >= markers.Length()) {
+		return -1;
+	}
 	if (!markers[line]) {
 		// Need new structure to hold marker handle
 		markers[line] = new MarkerHandleSet();
 		if (!markers[line])
-			return - 1;
+			return -1;
 	}
 	markers[line]->InsertHandle(handleCurrent, markerNum);
 
