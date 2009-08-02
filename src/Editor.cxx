@@ -1306,7 +1306,7 @@ bool Editor::WrapOneLine(Surface *surface, int lineToWrap) {
 // Check if wrapping needed and perform any needed wrapping.
 // fullwrap: if true, all lines which need wrapping will be done,
 //           in this single call.
-// priorityWrapLineStart: If greater than zero, all lines starting from
+// priorityWrapLineStart: If greater than or equal to zero, all lines starting from
 //           here to 1 page + 100 lines past will be wrapped (even if there are
 //           more lines under wrapping process in idle).
 // If it is neither fullwrap, nor priorityWrap, then 1 page + 100 lines will be
@@ -3203,7 +3203,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	// 	lines first).
 	int startLineToWrap = cs.DocFromDisplay(topLine) - 5;
 	if (startLineToWrap < 0)
-		startLineToWrap = -1;
+		startLineToWrap = 0;
 	if (WrapLines(false, startLineToWrap)) {
 		// The wrapping process has changed the height of some lines so
 		// abandon this paint for a complete repaint.
