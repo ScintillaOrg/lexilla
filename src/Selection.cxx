@@ -156,7 +156,7 @@ void SelectionRange::MinimizeVirtualSpace() {
 	}
 }
 
-Selection::Selection() : mainRange(0), moveExtends(false), selType(selStream), tentativeMain(false) {
+Selection::Selection() : mainRange(0), moveExtends(false), tentativeMain(false), selType(selStream) {
 	AddSelection(SelectionPosition(0));
 }
 
