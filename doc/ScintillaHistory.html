@@ -365,6 +365,9 @@
 	Virtual space allows selecting beyond the last character on a line.
 	</li>
 	<li>
+	SciTE on GTK+ path bar is now optional and defaults to off.
+	</li>
+	<li>
 	MagikSF lexer recognises numbers correctly.
 	</li>
 	<li>
@@ -399,6 +402,11 @@
 	<li>
 	Bug fixed where EN_CHANGE notification was sent when performing a paste operation in a
 	read-only document. Bug #2825485.
+	</li>
+	<li>
+	Refactored code so that Scintilla exposes less of its internal implementation and uses the C++ standard
+	library for some basic collections. Projects that linked to Scintilla's SString or PropSet classes
+	should copy this code from a previous version of Scintilla or from SciTE.
 	</li>
     </ul>
     <h3>
