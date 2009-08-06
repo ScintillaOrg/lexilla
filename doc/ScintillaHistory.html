@@ -358,7 +358,47 @@
 	Released on 11 August 2009.
 	</li>
 	<li>
-	Supports multiple selection and virtual space.
+	Multiple pieces of text can be selected simultaneously by holding control whil dragging the mouse.
+	Typing, backspace and delete may affect all selections together.
+	</li>
+	<li>
+	Virtual space allows selecting beyond the last character on a line.
+	</li>
+	<li>
+	MagikSF lexer recognises numbers correctly.
+	</li>
+	<li>
+	Folding of Python comments and blank lines improved. Bug #210240.
+	</li>
+	<li>
+	Bug fixed where background colour of last character in document leaked past that character.
+	</li>
+	<li>
+	Crash fixed when adding marker beyond last line in document. Bug #2830307.
+	</li>
+	<li>
+	Resource leak fixed in SciTE for Windows when printing fails. Bug #2816524.
+	</li>
+	<li>
+	Bug fixed on Windows where the system caret was destroyed during destruction when another window 
+	was using the system caret. Bug #2830223.
+	</li>
+	<li>
+	Bug fixed where indentation guides were drawn over text when the indentation used a style with a different
+	space width to the default style.
+	</li>
+	<li>
+	SciTE bug fixed where box comment added a bare line feed rather than the chosen line end. Bug #2818104.
+	</li>
+	<li>
+	Reverted fix that led to wrapping whole document when displaying the first line of the document.
+	</li>
+	<li>
+	Export to LaTeX in SciTE fixed to work in more cases and not use as much space. Bug #1286548.
+	</li>
+	<li>
+	Bug fixed where EN_CHANGE notification was sent when performing a paste operation in a
+	read-only document. Bug #2825485.
 	</li>
     </ul>
     <h3>
