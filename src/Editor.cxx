@@ -2840,6 +2840,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	if ((vsDraw.viewIndentationGuides == ivLookForward || vsDraw.viewIndentationGuides == ivLookBoth)
 	        && (subLine == 0)) {
 		int indentSpace = pdoc->GetLineIndentation(line);
+		int xStartText = ll->positions[pdoc->GetLineIndentPosition(line) - posLineStart];
+
 		// Find the most recent line with some text
 
 		int lineLastWithText = line;
@@ -2847,6 +2849,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 			lineLastWithText--;
 		}
 		if (lineLastWithText < line) {
+			xStartText = 100000;	// Don't limit to visible indentation on empty line
 			// This line is empty, so use indentation of last line with text
 			int indentLastWithText = pdoc->GetLineIndentation(lineLastWithText);
 			int isFoldHeader = pdoc->GetLevel(lineLastWithText) & SC_FOLDLEVELHEADERFLAG;
@@ -2876,8 +2879,10 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 
 		for (int indentPos = pdoc->IndentSize(); indentPos < indentSpace; indentPos += pdoc->IndentSize()) {
 			int xIndent = indentPos * vsDraw.spaceWidth;
-			DrawIndentGuide(surface, lineVisible, vsDraw.lineHeight, xIndent + xStart, rcSegment,
-			        (ll->xHighlightGuide == xIndent));
+			if (xIndent < xStartText) {
+				DrawIndentGuide(surface, lineVisible, vsDraw.lineHeight, xIndent + xStart, rcSegment,
+					(ll->xHighlightGuide == xIndent));
+			}
 		}
 	}
 
