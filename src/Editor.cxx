@@ -3760,7 +3760,8 @@ void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 }
 
 void Editor::ClearSelection() {
-	FilterSelections();
+	if (!sel.IsRectangular())
+		FilterSelections();
 	UndoGroup ug(pdoc);
 	for (size_t r=0; r<sel.Count(); r++) {
 		if (!sel.Range(r).Empty()) {
@@ -3922,7 +3923,8 @@ void Editor::DelChar() {
 }
 
 void Editor::DelCharBack(bool allowLineStartDeletion) {
-	FilterSelections();
+	if (!sel.IsRectangular())
+		FilterSelections();
 	if (sel.IsRectangular())
 		allowLineStartDeletion = false;
 	UndoGroup ug(pdoc, (sel.Count() > 1) || !sel.Empty());
