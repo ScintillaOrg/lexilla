@@ -521,7 +521,7 @@ int Editor::PositionFromLineX(int lineDoc, int x) {
 	if (surface && ll) {
 		unsigned int posLineStart = pdoc->LineStart(lineDoc);
 		LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
-		retVal = ll->numCharsInLine + posLineStart;
+		retVal = ll->numCharsBeforeEOL + posLineStart;
 		int subLine = 0;
 		int lineStart = ll->LineStart(subLine);
 		int lineEnd = ll->LineLastVisible(subLine);
