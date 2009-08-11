@@ -3838,6 +3838,8 @@ void Editor::PasteRectangular(SelectionPosition pos, const char *ptr, int len) {
 		InsertSpace(sel.RangeMain().caret.Position(), sel.RangeMain().caret.VirtualSpace()));
 	int xInsert = XFromPosition(sel.RangeMain().caret);
 	bool prevCr = false;
+	while ((len > 0) && IsEOLChar(ptr[len-1]))
+		len--;
 	for (int i = 0; i < len; i++) {
 		if (IsEOLChar(ptr[i])) {
 			if ((ptr[i] == '\r') || (!prevCr))
