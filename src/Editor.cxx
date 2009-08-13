@@ -6743,18 +6743,30 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return pdoc->CharAt(wParam);
 
 	case SCI_SETCURRENTPOS:
-		SetSelection(wParam, sel.MainAnchor());
+		if (sel.IsRectangular()) {
+			sel.Rectangular().caret.SetPosition(wParam);
+			SetRectangularRange();
+			Redraw();
+		} else {
+			SetSelection(wParam, sel.MainAnchor());
+		}
 		break;
 
 	case SCI_GETCURRENTPOS:
-		return sel.MainCaret();
+		return sel.IsRectangular() ? sel.Rectangular().caret.Position() : sel.MainCaret();
 
 	case SCI_SETANCHOR:
-		SetSelection(sel.MainCaret(), wParam);
+		if (sel.IsRectangular()) {
+			sel.Rectangular().anchor.SetPosition(wParam);
+			SetRectangularRange();
+			Redraw();
+		} else {
+			SetSelection(sel.MainCaret(), wParam);
+		}
 		break;
 
 	case SCI_GETANCHOR:
-		return sel.MainAnchor();
+		return sel.IsRectangular() ? sel.Rectangular().anchor.Position() : sel.MainAnchor();
 
 	case SCI_SETSELECTIONSTART:
 		SetSelection(Platform::Maximum(sel.MainCaret(), wParam), wParam);
