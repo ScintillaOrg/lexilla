@@ -1209,13 +1209,16 @@ struct TextToFind {
      This copies the currently selected text and a terminating 0 byte to the <code>text</code>
     buffer. The buffer size should be determined by calling with a NULL pointer for the <code>text</code> argument
     <code>SCI_GETSELTEXT(0,0)</code>.
-    This allows for rectangular and discontiguous selections as well as simple selections.<br />
-
-    <p>See also: <code><a class="message" href="#SCI_GETCURLINE">SCI_GETCURLINE</a>, <a
-    class="message" href="#SCI_GETLINE">SCI_GETLINE</a>, <a class="message"
-    href="#SCI_GETTEXT">SCI_GETTEXT</a>, <a class="message"
-    href="#SCI_GETSTYLEDTEXT">SCI_GETSTYLEDTEXT</a>, <a class="message"
-    href="#SCI_GETTEXTRANGE">SCI_GETTEXTRANGE</a></code></p>
+    This allows for rectangular and discontiguous selections as well as simple selections. 
+    See <a class="toc" href="#MultipleSelectionAndVirtualSpace">Multiple Selection</a> for information on 
+    how multiple and rectangular selections and virtual space are copied.</p>
+    
+    <p>See also: <code><a class="message" href="#SCI_GETCURLINE">SCI_GETCURLINE</a>, 
+    <a class="message" href="#SCI_GETLINE">SCI_GETLINE</a>, 
+    <a class="message" href="#SCI_GETTEXT">SCI_GETTEXT</a>, 
+    <a class="message" href="#SCI_GETSTYLEDTEXT">SCI_GETSTYLEDTEXT</a>, 
+    <a class="message" href="#SCI_GETTEXTRANGE">SCI_GETTEXTRANGE</a> 
+    </code></p>
 
     <p><b id="SCI_GETCURLINE">SCI_GETCURLINE(int textLen, char *text)</b><br />
      This retrieves the text of the line containing the caret and returns the position within the
@@ -1480,6 +1483,12 @@ struct TextToFind {
     Virtual space is space beyond the end of each line. The caret may be moved into virtual space but no real space will be 
     added to the document until there is some text typed or some other text insertion command is used.
     </p>
+    
+    <p>When discontiguous selections are copied to the clipboard, each selection is added to the clipboard text 
+    in order with no delimiting characters.
+    For rectangular selections the document's line end is added after each line's text. Due to being added
+    in order, when a rectangular selection is selected from the bottom to the top, the lines will be in the reverse order 
+    to how they are in the document. Virtual space is not copied.</p>
 
     <p>
     <b id="SCI_SETMULTIPLESELECTION">SCI_SETMULTIPLESELECTION(bool multipleSelection)</b><br />
