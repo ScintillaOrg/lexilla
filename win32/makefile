@@ -29,12 +29,13 @@ LDFLAGS=-mwindows -lstdc++ -limm32 -lole32 -luuid -mno-cygwin
 # Add -MMD to get dependencies
 #CXXFLAGS = -g -pg -pedantic -Os -fno-exceptions -fvtable-thunks -fno-rtti
 INCLUDEDIRS=-I ../include -I ../src
-CXXBASEFLAGS=-Wall -Wno-missing-braces -Wno-char-subscripts -pedantic $(INCLUDEDIRS) -Os $(THUNKFLAGS) -fno-rtti -mno-cygwin
+CXXBASEFLAGS=-Wall -Wno-missing-braces -Wno-char-subscripts -pedantic $(INCLUDEDIRS) $(THUNKFLAGS) -fno-rtti -mno-cygwin
 
 ifdef DEBUG
-CXXFLAGS=-DDEBUG $(CXXBASEFLAGS)
+CXXFLAGS=-DDEBUG -g $(CXXBASEFLAGS)
 else
-CXXFLAGS=-DNDEBUG $(CXXBASEFLAGS)
+CXXFLAGS=-DNDEBUG -Os $(CXXBASEFLAGS)
+STRIPFLAG=-s
 endif
 
 .cxx.o:
@@ -69,7 +70,7 @@ SOBJS	= ScintillaWin.o ScintillaBase.o Editor.o CharClassify.o Decoration.o \
 	ScintRes.o PlatWin.o PositionCache.o KeyMap.o Indicator.o LineMarker.o RESearch.o RunStyles.o \
 	Selection.o Style.o ViewStyle.o AutoComplete.o UniConversion.o PropSet.o XPM.o PerLine.o
 $(COMPONENT): $(SOBJS) Scintilla.def
-	$(DLLWRAP) --add-stdcall-alias --target i386-mingw32 -o $@ $(SOBJS) $(LDFLAGS) -s --relocatable
+	$(DLLWRAP) --add-stdcall-alias --target i386-mingw32 -o $@ $(SOBJS) $(LDFLAGS) $(STRIPFLAG) --relocatable
 
 LOBJS	= ScintillaWinL.o ScintillaBaseL.o Editor.o CharClassify.o Decoration.o \
 	Document.o ContractionState.o CellBuffer.o CallTip.o \
@@ -77,7 +78,7 @@ LOBJS	= ScintillaWinL.o ScintillaBaseL.o Editor.o CharClassify.o Decoration.o \
 	Selection.o Style.o ViewStyle.o AutoComplete.o UniConversion.o KeyWords.o \
 	DocumentAccessor.o PropSet.o ExternalLexer.o StyleContext.o XPM.o PerLine.o $(LEXOBJS)
 $(LEXCOMPONENT): $(LOBJS) Scintilla.def
-	$(DLLWRAP) --add-stdcall-alias --target i386-mingw32 -o $@ $(LOBJS) $(LDFLAGS) -s --relocatable
+	$(DLLWRAP) --add-stdcall-alias --target i386-mingw32 -o $@ $(LOBJS) $(LDFLAGS) $(STRIPFLAG) --relocatable
 
 $(LEXLIB): $(LEXOBJS)
 	$(AR) rc $@ $^
