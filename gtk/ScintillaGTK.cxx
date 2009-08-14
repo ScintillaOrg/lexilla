@@ -2602,15 +2602,14 @@ void ScintillaGTK::DragDataGet(GtkWidget *widget, GdkDragContext *context,
 			sciThis->GetSelection(selection_data, info, &sciThis->drag);
 		}
 		if (context->action == GDK_ACTION_MOVE) {
-			SelectionPosition selStart = sciThis->SelectionStart();
-			SelectionPosition selEnd = sciThis->SelectionEnd();
-			if (sciThis->posDrop > selStart) {
-				if (sciThis->posDrop > selEnd)
-					sciThis->posDrop.Add(-((selEnd.Position() - selStart.Position())));
-				else
-					sciThis->posDrop = selStart;
-				sciThis->posDrop = SelectionPosition(
-					sciThis->pdoc->ClampPositionIntoDocument(sciThis->posDrop.Position()));
+			for (size_t r=0; r<sciThis->sel.Count(); r++) {
+				if (sciThis->posDrop >= sciThis->sel.Range(r).Start()) {
+					if (sciThis->posDrop > sciThis->sel.Range(r).End()) {
+						sciThis->posDrop.Add(-sciThis->sel.Range(r).Length());
+					} else {
+						sciThis->posDrop.Add(-SelectionRange(sciThis->posDrop, sciThis->sel.Range(r).Start()).Length());
+					}
+				}
 			}
 			sciThis->ClearSelection();
 		}
