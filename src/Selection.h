@@ -98,6 +98,9 @@ struct SelectionRange {
 	bool operator ==(const SelectionRange &other) const {
 		return caret == other.caret && anchor == other.anchor;
 	}
+	bool operator <(const SelectionRange &other) const {
+		return caret < other.caret || ((caret == other.caret) && (anchor < other.anchor));
+	}
 	void Reset() {
 		anchor.Reset();
 		caret.Reset();
@@ -161,6 +164,9 @@ public:
 	void RemoveDuplicates();
 	void RotateMain();
 	bool Tentative() const { return tentativeMain; }
+	std::vector<SelectionRange> RangesCopy() const {
+		return ranges;
+	}
 };
 
 #ifdef SCI_NAMESPACE

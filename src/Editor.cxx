@@ -12,6 +12,7 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 
 // With Borland C++ 5.5, including <string> includes Windows.h leading to defining
 // FindText to FindTextA which makes calls here to Document::FindText fail.
@@ -5345,8 +5346,11 @@ void Editor::CopySelectionRange(SelectionText *ss, bool allowLineCopy) {
 		int size = sel.Length() + delimiterLength * sel.Count();
 		char *text = new char[size + 1];
 		int j = 0;
-		for (size_t r=0; r<sel.Count(); r++) {
-			SelectionRange current = sel.Range(r);
+		std::vector<SelectionRange> rangesInOrder = sel.RangesCopy();
+		if (sel.selType == Selection::selRectangle)
+			std::sort(rangesInOrder.begin(), rangesInOrder.end());
+		for (size_t r=0; r<rangesInOrder.size(); r++) {
+			SelectionRange current = rangesInOrder[r];
 			for (int i = current.Start().Position();
 			        i < current.End().Position();
 			        i++) {
