@@ -1486,9 +1486,8 @@ struct TextToFind {
     
     <p>When discontiguous selections are copied to the clipboard, each selection is added to the clipboard text 
     in order with no delimiting characters.
-    For rectangular selections the document's line end is added after each line's text. Due to being added
-    in order, when a rectangular selection is selected from the bottom to the top, the lines will be in the reverse order 
-    to how they are in the document. Virtual space is not copied.</p>
+    For rectangular selections the document's line end is added after each line's text. Rectangular selections
+    are always copied from top line to bottom, not in the in order of selection.Virtual space is not copied.</p>
 
     <p>
     <b id="SCI_SETMULTIPLESELECTION">SCI_SETMULTIPLESELECTION(bool multipleSelection)</b><br />
