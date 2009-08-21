@@ -5330,7 +5330,7 @@ void Editor::CopySelectionRange(SelectionText *ss, bool allowLineCopy) {
 				strncat(textWithEndl, "\r", textLen);
 			if (pdoc->eolMode != SC_EOL_CR)
 				strncat(textWithEndl, "\n", textLen);
-			ss->Set(textWithEndl, strlen(textWithEndl),
+			ss->Set(textWithEndl, strlen(textWithEndl) + 1,
 				pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false, true);
 			delete []text;
 		}
@@ -6465,7 +6465,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			SelectionText selectedText;
 			CopySelectionRange(&selectedText);
 			if (lParam == 0) {
-				return selectedText.len + 1;
+				return selectedText.len ? selectedText.len : 1;
 			} else {
 				char *ptr = CharPtrFromSPtr(lParam);
 				int iChar = 0;
