@@ -2600,11 +2600,15 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		}
 	}
 
+	bool selBackDrawn = vsDraw.selbackset && 
+		((vsDraw.selAlpha == SC_ALPHA_NOALPHA) || (vsDraw.selAdditionalAlpha == SC_ALPHA_NOALPHA));
+
 	// Does not take margin into account but not significant
 	int xStartVisible = subLineStart - xStart;
 
 	ll->psel = &sel;
-	BreakFinder bfBack(ll, lineStart, lineEnd, posLineStart, IsUnicodeMode(), xStartVisible);
+
+	BreakFinder bfBack(ll, lineStart, lineEnd, posLineStart, IsUnicodeMode(), xStartVisible, selBackDrawn);
 	int next = bfBack.First();
 
 	// Background drawing loop
@@ -2694,7 +2698,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 
 	inIndentation = subLine == 0;	// Do not handle indentation except on first subline.
 	// Foreground drawing loop
-	BreakFinder bfFore(ll, lineStart, lineEnd, posLineStart, IsUnicodeMode(), xStartVisible);
+	BreakFinder bfFore(ll, lineStart, lineEnd, posLineStart, IsUnicodeMode(), xStartVisible,
+		((!twoPhaseDraw && selBackDrawn) || vsDraw.selforeset));
 	next = bfFore.First();
 
 	while (next < lineEnd) {
