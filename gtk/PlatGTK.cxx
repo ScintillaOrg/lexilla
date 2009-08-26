@@ -2733,16 +2733,35 @@ long Platform::SendScintillaPointer(
 	                              reinterpret_cast<sptr_t>(lParam));
 }
 
-bool Platform::IsDBCSLeadByte(int /* codePage */, char /* ch */) {
+bool Platform::IsDBCSLeadByte(int codePage, char ch) {
+	// Byte ranges found in Wikipedia articles with relevant search strings in each case
+	unsigned char uch = static_cast<unsigned char>(ch);
+	switch (codePage) {
+		case 932:
+			// Shift_jis
+			return ((uch >= 0x81) && (uch <= 0x9F)) ||
+				((uch >= 0xE0) && (uch <= 0xEF));
+		case 936:
+			// GBK
+			return (uch >= 0x81) && (uch <= 0xFE);
+		case 950:
+			// Big5
+			return (uch >= 0x81) && (uch <= 0xFE);
+		// Korean EUC-KR may be code page 949.
+	}
 	return false;
 }
 
-int Platform::DBCSCharLength(int, const char *s) {
-	int bytes = mblen(s, MB_CUR_MAX);
-	if (bytes >= 1)
-		return bytes;
-	else
-		return 1;
+int Platform::DBCSCharLength(int codePage, const char *s) {
+	if (codePage == 932 || codePage == 936 || codePage == 950) {
+		return IsDBCSLeadByte(codePage, s[0]) ? 2 : 1;
+	} else {
+		int bytes = mblen(s, MB_CUR_MAX);
+		if (bytes >= 1)
+			return bytes;
+		else
+			return 1;
+	}
 }
 
 int Platform::DBCSCharMaxLength() {
