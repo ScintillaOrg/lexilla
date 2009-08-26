@@ -1371,6 +1371,8 @@ void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, int ybase, con
 	}
 }
 
+#ifdef USE_PANGO
+
 class ClusterIterator {
 	PangoLayoutIter *iter;
 	PangoRectangle pos;
@@ -1404,6 +1406,8 @@ public:
 		distance = position - positionStart;
 	}
 };
+
+#endif
 
 void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positions) {
 	if (font_.GetID()) {
