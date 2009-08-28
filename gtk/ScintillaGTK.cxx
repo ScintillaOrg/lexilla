@@ -1540,7 +1540,9 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 				if (selection_data->selection != GDK_SELECTION_PRIMARY) {
 					ClearSelection();
 				}
-				SelectionPosition selStart = SelectionStart();
+				SelectionPosition selStart = sel.IsRectangular() ?
+					sel.Rectangular().Start() :
+					sel.Range(sel.Main()).Start();
 
 				if (selText.rectangular) {
 					PasteRectangular(selStart, selText.s, selText.len);
