@@ -2807,8 +2807,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 										surface->FillRectangle(rcSpace, textBack);
 									}
 									PRectangle rcDot(xmid + xStart - subLineStart, rcSegment.top + vsDraw.lineHeight / 2, 0, 0);
-									rcDot.right = rcDot.left + 1;
-									rcDot.bottom = rcDot.top + 1;
+									rcDot.right = rcDot.left + vs.whitespaceSize;
+									rcDot.bottom = rcDot.top + vs.whitespaceSize;
 									surface->FillRectangle(rcDot, textFore);
 								}
 							}
@@ -6860,6 +6860,14 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETVIEWWS:
 		vs.viewWhitespace = static_cast<WhiteSpaceVisibility>(wParam);
+		Redraw();
+		break;
+
+	case SCI_GETWHITESPACESIZE:
+		return vs.whitespaceSize;
+
+	case SCI_SETWHITESPACESIZE:
+		vs.whitespaceSize = static_cast<int>(wParam);
 		Redraw();
 		break;
 

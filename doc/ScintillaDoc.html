@@ -1950,6 +1950,9 @@ struct TextToFind {
     useWhitespaceForeColour, int colour)</a><br />
      <a class="message" href="#SCI_SETWHITESPACEBACK">SCI_SETWHITESPACEBACK(bool
     useWhitespaceBackColour, int colour)</a><br />
+     <a class="message" href="#SCI_SETWHITESPACESIZE">SCI_SETWHITESPACESIZE(int
+    size)</a><br />
+     <a class="message" href="#SCI_GETWHITESPACESIZE">SCI_GETWHITESPACESIZE</a><br />
      <a class="message" href="#SCI_SETEXTRAASCENT">SCI_SETEXTRAASCENT(int extraAscent)</a><br />
      <a class="message" href="#SCI_GETEXTRAASCENT">SCI_GETEXTRAASCENT</a><br />
      <a class="message" href="#SCI_SETEXTRADESCENT">SCI_SETEXTRADESCENT(int extraDescent)</a><br />
@@ -2004,6 +2007,12 @@ struct TextToFind {
     foreground and/or background colour of all visible white space can be set globally, overriding
     the lexer's colours with <code>SCI_SETWHITESPACEFORE</code> and
     <code>SCI_SETWHITESPACEBACK</code>.</p>
+
+     <b id="SCI_SETWHITESPACESIZE">SCI_SETWHITESPACESIZE(int size)</b><br />
+     <b id="SCI_GETWHITESPACESIZE">SCI_GETWHITESPACESIZE</b><br />
+     SCI_SETWHITESPACESIZE sets the size of the dots used for mark space characters.
+     The SCI_GETWHITESPACESIZE message retrieves the current size.
+    <p>
 
     <p>
      <b id="SCI_SETEXTRAASCENT">SCI_SETEXTRAASCENT(int extraAscent)</b><br />
