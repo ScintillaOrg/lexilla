@@ -32,7 +32,7 @@ static NSCursor* waitCursor;
   if (self != nil)
   {
     // Some initialization for our view.
-    mCurrentCursor = [NSCursor arrowCursor];
+    mCurrentCursor = [[NSCursor arrowCursor] retain];
     mCurrentTrackingRect = 0;
     mMarkedTextRange = NSMakeRange(NSNotFound, 0);
     
@@ -69,6 +69,7 @@ static NSCursor* waitCursor;
  */
 - (void) setCursor: (Window::Cursor) cursor
 {
+  [mCurrentCursor autorelease];
   switch (cursor)
   {
     case Window::cursorText:
@@ -94,6 +95,8 @@ static NSCursor* waitCursor;
       mCurrentCursor = [NSCursor arrowCursor];
       break;
   }
+  
+  [mCurrentCursor retain];
   
   // Trigger recreation of the cursor rectangle(s).
   [[self window] invalidateCursorRectsForView: self];
@@ -529,6 +532,14 @@ static NSCursor* waitCursor;
   mOwner.backend->Redo();
 }
 
+//--------------------------------------------------------------------------------------------------
+
+- (void) dealloc
+{
+  [mCurrentCursor release];
+  [super dealloc];
+}
+
 @end
 
 //--------------------------------------------------------------------------------------------------
@@ -556,11 +567,11 @@ static NSCursor* waitCursor;
     
     NSString* path = [bundle pathForResource: @"mac_cursor_busy" ofType: @"png" inDirectory: nil];
     NSImage* image = [[[NSImage alloc] initWithContentsOfFile: path] autorelease];
-    waitCursor = [[[NSCursor alloc] initWithImage: image hotSpot: NSMakePoint(2, 2)] retain];
+    waitCursor = [[NSCursor alloc] initWithImage: image hotSpot: NSMakePoint(2, 2)];
     
     path = [bundle pathForResource: @"mac_cursor_flipped" ofType: @"png" inDirectory: nil];
     image = [[[NSImage alloc] initWithContentsOfFile: path] autorelease];
-    reverseArrowCursor = [[[NSCursor alloc] initWithImage: image hotSpot: NSMakePoint(12, 2)] retain];
+    reverseArrowCursor = [[NSCursor alloc] initWithImage: image hotSpot: NSMakePoint(12, 2)];
   }
 }
 
@@ -722,9 +733,6 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 
 //--------------------------------------------------------------------------------------------------
 
-/**
- * Release the backend.
- */
 - (void) dealloc
 {
   [mInfoBar release];
