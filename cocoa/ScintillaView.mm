@@ -652,12 +652,14 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
             [editor sendNotification: NSTextDidChangeNotification];
           break;
         case SCN_ZOOM:
+		  {
           // A zoom change happend. Notify info bar if there is one.
           float zoom = [editor getGeneralProperty: SCI_GETZOOM parameter: 0];
           int fontSize = [editor getGeneralProperty: SCI_STYLEGETSIZE parameter: STYLE_DEFAULT];
           float factor = (zoom / fontSize) + 1;
           [editor->mInfoBar notify: IBNZoomChanged message: nil location: NSZeroPoint value: factor];
-          break;
+          }
+		  break;
         case SCN_UPDATEUI:
           // Triggered whenever changes in the UI state need to be reflected.
           // These can be: caret changes, selection changes etc.
