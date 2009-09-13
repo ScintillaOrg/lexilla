@@ -6327,6 +6327,8 @@ sptr_t Editor::StyleGetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 	case SCI_STYLEGETSIZE:
 		return vs.styles[wParam].size;
 	case SCI_STYLEGETFONT:
+		if (!vs.styles[wParam].fontName)
+			return 0;
 		if (lParam != 0)
 			strcpy(CharPtrFromSPtr(lParam), vs.styles[wParam].fontName);
 		return strlen(vs.styles[wParam].fontName);
