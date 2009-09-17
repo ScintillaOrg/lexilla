@@ -15,12 +15,20 @@
 typedef BOOL bool;
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if PLAT_WIN
 /* Return false on failure: */
 bool Scintilla_RegisterClasses(void *hInstance);
 bool Scintilla_ReleaseResources();
 #endif
 int Scintilla_LinkLexers();
+
+#ifdef __cplusplus
+}
+#endif
 
 /* Here should be placed typedefs for uptr_t, an unsigned integer type large enough to
  * hold a pointer and sptr_t, a signed integer large enough to hold a pointer.
