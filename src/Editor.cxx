@@ -4561,8 +4561,10 @@ void Editor::NewLine() {
 }
 
 void Editor::CursorUpOrDown(int direction, Selection::selTypes selt) {
-	Point pt = PointMainCaret();
-	int lineDoc = pdoc->LineFromPosition(sel.MainCaret());
+	SelectionPosition caretToUse = sel.IsRectangular() ?
+		sel.Rectangular().caret : sel.Range(sel.Main()).caret;
+	Point pt = LocationFromPosition(caretToUse);
+	int lineDoc = pdoc->LineFromPosition(caretToUse.Position());
 	Point ptStartLine = LocationFromPosition(pdoc->LineStart(lineDoc));
 	int subLine = (pt.y - ptStartLine.y) / vs.lineHeight;
 	int commentLines = vs.annotationVisible ? pdoc->AnnotationLines(lineDoc) : 0;
