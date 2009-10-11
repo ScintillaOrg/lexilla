@@ -4685,7 +4685,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 				MovePositionTo(MovePositionSoVisible(SelectionPosition(sel.MainCaret() - 1), -1));
 			}
 		} else {
-			MovePositionTo(sel.RangeMain().Start());
+			MovePositionTo(sel.IsRectangular() ? sel.Limits().start : sel.RangeMain().Start());
 		}
 		SetLastXChosen();
 		break;
@@ -4719,7 +4719,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 				MovePositionTo(MovePositionSoVisible(SelectionPosition(sel.MainCaret() + 1), 1));
 			}
 		} else {
-			MovePositionTo(sel.RangeMain().End());
+			MovePositionTo(sel.IsRectangular() ? sel.Limits().end : sel.RangeMain().End());
 		}
 		SetLastXChosen();
 		break;
