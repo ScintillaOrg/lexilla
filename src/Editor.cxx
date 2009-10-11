@@ -5678,10 +5678,12 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 						SetSelection(newPos, newPos);
 					}
 				}
+				SelectionPosition anchorCurrent = sel.IsRectangular() ? 
+					sel.Rectangular().anchor : sel.RangeMain().anchor;
 				sel.selType = alt ? Selection::selRectangle : Selection::selStream;
 				selectionType = selChar;
 				originalAnchorPos = sel.MainCaret();
-				sel.Rectangular() = SelectionRange(newPos);
+				sel.Rectangular() = SelectionRange(newPos, anchorCurrent);
 				SetRectangularRange();
 			}
 		}
