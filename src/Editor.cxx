@@ -4539,7 +4539,7 @@ void Editor::Duplicate(bool forLine) {
 		SelectionPosition last = sel.Last();
 		if (forLine) {
 			int line = pdoc->LineFromPosition(last.Position());
-			last = SelectionPosition(last.Position() + pdoc->LineEnd(line) - pdoc->LineStart(line));
+			last = SelectionPosition(last.Position() + pdoc->LineStart(line+1) - pdoc->LineStart(line));
 		}
 		if (sel.Rectangular().anchor > sel.Rectangular().caret)
 			sel.Rectangular().anchor = last;
