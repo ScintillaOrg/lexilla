@@ -4514,6 +4514,13 @@ void Editor::Duplicate(bool forLine) {
 		forLine = true;
 	}
 	UndoGroup ug(pdoc, sel.Count() > 1);
+	SelectionPosition last;
+	const char *eol = "";
+	int eolLen = 0;
+	if (forLine) {
+		eol = StringFromEOLMode(pdoc->eolMode);
+		eolLen = istrlen(eol);
+	}
 	for (size_t r=0; r<sel.Count(); r++) {
 		SelectionPosition start = sel.Range(r).Start();
 		SelectionPosition end = sel.Range(r).End();
@@ -4523,14 +4530,22 @@ void Editor::Duplicate(bool forLine) {
 			end = SelectionPosition(pdoc->LineEnd(line));
 		}
 		char *text = CopyRange(start.Position(), end.Position());
-		if (forLine) {
-			const char *eol = StringFromEOLMode(pdoc->eolMode);
-			pdoc->InsertCString(end.Position(), eol);
-			pdoc->InsertString(end.Position() + istrlen(eol), text, SelectionRange(end, start).Length());
-		} else {
-			pdoc->InsertString(end.Position(), text, SelectionRange(end, start).Length());
-		}
+		if (forLine)
+			pdoc->InsertString(end.Position(), eol, eolLen);
+		pdoc->InsertString(end.Position() + eolLen, text, SelectionRange(end, start).Length());
 		delete []text;
+	}
+	if (sel.Count() && sel.IsRectangular()) {
+		SelectionPosition last = sel.Last();
+		if (forLine) {
+			int line = pdoc->LineFromPosition(last.Position());
+			last = SelectionPosition(last.Position() + pdoc->LineEnd(line) - pdoc->LineStart(line));
+		}
+		if (sel.Rectangular().anchor > sel.Rectangular().caret)
+			sel.Rectangular().anchor = last;
+		else
+			sel.Rectangular().caret = last;
+		SetRectangularRange();
 	}
 }
 
