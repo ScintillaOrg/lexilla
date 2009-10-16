@@ -143,6 +143,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool multipleSelection;
 	bool additionalSelectionTyping;
 	bool additionalCaretsBlink;
+	bool additionalCaretsVisible;
 
 	int virtualSpaceOptions;
 

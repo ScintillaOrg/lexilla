@@ -151,6 +151,7 @@ Editor::Editor() {
 	multipleSelection = false;
 	additionalSelectionTyping = false;
 	additionalCaretsBlink = true;
+	additionalCaretsVisible = true;
 	virtualSpaceOptions = SCVS_NONE;
 
 	pixmapLine = Surface::Allocate();
@@ -3103,8 +3104,10 @@ void Editor::DrawCarets(Surface *surface, ViewStyle &vsDraw, int lineDoc, int xS
 				if (lineStart != 0)	// Wrapped
 					xposCaret += ll->wrapIndent;
 			}
+			bool caretBlinkState = (caret.active && caret.on) || (!additionalCaretsBlink && !mainCaret);
+			bool caretVisibleState = additionalCaretsVisible || mainCaret;
 			if ((xposCaret >= 0) && (vsDraw.caretWidth > 0) && (vsDraw.caretStyle != CARETSTYLE_INVISIBLE) &&
-			        ((posDrag.IsValid()) || ((caret.active && caret.on) || (!additionalCaretsBlink && !mainCaret)))) {
+			        ((posDrag.IsValid()) || (caretBlinkState && caretVisibleState))) {
 				bool caretAtEOF = false;
 				bool caretAtEOL = false;
 				bool drawBlockCaret = false;
@@ -8205,6 +8208,14 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETADDITIONALCARETSBLINK:
 		return additionalCaretsBlink;
+
+	case SCI_SETADDITIONALCARETSVISIBLE:
+		additionalCaretsVisible = wParam != 0;
+		InvalidateCaret();
+		break;
+
+	case SCI_GETADDITIONALCARETSVISIBLE:
+		return additionalCaretsVisible;
 
 	case SCI_GETSELECTIONS:
 		return sel.Count();

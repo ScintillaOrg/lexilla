@@ -1951,6 +1951,12 @@ set void SetAdditionalCaretsBlink=2567(bool additionalCaretsBlink,)
 # Whether additional carets will blink
 get bool GetAdditionalCaretsBlink=2568(,)
 
+# Set whether additional carets are visible
+set void SetAdditionalCaretsVisible=2608(bool additionalCaretsBlink,)
+
+# Whether additional carets are visible
+get bool GetAdditionalCaretsVisible=2609(,)
+
 # How many selections are there?
 get int GetSelections=2570(,)
 
