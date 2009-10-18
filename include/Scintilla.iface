@@ -1724,6 +1724,10 @@ fun void SetCharsDefault=2444(,)
 # Get currently selected item position in the auto-completion list
 fun int AutoCGetCurrent=2445(,)
 
+# Get currently selected item text in the auto-completion list
+# Returns the length of the item text
+fun int AutoCGetCurrentText=2610(, stringresult s)
+
 # Enlarge the document to a particular size of text bytes.
 fun void Allocate=2446(int bytes,)
 

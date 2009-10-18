@@ -3703,6 +3703,8 @@ struct TextToFind {
      <a class="message" href="#SCI_AUTOCSELECT">SCI_AUTOCSELECT(&lt;unused&gt;, const char
     *select)</a><br />
      <a class="message" href="#SCI_AUTOCGETCURRENT">SCI_AUTOCGETCURRENT</a><br />
+     <a class="message" href="#SCI_AUTOCGETCURRENTTEXT">SCI_AUTOCGETCURRENTTEXT(&lt;unused&gt;,
+     char *text)</a><br />
      <a class="message" href="#SCI_AUTOCSETCANCELATSTART">SCI_AUTOCSETCANCELATSTART(bool
     cancel)</a><br />
      <a class="message" href="#SCI_AUTOCGETCANCELATSTART">SCI_AUTOCGETCANCELATSTART</a><br />
@@ -3782,8 +3784,18 @@ struct TextToFind {
     item is found, it is selected. If the item is not found, the autocompletion list closes if
     auto-hide is true (see <a class="message"
     href="#SCI_AUTOCSETAUTOHIDE"><code>SCI_AUTOCSETAUTOHIDE</code></a>).<br />
-    The current selection can be retrieved with <code>SCI_AUTOCGETCURRENT</code>
-    </p>
+    The current selection index can be retrieved with <code>SCI_AUTOCGETCURRENT</code>.</p>
+
+    <p><b id="SCI_AUTOCGETCURRENTTEXT">SCI_AUTOCGETCURRENTTEXT(&lt;unused&gt;, char *text)</b><br />
+     This message retrieves the current selected text in the autocompletion list. Normally the
+    <a class="message" href="#SCN_AUTOCSELECTION"><code>SCN_AUTOCSELECTION</code></a> notification
+    is used instead.</p>
+
+    <p></p>The value is copied to the <code>text</code> buffer, returning the length (not including the
+    terminating 0). If not found, an empty string is copied to the buffer and 0 is returned.</p>
+
+    <p>If the value argument is 0 then the length that should be allocated to store the value is
+    returned; again, the terminating 0 is not included.</p>
 
     <p><b id="SCI_AUTOCSETCANCELATSTART">SCI_AUTOCSETCANCELATSTART(bool cancel)</b><br />
      <b id="SCI_AUTOCGETCANCELATSTART">SCI_AUTOCGETCANCELATSTART</b><br />

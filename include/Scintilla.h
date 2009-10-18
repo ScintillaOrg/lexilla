@@ -652,6 +652,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_SETWHITESPACECHARS 2443
 #define SCI_SETCHARSDEFAULT 2444
 #define SCI_AUTOCGETCURRENT 2445
+#define SCI_AUTOCGETCURRENTTEXT 2610
 #define SCI_ALLOCATE 2446
 #define SCI_TARGETASUTF8 2447
 #define SCI_SETLENGTHFORENCODE 2448
