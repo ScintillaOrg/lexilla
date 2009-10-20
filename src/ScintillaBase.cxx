@@ -481,6 +481,8 @@ void ScintillaBase::SetLexer(uptr_t wParam) {
 	lexCurrent = LexerModule::Find(lexLanguage);
 	if (!lexCurrent)
 		lexCurrent = LexerModule::Find(SCLEX_NULL);
+	int bits = lexCurrent ? lexCurrent->GetStyleBitsNeeded() : 5;
+	vs.EnsureStyle((1 << bits) - 1);
 }
 
 void ScintillaBase::SetLexerLanguage(const char *languageName) {
@@ -490,6 +492,8 @@ void ScintillaBase::SetLexerLanguage(const char *languageName) {
 		lexCurrent = LexerModule::Find(SCLEX_NULL);
 	if (lexCurrent)
 		lexLanguage = lexCurrent->GetLanguage();
+	int bits = lexCurrent ? lexCurrent->GetStyleBitsNeeded() : 5;
+	vs.EnsureStyle((1 << bits) - 1);
 }
 
 void ScintillaBase::Colourise(int start, int end) {
