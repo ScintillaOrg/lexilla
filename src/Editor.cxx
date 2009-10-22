@@ -3780,7 +3780,7 @@ void Editor::ClearSelection() {
 				sel.Range(r).End().Position())) {
 				pdoc->DeleteChars(sel.Range(r).Start().Position(), 
 					sel.Range(r).Length());
-				sel.Range(r).ClearVirtualSpace();
+				sel.Range(r) = sel.Range(r).Start();
 			}
 		}
 	}
@@ -3889,6 +3889,12 @@ void Editor::Clear() {
 	if (sel.Empty()) {
 		for (size_t r=0; r<sel.Count(); r++) {
 			if (!RangeContainsProtected(sel.Range(r).caret.Position(), sel.Range(r).caret.Position() + 1)) {
+				if (sel.Range(r).Start().VirtualSpace()) {
+					if (sel.Range(r).anchor < sel.Range(r).caret)
+						sel.Range(r) = SelectionPosition(InsertSpace(sel.Range(r).anchor.Position(), sel.Range(r).anchor.VirtualSpace()));
+					else
+						sel.Range(r) = SelectionPosition(InsertSpace(sel.Range(r).caret.Position(), sel.Range(r).caret.VirtualSpace()));
+				}
 				if ((sel.Count() == 1) || !IsEOLChar(pdoc->CharAt(sel.Range(r).caret.Position()))) {
 					pdoc->DelChar(sel.Range(r).caret.Position());
 					sel.Range(r).ClearVirtualSpace();
@@ -4998,15 +5004,20 @@ int Editor::KeyCommand(unsigned int iMessage) {
 	case SCI_DELWORDLEFT: {
 			int startWord = pdoc->NextWordStart(sel.MainCaret(), -1);
 			pdoc->DeleteChars(startWord, sel.MainCaret() - startWord);
+			sel.RangeMain().ClearVirtualSpace();
 			SetLastXChosen();
 		}
 		break;
 	case SCI_DELWORDRIGHT: {
+			sel.RangeMain().caret = SelectionPosition(
+				InsertSpace(sel.RangeMain().caret.Position(), sel.RangeMain().caret.VirtualSpace()));
 			int endWord = pdoc->NextWordStart(sel.MainCaret(), 1);
 			pdoc->DeleteChars(sel.MainCaret(), endWord - sel.MainCaret());
 		}
 		break;
 	case SCI_DELWORDRIGHTEND: {
+			sel.RangeMain().caret = SelectionPosition(
+				InsertSpace(sel.RangeMain().caret.Position(), sel.RangeMain().caret.VirtualSpace()));
 			int endWord = pdoc->NextWordEnd(sel.MainCaret(), 1);
 			pdoc->DeleteChars(sel.MainCaret(), endWord - sel.MainCaret());
 		}
@@ -5015,6 +5026,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 			int line = pdoc->LineFromPosition(sel.MainCaret());
 			int start = pdoc->LineStart(line);
 			pdoc->DeleteChars(start, sel.MainCaret() - start);
+			sel.RangeMain().ClearVirtualSpace();
 			SetLastXChosen();
 		}
 		break;
