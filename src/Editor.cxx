@@ -6387,6 +6387,15 @@ sptr_t Editor::StyleGetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 	return 0;
 }
 
+sptr_t Editor::StringResult(sptr_t lParam, const char *val) {
+	const int n = strlen(val);
+	if (lParam != 0) {
+		char *ptr = reinterpret_cast<char *>(lParam);
+		strcpy(ptr, val);
+	}
+	return n;	// Not including NUL
+}
+
 sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	//Platform::DebugPrintf("S start wnd proc %d %d %d\n",iMessage, wParam, lParam);
 
