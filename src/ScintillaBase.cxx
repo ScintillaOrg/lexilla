@@ -730,15 +730,8 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		          reinterpret_cast<const char *>(lParam));
 		break;
 
-	case SCI_GETPROPERTY: {
-			const char *val = props.Get(reinterpret_cast<const char *>(wParam));
-			const int n = strlen(val);
-			if (lParam != 0) {
-				char *ptr = reinterpret_cast<char *>(lParam);
-				strcpy(ptr, val);
-			}
-			return n;	// Not including NUL
-		}
+	case SCI_GETPROPERTY:
+			return StringResult(lParam, props.Get(reinterpret_cast<const char *>(wParam)));
 
 	case SCI_GETPROPERTYEXPANDED: {
 			char *val = props.Expanded(reinterpret_cast<const char *>(wParam));
@@ -765,8 +758,12 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		SetLexerLanguage(reinterpret_cast<const char *>(lParam));
 		break;
 
+	case SCI_GETLEXERLANGUAGE:
+		return StringResult(lParam, lexCurrent ? lexCurrent->languageName : "");
+
 	case SCI_GETSTYLEBITSNEEDED:
 		return lexCurrent ? lexCurrent->GetStyleBitsNeeded() : 5;
+
 #endif
 
 	default:

@@ -2097,6 +2097,10 @@ get int GetPropertyInt=4010(string key,)
 # Retrieve the number of bits the current lexer needs for styling.
 get int GetStyleBitsNeeded=4011(,)
 
+# Retrieve the name of the lexer.
+# Return the length of the text.
+get int GetLexerLanguage=4012(, stringresult text)
+
 # Notifications
 # Type of modification and the action which caused the modification.
 # These are defined as a bit mask to make it easy to specify which notifications are wanted.

@@ -1015,6 +1015,25 @@ class TestMultiSelection(unittest.TestCase):
 		self.assertEquals(self.ed.GetSelectionNCaret(0), 3)
 		self.assertEquals(self.ed.GetSelectionNCaretVirtualSpace(0), 0)
 
+class TestLexer(unittest.TestCase):
+	def setUp(self):
+		self.xite = XiteWin.xiteFrame
+		self.ed = self.xite.ed
+		self.ed.ClearAll()
+		self.ed.EmptyUndoBuffer()
+		
+	def testLexerNumber(self):
+		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.assertEquals(self.ed.GetLexer(), self.ed.SCLEX_CPP)
+
+	def testLexerName(self):
+		self.ed.LexerLanguage = b"cpp"
+		self.assertEquals(self.ed.GetLexer(), self.ed.SCLEX_CPP)
+		name = b"-" * 100
+		length = self.ed.GetLexerLanguage(0, name)
+		name = name[:length]
+		self.assertEquals(name, b"cpp")
+
 class TestAutoComplete(unittest.TestCase):
 
 	def setUp(self):
