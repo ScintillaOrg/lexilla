@@ -666,7 +666,7 @@ Font::Font() : fid(0) {}
 Font::~Font() {}
 
 void Font::Create(const char *faceName, int characterSet, int size,
-	bool bold, bool italic, bool) {
+	bool bold, bool italic, int) {
 	Release();
 	fid = FontCached::FindOrCreate(faceName, characterSet, size, bold, italic);
 }

@@ -106,7 +106,7 @@ public:
 	int caretStyle;
 	int caretWidth;
 	bool someStylesProtected;
-	bool extraFontFlag;
+	int extraFontFlag;
 	int extraAscent;
 	int extraDescent;
 	int marginStyleOffset;

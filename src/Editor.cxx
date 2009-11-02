@@ -7001,6 +7001,15 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		InvalidateStyleRedraw();
 		break;
 
+	case SCI_SETFONTQUALITY:
+		vs.extraFontFlag &= ~SC_EFF_QUALITY_MASK;
+		vs.extraFontFlag |= (wParam & SC_EFF_QUALITY_MASK);
+		InvalidateStyleRedraw();
+		break;
+
+	case SCI_GETFONTQUALITY:
+		return (vs.extraFontFlag & SC_EFF_QUALITY_MASK);
+
 	case SCI_SETTABWIDTH:
 		if (wParam > 0) {
 			pdoc->tabInChars = wParam;

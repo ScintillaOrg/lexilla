@@ -1205,6 +1205,21 @@ get bool GetTwoPhaseDraw=2283(,)
 # and then the foreground. This avoids chopping off characters that overlap the next run.
 set void SetTwoPhaseDraw=2284(bool twoPhase,)
 
+# Control font anti-aliasing.
+
+enu FontQuality=SC_EFF_
+val SC_EFF_QUALITY_MASK=0xF
+val SC_EFF_QUALITY_DEFAULT=0
+val SC_EFF_QUALITY_NON_ANTIALIASED=1
+val SC_EFF_QUALITY_ANTIALIASED=2
+val SC_EFF_QUALITY_LCD_OPTIMIZED=3
+
+# Choose the quality level for text from the FontQuality enumeration.
+set void SetFontQuality=2611(int fontQuality,)
+
+# Retrieve the quality level for text.
+get int GetFontQuality=2612(,)
+
 # Make the target range start and end be the same as the selection range start and end.
 fun void TargetFromSelection=2287(,)
 

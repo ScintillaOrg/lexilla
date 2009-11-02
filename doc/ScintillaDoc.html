@@ -2873,6 +2873,8 @@ struct TextToFind {
      <a class="message" href="#SCI_GETBUFFEREDDRAW">SCI_GETBUFFEREDDRAW</a><br />
      <a class="message" href="#SCI_SETTWOPHASEDRAW">SCI_SETTWOPHASEDRAW(bool twoPhase)</a><br />
      <a class="message" href="#SCI_GETTWOPHASEDRAW">SCI_GETTWOPHASEDRAW</a><br />
+     <a class="message" href="#SCI_SETFONTQUALITY">SCI_SETFONTQUALITY(int fontQuality)</a><br />
+     <a class="message" href="#SCI_GETFONTQUALITY">SCI_GETFONTQUALITY</a><br />
      <a class="message" href="#SCI_SETCODEPAGE">SCI_SETCODEPAGE(int codePage)</a><br />
      <a class="message" href="#SCI_GETCODEPAGE">SCI_GETCODEPAGE</a><br />
      <a class="message" href="#SCI_SETKEYSUNICODE">SCI_SETKEYSUNICODE(bool keysUnicode)</a><br />
@@ -2933,6 +2935,14 @@ struct TextToFind {
      fixes this by drawing all the backgrounds first and then drawing the text in
      transparent mode. Two phase drawing may flicker more than single phase
      unless buffered drawing is on. The default is for drawing to be two phase.</p>
+
+    <p><b id="SCI_SETFONTQUALITY">SCI_SETFONTQUALITY(int fontQuality)</b><br />
+     <b id="SCI_GETFONTQUALITY">SCI_GETFONTQUALITY</b><br />
+     Manage font quality (antialiasing method). Currently, the following values are available on Windows:
+     <code>SC_EFF_QUALITY_DEFAULT</code> (backward compatible),
+     <code>SC_EFF_QUALITY_NON_ANTIALIASED</code>,
+     <code>SC_EFF_QUALITY_ANTIALIASED</code>,
+     <code>SC_EFF_QUALITY_LCD_OPTIMIZED</code>.</p>
 
     <p><b id="SCI_SETCODEPAGE">SCI_SETCODEPAGE(int codePage)</b><br />
      <b id="SCI_GETCODEPAGE">SCI_GETCODEPAGE</b><br />
