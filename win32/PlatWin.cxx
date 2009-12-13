@@ -328,7 +328,8 @@ void Font::Create(const char *faceName, int characterSet, int size,
 	SetLogFont(lf, faceName, characterSet, size, bold, italic, extraFontFlag);
 	fid = ::CreateFontIndirect(&lf);
 #else
-	fid = FontCached::FindOrCreate(faceName, characterSet, size, bold, italic, extraFontFlag);
+	if (faceName)
+		fid = FontCached::FindOrCreate(faceName, characterSet, size, bold, italic, extraFontFlag);
 #endif
 }
 
