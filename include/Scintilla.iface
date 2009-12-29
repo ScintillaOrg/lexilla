@@ -2007,13 +2007,13 @@ get int GetSelectionNAnchorVirtualSpace=2583(int selection,)
 set void SetSelectionNStart=2584(int selection, position pos)
 
 # Returns the position at the start of the selection.
-get position GetSelectionNStart=2585(,)
+get position GetSelectionNStart=2585(int selection,)
 
 # Sets the position that ends the selection - this becomes the currentPosition.
 set void SetSelectionNEnd=2586(int selection, position pos,)
 
 # Returns the position at the end of the selection.
-get position GetSelectionNEnd=2587(,)
+get position GetSelectionNEnd=2587(int selection,)
 
 set void SetRectangularSelectionCaret=2588(position pos,)
 get position GetRectangularSelectionCaret=2589(,)
