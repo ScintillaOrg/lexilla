@@ -3912,6 +3912,7 @@ void Editor::Clear() {
 }
 
 void Editor::SelectAll() {
+	sel.Clear();
 	SetSelection(0, pdoc->Length());
 	Redraw();
 }
