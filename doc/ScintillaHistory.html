@@ -361,7 +361,119 @@
 	Released on 25 January 2010.
 	</li>
 	<li>
-	Fix to positioning rectangular paste when viewing line ends.
+	Markdown lexer added. Feature #2844081.
+	</li>
+	<li>
+	On GTK+, include code that understands the ranges of lead bytes for code pages 932, 936, and 950
+	so that most Chinese and Japanese text can be used on systems that are not set to the corresponding locale.
+	</li>
+	<li>
+	Allow changing the size of dots in visible whitespace.
+	</li>
+	<li>
+	Additional carets can be hidden with SCI_SETADDITIONALCARETSVISIBLE.
+	</li>
+	<li>
+	Can choose anti-aliased, non-anti-aliased or lcd-optimized text using SCI_SETFONTQUALITY.
+	</li>
+	<li>
+	Retrieve the current selected text in the autocompletion list with SCI_AUTOCGETCURRENTTEXT.
+	</li>
+	<li>
+	Progress 4GL lexer improves handling of comments in preprocessor declaration. Feature #2902206.
+	</li>
+	<li>
+	HTML lexer extended to handle Mako template language.
+	</li>
+	<li>
+	SQL folder extended for SQL Anywhere "EXISTS" and "ENDIF" keywords. Feature #2887524.
+	</li>
+	<li>
+	SciTE adds APIPath and AbbrevPath variables.
+	</li>
+	<li>
+	SciTE on GTK+ uses pipes instead of temporary files for running tools. This should be more secure.
+	</li>
+	<li>
+	Fixed crash when calling SCI_STYLEGETFONT for a style which does not have a font set. Bug #2857425.
+	</li>
+	<li>
+	Fixed crash in SciTE using autocomplete word when word characters includes space. Bug #2840141.
+	</li>
+	<li>
+	Fixed bug with handling upper-case file extensions SciTE on GTK+.
+	</li>
+	<li>
+	Fixed SciTE loading files from sessions with folded folds where it would not 
+	be scrolled to the correct location. Bug #2882775.
+	</li>
+	<li>
+	Fixed SciTE loading files from sessions when file no longer exists. Bug #2883437.
+	</li>
+	<li>
+	Fixed crash in SciTE setting a property to nil from Lua.
+	</li>
+	<li>
+	SCI_GETSELTEXT fixed to return correct length. Bug #2929441.
+	</li>
+	<li>
+	Fixed text positioning problems with selection in some circumstances.
+	</li>
+	<li>
+	Fixed text positioning problems with ligatures on GTK+.
+	</li>
+	<li>
+	Fixed problem pasting into rectangular selection with caret at bottom caused text to go from the caret down
+	rather than replacing the selection.
+	</li>
+	<li>
+	Fixed problem replacing in a rectangular selection where only the final line was changed.
+	</li>
+	<li>
+	Fixed inability to select a rectangular area using Alt+Shift+Click at both corners. Bug #2899746.
+	</li>
+	<li>
+	Fixed problem moving to start/end of a rectangular selection with left/right key. Bug #2871358.
+	</li>
+	<li>
+	Fixed problem with Select All when there's a rectangular selection. Bug #2930488.
+	</li>
+	<li>
+	Fixed SCI_LINEDUPLICATE on a rectangular selection to not produce multiple discontinuous selections.
+	</li>
+	<li>
+	Virtual space removed when performing delete word left or delete line left.
+	Virtual space converted to real space for delete word right.
+	Preserve virtual space when pressing Delete key. Bug #2882566.
+	</li>
+	<li>
+	Fixed problem where Shift+Alt+Down did not move through wrapped lines. Bug #2871749.
+	</li>
+	<li>
+	Fixed incorrect background colour when using coloured lines with virtual space. Bug #2914691.
+	</li>
+	<li>
+	Fixed blank background colour with EOLFilled style on last line. Bug #2890105.
+	</li>
+	<li>
+	Fixed problem in VB lexer with keyword at end of file. Bug #2901239.
+	</li>
+	<li>
+	Fixed SciTE bug where double clicking on a tab closed the file.
+	</li>
+	<li>
+	Fixed SciTE brace matching commands to only work when the caret is next to the brace, not when 
+	it is in virtual space. Bug #2885560.
+	</li>
+	<li>
+	Fixed SciTE on Windows Vista to access files in the Program Files directory rather than allow Windows
+	to virtualize access. Bug #2916685.
+	</li>
+	<li>
+	Fixed NSIS folder to handle keywords that start with '!'. Bugs #2872157.
+	</li>
+	<li>
+	Changed linkage of Scintilla_LinkLexers to "C" so that it can be used by clients written in C. Bug #2844718.
 	</li>
     </ul>
     <h3>
