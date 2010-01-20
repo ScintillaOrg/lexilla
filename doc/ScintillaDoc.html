@@ -747,8 +747,8 @@ struct TextToFind {
     <code>SCI_REPLACETARGET</code> or <code>SCI_REPLACETARGETRE</code>.</p>
 
     <p>Searching can be performed within the target range with <code>SCI_SEARCHINTARGET</code>,
-    which uses a counted string to allow searching for null characters. It returns the length of
-    range or -1 for failure, in which case the target is not moved. The flags used by
+    which uses a counted string to allow searching for null characters. It returns the 
+    position of the start of the matching text range or -1 for failure, in which case the target is not moved. The flags used by
     <code>SCI_SEARCHINTARGET</code> such as <code>SCFIND_MATCHCASE</code>,
     <code>SCFIND_WHOLEWORD</code>, <code>SCFIND_WORDSTART</code>, and <code>SCFIND_REGEXP</code>
     can be set with <code>SCI_SETSEARCHFLAGS</code>. <code>SCI_SEARCHINTARGET</code> may be simpler
