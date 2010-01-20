@@ -380,6 +380,9 @@
 	Retrieve the current selected text in the autocompletion list with SCI_AUTOCGETCURRENTTEXT.
 	</li>
 	<li>
+	Retrieve the name of the current lexer with SCI_GETLEXERLANGUAGE.
+	</li>
+	<li>
 	Progress 4GL lexer improves handling of comments in preprocessor declaration. Feature #2902206.
 	</li>
 	<li>
@@ -396,6 +399,9 @@
 	</li>
 	<li>
 	Fixed crash when calling SCI_STYLEGETFONT for a style which does not have a font set. Bug #2857425.
+	</li>
+	<li>
+	Fixed crash caused by not having sufficient styles allocated after choosing a lexer. Bug #2881279.
 	</li>
 	<li>
 	Fixed crash in SciTE using autocomplete word when word characters includes space. Bug #2840141.
