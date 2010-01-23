@@ -572,10 +572,10 @@ fun void SetWhitespaceFore=2084(bool useSetting, colour fore)
 fun void SetWhitespaceBack=2085(bool useSetting, colour back)
 
 # Set the size of the dots used to mark space characters.
-fun void SetWhitespaceSize=2086(int size,)
+set void SetWhitespaceSize=2086(int size,)
 
 # Get the size of the dots used to mark space characters.
-fun void GetWhitespaceSize=2087(,)
+get void GetWhitespaceSize=2087(,)
 
 # Divide each styling byte into lexical class bits (default: 5) and indicator
 # bits (default: 3). If a lexer requires more than 32 lexical states, then this
