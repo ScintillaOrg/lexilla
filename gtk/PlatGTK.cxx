@@ -1287,7 +1287,11 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 				pango_layout_set_text(layout, utfForm, len);
 			}
 			pango_layout_set_font_description(layout, PFont(font_)->pfd);
+#ifdef PANGO_VERSION
 			PangoLayoutLine *pll = pango_layout_get_line_readonly(layout,0);
+#else
+			PangoLayoutLine *pll = pango_layout_get_line(layout,0);
+#endif
 			gdk_draw_layout_line(drawable, gc, xText, ybase, pll);
 			if (useGFree) {
 				g_free(utfForm);
@@ -1594,7 +1598,11 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 				}
 				pango_layout_set_text(layout, utfForm, len);
 			}
-			PangoLayoutLine *pangoLine = pango_layout_get_line_readonly(layout, 0);
+#ifdef PANGO_VERSION
+			PangoLayoutLine *pangoLine = pango_layout_get_line_readonly(layout,0);
+#else
+			PangoLayoutLine *pangoLine = pango_layout_get_line(layout,0);
+#endif
 			pango_layout_line_get_extents(pangoLine, NULL, &pos);
 			if (useGFree) {
 				g_free(utfForm);
