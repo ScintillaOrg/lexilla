@@ -38,7 +38,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 20/January/2010 NH</p>
+    <p>Last edited 24/January/2010 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -2943,6 +2943,8 @@ struct TextToFind {
      <code>SC_EFF_QUALITY_NON_ANTIALIASED</code>,
      <code>SC_EFF_QUALITY_ANTIALIASED</code>,
      <code>SC_EFF_QUALITY_LCD_OPTIMIZED</code>.</p>
+     <p>In case it is necessary to squeeze more options into this property, only a limited number of bits defined
+     by SC_EFF_QUALITY_MASK (0xf) will be used for quality.</p>
 
     <p><b id="SCI_SETCODEPAGE">SCI_SETCODEPAGE(int codePage)</b><br />
      <b id="SCI_GETCODEPAGE">SCI_GETCODEPAGE</b><br />
@@ -3182,7 +3184,7 @@ struct TextToFind {
 
     <h2 id="Markers">Markers</h2>
 
-    <p>There are 32 markers, numbered 0 to 31, and you can assign any combination of them to each
+    <p>There are 32 markers, numbered 0 to <code>MARKER_MAX</code> (31), and you can assign any combination of them to each
     line in the document. Markers appear in the <a class="jump" href="#Margins">selection
     margin</a> to the left of the text. If the selection margin is set to zero width, the
     background colour of the whole line is changed instead. Marker numbers 25 to 31 are used by
@@ -4704,48 +4706,53 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <table cellpadding="1" cellspacing="2" border="0" summary="Fold flags">
       <tbody>
         <tr>
-          <th align="center">Value</th>
-
+          <th align="left">Symbol</th>
+          <th align="left">Value</th>
           <th align="left">Effect</th>
         </tr>
       </tbody>
 
       <tbody valign="top">
         <tr>
-          <td align="center">1</td>
-
-          <td align="left">Experimental - draw boxes if expanded</td>
+          <td align="left"></td>
+          <td align="left">1</td>
+          <td align="left">Experimental feature that has been removed.</td>
         </tr>
 
         <tr>
-          <td align="center">2</td>
+          <td align="left">SC_FOLDFLAG_LINEBEFORE_EXPANDED</td>
+          <td align="left">2</td>
 
           <td align="left">Draw above if expanded</td>
         </tr>
 
         <tr>
-          <td align="center">4</td>
+          <td align="left">SC_FOLDFLAG_LINEBEFORE_CONTRACTED</td>
+          <td align="left">4</td>
 
           <td align="left">Draw above if not expanded</td>
         </tr>
 
         <tr>
-          <td align="center">8</td>
+          <td align="left">SC_FOLDFLAG_LINEAFTER_EXPANDED</td>
+          <td align="left">8</td>
 
           <td align="left">Draw below if expanded</td>
         </tr>
 
         <tr>
-          <td align="center">16</td>
+          <td align="left">SC_FOLDFLAG_LINEAFTER_CONTRACTED</td>
+          <td align="left">16</td>
 
           <td align="left">Draw below if not expanded</td>
         </tr>
 
         <tr>
-          <td align="center">64</td>
+          <td align="left">SC_FOLDFLAG_LEVELNUMBERS</td>
+          <td align="left">64</td>
 
           <td align="left">display hexadecimal fold levels in line margin to aid debugging of
-          folding. This feature needs to be redesigned to be sensible.</td>
+          folding. The appearance of this feature may change in the future.</td>
         </tr>
       </tbody>
     </table>
@@ -5159,9 +5166,11 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <code>Fold</code>. See <code>externalLexer.cxx</code> for more.</p>
     <code><a class="message" href="#SCI_SETLEXER">SCI_SETLEXER(int lexer)</a><br />
      <a class="message" href="#SCI_GETLEXER">SCI_GETLEXER</a><br />
-     <a class="message" href="#SCI_SETLEXERLANGUAGE">SCI_SETLEXERLANGUAGE(&lt;unused&gt;, char
+     <a class="message" href="#SCI_SETLEXERLANGUAGE">SCI_SETLEXERLANGUAGE(&lt;unused&gt;, const char
     *name)</a><br />
-     <a class="message" href="#SCI_LOADLEXERLIBRARY">SCI_LOADLEXERLIBRARY(&lt;unused&gt;, char
+     <a class="message" href="#SCI_GETLEXERLANGUAGE">SCI_GETLEXERLANGUAGE(&lt;unused&gt;, char
+    *name)</a><br />
+     <a class="message" href="#SCI_LOADLEXERLIBRARY">SCI_LOADLEXERLIBRARY(&lt;unused&gt;, const char
     *path)</a><br />
      <a class="message" href="#SCI_COLOURISE">SCI_COLOURISE(int start, int end)</a><br />
      <a class="message" href="#SCI_SETPROPERTY">SCI_SETPROPERTY(const char *key, const char *value)</a><br />
@@ -5185,7 +5194,8 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     assigns unused lexer numbers to.</p>
 
     <p><b id="SCI_SETLEXERLANGUAGE">SCI_SETLEXERLANGUAGE(&lt;unused&gt;, const char *name)</b><br />
-     This message lets you select a lexer by name, and is the only method if you are using an
+    <b id="SCI_GETLEXERLANGUAGE">SCI_GETLEXERLANGUAGE(&lt;unused&gt;, char *name)</b><br />
+     <code>SCI_SETLEXERLANGUAGE</code> lets you select a lexer by name, and is the only method if you are using an
     external lexer or if you have written a lexer module for a language of your own and do not wish
     to assign it an explicit lexer number. To select an existing lexer, set <code>name</code> to
     match the (case sensitive) name given to the module, for example "ada" or "python", not "Ada"
@@ -5196,6 +5206,8 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <p>To test if your lexer assignment worked, use <a class="message"
     href="#SCI_GETLEXER"><code>SCI_GETLEXER</code></a> before and after setting the new lexer to
     see if the lexer number changed.</p>
+
+    <p><code>SCI_GETLEXERLANGUAGE</code> retrieves the name of the lexer.</p>
 
     <p><b id="SCI_LOADLEXERLIBRARY">SCI_LOADLEXERLIBRARY(&lt;unused&gt;, const char *path)</b><br />
      Load a lexer implemented in a shared library. This is a .so file on GTK+/Linux or a .DLL file on Windows.
