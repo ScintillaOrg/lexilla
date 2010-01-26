@@ -413,7 +413,9 @@ BreakFinder::BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posL
 	}
 
 	if (breakForSelection) {
-		SelectionSegment segmentLine(SelectionPosition(posLineStart), SelectionPosition(posLineStart + lineEnd));
+		SelectionPosition posStart(posLineStart);
+		SelectionPosition posEnd(posLineStart + lineEnd);
+		SelectionSegment segmentLine(posStart, posEnd);
 		for (size_t r=0; r<ll->psel->Count(); r++) {
 			SelectionSegment portion = ll->psel->Range(r).Intersect(segmentLine);
 			if (!(portion.start == portion.end)) {
