@@ -297,7 +297,7 @@
     languages, and three independent indicators so that, for example, syntax errors, deprecated
     names and bad indentation could all be displayed at once. The number of bits used for styles
     can be altered with <a class="message"
-    href="#SCI_SETSTYLEBITS"><code>SCI_SETSTYLEBITS</code></a> up to a maximum of 7 bits.
+    href="#SCI_SETSTYLEBITS"><code>SCI_SETSTYLEBITS</code></a> up to a maximum of 8 bits.
     The remaining bits can be used for indicators.</p>
 
     <p>In this document, 'character' normally refers to a byte even when multi-byte characters are used.
@@ -483,7 +483,7 @@
     <p><b id="SCI_SETSTYLEBITS">SCI_SETSTYLEBITS(int bits)</b><br />
      <b id="SCI_GETSTYLEBITS">SCI_GETSTYLEBITS</b><br />
      This pair of routines sets and reads back the number of bits in each cell to use for styling,
-    to a maximum of 7 style bits. The remaining bits can be used as indicators. The standard
+    to a maximum of 8 style bits. The remaining bits can be used as indicators. The standard
     setting is <code>SCI_SETSTYLEBITS(5)</code>.
     The number of styling bits needed by the current lexer can be found with
     <a class="message" href="#SCI_GETSTYLEBITSNEEDED">SCI_GETSTYLEBITSNEEDED</a>.</p>
@@ -3674,7 +3674,7 @@ struct TextToFind {
         when you are done.</p>
 
     <p>The number of bits used for styles can be altered with <a class="message"
-    href="#SCI_SETSTYLEBITS"><code>SCI_SETSTYLEBITS</code></a> from 0 to 7 bits. The remaining bits
+    href="#SCI_SETSTYLEBITS"><code>SCI_SETSTYLEBITS</code></a> from 0 to 8 bits. The remaining bits
     can be used for indicators, so there can be from 1 to 8 indicators. However, the
     <code>INDIC*_MASK</code> constants defined in <code>Scintilla.h</code> all assume 5 bits of
     styling information and 3 indicators. If you use a different arrangement, you must define your
