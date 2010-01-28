@@ -372,8 +372,8 @@ class SurfaceImpl : public Surface {
 	void SetFont(Font &font_);
 
 	// Private so SurfaceImpl objects can not be copied
-	SurfaceImpl(const SurfaceImpl &) : Surface() {}
-	SurfaceImpl &operator=(const SurfaceImpl &) { return *this; }
+	SurfaceImpl(const SurfaceImpl &);
+	SurfaceImpl &operator=(const SurfaceImpl &);
 public:
 	SurfaceImpl();
 	virtual ~SurfaceImpl();

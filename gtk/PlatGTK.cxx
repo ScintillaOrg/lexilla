@@ -352,6 +352,7 @@ static void GenerateFontSpecStrings(const char *fontName, int characterSet,
 		char tmp[300];
 		char *d1 = NULL, *d2 = NULL, *d3 = NULL;
 		strncpy(tmp, fontName, sizeof(tmp) - 1);
+		tmp[sizeof(tmp) - 1] = '\0';
 		d1 = strchr(tmp, '-');
 		// we know the first dash exists
 		d2 = strchr(d1 + 1, '-');
@@ -1994,9 +1995,7 @@ class ListBoxX : public ListBox {
 #if GTK_MAJOR_VERSION >= 2
         GtkCellRenderer* pixbuf_renderer;
 #endif
-	int lineHeight;
 	XPMSet xset;
-	bool unicodeMode;
 	int desiredVisibleRows;
 	unsigned int maxItemCharacters;
 	unsigned int aveCharWidth;
@@ -2004,8 +2003,9 @@ public:
 	CallBackAction doubleClickAction;
 	void *doubleClickActionData;
 
-	ListBoxX() : list(0), pixhash(NULL), desiredVisibleRows(5), maxItemCharacters(0),
-		doubleClickAction(NULL), doubleClickActionData(NULL) {
+	ListBoxX() : list(0), pixhash(NULL),
+		desiredVisibleRows(5), maxItemCharacters(0),
+		aveCharWidth(1), doubleClickAction(NULL), doubleClickActionData(NULL) {
 #if GTK_MAJOR_VERSION < 2
 			current = 0;
 #endif

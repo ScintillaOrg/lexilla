@@ -176,9 +176,9 @@ class ScintillaWin :
 	static HINSTANCE hInstance;
 
 	ScintillaWin(HWND hwnd);
-	ScintillaWin(const ScintillaWin &) : ScintillaBase() {}
+	ScintillaWin(const ScintillaWin &);
 	virtual ~ScintillaWin();
-	ScintillaWin &operator=(const ScintillaWin &) { return *this; }
+	ScintillaWin &operator=(const ScintillaWin &);
 
 	virtual void Initialise();
 	virtual void Finalise();

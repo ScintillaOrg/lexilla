@@ -156,8 +156,8 @@ class ScintillaGTK : public ScintillaBase {
 	GdkRegion *rgnUpdate;
 
 	// Private so ScintillaGTK objects can not be copied
-	ScintillaGTK(const ScintillaGTK &) : ScintillaBase() {}
-	ScintillaGTK &operator=(const ScintillaGTK &) { return * this; }
+	ScintillaGTK(const ScintillaGTK &);
+	ScintillaGTK &operator=(const ScintillaGTK &);
 
 public:
 	ScintillaGTK(_ScintillaObject *sci_);

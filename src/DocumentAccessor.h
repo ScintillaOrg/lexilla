@@ -17,8 +17,8 @@ class Document;
 
 class DocumentAccessor : public Accessor {
 	// Private so DocumentAccessor objects can not be copied
-	DocumentAccessor(const DocumentAccessor &source) : Accessor(), props(source.props) {}
-	DocumentAccessor &operator=(const DocumentAccessor &) { return *this; }
+	DocumentAccessor(const DocumentAccessor &source);
+	DocumentAccessor &operator=(const DocumentAccessor &);
 
 protected:
 	Document *pdoc;
