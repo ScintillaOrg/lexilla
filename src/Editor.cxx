@@ -706,6 +706,18 @@ void Editor::SetRectangularRange() {
 	}
 }
 
+void Editor::ThinRectangularRange() {
+	if (sel.IsRectangular()) {
+		sel.selType = Selection::selThin;
+		if (sel.Rectangular().caret < sel.Rectangular().anchor) {
+			sel.Rectangular() = SelectionRange(sel.Range(sel.Count()-1).caret, sel.Range(0).anchor);
+		} else {
+			sel.Rectangular() = SelectionRange(sel.Range(sel.Count()-1).anchor, sel.Range(0).caret);
+		}
+		SetRectangularRange();
+	}
+}
+
 void Editor::InvalidateSelection(SelectionRange newMain, bool invalidateWholeSelection) {
 	if (sel.Count() > 1 || !(sel.RangeMain().anchor == newMain.anchor) || sel.IsRectangular()) {
 		invalidateWholeSelection = true;
@@ -3724,10 +3736,7 @@ void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 	if (wrapState != eWrapNone) {
 		SetScrollBars();
 	}
-	if (sel.IsRectangular()) {
-		sel.selType = Selection::selThin;
-		sel.Rectangular() = SelectionRange(sel.Rectangular().caret, sel.Range(0).anchor);
-	}
+	ThinRectangularRange();
 	// If in wrap mode rewrap current line so EnsureCaretVisible has accurate information
 	EnsureCaretVisible();
 	// Avoid blinking during rapid typing:
@@ -3788,6 +3797,7 @@ void Editor::ClearSelection() {
 			}
 		}
 	}
+	ThinRectangularRange();
 	sel.RemoveDuplicates();
 	ClaimSelection();
 }
@@ -3985,11 +3995,6 @@ void Editor::DelCharBack(bool allowLineStartDeletion) {
 		}
 	} else {
 		ClearSelection();
-		if (sel.IsRectangular()) {
-			sel.selType = Selection::selThin;
-			sel.Rectangular() = SelectionRange(sel.Rectangular().caret, sel.Range(0).anchor);
-		}
-		//SetEmptySelection(sel.MainCaret());
 	}
 	sel.RemoveDuplicates();
 	// Avoid blinking during rapid typing:
@@ -4590,8 +4595,14 @@ void Editor::NewLine() {
 }
 
 void Editor::CursorUpOrDown(int direction, Selection::selTypes selt) {
-	SelectionPosition caretToUse = sel.IsRectangular() ?
-		sel.Rectangular().caret : sel.Range(sel.Main()).caret;
+	SelectionPosition caretToUse = sel.Range(sel.Main()).caret;
+	if (sel.IsRectangular()) {
+		if (selt ==  Selection::noSel) {
+			caretToUse = (direction > 0) ? sel.Limits().end : sel.Limits().start;
+		} else {
+			caretToUse = sel.Rectangular().caret;
+		}
+	}
 	Point pt = LocationFromPosition(caretToUse);
 	int lineDoc = pdoc->LineFromPosition(caretToUse.Position());
 	Point ptStartLine = LocationFromPosition(pdoc->LineStart(lineDoc));
@@ -4708,15 +4719,16 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		break;
 	case SCI_CHARLEFT:
 		if (SelectionEmpty() || sel.MoveExtends()) {
-			if (pdoc->IsLineEndPosition(sel.MainCaret()) && sel.RangeMain().caret.VirtualSpace()) {
+			if ((sel.Count() == 1) && pdoc->IsLineEndPosition(sel.MainCaret()) && sel.RangeMain().caret.VirtualSpace()) {
 				SelectionPosition spCaret = sel.RangeMain().caret;
 				spCaret.SetVirtualSpace(spCaret.VirtualSpace() - 1);
 				MovePositionTo(spCaret);
 			} else {
-				MovePositionTo(MovePositionSoVisible(SelectionPosition(sel.MainCaret() - 1), -1));
+				MovePositionTo(MovePositionSoVisible(
+					SelectionPosition((sel.LimitsForRectangularElseMain().start).Position() - 1), -1));
 			}
 		} else {
-			MovePositionTo(sel.IsRectangular() ? sel.Limits().start : sel.RangeMain().Start());
+			MovePositionTo(sel.LimitsForRectangularElseMain().start);
 		}
 		SetLastXChosen();
 		break;
@@ -4747,10 +4759,11 @@ int Editor::KeyCommand(unsigned int iMessage) {
 				spCaret.SetVirtualSpace(spCaret.VirtualSpace() + 1);
 				MovePositionTo(spCaret);
 			} else {
-				MovePositionTo(MovePositionSoVisible(SelectionPosition(sel.MainCaret() + 1), 1));
+				MovePositionTo(MovePositionSoVisible(
+					SelectionPosition((sel.LimitsForRectangularElseMain().end).Position() + 1), 1));
 			}
 		} else {
-			MovePositionTo(sel.IsRectangular() ? sel.Limits().end : sel.RangeMain().End());
+			MovePositionTo(sel.LimitsForRectangularElseMain().end);
 		}
 		SetLastXChosen();
 		break;

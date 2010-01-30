@@ -192,6 +192,14 @@ SelectionSegment Selection::Limits() const {
 	}
 }
 
+SelectionSegment Selection::LimitsForRectangularElseMain() const {
+	if (IsRectangular()) {
+		return Limits();
+	} else {
+		return SelectionSegment(ranges[mainRange].caret, ranges[mainRange].anchor);
+	}
+}
+
 size_t Selection::Count() const {
 	return ranges.size();
 }
