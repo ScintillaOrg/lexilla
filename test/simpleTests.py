@@ -697,6 +697,29 @@ class TestIndicators(unittest.TestCase):
 		self.assertEquals(self.ed.IndicGetStyle(0), 2)
 		self.assertEquals(self.ed.IndicGetFore(0), 0xff0080)
 
+class TestScrolling(unittest.TestCase):
+
+	def setUp(self):
+		self.xite = XiteWin.xiteFrame
+		self.ed = self.xite.ed
+		self.ed.ClearAll()
+		self.ed.EmptyUndoBuffer()
+		# 150 should be enough lines
+		self.ed.InsertText(0, b"a\n" * 150)
+
+	def testTop(self):
+		self.ed.GotoLine(0)
+		self.assertEquals(self.ed.FirstVisibleLine, 0)
+
+	def testLineScroll(self):
+		self.ed.GotoLine(0)
+		self.ed.LineScroll(0, 3)
+		self.assertEquals(self.ed.FirstVisibleLine, 3)
+
+	def testVisibleLine(self):
+		self.ed.FirstVisibleLine = 7
+		self.assertEquals(self.ed.FirstVisibleLine, 7)
+
 class TestSearch(unittest.TestCase):
 
 	def setUp(self):

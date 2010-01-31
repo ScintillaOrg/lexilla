@@ -6499,6 +6499,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETFIRSTVISIBLELINE:
 		return topLine;
 
+	case SCI_SETFIRSTVISIBLELINE:
+		ScrollTo(wParam);
+		break;
+
 	case SCI_GETLINE: {	// Risk of overwriting the end of the buffer
 			int lineStart = pdoc->LineStart(wParam);
 			int lineEnd = pdoc->LineStart(wParam + 1);

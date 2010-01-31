@@ -485,6 +485,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_EFF_QUALITY_LCD_OPTIMIZED 3
 #define SCI_SETFONTQUALITY 2611
 #define SCI_GETFONTQUALITY 2612
+#define SCI_SETFIRSTVISIBLELINE 2613
 #define SCI_TARGETFROMSELECTION 2287
 #define SCI_LINESJOIN 2288
 #define SCI_LINESSPLIT 2289
