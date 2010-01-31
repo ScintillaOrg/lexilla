@@ -1015,8 +1015,8 @@ struct TextToFind {
     <code><a class="message" href="#SCI_GETTEXTLENGTH">SCI_GETTEXTLENGTH</a><br />
      <a class="message" href="#SCI_GETLENGTH">SCI_GETLENGTH</a><br />
      <a class="message" href="#SCI_GETLINECOUNT">SCI_GETLINECOUNT</a><br />
-     <a class="message" href="#SCI_GETFIRSTVISIBLELINE">SCI_GETFIRSTVISIBLELINE</a><br />
      <a class="message" href="#SCI_SETFIRSTVISIBLELINE">SCI_SETFIRSTVISIBLELINE(int lineDisplay)</a><br />
+     <a class="message" href="#SCI_GETFIRSTVISIBLELINE">SCI_GETFIRSTVISIBLELINE</a><br />
      <a class="message" href="#SCI_LINESONSCREEN">SCI_LINESONSCREEN</a><br />
      <a class="message" href="#SCI_GETMODIFY">SCI_GETMODIFY</a><br />
      <a class="message" href="#SCI_SETSEL">SCI_SETSEL(int anchorPos, int currentPos)</a><br />
@@ -1075,8 +1075,8 @@ struct TextToFind {
      This returns the number of lines in the document. An empty document contains 1 line. A
     document holding only an end of line sequence has 2 lines.</p>
 
-    <p><b id="SCI_GETFIRSTVISIBLELINE">SCI_GETFIRSTVISIBLELINE</b><br />
-     <b id="SCI_SETFIRSTVISIBLELINE">SCI_SETFIRSTVISIBLELINE(int lineDisplay)</b><br />
+    <p><b id="SCI_SETFIRSTVISIBLELINE">SCI_SETFIRSTVISIBLELINE(int lineDisplay)</b><br />
+     <b id="SCI_GETFIRSTVISIBLELINE">SCI_GETFIRSTVISIBLELINE</b><br />
      These messages retrieve and set the line number of the first visible line in the Scintilla view. The first line
     in the document is numbered 0. The value is a visible line rather than a document line.</p>
 
