@@ -1150,4 +1150,7 @@ class TestAutoComplete(unittest.TestCase):
 	#~ nf = x + "\\" + n
 	#~ print os.access(nf, os.R_OK), nf
 if __name__ == '__main__':
-	XiteWin.main("simpleTests")
+	uu = XiteWin.main("simpleTests")
+	#~ for x in sorted(uu.keys()):
+		#~ print(x, uu[x])
+	#~ print()
