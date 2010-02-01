@@ -1221,7 +1221,7 @@ set void SetFontQuality=2611(int fontQuality,)
 get int GetFontQuality=2612(,)
 
 # Scroll so that a display line is at the top of the display.
-set int SetFirstVisibleLine=2613(int lineDisplay,)
+set void SetFirstVisibleLine=2613(int lineDisplay,)
 
 # Make the target range start and end be the same as the selection range start and end.
 fun void TargetFromSelection=2287(,)
