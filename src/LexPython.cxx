@@ -158,6 +158,10 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 	if (styler.GetPropertyInt("lexer.python.strings.b", 1))
 		allowedLiterals = static_cast<literalsAllowed>(allowedLiterals | litB);
 
+	// property lexer.python.strings.over.newline
+	//      Set to 1 to allow strings to span newline characters.
+	bool stringsOverNewline = styler.GetPropertyInt("lexer.python.strings.over.newline") != 0;
+
 	initStyle = initStyle & 31;
 	if (initStyle == SCE_P_STRINGEOL) {
 		initStyle = SCE_P_DEFAULT;
@@ -204,7 +208,7 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 			}
 			lineCurrent++;
 			if ((sc.state == SCE_P_STRING) || (sc.state == SCE_P_CHARACTER)) {
-				if (inContinuedString) {
+				if (inContinuedString || stringsOverNewline) {
 					inContinuedString = false;
 				} else {
 					sc.ChangeState(SCE_P_STRINGEOL);
