@@ -6533,6 +6533,8 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 				nEnd = pdoc->Length();
 			if (nStart < 0)
 				nStart = nEnd; 	// Remove selection
+			InvalidateSelection(SelectionRange(nStart, nEnd));
+			sel.Clear();
 			sel.selType = Selection::selStream;
 			SetSelection(nEnd, nStart);
 			EnsureCaretVisible();
