@@ -359,7 +359,7 @@
     </h3>
     <ul>
 	<li>
-	Released sometime in 2010.
+	Released 14 February 2010.
 	</li>
 	<li>
 	Added SCI_SETFIRSTVISIBLELINE to match SCI_GETFIRSTVISIBLELINE.
@@ -371,6 +371,11 @@
 	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2942448&group_id=2439">Bug #2942448.</a>
 	</li>
 	<li>
+	Python lexer extended with lexer.python.strings.over.newline option that allows non-triple-quoted strings to extend
+	past line ends. This allows use of the Ren'Py language.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=352439&aid=2945550&group_id=2439">Feature #2945550.</a>
+	</li>
+	<li>
 	Fixed bugs with cursor movement after deleting a rectangular selection.
 	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2942131&group_id=2439">Bug #2942131.</a>
 	</li>
@@ -380,6 +385,15 @@
 	</li>
 	<li>
 	Fixed SciTE on GTK+ bug where running a tool made the user interface completely unresponsive.
+	</li>
+	<li>
+	Fixed bug where calling SCI_SETSEL when there is a rectangular selection left
+	the additional selections selected.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2947064&group_id=2439">Bug #2947064.</a>
+	</li>
+	<li>
+	Fixed macro recording bug where not all bytes in multi-byte character insertions were reported through
+	SCI_REPLACESEL.
 	</li>
     </ul>
     <h3>
@@ -446,7 +460,7 @@
 	Fixed bug with handling upper-case file extensions SciTE on GTK+.
 	</li>
 	<li>
-	Fixed SciTE loading files from sessions with folded folds where it would not 
+	Fixed SciTE loading files from sessions with folded folds where it would not
 	be scrolled to the correct location.
 	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2882775&group_id=2439">Bug #2882775.</a>
 	</li>
@@ -526,7 +540,7 @@
 	Fixed SciTE bug where double clicking on a tab closed the file.
 	</li>
 	<li>
-	Fixed SciTE brace matching commands to only work when the caret is next to the brace, not when 
+	Fixed SciTE brace matching commands to only work when the caret is next to the brace, not when
 	it is in virtual space.
 	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2885560&group_id=2439">Bug #2885560.</a>
 	</li>
@@ -606,7 +620,7 @@
 	Resource leak fixed in SciTE for Windows when printing fails. <a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2816524&group_id=2439">Bug #2816524.</a>
 	</li>
 	<li>
-	Bug fixed on Windows where the system caret was destroyed during destruction when another window 
+	Bug fixed on Windows where the system caret was destroyed during destruction when another window
 	was using the system caret. <a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2830223&group_id=2439">Bug #2830223.</a>
 	</li>
 	<li>
@@ -641,9 +655,9 @@
 	</li>
 	<li>
 	Memory exhaustion and other exceptions handled by placing an error value into the
-	status property rather than crashing. 
+	status property rather than crashing.
 	Scintilla now builds with exception handling enabled and requires exception handling to be enabled. <br />
-	This is a major change and application developers should consider how they will deal with Scintilla exhausting 
+	This is a major change and application developers should consider how they will deal with Scintilla exhausting
 	memory since Scintilla may not be in a stable state.
 	</li>
 	<li>
@@ -679,7 +693,7 @@
 	APIs added for finding the character at a point rather than an inter-character position. <a href="https://sourceforge.net/tracker/?func=detail&atid=352439&aid=2646738&group_id=2439">Feature #2646738.</a>
 	</li>
 	<li>
-	A new marker SC_MARK_BACKGROUND_UNDERLINE is drawn in the text area as an underline 
+	A new marker SC_MARK_BACKGROUND_UNDERLINE is drawn in the text area as an underline
 	the full width of the window.
 	</li>
 	<li>
@@ -873,7 +887,7 @@
 	to libraries like regular expression libraries.
 	</li>
 	<li>
-	Scintilla on Windows can interpret keys as Unicode even when a narrow character 
+	Scintilla on Windows can interpret keys as Unicode even when a narrow character
 	window with SCI_SETKEYSUNICODE.
 	</li>
 	<li>
@@ -898,7 +912,7 @@
 	CSS lexer updated and works with non-ASCII.
 	</li>
 	<li>
-	Diff lexer adds style for changed lines, handles subversion diffs better and 
+	Diff lexer adds style for changed lines, handles subversion diffs better and
 	fixes styling and folding for lines containing chunk dividers ("---").
 	</li>
 	<li>
@@ -908,7 +922,7 @@
 	Haskell lexer allows hexadecimal literals.
 	</li>
 	<li>
-	HTML lexer improves PHP and JavaScript folding. 
+	HTML lexer improves PHP and JavaScript folding.
 	PHP heredocs, nowdocs, strings and comments processed more accurately.
 	Internet Explorer's non-standard &gt;comment&lt; tag supported.
 	Script recognition in XML can be controlled with lexer.xml.allow.scripts property.
@@ -953,7 +967,7 @@
 	SciTE bug fixed where eol.mode not used for initial buffer.
 	</li>
 	<li>
-	SciTE bug fixed where a file could be saved as the same name as another 
+	SciTE bug fixed where a file could be saved as the same name as another
 	buffer leading to confusing behaviour.
 	</li>
 	<li>
