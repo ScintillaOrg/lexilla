@@ -850,6 +850,12 @@ int Editor::MovePositionTo(SelectionPosition newPos, Selection::selTypes selt, b
 	int delta = newPos.Position() - sel.MainCaret();
 	newPos = ClampPositionIntoDocument(newPos);
 	newPos = MovePositionOutsideChar(newPos, delta);
+	if (!multipleSelection && sel.IsRectangular() && (selt == Selection::selStream)) {
+		// Can't turn into multiple selection so clear additional selections
+		InvalidateSelection(SelectionRange(newPos), true);
+		SelectionRange rangeMain = sel.RangeMain();
+		sel.SetSelection(rangeMain);
+	}
 	if (!sel.IsRectangular() && (selt == Selection::selRectangle)) {
 		// Switching to rectangular
 		SelectionRange rangeMain = sel.RangeMain();
