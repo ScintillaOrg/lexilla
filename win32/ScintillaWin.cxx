@@ -483,7 +483,7 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 		hRgnUpdate = 0;
 	}
 
-	if(!IsOcxCtrl)
+	if (!IsOcxCtrl)
 		::EndPaint(MainHWND(), pps);
 	if (paintState == paintAbandoned) {
 		// Painting area was insufficient to cover new styling or brace highlight positions
@@ -685,7 +685,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		case SC_WIN_IDLE:
 			// wParam=dwTickCountInitial, or 0 to initialize.  lParam=bSkipUserInputTest
 			if (idler.state) {
-				if (lParam || (WAIT_TIMEOUT==MsgWaitForMultipleObjects(0,0,0,0, QS_INPUT|QS_HOTKEY))) {
+				if (lParam || (WAIT_TIMEOUT == MsgWaitForMultipleObjects(0, 0, 0, 0, QS_INPUT|QS_HOTKEY))) {
 					if (Idle()) {
 						// User input was given priority above, but all events do get a turn.  Other
 						// messages, notifications, etc. will get interleaved with the idle messages.
@@ -852,7 +852,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				HWND wThis = MainHWND();
 				HWND wCT = reinterpret_cast<HWND>(ct.wCallTip.GetID());
 				if (!wParam ||
-					!(::IsChild(wThis,wOther) || (wOther == wCT))) {
+					!(::IsChild(wThis, wOther) || (wOther == wCT))) {
 					SetFocusState(false);
 					DestroySystemCaret();
 				}
@@ -1028,14 +1028,14 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 #ifdef SCI_LEXER
 		case SCI_LOADLEXERLIBRARY:
-			LexerManager::GetInstance()->Load(reinterpret_cast<const char*>(lParam));
+			LexerManager::GetInstance()->Load(reinterpret_cast<const char *>(lParam));
 			break;
 #endif
 
 		default:
 			return ScintillaBase::WndProc(iMessage, wParam, lParam);
 		}
-	} catch (std::bad_alloc&) {
+	} catch (std::bad_alloc &) {
 		errorStatus = SC_STATUS_BADALLOC;
 	} catch (...) {
 		errorStatus = SC_STATUS_FAILURE;
@@ -1154,7 +1154,7 @@ bool ScintillaWin::GetScrollInfo(int nBar, LPSCROLLINFO lpsi) {
 // Change the scroll position but avoid repaint if changing to same value
 void ScintillaWin::ChangeScrollPos(int barType, int pos) {
 	SCROLLINFO sci = {
-		sizeof(sci),0,0,0,0,0,0
+		sizeof(sci), 0, 0, 0, 0, 0, 0
 	};
 	sci.fMask = SIF_POS;
 	GetScrollInfo(barType, &sci);
@@ -1176,7 +1176,7 @@ void ScintillaWin::SetHorizontalScrollPos() {
 bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
 	bool modified = false;
 	SCROLLINFO sci = {
-		sizeof(sci),0,0,0,0,0,0
+		sizeof(sci), 0, 0, 0, 0, 0, 0
 	};
 	sci.fMask = SIF_PAGE | SIF_RANGE;
 	GetScrollInfo(SB_VERT, &sci);
@@ -1576,7 +1576,7 @@ FormatEnumerator::FormatEnumerator(int pos_, CLIPFORMAT formats_[], int formatsL
 	ref = 0;   // First QI adds first reference...
 	pos = pos_;
 	formatsLen = formatsLen_;
-	for (int i=0;i<formatsLen;i++)
+	for (int i=0; i<formatsLen; i++)
 		formats[i] = formats_[i];
 }
 
@@ -1699,7 +1699,7 @@ STDMETHODIMP DataObject_EnumFormatEtc(DataObject *pd, DWORD dwDirection, IEnumFO
 		}
 		return FormatEnumerator_QueryInterface(pfe, IID_IEnumFORMATETC,
 											   reinterpret_cast<void **>(ppEnum));
-	} catch (std::bad_alloc&) {
+	} catch (std::bad_alloc &) {
 		pd->sci->errorStatus = SC_STATUS_BADALLOC;
 		return E_OUTOFMEMORY;
 	} catch (...) {
@@ -1829,7 +1829,7 @@ void ScintillaWin::ImeStartComposition() {
 			// Since the style creation code has been made platform independent,
 			// The logfont for the IME is recreated here.
 			int styleHere = (pdoc->StyleAt(sel.MainCaret())) & 31;
-			LOGFONTA lf = {0,0,0,0,0,0,0,0,0,0,0,0,0, ""};
+			LOGFONTA lf = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ""};
 			int sizeZoomed = vs.styles[styleHere].size + vs.zoomLevel;
 			if (sizeZoomed <= 2)	// Hangs if sizeZoomed <= 1
 				sizeZoomed = 2;
@@ -1865,7 +1865,7 @@ void ScintillaWin::AddCharBytes(char b0, char b1) {
 
 	int inputCodePage = InputCodePage();
 	if (inputCodePage && IsUnicodeMode()) {
-		char utfval[4]="\0\0\0";
+		char utfval[4] = "\0\0\0";
 		char ansiChars[3];
 		wchar_t wcs[2];
 		if (b0) {	// Two bytes from IME
@@ -2192,7 +2192,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 
 		SetDragPosition(SelectionPosition(invalidPosition));
 
-		STGMEDIUM medium={0,{0},0};
+		STGMEDIUM medium = {0, {0}, 0};
 
 		char *data = 0;
 		bool dataAllocated = false;
@@ -2244,7 +2244,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 
 		POINT rpt = {pt.x, pt.y};
 		::ScreenToClient(MainHWND(), &rpt);
-		SelectionPosition movePos = SPositionFromLocation(Point(rpt.x, rpt.y), false, false, UserVirtualSpace()); 
+		SelectionPosition movePos = SPositionFromLocation(Point(rpt.x, rpt.y), false, false, UserVirtualSpace());
 
 		DropAt(movePos, data, *pdwEffect == DROPEFFECT_MOVE, hrRectangular == S_OK);
 
@@ -2475,7 +2475,7 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
 				sciThis->CallTipClick();
 				return 0;
 			} else if (iMessage == WM_SETCURSOR) {
-				::SetCursor(::LoadCursor(NULL,IDC_ARROW));
+				::SetCursor(::LoadCursor(NULL, IDC_ARROW));
 				return 0;
 			} else if (iMessage == WM_NCHITTEST) {
 				return HTCAPTION;
@@ -2518,7 +2518,7 @@ sptr_t PASCAL ScintillaWin::SWndProc(
 				sci = new ScintillaWin(hWnd);
 				SetWindowPointer(hWnd, sci);
 				return sci->WndProc(iMessage, wParam, lParam);
-			} 
+			}
 		} catch (...) {
 		}
 		return ::DefWindowProc(hWnd, iMessage, wParam, lParam);
