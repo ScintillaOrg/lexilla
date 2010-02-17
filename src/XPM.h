@@ -30,10 +30,10 @@ class XPM {
 	ColourPair *colourCodeTable[256];
 public:
 	XPM(const char *textForm);
-	XPM(const char * const *linesForm);
+	XPM(const char *const *linesForm);
 	~XPM();
 	void Init(const char *textForm);
-	void Init(const char * const *linesForm);
+	void Init(const char *const *linesForm);
 	void Clear();
 	/// Similar to same named method in ViewStyle:
 	void RefreshColourPalette(Palette &pal, bool want);

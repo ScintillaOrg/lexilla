@@ -56,7 +56,7 @@ ScintillaBase::ScintillaBase() {
 	lexLanguage = SCLEX_CONTAINER;
 	performingStyle = false;
 	lexCurrent = 0;
-	for (int wl = 0;wl < numWordLists;wl++)
+	for (int wl = 0; wl < numWordLists; wl++)
 		keyWordLists[wl] = new WordList;
 	keyWordLists[numWordLists] = 0;
 #endif
@@ -64,7 +64,7 @@ ScintillaBase::ScintillaBase() {
 
 ScintillaBase::~ScintillaBase() {
 #ifdef SCI_LEXER
-	for (int wl = 0;wl < numWordLists;wl++)
+	for (int wl = 0; wl < numWordLists; wl++)
 		delete keyWordLists[wl];
 #endif
 }
@@ -202,8 +202,8 @@ int ScintillaBase::KeyCommand(unsigned int iMessage) {
 	return Editor::KeyCommand(iMessage);
 }
 
-void ScintillaBase::AutoCompleteDoubleClick(void* p) {
-	ScintillaBase* sci = reinterpret_cast<ScintillaBase*>(p);
+void ScintillaBase::AutoCompleteDoubleClick(void *p) {
+	ScintillaBase *sci = reinterpret_cast<ScintillaBase *>(p);
 	sci->AutoCompleteCompleted();
 }
 

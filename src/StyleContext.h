@@ -16,7 +16,7 @@ namespace Scintilla {
 class StyleContext {
 	Accessor &styler;
 	unsigned int endPos;
-	StyleContext& operator=(const StyleContext&);
+	StyleContext &operator=(const StyleContext &);
 	void GetNextChar(unsigned int pos) {
 		chNext = static_cast<unsigned char>(styler.SafeGetCharAt(pos+1));
 		if (styler.IsLeadByte(static_cast<char>(chNext))) {

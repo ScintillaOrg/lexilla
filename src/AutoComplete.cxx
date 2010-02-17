@@ -47,8 +47,8 @@ bool AutoComplete::Active() {
 	return active;
 }
 
-void AutoComplete::Start(Window &parent, int ctrlID, 
-	int position, Point location, int startLen_, 
+void AutoComplete::Start(Window &parent, int ctrlID,
+	int position, Point location, int startLen_,
 	int lineHeight, bool unicodeMode) {
 	if (active) {
 		Cancel();

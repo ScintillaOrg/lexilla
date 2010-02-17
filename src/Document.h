@@ -81,17 +81,17 @@ class Document;
  */
 class RegexSearchBase {
 public:
-	virtual ~RegexSearchBase(){}
+	virtual ~RegexSearchBase() {}
 
-	virtual long FindText(Document* doc, int minPos, int maxPos, const char *s,
+	virtual long FindText(Document *doc, int minPos, int maxPos, const char *s,
                         bool caseSensitive, bool word, bool wordStart, int flags, int *length) = 0;
 
 	///@return String with the substitutions, must remain valid until the next call or destruction
-	virtual const char *SubstituteByPosition(Document* doc, const char *text, int *length) = 0;
+	virtual const char *SubstituteByPosition(Document *doc, const char *text, int *length) = 0;
 };
 
 /// Factory function for RegexSearchBase
-extern RegexSearchBase* CreateRegexSearch(CharClassify *charClassTable);
+extern RegexSearchBase *CreateRegexSearch(CharClassify *charClassTable);
 
 struct StyledText {
 	size_t length;
@@ -99,7 +99,7 @@ struct StyledText {
 	bool multipleStyles;
 	size_t style;
 	const unsigned char *styles;
-	StyledText(	size_t length_, const char *text_, bool multipleStyles_, int style_, const unsigned char *styles_) : 
+	StyledText(size_t length_, const char *text_, bool multipleStyles_, int style_, const unsigned char *styles_) :
 		length(length_), text(text_), multipleStyles(multipleStyles_), style(style_), styles(styles_) {
 	}
 	// Return number of bytes from start to before '\n' or end of text.
@@ -147,11 +147,11 @@ private:
 	int lenWatchers;
 
 	// ldSize is not real data - it is for dimensions and loops
-	enum lineData { ldMarkers, ldLevels, ldState, ldMargin, ldAnnotation, ldSize };	
+	enum lineData { ldMarkers, ldLevels, ldState, ldMargin, ldAnnotation, ldSize };
 	PerLine *perLineData[ldSize];
 
 	bool matchesValid;
-	RegexSearchBase* regex;
+	RegexSearchBase *regex;
 
 public:
 	int stylingBits;
@@ -324,7 +324,7 @@ class UndoGroup {
 	Document *pdoc;
 	bool groupNeeded;
 public:
-	UndoGroup(Document *pdoc_, bool groupNeeded_=true) : 
+	UndoGroup(Document *pdoc_, bool groupNeeded_=true) :
 		pdoc(pdoc_), groupNeeded(groupNeeded_) {
 		if (groupNeeded) {
 			pdoc->BeginUndoAction();

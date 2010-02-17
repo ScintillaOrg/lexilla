@@ -338,7 +338,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
         PRectangle rcLine, LineLayout *ll, int subLine);
 	void DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart,
 		PRectangle rcLine, LineLayout *ll, int subLine);
-	void DrawBlockCaret(Surface *surface, ViewStyle &vsDraw, LineLayout *ll, int subLine, 
+	void DrawBlockCaret(Surface *surface, ViewStyle &vsDraw, LineLayout *ll, int subLine,
 		int xStart, int offset, int posCaret, PRectangle rcCaret, ColourAllocated caretColour);
 	void DrawCarets(Surface *surface, ViewStyle &vsDraw, int line, int xStart,
 		PRectangle rcLine, LineLayout *ll, int subLine);
@@ -461,7 +461,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	void SetAnnotationHeights(int start, int end);
 	void SetDocPointer(Document *document);
-	
+
 	void SetAnnotationVisible(int visible);
 
 	void Expand(int &line, bool doExpand);
@@ -472,7 +472,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool PositionIsHotspot(int position);
 	bool PointIsHotspot(Point pt);
 	void SetHotSpotRange(Point *pt);
-	void GetHotSpotRange(int& hsStart, int& hsEnd);
+	void GetHotSpotRange(int &hsStart, int &hsEnd);
 
 	int CodePage() const;
 	virtual bool ValidCodePage(int /* codePage */) const { return true; }
