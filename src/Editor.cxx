@@ -914,7 +914,7 @@ Point Editor::PointMainCaret() {
  */
 void Editor::SetLastXChosen() {
 	Point pt = PointMainCaret();
-	lastXChosen = pt.x;
+	lastXChosen = pt.x + xOffset;
 }
 
 void Editor::ScrollTo(int line, bool moveThumb) {
@@ -961,12 +961,12 @@ void Editor::MoveCaretInsideView(bool ensureVisible) {
 	Point pt = PointMainCaret();
 	if (pt.y < rcClient.top) {
 		MovePositionTo(SPositionFromLocation(
-		            Point(lastXChosen, rcClient.top)),
+		            Point(lastXChosen - xOffset, rcClient.top)),
 					Selection::noSel, ensureVisible);
 	} else if ((pt.y + vs.lineHeight - 1) > rcClient.bottom) {
 		int yOfLastLineFullyDisplayed = rcClient.top + (LinesOnScreen() - 1) * vs.lineHeight;
 		MovePositionTo(SPositionFromLocation(
-		            Point(lastXChosen, rcClient.top + yOfLastLineFullyDisplayed)),
+		            Point(lastXChosen - xOffset, rcClient.top + yOfLastLineFullyDisplayed)),
 		        Selection::noSel, ensureVisible);
 	}
 }
@@ -4469,16 +4469,16 @@ void Editor::PageMove(int direction, Selection::selTypes selt, bool stuttered) {
 	int topStutterLine = topLine + caretYSlop;
 	int bottomStutterLine =
 	    pdoc->LineFromPosition(PositionFromLocation(
-	                Point(lastXChosen, direction * vs.lineHeight * LinesToScroll())))
+	                Point(lastXChosen - xOffset, direction * vs.lineHeight * LinesToScroll())))
 	    - caretYSlop - 1;
 
 	if (stuttered && (direction < 0 && currentLine > topStutterLine)) {
 		topLineNew = topLine;
-		newPos = PositionFromLocation(Point(lastXChosen, vs.lineHeight * caretYSlop));
+		newPos = PositionFromLocation(Point(lastXChosen - xOffset, vs.lineHeight * caretYSlop));
 
 	} else if (stuttered && (direction > 0 && currentLine < bottomStutterLine)) {
 		topLineNew = topLine;
-		newPos = PositionFromLocation(Point(lastXChosen, vs.lineHeight * (LinesToScroll() - caretYSlop)));
+		newPos = PositionFromLocation(Point(lastXChosen - xOffset, vs.lineHeight * (LinesToScroll() - caretYSlop)));
 
 	} else {
 		Point pt = LocationFromPosition(sel.MainCaret());
@@ -4486,7 +4486,7 @@ void Editor::PageMove(int direction, Selection::selTypes selt, bool stuttered) {
 		topLineNew = Platform::Clamp(
 		            topLine + direction * LinesToScroll(), 0, MaxScrollPos());
 		newPos = PositionFromLocation(
-		            Point(lastXChosen, pt.y + direction * (vs.lineHeight * LinesToScroll())));
+		            Point(lastXChosen - xOffset, pt.y + direction * (vs.lineHeight * LinesToScroll())));
 	}
 
 	if (topLineNew != topLine) {
@@ -4619,10 +4619,10 @@ void Editor::CursorUpOrDown(int direction, Selection::selTypes selt) {
 	int subLine = (pt.y - ptStartLine.y) / vs.lineHeight;
 	int commentLines = vs.annotationVisible ? pdoc->AnnotationLines(lineDoc) : 0;
 	SelectionPosition posNew = SPositionFromLocation(
-	            Point(lastXChosen, pt.y + direction * vs.lineHeight), false, false, UserVirtualSpace());
+	            Point(lastXChosen - xOffset, pt.y + direction * vs.lineHeight), false, false, UserVirtualSpace());
 	if ((direction > 0) && (subLine >= (cs.GetHeight(lineDoc) - 1 - commentLines))) {
 		posNew = SPositionFromLocation(
-	            Point(lastXChosen, pt.y + (commentLines + 1) * vs.lineHeight), false, false, UserVirtualSpace());
+	            Point(lastXChosen - xOffset, pt.y + (commentLines + 1) * vs.lineHeight), false, false, UserVirtualSpace());
 	}
 	if (direction < 0) {
 		// Line wrapping may lead to a location on the same line, so
@@ -5751,7 +5751,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 		}
 	}
 	lastClickTime = curTime;
-	lastXChosen = pt.x;
+	lastXChosen = pt.x + xOffset;
 	ShowCaretAtCurrentPosition();
 }
 
@@ -5974,7 +5974,7 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 		SetRectangularRange();
 		lastClickTime = curTime;
 		lastClick = pt;
-		lastXChosen = pt.x;
+		lastXChosen = pt.x + xOffset;
 		if (sel.selType == Selection::selStream) {
 			SetLastXChosen();
 		}
