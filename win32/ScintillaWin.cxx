@@ -95,12 +95,6 @@ extern void Platform_Finalise();
 
 typedef BOOL (WINAPI *TrackMouseEventSig)(LPTRACKMOUSEEVENT);
 
-/** TOTAL_CONTROL ifdef surrounds code that will only work when ScintillaWin
- * is derived from ScintillaBase (all features) rather than directly from Editor
- * (lightweight editor).
- */
-#define TOTAL_CONTROL
-
 // GCC has trouble with the standard COM ABI so do it the old C way with explicit vtables.
 
 const TCHAR scintillaClassName[] = TEXT("Scintilla");
@@ -622,9 +616,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			break;
 
 		case WM_COMMAND:
-#ifdef TOTAL_CONTROL
 			Command(LoWord(wParam));
-#endif
 			break;
 
 		case WM_PAINT:
@@ -927,7 +919,6 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			}
 
 		case WM_CONTEXTMENU:
-#ifdef TOTAL_CONTROL
 			if (displayPopupMenu) {
 				Point pt = Point::FromLong(lParam);
 				if ((pt.x == -1) && (pt.y == -1)) {
@@ -940,7 +931,6 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				ContextMenu(pt);
 				return 0;
 			}
-#endif
 			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 
 		case WM_INPUTLANGCHANGE:
@@ -1478,7 +1468,6 @@ void ScintillaWin::Paste() {
 }
 
 void ScintillaWin::CreateCallTipWindow(PRectangle) {
-#ifdef TOTAL_CONTROL
 	if (!ct.wCallTip.Created()) {
 		ct.wCallTip = ::CreateWindow(callClassName, TEXT("ACallTip"),
 					     WS_POPUP, 100, 100, 150, 20,
@@ -1487,11 +1476,9 @@ void ScintillaWin::CreateCallTipWindow(PRectangle) {
 					     this);
 		ct.wDraw = ct.wCallTip;
 	}
-#endif
 }
 
 void ScintillaWin::AddToPopUp(const char *label, int cmd, bool enabled) {
-#ifdef TOTAL_CONTROL
 	HMENU hmenuPopup = reinterpret_cast<HMENU>(popup.GetID());
 	if (!label[0])
 		::AppendMenuA(hmenuPopup, MF_SEPARATOR, 0, "");
@@ -1499,7 +1486,6 @@ void ScintillaWin::AddToPopUp(const char *label, int cmd, bool enabled) {
 		::AppendMenuA(hmenuPopup, MF_STRING, cmd, label);
 	else
 		::AppendMenuA(hmenuPopup, MF_STRING | MF_DISABLED | MF_GRAYED, cmd, label);
-#endif
 }
 
 void ScintillaWin::ClaimSelection() {
