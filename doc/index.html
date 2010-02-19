@@ -11,11 +11,18 @@
     content="www.scintilla.org is the home of the Scintilla editing component and SciTE text editor application." />
     <meta name="Date.Modified" content="20100214" />
     <style type="text/css">
-        .versionlist {
-	color: #FFCC99;
+        #versionlist {
+            margin: 0;
+            padding: .5em;
+            list-style-type: none;
+            color: #FFCC99;
+            background: #000000;
+        }
+        #versionlist li {
+            margin-bottom: .5em;
         }
     </style>
-    <script>
+    <script type="text/javascript">
    	function IsRemote() {
 		var loc = '' + window.location;
 		return loc.indexOf('http:') != -1;
@@ -51,51 +58,19 @@
         </td>
       </tr>
     </table>
-    <table bgcolor="#000000" width="100%" cellspacing="0" cellpadding="6" border="0">
-      <tr>
-        <td width="100%">
-          <span class="versionlist">Version 2.03 fixes some problems with rectangular selection.</span>
-        </td>
-      </tr>
-      <tr>
-        <td width="100%">
-          <span class="versionlist">Version 2.02 fixes some problems with rectangular selection.</span>
-        </td>
-      </tr>
-      <tr>
-        <td width="100%">
-          <span class="versionlist">Version 2.01 fixes some problems with multiple selection.</span>
-        </td>
-      </tr>
-      <tr>
-        <td width="100%">
-          <span class="versionlist">Version 2.0 supports multiple selection and virtual space.</span>
-        </td>
-      </tr>
-      <tr>
-        <td width="100%">
-          <span class="versionlist">Version 1.79 reports memory exhaustion instead of crashing.<br />
-	  This is a major change and application developers should consider how they will deal with Scintilla exhausting
-	memory since Scintilla may not be in a stable state.</span>
-        </td>
-      </tr>
-      <tr>
-        <td width="100%">
-          <span class="versionlist">Version 1.78 allows annotation lines to be displayed beneath each document line
-	  and to display a margin with different text for each document line.</span>
-        </td>
-      </tr>
-      <tr>
-        <td width="100%">
-          <span class="versionlist">Version 1.77 allows direct temporary access to the text buffer.</span>
-        </td>
-      </tr>
-      <tr>
-        <td width="100%">
-          <span class="versionlist">Version 1.76 fixes some minor bugs.</span>
-        </td>
-      </tr>
-    </table>
+    <ul id="versionlist">
+      <li>Version 2.03 fixes some problems with rectangular selection.</li>
+      <li>Version 2.02 fixes some problems with rectangular selection.</li>
+      <li>Version 2.01 fixes some problems with multiple selection.</li>
+      <li>Version 2.0 supports multiple selection and virtual space.</li>
+      <li>Version 1.79 reports memory exhaustion instead of crashing.<br />
+          This is a major change and application developers should consider how they will deal with Scintilla exhausting
+          memory since Scintilla may not be in a stable state.</li>
+      <li>Version 1.78 allows annotation lines to be displayed beneath each document line
+          and to display a margin with different text for each document line.</li>
+      <li>Version 1.77 allows direct temporary access to the text buffer.</li>
+      <li>Version 1.76 fixes some minor bugs.</li>
+    </ul>
     <table bgcolor="#CCCCCC" width="100%" cellspacing="0" cellpadding="8" border="0">
       <tr>
         <td>
