@@ -93,6 +93,8 @@ extern bool IsNT();
 extern void Platform_Initialise(void *hInstance);
 extern void Platform_Finalise();
 
+typedef BOOL (WINAPI *TrackMouseEventSig)(LPTRACKMOUSEEVENT);
+
 /** TOTAL_CONTROL ifdef surrounds code that will only work when ScintillaWin
  * is derived from ScintillaBase (all features) rather than directly from Editor
  * (lightweight editor).
@@ -157,6 +159,8 @@ class ScintillaWin :
 	bool lastKeyDownConsumed;
 
 	bool capturedMouse;
+	bool trackedMouseLeave;
+	TrackMouseEventSig TrackMouseEventFn;
 
 	unsigned int linesPerScroll;	///< Intellimouse support
 	int wheelDelta; ///< Wheel delta from roll
@@ -203,6 +207,7 @@ class ScintillaWin :
 	virtual void SetTicking(bool on);
 	virtual void SetMouseCapture(bool on);
 	virtual bool HaveMouseCapture();
+	virtual void SetTrackMouseLeaveEvent(bool on);
 	virtual bool PaintContains(PRectangle rc);
 	virtual void ScrollText(int linesToMove);
 	virtual void UpdateSystemCaret();
@@ -298,6 +303,9 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	lastKeyDownConsumed = false;
 
 	capturedMouse = false;
+	trackedMouseLeave = false;
+	TrackMouseEventFn = 0;
+
 	linesPerScroll = 0;
 	wheelDelta = 0;   // Wheel delta from roll
 
@@ -338,6 +346,18 @@ void ScintillaWin::Initialise() {
 	// no effect.  If the app hasnt, we really shouldnt ask them to call
 	// it just so this internal feature works.
 	hrOle = ::OleInitialize(NULL);
+
+	// Find TrackMouseEvent which is available on Windows > 95
+	HMODULE user32 = ::GetModuleHandle("user32.dll");
+	TrackMouseEventFn = (TrackMouseEventSig)::GetProcAddress(user32, "TrackMouseEvent");
+	if (TrackMouseEventFn == NULL) {
+		// Windows 95 has an emulation in comctl32.dll:_TrackMouseEvent
+		HMODULE commctrl32 = ::LoadLibrary("comctl32.dll");
+		if (commctrl32 != NULL) {
+			TrackMouseEventFn = (TrackMouseEventSig)
+				::GetProcAddress(commctrl32, "_TrackMouseEvent");
+		}
+	}
 }
 
 void ScintillaWin::Finalise() {
@@ -731,8 +751,14 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			break;
 
 		case WM_MOUSEMOVE:
+			SetTrackMouseLeaveEvent(true);
 			ButtonMove(Point::FromLong(lParam));
 			break;
+
+		case WM_MOUSELEAVE:
+			SetTrackMouseLeaveEvent(false);
+			MouseLeave();
+			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 
 		case WM_LBUTTONUP:
 			ButtonUp(Point::FromLong(lParam),
@@ -1099,6 +1125,17 @@ bool ScintillaWin::HaveMouseCapture() {
 	// Cannot just see if GetCapture is this window as the scroll bar also sets capture for the window
 	return capturedMouse;
 	//return capturedMouse && (::GetCapture() == MainHWND());
+}
+
+void ScintillaWin::SetTrackMouseLeaveEvent(bool on) {
+	if (on && TrackMouseEventFn && !trackedMouseLeave) {
+		TRACKMOUSEEVENT tme;
+		tme.cbSize = sizeof(tme);
+		tme.dwFlags = TME_LEAVE;
+		tme.hwndTrack = MainHWND();
+		TrackMouseEventFn(&tme);
+	}
+	trackedMouseLeave = on;
 }
 
 bool ScintillaWin::PaintContains(PRectangle rc) {

@@ -5621,7 +5621,11 @@ void Editor::DwellEnd(bool mouseMoved) {
 	}
 }
 
-static bool AllowVirtualSpace(int	virtualSpaceOptions, bool rectangular) {
+void Editor::MouseLeave() {
+	SetHotSpotRange(NULL);
+}
+
+static bool AllowVirtualSpace(int virtualSpaceOptions, bool rectangular) {
 	return ((virtualSpaceOptions & SCVS_USERACCESSIBLE) != 0)
 		|| (rectangular && ((virtualSpaceOptions & SCVS_RECTANGULARSELECTION) != 0));
 }
@@ -5897,6 +5901,7 @@ void Editor::ButtonMove(Point pt) {
 		if (vs.fixedColumnWidth > 0) {	// There is a margin
 			if (PointInSelMargin(pt)) {
 				DisplayCursor(Window::cursorReverseArrow);
+				SetHotSpotRange(NULL);
 				return; 	// No need to test for selection
 			}
 		}
