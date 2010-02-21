@@ -21,6 +21,18 @@
         #versionlist li {
             margin-bottom: .5em;
         }
+        #menu {
+            margin: 0;
+            padding: .5em 0;
+            list-style-type: none;
+            font-size: larger;
+            background: #CCCCCC;
+        }
+        #menu li {
+            margin: 0;
+            padding: 0 .5em;
+            display: inline;
+        }
     </style>
     <script type="text/javascript">
    	function IsRemote() {
@@ -71,35 +83,22 @@
       <li>Version 1.77 allows direct temporary access to the text buffer.</li>
       <li>Version 1.76 fixes some minor bugs.</li>
     </ul>
-    <table bgcolor="#CCCCCC" width="100%" cellspacing="0" cellpadding="8" border="0">
-      <tr>
-        <td>
-          <font size="4">
+    <ul id="menu">
+      <li id="remote1"><a href="http://www.scintilla.org/SciTEImage.html">Screenshot</a></li>
+      <li id="remote2"><a href="http://www.scintilla.org/ScintillaDownload.html">Download</a></li>
+      <li><a href="http://www.scintilla.org/ScintillaDoc.html">Documentation</a></li>
+      <li><a href="http://www.scintilla.org/ScintillaToDo.html">Bugs</a></li>
+      <li id="remote3"><a href="http://www.scintilla.org/SciTE.html">SciTE</a></li>
+      <li><a href="http://www.scintilla.org/ScintillaHistory.html">History</a></li>
+      <li><a href="http://www.scintilla.org/ScintillaRelated.html">Related</a></li>
+    </ul>
 <script type="text/javascript" language="JavaScript"><!--
-if (IsRemote()) {
-    document.write('<a href="http://www.scintilla.org/SciTEImage.html">Screenshot</a>&nbsp;&nbsp;');
-    document.write('<a href="http://www.scintilla.org/ScintillaDownload.html">Download</a>&nbsp;&nbsp;');
+if (!IsRemote()) { //if NOT remote...
+    document.getElementById('remote1').style.display='none';
+    document.getElementById('remote2').style.display='none';
+    document.getElementById('remote3').style.display='none';
 }
 //--></script>
-<noscript>
- 	 <a href="http://www.scintilla.org/SciTEImage.html">Screenshot</a>&nbsp;&nbsp;
-	 <a href="http://www.scintilla.org/ScintillaDownload.html">Download</a>&nbsp;&nbsp;
-</noscript>
- 	 <a href="http://www.scintilla.org/ScintillaDoc.html">Documentation</a>&nbsp;&nbsp;
-	 <a href="http://www.scintilla.org/ScintillaToDo.html">Bugs</a>&nbsp;&nbsp;
-<script type="text/javascript" language="JavaScript"><!--
-if (IsRemote()) {
-    document.write('<a href="http://www.scintilla.org/SciTE.html">SciTE</a>&nbsp;&nbsp; ');
-}
-//--></script>
-<noscript>
-	 <a href="http://www.scintilla.org/SciTE.html">SciTE</a>&nbsp;&nbsp;
-</noscript>
-	  <a href="http://www.scintilla.org/ScintillaHistory.html">
-          History</a>&nbsp;&nbsp; <a href="http://www.scintilla.org/ScintillaRelated.html">Related</a>&nbsp;&nbsp;</font>
-        </td>
-      </tr>
-    </table>
     <p>
        <a href="http://www.scintilla.org/ScintillaDoc.html">Scintilla</a> is a free source code editing component.
        It comes with complete source code and a <a href="http://www.scintilla.org/License.txt">license</a> that
