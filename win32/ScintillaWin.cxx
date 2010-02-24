@@ -106,11 +106,13 @@ using namespace Scintilla;
 
 class ScintillaWin; 	// Forward declaration for COM interface subobjects
 
+typedef void VFunction(void);
+
 /**
  */
 class FormatEnumerator {
 public:
-	void **vtbl;
+	VFunction **vtbl;
 	int ref;
 	int pos;
 	CLIPFORMAT formats[2];
@@ -122,7 +124,7 @@ public:
  */
 class DropSource {
 public:
-	void **vtbl;
+	VFunction **vtbl;
 	ScintillaWin *sci;
 	DropSource();
 };
@@ -131,7 +133,7 @@ public:
  */
 class DataObject {
 public:
-	void **vtbl;
+	VFunction **vtbl;
 	ScintillaWin *sci;
 	DataObject();
 };
@@ -140,7 +142,7 @@ public:
  */
 class DropTarget {
 public:
-	void **vtbl;
+	VFunction **vtbl;
 	ScintillaWin *sci;
 	DropTarget();
 };
@@ -1584,14 +1586,14 @@ STDMETHODIMP FormatEnumerator_Clone(FormatEnumerator *fe, IEnumFORMATETC **ppenu
 	                                       reinterpret_cast<void **>(ppenum));
 }
 
-static void *vtFormatEnumerator[] = {
-	(void *)(FormatEnumerator_QueryInterface),
-	(void *)(FormatEnumerator_AddRef),
-	(void *)(FormatEnumerator_Release),
-	(void *)(FormatEnumerator_Next),
-	(void *)(FormatEnumerator_Skip),
-	(void *)(FormatEnumerator_Reset),
-	(void *)(FormatEnumerator_Clone)
+static VFunction *vtFormatEnumerator[] = {
+	(VFunction *)(FormatEnumerator_QueryInterface),
+	(VFunction *)(FormatEnumerator_AddRef),
+	(VFunction *)(FormatEnumerator_Release),
+	(VFunction *)(FormatEnumerator_Next),
+	(VFunction *)(FormatEnumerator_Skip),
+	(VFunction *)(FormatEnumerator_Reset),
+	(VFunction *)(FormatEnumerator_Clone)
 };
 
 FormatEnumerator::FormatEnumerator(int pos_, CLIPFORMAT formats_[], int formatsLen_) {
@@ -1627,12 +1629,12 @@ STDMETHODIMP DropSource_GiveFeedback(DropSource *, DWORD) {
 	return DRAGDROP_S_USEDEFAULTCURSORS;
 }
 
-static void *vtDropSource[] = {
-	(void *)(DropSource_QueryInterface),
-	(void *)(DropSource_AddRef),
-	(void *)(DropSource_Release),
-	(void *)(DropSource_QueryContinueDrag),
-	(void *)(DropSource_GiveFeedback)
+static VFunction *vtDropSource[] = {
+	(VFunction *)(DropSource_QueryInterface),
+	(VFunction *)(DropSource_AddRef),
+	(VFunction *)(DropSource_Release),
+	(VFunction *)(DropSource_QueryContinueDrag),
+	(VFunction *)(DropSource_GiveFeedback)
 };
 
 DropSource::DropSource() {
@@ -1746,19 +1748,19 @@ STDMETHODIMP DataObject_EnumDAdvise(DataObject *, IEnumSTATDATA **) {
 	return E_FAIL;
 }
 
-static void *vtDataObject[] = {
-	(void *)(DataObject_QueryInterface),
-	(void *)(DataObject_AddRef),
-	(void *)(DataObject_Release),
-	(void *)(DataObject_GetData),
-	(void *)(DataObject_GetDataHere),
-	(void *)(DataObject_QueryGetData),
-	(void *)(DataObject_GetCanonicalFormatEtc),
-	(void *)(DataObject_SetData),
-	(void *)(DataObject_EnumFormatEtc),
-	(void *)(DataObject_DAdvise),
-	(void *)(DataObject_DUnadvise),
-	(void *)(DataObject_EnumDAdvise)
+static VFunction *vtDataObject[] = {
+	(VFunction *)(DataObject_QueryInterface),
+	(VFunction *)(DataObject_AddRef),
+	(VFunction *)(DataObject_Release),
+	(VFunction *)(DataObject_GetData),
+	(VFunction *)(DataObject_GetDataHere),
+	(VFunction *)(DataObject_QueryGetData),
+	(VFunction *)(DataObject_GetCanonicalFormatEtc),
+	(VFunction *)(DataObject_SetData),
+	(VFunction *)(DataObject_EnumFormatEtc),
+	(VFunction *)(DataObject_DAdvise),
+	(VFunction *)(DataObject_DUnadvise),
+	(VFunction *)(DataObject_EnumDAdvise)
 };
 
 DataObject::DataObject() {
@@ -1814,14 +1816,14 @@ STDMETHODIMP DropTarget_Drop(DropTarget *dt, LPDATAOBJECT pIDataSource, DWORD gr
 	return E_FAIL;
 }
 
-static void *vtDropTarget[] = {
-	(void *)(DropTarget_QueryInterface),
-	(void *)(DropTarget_AddRef),
-	(void *)(DropTarget_Release),
-	(void *)(DropTarget_DragEnter),
-	(void *)(DropTarget_DragOver),
-	(void *)(DropTarget_DragLeave),
-	(void *)(DropTarget_Drop)
+static VFunction *vtDropTarget[] = {
+	(VFunction *)(DropTarget_QueryInterface),
+	(VFunction *)(DropTarget_AddRef),
+	(VFunction *)(DropTarget_Release),
+	(VFunction *)(DropTarget_DragEnter),
+	(VFunction *)(DropTarget_DragOver),
+	(VFunction *)(DropTarget_DragLeave),
+	(VFunction *)(DropTarget_Drop)
 };
 
 DropTarget::DropTarget() {
