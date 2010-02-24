@@ -2397,7 +2397,7 @@ bool ScintillaWin::Unregister() {
 bool ScintillaWin::HasCaretSizeChanged() {
 	if (
 		( (0 != vs.caretWidth) && (sysCaretWidth != vs.caretWidth) )
-		|| (0 != vs.lineHeight) && (sysCaretHeight != vs.lineHeight)
+		|| ((0 != vs.lineHeight) && (sysCaretHeight != vs.lineHeight))
 		) {
 		return true;
 	}
