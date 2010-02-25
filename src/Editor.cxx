@@ -3733,7 +3733,11 @@ void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 				if (wrapState != eWrapNone) {
 					AutoSurface surface(this);
 					if (surface) {
-						WrapOneLine(surface, pdoc->LineFromPosition(positionInsert));
+						if (WrapOneLine(surface, pdoc->LineFromPosition(positionInsert))) {
+							SetScrollBars();
+							SetVerticalScrollPos();
+							Redraw();
+						}
 					}
 				}
 			}
