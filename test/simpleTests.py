@@ -339,6 +339,15 @@ class TestSimple(unittest.TestCase):
 		self.assertEquals(self.ed.TargetStart, 4)
 		self.assertEquals(self.ed.TargetEnd, 5)
 
+	def testTargetEscape(self):
+		# Checks that a literal \ can be in the replacement. Bug #2959876
+		self.ed.SetText(0, b"abcd")
+		self.ed.TargetStart = 1
+		self.ed.TargetEnd = 3
+		rep = b"\\\\n"
+		self.ed.ReplaceTargetRE(len(rep), rep)
+		self.assertEquals(self.ed.Contents(), b"a\\nd")
+
 	def testPointsAndPositions(self):
 		self.ed.AddText(1, b"x")
 		# Start of text
