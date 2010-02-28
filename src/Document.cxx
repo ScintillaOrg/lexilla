@@ -1780,6 +1780,9 @@ const char *BuiltinRegex::SubstituteByPosition(Document *doc, const char *text, 
 				case 'v':
 					*o++ = '\v';
 					break;
+				case '\\':
+					*o++ = '\\';
+					break;
 				default:
 					*o++ = '\\';
 					j--;
