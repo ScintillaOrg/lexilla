@@ -76,12 +76,12 @@ static const char *GetNextWord(Accessor &styler, unsigned int start, char *s, si
 		char ch = static_cast<char>(styler.SafeGetCharAt(start + i));
 		if ((i == 0) && !IsAWordStart(ch))
 			break;
-		if ((i > 0) && !IsAWordChar(ch)) 
+		if ((i > 0) && !IsAWordChar(ch))
 			break;
 		s[i] = ch;
 	}
 	s[i] = '\0';
-	
+
 	return s;
 }
 
@@ -494,7 +494,7 @@ static bool isMakoBlockEnd(const int ch, const int chNext, const char *blockType
 	if (strlen(blockType) == 0) {
 		return ((ch == '%') && (chNext == '>'));
 	} else if ((0 == strcmp(blockType, "inherit")) ||
-			   (0 == strcmp(blockType, "namespace")) || 
+			   (0 == strcmp(blockType, "namespace")) ||
 			   (0 == strcmp(blockType, "include")) ||
 			   (0 == strcmp(blockType, "page"))) {
 		return ((ch == '/') && (chNext == '>'));
@@ -612,8 +612,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		// Default client and ASP scripting language is JavaScript
 		lineState = eScriptJS << 8;
 
-		// property asp.default.language 
-		//	Script in ASP code is initially assumed to be in JavaScript. 
+		// property asp.default.language
+		//	Script in ASP code is initially assumed to be in JavaScript.
 		//	To change this to VBScript set asp.default.language to 2. Python is 3.
 		lineState |= styler.GetPropertyInt("asp.default.language", eScriptJS) << 4;
 	}
@@ -631,41 +631,41 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		scriptLanguage = eScriptComment;
 	}
 
-	// property fold.html 
-	//	Folding is turned on or off for HTML and XML files with this option. 
+	// property fold.html
+	//	Folding is turned on or off for HTML and XML files with this option.
 	//	The fold option must also be on for folding to occur.
 	const bool foldHTML = styler.GetPropertyInt("fold.html", 0) != 0;
 
 	const bool fold = foldHTML && styler.GetPropertyInt("fold", 0);
 
-	// property fold.html.preprocessor 
-	//	Folding is turned on or off for scripts embedded in HTML files with this option. 
+	// property fold.html.preprocessor
+	//	Folding is turned on or off for scripts embedded in HTML files with this option.
 	//	The default is on.
 	const bool foldHTMLPreprocessor = foldHTML && styler.GetPropertyInt("fold.html.preprocessor", 1);
 
 	const bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 
-	// property fold.hypertext.comment 
-	//	Allow folding for comments in scripts embedded in HTML. 
-	//	The default is off. 
+	// property fold.hypertext.comment
+	//	Allow folding for comments in scripts embedded in HTML.
+	//	The default is off.
 	const bool foldComment = fold && styler.GetPropertyInt("fold.hypertext.comment", 0) != 0;
 
-	// property fold.hypertext.heredoc 
-	//	Allow folding for heredocs in scripts embedded in HTML. 
-	//	The default is off.  
+	// property fold.hypertext.heredoc
+	//	Allow folding for heredocs in scripts embedded in HTML.
+	//	The default is off.
 	const bool foldHeredoc = fold && styler.GetPropertyInt("fold.hypertext.heredoc", 0) != 0;
 
-	// property html.tags.case.sensitive 
-	//	For XML and HTML, setting this property to 1 will make tags match in a case 
-	//	sensitive way which is the expected behaviour for XML and XHTML. 
+	// property html.tags.case.sensitive
+	//	For XML and HTML, setting this property to 1 will make tags match in a case
+	//	sensitive way which is the expected behaviour for XML and XHTML.
 	const bool caseSensitive = styler.GetPropertyInt("html.tags.case.sensitive", 0) != 0;
 
-	// property lexer.xml.allow.scripts 
-	//	Set to 0 to disable scripts in XML.  
+	// property lexer.xml.allow.scripts
+	//	Set to 0 to disable scripts in XML.
 	const bool allowScripts = styler.GetPropertyInt("lexer.xml.allow.scripts", 1) != 0;
 
-	// property lexer.html.mako 
-	//	Set to 1 to enable the mako template language.  
+	// property lexer.html.mako
+	//	Set to 1 to enable the mako template language.
 	const bool isMako = styler.GetPropertyInt("lexer.html.mako", 0) != 0;
 
 	const CharacterSet setHTMLWord(CharacterSet::setAlphaNum, ".-_:!#", 0x80, true);
@@ -800,7 +800,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		if (((ch == '\r' && chNext != '\n') || (ch == '\n')) &&
 			(!isMako || (0 != strcmp(makoBlockType, "%")))) {
 		}
-		
+
 		// generic end of script processing
 		else if ((inScriptType == eNonHtmlScript) && (ch == '<') && (chNext == '/')) {
 			// Check if it's the end of the script tag (or any other HTML tag)
@@ -886,13 +886,13 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		}
 
 		// handle the start Mako template Python code
-		else if (isMako && scriptLanguage == eScriptNone && ((ch == '<' && chNext == '%') || 
+		else if (isMako && scriptLanguage == eScriptNone && ((ch == '<' && chNext == '%') ||
 															 (lineStartVisibleChars == 1 && ch == '%') ||
 															 (ch == '$' && chNext == '{') ||
 															 (ch == '<' && chNext == '/' && chNext2 == '%'))) {
 			if (ch == '%')
 				strcpy(makoBlockType, "%");
-			else if (ch == '$') 
+			else if (ch == '$')
 				strcpy(makoBlockType, "{");
 			else if (chNext == '/')
 				GetNextWord(styler, i+3, makoBlockType, sizeof(makoBlockType));
@@ -917,7 +917,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			styler.ColourTo(i, SCE_H_ASP);
 			if (foldHTMLPreprocessor && ch == '<')
 				levelCurrent++;
-				
+
 			if (ch != '%' && ch != '$') {
 				i += strlen(makoBlockType);
 				visibleChars += strlen(makoBlockType);
@@ -998,8 +998,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		}
 
 		// handle the end of Mako Python code
-		else if (isMako && 
-			     ((inScriptType == eNonHtmlPreProc) || (inScriptType == eNonHtmlScriptPreProc)) && 
+		else if (isMako &&
+			     ((inScriptType == eNonHtmlPreProc) || (inScriptType == eNonHtmlScriptPreProc)) &&
 				 (scriptLanguage != eScriptNone) && stateAllowsTermination(state) &&
 				 isMakoBlockEnd(ch, chNext, makoBlockType)) {
 			if (state == SCE_H_ASPAT) {
