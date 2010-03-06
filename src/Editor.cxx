@@ -7142,9 +7142,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return wrapState;
 
 	case SCI_SETWRAPVISUALFLAGS:
-		wrapVisualFlags = wParam;
-		InvalidateStyleRedraw();
-		ReconfigureScrollBars();
+		if (wrapVisualFlags != static_cast<int>(wParam)) {
+			wrapVisualFlags = wParam;
+			InvalidateStyleRedraw();
+			ReconfigureScrollBars();
+		}
 		break;
 
 	case SCI_GETWRAPVISUALFLAGS:
@@ -7159,18 +7161,22 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return wrapVisualFlagsLocation;
 
 	case SCI_SETWRAPSTARTINDENT:
-		wrapVisualStartIndent = wParam;
-		InvalidateStyleRedraw();
-		ReconfigureScrollBars();
+		if (wrapVisualStartIndent != static_cast<int>(wParam)) {
+			wrapVisualStartIndent = wParam;
+			InvalidateStyleRedraw();
+			ReconfigureScrollBars();
+		}
 		break;
 
 	case SCI_GETWRAPSTARTINDENT:
 		return wrapVisualStartIndent;
 
 	case SCI_SETWRAPINDENTMODE:
-		wrapIndentMode = wParam;
-		InvalidateStyleRedraw();
-		ReconfigureScrollBars();
+		if (wrapIndentMode != static_cast<int>(wParam)) {
+			wrapIndentMode = wParam;
+			InvalidateStyleRedraw();
+			ReconfigureScrollBars();
+		}
 		break;
 
 	case SCI_GETWRAPINDENTMODE:
