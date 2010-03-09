@@ -5215,7 +5215,7 @@ void Editor::Indent(bool forwards) {
 					int indentation = pdoc->GetLineIndentation(lineCurrentPos);
 					int indentationStep = pdoc->IndentSize();
 					pdoc->SetLineIndentation(lineCurrentPos, indentation - indentationStep);
-					SetEmptySelection(pdoc->GetLineIndentPosition(lineCurrentPos));
+					sel.Range(r) = SelectionRange(pdoc->GetLineIndentPosition(lineCurrentPos));
 				} else {
 					int newColumn = ((pdoc->GetColumn(caretPosition) - 1) / pdoc->tabInChars) *
 							pdoc->tabInChars;
