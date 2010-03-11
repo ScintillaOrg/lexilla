@@ -142,6 +142,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool caretSticky;
 	bool multipleSelection;
 	bool additionalSelectionTyping;
+	int multiPasteMode;
 	bool additionalCaretsBlink;
 	bool additionalCaretsVisible;
 
@@ -358,6 +359,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int InsertSpace(int position, unsigned int spaces);
 	void AddChar(char ch);
 	virtual void AddCharUTF(char *s, unsigned int len, bool treatAsDBCS=false);
+	void InsertPaste(SelectionPosition selStart, const char *text, int len);
 	void ClearSelection();
 	void ClearAll();
 	void ClearDocumentStyle();
