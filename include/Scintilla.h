@@ -905,22 +905,27 @@ struct Sci_TextToFind {
 #define TextRange Sci_TextRange
 #define TextToFind Sci_TextToFind
 
-#ifdef PLATFORM_H
+typedef void *Sci_SurfaceID;
+
+struct Sci_Rectangle {
+	int left;
+	int top;
+	int right;
+	int bottom;
+};
 
 /* This structure is used in printing and requires some of the graphics types
  * from Platform.h.  Not needed by most client code. */
 
 struct Sci_RangeToFormat {
-	SurfaceID hdc;
-	SurfaceID hdcTarget;
-	PRectangle rc;
-	PRectangle rcPage;
+	Sci_SurfaceID hdc;
+	Sci_SurfaceID hdcTarget;
+	Sci_Rectangle rc;
+	Sci_Rectangle rcPage;
 	Sci_CharacterRange chrg;
 };
 
 #define RangeToFormat Sci_RangeToFormat
-
-#endif
 
 struct Sci_NotifyHeader {
 	/* Compatible with Windows NMHDR.

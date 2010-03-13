@@ -3536,7 +3536,7 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 
 	int nPrintPos = pfr->chrg.cpMin;
 	int visibleLine = 0;
-	int widthPrint = pfr->rc.Width() - vsPrint.fixedColumnWidth;
+	int widthPrint = pfr->rc.right - pfr->rc.left - vsPrint.fixedColumnWidth;
 	if (printWrapState == eWrapNone)
 		widthPrint = LineLayout::wrapWidthInfinite;
 
