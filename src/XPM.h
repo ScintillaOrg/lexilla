@@ -43,9 +43,9 @@ public:
 	void Draw(Surface *surface, PRectangle &rc);
 	char **InLinesForm() { return lines; }
 	void SetId(int pid_) { pid = pid_; }
-	int GetId() { return pid; }
-	int GetHeight() { return height; }
-	int GetWidth() { return width; }
+	int GetId() const { return pid; }
+	int GetHeight() const { return height; }
+	int GetWidth() const { return width; }
 	static const char **LinesFormFromTextForm(const char *textForm);
 };
 

@@ -448,7 +448,7 @@ BreakFinder::~BreakFinder() {
 	delete []selAndEdge;
 }
 
-int BreakFinder::First() {
+int BreakFinder::First() const {
 	return nextBreak;
 }
 
@@ -580,7 +580,7 @@ int PositionCacheEntry::Hash(unsigned int styleNumber, const char *s, unsigned i
 	return ret;
 }
 
-bool PositionCacheEntry::NewerThan(const PositionCacheEntry &other) {
+bool PositionCacheEntry::NewerThan(const PositionCacheEntry &other) const {
 	return clock > other.clock;
 }
 

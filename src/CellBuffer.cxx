@@ -455,7 +455,7 @@ int CellBuffer::LineStart(int line) const {
 		return lv.LineStart(line);
 }
 
-bool CellBuffer::IsReadOnly() {
+bool CellBuffer::IsReadOnly() const {
 	return readOnly;
 }
 
@@ -586,7 +586,7 @@ bool CellBuffer::SetUndoCollection(bool collectUndo) {
 	return collectingUndo;
 }
 
-bool CellBuffer::IsCollectingUndo() {
+bool CellBuffer::IsCollectingUndo() const {
 	return collectingUndo;
 }
 
