@@ -1082,9 +1082,9 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated 
 		GdkPixbuf *pixalpha = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, width, height);
 
 		guint32 valEmpty = u32FromRGBA(0,0,0,0);
-		guint32 valFill = u32FromRGBA(GetRValue(fill.AsLong()), 
+		guint32 valFill = u32FromRGBA(GetRValue(fill.AsLong()),
 			GetGValue(fill.AsLong()), GetBValue(fill.AsLong()), alphaFill);
-		guint32 valOutline = u32FromRGBA(GetRValue(outline.AsLong()), 
+		guint32 valOutline = u32FromRGBA(GetRValue(outline.AsLong()),
 			GetGValue(outline.AsLong()), GetBValue(outline.AsLong()), alphaOutline);
 		guint32 *pixels = reinterpret_cast<guint32 *>(gdk_pixbuf_get_pixels(pixalpha));
 		int stride = gdk_pixbuf_get_rowstride(pixalpha) / 4;
@@ -1388,8 +1388,8 @@ public:
 	int position;
 	int distance;
 	int curIndex;
-	ClusterIterator(PangoLayout *layout, int len) : lenPositions(len), finished(false), 
-		positionStart(0), position(0), distance(0) {
+	ClusterIterator(PangoLayout *layout, int len) : lenPositions(len), finished(false),
+		positionStart(0), position(0), distance(0), curIndex(0) {
 		iter = pango_layout_get_iter(layout);
 		pango_layout_iter_get_cluster_extents(iter, NULL, &pos);
 	}
@@ -1397,7 +1397,7 @@ public:
 		pango_layout_iter_free(iter);
 	}
 
-	void Next() { 
+	void Next() {
 		positionStart = position;
 		if (pango_layout_iter_next_cluster(iter)) {
 			pango_layout_iter_get_cluster_extents(iter, NULL, &pos);
@@ -2153,7 +2153,7 @@ void ListBoxX::Create(Window &, int, Point, int, bool) {
 	gtk_tree_view_column_pack_start(column, pixbuf_renderer, FALSE);
 	gtk_tree_view_column_add_attribute(column, pixbuf_renderer,
 										"pixbuf", PIXBUF_COLUMN);
-	
+
 	GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
 	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer), 1);
 	gtk_tree_view_column_pack_start(column, renderer, TRUE);
@@ -2351,7 +2351,7 @@ void ListBoxX::Append(char *s, int type) {
 
 			gint pixbuf_width = gdk_pixbuf_get_width(list_image->pixbuf);
 			gint renderer_height, renderer_width;
-			gtk_cell_renderer_get_fixed_size(pixbuf_renderer, 
+			gtk_cell_renderer_get_fixed_size(pixbuf_renderer,
 								&renderer_width, &renderer_height);
 			if (pixbuf_width > renderer_width)
 				gtk_cell_renderer_set_fixed_size(pixbuf_renderer,
