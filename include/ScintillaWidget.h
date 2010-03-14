@@ -9,7 +9,7 @@
 #ifndef SCINTILLAWIDGET_H
 #define SCINTILLAWIDGET_H
 
-#if PLAT_GTK
+#if defined(GTK)
 
 #ifdef __cplusplus
 extern "C" {

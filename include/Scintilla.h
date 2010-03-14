@@ -19,7 +19,7 @@ typedef BOOL bool;
 extern "C" {
 #endif
 
-#if PLAT_WIN
+#if defined(_WIN32)
 /* Return false on failure: */
 bool Scintilla_RegisterClasses(void *hInstance);
 bool Scintilla_ReleaseResources();
