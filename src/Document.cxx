@@ -1737,6 +1737,7 @@ const char *BuiltinRegex::SubstituteByPosition(Document *doc, const char *text, 
 				case 'r':
 				case 't':
 				case 'v':
+				case '\\':
 					i++;
 				}
 				lenResult++;
