@@ -1850,7 +1850,7 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 			        (event->state & modifierTranslated(rectangularSelectionModifier)) != 0);
 		} else if (event->button == 2) {
 			// Grab the primary selection if it exists
-			SelectionPosition pos = SPositionFromLocation(pt);
+			SelectionPosition pos = SPositionFromLocation(pt, false, false, UserVirtualSpace());
 			if (OwnPrimarySelection() && primary.s == NULL)
 				CopySelectionRange(&primary);
 
