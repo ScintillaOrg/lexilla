@@ -1491,6 +1491,8 @@ void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, Selectio
 	isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect) != 0;
 #else
 	isRectangular = ((len > 2) && (data[len - 1] == 0 && data[len - 2] == '\n'));
+	if (isRectangular)
+		len--;	// Forget the extra '\0'
 #endif
 
 	char *dest;
