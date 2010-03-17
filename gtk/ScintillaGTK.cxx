@@ -1549,10 +1549,7 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 				if (selText.rectangular) {
 					PasteRectangular(selStart, selText.s, selText.len);
 				} else {
-					selStart = SelectionPosition(InsertSpace(selStart.Position(), selStart.VirtualSpace()));
-					if (pdoc->InsertString(selStart.Position(),selText.s, selText.len)) {
-						SetEmptySelection(selStart.Position() + selText.len);
-					}
+					InsertPaste(selStart, selText.s, selText.len);
 				}
 				EnsureCaretVisible();
 			}
