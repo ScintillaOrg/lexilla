@@ -61,6 +61,18 @@ void UTF8FromUTF16(const wchar_t *uptr, unsigned int tlen, char *putf, unsigned 
 	putf[len] = '\0';
 }
 
+unsigned int UTF8CharLength(unsigned char ch) {
+	if (ch < 0x80) {
+		return 1;
+	} else if (ch < 0x80 + 0x40 + 0x20) {
+		return 2;
+	} else if (ch < 0x80 + 0x40 + 0x20 + 0x10) {
+		return 3;
+	} else {
+		return 4;
+	}
+}
+
 unsigned int UTF16Length(const char *s, unsigned int len) {
 	unsigned int ulen = 0;
 	unsigned int charLen;
