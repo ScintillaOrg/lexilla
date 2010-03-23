@@ -38,7 +38,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 24/January/2010 NH</p>
+    <p>Last edited 23/March/2010 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -331,7 +331,7 @@
     *text)</a><br />
      <a class="message" href="#SCI_SETREADONLY">SCI_SETREADONLY(bool readOnly)</a><br />
      <a class="message" href="#SCI_GETREADONLY">SCI_GETREADONLY</a><br />
-     <a class="message" href="#SCI_GETTEXTRANGE">SCI_GETTEXTRANGE(&lt;unused&gt;, TextRange
+     <a class="message" href="#SCI_GETTEXTRANGE">SCI_GETTEXTRANGE(&lt;unused&gt;, Sci_TextRange
     *tr)</a><br />
      <a class="message" href="#SCI_ALLOCATE">SCI_ALLOCATE(int bytes, &lt;unused&gt;)</a><br />
      <a class="message" href="#SCI_ADDTEXT">SCI_ADDTEXT(int length, const char *s)</a><br />
@@ -342,7 +342,7 @@
      <a class="message" href="#SCI_CLEARDOCUMENTSTYLE">SCI_CLEARDOCUMENTSTYLE</a><br />
      <a class="message" href="#SCI_GETCHARAT">SCI_GETCHARAT(int position)</a><br />
      <a class="message" href="#SCI_GETSTYLEAT">SCI_GETSTYLEAT(int position)</a><br />
-     <a class="message" href="#SCI_GETSTYLEDTEXT">SCI_GETSTYLEDTEXT(&lt;unused&gt;, TextRange
+     <a class="message" href="#SCI_GETSTYLEDTEXT">SCI_GETSTYLEDTEXT(&lt;unused&gt;, Sci_TextRange
     *tr)</a><br />
      <a class="message" href="#SCI_SETSTYLEBITS">SCI_SETSTYLEBITS(int bits)</a><br />
      <a class="message" href="#SCI_GETSTYLEBITS">SCI_GETSTYLEBITS</a><br />
@@ -413,9 +413,9 @@
     href="#SCN_MODIFYATTEMPTRO"><code>SCN_MODIFYATTEMPTRO</code></a> notification.</p>
 
     <p><b id="SCI_GETTEXTRANGE">SCI_GETTEXTRANGE(&lt;unused&gt;, <a class="jump"
-    href="#TextRange">TextRange</a> *tr)</b><br />
+    href="#Sci_TextRange">Sci_TextRange</a> *tr)</b><br />
      This collects the text between the positions <code>cpMin</code> and <code>cpMax</code> and
-    copies it to <code>lpstrText</code> (see <code>struct TextRange</code> in
+    copies it to <code>lpstrText</code> (see <code>struct Sci_TextRange</code> in
     <code>Scintilla.h</code>). If <code>cpMax</code> is -1, text is returned to the end of the
     document. The text is 0 terminated, so you must supply a buffer that is at least 1 character
     longer than the number of characters you wish to read. The return value is the length of the
@@ -428,11 +428,11 @@
     href="#SCI_GETTEXT">SCI_GETTEXT</a></code></p>
 
     <p><b id="SCI_GETSTYLEDTEXT">SCI_GETSTYLEDTEXT(&lt;unused&gt;, <a class="jump"
-    href="#TextRange">TextRange</a> *tr)</b><br />
+    href="#Sci_TextRange">Sci_TextRange</a> *tr)</b><br />
      This collects styled text into a buffer using two bytes for each cell, with the character at
     the lower address of each pair and the style byte at the upper address. Characters between the
     positions <code>cpMin</code> and <code>cpMax</code> are copied to <code>lpstrText</code> (see
-    <code>struct TextRange</code> in <code>Scintilla.h</code>). Two 0 bytes are added to the end of
+    <code>struct Sci_TextRange</code> in <code>Scintilla.h</code>). Two 0 bytes are added to the end of
     the text, so the buffer that <code>lpstrText</code> points at must be at least
     <code>2*(cpMax-cpMin)+2</code> bytes long. No check is made for sensible values of
     <code>cpMin</code> or <code>cpMax</code>. Positions outside the document return character codes
@@ -492,18 +492,18 @@
     The number of styling bits needed by the current lexer can be found with
     <a class="message" href="#SCI_GETSTYLEBITSNEEDED">SCI_GETSTYLEBITSNEEDED</a>.</p>
 
-    <p><b id="TextRange">TextRange</b> and <b id="CharacterRange">CharacterRange</b><br />
+    <p><b id="Sci_TextRange">Sci_TextRange</b> and <b id="Sci_CharacterRange">Sci_CharacterRange</b><br />
      These structures are defined to be exactly the same shape as the Win32 <code>TEXTRANGE</code>
     and <code>CHARRANGE</code>, so that older code that treats Scintilla as a RichEdit will
     work.</p>
 <pre>
-struct CharacterRange {
+struct Sci_CharacterRange {
     long cpMin;
     long cpMax;
 };
 
-struct TextRange {
-    struct CharacterRange chrg;
+struct Sci_TextRange {
+    struct Sci_CharacterRange chrg;
     char *lpstrText;
 };
 </pre>
@@ -535,7 +535,7 @@ struct TextRange {
     or can be called from the container using direct access to the buffer contents through
     <a class="message" href="#SCI_GETCHARACTERPOINTER">SCI_GETCHARACTERPOINTER</a>.
     </p>
-    <code><a class="message" href="#SCI_FINDTEXT">SCI_FINDTEXT(int flags, TextToFind
+    <code><a class="message" href="#SCI_FINDTEXT">SCI_FINDTEXT(int flags, Sci_TextToFind
     *ttf)</a><br />
      <a class="message" href="#SCI_SEARCHANCHOR">SCI_SEARCHANCHOR</a><br />
      <a class="message" href="#SCI_SEARCHNEXT">SCI_SEARCHNEXT(int searchFlags, const char
@@ -682,35 +682,35 @@ struct TextRange {
     </table>
 
     <p><b id="SCI_FINDTEXT">SCI_FINDTEXT(int searchFlags, <a class="jump"
-    href="#TextToFind">TextToFind</a> *ttf)</b><br />
+    href="#Sci_TextToFind">Sci_TextToFind</a> *ttf)</b><br />
      This message searches for text in the document. It does not use or move the current selection.
     The <a class="jump" href="#searchFlags"><code>searchFlags</code></a> argument controls the
     search type, which includes regular expression searches.</p>
 
-    <p>The <code>TextToFind</code> structure is defined in <code>Scintilla.h</code>; set
+    <p>The <code>Sci_TextToFind</code> structure is defined in <code>Scintilla.h</code>; set
     <code>chrg.cpMin</code> and <code>chrg.cpMax</code> with the range of positions in the document
     to search. If <code>SCFIND_REGEXP</code> is not included in the flags, you can search backwards by
     setting <code>chrg.cpMax</code> less than <code>chrg.cpMin</code>. If <code>SCFIND_REGEXP</code>
     is included, the search is always forwards (even if <code>chrg.cpMax</code> is less than <code>chrg.cpMin</code>).
-    Set the <code>lpstrText</code> member of <code>TextToFind</code> to point at a zero terminated
-    text string holding the search pattern. If your language makes the use of <code>TextToFind</code>
+    Set the <code>lpstrText</code> member of <code>Sci_TextToFind</code> to point at a zero terminated
+    text string holding the search pattern. If your language makes the use of <code>Sci_TextToFind</code>
     difficult, you should consider using <code>SCI_SEARCHINTARGET</code> instead.</p>
 
     <p>The return value is -1 if the search fails or the position of the start of the found text if
     it succeeds. The <code>chrgText.cpMin</code> and <code>chrgText.cpMax</code> members of
-    <code>TextToFind</code> are filled in with the start and end positions of the found text.</p>
+    <code>Sci_TextToFind</code> are filled in with the start and end positions of the found text.</p>
 
     <p>See also: <code><a class="message"
     href="#SCI_SEARCHINTARGET">SCI_SEARCHINTARGET</a></code></p>
 
-    <p><b id="TextToFind">TextToFind</b><br />
+    <p><b id="Sci_TextToFind">Sci_TextToFind</b><br />
      This structure is defined to have exactly the same shape as the Win32 structure
     <code>FINDTEXTEX</code> for old code that treated Scintilla as a RichEdit control.</p>
 <pre>
-struct TextToFind {
-    struct <a class="jump" href="#CharacterRange">CharacterRange</a> chrg;     // range to search
+struct Sci_TextToFind {
+    struct <a class="jump" href="#Sci_CharacterRange">Sci_CharacterRange</a> chrg;     // range to search
     char *lpstrText;                // the search pattern (zero terminated)
-    struct CharacterRange chrgText; // returned as position of matching text
+    struct Sci_CharacterRange chrgText; // returned as position of matching text
 };
 </pre>
 
@@ -4360,7 +4360,7 @@ struct TextToFind {
     which can include a printer display context. Printed output shows text styling as on the
     screen, but it hides all margins except a line number margin. All special marker effects are
     removed and the selection and caret are hidden.</p>
-    <code><a class="message" href="#SCI_FORMATRANGE">SCI_FORMATRANGE(bool bDraw, RangeToFormat
+    <code><a class="message" href="#SCI_FORMATRANGE">SCI_FORMATRANGE(bool bDraw, Sci_RangeToFormat
     *pfr)</a><br />
      <a class="message" href="#SCI_SETPRINTMAGNIFICATION">SCI_SETPRINTMAGNIFICATION(int
     magnification)</a><br />
@@ -4371,7 +4371,7 @@ struct TextToFind {
      <a class="message" href="#SCI_GETPRINTWRAPMODE">SCI_GETPRINTWRAPMODE</a><br />
     </code>
 
-    <p><b id="SCI_FORMATRANGE">SCI_FORMATRANGE(bool bDraw, RangeToFormat *pfr)</b><br />
+    <p><b id="SCI_FORMATRANGE">SCI_FORMATRANGE(bool bDraw, Sci_RangeToFormat *pfr)</b><br />
      This call allows Windows users to render a range of text into a device context. If you use
     this for printing, you will probably want to arrange a page header and footer; Scintilla does
     not do this for you. See <code>SciTEWin::Print()</code> in <code>SciTEWinDlg.cxx</code> for an
@@ -4382,12 +4382,14 @@ struct TextToFind {
     (for example, if you use this with MFC you will need to paginate in
     <code>OnBeginPrinting()</code> before you output each page.</p>
 <pre>
-struct RangeToFormat {
-    SurfaceID hdc;        // The HDC (device context) we print to
-    SurfaceID hdcTarget;  // The HDC we use for measuring (may be same as hdc)
-    PRectangle rc;        // Rectangle in which to print
-    PRectangle rcPage;    // Physically printable page size
-    CharacterRange chrg;  // Range of characters to print
+struct Sci_Rectangle { int left; int top; int right; int bottom; };
+
+struct Sci_RangeToFormat {
+    Sci_SurfaceID hdc;        // The HDC (device context) we print to
+    Sci_SurfaceID hdcTarget;  // The HDC we use for measuring (may be same as hdc)
+    Sci_Rectangle rc;         // Rectangle in which to print
+    Sci_Rectangle rcPage;     // Physically printable page size
+    Sci_CharacterRange chrg;  // Range of characters to print
 };
 </pre>
 
