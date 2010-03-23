@@ -507,6 +507,18 @@ static bool isMakoBlockEnd(const int ch, const int chNext, const char *blockType
 	}
 }
 
+static bool isDjangoBlockEnd(const int ch, const int chNext, const char *blockType) {
+	if (strlen(blockType) == 0) {
+		return 0;
+	} else if (0 == strcmp(blockType, "%")) {
+		return ((ch == '%') && (chNext == '}'));
+	} else if (0 == strcmp(blockType, "{")) {
+		return ((ch == '}') && (chNext == '}'));
+	} else {
+		return 0;
+	}
+}
+
 static bool isPHPStringState(int state) {
 	return
 	    (state == SCE_HPHP_HSTRING) ||
@@ -583,6 +595,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	int state = stateForPrintState(StateToPrint);
 	char makoBlockType[200];
 	makoBlockType[0] = '\0';
+	char djangoBlockType[2];
+	djangoBlockType[0] = '\0';
 
 	// If inside a tag, it may be a script tag, so reread from the start to ensure any language tags are seen
 	if (InTagState(state)) {
@@ -667,6 +681,10 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	// property lexer.html.mako
 	//	Set to 1 to enable the mako template language.
 	const bool isMako = styler.GetPropertyInt("lexer.html.mako", 0) != 0;
+
+	// property lexer.html.django
+	//	Set to 1 to enable the django template language.  
+	const bool isDjango = styler.GetPropertyInt("lexer.html.django", 0) != 0;
 
 	const CharacterSet setHTMLWord(CharacterSet::setAlphaNum, ".-_:!#", 0x80, true);
 	const CharacterSet setTagContinue(CharacterSet::setAlphaNum, ".-_:!#[", 0x80, true);
@@ -931,8 +949,33 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			continue;
 		}
 
+		// handle the start Django template code
+		else if (isDjango && scriptLanguage == eScriptNone && (ch == '{' && (chNext == '%' ||  chNext == '{'))) {
+			if (chNext == '%')
+				strcpy(djangoBlockType, "%");
+			else
+				strcpy(djangoBlockType, "{");
+			styler.ColourTo(i - 1, StateToPrint);
+			beforePreProc = state;
+			if (inScriptType == eNonHtmlScript)
+				inScriptType = eNonHtmlScriptPreProc;
+			else
+				inScriptType = eNonHtmlPreProc;
+
+			i += 1;
+			visibleChars += 1;
+			state = SCE_HP_START;
+			scriptLanguage = eScriptPython;
+			styler.ColourTo(i, SCE_H_ASP);
+			if (foldHTMLPreprocessor && chNext == '%')
+				levelCurrent++;
+
+			ch = static_cast<unsigned char>(styler.SafeGetCharAt(i));
+			continue;
+		}
+
 		// handle the start of ASP pre-processor = Non-HTML
-		else if (!isMako && !isCommentASPState(state) && (ch == '<') && (chNext == '%') && !isPHPStringState(state)) {
+		else if (!isMako && !isDjango && !isCommentASPState(state) && (ch == '<') && (chNext == '%') && !isPHPStringState(state)) {
 			styler.ColourTo(i - 1, StateToPrint);
 			beforePreProc = state;
 			if (inScriptType == eNonHtmlScript)
@@ -1030,8 +1073,37 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			continue;
 		}
 
+		// handle the end of Django template code
+		else if (isDjango && 
+			     ((inScriptType == eNonHtmlPreProc) || (inScriptType == eNonHtmlScriptPreProc)) && 
+				 (scriptLanguage != eScriptNone) && stateAllowsTermination(state) &&
+				 isDjangoBlockEnd(ch, chNext, djangoBlockType)) {
+			if (state == SCE_H_ASPAT) {
+				aspScript = segIsScriptingIndicator(styler,
+				                                    styler.GetStartSegment(), i - 1, aspScript);
+			}
+			if (state == SCE_HP_WORD) {
+				classifyWordHTPy(styler.GetStartSegment(), i - 1, keywords4, styler, prevWord, inScriptType);
+			} else {
+				styler.ColourTo(i - 1, StateToPrint);
+			}
+			i += 1;
+			visibleChars += 1;
+			styler.ColourTo(i, SCE_H_ASP);
+			state = beforePreProc;
+			if (inScriptType == eNonHtmlScriptPreProc)
+				inScriptType = eNonHtmlScript;
+			else
+				inScriptType = eHtml;
+			if (foldHTMLPreprocessor) {
+				levelCurrent--;
+			}
+			scriptLanguage = eScriptNone;
+			continue;
+		}
+
 		// handle the end of a pre-processor = Non-HTML
-		else if ((!isMako && ((inScriptType == eNonHtmlPreProc) || (inScriptType == eNonHtmlScriptPreProc)) &&
+		else if ((!isMako && !isDjango && ((inScriptType == eNonHtmlPreProc) || (inScriptType == eNonHtmlScriptPreProc)) &&
 				  (((scriptLanguage != eScriptNone) && stateAllowsTermination(state))) &&
 				  (((ch == '%') || (ch == '?')) && (chNext == '>'))) ||
 		         ((scriptLanguage == eScriptSGML) && (ch == '>') && (state != SCE_H_SGML_COMMENT))) {
