@@ -195,6 +195,7 @@ private:
 	void NotifyKey(int key, int modifiers);
 	void NotifyURIDropped(const char *list);
 	const char *CharacterSetID() const;
+	virtual std::string CaseMapString(const std::string &s, int caseMapping);
 	virtual int KeyDefault(int key, int modifiers);
 	virtual void CopyToClipboard(const SelectionText &selectedText);
 	virtual void Copy();
@@ -892,6 +893,7 @@ void ScintillaGTK::StartDrag() {
 #ifdef USE_CONVERTER
 static char *ConvertText(int *lenResult, char *s, size_t len, const char *charSetDest,
 	const char *charSetSource, bool transliterations) {
+	// s is not const because of different versions of iconv disagreeing about const
 	*lenResult = 0;
 	char *destForm = 0;
 	Converter conv(charSetDest, charSetSource, transliterations);
@@ -1334,6 +1336,56 @@ const char *CharacterSetID(int characterSet);
 
 const char *ScintillaGTK::CharacterSetID() const {
 	return ::CharacterSetID(vs.styles[STYLE_DEFAULT].characterSet);
+}
+
+std::string ScintillaGTK::CaseMapString(const std::string &s, int caseMapping) {
+#if GTK_MAJOR_VERSION < 2
+	return Editor::CaseMapString(s, caseMapping);
+#else
+	if (s.size() == 0)
+		return std::string();
+
+	if (caseMapping == cmSame)
+		return s;
+
+	const char *needsFree1 = 0;	// Must be freed with delete []
+	const char *charSetBuffer = CharacterSetID();
+	const char *sUTF8 = s.c_str();
+	int rangeBytes = s.size();
+
+	int convertedLength = rangeBytes;
+	// Change text to UTF-8
+	if (!IsUnicodeMode()) {
+		// Need to convert
+		if (*charSetBuffer) {
+			sUTF8 = ConvertText(&convertedLength, const_cast<char *>(s.c_str()), rangeBytes,
+				"UTF-8", charSetBuffer, false);
+			needsFree1 = sUTF8;
+		}
+	}
+	gchar *mapped;	// Must be freed with g_free
+	if (caseMapping == cmUpper) {
+		mapped = g_utf8_strup(sUTF8, convertedLength);
+	} else {
+		mapped = g_utf8_strdown(sUTF8, convertedLength);
+	}
+	int mappedLength = strlen(mapped);
+	char *mappedBack = mapped;
+
+	char *needsFree2 = 0;	// Must be freed with delete []
+	if (!IsUnicodeMode()) {
+		if (*charSetBuffer) {
+			mappedBack = ConvertText(&mappedLength, mapped, mappedLength, charSetBuffer, "UTF-8", false);
+			needsFree2 = mappedBack;
+		}
+	}
+
+	std::string ret(mappedBack, mappedLength);
+	g_free(mapped);
+	delete []needsFree1;
+	delete []needsFree2;
+	return ret;
+#endif
 }
 
 int ScintillaGTK::KeyDefault(int key, int modifiers) {
