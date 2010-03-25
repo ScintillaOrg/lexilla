@@ -216,6 +216,7 @@ class ScintillaWin :
 	virtual int GetCtrlID();
 	virtual void NotifyParent(SCNotification scn);
 	virtual void NotifyDoubleClick(Point pt, bool shift, bool ctrl, bool alt);
+	virtual CaseFolder *CaseFolderForEncoding();
 	virtual std::string CaseMapString(const std::string &s, int caseMapping);
 	virtual void Copy();
 	virtual void CopyAllowLine();
@@ -1296,6 +1297,79 @@ void ScintillaWin::NotifyDoubleClick(Point pt, bool shift, bool ctrl, bool alt) 
 			  WM_LBUTTONDBLCLK,
 			  shift ? MK_SHIFT : 0,
 			  MAKELPARAM(pt.x, pt.y));
+}
+
+class CaseFolderUTF8  : public CaseFolderTable {
+	// Allocate the expandable storage here so that it does not need to be reallocated
+	// for each call to Fold.
+	std::vector<wchar_t> utf16Mixed;
+	std::vector<wchar_t> utf16Folded;
+public:
+	CaseFolderUTF8() {
+		StandardASCII();
+	}
+	virtual size_t Fold(char *folded, size_t sizeFolded, const char *mixed, size_t lenMixed) {
+		if ((lenMixed == 1) && (sizeFolded > 0)) {
+			folded[0] = mapping[static_cast<unsigned char>(mixed[0])];
+			return 1;
+		} else {
+			if (lenMixed > utf16Mixed.size()) {
+				utf16Mixed.resize(lenMixed + 8);
+			}
+			size_t nUtf16Mixed = ::MultiByteToWideChar(65001, 0, mixed, lenMixed,
+				&utf16Mixed[0], utf16Mixed.size());
+
+			if (nUtf16Mixed * 4 > utf16Folded.size()) {	// Maximum folding expansion factor of 4
+				utf16Folded.resize(nUtf16Mixed * 4 + 8);
+			}
+			int lenFlat = ::LCMapStringW(LOCALE_SYSTEM_DEFAULT,
+				LCMAP_LINGUISTIC_CASING | LCMAP_LOWERCASE,
+				&utf16Mixed[0], nUtf16Mixed, &utf16Folded[0], utf16Folded.size());
+
+			size_t lenOut = UTF8Length(&utf16Folded[0], lenFlat);
+			if (lenOut < sizeFolded) {
+				UTF8FromUTF16(&utf16Folded[0], lenFlat, folded, lenOut);
+				return lenOut;
+			} else {
+				return 0;
+			}
+		}
+	}
+};
+
+CaseFolder *ScintillaWin::CaseFolderForEncoding() {
+	UINT cpDest = CodePageOfDocument();
+	if (cpDest == SC_CP_UTF8) {
+		return new CaseFolderUTF8();
+	} else {
+		CaseFolderTable *pcf = new CaseFolderTable();
+		if (pdoc->dbcsCodePage == 0) {
+			pcf->StandardASCII();
+			// Only for single byte encodings
+			UINT cpDoc = CodePageOfDocument();
+			for (int i=0x80; i<0x100; i++) {
+				char sCharacter[2] = "A";
+				sCharacter[0] = static_cast<char>(i);
+				wchar_t wCharacter[20];
+				unsigned int lengthUTF16 = ::MultiByteToWideChar(cpDoc, 0, sCharacter, 1,
+					wCharacter, sizeof(wCharacter)/sizeof(wCharacter[0]));
+				if (lengthUTF16 == 1) {
+					wchar_t wLower[20];
+					int charsConverted = ::LCMapStringW(LOCALE_SYSTEM_DEFAULT,
+						LCMAP_LINGUISTIC_CASING | LCMAP_LOWERCASE,
+						wCharacter, lengthUTF16, wLower, sizeof(wLower)/sizeof(wLower[0]));
+					char sCharacterLowered[20];
+					unsigned int lengthConverted = ::WideCharToMultiByte(cpDoc, 0,
+						wLower, charsConverted,
+						sCharacterLowered, sizeof(sCharacterLowered), NULL, 0);
+					if ((lengthConverted == 1) && (sCharacter[0] != sCharacterLowered[0])) {
+						pcf->SetTranslation(sCharacter[0], sCharacterLowered[0]);
+					}
+				}
+			}
+		}
+		return pcf;
+	}
 }
 
 std::string ScintillaWin::CaseMapString(const std::string &s, int caseMapping) {

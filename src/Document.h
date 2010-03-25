@@ -115,6 +115,24 @@ struct StyledText {
 	}
 };
 
+class CaseFolder {
+public:
+	virtual ~CaseFolder() {
+	};
+	virtual size_t Fold(char *folded, size_t sizeFolded, const char *mixed, size_t lenMixed) = 0;
+};
+
+class CaseFolderTable : public CaseFolder {
+protected:
+	char mapping[256];
+public:
+	CaseFolderTable();
+	virtual ~CaseFolderTable();
+	virtual size_t Fold(char *folded, size_t sizeFolded, const char *mixed, size_t lenMixed);
+	void SetTranslation(char ch, char chTranslation);
+	void StandardASCII();
+};
+
 /**
  */
 class Document : PerLine {
@@ -254,9 +272,9 @@ public:
 	int NextWordEnd(int pos, int delta);
 	int Length() const { return cb.Length(); }
 	void Allocate(int newSize) { cb.Allocate(newSize); }
-	long FindText(int minPos, int maxPos, const char *s,
-		bool caseSensitive, bool word, bool wordStart, bool regExp, int flags, int *length);
-	long FindText(int iMessage, unsigned long wParam, long lParam);
+	size_t ExtractChar(int pos, char *bytes);
+	long FindText(int minPos, int maxPos, const char *s, bool caseSensitive, bool word,
+		bool wordStart, bool regExp, int flags, int *length, CaseFolder *pcf);
 	const char *SubstituteByPosition(const char *text, int *length);
 	int LinesTotal() const;
 

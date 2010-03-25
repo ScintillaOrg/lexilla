@@ -1109,6 +1109,84 @@ class TestCaseMapping(unittest.TestCase):
 		self.assertEquals(self.ed.Length, 1)
 		self.assertEquals(self.ed.Contents(), r)
 
+class TestCaseInsensitiveSearch(unittest.TestCase):
+	def setUp(self):
+		self.xite = XiteWin.xiteFrame
+		self.ed = self.xite.ed
+		self.ed.ClearAll()
+		self.ed.EmptyUndoBuffer()
+
+	def tearDown(self):
+		self.ed.SetCodePage(0)
+		self.ed.StyleSetCharacterSet(self.ed.STYLE_DEFAULT, self.ed.SC_CHARSET_DEFAULT)
+
+	def testEmpty(self):
+		text = b" x X"
+		searchString = b""
+		self.ed.SetText(len(text), text)
+		self.ed.TargetStart = 0
+		self.ed.TargetEnd = self.ed.Length-1
+		self.ed.SearchFlags = 0
+		pos = self.ed.SearchInTarget(len(searchString), searchString)
+		self.assertEquals(-1, pos)
+
+	def testASCII(self):
+		text = b" x X"
+		searchString = b"X"
+		self.ed.SetText(len(text), text)
+		self.ed.TargetStart = 0
+		self.ed.TargetEnd = self.ed.Length-1
+		self.ed.SearchFlags = 0
+		pos = self.ed.SearchInTarget(len(searchString), searchString)
+		self.assertEquals(1, pos)
+
+	def testLatin1(self):
+		text = "Frånd Åå".encode("Latin-1")
+		searchString = "Å".encode("Latin-1")
+		self.ed.SetText(len(text), text)
+		self.ed.TargetStart = 0
+		self.ed.TargetEnd = self.ed.Length-1
+		self.ed.SearchFlags = 0
+		pos = self.ed.SearchInTarget(len(searchString), searchString)
+		self.assertEquals(2, pos)
+
+	def testRussian(self):
+		self.ed.StyleSetCharacterSet(self.ed.STYLE_DEFAULT, self.ed.SC_CHARSET_RUSSIAN)
+		text = "=(Б tex б)".encode("Windows-1251")
+		searchString = "б".encode("Windows-1251")
+		self.ed.SetText(len(text), text)
+		self.ed.TargetStart = 0
+		self.ed.TargetEnd = self.ed.Length-1
+		self.ed.SearchFlags = 0
+		pos = self.ed.SearchInTarget(len(searchString), searchString)
+		self.assertEquals(2, pos)
+
+	def testUTF(self):
+		self.ed.SetCodePage(65001)
+		text = "Frånd Åå".encode("UTF-8")
+		searchString = "Å".encode("UTF-8")
+		self.ed.SetText(len(text), text)
+		self.ed.TargetStart = 0
+		self.ed.TargetEnd = self.ed.Length-1
+		self.ed.SearchFlags = 0
+		pos = self.ed.SearchInTarget(len(searchString), searchString)
+		self.assertEquals(2, pos)
+
+	def testUTFDifferentLength(self):
+		# Searching for a two byte string "ı" finds a single byte "I"
+		self.ed.SetCodePage(65001)
+		text = "Fråndi Ååİ $".encode("UTF-8")
+		firstPosition = len("Frånd".encode("UTF-8"))
+		searchString = "İ".encode("UTF-8")
+		self.assertEquals(len(searchString), 2)
+		self.ed.SetText(len(text), text)
+		self.ed.TargetStart = 0
+		self.ed.TargetEnd = self.ed.Length-1
+		self.ed.SearchFlags = 0
+		pos = self.ed.SearchInTarget(len(searchString), searchString)
+		self.assertEquals(firstPosition, pos)
+		self.assertEquals(firstPosition+1, self.ed.TargetEnd)
+
 class TestLexer(unittest.TestCase):
 	def setUp(self):
 		self.xite = XiteWin.xiteFrame

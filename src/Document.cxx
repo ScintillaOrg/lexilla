@@ -10,6 +10,17 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#include <string>
+#include <vector>
+
+// With Borland C++ 5.5, including <string> includes Windows.h leading to defining
+// FindText to FindTextA which makes calls here to Document::FindText fail.
+#ifdef __BORLANDC__
+#ifdef FindText
+#undef FindText
+#endif
+#endif
+
 #include "Platform.h"
 
 #include "Scintilla.h"
@@ -22,6 +33,7 @@
 #include "Decoration.h"
 #include "Document.h"
 #include "RESearch.h"
+#include "UniConversion.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -1074,6 +1086,57 @@ static inline char MakeLowerCase(char ch) {
 		return static_cast<char>(ch - 'A' + 'a');
 }
 
+static bool GoodTrailByte(int v) {
+	return (v >= 0x80) && (v < 0xc0);
+}
+
+size_t Document::ExtractChar(int pos, char *bytes) {
+	unsigned char ch = static_cast<unsigned char>(cb.CharAt(pos));
+	size_t widthChar = UTF8CharLength(ch);
+	bytes[0] = ch;
+	for (size_t i=1; i<widthChar; i++) {
+		bytes[i] = cb.CharAt(pos+i);
+		if (!GoodTrailByte(static_cast<unsigned char>(bytes[i]))) { // Bad byte
+			widthChar = 1;
+		}
+	}
+	return widthChar;
+}
+
+CaseFolderTable::CaseFolderTable() {
+	for (size_t iChar=0; iChar<sizeof(mapping); iChar++) {
+		mapping[iChar] = static_cast<char>(iChar);
+	}
+}
+
+CaseFolderTable::~CaseFolderTable() {
+}
+
+size_t CaseFolderTable::Fold(char *folded, size_t sizeFolded, const char *mixed, size_t lenMixed) {
+	if (lenMixed > sizeFolded) {
+		return 0;
+	} else {
+		for (size_t i=0; i<lenMixed; i++) {
+			folded[i] = mapping[static_cast<unsigned char>(mixed[i])];
+		}
+		return lenMixed;
+	}
+}
+
+void CaseFolderTable::SetTranslation(char ch, char chTranslation) {
+	mapping[static_cast<unsigned char>(ch)] = chTranslation;
+}
+
+void CaseFolderTable::StandardASCII() {
+	for (size_t iChar=0; iChar<sizeof(mapping); iChar++) {
+		if (iChar >= 'A' && iChar <= 'Z') {
+			mapping[iChar] = static_cast<char>(iChar - 'A' + 'a');
+		} else {
+			mapping[iChar] = static_cast<char>(iChar);
+		}
+	}
+}
+
 /**
  * Find text in document, supporting both forward and backward
  * searches (just pass minPos > maxPos to do a backward search)
@@ -1081,7 +1144,7 @@ static inline char MakeLowerCase(char ch) {
  */
 long Document::FindText(int minPos, int maxPos, const char *s,
                         bool caseSensitive, bool word, bool wordStart, bool regExp, int flags,
-                        int *length) {
+                        int *length, CaseFolder *pcf) {
 	if (regExp) {
 		if (!regex)
 			regex = CreateRegexSearch(&charClass);
@@ -1104,13 +1167,11 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 			endSearch = endPos - lengthFind + 1;
 		}
 		//Platform::DebugPrintf("Find %d %d %s %d\n", startPos, endPos, ft->lpstrText, lengthFind);
-		char firstChar = s[0];
-		if (!caseSensitive)
-			firstChar = static_cast<char>(MakeUpperCase(firstChar));
 		int pos = forward ? startPos : (startPos - 1);
-		while (forward ? (pos < endSearch) : (pos >= endSearch)) {
-			char ch = CharAt(pos);
-			if (caseSensitive) {
+		char firstChar = s[0];
+		if (caseSensitive) {
+			while (forward ? (pos < endSearch) : (pos >= endSearch)) {
+				char ch = CharAt(pos);
 				if (ch == firstChar) {
 					bool found = true;
 					if (pos + lengthFind > Platform::Maximum(startPos, endPos)) found = false;
@@ -1126,27 +1187,88 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 							return pos;
 					}
 				}
-			} else {
-				if (MakeUpperCase(ch) == firstChar) {
+				pos += increment;
+				if (dbcsCodePage && (pos >= 0)) {
+					// Ensure trying to match from start of character
+					pos = MovePositionOutsideChar(pos, increment, false);
+				}
+			}
+		} else if (SC_CP_UTF8 == dbcsCodePage) {
+			const size_t maxBytesCharacter = 4;
+			const size_t maxFoldingExpansion = 4;
+			int endMatch = Platform::Maximum(startPos, endPos);
+			std::vector<char> searchThing(*length * maxBytesCharacter * maxFoldingExpansion + 1);
+			size_t lenSearch = pcf->Fold(&searchThing[0], searchThing.size(), s, *length);
+			while (forward ? (pos < endSearch) : (pos >= endSearch)) {
+				bool matchChar = true;
+				int matchOff = 0;
+				int searchOff = 0;
+				int widthFirst = 0;
+				while (matchChar && (pos + matchOff < endMatch)) {
+					int widthChar;
+					char bytes[maxBytesCharacter + 1];
+					widthChar = ExtractChar(pos + matchOff, bytes);
+					bytes[maxBytesCharacter] = 0;
+					if (!widthFirst)
+						widthFirst = widthChar;
+					char folded[maxBytesCharacter * maxFoldingExpansion + 1];
+					int lenFlat = pcf->Fold(folded, sizeof(folded), bytes, widthChar);
+					folded[lenFlat] = 0;
+					// Does folded match the buffer
+					matchChar = 0 == strncmp(folded, &searchThing[0] + searchOff, lenFlat);
+					matchOff += widthChar;
+					searchOff += lenFlat;
+					if (searchOff >= static_cast<int>(lenSearch))
+						break;
+				}
+				if (matchChar && (searchOff == static_cast<int>(lenSearch))) {
+					if ((!word && !wordStart) ||
+					        (word && IsWordAt(pos, pos + lengthFind)) ||
+							(wordStart && IsWordStartAt(pos))) {
+						*length = matchOff;
+						return pos;
+					}
+				}
+				if (forward) {
+					pos += widthFirst;
+				} else {
+					pos--;
+					if (pos > 0) {
+						// Ensure trying to match from start of character
+						pos = MovePositionOutsideChar(pos, increment, false);
+					}
+				}
+			}
+		} else {
+			CaseFolderTable caseFolder;
+			std::vector<char> searchThing(*length + 1);
+			pcf->Fold(&searchThing[0], searchThing.size(), s, *length);
+			while (forward ? (pos < endSearch) : (pos >= endSearch)) {
+				char ch = CharAt(pos);
+				char folded[2];
+				pcf->Fold(folded, sizeof(folded), &ch, 1);
+				if (folded[0] == searchThing[0]) {
 					bool found = true;
 					if (pos + lengthFind > Platform::Maximum(startPos, endPos)) found = false;
 					for (int posMatch = 1; posMatch < lengthFind && found; posMatch++) {
 						ch = CharAt(pos + posMatch);
-						if (MakeUpperCase(ch) != MakeUpperCase(s[posMatch]))
+						pcf->Fold(folded, sizeof(folded), &ch, 1);
+						if (folded[0] != searchThing[posMatch])
 							found = false;
 					}
 					if (found) {
 						if ((!word && !wordStart) ||
 						        (word && IsWordAt(pos, pos + lengthFind)) ||
-						        (wordStart && IsWordStartAt(pos)))
+								(wordStart && IsWordStartAt(pos))) {
 							return pos;
+						}
 					}
 				}
-			}
-			pos += increment;
-			if (dbcsCodePage && (pos >= 0)) {
-				// Ensure trying to match from start of character
-				pos = MovePositionOutsideChar(pos, increment, false);
+				pos += increment;
+				if (dbcsCodePage && (pos >= 0)) {
+					// Ensure trying to match from start of character
+					pos = MovePositionOutsideChar(pos, increment, false);
+				}
 			}
 		}
 	}
