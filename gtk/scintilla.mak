@@ -1,16 +1,12 @@
 # Make file for GTK+/Scintilla on Windows Visual C++
 # Borland C++ does not work
-# Copyright 1998-2000 by Neil Hodgson <neilh@scintilla.org>
+# Copyright 1998-2010 by Neil Hodgson <neilh@scintilla.org>
 # The License.txt file describes the conditions under which this software may be distributed.
-# This makefile is for using Visual C++ with nmake or Borland C++ with make depending on
-# the setting of the VENDOR macro. If no VENDOR is defined n the command line then
-# the tool used is automatically detected.
-# Usage for Microsoft:
+# This makefile is for using Visual C++ with nmake.
+# Usage:
 #     nmake -f scintilla.mak
-# Usage for Borland:
-#     make -f scintilla.mak
-# For debug versions define DEBUG on the command line, for Borland:
-#     make DEBUG=1 -f scintilla.mak
+# For debug versions define DEBUG on the command line:
+#     nmake DEBUG=1 -f scintilla.mak
 # The main makefile uses mingw32 gcc and may be more current than this file.
 
 .SUFFIXES: .cxx
