@@ -329,6 +329,10 @@ class TestSimple(unittest.TestCase):
 		searchString = b"\([1-9]+\)"
 		pos = self.ed.SearchInTarget(len(searchString), searchString)
 		self.assertEquals(1, pos)
+		tagString = b"abcdefghijklmnop"
+		lenTag = self.ed.GetTag(1, tagString)
+		tagString = tagString[:lenTag]
+		self.assertEquals(tagString, b"321")
 		rep = b"\\1"
 		self.ed.TargetStart = 0
 		self.ed.TargetEnd = 0
@@ -409,7 +413,7 @@ class TestContainerUndo(unittest.TestCase):
 		self.assertEquals(self.ed.Length, 2)
 		self.assertEquals(self.UndoState(), MODI | UNDO)
 		self.ed.Undo()
-	
+
 	def testContainerActCoalesce(self):
 		self.ed.InsertText(0, self.data)
 		self.ed.AddUndoAction(5, 1)
@@ -685,7 +689,7 @@ class TestMarkers(unittest.TestCase):
 		self.assertEquals(self.ed.GetLineState(0), 0)
 		self.assertEquals(self.ed.GetLineState(1), 100)
 		self.assertEquals(self.ed.GetLineState(2), 0)
-		
+
 	def testSymbolRetrieval(self):
 		self.ed.MarkerDefine(1,3)
 		self.assertEquals(self.ed.MarkerSymbolDefined(1), 3)
@@ -844,7 +848,7 @@ class TestTextMargin(unittest.TestCase):
 		self.xite.DoEvents()
 		lineHeightIncreased = self.ed.TextHeight(0)
 		self.assertEquals(lineHeightIncreased, lineHeight + 2 + 1)
-		
+
 	def testTextMargin(self):
 		self.ed.MarginSetText(0, self.txt)
 		result = b"\0" * 10
@@ -1128,7 +1132,7 @@ class TestCaseInsensitiveSearch(unittest.TestCase):
 		self.ed.TargetEnd = self.ed.Length-1
 		self.ed.SearchFlags = 0
 		pos = self.ed.SearchInTarget(len(searchString), searchString)
-		self.assertEquals(-1, pos)
+		self.assertEquals(0, pos)
 
 	def testASCII(self):
 		text = b" x X"
@@ -1193,7 +1197,7 @@ class TestLexer(unittest.TestCase):
 		self.ed = self.xite.ed
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
-		
+
 	def testLexerNumber(self):
 		self.ed.Lexer = self.ed.SCLEX_CPP
 		self.assertEquals(self.ed.GetLexer(), self.ed.SCLEX_CPP)

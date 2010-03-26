@@ -1233,6 +1233,9 @@ set void SetMultiPaste=2614(int multiPaste,)
 # Retrieve the effect of pasting when there are multiple selections..
 get int GetMultiPaste=2615(,)
 
+# Retrieve the value of a tag from a regular expression search.
+fun int GetTag=2616(int tagNumber, stringresult tagValue)
+
 # Make the target range start and end be the same as the selection range start and end.
 fun void TargetFromSelection=2287(,)
 

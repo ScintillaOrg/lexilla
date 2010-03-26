@@ -473,6 +473,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void Expand(int &line, bool doExpand);
 	void ToggleContraction(int line);
 	void EnsureLineVisible(int lineDoc, bool enforcePolicy);
+	int GetTag(char *tagValue, int tagNumber);
 	int ReplaceTarget(bool replacePatterns, const char *text, int length=-1);
 
 	bool PositionIsHotspot(int position);

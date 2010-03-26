@@ -772,6 +772,7 @@ struct Sci_TextToFind {
     *text)</a><br />
      <a class="message" href="#SCI_REPLACETARGETRE">SCI_REPLACETARGETRE(int length, const char
     *text)</a><br />
+     <a class="message" href="#SCI_GETTAG">SCI_GETTAG(int tagNumber, char *tagValue)</a><br />
     </code>
 
     <p><b id="SCI_SETTARGETSTART">SCI_SETTARGETSTART(int pos)</b><br />
@@ -817,6 +818,10 @@ struct Sci_TextToFind {
     expression search.
            After replacement, the target range refers to the replacement text.
            The return value is the length of the replacement string.</p>
+
+    <p><b id="SCI_GETTAG">SCI_GETTAG(int tagNumber, char *tagValue)</b><br />
+     Discover what text was matched by tagged expressions in a regular expression search.
+     This is useful if the application wants to interpret the replacement string itself.</p>
 
     <p>See also: <a class="message" href="#SCI_FINDTEXT"><code>SCI_FINDTEXT</code></a></p>
 
@@ -2770,7 +2775,7 @@ struct Sci_TextToFind {
      The whole of the text margin on a line may be displayed in a particular style with
      <code>SCI_MARGINSETSTYLE</code> or each character may be individually styled with
      <code>SCI_MARGINSETSTYLES</code> which uses an array of bytes with each byte setting the style
-     of the corresponding text byte simlar to <code>SCI_SETSTYLINGEX</code>.
+     of the corresponding text byte similar to <code>SCI_SETSTYLINGEX</code>.
      Setting a text margin will cause a
      <a class="message" href="#SC_MOD_CHANGEMARGIN"><code>SC_MOD_CHANGEMARGIN</code></a>
      notification to be sent.
@@ -2822,7 +2827,7 @@ struct Sci_TextToFind {
      The whole of the text ANNOTATION on a line may be displayed in a particular style with
      <code>SCI_ANNOTATIONSETSTYLE</code> or each character may be individually styled with
      <code>SCI_ANNOTATIONSETSTYLES</code> which uses an array of bytes with each byte setting the style
-     of the corresponding text byte simlar to <code>SCI_SETSTYLINGEX</code>. The text must be set first as it
+     of the corresponding text byte similar to <code>SCI_SETSTYLINGEX</code>. The text must be set first as it
      specifies how long the annotation is so how many bytes of styling to read.
      Setting an annotation will cause a
      <a class="message" href="#SC_MOD_CHANGEANNOTATION"><code>SC_MOD_CHANGEANNOTATION</code></a>

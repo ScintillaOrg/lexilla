@@ -6377,6 +6377,24 @@ void Editor::EnsureLineVisible(int lineDoc, bool enforcePolicy) {
 	}
 }
 
+int Editor::GetTag(char *tagValue, int tagNumber) {
+	char name[3] = "\\?";
+	const char *text = 0;
+	int length = 0;
+	if ((tagNumber >= 1) && (tagNumber <= 9)) {
+		name[1] = tagNumber + '0';
+		length = 2;
+		text = pdoc->SubstituteByPosition(name, &length);
+	}
+	if (tagValue) {
+		if (text)
+			memcpy(tagValue, text, length + 1);
+		else
+			*tagValue = '\0';
+	}
+	return length;
+}
+
 int Editor::ReplaceTarget(bool replacePatterns, const char *text, int length) {
 	UndoGroup ug(pdoc);
 	if (length == -1)
@@ -6760,6 +6778,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETSEARCHFLAGS:
 		return searchFlags;
+
+	case SCI_GETTAG:
+		return GetTag(CharPtrFromSPtr(lParam), wParam);
 
 	case SCI_POSITIONBEFORE:
 		return pdoc->MovePositionOutsideChar(wParam - 1, -1, true);

@@ -490,6 +490,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_MULTIPASTE_EACH 1
 #define SCI_SETMULTIPASTE 2614
 #define SCI_GETMULTIPASTE 2615
+#define SCI_GETTAG 2616
 #define SCI_TARGETFROMSELECTION 2287
 #define SCI_LINESJOIN 2288
 #define SCI_LINESSPLIT 2289
