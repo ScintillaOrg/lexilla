@@ -981,7 +981,7 @@ int Document::ExtendWordSelect(int pos, int delta, bool onlyWordCharacters) {
 		while (pos < (Length()) && (WordCharClass(cb.CharAt(pos)) == ccStart))
 			pos++;
 	}
-	return MovePositionOutsideChar(pos, delta);
+	return MovePositionOutsideChar(pos, delta, true);
 }
 
 /**
@@ -1137,58 +1137,53 @@ void CaseFolderTable::StandardASCII() {
 	}
 }
 
+bool Document::MatchesWordOptions(bool word, bool wordStart, int pos, int length) {
+	return (!word && !wordStart) ||
+			(word && IsWordAt(pos, pos + length)) ||
+			(wordStart && IsWordStartAt(pos));
+}
+
 /**
  * Find text in document, supporting both forward and backward
  * searches (just pass minPos > maxPos to do a backward search)
  * Has not been tested with backwards DBCS searches yet.
  */
-long Document::FindText(int minPos, int maxPos, const char *s,
+long Document::FindText(int minPos, int maxPos, const char *search,
                         bool caseSensitive, bool word, bool wordStart, bool regExp, int flags,
                         int *length, CaseFolder *pcf) {
 	if (regExp) {
 		if (!regex)
 			regex = CreateRegexSearch(&charClass);
-		return regex->FindText(this, minPos, maxPos, s, caseSensitive, word, wordStart, flags, length);
+		return regex->FindText(this, minPos, maxPos, search, caseSensitive, word, wordStart, flags, length);
 	} else {
 
-		bool forward = minPos <= maxPos;
-		int increment = forward ? 1 : -1;
+		const bool forward = minPos <= maxPos;
+		const int increment = forward ? 1 : -1;
 
 		// Range endpoints should not be inside DBCS characters, but just in case, move them.
-		int startPos = MovePositionOutsideChar(minPos, increment, false);
-		int endPos = MovePositionOutsideChar(maxPos, increment, false);
+		const int startPos = MovePositionOutsideChar(minPos, increment, false);
+		const int endPos = MovePositionOutsideChar(maxPos, increment, false);
 
 		// Compute actual search ranges needed
-		int lengthFind = *length;
-		if (lengthFind == -1)
-			lengthFind = static_cast<int>(strlen(s));
-		int endSearch = endPos;
-		if (startPos <= endPos) {
-			endSearch = endPos - lengthFind + 1;
-		}
+		const int lengthFind = (*length == -1) ? static_cast<int>(strlen(search)) : *length;
+		const int endSearch = (startPos <= endPos) ? endPos - lengthFind + 1 : endPos;
+
 		//Platform::DebugPrintf("Find %d %d %s %d\n", startPos, endPos, ft->lpstrText, lengthFind);
+		const int limitPos = Platform::Maximum(startPos, endPos);
 		int pos = forward ? startPos : (startPos - 1);
-		char firstChar = s[0];
 		if (caseSensitive) {
 			while (forward ? (pos < endSearch) : (pos >= endSearch)) {
-				char ch = CharAt(pos);
-				if (ch == firstChar) {
-					bool found = true;
-					if (pos + lengthFind > Platform::Maximum(startPos, endPos)) found = false;
-					for (int posMatch = 1; posMatch < lengthFind && found; posMatch++) {
-						ch = CharAt(pos + posMatch);
-						if (ch != s[posMatch])
-							found = false;
-					}
-					if (found) {
-						if ((!word && !wordStart) ||
-						        (word && IsWordAt(pos, pos + lengthFind)) ||
-						        (wordStart && IsWordStartAt(pos)))
-							return pos;
-					}
+				bool found = (pos + lengthFind) <= limitPos;
+				for (int indexSearch = 0; (indexSearch < lengthFind) && found; indexSearch++) {
+					found = CharAt(pos + indexSearch) == search[indexSearch];
+				}
+				if (found && MatchesWordOptions(word, wordStart, pos, lengthFind)) {
+					return pos;
 				}
 				pos += increment;
 				if (dbcsCodePage && (pos >= 0)) {
+					// Have to use >= 0 as otherwise next statement would change 
+					// -1 to 0 and make loop infinite.
 					// Ensure trying to match from start of character
 					pos = MovePositionOutsideChar(pos, increment, false);
 				}
@@ -1196,41 +1191,37 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 		} else if (SC_CP_UTF8 == dbcsCodePage) {
 			const size_t maxBytesCharacter = 4;
 			const size_t maxFoldingExpansion = 4;
-			int endMatch = Platform::Maximum(startPos, endPos);
-			std::vector<char> searchThing(*length * maxBytesCharacter * maxFoldingExpansion + 1);
-			size_t lenSearch = pcf->Fold(&searchThing[0], searchThing.size(), s, *length);
+			std::vector<char> searchThing(lengthFind * maxBytesCharacter * maxFoldingExpansion + 1);
+			const int lenSearch = pcf->Fold(&searchThing[0], searchThing.size(), search, lengthFind);
 			while (forward ? (pos < endSearch) : (pos >= endSearch)) {
-				bool matchChar = true;
-				int matchOff = 0;
-				int searchOff = 0;
-				int widthFirst = 0;
-				while (matchChar && (pos + matchOff < endMatch)) {
-					int widthChar;
+				int widthFirstCharacter = 0;
+				int indexDocument = 0;
+				int indexSearch = 0;
+				bool characterMatches = true;
+				while (characterMatches && 
+					((pos + indexDocument) < limitPos) && 
+					(indexSearch < lenSearch)) {
 					char bytes[maxBytesCharacter + 1];
-					widthChar = ExtractChar(pos + matchOff, bytes);
 					bytes[maxBytesCharacter] = 0;
-					if (!widthFirst)
-						widthFirst = widthChar;
+					const int widthChar = ExtractChar(pos + indexDocument, bytes);
+					if (!widthFirstCharacter)
+						widthFirstCharacter = widthChar;
 					char folded[maxBytesCharacter * maxFoldingExpansion + 1];
-					int lenFlat = pcf->Fold(folded, sizeof(folded), bytes, widthChar);
+					const int lenFlat = pcf->Fold(folded, sizeof(folded), bytes, widthChar);
 					folded[lenFlat] = 0;
 					// Does folded match the buffer
-					matchChar = 0 == strncmp(folded, &searchThing[0] + searchOff, lenFlat);
-					matchOff += widthChar;
-					searchOff += lenFlat;
-					if (searchOff >= static_cast<int>(lenSearch))
-						break;
+					characterMatches = 0 == memcmp(folded, &searchThing[0] + indexSearch, lenFlat);
+					indexDocument += widthChar;
+					indexSearch += lenFlat;
 				}
-				if (matchChar && (searchOff == static_cast<int>(lenSearch))) {
-					if ((!word && !wordStart) ||
-					        (word && IsWordAt(pos, pos + lengthFind)) ||
-							(wordStart && IsWordStartAt(pos))) {
-						*length = matchOff;
+				if (characterMatches && (indexSearch == static_cast<int>(lenSearch))) {
+					if (MatchesWordOptions(word, wordStart, pos, indexDocument)) {
+						*length = indexDocument;
 						return pos;
 					}
 				}
 				if (forward) {
-					pos += widthFirst;
+					pos += widthFirstCharacter;
 				} else {
 					pos--;
 					if (pos > 0) {
@@ -1241,28 +1232,18 @@ long Document::FindText(int minPos, int maxPos, const char *s,
 			}
 		} else {
 			CaseFolderTable caseFolder;
-			std::vector<char> searchThing(*length + 1);
-			pcf->Fold(&searchThing[0], searchThing.size(), s, *length);
+			std::vector<char> searchThing(lengthFind + 1);
+			pcf->Fold(&searchThing[0], searchThing.size(), search, lengthFind);
 			while (forward ? (pos < endSearch) : (pos >= endSearch)) {
-				char ch = CharAt(pos);
-				char folded[2];
-				pcf->Fold(folded, sizeof(folded), &ch, 1);
-				if (folded[0] == searchThing[0]) {
-					bool found = true;
-					if (pos + lengthFind > Platform::Maximum(startPos, endPos)) found = false;
-					for (int posMatch = 1; posMatch < lengthFind && found; posMatch++) {
-						ch = CharAt(pos + posMatch);
-						pcf->Fold(folded, sizeof(folded), &ch, 1);
-						if (folded[0] != searchThing[posMatch])
-							found = false;
-					}
-					if (found) {
-						if ((!word && !wordStart) ||
-						        (word && IsWordAt(pos, pos + lengthFind)) ||
-								(wordStart && IsWordStartAt(pos))) {
-							return pos;
-						}
-					}
+				bool found = (pos + lengthFind) <= limitPos;
+				for (int indexSearch = 0; (indexSearch < lengthFind) && found; indexSearch++) {
+					char ch = CharAt(pos + indexSearch);
+					char folded[2];
+					pcf->Fold(folded, sizeof(folded), &ch, 1);
+					found = folded[0] == searchThing[indexSearch];
+				}
+				if (found && MatchesWordOptions(word, wordStart, pos, lengthFind)) {
+					return pos;
 				}
 				pos += increment;
 				if (dbcsCodePage && (pos >= 0)) {
@@ -1691,7 +1672,7 @@ int Document::BraceMatch(int position, int /*maxReStyle*/) {
 	int depth = 1;
 	position = position + direction;
 	while ((position >= 0) && (position < Length())) {
-		position = MovePositionOutsideChar(position, direction);
+		position = MovePositionOutsideChar(position, direction, true);
 		char chAtPos = CharAt(position);
 		char styAtPos = static_cast<char>(StyleAt(position) & stylingBitsMask);
 		if ((position > GetEndStyled()) || (styAtPos == styBrace)) {

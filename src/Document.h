@@ -273,7 +273,8 @@ public:
 	int Length() const { return cb.Length(); }
 	void Allocate(int newSize) { cb.Allocate(newSize); }
 	size_t ExtractChar(int pos, char *bytes);
-	long FindText(int minPos, int maxPos, const char *s, bool caseSensitive, bool word,
+	bool MatchesWordOptions(bool word, bool wordStart, int pos, int length);
+	long FindText(int minPos, int maxPos, const char *search, bool caseSensitive, bool word,
 		bool wordStart, bool regExp, int flags, int *length, CaseFolder *pcf);
 	const char *SubstituteByPosition(const char *text, int *length);
 	int LinesTotal() const;
