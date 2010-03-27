@@ -1832,6 +1832,7 @@ static bool GoodTrailByte(int v) {
 }
 
 bool BadUTF(const char *s, int len, int &trailBytes) {
+	// For the rules: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
 	if (trailBytes) {
 		trailBytes--;
 		return false;
@@ -1848,6 +1849,23 @@ bool BadUTF(const char *s, int len, int &trailBytes) {
 		if (len < 4)
 			return true;
 		if (GoodTrailByte(us[1]) && GoodTrailByte(us[2]) && GoodTrailByte(us[3])) {
+			if (*us == 0xf4) {
+				// Chcek if encoding a value beyond the last Unicode character 10FFFF
+				if (us[1] > 0x8f) {
+					return true;
+				} else if (us[1] == 0x8f) {
+					if (us[2] > 0xbf) {
+						return true;
+					} else if (us[2] == 0xbf) {
+						if (us[3] > 0xbf) {
+							return true;
+						}
+					}
+				}
+			} else if ((*us == 0xf0) && ((us[1] & 0xf0) == 0x80)) {
+				// Overlong
+				return true;
+			}
 			trailBytes = 3;
 			return false;
 		} else {
@@ -1858,6 +1876,22 @@ bool BadUTF(const char *s, int len, int &trailBytes) {
 		if (len < 3)
 			return true;
 		if (GoodTrailByte(us[1]) && GoodTrailByte(us[2])) {
+			if ((*us == 0xe0) && ((us[1] & 0xe0) == 0x80)) {
+				// Overlong
+				return true;
+			}
+			if ((*us == 0xed) && ((us[1] & 0xe0) == 0xa0)) {
+				// Surrogate
+				return true;
+			}
+			if ((*us == 0xef) && (us[1] == 0xbf) && (us[2] == 0xbe)) {
+				// U+FFFE
+				return true;
+			}
+			if ((*us == 0xef) && (us[1] == 0xbf) && (us[2] == 0xbf)) {
+				// U+FFFF
+				return true;
+			}
 			trailBytes = 2;
 			return false;
 		} else {
@@ -4558,9 +4592,9 @@ void Editor::ChangeCaseOfSelection(int caseMapping) {
 				while (sMapped[lastDifference] == sText[lastDifference])
 					lastDifference--;
 				size_t endSame = sMapped.size() - 1 - lastDifference;
-				pdoc->DeleteChars(currentNoVS.Start().Position() + firstDifference, 
+				pdoc->DeleteChars(currentNoVS.Start().Position() + firstDifference,
 					rangeBytes - firstDifference - endSame);
-				pdoc->InsertString(currentNoVS.Start().Position() + firstDifference, 
+				pdoc->InsertString(currentNoVS.Start().Position() + firstDifference,
 					sMapped.c_str() + firstDifference, lastDifference - firstDifference + 1);
 				// Automatic movement changes selection so reset to exactly the same as it was.
 				sel.Range(r) = current;
