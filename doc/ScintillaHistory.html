@@ -363,75 +363,79 @@
 	Released 7 April 2010.
 	</li>
 	<li>
-	Support for version 1.x of GTK+ removed.
+	Version 1.x of GTK+ is no longer supported.
 	</li>
 	<li>
-	Case-insensitive search for non-ASCII.
+	Case-insensitive search works for non-ASCII characters in UTF-8 and 8-bit encodings.
 	</li>
 	<li>
-	Upper and lower casing for non-ASCII.
+	Non-ASCII characters may be changed to upper and lower case.
 	</li>
 	<li>
 	SciTE on Windows can access all files including those with names outside the user's preferred character encoding.
 	</li>
 	<li>
-	Multiple paste option.
+	When there are multiple selections, the paste command can go either to the main selection or to each
+	selection. This is controlled with SCI_SETMULTIPASTE.
 	</li>
 	<li>
-	Detects more forms of bad UTF-8 including overlong sequences, surrogates, and characters outside
-	the valid range.
+	More forms of bad UTF-8 are detected including overlong sequences, surrogates, and characters outside
+	the valid range. Bad UTF-8 bytes are now displayed as 2 hex digits preceded by 'x'.
 	</li>
 	<li>
 	SCI_GETTAG retrieves the value of captured expressions within regular expression searches.
 	</li>
 	<li>
-	Rectangular selection expansion
-	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2948260&group_id=2439">Bug #2948260.</a>
-	</li>
-	<li>
-	up/down-arrow column stickiness confused by horiz scroll
-	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2950799&group_id=2439">Bug #2950799.</a>
-	</li>
-	<li>
-	mouse leave cancels hotspot
-	<a href="https://sourceforge.net/tracker/?func=detail&aid=2951353&group_id=2439&atid=102439">Bug #2951353.</a>
-	</li>
-	<li>
-	R Lexer is case insensitive for keywords
-	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2956543&group_id=2439">Bug #2956543.</a>
-	</li>
-	<li>
-	Text disappears when the "wrap" option is on
-	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2958043&group_id=2439">Bug #2958043.</a>
-	</li>
-	<li>
-	Regular expression replace cannot escape \\
-	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2959876&group_id=2439">Bug #2959876.</a>
-	</li>
-	<li>
-	Middle-click paste inserts text beyond end of line
-	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2971618&group_id=2439">Bug #2971618.</a>
-	</li>
-	<li>
-	Crash, Output pane
-	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2976551&group_id=2439">Bug #2976551.</a>
-	</li>
-	<li>
-	Django template highlighting
+	Django template highlighting added to the HTML lexer.
 	<a href="https://sourceforge.net/tracker/?func=detail&atid=352439&aid=2974889&group_id=2439">Feature #2974889.</a>
 	</li>
 	<li>
-	save not showing any file types
+	Verilog line comments can be folded.
+	</li>
+	<li>
+	SciTE on Windows allows specifying a filter for the Save As dialog.
 	<a href="https://sourceforge.net/tracker/?func=detail&atid=352439&aid=2943445&group_id=2439">Feature #2943445.</a>
 	</li>
 	<li>
-	verilog line comment folding
+	Bug fixed when multiple selection disabled where rectangular selections could be expanded into multiple selections.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2948260&group_id=2439">Bug #2948260.</a>
+	</li>
+	<li>
+	Bug fixed when document horizontally scrolled and up/down-arrow did not return to the same
+	column after horizontal scroll occurred.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2950799&group_id=2439">Bug #2950799.</a>
+	</li>
+	<li>
+	Bug fixed to remove hotspot highlight when mouse is moved out of the document. Windows only fix.
+	<a href="https://sourceforge.net/tracker/?func=detail&aid=2951353&group_id=2439&atid=102439">Bug #2951353.</a>
+	</li>
+	<li>
+	R lexer now performs case-sensitive check for keywords.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2956543&group_id=2439">Bug #2956543.</a>
+	</li>
+	<li>
+	Bug fixed on GTK+ where text disappeared when a wrap occurred.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2958043&group_id=2439">Bug #2958043.</a>
+	</li>
+	<li>
+	Bug fixed where regular expression replace cannot escape the '\' character by using '\\'.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2959876&group_id=2439">Bug #2959876.</a>
+	</li>
+	<li>
+	Bug fixed on GTK+ when virtual space disabled, middle-click could still paste text beyond end of line.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2971618&group_id=2439">Bug #2971618.</a>
+	</li>
+	<li>
+	SciTE crash fixed when double clicking on a malformed error message in the output pane.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2976551&group_id=2439">Bug #2976551.</a>
 	</li>
 	<li>
 	Improved performance on GTK+ when changing parameters associated with scroll bars to the same value.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=352439&aid=2964357&group_id=2439">Bug #2964357.</a>
 	</li>
 	<li>
-	rectangular selection, un-indenting fix.
+	Fixed bug with pressing Shift+Tab with a rectangular selection so that it performs an un-indent
+	similar to how Tab performs an indent.
 	</li>
     </ul>
     <h3>
@@ -936,8 +940,8 @@
 	</li>
 	<li>
 	Incorrect memory freeing fixed on OS X.
-	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2354098&group_id=2439">Bug #2354098,</a>
-	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2671749&group_id=2439">#2671749.</a>
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2354098&group_id=2439">Bug #2354098</a>,
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=2671749&group_id=2439">Bug #2671749.</a>
 	</li>
 	<li>
 	SciTE on GTK+ crash fixed on startup when child process exits before initialisation complete.
