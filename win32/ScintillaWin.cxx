@@ -1567,10 +1567,10 @@ void ScintillaWin::Paste() {
 				// CF_UNICODETEXT available, but not in Unicode mode
 				// Convert from Unicode to current Scintilla code page
 				UINT cpDest = CodePageOfDocument();
-				len = ::WideCharToMultiByte(cpDest, 0, uptr, memUSelection.Size() / 2,
+				len = ::WideCharToMultiByte(cpDest, 0, uptr, -1,
 				                            NULL, 0, NULL, NULL) - 1; // subtract 0 terminator
 				putf = new char[len + 1];
-				::WideCharToMultiByte(cpDest, 0, uptr, memUSelection.Size() / 2,
+				::WideCharToMultiByte(cpDest, 0, uptr, -1,
 					                      putf, len + 1, NULL, NULL);
 			}
 

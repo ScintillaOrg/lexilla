@@ -857,7 +857,7 @@ char *Document::TransformLineEnds(int *pLenOut, const char *s, size_t len, int e
 	char *dest = new char[2 * len + 1];
 	const char *sptr = s;
 	char *dptr = dest;
-	for (size_t i = 0; i < len; i++) {
+	for (size_t i = 0; (i < len) && (*sptr != '\0'); i++) {
 		if (*sptr == '\n' || *sptr == '\r') {
 			if (eolMode == SC_EOL_CR) {
 				*dptr++ = '\r';
