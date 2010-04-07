@@ -11,18 +11,14 @@
 #ifndef SCINTILLA_H
 #define SCINTILLA_H
 
-#if LCCWIN
-typedef BOOL bool;
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #if defined(_WIN32)
 /* Return false on failure: */
-bool Scintilla_RegisterClasses(void *hInstance);
-bool Scintilla_ReleaseResources();
+int Scintilla_RegisterClasses(void *hInstance);
+int Scintilla_ReleaseResources();
 #endif
 int Scintilla_LinkLexers();
 

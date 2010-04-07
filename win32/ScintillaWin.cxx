@@ -2682,7 +2682,7 @@ sptr_t PASCAL ScintillaWin::SWndProc(
 
 // This function is externally visible so it can be called from container when building statically.
 // Must be called once only.
-bool Scintilla_RegisterClasses(void *hInstance) {
+int Scintilla_RegisterClasses(void *hInstance) {
 	Platform_Initialise(hInstance);
 	bool result = ScintillaWin::Register(reinterpret_cast<HINSTANCE>(hInstance));
 #ifdef SCI_LEXER
@@ -2692,7 +2692,7 @@ bool Scintilla_RegisterClasses(void *hInstance) {
 }
 
 // This function is externally visible so it can be called from container when building statically.
-bool Scintilla_ReleaseResources() {
+int Scintilla_ReleaseResources() {
 	bool result = ScintillaWin::Unregister();
 	Platform_Finalise();
 	return result;
