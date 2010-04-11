@@ -1612,6 +1612,7 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 			if (OwnPrimarySelection() && primary.s == NULL)
 				CopySelectionRange(&primary);
 
+			sel.Clear();
 			SetSelection(pos, pos);
 			atomSought = atomUTF8;
 			gtk_selection_convert(GTK_WIDGET(PWidget(wMain)), GDK_SELECTION_PRIMARY,
