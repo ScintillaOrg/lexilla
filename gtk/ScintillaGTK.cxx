@@ -701,7 +701,7 @@ void ScintillaGTK::StartDrag() {
 }
 
 static char *ConvertText(int *lenResult, char *s, size_t len, const char *charSetDest,
-	const char *charSetSource, bool transliterations) {
+	const char *charSetSource, bool transliterations, bool silent=false) {
 	// s is not const because of different versions of iconv disagreeing about const
 	*lenResult = 0;
 	char *destForm = 0;
@@ -714,7 +714,9 @@ static char *ConvertText(int *lenResult, char *s, size_t len, const char *charSe
 		size_t outLeft = len*3+1;
 		size_t conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
 		if (conversions == ((size_t)(-1))) {
-fprintf(stderr, "iconv %s->%s failed for %s\n", charSetSource, charSetDest, static_cast<char *>(s));
+			if (!silent)
+				fprintf(stderr, "iconv %s->%s failed for %s\n", 
+					charSetSource, charSetDest, static_cast<char *>(s));
 			delete []destForm;
 			destForm = 0;
 		} else {
@@ -1104,7 +1106,7 @@ CaseFolder *ScintillaGTK::CaseFolderForEncoding() {
 					if (mapped) {
 						int mappedLength = strlen(mapped);
 						const char *mappedBack = ConvertText(&mappedLength, mapped,
-							mappedLength, charSetBuffer, "UTF-8", false);
+							mappedLength, charSetBuffer, "UTF-8", false, true);
 						if (mappedBack && (strlen(mappedBack) == 1) && (mappedBack[0] != sCharacter[0])) {
 							pcf->SetTranslation(sCharacter[0], mappedBack[0]);
 						}
