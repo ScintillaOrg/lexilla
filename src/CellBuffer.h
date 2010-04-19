@@ -37,7 +37,7 @@ public:
 	void SetPerLine(PerLine *pl);
 
 	void InsertText(int line, int delta);
-	void InsertLine(int line, int position);
+	void InsertLine(int line, int position, bool lineStart);
 	void SetLineStart(int line, int position);
 	void RemoveLine(int line);
 	int Lines() const {
@@ -159,7 +159,7 @@ public:
 	int Lines() const;
 	int LineStart(int line) const;
 	int LineFromPosition(int pos) const { return lv.LineFromPosition(pos); }
-	void InsertLine(int line, int position);
+	void InsertLine(int line, int position, bool lineStart);
 	void RemoveLine(int line);
 	const char *InsertString(int position, const char *s, int insertLength, bool &startSequence);
 
