@@ -1,10 +1,8 @@
 # Make file for Scintilla on Windows
-# Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
+# Copyright 1998-2010 by Neil Hodgson <neilh@scintilla.org>
 # The License.txt file describes the conditions under which this software may be distributed.
-# This makefile assumes the mingw32 version of GCC 2.95.3 is used and changes will
+# This makefile assumes the mingw32 version of GCC 3.x or 4.x is used and changes will
 # be needed to use other compilers.
-# The -fvtable-thunks option is required for older (2.9*) versions of gcc but can be removed
-# safely if using a newer version which may display warning messages.
 
 .SUFFIXES: .cxx
 CC = g++
@@ -15,21 +13,13 @@ COMPONENT = ../bin/Scintilla.dll
 LEXCOMPONENT = ../bin/SciLexer.dll
 LEXLIB = Lexers.a
 
-ifndef NOTHUNKS
-gversion = $(word 1,$(subst ., ,$(shell g++ --version)))
-ifeq ($(gversion),2)
-THUNKFLAGS=-fvtable-thunks
-endif
-endif
-
 vpath %.h ../src ../include
 vpath %.cxx ../src
 
 LDFLAGS=-mwindows -lstdc++ -limm32 -lole32 -luuid -mno-cygwin
 # Add -MMD to get dependencies
-#CXXFLAGS = -g -pg -pedantic -Os -fno-exceptions -fvtable-thunks -fno-rtti
 INCLUDEDIRS=-I ../include -I ../src
-CXXBASEFLAGS=-Wall -Wno-missing-braces -Wno-char-subscripts -Wno-strict-overflow -pedantic $(INCLUDEDIRS) $(THUNKFLAGS) -fno-rtti -mno-cygwin
+CXXBASEFLAGS=-Wall -Wno-missing-braces -Wno-char-subscripts -Wno-strict-overflow -pedantic $(INCLUDEDIRS) -fno-rtti -mno-cygwin
 
 ifdef DEBUG
 CXXFLAGS=-DDEBUG -g $(CXXBASEFLAGS)
