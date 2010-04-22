@@ -78,7 +78,7 @@ namespace Scintilla {
  * back to the parent. Therefore, there must be a callback handler that acts
  * like a Windows WndProc, where Scintilla can send notifications to. Use
  * ScintillaCocoa::RegisterNotifyHandler() to register such a handler.
- * Messgae format is:
+ * Message format is:
  * <br>
  * WM_COMMAND: HIWORD (wParam) = notification code, LOWORD (wParam) = 0 (no control ID), lParam = ScintillaCocoa*
  * <br>
@@ -196,8 +196,9 @@ public:
   virtual void Undo();
   virtual void Redo();
   
-  //    virtual OSStatus ContextualMenuClick( HIPoint& location );
-//
+  virtual NSMenu* CreateContextMenu(NSEvent* event);
+  void HandleCommand(NSInteger command);
+
 //    virtual OSStatus ActiveStateChanged();
 //
 //    virtual void CallTipClick();

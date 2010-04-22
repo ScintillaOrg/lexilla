@@ -174,6 +174,16 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
 
 //--------------------------------------------------------------------------------------------------
 
+/**
+ * Called by the framework if it wants to show a context menu for the editor.
+ */
+- (NSMenu*) menuForEvent: (NSEvent*) theEvent
+{
+  return mOwner.backend->CreateContextMenu(theEvent);
+}
+
+//--------------------------------------------------------------------------------------------------
+
 // Adoption of NSTextInput protocol.
 
 - (NSAttributedString*) attributedSubstringFromRange: (NSRange) range
@@ -228,7 +238,6 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
 {
   // Remove any previously marked text first.
   [self removeMarkedText];
-  
   mOwner.backend->InsertText((NSString*) aString);
 }
 
@@ -604,11 +613,13 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
   switch (type)
   {
     case IBNZoomChanged:
+    {
       // Compute point increase/decrease based on default font size.
       int fontSize = [self getGeneralProperty: SCI_STYLEGETSIZE parameter: STYLE_DEFAULT];
       int zoom = (int) (fontSize * (value - 1));
       [self setGeneralProperty: SCI_SETZOOM parameter: zoom value: 0];
       break;
+    }
   };
 }
 
@@ -987,12 +998,12 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Getter for the current text in raw form (no formatting information included).
+ * Getter for the currently selected text in raw form (no formatting information included).
  * If there is no text available an empty string is returned.
  */
 - (NSString*) selectedString
 {
-  NSString *result = nil;
+  NSString *result = @"";
   
   char *buffer(0);
   const int length = mBackend->WndProc(SCI_GETSELTEXT, 0, 0);
@@ -1013,8 +1024,6 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
       buffer = 0;
     }
   }
-  else
-    result = [NSString stringWithUTF8String: ""];
   
   return result;
 }
@@ -1027,7 +1036,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
  */
 - (NSString*) string
 {
-  NSString *result = nil;
+  NSString *result = @"";
   
   char *buffer(0);
   const int length = mBackend->WndProc(SCI_GETLENGTH, 0, 0);
@@ -1048,8 +1057,6 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
       buffer = 0;
     }
   }
-  else
-    result = [NSString stringWithUTF8String: ""];
   
   return result;
 }
@@ -1067,9 +1074,24 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 
 //--------------------------------------------------------------------------------------------------
 
+- (void) insertString: (NSString*) aString atOffset: (int)offset
+{
+  const char* text = [aString UTF8String];
+  mBackend->WndProc(SCI_ADDTEXT, offset, (long) text);
+}
+
+//--------------------------------------------------------------------------------------------------
+
 - (void) setEditable: (BOOL) editable
 {
   mBackend->WndProc(SCI_SETREADONLY, editable ? 0 : 1, 0);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+- (BOOL) isEditable
+{
+  return mBackend->WndProc(SCI_GETREADONLY, 0, 0) != 0;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1095,35 +1117,6 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 //--------------------------------------------------------------------------------------------------
 
 /**
- * This is a helper method to set a property in the backend, with native parameters.
- *
- * @param property Main property like SCI_STYLESETFORE for which a value is to get.
- * @param parameter Additional info for this property like a parameter or index.
- * @param value The value to be set.
- */
-- (void) setEditorProperty: (int) property wParam: (long) parameter lParam: (long) value
-{
-  mBackend->WndProc(property, parameter, value);
-}
-
-//--------------------------------------------------------------------------------------------------
-
-/**
- * This is a helper method to get a property in the backend, with native parameters.
- *
- * @param property Main property like SCI_STYLESETFORE for which a value is to get.
- * @param parameter Additional info for this property like a parameter or index.
- * @result A generic value which must be interpreted depending on the property queried.
- */
-- (long) getEditorProperty: (int) property wParam: (long) parameter
-{
-  return mBackend->WndProc(property, parameter, 0);
-}
-
-
-//--------------------------------------------------------------------------------------------------
-
-/**
  * This is a helper method to set properties in the backend, with native parameters.
  *
  * @param property Main property like SCI_STYLESETFORE for which a value is to be set.
@@ -1142,7 +1135,18 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
  *
  * @param property Main property like SCI_STYLESETFORE for which a value is to get.
  * @param parameter Additional info for this property like a parameter or index.
+ * @param extra Yet another parameter if needed.
  * @result A generic value which must be interpreted depending on the property queried.
+ */
+- (long) getGeneralProperty: (int) property parameter: (long) parameter extra: (long) extra
+{
+  return mBackend->WndProc(property, parameter, extra);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Convenience function to avoid unneeded extra parameter.
  */
 - (long) getGeneralProperty: (int) property parameter: (long) parameter
 {
@@ -1152,12 +1156,21 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Very similar to getGeneralProperty:parameter, but allows to specify an additional value
- * which certain actions require.
+ * Convenience function to avoid unneeded parameters.
  */
-- (long) getGeneralProperty: (int) property parameter: (long) parameter extra: (long) extra
+- (long) getGeneralProperty: (int) property
 {
-  return mBackend->WndProc(property, parameter, extra);
+  return mBackend->WndProc(property, 0, 0);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Use this variant if you have to pass in a reference to something (e.g. a text range).
+ */
+- (long) getGeneralProperty: (int) property ref: (const void*) ref
+{
+  return mBackend->WndProc(property, 0, (sptr_t) ref);  
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1345,6 +1358,16 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 {
   if (mInfoBar != nil)
     [mInfoBar notify: IBNStatusChanged message: text location: NSZeroPoint value: 0];
+}
+
+- (NSRange) selectedRange
+{
+  return [mContent selectedRange];
+}
+
+- (void)insertText: (NSString*)text
+{
+  [mContent insertText: text];
 }
 
 @end

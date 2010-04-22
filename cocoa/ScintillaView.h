@@ -85,7 +85,9 @@ extern NSString *SCIUpdateUINotification;
 // NSTextView compatibility layer.
 - (NSString*) string;
 - (void) setString: (NSString*) aString;
+- (void) insertText: (NSString*) aString;
 - (void) setEditable: (BOOL) editable;
+- (BOOL) isEditable;
 - (NSRange) selectedRange;
 
 - (NSString*) selectedString;
@@ -96,8 +98,10 @@ extern NSString *SCIUpdateUINotification;
 
 // Back end properties getters and setters.
 - (void) setGeneralProperty: (int) property parameter: (long) parameter value: (long) value;
+- (long) getGeneralProperty: (int) property;
 - (long) getGeneralProperty: (int) property parameter: (long) parameter;
 - (long) getGeneralProperty: (int) property parameter: (long) parameter extra: (long) extra;
+- (long) getGeneralProperty: (int) property ref: (const void*) ref;
 - (void) setColorProperty: (int) property parameter: (long) parameter value: (NSColor*) value;
 - (void) setColorProperty: (int) property parameter: (long) parameter fromHTML: (NSString*) fromHTML;
 - (NSColor*) getColorProperty: (int) property parameter: (long) parameter;
