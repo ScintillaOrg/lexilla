@@ -32,10 +32,10 @@ public:
 
 	Range(Position pos=0) :
 		start(pos), end(pos) {
-	};
+	}
 	Range(Position start_, Position end_) :
 		start(start_), end(end_) {
-	};
+	}
 
 	bool Valid() const {
 		return (start != invalidPosition) && (end != invalidPosition);
@@ -118,7 +118,7 @@ struct StyledText {
 class CaseFolder {
 public:
 	virtual ~CaseFolder() {
-	};
+	}
 	virtual size_t Fold(char *folded, size_t sizeFolded, const char *mixed, size_t lenMixed) = 0;
 };
 

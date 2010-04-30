@@ -7,8 +7,13 @@
 # Also works with ming32-make on Windows.
 
 .SUFFIXES: .cxx .c .o .h .a
+ifdef CLANG
+CC = clang
+CCOMP = clang
+else
 CC = g++
 CCOMP = gcc
+endif
 AR = ar
 RANLIB = touch
 
