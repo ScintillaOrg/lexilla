@@ -1,6 +1,6 @@
 // Scintilla source code edit control
 /** @file LexFlagShip.cxx
- ** Lexer for FlagShip 
+ ** Lexer for FlagShip
  ** (Syntactically compatible to other XBase dialects, like dBase, Clipper, Fox etc.)
  **/
 // Copyright 2005 by Randy Butler
@@ -26,10 +26,6 @@
 using namespace Scintilla;
 #endif
 
-static bool IsFlagShipComment(Accessor &styler, int pos, int len) {
-	return len>0 && styler[pos]=='\'';
-}
-
 static inline bool IsTypeCharacter(int ch) {
 	return ch == '%' || ch == '&' || ch == '@' || ch == '!' || ch == '#' || ch == '$';
 }
@@ -54,7 +50,6 @@ static inline bool IsADateCharacter(const int ch) {
 static void ColouriseFlagShipDoc(unsigned int startPos, int length, int initStyle,
                            WordList *keywordlists[], Accessor &styler) {
 
-	//bool FSScriptSyntax = true;
 	WordList &keywords = *keywordlists[0];
 	WordList &keywords2 = *keywordlists[1];
 	WordList &keywords3 = *keywordlists[2];
@@ -179,30 +174,26 @@ static void FoldFlagShipDoc(unsigned int startPos, int length, int,
 
 	// Backtrack to previous line in case need to fix its fold status
 	int lineCurrent = styler.GetLine(startPos);
-	if (startPos > 0) {
-		if (lineCurrent > 0) {
-			lineCurrent--;
-			startPos = styler.LineStart(lineCurrent);
-		}
+	if (startPos > 0 && lineCurrent > 0) {
+		lineCurrent--;
+		startPos = styler.LineStart(lineCurrent);
 	}
 	int spaceFlags = 0;
-	int indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, IsFlagShipComment);
+	int indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags);
 	char chNext = styler[startPos];
 	for (int i = startPos; i < endPos; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 
-		if ((ch == '\r' && chNext != '\n') || (ch == '\n') || (i == endPos)) {
+		if ((ch == '\r' && chNext != '\n') || (ch == '\n') || (i == endPos-1)) {
 			int lev = indentCurrent;
-			int indentNext = styler.IndentAmount(lineCurrent + 1, &spaceFlags, IsFlagShipComment);
+			int indentNext = styler.IndentAmount(lineCurrent + 1, &spaceFlags);
 			if (!(indentCurrent & SC_FOLDLEVELWHITEFLAG)) {
-				// Only non whitespace lines can be headers
 				if ((indentCurrent & SC_FOLDLEVELNUMBERMASK) < (indentNext & SC_FOLDLEVELNUMBERMASK)) {
 					lev |= SC_FOLDLEVELHEADERFLAG;
 				} else if (indentNext & SC_FOLDLEVELWHITEFLAG) {
-					// Line after is blank so check the next - maybe should continue further?
 					int spaceFlags2 = 0;
-					int indentNext2 = styler.IndentAmount(lineCurrent + 2, &spaceFlags2, IsFlagShipComment);
+					int indentNext2 = styler.IndentAmount(lineCurrent + 2, &spaceFlags2);
 					if ((indentCurrent & SC_FOLDLEVELNUMBERMASK) < (indentNext2 & SC_FOLDLEVELNUMBERMASK)) {
 						lev |= SC_FOLDLEVELHEADERFLAG;
 					}
@@ -215,7 +206,6 @@ static void FoldFlagShipDoc(unsigned int startPos, int length, int,
 	}
 }
 
-
 static const char * const FSWordListDesc[] = {
 	"Keywords",
 	"functions",
@@ -225,6 +215,3 @@ static const char * const FSWordListDesc[] = {
 };
 
 LexerModule lmFlagShip(SCLEX_FLAGSHIP, ColouriseFlagShipDoc, "flagship", FoldFlagShipDoc, FSWordListDesc);
-
-
-
