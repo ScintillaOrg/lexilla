@@ -1375,7 +1375,7 @@ std::string ScintillaWin::CaseMapString(const std::string &s, int caseMapping) {
 
 	UINT cpDoc = CodePageOfDocument();
 
-	unsigned int lengthUTF16 = ::MultiByteToWideChar(cpDoc, 0, s.c_str(), s.size(), NULL, NULL);
+	unsigned int lengthUTF16 = ::MultiByteToWideChar(cpDoc, 0, s.c_str(), s.size(), NULL, 0);
 	if (lengthUTF16 == 0)	// Failed to convert
 		return s;
 

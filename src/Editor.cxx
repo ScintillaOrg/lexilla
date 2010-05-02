@@ -1850,7 +1850,7 @@ bool BadUTF(const char *s, int len, int &trailBytes) {
 			return true;
 		if (GoodTrailByte(us[1]) && GoodTrailByte(us[2]) && GoodTrailByte(us[3])) {
 			if (*us == 0xf4) {
-				// Chcek if encoding a value beyond the last Unicode character 10FFFF
+				// Check if encoding a value beyond the last Unicode character 10FFFF
 				if (us[1] > 0x8f) {
 					return true;
 				} else if (us[1] == 0x8f) {
