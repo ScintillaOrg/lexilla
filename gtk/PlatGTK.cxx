@@ -347,7 +347,7 @@ static void GenerateFontSpecStrings(const char *fontName, int characterSet,
 		d2 = strchr(d1 + 1, '-');
 		if (d2)
 			d3 = strchr(d2 + 1, '-');
-		if (d3) {
+		if (d3 && d2) {
 			// foundary-fontface-isoxxx-x
 			*d2 = '\0';
 			foundary[0] = '-';
