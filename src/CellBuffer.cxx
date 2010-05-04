@@ -517,7 +517,6 @@ void CellBuffer::BasicInsertString(int position, const char *s, int insertLength
 				lineInsert++;
 			}
 		}
-		atLineStart = false;
 		chPrev = ch;
 	}
 	// Joining two lines where last insertion is cr and following substance starts with lf
