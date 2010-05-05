@@ -46,9 +46,9 @@ static void ColouriseFlagShipDoc(unsigned int startPos, int length, int initStyl
 	WordList &keywords5 = *keywordlists[4];
 
 	// property lexer.flagship.styling.within.preprocessor
-	//	For Harbour code, determines whether all preprocessor code is styled in the preprocessor style (0, the default) or
-	//	only from the initial # to the end of the command word(1). It also determines how presents: text, dump, code disabled.
-	bool stylingWithinPreprocessor = styler.GetPropertyInt("lexer.flagship.styling.within.preprocessor") != 0;
+	//	For Harbour code, determines whether all preprocessor code is styled in the preprocessor style (0) or only from the
+	//	initial # to the end of the command word(1, the default). It also determines how to present text, dump, and disabled code.
+	bool stylingWithinPreprocessor = styler.GetPropertyInt("lexer.flagship.styling.within.preprocessor", 1) != 0;
 
 	CharacterSet setDoxygen(CharacterSet::setAlpha, "$@\\&<>#{}[]");
 
