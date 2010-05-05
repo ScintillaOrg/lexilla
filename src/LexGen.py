@@ -181,7 +181,7 @@ def FindProperties(lexFile):
     properties = {}
     f = open(lexFile)
     for l in f.readlines():
-        if "GetProperty" in l:
+        if "GetProperty" in l and '"' in l:
             l = l.strip()
             if not l.startswith("//"):	# Drop comments
                 propertyName = l.split("\"")[1]
