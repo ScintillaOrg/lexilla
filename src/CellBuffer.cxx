@@ -341,7 +341,7 @@ char CellBuffer::CharAt(int position) const {
 	return substance.ValueAt(position);
 }
 
-void CellBuffer::GetCharRange(char *buffer, int position, int lengthRetrieve) {
+void CellBuffer::GetCharRange(char *buffer, int position, int lengthRetrieve) const {
 	if (lengthRetrieve < 0)
 		return;
 	if (position < 0)
@@ -357,7 +357,7 @@ void CellBuffer::GetCharRange(char *buffer, int position, int lengthRetrieve) {
 	}
 }
 
-char CellBuffer::StyleAt(int position) {
+char CellBuffer::StyleAt(int position) const {
 	return style.ValueAt(position);
 }
 

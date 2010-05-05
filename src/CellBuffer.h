@@ -149,8 +149,8 @@ public:
 
 	/// Retrieving positions outside the range of the buffer works and returns 0
 	char CharAt(int position) const;
-	void GetCharRange(char *buffer, int position, int lengthRetrieve);
-	char StyleAt(int position);
+	void GetCharRange(char *buffer, int position, int lengthRetrieve) const;
+	char StyleAt(int position) const;
 	const char *BufferPointer();
 
 	int Length() const;
