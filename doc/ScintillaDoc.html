@@ -5265,6 +5265,12 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     Property names should start with "lexer.&lt;lexer&gt;." or "fold.&lt;lexer&gt;." when they apply to one
     lexer or start with "lexer." or "fold." if they apply to multiple lexers.</p>
 
+    <p>Applications may discover the set of properties used by searching the source code of lexers for lines that contain
+    <code>GetProperty</code> and a double quoted string and extract the value of the double quoted string as the property name.
+    The <code>scintilla/src/LexGen.py</code> script does this and can be used as an example.
+    Documentation for the property may be located above the call as a multi-line comment starting with
+    <br/><code>// property &lt;property-name&gt;</code></p>
+
     <p><b id="SCI_GETPROPERTY">SCI_GETPROPERTY(const char *key, char *value)</b><br />
     Lookup a keyword:value pair using the specified key; if found, copy the value to the user-supplied
     buffer and return the length (not including the terminating 0).  If not found, copy an empty string
