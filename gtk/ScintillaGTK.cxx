@@ -828,7 +828,7 @@ sptr_t ScintillaGTK::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 #ifdef SCI_LEXER
 		case SCI_LOADLEXERLIBRARY:
-			LexerManager::GetInstance()->Load(reinterpret_cast<const char*>(wParam));
+			LexerManager::GetInstance()->Load(reinterpret_cast<const char*>(lParam));
 			break;
 #endif
 		case SCI_TARGETASUTF8:
