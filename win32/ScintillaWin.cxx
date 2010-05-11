@@ -1379,7 +1379,7 @@ std::string ScintillaWin::CaseMapString(const std::string &s, int caseMapping) {
 	if (lengthUTF16 == 0)	// Failed to convert
 		return s;
 
-	DWORD mapFlags = LCMAP_LINGUISTIC_CASING | 
+	DWORD mapFlags = LCMAP_LINGUISTIC_CASING |
 		((caseMapping == cmUpper) ? LCMAP_UPPERCASE : LCMAP_LOWERCASE);
 
 	// Many conversions performed by search function are short so optimize this case.
@@ -1396,16 +1396,16 @@ std::string ScintillaWin::CaseMapString(const std::string &s, int caseMapping) {
 		int charsConverted = ::LCMapStringW(LOCALE_SYSTEM_DEFAULT, mapFlags,
 			&vwcText[0], lengthUTF16, NULL, 0);
 		std::vector<wchar_t> vwcConverted(charsConverted);
-		::LCMapStringW(LOCALE_SYSTEM_DEFAULT, mapFlags, 
+		::LCMapStringW(LOCALE_SYSTEM_DEFAULT, mapFlags,
 			&vwcText[0], lengthUTF16, &vwcConverted[0], charsConverted);
 
 		// Change back to document encoding
 		unsigned int lengthConverted = ::WideCharToMultiByte(cpDoc, 0,
-			&vwcConverted[0], vwcConverted.size(), 
+			&vwcConverted[0], vwcConverted.size(),
 			NULL, 0, NULL, 0);
 		std::vector<char> vcConverted(lengthConverted);
-		::WideCharToMultiByte(cpDoc, 0, 
-			&vwcConverted[0], vwcConverted.size(), 
+		::WideCharToMultiByte(cpDoc, 0,
+			&vwcConverted[0], vwcConverted.size(),
 			&vcConverted[0], vcConverted.size(), NULL, 0);
 
 		return std::string(&vcConverted[0], vcConverted.size());
@@ -1428,12 +1428,12 @@ std::string ScintillaWin::CaseMapString(const std::string &s, int caseMapping) {
 
 		// Change back to document encoding
 		unsigned int lengthConverted = ::WideCharToMultiByte(cpDoc, 0,
-			vwcConverted, charsConverted, 
+			vwcConverted, charsConverted,
 			NULL, 0, NULL, 0);
 		// Each UTF-16 code unit may need up to 3 bytes in UTF-8
 		char vcConverted[shortSize * 3 * 3];
-		::WideCharToMultiByte(cpDoc, 0, 
-			vwcConverted, charsConverted, 
+		::WideCharToMultiByte(cpDoc, 0,
+			vwcConverted, charsConverted,
 			vcConverted, lengthConverted, NULL, 0);
 
 		return std::string(vcConverted, lengthConverted);
@@ -1496,7 +1496,7 @@ public:
 	void SetClip(UINT uFormat) {
 		::SetClipboardData(uFormat, Unlock());
 	}
-	operator bool() {
+	operator bool() const {
 		return ptr != 0;
 	}
 	SIZE_T Size() {
