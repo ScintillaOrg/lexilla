@@ -221,6 +221,10 @@ void LexerManager::Load(const char *path) {
 }
 
 void LexerManager::LoadLexerLibrary(const char *module) {
+	for (LexerLibrary *ll = first; ll; ll= ll->next) {
+		if (strcmp(ll->m_sModuleName.c_str(), module) == 0)
+			return;
+	}
 	LexerLibrary *lib = new LexerLibrary(module);
 	if (NULL != first) {
 		last->next = lib;
