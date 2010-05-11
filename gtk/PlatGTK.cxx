@@ -667,11 +667,9 @@ void Font::Release() {
 
 // Required on OS X
 #ifdef SCI_NAMESPACE
-class Scintilla::SurfaceImpl : public Surface
-#else
-class SurfaceImpl : public Surface
+namespace Scintilla {
 #endif
-{
+class SurfaceImpl : public Surface {
 	encodingType et;
 	GdkDrawable *drawable;
 	GdkGC *gc;
@@ -731,6 +729,9 @@ public:
 	void SetUnicodeMode(bool unicodeMode_);
 	void SetDBCSMode(int codePage);
 };
+#ifdef SCI_NAMESPACE
+}
+#endif
 
 const char *CharacterSetID(int characterSet) {
 	switch (characterSet) {
