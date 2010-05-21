@@ -2377,6 +2377,16 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 			}
 		}
 
+		if (data && convertPastes) {
+			// Convert line endings of the drop into our local line-endings mode
+			int len = strlen(data);
+			char *convertedText = Document::TransformLineEnds(&len, data, len, pdoc->eolMode);
+			if (dataAllocated)
+				delete []data;
+			data = convertedText;
+			dataAllocated = true;
+		}
+
 		if (!data) {
 			//Platform::DebugPrintf("Bad data format: 0x%x\n", hres);
 			return hr;
