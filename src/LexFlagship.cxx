@@ -86,9 +86,13 @@ static void ColouriseFlagShipDoc(unsigned int startPos, int length, int initStyl
 				}
 				break;
 			case SCE_FS_NUMBER:
+				if (!IsAWordChar(sc.ch) && !(sc.ch == '.' && IsADigit(sc.chNext))) {
+					sc.SetState(SCE_FS_DEFAULT);
+				}
+				break;
 			case SCE_FS_NUMBER_C:
 				if (!IsAWordChar(sc.ch) && sc.ch != '.') {
-					sc.SetState(bEnableCode ? SCE_FS_DEFAULT : SCE_FS_DEFAULT_C);
+					sc.SetState(SCE_FS_DEFAULT_C);
 				}
 				break;
 			case SCE_FS_CONSTANT:
