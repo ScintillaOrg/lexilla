@@ -270,10 +270,6 @@ def RegenerateAll():
     Regenerate(root + "scintilla/src/KeyWords.cxx", "//", NATIVE, lexerModules)
     Regenerate(root + "scintilla/win32/scintilla.mak", "#", NATIVE, lexFiles)
     Regenerate(root + "scintilla/win32/scintilla_vc6.mak", "#", NATIVE, lexFiles)
-    # Use Unix EOLs for gtk Makefiles so they work for Linux users when
-    # extracted from the Scintilla source ZIP (typically created on
-    # Windows).
-    Regenerate(root + "scintilla/macosx/makefile", "#", LF, lexFiles)
     if os.path.exists(root + "scite"):
         Regenerate(root + "scite/win32/makefile", "#", NATIVE, lexFiles, propFiles)
         Regenerate(root + "scite/win32/scite.mak", "#", NATIVE, lexFiles, propFiles)
