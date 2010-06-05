@@ -2,14 +2,14 @@ ExtInput.o: ExtInput.cxx ScintillaMacOSX.h TView.h TCarbonEvent.h TRect.h \
   ../include/Platform.h ../include/Scintilla.h PlatMacOSX.h \
   QuartzTextLayout.h QuartzTextStyle.h QuartzTextStyleAttribute.h \
   ../include/ScintillaWidget.h ../include/SciLexer.h ../include/PropSet.h \
-  ../include/Accessor.h ../include/KeyWords.h ../src/SVector.h \
-  ../src/SplitVector.h ../src/Partitioning.h ../src/RunStyles.h \
-  ../src/ContractionState.h ../src/CellBuffer.h ../src/CallTip.h \
-  ../src/KeyMap.h ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h \
-  ../src/Style.h ../src/AutoComplete.h ../src/ViewStyle.h \
-  ../src/CharClassify.h ../src/Decoration.h ../src/Document.h \
-  ../src/Selection.h ../src/PositionCache.h ../src/Editor.h \
-  ../src/ScintillaBase.h ScintillaCallTip.h ExtInput.h
+  ../src/PropSetSimple.h ../include/Accessor.h ../include/KeyWords.h \
+  ../src/SVector.h ../src/SplitVector.h ../src/Partitioning.h \
+  ../src/RunStyles.h ../src/ContractionState.h ../src/CellBuffer.h \
+  ../src/CallTip.h ../src/KeyMap.h ../src/Indicator.h ../src/XPM.h \
+  ../src/LineMarker.h ../src/Style.h ../src/AutoComplete.h \
+  ../src/ViewStyle.h ../src/CharClassify.h ../src/Decoration.h \
+  ../src/Document.h ../src/Selection.h ../src/PositionCache.h \
+  ../src/Editor.h ../src/ScintillaBase.h ScintillaCallTip.h ExtInput.h
 PlatMacOSX.o: PlatMacOSX.cxx QuartzTextLayout.h QuartzTextStyle.h \
   QuartzTextStyleAttribute.h TCarbonEvent.h ../include/Platform.h \
   ../include/Scintilla.h PlatMacOSX.h ../src/XPM.h \
@@ -18,40 +18,41 @@ ScintillaCallTip.o: ScintillaCallTip.cxx ScintillaMacOSX.h TView.h \
   TCarbonEvent.h TRect.h ../include/Platform.h ../include/Scintilla.h \
   PlatMacOSX.h QuartzTextLayout.h QuartzTextStyle.h \
   QuartzTextStyleAttribute.h ../include/ScintillaWidget.h \
-  ../include/SciLexer.h ../include/PropSet.h ../include/Accessor.h \
-  ../include/KeyWords.h ../src/SVector.h ../src/SplitVector.h \
-  ../src/Partitioning.h ../src/RunStyles.h ../src/ContractionState.h \
-  ../src/CellBuffer.h ../src/CallTip.h ../src/KeyMap.h ../src/Indicator.h \
-  ../src/XPM.h ../src/LineMarker.h ../src/Style.h ../src/AutoComplete.h \
-  ../src/ViewStyle.h ../src/CharClassify.h ../src/Decoration.h \
-  ../src/Document.h ../src/Selection.h ../src/PositionCache.h \
-  ../src/Editor.h ../src/ScintillaBase.h ScintillaCallTip.h
+  ../include/SciLexer.h ../include/PropSet.h ../src/PropSetSimple.h \
+  ../include/Accessor.h ../include/KeyWords.h ../src/SVector.h \
+  ../src/SplitVector.h ../src/Partitioning.h ../src/RunStyles.h \
+  ../src/ContractionState.h ../src/CellBuffer.h ../src/CallTip.h \
+  ../src/KeyMap.h ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h \
+  ../src/Style.h ../src/AutoComplete.h ../src/ViewStyle.h \
+  ../src/CharClassify.h ../src/Decoration.h ../src/Document.h \
+  ../src/Selection.h ../src/PositionCache.h ../src/Editor.h \
+  ../src/ScintillaBase.h ScintillaCallTip.h
 ScintillaListBox.o: ScintillaListBox.cxx ScintillaMacOSX.h TView.h \
   TCarbonEvent.h TRect.h ../include/Platform.h ../include/Scintilla.h \
   PlatMacOSX.h QuartzTextLayout.h QuartzTextStyle.h \
   QuartzTextStyleAttribute.h ../include/ScintillaWidget.h \
-  ../include/SciLexer.h ../include/PropSet.h ../include/Accessor.h \
-  ../include/KeyWords.h ../src/SVector.h ../src/SplitVector.h \
-  ../src/Partitioning.h ../src/RunStyles.h ../src/ContractionState.h \
-  ../src/CellBuffer.h ../src/CallTip.h ../src/KeyMap.h ../src/Indicator.h \
-  ../src/XPM.h ../src/LineMarker.h ../src/Style.h ../src/AutoComplete.h \
-  ../src/ViewStyle.h ../src/CharClassify.h ../src/Decoration.h \
-  ../src/Document.h ../src/Selection.h ../src/PositionCache.h \
-  ../src/Editor.h ../src/ScintillaBase.h ScintillaCallTip.h \
-  ScintillaListBox.h
+  ../include/SciLexer.h ../include/PropSet.h ../src/PropSetSimple.h \
+  ../include/Accessor.h ../include/KeyWords.h ../src/SVector.h \
+  ../src/SplitVector.h ../src/Partitioning.h ../src/RunStyles.h \
+  ../src/ContractionState.h ../src/CellBuffer.h ../src/CallTip.h \
+  ../src/KeyMap.h ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h \
+  ../src/Style.h ../src/AutoComplete.h ../src/ViewStyle.h \
+  ../src/CharClassify.h ../src/Decoration.h ../src/Document.h \
+  ../src/Selection.h ../src/PositionCache.h ../src/Editor.h \
+  ../src/ScintillaBase.h ScintillaCallTip.h ScintillaListBox.h
 ScintillaMacOSX.o: ScintillaMacOSX.cxx ScintillaMacOSX.h TView.h \
   TCarbonEvent.h TRect.h ../include/Platform.h ../include/Scintilla.h \
   PlatMacOSX.h QuartzTextLayout.h QuartzTextStyle.h \
   QuartzTextStyleAttribute.h ../include/ScintillaWidget.h \
-  ../include/SciLexer.h ../include/PropSet.h ../include/Accessor.h \
-  ../include/KeyWords.h ../src/SVector.h ../src/SplitVector.h \
-  ../src/Partitioning.h ../src/RunStyles.h ../src/ContractionState.h \
-  ../src/CellBuffer.h ../src/CallTip.h ../src/KeyMap.h ../src/Indicator.h \
-  ../src/XPM.h ../src/LineMarker.h ../src/Style.h ../src/AutoComplete.h \
-  ../src/ViewStyle.h ../src/CharClassify.h ../src/Decoration.h \
-  ../src/Document.h ../src/Selection.h ../src/PositionCache.h \
-  ../src/Editor.h ../src/ScintillaBase.h ScintillaCallTip.h \
-  ../src/UniConversion.h
+  ../include/SciLexer.h ../include/PropSet.h ../src/PropSetSimple.h \
+  ../include/Accessor.h ../include/KeyWords.h ../src/SVector.h \
+  ../src/SplitVector.h ../src/Partitioning.h ../src/RunStyles.h \
+  ../src/ContractionState.h ../src/CellBuffer.h ../src/CallTip.h \
+  ../src/KeyMap.h ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h \
+  ../src/Style.h ../src/AutoComplete.h ../src/ViewStyle.h \
+  ../src/CharClassify.h ../src/Decoration.h ../src/Document.h \
+  ../src/Selection.h ../src/PositionCache.h ../src/Editor.h \
+  ../src/ScintillaBase.h ScintillaCallTip.h ../src/UniConversion.h
 TCarbonEvent.o: TCarbonEvent.cxx TCarbonEvent.h
 TView.o: TView.cxx TView.h TCarbonEvent.h TRect.h
 AutoComplete.o: ../src/AutoComplete.cxx ../include/Platform.h \
@@ -72,7 +73,7 @@ Document.o: ../src/Document.cxx ../include/Platform.h \
   ../include/Scintilla.h ../src/SplitVector.h ../src/Partitioning.h \
   ../src/RunStyles.h ../src/CellBuffer.h ../src/PerLine.h \
   ../src/CharClassify.h ../src/Decoration.h ../src/Document.h \
-  ../src/RESearch.h
+  ../src/RESearch.h ../src/UniConversion.h
 DocumentAccessor.o: ../src/DocumentAccessor.cxx ../include/Platform.h \
   ../include/PropSet.h ../include/Accessor.h ../src/DocumentAccessor.h \
   ../src/SplitVector.h ../src/Partitioning.h ../src/RunStyles.h \
@@ -173,7 +174,8 @@ LexErlang.o: ../src/LexErlang.cxx ../include/Platform.h \
   ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
 LexFlagship.o: ../src/LexFlagship.cxx ../include/Platform.h \
   ../include/PropSet.h ../include/Accessor.h ../src/StyleContext.h \
-  ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
+  ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h \
+  ../src/CharacterSet.h
 LexForth.o: ../src/LexForth.cxx ../include/Platform.h \
   ../include/PropSet.h ../include/Accessor.h ../src/StyleContext.h \
   ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
@@ -218,6 +220,9 @@ LexMSSQL.o: ../src/LexMSSQL.cxx ../include/Platform.h \
   ../include/PropSet.h ../include/Accessor.h ../include/KeyWords.h \
   ../include/Scintilla.h ../include/SciLexer.h
 LexMagik.o: ../src/LexMagik.cxx ../include/Platform.h \
+  ../include/PropSet.h ../include/Accessor.h ../src/StyleContext.h \
+  ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
+LexMarkdown.o: ../src/LexMarkdown.cxx ../include/Platform.h \
   ../include/PropSet.h ../include/Accessor.h ../src/StyleContext.h \
   ../include/KeyWords.h ../include/Scintilla.h ../include/SciLexer.h
 LexMatlab.o: ../src/LexMatlab.cxx ../include/Platform.h \
