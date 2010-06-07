@@ -90,11 +90,11 @@ static int classifyWordCOBOL(unsigned int start, unsigned int end, /*WordList &k
     getRange(start, end, styler, s, sizeof(s));
 
     char chAttr = SCE_C_IDENTIFIER;
-    if (isdigit(s[0]) || (s[0] == '.')) {
+    if (isdigit(s[0]) || (s[0] == '.') || (s[0] == 'v')) {
         chAttr = SCE_C_NUMBER;
 		char *p = s + 1;
 		while (*p) {
-			if (!isdigit(*p) && isCOBOLwordchar(*p)) {
+			if ((!isdigit(*p) && (*p) != 'v') && isCOBOLwordchar(*p)) {
 				chAttr = SCE_C_IDENTIFIER;
 			    break;
 			}
