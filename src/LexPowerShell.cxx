@@ -35,6 +35,8 @@ static void ColourisePowerShellDoc(unsigned int startPos, int length, int initSt
 	WordList &keywords = *keywordlists[0];
 	WordList &keywords2 = *keywordlists[1];
 	WordList &keywords3 = *keywordlists[2];
+	WordList &keywords4 = *keywordlists[3];
+	WordList &keywords5 = *keywordlists[4];
 
 	styler.StartAt(startPos);
 
@@ -45,6 +47,10 @@ static void ColourisePowerShellDoc(unsigned int startPos, int length, int initSt
 		if (sc.state == SCE_POWERSHELL_COMMENT) {
 			if (sc.atLineEnd) {
 				sc.SetState(SCE_POWERSHELL_DEFAULT);
+			}
+		} else if (sc.state == SCE_POWERSHELL_COMMENTSTREAM) {
+			if (sc.ch == '>' && sc.chPrev == '#') {
+				sc.ForwardSetState(SCE_POWERSHELL_DEFAULT);
 			}
 		} else if (sc.state == SCE_POWERSHELL_STRING) {
 			// This is a doubles quotes string
@@ -79,6 +85,10 @@ static void ColourisePowerShellDoc(unsigned int startPos, int length, int initSt
 					sc.ChangeState(SCE_POWERSHELL_CMDLET);
 				} else if (keywords3.InList(s)) {
 					sc.ChangeState(SCE_POWERSHELL_ALIAS);
+				} else if (keywords4.InList(s)) {
+					sc.ChangeState(SCE_POWERSHELL_FUNCTION);
+				} else if (keywords5.InList(s)) {
+					sc.ChangeState(SCE_POWERSHELL_USER1);
 				}
 				sc.SetState(SCE_POWERSHELL_DEFAULT);
 			}
@@ -88,6 +98,8 @@ static void ColourisePowerShellDoc(unsigned int startPos, int length, int initSt
 		if (sc.state == SCE_POWERSHELL_DEFAULT) {
 			if (sc.ch == '#') {
 				sc.SetState(SCE_POWERSHELL_COMMENT);
+			} else if (sc.ch == '<' && sc.chNext == '#') {
+				sc.SetState(SCE_POWERSHELL_COMMENTSTREAM);
 			} else if (sc.ch == '\"') {
 				sc.SetState(SCE_POWERSHELL_STRING);
 			} else if (sc.ch == '\'') {
@@ -109,8 +121,9 @@ static void ColourisePowerShellDoc(unsigned int startPos, int length, int initSt
 // Store both the current line's fold level and the next lines in the
 // level store to make it easy to pick up with each increment
 // and to make it possible to fiddle the current level for "} else {".
-static void FoldPowerShellDoc(unsigned int startPos, int length, int,
+static void FoldPowerShellDoc(unsigned int startPos, int length, int initStyle,
                            WordList *[], Accessor &styler) {
+	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	bool foldAtElse = styler.GetPropertyInt("fold.at.else", 0) != 0;
 	unsigned int endPos = startPos + length;
@@ -123,10 +136,12 @@ static void FoldPowerShellDoc(unsigned int startPos, int length, int,
 	int levelNext = levelCurrent;
 	char chNext = styler[startPos];
 	int styleNext = styler.StyleAt(startPos);
+	int style = initStyle;
 	for (unsigned int i = startPos; i < endPos; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
-		int style = styleNext;
+		int stylePrev = style;
+		style = styleNext;
 		styleNext = styler.StyleAt(i + 1);
 		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 		if (style == SCE_POWERSHELL_OPERATOR) {
@@ -138,6 +153,12 @@ static void FoldPowerShellDoc(unsigned int startPos, int length, int,
 				}
 				levelNext++;
 			} else if (ch == '}') {
+				levelNext--;
+			}
+		} else if (foldComment && style == SCE_POWERSHELL_COMMENTSTREAM) {
+			if (stylePrev != SCE_POWERSHELL_COMMENTSTREAM) {
+				levelNext++;
+			} else if (styleNext != SCE_POWERSHELL_COMMENTSTREAM) {
 				levelNext--;
 			}
 		}
@@ -168,6 +189,8 @@ static const char * const powershellWordLists[] = {
 	"Commands",
 	"Cmdlets",
 	"Aliases",
+	"Functions",
+	"User1",
 	0
 };
 
