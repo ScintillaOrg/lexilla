@@ -6,7 +6,7 @@
 
 .SUFFIXES: .cxx
 CC = g++
-DLLWRAP = dllwrap
+DLLWRAP = g++ -shared -Wl,--kill-at
 DEL = del /q
 
 COMPONENT = ../bin/Scintilla.dll
@@ -46,7 +46,7 @@ SOBJS	= ScintillaWin.o ScintillaBase.o Editor.o CharClassify.o Decoration.o \
 	ScintRes.o PlatWin.o PositionCache.o KeyMap.o Indicator.o LineMarker.o RESearch.o RunStyles.o \
 	Selection.o Style.o ViewStyle.o AutoComplete.o UniConversion.o PropSet.o XPM.o PerLine.o
 $(COMPONENT): $(SOBJS) Scintilla.def
-	$(DLLWRAP) --add-stdcall-alias --target i386-mingw32 -o $@ $(SOBJS) $(LDFLAGS) $(STRIPFLAG) --relocatable
+	$(DLLWRAP) --add-stdcall-alias --target=i386-mingw32 -o $@ $(SOBJS) $(LDFLAGS) $(STRIPFLAG) --relocatable
 
 LOBJS	= ScintillaWinL.o ScintillaBaseL.o Editor.o CharClassify.o Decoration.o \
 	Document.o ContractionState.o CellBuffer.o CallTip.o \
@@ -54,7 +54,7 @@ LOBJS	= ScintillaWinL.o ScintillaBaseL.o Editor.o CharClassify.o Decoration.o \
 	Selection.o Style.o ViewStyle.o AutoComplete.o UniConversion.o KeyWords.o \
 	DocumentAccessor.o PropSet.o ExternalLexer.o StyleContext.o XPM.o PerLine.o $(LEXOBJS)
 $(LEXCOMPONENT): $(LOBJS) Scintilla.def
-	$(DLLWRAP) --add-stdcall-alias --target i386-mingw32 -o $@ $(LOBJS) $(LDFLAGS) $(STRIPFLAG) --relocatable
+	$(DLLWRAP) --add-stdcall-alias --target=i386-mingw32 -o $@ $(LOBJS) $(LDFLAGS) $(STRIPFLAG) --relocatable
 
 $(LEXLIB): $(LEXOBJS)
 	$(AR) rc $@ $^
