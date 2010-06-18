@@ -1151,6 +1151,8 @@ bool Document::MatchesWordOptions(bool word, bool wordStart, int pos, int length
 long Document::FindText(int minPos, int maxPos, const char *search,
                         bool caseSensitive, bool word, bool wordStart, bool regExp, int flags,
                         int *length, CaseFolder *pcf) {
+	if (*length <= 0)
+		return minPos;
 	if (regExp) {
 		if (!regex)
 			regex = CreateRegexSearch(&charClass);
