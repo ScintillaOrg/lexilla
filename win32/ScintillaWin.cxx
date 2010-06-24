@@ -1314,6 +1314,12 @@ public:
 			size_t nUtf16Mixed = ::MultiByteToWideChar(65001, 0, mixed, lenMixed,
 				&utf16Mixed[0], utf16Mixed.size());
 
+			if (nUtf16Mixed == 0) {
+				// Failed to convert -> bad UTF-8
+				folded[0] = '\0';
+				return 1;
+			}
+
 			if (nUtf16Mixed * 4 > utf16Folded.size()) {	// Maximum folding expansion factor of 4
 				utf16Folded.resize(nUtf16Mixed * 4 + 8);
 			}
