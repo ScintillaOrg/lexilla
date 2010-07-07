@@ -192,12 +192,16 @@ void Document::DeleteMarkFromHandle(int markerHandle) {
 }
 
 void Document::DeleteAllMarks(int markerNum) {
+	bool someChanges = false;
 	for (int line = 0; line < LinesTotal(); line++) {
-		static_cast<LineMarkers *>(perLineData[ldMarkers])->DeleteMark(line, markerNum, true);
+		if (static_cast<LineMarkers *>(perLineData[ldMarkers])->DeleteMark(line, markerNum, true))
+			someChanges = true;
 	}
-	DocModification mh(SC_MOD_CHANGEMARKER, 0, 0, 0, 0);
-	mh.line = -1;
-	NotifyModified(mh);
+	if (someChanges) {
+		DocModification mh(SC_MOD_CHANGEMARKER, 0, 0, 0, 0);
+		mh.line = -1;
+		NotifyModified(mh);
+	}
 }
 
 int Document::LineFromHandle(int markerHandle) {
@@ -1430,6 +1434,8 @@ void Document::AnnotationSetText(int line, const char *text) {
 
 void Document::AnnotationSetStyle(int line, int style) {
 	static_cast<LineAnnotation *>(perLineData[ldAnnotation])->SetStyle(line, style);
+	DocModification mh(SC_MOD_CHANGEANNOTATION, LineStart(line), 0, 0, 0, line);
+	NotifyModified(mh);
 }
 
 void Document::AnnotationSetStyles(int line, const unsigned char *styles) {

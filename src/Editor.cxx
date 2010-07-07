@@ -4354,6 +4354,7 @@ void Editor::NotifyModified(Document *, DocModification mh, void *) {
 			int lineDoc = pdoc->LineFromPosition(mh.position);
 			if (vs.annotationVisible) {
 				cs.SetHeight(lineDoc, cs.GetHeight(lineDoc) + mh.annotationLinesAdded);
+				Redraw();
 			}
 		}
 		CheckModificationForWrap(mh);
@@ -6374,6 +6375,7 @@ void Editor::SetAnnotationVisible(int visible) {
 				}
 			}
 		}
+		Redraw();
 	}
 }
 
