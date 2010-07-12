@@ -2733,9 +2733,10 @@ struct Sci_TextToFind {
     sure that no symbol margin includes 0x400 in its mask, any line with the marker gets the
     background colour changed.</p>
 
-    <p>To set a non-folding margin 1 use <code>SCI_SETMARGINMASKN(1, ~SC_MASK_FOLDERS)</code>; to
-    set a folding margin 2 use <code>SCI_SETMARGINMASKN(2, SC_MASK_FOLDERS)</code>. This is the
-    default set by Scintilla. <code>~SC_MASK_FOLDERS</code> is 0x1FFFFFF in hexadecimal or 33554431
+    <p>To set a non-folding margin 1 use <code>SCI_SETMARGINMASKN(1, ~SC_MASK_FOLDERS)</code>
+    which is the default set by Scintilla.
+    To set a folding margin 2 use <code>SCI_SETMARGINMASKN(2, SC_MASK_FOLDERS)</code>.
+    <code>~SC_MASK_FOLDERS</code> is 0x1FFFFFF in hexadecimal or 33554431
     decimal. Of course, you may need to display all 32 symbols in a margin, in which case use
     <code>SCI_SETMARGINMASKN(margin, -1)</code>.</p>
 
