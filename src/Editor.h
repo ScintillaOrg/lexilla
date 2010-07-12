@@ -159,7 +159,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int lineWidthMaxSeen;
 	bool verticalScrollBarVisible;
 	bool endAtLastLine;
-	bool caretSticky;
+	int caretSticky;
 	bool multipleSelection;
 	bool additionalSelectionTyping;
 	int multiPasteMode;
