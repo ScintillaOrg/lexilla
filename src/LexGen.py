@@ -205,13 +205,35 @@ def FindPropertyDocumentation(lexFile):
                 # Only allow lower case property names
                 name = propertyName
                 documents[name] = ""
+        elif "DefineProperty" in l and "\"" in l:
+            propertyName = l.split("\"")[1]
+            if propertyName.lower() == propertyName:
+                # Only allow lower case property names
+                name = propertyName
+                documents[name] = ""
         elif name:
             if l.startswith("//"):
                 if documents[name]:
                     documents[name] += " "
                 documents[name] += l[2:].strip()
+            elif l.startswith("\""):
+                if documents[name]:
+                    documents[name] += " "
+                l = l[1:].strip()
+                if l.endswith(";"):
+                    l = l[:-1].strip()
+                if l.endswith(")"):
+                    l = l[:-1].strip()
+                if l.endswith("\""):
+                    l = l[:-1]
+                # Fix escaped double quotes
+                l = l.replace("\\\"", "\"")
+                documents[name] += l
             else:
                 name = ""
+    for name in list(documents.keys()):
+        if documents[name] == "":
+            del documents[name]
     return documents
 
 def ciCompare(a,b):
@@ -268,9 +290,12 @@ def RegenerateAll():
         print(propFiles)
 
     Regenerate(root + "scintilla/src/Catalogue.cxx", "//", NATIVE, lexerModules)
-
+    Regenerate(root + "scintilla/win32/makefile", "#", NATIVE, lexFiles)
     Regenerate(root + "scintilla/win32/scintilla.mak", "#", NATIVE, lexFiles)
     Regenerate(root + "scintilla/win32/scintilla_vc6.mak", "#", NATIVE, lexFiles)
+    # Use Unix EOLs for gtk Makefiles so they work for Linux users when
+    # extracted from the Scintilla source ZIP (typically created on
+    # Windows).
     if os.path.exists(root + "scite"):
         Regenerate(root + "scite/win32/makefile", "#", NATIVE, lexFiles, propFiles)
         Regenerate(root + "scite/win32/scite.mak", "#", NATIVE, lexFiles, propFiles)
