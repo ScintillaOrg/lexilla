@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <assert.h>
 
 #include <string>
 #include <vector>
@@ -23,13 +24,16 @@
 
 #include "Platform.h"
 
+#include "ILexer.h"
 #include "Scintilla.h"
+
 #include "SplitVector.h"
 #include "Partitioning.h"
 #include "RunStyles.h"
 #include "CellBuffer.h"
 #include "PerLine.h"
 #include "CharClassify.h"
+#include "CharacterSet.h"
 #include "Decoration.h"
 #include "Document.h"
 #include "RESearch.h"
@@ -58,6 +62,36 @@ static inline bool IsLowerCase(char ch) {
 
 static inline bool IsUpperCase(char ch) {
 	return isascii(ch) && isupper(ch);
+}
+
+void LexInterface::Colourise(int start, int end) {
+	ElapsedTime et;
+	if (pdoc && instance && !performingStyle) {
+		// Protect against reentrance, which may occur, for example, when
+		// fold points are discovered while performing styling and the folding
+		// code looks for child lines which may trigger styling.
+		performingStyle = true;
+
+		int lengthDoc = pdoc->Length();
+		if (end == -1)
+			end = lengthDoc;
+		int len = end - start;
+
+		PLATFORM_ASSERT(len >= 0);
+		PLATFORM_ASSERT(start + len <= lengthDoc);
+
+		int styleStart = 0;
+		if (start > 0)
+			styleStart = pdoc->StyleAt(start - 1) & pdoc->stylingBitsMask;
+
+		if (len > 0) {
+			instance->Lex(start, len, styleStart, pdoc);
+			instance->Fold(start, len, styleStart, pdoc);
+		}
+
+		performingStyle = false;
+	}
+	Platform::DebugPrintf("Style:%d %9.6g \n", performingStyle, et.Duration());
 }
 
 Document::Document() {
@@ -95,6 +129,8 @@ Document::Document() {
 	perLineData[ldAnnotation] = new LineAnnotation();
 
 	cb.SetPerLine(this);
+
+	pli = 0;
 }
 
 Document::~Document() {
@@ -110,6 +146,8 @@ Document::~Document() {
 	lenWatchers = 0;
 	delete regex;
 	regex = 0;
+	delete pli;
+	pli = 0;
 }
 
 void Document::Init() {
@@ -208,7 +246,7 @@ int Document::LineFromHandle(int markerHandle) {
 	return static_cast<LineMarkers *>(perLineData[ldMarkers])->LineFromHandle(markerHandle);
 }
 
-int Document::LineStart(int line) const {
+int SCI_METHOD Document::LineStart(int line) const {
 	return cb.LineStart(line);
 }
 
@@ -225,7 +263,14 @@ int Document::LineEnd(int line) const {
 	}
 }
 
-int Document::LineFromPosition(int pos) const {
+void SCI_METHOD Document::SetErrorStatus(int status) {
+	// Tell the watchers the lexer has changed.
+	for (int i = 0; i < lenWatchers; i++) {
+		watchers[i].watcher->NotifyErrorOccurred(this, watchers[i].userData, status);
+	}
+}
+
+int SCI_METHOD Document::LineFromPosition(int pos) const {
 	return cb.LineFromPosition(pos);
 }
 
@@ -250,7 +295,7 @@ int Document::VCHomePosition(int position) const {
 		return startText;
 }
 
-int Document::SetLevel(int line, int level) {
+int SCI_METHOD Document::SetLevel(int line, int level) {
 	int prev = static_cast<LineLevels *>(perLineData[ldLevels])->SetLevel(line, level, LinesTotal());
 	if (prev != level) {
 		DocModification mh(SC_MOD_CHANGEFOLD | SC_MOD_CHANGEMARKER,
@@ -262,7 +307,7 @@ int Document::SetLevel(int line, int level) {
 	return prev;
 }
 
-int Document::GetLevel(int line) const {
+int SCI_METHOD Document::GetLevel(int line) const {
 	return static_cast<LineLevels *>(perLineData[ldLevels])->GetLevel(line);
 }
 
@@ -474,6 +519,14 @@ int Document::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
 	}
 
 	return pos;
+}
+
+int SCI_METHOD Document::CodePage() const {
+	return dbcsCodePage;
+}
+
+bool SCI_METHOD Document::IsDBCSLeadByte(char ch) const {
+	return Platform::IsDBCSLeadByte(dbcsCodePage, ch);
 }
 
 void Document::ModifiedAt(int pos) {
@@ -1303,12 +1356,12 @@ void Document::SetStylingBits(int bits) {
 	stylingBitsMask = (1 << stylingBits) - 1;
 }
 
-void Document::StartStyling(int position, char mask) {
+void SCI_METHOD Document::StartStyling(int position, char mask) {
 	stylingMask = mask;
 	endStyled = position;
 }
 
-bool Document::SetStyleFor(int length, char style) {
+bool SCI_METHOD Document::SetStyleFor(int length, char style) {
 	if (enteredStyling != 0) {
 		return false;
 	} else {
@@ -1326,7 +1379,7 @@ bool Document::SetStyleFor(int length, char style) {
 	}
 }
 
-bool Document::SetStyles(int length, const char *styles) {
+bool SCI_METHOD Document::SetStyles(int length, const char *styles) {
 	if (enteredStyling != 0) {
 		return false;
 	} else {
@@ -1357,14 +1410,27 @@ bool Document::SetStyles(int length, const char *styles) {
 void Document::EnsureStyledTo(int pos) {
 	if ((enteredStyling == 0) && (pos > GetEndStyled())) {
 		IncrementStyleClock();
-		// Ask the watchers to style, and stop as soon as one responds.
-		for (int i = 0; pos > GetEndStyled() && i < lenWatchers; i++) {
-			watchers[i].watcher->NotifyStyleNeeded(this, watchers[i].userData, pos);
+		if (pli) {
+			int lineEndStyled = LineFromPosition(GetEndStyled());
+			int endStyled = LineStart(lineEndStyled);
+			pli->Colourise(endStyled, pos);
+		} else {
+			// Ask the watchers to style, and stop as soon as one responds.
+			for (int i = 0; pos > GetEndStyled() && i < lenWatchers; i++) {
+				watchers[i].watcher->NotifyStyleNeeded(this, watchers[i].userData, pos);
+			}
 		}
 	}
 }
 
-int Document::SetLineState(int line, int state) {
+void Document::LexerChanged() {
+	// Tell the watchers the lexer has changed.
+	for (int i = 0; i < lenWatchers; i++) {
+		watchers[i].watcher->NotifyLexerChanged(this, watchers[i].userData);
+	}
+}
+
+int SCI_METHOD Document::SetLineState(int line, int state) {
 	int statePrevious = static_cast<LineState *>(perLineData[ldState])->SetLineState(line, state);
 	if (state != statePrevious) {
 		DocModification mh(SC_MOD_CHANGELINESTATE, 0, 0, 0, 0, line);
@@ -1373,12 +1439,17 @@ int Document::SetLineState(int line, int state) {
 	return statePrevious;
 }
 
-int Document::GetLineState(int line) const {
+int SCI_METHOD Document::GetLineState(int line) const {
 	return static_cast<LineState *>(perLineData[ldState])->GetLineState(line);
 }
 
 int Document::GetMaxLineState() {
 	return static_cast<LineState *>(perLineData[ldState])->GetMaxLineState();
+}
+
+void SCI_METHOD Document::ChangeLexerState(int start, int end) {
+	DocModification mh(SC_MOD_LEXERSTATE, start, end-start, 0, 0, 0);
+	NotifyModified(mh);
 }
 
 StyledText Document::MarginStyledText(int line) {
@@ -1462,7 +1533,7 @@ void Document::IncrementStyleClock() {
 	styleClock = (styleClock + 1) % 0x100000;
 }
 
-void Document::DecorationFillRange(int position, int value, int fillLength) {
+void SCI_METHOD Document::DecorationFillRange(int position, int value, int fillLength) {
 	if (decorations.FillRange(position, value, fillLength)) {
 		DocModification mh(SC_MOD_CHANGEINDICATOR | SC_PERFORMED_USER,
 							position, fillLength);

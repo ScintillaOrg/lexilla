@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <assert.h>
 
 #include <string>
 #include <vector>
@@ -25,6 +26,7 @@
 
 #include "Platform.h"
 
+#include "ILexer.h"
 #include "Scintilla.h"
 
 #include "SplitVector.h"
@@ -4132,6 +4134,13 @@ void Editor::NotifyStyleNeeded(Document *, void *, int endStyleNeeded) {
 	NotifyStyleToNeeded(endStyleNeeded);
 }
 
+void Editor::NotifyLexerChanged(Document *, void *) {
+}
+
+void Editor::NotifyErrorOccurred(Document *, void *, int status) {
+	errorStatus = status;
+}
+
 void Editor::NotifyChar(int ch) {
 	SCNotification scn = {0};
 	scn.nmhdr.code = SCN_CHARADDED;
@@ -4312,6 +4321,14 @@ void Editor::NotifyModified(Document *, DocModification mh, void *) {
 			    Range(pdoc->LineStart(mh.line), pdoc->LineStart(mh.line + 1)));
 		} else {
 			// Could check that change is before last visible line.
+			Redraw();
+		}
+	}
+	if (mh.modificationType & SC_MOD_LEXERSTATE) {
+		if (paintState == painting) {
+			CheckForChangeOutsidePaint(
+			    Range(mh.position, mh.position + mh.length));
+		} else {
 			Redraw();
 		}
 	}
@@ -8709,6 +8726,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SWAPMAINANCHORCARET:
 		InvalidateSelection(sel.RangeMain());
 		sel.RangeMain() = SelectionRange(sel.RangeMain().anchor, sel.RangeMain().caret);
+		break;
+
+	case SCI_CHANGELEXERSTATE:
+		pdoc->ChangeLexerState(wParam, lParam);
 		break;
 
 	default:
