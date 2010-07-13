@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 #include <ctype.h>
 #include <time.h>
 
@@ -22,14 +23,11 @@
 #include "windows.h"
 #endif
 
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "ScintillaWidget.h"
 #ifdef SCI_LEXER
 #include "SciLexer.h"
-#include "PropSet.h"
-#include "PropSetSimple.h"
-#include "Accessor.h"
-#include "KeyWords.h"
 #endif
 #include "SVector.h"
 #include "SplitVector.h"
@@ -61,6 +59,7 @@
 #ifdef SCI_LEXER
 #include <glib.h>
 #include <gmodule.h>
+#include "LexerModule.h"
 #include "ExternalLexer.h"
 #endif
 
@@ -830,7 +829,7 @@ sptr_t ScintillaGTK::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 #ifdef SCI_LEXER
 		case SCI_LOADLEXERLIBRARY:
-			LexerManager::GetInstance()->Load(reinterpret_cast<const char*>(lParam));
+                        LexerManager::GetInstance()->Load(reinterpret_cast<const char*>(lParam));
 			break;
 #endif
 		case SCI_TARGETASUTF8:
@@ -2434,6 +2433,9 @@ GType scintilla_get_type() {
 
 void ScintillaGTK::ClassInit(OBJECT_CLASS* object_class, GtkWidgetClass *widget_class, GtkContainerClass *container_class) {
 	Platform_Initialise();
+#ifdef SCI_LEXER
+	Scintilla_LinkLexers();
+#endif
 	atomClipboard = gdk_atom_intern("CLIPBOARD", FALSE);
 	atomUTF8 = gdk_atom_intern("UTF8_STRING", FALSE);
 	atomString = GDK_SELECTION_TYPE_STRING;
