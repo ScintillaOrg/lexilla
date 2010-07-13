@@ -1,0 +1,23 @@
+[patterns]
+**.cxx = native
+**.c = native
+**.h = native
+**.py = native
+**.rc = native
+**.html = native
+**.bat = native
+**.mak = native
+**.manifest = native
+**.properties = native
+**.dsp = native
+**.sln = native
+**.vcproj = native
+**.gen = native
+**.bmp = BIN
+**.cur = BIN
+**.ico = BIN
+**.jpg = BIN
+**.png = BIN
+tgzsrc = LF
+tgzsrc = LF
+scripts/ba = LF
