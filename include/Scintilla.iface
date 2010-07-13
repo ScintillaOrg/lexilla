@@ -2144,6 +2144,23 @@ get int GetLexerLanguage=4012(, stringresult text)
 # For private communication between an application and a known lexer.
 fun int PrivateLexerCall=4013(int operation, int pointer)
 
+# Retrieve a '\n' separated list of properties understood by the current lexer.
+fun int PropertyNames=4014(, stringresult names)
+
+enu TypeProperty=SC_TYPE_
+val SC_TYPE_BOOLEAN=0
+val SC_TYPE_INTEGER=1
+val SC_TYPE_STRING=2
+
+# Retrieve the type of a property.
+fun int PropertyType=4015(string name,)
+
+# Describe a property.
+fun int DescribeProperty=4016(string name, stringresult description)
+
+# Retrieve a '\n' separated list of descriptions of the keyword sets understood by the current lexer.
+fun int DescribeKeyWordSets=4017(, stringresult descriptions)
+
 # Notifications
 # Type of modification and the action which caused the modification.
 # These are defined as a bit mask to make it easy to specify which notifications are wanted.
