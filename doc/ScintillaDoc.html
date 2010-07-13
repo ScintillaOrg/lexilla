@@ -5207,10 +5207,14 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_LOADLEXERLIBRARY">SCI_LOADLEXERLIBRARY(&lt;unused&gt;, const char
     *path)</a><br />
      <a class="message" href="#SCI_COLOURISE">SCI_COLOURISE(int start, int end)</a><br />
+     <a class="message" href="#SCI_PROPERTYNAMES">SCI_PROPERTYNAMES(&lt;unused&gt;, char *names)</a><br />
+     <a class="message" href="#SCI_PROPERTYTYPE">SCI_PROPERTYTYPE(const char *name)</a><br />
+     <a class="message" href="#SCI_DESCRIBEPROPERTY">SCI_DESCRIBEPROPERTY(const char *name, char *description)</a><br />
      <a class="message" href="#SCI_SETPROPERTY">SCI_SETPROPERTY(const char *key, const char *value)</a><br />
      <a class="message" href="#SCI_GETPROPERTY">SCI_GETPROPERTY(const char *key, char *value)</a><br />
      <a class="message" href="#SCI_GETPROPERTYEXPANDED">SCI_GETPROPERTYEXPANDED(const char *key, char *value)</a><br />
      <a class="message" href="#SCI_GETPROPERTYINT">SCI_GETPROPERTYINT(const char *key, int default)</a><br />
+     <a class="message" href="#SCI_DESCRIBEKEYWORDSETS">SCI_DESCRIBEKEYWORDSETS(&lt;unused&gt;, char *descriptions)</a><br />
      <a class="message" href="#SCI_SETKEYWORDS">SCI_SETKEYWORDS(int keyWordSet, const char
     *keyWordList)</a><br />
      <a class="message" href="#SCI_GETSTYLEBITSNEEDED">SCI_GETSTYLEBITSNEEDED</a>
@@ -5254,6 +5258,17 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <code>startPos</code> to the end. If the <code>"fold"</code> property is set to
     <code>"1"</code> and your lexer or container supports folding, fold levels are also set. This
     message causes a redraw.</p>
+
+    <p><b id="SCI_PROPERTYNAMES">SCI_PROPERTYNAMES(&lt;unused&gt;, char *names)</b><br />
+    <b id="SCI_PROPERTYTYPE">SCI_PROPERTYTYPE(const char *name)</b><br />
+    <b id="SCI_DESCRIBEPROPERTY">SCI_DESCRIBEPROPERTY(const char *name, char *description)</b><br />
+    Information may be retrieved about the properties that can be set for the current lexer.
+    This information is only available for newer lexers.
+    <code>SCI_PROPERTYNAMES</code> returns a string with all of the valid properties separated by "\n".
+    If the lexer does not support this call then an empty string is returned.
+    Properties may be boolean (<code>SC_TYPE_BOOLEAN</code>), integer (<code>SC_TYPE_INTEGER</code>),
+    or string (<code>SC_TYPE_STRING</code>) and this is found with <code>SCI_PROPERTYTYPE</code>.
+    A description of a property in English is returned by <code>SCI_DESCRIBEPROPERTY</code>.</p>
 
     <p><b id="SCI_SETPROPERTY">SCI_SETPROPERTY(const char *key, const char *value)</b><br />
      You can communicate settings to lexers with keyword:value string pairs. There is no limit to
@@ -5336,6 +5351,9 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     lexer that colours keywords and you could change languages by changing the keywords in set 0.
     There is nothing to stop you building your own keyword lists into the lexer, but this means
     that the lexer must be rebuilt if more keywords are added.</p>
+
+    <p><b id="SCI_DESCRIBEKEYWORDSETS">SCI_DESCRIBEKEYWORDSETS(&lt;unused&gt;, char *descriptions)</b><br />
+    A description of all of the keyword sets separated by "\n" is returned by <code>SCI_DESCRIBEKEYWORDSETS</code>.</p>
 
     <p><b id="SCI_GETSTYLEBITSNEEDED">SCI_GETSTYLEBITSNEEDED</b><br />
      Retrieve the number of bits the current lexer needs for styling. This should normally be the argument
