@@ -2,6 +2,9 @@
 **.cxx = native
 **.c = native
 **.h = native
+**.m = native
+**.mm = native
+**.mk = native
 **.py = native
 **.rc = native
 **.html = native
@@ -9,6 +12,7 @@
 **.mak = native
 **.manifest = native
 **.properties = native
+**.hgeol = native
 **.dsp = native
 **.sln = native
 **.vcproj = native
