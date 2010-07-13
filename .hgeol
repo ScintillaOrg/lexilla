@@ -15,6 +15,10 @@
 **.manifest = native
 **.properties = native
 **.styled = native
+**.asp = native
+**.php = native
+**.vb = native
+**.d = native
 **.txt = native
 **.pch = native
 **.hgeol = native
