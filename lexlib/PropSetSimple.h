@@ -12,7 +12,7 @@
 namespace Scintilla {
 #endif
 
-class PropSetSimple : public PropertyGet {
+class PropSetSimple {
 	void *impl;
 	void Set(const char *keyVal);
 public:
@@ -22,7 +22,7 @@ public:
 	void SetMultiple(const char *);
 	const char *Get(const char *key) const;
 	char *Expanded(const char *key) const;
-	char *ToString() const;
+	int GetExpanded(const char *key, char *result) const;
 	int GetInt(const char *key, int defaultValue=0) const;
 };
 

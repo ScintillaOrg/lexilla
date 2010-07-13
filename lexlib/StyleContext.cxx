@@ -9,10 +9,11 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <assert.h>
 
-#include "Platform.h"
+#include "ILexer.h"
 
-#include "PropSet.h"
+#include "LexAccessor.h"
 #include "Accessor.h"
 #include "StyleContext.h"
 
@@ -22,7 +23,7 @@ using namespace Scintilla;
 
 static void getRange(unsigned int start,
 		unsigned int end,
-		Accessor &styler,
+		LexAccessor &styler,
 		char *s,
 		unsigned int len) {
 	unsigned int i = 0;
@@ -39,7 +40,7 @@ void StyleContext::GetCurrent(char *s, unsigned int len) {
 
 static void getRangeLowered(unsigned int start,
 		unsigned int end,
-		Accessor &styler,
+		LexAccessor &styler,
 		char *s,
 		unsigned int len) {
 	unsigned int i = 0;
