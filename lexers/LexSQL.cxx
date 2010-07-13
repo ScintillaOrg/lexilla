@@ -7,18 +7,22 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
+#include <ctype.h>
 
-#include "Platform.h"
-
-#include "PropSet.h"
-#include "Accessor.h"
-#include "StyleContext.h"
-#include "KeyWords.h"
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
+#include "StyleContext.h"
+#include "CharacterSet.h"
+#include "LexerModule.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -61,8 +65,8 @@ static void ColouriseSQLDoc(unsigned int startPos, int length, int initStyle, Wo
 
 	StyleContext sc(startPos, length, initStyle, styler);
 
-	// property sql.backslash.escapes 
-	//	Enables backslash as an escape character in SQL. 
+	// property sql.backslash.escapes
+	//	Enables backslash as an escape character in SQL.
 	bool sqlBackslashEscapes = styler.GetPropertyInt("sql.backslash.escapes", 0) != 0;
 
 	bool sqlBackticksIdentifier = styler.GetPropertyInt("lexer.sql.backticks.identifier", 0) != 0;
@@ -231,8 +235,8 @@ static void FoldSQLDoc(unsigned int startPos, int length, int initStyle,
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	bool foldOnlyBegin = styler.GetPropertyInt("fold.sql.only.begin", 0) != 0;
 
-	// property fold.sql.exists 
-	//	Enables "EXISTS" to end a fold as is started by "IF" in "DROP TABLE IF EXISTS". 
+	// property fold.sql.exists
+	//	Enables "EXISTS" to end a fold as is started by "IF" in "DROP TABLE IF EXISTS".
 	bool foldSqlExists = styler.GetPropertyInt("fold.sql.exists", 1) != 0;
 
 	unsigned int endPos = startPos + length;
@@ -311,7 +315,7 @@ static void FoldSQLDoc(unsigned int startPos, int length, int initStyle,
 //						// DROP TABLE IF EXISTS or CREATE TABLE IF NOT EXISTS
 						(foldSqlExists && (strcmp(s, "exists") == 0)) ||
 //						//  SQL Anywhere permits IF ... ELSE ... ENDIF
-//						//      will only be active if "endif" appears in the 
+//						//      will only be active if "endif" appears in the
 //						//		keyword list.
 						(strcmp(s, "endif") == 0)) {
 				endFound = true;

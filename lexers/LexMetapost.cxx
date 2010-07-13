@@ -14,18 +14,22 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
+#include <ctype.h>
 
-#include "Platform.h"
-
-#include "PropSet.h"
-#include "Accessor.h"
-#include "KeyWords.h"
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
 #include "StyleContext.h"
+#include "CharacterSet.h"
+#include "LexerModule.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -326,11 +330,11 @@ static const char * const metapostWordListDesc[] = {
 static int classifyFoldPointMetapost(const char* s,WordList *keywordlists[]) {
 	WordList& keywordsStart=*keywordlists[3];
 	WordList& keywordsStop1=*keywordlists[4];
-	
+
 	if (keywordsStart.InList(s)) {return 1;}
 	else if (keywordsStop1.InList(s)) {return -1;}
 	return 0;
-	
+
 }
 
 static int ParseMetapostWord(unsigned int pos, Accessor &styler, char *word)
@@ -344,11 +348,11 @@ static int ParseMetapostWord(unsigned int pos, Accessor &styler, char *word)
           length++;
           ch=styler.SafeGetCharAt(pos+length);
   }
-  word[length]=0;   
+  word[length]=0;
   return length;
 }
- 
-static void FoldMetapostDoc(unsigned int startPos, int length, int, WordList *keywordlists[], Accessor &styler) 
+
+static void FoldMetapostDoc(unsigned int startPos, int length, int, WordList *keywordlists[], Accessor &styler)
 {
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	unsigned int endPos = startPos+length;
@@ -357,9 +361,9 @@ static void FoldMetapostDoc(unsigned int startPos, int length, int, WordList *ke
 	int levelPrev=styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent=levelPrev;
 	char chNext=styler[startPos];
-	
+
 	char buffer[100]="";
-	
+
 	for (unsigned int i=startPos; i < endPos; i++) {
 		char ch=chNext;
 		chNext=styler.SafeGetCharAt(i+1);
@@ -371,7 +375,7 @@ static void FoldMetapostDoc(unsigned int startPos, int length, int, WordList *ke
             ParseMetapostWord(i, styler, buffer);
 			levelCurrent += classifyFoldPointMetapost(buffer,keywordlists);
 		}
-		
+
 		if (atEOL) {
 			int lev = levelPrev;
 			if (visibleChars == 0 && foldCompact)

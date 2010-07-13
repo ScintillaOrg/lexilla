@@ -7,18 +7,22 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <stdarg.h>
 #include <stdio.h>
+#include <stdarg.h>
+#include <assert.h>
+#include <ctype.h>
 
-#include "Platform.h"
-
-#include "PropSet.h"
-#include "Accessor.h"
-#include "StyleContext.h"
-#include "KeyWords.h"
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
+#include "StyleContext.h"
+#include "CharacterSet.h"
+#include "LexerModule.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -47,7 +51,7 @@ static void ColouriseTCLDoc(unsigned int startPos, int length, int , WordList *k
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool commentLevel = false;
     bool subBrace = false; // substitution begin with a brace ${.....}
-	enum tLineState {LS_DEFAULT, LS_OPEN_COMMENT, LS_OPEN_DOUBLE_QUOTE, LS_COMMENT_BOX, LS_MASK_STATE = 0xf, 
+	enum tLineState {LS_DEFAULT, LS_OPEN_COMMENT, LS_OPEN_DOUBLE_QUOTE, LS_COMMENT_BOX, LS_MASK_STATE = 0xf,
         LS_COMMAND_EXPECTED = 16, LS_BRACE_ONLY = 32 } lineState = LS_DEFAULT;
 	bool prevSlash = false;
 	int currentLevel = 0;
@@ -86,7 +90,7 @@ static void ColouriseTCLDoc(unsigned int startPos, int length, int , WordList *k
     StyleContext sc(startPos, length, SCE_TCL_DEFAULT, styler);
 	for (; ; sc.Forward()) {
 next:
-        if (sc.ch=='\r' && sc.chNext == '\n') // only ignore \r on PC process on the mac 
+        if (sc.ch=='\r' && sc.chNext == '\n') // only ignore \r on PC process on the mac
             continue;
         bool atEnd = !sc.More();  // make sure we coloured the last word
         if (lineState != LS_DEFAULT) {
@@ -170,7 +174,7 @@ next:
                         sc.ChangeState(SCE_TCL_WORD7);
                     } else if (keywords9.InList(s)) {
                         sc.ChangeState(SCE_TCL_WORD8);
-                    } 
+                    }
                 }
                 expected = false;
                 sc.SetState(quote ? SCE_TCL_IN_QUOTE : SCE_TCL_DEFAULT);
@@ -212,7 +216,7 @@ next:
                 } else if (sc.state == SCE_TCL_COMMENT_BOX)
                     lineState = LS_COMMENT_BOX;
 			}
-            styler.SetLineState(currentLine, 
+            styler.SetLineState(currentLine,
                 (subBrace ? LS_BRACE_ONLY : 0) |
                 (expected ? LS_COMMAND_EXPECTED : 0)  | lineState);
             if (lineState == LS_COMMENT_BOX)
@@ -285,7 +289,7 @@ next:
 
 		if (sc.ch == '\\') {
 			prevSlash = true;
-			continue;		
+			continue;
 		}
 
 		// Determine if a new state should be entered.
@@ -322,7 +326,7 @@ next:
                     subParen = 0;
                     if (sc.chNext != '{') {
                         sc.SetState(SCE_TCL_SUBSTITUTION);
-                    } 
+                    }
                     else {
                         sc.SetState(SCE_TCL_OPERATOR);  // $
                         sc.Forward();  // {

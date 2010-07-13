@@ -8,16 +8,22 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <assert.h>
 #include <ctype.h>
 
-#include "Platform.h"
-
-#include "PropSet.h"
-#include "Accessor.h"
-#include "StyleContext.h"
-#include "KeyWords.h"
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
+#include "StyleContext.h"
+#include "CharacterSet.h"
+#include "LexerModule.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -39,7 +45,7 @@ classificationBlock
     value: #BinSel value: '~@%&*-+=|\/,<>?!';
     value: #Upper value: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.
 
-((String new: 500) streamContents: [ :stream |            
+((String new: 500) streamContents: [ :stream |
     stream crLf; nextPutAll: 'static int ClassificationTable[256] = {'.
     lexTable keysAndValuesDo: [ :index :value |
         ((index - 1) rem: 16) == 0 ifTrue: [
@@ -50,7 +56,7 @@ classificationBlock
         index ~= 256 ifTrue: [
             stream nextPut: $,]].
     stream crLf; nextPutAll: '};'; crLf.
-    
+
     charClasses keysAndValuesDo: [ :index :name |
         stream
             crLf;
@@ -95,7 +101,7 @@ static inline bool isDigitOfRadix(int ch, int radix)
 }
 
 static inline void skipComment(StyleContext& sc)
-{    
+{
     while (sc.More() && sc.ch != '\"')
         sc.Forward();
 }
@@ -118,7 +124,7 @@ static void handleHash(StyleContext& sc)
         sc.SetState(SCE_ST_SPECIAL);
         return;
     }
-    
+
     sc.SetState(SCE_ST_SYMBOL);
     sc.Forward();
     if (sc.ch == '\'') {
@@ -162,7 +168,7 @@ static void handleNumeric(StyleContext& sc)
     char num[256];
     int nl;
     int radix;
-    
+
     sc.SetState(SCE_ST_NUMBER);
     num[0] = static_cast<char>(sc.ch);
     nl = 1;
@@ -217,7 +223,7 @@ static void handleLetter(StyleContext& sc, WordList* specialSelectorList)
     int il;
     int state;
     bool doubleColonPresent;
-    
+
     sc.SetState(SCE_ST_DEFAULT);
 
     ident[0] = static_cast<char>(sc.ch);
@@ -237,7 +243,7 @@ static void handleLetter(StyleContext& sc, WordList* specialSelectorList)
     else
         doubleColonPresent = false;
     ident[il] = 0;
-    
+
     if (specialSelectorList->InList(ident))
             state = SCE_ST_SPEC_SEL;
     else if (doubleColonPresent)
@@ -256,7 +262,7 @@ static void handleLetter(StyleContext& sc, WordList* specialSelectorList)
         else
             state = SCE_ST_DEFAULT;
     }
-    
+
     sc.ChangeState(state);
 }
 
@@ -277,7 +283,7 @@ static void colorizeSmalltalkDoc(unsigned int startPos, int length, int initStyl
 
     for (; sc.More(); sc.Forward()) {
         int ch;
-        
+
         ch = sc.ch;
         if (ch == '\"') {
             sc.SetState(SCE_ST_COMMENT);

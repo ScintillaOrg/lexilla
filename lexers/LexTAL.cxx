@@ -10,18 +10,22 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
+#include <ctype.h>
 
-#include "Platform.h"
-
-#include "PropSet.h"
-#include "Accessor.h"
-#include "KeyWords.h"
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
 #include "StyleContext.h"
+#include "CharacterSet.h"
+#include "LexerModule.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -94,7 +98,7 @@ static int classifyWordTAL(unsigned int start, unsigned int end, /*WordList &key
 			else if (strcmp(s, "end") == 0) {
 				ret = -1;
 			}
-		} 
+		}
 		else if (s[0] == '$' || builtins.InList(s)) {
 			chAttr = SCE_C_WORD2;
 		}

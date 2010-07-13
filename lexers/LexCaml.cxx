@@ -20,19 +20,22 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
+#include <ctype.h>
 
-#include "Platform.h"
-
-#include "PropSet.h"
-#include "PropSetSimple.h"
-#include "Accessor.h"
-#include "StyleContext.h"
-#include "KeyWords.h"
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
+#include "StyleContext.h"
+#include "CharacterSet.h"
+#include "LexerModule.h"
 
 //	Since the Microsoft __iscsym[f] funcs are not ANSI...
 inline int  iscaml(int c) {return isalnum(c) || c == '_';}
@@ -51,8 +54,12 @@ using namespace Scintilla;
 /*
 	(actually seems to work!)
 */
+#include <string>
 #include "WindowAccessor.h"
 #include "ExternalLexer.h"
+
+#undef EXT_LEXER_DECL
+#define EXT_LEXER_DECL __declspec( dllexport ) __stdcall
 
 #if PLAT_WIN
 #include <windows.h>

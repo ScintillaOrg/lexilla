@@ -4,25 +4,27 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
 
-#include "Platform.h"
-
-#include "PropSet.h"
-#include "Accessor.h"
-#include "StyleContext.h"
-#include "KeyWords.h"
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
+#include "StyleContext.h"
 #include "CharacterSet.h"
+#include "LexerModule.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
 #endif
 
-static void ColouriseAsyDoc(unsigned int startPos, int length, int initStyle, 
+static void ColouriseAsyDoc(unsigned int startPos, int length, int initStyle,
 		WordList *keywordlists[], Accessor &styler) {
 
 	WordList &keywords = *keywordlists[0];
@@ -118,7 +120,7 @@ static void ColouriseAsyDoc(unsigned int startPos, int length, int initStyle,
 				sc.SetState(SCE_ASY_IDENTIFIER);
 			} else if (sc.Match('/', '*')) {
 				sc.SetState(SCE_ASY_COMMENT);
-				sc.Forward();	// 
+				sc.Forward();	//
 			} else if (sc.Match('/', '/')) {
 				sc.SetState(SCE_ASY_COMMENTLINE);
 			} else if (sc.ch == '\"') {
@@ -162,14 +164,14 @@ static int ParseASYWord(unsigned int pos, Accessor &styler, char *word)
           length++;
           ch=styler.SafeGetCharAt(pos+length);
   }
-  word[length]=0;   
+  word[length]=0;
   return length;
 }
 
 static bool IsASYDrawingLine(int line, Accessor &styler) {
 	int pos = styler.LineStart(line);
 	int eol_pos = styler.LineStart(line + 1) - 1;
-	
+
 	int startpos = pos;
 	char buffer[100]="";
 
@@ -181,11 +183,11 @@ static bool IsASYDrawingLine(int line, Accessor &styler) {
 		if (!drawcommands && ch!=' ') return false;
 		else if (drawcommands) return true;
 		startpos++;
-	}		
+	}
 	return false;
 }
 
-static void FoldAsyDoc(unsigned int startPos, int length, int initStyle, 
+static void FoldAsyDoc(unsigned int startPos, int length, int initStyle,
 					   WordList *[], Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
@@ -236,7 +238,7 @@ static void FoldAsyDoc(unsigned int startPos, int length, int initStyle,
 			else if (lineCurrent!=0 && IsASYDrawingLine(lineCurrent - 1, styler) &&
 				!IsASYDrawingLine(lineCurrent+1, styler))
 				levelNext--;
-		}	
+		}
 
 		if (atEOL) {
 			int levelUse = levelCurrent;

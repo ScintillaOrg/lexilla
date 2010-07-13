@@ -7,20 +7,25 @@
 // Copyright 2003 by Marius Gheorghe <mgheorghe@cabletest.com>
 // The License.txt file describes the conditions under which this software may be distributed.
 
+#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <ctype.h>
-#include <stdlib.h>
+#include <stdarg.h>
+#include <assert.h>
 
 #include <string>
 
-#include "Platform.h"
-
-#include "PropSet.h"
-#include "Accessor.h"
-#include "KeyWords.h"
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
+#include "StyleContext.h"
+#include "CharacterSet.h"
+#include "LexerModule.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -66,7 +71,7 @@ static int GetLotLineState(std::string &line) {
 				return SCE_LOT_ABORT;
 			}
 			else {
-				return i ? SCE_LOT_PASS : SCE_LOT_DEFAULT;			
+				return i ? SCE_LOT_PASS : SCE_LOT_DEFAULT;
 			}
 		}
 	}
@@ -135,10 +140,10 @@ static void FoldLotDoc(unsigned int startPos, int length, int, WordList *[], Acc
 		if (ch == '\r' && chNext == '\n') {
 			// TO DO:
 			// Should really get the state of the previous line from the styler
-			int stylePrev = style;	
+			int stylePrev = style;
 			style = styleNext;
 			styleNext = styler.StyleAt(i + 2);
-		
+
 			switch (style) {
 /*
 			case SCE_LOT_SET:
@@ -147,7 +152,7 @@ static void FoldLotDoc(unsigned int startPos, int length, int, WordList *[], Acc
 */
 			case SCE_LOT_FAIL:
 /*
-				if (stylePrev != SCE_LOT_FAIL) 
+				if (stylePrev != SCE_LOT_FAIL)
 					lev = SC_FOLDLEVELBASE | SC_FOLDLEVELHEADERFLAG;
 				else
 					lev = SC_FOLDLEVELBASE + 1;
@@ -156,7 +161,7 @@ static void FoldLotDoc(unsigned int startPos, int length, int, WordList *[], Acc
 				break;
 
 			default:
-				if (lineCurrent == 0 || stylePrev == SCE_LOT_FAIL) 
+				if (lineCurrent == 0 || stylePrev == SCE_LOT_FAIL)
 					lev = SC_FOLDLEVELBASE | SC_FOLDLEVELHEADERFLAG;
 				else
 					lev = SC_FOLDLEVELBASE + 1;
@@ -166,7 +171,7 @@ static void FoldLotDoc(unsigned int startPos, int length, int, WordList *[], Acc
 				break;
 			}
 
-			if (lev != styler.LevelAt(lineCurrent)) 
+			if (lev != styler.LevelAt(lineCurrent))
 				styler.SetLevel(lineCurrent, lev);
 
 			lineCurrent++;

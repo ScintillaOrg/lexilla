@@ -4,23 +4,28 @@
 /** @file LexErlang.cxx
  ** Lexer for Erlang.
  ** Enhanced by Etienne 'Lenain' Girondel (lenaing@gmail.com)
- ** Originally wrote by Peter-Henry Mander, 
+ ** Originally wrote by Peter-Henry Mander,
  ** based on Matlab lexer by José Fonseca.
  **/
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
+#include <ctype.h>
 
-#include "Platform.h"
-#include "PropSet.h"
-#include "Accessor.h"
-#include "StyleContext.h"
-#include "KeyWords.h"
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
+#include "StyleContext.h"
+#include "CharacterSet.h"
+#include "LexerModule.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -152,7 +157,7 @@ static void ColouriseErlangDoc(unsigned int startPos, int length, int initStyle,
 						// Try to match documentation comment
 						sc.GetCurrent(cur, sizeof(cur));
 
-						if (parse_state == COMMENT_DOC_MACRO 
+						if (parse_state == COMMENT_DOC_MACRO
 							&& erlangDocMacro.InList(cur)) {
 								sc.ChangeState(SCE_ERLANG_COMMENT_DOC_MACRO);
 								while (sc.ch != '}' && !sc.atLineEnd)
@@ -340,7 +345,7 @@ static void ColouriseErlangDoc(unsigned int startPos, int length, int initStyle,
 				case NUMERAL_BASE_VALUE : {
 					if (!is_radix(radix_digits,sc.ch)) {
 						radix_digits = 0;
-				
+
 						if (!isalnum(sc.ch))
 							sc.ChangeState(SCE_ERLANG_NUMBER);
 
@@ -380,7 +385,7 @@ static void ColouriseErlangDoc(unsigned int startPos, int length, int initStyle,
 			/* Preprocessor --------------------------------------------------*/
 				case PREPROCESSOR : {
 					if (!IsAWordChar(sc.ch)) {
-						
+
 						sc.GetCurrent(cur, sizeof(cur));
 						if (erlangPreproc.InList(cur)) {
 							style = SCE_ERLANG_PREPROC;
@@ -421,7 +426,7 @@ static void ColouriseErlangDoc(unsigned int startPos, int length, int initStyle,
 				} break;
 				case SCE_ERLANG_OPERATOR : {
 					if (sc.chPrev == '.') {
-						if (sc.ch == '*' || sc.ch == '/' || sc.ch == '\\' 
+						if (sc.ch == '*' || sc.ch == '/' || sc.ch == '\\'
 							|| sc.ch == '^') {
 							sc.ForwardSetState(SCE_ERLANG_DEFAULT);
 						} else if (sc.ch == '\'') {

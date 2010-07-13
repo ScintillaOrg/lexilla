@@ -2,31 +2,31 @@
  *  LexMarkdown.cxx
  *
  *  A simple Markdown lexer for scintilla.
- *   
+ *
  *  Includes highlighting for some extra features from the
- *  Pandoc implementation; strikeout, using '#.' as a default 
+ *  Pandoc implementation; strikeout, using '#.' as a default
  *  ordered list item marker, and delimited code blocks.
- * 
+ *
  *  Limitations:
- * 
+ *
  *  Standard indented code blocks are not highlighted at all,
- *  as it would conflict with other indentation schemes. Use 
+ *  as it would conflict with other indentation schemes. Use
  *  delimited code blocks for blanket highlighting of an
  *  entire code block.  Embedded HTML is not highlighted either.
  *  Blanket HTML highlighting has issues, because some Markdown
  *  implementations allow Markdown markup inside of the HTML. Also,
- *  there is a following blank line issue that can't be ignored, 
- *  explained in the next paragraph. Embedded HTML and code 
- *  blocks would be better supported with language specific 
+ *  there is a following blank line issue that can't be ignored,
+ *  explained in the next paragraph. Embedded HTML and code
+ *  blocks would be better supported with language specific
  *  highlighting.
- * 
+ *
  *  The highlighting aims to accurately reflect correct syntax,
  *  but a few restrictions are relaxed. Delimited code blocks are
- *  highlighted, even if the line following the code block is not blank.  
+ *  highlighted, even if the line following the code block is not blank.
  *  Requiring a blank line after a block, breaks the highlighting
  *  in certain cases, because of the way Scintilla ends up calling
  *  the lexer.
- * 
+ *
  *  Written by Jon Strait - jstrait@moonloop.net
  *
  *  The License.txt file describes the conditions under which this
@@ -34,20 +34,23 @@
  *
  *****************************************************************/
 
-#include <stdlib.h>         
+#include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
 
-#include "Platform.h"
-
-#include "PropSet.h"
-#include "Accessor.h"
-#include "StyleContext.h"
-#include "KeyWords.h"
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
+#include "StyleContext.h"
+#include "CharacterSet.h"
+#include "LexerModule.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -74,7 +77,7 @@ static bool FollowToLineEnd(const int ch, const int state, const unsigned int en
     else return false;
 }
 
-// Set the state on text section from current to length characters, 
+// Set the state on text section from current to length characters,
 // then set the rest until the newline to default, except for any characters matching token
 static void SetStateAndZoom(const int state, const int length, const int token, StyleContext &sc) {
     sc.SetState(state);
@@ -100,7 +103,7 @@ static void SetStateAndZoom(const int state, const int length, const int token, 
 static bool HasPrevLineContent(StyleContext &sc) {
     int i = 0;
     // Go back to the previous newline
-    while ((--i + sc.currentPos) && !IsNewline(sc.GetRelative(i))) 
+    while ((--i + sc.currentPos) && !IsNewline(sc.GetRelative(i)))
         ;
     while (--i + sc.currentPos) {
         if (IsNewline(sc.GetRelative(i)))
@@ -116,12 +119,12 @@ static bool IsValidHrule(const unsigned int endPos, StyleContext &sc) {
     unsigned int i = 0;
     while (++i) {
         c = sc.GetRelative(i);
-        if (c == sc.ch) 
+        if (c == sc.ch)
             ++count;
         // hit a terminating character
         else if (!IsASpaceOrTab(c) || sc.currentPos + i == endPos) {
             // Are we a valid HRULE
-            if ((IsNewline(c) || sc.currentPos + i == endPos) && 
+            if ((IsNewline(c) || sc.currentPos + i == endPos) &&
                     count >= 3 && !HasPrevLineContent(sc)) {
                 sc.SetState(SCE_MARKDOWN_HRULE);
                 sc.Forward(i);
@@ -145,7 +148,7 @@ static void ColorizeMarkdownDoc(unsigned int startPos, int length, int initStyle
     // Useful in the corner case of having to start at the beginning file position
     // in the default state.
     bool freezeCursor = false;
-    
+
     StyleContext sc(startPos, length, initStyle, styler);
 
     while (sc.More()) {
@@ -154,18 +157,18 @@ static void ColorizeMarkdownDoc(unsigned int startPos, int length, int initStyle
             sc.Forward();
             continue;
         }
-        
+
         // A blockquotes resets the line semantics
         if (sc.state == SCE_MARKDOWN_BLOCKQUOTE)
             sc.SetState(SCE_MARKDOWN_LINE_BEGIN);
-        
+
         // Conditional state-based actions
         if (sc.state == SCE_MARKDOWN_CODE2) {
             if (sc.Match("``") && sc.GetRelative(-2) != ' ') {
                 sc.Forward(2);
                 sc.SetState(SCE_MARKDOWN_DEFAULT);
             }
-        }    
+        }
         else if (sc.state == SCE_MARKDOWN_CODE) {
             if (sc.ch == '`' && sc.chPrev != ' ')
                 sc.ForwardSetState(SCE_MARKDOWN_DEFAULT);
@@ -201,14 +204,14 @@ static void ColorizeMarkdownDoc(unsigned int startPos, int length, int initStyle
                 sc.Forward(2);
                 sc.SetState(SCE_MARKDOWN_DEFAULT);
             }
-        } 
-        else if (sc.state == SCE_MARKDOWN_STRONG2) {  
-            if (sc.Match("__") && sc.chPrev != ' ') {  
+        }
+        else if (sc.state == SCE_MARKDOWN_STRONG2) {
+            if (sc.Match("__") && sc.chPrev != ' ') {
                 sc.Forward(2);
                 sc.SetState(SCE_MARKDOWN_DEFAULT);
             }
         }
-        // Emphasis    
+        // Emphasis
         else if (sc.state == SCE_MARKDOWN_EM1) {
             if (sc.ch == '*' && sc.chPrev != ' ')
                 sc.ForwardSetState(SCE_MARKDOWN_DEFAULT);
@@ -281,7 +284,7 @@ static void ColorizeMarkdownDoc(unsigned int startPos, int length, int initStyle
                 sc.SetState(SCE_MARKDOWN_PRECHAR);
             }
         }
-                
+
         // The header lasts until the newline
         else if (sc.state == SCE_MARKDOWN_HEADER1 || sc.state == SCE_MARKDOWN_HEADER2 ||
                 sc.state == SCE_MARKDOWN_HEADER3 || sc.state == SCE_MARKDOWN_HEADER4 ||
@@ -289,7 +292,7 @@ static void ColorizeMarkdownDoc(unsigned int startPos, int length, int initStyle
             if (IsNewline(sc.ch))
                 sc.SetState(SCE_MARKDOWN_LINE_BEGIN);
         }
-        
+
         // New state only within the initial whitespace
         if (sc.state == SCE_MARKDOWN_PRECHAR) {
             // Blockquote
@@ -300,8 +303,8 @@ static void ColorizeMarkdownDoc(unsigned int startPos, int length, int initStyle
             else if (!HasPrevLineContent(sc) && (sc.chPrev == '\t' || precharCount >= 4))
                 sc.SetState(SCE_MARKDOWN_CODEBK);
             */
-            // HRule - Total of three or more hyphens, asterisks, or underscores 
-            // on a line by themselves    
+            // HRule - Total of three or more hyphens, asterisks, or underscores
+            // on a line by themselves
             else if ((sc.ch == '-' || sc.ch == '*' || sc.ch == '_') && IsValidHrule(endPos, sc))
                 ;
             // Unordered list
@@ -314,7 +317,7 @@ static void ColorizeMarkdownDoc(unsigned int startPos, int length, int initStyle
                 int digitCount = 0;
                 while (IsADigit(sc.GetRelative(++digitCount)))
                     ;
-                if (sc.GetRelative(digitCount) == '.' && 
+                if (sc.GetRelative(digitCount) == '.' &&
                         IsASpaceOrTab(sc.GetRelative(digitCount + 1))) {
                     sc.SetState(SCE_MARKDOWN_OLIST_ITEM);
                     sc.Forward(digitCount + 1);
@@ -332,7 +335,7 @@ static void ColorizeMarkdownDoc(unsigned int startPos, int length, int initStyle
             else
                 ++precharCount;
         }
-        
+
         // New state anywhere in doc
         if (sc.state == SCE_MARKDOWN_DEFAULT) {
             if (sc.atLineStart && sc.ch == '#') {

@@ -13,18 +13,22 @@ Support more than 6 comments levels
 **/
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
+#include <ctype.h>
 
-#include "Platform.h"
-
-#include "PropSet.h"
-#include "Accessor.h"
-#include "StyleContext.h"
-#include "KeyWords.h"
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
+#include "StyleContext.h"
+#include "CharacterSet.h"
+#include "LexerModule.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -47,7 +51,7 @@ static void Colourise4glDoc(unsigned int startPos, int length, int initStyle, Wo
     WordList &keywords2 = *keywordlists[1];   // block opening keywords, only when SentenceStart
     WordList &keywords3 = *keywordlists[2];   // block opening keywords
     //WordList &keywords4 = *keywordlists[3]; // preprocessor keywords. Not implemented
-    
+
 
 	int visibleChars = 0;
 	int mask;
@@ -180,7 +184,7 @@ static void Colourise4glDoc(unsigned int startPos, int length, int initStyle, Wo
 			} else if (isoperator(static_cast<char>(sc.ch))) {
 		/* 	This code allows highlight of handles. Alas, it would cause the phrase "last-event:function"
 			to be recognized as a BlockBegin */
-			
+
 				if (sc.ch == ':')
 					sc.SetState(SCE_4GL_OPERATOR & SetSentenceStart);
 				/* else */

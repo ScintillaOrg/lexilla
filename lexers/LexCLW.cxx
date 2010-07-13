@@ -10,16 +10,20 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
 #include <ctype.h>
 
-#include "Platform.h"
-
-#include "PropSet.h"
-#include "Accessor.h"
-#include "StyleContext.h"
-#include "KeyWords.h"
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
+#include "StyleContext.h"
+#include "CharacterSet.h"
+#include "LexerModule.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -60,10 +64,10 @@ inline bool IsALabelStart(const int iChar) {
 // Is a label character
 inline bool IsALabelCharacter(const int iChar) {
 
-	return(isalnum(iChar) || iChar == '_' || iChar == ':'); 
+	return(isalnum(iChar) || iChar == '_' || iChar == ':');
 }
 
-// Is the character is a ! and the the next character is not a ! 
+// Is the character is a ! and the the next character is not a !
 inline bool IsACommentStart(const int iChar) {
 
 	return(iChar == '!');
@@ -126,7 +130,7 @@ inline bool SetNumericConstantState(StyleContext &scDoc) {
 				break;
 			default :
 				break;
-		}	
+		}
 	}
 	// If points found (can be more than one for improper formatted number
 	if (iPoints > 0) {
@@ -186,12 +190,12 @@ static void ColouriseClarionDoc(unsigned int uiStartPos, int iLength, int iInitS
 	WordList &wlLabelReservedWords = *wlKeywords[7];		// Clarion Reserved Keywords (Labels)
 	WordList &wlProcLabelReservedWords = *wlKeywords[8];	// Clarion Reserved Keywords (Procedure Labels)
 
-	const char wlProcReservedKeywordList[] = 
+	const char wlProcReservedKeywordList[] =
 	"PROCEDURE FUNCTION";
 	WordList wlProcReservedKeywords;
 	wlProcReservedKeywords.Set(wlProcReservedKeywordList);
 
-	const char wlCompilerKeywordList[] = 
+	const char wlCompilerKeywordList[] =
 	"COMPILE OMIT";
 	WordList wlCompilerKeywords;
 	wlCompilerKeywords.Set(wlCompilerKeywordList);
@@ -243,7 +247,7 @@ static void ColouriseClarionDoc(unsigned int uiStartPos, int iLength, int iInitS
 						// change the label to error state
 						scDoc.ChangeState(SCE_CLW_ERROR);
 					}
-					// Else if UPPERCASE label string is 
+					// Else if UPPERCASE label string is
 					else if (wlProcLabelReservedWords.InList(cLabel) && iColumn1Label) {
 						char cWord[512];	// Word buffer
 						// Get the next word from the current position
@@ -368,13 +372,13 @@ static void ColouriseClarionDoc(unsigned int uiStartPos, int iLength, int iInitS
 				// Increment the parenthese level
 				iParenthesesLevel++;
 			}
-			// Else if the character is a ) (close parenthese) 
+			// Else if the character is a ) (close parenthese)
 			else if (scDoc.ch == ')') {
 				// If the parenthese level is set to zero
 				// parentheses matched
 				if (!iParenthesesLevel) {
 					scDoc.SetState(SCE_CLW_DEFAULT);
-				} 
+				}
 				// Else parenthese level is greater than zero
 				// still looking for matching parentheses
 				else {
@@ -399,7 +403,7 @@ static void ColouriseClarionDoc(unsigned int uiStartPos, int iLength, int iInitS
 			|| IsAHexCharacter(scDoc.ch, bCaseSensitive)
 			|| scDoc.ch == '.'
 			|| IsANumericBaseCharacter(scDoc.ch, bCaseSensitive))) {
-				// If the number was a real 
+				// If the number was a real
 				if (SetNumericConstantState(scDoc)) {
 					// Colour the matched string to the real constant state
 					scDoc.ChangeState(SCE_CLW_REAL_CONSTANT);
@@ -461,7 +465,7 @@ static void ColouriseClarionDoc(unsigned int uiStartPos, int iLength, int iInitS
 		}
 		// Default Handling
 		else {
-			// If in default state 
+			// If in default state
 			if (scDoc.state == SCE_CLW_DEFAULT) {
 				// If is a letter could be a possible statement
 				if (isalpha(scDoc.ch)) {
@@ -477,10 +481,10 @@ static void ColouriseClarionDoc(unsigned int uiStartPos, int iLength, int iInitS
 				else if (IsACommentStart(scDoc.ch) || scDoc.ch == '|') {
 					// then set the state to comment.
 					scDoc.SetState(SCE_CLW_COMMENT);
-				}		
+				}
 				// else if the character is a ' (single quote)
 				else if (scDoc.ch == '\'') {
-					// If the character is also a ' (single quote) 
+					// If the character is also a ' (single quote)
 					// Embedded Apostrophe
 					if (scDoc.chNext == '\'') {
 						// Move forward colouring it as default state
@@ -490,7 +494,7 @@ static void ColouriseClarionDoc(unsigned int uiStartPos, int iLength, int iInitS
 						// move to the next character and then set the state to comment.
 						scDoc.ForwardSetState(SCE_CLW_STRING);
 					}
-				}		
+				}
 				// else the character is an @ (ampersand)
 				else if (scDoc.ch == '@') {
 					// Case insensitive.
@@ -509,7 +513,7 @@ static void ColouriseClarionDoc(unsigned int uiStartPos, int iLength, int iInitS
 							scDoc.SetState(SCE_CLW_PICTURE_STRING);
 						}
 					}
-				}		
+				}
 			}
 		}
 	}
@@ -616,7 +620,7 @@ static void FoldClarionDoc(unsigned int uiStartPos, int iLength, int iInitStyle,
 		iStyle = iStyleNext;
 		iStyleNext = accStyler.StyleAt(uiPos + 1);
 		bool bEOL = (chChar == '\r' && chNext != '\n') || (chChar == '\n');
-	
+
 		if (iStylePrev == SCE_CLW_DEFAULT) {
 			if (iStyle == SCE_CLW_KEYWORD || iStyle == SCE_CLW_STRUCTURE_DATA_TYPE) {
 				// Store last word start point.
@@ -647,7 +651,7 @@ static void FoldClarionDoc(unsigned int uiStartPos, int iLength, int iInitStyle,
 			iLevelPrev = iLevelCurrent;
 			iVisibleChars = 0;
 		}
-		
+
 		if (!isspacechar(chChar))
 			iVisibleChars++;
 	}

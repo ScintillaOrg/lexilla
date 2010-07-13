@@ -9,18 +9,22 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
+#include <ctype.h>
 
-#include "Platform.h"
-
-#include "PropSet.h"
-#include "Accessor.h"
-#include "StyleContext.h"
-#include "KeyWords.h"
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
+#include "StyleContext.h"
+#include "CharacterSet.h"
+#include "LexerModule.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -113,7 +117,7 @@ static int scanNumber(Accessor &styler, int pos) {
       if (ch == '_' || (ch >= '0' && ch <= '1')) ++pos;
       else break;
     }
-  } else if (ch == '0' && 
+  } else if (ch == '0' &&
             (ch2 == 'o' || ch2 == 'O' || ch2 == 'c' || ch2 == 'C')) {
     /* octal number: */
     pos += 2;
@@ -203,7 +207,7 @@ static void ColouriseNimrodDoc(unsigned int startPos, int length, int initStyle,
       case '#': {
         bool doccomment = (styler.SafeGetCharAt(pos+1) == '#');
         while (pos < max && !isNewLine(styler.SafeGetCharAt(pos, LF))) pos++;
-        if (doccomment) 
+        if (doccomment)
           styler.ColourTo(pos, SCE_C_COMMENTLINEDOC);
         else
           styler.ColourTo(pos, SCE_P_COMMENTLINE);
@@ -280,7 +284,7 @@ static bool IsQuoteLine(int line, Accessor &styler) {
 }
 
 
-static void FoldNimrodDoc(unsigned int startPos, int length, 
+static void FoldNimrodDoc(unsigned int startPos, int length,
                           int /*initStyle - unused*/,
                           WordList *[], Accessor &styler) {
 	const int maxPos = startPos + length;
@@ -311,7 +315,7 @@ static void FoldNimrodDoc(unsigned int startPos, int length,
 	int prev_state = SCE_P_DEFAULT & 31;
 	if (lineCurrent >= 1)
 		prev_state = styler.StyleAt(startPos - 1) & 31;
-	int prevQuote = foldQuotes && ((prev_state == SCE_P_TRIPLE) || 
+	int prevQuote = foldQuotes && ((prev_state == SCE_P_TRIPLE) ||
 	                               (prev_state == SCE_P_TRIPLEDOUBLE));
 	int prevComment = 0;
 	if (lineCurrent >= 1)
@@ -320,7 +324,7 @@ static void FoldNimrodDoc(unsigned int startPos, int length,
 	// Process all characters to end of requested range or end of any triple quote
 	// or comment that hangs over the end of the range.  Cap processing in all cases
 	// to end of document (in case of unclosed quote or comment at end).
-	while ((lineCurrent <= docLines) && ((lineCurrent <= maxLines) || 
+	while ((lineCurrent <= docLines) && ((lineCurrent <= maxLines) ||
 	                                      prevQuote || prevComment)) {
 
 		// Gather info
@@ -338,7 +342,7 @@ static void FoldNimrodDoc(unsigned int startPos, int length,
 		const int quote_continue = (quote && prevQuote);
 		const int comment = foldComment && IsCommentLine(lineCurrent, styler);
 		const int comment_start = (comment && !prevComment && (lineNext <= docLines) &&
-		                           IsCommentLine(lineNext, styler) && 
+		                           IsCommentLine(lineNext, styler) &&
 		                           (lev > SC_FOLDLEVELBASE));
 		const int comment_continue = (comment && prevComment);
 		if ((!quote || !prevQuote) && !comment)
@@ -377,8 +381,8 @@ static void FoldNimrodDoc(unsigned int startPos, int length,
 		}
 
 		const int levelAfterComments = indentNext & SC_FOLDLEVELNUMBERMASK;
-		const int levelBeforeComments = 
-		    Platform::Maximum(indentCurrentLevel,levelAfterComments);
+		const int levelBeforeComments =
+		    Maximum(indentCurrentLevel,levelAfterComments);
 
 		// Now set all the indent levels on the lines we skipped
 		// Do this from end to start.  Once we encounter one line
@@ -401,7 +405,7 @@ static void FoldNimrodDoc(unsigned int startPos, int length,
 
 		// Set fold header on non-quote/non-comment line
 		if (!quote && !comment && !(indentCurrent & SC_FOLDLEVELWHITEFLAG) ) {
-			if ((indentCurrent & SC_FOLDLEVELNUMBERMASK) < 
+			if ((indentCurrent & SC_FOLDLEVELNUMBERMASK) <
 			     (indentNext & SC_FOLDLEVELNUMBERMASK))
 				lev |= SC_FOLDLEVELHEADERFLAG;
 		}

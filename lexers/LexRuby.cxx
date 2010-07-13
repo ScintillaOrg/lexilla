@@ -7,17 +7,22 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
+#include <ctype.h>
 
-#include "Platform.h"
-
-#include "PropSet.h"
-#include "Accessor.h"
-#include "KeyWords.h"
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
+#include "StyleContext.h"
+#include "CharacterSet.h"
+#include "LexerModule.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -78,7 +83,7 @@ static bool followsDot(unsigned int pos, Accessor &styler) {
                     return false;
                 }
                 break;
-                
+
             case SCE_RB_OPERATOR:
                 return styler[pos] == '.';
 
@@ -118,7 +123,7 @@ static int ClassifyWordRb(unsigned int start, unsigned int end, WordList &keywor
     else if (keywords.InList(s) && !followsDot(start - 1, styler)) {
         if (keywordIsAmbiguous(s)
             && keywordIsModifier(s, start, styler)) {
-            
+
             // Demoted keywords are colored as keywords,
             // but do not affect changes in indentation.
             //
@@ -127,7 +132,7 @@ static int ClassifyWordRb(unsigned int start, unsigned int end, WordList &keywor
             // 2. <<stmt if test>> : demoted
             // 3. <<lhs = if ...>> : normal: start a new indent level
             // 4. <<obj.if = 10>> : color as identifer, since it follows '.'
-            
+
             chAttr = SCE_RB_WORD_DEMOTED;
         } else {
             chAttr = SCE_RB_WORD;
@@ -224,7 +229,7 @@ static bool currLineContainsHereDelims(int& startPos,
             // Leave the pointers where they are -- there are no
             // here doc delims on the current line, even if
             // the EOL isn't default style
-            
+
             return false;
         } else {
             styler.Flush();
@@ -276,7 +281,7 @@ class QuoteCls {
         }
 		return *this;
     }
-            
+
 };
 
 
@@ -352,7 +357,7 @@ static int skipWhitespace(int startPos,
     }
     return endPos;
 }
-    
+
 // This routine looks for false positives like
 // undef foo, <<
 // There aren't too many.
@@ -362,7 +367,7 @@ static int skipWhitespace(int startPos,
 static bool sureThisIsHeredoc(int iPrev,
                               Accessor &styler,
                               char *prevWord) {
-                    
+
     // Not so fast, since Ruby's so dynamic.  Check the context
     // to make sure we're OK.
     int prevStyle;
@@ -453,7 +458,7 @@ static bool sureThisIsNotHeredoc(int lt2StartPos,
     styler.Flush();
     const bool definitely_not_a_here_doc = true;
     const bool looks_like_a_here_doc = false;
-    
+
     // Find the first word after some whitespace
     int firstWordPosn = skipWhitespace(lineStartPosn, lt2StartPos, styler);
     if (firstWordPosn >= lt2StartPos) {
@@ -531,7 +536,7 @@ static bool sureThisIsNotHeredoc(int lt2StartPos,
         target_quote = styler[j];
         j += 1;
     }
-    
+
     if (isSafeAlnum(styler[j])) {
         // Init target_end because some compilers think it won't
         // be initialized by the time it's used
@@ -549,7 +554,7 @@ static bool sureThisIsNotHeredoc(int lt2StartPos,
 
             // And for now make sure that it's a newline
             // don't handle arbitrary expressions yet
-            
+
             target_end = j;
 			if (target_quote) {
 				// Now we can move to the character after the string delimiter.
@@ -592,7 +597,7 @@ static bool sureThisIsNotHeredoc(int lt2StartPos,
 }
 
 //todo: if we aren't looking at a stdio character,
-// move to the start of the first line that is not in a 
+// move to the start of the first line that is not in a
 // multi-line construct
 
 static void synchronizeDocStart(unsigned int& startPos,
@@ -610,7 +615,7 @@ static void synchronizeDocStart(unsigned int& startPos,
             // Don't do anything else with these.
             return;
     }
-    
+
     int pos = startPos;
     // Quick way to characterize each line
     int lineStart;
@@ -651,7 +656,7 @@ static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
 	// Lexer for Ruby often has to backtrack to start of current style to determine
 	// which characters are being used as quotes, how deeply nested is the
 	// start position and what the termination string is for here documents
-    
+
 	WordList &keywords = *keywordlists[0];
 
 	class HereDocCls {
@@ -674,7 +679,7 @@ static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
             CanBeIndented = false;
 		}
 	};
-	HereDocCls HereDoc;	
+	HereDocCls HereDoc;
 
 	QuoteCls Quote;
 
@@ -750,7 +755,7 @@ static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
 			i += 1;
 			continue;
 		}
-		
+
         // skip on DOS/Windows
         //No, don't, because some things will get tagged on,
         // so we won't recognize keywords, for example
@@ -759,7 +764,7 @@ static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
 	    	continue;
         }
 #endif
-            
+
         if (HereDoc.State == 1 && isEOLChar(ch)) {
 			// Begin of here-doc (the line after the here-doc delimiter):
 			HereDoc.State = 2;
@@ -1003,7 +1008,7 @@ static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
                 // So if we don't have one of these chars,
                 // we aren't ending an object exp'n, and ops
                 // like : << / are unary operators.
-                
+
                 if (ch == '{') {
                     ++brace_counts;
                     preferRE = true;
@@ -1035,7 +1040,7 @@ static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
 
                 // Default accessor treats '.' as word-chars,
                 // but we don't for now.
-                
+
                 if (ch == '='
                     && isSafeWordcharOrHigh(chPrev)
                     && (chNext == '('
@@ -1066,11 +1071,11 @@ static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
                         case SCE_RB_WORD:
                             preferRE = RE_CanFollowKeyword(prevWord);
 							break;
-                            
+
                         case SCE_RB_WORD_DEMOTED:
                             preferRE = true;
 							break;
-                            
+
                         case SCE_RB_IDENTIFIER:
                             if (isMatch(styler, lengthDoc, wordStartPos, "print")) {
                                 preferRE = true;
@@ -1087,7 +1092,7 @@ static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
                         // We might be redefining an operator-method
                         preferRE = false;
                     }
-                    // And if it's the first 
+                    // And if it's the first
                     redo_char(i, ch, chNext, chNext2, state); // pass by ref
                 }
             }
@@ -1141,7 +1146,7 @@ static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
             // See the comment for SCE_RB_HERE_DELIM in LexPerl.cxx
             // Slightly different: if we find an immediate '-',
             // the target can appear indented.
-            
+
 			if (HereDoc.State == 0) { // '<<' encountered
 				HereDoc.State = 1;
                 HereDoc.DelimiterLength = 0;
@@ -1157,7 +1162,7 @@ static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
                     preferRE = false;
                 } else {
                     HereDoc.Quote = ch;
-                
+
                     if (ch == '\'' || ch == '"' || ch == '`') {
                         HereDoc.Quoted = true;
                         HereDoc.Delimiter[0] = '\0';
@@ -1291,7 +1296,7 @@ static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
             } else if (ch == Quote.Up) {
                 // Only if close quoter != open quoter
                 Quote.Count++;
-                
+
             } else if (ch == '#' ) {
                 if (chNext == '{'
                     && inner_string_count < INNER_STRINGS_MAX_COUNT) {
@@ -1336,7 +1341,7 @@ static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
                 }
             }
         // Quotes of all kinds...
-        } else if (state == SCE_RB_STRING_Q || state == SCE_RB_STRING_QQ || 
+        } else if (state == SCE_RB_STRING_Q || state == SCE_RB_STRING_QQ ||
                    state == SCE_RB_STRING_QX || state == SCE_RB_STRING_QW ||
                    state == SCE_RB_STRING || state == SCE_RB_CHARACTER ||
                    state == SCE_RB_BACKTICKS) {
@@ -1373,7 +1378,7 @@ static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
                 advance_char(i, ch, chNext, chNext2);
             }
         }
-            
+
         if (state == SCE_RB_ERROR) {
             break;
         }
@@ -1389,7 +1394,7 @@ static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
 }
 
 // Helper functions for folding, disambiguation keywords
-// Assert that there are no high-bit chars 
+// Assert that there are no high-bit chars
 
 static void getPrevWord(int pos,
                         char *prevWord,
@@ -1430,7 +1435,7 @@ static bool keywordIsAmbiguous(const char *prevWord)
 
 // Demote keywords in the following conditions:
 // if, while, unless, until modify a statement
-// do after a while or until, as a noise word (like then after if) 
+// do after a while or until, as a noise word (like then after if)
 
 static bool keywordIsModifier(const char *word,
                               int pos,
@@ -1490,7 +1495,7 @@ static bool keywordIsModifier(const char *word,
     // Assume that if the keyword follows an operator,
     // usually it's a block assignment, like
     // a << if x then y else z
-    
+
     ch = styler[pos];
     switch (ch) {
         case ')':
@@ -1561,25 +1566,25 @@ static bool keywordDoStartsLoop(int pos,
 
 /*
  *  Folding Ruby
- * 
+ *
  *  The language is quite complex to analyze without a full parse.
  *  For example, this line shouldn't affect fold level:
- * 
+ *
  *   print "hello" if feeling_friendly?
- * 
+ *
  *  Neither should this:
- * 
+ *
  *   print "hello" \
  *      if feeling_friendly?
- * 
- * 
+ *
+ *
  *  But this should:
- * 
+ *
  *   if feeling_friendly?  #++
  *     print "hello" \
  *     print "goodbye"
  *   end                   #--
- * 
+ *
  *  So we cheat, by actually looking at the existing indentation
  *  levels for each line, and just echoing it back.  Like Python.
  *  Then if we get better at it, we'll take braces into consideration,
@@ -1587,29 +1592,29 @@ static bool keywordDoStartsLoop(int pos,
 
  *  How the keywords should work:
  *  No effect:
- *  __FILE__ __LINE__ BEGIN END alias and 
+ *  __FILE__ __LINE__ BEGIN END alias and
  *  defined? false in nil not or self super then
  *  true undef
 
  *  Always increment:
  *  begin  class def do for module when {
- * 
+ *
  *  Always decrement:
  *  end }
- * 
+ *
  *  Increment if these start a statement
  *  if unless until while -- do nothing if they're modifiers
 
  *  These end a block if there's no modifier, but don't bother
  *  break next redo retry return yield
- * 
+ *
  *  These temporarily de-indent, but re-indent
  *  case else elsif ensure rescue
- * 
+ *
  *  This means that the folder reflects indentation rather
  *  than setting it.  The language-service updates indentation
  *  when users type return and finishes entering de-denters.
- * 
+ *
  *  Later offer to fold POD, here-docs, strings, and blocks of comments
  */
 
@@ -1617,7 +1622,7 @@ static void FoldRbDoc(unsigned int startPos, int length, int initStyle,
                       WordList *[], Accessor &styler) {
 	const bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
-    
+
     synchronizeDocStart(startPos, length, initStyle, styler, // ref args
                         false);
 	unsigned int endPos = startPos + length;

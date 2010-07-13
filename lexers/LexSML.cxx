@@ -6,21 +6,24 @@
 // Modified from LexCaml.cxx by Robert Roessler <robertr@rftp.com> Copyright 2005
 // The License.txt file describes the conditions under which this software may be distributed.
 
-
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
+#include <ctype.h>
 
-#include "Platform.h"
-
-#include "PropSet.h"
-#include "Accessor.h"
-#include "StyleContext.h"
-#include "KeyWords.h"
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
+#include "StyleContext.h"
+#include "CharacterSet.h"
+#include "LexerModule.h"
 
 inline int  issml(int c) {return isalnum(c) || c == '_';}
 inline int issmlf(int c) {return isalpha(c) || c == '_';}
@@ -67,7 +70,7 @@ void ColouriseSMLDoc(
 			else if (sc.Match('#','\"')){
 					state2 = SCE_SML_CHAR,chLit = 0;
 					sc.Forward();
-					
+
 				}
 			else if (isdigit(sc.ch)) {
 				state2 = SCE_SML_NUMBER, chBase = 10;
@@ -218,4 +221,4 @@ static const char * const SMLWordListDesc[] = {
 };
 
 LexerModule lmSML(SCLEX_SML, ColouriseSMLDoc, "SML", FoldSMLDoc, SMLWordListDesc);
- 	  	 
+

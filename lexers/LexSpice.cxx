@@ -6,19 +6,24 @@
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <stdlib.h>
-#include <ctype.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdarg.h>
+#include <assert.h>
 
 #include <string>
 
-#include "Platform.h"
+#include "ILexer.h"
+#include "Scintilla.h"
+#include "SciLexer.h"
 
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
 #include "Accessor.h"
 #include "StyleContext.h"
-#include "PropSet.h"
-#include "KeyWords.h"
-#include "SciLexer.h"
+#include "CharacterSet.h"
+#include "LexerModule.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;

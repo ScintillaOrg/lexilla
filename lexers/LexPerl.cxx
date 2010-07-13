@@ -8,19 +8,22 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
+#include <ctype.h>
 
-#include "Platform.h"
-
-#include "PropSet.h"
-#include "Accessor.h"
-#include "StyleContext.h"
-#include "KeyWords.h"
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
+#include "StyleContext.h"
 #include "CharacterSet.h"
+#include "LexerModule.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -1187,12 +1190,12 @@ static void FoldPerlDoc(unsigned int startPos, int length, int, WordList *[],
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	// Custom folding of POD and packages
 
-	// property fold.perl.pod 
-	//	Enable folding Pod blocks when using the Perl lexer. 
+	// property fold.perl.pod
+	//	Enable folding Pod blocks when using the Perl lexer.
 	bool foldPOD = styler.GetPropertyInt("fold.perl.pod", 1) != 0;
 
-	// property fold.perl.package 
-	//	Enable folding packages when using the Perl lexer. 
+	// property fold.perl.package
+	//	Enable folding packages when using the Perl lexer.
 	bool foldPackage = styler.GetPropertyInt("fold.perl.package", 1) != 0;
 
 	unsigned int endPos = startPos + length;

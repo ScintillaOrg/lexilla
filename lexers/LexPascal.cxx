@@ -11,20 +11,20 @@
 
 A few words about features of the new completely rewritten LexPascal...
 
-Generally speaking LexPascal tries to support all available Delphi features (up 
+Generally speaking LexPascal tries to support all available Delphi features (up
 to Delphi 2009 at this time), including .NET specific features.
 
 ~ HIGHLIGHTING:
 
-If you enable "lexer.pascal.smart.highlighting" property, some keywords will 
-only be highlighted in appropriate context. As implemented those are keywords 
-related to property and DLL exports declarations (similar to how Delphi IDE 
-works). 
+If you enable "lexer.pascal.smart.highlighting" property, some keywords will
+only be highlighted in appropriate context. As implemented those are keywords
+related to property and DLL exports declarations (similar to how Delphi IDE
+works).
 
-For example, keywords "read" and "write" will only be highlighted if they are in 
+For example, keywords "read" and "write" will only be highlighted if they are in
 property declaration:
 
-property MyProperty: boolean read FMyProperty write FMyProperty; 
+property MyProperty: boolean read FMyProperty write FMyProperty;
 
 ~ FOLDING:
 
@@ -32,34 +32,34 @@ Folding is supported in the following cases:
 
 - Folding of stream-like comments
 - Folding of groups of consecutive line comments
-- Folding of preprocessor blocks (the following preprocessor blocks are 
-supported: IF / IFEND; IFDEF, IFNDEF, IFOPT / ENDIF and REGION / ENDREGION 
+- Folding of preprocessor blocks (the following preprocessor blocks are
+supported: IF / IFEND; IFDEF, IFNDEF, IFOPT / ENDIF and REGION / ENDREGION
 blocks), including nesting of preprocessor blocks up to 255 levels
-- Folding of code blocks on appropriate keywords (the following code blocks are 
-supported: "begin, asm, record, try, case / end" blocks, class & object 
+- Folding of code blocks on appropriate keywords (the following code blocks are
+supported: "begin, asm, record, try, case / end" blocks, class & object
 declarations and interface declarations)
 
 Remarks:
 
-- Folding of code blocks tries to handle all special cases in which folding 
+- Folding of code blocks tries to handle all special cases in which folding
 should not occur. As implemented those are:
 
-1. Structure "record case / end" (there's only one "end" statement and "case" is 
+1. Structure "record case / end" (there's only one "end" statement and "case" is
 ignored as fold point)
-2. Forward class declarations ("type TMyClass = class;") and object method 
-declarations ("TNotifyEvent = procedure(Sender: TObject) of object;") are 
+2. Forward class declarations ("type TMyClass = class;") and object method
+declarations ("TNotifyEvent = procedure(Sender: TObject) of object;") are
 ignored as fold points
-3. Simplified complete class declarations ("type TMyClass = class(TObject);") 
+3. Simplified complete class declarations ("type TMyClass = class(TObject);")
 are ignored as fold points
-4. Every other situation when class keyword doesn't actually start class 
-declaration ("class procedure", "class function", "class of", "class var", 
+4. Every other situation when class keyword doesn't actually start class
+declaration ("class procedure", "class function", "class of", "class var",
 "class property" and "class operator")
 
-- Folding of code blocks inside preprocessor blocks is disabled (any comments 
-inside them will be folded fine) because there is no guarantee that complete 
-code block will be contained inside folded preprocessor block in which case 
-folded code block could end prematurely at the end of preprocessor block if 
-there is no closing statement inside. This was done in order to properly process 
+- Folding of code blocks inside preprocessor blocks is disabled (any comments
+inside them will be folded fine) because there is no guarantee that complete
+code block will be contained inside folded preprocessor block in which case
+folded code block could end prematurely at the end of preprocessor block if
+there is no closing statement inside. This was done in order to properly process
 document that may contain something like this:
 
 type
@@ -76,52 +76,55 @@ type
   ...
 end;
 
-If class declarations were folded, then the second class declaration would end 
-at "$ENDIF" statement, first class statement would end at "end;" statement and 
-preprocessor "$IFDEF" block would go all the way to the end of document. 
-However, having in mind all this, if you want to enable folding of code blocks 
-inside preprocessor blocks, you can disable folding of preprocessor blocks by 
-changing "fold.preprocessor" property, in which case everything inside them 
+If class declarations were folded, then the second class declaration would end
+at "$ENDIF" statement, first class statement would end at "end;" statement and
+preprocessor "$IFDEF" block would go all the way to the end of document.
+However, having in mind all this, if you want to enable folding of code blocks
+inside preprocessor blocks, you can disable folding of preprocessor blocks by
+changing "fold.preprocessor" property, in which case everything inside them
 would be folded.
 
 ~ KEYWORDS:
 
-The list of keywords that can be used in pascal.properties file (up to Delphi 
+The list of keywords that can be used in pascal.properties file (up to Delphi
 2009):
 
-- Keywords: absolute abstract and array as asm assembler automated begin case 
-cdecl class const constructor deprecated destructor dispid dispinterface div do 
-downto dynamic else end except export exports external far file final 
-finalization finally for forward function goto if implementation in inherited 
-initialization inline interface is label library message mod near nil not object 
-of on or out overload override packed pascal platform private procedure program 
-property protected public published raise record register reintroduce repeat 
-resourcestring safecall sealed set shl shr static stdcall strict string then 
+- Keywords: absolute abstract and array as asm assembler automated begin case
+cdecl class const constructor deprecated destructor dispid dispinterface div do
+downto dynamic else end except export exports external far file final
+finalization finally for forward function goto if implementation in inherited
+initialization inline interface is label library message mod near nil not object
+of on or out overload override packed pascal platform private procedure program
+property protected public published raise record register reintroduce repeat
+resourcestring safecall sealed set shl shr static stdcall strict string then
 threadvar to try type unit unsafe until uses var varargs virtual while with xor
 
-- Keywords related to the "smart highlithing" feature: add default implements 
+- Keywords related to the "smart highlithing" feature: add default implements
 index name nodefault read readonly remove stored write writeonly
 
-- Keywords related to Delphi packages (in addition to all above): package 
+- Keywords related to Delphi packages (in addition to all above): package
 contains requires
 
 */
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
+#include <ctype.h>
 
-#include "Platform.h"
-
-#include "PropSet.h"
-#include "Accessor.h"
-#include "KeyWords.h"
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
 #include "StyleContext.h"
 #include "CharacterSet.h"
+#include "LexerModule.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -155,12 +158,12 @@ static void GetForwardRangeLowered(unsigned int start,
 }
 
 enum {
-	stateInAsm = 0x1000, 
-	stateInProperty = 0x2000, 
-	stateInExport = 0x4000, 
-	stateFoldInPreprocessor = 0x0100, 
-	stateFoldInRecord = 0x0200, 
-	stateFoldInPreprocessorLevelMask = 0x00FF, 
+	stateInAsm = 0x1000,
+	stateInProperty = 0x2000,
+	stateInExport = 0x4000,
+	stateFoldInPreprocessor = 0x0100,
+	stateFoldInRecord = 0x0200,
+	stateFoldInPreprocessorLevelMask = 0x00FF,
 	stateFoldMaskAll = 0x0FFF
 };
 
@@ -190,11 +193,11 @@ static void ClassifyPascalWord(WordList *keywordlists[], StyleContext &sc, int &
 					ignoreKeyword = true;
 				} else if (!(curLineState & stateInExport) && strcmp(s, "name") == 0) {
 					ignoreKeyword = true;
-				} else if (!(curLineState & stateInProperty) && 
-					(strcmp(s, "read") == 0 || strcmp(s, "write") == 0 || 
-					 strcmp(s, "default") == 0 || strcmp(s, "nodefault") == 0 || 
-					 strcmp(s, "stored") == 0 || strcmp(s, "implements") == 0 || 
-					 strcmp(s, "readonly") == 0 || strcmp(s, "writeonly") == 0 || 
+				} else if (!(curLineState & stateInProperty) &&
+					(strcmp(s, "read") == 0 || strcmp(s, "write") == 0 ||
+					 strcmp(s, "default") == 0 || strcmp(s, "nodefault") == 0 ||
+					 strcmp(s, "stored") == 0 || strcmp(s, "implements") == 0 ||
+					 strcmp(s, "readonly") == 0 || strcmp(s, "writeonly") == 0 ||
 					 strcmp(s, "add") == 0 || strcmp(s, "remove") == 0)) {
 					ignoreKeyword = true;
 				}
@@ -367,7 +370,7 @@ static void SetFoldInPreprocessorLevelFlag(int &lineFoldStateCurrent, unsigned i
 	lineFoldStateCurrent |= nestLevel & stateFoldInPreprocessorLevelMask;
 }
 
-static void ClassifyPascalPreprocessorFoldPoint(int &levelCurrent, int &lineFoldStateCurrent, 
+static void ClassifyPascalPreprocessorFoldPoint(int &levelCurrent, int &lineFoldStateCurrent,
 		unsigned int startPos, Accessor &styler) {
 	CharacterSet setWord(CharacterSet::setAlpha);
 
@@ -376,17 +379,17 @@ static void ClassifyPascalPreprocessorFoldPoint(int &levelCurrent, int &lineFold
 
 	unsigned int nestLevel = GetFoldInPreprocessorLevelFlag(lineFoldStateCurrent);
 
-	if (strcmp(s, "if") == 0 || 
-		strcmp(s, "ifdef") == 0 || 
-		strcmp(s, "ifndef") == 0 || 
-		strcmp(s, "ifopt") == 0 || 
+	if (strcmp(s, "if") == 0 ||
+		strcmp(s, "ifdef") == 0 ||
+		strcmp(s, "ifndef") == 0 ||
+		strcmp(s, "ifopt") == 0 ||
 		strcmp(s, "region") == 0) {
 		nestLevel++;
 		SetFoldInPreprocessorLevelFlag(lineFoldStateCurrent, nestLevel);
 		lineFoldStateCurrent |= stateFoldInPreprocessor;
 		levelCurrent++;
-	} else if (strcmp(s, "endif") == 0 || 
-		strcmp(s, "ifend") == 0 || 
+	} else if (strcmp(s, "endif") == 0 ||
+		strcmp(s, "ifend") == 0 ||
 		strcmp(s, "endregion") == 0) {
 		nestLevel--;
 		SetFoldInPreprocessorLevelFlag(lineFoldStateCurrent, nestLevel);
@@ -400,12 +403,12 @@ static void ClassifyPascalPreprocessorFoldPoint(int &levelCurrent, int &lineFold
 	}
 }
 
-static unsigned int SkipWhiteSpace(unsigned int currentPos, unsigned int endPos, 
+static unsigned int SkipWhiteSpace(unsigned int currentPos, unsigned int endPos,
 		Accessor &styler, bool includeChars = false) {
 	CharacterSet setWord(CharacterSet::setAlphaNum, "_");
 	unsigned int j = currentPos + 1;
 	char ch = styler.SafeGetCharAt(j);
-	while ((j < endPos) && (IsASpaceOrTab(ch) || ch == '\r' || ch == '\n' || 
+	while ((j < endPos) && (IsASpaceOrTab(ch) || ch == '\r' || ch == '\n' ||
 		IsStreamCommentStyle(styler.StyleAt(j)) || (includeChars && setWord.Contains(ch)))) {
 		j++;
 		ch = styler.SafeGetCharAt(j);
@@ -413,8 +416,8 @@ static unsigned int SkipWhiteSpace(unsigned int currentPos, unsigned int endPos,
 	return j;
 }
 
-static void ClassifyPascalWordFoldPoint(int &levelCurrent, int &lineFoldStateCurrent, 
-		int startPos, unsigned int endPos, 
+static void ClassifyPascalWordFoldPoint(int &levelCurrent, int &lineFoldStateCurrent,
+		int startPos, unsigned int endPos,
 		unsigned int lastStart, unsigned int currentPos, Accessor &styler) {
 	char s[100];
 	GetRangeLowered(lastStart, currentPos, styler, s, sizeof(s));
@@ -422,9 +425,9 @@ static void ClassifyPascalWordFoldPoint(int &levelCurrent, int &lineFoldStateCur
 	if (strcmp(s, "record") == 0) {
 		lineFoldStateCurrent |= stateFoldInRecord;
 		levelCurrent++;
-	} else if (strcmp(s, "begin") == 0 || 
-		strcmp(s, "asm") == 0 || 
-		strcmp(s, "try") == 0 || 
+	} else if (strcmp(s, "begin") == 0 ||
+		strcmp(s, "asm") == 0 ||
+		strcmp(s, "try") == 0 ||
 		(strcmp(s, "case") == 0 && !(lineFoldStateCurrent & stateFoldInRecord))) {
 		levelCurrent++;
 	} else if (strcmp(s, "class") == 0 || strcmp(s, "object") == 0) {
@@ -436,13 +439,13 @@ static void ClassifyPascalWordFoldPoint(int &levelCurrent, int &lineFoldStateCur
 			CharacterSet setWord(CharacterSet::setAlphaNum, "_");
 
 			if (styler.SafeGetCharAt(j) == ';') {
-				// Handle forward class declarations ("type TMyClass = class;") 
+				// Handle forward class declarations ("type TMyClass = class;")
 				// and object method declarations ("TNotifyEvent = procedure(Sender: TObject) of object;")
 				ignoreKeyword = true;
 			} else if (strcmp(s, "class") == 0) {
 				// "class" keyword has a few more special cases...
 				if (styler.SafeGetCharAt(j) == '(') {
-					// Handle simplified complete class declarations ("type TMyClass = class(TObject);") 
+					// Handle simplified complete class declarations ("type TMyClass = class(TObject);")
 					j = SkipWhiteSpace(j, endPos, styler, true);
 					if (j < endPos && styler.SafeGetCharAt(j) == ')') {
 						j = SkipWhiteSpace(j, endPos, styler);
@@ -454,11 +457,11 @@ static void ClassifyPascalWordFoldPoint(int &levelCurrent, int &lineFoldStateCur
 					char s2[11];	// Size of the longest possible keyword + one additional character + null
 					GetForwardRangeLowered(j, setWord, styler, s2, sizeof(s2));
 
-					if (strcmp(s2, "procedure") == 0 || 
-						strcmp(s2, "function") == 0 || 
-						strcmp(s2, "of") == 0 || 
-						strcmp(s2, "var") == 0 || 
-						strcmp(s2, "property") == 0 || 
+					if (strcmp(s2, "procedure") == 0 ||
+						strcmp(s2, "function") == 0 ||
+						strcmp(s2, "of") == 0 ||
+						strcmp(s2, "var") == 0 ||
+						strcmp(s2, "property") == 0 ||
 						strcmp(s2, "operator") == 0) {
 						ignoreKeyword = true;
 					}
@@ -473,7 +476,7 @@ static void ClassifyPascalWordFoldPoint(int &levelCurrent, int &lineFoldStateCur
 		bool ignoreKeyword = true;
 		int j = lastStart - 1;
 		char ch = styler.SafeGetCharAt(j);
-		while ((j >= startPos) && (IsASpaceOrTab(ch) || ch == '\r' || ch == '\n' || 
+		while ((j >= startPos) && (IsASpaceOrTab(ch) || ch == '\r' || ch == '\n' ||
 			IsStreamCommentStyle(styler.StyleAt(j)))) {
 			j--;
 			ch = styler.SafeGetCharAt(j);
@@ -539,7 +542,7 @@ static void FoldPascalDoc(unsigned int startPos, int length, int initStyle, Word
 		if (foldPreprocessor) {
 			if (style == SCE_PAS_PREPROCESSOR && ch == '{' && chNext == '$') {
 				ClassifyPascalPreprocessorFoldPoint(levelCurrent, lineFoldStateCurrent, i + 2, styler);
-			} else if (style == SCE_PAS_PREPROCESSOR2 && ch == '(' && chNext == '*' 
+			} else if (style == SCE_PAS_PREPROCESSOR2 && ch == '(' && chNext == '*'
 			           && styler.SafeGetCharAt(i + 2) == '$') {
 				ClassifyPascalPreprocessorFoldPoint(levelCurrent, lineFoldStateCurrent, i + 3, styler);
 			}

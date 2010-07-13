@@ -18,18 +18,22 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
+#include <ctype.h>
 
-#include "Platform.h"
-
-#include "PropSet.h"
-#include "Accessor.h"
-#include "KeyWords.h"
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
 #include "StyleContext.h"
+#include "CharacterSet.h"
+#include "LexerModule.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -285,8 +289,8 @@ static void ColouriseTeXDoc(
 
 static inline bool isNumber(int ch) {
 	return
-      (ch == '0') || (ch == '1') || (ch == '2') || 
-      (ch == '3') || (ch == '4') || (ch == '5') || 
+      (ch == '0') || (ch == '1') || (ch == '2') ||
+      (ch == '3') || (ch == '4') || (ch == '5') ||
       (ch == '6') || (ch == '7') || (ch == '8') || (ch == '9');
 }
 
@@ -298,7 +302,7 @@ static int ParseTeXCommand(unsigned int pos, Accessor &styler, char *command)
 {
   int length=0;
   char ch=styler.SafeGetCharAt(pos+1);
-  
+
   if(ch==',' || ch==':' || ch==';' || ch=='%'){
       command[0]=ch;
       command[1]=0;
@@ -311,14 +315,14 @@ static int ParseTeXCommand(unsigned int pos, Accessor &styler, char *command)
           length++;
           ch=styler.SafeGetCharAt(pos+length+1);
      }
-     
-  command[length]='\0';   
+
+  command[length]='\0';
   if(!length) return 0;
   return length+1;
 }
 
 static int classifyFoldPointTeXPaired(const char* s) {
-	int lev=0; 
+	int lev=0;
 	if (!(isdigit(s[0]) || (s[0] == '.'))){
 		if (strcmp(s, "begin")==0||strcmp(s,"FoldStart")==0||
 			strcmp(s,"abstract")==0||strcmp(s,"unprotect")==0||
@@ -330,14 +334,14 @@ static int classifyFoldPointTeXPaired(const char* s) {
 			strcmp(s,"maketitle")==0||strcmp(s,"protect")==0||
 			strncmp(s,"stop",4)==0||strncmp(s,"Stop",4)==0||
 			strcmp(s,"fi")==0
-			) 
+			)
 		lev=-1;
 	}
 	return lev;
 }
 
 static int classifyFoldPointTeXUnpaired(const char* s) {
-	int lev=0; 
+	int lev=0;
 	if (!(isdigit(s[0]) || (s[0] == '.'))){
 		if (strcmp(s,"part")==0||
 			strcmp(s,"chapter")==0||
@@ -362,7 +366,7 @@ static int classifyFoldPointTeXUnpaired(const char* s) {
 static bool IsTeXCommentLine(int line, Accessor &styler) {
 	int pos = styler.LineStart(line);
 	int eol_pos = styler.LineStart(line + 1) - 1;
-	
+
 	int startpos = pos;
 
 	while (startpos<eol_pos){
@@ -370,14 +374,14 @@ static bool IsTeXCommentLine(int line, Accessor &styler) {
 		if (ch!='%' && ch!=' ') return false;
 		else if (ch=='%') return true;
 		startpos++;
-	}		
+	}
 
 	return false;
 }
 
 // FoldTeXDoc: borrowed from VisualTeX with modifications
 
-static void FoldTexDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler) 
+static void FoldTexDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler)
 {
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	unsigned int endPos = startPos+length;
@@ -387,7 +391,7 @@ static void FoldTexDoc(unsigned int startPos, int length, int, WordList *[], Acc
 	int levelCurrent=levelPrev;
 	char chNext=styler[startPos];
 	char buffer[100]="";
-	
+
 	for (unsigned int i=startPos; i < endPos; i++) {
 		char ch=chNext;
 		chNext=styler.SafeGetCharAt(i+1);
@@ -412,12 +416,12 @@ static void FoldTexDoc(unsigned int startPos, int length, int, WordList *[], Acc
 	chNext4=styler.SafeGetCharAt(i+4);
 	chNext5=styler.SafeGetCharAt(i+5);
 
-	bool atEOfold = (ch == '%') && 
-			(chNext == '%') && (chNext2=='}') && 
+	bool atEOfold = (ch == '%') &&
+			(chNext == '%') && (chNext2=='}') &&
 				(chNext3=='}')&& (chNext4=='-')&& (chNext5=='-');
 
-	bool atBOfold = (ch == '%') && 
-			(chNext == '%') && (chNext2=='-') && 
+	bool atBOfold = (ch == '%') &&
+			(chNext == '%') && (chNext2=='-') &&
 				(chNext3=='-')&& (chNext4=='{')&& (chNext5=='{');
 
 	if(atBOfold){
@@ -427,11 +431,11 @@ static void FoldTexDoc(unsigned int startPos, int length, int, WordList *[], Acc
 	if(atEOfold){
 		levelCurrent-=1;
 	}
-	
+
 	if(ch=='\\' && chNext=='['){
 		levelCurrent+=1;
 	}
-	
+
 	if(ch=='\\' && chNext==']'){
 		levelCurrent-=1;
 	}
@@ -452,8 +456,8 @@ static void FoldTexDoc(unsigned int startPos, int length, int, WordList *[], Acc
                 levelCurrent--;
         }
 
-//---------------------------------------------------------------------------------------------	
-		
+//---------------------------------------------------------------------------------------------
+
 		if (atEOL) {
 			int lev = levelPrev;
 			if (visibleChars == 0 && foldCompact)

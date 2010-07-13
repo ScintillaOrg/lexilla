@@ -6,18 +6,22 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
+#include <ctype.h>
 
-#include "Platform.h"
-
-#include "PropSet.h"
-#include "Accessor.h"
-#include "KeyWords.h"
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
 #include "StyleContext.h"
+#include "CharacterSet.h"
+#include "LexerModule.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -92,7 +96,7 @@ inline bool HandleString( unsigned int & cur, unsigned int one_too_much, Accesso
 inline bool HandleCommentBlock( unsigned int & cur, unsigned int one_too_much, Accessor & styler, bool could_fail )
 {
 	char ch;
-	
+
 	if( could_fail )
 	{
 		cur++;
@@ -101,7 +105,7 @@ inline bool HandleCommentBlock( unsigned int & cur, unsigned int one_too_much, A
 			styler.ColourTo( cur - 1, SCE_OPAL_DEFAULT );
 			return false; // STOP
 		}
-		
+
 		ch = styler.SafeGetCharAt( cur );
 		if( ch != '*' )
 		{
@@ -110,7 +114,7 @@ inline bool HandleCommentBlock( unsigned int & cur, unsigned int one_too_much, A
 			return true;
 		}
 	}
-	
+
 	// Wait for comment close
 	cur++;
 	bool star_found = false;
@@ -121,7 +125,7 @@ inline bool HandleCommentBlock( unsigned int & cur, unsigned int one_too_much, A
 			styler.ColourTo( cur - 1, SCE_OPAL_COMMENT_BLOCK );
 			return false; // STOP
 		}
-		
+
 		ch = styler.SafeGetCharAt( cur );
 		if( star_found )
 		{
@@ -155,7 +159,7 @@ inline bool HandleCommentBlock( unsigned int & cur, unsigned int one_too_much, A
 inline bool HandleCommentLine( unsigned int & cur, unsigned int one_too_much, Accessor & styler, bool could_fail )
 {
 	char ch;
-	
+
 	if( could_fail )
 	{
 		cur++;
@@ -164,7 +168,7 @@ inline bool HandleCommentLine( unsigned int & cur, unsigned int one_too_much, Ac
 			styler.ColourTo( cur - 1, SCE_OPAL_DEFAULT );
 			return false; // STOP
 		}
-		
+
 		ch = styler.SafeGetCharAt( cur );
 		if( ch != '-' )
 		{
@@ -179,7 +183,7 @@ inline bool HandleCommentLine( unsigned int & cur, unsigned int one_too_much, Ac
 			styler.ColourTo( cur - 1, SCE_OPAL_DEFAULT );
 			return false; // STOP
 		}
-		
+
 		ch = styler.SafeGetCharAt( cur );
 		if( ( ch != ' ' ) && ( ch != '\t' ) )
 		{
@@ -224,7 +228,7 @@ inline bool HandleCommentLine( unsigned int & cur, unsigned int one_too_much, Ac
 		{
 			if( ch == '\015' )
 			{
-				fifteen_found = true;	
+				fifteen_found = true;
 			}
 			else if( ch == '\012' )
 			{
@@ -259,7 +263,7 @@ inline bool HandleSpace( unsigned int & cur, unsigned int one_too_much, Accessor
 			styler.ColourTo( cur - 1, SCE_OPAL_SPACE );
 			return false;
 		}
-		
+
 		ch = styler.SafeGetCharAt( cur );
 		switch( ch )
 		{
@@ -269,7 +273,7 @@ inline bool HandleSpace( unsigned int & cur, unsigned int one_too_much, Accessor
 		case '\012':
 			cur++;
 			break;
-		
+
 		default:
 			styler.ColourTo( cur - 1, SCE_OPAL_SPACE );
 			styler.StartSegment( cur );
@@ -314,7 +318,7 @@ inline bool HandleWord( unsigned int & cur, unsigned int one_too_much, Accessor 
 			!( isascii( ch ) && ( islower( ch ) || isupper( ch ) || isdigit( ch ) ) ) ) break;
 
 		cur++;
-		if( cur >= one_too_much ) 
+		if( cur >= one_too_much )
 		{
 			break;
 		}
@@ -323,7 +327,7 @@ inline bool HandleWord( unsigned int & cur, unsigned int one_too_much, Accessor 
 	const int ide_len = cur - beg + 1;
 	char * ide = new char[ ide_len ];
 	getRange( beg, cur, styler, ide, ide_len );
-	
+
 	WordList & keywords    = *keywordlists[ 0 ];
 	WordList & classwords  = *keywordlists[ 1 ];
 
@@ -338,8 +342,8 @@ inline bool HandleWord( unsigned int & cur, unsigned int one_too_much, Accessor 
 		}
 		else
 		{
-			styler.StartSegment( cur );	
-			return true;			
+			styler.StartSegment( cur );
+			return true;
 		}
 	}
 	else if( classwords.InList( ide ) ) // Sort
@@ -353,8 +357,8 @@ inline bool HandleWord( unsigned int & cur, unsigned int one_too_much, Accessor 
 		}
 		else
 		{
-			styler.StartSegment( cur );	
-			return true;			
+			styler.StartSegment( cur );
+			return true;
 		}
 	}
 	else if( !strcmp( ide, "true" ) || !strcmp( ide, "false" ) ) // Bool const
@@ -368,8 +372,8 @@ inline bool HandleWord( unsigned int & cur, unsigned int one_too_much, Accessor 
 		}
 		else
 		{
-			styler.StartSegment( cur );	
-			return true;			
+			styler.StartSegment( cur );
+			return true;
 		}
 	}
 	else // Unknown keyword
@@ -384,7 +388,7 @@ inline bool HandleWord( unsigned int & cur, unsigned int one_too_much, Accessor 
 		else
 		{
 			styler.StartSegment( cur );
-			return true;			
+			return true;
 		}
 	}
 
@@ -400,7 +404,7 @@ inline bool HandleSkip( unsigned int & cur, unsigned int one_too_much, Accessor 
 	}
 	else
 	{
-		styler.StartSegment( cur );	
+		styler.StartSegment( cur );
 		return true;
 	}
 }
@@ -444,11 +448,11 @@ static void ColouriseOpalDoc( unsigned int startPos, int length, int initStyle, 
 			if( !HandleString( cur, one_too_much, styler ) ) return;
 			state = SCE_OPAL_DEFAULT;
 			break;
-			
+
 		default: // SCE_OPAL_DEFAULT:
 			{
 				char ch = styler.SafeGetCharAt( cur );
-				
+
 				switch( ch )
 				{
 				// String
@@ -483,7 +487,7 @@ static void ColouriseOpalDoc( unsigned int startPos, int length, int initStyle, 
 				case '\012':
 					if( !HandleSpace( cur, one_too_much, styler ) ) return;
 					break;
-				
+
 				default:
 					{
 						// Integer
@@ -496,7 +500,7 @@ static void ColouriseOpalDoc( unsigned int startPos, int length, int initStyle, 
 						else if( isascii( ch ) && ( islower( ch ) || isupper( ch ) ) )
 						{
 							if( !HandleWord( cur, one_too_much, styler, keywordlists ) ) return;
-							
+
 						}
 
 						// Skip

@@ -12,18 +12,22 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
+#include <ctype.h>
 
-#include "Platform.h"
-
-#include "PropSet.h"
-#include "Accessor.h"
-#include "StyleContext.h"
-#include "KeyWords.h"
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
+#include "StyleContext.h"
+#include "CharacterSet.h"
+#include "LexerModule.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -113,12 +117,12 @@ static void ColouriseMySQLDoc(unsigned int startPos, int length, int initStyle, 
         if (!IsAWordChar(sc.ch))
         {
           CheckForKeyword(sc, keywordlists);
-          
+
           // Additional check for function keywords needed.
           // A function name must be followed by an opening parenthesis.
           if (sc.state == SCE_MYSQL_FUNCTION && sc.ch != '(')
             sc.ChangeState(SCE_MYSQL_DEFAULT);
-            
+
           sc.SetState(SCE_MYSQL_DEFAULT);
         }
         break;
@@ -137,7 +141,7 @@ static void ColouriseMySQLDoc(unsigned int startPos, int length, int initStyle, 
           if (keywordlists[4]->InList(&s[2]))
             sc.ChangeState(SCE_MYSQL_KNOWNSYSTEMVARIABLE);
           delete [] s;
-          
+
           sc.SetState(SCE_MYSQL_DEFAULT);
         }
         break;
@@ -232,7 +236,7 @@ static void ColouriseMySQLDoc(unsigned int startPos, int length, int initStyle, 
               if (sc.Match('/', '*'))
               {
                 sc.SetState(SCE_MYSQL_COMMENT);
-                
+
                 // Skip comment introducer and check for hidden command.
                 sc.Forward(2);
                 if (sc.ch == '!')
@@ -247,7 +251,7 @@ static void ColouriseMySQLDoc(unsigned int startPos, int length, int initStyle, 
                   // Special MySQL single line comment.
                   sc.SetState(SCE_MYSQL_COMMENTLINE);
                   sc.Forward(2);
-                  
+
                   // Check the third character too. It must be a space or EOL.
                   if (sc.ch != ' ' && sc.ch != '\n' && sc.ch != '\r')
                     sc.ChangeState(SCE_MYSQL_OPERATOR);
@@ -258,7 +262,7 @@ static void ColouriseMySQLDoc(unsigned int startPos, int length, int initStyle, 
       }
     }
   }
-  
+
   // Do a final check for keywords if we currently have an identifier, to highlight them
   // also at the end of a line.
   if (sc.state == SCE_MYSQL_IDENTIFIER)
@@ -270,7 +274,7 @@ static void ColouriseMySQLDoc(unsigned int startPos, int length, int initStyle, 
     if (sc.state == SCE_MYSQL_FUNCTION && sc.ch != '(')
       sc.ChangeState(SCE_MYSQL_DEFAULT);
   }
-	
+
   sc.Complete();
 }
 
@@ -320,7 +324,7 @@ static void FoldMySQLDoc(unsigned int startPos, int length, int initStyle, WordL
 
 	int styleNext = styler.StyleAt(startPos);
 	int style = initStyle;
-	
+
   bool endFound = false;
 	bool whenFound = false;
 	bool elseFound = false;
@@ -331,11 +335,11 @@ static void FoldMySQLDoc(unsigned int startPos, int length, int initStyle, WordL
 		int stylePrev = style;
 		style = styleNext;
 		styleNext = styler.StyleAt(i + 1);
-    
+
     char currentChar = nextChar;
     nextChar = styler.SafeGetCharAt(i + 1);
 		bool atEOL = (currentChar == '\r' && nextChar != '\n') || (currentChar == '\n');
-	
+
     switch (style)
     {
       case SCE_MYSQL_COMMENT:
@@ -357,7 +361,7 @@ static void FoldMySQLDoc(unsigned int startPos, int length, int initStyle, WordL
         break;
       case SCE_MYSQL_COMMENTLINE:
         if (foldComment)
-        { 
+        {
           // Not really a standard, but we add support for single line comments
           // with special curly braces syntax as foldable comments too.
           // MySQL needs -- comments to be followed by space or control char
@@ -400,14 +404,14 @@ static void FoldMySQLDoc(unsigned int startPos, int length, int initStyle, WordL
           bool whileFound = MatchIgnoreCase(styler, i, "while");
           bool loopFound = MatchIgnoreCase(styler, i, "loop");
           bool repeatFound = MatchIgnoreCase(styler, i, "repeat");
-          
+
           if (!foldOnlyBegin && endFound && (ifFound || whileFound || loopFound))
           {
             endFound = false;
             levelNext--;
             if (levelNext < SC_FOLDLEVELBASE)
               levelNext = SC_FOLDLEVELBASE;
-            
+
             // Note that "else" is special here. It may or may not be followed by an "if .. then",
             // but in any case the level stays the same. When followed by an "if .. then" the level
             // will be increased later, if not, then at eol.
@@ -461,7 +465,7 @@ static void FoldMySQLDoc(unsigned int startPos, int length, int initStyle, WordL
         }
         break;
     }
-    
+
     // Handle the case of a trailing end without an if / while etc, as in the case of a begin.
 		if (endFound)
     {
@@ -470,7 +474,7 @@ static void FoldMySQLDoc(unsigned int startPos, int length, int initStyle, WordL
 			if (levelNext < SC_FOLDLEVELBASE)
         levelNext = SC_FOLDLEVELBASE;
 		}
-    
+
 		if (atEOL)
     {
 			if (elseFound)
@@ -487,14 +491,14 @@ static void FoldMySQLDoc(unsigned int startPos, int length, int initStyle, WordL
 				lev |= SC_FOLDLEVELHEADERFLAG;
 			if (lev != styler.LevelAt(lineCurrent))
 				styler.SetLevel(lineCurrent, lev);
-      
+
 			lineCurrent++;
 			levelCurrent = levelNext;
 			visibleChars = 0;
 			endFound = false;
 			whenFound = false;
 		}
-    
+
 		if (!isspacechar(currentChar))
 			visibleChars++;
 	}

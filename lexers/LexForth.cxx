@@ -7,18 +7,22 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
+#include <ctype.h>
 
-#include "Platform.h"
-
-#include "PropSet.h"
-#include "Accessor.h"
-#include "StyleContext.h"
-#include "KeyWords.h"
+#include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include "PropSetSimple.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
+#include "StyleContext.h"
+#include "CharacterSet.h"
+#include "LexerModule.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -130,7 +134,7 @@ static void ColouriseForthDoc(unsigned int startPos, int length, int initStyle, 
 				sc.SetState(SCE_FORTH_NUMBER);
 				while(sc.More() && isascii(sc.chNext) && (sc.chNext == '0' || sc.chNext == '1'))
 					sc.Forward();
-			} else if (	isascii(sc.ch) && 
+			} else if (	isascii(sc.ch) &&
 						(isxdigit(sc.ch) || ((sc.ch == '.' || sc.ch == '-') && isascii(sc.chNext) && isxdigit(sc.chNext)) )
 					){
 				sc.SetState(SCE_FORTH_NUMBER);
@@ -173,4 +177,4 @@ static const char * const forthWordLists[] = {
 
 LexerModule lmForth(SCLEX_FORTH, ColouriseForthDoc, "forth", FoldForthDoc, forthWordLists);
 
- 	  	 
+
