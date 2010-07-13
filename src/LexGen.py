@@ -290,7 +290,6 @@ def RegenerateAll():
         print(propFiles)
 
     Regenerate(root + "scintilla/src/Catalogue.cxx", "//", NATIVE, lexerModules)
-    Regenerate(root + "scintilla/win32/makefile", "#", NATIVE, lexFiles)
     Regenerate(root + "scintilla/win32/scintilla.mak", "#", NATIVE, lexFiles)
     Regenerate(root + "scintilla/win32/scintilla_vc6.mak", "#", NATIVE, lexFiles)
     # Use Unix EOLs for gtk Makefiles so they work for Linux users when
