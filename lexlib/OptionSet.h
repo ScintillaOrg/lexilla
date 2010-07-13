@@ -93,14 +93,14 @@ public:
 		return names.c_str();
 	}
 	int PropertyType(const char *name) {
-		OptionMap::iterator it = nameToDef.find(name);
+		typename OptionMap::iterator it = nameToDef.find(name);
 		if (it != nameToDef.end()) {
 			return it->second.opType;
 		}
 		return SC_TYPE_BOOLEAN;
 	}
 	const char *DescribeProperty(const char *name) {
-		OptionMap::iterator it = nameToDef.find(name);
+		typename OptionMap::iterator it = nameToDef.find(name);
 		if (it != nameToDef.end()) {
 			return it->second.description.c_str();
 		}
@@ -108,7 +108,7 @@ public:
 	}
 
 	bool PropertySet(T *base, const char *name, const char *val) {
-		OptionMap::iterator it = nameToDef.find(name);
+		typename OptionMap::iterator it = nameToDef.find(name);
 		if (it != nameToDef.end()) {
 			return it->second.Set(base, val);
 		}
