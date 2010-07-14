@@ -28,7 +28,10 @@ class OptionSet {
 			plcos ps;
 		};
 		std::string description;
-		Option(plcob pb_=0, std::string description_="") :
+		Option() :
+			opType(SC_TYPE_BOOLEAN), pb(0), description("") {
+		}
+		Option(plcob pb_, std::string description_="") :
 			opType(SC_TYPE_BOOLEAN), pb(pb_), description(description_) {
 		}
 		Option(plcoi pi_, std::string description_) :
