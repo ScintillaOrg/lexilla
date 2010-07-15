@@ -18,10 +18,10 @@ GCC_MAJOR    := $(shell $(CC) -v 2>&1 | \
 STATICLIB=../bin/libscintilla.a
 DYNAMICLIB=../bin/libscintilla.dylib
 
-vpath %.h ../src ../include
-vpath %.cxx ../src
+vpath %.h ../src ../include ../lexlib
+vpath %.cxx ../src ../lexlib ../lexers
 
-INCLUDEDIRS=-I ../include -I ../src
+INCLUDEDIRS=-I ../include -I ../src -I ../lexlib
 
 ifeq ($(GCC_MAJOR),3)
 # 10.4 will have GCC 4 or better, so this should only ever happen
@@ -60,7 +60,7 @@ endif
 .c.o:
 	$(CCOMP) $(CXXFLAGS) $(OPTIONS) $(DFLAGS) $(CONTAINER) $(ARCHFLAGS) $(EXT_INPUT) $(INCLUDEDIRS) -w -c $<
 
-LEXOBJS:=$(addsuffix .o,$(basename $(notdir $(wildcard ../src/Lex*.cxx))))
+LEXOBJS:=$(addsuffix .o,$(basename $(notdir $(wildcard ../lexers/Lex*.cxx))))
 
 # The LEXOBJS have to be treated specially as the functions in them are not called from external code
 
@@ -72,12 +72,12 @@ clean:
 	rm -f *.o $(COMPLIB)
 
 deps:
-	$(CC) -MM -DSCI_NAMESPACE -DMACOSX -DSCI_LEXER  $(CXXFLAGS) $(INCLUDEDIRS) *.cxx ../src/*.cxx >deps.mak
+	$(CC) -MM -DSCI_NAMESPACE -DMACOSX -DSCI_LEXER  $(CXXFLAGS) $(INCLUDEDIRS) *.cxx ../src/*.cxx ../lexlib/*.cxx ../src/*.cxx >deps.mak
 
-COMPLIB=DocumentAccessor.o WindowAccessor.o KeyWords.o StyleContext.o \
-	CharClassify.o Decoration.o Document.o PerLine.o CallTip.o PositionCache.o \
-	ScintillaBase.o ContractionState.o Editor.o ExternalLexer.o PropSet.o PlatMacOSX.o \
-	KeyMap.o LineMarker.o ScintillaMacOSX.o CellBuffer.o ViewStyle.o \
+COMPLIB=Accessor.o CharacterSet.o LexerBase.o LexerModule.o LexerSimple.o StyleContext.o WordList.o \
+	CharClassify.o Decoration.o Document.o PerLine.o Catalogue.o CallTip.o \
+	ScintillaBase.o ContractionState.o Editor.o ExternalLexer.o PropSetSimple.o PlatMacOSX.o \
+	KeyMap.o LineMarker.o PositionCache.o ScintillaMacOSX.o CellBuffer.o ViewStyle.o \
 	RESearch.o RunStyles.o Selection.o Style.o Indicator.o AutoComplete.o UniConversion.o XPM.o \
         TCarbonEvent.o TView.o ScintillaCallTip.o $(EXTOBS) \
 	$(LEXOBJS)
