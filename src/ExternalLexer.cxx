@@ -65,8 +65,6 @@ LexerLibrary::LexerLibrary(const char *ModuleName) {
 
 			// Find functions in the DLL
 			GetLexerNameFn GetLexerName = (GetLexerNameFn)(sptr_t)lib->FindFunction("GetLexerName");
-			//ExtLexerFunction fnLexer = (ExtLexerFunction)(sptr_t)lib->FindFunction("Lex");
-			//ExtFoldFunction fnFolder = (ExtFoldFunction)(sptr_t)lib->FindFunction("Fold");
 			GetLexerFactoryFunction fnFactory = (GetLexerFactoryFunction)(sptr_t)lib->FindFunction("GetLexerFactory");
 
 			// Assign a buffer for the lexer name.
@@ -107,7 +105,6 @@ LexerLibrary::~LexerLibrary() {
 }
 
 void LexerLibrary::Release() {
-	//TODO maintain a list of lexers created, and delete them!
 	LexerMinder *lm;
 	LexerMinder *lmNext;
 	lm = first;
