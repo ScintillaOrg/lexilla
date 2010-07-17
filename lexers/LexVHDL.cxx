@@ -105,7 +105,7 @@ static void ColouriseVHDLDoc(
         }
         sc.SetState(SCE_VHDL_DEFAULT);
       }
-    } else if (sc.state == SCE_VHDL_COMMENT || sc.state == SCE_V_COMMENTLINEBANG) {
+    } else if (sc.state == SCE_VHDL_COMMENT || sc.state == SCE_VHDL_COMMENTLINEBANG) {
       if (sc.atLineEnd) {
         sc.SetState(SCE_VHDL_DEFAULT);
       }
@@ -117,7 +117,7 @@ static void ColouriseVHDLDoc(
       } else if (sc.ch == '\"') {
         sc.ForwardSetState(SCE_VHDL_DEFAULT);
       } else if (sc.atLineEnd) {
-        sc.ChangeState(SCE_V_STRINGEOL);
+        sc.ChangeState(SCE_VHDL_STRINGEOL);
         sc.ForwardSetState(SCE_VHDL_DEFAULT);
       }
     }
