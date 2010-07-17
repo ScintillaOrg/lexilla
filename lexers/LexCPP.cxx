@@ -192,8 +192,6 @@ struct OptionsCPP {
 	bool foldPreprocessor;
 	bool foldCompact;
 	bool foldAtElse;
-	int OO_i;
-	std::string OO_s;
 	OptionsCPP() {
 		stylingWithinPreprocessor = false;
 		identifiersAllowDollars = true;
