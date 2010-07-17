@@ -189,6 +189,7 @@ struct OptionsCPP {
 	bool trackPreprocessor;
 	bool updatePreprocessor;
 	bool foldComment;
+	bool foldCommentExplicit;
 	bool foldPreprocessor;
 	bool foldCompact;
 	bool foldAtElse;
@@ -198,6 +199,7 @@ struct OptionsCPP {
 		trackPreprocessor = true;
 		updatePreprocessor = true;
 		foldComment = false;
+		foldCommentExplicit = true;
 		foldPreprocessor = false;
 		foldCompact = false;
 		foldAtElse = false;
@@ -233,6 +235,9 @@ struct OptionSetCPP : public OptionSet<OptionsCPP> {
 			"This option enables folding multi-line comments and explicit fold points when using the C++ lexer. "
 			"Explicit fold points allows adding extra folding by placing a //{ comment at the start and a //} "
 			"at the end of a section that should fold.");
+
+		DefineProperty("fold.cpp.comment.explicit", &OptionsCPP::foldCommentExplicit,
+			"Set this property to 0 to disable folding explicit fold points when fold.comment=1.");
 
 		DefineProperty("fold.preprocessor", &OptionsCPP::foldPreprocessor,
 			"This option enables folding preprocessor directives when using the C++ lexer. "
@@ -823,7 +828,7 @@ void SCI_METHOD LexerCPP::Fold(unsigned int startPos, int length, int initStyle,
 				levelNext--;
 			}
 		}
-		if (options.foldComment && (style == SCE_C_COMMENTLINE)) {
+		if (options.foldComment && options.foldCommentExplicit && (style == SCE_C_COMMENTLINE)) {
 			if ((ch == '/') && (chNext == '/')) {
 				char chNext2 = styler.SafeGetCharAt(i + 2);
 				if (chNext2 == '{') {
