@@ -1184,6 +1184,26 @@ static bool IsCommentLine(int line, Accessor &styler) {
 	return false;
 }
 
+static bool IsPackageLine(int line, Accessor &styler) {
+	int pos = styler.LineStart(line);
+	int style = styler.StyleAt(pos);
+	if (style == SCE_PL_WORD && styler.Match(pos, "package")) {
+		return true;
+	}
+	return false;
+}
+
+static int PodHeadingLevel(int pos, Accessor &styler) {
+	int lvl = static_cast<unsigned char>(styler.SafeGetCharAt(pos + 5));
+	if (lvl >= '1' && lvl <= '4') {
+		return lvl - '0';
+	}
+	return 0;
+}
+
+#define PERL_HEADFOLD_SHIFT		4
+#define PERL_HEADFOLD_MASK		0xF0
+
 static void FoldPerlDoc(unsigned int startPos, int length, int, WordList *[],
                         Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
@@ -1210,7 +1230,7 @@ static void FoldPerlDoc(unsigned int startPos, int length, int, WordList *[],
 	int styleNext = styler.StyleAt(startPos);
 	// Used at end of line to determine if the line was a package definition
 	bool isPackageLine = false;
-	bool isPodHeading = false;
+	int podHeading = 0;
 	for (unsigned int i = startPos; i < endPos; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
@@ -1225,52 +1245,61 @@ static void FoldPerlDoc(unsigned int startPos, int length, int, WordList *[],
 				&& IsCommentLine(lineCurrent + 1, styler))
 				levelCurrent++;
 			else if (IsCommentLine(lineCurrent - 1, styler)
-					 && !IsCommentLine(lineCurrent+1, styler))
+					 && !IsCommentLine(lineCurrent + 1, styler))
 				levelCurrent--;
 		}
+		// {} [] block folding
 		if (style == SCE_PL_OPERATOR) {
 			if (ch == '{') {
 				levelCurrent++;
 			} else if (ch == '}') {
 				levelCurrent--;
 			}
+			if (ch == '[') {
+				levelCurrent++;
+			} else if (ch == ']') {
+				levelCurrent--;
+			}
 		}
-		// Custom POD folding
+		// POD folding
 		if (foldPOD && atLineStart) {
 			int stylePrevCh = (i) ? styler.StyleAt(i - 1):SCE_PL_DEFAULT;
 			if (style == SCE_PL_POD) {
 				if (stylePrevCh != SCE_PL_POD && stylePrevCh != SCE_PL_POD_VERB)
 					levelCurrent++;
 				else if (styler.Match(i, "=cut"))
-					levelCurrent--;
+					levelCurrent = (levelCurrent & ~PERL_HEADFOLD_MASK) - 1;
 				else if (styler.Match(i, "=head"))
-					isPodHeading = true;
+					podHeading = PodHeadingLevel(i, styler);
 			} else if (style == SCE_PL_DATASECTION) {
 				if (ch == '=' && isascii(chNext) && isalpha(chNext) && levelCurrent == SC_FOLDLEVELBASE)
 					levelCurrent++;
 				else if (styler.Match(i, "=cut") && levelCurrent > SC_FOLDLEVELBASE)
-					levelCurrent--;
+					levelCurrent = (levelCurrent & ~PERL_HEADFOLD_MASK) - 1;
 				else if (styler.Match(i, "=head"))
-					isPodHeading = true;
+					podHeading = PodHeadingLevel(i, styler);
 				// if package used or unclosed brace, level > SC_FOLDLEVELBASE!
 				// reset needed as level test is vs. SC_FOLDLEVELBASE
-				else if (styler.Match(i, "__END__"))
+				else if (stylePrevCh != SCE_PL_DATASECTION)
 					levelCurrent = SC_FOLDLEVELBASE;
 			}
 		}
-		// Custom package folding
+		// package folding
 		if (foldPackage && atLineStart) {
-			if (style == SCE_PL_WORD && styler.Match(i, "package")) {
+			if (IsPackageLine(lineCurrent, styler)
+				&& !IsPackageLine(lineCurrent + 1, styler))
 				isPackageLine = true;
-			}
 		}
 
 		if (atEOL) {
 			int lev = levelPrev;
-			if (isPodHeading) {
-				lev = levelPrev - 1;
+			// POD headings occupy bits 7-4, leaving some breathing room for
+			// non-standard practice -- POD sections stuck in blocks, etc.
+			if (podHeading > 0) {
+				levelCurrent = (lev & ~PERL_HEADFOLD_MASK) | (podHeading << PERL_HEADFOLD_SHIFT);
+				lev = levelCurrent - 1;
 				lev |= SC_FOLDLEVELHEADERFLAG;
-				isPodHeading = false;
+				podHeading = 0;
 			}
 			// Check if line was a package declaration
 			// because packages need "special" treatment
