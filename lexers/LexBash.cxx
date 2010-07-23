@@ -223,7 +223,7 @@ static void ColouriseBashDoc(unsigned int startPos, int length, int initStyle,
 					char s2[10];
 					sc.GetCurrent(s, sizeof(s));
 					// allow keywords ending in a whitespace or command delimiter
-					s2[0] = sc.ch;
+					s2[0] = static_cast<char>(sc.ch);
 					s2[1] = '\0';
 					bool keywordEnds = IsASpace(sc.ch) || cmdDelimiter.InList(s2);
 					// 'in' or 'do' may be construct keywords
@@ -558,9 +558,9 @@ static void ColouriseBashDoc(unsigned int startPos, int length, int initStyle,
 				 || cmdState == BASH_CMD_BODY
 				 || cmdState == BASH_CMD_WORD
 				 || (cmdState == BASH_CMD_TEST && testExprType == 0)) {
-					s[0] = sc.ch;
+					s[0] = static_cast<char>(sc.ch);
 					if (setBashOperator.Contains(sc.chNext)) {
-						s[1] = sc.chNext;
+						s[1] = static_cast<char>(sc.chNext);
 						s[2] = '\0';
 						isCmdDelim = cmdDelimiter.InList(s);
 						if (isCmdDelim)
