@@ -458,6 +458,10 @@ SOURCE=..\lexers\LexTeX.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\lexers\LexTxt2tags.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\lexers\LexVB.cxx
 # End Source File
 # Begin Source File
