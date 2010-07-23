@@ -2,7 +2,7 @@
 /** @file LexBash.cxx
  ** Lexer for Bash.
  **/
-// Copyright 2004-2008 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 2004-2010 by Neil Hodgson <neilh@scintilla.org>
 // Adapted from LexPerl by Kein-Hong Man 2004
 // The License.txt file describes the conditions under which this software may be distributed.
 
@@ -28,19 +28,27 @@
 using namespace Scintilla;
 #endif
 
-#define HERE_DELIM_MAX 256
+#define HERE_DELIM_MAX			256
 
 // define this if you want 'invalid octals' to be marked as errors
 // usually, this is not a good idea, permissive lexing is better
 #undef PEDANTIC_OCTAL
 
-#define BASH_BASE_ERROR		65
-#define BASH_BASE_DECIMAL	66
-#define BASH_BASE_HEX		67
+#define BASH_BASE_ERROR			65
+#define BASH_BASE_DECIMAL		66
+#define BASH_BASE_HEX			67
 #ifdef PEDANTIC_OCTAL
-#define BASH_BASE_OCTAL		68
-#define BASH_BASE_OCTAL_ERROR	69
+#define BASH_BASE_OCTAL			68
+#define	BASH_BASE_OCTAL_ERROR	69
 #endif
+
+// state constants for parts of a bash command segment
+#define	BASH_CMD_BODY			0
+#define BASH_CMD_START			1
+#define BASH_CMD_WORD			2
+#define BASH_CMD_TEST			3
+#define BASH_CMD_ARITH			4
+#define BASH_CMD_DELIM			5
 
 static inline int translateBashDigit(int ch) {
 	if (ch >= '0' && ch <= '9') {
@@ -82,11 +90,15 @@ static void ColouriseBashDoc(unsigned int startPos, int length, int initStyle,
 							 WordList *keywordlists[], Accessor &styler) {
 
 	WordList &keywords = *keywordlists[0];
+	WordList cmdDelimiter, bashStruct, bashStruct_in;
+	cmdDelimiter.Set("| || |& & && ; ;; ( ) { }");
+	bashStruct.Set("if elif fi while until else then do done esac eval");
+	bashStruct_in.Set("for case select");
 
 	CharacterSet setWordStart(CharacterSet::setAlpha, "_");
 	// note that [+-] are often parts of identifiers in shell scripts
 	CharacterSet setWord(CharacterSet::setAlphaNum, "._+-");
-	CharacterSet setBashOperator(CharacterSet::setNone, "^&\\%()-+=|{}[]:;>,*/<?!.~@");
+	CharacterSet setBashOperator(CharacterSet::setNone, "^&%()-+=|{}[]:;>,*/<?!.~@");
 	CharacterSet setSingleCharOp(CharacterSet::setNone, "rwxoRWXOezsfdlpSbctugkTBMACahGLNn");
 	CharacterSet setParam(CharacterSet::setAlphaNum, "$_");
 	CharacterSet setHereDoc(CharacterSet::setAlpha, "_\\-+!");
@@ -146,46 +158,115 @@ static void ColouriseBashDoc(unsigned int startPos, int length, int initStyle,
 	int numBase = 0;
 	int digit;
 	unsigned int endPos = startPos + length;
+	int cmdState = BASH_CMD_START;
+	int testExprType = 0;
 
-	// Backtrack to beginning of style if required...
-	// If in a long distance lexical state, backtrack to find quote characters
-	if (initStyle == SCE_SH_HERE_Q) {
-		while ((startPos > 1) && (styler.StyleAt(startPos) != SCE_SH_HERE_DELIM)) {
-			startPos--;
-		}
-		startPos = styler.LineStart(styler.GetLine(startPos));
-		initStyle = styler.StyleAt(startPos - 1);
+	// Always backtracks to the start of a line that is not a continuation
+	// of the previous line (i.e. start of a bash command segment)
+	int ln = styler.GetLine(startPos);
+	for (;;) {
+		startPos = styler.LineStart(ln);
+		if (ln == 0 || styler.GetLineState(ln) == BASH_CMD_START)
+			break;
+		ln--;
 	}
-	// Bash strings can be multi-line with embedded newlines, so backtrack.
-	// Bash numbers have additional state during lexing, so backtrack too.
-	if (initStyle == SCE_SH_STRING
-	 || initStyle == SCE_SH_BACKTICKS
-	 || initStyle == SCE_SH_CHARACTER
-	 || initStyle == SCE_SH_NUMBER
-	 || initStyle == SCE_SH_IDENTIFIER
-	 || initStyle == SCE_SH_COMMENTLINE) {
-		while ((startPos > 1) && (styler.StyleAt(startPos - 1) == initStyle)) {
-			startPos--;
-		}
-		initStyle = SCE_SH_DEFAULT;
-	}
+	initStyle = SCE_SH_DEFAULT;
 
 	StyleContext sc(startPos, endPos - startPos, initStyle, styler);
 
 	for (; sc.More(); sc.Forward()) {
 
+		// handle line continuation, updates per-line stored state
+		if (sc.atLineStart) {
+			ln = styler.GetLine(sc.currentPos);
+			if (sc.state == SCE_SH_STRING
+			 || sc.state == SCE_SH_BACKTICKS
+			 || sc.state == SCE_SH_CHARACTER
+			 || sc.state == SCE_SH_HERE_Q
+			 || sc.state == SCE_SH_COMMENTLINE
+			 || sc.state == SCE_SH_PARAM) {
+				// force backtrack while retaining cmdState
+				styler.SetLineState(ln, BASH_CMD_BODY);
+			} else {
+				if (ln > 0) {
+					if ((sc.GetRelative(-3) == '\\' && sc.GetRelative(-2) == '\r' && sc.chPrev == '\n')
+					 || sc.GetRelative(-2) == '\\') {	// handle '\' line continuation
+						// retain last line's state
+					} else
+						cmdState = BASH_CMD_START;
+				}
+				styler.SetLineState(ln, cmdState);
+			}
+		}
+
+		// controls change of cmdState at the end of a non-whitespace element
+		// states BODY|TEST|ARITH persist until the end of a command segment
+		// state WORD persist, but ends with 'in' or 'do' construct keywords
+		int cmdStateNew = BASH_CMD_BODY;
+		if (cmdState == BASH_CMD_TEST || cmdState == BASH_CMD_ARITH || cmdState == BASH_CMD_WORD)
+			cmdStateNew = cmdState;
+		int stylePrev = sc.state;
+
 		// Determine if the current state should terminate.
 		switch (sc.state) {
 			case SCE_SH_OPERATOR:
 				sc.SetState(SCE_SH_DEFAULT);
+				if (cmdState == BASH_CMD_DELIM)		// if command delimiter, start new command
+					cmdStateNew = BASH_CMD_START;
+				else if (sc.chPrev == '\\')			// propagate command state if line continued
+					cmdStateNew = cmdState;
 				break;
 			case SCE_SH_WORD:
 				// "." never used in Bash variable names but used in file names
 				if (!setWord.Contains(sc.ch)) {
-					char s[1000];
+					char s[500];
+					char s2[10];
 					sc.GetCurrent(s, sizeof(s));
-					if (s[0] != '-' &&	// for file operators
-						!keywords.InList(s)) {
+					// allow keywords ending in a whitespace or command delimiter
+					s2[0] = sc.ch;
+					s2[1] = '\0';
+					bool keywordEnds = IsASpace(sc.ch) || cmdDelimiter.InList(s2);
+					// 'in' or 'do' may be construct keywords
+					if (cmdState == BASH_CMD_WORD) {
+						if (strcmp(s, "in") == 0 && keywordEnds)
+							cmdStateNew = BASH_CMD_BODY;
+						else if (strcmp(s, "do") == 0 && keywordEnds)
+							cmdStateNew = BASH_CMD_START;
+						else
+							sc.ChangeState(SCE_SH_IDENTIFIER);
+						sc.SetState(SCE_SH_DEFAULT);
+						break;
+					}
+					// a 'test' keyword starts a test expression
+					if (strcmp(s, "test") == 0) {
+						if (cmdState == BASH_CMD_START && keywordEnds) {
+							cmdStateNew = BASH_CMD_TEST;
+							testExprType = 0;
+						} else
+							sc.ChangeState(SCE_SH_IDENTIFIER);
+					}
+					// detect bash construct keywords
+					else if (bashStruct.InList(s)) {
+						if (cmdState == BASH_CMD_START && keywordEnds)
+							cmdStateNew = BASH_CMD_START;
+						else
+							sc.ChangeState(SCE_SH_IDENTIFIER);
+					}
+					// 'for'|'case'|'select' needs 'in'|'do' to be highlighted later
+					else if (bashStruct_in.InList(s)) {
+						if (cmdState == BASH_CMD_START && keywordEnds)
+							cmdStateNew = BASH_CMD_WORD;
+						else
+							sc.ChangeState(SCE_SH_IDENTIFIER);
+					}
+					// disambiguate option items and file test operators
+					else if (s[0] == '-') {
+						if (cmdState != BASH_CMD_TEST)
+							sc.ChangeState(SCE_SH_IDENTIFIER);
+					}
+					// disambiguate keywords and identifiers
+					else if (cmdState != BASH_CMD_START
+						  || !(keywords.InList(s) && keywordEnds)) {
 						sc.ChangeState(SCE_SH_IDENTIFIER);
 					}
 					sc.SetState(SCE_SH_DEFAULT);
@@ -378,10 +459,17 @@ static void ColouriseBashDoc(unsigned int startPos, int length, int initStyle,
 			sc.SetState(SCE_SH_HERE_Q);
 		}
 
+		// update cmdState about the current command segment
+		if (stylePrev != SCE_SH_DEFAULT && sc.state == SCE_SH_DEFAULT) {
+			cmdState = cmdStateNew;
+		}
 		// Determine if a new state should be entered.
 		if (sc.state == SCE_SH_DEFAULT) {
-			if (sc.ch == '\\') {	// escaped character
+			if (sc.ch == '\\') {
+				// Bash can escape any non-newline as a literal
 				sc.SetState(SCE_SH_IDENTIFIER);
+				if (sc.chNext == '\r' || sc.chNext == '\n')
+					sc.SetState(SCE_SH_OPERATOR);
 			} else if (IsADigit(sc.ch)) {
 				sc.SetState(SCE_SH_NUMBER);
 				numBase = BASH_BASE_DECIMAL;
@@ -411,6 +499,10 @@ static void ColouriseBashDoc(unsigned int startPos, int length, int initStyle,
 				sc.SetState(SCE_SH_BACKTICKS);
 				Quote.Start(sc.ch);
 			} else if (sc.ch == '$') {
+				if (sc.Match("$((")) {
+					sc.SetState(SCE_SH_OPERATOR);	// handle '((' later
+					continue;
+				}
 				sc.SetState(SCE_SH_SCALAR);
 				sc.Forward();
 				if (sc.ch == '{') {
@@ -421,9 +513,6 @@ static void ColouriseBashDoc(unsigned int startPos, int length, int initStyle,
 					sc.ChangeState(SCE_SH_STRING);
 				} else if (sc.ch == '(' || sc.ch == '`') {
 					sc.ChangeState(SCE_SH_BACKTICKS);
-					if (sc.chNext == '(') {	// $(( is lexed as operator
-						sc.ChangeState(SCE_SH_OPERATOR);
-					}
 				} else {
 					continue;	// scalar has no delimiter pair
 				}
@@ -440,9 +529,66 @@ static void ColouriseBashDoc(unsigned int startPos, int length, int initStyle,
 				sc.SetState(SCE_SH_WORD);
 				sc.Forward();
 			} else if (setBashOperator.Contains(sc.ch)) {
+				char s[10];
+				bool isCmdDelim = false;
 				sc.SetState(SCE_SH_OPERATOR);
+				// handle opening delimiters for test/arithmetic expressions - ((,[[,[
+				if (cmdState == BASH_CMD_START
+				 || cmdState == BASH_CMD_BODY) {
+					if (sc.Match('(', '(')) {
+						cmdState = BASH_CMD_ARITH;
+						sc.Forward();
+					} else if (sc.Match('[', '[') && IsASpace(sc.GetRelative(2))) {
+						cmdState = BASH_CMD_TEST;
+						testExprType = 1;
+						sc.Forward();
+					} else if (sc.ch == '[' && IsASpace(sc.chNext)) {
+						cmdState = BASH_CMD_TEST;
+						testExprType = 2;
+					}
+				}
+				// special state -- for ((x;y;z)) in ... looping
+				if (cmdState == BASH_CMD_WORD && sc.Match('(', '(')) {
+					cmdState = BASH_CMD_ARITH;
+					sc.Forward();
+					continue;
+				}
+				// handle command delimiters in command START|BODY|WORD state, also TEST if 'test'
+				if (cmdState == BASH_CMD_START
+				 || cmdState == BASH_CMD_BODY
+				 || cmdState == BASH_CMD_WORD
+				 || (cmdState == BASH_CMD_TEST && testExprType == 0)) {
+					s[0] = sc.ch;
+					if (setBashOperator.Contains(sc.chNext)) {
+						s[1] = sc.chNext;
+						s[2] = '\0';
+						isCmdDelim = cmdDelimiter.InList(s);
+						if (isCmdDelim)
+							sc.Forward();
+					}
+					if (!isCmdDelim) {
+						s[1] = '\0';
+						isCmdDelim = cmdDelimiter.InList(s);
+					}
+					if (isCmdDelim) {
+						cmdState = BASH_CMD_DELIM;
+						continue;
+					}
+				}
+				// handle closing delimiters for test/arithmetic expressions - )),]],]
+				if (cmdState == BASH_CMD_ARITH && sc.Match(')', ')')) {
+					cmdState = BASH_CMD_BODY;
+					sc.Forward();
+				} else if (cmdState == BASH_CMD_TEST && IsASpace(sc.chPrev)) {
+					if (sc.Match(']', ']') && testExprType == 1) {
+						sc.Forward();
+						cmdState = BASH_CMD_BODY;
+					} else if (sc.ch == ']' && testExprType == 2) {
+						cmdState = BASH_CMD_BODY;
+					}
+				}
 			}
-		}
+		}// sc.state
 	}
 	sc.Complete();
 }
