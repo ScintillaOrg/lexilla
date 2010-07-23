@@ -91,7 +91,6 @@ void LexInterface::Colourise(int start, int end) {
 
 		performingStyle = false;
 	}
-	Platform::DebugPrintf("Style:%d %9.6g \n", performingStyle, et.Duration());
 }
 
 Document::Document() {
@@ -1241,7 +1240,7 @@ long Document::FindText(int minPos, int maxPos, const char *search,
 				}
 				pos += increment;
 				if (dbcsCodePage && (pos >= 0)) {
-					// Have to use >= 0 as otherwise next statement would change 
+					// Have to use >= 0 as otherwise next statement would change
 					// -1 to 0 and make loop infinite.
 					// Ensure trying to match from start of character
 					pos = MovePositionOutsideChar(pos, increment, false);
@@ -1257,8 +1256,8 @@ long Document::FindText(int minPos, int maxPos, const char *search,
 				int indexDocument = 0;
 				int indexSearch = 0;
 				bool characterMatches = true;
-				while (characterMatches && 
-					((pos + indexDocument) < limitPos) && 
+				while (characterMatches &&
+					((pos + indexDocument) < limitPos) &&
 					(indexSearch < lenSearch)) {
 					char bytes[maxBytesCharacter + 1];
 					bytes[maxBytesCharacter] = 0;
