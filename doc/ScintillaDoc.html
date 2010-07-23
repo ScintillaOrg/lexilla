@@ -5248,6 +5248,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_LOADLEXERLIBRARY">SCI_LOADLEXERLIBRARY(&lt;unused&gt;, const char
     *path)</a><br />
      <a class="message" href="#SCI_COLOURISE">SCI_COLOURISE(int start, int end)</a><br />
+     <a class="message" href="#SCI_CHANGELEXERSTATE">SCI_CHANGELEXERSTATE(int start, int end)</a><br />
      <a class="message" href="#SCI_PROPERTYNAMES">SCI_PROPERTYNAMES(&lt;unused&gt;, char *names)</a><br />
      <a class="message" href="#SCI_PROPERTYTYPE">SCI_PROPERTYTYPE(const char *name)</a><br />
      <a class="message" href="#SCI_DESCRIBEPROPERTY">SCI_DESCRIBEPROPERTY(const char *name, char *description)</a><br />
@@ -5299,6 +5300,10 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <code>startPos</code> to the end. If the <code>"fold"</code> property is set to
     <code>"1"</code> and your lexer or container supports folding, fold levels are also set. This
     message causes a redraw.</p>
+
+    <p><b id="SCI_CHANGELEXERSTATE">SCI_CHANGELEXERSTATE(int startPos, int endPos)</b><br />
+    Indicate that the internal state of a lexer has changed over a range and therefore
+    there may be a need to redraw.</p>
 
     <p><b id="SCI_PROPERTYNAMES">SCI_PROPERTYNAMES(&lt;unused&gt;, char *names)</b><br />
     <b id="SCI_PROPERTYTYPE">SCI_PROPERTYTYPE(const char *name)</b><br />
@@ -6042,6 +6047,16 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
           was called.</td>
 
           <td><code>line</code></td>
+        </tr>
+
+        <tr>
+          <td align="left"><code id="SC_MOD_LEXERSTATE">SC_MOD_LEXERSTATE</code></td>
+
+          <td align="center">0x80000</td>
+
+          <td>The internal state of a lexer has changed over a range.</td>
+
+          <td><code>position, length</code></td>
         </tr>
 
         <tr>
