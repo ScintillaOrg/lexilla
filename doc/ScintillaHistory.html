@@ -373,6 +373,8 @@
 	Compatibility classes allow current lexers compiled into Scintilla to run with few changes.
 	The interface to external lexers has changed and existing external lexers will need to have changes
 	made and be recompiled.
+	A single lexer object is attached to a document whereas previously lexers were attached to views
+	which could lead to different lexers being used for split views with confusing results.
 	</li>
 	<li>
 	C++ lexer understands the preprocessor enough to grey-out inactive code due to conditional compilation.
@@ -401,11 +403,19 @@
 	<a href="https://sourceforge.net/tracker/?func=detail&atid=352439&aid=3030887&group_id=2439">Feature #3030887.</a>
 	</li>
 	<li>
+	PowerShell lexer supports multiline &lt;# .. #&gt; comments and adds 2 keyword classes.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=352439&aid=3015176&group_id=2439">Feature #3015176.</a>
+	</li>
+	<li>
+	Lexing performed incrementally when needed by wrapping to make user interface more responsive.
+	</li>
+	<li>
 	SciTE setting replaceselection:yes works on GTK+.
 	</li>
 	<li>
 	SciTE Lua scripts calling io.open or io.popen on Windows have arguments treated as UTF-8 and converted to Unicode
-	so that non-ASCII file paths will work.
+	so that non-ASCII file paths will work. Lua files with non-ASCII paths run.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=3016951&group_id=2439">Bug #3016951.</a>
 	</li>
 	<li>
 	Crash fixed when searching for empty string.
