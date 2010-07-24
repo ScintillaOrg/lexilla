@@ -14,7 +14,7 @@
  */
 
 #include <stdlib.h>
-#include <string.h>
+#include <string>
 #include <stdio.h>
 #include <ctype.h>
 #include <time.h>
@@ -122,6 +122,7 @@ protected:
   
   virtual void Initialise();
   virtual void Finalise();
+  virtual std::string CaseMapString(const std::string &s, int caseMapping);
 public:
   ScintillaCocoa(NSView* view);
   virtual ~ScintillaCocoa();
