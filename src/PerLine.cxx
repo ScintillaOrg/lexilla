@@ -245,10 +245,7 @@ void LineLevels::Init() {
 
 void LineLevels::InsertLine(int line) {
 	if (levels.Length()) {
-		int level = SC_FOLDLEVELBASE;
-		if ((line > 0) && (line < levels.Length())) {
-			level = levels[line-1] & ~SC_FOLDLEVELWHITEFLAG;
-		}
+		int level = (line < levels.Length()) ? levels[line] : SC_FOLDLEVELBASE;
 		levels.InsertValue(line, 1, level);
 	}
 }
@@ -306,7 +303,8 @@ void LineState::Init() {
 void LineState::InsertLine(int line) {
 	if (lineStates.Length()) {
 		lineStates.EnsureLength(line);
-		lineStates.Insert(line, 0);
+		int val = (line < lineStates.Length()) ? lineStates[line] : 0;
+		lineStates.Insert(line, val);
 	}
 }
 
