@@ -146,6 +146,9 @@ public:
 	virtual ~LexInterface() {
 	}
 	void Colourise(int start, int end);
+	bool UseContainerLexing() const {
+		return instance == 0;
+	}
 };
 
 /**

@@ -1409,7 +1409,7 @@ bool SCI_METHOD Document::SetStyles(int length, const char *styles) {
 void Document::EnsureStyledTo(int pos) {
 	if ((enteredStyling == 0) && (pos > GetEndStyled())) {
 		IncrementStyleClock();
-		if (pli) {
+		if (pli && !pli->UseContainerLexing()) {
 			int lineEndStyled = LineFromPosition(GetEndStyled());
 			int endStyled = LineStart(lineEndStyled);
 			pli->Colourise(endStyled, pos);

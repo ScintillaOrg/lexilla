@@ -527,17 +527,22 @@ void LexState::SetLexerModule(const LexerModule *lex) {
 			instance = 0;
 		}
 		lexCurrent = lex;
-		instance = lexCurrent->Create();
+		if (lexCurrent)
+			instance = lexCurrent->Create();
 		pdoc->LexerChanged();
 	}
 }
 
 void LexState::SetLexer(uptr_t wParam) {
 	lexLanguage = wParam;
-	const LexerModule *lex = Catalogue::Find(lexLanguage);
-	if (!lex)
-		lex = Catalogue::Find(SCLEX_NULL);
-	SetLexerModule(lex);
+	if (lexLanguage == SCLEX_CONTAINER) {
+		SetLexerModule(0);
+	} else {
+		const LexerModule *lex = Catalogue::Find(lexLanguage);
+		if (!lex)
+			lex = Catalogue::Find(SCLEX_NULL);
+		SetLexerModule(lex);
+	}
 }
 
 void LexState::SetLexerLanguage(const char *languageName) {
