@@ -964,8 +964,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			beforeLanguage = scriptLanguage;
 			scriptLanguage = eScriptPython;
 			styler.ColourTo(i, SCE_H_ASP);
-			if (foldHTMLPreprocessor && chNext == '%')
-				levelCurrent++;
 
 			ch = static_cast<unsigned char>(styler.SafeGetCharAt(i));
 			continue;
@@ -1092,9 +1090,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				inScriptType = eNonHtmlScript;
 			else
 				inScriptType = eHtml;
-			if (foldHTMLPreprocessor) {
-				levelCurrent--;
-			}
 			scriptLanguage = beforeLanguage;
 			continue;
 		}
