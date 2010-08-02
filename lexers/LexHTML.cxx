@@ -615,7 +615,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	int lineCurrent = styler.GetLine(startPos);
 	int lineState;
 	if (lineCurrent > 0) {
-		lineState = styler.GetLineState(lineCurrent);
+		lineState = styler.GetLineState(lineCurrent-1);
 	} else {
 		// Default client and ASP scripting language is JavaScript
 		lineState = eScriptJS << 8;
@@ -798,8 +798,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				visibleChars = 0;
 				levelPrev = levelCurrent;
 			}
-			lineCurrent++;
-			lineStartVisibleChars = 0;
 			styler.SetLineState(lineCurrent,
 			                    ((inScriptType & 0x03) << 0) |
 			                    ((tagOpened & 0x01) << 2) |
@@ -807,6 +805,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			                    ((aspScript & 0x0F) << 4) |
 			                    ((clientScript & 0x0F) << 8) |
 			                    ((beforePreProc & 0xFF) << 12));
+			lineCurrent++;
+			lineStartVisibleChars = 0;
 		}
 
 		// Allow falling through to mako handling code if newline is going to end a block
