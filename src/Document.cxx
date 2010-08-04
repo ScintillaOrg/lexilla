@@ -843,7 +843,7 @@ void Document::DelCharBack(int pos) {
 	} else if (IsCrLf(pos - 2)) {
 		DeleteChars(pos - 2, 2);
 	} else if (dbcsCodePage) {
-		int startChar = MovePositionOutsideChar(pos - 1, -1, false);
+		int startChar = NextPosition(pos, -1);
 		DeleteChars(startChar, pos - startChar);
 	} else {
 		DeleteChars(pos - 1, 1);
@@ -936,7 +936,7 @@ int Document::GetColumn(int pos) {
 				return column;
 			} else {
 				column++;
-				i = MovePositionOutsideChar(i + 1, 1, false);
+				i = NextPosition(i, 1);
 			}
 		}
 	}
@@ -958,7 +958,7 @@ int Document::FindColumn(int line, int column) {
 				return position;
 			} else {
 				columnCurrent++;
-				position = MovePositionOutsideChar(position + 1, 1, false);
+				position = NextPosition(position, 1);
 			}
 		}
 	}
@@ -1821,9 +1821,8 @@ int Document::BraceMatch(int position, int /*maxReStyle*/) {
 	if (chBrace == '(' || chBrace == '[' || chBrace == '{' || chBrace == '<')
 		direction = 1;
 	int depth = 1;
-	position = position + direction;
+	position = NextPosition(position, direction);
 	while ((position >= 0) && (position < Length())) {
-		position = MovePositionOutsideChar(position, direction, true);
 		char chAtPos = CharAt(position);
 		char styAtPos = static_cast<char>(StyleAt(position) & stylingBitsMask);
 		if ((position > GetEndStyled()) || (styAtPos == styBrace)) {
@@ -1834,7 +1833,10 @@ int Document::BraceMatch(int position, int /*maxReStyle*/) {
 			if (depth == 0)
 				return position;
 		}
-		position = position + direction;
+		int positionBeforeMove = position;
+		position = NextPosition(position, direction);
+		if (position == positionBeforeMove)
+			break;
 	}
 	return - 1;
 }
