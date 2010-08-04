@@ -372,8 +372,6 @@ bool Document::IsCrLf(int pos) {
 	return (cb.CharAt(pos) == '\r') && (cb.CharAt(pos + 1) == '\n');
 }
 
-static const int maxBytesInDBCSCharacter=5;
-
 int Document::LenChar(int pos) {
 	if (pos < 0) {
 		return 1;
@@ -394,13 +392,7 @@ int Document::LenChar(int pos) {
 		else
 			return len;
 	} else if (dbcsCodePage) {
-		char mbstr[maxBytesInDBCSCharacter+1];
-		int i;
-		for (i=0; i<Platform::DBCSCharMaxLength(); i++) {
-			mbstr[i] = cb.CharAt(pos+i);
-		}
-		mbstr[i] = '\0';
-		return Platform::DBCSCharLength(dbcsCodePage, mbstr);
+		return IsDBCSLeadByte(cb.CharAt(pos)) ? 2 : 1;
 	} else {
 		return 1;
 	}
@@ -495,14 +487,7 @@ int Document::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
 			// not be a DBCS trail byte.
 			int posCheck = LineStart(LineFromPosition(pos));
 			while (posCheck < pos) {
-				char mbstr[maxBytesInDBCSCharacter+1];
-				int i;
-				for (i=0; i<Platform::DBCSCharMaxLength(); i++) {
-					mbstr[i] = cb.CharAt(posCheck+i);
-				}
-				mbstr[i] = '\0';
-
-				int mbsize = Platform::DBCSCharLength(dbcsCodePage, mbstr);
+				int mbsize = IsDBCSLeadByte(cb.CharAt(posCheck)) ? 2 : 1;
 				if (posCheck + mbsize == pos) {
 					return pos;
 				} else if (posCheck + mbsize > pos) {
@@ -525,7 +510,25 @@ int SCI_METHOD Document::CodePage() const {
 }
 
 bool SCI_METHOD Document::IsDBCSLeadByte(char ch) const {
-	return Platform::IsDBCSLeadByte(dbcsCodePage, ch);
+	// Byte ranges found in Wikipedia articles with relevant search strings in each case
+	unsigned char uch = static_cast<unsigned char>(ch);
+	switch (dbcsCodePage) {
+		case 932:
+			// Shift_jis
+			return ((uch >= 0x81) && (uch <= 0x9F)) ||
+				((uch >= 0xE0) && (uch <= 0xEF));
+		case 936:
+			// GBK
+			return (uch >= 0x81) && (uch <= 0xFE);
+		case 949:
+			// Korean EUC-KR
+			// There is also a code page 1361 for Korean Johab which appears to not be widely supported
+			return (uch >= 0x81) && (uch <= 0xFE);
+		case 950:
+			// Big5
+			return (uch >= 0x81) && (uch <= 0xFE);
+	}
+	return false;
 }
 
 void Document::ModifiedAt(int pos) {
