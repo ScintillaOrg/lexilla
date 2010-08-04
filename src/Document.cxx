@@ -505,6 +505,76 @@ int Document::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
 	return pos;
 }
 
+// NextPosition moves between valid positions - it can not handle a position in the middle of a 
+// multi-byte character. It is used to iterate through text more efficiently than MovePositionOutsideChar.
+int Document::NextPosition(int pos, int moveDir) {
+	// If out of range, just return minimum/maximum value.
+	int increment = (moveDir > 0) ? 1 : -1;
+	if (pos + increment <= 0)
+		return 0;
+	if (pos + increment >= Length())
+		return Length();
+
+	// PLATFORM_ASSERT(pos > 0 && pos < Length());
+	if (moveDir > 0) {
+		if (IsCrLf(pos))
+			return pos + 2;
+	} else {
+		if ((pos >= 2) && IsCrLf(pos-2))
+			return pos - 2;
+	}
+
+	// Not between CR and LF
+
+	if (dbcsCodePage) {
+		if (SC_CP_UTF8 == dbcsCodePage) {
+			pos += increment;
+			unsigned char ch = static_cast<unsigned char>(cb.CharAt(pos));
+			int startUTF = pos;
+			int endUTF = pos;
+			if (IsTrailByte(ch) && InGoodUTF8(pos, startUTF, endUTF)) {
+				// ch is a trail byte within a UTF-8 character
+				if (moveDir > 0)
+					pos = endUTF;
+				else
+					pos = startUTF;
+			}
+		} else {
+			if (moveDir > 0) {
+				int mbsize = IsDBCSLeadByte(cb.CharAt(pos)) ? 2 : 1;
+				pos += mbsize;
+				if (pos > Length())
+					pos = Length();
+			} else {
+				// Anchor DBCS calculations at start of line because start of line can
+				// not be a DBCS trail byte.
+				int posStartLine = LineStart(LineFromPosition(pos));
+				// See http://msdn.microsoft.com/en-us/library/cc194792%28v=MSDN.10%29.aspx
+				// http://msdn.microsoft.com/en-us/library/cc194790.aspx
+				if ((pos - 1) <= posStartLine) {
+					return posStartLine;
+				} else if (IsDBCSLeadByte(cb.CharAt(pos - 1))) {
+					// Must actually be trail byte
+					return pos - 2;
+				} else {
+					// Otherwise, step back until a non-lead-byte is found.
+					int posTemp = pos - 1;
+					while (posStartLine <= --posTemp && IsDBCSLeadByte(cb.CharAt(posTemp)))
+						;
+					// Now posTemp+1 must point to the beginning of a character,
+					// so figure out whether we went back an even or an odd
+					// number of bytes and go back 1 or 2 bytes, respectively.
+					return (pos - 1 - ((pos - posTemp) & 1));				
+				}
+			}
+		}
+	} else {
+		pos += increment;
+	}
+
+	return pos;
+}
+
 int SCI_METHOD Document::CodePage() const {
 	return dbcsCodePage;
 }
