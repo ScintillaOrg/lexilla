@@ -746,11 +746,11 @@ const char *CharacterSetID(int characterSet) {
 	case SC_CHARSET_EASTEUROPE:
 		return "ISO-8859-2";
 	case SC_CHARSET_GB2312:
-		return "GB2312";
+		return "CP936";
 	case SC_CHARSET_GREEK:
 		return "ISO-8859-7";
 	case SC_CHARSET_HANGUL:
-		return "";
+		return "CP949";
 	case SC_CHARSET_MAC:
 		return "MACINTOSH";
 	case SC_CHARSET_OEM:
@@ -766,7 +766,7 @@ const char *CharacterSetID(int characterSet) {
 	case SC_CHARSET_TURKISH:
 		return "ISO-8859-9";
 	case SC_CHARSET_JOHAB:
-		return "JOHAB";
+		return "CP1361";
 	case SC_CHARSET_HEBREW:
 		return "ISO-8859-8";
 	case SC_CHARSET_ARABIC:
