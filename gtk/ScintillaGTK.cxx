@@ -716,7 +716,7 @@ static char *ConvertText(int *lenResult, char *s, size_t len, const char *charSe
 		size_t conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
 		if (conversions == ((size_t)(-1))) {
 			if (!silent)
-				fprintf(stderr, "iconv %s->%s failed for %s\n", 
+				fprintf(stderr, "iconv %s->%s failed for %s\n",
 					charSetSource, charSetDest, static_cast<char *>(s));
 			delete []destForm;
 			destForm = 0;
@@ -881,7 +881,7 @@ bool ScintillaGTK::SetIdle(bool on) {
 		if (!idler.state) {
 			idler.state = true;
 			idler.idlerID = reinterpret_cast<IdlerID>(
-				g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, 
+				g_idle_add_full(G_PRIORITY_DEFAULT_IDLE,
 					reinterpret_cast<GSourceFunc>(IdleCallback), this, NULL));
 		}
 	} else {
@@ -2343,7 +2343,7 @@ void ScintillaGTK::QueueStyling(int upTo) {
 	if (!styleNeeded.active) {
 		// Only allow one style needed to be queued
 		styleNeeded.active = true;
-		g_idle_add_full(G_PRIORITY_HIGH_IDLE, 
+		g_idle_add_full(G_PRIORITY_HIGH_IDLE,
 			reinterpret_cast<GSourceFunc>(StyleIdle), this, NULL);
 	}
 }
