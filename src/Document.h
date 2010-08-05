@@ -231,6 +231,7 @@ public:
 	bool InGoodUTF8(int pos, int &start, int &end);
 	int MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd=true);
 	int NextPosition(int pos, int moveDir);
+	bool NextCharacter(int &pos, int moveDir);	// Returns true if pos changed
 	int SCI_METHOD CodePage() const;
 	bool SCI_METHOD IsDBCSLeadByte(char ch) const;
 

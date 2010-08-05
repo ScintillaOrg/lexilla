@@ -485,7 +485,16 @@ int Document::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
 		} else {
 			// Anchor DBCS calculations at start of line because start of line can
 			// not be a DBCS trail byte.
-			int posCheck = LineStart(LineFromPosition(pos));
+			int posStartLine = LineStart(LineFromPosition(pos));
+			if (pos == posStartLine)
+				return pos;
+
+			// Step back until a non-lead-byte is found.
+			int posCheck = pos;
+			while ((posCheck > posStartLine) && IsDBCSLeadByte(cb.CharAt(posCheck-1)))
+				posCheck--;
+
+			// Check from known start of character.
 			while (posCheck < pos) {
 				int mbsize = IsDBCSLeadByte(cb.CharAt(posCheck)) ? 2 : 1;
 				if (posCheck + mbsize == pos) {
@@ -575,6 +584,17 @@ int Document::NextPosition(int pos, int moveDir) {
 	return pos;
 }
 
+bool Document::NextCharacter(int &pos, int moveDir) {
+	// Returns true if pos changed
+	int posNext = NextPosition(pos, moveDir);
+	if (posNext == pos) {
+		return false;
+	} else {
+		pos = posNext;
+		return true;
+	}
+}
+
 int SCI_METHOD Document::CodePage() const {
 	return dbcsCodePage;
 }
@@ -598,7 +618,7 @@ bool SCI_METHOD Document::IsDBCSLeadByte(char ch) const {
 			return (uch >= 0x81) && (uch <= 0xFE);
 		case 1361:
 			// Korean Johab KS C-5601-1992
-			return 
+			return
 				((uch >= 0x84) && (uch <= 0xD3)) ||
 				((uch >= 0xD8) && (uch <= 0xDE)) ||
 				((uch >= 0xE0) && (uch <= 0xF9));
@@ -1316,13 +1336,8 @@ long Document::FindText(int minPos, int maxPos, const char *search,
 				if (found && MatchesWordOptions(word, wordStart, pos, lengthFind)) {
 					return pos;
 				}
-				pos += increment;
-				if (dbcsCodePage && (pos >= 0)) {
-					// Have to use >= 0 as otherwise next statement would change
-					// -1 to 0 and make loop infinite.
-					// Ensure trying to match from start of character
-					pos = MovePositionOutsideChar(pos, increment, false);
-				}
+				if (!NextCharacter(pos, increment))
+					break;
 			}
 		} else if (SC_CP_UTF8 == dbcsCodePage) {
 			const size_t maxBytesCharacter = 4;
@@ -1359,12 +1374,43 @@ long Document::FindText(int minPos, int maxPos, const char *search,
 				if (forward) {
 					pos += widthFirstCharacter;
 				} else {
-					pos--;
-					if (pos > 0) {
-						// Ensure trying to match from start of character
-						pos = MovePositionOutsideChar(pos, increment, false);
+					if (!NextCharacter(pos, increment))
+						break;
+				}
+			}
+		} else if (dbcsCodePage) {
+			const size_t maxBytesCharacter = 2;
+			const size_t maxFoldingExpansion = 4;
+			std::vector<char> searchThing(lengthFind * maxBytesCharacter * maxFoldingExpansion + 1);
+			const int lenSearch = pcf->Fold(&searchThing[0], searchThing.size(), search, lengthFind);
+			while (forward ? (pos < endSearch) : (pos >= endSearch)) {
+				int indexDocument = 0;
+				int indexSearch = 0;
+				bool characterMatches = true;
+				while (characterMatches &&
+					((pos + indexDocument) < limitPos) &&
+					(indexSearch < lenSearch)) {
+					char bytes[maxBytesCharacter + 1];
+					bytes[0] = cb.CharAt(pos + indexDocument);
+					const int widthChar = IsDBCSLeadByte(bytes[0]) ? 2 : 1;
+					if (widthChar == 2) 
+						bytes[1] = cb.CharAt(pos + indexDocument + 1);
+					char folded[maxBytesCharacter * maxFoldingExpansion + 1];
+					const int lenFlat = pcf->Fold(folded, sizeof(folded), bytes, widthChar);
+					folded[lenFlat] = 0;
+					// Does folded match the buffer
+					characterMatches = 0 == memcmp(folded, &searchThing[0] + indexSearch, lenFlat);
+					indexDocument += widthChar;
+					indexSearch += lenFlat;
+				}
+				if (characterMatches && (indexSearch == static_cast<int>(lenSearch))) {
+					if (MatchesWordOptions(word, wordStart, pos, indexDocument)) {
+						*length = indexDocument;
+						return pos;
 					}
 				}
+				if (!NextCharacter(pos, increment))
+					break;
 			}
 		} else {
 			CaseFolderTable caseFolder;
@@ -1381,11 +1427,8 @@ long Document::FindText(int minPos, int maxPos, const char *search,
 				if (found && MatchesWordOptions(word, wordStart, pos, lengthFind)) {
 					return pos;
 				}
-				pos += increment;
-				if (dbcsCodePage && (pos >= 0)) {
-					// Ensure trying to match from start of character
-					pos = MovePositionOutsideChar(pos, increment, false);
-				}
+				if (!NextCharacter(pos, increment))
+					break;
 			}
 		}
 	}
