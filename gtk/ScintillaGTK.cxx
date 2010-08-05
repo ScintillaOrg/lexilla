@@ -811,8 +811,7 @@ bool ScintillaGTK::ValidCodePage(int codePage) const {
 	|| codePage == 936
 	|| codePage == 949
 	|| codePage == 950
-	|| codePage == 1361
-	|| codePage == SC_CP_DBCS;
+	|| codePage == 1361;
 }
 
 sptr_t ScintillaGTK::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
