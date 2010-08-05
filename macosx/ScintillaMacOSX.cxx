@@ -434,7 +434,7 @@ void ScintillaMacOSX::StartDrag() {
     SelectionText selectedText;
     CopySelectionRange(&selectedText);
     PasteboardRef theClipboard;
-    SetPasteboardData(theClipboard, selectedText);
+    SetPasteboardData(theClipboard, selectedText, true);
     NewDragWithPasteboard( theClipboard, &inDrag);
     CFRelease( theClipboard );
 
@@ -639,7 +639,7 @@ bool ScintillaMacOSX::GetDragData(DragRef inDrag, PasteboardRef &pasteBoard,
     return GetPasteboardData(pasteBoard, selectedText, isFileURL);
 }
 
-void ScintillaMacOSX::SetPasteboardData(PasteboardRef &theClipboard, const SelectionText &selectedText)
+void ScintillaMacOSX::SetPasteboardData(PasteboardRef &theClipboard, const SelectionText &selectedText, bool inDragDropSession)
 {
     if (selectedText.len == 0)
         return;
@@ -649,7 +649,9 @@ void ScintillaMacOSX::SetPasteboardData(PasteboardRef &theClipboard, const Selec
     // Create a CFString from the ASCII/UTF8 data, convert it to UTF16
     CFStringRef string = CFStringCreateWithBytes( NULL, reinterpret_cast<UInt8*>( selectedText.s ), selectedText.len - 1, encoding, false );
 
-    PasteboardCreate( kPasteboardClipboard, &theClipboard );
+    PasteboardCreate((inDragDropSession
+                      ? kPasteboardUniqueName
+                      : kPasteboardClipboard), &theClipboard );
     PasteboardClear( theClipboard );
 
     CFDataRef data = NULL;
@@ -1477,7 +1479,7 @@ bool ScintillaMacOSX::AlwaysTrue()
 
 void ScintillaMacOSX::CopyToClipboard(const SelectionText &selectedText) {
     PasteboardRef theClipboard;
-    SetPasteboardData(theClipboard, selectedText);
+    SetPasteboardData(theClipboard, selectedText, false); // not in drag/drop
     // Done with the CFString
     CFRelease( theClipboard );
 }

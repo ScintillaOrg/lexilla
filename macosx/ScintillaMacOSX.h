@@ -118,7 +118,8 @@ private:
     bool GetPasteboardData(PasteboardRef &pasteBoard,
                            SelectionText *selectedText, bool *isFileURL);
     void SetPasteboardData(PasteboardRef &pasteBoard,
-                           const SelectionText &selectedText);
+                           const SelectionText &selectedText,
+                           bool inDragDropSession);
     char *GetStringFromCFString(CFStringRef &textString, int *textLen);
 
     // Drag and drop
