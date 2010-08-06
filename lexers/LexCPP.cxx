@@ -188,6 +188,7 @@ struct OptionsCPP {
 	bool identifiersAllowDollars;
 	bool trackPreprocessor;
 	bool updatePreprocessor;
+	bool fold;
 	bool foldComment;
 	bool foldCommentExplicit;
 	bool foldPreprocessor;
@@ -198,6 +199,7 @@ struct OptionsCPP {
 		identifiersAllowDollars = true;
 		trackPreprocessor = true;
 		updatePreprocessor = true;
+		fold = false;
 		foldComment = false;
 		foldCommentExplicit = true;
 		foldPreprocessor = false;
@@ -230,6 +232,8 @@ struct OptionSetCPP : public OptionSet<OptionsCPP> {
 
 		DefineProperty("lexer.cpp.update.preprocessor", &OptionsCPP::updatePreprocessor,
 			"Set to 1 to update preprocessor definitions when #define found.");
+
+		DefineProperty("fold", &OptionsCPP::fold);
 
 		DefineProperty("fold.comment", &OptionsCPP::foldComment,
 			"This option enables folding multi-line comments and explicit fold points when using the C++ lexer. "
@@ -799,6 +803,9 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 // and to make it possible to fiddle the current level for "} else {".
 
 void SCI_METHOD LexerCPP::Fold(unsigned int startPos, int length, int initStyle, IDocument *pAccess) {
+
+	if (!options.fold)
+		return;
 
 	LexAccessor styler(pAccess);
 
