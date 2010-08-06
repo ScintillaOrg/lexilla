@@ -1437,7 +1437,10 @@ long Document::FindText(int minPos, int maxPos, const char *search,
 }
 
 const char *Document::SubstituteByPosition(const char *text, int *length) {
-	return regex->SubstituteByPosition(this, text, length);
+	if (regex)
+		return regex->SubstituteByPosition(this, text, length);
+	else
+		return 0;
 }
 
 int Document::LinesTotal() const {
