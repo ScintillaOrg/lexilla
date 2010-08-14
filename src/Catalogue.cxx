@@ -29,6 +29,7 @@ static std::vector<LexerModule *> lexerCatalogue;
 static int nextLanguage = SCLEX_AUTOMATIC+1;
 
 const LexerModule *Catalogue::Find(int language) {
+	Scintilla_LinkLexers();
 	for (std::vector<LexerModule *>::iterator it=lexerCatalogue.begin();
 		it != lexerCatalogue.end(); ++it) {
 		if ((*it)->GetLanguage() == language) {
@@ -39,6 +40,7 @@ const LexerModule *Catalogue::Find(int language) {
 }
 
 const LexerModule *Catalogue::Find(const char *languageName) {
+	Scintilla_LinkLexers();
 	if (languageName) {
 		for (std::vector<LexerModule *>::iterator it=lexerCatalogue.begin();
 			it != lexerCatalogue.end(); ++it) {
