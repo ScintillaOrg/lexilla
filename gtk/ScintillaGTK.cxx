@@ -258,7 +258,7 @@ private:
 	static gboolean IdleCallback(ScintillaGTK *sciThis);
 	static gboolean StyleIdle(ScintillaGTK *sciThis);
 	virtual void QueueStyling(int upTo);
-	static void PopUpCB(ScintillaGTK *sciThis, guint action, GtkWidget *widget);
+	static void PopUpCB(GtkMenuItem *menuItem, ScintillaGTK *sciThis);
 
 	gint ExposeTextThis(GtkWidget *widget, GdkEventExpose *ose);
 	static gint ExposeText(GtkWidget *widget, GdkEventExpose *ose, ScintillaGTK *sciThis);
@@ -376,7 +376,7 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	gdk_window_set_user_data(widget->window, widget);
 	gdk_window_set_background(widget->window, &widget->style->bg[GTK_STATE_NORMAL]);
 	gdk_window_show(widget->window);
-	gdk_cursor_destroy(cursor);
+	gdk_cursor_unref(cursor);
 	widget->style = gtk_style_attach(widget->style, widget->window);
 	wPreedit = gtk_window_new(GTK_WINDOW_POPUP);
 	wPreeditDraw = gtk_drawing_area_new();
@@ -620,8 +620,7 @@ void ScintillaGTK::Initialise() {
 	gtk_widget_set_events(widtxt, GDK_EXPOSURE_MASK);
 	// Avoid background drawing flash
 	gtk_widget_set_double_buffered(widtxt, FALSE);
-	gtk_drawing_area_size(GTK_DRAWING_AREA(widtxt),
-	                      100,100);
+	gtk_widget_set_size_request(widtxt, 100, 100);
 	adjustmentv = gtk_adjustment_new(0.0, 0.0, 201.0, 1.0, 20.0, 20.0);
 	scrollbarv = gtk_vscrollbar_new(GTK_ADJUSTMENT(adjustmentv));
 	GTK_WIDGET_UNSET_FLAGS(PWidget(scrollbarv), GTK_CAN_FOCUS);
@@ -866,9 +865,9 @@ void ScintillaGTK::SetTicking(bool on) {
 	if (timer.ticking != on) {
 		timer.ticking = on;
 		if (timer.ticking) {
-			timer.tickerID = reinterpret_cast<TickerID>(gtk_timeout_add(timer.tickSize, (GtkFunction)TimeOut, this));
+			timer.tickerID = reinterpret_cast<TickerID>(g_timeout_add(timer.tickSize, (GtkFunction)TimeOut, this));
 		} else {
-			gtk_timeout_remove(GPOINTER_TO_UINT(timer.tickerID));
+			g_source_remove(GPOINTER_TO_UINT(timer.tickerID));
 		}
 	}
 	timer.ticksToWait = caret.period;
@@ -1281,8 +1280,7 @@ void ScintillaGTK::CreateCallTipWindow(PRectangle rc) {
 		gtk_widget_set_events(widcdrw,
 			GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
 	}
-	gtk_drawing_area_size(GTK_DRAWING_AREA(PWidget(ct.wDraw)),
-	                      rc.Width(), rc.Height());
+	gtk_widget_set_size_request(PWidget(ct.wDraw), rc.Width(), rc.Height());
 	ct.wDraw.Show();
 	if (PWidget(ct.wCallTip)->window) {
 		gdk_window_resize(PWidget(ct.wCallTip)->window, rc.Width(), rc.Height());
@@ -1290,24 +1288,18 @@ void ScintillaGTK::CreateCallTipWindow(PRectangle rc) {
 }
 
 void ScintillaGTK::AddToPopUp(const char *label, int cmd, bool enabled) {
-	char fulllabel[200];
-	strcpy(fulllabel, "/");
-	strcat(fulllabel, label);
-	GtkItemFactoryCallback menuSig = GtkItemFactoryCallback(PopUpCB);
-	GtkItemFactoryEntry itemEntry = {
-	    fulllabel, NULL,
-	    menuSig,
-	    cmd,
-	    const_cast<gchar *>(label[0] ? "<Item>" : "<Separator>"),
-	    NULL
-	};
-	gtk_item_factory_create_item(GTK_ITEM_FACTORY(popup.GetID()),
-	                             &itemEntry, this, 1);
+	GtkWidget *menuItem;
+	if (label[0])
+		menuItem = gtk_menu_item_new_with_label(label);
+	else
+		menuItem = gtk_separator_menu_item_new();
+	gtk_menu_shell_append(GTK_MENU_SHELL(popup.GetID()), menuItem);
+	g_object_set_data(G_OBJECT(menuItem), "CmdNum", reinterpret_cast<void *>(cmd));
+	g_signal_connect(G_OBJECT(menuItem),"activate", G_CALLBACK(PopUpCB), this);
+
 	if (cmd) {
-		GtkWidget *item = gtk_item_factory_get_widget_by_action(
-		                      reinterpret_cast<GtkItemFactory *>(popup.GetID()), cmd);
-		if (item)
-			gtk_widget_set_sensitive(item, enabled);
+		if (menuItem)
+			gtk_widget_set_sensitive(menuItem, enabled);
 	}
 }
 
@@ -1966,8 +1958,8 @@ gboolean ScintillaGTK::ExposePreeditThis(GtkWidget *widget, GdkEventExpose *ose)
 		GdkColor color[2] = {   {0, 0x0000, 0x0000, 0x0000},
 			{0, 0xffff, 0xffff, 0xffff}
 		};
-		gdk_color_alloc(gdk_colormap_get_system(), color);
-		gdk_color_alloc(gdk_colormap_get_system(), color + 1);
+		gdk_colormap_alloc_color(gdk_colormap_get_system(), color, FALSE, TRUE);
+		gdk_colormap_alloc_color(gdk_colormap_get_system(), color + 1, FALSE, TRUE);
 
 		gdk_gc_set_foreground(gc, color + 1);
 		gdk_draw_rectangle(widget->window, gc, TRUE, ose->area.x, ose->area.y,
@@ -1977,7 +1969,7 @@ gboolean ScintillaGTK::ExposePreeditThis(GtkWidget *widget, GdkEventExpose *ose)
 		gdk_gc_set_background(gc, color + 1);
 		gdk_draw_layout(widget->window, gc, 0, 0, layout);
 
-		gdk_gc_unref(gc);
+		g_object_unref(gc);
 		g_free(str);
 		pango_attr_list_unref(attrs);
 		g_object_unref(layout);
@@ -2386,7 +2378,8 @@ void ScintillaGTK::QueueStyling(int upTo) {
 	}
 }
 
-void ScintillaGTK::PopUpCB(ScintillaGTK *sciThis, guint action, GtkWidget *) {
+void ScintillaGTK::PopUpCB(GtkMenuItem *menuItem, ScintillaGTK *sciThis) {
+	guint action = (sptr_t)(g_object_get_data(G_OBJECT(menuItem), "CmdNum"));
 	if (action) {
 		sciThis->Command(action);
 	}

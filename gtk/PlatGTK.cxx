@@ -803,11 +803,11 @@ void SurfaceImpl::Release() {
 	drawable = 0;
 	if (createdGC) {
 		createdGC = false;
-		gdk_gc_unref(gc);
+		g_object_unref(gc);
 	}
 	gc = 0;
 	if (ppixmap)
-		gdk_pixmap_unref(ppixmap);
+		g_object_unref(ppixmap);
 	ppixmap = 0;
 	if (layout)
 		g_object_unref(layout);
@@ -954,7 +954,7 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 			int widthx = (xTile + widthPat > rc.right) ? rc.right - xTile : widthPat;
 			for (int yTile = rc.top; yTile < rc.bottom; yTile += heightPat) {
 				int heighty = (yTile + heightPat > rc.bottom) ? rc.bottom - yTile : heightPat;
-				gdk_draw_pixmap(drawable,
+				gdk_draw_drawable(drawable,
 				                gc,
 				                static_cast<SurfaceImpl &>(surfacePattern).drawable,
 				                0, 0,
@@ -1080,7 +1080,7 @@ void SurfaceImpl::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated b
 
 void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	if (static_cast<SurfaceImpl &>(surfaceSource).drawable) {
-		gdk_draw_pixmap(drawable,
+		gdk_draw_drawable(drawable,
 		                gc,
 		                static_cast<SurfaceImpl &>(surfaceSource).drawable,
 		                from.x, from.y,
@@ -1755,7 +1755,7 @@ void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
 
 	gtk_window_move(GTK_WINDOW(PWidget(wid)), ox, oy);
 
-	gtk_widget_set_usize(PWidget(wid), sizex, sizey);
+	gtk_widget_set_size_request(PWidget(wid), sizex, sizey);
 }
 
 PRectangle Window::GetClientPosition() {
@@ -1821,7 +1821,7 @@ void Window::SetCursor(Cursor curs) {
 
 	if (PWidget(wid)->window)
 		gdk_window_set_cursor(PWidget(wid)->window, gdkCurs);
-	gdk_cursor_destroy(gdkCurs);
+	gdk_cursor_unref(gdkCurs);
 }
 
 void Window::SetTitle(const char *s) {
@@ -1864,7 +1864,7 @@ struct ListImage {
 static void list_image_free(gpointer, gpointer value, gpointer) {
 	ListImage *list_image = (ListImage *) value;
 	if (list_image->pixbuf)
-		gdk_pixbuf_unref (list_image->pixbuf);
+		g_object_unref (list_image->pixbuf);
 	g_free(list_image);
 }
 
@@ -2070,14 +2070,14 @@ PRectangle ListBoxX::GetDesiredRect() {
 		height = (rows * row_height
 		          + 2 * (ythickness
 		                 + GTK_CONTAINER(PWidget(list))->border_width + 1));
-		gtk_widget_set_usize(GTK_WIDGET(PWidget(list)), -1, height);
+		gtk_widget_set_size_request(GTK_WIDGET(PWidget(list)), -1, height);
 
 		// Get the size of the scroller because we set usize on the window
 		gtk_widget_size_request(GTK_WIDGET(scroller), &req);
 		rc.right = req.width;
 		rc.bottom = req.height;
 
-		gtk_widget_set_usize(GTK_WIDGET(list), -1, -1);
+		gtk_widget_set_size_request(GTK_WIDGET(list), -1, -1);
 		int width = maxItemCharacters;
 		if (width < 12)
 			width = 12;
@@ -2117,7 +2117,7 @@ static void init_pixmap(ListImage *list_image) {
 
 	// Drop any existing pixmap/bitmap as data may have changed
 	if (list_image->pixbuf)
-		gdk_pixbuf_unref(list_image->pixbuf);
+		g_object_unref(list_image->pixbuf);
 	list_image->pixbuf =
 		gdk_pixbuf_new_from_xpm_data((const gchar**)xpm_lineform);
 	delete []xpm_lineformfromtext;
@@ -2293,7 +2293,7 @@ void ListBoxX::RegisterImage(int type, const char *xpm_data) {
 	if (list_image) {
 		// Drop icon already registered
 		if (list_image->pixbuf)
-			gdk_pixbuf_unref(list_image->pixbuf);
+			g_object_unref(list_image->pixbuf);
 		list_image->pixbuf = NULL;
 		list_image->xpm_data = xpm_data;
 	} else {
@@ -2342,7 +2342,13 @@ Menu::Menu() : mid(0) {}
 
 void Menu::CreatePopUp() {
 	Destroy();
-	mid = gtk_item_factory_new(GTK_TYPE_MENU, "<main>", NULL);
+	mid = gtk_menu_new();
+#if GLIB_CHECK_VERSION(2,10,0)
+	 g_object_ref_sink(G_OBJECT(mid));
+#else
+	g_object_ref(G_OBJECT(mid));
+	gtk_object_sink(GTK_OBJECT(G_OBJECT(mid)));
+#endif
 }
 
 void Menu::Destroy() {
@@ -2351,21 +2357,27 @@ void Menu::Destroy() {
 	mid = 0;
 }
 
+static void  MenuPositionFunc(GtkMenu *, gint *x, gint *y, gboolean *, gpointer userData) {
+	sptr_t intFromPointer = reinterpret_cast<sptr_t>(userData);
+	*x = intFromPointer & 0xffff;
+	*y = intFromPointer >> 16;
+}
+
 void Menu::Show(Point pt, Window &) {
 	int screenHeight = gdk_screen_height();
 	int screenWidth = gdk_screen_width();
-	GtkItemFactory *factory = reinterpret_cast<GtkItemFactory *>(mid);
-	GtkWidget *widget = gtk_item_factory_get_widget(factory, "<main>");
-	gtk_widget_show_all(widget);
+	GtkMenu *widget = reinterpret_cast<GtkMenu *>(mid);
+	gtk_widget_show_all(GTK_WIDGET(widget));
 	GtkRequisition requisition;
-	gtk_widget_size_request(widget, &requisition);
+	gtk_widget_size_request(GTK_WIDGET(widget), &requisition);
 	if ((pt.x + requisition.width) > screenWidth) {
 		pt.x = screenWidth - requisition.width;
 	}
 	if ((pt.y + requisition.height) > screenHeight) {
 		pt.y = screenHeight - requisition.height;
 	}
-	gtk_item_factory_popup(factory, pt.x - 4, pt.y - 4, 3,
+	gtk_menu_popup(widget, NULL, NULL, MenuPositionFunc,
+		reinterpret_cast<void *>((pt.y << 16) | pt.x), 0,
 		gtk_get_current_event_time());
 }
 
