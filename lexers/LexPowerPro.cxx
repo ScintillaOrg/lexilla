@@ -114,7 +114,7 @@ static bool IsFunction(Accessor &styler, unsigned int currentPos) {
 	//make sure that there are only spaces (or tabs) between the beginning
 	//of the line and the function declaration
 	position = currentPos - numberOfCharacters - 1; 		//-1 to move to char before 'function'
-	for (unsigned int i = 0; i < 16; i++) {					//check up to 16 preceeding characters
+	for (unsigned int j = 0; j < 16; j++) {					//check up to 16 preceeding characters
 		char c = styler.SafeGetCharAt(position--, '\0');	//if can't read char, return NUL (past beginning of document)
 		if (c <= 0)	//reached beginning of document
 			return true;
