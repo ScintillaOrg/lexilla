@@ -65,6 +65,16 @@
 
 #include "Converter.h"
 
+#if GTK_CHECK_VERSION(2,20,0)
+#define IS_WIDGET_REALIZED(w) (gtk_widget_get_realized(GTK_WIDGET(w)))
+#define IS_WIDGET_MAPPED(w) (gtk_widget_get_mapped(GTK_WIDGET(w)))
+#define IS_WIDGET_VISIBLE(w) (gtk_widget_get_visible(GTK_WIDGET(w)))
+#else
+#define IS_WIDGET_REALIZED(w) (GTK_WIDGET_REALIZED(w))
+#define IS_WIDGET_MAPPED(w) (GTK_WIDGET_MAPPED(w))
+#define IS_WIDGET_VISIBLE(w) (GTK_WIDGET_VISIBLE(w))
+#endif
+
 #ifdef _MSC_VER
 // Constant conditional expressions are because of GTK+ headers
 #pragma warning(disable: 4127)
@@ -410,7 +420,7 @@ void ScintillaGTK::Realize(GtkWidget *widget) {
 
 void ScintillaGTK::UnRealizeThis(GtkWidget *widget) {
 	try {
-		if (GTK_WIDGET_MAPPED(widget)) {
+		if (IS_WIDGET_MAPPED(widget)) {
 			gtk_widget_unmap(widget);
 		}
 		GTK_WIDGET_UNSET_FLAGS(widget, GTK_REALIZED);
@@ -437,8 +447,8 @@ void ScintillaGTK::UnRealize(GtkWidget *widget) {
 
 static void MapWidget(GtkWidget *widget) {
 	if (widget &&
-	        GTK_WIDGET_VISIBLE(widget) &&
-	        !GTK_WIDGET_MAPPED(widget)) {
+	        IS_WIDGET_VISIBLE(widget) &&
+	        !IS_WIDGET_MAPPED(widget)) {
 		gtk_widget_map(widget);
 	}
 }
@@ -567,7 +577,7 @@ void ScintillaGTK::SizeAllocate(GtkWidget *widget, GtkAllocation *allocation) {
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	try {
 		widget->allocation = *allocation;
-		if (GTK_WIDGET_REALIZED(widget))
+		if (IS_WIDGET_REALIZED(widget))
 			gdk_window_move_resize(widget->window,
 			        widget->allocation.x,
 			        widget->allocation.y,
@@ -1301,7 +1311,7 @@ bool ScintillaGTK::OwnPrimarySelection() {
 void ScintillaGTK::ClaimSelection() {
 	// X Windows has a 'primary selection' as well as the clipboard.
 	// Whenever the user selects some text, we become the primary selection
-	if (!sel.Empty() && GTK_WIDGET_REALIZED(GTK_WIDGET(PWidget(wMain)))) {
+	if (!sel.Empty() && IS_WIDGET_REALIZED(GTK_WIDGET(PWidget(wMain)))) {
 		primarySelection = true;
 		gtk_selection_owner_set(GTK_WIDGET(PWidget(wMain)),
 		                        GDK_SELECTION_PRIMARY, GDK_CURRENT_TIME);
@@ -1560,7 +1570,7 @@ void ScintillaGTK::Resize(int width, int height) {
 	} else {
 		gtk_widget_hide(GTK_WIDGET(PWidget(scrollbarv)));
 	}
-	if (GTK_WIDGET_MAPPED(PWidget(wMain))) {
+	if (IS_WIDGET_MAPPED(PWidget(wMain))) {
 		ChangeSize();
 	}
 

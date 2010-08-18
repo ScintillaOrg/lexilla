@@ -33,6 +33,12 @@
 
 #include "Converter.h"
 
+#if GTK_CHECK_VERSION(2,20,0)
+#define IS_WIDGET_FOCUSSED(w) (gtk_widget_has_focus(GTK_WIDGET(w)))
+#else
+#define IS_WIDGET_FOCUSSED(w) (GTK_WIDGET_HAS_FOCUS(w))
+#endif
+
 #ifdef _MSC_VER
 // Ignore unreferenced local functions in GTK+ headers
 #pragma warning(disable: 4505)
@@ -1741,7 +1747,7 @@ void Window::Destroy() {
 }
 
 bool Window::HasFocus() {
-	return GTK_WIDGET_HAS_FOCUS(wid);
+	return IS_WIDGET_FOCUSSED(wid);
 }
 
 PRectangle Window::GetPosition() {
