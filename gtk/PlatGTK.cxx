@@ -121,8 +121,10 @@ public:
 		ResetWidths(et);
 	}
 	~FontHandle() {
+#ifndef DISABLE_GDK_FONT
 		if (pfont)
 			gdk_font_unref(pfont);
+#endif
 		pfont = 0;
 		if (pfd)
 			pango_font_description_free(pfd);
@@ -267,6 +269,8 @@ void Palette::Allocate(Window &w) {
 	delete []successPalette;
 }
 
+#ifndef DISABLE_GDK_FONT
+
 static const char *CharacterSetName(int characterSet) {
 	switch (characterSet) {
 	case SC_CHARSET_ANSI:
@@ -373,6 +377,8 @@ static void GenerateFontSpecStrings(const char *fontName, int characterSet,
 		strncpy(charset, CharacterSetName(characterSet), charset_len - 1);
 	}
 }
+
+#endif
 
 static void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, int size, bool bold, bool italic) {
 	memset(&lf, 0, sizeof(lf));
@@ -481,6 +487,7 @@ void FontCached::ReleaseId(FontID fid_) {
 	FontMutexUnlock();
 }
 
+#ifndef DISABLE_GDK_FONT
 static GdkFont *LoadFontOrSet(const char *fontspec, int characterSet) {
 	if (IsDBCSCharacterSet(characterSet)) {
 		return gdk_fontset_load(fontspec);
@@ -488,6 +495,7 @@ static GdkFont *LoadFontOrSet(const char *fontspec, int characterSet) {
 		return gdk_font_load(fontspec);
 	}
 }
+#endif
 
 FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
                                  int size, bool bold, bool italic) {
@@ -513,6 +521,7 @@ FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
 		}
 	}
 
+#ifndef DISABLE_GDK_FONT
 	GdkFont *newid = 0;
 	// If name of the font begins with a '-', assume, that it is
 	// a full fontspec.
@@ -598,7 +607,6 @@ FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
 		newid = gdk_fontset_load(fontset);
 		if (newid)
 			return new FontHandle(newid);
-
 		// if fontset load failed, fall through, we'll use
 		// the last font entry and continue to try and
 		// get something that matches
@@ -647,6 +655,9 @@ FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
 			characterSet);
 	}
 	return new FontHandle(newid);
+#else
+	return new FontHandle(0);
+#endif
 }
 
 Font::Font() : fid(0) {}
@@ -1089,6 +1100,7 @@ void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	}
 }
 
+#ifndef DISABLE_GDK_FONT
 static size_t UTF8Len(char ch) {
 	unsigned char uch = static_cast<unsigned char>(ch);
 	if (uch < 0x80)
@@ -1098,6 +1110,7 @@ static size_t UTF8Len(char ch) {
 	else
 		return 3;
 }
+#endif
 
 char *UTF8FromLatin1(const char *s, int &len) {
 	char *utfForm = new char[len*2+1];
@@ -1151,6 +1164,7 @@ static size_t MultiByteLenFromIconv(const Converter &conv, const char *s, size_t
 	return 1;
 }
 
+#ifndef DISABLE_GDK_FONT
 static char *UTF8FromGdkWChar(GdkWChar *wctext, int wclen) {
 	char *utfForm = new char[wclen*3+1];	// Maximum of 3 UTF-8 bytes per character
 	size_t lenU = 0;
@@ -1170,8 +1184,10 @@ static char *UTF8FromGdkWChar(GdkWChar *wctext, int wclen) {
 	utfForm[lenU] = '\0';
 	return utfForm;
 }
+#endif
 
 static char *UTF8FromDBCS(const char *s, int &len) {
+#ifndef DISABLE_GDK_FONT
 	GdkWChar *wctext = new GdkWChar[len + 1];
 	GdkWChar *wcp = wctext;
 	int wclen = gdk_mbstowcs(wcp, s, len);
@@ -1186,6 +1202,9 @@ static char *UTF8FromDBCS(const char *s, int &len) {
 	delete []wctext;
 	len = strlen(utfForm);
 	return utfForm;
+#else
+	return 0;
+#endif
 }
 
 static size_t UTF8CharLength(const char *s) {
@@ -1244,6 +1263,7 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 			}
 			return;
 		}
+#ifndef DISABLE_GDK_FONT
 		// Draw text as a series of segments to avoid limitations in X servers
 		const int segmentLength = 1000;
 		bool draw8bit = true;
@@ -1291,6 +1311,7 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 				s += lenDraw;
 			}
 		}
+#endif
 	}
 }
 
@@ -1354,7 +1375,6 @@ public:
 
 void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positions) {
 	if (font_.GetID()) {
-		int totalWidth = 0;
 		const int lenPositions = len;
 		if (PFont(font_)->pfd) {
 			if (len == 1) {
@@ -1453,6 +1473,8 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 			}
 			return;
 		}
+#ifndef DISABLE_GDK_FONT
+		int totalWidth = 0;
 		GdkFont *gf = PFont(font_)->pfont;
 		bool measure8bit = true;
 		if (et != singleByte) {
@@ -1503,6 +1525,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 				positions[i] = totalWidth;
 			}
 		}
+#endif
 	} else {
 		// No font so return an ascending range of values
 		for (int i = 0; i < len; i++) {
@@ -1547,6 +1570,7 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 			}
 			return PANGO_PIXELS(pos.width);
 		}
+#ifndef DISABLE_GDK_FONT
 		if (et == UTF8) {
 			GdkWChar wctext[maxLengthTextRun];
 			size_t wclen = UTF16FromUTF8(s, len, static_cast<wchar_t *>(static_cast<void *>(wctext)),
@@ -1556,6 +1580,9 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 		} else {
 			return gdk_text_width(PFont(font_)->pfont, s, len);
 		}
+#else
+		return 1;
+#endif
 	} else {
 		return 1;
 	}
@@ -1566,7 +1593,11 @@ int SurfaceImpl::WidthChar(Font &font_, char ch) {
 		if (PFont(font_)->pfd) {
 			return WidthText(font_, &ch, 1);
 		}
+#ifndef DISABLE_GDK_FONT
 		return gdk_char_width(PFont(font_)->pfont, ch);
+#else
+		return 1;
+#endif
 	} else {
 		return 1;
 	}
@@ -1603,9 +1634,11 @@ int SurfaceImpl::Ascent(Font &font_) {
 		pango_font_metrics_unref(metrics);
 		ascent = PFont(font_)->ascent;
 	}
+#ifndef DISABLE_GDK_FONT
 	if ((ascent == 0) && (PFont(font_)->pfont)) {
 		ascent = PFont(font_)->pfont->ascent;
 	}
+#endif
 	if (ascent == 0) {
 		ascent = 1;
 	}
@@ -1637,7 +1670,11 @@ int SurfaceImpl::Descent(Font &font_) {
 		pango_font_metrics_unref(metrics);
 		return descent;
 	}
+#ifndef DISABLE_GDK_FONT
 	return PFont(font_)->pfont->descent;
+#else
+	return 0;
+#endif
 #else
 
 	gint lbearing;
