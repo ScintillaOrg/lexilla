@@ -2191,7 +2191,10 @@ gint ScintillaGTK::SelectionClear(GtkWidget *widget, GdkEventSelection *selectio
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	//Platform::DebugPrintf("Selection clear\n");
 	sciThis->UnclaimSelection(selection_event);
-	return gtk_selection_clear(widget, selection_event);
+	if (GTK_WIDGET_CLASS(sciThis->parentClass)->selection_clear_event) {
+		return GTK_WIDGET_CLASS(sciThis->parentClass)->selection_clear_event(widget, selection_event);
+	}
+	return TRUE;
 }
 
 void ScintillaGTK::DragBegin(GtkWidget *, GdkDragContext *) {
