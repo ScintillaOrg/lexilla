@@ -584,7 +584,7 @@ void ScintillaGTK::SizeAllocate(GtkWidget *widget, GtkAllocation *allocation) {
 void ScintillaGTK::Initialise() {
 	//Platform::DebugPrintf("ScintillaGTK::Initialise\n");
 	parentClass = reinterpret_cast<GtkWidgetClass *>(
-	                  gtk_type_class(gtk_container_get_type()));
+	                  g_type_class_ref(gtk_container_get_type()));
 
 	GTK_WIDGET_SET_FLAGS(PWidget(wMain), GTK_CAN_FOCUS);
 	GTK_WIDGET_SET_FLAGS(GTK_WIDGET(PWidget(wMain)), GTK_SENSITIVE);
