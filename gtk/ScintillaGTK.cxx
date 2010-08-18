@@ -204,7 +204,6 @@ private:
 	static void Map(GtkWidget *widget);
 	void UnMapThis();
 	static void UnMap(GtkWidget *widget);
-	static gint CursorMoved(GtkWidget *widget, int xoffset, int yoffset, ScintillaGTK *sciThis);
 	gint FocusInThis(GtkWidget *widget);
 	static gint FocusIn(GtkWidget *widget, GdkEventFocus *event);
 	gint FocusOutThis(GtkWidget *widget);
@@ -501,16 +500,6 @@ void ScintillaGTK::MainForAll(GtkContainer *container, gboolean include_internal
 	if (callback != NULL && include_internals) {
 		sciThis->ForAll(callback, callback_data);
 	}
-}
-
-gint ScintillaGTK::CursorMoved(GtkWidget *, int xoffset, int yoffset, ScintillaGTK *sciThis) {
-	GdkRectangle area;
-	area.x = xoffset;
-	area.y = yoffset;
-	area.width = 1;
-	area.height = 1;
-	gtk_im_context_set_cursor_location(sciThis->im_context, &area);
-	return FALSE;
 }
 
 gint ScintillaGTK::FocusInThis(GtkWidget *widget) {
@@ -2086,36 +2075,6 @@ void ScintillaGTK::Destroy(GObject *object) {
 		scio->pscin = 0;
 	} catch (...) {
 		// Its dead so nowhere to save the status
-	}
-}
-
-static void DrawChild(GtkWidget *widget, GdkRectangle *area) {
-	GdkRectangle areaIntersect;
-	if (widget &&
-	        GTK_WIDGET_DRAWABLE(widget) &&
-	        gtk_widget_intersect(widget, area, &areaIntersect)) {
-		gtk_widget_draw(widget, &areaIntersect);
-	}
-}
-
-void ScintillaGTK::Draw(GtkWidget *widget, GdkRectangle *area) {
-	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
-	try {
-		//Platform::DebugPrintf("Draw %p %0d,%0d %0d,%0d\n", widget, area->x, area->y, area->width, area->height);
-		PRectangle rcPaint(area->x, area->y, area->x + area->width, area->y + area->height);
-		sciThis->SyncPaint(rcPaint);
-		if (GTK_WIDGET_DRAWABLE(PWidget(sciThis->wMain))) {
-			DrawChild(PWidget(sciThis->scrollbarh), area);
-			DrawChild(PWidget(sciThis->scrollbarv), area);
-		}
-
-		Point pt = sciThis->PointMainCaret();
-		pt.y += sciThis->vs.lineHeight - 2;
-		if (pt.x < 0) pt.x = 0;
-		if (pt.y < 0) pt.y = 0;
-		CursorMoved(widget, pt.x, pt.y, sciThis);
-	} catch (...) {
-		sciThis->errorStatus = SC_STATUS_FAILURE;
 	}
 }
 
