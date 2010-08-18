@@ -505,17 +505,6 @@ static GdkFont *LoadFontOrSet(const char *fontspec, int characterSet) {
 
 FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
                                  int size, bool bold, bool italic) {
-	char fontset[1024];
-	char fontspec[300];
-	char foundary[50];
-	char faceName[100];
-	char charset[50];
-	fontset[0] = '\0';
-	fontspec[0] = '\0';
-	foundary[0] = '\0';
-	faceName[0] = '\0';
-	charset[0] = '\0';
-
 	if (fontName[0] == '!') {
 		PangoFontDescription *pfd = pango_font_description_new();
 		if (pfd) {
@@ -528,6 +517,17 @@ FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
 	}
 
 #ifndef DISABLE_GDK_FONT
+	char fontset[1024];
+	char fontspec[300];
+	char foundary[50];
+	char faceName[100];
+	char charset[50];
+	fontset[0] = '\0';
+	fontspec[0] = '\0';
+	foundary[0] = '\0';
+	faceName[0] = '\0';
+	charset[0] = '\0';
+
 	GdkFont *newid = 0;
 	// If name of the font begins with a '-', assume, that it is
 	// a full fontspec.
