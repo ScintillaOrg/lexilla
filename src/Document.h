@@ -254,7 +254,7 @@ public:
 	void AddUndoAction(int token, bool mayCoalesce) { cb.AddUndoAction(token, mayCoalesce); }
 	void SetSavePoint();
 	bool IsSavePoint() { return cb.IsSavePoint(); }
-	const char *BufferPointer() { return cb.BufferPointer(); }
+	const char * SCI_METHOD BufferPointer() { return cb.BufferPointer(); }
 
 	int GetLineIndentation(int line);
 	void SetLineIndentation(int line, int indent);

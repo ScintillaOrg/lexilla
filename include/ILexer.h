@@ -41,6 +41,7 @@ public:
 	virtual void SCI_METHOD ChangeLexerState(int start, int end) = 0;
 	virtual int SCI_METHOD CodePage() const = 0;
 	virtual bool SCI_METHOD IsDBCSLeadByte(char ch) const = 0;
+	virtual const char * SCI_METHOD BufferPointer() = 0;
 };
 
 enum { lvOriginal=0 };
