@@ -514,7 +514,7 @@ int Document::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
 	return pos;
 }
 
-// NextPosition moves between valid positions - it can not handle a position in the middle of a 
+// NextPosition moves between valid positions - it can not handle a position in the middle of a
 // multi-byte character. It is used to iterate through text more efficiently than MovePositionOutsideChar.
 int Document::NextPosition(int pos, int moveDir) {
 	// If out of range, just return minimum/maximum value.
@@ -573,7 +573,7 @@ int Document::NextPosition(int pos, int moveDir) {
 					// Now posTemp+1 must point to the beginning of a character,
 					// so figure out whether we went back an even or an odd
 					// number of bytes and go back 1 or 2 bytes, respectively.
-					return (pos - 1 - ((pos - posTemp) & 1));				
+					return (pos - 1 - ((pos - posTemp) & 1));
 				}
 			}
 		}
@@ -900,7 +900,7 @@ static void CreateIndentation(char *linebuf, int length, int indent, int tabSize
 	*linebuf = '\0';
 }
 
-int Document::GetLineIndentation(int line) {
+int SCI_METHOD Document::GetLineIndentation(int line) {
 	int indent = 0;
 	if ((line >= 0) && (line < LinesTotal())) {
 		int lineStart = LineStart(line);
@@ -1393,7 +1393,7 @@ long Document::FindText(int minPos, int maxPos, const char *search,
 					char bytes[maxBytesCharacter + 1];
 					bytes[0] = cb.CharAt(pos + indexDocument);
 					const int widthChar = IsDBCSLeadByte(bytes[0]) ? 2 : 1;
-					if (widthChar == 2) 
+					if (widthChar == 2)
 						bytes[1] = cb.CharAt(pos + indexDocument + 1);
 					char folded[maxBytesCharacter * maxFoldingExpansion + 1];
 					const int lenFlat = pcf->Fold(folded, sizeof(folded), bytes, widthChar);
