@@ -468,8 +468,6 @@ int Document::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
 			return pos - 1;
 	}
 
-	// Not between CR and LF
-
 	if (dbcsCodePage) {
 		if (SC_CP_UTF8 == dbcsCodePage) {
 			unsigned char ch = static_cast<unsigned char>(cb.CharAt(pos));
@@ -516,6 +514,7 @@ int Document::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
 
 // NextPosition moves between valid positions - it can not handle a position in the middle of a
 // multi-byte character. It is used to iterate through text more efficiently than MovePositionOutsideChar.
+// A \r\n pair is treated as two characters.
 int Document::NextPosition(int pos, int moveDir) {
 	// If out of range, just return minimum/maximum value.
 	int increment = (moveDir > 0) ? 1 : -1;
@@ -523,17 +522,6 @@ int Document::NextPosition(int pos, int moveDir) {
 		return 0;
 	if (pos + increment >= Length())
 		return Length();
-
-	// PLATFORM_ASSERT(pos > 0 && pos < Length());
-	if (moveDir > 0) {
-		if (IsCrLf(pos))
-			return pos + 2;
-	} else {
-		if ((pos >= 2) && IsCrLf(pos-2))
-			return pos - 2;
-	}
-
-	// Not between CR and LF
 
 	if (dbcsCodePage) {
 		if (SC_CP_UTF8 == dbcsCodePage) {
