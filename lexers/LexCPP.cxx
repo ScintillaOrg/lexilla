@@ -504,6 +504,8 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 			}
 		}
 
+		const bool atLineEndBeforeSwitch = sc.atLineEnd;
+
 		// Determine if the current state should terminate.
 		switch (sc.state & maskActivity) {
 			case SCE_C_OPERATOR:
@@ -659,6 +661,12 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 				if (sc.ch == '\r' || sc.ch == '\n' || sc.ch == ')') {
 					sc.SetState(SCE_C_DEFAULT|activitySet);
 				}
+		}
+
+		if (sc.atLineEnd && !atLineEndBeforeSwitch) {
+			// State exit processing consumed characters up to end of line.
+			lineCurrent++;
+			vlls.Add(lineCurrent, preproc);
 		}
 
 		// Determine if a new state should be entered.
