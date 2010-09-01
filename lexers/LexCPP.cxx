@@ -977,9 +977,9 @@ void LexerCPP::EvaluateTokens(std::vector<std::string> &tokens) {
 				else if (tokens[k+1] == "*")
 					result = valA * valB;
 				else if (tokens[k+1] == "/")
-					result = valA / valB;
+					result = valA / (valB ? valB : 1);
 				else if (tokens[k+1] == "%")
-					result = valA % valB;
+					result = valA % (valB ? valB : 1);
 				else if (tokens[k+1] == "<")
 					result = valA < valB;
 				else if (tokens[k+1] == "<=")
