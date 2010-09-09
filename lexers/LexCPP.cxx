@@ -67,6 +67,29 @@ static bool FollowsPostfixOperator(StyleContext &sc, LexAccessor &styler) {
 	return false;
 }
 
+static bool followsReturnKeyword(StyleContext &sc, LexAccessor &styler) {
+	// Don't look at styles, so no need to flush.
+	int pos = (int) sc.currentPos;
+	int currentLine = styler.GetLine(pos);
+	int lineStartPos = styler.LineStart(currentLine);
+	char ch;
+	while (--pos > lineStartPos) {
+		ch = styler.SafeGetCharAt(pos);
+		if (ch != ' ' && ch != '\t') {
+			break;
+		}
+	}
+	const char *retBack = "nruter";
+	const char *s = retBack;
+	while (*s
+		&& pos >= lineStartPos
+		&& styler.SafeGetCharAt(pos) == *s) {
+		s++;
+		pos--;
+	}
+	return !*s;
+}
+
 static std::string GetRestOfLine(LexAccessor &styler, int start, bool allowSpace) {
 	std::string restOfLine;
 	int i =0;
@@ -701,8 +724,11 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 					sc.SetState(SCE_C_COMMENTLINEDOC|activitySet);
 				else
 					sc.SetState(SCE_C_COMMENTLINE|activitySet);
-			} else if (sc.ch == '/' && setOKBeforeRE.Contains(chPrevNonWhite) &&
-				(!setCouldBePostOp.Contains(chPrevNonWhite) || !FollowsPostfixOperator(sc, styler))) {
+			} else if (sc.ch == '/'
+				   && (setOKBeforeRE.Contains(chPrevNonWhite)
+				       || followsReturnKeyword(sc, styler))
+				   && (!setCouldBePostOp.Contains(chPrevNonWhite)
+				       || !FollowsPostfixOperator(sc, styler))) {
 				sc.SetState(SCE_C_REGEX|activitySet);	// JavaScript's RegEx
 			} else if (sc.ch == '\"') {
 				sc.SetState(SCE_C_STRING|activitySet);
