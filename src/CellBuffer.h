@@ -142,6 +142,10 @@ private:
 
 	LineVector lv;
 
+	/// Actions without undo
+	void BasicInsertString(int position, const char *s, int insertLength);
+	void BasicDeleteChars(int position, int deleteLength);
+
 public:
 
 	CellBuffer();
@@ -177,10 +181,6 @@ public:
 	/// the buffer was saved. Undo and redo can move over the save point.
 	void SetSavePoint();
 	bool IsSavePoint();
-
-	/// Actions without undo
-	void BasicInsertString(int position, const char *s, int insertLength);
-	void BasicDeleteChars(int position, int deleteLength);
 
 	bool SetUndoCollection(bool collectUndo);
 	bool IsCollectingUndo() const;
