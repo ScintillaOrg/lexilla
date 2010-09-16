@@ -228,9 +228,9 @@ public:
 	int ClampPositionIntoDocument(int pos);
 	bool IsCrLf(int pos);
 	int LenChar(int pos);
-	bool InGoodUTF8(int pos, int &start, int &end);
+	bool InGoodUTF8(int pos, int &start, int &end) const;
 	int MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd=true);
-	int NextPosition(int pos, int moveDir);
+	int NextPosition(int pos, int moveDir) const;
 	bool NextCharacter(int &pos, int moveDir);	// Returns true if pos changed
 	int SCI_METHOD CodePage() const;
 	bool SCI_METHOD IsDBCSLeadByte(char ch) const;
