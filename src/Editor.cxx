@@ -5833,6 +5833,10 @@ void Editor::DwellEnd(bool mouseMoved) {
 
 void Editor::MouseLeave() {
 	SetHotSpotRange(NULL);
+	if (!HaveMouseCapture()) {
+		ptMouseLast = Point(-1,-1);
+		DwellEnd(true);
+	}
 }
 
 static bool AllowVirtualSpace(int virtualSpaceOptions, bool rectangular) {
@@ -6221,7 +6225,8 @@ void Editor::Tick() {
 	}
 	if ((dwellDelay < SC_TIME_FOREVER) &&
 	        (ticksToDwell > 0) &&
-	        (!HaveMouseCapture())) {
+	        (!HaveMouseCapture()) &&
+	        (ptMouseLast.y >= 0)) {
 		ticksToDwell -= timer.tickSize;
 		if (ticksToDwell <= 0) {
 			dwelling = true;
