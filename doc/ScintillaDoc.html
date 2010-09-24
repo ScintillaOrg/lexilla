@@ -4699,6 +4699,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_SETFOLDEXPANDED">SCI_SETFOLDEXPANDED(int line, bool
     expanded)</a><br />
      <a class="message" href="#SCI_GETFOLDEXPANDED">SCI_GETFOLDEXPANDED(int line)</a><br />
+     <a class="message" href="#SCI_CONTRACTEDFOLDNEXT">SCI_CONTRACTEDFOLDNEXT(int lineStart)</a><br />
      <a class="message" href="#SCI_TOGGLEFOLD">SCI_TOGGLEFOLD(int line)</a><br />
      <a class="message" href="#SCI_ENSUREVISIBLE">SCI_ENSUREVISIBLE(int line)</a><br />
      <a class="message" href="#SCI_ENSUREVISIBLEENFORCEPOLICY">SCI_ENSUREVISIBLEENFORCEPOLICY(int
@@ -4848,6 +4849,13 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <code>SCI_SETFOLDEXPANDED</code> message to process many folds without updating the display
     until you had finished. See <code>SciTEBase::FoldAll()</code> and
     <code>SciTEBase::Expand()</code> for examples of the use of these messages.</p>
+
+    <p><b id="SCI_CONTRACTEDFOLDNEXT">SCI_CONTRACTEDFOLDNEXT(int lineStart)</b><br />
+     Search efficiently for lines that are contracted fold headers. 
+     This is useful when saving the user's folding when switching documents or saving folding with a file. 
+     The search starts at line number <code>lineStart</code> and continues forwards to the end of the file.
+     <code>lineStart</code> is returned if it is a contracted fold header otherwise the next contracted
+     fold header is returned. If there are no more contracted fold headers then -1 is returned.</p>
 
     <p><b id="SCI_ENSUREVISIBLE">SCI_ENSUREVISIBLE(int line)</b><br />
      <b id="SCI_ENSUREVISIBLEENFORCEPOLICY">SCI_ENSUREVISIBLEENFORCEPOLICY(int line)</b><br />

@@ -6481,6 +6481,18 @@ void Editor::ToggleContraction(int line) {
 	}
 }
 
+int Editor::ContractedFoldNext(int lineStart) {
+	for (int line = lineStart; line<pdoc->LinesTotal(); ) {
+		if (!cs.GetExpanded(line) && (pdoc->GetLevel(line) & SC_FOLDLEVELHEADERFLAG))
+			return line;
+		line = cs.ContractedNext(line+1);
+		if (line < 0)
+			return -1;
+	}
+
+	return -1;
+}
+
 /**
  * Recurse up from this line to find any folds that prevent this line from being visible
  * and unfold them all.
@@ -7865,6 +7877,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_TOGGLEFOLD:
 		ToggleContraction(wParam);
 		break;
+
+	case SCI_CONTRACTEDFOLDNEXT:
+		return ContractedFoldNext(wParam);
 
 	case SCI_ENSUREVISIBLE:
 		EnsureLineVisible(wParam, false);

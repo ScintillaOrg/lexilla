@@ -304,7 +304,8 @@ fun void MarkerDeleteAll=2045(int markerNumber,)
 # Get a bit mask of all the markers set on a line.
 fun int MarkerGet=2046(int line,)
 
-# Find the next line after lineStart that includes a marker in mask.
+# Find the next line at or after lineStart that includes a marker in mask.
+# Return -1 when no more lines.
 fun int MarkerNext=2047(int lineStart, int markerMask)
 
 # Find the previous line before lineStart that includes a marker in mask.
@@ -2089,6 +2090,10 @@ fun void SwapMainAnchorCaret=2607(,)
 # Indicate that the internal state of a lexer has changed over a range and therefore
 # there may be a need to redraw.
 fun int ChangeLexerState=2617(position start, position end)
+
+# Find the next line at or after lineStart that is a contracted fold header line.
+# Return -1 when no more lines.
+fun int ContractedFoldNext=2618(int lineStart,)
 
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
