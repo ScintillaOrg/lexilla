@@ -194,7 +194,7 @@ int Document::GetMark(int line) {
 }
 
 int Document::AddMark(int line, int markerNum) {
-	if (line <= LinesTotal()) {
+	if (line >= 0 && line <= LinesTotal()) {
 		int prev = static_cast<LineMarkers *>(perLineData[ldMarkers])->
 			AddMark(line, markerNum, LinesTotal());
 		DocModification mh(SC_MOD_CHANGEMARKER, LineStart(line), 0, 0, 0, line);
@@ -206,6 +206,9 @@ int Document::AddMark(int line, int markerNum) {
 }
 
 void Document::AddMarkSet(int line, int valueSet) {
+	if (line < 0 || line > LinesTotal()) {
+		return;
+	}
 	unsigned int m = valueSet;
 	for (int i = 0; m; i++, m >>= 1)
 		if (m & 1)
