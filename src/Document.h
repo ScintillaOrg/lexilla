@@ -278,6 +278,9 @@ public:
 		cb.GetCharRange(buffer, position, lengthRetrieve);
 	}
 	char SCI_METHOD StyleAt(int position) const { return cb.StyleAt(position); }
+	void GetStyleRange(unsigned char *buffer, int position, int lengthRetrieve) const {
+		cb.GetStyleRange(buffer, position, lengthRetrieve);
+	}
 	int GetMark(int line);
 	int AddMark(int line, int markerNum);
 	void AddMarkSet(int line, int valueSet);

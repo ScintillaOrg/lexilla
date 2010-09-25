@@ -155,6 +155,7 @@ public:
 	char CharAt(int position) const;
 	void GetCharRange(char *buffer, int position, int lengthRetrieve) const;
 	char StyleAt(int position) const;
+	void GetStyleRange(unsigned char *buffer, int position, int lengthRetrieve) const;
 	const char *BufferPointer();
 
 	int Length() const;

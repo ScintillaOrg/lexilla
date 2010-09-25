@@ -2022,8 +2022,6 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 	if (ll->validity == LineLayout::llInvalid) {
 		ll->widthLine = LineLayout::wrapWidthInfinite;
 		ll->lines = 1;
-		int numCharsInLine = 0;
-		int numCharsBeforeEOL = 0;
 		if (vstyle.edgeState == EDGE_BACKGROUND) {
 			ll->edgeColumn = pdoc->FindColumn(line, theEdge);
 			if (ll->edgeColumn >= posLineStart) {
@@ -2034,24 +2032,30 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 		}
 
 		char styleByte = 0;
-		int styleMask = pdoc->stylingBitsMask;
+		const int styleMask = pdoc->stylingBitsMask;
 		ll->styleBitsSet = 0;
 		// Fill base line layout
-		for (int charInDoc = posLineStart; charInDoc < posLineEnd; charInDoc++) {
-			char chDoc = pdoc->CharAt(charInDoc);
-			styleByte = pdoc->StyleAt(charInDoc);
+		const int lineLength = posLineEnd - posLineStart;
+		pdoc->GetCharRange(ll->chars, posLineStart, lineLength);
+		pdoc->GetStyleRange(ll->styles, posLineStart, lineLength);
+		int numCharsBeforeEOL = lineLength;
+		while ((numCharsBeforeEOL > 0) && IsEOLChar(ll->chars[numCharsBeforeEOL-1])) {
+			numCharsBeforeEOL--;
+		}
+		const int numCharsInLine = (vstyle.viewEOL) ? lineLength : numCharsBeforeEOL;
+		for (int charInLine = 0; charInLine < numCharsInLine; charInLine++) {
+			styleByte = ll->styles[charInLine];
 			ll->styleBitsSet |= styleByte;
-			if (vstyle.viewEOL || (!IsEOLChar(chDoc))) {
-				ll->chars[numCharsInLine] = chDoc;
-				ll->styles[numCharsInLine] = static_cast<char>(styleByte & styleMask);
-				ll->indicators[numCharsInLine] = static_cast<char>(styleByte & ~styleMask);
-				if (vstyle.styles[ll->styles[numCharsInLine]].caseForce == Style::caseUpper)
-					ll->chars[numCharsInLine] = static_cast<char>(toupper(chDoc));
-				else if (vstyle.styles[ll->styles[numCharsInLine]].caseForce == Style::caseLower)
-					ll->chars[numCharsInLine] = static_cast<char>(tolower(chDoc));
-				numCharsInLine++;
-				if (!IsEOLChar(chDoc))
-					numCharsBeforeEOL++;
+			ll->styles[numCharsInLine] = static_cast<char>(styleByte & styleMask);
+			ll->indicators[numCharsInLine] = static_cast<char>(styleByte & ~styleMask);
+		}
+		if (vstyle.someStylesForceCase) {
+			for (int charInLine = 0; charInLine<lineLength; charInLine++) {
+				char chDoc = ll->chars[charInLine];
+				if (vstyle.styles[ll->styles[charInLine]].caseForce == Style::caseUpper)
+					ll->chars[charInLine] = static_cast<char>(toupper(chDoc));
+				else if (vstyle.styles[ll->styles[charInLine]].caseForce == Style::caseLower)
+					ll->chars[charInLine] = static_cast<char>(tolower(chDoc));
 			}
 		}
 		ll->xHighlightGuide = 0;
