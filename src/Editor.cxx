@@ -4605,9 +4605,9 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, uptr_t wParam, sptr_t lPar
  * If stuttered = true and already at first/last row, scroll as normal.
  */
 void Editor::PageMove(int direction, Selection::selTypes selt, bool stuttered) {
-	int topLineNew, newPos;
+	int topLineNew;
+	SelectionPosition newPos;
 
-	// I consider only the caretYSlop, and ignore the caretYPolicy-- is that a problem?
 	int currentLine = pdoc->LineFromPosition(sel.MainCaret());
 	int topStutterLine = topLine + caretYSlop;
 	int bottomStutterLine =
@@ -4617,28 +4617,31 @@ void Editor::PageMove(int direction, Selection::selTypes selt, bool stuttered) {
 
 	if (stuttered && (direction < 0 && currentLine > topStutterLine)) {
 		topLineNew = topLine;
-		newPos = PositionFromLocation(Point(lastXChosen - xOffset, vs.lineHeight * caretYSlop));
+		newPos = SPositionFromLocation(Point(lastXChosen - xOffset, vs.lineHeight * caretYSlop),
+			false, false, UserVirtualSpace());
 
 	} else if (stuttered && (direction > 0 && currentLine < bottomStutterLine)) {
 		topLineNew = topLine;
-		newPos = PositionFromLocation(Point(lastXChosen - xOffset, vs.lineHeight * (LinesToScroll() - caretYSlop)));
+		newPos = SPositionFromLocation(Point(lastXChosen - xOffset, vs.lineHeight * (LinesToScroll() - caretYSlop)),
+			false, false, UserVirtualSpace());
 
 	} else {
 		Point pt = LocationFromPosition(sel.MainCaret());
 
 		topLineNew = Platform::Clamp(
 		            topLine + direction * LinesToScroll(), 0, MaxScrollPos());
-		newPos = PositionFromLocation(
-		            Point(lastXChosen - xOffset, pt.y + direction * (vs.lineHeight * LinesToScroll())));
+		newPos = SPositionFromLocation(
+			Point(lastXChosen - xOffset, pt.y + direction * (vs.lineHeight * LinesToScroll())),
+			false, false, UserVirtualSpace());
 	}
 
 	if (topLineNew != topLine) {
 		SetTopLine(topLineNew);
-		MovePositionTo(SelectionPosition(newPos), selt);
+		MovePositionTo(newPos, selt);
 		Redraw();
 		SetVerticalScrollPos();
 	} else {
-		MovePositionTo(SelectionPosition(newPos), selt);
+		MovePositionTo(newPos, selt);
 	}
 }
 
