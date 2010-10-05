@@ -329,6 +329,10 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 
 	keysAlwaysUnicode = false;
 
+	caret.period = ::GetCaretBlinkTime();
+	if (caret.period < 0)
+		caret.period = 0;
+
 	Initialise();
 }
 
