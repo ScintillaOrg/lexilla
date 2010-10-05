@@ -1037,9 +1037,9 @@ void Window::SetPosition(PRectangle rc) {
 void Window::SetPositionRelative(PRectangle rc, Window w) {
 	LONG style = ::GetWindowLong(reinterpret_cast<HWND>(wid), GWL_STYLE);
 	if (style & WS_POPUP) {
-		RECT rcOther;
-		::GetWindowRect(reinterpret_cast<HWND>(w.GetID()), &rcOther);
-		rc.Move(rcOther.left, rcOther.top);
+		POINT ptOther = {0, 0};
+		::ClientToScreen(reinterpret_cast<HWND>(w.GetID()), &ptOther);
+		rc.Move(ptOther.x, ptOther.y);
 
 		// This #ifdef is for VC 98 which has problems with MultiMon.h under some conditions.
 #ifdef MONITOR_DEFAULTTONULL
