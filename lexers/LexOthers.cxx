@@ -1170,7 +1170,7 @@ static int isTag(int start, Accessor &styler) {
 	while (i < 5 && e) {
 		s[i] = styler[start + i];
 		i++;
-		e = styler[start + i] != '{';
+		e = (strchr("{ \t", styler[start + i]) == NULL);
 	}
 	s[i] = '\0';
 	return (strcmp(s, "begin") == 0) || (strcmp(s, "end") == 0);
