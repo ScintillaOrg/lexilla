@@ -135,6 +135,7 @@ Editor::Editor() {
 	dropWentOutside = false;
 	posDrag = SelectionPosition(invalidPosition);
 	posDrop = SelectionPosition(invalidPosition);
+	hotSpotClickPos = INVALID_POSITION;
 	selectionType = selChar;
 
 	lastXChosen = 0;
@@ -4198,6 +4199,15 @@ void Editor::NotifyHotSpotClicked(int position, bool shift, bool ctrl, bool alt)
 	NotifyParent(scn);
 }
 
+void Editor::NotifyHotSpotReleaseClick(int position, bool shift, bool ctrl, bool alt) {
+	SCNotification scn = {0};
+	scn.nmhdr.code = SCN_HOTSPOTRELEASECLICK;
+	scn.position = position;
+	scn.modifiers = (shift ? SCI_SHIFT : 0) | (ctrl ? SCI_CTRL : 0) |
+	        (alt ? SCI_ALT : 0);
+	NotifyParent(scn);
+}
+
 void Editor::NotifyUpdateUI() {
 	SCNotification scn = {0};
 	scn.nmhdr.code = SCN_UPDATEUI;
@@ -5939,6 +5949,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 		} else {
 			if (PointIsHotspot(pt)) {
 				NotifyHotSpotClicked(newPos.Position(), shift, ctrl, alt);
+				hotSpotClickPos = PositionFromLocation(pt,true,false);
 			}
 			if (!shift) {
 				if (PointInSelection(pt) && !SelectionEmpty())
@@ -6118,6 +6129,13 @@ void Editor::ButtonMove(Point pt) {
 		if (hsStart != -1 && !PositionIsHotspot(movePos.Position()))
 			SetHotSpotRange(NULL);
 
+		if (hotSpotClickPos != INVALID_POSITION && PositionFromLocation(pt,true,false) != hotSpotClickPos ) {
+			if (inDragDrop == ddNone) {
+				DisplayCursor(Window::cursorText);
+			}
+			hotSpotClickPos = INVALID_POSITION;
+		}
+
 	} else {
 		if (vs.fixedColumnWidth > 0) {	// There is a margin
 			if (PointInSelMargin(pt)) {
@@ -6147,6 +6165,10 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 	if (inDragDrop == ddInitial) {
 		inDragDrop = ddNone;
 		SetEmptySelection(newPos.Position());
+	}
+	if (hotSpotClickPos != INVALID_POSITION && PointIsHotspot(pt)) {
+		hotSpotClickPos = INVALID_POSITION;
+		NotifyHotSpotReleaseClick(newPos.Position(), false, ctrl, false);
 	}
 	if (HaveMouseCapture()) {
 		if (PointInSelMargin(pt)) {

@@ -4851,8 +4851,8 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <code>SciTEBase::Expand()</code> for examples of the use of these messages.</p>
 
     <p><b id="SCI_CONTRACTEDFOLDNEXT">SCI_CONTRACTEDFOLDNEXT(int lineStart)</b><br />
-     Search efficiently for lines that are contracted fold headers. 
-     This is useful when saving the user's folding when switching documents or saving folding with a file. 
+     Search efficiently for lines that are contracted fold headers.
+     This is useful when saving the user's folding when switching documents or saving folding with a file.
      The search starts at line number <code>lineStart</code> and continues forwards to the end of the file.
      <code>lineStart</code> is returned if it is a contracted fold header otherwise the next contracted
      fold header is returned. If there are no more contracted fold headers then -1 is returned.</p>
@@ -5676,9 +5676,10 @@ struct SCNotification {
     int position;
     // SCN_STYLENEEDED, SCN_DOUBLECLICK, SCN_MODIFIED, SCN_DWELLSTART,
     // SCN_DWELLEND, SCN_CALLTIPCLICK,
-    // SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK
+    // SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK, SCN_HOTSPOTRELEASECLICK
     int ch;             // SCN_CHARADDED, SCN_KEY
-    int modifiers;      // SCN_KEY, SCN_DOUBLECLICK, SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK
+    int modifiers;
+    // SCN_KEY, SCN_DOUBLECLICK, SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK, SCN_HOTSPOTRELEASECLICK
     int modificationType; // SCN_MODIFIED
     const char *text;   // SCN_MODIFIED, SCN_USERLISTSELECTION, SCN_AUTOCSELECTION
     int length;         // SCN_MODIFIED
@@ -5718,6 +5719,7 @@ struct SCNotification {
      <a class="message" href="#SCN_ZOOM">SCN_ZOOM</a><br />
      <a class="message" href="#SCN_HOTSPOTCLICK">SCN_HOTSPOTCLICK</a><br />
      <a class="message" href="#SCN_HOTSPOTDOUBLECLICK">SCN_HOTSPOTDOUBLECLICK</a><br />
+     <a class="message" href="#SCN_HOTSPOTRELEASECLICK">SCN_HOTSPOTRELEASECLICK</a><br />
      <a class="message" href="#SCN_INDICATORCLICK">SCN_INDICATORCLICK</a><br />
      <a class="message" href="#SCN_INDICATORRELEASE">SCN_INDICATORRELEASE</a><br />
      <a class="message" href="#SCN_CALLTIPCLICK">SCN_CALLTIPCLICK</a><br />
@@ -6349,12 +6351,14 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     <p>
     <b id="SCN_HOTSPOTCLICK">SCN_HOTSPOTCLICK</b><br />
     <b id="SCN_HOTSPOTDOUBLECLICK">SCN_HOTSPOTDOUBLECLICK</b><br />
+    <b id="SCN_HOTSPOTRELEASECLICK">SCN_HOTSPOTRELEASECLICK</b><br />
      These notifications are generated when the user clicks or double clicks on
      text that is in a style with the hotspot attribute set.
     This notification can be used to link to variable definitions or web pages.
     The <code>position</code> field is set the text position of the click or
     double click and the <code>modifiers</code> field set to the key modifiers
-    held down in a similar manner to <a class="message" href="#SCN_KEY">SCN_KEY</a>.</p>
+    held down in a similar manner to <a class="message" href="#SCN_KEY">SCN_KEY</a>.
+    Only the state of the Ctrl key is reported for <code>SCN_HOTSPOTRELEASECLICK</code>.</p>
 
     <p>
     <b id="SCN_INDICATORCLICK">SCN_INDICATORCLICK</b><br />

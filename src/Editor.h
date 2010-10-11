@@ -197,6 +197,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool dropWentOutside;
 	SelectionPosition posDrag;
 	SelectionPosition posDrop;
+	int hotSpotClickPos;
 	int lastXChosen;
 	int lineAnchor;
 	int originalAnchorPos;
@@ -417,6 +418,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual void NotifyDoubleClick(Point pt, bool shift, bool ctrl, bool alt);
 	void NotifyHotSpotClicked(int position, bool shift, bool ctrl, bool alt);
 	void NotifyHotSpotDoubleClicked(int position, bool shift, bool ctrl, bool alt);
+	void NotifyHotSpotReleaseClick(int position, bool shift, bool ctrl, bool alt);
 	void NotifyUpdateUI();
 	void NotifyPainted();
 	void NotifyIndicatorClick(bool click, int position, bool shift, bool ctrl, bool alt);
