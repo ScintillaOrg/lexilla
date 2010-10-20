@@ -1129,6 +1129,10 @@ static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
                 }
             } else if (isSafeAlnumOrHigh(ch) || ch == '_') {
                 // Keep going
+            } else if (ch == '.' && chNext == '.') {
+                ++numDots;
+                styler.ColourTo(i - 1, state);
+                redo_char(i, ch, chNext, chNext2, state); // pass by ref
             } else if (ch == '.' && ++numDots == 1) {
                 // Keep going
             } else {
