@@ -2054,11 +2054,11 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 			numCharsBeforeEOL--;
 		}
 		const int numCharsInLine = (vstyle.viewEOL) ? lineLength : numCharsBeforeEOL;
-		for (int charInLine = 0; charInLine < numCharsInLine; charInLine++) {
-			styleByte = ll->styles[charInLine];
+		for (int styleInLine = 0; styleInLine < numCharsInLine; styleInLine++) {
+			styleByte = ll->styles[styleInLine];
 			ll->styleBitsSet |= styleByte;
-			ll->styles[numCharsInLine] = static_cast<char>(styleByte & styleMask);
-			ll->indicators[numCharsInLine] = static_cast<char>(styleByte & ~styleMask);
+			ll->styles[styleInLine] = static_cast<char>(styleByte & styleMask);
+			ll->indicators[styleInLine] = static_cast<char>(styleByte & ~styleMask);
 		}
 		if (vstyle.someStylesForceCase) {
 			for (int charInLine = 0; charInLine<lineLength; charInLine++) {
