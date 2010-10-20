@@ -259,7 +259,7 @@ val SC_MARK_CIRCLEPLUSCONNECTED=19
 val SC_MARK_CIRCLEMINUS=20
 val SC_MARK_CIRCLEMINUSCONNECTED=21
 
-# Invisible mark that only sets the line background color.
+# Invisible mark that only sets the line background colour.
 val SC_MARK_BACKGROUND=22
 val SC_MARK_DOTDOTDOT=23
 val SC_MARK_ARROWS=24
@@ -2094,6 +2094,9 @@ fun int ChangeLexerState=2617(position start, position end)
 # Find the next line at or after lineStart that is a contracted fold header line.
 # Return -1 when no more lines.
 fun int ContractedFoldNext=2618(int lineStart,)
+
+# Centre current line in window.
+fun void VerticalCentreCaret=2619(,)
 
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)

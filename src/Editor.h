@@ -219,7 +219,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	PRectangle rcPaint;
 	bool paintingAllText;
 	StyleNeeded styleNeeded;
-	
+
 	int modEventMask;
 
 	SelectionText drag;
@@ -328,6 +328,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void ScrollTo(int line, bool moveThumb=true);
 	virtual void ScrollText(int linesToMove);
 	void HorizontalScrollTo(int xPos);
+	void VerticalCentreCaret();
 	void MoveCaretInsideView(bool ensureVisible=true);
 	int DisplayFromPosition(int pos);
 
