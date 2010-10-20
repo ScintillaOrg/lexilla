@@ -1482,7 +1482,7 @@ static bool keywordIsModifier(const char *word,
           break;
         }
     }
-    
+
     styler.Flush();
     while (--pos >= lineStartPosn) {
         style = actual_style(styler.StyleAt(pos));
@@ -1493,7 +1493,7 @@ static bool keywordIsModifier(const char *word,
 				// Scintilla's LineStart() and GetLine() routines aren't
 				// platform-independent, so if we have text prepared with
 				// a different system we can't rely on it.
-                
+
                 // Also, lineStartPosn may have been moved to more than one
                 // line above word's line while pushing past continuations.
                 chPrev = styler.SafeGetCharAt(pos - 1);
