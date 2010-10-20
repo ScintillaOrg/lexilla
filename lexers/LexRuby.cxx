@@ -978,6 +978,15 @@ static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
                 } else if (preferRE && !isSafeWordcharOrHigh(chNext)) {
                     // Ruby doesn't allow high bit chars here,
                     // but the editor host might
+                    Quote.New();
+                    state = SCE_RB_STRING_QQ;
+                    Quote.Open(chNext);
+                    advance_char(i, ch, chNext, chNext2); // pass by ref
+                    have_string = true;
+                } else if (!isSafeWordcharOrHigh(chNext) && !iswhitespace(chNext) && !isEOLChar(chNext)) {
+                    // Ruby doesn't allow high bit chars here,
+                    // but the editor host might
+                    Quote.New();
                     state = SCE_RB_STRING_QQ;
                     Quote.Open(chNext);
                     advance_char(i, ch, chNext, chNext2); // pass by ref
