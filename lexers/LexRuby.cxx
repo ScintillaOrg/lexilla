@@ -1457,10 +1457,32 @@ static bool keywordIsModifier(const char *word,
     if (word[0] == 'd' && word[1] == 'o' && !word[2]) {
         return keywordDoStartsLoop(pos, styler);
     }
-    char ch;
+    char ch, chPrev, chPrev2;
     int style = SCE_RB_DEFAULT;
 	int lineStart = styler.GetLine(pos);
     int lineStartPosn = styler.LineStart(lineStart);
+    // We want to step backwards until we don't care about the current
+    // position. But first move lineStartPosn back behind any
+    // continuations immediately above word.
+    while (lineStartPosn > 0) {
+        ch = styler[lineStartPosn-1];
+        if (ch == '\n' || ch == '\r') {
+            chPrev  = styler.SafeGetCharAt(lineStartPosn-2);
+            chPrev2 = styler.SafeGetCharAt(lineStartPosn-3);
+            lineStart = styler.GetLine(lineStartPosn-1);
+            // If we find a continuation line, include it in our analysis.
+            if (chPrev == '\\') {
+                lineStartPosn = styler.LineStart(lineStart);
+            } else if (ch == '\n' && chPrev == '\r' && chPrev2 == '\\') {
+                lineStartPosn = styler.LineStart(lineStart);
+            } else {
+                break;
+            }
+        } else {
+          break;
+        }
+    }
+    
     styler.Flush();
     while (--pos >= lineStartPosn) {
         style = actual_style(styler.StyleAt(pos));
@@ -1471,14 +1493,27 @@ static bool keywordIsModifier(const char *word,
 				// Scintilla's LineStart() and GetLine() routines aren't
 				// platform-independent, so if we have text prepared with
 				// a different system we can't rely on it.
-				return false;
+                
+                // Also, lineStartPosn may have been moved to more than one
+                // line above word's line while pushing past continuations.
+                chPrev = styler.SafeGetCharAt(pos - 1);
+                chPrev2 = styler.SafeGetCharAt(pos - 2);
+                if (chPrev == '\\') {
+                    pos-=1;  // gloss over the "\\"
+                    //continue
+                } else if (ch == '\n' && chPrev == '\r' && chPrev2 == '\\') {
+                    pos-=2;  // gloss over the "\\\r"
+                    //continue
+                } else {
+				    return false;
+                }
 			}
 		} else {
             break;
 		}
     }
     if (pos < lineStartPosn) {
-        return false; //XXX not quite right if the prev line is a continuation
+        return false;
     }
     // First things where the action is unambiguous
     switch (style) {
