@@ -367,7 +367,11 @@ ScintillaGTK::~ScintillaGTK() {
 
 void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	//Platform::DebugPrintf("ScintillaGTK::realize this\n");
+#if GTK_CHECK_VERSION(2,20,0)
+	gtk_widget_set_realized(widget, TRUE);
+#else
 	GTK_WIDGET_SET_FLAGS(widget, GTK_REALIZED);
+#endif
 	GdkWindowAttr attrs;
 	attrs.window_type = GDK_WINDOW_CHILD;
 	attrs.x = widget->allocation.x;
@@ -423,7 +427,11 @@ void ScintillaGTK::UnRealizeThis(GtkWidget *widget) {
 		if (IS_WIDGET_MAPPED(widget)) {
 			gtk_widget_unmap(widget);
 		}
+#if GTK_CHECK_VERSION(2,20,0)
+		gtk_widget_set_realized(widget, FALSE);
+#else
 		GTK_WIDGET_UNSET_FLAGS(widget, GTK_REALIZED);
+#endif
 		gtk_widget_unrealize(PWidget(wText));
 		gtk_widget_unrealize(PWidget(scrollbarv));
 		gtk_widget_unrealize(PWidget(scrollbarh));
@@ -456,7 +464,11 @@ static void MapWidget(GtkWidget *widget) {
 void ScintillaGTK::MapThis() {
 	try {
 		//Platform::DebugPrintf("ScintillaGTK::map this\n");
+#if GTK_CHECK_VERSION(2,20,0)
+		gtk_widget_set_mapped(PWidget(wMain), TRUE);
+#else
 		GTK_WIDGET_SET_FLAGS(PWidget(wMain), GTK_MAPPED);
+#endif
 		MapWidget(PWidget(wText));
 		MapWidget(PWidget(scrollbarh));
 		MapWidget(PWidget(scrollbarv));
@@ -478,7 +490,11 @@ void ScintillaGTK::Map(GtkWidget *widget) {
 void ScintillaGTK::UnMapThis() {
 	try {
 		//Platform::DebugPrintf("ScintillaGTK::unmap this\n");
+#if GTK_CHECK_VERSION(2,20,0)
+		gtk_widget_set_mapped(PWidget(wMain), FALSE);
+#else
 		GTK_WIDGET_UNSET_FLAGS(PWidget(wMain), GTK_MAPPED);
+#endif
 		DropGraphics();
 		gdk_window_hide(PWidget(wMain)->window);
 		gtk_widget_unmap(PWidget(wText));
@@ -596,8 +612,13 @@ void ScintillaGTK::Initialise() {
 	parentClass = reinterpret_cast<GtkWidgetClass *>(
 	                  g_type_class_ref(gtk_container_get_type()));
 
+#if GTK_CHECK_VERSION(2,20,0)
+	gtk_widget_set_can_focus(PWidget(wMain), TRUE);
+	gtk_widget_set_sensitive(PWidget(wMain), TRUE);
+#else
 	GTK_WIDGET_SET_FLAGS(PWidget(wMain), GTK_CAN_FOCUS);
 	GTK_WIDGET_SET_FLAGS(GTK_WIDGET(PWidget(wMain)), GTK_SENSITIVE);
+#endif
 	gtk_widget_set_events(PWidget(wMain),
 	                      GDK_EXPOSURE_MASK
 	                      | GDK_STRUCTURE_MASK
@@ -622,7 +643,11 @@ void ScintillaGTK::Initialise() {
 	gtk_widget_set_size_request(widtxt, 100, 100);
 	adjustmentv = gtk_adjustment_new(0.0, 0.0, 201.0, 1.0, 20.0, 20.0);
 	scrollbarv = gtk_vscrollbar_new(GTK_ADJUSTMENT(adjustmentv));
+#if GTK_CHECK_VERSION(2,20,0)
+	gtk_widget_set_can_focus(PWidget(scrollbarv), FALSE);
+#else
 	GTK_WIDGET_UNSET_FLAGS(PWidget(scrollbarv), GTK_CAN_FOCUS);
+#endif
 	g_signal_connect(G_OBJECT(adjustmentv), "value_changed",
 			   G_CALLBACK(ScrollSignal), this);
 	gtk_widget_set_parent(PWidget(scrollbarv), PWidget(wMain));
@@ -630,7 +655,11 @@ void ScintillaGTK::Initialise() {
 
 	adjustmenth = gtk_adjustment_new(0.0, 0.0, 101.0, 1.0, 20.0, 20.0);
 	scrollbarh = gtk_hscrollbar_new(GTK_ADJUSTMENT(adjustmenth));
+#if GTK_CHECK_VERSION(2,20,0)
+	gtk_widget_set_can_focus(PWidget(scrollbarh), FALSE);
+#else
 	GTK_WIDGET_UNSET_FLAGS(PWidget(scrollbarh), GTK_CAN_FOCUS);
+#endif
 	g_signal_connect(G_OBJECT(adjustmenth), "value_changed",
 			   G_CALLBACK(ScrollHSignal), this);
 	gtk_widget_set_parent(PWidget(scrollbarh), PWidget(wMain));
@@ -2524,7 +2553,11 @@ static void scintilla_class_init(ScintillaClass *klass) {
 
 static void scintilla_init(ScintillaObject *sci) {
 	try {
+#if GTK_CHECK_VERSION(2,20,0)
+		gtk_widget_set_can_focus(GTK_WIDGET(sci), TRUE);
+#else
 		GTK_WIDGET_SET_FLAGS(sci, GTK_CAN_FOCUS);
+#endif
 		sci->pscin = new ScintillaGTK(sci);
 	} catch (...) {
 	}
