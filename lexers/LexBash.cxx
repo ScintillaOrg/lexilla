@@ -407,8 +407,8 @@ static void ColouriseBashDoc(unsigned int startPos, int length, int initStyle,
 					if (s[strlen(s) - 1] == '\r')
 						s[strlen(s) - 1] = '\0';
 					if (strcmp(HereDoc.Delimiter, s) == 0) {
-						if ((prefixws > 0 && HereDoc.Indent) ||	// indentation rule
-							(prefixws == 0 && !HereDoc.Indent)) {
+						if ((prefixws == 0) ||	// indentation rule
+							(prefixws > 0 && HereDoc.Indent)) {
 							sc.SetState(SCE_SH_DEFAULT);
 							break;
 						}
