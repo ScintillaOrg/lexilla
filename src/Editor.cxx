@@ -2060,7 +2060,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 			ll->styles[styleInLine] = static_cast<char>(styleByte & styleMask);
 			ll->indicators[styleInLine] = static_cast<char>(styleByte & ~styleMask);
 		}
-		styleByte =static_cast<char>((numCharsInLine ? ll->styles[numCharsInLine] : 0) & styleMask);
+		styleByte = static_cast<char>((numCharsInLine ? ll->styles[numCharsInLine] : 0) & styleMask);
 		if (vstyle.someStylesForceCase) {
 			for (int charInLine = 0; charInLine<lineLength; charInLine++) {
 				char chDoc = ll->chars[charInLine];
