@@ -164,6 +164,8 @@ def FindModules(lexFile):
             modules.append(l.split()[1])
     return modules
 
+# Properties that start with lexer. or fold. are automatically found but there are some
+# older properties that don't follow this pattern so must be explicitly listed.
 knownIrregularProperties = [
     "fold",
     "styling.within.preprocessor",
