@@ -70,6 +70,11 @@ static void ColouriseSQLDoc(unsigned int startPos, int length, int initStyle, Wo
 	bool sqlBackslashEscapes = styler.GetPropertyInt("sql.backslash.escapes", 0) != 0;
 
 	bool sqlBackticksIdentifier = styler.GetPropertyInt("lexer.sql.backticks.identifier", 0) != 0;
+
+	// property lexer.sql.numbersign.comment
+	//  If "lexer.sql.numbersign.comment" property is set to 0 a line beginning with '#' will not be a comment.
+	bool sqlNumbersignComment = styler.GetPropertyInt("lexer.sql.numbersign.comment", 1) != 0;
+
 	int styleBeforeDCKeyword = SCE_SQL_DEFAULT;
 	for (; sc.More(); sc.Forward()) {
 		// Determine if the current state should terminate.
@@ -206,7 +211,7 @@ static void ColouriseSQLDoc(unsigned int startPos, int length, int initStyle, Wo
 				// Perhaps we should enforce that with proper property:
 //~ 			} else if (sc.Match("-- ")) {
 				sc.SetState(SCE_SQL_COMMENTLINE);
-			} else if (sc.ch == '#') {
+			} else if (sc.ch == '#' && sqlNumbersignComment) {
 				sc.SetState(SCE_SQL_COMMENTLINEDOC);
 			} else if (sc.ch == '\'') {
 				sc.SetState(SCE_SQL_CHARACTER);
