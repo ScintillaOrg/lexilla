@@ -2042,7 +2042,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 			ll->edgeColumn = -1;
 		}
 
-		char styleByte = 0;
+		char styleByte;
 		const int styleMask = pdoc->stylingBitsMask;
 		ll->styleBitsSet = 0;
 		// Fill base line layout
