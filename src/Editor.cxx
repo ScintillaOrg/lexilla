@@ -3165,11 +3165,11 @@ void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 		}
 
 		pixmapSelPattern->FillRectangle(rcPattern, colourFMFill);
-		pixmapSelPattern->PenColour(colourFMStripes);
-		for (int stripe = 0; stripe < patternSize; stripe++) {
-			// Alternating 1 pixel stripes is same as checkerboard.
-			pixmapSelPattern->MoveTo(0, stripe * 2);
-			pixmapSelPattern->LineTo(patternSize, stripe * 2 - patternSize);
+		for (int y = 0; y < patternSize; y++) {
+			for (int x = y % 2; x < patternSize; x+=2) {
+				PRectangle rcPixel(x, y, x+1, y+1);
+				pixmapSelPattern->FillRectangle(rcPixel, colourFMStripes);
+			}
 		}
 	}
 
@@ -3183,10 +3183,9 @@ void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 		pixmapIndentGuideHighlight->FillRectangle(rcIG, vs.styles[STYLE_BRACELIGHT].back.allocated);
 		pixmapIndentGuideHighlight->PenColour(vs.styles[STYLE_BRACELIGHT].fore.allocated);
 		for (int stripe = 1; stripe < vs.lineHeight + 1; stripe += 2) {
-			pixmapIndentGuide->MoveTo(0, stripe);
-			pixmapIndentGuide->LineTo(2, stripe);
-			pixmapIndentGuideHighlight->MoveTo(0, stripe);
-			pixmapIndentGuideHighlight->LineTo(2, stripe);
+			PRectangle rcPixel(0, stripe, 1, stripe+1);
+			pixmapIndentGuide->FillRectangle(rcPixel, vs.styles[STYLE_INDENTGUIDE].fore.allocated);
+			pixmapIndentGuideHighlight->FillRectangle(rcPixel, vs.styles[STYLE_BRACELIGHT].fore.allocated);
 		}
 	}
 
