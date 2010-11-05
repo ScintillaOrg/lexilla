@@ -41,7 +41,7 @@
 #endif
 
 #if GTK_CHECK_VERSION(2,22,0)
-//#define USE_CAIRO 1
+#define USE_CAIRO 1
 #endif
 
 #ifdef USE_CAIRO
