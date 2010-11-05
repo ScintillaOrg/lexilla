@@ -1016,29 +1016,43 @@ void SurfaceImpl::MoveTo(int x_, int y_) {
 	y = y_;
 }
 
+#ifdef USE_CAIRO
+static int Delta(int difference) {
+	if (difference < 0)
+		return -1;
+	else if (difference > 0)
+		return 1;
+	else
+		return 0;
+}
+#endif
+
 void SurfaceImpl::LineTo(int x_, int y_) {
 #ifdef USE_CAIRO
-	// Lines draw their end position, unlike Win32 or GDK with GDK_CAP_NOT_LAST.
+	// cairo_line_to draws the end position, unlike Win32 or GDK with GDK_CAP_NOT_LAST.
 	// For simple cases, move back one pixel from end.
 	if (context) {
-		cairo_move_to(context, x + 0.5, y + 0.5);
-		int xdiff = x_ - x;
-		int xdelta = 0;
-		if (xdiff < 0)
-			xdelta = -1;
-		else if (xdiff > 0)
-			xdelta = 1;
-		int ydiff = y_ - y;
-		int ydelta = 0;
-		if (ydiff < 0)
-			ydelta = -1;
-		else if (ydiff > 0)
-			ydelta = 1;
-		if ((abs(xdiff) == abs(ydiff)) || (xdiff == 0) || (ydiff == 0)) {
-			// Horizontal, vertical or 45 degree slope
-			cairo_line_to(context, x_ + 0.5 - xdelta, y_ + 0.5 - ydelta);
+		int xDiff = x_ - x;
+		int xDelta = Delta(xDiff);
+		int yDiff = y_ - y;
+		int yDelta = Delta(yDiff);
+		if ((xDiff == 0) || (yDiff == 0)) {
+			// Horizontal or vertical lines can be more precisely drawn as a filled rectangle
+			int xEnd = x_ - xDelta;
+			int left = Platform::Minimum(x, xEnd);
+			int width = abs(x - xEnd) + 1;
+			int yEnd = y_ - yDelta;
+			int top = Platform::Minimum(y, yEnd);
+			int height = abs(y - yEnd) + 1;
+			cairo_rectangle(context, left, top, width, height);
+			cairo_fill(context);
+		} else if ((abs(xDiff) == abs(yDiff))) {
+			// 45 degree slope
+			cairo_move_to(context, x + 0.5, y + 0.5);
+			cairo_line_to(context, x_ + 0.5 - xDelta, y_ + 0.5 - yDelta);
 		} else {
 			// Line has a different slope so difficult to avoid last pixel
+			cairo_move_to(context, x + 0.5, y + 0.5);
 			cairo_line_to(context, x_ + 0.5, y_ + 0.5);
 		}
 		cairo_stroke(context);
