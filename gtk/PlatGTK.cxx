@@ -41,7 +41,7 @@
 #endif
 
 #if GTK_CHECK_VERSION(2,22,0)
-#define USE_CAIRO 1
+//#define USE_CAIRO 1
 #endif
 
 #ifdef USE_CAIRO
@@ -1088,8 +1088,8 @@ void SurfaceImpl::RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAlloc
 	if (gc && drawable) {
 #endif
 #ifdef USE_CAIRO
-		cairo_rectangle(context, rc.left, rc.top,
-	                     rc.right - rc.left, rc.bottom - rc.top);
+		cairo_rectangle(context, rc.left + 0.5, rc.top + 0.5,
+	                     rc.right - rc.left - 1, rc.bottom - rc.top - 1);
 		PenColour(back);
 		cairo_fill_preserve(context);
 		PenColour(fore);
@@ -1297,8 +1297,8 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated 
 void SurfaceImpl::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
 	PenColour(back);
 #ifdef USE_CAIRO
-	cairo_arc(context, (rc.left + rc.right) / 2, (rc.top + rc.bottom) / 2, 
-		Platform::Minimum(rc.Width(), rc.Height()) / 2 - 1, 0, 2*M_PI);
+	cairo_arc(context, (rc.left + rc.right) / 2 + 0.5, (rc.top + rc.bottom) / 2 + 0.5, 
+		Platform::Minimum(rc.Width(), rc.Height()) / 2, 0, 2*M_PI);
 	cairo_fill_preserve(context);
 	PenColour(fore);
 	cairo_stroke(context);
