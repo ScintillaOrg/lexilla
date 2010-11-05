@@ -1019,10 +1019,28 @@ void SurfaceImpl::MoveTo(int x_, int y_) {
 void SurfaceImpl::LineTo(int x_, int y_) {
 #ifdef USE_CAIRO
 	// Lines draw their end position, unlike Win32 or GDK with GDK_CAP_NOT_LAST.
-	// Could try to move back one pixel, possibly only for simple cases like horizontal and vertical
+	// For simple cases, move back one pixel from end.
 	if (context) {
 		cairo_move_to(context, x + 0.5, y + 0.5);
-		cairo_line_to(context, x_ + 0.5, y_ + 0.5);
+		int xdiff = x_ - x;
+		int xdelta = 0;
+		if (xdiff < 0)
+			xdelta = -1;
+		else if (xdiff > 0)
+			xdelta = 1;
+		int ydiff = y_ - y;
+		int ydelta = 0;
+		if (ydiff < 0)
+			ydelta = -1;
+		else if (ydiff > 0)
+			ydelta = 1;
+		if ((abs(xdiff) == abs(ydiff)) || (xdiff == 0) || (ydiff == 0)) {
+			// Horizontal, vertical or 45 degree slope
+			cairo_line_to(context, x_ + 0.5 - xdelta, y_ + 0.5 - ydelta);
+		} else {
+			// Line has a different slope so difficult to avoid last pixel
+			cairo_line_to(context, x_ + 0.5, y_ + 0.5);
+		}
 		cairo_stroke(context);
 	}
 #else
