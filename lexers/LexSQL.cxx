@@ -307,7 +307,10 @@ static void FoldSQLDoc(unsigned int startPos, int length, int initStyle,
 			} else {
 				s[j] = '\0';
 			}
-			if ((!foldOnlyBegin) && (strcmp(s, "if") == 0 || strcmp(s, "loop") == 0)) {
+			if ((!foldOnlyBegin) && (
+				strcmp(s, "if") == 0 ||
+				strcmp(s, "loop") == 0 ||
+				strcmp(s, "case") == 0)) {
 				if (endFound) {
 					// ignore
 					endFound = false;
