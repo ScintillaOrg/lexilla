@@ -295,8 +295,8 @@ def RegenerateAll():
     Regenerate(root + "scintilla/win32/scintilla.mak", "#", NATIVE, lexFiles)
     Regenerate(root + "scintilla/win32/scintilla_vc6.mak", "#", NATIVE, lexFiles)
     if os.path.exists(root + "scite"):
-        Regenerate(root + "scite/win32/makefile", "#", NATIVE, lexFiles, propFiles)
-        Regenerate(root + "scite/win32/scite.mak", "#", NATIVE, lexFiles, propFiles)
+        Regenerate(root + "scite/win32/makefile", "#", NATIVE, propFiles)
+        Regenerate(root + "scite/win32/scite.mak", "#", NATIVE, propFiles)
         Regenerate(root + "scite/src/SciTEProps.cxx", "//", NATIVE, lexerProperties)
         Regenerate(root + "scite/doc/SciTEDoc.html", "<!--", NATIVE, propertiesHTML)
         Generate(root + "scite/boundscheck/vcproj.gen",
