@@ -1,6 +1,7 @@
 syntax: glob
 *.o
 *.a
+*.lib
 *.obj
 *.pyc
 *.dll
