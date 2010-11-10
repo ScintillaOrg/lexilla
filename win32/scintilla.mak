@@ -216,14 +216,14 @@ $(LEXLIB): $(LEXOBJS)
 
 # Define how to build all the objects and what they depend on
 
-{..\src}.cxx{$(DIR_O)}.obj:
-	$(CC) $(CXXFLAGS) -c $(NAME)$@ $<
-{..\lexlib}.cxx{$(DIR_O)}.obj:
-	$(CC) $(CXXFLAGS) -c $(NAME)$@ $<
-{..\lexers}.cxx{$(DIR_O)}.obj:
-	$(CC) $(CXXFLAGS) -c $(NAME)$@ $<
-{.}.cxx{$(DIR_O)}.obj:
-	$(CC) $(CXXFLAGS) -c $(NAME)$@ $<
+{..\src}.cxx{$(DIR_O)}.obj::
+	$(CC) $(CXXFLAGS) -c $(NAME)$(DIR_O)\ $<
+{..\lexlib}.cxx{$(DIR_O)}.obj::
+	$(CC) $(CXXFLAGS) -c $(NAME)$(DIR_O)\ $<
+{..\lexers}.cxx{$(DIR_O)}.obj::
+	$(CC) $(CXXFLAGS) -c $(NAME)$(DIR_O)\ $<
+{.}.cxx{$(DIR_O)}.obj::
+	$(CC) $(CXXFLAGS) -c $(NAME)$(DIR_O)\ $<
 
 # Some source files are compiled into more than one object because of different conditional compilation
 $(DIR_O)\ScintillaBaseL.obj: ..\src\ScintillaBase.cxx
