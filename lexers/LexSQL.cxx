@@ -2,7 +2,7 @@
 /** @file LexSQL.cxx
  ** Lexer for SQL, including PL/SQL and SQL*Plus.
  **/
-// Copyright 1998-2005 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2010 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <stdlib.h>
@@ -239,6 +239,7 @@ static void FoldSQLDoc(unsigned int startPos, int length, int initStyle,
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	bool foldOnlyBegin = styler.GetPropertyInt("fold.sql.only.begin", 0) != 0;
+	bool foldAtElse = styler.GetPropertyInt("fold.at.else", 0) != 0;
 
 	// property fold.sql.exists
 	//	Enables "EXISTS" to end a fold as is started by "IF" in "DROP TABLE IF EXISTS".
@@ -312,11 +313,16 @@ static void FoldSQLDoc(unsigned int startPos, int length, int initStyle,
 				strcmp(s, "loop") == 0 ||
 				strcmp(s, "case") == 0)) {
 				if (endFound) {
-					// ignore
+					// ignore because we are into "end if;" or "end loop;" or "end case;"
 					endFound = false;
 				} else {
 					levelNext++;
 				}
+			} else if ((!foldOnlyBegin) && (
+				// folding for else & elsif block only if foldAtElse is set.
+				foldAtElse && (strcmp(s, "elsif") == 0 || strcmp(s, "else") == 0))) {
+				// we are in same case "} else {" in C language
+				levelCurrent--;
 			} else if (strcmp(s, "begin") == 0) {
 				levelNext++;
 			} else if ((strcmp(s, "end") == 0) ||
