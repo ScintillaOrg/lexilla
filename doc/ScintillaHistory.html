@@ -378,6 +378,55 @@
 	<li>
 	Released 7 December 2010.
 	</li>
+	<li>
+	On GTK+ version 2.22 and later, drawing is performed with Cairo rather than GDK.
+	This is in preparation for GTK+ 3.0 which will no longer support GDK drawing.
+	The appearance of some elements will be different with Cairo as it is anti-aliased and uses sub-pixel positioning.
+	Cairo may be turned on for GTK+ versions before 2.22 by defining USE_CAIRO although this has not
+	been extensively tested.
+	</li>
+	<li>
+	New lexer a68k for Motorola 68000 assembler.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=352439&aid=3101598&group_id=2439">Feature #3101598.</a>
+	</li>
+	<li>
+	Borland is no longer supported for building Scintilla or SciTE on Windows.
+	</li>
+	<li>
+	Performance improved when creating large rectangular selections.
+	</li>
+	<li>
+	PHP folder recognizes #region and #endregion comments.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=352439&aid=3101624&group_id=2439">Feature #3101624.</a>
+	</li>
+	<li>
+	SQL lexer has a lexer.sql.numbersign.comment option to turn off use of '#' comments
+	as these are a non-standard feature only available in some implementations.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=352439&aid=3098071&group_id=2439">Feature #3098071.</a>
+	</li>
+	<li>
+	SQL folder recognizes case statements and understands the fold.at.else property.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=3104091&group_id=2439">Bug #3104091.</a>
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=3107362&group_id=2439">Bug #3107362.</a>
+	</li>
+	<li>
+	SQL folder fixes bugs with end statements when fold.sql.only.begin=1.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=3104091&group_id=2439">Bug #3104091.</a>
+	</li>
+	<li>
+	SciTE on Windows bug fixed with multi-line tab bar not adjusting correctly when maximizing and demaximizing.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=3097517&group_id=2439">Bug #3097517.</a>
+	</li>
+	<li>
+	Crash fixed on GTK+ when Scintilla widget destroyed while it still has an outstanding style idle pending.
+	</li>
+	<li>
+	Bug fixed where searching backwards in DBCS text (code page 936 or similar) failed to find occurrences at the start of the line.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=3103936&group_id=2439">Bug #3103936.</a>
+	</li>
+	<li>
+	SciTE on Windows supports Unicode file names when executing help applications with winhelp and htmlhelp subsystems.
+	</li>
     </ul>
     <h3>
        <a href="http://prdownloads.sourceforge.net/scintilla/scite222.zip?download">Release 2.22</a>
