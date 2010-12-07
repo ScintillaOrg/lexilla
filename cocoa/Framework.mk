@@ -6,7 +6,7 @@ INST_NAME=-install_name \
 
 LD=gcc $(ARCH) -dynamiclib -framework Cocoa $(INST_NAME)
 
-SCI_LEXERS=LexAPDL.o LexASY.o LexAU3.o LexAVE.o LexAbaqus.o LexAda.o \
+SCI_LEXERS=LexAPDL.o LexA68k.o LexASY.o LexAU3.o LexAVE.o LexAbaqus.o LexAda.o \
 	LexAsm.o LexAsn1.o LexBaan.o LexBash.o LexBasic.o LexBullant.o LexCLW.o \
 	LexCOBOL.o LexCPP.o LexCSS.o LexCaml.o LexCmake.o LexConf.o LexCrontab.o \
 	LexCsound.o LexD.o LexEScript.o LexEiffel.o LexErlang.o LexFlagship.o \
