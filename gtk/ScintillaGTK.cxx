@@ -1424,7 +1424,7 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 
 				UndoGroup ug(pdoc);
 				if (selection_data->selection != GDK_SELECTION_PRIMARY) {
-					ClearSelection();
+					ClearSelection(multiPasteMode == SC_MULTIPASTE_EACH);
 				}
 				SelectionPosition selStart = sel.IsRectangular() ?
 					sel.Rectangular().Start() :
