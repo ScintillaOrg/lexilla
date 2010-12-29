@@ -826,7 +826,7 @@ context(0),
 psurf(0),
 #else
 drawable(0),
-gc(0), 
+gc(0),
 ppixmap(0),
 #endif
 x(0), y(0), inited(false), createdGC(false)
@@ -888,7 +888,7 @@ void SurfaceImpl::Init(WindowID wid) {
 		context = gdk_cairo_create(drawable_);
 		PLATFORM_ASSERT(context);
 	} else {
-		// Shouldn't happen with valid window but may when calls made before 
+		// Shouldn't happen with valid window but may when calls made before
 		// window completely allocated and mapped.
 		psurf = cairo_image_surface_create(CAIRO_FORMAT_RGB24, 1, 1);
 		context = cairo_create(psurf);
@@ -1249,7 +1249,7 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated 
 		ColourAllocated outline, int alphaOutline, int flags) {
 #ifdef USE_CAIRO
 	if (context && rc.Width() > 0) {
-		cairo_set_source_rgba(context, 
+		cairo_set_source_rgba(context,
 			GetRValue(fill.AsLong()) / 255.0,
 			GetGValue(fill.AsLong()) / 255.0,
 			GetBValue(fill.AsLong()) / 255.0,
@@ -1257,7 +1257,7 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated 
 		PathRoundRectangle(context, rc.left + 1.0, rc.top+1.0, rc.right - rc.left - 2.0, rc.bottom - rc.top - 2.0, cornerSize);
 		cairo_fill(context);
 
-		cairo_set_source_rgba(context, 
+		cairo_set_source_rgba(context,
 			GetRValue(outline.AsLong()) / 255.0,
 			GetGValue(outline.AsLong()) / 255.0,
 			GetBValue(outline.AsLong()) / 255.0,
@@ -1311,7 +1311,7 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated 
 void SurfaceImpl::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
 	PenColour(back);
 #ifdef USE_CAIRO
-	cairo_arc(context, (rc.left + rc.right) / 2 + 0.5, (rc.top + rc.bottom) / 2 + 0.5, 
+	cairo_arc(context, (rc.left + rc.right) / 2 + 0.5, (rc.top + rc.bottom) / 2 + 0.5,
 		Platform::Minimum(rc.Width(), rc.Height()) / 2, 0, 2*M_PI);
 	cairo_fill_preserve(context);
 	PenColour(fore);
