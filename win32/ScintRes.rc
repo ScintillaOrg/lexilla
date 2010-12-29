@@ -4,8 +4,6 @@
 
 #include <windows.h>
 
-#include "PlatformRes.h"
-
 VS_VERSION_INFO VERSIONINFO
 FILEVERSION	2, 2, 3, 0
 PRODUCTVERSION	2, 2, 3, 0
@@ -34,5 +32,3 @@ BEGIN
 		END
 	END
 END
-
-IDC_MARGIN         CURSOR  DISCARDABLE     "Margin.cur"

@@ -450,7 +450,7 @@ $(DIR_O)\LineMarker.obj: ../src/LineMarker.cxx ../include/Platform.h \
 $(DIR_O)\PerLine.obj: ../src/PerLine.cxx ../include/Platform.h \
   ../include/Scintilla.h ../src/SVector.h ../src/SplitVector.h \
   ../src/Partitioning.h ../src/RunStyles.h ../src/PerLine.h
-$(DIR_O)\PlatWin.obj: PlatWin.cxx ../include/Platform.h PlatformRes.h \
+$(DIR_O)\PlatWin.obj: PlatWin.cxx ../include/Platform.h \
   ../src/UniConversion.h ../src/XPM.h
 $(DIR_O)\PositionCache.obj: ../src/Editor.cxx ../include/Platform.h ../include/Scintilla.h \
   ../src/ContractionState.h ../src/SVector.h ../src/SplitVector.h \
