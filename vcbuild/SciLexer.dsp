@@ -162,6 +162,10 @@ SOURCE=..\src\KeyMap.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\lexers\LexA68k.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\lexers\LexAbaqus.cxx
 # End Source File
 # Begin Source File
