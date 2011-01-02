@@ -5687,6 +5687,9 @@ struct SCNotification {
     int listType;       // SCN_USERLISTSELECTION, SCN_AUTOCSELECTION
     int x;              // SCN_DWELLSTART, SCN_DWELLEND
     int y;              // SCN_DWELLSTART, SCN_DWELLEND
+    int token;		// SCN_MODIFIED with SC_MOD_CONTAINER
+    int annotationLinesAdded;	// SC_MOD_CHANGEANNOTATION
+    int updated;	// SCN_UPDATEUI
 };
 </pre>
 
@@ -5787,13 +5790,59 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
     double click and the <code>line</code> field is set to the line of the double click.</p>
 
     <p><b id="SCN_UPDATEUI">SCN_UPDATEUI</b><br />
-     Either the text or styling of the document has changed or the selection range has changed. Now
-    would be a good time to update any container UI elements that depend on document or view state.
-    This was previously called <code><a class="message"
-    href="#SCN_CHECKBRACE">SCN_CHECKBRACE</a></code> because a common use is to check whether the
-    caret is next to a brace and set highlights on this brace and its corresponding matching brace.
-    This also replaces <a class="message" href="#SCN_POSCHANGED"><code>SCN_POSCHANGED</code></a>,
-    which is now deprecated.</p>
+     Either the text or styling of the document has changed or the selection range or scroll position has changed.
+     Now would be a good time to update any container UI elements that depend on document or view state.
+     The <code>updated</code> field is set to the bit set of things changed since the previous notiication.</p>
+    <table cellpadding="1" cellspacing="2" border="0" summary="Modify notification type flags">
+      <tbody>
+        <tr>
+          <th align="left">Symbol</th>
+
+          <th>Value</th>
+
+          <th align="left">Meaning</th>
+
+        </tr>
+      </tbody>
+
+      <tbody valign="top">
+        <tr>
+          <td align="left"><code>SC_UPDATE_CONTENT</code></td>
+
+          <td align="center">0x01</td>
+
+          <td>Contents, styling or markers have been changed.</td>
+
+        </tr>
+
+        <tr>
+          <td align="left"><code>SC_UPDATE_SELECTION</code></td>
+
+          <td align="center">0x02</td>
+
+          <td>Selection has been changed.</td>
+
+        </tr>
+
+        <tr>
+          <td align="left"><code>SC_UPDATE_V_SCROLL</code></td>
+
+          <td align="center">0x04</td>
+
+          <td>Scrolled vertically.</td>
+
+        </tr>
+
+        <tr>
+          <td align="left"><code>SC_UPDATE_H_SCROLL</code></td>
+
+          <td align="center">0x08</td>
+
+          <td>Scrolled horizontally.</td>
+
+        </tr>
+      </tbody>
+    </table>
 
     <p><b id="SCN_MODIFIED">SCN_MODIFIED</b><br />
      This notification is sent when the text or styling of the document changes or is about to
