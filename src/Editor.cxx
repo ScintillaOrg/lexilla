@@ -5134,6 +5134,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		inOverstrike = !inOverstrike;
 		DropCaret();
 		ShowCaretAtCurrentPosition();
+		ContainerNeedsUpdate(SC_UPDATE_CONTENT);
 		NotifyUpdateUI();
 		break;
 	case SCI_CANCEL:            	// Cancel any modes - handled in subclass
