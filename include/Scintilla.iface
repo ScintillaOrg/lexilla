@@ -352,6 +352,12 @@ set void SetMarginSensitiveN=2246(int margin, bool sensitive)
 # Retrieve the mouse click sensitivity of a margin.
 get bool GetMarginSensitiveN=2247(int margin,)
 
+# Set the cursor shown when the mouse is inside a margin.
+set void SetMarginCursorN=2248(int margin, int cursor)
+
+# Retrieve the cursor shown in a margin.
+get int GetMarginCursorN=2249(int margin,)
+
 # Styles in range 32..38 are predefined for parts of the UI and are not used as normal styles.
 # Style 39 is for future use.
 enu StylesCommon=STYLE_
@@ -1540,7 +1546,9 @@ get bool GetMouseDownCaptures=2385(,)
 
 enu CursorShape=SC_CURSOR
 val SC_CURSORNORMAL=-1
+val SC_CURSORARROW=2
 val SC_CURSORWAIT=4
+val SC_CURSORREVERSEARROW=7
 # Sets the cursor to one of the SC_CURSOR* values.
 set void SetCursor=2386(int cursorType,)
 # Get cursor type.
