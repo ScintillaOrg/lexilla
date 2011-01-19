@@ -2721,6 +2721,10 @@ struct Sci_TextToFind {
     sensitive)</a><br />
      <a class="message" href="#SCI_GETMARGINSENSITIVEN">SCI_GETMARGINSENSITIVEN(int
     margin)</a><br />
+     <a class="message" href="#SCI_SETMARGINCURSORN">SCI_SETMARGINCURSORN(int margin, int
+    cursor)</a><br />
+     <a class="message" href="#SCI_GETMARGINCURSORN">SCI_GETMARGINCURSORN(int
+    margin)</a><br />
      <a class="message" href="#SCI_SETMARGINLEFT">SCI_SETMARGINLEFT(&lt;unused&gt;, int
     pixels)</a><br />
      <a class="message" href="#SCI_GETMARGINLEFT">SCI_GETMARGINLEFT</a><br />
@@ -2797,6 +2801,14 @@ struct Sci_TextToFind {
     href="#Notifications">notification</a> to the container. Margins that are not sensitive act as
     selection margins which make it easy to select ranges of lines. By default, all margins are
     insensitive.</p>
+
+    <p><b id="SCI_SETMARGINCURSORN">SCI_SETMARGINCURSORN(int margin, int
+    cursor)</b><br />
+     <b id="SCI_GETMARGINCURSORN">SCI_GETMARGINCURSORN(int margin)</b><br />
+     A reversed arrow cursor is normally shown over all margins. This may be changed to a normal arrow with
+     <code>SCI_SETMARGINCURSORN(margin, SC_CURSORARROW)</code> or restored to a
+     reversed arrow with
+     <code>SCI_SETMARGINCURSORN(margin, SC_CURSORREVERSEARROW)</code>.</p>
 
     <p><b id="SCI_SETMARGINLEFT">SCI_SETMARGINLEFT(&lt;unused&gt;, int pixels)</b><br />
      <b id="SCI_GETMARGINLEFT">SCI_GETMARGINLEFT</b><br />
