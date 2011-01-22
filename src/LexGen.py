@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # LexGen.py - implemented 2002 by Neil Hodgson neilh@scintilla.org
 # Released to the public domain.
 
