@@ -172,7 +172,6 @@ struct OptionsSQL {
 	bool foldComment;
 	bool foldCompact;
 	bool foldOnlyBegin;
-	bool foldSqlExists;
 	bool sqlBackticksIdentifier;
 	bool sqlNumbersignComment;
 	bool sqlBackslashEscapes;
@@ -183,7 +182,6 @@ struct OptionsSQL {
 		foldComment = false;
 		foldCompact = false;
 		foldOnlyBegin = false;
-		foldSqlExists = false;
 		sqlBackticksIdentifier = false;
 		sqlNumbersignComment = false;
 		sqlBackslashEscapes = false;
@@ -215,9 +213,6 @@ struct OptionSetSQL : public OptionSet<OptionsSQL> {
 		DefineProperty("fold.compact", &OptionsSQL::foldCompact);
 
 		DefineProperty("fold.sql.only.begin", &OptionsSQL::foldOnlyBegin);
-
-		DefineProperty("fold.sql.exists", &OptionsSQL::foldSqlExists,
-		               "Enables \"EXISTS\" to end a fold as is started by \"IF\" in \"DROP TABLE IF EXISTS\".");
 
 		DefineProperty("lexer.sql.backticks.identifier", &OptionsSQL::sqlBackticksIdentifier);
 
@@ -671,11 +666,9 @@ void SCI_METHOD LexerSQL::Fold(unsigned int startPos, int length, int initStyle,
 				levelNext++;
 				sqlStatesCurrentLine = sqlStates.IntoDeclareBlock(sqlStatesCurrentLine, false);
 			} else if ((strcmp(s, "end") == 0) ||
-			           // DROP TABLE IF EXISTS or CREATE TABLE IF NOT EXISTS
-			           (options.foldSqlExists && (strcmp(s, "exists") == 0)) ||
-			           //  SQL Anywhere permits IF ... ELSE ... ENDIF
-			           //      will only be active if "endif" appears in the
-			           //		keyword list.
+			           // SQL Anywhere permits IF ... ELSE ... ENDIF
+			           // will only be active if "endif" appears in the
+			           // keyword list.
 			           (strcmp(s, "endif") == 0)) {
 				endFound = true;
 				levelNext--;
