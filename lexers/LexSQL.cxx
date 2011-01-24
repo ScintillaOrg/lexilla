@@ -42,7 +42,7 @@ static inline bool IsAWordChar(int ch, bool sqlAllowDottedWord) {
 	if (!sqlAllowDottedWord)
 		return (ch < 0x80) && (isalnum(ch) || ch == '_');
 	else
-		return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch=='.');
+		return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '.');
 }
 
 static inline bool IsAWordStart(int ch) {
@@ -229,7 +229,7 @@ struct OptionSetSQL : public OptionSet<OptionsSQL> {
 
 		DefineProperty("lexer.sql.allow.dotted.word", &OptionsSQL::sqlAllowDottedWord,
 		               "Set to 1 to colourise recognized words with dots "
-			       "(recommended for Oracle PL/SQL objects).");
+		               "(recommended for Oracle PL/SQL objects).");
 
 		DefineWordListSets(sqlWordListDesc);
 	}
