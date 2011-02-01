@@ -4,10 +4,10 @@
     Currently tested:
         SplitVector
         Partitioning
+        RunStyles
         ContractionState
 
     To do:
-        RunStyles
         Decoration
         DecorationList
         PerLine *
