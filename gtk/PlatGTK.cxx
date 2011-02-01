@@ -893,6 +893,7 @@ void SurfaceImpl::Init(WindowID wid) {
 		psurf = cairo_image_surface_create(CAIRO_FORMAT_RGB24, 1, 1);
 		context = cairo_create(psurf);
 	}
+	createdGC = true;
 	pcontext = pango_cairo_create_context(context);
 	PLATFORM_ASSERT(pcontext);
 	layout = pango_cairo_create_layout(context);
