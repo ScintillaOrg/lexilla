@@ -525,7 +525,7 @@ void ScintillaCocoa::Paste(bool forceRectangular)
     return;
   
   pdoc->BeginUndoAction();
-  ClearSelection();
+  ClearSelection(false);
   int length = selectedText.len - 1; // One less to avoid inserting the terminating 0 character.
   if (selectedText.rectangular)
   {
