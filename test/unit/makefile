@@ -20,6 +20,10 @@ CPPFLAGS = $(shell gtest-config --cppflags)
 CXXFLAGS = $(shell gtest-config --cxxflags)
 LINKFLAGS = $(shell gtest-config --ldflags --libs)
 
+# For coverage testing with gcov
+#CPPFLAGS += -fprofile-arcs -ftest-coverage
+#LINKFLAGS += -fprofile-arcs -ftest-coverage
+
 endif
 
 #vpath %.cxx ../src ../lexlib ../lexers
@@ -45,7 +49,7 @@ GTEST_HEADERS=$(GTEST_DIR)/include/gtest/*.h $(GTEST_DIR)/include/gtest/internal
 all: $(TESTS)
 
 clean:
-	$(DEL) $(TESTS) *.a *.o *.exe
+	$(DEL) $(TESTS) *.a *.o *.exe *.gcov *.gcda *.gcno
 
 # Usually you shouldn't tweak such internal variables, indicated by a
 # trailing _.
