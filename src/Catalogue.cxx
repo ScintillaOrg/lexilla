@@ -134,6 +134,7 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmMatlab);
 	LINK_LEXER(lmMETAPOST);
 	LINK_LEXER(lmMMIXAL);
+	LINK_LEXER(lmModula);
 	LINK_LEXER(lmMSSQL);
 	LINK_LEXER(lmMySQL);
 	LINK_LEXER(lmNimrod);

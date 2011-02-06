@@ -126,6 +126,7 @@ LEXOBJS=\
 	$(DIR_O)\LexMatlab.obj \
 	$(DIR_O)\LexMetapost.obj \
 	$(DIR_O)\LexMMIXAL.obj \
+	$(DIR_O)\LexModula.obj \
 	$(DIR_O)\LexMPT.obj \
 	$(DIR_O)\LexMSSQL.obj \
 	$(DIR_O)\LexMySQL.obj \
@@ -364,6 +365,8 @@ $(DIR_O)\LexMatlab.obj: ..\lexers\LexMatlab.cxx $(LEX_HEADERS)
 $(DIR_O)\LexMetapost.obj: ..\lexers\LexMetapost.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexMMIXAL.obj: ..\lexers\LexMMIXAL.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexModula.obj: ..\lexers\LexModula.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexMPT.obj: ..\lexers\LexMPT.cxx $(LEX_HEADERS)
 

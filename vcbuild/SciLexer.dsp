@@ -334,6 +334,10 @@ SOURCE=..\lexers\LexMMIXAL.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\lexers\LexModula.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\lexers\LexMPT.cxx
 # End Source File
 # Begin Source File
