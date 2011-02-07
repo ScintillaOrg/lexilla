@@ -1,15 +1,11 @@
-# Make file for Scintilla on Windows Visual C++ and Borland C++ version
-# Copyright 1998-2009 by Neil Hodgson <neilh@scintilla.org>
+# Make file for Scintilla on Windows Visual C++ version
+# Copyright 1998-2010 by Neil Hodgson <neilh@scintilla.org>
 # The License.txt file describes the conditions under which this software may be distributed.
-# This makefile is for using Visual C++ with nmake or Borland C++ with make depending on
-# the setting of the VENDOR macro. If no VENDOR is defined n the command line then
-# the tool used is automatically detected.
+# This makefile is for using Visual C++ with nmake.
 # Usage for Microsoft:
 #     nmake -f scintilla.mak
-# Usage for Borland:
-#     make -f scintilla.mak
-# For debug versions define DEBUG on the command line, for Borland:
-#     make DEBUG=1 -f scintilla.mak
+# For debug versions define DEBUG on the command line:
+#     nmake DEBUG=1 -f scintilla.mak
 # The main makefile uses mingw32 gcc and may be more current than this file.
 
 .SUFFIXES: .cxx
@@ -19,17 +15,6 @@ DIR_BIN=..\bin
 
 COMPONENT=$(DIR_BIN)\Scintilla.dll
 LEXCOMPONENT=$(DIR_BIN)\SciLexer.dll
-
-!IFNDEF VENDOR
-!IFDEF _NMAKE_VER
-#Microsoft nmake so make default VENDOR MICROSOFT
-VENDOR=MICROSOFT
-!ELSE
-VENDOR=BORLAND
-!ENDIF
-!ENDIF
-
-!IF "$(VENDOR)"=="MICROSOFT"
 
 CC=cl
 RC=rc
@@ -46,25 +31,6 @@ LDFLAGS=-OPT:NOWIN98 -OPT:REF
 LDDEBUG=
 LIBS=KERNEL32.lib USER32.lib GDI32.lib IMM32.lib OLE32.LIB
 NOLOGO=-nologo
-
-!ELSE
-# BORLAND
-
-CC=bcc32
-RC=brcc32 -r
-LD=ilink32
-
-CXXFLAGS=-P -tWM -w -w-prc -w-inl -RT-
-# Above turns off warnings for clarfying parentheses and inlines with for not expanded
-CXXDEBUG=-Od -v -DDEBUG
-CXXNDEBUG=-O1 -DNDEBUG
-NAME=-o
-LDFLAGS=-Gn -x -c
-LDDEBUG=-v
-LIBS=import32 cw32mt
-NOLOGO=-q
-
-!ENDIF
 
 !IFDEF QUIET
 CC=@$(CC)
@@ -241,23 +207,11 @@ LOBJS=\
 $(DIR_O)\ScintRes.res : ScintRes.rc
 	$(RC) -fo$@ $**
 
-!IF "$(VENDOR)"=="MICROSOFT"
-
 $(COMPONENT): $(SOBJS) $(DIR_O)\ScintRes.res
 	$(LD) $(LDFLAGS) -DEF:Scintilla.def -DLL -OUT:$@ $** $(LIBS)
 
 $(LEXCOMPONENT): $(LOBJS) $(DIR_O)\ScintRes.res
 	$(LD) $(LDFLAGS) -DEF:Scintilla.def -DLL -OUT:$@ $** $(LIBS)
-
-!ELSE
-
-$(COMPONENT): $(SOBJS) $(DIR_O)\ScintRes.res
-	$(LD) $(LDFLAGS) -Tpd c0d32 $(SOBJS), $@, , $(LIBS), , $(DIR_O)\ScintRes.res
-
-$(LEXCOMPONENT): $(LOBJS) $(DIR_O)\ScintRes.res
-	$(LD) $(LDFLAGS) -Tpd c0d32 $(LOBJS), $@, , $(LIBS), , $(DIR_O)\ScintRes.res
-
-!ENDIF
 
 # Define how to build all the objects and what they depend on
 
