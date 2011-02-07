@@ -493,7 +493,7 @@ void SCI_METHOD LexerD::Fold(unsigned int startPos, int length, int initStyle, I
 				levelNext--;
 			}
 		}
-		if (atEOL) {
+		if (atEOL || (i == endPos-1)) {
 			if (options.foldComment) {  // Handle nested comments
 				int nc;
 				nc =  styler.GetLineState(lineCurrent);
