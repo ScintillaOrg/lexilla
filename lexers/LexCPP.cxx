@@ -851,7 +851,6 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 	if (definitionsChanged)
 		styler.ChangeLexerState(startPos, startPos + length);
 	sc.Complete();
-	styler.Flush();
 }
 
 // Store both the current line's fold level and the next lines in the
