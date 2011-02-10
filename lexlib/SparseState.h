@@ -30,7 +30,9 @@ class SparseState {
 public:
 	void Set(int position, T value) {
 		Delete(position);
-		states.push_back(State(position, value));
+		if ((states.size() == 0) || (value != states[states.size()-1].value)) {
+			states.push_back(State(position, value));
+		}
 	}
 	T ValueAt(int position) {
 		if (!states.size())

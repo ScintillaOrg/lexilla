@@ -95,6 +95,13 @@ TEST_F(SparseStateTest, ReplaceLast) {
 	EXPECT_EQ(32, pss->ValueAt(3));
 }
 
+TEST_F(SparseStateTest, CheckOnlyChangeAppended) {
+	pss->Set(0, 30);
+	pss->Set(2, 31);
+	pss->Set(3, 31);
+	EXPECT_EQ(2u, pss->size());
+}
+
 class SparseStateStringTest : public ::testing::Test {
 protected:
 	virtual void SetUp() {
