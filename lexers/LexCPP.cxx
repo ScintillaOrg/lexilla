@@ -586,18 +586,21 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 					} else if (keywords4.InList(s)) {
 						sc.ChangeState(SCE_C_GLOBALCLASS|activitySet);
 					}
-					if (sc.ch == '\"') {
-						// Should check all s in "L|u|U|u8" "R"
-						const bool raw = sc.chPrev == 'R';
+					const bool literalString = sc.ch == '\"';
+					if (literalString || sc.ch == '\'') {
 						size_t lenS = strlen(s);
+						const bool raw = literalString && sc.chPrev == 'R';
 						if (raw)
 							s[lenS--] = '\0';
 						bool valid = 
 							(lenS == 0) ||
 							((lenS == 1) && ((s[0] == 'L') || (s[0] == 'u') || (s[0] == 'U'))) ||
-							((lenS == 2) && (s[0] == 'u') && (s[1] == '8'));
+							((lenS == 2) && literalString && (s[0] == 'u') && (s[1] == '8'));
 						if (valid) {
-							sc.ChangeState((raw ? SCE_C_STRINGRAW : SCE_C_STRING)|activitySet);
+							if (literalString)
+								sc.ChangeState((raw ? SCE_C_STRINGRAW : SCE_C_STRING)|activitySet);
+							else
+								sc.ChangeState(SCE_C_CHARACTER|activitySet);
 						}
 					}
 					sc.SetState(SCE_C_DEFAULT|activitySet);
