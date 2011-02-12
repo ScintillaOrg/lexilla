@@ -12,6 +12,7 @@ DEL = del /q
 CPPFLAGS += -I$(GTEST_DIR)/include
 GTEST_ALL =  gtest-all.o
 LINKFLAGS = $(CPPFLAGS) $(CXXFLAGS)
+EXE = unitTest.exe
 
 else
 
@@ -19,6 +20,7 @@ DEL = rm -f
 CPPFLAGS = $(shell gtest-config --cppflags)
 CXXFLAGS = $(shell gtest-config --cxxflags)
 LINKFLAGS = $(shell gtest-config --ldflags --libs)
+EXE = unitTest
 
 # For coverage testing with gcov
 #CPPFLAGS += -fprofile-arcs -ftest-coverage
@@ -42,7 +44,7 @@ CXXFLAGS += -g -Wall -Wextra -Wno-unused-function
 CASES:=$(addsuffix .o,$(basename $(notdir $(wildcard test*.cxx))))
 TESTEDOBJS=ContractionState.o RunStyles.o
 
-TESTS=unitTest
+TESTS=$(EXE)
 
 GTEST_HEADERS=$(GTEST_DIR)/include/gtest/*.h $(GTEST_DIR)/include/gtest/internal/*.h
 
@@ -62,5 +64,5 @@ gtest-all.o: $(GTEST_SRCS_)
 .cxx.o:
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS)  -c $<
 
-unitTest: $(CASES) $(TESTEDOBJS) unitTest.o $(GTEST_ALL)
+$(EXE): $(CASES) $(TESTEDOBJS) unitTest.o $(GTEST_ALL)
 	$(CXX) $(LINKFLAGS) $^ -o $@
