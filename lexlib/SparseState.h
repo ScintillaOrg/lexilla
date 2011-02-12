@@ -28,6 +28,7 @@ class SparseState {
 			return (position == other.position) && (value == other.value);
 		}
 	};
+	int positionFirst;
 	typedef std::vector<State> stateVector;
 	stateVector states;
 
@@ -37,6 +38,9 @@ class SparseState {
 	}
 
 public:
+	SparseState(int positionFirst_=-1) {
+		positionFirst = positionFirst_;
+	}
 	void Set(int position, T value) {
 		Delete(position);
 		if ((states.size() == 0) || (value != states[states.size()-1].value)) {
@@ -68,6 +72,34 @@ public:
 	}
 	size_t size() const {
 		return states.size();
+	}
+
+	// Returns true if Merge caused a significant change
+	bool Merge(const SparseState<T> &other, int ignoreAfter) {
+		// Changes caused beyond ignoreAfter are not significant
+		Delete(ignoreAfter+1);
+
+		bool different = true;
+		bool changed = false;
+		typename stateVector::iterator low = Find(other.positionFirst);
+		if (static_cast<size_t>(states.end() - low) == other.states.size()) {
+			// Same number in other as after positionFirst in this
+			different = !std::equal(low, states.end(), other.states.begin());
+		}
+		if (different) {
+			if (low != states.end()) {
+				states.erase(low, states.end());
+				changed = true;
+			}
+			typename stateVector::const_iterator startOther = other.states.begin();
+			if (!states.empty() && states.back().value == startOther->value)
+				startOther++;
+			if (startOther != other.states.end()) {
+				states.insert(states.end(), startOther, other.states.end());
+				changed = true;
+			}
+		}
+		return changed;
 	}
 };
 

@@ -506,7 +506,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 
 	const int maskActivity = 0x3F;
 	std::string rawStringTerminator = rawStringTerminators.ValueAt(lineCurrent-1);
-	bool changedRawStringState = rawStringTerminators.Delete(lineCurrent);
+	SparseState<std::string> rawSTNew(lineCurrent);
 
 	int activitySet = preproc.IsInactive() ? 0x40 : 0;
 
@@ -540,8 +540,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 			lineCurrent++;
 			vlls.Add(lineCurrent, preproc);
 			if (rawStringTerminator != "") {
-				rawStringTerminators.Set(lineCurrent-1, rawStringTerminator);
-				changedRawStringState = true;
+				rawSTNew.Set(lineCurrent-1, rawStringTerminator);
 			}
 		}
 
@@ -893,7 +892,8 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 		}
 		continuationLine = false;
 	}
-	if (definitionsChanged || changedRawStringState)
+	const bool rawStringsChanged = rawStringTerminators.Merge(rawSTNew, lineCurrent);
+	if (definitionsChanged || rawStringsChanged)
 		styler.ChangeLexerState(startPos, startPos + length);
 	sc.Complete();
 }

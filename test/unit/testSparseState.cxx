@@ -95,11 +95,110 @@ TEST_F(SparseStateTest, ReplaceLast) {
 	EXPECT_EQ(32, pss->ValueAt(3));
 }
 
-TEST_F(SparseStateTest, CheckOnlyChangeAppended) {
+TEST_F(SparseStateTest, OnlyChangeAppended) {
 	pss->Set(0, 30);
 	pss->Set(2, 31);
 	pss->Set(3, 31);
 	EXPECT_EQ(2u, pss->size());
+}
+
+TEST_F(SparseStateTest, MergeBetween) {
+	pss->Set(0, 30);
+	pss->Set(2, 32);
+	pss->Set(4, 34);
+	EXPECT_EQ(3u, pss->size());
+
+	SparseState<int> ssAdditions(3);
+	ssAdditions.Set(4, 34);
+	EXPECT_EQ(1u, ssAdditions.size());
+	bool mergeChanged = pss->Merge(ssAdditions,5);
+	EXPECT_EQ(0, mergeChanged);
+
+	ssAdditions.Set(4, 44);
+	EXPECT_EQ(1u, ssAdditions.size());
+	mergeChanged = pss->Merge(ssAdditions,5);
+	EXPECT_EQ(true, mergeChanged);
+	EXPECT_EQ(3u, pss->size());
+	EXPECT_EQ(44, pss->ValueAt(4));
+}
+
+TEST_F(SparseStateTest, MergeAtExisting) {
+	pss->Set(0, 30);
+	pss->Set(2, 32);
+	pss->Set(4, 34);
+	EXPECT_EQ(3u, pss->size());
+
+	SparseState<int> ssAdditions(4);
+	ssAdditions.Set(4, 34);
+	EXPECT_EQ(1u, ssAdditions.size());
+	bool mergeChanged = pss->Merge(ssAdditions,5);
+	EXPECT_EQ(0, mergeChanged);
+
+	ssAdditions.Set(4, 44);
+	EXPECT_EQ(1u, ssAdditions.size());
+	mergeChanged = pss->Merge(ssAdditions,5);
+	EXPECT_EQ(true, mergeChanged);
+	EXPECT_EQ(3u, pss->size());
+	EXPECT_EQ(44, pss->ValueAt(4));
+}
+
+TEST_F(SparseStateTest, MergeWhichRemoves) {
+	pss->Set(0, 30);
+	pss->Set(2, 32);
+	pss->Set(4, 34);
+	EXPECT_EQ(3u, pss->size());
+
+	SparseState<int> ssAdditions(2);
+	ssAdditions.Set(2, 22);
+	EXPECT_EQ(1u, ssAdditions.size());
+	EXPECT_EQ(22, ssAdditions.ValueAt(2));
+	bool mergeChanged = pss->Merge(ssAdditions,5);
+	EXPECT_EQ(true, mergeChanged);
+	EXPECT_EQ(2u, pss->size());
+	EXPECT_EQ(22, pss->ValueAt(2));
+}
+
+TEST_F(SparseStateTest, MergeIgnoreSome) {
+	pss->Set(0, 30);
+	pss->Set(2, 32);
+	pss->Set(4, 34);
+
+	SparseState<int> ssAdditions(2);
+	ssAdditions.Set(2, 32);
+	bool mergeChanged = pss->Merge(ssAdditions,3);
+
+	EXPECT_EQ(0, mergeChanged);
+	EXPECT_EQ(2u, pss->size());
+	EXPECT_EQ(32, pss->ValueAt(2));
+}
+
+TEST_F(SparseStateTest, MergeIgnoreSomeStart) {
+	pss->Set(0, 30);
+	pss->Set(2, 32);
+	pss->Set(4, 34);
+
+	SparseState<int> ssAdditions(2);
+	ssAdditions.Set(2, 32);
+	bool mergeChanged = pss->Merge(ssAdditions,2);
+
+	EXPECT_EQ(0, mergeChanged);
+	EXPECT_EQ(2u, pss->size());
+	EXPECT_EQ(32, pss->ValueAt(2));
+}
+
+TEST_F(SparseStateTest, MergeIgnoreRepeat) {
+	pss->Set(0, 30);
+	pss->Set(2, 32);
+	pss->Set(4, 34);
+
+	SparseState<int> ssAdditions(5);
+	// Appending same value as at end of pss.
+	ssAdditions.Set(5, 34);
+	bool mergeChanged = pss->Merge(ssAdditions,6);
+
+	EXPECT_EQ(0, mergeChanged);
+	EXPECT_EQ(3u, pss->size());
+	EXPECT_EQ(34, pss->ValueAt(4));
 }
 
 class SparseStateStringTest : public ::testing::Test {
