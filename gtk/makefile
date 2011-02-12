@@ -27,11 +27,11 @@ endif
 
 ifdef windir
 DEL = del /q
+COMPLIB=..\bin\scintilla.a
 else
 DEL = rm -f
-endif
-
 COMPLIB=../bin/scintilla.a
+endif
 
 vpath %.h ../src ../include ../lexlib
 vpath %.cxx ../src ../lexlib ../lexers
