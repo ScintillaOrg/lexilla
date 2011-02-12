@@ -24,9 +24,18 @@ class SparseState {
 		inline bool operator<(const State &other) const {
 			return position < other.position;
 		}
+		inline bool operator==(const State &other) const {
+			return (position == other.position) && (value == other.value);
+		}
 	};
 	typedef std::vector<State> stateVector;
 	stateVector states;
+
+	typename stateVector::iterator Find(int position) {
+		State searchValue(position, T());
+		return std::lower_bound(states.begin(), states.end(), searchValue);
+	}
+
 public:
 	void Set(int position, T value) {
 		Delete(position);
@@ -39,9 +48,7 @@ public:
 			return T();
 		if (position < states[0].position)
 			return T();
-		State searchValue(position, T());
-		typename stateVector::iterator low =
-			lower_bound(states.begin(), states.end(), searchValue);
+		typename stateVector::iterator low = Find(position);
 		if (low == states.end()) {
 			return states[states.size()-1].value;
 		} else {
@@ -52,16 +59,14 @@ public:
 		}
 	}
 	bool Delete(int position) {
-		State searchValue(position, T());
-		typename stateVector::iterator low =
-			lower_bound(states.begin(), states.end(), searchValue);
+		typename stateVector::iterator low = Find(position);
 		if (low != states.end()) {
 			states.erase(low, states.end());
 			return true;
 		}
 		return false;
 	}
-	size_t size() {
+	size_t size() const {
 		return states.size();
 	}
 };
