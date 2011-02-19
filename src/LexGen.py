@@ -220,8 +220,6 @@ def FindPropertyDocumentation(lexFile):
                     documents[name] += " "
                 documents[name] += l[2:].strip()
             elif l.startswith("\""):
-                if documents[name]:
-                    documents[name] += " "
                 l = l[1:].strip()
                 if l.endswith(";"):
                     l = l[:-1].strip()
