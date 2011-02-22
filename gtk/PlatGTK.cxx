@@ -2142,7 +2142,6 @@ void Window::SetTitle(const char *s) {
    gdk window coordinates */
 PRectangle Window::GetMonitorRect(Point pt) {
 	gint x_offset, y_offset;
-	pt = pt;
 
 	gdk_window_get_origin(PWidget(wid)->window, &x_offset, &y_offset);
 
@@ -2161,6 +2160,7 @@ PRectangle Window::GetMonitorRect(Point pt) {
 		return PRectangle(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
 	}
 #else
+	pt = pt;
 	return PRectangle(-x_offset, -y_offset, (-x_offset) + gdk_screen_width(),
 	                  (-y_offset) + gdk_screen_height());
 #endif
@@ -2203,7 +2203,7 @@ public:
 	CallBackAction doubleClickAction;
 	void *doubleClickActionData;
 
-	ListBoxX() : list(0), pixhash(NULL), pixbuf_renderer(0),
+	ListBoxX() : list(0), scroller(0), pixhash(NULL), pixbuf_renderer(0),
 		desiredVisibleRows(5), maxItemCharacters(0),
 		aveCharWidth(1), doubleClickAction(NULL), doubleClickActionData(NULL) {
 	}
