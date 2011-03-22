@@ -323,12 +323,16 @@ struct OptionsPerl {
 	                         // Enable folding Pod blocks when using the Perl lexer.
 	bool foldPackage;        // property fold.perl.package
 	                         // Enable folding packages when using the Perl lexer.
+
+	bool foldCommentExplicit;
+
 	OptionsPerl() {
 		fold = false;
 		foldComment = false;
 		foldCompact = true;
 		foldPOD = true;
 		foldPackage = true;
+		foldCommentExplicit = true;
 	}
 };
 
@@ -350,6 +354,9 @@ struct OptionSetPerl : public OptionSet<OptionsPerl> {
 
 		DefineProperty("fold.perl.package", &OptionsPerl::foldPackage,
 			"Set to 0 to disable folding packages when using the Perl lexer.");
+
+		DefineProperty("fold.perl.comment.explicit", &OptionsPerl::foldCommentExplicit,
+			"Set to 0 to disable explicit folding.");
 
 		DefineWordListSets(perlWordListDesc);
 	}
@@ -1363,6 +1370,7 @@ void SCI_METHOD LexerPerl::Fold(unsigned int startPos, int length, int /* initSt
 		chNext = styler.SafeGetCharAt(i + 1);
 		int style = styleNext;
 		styleNext = styler.StyleAt(i + 1);
+		int stylePrevCh = (i) ? styler.StyleAt(i - 1):SCE_PL_DEFAULT;
 		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 		bool atLineStart = ((chPrev == '\r') || (chPrev == '\n')) || i == 0;
 		// Comment folding
@@ -1378,11 +1386,15 @@ void SCI_METHOD LexerPerl::Fold(unsigned int startPos, int length, int /* initSt
 		// {} [] block folding
 		if (style == SCE_PL_OPERATOR) {
 			if (ch == '{') {
+				if (levelCurrent < levelPrev)
+					--levelPrev;
 				levelCurrent++;
 			} else if (ch == '}') {
 				levelCurrent--;
 			}
 			if (ch == '[') {
+				if (levelCurrent < levelPrev)
+					--levelPrev;
 				levelCurrent++;
 			} else if (ch == ']') {
 				levelCurrent--;
@@ -1390,7 +1402,6 @@ void SCI_METHOD LexerPerl::Fold(unsigned int startPos, int length, int /* initSt
 		}
 		// POD folding
 		if (options.foldPOD && atLineStart) {
-			int stylePrevCh = (i) ? styler.StyleAt(i - 1):SCE_PL_DEFAULT;
 			if (style == SCE_PL_POD) {
 				if (stylePrevCh != SCE_PL_POD && stylePrevCh != SCE_PL_POD_VERB)
 					levelCurrent++;
@@ -1416,6 +1427,45 @@ void SCI_METHOD LexerPerl::Fold(unsigned int startPos, int length, int /* initSt
 			if (IsPackageLine(lineCurrent, styler)
 				&& !IsPackageLine(lineCurrent + 1, styler))
 				isPackageLine = true;
+		}
+
+		//heredoc folding
+		switch (style) {
+		case SCE_PL_HERE_QQ :
+		case SCE_PL_HERE_Q :
+		case SCE_PL_HERE_QX :
+			switch (stylePrevCh) {
+			case SCE_PL_HERE_QQ :
+			case SCE_PL_HERE_Q :
+			case SCE_PL_HERE_QX :
+				//do nothing;
+				break;
+			default :
+				levelCurrent++;
+				break;
+			}
+			break;
+		default:
+			switch (stylePrevCh) {
+			case SCE_PL_HERE_QQ :
+			case SCE_PL_HERE_Q :
+			case SCE_PL_HERE_QX :
+				levelCurrent--;
+				break;
+			default :
+				//do nothing;
+				break;
+			}
+			break;
+		}
+
+		//explicit folding
+		if (options.foldCommentExplicit && style == SCE_PL_COMMENTLINE && ch == '#') {
+			if (chNext == '{') {
+				levelCurrent++;
+			} else if (levelCurrent > SC_FOLDLEVELBASE  && chNext == '}') {
+				levelCurrent--;
+			}
 		}
 
 		if (atEOL) {
