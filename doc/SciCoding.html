@@ -122,17 +122,16 @@
 	Design goals for Scintilla and SciTE include portability to currently available C++
 	compilers on diverse platforms with high performance and low resource usage.
 	Scintilla has stricter portability requirements to SciTE as it may be ported to
-	low capability platforms such as Windows CE or PalmOS but it is less likely
-	SciTE will be.
+	low capability platforms.
 	</p>
 	<p>
-	To achieve portability, only a subset of C++ features are used. Exceptions are
-	not available on some platforms such as Windows CE so exceptions are not used
-	and thus the standard C++ library can not be used.
-	Template support differs between compilers so is not used in Scintilla but there
-	are some simple uses in SciTE.
+	To achieve portability, only a subset of C++ features are used.
+	Exceptions and templates may be used but, since Scintilla can be used from C as well as
+	C++, exceptions may not be thrown out of Scintilla and all exceptions should be caught
+	before returning from Scintilla.
 	Run-time type information adds to memory use so is turned off.
-	Name spaces are not used.
+	A 'Scintilla' name spaces is optionally used based on the SCI_NAMESPACE
+	definition. This helps with name clashes on OS X.
 	</p>
 	<p>
 	The goto statement is not used because of bad memories from my first job
@@ -175,9 +174,9 @@
        Allocation
     </h3>
 	<p>
-	As exceptions are not used, memory exhaustion can occur.
-	This should be checked for and handled but there is quite a lot of Scintilla and
-	SciTE code that doesn't yet.
+	Memory exhaustion can occur in many Scintilla methods.
+	This should be checked for and handled but once it has happened, it is very difficult to do
+	anything as Scintilla's data structures may be in an inconsistent state.
 	Fixed length buffers are often used as these are simple and avoid the need to
 	worry about memory exhaustion but then require that buffer lengths are
 	respected.
