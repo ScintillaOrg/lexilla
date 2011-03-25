@@ -1685,6 +1685,8 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 			gtk_selection_convert(GTK_WIDGET(PWidget(wMain)), GDK_SELECTION_PRIMARY,
 			        atomSought, event->time);
 		} else if (event->button == 3) {
+			if (!PointInSelection(pt))
+				SetEmptySelection(PositionFromLocation(pt));
 			if (displayPopupMenu) {
 				// PopUp menu
 				// Convert to screen
