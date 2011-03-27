@@ -883,6 +883,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		         (ch == '<') &&
 		         (chNext == '?') &&
 				 !IsScriptCommentState(state) ) {
+ 			beforeLanguage = scriptLanguage;
 			scriptLanguage = segIsScriptingIndicator(styler, i + 2, i + 6, eScriptPHP);
 			if (scriptLanguage != eScriptPHP && isStringState(state)) continue;
 			styler.ColourTo(i - 1, StateToPrint);
@@ -1154,7 +1155,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			if (foldHTMLPreprocessor && (scriptLanguage != eScriptXML)) {
 				levelCurrent--;
 			}
-			scriptLanguage = eScriptNone;
+			scriptLanguage = beforeLanguage;
 			continue;
 		}
 		/////////////////////////////////////
