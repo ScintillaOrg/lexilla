@@ -435,7 +435,6 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 
 	gtk_selection_add_targets(widget, GDK_SELECTION_PRIMARY,
 	                          clipboardCopyTargets, nClipboardCopyTargets);
-
 #ifndef USE_GTK_CLIPBOARD
 	gtk_selection_add_targets(widget, atomClipboard,
 	                          clipboardPasteTargets, nClipboardPasteTargets);
@@ -449,13 +448,10 @@ void ScintillaGTK::Realize(GtkWidget *widget) {
 
 void ScintillaGTK::UnRealizeThis(GtkWidget *widget) {
 	try {
-
 		gtk_selection_clear_targets(widget, GDK_SELECTION_PRIMARY);
-
 #ifndef USE_GTK_CLIPBOARD
 		gtk_selection_clear_targets(widget, atomClipboard);
 #endif
-
 
 		if (IS_WIDGET_MAPPED(widget)) {
 			gtk_widget_unmap(widget);
