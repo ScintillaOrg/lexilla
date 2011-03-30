@@ -38,6 +38,7 @@ class FontAlias : public Font {
 public:
 	FontAlias();
 	virtual ~FontAlias();
+	void MakeAlias(Font &fontOrigin);
 	void ClearFont();
 };
 

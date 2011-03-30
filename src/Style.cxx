@@ -24,6 +24,10 @@ FontAlias::~FontAlias() {
 	// ~Font will not release the actual font resource sine it is now 0
 }
 
+void FontAlias::MakeAlias(Font &fontOrigin) {
+	SetID(fontOrigin.GetID());
+}
+
 void FontAlias::ClearFont() {
 	SetID(0);
 }
@@ -137,7 +141,7 @@ void Style::ClearTo(const Style &source) {
 }
 
 void Style::Copy(Font &font_, const FontMeasurements &fm_) {
-	font.SetID(font_.GetID());
+	font.MakeAlias(font_);
 	(FontMeasurements &)(*this) = fm_;
 #if PLAT_WX
 	ascent = surface.Ascent(font);
