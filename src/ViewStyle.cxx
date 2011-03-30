@@ -372,15 +372,15 @@ void ViewStyle::Refresh(Surface &surface) {
 	}
 
 	CreateFont(styles[STYLE_DEFAULT]);
-	for (unsigned int i=0; i<stylesSize; i++) {
-		CreateFont(styles[i]);
+	for (unsigned int j=0; j<stylesSize; j++) {
+		CreateFont(styles[j]);
 	}
 
 	frFirst->Realise(surface, zoomLevel);
 
-	for (unsigned int i=0; i<stylesSize; i++) {
-		FontRealised *fr = frFirst->Find(styles[i]);
-		styles[i].Copy(*fr, *fr);
+	for (unsigned int k=0; k<stylesSize; k++) {
+		FontRealised *fr = frFirst->Find(styles[k]);
+		styles[k].Copy(*fr, *fr);
 	}
 	maxAscent = 1;
 	maxDescent = 1;
@@ -391,11 +391,11 @@ void ViewStyle::Refresh(Surface &surface) {
 
 	someStylesProtected = false;
 	someStylesForceCase = false;
-	for (unsigned int i=0; i<stylesSize; i++) {
-		if (styles[i].IsProtected()) {
+	for (unsigned int l=0; l<stylesSize; l++) {
+		if (styles[l].IsProtected()) {
 			someStylesProtected = true;
 		}
-		if (styles[i].caseForce != Style::caseMixed) {
+		if (styles[l].caseForce != Style::caseMixed) {
 			someStylesForceCase = true;
 		}
 	}
