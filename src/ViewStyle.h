@@ -39,11 +39,12 @@ public:
 	const char *Save(const char *name);
 };
 
-class FontRealised : public Font, public FontSpecification, public FontMeasurements {
+class FontRealised : public FontSpecification, public FontMeasurements {
 	// Private so FontRealised objects can not be copied
 	FontRealised(const FontRealised &);
 	FontRealised &operator=(const FontRealised &);
 public:
+	Font font;
 	FontRealised *frNext;
 	FontRealised(const FontSpecification &fs);
 	virtual ~FontRealised();

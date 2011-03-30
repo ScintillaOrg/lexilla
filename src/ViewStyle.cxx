@@ -89,14 +89,14 @@ void FontRealised::Realise(Surface &surface, int zoomLevel) {
 		sizeZoomed = 2;
 
 	int deviceHeight = surface.DeviceHeightFont(sizeZoomed);
-	Create(fontName, characterSet, deviceHeight, bold, italic, extraFontFlag);
+	font.Create(fontName, characterSet, deviceHeight, bold, italic, extraFontFlag);
 
-	ascent = surface.Ascent(*this);
-	descent = surface.Descent(*this);
-	externalLeading = surface.ExternalLeading(*this);
-	lineHeight = surface.Height(*this);
-	aveCharWidth = surface.AverageCharWidth(*this);
-	spaceWidth = surface.WidthChar(*this, ' ');
+	ascent = surface.Ascent(font);
+	descent = surface.Descent(font);
+	externalLeading = surface.ExternalLeading(font);
+	lineHeight = surface.Height(font);
+	aveCharWidth = surface.AverageCharWidth(font);
+	spaceWidth = surface.WidthChar(font, ' ');
 	if (frNext) {
 		frNext->Realise(surface, zoomLevel);
 	}
@@ -380,7 +380,7 @@ void ViewStyle::Refresh(Surface &surface) {
 
 	for (unsigned int k=0; k<stylesSize; k++) {
 		FontRealised *fr = frFirst->Find(styles[k]);
-		styles[k].Copy(*fr, *fr);
+		styles[k].Copy(fr->font, *fr);
 	}
 	maxAscent = 1;
 	maxDescent = 1;
