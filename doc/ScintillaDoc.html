@@ -79,7 +79,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 19/January/2011 NH</p>
+    <p>Last edited 31/March/2011 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -5509,6 +5509,11 @@ where it can be applied to each document. This avoids the costs of
 constructing the system header information for each document. This is
 invoked with the <code>SCI_PRIVATELEXERCALL</code> API.</p>
 
+<p><code>Fold</code> is called with the exact range that needs folding.
+Previously, lexers were called with a range that started one line before the range that
+needs to be folded as this allowed fixing up the last line from the previous folding.
+The new approach allows the lexer to decide whether to backtrack or to handle this
+more efficiently.</p>
 
 <h4>IDocument</h4>
 
