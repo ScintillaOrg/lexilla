@@ -609,8 +609,8 @@ gint ScintillaGTK::FocusOut(GtkWidget *widget, GdkEventFocus * /*event*/) {
 
 void ScintillaGTK::SizeRequest(GtkWidget *widget, GtkRequisition *requisition) {
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
-	requisition->width = 600;
-	requisition->height = gdk_screen_height();
+	requisition->width = -1;
+	requisition->height = -1;
 	GtkRequisition child_requisition;
 	gtk_widget_size_request(PWidget(sciThis->scrollbarh), &child_requisition);
 	gtk_widget_size_request(PWidget(sciThis->scrollbarv), &child_requisition);
