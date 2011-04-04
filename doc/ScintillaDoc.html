@@ -79,7 +79,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 31/March/2011 NH</p>
+    <p>Last edited 4/April/2011 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -5682,31 +5682,38 @@ struct NotifyHeader {   // This matches the Win32 NMHDR structure
 };
 
 struct SCNotification {
-    struct NotifyHeader nmhdr;
-    int position;
-    // SCN_STYLENEEDED, SCN_DOUBLECLICK, SCN_MODIFIED, SCN_DWELLSTART,
-    // SCN_DWELLEND, SCN_CALLTIPCLICK,
-    // SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK, SCN_HOTSPOTRELEASECLICK
-    int ch;             // SCN_CHARADDED, SCN_KEY
-    int modifiers;
-    // SCN_KEY, SCN_DOUBLECLICK, SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK, SCN_HOTSPOTRELEASECLICK
-    int modificationType; // SCN_MODIFIED
-    const char *text;   // SCN_MODIFIED, SCN_USERLISTSELECTION, SCN_AUTOCSELECTION
-    int length;         // SCN_MODIFIED
-    int linesAdded;     // SCN_MODIFIED
-    int message;        // SCN_MACRORECORD
-    uptr_t wParam;      // SCN_MACRORECORD
-    sptr_t lParam;      // SCN_MACRORECORD
-    int line;           // SCN_MODIFIED, SCN_DOUBLECLICK
-    int foldLevelNow;   // SCN_MODIFIED
-    int foldLevelPrev;  // SCN_MODIFIED
-    int margin;         // SCN_MARGINCLICK
-    int listType;       // SCN_USERLISTSELECTION, SCN_AUTOCSELECTION
-    int x;              // SCN_DWELLSTART, SCN_DWELLEND
-    int y;              // SCN_DWELLSTART, SCN_DWELLEND
-    int token;		// SCN_MODIFIED with SC_MOD_CONTAINER
-    int annotationLinesAdded;	// SC_MOD_CHANGEANNOTATION
-    int updated;	// SCN_UPDATEUI
+	struct Sci_NotifyHeader nmhdr;
+	int position;
+	/* SCN_STYLENEEDED, SCN_DOUBLECLICK, SCN_MODIFIED, SCN_MARGINCLICK, */
+	/* SCN_NEEDSHOWN, SCN_DWELLSTART, SCN_DWELLEND, SCN_CALLTIPCLICK, */
+	/* SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK, SCN_HOTSPOTRELEASECLICK, */
+	/* SCN_INDICATORCLICK, SCN_INDICATORRELEASE, */
+	/* SCN_USERLISTSELECTION, SCN_AUTOCSELECTION */
+
+	int ch;		/* SCN_CHARADDED, SCN_KEY */
+	int modifiers;
+	/* SCN_KEY, SCN_DOUBLECLICK, SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK, */
+	/* SCN_HOTSPOTRELEASECLICK, SCN_INDICATORCLICK, SCN_INDICATORRELEASE, */
+
+	int modificationType;	/* SCN_MODIFIED */
+	const char *text;
+	/* SCN_MODIFIED, SCN_USERLISTSELECTION, SCN_AUTOCSELECTION, SCN_URIDROPPED */
+
+	int length;		/* SCN_MODIFIED */
+	int linesAdded;	/* SCN_MODIFIED */
+	int message;	/* SCN_MACRORECORD */
+	uptr_t wParam;	/* SCN_MACRORECORD */
+	sptr_t lParam;	/* SCN_MACRORECORD */
+	int line;		/* SCN_MODIFIED */
+	int foldLevelNow;	/* SCN_MODIFIED */
+	int foldLevelPrev;	/* SCN_MODIFIED */
+	int margin;		/* SCN_MARGINCLICK */
+	int listType;	/* SCN_USERLISTSELECTION */
+	int x;			/* SCN_DWELLSTART, SCN_DWELLEND */
+	int y;		/* SCN_DWELLSTART, SCN_DWELLEND */
+	int token;		/* SCN_MODIFIED with SC_MOD_CONTAINER */
+	int annotationLinesAdded;	/* SCN_MODIFIED with SC_MOD_CHANGEANNOTATION */
+	int updated;	/* SCN_UPDATEUI */
 };
 </pre>
 
@@ -5804,7 +5811,9 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
 
     <p><b id="SCN_DOUBLECLICK">SCN_DOUBLECLICK</b><br />
      The mouse button was double clicked in editor. The <code>position</code> field is set to the text position of the
-    double click and the <code>line</code> field is set to the line of the double click.</p>
+    double click, the <code>line</code> field is set to the line of the double click, and
+    the <code>modifiers</code> field is set to the key modifiers
+    held down in a similar manner to <a class="message" href="#SCN_KEY">SCN_KEY</a>.</p>
 
     <p><b id="SCN_UPDATEUI">SCN_UPDATEUI</b><br />
      Either the text or styling of the document has changed or the selection range or scroll position has changed.
@@ -6333,7 +6342,7 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
 
       <tbody valign="top">
         <tr>
-          <td align="left"><code>wParam</code></td>
+          <td align="left"><code>listType</code></td>
 
           <td align="left">This is set to the <code>listType</code> parameter from the <a
           class="message" href="#SCI_USERLISTSHOW"><code>SCI_USERLISTSHOW</code></a> message that
@@ -6345,10 +6354,15 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
 
           <td align="left">The text of the selection.</td>
         </tr>
+
+        <tr>
+          <td align="left"><code>position</code></td>
+
+          <td align="left">The position the list was displayed at.</td>
+        </tr>
       </tbody>
     </table>
     <br />
-     <br />
 
 
     <p><b id="SCN_URIDROPPED">SCN_URIDROPPED</b><br />
@@ -6392,7 +6406,6 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
       </tbody>
     </table>
     <br />
-     <br />
 
     <p><b id="SCI_SETMOUSEDWELLTIME">SCI_SETMOUSEDWELLTIME</b><br />
      <b id="SCI_GETMOUSEDWELLTIME">SCI_GETMOUSEDWELLTIME</b><br />
@@ -6452,7 +6465,7 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
 
       <tbody valign="top">
         <tr>
-          <td align="left"><code>lParam</code></td>
+          <td align="left"><code>position</code></td>
 
           <td align="left">The start position of the word being completed.</td>
         </tr>
