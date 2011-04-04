@@ -205,7 +205,7 @@ struct OptionSetSQL : public OptionSet<OptionsSQL> {
 		DefineProperty("fold", &OptionsSQL::fold);
 
 		DefineProperty("fold.sql.at.else", &OptionsSQL::foldAtElse,
-		               "This option enables SQL folding on a \"ELSE\" and \"ELSIF\"line of an IF statement.");
+		               "This option enables SQL folding on a \"ELSE\" and \"ELSIF\" line of an IF statement.");
 
 		DefineProperty("fold.comment", &OptionsSQL::foldComment);
 
