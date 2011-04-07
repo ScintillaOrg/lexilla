@@ -139,6 +139,9 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int cursorMode;
 	int controlCharSymbol;
 
+	// Highlight current folding block
+	HighlightDelimiter highlightDelimiter;
+
 	bool hasFocus;
 	bool hideSelection;
 	bool inOverstrike;

@@ -755,6 +755,7 @@ void Editor::InvalidateSelection(SelectionRange newMain, bool invalidateWholeSel
 void Editor::SetSelection(SelectionPosition currentPos_, SelectionPosition anchor_) {
 	currentPos_ = ClampPositionIntoDocument(currentPos_);
 	anchor_ = ClampPositionIntoDocument(anchor_);
+	int currentLine = pdoc->LineFromPosition(currentPos_.Position());
 	/* For Line selection - ensure the anchor and caret are always
 	   at the beginning and end of the region lines. */
 	if (sel.selType == Selection::selLines) {
@@ -773,6 +774,10 @@ void Editor::SetSelection(SelectionPosition currentPos_, SelectionPosition ancho
 	sel.RangeMain() = rangeNew;
 	SetRectangularRange();
 	ClaimSelection();
+
+	if (highlightDelimiter.NeedsDrawing(currentLine)) {
+		RedrawSelMargin();
+	}
 }
 
 void Editor::SetSelection(int currentPos_, int anchor_) {
@@ -782,6 +787,7 @@ void Editor::SetSelection(int currentPos_, int anchor_) {
 // Just move the caret on the main selection
 void Editor::SetSelection(SelectionPosition currentPos_) {
 	currentPos_ = ClampPositionIntoDocument(currentPos_);
+	int currentLine = pdoc->LineFromPosition(currentPos_.Position());
 	if (sel.Count() > 1 || !(sel.RangeMain().caret == currentPos_)) {
 		InvalidateSelection(SelectionRange(currentPos_));
 	}
@@ -794,6 +800,10 @@ void Editor::SetSelection(SelectionPosition currentPos_) {
 			SelectionRange(SelectionPosition(currentPos_), sel.RangeMain().anchor);
 	}
 	ClaimSelection();
+
+	if (highlightDelimiter.NeedsDrawing(currentLine)) {
+		RedrawSelMargin();
+	}
 }
 
 void Editor::SetSelection(int currentPos_) {
@@ -801,6 +811,7 @@ void Editor::SetSelection(int currentPos_) {
 }
 
 void Editor::SetEmptySelection(SelectionPosition currentPos_) {
+	int currentLine = pdoc->LineFromPosition(currentPos_.Position());
 	SelectionRange rangeNew(ClampPositionIntoDocument(currentPos_));
 	if (sel.Count() > 1 || !(sel.RangeMain() == rangeNew)) {
 		InvalidateSelection(rangeNew);
@@ -810,6 +821,9 @@ void Editor::SetEmptySelection(SelectionPosition currentPos_) {
 	SetRectangularRange();
 	ClaimSelection();
 
+	if (highlightDelimiter.NeedsDrawing(currentLine)) {
+		RedrawSelMargin();
+	}
 }
 
 void Editor::SetEmptySelection(int currentPos_) {
@@ -909,6 +923,12 @@ int Editor::MovePositionTo(SelectionPosition newPos, Selection::selTypes selt, b
 		} else {
 			SetXYScroll(newXY);
 		}
+	}
+
+	int currentLine = pdoc->LineFromPosition(newPos.Position());
+
+	if (highlightDelimiter.NeedsDrawing(currentLine)) {
+		RedrawSelMargin();
 	}
 	return 0;
 }
@@ -1692,7 +1712,6 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 
 			int visibleLine = topLine;
 			int yposScreen = 0;
-
 			// Work out whether the top line is whitespace located after a
 			// lessening of fold level which implies a 'fold tail' but which should not
 			// be displayed until the last of a sequence of whitespace.
@@ -1710,6 +1729,9 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 						needWhiteClosure = true;
 				}
 			}
+			if (highlightDelimiter.isEnabled && (vs.ms[margin].mask & SC_MASK_FOLDERS)) {
+				pdoc->GetHighlightDelimiters(pdoc->LineFromPosition(CurrentPosition()), highlightDelimiter);
+			}
 
 			// Old code does not know about new markers needed to distinguish all cases
 			int folderOpenMid = SubstituteMarkerIfEmpty(SC_MARKNUM_FOLDEROPENMID,
@@ -1720,7 +1742,6 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 			while ((visibleLine < cs.LinesDisplayed()) && yposScreen < rcMargin.bottom) {
 
 				PLATFORM_ASSERT(visibleLine < cs.LinesDisplayed());
-
 				int lineDoc = cs.DocFromDisplay(visibleLine);
 				PLATFORM_ASSERT(cs.GetVisible(lineDoc));
 				bool firstSubLine = visibleLine == cs.DisplayFromDoc(lineDoc);
@@ -1791,7 +1812,6 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 						marks |= 1 << SC_MARKNUM_FOLDERSUB;
 					}
 				}
-
 				marks &= vs.ms[margin].mask;
 				PRectangle rcMarker = rcSelMargin;
 				rcMarker.top = yposScreen;
@@ -1838,7 +1858,20 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 				if (marks) {
 					for (int markBit = 0; (markBit < 32) && marks; markBit++) {
 						if (marks & 1) {
-							vs.markers[markBit].Draw(surface, rcMarker, vs.styles[STYLE_LINENUMBER].font);
+							LineMarker::typeOfFold tFold;
+							if (!highlightDelimiter.isCurrentBlockHighlight(lineDoc)) {
+								tFold = LineMarker::undefined;
+							} else if (highlightDelimiter.isBodyBlockFold(lineDoc)) {
+								tFold = LineMarker::body;
+							} else if (highlightDelimiter.isHeadBlockFold(lineDoc)) {
+								tFold = LineMarker::head;
+							} else if (highlightDelimiter.isTailBlockFold(lineDoc)) {
+								tFold = LineMarker::tail;
+							} else {
+								//Normally, this branch is never used. But I prefer to manage it anyway.
+								tFold = LineMarker::undefined;
+							}
+							vs.markers[markBit].Draw(surface, rcMarker, vs.styles[STYLE_LINENUMBER].font, tFold);
 						}
 						marks >>= 1;
 					}
@@ -7743,6 +7776,15 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			vs.markers[wParam].fore.desired = ColourDesired(lParam);
 		InvalidateStyleData();
 		RedrawSelMargin();
+		break;
+	case SCI_MARKERSETBACKSELECTED:
+		if (wParam <= MARKER_MAX)
+			vs.markers[wParam].backSelected.desired = ColourDesired(lParam);
+		InvalidateStyleRedraw();
+		break;
+	case SCI_MARKERENABLEHIGHLIGHT:
+		highlightDelimiter.isEnabled = wParam == 1;
+		InvalidateStyleRedraw();
 		break;
 	case SCI_MARKERSETBACK:
 		if (wParam <= MARKER_MAX)
