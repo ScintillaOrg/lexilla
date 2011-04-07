@@ -1735,17 +1735,21 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 				int levelNextNum = levelNext & SC_FOLDLEVELNUMBERMASK;
 				if (level & SC_FOLDLEVELHEADERFLAG) {
 					if (firstSubLine) {
-						if (cs.GetExpanded(lineDoc)) {
-							if (levelNum == SC_FOLDLEVELBASE)
-								marks |= 1 << SC_MARKNUM_FOLDEROPEN;
-							else
-								marks |= 1 << folderOpenMid;
-						} else {
-							if (levelNum == SC_FOLDLEVELBASE)
-								marks |= 1 << SC_MARKNUM_FOLDER;
-							else
-								marks |= 1 << folderEnd;
-						}
+						if (levelNum < levelNextNum) {
+							if (cs.GetExpanded(lineDoc)) {
+								if (levelNum == SC_FOLDLEVELBASE)
+									marks |= 1 << SC_MARKNUM_FOLDEROPEN;
+								else
+									marks |= 1 << folderOpenMid;
+							} else {
+								if (levelNum == SC_FOLDLEVELBASE)
+									marks |= 1 << SC_MARKNUM_FOLDER;
+								else
+									marks |= 1 << folderEnd;
+							}
+						} else if (levelNum > SC_FOLDLEVELBASE){
+							marks |= 1 << SC_MARKNUM_FOLDERSUB;
+ 						}
 					} else {
 						marks |= 1 << SC_MARKNUM_FOLDERSUB;
 					}
@@ -3443,21 +3447,22 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 				ll->RestoreBracesHighlight(rangeLine, braces);
 
 				bool expanded = cs.GetExpanded(lineDoc);
-				// Paint the line above the fold
-				if ((expanded && (foldFlags & SC_FOLDFLAG_LINEBEFORE_EXPANDED))
-					||
-					(!expanded && (foldFlags & SC_FOLDFLAG_LINEBEFORE_CONTRACTED))) {
-					if (pdoc->GetLevel(lineDoc) & SC_FOLDLEVELHEADERFLAG) {
+				const int level = pdoc->GetLevel(lineDoc);
+				const int levelNext = pdoc->GetLevel(lineDoc + 1);
+				if ((level & SC_FOLDLEVELHEADERFLAG) &&
+					((level & SC_FOLDLEVELNUMBERMASK) < (levelNext & SC_FOLDLEVELNUMBERMASK))) {
+					// Paint the line above the fold
+					if ((expanded && (foldFlags & SC_FOLDFLAG_LINEBEFORE_EXPANDED))
+						||
+						(!expanded && (foldFlags & SC_FOLDFLAG_LINEBEFORE_CONTRACTED))) {
 						PRectangle rcFoldLine = rcLine;
 						rcFoldLine.bottom = rcFoldLine.top + 1;
 						surface->FillRectangle(rcFoldLine, vs.styles[STYLE_DEFAULT].fore.allocated);
 					}
-				}
-				// Paint the line below the fold
-				if ((expanded && (foldFlags & SC_FOLDFLAG_LINEAFTER_EXPANDED))
-					||
-					(!expanded && (foldFlags & SC_FOLDFLAG_LINEAFTER_CONTRACTED))) {
-					if (pdoc->GetLevel(lineDoc) & SC_FOLDLEVELHEADERFLAG) {
+					// Paint the line below the fold
+					if ((expanded && (foldFlags & SC_FOLDFLAG_LINEAFTER_EXPANDED))
+						||
+						(!expanded && (foldFlags & SC_FOLDFLAG_LINEAFTER_CONTRACTED))) {
 						PRectangle rcFoldLine = rcLine;
 						rcFoldLine.top = rcFoldLine.bottom - 1;
 						surface->FillRectangle(rcFoldLine, vs.styles[STYLE_DEFAULT].fore.allocated);
@@ -6558,8 +6563,8 @@ void Editor::ToggleContraction(int line) {
 
 		if (cs.GetExpanded(line)) {
 			int lineMaxSubord = pdoc->GetLastChild(line);
-			cs.SetExpanded(line, 0);
 			if (lineMaxSubord > line) {
+				cs.SetExpanded(line, 0);
 				cs.SetVisible(line + 1, lineMaxSubord, false);
 
 				int lineCurrent = pdoc->LineFromPosition(sel.MainCaret());
