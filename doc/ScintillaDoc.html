@@ -79,7 +79,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 4/April/2011 NH</p>
+    <p>Last edited 20/April/2011 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -3557,6 +3557,8 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_INDICGETFORE">SCI_INDICGETFORE(int indicatorNumber)</a><br />
      <a class="message" href="#SCI_INDICSETALPHA">SCI_INDICSETALPHA(int indicatorNumber, int alpha)</a><br />
      <a class="message" href="#SCI_INDICGETALPHA">SCI_INDICGETALPHA(int indicatorNumber)</a><br />
+     <a class="message" href="#SCI_INDICSETOUTLINEALPHA">SCI_INDICSETOUTLINEALPHA(int indicatorNumber, int alpha)</a><br />
+     <a class="message" href="#SCI_INDICGETOUTLINEALPHA">SCI_INDICGETOUTLINEALPHA(int indicatorNumber)</a><br />
      <a class="message" href="#SCI_INDICSETUNDER">SCI_INDICSETUNDER(int indicatorNumber, bool under)</a><br />
      <a class="message" href="#SCI_INDICGETUNDER">SCI_INDICGETUNDER(int indicatorNumber)</a><br />
     </code>
@@ -3641,9 +3643,10 @@ struct Sci_TextToFind {
           <td align="center">7</td>
 
           <td>A rectangle with rounded corners around the text using translucent drawing with the
-              interior more transparent than the border. You can use
-              <a class="message" href="#SCI_INDICSETALPHA">SCI_INDICSETALPHA</a>
-              to control the alpha transparency value. The default alpha value is 30.
+              interior usually more transparent than the border. You can use
+              <a class="message" href="#SCI_INDICSETALPHA">SCI_INDICSETALPHA</a> and
+			  <a class="message" href="#SCI_INDICSETOUTLINEALPHA">SCI_INDICSETOUTLINEALPHA</a>
+              to control the alpha transparency values. The default alpha values are 30 for fill colour and 50 for outline colour.
 	</td>
         </tr>
       </tbody>
@@ -3665,7 +3668,14 @@ struct Sci_TextToFind {
     <p><b id="SCI_INDICSETALPHA">SCI_INDICSETALPHA(int indicatorNumber, int alpha)</b><br />
      <b id="SCI_INDICGETALPHA">SCI_INDICGETALPHA(int indicatorNumber)</b><br />
      These two messages set and get the alpha transparency used for drawing the
-     fill color of the INDIC_ROUNDBOX rectangle. The alpha value can range from
+     fill colour of the INDIC_ROUNDBOX rectangle. The alpha value can range from
+     0 (completely transparent) to 255 (no transparency).
+     </p>
+
+    <p><b id="SCI_INDICSETOUTLINEALPHA">SCI_INDICSETOUTLINEALPHA(int indicatorNumber, int alpha)</b><br />
+     <b id="SCI_INDICGETOUTLINEALPHA">SCI_INDICGETOUTLINEALPHA(int indicatorNumber)</b><br />
+     These two messages set and get the alpha transparency used for drawing the
+     outline colour of the INDIC_ROUNDBOX rectangle. The alpha value can range from
      0 (completely transparent) to 255 (no transparency).
      </p>
 
