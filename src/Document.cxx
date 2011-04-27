@@ -2054,6 +2054,12 @@ long BuiltinRegex::FindText(Document *doc, int minPos, int maxPos, const char *s
 		// the start position is at end of line or between line end characters.
 		lineRangeStart++;
 		startPos = doc->LineStart(lineRangeStart);
+	} else if ((increment == -1) &&
+	           (startPos <= doc->LineStart(lineRangeStart)) &&
+	           (lineRangeStart > lineRangeEnd)) {
+		// the start position is at beginning of line.
+		lineRangeStart--;
+		startPos = doc->LineEnd(lineRangeStart);
 	}
 	int pos = -1;
 	int lenRet = 0;
@@ -2091,7 +2097,8 @@ long BuiltinRegex::FindText(Document *doc, int minPos, int maxPos, const char *s
 		if (success) {
 			pos = search.bopat[0];
 			lenRet = search.eopat[0] - search.bopat[0];
-			if (increment == -1) {
+			// There can be only one start of a line, so no need to look for last match in line
+			if ((increment == -1) && (s[0] != '^')) {
 				// Check for the last match on this line.
 				int repetitions = 1000;	// Break out of infinite loop
 				while (success && (search.eopat[0] <= endOfLine) && (repetitions--)) {
