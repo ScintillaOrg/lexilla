@@ -79,7 +79,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 20/April/2011 NH</p>
+    <p>Last edited 27/April/2011 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -625,10 +625,9 @@ struct Sci_TextRange {
       </tbody>
     </table>
 
-    <p>If <code>SCFIND_REGEXP</code> is not included in the <code>searchFlags</code>, you can
+    <p>You can
     search backwards to find the previous occurrence of a search string by setting the end of the
-    search range before the start. If <code>SCFIND_REGEXP</code> is included, searches are always
-    from a lower position to a higher position, even if the search range is backwards.</p>
+    search range before the start.</p>
 
     <p>In a regular expression, special characters interpreted are:</p>
 
@@ -722,6 +721,8 @@ struct Sci_TextRange {
       </tbody>
     </table>
 
+    <p>Regular expressions will only match ranges within a single line, never matching over multiple lines.</p>
+
     <p><b id="SCI_FINDTEXT">SCI_FINDTEXT(int searchFlags, <a class="jump"
     href="#Sci_TextToFind">Sci_TextToFind</a> *ttf)</b><br />
      This message searches for text in the document. It does not use or move the current selection.
@@ -730,9 +731,8 @@ struct Sci_TextRange {
 
     <p>The <code>Sci_TextToFind</code> structure is defined in <code>Scintilla.h</code>; set
     <code>chrg.cpMin</code> and <code>chrg.cpMax</code> with the range of positions in the document
-    to search. If <code>SCFIND_REGEXP</code> is not included in the flags, you can search backwards by
-    setting <code>chrg.cpMax</code> less than <code>chrg.cpMin</code>. If <code>SCFIND_REGEXP</code>
-    is included, the search is always forwards (even if <code>chrg.cpMax</code> is less than <code>chrg.cpMin</code>).
+    to search. You can search backwards by
+    setting <code>chrg.cpMax</code> less than <code>chrg.cpMin</code>.
     Set the <code>lpstrText</code> member of <code>Sci_TextToFind</code> to point at a zero terminated
     text string holding the search pattern. If your language makes the use of <code>Sci_TextToFind</code>
     difficult, you should consider using <code>SCI_SEARCHINTARGET</code> instead.</p>
@@ -772,9 +772,7 @@ struct Sci_TextToFind {
 
     <p><code>SCI_SEARCHNEXT</code> and <code>SCI_SEARCHPREV</code> search for the next and previous
     occurrence of the zero terminated search string pointed at by text. The search is modified by
-    the <a class="jump" href="#searchFlags"><code>searchFlags</code></a>. If you request a regular
-    expression, <code>SCI_SEARCHPREV</code> finds the first occurrence of the search string in the
-    document, not the previous one before the anchor point.</p>
+    the <a class="jump" href="#searchFlags"><code>searchFlags</code></a>. </p>
 
     <p>The return value is -1 if nothing is found, otherwise the return value is the start position
     of the matching text. The selection is updated to show the matched text, but is not scrolled
