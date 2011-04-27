@@ -1730,7 +1730,9 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 				}
 			}
 			if (highlightDelimiter.isEnabled && (vs.ms[margin].mask & SC_MASK_FOLDERS)) {
-				pdoc->GetHighlightDelimiters(pdoc->LineFromPosition(CurrentPosition()), highlightDelimiter);
+				int lineBack = cs.DocFromDisplay(topLine);
+				int lineFront = cs.DocFromDisplay(((rcMargin.bottom - rcMargin.top) / vs.lineHeight) + topLine) + 1;
+				pdoc->GetHighlightDelimiters(highlightDelimiter, pdoc->LineFromPosition(CurrentPosition()), lineBack, lineFront);
 			}
 
 			// Old code does not know about new markers needed to distinguish all cases
