@@ -77,6 +77,8 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 	case LineMarker::head :
 		head = backSelected;
 		tail = backSelected;
+		if (markType == SC_MARK_VLINE)
+			body = backSelected;
 		break;
 	case LineMarker::body :
 		head = backSelected;
