@@ -3087,6 +3087,8 @@ struct Sci_TextToFind {
     <code><a class="message" href="#SCI_BRACEHIGHLIGHT">SCI_BRACEHIGHLIGHT(int pos1, int
     pos2)</a><br />
      <a class="message" href="#SCI_BRACEBADLIGHT">SCI_BRACEBADLIGHT(int pos1)</a><br />
+     <a class="message" href="#SCI_BRACEHIGHLIGHTINDICATOR">SCI_BRACEHIGHLIGHTINDICATOR(bool useBraceHighlightIndicator, int indicatorNumber)</a><br />
+     <a class="message" href="#SCI_BRACEBADLIGHTINDICATOR">SCI_BRACEBADLIGHTINDICATOR(bool useBraceBadLightIndicator, int indicatorNumber)</a><br />
      <a class="message" href="#SCI_BRACEMATCH">SCI_BRACEMATCH(int position, int
     maxReStyle)</a><br />
     </code>
@@ -3104,6 +3106,12 @@ struct Sci_TextToFind {
     badlighting style</a>, style <code>STYLE_BRACEBAD</code> (35), can be used to show the brace
     that is unmatched. Using a position of <code>INVALID_POSITION</code> (-1) removes the
     highlight.</p>
+
+    <p><b id="#SCI_BRACEHIGHLIGHTINDICATOR">SCI_BRACEHIGHLIGHTINDICATOR(bool useBraceHighlightIndicator, int indicatorNumber)</b><br />
+     Use specified indicator to highlight matching braces instead of changing their style.</p>
+
+    <p><b id="#SCI_BRACEBADLIGHTINDICATOR">SCI_BRACEBADLIGHTINDICATOR(bool useBraceBadLightIndicator, int indicatorNumber)</b><br />
+     Use specified indicator to highlight non matching brace instead of changing its style.</p>
 
     <p><b id="SCI_BRACEMATCH">SCI_BRACEMATCH(int pos, int maxReStyle)</b><br />
      The <code>SCI_BRACEMATCH</code> message finds a corresponding matching brace given
