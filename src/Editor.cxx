@@ -3050,7 +3050,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 			lineNextWithText++;
 		}
 		if (lineNextWithText > line) {
-			// This line is empty, so use indentation of last line with text
+			xStartText = 100000;	// Don't limit to visible indentation on empty line
+			// This line is empty, so use indentation of first next line with text
 			indentSpace = Platform::Maximum(indentSpace,
 			        pdoc->GetLineIndentation(lineNextWithText));
 		}
