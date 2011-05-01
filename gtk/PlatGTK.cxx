@@ -2501,9 +2501,13 @@ void ListBoxX::Select(int n) {
 		int total = Length();
 		GtkAdjustment *adj =
 			gtk_tree_view_get_vadjustment(GTK_TREE_VIEW(list));
+#if GTK_CHECK_VERSION(3,0,0)
+		gfloat value = ((gfloat)n / total) * (gtk_adjustment_get_upper(adj) - gtk_adjustment_get_lower(adj))
+							+ gtk_adjustment_get_lower(adj) - gtk_adjustment_get_page_size(adj) / 2;
+#else
 		gfloat value = ((gfloat)n / total) * (adj->upper - adj->lower)
 							+ adj->lower - adj->page_size / 2;
-
+#endif
 		// Get cell height
 		int row_width;
 		int row_height;
@@ -2522,8 +2526,13 @@ void ListBoxX::Select(int n) {
 		}
 		// Clamp it.
 		value = (value < 0)? 0 : value;
+#if GTK_CHECK_VERSION(3,0,0)
+		value = (value > (gtk_adjustment_get_upper(adj) - gtk_adjustment_get_page_size(adj)))?
+					(gtk_adjustment_get_upper(adj) - gtk_adjustment_get_page_size(adj)) : value;
+#else
 		value = (value > (adj->upper - adj->page_size))?
 					(adj->upper - adj->page_size) : value;
+#endif
 
 		// Set it.
 		gtk_adjustment_set_value(adj, value);

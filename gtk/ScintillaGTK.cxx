@@ -118,8 +118,8 @@ class ScintillaGTK : public ScintillaBase {
 	Window wText;
 	Window scrollbarv;
 	Window scrollbarh;
-	GtkObject *adjustmentv;
-	GtkObject *adjustmenth;
+	GtkAdjustment *adjustmentv;
+	GtkAdjustment *adjustmenth;
 	int scrollBarWidth;
 	int scrollBarHeight;
 
@@ -683,7 +683,7 @@ void ScintillaGTK::Initialise() {
 	// Avoid background drawing flash
 	gtk_widget_set_double_buffered(widtxt, FALSE);
 	gtk_widget_set_size_request(widtxt, 100, 100);
-	adjustmentv = gtk_adjustment_new(0.0, 0.0, 201.0, 1.0, 20.0, 20.0);
+	adjustmentv = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.0, 201.0, 1.0, 20.0, 20.0));
 	scrollbarv = gtk_vscrollbar_new(GTK_ADJUSTMENT(adjustmentv));
 #if GTK_CHECK_VERSION(2,20,0)
 	gtk_widget_set_can_focus(PWidget(scrollbarv), FALSE);
@@ -695,7 +695,7 @@ void ScintillaGTK::Initialise() {
 	gtk_widget_set_parent(PWidget(scrollbarv), PWidget(wMain));
 	gtk_widget_show(PWidget(scrollbarv));
 
-	adjustmenth = gtk_adjustment_new(0.0, 0.0, 101.0, 1.0, 20.0, 20.0);
+	adjustmenth = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.0, 101.0, 1.0, 20.0, 20.0));
 	scrollbarh = gtk_hscrollbar_new(GTK_ADJUSTMENT(adjustmenth));
 #if GTK_CHECK_VERSION(2,20,0)
 	gtk_widget_set_can_focus(PWidget(scrollbarh), FALSE);
@@ -1051,6 +1051,17 @@ bool ScintillaGTK::ModifyScrollBars(int nMax, int nPage) {
 	bool modified = false;
 	int pageScroll = LinesToScroll();
 
+#if GTK_CHECK_VERSION(3,0,0)
+	if (gtk_adjustment_get_upper(adjustmentv) != (nMax + 1) ||
+	        gtk_adjustment_get_page_size(adjustmentv) != nPage ||
+	        gtk_adjustment_get_page_increment(adjustmentv) != pageScroll) {
+		gtk_adjustment_set_upper(adjustmentv, nMax + 1);
+	        gtk_adjustment_set_page_size(adjustmentv, nPage);
+	        gtk_adjustment_set_page_increment(adjustmentv, pageScroll);
+		gtk_adjustment_changed(GTK_ADJUSTMENT(adjustmentv));
+		modified = true;
+	}
+#else
 	if (GTK_ADJUSTMENT(adjustmentv)->upper != (nMax + 1) ||
 	        GTK_ADJUSTMENT(adjustmentv)->page_size != nPage ||
 	        GTK_ADJUSTMENT(adjustmentv)->page_increment != pageScroll) {
@@ -1060,6 +1071,7 @@ bool ScintillaGTK::ModifyScrollBars(int nMax, int nPage) {
 		gtk_adjustment_changed(GTK_ADJUSTMENT(adjustmentv));
 		modified = true;
 	}
+#endif
 
 	PRectangle rcText = GetTextRectangle();
 	int horizEndPreferred = scrollWidth;
@@ -1068,6 +1080,19 @@ bool ScintillaGTK::ModifyScrollBars(int nMax, int nPage) {
 	unsigned int pageWidth = rcText.Width();
 	unsigned int pageIncrement = pageWidth / 3;
 	unsigned int charWidth = vs.styles[STYLE_DEFAULT].aveCharWidth;
+#if GTK_CHECK_VERSION(3,0,0)
+	if (gtk_adjustment_get_upper(adjustmenth) != horizEndPreferred ||
+	        gtk_adjustment_get_page_size(adjustmenth) != pageWidth ||
+	        gtk_adjustment_get_page_increment(adjustmenth) != pageIncrement ||
+	        gtk_adjustment_get_step_increment(adjustmenth) != charWidth) {
+		gtk_adjustment_set_upper(adjustmenth, horizEndPreferred);
+	        gtk_adjustment_set_page_size(adjustmenth, pageWidth);
+	        gtk_adjustment_set_page_increment(adjustmenth, pageIncrement);
+	        gtk_adjustment_set_step_increment(adjustmenth, charWidth);
+		gtk_adjustment_changed(GTK_ADJUSTMENT(adjustmenth));
+		modified = true;
+	}
+#else
 	if (GTK_ADJUSTMENT(adjustmenth)->upper != horizEndPreferred ||
 	        GTK_ADJUSTMENT(adjustmenth)->page_size != pageWidth ||
 	        GTK_ADJUSTMENT(adjustmenth)->page_increment != pageIncrement ||
@@ -1079,6 +1104,7 @@ bool ScintillaGTK::ModifyScrollBars(int nMax, int nPage) {
 		gtk_adjustment_changed(GTK_ADJUSTMENT(adjustmenth));
 		modified = true;
 	}
+#endif
 	return modified;
 }
 
@@ -1600,8 +1626,16 @@ void ScintillaGTK::Resize(int width, int height) {
 	//printf("Resize %d %d\n", width, height);
 
 	// Not always needed, but some themes can have different sizes of scrollbars
+#if GTK_CHECK_VERSION(3,0,0)
+	GtkRequisition requisition;
+	gtk_widget_get_requisition(PWidget(scrollbarv), &requisition);
+	scrollBarWidth = requisition.width;
+	gtk_widget_get_requisition(PWidget(scrollbarh), &requisition);
+	scrollBarHeight = requisition.height;
+#else
 	scrollBarWidth = GTK_WIDGET(PWidget(scrollbarv))->requisition.width;
 	scrollBarHeight = GTK_WIDGET(PWidget(scrollbarh))->requisition.height;
+#endif
 
 	// These allocations should never produce negative sizes as they would wrap around to huge
 	// unsigned numbers inside GTK+ causing warnings.
@@ -1649,10 +1683,16 @@ void ScintillaGTK::Resize(int width, int height) {
 	gtk_widget_size_allocate(GTK_WIDGET(PWidget(wText)), &alloc);
 }
 
-static void SetAdjustmentValue(GtkObject *object, int value) {
+static void SetAdjustmentValue(GtkAdjustment *object, int value) {
 	GtkAdjustment *adjustment = GTK_ADJUSTMENT(object);
+#if GTK_CHECK_VERSION(3,0,0)
+	int maxValue = static_cast<int>(
+		gtk_adjustment_get_upper(adjustment) - gtk_adjustment_get_page_size(adjustment));
+#else
 	int maxValue = static_cast<int>(
 		adjustment->upper - adjustment->page_size);
+#endif
+
 	if (value > maxValue)
 		value = maxValue;
 	if (value < 0)
@@ -2220,7 +2260,11 @@ gboolean ScintillaGTK::Expose(GtkWidget *, GdkEventExpose *ose) {
 
 void ScintillaGTK::ScrollSignal(GtkAdjustment *adj, ScintillaGTK *sciThis) {
 	try {
+#if GTK_CHECK_VERSION(3,0,0)
+		sciThis->ScrollTo(static_cast<int>(gtk_adjustment_get_value(adj)), false);
+#else
 		sciThis->ScrollTo(static_cast<int>(adj->value), false);
+#endif
 	} catch (...) {
 		sciThis->errorStatus = SC_STATUS_FAILURE;
 	}
@@ -2228,7 +2272,11 @@ void ScintillaGTK::ScrollSignal(GtkAdjustment *adj, ScintillaGTK *sciThis) {
 
 void ScintillaGTK::ScrollHSignal(GtkAdjustment *adj, ScintillaGTK *sciThis) {
 	try {
+#if GTK_CHECK_VERSION(3,0,0)
+		sciThis->HorizontalScrollTo(static_cast<int>(gtk_adjustment_get_value(adj) * 2));
+#else
 		sciThis->HorizontalScrollTo(static_cast<int>(adj->value * 2));
+#endif
 	} catch (...) {
 		sciThis->errorStatus = SC_STATUS_FAILURE;
 	}
