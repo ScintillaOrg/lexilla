@@ -1949,6 +1949,75 @@ gint ScintillaGTK::Motion(GtkWidget *widget, GdkEventMotion *event) {
 // Map the keypad keys to their equivalent functions
 static int KeyTranslate(int keyIn) {
 	switch (keyIn) {
+#if GTK_CHECK_VERSION(3,0,0)
+	case GDK_KEY_ISO_Left_Tab:
+		return SCK_TAB;
+	case GDK_KEY_KP_Down:
+		return SCK_DOWN;
+	case GDK_KEY_KP_Up:
+		return SCK_UP;
+	case GDK_KEY_KP_Left:
+		return SCK_LEFT;
+	case GDK_KEY_KP_Right:
+		return SCK_RIGHT;
+	case GDK_KEY_KP_Home:
+		return SCK_HOME;
+	case GDK_KEY_KP_End:
+		return SCK_END;
+	case GDK_KEY_KP_Page_Up:
+		return SCK_PRIOR;
+	case GDK_KEY_KP_Page_Down:
+		return SCK_NEXT;
+	case GDK_KEY_KP_Delete:
+		return SCK_DELETE;
+	case GDK_KEY_KP_Insert:
+		return SCK_INSERT;
+	case GDK_KEY_KP_Enter:
+		return SCK_RETURN;
+
+	case GDK_KEY_Down:
+		return SCK_DOWN;
+	case GDK_KEY_Up:
+		return SCK_UP;
+	case GDK_KEY_Left:
+		return SCK_LEFT;
+	case GDK_KEY_Right:
+		return SCK_RIGHT;
+	case GDK_KEY_Home:
+		return SCK_HOME;
+	case GDK_KEY_End:
+		return SCK_END;
+	case GDK_KEY_Page_Up:
+		return SCK_PRIOR;
+	case GDK_KEY_Page_Down:
+		return SCK_NEXT;
+	case GDK_KEY_Delete:
+		return SCK_DELETE;
+	case GDK_KEY_Insert:
+		return SCK_INSERT;
+	case GDK_KEY_Escape:
+		return SCK_ESCAPE;
+	case GDK_KEY_BackSpace:
+		return SCK_BACK;
+	case GDK_KEY_Tab:
+		return SCK_TAB;
+	case GDK_KEY_Return:
+		return SCK_RETURN;
+	case GDK_KEY_KP_Add:
+		return SCK_ADD;
+	case GDK_KEY_KP_Subtract:
+		return SCK_SUBTRACT;
+	case GDK_KEY_KP_Divide:
+		return SCK_DIVIDE;
+	case GDK_KEY_Super_L:
+		return SCK_WIN;
+	case GDK_KEY_Super_R:
+		return SCK_RWIN;
+	case GDK_KEY_Menu:
+		return SCK_MENU;
+
+#else
+
 	case GDK_ISO_Left_Tab:
 		return SCK_TAB;
 	case GDK_KP_Down:
@@ -2014,6 +2083,7 @@ static int KeyTranslate(int keyIn) {
 		return SCK_RWIN;
 	case GDK_Menu:
 		return SCK_MENU;
+#endif
 	default:
 		return keyIn;
 	}
@@ -2036,7 +2106,11 @@ gboolean ScintillaGTK::KeyThis(GdkEventKey *event) {
 		guint key = event->keyval;
 		if (ctrl && (key < 128))
 			key = toupper(key);
+#if GTK_CHECK_VERSION(3,0,0)
+		else if (!ctrl && (key >= GDK_KEY_KP_Multiply && key <= GDK_KEY_KP_9))
+#else
 		else if (!ctrl && (key >= GDK_KP_Multiply && key <= GDK_KP_9))
+#endif
 			key &= 0x7F;
 		// Hack for keys over 256 and below command keys but makes Hungarian work.
 		// This will have to change for Unicode
