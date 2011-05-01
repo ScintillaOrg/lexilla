@@ -2277,13 +2277,18 @@ void ScintillaGTK::PreeditChanged(GtkIMContext *, ScintillaGTK *sciThis) {
 }
 
 void ScintillaGTK::StyleSetText(GtkWidget *widget, GtkStyle *, void*) {
-	if (WindowFromWidget(widget))
-		gdk_window_set_back_pixmap(WindowFromWidget(widget), NULL, FALSE);
+	RealizeText(widget, NULL);
 }
 
 void ScintillaGTK::RealizeText(GtkWidget *widget, void*) {
-	if (WindowFromWidget(widget))
+	// Set NULL background to avoid automatic clearing so Scintilla responsible for all drawing
+	if (WindowFromWidget(widget)) {
+#if GTK_CHECK_VERSION(3,0,0)
+		gdk_window_set_background_pattern(WindowFromWidget(widget), NULL);
+#else
 		gdk_window_set_back_pixmap(WindowFromWidget(widget), NULL, FALSE);
+#endif
+	}
 }
 
 void ScintillaGTK::Destroy(GObject *object) {
