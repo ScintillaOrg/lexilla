@@ -116,10 +116,17 @@ class FontHandle {
 	encodingType et;
 public:
 	int ascent;
+#ifndef DISABLE_GDK_FONT
 	GdkFont *pfont;
+#endif
 	PangoFontDescription *pfd;
 	int characterSet;
-	FontHandle(GdkFont *pfont_) {
+#ifdef DISABLE_GDK_FONT
+	FontHandle() : et(singleByte), ascent(0), pfd(0), characterSet(-1) {
+		ResetWidths(et);
+	}
+#else
+	FontHandle(GdkFont *pfont_=0) {
 		et = singleByte;
 		ascent = 0;
 		pfont = pfont_;
@@ -127,10 +134,13 @@ public:
 		characterSet = -1;
 		ResetWidths(et);
 	}
+#endif
 	FontHandle(PangoFontDescription *pfd_, int characterSet_) {
 		et = singleByte;
 		ascent = 0;
+#ifndef DISABLE_GDK_FONT
 		pfont = 0;
+#endif
 		pfd = pfd_;
 		characterSet = characterSet_;
 		ResetWidths(et);
@@ -139,8 +149,8 @@ public:
 #ifndef DISABLE_GDK_FONT
 		if (pfont)
 			gdk_font_unref(pfont);
-#endif
 		pfont = 0;
+#endif
 		if (pfd)
 			pango_font_description_free(pfd);
 		pfd = 0;
@@ -671,7 +681,7 @@ FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
 	}
 	return new FontHandle(newid);
 #else
-	return new FontHandle(0);
+	return new FontHandle();
 #endif
 }
 
