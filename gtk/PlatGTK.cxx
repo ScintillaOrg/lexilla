@@ -2023,11 +2023,17 @@ PRectangle Window::GetPosition() {
 	// Before any size allocated pretend its 1000 wide so not scrolled
 	PRectangle rc(0, 0, 1000, 1000);
 	if (wid) {
-		rc.left = PWidget(wid)->allocation.x;
-		rc.top = PWidget(wid)->allocation.y;
-		if (PWidget(wid)->allocation.width > 20) {
-			rc.right = rc.left + PWidget(wid)->allocation.width;
-			rc.bottom = rc.top + PWidget(wid)->allocation.height;
+		GtkAllocation allocation;
+#if GTK_CHECK_VERSION(3,0,0)
+		gtk_widget_get_allocation(PWidget(wid), &allocation);
+#else
+		allocation = PWidget(wid)->allocation;
+#endif
+		rc.left = allocation.x;
+		rc.top = allocation.y;
+		if (allocation.width > 20) {
+			rc.right = rc.left + allocation.width;
+			rc.bottom = rc.top + allocation.height;
 		}
 	}
 	return rc;
@@ -2378,10 +2384,18 @@ PRectangle ListBoxX::GetDesiredRect() {
 			gtk_tree_view_get_column(GTK_TREE_VIEW(list), 0);
 		gtk_tree_view_column_cell_get_size(column, NULL,
 			NULL, NULL, &row_width, &row_height);
+#if GTK_CHECK_VERSION(3,0,0)
+		GtkStyle *styleList = gtk_widget_get_style(PWidget(list));
+		int ythickness = styleList->ythickness;
+		height = (rows * row_height
+		          + 2 * (ythickness
+		                 + gtk_container_get_border_width(GTK_CONTAINER(PWidget(list))) + 1));
+#else
 		int ythickness = PWidget(list)->style->ythickness;
 		height = (rows * row_height
 		          + 2 * (ythickness
 		                 + GTK_CONTAINER(PWidget(list))->border_width + 1));
+#endif
 		gtk_widget_set_size_request(GTK_WIDGET(PWidget(list)), -1, height);
 
 		// Get the size of the scroller because we set usize on the window

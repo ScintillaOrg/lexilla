@@ -394,10 +394,16 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 #endif
 	GdkWindowAttr attrs;
 	attrs.window_type = GDK_WINDOW_CHILD;
-	attrs.x = widget->allocation.x;
-	attrs.y = widget->allocation.y;
-	attrs.width = widget->allocation.width;
-	attrs.height = widget->allocation.height;
+	GtkAllocation allocation;
+#if GTK_CHECK_VERSION(3,0,0)
+	gtk_widget_get_allocation(widget, &allocation);
+#else
+	allocation = widget->allocation;
+#endif
+	attrs.x = allocation.x;
+	attrs.y = allocation.y;
+	attrs.width = allocation.width;
+	attrs.height = allocation.height;
 	attrs.wclass = GDK_INPUT_OUTPUT;
 	attrs.visual = gtk_widget_get_visual(widget);
 	attrs.colormap = gtk_widget_get_colormap(widget);
@@ -634,13 +640,17 @@ void ScintillaGTK::SizeRequest(GtkWidget *widget, GtkRequisition *requisition) {
 void ScintillaGTK::SizeAllocate(GtkWidget *widget, GtkAllocation *allocation) {
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	try {
+#if GTK_CHECK_VERSION(2,20,0)
+		gtk_widget_set_allocation(widget, allocation);
+#else
 		widget->allocation = *allocation;
+#endif
 		if (IS_WIDGET_REALIZED(widget))
 			gdk_window_move_resize(WindowFromWidget(widget),
-			        widget->allocation.x,
-			        widget->allocation.y,
-			        widget->allocation.width,
-			        widget->allocation.height);
+			        allocation->x,
+			        allocation->y,
+			        allocation->width,
+			        allocation->height);
 
 		sciThis->Resize(allocation->width, allocation->height);
 
