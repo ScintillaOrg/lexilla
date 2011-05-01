@@ -1416,11 +1416,23 @@ void ScintillaGTK::ClaimSelection() {
 	}
 }
 
+#if GTK_CHECK_VERSION(3,0,0)
+static const guchar *DataOfGSD(GtkSelectionData *sd) { return gtk_selection_data_get_data(sd); }
+static gint LengthOfGSD(GtkSelectionData *sd) { return gtk_selection_data_get_length(sd); }
+static GdkAtom TypeOfGSD(GtkSelectionData *sd) { return gtk_selection_data_get_data_type(sd); }
+static GdkAtom SelectionOfGSD(GtkSelectionData *sd) { return gtk_selection_data_get_selection(sd); }
+#else
+static const guchar *DataOfGSD(GtkSelectionData *sd) { return sd->data; }
+static gint LengthOfGSD(GtkSelectionData *sd) { return sd->length; }
+static GdkAtom TypeOfGSD(GtkSelectionData *sd) { return sd->type; }
+static GdkAtom SelectionOfGSD(GtkSelectionData *sd) { return sd->selection; }
+#endif
+
 // Detect rectangular text, convert line ends to current mode, convert from or to UTF-8
 void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, SelectionText &selText) {
-	char *data = reinterpret_cast<char *>(selectionData->data);
-	int len = selectionData->length;
-	GdkAtom selectionTypeData = selectionData->type;
+	const char *data = reinterpret_cast<const char *>(DataOfGSD(selectionData));
+	int len = LengthOfGSD(selectionData);
+	GdkAtom selectionTypeData = TypeOfGSD(selectionData);
 
 	// Return empty string if selection is not a string
 	if ((selectionTypeData != GDK_TARGET_STRING) && (selectionTypeData != atomUTF8)) {
@@ -1469,19 +1481,19 @@ void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, Selectio
 
 void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 	try {
-		if ((selection_data->selection == atomClipboard) ||
-		        (selection_data->selection == GDK_SELECTION_PRIMARY)) {
-			if ((atomSought == atomUTF8) && (selection_data->length <= 0)) {
+		if ((SelectionOfGSD(selection_data) == atomClipboard) ||
+		        (SelectionOfGSD(selection_data) == GDK_SELECTION_PRIMARY)) {
+			if ((atomSought == atomUTF8) && (LengthOfGSD(selection_data) <= 0)) {
 				atomSought = atomString;
 				gtk_selection_convert(GTK_WIDGET(PWidget(wMain)),
-				        selection_data->selection, atomSought, GDK_CURRENT_TIME);
-			} else if ((selection_data->length > 0) &&
-			        ((selection_data->type == GDK_TARGET_STRING) || (selection_data->type == atomUTF8))) {
+				        SelectionOfGSD(selection_data), atomSought, GDK_CURRENT_TIME);
+			} else if ((LengthOfGSD(selection_data) > 0) &&
+			        ((TypeOfGSD(selection_data) == GDK_TARGET_STRING) || (TypeOfGSD(selection_data) == atomUTF8))) {
 				SelectionText selText;
 				GetGtkSelectionText(selection_data, selText);
 
 				UndoGroup ug(pdoc);
-				if (selection_data->selection != GDK_SELECTION_PRIMARY) {
+				if (SelectionOfGSD(selection_data) != GDK_SELECTION_PRIMARY) {
 					ClearSelection(multiPasteMode == SC_MULTIPASTE_EACH);
 				}
 				SelectionPosition selStart = sel.IsRectangular() ?
@@ -1506,19 +1518,19 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 
 void ScintillaGTK::ReceivedDrop(GtkSelectionData *selection_data) {
 	dragWasDropped = true;
-	if (selection_data->type == atomUriList || selection_data->type == atomDROPFILES_DND) {
-		char *ptr = new char[selection_data->length + 1];
-		ptr[selection_data->length] = '\0';
-		memcpy(ptr, selection_data->data, selection_data->length);
+	if (TypeOfGSD(selection_data) == atomUriList || TypeOfGSD(selection_data) == atomDROPFILES_DND) {
+		char *ptr = new char[LengthOfGSD(selection_data) + 1];
+		ptr[LengthOfGSD(selection_data)] = '\0';
+		memcpy(ptr, DataOfGSD(selection_data), LengthOfGSD(selection_data));
  		NotifyURIDropped(ptr);
 		delete []ptr;
-	} else if ((selection_data->type == GDK_TARGET_STRING) || (selection_data->type == atomUTF8)) {
-		if (selection_data->length > 0) {
+	} else if ((TypeOfGSD(selection_data) == GDK_TARGET_STRING) || (TypeOfGSD(selection_data) == atomUTF8)) {
+		if (TypeOfGSD(selection_data) > 0) {
 			SelectionText selText;
 			GetGtkSelectionText(selection_data, selText);
 			DropAt(posDrop, selText.s, false, selText.rectangular);
 		}
-	} else if (selection_data->length > 0) {
+	} else if (LengthOfGSD(selection_data) > 0) {
 		//~ fprintf(stderr, "ReceivedDrop other %p\n", static_cast<void *>(selection_data->type));
 	}
 	Redraw();
@@ -2294,7 +2306,7 @@ void ScintillaGTK::SelectionGet(GtkWidget *widget,
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	try {
 		//Platform::DebugPrintf("Selection get\n");
-		if (selection_data->selection == GDK_SELECTION_PRIMARY) {
+		if (SelectionOfGSD(selection_data) == GDK_SELECTION_PRIMARY) {
 			if (sciThis->primary.s == NULL) {
 				sciThis->CopySelectionRange(&sciThis->primary);
 			}
@@ -2329,13 +2341,19 @@ gboolean ScintillaGTK::DragMotionThis(GdkDragContext *context,
 	try {
 		Point npt(x, y);
 		SetDragPosition(SPositionFromLocation(npt, false, false, UserVirtualSpace()));
+#if GTK_CHECK_VERSION(3,0,0)
+		GdkDragAction preferredAction = gdk_drag_context_get_suggested_action(context);
+		GdkDragAction actions = gdk_drag_context_get_actions(context);
+#else
 		GdkDragAction preferredAction = context->suggested_action;
+		GdkDragAction actions = context->actions;
+#endif
 		SelectionPosition pos = SPositionFromLocation(npt);
 		if ((inDragDrop == ddDragging) && (PositionInSelection(pos.Position()))) {
 			// Avoid dragging selection onto itself as that produces a move
 			// with no real effect but which creates undo actions.
 			preferredAction = static_cast<GdkDragAction>(0);
-		} else if (context->actions == static_cast<GdkDragAction>
+		} else if (actions == static_cast<GdkDragAction>
 		        (GDK_ACTION_COPY | GDK_ACTION_MOVE)) {
 			preferredAction = GDK_ACTION_MOVE;
 		}
@@ -2407,7 +2425,12 @@ void ScintillaGTK::DragDataGet(GtkWidget *widget, GdkDragContext *context,
 		if (!sciThis->sel.Empty()) {
 			sciThis->GetSelection(selection_data, info, &sciThis->drag);
 		}
-		if (context->action == GDK_ACTION_MOVE) {
+#if GTK_CHECK_VERSION(3,0,0)
+		GdkDragAction action = gdk_drag_context_get_selected_action(context);
+#else
+		GdkDragAction action = context->action;
+#endif
+		if (action == GDK_ACTION_MOVE) {
 			for (size_t r=0; r<sciThis->sel.Count(); r++) {
 				if (sciThis->posDrop >= sciThis->sel.Range(r).Start()) {
 					if (sciThis->posDrop > sciThis->sel.Range(r).End()) {
