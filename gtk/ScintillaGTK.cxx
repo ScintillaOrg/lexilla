@@ -52,8 +52,6 @@
 #include "ScintillaBase.h"
 #include "UniConversion.h"
 
-#include "gtk/gtksignal.h"
-#include "gtk/gtkmarshal.h"
 #include "scintilla-marshal.h"
 
 #ifdef SCI_LEXER
