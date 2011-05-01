@@ -201,9 +201,11 @@ static GtkWidget *PWidget(WindowID wid) {
 	return reinterpret_cast<GtkWidget *>(wid);
 }
 
+#if !GTK_CHECK_VERSION(3,0,0)
 static GtkWidget *PWidget(Window &w) {
 	return PWidget(w.GetID());
 }
+#endif
 
 Point Point::FromLong(long lpoint) {
 	return Point(
@@ -272,6 +274,8 @@ void Palette::WantFind(ColourPair &cp, bool want) {
 }
 
 void Palette::Allocate(Window &w) {
+#if !GTK_CHECK_VERSION(3,0,0)
+	// Disable palette on GTK+ 3.
 	if (allocatedPalette) {
 		gdk_colormap_free_colors(gtk_widget_get_colormap(PWidget(w)),
 		                         reinterpret_cast<GdkColor *>(allocatedPalette),
@@ -300,6 +304,7 @@ void Palette::Allocate(Window &w) {
 		}
 	}
 	delete []successPalette;
+#endif
 }
 
 #ifndef DISABLE_GDK_FONT
@@ -713,6 +718,8 @@ void Font::Release() {
 #ifdef SCI_NAMESPACE
 namespace Scintilla {
 #endif
+
+// On GTK+ 2.x, SurfaceID is a GdkDrawable* and on GTK+ 3.x, it is a cairo_t*
 class SurfaceImpl : public Surface {
 	encodingType et;
 #ifdef USE_CAIRO
@@ -901,7 +908,11 @@ void SurfaceImpl::Init(WindowID wid) {
 	Release();
 	PLATFORM_ASSERT(wid);
 #ifdef USE_CAIRO
-	GdkDrawable *drawable_ = GDK_DRAWABLE(WindowFromWidget(PWidget(wid)));
+#if GTK_CHECK_VERSION(3,0,0)
+	GdkWindow *drawable_ = gtk_widget_get_window(PWidget(wid));
+#else
+	GdkDrawable *drawable_ = GDK_DRAWABLE(PWidget(wid)->window);
+#endif
 	if (drawable_) {
 		context = gdk_cairo_create(drawable_);
 		PLATFORM_ASSERT(context);
@@ -922,14 +933,17 @@ void SurfaceImpl::Init(WindowID wid) {
 
 void SurfaceImpl::Init(SurfaceID sid, WindowID wid) {
 	PLATFORM_ASSERT(sid);
-	GdkDrawable *drawable_ = reinterpret_cast<GdkDrawable *>(sid);
 	Release();
 	PLATFORM_ASSERT(wid);
 #ifdef USE_CAIRO
-	context = gdk_cairo_create(drawable_);
+#if GTK_CHECK_VERSION(3,0,0)
+	context = cairo_reference(reinterpret_cast<cairo_t *>(sid));
 #else
-	gc = gdk_gc_new(drawable_);
-	drawable = drawable_;
+	context = gdk_cairo_create(reinterpret_cast<GdkDrawable *>(sid));
+#endif
+#else
+	drawable = reinterpret_cast<GdkDrawable *>(sid);
+	gc = gdk_gc_new(drawable);
 #endif
 	pcontext = gtk_widget_create_pango_context(PWidget(wid));
 	layout = pango_layout_new(pcontext);
@@ -991,10 +1005,18 @@ void SurfaceImpl::PenColour(ColourAllocated fore) {
 #ifdef USE_CAIRO
 	if (context) {
 		ColourDesired cdFore(fore.AsLong());
+#if GTK_CHECK_VERSION(3,0,0)
+		// Colours appear inverted - possibly because palette no longer used
+		cairo_set_source_rgb(context,
+			cdFore.GetRed() / 255.0,
+			cdFore.GetGreen() / 255.0,
+			cdFore.GetBlue() / 255.0);
+#else
 		cairo_set_source_rgb(context,
 			cdFore.GetBlue() / 255.0,
 			cdFore.GetGreen() / 255.0,
 			cdFore.GetRed() / 255.0);
+#endif
 	}
 #else
 	if (gc) {
