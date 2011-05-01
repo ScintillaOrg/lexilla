@@ -238,6 +238,8 @@ private:
 	gint FocusOutThis(GtkWidget *widget);
 	static gint FocusOut(GtkWidget *widget, GdkEventFocus *event);
 	static void SizeRequest(GtkWidget *widget, GtkRequisition *requisition);
+	static void GetPreferredWidth(GtkWidget *widget, gint *minimalWidth, gint *naturalWidth);
+	static void GetPreferredHeight(GtkWidget *widget, gint *minimalHeight, gint *naturalHeight);
 	static void SizeAllocate(GtkWidget *widget, GtkAllocation *allocation);
 	gboolean Expose(GtkWidget *widget, GdkEventExpose *ose);
 	static gboolean ExposeMain(GtkWidget *widget, GdkEventExpose *ose);
@@ -635,6 +637,18 @@ void ScintillaGTK::SizeRequest(GtkWidget *widget, GtkRequisition *requisition) {
 	GtkRequisition child_requisition;
 	gtk_widget_size_request(PWidget(sciThis->scrollbarh), &child_requisition);
 	gtk_widget_size_request(PWidget(sciThis->scrollbarv), &child_requisition);
+}
+
+void ScintillaGTK::GetPreferredWidth(GtkWidget *widget, gint *minimalWidth, gint *naturalWidth) {
+	GtkRequisition requisition;
+	SizeRequest(widget, &requisition);
+	*minimalWidth = *naturalWidth = requisition.width;
+}
+
+void ScintillaGTK::GetPreferredHeight(GtkWidget *widget, gint *minimalHeight, gint *naturalHeight) {
+	GtkRequisition requisition;
+	SizeRequest(widget, &requisition);
+	*minimalHeight = *naturalHeight = requisition.height;
 }
 
 void ScintillaGTK::SizeAllocate(GtkWidget *widget, GtkAllocation *allocation) {
@@ -2672,7 +2686,12 @@ void ScintillaGTK::ClassInit(OBJECT_CLASS* object_class, GtkWidgetClass *widget_
 	// in Initialise() may require coordinate translation?)
 
 	object_class->finalize = Destroy;
+#if GTK_CHECK_VERSION(3,0,0)
+	widget_class->get_preferred_width = GetPreferredWidth;
+	widget_class->get_preferred_height = GetPreferredHeight;
+#else
 	widget_class->size_request = SizeRequest;
+#endif
 	widget_class->size_allocate = SizeAllocate;
 	widget_class->expose_event = ExposeMain;
 	widget_class->motion_notify_event = Motion;
