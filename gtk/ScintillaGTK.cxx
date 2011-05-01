@@ -159,7 +159,11 @@ class ScintillaGTK : public ScintillaBase {
 	gint lastWheelMouseDirection;
 	gint wheelMouseIntensity;
 
+#if GTK_CHECK_VERSION(3,0,0)
+	cairo_region_t *rgnUpdate;
+#else
 	GdkRegion *rgnUpdate;
+#endif
 
 	// Private so ScintillaGTK objects can not be copied
 	ScintillaGTK(const ScintillaGTK &);
@@ -241,8 +245,17 @@ private:
 	static void GetPreferredWidth(GtkWidget *widget, gint *minimalWidth, gint *naturalWidth);
 	static void GetPreferredHeight(GtkWidget *widget, gint *minimalHeight, gint *naturalHeight);
 	static void SizeAllocate(GtkWidget *widget, GtkAllocation *allocation);
+#if GTK_CHECK_VERSION(3,0,0)
+	gboolean DrawTextThis(cairo_t *cr);
+	static gboolean DrawText(GtkWidget *widget, cairo_t *cr, ScintillaGTK *sciThis);
+	gboolean DrawThis(cairo_t *cr);
+	static gboolean DrawMain(GtkWidget *widget, cairo_t *cr);
+#else
+	gboolean ExposeTextThis(GtkWidget *widget, GdkEventExpose *ose);
+	static gboolean ExposeText(GtkWidget *widget, GdkEventExpose *ose, ScintillaGTK *sciThis);
 	gboolean Expose(GtkWidget *widget, GdkEventExpose *ose);
 	static gboolean ExposeMain(GtkWidget *widget, GdkEventExpose *ose);
+#endif
 	static void Draw(GtkWidget *widget, GdkRectangle *area);
 	void ForAll(GtkCallback callback, gpointer callback_data);
 	static void MainForAll(GtkContainer *container, gboolean include_internals, GtkCallback callback, gpointer callback_data);
@@ -290,10 +303,11 @@ private:
 	virtual void QueueStyling(int upTo);
 	static void PopUpCB(GtkMenuItem *menuItem, ScintillaGTK *sciThis);
 
-	gboolean ExposeTextThis(GtkWidget *widget, GdkEventExpose *ose);
-	static gboolean ExposeText(GtkWidget *widget, GdkEventExpose *ose, ScintillaGTK *sciThis);
-
+#if GTK_CHECK_VERSION(3,0,0)
+	static gboolean DrawCT(GtkWidget *widget, cairo_t *cr, CallTip *ctip);
+#else
 	static gboolean ExposeCT(GtkWidget *widget, GdkEventExpose *ose, CallTip *ct);
+#endif
 	static gboolean PressCT(GtkWidget *widget, GdkEventButton *event, ScintillaGTK *sciThis);
 
 	static sptr_t DirectFunction(ScintillaGTK *sciThis,
@@ -435,8 +449,10 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	wPreedit = gtk_window_new(GTK_WINDOW_POPUP);
 	wPreeditDraw = gtk_drawing_area_new();
 	GtkWidget *predrw = PWidget(wPreeditDraw);	// No code inside the G_OBJECT macro
+#if !GTK_CHECK_VERSION(3,0,0)
 	g_signal_connect(G_OBJECT(predrw), "expose_event",
 		G_CALLBACK(ExposePreedit), this);
+#endif
 	gtk_container_add(GTK_CONTAINER(PWidget(wPreedit)), predrw);
 	gtk_widget_realize(PWidget(wPreedit));
 	gtk_widget_realize(predrw);
@@ -714,8 +730,13 @@ void ScintillaGTK::Initialise() {
 	gtk_widget_set_parent(PWidget(wText), PWidget(wMain));
 	GtkWidget *widtxt = PWidget(wText);	// No code inside the G_OBJECT macro
 	gtk_widget_show(widtxt);
+#if GTK_CHECK_VERSION(3,0,0)
+	g_signal_connect(G_OBJECT(widtxt), "draw",
+			   G_CALLBACK(ScintillaGTK::DrawText), this);
+#else
 	g_signal_connect(G_OBJECT(widtxt), "expose_event",
 			   G_CALLBACK(ScintillaGTK::ExposeText), this);
+#endif
 	gtk_widget_set_events(widtxt, GDK_EXPOSURE_MASK);
 	// Avoid background drawing flash
 	gtk_widget_set_double_buffered(widtxt, FALSE);
@@ -1013,11 +1034,19 @@ bool ScintillaGTK::PaintContains(PRectangle rc) {
 		if (!rcPaint.Contains(rc)) {
 			contains = false;
 		} else if (rgnUpdate) {
+#if GTK_CHECK_VERSION(3,0,0)
+			cairo_rectangle_int_t grc = {rc.left, rc.top,
+				rc.right - rc.left, rc.bottom - rc.top};
+			if (cairo_region_contains_rectangle(rgnUpdate, &grc) != CAIRO_REGION_OVERLAP_IN) {
+				contains = false;
+			}
+#else
 			GdkRectangle grc = {rc.left, rc.top,
 				rc.right - rc.left, rc.bottom - rc.top};
 			if (gdk_region_rect_in(rgnUpdate, &grc) != GDK_OVERLAP_RECTANGLE_IN) {
 				contains = false;
 			}
+#endif
 		}
 	}
 	return contains;
@@ -1051,10 +1080,18 @@ void ScintillaGTK::SyncPaint(PRectangle rc) {
 	if (PWindow(wText)) {
 		Surface *sw = Surface::Allocate();
 		if (sw) {
+#if GTK_CHECK_VERSION(3,0,0)
+			cairo_t *cr = gdk_cairo_create(PWindow(wText));
+			sw->Init(cr, PWidget(wText));
+#else
 			sw->Init(PWindow(wText), PWidget(wText));
+#endif
 			Paint(sw, rc);
 			sw->Release();
 			delete sw;
+#if GTK_CHECK_VERSION(3,0,0)
+			cairo_destroy(cr);
+#endif
 		}
 	}
 	if (paintState == paintAbandoned) {
@@ -1399,8 +1436,13 @@ void ScintillaGTK::CreateCallTipWindow(PRectangle rc) {
 		ct.wDraw = gtk_drawing_area_new();
 		GtkWidget *widcdrw = PWidget(ct.wDraw);	//	// No code inside the G_OBJECT macro
 		gtk_container_add(GTK_CONTAINER(PWidget(ct.wCallTip)), widcdrw);
+#if GTK_CHECK_VERSION(3,0,0)
+		g_signal_connect(G_OBJECT(widcdrw), "draw",
+				   G_CALLBACK(ScintillaGTK::DrawCT), &ct);
+#else
 		g_signal_connect(G_OBJECT(widcdrw), "expose_event",
 				   G_CALLBACK(ScintillaGTK::ExposeCT), &ct);
+#endif
 		g_signal_connect(G_OBJECT(widcdrw), "button_press_event",
 				   G_CALLBACK(ScintillaGTK::PressCT), static_cast<void *>(this));
 		gtk_widget_set_events(widcdrw,
@@ -2321,6 +2363,67 @@ void ScintillaGTK::Destroy(GObject *object) {
 	}
 }
 
+#if GTK_CHECK_VERSION(3,0,0)
+
+gboolean ScintillaGTK::DrawTextThis(cairo_t *cr) {
+	try {
+		paintState = painting;
+
+		rcPaint = GetClientRectangle();
+
+		PLATFORM_ASSERT(rgnUpdate == NULL);
+		// TODO: find the region being exposed
+		rgnUpdate = 0;
+		PRectangle rcClient = GetClientRectangle();
+		paintingAllText = rcPaint.Contains(rcClient);
+		Surface *surfaceWindow = Surface::Allocate();
+		if (surfaceWindow) {
+			surfaceWindow->Init(cr, PWidget(wText));
+			Paint(surfaceWindow, rcPaint);
+			surfaceWindow->Release();
+			delete surfaceWindow;
+		}
+		if (paintState == paintAbandoned) {
+			// Painting area was insufficient to cover new styling or brace highlight positions
+			FullPaint();
+		}
+		paintState = notPainting;
+
+		if (rgnUpdate) {
+			cairo_region_destroy(rgnUpdate);
+		}
+		rgnUpdate = 0;
+		paintState = notPainting;
+	} catch (...) {
+		errorStatus = SC_STATUS_FAILURE;
+	}
+
+	return FALSE;
+}
+
+gboolean ScintillaGTK::DrawText(GtkWidget *, cairo_t *cr, ScintillaGTK *sciThis) {
+	return sciThis->DrawTextThis(cr);
+}
+
+gboolean ScintillaGTK::DrawThis(cairo_t *cr) {
+	try {
+		gtk_container_propagate_draw(
+		    GTK_CONTAINER(PWidget(wMain)), PWidget(scrollbarh), cr);
+		gtk_container_propagate_draw(
+		    GTK_CONTAINER(PWidget(wMain)), PWidget(scrollbarv), cr);
+	} catch (...) {
+		errorStatus = SC_STATUS_FAILURE;
+	}
+	return FALSE;
+}
+
+gboolean ScintillaGTK::DrawMain(GtkWidget *widget, cairo_t *cr) {
+	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
+	return sciThis->DrawThis(cr);
+}
+
+#else
+
 gboolean ScintillaGTK::ExposeTextThis(GtkWidget * /*widget*/, GdkEventExpose *ose) {
 	try {
 		paintState = painting;
@@ -2385,6 +2488,8 @@ gboolean ScintillaGTK::Expose(GtkWidget *, GdkEventExpose *ose) {
 	}
 	return FALSE;
 }
+
+#endif
 
 void ScintillaGTK::ScrollSignal(GtkAdjustment *adj, ScintillaGTK *sciThis) {
 	try {
@@ -2625,6 +2730,27 @@ gboolean ScintillaGTK::PressCT(GtkWidget *widget, GdkEventButton *event, Scintil
 	return TRUE;
 }
 
+#if GTK_CHECK_VERSION(3,0,0)
+
+gboolean ScintillaGTK::DrawCT(GtkWidget *widget, cairo_t *cr, CallTip *ctip) {
+	try {
+		Surface *surfaceWindow = Surface::Allocate();
+		if (surfaceWindow) {
+			surfaceWindow->Init(cr, widget);
+			surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == ctip->codePage);
+			surfaceWindow->SetDBCSMode(ctip->codePage);
+			ctip->PaintCT(surfaceWindow);
+			surfaceWindow->Release();
+			delete surfaceWindow;
+		}
+	} catch (...) {
+		// No pointer back to Scintilla to save status
+	}
+	return TRUE;
+}
+
+#else
+
 gboolean ScintillaGTK::ExposeCT(GtkWidget *widget, GdkEventExpose * /*ose*/, CallTip *ctip) {
 	try {
 		Surface *surfaceWindow = Surface::Allocate();
@@ -2641,6 +2767,8 @@ gboolean ScintillaGTK::ExposeCT(GtkWidget *widget, GdkEventExpose * /*ose*/, Cal
 	}
 	return TRUE;
 }
+
+#endif
 
 sptr_t ScintillaGTK::DirectFunction(
     ScintillaGTK *sciThis, unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
@@ -2711,7 +2839,11 @@ void ScintillaGTK::ClassInit(OBJECT_CLASS* object_class, GtkWidgetClass *widget_
 	widget_class->size_request = SizeRequest;
 #endif
 	widget_class->size_allocate = SizeAllocate;
+#if GTK_CHECK_VERSION(3,0,0)
+	widget_class->draw = DrawMain;
+#else
 	widget_class->expose_event = ExposeMain;
+#endif
 	widget_class->motion_notify_event = Motion;
 	widget_class->button_press_event = Press;
 	widget_class->button_release_event = MouseRelease;
