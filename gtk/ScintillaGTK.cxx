@@ -241,8 +241,8 @@ private:
 	static gint FocusOut(GtkWidget *widget, GdkEventFocus *event);
 	static void SizeRequest(GtkWidget *widget, GtkRequisition *requisition);
 	static void SizeAllocate(GtkWidget *widget, GtkAllocation *allocation);
-	gint Expose(GtkWidget *widget, GdkEventExpose *ose);
-	static gint ExposeMain(GtkWidget *widget, GdkEventExpose *ose);
+	gboolean Expose(GtkWidget *widget, GdkEventExpose *ose);
+	static gboolean ExposeMain(GtkWidget *widget, GdkEventExpose *ose);
 	static void Draw(GtkWidget *widget, GdkRectangle *area);
 	void ForAll(GtkCallback callback, gpointer callback_data);
 	static void MainForAll(GtkContainer *container, gboolean include_internals, GtkCallback callback, gpointer callback_data);
@@ -263,8 +263,8 @@ private:
 	static void Commit(GtkIMContext *context, char *str, ScintillaGTK *sciThis);
 	void PreeditChangedThis();
 	static void PreeditChanged(GtkIMContext *context, ScintillaGTK *sciThis);
-	static gint StyleSetText(GtkWidget *widget, GtkStyle *previous, void*);
-	static gint RealizeText(GtkWidget *widget, void*);
+	static void StyleSetText(GtkWidget *widget, GtkStyle *previous, void*);
+	static void RealizeText(GtkWidget *widget, void*);
 	static void Destroy(GObject *object);
 	static void SelectionReceived(GtkWidget *widget, GtkSelectionData *selection_data,
 	                              guint time);
@@ -284,17 +284,17 @@ private:
 	                             gint x, gint y, GtkSelectionData *selection_data, guint info, guint time);
 	static void DragDataGet(GtkWidget *widget, GdkDragContext *context,
 	                        GtkSelectionData *selection_data, guint info, guint time);
-	static gint TimeOut(ScintillaGTK *sciThis);
+	static gboolean TimeOut(ScintillaGTK *sciThis);
 	static gboolean IdleCallback(ScintillaGTK *sciThis);
 	static gboolean StyleIdle(ScintillaGTK *sciThis);
 	virtual void QueueStyling(int upTo);
 	static void PopUpCB(GtkMenuItem *menuItem, ScintillaGTK *sciThis);
 
-	gint ExposeTextThis(GtkWidget *widget, GdkEventExpose *ose);
-	static gint ExposeText(GtkWidget *widget, GdkEventExpose *ose, ScintillaGTK *sciThis);
+	gboolean ExposeTextThis(GtkWidget *widget, GdkEventExpose *ose);
+	static gboolean ExposeText(GtkWidget *widget, GdkEventExpose *ose, ScintillaGTK *sciThis);
 
-	static gint ExposeCT(GtkWidget *widget, GdkEventExpose *ose, CallTip *ct);
-	static gint PressCT(GtkWidget *widget, GdkEventButton *event, ScintillaGTK *sciThis);
+	static gboolean ExposeCT(GtkWidget *widget, GdkEventExpose *ose, CallTip *ct);
+	static gboolean PressCT(GtkWidget *widget, GdkEventButton *event, ScintillaGTK *sciThis);
 
 	static sptr_t DirectFunction(ScintillaGTK *sciThis,
 	                             unsigned int iMessage, uptr_t wParam, sptr_t lParam);
@@ -929,7 +929,8 @@ void ScintillaGTK::SetTicking(bool on) {
 	if (timer.ticking != on) {
 		timer.ticking = on;
 		if (timer.ticking) {
-			timer.tickerID = reinterpret_cast<TickerID>(g_timeout_add(timer.tickSize, (GtkFunction)TimeOut, this));
+			timer.tickerID = reinterpret_cast<TickerID>(g_timeout_add(timer.tickSize,
+				reinterpret_cast<GSourceFunc>(TimeOut), this));
 		} else {
 			g_source_remove(GPOINTER_TO_UINT(timer.tickerID));
 		}
@@ -2127,16 +2128,14 @@ void ScintillaGTK::PreeditChanged(GtkIMContext *, ScintillaGTK *sciThis) {
 	sciThis->PreeditChangedThis();
 }
 
-gint ScintillaGTK::StyleSetText(GtkWidget *widget, GtkStyle *, void*) {
+void ScintillaGTK::StyleSetText(GtkWidget *widget, GtkStyle *, void*) {
 	if (WindowFromWidget(widget))
 		gdk_window_set_back_pixmap(WindowFromWidget(widget), NULL, FALSE);
-	return FALSE;
 }
 
-gint ScintillaGTK::RealizeText(GtkWidget *widget, void*) {
+void ScintillaGTK::RealizeText(GtkWidget *widget, void*) {
 	if (WindowFromWidget(widget))
 		gdk_window_set_back_pixmap(WindowFromWidget(widget), NULL, FALSE);
-	return FALSE;
 }
 
 void ScintillaGTK::Destroy(GObject *object) {
@@ -2156,7 +2155,7 @@ void ScintillaGTK::Destroy(GObject *object) {
 	}
 }
 
-gint ScintillaGTK::ExposeTextThis(GtkWidget * /*widget*/, GdkEventExpose *ose) {
+gboolean ScintillaGTK::ExposeTextThis(GtkWidget * /*widget*/, GdkEventExpose *ose) {
 	try {
 		paintState = painting;
 
@@ -2193,18 +2192,18 @@ gint ScintillaGTK::ExposeTextThis(GtkWidget * /*widget*/, GdkEventExpose *ose) {
 	return FALSE;
 }
 
-gint ScintillaGTK::ExposeText(GtkWidget *widget, GdkEventExpose *ose, ScintillaGTK *sciThis) {
+gboolean ScintillaGTK::ExposeText(GtkWidget *widget, GdkEventExpose *ose, ScintillaGTK *sciThis) {
 	return sciThis->ExposeTextThis(widget, ose);
 }
 
-gint ScintillaGTK::ExposeMain(GtkWidget *widget, GdkEventExpose *ose) {
+gboolean ScintillaGTK::ExposeMain(GtkWidget *widget, GdkEventExpose *ose) {
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	//Platform::DebugPrintf("Expose Main %0d,%0d %0d,%0d\n",
 	//ose->area.x, ose->area.y, ose->area.width, ose->area.height);
 	return sciThis->Expose(widget, ose);
 }
 
-gint ScintillaGTK::Expose(GtkWidget *, GdkEventExpose *ose) {
+gboolean ScintillaGTK::Expose(GtkWidget *, GdkEventExpose *ose) {
 	try {
 		//fprintf(stderr, "Expose %0d,%0d %0d,%0d\n",
 		//ose->area.x, ose->area.y, ose->area.width, ose->area.height);
@@ -2425,7 +2424,7 @@ void ScintillaGTK::PopUpCB(GtkMenuItem *menuItem, ScintillaGTK *sciThis) {
 	}
 }
 
-gint ScintillaGTK::PressCT(GtkWidget *widget, GdkEventButton *event, ScintillaGTK *sciThis) {
+gboolean ScintillaGTK::PressCT(GtkWidget *widget, GdkEventButton *event, ScintillaGTK *sciThis) {
 	try {
 		if (event->window != WindowFromWidget(widget))
 			return FALSE;
@@ -2441,7 +2440,7 @@ gint ScintillaGTK::PressCT(GtkWidget *widget, GdkEventButton *event, ScintillaGT
 	return TRUE;
 }
 
-gint ScintillaGTK::ExposeCT(GtkWidget *widget, GdkEventExpose * /*ose*/, CallTip *ctip) {
+gboolean ScintillaGTK::ExposeCT(GtkWidget *widget, GdkEventExpose * /*ose*/, CallTip *ctip) {
 	try {
 		Surface *surfaceWindow = Surface::Allocate();
 		if (surfaceWindow) {
