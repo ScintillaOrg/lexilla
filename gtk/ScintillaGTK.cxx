@@ -79,6 +79,23 @@
 #define USE_CAIRO 1
 #endif
 
+static GdkWindow *WindowFromWidget(GtkWidget *w) {
+#if GTK_CHECK_VERSION(3,0,0)
+	return gtk_widget_get_window(w);
+#else
+	return w->window;
+#endif
+}
+
+static GdkWindow *PWindow(const Window &w) {
+	GtkWidget *widget = reinterpret_cast<GtkWidget *>(w.GetID());
+#if GTK_CHECK_VERSION(3,0,0)
+	return gtk_widget_get_window(widget);
+#else
+	return widget->window;
+#endif
+}
+
 #ifdef _MSC_VER
 // Constant conditional expressions are because of GTK+ headers
 #pragma warning(disable: 4127)
@@ -411,7 +428,7 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 		G_CALLBACK(Commit), this);
 	g_signal_connect(G_OBJECT(im_context), "preedit_changed",
 		G_CALLBACK(PreeditChanged), this);
-	gtk_im_context_set_client_window(im_context, widget->window);
+	gtk_im_context_set_client_window(im_context, WindowFromWidget(widget));
 	GtkWidget *widtxt = PWidget(wText);	//	// No code inside the G_OBJECT macro
 	g_signal_connect_after(G_OBJECT(widtxt), "style_set",
 		G_CALLBACK(ScintillaGTK::StyleSetText), NULL);
@@ -422,15 +439,15 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	gtk_widget_realize(PWidget(scrollbarh));
 
 	cursor = gdk_cursor_new(GDK_XTERM);
-	gdk_window_set_cursor(PWidget(wText)->window, cursor);
+	gdk_window_set_cursor(PWindow(wText), cursor);
 	gdk_cursor_unref(cursor);
 
 	cursor = gdk_cursor_new(GDK_LEFT_PTR);
-	gdk_window_set_cursor(PWidget(scrollbarv)->window, cursor);
+	gdk_window_set_cursor(PWindow(scrollbarv), cursor);
 	gdk_cursor_unref(cursor);
 
 	cursor = gdk_cursor_new(GDK_LEFT_PTR);
-	gdk_window_set_cursor(PWidget(scrollbarh)->window, cursor);
+	gdk_window_set_cursor(PWindow(scrollbarh), cursor);
 	gdk_cursor_unref(cursor);
 
 	gtk_selection_add_targets(widget, GDK_SELECTION_PRIMARY,
@@ -505,7 +522,7 @@ void ScintillaGTK::MapThis() {
 		scrollbarv.SetCursor(Window::cursorArrow);
 		scrollbarh.SetCursor(Window::cursorArrow);
 		ChangeSize();
-		gdk_window_show(PWidget(wMain)->window);
+		gdk_window_show(PWindow(wMain));
 	} catch (...) {
 		errorStatus = SC_STATUS_FAILURE;
 	}
@@ -525,7 +542,7 @@ void ScintillaGTK::UnMapThis() {
 		GTK_WIDGET_UNSET_FLAGS(PWidget(wMain), GTK_MAPPED);
 #endif
 		DropGraphics();
-		gdk_window_hide(PWidget(wMain)->window);
+		gdk_window_hide(PWindow(wMain));
 		gtk_widget_unmap(PWidget(wText));
 		gtk_widget_unmap(PWidget(scrollbarh));
 		gtk_widget_unmap(PWidget(scrollbarv));
@@ -621,7 +638,7 @@ void ScintillaGTK::SizeAllocate(GtkWidget *widget, GtkAllocation *allocation) {
 	try {
 		widget->allocation = *allocation;
 		if (IS_WIDGET_REALIZED(widget))
-			gdk_window_move_resize(widget->window,
+			gdk_window_move_resize(WindowFromWidget(widget),
 			        widget->allocation.x,
 			        widget->allocation.y,
 			        widget->allocation.width,
@@ -995,10 +1012,10 @@ void ScintillaGTK::SyncPaint(PRectangle rc) {
 	rcPaint = rc;
 	PRectangle rcClient = GetClientRectangle();
 	paintingAllText = rcPaint.Contains(rcClient);
-	if ((PWidget(wText))->window) {
+	if (PWindow(wText)) {
 		Surface *sw = Surface::Allocate();
 		if (sw) {
-			sw->Init(PWidget(wText)->window, PWidget(wText));
+			sw->Init(PWindow(wText), PWidget(wText));
 			Paint(sw, rc);
 			sw->Release();
 			delete sw;
@@ -1017,8 +1034,8 @@ void ScintillaGTK::ScrollText(int linesToMove) {
 	//	rc.left, rc.top, rc.right, rc.bottom);
 	GtkWidget *wi = PWidget(wText);
 
-	gdk_window_scroll(wi->window, 0, -diff);
-	gdk_window_process_updates(wi->window, FALSE);
+	gdk_window_scroll(WindowFromWidget(wi), 0, -diff);
+	gdk_window_process_updates(WindowFromWidget(wi), FALSE);
 }
 
 void ScintillaGTK::SetVerticalScrollPos() {
@@ -1329,8 +1346,8 @@ void ScintillaGTK::CreateCallTipWindow(PRectangle rc) {
 	}
 	gtk_widget_set_size_request(PWidget(ct.wDraw), rc.Width(), rc.Height());
 	ct.wDraw.Show();
-	if (PWidget(ct.wCallTip)->window) {
-		gdk_window_resize(PWidget(ct.wCallTip)->window, rc.Width(), rc.Height());
+	if (PWindow(ct.wCallTip)) {
+		gdk_window_resize(PWindow(ct.wCallTip), rc.Width(), rc.Height());
 	}
 }
 
@@ -1352,8 +1369,8 @@ void ScintillaGTK::AddToPopUp(const char *label, int cmd, bool enabled) {
 
 bool ScintillaGTK::OwnPrimarySelection() {
 	return ((gdk_selection_owner_get(GDK_SELECTION_PRIMARY)
-		== GTK_WIDGET(PWidget(wMain))->window) &&
-			(GTK_WIDGET(PWidget(wMain))->window != NULL));
+		== PWindow(wMain)) &&
+			(PWindow(wMain) != NULL));
 }
 
 void ScintillaGTK::ClaimSelection() {
@@ -1708,7 +1725,7 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 				// Convert to screen
 				int ox = 0;
 				int oy = 0;
-				gdk_window_get_origin(PWidget(wMain)->window, &ox, &oy);
+				gdk_window_get_origin(PWindow(wMain), &ox, &oy);
 				ContextMenu(Point(pt.x + ox, pt.y + oy));
 			} else {
 				return FALSE;
@@ -1733,7 +1750,7 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 }
 
 gint ScintillaGTK::Press(GtkWidget *widget, GdkEventButton *event) {
-	if (event->window != widget->window)
+	if (event->window != WindowFromWidget(widget))
 		return FALSE;
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	return sciThis->PressThis(event);
@@ -1751,7 +1768,7 @@ gint ScintillaGTK::MouseRelease(GtkWidget *widget, GdkEventButton *event) {
 			pt.y = int(event->y);
 			//Platform::DebugPrintf("Up %x %x %d %d %d\n",
 			//	sciThis,event->window,event->time, pt.x, pt.y);
-			if (event->window != PWidget(sciThis->wMain)->window)
+			if (event->window != PWindow(sciThis->wMain))
 				// If mouse released on scroll bar then the position is relative to the
 				// scrollbar, not the drawing window so just repeat the most recent point.
 				pt = sciThis->ptMouseLast;
@@ -1846,7 +1863,7 @@ gint ScintillaGTK::Motion(GtkWidget *widget, GdkEventMotion *event) {
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	try {
 		//Platform::DebugPrintf("Motion %x %d\n",sciThis,event->time);
-		if (event->window != widget->window)
+		if (event->window != WindowFromWidget(widget))
 			return FALSE;
 		int x = 0;
 		int y = 0;
@@ -2084,7 +2101,7 @@ void ScintillaGTK::PreeditChangedThis() {
 			g_object_unref(layout);
 
 			gint x, y;
-			gdk_window_get_origin((PWidget(wText))->window, &x, &y);
+			gdk_window_get_origin(PWindow(wText), &x, &y);
 
 			Point pt = PointMainCaret();
 			if (pt.x < 0)
@@ -2111,14 +2128,14 @@ void ScintillaGTK::PreeditChanged(GtkIMContext *, ScintillaGTK *sciThis) {
 }
 
 gint ScintillaGTK::StyleSetText(GtkWidget *widget, GtkStyle *, void*) {
-	if (widget->window != NULL)
-		gdk_window_set_back_pixmap(widget->window, NULL, FALSE);
+	if (WindowFromWidget(widget))
+		gdk_window_set_back_pixmap(WindowFromWidget(widget), NULL, FALSE);
 	return FALSE;
 }
 
 gint ScintillaGTK::RealizeText(GtkWidget *widget, void*) {
-	if (widget->window != NULL)
-		gdk_window_set_back_pixmap(widget->window, NULL, FALSE);
+	if (WindowFromWidget(widget))
+		gdk_window_set_back_pixmap(WindowFromWidget(widget), NULL, FALSE);
 	return FALSE;
 }
 
@@ -2154,7 +2171,7 @@ gint ScintillaGTK::ExposeTextThis(GtkWidget * /*widget*/, GdkEventExpose *ose) {
 		paintingAllText = rcPaint.Contains(rcClient);
 		Surface *surfaceWindow = Surface::Allocate();
 		if (surfaceWindow) {
-			surfaceWindow->Init(PWidget(wText)->window, PWidget(wText));
+			surfaceWindow->Init(PWindow(wText), PWidget(wText));
 			Paint(surfaceWindow, rcPaint);
 			surfaceWindow->Release();
 			delete surfaceWindow;
@@ -2410,7 +2427,7 @@ void ScintillaGTK::PopUpCB(GtkMenuItem *menuItem, ScintillaGTK *sciThis) {
 
 gint ScintillaGTK::PressCT(GtkWidget *widget, GdkEventButton *event, ScintillaGTK *sciThis) {
 	try {
-		if (event->window != widget->window)
+		if (event->window != WindowFromWidget(widget))
 			return FALSE;
 		if (event->type != GDK_BUTTON_PRESS)
 			return FALSE;
@@ -2428,7 +2445,7 @@ gint ScintillaGTK::ExposeCT(GtkWidget *widget, GdkEventExpose * /*ose*/, CallTip
 	try {
 		Surface *surfaceWindow = Surface::Allocate();
 		if (surfaceWindow) {
-			surfaceWindow->Init(widget->window, widget);
+			surfaceWindow->Init(WindowFromWidget(widget), widget);
 			surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == ctip->codePage);
 			surfaceWindow->SetDBCSMode(ctip->codePage);
 			ctip->PaintCT(surfaceWindow);

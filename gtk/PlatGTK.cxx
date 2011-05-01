@@ -44,6 +44,14 @@
 #define USE_CAIRO 1
 #endif
 
+static GdkWindow *WindowFromWidget(GtkWidget *w) {
+#if GTK_CHECK_VERSION(3,0,0)
+	return gtk_widget_get_window(w);
+#else
+	return w->window;
+#endif
+}
+
 #ifdef USE_CAIRO
 #define DISABLE_GDK_FONT 1
 #endif
@@ -893,7 +901,7 @@ void SurfaceImpl::Init(WindowID wid) {
 	Release();
 	PLATFORM_ASSERT(wid);
 #ifdef USE_CAIRO
-	GdkDrawable *drawable_ = GDK_DRAWABLE(PWidget(wid)->window);
+	GdkDrawable *drawable_ = GDK_DRAWABLE(WindowFromWidget(PWidget(wid)));
 	if (drawable_) {
 		context = gdk_cairo_create(drawable_);
 		PLATFORM_ASSERT(context);
@@ -2037,7 +2045,7 @@ void Window::SetPosition(PRectangle rc) {
 void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
 	int ox = 0;
 	int oy = 0;
-	gdk_window_get_origin(PWidget(relativeTo.wid)->window, &ox, &oy);
+	gdk_window_get_origin(WindowFromWidget(PWidget(relativeTo.wid)), &ox, &oy);
 	ox += rc.left;
 	if (ox < 0)
 		ox = 0;
@@ -2123,8 +2131,8 @@ void Window::SetCursor(Cursor curs) {
 		break;
 	}
 
-	if (PWidget(wid)->window)
-		gdk_window_set_cursor(PWidget(wid)->window, gdkCurs);
+	if (WindowFromWidget(PWidget(wid)))
+		gdk_window_set_cursor(WindowFromWidget(PWidget(wid)), gdkCurs);
 	gdk_cursor_unref(gdkCurs);
 }
 
@@ -2137,7 +2145,7 @@ void Window::SetTitle(const char *s) {
 PRectangle Window::GetMonitorRect(Point pt) {
 	gint x_offset, y_offset;
 
-	gdk_window_get_origin(PWidget(wid)->window, &x_offset, &y_offset);
+	gdk_window_get_origin(WindowFromWidget(PWidget(wid)), &x_offset, &y_offset);
 
 #if GTK_CHECK_VERSION(2,2,0)
 	// GTK+ 2.2+
