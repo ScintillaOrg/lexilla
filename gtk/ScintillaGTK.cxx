@@ -408,10 +408,22 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	attrs.height = allocation.height;
 	attrs.wclass = GDK_INPUT_OUTPUT;
 	attrs.visual = gtk_widget_get_visual(widget);
+#if !GTK_CHECK_VERSION(3,0,0)
 	attrs.colormap = gtk_widget_get_colormap(widget);
+#endif
 	attrs.event_mask = gtk_widget_get_events(widget) | GDK_EXPOSURE_MASK;
 	GdkCursor *cursor = gdk_cursor_new(GDK_XTERM);
 	attrs.cursor = cursor;
+#if GTK_CHECK_VERSION(3,0,0)
+	gtk_widget_set_window(widget, gdk_window_new(gtk_widget_get_parent_window(widget), &attrs,
+		GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_CURSOR));
+	gdk_window_set_user_data(gtk_widget_get_window(widget), widget);
+	gdk_window_set_background(gtk_widget_get_window(widget), 
+		&(gtk_widget_get_style(widget)->bg[GTK_STATE_NORMAL]));
+	gdk_window_show(gtk_widget_get_window(widget));
+	gdk_cursor_unref(cursor);
+	gtk_widget_style_attach(widget);
+#else
 	widget->window = gdk_window_new(gtk_widget_get_parent_window(widget), &attrs,
 		GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP | GDK_WA_CURSOR);
 	gdk_window_set_user_data(widget->window, widget);
@@ -419,6 +431,7 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	gdk_window_show(widget->window);
 	gdk_cursor_unref(cursor);
 	widget->style = gtk_style_attach(widget->style, widget->window);
+#endif
 	wPreedit = gtk_window_new(GTK_WINDOW_POPUP);
 	wPreeditDraw = gtk_drawing_area_new();
 	GtkWidget *predrw = PWidget(wPreeditDraw);	// No code inside the G_OBJECT macro
