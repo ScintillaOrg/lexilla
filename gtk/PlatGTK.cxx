@@ -2161,7 +2161,7 @@ void Window::SetCursor(Cursor curs) {
 
 	if (WindowFromWidget(PWidget(wid)))
 		gdk_window_set_cursor(WindowFromWidget(PWidget(wid)), gdkCurs);
-	g_object_unref(gdkCurs);
+	gdk_cursor_unref(gdkCurs);
 }
 
 void Window::SetTitle(const char *s) {
