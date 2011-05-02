@@ -160,7 +160,7 @@ class ScintillaGTK : public ScintillaBase {
 	gint wheelMouseIntensity;
 
 #if GTK_CHECK_VERSION(3,0,0)
-	cairo_region_t *rgnUpdate;
+	cairo_rectangle_list_t *rgnUpdate;
 #else
 	GdkRegion *rgnUpdate;
 #endif
@@ -432,7 +432,7 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	gtk_widget_set_window(widget, gdk_window_new(gtk_widget_get_parent_window(widget), &attrs,
 		GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_CURSOR));
 	gdk_window_set_user_data(gtk_widget_get_window(widget), widget);
-	gdk_window_set_background(gtk_widget_get_window(widget), 
+	gdk_window_set_background(gtk_widget_get_window(widget),
 		&(gtk_widget_get_style(widget)->bg[GTK_STATE_NORMAL]));
 	gdk_window_show(gtk_widget_get_window(widget));
 	gdk_cursor_unref(cursor);
@@ -1028,18 +1028,39 @@ bool ScintillaGTK::HaveMouseCapture() {
 	return capturedMouse;
 }
 
+#if GTK_CHECK_VERSION(3,0,0)
+
+// Is crcTest completely in crcContainer?
+static bool CRectContains(const cairo_rectangle_t &crcContainer, const cairo_rectangle_t &crcTest) {
+	return
+		(crcTest.x >= crcContainer.x) && ((crcTest.x + crcTest.width) <= (crcContainer.x + crcContainer.width)) &&
+		(crcTest.y >= crcContainer.y) && ((crcTest.y + crcTest.height) <= (crcContainer.y + crcContainer.height));
+}
+
+// Is crcTest completely in crcListContainer?
+// May incorrectly return false if complex shape
+static bool CRectListContains(const cairo_rectangle_list_t *crcListContainer, const cairo_rectangle_t &crcTest) {
+	for (int r=0; r<crcListContainer->num_rectangles; r++) {
+		if (CRectContains(crcListContainer->rectangles[r], crcTest))
+			return true;
+	}
+	return false;
+}
+
+#endif
+
 bool ScintillaGTK::PaintContains(PRectangle rc) {
+	// This allows optimization when a rectangle is completely in the update region.
+	// It is OK to return false when too difficult to determine as that just performs extra drawing
 	bool contains = true;
 	if (paintState == painting) {
 		if (!rcPaint.Contains(rc)) {
 			contains = false;
 		} else if (rgnUpdate) {
 #if GTK_CHECK_VERSION(3,0,0)
-			cairo_rectangle_int_t grc = {rc.left, rc.top,
+			cairo_rectangle_t grc = {rc.left, rc.top,
 				rc.right - rc.left, rc.bottom - rc.top};
-			if (cairo_region_contains_rectangle(rgnUpdate, &grc) != CAIRO_REGION_OVERLAP_IN) {
-				contains = false;
-			}
+			contains = CRectListContains(rgnUpdate, grc);
 #else
 			GdkRectangle grc = {rc.left, rc.top,
 				rc.right - rc.left, rc.bottom - rc.top};
@@ -2372,8 +2393,20 @@ gboolean ScintillaGTK::DrawTextThis(cairo_t *cr) {
 		rcPaint = GetClientRectangle();
 
 		PLATFORM_ASSERT(rgnUpdate == NULL);
-		// TODO: find the region being exposed
-		rgnUpdate = 0;
+		rgnUpdate = cairo_copy_clip_rectangle_list(cr);
+		if (rgnUpdate && rgnUpdate->status != CAIRO_STATUS_SUCCESS) {
+			// If not successful then ignore
+			fprintf(stderr, "DrawTextThis failed to copy update region %d [%d]\n", rgnUpdate->status, rgnUpdate->num_rectangles);
+			cairo_rectangle_list_destroy(rgnUpdate);
+			rgnUpdate = 0;
+		}
+
+		double x1, y1, x2, y2;
+		cairo_clip_extents(cr, &x1, &y1, &x2, &y2);
+		rcPaint.left = x1;
+		rcPaint.top = y1;
+		rcPaint.right = x2;
+		rcPaint.bottom = y2;
 		PRectangle rcClient = GetClientRectangle();
 		paintingAllText = rcPaint.Contains(rcClient);
 		Surface *surfaceWindow = Surface::Allocate();
@@ -2390,7 +2423,7 @@ gboolean ScintillaGTK::DrawTextThis(cairo_t *cr) {
 		paintState = notPainting;
 
 		if (rgnUpdate) {
-			cairo_region_destroy(rgnUpdate);
+			cairo_rectangle_list_destroy(rgnUpdate);
 		}
 		rgnUpdate = 0;
 		paintState = notPainting;
