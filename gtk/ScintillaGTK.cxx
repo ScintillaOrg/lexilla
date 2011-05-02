@@ -435,7 +435,8 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	gdk_window_set_background(gtk_widget_get_window(widget),
 		&(gtk_widget_get_style(widget)->bg[GTK_STATE_NORMAL]));
 	gdk_window_show(gtk_widget_get_window(widget));
-	gdk_cursor_unref(cursor);
+	g_object_unref(cursor);
+	// Deprecated: should chain up to parent class' "realize" implementation
 	gtk_widget_style_attach(widget);
 #else
 	widget->window = gdk_window_new(gtk_widget_get_parent_window(widget), &attrs,
@@ -443,7 +444,7 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	gdk_window_set_user_data(widget->window, widget);
 	gdk_window_set_background(widget->window, &widget->style->bg[GTK_STATE_NORMAL]);
 	gdk_window_show(widget->window);
-	gdk_cursor_unref(cursor);
+	g_object_unref(cursor);
 	widget->style = gtk_style_attach(widget->style, widget->window);
 #endif
 	wPreedit = gtk_window_new(GTK_WINDOW_POPUP);
@@ -475,15 +476,15 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 
 	cursor = gdk_cursor_new(GDK_XTERM);
 	gdk_window_set_cursor(PWindow(wText), cursor);
-	gdk_cursor_unref(cursor);
+	g_object_unref(cursor);
 
 	cursor = gdk_cursor_new(GDK_LEFT_PTR);
 	gdk_window_set_cursor(PWindow(scrollbarv), cursor);
-	gdk_cursor_unref(cursor);
+	g_object_unref(cursor);
 
 	cursor = gdk_cursor_new(GDK_LEFT_PTR);
 	gdk_window_set_cursor(PWindow(scrollbarh), cursor);
-	gdk_cursor_unref(cursor);
+	g_object_unref(cursor);
 
 	gtk_selection_add_targets(widget, GDK_SELECTION_PRIMARY,
 	                          clipboardCopyTargets, nClipboardCopyTargets);
@@ -666,6 +667,7 @@ void ScintillaGTK::SizeRequest(GtkWidget *widget, GtkRequisition *requisition) {
 	GtkRequisition child_requisition;
 	gtk_widget_size_request(PWidget(sciThis->scrollbarh), &child_requisition);
 	gtk_widget_size_request(PWidget(sciThis->scrollbarv), &child_requisition);
+#endif
 }
 
 void ScintillaGTK::GetPreferredWidth(GtkWidget *widget, gint *minimalWidth, gint *naturalWidth) {

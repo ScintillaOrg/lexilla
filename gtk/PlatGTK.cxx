@@ -2161,7 +2161,7 @@ void Window::SetCursor(Cursor curs) {
 
 	if (WindowFromWidget(PWidget(wid)))
 		gdk_window_set_cursor(WindowFromWidget(PWidget(wid)), gdkCurs);
-	gdk_cursor_unref(gdkCurs);
+	g_object_unref(gdkCurs);
 }
 
 void Window::SetTitle(const char *s) {
@@ -2204,7 +2204,7 @@ struct ListImage {
 static void list_image_free(gpointer, gpointer value, gpointer) {
 	ListImage *list_image = (ListImage *) value;
 	if (list_image->pixbuf)
-		g_object_unref (list_image->pixbuf);
+		g_object_unref(list_image->pixbuf);
 	g_free(list_image);
 }
 
