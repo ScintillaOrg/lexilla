@@ -665,6 +665,10 @@ void ScintillaGTK::SizeRequest(GtkWidget *widget, GtkRequisition *requisition) {
 	requisition->width = 1;
 	requisition->height = 1;
 	GtkRequisition child_requisition;
+#if GTK_CHECK_VERSION(3,0,0)
+	gtk_widget_get_preferred_size(PWidget(sciThis->scrollbarh), NULL, &child_requisition);
+	gtk_widget_get_preferred_size(PWidget(sciThis->scrollbarv), NULL, &child_requisition);
+#else
 	gtk_widget_size_request(PWidget(sciThis->scrollbarh), &child_requisition);
 	gtk_widget_size_request(PWidget(sciThis->scrollbarv), &child_requisition);
 #endif

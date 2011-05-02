@@ -2288,24 +2288,47 @@ static gboolean ButtonPress(GtkWidget *, GdkEventButton* ev, gpointer p) {
 /* Change the active color to the selected color so the listbox uses the color
 scheme that it would use if it had the focus. */
 static void StyleSet(GtkWidget *w, GtkStyle*, void*) {
-	GtkStyle* style;
 
 	g_return_if_fail(w != NULL);
 
 	/* Copy the selected color to active.  Note that the modify calls will cause
 	recursive calls to this function after the value is updated and w->style to
 	be set to a new object */
-	style = gtk_widget_get_style(w);
+
+#if GTK_CHECK_VERSION(3,0,0)
+	GtkStyleContext *styleContext = gtk_widget_get_style_context(w);
+	if (styleContext == NULL)
+		return;
+
+	GdkRGBA colourForeSelected;
+	gtk_style_context_get_color(styleContext, GTK_STATE_FLAG_SELECTED, &colourForeSelected);
+	GdkRGBA colourForeActive;
+	gtk_style_context_get_color(styleContext, GTK_STATE_FLAG_ACTIVE, &colourForeActive);
+	if (!gdk_rgba_equal(&colourForeSelected, &colourForeActive))
+		gtk_widget_override_color(w, GTK_STATE_FLAG_ACTIVE, &colourForeSelected);
+
+	styleContext = gtk_widget_get_style_context(w);
+	if (styleContext == NULL)
+		return;
+
+	GdkRGBA colourBaseSelected;
+	gtk_style_context_get_background_color(styleContext, GTK_STATE_FLAG_SELECTED, &colourBaseSelected);
+	GdkRGBA colourBaseActive;
+	gtk_style_context_get_background_color(styleContext, GTK_STATE_FLAG_ACTIVE, &colourBaseActive);
+	if (!gdk_rgba_equal(&colourBaseSelected, &colourBaseActive))
+		gtk_widget_override_background_color(w, GTK_STATE_FLAG_ACTIVE, &colourBaseSelected);
+#else
+	GtkStyle *style = gtk_widget_get_style(w);
 	if (style == NULL)
 		return;
 	if (!gdk_color_equal(&style->base[GTK_STATE_SELECTED], &style->base[GTK_STATE_ACTIVE]))
 		gtk_widget_modify_base(w, GTK_STATE_ACTIVE, &style->base[GTK_STATE_SELECTED]);
-
 	style = gtk_widget_get_style(w);
 	if (style == NULL)
 		return;
 	if (!gdk_color_equal(&style->text[GTK_STATE_SELECTED], &style->text[GTK_STATE_ACTIVE]))
 		gtk_widget_modify_text(w, GTK_STATE_ACTIVE, &style->text[GTK_STATE_SELECTED]);
+#endif
 }
 
 void ListBoxX::Create(Window &, int, Point, int, bool) {
@@ -2370,7 +2393,11 @@ void ListBoxX::SetFont(Font &scint_font) {
 	// Only do for Pango font as there have been crashes for GDK fonts
 	if (Created() && PFont(scint_font)->pfd) {
 		// Current font is Pango font
+#if GTK_CHECK_VERSION(3,0,0)
+		gtk_widget_override_font(PWidget(list), PFont(scint_font)->pfd);
+#else
 		gtk_widget_modify_font(PWidget(list), PFont(scint_font)->pfd);
+#endif
 	}
 }
 
@@ -2407,11 +2434,12 @@ PRectangle ListBoxX::GetDesiredRect() {
 		gtk_tree_view_column_cell_get_size(column, NULL,
 			NULL, NULL, &row_width, &row_height);
 #if GTK_CHECK_VERSION(3,0,0)
-		GtkStyle *styleList = gtk_widget_get_style(PWidget(list));
-		int ythickness = styleList->ythickness;
+		GtkStyleContext *styleContextList = gtk_widget_get_style_context(PWidget(list));
+		GtkBorder padding;
+		gtk_style_context_get_padding(styleContextList, GTK_STATE_FLAG_NORMAL, &padding);
 		height = (rows * row_height
-		          + 2 * (ythickness
-		                 + gtk_container_get_border_width(GTK_CONTAINER(PWidget(list))) + 1));
+		          + padding.top + padding.bottom
+		          + 2 * (gtk_container_get_border_width(GTK_CONTAINER(PWidget(list))) + 1));
 #else
 		int ythickness = PWidget(list)->style->ythickness;
 		height = (rows * row_height
@@ -2421,7 +2449,11 @@ PRectangle ListBoxX::GetDesiredRect() {
 		gtk_widget_set_size_request(GTK_WIDGET(PWidget(list)), -1, height);
 
 		// Get the size of the scroller because we set usize on the window
+#if GTK_CHECK_VERSION(3,0,0)
+		gtk_widget_get_preferred_size(GTK_WIDGET(scroller), NULL, &req);
+#else
 		gtk_widget_size_request(GTK_WIDGET(scroller), &req);
+#endif
 		rc.right = req.width;
 		rc.bottom = req.height;
 
@@ -2535,12 +2567,14 @@ void ListBoxX::Select(int n) {
 
 		// Move the scrollbar to show the selection.
 		int total = Length();
-		GtkAdjustment *adj =
-			gtk_tree_view_get_vadjustment(GTK_TREE_VIEW(list));
 #if GTK_CHECK_VERSION(3,0,0)
+		GtkAdjustment *adj =
+			gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(list));
 		gfloat value = ((gfloat)n / total) * (gtk_adjustment_get_upper(adj) - gtk_adjustment_get_lower(adj))
 							+ gtk_adjustment_get_lower(adj) - gtk_adjustment_get_page_size(adj) / 2;
 #else
+		GtkAdjustment *adj =
+			gtk_tree_view_get_vadjustment(GTK_TREE_VIEW(list));
 		gfloat value = ((gfloat)n / total) * (adj->upper - adj->lower)
 							+ adj->lower - adj->page_size / 2;
 #endif
@@ -2726,7 +2760,11 @@ void Menu::Show(Point pt, Window &) {
 	GtkMenu *widget = reinterpret_cast<GtkMenu *>(mid);
 	gtk_widget_show_all(GTK_WIDGET(widget));
 	GtkRequisition requisition;
+#if GTK_CHECK_VERSION(3,0,0)
+	gtk_widget_get_preferred_size(GTK_WIDGET(widget), NULL, &requisition);
+#else
 	gtk_widget_size_request(GTK_WIDGET(widget), &requisition);
+#endif
 	if ((pt.x + requisition.width) > screenWidth) {
 		pt.x = screenWidth - requisition.width;
 	}
