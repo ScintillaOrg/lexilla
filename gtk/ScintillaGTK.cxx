@@ -1763,7 +1763,7 @@ void ScintillaGTK::Resize(int width, int height) {
 		gtk_widget_show(GTK_WIDGET(PWidget(scrollbarh)));
 		alloc.x = 0;
 		alloc.y = height - scrollBarHeight;
-		alloc.width = Platform::Maximum(1, width - scrollBarWidth) + 1;
+		alloc.width = Platform::Maximum(1, width - scrollBarWidth);
 		alloc.height = horizontalScrollBarHeight;
 		gtk_widget_size_allocate(GTK_WIDGET(PWidget(scrollbarh)), &alloc);
 	} else {
@@ -1775,7 +1775,7 @@ void ScintillaGTK::Resize(int width, int height) {
 		alloc.x = width - scrollBarWidth;
 		alloc.y = 0;
 		alloc.width = scrollBarWidth;
-		alloc.height = Platform::Maximum(1, height - scrollBarHeight) + 1;
+		alloc.height = Platform::Maximum(1, height - scrollBarHeight);
 		if (!showSBHorizontal)
 			alloc.height += scrollBarWidth-1;
 		gtk_widget_size_allocate(GTK_WIDGET(PWidget(scrollbarv)), &alloc);
