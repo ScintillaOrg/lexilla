@@ -999,7 +999,7 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID 
 #ifdef USE_CAIRO
 	if (height > 0 && width > 0)
 		psurf = CreateSimilarSurface(
-			gtk_widget_get_window(PWidget(wid)),
+			WindowFromWidget(PWidget(wid)),
 			CAIRO_CONTENT_COLOR_ALPHA, width, height);
 #else
 	if (height > 0 && width > 0)
