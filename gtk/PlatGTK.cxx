@@ -1242,7 +1242,12 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAl
 static void PathRoundRectangle(cairo_t *context, double left, double top, double width, double height, int radius) {
 	double degrees = M_PI / 180.0;
 
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 2, 0)
 	cairo_new_sub_path(context);
+#else
+	// First arc is in the top-right corner and starts from a point on the top line
+	cairo_move_to(context, left + width - radius, top);
+#endif
 	cairo_arc(context, left + width - radius, top + radius, radius, -90 * degrees, 0 * degrees);
 	cairo_arc(context, left + width - radius, top + height - radius, radius, 0 * degrees, 90 * degrees);
 	cairo_arc(context, left + radius, top + height - radius, radius, 90 * degrees, 180 * degrees);
