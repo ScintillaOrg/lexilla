@@ -1178,7 +1178,7 @@ void ScintillaCocoa::NotifyParent(SCNotification scn)
   if (notifyProc != NULL)
   {
     scn.nmhdr.hwndFrom = (void*) this;
-    scn.nmhdr.idFrom = (unsigned int) wMain.GetID();
+    scn.nmhdr.idFrom = (uintptr_t) wMain.GetID();
     notifyProc(notifyObj, WM_NOTIFY, (uintptr_t) 0, (uintptr_t) &scn);
   }
 }

@@ -542,7 +542,7 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern)
       
       // Unlike the documentation, you MUST pass in a "components" parameter:
       // For coloured patterns it is the alpha value.
-      const float alpha = 1.0;
+      const CGFloat alpha = 1.0;
       CGContextSetFillPattern( gc, pattern, &alpha );
       CGContextFillRect( gc, PRectangleToCGRect( rc ) );
       CGContextRestoreGState( gc );
@@ -1475,7 +1475,7 @@ void ListBoxImpl::DrawRow(DataBrowserItemID item,
   ColourPair fore;
   
   if (itemState == kDataBrowserItemIsSelected) {
-    long        systemVersion;
+    SInt32        systemVersion;
     Gestalt( gestaltSystemVersion, &systemVersion );
     //  Panther DB starts using kThemeBrushSecondaryHighlightColor for inactive browser hilighting
     if ( (systemVersion >= 0x00001030) )//&& (IsControlActive( lb ) == false) )
@@ -1621,7 +1621,7 @@ void ListBoxImpl::SetFont(Font &font_) {
   ts->getAttribute( kATSUFontTag, sizeof(fontID), &fontID, NULL );
   ATSUFontIDtoFOND(fontID, &style.font, NULL);
   ts->getAttribute( kATSUSizeTag, sizeof(Fixed), &value, NULL );
-  style.size = ((SInt16)FixRound((SInt32)value));
+  style.size = ((SInt16)FixRound((uintptr_t)value));
   //SetControlFontStyle(lb, &style);
   
 #ifdef DB_TABLE_ROW_HEIGHT
