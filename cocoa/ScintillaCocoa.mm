@@ -396,7 +396,7 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
       return 0;
       
     default:
-      unsigned int r = ScintillaBase::WndProc(iMessage, wParam, lParam);
+      sptr_t r = ScintillaBase::WndProc(iMessage, wParam, lParam);
       
       return r;
   }
