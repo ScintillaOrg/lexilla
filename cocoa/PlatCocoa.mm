@@ -156,23 +156,15 @@ void Font::Create(const char *faceName, int characterSet, int size, bool bold, b
                   int extraFontFlag)
 {
   // TODO: How should I handle the characterSet request?
-  Release();
-  
-  QuartzTextStyle* style = new QuartzTextStyle();
-  fid = style;
-  
-  // Find the font
-  QuartzFont font(faceName, strlen(faceName));
-  
-  // We set Font, Size, Bold, Italic
-  QuartzTextSize textSize(size);
-  QuartzTextBold isBold(bold);
-  QuartzTextItalic isItalic(italic);
-  
-  // Actually set the attributes
-  QuartzTextStyleAttribute* attributes[] = { &font, &textSize, &isBold, &isItalic };
-  style->setAttributes(attributes, sizeof(attributes) / sizeof(*attributes));
-  style->setFontFeature(kLigaturesType, kCommonLigaturesOffSelector);
+	Release();
+
+	QuartzTextStyle* style = new QuartzTextStyle();
+	fid = style;
+
+	// Create the font with attributes
+	QuartzFont font(faceName, strlen(faceName), size, bold, italic);
+	CTFontRef fontRef = font.getFontID();
+	style->setFontRef(fontRef);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -774,78 +766,49 @@ void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const c
 void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len, 
                                       ColourAllocated fore)
 {
-  textLayout->setText (reinterpret_cast<const UInt8*>(s), len, *reinterpret_cast<QuartzTextStyle*>(font_.GetID()));
-  
-  // The Quartz RGB fill color influences the ATSUI color
-  FillColour(fore);
-  
-  // Draw text vertically flipped as OS X uses a coordinate system where +Y is upwards.
-  textLayout->draw(rc.left, ybase, true);
+	ColourDesired colour(fore.AsLong());
+	CGColorRef color = CGColorCreateGenericRGB(colour.GetRed()/255.0,colour.GetGreen()/255.0,colour.GetBlue()/255.0,1.0);
+
+	QuartzTextStyle* style = reinterpret_cast<QuartzTextStyle*>(font_.GetID());
+	style->setCTStyleColor(color);
+
+	textLayout->setText (reinterpret_cast<const UInt8*>(s), len, *reinterpret_cast<QuartzTextStyle*>(font_.GetID()));
+	textLayout->draw(rc.left, ybase);
 }
 
 //--------------------------------------------------------------------------------------------------
 
 void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positions)
 {
-  // sample at http://developer.apple.com/samplecode/ATSUICurveAccessDemo/listing1.html
-  // sample includes use of ATSUGetGlyphInfo which would be better for older
-  // OSX systems.  We should expand to using that on older systems as well.
-  for (int i = 0; i < len; i++)
-    positions [i] = 0;
-  
-  // We need the right X coords, so we have to append a char to get the left coord of thast extra char
-  char* buf = (char*) malloc (len+1);
-  if (!buf)
-    return;
-  
-  memcpy (buf, s, len);
-  buf [len] = '.';
-  
-  textLayout->setText (reinterpret_cast<const UInt8*>(buf), len+1, *reinterpret_cast<QuartzTextStyle*>(font_.GetID()));
-  ATSUGlyphInfoArray* theGlyphInfoArrayPtr;
-  ByteCount theArraySize;
-  
-  // Get the GlyphInfoArray
-  ATSUTextLayout layout = textLayout->getLayout();
-  if ( noErr == ATSUGetGlyphInfo (layout, 0, textLayout->getLength(), &theArraySize, NULL))
-  {
-    theGlyphInfoArrayPtr = (ATSUGlyphInfoArray *) malloc (theArraySize + sizeof(ItemCount) + sizeof(ATSUTextLayout));
-    if (theGlyphInfoArrayPtr)
-    {
-      if (noErr == ATSUGetGlyphInfo (layout, 0, textLayout->getLength(), &theArraySize, theGlyphInfoArrayPtr))
-      {
-        // do not count the first item, which is at the beginning of the line
-        for ( UniCharCount unicodePosition = 1, i = 0; i < len && unicodePosition < theGlyphInfoArrayPtr->numGlyphs; unicodePosition ++ )
-        {
-          // The ideal position is the x coordinate of the glyph, relative to the beginning of the line
-          int position = (int)( theGlyphInfoArrayPtr->glyphs[unicodePosition].idealX + 0.5 );    // These older APIs return float values
-          unsigned char uch = s[i];
-          positions[i++] = position;
-          
-          // If we are using unicode (UTF8), map the Unicode position back to the UTF8 characters,
-          // as 1 unicode character can map to multiple UTF8 characters.
-          // See: http://www.tbray.org/ongoing/When/200x/2003/04/26/UTF
-          // Or: http://www.cl.cam.ac.uk/~mgk25/unicode.html
-          if ( unicodeMode ) 
-          {
-            unsigned char mask = 0xc0;
-            int count = 1;
-            // Add one additonal byte for each extra high order one in the byte
-            while ( uch >= mask && count < 8 ) 
-            {
-              positions[i++] = position;
-              count ++;
-              mask = mask >> 1 | 0x80; // add an additional one in the highest order position
-            }
-          }
-        }
-      }
-      
-      // Free the GlyphInfoArray
-      free (theGlyphInfoArrayPtr);
-    }
-  }
-  free (buf);
+	for (int i = 0; i < len; i++)
+		positions [i] = 0;
+	textLayout->setText (reinterpret_cast<const UInt8*>(s), len, *reinterpret_cast<QuartzTextStyle*>(font_.GetID()));
+	
+	CTLineRef mLine = textLayout->getCTLine();
+	assert(mLine != NULL);
+	
+	CGFloat* secondaryOffset= 0;
+	int unicodeCharStart = 0;
+	for ( int  i = 0; i < len+1; i ++ ){
+		unsigned char uch = s[i];
+		CFIndex charIndex = unicodeCharStart+1;
+		CGFloat advance = CTLineGetOffsetForStringIndex(mLine, charIndex, secondaryOffset);
+		
+		if ( unicodeMode ) 
+		{
+			unsigned char mask = 0xc0;
+			int lcount = 1;
+			// Add one additonal byte for each extra high order one in the byte
+			while ( uch >= mask && lcount < 8 ) 
+			{
+				positions[i++] = (int)(advance+0.5);
+				lcount ++;
+				mask = mask >> 1 | 0x80; // add an additional one in the highest order position
+			}
+		}
+		positions[i] = (int)(advance+0.5);
+		unicodeCharStart++;
+	}
 }
 
 int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
@@ -853,19 +816,7 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
   {
     textLayout->setText (reinterpret_cast<const UInt8*>(s), len, *reinterpret_cast<QuartzTextStyle*>(font_.GetID()));
     
-    // TODO: Maybe I should add some sort of text measurement features to QuartzTextLayout?
-    unsigned long actualNumberOfBounds = 0;
-    ATSTrapezoid glyphBounds;
-    
-    // We get a single bound, since the text should only require one. If it requires more, there is an issue
-    if ( ATSUGetGlyphBounds( textLayout->getLayout(), 0, 0, kATSUFromTextBeginning, kATSUToTextEnd, kATSUseDeviceOrigins, 1, &glyphBounds, &actualNumberOfBounds ) != noErr || actualNumberOfBounds != 1 )
-    {
-      Platform::DebugDisplay( "ATSUGetGlyphBounds failed in WidthText" );
-      return 0;
-    }
-    
-    //Platform::DebugPrintf( "WidthText: \"%*s\" = %ld\n", len, s, Fix2Long( glyphBounds.upperRight.x - glyphBounds.upperLeft.x ) );
-    return Fix2Long( glyphBounds.upperRight.x - glyphBounds.upperLeft.x );
+	return textLayout->MeasureStringWidth();
   }
   return 1;
 }
@@ -876,31 +827,11 @@ int SurfaceImpl::WidthChar(Font &font_, char ch) {
   {
     textLayout->setText (reinterpret_cast<const UInt8*>(str), 1, *reinterpret_cast<QuartzTextStyle*>(font_.GetID()));
     
-    // TODO: Maybe I should add some sort of text measurement features to QuartzTextLayout?
-    unsigned long actualNumberOfBounds = 0;
-    ATSTrapezoid glyphBounds;
-    
-    // We get a single bound, since the text should only require one. If it requires more, there is an issue
-    if ( ATSUGetGlyphBounds( textLayout->getLayout(), 0, 0, kATSUFromTextBeginning, kATSUToTextEnd, kATSUseDeviceOrigins, 1, &glyphBounds, &actualNumberOfBounds ) != noErr || actualNumberOfBounds != 1 )
-    {
-      Platform::DebugDisplay( "ATSUGetGlyphBounds failed in WidthChar" );
-      return 0;
-    }
-    
-    return Fix2Long( glyphBounds.upperRight.x - glyphBounds.upperLeft.x );
+    return textLayout->MeasureStringWidth();
   }
   else
     return 1;
 }
-
-// Three possible strategies for determining ascent and descent of font:
-// 1) Call ATSUGetGlyphBounds with string containing all letters, numbers and punctuation.
-// 2) Use the ascent and descent fields of the font.
-// 3) Call ATSUGetGlyphBounds with string as 1 but also including accented capitals.
-// Smallest values given by 1 and largest by 3 with 2 in between.
-// Techniques 1 and 2 sometimes chop off extreme portions of ascenders and
-// descenders but are mostly OK except for accented characters which are
-// rarely used in code.
 
 // This string contains a good range of characters to test for size.
 const char sizeString[] = "`~!@#$%^&*()-_=+\\|[]{};:\"\'<,>.?/1234567890"
@@ -910,16 +841,18 @@ int SurfaceImpl::Ascent(Font &font_) {
   if (!font_.GetID())
     return 1;
   
-  ATSUTextMeasurement ascent = reinterpret_cast<QuartzTextStyle*>( font_.GetID() )->getAttribute<ATSUTextMeasurement>( kATSUAscentTag );
-  return Fix2Long( ascent );
+	float ascent = reinterpret_cast<QuartzTextStyle*>( font_.GetID() )->getAscent();
+	return ascent + 0.5;
+
 }
 
 int SurfaceImpl::Descent(Font &font_) {
   if (!font_.GetID())
     return 1;
   
-  ATSUTextMeasurement descent = reinterpret_cast<QuartzTextStyle*>( font_.GetID() )->getAttribute<ATSUTextMeasurement>( kATSUDescentTag );
-  return Fix2Long( descent );
+	float descent = reinterpret_cast<QuartzTextStyle*>( font_.GetID() )->getDescent();
+	return descent + 0.5;
+
 }
 
 int SurfaceImpl::InternalLeading(Font &) {
@@ -932,12 +865,15 @@ int SurfaceImpl::ExternalLeading(Font &font_) {
   if (!font_.GetID())
     return 1;
   
-  ATSUTextMeasurement lineGap = reinterpret_cast<QuartzTextStyle*>( font_.GetID() )->getAttribute<ATSUTextMeasurement>( kATSULeadingTag );
-  return Fix2Long( lineGap );
+	float leading = reinterpret_cast<QuartzTextStyle*>( font_.GetID() )->getLeading();
+	return leading + 0.5;
+
 }
 
 int SurfaceImpl::Height(Font &font_) {
-  return Ascent(font_) + Descent(font_);
+
+	int ht = Ascent(font_) + Descent(font_);
+	return ht;
 }
 
 int SurfaceImpl::AverageCharWidth(Font &font_) {
@@ -949,29 +885,6 @@ int SurfaceImpl::AverageCharWidth(Font &font_) {
   int width = WidthText( font_, sizeString, sizeStringLength  );
   
   return (int) ((width / (float) sizeStringLength) + 0.5);
-  
-  /*
-   ATSUStyle textStyle = reinterpret_cast<QuartzTextStyle*>( font_.GetID() )->getATSUStyle();
-   ATSUFontID fontID;
-   
-   ByteCount actualSize = 0;
-   if ( ATSUGetAttribute( textStyle, kATSUFontTag, sizeof( fontID ), &fontID, &actualSize ) != noErr )
-   {
-   Platform::DebugDisplay( "ATSUGetAttribute failed" );
-   return 1;
-   }
-   
-   ATSFontMetrics metrics;
-   memset( &metrics, 0, sizeof( metrics ) );
-   if ( ATSFontGetHorizontalMetrics( fontID, kATSOptionFlagsDefault, &metrics ) != noErr )
-   {
-   Platform::DebugDisplay( "ATSFontGetHorizontalMetrics failed in AverageCharWidth" );
-   return 1;
-   }
-   
-   printf( "%f %f %f\n", metrics.avgAdvanceWidth * 32, metrics.ascent * 32, metrics.descent * 32 );
-   
-   return (int) (metrics.avgAdvanceWidth + 0.5);*/
 }
 
 int SurfaceImpl::SetPalette(Scintilla::Palette *, bool) {
