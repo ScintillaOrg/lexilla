@@ -1382,6 +1382,9 @@ void ListBoxImpl::DrawRow(DataBrowserItemID item,
                           DataBrowserItemState itemState,
                           const Rect *theRect)
 {
+// ListBox does not work on Cocoa
+// Just make compile for now
+#if 0
   Rect row = *theRect;
   row.left = 0;
   
@@ -1441,6 +1444,7 @@ void ListBoxImpl::DrawRow(DataBrowserItemID item,
     QDEndCGContext( port, &cgContext );
     delete surfaceItem;
   }
+#endif
 }
 
 
@@ -1525,6 +1529,9 @@ void ListBoxImpl::InstallDataBrowserCustomCallbacks()
 }
 
 void ListBoxImpl::SetFont(Font &font_) {
+// ListBox does not work on Cocoa
+// Just make compile for now
+#if 0
   // Having to do this conversion is LAME
   QuartzTextStyle *ts = reinterpret_cast<QuartzTextStyle*>( font_.GetID() );
   ControlFontStyleRec style;
@@ -1554,6 +1561,9 @@ void ListBoxImpl::SetFont(Font &font_) {
   ::CFStringGetCString( fontNameCF, fontName, (CFIndex)255, kCFStringEncodingMacRoman );
   
   font.Create((const char *)fontName, 0, style.size, false, false);
+#else
+    font.Create("Monaco", 0, 10, false, false);
+#endif
 }
 
 void ListBoxImpl::SetAverageCharWidth(int width) {
