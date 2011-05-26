@@ -114,7 +114,6 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
   [super resetCursorRects];
   
   // We only have one cursor rect: our bounds.
-  NSRect bounds = [self bounds];
   [self addCursorRect: [self bounds] cursor: mCurrentCursor];
   [mCurrentCursor setOnMouseEntered: YES];
 }
