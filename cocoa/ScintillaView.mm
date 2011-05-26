@@ -649,6 +649,8 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
       [self setGeneralProperty: SCI_SETZOOM value: zoom];
       break;
     }
+    default:
+      break;
   };
 }
 
