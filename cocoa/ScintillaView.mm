@@ -1366,6 +1366,17 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Sets the notification callback
+ */
+- (void) registerNotifyCallback: (intptr_t) windowid value: (Scintilla::SciNotifyFunc) callback
+{
+	mBackend->RegisterNotifyCallback(windowid, callback);
+}
+
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Sets the new control which is displayed as info bar at the top or bottom of the editor.
  * Set newBar to nil if you want to hide the bar again.
  * When aligned to bottom position then the info bar and the horizontal scroller share the available
