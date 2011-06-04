@@ -161,6 +161,8 @@ public:
   virtual bool CanPaste();
   virtual void Paste();
   virtual void Paste(bool rectangular);
+  void CTPaint(void* gc, NSRect rc);
+  void CallTipMouseDown(NSPoint pt);
   virtual void CreateCallTipWindow(PRectangle rc);
   virtual void AddToPopUp(const char *label, int cmd = 0, bool enabled = true);
   virtual void ClaimSelection();

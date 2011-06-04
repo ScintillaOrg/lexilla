@@ -684,75 +684,98 @@ void ScintillaCocoa::Paste(bool forceRectangular)
 
 //--------------------------------------------------------------------------------------------------
 
-void ScintillaCocoa::CreateCallTipWindow(PRectangle rc)
-{
-/*
-  // create a calltip window
-  if (!ct.wCallTip.Created()) {
-    WindowClass windowClass = kHelpWindowClass;
-    WindowAttributes attributes = kWindowNoAttributes;
-    Rect contentBounds;
-    WindowRef outWindow;
-    
-    // convert PRectangle to Rect
-    // this adjustment gets the calltip window placed in the correct location relative
-    // to our editor window
-    Rect bounds;
-    OSStatus err;
-    err = GetWindowBounds( this->GetOwner(), kWindowGlobalPortRgn, &bounds );
-    assert( err == noErr );
-    contentBounds.top = rc.top + bounds.top;
-    contentBounds.bottom = rc.bottom + bounds.top;
-    contentBounds.right = rc.right + bounds.left;
-    contentBounds.left = rc.left + bounds.left;
-    
-    // create our calltip hiview
-    HIViewRef ctw = scintilla_calltip_new();
-    CallTip* objectPtr = &ct;
-    ScintillaCocoa* sciThis = this;
-    SetControlProperty( ctw, scintillaMacOSType, 0, sizeof( this ), &sciThis );
-    SetControlProperty( ctw, scintillaCallTipType, 0, sizeof( objectPtr ), &objectPtr );
-    
-    CreateNewWindow(windowClass, attributes, &contentBounds, &outWindow);
-    ControlRef root;
-    CreateRootControl(outWindow, &root);
-    
-    HIViewRef hiroot = HIViewGetRoot (outWindow);
-    HIViewAddSubview(hiroot, ctw);
-    
-    HIRect boundsRect;
-    HIViewGetFrame(hiroot, &boundsRect);
-    HIViewSetFrame( ctw, &boundsRect );
-    
-    // bind the size of the calltip to the size of it's container window
-    HILayoutInfo layout = {
-      kHILayoutInfoVersionZero,
-      {
-        { NULL, kHILayoutBindTop, 0 },
-        { NULL, kHILayoutBindLeft, 0 },
-        { NULL, kHILayoutBindBottom, 0 },
-        { NULL, kHILayoutBindRight, 0 }
-      },
-      {
-        { NULL, kHILayoutScaleAbsolute, 0 },
-        { NULL, kHILayoutScaleAbsolute, 0 }
-        
-      },
-      {
-        { NULL, kHILayoutPositionTop, 0 },
-        { NULL, kHILayoutPositionLeft, 0 }
-      }
-    };
-    HIViewSetLayoutInfo(ctw, &layout);
-    
-    ct.wCallTip = root;
-    ct.wDraw = ctw;
-    ct.wCallTip.SetWindow(outWindow);
-    HIViewSetVisible(ctw,true);
-    
-  }
-*/
+void ScintillaCocoa::CTPaint(void* gc, NSRect rc) {
+    Surface *surfaceWindow = Surface::Allocate();
+    if (surfaceWindow) {
+        surfaceWindow->Init(gc, wMain.GetID());
+        surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == ct.codePage);
+        surfaceWindow->SetDBCSMode(ct.codePage);
+        ct.PaintCT(surfaceWindow);
+        surfaceWindow->Release();
+        delete surfaceWindow;
+    }
 }
+
+@interface CallTipView : NSControl {
+    ScintillaCocoa *sci;
+}
+
+@end
+
+@implementation CallTipView
+
+- (NSView*) initWithFrame: (NSRect) frame {
+	self = [super initWithFrame: frame];
+
+	if (self) {
+        sci = NULL;
+	}
+	
+	return self;
+}
+
+- (void) dealloc {
+	[super dealloc];
+}
+
+- (BOOL) isFlipped {
+	return YES;
+}
+
+- (void) setSci: (ScintillaCocoa *) sci_ {
+    sci = sci_;
+}
+
+- (void) drawRect: (NSRect) needsDisplayInRect {
+    if (sci) {
+        CGContextRef context = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
+        sci->CTPaint(context, needsDisplayInRect);
+    }
+}
+
+- (void) mouseDown: (NSEvent *) event {
+    if (sci) {
+        sci->CallTipMouseDown([event locationInWindow]);
+    }
+}
+
+// On OS X, only the key view should modify the cursor so the calltip can't.
+// This view does not become key so resetCursorRects never called.
+- (void) resetCursorRects {
+    //[super resetCursorRects];
+    //[self addCursorRect: [self bounds] cursor: [NSCursor arrowCursor]];
+}
+
+@end
+
+void ScintillaCocoa::CallTipMouseDown(NSPoint pt) {
+    NSRect rectBounds = [(NSView *)(ct.wDraw.GetID()) bounds];
+    Point location(pt.x, rectBounds.size.height - pt.y);
+    ct.MouseClick(location);
+    CallTipClick();
+}
+
+void ScintillaCocoa::CreateCallTipWindow(PRectangle rc) {
+    if (!ct.wCallTip.Created()) {
+        NSRect ctRect = NSMakeRect(rc.top,rc.bottom, rc.Width(), rc.Height());
+        NSWindow *callTip = [[NSWindow alloc] initWithContentRect: ctRect 
+                                                        styleMask: NSBorderlessWindowMask
+                                                          backing: NSBackingStoreBuffered
+                                                            defer: NO];
+        [callTip setLevel:NSFloatingWindowLevel];
+        [callTip setHasShadow:YES];
+        NSRect ctContent = NSMakeRect(0,0, rc.Width(), rc.Height());
+        CallTipView *caption = [CallTipView alloc];
+        [caption initWithFrame: ctContent];
+        [caption setAutoresizingMask: NSViewWidthSizable | NSViewMaxYMargin];
+        [caption setSci: this];
+        [[callTip contentView] addSubview: caption];
+        [callTip orderFront:caption];
+        ct.wCallTip = callTip;
+        ct.wDraw = caption;
+    }
+}
+
 
 
 void ScintillaCocoa::AddToPopUp(const char *label, int cmd, bool enabled)
