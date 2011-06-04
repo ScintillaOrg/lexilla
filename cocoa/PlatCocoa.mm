@@ -764,6 +764,63 @@ void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const c
 
 //--------------------------------------------------------------------------------------------------
 
+CFStringEncoding EncodingFromCharacterSet(bool unicode, int characterSet)
+{
+  if (unicode)
+    return kCFStringEncodingUTF8;
+
+  // Unsupported -> Latin1 as reasonably safe
+  enum { notSupported = kCFStringEncodingISOLatin1};
+
+  switch (characterSet)
+  {
+  case SC_CHARSET_ANSI:
+    return kCFStringEncodingISOLatin1;
+  case SC_CHARSET_DEFAULT:
+    return kCFStringEncodingISOLatin1;
+  case SC_CHARSET_BALTIC:
+    return kCFStringEncodingWindowsBalticRim;
+  case SC_CHARSET_CHINESEBIG5:
+    return kCFStringEncodingBig5;
+  case SC_CHARSET_EASTEUROPE:
+    return kCFStringEncodingWindowsLatin2;
+  case SC_CHARSET_GB2312:
+    return kCFStringEncodingGB_18030_2000;
+  case SC_CHARSET_GREEK:
+    return kCFStringEncodingWindowsGreek;
+  case SC_CHARSET_HANGUL:
+    return kCFStringEncodingEUC_KR;
+  case SC_CHARSET_MAC:
+    return kCFStringEncodingMacRoman;
+  case SC_CHARSET_OEM:
+    return kCFStringEncodingISOLatin1;
+  case SC_CHARSET_RUSSIAN:
+    return kCFStringEncodingKOI8_R;
+  case SC_CHARSET_CYRILLIC:
+    return kCFStringEncodingWindowsCyrillic;
+  case SC_CHARSET_SHIFTJIS:
+    return kCFStringEncodingShiftJIS;
+  case SC_CHARSET_SYMBOL:
+    return kCFStringEncodingMacSymbol;
+  case SC_CHARSET_TURKISH:
+    return kCFStringEncodingWindowsLatin5;
+  case SC_CHARSET_JOHAB:
+    return kCFStringEncodingWindowsKoreanJohab;
+  case SC_CHARSET_HEBREW:
+    return kCFStringEncodingWindowsHebrew;
+  case SC_CHARSET_ARABIC:
+    return kCFStringEncodingWindowsArabic;
+  case SC_CHARSET_VIETNAMESE:
+    return kCFStringEncodingWindowsVietnamese;
+  case SC_CHARSET_THAI:
+    return kCFStringEncodingISOLatinThai;
+  case SC_CHARSET_8859_15:
+    return kCFStringEncodingISOLatin1;
+  default:
+    return notSupported;
+  }
+}
+
 void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len, 
                                       ColourAllocated fore)
 {
@@ -905,8 +962,9 @@ void SurfaceImpl::SetUnicodeMode(bool unicodeMode_) {
   unicodeMode = unicodeMode_;
 }
 
-void SurfaceImpl::SetDBCSMode(int codePage) {
-  // TODO: Implement this for code pages != UTF-8
+void SurfaceImpl::SetDBCSMode(int codePage_) {
+  if (codePage_ && (codePage_ != SC_CP_UTF8))
+    codePage = codePage_;
 }
 
 Surface *Surface::Allocate()

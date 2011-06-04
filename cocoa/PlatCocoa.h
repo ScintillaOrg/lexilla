@@ -23,6 +23,7 @@
 
 NSRect PRectangleToNSRect(Scintilla::PRectangle& rc);
 Scintilla::PRectangle NSRectToPRectangle(NSRect& rc);
+CFStringEncoding EncodingFromCharacterSet(bool unicode, int characterSet);
 
 @interface ScintillaContextMenu : NSMenu
 {
@@ -111,7 +112,7 @@ public:
   void FlushCachedState();
 
   void SetUnicodeMode(bool unicodeMode_);
-  void SetDBCSMode(int codePage);
+  void SetDBCSMode(int codePage_);
 }; // SurfaceImpl class
   
 } // Scintilla namespace
