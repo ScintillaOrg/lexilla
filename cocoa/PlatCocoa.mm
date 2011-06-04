@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <sys/time.h>
 #include <stdexcept>
+#include <map>
 
 #include "XPM.h"
 
@@ -915,16 +916,26 @@ Surface *Surface::Allocate()
 
 //----------------- Window -------------------------------------------------------------------------
 
-Window::~Window() {
+// Cocoa uses different types for windows and views, so a Window may
+// be either an NSWindow or NSView and the code will check the type
+// before performing an action.
+
+Window::~Window()
+{
 }
 
 //--------------------------------------------------------------------------------------------------
 
 void Window::Destroy()
 {
-  if (windowRef)
+  if (wid)
   {
-    // not used
+    id idWin = reinterpret_cast<id>(wid);
+    if ([idWin isKindOfClass: [NSWindow class]])
+    {
+      NSWindow* win = reinterpret_cast<NSWindow*>(idWin);
+      [win release];
+    }
   }
   wid = 0;
 }
@@ -939,62 +950,85 @@ bool Window::HasFocus()
 
 //--------------------------------------------------------------------------------------------------
 
+static int ScreenMax(NSWindow* win)
+{
+  NSScreen* screen = [win screen];
+  NSRect frame = [screen frame];
+  return frame.origin.y + frame.size.height;
+}
+
 PRectangle Window::GetPosition()
 {
-  NSRect rect= [reinterpret_cast<NSView*>(wid) frame];
-  
-  return PRectangle(NSMinX(rect), NSMinY(rect), NSMaxX(rect), NSMaxY(rect));
+  if (wid)
+  {
+    NSRect rect;
+    id idWin = reinterpret_cast<id>(wid);
+    NSWindow* win;
+    if ([idWin isKindOfClass: [NSView class]])
+    {
+      // NSView
+      NSView* view = reinterpret_cast<NSView*>(idWin);
+      win = [view window];
+      rect = [view bounds];
+      rect = [view convertRectToBase: rect];
+      rect.origin = [win convertBaseToScreen:rect.origin];
+    }
+    else
+    {
+      // NSWindow
+      win = reinterpret_cast<NSWindow*>(idWin);
+      rect = [win frame];
+    }
+    int screenHeight = ScreenMax(win);
+    // Invert screen positions to match Scintilla
+    return PRectangle(
+        NSMinX(rect), screenHeight - NSMaxY(rect),
+        NSMaxX(rect), screenHeight - NSMinY(rect));
+  }
+  else
+  {
+    return PRectangle(0, 0, 1, 1);
+  }
 }
 
 //--------------------------------------------------------------------------------------------------
 
 void Window::SetPosition(PRectangle rc)
 {
-  // Moves this view inside the parent view
-  if ( wid )
+  if (wid)
   {
-    // Set the frame on the view, the function handles the rest
-    //        CGRect r = PRectangleToCGRect( rc );
-    //        HIViewSetFrame( reinterpret_cast<HIViewRef>( wid ), &r );
+    id idWin = reinterpret_cast<id>(wid);
+    if ([idWin isKindOfClass: [NSView class]])
+    {
+      // NSView
+      // Moves this view inside the parent view
+      NSRect nsrc = NSMakeRect(rc.left, rc.bottom, rc.Width(), rc.Height());
+      NSView* view = reinterpret_cast<NSView*>(idWin);
+      nsrc.origin = [[view window] convertScreenToBase:nsrc.origin];
+      [view setFrame: nsrc];
+    }
+    else
+    {
+      // NSWindow
+      NSWindow* win = reinterpret_cast<NSWindow*>(idWin);
+      int screenHeight = ScreenMax(win);
+      NSRect nsrc = NSMakeRect(rc.left, screenHeight - rc.bottom,
+          rc.Width(), rc.Height());
+      [win setFrame: nsrc display:YES];
+    }
   }
 }
 
 //--------------------------------------------------------------------------------------------------
 
-void Window::SetPositionRelative(PRectangle rc, Window window) {
-  //    // used to actually move child windows (ie. listbox/calltip) so we have to move
-  //    // the window, not the hiview
-  //    if (windowRef) {
-  //        // we go through some contortions here to get an accurate location for our
-  //        // child windows.  This is necessary due to the multiple ways an embedding
-  //        // app may be setup.  See SciTest/main.c (GOOD && BAD) for test case.
-  //        WindowRef relativeWindow = GetControlOwner(reinterpret_cast<HIViewRef>( window.GetID() ));
-  //        WindowRef thisWindow = reinterpret_cast<WindowRef>( windowRef );
-  //
-  //        Rect portBounds;
-  //        ::GetWindowBounds(relativeWindow, kWindowStructureRgn, &portBounds);
-  //        //fprintf(stderr, "portBounds %d %d %d %d\n", portBounds.left, portBounds.top, portBounds.right, portBounds.bottom);
-  //        PRectangle hbounds = window.GetPosition();
-  //        //fprintf(stderr, "hbounds %d %d %d %d\n", hbounds.left, hbounds.top, hbounds.right, hbounds.bottom);
-  //        HIViewRef parent = HIViewGetSuperview(reinterpret_cast<HIViewRef>( window.GetID() ));
-  //        Rect pbounds;
-  //        GetControlBounds(parent, &pbounds);
-  //        //fprintf(stderr, "pbounds %d %d %d %d\n", pbounds.left, pbounds.top, pbounds.right, pbounds.bottom);
-  //
-  //        PRectangle bounds;
-  //        bounds.top = portBounds.top + pbounds.top + hbounds.top + rc.top;
-  //        bounds.bottom = bounds.top + rc.Height();
-  //        bounds.left = portBounds.left + pbounds.left + hbounds.left + rc.left;
-  //        bounds.right = bounds.left + rc.Width();
-  //        //fprintf(stderr, "bounds %d %d %d %d\n", bounds.left, bounds.top, bounds.right, bounds.bottom);
-  //
-  //        MoveWindow(thisWindow, bounds.left, bounds.top, false);
-  //        SizeWindow(thisWindow, bounds.Width(), bounds.Height(), true);
-  //
-  //        SetPosition(PRectangle(0,0,rc.Width(),rc.Height()));
-  //    } else {
-  //        SetPosition(rc);
-  //    }
+void Window::SetPositionRelative(PRectangle rc, Window window)
+{
+  PRectangle rcOther = window.GetPosition();
+  rc.left += rcOther.left;
+  rc.right += rcOther.left;
+  rc.top += rcOther.top;
+  rc.bottom += rcOther.top;
+  SetPosition(rc);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1009,30 +1043,46 @@ PRectangle Window::GetClientPosition()
 
 void Window::Show(bool show)
 {
-  //    if ( wid ) {
-  //        HIViewSetVisible( reinterpret_cast<HIViewRef>( wid ), show );
-  //    }
-  //    // this is necessary for calltip/listbox
-  //    if (windowRef) {
-  //        WindowRef thisWindow = reinterpret_cast<WindowRef>( windowRef );
-  //        if (show) {
-  //            ShowWindow( thisWindow );
-  //            DrawControls( thisWindow );
-  //        } else
-  //            HideWindow( thisWindow );
-  //    }
+  if (wid)
+  {
+    id idWin = reinterpret_cast<id>(wid);
+    if ([idWin isKindOfClass: [NSWindow class]])
+    {
+      NSWindow* win = reinterpret_cast<NSWindow*>(idWin);
+      if (show)
+      {
+        [win orderFront:nil];
+      }
+      else
+      {
+        [win orderOut:nil];
+      }
+    }
+  }
 }
 
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Invalidates the entire window (here an NSView) so it is completely redrawn.
+ * Invalidates the entire window or view so it is completely redrawn.
  */
 void Window::InvalidateAll()
 {
   if (wid)
   {
-    NSView* container = reinterpret_cast<NSView*>(wid);
+    id idWin = reinterpret_cast<id>(wid);
+    NSView* container;
+    if ([idWin isKindOfClass: [NSView class]])
+    {
+      container = reinterpret_cast<NSView*>(idWin);
+    }
+    else
+    {
+      // NSWindow
+      NSWindow* win = reinterpret_cast<NSWindow*>(idWin);
+      container = reinterpret_cast<NSView*>([win contentView]);
+      container.needsDisplay = YES;
+    }
     container.needsDisplay = YES;
   }
 }
@@ -1040,22 +1090,33 @@ void Window::InvalidateAll()
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Invalidates part of the window (here an NSView) so only this part redrawn.
+ * Invalidates part of the window or view so only this part redrawn.
  */
 void Window::InvalidateRectangle(PRectangle rc)
 {
   if (wid)
   {
-    NSView* container = reinterpret_cast<NSView*>(wid);
+    id idWin = reinterpret_cast<id>(wid);
+    NSView* container;
+    if ([idWin isKindOfClass: [NSView class]])
+    {
+      container = reinterpret_cast<NSView*>(idWin);
+    }
+    else
+    {
+      // NSWindow
+      NSWindow* win = reinterpret_cast<NSWindow*>(idWin);
+      container = reinterpret_cast<NSView*>([win contentView]);
+    }
     [container setNeedsDisplayInRect: PRectangleToNSRect(rc)];
   }
 }
 
 //--------------------------------------------------------------------------------------------------
 
-void Window::SetFont(Font &)
+void Window::SetFont(Font&)
 {
-  // TODO: Do I need to implement this? MSDN: specifies the font that a control is to use when drawing text.
+  // Implemented on list subclass on Cocoa.
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1068,26 +1129,81 @@ void Window::SetCursor(Cursor curs)
 {
   if (wid)
   {
-    InnerView* container = reinterpret_cast<InnerView*>(wid);
-    [container setCursor: curs];
+    id idWin = reinterpret_cast<id>(wid);
+    if ([idWin isMemberOfClass: [InnerView class]])
+    {
+      InnerView* container = reinterpret_cast<InnerView*>(idWin);
+      [container setCursor: curs];
+    }
   }
 }
 
 //--------------------------------------------------------------------------------------------------
 
-void Window::SetTitle(const char *s)
+void Window::SetTitle(const char* s)
 {
-  //    WindowRef window = GetControlOwner(reinterpret_cast<HIViewRef>( wid ));
-  //    CFStringRef title = CFStringCreateWithCString(kCFAllocatorDefault, s, kCFStringEncodingMacRoman);
-  //    SetWindowTitleWithCFString(window, title);
-  //    CFRelease(title);
+  if (wid)
+  {
+    id idWin = reinterpret_cast<id>(wid);
+    if ([idWin isKindOfClass: [NSWindow class]])
+    {
+      NSWindow* win = reinterpret_cast<NSWindow*>(idWin);
+      NSString* sTitle = [NSString stringWithUTF8String:s];
+      [win setTitle:sTitle];
+    }
+  }
 }
 
 //--------------------------------------------------------------------------------------------------
 
 PRectangle Window::GetMonitorRect(Point)
 {
-	return PRectangle();
+  if (wid)
+  {
+    id idWin = reinterpret_cast<id>(wid);
+    if ([idWin isKindOfClass: [NSWindow class]])
+    {
+      NSWindow* win = reinterpret_cast<NSWindow*>(idWin);
+      NSScreen* screen = [win screen];
+      NSRect rect = [screen frame];
+      int screenHeight = rect.origin.y + rect.size.height;
+      // Invert screen positions to match Scintilla
+      return PRectangle(
+          NSMinX(rect), screenHeight - NSMaxY(rect),
+          NSMaxX(rect), screenHeight - NSMinY(rect));
+    }
+  }
+  return PRectangle();
+}
+
+//----------------- ImageFromXPM -------------------------------------------------------------------
+
+// Convert an XPM image into an NSImage for use with Cocoa
+
+static NSImage* ImageFromXPM(XPM* pxpm)
+{
+  NSImage* img = nil;
+  if (pxpm)
+  {
+    const int width = pxpm->GetWidth();
+    const int height = pxpm->GetHeight();
+    PRectangle rcxpm(0, 0, width, height);
+    Surface* surfaceXPM = Surface::Allocate();
+    if (surfaceXPM)
+    {
+      surfaceXPM->InitPixMap(width, height, NULL, NULL);
+      SurfaceImpl* surfaceIXPM = static_cast<SurfaceImpl*>(surfaceXPM);
+      CGContextClearRect(surfaceIXPM->GetContext(), CGRectMake(0, 0, width, height));
+      pxpm->Draw(surfaceXPM, rcxpm);
+      img = [NSImage alloc];
+      [img autorelease];
+      CGImageRef imageRef = surfaceIXPM->GetImage();
+      [img initWithCGImage:imageRef size:NSZeroSize];
+      CGImageRelease(imageRef);
+      delete surfaceXPM;
+    }
+  }
+  return img;
 }
 
 //----------------- ListBox ------------------------------------------------------------------------
@@ -1104,665 +1220,483 @@ ListBox::~ListBox()
 
 //--------------------------------------------------------------------------------------------------
 
-static const OSType scintillaListBoxType = 'sclb';
-
-enum {
-  kItemsPerContainer = 1,
-  kIconColumn = 'icon',
-  kTextColumn = 'text'
+struct RowData
+{
+  int type;
+  std::string text;
+  RowData(int type_, const char* text_) :
+    type(type_), text(text_)
+  {
+  }
 };
-static SInt32 kScrollBarWidth = 0;
 
-class LineData {
-  int *types;
-  CFStringRef *strings;
-  int len;
-  int maximum;
+class LinesData
+{
+  std::vector<RowData> lines;
 public:
-  LineData() :types(0), strings(0), len(0), maximum(0) {}
-  ~LineData() {
-    Clear();
+  LinesData()
+  {
   }
-  void Clear() {
-    delete []types;
-    types = 0;
-    for (int i=0; i<maximum; i++) {
-      if (strings[i]) CFRelease(strings[i]);
-    }
-    delete []strings;
-    strings = 0;
-    len = 0;
-    maximum = 0;
+  ~LinesData()
+  {
   }
-  void Add(int index, int type, CFStringRef str ) {
-    if (index >= maximum) {
-      if (index >= len) {
-        int lenNew = (index+1) * 2;
-        int *typesNew = new int[lenNew];
-        CFStringRef *stringsNew = new CFStringRef[lenNew];
-        for (int i=0; i<maximum; i++) {
-          typesNew[i] = types[i];
-          stringsNew[i] = strings[i];
-        }
-        delete []types;
-        delete []strings;
-        types = typesNew;
-        strings = stringsNew;
-        len = lenNew;
-      }
-      while (maximum < index) {
-        types[maximum] = 0;
-        strings[maximum] = 0;
-        maximum++;
-      }
-    }
-    types[index] = type;
-    strings[index] = str;
-    if (index == maximum) {
-      maximum++;
-    }
+  int Length() const
+  {
+    return lines.size();
   }
-  int GetType(int index) {
-    if (index < maximum) {
-      return types[index];
-    } else {
+  void Clear()
+  {
+    lines.clear();
+  }
+  void Add(int index, int type, char* str)
+  {
+    lines.push_back(RowData(type, str));
+  }
+  int GetType(int index) const
+  {
+    if (index < lines.size())
+    {
+      return lines[index].type;
+    }
+    else
+    {
       return 0;
     }
   }
-  CFStringRef GetString(int index) {
-    if (index < maximum) {
-      return strings[index];
-    } else {
+  const char* GetString(int index) const
+  {
+    if (index < lines.size())
+    {
+      return lines[index].text.c_str();
+    }
+    else
+    {
       return 0;
     }
   }
 };
+
+class ListBoxImpl;
+
+@interface AutoCompletionDataSource :
+NSObject <NSTableViewDataSource>
+{
+  ListBoxImpl* box;
+}
+
+@end
 
 //----------------- ListBoxImpl --------------------------------------------------------------------
+
+// Map from icon type to an NSImage*
+typedef std::map<int, NSImage*> ImageMap;
 
 class ListBoxImpl : public ListBox
 {
 private:
   ControlRef lb;
-  XPMSet xset;
+  ImageMap images;
   int lineHeight;
   bool unicodeMode;
   int desiredVisibleRows;
   unsigned int maxItemWidth;
   unsigned int aveCharWidth;
+  unsigned int maxIconWidth;
   Font font;
   int maxWidth;
-  
-  void InstallDataBrowserCustomCallbacks();
-  void ConfigureDataBrowser();
-  
-  static pascal OSStatus  WindowEventHandler(EventHandlerCallRef  inCallRef,
-                                             EventRef inEvent,
-                                             void *inUserData );
-  EventHandlerRef eventHandler;
-  
-protected:
-  WindowRef windowRef;
-  
-public:
-  LineData ld;
+
+  NSTableView* table;
+  NSScrollView* scroller;
+  NSTableColumn* colIcon;
+  NSTableColumn* colText;
+
+  LinesData ld;
   CallBackAction doubleClickAction;
-  void *doubleClickActionData;
-  
+  void* doubleClickActionData;
+
+public:
   ListBoxImpl() : lb(NULL), lineHeight(10), unicodeMode(false),
-  desiredVisibleRows(5), maxItemWidth(0), aveCharWidth(8),
-  doubleClickAction(NULL), doubleClickActionData(NULL)
+    desiredVisibleRows(5), maxItemWidth(0), aveCharWidth(8), maxIconWidth(0),
+    doubleClickAction(NULL), doubleClickActionData(NULL)
   {
-    if (kScrollBarWidth == 0)
-      ;//GetThemeMetric(kThemeMetricScrollBarWidth, &kScrollBarWidth);
   }
-  
   ~ListBoxImpl() {};
-  void SetFont(Font &font);
-  void Create(Window &parent, int ctrlID, Scintilla::Point pt, int lineHeight_, bool unicodeMode_);
+
+  // ListBox methods
+  void SetFont(Font& font);
+  void Create(Window& parent, int ctrlID, Scintilla::Point pt, int lineHeight_, bool unicodeMode_);
   void SetAverageCharWidth(int width);
   void SetVisibleRows(int rows);
   int GetVisibleRows() const;
   PRectangle GetDesiredRect();
   int CaretFromEdge();
   void Clear();
-  void Append(char *s, int type = -1);
+  void Append(char* s, int type = -1);
   int Length();
   void Select(int n);
   int GetSelection();
-  int Find(const char *prefix);
-  void GetValue(int n, char *value, int len);
-  void Sort();
-  void RegisterImage(int type, const char *xpm_data);
+  int Find(const char* prefix);
+  void GetValue(int n, char* value, int len);
+  void RegisterImage(int type, const char* xpm_data);
   void ClearRegisteredImages();
-  void SetDoubleClickAction(CallBackAction action, void *data) {
+  void SetDoubleClickAction(CallBackAction action, void* data)
+  {
     doubleClickAction = action;
     doubleClickActionData = data;
   }
-  
-  int IconWidth();
-  void ShowHideScrollbar();
-#ifdef DB_TABLE_ROW_HEIGHT
-  void SetRowHeight(DataBrowserItemID itemID);
-#endif
-  
-  void DrawRow(DataBrowserItemID item,
-               DataBrowserPropertyID property,
-               DataBrowserItemState itemState,
-               const Rect *theRect);
-  
   void SetList(const char* list, char separator, char typesep);
+
+  // For access from AutoCompletionDataSource
+  int Rows();
+  NSImage* ImageForRow(int row);
+  NSString* TextForRow(int row);
+  void DoubleClick();
 };
 
-ListBox *ListBox::Allocate() {
-  ListBoxImpl *lb = new ListBoxImpl();
+@implementation AutoCompletionDataSource
+
+- (void)setBox: (ListBoxImpl*)box_
+{
+  box = box_;
+}
+
+- (void) doubleClick: (id) sender
+{
+  if (box)
+  {
+    box->DoubleClick();
+  }
+}
+
+- (id)tableView: (NSTableView*)aTableView objectValueForTableColumn: (NSTableColumn*)aTableColumn row: (NSInteger)rowIndex
+{
+#pragma unused(aTableView)
+  if (!box)
+    return nil;
+  if ([(NSString*)[aTableColumn identifier] isEqualToString: @"icon"])
+  {
+    return box->ImageForRow(rowIndex);
+  }
+  else {
+    return box->TextForRow(rowIndex);
+  }
+}
+
+- (void)tableView: (NSTableView*)aTableView setObjectValue: anObject forTableColumn: (NSTableColumn*)aTableColumn row: (NSInteger)rowIndex
+{
+#pragma unused(aTableView)
+#pragma unused(anObject)
+#pragma unused(aTableColumn)
+#pragma unused(rowIndex)
+}
+
+- (NSInteger)numberOfRowsInTableView:
+(NSTableView*)aTableView
+{
+#pragma unused(aTableView)
+  if (!box)
+    return 0;
+  return box->Rows();
+}
+
+@end
+
+ListBox* ListBox::Allocate()
+{
+  ListBoxImpl* lb = new ListBoxImpl();
   return lb;
 }
 
-void ListBoxImpl::Create(Window &/*parent*/, int /*ctrlID*/, Scintilla::Point /*pt*/,
-                         int lineHeight_, bool unicodeMode_) {
+void ListBoxImpl::Create(Window& /*parent*/, int /*ctrlID*/, Scintilla::Point pt,
+    int lineHeight_, bool unicodeMode_)
+{
   lineHeight = lineHeight_;
   unicodeMode = unicodeMode_;
   maxWidth = 2000;
-  
-  //WindowClass windowClass = kHelpWindowClass;
-  //WindowAttributes attributes = kWindowNoAttributes;
-  Rect contentBounds;
-  WindowRef outWindow;
-  
-  contentBounds.top = contentBounds.left = 0;
-  contentBounds.right = 100;
-  contentBounds.bottom = lineHeight * desiredVisibleRows;
-  
-  //CreateNewWindow(windowClass, attributes, &contentBounds, &outWindow);
-  
-  //InstallStandardEventHandler(GetWindowEventTarget(outWindow));
-  
-  //ControlRef root;
-  //CreateRootControl(outWindow, &root);
-  
-  //CreateDataBrowserControl(outWindow, &contentBounds, kDataBrowserListView, &lb);
-  
-#ifdef DB_TABLE_ROW_HEIGHT
-  // TODO: does not seem to have any effect
-  //SetDataBrowserTableViewRowHeight(lb, lineHeight);
-#endif
-  
-  // get rid of the frame, forces databrowser to the full size
-  // of the window
-  //Boolean frameAndFocus = false;
-  //SetControlData(lb, kControlNoPart, kControlDataBrowserIncludesFrameAndFocusTag,
-  //       sizeof(frameAndFocus), &frameAndFocus);
-  
-  //ListBoxImpl* lbThis = this;
-  //SetControlProperty( lb, scintillaListBoxType, 0, sizeof( this ), &lbThis );
-  
-  ConfigureDataBrowser();
-  InstallDataBrowserCustomCallbacks();
-  
-  // install event handlers
-  /*
-  static const EventTypeSpec kWindowEvents[] =
-  {
-    { kEventClassMouse, kEventMouseDown },
-    { kEventClassMouse, kEventMouseMoved },
-  };
-   */
-  
-  eventHandler = NULL;
-  //InstallWindowEventHandler( outWindow, WindowEventHandler,
-  //               GetEventTypeCount( kWindowEvents ),
-  //               kWindowEvents, this, &eventHandler );
-  
-  wid = lb;
-  //SetControlVisibility(lb, true, true);
-  SetControl(lb);
-  SetWindow(outWindow);
+
+  NSRect lbRect = NSMakeRect(pt.x,pt.y, 120, lineHeight * desiredVisibleRows);
+  NSWindow* winLB = [[NSWindow alloc] initWithContentRect: lbRect
+    styleMask: NSBorderlessWindowMask
+    backing: NSBackingStoreBuffered
+    defer: NO];
+  [winLB setLevel:NSFloatingWindowLevel];
+  [winLB setHasShadow:YES];
+  scroller = [NSScrollView alloc];
+  NSRect scRect = NSMakeRect(0, 0, lbRect.size.width, lbRect.size.height);
+  [scroller initWithFrame: scRect];
+  [scroller setHasVerticalScroller:YES];
+  table = [NSTableView alloc];
+  [table initWithFrame: scRect];
+  [table setHeaderView:nil];
+  [scroller setDocumentView: table];
+  colIcon = [[NSTableColumn alloc] initWithIdentifier:@"icon"];
+  [colIcon setWidth: 20];
+  [colIcon setEditable:NO];
+  [colIcon setHidden:YES];
+  NSImageCell* imCell = [[NSImageCell alloc] init];
+  [colIcon setDataCell:imCell];
+  [table addTableColumn:colIcon];
+  colText = [[NSTableColumn alloc] initWithIdentifier:@"name"];
+  [colText setResizingMask:NSTableColumnAutoresizingMask];
+  [colText setEditable:NO];
+  [table addTableColumn:colText];
+  AutoCompletionDataSource* ds = [[AutoCompletionDataSource alloc] init];
+  [ds setBox:this];
+  [table setDataSource: ds];
+  [scroller setAutoresizingMask: NSViewWidthSizable | NSViewHeightSizable];
+  [[winLB contentView] addSubview: scroller];
+
+  [table setTarget:ds];
+  [table setDoubleAction:@selector(doubleClick:)];
+  wid = winLB;
 }
 
-pascal OSStatus ListBoxImpl::WindowEventHandler(
-                                                EventHandlerCallRef inCallRef,
-                                                EventRef            inEvent,
-                                                void*               inUserData )
+void ListBoxImpl::SetFont(Font& font_)
 {
-  
-  switch (kEventClassMouse /* GetEventClass(inEvent) */) {
-    case kEventClassMouse:
-      switch (kEventMouseDown /* GetEventKind(inEvent) */ )
-    {
-      case kEventMouseMoved:
-      {
-        //SetThemeCursor( kThemeArrowCursor );
-        break;
-      }
-      case kEventMouseDown:
-      {
-        // we cannot handle the double click from the databrowser notify callback as
-        // calling doubleClickAction causes the listbox to be destroyed.  It is
-        // safe to do it from this event handler since the destroy event will be queued
-        // until we're done here.
-        /*
-         TCarbonEvent        event( inEvent );
-         EventMouseButton inMouseButton;
-         event.GetParameter<EventMouseButton>( kEventParamMouseButton, typeMouseButton, &inMouseButton );
-         
-         UInt32 inClickCount;
-         event.GetParameter( kEventParamClickCount, &inClickCount );
-         if (inMouseButton == kEventMouseButtonPrimary && inClickCount == 2) {
-         // handle our single mouse click now
-         ListBoxImpl* listbox = reinterpret_cast<ListBoxImpl*>( inUserData );
-         const WindowRef window = GetControlOwner(listbox->lb);
-         const HIViewRef rootView = HIViewGetRoot( window );
-         HIViewRef targetView = NULL;
-         HIViewGetViewForMouseEvent( rootView, inEvent, &targetView );
-         if ( targetView == listbox->lb )
-         {
-         if (listbox->doubleClickAction != NULL) {
-         listbox->doubleClickAction(listbox->doubleClickActionData);
-         }
-         }
-         }
-         */
-      }
-    }
-  }
-  return eventNotHandledErr;
+  font.SetID(font_.GetID());
+  // NSCell setFont takes an NSFont* rather than a CTFontRef but they
+  // are the same thing toll-free bridged.
+  NSFont* pfont = (NSFont*)FontRef(font_);
+  [[colText dataCell] setFont: pfont];
+  CGFloat itemHeight = lround([pfont ascender] - [pfont descender]);
+  [table setRowHeight:itemHeight];
 }
 
-#ifdef DB_TABLE_ROW_HEIGHT
-void ListBoxImpl::SetRowHeight(DataBrowserItemID itemID)
+void ListBoxImpl::SetAverageCharWidth(int width)
 {
-  // XXX does not seem to have any effect
-  //SetDataBrowserTableViewItemRowHeight(lb, itemID, lineHeight);
-}
-#endif
-
-void ListBoxImpl::DrawRow(DataBrowserItemID item,
-                          DataBrowserPropertyID property,
-                          DataBrowserItemState itemState,
-                          const Rect *theRect)
-{
-// ListBox does not work on Cocoa
-// Just make compile for now
-#if 0
-  Rect row = *theRect;
-  row.left = 0;
-  
-  ColourPair fore;
-  
-  if (itemState == kDataBrowserItemIsSelected) {
-    SInt32        systemVersion;
-    Gestalt( gestaltSystemVersion, &systemVersion );
-    //  Panther DB starts using kThemeBrushSecondaryHighlightColor for inactive browser hilighting
-    if ( (systemVersion >= 0x00001030) )//&& (IsControlActive( lb ) == false) )
-      ;//SetThemePen( kThemeBrushSecondaryHighlightColor, 32, true );
-    else
-      ; //SetThemePen( kThemeBrushAlternatePrimaryHighlightColor, 32, true );
-    
-    PaintRect(&row);
-    fore = ColourDesired(0xff,0xff,0xff);
-  }
-  
-  int widthPix = xset.GetWidth() + 2;
-  int pixId = ld.GetType(item - 1);
-  XPM *pxpm = xset.Get(pixId);
-  
-  char s[255];
-  GetValue(item - 1, s, 255);
-  
-  Surface *surfaceItem = Surface::Allocate();
-  if (surfaceItem) {
-    CGContextRef    cgContext;
-    GrafPtr        port;
-    Rect bounds;
-    
-    //GetControlBounds(lb, &bounds);
-    GetPort( &port );
-    QDBeginCGContext( port, &cgContext );
-    
-    CGContextSaveGState( cgContext );
-    CGContextTranslateCTM(cgContext, 0, bounds.bottom - bounds.top);
-    CGContextScaleCTM(cgContext, 1.0, -1.0);
-    
-    surfaceItem->Init(cgContext, NULL);
-    
-    int left = row.left;
-    if (pxpm) {
-      PRectangle rc(left + 1, row.top,
-                    left + 1 + widthPix, row.bottom);
-      pxpm->Draw(surfaceItem, rc);
-    }
-    
-    // draw the text
-    PRectangle trc(left + 2 + widthPix, row.top, row.right, row.bottom);
-    int ascent = surfaceItem->Ascent(font) - surfaceItem->InternalLeading(font);
-    int ytext = trc.top + ascent + 1;
-    trc.bottom = ytext + surfaceItem->Descent(font) + 1;
-    surfaceItem->DrawTextTransparent( trc, font, ytext, s, strlen(s), fore.allocated );
-    
-    CGContextRestoreGState( cgContext );
-    QDEndCGContext( port, &cgContext );
-    delete surfaceItem;
-  }
-#endif
-}
-
-
-pascal void ListBoxDrawItemCallback(ControlRef browser, DataBrowserItemID item,
-                                    DataBrowserPropertyID property,
-                                    DataBrowserItemState itemState,
-                                    const Rect *theRect, SInt16 gdDepth,
-                                    Boolean colorDevice)
-{
-  if (property != kIconColumn) return;
-  ListBoxImpl* lbThis = NULL;
-  //OSStatus err;
-  //err = GetControlProperty( browser, scintillaListBoxType, 0, sizeof( lbThis ), NULL, &lbThis );
-  // adjust our rect
-  lbThis->DrawRow(item, property, itemState, theRect);
-  
-}
-
-void ListBoxImpl::ConfigureDataBrowser()
-{
-  DataBrowserViewStyle viewStyle;
-  //DataBrowserSelectionFlags selectionFlags;
-  //GetDataBrowserViewStyle(lb, &viewStyle);
-  
-  //SetDataBrowserHasScrollBars(lb, false, true);
-  //SetDataBrowserListViewHeaderBtnHeight(lb, 0);
-  //GetDataBrowserSelectionFlags(lb, &selectionFlags);
-  //SetDataBrowserSelectionFlags(lb, selectionFlags |= kDataBrowserSelectOnlyOne);
-  // if you change the hilite style, also change the style in ListBoxDrawItemCallback
-  //SetDataBrowserTableViewHiliteStyle(lb, kDataBrowserTableViewFillHilite);
-  
-  Rect insetRect;
-  //GetDataBrowserScrollBarInset(lb, &insetRect);
-  
-  insetRect.right = kScrollBarWidth - 1;
-  //SetDataBrowserScrollBarInset(lb, &insetRect);
-  
-  switch (viewStyle)
-  {
-    case kDataBrowserListView:
-    {
-      DataBrowserListViewColumnDesc iconCol;
-      iconCol.headerBtnDesc.version = kDataBrowserListViewLatestHeaderDesc;
-      iconCol.headerBtnDesc.minimumWidth = 0;
-      iconCol.headerBtnDesc.maximumWidth = maxWidth;
-      iconCol.headerBtnDesc.titleOffset = 0;
-      iconCol.headerBtnDesc.titleString = NULL;
-      iconCol.headerBtnDesc.initialOrder = kDataBrowserOrderIncreasing;
-      
-      iconCol.headerBtnDesc.btnFontStyle.flags = kControlUseJustMask;
-      iconCol.headerBtnDesc.btnFontStyle.just = teFlushLeft;
-      
-      iconCol.headerBtnDesc.btnContentInfo.contentType = kControlContentTextOnly;
-      
-      iconCol.propertyDesc.propertyID = kIconColumn;
-      iconCol.propertyDesc.propertyType = kDataBrowserCustomType;
-      iconCol.propertyDesc.propertyFlags = kDataBrowserListViewSelectionColumn;
-      
-      //AddDataBrowserListViewColumn(lb, &iconCol, kDataBrowserListViewAppendColumn);
-    }  break;
-      
-  }
-}
-
-void ListBoxImpl::InstallDataBrowserCustomCallbacks()
-{
-  /*
-   DataBrowserCustomCallbacks callbacks;
-   
-   callbacks.version = kDataBrowserLatestCustomCallbacks;
-   verify_noerr(InitDataBrowserCustomCallbacks(&callbacks));
-   callbacks.u.v1.drawItemCallback = NewDataBrowserDrawItemUPP(ListBoxDrawItemCallback);
-   callbacks.u.v1.hitTestCallback = NULL;//NewDataBrowserHitTestUPP(ListBoxHitTestCallback);
-   callbacks.u.v1.trackingCallback = NULL;//NewDataBrowserTrackingUPP(ListBoxTrackingCallback);
-   callbacks.u.v1.editTextCallback = NULL;
-   callbacks.u.v1.dragRegionCallback = NULL;
-   callbacks.u.v1.acceptDragCallback = NULL;
-   callbacks.u.v1.receiveDragCallback = NULL;
-   
-   SetDataBrowserCustomCallbacks(lb, &callbacks);
-   */
-}
-
-void ListBoxImpl::SetFont(Font &font_) {
-// ListBox does not work on Cocoa
-// Just make compile for now
-#if 0
-  // Having to do this conversion is LAME
-  QuartzTextStyle *ts = reinterpret_cast<QuartzTextStyle*>( font_.GetID() );
-  ControlFontStyleRec style;
-  ATSUAttributeValuePtr value;
-  ATSUFontID        fontID;
-  style.flags = kControlUseFontMask | kControlUseSizeMask | kControlAddToMetaFontMask;
-  ts->getAttribute( kATSUFontTag, sizeof(fontID), &fontID, NULL );
-  ATSUFontIDtoFOND(fontID, &style.font, NULL);
-  ts->getAttribute( kATSUSizeTag, sizeof(Fixed), &value, NULL );
-  style.size = ((SInt16)FixRound((uintptr_t)value));
-  //SetControlFontStyle(lb, &style);
-  
-#ifdef DB_TABLE_ROW_HEIGHT
-  //  XXX this doesn't *stick*
-  ATSUTextMeasurement ascent = ts->getAttribute<ATSUTextMeasurement>( kATSUAscentTag );
-  ATSUTextMeasurement descent = ts->getAttribute<ATSUTextMeasurement>( kATSUDescentTag );
-  lineHeight = Fix2Long( ascent ) + Fix2Long( descent );
-  //SetDataBrowserTableViewRowHeight(lb, lineHeight + lineLeading);
-#endif
-  
-  // !@&^#%$ we cant copy Font, but we need one for our custom drawing
-  Str255 fontName255;
-  char fontName[256];
-  FMGetFontFamilyName(style.font, fontName255);
-  
-  CFStringRef fontNameCF = ::CFStringCreateWithPascalString( kCFAllocatorDefault, fontName255, kCFStringEncodingMacRoman );
-  ::CFStringGetCString( fontNameCF, fontName, (CFIndex)255, kCFStringEncodingMacRoman );
-  
-  font.Create((const char *)fontName, 0, style.size, false, false);
-#else
-    font.Create("Monaco", 0, 10, false, false);
-#endif
-}
-
-void ListBoxImpl::SetAverageCharWidth(int width) {
   aveCharWidth = width;
 }
 
-void ListBoxImpl::SetVisibleRows(int rows) {
+void ListBoxImpl::SetVisibleRows(int rows)
+{
   desiredVisibleRows = rows;
 }
 
-int ListBoxImpl::GetVisibleRows() const {
-  // XXX Windows & GTK do this, but it seems incorrect to me.  Other logic
-  //     to do with visible rows is essentially the same across platforms.
+int ListBoxImpl::GetVisibleRows() const
+{
   return desiredVisibleRows;
-  /*
-   // This would be more correct
-   int rows = Length();
-   if ((rows == 0) || (rows > desiredVisibleRows))
-   rows = desiredVisibleRows;
-   return rows;
-   */
 }
 
-PRectangle ListBoxImpl::GetDesiredRect() {
-  PRectangle rcDesired = GetPosition();
-  
-  // XXX because setting the line height on the table doesnt
-  //     *stick*, we'll have to suffer and just use whatever
-  //     the table desides is the correct height.
-  UInt16 itemHeight;// = lineHeight;
-  //GetDataBrowserTableViewRowHeight(lb, &itemHeight);
-  
+PRectangle ListBoxImpl::GetDesiredRect()
+{
+  PRectangle rcDesired;
+  rcDesired = GetPosition();
+
+  // There appears to be an extra pixel above and below the row contents
+  int itemHeight = [table rowHeight] + 2;
+
   int rows = Length();
   if ((rows == 0) || (rows > desiredVisibleRows))
     rows = desiredVisibleRows;
-  
-  rcDesired.bottom = itemHeight * rows;
+
+  rcDesired.bottom = rcDesired.top + itemHeight * rows;
   rcDesired.right = rcDesired.left + maxItemWidth + aveCharWidth;
-  
-  if (Length() > rows) 
-    rcDesired.right += kScrollBarWidth;
-  rcDesired.right += IconWidth();
-  
-  // Set the column width
-  //SetDataBrowserTableViewColumnWidth (lb, UInt16 (rcDesired.right - rcDesired.left));
+
+  if (Length() > rows)
+  {
+    [scroller setHasVerticalScroller:YES];
+    rcDesired.right += [NSScroller scrollerWidth];
+  }
+  else
+  {
+    [scroller setHasVerticalScroller:NO];
+  }
+  rcDesired.right += maxIconWidth;
+  rcDesired.right += 6;
+
   return rcDesired;
 }
 
-void ListBoxImpl::ShowHideScrollbar() {
-  int rows = Length();
-  if (rows > desiredVisibleRows) {
-    //SetDataBrowserHasScrollBars(lb, false, true);
-  } else {
-    //SetDataBrowserHasScrollBars(lb, false, false);
+int ListBoxImpl::CaretFromEdge()
+{
+  if ([colIcon isHidden])
+    return 3;
+  else
+    return 6 + [colIcon width];
+}
+
+void ListBoxImpl::Clear()
+{
+  maxItemWidth = 0;
+  maxIconWidth = 0;
+  ld.Clear();
+}
+
+void ListBoxImpl::Append(char* s, int type)
+{
+  int count = Length();
+  ld.Add(count, type, s);
+
+  Scintilla::SurfaceImpl surface;
+  unsigned int width = surface.WidthText(font, s, strlen(s));
+  if (width > maxItemWidth)
+  {
+    maxItemWidth = width;
+    [colText setWidth: maxItemWidth];
+  }
+  ImageMap::iterator it = images.find(type);
+  if (it != images.end())
+  {
+    NSImage* img = it->second;
+    if (img)
+    {
+      unsigned int widthIcon = img.size.width;
+      if (widthIcon > maxIconWidth)
+      {
+        [colIcon setHidden: NO];
+        maxIconWidth = widthIcon;
+        [colIcon setWidth: maxIconWidth];
+      }
+    }
   }
 }
 
-int ListBoxImpl::IconWidth() {
-  return xset.GetWidth() + 2;
-}
-
-int ListBoxImpl::CaretFromEdge() {
-  return 0;
-}
-
-void ListBoxImpl::Clear() {
-  // passing NULL to "items" arg 4 clears the list
-  maxItemWidth = 0;
-  ld.Clear();
-  //AddDataBrowserItems (lb, kDataBrowserNoItem, 0, NULL, kDataBrowserItemNoProperty);
-}
-
-void ListBoxImpl::Append(char *s, int type) {
-  int count = Length();
-  CFStringRef r = CFStringCreateWithCString(NULL, s, kTextEncodingMacRoman);
-  ld.Add(count, type, r);
-  
-  Scintilla::SurfaceImpl surface;
-  unsigned int width = surface.WidthText (font, s, strlen (s));
-  if (width > maxItemWidth)
-    maxItemWidth = width;
-  
-  DataBrowserItemID items[1];
-  items[0] = count + 1;
-  //AddDataBrowserItems (lb, kDataBrowserNoItem, 1, items, kDataBrowserItemNoProperty);
-  ShowHideScrollbar();
-}
-
-void ListBoxImpl::SetList(const char* list, char separator, char typesep) {
-  // XXX copied from PlatGTK, should be in base class
+void ListBoxImpl::SetList(const char* list, char separator, char typesep)
+{
   Clear();
   int count = strlen(list) + 1;
-  char *words = new char[count];
-  if (words) {
+  char* words = new char[count];
+  if (words)
+  {
     memcpy(words, list, count);
-    char *startword = words;
-    char *numword = NULL;
+    char* startword = words;
+    char* numword = NULL;
     int i = 0;
-    for (; words[i]; i++) {
-      if (words[i] == separator) {
+    for (; words[i]; i++)
+    {
+      if (words[i] == separator)
+      {
         words[i] = '\0';
         if (numword)
           *numword = '\0';
         Append(startword, numword?atoi(numword + 1):-1);
         startword = words + i + 1;
         numword = NULL;
-      } else if (words[i] == typesep) {
+      }
+      else if (words[i] == typesep)
+      {
         numword = words + i;
       }
     }
-    if (startword) {
+    if (startword)
+    {
       if (numword)
         *numword = '\0';
       Append(startword, numword?atoi(numword + 1):-1);
     }
     delete []words;
   }
+  [table reloadData];
 }
 
-int ListBoxImpl::Length() {
-  UInt32 numItems = 0;
-  //GetDataBrowserItemCount(lb, kDataBrowserNoItem, false, kDataBrowserItemAnyState, &numItems);
-  return (int)numItems;
+int ListBoxImpl::Length()
+{
+  return ld.Length();
 }
 
-void ListBoxImpl::Select(int n) {
-  DataBrowserItemID items[1];
-  items[0] = n + 1;
-  //SetDataBrowserSelectedItems(lb, 1, items, kDataBrowserItemsAssign);
-  //RevealDataBrowserItem(lb, items[0], kIconColumn, kDataBrowserRevealOnly);
-  // force update on selection
-  //Draw1Control(lb);
+void ListBoxImpl::Select(int n)
+{
+  [table selectRowIndexes:[NSIndexSet indexSetWithIndex:n] byExtendingSelection:NO];
+  [table scrollRowToVisible:n];
 }
 
-int ListBoxImpl::GetSelection() {
-  Handle selectedItems = NewHandle(0);
-  //GetDataBrowserItems(lb, kDataBrowserNoItem, true, kDataBrowserItemIsSelected, selectedItems);
-  UInt32 numSelectedItems = GetHandleSize(selectedItems)/sizeof(DataBrowserItemID);
-  if (numSelectedItems == 0) {
-    return -1;
-  }
-  HLock( selectedItems );
-  DataBrowserItemID *individualItem = (DataBrowserItemID*)( *selectedItems );
-  DataBrowserItemID selected[numSelectedItems];
-  selected[0] = *individualItem;
-  HUnlock( selectedItems );
-  return selected[0] - 1;
+int ListBoxImpl::GetSelection()
+{
+  return [table selectedRow];
 }
 
-int ListBoxImpl::Find(const char *prefix) {
+int ListBoxImpl::Find(const char* prefix)
+{
   int count = Length();
-  char s[255];
-  for (int i = 0; i < count; i++) {
-    GetValue(i, s, 255);
-    if ((s[0] != '\0') && (0 == strncmp(prefix, s, strlen(prefix)))) {
+  for (int i = 0; i < count; i++)
+  {
+    const char* s = ld.GetString(i);
+    if (s && (s[0] != '\0') && (0 == strncmp(prefix, s, strlen(prefix))))
+    {
       return i;
     }
   }
   return - 1;
 }
 
-void ListBoxImpl::GetValue(int n, char *value, int len) {
-  CFStringRef textString = ld.GetString(n);
-  if (textString == NULL) {
+void ListBoxImpl::GetValue(int n, char* value, int len)
+{
+  const char* textString = ld.GetString(n);
+  if (textString == NULL)
+  {
     value[0] = '\0';
     return;
   }
-  CFIndex numUniChars = CFStringGetLength( textString );
-  
-  // XXX how do we know the encoding of the listbox?
-  CFStringEncoding encoding = kCFStringEncodingUTF8; //( IsUnicodeMode() ? kCFStringEncodingUTF8 : kCFStringEncodingASCII);
-  CFIndex maximumByteLength = CFStringGetMaximumSizeForEncoding( numUniChars, encoding ) + 1;
-  char* text = new char[maximumByteLength];
-  CFIndex usedBufferLength = 0;
-  CFStringGetBytes( textString, CFRangeMake( 0, numUniChars ), encoding,
-                   '?', false, reinterpret_cast<UInt8*>( text ),
-                   maximumByteLength, &usedBufferLength );
-  text[usedBufferLength] = '\0'; // null terminate the ASCII/UTF8 string
-  
-  if (text && len > 0) {
-    strncpy(value, text, len);
-    value[len - 1] = '\0';
-  } else {
-    value[0] = '\0';
+  strncpy(value, textString, len);
+  value[len - 1] = '\0';
+}
+
+void ListBoxImpl::RegisterImage(int type, const char* xpm_data)
+{
+  XPM xpm(xpm_data);
+  xpm.CopyDesiredColours();
+  NSImage* img = ImageFromXPM(&xpm);
+  [img retain];
+  ImageMap::iterator it=images.find(type);
+  if (it == images.end())
+  {
+    images[type] = img;
   }
-  delete text;
+  else
+  {
+    [it->second release];
+    it->second = img;
+  }
 }
 
-void ListBoxImpl::Sort() {
-  // TODO: Implement this
-  fprintf(stderr, "ListBox::Sort\n");
+void ListBoxImpl::ClearRegisteredImages()
+{
+  for (ImageMap::iterator it=images.begin();
+      it != images.end(); ++it)
+  {
+    [it->second release];
+    it->second = nil;
+  }
+  images.clear();
 }
 
-void ListBoxImpl::RegisterImage(int type, const char *xpm_data) {
-  xset.Add(type, xpm_data);
+int ListBoxImpl::Rows()
+{
+  return ld.Length();
 }
 
-void ListBoxImpl::ClearRegisteredImages() {
-  xset.Clear();
+NSImage* ListBoxImpl::ImageForRow(int row)
+{
+  ImageMap::iterator it = images.find(ld.GetType(row));
+  if (it != images.end())
+  {
+    NSImage* img = it->second;
+    [img retain];
+    return img;
+  }
+  else
+  {
+    return nil;
+  }
+}
+
+NSString* ListBoxImpl::TextForRow(int row)
+{
+  const char* textString = ld.GetString(row);
+  NSString* sTitle;
+  if (unicodeMode)
+    sTitle = [NSString stringWithUTF8String:textString];
+  else
+    sTitle = [NSString stringWithCString:textString encoding:NSWindowsCP1252StringEncoding];
+  return sTitle;
+}
+
+void ListBoxImpl::DoubleClick()
+{
+  if (doubleClickAction)
+  {
+    doubleClickAction(doubleClickActionData);
+  }
 }
 
 //----------------- ScintillaContextMenu -----------------------------------------------------------
