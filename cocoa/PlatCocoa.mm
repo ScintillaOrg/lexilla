@@ -1390,8 +1390,7 @@ public:
 #pragma unused(rowIndex)
 }
 
-- (NSInteger)numberOfRowsInTableView:
-(NSTableView*)aTableView
+- (NSInteger)numberOfRowsInTableView: (NSTableView*)aTableView
 {
 #pragma unused(aTableView)
   if (!box)
