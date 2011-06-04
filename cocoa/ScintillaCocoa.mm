@@ -256,25 +256,164 @@ void ScintillaCocoa::Finalise()
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Convert a core foundation string into an array of bytes in a particular encoding
+ */
+
+static char *EncodedBytes(CFStringRef cfsRef, CFStringEncoding encoding) {
+    CFRange rangeAll = {0, CFStringGetLength(cfsRef)};
+    CFIndex usedLen = 0;
+    CFStringGetBytes(cfsRef, rangeAll, encoding, '?',
+                     false, NULL, 0, &usedLen);
+    
+    char *buffer = new char[usedLen+1];
+    CFStringGetBytes(cfsRef, rangeAll, encoding, '?',
+                     false, (UInt8 *)buffer,usedLen, NULL);
+    buffer[usedLen] = '\0';
+    return buffer;
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Case folders.
+ */
+
+class CaseFolderUTF8 : public CaseFolderTable {
+public:
+	CaseFolderUTF8() {
+		StandardASCII();
+	}
+	virtual size_t Fold(char *folded, size_t sizeFolded, const char *mixed, size_t lenMixed) {
+		if ((lenMixed == 1) && (sizeFolded > 0)) {
+			folded[0] = mapping[static_cast<unsigned char>(mixed[0])];
+			return 1;
+		} else {
+            CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
+                                                         reinterpret_cast<const UInt8 *>(mixed), 
+                                                         lenMixed, kCFStringEncodingUTF8, false);
+
+            NSString *sMapped = [(NSString *)cfsVal stringByFoldingWithOptions:NSCaseInsensitiveSearch
+                                                            locale:[NSLocale currentLocale]];
+
+            const char *cpMapped = [sMapped UTF8String];
+			size_t lenMapped = strlen(cpMapped);
+			if (lenMapped < sizeFolded) {
+				memcpy(folded, cpMapped,  lenMapped);
+			} else {
+				lenMapped = 0;
+			}
+            CFRelease(cfsVal);
+			return lenMapped;
+		}
+	}
+};
+
+class CaseFolderDBCS : public CaseFolderTable {
+	CFStringEncoding encoding;
+public:
+	CaseFolderDBCS(CFStringEncoding encoding_) : encoding(encoding_) {
+		StandardASCII();
+	}
+	virtual size_t Fold(char *folded, size_t sizeFolded, const char *mixed, size_t lenMixed) {
+		if ((lenMixed == 1) && (sizeFolded > 0)) {
+			folded[0] = mapping[static_cast<unsigned char>(mixed[0])];
+			return 1;
+		} else {
+            CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
+                                                         reinterpret_cast<const UInt8 *>(mixed), 
+                                                         lenMixed, encoding, false);
+
+            NSString *sMapped = [(NSString *)cfsVal stringByFoldingWithOptions:NSCaseInsensitiveSearch
+                                                                        locale:[NSLocale currentLocale]];
+            
+            char *encoded = EncodedBytes((CFStringRef)sMapped, encoding);
+
+			size_t lenMapped = strlen(encoded);
+            if (lenMapped < sizeFolded) {
+                memcpy(folded, encoded,  lenMapped);
+            } else {
+                folded[0] = '\0';
+                lenMapped = 1;
+            }
+            delete []encoded;
+            CFRelease(cfsVal);
+			return lenMapped;
+		}
+		// Something failed so return a single NUL byte
+		folded[0] = '\0';
+		return 1;
+	}
+};
+
+CaseFolder *ScintillaCocoa::CaseFolderForEncoding() {
+	if (pdoc->dbcsCodePage == SC_CP_UTF8) {
+		return new CaseFolderUTF8();
+	} else {
+        CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
+                                                             vs.styles[STYLE_DEFAULT].characterSet);
+        if (pdoc->dbcsCodePage == 0) {
+            CaseFolderTable *pcf = new CaseFolderTable();
+            pcf->StandardASCII();
+            // Only for single byte encodings
+            for (int i=0x80; i<0x100; i++) {
+                char sCharacter[2] = "A";
+                sCharacter[0] = i;
+                CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
+                                                             reinterpret_cast<const UInt8 *>(sCharacter), 
+                                                             1, encoding, false);
+                
+                NSString *sMapped = [(NSString *)cfsVal stringByFoldingWithOptions:NSCaseInsensitiveSearch
+                                                                            locale:[NSLocale currentLocale]];
+                
+                char *encoded = EncodedBytes((CFStringRef)sMapped, encoding);
+                
+                if (strlen(encoded) == 1) {
+                    pcf->SetTranslation(sCharacter[0], encoded[0]);
+                }
+                
+                delete []encoded;
+                CFRelease(cfsVal);
+            }
+            return pcf;
+        } else {
+            return new CaseFolderDBCS(encoding);
+        }
+		return 0;
+	}
+}
+
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Case-fold the given string depending on the specified case mapping type.
- * Note: ScintillaCocoa exclusively works with Unicode. We don't even think about adding support for
- *       obsolete code page stuff.    
  */
 std::string ScintillaCocoa::CaseMapString(const std::string &s, int caseMapping)
 {
-  NSString* textToConvert = [NSString stringWithUTF8String: s.c_str()];
-  std::string result;
+  CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
+                                                       vs.styles[STYLE_DEFAULT].characterSet);
+  CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
+                                               reinterpret_cast<const UInt8 *>(s.c_str()), 
+                                               s.length(), encoding, false);
+
+  NSString *sMapped;
   switch (caseMapping)
   {
     case cmUpper:
-      result = [[textToConvert uppercaseString] UTF8String];
+      sMapped = [(NSString *)cfsVal uppercaseString];
       break;
     case cmLower:
-      result = [[textToConvert lowercaseString] UTF8String];
+      sMapped = [(NSString *)cfsVal lowercaseString];
       break;
     default:
-      result = s;
+      sMapped = [(NSString *)cfsVal copy];
   }
+
+  // Back to encoding
+  char *encoded = EncodedBytes((CFStringRef)sMapped, encoding);
+  std::string result(encoded);
+  delete []encoded;
+  CFRelease(cfsVal);
   return result;
 }
 

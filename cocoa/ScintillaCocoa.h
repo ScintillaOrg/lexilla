@@ -122,6 +122,7 @@ protected:
   
   virtual void Initialise();
   virtual void Finalise();
+  virtual CaseFolder *CaseFolderForEncoding();
   virtual std::string CaseMapString(const std::string &s, int caseMapping);
 public:
   ScintillaCocoa(NSView* view);
