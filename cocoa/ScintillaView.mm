@@ -794,6 +794,17 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
     [self setGeneralProperty: SCI_INDICSETUNDER parameter: INPUT_INDICATOR value: 1];
     [self setGeneralProperty: SCI_INDICSETSTYLE parameter: INPUT_INDICATOR value: INDIC_PLAIN];
     [self setGeneralProperty: SCI_INDICSETALPHA parameter: INPUT_INDICATOR value: 100];
+      
+    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+    [center addObserver:self
+               selector:@selector(applicationDidResignActive:)
+                   name:NSApplicationDidResignActiveNotification
+                 object:nil];
+      
+    [center addObserver:self
+               selector:@selector(applicationDidBecomeActive:)
+                   name:NSApplicationDidBecomeActiveNotification
+                 object:nil];
   }
   return self;
 }
@@ -805,6 +816,18 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
   [mInfoBar release];
   delete mBackend;
   [super dealloc];
+}
+
+//--------------------------------------------------------------------------------------------------
+
+- (void) applicationDidResignActive: (NSNotification *)note {
+    mBackend->ActiveStateChanged(false);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+- (void) applicationDidBecomeActive: (NSNotification *)note {
+    mBackend->ActiveStateChanged(true);
 }
 
 //--------------------------------------------------------------------------------------------------

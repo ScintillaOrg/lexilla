@@ -1649,19 +1649,18 @@ void ScintillaCocoa::HandleCommand(NSInteger command)
 
 //--------------------------------------------------------------------------------------------------
 
-//OSStatus ScintillaCocoa::ActiveStateChanged()
-//{
-//  // If the window is being deactivated, lose the focus and turn off the ticking
-//  if ( ! this->IsActive() ) {
-//    DropCaret();
-//    //SetFocusState( false );
-//    SetTicking( false );
-//  } else {
-//    ShowCaretAtCurrentPosition();
-//  }
-//  return noErr;
-//}
-//
+void ScintillaCocoa::ActiveStateChanged(bool isActive)
+{
+  // If the window is being deactivated, lose the focus and turn off the ticking
+  if (!isActive) {
+    DropCaret();
+    //SetFocusState( false );
+    SetTicking( false );
+  } else {
+    ShowCaretAtCurrentPosition();
+  }
+}
+
 
 //--------------------------------------------------------------------------------------------------
 

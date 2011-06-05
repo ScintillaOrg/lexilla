@@ -202,10 +202,7 @@ public:
   virtual NSMenu* CreateContextMenu(NSEvent* event);
   void HandleCommand(NSInteger command);
 
-//    virtual OSStatus ActiveStateChanged();
-//
-//    virtual void CallTipClick();
- 
+  virtual void ActiveStateChanged(bool isActive);
 };
 
 
