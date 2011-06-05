@@ -518,7 +518,9 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
       return reinterpret_cast<sptr_t>(this);
       
     case SCI_GRABFOCUS:
-      // TODO: implement it
+	  [[ContentView() window] makeFirstResponder:ContentView()];
+      break;
+
       break;
 
     case WM_UNICHAR: 
@@ -775,8 +777,6 @@ void ScintillaCocoa::CreateCallTipWindow(PRectangle rc) {
         ct.wDraw = caption;
     }
 }
-
-
 
 void ScintillaCocoa::AddToPopUp(const char *label, int cmd, bool enabled)
 {
