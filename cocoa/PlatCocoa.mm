@@ -384,9 +384,13 @@ CGImageRef SurfaceImpl::GetImage()
  */
 int SurfaceImpl::LogPixelsY()
 {
-  NSSize deviceResolution = [[[[NSScreen mainScreen] deviceDescription] 
-                              objectForKey: NSDeviceResolution] sizeValue];
-  return (int) deviceResolution.height;
+  if (verticalDeviceResolution == 0)
+  {
+    NSSize deviceResolution = [[[[NSScreen mainScreen] deviceDescription]
+    objectForKey: NSDeviceResolution] sizeValue];
+    verticalDeviceResolution = (int) deviceResolution.height;
+  }
+  return verticalDeviceResolution;
 }
 
 //--------------------------------------------------------------------------------------------------

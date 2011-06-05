@@ -49,6 +49,8 @@ private:
   /** The text layout instance */
   QuartzTextLayout*	textLayout;
   int codePage;
+  int verticalDeviceResolution;
+	
   /** If the surface is a bitmap context, contains a reference to the bitmap data. */
   uint8_t* bitmapData;
   /** If the surface is a bitmap context, stores the dimensions of the bitmap. */
