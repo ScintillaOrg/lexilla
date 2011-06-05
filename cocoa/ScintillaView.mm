@@ -628,7 +628,7 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Called by a connected compontent (usually the info bar) if something changed there.
+ * Called by a connected component (usually the info bar) if something changed there.
  *
  * @param type The type of the notification.
  * @param message Carries the new status message if the type is a status message change.
