@@ -1003,7 +1003,8 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 - (BOOL) setHorizontalScrollRange: (int) range page: (int) page
 {
   BOOL result = NO;
-  BOOL hideScroller = page >= range;
+  BOOL hideScroller = (page >= range) || 
+    (mBackend->WndProc(SCI_GETWRAPMODE, 0, 0) != SC_WRAP_NONE);
   
   if ([mHorizontalScroller isHidden] != hideScroller)
   {
