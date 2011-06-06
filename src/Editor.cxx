@@ -131,7 +131,7 @@ Editor::Editor() {
 	selectionType = selChar;
 
 	lastXChosen = 0;
-	lineAnchor = 0;
+	lineAnchorPos = 0;
 	originalAnchorPos = 0;
 	wordSelectAnchorStartPos = 0;
 	wordSelectAnchorEndPos = 0;
@@ -6007,17 +6007,22 @@ Window::Cursor Editor::GetMarginCursor(Point pt) {
 	return Window::cursorReverseArrow;
 }
 
-void Editor::LineSelection(int lineCurrent_, int lineAnchor_) {
-	if (lineAnchor_ < lineCurrent_) {
-		SetSelection(pdoc->LineStart(lineCurrent_ + 1),
-		        pdoc->LineStart(lineAnchor_));
-	} else if (lineAnchor_ > lineCurrent_) {
-		SetSelection(pdoc->LineStart(lineCurrent_),
-		        pdoc->LineStart(lineAnchor_ + 1));
+void Editor::LineSelection(int lineCurrentPos_, int lineAnchorPos_) {
+	int selCurrentPos, selAnchorPos;
+	if (lineAnchorPos_ < lineCurrentPos_) {
+		selCurrentPos = StartEndDisplayLine(lineCurrentPos_, false) + 1;
+		selCurrentPos = pdoc->MovePositionOutsideChar(selCurrentPos, 1);
+		selAnchorPos = StartEndDisplayLine(lineAnchorPos_, true);
+	} else if (lineAnchorPos_ > lineCurrentPos_) {
+		selCurrentPos = StartEndDisplayLine(lineCurrentPos_, true);
+		selAnchorPos = StartEndDisplayLine(lineAnchorPos_, false) + 1;
+		selAnchorPos = pdoc->MovePositionOutsideChar(selAnchorPos, 1);
 	} else { // Same line, select it
-		SetSelection(pdoc->LineStart(lineAnchor_ + 1),
-		        pdoc->LineStart(lineAnchor_));
+		selCurrentPos = StartEndDisplayLine(lineAnchorPos_, false) + 1;
+		selCurrentPos = pdoc->MovePositionOutsideChar(selCurrentPos, 1);
+		selAnchorPos = StartEndDisplayLine(lineAnchorPos_, true);
 	}
+	SetSelection(selCurrentPos, selAnchorPos);
 }
 
 void Editor::WordSelection(int pos) {
@@ -6133,8 +6138,8 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 			wordSelectInitialCaretPos = sel.MainCaret();
 			WordSelection(wordSelectInitialCaretPos);
 		} else if (selectionType == selLine) {
-			lineAnchor = LineFromLocation(pt);
-			SetSelection(pdoc->LineStart(lineAnchor + 1), pdoc->LineStart(lineAnchor));
+			lineAnchorPos = newPos.Position();
+			LineSelection(lineAnchorPos, lineAnchorPos);
 			//Platform::DebugPrintf("Triple click: %d - %d\n", anchor, currentPos);
 		} else {
 			SetEmptySelection(sel.MainCaret());
@@ -6154,20 +6159,16 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 				return;
 			}
 			if (!shift) {
-				lineAnchor = LineFromLocation(pt);
 				// Single click in margin: select whole line
-				LineSelection(lineAnchor, lineAnchor);
-				SetSelection(pdoc->LineStart(lineAnchor + 1),
-				        pdoc->LineStart(lineAnchor));
+				lineAnchorPos = newPos.Position();
+				LineSelection(lineAnchorPos, lineAnchorPos);
 			} else {
 				// Single shift+click in margin: select from line anchor to clicked line
 				if (sel.MainAnchor() > sel.MainCaret())
-					lineAnchor = pdoc->LineFromPosition(sel.MainAnchor() - 1);
+					lineAnchorPos = sel.MainAnchor() - 1;
 				else
-					lineAnchor = pdoc->LineFromPosition(sel.MainAnchor());
-				int lineStart = LineFromLocation(pt);
-				LineSelection(lineStart, lineAnchor);
-				//lineAnchor = lineStart; // Keep the same anchor for ButtonMove
+					lineAnchorPos = sel.MainAnchor();
+				LineSelection(newPos.Position(), lineAnchorPos);
 			}
 
 			SetDragPosition(SelectionPosition(invalidPosition));
@@ -6330,8 +6331,7 @@ void Editor::ButtonMove(Point pt) {
 				}
 			} else {
 				// Continue selecting by line
-				int lineMove = LineFromLocation(pt);
-				LineSelection(lineMove, lineAnchor);
+				LineSelection(movePos.Position(), lineAnchorPos);
 			}
 		}
 
