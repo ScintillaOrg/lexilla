@@ -144,6 +144,9 @@ Editor::Editor() {
 
 	caretYPolicy = CARET_EVEN;
 	caretYSlop = 0;
+	
+	visiblePolicy = 0;
+	visibleSlop = 0;
 
 	searchAnchor = 0;
 
