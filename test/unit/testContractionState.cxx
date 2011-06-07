@@ -76,6 +76,7 @@ TEST_F(ContractionStateTest, ShowHide) {
 	EXPECT_EQ(0, pcs->GetVisible(1));
 	EXPECT_EQ(true, pcs->GetVisible(2));
 	EXPECT_EQ(4, pcs->LinesDisplayed());
+	EXPECT_EQ(1, pcs->HiddenLines());
 
 	pcs->SetVisible(1, 2, true);
 	for (int l=0;l<4;l++) {
@@ -88,6 +89,26 @@ TEST_F(ContractionStateTest, ShowHide) {
 	for (int l=0;l<4;l++) {
 		EXPECT_EQ(true, pcs->GetVisible(0));
 	}
+	EXPECT_EQ(0, pcs->HiddenLines());
+}
+
+TEST_F(ContractionStateTest, Hidden) {
+	pcs->InsertLines(0,1);
+	for (int l=0;l<2;l++) {
+		EXPECT_EQ(true, pcs->GetVisible(0));
+	}
+	EXPECT_EQ(0, pcs->HiddenLines());
+
+	pcs->SetVisible(1, 1, false);
+	EXPECT_EQ(true, pcs->GetVisible(0));
+	EXPECT_EQ(0, pcs->GetVisible(1));
+	EXPECT_EQ(1, pcs->HiddenLines());
+
+	pcs->SetVisible(1, 1, true);
+	for (int l=0;l<2;l++) {
+		EXPECT_EQ(true, pcs->GetVisible(0));
+	}
+	EXPECT_EQ(0, pcs->HiddenLines());
 }
 
 TEST_F(ContractionStateTest, Contracting) {
