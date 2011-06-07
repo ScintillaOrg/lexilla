@@ -21,7 +21,7 @@ using namespace Scintilla;
 #endif
 
 // Find the first run at a position
-int RunStyles::RunFromPosition(int position) {
+int RunStyles::RunFromPosition(int position) const {
 	int run = starts->PartitionFromPosition(position);
 	// Go to first element with this position
 	while ((run > 0) && (position == starts->PositionFromPartition(run-1))) {
@@ -214,6 +214,10 @@ void RunStyles::DeleteRange(int position, int deleteLength) {
 		RemoveRunIfEmpty(runStart);
 		RemoveRunIfSameAsPrevious(runStart);
 	}
+}
+
+int RunStyles::Runs() const {
+	return starts->Partitions();
 }
 
 bool RunStyles::AllSame() const {
