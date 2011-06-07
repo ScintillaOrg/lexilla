@@ -233,3 +233,18 @@ bool RunStyles::AllSame() const {
 bool RunStyles::AllSameAs(int value) const {
 	return AllSame() && (styles->ValueAt(0) == value);
 }
+
+int RunStyles::Find(int value, int start) const {
+	if (start < Length()) {
+		int run = start ? RunFromPosition(start) : 0;
+		if (styles->ValueAt(run) == value)
+			return start;
+		run++;
+		while (run < starts->Partitions()) {
+			if (styles->ValueAt(run) == value)
+				return starts->PositionFromPartition(run);
+			run++;
+		}
+	}
+	return -1;
+}

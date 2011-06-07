@@ -40,6 +40,7 @@ public:
 	int Runs() const;
 	bool AllSame() const;
 	bool AllSameAs(int value) const;
+	int Find(int value, int start) const;
 };
 
 #ifdef SCI_NAMESPACE
