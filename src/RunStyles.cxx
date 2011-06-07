@@ -216,3 +216,14 @@ void RunStyles::DeleteRange(int position, int deleteLength) {
 	}
 }
 
+bool RunStyles::AllSame() const {
+	for (int run = 1; run < starts->Partitions(); run++) {
+		if (styles->ValueAt(run) != styles->ValueAt(run - 1))
+			return false;
+	}
+	return true;
+}
+
+bool RunStyles::AllSameAs(int value) const {
+	return AllSame() && (styles->ValueAt(0) == value);
+}

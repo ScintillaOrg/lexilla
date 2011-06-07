@@ -37,6 +37,8 @@ public:
 	void InsertSpace(int position, int insertLength);
 	void DeleteAll();
 	void DeleteRange(int position, int deleteLength);
+	bool AllSame() const;
+	bool AllSameAs(int value) const;
 };
 
 #ifdef SCI_NAMESPACE
