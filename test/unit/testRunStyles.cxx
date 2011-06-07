@@ -204,6 +204,24 @@ TEST_F(RunStylesTest, Find) {
 	EXPECT_EQ(-1, prs->Find(3,6));
 }
 
+TEST_F(RunStylesTest, AllSame) {
+	EXPECT_EQ(true, prs->AllSame());
+	prs->InsertSpace(0, 5);
+	EXPECT_EQ(true, prs->AllSame());
+	EXPECT_EQ(0, prs->AllSameAs(88));
+	EXPECT_EQ(true, prs->AllSameAs(0));
+	int startFill = 1;
+	int lengthFill = 3;
+	EXPECT_EQ(true, prs->FillRange(startFill, 99, lengthFill));
+	EXPECT_EQ(0, prs->AllSame());
+	EXPECT_EQ(0, prs->AllSameAs(88));
+	EXPECT_EQ(0, prs->AllSameAs(0));
+	EXPECT_EQ(true, prs->FillRange(startFill, 0, lengthFill));
+	EXPECT_EQ(true, prs->AllSame());
+	EXPECT_EQ(0, prs->AllSameAs(88));
+	EXPECT_EQ(true, prs->AllSameAs(0));
+}
+
 TEST_F(RunStylesTest, FindWithReversion) {
 	prs->InsertSpace(0, 5);
 	EXPECT_EQ(1, prs->Runs());
