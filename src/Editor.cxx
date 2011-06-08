@@ -6010,20 +6010,35 @@ Window::Cursor Editor::GetMarginCursor(Point pt) {
 	return Window::cursorReverseArrow;
 }
 
-void Editor::LineSelection(int lineCurrentPos_, int lineAnchorPos_) {
+void Editor::LineSelection(int lineCurrentPos_, int lineAnchorPos_, bool wholeLine) {
 	int selCurrentPos, selAnchorPos;
-	if (lineAnchorPos_ < lineCurrentPos_) {
-		selCurrentPos = StartEndDisplayLine(lineCurrentPos_, false) + 1;
-		selCurrentPos = pdoc->MovePositionOutsideChar(selCurrentPos, 1);
-		selAnchorPos = StartEndDisplayLine(lineAnchorPos_, true);
-	} else if (lineAnchorPos_ > lineCurrentPos_) {
-		selCurrentPos = StartEndDisplayLine(lineCurrentPos_, true);
-		selAnchorPos = StartEndDisplayLine(lineAnchorPos_, false) + 1;
-		selAnchorPos = pdoc->MovePositionOutsideChar(selAnchorPos, 1);
-	} else { // Same line, select it
-		selCurrentPos = StartEndDisplayLine(lineAnchorPos_, false) + 1;
-		selCurrentPos = pdoc->MovePositionOutsideChar(selCurrentPos, 1);
-		selAnchorPos = StartEndDisplayLine(lineAnchorPos_, true);
+	if (wholeLine) {
+		int lineCurrent_ = pdoc->LineFromPosition(lineCurrentPos_);
+		int lineAnchor_ = pdoc->LineFromPosition(lineAnchorPos_);
+		if (lineAnchorPos_ < lineCurrentPos_) {
+			selCurrentPos = pdoc->LineStart(lineCurrent_ + 1);
+			selAnchorPos = pdoc->LineStart(lineAnchor_);
+		} else if (lineAnchorPos_ > lineCurrentPos_) {
+			selCurrentPos = pdoc->LineStart(lineCurrent_);
+			selAnchorPos = pdoc->LineStart(lineAnchor_ + 1);
+		} else { // Same line, select it
+			selCurrentPos = pdoc->LineStart(lineAnchor_ + 1);
+			selAnchorPos = pdoc->LineStart(lineAnchor_);
+		}
+	} else {
+		if (lineAnchorPos_ < lineCurrentPos_) {
+			selCurrentPos = StartEndDisplayLine(lineCurrentPos_, false) + 1;
+			selCurrentPos = pdoc->MovePositionOutsideChar(selCurrentPos, 1);
+			selAnchorPos = StartEndDisplayLine(lineAnchorPos_, true);
+		} else if (lineAnchorPos_ > lineCurrentPos_) {
+			selCurrentPos = StartEndDisplayLine(lineCurrentPos_, true);
+			selAnchorPos = StartEndDisplayLine(lineAnchorPos_, false) + 1;
+			selAnchorPos = pdoc->MovePositionOutsideChar(selAnchorPos, 1);
+		} else { // Same line, select it
+			selCurrentPos = StartEndDisplayLine(lineAnchorPos_, false) + 1;
+			selCurrentPos = pdoc->MovePositionOutsideChar(selCurrentPos, 1);
+			selAnchorPos = StartEndDisplayLine(lineAnchorPos_, true);
+		}
 	}
 	SetSelection(selCurrentPos, selAnchorPos);
 }
@@ -6105,10 +6120,20 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 				selectionType = selWord;
 				doubleClick = true;
 			} else if (selectionType == selWord) {
-				selectionType = selLine;
+				// Since we ended up here, we're inside a *triple* click, which should always select 
+				// whole line irregardless of word wrap being enabled or not.
+				selectionType = selWholeLine;
 			} else {
-				selectionType = selChar;
-				originalAnchorPos = sel.MainCaret();
+				if (inSelMargin) {
+					// Selection type is either selSubLine or selWholeLine here and we're inside margin.
+					// If it is selSubLine, we're inside a *double* click and word wrap is enabled, 
+					// so we switch to selWholeLine in order to select whole line.
+					if (selectionType == selSubLine)
+						selectionType = selWholeLine;
+				} else {
+					selectionType = selChar;
+					originalAnchorPos = sel.MainCaret();
+				}
 			}
 		}
 
@@ -6140,9 +6165,9 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 			wordSelectAnchorEndPos = endWord;
 			wordSelectInitialCaretPos = sel.MainCaret();
 			WordSelection(wordSelectInitialCaretPos);
-		} else if (selectionType == selLine) {
+		} else if (selectionType == selSubLine || selectionType == selWholeLine) {
 			lineAnchorPos = newPos.Position();
-			LineSelection(lineAnchorPos, lineAnchorPos);
+			LineSelection(lineAnchorPos, lineAnchorPos, selectionType == selWholeLine);
 			//Platform::DebugPrintf("Triple click: %d - %d\n", anchor, currentPos);
 		} else {
 			SetEmptySelection(sel.MainCaret());
@@ -6162,21 +6187,27 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 				return;
 			}
 			if (!shift) {
-				// Single click in margin: select whole line
+				// Single click in margin: select whole line or only subline if word wrap is enabled
 				lineAnchorPos = newPos.Position();
-				LineSelection(lineAnchorPos, lineAnchorPos);
+				selectionType = (wrapState != eWrapNone) ? selSubLine : selWholeLine;
+				LineSelection(lineAnchorPos, lineAnchorPos, selectionType == selWholeLine);
 			} else {
 				// Single shift+click in margin: select from line anchor to clicked line
 				if (sel.MainAnchor() > sel.MainCaret())
 					lineAnchorPos = sel.MainAnchor() - 1;
 				else
 					lineAnchorPos = sel.MainAnchor();
-				LineSelection(newPos.Position(), lineAnchorPos);
+				// Reset selection type if there is an empty selection. 
+				// This ensures that we don't end up stuck in previous selection mode, which is no longer valid.
+				// Otherwise, if there's a non empty selection, reset selection type only if it differs from selSubLine and selWholeLine.
+				// This ensures that we continue selecting in the same selection mode.
+				if (sel.Empty()	|| (selectionType != selSubLine && selectionType != selWholeLine))
+					selectionType = (wrapState != eWrapNone) ? selSubLine : selWholeLine;
+				LineSelection(newPos.Position(), lineAnchorPos, selectionType == selWholeLine);
 			}
 
 			SetDragPosition(SelectionPosition(invalidPosition));
 			SetMouseCapture(true);
-			selectionType = selLine;
 		} else {
 			if (PointIsHotspot(pt)) {
 				NotifyHotSpotClicked(newPos.Position(), shift, ctrl, alt);
@@ -6334,7 +6365,7 @@ void Editor::ButtonMove(Point pt) {
 				}
 			} else {
 				// Continue selecting by line
-				LineSelection(movePos.Position(), lineAnchorPos);
+				LineSelection(movePos.Position(), lineAnchorPos, selectionType == selWholeLine);
 			}
 		}
 
