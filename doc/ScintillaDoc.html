@@ -2753,6 +2753,8 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_MARGINTEXTCLEARALL">SCI_MARGINTEXTCLEARALL</a><br />
      <a class="message" href="#SCI_MARGINSETSTYLEOFFSET">SCI_MARGINSETSTYLEOFFSET(int style)</a><br />
      <a class="message" href="#SCI_MARGINGETSTYLEOFFSET">SCI_MARGINGETSTYLEOFFSET</a><br />
+     <a class="message" href="#SCI_SETMARGINOPTIONS">SCI_SETMARGINOPTIONS(int marginOptions)</a><br />
+     <a class="message" href="#SCI_GETMARGINOPTIONS">SCI_GETMARGINOPTIONS</a><br />
     </code>
 
     <p><b id="SCI_SETMARGINTYPEN">SCI_SETMARGINTYPEN(int margin, int iType)</b><br />
@@ -2859,6 +2861,15 @@ struct Sci_TextToFind {
     <code>SCI_MARGINSETSTYLEOFFSET(256)</code> would allow the margin styles to be numbered from
     256 upto 511 so they do not overlap styles set by lexers. Each style number set with <code>SCI_MARGINSETSTYLE</code>
     or <code>SCI_MARGINSETSTYLES</code> has the offset added before looking up the style.
+    </p>
+    <p>
+     <b id="SCI_SETMARGINOPTIONS">SCI_SETMARGINOPTIONS(int marginOptions)</b><br />
+     <b id="SCI_GETMARGINOPTIONS">SCI_GETMARGINOPTIONS</b><br />
+    Define margin options by enabling appropriate bit flags. At the moment, only one flag is available 
+    <code>SC_MARGINOPTION_SUBLINESELECT</code>=1, which controls how wrapped lines are selected when clicking 
+    on margin in front of them. If <code>SC_MARGINOPTION_SUBLINESELECT</code> is set only sub line of wrapped 
+    line is selected, otherwise whole wrapped line is selected. Margin options are set to 
+    <code>SC_MARGINOPTION_NONE</code>=0 by default.
     </p>
 
     <h2 id="Annotations">Annotations</h2>

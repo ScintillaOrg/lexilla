@@ -102,6 +102,7 @@ public:
 	enum { margins=5 };
 	int leftMarginWidth;	///< Spacing margin on left of text
 	int rightMarginWidth;	///< Spacing margin on left of text
+	int marginOptions;
 	bool symbolMargin;
 	int maskInLine;	///< Mask for markers to be put into text because there is nowhere for them to go in margin
 	MarginStyle ms[margins];

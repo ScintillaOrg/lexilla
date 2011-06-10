@@ -6195,7 +6195,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 			if (!shift) {
 				// Single click in margin: select whole line or only subline if word wrap is enabled
 				lineAnchorPos = newPos.Position();
-				selectionType = (wrapState != eWrapNone) ? selSubLine : selWholeLine;
+				selectionType = ((wrapState != eWrapNone) && (vs.marginOptions & SC_MARGINOPTION_SUBLINESELECT)) ? selSubLine : selWholeLine;
 				LineSelection(lineAnchorPos, lineAnchorPos, selectionType == selWholeLine);
 			} else {
 				// Single shift+click in margin: select from line anchor to clicked line
@@ -6208,7 +6208,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 				// Otherwise, if there's a non empty selection, reset selection type only if it differs from selSubLine and selWholeLine.
 				// This ensures that we continue selecting in the same selection mode.
 				if (sel.Empty()	|| (selectionType != selSubLine && selectionType != selWholeLine))
-					selectionType = (wrapState != eWrapNone) ? selSubLine : selWholeLine;
+					selectionType = ((wrapState != eWrapNone) && (vs.marginOptions & SC_MARGINOPTION_SUBLINESELECT)) ? selSubLine : selWholeLine;
 				LineSelection(newPos.Position(), lineAnchorPos, selectionType == selWholeLine);
 			}
 
@@ -8796,6 +8796,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_MARGINGETSTYLEOFFSET:
 		return vs.marginStyleOffset;
+
+	case SCI_SETMARGINOPTIONS:
+		vs.marginOptions = wParam;
+		break;
+
+	case SCI_GETMARGINOPTIONS:
+		return vs.marginOptions;
 
 	case SCI_MARGINSETTEXT:
 		pdoc->MarginSetText(wParam, CharPtrFromSPtr(lParam));
