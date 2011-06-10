@@ -20,7 +20,7 @@
 #include "Platform.h"
 
 #if PLAT_GTK_WIN32
-#include "windows.h"
+#include <windows.h>
 #endif
 
 #include "ILexer.h"
