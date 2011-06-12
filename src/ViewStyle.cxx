@@ -187,7 +187,6 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	someStylesForceCase = false;
 	leftMarginWidth = source.leftMarginWidth;
 	rightMarginWidth = source.rightMarginWidth;
-	marginOptions = source.marginOptions;
 	for (int i=0; i < margins; i++) {
 		ms[i] = source.ms[i];
 	}
@@ -288,7 +287,6 @@ void ViewStyle::Init(size_t stylesSize_) {
 
 	leftMarginWidth = 1;
 	rightMarginWidth = 1;
-	marginOptions = SC_MARGINOPTION_NONE;
 	ms[0].style = SC_MARGIN_NUMBER;
 	ms[0].width = 0;
 	ms[0].mask = 0;
