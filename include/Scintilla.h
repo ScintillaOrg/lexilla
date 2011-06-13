@@ -807,6 +807,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_VERTICALCENTRECARET 2619
 #define SCI_MOVESELECTEDLINESUP 2620
 #define SCI_MOVESELECTEDLINESDOWN 2621
+#define SCI_SETIDENTIFIER 2622
+#define SCI_GETIDENTIFIER 2623
 #define SCI_STARTRECORD 3001
 #define SCI_STOPRECORD 3002
 #define SCI_SETLEXER 4001

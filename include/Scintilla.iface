@@ -2143,6 +2143,12 @@ fun void MoveSelectedLinesUp=2620(,)
 # Move the selected lines down one line, shifting the line below before the selection
 fun void MoveSelectedLinesDown=2621(,)
 
+# Set the identifier reported as idFrom in notification messages.
+set void SetIdentifier=2622(int identifier,)
+
+# Get the identifier.
+get int GetIdentifier=2623(,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 
