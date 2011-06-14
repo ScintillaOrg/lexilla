@@ -181,9 +181,19 @@ void Font::Release()
 
 SurfaceImpl::SurfaceImpl()
 {
-  bitmapData = NULL; // Release will try and delete bitmapData if != NULL
+  unicodeMode = true;
+  x = 0;
+  y = 0;
   gc = NULL;
+
   textLayout = new QuartzTextLayout(NULL);
+  codePage = 0;
+  verticalDeviceResolution = 0;
+
+  bitmapData = NULL; // Release will try and delete bitmapData if != NULL
+  bitmapWidth = 0;
+  bitmapHeight = 0;
+
   Release();
 }
 
