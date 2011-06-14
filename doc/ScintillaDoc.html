@@ -79,7 +79,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 13/June/2011 NH</p>
+    <p>Last edited 13/June/2011 MNJ</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -1077,6 +1077,7 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_GETSELECTIONSTART">SCI_GETSELECTIONSTART</a><br />
      <a class="message" href="#SCI_SETSELECTIONEND">SCI_SETSELECTIONEND(int position)</a><br />
      <a class="message" href="#SCI_GETSELECTIONEND">SCI_GETSELECTIONEND</a><br />
+     <a class="message" href="#SCI_SETEMPTYSELECTION">SCI_SETEMPTYSELECTION(int pos)</a><br />
      <a class="message" href="#SCI_SELECTALL">SCI_SELECTALL</a><br />
      <a class="message" href="#SCI_LINEFROMPOSITION">SCI_LINEFROMPOSITION(int position)</a><br />
      <a class="message" href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE(int line)</a><br />
@@ -1228,6 +1229,9 @@ struct Sci_TextToFind {
     position and which is the anchor. <code>SCI_GETSELECTIONSTART</code> returns the smaller of the
     current position or the anchor position. <code>SCI_GETSELECTIONEND</code> returns the larger of
     the two values.</p>
+
+    <p><b id="SCI_SETEMPTYSELECTION">SCI_SETEMPTYSELECTION(int pos)</b><br />
+     This removes any selection and sets the caret at <code>pos</code>. The caret is not scrolled into view.</p>
 
     <p><b id="SCI_SELECTALL">SCI_SELECTALL</b><br />
      This selects all the text in the document. The current position is not scrolled into view.</p>

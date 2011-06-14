@@ -7482,6 +7482,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETSELECTIONEND:
 		return sel.LimitsForRectangularElseMain().end.Position();
 
+	case SCI_SETEMPTYSELECTION:
+		SetEmptySelection(wParam);
+		break;
+
 	case SCI_SETPRINTMAGNIFICATION:
 		printMagnification = wParam;
 		break;
