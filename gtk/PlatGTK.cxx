@@ -296,9 +296,11 @@ void Palette::Allocate(Window &w) {
 			paletteNew[iPal].blue = entries[iPal].desired.GetBlue() * (65535 / 255);
 			paletteNew[iPal].pixel = entries[iPal].desired.AsLong();
 		}
+#ifndef USE_CAIRO
 		gdk_colormap_alloc_colors(gtk_widget_get_colormap(PWidget(w)),
 		                          paletteNew, allocatedLen, FALSE, TRUE,
 		                          successPalette);
+#endif
 		for (iPal = 0; iPal < used; iPal++) {
 			entries[iPal].allocated.Set(paletteNew[iPal].pixel);
 		}
@@ -1005,18 +1007,10 @@ void SurfaceImpl::PenColour(ColourAllocated fore) {
 #ifdef USE_CAIRO
 	if (context) {
 		ColourDesired cdFore(fore.AsLong());
-#if GTK_CHECK_VERSION(3,0,0)
-		// Colours appear inverted - possibly because palette no longer used
 		cairo_set_source_rgb(context,
 			cdFore.GetRed() / 255.0,
 			cdFore.GetGreen() / 255.0,
 			cdFore.GetBlue() / 255.0);
-#else
-		cairo_set_source_rgb(context,
-			cdFore.GetBlue() / 255.0,
-			cdFore.GetGreen() / 255.0,
-			cdFore.GetRed() / 255.0);
-#endif
 	}
 #else
 	if (gc) {
