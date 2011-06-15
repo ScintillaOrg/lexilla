@@ -691,7 +691,8 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
     {
       // Parent notification. Details are passed as SCNotification structure.
       SCNotification* scn = reinterpret_cast<SCNotification*>(lParam);
-      editor = reinterpret_cast<InnerView*>(scn->nmhdr.idFrom).owner;
+      ScintillaCocoa *psc = reinterpret_cast<ScintillaCocoa*>(scn->nmhdr.hwndFrom);
+      editor = reinterpret_cast<InnerView*>(psc->ContentView()).owner;
       switch (scn->nmhdr.code)
       {
         case SCN_MARGINCLICK:

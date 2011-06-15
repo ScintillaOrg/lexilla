@@ -116,7 +116,6 @@ private:
   int scrollSpeed;
   int scrollTicks;
 protected:
-  NSView* ContentView();
   PRectangle GetClientRectangle();
   Point ConvertPoint(NSPoint point);
   
@@ -125,6 +124,8 @@ protected:
   virtual CaseFolder *CaseFolderForEncoding();
   virtual std::string CaseMapString(const std::string &s, int caseMapping);
 public:
+  NSView* ContentView();
+
   ScintillaCocoa(NSView* view);
   virtual ~ScintillaCocoa();
 
