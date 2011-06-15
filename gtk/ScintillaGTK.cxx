@@ -432,20 +432,20 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	gtk_widget_set_window(widget, gdk_window_new(gtk_widget_get_parent_window(widget), &attrs,
 		GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_CURSOR));
 	gdk_window_set_user_data(gtk_widget_get_window(widget), widget);
+	// Deprecated: should chain up to parent class' "realize" implementation
+	gtk_widget_style_attach(widget);
 	gdk_window_set_background(gtk_widget_get_window(widget),
 		&(gtk_widget_get_style(widget)->bg[GTK_STATE_NORMAL]));
 	gdk_window_show(gtk_widget_get_window(widget));
 	gdk_cursor_unref(cursor);
-	// Deprecated: should chain up to parent class' "realize" implementation
-	gtk_widget_style_attach(widget);
 #else
 	widget->window = gdk_window_new(gtk_widget_get_parent_window(widget), &attrs,
 		GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP | GDK_WA_CURSOR);
 	gdk_window_set_user_data(widget->window, widget);
+	widget->style = gtk_style_attach(widget->style, widget->window);
 	gdk_window_set_background(widget->window, &widget->style->bg[GTK_STATE_NORMAL]);
 	gdk_window_show(widget->window);
 	gdk_cursor_unref(cursor);
-	widget->style = gtk_style_attach(widget->style, widget->window);
 #endif
 	wPreedit = gtk_window_new(GTK_WINDOW_POPUP);
 	wPreeditDraw = gtk_drawing_area_new();
