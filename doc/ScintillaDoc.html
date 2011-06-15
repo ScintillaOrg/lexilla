@@ -4446,7 +4446,10 @@ struct Sci_TextToFind {
     <code>SCK_WIN</code>.</p>
 
     <p>The modifiers are a combination of zero or more of <code>SCMOD_ALT</code>,
-    <code>SCMOD_CTRL</code>, and <code>SCMOD_SHIFT</code>. If you are building a table, you might
+    <code>SCMOD_CTRL</code>, <code>SCMOD_SHIFT</code>, and <code>SCMOD_META</code>.
+    On OS X, the Command key is mapped to <code>SCMOD_CTRL</code> and the Control key to 
+    <code>SCMOD_META</code>.
+    If you are building a table, you might
     want to use <code>SCMOD_NORM</code>, which has the value 0, to mean no modifiers.</p>
 
     <p><b id="SCI_ASSIGNCMDKEY">SCI_ASSIGNCMDKEY(int <a class="jump"
