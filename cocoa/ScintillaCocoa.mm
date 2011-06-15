@@ -1537,9 +1537,9 @@ void ScintillaCocoa::MouseDown(NSEvent* event)
   NSTimeInterval time = [event timestamp];
   bool command = ([event modifierFlags] & NSCommandKeyMask) != 0;
   bool shift = ([event modifierFlags] & NSShiftKeyMask) != 0;
-  bool control = ([event modifierFlags] & NSControlKeyMask) != 0;
+  bool alt = ([event modifierFlags] & NSAlternateKeyMask) != 0;
     
-  ButtonDown(Point(location.x, location.y), (int) (time * 1000), shift, control, command);
+  ButtonDown(Point(location.x, location.y), (int) (time * 1000), shift, command, alt);
 }
 
 //--------------------------------------------------------------------------------------------------
