@@ -32,24 +32,30 @@ NSString* ScintillaRecPboardType = @"com.scintilla.utf16-plain-text.rectangular"
 //--------------------------------------------------------------------------------------------------
 
 // Define keyboard shortcuts (equivalents) the Mac way.
-#define SCI_CMD ( SCI_ALT | SCI_CTRL)
+#define SCI_CMD ( SCI_CTRL)
 #define SCI_SCMD ( SCI_CMD | SCI_SHIFT)
+#define SCI_META ( SCMOD_META )
+#define SCI_SMETA ( SCI_META | SCI_SHIFT)
 
 static const KeyToCommand macMapDefault[] =
 {
+  // OS X specific
   {SCK_DOWN,      SCI_CMD,    SCI_DOCUMENTEND},
   {SCK_UP,        SCI_CMD,    SCI_DOCUMENTSTART},
   {SCK_LEFT,      SCI_CMD,    SCI_VCHOME},
   {SCK_LEFT,      SCI_SCMD,   SCI_VCHOMEEXTEND},
   {SCK_RIGHT,     SCI_CMD,    SCI_LINEEND},
   {SCK_RIGHT,     SCI_SCMD,   SCI_LINEENDEXTEND},
+
+  // Similar to Windows and GTK+
+  // Where equivalent clashes with OS X standard, use Meta instead
   {SCK_DOWN,      SCI_NORM,   SCI_LINEDOWN},
   {SCK_DOWN,      SCI_SHIFT,  SCI_LINEDOWNEXTEND},
-  {SCK_DOWN,      SCI_CTRL,   SCI_LINESCROLLDOWN},
+  {SCK_DOWN,      SCI_META,   SCI_LINESCROLLDOWN},
   {SCK_DOWN,      SCI_ASHIFT, SCI_LINEDOWNRECTEXTEND},
   {SCK_UP,        SCI_NORM,   SCI_LINEUP},
   {SCK_UP,        SCI_SHIFT,  SCI_LINEUPEXTEND},
-  {SCK_UP,        SCI_CTRL,   SCI_LINESCROLLUP},
+  {SCK_UP,        SCI_META,   SCI_LINESCROLLUP},
   {SCK_UP,        SCI_ASHIFT, SCI_LINEUPRECTEXTEND},
   {'[',           SCI_CTRL,   SCI_PARAUP},
   {'[',           SCI_CSHIFT, SCI_PARAUPEXTEND},
@@ -58,13 +64,15 @@ static const KeyToCommand macMapDefault[] =
   {SCK_LEFT,      SCI_NORM,   SCI_CHARLEFT},
   {SCK_LEFT,      SCI_SHIFT,  SCI_CHARLEFTEXTEND},
   {SCK_LEFT,      SCI_ALT,    SCI_WORDLEFT},
-  {SCK_LEFT,      SCI_CSHIFT, SCI_WORDLEFTEXTEND},
-  {SCK_LEFT,      SCI_ASHIFT, SCI_WORDLEFTEXTEND},
+  {SCK_LEFT,      SCI_META,   SCI_WORDLEFT},
+  {SCK_LEFT,      SCI_SMETA,  SCI_WORDLEFTEXTEND},
+  {SCK_LEFT,      SCI_ASHIFT, SCI_CHARLEFTRECTEXTEND},
   {SCK_RIGHT,     SCI_NORM,   SCI_CHARRIGHT},
   {SCK_RIGHT,     SCI_SHIFT,  SCI_CHARRIGHTEXTEND},
   {SCK_RIGHT,     SCI_ALT,    SCI_WORDRIGHT},
-  {SCK_RIGHT,     SCI_CSHIFT, SCI_WORDRIGHTEXTEND},
-  {SCK_RIGHT,     SCI_ASHIFT, SCI_WORDRIGHTEXTEND},
+  {SCK_RIGHT,     SCI_META,   SCI_WORDRIGHT},
+  {SCK_RIGHT,     SCI_SMETA,  SCI_WORDRIGHTEXTEND},
+  {SCK_RIGHT,     SCI_ASHIFT, SCI_CHARRIGHTRECTEXTEND},
   {'/',           SCI_CTRL,   SCI_WORDPARTLEFT},
   {'/',           SCI_CSHIFT, SCI_WORDPARTLEFTEXTEND},
   {'\\',          SCI_CTRL,   SCI_WORDPARTRIGHT},
@@ -1482,9 +1490,13 @@ bool ScintillaCocoa::KeyboardInput(NSEvent* event)
     
     bool consumed = false; // Consumed as command?
     
-    // Signal command as control + alt. This leaves us without command + control and command + alt
-    // but that's what we get when we have a modifier key more than other platforms.
-    if (KeyDown(key, shift, control || command, alt || command, &consumed))
+    // Signal Control as SCMOD_META
+    int modifierKeys = 
+	  (shift ? SCI_SHIFT : 0) | 
+	  (command ? SCI_CTRL : 0) |
+	  (alt ? SCI_ALT : 0) |
+	  (control ? SCI_META : 0);
+    if (KeyDownWithModifiers(key, modifierKeys, &consumed))
       handled = true;
     if (consumed)
       handled = true;
