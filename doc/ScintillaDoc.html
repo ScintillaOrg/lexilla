@@ -79,7 +79,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 13/June/2011 MNJ</p>
+    <p>Last edited 18/June/2011 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -3628,7 +3628,7 @@ struct Sci_TextToFind {
 
           <td align="center">1</td>
 
-          <td>A squiggly underline.</td>
+          <td>A squiggly underline. Requires 3 pixels of descender space.</td>
         </tr>
 
         <tr>
@@ -3709,6 +3709,15 @@ struct Sci_TextToFind {
           <td align="center">10</td>
 
           <td>A dotted underline.</td>
+        </tr>
+
+        <tr>
+          <td align="left"><code>INDIC_SQUIGGLELOW</code></td>
+
+          <td align="center">11</td>
+
+          <td>Similar to <code>INDIC_SQUIGGLE</code> but only using 2 vertical pixels
+	  so will fit under small fonts.</td>
         </tr>
 
       </tbody>
