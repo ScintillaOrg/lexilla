@@ -44,6 +44,28 @@
 #define USE_CAIRO 1
 #endif
 
+#ifdef USE_CAIRO
+
+static cairo_surface_t *CreateSimilarSurface(GdkWindow *window, cairo_content_t content, int width, int height) {
+#if GTK_CHECK_VERSION(2,22,0)
+	return gdk_window_create_similar_surface(window, content, width, height);
+#else
+	cairo_surface_t *window_surface, *surface;
+
+	g_return_val_if_fail(GDK_IS_WINDOW(window), NULL);
+
+	window_surface = GDK_DRAWABLE_GET_CLASS(window)->ref_cairo_surface(window);
+
+	surface = cairo_surface_create_similar(window_surface, content, width, height);
+
+	cairo_surface_destroy(window_surface);
+
+	return surface;
+#endif
+}
+
+#endif
+
 static GdkWindow *WindowFromWidget(GtkWidget *w) {
 #if GTK_CHECK_VERSION(3,0,0)
 	return gtk_widget_get_window(w);
@@ -976,7 +998,7 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID 
 	PLATFORM_ASSERT(layout);
 #ifdef USE_CAIRO
 	if (height > 0 && width > 0)
-		psurf = gdk_window_create_similar_surface(
+		psurf = CreateSimilarSurface(
 			gtk_widget_get_window(PWidget(wid)),
 			CAIRO_CONTENT_COLOR_ALPHA, width, height);
 #else
@@ -1274,7 +1296,10 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated 
 			cdFill.GetGreen() / 255.0,
 			cdFill.GetBlue() / 255.0,
 			alphaFill / 255.0);
-		PathRoundRectangle(context, rc.left + 1.0, rc.top+1.0, rc.right - rc.left - 2.0, rc.bottom - rc.top - 2.0, cornerSize);
+		if (cornerSize > 0)
+			PathRoundRectangle(context, rc.left + 1.0, rc.top + 1.0, rc.right - rc.left - 2.0, rc.bottom - rc.top - 2.0, cornerSize);
+		else
+			cairo_rectangle(context, rc.left + 1.0, rc.top + 1.0, rc.right - rc.left - 2.0, rc.bottom - rc.top - 2.0);
 		cairo_fill(context);
 
 		ColourDesired cdOutline(outline.AsLong());
@@ -1283,7 +1308,10 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated 
 			cdOutline.GetGreen() / 255.0,
 			cdOutline.GetBlue() / 255.0,
 			alphaOutline / 255.0);
-		PathRoundRectangle(context, rc.left +0.5, rc.top+0.5, rc.right - rc.left - 1, rc.bottom - rc.top - 1, cornerSize);
+		if (cornerSize > 0)
+			PathRoundRectangle(context, rc.left + 0.5, rc.top + 0.5, rc.right - rc.left - 1, rc.bottom - rc.top - 1, cornerSize);
+		else
+			cairo_rectangle(context, rc.left + 0.5, rc.top + 0.5, rc.right - rc.left - 1, rc.bottom - rc.top - 1);
 		cairo_stroke(context);
 	}
 #else
