@@ -763,7 +763,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				}
 				break;
 			case eScriptPython:
-				if (state != SCE_HP_COMMENTLINE) {
+				if (state != SCE_HP_COMMENTLINE && !isMako) {
 					if ((ch == ':') && ((chNext == '\n') || (chNext == '\r' && chNext2 == '\n'))) {
 						levelCurrent++;
 					} else if ((ch == '\n') && !((chNext == '\r') && (chNext2 == '\n')) && (chNext != '\n')) {
@@ -952,8 +952,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			state = SCE_HP_START;
 			scriptLanguage = eScriptPython;
 			styler.ColourTo(i, SCE_H_ASP);
-			if (foldHTMLPreprocessor && ch == '<')
-				levelCurrent++;
 
 			if (ch != '%' && ch != '$') {
 				i += strlen(makoBlockType);
@@ -1114,9 +1112,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 				inScriptType = eNonHtmlScript;
 			else
 				inScriptType = eHtml;
-			if (foldHTMLPreprocessor && ch != '\n' && ch != '\r') {
-				levelCurrent--;
-			}
 			scriptLanguage = eScriptNone;
 			continue;
 		}
