@@ -2289,7 +2289,12 @@ gboolean ScintillaGTK::ExposePreeditThis(GtkWidget *widget, GdkEventExpose *ose)
 		PangoLayout *layout = gtk_widget_create_pango_layout(PWidget(wText), str);
 		pango_layout_set_attributes(layout, attrs);
 
-#ifndef USE_CAIRO
+#ifdef USE_CAIRO
+		cairo_t *context = gdk_cairo_create(reinterpret_cast<GdkDrawable *>(WindowFromWidget(widget)));
+		cairo_move_to(context, 0, 0);
+		pango_cairo_show_layout(context, layout);
+		cairo_destroy(context);
+#else
 		GdkGC *gc = gdk_gc_new(widget->window);
 		GdkColor color[2] = {   {0, 0x0000, 0x0000, 0x0000},
 			{0, 0xffff, 0xffff, 0xffff}
