@@ -270,8 +270,13 @@ private:
 	gboolean KeyThis(GdkEventKey *event);
 	static gboolean KeyPress(GtkWidget *widget, GdkEventKey *event);
 	static gboolean KeyRelease(GtkWidget *widget, GdkEventKey *event);
+#if GTK_CHECK_VERSION(3,0,0)
+	gboolean DrawPreeditThis(GtkWidget *widget, cairo_t *cr);
+	static gboolean DrawPreedit(GtkWidget *widget, cairo_t *cr, ScintillaGTK *sciThis);
+#else
 	gboolean ExposePreeditThis(GtkWidget *widget, GdkEventExpose *ose);
 	static gboolean ExposePreedit(GtkWidget *widget, GdkEventExpose *ose, ScintillaGTK *sciThis);
+#endif
 	void CommitThis(char *str);
 	static void Commit(GtkIMContext *context, char *str, ScintillaGTK *sciThis);
 	void PreeditChangedThis();
@@ -450,7 +455,10 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	wPreedit = gtk_window_new(GTK_WINDOW_POPUP);
 	wPreeditDraw = gtk_drawing_area_new();
 	GtkWidget *predrw = PWidget(wPreeditDraw);	// No code inside the G_OBJECT macro
-#if !GTK_CHECK_VERSION(3,0,0)
+#if GTK_CHECK_VERSION(3,0,0)
+	g_signal_connect(G_OBJECT(predrw), "draw",
+		G_CALLBACK(DrawPreedit), this);
+#else
 	g_signal_connect(G_OBJECT(predrw), "expose_event",
 		G_CALLBACK(ExposePreedit), this);
 #endif
@@ -2241,6 +2249,36 @@ gboolean ScintillaGTK::KeyRelease(GtkWidget *, GdkEventKey * /*event*/) {
 	return FALSE;
 }
 
+#if GTK_CHECK_VERSION(3,0,0)
+
+gboolean ScintillaGTK::DrawPreeditThis(GtkWidget *widget, cairo_t *cr) {
+	try {
+		gchar *str;
+		gint cursor_pos;
+		PangoAttrList *attrs;
+
+		gtk_im_context_get_preedit_string(im_context, &str, &attrs, &cursor_pos);
+		PangoLayout *layout = gtk_widget_create_pango_layout(PWidget(wText), str);
+		pango_layout_set_attributes(layout, attrs);
+	
+		cairo_move_to(cr, 0, 0);
+		pango_cairo_show_layout(cr, layout);
+
+		g_free(str);
+		pango_attr_list_unref(attrs);
+		g_object_unref(layout);
+	} catch (...) {
+		errorStatus = SC_STATUS_FAILURE;
+	}
+	return TRUE;
+}
+
+gboolean ScintillaGTK::DrawPreedit(GtkWidget *widget, cairo_t *cr, ScintillaGTK *sciThis) {
+	return sciThis->DrawPreeditThis(widget, cr);
+}
+
+#else
+
 gboolean ScintillaGTK::ExposePreeditThis(GtkWidget *widget, GdkEventExpose *ose) {
 	try {
 		gchar *str;
@@ -2280,6 +2318,8 @@ gboolean ScintillaGTK::ExposePreeditThis(GtkWidget *widget, GdkEventExpose *ose)
 gboolean ScintillaGTK::ExposePreedit(GtkWidget *widget, GdkEventExpose *ose, ScintillaGTK *sciThis) {
 	return sciThis->ExposePreeditThis(widget, ose);
 }
+
+#endif
 
 void ScintillaGTK::CommitThis(char *utfVal) {
 	try {
