@@ -5981,7 +5981,7 @@ bool Editor::PositionInSelection(int pos) {
 }
 
 bool Editor::PointInSelection(Point pt) {
-	SelectionPosition pos = SPositionFromLocation(pt);
+	SelectionPosition pos = SPositionFromLocation(pt, false, true);
 	int xPos = XFromPosition(pos);
 	for (size_t r=0; r<sel.Count(); r++) {
 		SelectionRange range = sel.Range(r);
