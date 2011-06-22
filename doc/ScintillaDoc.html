@@ -309,14 +309,17 @@
         <tr>
           <td>o <a class="toc" href="#Notifications">Notifications</a></td>
 
-          <td>o <a class="toc" href="#GTK">GTK+</a></td>
+          <td>o <a class="toc" href="#Images">Images</a></td>
 
-          <td>o <a class="toc" href="#DeprecatedMessages">Deprecated messages</a></td>
+          <td>o <a class="toc" href="#GTK">GTK+</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#DeprecatedMessages">Deprecated messages</a></td>
+	  
           <td>o <a class="toc" href="#EditMessagesNeverSupportedByScintilla">Edit messages never
           supported by Scintilla</a></td>
+	  
           <td>o <a class="toc" href="#BuildingScintilla">Building Scintilla</a></td>
 
         </tr>
@@ -3483,12 +3486,9 @@ struct Sci_TextToFind {
 
     <p><b id="SCI_MARKERDEFINEPIXMAP">SCI_MARKERDEFINEPIXMAP(int markerNumber, const char
     *xpm)</b><br />
-     Markers can be set to pixmaps with this message. The XPM format is used for the pixmap and it
-    is limited to pixmaps that use one character per pixel with no named colours.
-    The transparent colour may be named 'None'.
-    The data should be null terminated.
-    Pixmaps use the <code>SC_MARK_PIXMAP</code> marker symbol. You can find descriptions of
-    the XPM format <a class="jump" href="http://en.wikipedia.org/wiki/X_PixMap">from here</a>.</p>
+     Markers can be set to pixmaps with this message. The 
+     <a class="jump" href="#Images">XPM format</a> is used for the pixmap.
+    Pixmaps use the <code>SC_MARK_PIXMAP</code> marker symbol. </p>
 
     <p><b id="SCI_MARKERSYMBOLDEFINED">SCI_MARKERSYMBOLDEFINED(int markerNumber)</b><br />
      Returns the symbol defined for a markerNumber with <code>SCI_MARKERDEFINE</code>
@@ -4002,8 +4002,7 @@ struct Sci_TextToFind {
       Autocompletion list items may display an image as well as text. Each image is first registered with an integer
       type. Then this integer is included in the text of the list separated by a '?' from the text. For example,
       "fclose?2 fopen" displays image 2 before the string "fclose" and no image before "fopen".
-      The images are in XPM format as is described for
-      <a class="message" href="#SCI_MARKERDEFINEPIXMAP"><code>SCI_MARKERDEFINEPIXMAP</code></a>
+      The images are in <a class="jump" href="#Images">XPM format.</a>
       The set of registered images can be cleared with <code>SCI_CLEARREGISTEREDIMAGES</code> and the '?' separator changed
       with <code>SCI_AUTOCSETTYPESEPARATOR</code>.
     </p>
@@ -6594,6 +6593,21 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     <p><b id="SCN_AUTOCCHARDELETED">SCN_AUTOCCHARDELETED</b><br />
      The user deleted a character while autocompletion list was active.
      There is no other information in SCNotification.</p>
+     
+    <h2 id="Images">Images</h2>
+    <p>The XPM format is supported for images.
+    This format is <a class="jump" href="http://en.wikipedia.org/wiki/X_PixMap">described here</a>. 
+    Scintilla is only able to handle XPM pixmaps that use one character per pixel with no named colours.
+    There may be a completely transparent colour named "None".</p>
+    <p>There are two forms of data structure used for XPM images, the first "lines form" format is well suited
+    to embedding an image inside C source code and the "text form" is suited to reading from a file.
+    In the lines form, an array of strings is used with the first string indicating the dimensions and number of colours
+    used. This is followed by a string for each colour and that section is followed by the image with one string per line.
+    The text form contains the same data as one null terminated block formatted as C source code starting
+    with a "/* XPM */" comment to mark the format.</p>
+    <p>Either format may be used with Scintilla APIs with the bytes at the location pointed to examined
+    to determine which format: if the bytes start with "/* XPM */" then it is treated as text form,
+    otherwise it is treated as lines form.</p>
 
     <h2 id="GTK">GTK+</h2>
     <p>On GTK+, the following functions create a Scintilla widget, communicate with it and allow
