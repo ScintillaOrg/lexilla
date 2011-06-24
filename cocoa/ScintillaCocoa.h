@@ -20,6 +20,7 @@
 #include <time.h>
 
 #include <vector>
+#include <map>
 
 #include "ILexer.h"
 

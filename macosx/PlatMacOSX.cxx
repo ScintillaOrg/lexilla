@@ -12,6 +12,9 @@
 
 #include <sys/time.h>
 
+#include <vector>
+#include <map>
+
 #include <Carbon/Carbon.h>
 #include "QuartzTextLayout.h"
 #include "TCarbonEvent.h"
@@ -480,6 +483,10 @@ void Scintilla::SurfaceImpl::AlphaRectangle(PRectangle rc, int /*cornerSize*/, C
         CGRect rect = PRectangleToCGRect( rc );
         CGContextFillRect( gc, rect );
     }
+}
+
+void SurfaceImpl::DrawRGBAImage(PRectangle /* rc */, int /* width */, int /* height */, const unsigned char * /* pixelsImage*/) {
+	// Not supported for Carbon
 }
 
 void SurfaceImpl::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
@@ -1128,6 +1135,7 @@ public:
     int Find(const char *prefix);
     void GetValue(int n, char *value, int len);
     void RegisterImage(int type, const char *xpm_data);
+    void RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage);
     void ClearRegisteredImages();
     void SetDoubleClickAction(CallBackAction action, void *data) {
         doubleClickAction = action;
@@ -1633,6 +1641,10 @@ void ListBoxImpl::GetValue(int n, char *value, int len) {
 
 void ListBoxImpl::RegisterImage(int type, const char *xpm_data) {
     xset.Add(type, xpm_data);
+}
+
+void ListBoxImpl::RegisterRGBAImage(int /* type */, int /* width */, int /* height */, const unsigned char * /*pixelsImage */) {
+	// Not supported for Carbon
 }
 
 void ListBoxImpl::ClearRegisteredImages() {

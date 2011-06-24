@@ -17,6 +17,7 @@
 #include <time.h>
 
 #include <vector>
+#include <map>
 
 #include "Platform.h"
 #include "Scintilla.h"

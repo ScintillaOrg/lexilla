@@ -639,6 +639,73 @@ void Scintilla::SurfaceImpl::AlphaRectangle(PRectangle rc, int /*cornerSize*/, C
   }
 }
 
+static CGImageRef ImageFromRGBA(int width, int height, const unsigned char *pixelsImage, bool invert) {
+	CGImageRef image = 0;
+
+	// Create an RGB color space.
+	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+	if (colorSpace) {
+		const int bitmapBytesPerRow = ((int) width * 4);
+		const int bitmapByteCount = (bitmapBytesPerRow * (int) height);
+		
+		// Create a data provider.
+		CGDataProviderRef dataProvider = 0;
+		unsigned char *pixelsUpsideDown = 0;
+		if (invert) {
+			pixelsUpsideDown = new unsigned char[bitmapByteCount];
+		
+			for (int y=0; y<height; y++) {
+				int yInverse = height - y - 1;
+				memcpy(pixelsUpsideDown + y * bitmapBytesPerRow,
+				       pixelsImage + yInverse * bitmapBytesPerRow,
+				       bitmapBytesPerRow);
+			}
+			
+			dataProvider = CGDataProviderCreateWithData(
+								NULL, pixelsUpsideDown, bitmapByteCount, NULL);
+		} else {
+			dataProvider = CGDataProviderCreateWithData(
+								NULL, pixelsImage, bitmapByteCount, NULL);
+			
+		}
+		if (dataProvider) {
+			// Create the CGImage.
+			image = CGImageCreate(width,
+							 height,
+							 8,
+							 8 * 4,
+							 bitmapBytesPerRow,
+							 colorSpace,
+							 kCGImageAlphaLast,
+							 dataProvider,
+							 NULL,
+							 0,
+							 kCGRenderingIntentDefault);
+
+			CGDataProviderRelease(dataProvider);
+		}
+		delete []pixelsUpsideDown;
+		
+		// The image retains the color space, so we can release it.
+		CGColorSpaceRelease(colorSpace);
+	}
+	return image;
+}
+
+void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) {
+	CGImageRef image = ImageFromRGBA(width, height, pixelsImage, true);
+	if (image) {
+		//CGContextSaveGState(gc);
+		//CGRect dst = PRectangleToCGRect(rc);
+		//CGContextClipToRect(gc, dst);
+		CGRect drawRect = CGRectMake (0, 0, width, height);
+		CGContextDrawImage(gc, drawRect, image);
+		//CGContextRestoreGState (gc);
+		
+		CGImageRelease(image);
+	}
+}
+
 void SurfaceImpl::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
   // Drawing an ellipse with bezier curves. Code modified from:
   // http://www.codeguru.com/gdi/ellipse.shtml
@@ -1410,6 +1477,7 @@ public:
   int Find(const char* prefix);
   void GetValue(int n, char* value, int len);
   void RegisterImage(int type, const char* xpm_data);
+  void RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage);
   void ClearRegisteredImages();
   void SetDoubleClickAction(CallBackAction action, void* data)
   {
@@ -1719,6 +1787,26 @@ void ListBoxImpl::RegisterImage(int type, const char* xpm_data)
     [it->second release];
     it->second = img;
   }
+}
+
+void ListBoxImpl::RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage) {
+	NSImage *img = [NSImage alloc];
+	[img autorelease];
+	CGImageRef imageRef = ImageFromRGBA(width, height, pixelsImage, false);
+	NSSize sz = {width, height};
+	[img initWithCGImage:imageRef size:sz];
+	CGImageRelease(imageRef);
+	[img retain];
+	ImageMap::iterator it=images.find(type);
+	if (it == images.end())
+	{
+		images[type] = img;
+	}
+	else
+	{
+		[it->second release];
+		it->second = img;
+	}
 }
 
 void ListBoxImpl::ClearRegisteredImages()

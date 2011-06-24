@@ -79,7 +79,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 18/June/2011 NH</p>
+    <p>Last edited 24/June/2011 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -3306,6 +3306,10 @@ struct Sci_TextToFind {
     markerSymbols)</a><br />
      <a class="message" href="#SCI_MARKERDEFINEPIXMAP">SCI_MARKERDEFINEPIXMAP(int markerNumber,
     const char *xpm)</a><br />
+     <a class="message" href="#SCI_RGBAIMAGESETWIDTH">SCI_RGBAIMAGESETWIDTH(int width)</a><br />
+     <a class="message" href="#SCI_RGBAIMAGESETHEIGHT">SCI_RGBAIMAGESETHEIGHT(int height)</a><br />
+     <a class="message" href="#SCI_MARKERDEFINERGBAIMAGE">SCI_MARKERDEFINERGBAIMAGE(int markerNumber,
+    const char *pixels)</a><br />
      <a class="message" href="#SCI_MARKERSYMBOLDEFINED">SCI_MARKERSYMBOLDEFINED(int markerNumber)
      </a><br />
      <a class="message" href="#SCI_MARKERSETFORE">SCI_MARKERSETFORE(int markerNumber, int
@@ -3487,12 +3491,23 @@ struct Sci_TextToFind {
     <p><b id="SCI_MARKERDEFINEPIXMAP">SCI_MARKERDEFINEPIXMAP(int markerNumber, const char
     *xpm)</b><br />
      Markers can be set to pixmaps with this message. The 
-     <a class="jump" href="#Images">XPM format</a> is used for the pixmap.
+     <a class="jump" href="#XPM">XPM format</a> is used for the pixmap.
     Pixmaps use the <code>SC_MARK_PIXMAP</code> marker symbol. </p>
+
+    <p>
+    <b id="SCI_RGBAIMAGESETWIDTH">SCI_RGBAIMAGESETWIDTH(int width)</b><br />
+    <b id="SCI_RGBAIMAGESETHEIGHT">SCI_RGBAIMAGESETHEIGHT(int height)</b><br />
+    <b id="SCI_MARKERDEFINERGBAIMAGE">SCI_MARKERDEFINERGBAIMAGE(int markerNumber, const char *pixels)</b><br />
+     Markers can be set to translucent pixmaps with this message. The 
+     <a class="jump" href="#RGBA">RGBA format</a> is used for the pixmap.
+     The width and height must previously been set with the <code>SCI_RGBAIMAGESETWIDTH</code> and 
+     <code>SCI_RGBAIMAGESETHEIGHT</code> messages.
+    Pixmaps use the <code>SC_MARK_RGBAIMAGE</code> marker symbol. </p>
 
     <p><b id="SCI_MARKERSYMBOLDEFINED">SCI_MARKERSYMBOLDEFINED(int markerNumber)</b><br />
      Returns the symbol defined for a markerNumber with <code>SCI_MARKERDEFINE</code>
-     or <code>SC_MARK_PIXMAP</code> if defined with <code>SCI_MARKERDEFINEPIXMAP</code>.</p>
+     or <code>SC_MARK_PIXMAP</code> if defined with <code>SCI_MARKERDEFINEPIXMAP</code>
+     or <code>SC_MARK_RGBAIMAGE</code> if defined with <code>SCI_MARKERDEFINERGBAIMAGE</code>.</p>
 
     <p><b id="SCI_MARKERSETFORE">SCI_MARKERSETFORE(int markerNumber, int <a class="jump"
     href="#colour">colour</a>)</b><br />
@@ -3882,7 +3897,8 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_AUTOCSETDROPRESTOFWORD">SCI_AUTOCSETDROPRESTOFWORD(bool
     dropRestOfWord)</a><br />
      <a class="message" href="#SCI_AUTOCGETDROPRESTOFWORD">SCI_AUTOCGETDROPRESTOFWORD</a><br />
-     <a class="message" href="#SCI_REGISTERIMAGE">SCI_REGISTERIMAGE</a><br />
+     <a class="message" href="#SCI_REGISTERIMAGE">SCI_REGISTERIMAGE(int type, const char *xpmData)</a><br />
+     <a class="message" href="#SCI_REGISTERRGBAIMAGE">SCI_REGISTERRGBAIMAGE(int type, const char *pixels)</a><br />
      <a class="message" href="#SCI_CLEARREGISTEREDIMAGES">SCI_CLEARREGISTEREDIMAGES</a><br />
      <a class="message" href="#SCI_AUTOCSETTYPESEPARATOR">SCI_AUTOCSETTYPESEPARATOR(char separatorCharacter)</a><br />
      <a class="message" href="#SCI_AUTOCGETTYPESEPARATOR">SCI_AUTOCGETTYPESEPARATOR</a><br />
@@ -3995,6 +4011,7 @@ struct Sci_TextToFind {
 
     <p>
       <b id="SCI_REGISTERIMAGE">SCI_REGISTERIMAGE(int type, const char *xpmData)</b><br />
+      <b id="SCI_REGISTERRGBAIMAGE">SCI_REGISTERRGBAIMAGE(int type, const char *pixels)</b><br />
       <b id="SCI_CLEARREGISTEREDIMAGES">SCI_CLEARREGISTEREDIMAGES</b><br />
       <b id="SCI_AUTOCSETTYPESEPARATOR">SCI_AUTOCSETTYPESEPARATOR(char separatorCharacter)</b><br />
       <b id="SCI_AUTOCGETTYPESEPARATOR">SCI_AUTOCGETTYPESEPARATOR</b><br />
@@ -4002,7 +4019,11 @@ struct Sci_TextToFind {
       Autocompletion list items may display an image as well as text. Each image is first registered with an integer
       type. Then this integer is included in the text of the list separated by a '?' from the text. For example,
       "fclose?2 fopen" displays image 2 before the string "fclose" and no image before "fopen".
-      The images are in <a class="jump" href="#Images">XPM format.</a>
+      The images are in either the <a class="jump" href="#XPM">XPM format</a> (<code>SCI_REGISTERIMAGE</code>) or 
+      <a class="jump" href="#RGBA">RGBA format</a> (<code>SCI_REGISTERRGBAIMAGE</code>).
+      For <code>SCI_REGISTERRGBAIMAGE</code> the width and height must previously been set with
+      the <a class="message" href="#SCI_RGBAIMAGESETWIDTH"><code>SCI_RGBAIMAGESETWIDTH</code></a> and 
+      <a class="message" href="#SCI_RGBAIMAGESETHEIGHT"><code>SCI_RGBAIMAGESETHEIGHT</code></a> messages.
       The set of registered images can be cleared with <code>SCI_CLEARREGISTEREDIMAGES</code> and the '?' separator changed
       with <code>SCI_AUTOCSETTYPESEPARATOR</code>.
     </p>
@@ -6595,8 +6616,40 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
      There is no other information in SCNotification.</p>
      
     <h2 id="Images">Images</h2>
-    <p>The XPM format is supported for images.
-    This format is <a class="jump" href="http://en.wikipedia.org/wiki/X_PixMap">described here</a>. 
+    
+    <p>Two formats are supported for images used in margin markers and autocompletion lists, RGBA and XPM.</p>
+
+    <h3 id="RGBA">RGBA</h3>
+    
+    <p>The RGBA format allows translucency with an <a class="jump" href="#alpha">alpha</a>
+    value for each pixel. It is simpler than
+    <code>XPM</code> and more capable.</p>
+    
+    <p>The data is a sequence of 4 byte pixel values starting with the pixels for the top line, with the
+    leftmost pixel first, then continuing with the pixels for subsequent lines. There is no gap between
+    lines for alignment reasons.</p>
+
+    <p>Each pixel consists of, in order, a red byte, a green byte, a blue byte and an alpha byte.
+    The colour bytes are not premultiplied by the alpha value. That is, a fully red pixel that is
+    25% opaque will be [FF, 00, 00, 3F]</p>
+
+    <p>Since the RGBA pixel data does not include any size information the 
+    width and height must previously been set with the 
+    <a class="message" href="#SCI_RGBAIMAGESETWIDTH"><code>SCI_RGBAIMAGESETWIDTH</code></a> and 
+    <a class="message" href="#SCI_RGBAIMAGESETHEIGHT"><code>SCI_RGBAIMAGESETHEIGHT</code></a> messages.</p>
+    
+    <p>GUI platforms often include functions for reading image file formats like PNG into memory
+    in the RGBA form or a similar form.
+    If there is no suitable platform support, the <a href="http://lodev.org/lodepng/">LodePNG and picoPNG</a> libraries are small libraries
+    for loading and decoding PNG files available under a BSD-style license.</p>
+    
+    <p>RGBA format is supported on Windows, GTK+ and OS X Cocoa.
+    It is not supported on OS X Carbon.</p>
+
+    <h3 id="XPM">XPM</h3>
+    
+    <p>The XPM format is 
+    <a class="jump" href="http://en.wikipedia.org/wiki/X_PixMap">described here</a>. 
     Scintilla is only able to handle XPM pixmaps that use one character per pixel with no named colours.
     There may be a completely transparent colour named "None".</p>
     <p>There are two forms of data structure used for XPM images, the first "lines form" format is well suited
@@ -6608,6 +6661,8 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     <p>Either format may be used with Scintilla APIs with the bytes at the location pointed to examined
     to determine which format: if the bytes start with "/* XPM */" then it is treated as text form,
     otherwise it is treated as lines form.</p>
+
+    <p>XPM format is supported on on all platforms.</p>
 
     <h2 id="GTK">GTK+</h2>
     <p>On GTK+, the following functions create a Scintilla widget, communicate with it and allow

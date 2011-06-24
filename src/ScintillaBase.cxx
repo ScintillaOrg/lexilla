@@ -13,6 +13,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include "Platform.h"
 
@@ -758,6 +759,10 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 
 	case SCI_REGISTERIMAGE:
 		ac.lb->RegisterImage(wParam, reinterpret_cast<const char *>(lParam));
+		break;
+
+	case SCI_REGISTERRGBAIMAGE:
+		ac.lb->RegisterRGBAImage(wParam, sizeRGBAImage.x, sizeRGBAImage.y, reinterpret_cast<unsigned char *>(lParam));
 		break;
 
 	case SCI_CLEARREGISTEREDIMAGES:

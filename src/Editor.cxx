@@ -13,6 +13,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <algorithm>
 #include <memory>
 
@@ -8015,6 +8016,22 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_MARKERDEFINEPIXMAP:
 		if (wParam <= MARKER_MAX) {
 			vs.markers[wParam].SetXPM(CharPtrFromSPtr(lParam));
+		};
+		InvalidateStyleData();
+		RedrawSelMargin();
+		break;
+
+	case SCI_RGBAIMAGESETWIDTH:
+		sizeRGBAImage.x = wParam;
+		break;
+
+	case SCI_RGBAIMAGESETHEIGHT:
+		sizeRGBAImage.y = wParam;
+		break;
+
+	case SCI_MARKERDEFINERGBAIMAGE:
+		if (wParam <= MARKER_MAX) {
+			vs.markers[wParam].SetRGBAImage(sizeRGBAImage, reinterpret_cast<unsigned char *>(lParam));
 		};
 		InvalidateStyleData();
 		RedrawSelMargin();

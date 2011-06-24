@@ -13,6 +13,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>

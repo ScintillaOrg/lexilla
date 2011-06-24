@@ -93,6 +93,7 @@ public:
   void RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back);
   void AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated fill, int alphaFill,
                      ColourAllocated outline, int alphaOutline, int flags);
+  void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage);
   void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back);
   void Copy(PRectangle rc, Scintilla::Point from, Surface &surfaceSource);
   void DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore,

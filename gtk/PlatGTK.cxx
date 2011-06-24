@@ -9,6 +9,9 @@
 #include <stddef.h>
 #include <math.h>
 
+#include <vector>
+#include <map>
+
 #include <glib.h>
 #include <gmodule.h>
 #include <gdk/gdk.h>
@@ -785,6 +788,7 @@ public:
 	void RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back);
 	void AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated fill, int alphaFill,
 		ColourAllocated outline, int alphaOutline, int flags);
+	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage);
 	void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back);
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource);
 
@@ -1359,6 +1363,51 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated 
 
 		g_object_unref(pixalpha);
 	}
+#endif
+}
+
+void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) {
+	if (rc.Width() > width)
+		rc.left += (rc.Width() - width) / 2;
+	rc.right = rc.left + width;
+	if (rc.Height() > height)
+		rc.top += (rc.Height() - height) / 2;
+	rc.bottom = rc.top + height;
+
+#ifdef USE_CAIRO
+	int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
+	int ucs = stride * height;
+	std::vector<unsigned char> image(ucs);
+	for (int y=0; y<height; y++) {
+		for (int x=0; x<width; x++) {
+			unsigned char *pixel = &image[0] + y*stride + x * 4;
+			unsigned char alpha = pixelsImage[3];
+			pixel[2] = (*pixelsImage++) * alpha / 255;
+			pixel[1] = (*pixelsImage++) * alpha / 255;
+			pixel[0] = (*pixelsImage++) * alpha / 255;
+			pixel[3] = *pixelsImage++;
+		}
+	}
+
+	cairo_surface_t *psurf = cairo_image_surface_create_for_data(&image[0], CAIRO_FORMAT_ARGB32, width, height, stride);
+	cairo_set_source_surface(context, psurf, rc.left, rc.top);
+	cairo_rectangle(context, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top);
+	cairo_fill(context);
+
+	cairo_surface_destroy(psurf);
+#else
+	GdkPixbuf *pixbuf = gdk_pixbuf_new_from_data(pixelsImage,
+                                                         GDK_COLORSPACE_RGB,
+                                                         TRUE,
+                                                         8,
+                                                         width,
+                                                         height,
+                                                         width * 4,
+                                                         NULL,
+                                                         NULL);
+	gdk_draw_pixbuf(drawable, gc, pixbuf,
+		0,0, rc.left,rc.top, width,height, GDK_RGB_DITHER_NORMAL, 0, 0);
+	g_object_unref(pixbuf);
 #endif
 }
 
@@ -2225,8 +2274,10 @@ PRectangle Window::GetMonitorRect(Point pt) {
 #endif
 }
 
+typedef std::map<int, RGBAImage*> ImageMap;
+
 struct ListImage {
-	const char *xpm_data;
+	const RGBAImage *rgba_data;
 	GdkPixbuf *pixbuf;
 };
 
@@ -2254,7 +2305,7 @@ class ListBoxX : public ListBox {
 	WindowID scroller;
 	void *pixhash;
 	GtkCellRenderer* pixbuf_renderer;
-	XPMSet xset;
+	RGBAImageSet images;
 	int desiredVisibleRows;
 	unsigned int maxItemCharacters;
 	unsigned int aveCharWidth;
@@ -2286,7 +2337,9 @@ public:
 	virtual int GetSelection();
 	virtual int Find(const char *prefix);
 	virtual void GetValue(int n, char *value, int len);
+	void RegisterRGBA(int type, RGBAImage *image);
 	virtual void RegisterImage(int type, const char *xpm_data);
+	virtual void RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage);
 	virtual void ClearRegisteredImages();
 	virtual void SetDoubleClickAction(CallBackAction action, void *data) {
 		doubleClickAction = action;
@@ -2511,25 +2564,21 @@ void ListBoxX::Clear() {
 }
 
 static void init_pixmap(ListImage *list_image) {
-	const char *textForm = list_image->xpm_data;
-	const char * const * xpm_lineform = reinterpret_cast<const char * const *>(textForm);
-	const char **xpm_lineformfromtext = 0;
-	// The XPM data can be either in atext form as will be read from a file
-	// or in a line form (array of char  *) as will be used for images defined in code.
-	// Test for text form and convert to line form
-	if ((0 == memcmp(textForm, "/* X", 4)) && (0 == memcmp(textForm, "/* XPM */", 9))) {
-		// Test done is two parts to avoid possibility of overstepping the memory
-		// if memcmp implemented strangely. Must be 4 bytes at least at destination.
-		xpm_lineformfromtext = XPM::LinesFormFromTextForm(textForm);
-		xpm_lineform = xpm_lineformfromtext;
+	if (list_image->rgba_data) {
+		// Drop any existing pixmap/bitmap as data may have changed
+		if (list_image->pixbuf)
+			g_object_unref(list_image->pixbuf);
+		list_image->pixbuf =
+			gdk_pixbuf_new_from_data(list_image->rgba_data->Pixels(),
+                                                         GDK_COLORSPACE_RGB,
+                                                         TRUE,
+                                                         8,
+                                                         list_image->rgba_data->GetWidth(),
+                                                         list_image->rgba_data->GetHeight(),
+                                                         list_image->rgba_data->GetWidth() * 4,
+                                                         NULL,
+                                                         NULL);
 	}
-
-	// Drop any existing pixmap/bitmap as data may have changed
-	if (list_image->pixbuf)
-		g_object_unref(list_image->pixbuf);
-	list_image->pixbuf =
-		gdk_pixbuf_new_from_xpm_data((const gchar**)xpm_lineform);
-	delete []xpm_lineformfromtext;
 }
 
 #define SPACING 5
@@ -2697,13 +2746,8 @@ void ListBoxX::GetValue(int n, char *value, int len) {
 #pragma warning(disable: 4127)
 #endif
 
-void ListBoxX::RegisterImage(int type, const char *xpm_data) {
-	g_return_if_fail(xpm_data);
-
-	// Saved and use the saved copy so caller's copy can disappear.
-	xset.Add(type, xpm_data);
-	XPM *pxpm = xset.Get(type);
-	xpm_data = reinterpret_cast<const char *>(pxpm->InLinesForm());
+void ListBoxX::RegisterRGBA(int type, RGBAImage *image) {
+	images.Add(type, image);
 
 	if (!pixhash) {
 		pixhash = g_hash_table_new(g_direct_hash, g_direct_equal);
@@ -2715,17 +2759,27 @@ void ListBoxX::RegisterImage(int type, const char *xpm_data) {
 		if (list_image->pixbuf)
 			g_object_unref(list_image->pixbuf);
 		list_image->pixbuf = NULL;
-		list_image->xpm_data = xpm_data;
+		list_image->rgba_data = image;
 	} else {
 		list_image = g_new0(ListImage, 1);
-		list_image->xpm_data = xpm_data;
+		list_image->rgba_data = image;
 		g_hash_table_insert((GHashTable *) pixhash, GINT_TO_POINTER(type),
 			(gpointer) list_image);
 	}
 }
 
+void ListBoxX::RegisterImage(int type, const char *xpm_data) {
+	g_return_if_fail(xpm_data);
+	XPM xpmImage(xpm_data);
+	RegisterRGBA(type, new RGBAImage(xpmImage));
+}
+
+void ListBoxX::RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage) {
+	RegisterRGBA(type, new RGBAImage(width, height, pixelsImage));
+}
+
 void ListBoxX::ClearRegisteredImages() {
-	xset.Clear();
+	images.Clear();
 }
 
 void ListBoxX::SetList(const char *listText, char separator, char typesep) {
