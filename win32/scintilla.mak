@@ -455,7 +455,7 @@ $(DIR_O)\PerLine.obj: ../src/PerLine.cxx ../include/Platform.h \
   ../src/Partitioning.h ../src/RunStyles.h ../src/PerLine.h
 $(DIR_O)\PlatWin.obj: PlatWin.cxx ../include/Platform.h \
   ../src/UniConversion.h ../src/XPM.h
-$(DIR_O)\PositionCache.obj: ../src/Editor.cxx ../include/Platform.h ../include/Scintilla.h \
+$(DIR_O)\PositionCache.obj: ../src/PositionCache.cxx ../include/Platform.h ../include/Scintilla.h \
   ../src/ContractionState.h ../src/SVector.h ../src/SplitVector.h \
   ../src/Partitioning.h ../src/CellBuffer.h ../src/KeyMap.h \
   ../src/RunStyles.h ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h \
