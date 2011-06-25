@@ -205,7 +205,7 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 	if (ac.chooseSingle && (listType == 0)) {
 		if (list && !strchr(list, ac.GetSeparator())) {
 			const char *typeSep = strchr(list, ac.GetTypesep());
-			size_t lenInsert = (typeSep) ? (typeSep-list) : strlen(list);
+			int lenInsert = static_cast<int>((typeSep) ? (typeSep-list) : strlen(list));
 			if (ac.ignoreCase) {
 				SetEmptySelection(sel.MainCaret() - lenEntered);
 				pdoc->DeleteChars(sel.MainCaret(), lenEntered);
@@ -394,7 +394,7 @@ int ScintillaBase::AutoCompleteGetCurrentText(char *buffer) {
 			ac.lb->GetValue(item, selected, sizeof(selected));
 			if (buffer != NULL)
 				strcpy(buffer, selected);
-			return strlen(selected);
+			return static_cast<int>(strlen(selected));
 		}
 	}
 	if (buffer != NULL)

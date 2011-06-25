@@ -605,11 +605,11 @@ void PositionCache::MeasureWidths(Surface *surface, ViewStyle &vstyle, unsigned 
 
 		// Two way associative: try two probe positions.
 		int hashValue = PositionCacheEntry::Hash(styleNumber, s, len);
-		probe = hashValue % size;
+		probe = static_cast<int>(hashValue % size);
 		if (pces[probe].Retrieve(styleNumber, s, len, positions)) {
 			return;
 		}
-		int probe2 = (hashValue * 37) % size;
+		int probe2 = static_cast<int>((hashValue * 37) % size);
 		if (pces[probe2].Retrieve(styleNumber, s, len, positions)) {
 			return;
 		}
