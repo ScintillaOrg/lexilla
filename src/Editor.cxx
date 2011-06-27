@@ -7866,8 +7866,8 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return endAtLastLine;
 
 	case SCI_SETCARETSTICKY:
-		PLATFORM_ASSERT((wParam >= SC_CARETSTICKY_OFF) && (wParam <= SC_CARETSTICKY_WHITESPACE));
-		if ((wParam >= SC_CARETSTICKY_OFF) && (wParam <= SC_CARETSTICKY_WHITESPACE)) {
+		PLATFORM_ASSERT(wParam <= SC_CARETSTICKY_WHITESPACE);
+		if (wParam <= SC_CARETSTICKY_WHITESPACE) {
 			caretSticky = wParam;
 		}
 		break;
@@ -8339,7 +8339,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return vs.caretcolour.desired.AsLong();
 
 	case SCI_SETCARETSTYLE:
-		if (wParam >= CARETSTYLE_INVISIBLE && wParam <= CARETSTYLE_BLOCK)
+		if (wParam <= CARETSTYLE_BLOCK)
 			vs.caretStyle = wParam;
 		else
 			/* Default to the line caret */
