@@ -244,6 +244,8 @@ bool ContractionState::SetHeight(int lineDoc, int height) {
 			Check();
 			return false;
 		}
+	} else {
+		return false;
 	}
 }
 
