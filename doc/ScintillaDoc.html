@@ -79,7 +79,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 24/June/2011 NH</p>
+    <p>Last edited 2/July/2011 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -2707,8 +2707,10 @@ struct Sci_TextToFind {
     <h2 id="Margins">Margins</h2>
 
     <p>There may be up to five margins to the left of the text display, plus a gap either side of
-    the text. Each margin can be set to display either symbols or line numbers with <a
-    class="message" href="#SCI_SETMARGINTYPEN"><code>SCI_SETMARGINTYPEN</code></a>. The markers
+    the text. Each margin can be set to display only symbols, line numbers, or text with <a
+    class="message" href="#SCI_SETMARGINTYPEN"><code>SCI_SETMARGINTYPEN</code></a>.
+    Textual margins may also display symbols.
+    The markers
     that can be displayed in each margin are set with <a class="message"
     href="#SCI_SETMARGINMASKN"><code>SCI_SETMARGINMASKN</code></a>. Any markers not associated with
     a visible margin will be displayed as changes in background colour in the text. A width in
