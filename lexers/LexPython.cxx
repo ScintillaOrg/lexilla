@@ -165,6 +165,11 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 	//      Set to 1 to allow strings to span newline characters.
 	bool stringsOverNewline = styler.GetPropertyInt("lexer.python.strings.over.newline") != 0;
 
+	// property lexer.python.keywords2.no.sub.identifiers
+	//	When enabled, it will not style keywords2 items that are used as a sub-identifier.
+	//      Example: when set, will not highlight "foo.open" when "open" is a keywords2 item.
+	const bool keywords2NoSubIdentifiers = styler.GetPropertyInt("lexer.python.keywords2.no.sub.identifiers") != 0;
+
 	initStyle = initStyle & 31;
 	if (initStyle == SCE_P_STRINGEOL) {
 		initStyle = SCE_P_DEFAULT;
@@ -264,12 +269,16 @@ static void ColourisePyDoc(unsigned int startPos, int length, int initStyle,
 						}
 					}
 				} else if (keywords2.InList(s)) {
-					// We don't want to highlight keywords2
-					// that are used as a sub-identifier,
-					// i.e. not open in "foo.open".
-					int pos = styler.GetStartSegment() - 1;
-					if (pos < 0 || (styler.SafeGetCharAt(pos, '\0') != '.'))
+					if (keywords2NoSubIdentifiers) {
+						// We don't want to highlight keywords2
+						// that are used as a sub-identifier,
+						// i.e. not open in "foo.open".
+						int pos = styler.GetStartSegment() - 1;
+						if (pos < 0 || (styler.SafeGetCharAt(pos, '\0') != '.'))
+							style = SCE_P_WORD2;
+					} else {
 						style = SCE_P_WORD2;
+					}
 				}
 				sc.ChangeState(style);
 				sc.SetState(SCE_P_DEFAULT);
