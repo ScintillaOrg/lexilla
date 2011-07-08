@@ -460,7 +460,6 @@ static void FoldPyDoc(unsigned int startPos, int length, int /*initStyle - unuse
 	if (lineCurrent >= 1)
 		prev_state = styler.StyleAt(startPos - 1) & 31;
 	int prevQuote = foldQuotes && ((prev_state == SCE_P_TRIPLE) || (prev_state == SCE_P_TRIPLEDOUBLE));
-	if (lineCurrent >= 1)
 
 	// Process all characters to end of requested range or end of any triple quote
 	//that hangs over the end of the range.  Cap processing in all cases
