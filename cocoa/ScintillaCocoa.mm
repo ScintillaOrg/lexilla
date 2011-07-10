@@ -1101,9 +1101,26 @@ bool ScintillaCocoa::GetPasteboardData(NSPasteboard* board, SelectionText* selec
   {
     if (selectedText != nil)
     {
-      char* text = (char*) [data UTF8String];
+      CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
+                                                           vs.styles[STYLE_DEFAULT].characterSet);
+      CFRange rangeAll = {0, [data length]};
+      CFIndex usedLen = 0;
+      CFStringGetBytes((CFStringRef)data, rangeAll, encoding, '?',
+                       false, NULL, 0, &usedLen);
+
+      UInt8 *buffer = new UInt8[usedLen];
+    
+      CFStringGetBytes((CFStringRef)data, rangeAll, encoding, '?',
+                       false, buffer,usedLen, NULL);
+
       bool rectangular = bestType == ScintillaRecPboardType;
-      selectedText->Copy(text, strlen(text) + 1, SC_CP_UTF8, SC_CHARSET_DEFAULT , rectangular, false);
+
+      int len = usedLen;
+      char *dest = Document::TransformLineEnds(&len, (char *)buffer, len, pdoc->eolMode);
+
+      selectedText->Set(dest, len+1, pdoc->dbcsCodePage, 
+                         vs.styles[STYLE_DEFAULT].characterSet , rectangular, false);
+      delete []buffer;
     }
     return true;
   }
