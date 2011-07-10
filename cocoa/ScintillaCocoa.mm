@@ -1168,6 +1168,51 @@ void ScintillaCocoa::SyncPaint(void* gc, PRectangle rc)
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Scrolls the pixels in the window some number of lines.
+ * Invalidates the pixels scrolled into view.
+ */
+void ScintillaCocoa::ScrollText(int linesToMove)
+{
+	// Move those pixels
+	NSView *content = ContentView();
+    
+	[content lockFocus];
+	int diff = vs.lineHeight * linesToMove;
+	PRectangle textRect = GetTextRectangle();
+	// Include margins as they must scroll
+	textRect.left = 0;
+	NSRect textRectangle = PRectangleToNSRect(textRect);
+	NSPoint destPoint = textRectangle.origin;
+    destPoint.y += diff;
+	NSCopyBits(0, textRectangle, destPoint);
+
+	// Paint them nice
+	NSRect redrawRectangle = textRectangle;
+	if (linesToMove < 0) {
+		// Repaint bottom
+		redrawRectangle.origin.y = redrawRectangle.origin.y + redrawRectangle.size.height + diff;
+		redrawRectangle.size.height = -diff;
+	} else {
+		// Repaint top
+		redrawRectangle.size.height = diff;
+	}
+	
+	[content drawRect: redrawRectangle];
+	[content unlockFocus];
+
+	// If no flush done here then multiple scrolls will get buffered and screen 
+	// will only update a few times a second.
+	//[[content window] flushWindow];
+    // However, doing the flush leads to the caret updating as a separate operation
+    // which looks bad when scrolling by holding down the down arrow key.
+
+	// Could invalidate instead of synchronous draw but that may not be as smooth
+	//[content setNeedsDisplayInRect: redrawRectangle];
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Modfies the vertical scroll position to make the current top line show up as such.
  */
 void ScintillaCocoa::SetVerticalScrollPos()
