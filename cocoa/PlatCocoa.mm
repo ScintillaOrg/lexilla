@@ -944,8 +944,6 @@ static size_t utf8LengthFromLead(unsigned char uch) {
 void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positions)
 {
 	CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
-	for (int i = 0; i < len; i++)
-		positions [i] = 0;
 	textLayout->setText (reinterpret_cast<const UInt8*>(s), len, encoding, *reinterpret_cast<QuartzTextStyle*>(font_.GetID()));
 	
 	CTLineRef mLine = textLayout->getCTLine();
