@@ -1066,8 +1066,11 @@ void ScintillaCocoa::SetPasteboardData(NSPasteboard* board, const SelectionText 
   if (selectedText.len == 0)
     return;
 
-  NSString *string;
-  string = [NSString stringWithUTF8String: selectedText.s];
+  CFStringEncoding encoding = EncodingFromCharacterSet(selectedText.codePage == SC_CP_UTF8,
+                                                       selectedText.characterSet);
+  CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
+                                               reinterpret_cast<const UInt8 *>(selectedText.s), 
+                                               selectedText.len-1, encoding, false);
 
   [board declareTypes:[NSArray arrayWithObjects:
                        NSStringPboardType,
@@ -1077,11 +1080,12 @@ void ScintillaCocoa::SetPasteboardData(NSPasteboard* board, const SelectionText 
   if (selectedText.rectangular)
   {
     // This is specific to scintilla, allows us to drag rectangular selections around the document.
-    [board setString: string forType: ScintillaRecPboardType];
+    [board setString: (NSString *)cfsVal forType: ScintillaRecPboardType];
   }
   
-  [board setString: string forType: NSStringPboardType];
-  
+  [board setString: (NSString *)cfsVal forType: NSStringPboardType];
+
+  CFRelease(cfsVal);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1574,8 +1578,20 @@ bool ScintillaCocoa::KeyboardInput(NSEvent* event)
  */
 int ScintillaCocoa::InsertText(NSString* input)
 {
-  const char* utf8 = [input UTF8String];
-  AddCharUTF((char*) utf8, strlen(utf8), false);
+  CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
+                                                         vs.styles[STYLE_DEFAULT].characterSet);
+  CFRange rangeAll = {0, [input length]};
+  CFIndex usedLen = 0;
+  CFStringGetBytes((CFStringRef)input, rangeAll, encoding, '?',
+                   false, NULL, 0, &usedLen);
+    
+  UInt8 *buffer = new UInt8[usedLen];
+    
+  CFStringGetBytes((CFStringRef)input, rangeAll, encoding, '?',
+                     false, buffer,usedLen, NULL);
+    
+  AddCharUTF((char*) buffer, usedLen, false);
+  delete []buffer;
   return true;
 }
 
