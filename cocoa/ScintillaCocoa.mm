@@ -895,13 +895,84 @@ void ScintillaCocoa::StartDrag()
   CopySelectionRange(&selectedText);
   SetPasteboardData(pasteboard, selectedText);
   
+  // calculate the bounds of the selection
+  PRectangle client = GetTextRectangle();
+  int selStart = sel.RangeMain().Start().Position();
+  int selEnd = sel.RangeMain().End().Position();
+  int startLine = pdoc->LineFromPosition(selStart);
+  int endLine = pdoc->LineFromPosition(selEnd);
+  Point pt;
+  int startPos, endPos, ep;
+  Rect rcSel;
+  
+  if (startLine==endLine && WndProc(SCI_GETWRAPMODE, 0, 0) != SC_WRAP_NONE) {
+    // Komodo bug http://bugs.activestate.com/show_bug.cgi?id=87571
+    // Scintilla bug https://sourceforge.net/tracker/?func=detail&atid=102439&aid=3040200&group_id=2439
+    // If the width on a wrapped-line selection is negative,
+    // find a better bounding rectangle.
+    
+    Point ptStart, ptEnd;
+    startPos = WndProc(SCI_GETLINESELSTARTPOSITION, startLine, 0);
+    endPos =   WndProc(SCI_GETLINESELENDPOSITION,   startLine, 0);
+    // step back a position if we're counting the newline
+    ep =       WndProc(SCI_GETLINEENDPOSITION,      startLine, 0);
+    if (endPos > ep) endPos = ep;
+    ptStart = LocationFromPosition(startPos);
+    ptEnd =   LocationFromPosition(endPos);
+    if (ptStart.y == ptEnd.y) {
+      // We're just selecting part of one visible line
+      rcSel.left = ptStart.x;
+      rcSel.right = ptEnd.x < client.right ? ptEnd.x : client.right;
+    } else {
+      // Find the bounding box.
+      startPos = WndProc(SCI_POSITIONFROMLINE, startLine, 0);
+      rcSel.left = LocationFromPosition(startPos).x;
+      rcSel.right = client.right;
+    }
+    rcSel.top = ptStart.y;
+    rcSel.bottom = ptEnd.y + vs.lineHeight;
+    if (rcSel.bottom > client.bottom) {
+      rcSel.bottom = client.bottom;
+    }
+  } else {
+    rcSel.top = rcSel.bottom = rcSel.right = rcSel.left = -1;
+    for (int l = startLine; l <= endLine; l++) {
+      startPos = WndProc(SCI_GETLINESELSTARTPOSITION, l, 0);
+      endPos = WndProc(SCI_GETLINESELENDPOSITION, l, 0);
+      if (endPos == startPos) continue;
+      // step back a position if we're counting the newline
+      ep = WndProc(SCI_GETLINEENDPOSITION, l, 0);
+      if (endPos > ep) endPos = ep;
+      pt = LocationFromPosition(startPos); // top left of line selection
+      if (pt.x < rcSel.left || rcSel.left < 0) rcSel.left = pt.x;
+      if (pt.y < rcSel.top || rcSel.top < 0) rcSel.top = pt.y;
+      pt = LocationFromPosition(endPos); // top right of line selection
+      pt.y += vs.lineHeight; // get to the bottom of the line
+      if (pt.x > rcSel.right || rcSel.right < 0) {
+        if (pt.x > client.right)
+          rcSel.right = client.right;
+        else
+          rcSel.right = pt.x;
+      }
+      if (pt.y > rcSel.bottom || rcSel.bottom < 0) {
+        if (pt.y > client.bottom)
+          rcSel.bottom = client.bottom;
+        else
+          rcSel.bottom = pt.y;
+      }
+    }
+  }
+  // must convert to global coordinates for drag regions, but also save the
+  // image rectangle for further calculations and copy operations
+  PRectangle localRectangle = PRectangle(rcSel.left, rcSel.top, rcSel.right, rcSel.bottom);
+    
   // Prepare drag image.
-  PRectangle localRectangle = RectangleFromRange(sel.RangeMain().Start().Position(), sel.RangeMain().End().Position());
   NSRect selectionRectangle = PRectangleToNSRect(localRectangle);
   
   NSView* content = ContentView();
+    
+#if 1
 
-#if 0 // TODO: fix initialization of the drag image with CGImageRef.
   // To get a bitmap of the text we're dragging, we just use Paint on a pixmap surface.
   SurfaceImpl *sw = new SurfaceImpl();
   SurfaceImpl *pixmap = NULL;
@@ -916,16 +987,20 @@ void ScintillaCocoa::StartDrag()
       PRectangle client = GetClientRectangle();
       PRectangle imageRect = NSRectToPRectangle(selectionRectangle);
       paintState = painting;
-      //sw->InitPixMap(client.Width(), client.Height(), NULL, NULL);
-      sw->InitPixMap(imageRect.Width(), imageRect.Height(), NULL, NULL);
+      sw->InitPixMap(client.Width(), client.Height(), NULL, NULL);
       paintingAllText = true;
-      Paint(sw, imageRect);
+      // Have to create a new context and make current as text drawing goes 
+      // to the current context, not a passed context.
+      CGContextRef gcsw = sw->GetContext(); 
+      NSGraphicsContext *nsgc = [NSGraphicsContext graphicsContextWithGraphicsPort: gcsw 
+                                                                           flipped: YES];
+      [NSGraphicsContext setCurrentContext:nsgc];
+      Paint(sw, client);
       paintState = notPainting;
       
       pixmap->InitPixMap(imageRect.Width(), imageRect.Height(), NULL, NULL);
       
       CGContextRef gc = pixmap->GetContext(); 
-      
       // To make Paint() work on a bitmap, we have to flip our coordinates and translate the origin
       CGContextTranslateCTM(gc, 0, imageRect.Height());
       CGContextScaleCTM(gc, 1.0, -1.0);
@@ -943,7 +1018,9 @@ void ScintillaCocoa::StartDrag()
   NSBitmapImageRep* bitmap = NULL;
   if (pixmap)
   {
-    bitmap = [[[NSBitmapImageRep alloc] initWithCGImage: pixmap->GetImage()] autorelease];
+    CGImageRef imagePixmap = pixmap->GetImage();
+    bitmap = [[[NSBitmapImageRep alloc] initWithCGImage: imagePixmap] autorelease];
+    CGImageRelease(imagePixmap);
     pixmap->Release();
     delete pixmap;
   }
