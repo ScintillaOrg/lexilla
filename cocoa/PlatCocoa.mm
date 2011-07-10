@@ -360,9 +360,13 @@ CGImageRef SurfaceImpl::GetImage()
   const int bitmapBytesPerRow = ((int) bitmapWidth * BYTES_PER_PIXEL);
   const int bitmapByteCount = (bitmapBytesPerRow * (int) bitmapHeight);
   
+  // Make a copy of the bitmap data for the image creation and divorce it
+  // From the SurfaceImpl lifetime
+  CFDataRef dataRef = CFDataCreate(kCFAllocatorDefault, bitmapData, bitmapByteCount);
+
   // Create a data provider.
-  CGDataProviderRef dataProvider = CGDataProviderCreateWithData(NULL, bitmapData, bitmapByteCount, 
-                                                                NULL);
+  CGDataProviderRef dataProvider = CGDataProviderCreateWithCFData(dataRef);
+
   CGImageRef image = NULL;
   if (dataProvider != NULL)
   {
@@ -388,6 +392,9 @@ CGImageRef SurfaceImpl::GetImage()
   CGDataProviderRelease(dataProvider);
   dataProvider = NULL;
   
+  // Done with the data provider.
+  CFRelease(dataRef);
+    
   return image;
 }
 
@@ -791,6 +798,7 @@ void SurfaceImpl::CopyImageRectangle(Surface &surfaceSource, PRectangle srcRect,
   CGContextClipToRect (gc, dst);
   CGContextDrawImage (gc, drawRect, image);
   CGContextRestoreGState (gc);
+  CGImageRelease(image);
 }
 
 void SurfaceImpl::Copy(PRectangle rc, Scintilla::Point from, Surface &surfaceSource) {
