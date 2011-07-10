@@ -154,13 +154,11 @@ static int FontCharacterSet(Font &f) {
 }
 
 /**
- * Creates a Quartz 2D font with the given properties.
- * TODO: rewrite to use NSFont.
+ * Creates a CTFontRef with the given properties.
  */
 void Font::Create(const char *faceName, int characterSet, int size, bool bold, bool italic, 
                   int extraFontFlag)
 {
-  // TODO: How should I handle the characterSet request?
 	Release();
 
 	QuartzTextStyle* style = new QuartzTextStyle();
@@ -475,7 +473,6 @@ void SurfaceImpl::Polygon(Scintilla::Point *pts, int npts, ColourAllocated fore,
   // Draw the polygon
   CGContextAddLines(gc, points, npts);
   
-  // TODO: Should the path be automatically closed, or is that the caller's responsability?
   // Explicitly close the path, so it is closed for stroking AND filling (implicit close = filling only)
   CGContextClosePath( gc );
   CGContextDrawPath( gc, kCGPathFillStroke );
@@ -498,7 +495,6 @@ void SurfaceImpl::RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAlloc
     // Quartz integer -> float point conversion fun (see comment in SurfaceImpl::LineTo)
     // We subtract 1 from the Width() and Height() so that all our drawing is within the area defined
     // by the PRectangle. Otherwise, we draw one pixel too far to the right and bottom.
-    // TODO: Create some version of PRectangleToCGRect to do this conversion for us?
     CGContextAddRect( gc, CGRectMake( rc.left + 0.5, rc.top + 0.5, rc.Width() - 1, rc.Height() - 1 ) );
     CGContextDrawPath( gc, kCGPathFillStroke );
   }
@@ -576,8 +572,12 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern)
 }
 
 void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
-  // TODO: Look at the Win32 API to determine what this is supposed to do:
+  // This is only called from the margin marker drawing code for SC_MARK_ROUNDRECT
+  // The Win32 version does
   //  ::RoundRect(hdc, rc.left + 1, rc.top, rc.right - 1, rc.bottom, 8, 8 );
+  // which is a rectangle with rounded corners each having a radius of 4 pixels.
+  // It would be almost as good just cutting off the corners with lines at
+  // 45 degrees as is done on GTK+.
   
   // Create a rectangle with semicircles at the corners
   const int MAX_RADIUS = 4;
@@ -611,7 +611,6 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAl
   };
   
   // Align the points in the middle of the pixels
-  // TODO: Should I include these +0.5 in the array creation code above?
   for( int i = 0; i < 4*3; ++ i )
   {
     CGPoint* c = (CGPoint*) corners;
@@ -1039,8 +1038,6 @@ int SurfaceImpl::Descent(Font &font_) {
 }
 
 int SurfaceImpl::InternalLeading(Font &) {
-  // TODO: How do we get EM_Size?
-  // internal leading = ascent - descent - EM_size
   return 0;
 }
 
@@ -1958,7 +1955,9 @@ void Menu::Show(Point pt, Window &)
 
 //----------------- ElapsedTime --------------------------------------------------------------------
 
-// TODO: Consider if I should be using GetCurrentEventTime instead of gettimeoday
+// ElapsedTime is used for precise performance measurements during development
+// and not for anything a user sees.
+
 ElapsedTime::ElapsedTime() {
   struct timeval curTime;
   int retVal;
