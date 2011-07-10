@@ -501,7 +501,19 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
  */
 - (NSDragOperation) draggingSourceOperationMaskForLocal: (BOOL) flag
 {
-  return NSDragOperationCopy | NSDragOperationMove;
+  return NSDragOperationCopy | NSDragOperationMove | NSDragOperationDelete;
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Finished a drag: may need to delete selection.
+ */
+
+- (void)draggedImage:(NSImage *)image endedAt:(NSPoint)screenPoint operation:(NSDragOperation)operation {
+    if (operation == NSDragOperationDelete) {
+        mOwner.backend->WndProc(SCI_CLEAR, 0, 0);
+    }
 }
 
 //--------------------------------------------------------------------------------------------------
