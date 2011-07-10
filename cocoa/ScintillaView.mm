@@ -301,10 +301,10 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
   // Note: Scintilla internally works almost always with bytes instead chars, so we need to take
   //       this into account when determining selection ranges and such.
   std::string raw_text = [newText UTF8String];
-  mOwner.backend->InsertText(newText);
+  int lengthInserted = mOwner.backend->InsertText(newText);
 
   mMarkedTextRange.location = currentPosition;
-  mMarkedTextRange.length = raw_text.size();
+  mMarkedTextRange.length = lengthInserted;
     
   // Mark the just inserted text. Keep the marked range for later reset.
   [mOwner setGeneralProperty: SCI_SETINDICATORCURRENT value: INPUT_INDICATOR];

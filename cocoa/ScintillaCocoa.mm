@@ -1672,7 +1672,7 @@ int ScintillaCocoa::InsertText(NSString* input)
     
   AddCharUTF((char*) buffer, usedLen, false);
   delete []buffer;
-  return true;
+  return usedLen;
 }
 
 //--------------------------------------------------------------------------------------------------
