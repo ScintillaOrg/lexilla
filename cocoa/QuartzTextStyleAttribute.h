@@ -43,13 +43,28 @@ public:
 			// create a font and then a copy of it with the sym traits
 			CTFontRef iFont = ::CTFontCreateWithName(fontName, size, NULL);
 			fontid = ::CTFontCreateCopyWithSymbolicTraits(iFont, size, NULL, desiredTrait, traitMask);
-			CFRelease(iFont);
+			if (fontid)
+			{
+				CFRelease(iFont);
+			}
+			else
+			{
+				// Traits failed so use base font
+				fontid = iFont;
+			}
 		}
 		else
 		{
 			// create the font, no traits
 			fontid = ::CTFontCreateWithName(fontName, size, NULL);
 		}
+
+		if (!fontid)
+		{
+			// Failed to create requested font so use font always present
+			fontid = ::CTFontCreateWithName((CFStringRef)@"Monaco", size, NULL);
+		}
+
     }
 
 	CTFontRef getFontID()
