@@ -165,7 +165,7 @@ void Font::Create(const char *faceName, int characterSet, int size, bool bold, b
 	// Create the font with attributes
 	QuartzFont font(faceName, strlen(faceName), size, bold, italic);
 	CTFontRef fontRef = font.getFontID();
-	style->setFontRef(fontRef);
+	style->setFontRef(fontRef, characterSet);
 }
 
 //--------------------------------------------------------------------------------------------------
