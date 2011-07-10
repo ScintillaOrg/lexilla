@@ -529,6 +529,9 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 	  [[ContentView() window] makeFirstResponder:ContentView()];
       break;
 
+    case SCI_SETBUFFEREDDRAW:
+      // Buffered drawing not supported on Cocoa 
+      bufferedDraw = false;
       break;
 
     case WM_UNICHAR: 
