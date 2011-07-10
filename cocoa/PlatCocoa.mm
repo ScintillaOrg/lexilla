@@ -149,6 +149,10 @@ Font::~Font()
 
 //--------------------------------------------------------------------------------------------------
 
+static int FontCharacterSet(Font &f) {
+	return reinterpret_cast<QuartzTextStyle *>(f.GetID())->getCharacterSet();
+}
+
 /**
  * Creates a Quartz 2D font with the given properties.
  * TODO: rewrite to use NSFont.
@@ -905,55 +909,86 @@ CFStringEncoding EncodingFromCharacterSet(bool unicode, int characterSet)
 void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len, 
                                       ColourAllocated fore)
 {
+	CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
 	ColourDesired colour(fore.AsLong());
 	CGColorRef color = CGColorCreateGenericRGB(colour.GetRed()/255.0,colour.GetGreen()/255.0,colour.GetBlue()/255.0,1.0);
 
 	QuartzTextStyle* style = reinterpret_cast<QuartzTextStyle*>(font_.GetID());
 	style->setCTStyleColor(color);
 
-	textLayout->setText (reinterpret_cast<const UInt8*>(s), len, *reinterpret_cast<QuartzTextStyle*>(font_.GetID()));
+	textLayout->setText (reinterpret_cast<const UInt8*>(s), len, encoding, *reinterpret_cast<QuartzTextStyle*>(font_.GetID()));
 	textLayout->draw(rc.left, ybase);
+}
+
+static size_t utf8LengthFromLead(unsigned char uch) {
+	if (uch >= (0x80 + 0x40 + 0x20 + 0x10)) {
+		return 4;
+	} else if (uch >= (0x80 + 0x40 + 0x20)) {
+		return 3;
+	} else if (uch >= (0x80)) {
+		return 2;
+	} else {
+		return 1;
+	}
 }
 
 //--------------------------------------------------------------------------------------------------
 
 void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positions)
 {
+	CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
 	for (int i = 0; i < len; i++)
 		positions [i] = 0;
-	textLayout->setText (reinterpret_cast<const UInt8*>(s), len, *reinterpret_cast<QuartzTextStyle*>(font_.GetID()));
+	textLayout->setText (reinterpret_cast<const UInt8*>(s), len, encoding, *reinterpret_cast<QuartzTextStyle*>(font_.GetID()));
 	
 	CTLineRef mLine = textLayout->getCTLine();
 	assert(mLine != NULL);
 	
-	CGFloat* secondaryOffset= 0;
-	int unicodeCharStart = 0;
-	for ( int  i = 0; i < len+1; i ++ ){
-		unsigned char uch = s[i];
-		CFIndex charIndex = unicodeCharStart+1;
-		CGFloat advance = CTLineGetOffsetForStringIndex(mLine, charIndex, secondaryOffset);
-		
-		if ( unicodeMode ) 
-		{
-			unsigned char mask = 0xc0;
-			int lcount = 1;
-			// Add one additonal byte for each extra high order one in the byte
-			while ( uch >= mask && lcount < 8 ) 
-			{
-				positions[i++] = (int)(advance+0.5);
-				lcount ++;
-				mask = mask >> 1 | 0x80; // add an additional one in the highest order position
+	if (unicodeMode) {
+		// Map the widths given for UTF-16 characters back onto the UTF-8 input string
+		int fit = textLayout->getStringLength();
+		int ui=0;
+		const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
+		int i=0;
+		while (ui<fit) {
+			size_t lenChar = utf8LengthFromLead(us[i]);
+			size_t codeUnits = (lenChar < 4) ? 1 : 2;
+			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, ui+1, NULL);
+			for (unsigned int bytePos=0; (bytePos<lenChar) && (i<len); bytePos++) {
+				positions[i++] = lround(xPosition);
 			}
+			ui += codeUnits;
 		}
-		positions[i] = (int)(advance+0.5);
-		unicodeCharStart++;
+		int lastPos = 0;
+		if (i > 0)
+			lastPos = positions[i-1];
+		while (i<len) {
+			positions[i++] = lastPos;
+		}
+	} else if (codePage) {
+		int ui = 0;
+		for (int i=0;i<len;) {
+			size_t lenChar = Platform::IsDBCSLeadByte(codePage, s[i]) ? 2 : 1;
+			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, ui+1, NULL);
+			for (unsigned int bytePos=0; (bytePos<lenChar) && (i<len); bytePos++) {
+				positions[i++] = lround(xPosition);
+			}
+			ui++;
+		}
+	} else {	// Single byte encoding
+		for (int i=0;i<len;i++) {
+			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, i+1, NULL);
+			positions[i] = lround(xPosition);
+		}
 	}
+
 }
 
 int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
   if (font_.GetID())
   {
-    textLayout->setText (reinterpret_cast<const UInt8*>(s), len, *reinterpret_cast<QuartzTextStyle*>(font_.GetID()));
+    CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
+    textLayout->setText (reinterpret_cast<const UInt8*>(s), len, encoding, *reinterpret_cast<QuartzTextStyle*>(font_.GetID()));
     
 	return textLayout->MeasureStringWidth();
   }
@@ -964,7 +999,8 @@ int SurfaceImpl::WidthChar(Font &font_, char ch) {
   char str[2] = { ch, '\0' };
   if (font_.GetID())
   {
-    textLayout->setText (reinterpret_cast<const UInt8*>(str), 1, *reinterpret_cast<QuartzTextStyle*>(font_.GetID()));
+    CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
+    textLayout->setText (reinterpret_cast<const UInt8*>(str), 1, encoding, *reinterpret_cast<QuartzTextStyle*>(font_.GetID()));
     
     return textLayout->MeasureStringWidth();
   }
