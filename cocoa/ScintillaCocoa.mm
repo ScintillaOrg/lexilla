@@ -542,7 +542,7 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
       {
         NSString* input = [[NSString stringWithCharacters: (const unichar*) &wParam length: 1] autorelease];
         const char* utf8 = [input UTF8String];
-        AddCharUTF((char*) utf8, strlen(utf8), false);
+        AddCharUTF((char*) utf8, static_cast<unsigned int>(strlen(utf8)), false);
         return 1;
       }
       return 0;
@@ -902,7 +902,7 @@ void ScintillaCocoa::StartDrag()
   int startLine = pdoc->LineFromPosition(selStart);
   int endLine = pdoc->LineFromPosition(selEnd);
   Point pt;
-  int startPos, endPos, ep;
+  long startPos, endPos, ep;
   Rect rcSel;
   
   if (startLine==endLine && WndProc(SCI_GETWRAPMODE, 0, 0) != SC_WRAP_NONE) {
@@ -917,8 +917,8 @@ void ScintillaCocoa::StartDrag()
     // step back a position if we're counting the newline
     ep =       WndProc(SCI_GETLINEENDPOSITION,      startLine, 0);
     if (endPos > ep) endPos = ep;
-    ptStart = LocationFromPosition(startPos);
-    ptEnd =   LocationFromPosition(endPos);
+    ptStart = LocationFromPosition(static_cast<int>(startPos));
+    ptEnd =   LocationFromPosition(static_cast<int>(endPos));
     if (ptStart.y == ptEnd.y) {
       // We're just selecting part of one visible line
       rcSel.left = ptStart.x;
@@ -926,7 +926,7 @@ void ScintillaCocoa::StartDrag()
     } else {
       // Find the bounding box.
       startPos = WndProc(SCI_POSITIONFROMLINE, startLine, 0);
-      rcSel.left = LocationFromPosition(startPos).x;
+      rcSel.left = LocationFromPosition(static_cast<int>(startPos)).x;
       rcSel.right = client.right;
     }
     rcSel.top = ptStart.y;
@@ -943,10 +943,10 @@ void ScintillaCocoa::StartDrag()
       // step back a position if we're counting the newline
       ep = WndProc(SCI_GETLINEENDPOSITION, l, 0);
       if (endPos > ep) endPos = ep;
-      pt = LocationFromPosition(startPos); // top left of line selection
+      pt = LocationFromPosition(static_cast<int>(startPos)); // top left of line selection
       if (pt.x < rcSel.left || rcSel.left < 0) rcSel.left = pt.x;
       if (pt.y < rcSel.top || rcSel.top < 0) rcSel.top = pt.y;
-      pt = LocationFromPosition(endPos); // top right of line selection
+      pt = LocationFromPosition(static_cast<int>(endPos)); // top right of line selection
       pt.y += vs.lineHeight; // get to the bottom of the line
       if (pt.x > rcSel.right || rcSel.right < 0) {
         if (pt.x > client.right)
@@ -984,7 +984,6 @@ void ScintillaCocoa::StartDrag()
     pixmap = new SurfaceImpl();
     if (pixmap)
     {
-      PRectangle client = GetClientRectangle();
       PRectangle imageRect = NSRectToPRectangle(selectionRectangle);
       paintState = painting;
       sw->InitPixMap(client.Width(), client.Height(), NULL, NULL);
@@ -1199,7 +1198,7 @@ bool ScintillaCocoa::GetPasteboardData(NSPasteboard* board, SelectionText* selec
 
       bool rectangular = bestType == ScintillaRecPboardType;
 
-      int len = usedLen;
+      int len = static_cast<int>(usedLen);
       char *dest = Document::TransformLineEnds(&len, (char *)buffer, len, pdoc->eolMode);
 
       selectedText->Set(dest, len+1, pdoc->dbcsCodePage, 
@@ -1351,7 +1350,7 @@ void ScintillaCocoa::SetHorizontalScrollPos()
 bool ScintillaCocoa::ModifyScrollBars(int nMax, int nPage)
 {
   // Input values are given in lines, not pixels, so we have to convert.
-  int lineHeight = WndProc(SCI_TEXTHEIGHT, 0, 0);
+  int lineHeight = static_cast<int>(WndProc(SCI_TEXTHEIGHT, 0, 0));
   PRectangle bounds = GetTextRectangle();
   ScintillaView* topContainer = TopContainer();
 
@@ -1670,9 +1669,9 @@ int ScintillaCocoa::InsertText(NSString* input)
   CFStringGetBytes((CFStringRef)input, rangeAll, encoding, '?',
                      false, buffer,usedLen, NULL);
     
-  AddCharUTF((char*) buffer, usedLen, false);
+  AddCharUTF((char*) buffer, static_cast<unsigned int>(usedLen), false);
   delete []buffer;
-  return usedLen;
+  return static_cast<int>(usedLen);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1814,7 +1813,7 @@ NSMenu* ScintillaCocoa::CreateContextMenu(NSEvent* event)
  */
 void ScintillaCocoa::HandleCommand(NSInteger command)
 {
-  Command(command);
+  Command(static_cast<int>(command));
 }
 
 //--------------------------------------------------------------------------------------------------

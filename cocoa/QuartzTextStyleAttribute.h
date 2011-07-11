@@ -16,7 +16,7 @@ class QuartzFont
 {
 public:
     /** Create a font style from a name. */
-	QuartzFont( const char* name, int length, float size, bool bold, bool italic )
+	QuartzFont( const char* name, size_t length, float size, bool bold, bool italic )
     {
         assert( name != NULL && length > 0 && name[length] == '\0' );
 

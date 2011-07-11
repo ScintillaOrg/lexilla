@@ -951,7 +951,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 	
 	if (unicodeMode) {
 		// Map the widths given for UTF-16 characters back onto the UTF-8 input string
-		int fit = textLayout->getStringLength();
+		CFIndex fit = textLayout->getStringLength();
 		int ui=0;
 		const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
 		int i=0;
@@ -960,7 +960,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 			size_t codeUnits = (lenChar < 4) ? 1 : 2;
 			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, ui+1, NULL);
 			for (unsigned int bytePos=0; (bytePos<lenChar) && (i<len); bytePos++) {
-				positions[i++] = lround(xPosition);
+				positions[i++] = static_cast<int>(lround(xPosition));
 			}
 			ui += codeUnits;
 		}
@@ -976,14 +976,14 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 			size_t lenChar = Platform::IsDBCSLeadByte(codePage, s[i]) ? 2 : 1;
 			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, ui+1, NULL);
 			for (unsigned int bytePos=0; (bytePos<lenChar) && (i<len); bytePos++) {
-				positions[i++] = lround(xPosition);
+				positions[i++] = static_cast<int>(lround(xPosition));
 			}
 			ui++;
 		}
 	} else {	// Single byte encoding
 		for (int i=0;i<len;i++) {
 			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, i+1, NULL);
-			positions[i] = lround(xPosition);
+			positions[i] = static_cast<int>(lround(xPosition));
 		}
 	}
 
@@ -1420,7 +1420,7 @@ public:
   }
   int Length() const
   {
-    return lines.size();
+    return static_cast<int>(lines.size());
   }
   void Clear()
   {
@@ -1430,7 +1430,7 @@ public:
   {
     lines.push_back(RowData(type, str));
   }
-  int GetType(int index) const
+  int GetType(size_t index) const
   {
     if (index < lines.size())
     {
@@ -1441,7 +1441,7 @@ public:
       return 0;
     }
   }
-  const char* GetString(int index) const
+  const char* GetString(size_t index) const
   {
     if (index < lines.size())
     {
@@ -1467,7 +1467,7 @@ NSObject <NSTableViewDataSource>
 //----------------- ListBoxImpl --------------------------------------------------------------------
 
 // Map from icon type to an NSImage*
-typedef std::map<int, NSImage*> ImageMap;
+typedef std::map<NSInteger, NSImage*> ImageMap;
 
 class ListBoxImpl : public ListBox
 {
@@ -1527,8 +1527,8 @@ public:
 
   // For access from AutoCompletionDataSource
   int Rows();
-  NSImage* ImageForRow(int row);
-  NSString* TextForRow(int row);
+  NSImage* ImageForRow(NSInteger row);
+  NSString* TextForRow(NSInteger row);
   void DoubleClick();
 };
 
@@ -1707,7 +1707,7 @@ void ListBoxImpl::Append(char* s, int type)
   ld.Add(count, type, s);
 
   Scintilla::SurfaceImpl surface;
-  unsigned int width = surface.WidthText(font, s, strlen(s));
+  unsigned int width = surface.WidthText(font, s, static_cast<int>(strlen(s)));
   if (width > maxItemWidth)
   {
     maxItemWidth = width;
@@ -1733,7 +1733,7 @@ void ListBoxImpl::Append(char* s, int type)
 void ListBoxImpl::SetList(const char* list, char separator, char typesep)
 {
   Clear();
-  int count = strlen(list) + 1;
+  size_t count = strlen(list) + 1;
   char* words = new char[count];
   if (words)
   {
@@ -1781,7 +1781,7 @@ void ListBoxImpl::Select(int n)
 
 int ListBoxImpl::GetSelection()
 {
-  return [table selectedRow];
+  return static_cast<int>([table selectedRow]);
 }
 
 int ListBoxImpl::Find(const char* prefix)
@@ -1864,7 +1864,7 @@ int ListBoxImpl::Rows()
   return ld.Length();
 }
 
-NSImage* ListBoxImpl::ImageForRow(int row)
+NSImage* ListBoxImpl::ImageForRow(NSInteger row)
 {
   ImageMap::iterator it = images.find(ld.GetType(row));
   if (it != images.end())
@@ -1879,7 +1879,7 @@ NSImage* ListBoxImpl::ImageForRow(int row)
   }
 }
 
-NSString* ListBoxImpl::TextForRow(int row)
+NSString* ListBoxImpl::TextForRow(NSInteger row)
 {
   const char* textString = ld.GetString(row);
   NSString* sTitle;
@@ -2013,7 +2013,8 @@ const char *Platform::DefaultFont()
  */
 int Platform::DefaultFontSize()
 {
-  return [[NSUserDefaults standardUserDefaults] integerForKey: @"NSFixedPitchFontSize"];
+  return static_cast<int>([[NSUserDefaults standardUserDefaults]
+			   integerForKey: @"NSFixedPitchFontSize"]);
 }
 
 //--------------------------------------------------------------------------------------------------
