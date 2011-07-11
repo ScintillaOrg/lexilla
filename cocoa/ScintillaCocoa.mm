@@ -1628,7 +1628,7 @@ bool ScintillaCocoa::KeyboardInput(NSEvent* event)
   bool handled = false;
   
   // Handle each entry individually. Usually we only have one entry anway.
-  for (int i = 0; i < input.length; i++)
+  for (size_t i = 0; i < input.length; i++)
   {
     const UniChar originalKey = [input characterAtIndex: i];
     UniChar key = KeyTranslate(originalKey);
