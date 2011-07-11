@@ -65,6 +65,7 @@ public:
 			fontid = ::CTFontCreateWithName((CFStringRef)@"Monaco", size, NULL);
 		}
 
+		CFRelease(fontName);
     }
 
 	CTFontRef getFontID()
