@@ -129,7 +129,7 @@ void Scintilla::Palette::WantFind(ColourPair &cp, bool want)
 
 //--------------------------------------------------------------------------------------------------
 
-void Scintilla::Palette::Allocate(Window& w)
+void Scintilla::Palette::Allocate(Window&)
 {
   // Nothing to allocate as we don't use palettes.
 }
@@ -157,7 +157,7 @@ static int FontCharacterSet(Font &f) {
  * Creates a CTFontRef with the given properties.
  */
 void Font::Create(const char *faceName, int characterSet, int size, bool bold, bool italic, 
-                  int extraFontFlag)
+                  int /* extraFontFlag */)
 {
 	Release();
 
@@ -238,7 +238,7 @@ bool SurfaceImpl::Initialised()
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::Init(WindowID wid)
+void SurfaceImpl::Init(WindowID)
 {
   // To be able to draw, the surface must get a CGContext handle.  We save the graphics port,
   // then aquire/release the context on an as-need basis (see above).
@@ -251,7 +251,7 @@ void SurfaceImpl::Init(WindowID wid)
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::Init(SurfaceID sid, WindowID wid)
+void SurfaceImpl::Init(SurfaceID sid, WindowID)
 {
   Release();
   gc = reinterpret_cast<CGContextRef>(sid);
@@ -261,7 +261,7 @@ void SurfaceImpl::Init(SurfaceID sid, WindowID wid)
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::InitPixMap(int width, int height, Surface* surface_, WindowID wid)
+void SurfaceImpl::InitPixMap(int width, int height, Surface* /* surface_ */, WindowID /* wid */)
 {
   Release();
   
@@ -702,7 +702,7 @@ static CGImageRef ImageFromRGBA(int width, int height, const unsigned char *pixe
 	return image;
 }
 
-void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) {
+void SurfaceImpl::DrawRGBAImage(PRectangle /* rc */, int width, int height, const unsigned char *pixelsImage) {
 	CGImageRef image = ImageFromRGBA(width, height, pixelsImage, true);
 	if (image) {
 		//CGContextSaveGState(gc);
@@ -1426,7 +1426,7 @@ public:
   {
     lines.clear();
   }
-  void Add(int index, int type, char* str)
+  void Add(int /* index */, int type, char* str)
   {
     lines.push_back(RowData(type, str));
   }
@@ -1541,6 +1541,7 @@ public:
 
 - (void) doubleClick: (id) sender
 {
+#pragma unused(sender)
   if (box)
   {
     box->DoubleClick();
@@ -1945,7 +1946,7 @@ void Menu::Destroy()
 
 //--------------------------------------------------------------------------------------------------
 
-void Menu::Show(Point pt, Window &)
+void Menu::Show(Point, Window &)
 {
   // Cocoa menus are handled a bit differently. We only create the menu. The framework
   // takes care to show it properly.
@@ -2094,9 +2095,9 @@ bool Platform::IsDBCSLeadByte(int codePage, char ch)
 
 //--------------------------------------------------------------------------------------------------
 
-int Platform::DBCSCharLength(int codePage, const char* s)
+int Platform::DBCSCharLength(int /* codePage */, const char* /* s */)
 {
-  // No support for DBCS.
+  // DBCS no longer uses this.
   return 1;
 }
 
@@ -2104,7 +2105,6 @@ int Platform::DBCSCharLength(int codePage, const char* s)
 
 int Platform::DBCSCharMaxLength()
 {
-  // No support for DBCS.
   return 2;
 }
 
@@ -2197,8 +2197,9 @@ int Platform::Clamp(int val, int minVal, int maxVal)
  * @param modulePath The path to the module to load.
  * @return A library instance or NULL if the module could not be found or another problem occured.
  */
-DynamicLibrary* DynamicLibrary::Load(const char* modulePath)
+DynamicLibrary* DynamicLibrary::Load(const char* /* modulePath */)
 {
+  // Not implemented.
   return NULL;
 }
 

@@ -177,6 +177,7 @@ static const KeyToCommand macMapDefault[] =
  */
 - (void) idleTimerFired: (NSTimer*) timer
 {
+#pragma unused(timer)
   // Idle timer event.
   // Post a new idle notification, which gets executed when the run loop is idle.
   // Since we are coalescing on name and sender there will always be only one actual notification
@@ -196,6 +197,7 @@ static const KeyToCommand macMapDefault[] =
  */
 - (void) idleTriggered: (NSNotification*) notification
 {
+#pragma unused(notification)
   reinterpret_cast<ScintillaCocoa*>(mTarget)->IdleTimerFired();
 }
 
@@ -698,6 +700,7 @@ void ScintillaCocoa::Paste(bool forceRectangular)
 //--------------------------------------------------------------------------------------------------
 
 void ScintillaCocoa::CTPaint(void* gc, NSRect rc) {
+#pragma unused(rc)
     Surface *surfaceWindow = Surface::Allocate();
     if (surfaceWindow) {
         surfaceWindow->Init(gc, wMain.GetID());
@@ -834,7 +837,7 @@ NSPoint ScintillaCocoa::GetCaretPosition()
 
 // -------------------------------------------------------------------------------------------------
 
-#pragma segment Drag
+#pragma mark Drag
 
 /**
  * Triggered by the tick timer on a regular basis to scroll the content during a drag operation.
@@ -1102,6 +1105,7 @@ NSDragOperation ScintillaCocoa::DraggingUpdated(id <NSDraggingInfo> info)
  */
 void ScintillaCocoa::DraggingExited(id <NSDraggingInfo> info)
 {
+#pragma unused(info)
   SetDragPosition(SelectionPosition(invalidPosition));
   inDragDrop = ddNone;
 }
@@ -1349,6 +1353,7 @@ void ScintillaCocoa::SetHorizontalScrollPos()
  */
 bool ScintillaCocoa::ModifyScrollBars(int nMax, int nPage)
 {
+#pragma unused(nPage)
   // Input values are given in lines, not pixels, so we have to convert.
   int lineHeight = static_cast<int>(WndProc(SCI_TEXTHEIGHT, 0, 0));
   PRectangle bounds = GetTextRectangle();
@@ -1534,6 +1539,7 @@ bool ScintillaCocoa::CanRedo()
 
 void ScintillaCocoa::TimerFired(NSTimer* timer)
 {
+#pragma unused(timer)
   Tick();
   DragScroll();
 }
@@ -1693,7 +1699,7 @@ void ScintillaCocoa::MouseEntered(NSEvent* event)
 
 //--------------------------------------------------------------------------------------------------
 
-void ScintillaCocoa::MouseExited(NSEvent* event)
+void ScintillaCocoa::MouseExited(NSEvent* /* event */)
 {
   // Nothing to do here.
 }
@@ -1797,7 +1803,7 @@ void ScintillaCocoa::Redo()
 /**
  * Creates and returns a popup menu, which is then displayed by the Cocoa framework.
  */
-NSMenu* ScintillaCocoa::CreateContextMenu(NSEvent* event)
+NSMenu* ScintillaCocoa::CreateContextMenu(NSEvent* /* event */)
 {
   // Call ScintillaBase to create the context menu.
   ContextMenu(Point(0, 0));

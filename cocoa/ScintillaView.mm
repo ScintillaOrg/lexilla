@@ -158,6 +158,7 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
  */
 - (BOOL) acceptsFirstMouse: (NSEvent *) theEvent
 {
+#pragma unused(theEvent)
   return YES;
 }
 
@@ -484,6 +485,7 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
 
 - (BOOL) prepareForDragOperation: (id <NSDraggingInfo>) sender
 {
+#pragma unused(sender)
   return YES;
 }
 
@@ -533,36 +535,43 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
 
 - (void) selectAll: (id) sender
 {
+#pragma unused(sender)
   mOwner.backend->SelectAll();
 }
 
 - (void) deleteBackward: (id) sender
 {
+#pragma unused(sender)
   mOwner.backend->DeleteBackward();
 }
 
 - (void) cut: (id) sender
 {
+#pragma unused(sender)
   mOwner.backend->Cut();
 }
 
 - (void) copy: (id) sender
 {
+#pragma unused(sender)
   mOwner.backend->Copy();
 }
 
 - (void) paste: (id) sender
 {
+#pragma unused(sender)
   mOwner.backend->Paste();
 }
 
 - (void) undo: (id) sender
 {
+#pragma unused(sender)
   mOwner.backend->Undo();
 }
 
 - (void) redo: (id) sender
 {
+#pragma unused(sender)
   mOwner.backend->Redo();
 }
 
@@ -834,12 +843,14 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 //--------------------------------------------------------------------------------------------------
 
 - (void) applicationDidResignActive: (NSNotification *)note {
+#pragma unused(note)
     mBackend->ActiveStateChanged(false);
 }
 
 //--------------------------------------------------------------------------------------------------
 
 - (void) applicationDidBecomeActive: (NSNotification *)note {
+#pragma unused(note)
     mBackend->ActiveStateChanged(true);
 }
 
