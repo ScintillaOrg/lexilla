@@ -1498,7 +1498,7 @@ public:
     doubleClickAction(NULL), doubleClickActionData(NULL)
   {
   }
-  ~ListBoxImpl() {};
+  ~ListBoxImpl() {}
 
   // ListBox methods
   void SetFont(Font& font);
