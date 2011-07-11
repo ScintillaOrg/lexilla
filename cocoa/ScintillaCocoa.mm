@@ -1474,7 +1474,8 @@ void ScintillaCocoa::RegisterNotifyCallback(intptr_t windowid, SciNotifyFunc cal
 void ScintillaCocoa::NotifyChange()
 {
   if (notifyProc != NULL)
-    notifyProc(notifyObj, WM_COMMAND, (uintptr_t) (SCEN_CHANGE << 16), (uintptr_t) this);
+    notifyProc(notifyObj, WM_COMMAND, Platform::LongFromTwoShorts(GetCtrlID(), SCEN_CHANGE),
+	       (uintptr_t) this);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1482,7 +1483,8 @@ void ScintillaCocoa::NotifyChange()
 void ScintillaCocoa::NotifyFocus(bool focus)
 {
   if (notifyProc != NULL)
-    notifyProc(notifyObj, WM_COMMAND, (uintptr_t) ((focus ? SCEN_SETFOCUS : SCEN_KILLFOCUS) << 16), (uintptr_t) this);
+    notifyProc(notifyObj, WM_COMMAND, Platform::LongFromTwoShorts(GetCtrlID(), (focus ? SCEN_SETFOCUS : SCEN_KILLFOCUS)),
+	       (uintptr_t) this);
 }
 
 //--------------------------------------------------------------------------------------------------
