@@ -2245,8 +2245,12 @@ gboolean ScintillaGTK::KeyPress(GtkWidget *widget, GdkEventKey *event) {
 	return sciThis->KeyThis(event);
 }
 
-gboolean ScintillaGTK::KeyRelease(GtkWidget *, GdkEventKey * /*event*/) {
+gboolean ScintillaGTK::KeyRelease(GtkWidget *widget, GdkEventKey *event) {
 	//Platform::DebugPrintf("SC-keyrel: %d %x %3s\n",event->keyval, event->state, event->string);
+	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
+	if (gtk_im_context_filter_keypress(sciThis->im_context, event)) {
+		return TRUE;
+	}
 	return FALSE;
 }
 
@@ -2261,7 +2265,7 @@ gboolean ScintillaGTK::DrawPreeditThis(GtkWidget *widget, cairo_t *cr) {
 		gtk_im_context_get_preedit_string(im_context, &str, &attrs, &cursor_pos);
 		PangoLayout *layout = gtk_widget_create_pango_layout(PWidget(wText), str);
 		pango_layout_set_attributes(layout, attrs);
-	
+
 		cairo_move_to(cr, 0, 0);
 		pango_cairo_show_layout(cr, layout);
 
