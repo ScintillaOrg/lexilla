@@ -2975,7 +2975,8 @@ bool Platform::IsDBCSLeadByte(int codePage, char ch) {
 		case 932:
 			// Shift_jis
 			return ((uch >= 0x81) && (uch <= 0x9F)) ||
-				((uch >= 0xE0) && (uch <= 0xEF));
+				((uch >= 0xE0) && (uch <= 0xFC));
+				// Lead bytes F0 to FC may be a Microsoft addition. 
 		case 936:
 			// GBK
 			return (uch >= 0x81) && (uch <= 0xFE);
