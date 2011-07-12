@@ -34,7 +34,6 @@ NSString* ScintillaRecPboardType = @"com.scintilla.utf16-plain-text.rectangular"
 // Define keyboard shortcuts (equivalents) the Mac way.
 #define SCI_CMD ( SCI_CTRL)
 #define SCI_SCMD ( SCI_CMD | SCI_SHIFT)
-#define SCI_META ( SCMOD_META )
 #define SCI_SMETA ( SCI_META | SCI_SHIFT)
 
 static const KeyToCommand macMapDefault[] =

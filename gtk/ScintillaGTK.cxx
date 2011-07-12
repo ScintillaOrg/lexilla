@@ -2223,7 +2223,17 @@ gboolean ScintillaGTK::KeyThis(GdkEventKey *event) {
 			key = KeyTranslate(key);
 
 		bool consumed = false;
+#if !(PLAT_GTK_MACOSX)
 		bool added = KeyDown(key, shift, ctrl, alt, &consumed) != 0;
+#else
+		bool meta = ctrl;
+		ctrl = alt;
+		alt = (event->state & GDK_MOD5_MASK) != 0;
+		bool added = KeyDownWithModifiers(key, (shift ? SCI_SHIFT : 0) |
+		                                       (ctrl ? SCI_CTRL : 0) |
+		                                       (alt ? SCI_ALT : 0) |
+		                                       (meta ? SCI_META : 0), &consumed) != 0;
+#endif
 		if (!consumed)
 			consumed = added;
 		//fprintf(stderr, "SK-key: %d %x %x\n",event->keyval, event->state, consumed);
