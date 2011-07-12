@@ -268,7 +268,6 @@ def RegenerateAll():
         for k in documents.keys():
             propertyDocuments[k] = documents[k]
     sortListInsensitive(lexerModules)
-    del lexerProperties["fold.comment.python"]
     lexerProperties = list(lexerProperties.keys())
     sortListInsensitive(lexerProperties)
 
