@@ -39,12 +39,14 @@ NSString* ScintillaRecPboardType = @"com.scintilla.utf16-plain-text.rectangular"
 static const KeyToCommand macMapDefault[] =
 {
   // OS X specific
-  {SCK_DOWN,      SCI_CMD,    SCI_DOCUMENTEND},
-  {SCK_UP,        SCI_CMD,    SCI_DOCUMENTSTART},
-  {SCK_LEFT,      SCI_CMD,    SCI_VCHOME},
-  {SCK_LEFT,      SCI_SCMD,   SCI_VCHOMEEXTEND},
-  {SCK_RIGHT,     SCI_CMD,    SCI_LINEEND},
-  {SCK_RIGHT,     SCI_SCMD,   SCI_LINEENDEXTEND},
+  {SCK_DOWN,      SCI_CTRL,   SCI_DOCUMENTEND},
+  {SCK_DOWN,      SCI_CSHIFT, SCI_DOCUMENTENDEXTEND},
+  {SCK_UP,        SCI_CTRL,   SCI_DOCUMENTSTART},
+  {SCK_UP,        SCI_CSHIFT, SCI_DOCUMENTSTARTEXTEND},
+  {SCK_LEFT,      SCI_CTRL,   SCI_VCHOME},
+  {SCK_LEFT,      SCI_CSHIFT, SCI_VCHOMEEXTEND},
+  {SCK_RIGHT,     SCI_CTRL,   SCI_LINEEND},
+  {SCK_RIGHT,     SCI_CSHIFT, SCI_LINEENDEXTEND},
 
   // Similar to Windows and GTK+
   // Where equivalent clashes with OS X standard, use Meta instead
