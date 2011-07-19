@@ -2209,7 +2209,7 @@ gboolean ScintillaGTK::KeyThis(GdkEventKey *event) {
 		bool ctrl = (event->state & GDK_CONTROL_MASK) != 0;
 		bool alt = (event->state & GDK_MOD1_MASK) != 0;
 		guint key = event->keyval;
-		if (ctrl && (key < 128))
+		if ((ctrl || alt) && (key < 128))
 			key = toupper(key);
 #if GTK_CHECK_VERSION(3,0,0)
 		else if (!ctrl && (key >= GDK_KEY_KP_Multiply && key <= GDK_KEY_KP_9))
