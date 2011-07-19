@@ -79,7 +79,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 2/July/2011 NH</p>
+    <p>Last edited 19/July/2011 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -4419,6 +4419,12 @@ struct Sci_TextToFind {
 
           <td><code>SCI_MOVESELECTEDLINESDOWN</code></td>
         </tr>
+
+        <tr>
+          <td><code>SCI_SCROLLTOSTART</code></td>
+
+          <td><code>SCI_SCROLLTOEND</code></td>
+        </tr>
      </tbody>
     </table>
 
@@ -4443,6 +4449,11 @@ struct Sci_TextToFind {
      They go first to the start / end of the display line, like <code>SCI_[HOME|LINEEND]DISPLAY*</code>,
      but if the cursor is already at the point, it goes on to the start or end of the document line,
      as appropriate for <code>SCI_[[VC]HOME|LINEEND]*</code>.
+     </p>
+
+    <p>The <code>SCI_SCROLLTO[START|END]</code> commands scroll the document to the start
+    or end without changing the selection. This is the expected behaviour of the <code>home</code> and
+    <code>end</code> keys on OS X.
      </p>
 
     <h2 id="KeyBindings">Key bindings</h2>

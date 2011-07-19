@@ -816,6 +816,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_RGBAIMAGESETHEIGHT 2625
 #define SCI_MARKERDEFINERGBAIMAGE 2626
 #define SCI_REGISTERRGBAIMAGE 2627
+#define SCI_SCROLLTOSTART 2628
+#define SCI_SCROLLTOEND 2629
 #define SCI_STARTRECORD 3001
 #define SCI_STOPRECORD 3002
 #define SCI_SETLEXER 4001

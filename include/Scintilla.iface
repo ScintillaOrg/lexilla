@@ -2168,6 +2168,12 @@ fun void MarkerDefineRGBAImage=2626(int markerNumber, string pixels)
 # It has the width and height from RGBAImageSetWidth/Height
 fun void RegisterRGBAImage=2627(int type, string pixels)
 
+# Scroll to start of document.
+fun void ScrollToStart=2628(,)
+
+# Scroll to end of document.
+fun void ScrollToEnd=2629(,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 
