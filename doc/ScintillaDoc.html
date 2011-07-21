@@ -79,7 +79,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 19/July/2011 NH</p>
+    <p>Last edited 21/July/2011 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -3735,6 +3735,19 @@ struct Sci_TextToFind {
 
           <td>Similar to <code>INDIC_SQUIGGLE</code> but only using 2 vertical pixels
 	  so will fit under small fonts.</td>
+        </tr>
+
+        <tr>
+          <td align="left"><code>DOTBOX</code></td>
+
+          <td align="center">12</td>
+
+          <td>A dotted rectangle around the text using translucent drawing.
+          Translucency alternates between the alpha and outline alpha settings with the top-left pixel using the alpha setting.
+              <a class="message" href="#SCI_INDICSETALPHA">SCI_INDICSETALPHA</a> and
+              <a class="message" href="#SCI_INDICSETOUTLINEALPHA">SCI_INDICSETOUTLINEALPHA</a>
+              control the alpha transparency values. The default values are 30 for alpha and 50 for outline alpha.
+              To avoid excessive memory allocation the maximum width of a dotted box is 4000 pixels.</td>
         </tr>
 
       </tbody>
