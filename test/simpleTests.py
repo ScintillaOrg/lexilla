@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import with_statement
+from __future__ import unicode_literals
 
-import ctypes, os, unittest
+import ctypes, os, sys, unittest
 
 import XiteWin
 
@@ -361,12 +362,15 @@ class TestSimple(unittest.TestCase):
 
 	def testLinePositions(self):
 		text = b"ab\ncd\nef"
+		nl = b"\n"
+		if sys.version_info[0] == 3:
+			nl = ord(b"\n")
 		self.ed.AddText(len(text), text)
 		self.assertEquals(self.ed.LineFromPosition(-1), 0)
 		line = 0
 		for pos in range(len(text)+1):
 			self.assertEquals(self.ed.LineFromPosition(pos), line)
-			if pos < len(text) and text[pos] == ord("\n"):
+			if pos < len(text) and text[pos] == nl:
 				line += 1
 
 	def testWordPositions(self):
