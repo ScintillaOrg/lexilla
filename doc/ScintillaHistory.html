@@ -398,6 +398,91 @@
 	<li>
 	Released 20 August 2011.
 	</li>
+	<li>
+	GTK+ Cairo support works back to GTK+ version 2.8. Requires changing Scintilla source code to enable before GTK+ 2.22.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=3322351&group_id=2439">Bug #3322351.</a>
+	</li>
+	<li>
+	Alpha blended images in RGBA format can be used for margin markers and in autocompletion lists.
+	</li>
+	<li>
+	INDIC_DOTBOX added as a translucent dotted rectangular indicator.
+	</li>
+	<li>
+	Asian text input using IME works for GTK+ 3.x and GTK+ 2.x with Cairo.
+	</li>
+	<li>
+	On GTK+, IME works for Ctrl+Shift+U Unicode input in Scintilla. For SciTE, Ctrl+Shift+U is still Make Selection Uppercase.
+	</li>
+	<li>
+	Key bindings for GTK+ on OS X made compatible with Cocoa port and platform conventions.
+	</li>
+	<li>
+	Cocoa port supports different character encodings, improves scrolling performance and drag image appearance.
+	The control ID is included in WM_COMMAND notifications. Text may be deleted by dragging to the trash.
+	ScrollToStart and ScrollToEnd key commands added to simplify implementation of standard OS X Home and End
+	behaviour.
+	</li>
+	<li>
+	SciTE on GTK+ uses a paned widget to contain the edit and output panes instead of custom code.
+	This allows the divider to be moved easily on GTK+ 3 and its appearance follows GTK+ conventions more closely.
+	</li>
+	<li>
+	SciTE builds and installs on BSD.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=3324644&group_id=2439">Bug #3324644.</a>
+	</li>
+	<li>
+	Cobol supports fixed format comments..
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=3014850&group_id=2439">Bug #3014850.</a>
+	</li>
+	<li>
+	Mako template language block syntax extended and ## comments recognised.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=352439&aid=3325178&group_id=2439">Feature #3325178.</a>
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=3318818&group_id=2439">Bug #3318818.</a>
+	</li>
+	<li>
+	Folding of Mako template language within HTML fixed.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=3324563&group_id=2439">Bug #3324563.</a>
+	</li>
+	<li>
+	Python lexer has lexer.python.keywords2.no.sub.identifiers option to avoid highlighting second set of 
+	keywords following '.'.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=3325333&group_id=2439">Bug #3325333.</a>
+	</li>
+	<li>
+	Python folder fixes bug where fold would not extend to final line.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=3349157&group_id=2439">Bug #3349157.</a>
+	</li>
+	<li>
+	SciTE treats LPEG lexers the same as script lexers by setting all 8 style bits.
+	</li>
+	<li>
+	For Cocoa, crashes with unsupported font variants and memory leaks for colour objects fixed.
+	</li>
+	<li>
+	Shift-JIS lead byte ranges modified to match Windows.
+	</li>
+	<li>
+	Mouse pointer changes over selection to an arrow more consistently.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=3315756&group_id=2439">Bug #3315756.</a>
+	</li>
+	<li>
+	Bug fixed with annotations beyond end of document.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=3347268&group_id=2439">Bug #3347268.</a>
+	</li>
+	<li>
+	Fold highlight drawing fixed for some situations.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=3323015&group_id=2439">Bug #3323015.</a>
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=3323805&group_id=2439">Bug #3323805.</a>
+	</li>
+	<li>
+	Case insensitive search fixed for cases where folded character uses fewer bytes than base character.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=3362038&group_id=2439">Bug #3362038.</a>
+	</li>
+	<li>
+	SciTE bookmark.alpha setting fixed.
+	<a href="https://sourceforge.net/tracker/?func=detail&atid=102439&aid=3373907&group_id=2439">Bug #3373907.</a>
+	</li>
     </ul>
     <h3>
        <a href="http://prdownloads.sourceforge.net/scintilla/scite227.zip?download">Release 2.27</a>
