@@ -24,6 +24,9 @@
 #include <richedit.h>
 #include <windowsx.h>
 
+#include <d2d1.h>
+#include <dwrite.h>
+
 #include "Platform.h"
 
 #include "ILexer.h"
@@ -197,6 +200,10 @@ class ScintillaWin :
 
 	static HINSTANCE hInstance;
 
+	IDWriteFactory *pIDWriteFactory;
+	ID2D1Factory *pD2DFactory;
+	ID2D1HwndRenderTarget *pRenderTarget;
+
 	ScintillaWin(HWND hwnd);
 	ScintillaWin(const ScintillaWin &);
 	virtual ~ScintillaWin();
@@ -204,6 +211,8 @@ class ScintillaWin :
 
 	virtual void Initialise();
 	virtual void Finalise();
+	void EnsureRenderTarget();
+	void DropRenderTarget();
 	HWND MainHWND();
 
 	static sptr_t DirectFunction(
@@ -350,6 +359,10 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	sysCaretWidth = 0;
 	sysCaretHeight = 0;
 
+	pIDWriteFactory = 0;
+	pD2DFactory = 0;
+	pRenderTarget = 0;
+
 	keysAlwaysUnicode = false;
 
 	caret.period = ::GetCaretBlinkTime();
@@ -378,15 +391,66 @@ void ScintillaWin::Initialise() {
 				::GetProcAddress(commctrl32, "_TrackMouseEvent");
 		}
 	}
+
+	if (!pIDWriteFactory) {
+		DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED,
+			__uuidof(IDWriteFactory),
+			reinterpret_cast<IUnknown**>(&pIDWriteFactory));
+	}
+	if (!pD2DFactory) {
+		D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &pD2DFactory);
+	}
 }
 
 void ScintillaWin::Finalise() {
 	ScintillaBase::Finalise();
 	SetTicking(false);
 	SetIdle(false);
+	DropRenderTarget();
+	if (pIDWriteFactory) {
+		pIDWriteFactory->Release();
+		pIDWriteFactory = 0;
+	}
+	if (pD2DFactory) {
+		pD2DFactory->Release();
+		pD2DFactory = 0;
+	}
 	::RevokeDragDrop(MainHWND());
 	if (SUCCEEDED(hrOle)) {
 		::OleUninitialize();
+	}
+}
+
+void ScintillaWin::EnsureRenderTarget() {
+	if (pD2DFactory && !pRenderTarget) {
+		RECT rc;
+		HWND hw = MainHWND();
+		GetClientRect(hw, &rc);
+
+		D2D1_SIZE_U size = D2D1::SizeU(rc.right - rc.left, rc.bottom - rc.top);
+
+		// Create a Direct2D render target.
+#if 1
+		pD2DFactory->CreateHwndRenderTarget(
+			D2D1::RenderTargetProperties(),
+			D2D1::HwndRenderTargetProperties(hw, size),
+			&pRenderTarget);
+#else
+		pD2DFactory->CreateHwndRenderTarget(
+			D2D1::RenderTargetProperties(
+				D2D1_RENDER_TARGET_TYPE_DEFAULT ,
+				D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED),
+				96.0f, 96.0f, D2D1_RENDER_TARGET_USAGE_NONE, D2D1_FEATURE_LEVEL_DEFAULT),
+			D2D1::HwndRenderTargetProperties(hw, size),
+			&pRenderTarget);
+#endif
+	}
+}
+
+void ScintillaWin::DropRenderTarget() {
+	if (pRenderTarget) {
+		pRenderTarget->Release();
+		pRenderTarget = 0;
 	}
 }
 
@@ -505,8 +569,11 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 		pps = &ps;
 		::BeginPaint(MainHWND(), pps);
 	}
-	AutoSurface surfaceWindow(pps->hdc, this);
+	//AutoSurface surfaceWindow(pps->hdc, this);
+	EnsureRenderTarget();
+	AutoSurface surfaceWindow(pRenderTarget, this);
 	if (surfaceWindow) {
+		pRenderTarget->BeginDraw();
 		rcPaint = PRectangle(pps->rcPaint.left, pps->rcPaint.top, pps->rcPaint.right, pps->rcPaint.bottom);
 		PRectangle rcClient = GetClientRectangle();
 		paintingAllText = rcPaint.Contains(rcClient);
@@ -517,6 +584,10 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 		}
 		Paint(surfaceWindow, rcPaint);
 		surfaceWindow->Release();
+		HRESULT hr = pRenderTarget->EndDraw();
+		if (hr == D2DERR_RECREATE_TARGET) {
+			DropRenderTarget();
+        }
 	}
 	if (hRgnUpdate) {
 		::DeleteRgn(hRgnUpdate);
@@ -674,6 +745,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			break;
 
 		case WM_SIZE: {
+				DropRenderTarget();
 				//Platform::DebugPrintf("Scintilla WM_SIZE %d %d\n", LoWord(lParam), HiWord(lParam));
 				ChangeSize();
 			}
@@ -1189,11 +1261,12 @@ bool ScintillaWin::PaintContains(PRectangle rc) {
 	return contains;
 }
 
-void ScintillaWin::ScrollText(int linesToMove) {
+void ScintillaWin::ScrollText(int /* linesToMove */) {
 	//Platform::DebugPrintf("ScintillaWin::ScrollText %d\n", linesToMove);
-	::ScrollWindow(MainHWND(), 0,
-		vs.lineHeight * linesToMove, 0, 0);
-	::UpdateWindow(MainHWND());
+	//::ScrollWindow(MainHWND(), 0,
+	//	vs.lineHeight * linesToMove, 0, 0);
+	//::UpdateWindow(MainHWND());
+	Redraw();
 }
 
 void ScintillaWin::UpdateSystemCaret() {
@@ -2283,7 +2356,9 @@ void ScintillaWin::HorizontalScrollMessage(WPARAM wParam) {
 	HorizontalScrollTo(xPos);
 }
 
-void ScintillaWin::RealizeWindowPalette(bool inBackGround) {
+void ScintillaWin::RealizeWindowPalette(bool) {
+	// No support for palette with D2D
+/*
 	RefreshStyleData();
 	HDC hdc = ::GetDC(MainHWND());
 	// Select a stock font to prevent warnings from BoundsChecker
@@ -2296,6 +2371,7 @@ void ScintillaWin::RealizeWindowPalette(bool inBackGround) {
 		surfaceWindow->Release();
 	}
 	::ReleaseDC(MainHWND(), hdc);
+*/
 }
 
 /**
@@ -2303,23 +2379,30 @@ void ScintillaWin::RealizeWindowPalette(bool inBackGround) {
  * This paint will not be abandoned.
  */
 void ScintillaWin::FullPaint() {
-	HDC hdc = ::GetDC(MainHWND());
-	FullPaintDC(hdc);
-	::ReleaseDC(MainHWND(), hdc);
+	//HDC hdc = ::GetDC(MainHWND());
+	//FullPaintDC(hdc);
+	//::ReleaseDC(MainHWND(), hdc);
+	FullPaintDC(0);
 }
 
 /**
  * Redraw all of text area on the specified DC.
  * This paint will not be abandoned.
  */
-void ScintillaWin::FullPaintDC(HDC hdc) {
+void ScintillaWin::FullPaintDC(HDC) {
 	paintState = painting;
 	rcPaint = GetClientRectangle();
 	paintingAllText = true;
-	AutoSurface surfaceWindow(hdc, this);
+	EnsureRenderTarget();
+	AutoSurface surfaceWindow(pRenderTarget, this);
 	if (surfaceWindow) {
+		pRenderTarget->BeginDraw();
 		Paint(surfaceWindow, rcPaint);
 		surfaceWindow->Release();
+		HRESULT hr = pRenderTarget->EndDraw();
+		if (hr == D2DERR_RECREATE_TARGET) {
+			DropRenderTarget();
+        }
 	}
 	paintState = notPainting;
 }
@@ -2693,10 +2776,21 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
 				::BeginPaint(hWnd, &ps);
 				Surface *surfaceWindow = Surface::Allocate();
 				if (surfaceWindow) {
-					surfaceWindow->Init(ps.hdc, hWnd);
+					ID2D1HwndRenderTarget *pCTRenderTarget = 0;
+					RECT rc;
+					GetClientRect(hWnd, &rc);
+					// Create a Direct2D render target.
+					sciThis->pD2DFactory->CreateHwndRenderTarget(
+						D2D1::RenderTargetProperties(),
+						D2D1::HwndRenderTargetProperties(hWnd, D2D1::SizeU(rc.right - rc.left, rc.bottom - rc.top)),
+						&pCTRenderTarget);
+					//surfaceWindow->Init(ps.hdc, hWnd);
+					surfaceWindow->Init(pCTRenderTarget, hWnd);
 					surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == sciThis->ct.codePage);
 					surfaceWindow->SetDBCSMode(sciThis->ct.codePage);
+					pCTRenderTarget->BeginDraw();
 					sciThis->ct.PaintCT(surfaceWindow);
+					pCTRenderTarget->EndDraw();
 					surfaceWindow->Release();
 					delete surfaceWindow;
 				}
