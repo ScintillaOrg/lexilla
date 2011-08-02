@@ -96,20 +96,20 @@ public:
   void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage);
   void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back);
   void Copy(PRectangle rc, Scintilla::Point from, Surface &surfaceSource);
-  void DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore,
+  void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore,
                      ColourAllocated back);
-  void DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, 
+  void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore, 
                       ColourAllocated back);
-  void DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore);
-  void MeasureWidths(Font &font_, const char *s, int len, int *positions);
-  int WidthText(Font &font_, const char *s, int len);
-  int WidthChar(Font &font_, char ch);
-  int Ascent(Font &font_);
-  int Descent(Font &font_);
-  int InternalLeading(Font &font_);
-  int ExternalLeading(Font &font_);
-  int Height(Font &font_);
-  int AverageCharWidth(Font &font_);
+  void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore);
+  void MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions);
+  XYPOSITION WidthText(Font &font_, const char *s, int len);
+  XYPOSITION WidthChar(Font &font_, char ch);
+  XYPOSITION Ascent(Font &font_);
+  XYPOSITION Descent(Font &font_);
+  XYPOSITION InternalLeading(Font &font_);
+  XYPOSITION ExternalLeading(Font &font_);
+  XYPOSITION Height(Font &font_);
+  XYPOSITION AverageCharWidth(Font &font_);
 
   int SetPalette(Scintilla::Palette *pal, bool inBackGround);
   void SetClip(PRectangle rc);
