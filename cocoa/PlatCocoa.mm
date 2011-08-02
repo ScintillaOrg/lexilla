@@ -156,7 +156,7 @@ static int FontCharacterSet(Font &f) {
 /**
  * Creates a CTFontRef with the given properties.
  */
-void Font::Create(const char *faceName, int characterSet, int size, bool bold, bool italic, 
+void Font::Create(const char *faceName, int characterSet, float size, bool bold, bool italic, 
                   int /* extraFontFlag */)
 {
 	Release();
@@ -507,6 +507,9 @@ void SurfaceImpl::FillRectangle(PRectangle rc, ColourAllocated back)
   if (gc)
   {
     FillColour(back);
+    // Snap rectangle boundaries to nearest int
+    rc.left = lround(rc.left);
+    rc.right = lround(rc.right);
     CGRect rect = PRectangleToCGRect(rc);
     CGContextFillRect(gc, rect);
   }
@@ -641,7 +644,10 @@ void Scintilla::SurfaceImpl::AlphaRectangle(PRectangle rc, int /*cornerSize*/, C
 {
   if ( gc ) {
     ColourDesired colour( fill.AsLong() );
-    
+ 
+    // Snap rectangle boundaries to nearest int
+    rc.left = lround(rc.left);
+    rc.right = lround(rc.right);
     // Set the Fill color to match
     CGContextSetRGBFillColor( gc, colour.GetRed() / 255.0, colour.GetGreen() / 255.0, colour.GetBlue() / 255.0, alphaFill / 255.0 );
     CGRect rect = PRectangleToCGRect( rc );
@@ -836,7 +842,7 @@ void SurfaceImpl::Copy(PRectangle rc, Scintilla::Point from, Surface &surfaceSou
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len,
+void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
                                  ColourAllocated fore, ColourAllocated back)
 {
   FillRectangle(rc, back);
@@ -845,7 +851,7 @@ void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const ch
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len,
+void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
                                   ColourAllocated fore, ColourAllocated back)
 {
   CGContextSaveGState(gc);
@@ -913,7 +919,7 @@ CFStringEncoding EncodingFromCharacterSet(bool unicode, int characterSet)
   }
 }
 
-void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len, 
+void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, 
                                       ColourAllocated fore)
 {
 	CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
@@ -943,7 +949,7 @@ static size_t utf8LengthFromLead(unsigned char uch) {
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positions)
+void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions)
 {
 	CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
 	textLayout->setText (reinterpret_cast<const UInt8*>(s), len, encoding, *reinterpret_cast<QuartzTextStyle*>(font_.GetID()));
@@ -962,7 +968,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 			size_t codeUnits = (lenChar < 4) ? 1 : 2;
 			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, ui+1, NULL);
 			for (unsigned int bytePos=0; (bytePos<lenChar) && (i<len); bytePos++) {
-				positions[i++] = static_cast<int>(lround(xPosition));
+				positions[i++] = xPosition;
 			}
 			ui += codeUnits;
 		}
@@ -978,20 +984,20 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 			size_t lenChar = Platform::IsDBCSLeadByte(codePage, s[i]) ? 2 : 1;
 			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, ui+1, NULL);
 			for (unsigned int bytePos=0; (bytePos<lenChar) && (i<len); bytePos++) {
-				positions[i++] = static_cast<int>(lround(xPosition));
+				positions[i++] = xPosition;
 			}
 			ui++;
 		}
 	} else {	// Single byte encoding
 		for (int i=0;i<len;i++) {
 			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, i+1, NULL);
-			positions[i] = static_cast<int>(lround(xPosition));
+			positions[i] = xPosition;
 		}
 	}
 
 }
 
-int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
+XYPOSITION SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
   if (font_.GetID())
   {
     CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
@@ -1002,7 +1008,7 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
   return 1;
 }
 
-int SurfaceImpl::WidthChar(Font &font_, char ch) {
+XYPOSITION SurfaceImpl::WidthChar(Font &font_, char ch) {
   char str[2] = { ch, '\0' };
   if (font_.GetID())
   {
@@ -1019,7 +1025,7 @@ int SurfaceImpl::WidthChar(Font &font_, char ch) {
 const char sizeString[] = "`~!@#$%^&*()-_=+\\|[]{};:\"\'<,>.?/1234567890"
 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-int SurfaceImpl::Ascent(Font &font_) {
+XYPOSITION SurfaceImpl::Ascent(Font &font_) {
   if (!font_.GetID())
     return 1;
   
@@ -1028,7 +1034,7 @@ int SurfaceImpl::Ascent(Font &font_) {
 
 }
 
-int SurfaceImpl::Descent(Font &font_) {
+XYPOSITION SurfaceImpl::Descent(Font &font_) {
   if (!font_.GetID())
     return 1;
   
@@ -1037,11 +1043,11 @@ int SurfaceImpl::Descent(Font &font_) {
 
 }
 
-int SurfaceImpl::InternalLeading(Font &) {
+XYPOSITION SurfaceImpl::InternalLeading(Font &) {
   return 0;
 }
 
-int SurfaceImpl::ExternalLeading(Font &font_) {
+XYPOSITION SurfaceImpl::ExternalLeading(Font &font_) {
   if (!font_.GetID())
     return 1;
   
@@ -1050,13 +1056,13 @@ int SurfaceImpl::ExternalLeading(Font &font_) {
 
 }
 
-int SurfaceImpl::Height(Font &font_) {
+XYPOSITION SurfaceImpl::Height(Font &font_) {
 
 	int ht = Ascent(font_) + Descent(font_);
 	return ht;
 }
 
-int SurfaceImpl::AverageCharWidth(Font &font_) {
+XYPOSITION SurfaceImpl::AverageCharWidth(Font &font_) {
   
   if (!font_.GetID())
     return 1;

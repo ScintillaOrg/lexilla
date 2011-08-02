@@ -116,7 +116,7 @@ const char user_keywords[] = // Definition of own keywords, not used by MySQL.
   [mEditor setReferenceProperty: SCI_SETKEYWORDS parameter: 7 value: user_keywords];
   
   // Colors and styles for various syntactic elements. First the default style.
-  [mEditor setStringProperty: SCI_STYLESETFONT parameter: STYLE_DEFAULT value: @"Andale Mono"];
+  [mEditor setStringProperty: SCI_STYLESETFONT parameter: STYLE_DEFAULT value: @"Helvetica"];
   // [mEditor setStringProperty: SCI_STYLESETFONT parameter: STYLE_DEFAULT value: @"Monospac821 BT"]; // Very pleasing programmer's font.
   [mEditor setGeneralProperty: SCI_STYLESETSIZE parameter: STYLE_DEFAULT value: 14];
   [mEditor setColorProperty: SCI_STYLESETFORE parameter: STYLE_DEFAULT value: [NSColor blackColor]];
