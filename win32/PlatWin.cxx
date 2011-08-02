@@ -313,8 +313,10 @@ FontCached::FontCached(const char *faceName_, int characterSet_, float size_, bo
 		WCHAR wszFace[faceSize];
 		UTF16FromUTF8(faceName_, strlen(faceName_)+1, wszFace, faceSize);
 		FLOAT fHeight = size_;
+		if (fHeight > 2000)
+			fHeight = fHeight / 1000.0f;
 		HRESULT hr = pIDWriteFactory->CreateTextFormat(wszFace, NULL,
-			bold_ ? DWRITE_FONT_WEIGHT_BOLD : DWRITE_FONT_WEIGHT_REGULAR,
+			bold_ ? DWRITE_FONT_WEIGHT_SEMI_BOLD : DWRITE_FONT_WEIGHT_REGULAR,
 			italic_ ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL,
 			DWRITE_FONT_STRETCH_NORMAL, fHeight, L"en-us", &pTextFormat);
 		if (SUCCEEDED(hr)) {
