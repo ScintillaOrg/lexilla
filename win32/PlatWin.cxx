@@ -273,20 +273,20 @@ class FontCached : Font {
 	int usage;
 	LOGFONTA lf;
 	int hash;
-	FontCached(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_, int extraFontFlag_);
+	FontCached(const char *faceName_, int characterSet_, float size_, bool bold_, bool italic_, int extraFontFlag_);
 	~FontCached() {}
-	bool SameAs(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_, int extraFontFlag_);
+	bool SameAs(const char *faceName_, int characterSet_, float size_, bool bold_, bool italic_, int extraFontFlag_);
 	virtual void Release();
 
 	static FontCached *first;
 public:
-	static FontID FindOrCreate(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_, int extraFontFlag_);
+	static FontID FindOrCreate(const char *faceName_, int characterSet_, float size_, bool bold_, bool italic_, int extraFontFlag_);
 	static void ReleaseId(FontID fid_);
 };
 
 FontCached *FontCached::first = 0;
 
-FontCached::FontCached(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_, int extraFontFlag_) :
+FontCached::FontCached(const char *faceName_, int characterSet_, float size_, bool bold_, bool italic_, int extraFontFlag_) :
 	next(0), usage(0), hash(0) {
 	SetLogFont(lf, faceName_, characterSet_, size_, bold_, italic_, extraFontFlag_);
 	hash = HashFont(faceName_, characterSet_, size_, bold_, italic_, extraFontFlag_);
@@ -338,7 +338,7 @@ FontCached::FontCached(const char *faceName_, int characterSet_, int size_, bool
 	usage = 1;
 }
 
-bool FontCached::SameAs(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_, int extraFontFlag_) {
+bool FontCached::SameAs(const char *faceName_, int characterSet_, float size_, bool bold_, bool italic_, int extraFontFlag_) {
 	return
 		(lf.lfHeight == -(abs(size_))) &&
 		(lf.lfWeight == (bold_ ? FW_BOLD : FW_NORMAL)) &&
@@ -353,7 +353,7 @@ void FontCached::Release() {
 	fid = 0;
 }
 
-FontID FontCached::FindOrCreate(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_, int extraFontFlag_) {
+FontID FontCached::FindOrCreate(const char *faceName_, int characterSet_, float size_, bool bold_, bool italic_, int extraFontFlag_) {
 	FontID ret = 0;
 	::EnterCriticalSection(&crPlatformLock);
 	int hashFind = HashFont(faceName_, characterSet_, size_, bold_, italic_, extraFontFlag_);
@@ -404,7 +404,7 @@ Font::~Font() {
 
 #define FONTS_CACHED
 
-void Font::Create(const char *faceName, int characterSet, int size,
+void Font::Create(const char *faceName, int characterSet, float size,
 	bool bold, bool italic, int extraFontFlag) {
 	Release();
 	if (faceName)
@@ -481,19 +481,19 @@ public:
 	void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back);
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource);
 
-	void DrawTextCommon(PRectangle rc, Font &font_, int ybase, const char *s, int len, UINT fuOptions);
-	void DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
-	void DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
-	void DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore);
-	void MeasureWidths(Font &font_, const char *s, int len, int *positions);
-	int WidthText(Font &font_, const char *s, int len);
-	int WidthChar(Font &font_, char ch);
-	int Ascent(Font &font_);
-	int Descent(Font &font_);
-	int InternalLeading(Font &font_);
-	int ExternalLeading(Font &font_);
-	int Height(Font &font_);
-	int AverageCharWidth(Font &font_);
+	void DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, UINT fuOptions);
+	void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
+	void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
+	void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore);
+	void MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions);
+	XYPOSITION WidthText(Font &font_, const char *s, int len);
+	XYPOSITION WidthChar(Font &font_, char ch);
+	XYPOSITION Ascent(Font &font_);
+	XYPOSITION Descent(Font &font_);
+	XYPOSITION InternalLeading(Font &font_);
+	XYPOSITION ExternalLeading(Font &font_);
+	XYPOSITION Height(Font &font_);
+	XYPOSITION AverageCharWidth(Font &font_);
 
 	int SetPalette(Palette *pal, bool inBackGround);
 	void SetClip(PRectangle rc);
@@ -664,6 +664,10 @@ static int Delta(int difference) {
 		return 0;
 }
 
+static int RoundFloat(float f) {
+	return int(f+0.5);
+}
+
 void SurfaceImpl::LineTo(int x_, int y_) {
 	if (pRenderTarget) {
 		int xDiff = x_ - x;
@@ -726,7 +730,7 @@ void SurfaceImpl::Polygon(Point *pts, int npts, ColourAllocated fore, ColourAllo
 void SurfaceImpl::RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
 	if (pRenderTarget) {
 		D2DPenColour(back);
-		D2D1_RECT_F rectangle1 = D2D1::RectF(rc.left + 0.5, rc.top+0.5, rc.right - 0.5, rc.bottom-0.5);
+		D2D1_RECT_F rectangle1 = D2D1::RectF(RoundFloat(rc.left) + 0.5, rc.top+0.5, RoundFloat(rc.right) - 0.5, rc.bottom-0.5);
 		D2DPenColour(back);
 		pRenderTarget->FillRectangle(&rectangle1, pBrush);
 		D2DPenColour(fore);
@@ -737,7 +741,7 @@ void SurfaceImpl::RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAlloc
 void SurfaceImpl::FillRectangle(PRectangle rc, ColourAllocated back) {
 	if (pRenderTarget) {
 		D2DPenColour(back);
-        D2D1_RECT_F rectangle1 = D2D1::RectF(rc.left, rc.top, rc.right, rc.bottom);
+        D2D1_RECT_F rectangle1 = D2D1::RectF(RoundFloat(rc.left), rc.top, RoundFloat(rc.right), rc.bottom);
         pRenderTarget->FillRectangle(&rectangle1, pBrush);
 	}
 }
@@ -903,9 +907,9 @@ public:
 		}
 	}
 };
-typedef VarBuffer<int, stackBufferLength> TextPositions;
+typedef VarBuffer<XYPOSITION, stackBufferLength> TextPositions;
 
-void SurfaceImpl::DrawTextCommon(PRectangle rc, Font &font_, int ybase, const char *s, int len, UINT) {
+void SurfaceImpl::DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, UINT) {
 	SetFont(font_);
 	RECT rcw = RectFromPRectangle(rc);
 
@@ -919,7 +923,7 @@ void SurfaceImpl::DrawTextCommon(PRectangle rc, Font &font_, int ybase, const ch
 				rc.Width()+2, rc.Height(), &pTextLayout);
 		if (SUCCEEDED(hr)) {
 			D2D1_POINT_2F origin = {rc.left, ybase-baseline};
-			pRenderTarget->DrawTextLayout(origin, pTextLayout, pBrush);
+			pRenderTarget->DrawTextLayout(origin, pTextLayout, pBrush, D2D1_DRAW_TEXT_OPTIONS_NONE);
 		} else {
 			D2D1_RECT_F layoutRect = D2D1::RectF(
 				static_cast<FLOAT>(rcw.left) / dpiScaleX,
@@ -931,7 +935,7 @@ void SurfaceImpl::DrawTextCommon(PRectangle rc, Font &font_, int ybase, const ch
 	}
 }
 
-void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len,
+void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
 	ColourAllocated fore, ColourAllocated back) {
 	if (pRenderTarget) {
 		FillRectangle(rc, back);
@@ -940,7 +944,7 @@ void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const ch
 	}
 }
 
-void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len,
+void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
 	ColourAllocated fore, ColourAllocated back) {
 	if (pRenderTarget) {
 		FillRectangle(rc, back);
@@ -949,7 +953,7 @@ void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const c
 	}
 }
 
-void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len,
+void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
 	ColourAllocated fore) {
 	// Avoid drawing spaces in transparent mode
 	for (int i=0;i<len;i++) {
@@ -963,7 +967,7 @@ void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, int ybase, con
 	}
 }
 
-int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
+XYPOSITION SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 	FLOAT width = 1.0;
 	SetFont(font_);
 	const TextWide tbuf(s, len, unicodeMode, codePage);
@@ -981,7 +985,7 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 	return int(width + 0.5);
 }
 
-void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positions) {
+void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions) {
 	SetFont(font_);
 	int fit = 0;
 	const TextWide tbuf(s, len, unicodeMode, codePage);
@@ -1004,7 +1008,8 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 		for (size_t ci=0;ci<count;ci++) {
 			position += clusterMetrics[ci].width;
 			for (size_t inCluster=0; inCluster<clusterMetrics[ci].length; inCluster++) {
-				poses.buffer[ti++] = int(position + 0.5);
+				//poses.buffer[ti++] = int(position + 0.5);
+				poses.buffer[ti++] = position;
 			}
 		}
 		PLATFORM_ASSERT(ti == static_cast<size_t>(tbuf.tlen));
@@ -1064,7 +1069,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 	}
 }
 
-int SurfaceImpl::WidthChar(Font &font_, char ch) {
+XYPOSITION SurfaceImpl::WidthChar(Font &font_, char ch) {
 	FLOAT width = 1.0;
 	SetFont(font_);
 	if (pIDWriteFactory && pTextFormat) {
@@ -1082,7 +1087,7 @@ int SurfaceImpl::WidthChar(Font &font_, char ch) {
 	return int(width + 0.5);
 }
 
-int SurfaceImpl::Ascent(Font &font_) {
+XYPOSITION SurfaceImpl::Ascent(Font &font_) {
 	FLOAT ascent = 1.0;
 	SetFont(font_);
 	if (pIDWriteFactory && pTextFormat) {
@@ -1114,7 +1119,7 @@ int SurfaceImpl::Ascent(Font &font_) {
 	return int(ascent + 0.5);
 }
 
-int SurfaceImpl::Descent(Font &font_) {
+XYPOSITION SurfaceImpl::Descent(Font &font_) {
 	FLOAT descent = 1.0;
 	SetFont(font_);
 	if (pIDWriteFactory && pTextFormat) {
@@ -1135,15 +1140,15 @@ int SurfaceImpl::Descent(Font &font_) {
 	return int(descent + 0.5);
 }
 
-int SurfaceImpl::InternalLeading(Font &) {
+XYPOSITION SurfaceImpl::InternalLeading(Font &) {
 	return 0;
 }
 
-int SurfaceImpl::ExternalLeading(Font &) {
+XYPOSITION SurfaceImpl::ExternalLeading(Font &) {
 	return 1;
 }
 
-int SurfaceImpl::Height(Font &font_) {
+XYPOSITION SurfaceImpl::Height(Font &font_) {
 	FLOAT height = 1.0;
 	SetFont(font_);
 	if (pIDWriteFactory && pTextFormat) {
@@ -1165,7 +1170,7 @@ int SurfaceImpl::Height(Font &font_) {
 	return int(height);
 }
 
-int SurfaceImpl::AverageCharWidth(Font &font_) {
+XYPOSITION SurfaceImpl::AverageCharWidth(Font &font_) {
 	FLOAT width = 1.0;
 	SetFont(font_);
 	if (pIDWriteFactory && pTextFormat) {

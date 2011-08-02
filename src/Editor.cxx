@@ -2216,7 +2216,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 		// Layout the line, determining the position of each character,
 		// with an extra element at the end for the end of the line.
 		int startseg = 0;	// Start of the current segment, in char. number
-		int startsegx = 0;	// Start of the current segment, in pixels
+		XYPOSITION startsegx = 0;	// Start of the current segment, in pixels
 		ll->positions[0] = 0;
 		unsigned int tabWidth = vstyle.spaceWidth * pdoc->tabInChars;
 		bool lastSegItalics = false;
@@ -2902,8 +2902,10 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		// draw strings that are completely past the right side of the window.
 		if ((rcSegment.left <= rcLine.right) && (rcSegment.right >= rcLine.left)) {
 			// Clip to line rectangle, since may have a huge position which will not work with some platforms
-			rcSegment.left = Platform::Maximum(rcSegment.left, rcLine.left);
-			rcSegment.right = Platform::Minimum(rcSegment.right, rcLine.right);
+			if (rcSegment.left < rcLine.left)
+				rcSegment.left = rcLine.left;
+			if (rcSegment.right > rcLine.right)
+				rcSegment.right = rcLine.right;
 
 			int styleMain = ll->styles[i];
 			const int inSelection = hideSelection ? 0 : sel.CharacterInSelection(iDoc);
@@ -3379,7 +3381,7 @@ void Editor::DrawCarets(Surface *surface, ViewStyle &vsDraw, int lineDoc, int xS
 		const int spaceWidth = static_cast<int>(vsDraw.styles[ll->EndLineStyle()].spaceWidth);
 		const int virtualOffset = posCaret.VirtualSpace() * spaceWidth;
 		if (ll->InLine(offset, subLine) && offset <= ll->numCharsBeforeEOL) {
-			int xposCaret = ll->positions[offset] + virtualOffset - ll->positions[ll->LineStart(subLine)];
+			XYPOSITION xposCaret = ll->positions[offset] + virtualOffset - ll->positions[ll->LineStart(subLine)];
 			if (ll->wrapIndent != 0) {
 				int lineStart = ll->LineStart(subLine);
 				if (lineStart != 0)	// Wrapped
