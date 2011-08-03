@@ -514,7 +514,8 @@ public:
 
 SurfaceImpl::SurfaceImpl() :
 	unicodeMode(false),
-	hdc(0), 	hdcOwned(false) {
+	hdc(0), hdcOwned(false),
+	x(0), y(0), {
 	// Windows 9x has only a 16 bit coordinate system so break after 30000 pixels
 	maxWidthMeasure = IsNT() ? INT_MAX : 30000;
 	// There appears to be a 16 bit string length limit in GDI on NT and a limit of
