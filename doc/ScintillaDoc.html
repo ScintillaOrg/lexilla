@@ -79,7 +79,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 26/July/2011 NH</p>
+    <p>Last edited 1/August/2011 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -4466,8 +4466,9 @@ struct Sci_TextToFind {
      </p>
 
     <p>The <code>SCI_SCROLLTO[START|END]</code> commands scroll the document to the start
-    or end without changing the selection. This is the expected behaviour of the <code>home</code> and
-    <code>end</code> keys on OS X.
+    or end without changing the selection. These commands match OS X platform conventions for the behaviour of the
+    <code>home</code> and <code>end</code> keys. Scintilla can be made to match OS X applications
+    by binding the <code>home</code> and <code>end</code> keys to these commands.
      </p>
 
     <h2 id="KeyBindings">Key bindings</h2>
