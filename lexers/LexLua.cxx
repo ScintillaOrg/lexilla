@@ -202,7 +202,7 @@ static void ColouriseLuaDoc(
 					sc.ChangeState(SCE_LUA_WORD);
 					if (strcmp(s, "goto") == 0) {	// goto <label> forward scan
 						sc.SetState(SCE_LUA_DEFAULT);
-						while (IsASpaceOrTab(sc.ch))
+						while (IsASpaceOrTab(sc.ch) && !sc.atLineEnd)
 							sc.Forward();
 						if (setWordStart.Contains(sc.ch)) {
 							sc.SetState(SCE_LUA_LABEL);
