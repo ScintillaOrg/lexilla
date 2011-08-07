@@ -2216,7 +2216,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 		// Layout the line, determining the position of each character,
 		// with an extra element at the end for the end of the line.
 		int startseg = 0;	// Start of the current segment, in char. number
-		XYPOSITION startsegx = 0;	// Start of the current segment, in pixels
+		XYACCUMULATOR startsegx = 0;	// Start of the current segment, in pixels
 		ll->positions[0] = 0;
 		unsigned int tabWidth = vstyle.spaceWidth * pdoc->tabInChars;
 		bool lastSegItalics = false;
