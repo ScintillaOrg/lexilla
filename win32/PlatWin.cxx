@@ -462,7 +462,6 @@ class SurfaceImpl : public Surface {
 
 	ID2D1RenderTarget *pRenderTarget;
 	bool ownRenderTarget;
-	bool needsEndDraw;
 	int clipsActive;
 
 	IDWriteTextFormat *pTextFormat;
@@ -549,7 +548,6 @@ SurfaceImpl::SurfaceImpl() :
 
 	pRenderTarget = NULL;
 	ownRenderTarget = false;
-	needsEndDraw = false;
 	clipsActive = 0;
 	pTextFormat = NULL;
 	baseline = 1.0f;
@@ -630,7 +628,6 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID)
 		pRenderTarget = pCompatibleRenderTarget;
 		pRenderTarget->BeginDraw();
 		ownRenderTarget = true;
-		needsEndDraw = true;
 	}
 }
 
