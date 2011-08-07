@@ -273,7 +273,7 @@ PRectangle CallTip::CallTipStart(int pos, Point pt, const char *defn,
 	inCallTipMode = true;
 	posStartCallTip = pos;
 	int deviceHeight = surfaceMeasure->DeviceHeightFont(size);
-	font.Create(faceName, characterSet, deviceHeight, false, false);
+	font.Create(faceName, characterSet, deviceHeight / SC_FONT_SIZE_MULTIPLIER, SC_WEIGHT_NORMAL, false);
 	// Look for multiple lines in the text
 	// Only support \n here - simply means container must avoid \r!
 	int numLines = 1;
