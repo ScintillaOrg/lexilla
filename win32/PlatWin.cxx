@@ -197,15 +197,42 @@ void Palette::Allocate(Window &) {
 	}
 }
 
-static IDWriteFactory *pIDWriteFactory = 0;
+IDWriteFactory *pIDWriteFactory = 0;
+ID2D1Factory *pD2DFactory = 0;
 
-static void EnsureDWriteFactory() {
-	// Construct
-	if (!pIDWriteFactory) {
-		DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED,
-			__uuidof(IDWriteFactory),
-			reinterpret_cast<IUnknown**>(&pIDWriteFactory));
+bool LoadD2D() {
+	static bool triedLoadingD2D = false;
+	static HMODULE hDLLD2D = 0;
+	static HMODULE hDLLDWrite = 0;
+	if (!triedLoadingD2D) {
+		typedef HRESULT (WINAPI *D2D1CFSig)(D2D1_FACTORY_TYPE factoryType, REFIID riid,
+			CONST D2D1_FACTORY_OPTIONS *pFactoryOptions, IUnknown **factory);
+		typedef HRESULT (WINAPI *DWriteCFSig)(DWRITE_FACTORY_TYPE factoryType, REFIID iid,
+			IUnknown **factory);
+
+		hDLLD2D = ::LoadLibrary(TEXT("D2D1.DLL"));
+		if (hDLLD2D) {
+			D2D1CFSig fnD2DCF = (D2D1CFSig)::GetProcAddress(hDLLD2D, "D2D1CreateFactory");
+			if (fnD2DCF) {
+				// A single threaded factory as Scintilla always draw on the GUI thread
+				fnD2DCF(D2D1_FACTORY_TYPE_SINGLE_THREADED,
+					__uuidof(ID2D1Factory),
+					0,
+					reinterpret_cast<IUnknown**>(&pD2DFactory));
+			}
+		}
+		hDLLDWrite = ::LoadLibrary(TEXT("DWRITE.DLL"));
+		if (hDLLDWrite) {
+			DWriteCFSig fnDWCF = (DWriteCFSig)::GetProcAddress(hDLLDWrite, "DWriteCreateFactory");
+			if (fnDWCF) {
+				fnDWCF(DWRITE_FACTORY_TYPE_SHARED,
+					__uuidof(IDWriteFactory),
+					reinterpret_cast<IUnknown**>(&pIDWriteFactory));
+			}
+		}
 	}
+	triedLoadingD2D = true;
+	return pIDWriteFactory && pD2DFactory;
 }
 
 struct FormatAndBaseline {
@@ -292,7 +319,6 @@ FontCached::FontCached(const char *faceName_, int characterSet_, float size_, in
 	SetLogFont(lf, faceName_, characterSet_, size_, weight_, italic_, extraFontFlag_);
 	hash = HashFont(faceName_, characterSet_, size_, weight_, italic_, extraFontFlag_);
 	fid = 0;
-	EnsureDWriteFactory();
 	if (pIDWriteFactory) {
 #ifdef OLD_CODE
 		HFONT fontSave = static_cast<HFONT>(::SelectObject(hdc, font_.GetID()));
@@ -508,9 +534,6 @@ public:
 } //namespace Scintilla
 #endif
 
-#pragma comment(lib, "d2d1.lib")
-#pragma comment(lib, "dwrite.lib")
-
 SurfaceImpl::SurfaceImpl() :
 	unicodeMode(false),
 	hdc(0), hdcOwned(false),
@@ -563,11 +586,7 @@ void SurfaceImpl::Release() {
 	}
 }
 
-// Ensures have pIDWriteFactory, and pRenderTarget
-// If any fail, pRenderTarget will be NULL
 void SurfaceImpl::SetDWrite(HDC hdc) {
-	// Construct
-	EnsureDWriteFactory();
 	dpiScaleX = GetDeviceCaps(hdc, LOGPIXELSX) / 96.0f;
 	dpiScaleY = GetDeviceCaps(hdc, LOGPIXELSY) / 96.0f;
 }

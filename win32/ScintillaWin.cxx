@@ -57,6 +57,7 @@
 #include "Editor.h"
 #include "ScintillaBase.h"
 #include "UniConversion.h"
+#include "PlatWin.h"
 
 #ifdef SCI_LEXER
 #include "ExternalLexer.h"
@@ -89,11 +90,6 @@
 #endif
 
 #define SC_WIN_IDLE 5001
-
-// Functions imported from PlatWin
-extern bool IsNT();
-extern void Platform_Initialise(void *hInstance);
-extern void Platform_Finalise();
 
 typedef BOOL (WINAPI *TrackMouseEventSig)(LPTRACKMOUSEEVENT);
 
@@ -200,8 +196,6 @@ class ScintillaWin :
 
 	static HINSTANCE hInstance;
 
-	IDWriteFactory *pIDWriteFactory;
-	ID2D1Factory *pD2DFactory;
 	ID2D1HwndRenderTarget *pRenderTarget;
 
 	ScintillaWin(HWND hwnd);
@@ -359,8 +353,6 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	sysCaretWidth = 0;
 	sysCaretHeight = 0;
 
-	pIDWriteFactory = 0;
-	pD2DFactory = 0;
 	pRenderTarget = 0;
 
 	keysAlwaysUnicode = false;
@@ -392,14 +384,7 @@ void ScintillaWin::Initialise() {
 		}
 	}
 
-	if (!pIDWriteFactory) {
-		DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED,
-			__uuidof(IDWriteFactory),
-			reinterpret_cast<IUnknown**>(&pIDWriteFactory));
-	}
-	if (!pD2DFactory) {
-		D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &pD2DFactory);
-	}
+	LoadD2D();
 }
 
 void ScintillaWin::Finalise() {
@@ -407,14 +392,6 @@ void ScintillaWin::Finalise() {
 	SetTicking(false);
 	SetIdle(false);
 	DropRenderTarget();
-	if (pIDWriteFactory) {
-		pIDWriteFactory->Release();
-		pIDWriteFactory = 0;
-	}
-	if (pD2DFactory) {
-		pD2DFactory->Release();
-		pD2DFactory = 0;
-	}
 	::RevokeDragDrop(MainHWND());
 	if (SUCCEEDED(hrOle)) {
 		::OleUninitialize();
@@ -2780,7 +2757,7 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
 					RECT rc;
 					GetClientRect(hWnd, &rc);
 					// Create a Direct2D render target.
-					sciThis->pD2DFactory->CreateHwndRenderTarget(
+					pD2DFactory->CreateHwndRenderTarget(
 						D2D1::RenderTargetProperties(),
 						D2D1::HwndRenderTargetProperties(hWnd, D2D1::SizeU(rc.right - rc.left, rc.bottom - rc.top)),
 						&pCTRenderTarget);
