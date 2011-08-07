@@ -156,7 +156,7 @@ static int FontCharacterSet(Font &f) {
 /**
  * Creates a CTFontRef with the given properties.
  */
-void Font::Create(const char *faceName, int characterSet, float size, bool bold, bool italic, 
+void Font::Create(const char *faceName, int characterSet, float size, int weight, bool italic, 
                   int /* extraFontFlag */)
 {
 	Release();
