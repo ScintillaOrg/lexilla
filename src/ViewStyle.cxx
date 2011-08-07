@@ -92,8 +92,8 @@ void FontRealised::Realise(Surface &surface, int zoomLevel) {
 	if (sizeZoomed <= 2 * SC_FONT_SIZE_MULTIPLIER)	// Hangs if sizeZoomed <= 1
 		sizeZoomed = 2 * SC_FONT_SIZE_MULTIPLIER;
 
-	int deviceHeight = surface.DeviceHeightFont(sizeZoomed);
-	font.Create(fontName, characterSet, deviceHeight, weight, italic, extraFontFlag);
+	float deviceHeight = surface.DeviceHeightFont(sizeZoomed);
+	font.Create(fontName, characterSet, deviceHeight / SC_FONT_SIZE_MULTIPLIER, weight, italic, extraFontFlag);
 
 	ascent = surface.Ascent(font);
 	descent = surface.Descent(font);

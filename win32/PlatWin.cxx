@@ -242,12 +242,10 @@ static BYTE Win32MapFontQuality(int extraFontFlag) {
 	}
 }
 
-const int fontSizeMultiplier = 100;
-
 static void SetLogFont(LOGFONTA &lf, const char *faceName, int characterSet, float size, int weight, bool italic, int extraFontFlag) {
 	memset(&lf, 0, sizeof(lf));
 	// The negative is to allow for leading
-	lf.lfHeight = -(abs(static_cast<int>(size/fontSizeMultiplier)));
+	lf.lfHeight = -(abs(static_cast<int>(size)));
 	lf.lfWeight = weight;
 	lf.lfItalic = static_cast<BYTE>(italic ? 1 : 0);
 	lf.lfCharSet = static_cast<BYTE>(characterSet);
@@ -262,7 +260,7 @@ static void SetLogFont(LOGFONTA &lf, const char *faceName, int characterSet, flo
  */
 static int HashFont(const char *faceName, int characterSet, float size, int weight, bool italic, int extraFontFlag) {
 	return
-		static_cast<int>((size / fontSizeMultiplier)) ^
+		static_cast<int>(size) ^
 		(characterSet << 10) ^
 		((extraFontFlag & SC_EFF_QUALITY_MASK) << 9) ^
 		((weight/100) << 12) ^
@@ -315,7 +313,7 @@ FontCached::FontCached(const char *faceName_, int characterSet_, float size_, in
 		const int faceSize = 200;
 		WCHAR wszFace[faceSize];
 		UTF16FromUTF8(faceName_, strlen(faceName_)+1, wszFace, faceSize);
-		FLOAT fHeight = size_ / fontSizeMultiplier;
+		FLOAT fHeight = size_;
 		HRESULT hr = pIDWriteFactory->CreateTextFormat(wszFace, NULL,
 			static_cast<DWRITE_FONT_WEIGHT>(weight_),
 			italic_ ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL,
