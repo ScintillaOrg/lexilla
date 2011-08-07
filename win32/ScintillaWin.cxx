@@ -2770,6 +2770,7 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
 					pCTRenderTarget->EndDraw();
 					surfaceWindow->Release();
 					delete surfaceWindow;
+					pCTRenderTarget->Release();
 				}
 				::EndPaint(hWnd, &ps);
 				return 0;
