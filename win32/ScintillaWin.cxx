@@ -2151,9 +2151,9 @@ void ScintillaWin::ImeStartComposition() {
 			// The logfont for the IME is recreated here.
 			int styleHere = (pdoc->StyleAt(sel.MainCaret())) & 31;
 			LOGFONTA lf = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ""};
-			int sizeZoomed = vs.styles[styleHere].size + vs.zoomLevel;
-			if (sizeZoomed <= 2)	// Hangs if sizeZoomed <= 1
-				sizeZoomed = 2;
+			int sizeZoomed = vs.styles[styleHere].size + vs.zoomLevel * SC_FONT_SIZE_MULTIPLIER;
+			if (sizeZoomed <= 2 * SC_FONT_SIZE_MULTIPLIER)	// Hangs if sizeZoomed <= 1
+				sizeZoomed = 2 * SC_FONT_SIZE_MULTIPLIER;
 			AutoSurface surface(this);
 			int deviceHeight = sizeZoomed;
 			if (surface) {
@@ -2161,7 +2161,7 @@ void ScintillaWin::ImeStartComposition() {
 			}
 			// The negative is to allow for leading
 			lf.lfHeight = -(abs(deviceHeight));
-			lf.lfWeight = vs.styles[styleHere].bold ? FW_BOLD : FW_NORMAL;
+			lf.lfWeight = vs.styles[styleHere].weight;
 			lf.lfItalic = static_cast<BYTE>(vs.styles[styleHere].italic ? 1 : 0);
 			lf.lfCharSet = DEFAULT_CHARSET;
 			lf.lfFaceName[0] = '\0';

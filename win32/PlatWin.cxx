@@ -242,11 +242,13 @@ static BYTE Win32MapFontQuality(int extraFontFlag) {
 	}
 }
 
-static void SetLogFont(LOGFONTA &lf, const char *faceName, int characterSet, int size, bool bold, bool italic, int extraFontFlag) {
+const int fontSizeMultiplier = 100;
+
+static void SetLogFont(LOGFONTA &lf, const char *faceName, int characterSet, float size, int weight, bool italic, int extraFontFlag) {
 	memset(&lf, 0, sizeof(lf));
 	// The negative is to allow for leading
-	lf.lfHeight = -(abs(size));
-	lf.lfWeight = bold ? FW_BOLD : FW_NORMAL;
+	lf.lfHeight = -(abs(static_cast<int>(size/fontSizeMultiplier)));
+	lf.lfWeight = weight;
 	lf.lfItalic = static_cast<BYTE>(italic ? 1 : 0);
 	lf.lfCharSet = static_cast<BYTE>(characterSet);
 	lf.lfQuality = Win32MapFontQuality(extraFontFlag);
@@ -258,12 +260,12 @@ static void SetLogFont(LOGFONTA &lf, const char *faceName, int characterSet, int
  * If one font is the same as another, its hash will be the same, but if the hash is the
  * same then they may still be different.
  */
-static int HashFont(const char *faceName, int characterSet, int size, bool bold, bool italic, int extraFontFlag) {
+static int HashFont(const char *faceName, int characterSet, float size, int weight, bool italic, int extraFontFlag) {
 	return
-		size ^
+		static_cast<int>((size / fontSizeMultiplier)) ^
 		(characterSet << 10) ^
 		((extraFontFlag & SC_EFF_QUALITY_MASK) << 9) ^
-		(bold ? 0x10000000 : 0) ^
+		((weight/100) << 12) ^
 		(italic ? 0x20000000 : 0) ^
 		faceName[0];
 }
@@ -271,25 +273,26 @@ static int HashFont(const char *faceName, int characterSet, int size, bool bold,
 class FontCached : Font {
 	FontCached *next;
 	int usage;
+	float size;
 	LOGFONTA lf;
 	int hash;
-	FontCached(const char *faceName_, int characterSet_, float size_, bool bold_, bool italic_, int extraFontFlag_);
+	FontCached(const char *faceName_, int characterSet_, float size_, int weight_, bool italic_, int extraFontFlag_);
 	~FontCached() {}
-	bool SameAs(const char *faceName_, int characterSet_, float size_, bool bold_, bool italic_, int extraFontFlag_);
+	bool SameAs(const char *faceName_, int characterSet_, float size_, int weight_, bool italic_, int extraFontFlag_);
 	virtual void Release();
 
 	static FontCached *first;
 public:
-	static FontID FindOrCreate(const char *faceName_, int characterSet_, float size_, bool bold_, bool italic_, int extraFontFlag_);
+	static FontID FindOrCreate(const char *faceName_, int characterSet_, float size_, int weight_, bool italic_, int extraFontFlag_);
 	static void ReleaseId(FontID fid_);
 };
 
 FontCached *FontCached::first = 0;
 
-FontCached::FontCached(const char *faceName_, int characterSet_, float size_, bool bold_, bool italic_, int extraFontFlag_) :
-	next(0), usage(0), hash(0) {
-	SetLogFont(lf, faceName_, characterSet_, size_, bold_, italic_, extraFontFlag_);
-	hash = HashFont(faceName_, characterSet_, size_, bold_, italic_, extraFontFlag_);
+FontCached::FontCached(const char *faceName_, int characterSet_, float size_, int weight_, bool italic_, int extraFontFlag_) :
+	next(0), usage(0), size(1.0), hash(0) {
+	SetLogFont(lf, faceName_, characterSet_, size_, weight_, italic_, extraFontFlag_);
+	hash = HashFont(faceName_, characterSet_, size_, weight_, italic_, extraFontFlag_);
 	fid = 0;
 	EnsureDWriteFactory();
 	if (pIDWriteFactory) {
@@ -312,11 +315,9 @@ FontCached::FontCached(const char *faceName_, int characterSet_, float size_, bo
 		const int faceSize = 200;
 		WCHAR wszFace[faceSize];
 		UTF16FromUTF8(faceName_, strlen(faceName_)+1, wszFace, faceSize);
-		FLOAT fHeight = size_;
-		if (fHeight > 2000)
-			fHeight = fHeight / 1000.0f;
+		FLOAT fHeight = size_ / fontSizeMultiplier;
 		HRESULT hr = pIDWriteFactory->CreateTextFormat(wszFace, NULL,
-			bold_ ? DWRITE_FONT_WEIGHT_SEMI_BOLD : DWRITE_FONT_WEIGHT_REGULAR,
+			static_cast<DWRITE_FONT_WEIGHT>(weight_),
 			italic_ ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL,
 			DWRITE_FONT_STRETCH_NORMAL, fHeight, L"en-us", &pTextFormat);
 		if (SUCCEEDED(hr)) {
@@ -325,7 +326,7 @@ FontCached::FontCached(const char *faceName_, int characterSet_, float size_, bo
 			UINT32 lineCount = 0;
 			FLOAT baseline = 1.0f;
 			IDWriteTextLayout *pTextLayout = 0;
-			HRESULT hr = pIDWriteFactory->CreateTextLayout(L"X", 1, pTextFormat,
+			hr = pIDWriteFactory->CreateTextLayout(L"X", 1, pTextFormat,
 					100.0f, 100.0f, &pTextLayout);
 			if (SUCCEEDED(hr)) {
 				hr = pTextLayout->GetLineMetrics(lineMetrics, maxLines, &lineCount);
@@ -340,10 +341,10 @@ FontCached::FontCached(const char *faceName_, int characterSet_, float size_, bo
 	usage = 1;
 }
 
-bool FontCached::SameAs(const char *faceName_, int characterSet_, float size_, bool bold_, bool italic_, int extraFontFlag_) {
+bool FontCached::SameAs(const char *faceName_, int characterSet_, float size_, int weight_, bool italic_, int extraFontFlag_) {
 	return
-		(lf.lfHeight == -(abs(size_))) &&
-		(lf.lfWeight == (bold_ ? FW_BOLD : FW_NORMAL)) &&
+		(size == size_) &&
+		(lf.lfWeight == weight_) &&
 		(lf.lfItalic == static_cast<BYTE>(italic_ ? 1 : 0)) &&
 		(lf.lfCharSet == characterSet_) &&
 		(lf.lfQuality == Win32MapFontQuality(extraFontFlag_)) &&
@@ -355,19 +356,19 @@ void FontCached::Release() {
 	fid = 0;
 }
 
-FontID FontCached::FindOrCreate(const char *faceName_, int characterSet_, float size_, bool bold_, bool italic_, int extraFontFlag_) {
+FontID FontCached::FindOrCreate(const char *faceName_, int characterSet_, float size_, int weight_, bool italic_, int extraFontFlag_) {
 	FontID ret = 0;
 	::EnterCriticalSection(&crPlatformLock);
-	int hashFind = HashFont(faceName_, characterSet_, size_, bold_, italic_, extraFontFlag_);
+	int hashFind = HashFont(faceName_, characterSet_, size_, weight_, italic_, extraFontFlag_);
 	for (FontCached *cur=first; cur; cur=cur->next) {
 		if ((cur->hash == hashFind) &&
-			cur->SameAs(faceName_, characterSet_, size_, bold_, italic_, extraFontFlag_)) {
+			cur->SameAs(faceName_, characterSet_, size_, weight_, italic_, extraFontFlag_)) {
 			cur->usage++;
 			ret = cur->fid;
 		}
 	}
 	if (ret == 0) {
-		FontCached *fc = new FontCached(faceName_, characterSet_, size_, bold_, italic_, extraFontFlag_);
+		FontCached *fc = new FontCached(faceName_, characterSet_, size_, weight_, italic_, extraFontFlag_);
 		if (fc) {
 			fc->next = first;
 			first = fc;
@@ -407,10 +408,10 @@ Font::~Font() {
 #define FONTS_CACHED
 
 void Font::Create(const char *faceName, int characterSet, float size,
-	bool bold, bool italic, int extraFontFlag) {
+	int weight, bool italic, int extraFontFlag) {
 	Release();
 	if (faceName)
-		fid = FontCached::FindOrCreate(faceName, characterSet, size, bold, italic, extraFontFlag);
+		fid = FontCached::FindOrCreate(faceName, characterSet, size, weight, italic, extraFontFlag);
 }
 
 void Font::Release() {
@@ -515,7 +516,7 @@ public:
 SurfaceImpl::SurfaceImpl() :
 	unicodeMode(false),
 	hdc(0), hdcOwned(false),
-	x(0), y(0), {
+	x(0), y(0) {
 	// Windows 9x has only a 16 bit coordinate system so break after 30000 pixels
 	maxWidthMeasure = IsNT() ? INT_MAX : 30000;
 	// There appears to be a 16 bit string length limit in GDI on NT and a limit of

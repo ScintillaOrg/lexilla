@@ -88,12 +88,12 @@ FontRealised::~FontRealised() {
 
 void FontRealised::Realise(Surface &surface, int zoomLevel) {
 	PLATFORM_ASSERT(fontName);
-	sizeZoomed = size + zoomLevel;
-	if (sizeZoomed <= 2)	// Hangs if sizeZoomed <= 1
-		sizeZoomed = 2;
+	sizeZoomed = size + zoomLevel * SC_FONT_SIZE_MULTIPLIER;
+	if (sizeZoomed <= 2 * SC_FONT_SIZE_MULTIPLIER)	// Hangs if sizeZoomed <= 1
+		sizeZoomed = 2 * SC_FONT_SIZE_MULTIPLIER;
 
 	int deviceHeight = surface.DeviceHeightFont(sizeZoomed);
-	font.Create(fontName, characterSet, deviceHeight, bold, italic, extraFontFlag);
+	font.Create(fontName, characterSet, deviceHeight, weight, italic, extraFontFlag);
 
 	ascent = surface.Ascent(font);
 	descent = surface.Descent(font);
@@ -457,9 +457,9 @@ void ViewStyle::EnsureStyle(size_t index) {
 void ViewStyle::ResetDefaultStyle() {
 	styles[STYLE_DEFAULT].Clear(ColourDesired(0,0,0),
 	        ColourDesired(0xff,0xff,0xff),
-	        Platform::DefaultFontSize(), fontNames.Save(Platform::DefaultFont()),
+	        Platform::DefaultFontSize() * SC_FONT_SIZE_MULTIPLIER, fontNames.Save(Platform::DefaultFont()),
 	        SC_CHARSET_DEFAULT,
-	        false, false, false, false, Style::caseMixed, true, true, false);
+	        SC_WEIGHT_NORMAL, false, false, false, Style::caseMixed, true, true, false);
 }
 
 void ViewStyle::ClearStyles() {

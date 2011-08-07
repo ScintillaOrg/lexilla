@@ -6981,7 +6981,10 @@ void Editor::StyleSetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		vs.styles[wParam].back.desired = ColourDesired(lParam);
 		break;
 	case SCI_STYLESETBOLD:
-		vs.styles[wParam].bold = lParam != 0;
+		vs.styles[wParam].weight = lParam != 0 ? SC_WEIGHT_BOLD : SC_WEIGHT_NORMAL;
+		break;
+	case SCI_STYLESETWEIGHT:
+		vs.styles[wParam].weight = lParam;
 		break;
 	case SCI_STYLESETITALIC:
 		vs.styles[wParam].italic = lParam != 0;
@@ -6990,6 +6993,9 @@ void Editor::StyleSetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		vs.styles[wParam].eolFilled = lParam != 0;
 		break;
 	case SCI_STYLESETSIZE:
+		vs.styles[wParam].size = lParam * SC_FONT_SIZE_MULTIPLIER;
+		break;
+	case SCI_STYLESETSIZEFRACTIONAL:
 		vs.styles[wParam].size = lParam;
 		break;
 	case SCI_STYLESETFONT:
@@ -7027,12 +7033,16 @@ sptr_t Editor::StyleGetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 	case SCI_STYLEGETBACK:
 		return vs.styles[wParam].back.desired.AsLong();
 	case SCI_STYLEGETBOLD:
-		return vs.styles[wParam].bold ? 1 : 0;
+		return vs.styles[wParam].weight > SC_WEIGHT_NORMAL;
+	case SCI_STYLEGETWEIGHT:
+		return vs.styles[wParam].weight;
 	case SCI_STYLEGETITALIC:
 		return vs.styles[wParam].italic ? 1 : 0;
 	case SCI_STYLEGETEOLFILLED:
 		return vs.styles[wParam].eolFilled ? 1 : 0;
 	case SCI_STYLEGETSIZE:
+		return vs.styles[wParam].size / SC_FONT_SIZE_MULTIPLIER;
+	case SCI_STYLEGETSIZEFRACTIONAL:
 		return vs.styles[wParam].size;
 	case SCI_STYLEGETFONT:
 		if (!vs.styles[wParam].fontName)
@@ -8150,9 +8160,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_STYLESETFORE:
 	case SCI_STYLESETBACK:
 	case SCI_STYLESETBOLD:
+	case SCI_STYLESETWEIGHT:
 	case SCI_STYLESETITALIC:
 	case SCI_STYLESETEOLFILLED:
 	case SCI_STYLESETSIZE:
+	case SCI_STYLESETSIZEFRACTIONAL:
 	case SCI_STYLESETFONT:
 	case SCI_STYLESETUNDERLINE:
 	case SCI_STYLESETCASE:
@@ -8166,9 +8178,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_STYLEGETFORE:
 	case SCI_STYLEGETBACK:
 	case SCI_STYLEGETBOLD:
+	case SCI_STYLEGETWEIGHT:
 	case SCI_STYLEGETITALIC:
 	case SCI_STYLEGETEOLFILLED:
 	case SCI_STYLEGETSIZE:
+	case SCI_STYLEGETSIZEFRACTIONAL:
 	case SCI_STYLEGETFONT:
 	case SCI_STYLEGETUNDERLINE:
 	case SCI_STYLEGETCASE:
