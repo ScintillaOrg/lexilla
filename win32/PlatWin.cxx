@@ -246,7 +246,24 @@ struct FormatAndBaseline {
 		pTextFormat = 0;
 		baseline = 1;
 	}
+	HFONT HFont();
 };
+
+HFONT FormatAndBaseline::HFont() {
+	LOGFONTW lf;
+	memset(&lf, 0, sizeof(lf));
+	const int familySize = 200;
+	WCHAR fontFamilyName[familySize];
+
+	HRESULT hr = pTextFormat->GetFontFamilyName(fontFamilyName, familySize);
+	if (SUCCEEDED(hr)) {
+		lf.lfWeight = pTextFormat->GetFontWeight();
+		lf.lfItalic = pTextFormat->GetFontStyle() == DWRITE_FONT_STYLE_ITALIC;
+		lf.lfHeight = -static_cast<int>(pTextFormat->GetFontSize());
+		return ::CreateFontIndirect(&lf);
+	}
+	return 0;
+}
 
 #ifndef CLEARTYPE_QUALITY
 #define CLEARTYPE_QUALITY 5
@@ -1270,8 +1287,7 @@ void Window::SetPositionRelative(PRectangle rc, Window w) {
 #ifdef MONITOR_DEFAULTTONULL
 		// We're using the stub functionality of MultiMon.h to decay gracefully on machines
 		// (ie, pre Win2000, Win95) that do not support the newer functions.
-		RECT rcMonitor;
-		memcpy(&rcMonitor, &rc, sizeof(rcMonitor));  // RECT and Rectangle are the same really.
+		RECT rcMonitor = {rc.left, rc.top, rc.right, rc.bottom};
 		MONITORINFO mi = {0};
 		mi.cbSize = sizeof(mi);
 
@@ -1648,17 +1664,19 @@ void ListBoxX::Create(Window &parent_, int ctrlID_, Point location_, int lineHei
 		hinstanceParent,
 		this);
 
-	::MapWindowPoints(hwndParent, NULL, reinterpret_cast<POINT*>(&location), 1);
+	POINT locationw = {location.x, location.y};
+	::MapWindowPoints(hwndParent, NULL, &locationw, 1);
+	location = Point(locationw.x, locationw.y);
 }
 
 void ListBoxX::SetFont(Font &font) {
-	LOGFONT lf;
-	if (0 != ::GetObject(font.GetID(), sizeof(lf), &lf)) {
+	if (font.GetID()) {
 		if (fontCopy) {
 			::DeleteObject(fontCopy);
 			fontCopy = 0;
 		}
-		fontCopy = ::CreateFontIndirect(&lf);
+		FormatAndBaseline *pfabl = reinterpret_cast<FormatAndBaseline *>(font.GetID());
+		fontCopy = pfabl->HFont();
 		::SendMessage(lb, WM_SETFONT, reinterpret_cast<WPARAM>(fontCopy), 0);
 	}
 }
@@ -1829,17 +1847,36 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 		if (pimage) {
 			Surface *surfaceItem = Surface::Allocate();
 			if (surfaceItem) {
-				// TODO: Need a DC RenderTarget here
-				/*
-				surfaceItem->Init(pDrawItem->hDC, pDrawItem->hwndItem);
-				int left = pDrawItem->rcItem.left + ItemInset.x + ImageInset.x;
-				PRectangle rcImage(left, pDrawItem->rcItem.top,
-					left + images.GetWidth(), pDrawItem->rcItem.bottom);
-				surfaceItem->DrawRGBAImage(rcImage,
-					pimage->GetWidth(), pimage->GetHeight(), pimage->Pixels());
-				delete surfaceItem;
-				*/
-				::SetTextAlign(pDrawItem->hDC, TA_TOP);
+				if (pD2DFactory) {
+					D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
+						D2D1_RENDER_TARGET_TYPE_DEFAULT,
+						D2D1::PixelFormat(
+							DXGI_FORMAT_B8G8R8A8_UNORM,
+							D2D1_ALPHA_MODE_IGNORE),
+						0,
+						0,
+						D2D1_RENDER_TARGET_USAGE_NONE,
+						D2D1_FEATURE_LEVEL_DEFAULT
+						);
+					ID2D1DCRenderTarget *pDCRT = 0;
+					HRESULT hr = pD2DFactory->CreateDCRenderTarget(&props, &pDCRT);
+					RECT rcWindow;
+					GetClientRect(pDrawItem->hwndItem, &rcWindow);
+					hr = pDCRT->BindDC(pDrawItem->hDC, &rcWindow);
+					if (SUCCEEDED(hr)) {
+						surfaceItem->Init(pDCRT, pDrawItem->hwndItem);
+						pDCRT->BeginDraw();
+						int left = pDrawItem->rcItem.left + ItemInset.x + ImageInset.x;
+						PRectangle rcImage(left, pDrawItem->rcItem.top,
+							left + images.GetWidth(), pDrawItem->rcItem.bottom);
+						surfaceItem->DrawRGBAImage(rcImage,
+							pimage->GetWidth(), pimage->GetHeight(), pimage->Pixels());
+						delete surfaceItem;
+						::SetTextAlign(pDrawItem->hDC, TA_TOP);
+						pDCRT->EndDraw();
+						pDCRT->Release();
+					}
+				}
 			}
 		}
 	}
@@ -1906,7 +1943,9 @@ void ListBoxX::SetList(const char *list, char separator, char typesep) {
 }
 
 void ListBoxX::AdjustWindowRect(PRectangle *rc) const {
-	::AdjustWindowRectEx(reinterpret_cast<RECT*>(rc), WS_THICKFRAME, false, WS_EX_WINDOWEDGE);
+	RECT rcw = {rc->left, rc->top, rc->right, rc->bottom };
+	::AdjustWindowRectEx(&rcw, WS_THICKFRAME, false, WS_EX_WINDOWEDGE);
+	*rc = PRectangle(rcw.left, rcw.top, rcw.right, rcw.bottom);
 }
 
 int ListBoxX::ItemHeight() const {
@@ -1947,8 +1986,9 @@ void ListBoxX::SetRedraw(bool on) {
 
 void ListBoxX::ResizeToCursor() {
 	PRectangle rc = GetPosition();
-	Point pt;
-	::GetCursorPos(reinterpret_cast<POINT*>(&pt));
+	POINT ptw;
+	::GetCursorPos(&ptw);
+	Point pt(ptw.x, ptw.y);
 	pt.x += dragOffset.x;
 	pt.y += dragOffset.y;
 
