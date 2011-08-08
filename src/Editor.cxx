@@ -2237,7 +2237,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 				if (vstyle.styles[ll->styles[charInLine]].visible) {
 					if (isControl) {
 						if (ll->chars[charInLine] == '\t') {
-							ll->positions[charInLine + 1] = ((((startsegx + 2) /
+							ll->positions[charInLine + 1] = ((((static_cast<int>(startsegx) + 2) /
 							        tabWidth) + 1) * tabWidth) - startsegx;
 						} else if (controlCharSymbol < 32) {
 							if (ctrlCharWidth[ll->chars[charInLine]] == 0) {
