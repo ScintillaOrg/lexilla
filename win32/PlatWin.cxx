@@ -337,21 +337,6 @@ FontCached::FontCached(const char *faceName_, int characterSet_, float size_, in
 	hash = HashFont(faceName_, characterSet_, size_, weight_, italic_, extraFontFlag_);
 	fid = 0;
 	if (pIDWriteFactory) {
-#ifdef OLD_CODE
-		HFONT fontSave = static_cast<HFONT>(::SelectObject(hdc, font_.GetID()));
-		DWORD sizeOLTM = ::GetOutlineTextMetrics(hdc, NULL, NULL);
-		std::vector<char> vOLTM(sizeOLTM);
-		LPOUTLINETEXTMETRIC potm = reinterpret_cast<LPOUTLINETEXTMETRIC>(&vOLTM[0]);
-		DWORD worked = ::GetOutlineTextMetrics(hdc, sizeOLTM, potm);
-		::SelectObject(hdc, fontSave);
-		if (!worked)
-			return;
-		const WCHAR *pwcFamily = reinterpret_cast<WCHAR *>(&vOLTM[reinterpret_cast<size_t>(potm->otmpFamilyName)]);
-		//const WCHAR *pwcFace = reinterpret_cast<WCHAR *>(&vOLTM[reinterpret_cast<size_t>(potm->otmpFaceName)]);
-		FLOAT fHeight = potm->otmTextMetrics.tmHeight * 72.0f / 96.0f;
-		bool italics = potm->otmTextMetrics.tmItalic != 0;
-		bool bold = potm->otmTextMetrics.tmWeight >= FW_BOLD;
-#endif
 		IDWriteTextFormat *pTextFormat;
 		const int faceSize = 200;
 		WCHAR wszFace[faceSize];
