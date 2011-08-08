@@ -260,7 +260,7 @@ HFONT FormatAndBaseline::HFont() {
 		lf.lfWeight = pTextFormat->GetFontWeight();
 		lf.lfItalic = pTextFormat->GetFontStyle() == DWRITE_FONT_STYLE_ITALIC;
 		lf.lfHeight = -static_cast<int>(pTextFormat->GetFontSize());
-		return ::CreateFontIndirect(&lf);
+		return ::CreateFontIndirectW(&lf);
 	}
 	return 0;
 }
