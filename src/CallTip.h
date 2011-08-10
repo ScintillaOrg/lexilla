@@ -62,7 +62,7 @@ public:
 	/// Setup the calltip and return a rectangle of the area required.
 	PRectangle CallTipStart(int pos, Point pt, const char *defn,
 		const char *faceName, int size, int codePage_,
-		int characterSet, Window &wParent);
+		int characterSet, int technology, Window &wParent);
 
 	void CallTipCancel();
 

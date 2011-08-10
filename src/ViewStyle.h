@@ -48,7 +48,7 @@ public:
 	FontRealised *frNext;
 	FontRealised(const FontSpecification &fs);
 	virtual ~FontRealised();
-	void Realise(Surface &surface, int zoomLevel);
+	void Realise(Surface &surface, int zoomLevel, int technology);
 	FontRealised *Find(const FontSpecification &fs);
 	void FindMaxAscentDescent(unsigned int &maxAscent, unsigned int &maxDescent);
 };
@@ -67,6 +67,7 @@ public:
 	Style *styles;
 	LineMarker markers[MARKER_MAX + 1];
 	Indicator indicators[INDIC_MAX + 1];
+	int technology;
 	int lineHeight;
 	unsigned int maxAscent;
 	unsigned int maxDescent;

@@ -1127,6 +1127,16 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 		case SCI_GETKEYSUNICODE:
 			return keysAlwaysUnicode;
+		
+		case SCI_SETTECHNOLOGY:
+			if ((wParam == SC_TECHNOLOGY_DEFAULT) || (wParam == SC_TECHNOLOGY_DIRECTWRITE)) {
+				if (technology != static_cast<int>(wParam)) {
+					technology = wParam;
+					// Invalidate all cached information including layout.
+					InvalidateStyleRedraw();
+				}
+			}
+			break;
 
 #ifdef SCI_LEXER
 		case SCI_LOADLEXERLIBRARY:
@@ -2751,7 +2761,7 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
 			} else if (iMessage == WM_PAINT) {
 				PAINTSTRUCT ps;
 				::BeginPaint(hWnd, &ps);
-				Surface *surfaceWindow = Surface::Allocate();
+				Surface *surfaceWindow = Surface::Allocate(sciThis->technology);
 				if (surfaceWindow) {
 					ID2D1HwndRenderTarget *pCTRenderTarget = 0;
 					RECT rc;

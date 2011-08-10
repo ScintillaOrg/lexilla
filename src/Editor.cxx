@@ -102,7 +102,8 @@ Editor::Editor() {
 	ctrlID = 0;
 
 	stylesValid = false;
-
+	technology = SC_TECHNOLOGY_DEFAULT;
+	
 	printMagnification = 0;
 	printColourMode = SC_PRINT_NORMAL;
 	printWrapState = eWrapWord;
@@ -168,11 +169,11 @@ Editor::Editor() {
 	additionalCaretsVisible = true;
 	virtualSpaceOptions = SCVS_NONE;
 
-	pixmapLine = Surface::Allocate();
-	pixmapSelMargin = Surface::Allocate();
-	pixmapSelPattern = Surface::Allocate();
-	pixmapIndentGuide = Surface::Allocate();
-	pixmapIndentGuideHighlight = Surface::Allocate();
+	pixmapLine = 0;
+	pixmapSelMargin = 0;
+	pixmapSelPattern = 0;
+	pixmapIndentGuide = 0;
+	pixmapIndentGuideHighlight = 0;
 
 	targetStart = 0;
 	targetEnd = 0;
@@ -226,12 +227,7 @@ Editor::~Editor() {
 	pdoc->RemoveWatcher(this, 0);
 	pdoc->Release();
 	pdoc = 0;
-	DropGraphics();
-	delete pixmapLine;
-	delete pixmapSelMargin;
-	delete pixmapSelPattern;
-	delete pixmapIndentGuide;
-	delete pixmapIndentGuideHighlight;
+	DropGraphics(true);
 }
 
 void Editor::Finalise() {
@@ -239,17 +235,50 @@ void Editor::Finalise() {
 	CancelModes();
 }
 
-void Editor::DropGraphics() {
-	pixmapLine->Release();
-	pixmapSelMargin->Release();
-	pixmapSelPattern->Release();
-	pixmapIndentGuide->Release();
-	pixmapIndentGuideHighlight->Release();
+void Editor::DropGraphics(bool freeObjects) {
+	if (freeObjects) {
+		delete pixmapLine;
+		pixmapLine = 0;
+		delete pixmapSelMargin;
+		pixmapSelMargin = 0;
+		delete pixmapSelPattern;
+		pixmapSelPattern = 0;
+		delete pixmapIndentGuide;
+		pixmapIndentGuide = 0;
+		delete pixmapIndentGuideHighlight;
+		pixmapIndentGuideHighlight = 0;
+	} else {
+		if (pixmapLine)
+			pixmapLine->Release();
+		if (pixmapSelMargin)
+			pixmapSelMargin->Release();
+		if (pixmapSelPattern)
+			pixmapSelPattern->Release();
+		if (pixmapIndentGuide)
+			pixmapIndentGuide->Release();
+		if (pixmapIndentGuideHighlight)
+			pixmapIndentGuideHighlight->Release();
+	}
+}
+
+void Editor::AllocateGraphics() {
+	if (!pixmapLine)
+		pixmapLine = Surface::Allocate(technology);
+	if (!pixmapSelMargin)
+		pixmapSelMargin = Surface::Allocate(technology);
+	if (!pixmapSelPattern)
+		pixmapSelPattern = Surface::Allocate(technology);
+	if (!pixmapIndentGuide)
+		pixmapIndentGuide = Surface::Allocate(technology);
+	if (!pixmapIndentGuideHighlight)
+		pixmapIndentGuideHighlight = Surface::Allocate(technology);
 }
 
 void Editor::InvalidateStyleData() {
 	stylesValid = false;
-	DropGraphics();
+	vs.technology = technology;
+	DropGraphics(false);
+	AllocateGraphics();
 	palette.Release();
 	llc.Invalidate(LineLayout::llInvalid);
 	posCache.Clear();
@@ -3926,7 +3955,7 @@ void Editor::SetScrollBars() {
 }
 
 void Editor::ChangeSize() {
-	DropGraphics();
+	DropGraphics(false);
 	SetScrollBars();
 	if (wrapState != eWrapNone) {
 		PRectangle rcTextArea = GetClientRectangle();
@@ -9217,6 +9246,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	
 	case SCI_GETIDENTIFIER:
 		return GetCtrlID();
+
+	case SCI_SETTECHNOLOGY:
+		// No action by default
+		break;
+	
+	case SCI_GETTECHNOLOGY:
+		return technology;
 
 	default:
 		return DefWndProc(iMessage, wParam, lParam);

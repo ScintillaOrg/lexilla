@@ -321,14 +321,14 @@ static void SetLogFont(LOGFONTA &lf, const char *faceName, int characterSet, flo
  * If one font is the same as another, its hash will be the same, but if the hash is the
  * same then they may still be different.
  */
-static int HashFont(const char *faceName, int characterSet, float size, int weight, bool italic, int extraFontFlag) {
+static int HashFont(const FontParameters &fp) {
 	return
-		static_cast<int>(size) ^
-		(characterSet << 10) ^
-		((extraFontFlag & SC_EFF_QUALITY_MASK) << 9) ^
-		((weight/100) << 12) ^
-		(italic ? 0x20000000 : 0) ^
-		faceName[0];
+		static_cast<int>(fp.size) ^
+		(fp.characterSet << 10) ^
+		((fp.extraFontFlag & SC_EFF_QUALITY_MASK) << 9) ^
+		((fp.weight/100) << 12) ^
+		(fp.italic ? 0x20000000 : 0) ^
+		fp.faceName[0];
 }
 
 class FontCached : Font {
@@ -337,33 +337,33 @@ class FontCached : Font {
 	float size;
 	LOGFONTA lf;
 	int hash;
-	FontCached(const char *faceName_, int characterSet_, float size_, int weight_, bool italic_, int extraFontFlag_);
+	FontCached(const FontParameters &fp);
 	~FontCached() {}
-	bool SameAs(const char *faceName_, int characterSet_, float size_, int weight_, bool italic_, int extraFontFlag_);
+	bool SameAs(const FontParameters &fp);
 	virtual void Release();
 
 	static FontCached *first;
 public:
-	static FontID FindOrCreate(const char *faceName_, int characterSet_, float size_, int weight_, bool italic_, int extraFontFlag_);
+	static FontID FindOrCreate(const FontParameters &fp);
 	static void ReleaseId(FontID fid_);
 };
 
 FontCached *FontCached::first = 0;
 
-FontCached::FontCached(const char *faceName_, int characterSet_, float size_, int weight_, bool italic_, int extraFontFlag_) :
+FontCached::FontCached(const FontParameters &fp) :
 	next(0), usage(0), size(1.0), hash(0) {
-	SetLogFont(lf, faceName_, characterSet_, size_, weight_, italic_, extraFontFlag_);
-	hash = HashFont(faceName_, characterSet_, size_, weight_, italic_, extraFontFlag_);
+	SetLogFont(lf, fp.faceName, fp.characterSet, fp.size, fp.weight, fp.italic, fp.extraFontFlag);
+	hash = HashFont(fp);
 	fid = 0;
 	if (pIDWriteFactory) {
 		IDWriteTextFormat *pTextFormat;
 		const int faceSize = 200;
 		WCHAR wszFace[faceSize];
-		UTF16FromUTF8(faceName_, strlen(faceName_)+1, wszFace, faceSize);
-		FLOAT fHeight = size_;
-		DWRITE_FONT_STYLE style = italic_ ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL;
+		UTF16FromUTF8(fp.faceName, strlen(fp.faceName)+1, wszFace, faceSize);
+		FLOAT fHeight = fp.size;
+		DWRITE_FONT_STYLE style = fp.italic ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL;
 		HRESULT hr = pIDWriteFactory->CreateTextFormat(wszFace, NULL,
-			static_cast<DWRITE_FONT_WEIGHT>(weight_),
+			static_cast<DWRITE_FONT_WEIGHT>(fp.weight),
 			style,
 			DWRITE_FONT_STRETCH_NORMAL, fHeight, L"en-us", &pTextFormat);
 		if (SUCCEEDED(hr)) {
@@ -385,20 +385,20 @@ FontCached::FontCached(const char *faceName_, int characterSet_, float size_, in
 				}
 				pTextLayout->Release();
 			}
-			fid = reinterpret_cast<void *>(new FormatAndMetrics(pTextFormat, extraFontFlag_, yAscent, yDescent));
+			fid = reinterpret_cast<void *>(new FormatAndMetrics(pTextFormat, fp.extraFontFlag, yAscent, yDescent));
 		}
 	}
 	usage = 1;
 }
 
-bool FontCached::SameAs(const char *faceName_, int characterSet_, float size_, int weight_, bool italic_, int extraFontFlag_) {
+bool FontCached::SameAs(const FontParameters &fp) {
 	return
-		(size == size_) &&
-		(lf.lfWeight == weight_) &&
-		(lf.lfItalic == static_cast<BYTE>(italic_ ? 1 : 0)) &&
-		(lf.lfCharSet == characterSet_) &&
-		(lf.lfQuality == Win32MapFontQuality(extraFontFlag_)) &&
-		0 == strcmp(lf.lfFaceName,faceName_);
+		(size == fp.size) &&
+		(lf.lfWeight == fp.weight) &&
+		(lf.lfItalic == static_cast<BYTE>(fp.italic ? 1 : 0)) &&
+		(lf.lfCharSet == fp.characterSet) &&
+		(lf.lfQuality == Win32MapFontQuality(fp.extraFontFlag)) &&
+		0 == strcmp(lf.lfFaceName,fp.faceName);
 }
 
 void FontCached::Release() {
@@ -406,19 +406,19 @@ void FontCached::Release() {
 	fid = 0;
 }
 
-FontID FontCached::FindOrCreate(const char *faceName_, int characterSet_, float size_, int weight_, bool italic_, int extraFontFlag_) {
+FontID FontCached::FindOrCreate(const FontParameters &fp) {
 	FontID ret = 0;
 	::EnterCriticalSection(&crPlatformLock);
-	int hashFind = HashFont(faceName_, characterSet_, size_, weight_, italic_, extraFontFlag_);
+	int hashFind = HashFont(fp);
 	for (FontCached *cur=first; cur; cur=cur->next) {
 		if ((cur->hash == hashFind) &&
-			cur->SameAs(faceName_, characterSet_, size_, weight_, italic_, extraFontFlag_)) {
+			cur->SameAs(fp)) {
 			cur->usage++;
 			ret = cur->fid;
 		}
 	}
 	if (ret == 0) {
-		FontCached *fc = new FontCached(faceName_, characterSet_, size_, weight_, italic_, extraFontFlag_);
+		FontCached *fc = new FontCached(fp);
 		if (fc) {
 			fc->next = first;
 			first = fc;
@@ -457,11 +457,10 @@ Font::~Font() {
 
 #define FONTS_CACHED
 
-void Font::Create(const char *faceName, int characterSet, float size,
-	int weight, bool italic, int extraFontFlag) {
+void Font::Create(const FontParameters &fp) {
 	Release();
-	if (faceName)
-		fid = FontCached::FindOrCreate(faceName, characterSet, size, weight, italic, extraFontFlag);
+	if (fp.faceName)
+		fid = FontCached::FindOrCreate(fp);
 }
 
 void Font::Release() {
@@ -1203,7 +1202,7 @@ void SurfaceImpl::SetDBCSMode(int codePage_) {
 	win9xACPSame = !IsNT() && ((unsigned int)codePage == ::GetACP());
 }
 
-Surface *Surface::Allocate() {
+Surface *Surface::Allocate(int /* technology */) {
 	return new SurfaceImpl;
 }
 
@@ -1514,6 +1513,7 @@ ListBox::~ListBox() {
 class ListBoxX : public ListBox {
 	int lineHeight;
 	FontID fontCopy;
+	int technology;
 	RGBAImageSet images;
 	LineToItem lti;
 	HWND lb;
@@ -1555,7 +1555,7 @@ class ListBoxX : public ListBox {
 	static const Point ImageInset;	// Padding around image
 
 public:
-	ListBoxX() : lineHeight(10), fontCopy(0), lb(0), unicodeMode(false),
+	ListBoxX() : lineHeight(10), fontCopy(0), technology(0), lb(0), unicodeMode(false),
 		desiredVisibleRows(5), maxItemCharacters(0), aveCharWidth(8),
 		parent(NULL), ctrlID(0), doubleClickAction(NULL), doubleClickActionData(NULL),
 		widestItem(NULL), maxCharWidth(1), resizeHit(0) {
@@ -1567,7 +1567,7 @@ public:
 		}
 	}
 	virtual void SetFont(Font &font);
-	virtual void Create(Window &parent, int ctrlID, Point location_, int lineHeight_, bool unicodeMode_);
+	virtual void Create(Window &parent, int ctrlID, Point location_, int lineHeight_, bool unicodeMode_, int technology_);
 	virtual void SetAverageCharWidth(int width);
 	virtual void SetVisibleRows(int rows);
 	virtual int GetVisibleRows() const;
@@ -1602,12 +1602,13 @@ ListBox *ListBox::Allocate() {
 	return lb;
 }
 
-void ListBoxX::Create(Window &parent_, int ctrlID_, Point location_, int lineHeight_, bool unicodeMode_) {
+void ListBoxX::Create(Window &parent_, int ctrlID_, Point location_, int lineHeight_, bool unicodeMode_, int technology_) {
 	parent = &parent_;
 	ctrlID = ctrlID_;
 	location = location_;
 	lineHeight = lineHeight_;
 	unicodeMode = unicodeMode_;
+	technology = technology_;
 	HWND hwndParent = reinterpret_cast<HWND>(parent->GetID());
 	HINSTANCE hinstanceParent = GetWindowInstance(hwndParent);
 	// Window created as popup so not clipped within parent client area
@@ -1800,7 +1801,7 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 		// Draw the image, if any
 		RGBAImage *pimage = images.Get(pixId);
 		if (pimage) {
-			Surface *surfaceItem = Surface::Allocate();
+			Surface *surfaceItem = Surface::Allocate(technology);
 			if (surfaceItem) {
 				if (pD2DFactory) {
 					D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(

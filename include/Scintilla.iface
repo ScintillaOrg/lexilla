@@ -2194,6 +2194,15 @@ fun void ScrollToStart=2628(,)
 # Scroll to end of document.
 fun void ScrollToEnd=2629(,)
 
+val SC_TECHNOLOGY_DEFAULT=0
+val SC_TECHNOLOGY_DIRECTWRITE=0
+
+# Set the technolgy used.
+set void SetTechnology=2630(int technology,)
+
+# Get the tech.
+get int GetTechnology=2631(,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 
