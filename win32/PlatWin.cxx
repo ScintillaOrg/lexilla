@@ -237,14 +237,16 @@ bool LoadD2D() {
 
 struct FormatAndMetrics {
 	IDWriteTextFormat *pTextFormat;
+	int extraFontFlag;
 	FLOAT yAscent;
 	FLOAT yDescent;
-	FormatAndMetrics(IDWriteTextFormat *pTextFormat_, FLOAT yAscent_, FLOAT yDescent_) : 
-		pTextFormat(pTextFormat_), yAscent(yAscent_), yDescent(yDescent_) {
+	FormatAndMetrics(IDWriteTextFormat *pTextFormat_, int extraFontFlag_, FLOAT yAscent_, FLOAT yDescent_) : 
+		pTextFormat(pTextFormat_), extraFontFlag(extraFontFlag_), yAscent(yAscent_), yDescent(yDescent_) {
 	}
 	~FormatAndMetrics() {
 		pTextFormat->Release();
 		pTextFormat = 0;
+		extraFontFlag = 0;
 		yAscent = 2;
 		yDescent = 1;
 	}
@@ -283,6 +285,23 @@ static BYTE Win32MapFontQuality(int extraFontFlag) {
 
 		default:
 			return SC_EFF_QUALITY_DEFAULT;
+	}
+}
+
+static D2D1_TEXT_ANTIALIAS_MODE DWriteMapFontQuality(int extraFontFlag) {
+	switch (extraFontFlag & SC_EFF_QUALITY_MASK) {
+
+		case SC_EFF_QUALITY_NON_ANTIALIASED:
+			return D2D1_TEXT_ANTIALIAS_MODE_ALIASED;
+
+		case SC_EFF_QUALITY_ANTIALIASED:
+			return D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE;
+
+		case SC_EFF_QUALITY_LCD_OPTIMIZED:
+			return D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE;
+
+		default:
+			return D2D1_TEXT_ANTIALIAS_MODE_DEFAULT;
 	}
 }
 
@@ -366,7 +385,7 @@ FontCached::FontCached(const char *faceName_, int characterSet_, float size_, in
 				}
 				pTextLayout->Release();
 			}
-			fid = reinterpret_cast<void *>(new FormatAndMetrics(pTextFormat, yAscent, yDescent));
+			fid = reinterpret_cast<void *>(new FormatAndMetrics(pTextFormat, extraFontFlag_, yAscent, yDescent));
 		}
 	}
 	usage = 1;
@@ -669,6 +688,9 @@ void SurfaceImpl::SetFont(Font &font_) {
 	pTextFormat = pfabl->pTextFormat;
 	yAscent = pfabl->yAscent;
 	yDescent = pfabl->yDescent;
+	if (pRenderTarget) {
+		pRenderTarget->SetTextAntialiasMode(DWriteMapFontQuality(pfabl->extraFontFlag));
+	}
 }
 
 int SurfaceImpl::LogPixelsY() {
@@ -950,8 +972,6 @@ void SurfaceImpl::DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, c
 		IDWriteTextLayout *pTextLayout;
 		HRESULT hr = pIDWriteFactory->CreateTextLayout(tbuf.buffer, tbuf.tlen, pTextFormat,
 				rc.Width(), rc.Height(), &pTextLayout);
-		// Could be an option for SC_EFF_QUALITY_ANTIALIASED:
-		//pRenderTarget->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
 		if (SUCCEEDED(hr)) {
 			D2D1_POINT_2F origin = {rc.left, ybase-yAscent};
 			pRenderTarget->DrawTextLayout(origin, pTextLayout, pBrush, D2D1_DRAW_TEXT_OPTIONS_NONE);
