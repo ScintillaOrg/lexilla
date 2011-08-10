@@ -235,27 +235,27 @@ bool LoadD2D() {
 	return pIDWriteFactory && pD2DFactory;
 }
 
-struct FormatAndBaseline {
+struct FormatAndMetrics {
 	IDWriteTextFormat *pTextFormat;
-	FLOAT baseline;
-	FormatAndBaseline(IDWriteTextFormat *pTextFormat_, FLOAT baseline_) : 
-		pTextFormat(pTextFormat_), baseline(baseline_) {
+	FLOAT yAscent;
+	FLOAT yDescent;
+	FormatAndMetrics(IDWriteTextFormat *pTextFormat_, FLOAT yAscent_, FLOAT yDescent_) : 
+		pTextFormat(pTextFormat_), yAscent(yAscent_), yDescent(yDescent_) {
 	}
-	~FormatAndBaseline() {
+	~FormatAndMetrics() {
 		pTextFormat->Release();
 		pTextFormat = 0;
-		baseline = 1;
+		yAscent = 2;
+		yDescent = 1;
 	}
 	HFONT HFont();
 };
 
-HFONT FormatAndBaseline::HFont() {
+HFONT FormatAndMetrics::HFont() {
 	LOGFONTW lf;
 	memset(&lf, 0, sizeof(lf));
-	const int familySize = 200;
-	WCHAR fontFamilyName[familySize];
 
-	HRESULT hr = pTextFormat->GetFontFamilyName(fontFamilyName, familySize);
+	HRESULT hr = pTextFormat->GetFontFamilyName(lf.lfFaceName, LF_FACESIZE);
 	if (SUCCEEDED(hr)) {
 		lf.lfWeight = pTextFormat->GetFontWeight();
 		lf.lfItalic = pTextFormat->GetFontStyle() == DWRITE_FONT_STYLE_ITALIC;
@@ -342,26 +342,31 @@ FontCached::FontCached(const char *faceName_, int characterSet_, float size_, in
 		WCHAR wszFace[faceSize];
 		UTF16FromUTF8(faceName_, strlen(faceName_)+1, wszFace, faceSize);
 		FLOAT fHeight = size_;
+		DWRITE_FONT_STYLE style = italic_ ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL;
 		HRESULT hr = pIDWriteFactory->CreateTextFormat(wszFace, NULL,
 			static_cast<DWRITE_FONT_WEIGHT>(weight_),
-			italic_ ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL,
+			style,
 			DWRITE_FONT_STRETCH_NORMAL, fHeight, L"en-us", &pTextFormat);
 		if (SUCCEEDED(hr)) {
+			pTextFormat->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
+
 			const int maxLines = 2;
 			DWRITE_LINE_METRICS lineMetrics[maxLines];
 			UINT32 lineCount = 0;
-			FLOAT baseline = 1.0f;
+			FLOAT yAscent = 1.0f;
+			FLOAT yDescent = 1.0f;
 			IDWriteTextLayout *pTextLayout = 0;
 			hr = pIDWriteFactory->CreateTextLayout(L"X", 1, pTextFormat,
 					100.0f, 100.0f, &pTextLayout);
 			if (SUCCEEDED(hr)) {
 				hr = pTextLayout->GetLineMetrics(lineMetrics, maxLines, &lineCount);
 				if (SUCCEEDED(hr)) {
-					baseline = lineMetrics[0].baseline;
+					yAscent = lineMetrics[0].baseline;
+					yDescent = lineMetrics[0].height - lineMetrics[0].baseline;
 				}
 				pTextLayout->Release();
 			}
-			fid = reinterpret_cast<void *>(new FormatAndBaseline(pTextFormat, baseline));
+			fid = reinterpret_cast<void *>(new FormatAndMetrics(pTextFormat, yAscent, yDescent));
 		}
 	}
 	usage = 1;
@@ -378,7 +383,7 @@ bool FontCached::SameAs(const char *faceName_, int characterSet_, float size_, i
 }
 
 void FontCached::Release() {
-	delete reinterpret_cast<FormatAndBaseline *>(fid);
+	delete reinterpret_cast<FormatAndMetrics *>(fid);
 	fid = 0;
 }
 
@@ -467,7 +472,9 @@ class SurfaceImpl : public Surface {
 	int clipsActive;
 
 	IDWriteTextFormat *pTextFormat;
-	FLOAT baseline;
+	FLOAT yAscent;
+	FLOAT yDescent;
+
 	ID2D1SolidColorBrush *pBrush;
 	float dpiScaleX;
 	float dpiScaleY;
@@ -552,7 +559,8 @@ SurfaceImpl::SurfaceImpl() :
 	ownRenderTarget = false;
 	clipsActive = 0;
 	pTextFormat = NULL;
-	baseline = 1.0f;
+	yAscent = 2;
+	yDescent = 1;
 	pBrush = NULL;
 	dpiScaleX = 1.0;
 	dpiScaleY = 1.0;
@@ -657,9 +665,10 @@ void SurfaceImpl::D2DPenColour(ColourAllocated fore, int alpha) {
 }
 
 void SurfaceImpl::SetFont(Font &font_) {
-	FormatAndBaseline *pfabl = reinterpret_cast<FormatAndBaseline *>(font_.GetID());
+	FormatAndMetrics *pfabl = reinterpret_cast<FormatAndMetrics *>(font_.GetID());
 	pTextFormat = pfabl->pTextFormat;
-	baseline = pfabl->baseline;
+	yAscent = pfabl->yAscent;
+	yDescent = pfabl->yDescent;
 }
 
 int SurfaceImpl::LogPixelsY() {
@@ -940,14 +949,16 @@ void SurfaceImpl::DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, c
 		// Explicitly creating a text layout appears a little faster 
 		IDWriteTextLayout *pTextLayout;
 		HRESULT hr = pIDWriteFactory->CreateTextLayout(tbuf.buffer, tbuf.tlen, pTextFormat,
-				rc.Width()+2, rc.Height(), &pTextLayout);
+				rc.Width(), rc.Height(), &pTextLayout);
+		// Could be an option for SC_EFF_QUALITY_ANTIALIASED:
+		//pRenderTarget->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
 		if (SUCCEEDED(hr)) {
-			D2D1_POINT_2F origin = {rc.left, ybase-baseline};
+			D2D1_POINT_2F origin = {rc.left, ybase-yAscent};
 			pRenderTarget->DrawTextLayout(origin, pTextLayout, pBrush, D2D1_DRAW_TEXT_OPTIONS_NONE);
 		} else {
 			D2D1_RECT_F layoutRect = D2D1::RectF(
 				static_cast<FLOAT>(rcw.left) / dpiScaleX,
-				static_cast<FLOAT>(ybase-baseline) / dpiScaleY,
+				static_cast<FLOAT>(ybase-yAscent) / dpiScaleY,
 				static_cast<FLOAT>(rcw.right + 1) / dpiScaleX,
 				static_cast<FLOAT>(rcw.bottom) / dpiScaleY);
 			pRenderTarget->DrawText(tbuf.buffer, tbuf.tlen, pTextFormat, layoutRect, pBrush, D2D1_DRAW_TEXT_OPTIONS_NONE);
@@ -1108,56 +1119,13 @@ XYPOSITION SurfaceImpl::WidthChar(Font &font_, char ch) {
 }
 
 XYPOSITION SurfaceImpl::Ascent(Font &font_) {
-	FLOAT ascent = 1.0;
 	SetFont(font_);
-	if (pIDWriteFactory && pTextFormat) {
-		SetFont(font_);
-		// Create a layout
-		IDWriteTextLayout *pTextLayout = 0;
-		HRESULT hr = pIDWriteFactory->CreateTextLayout(L"X", 1, pTextFormat, 1000.0, 1000.0, &pTextLayout);
-		if (SUCCEEDED(hr)) {
-			DWRITE_TEXT_METRICS textMetrics;
-			pTextLayout->GetMetrics(&textMetrics);
-			ascent = textMetrics.layoutHeight;
-			const int clusters = 20;
-			DWRITE_CLUSTER_METRICS clusterMetrics[clusters];
-			UINT32 count = 0;
-			pTextLayout->GetClusterMetrics(clusterMetrics, clusters, &count);
-			//height = pTextLayout->GetMaxHeight();
-			FLOAT minWidth = 0;
-			hr = pTextLayout->DetermineMinWidth(&minWidth);
-			const int maxLines = 2;
-			DWRITE_LINE_METRICS lineMetrics[maxLines];
-			UINT32 lineCount = 0;
-			hr = pTextLayout->GetLineMetrics(lineMetrics, maxLines, &lineCount);
-			if (SUCCEEDED(hr)) {
-				ascent = lineMetrics[0].baseline;
-			}
-			pTextLayout->Release();
-		}
-	}
-	return int(ascent + 0.5);
+	return ceil(yAscent);
 }
 
 XYPOSITION SurfaceImpl::Descent(Font &font_) {
-	FLOAT descent = 1.0;
 	SetFont(font_);
-	if (pIDWriteFactory && pTextFormat) {
-		// Create a layout
-		IDWriteTextLayout *pTextLayout = 0;
-		HRESULT hr = pIDWriteFactory->CreateTextLayout(L"X", 1, pTextFormat, 1000.0, 1000.0, &pTextLayout);
-		if (SUCCEEDED(hr)) {
-			const int maxLines = 2;
-			DWRITE_LINE_METRICS lineMetrics[maxLines];
-			UINT32 lineCount = 0;
-			hr = pTextLayout->GetLineMetrics(lineMetrics, maxLines, &lineCount);
-			if (SUCCEEDED(hr)) {
-				descent = lineMetrics[0].height - lineMetrics[0].baseline;
-			}
-			pTextLayout->Release();
-		}
-	}
-	return int(descent + 0.5);
+	return ceil(yDescent);
 }
 
 XYPOSITION SurfaceImpl::InternalLeading(Font &) {
@@ -1169,25 +1137,7 @@ XYPOSITION SurfaceImpl::ExternalLeading(Font &) {
 }
 
 XYPOSITION SurfaceImpl::Height(Font &font_) {
-	FLOAT height = 1.0;
-	SetFont(font_);
-	if (pIDWriteFactory && pTextFormat) {
-		// Create a layout
-		IDWriteTextLayout *pTextLayout = 0;
-		HRESULT hr = pIDWriteFactory->CreateTextLayout(L"X", 1, pTextFormat, 1000.0, 1000.0, &pTextLayout);
-		if (SUCCEEDED(hr)) {
-			const int maxLines = 2;
-			DWRITE_LINE_METRICS lineMetrics[maxLines];
-			UINT32 lineCount = 0;
-			hr = pTextLayout->GetLineMetrics(lineMetrics, maxLines, &lineCount);
-			if (SUCCEEDED(hr)) {
-				height = lineMetrics[0].height;
-			}
-			pTextLayout->Release();
-		}
-	}
-	// Truncating rather than rounding as otherwise too much space.
-	return int(height);
+	return Ascent(font_) + Descent(font_);
 }
 
 XYPOSITION SurfaceImpl::AverageCharWidth(Font &font_) {
@@ -1660,7 +1610,7 @@ void ListBoxX::SetFont(Font &font) {
 			::DeleteObject(fontCopy);
 			fontCopy = 0;
 		}
-		FormatAndBaseline *pfabl = reinterpret_cast<FormatAndBaseline *>(font.GetID());
+		FormatAndMetrics *pfabl = reinterpret_cast<FormatAndMetrics *>(font.GetID());
 		fontCopy = pfabl->HFont();
 		::SendMessage(lb, WM_SETFONT, reinterpret_cast<WPARAM>(fontCopy), 0);
 	}
