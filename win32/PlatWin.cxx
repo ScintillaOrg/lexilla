@@ -236,16 +236,17 @@ bool LoadD2D() {
 }
 
 struct FormatAndMetrics {
+	int technology;
 	HFONT hfont;
 	IDWriteTextFormat *pTextFormat;
 	int extraFontFlag;
 	FLOAT yAscent;
 	FLOAT yDescent;
-	FormatAndMetrics(IDWriteTextFormat *pTextFormat_, int extraFontFlag_, FLOAT yAscent_, FLOAT yDescent_) : 
-		hfont(0), pTextFormat(pTextFormat_), extraFontFlag(extraFontFlag_), yAscent(yAscent_), yDescent(yDescent_) {
-	}
 	FormatAndMetrics(HFONT hfont_, int extraFontFlag_) : 
-		hfont(hfont_), pTextFormat(0), extraFontFlag(extraFontFlag_), yAscent(2), yDescent(1) {
+		technology(SCWIN_TECH_GDI), hfont(hfont_), pTextFormat(0), extraFontFlag(extraFontFlag_), yAscent(2), yDescent(1) {
+	}
+	FormatAndMetrics(IDWriteTextFormat *pTextFormat_, int extraFontFlag_, FLOAT yAscent_, FLOAT yDescent_) : 
+		technology(SCWIN_TECH_DIRECTWRITE), hfont(0), pTextFormat(pTextFormat_), extraFontFlag(extraFontFlag_), yAscent(yAscent_), yDescent(yDescent_) {
 	}
 	~FormatAndMetrics() {
 		if (hfont)
@@ -261,15 +262,19 @@ struct FormatAndMetrics {
 };
 
 HFONT FormatAndMetrics::HFont() {
-	LOGFONTW lf;
-	memset(&lf, 0, sizeof(lf));
+	if (technology == SCWIN_TECH_GDI) {
+		return hfont;
+	} else {
+		LOGFONTW lf;
+		memset(&lf, 0, sizeof(lf));
 
-	HRESULT hr = pTextFormat->GetFontFamilyName(lf.lfFaceName, LF_FACESIZE);
-	if (SUCCEEDED(hr)) {
-		lf.lfWeight = pTextFormat->GetFontWeight();
-		lf.lfItalic = pTextFormat->GetFontStyle() == DWRITE_FONT_STYLE_ITALIC;
-		lf.lfHeight = -static_cast<int>(pTextFormat->GetFontSize());
-		return ::CreateFontIndirectW(&lf);
+		HRESULT hr = pTextFormat->GetFontFamilyName(lf.lfFaceName, LF_FACESIZE);
+		if (SUCCEEDED(hr)) {
+			lf.lfWeight = pTextFormat->GetFontWeight();
+			lf.lfItalic = pTextFormat->GetFontStyle() == DWRITE_FONT_STYLE_ITALIC;
+			lf.lfHeight = -static_cast<int>(pTextFormat->GetFontSize());
+			return ::CreateFontIndirectW(&lf);
+		}
 	}
 	return 0;
 }
@@ -315,7 +320,7 @@ static D2D1_TEXT_ANTIALIAS_MODE DWriteMapFontQuality(int extraFontFlag) {
 static void SetLogFont(LOGFONTA &lf, const char *faceName, int characterSet, float size, int weight, bool italic, int extraFontFlag) {
 	memset(&lf, 0, sizeof(lf));
 	// The negative is to allow for leading
-	lf.lfHeight = -(abs(static_cast<int>(size)));
+	lf.lfHeight = -(abs(static_cast<int>(size + 0.5)));
 	lf.lfWeight = weight;
 	lf.lfItalic = static_cast<BYTE>(italic ? 1 : 0);
 	lf.lfCharSet = static_cast<BYTE>(characterSet);
@@ -717,6 +722,7 @@ void SurfaceGDI::BrushColor(ColourAllocated back) {
 void SurfaceGDI::SetFont(Font &font_) {
 	if (font_.GetID() != font) {
 		FormatAndMetrics *pfm = reinterpret_cast<FormatAndMetrics *>(font_.GetID());
+		PLATFORM_ASSERT(pfm->technology == SCWIN_TECH_GDI);
 		if (fontOld) {
 			::SelectObject(hdc, pfm->hfont);
 		} else {
@@ -1395,6 +1401,7 @@ void SurfaceD2D::D2DPenColour(ColourAllocated fore, int alpha) {
 
 void SurfaceD2D::SetFont(Font &font_) {
 	FormatAndMetrics *pfm = reinterpret_cast<FormatAndMetrics *>(font_.GetID());
+	PLATFORM_ASSERT(pfm->technology == SCWIN_TECH_DIRECTWRITE);
 	pTextFormat = pfm->pTextFormat;
 	yAscent = pfm->yAscent;
 	yDescent = pfm->yDescent;
@@ -2306,8 +2313,8 @@ void ListBoxX::SetFont(Font &font) {
 			::DeleteObject(fontCopy);
 			fontCopy = 0;
 		}
-		FormatAndMetrics *pfabl = reinterpret_cast<FormatAndMetrics *>(font.GetID());
-		fontCopy = pfabl->HFont();
+		FormatAndMetrics *pfm = reinterpret_cast<FormatAndMetrics *>(font.GetID());
+		fontCopy = pfm->HFont();
 		::SendMessage(lb, WM_SETFONT, reinterpret_cast<WPARAM>(fontCopy), 0);
 	}
 }

@@ -1146,6 +1146,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 					}
 					technology = wParam;
 					// Invalidate all cached information including layout.
+					DropGraphics(true);
 					InvalidateStyleRedraw();
 				}
 			}
@@ -2379,30 +2380,41 @@ void ScintillaWin::RealizeWindowPalette(bool) {
  * This paint will not be abandoned.
  */
 void ScintillaWin::FullPaint() {
-	//HDC hdc = ::GetDC(MainHWND());
-	//FullPaintDC(hdc);
-	//::ReleaseDC(MainHWND(), hdc);
-	FullPaintDC(0);
+	if (technology == SC_TECHNOLOGY_DEFAULT) {
+		HDC hdc = ::GetDC(MainHWND());
+		FullPaintDC(hdc);
+		::ReleaseDC(MainHWND(), hdc);
+	} else {
+		FullPaintDC(0);
+	}
 }
 
 /**
  * Redraw all of text area on the specified DC.
  * This paint will not be abandoned.
  */
-void ScintillaWin::FullPaintDC(HDC) {
+void ScintillaWin::FullPaintDC(HDC hdc) {
 	paintState = painting;
 	rcPaint = GetClientRectangle();
 	paintingAllText = true;
-	EnsureRenderTarget();
-	AutoSurface surfaceWindow(pRenderTarget, this);
-	if (surfaceWindow) {
-		pRenderTarget->BeginDraw();
-		Paint(surfaceWindow, rcPaint);
-		surfaceWindow->Release();
-		HRESULT hr = pRenderTarget->EndDraw();
-		if (hr == D2DERR_RECREATE_TARGET) {
-			DropRenderTarget();
-        }
+	if (technology == SC_TECHNOLOGY_DEFAULT) {
+		AutoSurface surfaceWindow(hdc, this);
+		if (surfaceWindow) {
+			Paint(surfaceWindow, rcPaint);
+			surfaceWindow->Release();
+		}
+	} else {
+		EnsureRenderTarget();
+		AutoSurface surfaceWindow(pRenderTarget, this);
+		if (surfaceWindow) {
+			pRenderTarget->BeginDraw();
+			Paint(surfaceWindow, rcPaint);
+			surfaceWindow->Release();
+			HRESULT hr = pRenderTarget->EndDraw();
+			if (hr == D2DERR_RECREATE_TARGET) {
+				DropRenderTarget();
+			}
+		}
 	}
 	paintState = notPainting;
 }
