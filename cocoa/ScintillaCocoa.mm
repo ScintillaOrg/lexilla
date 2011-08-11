@@ -702,7 +702,7 @@ void ScintillaCocoa::Paste(bool forceRectangular)
 
 void ScintillaCocoa::CTPaint(void* gc, NSRect rc) {
 #pragma unused(rc)
-    Surface *surfaceWindow = Surface::Allocate();
+    Surface *surfaceWindow = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
     if (surfaceWindow) {
         surfaceWindow->Init(gc, wMain.GetID());
         surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == ct.codePage);
@@ -1251,7 +1251,7 @@ void ScintillaCocoa::SyncPaint(void* gc, PRectangle rc)
   rcPaint = rc;
   PRectangle rcText = GetTextRectangle();
   paintingAllText = rcPaint.Contains(rcText);
-  Surface *sw = Surface::Allocate();
+  Surface *sw = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
   if (sw)
   {
     sw->Init(gc, wMain.GetID());

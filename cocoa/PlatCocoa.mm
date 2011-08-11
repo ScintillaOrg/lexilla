@@ -156,8 +156,7 @@ static int FontCharacterSet(Font &f) {
 /**
  * Creates a CTFontRef with the given properties.
  */
-void Font::Create(const char *faceName, int characterSet, float size, int weight, bool italic, 
-                  int /* extraFontFlag */)
+void Font::Create(const FontParameters &fp)
 {
 	Release();
 
@@ -165,9 +164,9 @@ void Font::Create(const char *faceName, int characterSet, float size, int weight
 	fid = style;
 
 	// Create the font with attributes
-	QuartzFont font(faceName, strlen(faceName), size, bold, italic);
+	QuartzFont font(fp.faceName, strlen(fp.faceName), fp.size, fp.weight, fp.italic);
 	CTFontRef fontRef = font.getFontID();
-	style->setFontRef(fontRef, characterSet);
+	style->setFontRef(fontRef, fp.characterSet);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1095,7 +1094,7 @@ void SurfaceImpl::SetDBCSMode(int codePage_) {
     codePage = codePage_;
 }
 
-Surface *Surface::Allocate()
+Surface *Surface::Allocate(int)
 {
   return new SurfaceImpl();
 }
@@ -1374,7 +1373,7 @@ static NSImage* ImageFromXPM(XPM* pxpm)
     const int width = pxpm->GetWidth();
     const int height = pxpm->GetHeight();
     PRectangle rcxpm(0, 0, width, height);
-    Surface* surfaceXPM = Surface::Allocate();
+    Surface* surfaceXPM = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
     if (surfaceXPM)
     {
       surfaceXPM->InitPixMap(width, height, NULL, NULL);
@@ -1510,7 +1509,7 @@ public:
 
   // ListBox methods
   void SetFont(Font& font);
-  void Create(Window& parent, int ctrlID, Scintilla::Point pt, int lineHeight_, bool unicodeMode_);
+  void Create(Window& parent, int ctrlID, Scintilla::Point pt, int lineHeight_, bool unicodeMode_, int technology_);
   void SetAverageCharWidth(int width);
   void SetVisibleRows(int rows);
   int GetVisibleRows() const;
@@ -1595,7 +1594,7 @@ ListBox* ListBox::Allocate()
 }
 
 void ListBoxImpl::Create(Window& /*parent*/, int /*ctrlID*/, Scintilla::Point pt,
-    int lineHeight_, bool unicodeMode_)
+    int lineHeight_, bool unicodeMode_, int)
 {
   lineHeight = lineHeight_;
   unicodeMode = unicodeMode_;
