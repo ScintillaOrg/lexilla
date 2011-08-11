@@ -459,13 +459,13 @@ static void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, floa
  * If one font is the same as another, its hash will be the same, but if the hash is the
  * same then they may still be different.
  */
-static int HashFont(const char *faceName, int characterSet, int size, int weight, bool italic) {
+static int HashFont(const FontParameters &fp) {
 	return
-	    size ^
-	    (characterSet << 10) ^
-	    ((weight / 100) << 12) ^
-	    (italic ? 0x20000000 : 0) ^
-	    faceName[0];
+	    static_cast<int>(fp.size+0.5) ^
+	    (fp.characterSet << 10) ^
+	    ((fp.weight / 100) << 12) ^
+	    (fp.italic ? 0x20000000 : 0) ^
+	    fp.faceName[0];
 }
 
 class FontCached : Font {
@@ -473,35 +473,34 @@ class FontCached : Font {
 	int usage;
 	LOGFONT lf;
 	int hash;
-	FontCached(const char *faceName_, int characterSet_, float size_, int weight_, bool italic_);
+	FontCached(const FontParameters &fp);
 	~FontCached() {}
-	bool SameAs(const char *faceName_, int characterSet_, float size_, int weight_, bool italic_);
+	bool SameAs(const FontParameters &fp);
 	virtual void Release();
-	static FontID CreateNewFont(const char *fontName, int characterSet,
-	                            float size, int weight, bool italic);
+	static FontID CreateNewFont(const FontParameters &fp);
 	static FontCached *first;
 public:
-	static FontID FindOrCreate(const char *faceName_, int characterSet_, float size_, int weight_, bool italic_);
+	static FontID FindOrCreate(const FontParameters &fp);
 	static void ReleaseId(FontID fid_);
 };
 
 FontCached *FontCached::first = 0;
 
-FontCached::FontCached(const char *faceName_, int characterSet_, float size_, int weight_, bool italic_) :
+FontCached::FontCached(const FontParameters &fp) :
 next(0), usage(0), hash(0) {
-	::SetLogFont(lf, faceName_, characterSet_, size_, weight_, italic_);
-	hash = HashFont(faceName_, characterSet_, size_, weight_, italic_);
-	fid = CreateNewFont(faceName_, characterSet_, size_, weight_, italic_);
+	::SetLogFont(lf, fp.faceName, fp.characterSet, fp.size, fp.weight, fp.italic);
+	hash = HashFont(fp);
+	fid = CreateNewFont(fp);
 	usage = 1;
 }
 
-bool FontCached::SameAs(const char *faceName_, int characterSet_, float size_, int weight_, bool italic_) {
+bool FontCached::SameAs(const FontParameters &fp) {
 	return
-	    lf.size == size_ &&
-	    lf.weight == weight_ &&
-	    lf.italic == italic_ &&
-	    lf.characterSet == characterSet_ &&
-	    0 == strcmp(lf.faceName, faceName_);
+	    lf.size == fp.size &&
+	    lf.weight == fp.weight &&
+	    lf.italic == fp.italic &&
+	    lf.characterSet == fp.characterSet &&
+	    0 == strcmp(lf.faceName, fp.faceName);
 }
 
 void FontCached::Release() {
@@ -510,19 +509,19 @@ void FontCached::Release() {
 	fid = 0;
 }
 
-FontID FontCached::FindOrCreate(const char *faceName_, int characterSet_, float size_, int weight_, bool italic_) {
+FontID FontCached::FindOrCreate(const FontParameters &fp) {
 	FontID ret = 0;
 	FontMutexLock();
-	int hashFind = HashFont(faceName_, characterSet_, size_, weight_, italic_);
+	int hashFind = HashFont(fp);
 	for (FontCached *cur = first; cur; cur = cur->next) {
 		if ((cur->hash == hashFind) &&
-		        cur->SameAs(faceName_, characterSet_, size_, weight_, italic_)) {
+		        cur->SameAs(fp)) {
 			cur->usage++;
 			ret = cur->fid;
 		}
 	}
 	if (ret == 0) {
-		FontCached *fc = new FontCached(faceName_, characterSet_, size_, weight_, italic_);
+		FontCached *fc = new FontCached(fp);
 		if (fc) {
 			fc->next = first;
 			first = fc;
@@ -562,16 +561,15 @@ static GdkFont *LoadFontOrSet(const char *fontspec, int characterSet) {
 }
 #endif
 
-FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
-                                 float size, int weight, bool italic) {
-	if (fontName[0] == '!') {
+FontID FontCached::CreateNewFont(const FontParameters &fp) {
+	if (fp.faceName[0] == '!') {
 		PangoFontDescription *pfd = pango_font_description_new();
 		if (pfd) {
-			pango_font_description_set_family(pfd, fontName+1);
-			pango_font_description_set_size(pfd, pango_units_from_double(size));
-			pango_font_description_set_weight(pfd, static_cast<PangoWeight>(weight));
-			pango_font_description_set_style(pfd, italic ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
-			return new FontHandle(pfd, characterSet);
+			pango_font_description_set_family(pfd, fp.faceName+1);
+			pango_font_description_set_size(pfd, pango_units_from_double(fp.size));
+			pango_font_description_set_weight(pfd, static_cast<PangoWeight>(fp.weight));
+			pango_font_description_set_style(pfd, fp.italic ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
+			return new FontHandle(pfd, fp.characterSet);
 		}
 	}
 
@@ -729,10 +727,9 @@ Font::Font() : fid(0) {}
 
 Font::~Font() {}
 
-void Font::Create(const char *faceName, int characterSet, float size,
-	int weight, bool italic, int) {
+void Font::Create(const FontParameters &fp) {
 	Release();
-	fid = FontCached::FindOrCreate(faceName, characterSet, size, weight, italic);
+	fid = FontCached::FindOrCreate(fp);
 }
 
 void Font::Release() {
@@ -2103,8 +2100,8 @@ void SurfaceImpl::SetDBCSMode(int codePage) {
 		et = dbcs;
 }
 
-Surface *Surface::Allocate() {
-	return new SurfaceImpl;
+Surface *Surface::Allocate(int) {
+	return new SurfaceImpl();
 }
 
 Window::~Window() {}
@@ -2324,7 +2321,7 @@ public:
 		}
 	}
 	virtual void SetFont(Font &font);
-	virtual void Create(Window &parent, int ctrlID, Point location_, int lineHeight_, bool unicodeMode_);
+	virtual void Create(Window &parent, int ctrlID, Point location_, int lineHeight_, bool unicodeMode_, int technology_);
 	virtual void SetAverageCharWidth(int width);
 	virtual void SetVisibleRows(int rows);
 	virtual int GetVisibleRows() const;
@@ -2413,7 +2410,7 @@ static void StyleSet(GtkWidget *w, GtkStyle*, void*) {
 #endif
 }
 
-void ListBoxX::Create(Window &, int, Point, int, bool) {
+void ListBoxX::Create(Window &, int, Point, int, bool, int) {
 	wid = gtk_window_new(GTK_WINDOW_POPUP);
 
 	GtkWidget *frame = gtk_frame_new(NULL);
