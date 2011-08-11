@@ -236,14 +236,21 @@ bool LoadD2D() {
 }
 
 struct FormatAndMetrics {
+	HFONT hfont;
 	IDWriteTextFormat *pTextFormat;
 	int extraFontFlag;
 	FLOAT yAscent;
 	FLOAT yDescent;
 	FormatAndMetrics(IDWriteTextFormat *pTextFormat_, int extraFontFlag_, FLOAT yAscent_, FLOAT yDescent_) : 
-		pTextFormat(pTextFormat_), extraFontFlag(extraFontFlag_), yAscent(yAscent_), yDescent(yDescent_) {
+		hfont(0), pTextFormat(pTextFormat_), extraFontFlag(extraFontFlag_), yAscent(yAscent_), yDescent(yDescent_) {
+	}
+	FormatAndMetrics(HFONT hfont_, int extraFontFlag_) : 
+		hfont(hfont_), pTextFormat(0), extraFontFlag(extraFontFlag_), yAscent(2), yDescent(1) {
 	}
 	~FormatAndMetrics() {
+		if (hfont)
+			::DeleteObject(hfont);
+		if (pTextFormat)
 		pTextFormat->Release();
 		pTextFormat = 0;
 		extraFontFlag = 0;
@@ -328,6 +335,7 @@ static int HashFont(const FontParameters &fp) {
 		((fp.extraFontFlag & SC_EFF_QUALITY_MASK) << 9) ^
 		((fp.weight/100) << 12) ^
 		(fp.italic ? 0x20000000 : 0) ^
+		(fp.technology << 15) ^
 		fp.faceName[0];
 }
 
@@ -336,6 +344,7 @@ class FontCached : Font {
 	int usage;
 	float size;
 	LOGFONTA lf;
+	int technology;
 	int hash;
 	FontCached(const FontParameters &fp);
 	~FontCached() {}
@@ -353,9 +362,13 @@ FontCached *FontCached::first = 0;
 FontCached::FontCached(const FontParameters &fp) :
 	next(0), usage(0), size(1.0), hash(0) {
 	SetLogFont(lf, fp.faceName, fp.characterSet, fp.size, fp.weight, fp.italic, fp.extraFontFlag);
+	technology = fp.technology;
 	hash = HashFont(fp);
 	fid = 0;
-	if (pIDWriteFactory) {
+	if (technology == SCWIN_TECH_GDI) {
+		HFONT hfont = ::CreateFontIndirectA(&lf);
+		fid = reinterpret_cast<void *>(new FormatAndMetrics(hfont, fp.extraFontFlag));
+	} else {
 		IDWriteTextFormat *pTextFormat;
 		const int faceSize = 200;
 		WCHAR wszFace[faceSize];
@@ -398,6 +411,7 @@ bool FontCached::SameAs(const FontParameters &fp) {
 		(lf.lfItalic == static_cast<BYTE>(fp.italic ? 1 : 0)) &&
 		(lf.lfCharSet == fp.characterSet) &&
 		(lf.lfQuality == Win32MapFontQuality(fp.extraFontFlag)) &&
+		(technology == fp.technology) &&
 		0 == strcmp(lf.lfFaceName,fp.faceName);
 }
 
@@ -469,11 +483,708 @@ void Font::Release() {
 	fid = 0;
 }
 
+// Buffer to hold strings and string position arrays without always allocating on heap.
+// May sometimes have string too long to allocate on stack. So use a fixed stack-allocated buffer
+// when less than safe size otherwise allocate on heap and free automatically.
+template<typename T, int lengthStandard>
+class VarBuffer {
+	T bufferStandard[lengthStandard];
+public:
+	T *buffer;
+	VarBuffer(size_t length) : buffer(0) {
+		if (length > lengthStandard) {
+			buffer = new T[length];
+		} else {
+			buffer = bufferStandard;
+		}
+	}
+	~VarBuffer() {
+		if (buffer != bufferStandard) {
+			delete []buffer;
+			buffer = 0;
+		}
+	}
+};
+
+const int stackBufferLength = 10000;
+class TextWide : public VarBuffer<wchar_t, stackBufferLength> {
+public:
+	int tlen;
+	TextWide(const char *s, int len, bool unicodeMode, int codePage=0) :
+		VarBuffer<wchar_t, stackBufferLength>(len) {
+		if (unicodeMode) {
+			tlen = UTF16FromUTF8(s, len, buffer, len);
+		} else {
+			// Support Asian string display in 9x English
+			tlen = ::MultiByteToWideChar(codePage, 0, s, len, buffer, len);
+		}
+	}
+};
+typedef VarBuffer<XYPOSITION, stackBufferLength> TextPositions;
+
 #ifdef SCI_NAMESPACE
 namespace Scintilla {
 #endif
 
-class SurfaceImpl : public Surface {
+class SurfaceGDI : public Surface {
+	bool unicodeMode;
+	HDC hdc;
+	bool hdcOwned;
+	HPEN pen;
+	HPEN penOld;
+	HBRUSH brush;
+	HBRUSH brushOld;
+	HFONT font;
+	HFONT fontOld;
+	HBITMAP bitmap;
+	HBITMAP bitmapOld;
+	HPALETTE paletteOld;
+	int maxWidthMeasure;
+	int maxLenText;
+
+	int codePage;
+	// If 9x OS and current code page is same as ANSI code page.
+	bool win9xACPSame;
+
+	void BrushColor(ColourAllocated back);
+	void SetFont(Font &font_);
+
+	// Private so SurfaceGDI objects can not be copied
+	SurfaceGDI(const SurfaceGDI &);
+	SurfaceGDI &operator=(const SurfaceGDI &);
+public:
+	SurfaceGDI();
+	virtual ~SurfaceGDI();
+
+	void Init(WindowID wid);
+	void Init(SurfaceID sid, WindowID wid);
+	void InitPixMap(int width, int height, Surface *surface_, WindowID wid);
+
+	void Release();
+	bool Initialised();
+	void PenColour(ColourAllocated fore);
+	int LogPixelsY();
+	int DeviceHeightFont(int points);
+	void MoveTo(int x_, int y_);
+	void LineTo(int x_, int y_);
+	void Polygon(Point *pts, int npts, ColourAllocated fore, ColourAllocated back);
+	void RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back);
+	void FillRectangle(PRectangle rc, ColourAllocated back);
+	void FillRectangle(PRectangle rc, Surface &surfacePattern);
+	void RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back);
+	void AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated fill, int alphaFill,
+		ColourAllocated outline, int alphaOutline, int flags);
+	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage);
+	void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back);
+	void Copy(PRectangle rc, Point from, Surface &surfaceSource);
+
+	void DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, UINT fuOptions);
+	void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
+	void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
+	void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore);
+	void MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions);
+	XYPOSITION WidthText(Font &font_, const char *s, int len);
+	XYPOSITION WidthChar(Font &font_, char ch);
+	XYPOSITION Ascent(Font &font_);
+	XYPOSITION Descent(Font &font_);
+	XYPOSITION InternalLeading(Font &font_);
+	XYPOSITION ExternalLeading(Font &font_);
+	XYPOSITION Height(Font &font_);
+	XYPOSITION AverageCharWidth(Font &font_);
+
+	int SetPalette(Palette *pal, bool inBackGround);
+	void SetClip(PRectangle rc);
+	void FlushCachedState();
+
+	void SetUnicodeMode(bool unicodeMode_);
+	void SetDBCSMode(int codePage_);
+};
+
+#ifdef SCI_NAMESPACE
+} //namespace Scintilla
+#endif
+
+SurfaceGDI::SurfaceGDI() :
+	unicodeMode(false),
+	hdc(0), 	hdcOwned(false),
+	pen(0), 	penOld(0),
+	brush(0), brushOld(0),
+	font(0), 	fontOld(0),
+	bitmap(0), bitmapOld(0),
+	paletteOld(0) {
+	// Windows 9x has only a 16 bit coordinate system so break after 30000 pixels
+	maxWidthMeasure = IsNT() ? INT_MAX : 30000;
+	// There appears to be a 16 bit string length limit in GDI on NT and a limit of
+	// 8192 characters on Windows 95.
+	maxLenText = IsNT() ? 65535 : 8192;
+
+	codePage = 0;
+	win9xACPSame = false;
+}
+
+SurfaceGDI::~SurfaceGDI() {
+	Release();
+}
+
+void SurfaceGDI::Release() {
+	if (penOld) {
+		::SelectObject(reinterpret_cast<HDC>(hdc), penOld);
+		::DeleteObject(pen);
+		penOld = 0;
+	}
+	pen = 0;
+	if (brushOld) {
+		::SelectObject(reinterpret_cast<HDC>(hdc), brushOld);
+		::DeleteObject(brush);
+		brushOld = 0;
+	}
+	brush = 0;
+	if (fontOld) {
+		// Fonts are not deleted as they are owned by a Font object
+		::SelectObject(reinterpret_cast<HDC>(hdc), fontOld);
+		fontOld = 0;
+	}
+	font = 0;
+	if (bitmapOld) {
+		::SelectObject(reinterpret_cast<HDC>(hdc), bitmapOld);
+		::DeleteObject(bitmap);
+		bitmapOld = 0;
+	}
+	bitmap = 0;
+	if (paletteOld) {
+		// Palettes are not deleted as they are owned by a Palette object
+		::SelectPalette(reinterpret_cast<HDC>(hdc),
+			reinterpret_cast<HPALETTE>(paletteOld), TRUE);
+		paletteOld = 0;
+	}
+	if (hdcOwned) {
+		::DeleteDC(reinterpret_cast<HDC>(hdc));
+		hdc = 0;
+		hdcOwned = false;
+	}
+}
+
+bool SurfaceGDI::Initialised() {
+	return hdc != 0;
+}
+
+void SurfaceGDI::Init(WindowID) {
+	Release();
+	hdc = ::CreateCompatibleDC(NULL);
+	hdcOwned = true;
+	::SetTextAlign(reinterpret_cast<HDC>(hdc), TA_BASELINE);
+}
+
+void SurfaceGDI::Init(SurfaceID sid, WindowID) {
+	Release();
+	hdc = reinterpret_cast<HDC>(sid);
+	::SetTextAlign(reinterpret_cast<HDC>(hdc), TA_BASELINE);
+}
+
+void SurfaceGDI::InitPixMap(int width, int height, Surface *surface_, WindowID) {
+	Release();
+	hdc = ::CreateCompatibleDC(static_cast<SurfaceGDI *>(surface_)->hdc);
+	hdcOwned = true;
+	bitmap = ::CreateCompatibleBitmap(static_cast<SurfaceGDI *>(surface_)->hdc, width, height);
+	bitmapOld = static_cast<HBITMAP>(::SelectObject(hdc, bitmap));
+	::SetTextAlign(reinterpret_cast<HDC>(hdc), TA_BASELINE);
+}
+
+void SurfaceGDI::PenColour(ColourAllocated fore) {
+	if (pen) {
+		::SelectObject(hdc, penOld);
+		::DeleteObject(pen);
+		pen = 0;
+		penOld = 0;
+	}
+	pen = ::CreatePen(0,1,fore.AsLong());
+	penOld = static_cast<HPEN>(::SelectObject(reinterpret_cast<HDC>(hdc), pen));
+}
+
+void SurfaceGDI::BrushColor(ColourAllocated back) {
+	if (brush) {
+		::SelectObject(hdc, brushOld);
+		::DeleteObject(brush);
+		brush = 0;
+		brushOld = 0;
+	}
+	// Only ever want pure, non-dithered brushes
+	ColourAllocated colourNearest = ::GetNearestColor(hdc, back.AsLong());
+	brush = ::CreateSolidBrush(colourNearest.AsLong());
+	brushOld = static_cast<HBRUSH>(::SelectObject(hdc, brush));
+}
+
+void SurfaceGDI::SetFont(Font &font_) {
+	if (font_.GetID() != font) {
+		FormatAndMetrics *pfm = reinterpret_cast<FormatAndMetrics *>(font_.GetID());
+		if (fontOld) {
+			::SelectObject(hdc, pfm->hfont);
+		} else {
+			fontOld = static_cast<HFONT>(::SelectObject(hdc, pfm->hfont));
+		}
+		font = reinterpret_cast<HFONT>(pfm->hfont);
+	}
+}
+
+int SurfaceGDI::LogPixelsY() {
+	return ::GetDeviceCaps(hdc, LOGPIXELSY);
+}
+
+int SurfaceGDI::DeviceHeightFont(int points) {
+	return ::MulDiv(points, LogPixelsY(), 72);
+}
+
+void SurfaceGDI::MoveTo(int x_, int y_) {
+	::MoveToEx(hdc, x_, y_, 0);
+}
+
+void SurfaceGDI::LineTo(int x_, int y_) {
+	::LineTo(hdc, x_, y_);
+}
+
+void SurfaceGDI::Polygon(Point *pts, int npts, ColourAllocated fore, ColourAllocated back) {
+	PenColour(fore);
+	BrushColor(back);
+	::Polygon(hdc, reinterpret_cast<POINT *>(pts), npts);
+}
+
+void SurfaceGDI::RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+	PenColour(fore);
+	BrushColor(back);
+	::Rectangle(hdc, rc.left, rc.top, rc.right, rc.bottom);
+}
+
+void SurfaceGDI::FillRectangle(PRectangle rc, ColourAllocated back) {
+	// Using ExtTextOut rather than a FillRect ensures that no dithering occurs.
+	// There is no need to allocate a brush either.
+	RECT rcw = RectFromPRectangle(rc);
+	::SetBkColor(hdc, back.AsLong());
+	::ExtTextOut(hdc, rc.left, rc.top, ETO_OPAQUE, &rcw, TEXT(""), 0, NULL);
+}
+
+void SurfaceGDI::FillRectangle(PRectangle rc, Surface &surfacePattern) {
+	HBRUSH br;
+	if (static_cast<SurfaceGDI &>(surfacePattern).bitmap)
+		br = ::CreatePatternBrush(static_cast<SurfaceGDI &>(surfacePattern).bitmap);
+	else	// Something is wrong so display in red
+		br = ::CreateSolidBrush(RGB(0xff, 0, 0));
+	RECT rcw = RectFromPRectangle(rc);
+	::FillRect(hdc, &rcw, br);
+	::DeleteObject(br);
+}
+
+void SurfaceGDI::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+	PenColour(fore);
+	BrushColor(back);
+	::RoundRect(hdc,
+		rc.left + 1, rc.top,
+		rc.right - 1, rc.bottom,
+		8, 8);
+}
+
+// Plot a point into a DWORD buffer symetrically to all 4 qudrants
+static void AllFour(DWORD *pixels, int width, int height, int x, int y, DWORD val) {
+	pixels[y*width+x] = val;
+	pixels[y*width+width-1-x] = val;
+	pixels[(height-1-y)*width+x] = val;
+	pixels[(height-1-y)*width+width-1-x] = val;
+}
+
+#ifndef AC_SRC_OVER
+#define AC_SRC_OVER                 0x00
+#endif
+#ifndef AC_SRC_ALPHA
+#define AC_SRC_ALPHA		0x01
+#endif
+
+static DWORD dwordFromBGRA(byte b, byte g, byte r, byte a) {
+	union {
+		byte pixVal[4];
+		DWORD val;
+	} converter;
+	converter.pixVal[0] = b;
+	converter.pixVal[1] = g;
+	converter.pixVal[2] = r;
+	converter.pixVal[3] = a;
+	return converter.val;
+}
+
+void SurfaceGDI::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated fill, int alphaFill,
+		ColourAllocated outline, int alphaOutline, int /* flags*/ ) {
+	if (AlphaBlendFn && rc.Width() > 0) {
+		HDC hMemDC = ::CreateCompatibleDC(reinterpret_cast<HDC>(hdc));
+		int width = rc.Width();
+		int height = rc.Height();
+		// Ensure not distorted too much by corners when small
+		cornerSize = Platform::Minimum(cornerSize, (Platform::Minimum(width, height) / 2) - 2);
+		BITMAPINFO bpih = {sizeof(BITMAPINFOHEADER), width, height, 1, 32, BI_RGB, 0, 0, 0, 0, 0};
+		void *image = 0;
+		HBITMAP hbmMem = CreateDIBSection(reinterpret_cast<HDC>(hMemDC), &bpih,
+			DIB_RGB_COLORS, &image, NULL, 0);
+
+		HBITMAP hbmOld = SelectBitmap(hMemDC, hbmMem);
+
+		DWORD valEmpty = dwordFromBGRA(0,0,0,0);
+		DWORD valFill = dwordFromBGRA(
+			static_cast<byte>(GetBValue(fill.AsLong()) * alphaFill / 255),
+			static_cast<byte>(GetGValue(fill.AsLong()) * alphaFill / 255),
+			static_cast<byte>(GetRValue(fill.AsLong()) * alphaFill / 255),
+			static_cast<byte>(alphaFill));
+		DWORD valOutline = dwordFromBGRA(
+			static_cast<byte>(GetBValue(outline.AsLong()) * alphaOutline / 255),
+			static_cast<byte>(GetGValue(outline.AsLong()) * alphaOutline / 255),
+			static_cast<byte>(GetRValue(outline.AsLong()) * alphaOutline / 255),
+			static_cast<byte>(alphaOutline));
+		DWORD *pixels = reinterpret_cast<DWORD *>(image);
+		for (int y=0; y<height; y++) {
+			for (int x=0; x<width; x++) {
+				if ((x==0) || (x==width-1) || (y == 0) || (y == height-1)) {
+					pixels[y*width+x] = valOutline;
+				} else {
+					pixels[y*width+x] = valFill;
+				}
+			}
+		}
+		for (int c=0;c<cornerSize; c++) {
+			for (int x=0;x<c+1; x++) {
+				AllFour(pixels, width, height, x, c-x, valEmpty);
+			}
+		}
+		for (int x=1;x<cornerSize; x++) {
+			AllFour(pixels, width, height, x, cornerSize-x, valOutline);
+		}
+
+		BLENDFUNCTION merge = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
+
+		AlphaBlendFn(reinterpret_cast<HDC>(hdc), rc.left, rc.top, width, height, hMemDC, 0, 0, width, height, merge);
+
+		SelectBitmap(hMemDC, hbmOld);
+		::DeleteObject(hbmMem);
+		::DeleteDC(hMemDC);
+	} else {
+		BrushColor(outline);
+		RECT rcw = RectFromPRectangle(rc);
+		FrameRect(hdc, &rcw, brush);
+	}
+}
+
+void SurfaceGDI::DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) {
+	if (AlphaBlendFn && rc.Width() > 0) {
+		HDC hMemDC = ::CreateCompatibleDC(reinterpret_cast<HDC>(hdc));
+		if (rc.Width() > width)
+			rc.left += (rc.Width() - width) / 2;
+		rc.right = rc.left + width;
+		if (rc.Height() > height)
+			rc.top += (rc.Height() - height) / 2;
+		rc.bottom = rc.top + height;
+
+		BITMAPINFO bpih = {sizeof(BITMAPINFOHEADER), width, height, 1, 32, BI_RGB, 0, 0, 0, 0, 0};
+		unsigned char *image = 0;
+		HBITMAP hbmMem = CreateDIBSection(reinterpret_cast<HDC>(hMemDC), &bpih,
+			DIB_RGB_COLORS, reinterpret_cast<void **>(&image), NULL, 0);
+		HBITMAP hbmOld = SelectBitmap(hMemDC, hbmMem);
+		
+		for (int y=height-1; y>=0; y--) {
+			for (int x=0; x<width; x++) {
+				unsigned char *pixel = image + (y*width+x) * 4;
+				unsigned char alpha = pixelsImage[3];
+				// Input is RGBA, output is BGRA with premultiplied alpha
+				pixel[2] = (*pixelsImage++) * alpha / 255;
+				pixel[1] = (*pixelsImage++) * alpha / 255;
+				pixel[0] = (*pixelsImage++) * alpha / 255;
+				pixel[3] = *pixelsImage++;
+			}
+		}
+		
+		BLENDFUNCTION merge = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
+
+		AlphaBlendFn(reinterpret_cast<HDC>(hdc), rc.left, rc.top, rc.Width(), rc.Height(), hMemDC, 0, 0, width, height, merge);
+
+		SelectBitmap(hMemDC, hbmOld);
+		::DeleteObject(hbmMem);
+		::DeleteDC(hMemDC);
+
+	}
+}
+
+void SurfaceGDI::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+	PenColour(fore);
+	BrushColor(back);
+	::Ellipse(hdc, rc.left, rc.top, rc.right, rc.bottom);
+}
+
+void SurfaceGDI::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
+	::BitBlt(hdc,
+		rc.left, rc.top, rc.Width(), rc.Height(),
+		static_cast<SurfaceGDI &>(surfaceSource).hdc, from.x, from.y, SRCCOPY);
+}
+
+typedef VarBuffer<int, stackBufferLength> TextPositionsI;
+
+void SurfaceGDI::DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, UINT fuOptions) {
+	SetFont(font_);
+	RECT rcw = RectFromPRectangle(rc);
+	SIZE sz={0,0};
+	int pos = 0;
+	int x = rc.left;
+
+	// Text drawing may fail if the text is too big.
+	// If it does fail, slice up into segments and draw each segment.
+	const int maxSegmentLength = 0x200;
+
+	if ((!unicodeMode) && (IsNT() || (codePage==0) || win9xACPSame)) {
+		// Use ANSI calls
+		int lenDraw = Platform::Minimum(len, maxLenText);
+		if (!::ExtTextOutA(hdc, x, ybase, fuOptions, &rcw, s, lenDraw, NULL)) {
+			while (lenDraw > pos) {
+				int seglen = Platform::Minimum(maxSegmentLength, lenDraw - pos);
+				if (!::ExtTextOutA(hdc, x, ybase, fuOptions, &rcw, s+pos, seglen, NULL)) {
+					PLATFORM_ASSERT(false);
+					return;
+				}
+				::GetTextExtentPoint32A(hdc, s+pos, seglen, &sz);
+				x += sz.cx;
+				pos += seglen;
+			}
+		}
+	} else {
+		// Use Unicode calls
+		const TextWide tbuf(s, len, unicodeMode, codePage);
+		if (!::ExtTextOutW(hdc, x, ybase, fuOptions, &rcw, tbuf.buffer, tbuf.tlen, NULL)) {
+			while (tbuf.tlen > pos) {
+				int seglen = Platform::Minimum(maxSegmentLength, tbuf.tlen - pos);
+				if (!::ExtTextOutW(hdc, x, ybase, fuOptions, &rcw, tbuf.buffer+pos, seglen, NULL)) {
+					PLATFORM_ASSERT(false);
+					return;
+				}
+				::GetTextExtentPoint32W(hdc, tbuf.buffer+pos, seglen, &sz);
+				x += sz.cx;
+				pos += seglen;
+			}
+		}
+	}
+}
+
+void SurfaceGDI::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
+	ColourAllocated fore, ColourAllocated back) {
+	::SetTextColor(hdc, fore.AsLong());
+	::SetBkColor(hdc, back.AsLong());
+	DrawTextCommon(rc, font_, ybase, s, len, ETO_OPAQUE);
+}
+
+void SurfaceGDI::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
+	ColourAllocated fore, ColourAllocated back) {
+	::SetTextColor(hdc, fore.AsLong());
+	::SetBkColor(hdc, back.AsLong());
+	DrawTextCommon(rc, font_, ybase, s, len, ETO_OPAQUE | ETO_CLIPPED);
+}
+
+void SurfaceGDI::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
+	ColourAllocated fore) {
+	// Avoid drawing spaces in transparent mode
+	for (int i=0;i<len;i++) {
+		if (s[i] != ' ') {
+			::SetTextColor(hdc, fore.AsLong());
+			::SetBkMode(hdc, TRANSPARENT);
+			DrawTextCommon(rc, font_, ybase, s, len, 0);
+			::SetBkMode(hdc, OPAQUE);
+			return;
+		}
+	}
+}
+
+XYPOSITION SurfaceGDI::WidthText(Font &font_, const char *s, int len) {
+	SetFont(font_);
+	SIZE sz={0,0};
+	if ((!unicodeMode) && (IsNT() || (codePage==0) || win9xACPSame)) {
+		::GetTextExtentPoint32A(hdc, s, Platform::Minimum(len, maxLenText), &sz);
+	} else {
+		const TextWide tbuf(s, len, unicodeMode, codePage);
+		::GetTextExtentPoint32W(hdc, tbuf.buffer, tbuf.tlen, &sz);
+	}
+	return sz.cx;
+}
+
+void SurfaceGDI::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions) {
+	SetFont(font_);
+	SIZE sz={0,0};
+	int fit = 0;
+	if (unicodeMode) {
+		const TextWide tbuf(s, len, unicodeMode, codePage);
+		TextPositionsI poses(tbuf.tlen);
+		fit = tbuf.tlen;
+		if (!::GetTextExtentExPointW(hdc, tbuf.buffer, tbuf.tlen, maxWidthMeasure, &fit, poses.buffer, &sz)) {
+			// Likely to have failed because on Windows 9x where function not available
+			// So measure the character widths by measuring each initial substring
+			// Turns a linear operation into a qudratic but seems fast enough on test files
+			for (int widthSS=0; widthSS < tbuf.tlen; widthSS++) {
+				::GetTextExtentPoint32W(hdc, tbuf.buffer, widthSS+1, &sz);
+				poses.buffer[widthSS] = sz.cx;
+			}
+		}
+		// Map the widths given for UTF-16 characters back onto the UTF-8 input string
+		int ui=0;
+		const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
+		int i=0;
+		while (ui<fit) {
+			unsigned char uch = us[i];
+			unsigned int lenChar = 1;
+			if (uch >= (0x80 + 0x40 + 0x20 + 0x10)) {
+				lenChar = 4;
+				ui++;
+			} else if (uch >= (0x80 + 0x40 + 0x20)) {
+				lenChar = 3;
+			} else if (uch >= (0x80)) {
+				lenChar = 2;
+			}
+			for (unsigned int bytePos=0; (bytePos<lenChar) && (i<len); bytePos++) {
+				positions[i++] = poses.buffer[ui];
+			}
+			ui++;
+		}
+		int lastPos = 0;
+		if (i > 0)
+			lastPos = positions[i-1];
+		while (i<len) {
+			positions[i++] = lastPos;
+		}
+	} else if (IsNT() || (codePage==0) || win9xACPSame) {
+		// Zero positions to avoid random behaviour on failure.
+		memset(positions, 0, len * sizeof(*positions));
+		// len may be larger than platform supports so loop over segments small enough for platform
+		int startOffset = 0;
+		while (len > 0) {
+			int lenBlock = Platform::Minimum(len, maxLenText);
+			TextPositionsI poses(len);
+			if (!::GetTextExtentExPointA(hdc, s, lenBlock, maxWidthMeasure, &fit, poses.buffer, &sz)) {
+				// Eeek - a NULL DC or other foolishness could cause this.
+				return;
+			} else if (fit < lenBlock) {
+				// For some reason, such as an incomplete DBCS character
+				// Not all the positions are filled in so make them equal to end.
+				for (int i = fit;i<lenBlock;i++)
+					poses.buffer[i] = poses.buffer[fit-1];
+			}
+			for (int i=0;i<lenBlock;i++)
+				positions[i] = poses.buffer[i] + startOffset;
+			startOffset = poses.buffer[lenBlock-1];
+			len -= lenBlock;
+			positions += lenBlock;
+			s += lenBlock;
+		}
+	} else {
+		// Support Asian string display in 9x English
+		const TextWide tbuf(s, len, unicodeMode, codePage);
+		TextPositionsI poses(tbuf.tlen);
+		for (int widthSS=0; widthSS<tbuf.tlen; widthSS++) {
+			::GetTextExtentPoint32W(hdc, tbuf.buffer, widthSS+1, &sz);
+			poses.buffer[widthSS] = sz.cx;
+		}
+
+		int ui = 0;
+		for (int i=0;i<len;) {
+			if (::IsDBCSLeadByteEx(codePage, s[i])) {
+				positions[i] = poses.buffer[ui];
+				positions[i+1] = poses.buffer[ui];
+				i += 2;
+			} else {
+				positions[i] = poses.buffer[ui];
+				i++;
+			}
+
+			ui++;
+		}
+	}
+}
+
+XYPOSITION SurfaceGDI::WidthChar(Font &font_, char ch) {
+	SetFont(font_);
+	SIZE sz;
+	::GetTextExtentPoint32A(hdc, &ch, 1, &sz);
+	return sz.cx;
+}
+
+XYPOSITION SurfaceGDI::Ascent(Font &font_) {
+	SetFont(font_);
+	TEXTMETRIC tm;
+	::GetTextMetrics(hdc, &tm);
+	return tm.tmAscent;
+}
+
+XYPOSITION SurfaceGDI::Descent(Font &font_) {
+	SetFont(font_);
+	TEXTMETRIC tm;
+	::GetTextMetrics(hdc, &tm);
+	return tm.tmDescent;
+}
+
+XYPOSITION SurfaceGDI::InternalLeading(Font &font_) {
+	SetFont(font_);
+	TEXTMETRIC tm;
+	::GetTextMetrics(hdc, &tm);
+	return tm.tmInternalLeading;
+}
+
+XYPOSITION SurfaceGDI::ExternalLeading(Font &font_) {
+	SetFont(font_);
+	TEXTMETRIC tm;
+	::GetTextMetrics(hdc, &tm);
+	return tm.tmExternalLeading;
+}
+
+XYPOSITION SurfaceGDI::Height(Font &font_) {
+	SetFont(font_);
+	TEXTMETRIC tm;
+	::GetTextMetrics(hdc, &tm);
+	return tm.tmHeight;
+}
+
+XYPOSITION SurfaceGDI::AverageCharWidth(Font &font_) {
+	SetFont(font_);
+	TEXTMETRIC tm;
+	::GetTextMetrics(hdc, &tm);
+	return tm.tmAveCharWidth;
+}
+
+int SurfaceGDI::SetPalette(Palette *pal, bool inBackGround) {
+	if (paletteOld) {
+		::SelectPalette(hdc, paletteOld, TRUE);
+	}
+	paletteOld = 0;
+	int changes = 0;
+	if (pal->allowRealization) {
+		paletteOld = ::SelectPalette(hdc,
+			reinterpret_cast<HPALETTE>(pal->hpal), inBackGround);
+		changes = ::RealizePalette(hdc);
+	}
+	return changes;
+}
+
+void SurfaceGDI::SetClip(PRectangle rc) {
+	::IntersectClipRect(hdc, rc.left, rc.top, rc.right, rc.bottom);
+}
+
+void SurfaceGDI::FlushCachedState() {
+	pen = 0;
+	brush = 0;
+	font = 0;
+}
+
+void SurfaceGDI::SetUnicodeMode(bool unicodeMode_) {
+	unicodeMode=unicodeMode_;
+}
+
+void SurfaceGDI::SetDBCSMode(int codePage_) {
+	// No action on window as automatically handled by system.
+	codePage = codePage_;
+	win9xACPSame = !IsNT() && ((unsigned int)codePage == ::GetACP());
+}
+
+#ifdef SCI_NAMESPACE
+namespace Scintilla {
+#endif
+
+class SurfaceD2D : public Surface {
 	bool unicodeMode;
 	HDC hdc;
 	bool hdcOwned;
@@ -500,12 +1211,12 @@ class SurfaceImpl : public Surface {
 
 	void SetFont(Font &font_);
 
-	// Private so SurfaceImpl objects can not be copied
-	SurfaceImpl(const SurfaceImpl &);
-	SurfaceImpl &operator=(const SurfaceImpl &);
+	// Private so SurfaceD2D objects can not be copied
+	SurfaceD2D(const SurfaceD2D &);
+	SurfaceD2D &operator=(const SurfaceD2D &);
 public:
-	SurfaceImpl();
-	virtual ~SurfaceImpl();
+	SurfaceD2D();
+	virtual ~SurfaceD2D();
 
 	void SetDWrite(HDC hdc);
 	void Init(WindowID wid);
@@ -560,7 +1271,7 @@ public:
 } //namespace Scintilla
 #endif
 
-SurfaceImpl::SurfaceImpl() :
+SurfaceD2D::SurfaceD2D() :
 	unicodeMode(false),
 	hdc(0), hdcOwned(false),
 	x(0), y(0) {
@@ -585,11 +1296,11 @@ SurfaceImpl::SurfaceImpl() :
 	hasBegun = false;
 }
 
-SurfaceImpl::~SurfaceImpl() {
+SurfaceD2D::~SurfaceD2D() {
 	Release();
 }
 
-void SurfaceImpl::Release() {
+void SurfaceD2D::Release() {
 	if (hdcOwned) {
 		::DeleteDC(reinterpret_cast<HDC>(hdc));
 		hdc = 0;
@@ -612,20 +1323,20 @@ void SurfaceImpl::Release() {
 	}
 }
 
-void SurfaceImpl::SetDWrite(HDC hdc) {
+void SurfaceD2D::SetDWrite(HDC hdc) {
 	dpiScaleX = GetDeviceCaps(hdc, LOGPIXELSX) / 96.0f;
 	dpiScaleY = GetDeviceCaps(hdc, LOGPIXELSY) / 96.0f;
 }
 
-bool SurfaceImpl::Initialised() {
+bool SurfaceD2D::Initialised() {
 	return pRenderTarget != 0;
 }
 
-HRESULT SurfaceImpl::FlushDrawing() {
+HRESULT SurfaceD2D::FlushDrawing() {
 	return pRenderTarget->Flush();
 }
 
-void SurfaceImpl::Init(WindowID wid) {
+void SurfaceD2D::Init(WindowID wid) {
 	Release();
 	hdc = ::CreateCompatibleDC(NULL);
 	hdcOwned = true;
@@ -635,7 +1346,7 @@ void SurfaceImpl::Init(WindowID wid) {
 	SetDWrite(hdc);
 }
 
-void SurfaceImpl::Init(SurfaceID sid, WindowID) {
+void SurfaceD2D::Init(SurfaceID sid, WindowID) {
 	Release();
 	hdc = ::CreateCompatibleDC(NULL);
 	hdcOwned = true;
@@ -644,11 +1355,11 @@ void SurfaceImpl::Init(SurfaceID sid, WindowID) {
 	SetDWrite(hdc);
 }
 
-void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID) {
+void SurfaceD2D::InitPixMap(int width, int height, Surface *surface_, WindowID) {
 	Release();
 	hdc = ::CreateCompatibleDC(NULL);	// Just for measurement
 	hdcOwned = true;
-	SurfaceImpl *psurfOther = static_cast<SurfaceImpl *>(surface_);
+	SurfaceD2D *psurfOther = static_cast<SurfaceD2D *>(surface_);
 	ID2D1BitmapRenderTarget *pCompatibleRenderTarget = NULL;
 	HRESULT hr = psurfOther->pRenderTarget->CreateCompatibleRenderTarget(
 		D2D1::SizeF(width, height), &pCompatibleRenderTarget);
@@ -659,11 +1370,11 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID)
 	}
 }
 
-void SurfaceImpl::PenColour(ColourAllocated fore) {
+void SurfaceD2D::PenColour(ColourAllocated fore) {
 	D2DPenColour(fore);
 }
 
-void SurfaceImpl::D2DPenColour(ColourAllocated fore, int alpha) {
+void SurfaceD2D::D2DPenColour(ColourAllocated fore, int alpha) {
 	if (pRenderTarget) {
 		D2D_COLOR_F col;
 		col.r = (fore.AsLong() & 0xff) / 255.0;
@@ -682,25 +1393,25 @@ void SurfaceImpl::D2DPenColour(ColourAllocated fore, int alpha) {
 	}
 }
 
-void SurfaceImpl::SetFont(Font &font_) {
-	FormatAndMetrics *pfabl = reinterpret_cast<FormatAndMetrics *>(font_.GetID());
-	pTextFormat = pfabl->pTextFormat;
-	yAscent = pfabl->yAscent;
-	yDescent = pfabl->yDescent;
+void SurfaceD2D::SetFont(Font &font_) {
+	FormatAndMetrics *pfm = reinterpret_cast<FormatAndMetrics *>(font_.GetID());
+	pTextFormat = pfm->pTextFormat;
+	yAscent = pfm->yAscent;
+	yDescent = pfm->yDescent;
 	if (pRenderTarget) {
-		pRenderTarget->SetTextAntialiasMode(DWriteMapFontQuality(pfabl->extraFontFlag));
+		pRenderTarget->SetTextAntialiasMode(DWriteMapFontQuality(pfm->extraFontFlag));
 	}
 }
 
-int SurfaceImpl::LogPixelsY() {
+int SurfaceD2D::LogPixelsY() {
 	return ::GetDeviceCaps(hdc, LOGPIXELSY);
 }
 
-int SurfaceImpl::DeviceHeightFont(int points) {
+int SurfaceD2D::DeviceHeightFont(int points) {
 	return ::MulDiv(points, LogPixelsY(), 72);
 }
 
-void SurfaceImpl::MoveTo(int x_, int y_) {
+void SurfaceD2D::MoveTo(int x_, int y_) {
 	x = x_;
 	y = y_;
 }
@@ -718,7 +1429,7 @@ static int RoundFloat(float f) {
 	return int(f+0.5);
 }
 
-void SurfaceImpl::LineTo(int x_, int y_) {
+void SurfaceD2D::LineTo(int x_, int y_) {
 	if (pRenderTarget) {
 		int xDiff = x_ - x;
 		int xDelta = Delta(xDiff);
@@ -748,7 +1459,7 @@ void SurfaceImpl::LineTo(int x_, int y_) {
 	}
 }
 
-void SurfaceImpl::Polygon(Point *pts, int npts, ColourAllocated fore, ColourAllocated back) {
+void SurfaceD2D::Polygon(Point *pts, int npts, ColourAllocated fore, ColourAllocated back) {
 	if (pRenderTarget) {
 		ID2D1Factory *pFactory = 0;
 		pRenderTarget->GetFactory(&pFactory);
@@ -777,7 +1488,7 @@ void SurfaceImpl::Polygon(Point *pts, int npts, ColourAllocated fore, ColourAllo
 	}
 }
 
-void SurfaceImpl::RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+void SurfaceD2D::RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
 	if (pRenderTarget) {
 		D2DPenColour(back);
 		D2D1_RECT_F rectangle1 = D2D1::RectF(RoundFloat(rc.left) + 0.5, rc.top+0.5, RoundFloat(rc.right) - 0.5, rc.bottom-0.5);
@@ -788,7 +1499,7 @@ void SurfaceImpl::RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAlloc
 	}
 }
 
-void SurfaceImpl::FillRectangle(PRectangle rc, ColourAllocated back) {
+void SurfaceD2D::FillRectangle(PRectangle rc, ColourAllocated back) {
 	if (pRenderTarget) {
 		D2DPenColour(back);
         D2D1_RECT_F rectangle1 = D2D1::RectF(RoundFloat(rc.left), rc.top, RoundFloat(rc.right), rc.bottom);
@@ -796,8 +1507,8 @@ void SurfaceImpl::FillRectangle(PRectangle rc, ColourAllocated back) {
 	}
 }
 
-void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern) {
-	SurfaceImpl &surfOther = static_cast<SurfaceImpl &>(surfacePattern);
+void SurfaceD2D::FillRectangle(PRectangle rc, Surface &surfacePattern) {
+	SurfaceD2D &surfOther = static_cast<SurfaceD2D &>(surfacePattern);
 	surfOther.FlushDrawing();
 	ID2D1Bitmap *pBitmap = NULL;
 	ID2D1BitmapRenderTarget *pCompatibleRenderTarget = reinterpret_cast<ID2D1BitmapRenderTarget *>(
@@ -820,7 +1531,7 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 	}
 }
 
-void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+void SurfaceD2D::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
 	if (pRenderTarget) {
 		D2D1_ROUNDED_RECT roundedRectFill = D2D1::RoundedRect(
 			D2D1::RectF(rc.left+1.0, rc.top+1.0, rc.right-1.0, rc.bottom-1.0),
@@ -836,7 +1547,7 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAl
 	}
 }
 
-void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated fill, int alphaFill,
+void SurfaceD2D::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated fill, int alphaFill,
 		ColourAllocated outline, int alphaOutline, int /* flags*/ ) {
 	if (pRenderTarget) {
 		D2D1_ROUNDED_RECT roundedRectFill = D2D1::RoundedRect(
@@ -853,7 +1564,7 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated 
 	}
 }
 
-void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) {
+void SurfaceD2D::DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) {
 	if (pRenderTarget) {
 		if (rc.Width() > width)
 			rc.left += (rc.Width() - width) / 2;
@@ -889,7 +1600,7 @@ void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsi
 	}
 }
 
-void SurfaceImpl::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+void SurfaceD2D::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
 	if (pRenderTarget) {
 		FLOAT radius = rc.Width() / 2.0f - 1.0f;
 		D2D1_ELLIPSE ellipse = D2D1::Ellipse(
@@ -903,8 +1614,8 @@ void SurfaceImpl::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated b
 	}
 }
 
-void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
-	SurfaceImpl &surfOther = static_cast<SurfaceImpl &>(surfaceSource);
+void SurfaceD2D::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
+	SurfaceD2D &surfOther = static_cast<SurfaceD2D &>(surfaceSource);
 	surfOther.FlushDrawing();
 	ID2D1BitmapRenderTarget *pCompatibleRenderTarget = reinterpret_cast<ID2D1BitmapRenderTarget *>(
 		surfOther.pRenderTarget);
@@ -920,46 +1631,7 @@ void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	}
 }
 
-// Buffer to hold strings and string position arrays without always allocating on heap.
-// May sometimes have string too long to allocate on stack. So use a fixed stack-allocated buffer
-// when less than safe size otherwise allocate on heap and free automatically.
-template<typename T, int lengthStandard>
-class VarBuffer {
-	T bufferStandard[lengthStandard];
-public:
-	T *buffer;
-	VarBuffer(size_t length) : buffer(0) {
-		if (length > lengthStandard) {
-			buffer = new T[length];
-		} else {
-			buffer = bufferStandard;
-		}
-	}
-	~VarBuffer() {
-		if (buffer != bufferStandard) {
-			delete []buffer;
-			buffer = 0;
-		}
-	}
-};
-
-const int stackBufferLength = 10000;
-class TextWide : public VarBuffer<wchar_t, stackBufferLength> {
-public:
-	int tlen;
-	TextWide(const char *s, int len, bool unicodeMode, int codePage=0) :
-		VarBuffer<wchar_t, stackBufferLength>(len) {
-		if (unicodeMode) {
-			tlen = UTF16FromUTF8(s, len, buffer, len);
-		} else {
-			// Support Asian string display in 9x English
-			tlen = ::MultiByteToWideChar(codePage, 0, s, len, buffer, len);
-		}
-	}
-};
-typedef VarBuffer<XYPOSITION, stackBufferLength> TextPositions;
-
-void SurfaceImpl::DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, UINT) {
+void SurfaceD2D::DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, UINT) {
 	SetFont(font_);
 	RECT rcw = RectFromPRectangle(rc);
 
@@ -985,7 +1657,7 @@ void SurfaceImpl::DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, c
 	}
 }
 
-void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
+void SurfaceD2D::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
 	ColourAllocated fore, ColourAllocated back) {
 	if (pRenderTarget) {
 		FillRectangle(rc, back);
@@ -994,7 +1666,7 @@ void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, c
 	}
 }
 
-void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
+void SurfaceD2D::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
 	ColourAllocated fore, ColourAllocated back) {
 	if (pRenderTarget) {
 		FillRectangle(rc, back);
@@ -1003,7 +1675,7 @@ void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, 
 	}
 }
 
-void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
+void SurfaceD2D::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
 	ColourAllocated fore) {
 	// Avoid drawing spaces in transparent mode
 	for (int i=0;i<len;i++) {
@@ -1017,7 +1689,7 @@ void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION yba
 	}
 }
 
-XYPOSITION SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
+XYPOSITION SurfaceD2D::WidthText(Font &font_, const char *s, int len) {
 	FLOAT width = 1.0;
 	SetFont(font_);
 	const TextWide tbuf(s, len, unicodeMode, codePage);
@@ -1035,7 +1707,7 @@ XYPOSITION SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 	return int(width + 0.5);
 }
 
-void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions) {
+void SurfaceD2D::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions) {
 	SetFont(font_);
 	int fit = 0;
 	const TextWide tbuf(s, len, unicodeMode, codePage);
@@ -1119,7 +1791,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION 
 	}
 }
 
-XYPOSITION SurfaceImpl::WidthChar(Font &font_, char ch) {
+XYPOSITION SurfaceD2D::WidthChar(Font &font_, char ch) {
 	FLOAT width = 1.0;
 	SetFont(font_);
 	if (pIDWriteFactory && pTextFormat) {
@@ -1137,29 +1809,29 @@ XYPOSITION SurfaceImpl::WidthChar(Font &font_, char ch) {
 	return int(width + 0.5);
 }
 
-XYPOSITION SurfaceImpl::Ascent(Font &font_) {
+XYPOSITION SurfaceD2D::Ascent(Font &font_) {
 	SetFont(font_);
 	return ceil(yAscent);
 }
 
-XYPOSITION SurfaceImpl::Descent(Font &font_) {
+XYPOSITION SurfaceD2D::Descent(Font &font_) {
 	SetFont(font_);
 	return ceil(yDescent);
 }
 
-XYPOSITION SurfaceImpl::InternalLeading(Font &) {
+XYPOSITION SurfaceD2D::InternalLeading(Font &) {
 	return 0;
 }
 
-XYPOSITION SurfaceImpl::ExternalLeading(Font &) {
+XYPOSITION SurfaceD2D::ExternalLeading(Font &) {
 	return 1;
 }
 
-XYPOSITION SurfaceImpl::Height(Font &font_) {
+XYPOSITION SurfaceD2D::Height(Font &font_) {
 	return Ascent(font_) + Descent(font_);
 }
 
-XYPOSITION SurfaceImpl::AverageCharWidth(Font &font_) {
+XYPOSITION SurfaceD2D::AverageCharWidth(Font &font_) {
 	FLOAT width = 1.0;
 	SetFont(font_);
 	if (pIDWriteFactory && pTextFormat) {
@@ -1177,11 +1849,11 @@ XYPOSITION SurfaceImpl::AverageCharWidth(Font &font_) {
 	return int(width + 0.5);
 }
 
-int SurfaceImpl::SetPalette(Palette *, bool) {
+int SurfaceD2D::SetPalette(Palette *, bool) {
 	return 0;
 }
 
-void SurfaceImpl::SetClip(PRectangle rc) {
+void SurfaceD2D::SetClip(PRectangle rc) {
 	if (pRenderTarget) {
 		D2D1_RECT_F rcClip = {rc.left, rc.top, rc.right, rc.bottom};
 		pRenderTarget->PushAxisAlignedClip(rcClip, D2D1_ANTIALIAS_MODE_ALIASED);
@@ -1189,21 +1861,24 @@ void SurfaceImpl::SetClip(PRectangle rc) {
 	}
 }
 
-void SurfaceImpl::FlushCachedState() {
+void SurfaceD2D::FlushCachedState() {
 }
 
-void SurfaceImpl::SetUnicodeMode(bool unicodeMode_) {
+void SurfaceD2D::SetUnicodeMode(bool unicodeMode_) {
 	unicodeMode=unicodeMode_;
 }
 
-void SurfaceImpl::SetDBCSMode(int codePage_) {
+void SurfaceD2D::SetDBCSMode(int codePage_) {
 	// No action on window as automatically handled by system.
 	codePage = codePage_;
 	win9xACPSame = !IsNT() && ((unsigned int)codePage == ::GetACP());
 }
 
-Surface *Surface::Allocate(int /* technology */) {
-	return new SurfaceImpl;
+Surface *Surface::Allocate(int technology) {
+	if (technology == SCWIN_TECH_GDI)
+		return new SurfaceGDI;
+	else
+		return new SurfaceD2D;
 }
 
 Window::~Window() {

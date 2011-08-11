@@ -383,8 +383,6 @@ void ScintillaWin::Initialise() {
 				::GetProcAddress(commctrl32, "_TrackMouseEvent");
 		}
 	}
-
-	LoadD2D();
 }
 
 void ScintillaWin::Finalise() {
@@ -546,25 +544,35 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 		pps = &ps;
 		::BeginPaint(MainHWND(), pps);
 	}
-	//AutoSurface surfaceWindow(pps->hdc, this);
-	EnsureRenderTarget();
-	AutoSurface surfaceWindow(pRenderTarget, this);
-	if (surfaceWindow) {
-		pRenderTarget->BeginDraw();
-		rcPaint = PRectangle(pps->rcPaint.left, pps->rcPaint.top, pps->rcPaint.right, pps->rcPaint.bottom);
-		PRectangle rcClient = GetClientRectangle();
-		paintingAllText = rcPaint.Contains(rcClient);
-		if (paintingAllText) {
-			//Platform::DebugPrintf("Performing full text paint\n");
-		} else {
-			//Platform::DebugPrintf("Performing partial paint %d .. %d\n", rcPaint.top, rcPaint.bottom);
+	if (technology == SC_TECHNOLOGY_DEFAULT) {
+		AutoSurface surfaceWindow(pps->hdc, this);
+		if (surfaceWindow) {
+			rcPaint = PRectangle(pps->rcPaint.left, pps->rcPaint.top, pps->rcPaint.right, pps->rcPaint.bottom);
+			PRectangle rcClient = GetClientRectangle();
+			paintingAllText = rcPaint.Contains(rcClient);
+			Paint(surfaceWindow, rcPaint);
+			surfaceWindow->Release();
 		}
-		Paint(surfaceWindow, rcPaint);
-		surfaceWindow->Release();
-		HRESULT hr = pRenderTarget->EndDraw();
-		if (hr == D2DERR_RECREATE_TARGET) {
-			DropRenderTarget();
-        }
+	} else {
+		EnsureRenderTarget();
+		AutoSurface surfaceWindow(pRenderTarget, this);
+		if (surfaceWindow) {
+			pRenderTarget->BeginDraw();
+			rcPaint = PRectangle(pps->rcPaint.left, pps->rcPaint.top, pps->rcPaint.right, pps->rcPaint.bottom);
+			PRectangle rcClient = GetClientRectangle();
+			paintingAllText = rcPaint.Contains(rcClient);
+			if (paintingAllText) {
+				//Platform::DebugPrintf("Performing full text paint\n");
+			} else {
+				//Platform::DebugPrintf("Performing partial paint %d .. %d\n", rcPaint.top, rcPaint.bottom);
+			}
+			Paint(surfaceWindow, rcPaint);
+			surfaceWindow->Release();
+			HRESULT hr = pRenderTarget->EndDraw();
+			if (hr == D2DERR_RECREATE_TARGET) {
+				DropRenderTarget();
+			}
+		}
 	}
 	if (hRgnUpdate) {
 		::DeleteRgn(hRgnUpdate);
@@ -1131,6 +1139,11 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		case SCI_SETTECHNOLOGY:
 			if ((wParam == SC_TECHNOLOGY_DEFAULT) || (wParam == SC_TECHNOLOGY_DIRECTWRITE)) {
 				if (technology != static_cast<int>(wParam)) {
+					if (static_cast<int>(wParam) == SC_TECHNOLOGY_DIRECTWRITE) {
+						if (!LoadD2D())
+							// Failed to load Direct2D or DirectWrite so no effect
+							return 0;
+					}
 					technology = wParam;
 					// Invalidate all cached information including layout.
 					InvalidateStyleRedraw();
