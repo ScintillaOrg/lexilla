@@ -1192,15 +1192,9 @@ namespace Scintilla {
 
 class SurfaceD2D : public Surface {
 	bool unicodeMode;
-	HDC hdc;
-	bool hdcOwned;
-	int maxWidthMeasure;
-	int maxLenText;
 	int x, y;
 
 	int codePage;
-	// If 9x OS and current code page is same as ANSI code page.
-	bool win9xACPSame;
 
 	ID2D1RenderTarget *pRenderTarget;
 	bool ownRenderTarget;
@@ -1211,9 +1205,10 @@ class SurfaceD2D : public Surface {
 	FLOAT yDescent;
 
 	ID2D1SolidColorBrush *pBrush;
+
+	int logPixelsY;
 	float dpiScaleX;
 	float dpiScaleY;
-	bool hasBegun;
 
 	void SetFont(Font &font_);
 
@@ -1224,7 +1219,7 @@ public:
 	SurfaceD2D();
 	virtual ~SurfaceD2D();
 
-	void SetDWrite(HDC hdc);
+	void SetScale();
 	void Init(WindowID wid);
 	void Init(SurfaceID sid, WindowID wid);
 	void InitPixMap(int width, int height, Surface *surface_, WindowID wid);
@@ -1279,27 +1274,24 @@ public:
 
 SurfaceD2D::SurfaceD2D() :
 	unicodeMode(false),
-	hdc(0), hdcOwned(false),
 	x(0), y(0) {
-	// Windows 9x has only a 16 bit coordinate system so break after 30000 pixels
-	maxWidthMeasure = IsNT() ? INT_MAX : 30000;
-	// There appears to be a 16 bit string length limit in GDI on NT and a limit of
-	// 8192 characters on Windows 95.
-	maxLenText = IsNT() ? 65535 : 8192;
 
 	codePage = 0;
-	win9xACPSame = false;
 
 	pRenderTarget = NULL;
 	ownRenderTarget = false;
 	clipsActive = 0;
+
+	// From selected font
 	pTextFormat = NULL;
 	yAscent = 2;
 	yDescent = 1;
+
 	pBrush = NULL;
+
+	logPixelsY = 72;
 	dpiScaleX = 1.0;
 	dpiScaleY = 1.0;
-	hasBegun = false;
 }
 
 SurfaceD2D::~SurfaceD2D() {
@@ -1307,12 +1299,6 @@ SurfaceD2D::~SurfaceD2D() {
 }
 
 void SurfaceD2D::Release() {
-	if (hdcOwned) {
-		::DeleteDC(reinterpret_cast<HDC>(hdc));
-		hdc = 0;
-		hdcOwned = false;
-	}
-
 	if (pBrush) {
 		pBrush->Release();
 		pBrush = 0;
@@ -1329,9 +1315,12 @@ void SurfaceD2D::Release() {
 	}
 }
 
-void SurfaceD2D::SetDWrite(HDC hdc) {
-	dpiScaleX = GetDeviceCaps(hdc, LOGPIXELSX) / 96.0f;
-	dpiScaleY = GetDeviceCaps(hdc, LOGPIXELSY) / 96.0f;
+void SurfaceD2D::SetScale() {
+	HDC hdcMeasure = ::CreateCompatibleDC(NULL);
+	logPixelsY = ::GetDeviceCaps(hdcMeasure, LOGPIXELSY);
+	dpiScaleX = ::GetDeviceCaps(hdcMeasure, LOGPIXELSX) / 96.0f;
+	dpiScaleY = logPixelsY / 96.0f;
+	::DeleteDC(hdcMeasure);
 }
 
 bool SurfaceD2D::Initialised() {
@@ -1342,29 +1331,20 @@ HRESULT SurfaceD2D::FlushDrawing() {
 	return pRenderTarget->Flush();
 }
 
-void SurfaceD2D::Init(WindowID wid) {
+void SurfaceD2D::Init(WindowID /* wid */) {
 	Release();
-	hdc = ::CreateCompatibleDC(NULL);
-	hdcOwned = true;
-	::SetTextAlign(reinterpret_cast<HDC>(hdc), TA_BASELINE);
-	RECT rc;
-	::GetClientRect(reinterpret_cast<HWND>(wid), &rc);
-	SetDWrite(hdc);
+	SetScale();
 }
 
 void SurfaceD2D::Init(SurfaceID sid, WindowID) {
 	Release();
-	hdc = ::CreateCompatibleDC(NULL);
-	hdcOwned = true;
+	SetScale();
 	pRenderTarget = reinterpret_cast<ID2D1HwndRenderTarget *>(sid);
-	::SetTextAlign(reinterpret_cast<HDC>(hdc), TA_BASELINE);
-	SetDWrite(hdc);
 }
 
 void SurfaceD2D::InitPixMap(int width, int height, Surface *surface_, WindowID) {
 	Release();
-	hdc = ::CreateCompatibleDC(NULL);	// Just for measurement
-	hdcOwned = true;
+	SetScale();
 	SurfaceD2D *psurfOther = static_cast<SurfaceD2D *>(surface_);
 	ID2D1BitmapRenderTarget *pCompatibleRenderTarget = NULL;
 	HRESULT hr = psurfOther->pRenderTarget->CreateCompatibleRenderTarget(
@@ -1411,7 +1391,7 @@ void SurfaceD2D::SetFont(Font &font_) {
 }
 
 int SurfaceD2D::LogPixelsY() {
-	return ::GetDeviceCaps(hdc, LOGPIXELSY);
+	return logPixelsY;
 }
 
 int SurfaceD2D::DeviceHeightFont(int points) {
@@ -1878,7 +1858,6 @@ void SurfaceD2D::SetUnicodeMode(bool unicodeMode_) {
 void SurfaceD2D::SetDBCSMode(int codePage_) {
 	// No action on window as automatically handled by system.
 	codePage = codePage_;
-	win9xACPSame = !IsNT() && ((unsigned int)codePage == ::GetACP());
 }
 
 Surface *Surface::Allocate(int technology) {
@@ -2485,7 +2464,16 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 		if (pimage) {
 			Surface *surfaceItem = Surface::Allocate(technology);
 			if (surfaceItem) {
-				if (pD2DFactory) {
+				if (technology == SCWIN_TECH_GDI) {
+					surfaceItem->Init(pDrawItem->hDC, pDrawItem->hwndItem);
+					int left = pDrawItem->rcItem.left + ItemInset.x + ImageInset.x;
+					PRectangle rcImage(left, pDrawItem->rcItem.top,
+						left + images.GetWidth(), pDrawItem->rcItem.bottom);
+					surfaceItem->DrawRGBAImage(rcImage,
+						pimage->GetWidth(), pimage->GetHeight(), pimage->Pixels());
+					delete surfaceItem;
+					::SetTextAlign(pDrawItem->hDC, TA_TOP);
+				} else {
 					D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
 						D2D1_RENDER_TARGET_TYPE_DEFAULT,
 						D2D1::PixelFormat(
@@ -2510,7 +2498,6 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 						surfaceItem->DrawRGBAImage(rcImage,
 							pimage->GetWidth(), pimage->GetHeight(), pimage->Pixels());
 						delete surfaceItem;
-						::SetTextAlign(pDrawItem->hDC, TA_TOP);
 						pDCRT->EndDraw();
 						pDCRT->Release();
 					}

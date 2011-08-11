@@ -2792,20 +2792,25 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
 					RECT rc;
 					GetClientRect(hWnd, &rc);
 					// Create a Direct2D render target.
-					pD2DFactory->CreateHwndRenderTarget(
-						D2D1::RenderTargetProperties(),
-						D2D1::HwndRenderTargetProperties(hWnd, D2D1::SizeU(rc.right - rc.left, rc.bottom - rc.top)),
-						&pCTRenderTarget);
-					//surfaceWindow->Init(ps.hdc, hWnd);
-					surfaceWindow->Init(pCTRenderTarget, hWnd);
+					if (sciThis->technology == SC_TECHNOLOGY_DEFAULT) {
+						surfaceWindow->Init(ps.hdc, hWnd);
+					} else {
+						pD2DFactory->CreateHwndRenderTarget(
+							D2D1::RenderTargetProperties(),
+							D2D1::HwndRenderTargetProperties(hWnd, D2D1::SizeU(rc.right - rc.left, rc.bottom - rc.top)),
+							&pCTRenderTarget);
+						surfaceWindow->Init(pCTRenderTarget, hWnd);
+						pCTRenderTarget->BeginDraw();
+					}
 					surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == sciThis->ct.codePage);
 					surfaceWindow->SetDBCSMode(sciThis->ct.codePage);
-					pCTRenderTarget->BeginDraw();
 					sciThis->ct.PaintCT(surfaceWindow);
-					pCTRenderTarget->EndDraw();
+					if (pCTRenderTarget)
+						pCTRenderTarget->EndDraw();
 					surfaceWindow->Release();
 					delete surfaceWindow;
-					pCTRenderTarget->Release();
+					if (pCTRenderTarget)
+						pCTRenderTarget->Release();
 				}
 				::EndPaint(hWnd, &ps);
 				return 0;
