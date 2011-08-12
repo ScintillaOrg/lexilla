@@ -487,7 +487,7 @@ val SC_FONT_SIZE_MULTIPLIER=100
 # Set the size of characters of a style. Size is in points multiplied by 100.
 set void StyleSetSizeFractional=2061(int style, int caseForce)
 
-# Get the weight of characters of a style in points multiplied by 100
+# Get the size of characters of a style in points multiplied by 100
 get int StyleGetSizeFractional=2062(int style,)
 
 enu FontWeight=SC_WEIGHT_
@@ -495,7 +495,7 @@ val SC_WEIGHT_NORMAL=400
 val SC_WEIGHT_SEMIBOLD=600
 val SC_WEIGHT_BOLD=700
 
-# Get the weight of characters of a style.
+# Set the weight of characters of a style.
 set void StyleSetWeight=2063(int style, int weight)
 
 # Get the weight of characters of a style.

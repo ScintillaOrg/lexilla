@@ -2392,9 +2392,15 @@ struct Sci_TextToFind {
     <a class="message" href="#SCI_STYLESETSIZE">SCI_STYLESETSIZE(int styleNumber, int
     sizeInPoints)</a><br />
     <a class="message" href="#SCI_STYLEGETSIZE">SCI_STYLEGETSIZE(int styleNumber)</a><br />
+    <a class="message" href="#SCI_STYLESETSIZEFRACTIONAL">SCI_STYLESETSIZEFRACTIONAL(int styleNumber, int
+    sizeInHundredthPoints)</a><br />
+    <a class="message" href="#SCI_STYLEGETSIZEFRACTIONAL">SCI_STYLEGETSIZEFRACTIONAL(int styleNumber)</a><br />
     <a class="message" href="#SCI_STYLESETBOLD">SCI_STYLESETBOLD(int styleNumber, bool
     bold)</a><br />
     <a class="message" href="#SCI_STYLEGETBOLD">SCI_STYLEGETBOLD(int styleNumber)</a><br />
+    <a class="message" href="#SCI_STYLESETWEIGHT">SCI_STYLESETWEIGHT(int styleNumber, int
+    weight)</a><br />
+    <a class="message" href="#SCI_STYLEGETWEIGHT">SCI_STYLEGETWEIGHT(int styleNumber)</a><br />
     <a class="message" href="#SCI_STYLESETITALIC">SCI_STYLESETITALIC(int styleNumber, bool
     italic)</a><br />
     <a class="message" href="#SCI_STYLEGETITALIC">SCI_STYLEGETITALIC(int styleNumber)</a><br />
@@ -2443,8 +2449,12 @@ struct Sci_TextToFind {
     <b id="SCI_STYLEGETFONT">SCI_STYLEGETFONT(int styleNumber, char *fontName)</b><br />
     <b id="SCI_STYLESETSIZE">SCI_STYLESETSIZE(int styleNumber, int sizeInPoints)</b><br />
     <b id="SCI_STYLEGETSIZE">SCI_STYLEGETSIZE(int styleNumber)</b><br />
+    <b id="SCI_STYLESETSIZEFRACTIONAL">SCI_STYLESETSIZEFRACTIONAL(int styleNumber, int sizeInHundredthPoints)</b><br />
+    <b id="SCI_STYLEGETSIZEFRACTIONAL">SCI_STYLEGETSIZEFRACTIONAL(int styleNumber)</b><br />
     <b id="SCI_STYLESETBOLD">SCI_STYLESETBOLD(int styleNumber, bool bold)</b><br />
     <b id="SCI_STYLEGETBOLD">SCI_STYLEGETBOLD(int styleNumber)</b><br />
+    <b id="SCI_STYLESETWEIGHT">SCI_STYLESETWEIGHT(int styleNumber, int weight)</b><br />
+    <b id="SCI_STYLEGETWEIGHT">SCI_STYLEGETWEIGHT(int styleNumber)</b><br />
     <b id="SCI_STYLESETITALIC">SCI_STYLESETITALIC(int styleNumber, bool italic)</b><br />
     <b id="SCI_STYLEGETITALIC">SCI_STYLEGETITALIC(int styleNumber)</b><br />
      These messages (plus <a class="message"
@@ -2457,6 +2467,21 @@ struct Sci_TextToFind {
     Pango antialiases text, works well with Unicode and is better supported in recent versions of GTK+
     but GDK is faster.
     Prepend a '!' character to the font name to use Pango.</p>
+    <p>Sizes can be set to a whole number of points with <code>SCI_STYLESETSIZE</code>
+    or to a fractional point size in hundredths of a point with <code>SCI_STYLESETSIZEFRACTIONAL</code>
+    by multiplying the size by 100 (<code>SC_FONT_SIZE_MULTIPLIER</code>).
+    For example, a text size of 9.4 points is set with <code>SCI_STYLESETSIZEFRACTIONAL(&lt;style&gt;, 940)</code>.
+    </p>
+    <p>The weight or boldness of a font can be set with <code>SCI_STYLESETBOLD</code>
+    or <code>SCI_STYLESETWEIGHT</code>. The weight is a number between 1 and 999 with 1 being very light
+    and 999 very heavy. While any value can be used, fonts often only support between 2 and 4 weights with three weights
+    being common enough to have symbolic names: 
+    <code>SC_WEIGHT_NORMAL</code> (400),
+    <code>SC_WEIGHT_SEMIBOLD</code> (600), and
+    <code>SC_WEIGHT_BOLD</code> (700).
+    The <code>SCI_STYLESETBOLD</code> message takes a boolean argument with 0 choosing <code>SC_WEIGHT_NORMAL</code>
+    and 1 <code>SC_WEIGHT_BOLD</code>.
+    </p>
 
     <p><b id="SCI_STYLESETUNDERLINE">SCI_STYLESETUNDERLINE(int styleNumber, bool
     underline)</b><br />
@@ -2983,6 +3008,8 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_GETBUFFEREDDRAW">SCI_GETBUFFEREDDRAW</a><br />
      <a class="message" href="#SCI_SETTWOPHASEDRAW">SCI_SETTWOPHASEDRAW(bool twoPhase)</a><br />
      <a class="message" href="#SCI_GETTWOPHASEDRAW">SCI_GETTWOPHASEDRAW</a><br />
+     <a class="message" href="#SCI_SETTECHNOLOGY">SCI_SETTECHNOLOGY(int technology)</a><br />
+     <a class="message" href="#SCI_GETTECHNOLOGY">SCI_GETTECHNOLOGY</a><br />
      <a class="message" href="#SCI_SETFONTQUALITY">SCI_SETFONTQUALITY(int fontQuality)</a><br />
      <a class="message" href="#SCI_GETFONTQUALITY">SCI_GETFONTQUALITY</a><br />
      <a class="message" href="#SCI_SETCODEPAGE">SCI_SETCODEPAGE(int codePage)</a><br />
@@ -3045,6 +3072,13 @@ struct Sci_TextToFind {
      fixes this by drawing all the backgrounds first and then drawing the text in
      transparent mode. Two phase drawing may flicker more than single phase
      unless buffered drawing is on. The default is for drawing to be two phase.</p>
+
+    <p><b id="SCI_SETTECHNOLOGY">SCI_SETTECHNOLOGY(int technology)</b><br />
+     <b id="SCI_GETTECHNOLOGY">SCI_GETTECHNOLOGY</b><br />
+    The technology property allows choosing between different drawing APIs and options.
+    On most platforms, the only choice is <code>SC_TECHNOLOGY_DEFAULT</code> (0).
+    On Windows Vista or later, <code>SC_TECHNOLOGY_DIRECTWRITE</code> (1)
+    can be chosen to use the Direct2D and DirectWrite APIs for higher quality antialiased drawing.</p>
 
     <p><b id="SCI_SETFONTQUALITY">SCI_SETFONTQUALITY(int fontQuality)</b><br />
      <b id="SCI_GETFONTQUALITY">SCI_GETFONTQUALITY</b><br />
