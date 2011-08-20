@@ -1882,7 +1882,6 @@ NSImage* ListBoxImpl::ImageForRow(NSInteger row)
   if (it != images.end())
   {
     NSImage* img = it->second;
-    [img retain];
     return img;
   }
   else
