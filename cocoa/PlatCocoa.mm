@@ -1378,7 +1378,10 @@ static NSImage* ImageFromXPM(XPM* pxpm)
       img = [NSImage alloc];
       [img autorelease];
       CGImageRef imageRef = surfaceIXPM->GetImage();
-      [img initWithCGImage:imageRef size:NSZeroSize];
+      [img initWithSize:NSZeroSize];
+      NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage: imageRef];
+      [img addRepresentation: bitmapRep];
+      [bitmapRep release];
       CGImageRelease(imageRef);
       delete surfaceXPM;
     }
@@ -1836,7 +1839,10 @@ void ListBoxImpl::RegisterRGBAImage(int type, int width, int height, const unsig
 	[img autorelease];
 	CGImageRef imageRef = ImageFromRGBA(width, height, pixelsImage, false);
 	NSSize sz = {width, height};
-	[img initWithCGImage:imageRef size:sz];
+	[img initWithSize: sz];
+	NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage: imageRef];
+	[img addRepresentation: bitmapRep];
+	[bitmapRep release];
 	CGImageRelease(imageRef);
 	[img retain];
 	ImageMap::iterator it=images.find(type);
