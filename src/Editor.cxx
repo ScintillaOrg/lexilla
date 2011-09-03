@@ -8378,7 +8378,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return vs.caretStyle;
 
 	case SCI_SETCARETWIDTH:
-		if (wParam <= 0)
+		if (static_cast<int>(wParam) <= 0)
 			vs.caretWidth = 0;
 		else if (wParam >= 3)
 			vs.caretWidth = 3;
