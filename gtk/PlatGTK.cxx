@@ -43,9 +43,7 @@
 #define IS_WIDGET_FOCUSSED(w) (GTK_WIDGET_HAS_FOCUS(w))
 #endif
 
-#if GTK_CHECK_VERSION(2,22,0)
 #define USE_CAIRO 1
-#endif
 
 #ifdef USE_CAIRO
 
@@ -2961,7 +2959,7 @@ bool Platform::IsDBCSLeadByte(int codePage, char ch) {
 			// Shift_jis
 			return ((uch >= 0x81) && (uch <= 0x9F)) ||
 				((uch >= 0xE0) && (uch <= 0xFC));
-				// Lead bytes F0 to FC may be a Microsoft addition. 
+				// Lead bytes F0 to FC may be a Microsoft addition.
 		case 936:
 			// GBK
 			return (uch >= 0x81) && (uch <= 0xFE);
