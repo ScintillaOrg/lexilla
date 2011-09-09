@@ -405,6 +405,14 @@ ScintillaGTK::~ScintillaGTK() {
 	g_idle_remove_by_data(this);
 }
 
+static void UnRefCursor(GdkCursor *cursor) {
+#if GTK_CHECK_VERSION(3,0,0)
+	g_object_unref(cursor);
+#else
+	gdk_cursor_unref(cursor);
+#endif
+}
+
 void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	//Platform::DebugPrintf("ScintillaGTK::realize this\n");
 #if GTK_CHECK_VERSION(2,20,0)
@@ -436,12 +444,14 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	gtk_widget_set_window(widget, gdk_window_new(gtk_widget_get_parent_window(widget), &attrs,
 		GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_CURSOR));
 	gdk_window_set_user_data(gtk_widget_get_window(widget), widget);
-	// Deprecated: should chain up to parent class' "realize" implementation
-	gtk_widget_style_attach(widget);
-	gdk_window_set_background(gtk_widget_get_window(widget),
-		&(gtk_widget_get_style(widget)->bg[GTK_STATE_NORMAL]));
+	GtkStyleContext *styleContext = gtk_widget_get_style_context(widget);
+	if (styleContext) {
+		GdkRGBA colourBackWidget;
+		gtk_style_context_get_background_color(styleContext, GTK_STATE_FLAG_NORMAL, &colourBackWidget);
+		gdk_window_set_background_rgba(gtk_widget_get_window(widget), &colourBackWidget);
+	}
 	gdk_window_show(gtk_widget_get_window(widget));
-	gdk_cursor_unref(cursor);
+	UnRefCursor(cursor);
 #else
 	widget->window = gdk_window_new(gtk_widget_get_parent_window(widget), &attrs,
 		GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP | GDK_WA_CURSOR);
@@ -449,7 +459,7 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	widget->style = gtk_style_attach(widget->style, widget->window);
 	gdk_window_set_background(widget->window, &widget->style->bg[GTK_STATE_NORMAL]);
 	gdk_window_show(widget->window);
-	gdk_cursor_unref(cursor);
+	UnRefCursor(cursor);
 #endif
 	wPreedit = gtk_window_new(GTK_WINDOW_POPUP);
 	wPreeditDraw = gtk_drawing_area_new();
@@ -483,15 +493,15 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 
 	cursor = gdk_cursor_new(GDK_XTERM);
 	gdk_window_set_cursor(PWindow(wText), cursor);
-	gdk_cursor_unref(cursor);
+	UnRefCursor(cursor);
 
 	cursor = gdk_cursor_new(GDK_LEFT_PTR);
 	gdk_window_set_cursor(PWindow(scrollbarv), cursor);
-	gdk_cursor_unref(cursor);
+	UnRefCursor(cursor);
 
 	cursor = gdk_cursor_new(GDK_LEFT_PTR);
 	gdk_window_set_cursor(PWindow(scrollbarh), cursor);
-	gdk_cursor_unref(cursor);
+	UnRefCursor(cursor);
 
 	gtk_selection_add_targets(widget, GDK_SELECTION_PRIMARY,
 	                          clipboardCopyTargets, nClipboardCopyTargets);
