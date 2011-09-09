@@ -2222,7 +2222,11 @@ void Window::SetCursor(Cursor curs) {
 
 	if (WindowFromWidget(PWidget(wid)))
 		gdk_window_set_cursor(WindowFromWidget(PWidget(wid)), gdkCurs);
+#if GTK_CHECK_VERSION(3,0,0)
+	g_object_unref(gdkCurs);
+#else
 	gdk_cursor_unref(gdkCurs);
+#endif
 }
 
 void Window::SetTitle(const char *s) {
