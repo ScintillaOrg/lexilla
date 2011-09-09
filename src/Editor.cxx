@@ -2588,7 +2588,7 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 
 	// Draw the eol-is-selected rectangle
 	rcSegment.left = xEol + xStart + virtualSpace + blobsWidth;
-	rcSegment.right = xEol + xStart + virtualSpace + blobsWidth + vsDraw.aveCharWidth;
+	rcSegment.right = rcSegment.left + vsDraw.aveCharWidth;
 
 	if (!hideSelection && eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1) && (alpha == SC_ALPHA_NOALPHA)) {
 		surface->FillRectangle(rcSegment, SelectionBackground(vsDraw, eolInSelection == 1));
@@ -2608,7 +2608,7 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 	}
 
 	// Fill the remainder of the line
-	rcSegment.left = xEol + xStart + virtualSpace + blobsWidth + vsDraw.aveCharWidth;
+	rcSegment.left = rcSegment.right;
 	if (rcSegment.left < rcLine.left)
 		rcSegment.left = rcLine.left;
 	rcSegment.right = rcLine.right;
