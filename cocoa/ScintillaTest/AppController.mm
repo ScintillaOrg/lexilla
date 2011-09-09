@@ -211,6 +211,47 @@ const char user_keywords[] = // Definition of own keywords, not used by MySQL.
 
 //--------------------------------------------------------------------------------------------------
 
+/* XPM */
+static const char * box_xpm[] = {
+	"12 12 2 1",
+	" 	c None",
+	".	c #800000",
+	"   .........",
+	"  .   .   ..",
+	" .   .   . .",
+	".........  .",
+	".   .   .  .",
+	".   .   . ..",
+	".   .   .. .",
+	".........  .",
+	".   .   .  .",
+	".   .   . . ",
+	".   .   ..  ",
+	".........   "};
+
+
+- (void) showAutocompletion
+{
+	const char *words = "Babylon-5?1 Battlestar-Galactica Millenium-Falcon?2 Moya?2 Serenity Voyager";
+	[mEditor setGeneralProperty: SCI_AUTOCSETIGNORECASE parameter: 1 value:0];
+	[mEditor setGeneralProperty: SCI_REGISTERIMAGE parameter: 1 value:(sptr_t)box_xpm];
+	const int imSize = 12;
+	[mEditor setGeneralProperty: SCI_RGBAIMAGESETWIDTH parameter: imSize value:0];
+	[mEditor setGeneralProperty: SCI_RGBAIMAGESETHEIGHT parameter: imSize value:0];
+	char image[imSize * imSize * 4];
+	for (size_t y = 0; y < imSize; y++) {
+		for (size_t x = 0; x < imSize; x++) {
+			char *p = image + (y * imSize + x) * 4;
+			p[0] = 0xFF;
+			p[1] = 0xA0;
+			p[2] = 0;
+			p[3] = x * 23;
+		}
+	}
+	[mEditor setGeneralProperty: SCI_REGISTERRGBAIMAGE parameter: 2 value:(sptr_t)image];
+	[mEditor setGeneralProperty: SCI_AUTOCSHOW parameter: 0 value:(sptr_t)words];
+}
+
 - (IBAction) searchText: (id) sender
 {
   NSSearchField* searchField = (NSSearchField*) sender;
@@ -219,6 +260,8 @@ const char user_keywords[] = // Definition of own keywords, not used by MySQL.
                       wholeWord: NO
                        scrollTo: YES
                            wrap: YES];
+  if ([[searchField stringValue] isEqualToString: @"XX"])
+    [self showAutocompletion];
 }
 
 @end

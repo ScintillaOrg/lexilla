@@ -74,9 +74,7 @@
 #define IS_WIDGET_VISIBLE(w) (GTK_WIDGET_VISIBLE(w))
 #endif
 
-#if GTK_CHECK_VERSION(2,22,0)
 #define USE_CAIRO 1
-#endif
 
 static GdkWindow *WindowFromWidget(GtkWidget *w) {
 #if GTK_CHECK_VERSION(3,0,0)
