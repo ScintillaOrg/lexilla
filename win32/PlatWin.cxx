@@ -2103,7 +2103,7 @@ LRESULT ListBoxX::WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam
 		return ::DefWindowProc(hWnd, iMessage, wParam, lParam);
 
 	case WM_MOUSEWHEEL:
-		wheelDelta -= GET_WHEEL_DELTA_WPARAM(wParam);
+		wheelDelta -= static_cast<short>(HIWORD(wParam));
 		if (abs(wheelDelta) >= WHEEL_DELTA) {
 			int nRows = GetVisibleRows();
 			int linesToScroll = 1;
