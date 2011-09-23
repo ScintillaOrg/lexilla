@@ -4143,6 +4143,7 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_CALLTIPSETFORE">SCI_CALLTIPSETFORE(int colour)</a><br />
      <a class="message" href="#SCI_CALLTIPSETFOREHLT">SCI_CALLTIPSETFOREHLT(int colour)</a><br />
      <a class="message" href="#SCI_CALLTIPUSESTYLE">SCI_CALLTIPUSESTYLE(int tabsize)</a><br />
+     <a class="message" href="#SCI_CALLTIPSETPOSITION">SCI_CALLTIPSETPOSITION(bool above)</a><br />
     </code>
 
     <p><b id="SCI_CALLTIPSHOW">SCI_CALLTIPSHOW(int posStart, const char *definition)</b><br />
@@ -4206,6 +4207,10 @@ struct Sci_TextToFind {
     less than 1, Tab characters are not treated specially. Once this call has been used, the
     call tip foreground and background colours are also taken from the style.</p>
 
+    <p><b id="SCI_CALLTIPSETPOSITION">SCI_CALLTIPSETPOSITION(bool above)</b><br />
+     By default the calltip is displayed below the text, setting above to <code>true</code>
+    (1) will display it above the text.</p>
+    
 
     <h2 id="KeyboardCommands">Keyboard commands</h2>
 
