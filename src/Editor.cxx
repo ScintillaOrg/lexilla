@@ -8259,6 +8259,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETLINEVISIBLE:
 		return cs.GetVisible(wParam);
 
+	case SCI_GETALLLINESVISIBLE:
+		return cs.HiddenLines() ? 0 : 1;
+
 	case SCI_SETFOLDEXPANDED:
 		if (cs.SetExpanded(wParam, lParam != 0)) {
 			RedrawSelMargin();

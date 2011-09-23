@@ -1065,6 +1065,9 @@ fun void HideLines=2227(int lineStart, int lineEnd)
 # Is a line visible?
 get bool GetLineVisible=2228(int line,)
 
+# Are all lines visible?
+get bool GetAllLinesVisible=2236(,)
+
 # Show the children of a header line.
 set void SetFoldExpanded=2229(int line, bool expanded)
 
