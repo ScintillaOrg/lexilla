@@ -4843,6 +4843,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_SHOWLINES">SCI_SHOWLINES(int lineStart, int lineEnd)</a><br />
      <a class="message" href="#SCI_HIDELINES">SCI_HIDELINES(int lineStart, int lineEnd)</a><br />
      <a class="message" href="#SCI_GETLINEVISIBLE">SCI_GETLINEVISIBLE(int line)</a><br />
+     <a class="message" href="#SCI_GETALLLINESVISIBLE">SCI_GETALLLINESVISIBLE</a><br />
      <a class="message" href="#SCI_SETFOLDLEVEL">SCI_SETFOLDLEVEL(int line, int level)</a><br />
      <a class="message" href="#SCI_GETFOLDLEVEL">SCI_GETFOLDLEVEL(int line)</a><br />
      <a class="message" href="#SCI_SETFOLDFLAGS">SCI_SETFOLDFLAGS(int flags)</a><br />
@@ -4878,9 +4879,14 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <p><b id="SCI_SHOWLINES">SCI_SHOWLINES(int lineStart, int lineEnd)</b><br />
      <b id="SCI_HIDELINES">SCI_HIDELINES(int lineStart, int lineEnd)</b><br />
      <b id="SCI_GETLINEVISIBLE">SCI_GETLINEVISIBLE(int line)</b><br />
+     <b id="SCI_GETALLLINESVISIBLE">SCI_GETALLLINESVISIBLE</b><br />
      The first two messages mark a range of lines as visible or invisible and then redraw the
-    display. The third message reports on the visible state of a line and returns 1 if it is
-    visible and 0 if it is not visible. These messages have no effect on fold levels or fold
+    display.
+    <code>SCI_GETLINEVISIBLE</code> reports on the visible state of a line and returns 1 if it is
+    visible and 0 if it is not visible.
+    <code>SCI_GETALLLINESVISIBLE</code> returns 1 if all lines are visible and 0
+    if some lines are hidden.
+    These messages have no effect on fold levels or fold
     flags. The first line can not be hidden.</p>
 
     <p><b id="SCI_SETFOLDLEVEL">SCI_SETFOLDLEVEL(int line, int level)</b><br />
