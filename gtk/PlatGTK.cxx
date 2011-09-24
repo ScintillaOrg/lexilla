@@ -79,7 +79,7 @@ enum encodingType { singleByte, UTF8, dbcs};
 
 struct LOGFONT {
 	int size;
-	bool bold;
+	int weight;
 	bool italic;
 	int characterSet;
 	char faceName[300];
@@ -292,10 +292,10 @@ void Palette::Allocate(Window &w) {
 #endif
 }
 
-static void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, int size, bool bold, bool italic) {
+static void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, float size, int weight, bool italic) {
 	memset(&lf, 0, sizeof(lf));
 	lf.size = size;
-	lf.bold = bold;
+	lf.weight = weight;
 	lf.italic = italic;
 	lf.characterSet = characterSet;
 	strncpy(lf.faceName, faceName, sizeof(lf.faceName) - 1);
@@ -306,13 +306,13 @@ static void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, int 
  * If one font is the same as another, its hash will be the same, but if the hash is the
  * same then they may still be different.
  */
-static int HashFont(const char *faceName, int characterSet, int size, bool bold, bool italic) {
+static int HashFont(const FontParameters &fp) {
 	return
-	    size ^
-	    (characterSet << 10) ^
-	    (bold ? 0x10000000 : 0) ^
-	    (italic ? 0x20000000 : 0) ^
-	    faceName[0];
+	    static_cast<int>(fp.size+0.5) ^
+	    (fp.characterSet << 10) ^
+	    ((fp.weight / 100) << 12) ^
+	    (fp.italic ? 0x20000000 : 0) ^
+	    fp.faceName[0];
 }
 
 class FontCached : Font {
@@ -320,35 +320,34 @@ class FontCached : Font {
 	int usage;
 	LOGFONT lf;
 	int hash;
-	FontCached(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_);
+	FontCached(const FontParameters &fp);
 	~FontCached() {}
-	bool SameAs(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_);
+	bool SameAs(const FontParameters &fp);
 	virtual void Release();
-	static FontID CreateNewFont(const char *fontName, int characterSet,
-	                            int size, bool bold, bool italic);
+	static FontID CreateNewFont(const FontParameters &fp);
 	static FontCached *first;
 public:
-	static FontID FindOrCreate(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_);
+	static FontID FindOrCreate(const FontParameters &fp);
 	static void ReleaseId(FontID fid_);
 };
 
 FontCached *FontCached::first = 0;
 
-FontCached::FontCached(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_) :
+FontCached::FontCached(const FontParameters &fp) :
 next(0), usage(0), hash(0) {
-	::SetLogFont(lf, faceName_, characterSet_, size_, bold_, italic_);
-	hash = HashFont(faceName_, characterSet_, size_, bold_, italic_);
-	fid = CreateNewFont(faceName_, characterSet_, size_, bold_, italic_);
+	::SetLogFont(lf, fp.faceName, fp.characterSet, fp.size, fp.weight, fp.italic);
+	hash = HashFont(fp);
+	fid = CreateNewFont(fp);
 	usage = 1;
 }
 
-bool FontCached::SameAs(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_) {
+bool FontCached::SameAs(const FontParameters &fp) {
 	return
-	    lf.size == size_ &&
-	    lf.bold == bold_ &&
-	    lf.italic == italic_ &&
-	    lf.characterSet == characterSet_ &&
-	    0 == strcmp(lf.faceName, faceName_);
+	    lf.size == fp.size &&
+	    lf.weight == fp.weight &&
+	    lf.italic == fp.italic &&
+	    lf.characterSet == fp.characterSet &&
+	    0 == strcmp(lf.faceName, fp.faceName);
 }
 
 void FontCached::Release() {
@@ -357,19 +356,19 @@ void FontCached::Release() {
 	fid = 0;
 }
 
-FontID FontCached::FindOrCreate(const char *faceName_, int characterSet_, int size_, bool bold_, bool italic_) {
+FontID FontCached::FindOrCreate(const FontParameters &fp) {
 	FontID ret = 0;
 	FontMutexLock();
-	int hashFind = HashFont(faceName_, characterSet_, size_, bold_, italic_);
+	int hashFind = HashFont(fp);
 	for (FontCached *cur = first; cur; cur = cur->next) {
 		if ((cur->hash == hashFind) &&
-		        cur->SameAs(faceName_, characterSet_, size_, bold_, italic_)) {
+		        cur->SameAs(fp)) {
 			cur->usage++;
 			ret = cur->fid;
 		}
 	}
 	if (ret == 0) {
-		FontCached *fc = new FontCached(faceName_, characterSet_, size_, bold_, italic_);
+		FontCached *fc = new FontCached(fp);
 		if (fc) {
 			fc->next = first;
 			first = fc;
@@ -399,17 +398,15 @@ void FontCached::ReleaseId(FontID fid_) {
 	FontMutexUnlock();
 }
 
-FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
-                                 int size, bool bold, bool italic) {
-	if (*fontName == '!')
-		fontName++;
+FontID FontCached::CreateNewFont(const FontParameters &fp) {
 	PangoFontDescription *pfd = pango_font_description_new();
 	if (pfd) {
-		pango_font_description_set_family(pfd, fontName);
-		pango_font_description_set_size(pfd, size * PANGO_SCALE);
-		pango_font_description_set_weight(pfd, bold ? PANGO_WEIGHT_BOLD : PANGO_WEIGHT_NORMAL);
-		pango_font_description_set_style(pfd, italic ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
-		return new FontHandle(pfd, characterSet);
+		pango_font_description_set_family(pfd, 
+			(fp.faceName[0] == '!') ? fp.faceName+1 : fp.faceName);
+		pango_font_description_set_size(pfd, pango_units_from_double(fp.size));
+		pango_font_description_set_weight(pfd, static_cast<PangoWeight>(fp.weight));
+		pango_font_description_set_style(pfd, fp.italic ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
+		return new FontHandle(pfd, fp.characterSet);
 	}
 
 	return new FontHandle();
@@ -419,10 +416,9 @@ Font::Font() : fid(0) {}
 
 Font::~Font() {}
 
-void Font::Create(const char *faceName, int characterSet, int size,
-	bool bold, bool italic, int) {
+void Font::Create(const FontParameters &fp) {
 	Release();
-	fid = FontCached::FindOrCreate(faceName, characterSet, size, bold, italic);
+	fid = FontCached::FindOrCreate(fp);
 }
 
 void Font::Release() {
@@ -476,19 +472,19 @@ public:
 	void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back);
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource);
 
-	void DrawTextBase(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore);
-	void DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
-	void DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
-	void DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore);
-	void MeasureWidths(Font &font_, const char *s, int len, int *positions);
-	int WidthText(Font &font_, const char *s, int len);
-	int WidthChar(Font &font_, char ch);
-	int Ascent(Font &font_);
-	int Descent(Font &font_);
-	int InternalLeading(Font &font_);
-	int ExternalLeading(Font &font_);
-	int Height(Font &font_);
-	int AverageCharWidth(Font &font_);
+	void DrawTextBase(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore);
+	void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
+	void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
+	void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore);
+	void MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions);
+	XYPOSITION WidthText(Font &font_, const char *s, int len);
+	XYPOSITION WidthChar(Font &font_, char ch);
+	XYPOSITION Ascent(Font &font_);
+	XYPOSITION Descent(Font &font_);
+	XYPOSITION InternalLeading(Font &font_);
+	XYPOSITION ExternalLeading(Font &font_);
+	XYPOSITION Height(Font &font_);
+	XYPOSITION AverageCharWidth(Font &font_);
 
 	int SetPalette(Palette *pal, bool inBackGround);
 	void SetClip(PRectangle rc);
@@ -964,11 +960,11 @@ static size_t UTF8CharLength(const char *s) {
 	}
 }
 
-void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char *s, int len,
+void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
                                  ColourAllocated fore) {
 	PenColour(fore);
 	if (context) {
-		int xText = rc.left;
+		XYPOSITION xText = rc.left;
 		if (PFont(font_)->pfd) {
 			char *utfForm = 0;
 			if (et == UTF8) {
@@ -997,20 +993,20 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 	}
 }
 
-void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len,
+void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
                                  ColourAllocated fore, ColourAllocated back) {
 	FillRectangle(rc, back);
 	DrawTextBase(rc, font_, ybase, s, len, fore);
 }
 
 // On GTK+, exactly same as DrawTextNoClip
-void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len,
+void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
                                   ColourAllocated fore, ColourAllocated back) {
 	FillRectangle(rc, back);
 	DrawTextBase(rc, font_, ybase, s, len, fore);
 }
 
-void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len,
+void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
                                   ColourAllocated fore) {
 	// Avoid drawing spaces in transparent mode
 	for (int i=0;i<len;i++) {
@@ -1027,9 +1023,9 @@ class ClusterIterator {
 	int lenPositions;
 public:
 	bool finished;
-	int positionStart;
-	int position;
-	int distance;
+	XYPOSITION positionStart;
+	XYPOSITION position;
+	XYPOSITION distance;
 	int curIndex;
 	ClusterIterator(PangoLayout *layout, int len) : lenPositions(len), finished(false),
 		positionStart(0), position(0), distance(0), curIndex(0) {
@@ -1044,18 +1040,18 @@ public:
 		positionStart = position;
 		if (pango_layout_iter_next_cluster(iter)) {
 			pango_layout_iter_get_cluster_extents(iter, NULL, &pos);
-			position = PANGO_PIXELS(pos.x);
+			position = pango_units_to_double(pos.x);
 			curIndex = pango_layout_iter_get_index(iter);
 		} else {
 			finished = true;
-			position = PANGO_PIXELS(pos.x + pos.width);
+			position = pango_units_to_double(pos.x + pos.width);
 			curIndex = lenPositions;
 		}
 		distance = position - positionStart;
 	}
 };
 
-void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positions) {
+void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions) {
 	if (font_.GetID()) {
 		const int lenPositions = len;
 		if (PFont(font_)->pfd) {
@@ -1158,7 +1154,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 	}
 }
 
-int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
+XYPOSITION SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 	if (font_.GetID()) {
 		if (PFont(font_)->pfd) {
 			char *utfForm = 0;
@@ -1183,7 +1179,7 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 #endif
 			pango_layout_line_get_extents(pangoLine, NULL, &pos);
 			delete []utfForm;
-			return PANGO_PIXELS(pos.width);
+			return pango_units_to_double(pos.width);
 		}
 		return 1;
 	} else {
@@ -1191,7 +1187,7 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 	}
 }
 
-int SurfaceImpl::WidthChar(Font &font_, char ch) {
+XYPOSITION SurfaceImpl::WidthChar(Font &font_, char ch) {
 	if (font_.GetID()) {
 		if (PFont(font_)->pfd) {
 			return WidthText(font_, &ch, 1);
@@ -1204,7 +1200,7 @@ int SurfaceImpl::WidthChar(Font &font_, char ch) {
 
 // Ascent and descent determined by Pango font metrics.
 
-int SurfaceImpl::Ascent(Font &font_) {
+XYPOSITION SurfaceImpl::Ascent(Font &font_) {
 	if (!(font_.GetID()))
 		return 1;
 	FontMutexLock();
@@ -1213,7 +1209,7 @@ int SurfaceImpl::Ascent(Font &font_) {
 		PangoFontMetrics *metrics = pango_context_get_metrics(pcontext,
 			PFont(font_)->pfd, pango_context_get_language(pcontext));
 		PFont(font_)->ascent =
-			PANGO_PIXELS(pango_font_metrics_get_ascent(metrics));
+			pango_units_to_double(pango_font_metrics_get_ascent(metrics));
 		pango_font_metrics_unref(metrics);
 		ascent = PFont(font_)->ascent;
 	}
@@ -1224,32 +1220,32 @@ int SurfaceImpl::Ascent(Font &font_) {
 	return ascent;
 }
 
-int SurfaceImpl::Descent(Font &font_) {
+XYPOSITION SurfaceImpl::Descent(Font &font_) {
 	if (!(font_.GetID()))
 		return 1;
 	if (PFont(font_)->pfd) {
 		PangoFontMetrics *metrics = pango_context_get_metrics(pcontext,
 			PFont(font_)->pfd, pango_context_get_language(pcontext));
-		int descent = PANGO_PIXELS(pango_font_metrics_get_descent(metrics));
+		int descent = pango_units_to_double(pango_font_metrics_get_descent(metrics));
 		pango_font_metrics_unref(metrics);
 		return descent;
 	}
 	return 0;
 }
 
-int SurfaceImpl::InternalLeading(Font &) {
+XYPOSITION SurfaceImpl::InternalLeading(Font &) {
 	return 0;
 }
 
-int SurfaceImpl::ExternalLeading(Font &) {
+XYPOSITION SurfaceImpl::ExternalLeading(Font &) {
 	return 0;
 }
 
-int SurfaceImpl::Height(Font &font_) {
+XYPOSITION SurfaceImpl::Height(Font &font_) {
 	return Ascent(font_) + Descent(font_);
 }
 
-int SurfaceImpl::AverageCharWidth(Font &font_) {
+XYPOSITION SurfaceImpl::AverageCharWidth(Font &font_) {
 	return WidthChar(font_, 'n');
 }
 
@@ -1275,8 +1271,8 @@ void SurfaceImpl::SetDBCSMode(int codePage) {
 		et = dbcs;
 }
 
-Surface *Surface::Allocate() {
-	return new SurfaceImpl;
+Surface *Surface::Allocate(int) {
+	return new SurfaceImpl();
 }
 
 Window::~Window() {}
@@ -1491,7 +1487,7 @@ public:
 		}
 	}
 	virtual void SetFont(Font &font);
-	virtual void Create(Window &parent, int ctrlID, Point location_, int lineHeight_, bool unicodeMode_);
+	virtual void Create(Window &parent, int ctrlID, Point location_, int lineHeight_, bool unicodeMode_, int technology_);
 	virtual void SetAverageCharWidth(int width);
 	virtual void SetVisibleRows(int rows);
 	virtual int GetVisibleRows() const;
@@ -1580,7 +1576,7 @@ static void StyleSet(GtkWidget *w, GtkStyle*, void*) {
 #endif
 }
 
-void ListBoxX::Create(Window &, int, Point, int, bool) {
+void ListBoxX::Create(Window &, int, Point, int, bool, int) {
 	wid = gtk_window_new(GTK_WINDOW_POPUP);
 
 	GtkWidget *frame = gtk_frame_new(NULL);
@@ -2022,7 +2018,7 @@ void Menu::Show(Point pt, Window &) {
 		pt.y = screenHeight - requisition.height;
 	}
 	gtk_menu_popup(widget, NULL, NULL, MenuPositionFunc,
-		reinterpret_cast<void *>((pt.y << 16) | pt.x), 0,
+		reinterpret_cast<void *>((static_cast<int>(pt.y) << 16) | static_cast<int>(pt.x)), 0,
 		gtk_get_current_event_time());
 }
 

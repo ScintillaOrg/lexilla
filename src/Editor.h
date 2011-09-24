@@ -131,6 +131,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	 * When a style attribute is changed, this cache is flushed. */
 	bool stylesValid;
 	ViewStyle vs;
+	int technology;
 	Point sizeRGBAImage;
 	Palette palette;
 
@@ -280,7 +281,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void InvalidateStyleRedraw();
 	virtual void RefreshColourPalette(Palette &pal, bool want);
 	void RefreshStyleData();
-	void DropGraphics();
+	void DropGraphics(bool freeObjects);
+	void AllocateGraphics();
 
 	virtual PRectangle GetClientRectangle();
 	PRectangle GetTextRectangle();
@@ -575,7 +577,7 @@ private:
 public:
 	AutoSurface(Editor *ed) : surf(0) {
 		if (ed->wMain.GetID()) {
-			surf = Surface::Allocate();
+			surf = Surface::Allocate(ed->technology);
 			if (surf) {
 				surf->Init(ed->wMain.GetID());
 				surf->SetUnicodeMode(SC_CP_UTF8 == ed->CodePage());
@@ -585,7 +587,7 @@ public:
 	}
 	AutoSurface(SurfaceID sid, Editor *ed) : surf(0) {
 		if (ed->wMain.GetID()) {
-			surf = Surface::Allocate();
+			surf = Surface::Allocate(ed->technology);
 			if (surf) {
 				surf->Init(sid, ed->wMain.GetID());
 				surf->SetUnicodeMode(SC_CP_UTF8 == ed->CodePage());

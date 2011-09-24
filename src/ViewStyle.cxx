@@ -86,14 +86,15 @@ FontRealised::~FontRealised() {
 	frNext = 0;
 }
 
-void FontRealised::Realise(Surface &surface, int zoomLevel) {
+void FontRealised::Realise(Surface &surface, int zoomLevel, int technology) {
 	PLATFORM_ASSERT(fontName);
-	sizeZoomed = size + zoomLevel;
-	if (sizeZoomed <= 2)	// Hangs if sizeZoomed <= 1
-		sizeZoomed = 2;
+	sizeZoomed = size + zoomLevel * SC_FONT_SIZE_MULTIPLIER;
+	if (sizeZoomed <= 2 * SC_FONT_SIZE_MULTIPLIER)	// Hangs if sizeZoomed <= 1
+		sizeZoomed = 2 * SC_FONT_SIZE_MULTIPLIER;
 
-	int deviceHeight = surface.DeviceHeightFont(sizeZoomed);
-	font.Create(fontName, characterSet, deviceHeight, bold, italic, extraFontFlag);
+	float deviceHeight = surface.DeviceHeightFont(sizeZoomed);
+	FontParameters fp(fontName, deviceHeight / SC_FONT_SIZE_MULTIPLIER, weight, italic, extraFontFlag, technology, characterSet);
+	font.Create(fp);
 
 	ascent = surface.Ascent(font);
 	descent = surface.Descent(font);
@@ -102,7 +103,7 @@ void FontRealised::Realise(Surface &surface, int zoomLevel) {
 	aveCharWidth = surface.AverageCharWidth(font);
 	spaceWidth = surface.WidthChar(font, ' ');
 	if (frNext) {
-		frNext->Realise(surface, zoomLevel);
+		frNext->Realise(surface, zoomLevel, technology);
 	}
 }
 
@@ -239,6 +240,7 @@ void ViewStyle::Init(size_t stylesSize_) {
 	indicators[2].under = false;
 	indicators[2].fore = ColourDesired(0xff, 0, 0);
 
+	technology = SC_TECHNOLOGY_DEFAULT;
 	lineHeight = 1;
 	maxAscent = 1;
 	maxDescent = 1;
@@ -388,7 +390,7 @@ void ViewStyle::Refresh(Surface &surface) {
 		CreateFont(styles[j]);
 	}
 
-	frFirst->Realise(surface, zoomLevel);
+	frFirst->Realise(surface, zoomLevel, technology);
 
 	for (unsigned int k=0; k<stylesSize; k++) {
 		FontRealised *fr = frFirst->Find(styles[k]);
@@ -457,9 +459,9 @@ void ViewStyle::EnsureStyle(size_t index) {
 void ViewStyle::ResetDefaultStyle() {
 	styles[STYLE_DEFAULT].Clear(ColourDesired(0,0,0),
 	        ColourDesired(0xff,0xff,0xff),
-	        Platform::DefaultFontSize(), fontNames.Save(Platform::DefaultFont()),
+	        Platform::DefaultFontSize() * SC_FONT_SIZE_MULTIPLIER, fontNames.Save(Platform::DefaultFont()),
 	        SC_CHARSET_DEFAULT,
-	        false, false, false, false, Style::caseMixed, true, true, false);
+	        SC_WEIGHT_NORMAL, false, false, false, Style::caseMixed, true, true, false);
 }
 
 void ViewStyle::ClearStyles() {

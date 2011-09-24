@@ -59,6 +59,10 @@
 namespace Scintilla {
 #endif
 
+typedef float XYPOSITION;
+typedef double XYACCUMULATOR;
+//#define XYPOSITION int
+
 // Underlying the implementation of the platform classes are platform specific types.
 // Sometimes these need to be passed around by client code so they are defined here
 
@@ -76,10 +80,10 @@ typedef void *IdlerID;
  */
 class Point {
 public:
-	int x;
-	int y;
+	XYPOSITION x;
+	XYPOSITION y;
 
-	explicit Point(int x_=0, int y_=0) : x(x_), y(y_) {
+	explicit Point(XYPOSITION x_=0, XYPOSITION y_=0) : x(x_), y(y_) {
 	}
 
 	// Other automatically defined methods (assignment, copy constructor, destructor) are fine
@@ -94,12 +98,12 @@ public:
  */
 class PRectangle {
 public:
-	int left;
-	int top;
-	int right;
-	int bottom;
+	XYPOSITION left;
+	XYPOSITION top;
+	XYPOSITION right;
+	XYPOSITION bottom;
 
-	PRectangle(int left_=0, int top_=0, int right_=0, int bottom_ = 0) :
+	PRectangle(XYPOSITION left_=0, XYPOSITION top_=0, XYPOSITION right_=0, XYPOSITION bottom_ = 0) :
 		left(left_), top(top_), right(right_), bottom(bottom_) {
 	}
 
@@ -121,14 +125,14 @@ public:
 		return (right > other.left) && (left < other.right) &&
 			(bottom > other.top) && (top < other.bottom);
 	}
-	void Move(int xDelta, int yDelta) {
+	void Move(XYPOSITION xDelta, XYPOSITION yDelta) {
 		left += xDelta;
 		top += yDelta;
 		right += xDelta;
 		bottom += yDelta;
 	}
-	int Width() { return right - left; }
-	int Height() { return bottom - top; }
+	XYPOSITION Width() { return right - left; }
+	XYPOSITION Height() { return bottom - top; }
 	bool Empty() {
 		return (Height() <= 0) || (Width() <= 0);
 	}
@@ -287,6 +291,37 @@ public:
 /**
  * Font management.
  */
+
+struct FontParameters {
+	const char *faceName;
+	float size;
+	int weight;
+	bool italic;
+	int extraFontFlag;
+	int technology;
+	int characterSet;
+
+	FontParameters(
+		const char *faceName_,
+		float size_=10,
+		int weight_=400,
+		bool italic_=false,
+		int extraFontFlag_=0,
+		int technology_=0,
+		int characterSet_=0) :
+
+		faceName(faceName_),
+		size(size_),
+		weight(weight_),
+		italic(italic_),
+		extraFontFlag(extraFontFlag_),
+		technology(technology_),
+		characterSet(characterSet_)
+	{
+	}
+
+};
+
 class Font {
 protected:
 	FontID fid;
@@ -300,8 +335,7 @@ public:
 	Font();
 	virtual ~Font();
 
-	virtual void Create(const char *faceName, int characterSet, int size,
-		bool bold, bool italic, int extraFontFlag=0);
+	virtual void Create(const FontParameters &fp);
 	virtual void Release();
 
 	FontID GetID() { return fid; }
@@ -325,7 +359,7 @@ private:
 public:
 	Surface() {}
 	virtual ~Surface() {}
-	static Surface *Allocate();
+	static Surface *Allocate(int technology);
 
 	virtual void Init(WindowID wid)=0;
 	virtual void Init(SurfaceID sid, WindowID wid)=0;
@@ -349,18 +383,18 @@ public:
 	virtual void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back)=0;
 	virtual void Copy(PRectangle rc, Point from, Surface &surfaceSource)=0;
 
-	virtual void DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back)=0;
-	virtual void DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back)=0;
-	virtual void DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore)=0;
-	virtual void MeasureWidths(Font &font_, const char *s, int len, int *positions)=0;
-	virtual int WidthText(Font &font_, const char *s, int len)=0;
-	virtual int WidthChar(Font &font_, char ch)=0;
-	virtual int Ascent(Font &font_)=0;
-	virtual int Descent(Font &font_)=0;
-	virtual int InternalLeading(Font &font_)=0;
-	virtual int ExternalLeading(Font &font_)=0;
-	virtual int Height(Font &font_)=0;
-	virtual int AverageCharWidth(Font &font_)=0;
+	virtual void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back)=0;
+	virtual void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back)=0;
+	virtual void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore)=0;
+	virtual void MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions)=0;
+	virtual XYPOSITION WidthText(Font &font_, const char *s, int len)=0;
+	virtual XYPOSITION WidthChar(Font &font_, char ch)=0;
+	virtual XYPOSITION Ascent(Font &font_)=0;
+	virtual XYPOSITION Descent(Font &font_)=0;
+	virtual XYPOSITION InternalLeading(Font &font_)=0;
+	virtual XYPOSITION ExternalLeading(Font &font_)=0;
+	virtual XYPOSITION Height(Font &font_)=0;
+	virtual XYPOSITION AverageCharWidth(Font &font_)=0;
 
 	virtual int SetPalette(Palette *pal, bool inBackGround)=0;
 	virtual void SetClip(PRectangle rc)=0;
@@ -439,7 +473,7 @@ public:
 	static ListBox *Allocate();
 
 	virtual void SetFont(Font &font)=0;
-	virtual void Create(Window &parent, int ctrlID, Point location, int lineHeight_, bool unicodeMode_)=0;
+	virtual void Create(Window &parent, int ctrlID, Point location, int lineHeight_, bool unicodeMode_, int technology_)=0;
 	virtual void SetAverageCharWidth(int width)=0;
 	virtual void SetVisibleRows(int rows)=0;
 	virtual int GetVisibleRows() const=0;

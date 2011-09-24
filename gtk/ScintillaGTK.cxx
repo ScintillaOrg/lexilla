@@ -574,7 +574,7 @@ void ScintillaGTK::UnMapThis() {
 #else
 		GTK_WIDGET_UNSET_FLAGS(PWidget(wMain), GTK_MAPPED);
 #endif
-		DropGraphics();
+		DropGraphics(false);
 		gdk_window_hide(PWindow(wMain));
 		gtk_widget_unmap(PWidget(wText));
 		gtk_widget_unmap(PWidget(scrollbarh));
@@ -1102,7 +1102,7 @@ void ScintillaGTK::SyncPaint(PRectangle rc) {
 	PRectangle rcClient = GetClientRectangle();
 	paintingAllText = rcPaint.Contains(rcClient);
 	if (PWindow(wText)) {
-		Surface *sw = Surface::Allocate();
+		Surface *sw = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
 		if (sw) {
 #if GTK_CHECK_VERSION(3,0,0)
 			cairo_t *cr = gdk_cairo_create(PWindow(wText));
@@ -2429,7 +2429,7 @@ gboolean ScintillaGTK::DrawTextThis(cairo_t *cr) {
 		rcPaint.bottom = y2;
 		PRectangle rcClient = GetClientRectangle();
 		paintingAllText = rcPaint.Contains(rcClient);
-		Surface *surfaceWindow = Surface::Allocate();
+		Surface *surfaceWindow = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
 		if (surfaceWindow) {
 			surfaceWindow->Init(cr, PWidget(wText));
 			Paint(surfaceWindow, rcPaint);
@@ -2490,7 +2490,7 @@ gboolean ScintillaGTK::ExposeTextThis(GtkWidget * /*widget*/, GdkEventExpose *os
 		rgnUpdate = gdk_region_copy(ose->region);
 		PRectangle rcClient = GetClientRectangle();
 		paintingAllText = rcPaint.Contains(rcClient);
-		Surface *surfaceWindow = Surface::Allocate();
+		Surface *surfaceWindow = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
 		if (surfaceWindow) {
 			surfaceWindow->Init(PWindow(wText), PWidget(wText));
 			Paint(surfaceWindow, rcPaint);
@@ -2782,7 +2782,7 @@ gboolean ScintillaGTK::PressCT(GtkWidget *widget, GdkEventButton *event, Scintil
 
 gboolean ScintillaGTK::DrawCT(GtkWidget *widget, cairo_t *cr, CallTip *ctip) {
 	try {
-		Surface *surfaceWindow = Surface::Allocate();
+		Surface *surfaceWindow = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
 		if (surfaceWindow) {
 			surfaceWindow->Init(cr, widget);
 			surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == ctip->codePage);
@@ -2801,7 +2801,7 @@ gboolean ScintillaGTK::DrawCT(GtkWidget *widget, cairo_t *cr, CallTip *ctip) {
 
 gboolean ScintillaGTK::ExposeCT(GtkWidget *widget, GdkEventExpose * /*ose*/, CallTip *ctip) {
 	try {
-		Surface *surfaceWindow = Surface::Allocate();
+		Surface *surfaceWindow = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
 		if (surfaceWindow) {
 			surfaceWindow->Init(WindowFromWidget(widget), widget);
 			surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == ctip->codePage);

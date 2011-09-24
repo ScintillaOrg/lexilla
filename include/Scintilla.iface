@@ -482,6 +482,25 @@ get bool StyleGetHotSpot=2493(int style,)
 # Set a style to be mixed case, or to force upper or lower case.
 set void StyleSetCase=2060(int style, int caseForce)
 
+val SC_FONT_SIZE_MULTIPLIER=100
+
+# Set the size of characters of a style. Size is in points multiplied by 100.
+set void StyleSetSizeFractional=2061(int style, int caseForce)
+
+# Get the size of characters of a style in points multiplied by 100
+get int StyleGetSizeFractional=2062(int style,)
+
+enu FontWeight=SC_WEIGHT_
+val SC_WEIGHT_NORMAL=400
+val SC_WEIGHT_SEMIBOLD=600
+val SC_WEIGHT_BOLD=700
+
+# Set the weight of characters of a style.
+set void StyleSetWeight=2063(int style, int weight)
+
+# Get the weight of characters of a style.
+get int StyleGetWeight=2064(int style,)
+
 # Set the character set of the font in a style.
 set void StyleSetCharacterSet=2066(int style, int characterSet)
 
@@ -2177,6 +2196,15 @@ fun void ScrollToStart=2628(,)
 
 # Scroll to end of document.
 fun void ScrollToEnd=2629(,)
+
+val SC_TECHNOLOGY_DEFAULT=0
+val SC_TECHNOLOGY_DIRECTWRITE=1
+
+# Set the technolgy used.
+set void SetTechnology=2630(int technology,)
+
+# Get the tech.
+get int GetTechnology=2631(,)
 
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
