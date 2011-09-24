@@ -24,8 +24,14 @@
 #include <richedit.h>
 #include <windowsx.h>
 
+#if defined(_MSC_VER)
+#define USE_D2D 1
+#endif
+
+#if defined(USE_D2D)
 #include <d2d1.h>
 #include <dwrite.h>
+#endif
 
 #include "Platform.h"
 
@@ -196,7 +202,9 @@ class ScintillaWin :
 
 	static HINSTANCE hInstance;
 
+#if defined(USE_D2D)
 	ID2D1HwndRenderTarget *pRenderTarget;
+#endif
 
 	ScintillaWin(HWND hwnd);
 	ScintillaWin(const ScintillaWin &);
@@ -353,7 +361,9 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	sysCaretWidth = 0;
 	sysCaretHeight = 0;
 
+#if defined(USE_D2D)
 	pRenderTarget = 0;
+#endif
 
 	keysAlwaysUnicode = false;
 
@@ -397,6 +407,7 @@ void ScintillaWin::Finalise() {
 }
 
 void ScintillaWin::EnsureRenderTarget() {
+#if defined(USE_D2D)
 	if (pD2DFactory && !pRenderTarget) {
 		RECT rc;
 		HWND hw = MainHWND();
@@ -420,13 +431,16 @@ void ScintillaWin::EnsureRenderTarget() {
 			&pRenderTarget);
 #endif
 	}
+#endif
 }
 
 void ScintillaWin::DropRenderTarget() {
+#if defined(USE_D2D)
 	if (pRenderTarget) {
 		pRenderTarget->Release();
 		pRenderTarget = 0;
 	}
+#endif
 }
 
 HWND ScintillaWin::MainHWND() {
@@ -554,6 +568,7 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 			surfaceWindow->Release();
 		}
 	} else {
+#if defined(USE_D2D)
 		EnsureRenderTarget();
 		AutoSurface surfaceWindow(pRenderTarget, this);
 		if (surfaceWindow) {
@@ -573,6 +588,7 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 				DropRenderTarget();
 			}
 		}
+#endif
 	}
 	if (hRgnUpdate) {
 		::DeleteRgn(hRgnUpdate);
@@ -1147,9 +1163,13 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			if ((wParam == SC_TECHNOLOGY_DEFAULT) || (wParam == SC_TECHNOLOGY_DIRECTWRITE)) {
 				if (technology != static_cast<int>(wParam)) {
 					if (static_cast<int>(wParam) == SC_TECHNOLOGY_DIRECTWRITE) {
+#if defined(USE_D2D)
 						if (!LoadD2D())
 							// Failed to load Direct2D or DirectWrite so no effect
 							return 0;
+#else
+						return 0;
+#endif
 					}
 					technology = wParam;
 					// Invalidate all cached information including layout.
@@ -2411,6 +2431,7 @@ void ScintillaWin::FullPaintDC(HDC hdc) {
 			surfaceWindow->Release();
 		}
 	} else {
+#if defined(USE_D2D)
 		EnsureRenderTarget();
 		AutoSurface surfaceWindow(pRenderTarget, this);
 		if (surfaceWindow) {
@@ -2422,6 +2443,7 @@ void ScintillaWin::FullPaintDC(HDC hdc) {
 				DropRenderTarget();
 			}
 		}
+#endif
 	}
 	paintState = notPainting;
 }
@@ -2795,29 +2817,37 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
 				::BeginPaint(hWnd, &ps);
 				Surface *surfaceWindow = Surface::Allocate(sciThis->technology);
 				if (surfaceWindow) {
+#if defined(USE_D2D)
 					ID2D1HwndRenderTarget *pCTRenderTarget = 0;
+#endif
 					RECT rc;
 					GetClientRect(hWnd, &rc);
 					// Create a Direct2D render target.
 					if (sciThis->technology == SC_TECHNOLOGY_DEFAULT) {
 						surfaceWindow->Init(ps.hdc, hWnd);
 					} else {
+#if defined(USE_D2D)
 						pD2DFactory->CreateHwndRenderTarget(
 							D2D1::RenderTargetProperties(),
 							D2D1::HwndRenderTargetProperties(hWnd, D2D1::SizeU(rc.right - rc.left, rc.bottom - rc.top)),
 							&pCTRenderTarget);
 						surfaceWindow->Init(pCTRenderTarget, hWnd);
 						pCTRenderTarget->BeginDraw();
+#endif
 					}
 					surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == sciThis->ct.codePage);
 					surfaceWindow->SetDBCSMode(sciThis->ct.codePage);
 					sciThis->ct.PaintCT(surfaceWindow);
+#if defined(USE_D2D)
 					if (pCTRenderTarget)
 						pCTRenderTarget->EndDraw();
+#endif
 					surfaceWindow->Release();
 					delete surfaceWindow;
+#if defined(USE_D2D)
 					if (pCTRenderTarget)
 						pCTRenderTarget->Release();
+#endif
 				}
 				::EndPaint(hWnd, &ps);
 				return 0;

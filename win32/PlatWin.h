@@ -8,6 +8,9 @@
 extern bool IsNT();
 extern void Platform_Initialise(void *hInstance);
 extern void Platform_Finalise();
+
+#if defined(_MSC_VER)
 extern bool LoadD2D();
 extern ID2D1Factory *pD2DFactory;
 extern IDWriteFactory *pIDWriteFactory;
+#endif

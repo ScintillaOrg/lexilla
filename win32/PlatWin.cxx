@@ -26,8 +26,15 @@
 #include <commctrl.h>
 #include <richedit.h>
 #include <windowsx.h>
+
+#if defined(_MSC_VER)
+#define USE_D2D 1
+#endif
+
+#if defined(USE_D2D)
 #include <d2d1.h>
 #include <dwrite.h>
+#endif
 
 #include "Platform.h"
 #include "UniConversion.h"
@@ -197,6 +204,7 @@ void Palette::Allocate(Window &) {
 	}
 }
 
+#if defined(USE_D2D)
 IDWriteFactory *pIDWriteFactory = 0;
 ID2D1Factory *pD2DFactory = 0;
 
@@ -234,26 +242,37 @@ bool LoadD2D() {
 	triedLoadingD2D = true;
 	return pIDWriteFactory && pD2DFactory;
 }
+#endif
 
 struct FormatAndMetrics {
 	int technology;
 	HFONT hfont;
+#if defined(USE_D2D)
 	IDWriteTextFormat *pTextFormat;
+#endif
 	int extraFontFlag;
 	FLOAT yAscent;
 	FLOAT yDescent;
 	FormatAndMetrics(HFONT hfont_, int extraFontFlag_) : 
-		technology(SCWIN_TECH_GDI), hfont(hfont_), pTextFormat(0), extraFontFlag(extraFontFlag_), yAscent(2), yDescent(1) {
+		technology(SCWIN_TECH_GDI), hfont(hfont_), 
+#if defined(USE_D2D)
+		pTextFormat(0),
+#endif
+		extraFontFlag(extraFontFlag_), yAscent(2), yDescent(1) {
 	}
+#if defined(USE_D2D)
 	FormatAndMetrics(IDWriteTextFormat *pTextFormat_, int extraFontFlag_, FLOAT yAscent_, FLOAT yDescent_) : 
 		technology(SCWIN_TECH_DIRECTWRITE), hfont(0), pTextFormat(pTextFormat_), extraFontFlag(extraFontFlag_), yAscent(yAscent_), yDescent(yDescent_) {
 	}
+#endif
 	~FormatAndMetrics() {
 		if (hfont)
 			::DeleteObject(hfont);
+#if defined(USE_D2D)
 		if (pTextFormat)
-		pTextFormat->Release();
+			pTextFormat->Release();
 		pTextFormat = 0;
+#endif
 		extraFontFlag = 0;
 		yAscent = 2;
 		yDescent = 1;
@@ -262,6 +281,7 @@ struct FormatAndMetrics {
 };
 
 HFONT FormatAndMetrics::HFont() {
+#if defined(USE_D2D)
 	if (technology == SCWIN_TECH_GDI) {
 		return hfont;
 	} else {
@@ -277,6 +297,9 @@ HFONT FormatAndMetrics::HFont() {
 		}
 	}
 	return 0;
+#else
+	return hfont;
+#endif
 }
 
 #ifndef CLEARTYPE_QUALITY
@@ -300,6 +323,7 @@ static BYTE Win32MapFontQuality(int extraFontFlag) {
 	}
 }
 
+#if defined(USE_D2D)
 static D2D1_TEXT_ANTIALIAS_MODE DWriteMapFontQuality(int extraFontFlag) {
 	switch (extraFontFlag & SC_EFF_QUALITY_MASK) {
 
@@ -316,6 +340,7 @@ static D2D1_TEXT_ANTIALIAS_MODE DWriteMapFontQuality(int extraFontFlag) {
 			return D2D1_TEXT_ANTIALIAS_MODE_DEFAULT;
 	}
 }
+#endif
 
 static void SetLogFont(LOGFONTA &lf, const char *faceName, int characterSet, float size, int weight, bool italic, int extraFontFlag) {
 	memset(&lf, 0, sizeof(lf));
@@ -374,10 +399,11 @@ FontCached::FontCached(const FontParameters &fp) :
 		HFONT hfont = ::CreateFontIndirectA(&lf);
 		fid = reinterpret_cast<void *>(new FormatAndMetrics(hfont, fp.extraFontFlag));
 	} else {
+#if defined(USE_D2D)
 		IDWriteTextFormat *pTextFormat;
 		const int faceSize = 200;
 		WCHAR wszFace[faceSize];
-		UTF16FromUTF8(fp.faceName, strlen(fp.faceName)+1, wszFace, faceSize);
+		UTF16FromUTF8(fp.faceName, static_cast<unsigned int>(strlen(fp.faceName))+1, wszFace, faceSize);
 		FLOAT fHeight = fp.size;
 		DWRITE_FONT_STYLE style = fp.italic ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL;
 		HRESULT hr = pIDWriteFactory->CreateTextFormat(wszFace, NULL,
@@ -405,6 +431,7 @@ FontCached::FontCached(const FontParameters &fp) :
 			}
 			fid = reinterpret_cast<void *>(new FormatAndMetrics(pTextFormat, fp.extraFontFlag, yAscent, yDescent));
 		}
+#endif
 	}
 	usage = 1;
 }
@@ -1190,6 +1217,8 @@ void SurfaceGDI::SetDBCSMode(int codePage_) {
 namespace Scintilla {
 #endif
 
+#if defined(USE_D2D)
+
 class SurfaceD2D : public Surface {
 	bool unicodeMode;
 	int x, y;
@@ -1825,7 +1854,8 @@ XYPOSITION SurfaceD2D::AverageCharWidth(Font &font_) {
 		// Create a layout
 		IDWriteTextLayout *pTextLayout = 0;
 		const WCHAR wszAllAlpha[] = L"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-		HRESULT hr = pIDWriteFactory->CreateTextLayout(wszAllAlpha, wcslen(wszAllAlpha), pTextFormat, 1000.0, 1000.0, &pTextLayout);
+		HRESULT hr = pIDWriteFactory->CreateTextLayout(wszAllAlpha, static_cast<UINT32>(wcslen(wszAllAlpha)), 
+			pTextFormat, 1000.0, 1000.0, &pTextLayout);
 		if (SUCCEEDED(hr)) {
 			DWRITE_TEXT_METRICS textMetrics;
 			pTextLayout->GetMetrics(&textMetrics);
@@ -1859,12 +1889,17 @@ void SurfaceD2D::SetDBCSMode(int codePage_) {
 	// No action on window as automatically handled by system.
 	codePage = codePage_;
 }
+#endif
 
 Surface *Surface::Allocate(int technology) {
+#if defined(USE_D2D)
 	if (technology == SCWIN_TECH_GDI)
 		return new SurfaceGDI;
 	else
 		return new SurfaceD2D;
+#else
+	return new SurfaceGDI;
+#endif
 }
 
 Window::~Window() {
@@ -2475,6 +2510,7 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 					delete surfaceItem;
 					::SetTextAlign(pDrawItem->hDC, TA_TOP);
 				} else {
+#if defined(USE_D2D)
 					D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
 						D2D1_RENDER_TARGET_TYPE_DEFAULT,
 						D2D1::PixelFormat(
@@ -2502,6 +2538,7 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 						pDCRT->EndDraw();
 						pDCRT->Release();
 					}
+#endif
 				}
 			}
 		}
