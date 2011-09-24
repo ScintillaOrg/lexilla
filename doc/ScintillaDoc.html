@@ -3023,25 +3023,6 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_GETFOCUS">SCI_GETFOCUS</a><br />
     </code>
 
-    <p><b id="SCI_SETUSEPALETTE">SCI_SETUSEPALETTE(bool allowPaletteUse)</b><br />
-     <b id="SCI_GETUSEPALETTE">SCI_GETUSEPALETTE</b><br />
-     On 8 bit displays, which can only display a maximum of 256 colours, the graphics environment
-    mediates between the colour needs of applications through the use of palettes. On GTK+,
-    Scintilla always uses a palette.</p>
-
-    <p>On Windows, there are some problems with visual flashing when switching between applications
-    with palettes and it is also necessary for the application containing the Scintilla control to
-    forward some messages to Scintilla for its palette code to work. Because of this, by default,
-    the palette is not used and the application must tell Scintilla to use one. If Scintilla is not
-    using a palette, it will only display in those colours already available, which are often the
-    20 Windows system colours.</p>
-
-    <p>To see an example of how to enable palette support in Scintilla, search the text of SciTE
-    for <code>WM_PALETTECHANGED</code>, <code>WM_QUERYNEWPALETTE</code> and
-    <code>SCI_SETUSEPALETTE</code>. The Windows messages to forward are:<br />
-     <code>WM_SYSCOLORCHANGE</code>, <code>WM_PALETTECHANGED</code>,
-    <code>WM_QUERYNEWPALETTE</code> (should return <code>TRUE</code>).</p>
-
     <p>To forward a message <code>(WM_XXXX, WPARAM, LPARAM)</code> to Scintilla, you can use
     <code>SendMessage(hScintilla, WM_XXXX, WPARAM, LPARAM)</code> where <code>hScintilla</code> is
     the handle to the Scintilla window you created as your editor.</p>
@@ -6806,15 +6787,14 @@ EM_FORMATRANGE
     <code>INCLUDE_DEPRECATED_FEATURES</code> in <code>Scintilla.h</code>. To ensure future
     compatibility you should change them as indicated.</p>
 
-    <p><b id="SCN_POSCHANGED">SCN_POSCHANGED()</b> Deprecated<br />
-     Fired when the user moves the cursor to a different position in the text. Use <a
-    class="message" href="#SCN_UPDATEUI"><code>SCN_UPDATEUI</code></a> instead.</p>
+    <p><b id="SC_CP_DBCS">SC_CP_DBCS</b> Deprecated<br />
+     This was used to set a DBCS (Double Byte Character Set) mode on GTK+.
+     An explicit DBCS code page should be used when calling <a class="message" href="#SCI_SETCODEPAGE">SCI_SETCODEPAGE</a></p>
 
-    <p><b id="SCN_CHECKBRACE">SCN_CHECKBRACE</b> Deprecated<br />
-     Either the text or styling of the document has changed or the selection range has changed.
-    This is replaced by <a class="message" href="#SCN_UPDATEUI"><code>SCN_UPDATEUI</code></a>. You
-    can also use <code><a class="message" href="#SCN_MODIFIED">SCN_MODIFIED</a></code> for more
-    detailed information on text and styling changes,</p>
+    <p><b id="SCI_SETUSEPALETTE">SCI_SETUSEPALETTE(bool allowPaletteUse)</b> Deprecated<br />
+    <b id="SCI_GETUSEPALETTE">SCI_GETUSEPALETTE</b> Deprecated<br />
+     Scintilla no longer supports palette mode. The last version to support palettes was 2.29.
+     Any calls to these methods should be removed.</p>
 
     <h2 id="EditMessagesNeverSupportedByScintilla">Edit messages never supported by Scintilla</h2>
 <pre>

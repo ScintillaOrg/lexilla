@@ -189,107 +189,10 @@ static GtkWidget *PWidget(WindowID wid) {
 	return reinterpret_cast<GtkWidget *>(wid);
 }
 
-#if !GTK_CHECK_VERSION(3,0,0)
-static GtkWidget *PWidget(Window &w) {
-	return PWidget(w.GetID());
-}
-#endif
-
 Point Point::FromLong(long lpoint) {
 	return Point(
 	           Platform::LowShortFromLong(lpoint),
 	           Platform::HighShortFromLong(lpoint));
-}
-
-Palette::Palette() {
-	used = 0;
-	allowRealization = false;
-	allocatedPalette = 0;
-	allocatedLen = 0;
-	size = 100;
-	entries = new ColourPair[size];
-}
-
-Palette::~Palette() {
-	Release();
-	delete []entries;
-	entries = 0;
-}
-
-void Palette::Release() {
-	used = 0;
-	delete [](reinterpret_cast<GdkColor *>(allocatedPalette));
-	allocatedPalette = 0;
-	allocatedLen = 0;
-	delete []entries;
-	size = 100;
-	entries = new ColourPair[size];
-}
-
-// This method either adds a colour to the list of wanted colours (want==true)
-// or retrieves the allocated colour back to the ColourPair.
-// This is one method to make it easier to keep the code for wanting and retrieving in sync.
-void Palette::WantFind(ColourPair &cp, bool want) {
-	if (want) {
-		for (int i=0; i < used; i++) {
-			if (entries[i].desired == cp.desired)
-				return;
-		}
-
-		if (used >= size) {
-			int sizeNew = size * 2;
-			ColourPair *entriesNew = new ColourPair[sizeNew];
-			for (int j=0; j<size; j++) {
-				entriesNew[j] = entries[j];
-			}
-			delete []entries;
-			entries = entriesNew;
-			size = sizeNew;
-		}
-
-		entries[used].desired = cp.desired;
-		entries[used].allocated.Set(cp.desired.AsLong());
-		used++;
-	} else {
-		for (int i=0; i < used; i++) {
-			if (entries[i].desired == cp.desired) {
-				cp.allocated = entries[i].allocated;
-				return;
-			}
-		}
-		cp.allocated.Set(cp.desired.AsLong());
-	}
-}
-
-void Palette::Allocate(Window &w) {
-#if !GTK_CHECK_VERSION(3,0,0)
-	// Disable palette on GTK+ 3.
-	if (allocatedPalette) {
-		gdk_colormap_free_colors(gtk_widget_get_colormap(PWidget(w)),
-		                         reinterpret_cast<GdkColor *>(allocatedPalette),
-		                         allocatedLen);
-		delete [](reinterpret_cast<GdkColor *>(allocatedPalette));
-		allocatedPalette = 0;
-		allocatedLen = 0;
-	}
-	GdkColor *paletteNew = new GdkColor[used];
-	allocatedPalette = paletteNew;
-	gboolean *successPalette = new gboolean[used];
-	if (paletteNew) {
-		allocatedLen = used;
-		int iPal = 0;
-		for (iPal = 0; iPal < used; iPal++) {
-			paletteNew[iPal].red = entries[iPal].desired.GetRed() * (65535 / 255);
-			paletteNew[iPal].green = entries[iPal].desired.GetGreen() * (65535 / 255);
-			paletteNew[iPal].blue = entries[iPal].desired.GetBlue() * (65535 / 255);
-			paletteNew[iPal].pixel = entries[iPal].desired.AsLong();
-		}
-		for (iPal = 0; iPal < used; iPal++) {
-			entries[iPal].allocated.Set(paletteNew[iPal].pixel);
-		}
-	}
-	delete []successPalette;
-#endif
 }
 
 static void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, float size, int weight, bool italic) {
@@ -456,26 +359,26 @@ public:
 
 	void Release();
 	bool Initialised();
-	void PenColour(ColourAllocated fore);
+	void PenColour(ColourDesired fore);
 	int LogPixelsY();
 	int DeviceHeightFont(int points);
 	void MoveTo(int x_, int y_);
 	void LineTo(int x_, int y_);
-	void Polygon(Point *pts, int npts, ColourAllocated fore, ColourAllocated back);
-	void RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back);
-	void FillRectangle(PRectangle rc, ColourAllocated back);
+	void Polygon(Point *pts, int npts, ColourDesired fore, ColourDesired back);
+	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back);
+	void FillRectangle(PRectangle rc, ColourDesired back);
 	void FillRectangle(PRectangle rc, Surface &surfacePattern);
-	void RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back);
-	void AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated fill, int alphaFill,
-		ColourAllocated outline, int alphaOutline, int flags);
+	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back);
+	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
+		ColourDesired outline, int alphaOutline, int flags);
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage);
-	void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back);
+	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back);
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource);
 
-	void DrawTextBase(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore);
-	void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
-	void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
-	void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore);
+	void DrawTextBase(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore);
+	void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore, ColourDesired back);
+	void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore, ColourDesired back);
+	void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore);
 	void MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions);
 	XYPOSITION WidthText(Font &font_, const char *s, int len);
 	XYPOSITION WidthChar(Font &font_, char ch);
@@ -486,7 +389,6 @@ public:
 	XYPOSITION Height(Font &font_);
 	XYPOSITION AverageCharWidth(Font &font_);
 
-	int SetPalette(Palette *pal, bool inBackGround);
 	void SetClip(PRectangle rc);
 	void FlushCachedState();
 
@@ -659,7 +561,7 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID 
 	inited = true;
 }
 
-void SurfaceImpl::PenColour(ColourAllocated fore) {
+void SurfaceImpl::PenColour(ColourDesired fore) {
 	if (context) {
 		ColourDesired cdFore(fore.AsLong());
 		cairo_set_source_rgb(context,
@@ -725,8 +627,8 @@ void SurfaceImpl::LineTo(int x_, int y_) {
 	y = y_;
 }
 
-void SurfaceImpl::Polygon(Point *pts, int npts, ColourAllocated fore,
-                          ColourAllocated back) {
+void SurfaceImpl::Polygon(Point *pts, int npts, ColourDesired fore,
+                          ColourDesired back) {
 	PenColour(back);
 	cairo_move_to(context, pts[0].x + 0.5, pts[0].y + 0.5);
 	for (int i = 1;i < npts;i++) {
@@ -738,7 +640,7 @@ void SurfaceImpl::Polygon(Point *pts, int npts, ColourAllocated fore,
 	cairo_stroke(context);
 }
 
-void SurfaceImpl::RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+void SurfaceImpl::RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) {
 	if (context) {
 		cairo_rectangle(context, rc.left + 0.5, rc.top + 0.5,
 	                     rc.right - rc.left - 1, rc.bottom - rc.top - 1);
@@ -749,7 +651,7 @@ void SurfaceImpl::RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAlloc
 	}
 }
 
-void SurfaceImpl::FillRectangle(PRectangle rc, ColourAllocated back) {
+void SurfaceImpl::FillRectangle(PRectangle rc, ColourDesired back) {
 	PenColour(back);
 	if (context && (rc.left < maxCoordinate)) {	// Protect against out of range
 		cairo_rectangle(context, rc.left, rc.top,
@@ -778,11 +680,11 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 	} else {
 		// Something is wrong so try to show anyway
 		// Shows up black because colour not allocated
-		FillRectangle(rc, ColourAllocated(0));
+		FillRectangle(rc, ColourDesired(0));
 	}
 }
 
-void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) {
 	if (((rc.right - rc.left) > 4) && ((rc.bottom - rc.top) > 4)) {
 		// Approximate a round rect with some cut off corners
 		Point pts[] = {
@@ -817,8 +719,8 @@ static void PathRoundRectangle(cairo_t *context, double left, double top, double
 	cairo_close_path(context);
 }
 
-void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated fill, int alphaFill,
-		ColourAllocated outline, int alphaOutline, int flags) {
+void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
+		ColourDesired outline, int alphaOutline, int flags) {
 	if (context && rc.Width() > 0) {
 		ColourDesired cdFill(fill.AsLong());
 		cairo_set_source_rgba(context,
@@ -876,7 +778,7 @@ void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsi
 	cairo_surface_destroy(psurf);
 }
 
-void SurfaceImpl::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+void SurfaceImpl::Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) {
 	PenColour(back);
 	cairo_arc(context, (rc.left + rc.right) / 2 + 0.5, (rc.top + rc.bottom) / 2 + 0.5,
 		Platform::Minimum(rc.Width(), rc.Height()) / 2, 0, 2*M_PI);
@@ -961,7 +863,7 @@ static size_t UTF8CharLength(const char *s) {
 }
 
 void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
-                                 ColourAllocated fore) {
+                                 ColourDesired fore) {
 	PenColour(fore);
 	if (context) {
 		XYPOSITION xText = rc.left;
@@ -994,20 +896,20 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, XYPOSITION ybase, con
 }
 
 void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
-                                 ColourAllocated fore, ColourAllocated back) {
+                                 ColourDesired fore, ColourDesired back) {
 	FillRectangle(rc, back);
 	DrawTextBase(rc, font_, ybase, s, len, fore);
 }
 
 // On GTK+, exactly same as DrawTextNoClip
 void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
-                                  ColourAllocated fore, ColourAllocated back) {
+                                  ColourDesired fore, ColourDesired back) {
 	FillRectangle(rc, back);
 	DrawTextBase(rc, font_, ybase, s, len, fore);
 }
 
 void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
-                                  ColourAllocated fore) {
+                                  ColourDesired fore) {
 	// Avoid drawing spaces in transparent mode
 	for (int i=0;i<len;i++) {
 		if (s[i] != ' ') {
@@ -1247,11 +1149,6 @@ XYPOSITION SurfaceImpl::Height(Font &font_) {
 
 XYPOSITION SurfaceImpl::AverageCharWidth(Font &font_) {
 	return WidthChar(font_, 'n');
-}
-
-int SurfaceImpl::SetPalette(Palette *, bool) {
-	// Handled in palette allocation for GTK so this does nothing
-	return 0;
 }
 
 void SurfaceImpl::SetClip(PRectangle rc) {

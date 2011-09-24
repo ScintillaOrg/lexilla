@@ -115,95 +115,6 @@ static RECT RectFromPRectangle(PRectangle prc) {
 	return rc;
 }
 
-Palette::Palette() {
-	used = 0;
-	allowRealization = false;
-	hpal = 0;
-	size = 100;
-	entries = new ColourPair[size];
-}
-
-Palette::~Palette() {
-	Release();
-	delete []entries;
-	entries = 0;
-}
-
-void Palette::Release() {
-	used = 0;
-	if (hpal)
-		::DeleteObject(hpal);
-	hpal = 0;
-	delete []entries;
-	size = 100;
-	entries = new ColourPair[size];
-}
-
-/**
- * This method either adds a colour to the list of wanted colours (want==true)
- * or retrieves the allocated colour back to the ColourPair.
- * This is one method to make it easier to keep the code for wanting and retrieving in sync.
- */
-void Palette::WantFind(ColourPair &cp, bool want) {
-	if (want) {
-		for (int i=0; i < used; i++) {
-			if (entries[i].desired == cp.desired)
-				return;
-		}
-
-		if (used >= size) {
-			int sizeNew = size * 2;
-			ColourPair *entriesNew = new ColourPair[sizeNew];
-			for (int j=0; j<size; j++) {
-				entriesNew[j] = entries[j];
-			}
-			delete []entries;
-			entries = entriesNew;
-			size = sizeNew;
-		}
-
-		entries[used].desired = cp.desired;
-		entries[used].allocated.Set(cp.desired.AsLong());
-		used++;
-	} else {
-		for (int i=0; i < used; i++) {
-			if (entries[i].desired == cp.desired) {
-				cp.allocated = entries[i].allocated;
-				return;
-			}
-		}
-		cp.allocated.Set(cp.desired.AsLong());
-	}
-}
-
-void Palette::Allocate(Window &) {
-	if (hpal)
-		::DeleteObject(hpal);
-	hpal = 0;
-
-	if (allowRealization) {
-		char *pal = new char[sizeof(LOGPALETTE) + (used-1) * sizeof(PALETTEENTRY)];
-		LOGPALETTE *logpal = reinterpret_cast<LOGPALETTE *>(pal);
-		logpal->palVersion = 0x300;
-		logpal->palNumEntries = static_cast<WORD>(used);
-		for (int iPal=0;iPal<used;iPal++) {
-			ColourDesired desired = entries[iPal].desired;
-			logpal->palPalEntry[iPal].peRed   = static_cast<BYTE>(desired.GetRed());
-			logpal->palPalEntry[iPal].peGreen = static_cast<BYTE>(desired.GetGreen());
-			logpal->palPalEntry[iPal].peBlue  = static_cast<BYTE>(desired.GetBlue());
-			entries[iPal].allocated.Set(
-				PALETTERGB(desired.GetRed(), desired.GetGreen(), desired.GetBlue()));
-			// PC_NOCOLLAPSE means exact colours allocated even when in background this means other windows
-			// are less likely to get their colours and also flashes more when switching windows
-			logpal->palPalEntry[iPal].peFlags = PC_NOCOLLAPSE;
-			// 0 allows approximate colours when in background, yielding moe colours to other windows
-			//logpal->palPalEntry[iPal].peFlags = 0;
-		}
-		hpal = ::CreatePalette(logpal);
-		delete []pal;
-	}
-}
-
 #if defined(USE_D2D)
 IDWriteFactory *pIDWriteFactory = 0;
 ID2D1Factory *pD2DFactory = 0;
@@ -570,7 +481,6 @@ class SurfaceGDI : public Surface {
 	HFONT fontOld;
 	HBITMAP bitmap;
 	HBITMAP bitmapOld;
-	HPALETTE paletteOld;
 	int maxWidthMeasure;
 	int maxLenText;
 
@@ -578,7 +488,7 @@ class SurfaceGDI : public Surface {
 	// If 9x OS and current code page is same as ANSI code page.
 	bool win9xACPSame;
 
-	void BrushColor(ColourAllocated back);
+	void BrushColor(ColourDesired back);
 	void SetFont(Font &font_);
 
 	// Private so SurfaceGDI objects can not be copied
@@ -594,26 +504,26 @@ public:
 
 	void Release();
 	bool Initialised();
-	void PenColour(ColourAllocated fore);
+	void PenColour(ColourDesired fore);
 	int LogPixelsY();
 	int DeviceHeightFont(int points);
 	void MoveTo(int x_, int y_);
 	void LineTo(int x_, int y_);
-	void Polygon(Point *pts, int npts, ColourAllocated fore, ColourAllocated back);
-	void RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back);
-	void FillRectangle(PRectangle rc, ColourAllocated back);
+	void Polygon(Point *pts, int npts, ColourDesired fore, ColourDesired back);
+	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back);
+	void FillRectangle(PRectangle rc, ColourDesired back);
 	void FillRectangle(PRectangle rc, Surface &surfacePattern);
-	void RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back);
-	void AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated fill, int alphaFill,
-		ColourAllocated outline, int alphaOutline, int flags);
+	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back);
+	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
+		ColourDesired outline, int alphaOutline, int flags);
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage);
-	void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back);
+	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back);
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource);
 
 	void DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, UINT fuOptions);
-	void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
-	void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
-	void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore);
+	void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore, ColourDesired back);
+	void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore, ColourDesired back);
+	void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore);
 	void MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions);
 	XYPOSITION WidthText(Font &font_, const char *s, int len);
 	XYPOSITION WidthChar(Font &font_, char ch);
@@ -624,7 +534,6 @@ public:
 	XYPOSITION Height(Font &font_);
 	XYPOSITION AverageCharWidth(Font &font_);
 
-	int SetPalette(Palette *pal, bool inBackGround);
 	void SetClip(PRectangle rc);
 	void FlushCachedState();
 
@@ -642,8 +551,7 @@ SurfaceGDI::SurfaceGDI() :
 	pen(0), 	penOld(0),
 	brush(0), brushOld(0),
 	font(0), 	fontOld(0),
-	bitmap(0), bitmapOld(0),
-	paletteOld(0) {
+	bitmap(0), bitmapOld(0) {
 	// Windows 9x has only a 16 bit coordinate system so break after 30000 pixels
 	maxWidthMeasure = IsNT() ? INT_MAX : 30000;
 	// There appears to be a 16 bit string length limit in GDI on NT and a limit of
@@ -683,12 +591,6 @@ void SurfaceGDI::Release() {
 		bitmapOld = 0;
 	}
 	bitmap = 0;
-	if (paletteOld) {
-		// Palettes are not deleted as they are owned by a Palette object
-		::SelectPalette(reinterpret_cast<HDC>(hdc),
-			reinterpret_cast<HPALETTE>(paletteOld), TRUE);
-		paletteOld = 0;
-	}
 	if (hdcOwned) {
 		::DeleteDC(reinterpret_cast<HDC>(hdc));
 		hdc = 0;
@@ -722,7 +624,7 @@ void SurfaceGDI::InitPixMap(int width, int height, Surface *surface_, WindowID) 
 	::SetTextAlign(reinterpret_cast<HDC>(hdc), TA_BASELINE);
 }
 
-void SurfaceGDI::PenColour(ColourAllocated fore) {
+void SurfaceGDI::PenColour(ColourDesired fore) {
 	if (pen) {
 		::SelectObject(hdc, penOld);
 		::DeleteObject(pen);
@@ -733,7 +635,7 @@ void SurfaceGDI::PenColour(ColourAllocated fore) {
 	penOld = static_cast<HPEN>(::SelectObject(reinterpret_cast<HDC>(hdc), pen));
 }
 
-void SurfaceGDI::BrushColor(ColourAllocated back) {
+void SurfaceGDI::BrushColor(ColourDesired back) {
 	if (brush) {
 		::SelectObject(hdc, brushOld);
 		::DeleteObject(brush);
@@ -741,7 +643,7 @@ void SurfaceGDI::BrushColor(ColourAllocated back) {
 		brushOld = 0;
 	}
 	// Only ever want pure, non-dithered brushes
-	ColourAllocated colourNearest = ::GetNearestColor(hdc, back.AsLong());
+	ColourDesired colourNearest = ::GetNearestColor(hdc, back.AsLong());
 	brush = ::CreateSolidBrush(colourNearest.AsLong());
 	brushOld = static_cast<HBRUSH>(::SelectObject(hdc, brush));
 }
@@ -775,19 +677,19 @@ void SurfaceGDI::LineTo(int x_, int y_) {
 	::LineTo(hdc, x_, y_);
 }
 
-void SurfaceGDI::Polygon(Point *pts, int npts, ColourAllocated fore, ColourAllocated back) {
+void SurfaceGDI::Polygon(Point *pts, int npts, ColourDesired fore, ColourDesired back) {
 	PenColour(fore);
 	BrushColor(back);
 	::Polygon(hdc, reinterpret_cast<POINT *>(pts), npts);
 }
 
-void SurfaceGDI::RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+void SurfaceGDI::RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) {
 	PenColour(fore);
 	BrushColor(back);
 	::Rectangle(hdc, rc.left, rc.top, rc.right, rc.bottom);
 }
 
-void SurfaceGDI::FillRectangle(PRectangle rc, ColourAllocated back) {
+void SurfaceGDI::FillRectangle(PRectangle rc, ColourDesired back) {
 	// Using ExtTextOut rather than a FillRect ensures that no dithering occurs.
 	// There is no need to allocate a brush either.
 	RECT rcw = RectFromPRectangle(rc);
@@ -806,7 +708,7 @@ void SurfaceGDI::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 	::DeleteObject(br);
 }
 
-void SurfaceGDI::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+void SurfaceGDI::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) {
 	PenColour(fore);
 	BrushColor(back);
 	::RoundRect(hdc,
@@ -842,8 +744,8 @@ static DWORD dwordFromBGRA(byte b, byte g, byte r, byte a) {
 	return converter.val;
 }
 
-void SurfaceGDI::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated fill, int alphaFill,
-		ColourAllocated outline, int alphaOutline, int /* flags*/ ) {
+void SurfaceGDI::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
+		ColourDesired outline, int alphaOutline, int /* flags*/ ) {
 	if (AlphaBlendFn && rc.Width() > 0) {
 		HDC hMemDC = ::CreateCompatibleDC(reinterpret_cast<HDC>(hdc));
 		int width = rc.Width();
@@ -940,7 +842,7 @@ void SurfaceGDI::DrawRGBAImage(PRectangle rc, int width, int height, const unsig
 	}
 }
 
-void SurfaceGDI::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+void SurfaceGDI::Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) {
 	PenColour(fore);
 	BrushColor(back);
 	::Ellipse(hdc, rc.left, rc.top, rc.right, rc.bottom);
@@ -999,21 +901,21 @@ void SurfaceGDI::DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, co
 }
 
 void SurfaceGDI::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
-	ColourAllocated fore, ColourAllocated back) {
+	ColourDesired fore, ColourDesired back) {
 	::SetTextColor(hdc, fore.AsLong());
 	::SetBkColor(hdc, back.AsLong());
 	DrawTextCommon(rc, font_, ybase, s, len, ETO_OPAQUE);
 }
 
 void SurfaceGDI::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
-	ColourAllocated fore, ColourAllocated back) {
+	ColourDesired fore, ColourDesired back) {
 	::SetTextColor(hdc, fore.AsLong());
 	::SetBkColor(hdc, back.AsLong());
 	DrawTextCommon(rc, font_, ybase, s, len, ETO_OPAQUE | ETO_CLIPPED);
 }
 
 void SurfaceGDI::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
-	ColourAllocated fore) {
+	ColourDesired fore) {
 	// Avoid drawing spaces in transparent mode
 	for (int i=0;i<len;i++) {
 		if (s[i] != ' ') {
@@ -1179,20 +1081,6 @@ XYPOSITION SurfaceGDI::AverageCharWidth(Font &font_) {
 	return tm.tmAveCharWidth;
 }
 
-int SurfaceGDI::SetPalette(Palette *pal, bool inBackGround) {
-	if (paletteOld) {
-		::SelectPalette(hdc, paletteOld, TRUE);
-	}
-	paletteOld = 0;
-	int changes = 0;
-	if (pal->allowRealization) {
-		paletteOld = ::SelectPalette(hdc,
-			reinterpret_cast<HPALETTE>(pal->hpal), inBackGround);
-		changes = ::RealizePalette(hdc);
-	}
-	return changes;
-}
-
 void SurfaceGDI::SetClip(PRectangle rc) {
 	::IntersectClipRect(hdc, rc.left, rc.top, rc.right, rc.bottom);
 }
@@ -1213,11 +1101,11 @@ void SurfaceGDI::SetDBCSMode(int codePage_) {
 	win9xACPSame = !IsNT() && ((unsigned int)codePage == ::GetACP());
 }
 
+#if defined(USE_D2D)
+
 #ifdef SCI_NAMESPACE
 namespace Scintilla {
 #endif
-
-#if defined(USE_D2D)
 
 class SurfaceD2D : public Surface {
 	bool unicodeMode;
@@ -1258,27 +1146,27 @@ public:
 
 	HRESULT FlushDrawing();
 
-	void PenColour(ColourAllocated fore);
-	void D2DPenColour(ColourAllocated fore, int alpha=255);
+	void PenColour(ColourDesired fore);
+	void D2DPenColour(ColourDesired fore, int alpha=255);
 	int LogPixelsY();
 	int DeviceHeightFont(int points);
 	void MoveTo(int x_, int y_);
 	void LineTo(int x_, int y_);
-	void Polygon(Point *pts, int npts, ColourAllocated fore, ColourAllocated back);
-	void RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back);
-	void FillRectangle(PRectangle rc, ColourAllocated back);
+	void Polygon(Point *pts, int npts, ColourDesired fore, ColourDesired back);
+	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back);
+	void FillRectangle(PRectangle rc, ColourDesired back);
 	void FillRectangle(PRectangle rc, Surface &surfacePattern);
-	void RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back);
-	void AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated fill, int alphaFill,
-		ColourAllocated outline, int alphaOutline, int flags);
+	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back);
+	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
+		ColourDesired outline, int alphaOutline, int flags);
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage);
-	void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back);
+	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back);
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource);
 
 	void DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, UINT fuOptions);
-	void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
-	void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back);
-	void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore);
+	void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore, ColourDesired back);
+	void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore, ColourDesired back);
+	void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore);
 	void MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions);
 	XYPOSITION WidthText(Font &font_, const char *s, int len);
 	XYPOSITION WidthChar(Font &font_, char ch);
@@ -1289,7 +1177,6 @@ public:
 	XYPOSITION Height(Font &font_);
 	XYPOSITION AverageCharWidth(Font &font_);
 
-	int SetPalette(Palette *pal, bool inBackGround);
 	void SetClip(PRectangle rc);
 	void FlushCachedState();
 
@@ -1385,11 +1272,11 @@ void SurfaceD2D::InitPixMap(int width, int height, Surface *surface_, WindowID) 
 	}
 }
 
-void SurfaceD2D::PenColour(ColourAllocated fore) {
+void SurfaceD2D::PenColour(ColourDesired fore) {
 	D2DPenColour(fore);
 }
 
-void SurfaceD2D::D2DPenColour(ColourAllocated fore, int alpha) {
+void SurfaceD2D::D2DPenColour(ColourDesired fore, int alpha) {
 	if (pRenderTarget) {
 		D2D_COLOR_F col;
 		col.r = (fore.AsLong() & 0xff) / 255.0;
@@ -1475,7 +1362,7 @@ void SurfaceD2D::LineTo(int x_, int y_) {
 	}
 }
 
-void SurfaceD2D::Polygon(Point *pts, int npts, ColourAllocated fore, ColourAllocated back) {
+void SurfaceD2D::Polygon(Point *pts, int npts, ColourDesired fore, ColourDesired back) {
 	if (pRenderTarget) {
 		ID2D1Factory *pFactory = 0;
 		pRenderTarget->GetFactory(&pFactory);
@@ -1504,7 +1391,7 @@ void SurfaceD2D::Polygon(Point *pts, int npts, ColourAllocated fore, ColourAlloc
 	}
 }
 
-void SurfaceD2D::RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+void SurfaceD2D::RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) {
 	if (pRenderTarget) {
 		D2DPenColour(back);
 		D2D1_RECT_F rectangle1 = D2D1::RectF(RoundFloat(rc.left) + 0.5, rc.top+0.5, RoundFloat(rc.right) - 0.5, rc.bottom-0.5);
@@ -1515,7 +1402,7 @@ void SurfaceD2D::RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAlloca
 	}
 }
 
-void SurfaceD2D::FillRectangle(PRectangle rc, ColourAllocated back) {
+void SurfaceD2D::FillRectangle(PRectangle rc, ColourDesired back) {
 	if (pRenderTarget) {
 		D2DPenColour(back);
         D2D1_RECT_F rectangle1 = D2D1::RectF(RoundFloat(rc.left), rc.top, RoundFloat(rc.right), rc.bottom);
@@ -1547,7 +1434,7 @@ void SurfaceD2D::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 	}
 }
 
-void SurfaceD2D::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+void SurfaceD2D::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) {
 	if (pRenderTarget) {
 		D2D1_ROUNDED_RECT roundedRectFill = D2D1::RoundedRect(
 			D2D1::RectF(rc.left+1.0, rc.top+1.0, rc.right-1.0, rc.bottom-1.0),
@@ -1563,8 +1450,8 @@ void SurfaceD2D::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAll
 	}
 }
 
-void SurfaceD2D::AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated fill, int alphaFill,
-		ColourAllocated outline, int alphaOutline, int /* flags*/ ) {
+void SurfaceD2D::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
+		ColourDesired outline, int alphaOutline, int /* flags*/ ) {
 	if (pRenderTarget) {
 		D2D1_ROUNDED_RECT roundedRectFill = D2D1::RoundedRect(
 			D2D1::RectF(rc.left+1.0, rc.top+1.0, rc.right-1.0, rc.bottom-1.0),
@@ -1616,7 +1503,7 @@ void SurfaceD2D::DrawRGBAImage(PRectangle rc, int width, int height, const unsig
 	}
 }
 
-void SurfaceD2D::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+void SurfaceD2D::Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) {
 	if (pRenderTarget) {
 		FLOAT radius = rc.Width() / 2.0f - 1.0f;
 		D2D1_ELLIPSE ellipse = D2D1::Ellipse(
@@ -1674,7 +1561,7 @@ void SurfaceD2D::DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, co
 }
 
 void SurfaceD2D::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
-	ColourAllocated fore, ColourAllocated back) {
+	ColourDesired fore, ColourDesired back) {
 	if (pRenderTarget) {
 		FillRectangle(rc, back);
 		D2DPenColour(fore);
@@ -1683,7 +1570,7 @@ void SurfaceD2D::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, co
 }
 
 void SurfaceD2D::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
-	ColourAllocated fore, ColourAllocated back) {
+	ColourDesired fore, ColourDesired back) {
 	if (pRenderTarget) {
 		FillRectangle(rc, back);
 		D2DPenColour(fore);
@@ -1692,7 +1579,7 @@ void SurfaceD2D::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, c
 }
 
 void SurfaceD2D::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
-	ColourAllocated fore) {
+	ColourDesired fore) {
 	// Avoid drawing spaces in transparent mode
 	for (int i=0;i<len;i++) {
 		if (s[i] != ' ') {
@@ -1864,10 +1751,6 @@ XYPOSITION SurfaceD2D::AverageCharWidth(Font &font_) {
 		}
 	}
 	return int(width + 0.5);
-}
-
-int SurfaceD2D::SetPalette(Palette *, bool) {
-	return 0;
 }
 
 void SurfaceD2D::SetClip(PRectangle rc) {

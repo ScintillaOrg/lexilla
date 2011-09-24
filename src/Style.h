@@ -58,8 +58,8 @@ struct FontMeasurements {
  */
 class Style : public FontSpecification, public FontMeasurements {
 public:
-	ColourPair fore;
-	ColourPair back;
+	ColourDesired fore;
+	ColourDesired back;
 	bool eolFilled;
 	bool underline;
 	enum ecaseForced {caseMixed, caseUpper, caseLower};

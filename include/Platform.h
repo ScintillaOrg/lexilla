@@ -139,18 +139,6 @@ public:
 };
 
 /**
- * In some circumstances, including Win32 in paletted mode and GTK+, each colour
- * must be allocated before use. The desired colours are held in the ColourDesired class,
- * and after allocation the allocation entry is stored in the ColourAllocated class. In other
- * circumstances, such as Win32 in true colour mode, the allocation process just copies
- * the RGB values from the desired to the allocated class.
- * As each desired colour requires allocation before it can be used, the ColourPair class
- * holds both a ColourDesired and a ColourAllocated
- * The Palette class is responsible for managing the palette of colours which contains a
- * list of ColourPair objects and performs the allocation.
- */
-
-/**
  * Holds a desired RGB colour.
  */
 class ColourDesired {
@@ -212,80 +200,6 @@ public:
 	unsigned int GetBlue() {
 		return (co >> 16) & 0xff;
 	}
-};
-
-/**
- * Holds an allocated RGB colour which may be an approximation to the desired colour.
- */
-class ColourAllocated {
-	long coAllocated;
-
-public:
-
-	ColourAllocated(long lcol=0) {
-		coAllocated = lcol;
-	}
-
-	void Set(long lcol) {
-		coAllocated = lcol;
-	}
-
-	long AsLong() const {
-		return coAllocated;
-	}
-};
-
-/**
- * Colour pairs hold a desired colour and an allocated colour.
- */
-struct ColourPair {
-	ColourDesired desired;
-	ColourAllocated allocated;
-
-	ColourPair(ColourDesired desired_=ColourDesired(0,0,0)) {
-		desired = desired_;
-		allocated.Set(desired.AsLong());
-	}
-	void Copy() {
-		allocated.Set(desired.AsLong());
-	}
-};
-
-class Window;	// Forward declaration for Palette
-
-/**
- * Colour palette management.
- */
-class Palette {
-	int used;
-	int size;
-	ColourPair *entries;
-#if PLAT_GTK
-	void *allocatedPalette; // GdkColor *
-	int allocatedLen;
-#endif
-	// Private so Palette objects can not be copied
-	Palette(const Palette &);
-	Palette &operator=(const Palette &);
-public:
-#if PLAT_WIN
-	void *hpal;
-#endif
-	bool allowRealization;
-
-	Palette();
-	~Palette();
-
-	void Release();
-
-	/**
-	 * This method either adds a colour to the list of wanted colours (want==true)
-	 * or retrieves the allocated colour back to the ColourPair.
-	 * This is one method to make it easier to keep the code for wanting and retrieving in sync.
-	 */
-	void WantFind(ColourPair &cp, bool want);
-
-	void Allocate(Window &w);
 };
 
 /**
@@ -367,25 +281,25 @@ public:
 
 	virtual void Release()=0;
 	virtual bool Initialised()=0;
-	virtual void PenColour(ColourAllocated fore)=0;
+	virtual void PenColour(ColourDesired fore)=0;
 	virtual int LogPixelsY()=0;
 	virtual int DeviceHeightFont(int points)=0;
 	virtual void MoveTo(int x_, int y_)=0;
 	virtual void LineTo(int x_, int y_)=0;
-	virtual void Polygon(Point *pts, int npts, ColourAllocated fore, ColourAllocated back)=0;
-	virtual void RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back)=0;
-	virtual void FillRectangle(PRectangle rc, ColourAllocated back)=0;
+	virtual void Polygon(Point *pts, int npts, ColourDesired fore, ColourDesired back)=0;
+	virtual void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back)=0;
+	virtual void FillRectangle(PRectangle rc, ColourDesired back)=0;
 	virtual void FillRectangle(PRectangle rc, Surface &surfacePattern)=0;
-	virtual void RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back)=0;
-	virtual void AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated fill, int alphaFill,
-		ColourAllocated outline, int alphaOutline, int flags)=0;
+	virtual void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back)=0;
+	virtual void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
+		ColourDesired outline, int alphaOutline, int flags)=0;
 	virtual void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) = 0;
-	virtual void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back)=0;
+	virtual void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back)=0;
 	virtual void Copy(PRectangle rc, Point from, Surface &surfaceSource)=0;
 
-	virtual void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back)=0;
-	virtual void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back)=0;
-	virtual void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourAllocated fore)=0;
+	virtual void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore, ColourDesired back)=0;
+	virtual void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore, ColourDesired back)=0;
+	virtual void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore)=0;
 	virtual void MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions)=0;
 	virtual XYPOSITION WidthText(Font &font_, const char *s, int len)=0;
 	virtual XYPOSITION WidthChar(Font &font_, char ch)=0;
@@ -396,7 +310,6 @@ public:
 	virtual XYPOSITION Height(Font &font_)=0;
 	virtual XYPOSITION AverageCharWidth(Font &font_)=0;
 
-	virtual int SetPalette(Palette *pal, bool inBackGround)=0;
 	virtual void SetClip(PRectangle rc)=0;
 	virtual void FlushCachedState()=0;
 

@@ -270,7 +270,6 @@ class ScintillaWin :
 	virtual void CopyToClipboard(const SelectionText &selectedText);
 	void ScrollMessage(WPARAM wParam);
 	void HorizontalScrollMessage(WPARAM wParam);
-	void RealizeWindowPalette(bool inBackGround);
 	void FullPaint();
 	void FullPaintDC(HDC dc);
 	bool IsCompatibleDC(HDC dc);
@@ -992,12 +991,10 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 					DestroySystemCaret();
 				}
 			}
-			//RealizeWindowPalette(true);
 			break;
 
 		case WM_SETFOCUS:
 			SetFocusState(true);
-			RealizeWindowPalette(false);
 			DestroySystemCaret();
 			CreateSystemCaret();
 			break;
@@ -1005,18 +1002,6 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		case WM_SYSCOLORCHANGE:
 			//Platform::DebugPrintf("Setting Changed\n");
 			InvalidateStyleData();
-			break;
-
-		case WM_PALETTECHANGED:
-			if (wParam != reinterpret_cast<uptr_t>(MainHWND())) {
-				//Platform::DebugPrintf("** Palette Changed\n");
-				RealizeWindowPalette(true);
-			}
-			break;
-
-		case WM_QUERYNEWPALETTE:
-			//Platform::DebugPrintf("** Query palette\n");
-			RealizeWindowPalette(false);
 			break;
 
 		case WM_IME_STARTCOMPOSITION: 	// dbcs
@@ -2382,24 +2367,6 @@ void ScintillaWin::HorizontalScrollMessage(WPARAM wParam) {
 		break;
 	}
 	HorizontalScrollTo(xPos);
-}
-
-void ScintillaWin::RealizeWindowPalette(bool) {
-	// No support for palette with D2D
-/*
-	RefreshStyleData();
-	HDC hdc = ::GetDC(MainHWND());
-	// Select a stock font to prevent warnings from BoundsChecker
-	::SelectObject(hdc, GetStockFont(DEFAULT_GUI_FONT));
-	AutoSurface surfaceWindow(hdc, this);
-	if (surfaceWindow) {
-		int changes = surfaceWindow->SetPalette(&palette, inBackGround);
-		if (changes > 0)
-			Redraw();
-		surfaceWindow->Release();
-	}
-	::ReleaseDC(MainHWND(), hdc);
-*/
 }
 
 /**

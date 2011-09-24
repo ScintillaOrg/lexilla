@@ -92,48 +92,6 @@ Scintilla::Point Scintilla::Point::FromLong(long lpoint)
                           );
 }
 
-//----------------- Palette ------------------------------------------------------------------------
-
-// The Palette implementation is only here because we would get linker errors if not.
-// We don't use indexed colors in ScintillaCocoa.
-
-Scintilla::Palette::Palette()
-{
-}
-
-//--------------------------------------------------------------------------------------------------
-
-Scintilla::Palette::~Palette()
-{
-}
-
-//--------------------------------------------------------------------------------------------------
-
-void Scintilla::Palette::Release()
-{
-}
-
-//--------------------------------------------------------------------------------------------------
-
-/**
- * Used to transform a given color, if needed. If the caller tries to find a color that matches the
- * desired color then we simply pass it on, as we support the full color space.
- */
-void Scintilla::Palette::WantFind(ColourPair &cp, bool want)
-{
-  if (!want)
-    cp.allocated.Set(cp.desired.AsLong());
-  
-  // Don't do anything if the caller wants the color it has already set.
-}
-
-//--------------------------------------------------------------------------------------------------
-
-void Scintilla::Palette::Allocate(Window&)
-{
-  // Nothing to allocate as we don't use palettes.
-}
-
 //----------------- Font ---------------------------------------------------------------------------
 
 Font::Font(): fid(0)
@@ -313,7 +271,7 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface* /* surface_ */, Win
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::PenColour(ColourAllocated fore)
+void SurfaceImpl::PenColour(ColourDesired fore)
 {
   if (gc)
   {
@@ -327,7 +285,7 @@ void SurfaceImpl::PenColour(ColourAllocated fore)
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::FillColour(const ColourAllocated& back)
+void SurfaceImpl::FillColour(const ColourDesired& back)
 {
   if (gc)
   {
@@ -450,8 +408,8 @@ void SurfaceImpl::LineTo(int x_, int y_)
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::Polygon(Scintilla::Point *pts, int npts, ColourAllocated fore,
-                          ColourAllocated back)
+void SurfaceImpl::Polygon(Scintilla::Point *pts, int npts, ColourDesired fore,
+                          ColourDesired back)
 {
   // Allocate memory for the array of points.
   CGPoint *points = new CGPoint[npts];
@@ -483,7 +441,7 @@ void SurfaceImpl::Polygon(Scintilla::Point *pts, int npts, ColourAllocated fore,
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back)
+void SurfaceImpl::RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back)
 {
   if (gc)
   {
@@ -501,7 +459,7 @@ void SurfaceImpl::RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAlloc
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::FillRectangle(PRectangle rc, ColourAllocated back)
+void SurfaceImpl::FillRectangle(PRectangle rc, ColourDesired back)
 {
   if (gc)
   {
@@ -531,7 +489,7 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern)
   CGImageRef image = patternSurface.GetImage();
   if (image == NULL)
   {
-    FillRectangle(rc, ColourAllocated(0));
+    FillRectangle(rc, ColourDesired(0));
     return;
   }
   
@@ -573,7 +531,7 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern)
   } /* pattern != NULL */
 }
 
-void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) {
   // This is only called from the margin marker drawing code for SC_MARK_ROUNDRECT
   // The Win32 version does
   //  ::RoundRect(hdc, rc.left + 1, rc.top, rc.right - 1, rc.bottom, 8, 8 );
@@ -638,8 +596,8 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAl
   CGContextDrawPath( gc, kCGPathFillStroke );
 }
 
-void Scintilla::SurfaceImpl::AlphaRectangle(PRectangle rc, int /*cornerSize*/, ColourAllocated fill, int alphaFill,
-                                            ColourAllocated /*outline*/, int /*alphaOutline*/, int /*flags*/)
+void Scintilla::SurfaceImpl::AlphaRectangle(PRectangle rc, int /*cornerSize*/, ColourDesired fill, int alphaFill,
+                                            ColourDesired /*outline*/, int /*alphaOutline*/, int /*flags*/)
 {
   if ( gc ) {
     ColourDesired colour( fill.AsLong() );
@@ -721,7 +679,7 @@ void SurfaceImpl::DrawRGBAImage(PRectangle /* rc */, int width, int height, cons
 	}
 }
 
-void SurfaceImpl::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back) {
+void SurfaceImpl::Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) {
   // Drawing an ellipse with bezier curves. Code modified from:
   // http://www.codeguru.com/gdi/ellipse.shtml
   // MAGICAL CONSTANT to map ellipse to beziers 2/3*(sqrt(2)-1)
@@ -818,7 +776,7 @@ void SurfaceImpl::Copy(PRectangle rc, Scintilla::Point from, Surface &surfaceSou
   // If we could not get an image reference, fill the rectangle black
   if ( image == NULL )
   {
-    FillRectangle( rc, ColourAllocated( 0 ) );
+    FillRectangle( rc, ColourDesired( 0 ) );
     return;
   }
   
@@ -842,7 +800,7 @@ void SurfaceImpl::Copy(PRectangle rc, Scintilla::Point from, Surface &surfaceSou
 //--------------------------------------------------------------------------------------------------
 
 void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
-                                 ColourAllocated fore, ColourAllocated back)
+                                 ColourDesired fore, ColourDesired back)
 {
   FillRectangle(rc, back);
   DrawTextTransparent(rc, font_, ybase, s, len, fore);
@@ -851,7 +809,7 @@ void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, c
 //--------------------------------------------------------------------------------------------------
 
 void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
-                                  ColourAllocated fore, ColourAllocated back)
+                                  ColourDesired fore, ColourDesired back)
 {
   CGContextSaveGState(gc);
   CGContextClipToRect(gc, PRectangleToCGRect(rc));
@@ -919,7 +877,7 @@ CFStringEncoding EncodingFromCharacterSet(bool unicode, int characterSet)
 }
 
 void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, 
-                                      ColourAllocated fore)
+                                      ColourDesired fore)
 {
 	CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
 	ColourDesired colour(fore.AsLong());
@@ -1070,11 +1028,6 @@ XYPOSITION SurfaceImpl::AverageCharWidth(Font &font_) {
   int width = WidthText( font_, sizeString, sizeStringLength  );
   
   return (int) ((width / (float) sizeStringLength) + 0.5);
-}
-
-int SurfaceImpl::SetPalette(Scintilla::Palette *, bool) {
-  // Mac OS X is always true colour (I think) so this doesn't matter
-  return 0;
 }
 
 void SurfaceImpl::SetClip(PRectangle rc) {

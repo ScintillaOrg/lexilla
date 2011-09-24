@@ -92,7 +92,6 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_GETTABWIDTH 2121
 #define SC_CP_UTF8 65001
 #define SCI_SETCODEPAGE 2037
-#define SCI_SETUSEPALETTE 2039
 #define MARKER_MAX 31
 #define SC_MARK_CIRCLE 0
 #define SC_MARK_ROUNDRECT 1
@@ -337,7 +336,6 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_GETLINEENDPOSITION 2136
 #define SCI_GETCODEPAGE 2137
 #define SCI_GETCARETFORE 2138
-#define SCI_GETUSEPALETTE 2139
 #define SCI_GETREADONLY 2140
 #define SCI_SETCURRENTPOS 2141
 #define SCI_SETSELECTIONSTART 2142
@@ -1041,6 +1039,8 @@ struct SCNotification {
 #ifdef INCLUDE_DEPRECATED_FEATURES
 
 #define SC_CP_DBCS 1
+#define SCI_SETUSEPALETTE 2039
+#define SCI_GETUSEPALETTE 2139
 
 #endif
 

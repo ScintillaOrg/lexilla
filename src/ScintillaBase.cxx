@@ -65,11 +65,6 @@ void ScintillaBase::Finalise() {
 	popup.Destroy();
 }
 
-void ScintillaBase::RefreshColourPalette(Palette &pal, bool want) {
-	Editor::RefreshColourPalette(pal, want);
-	ct.RefreshColourPalette(pal, want);
-}
-
 void ScintillaBase::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 	bool isFillUp = ac.Active() && ac.IsFillUpChar(*s);
 	if (!isFillUp) {
