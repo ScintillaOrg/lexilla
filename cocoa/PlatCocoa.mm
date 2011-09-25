@@ -1780,7 +1780,6 @@ void ListBoxImpl::GetValue(int n, char* value, int len)
 void ListBoxImpl::RegisterImage(int type, const char* xpm_data)
 {
   XPM xpm(xpm_data);
-  xpm.CopyDesiredColours();
   NSImage* img = ImageFromXPM(&xpm);
   [img retain];
   ImageMap::iterator it=images.find(type);
