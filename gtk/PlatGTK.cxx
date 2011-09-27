@@ -40,6 +40,17 @@
 #define IS_WIDGET_FOCUSSED(w) (GTK_WIDGET_HAS_FOCUS(w))
 #endif
 
+// The Pango version guard for pango_units_from_double and pango_units_to_double 
+// is more complex than simply implementing these here.
+
+static int pangoUnitsFromDouble(double d) {
+	return static_cast<int>(d * PANGO_SCALE + 0.5);
+}
+
+static double doubleFromPangoUnits(int pu) {
+	return static_cast<double>(pu) / PANGO_SCALE;
+}
+
 static cairo_surface_t *CreateSimilarSurface(GdkWindow *window, cairo_content_t content, int width, int height) {
 #if GTK_CHECK_VERSION(2,22,0)
 	return gdk_window_create_similar_surface(window, content, width, height);
@@ -306,7 +317,7 @@ FontID FontCached::CreateNewFont(const FontParameters &fp) {
 	if (pfd) {
 		pango_font_description_set_family(pfd, 
 			(fp.faceName[0] == '!') ? fp.faceName+1 : fp.faceName);
-		pango_font_description_set_size(pfd, pango_units_from_double(fp.size));
+		pango_font_description_set_size(pfd, pangoUnitsFromDouble(fp.size));
 		pango_font_description_set_weight(pfd, static_cast<PangoWeight>(fp.weight));
 		pango_font_description_set_style(pfd, fp.italic ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
 		return new FontHandle(pfd, fp.characterSet);
@@ -756,7 +767,11 @@ void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsi
 		rc.top += (rc.Height() - height) / 2;
 	rc.bottom = rc.top + height;
 
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1,6,0)
 	int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
+#else
+	int stride = width * 4;
+#endif
 	int ucs = stride * height;
 	std::vector<unsigned char> image(ucs);
 	for (int y=0; y<height; y++) {
@@ -942,11 +957,11 @@ public:
 		positionStart = position;
 		if (pango_layout_iter_next_cluster(iter)) {
 			pango_layout_iter_get_cluster_extents(iter, NULL, &pos);
-			position = pango_units_to_double(pos.x);
+			position = doubleFromPangoUnits(pos.x);
 			curIndex = pango_layout_iter_get_index(iter);
 		} else {
 			finished = true;
-			position = pango_units_to_double(pos.x + pos.width);
+			position = doubleFromPangoUnits(pos.x + pos.width);
 			curIndex = lenPositions;
 		}
 		distance = position - positionStart;
@@ -1081,7 +1096,7 @@ XYPOSITION SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 #endif
 			pango_layout_line_get_extents(pangoLine, NULL, &pos);
 			delete []utfForm;
-			return pango_units_to_double(pos.width);
+			return doubleFromPangoUnits(pos.width);
 		}
 		return 1;
 	} else {
@@ -1111,7 +1126,7 @@ XYPOSITION SurfaceImpl::Ascent(Font &font_) {
 		PangoFontMetrics *metrics = pango_context_get_metrics(pcontext,
 			PFont(font_)->pfd, pango_context_get_language(pcontext));
 		PFont(font_)->ascent =
-			pango_units_to_double(pango_font_metrics_get_ascent(metrics));
+			doubleFromPangoUnits(pango_font_metrics_get_ascent(metrics));
 		pango_font_metrics_unref(metrics);
 		ascent = PFont(font_)->ascent;
 	}
@@ -1128,7 +1143,7 @@ XYPOSITION SurfaceImpl::Descent(Font &font_) {
 	if (PFont(font_)->pfd) {
 		PangoFontMetrics *metrics = pango_context_get_metrics(pcontext,
 			PFont(font_)->pfd, pango_context_get_language(pcontext));
-		int descent = pango_units_to_double(pango_font_metrics_get_descent(metrics));
+		int descent = doubleFromPangoUnits(pango_font_metrics_get_descent(metrics));
 		pango_font_metrics_unref(metrics);
 		return descent;
 	}
