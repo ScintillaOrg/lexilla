@@ -821,7 +821,7 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		break;
 
 	case SCI_CALLTIPSETPOSITION:
-		ct.SetPosition((bool)wParam);
+		ct.SetPosition(wParam != 0);
 		InvalidateStyleRedraw();
 		break;
 
