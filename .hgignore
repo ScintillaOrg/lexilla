@@ -23,6 +23,7 @@ syntax: glob
 *.xcscheme
 *.xcworkspacedata
 *.xcuserstate
+*.xcsettings
 xcschememanagement.plist
 .DS_Store
 cocoa/build
