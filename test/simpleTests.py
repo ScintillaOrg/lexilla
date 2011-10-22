@@ -684,6 +684,9 @@ class TestMarkers(unittest.TestCase):
 		self.assertEquals(self.ed.MarkerPrevious(1, 2), 0)
 		self.assertEquals(self.ed.MarkerPrevious(2, 2), 2)
 
+	def testMarkerNegative(self):
+		self.assertEquals(self.ed.MarkerNext(-1, 2), -1)
+
 	def testLineState(self):
 		self.assertEquals(self.ed.MaxLineState, 0)
 		self.assertEquals(self.ed.GetLineState(0), 0)
