@@ -71,7 +71,12 @@
       </tr>
     </table>
     <ul id="versionlist">
-      <li>Version 3.0.0 has updated platform layers.</li>
+      <li>Version 3.0.0 has changed the platforms supported.
+      For OS X, Cocoa must be used instead of Carbon.
+      For recent versions of Windows, Direct2D and DirectWrite can be used.
+      For GTK+ all drawing is performed with Cairo as GDK drawing removed.
+      Palette support removed.
+      Font size and weight can be specified with more precision.</li>
       <li>Version 2.28 allows translucent images in RGBA format to be used for margin markers and in autocompletion lists.</li>
       <li>Version 2.27 fixes incorrect colours on some versions of GTK+.</li>
     </ul>
