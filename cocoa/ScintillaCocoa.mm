@@ -417,7 +417,7 @@ std::string ScintillaCocoa::CaseMapString(const std::string &s, int caseMapping)
       sMapped = [(NSString *)cfsVal lowercaseString];
       break;
     default:
-      sMapped = [(NSString *)cfsVal copy];
+      sMapped = (NSString *)cfsVal;
   }
 
   // Back to encoding
@@ -782,8 +782,7 @@ void ScintillaCocoa::CreateCallTipWindow(PRectangle rc) {
         [callTip setLevel:NSFloatingWindowLevel];
         [callTip setHasShadow:YES];
         NSRect ctContent = NSMakeRect(0,0, rc.Width(), rc.Height());
-        CallTipView *caption = [CallTipView alloc];
-        [caption initWithFrame: ctContent];
+        CallTipView *caption = [[CallTipView alloc] initWithFrame: ctContent];
         [caption setAutoresizingMask: NSViewWidthSizable | NSViewMaxYMargin];
         [caption setSci: this];
         [[callTip contentView] addSubview: caption];

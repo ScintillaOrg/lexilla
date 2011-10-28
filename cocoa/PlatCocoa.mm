@@ -1333,10 +1333,9 @@ static NSImage* ImageFromXPM(XPM* pxpm)
       SurfaceImpl* surfaceIXPM = static_cast<SurfaceImpl*>(surfaceXPM);
       CGContextClearRect(surfaceIXPM->GetContext(), CGRectMake(0, 0, width, height));
       pxpm->Draw(surfaceXPM, rcxpm);
-      img = [NSImage alloc];
+      img = [[NSImage alloc] initWithSize:NSZeroSize];
       [img autorelease];
       CGImageRef imageRef = surfaceIXPM->GetImage();
-      [img initWithSize:NSZeroSize];
       NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage: imageRef];
       [img addRepresentation: bitmapRep];
       [bitmapRep release];
@@ -1795,11 +1794,10 @@ void ListBoxImpl::RegisterImage(int type, const char* xpm_data)
 }
 
 void ListBoxImpl::RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage) {
-	NSImage *img = [NSImage alloc];
-	[img autorelease];
 	CGImageRef imageRef = ImageFromRGBA(width, height, pixelsImage, false);
 	NSSize sz = {width, height};
-	[img initWithSize: sz];
+	NSImage *img = [[NSImage alloc] initWithSize: sz];
+	[img autorelease];
 	NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage: imageRef];
 	[img addRepresentation: bitmapRep];
 	[bitmapRep release];
@@ -1926,8 +1924,7 @@ void Menu::Show(Point, Window &)
 
 ElapsedTime::ElapsedTime() {
   struct timeval curTime;
-  int retVal;
-  retVal = gettimeofday( &curTime, NULL );
+  gettimeofday( &curTime, NULL );
   
   bigBit = curTime.tv_sec;
   littleBit = curTime.tv_usec;
@@ -1935,8 +1932,7 @@ ElapsedTime::ElapsedTime() {
 
 double ElapsedTime::Duration(bool reset) {
   struct timeval curTime;
-  int retVal;
-  retVal = gettimeofday( &curTime, NULL );
+  gettimeofday( &curTime, NULL );
   long endBigBit = curTime.tv_sec;
   long endLittleBit = curTime.tv_usec;
   double result = 1000000.0 * (endBigBit - bigBit);
