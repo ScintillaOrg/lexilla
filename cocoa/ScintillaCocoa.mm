@@ -138,7 +138,7 @@ static const KeyToCommand macMapDefault[] =
 
 - (id) init: (void*) target
 {
-  [super init];
+  self = [super init];
   if (self != nil)
   {
     mTarget = target;
@@ -543,7 +543,7 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
       // performed.
       if (IsUnicodeMode())
       {
-        NSString* input = [[NSString stringWithCharacters: (const unichar*) &wParam length: 1] autorelease];
+        NSString* input = [NSString stringWithCharacters: (const unichar*) &wParam length: 1];
         const char* utf8 = [input UTF8String];
         AddCharUTF((char*) utf8, static_cast<unsigned int>(strlen(utf8)), false);
         return 1;

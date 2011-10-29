@@ -612,7 +612,7 @@ void Scintilla::SurfaceImpl::AlphaRectangle(PRectangle rc, int /*cornerSize*/, C
   }
 }
 
-static CGImageRef ImageFromRGBA(int width, int height, const unsigned char *pixelsImage, bool invert) {
+static CGImageRef ImageCreateFromRGBA(int width, int height, const unsigned char *pixelsImage, bool invert) {
 	CGImageRef image = 0;
 
 	// Create an RGB color space.
@@ -666,7 +666,7 @@ static CGImageRef ImageFromRGBA(int width, int height, const unsigned char *pixe
 }
 
 void SurfaceImpl::DrawRGBAImage(PRectangle /* rc */, int width, int height, const unsigned char *pixelsImage) {
-	CGImageRef image = ImageFromRGBA(width, height, pixelsImage, true);
+	CGImageRef image = ImageCreateFromRGBA(width, height, pixelsImage, true);
 	if (image) {
 		//CGContextSaveGState(gc);
 		//CGRect dst = PRectangleToCGRect(rc);
@@ -1794,7 +1794,7 @@ void ListBoxImpl::RegisterImage(int type, const char* xpm_data)
 }
 
 void ListBoxImpl::RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage) {
-	CGImageRef imageRef = ImageFromRGBA(width, height, pixelsImage, false);
+	CGImageRef imageRef = ImageCreateFromRGBA(width, height, pixelsImage, false);
 	NSSize sz = {width, height};
 	NSImage *img = [[NSImage alloc] initWithSize: sz];
 	[img autorelease];
