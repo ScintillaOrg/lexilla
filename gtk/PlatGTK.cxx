@@ -665,6 +665,8 @@ void SurfaceImpl::RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired
 void SurfaceImpl::FillRectangle(PRectangle rc, ColourDesired back) {
 	PenColour(back);
 	if (context && (rc.left < maxCoordinate)) {	// Protect against out of range
+		rc.left = lround(rc.left);
+		rc.right = lround(rc.right);
 		cairo_rectangle(context, rc.left, rc.top,
 	                     rc.right - rc.left, rc.bottom - rc.top);
 		cairo_fill(context);
