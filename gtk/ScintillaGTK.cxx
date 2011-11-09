@@ -745,7 +745,11 @@ void ScintillaGTK::Initialise() {
 	gtk_widget_set_double_buffered(widtxt, FALSE);
 	gtk_widget_set_size_request(widtxt, 100, 100);
 	adjustmentv = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.0, 201.0, 1.0, 20.0, 20.0));
+#if GTK_CHECK_VERSION(3,0,0)
+	scrollbarv = gtk_scrollbar_new(GTK_ORIENTATION_VERTICAL, GTK_ADJUSTMENT(adjustmentv));
+#else
 	scrollbarv = gtk_vscrollbar_new(GTK_ADJUSTMENT(adjustmentv));
+#endif
 #if GTK_CHECK_VERSION(2,20,0)
 	gtk_widget_set_can_focus(PWidget(scrollbarv), FALSE);
 #else
@@ -757,7 +761,11 @@ void ScintillaGTK::Initialise() {
 	gtk_widget_show(PWidget(scrollbarv));
 
 	adjustmenth = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.0, 101.0, 1.0, 20.0, 20.0));
+#if GTK_CHECK_VERSION(3,0,0)
+	scrollbarh = gtk_scrollbar_new(GTK_ORIENTATION_HORIZONTAL, GTK_ADJUSTMENT(adjustmenth));
+#else
 	scrollbarh = gtk_hscrollbar_new(GTK_ADJUSTMENT(adjustmenth));
+#endif
 #if GTK_CHECK_VERSION(2,20,0)
 	gtk_widget_set_can_focus(PWidget(scrollbarh), FALSE);
 #else
