@@ -799,15 +799,15 @@ void ScintillaCocoa::AddToPopUp(const char *label, int cmd, bool enabled)
   [menu setOwner: this];
   [menu setAutoenablesItems: NO];
   
-  if (cmd == 0)
+  if (cmd == 0) {
     item = [NSMenuItem separatorItem];
-  else
-    item = [[NSMenuItem alloc] init];
-  
+  } else {
+    item = [[[NSMenuItem alloc] init] autorelease];
+    [item setTitle: [NSString stringWithUTF8String: label]];
+  }
   [item setTarget: menu];
   [item setAction: @selector(handleCommand:)];
   [item setTag: cmd];
-  [item setTitle: [NSString stringWithUTF8String: label]];
   [item setEnabled: enabled];
   
   [menu addItem: item];

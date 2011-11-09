@@ -1452,7 +1452,8 @@ private:
   NSScrollView* scroller;
   NSTableColumn* colIcon;
   NSTableColumn* colText;
-
+  AutoCompletionDataSource* ds;
+	
   LinesData ld;
   CallBackAction doubleClickAction;
   void* doubleClickActionData;
@@ -1569,24 +1570,23 @@ void ListBoxImpl::Create(Window& /*parent*/, int /*ctrlID*/, Scintilla::Point pt
   NSRect scRect = NSMakeRect(0, 0, lbRect.size.width, lbRect.size.height);
   [scroller initWithFrame: scRect];
   [scroller setHasVerticalScroller:YES];
-  table = [NSTableView alloc];
-  [table initWithFrame: scRect];
+  table = [[NSTableView alloc] initWithFrame: scRect];
   [table setHeaderView:nil];
   [scroller setDocumentView: table];
   colIcon = [[NSTableColumn alloc] initWithIdentifier:@"icon"];
   [colIcon setWidth: 20];
   [colIcon setEditable:NO];
   [colIcon setHidden:YES];
-  NSImageCell* imCell = [[NSImageCell alloc] init];
+  NSImageCell* imCell = [[[NSImageCell alloc] init] autorelease];
   [colIcon setDataCell:imCell];
   [table addTableColumn:colIcon];
   colText = [[NSTableColumn alloc] initWithIdentifier:@"name"];
   [colText setResizingMask:NSTableColumnAutoresizingMask];
   [colText setEditable:NO];
   [table addTableColumn:colText];
-  AutoCompletionDataSource* ds = [[AutoCompletionDataSource alloc] init];
+  ds = [[AutoCompletionDataSource alloc] init];
   [ds setBox:this];
-  [table setDataSource: ds];
+  [table setDataSource: ds];	// Weak reference
   [scroller setAutoresizingMask: NSViewWidthSizable | NSViewHeightSizable];
   [[winLB contentView] addSubview: scroller];
 
