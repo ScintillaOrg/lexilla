@@ -34,9 +34,6 @@ extern NSString *SCIUpdateUINotification;
 
   // Set when we are in composition mode and partial input is displayed.
   NSRange mMarkedTextRange;
-  
-  // Caret position when a drag operation started.
-  int mLastPosition;
 }
 
 - (void) dealloc;
