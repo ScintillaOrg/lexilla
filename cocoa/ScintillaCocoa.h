@@ -116,6 +116,9 @@ private:
   
   int scrollSpeed;
   int scrollTicks;
+  NSTimer* tickTimer;
+  NSTimer* idleTimer;
+	
 protected:
   PRectangle GetClientRectangle();
   Point ConvertPoint(NSPoint point);
