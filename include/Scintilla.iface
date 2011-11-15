@@ -764,7 +764,7 @@ get position GetLineIndentPosition=2128(int line,)
 get int GetColumn=2129(position pos,)
 
 # Count characters between two positions.
-get int CountCharacters=2633(int startPos, int endPos)
+fun int CountCharacters=2633(int startPos, int endPos)
 
 # Show or hide the horizontal scroll bar.
 set void SetHScrollBar=2130(bool show,)
