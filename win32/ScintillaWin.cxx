@@ -204,6 +204,7 @@ class ScintillaWin :
 
 #if defined(USE_D2D)
 	ID2D1HwndRenderTarget *pRenderTarget;
+	bool renderTargetValid;
 #endif
 
 	ScintillaWin(HWND hwnd);
@@ -362,6 +363,7 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 
 #if defined(USE_D2D)
 	pRenderTarget = 0;
+	renderTargetValid = true;
 #endif
 
 	keysAlwaysUnicode = false;
@@ -407,6 +409,10 @@ void ScintillaWin::Finalise() {
 
 void ScintillaWin::EnsureRenderTarget() {
 #if defined(USE_D2D)
+	if (!renderTargetValid) {
+		DropRenderTarget();
+		renderTargetValid = true;
+	}
 	if (pD2DFactory && !pRenderTarget) {
 		RECT rc;
 		HWND hw = MainHWND();
@@ -745,7 +751,13 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			break;
 
 		case WM_SIZE: {
-				DropRenderTarget();
+#if defined(USE_D2D)
+				if (paintState == notPainting) {
+					DropRenderTarget();
+				} else {
+					renderTargetValid = false;
+				}
+#endif
 				//Platform::DebugPrintf("Scintilla WM_SIZE %d %d\n", LoWord(lParam), HiWord(lParam));
 				ChangeSize();
 			}
