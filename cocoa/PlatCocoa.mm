@@ -1333,8 +1333,7 @@ static NSImage* ImageFromXPM(XPM* pxpm)
       SurfaceImpl* surfaceIXPM = static_cast<SurfaceImpl*>(surfaceXPM);
       CGContextClearRect(surfaceIXPM->GetContext(), CGRectMake(0, 0, width, height));
       pxpm->Draw(surfaceXPM, rcxpm);
-      img = [[NSImage alloc] initWithSize:NSZeroSize];
-      [img autorelease];
+      img = [[[NSImage alloc] initWithSize:NSZeroSize] autorelease];
       CGImageRef imageRef = surfaceIXPM->GetImage();
       NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage: imageRef];
       [img addRepresentation: bitmapRep];
@@ -1796,8 +1795,7 @@ void ListBoxImpl::RegisterImage(int type, const char* xpm_data)
 void ListBoxImpl::RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage) {
 	CGImageRef imageRef = ImageCreateFromRGBA(width, height, pixelsImage, false);
 	NSSize sz = {width, height};
-	NSImage *img = [[NSImage alloc] initWithSize: sz];
-	[img autorelease];
+	NSImage *img = [[[NSImage alloc] initWithSize: sz] autorelease];
 	NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage: imageRef];
 	[img addRepresentation: bitmapRep];
 	[bitmapRep release];
