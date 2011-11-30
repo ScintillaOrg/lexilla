@@ -1761,6 +1761,12 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 		surface = surfWindow;
 	}
 
+	// Clip vertically to paint area to avoid drawing line numbers
+	if (rcMargin.bottom > rc.bottom)
+		rcMargin.bottom = rc.bottom;
+	if (rcMargin.top < rc.top)
+		rcMargin.top = rc.top;
+
 	PRectangle rcSelMargin = rcMargin;
 	rcSelMargin.right = rcMargin.left;
 
@@ -1793,8 +1799,9 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 				surface->FillRectangle(rcSelMargin, vs.styles[STYLE_LINENUMBER].back);
 			}
 
-			int visibleLine = topLine;
-			int yposScreen = 0;
+			const int lineStartPaint = rcMargin.top / vs.lineHeight;
+			int visibleLine = topLine + lineStartPaint;
+			int yposScreen = lineStartPaint * vs.lineHeight;
 			// Work out whether the top line is whitespace located after a
 			// lessening of fold level which implies a 'fold tail' but which should not
 			// be displayed until the last of a sequence of whitespace.
