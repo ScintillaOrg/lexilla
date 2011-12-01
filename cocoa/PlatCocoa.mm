@@ -481,6 +481,13 @@ void drawImageRefCallback(CGImageRef pattern, CGContextRef gc)
 
 //--------------------------------------------------------------------------------------------------
 
+void releaseImageRefCallback(CGImageRef pattern)
+{
+  CGImageRelease(pattern);
+}
+
+//--------------------------------------------------------------------------------------------------
+
 void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern)
 {
   SurfaceImpl& patternSurface = static_cast<SurfaceImpl &>(surfacePattern);
@@ -493,8 +500,9 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern)
     return;
   }
   
-  const CGPatternCallbacks drawImageCallbacks = { 0, 
-    reinterpret_cast<CGPatternDrawPatternCallback>(drawImageRefCallback), NULL };
+  const CGPatternCallbacks drawImageCallbacks = { 0,
+    reinterpret_cast<CGPatternDrawPatternCallback>(drawImageRefCallback),
+    reinterpret_cast<CGPatternReleaseInfoCallback>(releaseImageRefCallback) };
   
   CGPatternRef pattern = CGPatternCreate(image,
                                          CGRectMake(0, 0, patternSurface.bitmapWidth, patternSurface.bitmapHeight),
@@ -526,8 +534,6 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern)
     colorSpace = NULL;
     CGPatternRelease( pattern );
     pattern = NULL;
-    CGImageRelease( image );
-    image = NULL;
   } /* pattern != NULL */
 }
 
