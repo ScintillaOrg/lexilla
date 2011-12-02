@@ -469,7 +469,6 @@ static void FoldCoffeeScriptDoc(unsigned int startPos, int length, int,
 	int indentCurrentLevel = indentCurrent & SC_FOLDLEVELNUMBERMASK;
 
 	// Set up initial loop state
-	startPos = styler.LineStart(lineCurrent);
 	int prevComment = 0;
 	if (lineCurrent >= 1)
 		prevComment = foldComment && IsCommentLine(lineCurrent - 1, styler);
