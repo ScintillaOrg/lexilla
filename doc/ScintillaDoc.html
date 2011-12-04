@@ -4574,10 +4574,17 @@ struct Sci_TextToFind {
 
     <h2 id="Printing">Printing</h2>
 
-    <p>On Windows <code>SCI_FORMATRANGE</code> can be used to draw the text onto a display context
-    which can include a printer display context. Printed output shows text styling as on the
+    <p><code>SCI_FORMATRANGE</code> can be used to draw the text onto a display surface
+    which can include a printer display surface. Printed output shows text styling as on the
     screen, but it hides all margins except a line number margin. All special marker effects are
     removed and the selection and caret are hidden.</p>
+
+    <p>Different platforms use different display surface ID types to print on. On Windows, these are
+    <code>HDC</code>s., on GTK+ 3.x <code>cairo_t *</code>,
+    and on Cocoa <code>CGContextRef</code> is used.</p>
+
+    <p><code>SCI_FORMATRANGE</code> is not supported on GTK+ 2.x.</p>
+
     <code><a class="message" href="#SCI_FORMATRANGE">SCI_FORMATRANGE(bool bDraw, Sci_RangeToFormat
     *pfr)</a><br />
      <a class="message" href="#SCI_SETPRINTMAGNIFICATION">SCI_SETPRINTMAGNIFICATION(int
@@ -4590,7 +4597,7 @@ struct Sci_TextToFind {
     </code>
 
     <p><b id="SCI_FORMATRANGE">SCI_FORMATRANGE(bool bDraw, Sci_RangeToFormat *pfr)</b><br />
-     This call allows Windows users to render a range of text into a device context. If you use
+     This call renders a range of text into a device context. If you use
     this for printing, you will probably want to arrange a page header and footer; Scintilla does
     not do this for you. See <code>SciTEWin::Print()</code> in <code>SciTEWinDlg.cxx</code> for an
     example. Each use of this message renders a range of text into a rectangular area and returns
@@ -4603,15 +4610,15 @@ struct Sci_TextToFind {
 struct Sci_Rectangle { int left; int top; int right; int bottom; };
 
 struct Sci_RangeToFormat {
-    Sci_SurfaceID hdc;        // The HDC (device context) we print to
-    Sci_SurfaceID hdcTarget;  // The HDC we use for measuring (may be same as hdc)
+    Sci_SurfaceID hdc;        // The Surface ID we print to
+    Sci_SurfaceID hdcTarget;  // The Surface ID we use for measuring (may be same as hdc)
     Sci_Rectangle rc;         // Rectangle in which to print
     Sci_Rectangle rcPage;     // Physically printable page size
     Sci_CharacterRange chrg;  // Range of characters to print
 };
 </pre>
 
-    <p><code>hdc</code> and <code>hdcTarget</code> should both be set to the device context handle
+    <p>On Windows, <code>hdc</code> and <code>hdcTarget</code> should both be set to the device context handle
     of the output device (usually a printer). If you print to a metafile these will not be the same
     as Windows metafiles (unlike extended metafiles) do not implement the full API for returning
     information. In this case, set <code>hdcTarget</code> to the screen DC.<br />
@@ -4619,6 +4626,17 @@ struct Sci_RangeToFormat {
     and <code>maxY+1</code> are the number of physically printable pixels in x and y.<br />
      <code>rc</code> is the rectangle to render the text in (which will, of course, fit within the
     rectangle defined by rcPage).<br />
+     <code>chrg.cpMin</code> and <code>chrg.cpMax</code> define the start position and maximum
+    position of characters to output. All of each line within this character range is drawn.</p>
+
+    <p>On Cocoa, the surface IDs for printing (<code>bDraw=1</code>) should be the graphics port of the current context
+    (<code>(CGContextRef) [[NSGraphicsContext currentContext] graphicsPort]</code>) when the view's drawRect method is called.
+    The Surface IDs are not really used for measurement (<code>bDraw=0</code>) but can be set
+    to a bitmap context (created with <code>CGBitmapContextCreate</code>) to avoid runtime warnings.</p>
+
+    <p>On GTK+, the surface IDs to use can be found from the printing context with 
+    <code>gtk_print_context_get_cairo_context(context)</code>.</p>
+
      <code>chrg.cpMin</code> and <code>chrg.cpMax</code> define the start position and maximum
     position of characters to output. All of each line within this character range is drawn.</p>
 
