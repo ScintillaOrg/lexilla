@@ -141,7 +141,7 @@ static void FontMutexUnlock() {
 // On GTK+ 1.x holds a GdkFont* but on GTK+ 2.x can hold a GdkFont* or a
 // PangoFontDescription*.
 class FontHandle {
-	int width[128];
+	XYPOSITION width[128];
 	encodingType et;
 public:
 	int ascent;
@@ -168,8 +168,8 @@ public:
 			width[i] = 0;
 		}
 	}
-	int CharWidth(unsigned char ch, encodingType et_) {
-		int w = 0;
+	XYPOSITION CharWidth(unsigned char ch, encodingType et_) {
+		XYPOSITION w = 0;
 		FontMutexLock();
 		if ((ch <= 127) && (et == et_)) {
 			w = width[ch];
@@ -177,7 +177,7 @@ public:
 		FontMutexUnlock();
 		return w;
 	}
-	void SetCharWidth(unsigned char ch, int w, encodingType et_) {
+	void SetCharWidth(unsigned char ch, XYPOSITION w, encodingType et_) {
 		if (ch <= 127) {
 			FontMutexLock();
 			if (et != et_) {
