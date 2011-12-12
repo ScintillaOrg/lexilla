@@ -346,7 +346,7 @@ void Font::Release() {
 namespace Scintilla {
 #endif
 
-// On GTK+ 2.x, SurfaceID is a GdkDrawable* and on GTK+ 3.x, it is a cairo_t*
+// SurfaceID is a cairo_t*
 class SurfaceImpl : public Surface {
 	encodingType et;
 	cairo_t *context;
@@ -534,11 +534,7 @@ void SurfaceImpl::Init(SurfaceID sid, WindowID wid) {
 	PLATFORM_ASSERT(sid);
 	Release();
 	PLATFORM_ASSERT(wid);
-#if GTK_CHECK_VERSION(3,0,0)
 	context = cairo_reference(reinterpret_cast<cairo_t *>(sid));
-#else
-	context = gdk_cairo_create(reinterpret_cast<GdkDrawable *>(sid));
-#endif
 	pcontext = gtk_widget_create_pango_context(PWidget(wid));
 	layout = pango_layout_new(pcontext);
 	cairo_set_line_width(context, 1);

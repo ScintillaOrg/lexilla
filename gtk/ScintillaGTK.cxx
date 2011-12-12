@@ -1112,18 +1112,12 @@ void ScintillaGTK::SyncPaint(PRectangle rc) {
 	if (PWindow(wText)) {
 		Surface *sw = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
 		if (sw) {
-#if GTK_CHECK_VERSION(3,0,0)
 			cairo_t *cr = gdk_cairo_create(PWindow(wText));
 			sw->Init(cr, PWidget(wText));
-#else
-			sw->Init(PWindow(wText), PWidget(wText));
-#endif
 			Paint(sw, rc);
 			sw->Release();
 			delete sw;
-#if GTK_CHECK_VERSION(3,0,0)
 			cairo_destroy(cr);
-#endif
 		}
 	}
 	if (paintState == paintAbandoned) {
@@ -2500,10 +2494,12 @@ gboolean ScintillaGTK::ExposeTextThis(GtkWidget * /*widget*/, GdkEventExpose *os
 		paintingAllText = rcPaint.Contains(rcClient);
 		Surface *surfaceWindow = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
 		if (surfaceWindow) {
-			surfaceWindow->Init(PWindow(wText), PWidget(wText));
+			cairo_t *cr = gdk_cairo_create(PWindow(wText));
+			surfaceWindow->Init(cr, PWidget(wText));
 			Paint(surfaceWindow, rcPaint);
 			surfaceWindow->Release();
 			delete surfaceWindow;
+			cairo_destroy(cr);
 		}
 		if (paintState == paintAbandoned) {
 			// Painting area was insufficient to cover new styling or brace highlight positions
@@ -2811,12 +2807,14 @@ gboolean ScintillaGTK::ExposeCT(GtkWidget *widget, GdkEventExpose * /*ose*/, Cal
 	try {
 		Surface *surfaceWindow = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
 		if (surfaceWindow) {
-			surfaceWindow->Init(WindowFromWidget(widget), widget);
+			cairo_t *cr = gdk_cairo_create(WindowFromWidget(widget));
+			surfaceWindow->Init(cr, widget);
 			surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == ctip->codePage);
 			surfaceWindow->SetDBCSMode(ctip->codePage);
 			ctip->PaintCT(surfaceWindow);
 			surfaceWindow->Release();
 			delete surfaceWindow;
+			cairo_destroy(cr);
 		}
 	} catch (...) {
 		// No pointer back to Scintilla to save status
