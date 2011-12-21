@@ -157,6 +157,7 @@
 		114B6FEB11FA7645004FB6AB /* PropSetSimple.h in Headers */ = {isa = PBXBuildFile; fileRef = 114B6FE011FA7645004FB6AB /* PropSetSimple.h */; };
 		114B6FEC11FA7645004FB6AB /* StyleContext.h in Headers */ = {isa = PBXBuildFile; fileRef = 114B6FE111FA7645004FB6AB /* StyleContext.h */; };
 		114B6FED11FA7645004FB6AB /* WordList.h in Headers */ = {isa = PBXBuildFile; fileRef = 114B6FE211FA7645004FB6AB /* WordList.h */; };
+		117ACE9114A29A1E002876F9 /* LexTCMD.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 117ACE9014A29A1E002876F9 /* LexTCMD.cxx */; };
 		119FF1BF13C9D1820007CE42 /* QuartzTextStyle.h in Headers */ = {isa = PBXBuildFile; fileRef = 119FF1BE13C9D1820007CE42 /* QuartzTextStyle.h */; };
 		11A0A8A1148602DF0018D143 /* LexCoffeeScript.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 11A0A8A0148602DF0018D143 /* LexCoffeeScript.cxx */; };
 		11BB124D12FF9C1300F6BCF7 /* LexModula.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 11BB124C12FF9C1300F6BCF7 /* LexModula.cxx */; };
@@ -337,6 +338,7 @@
 		114B6FE011FA7645004FB6AB /* PropSetSimple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PropSetSimple.h; path = ../../lexlib/PropSetSimple.h; sourceTree = SOURCE_ROOT; };
 		114B6FE111FA7645004FB6AB /* StyleContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StyleContext.h; path = ../../lexlib/StyleContext.h; sourceTree = SOURCE_ROOT; };
 		114B6FE211FA7645004FB6AB /* WordList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WordList.h; path = ../../lexlib/WordList.h; sourceTree = SOURCE_ROOT; };
+		117ACE9014A29A1E002876F9 /* LexTCMD.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexTCMD.cxx; path = ../../lexers/LexTCMD.cxx; sourceTree = "<group>"; };
 		119FF1BE13C9D1820007CE42 /* QuartzTextStyle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = QuartzTextStyle.h; path = ../QuartzTextStyle.h; sourceTree = "<group>"; };
 		11A0A8A0148602DF0018D143 /* LexCoffeeScript.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexCoffeeScript.cxx; path = ../../lexers/LexCoffeeScript.cxx; sourceTree = "<group>"; };
 		11BB124C12FF9C1300F6BCF7 /* LexModula.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexModula.cxx; path = ../../lexers/LexModula.cxx; sourceTree = SOURCE_ROOT; };
@@ -532,6 +534,7 @@
 				114B6F0411FA7526004FB6AB /* LexTADS3.cxx */,
 				114B6F0511FA7526004FB6AB /* LexTAL.cxx */,
 				114B6F0611FA7526004FB6AB /* LexTCL.cxx */,
+				117ACE9014A29A1E002876F9 /* LexTCMD.cxx */,
 				114B6F0711FA7526004FB6AB /* LexTeX.cxx */,
 				114B6F0811FA7526004FB6AB /* LexTxt2tags.cxx */,
 				114B6F0911FA7526004FB6AB /* LexVB.cxx */,
@@ -922,6 +925,7 @@
 				11F35FDB12AEFAF100F0236D /* LexA68k.cxx in Sources */,
 				11BB124D12FF9C1300F6BCF7 /* LexModula.cxx in Sources */,
 				11A0A8A1148602DF0018D143 /* LexCoffeeScript.cxx in Sources */,
+				117ACE9114A29A1E002876F9 /* LexTCMD.cxx in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
