@@ -430,6 +430,14 @@ static void ColouriseTCMDDoc( unsigned int startPos, int length, int /*initStyle
 	}
 }
 
+// Convert string to upper case
+static void StrUpr(char *s) {
+	while (*s) {
+		*s = MakeUpperCase(*s);
+		s++;
+	}
+}
+
 // Folding support (for DO, IFF, SWITCH, TEXT, and command groups)
 static void FoldTCMDDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler)
 {
@@ -466,7 +474,7 @@ static void FoldTCMDDoc(unsigned int startPos, int length, int, WordList *[], Ac
                 s[j + 1] = '\0';
             }
 
-			_strupr( s );
+			StrUpr( s );
             if ((strcmp(s, "DO") == 0) || (strcmp(s, "IFF") == 0) || (strcmp(s, "SWITCH") == 0) || (strcmp(s, "TEXT") == 0)) {
                 levelIndent++;
             } else if ((strcmp(s, "ENDDO") == 0) || (strcmp(s, "ENDIFF") == 0) || (strcmp(s, "ENDSWITCH") == 0) || (strcmp(s, "ENDTEXT") == 0)) {
