@@ -159,6 +159,7 @@ LEXOBJS=\
 	$(DIR_O)\LexTADS3.obj \
 	$(DIR_O)\LexTAL.obj \
 	$(DIR_O)\LexTCL.obj \
+	$(DIR_O)\LexTCMD.obj \
 	$(DIR_O)\LexTeX.obj \
 	$(DIR_O)\LexTxt2tags.obj \
 	$(DIR_O)\LexVB.obj \
@@ -432,6 +433,8 @@ $(DIR_O)\LexTADS3.obj: ..\lexers\LexTADS3.cxx $(LEX_HEADERS)
 $(DIR_O)\LexTAL.obj: ..\lexers\LexTAL.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexTCL.obj: ..\lexers\LexTCL.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexTCMD.obj: ..\lexers\LexTCMD.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexTeX.obj: ..\lexers\LexTeX.cxx $(LEX_HEADERS)
 
