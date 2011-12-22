@@ -548,22 +548,22 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 	// Redirect assertions to debug output and save current state
 	bool assertsPopup = Platform::ShowAssertionPopUps(false);
 	paintState = painting;
-	PAINTSTRUCT ps;
-	PAINTSTRUCT *pps;
-
-	bool IsOcxCtrl = (wParam != 0); // if wParam != 0, it contains
-								   // a PAINSTRUCT* from the OCX
-	// Removed since this interferes with reporting other assertions as it occurs repeatedly
-	//PLATFORM_ASSERT(hRgnUpdate == NULL);
-	hRgnUpdate = ::CreateRectRgn(0, 0, 0, 0);
-	if (IsOcxCtrl) {
-		pps = reinterpret_cast<PAINTSTRUCT*>(wParam);
-	} else {
-		::GetUpdateRgn(MainHWND(), hRgnUpdate, FALSE);
-		pps = &ps;
-		::BeginPaint(MainHWND(), pps);
-	}
 	if (technology == SC_TECHNOLOGY_DEFAULT) {
+		PAINTSTRUCT ps;
+		PAINTSTRUCT *pps;
+
+		bool IsOcxCtrl = (wParam != 0); // if wParam != 0, it contains
+									   // a PAINSTRUCT* from the OCX
+		// Removed since this interferes with reporting other assertions as it occurs repeatedly
+		//PLATFORM_ASSERT(hRgnUpdate == NULL);
+		hRgnUpdate = ::CreateRectRgn(0, 0, 0, 0);
+		if (IsOcxCtrl) {
+			pps = reinterpret_cast<PAINTSTRUCT*>(wParam);
+		} else {
+			::GetUpdateRgn(MainHWND(), hRgnUpdate, FALSE);
+			pps = &ps;
+			::BeginPaint(MainHWND(), pps);
+		}
 		AutoSurface surfaceWindow(pps->hdc, this);
 		if (surfaceWindow) {
 			rcPaint = PRectangle(pps->rcPaint.left, pps->rcPaint.top, pps->rcPaint.right, pps->rcPaint.bottom);
@@ -572,13 +572,18 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 			Paint(surfaceWindow, rcPaint);
 			surfaceWindow->Release();
 		}
+		if (!IsOcxCtrl)
+			::EndPaint(MainHWND(), pps);
 	} else {
 #if defined(USE_D2D)
 		EnsureRenderTarget();
 		AutoSurface surfaceWindow(pRenderTarget, this);
 		if (surfaceWindow) {
 			pRenderTarget->BeginDraw();
-			rcPaint = PRectangle(pps->rcPaint.left, pps->rcPaint.top, pps->rcPaint.right, pps->rcPaint.bottom);
+			RECT rcUpdate;
+			::GetUpdateRect(MainHWND(), &rcUpdate, FALSE);
+			rcPaint = PRectangle(rcUpdate.left, rcUpdate.top, rcUpdate.right, rcUpdate.bottom);
+			//rcPaint = GetClientRectangle();
 			PRectangle rcClient = GetClientRectangle();
 			paintingAllText = rcPaint.Contains(rcClient);
 			if (paintingAllText) {
@@ -600,8 +605,6 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 		hRgnUpdate = 0;
 	}
 
-	if (!IsOcxCtrl)
-		::EndPaint(MainHWND(), pps);
 	if (paintState == paintAbandoned) {
 		// Painting area was insufficient to cover new styling or brace highlight positions
 		FullPaint();
