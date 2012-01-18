@@ -506,7 +506,7 @@ SelectionPosition Editor::SPositionFromLocation(Point pt, bool canReturnInvalid,
 		if (subLine < ll->lines) {
 			int lineStart = ll->LineStart(subLine);
 			int lineEnd = ll->LineLastVisible(subLine);
-			int subLineStart = ll->positions[lineStart];
+			XYPOSITION subLineStart = ll->positions[lineStart];
 
 			if (ll->wrapIndent != 0) {
 				if (lineStart != 0)	// Wrapped
@@ -552,43 +552,6 @@ int Editor::PositionFromLocation(Point pt, bool canReturnInvalid, bool charPosit
  * Find the document position corresponding to an x coordinate on a particular document line.
  * Ensure is between whole characters when document is in multi-byte or UTF-8 mode.
  */
-int Editor::PositionFromLineX(int lineDoc, int x) {
-	RefreshStyleData();
-	if (lineDoc >= pdoc->LinesTotal())
-		return pdoc->Length();
-	//Platform::DebugPrintf("Position of (%d,%d) line = %d top=%d\n", pt.x, pt.y, line, topLine);
-	AutoSurface surface(this);
-	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
-	int retVal = 0;
-	if (surface && ll) {
-		unsigned int posLineStart = pdoc->LineStart(lineDoc);
-		LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
-		retVal = ll->numCharsBeforeEOL + posLineStart;
-		int subLine = 0;
-		int lineStart = ll->LineStart(subLine);
-		int lineEnd = ll->LineLastVisible(subLine);
-		int subLineStart = ll->positions[lineStart];
-
-		if (ll->wrapIndent != 0) {
-			if (lineStart != 0)	// Wrapped
-				x -= ll->wrapIndent;
-		}
-		int i = ll->FindBefore(x + subLineStart, lineStart, lineEnd);
-		while (i < lineEnd) {
-			if ((x + subLineStart) < ((ll->positions[i] + ll->positions[i + 1]) / 2)) {
-				retVal = pdoc->MovePositionOutsideChar(i + posLineStart, 1);
-				break;
-			}
-			i++;
-		}
-	}
-	return retVal;
-}
-
-/**
- * Find the document position corresponding to an x coordinate on a particular document line.
- * Ensure is between whole characters when document is in multi-byte or UTF-8 mode.
- */
 SelectionPosition Editor::SPositionFromLineX(int lineDoc, int x) {
 	RefreshStyleData();
 	if (lineDoc >= pdoc->LinesTotal())
@@ -603,7 +566,7 @@ SelectionPosition Editor::SPositionFromLineX(int lineDoc, int x) {
 		int subLine = 0;
 		int lineStart = ll->LineStart(subLine);
 		int lineEnd = ll->LineLastVisible(subLine);
-		int subLineStart = ll->positions[lineStart];
+		XYPOSITION subLineStart = ll->positions[lineStart];
 
 		if (ll->wrapIndent != 0) {
 			if (lineStart != 0)	// Wrapped
@@ -622,6 +585,10 @@ SelectionPosition Editor::SPositionFromLineX(int lineDoc, int x) {
 		return SelectionPosition(lineEnd + posLineStart, spaceOffset);
 	}
 	return SelectionPosition(retVal);
+}
+
+int Editor::PositionFromLineX(int lineDoc, int x) {
+	return SPositionFromLineX(lineDoc, x).Position();
 }
 
 /**
@@ -2357,7 +2324,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 			// Calculate line start positions based upon width.
 			int lastGoodBreak = 0;
 			int lastLineStart = 0;
-			int startOffset = 0;
+			XYACCUMULATOR startOffset = 0;
 			int p = 0;
 			while (p < ll->numCharsInLine) {
 				if ((ll->positions[p + 1] - startOffset) >= width) {
