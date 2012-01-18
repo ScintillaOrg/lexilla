@@ -567,21 +567,22 @@ SelectionPosition Editor::SPositionFromLineX(int lineDoc, int x) {
 		int lineStart = ll->LineStart(subLine);
 		int lineEnd = ll->LineLastVisible(subLine);
 		XYPOSITION subLineStart = ll->positions[lineStart];
+		XYPOSITION newX = x;
 
 		if (ll->wrapIndent != 0) {
 			if (lineStart != 0)	// Wrapped
-				x -= ll->wrapIndent;
+				newX -= ll->wrapIndent;
 		}
-		int i = ll->FindBefore(x + subLineStart, lineStart, lineEnd);
+		int i = ll->FindBefore(newX + subLineStart, lineStart, lineEnd);
 		while (i < lineEnd) {
-			if ((x + subLineStart) < ((ll->positions[i] + ll->positions[i + 1]) / 2)) {
+			if ((newX + subLineStart) < ((ll->positions[i] + ll->positions[i + 1]) / 2)) {
 				retVal = pdoc->MovePositionOutsideChar(i + posLineStart, 1);
 				return SelectionPosition(retVal);
 			}
 			i++;
 		}
 		const XYPOSITION spaceWidth = vs.styles[ll->EndLineStyle()].spaceWidth;
-		int spaceOffset = (x + subLineStart - ll->positions[lineEnd] + spaceWidth / 2) / spaceWidth;
+		int spaceOffset = (newX + subLineStart - ll->positions[lineEnd] + spaceWidth / 2) / spaceWidth;
 		return SelectionPosition(lineEnd + posLineStart, spaceOffset);
 	}
 	return SelectionPosition(retVal);
@@ -1354,7 +1355,7 @@ Editor::XYScrollPosition Editor::XYScrollToMakeVisible(const bool useMargin, con
 			newXY.xOffset = pt.x + xOffset - rcClient.right + 1;
 			if (vs.caretStyle == CARETSTYLE_BLOCK) {
 				// Ensure we can see a good portion of the block caret
-				newXY.xOffset += vs.aveCharWidth;
+				newXY.xOffset += static_cast<int>(vs.aveCharWidth);
 			}
 		}
 		if (newXY.xOffset < 0) {
@@ -2304,7 +2305,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 			ll->lines = 1;
 		} else {
 			if (wrapVisualFlags & SC_WRAPVISUALFLAG_END) {
-				width -= vstyle.aveCharWidth; // take into account the space for end wrap mark
+				width -= static_cast<int>(vstyle.aveCharWidth); // take into account the space for end wrap mark
 			}
 			ll->wrapIndent = wrapAddIndent;
 			if (wrapIndentMode != SC_WRAPINDENT_FIXED)
@@ -2318,7 +2319,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 			if (ll->wrapIndent > width - static_cast<int>(vstyle.aveCharWidth) * 15)
 				ll->wrapIndent = wrapAddIndent;
 			// Check for wrapIndent minimum
-			if ((wrapVisualFlags & SC_WRAPVISUALFLAG_START) && (ll->wrapIndent < static_cast<int>(vstyle.aveCharWidth)))
+			if ((wrapVisualFlags & SC_WRAPVISUALFLAG_START) && (ll->wrapIndent < vstyle.aveCharWidth))
 				ll->wrapIndent = vstyle.aveCharWidth; // Indent to show start visual
 			ll->lines = 0;
 			// Calculate line start positions based upon width.
@@ -2874,7 +2875,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 				DrawWrapMarker(surface, rcPlace, false, wrapColour);
 			}
 
-			xStart += ll->wrapIndent;
+			xStart += static_cast<int>(ll->wrapIndent);
 		}
 	}
 
@@ -2882,7 +2883,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		((vsDraw.selAlpha == SC_ALPHA_NOALPHA) || (vsDraw.selAdditionalAlpha == SC_ALPHA_NOALPHA));
 
 	// Does not take margin into account but not significant
-	int xStartVisible = subLineStart - xStart;
+	int xStartVisible = static_cast<int>(subLineStart) - xStart;
 
 	ll->psel = &sel;
 
@@ -3288,7 +3289,7 @@ void Editor::DrawBlockCaret(Surface *surface, ViewStyle &vsDraw, LineLayout *ll,
 
 	// Adjust caret position to take into account any word wrapping symbols.
 	if ((ll->wrapIndent != 0) && (lineStart != 0)) {
-		int wordWrapCharWidth = ll->wrapIndent;
+		XYPOSITION wordWrapCharWidth = ll->wrapIndent;
 		rcCaret.left += wordWrapCharWidth;
 		rcCaret.right += wordWrapCharWidth;
 	}
@@ -3395,7 +3396,7 @@ void Editor::DrawCarets(Surface *surface, ViewStyle &vsDraw, int lineDoc, int xS
 				bool caretAtEOF = false;
 				bool caretAtEOL = false;
 				bool drawBlockCaret = false;
-				int widthOverstrikeCaret;
+				XYPOSITION widthOverstrikeCaret;
 				int caretWidthOffset = 0;
 				PRectangle rcCaret = rcLine;
 
