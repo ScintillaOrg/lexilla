@@ -93,6 +93,7 @@ LEXOBJS=\
 	$(DIR_O)\LexASY.obj \
 	$(DIR_O)\LexAU3.obj \
 	$(DIR_O)\LexAVE.obj \
+	$(DIR_O)\LexAVS.obj \
 	$(DIR_O)\LexBaan.obj \
 	$(DIR_O)\LexBash.obj \
 	$(DIR_O)\LexBasic.obj \
@@ -297,6 +298,8 @@ $(DIR_O)\LexASY.obj: ..\lexers\LexASY.cxx $(LEX_HEADERS)
 $(DIR_O)\LexAU3.obj: ..\lexers\LexAU3.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexAVE.obj: ..\lexers\LexAVE.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexAVS.obj: ..\lexers\LexAVS.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexBaan.obj: ..\lexers\LexBaan.cxx $(LEX_HEADERS)
 
