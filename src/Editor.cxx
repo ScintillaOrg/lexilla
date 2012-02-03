@@ -4496,6 +4496,7 @@ void Editor::CheckModificationForWrap(DocModification mh) {
 		if (wrapState != eWrapNone) {
 			NeedWrapping(lineDoc, lineDoc + lines + 1);
 		}
+		RefreshStyleData();
 		// Fix up annotation heights
 		SetAnnotationHeights(lineDoc, lineDoc + lines + 2);
 	}
