@@ -1465,6 +1465,12 @@ bool Editor::WrapOneLine(Surface *surface, int lineToWrap) {
 bool Editor::WrapLines(bool fullWrap, int priorityWrapLineStart) {
 	// If there are any pending wraps, do them during idle if possible.
 	int linesInOneCall = LinesOnScreen() + 100;
+	if (priorityWrapLineStart >= 0) {
+		// Using DocFromDisplay() here may result in chicken and egg problem in certain corner cases,
+		// which will hopefully be handled by added 100 lines. If some lines are still missed, idle wrapping will catch on.
+		int docLinesInOneCall = cs.DocFromDisplay(topLine + LinesOnScreen() + 100) - cs.DocFromDisplay(topLine);
+		linesInOneCall = Platform::Maximum(linesInOneCall, docLinesInOneCall);
+	}
 	if (wrapState != eWrapNone) {
 		if (wrapStart < wrapEnd) {
 			if (!SetIdle(true)) {
