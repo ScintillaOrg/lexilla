@@ -1398,21 +1398,9 @@ std::string ScintillaGTK::CaseMapString(const std::string &s, int caseMapping) {
 }
 
 int ScintillaGTK::KeyDefault(int key, int modifiers) {
-	if (!(modifiers & SCI_CTRL) && !(modifiers & SCI_ALT)) {
-		if (key < 256) {
-			NotifyKey(key, modifiers);
-			return 0;
-		} else {
-			// Pass up to container in case it is an accelerator
-			NotifyKey(key, modifiers);
-			return 0;
-		}
-	} else {
-		// Pass up to container in case it is an accelerator
-		NotifyKey(key, modifiers);
-		return 0;
-	}
-	//Platform::DebugPrintf("SK-key: %d %x %x\n",key, modifiers);
+	// Pass up to container in case it is an accelerator
+	NotifyKey(key, modifiers);
+	return 0;
 }
 
 void ScintillaGTK::CopyToClipboard(const SelectionText &selectedText) {
