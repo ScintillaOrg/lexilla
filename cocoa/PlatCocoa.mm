@@ -577,11 +577,13 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesi
   };
   
   // Align the points in the middle of the pixels
-  for( int i = 0; i < 4*3; ++ i )
+  for( int i = 0; i < 4; ++ i )
   {
-    CGPoint* c = (CGPoint*) corners;
-    c[i].x += 0.5;
-    c[i].y += 0.5;
+    for( int j = 0; j < 3; ++ j )
+    {
+      corners[i][j].x += 0.5;
+      corners[i][j].y += 0.5;
+    }
   }
   
   PenColour( fore );
