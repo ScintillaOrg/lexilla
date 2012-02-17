@@ -1979,7 +1979,7 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 									tFold = LineMarker::tail;
 								}
 							}
-							vs.markers[markBit].Draw(surface, rcMarker, vs.styles[STYLE_LINENUMBER].font, tFold);
+							vs.markers[markBit].Draw(surface, rcMarker, vs.styles[STYLE_LINENUMBER].font, tFold, vs.ms[margin].style);
 						}
 						marks >>= 1;
 					}
