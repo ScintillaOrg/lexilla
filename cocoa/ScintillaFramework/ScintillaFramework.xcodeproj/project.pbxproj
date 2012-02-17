@@ -162,6 +162,7 @@
 		119FF1BF13C9D1820007CE42 /* QuartzTextStyle.h in Headers */ = {isa = PBXBuildFile; fileRef = 119FF1BE13C9D1820007CE42 /* QuartzTextStyle.h */; };
 		11A0A8A1148602DF0018D143 /* LexCoffeeScript.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 11A0A8A0148602DF0018D143 /* LexCoffeeScript.cxx */; };
 		11BB124D12FF9C1300F6BCF7 /* LexModula.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 11BB124C12FF9C1300F6BCF7 /* LexModula.cxx */; };
+		11BEB6A214EF189600BDE92A /* LexECL.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 11BEB6A114EF189600BDE92A /* LexECL.cxx */; };
 		11F35FDB12AEFAF100F0236D /* LexA68k.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 11F35FDA12AEFAF100F0236D /* LexA68k.cxx */; };
 		2744E5A40FC168A100E85C33 /* InfoBar.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E59D0FC168A100E85C33 /* InfoBar.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2744E5AA0FC168A100E85C33 /* ScintillaView.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E5A30FC168A100E85C33 /* ScintillaView.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -344,6 +345,7 @@
 		119FF1BE13C9D1820007CE42 /* QuartzTextStyle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = QuartzTextStyle.h; path = ../QuartzTextStyle.h; sourceTree = "<group>"; };
 		11A0A8A0148602DF0018D143 /* LexCoffeeScript.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexCoffeeScript.cxx; path = ../../lexers/LexCoffeeScript.cxx; sourceTree = "<group>"; };
 		11BB124C12FF9C1300F6BCF7 /* LexModula.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexModula.cxx; path = ../../lexers/LexModula.cxx; sourceTree = SOURCE_ROOT; };
+		11BEB6A114EF189600BDE92A /* LexECL.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexECL.cxx; path = ../../lexers/LexECL.cxx; sourceTree = "<group>"; };
 		11F35FDA12AEFAF100F0236D /* LexA68k.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexA68k.cxx; path = ../../lexers/LexA68k.cxx; sourceTree = SOURCE_ROOT; };
 		2744E4850FC1678600E85C33 /* Platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Platform.h; path = ../../include/Platform.h; sourceTree = SOURCE_ROOT; };
 		2744E4870FC1678600E85C33 /* SciLexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SciLexer.h; path = ../../include/SciLexer.h; sourceTree = SOURCE_ROOT; };
@@ -460,6 +462,7 @@
 		2744E47D0FC1674E00E85C33 /* Lexers */ = {
 			isa = PBXGroup;
 			children = (
+				11BEB6A114EF189600BDE92A /* LexECL.cxx */,
 				11126B8114CD3A6200803C49 /* LexAVS.cxx */,
 				11F35FDA12AEFAF100F0236D /* LexA68k.cxx */,
 				114B6EBE11FA7526004FB6AB /* LexAbaqus.cxx */,
@@ -930,6 +933,7 @@
 				11A0A8A1148602DF0018D143 /* LexCoffeeScript.cxx in Sources */,
 				117ACE9114A29A1E002876F9 /* LexTCMD.cxx in Sources */,
 				11126B8214CD3A6200803C49 /* LexAVS.cxx in Sources */,
+				11BEB6A214EF189600BDE92A /* LexECL.cxx in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
