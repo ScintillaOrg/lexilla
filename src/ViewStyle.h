@@ -66,6 +66,7 @@ public:
 	size_t stylesSize;
 	Style *styles;
 	LineMarker markers[MARKER_MAX + 1];
+	int largestMarkerHeight;
 	Indicator indicators[INDIC_MAX + 1];
 	int technology;
 	int lineHeight;
@@ -148,6 +149,7 @@ public:
 	void SetStyleFontName(int styleIndex, const char *name);
 	bool ProtectionActive() const;
 	bool ValidStyle(size_t styleIndex) const;
+	void CalcLargestMarkerHeight();
 };
 
 #ifdef SCI_NAMESPACE

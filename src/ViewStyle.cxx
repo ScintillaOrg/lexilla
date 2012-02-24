@@ -145,6 +145,7 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	for (int mrk=0; mrk<=MARKER_MAX; mrk++) {
 		markers[mrk] = source.markers[mrk];
 	}
+	CalcLargestMarkerHeight();
 	for (int ind=0; ind<=INDIC_MAX; ind++) {
 		indicators[ind] = source.indicators[ind];
 	}
@@ -229,6 +230,9 @@ void ViewStyle::Init(size_t stylesSize_) {
 	AllocStyles(stylesSize_);
 	fontNames.Clear();
 	ResetDefaultStyle();
+
+	// There are no image markers by default, so no need for calling CalcLargestMarkerHeight()
+	largestMarkerHeight = 0;
 
 	indicators[0].style = INDIC_SQUIGGLE;
 	indicators[0].under = false;
@@ -455,5 +459,21 @@ bool ViewStyle::ProtectionActive() const {
 
 bool ViewStyle::ValidStyle(size_t styleIndex) const {
 	return styleIndex < stylesSize;
+}
+
+void ViewStyle::CalcLargestMarkerHeight() {
+	largestMarkerHeight = 0;
+	for (int m = 0; m <= MARKER_MAX; ++m) {
+		switch (markers[m].markType) {
+		case SC_MARK_PIXMAP:
+			if (markers[m].pxpm->GetHeight() > largestMarkerHeight)
+				largestMarkerHeight = markers[m].pxpm->GetHeight();
+			break;
+		case SC_MARK_RGBAIMAGE:
+			if (markers[m].image->GetHeight() > largestMarkerHeight)
+				largestMarkerHeight = markers[m].image->GetHeight();
+			break;
+		}
+	}
 }
 
