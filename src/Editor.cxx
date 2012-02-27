@@ -8075,11 +8075,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_MARKERSETBACKSELECTED:
 		if (wParam <= MARKER_MAX)
 			vs.markers[wParam].backSelected = ColourDesired(lParam);
-		InvalidateStyleRedraw();
+		InvalidateStyleData();
+		RedrawSelMargin();
 		break;
 	case SCI_MARKERENABLEHIGHLIGHT:
 		highlightDelimiter.isEnabled = wParam == 1;
-		InvalidateStyleRedraw();
+		RedrawSelMargin();
 		break;
 	case SCI_MARKERSETBACK:
 		if (wParam <= MARKER_MAX)
