@@ -638,6 +638,22 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Receives zoom messages, for example when a "pinch zoom" is performed on the trackpad.
+ */
+- (void) magnifyWithEvent: (NSEvent *) event
+{
+  CGFloat z = [event magnification];
+  
+  // Zoom out or in 1pt depending on sign of magnification event value (0.0 = no change)
+  if (z <= 0.0)
+    [ScintillaView directCall: self message: SCI_ZOOMOUT wParam: 0 lParam: 0];
+  else if (z >= 0.0)
+    [ScintillaView directCall: self message: SCI_ZOOMIN wParam: 0 lParam: 0];
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Sends a new notification of the given type to the default notification center.
  */
 - (void) sendNotification: (NSString*) notificationName
