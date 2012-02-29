@@ -30,4 +30,5 @@ cocoa/build
 cocoa/ScintillaFramework/build
 cocoa/ScintillaTest/build
 macosx/SciTest/build
+*.cppcheck
 
