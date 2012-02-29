@@ -1279,8 +1279,11 @@ void SurfaceD2D::InitPixMap(int width, int height, Surface *surface_, WindowID) 
 	SetScale();
 	SurfaceD2D *psurfOther = static_cast<SurfaceD2D *>(surface_);
 	ID2D1BitmapRenderTarget *pCompatibleRenderTarget = NULL;
+	D2D1_SIZE_F desiredSize = D2D1::SizeF(width, height);
+	D2D1_PIXEL_FORMAT desiredFormat = psurfOther->pRenderTarget->GetPixelFormat();
+	desiredFormat.alphaMode = D2D1_ALPHA_MODE_IGNORE;
 	HRESULT hr = psurfOther->pRenderTarget->CreateCompatibleRenderTarget(
-		D2D1::SizeF(width, height), &pCompatibleRenderTarget);
+		&desiredSize, NULL, &desiredFormat, D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_NONE, &pCompatibleRenderTarget);
 	if (SUCCEEDED(hr)) {
 		pRenderTarget = pCompatibleRenderTarget;
 		pRenderTarget->BeginDraw();
