@@ -1611,7 +1611,7 @@ XYPOSITION SurfaceD2D::WidthText(Font &font_, const char *s, int len) {
 			pTextLayout->Release();
 		}
 	}
-	return int(width + 0.5);
+	return width;
 }
 
 void SurfaceD2D::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions) {
@@ -1754,7 +1754,7 @@ XYPOSITION SurfaceD2D::AverageCharWidth(Font &font_) {
 			pTextLayout->Release();
 		}
 	}
-	return int(width + 0.5);
+	return width;
 }
 
 void SurfaceD2D::SetClip(PRectangle rc) {

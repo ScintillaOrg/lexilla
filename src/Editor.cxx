@@ -1947,8 +1947,8 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 					}
 					PRectangle rcNumber = rcMarker;
 					// Right justify
-					int width = surface->WidthText(vs.styles[STYLE_LINENUMBER].font, number, istrlen(number));
-					int xpos = rcNumber.right - width - 3;
+					XYPOSITION width = surface->WidthText(vs.styles[STYLE_LINENUMBER].font, number, istrlen(number));
+					XYPOSITION xpos = rcNumber.right - width - 3;
 					rcNumber.left = xpos;
 					surface->DrawTextNoClip(rcNumber, vs.styles[STYLE_LINENUMBER].font,
 					        rcNumber.top + vs.maxAscent, number, istrlen(number),
