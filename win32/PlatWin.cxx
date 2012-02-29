@@ -1457,17 +1457,28 @@ void SurfaceD2D::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesir
 void SurfaceD2D::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
 		ColourDesired outline, int alphaOutline, int /* flags*/ ) {
 	if (pRenderTarget) {
-		D2D1_ROUNDED_RECT roundedRectFill = D2D1::RoundedRect(
-			D2D1::RectF(rc.left+1.0, rc.top+1.0, rc.right-1.0, rc.bottom-1.0),
-			cornerSize, cornerSize);
-		D2DPenColour(fill, alphaFill);
-		pRenderTarget->FillRoundedRectangle(roundedRectFill, pBrush);
+		if (cornerSize == 0) {
+			// When corner size is zero, draw square rectangle to prevent blurry pixels at corners
+			D2D1_RECT_F rectFill = D2D1::RectF(RoundFloat(rc.left) + 1.0, rc.top + 1.0, RoundFloat(rc.right) - 1.0, rc.bottom - 1.0);
+			D2DPenColour(fill, alphaFill);
+			pRenderTarget->FillRectangle(rectFill, pBrush);
 
-		D2D1_ROUNDED_RECT roundedRect = D2D1::RoundedRect(
-			D2D1::RectF(rc.left + 0.5, rc.top+0.5, rc.right - 0.5, rc.bottom-0.5),
-			cornerSize, cornerSize);
-		D2DPenColour(outline, alphaOutline);
-		pRenderTarget->DrawRoundedRectangle(roundedRect, pBrush);
+			D2D1_RECT_F rectOutline = D2D1::RectF(RoundFloat(rc.left) + 0.5, rc.top + 0.5, RoundFloat(rc.right) - 0.5, rc.bottom - 0.5);
+			D2DPenColour(outline, alphaOutline);
+			pRenderTarget->DrawRectangle(rectOutline, pBrush);
+		} else {
+			D2D1_ROUNDED_RECT roundedRectFill = D2D1::RoundedRect(
+				D2D1::RectF(RoundFloat(rc.left) + 1.0, rc.top + 1.0, RoundFloat(rc.right) - 1.0, rc.bottom - 1.0),
+				cornerSize, cornerSize);
+			D2DPenColour(fill, alphaFill);
+			pRenderTarget->FillRoundedRectangle(roundedRectFill, pBrush);
+
+			D2D1_ROUNDED_RECT roundedRect = D2D1::RoundedRect(
+				D2D1::RectF(RoundFloat(rc.left) + 0.5, rc.top + 0.5, RoundFloat(rc.right) - 0.5, rc.bottom - 0.5),
+				cornerSize, cornerSize);
+			D2DPenColour(outline, alphaOutline);
+			pRenderTarget->DrawRoundedRectangle(roundedRect, pBrush);
+		}
 	}
 }
 
