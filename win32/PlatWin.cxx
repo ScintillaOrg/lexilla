@@ -1271,7 +1271,7 @@ void SurfaceD2D::Init(WindowID /* wid */) {
 void SurfaceD2D::Init(SurfaceID sid, WindowID) {
 	Release();
 	SetScale();
-	pRenderTarget = reinterpret_cast<ID2D1HwndRenderTarget *>(sid);
+	pRenderTarget = reinterpret_cast<ID2D1RenderTarget *>(sid);
 }
 
 void SurfaceD2D::InitPixMap(int width, int height, Surface *surface_, WindowID) {
