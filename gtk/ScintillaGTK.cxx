@@ -719,6 +719,7 @@ void ScintillaGTK::Initialise() {
 #endif
 	gtk_widget_set_events(PWidget(wMain),
 	                      GDK_EXPOSURE_MASK
+	                      | GDK_SCROLL_MASK
 	                      | GDK_STRUCTURE_MASK
 	                      | GDK_KEY_PRESS_MASK
 	                      | GDK_KEY_RELEASE_MASK
