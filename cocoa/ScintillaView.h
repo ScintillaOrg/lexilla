@@ -69,7 +69,7 @@ extern NSString *SCIUpdateUINotification;
 }
 
 - (void) dealloc;
-- (void) layout;
+- (void) positionSubViews;
 
 - (void) sendNotification: (NSString*) notificationName;
 - (void) notify: (NotificationType) type message: (NSString*) message location: (NSPoint) location

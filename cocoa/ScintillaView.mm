@@ -876,7 +876,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 {
   [super viewDidMoveToWindow];
   
-  [self layout];
+  [self positionSubViews];
   
   // Enable also mouse move events for our window (and so this view).
   [[self window] setAcceptsMouseMovedEvents: YES];
@@ -887,7 +887,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 /**
  * Used to position and size the parts of the editor (content, scrollers, info bar).
  */
-- (void) layout
+- (void) positionSubViews
 {
   int scrollerWidth = [NSScroller scrollerWidth];
 
@@ -1000,7 +1000,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
     [mVerticalScroller setHidden: hideScroller];
     if (!hideScroller)
       [mVerticalScroller setFloatValue: 0];
-    [self layout];
+    [self positionSubViews];
   }
   
   if (!hideScroller)
@@ -1050,7 +1050,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
   {
     result = YES;
     [mHorizontalScroller setHidden: hideScroller];
-    [self layout];
+    [self positionSubViews];
   }
   
   if (!hideScroller)
@@ -1101,7 +1101,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 - (void) setFrame: (NSRect) newFrame
 {
   [super setFrame: newFrame];
-  [self layout];
+  [self positionSubViews];
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1478,7 +1478,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
       mInitialInfoBarWidth = [mInfoBar frame].size.width;
     }
     
-    [self layout];
+    [self positionSubViews];
   }
 }
 
