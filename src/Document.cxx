@@ -721,7 +721,12 @@ int Document::SafeSegment(const char *text, int length, int lengthSegment) {
 		lastEncodingAllowedBreak = j;
 
 		if (dbcsCodePage == SC_CP_UTF8) {
-			j += (ch < 0x80) ? 1 : BytesFromLead(ch);
+			if (ch < 0x80) {
+				j++;
+			} else {
+				int bytes = BytesFromLead(ch);
+				j += bytes ? bytes : 1;
+			}
 		} else if (dbcsCodePage) {
 			j += IsDBCSLeadByte(ch) ? 2 : 1;
 		} else {
