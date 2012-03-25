@@ -76,12 +76,12 @@ class TestLexers(unittest.TestCase):
 			lineStart = self.ed.PositionFromLine(line)
 			self.ed.StartStyling(lineStart, mask)
 			self.assertEquals(self.ed.EndStyled, lineStart)
-			self.ed.Colourise(0, lenDocument)
+			self.ed.Colourise(lineStart, lenDocument)
 			progStyled = self.AsStyled()
 			if progStyled != prevStyled:
 				with open(nameNew, "wb") as f:
 					f.write(progStyled)
-				assertEquals(progStyled, prevStyled)
+				self.assertEquals(progStyled, prevStyled)
 				# Give up after one failure
 				return
 
