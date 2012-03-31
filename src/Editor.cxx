@@ -1030,6 +1030,12 @@ void Editor::VerticalCentreCaret() {
 	}
 }
 
+// Avoid 64 bit compiler warnings.
+// Scintilla does not support text buffers larger than 2**31
+static int istrlen(const char *s) {
+	return static_cast<int>(strlen(s));
+}
+
 void Editor::MoveSelectedLines(int lineDelta) {
 
 	// if selection doesn't start at the beginning of the line, set the new start
@@ -1043,9 +1049,11 @@ void Editor::MoveSelectedLines(int lineDelta) {
 	int selectionEnd = SelectionEnd().Position();
 	int endLine = pdoc->LineFromPosition(selectionEnd);
 	int beginningOfEndLine = pdoc->LineStart(endLine);
+	bool appendEol = false;
 	if (selectionEnd > beginningOfEndLine
 		|| selectionStart == selectionEnd) {
 		selectionEnd = pdoc->LineStart(endLine + 1);
+		appendEol = (selectionEnd == pdoc->Length() && pdoc->LineFromPosition(selectionEnd) == endLine);
 	}
 
 	// if there's nowhere for the selection to move
@@ -1059,19 +1067,34 @@ void Editor::MoveSelectedLines(int lineDelta) {
 
 	UndoGroup ug(pdoc);
 
+	if (lineDelta > 0 && selectionEnd == pdoc->LineStart(pdoc->LinesTotal() - 1)) {
+		SetSelection(pdoc->MovePositionOutsideChar(selectionEnd - 1, -1), selectionEnd);
+		ClearSelection();
+		selectionEnd = CurrentPosition();
+	}
 	SetSelection(selectionStart, selectionEnd);
 
 	SelectionText selectedText;
 	CopySelectionRange(&selectedText);
 
 	int selectionLength = SelectionRange(selectionStart, selectionEnd).Length();
-	ClearSelection();
-
 	Point currentLocation = LocationFromPosition(CurrentPosition());
 	int currentLine = LineFromLocation(currentLocation);
+
+	if (appendEol)
+		SetSelection(pdoc->MovePositionOutsideChar(selectionStart - 1, -1), selectionEnd);
+	ClearSelection();
+
+	const char *eol = StringFromEOLMode(pdoc->eolMode);
+	if (currentLine + lineDelta >= pdoc->LinesTotal())
+		pdoc->InsertCString(pdoc->Length(), eol);
 	GoToLine(currentLine + lineDelta);
 
 	pdoc->InsertCString(CurrentPosition(), selectedText.s);
+	if (appendEol) {
+		pdoc->InsertCString(CurrentPosition() + selectionLength, eol);
+		selectionLength += istrlen(eol);
+	}
 	SetSelection(CurrentPosition(), CurrentPosition() + selectionLength);
 }
 
@@ -1634,12 +1657,6 @@ int Editor::SubstituteMarkerIfEmpty(int markerCheck, int markerDefault) {
 	if (vs.markers[markerCheck].markType == SC_MARK_EMPTY)
 		return markerDefault;
 	return markerCheck;
-}
-
-// Avoid 64 bit compiler warnings.
-// Scintilla does not support text buffers larger than 2**31
-static int istrlen(const char *s) {
-	return static_cast<int>(strlen(s));
 }
 
 bool ValidStyledText(ViewStyle &vs, size_t styleOffset, const StyledText &st) {
