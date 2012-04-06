@@ -3774,7 +3774,6 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 			vsPrint.ms[margin].width = 0;
 		}
 	}
-	vsPrint.showMarkedLines = false;
 	vsPrint.fixedColumnWidth = 0;
 	vsPrint.zoomLevel = printMagnification;
 	// Don't show indentation guides
