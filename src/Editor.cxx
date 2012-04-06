@@ -3750,10 +3750,10 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 	if (!pfr)
 		return 0;
 
-	AutoSurface surface(pfr->hdc, this);
+	AutoSurface surface(pfr->hdc, this, SC_TECHNOLOGY_DEFAULT);
 	if (!surface)
 		return 0;
-	AutoSurface surfaceMeasure(pfr->hdcTarget, this);
+	AutoSurface surfaceMeasure(pfr->hdcTarget, this, SC_TECHNOLOGY_DEFAULT);
 	if (!surfaceMeasure) {
 		return 0;
 	}
@@ -3762,6 +3762,7 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 	posCache.Clear();
 
 	ViewStyle vsPrint(vs);
+	vsPrint.technology = SC_TECHNOLOGY_DEFAULT;
 
 	// Modify the view style for printing as do not normally want any of the transient features to be printed
 	// Printing supports only the line number margin.
@@ -3776,6 +3777,8 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 	vsPrint.showMarkedLines = false;
 	vsPrint.fixedColumnWidth = 0;
 	vsPrint.zoomLevel = printMagnification;
+	// Don't show indentation guides
+	// If this ever gets changed, cached pixmap would need to be recreated if technology != SC_TECHNOLOGY_DEFAULT
 	vsPrint.viewIndentationGuides = ivNone;
 	// Don't show the selection when printing
 	vsPrint.selbackset = false;
