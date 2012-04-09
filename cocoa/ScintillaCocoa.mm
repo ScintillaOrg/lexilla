@@ -307,13 +307,14 @@ public:
                                                             locale:[NSLocale currentLocale]];
 
             const char *cpMapped = [sMapped UTF8String];
-			size_t lenMapped = strlen(cpMapped);
+			size_t lenMapped = cpMapped ? strlen(cpMapped) : 0;
 			if (lenMapped < sizeFolded) {
 				memcpy(folded, cpMapped,  lenMapped);
 			} else {
 				lenMapped = 0;
 			}
-            CFRelease(cfsVal);
+			if (cfsVal)
+				CFRelease(cfsVal);
 			return lenMapped;
 		}
 	}
@@ -1167,7 +1168,8 @@ void ScintillaCocoa::SetPasteboardData(NSPasteboard* board, const SelectionText 
   
   [board setString: (NSString *)cfsVal forType: NSStringPboardType];
 
-  CFRelease(cfsVal);
+  if (cfsVal)
+    CFRelease(cfsVal);
 }
 
 //--------------------------------------------------------------------------------------------------
