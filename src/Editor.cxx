@@ -3502,10 +3502,10 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	//	paintingAllText, rcArea.left, rcArea.top, rcArea.right, rcArea.bottom);
 	AllocateGraphics();
 
-	StyleToPositionInView(PositionAfterArea(rcArea));
-
 	RefreshStyleData();
 	RefreshPixMaps(surfaceWindow);
+
+	StyleToPositionInView(PositionAfterArea(rcArea));
 
 	PRectangle rcClient = GetClientRectangle();
 	//Platform::DebugPrintf("Client: (%3d,%3d) ... (%3d,%3d)   %d\n",
