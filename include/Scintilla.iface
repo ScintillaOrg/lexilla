@@ -791,7 +791,7 @@ set void SetHighlightGuide=2134(int column,)
 get int GetHighlightGuide=2135(,)
 
 # Get the position after the last visible characters on a line.
-get int GetLineEndPosition=2136(int line,)
+get position GetLineEndPosition=2136(int line,)
 
 # Get the code page used to interpret the bytes of the document as characters.
 get int GetCodePage=2137(,)
