@@ -3504,7 +3504,6 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 
 	StyleToPositionInView(PositionAfterArea(rcArea));
 
-	pixmapLine->Release();
 	RefreshStyleData();
 	RefreshPixMaps(surfaceWindow);
 
