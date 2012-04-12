@@ -3237,7 +3237,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		if (subLine == (ll->lines - 1)) {
 			virtualSpaces = sel.VirtualSpaceFor(pdoc->LineEnd(line));
 		}
-		SelectionPosition posStart(posLineStart);
+		SelectionPosition posStart(posLineStart + lineStart);
 		SelectionPosition posEnd(posLineStart + lineEnd, virtualSpaces);
 		SelectionSegment virtualSpaceRange(posStart, posEnd);
 		for (size_t r=0; r<sel.Count(); r++) {
