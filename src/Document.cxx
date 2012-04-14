@@ -470,8 +470,8 @@ int Document::LenChar(int pos) {
 	}
 }
 
-static bool IsTrailByte(int ch) {
-	return (ch >= 0x80) && (ch < (0x80 + 0x40));
+static inline bool IsTrailByte(int ch) {
+	return (ch >= 0x80) && (ch < 0xc0);
 }
 
 static int BytesFromLead(int leadByte) {
@@ -1385,17 +1385,13 @@ static inline char MakeLowerCase(char ch) {
 		return static_cast<char>(ch - 'A' + 'a');
 }
 
-static bool GoodTrailByte(int v) {
-	return (v >= 0x80) && (v < 0xc0);
-}
-
 size_t Document::ExtractChar(int pos, char *bytes) {
 	unsigned char ch = static_cast<unsigned char>(cb.CharAt(pos));
 	size_t widthChar = UTF8CharLength(ch);
 	bytes[0] = ch;
 	for (size_t i=1; i<widthChar; i++) {
 		bytes[i] = cb.CharAt(static_cast<int>(pos+i));
-		if (!GoodTrailByte(static_cast<unsigned char>(bytes[i]))) { // Bad byte
+		if (!IsTrailByte(static_cast<unsigned char>(bytes[i]))) { // Bad byte
 			widthChar = 1;
 		}
 	}
