@@ -5727,16 +5727,6 @@ public:
 	}
 	~CaseFolderASCII() {
 	}
-	virtual size_t Fold(char *folded, size_t sizeFolded, const char *mixed, size_t lenMixed) {
-		if (lenMixed > sizeFolded) {
-			return 0;
-		} else {
-			for (size_t i=0; i<lenMixed; i++) {
-				folded[i] = mapping[static_cast<unsigned char>(mixed[i])];
-			}
-			return lenMixed;
-		}
-	}
 };
 
 
