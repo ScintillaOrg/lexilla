@@ -57,7 +57,6 @@ static inline bool IsUpperCase(char ch) {
 }
 
 void LexInterface::Colourise(int start, int end) {
-	ElapsedTime et;
 	if (pdoc && instance && !performingStyle) {
 		// Protect against reentrance, which may occur, for example, when
 		// fold points are discovered while performing styling and the folding
