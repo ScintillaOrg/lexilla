@@ -5643,14 +5643,6 @@ int Editor::KeyDown(int key, bool shift, bool ctrl, bool alt, bool *consumed) {
 	return KeyDownWithModifiers(key, modifiers, consumed);
 }
 
-void Editor::SetWhitespaceVisible(int view) {
-	vs.viewWhitespace = static_cast<WhiteSpaceVisibility>(view);
-}
-
-int Editor::GetWhitespaceVisible() {
-	return vs.viewWhitespace;
-}
-
 void Editor::Indent(bool forwards) {
 	for (size_t r=0; r<sel.Count(); r++) {
 		int lineOfAnchor = pdoc->LineFromPosition(sel.Range(r).anchor.Position());
