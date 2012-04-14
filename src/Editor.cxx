@@ -3814,6 +3814,10 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 	// White background for the line numbers
 	vsPrint.styles[STYLE_LINENUMBER].back = ColourDesired(0xff, 0xff, 0xff);
 
+	// Printing uses different margins, so reset screen margins
+	vsPrint.leftMarginWidth = 0;
+	vsPrint.rightMarginWidth = 0;
+
 	vsPrint.Refresh(*surfaceMeasure);
 	// Determining width must hapen after fonts have been realised in Refresh
 	int lineNumberWidth = 0;
