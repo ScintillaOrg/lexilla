@@ -687,7 +687,7 @@ bool SCI_METHOD Document::IsDBCSLeadByte(char ch) const {
 	return false;
 }
 
-inline bool IsSpaceOrTab(int ch) {
+static inline bool IsSpaceOrTab(int ch) {
 	return ch == ' ' || ch == '\t';
 }
 
@@ -1006,10 +1006,6 @@ void Document::DelCharBack(int pos) {
 	}
 }
 
-static bool isindentchar(char ch) {
-	return (ch == ' ') || (ch == '\t');
-}
-
 static int NextTab(int pos, int tabSize) {
 	return ((pos / tabSize) + 1) * tabSize;
 }
@@ -1069,7 +1065,7 @@ int Document::GetLineIndentPosition(int line) const {
 		return 0;
 	int pos = LineStart(line);
 	int length = Length();
-	while ((pos < length) && isindentchar(cb.CharAt(pos))) {
+	while ((pos < length) && IsSpaceOrTab(cb.CharAt(pos))) {
 		pos++;
 	}
 	return pos;
