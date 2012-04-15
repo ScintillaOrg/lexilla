@@ -1806,6 +1806,16 @@ fun int AutoCGetCurrent=2445(,)
 # Returns the length of the item text
 fun int AutoCGetCurrentText=2610(, stringresult s)
 
+enu CaseInsensititiveBehaviour=SC_CASEINSENSITITIVEBEHAVIOUR_
+val SC_CASEINSENSITITIVEBEHAVIOUR_RESPECTCASE=0
+val SC_CASEINSENSITITIVEBEHAVIOUR_IGNORECASE=1
+
+# Set auto-completion case insensitive behaviour to either prefer case-sensitive matches or have no preference.
+set void AutoCSetCaseInsensitiveBehaviour=2634(int behaviour,)
+
+# Get auto-completion case insensitive behaviour.
+get int AutoCGetCaseInsensitiveBehaviour=2635(,)
+
 # Enlarge the document to a particular size of text bytes.
 fun void Allocate=2446(int bytes,)
 
