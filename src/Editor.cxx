@@ -1939,28 +1939,33 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 				rcMarker.top = yposScreen;
 				rcMarker.bottom = yposScreen + vs.lineHeight;
 				if (vs.ms[margin].style == SC_MARGIN_NUMBER) {
-					char number[100];
-					number[0] = '\0';
-					if (firstSubLine)
+					if (firstSubLine) {
+						char number[100];
 						sprintf(number, "%d", lineDoc + 1);
-					if (foldFlags & SC_FOLDFLAG_LEVELNUMBERS) {
-						int lev = pdoc->GetLevel(lineDoc);
-						sprintf(number, "%c%c %03X %03X",
-						        (lev & SC_FOLDLEVELHEADERFLAG) ? 'H' : '_',
-						        (lev & SC_FOLDLEVELWHITEFLAG) ? 'W' : '_',
-						        lev & SC_FOLDLEVELNUMBERMASK,
-						        lev >> 16
-						       );
+						if (foldFlags & SC_FOLDFLAG_LEVELNUMBERS) {
+							int lev = pdoc->GetLevel(lineDoc);
+							sprintf(number, "%c%c %03X %03X",
+									(lev & SC_FOLDLEVELHEADERFLAG) ? 'H' : '_',
+									(lev & SC_FOLDLEVELWHITEFLAG) ? 'W' : '_',
+									lev & SC_FOLDLEVELNUMBERMASK,
+									lev >> 16
+								   );
+						}
+						PRectangle rcNumber = rcMarker;
+						// Right justify
+						XYPOSITION width = surface->WidthText(vs.styles[STYLE_LINENUMBER].font, number, istrlen(number));
+						XYPOSITION xpos = rcNumber.right - width - 3;
+						rcNumber.left = xpos;
+						surface->DrawTextNoClip(rcNumber, vs.styles[STYLE_LINENUMBER].font,
+								rcNumber.top + vs.maxAscent, number, istrlen(number),
+								vs.styles[STYLE_LINENUMBER].fore,
+								vs.styles[STYLE_LINENUMBER].back);
+					} else if (wrapVisualFlags & SC_WRAPVISUALFLAG_MARGIN) {
+						PRectangle rcWrapMarker = rcMarker;
+						rcWrapMarker.right -= 3;
+						rcWrapMarker.left = rcWrapMarker.right - vs.styles[STYLE_LINENUMBER].aveCharWidth;
+						DrawWrapMarker(surface, rcWrapMarker, false, vs.styles[STYLE_LINENUMBER].fore);
 					}
-					PRectangle rcNumber = rcMarker;
-					// Right justify
-					XYPOSITION width = surface->WidthText(vs.styles[STYLE_LINENUMBER].font, number, istrlen(number));
-					XYPOSITION xpos = rcNumber.right - width - 3;
-					rcNumber.left = xpos;
-					surface->DrawTextNoClip(rcNumber, vs.styles[STYLE_LINENUMBER].font,
-					        rcNumber.top + vs.maxAscent, number, istrlen(number),
-					        vs.styles[STYLE_LINENUMBER].fore,
-					        vs.styles[STYLE_LINENUMBER].back);
 				} else if (vs.ms[margin].style == SC_MARGIN_TEXT || vs.ms[margin].style == SC_MARGIN_RTEXT) {
 					if (firstSubLine) {
 						const StyledText stMargin  = pdoc->MarginStyledText(lineDoc);
