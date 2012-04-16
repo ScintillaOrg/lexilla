@@ -32,7 +32,7 @@ AutoComplete::AutoComplete() :
 	cancelAtStartPos(true),
 	autoHide(true),
 	dropRestOfWord(false),
-	ignoreCaseBehaviour(SC_CASEINSENSITITIVEBEHAVIOUR_RESPECTCASE) {
+	ignoreCaseBehaviour(SC_CASEINSENSITIVEBEHAVIOUR_RESPECTCASE) {
 	lb = ListBox::Allocate();
 	stopChars[0] = '\0';
 	fillUpChars[0] = '\0';
@@ -156,7 +156,7 @@ void AutoComplete::Select(const char *word) {
 			}
 			location = pivot;
 			if (ignoreCase
-				&& ignoreCaseBehaviour == SC_CASEINSENSITITIVEBEHAVIOUR_RESPECTCASE) {
+				&& ignoreCaseBehaviour == SC_CASEINSENSITIVEBEHAVIOUR_RESPECTCASE) {
 				// Check for exact-case match
 				for (; pivot <= end; pivot++) {
 					lb->GetValue(pivot, item, maxItemLen);
