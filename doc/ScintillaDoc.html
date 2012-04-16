@@ -79,7 +79,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 26/March/2012 NH</p>
+    <p>Last edited 16/April/2012 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -3855,6 +3855,29 @@ struct Sci_TextToFind {
     Find the start or end of a range with one value from a position within the range.
     Can be used to iterate through the document to discover all the indicator positions.
     </p>
+
+    <h3 id="FindIndicators">OS X Find Indicator</h3>
+
+    <p>On OS X search matches are highlighted with an animated gold rounded rectangle.
+    The indicator shows, then briefly grows 25% and shrinks to the original size to draw the user's attention.
+    While this feature is currently only implemented on OS X, it may be implemented on other platforms
+    in the future.</p>
+
+    <p><b id="SCI_FINDINDICATORSHOW">SCI_FINDINDICATORSHOW(int start, int end)</b><br />
+     <b id="SCI_FINDINDICATORFLASH">SCI_FINDINDICATORFLASH(int start, int end)</b><br />
+     These two messages show and animate the find indicator. The indicator remains visible with
+     <code>SCI_FINDINDICATORSHOW</code> and fades out after showing for half a second with 
+     <code>SCI_FINDINDICATORFLASH</code>.
+     <code>SCI_FINDINDICATORSHOW</code> behaves similarly to the OS X TextEdit and Safari applications
+     and is best suited to editing documentation where the search target is often a word.
+     <code>SCI_FINDINDICATORFLASH</code> is similar to Xcode and is suited to editing source code
+     where the match will often be located next to operators which would otherwise be hidden under the indicator's
+     padding.
+     </p>
+
+    <p><b id="SCI_FINDINDICATORHIDE">SCI_FINDINDICATORHIDE</b><br />
+     This message hides the find indicator.
+     </p>
 
     <h3 id="StyleByteIndicators">Style Byte Indicators (deprecated)</h3>
     <p>By default, Scintilla organizes the style byte associated with each text byte as 5 bits of

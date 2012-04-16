@@ -262,6 +262,11 @@ static const char * box_xpm[] = {
                       wholeWord: NO
                        scrollTo: YES
                            wrap: YES];
+
+  long matchStart = [mEditor getGeneralProperty: SCI_GETSELECTIONSTART parameter: 0];
+  long matchEnd = [mEditor getGeneralProperty: SCI_GETSELECTIONEND parameter: 0];
+  [mEditor setGeneralProperty: SCI_FINDINDICATORFLASH parameter: matchStart value:matchEnd];
+
   if ([[searchField stringValue] isEqualToString: @"XX"])
     [self showAutocompletion];
 }

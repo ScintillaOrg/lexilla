@@ -2217,6 +2217,15 @@ get int GetTechnology=2631(,)
 # Create an ILoader*.
 fun int CreateLoader=2632(int bytes,)
 
+# On OS X, show a find indicator.
+fun void FindIndicatorShow=2640(position start, position end)
+
+# On OS X, flash a find indicator, then fade out.
+fun void FindIndicatorFlash=2641(position start, position end)
+
+# On OS X, hide the find indicator.
+fun void FindIndicatorHide=2642(,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 

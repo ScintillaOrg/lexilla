@@ -15,6 +15,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import <QuartzCore/CAGradientLayer.h>
+#import <QuartzCore/CAAnimation.h>
+#import <QuartzCore/CATransaction.h>
 
 #import <Carbon/Carbon.h> // Temporary
 
@@ -134,6 +137,164 @@ static const KeyToCommand macMapDefault[] =
 
 //--------------------------------------------------------------------------------------------------
 
+/**
+ * Class to display the animated gold roundrect used on OS X for matches.
+ */
+@interface FindHighlightLayer : CAGradientLayer
+{
+@private
+	NSString *sFind;
+	int positionFind;
+	BOOL retaining;
+	CGFloat widthText;
+	CGFloat heightLine;
+	NSString *sFont;
+	CGFloat fontSize;
+}
+
+@property (copy) NSString *sFind;
+@property (assign) int positionFind;
+@property (assign) BOOL retaining;
+@property (assign) CGFloat widthText;
+@property (assign) CGFloat heightLine;
+@property (copy) NSString *sFont;
+@property (assign) CGFloat fontSize;
+
+- (void) animateMatch: (CGPoint)ptText bounce:(BOOL)bounce;
+- (void) hideMatch;
+
+@end
+
+//--------------------------------------------------------------------------------------------------
+
+@implementation FindHighlightLayer
+
+@synthesize sFind, positionFind, retaining, widthText, heightLine, sFont, fontSize;
+
+-(id) init {
+	if (self = [super init]) {
+		[self setNeedsDisplayOnBoundsChange: YES];
+		// A gold to slightly redder gradient to match other applications
+		CGColorRef colGold = CGColorCreateGenericRGB(1.0, 1.0, 0, 1.0);
+		CGColorRef colGoldRed = CGColorCreateGenericRGB(1.0, 0.8, 0, 1.0);
+		self.colors = [NSArray arrayWithObjects:(id)colGoldRed, (id)colGold, nil];
+		CGColorRelease(colGoldRed);
+		CGColorRelease(colGold);
+
+		CGColorRef colGreyBorder = CGColorCreateGenericGray(0.756f, 0.5f);
+		self.borderColor = colGreyBorder;
+		CGColorRelease(colGreyBorder);
+
+		self.borderWidth = 1.0;
+		self.cornerRadius = 5.0f;
+		self.shadowRadius = 1.0f;
+		self.shadowOpacity = 0.9f;
+		self.shadowOffset = CGSizeMake(0.0f, -2.0f);
+		self.anchorPoint = CGPointMake(0.5, 0.5);
+	}
+	return self;
+	
+}
+
+const CGFloat paddingHighlightX = 4;
+const CGFloat paddingHighlightY = 2;
+
+-(void) drawInContext:(CGContextRef)context {
+	if (!sFind || !sFont)
+		return;
+	
+	CFStringRef str = CFStringRef(sFind);
+	
+	CFMutableDictionaryRef styleDict = CFDictionaryCreateMutable(kCFAllocatorDefault, 2,
+								     &kCFTypeDictionaryKeyCallBacks, 
+								     &kCFTypeDictionaryValueCallBacks);
+	CGColorRef color = CGColorCreateGenericRGB(0.0, 0.0, 0.0, 1.0);
+	CFDictionarySetValue(styleDict, kCTForegroundColorAttributeName, color);
+	CTFontRef fontRef = ::CTFontCreateWithName((CFStringRef)sFont, fontSize, NULL);
+	CFDictionaryAddValue(styleDict, kCTFontAttributeName, fontRef);
+	
+	CFAttributedStringRef attrString = ::CFAttributedStringCreate(NULL, str, styleDict);
+	CTLineRef textLine = ::CTLineCreateWithAttributedString(attrString);
+	// Indent from corner of bounds
+	CGContextSetTextPosition(context, paddingHighlightX, 3 + paddingHighlightY);
+	CTLineDraw(textLine, context);
+	
+	CFRelease(textLine);
+	CFRelease(attrString);
+	CFRelease(fontRef);
+	CGColorRelease(color);
+	CFRelease(styleDict);
+}
+
+- (void) animateMatch: (CGPoint)ptText bounce:(BOOL)bounce {
+	if (!self.sFind || ![self.sFind length])
+		return;
+
+	CGFloat width = self.widthText + paddingHighlightX * 2;
+	CGFloat height = self.heightLine + paddingHighlightY * 2;
+
+	// Adjust for padding
+	ptText.x -= paddingHighlightX;
+	ptText.y += paddingHighlightY;
+
+	// Shift point to centre as expanding about centre
+	ptText.x += width / 2.0;
+	ptText.y -= height / 2.0;
+
+	[CATransaction begin];
+	[CATransaction setValue:[NSNumber numberWithFloat:0.0] forKey:kCATransactionAnimationDuration];
+	self.bounds = CGRectMake(0,0, width, height);
+	self.position = ptText;
+	if (bounce) {
+		// Do not reset visibility when just moving
+		self.hidden = NO;
+		self.opacity = 1.0;
+	}
+	[self setNeedsDisplay];
+	[CATransaction commit];
+	
+	if (bounce) {
+		CABasicAnimation *animBounce = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
+		animBounce.duration = 0.15;
+		animBounce.autoreverses = YES;
+		animBounce.removedOnCompletion = NO;
+		animBounce.fromValue = [NSNumber numberWithFloat: 1.0];
+		animBounce.toValue = [NSNumber numberWithFloat: 1.25];
+		
+		if (self.retaining) {
+			
+			[self addAnimation: animBounce forKey:@"animateFound"];
+			
+		} else {
+			
+			CABasicAnimation *animFade = [CABasicAnimation animationWithKeyPath:@"opacity"];
+			animFade.duration = 0.1;
+			animFade.beginTime = 0.4;
+			animFade.removedOnCompletion = NO;
+			animFade.fromValue = [NSNumber numberWithFloat: 1.0];
+			animFade.toValue = [NSNumber numberWithFloat: 0.0];
+			
+			CAAnimationGroup *group = [CAAnimationGroup animation];
+			[group setDuration:0.5];
+			group.removedOnCompletion = NO;
+			group.fillMode = kCAFillModeForwards;
+			[group setAnimations:[NSArray arrayWithObjects:animBounce, animFade, nil]];
+			
+			[self addAnimation:group forKey:@"animateFound"];
+		}
+	}
+}
+
+- (void) hideMatch {
+	self.sFind = @"";
+	self.positionFind = INVALID_POSITION;
+	self.hidden = YES;
+}
+
+@end
+
+//--------------------------------------------------------------------------------------------------
+
 @implementation TimerTarget
 
 - (id) init: (void*) target
@@ -210,6 +371,7 @@ ScintillaCocoa::ScintillaCocoa(NSView* view)
 {
   wMain= [view retain];
   timerTarget = [[[TimerTarget alloc] init: this] retain];
+  layerFindIndicator = NULL;
   Initialise();
 }
 
@@ -432,6 +594,16 @@ std::string ScintillaCocoa::CaseMapString(const std::string &s, int caseMapping)
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Cancel all modes, both for base class and any find indicator.
+ */
+void ScintillaCocoa::CancelModes() {
+  ScintillaBase::CancelModes();
+  HideFindIndicator();
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Helper function to get the outer container which represents the Scintilla editor on application side.
  */
 ScintillaView* ScintillaCocoa::TopContainer()
@@ -538,6 +710,18 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
       bufferedDraw = false;
       break;
 
+    case SCI_FINDINDICATORSHOW:
+      ShowFindIndicatorForRange(NSMakeRange(wParam, lParam-wParam), YES);
+      return 0;
+      
+    case SCI_FINDINDICATORFLASH:
+      ShowFindIndicatorForRange(NSMakeRange(wParam, lParam-wParam), NO);
+      return 0;
+		  
+    case SCI_FINDINDICATORHIDE:
+      HideFindIndicator();
+      return 0;
+		  
     case WM_UNICHAR: 
       // Special case not used normally. Characters passed in this way will be inserted
       // regardless of their value or modifier states. That means no command interpretation is
@@ -550,7 +734,7 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
         return 1;
       }
       return 0;
-      
+
     default:
       sptr_t r = ScintillaBase::WndProc(iMessage, wParam, lParam);
       
@@ -1280,6 +1464,11 @@ void ScintillaCocoa::ScrollText(int linesToMove)
 {
 	// Move those pixels
 	NSView *content = ContentView();
+	if ([content layer]) {
+		[content setNeedsDisplay: YES];
+		MoveFindIndicatorWithBounce(NO);
+		return;
+	}
     
 	[content lockFocus];
 	int diff = vs.lineHeight * linesToMove;
@@ -1341,6 +1530,7 @@ void ScintillaCocoa::SetHorizontalScrollPos()
   // does *not* belong to the scroll range.
   float relativePosition = (float) xOffset / (scrollWidth - textRect.Width());
   [topContainer setHorizontalScrollPosition: relativePosition];
+  MoveFindIndicatorWithBounce(NO);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1375,6 +1565,8 @@ bool ScintillaCocoa::ModifyScrollBars(int nMax, int nPage)
   else
     pageSize = scrollRange;
   bool horizontalChange = [topContainer setHorizontalScrollRange: scrollRange page: pageSize];
+
+  MoveFindIndicatorWithBounce(NO);	
   
   return verticalChange || horizontalChange;
 }
@@ -1841,4 +2033,69 @@ void ScintillaCocoa::ActiveStateChanged(bool isActive)
 
 
 //--------------------------------------------------------------------------------------------------
+
+void ScintillaCocoa::ShowFindIndicatorForRange(NSRange charRange, BOOL retaining)
+{
+  NSView *content = ContentView();
+  if (!layerFindIndicator)
+  {
+    layerFindIndicator = [[FindHighlightLayer alloc] init];
+    [content setWantsLayer: YES];
+    [[content layer] addSublayer:layerFindIndicator];
+  }
+  [layerFindIndicator removeAnimationForKey:@"animateFound"];
+  
+  if (charRange.length)
+  {
+    CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
+							 vs.styles[STYLE_DEFAULT].characterSet);
+    std::vector<char> buffer(charRange.length);
+    pdoc->GetCharRange(&buffer[0], charRange.location, charRange.length);
+    
+    CFStringRef cfsFind = CFStringCreateWithBytes(kCFAllocatorDefault,
+						  reinterpret_cast<const UInt8 *>(&buffer[0]), 
+						  charRange.length, encoding, false);
+    layerFindIndicator.sFind = (NSString *)cfsFind;
+    CFRelease(cfsFind);
+    layerFindIndicator.retaining = retaining;
+    layerFindIndicator.positionFind = charRange.location;
+    int style = WndProc(SCI_GETSTYLEAT, charRange.location, 0);
+    std::vector<char> bufferFontName(WndProc(SCI_STYLEGETFONT, style, 0) + 1);
+    WndProc(SCI_STYLEGETFONT, style, (sptr_t)&bufferFontName[0]);
+    layerFindIndicator.sFont = [NSString stringWithUTF8String: &bufferFontName[0]];
+    
+    layerFindIndicator.fontSize = WndProc(SCI_STYLEGETSIZEFRACTIONAL, style, 0) / 
+      (float)SC_FONT_SIZE_MULTIPLIER;
+    layerFindIndicator.widthText = WndProc(SCI_POINTXFROMPOSITION, 0, charRange.location + charRange.length) -
+      WndProc(SCI_POINTXFROMPOSITION, 0, charRange.location);
+    layerFindIndicator.heightLine = WndProc(SCI_TEXTHEIGHT, 0, 0);
+    MoveFindIndicatorWithBounce(YES);
+  }
+  else
+  {
+    [layerFindIndicator hideMatch];
+  }
+}
+
+void ScintillaCocoa::MoveFindIndicatorWithBounce(BOOL bounce)
+{
+  if (layerFindIndicator)
+  {
+    NSView *content = ContentView();
+    NSRect rcBounds = [content bounds];
+    CGPoint ptText;
+    ptText.x = WndProc(SCI_POINTXFROMPOSITION, 0, layerFindIndicator.positionFind);
+    ptText.y = rcBounds.size.height - WndProc(SCI_POINTYFROMPOSITION, 0, layerFindIndicator.positionFind);
+    [layerFindIndicator animateMatch:ptText bounce:bounce];
+  }
+}
+
+void ScintillaCocoa::HideFindIndicator()
+{
+  if (layerFindIndicator)
+  {
+    [layerFindIndicator hideMatch];
+  }
+}
+
 
