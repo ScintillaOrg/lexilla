@@ -1355,7 +1355,7 @@ struct ListImage {
 };
 
 static void list_image_free(gpointer, gpointer value, gpointer) {
-	ListImage *list_image = (ListImage *) value;
+	ListImage *list_image = static_cast<ListImage *>(value);
 	if (list_image->pixbuf)
 		g_object_unref(list_image->pixbuf);
 	g_free(list_image);
@@ -1659,8 +1659,8 @@ static void init_pixmap(ListImage *list_image) {
 void ListBoxX::Append(char *s, int type) {
 	ListImage *list_image = NULL;
 	if ((type >= 0) && pixhash) {
-		list_image = (ListImage *) g_hash_table_lookup((GHashTable *) pixhash
-		             , (gconstpointer) GINT_TO_POINTER(type));
+		list_image = static_cast<ListImage *>(g_hash_table_lookup((GHashTable *) pixhash
+		             , (gconstpointer) GINT_TO_POINTER(type)));
 	}
 	GtkTreeIter iter;
 	GtkListStore *store =
@@ -1825,8 +1825,8 @@ void ListBoxX::RegisterRGBA(int type, RGBAImage *image) {
 	if (!pixhash) {
 		pixhash = g_hash_table_new(g_direct_hash, g_direct_equal);
 	}
-	ListImage *list_image = (ListImage *) g_hash_table_lookup((GHashTable *) pixhash,
-		(gconstpointer) GINT_TO_POINTER(type));
+	ListImage *list_image = static_cast<ListImage *>(g_hash_table_lookup((GHashTable *) pixhash,
+		(gconstpointer) GINT_TO_POINTER(type)));
 	if (list_image) {
 		// Drop icon already registered
 		if (list_image->pixbuf)
