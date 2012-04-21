@@ -1584,6 +1584,10 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 					state = SCE_HJ_COMMENTDOC;
 				else
 					state = SCE_HJ_COMMENT;
+				if (chNext2 == '/') {
+					// Eat the * so it isn't used for the end of the comment
+					i++;
+				}
 			} else if (ch == '/' && chNext == '/') {
 				styler.ColourTo(i - 1, StateToPrint);
 				state = SCE_HJ_COMMENTLINE;
