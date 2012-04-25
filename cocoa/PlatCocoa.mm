@@ -2098,7 +2098,7 @@ int Platform::Maximum(int a, int b) {
 
 void Platform::DebugDisplay(const char *s)
 {
-  fprintf( stderr, s );
+  fprintf( stderr, "%s", s );
 }
 
 //--------------------------------------------------------------------------------------------------
