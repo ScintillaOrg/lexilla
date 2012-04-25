@@ -2056,7 +2056,8 @@ void ScintillaCocoa::ShowFindIndicatorForRange(NSRange charRange, BOOL retaining
 						  reinterpret_cast<const UInt8 *>(&buffer[0]), 
 						  charRange.length, encoding, false);
     layerFindIndicator.sFind = (NSString *)cfsFind;
-    CFRelease(cfsFind);
+    if (cfsFind)
+        CFRelease(cfsFind);
     layerFindIndicator.retaining = retaining;
     layerFindIndicator.positionFind = charRange.location;
     int style = WndProc(SCI_GETSTYLEAT, charRange.location, 0);
