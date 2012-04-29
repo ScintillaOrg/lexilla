@@ -1967,6 +1967,13 @@ gint ScintillaGTK::ScrollEvent(GtkWidget *widget,
 			return FALSE;
 		}
 
+#if GTK_CHECK_VERSION(3,4,0)
+		// Smooth scrolling not supported
+		if (event->direction == GDK_SCROLL_SMOOTH) {
+			return FALSE;
+		}
+#endif
+
 		// Horizontal scrolling
 		if (event->direction == GDK_SCROLL_LEFT || event->direction == GDK_SCROLL_RIGHT) {
 			sciThis->HorizontalScrollTo(sciThis->xOffset + cLineScroll);
