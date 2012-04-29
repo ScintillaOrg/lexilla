@@ -1577,6 +1577,11 @@ PRectangle ListBoxX::GetDesiredRect() {
 			rows = desiredVisibleRows;
 
 		GtkRequisition req;
+#if GTK_CHECK_VERSION(3,0,0)
+		// This, apparently unnecessary call, ensures gtk_tree_view_column_cell_get_size
+		// returns reasonable values. 
+		gtk_widget_get_preferred_size(GTK_WIDGET(scroller), NULL, &req);
+#endif
 		int height;
 
 		// First calculate height of the clist for our desired visible
@@ -1610,7 +1615,7 @@ PRectangle ListBoxX::GetDesiredRect() {
 		gtk_widget_size_request(GTK_WIDGET(scroller), &req);
 #endif
 		rc.right = req.width;
-		rc.bottom = req.height;
+		rc.bottom = Platform::Maximum(height, req.height);
 
 		gtk_widget_set_size_request(GTK_WIDGET(list), -1, -1);
 		int width = maxItemCharacters;
