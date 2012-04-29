@@ -2000,7 +2000,12 @@ gint ScintillaGTK::Motion(GtkWidget *widget, GdkEventMotion *event) {
 		int y = 0;
 		GdkModifierType state;
 		if (event->is_hint) {
+#if GTK_CHECK_VERSION(3,0,0)
+			gdk_window_get_device_position(event->window, 
+				event->device, &x, &y, &state);
+#else
 			gdk_window_get_pointer(event->window, &x, &y, &state);
+#endif
 		} else {
 			x = static_cast<int>(event->x);
 			y = static_cast<int>(event->y);
