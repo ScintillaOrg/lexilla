@@ -227,8 +227,10 @@ const CGFloat paddingHighlightY = 2;
 }
 
 - (void) animateMatch: (CGPoint)ptText bounce:(BOOL)bounce {
-	if (!self.sFind || ![self.sFind length])
+	if (!self.sFind || ![self.sFind length]) {
+		[self hideMatch];
 		return;
+	}
 
 	CGFloat width = self.widthText + paddingHighlightX * 2;
 	CGFloat height = self.heightLine + paddingHighlightY * 2;
