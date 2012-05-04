@@ -5037,14 +5037,23 @@ void Editor::NewLine() {
 	sel.SetSelection(sel.RangeMain());
 
 	// Clear main range and insert line end
-	ClearSelection();
+	bool needGroupUndo = !sel.Empty();
+	if (needGroupUndo)
+		pdoc->BeginUndoAction();
+
+	if (!sel.Empty())
+		ClearSelection();
 	const char *eol = "\n";
 	if (pdoc->eolMode == SC_EOL_CRLF) {
 		eol = "\r\n";
 	} else if (pdoc->eolMode == SC_EOL_CR) {
 		eol = "\r";
 	} // else SC_EOL_LF -> "\n" already set
-	if (pdoc->InsertCString(sel.MainCaret(), eol)) {
+	bool inserted = pdoc->InsertCString(sel.MainCaret(), eol);
+	// Want to end undo group before NotifyChar as applications often modify text here
+	if (needGroupUndo)
+		pdoc->EndUndoAction();
+	if (inserted) {
 		SetEmptySelection(sel.MainCaret() + istrlen(eol));
 		while (*eol) {
 			NotifyChar(*eol);
