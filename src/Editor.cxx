@@ -5032,6 +5032,11 @@ void Editor::CancelModes() {
 }
 
 void Editor::NewLine() {
+	// Remove non-main ranges
+	InvalidateSelection(sel.RangeMain(), true);
+	sel.SetSelection(sel.RangeMain());
+
+	// Clear main range and insert line end
 	ClearSelection();
 	const char *eol = "\n";
 	if (pdoc->eolMode == SC_EOL_CRLF) {
