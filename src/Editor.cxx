@@ -5800,6 +5800,19 @@ void Editor::SearchAnchor() {
 	searchAnchor = SelectionStart().Position();
 }
 
+// Simple RAII wrapper for CaseFolder as std::auto_ptr is now deprecated
+class ScopedCaseFolder {
+	CaseFolder *pcf;
+public:
+	ScopedCaseFolder(CaseFolder *pcf_) : pcf(pcf_) {
+	}
+	~ScopedCaseFolder() {
+		delete pcf;
+		pcf = 0;
+	}
+	CaseFolder *get() const { return pcf; }
+};
+
 /**
  * Find text from current search anchor: Must call @c SearchAnchor first.
  * Used for next text and previous text requests.
@@ -5814,7 +5827,7 @@ long Editor::SearchText(
 	const char *txt = reinterpret_cast<char *>(lParam);
 	int pos;
 	int lengthFound = istrlen(txt);
-	std::auto_ptr<CaseFolder> pcf(CaseFolderForEncoding());
+	ScopedCaseFolder pcf(CaseFolderForEncoding());
 	if (iMessage == SCI_SEARCHNEXT) {
 		pos = pdoc->FindText(searchAnchor, pdoc->Length(), txt,
 		        (wParam & SCFIND_MATCHCASE) != 0,
@@ -5865,7 +5878,7 @@ std::string Editor::CaseMapString(const std::string &s, int caseMapping) {
 long Editor::SearchInTarget(const char *text, int length) {
 	int lengthFound = length;
 
-	std::auto_ptr<CaseFolder> pcf(CaseFolderForEncoding());
+	ScopedCaseFolder pcf(CaseFolderForEncoding());
 	int pos = pdoc->FindText(targetStart, targetEnd, text,
 	        (searchFlags & SCFIND_MATCHCASE) != 0,
 	        (searchFlags & SCFIND_WHOLEWORD) != 0,
