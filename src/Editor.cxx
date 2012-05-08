@@ -6152,6 +6152,11 @@ Window::Cursor Editor::GetMarginCursor(Point pt) {
 	return Window::cursorReverseArrow;
 }
 
+void Editor::TrimAndSetSelection(int currentPos_, int anchor_) {
+	sel.TrimSelection(SelectionRange(currentPos_, anchor_));
+	SetSelection(currentPos_, anchor_);
+}
+
 void Editor::LineSelection(int lineCurrentPos_, int lineAnchorPos_, bool wholeLine) {
 	int selCurrentPos, selAnchorPos;
 	if (wholeLine) {
@@ -6182,7 +6187,7 @@ void Editor::LineSelection(int lineCurrentPos_, int lineAnchorPos_, bool wholeLi
 			selAnchorPos = StartEndDisplayLine(lineAnchorPos_, true);
 		}
 	}
-	SetSelection(selCurrentPos, selAnchorPos);
+	TrimAndSetSelection(selCurrentPos, selAnchorPos);
 }
 
 void Editor::WordSelection(int pos) {
@@ -6192,20 +6197,20 @@ void Editor::WordSelection(int pos) {
 		// This ensures that a series of empty lines isn't counted as a single "word".
 		if (!pdoc->IsLineEndPosition(pos))
 			pos = pdoc->ExtendWordSelect(pdoc->MovePositionOutsideChar(pos + 1, 1), -1);
-		SetSelection(pos, wordSelectAnchorEndPos);
+		TrimAndSetSelection(pos, wordSelectAnchorEndPos);
 	} else if (pos > wordSelectAnchorEndPos) {
 		// Extend forward to the word containing the character to the left of pos.
 		// Skip ExtendWordSelect if the line is empty or if pos is the first position on the line.
 		// This ensures that a series of empty lines isn't counted as a single "word".
 		if (pos > pdoc->LineStart(pdoc->LineFromPosition(pos)))
 			pos = pdoc->ExtendWordSelect(pdoc->MovePositionOutsideChar(pos - 1, -1), 1);
-		SetSelection(pos, wordSelectAnchorStartPos);
+		TrimAndSetSelection(pos, wordSelectAnchorStartPos);
 	} else {
 		// Select only the anchored word
 		if (pos >= originalAnchorPos)
-			SetSelection(wordSelectAnchorEndPos, wordSelectAnchorStartPos);
+			TrimAndSetSelection(wordSelectAnchorEndPos, wordSelectAnchorStartPos);
 		else
-			SetSelection(wordSelectAnchorStartPos, wordSelectAnchorEndPos);
+			TrimAndSetSelection(wordSelectAnchorStartPos, wordSelectAnchorEndPos);
 	}
 }
 
