@@ -1074,8 +1074,8 @@ bool ScintillaGTK::PaintContains(PRectangle rc) {
 				rc.right - rc.left, rc.bottom - rc.top};
 			contains = CRectListContains(rgnUpdate, grc);
 #else
-			GdkRectangle grc = {rc.left, rc.top,
-				rc.right - rc.left, rc.bottom - rc.top};
+			GdkRectangle grc = {static_cast<gint>(rc.left), static_cast<gint>(rc.top),
+				static_cast<gint>(rc.right - rc.left), static_cast<gint>(rc.bottom - rc.top)};
 			if (gdk_region_rect_in(rgnUpdate, &grc) != GDK_OVERLAP_RECTANGLE_IN) {
 				contains = false;
 			}
