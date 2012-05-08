@@ -423,7 +423,7 @@ void ScintillaWin::EnsureRenderTarget() {
 		// Create a Direct2D render target.
 #if 1
 		pD2DFactory->CreateHwndRenderTarget(
-			D2D1::RenderTargetProperties(),
+			D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT, D2D1::PixelFormat(), 96.0, 96.0),
 			D2D1::HwndRenderTargetProperties(hw, size),
 			&pRenderTarget);
 #else
@@ -2810,7 +2810,7 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
 					} else {
 #if defined(USE_D2D)
 						pD2DFactory->CreateHwndRenderTarget(
-							D2D1::RenderTargetProperties(),
+							D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT, D2D1::PixelFormat(), 96.0, 96.0),
 							D2D1::HwndRenderTargetProperties(hWnd, D2D1::SizeU(rc.right - rc.left, rc.bottom - rc.top)),
 							&pCTRenderTarget);
 						surfaceWindow->Init(pCTRenderTarget, hWnd);
