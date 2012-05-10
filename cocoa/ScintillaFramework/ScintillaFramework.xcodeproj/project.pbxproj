@@ -159,6 +159,8 @@
 		114B6FEC11FA7645004FB6AB /* StyleContext.h in Headers */ = {isa = PBXBuildFile; fileRef = 114B6FE111FA7645004FB6AB /* StyleContext.h */; };
 		114B6FED11FA7645004FB6AB /* WordList.h in Headers */ = {isa = PBXBuildFile; fileRef = 114B6FE211FA7645004FB6AB /* WordList.h */; };
 		1152A77315313E58000D4E1A /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1152A77215313E58000D4E1A /* QuartzCore.framework */; };
+		11594BE9155B91DF0099E1FA /* LexOScript.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 11594BE7155B91DF0099E1FA /* LexOScript.cxx */; };
+		11594BEA155B91DF0099E1FA /* LexVisualProlog.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 11594BE8155B91DF0099E1FA /* LexVisualProlog.cxx */; };
 		117ACE9114A29A1E002876F9 /* LexTCMD.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 117ACE9014A29A1E002876F9 /* LexTCMD.cxx */; };
 		119FF1BF13C9D1820007CE42 /* QuartzTextStyle.h in Headers */ = {isa = PBXBuildFile; fileRef = 119FF1BE13C9D1820007CE42 /* QuartzTextStyle.h */; };
 		11A0A8A1148602DF0018D143 /* LexCoffeeScript.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 11A0A8A0148602DF0018D143 /* LexCoffeeScript.cxx */; };
@@ -343,6 +345,8 @@
 		114B6FE111FA7645004FB6AB /* StyleContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StyleContext.h; path = ../../lexlib/StyleContext.h; sourceTree = SOURCE_ROOT; };
 		114B6FE211FA7645004FB6AB /* WordList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WordList.h; path = ../../lexlib/WordList.h; sourceTree = SOURCE_ROOT; };
 		1152A77215313E58000D4E1A /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = ../../../../../../../../System/Library/Frameworks/QuartzCore.framework; sourceTree = "<group>"; };
+		11594BE7155B91DF0099E1FA /* LexOScript.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexOScript.cxx; path = ../../lexers/LexOScript.cxx; sourceTree = "<group>"; };
+		11594BE8155B91DF0099E1FA /* LexVisualProlog.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexVisualProlog.cxx; path = ../../lexers/LexVisualProlog.cxx; sourceTree = "<group>"; };
 		117ACE9014A29A1E002876F9 /* LexTCMD.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexTCMD.cxx; path = ../../lexers/LexTCMD.cxx; sourceTree = "<group>"; };
 		119FF1BE13C9D1820007CE42 /* QuartzTextStyle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = QuartzTextStyle.h; path = ../QuartzTextStyle.h; sourceTree = "<group>"; };
 		11A0A8A0148602DF0018D143 /* LexCoffeeScript.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexCoffeeScript.cxx; path = ../../lexers/LexCoffeeScript.cxx; sourceTree = "<group>"; };
@@ -466,7 +470,6 @@
 		2744E47D0FC1674E00E85C33 /* Lexers */ = {
 			isa = PBXGroup;
 			children = (
-				11BEB6A114EF189600BDE92A /* LexECL.cxx */,
 				11126B8114CD3A6200803C49 /* LexAVS.cxx */,
 				11F35FDA12AEFAF100F0236D /* LexA68k.cxx */,
 				114B6EBE11FA7526004FB6AB /* LexAbaqus.cxx */,
@@ -492,6 +495,7 @@
 				114B6ED111FA7526004FB6AB /* LexCsound.cxx */,
 				114B6ED211FA7526004FB6AB /* LexCSS.cxx */,
 				114B6ED311FA7526004FB6AB /* LexD.cxx */,
+				11BEB6A114EF189600BDE92A /* LexECL.cxx */,
 				114B6ED411FA7526004FB6AB /* LexEiffel.cxx */,
 				114B6ED511FA7526004FB6AB /* LexErlang.cxx */,
 				114B6ED611FA7526004FB6AB /* LexEScript.cxx */,
@@ -519,6 +523,7 @@
 				114B6EEB11FA7526004FB6AB /* LexNimrod.cxx */,
 				114B6EEC11FA7526004FB6AB /* LexNsis.cxx */,
 				114B6EED11FA7526004FB6AB /* LexOpal.cxx */,
+				11594BE7155B91DF0099E1FA /* LexOScript.cxx */,
 				114B6EEE11FA7526004FB6AB /* LexOthers.cxx */,
 				114B6EEF11FA7526004FB6AB /* LexPascal.cxx */,
 				114B6EF011FA7526004FB6AB /* LexPB.cxx */,
@@ -550,6 +555,7 @@
 				114B6F0911FA7526004FB6AB /* LexVB.cxx */,
 				114B6F0A11FA7526004FB6AB /* LexVerilog.cxx */,
 				114B6F0B11FA7526004FB6AB /* LexVHDL.cxx */,
+				11594BE8155B91DF0099E1FA /* LexVisualProlog.cxx */,
 				114B6F0C11FA7526004FB6AB /* LexYAML.cxx */,
 			);
 			name = Lexers;
@@ -938,6 +944,8 @@
 				117ACE9114A29A1E002876F9 /* LexTCMD.cxx in Sources */,
 				11126B8214CD3A6200803C49 /* LexAVS.cxx in Sources */,
 				11BEB6A214EF189600BDE92A /* LexECL.cxx in Sources */,
+				11594BE9155B91DF0099E1FA /* LexOScript.cxx in Sources */,
+				11594BEA155B91DF0099E1FA /* LexVisualProlog.cxx in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
