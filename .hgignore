@@ -36,4 +36,14 @@ cocoa/ScintillaFramework/build
 cocoa/ScintillaTest/build
 macosx/SciTest/build
 *.cppcheck
-
+Makefile.Debug
+Makefile.Release
+*_resource.rc
+moc_*
+*.pro.user
+ScintillaEdit.cpp
+ScintillaEdit.h
+ScintillaConstants.py
+ScintillaEditBase.intermediate.manifest
+ScintillaEdit.intermediate.manifest
+qt/*/Makefile
