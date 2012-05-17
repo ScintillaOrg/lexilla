@@ -271,6 +271,12 @@ def UpdateVersionNumbers(root):
         "#define VERSION_SCINTILLA \"" + versionDotted + "\"")
     UpdateLineInFile(root + "scintilla/win32/ScintRes.rc", "#define VERSION_WORDS", 
         "#define VERSION_WORDS " + versionCommad)
+    UpdateLineInFile(root + "scintilla/qt/ScintillaEditBase/ScintillaEditBase.pro",
+        "VERSION =", 
+        "VERSION = " + versionDotted)
+    UpdateLineInFile(root + "scintilla/qt/ScintillaEdit/ScintillaEdit.pro",
+        "VERSION =", 
+        "VERSION = " + versionDotted)
     UpdateLineInFile(root + "scintilla/doc/ScintillaDownload.html", "       Release", 
         "       Release " + versionDotted)
     UpdateLineInFile(root + "scintilla/doc/index.html",
