@@ -71,7 +71,7 @@ ScintillaEditPy.pyd for Windows.
 
 A demonstration program can be run:
 
-python testswp.py
+python testsepq.py
 
 The individual steps in the script can be run manually if wanted although the
 shiboken program has complex arguments and differs between systems so run 
