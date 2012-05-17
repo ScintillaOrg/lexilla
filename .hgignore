@@ -5,6 +5,9 @@ syntax: glob
 *.obj
 *.pyc
 *.dll
+*.dylib
+*.framework
+*.pyd
 *.exp
 *.lib
 *.pdb
@@ -19,6 +22,8 @@ syntax: glob
 *.pbxbtree
 *.mode1v3
 *.pbxuser
+*.pbproj
+*.log
 *.xcbkptlist
 *.xcscheme
 *.xcworkspacedata
