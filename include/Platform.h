@@ -516,4 +516,10 @@ public:
 #pragma warning(disable: 4244 4309 4514 4710)
 #endif
 
+#if defined(__GNUC__) && defined(SCINTILLA_QT)
+#pragma GCC diagnostic ignored "-Wmissing-braces"
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#pragma GCC diagnostic ignored "-Wchar-subscripts"
+#endif
+
 #endif
