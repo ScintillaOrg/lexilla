@@ -1580,6 +1580,7 @@ void SurfaceD2D::DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, co
 		if (SUCCEEDED(hr)) {
 			D2D1_POINT_2F origin = {rc.left, ybase-yAscent};
 			pRenderTarget->DrawTextLayout(origin, pTextLayout, pBrush, D2D1_DRAW_TEXT_OPTIONS_NONE);
+			pTextLayout->Release();
 		} else {
 			D2D1_RECT_F layoutRect = D2D1::RectF(
 				static_cast<FLOAT>(rcw.left) / dpiScaleX,
