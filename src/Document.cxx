@@ -1461,13 +1461,16 @@ long Document::FindText(int minPos, int maxPos, const char *search,
 		}
 		if (caseSensitive) {
 			const int endSearch = (startPos <= endPos) ? endPos - lengthFind + 1 : endPos;
+			const char charStartSearch =  search[0];
 			while (forward ? (pos < endSearch) : (pos >= endSearch)) {
-				bool found = (pos + lengthFind) <= limitPos;
-				for (int indexSearch = 0; (indexSearch < lengthFind) && found; indexSearch++) {
-					found = CharAt(pos + indexSearch) == search[indexSearch];
-				}
-				if (found && MatchesWordOptions(word, wordStart, pos, lengthFind)) {
-					return pos;
+				if (CharAt(pos) == charStartSearch) {
+					bool found = (pos + lengthFind) <= limitPos;
+					for (int indexSearch = 1; (indexSearch < lengthFind) && found; indexSearch++) {
+						found = CharAt(pos + indexSearch) == search[indexSearch];
+					}
+					if (found && MatchesWordOptions(word, wordStart, pos, lengthFind)) {
+						return pos;
+					}
 				}
 				if (!NextCharacter(pos, increment))
 					break;
