@@ -11,3 +11,9 @@ unsigned int UTF8CharLength(unsigned char ch);
 unsigned int UTF16Length(const char *s, unsigned int len);
 unsigned int UTF16FromUTF8(const char *s, unsigned int len, wchar_t *tbuf, unsigned int tlen);
 
+inline bool UTF8IsTrailByte(int ch) {
+	return (ch >= 0x80) && (ch < 0xc0);
+}
+
+enum { UTF8MaskWidth=0x7, UTF8MaskInvalid=0x8 };
+int UTF8Classify(const unsigned char *us, int len);
