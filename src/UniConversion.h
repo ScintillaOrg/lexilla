@@ -11,6 +11,9 @@ unsigned int UTF8CharLength(unsigned char ch);
 unsigned int UTF16Length(const char *s, unsigned int len);
 unsigned int UTF16FromUTF8(const char *s, unsigned int len, wchar_t *tbuf, unsigned int tlen);
 
+extern int UTF8BytesOfLead[256];
+void UTF8BytesOfLeadInitialise();
+
 inline bool UTF8IsTrailByte(int ch) {
 	return (ch >= 0x80) && (ch < 0xc0);
 }

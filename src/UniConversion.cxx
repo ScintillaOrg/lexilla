@@ -130,6 +130,34 @@ unsigned int UTF16FromUTF8(const char *s, unsigned int len, wchar_t *tbuf, unsig
 	return ui;
 }
 
+int UTF8BytesOfLead[256];
+static bool initialisedBytesOfLead = false;
+
+static int BytesFromLead(int leadByte) {
+	if (leadByte < 0xC2) {
+		// Single byte or invalid
+		return 1;
+	} else if (leadByte < 0xE0) {
+		return 2;
+	} else if (leadByte < 0xF0) {
+		return 3;
+	} else if (leadByte < 0xF5) {
+		return 4;
+	} else {
+		// Characters longer than 4 bytes not possible in current UTF-8
+		return 1;
+	}
+}
+
+void UTF8BytesOfLeadInitialise() {
+	if (!initialisedBytesOfLead) {
+		for (int i=0;i<256;i++) {
+			UTF8BytesOfLead[i] = BytesFromLead(i);
+		}
+		initialisedBytesOfLead = true;
+	}
+}
+
 // Return both the width of the first character in the string and a status
 // saying whether it is valid or invalid.
 // Most invalid sequences return a width of 1 so are treated as isolated bytes but

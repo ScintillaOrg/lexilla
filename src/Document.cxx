@@ -112,6 +112,8 @@ Document::Document() {
 	matchesValid = false;
 	regex = 0;
 
+	UTF8BytesOfLeadInitialise();
+
 	perLineData[ldMarkers] = new LineMarkers();
 	perLineData[ldLevels] = new LineLevels();
 	perLineData[ldState] = new LineState();
@@ -449,19 +451,13 @@ int Document::LenChar(int pos) {
 	} else if (IsCrLf(pos)) {
 		return 2;
 	} else if (SC_CP_UTF8 == dbcsCodePage) {
-		unsigned char ch = static_cast<unsigned char>(cb.CharAt(pos));
-		if (ch < 0x80)
-			return 1;
-		int len = 2;
-		if (ch >= (0x80 + 0x40 + 0x20 + 0x10))
-			len = 4;
-		else if (ch >= (0x80 + 0x40 + 0x20))
-			len = 3;
+		const unsigned char leadByte = static_cast<unsigned char>(cb.CharAt(pos));
+		const int widthCharBytes = UTF8BytesOfLead[leadByte];
 		int lengthDoc = Length();
-		if ((pos + len) > lengthDoc)
-			return lengthDoc -pos;
+		if ((pos + widthCharBytes) > lengthDoc)
+			return lengthDoc - pos;
 		else
-			return len;
+			return widthCharBytes;
 	} else if (dbcsCodePage) {
 		return IsDBCSLeadByte(cb.CharAt(pos)) ? 2 : 1;
 	} else {
@@ -720,12 +716,7 @@ int Document::SafeSegment(const char *text, int length, int lengthSegment) {
 		lastEncodingAllowedBreak = j;
 
 		if (dbcsCodePage == SC_CP_UTF8) {
-			if (ch < 0x80) {
-				j++;
-			} else {
-				int bytes = BytesFromLead(ch);
-				j += bytes ? bytes : 1;
-			}
+			j += UTF8BytesOfLead[ch];
 		} else if (dbcsCodePage) {
 			j += IsDBCSLeadByte(ch) ? 2 : 1;
 		} else {
