@@ -2087,11 +2087,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 	if (ll->validity == LineLayout::llCheckTextAndStyle) {
 		int lineLength = posLineEnd - posLineStart;
 		if (!vstyle.viewEOL) {
-			int cid = posLineEnd - 1;
-			while ((cid > posLineStart) && IsEOLChar(pdoc->CharAt(cid))) {
-				cid--;
-				lineLength--;
-			}
+			lineLength = pdoc->LineEnd(line) - posLineStart;
 		}
 		if (lineLength == ll->numCharsInLine) {
 			// See if chars, styles, indicators, are all the same
@@ -2148,10 +2144,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 		const int lineLength = posLineEnd - posLineStart;
 		pdoc->GetCharRange(ll->chars, posLineStart, lineLength);
 		pdoc->GetStyleRange(ll->styles, posLineStart, lineLength);
-		int numCharsBeforeEOL = lineLength;
-		while ((numCharsBeforeEOL > 0) && IsEOLChar(ll->chars[numCharsBeforeEOL-1])) {
-			numCharsBeforeEOL--;
-		}
+		int numCharsBeforeEOL = pdoc->LineEnd(line) - posLineStart;
 		const int numCharsInLine = (vstyle.viewEOL) ? lineLength : numCharsBeforeEOL;
 		for (int styleInLine = 0; styleInLine < numCharsInLine; styleInLine++) {
 			styleByte = ll->styles[styleInLine];
@@ -2355,7 +2348,7 @@ ColourDesired Editor::TextBackground(ViewStyle &vsDraw, bool overrideBackground,
 	} else {
 		if ((vsDraw.edgeState == EDGE_BACKGROUND) &&
 		        (i >= ll->edgeColumn) &&
-		        !IsEOLChar(ll->chars[i]))
+		        (i < ll->numCharsBeforeEOL))
 			return vsDraw.edgecolour;
 		if (inHotspot && vsDraw.hotspotBackgroundSet)
 			return vsDraw.hotspotBackground;
