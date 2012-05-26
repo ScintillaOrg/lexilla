@@ -1373,19 +1373,6 @@ static inline char MakeLowerCase(char ch) {
 		return static_cast<char>(ch - 'A' + 'a');
 }
 
-size_t Document::ExtractChar(int pos, char *bytes) {
-	unsigned char ch = static_cast<unsigned char>(cb.CharAt(pos));
-	size_t widthChar = UTF8CharLength(ch);
-	bytes[0] = ch;
-	for (size_t i=1; i<widthChar; i++) {
-		bytes[i] = cb.CharAt(static_cast<int>(pos+i));
-		if (!IsTrailByte(static_cast<unsigned char>(bytes[i]))) { // Bad byte
-			widthChar = 1;
-		}
-	}
-	return widthChar;
-}
-
 CaseFolderTable::CaseFolderTable() {
 	for (size_t iChar=0; iChar<sizeof(mapping); iChar++) {
 		mapping[iChar] = static_cast<char>(iChar);
@@ -1476,37 +1463,46 @@ long Document::FindText(int minPos, int maxPos, const char *search,
 					break;
 			}
 		} else if (SC_CP_UTF8 == dbcsCodePage) {
-			const size_t maxBytesCharacter = 4;
 			const size_t maxFoldingExpansion = 4;
-			std::vector<char> searchThing(lengthFind * maxBytesCharacter * maxFoldingExpansion + 1);
+			std::vector<char> searchThing(lengthFind * UTF8MaxBytes * maxFoldingExpansion + 1);
 			const int lenSearch = static_cast<int>(
 				pcf->Fold(&searchThing[0], searchThing.size(), search, lengthFind));
+			char bytes[UTF8MaxBytes + 1];
+			char folded[UTF8MaxBytes * maxFoldingExpansion + 1];
 			while (forward ? (pos < endPos) : (pos >= endPos)) {
 				int widthFirstCharacter = 0;
-				int indexDocument = 0;
+				int posIndexDocument = pos;
 				int indexSearch = 0;
 				bool characterMatches = true;
-				while (characterMatches &&
-					((pos + indexDocument) < limitPos) &&
-					(indexSearch < lenSearch)) {
-					char bytes[maxBytesCharacter + 1];
-					bytes[maxBytesCharacter] = 0;
-					const int widthChar = static_cast<int>(ExtractChar(pos + indexDocument, bytes));
+				for (;;) {
+					const unsigned char leadByte = static_cast<unsigned char>(cb.CharAt(posIndexDocument));
+					bytes[0] = leadByte;
+					int widthChar = 1;
+					if (!UTF8IsAscii(leadByte)) {
+						const int widthCharBytes = UTF8BytesOfLead[leadByte];
+						for (int b=1; b<widthCharBytes; b++) {
+							bytes[b] = cb.CharAt(posIndexDocument+b);
+						}
+						widthChar = UTF8Classify(reinterpret_cast<const unsigned char *>(bytes), widthCharBytes) & UTF8MaskWidth;
+					}
 					if (!widthFirstCharacter)
 						widthFirstCharacter = widthChar;
-					if ((pos + indexDocument + widthChar) > limitPos)
+					if ((posIndexDocument + widthChar) > limitPos)
 						break;
-					char folded[maxBytesCharacter * maxFoldingExpansion + 1];
 					const int lenFlat = static_cast<int>(pcf->Fold(folded, sizeof(folded), bytes, widthChar));
 					folded[lenFlat] = 0;
 					// Does folded match the buffer
 					characterMatches = 0 == memcmp(folded, &searchThing[0] + indexSearch, lenFlat);
-					indexDocument += widthChar;
+					if (!characterMatches)
+						break;
+					posIndexDocument += widthChar;
 					indexSearch += lenFlat;
+					if (indexSearch >= lenSearch)
+						break;
 				}
 				if (characterMatches && (indexSearch == static_cast<int>(lenSearch))) {
-					if (MatchesWordOptions(word, wordStart, pos, indexDocument)) {
-						*length = indexDocument;
+					if (MatchesWordOptions(word, wordStart, pos, posIndexDocument - pos)) {
+						*length = posIndexDocument - pos;
 						return pos;
 					}
 				}

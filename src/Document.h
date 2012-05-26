@@ -352,7 +352,6 @@ public:
 	int NextWordEnd(int pos, int delta);
 	int SCI_METHOD Length() const { return cb.Length(); }
 	void Allocate(int newSize) { cb.Allocate(newSize); }
-	size_t ExtractChar(int pos, char *bytes);
 	bool MatchesWordOptions(bool word, bool wordStart, int pos, int length);
 	long FindText(int minPos, int maxPos, const char *search, bool caseSensitive, bool word,
 		bool wordStart, bool regExp, int flags, int *length, CaseFolder *pcf);
