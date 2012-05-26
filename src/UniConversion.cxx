@@ -240,11 +240,9 @@ int UTF8Classify(const unsigned char *us, int len) {
 		} else {
 			return UTF8MaskInvalid | 1;
 		}
-	} else if (*us >= 0xc0) {
-		// Overlong encoding
-		return UTF8MaskInvalid | 1;
 	} else {
-		// Trail byte
+		// 0xc0 .. 0xc1 is overlong encoding
+		// 0x80 .. 0xbf is trail byte
 		return UTF8MaskInvalid | 1;
 	}
 }
