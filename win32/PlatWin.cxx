@@ -1012,6 +1012,8 @@ void SurfaceGDI::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *
 			} else if (fit < lenBlock) {
 				// For some reason, such as an incomplete DBCS character
 				// Not all the positions are filled in so make them equal to end.
+				if (fit == 0)
+					poses.buffer[fit++] = 0;
 				for (int i = fit;i<lenBlock;i++)
 					poses.buffer[i] = poses.buffer[fit-1];
 			}
