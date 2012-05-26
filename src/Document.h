@@ -298,6 +298,8 @@ public:
 	void SetSavePoint();
 	bool IsSavePoint() { return cb.IsSavePoint(); }
 	const char * SCI_METHOD BufferPointer() { return cb.BufferPointer(); }
+	const char *RangePointer(int position, int rangeLength) { return cb.RangePointer(position, rangeLength); }
+	int GapPosition() const { return cb.GapPosition(); }
 
 	int SCI_METHOD GetLineIndentation(int line);
 	void SetLineIndentation(int line, int indent);

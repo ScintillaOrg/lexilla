@@ -8910,6 +8910,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETCHARACTERPOINTER:
 		return reinterpret_cast<sptr_t>(pdoc->BufferPointer());
 
+	case SCI_GETRANGEPOINTER:
+		return reinterpret_cast<sptr_t>(pdoc->RangePointer(wParam, lParam));
+
+	case SCI_GETGAPPOSITION:
+		return pdoc->GapPosition();
+
 	case SCI_SETEXTRAASCENT:
 		vs.extraAscent = wParam;
 		InvalidateStyleRedraw();

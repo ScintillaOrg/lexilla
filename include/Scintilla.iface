@@ -1924,6 +1924,15 @@ fun void CopyAllowLine=2519(,)
 # characters in the document.
 get int GetCharacterPointer=2520(,)
 
+# Return a read-only pointer to a range of characters in the document.
+# May move the gap so that the range is contiguous, but will only move up
+# to rangeLength bytes.
+get int GetRangePointer=2643(int position, int rangeLength)
+
+# Return a position which, to avoid performance costs, should not be within
+# the range of a call to GetRangePointer.
+get position GetGapPosition=2644(,)
+
 # Always interpret keyboard input as Unicode
 set void SetKeysUnicode=2521(bool keysUnicode,)
 

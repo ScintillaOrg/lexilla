@@ -1231,7 +1231,7 @@ class TestAutoComplete(unittest.TestCase):
 		self.ed = self.xite.ed
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
-		# 3 lines of 3 characters
+		# 1 line of 3 characters
 		t = b"xxx\n"
 		self.ed.AddText(len(t), t)
 
@@ -1310,6 +1310,36 @@ class TestAutoComplete(unittest.TestCase):
 
 		self.assertEquals(self.ed.AutoCActive(), 0)
 
+class TestDirectAccess(unittest.TestCase):
+
+	def setUp(self):
+		self.xite = XiteWin.xiteFrame
+		self.ed = self.xite.ed
+		self.ed.ClearAll()
+		self.ed.EmptyUndoBuffer()
+
+	def testGapPosition(self):
+		text = b"abcd"
+		self.ed.SetText(len(text), text)
+		self.assertEquals(self.ed.GapPosition, 4)
+		self.ed.TargetStart = 1
+		self.ed.TargetEnd = 1
+		rep = b"-"
+		self.ed.ReplaceTarget(len(rep), rep)
+		self.assertEquals(self.ed.GapPosition, 2)
+
+	def testCharacterPointerAndRangePointer(self):
+		text = b"abcd"
+		self.ed.SetText(len(text), text)
+		characterPointer = self.ed.CharacterPointer
+		rangePointer = self.ed.GetRangePointer(0,3)
+		self.assertEquals(characterPointer, rangePointer)
+		cpBuffer = ctypes.c_char_p(characterPointer)
+		self.assertEquals(cpBuffer.value, text)
+		# Gap will not be moved as already moved for CharacterPointer call
+		rangePointer = self.ed.GetRangePointer(1,3)
+		cpBuffer = ctypes.c_char_p(rangePointer)
+		self.assertEquals(cpBuffer.value, text[1:])
 
 #~ import os
 #~ for x in os.getenv("PATH").split(";"):
