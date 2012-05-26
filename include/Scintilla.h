@@ -51,6 +51,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_ADDSTYLEDTEXT 2002
 #define SCI_INSERTTEXT 2003
 #define SCI_CLEARALL 2004
+#define SCI_DELETERANGE 2645
 #define SCI_CLEARDOCUMENTSTYLE 2005
 #define SCI_GETLENGTH 2006
 #define SCI_GETCHARAT 2007

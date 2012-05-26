@@ -7480,6 +7480,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		ClearAll();
 		return 0;
 
+	case SCI_DELETERANGE:
+		pdoc->DeleteChars(wParam, lParam);
+		return 0;
+
 	case SCI_CLEARDOCUMENTSTYLE:
 		ClearDocumentStyle();
 		return 0;

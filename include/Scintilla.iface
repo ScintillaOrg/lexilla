@@ -101,6 +101,9 @@ fun void InsertText=2003(position pos, string text)
 # Delete all text in the document.
 fun void ClearAll=2004(,)
 
+# Delete a range of text in the document.
+fun void DeleteRange=2645(position pos, int deleteLength)
+
 # Set all style bytes to 0, remove all folding information.
 fun void ClearDocumentStyle=2005(,)
 

@@ -26,6 +26,13 @@ class TestSimple(unittest.TestCase):
 		self.ed.ClearAll()
 		self.assertEquals(self.ed.Length, 0)
 
+	def testDeleteRange(self):
+		self.ed.AddText(5, b"abcde")
+		self.assertEquals(self.ed.Length, 5)
+		self.ed.DeleteRange(1, 2)
+		self.assertEquals(self.ed.Length, 3)
+		self.assertEquals(self.ed.Contents(), b"ade")
+
 	def testAddStyledText(self):
 		self.assertEquals(self.ed.EndStyled, 0)
 		self.ed.AddStyledText(2, b"x\002")
