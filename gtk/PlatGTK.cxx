@@ -25,6 +25,11 @@
 #include "UniConversion.h"
 #include "XPM.h"
 
+#if defined(__clang__)
+// Clang 3.0 incorrectly displays  sentinel warnings. Fixed by clang 3.1.
+#pragma GCC diagnostic ignored "-Wsentinel"
+#endif
+
 /* GLIB must be compiled with thread support, otherwise we
    will bail on trying to use locks, and that could lead to
    problems for someone.  `glib-config --libs gthread` needs
