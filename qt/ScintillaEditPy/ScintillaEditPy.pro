@@ -33,6 +33,7 @@ INCLUDEPATH += $$PYSIDE_INCLUDES/QtGui
 unix:!mac {
 	LIBS += -ldl
 	LIBS += `pkg-config pyside --libs`
+	QMAKE_CXXFLAGS += -Wno-unused-parameter -Wno-empty-body
 }
 
 macx {
