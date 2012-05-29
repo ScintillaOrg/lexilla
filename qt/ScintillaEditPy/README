@@ -24,7 +24,8 @@ files. Both should be installed as ScintillaEditPy needs the headers and
 libraries from the development package and runs with the normal library package.
 On apt-based systems, the packages are libshiboken-dev, shiboken, libpyside-dev,
 and python-pyside. python-dev is also needed for Python language headers.
-On yum-based systems the libpyside-dev package is called python-pyside-devel.
+On yum-based systems the packages are shiboken-devel, python-pyside-devel,
+and python-devel.
 The qmake program may not be in the path and can be found with
 "find /usr -name qmake".
 
