@@ -3,7 +3,7 @@
 from __future__ import with_statement
 from __future__ import unicode_literals
 
-import ctypes, os, sys, unittest
+import codecs, ctypes, os, sys, unittest
 
 import XiteWin
 
@@ -1347,6 +1347,133 @@ class TestDirectAccess(unittest.TestCase):
 		rangePointer = self.ed.GetRangePointer(1,3)
 		cpBuffer = ctypes.c_char_p(rangePointer)
 		self.assertEquals(cpBuffer.value, text[1:])
+
+class TestWordChars(unittest.TestCase):
+	def setUp(self):
+		self.xite = XiteWin.xiteFrame
+		self.ed = self.xite.ed
+		self.ed.ClearAll()
+		self.ed.EmptyUndoBuffer()
+
+	def tearDown(self):
+		self.ed.SetCharsDefault()
+
+	def _setChars(self, charClass, chars):
+		""" Wrapper to call self.ed.Set*Chars with the right type
+		@param charClass {str} the character class, "word", "space", etc.
+		@param chars {iterable of int} characters to set
+		"""
+		if sys.version_info.major == 2:
+			# Python 2, use latin-1 encoded str
+			unichars = (unichr(x) for x in chars if x != 0)
+			# can't use literal u"", that's a syntax error in Py3k
+			# uncode() doesn't exist in Py3k, but we never run it there
+			result = unicode("").join(unichars).encode("latin-1")
+		else:
+			# Python 3, use bytes()
+			result = bytes(x for x in chars if x != 0)
+		meth = getattr(self.ed, "Set%sChars" % (charClass.capitalize()))
+		return meth(None, result)
+
+	def assertCharSetsEqual(self, first, second, *args, **kwargs):
+		""" Assert that the two character sets are equal.
+		If either set are an iterable of numbers, convert them to chars
+		first. """
+		first_set = set()
+		for c in first:
+			first_set.add(chr(c) if isinstance(c, int) else c)
+		second_set = set()
+		for c in second:
+			second_set.add(chr(c) if isinstance(c, int) else c)
+		return self.assertEqual(first_set, second_set, *args, **kwargs)
+
+	def testDefaultWordChars(self):
+		# check that the default word chars are as expected
+		import string
+		dataLen = self.ed.GetWordChars(None, None)
+		data = b"\0" * dataLen
+		self.ed.GetWordChars(None, data)
+		self.assertEquals(dataLen, len(data))
+		expected = set(string.digits + string.ascii_letters + '_') | \
+			set(chr(x) for x in range(0x80, 0x100))
+		self.assertCharSetsEqual(data, expected)
+
+	def testDefaultWhitespaceChars(self):
+		# check that the default whitespace chars are as expected
+		import string
+		dataLen = self.ed.GetWhitespaceChars(None, None)
+		data = b"\0" * dataLen
+		self.ed.GetWhitespaceChars(None, data)
+		self.assertEquals(dataLen, len(data))
+		expected = (set(chr(x) for x in (range(0, 0x20))) | set(' ')) - \
+			set(['\r', '\n'])
+		self.assertCharSetsEqual(data, expected)
+
+	def testDefaultPunctuationChars(self):
+		# check that the default punctuation chars are as expected
+		import string
+		dataLen = self.ed.GetPunctuationChars(None, None)
+		data = b"\0" * dataLen
+		self.ed.GetPunctuationChars(None, data)
+		self.assertEquals(dataLen, len(data))
+		expected = set(chr(x) for x in range(0x20, 0x80)) - \
+			set(string.ascii_letters + string.digits + "\r\n_ ")
+		self.assertCharSetsEqual(data, expected)
+
+	def testCustomWordChars(self):
+		# check that setting things to whitespace chars makes them not words
+		self._setChars("whitespace", range(1, 0x100))
+		dataLen = self.ed.GetWordChars(None, None)
+		data = b"\0" * dataLen
+		self.ed.GetWordChars(None, data)
+		self.assertEquals(dataLen, len(data))
+		expected = set()
+		self.assertCharSetsEqual(data, expected)
+		# and now set something to make sure that works too
+		expected = set(range(1, 0x100, 2))
+		self._setChars("word", expected)
+		dataLen = self.ed.GetWordChars(None, None)
+		data = b"\0" * dataLen
+		self.ed.GetWordChars(None, data)
+		self.assertEquals(dataLen, len(data))
+		self.assertCharSetsEqual(data, expected)
+
+	def testCustomWhitespaceChars(self):
+		# check setting whitespace chars to non-default values
+		self._setChars("word", range(1, 0x100))
+		# we can't change chr(0) from being anything but whitespace
+		expected = set([0])
+		dataLen = self.ed.GetWhitespaceChars(None, None)
+		data = b"\0" * dataLen
+		self.ed.GetWhitespaceChars(None, data)
+		self.assertEquals(dataLen, len(data))
+		self.assertCharSetsEqual(data, expected)
+		# now try to set it to something custom
+		expected = set(range(1, 0x100, 2)) | set([0])
+		self._setChars("whitespace", expected)
+		dataLen = self.ed.GetWhitespaceChars(None, None)
+		data = b"\0" * dataLen
+		self.ed.GetWhitespaceChars(None, data)
+		self.assertEquals(dataLen, len(data))
+		self.assertCharSetsEqual(data, expected)
+
+	def testCustomPunctuationChars(self):
+		# check setting punctuation chars to non-default values
+		self._setChars("word", range(1, 0x100))
+		expected = set()
+		dataLen = self.ed.GetPunctuationChars(None, None)
+		data = b"\0" * dataLen
+		self.ed.GetPunctuationChars(None, data)
+		self.assertEquals(dataLen, len(data))
+		self.assertEquals(set(data), expected)
+		# now try to set it to something custom
+		expected = set(range(1, 0x100, 1))
+		self._setChars("punctuation", expected)
+		dataLen = self.ed.GetPunctuationChars(None, None)
+		data = b"\0" * dataLen
+		self.ed.GetPunctuationChars(None, data)
+		self.assertEquals(dataLen, len(data))
+		self.assertCharSetsEqual(data, expected)
 
 #~ import os
 #~ for x in os.getenv("PATH").split(";"):

@@ -1615,6 +1615,10 @@ void Document::SetCharClasses(const unsigned char *chars, CharClassify::cc newCh
     charClass.SetCharClasses(chars, newCharClass);
 }
 
+int Document::GetCharsOfClass(CharClassify::cc characterClass, unsigned char *buffer) {
+    return charClass.GetCharsOfClass(characterClass, buffer);
+}
+
 void Document::SetStylingBits(int bits) {
 	stylingBits = bits;
 	stylingBitsMask = (1 << stylingBits) - 1;
