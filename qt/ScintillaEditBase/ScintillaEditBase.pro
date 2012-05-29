@@ -10,7 +10,7 @@ TARGET = ScintillaEditBase
 TEMPLATE = lib
 CONFIG += lib_bundle
 
-VERSION = 3.1.0
+VERSION = 3.2.0
 
 SOURCES += \
     PlatQt.cpp \
