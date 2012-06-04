@@ -1805,14 +1805,14 @@ fun void WordRightEndExtend=2442(,)
 set void SetWhitespaceChars=2443(, string characters)
 
 # Get the set of characters making up whitespace for when moving or selecting by word.
-get void GetWhitespaceChars=2647(, stringresult characters)
+get int GetWhitespaceChars=2647(, stringresult characters)
 
 # Set the set of characters making up punctuation characters
 # Should be called after SetWordChars.
 set void SetPunctuationChars=2648(, string characters)
 
 # Get the set of characters making up punctuation characters
-get void GetPunctuationChars=2649(, stringresult characters)
+get int GetPunctuationChars=2649(, stringresult characters)
 
 # Reset the set of characters for whitespace and word characters to the defaults.
 fun void SetCharsDefault=2444(,)
