@@ -849,6 +849,10 @@ int Document::Undo() {
 			bool multiLine = false;
 			int steps = cb.StartUndo();
 			//Platform::DebugPrintf("Steps=%d\n", steps);
+			int coalescedRemovePos = -1;
+			int coalescedRemoveLen = 0;
+			int prevRemoveActionPos = -1;
+			int prevRemoveActionLen = 0;
 			for (int step = 0; step < steps; step++) {
 				const int prevLinesTotal = LinesTotal();
 				const Action &action = cb.GetUndoStep();
@@ -859,15 +863,20 @@ int Document::Undo() {
 					DocModification dm(SC_MOD_CONTAINER | SC_PERFORMED_UNDO);
 					dm.token = action.position;
 					NotifyModified(dm);
+					if (!action.mayCoalesce) {
+						coalescedRemovePos = -1;
+						coalescedRemoveLen = 0;
+						prevRemoveActionPos = -1;
+						prevRemoveActionLen = 0;
+					}
 				} else {
 					NotifyModified(DocModification(
 									SC_MOD_BEFOREDELETE | SC_PERFORMED_UNDO, action));
 				}
 				cb.PerformUndoStep();
-				int cellPosition = action.position;
 				if (action.at != containerAction) {
-					ModifiedAt(cellPosition);
-					newPos = cellPosition;
+					ModifiedAt(action.position);
+					newPos = action.position;
 				}
 
 				int modFlags = SC_PERFORMED_UNDO;
@@ -875,8 +884,22 @@ int Document::Undo() {
 				if (action.at == removeAction) {
 					newPos += action.lenData;
 					modFlags |= SC_MOD_INSERTTEXT;
+					if ((coalescedRemoveLen > 0) &&
+						(action.position == prevRemoveActionPos || action.position == (prevRemoveActionPos + prevRemoveActionLen))) {
+						coalescedRemoveLen += action.lenData;
+						newPos = coalescedRemovePos + coalescedRemoveLen;
+					} else {
+						coalescedRemovePos = action.position;
+						coalescedRemoveLen = action.lenData;
+					}
+					prevRemoveActionPos = action.position;
+					prevRemoveActionLen = action.lenData;
 				} else if (action.at == insertAction) {
 					modFlags |= SC_MOD_DELETETEXT;
+					coalescedRemovePos = -1;
+					coalescedRemoveLen = 0;
+					prevRemoveActionPos = -1;
+					prevRemoveActionLen = 0;
 				}
 				if (steps > 1)
 					modFlags |= SC_MULTISTEPUNDOREDO;
@@ -888,7 +911,7 @@ int Document::Undo() {
 					if (multiLine)
 						modFlags |= SC_MULTILINEUNDOREDO;
 				}
-				NotifyModified(DocModification(modFlags, cellPosition, action.lenData,
+				NotifyModified(DocModification(modFlags, action.position, action.lenData,
 											   linesAdded, action.data));
 			}
 
