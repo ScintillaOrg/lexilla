@@ -751,7 +751,7 @@ void Document::CheckReadOnly() {
 // SetStyleAt does not change the persistent state of a document
 
 bool Document::DeleteChars(int pos, int len) {
-	if (len == 0)
+	if (len <= 0)
 		return false;
 	if ((pos + len) > Length())
 		return false;
