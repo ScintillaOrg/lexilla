@@ -642,6 +642,7 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
  */
 - (void) magnifyWithEvent: (NSEvent *) event
 {
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
   CGFloat z = [event magnification];
   
   // Zoom out or in 1pt depending on sign of magnification event value (0.0 = no change)
@@ -649,6 +650,7 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
     [ScintillaView directCall: self message: SCI_ZOOMOUT wParam: 0 lParam: 0];
   else if (z >= 0.0)
     [ScintillaView directCall: self message: SCI_ZOOMIN wParam: 0 lParam: 0];
+#endif
 }
 
 //--------------------------------------------------------------------------------------------------

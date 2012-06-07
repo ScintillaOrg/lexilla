@@ -15,7 +15,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
 #import <QuartzCore/CAGradientLayer.h>
+#endif
 #import <QuartzCore/CAAnimation.h>
 #import <QuartzCore/CATransaction.h>
 
@@ -136,6 +138,10 @@ static const KeyToCommand macMapDefault[] =
 };
 
 //--------------------------------------------------------------------------------------------------
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+
+// Only implement FindHighlightLayer on OS X 10.6+
 
 /**
  * Class to display the animated gold roundrect used on OS X for matches.
@@ -294,6 +300,8 @@ const CGFloat paddingHighlightY = 2;
 }
 
 @end
+
+#endif
 
 //--------------------------------------------------------------------------------------------------
 
@@ -2038,6 +2046,7 @@ void ScintillaCocoa::ActiveStateChanged(bool isActive)
 
 void ScintillaCocoa::ShowFindIndicatorForRange(NSRange charRange, BOOL retaining)
 {
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
   NSView *content = ContentView();
   if (!layerFindIndicator)
   {
@@ -2078,10 +2087,12 @@ void ScintillaCocoa::ShowFindIndicatorForRange(NSRange charRange, BOOL retaining
   {
     [layerFindIndicator hideMatch];
   }
+#endif
 }
 
 void ScintillaCocoa::MoveFindIndicatorWithBounce(BOOL bounce)
 {
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
   if (layerFindIndicator)
   {
     NSView *content = ContentView();
@@ -2091,14 +2102,17 @@ void ScintillaCocoa::MoveFindIndicatorWithBounce(BOOL bounce)
     ptText.y = rcBounds.size.height - WndProc(SCI_POINTYFROMPOSITION, 0, layerFindIndicator.positionFind);
     [layerFindIndicator animateMatch:ptText bounce:bounce];
   }
+#endif
 }
 
 void ScintillaCocoa::HideFindIndicator()
 {
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
   if (layerFindIndicator)
   {
     [layerFindIndicator hideMatch];
   }
+#endif
 }
 
 
