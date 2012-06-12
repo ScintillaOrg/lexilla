@@ -23,6 +23,18 @@ public:
 		characterSet = 0;
     }
 
+    QuartzTextStyle(const QuartzTextStyle &other)
+    {
+	    // Does not copy font colour attribute
+	    fontRef = static_cast<CTFontRef>(CFRetain(other.fontRef));
+	    styleDict = CFDictionaryCreateMutable(kCFAllocatorDefault, 2,
+						  &kCFTypeDictionaryKeyCallBacks, 
+						  &kCFTypeDictionaryValueCallBacks);
+	    CFDictionaryAddValue(styleDict, kCTFontAttributeName, fontRef);
+	    characterSet = other.characterSet;
+    }
+	
+
     ~QuartzTextStyle()
     {
 		if (styleDict != NULL)
