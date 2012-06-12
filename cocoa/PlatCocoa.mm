@@ -1611,7 +1611,7 @@ void ListBoxImpl::SetFont(Font& font_)
   font.SetID(new QuartzTextStyle(*style));
   NSFont *pfont = (NSFont *)style->getFontRef();
   [[colText dataCell] setFont: pfont];
-  CGFloat itemHeight = lround([pfont ascender] - [pfont descender]);
+  CGFloat itemHeight = ceil([pfont boundingRectForFont].size.height);
   [table setRowHeight:itemHeight];
 }
 
