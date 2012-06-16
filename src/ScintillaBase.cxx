@@ -213,6 +213,7 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 				pdoc->InsertString(sel.MainCaret(), list + lenEntered, lenInsert - lenEntered);
 				SetEmptySelection(sel.MainCaret() + lenInsert - lenEntered);
 			}
+			ac.Cancel();
 			return;
 		}
 	}
