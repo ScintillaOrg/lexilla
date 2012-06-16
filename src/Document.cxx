@@ -1757,10 +1757,12 @@ void Document::MarginSetText(int line, const char *text) {
 
 void Document::MarginSetStyle(int line, int style) {
 	static_cast<LineAnnotation *>(perLineData[ldMargin])->SetStyle(line, style);
+	NotifyModified(DocModification(SC_MOD_CHANGEMARGIN, LineStart(line), 0, 0, 0, line));
 }
 
 void Document::MarginSetStyles(int line, const unsigned char *styles) {
 	static_cast<LineAnnotation *>(perLineData[ldMargin])->SetStyles(line, styles);
+	NotifyModified(DocModification(SC_MOD_CHANGEMARGIN, LineStart(line), 0, 0, 0, line));
 }
 
 int Document::MarginLength(int line) const {
