@@ -1026,21 +1026,19 @@ static int NextTab(int pos, int tabSize) {
 	return ((pos / tabSize) + 1) * tabSize;
 }
 
-static void CreateIndentation(char *linebuf, int length, int indent, int tabSize, bool insertSpaces) {
-	length--;	// ensure space for \0
+static std::string CreateIndentation(int indent, int tabSize, bool insertSpaces) {
+	std::string indentation;
 	if (!insertSpaces) {
-		while ((indent >= tabSize) && (length > 0)) {
-			*linebuf++ = '\t';
+		while (indent >= tabSize) {
+			indentation += '\t';
 			indent -= tabSize;
-			length--;
 		}
 	}
-	while ((indent > 0) && (length > 0)) {
-		*linebuf++ = ' ';
+	while (indent > 0) {
+		indentation += ' ';
 		indent--;
-		length--;
 	}
-	*linebuf = '\0';
+	return indentation;
 }
 
 int SCI_METHOD Document::GetLineIndentation(int line) {
@@ -1066,13 +1064,12 @@ void Document::SetLineIndentation(int line, int indent) {
 	if (indent < 0)
 		indent = 0;
 	if (indent != indentOfLine) {
-		char linebuf[1000];
-		CreateIndentation(linebuf, sizeof(linebuf), indent, tabInChars, !useTabs);
+		std::string linebuf = CreateIndentation(indent, tabInChars, !useTabs);
 		int thisLineStart = LineStart(line);
 		int indentPos = GetLineIndentPosition(line);
 		UndoGroup ug(this);
 		DeleteChars(thisLineStart, indentPos - thisLineStart);
-		InsertCString(thisLineStart, linebuf);
+		InsertCString(thisLineStart, linebuf.c_str());
 	}
 }
 
