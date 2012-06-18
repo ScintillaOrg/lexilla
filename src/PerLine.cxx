@@ -225,12 +225,7 @@ bool LineMarkers::DeleteMark(int line, int markerNum, bool all) {
 			delete markers[line];
 			markers[line] = NULL;
 		} else {
-			bool performedDeletion = markers[line]->RemoveNumber(markerNum, all);
-			someChanges = someChanges || performedDeletion;
-			while (all && performedDeletion) {
-				performedDeletion = markers[line]->RemoveNumber(markerNum, all);
-				someChanges = someChanges || performedDeletion;
-			}
+			someChanges = markers[line]->RemoveNumber(markerNum, all);
 			if (markers[line]->Length() == 0) {
 				delete markers[line];
 				markers[line] = NULL;
