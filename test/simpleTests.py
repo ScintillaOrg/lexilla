@@ -651,6 +651,16 @@ class TestMarkers(unittest.TestCase):
 		self.ed.MarkerDelete(1,1)
 		self.assertEquals(self.ed.MarkerLineFromHandle(handle), -1)
 
+	def testTwiceAddedDelete(self):
+		handle = self.ed.MarkerAdd(1,1)
+		self.assertEquals(self.ed.MarkerGet(1), 2)
+		handle2 = self.ed.MarkerAdd(1,1)
+		self.assertEquals(self.ed.MarkerGet(1), 2)
+		self.ed.MarkerDelete(1,1)
+		self.assertEquals(self.ed.MarkerGet(1), 2)
+		self.ed.MarkerDelete(1,1)
+		self.assertEquals(self.ed.MarkerGet(1), 0)
+
 	def testMarkerDeleteAll(self):
 		h1 = self.ed.MarkerAdd(0,1)
 		h2 = self.ed.MarkerAdd(1,2)
