@@ -1,6 +1,6 @@
 // A demonstration program
 #include <stdio.h>
-#if 0
+#if 0 /* */
 #define DUMMY() \
 	if (1);
 #endif
