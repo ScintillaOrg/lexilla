@@ -527,6 +527,9 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 				// ends with a line continuation by locking in the state upto this position.
 				sc.SetState(sc.state);
 			}
+			if ((MaskActive(sc.state) == SCE_C_PREPROCESSOR) && (!continuationLine)) {
+				sc.SetState(SCE_C_DEFAULT|activitySet);
+			}
 			// Reset states to begining of colourise so no surprises
 			// if different sets of lines lexed.
 			visibleChars = 0;
@@ -610,9 +613,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 				}
 				break;
 			case SCE_C_PREPROCESSOR:
-				if (sc.atLineStart && !continuationLine) {
-					sc.SetState(SCE_C_DEFAULT|activitySet);
-				} else if (options.stylingWithinPreprocessor) {
+				if (options.stylingWithinPreprocessor) {
 					if (IsASpace(sc.ch)) {
 						sc.SetState(SCE_C_DEFAULT|activitySet);
 					}
