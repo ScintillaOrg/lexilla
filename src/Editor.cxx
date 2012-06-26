@@ -3523,10 +3523,16 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		rcTextArea.left = vs.fixedColumnWidth;
 		rcTextArea.right -= vs.rightMarginWidth;
 
+		// Allow text at start of line to overlap 1 pixel into the margin as this displays
+		// serifs and italic stems for aliased text.
+		const int leftTextOverlap = ((xOffset == 0) && (vs.rightMarginWidth > 0)) ? 1 : 0;
+
 		// Remove selection margin from drawing area so text will not be drawn
 		// on it in unbuffered mode.
 		if (!bufferedDraw) {
-			surfaceWindow->SetClip(rcTextArea);
+			PRectangle rcClipText = rcTextArea;
+			rcClipText.left -= leftTextOverlap;
+			surfaceWindow->SetClip(rcClipText);
 		}
 
 		// Loop on visible lines
@@ -3577,6 +3583,13 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 				ll->SetBracesHighlight(rangeLine, braces, static_cast<char>(bracesMatchStyle),
 				        highlightGuideColumn * vs.spaceWidth, bracesIgnoreStyle);
 
+				if (leftTextOverlap && bufferedDraw) {
+					PRectangle rcSpacer = rcLine;
+					rcSpacer.right = rcSpacer.left;
+					rcSpacer.left -= 1;
+					surface->FillRectangle(rcSpacer, vs.styles[STYLE_DEFAULT].back);
+				}
+
 				// Draw the line
 				DrawLine(surface, vs, lineDoc, visibleLine, xStart, rcLine, ll, subLine);
 				//durPaint += et.Duration(true);
@@ -3610,8 +3623,8 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 				DrawCarets(surface, vs, lineDoc, xStart, rcLine, ll, subLine);
 
 				if (bufferedDraw) {
-					Point from(vs.fixedColumnWidth, 0);
-					PRectangle rcCopyArea(vs.fixedColumnWidth, yposScreen,
+					Point from(vs.fixedColumnWidth-leftTextOverlap, 0);
+					PRectangle rcCopyArea(vs.fixedColumnWidth-leftTextOverlap, yposScreen,
 					        rcClient.right - vs.rightMarginWidth, yposScreen + vs.lineHeight);
 					surfaceWindow->Copy(rcCopyArea, from, *pixmapLine);
 				}
