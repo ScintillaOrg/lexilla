@@ -3525,7 +3525,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 
 		// Allow text at start of line to overlap 1 pixel into the margin as this displays
 		// serifs and italic stems for aliased text.
-		const int leftTextOverlap = ((xOffset == 0) && (vs.rightMarginWidth > 0)) ? 1 : 0;
+		const int leftTextOverlap = ((xOffset == 0) && (vs.leftMarginWidth > 0)) ? 1 : 0;
 
 		// Remove selection margin from drawing area so text will not be drawn
 		// on it in unbuffered mode.
