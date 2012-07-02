@@ -3243,6 +3243,8 @@ void Editor::DrawBlockCaret(Surface *surface, ViewStyle &vsDraw, LineLayout *ll,
 
 	// See if the next character shares horizontal space, if so we'll
 	// need to draw that too.
+	if (offsetFirstChar < 0)
+		offsetFirstChar = 0;
 	numCharsToDraw = offsetLastChar - offsetFirstChar;
 	while ((offsetLastChar < ll->LineStart(subLine + 1)) && (offsetLastChar <= ll->numCharsInLine)) {
 		// Update posAfter to point to the 2nd next char, this is where
