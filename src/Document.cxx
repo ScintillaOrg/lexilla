@@ -48,14 +48,6 @@ static inline bool IsADigit(char ch) {
 	return isascii(ch) && isdigit(ch);
 }
 
-static inline bool IsLowerCase(char ch) {
-	return isascii(ch) && islower(ch);
-}
-
-static inline bool IsUpperCase(char ch) {
-	return isascii(ch) && isupper(ch);
-}
-
 void LexInterface::Colourise(int start, int end) {
 	if (pdoc && instance && !performingStyle) {
 		// Protect against reentrance, which may occur, for example, when

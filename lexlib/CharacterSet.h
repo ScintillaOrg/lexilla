@@ -93,6 +93,14 @@ inline bool IsASCII(int ch) {
 	return (ch >= 0) && (ch < 0x80);
 }
 
+inline bool IsLowerCase(int ch) {
+	return (ch >= 'a') && (ch <= 'z');
+}
+
+inline bool IsUpperCase(int ch) {
+	return (ch >= 'A') && (ch <= 'Z');
+}
+
 inline bool IsAlphaNumeric(int ch) {
 	return
 		((ch >= '0') && (ch <= '9')) ||
