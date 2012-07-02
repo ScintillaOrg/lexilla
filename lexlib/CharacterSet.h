@@ -109,11 +109,11 @@ inline bool isspacechar(int ch) {
 }
 
 inline bool iswordchar(int ch) {
-	return IsASCII(ch) && (IsAlphaNumeric(ch) || ch == '.' || ch == '_');
+	return IsAlphaNumeric(ch) || ch == '.' || ch == '_';
 }
 
 inline bool iswordstart(int ch) {
-	return IsASCII(ch) && (IsAlphaNumeric(ch) || ch == '_');
+	return IsAlphaNumeric(ch) || ch == '_';
 }
 
 inline bool isoperator(int ch) {
