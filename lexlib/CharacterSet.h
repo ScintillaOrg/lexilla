@@ -90,7 +90,7 @@ inline bool IsADigit(int ch, int base) {
 }
 
 inline bool IsASCII(int ch) {
-	return ch < 0x80;
+	return (ch >= 0) && (ch < 0x80);
 }
 
 inline bool IsAlphaNumeric(int ch) {
