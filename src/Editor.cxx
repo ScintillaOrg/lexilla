@@ -6944,10 +6944,10 @@ void Editor::EnsureLineVisible(int lineDoc, bool enforcePolicy) {
 }
 
 int Editor::GetTag(char *tagValue, int tagNumber) {
-	char name[3] = "\\?";
 	const char *text = 0;
 	int length = 0;
 	if ((tagNumber >= 1) && (tagNumber <= 9)) {
+		char name[3] = "\\?";
 		name[1] = static_cast<char>(tagNumber + '0');
 		length = 2;
 		text = pdoc->SubstituteByPosition(name, &length);
