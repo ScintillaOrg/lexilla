@@ -1019,7 +1019,7 @@ ListBox *ListBox::Allocate()
 }
 
 ListWidget::ListWidget(QWidget *parent)
-: QListWidget(parent), doubleClickActionData(0)
+: QListWidget(parent), doubleClickAction(0), doubleClickActionData(0)
 {}
 
 ListWidget::~ListWidget() {}
