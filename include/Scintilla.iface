@@ -2104,10 +2104,10 @@ get int GetSelections=2570(,)
 fun void ClearSelections=2571(,)
 
 # Set a simple selection
-fun int SetSelection=2572(int caret,int anchor)
+fun int SetSelection=2572(int caret, int anchor)
 
 # Add a selection
-fun int AddSelection=2573(int caret,int anchor)
+fun int AddSelection=2573(int caret, int anchor)
 
 # Set the main selection
 set void SetMainSelection=2574(int selection,)
