@@ -2325,7 +2325,7 @@ fun int DescribeKeyWordSets=4017(, stringresult descriptions)
 # Type of modification and the action which caused the modification.
 # These are defined as a bit mask to make it easy to specify which notifications are wanted.
 # One bit is set from each of SC_MOD_* and SC_PERFORMED_*.
-enu ModificationFlags=SC_MOD_ SC_PERFORMED_ SC_LAST
+enu ModificationFlags=SC_MOD_ SC_PERFORMED_ SC_MULTISTEPUNDOREDO SC_LASTSTEPINUNDOREDO SC_MULTILINEUNDOREDO SC_STARTACTION SC_MODEVENTMASKALL
 val SC_MOD_INSERTTEXT=0x1
 val SC_MOD_DELETETEXT=0x2
 val SC_MOD_CHANGESTYLE=0x4
