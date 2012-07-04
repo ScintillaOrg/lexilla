@@ -287,13 +287,13 @@ val SC_MASK_FOLDERS=0xFE000000
 fun void MarkerDefine=2040(int markerNumber, int markerSymbol)
 
 # Set the foreground colour used for a particular marker number.
-fun void MarkerSetFore=2041(int markerNumber, colour fore)
+set void MarkerSetFore=2041(int markerNumber, colour fore)
 
 # Set the background colour used for a particular marker number.
-fun void MarkerSetBack=2042(int markerNumber, colour back)
+set void MarkerSetBack=2042(int markerNumber, colour back)
 
 # Set the background colour used for a particular marker number when its folding block is selected.
-fun void MarkerSetBackSelected=2292(int markerNumber, colour back)
+set void MarkerSetBackSelected=2292(int markerNumber, colour back)
 
 # Enable/disable highlight for current folding bloc (smallest one that contains the caret)
 fun void MarkerEnableHighlight=2293(bool enabled,)
@@ -324,7 +324,7 @@ fun void MarkerDefinePixmap=2049(int markerNumber, string pixmap)
 fun void MarkerAddSet=2466(int line, int set)
 
 # Set the alpha used for a marker that is drawn in the text area, not the margin.
-fun void MarkerSetAlpha=2476(int markerNumber, int alpha)
+set void MarkerSetAlpha=2476(int markerNumber, int alpha)
 
 enu MarginType=SC_MARGIN_
 val SC_MARGIN_SYMBOL=0
@@ -454,7 +454,7 @@ get int StyleGetSize=2485(int style,)
 
 # Get the font of a style.
 # Returns the length of the fontName
-fun int StyleGetFont=2486(int style, stringresult fontName)
+get int StyleGetFont=2486(int style, stringresult fontName)
 
 # Get is a style to have its end of line filled or not.
 get bool StyleGetEOLFilled=2487(int style,)
@@ -1112,7 +1112,7 @@ val SC_FOLDFLAG_LINEAFTER_CONTRACTED=0x0010
 val SC_FOLDFLAG_LEVELNUMBERS=0x0040
 
 # Set some style options for folding.
-fun void SetFoldFlags=2233(int flags,)
+set void SetFoldFlags=2233(int flags,)
 
 # Ensure a particular line is visible by expanding any header line hiding it.
 # Use the currently set visibility policy to determine which range to display.
@@ -1281,7 +1281,7 @@ set void SetMultiPaste=2614(int multiPaste,)
 get int GetMultiPaste=2615(,)
 
 # Retrieve the value of a tag from a regular expression search.
-fun int GetTag=2616(int tagNumber, stringresult tagValue)
+get int GetTag=2616(int tagNumber, stringresult tagValue)
 
 # Make the target range start and end be the same as the selection range start and end.
 fun void TargetFromSelection=2287(,)
@@ -1818,11 +1818,11 @@ get int GetPunctuationChars=2649(, stringresult characters)
 fun void SetCharsDefault=2444(,)
 
 # Get currently selected item position in the auto-completion list
-fun int AutoCGetCurrent=2445(,)
+get int AutoCGetCurrent=2445(,)
 
 # Get currently selected item text in the auto-completion list
 # Returns the length of the item text
-fun int AutoCGetCurrentText=2610(, stringresult s)
+get int AutoCGetCurrentText=2610(, stringresult s)
 
 enu CaseInsensitiveBehaviour=SC_CASEINSENSITIVEBEHAVIOUR_
 val SC_CASEINSENSITIVEBEHAVIOUR_RESPECTCASE=0
@@ -2284,11 +2284,11 @@ set void SetLexerLanguage=4006(, string language)
 fun void LoadLexerLibrary=4007(, string path)
 
 # Retrieve a "property" value previously set with SetProperty.
-fun int GetProperty=4008(string key, stringresult buf)
+get int GetProperty=4008(string key, stringresult buf)
 
 # Retrieve a "property" value previously set with SetProperty,
 # with "$()" variable replacement on returned buffer.
-fun int GetPropertyExpanded=4009(string key, stringresult buf)
+get int GetPropertyExpanded=4009(string key, stringresult buf)
 
 # Retrieve a "property" value previously set with SetProperty,
 # interpreted as an int AFTER any "$()" variable replacement.
