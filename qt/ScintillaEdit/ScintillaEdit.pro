@@ -10,7 +10,7 @@ TARGET = ScintillaEdit
 TEMPLATE = lib
 CONFIG += lib_bundle
 
-VERSION = 3.2.0
+VERSION = 3.2.1
 
 SOURCES += \
     ScintillaEdit.cpp \
