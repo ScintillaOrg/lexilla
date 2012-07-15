@@ -676,16 +676,11 @@ static CGImageRef ImageCreateFromRGBA(int width, int height, const unsigned char
 	return image;
 }
 
-void SurfaceImpl::DrawRGBAImage(PRectangle /* rc */, int width, int height, const unsigned char *pixelsImage) {
+void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) {
 	CGImageRef image = ImageCreateFromRGBA(width, height, pixelsImage, true);
 	if (image) {
-		//CGContextSaveGState(gc);
-		//CGRect dst = PRectangleToCGRect(rc);
-		//CGContextClipToRect(gc, dst);
-		CGRect drawRect = CGRectMake (0, 0, width, height);
+		CGRect drawRect = CGRectMake(rc.left, rc.top, width, height);
 		CGContextDrawImage(gc, drawRect, image);
-		//CGContextRestoreGState (gc);
-		
 		CGImageRelease(image);
 	}
 }
