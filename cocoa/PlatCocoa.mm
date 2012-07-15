@@ -620,6 +620,11 @@ void Scintilla::SurfaceImpl::AlphaRectangle(PRectangle rc, int /*cornerSize*/, C
   }
 }
 
+static void ProviderReleaseData(void *, const void *data, size_t) {
+	const unsigned char *pixels = reinterpret_cast<const unsigned char *>(data);
+	delete []pixels;
+}
+
 static CGImageRef ImageCreateFromRGBA(int width, int height, const unsigned char *pixelsImage, bool invert) {
 	CGImageRef image = 0;
 
@@ -631,9 +636,8 @@ static CGImageRef ImageCreateFromRGBA(int width, int height, const unsigned char
 		
 		// Create a data provider.
 		CGDataProviderRef dataProvider = 0;
-		unsigned char *pixelsUpsideDown = 0;
 		if (invert) {
-			pixelsUpsideDown = new unsigned char[bitmapByteCount];
+			unsigned char *pixelsUpsideDown = new unsigned char[bitmapByteCount];
 		
 			for (int y=0; y<height; y++) {
 				int yInverse = height - y - 1;
@@ -643,7 +647,7 @@ static CGImageRef ImageCreateFromRGBA(int width, int height, const unsigned char
 			}
 			
 			dataProvider = CGDataProviderCreateWithData(
-								NULL, pixelsUpsideDown, bitmapByteCount, NULL);
+								NULL, pixelsUpsideDown, bitmapByteCount, ProviderReleaseData);
 		} else {
 			dataProvider = CGDataProviderCreateWithData(
 								NULL, pixelsImage, bitmapByteCount, NULL);
@@ -665,7 +669,6 @@ static CGImageRef ImageCreateFromRGBA(int width, int height, const unsigned char
 
 			CGDataProviderRelease(dataProvider);
 		}
-		delete []pixelsUpsideDown;
 		
 		// The image retains the color space, so we can release it.
 		CGColorSpaceRelease(colorSpace);
