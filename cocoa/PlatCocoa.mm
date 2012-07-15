@@ -1351,19 +1351,85 @@ static NSImage* ImageFromXPM(XPM* pxpm)
   return img;
 }
 
-//----------------- ListBox ------------------------------------------------------------------------
+//----------------- ListBox and related classes ----------------------------------------------------
 
-ListBox::ListBox()
+namespace {
+
+// unnamed namespace hides IListBox interface
+
+class IListBox {
+public:
+  virtual int Rows() = 0;
+  virtual NSImage* ImageForRow(NSInteger row) = 0;
+  virtual NSString* TextForRow(NSInteger row) = 0;
+  virtual void DoubleClick() = 0;
+};
+
+} // unnamed namespace
+
+//----------------- AutoCompletionDataSource -------------------------------------------------------
+
+@interface AutoCompletionDataSource :
+NSObject
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+<NSTableViewDataSource>
+#endif
 {
+  IListBox* box;
 }
 
-//--------------------------------------------------------------------------------------------------
+@property IListBox* box;
 
-ListBox::~ListBox()
+@end
+
+@implementation AutoCompletionDataSource
+
+@synthesize box;
+
+- (void) doubleClick: (id) sender
 {
+#pragma unused(sender)
+	if (box)
+	{
+		box->DoubleClick();
+	}
 }
 
-//--------------------------------------------------------------------------------------------------
+- (id)tableView: (NSTableView*)aTableView objectValueForTableColumn: (NSTableColumn*)aTableColumn row: (NSInteger)rowIndex
+{
+#pragma unused(aTableView)
+	if (!box)
+		return nil;
+	if ([(NSString*)[aTableColumn identifier] isEqualToString: @"icon"])
+	{
+		return box->ImageForRow(rowIndex);
+	}
+	else {
+		return box->TextForRow(rowIndex);
+	}
+}
+
+- (void)tableView: (NSTableView*)aTableView setObjectValue: anObject forTableColumn: (NSTableColumn*)aTableColumn row: (NSInteger)rowIndex
+{
+#pragma unused(aTableView)
+#pragma unused(anObject)
+#pragma unused(aTableColumn)
+#pragma unused(rowIndex)
+}
+
+- (NSInteger)numberOfRowsInTableView: (NSTableView*)aTableView
+{
+#pragma unused(aTableView)
+	if (!box)
+		return 0;
+	return box->Rows();
+}
+
+@end
+
+//----------------- ListBoxImpl --------------------------------------------------------------------
+
+namespace {	// unnamed namespace hides ListBoxImpl and associated classes
 
 struct RowData
 {
@@ -1421,25 +1487,10 @@ public:
   }
 };
 
-class ListBoxImpl;
-
-@interface AutoCompletionDataSource :
-NSObject
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-<NSTableViewDataSource>
-#endif
-{
-  ListBoxImpl* box;
-}
-
-@end
-
-//----------------- ListBoxImpl --------------------------------------------------------------------
-
 // Map from icon type to an NSImage*
 typedef std::map<NSInteger, NSImage*> ImageMap;
 
-class ListBoxImpl : public ListBox
+class ListBoxImpl : public ListBox, IListBox
 {
 private:
   ControlRef lb;
@@ -1496,66 +1547,12 @@ public:
   }
   void SetList(const char* list, char separator, char typesep);
 
-  // For access from AutoCompletionDataSource
+  // For access from AutoCompletionDataSource implement IListBox
   int Rows();
   NSImage* ImageForRow(NSInteger row);
   NSString* TextForRow(NSInteger row);
   void DoubleClick();
 };
-
-@implementation AutoCompletionDataSource
-
-- (void)setBox: (ListBoxImpl*)box_
-{
-  box = box_;
-}
-
-- (void) doubleClick: (id) sender
-{
-#pragma unused(sender)
-  if (box)
-  {
-    box->DoubleClick();
-  }
-}
-
-- (id)tableView: (NSTableView*)aTableView objectValueForTableColumn: (NSTableColumn*)aTableColumn row: (NSInteger)rowIndex
-{
-#pragma unused(aTableView)
-  if (!box)
-    return nil;
-  if ([(NSString*)[aTableColumn identifier] isEqualToString: @"icon"])
-  {
-    return box->ImageForRow(rowIndex);
-  }
-  else {
-    return box->TextForRow(rowIndex);
-  }
-}
-
-- (void)tableView: (NSTableView*)aTableView setObjectValue: anObject forTableColumn: (NSTableColumn*)aTableColumn row: (NSInteger)rowIndex
-{
-#pragma unused(aTableView)
-#pragma unused(anObject)
-#pragma unused(aTableColumn)
-#pragma unused(rowIndex)
-}
-
-- (NSInteger)numberOfRowsInTableView: (NSTableView*)aTableView
-{
-#pragma unused(aTableView)
-  if (!box)
-    return 0;
-  return box->Rows();
-}
-
-@end
-
-ListBox* ListBox::Allocate()
-{
-  ListBoxImpl* lb = new ListBoxImpl();
-  return lb;
-}
 
 void ListBoxImpl::Create(Window& /*parent*/, int /*ctrlID*/, Scintilla::Point pt,
     int lineHeight_, bool unicodeMode_, int)
@@ -1867,6 +1864,24 @@ void ListBoxImpl::DoubleClick()
   {
     doubleClickAction(doubleClickActionData);
   }
+}
+
+} // unnamed namespace
+
+//----------------- ListBox ------------------------------------------------------------------------
+
+ListBox::ListBox()
+{
+}
+
+ListBox::~ListBox()
+{
+}
+
+ListBox* ListBox::Allocate()
+{
+	ListBoxImpl* lb = new ListBoxImpl();
+	return lb;
 }
 
 //----------------- ScintillaContextMenu -----------------------------------------------------------
