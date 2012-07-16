@@ -245,10 +245,13 @@ class SepBuilder:
 	def cleanEverything(self):
 		self.generateAPI(["--clean"])
 		runProgram([self.MakeCommand, "distclean"], exitOnFailure=False)
-		try:
-			os.remove(self.ProInclude)
-		except OSError:
-			pass
+		filesToRemove = [self.ProInclude, "typesystem_ScintillaEdit.xml", 
+			"../../bin/ScintillaEditPy.so", "../../bin/ScintillaConstants.py"]
+		for file in filesToRemove:
+			try:
+				os.remove(file)
+			except OSError:
+				pass
 		for logFile in glob.glob("*.log"):
 			try:
 				os.remove(logFile)

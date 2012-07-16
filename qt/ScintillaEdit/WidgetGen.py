@@ -271,5 +271,12 @@ def main(argv):
 	except:
 		raise
 
+	if cleanGenerated:
+		for file in ["ScintillaEdit.cpp", "ScintillaEdit.h", "../ScintillaEditPy/ScintillaConstants.py"]:
+			try:
+				os.remove(file)
+			except OSError:
+				pass
+		
 if __name__ == "__main__":
 	main(sys.argv[1:])
