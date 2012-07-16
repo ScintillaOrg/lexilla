@@ -18,7 +18,11 @@
 #include <map>
 
 #undef _WIN32_WINNT
-#define _WIN32_WINNT  0x0500
+#ifdef WIN_TARGET
+#define _WIN32_WINNT WIN_TARGET
+#else
+#define _WIN32_WINNT 0x0500
+#endif
 #include <windows.h>
 #include <commctrl.h>
 #include <richedit.h>

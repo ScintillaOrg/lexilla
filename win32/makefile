@@ -8,6 +8,15 @@
 CC = g++
 DEL = del /q
 
+# Discover Windows version by running 'VER' command and parsing output
+# For Windows 2000 looks like:Microsoft Windows 2000 [Version 5.00.2195]
+WINVERWORDS:=$(wordlist 1,2,$(subst ., ,$(lastword $(shell ver))))
+WINVER:=$(firstword $(WINVERWORDS)).$(lastword $(WINVERWORDS))
+# Windows NT 4 does not support GetMonitorInfo
+ifeq '$(WINVER)' '4.0'
+	VERSION_DEFINES:=-DWIN_TARGET=0x0400
+endif
+
 COMPONENT = ../bin/Scintilla.dll
 LEXCOMPONENT = ../bin/SciLexer.dll
 LEXLIB = Lexers.a
