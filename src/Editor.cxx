@@ -4322,6 +4322,7 @@ void Editor::DelCharBack(bool allowLineStartDeletion) {
 		ClearSelection();
 	}
 	sel.RemoveDuplicates();
+	ContainerNeedsUpdate(SC_UPDATE_SELECTION);
 	// Avoid blinking during rapid typing:
 	ShowCaretAtCurrentPosition();
 }
