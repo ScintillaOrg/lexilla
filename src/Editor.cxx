@@ -4317,6 +4317,7 @@ void Editor::DelCharBack(bool allowLineStartDeletion) {
 				sel.Range(r).ClearVirtualSpace();
 			}
 		}
+		ThinRectangularRange();
 	} else {
 		ClearSelection();
 	}
