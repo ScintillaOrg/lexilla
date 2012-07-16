@@ -9147,6 +9147,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETSELECTIONS:
 		return sel.Count();
 
+	case SCI_GETSELECTIONEMPTY:
+		return sel.Empty();
+
 	case SCI_CLEARSELECTIONS:
 		sel.Clear();
 		Redraw();
