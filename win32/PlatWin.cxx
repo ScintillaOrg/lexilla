@@ -848,10 +848,10 @@ void SurfaceGDI::DrawRGBAImage(PRectangle rc, int width, int height, const unsig
 					unsigned char *pixel = image + (y*width+x) * 4;
 					unsigned char alpha = pixelsImage[3];
 					// Input is RGBA, output is BGRA with premultiplied alpha
-					pixel[2] = (*pixelsImage++) * alpha / 255;
-					pixel[1] = (*pixelsImage++) * alpha / 255;
-					pixel[0] = (*pixelsImage++) * alpha / 255;
-					pixel[3] = *pixelsImage++;
+					pixel[2] = static_cast<unsigned char>((*pixelsImage++) * alpha / 255);
+					pixel[1] = static_cast<unsigned char>((*pixelsImage++) * alpha / 255);
+					pixel[0] = static_cast<unsigned char>((*pixelsImage++) * alpha / 255);
+					pixel[3] = static_cast<unsigned char>(*pixelsImage++);
 				}
 			}
 		
