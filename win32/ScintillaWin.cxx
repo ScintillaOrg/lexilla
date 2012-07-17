@@ -587,11 +587,6 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 			rcPaint = PRectangle(pps->rcPaint.left, pps->rcPaint.top, pps->rcPaint.right, pps->rcPaint.bottom);
 			PRectangle rcClient = GetClientRectangle();
 			paintingAllText = rcPaint.Contains(rcClient);
-			if (paintingAllText) {
-				//Platform::DebugPrintf("Performing full text paint\n");
-			} else {
-				//Platform::DebugPrintf("Performing partial paint %d .. %d\n", rcPaint.top, rcPaint.bottom);
-			}
 			Paint(surfaceWindow, rcPaint);
 			surfaceWindow->Release();
 			HRESULT hr = pRenderTarget->EndDraw();
