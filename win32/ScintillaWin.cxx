@@ -18,11 +18,9 @@
 #include <map>
 
 #undef _WIN32_WINNT
-#ifdef WIN_TARGET
-#define _WIN32_WINNT WIN_TARGET
-#else
 #define _WIN32_WINNT 0x0500
-#endif
+#undef WINVER
+#define WINVER 0x0500
 #include <windows.h>
 #include <commctrl.h>
 #include <richedit.h>

@@ -8,15 +8,6 @@
 CC = g++
 DEL = del /q
 
-# Discover Windows version by running 'VER' command and parsing output
-# For Windows 2000 looks like:Microsoft Windows 2000 [Version 5.00.2195]
-WINVERWORDS:=$(wordlist 1,2,$(subst ., ,$(lastword $(shell ver))))
-WINVER:=$(firstword $(WINVERWORDS)).$(lastword $(WINVERWORDS))
-# Windows NT 4 does not support GetMonitorInfo
-ifeq '$(WINVER)' '4.0'
-	VERSION_DEFINES:=-DWIN_TARGET=0x0400
-endif
-
 COMPONENT = ../bin/Scintilla.dll
 LEXCOMPONENT = ../bin/SciLexer.dll
 LEXLIB = Lexers.a
@@ -28,7 +19,7 @@ LDFLAGS=-shared -static -Wl,--enable-runtime-pseudo-reloc-v2 -mwindows -Wl,--add
 LIBS=-lstdc++ -limm32 -lole32 -luuid
 # Add -MMD to get dependencies
 INCLUDEDIRS=-I ../include -I ../src -I../lexlib
-CXXBASEFLAGS=-Wall -Wno-missing-braces -Wno-char-subscripts -pedantic $(INCLUDEDIRS) -fno-rtti $(VERSION_DEFINES)
+CXXBASEFLAGS=-Wall -Wno-missing-braces -Wno-char-subscripts -pedantic $(INCLUDEDIRS) -fno-rtti
 
 ifdef DEBUG
 CXXFLAGS=-DDEBUG -g $(CXXBASEFLAGS)
