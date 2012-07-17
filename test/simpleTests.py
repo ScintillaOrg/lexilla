@@ -827,13 +827,13 @@ class TestSearch(unittest.TestCase):
 	def testPhilippeREFind(self):
 		# Requires 1.,72
 		flags = self.ed.SCFIND_REGEXP
-		self.assertEquals(0, self.ed.FindBytes(0, self.ed.Length, "\w", flags))
-		self.assertEquals(1, self.ed.FindBytes(0, self.ed.Length, "\W", flags))
-		self.assertEquals(-1, self.ed.FindBytes(0, self.ed.Length, "\d", flags))
-		self.assertEquals(0, self.ed.FindBytes(0, self.ed.Length, "\D", flags))
-		self.assertEquals(1, self.ed.FindBytes(0, self.ed.Length, "\s", flags))
-		self.assertEquals(0, self.ed.FindBytes(0, self.ed.Length, "\S", flags))
-		self.assertEquals(2, self.ed.FindBytes(0, self.ed.Length, "\x62", flags))
+		self.assertEquals(0, self.ed.FindBytes(0, self.ed.Length, b"\w", flags))
+		self.assertEquals(1, self.ed.FindBytes(0, self.ed.Length, b"\W", flags))
+		self.assertEquals(-1, self.ed.FindBytes(0, self.ed.Length, b"\d", flags))
+		self.assertEquals(0, self.ed.FindBytes(0, self.ed.Length, b"\D", flags))
+		self.assertEquals(1, self.ed.FindBytes(0, self.ed.Length, b"\s", flags))
+		self.assertEquals(0, self.ed.FindBytes(0, self.ed.Length, b"\S", flags))
+		self.assertEquals(2, self.ed.FindBytes(0, self.ed.Length, b"\x62", flags))
 
 class TestProperties(unittest.TestCase):
 
