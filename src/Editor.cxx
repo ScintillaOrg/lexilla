@@ -5889,11 +5889,11 @@ void Editor::CopySelectionRange(SelectionText *ss, bool allowLineCopy) {
 			char *textWithEndl = new char[textLen];
 			textWithEndl[0] = '\0';
 			if (text)
-				strncat(textWithEndl, text, textLen);
+				strcat(textWithEndl, text);
 			if (pdoc->eolMode != SC_EOL_LF)
-				strncat(textWithEndl, "\r", textLen);
+				strcat(textWithEndl, "\r");
 			if (pdoc->eolMode != SC_EOL_CR)
-				strncat(textWithEndl, "\n", textLen);
+				strcat(textWithEndl, "\n");
 			ss->Set(textWithEndl, static_cast<int>(strlen(textWithEndl) + 1),
 				pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false, true);
 			delete []text;
