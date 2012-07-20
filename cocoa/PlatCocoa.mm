@@ -357,27 +357,23 @@ CGImageRef SurfaceImpl::GetImage()
 
 /**
  * Returns the vertical logical device resolution of the main monitor.
+ * This is no longer called.
+ * For Cocoa, all screens are treated as 72 DPI, even retina displays.
  */
 int SurfaceImpl::LogPixelsY()
 {
-  if (verticalDeviceResolution == 0)
-  {
-    NSSize deviceResolution = [[[[NSScreen mainScreen] deviceDescription]
-    objectForKey: NSDeviceResolution] sizeValue];
-    verticalDeviceResolution = (int) deviceResolution.height;
-  }
-  return verticalDeviceResolution;
+  return 72;
 }
 
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Converts the logical font height (in dpi) into a pixel height for the current main screen.
+ * Converts the logical font height in points into a device height.
+ * For Cocoa, points are always used for the result even on retina displays.
  */
 int SurfaceImpl::DeviceHeightFont(int points)
 {
-  int logPix = LogPixelsY();
-  return (points * logPix + logPix / 2) / 72;
+  return points;
 }
 
 //--------------------------------------------------------------------------------------------------
