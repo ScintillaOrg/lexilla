@@ -675,7 +675,7 @@ static CGImageRef ImageCreateFromRGBA(int width, int height, const unsigned char
 void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) {
 	CGImageRef image = ImageCreateFromRGBA(width, height, pixelsImage, true);
 	if (image) {
-		CGRect drawRect = CGRectMake(rc.left, rc.top, width, height);
+		CGRect drawRect = CGRectMake(rc.left, rc.top, rc.Width(), rc.Height());
 		CGContextDrawImage(gc, drawRect, image);
 		CGImageRelease(image);
 	}

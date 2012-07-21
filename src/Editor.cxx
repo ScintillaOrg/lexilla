@@ -104,6 +104,7 @@ Editor::Editor() {
 
 	stylesValid = false;
 	technology = SC_TECHNOLOGY_DEFAULT;
+	scaleRGBAImage = 100;
 	
 	printMagnification = 0;
 	printColourMode = SC_PRINT_NORMAL;
@@ -8159,9 +8160,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		sizeRGBAImage.y = wParam;
 		break;
 
+	case SCI_RGBAIMAGESETSCALE:
+		scaleRGBAImage = wParam;
+		break;
+
 	case SCI_MARKERDEFINERGBAIMAGE:
 		if (wParam <= MARKER_MAX) {
-			vs.markers[wParam].SetRGBAImage(sizeRGBAImage, reinterpret_cast<unsigned char *>(lParam));
+			vs.markers[wParam].SetRGBAImage(sizeRGBAImage, scaleRGBAImage / 100.0, reinterpret_cast<unsigned char *>(lParam));
 			vs.CalcLargestMarkerHeight();
 		};
 		InvalidateStyleData();
