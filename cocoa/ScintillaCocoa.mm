@@ -1538,7 +1538,10 @@ void ScintillaCocoa::SetHorizontalScrollPos()
   
   // Convert absolute coordinate into the range [0..1]. Keep in mind that the visible area
   // does *not* belong to the scroll range.
-  float relativePosition = (float) xOffset / (scrollWidth - textRect.Width());
+  int maxXOffset = scrollWidth - textRect.Width();
+  if (xOffset > maxXOffset)
+    xOffset = maxXOffset;
+  float relativePosition = (float) xOffset / maxXOffset;
   [topContainer setHorizontalScrollPosition: relativePosition];
   MoveFindIndicatorWithBounce(NO);
 }
