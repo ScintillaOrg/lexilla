@@ -62,6 +62,8 @@ extern NSString *SCIUpdateUINotification;
   NSScroller* mHorizontalScroller;
   NSScroller* mVerticalScroller;
   
+  CGFloat zoomDelta;
+  
   // Area to display additional controls (e.g. zoom info, caret position, status info).
   NSView <InfoBarCommunicator>* mInfoBar;
   BOOL mInfoBarAtTop;
