@@ -27,15 +27,21 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 	surface->PenColour(fore);
 	int ymid = (rc.bottom + rc.top) / 2;
 	if (style == INDIC_SQUIGGLE) {
-		surface->MoveTo(rc.left, rc.top);
-		int x = rc.left + 2;
-		int y = 2;
-		while (x < rc.right) {
+		int x = int(rc.left+0.5);
+		int xLast = int(rc.right+0.5);
+		int y = 0;
+		surface->MoveTo(x, rc.top + y);
+		while (x < xLast) {
+			if ((x + 2) > xLast) {
+				if (xLast > x)
+					y = 1;
+				x = xLast;
+			} else {
+				x += 2;
+				y = 2 - y;
+			}
 			surface->LineTo(x, rc.top + y);
-			x += 2;
-			y = 2 - y;
 		}
-		surface->LineTo(rc.right, rc.top + y);	// Finish the line
 	} else if (style == INDIC_SQUIGGLEPIXMAP) {
 		PRectangle rcSquiggle = PixelGridAlign(rc);
 
