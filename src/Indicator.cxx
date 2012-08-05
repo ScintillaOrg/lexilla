@@ -113,10 +113,9 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 		rcBox.right = rc.right;
 		surface->AlphaRectangle(rcBox, (style == INDIC_ROUNDBOX) ? 1 : 0, fore, fillAlpha, fore, outlineAlpha, 0);
 	} else if (style == INDIC_DOTBOX) {
-		PRectangle rcBox = rcLine;
+		PRectangle rcBox = PixelGridAlign(rc);
 		rcBox.top = rcLine.top + 1;
-		rcBox.left = rc.left;
-		rcBox.right = rc.right;
+		rcBox.bottom = rcLine.bottom;
 		// Cap width at 4000 to avoid large allocations when mistakes made
 		int width = Platform::Minimum(rcBox.Width(), 4000);
 		RGBAImage image(width, rcBox.Height(), 1.0, 0);
