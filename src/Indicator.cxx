@@ -18,6 +18,11 @@
 using namespace Scintilla;
 #endif
 
+static PRectangle PixelGridAlign(const PRectangle &rc) {
+	// Move left and right side to nearest pixel to avoid blurry visuals
+	return PRectangle(int(rc.left + 0.5), rc.top, int(rc.right + 0.5), rc.bottom);
+}
+
 void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &rcLine) {
 	surface->PenColour(fore);
 	int ymid = (rc.bottom + rc.top) / 2;
@@ -31,6 +36,25 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 			y = 2 - y;
 		}
 		surface->LineTo(rc.right, rc.top + y);	// Finish the line
+	} else if (style == INDIC_SQUIGGLEPIXMAP) {
+		PRectangle rcSquiggle = PixelGridAlign(rc);
+
+		int width = Platform::Minimum(4000, rcSquiggle.Width());
+		RGBAImage image(width, 3, 1.0, 0);
+		enum { alphaFull = 0xff, alphaSide = 0x2f, alphaSide2=0x5f };
+		for (int x = 0; x < width; x++) {
+			if (x%2) {
+				// Two halfway columns have a full pixel in middle flanked by light pixels
+				image.SetPixel(x, 0, fore, alphaSide);
+				image.SetPixel(x, 1, fore, alphaFull);
+				image.SetPixel(x, 2, fore, alphaSide);
+			} else {
+				// Extreme columns have a full pixel at bottom or top and a mid-tone pixel in centre
+				image.SetPixel(x, (x%4) ? 0 : 2, fore, alphaFull);
+				image.SetPixel(x, 1, fore, alphaSide2);
+			}
+		}
+		surface->DrawRGBAImage(rcSquiggle, image.GetWidth(), image.GetHeight(), image.Pixels());
 	} else if (style == INDIC_SQUIGGLELOW) {
 		surface->MoveTo(rc.left, rc.top);
 		int x = rc.left + 3;
