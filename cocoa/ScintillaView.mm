@@ -858,6 +858,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 
 - (void) dealloc
 {
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   [mInfoBar release];
   delete mBackend;
   [super dealloc];
