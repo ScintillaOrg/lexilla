@@ -1439,29 +1439,24 @@ bool ScintillaCocoa::HaveMouseCapture()
 /**
  * Synchronously paint a rectangle of the window.
  */
-void ScintillaCocoa::SyncPaint(void* gc, PRectangle rc)
+bool ScintillaCocoa::SyncPaint(void* gc, PRectangle rc)
 {
   paintState = painting;
   rcPaint = rc;
   PRectangle rcText = GetTextRectangle();
   paintingAllText = rcPaint.Contains(rcText);
+  bool succeeded = true;
   Surface *sw = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
   if (sw)
   {
     sw->Init(gc, wMain.GetID());
     Paint(sw, rc);
-    if (paintState == paintAbandoned)
-    {
-      // Do a full paint.
-      rcPaint = GetClientRectangle();
-      paintState = painting;
-      paintingAllText = true;
-      Paint(sw, rcPaint);
-    }
+    succeeded = paintState != paintAbandoned;
     sw->Release();
     delete sw;
   }
   paintState = notPainting;
+  return succeeded;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1769,9 +1764,9 @@ void ScintillaCocoa::IdleTimerFired()
  * @param rect The area to paint, given in the sender's coordinate system.
  * @param gc The context we can use to paint.
  */
-void ScintillaCocoa::Draw(NSRect rect, CGContextRef gc)
+bool ScintillaCocoa::Draw(NSRect rect, CGContextRef gc)
 {
-  SyncPaint(gc, NSRectToPRectangle(rect));
+  return SyncPaint(gc, NSRectToPRectangle(rect));
 }
 
 //--------------------------------------------------------------------------------------------------
