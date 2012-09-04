@@ -5732,15 +5732,15 @@ long Editor::FindText(
 
 	Sci_TextToFind *ft = reinterpret_cast<Sci_TextToFind *>(lParam);
 	int lengthFound = istrlen(ft->lpstrText);
-	std::auto_ptr<CaseFolder> pcf(CaseFolderForEncoding());
+	if (!pdoc->HasCaseFolder())
+		pdoc->SetCaseFolder(CaseFolderForEncoding());
 	int pos = pdoc->FindText(ft->chrg.cpMin, ft->chrg.cpMax, ft->lpstrText,
 	        (wParam & SCFIND_MATCHCASE) != 0,
 	        (wParam & SCFIND_WHOLEWORD) != 0,
 	        (wParam & SCFIND_WORDSTART) != 0,
 	        (wParam & SCFIND_REGEXP) != 0,
 	        wParam,
-	        &lengthFound,
-			pcf.get());
+	        &lengthFound);
 	if (pos != -1) {
 		ft->chrgText.cpMin = pos;
 		ft->chrgText.cpMax = pos + lengthFound;
@@ -5763,19 +5763,6 @@ void Editor::SearchAnchor() {
 	searchAnchor = SelectionStart().Position();
 }
 
-// Simple RAII wrapper for CaseFolder as std::auto_ptr is now deprecated
-class ScopedCaseFolder {
-	CaseFolder *pcf;
-public:
-	ScopedCaseFolder(CaseFolder *pcf_) : pcf(pcf_) {
-	}
-	~ScopedCaseFolder() {
-		delete pcf;
-		pcf = 0;
-	}
-	CaseFolder *get() const { return pcf; }
-};
-
 /**
  * Find text from current search anchor: Must call @c SearchAnchor first.
  * Used for next text and previous text requests.
@@ -5790,7 +5777,8 @@ long Editor::SearchText(
 	const char *txt = reinterpret_cast<char *>(lParam);
 	int pos;
 	int lengthFound = istrlen(txt);
-	ScopedCaseFolder pcf(CaseFolderForEncoding());
+	if (!pdoc->HasCaseFolder())
+		pdoc->SetCaseFolder(CaseFolderForEncoding());
 	if (iMessage == SCI_SEARCHNEXT) {
 		pos = pdoc->FindText(searchAnchor, pdoc->Length(), txt,
 		        (wParam & SCFIND_MATCHCASE) != 0,
@@ -5798,8 +5786,7 @@ long Editor::SearchText(
 		        (wParam & SCFIND_WORDSTART) != 0,
 		        (wParam & SCFIND_REGEXP) != 0,
 		        wParam,
-		        &lengthFound,
-				pcf.get());
+		        &lengthFound);
 	} else {
 		pos = pdoc->FindText(searchAnchor, 0, txt,
 		        (wParam & SCFIND_MATCHCASE) != 0,
@@ -5807,8 +5794,7 @@ long Editor::SearchText(
 		        (wParam & SCFIND_WORDSTART) != 0,
 		        (wParam & SCFIND_REGEXP) != 0,
 		        wParam,
-		        &lengthFound,
-				pcf.get());
+		        &lengthFound);
 	}
 	if (pos != -1) {
 		SetSelection(pos, pos + lengthFound);
@@ -5841,15 +5827,15 @@ std::string Editor::CaseMapString(const std::string &s, int caseMapping) {
 long Editor::SearchInTarget(const char *text, int length) {
 	int lengthFound = length;
 
-	ScopedCaseFolder pcf(CaseFolderForEncoding());
+	if (!pdoc->HasCaseFolder())
+		pdoc->SetCaseFolder(CaseFolderForEncoding());
 	int pos = pdoc->FindText(targetStart, targetEnd, text,
 	        (searchFlags & SCFIND_MATCHCASE) != 0,
 	        (searchFlags & SCFIND_WHOLEWORD) != 0,
 	        (searchFlags & SCFIND_WORDSTART) != 0,
 	        (searchFlags & SCFIND_REGEXP) != 0,
 	        searchFlags,
-	        &lengthFound,
-			pcf.get());
+	        &lengthFound);
 	if (pos != -1) {
 		targetStart = pos;
 		targetEnd = pos + lengthFound;
@@ -7098,6 +7084,7 @@ void Editor::StyleSetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		break;
 	case SCI_STYLESETCHARACTERSET:
 		vs.styles[wParam].characterSet = lParam;
+		pdoc->SetCaseFolder(NULL);
 		break;
 	case SCI_STYLESETVISIBLE:
 		vs.styles[wParam].visible = lParam != 0;
@@ -8076,8 +8063,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETCODEPAGE:
 		if (ValidCodePage(wParam)) {
-			pdoc->dbcsCodePage = wParam;
-			InvalidateStyleRedraw();
+			if (pdoc->SetDBCSCodePage(wParam)) {
+				InvalidateStyleRedraw();
+			}
 		}
 		break;
 
