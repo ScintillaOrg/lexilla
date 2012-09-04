@@ -3438,6 +3438,8 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	AllocateGraphics();
 
 	RefreshStyleData();
+	if (paintState == paintAbandoned)
+		return;	// Scroll bars may have changed so need redraw
 	RefreshPixMaps(surfaceWindow);
 
 	StyleToPositionInView(PositionAfterArea(rcArea));
