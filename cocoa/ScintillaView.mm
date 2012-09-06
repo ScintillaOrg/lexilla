@@ -1132,7 +1132,6 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
     try
     {
       mBackend->WndProc(SCI_GETSELTEXT, length + 1, (sptr_t) buffer);
-      mBackend->WndProc(SCI_SETSAVEPOINT, 0, 0);
       
       result = [NSString stringWithUTF8String: buffer];
       delete[] buffer;
@@ -1165,7 +1164,6 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
     try
     {
       mBackend->WndProc(SCI_GETTEXT, length + 1, (sptr_t) buffer);
-      mBackend->WndProc(SCI_SETSAVEPOINT, 0, 0);
       
       result = [NSString stringWithUTF8String: buffer];
       delete[] buffer;
