@@ -737,6 +737,39 @@ class TestIndicators(unittest.TestCase):
 		self.assertEquals(self.ed.IndicGetStyle(0), 2)
 		self.assertEquals(self.ed.IndicGetFore(0), 0xff0080)
 
+	def testIndicatorFill(self):
+		self.ed.InsertText(0, b"abc")
+		self.ed.IndicatorCurrent = 3
+		self.ed.IndicatorFillRange(1,1)
+		self.assertEquals(self.ed.IndicatorValueAt(3, 0), 0)
+		self.assertEquals(self.ed.IndicatorValueAt(3, 1), 1)
+		self.assertEquals(self.ed.IndicatorValueAt(3, 2), 0)
+		self.assertEquals(self.ed.IndicatorStart(3, 0), 0)
+		self.assertEquals(self.ed.IndicatorEnd(3, 0), 1)
+		self.assertEquals(self.ed.IndicatorStart(3, 1), 1)
+		self.assertEquals(self.ed.IndicatorEnd(3, 1), 2)
+		self.assertEquals(self.ed.IndicatorStart(3, 2), 2)
+		self.assertEquals(self.ed.IndicatorEnd(3, 2), 3)
+
+	def testIndicatorAtEnd(self):
+		self.ed.InsertText(0, b"ab")
+		self.ed.IndicatorCurrent = 3
+		self.ed.IndicatorFillRange(1,1)
+		self.assertEquals(self.ed.IndicatorValueAt(3, 0), 0)
+		self.assertEquals(self.ed.IndicatorValueAt(3, 1), 1)
+		self.assertEquals(self.ed.IndicatorStart(3, 0), 0)
+		self.assertEquals(self.ed.IndicatorEnd(3, 0), 1)
+		self.assertEquals(self.ed.IndicatorStart(3, 1), 1)
+		self.assertEquals(self.ed.IndicatorEnd(3, 1), 2)
+		self.ed.DeleteRange(1, 1)
+		# Now only one character left and does not have indicator so indicator 3 is null
+		self.assertEquals(self.ed.IndicatorValueAt(3, 0), 0)
+		# Since null, remaining calls return 0
+		self.assertEquals(self.ed.IndicatorStart(3, 0), 0)
+		self.assertEquals(self.ed.IndicatorEnd(3, 0), 0)
+		self.assertEquals(self.ed.IndicatorStart(3, 1), 0)
+		self.assertEquals(self.ed.IndicatorEnd(3, 1), 0)
+
 class TestScrolling(unittest.TestCase):
 
 	def setUp(self):

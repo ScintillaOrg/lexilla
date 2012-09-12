@@ -281,3 +281,34 @@ TEST_F(RunStylesTest, DeleteAll) {
 	EXPECT_EQ(1, prs->Runs());
 }
 
+TEST_F(RunStylesTest, DeleteSecond) {
+	prs->InsertSpace(0, 3);
+	int startFill = 1;
+	int lengthFill = 1;
+	EXPECT_EQ(true, prs->FillRange(startFill, 99, lengthFill));
+	EXPECT_EQ(3, prs->Length());
+	EXPECT_EQ(3, prs->Runs());
+	prs->DeleteRange(1, 1);
+	EXPECT_EQ(2, prs->Length());
+	EXPECT_EQ(1, prs->Runs());
+}
+
+TEST_F(RunStylesTest, DeleteEndRun) {
+	prs->InsertSpace(0, 2);
+	int startFill = 1;
+	int lengthFill = 1;
+	EXPECT_EQ(true, prs->FillRange(startFill, 99, lengthFill));
+	EXPECT_EQ(2, prs->Length());
+	EXPECT_EQ(2, prs->Runs());
+	EXPECT_EQ(0, prs->StartRun(0));
+	EXPECT_EQ(1, prs->EndRun(0));
+	EXPECT_EQ(1, prs->StartRun(1));
+	EXPECT_EQ(2, prs->EndRun(1));
+	prs->DeleteRange(1, 1);
+	EXPECT_EQ(1, prs->Length());
+	EXPECT_EQ(1, prs->Runs());
+	EXPECT_EQ(0, prs->StartRun(0));
+	EXPECT_EQ(1, prs->EndRun(0));
+	EXPECT_EQ(0, prs->StartRun(1));
+	EXPECT_EQ(1, prs->EndRun(1));
+}
