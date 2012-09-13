@@ -11,6 +11,7 @@
 // TODO:
 // * add keywords for flags (fuzzy, c-format, ...)
 // * highlight formats inside c-format strings (%s, %d, etc.)
+// * style for previous untranslated string? ("#|" comment)
 
 #include <stdlib.h>
 #include <string.h>
@@ -108,8 +109,6 @@ static void ColourisePODoc(unsigned int startPos, int length, int initStyle, Wor
 					sc.SetState(SCE_PO_REFERENCE);
 				else if (sc.chNext == ',')
 					sc.SetState(SCE_PO_FLAGS);
-				else if (sc.chNext == '|')
-					sc.SetState(SCE_PO_COMMENT); // previous untranslated string, no special style yet
 				else
 					sc.SetState(SCE_PO_COMMENT);
 			} else if (atLineStart && sc.Match("msgid")) { // includes msgid_plural
