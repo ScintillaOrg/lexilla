@@ -101,6 +101,7 @@ signals:
 	void hotSpotDoubleClick(int position, int modifiers);
 	void callTipClick();
 	void autoCompleteSelection(int position, const QString &text);
+	void autoCompleteCancelled();
 
 	// Base notifications for compatibility with other Scintilla implementations
 	void notify(SCNotification *pscn);

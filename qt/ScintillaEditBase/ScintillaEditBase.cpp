@@ -624,6 +624,10 @@ void ScintillaEditBase::notifyParent(SCNotification scn)
 			emit autoCompleteSelection(scn.lParam, QString::fromUtf8(scn.text));
 			break;
 
+		case SCN_AUTOCCANCELLED:
+			emit autoCompleteCancelled();
+			break;
+
 		default:
 			return;
 	}
