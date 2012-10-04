@@ -868,6 +868,14 @@ class TestSearch(unittest.TestCase):
 		self.assertEquals(0, self.ed.FindBytes(0, self.ed.Length, b"\S", flags))
 		self.assertEquals(2, self.ed.FindBytes(0, self.ed.Length, b"\x62", flags))
 
+	def testRENonASCII(self):
+		self.ed.InsertText(0, b"\xAD")
+		flags = self.ed.SCFIND_REGEXP
+		self.assertEquals(-1, self.ed.FindBytes(0, self.ed.Length, b"\\x10", flags))
+		self.assertEquals(2, self.ed.FindBytes(0, self.ed.Length, b"\\x09", flags))
+		self.assertEquals(-1, self.ed.FindBytes(0, self.ed.Length, b"\\xAB", flags))
+		self.assertEquals(0, self.ed.FindBytes(0, self.ed.Length, b"\\xAD", flags))
+
 class TestProperties(unittest.TestCase):
 
 	def setUp(self):
