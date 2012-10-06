@@ -241,13 +241,15 @@ const CGFloat paddingHighlightY = 2;
 	CGFloat width = self.widthText + paddingHighlightX * 2;
 	CGFloat height = self.heightLine + paddingHighlightY * 2;
 
+	CGFloat flipper = self.geometryFlipped ? -1.0 : 1.0;
+
 	// Adjust for padding
 	ptText.x -= paddingHighlightX;
-	ptText.y += paddingHighlightY;
+	ptText.y += flipper * paddingHighlightY;
 
 	// Shift point to centre as expanding about centre
 	ptText.x += width / 2.0;
-	ptText.y -= height / 2.0;
+	ptText.y -= flipper * height / 2.0;
 
 	[CATransaction begin];
 	[CATransaction setValue:[NSNumber numberWithFloat:0.0] forKey:kCATransactionAnimationDuration];
@@ -2050,6 +2052,7 @@ void ScintillaCocoa::ShowFindIndicatorForRange(NSRange charRange, BOOL retaining
   {
     layerFindIndicator = [[FindHighlightLayer alloc] init];
     [content setWantsLayer: YES];
+    layerFindIndicator.geometryFlipped = content.layer.geometryFlipped;
     [[content layer] addSublayer:layerFindIndicator];
   }
   [layerFindIndicator removeAnimationForKey:@"animateFound"];
@@ -2093,11 +2096,14 @@ void ScintillaCocoa::MoveFindIndicatorWithBounce(BOOL bounce)
 #if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
   if (layerFindIndicator)
   {
-    NSView *content = ContentView();
-    NSRect rcBounds = [content bounds];
-    CGPoint ptText;
-    ptText.x = WndProc(SCI_POINTXFROMPOSITION, 0, layerFindIndicator.positionFind);
-    ptText.y = rcBounds.size.height - WndProc(SCI_POINTYFROMPOSITION, 0, layerFindIndicator.positionFind);
+    CGPoint ptText = CGPointMake(
+      WndProc(SCI_POINTXFROMPOSITION, 0, layerFindIndicator.positionFind),
+      WndProc(SCI_POINTYFROMPOSITION, 0, layerFindIndicator.positionFind));
+    if (!layerFindIndicator.geometryFlipped)
+    {
+      NSView *content = ContentView();
+      ptText.y = content.bounds.size.height - ptText.y;
+    }
     [layerFindIndicator animateMatch:ptText bounce:bounce];
   }
 #endif
