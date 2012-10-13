@@ -1536,6 +1536,8 @@ void ScintillaCocoa::SetHorizontalScrollPos()
   // Convert absolute coordinate into the range [0..1]. Keep in mind that the visible area
   // does *not* belong to the scroll range.
   int maxXOffset = scrollWidth - textRect.Width();
+  if (maxXOffset < 0)
+    maxXOffset = 0;
   if (xOffset > maxXOffset)
     xOffset = maxXOffset;
   float relativePosition = (float) xOffset / maxXOffset;
