@@ -471,6 +471,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 	bool continuationLine = false;
 	bool isIncludePreprocessor = false;
 	bool isStringInPreprocessor = false;
+	bool inRERange = false;
 
 	int lineCurrent = styler.GetLine(startPos);
 	if ((MaskActive(initStyle) == SCE_C_PREPROCESSOR) ||
@@ -544,6 +545,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 			visibleChars = 0;
 			lastWordWasUUID = false;
 			isIncludePreprocessor = false;
+			inRERange = false;
 			if (preproc.IsInactive()) {
 				activitySet = activeFlag;
 				sc.SetState(sc.state | activitySet);
@@ -748,16 +750,18 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 			case SCE_C_REGEX:
 				if (sc.atLineStart) {
 					sc.SetState(SCE_C_DEFAULT|activitySet);
-				} else if (sc.ch == '/') {
+				} else if (! inRERange && sc.ch == '/') {
 					sc.Forward();
 					while ((sc.ch < 0x80) && islower(sc.ch))
 						sc.Forward();    // gobble regex flags
 					sc.SetState(SCE_C_DEFAULT|activitySet);
-				} else if (sc.ch == '\\') {
-					// Gobble up the quoted character
-					if (sc.chNext == '\\' || sc.chNext == '/') {
-						sc.Forward();
-					}
+				} else if (sc.ch == '\\' && (sc.chNext != '\n' && sc.chNext != '\r')) {
+					// Gobble up the escaped character
+					sc.Forward();
+				} else if (sc.ch == '[') {
+					inRERange = true;
+				} else if (sc.ch == ']') {
+					inRERange = false;
 				}
 				break;
 			case SCE_C_STRINGEOL:
@@ -838,6 +842,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 				   && (!setCouldBePostOp.Contains(chPrevNonWhite)
 				       || !FollowsPostfixOperator(sc, styler))) {
 				sc.SetState(SCE_C_REGEX|activitySet);	// JavaScript's RegEx
+				inRERange = false;
 			} else if (sc.ch == '\"') {
 				if (sc.chPrev == 'R') {
 					styler.Flush();
