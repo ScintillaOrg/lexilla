@@ -1172,7 +1172,7 @@ bool LexerCPP::EvaluateExpression(const std::string &expr, const std::map<std::s
 	std::vector<std::string> tokens;
 	const char *cp = expr.c_str();
 	for (;;) {
-		if (setWord.Contains(*cp)) {
+		if (setWord.Contains(static_cast<unsigned char>(*cp))) {
 			word += *cp;
 		} else {
 			std::map<std::string, std::string>::const_iterator it = preprocessorDefinitions.find(word);
@@ -1187,13 +1187,13 @@ bool LexerCPP::EvaluateExpression(const std::string &expr, const std::map<std::s
 			}
 			if ((*cp != ' ') && (*cp != '\t')) {
 				std::string op(cp, 1);
-				if (setRelOp.Contains(*cp)) {
-					if (setRelOp.Contains(cp[1])) {
+				if (setRelOp.Contains(static_cast<unsigned char>(*cp))) {
+					if (setRelOp.Contains(static_cast<unsigned char>(cp[1]))) {
 						op += cp[1];
 						cp++;
 					}
-				} else if (setLogicalOp.Contains(*cp)) {
-					if (setLogicalOp.Contains(cp[1])) {
+				} else if (setLogicalOp.Contains(static_cast<unsigned char>(*cp))) {
+					if (setLogicalOp.Contains(static_cast<unsigned char>(cp[1]))) {
 						op += cp[1];
 						cp++;
 					}
