@@ -88,10 +88,13 @@ static std::string GetRestOfLine(LexAccessor &styler, int start, bool allowSpace
 	int i =0;
 	char ch = styler.SafeGetCharAt(start, '\n');
 	while ((ch != '\r') && (ch != '\n')) {
+		char chNext = styler.SafeGetCharAt(start + i + 1, '\n');
+		if (ch == '/' && (chNext == '/' || chNext == '*'))
+			break;
 		if (allowSpace || (ch != ' '))
 			restOfLine += ch;
 		i++;
-		ch = styler.SafeGetCharAt(start + i, '\n');
+		ch = chNext;
 	}
 	return restOfLine;
 }
