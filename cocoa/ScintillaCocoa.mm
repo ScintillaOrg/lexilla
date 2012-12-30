@@ -1523,7 +1523,7 @@ void ScintillaCocoa::SetVerticalScrollPos()
   // Convert absolute coordinate into the range [0..1]. Keep in mind that the visible area
   // does *not* belong to the scroll range.
   int maxScrollPos = MaxScrollPos();
-  float relativePosition = (maxScrollPos > 0) ? ((float) topLine / maxScrollPos) : 0f;
+  float relativePosition = (maxScrollPos > 0) ? ((float) topLine / maxScrollPos) : 0.0f;
   [topContainer setVerticalScrollPosition: relativePosition];
 }
 
