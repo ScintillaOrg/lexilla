@@ -2740,7 +2740,9 @@ int ScintillaGTK::TimeOut(ScintillaGTK *sciThis) {
 gboolean ScintillaGTK::IdleCallback(ScintillaGTK *sciThis) {
 	// Idler will be automatically stopped, if there is nothing
 	// to do while idle.
+#ifndef GDK_VERSION_3_6
 	gdk_threads_enter();
+#endif
 	bool ret = sciThis->Idle();
 	if (ret == false) {
 		// FIXME: This will remove the idler from GTK, we don't want to
@@ -2748,14 +2750,20 @@ gboolean ScintillaGTK::IdleCallback(ScintillaGTK *sciThis) {
 		// returns false (although, it should be harmless).
 		sciThis->SetIdle(false);
 	}
+#ifndef GDK_VERSION_3_6
 	gdk_threads_leave();
+#endif
 	return ret;
 }
 
 gboolean ScintillaGTK::StyleIdle(ScintillaGTK *sciThis) {
+#ifndef GDK_VERSION_3_6
 	gdk_threads_enter();
+#endif
 	sciThis->IdleStyling();
+#ifndef GDK_VERSION_3_6
 	gdk_threads_leave();
+#endif
 	// Idler will be automatically stopped
 	return FALSE;
 }
