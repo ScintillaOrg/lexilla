@@ -2267,6 +2267,12 @@ fun void VCHomeDisplay=2652(,)
 # Like VCHomeDisplay but extending selection to new caret position.
 fun void VCHomeDisplayExtend=2653(,)
 
+# Is the caret line always visible?
+get bool GetCaretLineVisibleAlways=2654(,)
+
+# Sets the caret line to always visible.
+set void SetCaretLineVisibleAlways=2655(bool alwaysVisible,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 
