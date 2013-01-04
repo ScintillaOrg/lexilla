@@ -1581,7 +1581,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
                 bold: (BOOL) bold
                 italic: (BOOL) italic
 {
-  for (int i = 0; i < 32; i++)
+  for (int i = 0; i < 128; i++)
   {
     [self setGeneralProperty: SCI_STYLESETFONT
                    parameter: i
