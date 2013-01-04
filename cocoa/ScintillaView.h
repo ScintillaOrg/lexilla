@@ -22,6 +22,10 @@
 
 extern NSString *SCIUpdateUINotification;
 
+@protocol ScintillaNotificationProtocol
+- (void)notification: (Scintilla::SCNotification*)notification;
+@end
+
 /**
  * InnerView is the Cocoa interface to the Scintilla backend. It handles text input and
  * provides a canvas for painting the output.
@@ -70,10 +74,13 @@ extern NSString *SCIUpdateUINotification;
   NSView <InfoBarCommunicator>* mInfoBar;
   BOOL mInfoBarAtTop;
   int mInitialInfoBarWidth;
+
+  id<ScintillaNotificationProtocol> mDelegate;
 }
 
 @property (nonatomic, assign) Scintilla::ScintillaCocoa* backend;
 @property (nonatomic, assign) NSObject* owner;
+@property (nonatomic, assign) id<ScintillaNotificationProtocol> delegate;
 
 - (void) dealloc;
 - (void) positionSubViews;

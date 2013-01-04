@@ -4,7 +4,8 @@
  *
  * Created by Mike Lischke.
  *
- * Copyright 2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 2011, 2012, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2009, 2011 Sun Microsystems, Inc. All rights reserved.
  * This file is dual licensed under LGPL v2.1 and the Scintilla license (http://www.scintilla.org/License.txt).
  */
 
@@ -609,6 +610,7 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
 
 @synthesize backend = mBackend;
 @synthesize owner   = mOwner;
+@synthesize delegate = mDelegate;
 
 /**
  * ScintiallView is a composite control made from an NSView and an embedded NSView that is
@@ -725,6 +727,8 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
 /**
  * Notification function used by Scintilla to call us back (e.g. for handling clicks on the 
  * folder margin or changes in the editor).
+ * A delegate can be set to receive all notifications. If set no handling takes place here, except
+ * for action pertaining to internal stuff (like the info bar).
  */
 static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wParam, uintptr_t lParam)
 {
@@ -739,6 +743,14 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
       SCNotification* scn = reinterpret_cast<SCNotification*>(lParam);
       ScintillaCocoa *psc = reinterpret_cast<ScintillaCocoa*>(scn->nmhdr.hwndFrom);
       editor = reinterpret_cast<InnerView*>(psc->ContentView()).owner;
+
+      if (editor.delegate != nil)
+      {
+        [editor.delegate notification: scn];
+        if (scn->nmhdr.code != SCN_ZOOM && scn->nmhdr.code != SCN_UPDATEUI)
+          return;
+      }
+      
       switch (scn->nmhdr.code)
       {
         case SCN_MARGINCLICK:
