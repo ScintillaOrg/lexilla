@@ -1109,8 +1109,7 @@ PRectangle Window::GetPosition()
       // NSView
       NSView* view = reinterpret_cast<NSView*>(idWin);
       win = [view window];
-      rect = [view bounds];
-      rect = [view convertRectToBase: rect];
+      rect = [view convertRect: [view bounds] toView: nil];
       rect.origin = [win convertBaseToScreen:rect.origin];
     }
     else
