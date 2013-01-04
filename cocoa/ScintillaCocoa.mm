@@ -382,7 +382,7 @@ const CGFloat paddingHighlightY = 2;
 ScintillaCocoa::ScintillaCocoa(NSView* view)
 {
   wMain = view; // Don't retain since we're owned by view, which would cause a cycle
-  timerTarget = [[[TimerTarget alloc] init: this] retain];
+  timerTarget = [[TimerTarget alloc] init: this];
   layerFindIndicator = NULL;
   Initialise();
 }
