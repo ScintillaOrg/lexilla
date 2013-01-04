@@ -2938,6 +2938,9 @@ struct Sci_TextToFind {
     An annotation may consist of multiple lines separated by '\n'.
     Annotations can be used to display an assembler version of code for debugging or to show diagnostic messages inline or to
     line up different versions of text in a merge tool.</p>
+    <p>Annotations count as display lines for the methods
+    <a class="message" href="#SCI_VISIBLEFROMDOCLINE"><code>SCI_VISIBLEFROMDOCLINE</code></a> and
+    <a class="message" href="#SCI_DOCLINEFROMVISIBLE"><code>SCI_DOCLINEFROMVISIBLE</code></a></p>
     <p>Annotations used for inline diagnostics:</p>
     <p><img src="annotations.png" alt="Annotations used for inline diagnostics" /></p>
 
@@ -5080,16 +5083,19 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     </code>
 
     <p><b id="SCI_VISIBLEFROMDOCLINE">SCI_VISIBLEFROMDOCLINE(int docLine)</b><br />
-     When some lines are folded, then a particular line in the document may be displayed at a
-    different position to its document position. If no lines are folded, this message returns
+     When some lines are hidden and/or annotations are displayed, then a particular line in the
+     document may be displayed at a
+    different position to its document position. If no lines are hidden and there are no annotations,
+    this message returns
     <code>docLine</code>. Otherwise, this returns the display line (counting the very first visible
     line as 0). The display line of an invisible line is the same as the previous visible line. The
-    display line number of the first line in the document is 0. If there is folding and
+    display line number of the first line in the document is 0. If lines are hidden and
     <code>docLine</code> is outside the range of lines in the document, the return value is -1.
     Lines can occupy more than one display line if they wrap.</p>
 
     <p><b id="SCI_DOCLINEFROMVISIBLE">SCI_DOCLINEFROMVISIBLE(int displayLine)</b><br />
-     When some lines are hidden, then a particular line in the document may be displayed at a
+     When some lines are hidden and/or annotations are displayed, then a particular line in the
+     document may be displayed at a
     different position to its document position. This message returns the document line number that
     corresponds to a display line (counting the display line of the first line in the document as
     0). If <code>displayLine</code> is less than or equal to 0, the result is 0. If
