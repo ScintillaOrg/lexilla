@@ -4,7 +4,8 @@
  *
  * Created by Mike Lischke.
  *
- * Copyright 2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 2011, 2012, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2009, 2011 Sun Microsystems, Inc. All rights reserved.
  * This file is dual licensed under LGPL v2.1 and the Scintilla license (http://www.scintilla.org/License.txt).
  */
 
@@ -36,6 +37,8 @@ extern NSString *SCIUpdateUINotification;
   NSRange mMarkedTextRange;
 }
 
+@property (nonatomic, assign) ScintillaView* owner;
+
 - (void) dealloc;
 - (void) removeMarkedText;
 - (void) setCursor: (Scintilla::Window::Cursor) cursor;
@@ -43,7 +46,6 @@ extern NSString *SCIUpdateUINotification;
 - (BOOL) canUndo;
 - (BOOL) canRedo;
 
-@property (assign) ScintillaView* owner;
 @end
 
 @interface ScintillaView : NSView <InfoBarCommunicator>
@@ -69,6 +71,9 @@ extern NSString *SCIUpdateUINotification;
   BOOL mInfoBarAtTop;
   int mInitialInfoBarWidth;
 }
+
+@property (nonatomic, assign) Scintilla::ScintillaCocoa* backend;
+@property (nonatomic, assign) NSObject* owner;
 
 - (void) dealloc;
 - (void) positionSubViews;
@@ -137,6 +142,4 @@ extern NSString *SCIUpdateUINotification;
                      scrollTo: (BOOL) scrollTo
                          wrap: (BOOL) wrap;
 
-@property Scintilla::ScintillaCocoa* backend;
-@property (retain) NSObject* owner;
 @end
