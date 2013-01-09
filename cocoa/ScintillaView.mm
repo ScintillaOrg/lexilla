@@ -4,7 +4,7 @@
  *
  * Created by Mike Lischke.
  *
- * Copyright 2011, 2012, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2011, 2013, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2009, 2011 Sun Microsystems, Inc. All rights reserved.
  * This file is dual licensed under LGPL v2.1 and the Scintilla license (http://www.scintilla.org/License.txt).
  */
@@ -281,20 +281,18 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
  */
 - (void) setMarkedText: (id) aString selectedRange: (NSRange) range
 {
-  // Since we did not return any valid attribute for marked text (see validAttributesForMarkedText)
-  // we can safely assume the passed in text is an NSString instance.
-	NSString* newText = @"";
-	if ([aString isKindOfClass:[NSString class]])
-		newText = (NSString*) aString;
-	else if ([aString isKindOfClass:[NSAttributedString class]])
-		newText = (NSString*) [aString string];
-
+  NSString* newText = @"";
+  if ([aString isKindOfClass:[NSString class]])
+    newText = (NSString*) aString;
+  else
+    if ([aString isKindOfClass:[NSAttributedString class]])
+      newText = (NSString*) [aString string];
+  
   long currentPosition = [mOwner getGeneralProperty: SCI_GETCURRENTPOS parameter: 0];
 
   // Replace marked text if there is one.
   if (mMarkedTextRange.length > 0)
   {
-    // We have already marked text. Replace that.
     [mOwner setGeneralProperty: SCI_SETSELECTIONSTART
                          value: mMarkedTextRange.location];
     [mOwner setGeneralProperty: SCI_SETSELECTIONEND 
@@ -302,6 +300,10 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
     currentPosition = mMarkedTextRange.location;
   }
 
+  // Keep Scintilla from collecting undo actions for the composition task.
+  undoCollectionWasActive = [mOwner getGeneralProperty: SCI_GETUNDOCOLLECTION] != 0;
+  [mOwner setGeneralProperty: SCI_SETUNDOCOLLECTION value: 0];
+  
   // Note: Scintilla internally works almost always with bytes instead chars, so we need to take
   //       this into account when determining selection ranges and such.
   std::string raw_text = [newText UTF8String];
@@ -310,12 +312,21 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
   mMarkedTextRange.location = currentPosition;
   mMarkedTextRange.length = lengthInserted;
     
-  // Mark the just inserted text. Keep the marked range for later reset.
-  [mOwner setGeneralProperty: SCI_SETINDICATORCURRENT value: INPUT_INDICATOR];
-  [mOwner setGeneralProperty: SCI_INDICATORFILLRANGE
-                   parameter: mMarkedTextRange.location
-                       value: mMarkedTextRange.length];
-  
+  if (lengthInserted > 0)
+  {
+    // Mark the just inserted text. Keep the marked range for later reset.
+    [mOwner setGeneralProperty: SCI_SETINDICATORCURRENT value: INPUT_INDICATOR];
+    [mOwner setGeneralProperty: SCI_INDICATORFILLRANGE
+                     parameter: mMarkedTextRange.location
+                         value: mMarkedTextRange.length];
+  }
+  else
+  {
+    // Re-enable undo action collection if composition ended (indicated by an empty mark string).
+    if (undoCollectionWasActive)
+      [mOwner setGeneralProperty: SCI_SETUNDOCOLLECTION value: range.length == 0];
+  }
+
   // Select the part which is indicated in the given range. It does not scroll the caret into view.
   if (range.length > 0)
   {
@@ -337,6 +348,10 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
                      parameter: mMarkedTextRange.location
                          value: mMarkedTextRange.length];
     mMarkedTextRange = NSMakeRange(NSNotFound, 0);
+
+    // Reenable undo action collection, after we are done with text composition.    
+    if (undoCollectionWasActive)
+      [mOwner setGeneralProperty: SCI_SETUNDOCOLLECTION value: 1];
   }
 }
 
@@ -356,6 +371,10 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
                      value: mMarkedTextRange.location + mMarkedTextRange.length];
     mOwner.backend->InsertText(@"");
     mMarkedTextRange = NSMakeRange(NSNotFound, 0);
+
+    // Reenable undo action collection, after we are done with text composition.    
+    if (undoCollectionWasActive)
+      [mOwner setGeneralProperty: SCI_SETUNDOCOLLECTION value: 1];
   }
 }
 
