@@ -1700,7 +1700,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
         break;
 
       replaceCount++;
-      result = [ScintillaView directCall: self
+      [ScintillaView directCall: self
                                  message: SCI_REPLACETARGET
                                   wParam: targetLength
                                   lParam: (sptr_t) replacement];
@@ -1722,7 +1722,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 
     if (replaceCount > 0)
     {
-      result = [ScintillaView directCall: self
+      [ScintillaView directCall: self
                                  message: SCI_REPLACETARGET
                                   wParam: targetLength
                                   lParam: (sptr_t) replacement];
