@@ -144,10 +144,23 @@ extern NSString *SCIUpdateUINotification;
 - (void) setInfoBar: (NSView <InfoBarCommunicator>*) aView top: (BOOL) top;
 - (void) setStatusText: (NSString*) text;
 
-- (void) findAndHighlightText: (NSString*) searchText
+- (BOOL) findAndHighlightText: (NSString*) searchText
                     matchCase: (BOOL) matchCase
                     wholeWord: (BOOL) wholeWord
                      scrollTo: (BOOL) scrollTo
                          wrap: (BOOL) wrap;
+
+- (BOOL) findAndHighlightText: (NSString*) searchText
+                    matchCase: (BOOL) matchCase
+                    wholeWord: (BOOL) wholeWord
+                     scrollTo: (BOOL) scrollTo
+                         wrap: (BOOL) wrap
+                    backwards: (BOOL) backwards;
+
+- (int) findAndReplaceText: (NSString*) searchText
+                    byText: (NSString*) newText
+                 matchCase: (BOOL) matchCase
+                 wholeWord: (BOOL) wholeWord
+                     doAll: (BOOL) doAll;
 
 @end

@@ -1548,49 +1548,192 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Searches and marks the first occurance of the given text and optionally scrolls it into view.
+ * For backwards compatibility.
  */
-- (void) findAndHighlightText: (NSString*) searchText
+- (BOOL) findAndHighlightText: (NSString*) searchText
                     matchCase: (BOOL) matchCase
                     wholeWord: (BOOL) wholeWord
                      scrollTo: (BOOL) scrollTo
                          wrap: (BOOL) wrap
 {
-  // The current position is where we start searching. That is either the end of the current
-  // (main) selection or the caret position. That ensures we do proper "search next" too.
-  long currentPosition = [self getGeneralProperty: SCI_GETCURRENTPOS parameter: 0];
-  long length = [self getGeneralProperty: SCI_GETTEXTLENGTH parameter: 0];
+  return [self findAndHighlightText: searchText
+                          matchCase: matchCase
+                          wholeWord: wholeWord
+                           scrollTo: scrollTo
+                               wrap: wrap
+                          backwards: NO];
+}
 
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Searches and marks the first occurance of the given text and optionally scrolls it into view.
+ *
+ * @result YES if something was found, NO otherwise.
+ */
+- (BOOL) findAndHighlightText: (NSString*) searchText
+                    matchCase: (BOOL) matchCase
+                    wholeWord: (BOOL) wholeWord
+                     scrollTo: (BOOL) scrollTo
+                         wrap: (BOOL) wrap
+                    backwards: (BOOL) backwards
+{
   int searchFlags= 0;
   if (matchCase)
     searchFlags |= SCFIND_MATCHCASE;
   if (wholeWord)
     searchFlags |= SCFIND_WHOLEWORD;
 
-  Sci_TextToFind ttf;
-  ttf.chrg.cpMin = currentPosition;
-  ttf.chrg.cpMax = length;
-  ttf.lpstrText = (char*) [searchText UTF8String];
-  long position = mBackend->WndProc(SCI_FINDTEXT, searchFlags, (sptr_t) &ttf);
+  int selectionStart = [self getGeneralProperty: SCI_GETSELECTIONSTART parameter: 0];
+  int selectionEnd = [self getGeneralProperty: SCI_GETSELECTIONEND parameter: 0];
   
-  if (position < 0 && wrap)
+  // Sets the start point for the comming search to the begin of the current selection.
+  // For forward searches we have therefore to set the selection start to the current selection end
+  // for proper incremental search. This does not harm as we either get a new selection if something
+  // is found or the previous selection is restored.
+  if (!backwards)
+    [self getGeneralProperty: SCI_SETSELECTIONSTART parameter: selectionEnd];
+  [self setGeneralProperty: SCI_SEARCHANCHOR value: 0];
+  sptr_t result;
+  const char* textToSearch = [searchText UTF8String];
+
+  // The following call will also set the selection if something was found.
+  if (backwards)
   {
-    ttf.chrg.cpMin = 0;
-    ttf.chrg.cpMax = currentPosition;
-    position = mBackend->WndProc(SCI_FINDTEXT, searchFlags, (sptr_t) &ttf);
+    result = [ScintillaView directCall: self
+                               message: SCI_SEARCHPREV
+                                wParam: searchFlags
+                                lParam: (sptr_t) textToSearch];
+    if (result < 0 && wrap)
+    {
+      // Try again from the end of the document if nothing could be found so far and
+      // wrapped search is set.
+      [self getGeneralProperty: SCI_SETSELECTIONSTART parameter: [self getGeneralProperty: SCI_GETTEXTLENGTH parameter: 0]];
+      [self setGeneralProperty: SCI_SEARCHANCHOR value: 0];
+      result = [ScintillaView directCall: self
+                                 message: SCI_SEARCHNEXT
+                                  wParam: searchFlags
+                                  lParam: (sptr_t) textToSearch];
+    }
   }
-  
-  if (position >= 0)
+  else
   {
-    // Highlight the found text.
-    [self setGeneralProperty: SCI_SETSELECTIONSTART
-                       value: position];
-    [self setGeneralProperty: SCI_SETSELECTIONEND
-                       value: position + [searchText length]];
-    
+    result = [ScintillaView directCall: self
+                               message: SCI_SEARCHNEXT
+                                wParam: searchFlags
+                                lParam: (sptr_t) textToSearch];
+    if (result < 0 && wrap)
+    {
+      // Try again from the start of the document if nothing could be found so far and
+      // wrapped search is set.
+      [self getGeneralProperty: SCI_SETSELECTIONSTART parameter: 0];
+      [self setGeneralProperty: SCI_SEARCHANCHOR value: 0];
+      result = [ScintillaView directCall: self
+                                 message: SCI_SEARCHNEXT
+                                  wParam: searchFlags
+                                  lParam: (sptr_t) textToSearch];
+    }
+  }
+
+  if (result >= 0)
+  {
     if (scrollTo)
       [self setGeneralProperty: SCI_SCROLLCARET value: 0];
   }
+  else
+  {
+    // Restore the former selection if we did not find anything.
+    [self setGeneralProperty: SCI_SETSELECTIONSTART value: selectionStart];
+    [self setGeneralProperty: SCI_SETSELECTIONEND value: selectionEnd];
+  }
+  return (result >= 0) ? YES : NO;
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Searches the given text and replaces
+ *
+ * @result Number of entries replaced, 0 if none.
+ */
+- (int) findAndReplaceText: (NSString*) searchText
+                    byText: (NSString*) newText
+                 matchCase: (BOOL) matchCase
+                 wholeWord: (BOOL) wholeWord
+                     doAll: (BOOL) doAll
+{
+  // The current position is where we start searching for single occurences. Otherwise we start at
+  // the beginning of the document.
+  int startPosition;
+  if (doAll)
+    startPosition = 0; // Start at the beginning of the text if we replace all occurrences.
+  else
+    // For a signle replacement we start at the current caret position.
+    startPosition = [self getGeneralProperty: SCI_GETCURRENTPOS];
+  int endPosition = [self getGeneralProperty: SCI_GETTEXTLENGTH];
+
+  int searchFlags= 0;
+  if (matchCase)
+    searchFlags |= SCFIND_MATCHCASE;
+  if (wholeWord)
+    searchFlags |= SCFIND_WHOLEWORD;
+  [self setGeneralProperty: SCI_SETSEARCHFLAGS value: searchFlags];
+  [self setGeneralProperty: SCI_SETTARGETSTART value: startPosition];
+  [self setGeneralProperty: SCI_SETTARGETEND value: endPosition];
+
+  const char* textToSearch = [searchText UTF8String];
+  int sourceLength = strlen(textToSearch); // Length in bytes.
+  const char* replacement = [newText UTF8String];
+  int targetLength = strlen(replacement);  // Length in bytes.
+  sptr_t result;
+  
+  int replaceCount = 0;
+  if (doAll)
+  {
+    while (true)
+    {
+      result = [ScintillaView directCall: self
+                                 message: SCI_SEARCHINTARGET
+                                  wParam: sourceLength
+                                  lParam: (sptr_t) textToSearch];
+      if (result < 0)
+        break;
+
+      replaceCount++;
+      result = [ScintillaView directCall: self
+                                 message: SCI_REPLACETARGET
+                                  wParam: targetLength
+                                  lParam: (sptr_t) replacement];
+
+      // The replacement changes the target range to the replaced text. Continue after that til the end.
+      // The text length might be changed by the replacement so make sure the target end is the actual
+      // text end.
+      [self setGeneralProperty: SCI_SETTARGETSTART value: [self getGeneralProperty: SCI_GETTARGETEND]];
+      [self setGeneralProperty: SCI_SETTARGETEND value: [self getGeneralProperty: SCI_GETTEXTLENGTH]];
+    }
+  }
+  else
+  {
+    result = [ScintillaView directCall: self
+                               message: SCI_SEARCHINTARGET
+                                wParam: sourceLength
+                                lParam: (sptr_t) textToSearch];
+    replaceCount = (result < 0) ? 0 : 1;
+
+    if (replaceCount > 0)
+    {
+      result = [ScintillaView directCall: self
+                                 message: SCI_REPLACETARGET
+                                  wParam: targetLength
+                                  lParam: (sptr_t) replacement];
+
+    // For a single replace we set the new selection to the replaced text.
+    [self setGeneralProperty: SCI_SETSELECTIONSTART value: [self getGeneralProperty: SCI_GETTARGETSTART]];
+    [self setGeneralProperty: SCI_SETSELECTIONEND value: [self getGeneralProperty: SCI_GETTARGETEND]];
+    }
+  }
+  
+  return replaceCount;
 }
 
 //--------------------------------------------------------------------------------------------------
