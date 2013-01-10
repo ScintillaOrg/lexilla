@@ -329,6 +329,8 @@ const CGFloat paddingHighlightY = 2;
 
 - (void) dealloc
 {
+  NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
+  [center removeObserver:self];
   [notificationQueue release];
   [super dealloc];
 }
