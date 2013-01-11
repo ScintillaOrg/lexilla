@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1102C31C169FB49300DC16AB /* LexLaTeX.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 1102C31B169FB49300DC16AB /* LexLaTeX.cxx */; };
 		11126B8214CD3A6200803C49 /* LexAVS.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 11126B8114CD3A6200803C49 /* LexAVS.cxx */; };
 		1114D6CB1602A951001DC345 /* LexPO.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 1114D6CA1602A951001DC345 /* LexPO.cxx */; };
 		114B6F0D11FA7526004FB6AB /* LexAbaqus.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 114B6EBE11FA7526004FB6AB /* LexAbaqus.cxx */; };
@@ -194,6 +195,7 @@
 		0867D6A5FE840307C02AAC07 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		089C1667FE841158C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		1102C31B169FB49300DC16AB /* LexLaTeX.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexLaTeX.cxx; path = ../../lexers/LexLaTeX.cxx; sourceTree = "<group>"; };
 		11126B8114CD3A6200803C49 /* LexAVS.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexAVS.cxx; path = ../../lexers/LexAVS.cxx; sourceTree = "<group>"; };
 		1114D6CA1602A951001DC345 /* LexPO.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexPO.cxx; path = ../../lexers/LexPO.cxx; sourceTree = "<group>"; };
 		114B6EBE11FA7526004FB6AB /* LexAbaqus.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexAbaqus.cxx; path = ../../lexers/LexAbaqus.cxx; sourceTree = SOURCE_ROOT; };
@@ -510,6 +512,7 @@
 				114B6EDD11FA7526004FB6AB /* LexHTML.cxx */,
 				114B6EDE11FA7526004FB6AB /* LexInno.cxx */,
 				114B6EDF11FA7526004FB6AB /* LexKix.cxx */,
+				1102C31B169FB49300DC16AB /* LexLaTeX.cxx */,
 				114B6EE011FA7526004FB6AB /* LexLisp.cxx */,
 				114B6EE111FA7526004FB6AB /* LexLout.cxx */,
 				114B6EE211FA7526004FB6AB /* LexLua.cxx */,
@@ -950,6 +953,7 @@
 				11594BE9155B91DF0099E1FA /* LexOScript.cxx in Sources */,
 				11594BEA155B91DF0099E1FA /* LexVisualProlog.cxx in Sources */,
 				1114D6CB1602A951001DC345 /* LexPO.cxx in Sources */,
+				1102C31C169FB49300DC16AB /* LexLaTeX.cxx in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
