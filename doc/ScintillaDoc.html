@@ -79,7 +79,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 3/January/2013 NH</p>
+    <p>Last edited 18/January/2013 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -5899,6 +5899,27 @@ needs to be folded as this allowed fixing up the last line from the previous fol
 The new approach allows the lexer to decide whether to backtrack or to handle this
 more efficiently.</p>
 
+<h4>ILexerWithSubStyles</h4>
+
+<p>
+To allow lexers to report which line ends they support, and to support substyles,
+<code>Ilexer</code> is extended to <code>ILexerWithSubStyles</code>.
+</p>
+
+<div class="highlighted">
+<span class="S5">class</span><span class="S0"> </span>ILexerWithSubStyles<span class="S0"> </span><span class="S10">:</span><span class="S0"> </span><span class="S5">public</span><span class="S0"> </span>ILexer<span class="S0"> </span><span class="S10">{</span><br />
+<span class="S5">public</span><span class="S10">:</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>LineEndTypesSupported<span class="S10">()</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>AllocateSubStyles<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>styleBase<span class="S10">,</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>numberStyles<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>SubStylesStart<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>styleBase<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>SubStylesLength<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>styleBase<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>FreeSubStyles<span class="S10">()</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>SetIdentifiers<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>style<span class="S10">,</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span>identifiers<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>DistanceToSecondaryStyles<span class="S10">()</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>GetSubStyleBases<span class="S10">()</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S10">};</span><br />
+</div>
+
 <h4>IDocument</h4>
 
 <div class="highlighted">
@@ -6047,7 +6068,22 @@ exceptions. Exceptions should not be thrown over build boundaries as the
  two sides may be built with different compilers or incompatible
 exception options.</p>
 
-<p>The <code>ILexer</code> and <code>IDocument</code> interfaces may be
+<h4>IDocumentWithLineEnd</h4>
+
+<p>
+To allow lexers to determine the end position of a line and thus more easily support Unicode line ends
+<code>IDocument</code> is extended to <code>IDocumentWithLineEnd</code>.
+</p>
+
+<div class="highlighted">
+<span class="S5">class</span><span class="S0"> </span>IDocumentWithLineEnd<span class="S0"> </span><span class="S10">:</span><span class="S0"> </span><span class="S5">public</span><span class="S0"> </span>IDocument<span class="S0"> </span><span class="S10">{</span><br />
+<span class="S5">public</span><span class="S10">:</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>LineEnd<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>line<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S10">};</span><br />
+</div>
+
+<p>The <code>ILexer</code>, <code>ILexerWithSubStyles</code>, <code>IDocument</code>, and 
+<code>IDocumentWithLineEnd</code>  interfaces may be
 expanded in the future with extended versions (<code>ILexer2</code>...).
  The <code>Version</code> method indicates which interface is
 implemented and thus which methods may be called.</p>
