@@ -61,6 +61,9 @@
 		color: #000000;
 		font-size: 10pt;
 	}
+	.provisional {
+		background: #FFB000;
+        }
 /*]]>*/
 -->
     </style>
@@ -317,15 +320,18 @@
         <tr>
           <td>o <a class="toc" href="#GTK">GTK+</a></td>
 
+          <td>o <a class="toc" href="#ProvisionalMessages"><span class="provisional">Provisional messages</span></a></td>
+
           <td>o <a class="toc" href="#DeprecatedMessages">Deprecated messages</a></td>
-	  
-          <td>o <a class="toc" href="#EditMessagesNeverSupportedByScintilla">Edit messages never
-          supported by Scintilla</a></td>
 	  
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#EditMessagesNeverSupportedByScintilla">Edit messages never
+          supported by Scintilla</a></td>
+
           <td>o <a class="toc" href="#BuildingScintilla">Building Scintilla</a></td>
+
         </tr>
       </tbody>
     </table>
@@ -2176,8 +2182,8 @@ struct Sci_TextToFind {
 
     <h2 id="LineEndings">Line endings</h2>
 
-    <p>Scintilla can handle the major line end conventions and, depending on settings and
-    the current lexer also support additional Unicode line ends.</p>
+    <p>Scintilla can handle the major line end conventions <span class="provisional">and, depending on settings and
+    the current lexer also support additional Unicode line ends</span>.</p>
     
     <p>Scintilla can interpret any of the Macintosh (\r), Unix (\n) and Windows (\r\n)
     line ends.
@@ -2187,10 +2193,12 @@ struct Sci_TextToFind {
     entire document to one of these line endings with <code>SCI_CONVERTEOLS</code>. Finally, you
     can choose to display the line endings with <code>SCI_SETVIEWEOL</code>.</p>
 
+<div  class="provisional">
     <p>For the UTF-8 encoding, three additional Unicode line ends,
     Next Line (<code>NEL=U+0085</code>), Line Separator (<code>LS=U+2028</code>), and Paragraph Separator (<code>PS=U+2029</code>)
     may optionally be interpreted when Unicode line ends is turned on and the current lexer also supports
     Unicode line ends.</p>
+</div>
 
     <code><a class="message" href="#SCI_SETEOLMODE">SCI_SETEOLMODE(int eolMode)</a><br />
      <a class="message" href="#SCI_GETEOLMODE">SCI_GETEOLMODE</a><br />
@@ -2198,10 +2206,12 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_SETVIEWEOL">SCI_SETVIEWEOL(bool visible)</a><br />
      <a class="message" href="#SCI_GETVIEWEOL">SCI_GETVIEWEOL</a><br />
 
+<div  class="provisional">
      <a class="message" href="#SCI_GETLINEENDTYPESSUPPORTED">SCI_GETLINEENDTYPESSUPPORTED</a><br />
      <a class="message" href="#SCI_SETLINEENDTYPESALLOWED">SCI_SETLINEENDTYPESALLOWED(int lineEndBitSet)</a><br />
      <a class="message" href="#SCI_GETLINEENDTYPESALLOWED">SCI_GETLINEENDTYPESALLOWED</a><br />
      <a class="message" href="#SCI_GETLINEENDTYPESACTIVE">SCI_GETLINEENDTYPESACTIVE</a><br />
+</div>
     </code>
 
     <p><b id="SCI_SETEOLMODE">SCI_SETEOLMODE(int eolMode)</b><br />
@@ -2224,6 +2234,9 @@ struct Sci_TextToFind {
     <code>(CR)</code>, <code>(LF)</code>, or <code>(CR)(LF)</code>. <code>SCI_GETVIEWEOL</code>
     returns the current state.</p>
 
+<div  class="provisional">
+    <a href="#ProvisionalMessages">These features are provisional</a><br />
+
     <p><b id="SCI_GETLINEENDTYPESSUPPORTED">SCI_GETLINEENDTYPESSUPPORTED</b><br />
      <code>SCI_GETLINEENDTYPESSUPPORTED</code> reports the different types of line ends supported
      by the current lexer. This is a bit set although there is currently only a single choice
@@ -2240,6 +2253,7 @@ struct Sci_TextToFind {
     <p><b id="SCI_GETLINEENDTYPESACTIVE">SCI_GETLINEENDTYPESACTIVE</b><br />
      <code>SCI_GETLINEENDTYPESACTIVE</code> reports the set of line ends currently interpreted
      by Scintilla. It is <code>SCI_GETLINEENDTYPESSUPPORTED &amp; SCI_GETLINEENDTYPESALLOWED</code>.</p>
+</div>
 
     <h2 id="Styling">Styling</h2>
 
@@ -5672,6 +5686,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     *keyWordList)</a><br />
      <a class="message" href="#SCI_GETSTYLEBITSNEEDED">SCI_GETSTYLEBITSNEEDED</a><br />
 
+<div  class="provisional">
      <a class="message" href="#SCI_GETSUBSTYLEBASES">SCI_GETSUBSTYLEBASES(&lt;unused&gt;, char *styles)</a><br />
      <a class="message" href="#SCI_DISTANCETOSECONDARYSTYLES">SCI_DISTANCETOSECONDARYSTYLES</a><br />
      <a class="message" href="#SCI_ALLOCATESUBSTYLES">SCI_ALLOCATESUBSTYLES(int styleBase, int numberStyles)</a><br />
@@ -5679,6 +5694,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_GETSUBSTYLESSTART">SCI_GETSUBSTYLESSTART(int styleBase)</a><br />
      <a class="message" href="#SCI_GETSUBSTYLESLENGTH">SCI_GETSUBSTYLESLENGTH(int styleBase)</a><br />
      <a class="message" href="#SCI_SETIDENTIFIERS">SCI_SETIDENTIFIERS(int style, const char *identifiers)</a><br />
+</div>
 
     </code>
 
@@ -5825,7 +5841,9 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      to <a class="message" href="#SCI_SETSTYLEBITS">SCI_SETSTYLEBITS</a>.
      </p>
 
+<div  class="provisional">
     <h3 id="Substyles">Substyles</h3>
+    <a href="#ProvisionalMessages">These features are provisional</a><br />
     <p>Lexers may support several different sublanguages and each sublanguage may want to style some number of
     sets of identifiers (or similar lexemes such as documentation keywords) uniquely. Preallocating a large number for each
     purpose would exhaust the number of allowed styles quickly.
@@ -5852,6 +5870,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 
     <p><b id="SCI_SETIDENTIFIERS">SCI_SETIDENTIFIERS(int style, const char *identifiers)</b><br />
      Similar to <code>SCI_SETKEYWORDS</code> but for substyles.</p>
+</div>
 
     <h2 id="LexerObjects">Lexer Objects</h2>
 
@@ -5967,9 +5986,9 @@ needs to be folded as this allowed fixing up the last line from the previous fol
 The new approach allows the lexer to decide whether to backtrack or to handle this
 more efficiently.</p>
 
-<h4>ILexerWithSubStyles</h4>
+<h4 class="provisional">ILexerWithSubStyles</h4>
 
-<p>
+<p class="provisional">
 To allow lexers to report which line ends they support, and to support substyles,
 <code>Ilexer</code> is extended to <code>ILexerWithSubStyles</code>.
 </p>
@@ -7057,6 +7076,17 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
 
     <p><b id="scintilla_release_resources">void scintilla_release_resources()</b><br />
     Call this to free any remaining resources after all the Scintilla widgets have been destroyed.</p>
+
+    <h2 id="ProvisionalMessages">Provisional messages</h2>
+
+    <p>Complex new features may be added as 'provisional' to allow further changes to the API.
+    Provisional features may even be removed if experience shows they are a mistake.</p>
+
+    <p>Provisional features are displayed in this document with <span class="provisional">a distinctive background colour</span>.</p>
+
+    <p>Some developers may want to only use features that are stable and have graduated from
+    provisional status. To avoid using provisional messages compile with the symbol
+    <code>SCI_DISABLE_PROVISIONAL</code> defined.</p>
 
     <h2 id="DeprecatedMessages">Deprecated messages and notifications</h2>
 
