@@ -12,6 +12,8 @@
 namespace Scintilla {
 #endif
 
+enum EncodingType { enc8bit, encUnicode, encDBCS };
+
 class LexAccessor {
 private:
 	IDocument *pAccess;
@@ -25,7 +27,7 @@ private:
 	int startPos;
 	int endPos;
 	int codePage;
-	enum { enc8bit, encUnicode, encDBCS } encodingType;
+	enum EncodingType encodingType;
 	int lenDoc;
 	int mask;
 	char styleBuf[bufferSize];
@@ -91,7 +93,9 @@ public:
 	bool IsLeadByte(char ch) {
 		return pAccess->IsDBCSLeadByte(ch);
 	}
-
+	EncodingType Encoding() const {
+		return encodingType;
+	}
 	bool Match(int pos, const char *s) {
 		for (int i=0; *s; i++) {
 			if (*s != SafeGetCharAt(pos+i))
@@ -108,6 +112,19 @@ public:
 	}
 	int LineStart(int line) {
 		return pAccess->LineStart(line);
+	}
+	int LineEnd(int line) {
+		if (documentVersion >= dvLineEnd) {
+			return (static_cast<IDocumentWithLineEnd *>(pAccess))->LineEnd(line);
+		} else {
+			// Old interface means only '\r', '\n' and '\r\n' line ends.
+			int startNext = pAccess->LineStart(line+1);
+			char chLineEnd = SafeGetCharAt(startNext-1);
+			if (chLineEnd == '\n' && (SafeGetCharAt(startNext-2)  == '\r'))
+				return startNext - 2;
+			else
+				return startNext - 1;
+		}
 	}
 	int LevelAt(int line) {
 		return pAccess->GetLevel(line);
