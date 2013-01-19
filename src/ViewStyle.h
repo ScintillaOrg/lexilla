@@ -32,6 +32,8 @@ private:
 	int size;
 	int max;
 
+	// Private so FontNames objects can not be copied
+	FontNames(const FontNames &);
 public:
 	FontNames();
 	~FontNames();

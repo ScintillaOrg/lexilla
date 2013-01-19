@@ -98,6 +98,9 @@ class UndoHistory {
 
 	void EnsureUndoRoom();
 
+	// Private so UndoHistory objects can not be copied
+	UndoHistory(const UndoHistory &);
+
 public:
 	UndoHistory();
 	~UndoHistory();
