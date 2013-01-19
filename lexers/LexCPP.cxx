@@ -30,6 +30,7 @@
 #include "LexerModule.h"
 #include "OptionSet.h"
 #include "SparseState.h"
+#include "SubStyles.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -87,7 +88,8 @@ static std::string GetRestOfLine(LexAccessor &styler, int start, bool allowSpace
 	std::string restOfLine;
 	int i =0;
 	char ch = styler.SafeGetCharAt(start, '\n');
-	while ((ch != '\r') && (ch != '\n')) {
+	int endLine = styler.LineEnd(styler.GetLine(start));
+	while (((start+i) < endLine) && (ch != '\r')) {
 		char chNext = styler.SafeGetCharAt(start + i + 1, '\n');
 		if (ch == '/' && (chNext == '/' || chNext == '*'))
 			break;
@@ -310,7 +312,9 @@ struct OptionSetCPP : public OptionSet<OptionsCPP> {
 	}
 };
 
-class LexerCPP : public ILexer {
+static const char styleSubable[] = {SCE_C_IDENTIFIER, SCE_C_COMMENTDOCKEYWORD, 0};
+
+class LexerCPP : public ILexerWithSubStyles {
 	bool caseSensitive;
 	CharacterSet setWord;
 	CharacterSet setNegationOp;
@@ -329,6 +333,8 @@ class LexerCPP : public ILexer {
 	OptionSetCPP osCPP;
 	SparseState<std::string> rawStringTerminators;
 	enum { activeFlag = 0x40 };
+	enum { ssIdentifier, ssDocKeyword };
+	SubStyles subStyles;
 public:
 	LexerCPP(bool caseSensitive_) :
 		caseSensitive(caseSensitive_),
@@ -336,7 +342,8 @@ public:
 		setNegationOp(CharacterSet::setNone, "!"),
 		setArithmethicOp(CharacterSet::setNone, "+-/*%"),
 		setRelOp(CharacterSet::setNone, "=!<>"),
-		setLogicalOp(CharacterSet::setNone, "|&") {
+		setLogicalOp(CharacterSet::setNone, "|&"),
+		subStyles(styleSubable, 0x80, 0x40, activeFlag) {
 	}
 	virtual ~LexerCPP() {
 	}
@@ -344,7 +351,7 @@ public:
 		delete this;
 	}
 	int SCI_METHOD Version() const {
-		return lvOriginal;
+		return lvSubStyles;
 	}
 	const char * SCI_METHOD PropertyNames() {
 		return osCPP.PropertyNames();
@@ -365,6 +372,32 @@ public:
 
 	void * SCI_METHOD PrivateCall(int, void *) {
 		return 0;
+	}
+
+	int SCI_METHOD LineEndTypesSupported() {
+		return SC_LINE_END_TYPE_UNICODE;
+	};
+
+	int SCI_METHOD AllocateSubStyles(int styleBase, int numberStyles) {
+		return subStyles.Allocate(styleBase, numberStyles);
+	}
+	int SCI_METHOD SubStylesStart(int styleBase) {
+		return subStyles.Start(styleBase);
+	}
+	int SCI_METHOD SubStylesLength(int styleBase) {
+		return subStyles.Length(styleBase);
+	}
+	void SCI_METHOD FreeSubStyles() {
+		subStyles.Free();
+	}
+	void SCI_METHOD SetIdentifiers(int style, const char *identifiers) {
+		subStyles.SetIdentifiers(style, identifiers);
+	}
+	int SCI_METHOD DistanceToSecondaryStyles() {
+		return activeFlag;
+	}
+	const char * SCI_METHOD GetSubStyleBases() {
+		return styleSubable;
 	}
 
 	static ILexer *LexerFactoryCPP() {
@@ -479,15 +512,10 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
       (MaskActive(initStyle) == SCE_C_COMMENTLINEDOC)) {
 		// Set continuationLine if last character of previous line is '\'
 		if (lineCurrent > 0) {
-			int chBack = styler.SafeGetCharAt(startPos-1, 0);
-			int chBack2 = styler.SafeGetCharAt(startPos-2, 0);
-			int lineEndChar = '!';
-			if (chBack2 == '\r' && chBack == '\n') {
-				lineEndChar = styler.SafeGetCharAt(startPos-3, 0);
-			} else if (chBack == '\n' || chBack == '\r') {
-				lineEndChar = chBack2;
+			int endLinePrevious = styler.LineEnd(lineCurrent - 1);
+			if (endLinePrevious > 0) {
+				continuationLine = styler.SafeGetCharAt(endLinePrevious-1) == '\\';
 			}
-			continuationLine = lineEndChar == '\\';
 		}
 	}
 
@@ -501,7 +529,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 		}
 	}
 
-	StyleContext sc(startPos, length, initStyle, styler, 0x7f);
+	StyleContext sc(startPos, length, initStyle, styler, static_cast<char>(0xff));
 	LinePPState preproc = vlls.ForLine(lineCurrent);
 
 	bool definitionsChanged = false;
@@ -526,6 +554,11 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 	SparseState<std::string> rawSTNew(lineCurrent);
 
 	int activitySet = preproc.IsInactive() ? activeFlag : 0;
+
+	const WordClassifier &classifierIdentifiers = subStyles.Classifier(SCE_C_IDENTIFIER);
+	const WordClassifier &classifierDocKeyWords = subStyles.Classifier(SCE_C_COMMENTDOCKEYWORD);
+
+	int lineEndNext = styler.LineEnd(lineCurrent);
 
 	for (; sc.More();) {
 
@@ -554,6 +587,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 
 		if (sc.atLineEnd) {
 			lineCurrent++;
+			lineEndNext = styler.LineEnd(lineCurrent);
 			vlls.Add(lineCurrent, preproc);
 			if (rawStringTerminator != "") {
 				rawSTNew.Set(lineCurrent-1, rawStringTerminator);
@@ -562,11 +596,13 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 
 		// Handle line continuation generically.
 		if (sc.ch == '\\') {
-			if (sc.chNext == '\n' || sc.chNext == '\r') {
+			if (static_cast<int>((sc.currentPos+1)) >= lineEndNext) {
 				lineCurrent++;
+				lineEndNext = styler.LineEnd(lineCurrent);
 				vlls.Add(lineCurrent, preproc);
 				sc.Forward();
 				if (sc.ch == '\r' && sc.chNext == '\n') {
+					// Even in UTF-8, \r and \n are separate
 					sc.Forward();
 				}
 				continuationLine = true;
@@ -591,7 +627,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 				}
 				break;
 			case SCE_C_IDENTIFIER:
-				if (!setWord.Contains(sc.ch) || (sc.ch == '.')) {
+				if (sc.atLineStart || sc.atLineEnd || !setWord.Contains(sc.ch) || (sc.ch == '.')) {
 					char s[1000];
 					if (caseSensitive) {
 						sc.GetCurrent(s, sizeof(s));
@@ -605,6 +641,11 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 						sc.ChangeState(SCE_C_WORD2|activitySet);
 					} else if (keywords4.InList(s)) {
 						sc.ChangeState(SCE_C_GLOBALCLASS|activitySet);
+					} else {
+						int subStyle = classifierIdentifiers.ValueFor(s);
+						if (subStyle >= 0) {
+							sc.ChangeState(subStyle|activitySet);
+						}
 					}
 					const bool literalString = sc.ch == '\"';
 					if (literalString || sc.ch == '\'') {
@@ -697,8 +738,15 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 					} else {
 						sc.GetCurrentLowered(s, sizeof(s));
 					}
-					if (!IsASpace(sc.ch) || !keywords3.InList(s + 1)) {
+					if (!IsASpace(sc.ch)) {
 						sc.ChangeState(SCE_C_COMMENTDOCKEYWORDERROR|activitySet);
+					} else if (!keywords3.InList(s + 1)) {
+						int subStyleCDKW = classifierDocKeyWords.ValueFor(s+1);
+						if (subStyleCDKW >= 0) {
+							sc.ChangeState(subStyleCDKW|activitySet);
+						} else {
+							sc.ChangeState(SCE_C_COMMENTDOCKEYWORDERROR|activitySet);
+						}
 					}
 					sc.SetState(styleBeforeDCKeyword|activitySet);
 				}
@@ -755,7 +803,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 					while ((sc.ch < 0x80) && islower(sc.ch))
 						sc.Forward();    // gobble regex flags
 					sc.SetState(SCE_C_DEFAULT|activitySet);
-				} else if (sc.ch == '\\' && (sc.chNext != '\n' && sc.chNext != '\r')) {
+				} else if (sc.ch == '\\' && (static_cast<int>(sc.currentPos+1) < lineEndNext)) {
 					// Gobble up the escaped character
 					sc.Forward();
 				} else if (sc.ch == '[') {
@@ -787,7 +835,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 				}
 				break;
 			case SCE_C_UUID:
-				if (sc.ch == '\r' || sc.ch == '\n' || sc.ch == ')') {
+				if (sc.atLineEnd || sc.ch == ')') {
 					sc.SetState(SCE_C_DEFAULT|activitySet);
 				}
 		}
@@ -795,6 +843,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 		if (sc.atLineEnd && !atLineEndBeforeSwitch) {
 			// State exit processing consumed characters up to end of line.
 			lineCurrent++;
+			lineEndNext = styler.LineEnd(lineCurrent);
 			vlls.Add(lineCurrent, preproc);
 		}
 
@@ -816,7 +865,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 				} else {
 					sc.SetState(SCE_C_NUMBER|activitySet);
 				}
-			} else if (setWordStart.Contains(sc.ch) || (sc.ch == '@')) {
+			} else if (!sc.atLineEnd && (setWordStart.Contains(sc.ch) || (sc.ch == '@'))) {
 				if (lastWordWasUUID) {
 					sc.SetState(SCE_C_UUID|activitySet);
 					lastWordWasUUID = false;
@@ -945,7 +994,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 						}
 					}
 				}
-			} else if (isoperator(static_cast<char>(sc.ch))) {
+			} else if (isoperator(sc.ch)) {
 				sc.SetState(SCE_C_OPERATOR|activitySet);
 			}
 		}
@@ -980,6 +1029,7 @@ void SCI_METHOD LexerCPP::Fold(unsigned int startPos, int length, int initStyle,
 	int levelCurrent = SC_FOLDLEVELBASE;
 	if (lineCurrent > 0)
 		levelCurrent = styler.LevelAt(lineCurrent-1) >> 16;
+	unsigned int lineStartNext = styler.LineStart(lineCurrent+1);
 	int levelMinCurrent = levelCurrent;
 	int levelNext = levelCurrent;
 	char chNext = styler[startPos];
@@ -992,7 +1042,7 @@ void SCI_METHOD LexerCPP::Fold(unsigned int startPos, int length, int initStyle,
 		int stylePrev = style;
 		style = styleNext;
 		styleNext = MaskActive(styler.StyleAt(i + 1));
-		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
+		bool atEOL = i == (lineStartNext-1);
 		if (options.foldComment && options.foldCommentMultiline && IsStreamCommentStyle(style)) {
 			if (!IsStreamCommentStyle(stylePrev) && (stylePrev != SCE_C_COMMENTLINEDOC)) {
 				levelNext++;
@@ -1060,6 +1110,7 @@ void SCI_METHOD LexerCPP::Fold(unsigned int startPos, int length, int initStyle,
 				styler.SetLevel(lineCurrent, lev);
 			}
 			lineCurrent++;
+			lineStartNext = styler.LineStart(lineCurrent+1);
 			levelCurrent = levelNext;
 			levelMinCurrent = levelCurrent;
 			if (atEOL && (i == static_cast<unsigned int>(styler.Length()-1))) {

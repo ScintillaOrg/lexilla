@@ -282,6 +282,201 @@ class TestSimple(unittest.TestCase):
 			self.assertEquals(self.ed.Contents(), b"x" + lineEnds[lineEndType] + b"y")
 			self.assertEquals(self.ed.LineLength(0), 1 + len(lineEnds[lineEndType]))
 
+	# Several tests for unicode line ends U+2028 and U+2029
+	
+	def testUnicodeLineEnds(self):
+		# Add two lines separated with U+2028 and ensure it is seen as two lines
+		# Then remove U+2028 and should be just 1 lines
+		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.ed.SetCodePage(65001)
+		self.ed.SetLineEndTypesAllowed(1)
+		self.ed.AddText(5, b"x\xe2\x80\xa8y")
+		self.assertEquals(self.ed.LineCount, 2)
+		self.assertEquals(self.ed.GetLineEndPosition(0), 1)
+		self.assertEquals(self.ed.GetLineEndPosition(1), 5)
+		self.assertEquals(self.ed.LineLength(0), 4)
+		self.assertEquals(self.ed.LineLength(1), 1)
+		self.ed.TargetStart = 1
+		self.ed.TargetEnd = 4
+		self.ed.ReplaceTarget(0, b"")
+		self.assertEquals(self.ed.LineCount, 1)
+		self.assertEquals(self.ed.LineLength(0), 2)
+		self.assertEquals(self.ed.GetLineEndPosition(0), 2)
+
+	def testUnicodeLineEndsWithCodePage0(self):
+		# Try the Unicode line ends when not in Unicode mode -> should remain 1 line
+		self.ed.SetCodePage(0)
+		self.ed.AddText(5, b"x\xe2\x80\xa8y")
+		self.assertEquals(self.ed.LineCount, 1)
+		self.ed.AddText(4, b"x\xc2\x85y")
+		self.assertEquals(self.ed.LineCount, 1)
+
+	def testUnicodeLineEndsSwitchToUnicodeAndBack(self):
+		# Add the Unicode line ends when not in Unicode mode
+		self.ed.SetCodePage(0)
+		self.ed.AddText(5, b"x\xe2\x80\xa8y")
+		self.assertEquals(self.ed.LineCount, 1)
+		# Into UTF-8 mode - should now be interpreting as two lines
+		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.ed.SetCodePage(65001)
+		self.ed.SetLineEndTypesAllowed(1)
+		self.assertEquals(self.ed.LineCount, 2)
+		# Back to code page 0 and 1 line
+		self.ed.SetCodePage(0)
+		self.assertEquals(self.ed.LineCount, 1)
+
+	def testUFragmentedEOLCompletion(self):
+		# Add 2 starting bytes of UTF-8 line end then complete it
+		self.ed.ClearAll()
+		self.ed.AddText(4, b"x\xe2\x80y")
+		self.assertEquals(self.ed.LineCount, 1)
+		self.assertEquals(self.ed.GetLineEndPosition(0), 4)
+		self.ed.SetSel(3,3)
+		self.ed.AddText(1, b"\xa8")
+		self.assertEquals(self.ed.Contents(), b"x\xe2\x80\xa8y")
+		self.assertEquals(self.ed.LineCount, 2)
+
+		# Add 1 starting bytes of UTF-8 line end then complete it
+		self.ed.ClearAll()
+		self.ed.AddText(3, b"x\xe2y")
+		self.assertEquals(self.ed.LineCount, 1)
+		self.assertEquals(self.ed.GetLineEndPosition(0), 3)
+		self.ed.SetSel(2,2)
+		self.ed.AddText(2, b"\x80\xa8")
+		self.assertEquals(self.ed.Contents(), b"x\xe2\x80\xa8y")
+		self.assertEquals(self.ed.LineCount, 2)
+
+	def testUFragmentedEOLStart(self):
+		# Add end of UTF-8 line end then insert start
+		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.ed.SetCodePage(65001)
+		self.ed.SetLineEndTypesAllowed(1)
+		self.assertEquals(self.ed.LineCount, 1)
+		self.ed.AddText(4, b"x\x80\xa8y")
+		self.assertEquals(self.ed.LineCount, 1)
+		self.ed.SetSel(1,1)
+		self.ed.AddText(1, b"\xe2")
+		self.assertEquals(self.ed.LineCount, 2)
+
+	def testUBreakApartEOL(self):
+		# Add two lines separated by U+2029 then remove and add back each byte ensuring
+		# only one line after each removal of any byte in line end and 2 lines after reinsertion
+		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.ed.SetCodePage(65001)
+		self.ed.SetLineEndTypesAllowed(1)
+		text = b"x\xe2\x80\xa9y";
+		self.ed.AddText(5, text)
+		self.assertEquals(self.ed.LineCount, 2)
+		
+		for i in range(len(text)):
+			self.ed.TargetStart = i
+			self.ed.TargetEnd = i + 1
+			self.ed.ReplaceTarget(0, b"")
+			if i in [0, 4]:
+				# Removing text characters does not change number of lines
+				self.assertEquals(self.ed.LineCount, 2)
+			else:
+				# Removing byte from line end, removes 1 line
+				self.assertEquals(self.ed.LineCount, 1)
+				
+			self.ed.TargetEnd = i
+			self.ed.ReplaceTarget(1, text[i:i+1])
+			self.assertEquals(self.ed.LineCount, 2)
+
+	def testURemoveEOLFragment(self):
+		# Add UTF-8 line end then delete each byte causing line end to disappear
+		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.ed.SetCodePage(65001)
+		self.ed.SetLineEndTypesAllowed(1)
+		for i in range(3):
+			self.ed.ClearAll()
+			self.ed.AddText(5, b"x\xe2\x80\xa8y")
+			self.assertEquals(self.ed.LineCount, 2)
+			self.ed.TargetStart = i+1
+			self.ed.TargetEnd = i+2
+			self.ed.ReplaceTarget(0, b"")
+			self.assertEquals(self.ed.LineCount, 1)
+		
+	# Several tests for unicode NEL line ends U+0085
+
+	def testNELLineEnds(self):
+		# Add two lines separated with U+0085 and ensure it is seen as two lines
+		# Then remove U+0085 and should be just 1 lines
+		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.ed.SetCodePage(65001)
+		self.ed.SetLineEndTypesAllowed(1)
+		self.ed.AddText(4, b"x\xc2\x85y")
+		self.assertEquals(self.ed.LineCount, 2)
+		self.assertEquals(self.ed.GetLineEndPosition(0), 1)
+		self.assertEquals(self.ed.GetLineEndPosition(1), 4)
+		self.assertEquals(self.ed.LineLength(0), 3)
+		self.assertEquals(self.ed.LineLength(1), 1)
+		self.ed.TargetStart = 1
+		self.ed.TargetEnd = 3
+		self.ed.ReplaceTarget(0, b"")
+		self.assertEquals(self.ed.LineCount, 1)
+		self.assertEquals(self.ed.LineLength(0), 2)
+		self.assertEquals(self.ed.GetLineEndPosition(0), 2)
+
+	def testNELFragmentedEOLCompletion(self):
+		# Add starting byte of UTF-8 NEL then complete it
+		self.ed.AddText(3, b"x\xc2y")
+		self.assertEquals(self.ed.LineCount, 1)
+		self.assertEquals(self.ed.GetLineEndPosition(0), 3)
+		self.ed.SetSel(2,2)
+		self.ed.AddText(1, b"\x85")
+		self.assertEquals(self.ed.Contents(), b"x\xc2\x85y")
+		self.assertEquals(self.ed.LineCount, 2)
+
+	def testNELFragmentedEOLStart(self):
+		# Add end of UTF-8 NEL then insert start
+		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.ed.SetCodePage(65001)
+		self.ed.SetLineEndTypesAllowed(1)
+		self.assertEquals(self.ed.LineCount, 1)
+		self.ed.AddText(4, b"x\x85y")
+		self.assertEquals(self.ed.LineCount, 1)
+		self.ed.SetSel(1,1)
+		self.ed.AddText(1, b"\xc2")
+		self.assertEquals(self.ed.LineCount, 2)
+
+	def testNELBreakApartEOL(self):
+		# Add two lines separated by U+0085 then remove and add back each byte ensuring
+		# only one line after each removal of any byte in line end and 2 lines after reinsertion
+		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.ed.SetCodePage(65001)
+		self.ed.SetLineEndTypesAllowed(1)
+		text = b"x\xc2\x85y";
+		self.ed.AddText(4, text)
+		self.assertEquals(self.ed.LineCount, 2)
+		
+		for i in range(len(text)):
+			self.ed.TargetStart = i
+			self.ed.TargetEnd = i + 1
+			self.ed.ReplaceTarget(0, b"")
+			if i in [0, 3]:
+				# Removing text characters does not change number of lines
+				self.assertEquals(self.ed.LineCount, 2)
+			else:
+				# Removing byte from line end, removes 1 line
+				self.assertEquals(self.ed.LineCount, 1)
+				
+			self.ed.TargetEnd = i
+			self.ed.ReplaceTarget(1, text[i:i+1])
+			self.assertEquals(self.ed.LineCount, 2)
+
+	def testNELRemoveEOLFragment(self):
+		# Add UTF-8 NEL then delete each byte causing line end to disappear
+		self.ed.SetCodePage(65001)
+		for i in range(2):
+			self.ed.ClearAll()
+			self.ed.AddText(4, b"x\xc2\x85y")
+			self.assertEquals(self.ed.LineCount, 2)
+			self.ed.TargetStart = i+1
+			self.ed.TargetEnd = i+2
+			self.ed.ReplaceTarget(0, b"")
+			self.assertEquals(self.ed.LineCount, 1)
+		
 	def testGoto(self):
 		self.ed.AddText(5, b"a\nb\nc")
 		self.assertEquals(self.ed.CurrentPos, 5)
