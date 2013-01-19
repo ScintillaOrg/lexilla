@@ -7784,6 +7784,21 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		pdoc->eolMode = wParam;
 		break;
 
+	case SCI_SETLINEENDTYPESALLOWED:
+		if (pdoc->SetLineEndTypesAllowed(wParam)) {
+			cs.Clear();
+			cs.InsertLines(0, pdoc->LinesTotal() - 1);
+			SetAnnotationHeights(0, pdoc->LinesTotal());
+			InvalidateStyleRedraw();
+		}
+		break;
+
+	case SCI_GETLINEENDTYPESALLOWED:
+		return pdoc->GetLineEndTypesAllowed();
+		
+	case SCI_GETLINEENDTYPESACTIVE:
+		return pdoc->GetLineEndTypesActive();
+		
 	case SCI_STARTSTYLING:
 		pdoc->StartStyling(wParam, static_cast<char>(lParam));
 		break;
@@ -8080,6 +8095,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SETCODEPAGE:
 		if (ValidCodePage(wParam)) {
 			if (pdoc->SetDBCSCodePage(wParam)) {
+				cs.Clear();
+				cs.InsertLines(0, pdoc->LinesTotal() - 1);
+				SetAnnotationHeights(0, pdoc->LinesTotal());
 				InvalidateStyleRedraw();
 			}
 		}

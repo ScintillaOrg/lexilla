@@ -241,6 +241,7 @@ public:
 	int eolMode;
 	/// Can also be SC_CP_UTF8 to enable UTF-8 mode
 	int dbcsCodePage;
+	int lineEndBitSet;
 	int tabInChars;
 	int indentInChars;
 	int actualIndentInChars;
@@ -259,6 +260,9 @@ public:
 	virtual void Init();
 	int LineEndTypesSupported() const;
 	bool SetDBCSCodePage(int dbcsCodePage_);
+	int GetLineEndTypesAllowed() { return cb.GetLineEndTypes(); }
+	bool SetLineEndTypesAllowed(int lineEndBitSet_);
+	int GetLineEndTypesActive() { return cb.GetLineEndTypes(); }
 	virtual void InsertLine(int line);
 	virtual void RemoveLine(int line);
 

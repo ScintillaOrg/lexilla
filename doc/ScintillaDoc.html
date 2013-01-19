@@ -2199,6 +2199,9 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_GETVIEWEOL">SCI_GETVIEWEOL</a><br />
 
      <a class="message" href="#SCI_GETLINEENDTYPESSUPPORTED">SCI_GETLINEENDTYPESSUPPORTED</a><br />
+     <a class="message" href="#SCI_SETLINEENDTYPESALLOWED">SCI_SETLINEENDTYPESALLOWED(int lineEndBitSet)</a><br />
+     <a class="message" href="#SCI_GETLINEENDTYPESALLOWED">SCI_GETLINEENDTYPESALLOWED</a><br />
+     <a class="message" href="#SCI_GETLINEENDTYPESACTIVE">SCI_GETLINEENDTYPESACTIVE</a><br />
     </code>
 
     <p><b id="SCI_SETEOLMODE">SCI_SETEOLMODE(int eolMode)</b><br />
@@ -2226,6 +2229,17 @@ struct Sci_TextToFind {
      by the current lexer. This is a bit set although there is currently only a single choice
      with either <code>SC_LINE_END_TYPE_DEFAULT</code> (0) or <code>SC_LINE_END_TYPE_UNICODE</code> (1).
      These values are also used by the other messages concerned with Unicode line ends.</p>
+
+    <p><b id="SCI_SETLINEENDTYPESALLOWED">SCI_SETLINEENDTYPESALLOWED(int lineEndBitSet)</b><br />
+     <b id="SCI_GETLINEENDTYPESALLOWED">SCI_GETLINEENDTYPESALLOWED</b><br />
+     By default, only the ASCII line ends are interpreted. Unicode line ends may be requested with
+     <code>SCI_SETLINEENDTYPESALLOWED(SC_LINE_END_TYPE_UNICODE)</code>
+     but this will be ineffective unless the lexer also allows you Unicode line ends.
+    <code>SCI_GETLINEENDTYPESALLOWED</code> returns the current state.</p>
+
+    <p><b id="SCI_GETLINEENDTYPESACTIVE">SCI_GETLINEENDTYPESACTIVE</b><br />
+     <code>SCI_GETLINEENDTYPESACTIVE</code> reports the set of line ends currently interpreted
+     by Scintilla. It is <code>SCI_GETLINEENDTYPESSUPPORTED &amp; SCI_GETLINEENDTYPESALLOWED</code>.</p>
 
     <h2 id="Styling">Styling</h2>
 

@@ -2280,6 +2280,14 @@ enu LineEndType=SC_LINE_END_TYPE_
 val SC_LINE_END_TYPE_DEFAULT=0
 val SC_LINE_END_TYPE_UNICODE=1
 
+# Set the line end types that the application wants to use. May not be used if incompatible with lexer or encoding.
+set void SetLineEndTypesAllowed=2656(int lineEndBitSet,)
+
+# Get the line end types currently allowed.
+get int GetLineEndTypesAllowed=2657(,)
+
+# Get the line end types currently recognised. May be a subset of the allowed types due to lexer limitation.
+get int GetLineEndTypesActive=2658(,)
 
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
