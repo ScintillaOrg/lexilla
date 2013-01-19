@@ -343,6 +343,7 @@ public:
 	int SCI_METHOD LineEnd(int line) const;
 	int LineEndPosition(int position) const;
 	bool IsLineEndPosition(int position) const;
+	bool IsPositionInLineEnd(int position) const;
 	int VCHomePosition(int position) const;
 
 	int SCI_METHOD SetLevel(int line, int level);
