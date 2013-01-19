@@ -2176,17 +2176,29 @@ struct Sci_TextToFind {
 
     <h2 id="LineEndings">Line endings</h2>
 
-    <p>Scintilla can interpret any of the three major line end conventions, Macintosh (\r), Unix
-    (\n) and CP/M / DOS / Windows (\r\n). When the user presses the Enter key, one of these line
+    <p>Scintilla can handle the major line end conventions and, depending on settings and
+    the current lexer also support additional Unicode line ends.</p>
+    
+    <p>Scintilla can interpret any of the Macintosh (\r), Unix (\n) and Windows (\r\n)
+    line ends.
+    When the user presses the Enter key, one of these line
     end strings is inserted into the buffer. The default is \r\n in Windows and \n in Unix, but
     this can be changed with the <code>SCI_SETEOLMODE</code> message. You can also convert the
     entire document to one of these line endings with <code>SCI_CONVERTEOLS</code>. Finally, you
     can choose to display the line endings with <code>SCI_SETVIEWEOL</code>.</p>
+
+    <p>For the UTF-8 encoding, three additional Unicode line ends,
+    Next Line (<code>NEL=U+0085</code>), Line Separator (<code>LS=U+2028</code>), and Paragraph Separator (<code>PS=U+2029</code>)
+    may optionally be interpreted when Unicode line ends is turned on and the current lexer also supports
+    Unicode line ends.</p>
+
     <code><a class="message" href="#SCI_SETEOLMODE">SCI_SETEOLMODE(int eolMode)</a><br />
      <a class="message" href="#SCI_GETEOLMODE">SCI_GETEOLMODE</a><br />
      <a class="message" href="#SCI_CONVERTEOLS">SCI_CONVERTEOLS(int eolMode)</a><br />
      <a class="message" href="#SCI_SETVIEWEOL">SCI_SETVIEWEOL(bool visible)</a><br />
      <a class="message" href="#SCI_GETVIEWEOL">SCI_GETVIEWEOL</a><br />
+
+     <a class="message" href="#SCI_GETLINEENDTYPESSUPPORTED">SCI_GETLINEENDTYPESSUPPORTED</a><br />
     </code>
 
     <p><b id="SCI_SETEOLMODE">SCI_SETEOLMODE(int eolMode)</b><br />
@@ -2208,6 +2220,12 @@ struct Sci_TextToFind {
     <code>false</code>). The visible rendering of the end of line characters is similar to
     <code>(CR)</code>, <code>(LF)</code>, or <code>(CR)(LF)</code>. <code>SCI_GETVIEWEOL</code>
     returns the current state.</p>
+
+    <p><b id="SCI_GETLINEENDTYPESSUPPORTED">SCI_GETLINEENDTYPESSUPPORTED</b><br />
+     <code>SCI_GETLINEENDTYPESSUPPORTED</code> reports the different types of line ends supported
+     by the current lexer. This is a bit set although there is currently only a single choice
+     with either <code>SC_LINE_END_TYPE_DEFAULT</code> (0) or <code>SC_LINE_END_TYPE_UNICODE</code> (1).
+     These values are also used by the other messages concerned with Unicode line ends.</p>
 
     <h2 id="Styling">Styling</h2>
 
@@ -5638,8 +5656,16 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_DESCRIBEKEYWORDSETS">SCI_DESCRIBEKEYWORDSETS(&lt;unused&gt;, char *descriptions)</a><br />
      <a class="message" href="#SCI_SETKEYWORDS">SCI_SETKEYWORDS(int keyWordSet, const char
     *keyWordList)</a><br />
-     <a class="message" href="#SCI_GETSTYLEBITSNEEDED">SCI_GETSTYLEBITSNEEDED</a>
-    <br />
+     <a class="message" href="#SCI_GETSTYLEBITSNEEDED">SCI_GETSTYLEBITSNEEDED</a><br />
+
+     <a class="message" href="#SCI_GETSUBSTYLEBASES">SCI_GETSUBSTYLEBASES(&lt;unused&gt;, char *styles)</a><br />
+     <a class="message" href="#SCI_DISTANCETOSECONDARYSTYLES">SCI_DISTANCETOSECONDARYSTYLES</a><br />
+     <a class="message" href="#SCI_ALLOCATESUBSTYLES">SCI_ALLOCATESUBSTYLES(int styleBase, int numberStyles)</a><br />
+     <a class="message" href="#SCI_FREESUBSTYLES">SCI_FREESUBSTYLES</a><br />
+     <a class="message" href="#SCI_GETSUBSTYLESSTART">SCI_GETSUBSTYLESSTART(int styleBase)</a><br />
+     <a class="message" href="#SCI_GETSUBSTYLESLENGTH">SCI_GETSUBSTYLESLENGTH(int styleBase)</a><br />
+     <a class="message" href="#SCI_SETIDENTIFIERS">SCI_SETIDENTIFIERS(int style, const char *identifiers)</a><br />
+
     </code>
 
     <p><b id="SCI_SETLEXER">SCI_SETLEXER(int lexer)</b><br />
@@ -5784,6 +5810,34 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      Retrieve the number of bits the current lexer needs for styling. This should normally be the argument
      to <a class="message" href="#SCI_SETSTYLEBITS">SCI_SETSTYLEBITS</a>.
      </p>
+
+    <h3 id="Substyles">Substyles</h3>
+    <p>Lexers may support several different sublanguages and each sublanguage may want to style some number of
+    sets of identifiers (or similar lexemes such as documentation keywords) uniquely. Preallocating a large number for each
+    purpose would exhaust the number of allowed styles quickly.
+    This is alleviated by substyles which allow the application to determine how many sets of identifiers to allocate for
+    each purpose.
+    Lexers have to explicitly support this feature by implementing the methods in <code>ILexerWithSubStyles</code>.</p>
+
+    <p><b id="SCI_GETSUBSTYLEBASES">SCI_GETSUBSTYLEBASES(&lt;unused&gt;, char *styles)</b><br />
+     Fill <code>styles</code> with a byte for each style that can be split into substyles.</p>
+
+    <p><b id="SCI_DISTANCETOSECONDARYSTYLES">SCI_DISTANCETOSECONDARYSTYLES</b><br />
+     Returns the distance between a primary style and its corresponding secondary style.</p>
+
+    <p><b id="SCI_ALLOCATESUBSTYLES">SCI_ALLOCATESUBSTYLES(int styleBase, int numberStyles)</b><br />
+     Allocate some number of substyles for a particular base style returning the first substyle number allocated.
+     Substyles are allocated contiguously.</p>
+
+    <p><b id="SCI_FREESUBSTYLES">SCI_FREESUBSTYLES</b><br />
+     Free all allocated substyles.</p>
+
+    <p><b id="SCI_GETSUBSTYLESSTART">SCI_GETSUBSTYLESSTART(int styleBase)</b><br />
+    <b id="SCI_GETSUBSTYLESLENGTH">SCI_GETSUBSTYLESLENGTH(int styleBase)</b><br />
+     Return the start and length of the substyles allocated for a base style.</p>
+
+    <p><b id="SCI_SETIDENTIFIERS">SCI_SETIDENTIFIERS(int style, const char *identifiers)</b><br />
+     Similar to <code>SCI_SETKEYWORDS</code> but for substyles.</p>
 
     <h2 id="LexerObjects">Lexer Objects</h2>
 

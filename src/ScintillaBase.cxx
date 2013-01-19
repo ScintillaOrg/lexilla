@@ -473,6 +473,7 @@ class LexState : public LexInterface {
 	const LexerModule *lexCurrent;
 	void SetLexerModule(const LexerModule *lex);
 	PropSetSimple props;
+	int interfaceVersion;
 public:
 	int lexLanguage;
 
@@ -492,6 +493,15 @@ public:
 	const char *PropGet(const char *key) const;
 	int PropGetInt(const char *key, int defaultValue=0) const;
 	int PropGetExpanded(const char *key, char *result) const;
+
+	int LineEndTypesSupported();
+	int AllocateSubStyles(int styleBase, int numberStyles);
+	int SubStylesStart(int styleBase);
+	int SubStylesLength(int styleBase);
+	void FreeSubStyles();
+	void SetIdentifiers(int style, const char *identifiers);
+	int DistanceToSecondaryStyles();
+	const char *GetSubStyleBases();
 };
 
 #ifdef SCI_NAMESPACE
@@ -501,6 +511,7 @@ public:
 LexState::LexState(Document *pdoc_) : LexInterface(pdoc_) {
 	lexCurrent = 0;
 	performingStyle = false;
+	interfaceVersion = lvOriginal;
 	lexLanguage = SCLEX_CONTAINER;
 }
 
@@ -524,9 +535,12 @@ void LexState::SetLexerModule(const LexerModule *lex) {
 			instance->Release();
 			instance = 0;
 		}
+		interfaceVersion = lvOriginal;
 		lexCurrent = lex;
-		if (lexCurrent)
+		if (lexCurrent) {
 			instance = lexCurrent->Create();
+			interfaceVersion = instance->Version();
+		}
 		pdoc->LexerChanged();
 	}
 }
@@ -629,6 +643,60 @@ int LexState::PropGetInt(const char *key, int defaultValue) const {
 
 int LexState::PropGetExpanded(const char *key, char *result) const {
 	return props.GetExpanded(key, result);
+}
+
+int LexState::LineEndTypesSupported() {
+	if (instance && (interfaceVersion >= lvSubStyles)) {
+		return static_cast<ILexerWithSubStyles *>(instance)->LineEndTypesSupported();
+	}
+	return 0;
+}
+
+int LexState::AllocateSubStyles(int styleBase, int numberStyles) {
+	if (instance && (interfaceVersion >= lvSubStyles)) {
+		return static_cast<ILexerWithSubStyles *>(instance)->AllocateSubStyles(styleBase, numberStyles);
+	}
+	return -1;
+}
+
+int LexState::SubStylesStart(int styleBase) {
+	if (instance && (interfaceVersion >= lvSubStyles)) {
+		return static_cast<ILexerWithSubStyles *>(instance)->SubStylesStart(styleBase);
+	}
+	return -1;
+}
+
+int LexState::SubStylesLength(int styleBase) {
+	if (instance && (interfaceVersion >= lvSubStyles)) {
+		return static_cast<ILexerWithSubStyles *>(instance)->SubStylesLength(styleBase);
+	}
+	return 0;
+}
+
+void LexState::FreeSubStyles() {
+	if (instance && (interfaceVersion >= lvSubStyles)) {
+		static_cast<ILexerWithSubStyles *>(instance)->FreeSubStyles();
+	}
+}
+
+void LexState::SetIdentifiers(int style, const char *identifiers) {
+	if (instance && (interfaceVersion >= lvSubStyles)) {
+		static_cast<ILexerWithSubStyles *>(instance)->SetIdentifiers(style, identifiers);
+	}
+}
+
+int LexState::DistanceToSecondaryStyles() {
+	if (instance && (interfaceVersion >= lvSubStyles)) {
+		return static_cast<ILexerWithSubStyles *>(instance)->DistanceToSecondaryStyles();
+	}
+	return 0;
+}
+
+const char *LexState::GetSubStyleBases() {
+	if (instance && (interfaceVersion >= lvSubStyles)) {
+		return static_cast<ILexerWithSubStyles *>(instance)->GetSubStyleBases();
+	}
+	return "";
 }
 
 #endif
@@ -891,6 +959,31 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 	case SCI_DESCRIBEKEYWORDSETS:
 		return StringResult(lParam, DocumentLexState()->DescribeWordListSets());
 
+	case SCI_GETLINEENDTYPESSUPPORTED:
+		return DocumentLexState()->LineEndTypesSupported();
+
+	case SCI_ALLOCATESUBSTYLES:
+		return DocumentLexState()->AllocateSubStyles(wParam, lParam);
+
+	case SCI_GETSUBSTYLESSTART:
+		return DocumentLexState()->SubStylesStart(wParam);
+
+	case SCI_GETSUBSTYLESLENGTH:
+		return DocumentLexState()->SubStylesLength(wParam);
+
+	case SCI_FREESUBSTYLES:
+		DocumentLexState()->FreeSubStyles();
+		break;
+
+	case SCI_SETIDENTIFIERS:
+		DocumentLexState()->SetIdentifiers(wParam, reinterpret_cast<const char *>(lParam));
+		break;
+
+	case SCI_DISTANCETOSECONDARYSTYLES:
+		return DocumentLexState()->DistanceToSecondaryStyles();
+
+	case SCI_GETSUBSTYLEBASES:
+		return StringResult(lParam, DocumentLexState()->GetSubStyleBases());
 #endif
 
 	default:

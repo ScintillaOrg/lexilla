@@ -186,6 +186,7 @@ public:
 	virtual ~LexInterface() {
 	}
 	void Colourise(int start, int end);
+	int LineEndTypesSupported();
 	bool UseContainerLexing() const {
 		return instance == 0;
 	}
@@ -193,7 +194,7 @@ public:
 
 /**
  */
-class Document : PerLine, public IDocument, public ILoader {
+class Document : PerLine, public IDocumentWithLineEnd, public ILoader {
 
 public:
 	/** Used to pair watcher pointer with user data. */
@@ -256,12 +257,13 @@ public:
 	int SCI_METHOD Release();
 
 	virtual void Init();
+	int LineEndTypesSupported() const;
 	bool SetDBCSCodePage(int dbcsCodePage_);
 	virtual void InsertLine(int line);
 	virtual void RemoveLine(int line);
 
 	int SCI_METHOD Version() const {
-		return dvOriginal;
+		return dvLineEnd;
 	}
 
 	void SCI_METHOD SetErrorStatus(int status);
@@ -338,7 +340,7 @@ public:
 	void DeleteAllMarks(int markerNum);
 	int LineFromHandle(int markerHandle);
 	int SCI_METHOD LineStart(int line) const;
-	int LineEnd(int line) const;
+	int SCI_METHOD LineEnd(int line) const;
 	int LineEndPosition(int position) const;
 	bool IsLineEndPosition(int position) const;
 	int VCHomePosition(int position) const;

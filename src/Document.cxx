@@ -67,6 +67,17 @@ void LexInterface::Colourise(int start, int end) {
 	}
 }
 
+int LexInterface::LineEndTypesSupported() {
+	if (instance) {
+		int interfaceVersion = instance->Version();
+		if (interfaceVersion >= lvSubStyles) {
+			ILexerWithSubStyles *ssinstance = static_cast<ILexerWithSubStyles *>(instance);
+			return ssinstance->LineEndTypesSupported();
+		}
+	}
+	return 0;
+}
+
 Document::Document() {
 	refCount = 0;
 	pcf = NULL;
@@ -133,6 +144,13 @@ void Document::Init() {
 		if (perLineData[j])
 			perLineData[j]->Init();
 	}
+}
+
+int Document::LineEndTypesSupported() const {
+	if ((SC_CP_UTF8 == dbcsCodePage) && pli)
+		return pli->LineEndTypesSupported();
+	else
+		return 0;
 }
 
 bool Document::SetDBCSCodePage(int dbcsCodePage_) {
@@ -245,7 +263,7 @@ int SCI_METHOD Document::LineStart(int line) const {
 	return cb.LineStart(line);
 }
 
-int Document::LineEnd(int line) const {
+int SCI_METHOD Document::LineEnd(int line) const {
 	if (line == LinesTotal() - 1) {
 		return LineStart(line + 1);
 	} else {
