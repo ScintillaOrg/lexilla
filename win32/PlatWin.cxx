@@ -448,6 +448,9 @@ void Font::Release() {
 template<typename T, int lengthStandard>
 class VarBuffer {
 	T bufferStandard[lengthStandard];
+	// Private so VarBuffer objects can not be copied
+	VarBuffer(const VarBuffer &);
+	VarBuffer &operator=(const VarBuffer &);
 public:
 	T *buffer;
 	VarBuffer(size_t length) : buffer(0) {
