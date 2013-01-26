@@ -531,9 +531,8 @@ void CellBuffer::ResetLineEnds() {
 	lv.InsertText(lineInsert-1, length);
 	unsigned char chBeforePrev = 0;
 	unsigned char chPrev = 0;
-	unsigned char ch = ' ';
 	for (int i = 0; i < length; i++) {
-		ch = substance.ValueAt(position + i);
+		unsigned char ch = substance.ValueAt(position + i);
 		if (ch == '\r') {
 			InsertLine(lineInsert, (position + i) + 1, atLineStart);
 			lineInsert++;
