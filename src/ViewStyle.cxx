@@ -6,6 +6,7 @@
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <string.h>
+#include <assert.h>
 
 #include <vector>
 #include <map>
@@ -356,6 +357,7 @@ void ViewStyle::Refresh(Surface &surface) {
 		CreateFont(styles[j]);
 	}
 
+	assert(frFirst);
 	frFirst->Realise(surface, zoomLevel, technology);
 
 	for (unsigned int k=0; k<stylesSize; k++) {
