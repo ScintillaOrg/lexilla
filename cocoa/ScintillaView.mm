@@ -932,9 +932,9 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
   int scrollerWidth = [NSScroller scrollerWidth];
 
   NSSize size = [self frame].size;
-  NSRect hScrollerRect = {0, 0, size.width, scrollerWidth};
-  NSRect vScrollerRect = {size.width - scrollerWidth, 0, scrollerWidth, size.height};
-  NSRect barFrame = {0, size.height - scrollerWidth, size.width, scrollerWidth};
+  NSRect hScrollerRect = {0, 0, size.width, static_cast<CGFloat>(scrollerWidth)};
+  NSRect vScrollerRect = {size.width - scrollerWidth, 0, static_cast<CGFloat>(scrollerWidth), size.height};
+  NSRect barFrame = {0, size.height - scrollerWidth, size.width, static_cast<CGFloat>(scrollerWidth)};
   BOOL infoBarVisible = mInfoBar != nil && ![mInfoBar isHidden];
   
   // Horizontal offset of the content. Almost always 0 unless the vertical scroller
@@ -1009,7 +1009,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
     }
   }
   
-  NSRect contentRect = {contentX, vScrollerRect.origin.y, size.width, size.height};
+  NSRect contentRect = {static_cast<CGFloat>(contentX), vScrollerRect.origin.y, size.width, size.height};
   [mContent setFrame: contentRect];
   
   if (infoBarVisible)

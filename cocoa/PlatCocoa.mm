@@ -1793,7 +1793,7 @@ void ListBoxImpl::RegisterImage(int type, const char* xpm_data)
 
 void ListBoxImpl::RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage) {
 	CGImageRef imageRef = ImageCreateFromRGBA(width, height, pixelsImage, false);
-	NSSize sz = {width, height};
+	NSSize sz = {static_cast<CGFloat>(width), static_cast<CGFloat>(height)};
 	NSImage *img = [[[NSImage alloc] initWithSize: sz] autorelease];
 	NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage: imageRef];
 	[img addRepresentation: bitmapRep];

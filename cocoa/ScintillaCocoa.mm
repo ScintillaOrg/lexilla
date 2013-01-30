@@ -1387,7 +1387,7 @@ bool ScintillaCocoa::GetPasteboardData(NSPasteboard* board, SelectionText* selec
     {
       CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
                                                            vs.styles[STYLE_DEFAULT].characterSet);
-      CFRange rangeAll = {0, [data length]};
+      CFRange rangeAll = {0, static_cast<CFIndex>([data length])};
       CFIndex usedLen = 0;
       CFStringGetBytes((CFStringRef)data, rangeAll, encoding, '?',
                        false, NULL, 0, &usedLen);
@@ -1873,7 +1873,7 @@ int ScintillaCocoa::InsertText(NSString* input)
 {
   CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
                                                          vs.styles[STYLE_DEFAULT].characterSet);
-  CFRange rangeAll = {0, [input length]};
+  CFRange rangeAll = {0, static_cast<CFIndex>([input length])};
   CFIndex usedLen = 0;
   CFStringGetBytes((CFStringRef)input, rangeAll, encoding, '?',
                    false, NULL, 0, &usedLen);
