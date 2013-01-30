@@ -134,6 +134,10 @@ public:
 		return (block >= 0) ? classifiers[block].Length() : 0;
 	}
 
+	int DistanceToSecondaryStyles() const {
+		return secondaryDistance;
+	}
+
 	void SetIdentifiers(int style, const char *identifiers) {
 		int block = BlockFromStyle(style);
 		if (block >= 0)
