@@ -167,9 +167,9 @@ static void FoldPODoc(unsigned int startPos, int length, int, WordList *[], Acce
 	unsigned int endPos = startPos + length;
 	int curLine = styler.GetLine(startPos);
 	int lineState = styler.GetLineState(curLine);
-	int nextLineState = lineState;
+	int nextLineState;
 	int level = styler.LevelAt(curLine) & SC_FOLDLEVELNUMBERMASK;
-	int nextLevel = level;
+	int nextLevel;
 	int visible = 0;
 	int chNext = styler[startPos];
 	
