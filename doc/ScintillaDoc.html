@@ -401,6 +401,8 @@
     *tr)</a><br />
      <a class="message" href="#SCI_SETSTYLEBITS">SCI_SETSTYLEBITS(int bits)</a><br />
      <a class="message" href="#SCI_GETSTYLEBITS">SCI_GETSTYLEBITS</a><br />
+     <a class="message" href="#SCI_RELEASEALLEXTENDEDSTYLES">SCI_RELEASEALLEXTENDEDSTYLES</a><br />
+     <a class="message" href="#SCI_ALLOCATEEXTENDEDSTYLES">SCI_ALLOCATEEXTENDEDSTYLES(int numberStyles)</a><br />
      <a class="message" href="#SCI_TARGETASUTF8">SCI_TARGETASUTF8(&lt;unused&gt;, char *s)</a><br />
      <a class="message" href="#SCI_ENCODEDFROMUTF8">SCI_ENCODEDFROMUTF8(const char *utf8, char *encoded)</a><br />
      <a class="message" href="#SCI_SETLENGTHFORENCODE">SCI_SETLENGTHFORENCODE(int bytes)</a><br />
@@ -549,6 +551,18 @@
     setting is <code>SCI_SETSTYLEBITS(5)</code>.
     The number of styling bits needed by the current lexer can be found with
     <a class="message" href="#SCI_GETSTYLEBITSNEEDED">SCI_GETSTYLEBITSNEEDED</a>.</p>
+
+    <p><b id="SCI_RELEASEALLEXTENDEDSTYLES">SCI_RELEASEALLEXTENDEDSTYLES</b><br />
+    <b id="SCI_ALLOCATEEXTENDEDSTYLES">SCI_ALLOCATEEXTENDEDSTYLES(int numberStyles)</b><br />
+     Extended styles are used for features like textual margins and annotations as well as internally by Scintilla.
+     They are outside the range 0..255 used for the styles bytes associated with document bytes.
+     These functions manage the use of extended styles to ensures that components cooperate in defining styles.
+     <code>SCI_RELEASEALLEXTENDEDSTYLES</code> releases any extended styles allocated by the container.
+     <code>SCI_ALLOCATEEXTENDEDSTYLES</code> allocates a range of style numbers after the byte style values and returns
+     the number of the first allocated style.
+     Ranges for magin and annotation styles should be allocated before calling 
+     <a class="message" href="#SCI_MARGINSETSTYLEOFFSET">SCI_MARGINSETSTYLEOFFSET</a> or
+     <a class="message" href="#SCI_ANNOTATIONSETSTYLEOFFSET">SCI_ANNOTATIONSETSTYLEOFFSET</a>.</p>
 
     <p><b id="Sci_TextRange">Sci_TextRange</b> and <b id="Sci_CharacterRange">Sci_CharacterRange</b><br />
      These structures are defined to be exactly the same shape as the Win32 <code>TEXTRANGE</code>
@@ -2969,6 +2983,10 @@ struct Sci_TextToFind {
     or <code>SCI_MARGINSETSTYLES</code> has the offset added before looking up the style.
     </p>
     <p>
+    Always call <a class="message" href="#SCI_ALLOCATEEXTENDEDSTYLES">SCI_ALLOCATEEXTENDEDSTYLES</a>
+    before <code>SCI_MARGINSETSTYLEOFFSET</code> and use the result as the argument to <code>SCI_MARGINSETSTYLEOFFSET</code>.
+    </p>
+    <p>
      <b id="SCI_SETMARGINOPTIONS">SCI_SETMARGINOPTIONS(int marginOptions)</b><br />
      <b id="SCI_GETMARGINOPTIONS">SCI_GETMARGINOPTIONS</b><br />
     Define margin options by enabling appropriate bit flags. At the moment, only one flag is available 
@@ -3076,6 +3094,10 @@ struct Sci_TextToFind {
     512 upto 767 so they do not overlap styles set by lexers (or margins if margins offset is 256).
     Each style number set with <code>SCI_ANNOTATIONSETSTYLE</code>
     or <code>SCI_ANNOTATIONSETSTYLES</code> has the offset added before looking up the style.
+    </p>
+    <p>
+    Always call <a class="message" href="#SCI_ALLOCATEEXTENDEDSTYLES">SCI_ALLOCATEEXTENDEDSTYLES</a>
+    before <code>SCI_ANNOTATIONSETSTYLEOFFSET</code> and use the result as the argument to <code>SCI_ANNOTATIONSETSTYLEOFFSET</code>.
     </p>
 
     <h2 id="OtherSettings">Other settings</h2>

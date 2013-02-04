@@ -141,6 +141,7 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 		// Can't just copy fontname as its lifetime is relative to its owning ViewStyle
 		styles[sty].fontName = fontNames.Save(source.styles[sty].fontName);
 	}
+	nextExtendedStyle = source.nextExtendedStyle;
 	for (int mrk=0; mrk<=MARKER_MAX; mrk++) {
 		markers[mrk] = source.markers[mrk];
 	}
@@ -226,6 +227,7 @@ void ViewStyle::Init(size_t stylesSize_) {
 	stylesSize = 0;
 	styles = NULL;
 	AllocStyles(stylesSize_);
+	nextExtendedStyle = 256;
 	fontNames.Clear();
 	ResetDefaultStyle();
 
@@ -413,6 +415,16 @@ void ViewStyle::AllocStyles(size_t sizeNew) {
 	stylesSize = sizeNew;
 }
 
+void ViewStyle::ReleaseAllExtendedStyles() {
+	nextExtendedStyle = 256;
+}
+
+int ViewStyle::AllocateExtendedStyles(int numberStyles) {
+	int startRange = static_cast<int>(nextExtendedStyle);
+	nextExtendedStyle += numberStyles;
+	return startRange;
+}
+
 void ViewStyle::EnsureStyle(size_t index) {
 	if (index >= stylesSize) {
 		size_t sizeNew = stylesSize * 2;
@@ -471,4 +483,3 @@ void ViewStyle::CalcLargestMarkerHeight() {
 		}
 	}
 }
-

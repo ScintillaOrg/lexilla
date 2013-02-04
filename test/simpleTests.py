@@ -1181,6 +1181,18 @@ class TestAnnotation(unittest.TestCase):
 		self.assertEquals(result, styles)
 		self.ed.AnnotationClearAll()
 
+	def testExtendedStyles(self):
+		start0 = self.ed.AllocateExtendedStyles(0)
+		self.assertEquals(start0, 256)
+		start1 = self.ed.AllocateExtendedStyles(10)
+		self.assertEquals(start1, 256)
+		start2 = self.ed.AllocateExtendedStyles(20)
+		self.assertEquals(start2, start1 + 10)
+		# Reset by changing lexer
+		self.ed.ReleaseAllExtendedStyles()
+		start0 = self.ed.AllocateExtendedStyles(0)
+		self.assertEquals(start0, 256)
+
 	def testTextAnnotationStyleOffset(self):
 		self.ed.AnnotationSetStyleOffset(300)
 		self.assertEquals(self.ed.AnnotationGetStyleOffset(), 300)

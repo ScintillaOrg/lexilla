@@ -6824,6 +6824,8 @@ void Editor::SetDocPointer(Document *document) {
 	braces[0] = invalidPosition;
 	braces[1] = invalidPosition;
 
+	vs.ReleaseAllExtendedStyles();
+
 	// Reset the contraction state to fully shown.
 	cs.Clear();
 	cs.InsertLines(0, pdoc->LinesTotal() - 1);
@@ -9160,6 +9162,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_ANNOTATIONGETSTYLEOFFSET:
 		return vs.annotationStyleOffset;
+
+	case SCI_RELEASEALLEXTENDEDSTYLES:
+		vs.ReleaseAllExtendedStyles();
+		break;
+
+	case SCI_ALLOCATEEXTENDEDSTYLES:
+		return vs.AllocateExtendedStyles(wParam);
 
 	case SCI_ADDUNDOACTION:
 		pdoc->AddUndoAction(wParam, lParam & UNDO_MAY_COALESCE);

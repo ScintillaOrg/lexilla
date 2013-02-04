@@ -67,6 +67,7 @@ public:
 	FontRealised *frFirst;
 	size_t stylesSize;
 	Style *styles;
+	size_t nextExtendedStyle;
 	LineMarker markers[MARKER_MAX + 1];
 	int largestMarkerHeight;
 	Indicator indicators[INDIC_MAX + 1];
@@ -144,6 +145,8 @@ public:
 	void CreateFont(const FontSpecification &fs);
 	void Refresh(Surface &surface);
 	void AllocStyles(size_t sizeNew);
+	void ReleaseAllExtendedStyles();
+	int AllocateExtendedStyles(int numberStyles);
 	void EnsureStyle(size_t index);
 	void ResetDefaultStyle();
 	void ClearStyles();
