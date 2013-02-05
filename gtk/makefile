@@ -8,11 +8,8 @@
 
 .SUFFIXES: .cxx .c .o .h .a
 ifdef CLANG
-ifdef CLANG_ANALYZE
-ANALYZE=--analyze
-endif
-CC = clang $(ANALYZE)
-CCOMP = clang $(ANALYZE)
+CC = clang
+CCOMP = clang
 else
 CC = g++
 CCOMP = gcc
@@ -79,6 +76,9 @@ all: $(COMPLIB)
 
 clean:
 	$(DEL) *.o $(COMPLIB) *.plist
+
+analyze:
+	clang --analyze $(CONFIGFLAGS) $(CXXTFLAGS) $(CXXFLAGS) *.cxx ../src/*.cxx ../lexlib/*.cxx ../lexers/*.cxx
 
 deps:
 	$(CC) -MM $(CONFIGFLAGS) $(CXXTFLAGS) *.cxx ../src/*.cxx | sed -e 's/\/usr.* //' | grep [a-zA-Z] >deps.mak
