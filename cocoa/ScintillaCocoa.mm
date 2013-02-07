@@ -1351,10 +1351,10 @@ void ScintillaCocoa::SetPasteboardData(NSPasteboard* board, const SelectionText 
                                                reinterpret_cast<const UInt8 *>(selectedText.s), 
                                                selectedText.len-1, encoding, false);
 
-  [board declareTypes:[NSArray arrayWithObjects:
-                       NSStringPboardType,
-                       selectedText.rectangular ? ScintillaRecPboardType : nil,
-                       nil] owner:nil];
+  NSArray *pbTypes = selectedText.rectangular ?
+    [NSArray arrayWithObjects: NSStringPboardType, ScintillaRecPboardType, nil] :
+    [NSArray arrayWithObjects: NSStringPboardType, nil];
+  [board declareTypes:pbTypes owner:nil];
   
   if (selectedText.rectangular)
   {
