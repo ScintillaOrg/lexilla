@@ -8067,6 +8067,8 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			verticalScrollBarVisible = wParam != 0;
 			SetScrollBars();
 			ReconfigureScrollBars();
+			if (verticalScrollBarVisible)
+				SetVerticalScrollPos();
 		}
 		break;
 
