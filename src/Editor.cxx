@@ -1947,8 +1947,9 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 				rcMarker.bottom = yposScreen + vs.lineHeight;
 				if (vs.ms[margin].style == SC_MARGIN_NUMBER) {
 					if (firstSubLine) {
-						char number[100];
-						sprintf(number, "%d", lineDoc + 1);
+						char number[100] = "";
+						if (lineDoc >= 0)
+							sprintf(number, "%d", lineDoc + 1);
 						if (foldFlags & SC_FOLDFLAG_LEVELNUMBERS) {
 							int lev = pdoc->GetLevel(lineDoc);
 							sprintf(number, "%c%c %03X %03X",
