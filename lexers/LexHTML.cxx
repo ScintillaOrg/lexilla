@@ -900,6 +900,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		         !isPHPStringState(state) &&
 		         (state != SCE_HPHP_COMMENT) &&
 		         (state != SCE_HPHP_COMMENTLINE) &&
+		         (state != SCE_H_COMMENT) &&
 		         (ch == '<') &&
 		         (chNext == '?') &&
 				 !IsScriptCommentState(state)) {
