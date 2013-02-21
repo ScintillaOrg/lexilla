@@ -132,8 +132,9 @@ struct PPDefinition {
 	int line;
 	std::string key;
 	std::string value;
-	PPDefinition(int line_, const std::string &key_, const std::string &value_) :
-		line(line_), key(key_), value(value_) {
+	bool isUndef;
+	PPDefinition(int line_, const std::string &key_, const std::string &value_, bool isUndef_ = false) :
+		line(line_), key(key_), value(value_), isUndef(isUndef_) {
 	}
 };
 
@@ -547,7 +548,10 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 
 	std::map<std::string, std::string> preprocessorDefinitions = preprocessorDefinitionsStart;
 	for (std::vector<PPDefinition>::iterator itDef = ppDefineHistory.begin(); itDef != ppDefineHistory.end(); ++itDef) {
-		preprocessorDefinitions[itDef->key] = itDef->value;
+		if (itDef->isUndef)
+			preprocessorDefinitions.erase(itDef->key);
+		else
+			preprocessorDefinitions[itDef->key] = itDef->value;
 	}
 
 	std::string rawStringTerminator = rawStringTerminators.ValueAt(lineCurrent-1);
@@ -989,6 +993,18 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 										ppDefineHistory.push_back(PPDefinition(lineCurrent, key, value));
 										definitionsChanged = true;
 									}
+								}
+							}
+						} else if (sc.Match("undef")) {
+							if (options.updatePreprocessor && !preproc.IsInactive()) {
+								std::string restOfLine = GetRestOfLine(styler, sc.currentPos + 5, true);
+								std::vector<std::string> tokens = Tokenize(restOfLine);
+								std::string key;
+								if (tokens.size() >= 1) {
+									key = tokens[0];
+									preprocessorDefinitions.erase(key);
+									ppDefineHistory.push_back(PPDefinition(lineCurrent, key, "", true));
+									definitionsChanged = true;
 								}
 							}
 						}
