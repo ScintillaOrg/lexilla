@@ -155,8 +155,7 @@ static void FontMutexUnlock() {
 #endif
 }
 
-// On GTK+ 1.x holds a GdkFont* but on GTK+ 2.x can hold a GdkFont* or a
-// PangoFontDescription*.
+// Holds a PangoFontDescription*.
 class FontHandle {
 	XYPOSITION width[128];
 	encodingType et;
