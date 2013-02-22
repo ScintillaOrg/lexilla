@@ -945,7 +945,7 @@ static int RecogniseErrorListLine(const char *lineBuffer, unsigned int lengthLin
 	} else if (strstart(lineBuffer, "In file included from ") ||
 	           strstart(lineBuffer, "                 from ")) {
 		// GCC showing include path to following error
-		return SCE_ERR_FROM;
+		return SCE_ERR_GCC_INCLUDED_FROM;
 	} else {
 		// Look for one of the following formats:
 		// GCC: <filename>:<line>:<message>
