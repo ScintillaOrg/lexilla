@@ -437,7 +437,43 @@
 	<li>
 	Released 26 February 2013.
 	</li>
-    <ul>
+	<li>
+	To allow cooperation between different uses of extended (beyond 255) styles they should be allocated
+	using SCI_ALLOCATEEXTENDEDSTYLES.
+	</li>
+	<li>
+	The C++ lexer understands the #undef directive when determining preprocessor definitions.
+	<a href="http://sourceforge.net/p/scintilla/feature-requests/978/">Feature #978.</a>
+	</li>
+	<li>
+	The errorlist lexer recognises gcc include path diagnostics that appear before an error.
+	</li>
+	<li>
+	Folding implemented for GetText (PO)  translation language.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1437/">Bug #1437.</a>
+	</li>
+	<li>
+	HTML lexer does not interrupt comment style for processing instructions.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1447/">Bug #1447.</a>
+	</li>
+	<li>
+	Fix SciTE forgetting caret x-position when switching documents.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1442/">Bug #1442.</a>
+	</li>
+	<li>
+	Fixed bug where vertical scrollbar thumb appeared at beginning of document when
+	scrollbar shown.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1446/">Bug #1446.</a>
+	</li>
+	<li>
+	<a href="ScintillaDoc.html#ProvisionalMessages">Provisional features</a>
+	are new features that may change or be removed if they cause problems but should later become
+	permanent features if they are work well.
+	For this release <a href="ScintillaDoc.html#SCI_GETLINEENDTYPESSUPPORTED">Unicode line ends</a> and
+	<a href="ScintillaDoc.html#Substyles">substyles</a>
+	are provisional features.
+	</li>
+    </ul>
     <h3>
        <a href="http://prdownloads.sourceforge.net/scintilla/scite324.zip?download">Release 3.2.4</a>
     </h3>
