@@ -326,6 +326,8 @@ fun void MarkerAddSet=2466(int line, int set)
 # Set the alpha used for a marker that is drawn in the text area, not the margin.
 set void MarkerSetAlpha=2476(int markerNumber, int alpha)
 
+val SC_MAX_MARGIN=4
+
 enu MarginType=SC_MARGIN_
 val SC_MARGIN_SYMBOL=0
 val SC_MARGIN_NUMBER=1

@@ -193,8 +193,8 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	someStylesForceCase = false;
 	leftMarginWidth = source.leftMarginWidth;
 	rightMarginWidth = source.rightMarginWidth;
-	for (int i=0; i < margins; i++) {
-		ms[i] = source.ms[i];
+	for (int margin=0; margin <= SC_MAX_MARGIN; margin++) {
+		ms[margin] = source.ms[margin];
 	}
 	maskInLine = source.maskInLine;
 	fixedColumnWidth = source.fixedColumnWidth;
@@ -308,7 +308,7 @@ void ViewStyle::Init(size_t stylesSize_) {
 	ms[2].mask = 0;
 	fixedColumnWidth = leftMarginWidth;
 	maskInLine = 0xffffffff;
-	for (int margin=0; margin < margins; margin++) {
+	for (int margin=0; margin <= SC_MAX_MARGIN; margin++) {
 		fixedColumnWidth += ms[margin].width;
 		if (ms[margin].width > 0)
 			maskInLine &= ~ms[margin].mask;
@@ -389,7 +389,7 @@ void ViewStyle::Refresh(Surface &surface) {
 
 	fixedColumnWidth = leftMarginWidth;
 	maskInLine = 0xffffffff;
-	for (int margin=0; margin < margins; margin++) {
+	for (int margin=0; margin <= SC_MAX_MARGIN; margin++) {
 		fixedColumnWidth += ms[margin].width;
 		if (ms[margin].width > 0)
 			maskInLine &= ~ms[margin].mask;
