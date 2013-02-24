@@ -129,7 +129,9 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
   CGContextRef context = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
   
   if (!mOwner.backend->Draw(rect, context)) {
-    [self display];
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [self display];
+    });
   }
 }
 
