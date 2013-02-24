@@ -130,7 +130,7 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
   
   if (!mOwner.backend->Draw(rect, context)) {
     dispatch_async(dispatch_get_main_queue(), ^{
-      [self display];
+      [self setNeedsDisplay:YES];
     });
   }
 }
