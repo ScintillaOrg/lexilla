@@ -973,7 +973,7 @@ class TestScrolling(unittest.TestCase):
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
 		# 150 should be enough lines
-		self.ed.InsertText(0, b"a\n" * 150)
+		self.ed.InsertText(0, b"a" * 150 + b"\n" * 150)
 
 	def testTop(self):
 		self.ed.GotoLine(0)
@@ -983,6 +983,14 @@ class TestScrolling(unittest.TestCase):
 		self.ed.GotoLine(0)
 		self.ed.LineScroll(0, 3)
 		self.assertEquals(self.ed.FirstVisibleLine, 3)
+		self.ed.LineScroll(0, -2)
+		self.assertEquals(self.ed.FirstVisibleLine, 1)
+		self.assertEquals(self.ed.XOffset, 0)
+		self.ed.LineScroll(10, 0)
+		self.assertGreater(self.ed.XOffset, 0)
+		scroll_width = float(self.ed.XOffset) / 10
+		self.ed.LineScroll(-2, 0)
+		self.assertEquals(self.ed.XOffset, scroll_width * 8)
 
 	def testVisibleLine(self):
 		self.ed.FirstVisibleLine = 7
