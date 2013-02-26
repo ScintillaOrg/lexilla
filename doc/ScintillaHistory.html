@@ -442,6 +442,12 @@
 	using SCI_ALLOCATEEXTENDEDSTYLES.
 	</li>
 	<li>
+	For Unicode documents, lexers that use StyleContext will retrieve whole characters
+	instead of bytes.
+	LexAccessor provides a LineEnd method which can be a more efficient way to
+	handle line ends and can enable Unicode line ends.
+	</li>
+	<li>
 	The C++ lexer understands the #undef directive when determining preprocessor definitions.
 	<a href="http://sourceforge.net/p/scintilla/feature-requests/978/">Feature #978.</a>
 	</li>
