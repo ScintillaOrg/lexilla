@@ -404,12 +404,8 @@ ScintillaCocoa::~ScintillaCocoa()
  */
 void ScintillaCocoa::Initialise() 
 {
-  static bool initedLexers = false;
-  if (!initedLexers)
-  {
-    initedLexers = true;
-    Scintilla_LinkLexers();
-  }
+  Scintilla_LinkLexers();
+
   notifyObj = NULL;
   notifyProc = NULL;
   
