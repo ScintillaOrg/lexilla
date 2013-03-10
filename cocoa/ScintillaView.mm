@@ -22,6 +22,32 @@ static NSCursor* waitCursor;
 
 NSString *SCIUpdateUINotification = @"SCIUpdateUI";
 
+/**
+ * Provide an NSCursor object that matches the Window::Cursor enumeration.
+ */
+static NSCursor *cursorFromEnum(Window::Cursor cursor)
+{
+  switch (cursor)
+  {
+    case Window::cursorText:
+      return [NSCursor IBeamCursor];
+    case Window::cursorArrow:
+      return [NSCursor arrowCursor];
+    case Window::cursorWait:
+      return waitCursor;
+    case Window::cursorHoriz:
+      return [NSCursor resizeLeftRightCursor];
+    case Window::cursorVert:
+      return [NSCursor resizeUpDownCursor];
+    case Window::cursorReverseArrow:
+      return reverseArrowCursor;
+    case Window::cursorUp:
+    default:
+      return [NSCursor arrowCursor];
+  }
+}
+
+
 @implementation InnerView
 
 @synthesize owner = mOwner;
@@ -73,32 +99,7 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
 - (void) setCursor: (Window::Cursor) cursor
 {
   [mCurrentCursor autorelease];
-  switch (cursor)
-  {
-    case Window::cursorText:
-      mCurrentCursor = [NSCursor IBeamCursor];
-      break;
-    case Window::cursorArrow:
-      mCurrentCursor = [NSCursor arrowCursor];
-      break;
-    case Window::cursorWait:
-      mCurrentCursor = waitCursor;
-      break;
-    case Window::cursorHoriz:
-      mCurrentCursor = [NSCursor resizeLeftRightCursor];
-      break;
-    case Window::cursorVert:
-      mCurrentCursor = [NSCursor resizeUpDownCursor];
-      break;
-    case Window::cursorReverseArrow:
-      mCurrentCursor = reverseArrowCursor;
-      break;
-    case Window::cursorUp:
-    default:
-      mCurrentCursor = [NSCursor arrowCursor];
-      break;
-  }
-  
+  mCurrentCursor = cursorFromEnum(cursor);
   [mCurrentCursor retain];
   
   // Trigger recreation of the cursor rectangle(s).
