@@ -79,7 +79,7 @@ extern NSString *SCIUpdateUINotification;
   id<ScintillaNotificationProtocol> mDelegate;
 }
 
-@property (nonatomic, assign) Scintilla::ScintillaCocoa* backend;
+@property (nonatomic, readonly) Scintilla::ScintillaCocoa* backend;
 @property (nonatomic, assign) NSObject* owner;
 @property (nonatomic, assign) id<ScintillaNotificationProtocol> delegate;
 
