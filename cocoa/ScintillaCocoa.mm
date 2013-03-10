@@ -1508,7 +1508,7 @@ void ScintillaCocoa::ScrollText(int linesToMove)
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Modfies the vertical scroll position to make the current top line show up as such.
+ * Modifies the vertical scroll position to make the current top line show up as such.
  */
 void ScintillaCocoa::SetVerticalScrollPos()
 {
@@ -1523,6 +1523,9 @@ void ScintillaCocoa::SetVerticalScrollPos()
 
 //--------------------------------------------------------------------------------------------------
 
+/**
+ * Modifies the horizontal scroll position to match xOffset.
+ */
 void ScintillaCocoa::SetHorizontalScrollPos()
 {
   ScintillaView* topContainer = TopContainer();

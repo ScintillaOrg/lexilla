@@ -634,7 +634,7 @@ NSString *SCIUpdateUINotification = @"SCIUpdateUI";
 @synthesize delegate = mDelegate;
 
 /**
- * ScintiallView is a composite control made from an NSView and an embedded NSView that is
+ * ScintillaView is a composite control made from an NSView and an embedded NSView that is
  * used as canvas for the output (by the backend, using its CGContext), plus other elements
  * (scrollers, info bar).
  */
@@ -1066,7 +1066,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 /**
  * Used to set the position of the vertical scroll thumb.
  *
- * @param position The relative position in the rang [0..1];
+ * @param position The relative position in the range [0..1];
  */
 - (void) setVerticalScrollPosition: (float) position
 {
@@ -1116,7 +1116,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 /**
  * Used to set the position of the vertical scroll thumb.
  *
- * @param position The relative position in the rang [0..1];
+ * @param position The relative position in the range [0..1];
  */
 - (void) setHorizontalScrollPosition: (float) position
 {
