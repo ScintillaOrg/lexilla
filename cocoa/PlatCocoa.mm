@@ -28,8 +28,6 @@
 
 #import <Foundation/NSGeometry.h>
 
-#import <Carbon/Carbon.h> // Temporary
-
 using namespace Scintilla;
 
 extern sptr_t scintilla_send_message(void* sci, unsigned int iMessage, uptr_t wParam, sptr_t lParam);
@@ -1488,7 +1486,6 @@ typedef std::map<NSInteger, NSImage*> ImageMap;
 class ListBoxImpl : public ListBox, IListBox
 {
 private:
-  ControlRef lb;
   ImageMap images;
   int lineHeight;
   bool unicodeMode;
@@ -1510,7 +1507,7 @@ private:
   void* doubleClickActionData;
 
 public:
-  ListBoxImpl() : lb(NULL), lineHeight(10), unicodeMode(false),
+  ListBoxImpl() : lineHeight(10), unicodeMode(false),
     desiredVisibleRows(5), maxItemWidth(0), aveCharWidth(8), maxIconWidth(0),
     doubleClickAction(NULL), doubleClickActionData(NULL)
   {
@@ -2010,7 +2007,7 @@ unsigned int Platform::DoubleClickTime()
                      @"com.apple.mouse.doubleClickThreshold"];
   if (threshold == 0)
     threshold = 0.5;
-  return static_cast<unsigned int>(threshold / kEventDurationMillisecond);
+  return static_cast<unsigned int>(threshold * 1000.0);
 }
 
 //--------------------------------------------------------------------------------------------------

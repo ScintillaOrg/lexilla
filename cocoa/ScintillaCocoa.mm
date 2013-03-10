@@ -21,8 +21,6 @@
 #import <QuartzCore/CAAnimation.h>
 #import <QuartzCore/CATransaction.h>
 
-#import <Carbon/Carbon.h> // Temporary
-
 #include "ScintillaView.h"
 #include "PlatCocoa.h"
 
