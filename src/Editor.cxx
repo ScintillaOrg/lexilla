@@ -782,6 +782,7 @@ void Editor::SetSelection(SelectionPosition currentPos_, SelectionPosition ancho
 	if (highlightDelimiter.NeedsDrawing(currentLine)) {
 		RedrawSelMargin();
 	}
+	QueueIdleWork(WorkNeeded::workUpdateUI);
 }
 
 void Editor::SetSelection(int currentPos_, int anchor_) {
@@ -808,6 +809,7 @@ void Editor::SetSelection(SelectionPosition currentPos_) {
 	if (highlightDelimiter.NeedsDrawing(currentLine)) {
 		RedrawSelMargin();
 	}
+	QueueIdleWork(WorkNeeded::workUpdateUI);
 }
 
 void Editor::SetSelection(int currentPos_) {
@@ -828,6 +830,7 @@ void Editor::SetEmptySelection(SelectionPosition currentPos_) {
 	if (highlightDelimiter.NeedsDrawing(currentLine)) {
 		RedrawSelMargin();
 	}
+	QueueIdleWork(WorkNeeded::workUpdateUI);
 }
 
 void Editor::SetEmptySelection(int currentPos_) {
@@ -4641,18 +4644,13 @@ void Editor::NotifyModified(Document *, DocModification mh, void *) {
 				}
 			}
 
-			//Platform::DebugPrintf("** %x Doc Changed\n", this);
-			// TODO: could invalidate from mh.startModification to end of screen
-			//InvalidateRange(mh.position, mh.position + mh.length);
 			if (paintState == notPainting && !CanDeferToLastStep(mh)) {
-				QueueStyling(pdoc->Length());
+				QueueIdleWork(WorkNeeded::workStyle, pdoc->Length());
 				Redraw();
 			}
 		} else {
-			//Platform::DebugPrintf("** %x Line Changed %d .. %d\n", this,
-			//	mh.position, mh.position + mh.length);
 			if (paintState == notPainting && mh.length && !CanEliminate(mh)) {
-				QueueStyling(mh.position + mh.length);
+				QueueIdleWork(WorkNeeded::workStyle, mh.position + mh.length);
 				InvalidateRange(mh.position, mh.position + mh.length);
 			}
 		}
@@ -6719,14 +6717,15 @@ void Editor::StyleToPositionInView(Position pos) {
 void Editor::IdleStyling() {
 	// Style the line after the modification as this allows modifications that change just the
 	// line of the modification to heal instead of propagating to the rest of the window.
-	StyleToPositionInView(pdoc->LineStart(pdoc->LineFromPosition(styleNeeded.upTo) + 2));
+	if (workNeeded.items & WorkNeeded::workStyle)
+		StyleToPositionInView(pdoc->LineStart(pdoc->LineFromPosition(workNeeded.upTo) + 2));
 
 	NotifyUpdateUI();
-	styleNeeded.Reset();
+	workNeeded.Reset();
 }
 
-void Editor::QueueStyling(int upTo) {
-	styleNeeded.NeedUpTo(upTo);
+void Editor::QueueIdleWork(WorkNeeded::workItems items, int upTo) {
+	workNeeded.Need(items, upTo);
 }
 
 bool Editor::PaintContains(PRectangle rc) {

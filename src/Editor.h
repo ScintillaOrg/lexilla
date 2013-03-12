@@ -47,21 +47,30 @@ public:
 
 /**
  * When platform has a way to generate an event before painting,
- * accumulate needed styling range in StyleNeeded to avoid unnecessary work.
+ * accumulate needed styling range and other work items in 
+ * WorkNeeded to avoid unnecessary work inside paint handler
  */
-class StyleNeeded {
+class WorkNeeded {
 public:
+	enum workItems {
+		workNone=0,
+		workStyle=1,
+		workUpdateUI=2
+	};
 	bool active;
+	enum workItems items;
 	Position upTo;
 
-	StyleNeeded() : active(false), upTo(0) {}
+	WorkNeeded() : active(false), items(workNone), upTo(0) {}
 	void Reset() {
 		active = false;
+		items = workNone;
 		upTo = 0;
 	}
-	void NeedUpTo(Position pos) {
-		if (upTo < pos)
+	void Need(workItems items_, Position pos) {
+		if ((items_ & workStyle) && (upTo < pos))
 			upTo = pos;
+		items = static_cast<workItems>(items | items_);
 	}
 };
 
@@ -241,7 +250,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	PRectangle rcPaint;
 	bool paintingAllText;
 	bool willRedrawAll;
-	StyleNeeded styleNeeded;
+	WorkNeeded workNeeded;
 
 	int modEventMask;
 
@@ -532,7 +541,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int PositionAfterArea(PRectangle rcArea);
 	void StyleToPositionInView(Position pos);
 	void IdleStyling();
-	virtual void QueueStyling(int upTo);
+	virtual void QueueIdleWork(WorkNeeded::workItems items, int upTo=0);
 
 	virtual bool PaintContains(PRectangle rc);
 	bool PaintContainsMargin();

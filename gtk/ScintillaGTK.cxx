@@ -296,7 +296,7 @@ private:
 	static gboolean TimeOut(ScintillaGTK *sciThis);
 	static gboolean IdleCallback(ScintillaGTK *sciThis);
 	static gboolean StyleIdle(ScintillaGTK *sciThis);
-	virtual void QueueStyling(int upTo);
+	virtual void QueueIdleWork(WorkNeeded::workItems items, int upTo);
 	static void PopUpCB(GtkMenuItem *menuItem, ScintillaGTK *sciThis);
 
 #if GTK_CHECK_VERSION(3,0,0)
@@ -2768,11 +2768,11 @@ gboolean ScintillaGTK::StyleIdle(ScintillaGTK *sciThis) {
 	return FALSE;
 }
 
-void ScintillaGTK::QueueStyling(int upTo) {
-	Editor::QueueStyling(upTo);
-	if (!styleNeeded.active) {
+void ScintillaGTK::QueueIdleWork(WorkNeeded::workItems items, int upTo) {
+	Editor::QueueIdleWork(items, upTo);
+	if (!workNeeded.active) {
 		// Only allow one style needed to be queued
-		styleNeeded.active = true;
+		workNeeded.active = true;
 		g_idle_add_full(G_PRIORITY_HIGH_IDLE,
 			reinterpret_cast<GSourceFunc>(StyleIdle), this, NULL);
 	}
