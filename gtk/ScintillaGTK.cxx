@@ -1138,6 +1138,7 @@ void ScintillaGTK::ScrollText(int linesToMove) {
 	//Platform::DebugPrintf("ScintillaGTK::ScrollText %d %d %0d,%0d %0d,%0d\n", linesToMove, diff,
 	//	rc.left, rc.top, rc.right, rc.bottom);
 	GtkWidget *wi = PWidget(wText);
+	NotifyUpdateUI();
 
 	if (IS_WIDGET_REALIZED(wi)) {
 		gdk_window_scroll(WindowFromWidget(wi), 0, -diff);
