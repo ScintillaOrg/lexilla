@@ -2761,7 +2761,7 @@ gboolean ScintillaGTK::StyleIdle(ScintillaGTK *sciThis) {
 #ifndef GDK_VERSION_3_6
 	gdk_threads_enter();
 #endif
-	sciThis->IdleStyling();
+	sciThis->IdleWork();
 #ifndef GDK_VERSION_3_6
 	gdk_threads_leave();
 #endif

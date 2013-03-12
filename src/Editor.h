@@ -540,7 +540,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	int PositionAfterArea(PRectangle rcArea);
 	void StyleToPositionInView(Position pos);
-	void IdleStyling();
+	virtual void IdleWork();
 	virtual void QueueIdleWork(WorkNeeded::workItems items, int upTo=0);
 
 	virtual bool PaintContains(PRectangle rc);

@@ -6714,7 +6714,7 @@ void Editor::StyleToPositionInView(Position pos) {
 	}
 }
 
-void Editor::IdleStyling() {
+void Editor::IdleWork() {
 	// Style the line after the modification as this allows modifications that change just the
 	// line of the modification to heal instead of propagating to the rest of the window.
 	if (workNeeded.items & WorkNeeded::workStyle)

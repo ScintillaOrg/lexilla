@@ -383,6 +383,7 @@ ScintillaCocoa::ScintillaCocoa(NSView* view)
 {
   wMain = view; // Don't retain since we're owned by view, which would cause a cycle
   timerTarget = [[TimerTarget alloc] init: this];
+  observer = NULL;
   layerFindIndicator = NULL;
   Initialise();
 }
@@ -428,8 +429,66 @@ void ScintillaCocoa::Initialise()
  */
 void ScintillaCocoa::Finalise()
 {
+  ObserverRemove();
   SetTicking(false);
   ScintillaBase::Finalise();
+}
+
+//--------------------------------------------------------------------------------------------------
+
+void ScintillaCocoa::UpdateObserver(CFRunLoopObserverRef observer, CFRunLoopActivity activity, void *info) {
+  ScintillaCocoa* sci = reinterpret_cast<ScintillaCocoa*>(info);
+  sci->IdleWork();
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Add an observer to the run loop to perform styling as high-priority idle task.
+ */
+
+void ScintillaCocoa::ObserverAdd() {
+  if (!observer) {
+    CFRunLoopObserverContext context;
+    context.version = 0;
+    context.info = this;
+    context.retain = NULL;
+    context.release = NULL;
+    context.copyDescription = NULL;
+
+    CFRunLoopRef mainRunLoop = CFRunLoopGetMain();
+    observer = CFRunLoopObserverCreate(NULL, kCFRunLoopEntry | kCFRunLoopBeforeWaiting,
+      true, 0, UpdateObserver, &context);
+    CFRunLoopAddObserver(mainRunLoop, observer, kCFRunLoopCommonModes);
+  }
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Remove the run loop observer.
+ */
+void ScintillaCocoa::ObserverRemove() {
+  if (observer) {
+    CFRunLoopRef mainRunLoop = CFRunLoopGetMain();
+    CFRunLoopRemoveObserver(mainRunLoop, observer, kCFRunLoopCommonModes);
+    CFRelease(observer);
+  }
+  observer = NULL;
+}
+
+//--------------------------------------------------------------------------------------------------
+
+void ScintillaCocoa::IdleWork() {
+  Editor::IdleWork();
+  ObserverRemove();
+}
+
+//--------------------------------------------------------------------------------------------------
+
+void ScintillaCocoa::QueueIdleWork(WorkNeeded::workItems items, int upTo) {
+  Editor::QueueIdleWork(items, upTo);
+  ObserverAdd();
 }
 
 //--------------------------------------------------------------------------------------------------

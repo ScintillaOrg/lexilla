@@ -120,6 +120,7 @@ private:
   int scrollTicks;
   NSTimer* tickTimer;
   NSTimer* idleTimer;
+  CFRunLoopObserverRef observer;
 	
   FindHighlightLayer *layerFindIndicator;
 
@@ -184,6 +185,11 @@ public:
 
   void TimerFired(NSTimer* timer);
   void IdleTimerFired();
+  static void UpdateObserver(CFRunLoopObserverRef observer, CFRunLoopActivity activity, void *sci);
+  void ObserverAdd();
+  void ObserverRemove();
+  virtual void IdleWork();
+  virtual void QueueIdleWork(WorkNeeded::workItems items, int upTo);
   int InsertText(NSString* input);
   
   bool KeyboardInput(NSEvent* event);
