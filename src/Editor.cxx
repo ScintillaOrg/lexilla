@@ -3467,10 +3467,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	int yposScreen = screenLinePaintFirst * vs.lineHeight;
 
 	bool paintAbandonedByStyling = paintState == paintAbandoned;
-	if (needUpdateUI) {
-		NotifyUpdateUI();
-		needUpdateUI = 0;
-
+	if (NotifyUpdateUI()) {
 		RefreshStyleData();
 		RefreshPixMaps(surfaceWindow);
 	}
@@ -4427,11 +4424,16 @@ void Editor::NotifyHotSpotReleaseClick(int position, bool shift, bool ctrl, bool
 	NotifyParent(scn);
 }
 
-void Editor::NotifyUpdateUI() {
-	SCNotification scn = {0};
-	scn.nmhdr.code = SCN_UPDATEUI;
-	scn.updated = needUpdateUI;
-	NotifyParent(scn);
+bool Editor::NotifyUpdateUI() {
+	if (needUpdateUI) {
+		SCNotification scn = {0};
+		scn.nmhdr.code = SCN_UPDATEUI;
+		scn.updated = needUpdateUI;
+		NotifyParent(scn);
+		needUpdateUI = 0;
+		return true;
+	}
+	return false;
 }
 
 void Editor::NotifyPainted() {
@@ -6719,10 +6721,7 @@ void Editor::IdleStyling() {
 	// line of the modification to heal instead of propagating to the rest of the window.
 	StyleToPositionInView(pdoc->LineStart(pdoc->LineFromPosition(styleNeeded.upTo) + 2));
 
-	if (needUpdateUI) {
-		NotifyUpdateUI();
-		needUpdateUI = 0;
-	}
+	NotifyUpdateUI();
 	styleNeeded.Reset();
 }
 

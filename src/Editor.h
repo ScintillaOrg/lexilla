@@ -452,7 +452,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void NotifyHotSpotClicked(int position, bool shift, bool ctrl, bool alt);
 	void NotifyHotSpotDoubleClicked(int position, bool shift, bool ctrl, bool alt);
 	void NotifyHotSpotReleaseClick(int position, bool shift, bool ctrl, bool alt);
-	void NotifyUpdateUI();
+	bool NotifyUpdateUI();
 	void NotifyPainted();
 	void NotifyIndicatorClick(bool click, int position, bool shift, bool ctrl, bool alt);
 	bool NotifyMarginClick(Point pt, bool shift, bool ctrl, bool alt);
