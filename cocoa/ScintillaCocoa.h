@@ -54,6 +54,7 @@
 
 extern "C" NSString* ScintillaRecPboardType;
 
+@class InnerView;
 @class ScintillaView;
 
 @class FindHighlightLayer;
@@ -132,16 +133,16 @@ protected:
   virtual CaseFolder *CaseFolderForEncoding();
   virtual std::string CaseMapString(const std::string &s, int caseMapping);
   virtual void CancelModes();
-public:
-  NSView* ContentView();
 
-  ScintillaCocoa(NSView* view);
+public:
+  ScintillaCocoa(InnerView* view);
   virtual ~ScintillaCocoa();
 
   void RegisterNotifyCallback(intptr_t windowid, SciNotifyFunc callback);
   sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
   ScintillaView* TopContainer();
+  InnerView* ContentView();
 
   bool SyncPaint(void* gc, PRectangle rc);
   bool Draw(NSRect rect, CGContextRef gc);

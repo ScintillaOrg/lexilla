@@ -379,7 +379,7 @@ const CGFloat paddingHighlightY = 2;
 
 //----------------- ScintillaCocoa -----------------------------------------------------------------
 
-ScintillaCocoa::ScintillaCocoa(NSView* view)
+ScintillaCocoa::ScintillaCocoa(InnerView* view)
 {
   wMain = view; // Don't retain since we're owned by view, which would cause a cycle
   timerTarget = [[TimerTarget alloc] init: this];
@@ -686,9 +686,9 @@ ScintillaView* ScintillaCocoa::TopContainer()
 /**
  * Helper function to get the inner container which represents the actual "canvas" we work with.
  */
-NSView* ScintillaCocoa::ContentView()
+InnerView* ScintillaCocoa::ContentView()
 {
-  return static_cast<NSView*>(wMain.GetID());
+  return static_cast<InnerView*>(wMain.GetID());
 }
 
 //--------------------------------------------------------------------------------------------------
