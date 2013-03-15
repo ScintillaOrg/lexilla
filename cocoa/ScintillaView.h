@@ -27,6 +27,24 @@ extern NSString *SCIUpdateUINotification;
 @end
 
 /**
+ * MarginView draws line numbers and other margins next to the text view.
+ */
+@interface MarginView : NSRulerView
+{
+@private
+  int marginWidth;
+  ScintillaView *owner;
+  NSMutableArray *currentCursors;
+}
+
+@property (assign) int marginWidth;
+@property (assign) ScintillaView *owner;
+
+- (id)initWithScrollView:(NSScrollView *)aScrollView;
+
+@end
+
+/**
  * InnerView is the Cocoa interface to the Scintilla backend. It handles text input and
  * provides a canvas for painting the output.
  */
@@ -63,8 +81,8 @@ extern NSString *SCIUpdateUINotification;
   // This is the actual content to which the backend renders itself.
   InnerView* mContent;
   
-  NSScroller* mHorizontalScroller;
-  NSScroller* mVerticalScroller;
+  NSScrollView *scrollView;
+  MarginView *marginView;
   
   CGFloat zoomDelta;
   
@@ -78,6 +96,7 @@ extern NSString *SCIUpdateUINotification;
 
 @property (nonatomic, readonly) Scintilla::ScintillaCocoa* backend;
 @property (nonatomic, assign) id<ScintillaNotificationProtocol> delegate;
+@property (nonatomic, readonly) NSScrollView *scrollView;
 
 - (void) dealloc;
 - (void) positionSubViews;
@@ -90,11 +109,7 @@ extern NSString *SCIUpdateUINotification;
 - (void) suspendDrawing: (BOOL) suspend;
 
 // Scroller handling
-- (BOOL) setVerticalScrollRange: (int) range page: (int) page;
-- (void) setVerticalScrollPosition: (float) position;
-- (BOOL) setHorizontalScrollRange: (int) range page: (int) page;
-- (void) setHorizontalScrollPosition: (float) position;
-
+- (void) setMarginWidth: (int) width;
 - (void) scrollerAction: (id) sender;
 - (InnerView*) content;
 

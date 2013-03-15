@@ -148,6 +148,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	/** On GTK+, Scintilla is a container widget holding two scroll bars
 	 * whereas on Windows there is just one window with both scroll bars turned on. */
 	Window wMain;	///< The Scintilla parent window
+	Window wMargin;	///< May be separate when using a scroll view for wMain
 
 	/** Style resources may be expensive to allocate so are cached between uses.
 	 * When a style attribute is changed, this cache is flushed. */
@@ -199,6 +200,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	Surface *pixmapLine;
 	Surface *pixmapSelMargin;
 	Surface *pixmapSelPattern;
+	Surface *pixmapSelPatternOffset1;
 	Surface *pixmapIndentGuide;
 	Surface *pixmapIndentGuideHighlight;
 
@@ -308,6 +310,11 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void DropGraphics(bool freeObjects);
 	void AllocateGraphics();
 
+	// The top left visible point in main window coordinates. Will be 0,0 except for
+	// scroll views where it will be equivalent to the current scroll position.
+	virtual Point GetVisibleOriginInMain();
+	Point DocumentPointFromView(Point ptView);  // Convert a point from view space to document
+	int TopLineOfMain();   // Return the line at Main's y coordinate 0
 	virtual PRectangle GetClientRectangle();
 	PRectangle GetTextRectangle();
 

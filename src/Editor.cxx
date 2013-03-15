@@ -175,6 +175,7 @@ Editor::Editor() {
 	pixmapLine = 0;
 	pixmapSelMargin = 0;
 	pixmapSelPattern = 0;
+	pixmapSelPatternOffset1 = 0;
 	pixmapIndentGuide = 0;
 	pixmapIndentGuideHighlight = 0;
 
@@ -250,6 +251,8 @@ void Editor::DropGraphics(bool freeObjects) {
 		pixmapSelMargin = 0;
 		delete pixmapSelPattern;
 		pixmapSelPattern = 0;
+		delete pixmapSelPatternOffset1;
+		pixmapSelPatternOffset1 = 0;
 		delete pixmapIndentGuide;
 		pixmapIndentGuide = 0;
 		delete pixmapIndentGuideHighlight;
@@ -261,6 +264,8 @@ void Editor::DropGraphics(bool freeObjects) {
 			pixmapSelMargin->Release();
 		if (pixmapSelPattern)
 			pixmapSelPattern->Release();
+		if (pixmapSelPatternOffset1)
+			pixmapSelPatternOffset1->Release();
 		if (pixmapIndentGuide)
 			pixmapIndentGuide->Release();
 		if (pixmapIndentGuideHighlight)
@@ -275,6 +280,8 @@ void Editor::AllocateGraphics() {
 		pixmapSelMargin = Surface::Allocate(technology);
 	if (!pixmapSelPattern)
 		pixmapSelPattern = Surface::Allocate(technology);
+	if (!pixmapSelPatternOffset1)
+		pixmapSelPatternOffset1 = Surface::Allocate(technology);
 	if (!pixmapIndentGuide)
 		pixmapIndentGuide = Surface::Allocate(technology);
 	if (!pixmapIndentGuideHighlight)
@@ -308,13 +315,37 @@ void Editor::RefreshStyleData() {
 	}
 }
 
+Point Editor::GetVisibleOriginInMain() {
+	return Point(0,0);
+}
+
+Point Editor::DocumentPointFromView(Point ptView) {
+	Point ptDocument = ptView;
+	if (wMargin.GetID()) {
+		Point ptOrigin = GetVisibleOriginInMain();
+		ptDocument.x += ptOrigin.x;
+		ptDocument.y += ptOrigin.y;
+	} else {
+		ptDocument.x += xOffset;
+		ptDocument.y += topLine * vs.lineHeight;
+	}
+	return ptDocument;
+}
+
+int Editor::TopLineOfMain() {
+	if (wMargin.GetID())
+		return 0;
+	else
+		return topLine;
+}
+
 PRectangle Editor::GetClientRectangle() {
 	return wMain.GetClientPosition();
 }
 
 PRectangle Editor::GetTextRectangle() {
 	PRectangle rc = GetClientRectangle();
-	rc.left += vs.fixedColumnWidth;
+	rc.left += vs.textStart;
 	rc.right -= vs.rightMarginWidth;
 	return rc;
 }
@@ -437,7 +468,7 @@ Point Editor::LocationFromPosition(SelectionPosition pos) {
 				pt.y += vs.lineHeight;
 			}
 		}
-		pt.x += vs.fixedColumnWidth - xOffset;
+		pt.x += vs.textStart - xOffset;
 	}
 	pt.x += pos.VirtualSpace() * vs.styles[ll->EndLineStyle()].spaceWidth;
 	return pt;
@@ -449,12 +480,12 @@ Point Editor::LocationFromPosition(int pos) {
 
 int Editor::XFromPosition(int pos) {
 	Point pt = LocationFromPosition(pos);
-	return pt.x - vs.fixedColumnWidth + xOffset;
+	return pt.x - vs.textStart + xOffset;
 }
 
 int Editor::XFromPosition(SelectionPosition sp) {
 	Point pt = LocationFromPosition(sp);
-	return pt.x - vs.fixedColumnWidth + xOffset;
+	return pt.x - vs.textStart + xOffset;
 }
 
 int Editor::LineFromLocation(Point pt) {
@@ -462,7 +493,7 @@ int Editor::LineFromLocation(Point pt) {
 }
 
 void Editor::SetTopLine(int topLineNew) {
-	if (topLine != topLineNew) {
+	if ((topLine != topLineNew) && (topLineNew >= 0)) {
 		topLine = topLineNew;
 		ContainerNeedsUpdate(SC_UPDATE_V_SCROLL);
 	}
@@ -475,13 +506,14 @@ SelectionPosition Editor::SPositionFromLocation(Point pt, bool canReturnInvalid,
 		PRectangle rcClient = GetTextRectangle();
 		if (!rcClient.Contains(pt))
 			return SelectionPosition(INVALID_POSITION);
-		if (pt.x < vs.fixedColumnWidth)
+		if (pt.x < vs.textStart)
 			return SelectionPosition(INVALID_POSITION);
 		if (pt.y < 0)
 			return SelectionPosition(INVALID_POSITION);
 	}
-	pt.x = pt.x - vs.fixedColumnWidth + xOffset;
-	int visibleLine = floor(pt.y / vs.lineHeight) + topLine;
+	pt = DocumentPointFromView(pt);
+	pt.x = pt.x - vs.textStart;
+	int visibleLine = floor(pt.y / vs.lineHeight);
 	if (!canReturnInvalid && (visibleLine < 0))
 		visibleLine = 0;
 	int lineDoc = cs.DocFromDisplay(visibleLine);
@@ -620,6 +652,8 @@ void Editor::Redraw() {
 	//Platform::DebugPrintf("Redraw all\n");
 	PRectangle rcClient = GetClientRectangle();
 	wMain.InvalidateRectangle(rcClient);
+	if (wMargin.GetID())
+		wMargin.InvalidateAll();
 	//wMain.InvalidateAll();
 }
 
@@ -629,7 +663,7 @@ void Editor::RedrawSelMargin(int line, bool allAfter) {
 			Redraw();
 		} else {
 			PRectangle rcSelMargin = GetClientRectangle();
-			rcSelMargin.right = vs.fixedColumnWidth;
+			rcSelMargin.right = rcSelMargin.left + vs.fixedColumnWidth;
 			if (line != -1) {
 				int position = pdoc->LineStart(line);
 				PRectangle rcLine = RectangleFromRange(position, position);
@@ -649,7 +683,13 @@ void Editor::RedrawSelMargin(int line, bool allAfter) {
 				if (!allAfter)
 					rcSelMargin.bottom = rcLine.bottom;
 			}
-			wMain.InvalidateRectangle(rcSelMargin);
+			if (wMargin.GetID()) {
+				Point ptOrigin = GetVisibleOriginInMain();
+				rcSelMargin.Move(-ptOrigin.x, -ptOrigin.y);
+				wMargin.InvalidateRectangle(rcSelMargin);
+			} else {
+				wMain.InvalidateRectangle(rcSelMargin);
+			}
 		}
 	}
 }
@@ -667,15 +707,12 @@ PRectangle Editor::RectangleFromRange(int start, int end) {
 	PRectangle rcClient = GetTextRectangle();
 	PRectangle rc;
 	const int leftTextOverlap = ((xOffset == 0) && (vs.leftMarginWidth > 0)) ? 1 : 0;
-	rc.left = vs.fixedColumnWidth - leftTextOverlap;
-	rc.top = (minLine - topLine) * vs.lineHeight;
-	if (rc.top < 0)
-		rc.top = 0;
+	rc.left = vs.textStart - leftTextOverlap;
+	rc.top = (minLine - TopLineOfMain()) * vs.lineHeight;
+	if (rc.top < rcClient.top)
+		rc.top = rcClient.top;
 	rc.right = rcClient.right;
-	rc.bottom = (maxLine - topLine + 1) * vs.lineHeight;
-	// Ensure PRectangle is within 16 bit space
-	rc.top = Platform::Clamp(rc.top, -32000, 32000);
-	rc.bottom = Platform::Clamp(rc.bottom, -32000, 32000);
+	rc.bottom = (maxLine - TopLineOfMain() + 1) * vs.lineHeight;
 
 	return rc;
 }
@@ -1199,7 +1236,9 @@ slop | strict | jumps | even | Caret can go to the margin                 | When
 Editor::XYScrollPosition Editor::XYScrollToMakeVisible(const bool useMargin, const bool vert, const bool horiz) {
 	PRectangle rcClient = GetTextRectangle();
 	const SelectionPosition posCaret = posDrag.IsValid() ? posDrag : sel.RangeMain().caret;
-	const Point pt = LocationFromPosition(posCaret);
+	Point pt = LocationFromPosition(posCaret);
+	const Point ptOrigin = GetVisibleOriginInMain();
+	pt.x += ptOrigin.x;
 	const Point ptBottomCaret(pt.x, pt.y + vs.lineHeight - 1);
 	const int lineCaret = DisplayFromPosition(posCaret.Position());
 
@@ -1543,8 +1582,8 @@ bool Editor::WrapLines(bool fullWrap, int priorityWrapLineStart) {
 			int lineDocTop = cs.DocFromDisplay(topLine);
 			int subLineTop = topLine - cs.DisplayFromDoc(lineDocTop);
 			PRectangle rcTextArea = GetClientRectangle();
-			rcTextArea.left = vs.fixedColumnWidth;
-			rcTextArea.right -= vs.rightMarginWidth;
+			rcTextArea.left = vs.textStart;
+			rcTextArea.right -= vs.textStart;
 			wrapWidth = rcTextArea.Width();
 			RefreshStyleData();
 			AutoSurface surface(this);
@@ -1754,7 +1793,12 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 	if (vs.fixedColumnWidth == 0)
 		return;
 
+	RefreshPixMaps(surfWindow);
+
 	PRectangle rcMargin = GetClientRectangle();
+	Point ptOrigin = GetVisibleOriginInMain();
+	rcMargin.Move(0, -ptOrigin.y);
+	rcMargin.left = 0;
 	rcMargin.right = vs.fixedColumnWidth;
 
 	if (!rc.Intersects(rcMargin))
@@ -1783,10 +1827,14 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 			rcSelMargin.right = rcSelMargin.left + vs.ms[margin].width;
 
 			if (vs.ms[margin].style != SC_MARGIN_NUMBER) {
-				if (vs.ms[margin].mask & SC_MASK_FOLDERS)
+				if (vs.ms[margin].mask & SC_MASK_FOLDERS) {
 					// Required because of special way brush is created for selection margin
-					surface->FillRectangle(rcSelMargin, *pixmapSelPattern);
-				else {
+					// Ensure patterns line up when scrolling with separate margin view
+					// by choosing correctly aligned variant.
+					bool invertPhase = static_cast<int>(ptOrigin.y) & 1;
+					surface->FillRectangle(rcSelMargin,
+					  invertPhase ? *pixmapSelPattern : *pixmapSelPatternOffset1);
+				} else {
 					ColourDesired colour;
 					switch (vs.ms[margin].style) {
 					case SC_MARGIN_BACK:
@@ -1805,9 +1853,9 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 				surface->FillRectangle(rcSelMargin, vs.styles[STYLE_LINENUMBER].back);
 			}
 
-			const int lineStartPaint = rcMargin.top / vs.lineHeight;
-			int visibleLine = topLine + lineStartPaint;
-			int yposScreen = lineStartPaint * vs.lineHeight;
+			const int lineStartPaint = (rcMargin.top + ptOrigin.y) / vs.lineHeight;
+			int visibleLine = TopLineOfMain() + lineStartPaint;
+			int yposScreen = lineStartPaint * vs.lineHeight - ptOrigin.y;
 			// Work out whether the top line is whitespace located after a
 			// lessening of fold level which implies a 'fold tail' but which should not
 			// be displayed until the last of a sequence of whitespace.
@@ -3299,6 +3347,7 @@ void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 	if (!pixmapSelPattern->Initialised()) {
 		const int patternSize = 8;
 		pixmapSelPattern->InitPixMap(patternSize, patternSize, surfaceWindow, wMain.GetID());
+		pixmapSelPatternOffset1->InitPixMap(patternSize, patternSize, surfaceWindow, wMain.GetID());
 		// This complex procedure is to reproduce the checkerboard dithered pattern used by windows
 		// for scroll bars and Visual Studio for its selection margin. The colour of this pattern is half
 		// way between the chrome colour and the chrome highlight colour making a nice transition
@@ -3325,10 +3374,12 @@ void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 		}
 
 		pixmapSelPattern->FillRectangle(rcPattern, colourFMFill);
+		pixmapSelPatternOffset1->FillRectangle(rcPattern, colourFMStripes);
 		for (int y = 0; y < patternSize; y++) {
 			for (int x = y % 2; x < patternSize; x+=2) {
 				PRectangle rcPixel(x, y, x+1, y+1);
 				pixmapSelPattern->FillRectangle(rcPixel, colourFMStripes);
+				pixmapSelPatternOffset1->FillRectangle(rcPixel, colourFMFill);
 			}
 		}
 	}
@@ -3456,12 +3507,13 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	StyleToPositionInView(PositionAfterArea(rcArea));
 
 	PRectangle rcClient = GetClientRectangle();
+	Point ptOrigin = GetVisibleOriginInMain();
 	//Platform::DebugPrintf("Client: (%3d,%3d) ... (%3d,%3d)   %d\n",
 	//	rcClient.left, rcClient.top, rcClient.right, rcClient.bottom);
 
 	int screenLinePaintFirst = rcArea.top / vs.lineHeight;
 
-	int xStart = vs.fixedColumnWidth - xOffset;
+	int xStart = vs.textStart - xOffset + ptOrigin.x;
 	int ypos = 0;
 	if (!bufferedDraw)
 		ypos += screenLinePaintFirst * vs.lineHeight;
@@ -3493,12 +3545,20 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		surfaceWindow->SetClip(rcArea);
 
 	if (paintState != paintAbandoned) {
-		PaintSelMargin(surfaceWindow, rcArea);
-
-		PRectangle rcRightMargin = rcClient;
-		rcRightMargin.left = rcRightMargin.right - vs.rightMarginWidth;
-		if (rcArea.Intersects(rcRightMargin)) {
-			surfaceWindow->FillRectangle(rcRightMargin, vs.styles[STYLE_DEFAULT].back);
+		if (vs.marginInside) {
+			PaintSelMargin(surfaceWindow, rcArea);
+			PRectangle rcRightMargin = rcClient;
+			rcRightMargin.left = rcRightMargin.right - vs.rightMarginWidth;
+			if (rcArea.Intersects(rcRightMargin)) {
+				surfaceWindow->FillRectangle(rcRightMargin, vs.styles[STYLE_DEFAULT].back);
+			}
+		} else { // Else separate view so separate paint event but leftMargin included to allow overlap
+			PRectangle rcLeftMargin = rcArea;
+			rcLeftMargin.left = 0;
+			rcLeftMargin.right = rcLeftMargin.left + vs.leftMarginWidth;
+			if (rcArea.Intersects(rcLeftMargin)) {
+				surfaceWindow->FillRectangle(rcLeftMargin, vs.styles[STYLE_DEFAULT].back);
+			}
 		}
 	}
 
@@ -3522,7 +3582,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	const int leftTextOverlap = ((xOffset == 0) && (vs.leftMarginWidth > 0)) ? 1 : 0;
 
 	// Do the painting
-	if (rcArea.right > vs.fixedColumnWidth - leftTextOverlap) {
+	if (rcArea.right > vs.textStart - leftTextOverlap) {
 
 		Surface *surface = surfaceWindow;
 		if (bufferedDraw) {
@@ -3532,7 +3592,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		surface->SetUnicodeMode(IsUnicodeMode());
 		surface->SetDBCSMode(CodePage());
 
-		int visibleLine = topLine + screenLinePaintFirst;
+		int visibleLine = TopLineOfMain() + screenLinePaintFirst;
 
 		SelectionPosition posCaret = sel.RangeMain().caret;
 		if (posDrag.IsValid())
@@ -3540,12 +3600,16 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		int lineCaret = pdoc->LineFromPosition(posCaret.Position());
 
 		PRectangle rcTextArea = rcClient;
-		rcTextArea.left = vs.fixedColumnWidth;
-		rcTextArea.right -= vs.rightMarginWidth;
+		if (vs.marginInside) {
+			rcTextArea.left += vs.textStart;
+			rcTextArea.right -= vs.rightMarginWidth;
+		} else {
+			rcTextArea = rcArea;
+		}
 
 		// Remove selection margin from drawing area so text will not be drawn
 		// on it in unbuffered mode.
-		if (!bufferedDraw) {
+		if (!bufferedDraw && vs.marginInside) {
 			PRectangle rcClipText = rcTextArea;
 			rcClipText.left -= leftTextOverlap;
 			surfaceWindow->SetClip(rcClipText);
@@ -3639,8 +3703,8 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 				DrawCarets(surface, vs, lineDoc, xStart, rcLine, ll, subLine);
 
 				if (bufferedDraw) {
-					Point from(vs.fixedColumnWidth-leftTextOverlap, 0);
-					PRectangle rcCopyArea(vs.fixedColumnWidth-leftTextOverlap, yposScreen,
+					Point from(vs.textStart-leftTextOverlap, 0);
+					PRectangle rcCopyArea(vs.textStart-leftTextOverlap, yposScreen,
 					        rcClient.right - vs.rightMarginWidth, yposScreen + vs.lineHeight);
 					surfaceWindow->Copy(rcCopyArea, from, *pixmapLine);
 				}
@@ -3664,10 +3728,10 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		//	durPaint = 0.00000001;
 
 		// Right column limit indicator
-		PRectangle rcBeyondEOF = rcClient;
-		rcBeyondEOF.left = vs.fixedColumnWidth;
-		rcBeyondEOF.right = rcBeyondEOF.right - vs.rightMarginWidth;
-		rcBeyondEOF.top = (cs.LinesDisplayed() - topLine) * vs.lineHeight;
+		PRectangle rcBeyondEOF = (vs.marginInside) ? rcClient : rcArea;
+		rcBeyondEOF.left = vs.textStart;
+		rcBeyondEOF.right = rcBeyondEOF.right - ((vs.marginInside) ? vs.rightMarginWidth : 0);
+		rcBeyondEOF.top = (cs.LinesDisplayed() - TopLineOfMain()) * vs.lineHeight;
 		if (rcBeyondEOF.top < rcBeyondEOF.bottom) {
 			surfaceWindow->FillRectangle(rcBeyondEOF, vs.styles[STYLE_DEFAULT].back);
 			if (vs.edgeState == EDGE_LINE) {
@@ -3937,7 +4001,7 @@ void Editor::ChangeSize() {
 	SetScrollBars();
 	if (wrapState != eWrapNone) {
 		PRectangle rcTextArea = GetClientRectangle();
-		rcTextArea.left = vs.fixedColumnWidth;
+		rcTextArea.left = vs.textStart;
 		rcTextArea.right -= vs.rightMarginWidth;
 		if (wrapWidth != rcTextArea.Width()) {
 			NeedWrapping();
@@ -4457,7 +4521,7 @@ void Editor::NotifyIndicatorClick(bool click, int position, bool shift, bool ctr
 
 bool Editor::NotifyMarginClick(Point pt, bool shift, bool ctrl, bool alt) {
 	int marginClicked = -1;
-	int x = 0;
+	int x = vs.textStart - vs.fixedColumnWidth;
 	for (int margin = 0; margin <= SC_MAX_MARGIN; margin++) {
 		if ((pt.x >= x) && (pt.x < x + vs.ms[margin].width))
 			marginClicked = margin;
@@ -6111,7 +6175,8 @@ bool Editor::PointInSelMargin(Point pt) {
 	// Really means: "Point in a margin"
 	if (vs.fixedColumnWidth > 0) {	// There is a margin
 		PRectangle rcSelMargin = GetClientRectangle();
-		rcSelMargin.right = vs.fixedColumnWidth - vs.leftMarginWidth;
+		rcSelMargin.right = vs.textStart - vs.leftMarginWidth;
+		rcSelMargin.left = vs.textStart - vs.fixedColumnWidth;
 		return rcSelMargin.Contains(pt);
 	} else {
 		return false;
@@ -6501,6 +6566,8 @@ void Editor::ButtonMove(Point pt) {
 
 		// Autoscroll
 		PRectangle rcClient = GetClientRectangle();
+		Point ptOrigin = GetVisibleOriginInMain();
+		rcClient.Move(0, -ptOrigin.y);
 		int lineMove = DisplayFromPosition(movePos.Position());
 		if (pt.y > rcClient.bottom) {
 			ScrollTo(lineMove - LinesOnScreen() + 1);
@@ -6700,7 +6767,7 @@ int Editor::PositionAfterArea(PRectangle rcArea) {
 // Style to a position within the view. If this causes a change at end of last line then
 // affects later lines so style all the viewed text.
 void Editor::StyleToPositionInView(Position pos) {
-	int endWindow = PositionAfterArea(GetClientRectangle());
+	int endWindow = (vs.marginInside) ? (PositionAfterArea(GetClientRectangle())) : (pdoc->Length());
 	if (pos > endWindow)
 		pos = endWindow;
 	int styleAtEnd = pdoc->StyleAt(pos-1);
@@ -6735,8 +6802,13 @@ bool Editor::PaintContains(PRectangle rc) {
 }
 
 bool Editor::PaintContainsMargin() {
+	if (wMargin.GetID()) {
+		// With separate margin view, paint of text view
+		// never contains margin.
+		return false;
+	}
 	PRectangle rcSelMargin = GetClientRectangle();
-	rcSelMargin.right = vs.fixedColumnWidth;
+	rcSelMargin.right = vs.textStart;
 	return PaintContains(rcSelMargin);
 }
 
@@ -7446,7 +7518,8 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			return 0;
 		} else {
 			Point pt = LocationFromPosition(lParam);
-			return pt.x;
+			// Convert to view-relative
+			return pt.x - vs.textStart + vs.fixedColumnWidth;
 		}
 
 	case SCI_POINTYFROMPOSITION:

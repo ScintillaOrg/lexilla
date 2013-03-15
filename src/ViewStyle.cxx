@@ -198,6 +198,8 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	}
 	maskInLine = source.maskInLine;
 	fixedColumnWidth = source.fixedColumnWidth;
+	marginInside = source.marginInside;
+	textStart = source.textStart;
 	zoomLevel = source.zoomLevel;
 	viewWhitespace = source.viewWhitespace;
 	whitespaceSize = source.whitespaceSize;
@@ -306,13 +308,15 @@ void ViewStyle::Init(size_t stylesSize_) {
 	ms[2].style = SC_MARGIN_SYMBOL;
 	ms[2].width = 0;
 	ms[2].mask = 0;
-	fixedColumnWidth = leftMarginWidth;
+	marginInside = true;
+	fixedColumnWidth = marginInside ? leftMarginWidth : 0;
 	maskInLine = 0xffffffff;
 	for (int margin=0; margin <= SC_MAX_MARGIN; margin++) {
 		fixedColumnWidth += ms[margin].width;
 		if (ms[margin].width > 0)
 			maskInLine &= ~ms[margin].mask;
 	}
+	textStart = marginInside ? fixedColumnWidth : leftMarginWidth;
 	zoomLevel = 0;
 	viewWhitespace = wsInvisible;
 	whitespaceSize = 1;
@@ -387,13 +391,14 @@ void ViewStyle::Refresh(Surface &surface) {
 	aveCharWidth = styles[STYLE_DEFAULT].aveCharWidth;
 	spaceWidth = styles[STYLE_DEFAULT].spaceWidth;
 
-	fixedColumnWidth = leftMarginWidth;
+	fixedColumnWidth = marginInside ? leftMarginWidth : 0;
 	maskInLine = 0xffffffff;
 	for (int margin=0; margin <= SC_MAX_MARGIN; margin++) {
 		fixedColumnWidth += ms[margin].width;
 		if (ms[margin].width > 0)
 			maskInLine &= ~ms[margin].mask;
 	}
+	textStart = marginInside ? fixedColumnWidth : leftMarginWidth;
 }
 
 void ViewStyle::AllocStyles(size_t sizeNew) {

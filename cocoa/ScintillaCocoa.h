@@ -55,6 +55,7 @@
 extern "C" NSString* ScintillaRecPboardType;
 
 @class InnerView;
+@class MarginView;
 @class ScintillaView;
 
 @class FindHighlightLayer;
@@ -109,6 +110,8 @@ private:
 
   bool capturedMouse;
 
+  bool enteredSetScrollingSize;
+
   // Private so ScintillaCocoa objects can not be copied
   ScintillaCocoa(const ScintillaCocoa &) : ScintillaBase() {}
   ScintillaCocoa &operator=(const ScintillaCocoa &) { return * this; }
@@ -125,6 +128,7 @@ private:
   FindHighlightLayer *layerFindIndicator;
 
 protected:
+  Point GetVisibleOriginInMain();
   PRectangle GetClientRectangle();
   Point ConvertPoint(NSPoint point);
   
@@ -135,17 +139,19 @@ protected:
   virtual void CancelModes();
 
 public:
-  ScintillaCocoa(InnerView* view);
+  ScintillaCocoa(InnerView* view, MarginView* viewMargin);
   virtual ~ScintillaCocoa();
 
   void RegisterNotifyCallback(intptr_t windowid, SciNotifyFunc callback);
   sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
   ScintillaView* TopContainer();
+  NSScrollView* ScrollContainer();
   InnerView* ContentView();
 
   bool SyncPaint(void* gc, PRectangle rc);
   bool Draw(NSRect rect, CGContextRef gc);
+  void PaintMargin(NSRect aRect);
 
   virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
   void SetTicking(bool on);
@@ -156,9 +162,10 @@ public:
   void SetVerticalScrollPos();
   void SetHorizontalScrollPos();
   bool ModifyScrollBars(int nMax, int nPage);
+  bool SetScrollingSize(void);
   void Resize();
-  void DoScroll(float position, NSScrollerPart part, bool horizontal);
-    
+  void UpdateForScroll();
+
   // Notifications for the owner.
   void NotifyChange();
   void NotifyFocus(bool focus);

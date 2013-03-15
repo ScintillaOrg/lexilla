@@ -48,13 +48,112 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 }
 
 
+@implementation MarginView
+
+@synthesize marginWidth, owner;
+
+- (id)initWithScrollView:(NSScrollView *)aScrollView
+{
+  self = [super initWithScrollView:aScrollView orientation:NSVerticalRuler];
+  if (self != nil)
+  {
+    owner = nil;
+    marginWidth = 20;
+    currentCursors = [[NSMutableArray arrayWithCapacity:0] retain];
+    for (size_t i=0; i<5; i++)
+    {
+      [currentCursors addObject: [reverseArrowCursor retain]];
+    }
+    [self setClientView:[aScrollView documentView]];
+  }
+  return self;
+}
+
+- (void) dealloc
+{
+  [currentCursors release];
+  [super dealloc];
+}
+
+- (void) setFrame: (NSRect) frame
+{
+  [super setFrame: frame];
+  
+  [[self window] invalidateCursorRectsForView: self];
+}
+
+- (CGFloat)requiredThickness
+{
+  return marginWidth;
+}
+
+- (void)drawHashMarksAndLabelsInRect:(NSRect)aRect
+{
+  if (owner) {
+    NSRect contentRect = [[[self scrollView] contentView] bounds];
+    NSRect marginRect = [self bounds];
+    // Ensure paint to bottom of view to avoid glitches
+    if (marginRect.size.height > contentRect.size.height) {
+      // Legacy scroll bar mode leaves a poorly painted corner
+      aRect = marginRect;
+    }
+    owner.backend->PaintMargin(aRect);
+  }
+}
+
+- (void) mouseDown: (NSEvent *) theEvent
+{
+  owner.backend->MouseDown(theEvent);
+}
+
+- (void) mouseDragged: (NSEvent *) theEvent
+{
+  owner.backend->MouseMove(theEvent);
+}
+
+- (void) mouseMoved: (NSEvent *) theEvent
+{
+  owner.backend->MouseMove(theEvent);
+}
+
+- (void) mouseUp: (NSEvent *) theEvent
+{
+  owner.backend->MouseUp(theEvent);
+}
+
+/**
+ * This method is called to give us the opportunity to define our mouse sensitive rectangle.
+ */
+- (void) resetCursorRects
+{
+  [super resetCursorRects];
+  
+  int x = 0;
+  NSRect marginRect = [self bounds];
+  size_t co = [currentCursors count];
+  for (size_t i=0; i<co; i++)
+  {
+    int cursType = owner.backend->WndProc(SCI_GETMARGINCURSORN, i, 0);
+    int width =owner.backend->WndProc(SCI_GETMARGINWIDTHN, i, 0);
+    NSCursor *cc = cursorFromEnum(static_cast<Window::Cursor>(cursType));
+    [currentCursors replaceObjectAtIndex:i withObject: cc];
+    marginRect.origin.x = x;
+    marginRect.size.width = width;
+    [self addCursorRect: marginRect cursor: cc];
+    [cc setOnMouseEntered: YES];
+    x += width;
+  }
+}
+
+@end
+
 @implementation InnerView
 
 @synthesize owner = mOwner;
 
 //--------------------------------------------------------------------------------------------------
 
-- (NSView*) initWithFrame: (NSRect) frame 
+- (NSView*) initWithFrame: (NSRect) frame
 {
   self = [super initWithFrame: frame];
   
@@ -449,9 +548,35 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 //--------------------------------------------------------------------------------------------------
 
+/**
+ * Mouse wheel with command key magnifies text.
+ */
 - (void) scrollWheel: (NSEvent *) theEvent
 {
-  mOwner.backend->MouseWheel(theEvent);
+  if (([theEvent modifierFlags] & NSCommandKeyMask) != 0) {
+    mOwner.backend->MouseWheel(theEvent);
+  } else {
+    [super scrollWheel:theEvent];
+  }
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Ensure scrolling is aligned to whole lines instead of starting part-way through a line
+ */
+- (NSRect)adjustScroll:(NSRect)proposedVisibleRect
+{
+  NSRect rc = proposedVisibleRect;
+  // Snap to lines
+  NSRect contentRect = [self bounds];
+  if ((rc.origin.y > 0) && (NSMaxY(rc) < contentRect.size.height)) {
+    // Only snap for positions inside the document - allow outside
+    // for overshoot.
+    int lineHeight = mOwner.backend->WndProc(SCI_TEXTHEIGHT, 0, 0);
+    rc.origin.y = roundf(rc.origin.y / lineHeight) * lineHeight;
+  }
+  return rc;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -632,6 +757,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 @synthesize backend = mBackend;
 @synthesize delegate = mDelegate;
+@synthesize scrollView;
 
 /**
  * ScintillaView is a composite control made from an NSView and an embedded NSView that is
@@ -843,27 +969,32 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
   if (self)
   {
     mContent = [[[InnerView alloc] init] autorelease];
-    mBackend = new ScintillaCocoa(mContent);
     mContent.owner = self;
-    [self addSubview: mContent];
-    
+
     // Initialize the scrollers but don't show them yet.
     // Pick an arbitrary size, just to make NSScroller selecting the proper scroller direction
     // (horizontal or vertical).
     NSRect scrollerRect = NSMakeRect(0, 0, 100, 10);
-    mHorizontalScroller = [[[NSScroller alloc] initWithFrame: scrollerRect] autorelease];
-    [mHorizontalScroller setHidden: YES];
-    [mHorizontalScroller setTarget: self];
-    [mHorizontalScroller setAction: @selector(scrollerAction:)];
-    [self addSubview: mHorizontalScroller];
+    scrollView = [[[NSScrollView alloc] initWithFrame: scrollerRect] autorelease];
+    [scrollView setDocumentView: mContent];
+    [scrollView setHasVerticalScroller:YES];
+    [scrollView setHasHorizontalScroller:YES];
+    [scrollView setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+    //[scrollView setScrollerStyle:NSScrollerStyleLegacy];
+    //[scrollView setScrollerKnobStyle:NSScrollerKnobStyleDark];
+    //[scrollView setHorizontalScrollElasticity:NSScrollElasticityNone];
+    [self addSubview: scrollView];
+
+    marginView = [[MarginView alloc] initWithScrollView:scrollView];
+    marginView.owner = self;
+    [marginView setRuleThickness:[marginView requiredThickness]];
+    [scrollView setVerticalRulerView:marginView];
+    [scrollView setHasHorizontalRuler:NO];
+    [scrollView setHasVerticalRuler:YES];
+    [scrollView setRulersVisible:YES];
     
-    scrollerRect.size = NSMakeSize(10, 100);
-    mVerticalScroller = [[[NSScroller alloc] initWithFrame: scrollerRect] autorelease];
-    [mVerticalScroller setHidden: YES];
-    [mVerticalScroller setTarget: self];
-    [mVerticalScroller setAction: @selector(scrollerAction:)];
-    [self addSubview: mVerticalScroller];
-    
+    mBackend = new ScintillaCocoa(mContent, marginView);
+
     // Establish a connection from the back end to this container so we can handle situations
     // which require our attention.
     mBackend->RegisterNotifyCallback(nil, notification);
@@ -885,6 +1016,12 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
                selector:@selector(applicationDidBecomeActive:)
                    name:NSApplicationDidBecomeActiveNotification
                  object:nil];
+
+    [[scrollView contentView] setPostsBoundsChangedNotifications:YES];
+    [center addObserver:self
+	       selector:@selector(scrollerAction:)
+		   name:NSViewBoundsDidChangeNotification
+		 object:[scrollView contentView]];
   }
   return self;
 }
@@ -934,193 +1071,47 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
   int scrollerWidth = [NSScroller scrollerWidth];
 
   NSSize size = [self frame].size;
-  NSRect hScrollerRect = {0, 0, size.width, static_cast<CGFloat>(scrollerWidth)};
-  NSRect vScrollerRect = {size.width - scrollerWidth, 0, static_cast<CGFloat>(scrollerWidth), size.height};
   NSRect barFrame = {0, size.height - scrollerWidth, size.width, static_cast<CGFloat>(scrollerWidth)};
   BOOL infoBarVisible = mInfoBar != nil && ![mInfoBar isHidden];
-  
+
   // Horizontal offset of the content. Almost always 0 unless the vertical scroller
   // is on the left side.
   int contentX = 0;
-  
-  // Vertical scroller frame calculation.
-  if (![mVerticalScroller isHidden])
-  {
-    // Consider user settings (left vs right vertical scrollbar).
-    BOOL isLeft = [[[NSUserDefaults standardUserDefaults] stringForKey: @"NSScrollerPosition"] 
-                   isEqualToString: @"left"];
-    if (isLeft)
-    {
-      vScrollerRect.origin.x = 0;
-      hScrollerRect.origin.x = scrollerWidth;
-      contentX = scrollerWidth;
-    };
-    
-    size.width -= scrollerWidth;
-    hScrollerRect.size.width -= scrollerWidth;
-  }
-  
-  // Same for horizontal scroller.
-  if (![mHorizontalScroller isHidden])
-  {
-    // Make room for the h-scroller.
-    size.height -= scrollerWidth;
-    vScrollerRect.size.height -= scrollerWidth;
-    vScrollerRect.origin.y += scrollerWidth;
-  };
-  
+  NSRect scrollRect = {contentX, 0, size.width, size.height};
+
   // Info bar frame.
   if (infoBarVisible)
   {
+    scrollRect.size.height -= scrollerWidth;
     // Initial value already is as if the bar is at top.
-    if (mInfoBarAtTop)
+    if (!mInfoBarAtTop)
     {
-      vScrollerRect.size.height -= scrollerWidth;
-      size.height -= scrollerWidth;
-    }
-    else
-    {
-      // Layout info bar and h-scroller side by side in a friendly manner.
-      int nativeWidth = mInitialInfoBarWidth;
-      int remainingWidth = barFrame.size.width;
-      
+      scrollRect.origin.y += scrollerWidth;
       barFrame.origin.y = 0;
-
-      if ([mHorizontalScroller isHidden])
-      {
-        // H-scroller is not visible, so take the full space.
-        vScrollerRect.origin.y += scrollerWidth;
-        vScrollerRect.size.height -= scrollerWidth;
-        size.height -= scrollerWidth;
-      }
-      else
-      {
-        // If the left offset of the h-scroller is > 0 then the v-scroller is on the left side.
-        // In this case we take the full width, otherwise what has been given to the h-scroller 
-        // and content up to now.
-        if (hScrollerRect.origin.x == 0)
-          remainingWidth = size.width;
-
-        // Note: remainingWidth can become < 0, which hides the scroller.
-        remainingWidth -= nativeWidth;
-
-        hScrollerRect.origin.x = nativeWidth;
-        hScrollerRect.size.width = remainingWidth;
-        barFrame.size.width = nativeWidth;
-      }
     }
   }
-  
-  NSRect contentRect = {static_cast<CGFloat>(contentX), vScrollerRect.origin.y, size.width, size.height};
-  [mContent setFrame: contentRect];
-  
+
+  if (!NSEqualRects([scrollView frame], scrollRect)) {
+    [scrollView setFrame: scrollRect];
+    mBackend->Resize();
+  }
+
   if (infoBarVisible)
     [mInfoBar setFrame: barFrame];
-  if (![mHorizontalScroller isHidden])
-    [mHorizontalScroller setFrame: hScrollerRect];
-  if (![mVerticalScroller isHidden])
-    [mVerticalScroller setFrame: vScrollerRect];
 }
 
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Called by the backend to adjust the vertical scroller (range and page).
- *
- * @param range Determines the total size of the scroll area used in the editor.
- * @param page Determines how many pixels a page is.
- * @result Returns YES if anything changed, otherwise NO.
+ * Set the width of the margin.
  */
-- (BOOL) setVerticalScrollRange: (int) range page: (int) page
+- (void) setMarginWidth: (int) width
 {
-  BOOL result = NO;
-  BOOL hideScroller = page >= range;
-  
-  if ([mVerticalScroller isHidden] != hideScroller)
+  if (marginView.ruleThickness != width)
   {
-    result = YES;
-    [mVerticalScroller setHidden: hideScroller];
-    if (!hideScroller)
-      [mVerticalScroller setFloatValue: 0];
-    [self positionSubViews];
+    marginView.marginWidth = width;
+    [marginView setRuleThickness:[marginView requiredThickness]];
   }
-  
-  if (!hideScroller)
-  {
-    [mVerticalScroller setEnabled: YES];
-    
-    CGFloat currentProportion = [mVerticalScroller knobProportion];
-    CGFloat newProportion = page / (CGFloat) range;
-    if (currentProportion != newProportion)
-    {
-      result = YES;
-      [mVerticalScroller setKnobProportion: newProportion];
-    }
-  }
-  
-  return result;
-}
-
-//--------------------------------------------------------------------------------------------------
-
-/**
- * Used to set the position of the vertical scroll thumb.
- *
- * @param position The relative position in the range [0..1];
- */
-- (void) setVerticalScrollPosition: (float) position
-{
-  [mVerticalScroller setFloatValue: position];
-}
-
-//--------------------------------------------------------------------------------------------------
-
-/**
- * Called by the backend to adjust the horizontal scroller (range and page).
- *
- * @param range Determines the total size of the scroll area used in the editor.
- * @param page Determines how many pixels a page is.
- * @result Returns YES if anything changed, otherwise NO.
- */
-- (BOOL) setHorizontalScrollRange: (int) range page: (int) page
-{
-  BOOL result = NO;
-  BOOL hideScroller = (page >= range) || 
-    (mBackend->WndProc(SCI_GETWRAPMODE, 0, 0) != SC_WRAP_NONE);
-  
-  if ([mHorizontalScroller isHidden] != hideScroller)
-  {
-    result = YES;
-    [mHorizontalScroller setHidden: hideScroller];
-    [self positionSubViews];
-  }
-  
-  if (!hideScroller)
-  {
-    [mHorizontalScroller setEnabled: YES];
-    
-    CGFloat currentProportion = [mHorizontalScroller knobProportion];
-    CGFloat newProportion = page / (CGFloat) range;
-    if (currentProportion != newProportion)
-    {
-      result = YES;
-      [mHorizontalScroller setKnobProportion: newProportion];
-    }
-  }
-  
-  return result;
-}
-
-//--------------------------------------------------------------------------------------------------
-
-/**
- * Used to set the position of the vertical scroll thumb.
- *
- * @param position The relative position in the range [0..1];
- */
-- (void) setHorizontalScrollPosition: (float) position
-{
-  [mHorizontalScroller setFloatValue: position];
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1131,8 +1122,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
  */
 - (void) scrollerAction: (id) sender
 {
-  float position = [sender doubleValue];
-  mBackend->DoScroll(position, [sender hitPart], sender == mHorizontalScroller);
+  mBackend->UpdateForScroll();
 }
 
 //--------------------------------------------------------------------------------------------------

@@ -108,7 +108,9 @@ public:
 	int rightMarginWidth;	///< Spacing margin on right of text
 	int maskInLine;	///< Mask for markers to be put into text because there is nowhere for them to go in margin
 	MarginStyle ms[SC_MAX_MARGIN+1];
-	int fixedColumnWidth;
+	int fixedColumnWidth;	///< Total width of margins
+	bool marginInside;	///< true: margin included in text view, false: separate views
+	int textStart;	///< Starting x position of text within the view
 	int zoomLevel;
 	WhiteSpaceVisibility viewWhitespace;
 	int whitespaceSize;
