@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <math.h>
 #include <assert.h>
 
 #include <string>
@@ -480,10 +481,7 @@ SelectionPosition Editor::SPositionFromLocation(Point pt, bool canReturnInvalid,
 			return SelectionPosition(INVALID_POSITION);
 	}
 	pt.x = pt.x - vs.fixedColumnWidth + xOffset;
-	int visibleLine = pt.y / vs.lineHeight + topLine;
-	if (pt.y < 0) {	// Division rounds towards 0
-		visibleLine = (static_cast<int>(pt.y) - (vs.lineHeight - 1)) / vs.lineHeight + topLine;
-	}
+	int visibleLine = floor(pt.y / vs.lineHeight) + topLine;
 	if (!canReturnInvalid && (visibleLine < 0))
 		visibleLine = 0;
 	int lineDoc = cs.DocFromDisplay(visibleLine);
