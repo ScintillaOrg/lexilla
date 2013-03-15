@@ -3047,12 +3047,6 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 						textBack = vsDraw.whitespaceBackground;
 					surface->FillRectangle(rcSegment, textBack);
 				}
-				if ((vsDraw.viewWhitespace != wsInvisible) ||
-				        (inIndentation && vsDraw.viewIndentationGuides != ivNone)) {
-					if (vsDraw.whitespaceForegroundSet)
-						textFore = vsDraw.whitespaceForeground;
-					surface->PenColour(textFore);
-				}
 				if (inIndentation && vsDraw.viewIndentationGuides == ivReal) {
 					for (int indentCount = (ll->positions[i] + epsilon) / indentWidth;
 						indentCount <= (ll->positions[i + 1] - epsilon) / indentWidth;
@@ -3066,6 +3060,9 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 				}
 				if (vsDraw.viewWhitespace != wsInvisible) {
 					if (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways) {
+						if (vsDraw.whitespaceForegroundSet)
+							textFore = vsDraw.whitespaceForeground;
+						surface->PenColour(textFore);
 						PRectangle rcTab(rcSegment.left + 1, rcSegment.top + 4,
 						        rcSegment.right - 1, rcSegment.bottom - vsDraw.maxDescent);
 						DrawTabArrow(surface, rcTab, rcSegment.top + vsDraw.lineHeight / 2);
