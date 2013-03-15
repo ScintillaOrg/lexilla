@@ -49,7 +49,6 @@
 #include "Selection.h"
 #include "PositionCache.h"
 #include "Editor.h"
-//#include "ScintillaCallTip.h"
 
 #include "ScintillaBase.h"
 

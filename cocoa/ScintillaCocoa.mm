@@ -1470,16 +1470,6 @@ bool ScintillaCocoa::GetPasteboardData(NSPasteboard* board, SelectionText* selec
 void ScintillaCocoa::SetMouseCapture(bool on)
 {
   capturedMouse = on;
-  /*
-  if (mouseDownCaptures)
-  {
-    if (capturedMouse)
-      WndProc(SCI_SETCURSOR, Window::cursorArrow, 0);
-    else
-      // Reset to normal. Actual image will be set on mouse move.
-      WndProc(SCI_SETCURSOR, (unsigned int) SC_CURSORNORMAL, 0);
-  }
-   */
 }
 
 //--------------------------------------------------------------------------------------------------
