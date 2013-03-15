@@ -383,6 +383,15 @@ ScintillaCocoa::ScintillaCocoa(NSView* view)
 {
   wMain = view; // Don't retain since we're owned by view, which would cause a cycle
   timerTarget = [[TimerTarget alloc] init: this];
+  lastMouseEvent = NULL;
+  notifyObj = NULL;
+  notifyProc = NULL;
+  capturedMouse = false;
+
+  scrollSpeed = 1;
+  scrollTicks = 2000;
+  tickTimer = NULL;
+  idleTimer = NULL;
   observer = NULL;
   layerFindIndicator = NULL;
   Initialise();
@@ -405,11 +414,6 @@ void ScintillaCocoa::Initialise()
 {
   Scintilla_LinkLexers();
 
-  notifyObj = NULL;
-  notifyProc = NULL;
-  
-  capturedMouse = false;
-  
   // Tell Scintilla not to buffer: Quartz buffers drawing for us.
   WndProc(SCI_SETBUFFEREDDRAW, 0, 0);
   
