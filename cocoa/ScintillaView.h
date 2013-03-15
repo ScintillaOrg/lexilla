@@ -60,9 +60,6 @@ extern NSString *SCIUpdateUINotification;
   // It uses the content view for display.
   Scintilla::ScintillaCocoa* mBackend;
   
-  // The object (eg NSDocument) that controls the ScintillaView.
-  NSObject* mOwner;
-  
   // This is the actual content to which the backend renders itself.
   InnerView* mContent;
   
@@ -80,7 +77,6 @@ extern NSString *SCIUpdateUINotification;
 }
 
 @property (nonatomic, readonly) Scintilla::ScintillaCocoa* backend;
-@property (nonatomic, assign) NSObject* owner;
 @property (nonatomic, assign) id<ScintillaNotificationProtocol> delegate;
 
 - (void) dealloc;

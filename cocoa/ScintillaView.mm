@@ -631,7 +631,6 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 @implementation ScintillaView
 
 @synthesize backend = mBackend;
-@synthesize owner   = mOwner;
 @synthesize delegate = mDelegate;
 
 /**
