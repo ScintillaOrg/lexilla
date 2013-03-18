@@ -494,6 +494,8 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 
 	CharacterSet setWordStart(CharacterSet::setAlpha, "_", 0x80, true);
 
+	CharacterSet setInvalidRawFirst(CharacterSet::setNone, " )\\\t\v\f\n");
+
 	if (options.identifiersAllowDollars) {
 		setWordStart.Add('$');
 	}
@@ -654,7 +656,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 					const bool literalString = sc.ch == '\"';
 					if (literalString || sc.ch == '\'') {
 						size_t lenS = strlen(s);
-						const bool raw = literalString && sc.chPrev == 'R';
+						const bool raw = literalString && sc.chPrev == 'R' && !setInvalidRawFirst.Contains(sc.chNext);
 						if (raw)
 							s[lenS--] = '\0';
 						bool valid =
