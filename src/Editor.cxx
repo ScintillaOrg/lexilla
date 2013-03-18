@@ -7005,12 +7005,17 @@ void Editor::EnsureLineVisible(int lineDoc, bool enforcePolicy) {
 		WrapLines(true, -1);
 
 	if (!cs.GetVisible(lineDoc)) {
+		// Back up to find a non-blank line 
 		int lookLine = lineDoc;
 		int lookLineLevel = pdoc->GetLevel(lookLine);
 		while ((lookLine > 0) && (lookLineLevel & SC_FOLDLEVELWHITEFLAG)) {
 			lookLineLevel = pdoc->GetLevel(--lookLine);
 		}
 		int lineParent = pdoc->GetFoldParent(lookLine);
+		if (lineParent < 0) {
+			// Backed up to a top level line, so try to find parent of initial line 
+			lineParent = pdoc->GetFoldParent(lineDoc);
+		}
 		if (lineParent >= 0) {
 			if (lineDoc != lineParent)
 				EnsureLineVisible(lineParent, enforcePolicy);
