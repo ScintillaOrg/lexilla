@@ -1730,6 +1730,7 @@ struct Sci_TextToFind {
     <h2 id="ScrollingAndAutomaticScrolling">Scrolling and automatic scrolling</h2>
     <code><a class="message" href="#SCI_LINESCROLL">SCI_LINESCROLL(int column, int line)</a><br />
      <a class="message" href="#SCI_SCROLLCARET">SCI_SCROLLCARET</a><br />
+     <a class="message" href="#SCI_SCROLLRANGE">SCI_SCROLLRANGE(int secondary, int primary)</a><br />
      <a class="message" href="#SCI_SETXCARETPOLICY">SCI_SETXCARETPOLICY(int caretPolicy, int
     caretSlop)</a><br />
      <a class="message" href="#SCI_SETYCARETPOLICY">SCI_SETYCARETPOLICY(int caretPolicy, int
@@ -1765,6 +1766,14 @@ struct Sci_TextToFind {
     <p><b id="SCI_SCROLLCARET">SCI_SCROLLCARET</b><br />
      If the current position (this is the caret if there is no selection) is not visible, the view
     is scrolled to make it visible according to the current caret policy.</p>
+
+    <p><b id="SCI_SCROLLRANGE">SCI_SCROLLRANGE(int secondary, int primary)</b><br />
+     Scroll the argument positions and the range between them into view giving
+     priority to the primary position then the secondary position.
+     The behaviour is similar to <a class="message" href="#SCI_SCROLLCARET"><code>SCI_SCROLLCARET</code></a>
+     with the primary position used instead of the caret. An effort is then made to ensure that the secondary
+     position and range between are also visible.
+     This may be used to make a search match visible.</p>
 
     <p><b id="SCI_SETXCARETPOLICY">SCI_SETXCARETPOLICY(int caretPolicy, int caretSlop)</b><br />
      <b id="SCI_SETYCARETPOLICY">SCI_SETYCARETPOLICY(int caretPolicy, int caretSlop)</b><br />

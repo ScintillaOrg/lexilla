@@ -924,6 +924,11 @@ fun void LineScroll=2168(int columns, int lines)
 # Ensure the caret is visible.
 fun void ScrollCaret=2169(,)
 
+# Scroll the argument positions and the range between them into view giving
+# priority to the primary position then the secondary position.
+# This may be used to make a search match visible.
+fun void ScrollRange=2569(position secondary, position primary)
+
 # Replace the selected text with the argument text.
 fun void ReplaceSel=2170(, string text)
 

@@ -381,10 +381,19 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 		int xOffset;
 		int topLine;
 		XYScrollPosition(int xOffset_, int topLine_) : xOffset(xOffset_), topLine(topLine_) {}
+		bool operator==(const XYScrollPosition &other) const {
+			return (xOffset == other.xOffset) && (topLine == other.topLine);
+		}
 	};
-	XYScrollPosition XYScrollToMakeVisible(const bool useMargin, const bool vert, const bool horiz);
+	enum XYScrollOptions {
+		xysUseMargin=0x1,
+		xysVertical=0x2,
+		xysHorizontal=0x4,
+		xysDefault=xysUseMargin|xysVertical|xysHorizontal};
+	XYScrollPosition XYScrollToMakeVisible(const SelectionRange range, const XYScrollOptions options);
 	void SetXYScroll(XYScrollPosition newXY);
 	void EnsureCaretVisible(bool useMargin=true, bool vert=true, bool horiz=true);
+	void ScrollRange(SelectionRange range);
 	void ShowCaretAtCurrentPosition();
 	void DropCaret();
 	void InvalidateCaret();

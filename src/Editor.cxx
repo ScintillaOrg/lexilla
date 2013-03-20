@@ -962,7 +962,8 @@ int Editor::MovePositionTo(SelectionPosition newPos, Selection::selTypes selt, b
 		// In case in need of wrapping to ensure DisplayFromDoc works.
 		if (currentLine >= wrapStart)
 			WrapLines(true, -1);
-		XYScrollPosition newXY = XYScrollToMakeVisible(true, true, true);
+		XYScrollPosition newXY = XYScrollToMakeVisible(
+			SelectionRange(posDrag.IsValid() ? posDrag : sel.RangeMain().caret), xysDefault);
 		if (simpleCaret && (newXY.xOffset == xOffset)) {
 			// simple vertical scroll then invalidate
 			ScrollTo(newXY.topLine);
@@ -1233,19 +1234,20 @@ slop | strict | jumps | even | Caret can go to the margin                 | When
   1  |   1    |   1   |   1  | No, kept out of UZ                         | moved to put caret at 3UZ of the margin
 */
 
-Editor::XYScrollPosition Editor::XYScrollToMakeVisible(const bool useMargin, const bool vert, const bool horiz) {
+Editor::XYScrollPosition Editor::XYScrollToMakeVisible(const SelectionRange range, const XYScrollOptions options) {
 	PRectangle rcClient = GetTextRectangle();
-	const SelectionPosition posCaret = posDrag.IsValid() ? posDrag : sel.RangeMain().caret;
-	Point pt = LocationFromPosition(posCaret);
+	Point pt = LocationFromPosition(range.caret);
+	Point ptAnchor = LocationFromPosition(range.anchor);
 	const Point ptOrigin = GetVisibleOriginInMain();
 	pt.x += ptOrigin.x;
+	ptAnchor.x += ptOrigin.x;
 	const Point ptBottomCaret(pt.x, pt.y + vs.lineHeight - 1);
-	const int lineCaret = DisplayFromPosition(posCaret.Position());
 
 	XYScrollPosition newXY(xOffset, topLine);
 
 	// Vertical positioning
-	if (vert && (pt.y < rcClient.top || ptBottomCaret.y >= rcClient.bottom || (caretYPolicy & CARET_STRICT) != 0)) {
+	if ((options & xysVertical) && (pt.y < rcClient.top || ptBottomCaret.y >= rcClient.bottom || (caretYPolicy & CARET_STRICT) != 0)) {
+		const int lineCaret = DisplayFromPosition(range.caret.Position());
 		const int linesOnScreen = LinesOnScreen();
 		const int halfScreen = Platform::Maximum(linesOnScreen - 1, 2) / 2;
 		const bool bSlop = (caretYPolicy & CARET_SLOP) != 0;
@@ -1259,7 +1261,7 @@ Editor::XYScrollPosition Editor::XYScrollToMakeVisible(const bool useMargin, con
 			int yMoveT, yMoveB;
 			if (bStrict) {
 				int yMarginT, yMarginB;
-				if (!useMargin) {
+				if (!(options & xysUseMargin)) {
 					// In drag mode, avoid moves
 					// otherwise, a double click will select several lines.
 					yMarginT = yMarginB = 0;
@@ -1329,11 +1331,23 @@ Editor::XYScrollPosition Editor::XYScrollToMakeVisible(const bool useMargin, con
 				}
 			}
 		}
+		if (!(range.caret == range.anchor)) {
+			const int lineAnchor = DisplayFromPosition(range.anchor.Position());
+			if (lineAnchor < lineCaret) {
+				// Shift up to show anchor or as much of range as possible
+				newXY.topLine = std::min(newXY.topLine, lineAnchor);
+				newXY.topLine = std::max(newXY.topLine, lineCaret - LinesOnScreen());
+			} else {
+				// Shift down to show anchor or as much of range as possible
+				newXY.topLine = std::max(newXY.topLine, lineAnchor - LinesOnScreen());
+				newXY.topLine = std::min(newXY.topLine, lineCaret);
+			}
+		}
 		newXY.topLine = Platform::Clamp(newXY.topLine, 0, MaxScrollPos());
 	}
 
 	// Horizontal positioning
-	if (horiz && (wrapState == eWrapNone)) {
+	if ((options & xysHorizontal) && (wrapState == eWrapNone)) {
 		const int halfScreen = Platform::Maximum(rcClient.Width() - 4, 4) / 2;
 		const bool bSlop = (caretXPolicy & CARET_SLOP) != 0;
 		const bool bStrict = (caretXPolicy & CARET_STRICT) != 0;
@@ -1344,7 +1358,7 @@ Editor::XYScrollPosition Editor::XYScrollToMakeVisible(const bool useMargin, con
 			int xMoveL, xMoveR;
 			if (bStrict) {
 				int xMarginL, xMarginR;
-				if (!useMargin) {
+				if (!(options & xysUseMargin)) {
 					// In drag mode, avoid moves unless very near of the margin
 					// otherwise, a simple click will select text.
 					xMarginL = xMarginR = 2;
@@ -1433,6 +1447,21 @@ Editor::XYScrollPosition Editor::XYScrollToMakeVisible(const bool useMargin, con
 				newXY.xOffset += static_cast<int>(vs.aveCharWidth);
 			}
 		}
+		if (!(range.caret == range.anchor)) {
+			if (ptAnchor.x < pt.x) {
+				// Shift to left to show anchor or as much of range as possible
+				int maxOffset = ptAnchor.x + xOffset - rcClient.left - 1;
+				int minOffset = pt.x + xOffset - rcClient.right + 1;
+				newXY.xOffset = std::min(newXY.xOffset, maxOffset);
+				newXY.xOffset = std::max(newXY.xOffset, minOffset);
+			} else {
+				// Shift to right to show anchor or as much of range as possible
+				int minOffset = ptAnchor.x + xOffset - rcClient.right + 1;
+				int maxOffset = pt.x + xOffset - rcClient.left - 1;
+				newXY.xOffset = std::max(newXY.xOffset, minOffset);
+				newXY.xOffset = std::min(newXY.xOffset, maxOffset);
+			}
+		}
 		if (newXY.xOffset < 0) {
 			newXY.xOffset = 0;
 		}
@@ -1465,8 +1494,13 @@ void Editor::SetXYScroll(XYScrollPosition newXY) {
 	}
 }
 
+void Editor::ScrollRange(SelectionRange range) {
+	SetXYScroll(XYScrollToMakeVisible(range, xysDefault));
+}
+
 void Editor::EnsureCaretVisible(bool useMargin, bool vert, bool horiz) {
-	SetXYScroll(XYScrollToMakeVisible(useMargin, vert, horiz));
+	SetXYScroll(XYScrollToMakeVisible(SelectionRange(posDrag.IsValid() ? posDrag : sel.RangeMain().caret),
+		static_cast<XYScrollOptions>((useMargin?xysUseMargin:0)|(vert?xysVertical:0)|(horiz?xysHorizontal:0))));
 }
 
 void Editor::ShowCaretAtCurrentPosition() {
@@ -8523,6 +8557,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_ENSUREVISIBLEENFORCEPOLICY:
 		EnsureLineVisible(wParam, true);
+		break;
+
+	case SCI_SCROLLRANGE: 
+		ScrollRange(SelectionRange(lParam, wParam));
 		break;
 
 	case SCI_SEARCHANCHOR:
