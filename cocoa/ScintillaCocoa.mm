@@ -1532,6 +1532,11 @@ bool ScintillaCocoa::SyncPaint(void* gc, PRectangle rc)
     delete sw;
   }
   paintState = notPainting;
+  if (!succeeded)
+  {
+    NSView *marginView = static_cast<NSView*>(wMargin.GetID());
+    [marginView setNeedsDisplay:YES];
+  }
   return succeeded;
 }
 
