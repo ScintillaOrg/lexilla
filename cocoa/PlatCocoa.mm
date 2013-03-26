@@ -2020,7 +2020,7 @@ bool Platform::MouseButtonBounce()
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Helper method for the backend to reach through to the scintiall window.
+ * Helper method for the backend to reach through to the scintilla window.
  */
 long Platform::SendScintilla(WindowID w, unsigned int msg, unsigned long wParam, long lParam) 
 {
@@ -2030,7 +2030,7 @@ long Platform::SendScintilla(WindowID w, unsigned int msg, unsigned long wParam,
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Helper method for the backend to reach through to the scintiall window.
+ * Helper method for the backend to reach through to the scintilla window.
  */
 long Platform::SendScintillaPointer(WindowID w, unsigned int msg, unsigned long wParam, void *lParam)
 {
