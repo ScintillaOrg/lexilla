@@ -1093,7 +1093,6 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 
   if (!NSEqualRects([scrollView frame], scrollRect)) {
     [scrollView setFrame: scrollRect];
-    mBackend->Resize();
   }
 
   if (infoBarVisible)
@@ -1132,8 +1131,12 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
  */
 - (void) setFrame: (NSRect) newFrame
 {
+  NSRect previousFrame = [self frame];
   [super setFrame: newFrame];
   [self positionSubViews];
+  if (!NSEqualRects(previousFrame, newFrame)) {
+    mBackend->Resize();
+  }
 }
 
 //--------------------------------------------------------------------------------------------------
