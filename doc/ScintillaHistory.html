@@ -431,6 +431,52 @@
       </li>
     </ul>
     <h3>
+       <a href="http://prdownloads.sourceforge.net/scintilla/scite330.zip?download">Release 3.3.0</a>
+    </h3>
+    <ul>
+	<li>
+	Released 30 March 2013.
+	</li>
+	<li>
+	Overlay scrollers and kinetic scrolling implemented on Cocoa.
+	</li>
+	<li>
+	To improve display smoothness, styling and UI Update notifications will, when possible, be performed in
+	a high-priority idle task on Cocoa instead of during painting.
+	Performing these jobs inside painting can cause paints to be abandoned and a new paint scheduled.
+	On GTK+, the high-priority idle task is used in more cases.
+	</li>
+	<li>
+	SCI_SCROLLRANGE added to scroll the view to display a range of text.
+	If the whole range can not be displayed, priority is given one end.
+	</li>
+	<li>
+	SCI_VISIBLEFROMDOCLINE fixed to never return a line beyond the document end.
+	</li>
+	<li>
+	SCI_LINESCROLL fixed for a negative colmn offset.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1450/">Bug #1450.</a>
+	</li>
+	<li>
+	HTML lexer recognizes JavaScript RegEx literals in more contexts.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1412/">Bug #1412.</a>
+	</li>
+	<li>
+	On GTK+, fix tab markers so visible if indent markers are visible.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1453/">Bug #1453.</a>
+	</li>
+	<li>
+	Fixed automatic display of folded text when return pressed at end of fold header and
+	first folded line was blank.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1455/">Bug #1455.</a>
+	</li>
+	<li>
+	The C++ lexer no longer recognizes raw (R"") strings when the first character after "
+	is invalid.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1454/">Bug #1454.</a>
+	</li>
+    </ul>
+    <h3>
        <a href="http://prdownloads.sourceforge.net/scintilla/scite325.zip?download">Release 3.2.5</a>
     </h3>
     <ul>
