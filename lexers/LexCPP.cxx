@@ -66,9 +66,8 @@ static bool followsReturnKeyword(StyleContext &sc, LexAccessor &styler) {
 	int pos = (int) sc.currentPos;
 	int currentLine = styler.GetLine(pos);
 	int lineStartPos = styler.LineStart(currentLine);
-	char ch;
 	while (--pos > lineStartPos) {
-		ch = styler.SafeGetCharAt(pos);
+		char ch = styler.SafeGetCharAt(pos);
 		if (ch != ' ' && ch != '\t') {
 			break;
 		}
