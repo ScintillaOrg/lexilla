@@ -1842,6 +1842,17 @@ set void AutoCSetCaseInsensitiveBehaviour=2634(int behaviour,)
 # Get auto-completion case insensitive behaviour.
 get int AutoCGetCaseInsensitiveBehaviour=2635(,)
 
+enu Ordering=SC_ORDER_
+val SC_ORDER_PRESORTED=0
+val SC_ORDER_PERFORMSORT=1
+val SC_ORDER_CUSTOM=2
+
+# Set the way autocompletion lists are ordered.
+set void AutoCSetOrder=2660(int order,)
+
+# Get the way autocompletion lists are ordered.
+get int AutoCGetOrder=2661(,)
+
 # Enlarge the document to a particular size of text bytes.
 fun void Allocate=2446(int bytes,)
 

@@ -794,6 +794,13 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 	case SCI_AUTOCGETCASEINSENSITIVEBEHAVIOUR:
 		return ac.ignoreCaseBehaviour;
 
+	case SCI_AUTOCSETORDER:
+		ac.autoSort = wParam;
+		break;
+
+	case SCI_AUTOCGETORDER:
+		return ac.autoSort;
+
 	case SCI_USERLISTSHOW:
 		listType = wParam;
 		AutoCompleteStart(0, reinterpret_cast<const char *>(lParam));

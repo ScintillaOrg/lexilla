@@ -4108,6 +4108,8 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_AUTOCGETIGNORECASE">SCI_AUTOCGETIGNORECASE</a><br />
      <a class="message" href="#SCI_AUTOCSETCASEINSENSITIVEBEHAVIOUR">SCI_AUTOCSETCASEINSENSITIVEBEHAVIOUR(int behaviour)</a><br>
      <a class="message" href="#SCI_AUTOCGETCASEINSENSITIVEBEHAVIOUR">SCI_AUTOCGETCASEINSENSITIVEBEHAVIOUR</a><br>
+     <a class="message" href="#SCI_AUTOCSETORDER">SCI_AUTOCSETORDER(int order)</a><br>
+     <a class="message" href="#SCI_AUTOCGETORDER">SCI_AUTOCGETORDER</a><br>
      <a class="message" href="#SCI_AUTOCSETAUTOHIDE">SCI_AUTOCSETAUTOHIDE(bool autoHide)</a><br />
      <a class="message" href="#SCI_AUTOCGETAUTOHIDE">SCI_AUTOCGETAUTOHIDE</a><br />
      <a class="message" href="#SCI_AUTOCSETDROPRESTOFWORD">SCI_AUTOCSETDROPRESTOFWORD(bool
@@ -4132,10 +4134,13 @@ struct Sci_TextToFind {
     and <a class="message"
     href="#SCI_AUTOCGETSEPARATOR"><code>SCI_AUTOCGETSEPARATOR</code></a>.</p>
 
-    <p>The list of words should be in sorted order. If set to ignore case mode with <a class="message" href="#SCI_AUTOCSETIGNORECASE"><code>SCI_AUTOCSETIGNORECASE</code></a>, then
+    <p>With default settings, the list of words should be in sorted order.
+    If set to ignore case mode with <a class="message" href="#SCI_AUTOCSETIGNORECASE"><code>SCI_AUTOCSETIGNORECASE</code></a>, then
     strings are matched after being converted to upper case. One result of this is that the list
     should be sorted with the punctuation characters '[', '\', ']', '^', '_', and '`' sorted after
-    letters.</p>
+    letters.
+    Alternative handling of list order may be specified with  <a class="message" href="#SCI_AUTOCSETORDER">SCI_AUTOCSETORDER</a>
+    </p>
 
     <p><b id="SCI_AUTOCCANCEL">SCI_AUTOCCANCEL</b><br />
      This message cancels any displayed autocompletion list. When in autocompletion mode, the list
@@ -4219,6 +4224,20 @@ struct Sci_TextToFind {
     nonetheless select the first list member that matches in a case sensitive way to entered characters.
     This corresponds to a behaviour property of <code>SC_CASEINSENSITIVEBEHAVIOUR_RESPECTCASE</code> (0).
     If you want autocompletion to ignore case at all, choose <code>SC_CASEINSENSITIVEBEHAVIOUR_IGNORECASE</code> (1).</p>
+
+    <p><b id="SCI_AUTOCSETORDER">SCI_AUTOCSETORDER(int order)</b><br>
+    <b id="SCI_AUTOCGETORDER">SCI_AUTOCGETORDER</b><br>
+    The default setting <code>SC_ORDER_PRESORTED</code> (0) requires that the list be provided in alphabetical sorted order.
+   </p>
+    <p>Sorting the list can be done by Scintilla instead of the application with <code>SC_ORDER_PERFORMSORT</code> (1).
+    This will take additional time.
+   </p>
+    <p>Applications that wish to prioritize some values and show the list in order of priority instead
+    of alphabetical order can use <code>SC_ORDER_CUSTOM</code> (2).
+    This requires extra processing in <a class="message" href="#SCI_AUTOCSHOW">SCI_AUTOCSHOW</a> to create a sorted index.
+   </p>
+    <p>Setting the order should be done before calling <a class="message" href="#SCI_AUTOCSHOW">SCI_AUTOCSHOW</a>.
+   </p>
 
     <p><b id="SCI_AUTOCSETAUTOHIDE">SCI_AUTOCSETAUTOHIDE(bool autoHide)</b><br />
      <b id="SCI_AUTOCGETAUTOHIDE">SCI_AUTOCGETAUTOHIDE</b><br />
