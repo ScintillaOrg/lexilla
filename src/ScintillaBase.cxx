@@ -235,6 +235,11 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 		Redraw();
 		pt = PointMainCaret();
 	}
+	if (wMargin.GetID()) {
+		Point ptOrigin = GetVisibleOriginInMain();
+		pt.x += ptOrigin.x;
+		pt.y += ptOrigin.y;
+	}
 	PRectangle rcac;
 	rcac.left = pt.x - ac.lb->CaretFromEdge();
 	if (pt.y >= rcPopupBounds.bottom - heightLB &&  // Wont fit below.
