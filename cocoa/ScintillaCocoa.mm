@@ -724,8 +724,8 @@ Scintilla::Point ScintillaCocoa::GetVisibleOriginInMain()
  */
 PRectangle ScintillaCocoa::GetClientRectangle()
 {
-  NSView* host = ContentView();
-  NSSize size = [[host superview] frame].size;
+  NSScrollView *scrollView = ScrollContainer();
+  NSSize size = [[scrollView contentView] bounds].size;
   Point origin = GetVisibleOriginInMain();
   return PRectangle(origin.x, origin.y, origin.x+size.width, origin.y + size.height);
 }

@@ -1240,7 +1240,9 @@ Editor::XYScrollPosition Editor::XYScrollToMakeVisible(const SelectionRange rang
 	Point ptAnchor = LocationFromPosition(range.anchor);
 	const Point ptOrigin = GetVisibleOriginInMain();
 	pt.x += ptOrigin.x;
+	pt.y += ptOrigin.y;
 	ptAnchor.x += ptOrigin.x;
+	ptAnchor.y += ptOrigin.y;
 	const Point ptBottomCaret(pt.x, pt.y + vs.lineHeight - 1);
 
 	XYScrollPosition newXY(xOffset, topLine);
