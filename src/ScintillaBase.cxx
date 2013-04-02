@@ -397,6 +397,11 @@ void ScintillaBase::CallTipShow(Point pt, const char *defn) {
 	if (ct.UseStyleCallTip()) {
 		ct.SetForeBack(vs.styles[STYLE_CALLTIP].fore, vs.styles[STYLE_CALLTIP].back);
 	}
+	if (wMargin.GetID()) {
+		Point ptOrigin = GetVisibleOriginInMain();
+		pt.x += ptOrigin.x;
+		pt.y += ptOrigin.y;
+	}
 	PRectangle rc = ct.CallTipStart(sel.MainCaret(), pt,
 		vs.lineHeight,
 		defn,
