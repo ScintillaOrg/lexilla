@@ -50,15 +50,16 @@ inline int BytesInUnicodeCodePoint(int codePoint) {
 class StyleContext {
 	LexAccessor &styler;
 	unsigned int endPos;
+	unsigned int lengthDocument;
 	StyleContext &operator=(const StyleContext &);
 
 	void GetNextChar(unsigned int pos) {
-		chNext = static_cast<unsigned char>(styler.SafeGetCharAt(pos+1));
+		chNext = static_cast<unsigned char>(styler.SafeGetCharAt(pos+1, 0));
 		if (styler.Encoding() == encUnicode) {
 			if (chNext >= 0x80) {
 				unsigned char bytes[4] = { static_cast<unsigned char>(chNext), 0, 0, 0 };
 				for (int trail=1; trail<3; trail++) {
-					bytes[trail] = static_cast<unsigned char>(styler.SafeGetCharAt(pos+1+trail));
+					bytes[trail] = static_cast<unsigned char>(styler.SafeGetCharAt(pos+1+trail, 0));
 					if (!((bytes[trail] >= 0x80) && (bytes[trail] < 0xc0))) {
 						bytes[trail] = 0;
 						break;
@@ -69,7 +70,7 @@ class StyleContext {
 		} else if (styler.Encoding() == encDBCS) {
 			if (styler.IsLeadByte(static_cast<char>(chNext))) {
 				chNext = chNext << 8;
-				chNext |= static_cast<unsigned char>(styler.SafeGetCharAt(pos+2));
+				chNext |= static_cast<unsigned char>(styler.SafeGetCharAt(pos+2, 0));
 			}
 		}
 		// End of line?
@@ -108,9 +109,12 @@ public:
 		styler.StartSegment(startPos);
 		currentLine = styler.GetLine(startPos);
 		lineStartNext = styler.LineStart(currentLine+1);
+		lengthDocument = static_cast<unsigned int>(styler.Length());
+		if (endPos == lengthDocument)
+			endPos++;
 		atLineStart = static_cast<unsigned int>(styler.LineStart(currentLine)) == startPos;
 		unsigned int pos = currentPos;
-		ch = static_cast<unsigned char>(styler.SafeGetCharAt(pos));
+		ch = static_cast<unsigned char>(styler.SafeGetCharAt(pos, 0));
 		if (styler.Encoding() == encUnicode) {
 			// Get the current char
 			GetNextChar(pos-1);
@@ -120,13 +124,13 @@ public:
 			if (styler.IsLeadByte(static_cast<char>(ch))) {
 				pos++;
 				ch = ch << 8;
-				ch |= static_cast<unsigned char>(styler.SafeGetCharAt(pos));
+				ch |= static_cast<unsigned char>(styler.SafeGetCharAt(pos, 0));
 			}
 		}
 		GetNextChar(pos);
 	}
 	void Complete() {
-		styler.ColourTo(currentPos - 1, state);
+		styler.ColourTo(currentPos - ((currentPos > lengthDocument) ? 2 : 1), state);
 		styler.Flush();
 	}
 	bool More() const {
@@ -174,19 +178,19 @@ public:
 		state = state_;
 	}
 	void SetState(int state_) {
-		styler.ColourTo(currentPos - 1, state);
+		styler.ColourTo(currentPos - ((currentPos > lengthDocument) ? 2 : 1), state);
 		state = state_;
 	}
 	void ForwardSetState(int state_) {
 		Forward();
-		styler.ColourTo(currentPos - 1, state);
+		styler.ColourTo(currentPos - ((currentPos > lengthDocument) ? 2 : 1), state);
 		state = state_;
 	}
 	int LengthCurrent() {
 		return currentPos - styler.GetStartSegment();
 	}
 	int GetRelative(int n) {
-		return static_cast<unsigned char>(styler.SafeGetCharAt(currentPos+n));
+		return static_cast<unsigned char>(styler.SafeGetCharAt(currentPos+n, 0));
 	}
 	bool Match(char ch0) const {
 		return ch == static_cast<unsigned char>(ch0);
@@ -204,7 +208,7 @@ public:
 			return false;
 		s++;
 		for (int n=2; *s; n++) {
-			if (*s != styler.SafeGetCharAt(currentPos+n))
+			if (*s != styler.SafeGetCharAt(currentPos+n, 0))
 				return false;
 			s++;
 		}
@@ -219,7 +223,7 @@ public:
 		s++;
 		for (int n=2; *s; n++) {
 			if (static_cast<unsigned char>(*s) !=
-				MakeLowerCase(static_cast<unsigned char>(styler.SafeGetCharAt(currentPos+n))))
+				MakeLowerCase(static_cast<unsigned char>(styler.SafeGetCharAt(currentPos+n, 0))))
 				return false;
 			s++;
 		}
