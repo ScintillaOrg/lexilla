@@ -7,7 +7,8 @@ import os, sys, unittest
 
 import ctypes
 from ctypes import wintypes
-from ctypes import c_int, c_ulong, c_char_p, c_wchar_p, c_ushort
+from ctypes import c_int, c_ulong, c_char_p, c_wchar_p, c_ushort, c_uint, c_long
+from ctypes.wintypes import HWND, WPARAM, LPARAM, HANDLE, HBRUSH, LPCWSTR
 user32=ctypes.windll.user32
 gdi32=ctypes.windll.gdi32
 kernel32=ctypes.windll.kernel32
@@ -24,7 +25,7 @@ scintillaBinDirectory = os.path.join(scintillaDirectory, "bin")
 os.environ['PATH'] = os.environ['PATH']  + ";" + scintillaBinDirectory
 #print(os.environ['PATH'])
 
-WFUNC = ctypes.WINFUNCTYPE(c_int, c_int, c_int, c_int, c_int)
+WFUNC = ctypes.WINFUNCTYPE(c_int, HWND, c_uint, WPARAM, LPARAM)
 
 WS_CHILD = 0x40000000
 WS_CLIPCHILDREN = 0x2000000
@@ -109,35 +110,35 @@ class WNDCLASS(ctypes.Structure):
 		('lpfnWndProc', WFUNC),
 		('cls_extra', c_int),
 		('wnd_extra', c_int),
-		('hInst', c_int),
-		('hIcon', c_int),
-		('hCursor', c_int),
-		('hbrBackground', c_int),
-		('menu_name', c_wchar_p),
-		('lpzClassName', c_wchar_p),
+		('hInst', HANDLE),
+		('hIcon', HANDLE),
+		('hCursor', HANDLE),
+		('hbrBackground', HBRUSH),
+		('menu_name', LPCWSTR),
+		('lpzClassName', LPCWSTR),
 	)
 
 class XTEXTRANGE(ctypes.Structure):
 	_fields_= (\
-		('cpMin', c_int),
-		('cpMax', c_int),
+		('cpMin', c_long),
+		('cpMax', c_long),
 		('lpstrText', c_char_p),
 	)
 
 class TEXTRANGE(ctypes.Structure):
 	_fields_= (\
-		('cpMin', c_int),
-		('cpMax', c_int),
+		('cpMin', c_long),
+		('cpMax', c_long),
 		('lpstrText', ctypes.POINTER(ctypes.c_char)),
 	)
 
 class FINDTEXT(ctypes.Structure):
 	_fields_= (\
-		('cpMin', c_int),
-		('cpMax', c_int),
+		('cpMin', c_long),
+		('cpMax', c_long),
 		('lpstrText', c_char_p),
-		('cpMinText', c_int),
-		('cpMaxText', c_int),
+		('cpMinText', c_long),
+		('cpMaxText', c_long),
 	)
 
 hinst = ctypes.windll.kernel32.GetModuleHandleW(0)
@@ -163,7 +164,23 @@ class SciCall:
 		self._ptr = ptr
 		self._msg = msg
 	def __call__(self, w=0, l=0):
-		return self._fn(self._ptr, self._msg, w, l)
+		if type(w) == type("x"):
+			ww = c_wchar_p(w)
+		elif type(w) == type(b"x"):
+			ww = c_char_p(w)
+		elif w is None:
+			ww = WPARAM()
+		else:
+			ww = WPARAM(w)
+		if type(l) == type("x"):
+			ll = c_wchar_p(l)
+		elif type(l) == type(b"x"):
+			ll = c_char_p(l)
+		elif type(l) == type(1):
+			ll = LPARAM(l)
+		else:
+			ll = l
+		return self._fn(self._ptr, self._msg, ww, ll)
 
 class Scintilla:
 	def __init__(self, face, hwndParent, hinstance):
@@ -184,8 +201,9 @@ class Scintilla:
 			"Scintilla", "Source",
 			WS_CHILD | WS_VSCROLL | WS_HSCROLL | WS_CLIPCHILDREN,
 			0, 0, 100, 100, hwndParent, 0, hinstance, 0)
-		self.__dict__["_sciptr"] = user32.SendMessageW(self._hwnd,
-			int(self.face.features["GetDirectPointer"]["Value"], 0), 0,0)
+		sciptr = c_char_p(user32.SendMessageW(self._hwnd,
+			int(self.face.features["GetDirectPointer"]["Value"], 0), 0,0))
+		self.__dict__["_sciptr"] = sciptr
 		user32.ShowWindow(self._hwnd, SW_SHOW)
 	def __getattr__(self, name):
 		if name in self.face.features:
@@ -326,6 +344,7 @@ class XiteWin():
 		user32.InvalidateRect(self.win, 0, 0)
 
 	def WndProc(self, h, m, w, l):
+		user32.DefWindowProcW.argtypes = [HWND, c_uint, WPARAM, LPARAM]
 		ms = sgsm.get(m, "XXX")
 		if trace:
 			print("%s %s %s %s" % (hex(h)[2:],ms,w,l))
