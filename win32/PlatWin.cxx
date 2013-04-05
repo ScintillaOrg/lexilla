@@ -81,6 +81,8 @@ static LONG_PTR GetWindowLongPtr(HWND hWnd, int nIndex) {
 }
 #endif
 
+extern UINT CodePageFromCharSet(DWORD characterSet, UINT documentCodePage);
+
 // Declarations needed for functions dynamically loaded as not available on all Windows versions.
 typedef BOOL (WINAPI *AlphaBlendSig)(HDC, int, int, int, int, HDC, int, int, int, int, BLENDFUNCTION);
 typedef HMONITOR (WINAPI *MonitorFromPointSig)(POINT, DWORD);
@@ -164,19 +166,32 @@ struct FormatAndMetrics {
 	IDWriteTextFormat *pTextFormat;
 #endif
 	int extraFontFlag;
+	int characterSet;
 	FLOAT yAscent;
 	FLOAT yDescent;
 	FLOAT yInternalLeading;
-	FormatAndMetrics(HFONT hfont_, int extraFontFlag_) : 
-		technology(SCWIN_TECH_GDI), hfont(hfont_), 
+	FormatAndMetrics(HFONT hfont_, int extraFontFlag_, int characterSet_) :
+		technology(SCWIN_TECH_GDI), hfont(hfont_),
 #if defined(USE_D2D)
 		pTextFormat(0),
 #endif
-		extraFontFlag(extraFontFlag_), yAscent(2), yDescent(1), yInternalLeading(0) {
+		extraFontFlag(extraFontFlag_), characterSet(characterSet_), yAscent(2), yDescent(1), yInternalLeading(0) {
 	}
 #if defined(USE_D2D)
-	FormatAndMetrics(IDWriteTextFormat *pTextFormat_, int extraFontFlag_, FLOAT yAscent_, FLOAT yDescent_, FLOAT yInternalLeading_) : 
-		technology(SCWIN_TECH_DIRECTWRITE), hfont(0), pTextFormat(pTextFormat_), extraFontFlag(extraFontFlag_), yAscent(yAscent_), yDescent(yDescent_), yInternalLeading(yInternalLeading_) {
+	FormatAndMetrics(IDWriteTextFormat *pTextFormat_,
+	        int extraFontFlag_,
+	        int characterSet_,
+	        FLOAT yAscent_,
+	        FLOAT yDescent_,
+	        FLOAT yInternalLeading_) :
+		technology(SCWIN_TECH_DIRECTWRITE),
+		hfont(0),
+		pTextFormat(pTextFormat_),
+		extraFontFlag(extraFontFlag_),
+		characterSet(characterSet_),
+		yAscent(yAscent_),
+		yDescent(yDescent_),
+		yInternalLeading(yInternalLeading_) {
 	}
 #endif
 	~FormatAndMetrics() {
@@ -188,6 +203,7 @@ struct FormatAndMetrics {
 		pTextFormat = 0;
 #endif
 		extraFontFlag = 0;
+		characterSet = 0;
 		yAscent = 2;
 		yDescent = 1;
 		yInternalLeading = 0;
@@ -315,7 +331,7 @@ FontCached::FontCached(const FontParameters &fp) :
 	fid = 0;
 	if (technology == SCWIN_TECH_GDI) {
 		HFONT hfont = ::CreateFontIndirectA(&lf);
-		fid = reinterpret_cast<void *>(new FormatAndMetrics(hfont, fp.extraFontFlag));
+		fid = reinterpret_cast<void *>(new FormatAndMetrics(hfont, fp.extraFontFlag, fp.characterSet));
 	} else {
 #if defined(USE_D2D)
 		IDWriteTextFormat *pTextFormat;
@@ -354,7 +370,7 @@ FontCached::FontCached(const FontParameters &fp) :
 				}
 				pTextLayout->Release();
 			}
-			fid = reinterpret_cast<void *>(new FormatAndMetrics(pTextFormat, fp.extraFontFlag, yAscent, yDescent, yInternalLeading));
+			fid = reinterpret_cast<void *>(new FormatAndMetrics(pTextFormat, fp.extraFontFlag, fp.characterSet, yAscent, yDescent, yInternalLeading));
 		}
 #endif
 	}
@@ -1140,6 +1156,7 @@ class SurfaceD2D : public Surface {
 	int x, y;
 
 	int codePage;
+	int codePageText;
 
 	ID2D1RenderTarget *pRenderTarget;
 	bool ownRenderTarget;
@@ -1222,6 +1239,7 @@ SurfaceD2D::SurfaceD2D() :
 	x(0), y(0) {
 
 	codePage = 0;
+	codePageText = 0;
 
 	pRenderTarget = NULL;
 	ownRenderTarget = false;
@@ -1335,6 +1353,10 @@ void SurfaceD2D::SetFont(Font &font_) {
 	yAscent = pfm->yAscent;
 	yDescent = pfm->yDescent;
 	yInternalLeading = pfm->yInternalLeading;
+	codePageText = codePage;
+	if (pfm->characterSet) {
+		codePageText = CodePageFromCharSet(pfm->characterSet, codePage);
+	}
 	if (pRenderTarget) {
 		pRenderTarget->SetTextAntialiasMode(DWriteMapFontQuality(pfm->extraFontFlag));
 	}
@@ -1582,7 +1604,7 @@ void SurfaceD2D::DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, co
 	SetFont(font_);
 
 	// Use Unicode calls
-	const TextWide tbuf(s, len, unicodeMode, codePage);
+	const TextWide tbuf(s, len, unicodeMode, codePageText);
 	if (pRenderTarget && pTextFormat && pBrush) {
 		if (fuOptions & ETO_CLIPPED) {
 			D2D1_RECT_F rcClip = {rc.left, rc.top, rc.right, rc.bottom};
@@ -1640,7 +1662,7 @@ void SurfaceD2D::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybas
 XYPOSITION SurfaceD2D::WidthText(Font &font_, const char *s, int len) {
 	FLOAT width = 1.0;
 	SetFont(font_);
-	const TextWide tbuf(s, len, unicodeMode, codePage);
+	const TextWide tbuf(s, len, unicodeMode, codePageText);
 	if (pIDWriteFactory && pTextFormat) {
 		// Create a layout
 		IDWriteTextLayout *pTextLayout = 0;
@@ -1658,7 +1680,7 @@ XYPOSITION SurfaceD2D::WidthText(Font &font_, const char *s, int len) {
 void SurfaceD2D::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions) {
 	SetFont(font_);
 	int fit = 0;
-	const TextWide tbuf(s, len, unicodeMode, codePage);
+	const TextWide tbuf(s, len, unicodeMode, codePageText);
 	TextPositions poses(tbuf.tlen);
 	fit = tbuf.tlen;
 	const int clusters = 1000;
@@ -1712,7 +1734,7 @@ void SurfaceD2D::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *
 		while (i<len) {
 			positions[i++] = lastPos;
 		}
-	} else if (codePage == 0) {
+	} else if (codePageText == 0) {
 
 		// One character per position
 		PLATFORM_ASSERT(len == tbuf.tlen);
@@ -1725,7 +1747,7 @@ void SurfaceD2D::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *
 		// May be more than one byte per position
 		int ui = 0;
 		for (int i=0;i<len;) {
-			if (::IsDBCSLeadByteEx(codePage, s[i])) {
+			if (::IsDBCSLeadByteEx(codePageText, s[i])) {
 				positions[i] = poses.buffer[ui];
 				positions[i+1] = poses.buffer[ui];
 				i += 2;
