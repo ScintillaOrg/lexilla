@@ -1062,7 +1062,7 @@ void SurfaceGDI::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *
 
 		int ui = 0;
 		for (int i=0;i<len;) {
-			if (::IsDBCSLeadByteEx(codePage, s[i])) {
+			if (Platform::IsDBCSLeadByte(codePage, s[i])) {
 				positions[i] = poses.buffer[ui];
 				positions[i+1] = poses.buffer[ui];
 				i += 2;
@@ -1747,7 +1747,7 @@ void SurfaceD2D::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *
 		// May be more than one byte per position
 		int ui = 0;
 		for (int i=0;i<len;) {
-			if (::IsDBCSLeadByteEx(codePageText, s[i])) {
+			if (Platform::IsDBCSLeadByte(codePageText, s[i])) {
 				positions[i] = poses.buffer[ui];
 				positions[i+1] = poses.buffer[ui];
 				i += 2;
@@ -3163,11 +3163,39 @@ long Platform::SendScintillaPointer(WindowID w, unsigned int msg, unsigned long 
 }
 
 bool Platform::IsDBCSLeadByte(int codePage, char ch) {
-	return ::IsDBCSLeadByteEx(codePage, ch) != 0;
+	// Byte ranges found in Wikipedia articles with relevant search strings in each case
+	unsigned char uch = static_cast<unsigned char>(ch);
+	switch (codePage) {
+	case 932:
+		// Shift_jis
+		return ((uch >= 0x81) && (uch <= 0x9F)) ||
+		       ((uch >= 0xE0) && (uch <= 0xEF));
+	case 936:
+		// GBK
+		return (uch >= 0x81) && (uch <= 0xFE);
+	case 949:
+		// Korean Wansung KS C-5601-1987
+		return (uch >= 0x81) && (uch <= 0xFE);
+	case 950:
+		// Big5
+		return (uch >= 0x81) && (uch <= 0xFE);
+	case 1361:
+		// Korean Johab KS C-5601-1992
+		return
+		    ((uch >= 0x84) && (uch <= 0xD3)) ||
+		    ((uch >= 0xD8) && (uch <= 0xDE)) ||
+		    ((uch >= 0xE0) && (uch <= 0xF9));
+	}
+	return false;
 }
 
 int Platform::DBCSCharLength(int codePage, const char *s) {
-	return (::IsDBCSLeadByteEx(codePage, s[0]) != 0) ? 2 : 1;
+	if (codePage == 932 || codePage == 936 || codePage == 949 ||
+	        codePage == 950 || codePage == 1361) {
+		return Platform::IsDBCSLeadByte(codePage, s[0]) ? 2 : 1;
+	} else {
+		return 1;
+	}
 }
 
 int Platform::DBCSCharMaxLength() {
