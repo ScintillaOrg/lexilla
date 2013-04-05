@@ -110,6 +110,12 @@ class TestLexers(unittest.TestCase):
 	def testLua(self):
 		self.LexExample("x.lua", b"lua", [b"function end"])
 
+	def testRuby(self):
+		self.LexExample("x.rb", b"ruby", [b"class def end"])
+
+	def testPerl(self):
+		self.LexExample("x.pl", b"perl", [b"printf sleep use while"])
+
 	def testD(self):
 		self.LexExample("x.d", b"d",
 			[b"keyword1", b"keyword2", b"", b"keyword4", b"keyword5",
