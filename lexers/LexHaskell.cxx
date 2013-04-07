@@ -63,11 +63,10 @@ static inline bool IsAWordStart(const int ch) {
    return (IsLowerCase(ch) || IsUpperCase(ch) || ch == '_');
 }
 
-static inline bool IsAWordChar(const int ch, const bool magicHash) {
+static inline bool IsAWordChar(const int ch) {
    return (  IsAlphaNumeric(ch)
           || ch == '_'
-          || ch == '\''
-          || (magicHash && ch == '#'));
+          || ch == '\'');
 }
 
 static inline bool IsAnOperatorChar(const int ch) {
@@ -76,7 +75,23 @@ static inline bool IsAnOperatorChar(const int ch) {
       || ch == '&' || ch == '*' || ch == '+' || ch == '-'
       || ch == '.' || ch == '/' || ch == ':' || ch == '<'
       || ch == '=' || ch == '>' || ch == '?' || ch == '@'
-      || ch == '\\' || ch == '^' || ch == '|' || ch == '~');
+      || ch == '^' || ch == '|' || ch == '~' || ch == '\\');
+}
+
+static inline void skipNewline(StyleContext &sc) {
+   if (sc.Match('\r', '\n')) {
+      sc.Forward(2);
+   } else if (sc.ch == '\n' || sc.ch == '\r') {
+      sc.Forward();
+   }
+}
+
+static inline void skipMagicHash(StyleContext &sc, const bool magicHash, const bool twoHashes=false) {
+   if (magicHash && sc.ch == '#')
+      if (twoHashes && sc.chNext == '#')
+         sc.Forward(2);
+      else
+         sc.Forward();
 }
 
 static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
@@ -86,9 +101,19 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
    WordList &ffi      = *keywordlists[1];
 
    // property lexer.haskell.allow.hash
-   //  Set to 1 to allow the # character in identifiers with the haskell lexer.
+   //  Set to 1 to allow the # character in identifiers and literals with the
+   //  haskell lexer.
    //  (GHC -XMagicHash extension)
    const bool magicHash = styler.GetPropertyInt("lexer.haskell.allow.hash") != 0;
+   // property lexer.haskell.allow.quotes
+   //  Set to 1 to enable highlighting of Template Haskell name quotations
+   //  and promoted constructors
+   //  (GHC -XTemplateHaskell and -XDataKinds extensions)
+   const bool allowQuotes = styler.GetPropertyInt("lexer.haskell.allow.quotes") != 0;
+   // property lexer.haskell.import.safe
+   //  Set to 1 to allow keyword "safe" in imports
+   //  (GHC SafeHaskell extensions)
+   const bool highlightSafe = styler.GetPropertyInt("lexer.haskell.import.safe") != 0;
    const bool stylingWithinPreprocessor = styler.GetPropertyInt("styling.within.preprocessor") != 0;
 
    StyleContext sc(startPos, length, initStyle, styler);
@@ -112,7 +137,7 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
             style = SCE_HA_CAPITAL;
          }
 
-         while(IsAnOperatorChar(sc.ch))
+         while (IsAnOperatorChar(sc.ch))
                sc.Forward();
 
          styler.ColourTo(sc.currentPos - 1, style);
@@ -122,9 +147,11 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
       else if (sc.state == SCE_HA_STRING) {
          if (sc.ch == '\"') {
             sc.Forward();
+            skipMagicHash(sc, magicHash);
             sc.SetState(SCE_HA_DEFAULT);
          } else if (sc.ch == '\\') {
-            sc.Forward(2);
+            sc.Forward();
+            skipNewline(sc);
          } else if (sc.atLineEnd) {
             sc.SetState(SCE_HA_DEFAULT);
          } else {
@@ -135,6 +162,7 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
       else if (sc.state == SCE_HA_CHARACTER) {
          if (sc.ch == '\'') {
             sc.Forward();
+            skipMagicHash(sc, magicHash);
             sc.SetState(SCE_HA_DEFAULT);
          } else if (sc.ch == '\\') {
             sc.Forward(2);
@@ -156,29 +184,38 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
             if (sc.ch == '+' || sc.ch == '-')
                 sc.Forward();
          } else {
+            skipMagicHash(sc, magicHash, true);
             sc.SetState(SCE_HA_DEFAULT);
          }
       }
          // Keyword or Identifier
       else if (sc.state == SCE_HA_IDENTIFIER) {
+         int style = isupper(sc.ch) ? SCE_HA_CAPITAL : SCE_HA_IDENTIFIER;
+
+         sc.Forward();
+
          while (sc.More()) {
-            if (IsAWordChar(sc.ch, magicHash)) {
+            if (IsAWordChar(sc.ch)) {
                sc.Forward();
-            } else if (xmode == SCE_HA_CAPITAL && sc.ch=='.') {
+            } else if (sc.ch == '#' && magicHash) {
+               sc.Forward();
+               break;
+            } else if (style == SCE_HA_CAPITAL && sc.ch=='.') {
                if (isupper(sc.chNext)) {
-                  xmode = SCE_HA_CAPITAL;
                   sc.Forward();
+                  style = SCE_HA_CAPITAL;
                } else if (IsAWordStart(sc.chNext)) {
-                  xmode = SCE_HA_IDENTIFIER;
                   sc.Forward();
+                  style = SCE_HA_IDENTIFIER;
                } else if (IsAnOperatorChar(sc.chNext)) {
-                  xmode = SCE_HA_OPERATOR;
                   sc.Forward();
+                  style = sc.ch == ':' ? SCE_HA_CAPITAL : SCE_HA_OPERATOR;
+                  while (IsAnOperatorChar(sc.ch))
+                     sc.Forward();
+                  break;
                } else {
                   break;
                }
-            } else if (xmode == SCE_HA_OPERATOR && IsAnOperatorChar(sc.ch)) {
-               sc.Forward();
             } else {
                break;
             }
@@ -187,14 +224,12 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
          char s[100];
          sc.GetCurrent(s, sizeof(s));
 
-         int style = xmode;
-
          int new_mode = HA_MODE_DEFAULT;
 
          if (keywords.InList(s)) {
             style = SCE_HA_KEYWORD;
          } else if (isupper(s[0])) {
-            if (mode >= HA_MODE_IMPORT1 && mode <= HA_MODE_IMPORT3) {
+            if (mode == HA_MODE_IMPORT1 || mode == HA_MODE_IMPORT3) {
                style    = SCE_HA_MODULE;
                new_mode = HA_MODE_IMPORT2;
             } else if (mode == HA_MODE_MODULE) {
@@ -202,6 +237,11 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
             }
          } else if (mode == HA_MODE_IMPORT1 &&
                     strcmp(s,"qualified") == 0) {
+             style    = SCE_HA_KEYWORD;
+             new_mode = HA_MODE_IMPORT1;
+         } else if (highlightSafe &&
+                    mode == HA_MODE_IMPORT1 &&
+                    strcmp(s,"safe") == 0) {
              style    = SCE_HA_KEYWORD;
              new_mode = HA_MODE_IMPORT1;
          } else if (mode == HA_MODE_IMPORT2) {
@@ -235,7 +275,6 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
                || strcmp(s,"data") == 0)
             new_mode = HA_MODE_TYPE;
 
-         xmode = 0;
          sc.ChangeState(SCE_HA_DEFAULT);
          mode = new_mode;
       }
@@ -288,7 +327,8 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
          if (stylingWithinPreprocessor && !IsAWordStart(sc.ch)) {
             sc.SetState(SCE_HA_DEFAULT);
          } else if (sc.ch == '\\' && !stylingWithinPreprocessor) {
-            sc.Forward(2);
+            sc.Forward();
+            skipNewline(sc);
          } else if (sc.atLineEnd) {
             sc.SetState(SCE_HA_DEFAULT);
          } else {
@@ -332,14 +372,38 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
             xmode = 1;
          }
          // String
-         else if (sc.Match('\"')) {
+         else if (sc.ch == '\"') {
             sc.SetState(SCE_HA_STRING);
             sc.Forward();
          }
-         // Character
-         else if (sc.Match('\'')) {
-            sc.SetState(SCE_HA_CHARACTER);
+         // Character or quoted name
+         else if (sc.ch == '\'') {
+            styler.ColourTo(sc.currentPos - 1, state);
             sc.Forward();
+
+            int style = SCE_HA_CHARACTER;
+
+            if (allowQuotes) {
+               // Quoted type ''T
+               if (sc.ch=='\'' && IsAWordStart(sc.chNext)) {
+                  sc.Forward();
+                  style=SCE_HA_IDENTIFIER;
+               } else if (sc.chNext != '\'') {
+                  // Quoted value or promoted constructor 'N
+                  if (IsAWordStart(sc.ch)) {
+                     style=SCE_HA_IDENTIFIER;
+                  // Promoted constructor operator ':~>
+                  } else if (sc.ch == ':') {
+                     style=SCE_HA_OPERATOR;
+                  // Promoted list or tuple '[T]
+                  } else if (sc.ch == '[' || sc.ch== '(') {
+                     styler.ColourTo(sc.currentPos - 1, SCE_HA_OPERATOR);
+                     style=SCE_HA_DEFAULT;
+                  }
+               }
+            }
+
+            sc.ChangeState(style);
          }
          // Preprocessor
          else if (sc.atLineStart && sc.ch == '#') {
@@ -363,9 +427,7 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
          }
          // Keyword or Identifier
          else if (IsAWordStart(sc.ch)) {
-            xmode = isupper(sc.ch) ? SCE_HA_CAPITAL : SCE_HA_IDENTIFIER;
             sc.SetState(SCE_HA_IDENTIFIER);
-            sc.Forward();
          } else {
             if (sc.atLineEnd) {
                 // Remember the line state for future incremental lexing
