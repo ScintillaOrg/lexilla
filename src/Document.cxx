@@ -2236,6 +2236,8 @@ long BuiltinRegex::FindText(Document *doc, int minPos, int maxPos, const char *s
 		int success = search.Execute(di, startOfLine, endOfLine);
 		if (success) {
 			pos = search.bopat[0];
+			// Ensure only whole characters selected
+			search.eopat[0] = doc->MovePositionOutsideChar(search.eopat[0], 1, false);
 			lenRet = search.eopat[0] - search.bopat[0];
 			// There can be only one start of a line, so no need to look for last match in line
 			if ((increment == -1) && (s[0] != '^')) {
