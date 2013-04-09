@@ -198,7 +198,8 @@ public:
   virtual void IdleWork();
   virtual void QueueIdleWork(WorkNeeded::workItems items, int upTo);
   int InsertText(NSString* input);
-  
+  void SelectOnlyMainSelection();
+
   bool KeyboardInput(NSEvent* event);
   void MouseDown(NSEvent* event);
   void MouseMove(NSEvent* event);

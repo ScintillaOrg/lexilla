@@ -1917,6 +1917,21 @@ int ScintillaCocoa::InsertText(NSString* input)
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Used to ensure that only one selection is active for input composition as composition
+ * does not support multi-typing.
+ * Also drop virtual space as that is not supported by composition.
+ */
+void ScintillaCocoa::SelectOnlyMainSelection()
+{
+  SelectionRange mainSel = sel.RangeMain();
+  mainSel.ClearVirtualSpace();
+  sel.SetSelection(mainSel);
+  Redraw();
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Called by the owning view when the mouse pointer enters the control.
  */
 void ScintillaCocoa::MouseEntered(NSEvent* event)
