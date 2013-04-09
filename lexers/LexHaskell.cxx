@@ -4,12 +4,13 @@
  *    A haskell lexer for the scintilla code control.
  *    Some stuff "lended" from LexPython.cxx and LexCPP.cxx.
  *    External lexer stuff inspired from the caml external lexer.
+ *    Folder copied from Python's.
  *
  *    Written by Tobias Engvall - tumm at dtek dot chalmers dot se
  *
  *    Several bug fixes by Krasimir Angelov - kr.angelov at gmail.com
  *
- *    Improvements by kudah - kudahkukarek at gmail.com
+ *    Improvements by kudah <kudahkukarek@gmail.com>
  *
  *    TODO:
  *    * Implement a folder :)
@@ -18,7 +19,6 @@
  *
  *
  *****************************************************************/
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -78,20 +78,13 @@ static inline bool IsAnOperatorChar(const int ch) {
       || ch == '^' || ch == '|' || ch == '~' || ch == '\\');
 }
 
-static inline void skipNewline(StyleContext &sc) {
-   if (sc.Match('\r', '\n')) {
-      sc.Forward(2);
-   } else if (sc.ch == '\n' || sc.ch == '\r') {
+static inline void skipMagicHash(StyleContext &sc, const bool magicHash, const bool twoHashes) {
+   if (magicHash && sc.ch == '#') {
       sc.Forward();
-   }
-}
-
-static inline void skipMagicHash(StyleContext &sc, const bool magicHash, const bool twoHashes=false) {
-   if (magicHash && sc.ch == '#')
-      if (twoHashes && sc.chNext == '#')
-         sc.Forward(2);
-      else
+      if (twoHashes && sc.ch == '#') {
          sc.Forward();
+      }
+   }
 }
 
 static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
@@ -119,13 +112,44 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
    StyleContext sc(startPos, length, initStyle, styler);
 
    int lineCurrent = styler.GetLine(startPos);
-   int state = lineCurrent ? styler.GetLineState(lineCurrent-1)
-                           : HA_MODE_DEFAULT;
+
+   int state = lineCurrent ? styler.GetLineState(lineCurrent-1) : 0;
    int mode  = state & 0xF;
-   int xmode = state >> 4; // obscure parameter. Means different things in different modes.
+   int nestLevel = state >> 4;
+
+   int base = 10;
+   bool inDashes = false;
 
    while (sc.More()) {
       // Check for state end
+
+      // For line numbering (and by extension, nested comments) to work,
+      // states should either only forward one character at a time, or check
+      // that characters they're skipping are not newlines. If states match on
+      // line end, they should skip it, to prevent double counting.
+      if (sc.atLineEnd) {
+         // Remember the line state for future incremental lexing
+         styler.SetLineState(lineCurrent, (nestLevel << 4) | mode);
+         lineCurrent++;
+      }
+
+      // Handle line continuation generically.
+      if (sc.ch == '\\' &&
+         (  sc.state == SCE_HA_STRING
+         || sc.state == SCE_HA_PREPROCESSOR)) {
+         if (sc.chNext == '\n' || sc.chNext == '\r') {
+            // Remember the line state for future incremental lexing
+            styler.SetLineState(lineCurrent, (nestLevel << 4) | mode);
+            lineCurrent++;
+
+            sc.Forward();
+            if (sc.ch == '\r' && sc.chNext == '\n') {
+               sc.Forward();
+            }
+            sc.Forward();
+            continue;
+         }
+      }
 
          // Operator
       if (sc.state == SCE_HA_OPERATOR) {
@@ -147,13 +171,13 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
       else if (sc.state == SCE_HA_STRING) {
          if (sc.ch == '\"') {
             sc.Forward();
-            skipMagicHash(sc, magicHash);
+            skipMagicHash(sc, magicHash, false);
             sc.SetState(SCE_HA_DEFAULT);
          } else if (sc.ch == '\\') {
-            sc.Forward();
-            skipNewline(sc);
+            sc.Forward(2);
          } else if (sc.atLineEnd) {
             sc.SetState(SCE_HA_DEFAULT);
+            sc.Forward(); // prevent double counting a line
          } else {
             sc.Forward();
          }
@@ -162,22 +186,23 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
       else if (sc.state == SCE_HA_CHARACTER) {
          if (sc.ch == '\'') {
             sc.Forward();
-            skipMagicHash(sc, magicHash);
+            skipMagicHash(sc, magicHash, false);
             sc.SetState(SCE_HA_DEFAULT);
          } else if (sc.ch == '\\') {
             sc.Forward(2);
          } else if (sc.atLineEnd) {
             sc.SetState(SCE_HA_DEFAULT);
+            sc.Forward(); // prevent double counting a line
          } else {
             sc.Forward();
          }
       }
          // Number
       else if (sc.state == SCE_HA_NUMBER) {
-         if (IsADigit(sc.ch, xmode) ||
-            (sc.ch=='.' && IsADigit(sc.chNext, xmode))) {
+         if (IsADigit(sc.ch, base) ||
+            (sc.ch=='.' && IsADigit(sc.chNext, base))) {
             sc.Forward();
-         } else if ((xmode == 10) &&
+         } else if ((base == 10) &&
                     (sc.ch == 'e' || sc.ch == 'E') &&
                     (IsADigit(sc.chNext) || sc.chNext == '+' || sc.chNext == '-')) {
             sc.Forward();
@@ -282,12 +307,13 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
          // Comments
             // Oneliner
       else if (sc.state == SCE_HA_COMMENTLINE) {
-         if (xmode == 1 && sc.ch != '-') {
-            xmode = 0;
+         if (inDashes && sc.ch != '-') {
+            inDashes = false;
             if (IsAnOperatorChar(sc.ch))
                sc.ChangeState(SCE_HA_OPERATOR);
          } else if (sc.atLineEnd) {
             sc.SetState(SCE_HA_DEFAULT);
+            sc.Forward(); // prevent double counting a line
          } else {
             sc.Forward();
          }
@@ -296,26 +322,22 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
       else if (sc.state == SCE_HA_COMMENTBLOCK) {
          if (sc.Match('{','-')) {
             sc.Forward(2);
-            xmode++;
+            nestLevel++;
          }
          else if (sc.Match('-','}')) {
             sc.Forward(2);
-            xmode--;
-            if (xmode == 0) {
+            nestLevel--;
+            if (nestLevel == 0) {
                sc.SetState(SCE_HA_DEFAULT);
             }
          } else {
-            if (sc.atLineEnd) {
-                // Remember the line state for future incremental lexing
-                styler.SetLineState(lineCurrent, (xmode << 4) | mode);
-                lineCurrent++;
-            }
             sc.Forward();
          }
       }
             // Pragma
       else if (sc.state == SCE_HA_PRAGMA) {
-         if (sc.Match("#-}")) {
+         // GHC pragma end should always be indented further than it's start.
+         if (sc.Match("#-}") && !sc.atLineStart) {
             sc.Forward(3);
             sc.SetState(SCE_HA_DEFAULT);
          } else {
@@ -326,31 +348,29 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
       else if (sc.state == SCE_HA_PREPROCESSOR) {
          if (stylingWithinPreprocessor && !IsAWordStart(sc.ch)) {
             sc.SetState(SCE_HA_DEFAULT);
-         } else if (sc.ch == '\\' && !stylingWithinPreprocessor) {
-            sc.Forward();
-            skipNewline(sc);
          } else if (sc.atLineEnd) {
             sc.SetState(SCE_HA_DEFAULT);
+            sc.Forward(); // prevent double counting a line
          } else {
             sc.Forward();
          }
       }
-      // New state?
-      if (sc.state == SCE_HA_DEFAULT) {
+            // New state?
+      else if (sc.state == SCE_HA_DEFAULT) {
          // Digit
          if (IsADigit(sc.ch)) {
             sc.SetState(SCE_HA_NUMBER);
             if (sc.ch == '0' && (sc.chNext == 'X' || sc.chNext == 'x')) {
-                // Match anything starting with "0x" or "0X", too
-                sc.Forward(2);
-                xmode = 16;
+               // Match anything starting with "0x" or "0X", too
+               sc.Forward(2);
+               base = 16;
             } else if (sc.ch == '0' && (sc.chNext == 'O' || sc.chNext == 'o')) {
-                // Match anything starting with "0x" or "0X", too
-                sc.Forward(2);
-                xmode = 8;
+               // Match anything starting with "0x" or "0X", too
+               sc.Forward(2);
+               base = 8;
             } else {
-                sc.Forward();
-                xmode = 10;
+               sc.Forward();
+               base = 10;
             }
             mode = HA_MODE_DEFAULT;
          }
@@ -363,13 +383,13 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
          else if (sc.Match('-','-')) {
             sc.SetState(SCE_HA_COMMENTLINE);
             sc.Forward(2);
-            xmode = 1;
+            inDashes = true;
          }
          // Comment block
          else if (sc.Match('{','-')) {
             sc.SetState(SCE_HA_COMMENTBLOCK);
             sc.Forward(2);
-            xmode = 1;
+            nestLevel++;
          }
          // String
          else if (sc.ch == '\"') {
@@ -428,18 +448,145 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
          // Keyword or Identifier
          else if (IsAWordStart(sc.ch)) {
             sc.SetState(SCE_HA_IDENTIFIER);
+         // Something we don't care about
          } else {
-            if (sc.atLineEnd) {
-                // Remember the line state for future incremental lexing
-                styler.SetLineState(lineCurrent, (xmode << 4) | mode);
-                lineCurrent++;
-            }
             sc.Forward();
          }
       }
    }
    sc.Complete();
 }
+
+static bool IsCommentLine(int line, Accessor &styler) {
+   int pos = styler.LineStart(line);
+   int eol_pos = styler.LineStart(line + 1) - 1;
+
+   for (int i = pos; i < eol_pos; i++) {
+      int ch = styler[i];
+      int style = styler.StyleAt(i);
+
+      if ((style < SCE_HA_COMMENTLINE || style > SCE_HA_COMMENTBLOCK3)
+         && ch != ' '
+         && ch != '\t') {
+         return false;
+      }
+   }
+   return true;
+}
+
+static void FoldHaskellDoc(unsigned int startPos, int length, int // initStyle
+                          ,WordList *[], Accessor &styler) {
+   const int maxPos = startPos + length;
+   const int maxLines =
+      maxPos == styler.Length()
+         ? styler.GetLine(maxPos)
+         : styler.GetLine(maxPos - 1);  // Requested last line
+   const int docLines = styler.GetLine(styler.Length()); // Available last line
+
+   const bool foldCompact = styler.GetPropertyInt("fold.compact") != 0;
+   // const bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
+
+   // Backtrack to previous non-blank line so we can determine indent level
+   // for any white space lines
+   // and so we can fix any preceding fold level (which is why we go back
+   // at least one line in all cases)
+   int spaceFlags = 0;
+   int lineCurrent = styler.GetLine(startPos);
+   int indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, NULL);
+   while (lineCurrent > 0) {
+      lineCurrent--;
+      indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, NULL);
+      if (!(indentCurrent & SC_FOLDLEVELWHITEFLAG) &&
+               !IsCommentLine(lineCurrent, styler))
+         break;
+   }
+   int indentCurrentLevel = indentCurrent & SC_FOLDLEVELNUMBERMASK;
+
+   // Set up initial loop state
+   startPos = styler.LineStart(lineCurrent);
+
+   // Process all characters to end of requested range
+   //that hangs over the end of the range.  Cap processing in all cases
+   // to end of document.
+   while (lineCurrent <= docLines && lineCurrent <= maxLines) {
+
+      // Gather info
+      int lev = indentCurrent;
+      int lineNext = lineCurrent + 1;
+      int indentNext = indentCurrent;
+      if (lineNext <= docLines) {
+         // Information about next line is only available if not at end of document
+         indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
+      }
+      if (indentNext & SC_FOLDLEVELWHITEFLAG)
+         indentNext = SC_FOLDLEVELWHITEFLAG | indentCurrentLevel;
+
+      // Skip past any blank lines for next indent level info; we skip also
+      // comments (all comments, not just those starting in column 0)
+      // which effectively folds them into surrounding code rather
+      // than screwing up folding.
+
+      while ((lineNext < docLines) &&
+            ((indentNext & SC_FOLDLEVELWHITEFLAG) ||
+             (lineNext <= docLines && IsCommentLine(lineNext, styler)))) {
+         lineNext++;
+         indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
+      }
+
+      const int levelAfterComments = indentNext & SC_FOLDLEVELNUMBERMASK;
+      const int levelBeforeComments = Maximum(indentCurrentLevel,levelAfterComments);
+
+      // Now set all the indent levels on the lines we skipped
+      // Do this from end to start.  Once we encounter one line
+      // which is indented more than the line after the end of
+      // the comment-block, use the level of the block before
+
+      int skipLine = lineNext;
+      int skipLevel = levelAfterComments;
+
+      while (--skipLine > lineCurrent) {
+         int skipLineIndent = styler.IndentAmount(skipLine, &spaceFlags, NULL);
+
+         if (foldCompact) {
+            if ((skipLineIndent & SC_FOLDLEVELNUMBERMASK) > levelAfterComments) {
+               skipLevel = levelBeforeComments;
+            }
+
+            int whiteFlag = skipLineIndent & SC_FOLDLEVELWHITEFLAG;
+
+            styler.SetLevel(skipLine, skipLevel | whiteFlag);
+         } else {
+            if (  (skipLineIndent & SC_FOLDLEVELNUMBERMASK) > levelAfterComments
+               && !(skipLineIndent & SC_FOLDLEVELWHITEFLAG)
+               && !IsCommentLine(skipLine, styler)) {
+               skipLevel = levelBeforeComments;
+            }
+
+            styler.SetLevel(skipLine, skipLevel);
+         }
+      }
+
+      if (!(indentCurrent & SC_FOLDLEVELWHITEFLAG)) {
+         if ((indentCurrent & SC_FOLDLEVELNUMBERMASK) < (indentNext & SC_FOLDLEVELNUMBERMASK))
+            lev |= SC_FOLDLEVELHEADERFLAG;
+      }
+
+      // Set fold level for this line and move to next line
+      styler.SetLevel(lineCurrent, foldCompact ? lev : lev & ~SC_FOLDLEVELWHITEFLAG);
+      indentCurrent = indentNext;
+      lineCurrent = lineNext;
+   }
+
+   // NOTE: Cannot set level of last line here because indentCurrent doesn't have
+   // header flag set; the loop above is crafted to take care of this case!
+   //styler.SetLevel(lineCurrent, indentCurrent);
+}
+
+static const char * const haskellWordListDesc[] = {
+   "Keywords",
+   "FFI",
+   0
+};
 
 // External stuff - used for dynamic-loading, not implemented in wxStyledTextCtrl yet.
 // Inspired by the caml external lexer - Credits to Robert Roessler - http://www.rftp.com
@@ -494,4 +641,4 @@ void EXT_LEXER_DECL GetLexerName(unsigned int Index, char *name, int buflength)
 }
 #endif
 
-LexerModule lmHaskell(SCLEX_HASKELL, ColorizeHaskellDoc, "haskell");
+LexerModule lmHaskell(SCLEX_HASKELL, ColorizeHaskellDoc, "haskell", FoldHaskellDoc, haskellWordListDesc);
