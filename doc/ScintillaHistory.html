@@ -444,6 +444,8 @@
 	<li>
 	Most lexers now lex an extra NUL byte at the end of the
 	document which makes it more likely they will classify keywords at document end correctly.
+	<a href="http://sourceforge.net/p/scintilla/bugs/574/">Bug #574</a>, 
+	<a href="http://sourceforge.net/p/scintilla/bugs/588/">Bug #588.</a>
 	</li>
 	<li>
 	Haskell lexer improved in several ways.
@@ -468,6 +470,10 @@
 	</li>
 	<li>
 	Position of calltip and autocompletion lists fixed on Cocoa.
+	</li>
+	<li>
+	While regular expression search in DBCS text is still not working, matching partial characters is now avoided
+	by moving end of match to end of character.
 	</li>
     </ul>
     <h3>
