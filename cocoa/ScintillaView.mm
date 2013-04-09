@@ -401,6 +401,11 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
                          value: mMarkedTextRange.location + mMarkedTextRange.length];
     currentPosition = mMarkedTextRange.location;
   }
+  else
+  {
+    // Ensure only a single selection
+    mOwner.backend->SelectOnlyMainSelection();
+  }
 
   // Keep Scintilla from collecting undo actions for the composition task.
   undoCollectionWasActive = [mOwner getGeneralProperty: SCI_GETUNDOCOLLECTION] != 0;
