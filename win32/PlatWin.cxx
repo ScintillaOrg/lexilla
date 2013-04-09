@@ -369,6 +369,12 @@ FontCached::FontCached(const FontParameters &fp) :
 					}
 				}
 				pTextLayout->Release();
+				DWRITE_LINE_SPACING_METHOD lineSpacingMethod=DWRITE_LINE_SPACING_METHOD_DEFAULT;
+				FLOAT lineSpacing=0;
+				FLOAT baseline=0;
+				if (SUCCEEDED(pTextFormat->GetLineSpacing(&lineSpacingMethod, &lineSpacing, &baseline))) {
+ 					pTextFormat->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_UNIFORM, lineMetrics[0].height, lineMetrics[0].baseline);
+				}
 			}
 			fid = reinterpret_cast<void *>(new FormatAndMetrics(pTextFormat, fp.extraFontFlag, fp.characterSet, yAscent, yDescent, yInternalLeading));
 		}
