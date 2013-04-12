@@ -13,7 +13,7 @@
  *    Improvements by kudah <kudahkukarek@gmail.com>
  *
  *    TODO:
- *    * Implement a folder :)
+ *    * Fold group declarations, comments, pragmas, #ifdefs, explicit layout, lists, tuples, quasi-quotes, splces, etc, etc, etc.
  *    * Nice Character-lexing (stuff inside '\''), LexPython has
  *      this.
  *
@@ -26,6 +26,9 @@
 #include <assert.h>
 #include <ctype.h>
 
+#include <string>
+#include <map>
+
 #include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
@@ -37,18 +40,10 @@
 #include "StyleContext.h"
 #include "CharacterSet.h"
 #include "LexerModule.h"
+#include "OptionSet.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
-#endif
-
-#ifdef BUILD_AS_EXTERNAL_LEXER
-
-#include "ExternalLexer.h"
-#include "WindowAccessor.h"
-
-#define BUILD_EXTERNAL_LEXER 0
-
 #endif
 
 #define HA_MODE_DEFAULT     0
@@ -87,35 +82,166 @@ static inline void skipMagicHash(StyleContext &sc, const bool magicHash, const b
    }
 }
 
-static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
-                               WordList *keywordlists[], Accessor &styler) {
+struct OptionsHaskell {
+   bool magicHash;
+   bool allowQuotes;
+   bool highlightSafe;
+   bool stylingWithinPreprocessor;
+   bool fold;
+   bool foldComment;
+   bool foldCompact;
+   bool foldImports;
+   OptionsHaskell() {
+      magicHash = true;
+      allowQuotes = true;
+      highlightSafe = true;
+      stylingWithinPreprocessor = false;
+      fold = false;
+      foldComment = false;
+      foldCompact = false;
+      foldImports = false;
+   }
+};
 
-   WordList &keywords = *keywordlists[0];
-   WordList &ffi      = *keywordlists[1];
+static const char * const haskellWordListDesc[] = {
+   "Keywords",
+   "FFI",
+   0
+};
 
-   // property lexer.haskell.allow.hash
-   //  Set to 1 to allow the # character in identifiers and literals with the
-   //  haskell lexer.
-   //  (GHC -XMagicHash extension)
-   const bool magicHash = styler.GetPropertyInt("lexer.haskell.allow.hash") != 0;
-   // property lexer.haskell.allow.quotes
-   //  Set to 1 to enable highlighting of Template Haskell name quotations
-   //  and promoted constructors
-   //  (GHC -XTemplateHaskell and -XDataKinds extensions)
-   const bool allowQuotes = styler.GetPropertyInt("lexer.haskell.allow.quotes") != 0;
-   // property lexer.haskell.import.safe
-   //  Set to 1 to allow keyword "safe" in imports
-   //  (GHC SafeHaskell extensions)
-   const bool highlightSafe = styler.GetPropertyInt("lexer.haskell.import.safe") != 0;
-   const bool stylingWithinPreprocessor = styler.GetPropertyInt("styling.within.preprocessor") != 0;
+struct OptionSetHaskell : public OptionSet<OptionsHaskell> {
+   OptionSetHaskell() {
+      DefineProperty("lexer.haskell.allow.hash", &OptionsHaskell::magicHash,
+         "Set to 1 to allow the '#' character at the end of identifiers and "
+         "literals with the haskell lexer (GHC -XMagicHash extension)");
+
+      DefineProperty("lexer.haskell.allow.quotes", &OptionsHaskell::allowQuotes,
+         "Set to 1 to enable highlighting of Template Haskell name quotations "
+         "and promoted constructors "
+         "(GHC -XTemplateHaskell and -XDataKinds extensions)");
+
+      DefineProperty("lexer.haskell.import.safe", &OptionsHaskell::highlightSafe,
+         "Set to 1 to allow keyword \"safe\" in imports "
+         "(GHC SafeHaskell extensions)");
+
+      DefineProperty("styling.within.preprocessor", &OptionsHaskell::stylingWithinPreprocessor,
+         "For Haskell code, determines whether all preprocessor code is styled in the "
+         "preprocessor style (0, the default) or only from the initial # to the end "
+         "of the command word(1)."
+         );
+
+      DefineProperty("fold", &OptionsHaskell::fold);
+
+      DefineProperty("fold.comment", &OptionsHaskell::foldComment);
+
+      DefineProperty("fold.compact", &OptionsHaskell::foldCompact);
+
+      DefineProperty("fold.haskell.imports", &OptionsHaskell::foldImports,
+         "Set to 1 to enable folding of import declarations");
+
+      DefineWordListSets(haskellWordListDesc);
+   }
+};
+
+class LexerHaskell : public ILexer {
+   int firstImportLine;
+   WordList keywords;
+   WordList ffi;
+   OptionsHaskell options;
+   OptionSetHaskell osHaskell;
+
+   inline bool LineContainsImport(int line, Accessor &styler) {
+      if (options.foldImports) {
+         return styler.Match(styler.LineStart(line), "import");
+      } else {
+         return false;
+      }
+   }
+public:
+   LexerHaskell() : firstImportLine(-1) {}
+   virtual ~LexerHaskell() {}
+
+   void SCI_METHOD Release() {
+      delete this;
+   }
+
+   int SCI_METHOD Version() const {
+      return lvOriginal;
+   }
+
+   const char * SCI_METHOD PropertyNames() {
+      return osHaskell.PropertyNames();
+   }
+
+   int SCI_METHOD PropertyType(const char *name) {
+      return osHaskell.PropertyType(name);
+   }
+
+   const char * SCI_METHOD DescribeProperty(const char *name) {
+      return osHaskell.DescribeProperty(name);
+   }
+
+   int SCI_METHOD PropertySet(const char *key, const char *val);
+
+   const char * SCI_METHOD DescribeWordListSets() {
+      return osHaskell.DescribeWordListSets();
+   }
+
+   int SCI_METHOD WordListSet(int n, const char *wl);
+
+   void SCI_METHOD Lex(unsigned int startPos, int length, int initStyle, IDocument *pAccess);
+
+   void SCI_METHOD Fold(unsigned int startPos, int length, int initStyle, IDocument *pAccess);
+
+   void * SCI_METHOD PrivateCall(int, void *) {
+      return 0;
+   }
+
+   static ILexer *LexerFactoryHaskell() {
+      return new LexerHaskell();
+   }
+};
+
+int SCI_METHOD LexerHaskell::PropertySet(const char *key, const char *val) {
+   if (osHaskell.PropertySet(&options, key, val)) {
+      return 0;
+   }
+   return -1;
+}
+
+int SCI_METHOD LexerHaskell::WordListSet(int n, const char *wl) {
+   WordList *wordListN = 0;
+   switch (n) {
+   case 0:
+      wordListN = &keywords;
+      break;
+   case 1:
+      wordListN = &ffi;
+      break;
+   }
+   int firstModification = -1;
+   if (wordListN) {
+      WordList wlNew;
+      wlNew.Set(wl);
+      if (*wordListN != wlNew) {
+         wordListN->Set(wl);
+         firstModification = 0;
+      }
+   }
+   return firstModification;
+}
+
+void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initStyle
+                                 ,IDocument *pAccess) {
+   LexAccessor styler(pAccess);
 
    StyleContext sc(startPos, length, initStyle, styler);
 
    int lineCurrent = styler.GetLine(startPos);
 
    int state = lineCurrent ? styler.GetLineState(lineCurrent-1) : 0;
-   int mode  = state & 0xF;
-   int nestLevel = state >> 4;
+   int mode  = state & 0x7;
+   int nestLevel = state >> 3;
 
    int base = 10;
    bool inDashes = false;
@@ -126,10 +252,10 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
       // For line numbering (and by extension, nested comments) to work,
       // states should either only forward one character at a time, or check
       // that characters they're skipping are not newlines. If states match on
-      // line end, they should skip it, to prevent double counting.
+      // line end, they should skip it to prevent double counting.
       if (sc.atLineEnd) {
          // Remember the line state for future incremental lexing
-         styler.SetLineState(lineCurrent, (nestLevel << 4) | mode);
+         styler.SetLineState(lineCurrent, (nestLevel << 3) | mode);
          lineCurrent++;
       }
 
@@ -139,7 +265,7 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
          || sc.state == SCE_HA_PREPROCESSOR)) {
          if (sc.chNext == '\n' || sc.chNext == '\r') {
             // Remember the line state for future incremental lexing
-            styler.SetLineState(lineCurrent, (nestLevel << 4) | mode);
+            styler.SetLineState(lineCurrent, (nestLevel << 3) | mode);
             lineCurrent++;
 
             sc.Forward();
@@ -171,7 +297,7 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
       else if (sc.state == SCE_HA_STRING) {
          if (sc.ch == '\"') {
             sc.Forward();
-            skipMagicHash(sc, magicHash, false);
+            skipMagicHash(sc, options.magicHash, false);
             sc.SetState(SCE_HA_DEFAULT);
          } else if (sc.ch == '\\') {
             sc.Forward(2);
@@ -186,7 +312,7 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
       else if (sc.state == SCE_HA_CHARACTER) {
          if (sc.ch == '\'') {
             sc.Forward();
-            skipMagicHash(sc, magicHash, false);
+            skipMagicHash(sc, options.magicHash, false);
             sc.SetState(SCE_HA_DEFAULT);
          } else if (sc.ch == '\\') {
             sc.Forward(2);
@@ -209,7 +335,7 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
             if (sc.ch == '+' || sc.ch == '-')
                 sc.Forward();
          } else {
-            skipMagicHash(sc, magicHash, true);
+            skipMagicHash(sc, options.magicHash, true);
             sc.SetState(SCE_HA_DEFAULT);
          }
       }
@@ -222,7 +348,7 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
          while (sc.More()) {
             if (IsAWordChar(sc.ch)) {
                sc.Forward();
-            } else if (sc.ch == '#' && magicHash) {
+            } else if (sc.ch == '#' && options.magicHash) {
                sc.Forward();
                break;
             } else if (style == SCE_HA_CAPITAL && sc.ch=='.') {
@@ -264,7 +390,7 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
                     strcmp(s,"qualified") == 0) {
              style    = SCE_HA_KEYWORD;
              new_mode = HA_MODE_IMPORT1;
-         } else if (highlightSafe &&
+         } else if (options.highlightSafe &&
                     mode == HA_MODE_IMPORT1 &&
                     strcmp(s,"safe") == 0) {
              style    = SCE_HA_KEYWORD;
@@ -346,7 +472,7 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
       }
             // Preprocessor
       else if (sc.state == SCE_HA_PREPROCESSOR) {
-         if (stylingWithinPreprocessor && !IsAWordStart(sc.ch)) {
+         if (options.stylingWithinPreprocessor && !IsAWordStart(sc.ch)) {
             sc.SetState(SCE_HA_DEFAULT);
          } else if (sc.atLineEnd) {
             sc.SetState(SCE_HA_DEFAULT);
@@ -403,7 +529,7 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
 
             int style = SCE_HA_CHARACTER;
 
-            if (allowQuotes) {
+            if (options.allowQuotes) {
                // Quoted type ''T
                if (sc.ch=='\'' && IsAWordStart(sc.chNext)) {
                   sc.Forward();
@@ -457,16 +583,24 @@ static void ColorizeHaskellDoc(unsigned int startPos, int length, int initStyle,
    sc.Complete();
 }
 
-static bool IsCommentLine(int line, Accessor &styler) {
+static inline bool IsCommentStyle(int style) {
+   return (style >= SCE_HA_COMMENTLINE && style <= SCE_HA_COMMENTBLOCK3);
+}
+
+static bool LineStartsWithACommentOrPreprocessor(int line, Accessor &styler) {
    int pos = styler.LineStart(line);
    int eol_pos = styler.LineStart(line + 1) - 1;
 
    for (int i = pos; i < eol_pos; i++) {
-      int ch = styler[i];
       int style = styler.StyleAt(i);
 
-      if ((style < SCE_HA_COMMENTLINE || style > SCE_HA_COMMENTBLOCK3)
-         && ch != ' '
+      if (IsCommentStyle(style) || style == SCE_HA_PREPROCESSOR) {
+         return true;
+      }
+
+      int ch = styler[i];
+
+      if (  ch != ' '
          && ch != '\t') {
          return false;
       }
@@ -474,8 +608,14 @@ static bool IsCommentLine(int line, Accessor &styler) {
    return true;
 }
 
-static void FoldHaskellDoc(unsigned int startPos, int length, int // initStyle
-                          ,WordList *[], Accessor &styler) {
+void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // initStyle
+                                  ,IDocument *pAccess) {
+   if (!options.fold)
+      return;
+
+   Accessor styler(pAccess, NULL);
+
+
    const int maxPos = startPos + length;
    const int maxLines =
       maxPos == styler.Length()
@@ -483,27 +623,39 @@ static void FoldHaskellDoc(unsigned int startPos, int length, int // initStyle
          : styler.GetLine(maxPos - 1);  // Requested last line
    const int docLines = styler.GetLine(styler.Length()); // Available last line
 
-   const bool foldCompact = styler.GetPropertyInt("fold.compact") != 0;
-   // const bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
-
    // Backtrack to previous non-blank line so we can determine indent level
    // for any white space lines
    // and so we can fix any preceding fold level (which is why we go back
    // at least one line in all cases)
    int spaceFlags = 0;
    int lineCurrent = styler.GetLine(startPos);
+   bool importCurrent = LineContainsImport(lineCurrent, styler);
    int indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, NULL);
+
    while (lineCurrent > 0) {
       lineCurrent--;
+      importCurrent = LineContainsImport(lineCurrent, styler);
       indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, NULL);
       if (!(indentCurrent & SC_FOLDLEVELWHITEFLAG) &&
-               !IsCommentLine(lineCurrent, styler))
+               !LineStartsWithACommentOrPreprocessor(lineCurrent, styler))
          break;
    }
+
    int indentCurrentLevel = indentCurrent & SC_FOLDLEVELNUMBERMASK;
 
-   // Set up initial loop state
-   startPos = styler.LineStart(lineCurrent);
+   if (lineCurrent <= firstImportLine) {
+      firstImportLine = -1; // readjust first import position
+   }
+
+   if (importCurrent) {
+      if (firstImportLine == -1) {
+         firstImportLine = lineCurrent;
+      }
+      if (firstImportLine != lineCurrent) {
+         indentCurrentLevel++;
+         indentCurrent = indentCurrentLevel | (indentCurrent & ~SC_FOLDLEVELNUMBERMASK);
+      }
+   }
 
    // Process all characters to end of requested range
    //that hangs over the end of the range.  Cap processing in all cases
@@ -511,11 +663,13 @@ static void FoldHaskellDoc(unsigned int startPos, int length, int // initStyle
    while (lineCurrent <= docLines && lineCurrent <= maxLines) {
 
       // Gather info
-      int lev = indentCurrent;
       int lineNext = lineCurrent + 1;
+      bool importNext = LineContainsImport(lineNext, styler);
       int indentNext = indentCurrent;
+
       if (lineNext <= docLines) {
          // Information about next line is only available if not at end of document
+         importNext = LineContainsImport(lineNext, styler);
          indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
       }
       if (indentNext & SC_FOLDLEVELWHITEFLAG)
@@ -528,13 +682,25 @@ static void FoldHaskellDoc(unsigned int startPos, int length, int // initStyle
 
       while ((lineNext < docLines) &&
             ((indentNext & SC_FOLDLEVELWHITEFLAG) ||
-             (lineNext <= docLines && IsCommentLine(lineNext, styler)))) {
+             (lineNext <= docLines && LineStartsWithACommentOrPreprocessor(lineNext, styler)))) {
          lineNext++;
+         importNext = LineContainsImport(lineNext, styler);
          indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
       }
 
-      const int levelAfterComments = indentNext & SC_FOLDLEVELNUMBERMASK;
-      const int levelBeforeComments = Maximum(indentCurrentLevel,levelAfterComments);
+      int indentNextLevel = indentNext & SC_FOLDLEVELNUMBERMASK;
+
+      if (importNext) {
+         if (firstImportLine == -1) {
+            firstImportLine = lineNext;
+         }
+         if (firstImportLine != lineNext) {
+            indentNextLevel++;
+            indentNext = indentNextLevel | (indentNext & ~SC_FOLDLEVELNUMBERMASK);
+         }
+      }
+
+      const int levelBeforeComments = Maximum(indentCurrentLevel,indentNextLevel);
 
       // Now set all the indent levels on the lines we skipped
       // Do this from end to start.  Once we encounter one line
@@ -542,13 +708,13 @@ static void FoldHaskellDoc(unsigned int startPos, int length, int // initStyle
       // the comment-block, use the level of the block before
 
       int skipLine = lineNext;
-      int skipLevel = levelAfterComments;
+      int skipLevel = indentNextLevel;
 
       while (--skipLine > lineCurrent) {
          int skipLineIndent = styler.IndentAmount(skipLine, &spaceFlags, NULL);
 
-         if (foldCompact) {
-            if ((skipLineIndent & SC_FOLDLEVELNUMBERMASK) > levelAfterComments) {
+         if (options.foldCompact) {
+            if ((skipLineIndent & SC_FOLDLEVELNUMBERMASK) > indentNextLevel) {
                skipLevel = levelBeforeComments;
             }
 
@@ -556,9 +722,9 @@ static void FoldHaskellDoc(unsigned int startPos, int length, int // initStyle
 
             styler.SetLevel(skipLine, skipLevel | whiteFlag);
          } else {
-            if (  (skipLineIndent & SC_FOLDLEVELNUMBERMASK) > levelAfterComments
+            if (  (skipLineIndent & SC_FOLDLEVELNUMBERMASK) > indentNextLevel
                && !(skipLineIndent & SC_FOLDLEVELWHITEFLAG)
-               && !IsCommentLine(skipLine, styler)) {
+               && !LineStartsWithACommentOrPreprocessor(skipLine, styler)) {
                skipLevel = levelBeforeComments;
             }
 
@@ -566,15 +732,18 @@ static void FoldHaskellDoc(unsigned int startPos, int length, int // initStyle
          }
       }
 
+      int lev = indentCurrent;
+
       if (!(indentCurrent & SC_FOLDLEVELWHITEFLAG)) {
          if ((indentCurrent & SC_FOLDLEVELNUMBERMASK) < (indentNext & SC_FOLDLEVELNUMBERMASK))
             lev |= SC_FOLDLEVELHEADERFLAG;
       }
 
       // Set fold level for this line and move to next line
-      styler.SetLevel(lineCurrent, foldCompact ? lev : lev & ~SC_FOLDLEVELWHITEFLAG);
+      styler.SetLevel(lineCurrent, options.foldCompact ? lev : lev & ~SC_FOLDLEVELWHITEFLAG);
       indentCurrent = indentNext;
       lineCurrent = lineNext;
+      importCurrent = importNext;
    }
 
    // NOTE: Cannot set level of last line here because indentCurrent doesn't have
@@ -582,63 +751,4 @@ static void FoldHaskellDoc(unsigned int startPos, int length, int // initStyle
    //styler.SetLevel(lineCurrent, indentCurrent);
 }
 
-static const char * const haskellWordListDesc[] = {
-   "Keywords",
-   "FFI",
-   0
-};
-
-// External stuff - used for dynamic-loading, not implemented in wxStyledTextCtrl yet.
-// Inspired by the caml external lexer - Credits to Robert Roessler - http://www.rftp.com
-#ifdef BUILD_EXTERNAL_LEXER
-static const char* LexerName = "haskell";
-
-void EXT_LEXER_DECL Lex(unsigned int lexer, unsigned int startPos, int length, int initStyle,
-                        char *words[], WindowID window, char *props)
-{
-   PropSetSimple ps;
-   ps.SetMultiple(props);
-   WindowAccessor wa(window, ps);
-
-   int nWL = 0;
-   for (; words[nWL]; nWL++) ;
-   WordList** wl = new WordList* [nWL + 1];
-   int i = 0;
-   for (; i<nWL; i++)
-   {
-      wl[i] = new WordList();
-      wl[i]->Set(words[i]);
-   }
-   wl[i] = 0;
-
-   ColorizeHaskellDoc(startPos, length, initStyle, wl, wa);
-   wa.Flush();
-   for (i=nWL-1;i>=0;i--)
-      delete wl[i];
-   delete [] wl;
-}
-
-void EXT_LEXER_DECL Fold (unsigned int lexer, unsigned int startPos, int length, int initStyle,
-                        char *words[], WindowID window, char *props)
-{
-
-}
-
-int EXT_LEXER_DECL GetLexerCount()
-{
-   return 1;
-}
-
-void EXT_LEXER_DECL GetLexerName(unsigned int Index, char *name, int buflength)
-{
-   if (buflength > 0) {
-      buflength--;
-      int n = strlen(LexerName);
-      if (n > buflength)
-         n = buflength;
-      memcpy(name, LexerName, n), name[n] = '\0';
-   }
-}
-#endif
-
-LexerModule lmHaskell(SCLEX_HASKELL, ColorizeHaskellDoc, "haskell", FoldHaskellDoc, haskellWordListDesc);
+LexerModule lmHaskell(SCLEX_HASKELL, LexerHaskell::LexerFactoryHaskell, "haskell", haskellWordListDesc);
