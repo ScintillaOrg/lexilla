@@ -73,15 +73,6 @@ static inline bool IsAnOperatorChar(const int ch) {
       || ch == '^' || ch == '|' || ch == '~' || ch == '\\');
 }
 
-static inline void skipMagicHash(StyleContext &sc, const bool magicHash, const bool twoHashes) {
-   if (magicHash && sc.ch == '#') {
-      sc.Forward();
-      if (twoHashes && sc.ch == '#') {
-         sc.Forward();
-      }
-   }
-}
-
 struct OptionsHaskell {
    bool magicHash;
    bool allowQuotes;
@@ -149,6 +140,15 @@ class LexerHaskell : public ILexer {
    WordList ffi;
    OptionsHaskell options;
    OptionSetHaskell osHaskell;
+
+   inline void skipMagicHash(StyleContext &sc, const bool twoHashes) {
+      if (options.magicHash && sc.ch == '#') {
+         sc.Forward();
+         if (twoHashes && sc.ch == '#') {
+            sc.Forward();
+         }
+      }
+   }
 
    inline bool LineContainsImport(int line, Accessor &styler) {
       if (options.foldImports) {
@@ -297,7 +297,7 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
       else if (sc.state == SCE_HA_STRING) {
          if (sc.ch == '\"') {
             sc.Forward();
-            skipMagicHash(sc, options.magicHash, false);
+            skipMagicHash(sc, false);
             sc.SetState(SCE_HA_DEFAULT);
          } else if (sc.ch == '\\') {
             sc.Forward(2);
@@ -312,7 +312,7 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
       else if (sc.state == SCE_HA_CHARACTER) {
          if (sc.ch == '\'') {
             sc.Forward();
-            skipMagicHash(sc, options.magicHash, false);
+            skipMagicHash(sc, false);
             sc.SetState(SCE_HA_DEFAULT);
          } else if (sc.ch == '\\') {
             sc.Forward(2);
@@ -335,7 +335,7 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
             if (sc.ch == '+' || sc.ch == '-')
                 sc.Forward();
          } else {
-            skipMagicHash(sc, options.magicHash, true);
+            skipMagicHash(sc, true);
             sc.SetState(SCE_HA_DEFAULT);
          }
       }
@@ -669,7 +669,6 @@ void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // ini
 
       if (lineNext <= docLines) {
          // Information about next line is only available if not at end of document
-         importNext = LineContainsImport(lineNext, styler);
          indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
       }
       if (indentNext & SC_FOLDLEVELWHITEFLAG)
