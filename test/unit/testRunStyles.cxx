@@ -320,11 +320,7 @@ TEST_F(RunStylesTest, OutsideBounds) {
 	prs->InsertSpace(0, 1);
 	int startFill = 1;
 	int lengthFill = 1;
-	try {
-		prs->FillRange(startFill, 99, lengthFill);
-	} catch (std::invalid_argument &) {
-		// Exception is supposed to occur so ignore.
-	}
+	prs->FillRange(startFill, 99, lengthFill);
 	EXPECT_EQ(1, prs->Length());
 	EXPECT_EQ(1, prs->Runs());
 	EXPECT_EQ(0, prs->StartRun(0));
