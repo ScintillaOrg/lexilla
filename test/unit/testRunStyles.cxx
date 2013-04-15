@@ -2,6 +2,8 @@
 
 #include <string.h>
 
+#include <stdexcept>
+
 #include "Platform.h"
 
 #include "SplitVector.h"
@@ -311,4 +313,20 @@ TEST_F(RunStylesTest, DeleteEndRun) {
 	EXPECT_EQ(1, prs->EndRun(0));
 	EXPECT_EQ(0, prs->StartRun(1));
 	EXPECT_EQ(1, prs->EndRun(1));
+	prs->Check();
+}
+
+TEST_F(RunStylesTest, OutsideBounds) {
+	prs->InsertSpace(0, 1);
+	int startFill = 1;
+	int lengthFill = 1;
+	try {
+		prs->FillRange(startFill, 99, lengthFill);
+	} catch (std::invalid_argument &) {
+		// Exception is supposed to occur so ignore.
+	}
+	EXPECT_EQ(1, prs->Length());
+	EXPECT_EQ(1, prs->Runs());
+	EXPECT_EQ(0, prs->StartRun(0));
+	EXPECT_EQ(1, prs->EndRun(0));
 }
