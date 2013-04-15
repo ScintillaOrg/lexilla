@@ -116,11 +116,11 @@ int RunStyles::EndRun(int position) {
 
 bool RunStyles::FillRange(int &position, int value, int &fillLength) {
 	if (fillLength <= 0) {
-		throw std::invalid_argument("RunStyles::FillRange <= 0 length.");
+		return false;
 	}
 	int end = position + fillLength;
 	if (end > Length()) {
-		throw std::invalid_argument("RunStyles::FillRange length goes past end.");
+		return false;
 	}
 	int runEnd = RunFromPosition(end);
 	if (styles->ValueAt(runEnd) == value) {
