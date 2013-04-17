@@ -437,10 +437,14 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   // Select the part which is indicated in the given range. It does not scroll the caret into view.
   if (range.length > 0)
   {
-    [mOwner setGeneralProperty: SCI_SETSELECTIONSTART
-                     value: currentPosition + range.location];
-    [mOwner setGeneralProperty: SCI_SETSELECTIONEND 
-                     value: currentPosition + range.location + range.length];
+    // range is in characters so convert to bytes for selection.
+    int rangeStart = currentPosition;
+    for (size_t characterInComposition=0; characterInComposition<range.location; characterInComposition++)
+      rangeStart = [mOwner getGeneralProperty: SCI_POSITIONAFTER parameter: rangeStart];
+    int rangeEnd = rangeStart;
+    for (size_t characterInRange=0; characterInRange<range.length; characterInRange++)
+      rangeEnd = [mOwner getGeneralProperty: SCI_POSITIONAFTER parameter: rangeEnd];
+    [mOwner setGeneralProperty: SCI_SETSELECTION parameter: rangeEnd value: rangeStart];
   }
 }
 
