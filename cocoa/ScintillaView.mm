@@ -324,9 +324,34 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 //--------------------------------------------------------------------------------------------------
 
-- (NSRect) firstRectForCharacterRange: (NSRange) range
+- (NSRect) firstRectForCharacterRange: (NSRange) aRange
 {
-  return NSZeroRect;
+  NSRect rect;
+  rect.origin.x = [ScintillaView directCall: mOwner
+				    message: SCI_POINTXFROMPOSITION
+				     wParam: 0
+				     lParam: aRange.location];
+  rect.origin.y = [ScintillaView directCall: mOwner
+				    message: SCI_POINTYFROMPOSITION
+				     wParam: 0
+				     lParam: aRange.location];
+  int rangeEnd = aRange.location + aRange.length;
+  rect.size.width = [ScintillaView directCall: mOwner
+				      message: SCI_POINTXFROMPOSITION
+				       wParam: 0
+				       lParam: rangeEnd] - rect.origin.x;
+  rect.size.height = [ScintillaView directCall: mOwner
+				       message: SCI_POINTYFROMPOSITION
+					wParam: 0
+					lParam: rangeEnd] - rect.origin.y;
+  rect.size.height += [ScintillaView directCall: mOwner
+					message: SCI_TEXTHEIGHT
+					 wParam: 0
+					 lParam: 0];
+  rect = [[[self superview] superview] convertRect:rect toView:nil];
+  rect = [self.window convertRectToScreen:rect];
+  
+  return rect;
 }
 
 //--------------------------------------------------------------------------------------------------
