@@ -54,6 +54,8 @@ using namespace Scintilla;
 #define HA_MODE_FFI         5
 #define HA_MODE_TYPE        6
 
+#define INDENT_OFFSET       1
+
 static inline bool IsAWordStart(const int ch) {
    return (IsLowerCase(ch) || IsUpperCase(ch) || ch == '_');
 }
@@ -642,6 +644,11 @@ void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // ini
    }
 
    int indentCurrentLevel = indentCurrent & SC_FOLDLEVELNUMBERMASK;
+   int indentCurrentMask = indentCurrent & ~SC_FOLDLEVELNUMBERMASK;
+
+   if (indentCurrentLevel != (SC_FOLDLEVELBASE & SC_FOLDLEVELNUMBERMASK)) {
+      indentCurrent = (indentCurrentLevel + INDENT_OFFSET) | indentCurrentMask;
+   }
 
    if (lineCurrent <= firstImportLine) {
       firstImportLine = -1; // readjust first import position
@@ -653,7 +660,7 @@ void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // ini
       }
       if (firstImportLine != lineCurrent) {
          indentCurrentLevel++;
-         indentCurrent = indentCurrentLevel | (indentCurrent & ~SC_FOLDLEVELNUMBERMASK);
+         indentCurrent = indentCurrentLevel | indentCurrentMask;
       }
    }
 
@@ -688,6 +695,11 @@ void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // ini
       }
 
       int indentNextLevel = indentNext & SC_FOLDLEVELNUMBERMASK;
+      int indentNextMask = indentNext & ~SC_FOLDLEVELNUMBERMASK;
+   
+      if (indentNextLevel != (SC_FOLDLEVELBASE & SC_FOLDLEVELNUMBERMASK)) {
+         indentNext = (indentNextLevel + INDENT_OFFSET) | indentNextMask;
+      }
 
       if (importHere) {
          if (firstImportLine == -1) {
@@ -695,7 +707,7 @@ void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // ini
          }
          if (firstImportLine != lineNext) {
             indentNextLevel++;
-            indentNext = indentNextLevel | (indentNext & ~SC_FOLDLEVELNUMBERMASK);
+            indentNext = indentNextLevel | indentNextMask;
          }
       }
 
