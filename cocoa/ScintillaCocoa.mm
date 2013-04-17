@@ -1940,7 +1940,7 @@ void ScintillaCocoa::SetDocPointer(Document *document)
   NSTextInputContext *inctxt = [NSTextInputContext currentInputContext];
   [inctxt discardMarkedText];
   InnerView *inner = ContentView();
-  [inner removeMarkedText];
+  [inner unmarkText];
   Editor::SetDocPointer(document);
 }
 
