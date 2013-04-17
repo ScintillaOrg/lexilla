@@ -629,12 +629,12 @@ void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // ini
    // at least one line in all cases)
    int spaceFlags = 0;
    int lineCurrent = styler.GetLine(startPos);
-   bool importCurrent = LineContainsImport(lineCurrent, styler);
+   bool importHere = LineContainsImport(lineCurrent, styler);
    int indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, NULL);
 
    while (lineCurrent > 0) {
       lineCurrent--;
-      importCurrent = LineContainsImport(lineCurrent, styler);
+      importHere = LineContainsImport(lineCurrent, styler);
       indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, NULL);
       if (!(indentCurrent & SC_FOLDLEVELWHITEFLAG) &&
                !LineStartsWithACommentOrPreprocessor(lineCurrent, styler))
@@ -647,7 +647,7 @@ void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // ini
       firstImportLine = -1; // readjust first import position
    }
 
-   if (importCurrent) {
+   if (importHere) {
       if (firstImportLine == -1) {
          firstImportLine = lineCurrent;
       }
@@ -664,7 +664,7 @@ void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // ini
 
       // Gather info
       int lineNext = lineCurrent + 1;
-      bool importNext = LineContainsImport(lineNext, styler);
+      importHere = LineContainsImport(lineNext, styler);
       int indentNext = indentCurrent;
 
       if (lineNext <= docLines) {
@@ -683,13 +683,13 @@ void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // ini
             ((indentNext & SC_FOLDLEVELWHITEFLAG) ||
              (lineNext <= docLines && LineStartsWithACommentOrPreprocessor(lineNext, styler)))) {
          lineNext++;
-         importNext = LineContainsImport(lineNext, styler);
+         importHere = LineContainsImport(lineNext, styler);
          indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
       }
 
       int indentNextLevel = indentNext & SC_FOLDLEVELNUMBERMASK;
 
-      if (importNext) {
+      if (importHere) {
          if (firstImportLine == -1) {
             firstImportLine = lineNext;
          }
