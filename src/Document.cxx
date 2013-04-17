@@ -892,7 +892,7 @@ void * SCI_METHOD Document::ConvertToDocument() {
 int Document::Undo() {
 	int newPos = -1;
 	CheckReadOnly();
-	if (enteredModification == 0) {
+	if ((enteredModification == 0) && (cb.IsCollectingUndo())) {
 		enteredModification++;
 		if (!cb.IsReadOnly()) {
 			bool startSavePoint = cb.IsSavePoint();
@@ -977,7 +977,7 @@ int Document::Undo() {
 int Document::Redo() {
 	int newPos = -1;
 	CheckReadOnly();
-	if (enteredModification == 0) {
+	if ((enteredModification == 0) && (cb.IsCollectingUndo())) {
 		enteredModification++;
 		if (!cb.IsReadOnly()) {
 			bool startSavePoint = cb.IsSavePoint();
