@@ -199,6 +199,7 @@ public:
   virtual void QueueIdleWork(WorkNeeded::workItems items, int upTo);
   int InsertText(NSString* input);
   void SelectOnlyMainSelection();
+  virtual void SetDocPointer(Document *document);
 
   bool KeyboardInput(NSEvent* event);
   void MouseDown(NSEvent* event);

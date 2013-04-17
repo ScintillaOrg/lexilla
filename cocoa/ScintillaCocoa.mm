@@ -1930,6 +1930,21 @@ void ScintillaCocoa::SelectOnlyMainSelection()
 }
 
 //--------------------------------------------------------------------------------------------------
+/**
+ * When switching documents discard any incomplete character composition state as otherwise tries to
+ * act on the new document.
+ */
+void ScintillaCocoa::SetDocPointer(Document *document)
+{
+  // Drop input composition.
+  NSTextInputContext *inctxt = [NSTextInputContext currentInputContext];
+  [inctxt discardMarkedText];
+  InnerView *inner = ContentView();
+  [inner removeMarkedText];
+  Editor::SetDocPointer(document);
+}
+
+//--------------------------------------------------------------------------------------------------
 
 /**
  * Called by the owning view when the mouse pointer enters the control.

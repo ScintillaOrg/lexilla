@@ -565,7 +565,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void SetBraceHighlight(Position pos0, Position pos1, int matchStyle);
 
 	void SetAnnotationHeights(int start, int end);
-	void SetDocPointer(Document *document);
+	virtual void SetDocPointer(Document *document);
 
 	void SetAnnotationVisible(int visible);
 
