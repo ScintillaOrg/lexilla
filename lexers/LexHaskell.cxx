@@ -742,7 +742,6 @@ void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // ini
       styler.SetLevel(lineCurrent, options.foldCompact ? lev : lev & ~SC_FOLDLEVELWHITEFLAG);
       indentCurrent = indentNext;
       lineCurrent = lineNext;
-      importCurrent = importNext;
    }
 
    // NOTE: Cannot set level of last line here because indentCurrent doesn't have
