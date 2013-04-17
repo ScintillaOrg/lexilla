@@ -403,14 +403,16 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   }
   else
   {
+    // Switching into composition so remember if collecting undo.
+    undoCollectionWasActive = [mOwner getGeneralProperty: SCI_GETUNDOCOLLECTION] != 0;
+
+    // Keep Scintilla from collecting undo actions for the composition task.
+    [mOwner setGeneralProperty: SCI_SETUNDOCOLLECTION value: 0];
+
     // Ensure only a single selection
     mOwner.backend->SelectOnlyMainSelection();
   }
 
-  // Keep Scintilla from collecting undo actions for the composition task.
-  undoCollectionWasActive = [mOwner getGeneralProperty: SCI_GETUNDOCOLLECTION] != 0;
-  [mOwner setGeneralProperty: SCI_SETUNDOCOLLECTION value: 0];
-  
   // Note: Scintilla internally works almost always with bytes instead chars, so we need to take
   //       this into account when determining selection ranges and such.
   std::string raw_text = [newText UTF8String];
