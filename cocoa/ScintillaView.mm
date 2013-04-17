@@ -308,14 +308,6 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 //--------------------------------------------------------------------------------------------------
 
-- (NSInteger) conversationIdentifier
-{
-  return (NSInteger) self;
-
-}
-
-//--------------------------------------------------------------------------------------------------
-
 - (void) doCommandBySelector: (SEL) selector
 {
   if ([self respondsToSelector: @selector(selector)])
