@@ -403,7 +403,7 @@ ScintillaCocoa::ScintillaCocoa(InnerView* view, MarginView* viewMargin)
 
 ScintillaCocoa::~ScintillaCocoa()
 {
-  SetTicking(false);
+  Finalise();
   [timerTarget release];
 }
 
