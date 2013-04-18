@@ -330,7 +330,8 @@ def RegenerateAll():
             lexerProperties[k] = 1
         documents = FindPropertyDocumentation(lexFile)
         for k in documents.keys():
-            propertyDocuments[k] = documents[k]
+            if k not in propertyDocuments:
+                propertyDocuments[k] = documents[k]
     sortListInsensitive(lexerModules)
     lexerProperties = list(lexerProperties.keys())
     sortListInsensitive(lexerProperties)
