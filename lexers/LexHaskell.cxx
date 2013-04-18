@@ -172,11 +172,10 @@ class LexerHaskell : public ILexer {
          int style = styler.StyleAt(currentPos);
 
          if (options.foldIndentedImports) {
-            int ch = styler.SafeGetCharAt(currentPos);
             int eol_pos = styler.LineStart(line + 1) - 1;
 
-            while(currentPos < eol_pos) {
-               ch = styler[currentPos];
+            while (currentPos < eol_pos) {
+               int ch = styler[currentPos];
                style = styler.StyleAt(currentPos);
 
                if (ch == ' ' || ch == '\t'
