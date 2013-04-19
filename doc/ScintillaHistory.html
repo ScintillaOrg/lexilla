@@ -442,6 +442,10 @@
 	Released 11 December 2013.
 	</li>
 	<li>
+	Haskell folder improved.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1459 /">Bug #1459 </a>.
+	</li>
+	<li>
 	PowerShell lexer recognises here strings and doccomment keywords.
 	#region folding added.
 	<a href="http://sourceforge.net/p/scintilla/feature-requests/985/">Feature #985.</a>
@@ -453,6 +457,19 @@
 	<li>
 	Fix multi-typing when two carets are located in virtual space on one line so that spaces
 	are preserved.
+	</li>
+	<li>
+	Fixes to input composition on Cocoa and implementation of accented character input through
+	press and hold. Set selection correctly so that changes to pieces of composition text are easier to perform.
+	Restore undo collection after a sequence of composition actions.
+	Composition popups appear near input.
+	</li>
+	<li>
+	Fix crash on Cocoa when view deallocated.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1466/">Bug #1466</a>, 
+	</li>
+	<li>
+	Fix display of DBCS documents on Windows Direct2D/DirectWrite with default character set.
 	</li>
     </ul>
     <h3>
