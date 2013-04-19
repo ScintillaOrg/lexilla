@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+#include <algorithm>
+
 #include "Platform.h"
 
 #include "Scintilla.h"
