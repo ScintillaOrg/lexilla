@@ -186,7 +186,6 @@ private:
 	virtual bool PaintContains(PRectangle rc);
 	void FullPaint();
 	virtual PRectangle GetClientRectangle();
-	void SyncPaint(PRectangle rc);
 	virtual void ScrollText(int linesToMove);
 	virtual void SetVerticalScrollPos();
 	virtual void SetHorizontalScrollPos();
@@ -280,7 +279,6 @@ private:
 	static void SelectionGet(GtkWidget *widget, GtkSelectionData *selection_data,
 	                         guint info, guint time);
 	static gint SelectionClear(GtkWidget *widget, GdkEventSelection *selection_event);
-	static void DragBegin(GtkWidget *widget, GdkDragContext *context);
 	gboolean DragMotionThis(GdkDragContext *context, gint x, gint y, guint dragtime);
 	static gboolean DragMotion(GtkWidget *widget, GdkDragContext *context,
 	                           gint x, gint y, guint dragtime);
@@ -1107,30 +1105,6 @@ PRectangle ScintillaGTK::GetClientRectangle() {
 	rc.left = 0;
 	rc.top = 0;
 	return rc;
-}
-
-// Synchronously paint a rectangle of the window.
-void ScintillaGTK::SyncPaint(PRectangle rc) {
-	paintState = painting;
-	rcPaint = rc;
-	PRectangle rcClient = GetClientRectangle();
-	paintingAllText = rcPaint.Contains(rcClient);
-	if (PWindow(wText)) {
-		Surface *sw = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
-		if (sw) {
-			cairo_t *cr = gdk_cairo_create(PWindow(wText));
-			sw->Init(cr, PWidget(wText));
-			Paint(sw, rc);
-			sw->Release();
-			delete sw;
-			cairo_destroy(cr);
-		}
-	}
-	if (paintState == paintAbandoned) {
-		// Painting area was insufficient to cover new styling or brace highlight positions
-		FullPaint();
-	}
-	paintState = notPainting;
 }
 
 void ScintillaGTK::ScrollText(int linesToMove) {
@@ -2615,10 +2589,6 @@ gint ScintillaGTK::SelectionClear(GtkWidget *widget, GdkEventSelection *selectio
 		return GTK_WIDGET_CLASS(sciThis->parentClass)->selection_clear_event(widget, selection_event);
 	}
 	return TRUE;
-}
-
-void ScintillaGTK::DragBegin(GtkWidget *, GdkDragContext *) {
-	//Platform::DebugPrintf("DragBegin\n");
 }
 
 gboolean ScintillaGTK::DragMotionThis(GdkDragContext *context,

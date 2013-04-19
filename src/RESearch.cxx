@@ -43,10 +43,6 @@
  *
  *          int RESearch::Execute(characterIndexer &ci, int lp, int endp)
  *
- *  RESearch::Substitute:   substitute the matched portions in a new string.
- *
- *          int RESearch::Substitute(CharacterIndexer &ci, char *src, char *dst)
- *
  *  re_fail:                failure routine for RESearch::Execute. (no longer used)
  *
  *          void re_fail(char *msg, char op)
@@ -967,52 +963,4 @@ int RESearch::PMatch(CharacterIndexer &ci, int lp, int endp, char *ap) {
 	return lp;
 }
 
-/*
- * RESearch::Substitute:
- *  substitute the matched portions of the src in dst.
- *
- *  &    substitute the entire matched pattern.
- *
- *  \digit  substitute a subpattern, with the given tag number.
- *      Tags are numbered from 1 to 9. If the particular
- *      tagged subpattern does not exist, null is substituted.
- */
-int RESearch::Substitute(CharacterIndexer &ci, char *src, char *dst) {
-	unsigned char c;
-	int  pin;
-	int bp;
-	int ep;
-
-	if (!*src || !bopat[0])
-		return 0;
-
-	while ((c = *src++) != 0) {
-		switch (c) {
-
-		case '&':
-			pin = 0;
-			break;
-
-		case '\\':
-			c = *src++;
-			if (c >= '0' && c <= '9') {
-				pin = c - '0';
-				break;
-			}
-
-		default:
-			*dst++ = c;
-			continue;
-		}
-
-		if ((bp = bopat[pin]) != 0 && (ep = eopat[pin]) != 0) {
-			while (ci.CharAt(bp) && bp < ep)
-				*dst++ = ci.CharAt(bp++);
-			if (bp < ep)
-				return 0;
-		}
-	}
-	*dst = '\0';
-	return 1;
-}
 

@@ -1050,11 +1050,6 @@ bool Document::InsertCString(int position, const char *s) {
 	return InsertString(position, s, static_cast<int>(s ? strlen(s) : 0));
 }
 
-void Document::ChangeChar(int pos, char ch) {
-	DeleteChars(pos, 1);
-	InsertChar(pos, ch);
-}
-
 void Document::DelChar(int pos) {
 	DeleteChars(pos, LenChar(pos));
 }
@@ -1667,25 +1662,6 @@ int Document::LinesTotal() const {
 	return cb.Lines();
 }
 
-void Document::ChangeCase(Range r, bool makeUpperCase) {
-	for (int pos = r.start; pos < r.end;) {
-		int len = LenChar(pos);
-		if (len == 1) {
-			char ch = CharAt(pos);
-			if (makeUpperCase) {
-				if (IsLowerCase(ch)) {
-					ChangeChar(pos, static_cast<char>(MakeUpperCase(ch)));
-				}
-			} else {
-				if (IsUpperCase(ch)) {
-					ChangeChar(pos, static_cast<char>(MakeLowerCase(ch)));
-				}
-			}
-		}
-		pos += len;
-	}
-}
-
 void Document::SetDefaultCharClasses(bool includeWordClass) {
     charClass.SetDefaultCharClasses(includeWordClass);
 }
@@ -1821,20 +1797,12 @@ void Document::MarginSetStyles(int line, const unsigned char *styles) {
 	NotifyModified(DocModification(SC_MOD_CHANGEMARGIN, LineStart(line), 0, 0, 0, line));
 }
 
-int Document::MarginLength(int line) const {
-	return static_cast<LineAnnotation *>(perLineData[ldMargin])->Length(line);
-}
-
 void Document::MarginClearAll() {
 	int maxEditorLine = LinesTotal();
 	for (int l=0; l<maxEditorLine; l++)
 		MarginSetText(l, 0);
 	// Free remaining data
 	static_cast<LineAnnotation *>(perLineData[ldMargin])->ClearAll();
-}
-
-bool Document::AnnotationAny() const {
-	return static_cast<LineAnnotation *>(perLineData[ldAnnotation])->AnySet();
 }
 
 StyledText Document::AnnotationStyledText(int line) {
@@ -1864,10 +1832,6 @@ void Document::AnnotationSetStyles(int line, const unsigned char *styles) {
 	if (line >= 0 && line < LinesTotal()) {
 		static_cast<LineAnnotation *>(perLineData[ldAnnotation])->SetStyles(line, styles);
 	}
-}
-
-int Document::AnnotationLength(int line) const {
-	return static_cast<LineAnnotation *>(perLineData[ldAnnotation])->Length(line);
 }
 
 int Document::AnnotationLines(int line) const {

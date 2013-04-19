@@ -36,7 +36,6 @@ public:
 	bool GrabMatches(CharacterIndexer &ci);
 	const char *Compile(const char *pattern, int length, bool caseSensitive, bool posix);
 	int Execute(CharacterIndexer &ci, int lp, int endp);
-	int Substitute(CharacterIndexer &ci, char *src, char *dst);
 
 	enum { MAXTAG=10 };
 	enum { MAXNFA=2048 };

@@ -323,7 +323,6 @@ public:
 
 	bool InsertChar(int pos, char ch);
 	bool InsertCString(int position, const char *s);
-	void ChangeChar(int pos, char ch);
 	void DelChar(int pos);
 	void DelCharBack(int pos);
 
@@ -371,8 +370,6 @@ public:
 	const char *SubstituteByPosition(const char *text, int *length);
 	int LinesTotal() const;
 
-	void ChangeCase(Range r, bool makeUpperCase);
-
 	void SetDefaultCharClasses(bool includeWordClass);
 	void SetCharClasses(const unsigned char *chars, CharClassify::cc newCharClass);
 	int GetCharsOfClass(CharClassify::cc charClass, unsigned char *buffer);
@@ -399,15 +396,12 @@ public:
 	void MarginSetStyle(int line, int style);
 	void MarginSetStyles(int line, const unsigned char *styles);
 	void MarginSetText(int line, const char *text);
-	int MarginLength(int line) const;
 	void MarginClearAll();
 
-	bool AnnotationAny() const;
 	StyledText AnnotationStyledText(int line);
 	void AnnotationSetText(int line, const char *text);
 	void AnnotationSetStyle(int line, int style);
 	void AnnotationSetStyles(int line, const unsigned char *styles);
-	int AnnotationLength(int line) const;
 	int AnnotationLines(int line) const;
 	void AnnotationClearAll();
 

@@ -45,17 +45,6 @@ int MarkerHandleSet::Length() const {
 	return c;
 }
 
-int MarkerHandleSet::NumberFromHandle(int handle) const {
-	MarkerHandleNumber *mhn = root;
-	while (mhn) {
-		if (mhn->handle == handle) {
-			return mhn->number;
-		}
-		mhn = mhn->next;
-	}
-	return - 1;
-}
-
 int MarkerHandleSet::MarkValue() const {
 	unsigned int m = 0;
 	MarkerHandleNumber *mhn = root;
@@ -389,10 +378,6 @@ void LineAnnotation::RemoveLine(int line) {
 		delete []annotations[line];
 		annotations.Delete(line);
 	}
-}
-
-bool LineAnnotation::AnySet() const {
-	return annotations.Length() > 0;
 }
 
 bool LineAnnotation::MultipleStyles(int line) const {
