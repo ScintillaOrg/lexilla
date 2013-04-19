@@ -10,13 +10,12 @@
  *
  *    Several bug fixes by Krasimir Angelov - kr.angelov at gmail.com
  *
- *    Improvements by kudah <kudahkukarek@gmail.com>
+ *    Improved by kudah <kudahkukarek@gmail.com>
  *
  *    TODO:
- *    * Fold group declarations, comments, pragmas, #ifdefs, explicit layout, lists, tuples, quasi-quotes, splces, etc, etc, etc.
- *    * Nice Character-lexing (stuff inside '\''), LexPython has
- *      this.
- *
+ *    * A proper lexical folder to fold group declarations, comments, pragmas,
+ *      #ifdefs, explicit layout, lists, tuples, quasi-quotes, splces, etc, etc,
+ *      etc.
  *
  *****************************************************************/
 #include <stdlib.h>
@@ -56,8 +55,17 @@ using namespace Scintilla;
 
 #define INDENT_OFFSET       1
 
+static inline bool IsAlpha(const int ch) {
+   return (ch >= 'a' && ch <= 'z')
+       || (ch >= 'A' && ch <= 'Z');
+}
+
+static inline bool IsAnIdentifierStart(const int ch) {
+   return (IsLowerCase(ch) || ch == '_');
+}
+
 static inline bool IsAWordStart(const int ch) {
-   return (IsLowerCase(ch) || IsUpperCase(ch) || ch == '_');
+   return (IsAlpha(ch) || ch == '_');
 }
 
 static inline bool IsAWordChar(const int ch) {
@@ -83,9 +91,14 @@ static inline bool IsCommentStyle(int style) {
    return (style >= SCE_HA_COMMENTLINE && style <= SCE_HA_COMMENTBLOCK3);
 }
 
+inline int StyleFromNestLevel(const int nestLevel) {
+      return SCE_HA_COMMENTBLOCK + (nestLevel % 3);
+   }
+
 struct OptionsHaskell {
    bool magicHash;
    bool allowQuotes;
+   bool implicitParams;
    bool highlightSafe;
    bool stylingWithinPreprocessor;
    bool fold;
@@ -94,9 +107,10 @@ struct OptionsHaskell {
    bool foldImports;
    bool foldIndentedImports;
    OptionsHaskell() {
-      magicHash = true;
-      allowQuotes = true;
-      highlightSafe = true;
+      magicHash = true;       // Widespread use, enabled by default.
+      allowQuotes = true;     // Widespread use, enabled by default.
+      implicitParams = false; // Fell out of favor, seldom used, disabled.
+      highlightSafe = true;   // Moderately used, doesn't hurt to enable.
       stylingWithinPreprocessor = false;
       fold = false;
       foldComment = false;
@@ -115,17 +129,23 @@ static const char * const haskellWordListDesc[] = {
 struct OptionSetHaskell : public OptionSet<OptionsHaskell> {
    OptionSetHaskell() {
       DefineProperty("lexer.haskell.allow.hash", &OptionsHaskell::magicHash,
-         "Set to 1 to allow the '#' character at the end of identifiers and "
-         "literals with the haskell lexer (GHC -XMagicHash extension)");
+         "Set to 0 to disallow the '#' character at the end of identifiers and "
+         "literals with the haskell lexer "
+         "(GHC -XMagicHash extension)");
 
       DefineProperty("lexer.haskell.allow.quotes", &OptionsHaskell::allowQuotes,
-         "Set to 1 to enable highlighting of Template Haskell name quotations "
+         "Set to 0 to disable highlighting of Template Haskell name quotations "
          "and promoted constructors "
          "(GHC -XTemplateHaskell and -XDataKinds extensions)");
 
+      DefineProperty("lexer.haskell.allow.questionmark", &OptionsHaskell::implicitParams,
+         "Set to 1 to allow the '?' character at the start of identifiers "
+         "with the haskell lexer "
+         "(GHC & Hugs -XImplicitParams extension)");
+
       DefineProperty("lexer.haskell.import.safe", &OptionsHaskell::highlightSafe,
-         "Set to 1 to allow keyword \"safe\" in imports "
-         "(GHC SafeHaskell extensions)");
+         "Set to 0 to disallow \"safe\" keyword in imports "
+         "(GHC -XSafe, -XTrustworthy, -XUnsafe extensions)");
 
       DefineProperty("styling.within.preprocessor", &OptionsHaskell::stylingWithinPreprocessor,
          "For Haskell code, determines whether all preprocessor code is styled in the "
@@ -271,6 +291,10 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
                                  ,IDocument *pAccess) {
    LexAccessor styler(pAccess);
 
+   // Do not leak onto next line
+	if (initStyle == SCE_HA_STRINGEOL)
+		initStyle = SCE_HA_DEFAULT;
+
    StyleContext sc(startPos, length, initStyle, styler);
 
    int lineCurrent = styler.GetLine(startPos);
@@ -294,6 +318,11 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
          styler.SetLineState(lineCurrent, (nestLevel << 3) | mode);
          lineCurrent++;
       }
+
+      if (sc.atLineStart && (sc.state == SCE_HA_STRING || sc.state == SCE_HA_CHARACTER)) {
+			// Prevent SCE_HA_STRINGEOL from leaking back to previous line
+			sc.SetState(sc.state);
+		}
 
       // Handle line continuation generically.
       if (sc.ch == '\\' &&
@@ -338,8 +367,8 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
          } else if (sc.ch == '\\') {
             sc.Forward(2);
          } else if (sc.atLineEnd) {
-            sc.SetState(SCE_HA_DEFAULT);
-            sc.Forward(); // prevent double counting a line
+            sc.ChangeState(SCE_HA_STRINGEOL);
+            sc.ForwardSetState(SCE_HA_DEFAULT);
          } else {
             sc.Forward();
          }
@@ -353,8 +382,8 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
          } else if (sc.ch == '\\') {
             sc.Forward(2);
          } else if (sc.atLineEnd) {
-            sc.SetState(SCE_HA_DEFAULT);
-            sc.Forward(); // prevent double counting a line
+            sc.ChangeState(SCE_HA_STRINGEOL);
+            sc.ForwardSetState(SCE_HA_DEFAULT);
          } else {
             sc.Forward();
          }
@@ -415,7 +444,7 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
 
          if (keywords.InList(s)) {
             style = SCE_HA_KEYWORD;
-         } else if (isupper(s[0])) {
+         } else if (style == SCE_HA_CAPITAL) {
             if (mode == HA_MODE_IMPORT1 || mode == HA_MODE_IMPORT3) {
                style    = SCE_HA_MODULE;
                new_mode = HA_MODE_IMPORT2;
@@ -481,17 +510,18 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
          }
       }
             // Nested
-      else if (sc.state == SCE_HA_COMMENTBLOCK) {
+      else if (IsCommentBlockStyle(sc.state)) {
          if (sc.Match('{','-')) {
+            sc.SetState(StyleFromNestLevel(nestLevel));
             sc.Forward(2);
             nestLevel++;
-         }
-         else if (sc.Match('-','}')) {
+         } else if (sc.Match('-','}')) {
             sc.Forward(2);
             nestLevel--;
-            if (nestLevel == 0) {
-               sc.SetState(SCE_HA_DEFAULT);
-            }
+            sc.SetState(
+               nestLevel == 0
+                  ? SCE_HA_DEFAULT
+                  : StyleFromNestLevel(nestLevel - 1));
          } else {
             sc.Forward();
          }
@@ -508,7 +538,7 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
       }
             // Preprocessor
       else if (sc.state == SCE_HA_PREPROCESSOR) {
-         if (options.stylingWithinPreprocessor && !IsAWordStart(sc.ch)) {
+         if (options.stylingWithinPreprocessor && !IsAlpha(sc.ch)) {
             sc.SetState(SCE_HA_DEFAULT);
          } else if (sc.atLineEnd) {
             sc.SetState(SCE_HA_DEFAULT);
@@ -549,7 +579,7 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
          }
          // Comment block
          else if (sc.Match('{','-')) {
-            sc.SetState(SCE_HA_COMMENTBLOCK);
+            sc.SetState(StyleFromNestLevel(nestLevel));
             sc.Forward(2);
             nestLevel++;
          }
@@ -583,6 +613,17 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
                      style=SCE_HA_DEFAULT;
                   }
                }
+            }
+
+            sc.ChangeState(style);
+         }
+         // Operator starting with '?' or an implicit parameter
+         else if (sc.ch == '?') {
+            int style = SCE_HA_OPERATOR;
+
+            if (options.implicitParams && IsAnIdentifierStart(sc.chNext)) {
+                  sc.Forward();
+                  style = SCE_HA_IDENTIFIER;
             }
 
             sc.ChangeState(style);
