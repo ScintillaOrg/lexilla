@@ -52,35 +52,85 @@ using namespace Scintilla;
 #define HA_MODE_MODULE      4
 #define HA_MODE_FFI         5
 #define HA_MODE_TYPE        6
+#define HA_MODE_PRAGMA      7
 
 #define INDENT_OFFSET       1
 
-static inline bool IsAlpha(const int ch) {
-   return (ch >= 'a' && ch <= 'z')
-       || (ch >= 'A' && ch <= 'Z');
+static int u_iswalpha(int);
+static int u_iswalnum(int);
+static int u_iswupper(int);
+static int u_IsHaskellSymbol(int);
+
+// #define HASKELL_UNICODE
+
+#ifndef HASKELL_UNICODE
+
+// Stubs
+
+static int u_iswalpha(int) {
+   return 0;
 }
 
-static inline bool IsAnIdentifierStart(const int ch) {
-   return (IsLowerCase(ch) || ch == '_');
+static int u_iswalnum(int) {
+   return 0;
 }
 
-static inline bool IsAWordStart(const int ch) {
-   return (IsAlpha(ch) || ch == '_');
+static int u_iswupper(int) {
+   return 0;
 }
 
-static inline bool IsAWordChar(const int ch) {
-   return (  IsAlphaNumeric(ch)
+static int u_IsHaskellSymbol(int) {
+   return 0;
+}
+
+#endif
+
+static inline bool IsHaskellLetter(const int ch) {
+   if (IsASCII(ch)) {
+      return (ch >= 'a' && ch <= 'z')
+          || (ch >= 'A' && ch <= 'Z');
+   } else {
+      return u_iswalpha(ch) != 0;
+   }
+}
+
+static inline bool IsHaskellAlphaNumeric(const int ch) {
+   if (IsASCII(ch)) {
+      return IsAlphaNumeric(ch);
+   } else {
+      return u_iswalnum(ch) != 0;
+   }
+}
+
+static inline bool IsHaskellUpperCase(const int ch) {
+   if (IsASCII(ch)) {
+      return ch >= 'A' && ch <= 'Z';
+   } else {
+      return u_iswupper(ch) != 0;
+   }
+}
+
+static inline bool IsAnHaskellOperatorChar(const int ch) {
+   if (IsASCII(ch)) {
+      return
+         (  ch == '!' || ch == '#' || ch == '$' || ch == '%'
+         || ch == '&' || ch == '*' || ch == '+' || ch == '-'
+         || ch == '.' || ch == '/' || ch == ':' || ch == '<'
+         || ch == '=' || ch == '>' || ch == '?' || ch == '@'
+         || ch == '^' || ch == '|' || ch == '~' || ch == '\\');
+   } else {
+      return u_IsHaskellSymbol(ch) != 0;
+   }
+}
+
+static inline bool IsAHaskellWordStart(const int ch) {
+   return IsHaskellLetter(ch) || ch == '_';
+}
+
+static inline bool IsAHaskellWordChar(const int ch) {
+   return (  IsHaskellAlphaNumeric(ch)
           || ch == '_'
           || ch == '\'');
-}
-
-static inline bool IsAnOperatorChar(const int ch) {
-   return
-      (  ch == '!' || ch == '#' || ch == '$' || ch == '%'
-      || ch == '&' || ch == '*' || ch == '+' || ch == '-'
-      || ch == '.' || ch == '/' || ch == ':' || ch == '<'
-      || ch == '=' || ch == '>' || ch == '?' || ch == '@'
-      || ch == '^' || ch == '|' || ch == '~' || ch == '\\');
 }
 
 static inline bool IsCommentBlockStyle(int style) {
@@ -174,6 +224,7 @@ class LexerHaskell : public ILexer {
    int firstImportLine;
    WordList keywords;
    WordList ffi;
+   WordList reserved_operators;
    OptionsHaskell options;
    OptionSetHaskell osHaskell;
 
@@ -274,6 +325,9 @@ int SCI_METHOD LexerHaskell::WordListSet(int n, const char *wl) {
    case 1:
       wordListN = &ffi;
       break;
+   case 2:
+      wordListN = &reserved_operators;
+      break;
    }
    int firstModification = -1;
    if (wordListN) {
@@ -292,8 +346,8 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
    LexAccessor styler(pAccess);
 
    // Do not leak onto next line
-	if (initStyle == SCE_HA_STRINGEOL)
-		initStyle = SCE_HA_DEFAULT;
+   if (initStyle == SCE_HA_STRINGEOL)
+      initStyle = SCE_HA_DEFAULT;
 
    StyleContext sc(startPos, length, initStyle, styler);
 
@@ -305,6 +359,8 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
 
    int base = 10;
    bool inDashes = false;
+
+   assert(!(IsCommentBlockStyle(initStyle) && nestLevel <= 0));
 
    while (sc.More()) {
       // Check for state end
@@ -320,20 +376,21 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
       }
 
       if (sc.atLineStart && (sc.state == SCE_HA_STRING || sc.state == SCE_HA_CHARACTER)) {
-			// Prevent SCE_HA_STRINGEOL from leaking back to previous line
-			sc.SetState(sc.state);
-		}
+         // Prevent SCE_HA_STRINGEOL from leaking back to previous line
+         sc.SetState(sc.state);
+      }
 
       // Handle line continuation generically.
       if (sc.ch == '\\' &&
          (  sc.state == SCE_HA_STRING
          || sc.state == SCE_HA_PREPROCESSOR)) {
          if (sc.chNext == '\n' || sc.chNext == '\r') {
+            sc.Forward();
+
             // Remember the line state for future incremental lexing
             styler.SetLineState(lineCurrent, (nestLevel << 3) | mode);
             lineCurrent++;
 
-            sc.Forward();
             if (sc.ch == '\r' && sc.chNext == '\n') {
                sc.Forward();
             }
@@ -348,42 +405,48 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
 
          if (sc.ch == ':' &&
             // except "::"
-            !(sc.chNext == ':' && !IsAnOperatorChar(sc.GetRelative(2)))) {
+            !(sc.chNext == ':' && !IsAnHaskellOperatorChar(sc.GetRelative(2)))) {
             style = SCE_HA_CAPITAL;
          }
 
-         while (IsAnOperatorChar(sc.ch))
+         while (IsAnHaskellOperatorChar(sc.ch))
                sc.Forward();
+
+         char s[100];
+         sc.GetCurrent(s, sizeof(s));
+
+         if (reserved_operators.InList(s))
+            style = SCE_HA_RESERVED_OPERATOR;
 
          styler.ColourTo(sc.currentPos - 1, style);
          sc.ChangeState(SCE_HA_DEFAULT);
       }
          // String
       else if (sc.state == SCE_HA_STRING) {
-         if (sc.ch == '\"') {
+         if (sc.atLineEnd) {
+            sc.ChangeState(SCE_HA_STRINGEOL);
+            sc.ForwardSetState(SCE_HA_DEFAULT);
+         } else if (sc.ch == '\"') {
             sc.Forward();
             skipMagicHash(sc, false);
             sc.SetState(SCE_HA_DEFAULT);
          } else if (sc.ch == '\\') {
             sc.Forward(2);
-         } else if (sc.atLineEnd) {
-            sc.ChangeState(SCE_HA_STRINGEOL);
-            sc.ForwardSetState(SCE_HA_DEFAULT);
          } else {
             sc.Forward();
          }
       }
          // Char
       else if (sc.state == SCE_HA_CHARACTER) {
-         if (sc.ch == '\'') {
+         if (sc.atLineEnd) {
+            sc.ChangeState(SCE_HA_STRINGEOL);
+            sc.ForwardSetState(SCE_HA_DEFAULT);
+         } else if (sc.ch == '\'') {
             sc.Forward();
             skipMagicHash(sc, false);
             sc.SetState(SCE_HA_DEFAULT);
          } else if (sc.ch == '\\') {
             sc.Forward(2);
-         } else if (sc.atLineEnd) {
-            sc.ChangeState(SCE_HA_STRINGEOL);
-            sc.ForwardSetState(SCE_HA_DEFAULT);
          } else {
             sc.Forward();
          }
@@ -406,27 +469,29 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
       }
          // Keyword or Identifier
       else if (sc.state == SCE_HA_IDENTIFIER) {
-         int style = isupper(sc.ch) ? SCE_HA_CAPITAL : SCE_HA_IDENTIFIER;
+         int style = IsHaskellUpperCase(sc.ch) ? SCE_HA_CAPITAL : SCE_HA_IDENTIFIER;
+
+         assert(IsAHaskellWordStart(sc.ch));
 
          sc.Forward();
 
          while (sc.More()) {
-            if (IsAWordChar(sc.ch)) {
+            if (IsAHaskellWordChar(sc.ch)) {
                sc.Forward();
             } else if (sc.ch == '#' && options.magicHash) {
                sc.Forward();
                break;
-            } else if (style == SCE_HA_CAPITAL && sc.ch=='.') {
-               if (isupper(sc.chNext)) {
+            } else if (sc.ch == '.' && style == SCE_HA_CAPITAL) {
+               if (IsHaskellUpperCase(sc.chNext)) {
                   sc.Forward();
                   style = SCE_HA_CAPITAL;
-               } else if (IsAWordStart(sc.chNext)) {
+               } else if (IsAHaskellWordStart(sc.chNext)) {
                   sc.Forward();
                   style = SCE_HA_IDENTIFIER;
-               } else if (IsAnOperatorChar(sc.chNext)) {
+               } else if (IsAnHaskellOperatorChar(sc.chNext)) {
                   sc.Forward();
                   style = sc.ch == ':' ? SCE_HA_CAPITAL : SCE_HA_OPERATOR;
-                  while (IsAnOperatorChar(sc.ch))
+                  while (IsAnHaskellOperatorChar(sc.ch))
                      sc.Forward();
                   break;
                } else {
@@ -498,13 +563,13 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
          // Comments
             // Oneliner
       else if (sc.state == SCE_HA_COMMENTLINE) {
-         if (inDashes && sc.ch != '-') {
-            inDashes = false;
-            if (IsAnOperatorChar(sc.ch))
-               sc.ChangeState(SCE_HA_OPERATOR);
-         } else if (sc.atLineEnd) {
-            sc.SetState(SCE_HA_DEFAULT);
+         if (sc.atLineEnd) {
+            sc.SetState(mode == HA_MODE_PRAGMA ? SCE_HA_PRAGMA : SCE_HA_DEFAULT);
             sc.Forward(); // prevent double counting a line
+         } else if (inDashes && sc.ch != '-' && mode != HA_MODE_PRAGMA) {
+            inDashes = false;
+            if (IsAnHaskellOperatorChar(sc.ch))
+               sc.ChangeState(SCE_HA_OPERATOR);
          } else {
             sc.Forward();
          }
@@ -515,12 +580,14 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
             sc.SetState(StyleFromNestLevel(nestLevel));
             sc.Forward(2);
             nestLevel++;
-         } else if (sc.Match('-','}')) {
+         } else if (sc.Match('-','}')
+                 && !(mode == HA_MODE_PRAGMA && sc.chPrev == '#')) {
             sc.Forward(2);
             nestLevel--;
+            assert(nestLevel >= 0);
             sc.SetState(
-               nestLevel == 0
-                  ? SCE_HA_DEFAULT
+               nestLevel <= 0
+                  ? (mode == HA_MODE_PRAGMA ? SCE_HA_PRAGMA : SCE_HA_DEFAULT)
                   : StyleFromNestLevel(nestLevel - 1));
          } else {
             sc.Forward();
@@ -530,19 +597,28 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
       else if (sc.state == SCE_HA_PRAGMA) {
          // GHC pragma end should always be indented further than it's start.
          if (sc.Match("#-}") && !sc.atLineStart) {
+            mode = HA_MODE_DEFAULT;
             sc.Forward(3);
             sc.SetState(SCE_HA_DEFAULT);
+         } else if (sc.Match('-','-')) {
+            sc.SetState(SCE_HA_COMMENTLINE);
+            sc.Forward(2);
+            inDashes = false;
+         } else if (sc.Match('{','-')) {
+            sc.SetState(StyleFromNestLevel(nestLevel));
+            sc.Forward(2);
+            nestLevel++;
          } else {
             sc.Forward();
          }
       }
             // Preprocessor
       else if (sc.state == SCE_HA_PREPROCESSOR) {
-         if (options.stylingWithinPreprocessor && !IsAlpha(sc.ch)) {
-            sc.SetState(SCE_HA_DEFAULT);
-         } else if (sc.atLineEnd) {
+         if (sc.atLineEnd) {
             sc.SetState(SCE_HA_DEFAULT);
             sc.Forward(); // prevent double counting a line
+         } else if (options.stylingWithinPreprocessor && !IsHaskellLetter(sc.ch)) {
+            sc.SetState(SCE_HA_DEFAULT);
          } else {
             sc.Forward();
          }
@@ -557,7 +633,7 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
                sc.Forward(2);
                base = 16;
             } else if (sc.ch == '0' && (sc.chNext == 'O' || sc.chNext == 'o')) {
-               // Match anything starting with "0x" or "0X", too
+               // Match anything starting with "0o" or "0O", too
                sc.Forward(2);
                base = 8;
             } else {
@@ -568,6 +644,7 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
          }
          // Pragma
          else if (sc.Match("{-#")) {
+            mode = HA_MODE_PRAGMA;
             sc.SetState(SCE_HA_PRAGMA);
             sc.Forward(3);
          }
@@ -590,43 +667,39 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
          }
          // Character or quoted name
          else if (sc.ch == '\'') {
-            styler.ColourTo(sc.currentPos - 1, state);
+            sc.SetState(SCE_HA_CHARACTER);
             sc.Forward();
-
-            int style = SCE_HA_CHARACTER;
 
             if (options.allowQuotes) {
                // Quoted type ''T
-               if (sc.ch=='\'' && IsAWordStart(sc.chNext)) {
+               if (sc.ch=='\'' && IsAHaskellWordStart(sc.chNext)) {
                   sc.Forward();
-                  style=SCE_HA_IDENTIFIER;
+                  sc.ChangeState(SCE_HA_IDENTIFIER);
                } else if (sc.chNext != '\'') {
                   // Quoted value or promoted constructor 'N
-                  if (IsAWordStart(sc.ch)) {
-                     style=SCE_HA_IDENTIFIER;
+                  if (IsAHaskellWordStart(sc.ch)) {
+                     sc.ChangeState(SCE_HA_IDENTIFIER);
                   // Promoted constructor operator ':~>
                   } else if (sc.ch == ':') {
-                     style=SCE_HA_OPERATOR;
+                     sc.ChangeState(SCE_HA_OPERATOR);
                   // Promoted list or tuple '[T]
                   } else if (sc.ch == '[' || sc.ch== '(') {
                      styler.ColourTo(sc.currentPos - 1, SCE_HA_OPERATOR);
-                     style=SCE_HA_DEFAULT;
+                     sc.ChangeState(SCE_HA_DEFAULT);
                   }
                }
             }
-
-            sc.ChangeState(style);
          }
          // Operator starting with '?' or an implicit parameter
          else if (sc.ch == '?') {
-            int style = SCE_HA_OPERATOR;
+            sc.SetState(SCE_HA_OPERATOR);
 
-            if (options.implicitParams && IsAnIdentifierStart(sc.chNext)) {
-                  sc.Forward();
-                  style = SCE_HA_IDENTIFIER;
+            if (  options.implicitParams
+               && IsAHaskellWordStart(sc.chNext)
+               && !IsHaskellUpperCase(sc.chNext)) {
+               sc.Forward();
+               sc.ChangeState(SCE_HA_IDENTIFIER);
             }
-
-            sc.ChangeState(style);
          }
          // Preprocessor
          else if (sc.atLineStart && sc.ch == '#') {
@@ -635,7 +708,7 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
             sc.Forward();
          }
          // Operator
-         else if (IsAnOperatorChar(sc.ch)) {
+         else if (IsAnHaskellOperatorChar(sc.ch)) {
             mode = HA_MODE_DEFAULT;
             sc.SetState(SCE_HA_OPERATOR);
          }
@@ -645,11 +718,10 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
                || sc.ch == '[' || sc.ch == ']'
                || sc.ch == '{' || sc.ch == '}') {
             sc.SetState(SCE_HA_OPERATOR);
-            sc.Forward();
-            sc.SetState(SCE_HA_DEFAULT);
+            sc.ForwardSetState(SCE_HA_DEFAULT);
          }
          // Keyword or Identifier
-         else if (IsAWordStart(sc.ch)) {
+         else if (IsAHaskellWordStart(sc.ch)) {
             sc.SetState(SCE_HA_IDENTIFIER);
          // Something we don't care about
          } else {
@@ -657,6 +729,7 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
          }
       }
    }
+   styler.SetLineState(lineCurrent, (nestLevel << 3) | mode);
    sc.Complete();
 }
 
@@ -687,7 +760,6 @@ void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // ini
       return;
 
    Accessor styler(pAccess, NULL);
-
 
    const int maxPos = startPos + length;
    const int maxLines =
@@ -767,7 +839,7 @@ void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // ini
 
       int indentNextLevel = indentNext & SC_FOLDLEVELNUMBERMASK;
       int indentNextMask = indentNext & ~SC_FOLDLEVELNUMBERMASK;
-   
+
       if (indentNextLevel != (SC_FOLDLEVELBASE & SC_FOLDLEVELNUMBERMASK)) {
          indentNext = (indentNextLevel + INDENT_OFFSET) | indentNextMask;
       }
