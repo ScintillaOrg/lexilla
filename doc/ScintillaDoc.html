@@ -5183,6 +5183,10 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_GETFOLDEXPANDED">SCI_GETFOLDEXPANDED(int line)</a><br />
      <a class="message" href="#SCI_CONTRACTEDFOLDNEXT">SCI_CONTRACTEDFOLDNEXT(int lineStart)</a><br />
      <a class="message" href="#SCI_TOGGLEFOLD">SCI_TOGGLEFOLD(int line)</a><br />
+     <a class="message" href="#SCI_FOLDLINE">SCI_FOLDLINE(int line, int action)</a><br />
+     <a class="message" href="#SCI_FOLDCHILDREN">SCI_FOLDCHILDREN(int line, int action)</a><br />
+     <a class="message" href="#SCI_FOLDALL">SCI_FOLDALL(int action)</a><br />
+     <a class="message" href="#SCI_EXPANDCHILDREN">SCI_EXPANDCHILDREN(int line, int level)</a><br />
      <a class="message" href="#SCI_ENSUREVISIBLE">SCI_ENSUREVISIBLE(int line)</a><br />
      <a class="message" href="#SCI_ENSUREVISIBLEENFORCEPOLICY">SCI_ENSUREVISIBLEENFORCEPOLICY(int
     line)</a><br />
@@ -5339,6 +5343,56 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <code>SCI_SETFOLDEXPANDED</code> message to process many folds without updating the display
     until you had finished. See <code>SciTEBase::FoldAll()</code> and
     <code>SciTEBase::Expand()</code> for examples of the use of these messages.</p>
+
+    <p><b id="SCI_FOLDLINE">SCI_FOLDLINE(int line, int action)</b><br />
+    <b id="SCI_FOLDCHILDREN">SCI_FOLDCHILDREN(int line, int action)</b><br />
+    <b id="SCI_FOLDALL">SCI_FOLDALL(int action)</b><br />
+    These messages provide a higher-level approach to folding instead of setting expanded flags and showing
+    or hiding individual lines.</p>
+    <p>An individual fold can be contracted/expanded/toggled with <code>SCI_FOLDLINE</code>.
+    To affect all child folds as well call <code>SCI_FOLDCHILDREN</code>.</p>
+    <p>To affect the entire document call <code>SCI_FOLDALL</code>. With <code>SC_FOLDACTION_TOGGLE</code>
+    the first fold header in the document is examined to decide whether to expand or contract.
+    </p>
+    <table cellpadding="1" cellspacing="2" border="0" summary="Fold flags">
+      <tbody>
+        <tr>
+          <th align="left">Symbol</th>
+          <th align="left">Value</th>
+          <th align="left">Effect</th>
+        </tr>
+      </tbody>
+
+      <tbody valign="top">
+        <tr>
+          <td align="left">SC_FOLDACTION_CONTRACT</td>
+          <td align="left">0</td>
+          <td align="left">Contract.</td>
+        </tr>
+
+        <tr>
+          <td align="left">SC_FOLDACTION_EXPAND</td>
+          <td align="left">1</td>
+          <td align="left">Expand.</td>
+        </tr>
+
+        <tr>
+          <td align="left">SC_FOLDACTION_TOGGLE</td>
+          <td align="left">2</td>
+          <td align="left">Toggle between contracted and expanded.</td>
+        </tr>
+
+      </tbody>
+    </table>
+     <p></p>
+    
+    <p><b id="SCI_EXPANDCHILDREN">SCI_EXPANDCHILDREN(int line, int level)</b><br />
+    This is used to respond to a change to a line causing its fold level or whether it is a header to change,
+    perhaps when adding or removing a '{'.</p>
+    <p>By the time the container has received the notification that the line has changed,
+    the fold level has already been set, so the container has to use the previous level in this call
+    so that any range hidden underneath this line can be shown.
+    </p>
 
     <p><b id="SCI_CONTRACTEDFOLDNEXT">SCI_CONTRACTEDFOLDNEXT(int lineStart)</b><br />
      Search efficiently for lines that are contracted fold headers.

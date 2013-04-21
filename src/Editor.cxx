@@ -6962,34 +6962,42 @@ void Editor::SetAnnotationVisible(int visible) {
 /**
  * Recursively expand a fold, making lines visible except where they have an unexpanded parent.
  */
-void Editor::Expand(int &line, bool doExpand) {
+int Editor::ExpandLine(int line) {
 	int lineMaxSubord = pdoc->GetLastChild(line);
 	line++;
 	while (line <= lineMaxSubord) {
-		if (doExpand)
-			cs.SetVisible(line, line, true);
+		cs.SetVisible(line, line, true);
 		int level = pdoc->GetLevel(line);
 		if (level & SC_FOLDLEVELHEADERFLAG) {
-			if (doExpand && cs.GetExpanded(line)) {
-				Expand(line, true);
+			if (cs.GetExpanded(line)) {
+				line = ExpandLine(line);
 			} else {
-				Expand(line, false);
+				line = pdoc->GetLastChild(line);
 			}
-		} else {
-			line++;
 		}
+		line++;
+	}
+	return lineMaxSubord;
+}
+
+void Editor::SetFoldExpanded(int lineDoc, bool expanded) {
+	if (cs.SetExpanded(lineDoc, expanded)) {
+		RedrawSelMargin();
 	}
 }
 
-void Editor::ToggleContraction(int line) {
+void Editor::FoldLine(int line, int action) {
 	if (line >= 0) {
-		if ((pdoc->GetLevel(line) & SC_FOLDLEVELHEADERFLAG) == 0) {
-			line = pdoc->GetFoldParent(line);
-			if (line < 0)
-				return;
+		if (action == SC_FOLDACTION_TOGGLE) {
+ 			if ((pdoc->GetLevel(line) & SC_FOLDLEVELHEADERFLAG) == 0) {
+				line = pdoc->GetFoldParent(line);
+				if (line < 0)
+					return;
+			}
+			action = (cs.GetExpanded(line)) ? SC_FOLDACTION_CONTRACT : SC_FOLDACTION_EXPAND;
 		}
 
-		if (cs.GetExpanded(line)) {
+		if (action == SC_FOLDACTION_CONTRACT) {
 			int lineMaxSubord = pdoc->GetLastChild(line);
 			if (lineMaxSubord > line) {
 				cs.SetExpanded(line, 0);
@@ -7000,9 +7008,6 @@ void Editor::ToggleContraction(int line) {
 					// This does not re-expand the fold
 					EnsureCaretVisible();
 				}
-
-				SetScrollBars();
-				Redraw();
 			}
 
 		} else {
@@ -7011,11 +7016,35 @@ void Editor::ToggleContraction(int line) {
 				GoToLine(line);
 			}
 			cs.SetExpanded(line, 1);
-			Expand(line, true);
-			SetScrollBars();
-			Redraw();
+			ExpandLine(line);
 		}
+
+		SetScrollBars();
+		Redraw();
 	}
+}
+
+void Editor::FoldExpand(int line, int action, int level) {
+	bool expanding = action == SC_FOLDACTION_EXPAND;
+	if (action == SC_FOLDACTION_TOGGLE) {
+		expanding = !cs.GetExpanded(line);
+	}
+	SetFoldExpanded(line, expanding);
+	if (expanding && (cs.HiddenLines() == 0))
+		// Nothing to do
+		return;
+	int lineMaxSubord = pdoc->GetLastChild(line, level & SC_FOLDLEVELNUMBERMASK);
+	line++;
+	cs.SetVisible(line, lineMaxSubord, expanding);
+	while (line <= lineMaxSubord) {
+		int levelLine = pdoc->GetLevel(line);
+		if (levelLine & SC_FOLDLEVELHEADERFLAG) {
+			SetFoldExpanded(line, expanding);
+		}
+		line++;
+	}
+	SetScrollBars();
+	Redraw();
 }
 
 int Editor::ContractedFoldNext(int lineStart) {
@@ -7057,7 +7086,7 @@ void Editor::EnsureLineVisible(int lineDoc, bool enforcePolicy) {
 				EnsureLineVisible(lineParent, enforcePolicy);
 			if (!cs.GetExpanded(lineParent)) {
 				cs.SetExpanded(lineParent, 1);
-				Expand(lineParent, true);
+				ExpandLine(lineParent);
 			}
 		}
 		SetScrollBars();
@@ -7084,6 +7113,44 @@ void Editor::EnsureLineVisible(int lineDoc, bool enforcePolicy) {
 			}
 		}
 	}
+}
+
+void Editor::FoldAll(int action) {
+	pdoc->EnsureStyledTo(pdoc->Length());
+	int maxLine = pdoc->LinesTotal();
+	bool expanding = action == SC_FOLDACTION_EXPAND;
+	if (action == SC_FOLDACTION_TOGGLE) {
+		// Discover current state
+		for (int lineSeek = 0; lineSeek < maxLine; lineSeek++) {
+			if (pdoc->GetLevel(lineSeek) & SC_FOLDLEVELHEADERFLAG) {
+				expanding = !cs.GetExpanded(lineSeek);
+				break;
+			}
+		}
+	}
+	if (expanding) {
+		cs.SetVisible(0, maxLine, true);
+		for (int line = 0; line < maxLine; line++) {
+			int levelLine = pdoc->GetLevel(line);
+			if (levelLine & SC_FOLDLEVELHEADERFLAG) {
+				SetFoldExpanded(line, true);
+			}
+		}
+	} else {
+		for (int line = 0; line < maxLine; line++) {
+			int level = pdoc->GetLevel(line);
+			if ((level & SC_FOLDLEVELHEADERFLAG) &&
+					(SC_FOLDLEVELBASE == (level & SC_FOLDLEVELNUMBERMASK))) {
+				SetFoldExpanded(line, false);
+				int lineMaxSubord = pdoc->GetLastChild(line, -1);
+				if (lineMaxSubord > line) {
+					cs.SetVisible(line + 1, lineMaxSubord, false);
+				}
+			}
+		}
+	}
+	SetScrollBars();
+	Redraw();
 }
 
 int Editor::GetTag(char *tagValue, int tagNumber) {
@@ -8533,9 +8600,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return cs.HiddenLines() ? 0 : 1;
 
 	case SCI_SETFOLDEXPANDED:
-		if (cs.SetExpanded(wParam, lParam != 0)) {
-			RedrawSelMargin();
-		}
+		SetFoldExpanded(wParam, lParam != 0);
 		break;
 
 	case SCI_GETFOLDEXPANDED:
@@ -8547,7 +8612,23 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_TOGGLEFOLD:
-		ToggleContraction(wParam);
+		FoldLine(wParam, SC_FOLDACTION_TOGGLE);
+		break;
+
+	case SCI_FOLDLINE:
+		FoldLine(wParam, lParam);
+		break;
+
+	case SCI_FOLDCHILDREN:
+		FoldExpand(wParam, lParam, pdoc->GetLevel(wParam));
+		break;
+
+	case SCI_FOLDALL:
+		FoldAll(wParam);
+		break;
+
+	case SCI_EXPANDCHILDREN:
+		FoldExpand(wParam, SC_FOLDACTION_EXPAND, lParam);
 		break;
 
 	case SCI_CONTRACTEDFOLDNEXT:
