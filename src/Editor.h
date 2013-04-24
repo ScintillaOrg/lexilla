@@ -274,6 +274,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool recordingMacro;
 
 	int foldFlags;
+	int foldAutomatic;
 	ContractionState cs;
 
 	// Hotspot support

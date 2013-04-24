@@ -208,6 +208,7 @@ Editor::Editor() {
 
 	recordingMacro = false;
 	foldFlags = 0;
+	foldAutomatic = 0;
 
 	wrapState = eWrapNone;
 	wrapWidth = LineLayout::wrapWidthInfinite;
@@ -4563,11 +4564,32 @@ bool Editor::NotifyMarginClick(Point pt, bool shift, bool ctrl, bool alt) {
 		x += vs.ms[margin].width;
 	}
 	if ((marginClicked >= 0) && vs.ms[marginClicked].sensitive) {
+		int position = pdoc->LineStart(LineFromLocation(pt));
+		if ((vs.ms[marginClicked].mask & SC_MASK_FOLDERS) && (foldAutomatic & SC_AUTOMATICFOLD_CLICK)) {
+			int lineClick = pdoc->LineFromPosition(position);
+			if (shift && ctrl) {
+				FoldAll(SC_FOLDACTION_TOGGLE);
+			} else {
+				int levelClick = pdoc->GetLevel(lineClick);
+				if (levelClick & SC_FOLDLEVELHEADERFLAG) {
+					if (shift) {
+						// Ensure all children visible
+						FoldExpand(lineClick, SC_FOLDACTION_EXPAND, levelClick);
+					} else if (ctrl) {
+						FoldExpand(lineClick, SC_FOLDACTION_TOGGLE, levelClick);
+					} else {
+						// Toggle this line
+						FoldLine(lineClick, SC_FOLDACTION_TOGGLE);
+					}
+				}
+			}
+			return true;
+		}
 		SCNotification scn = {0};
 		scn.nmhdr.code = SCN_MARGINCLICK;
 		scn.modifiers = (shift ? SCI_SHIFT : 0) | (ctrl ? SCI_CTRL : 0) |
 		        (alt ? SCI_ALT : 0);
-		scn.position = pdoc->LineStart(LineFromLocation(pt));
+		scn.position = position;
 		scn.margin = marginClicked;
 		NotifyParent(scn);
 		return true;
@@ -4706,11 +4728,11 @@ void Editor::NotifyModified(Document *, DocModification mh, void *) {
 						insertingNewLine = true;
 				}
 				if (insertingNewLine && (mh.position != pdoc->LineStart(lineOfPos)))
-					NotifyNeedShown(mh.position, pdoc->LineStart(lineOfPos+1) - mh.position);
+					NeedShown(mh.position, pdoc->LineStart(lineOfPos+1) - mh.position);
 				else
-					NotifyNeedShown(mh.position, 0);
+					NeedShown(mh.position, 0);
 			} else if (mh.modificationType & SC_MOD_BEFOREDELETE) {
-				NotifyNeedShown(mh.position, mh.length);
+				NeedShown(mh.position, mh.length);
 			}
 		}
 		if (mh.linesAdded != 0) {
@@ -4766,6 +4788,9 @@ void Editor::NotifyModified(Document *, DocModification mh, void *) {
 				RedrawSelMargin(mh.line);
 			}
 		}
+	}
+	if ((mh.modificationType & SC_MOD_CHANGEFOLD) && (foldAutomatic & SC_AUTOMATICFOLD_CHANGE)) {
+		FoldChanged(mh.line, mh.foldLevelNow, mh.foldLevelPrev);
 	}
 
 	// NOW pay the piper WRT "deferred" visual updates
@@ -7153,6 +7178,51 @@ void Editor::FoldAll(int action) {
 	Redraw();
 }
 
+void Editor::FoldChanged(int line, int levelNow, int levelPrev) {
+	if (levelNow & SC_FOLDLEVELHEADERFLAG) {
+		if (!(levelPrev & SC_FOLDLEVELHEADERFLAG)) {
+			// Adding a fold point.
+			if (cs.SetExpanded(line, true)) {
+				RedrawSelMargin();
+			}
+			FoldExpand(line, SC_FOLDACTION_EXPAND, levelPrev);
+		}
+	} else if (levelPrev & SC_FOLDLEVELHEADERFLAG) {
+		if (!cs.GetExpanded(line)) {
+			// Removing the fold from one that has been contracted so should expand
+			// otherwise lines are left invisible with no way to make them visible
+			if (cs.SetExpanded(line, true)) {
+				RedrawSelMargin();
+			}
+			FoldExpand(line, SC_FOLDACTION_EXPAND, levelPrev);
+		}
+	}
+	if (!(levelNow & SC_FOLDLEVELWHITEFLAG) &&
+	        ((levelPrev & SC_FOLDLEVELNUMBERMASK) > (levelNow & SC_FOLDLEVELNUMBERMASK))) {
+		if (cs.HiddenLines()) {
+			// See if should still be hidden
+			int parentLine = pdoc->GetFoldParent(line);
+			if ((parentLine < 0) || (cs.GetExpanded(parentLine) && cs.GetVisible(parentLine))) {
+				cs.SetVisible(line, line, true);
+				SetScrollBars();
+				Redraw();
+			}
+		}
+	}
+}
+
+void Editor::NeedShown(int pos, int len) {
+	if (foldAutomatic & SC_AUTOMATICFOLD_SHOW) {
+		int lineStart = pdoc->LineFromPosition(pos);
+		int lineEnd = pdoc->LineFromPosition(pos+len);
+		for (int line = lineStart; line <= lineEnd; line++) {
+			EnsureLineVisible(line, false);
+		}
+	} else {
+		NotifyNeedShown(pos, len);
+	}
+}
+
 int Editor::GetTag(char *tagValue, int tagNumber) {
 	const char *text = 0;
 	int length = 0;
@@ -8605,6 +8675,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETFOLDEXPANDED:
 		return cs.GetExpanded(wParam);
+
+	case SCI_SETAUTOMATICFOLD:
+		foldAutomatic = wParam;
+		break;
+
+	case SCI_GETAUTOMATICFOLD:
+		return foldAutomatic;
 
 	case SCI_SETFOLDFLAGS:
 		foldFlags = wParam;

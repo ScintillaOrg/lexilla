@@ -1130,6 +1130,17 @@ fun void FoldAll=2662(int action,)
 # Ensure a particular line is visible by expanding any header line hiding it.
 fun void EnsureVisible=2232(int line,)
 
+enu AutomaticFold=SC_AUTOMATICFOLD_
+val SC_AUTOMATICFOLD_SHOW=0x0001
+val SC_AUTOMATICFOLD_CLICK=0x0002
+val SC_AUTOMATICFOLD_CHANGE=0x0004
+
+# Set automatic folding behaviours.
+set void SetAutomaticFold=2663(int automaticFold,)
+
+# Get automatic folding behaviours.
+get int GetAutomaticFold=2664(,)
+
 enu FoldFlag=SC_FOLDFLAG_
 val SC_FOLDFLAG_LINEBEFORE_EXPANDED=0x0002
 val SC_FOLDFLAG_LINEBEFORE_CONTRACTED=0x0004

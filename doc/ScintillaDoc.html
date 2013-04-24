@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 18/January/2013 NH</p>
+    <p>Last edited 24/April/2013 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -5175,6 +5175,8 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_GETALLLINESVISIBLE">SCI_GETALLLINESVISIBLE</a><br />
      <a class="message" href="#SCI_SETFOLDLEVEL">SCI_SETFOLDLEVEL(int line, int level)</a><br />
      <a class="message" href="#SCI_GETFOLDLEVEL">SCI_GETFOLDLEVEL(int line)</a><br />
+     <a class="message" href="#SCI_SETAUTOMATICFOLD">SCI_SETAUTOMATICFOLD(int automaticFold)</a><br />
+     <a class="message" href="#SCI_GETAUTOMATICFOLD">SCI_GETAUTOMATICFOLD</a><br />
      <a class="message" href="#SCI_SETFOLDFLAGS">SCI_SETFOLDFLAGS(int flags)</a><br />
      <a class="message" href="#SCI_GETLASTCHILD">SCI_GETLASTCHILD(int line, int level)</a><br />
      <a class="message" href="#SCI_GETFOLDPARENT">SCI_GETFOLDPARENT(int line)</a><br />
@@ -5393,6 +5395,52 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     the fold level has already been set, so the container has to use the previous level in this call
     so that any range hidden underneath this line can be shown.
     </p>
+
+    <p><b id="SCI_SETAUTOMATICFOLD">SCI_SETAUTOMATICFOLD(int automaticFold)</b><br />
+    <b id="SCI_GETAUTOMATICFOLD">SCI_GETAUTOMATICFOLD</b><br />
+    Instead of implementing all the logic for handling folding in the container, Scintilla can provide behaviour
+    that is adequate for many applications. The <code>automaticFold</code> argument is a bit set defining
+    which of the 3 pieces of folding implementation should be enabled. Most applications should be able to use the
+    <code>SC_AUTOMATICFOLD_SHOW</code> and <code>SC_AUTOMATICFOLD_CHANGE</code>
+    flags unless they wish to implement quite different behavious such as defining their own fold structure.
+    <code>SC_AUTOMATICFOLD_CLICK</code> is more likely to be set off when an application would
+    like to add or change click behaviour such as showing method headers only when Shift+Alt is used in
+    conjunction with a click.
+    </p>
+    <table cellpadding="1" cellspacing="2" border="0" summary="Fold flags">
+      <tbody>
+        <tr>
+          <th align="left">Symbol</th>
+          <th align="left">Value</th>
+          <th align="left">Effect</th>
+        </tr>
+      </tbody>
+
+      <tbody valign="top">
+        <tr>
+          <td align="left">SC_AUTOMATICFOLD_SHOW</td>
+          <td align="left">1</td>
+          <td align="left">Automatically show lines as needed.
+          This avoids sending the <code>SCN_NEEDSHOWN</code> notification.</td>
+        </tr>
+
+        <tr>
+          <td align="left">SC_AUTOMATICFOLD_CLICK</td>
+          <td align="left">2</td>
+          <td align="left">Handle clicks in fold margin automatically.
+          This avoids sending the <code>SCN_MARGINCLICK</code> notification for folding margins.</td>
+        </tr>
+
+        <tr>
+          <td align="left">SC_AUTOMATICFOLD_CHANGE</td>
+          <td align="left">4</td>
+          <td align="left">Show lines as needed when fold structure is changed.
+          The <code>SCN_MODIFIED</code> notification is still sent unless it is disabled by the
+          container.</td>
+        </tr>
+
+      </tbody>
+    </table>
 
     <p><b id="SCI_CONTRACTEDFOLDNEXT">SCI_CONTRACTEDFOLDNEXT(int lineStart)</b><br />
      Search efficiently for lines that are contracted fold headers.
