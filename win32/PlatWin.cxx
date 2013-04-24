@@ -860,7 +860,7 @@ void SurfaceGDI::DrawRGBAImage(PRectangle rc, int width, int height, const unsig
 			DIB_RGB_COLORS, reinterpret_cast<void **>(&image), NULL, 0);
 		if (hbmMem) {
 			HBITMAP hbmOld = SelectBitmap(hMemDC, hbmMem);
-		
+
 			for (int y=height-1; y>=0; y--) {
 				for (int x=0; x<width; x++) {
 					unsigned char *pixel = image + (y*width+x) * 4;
@@ -872,7 +872,7 @@ void SurfaceGDI::DrawRGBAImage(PRectangle rc, int width, int height, const unsig
 					pixel[3] = static_cast<unsigned char>(*pixelsImage++);
 				}
 			}
-		
+
 			BLENDFUNCTION merge = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
 
 			AlphaBlendFn(reinterpret_cast<HDC>(hdc), rc.left, rc.top, rc.Width(), rc.Height(), hMemDC, 0, 0, width, height, merge);
@@ -1339,7 +1339,7 @@ void SurfaceD2D::D2DPenColour(ColourDesired fore, int alpha) {
 			pBrush->SetColor(col);
 		} else {
 			HRESULT hr = pRenderTarget->CreateSolidColorBrush(col, &pBrush);
-			if (!SUCCEEDED(hr) && pBrush) {						
+			if (!SUCCEEDED(hr) && pBrush) {
 				pBrush->Release();
 				pBrush = 0;
 			}
@@ -1407,11 +1407,11 @@ void SurfaceD2D::LineTo(int x_, int y_) {
 			pRenderTarget->FillRectangle(&rectangle1, pBrush);
 		} else if ((abs(xDiff) == abs(yDiff))) {
 			// 45 degree slope
-			pRenderTarget->DrawLine(D2D1::Point2F(x + 0.5, y + 0.5), 
+			pRenderTarget->DrawLine(D2D1::Point2F(x + 0.5, y + 0.5),
 				D2D1::Point2F(x_ + 0.5 - xDelta, y_ + 0.5 - yDelta), pBrush);
 		} else {
 			// Line has a different slope so difficult to avoid last pixel
-			pRenderTarget->DrawLine(D2D1::Point2F(x + 0.5, y + 0.5), 
+			pRenderTarget->DrawLine(D2D1::Point2F(x + 0.5, y + 0.5),
 				D2D1::Point2F(x_ + 0.5, y_ + 0.5), pBrush);
 		}
 		x = x_;
@@ -1558,7 +1558,7 @@ void SurfaceD2D::DrawRGBAImage(PRectangle rc, int width, int height, const unsig
 
 		ID2D1Bitmap *bitmap = 0;
 		D2D1_SIZE_U size = D2D1::SizeU(width, height);
-		D2D1_BITMAP_PROPERTIES props = {{DXGI_FORMAT_B8G8R8A8_UNORM,	
+		D2D1_BITMAP_PROPERTIES props = {{DXGI_FORMAT_B8G8R8A8_UNORM,
 		    D2D1_ALPHA_MODE_PREMULTIPLIED}, 72.0, 72.0};
 		HRESULT hr = pRenderTarget->CreateBitmap(size, &image[0],
                   width * 4, &props, &bitmap);
@@ -1594,7 +1594,7 @@ void SurfaceD2D::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	if (SUCCEEDED(hr)) {
 		D2D1_RECT_F rcDestination = {rc.left, rc.top, rc.right, rc.bottom};
 		D2D1_RECT_F rcSource = {from.x, from.y, from.x + rc.Width(), from.y + rc.Height()};
-		pRenderTarget->DrawBitmap(pBitmap, rcDestination, 1.0f, 
+		pRenderTarget->DrawBitmap(pBitmap, rcDestination, 1.0f,
 			D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, rcSource);
 		pRenderTarget->Flush();
 		pBitmap->Release();
@@ -1611,8 +1611,8 @@ void SurfaceD2D::DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, co
 			D2D1_RECT_F rcClip = {rc.left, rc.top, rc.right, rc.bottom};
 			pRenderTarget->PushAxisAlignedClip(rcClip, D2D1_ANTIALIAS_MODE_ALIASED);
 		}
-		
-		// Explicitly creating a text layout appears a little faster 
+
+		// Explicitly creating a text layout appears a little faster
 		IDWriteTextLayout *pTextLayout;
 		HRESULT hr = pIDWriteFactory->CreateTextLayout(tbuf.buffer, tbuf.tlen, pTextFormat,
 				rc.Width(), rc.Height(), &pTextLayout);
@@ -1811,7 +1811,7 @@ XYPOSITION SurfaceD2D::AverageCharWidth(Font &font_) {
 		// Create a layout
 		IDWriteTextLayout *pTextLayout = 0;
 		const WCHAR wszAllAlpha[] = L"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-		HRESULT hr = pIDWriteFactory->CreateTextLayout(wszAllAlpha, static_cast<UINT32>(wcslen(wszAllAlpha)), 
+		HRESULT hr = pIDWriteFactory->CreateTextLayout(wszAllAlpha, static_cast<UINT32>(wcslen(wszAllAlpha)),
 			pTextFormat, 1000.0, 1000.0, &pTextLayout);
 		if (SUCCEEDED(hr)) {
 			DWRITE_TEXT_METRICS textMetrics;
@@ -1907,7 +1907,7 @@ void Window::SetPositionRelative(PRectangle rc, Window w) {
 		// If hMonitor is NULL, that's just the main screen anyways.
 		//::GetMonitorInfo(hMonitor, &mi);
 		RECT rcWork = RectFromMonitor(hMonitor);
-		
+
 		if (rcWork.left < rcWork.right) {
 			// Now clamp our desired rectangle to fit inside the work area
 			// This way, the menu will fit wholly on one screen. An improvement even

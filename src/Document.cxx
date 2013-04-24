@@ -420,7 +420,7 @@ void Document::GetHighlightDelimiters(HighlightDelimiter &highlightDelimiter, in
 	int lookLine = line;
 	int lookLineLevel = level;
 	int lookLineLevelNum = lookLineLevel & SC_FOLDLEVELNUMBERMASK;
-	while ((lookLine > 0) && ((lookLineLevel & SC_FOLDLEVELWHITEFLAG) || 
+	while ((lookLine > 0) && ((lookLineLevel & SC_FOLDLEVELWHITEFLAG) ||
 		((lookLineLevel & SC_FOLDLEVELHEADERFLAG) && (lookLineLevelNum >= (GetLevel(lookLine + 1) & SC_FOLDLEVELNUMBERMASK))))) {
 		lookLineLevel = GetLevel(--lookLine);
 		lookLineLevelNum = lookLineLevel & SC_FOLDLEVELNUMBERMASK;
@@ -453,8 +453,8 @@ void Document::GetHighlightDelimiters(HighlightDelimiter &highlightDelimiter, in
 		}
 	}
 	if (firstChangeableLineBefore == -1) {
-		for (lookLine = line - 1, lookLineLevel = GetLevel(lookLine), lookLineLevelNum = lookLineLevel & SC_FOLDLEVELNUMBERMASK; 
-			lookLine >= beginFoldBlock; 
+		for (lookLine = line - 1, lookLineLevel = GetLevel(lookLine), lookLineLevelNum = lookLineLevel & SC_FOLDLEVELNUMBERMASK;
+			lookLine >= beginFoldBlock;
 			lookLineLevel = GetLevel(--lookLine), lookLineLevelNum = lookLineLevel & SC_FOLDLEVELNUMBERMASK) {
 			if ((lookLineLevel & SC_FOLDLEVELWHITEFLAG) || (lookLineLevelNum > (level & SC_FOLDLEVELNUMBERMASK))) {
 				firstChangeableLineBefore = lookLine;
@@ -466,8 +466,8 @@ void Document::GetHighlightDelimiters(HighlightDelimiter &highlightDelimiter, in
 		firstChangeableLineBefore = beginFoldBlock - 1;
 
 	int firstChangeableLineAfter = -1;
-	for (lookLine = line + 1, lookLineLevel = GetLevel(lookLine), lookLineLevelNum = lookLineLevel & SC_FOLDLEVELNUMBERMASK; 
-		lookLine <= endFoldBlock; 
+	for (lookLine = line + 1, lookLineLevel = GetLevel(lookLine), lookLineLevelNum = lookLineLevel & SC_FOLDLEVELNUMBERMASK;
+		lookLine <= endFoldBlock;
 		lookLineLevel = GetLevel(++lookLine), lookLineLevelNum = lookLineLevel & SC_FOLDLEVELNUMBERMASK) {
 		if ((lookLineLevel & SC_FOLDLEVELHEADERFLAG) && (lookLineLevelNum < (GetLevel(lookLine + 1) & SC_FOLDLEVELNUMBERMASK))) {
 			firstChangeableLineAfter = lookLine;
@@ -715,7 +715,7 @@ bool SCI_METHOD Document::IsDBCSLeadByte(char ch) const {
 			// Shift_jis
 			return ((uch >= 0x81) && (uch <= 0x9F)) ||
 				((uch >= 0xE0) && (uch <= 0xFC));
-				// Lead bytes F0 to FC may be a Microsoft addition. 
+				// Lead bytes F0 to FC may be a Microsoft addition.
 		case 936:
 			// GBK
 			return (uch >= 0x81) && (uch <= 0xFE);
