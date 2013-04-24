@@ -787,6 +787,28 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   return mOwner.backend->CanRedo();
 }
 
+- (BOOL) validateUserInterfaceItem: (id <NSValidatedUserInterfaceItem>) anItem
+{
+  SEL action = [anItem action];
+  if (action==@selector(undo:)) {
+    return [self canUndo];
+  }
+  else if (action==@selector(redo:)) {
+    return [self canRedo];
+  }
+  else if (action==@selector(cut:) || action==@selector(copy:) || action==@selector(clear:)) {
+    return mOwner.backend->HasSelection();
+  }
+  else if (action==@selector(paste:)) {
+    return mOwner.backend->CanPaste();
+  }
+  return YES;
+}
+
+- (void) clear: (id) sender
+{
+  [self deleteBackward:sender];
+}
 
 - (BOOL) isEditable
 {
