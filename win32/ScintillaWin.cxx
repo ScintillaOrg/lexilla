@@ -569,12 +569,12 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 		pps = &ps;
 		::BeginPaint(MainHWND(), pps);
 	}
+	rcPaint = PRectangle(pps->rcPaint.left, pps->rcPaint.top, pps->rcPaint.right, pps->rcPaint.bottom);
+	PRectangle rcClient = GetClientRectangle();
+	paintingAllText = rcPaint.Contains(rcClient);
 	if (technology == SC_TECHNOLOGY_DEFAULT) {
 		AutoSurface surfaceWindow(pps->hdc, this);
 		if (surfaceWindow) {
-			rcPaint = PRectangle(pps->rcPaint.left, pps->rcPaint.top, pps->rcPaint.right, pps->rcPaint.bottom);
-			PRectangle rcClient = GetClientRectangle();
-			paintingAllText = rcPaint.Contains(rcClient);
 			Paint(surfaceWindow, rcPaint);
 			surfaceWindow->Release();
 		}
@@ -584,9 +584,6 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 		AutoSurface surfaceWindow(pRenderTarget, this);
 		if (surfaceWindow) {
 			pRenderTarget->BeginDraw();
-			rcPaint = PRectangle(pps->rcPaint.left, pps->rcPaint.top, pps->rcPaint.right, pps->rcPaint.bottom);
-			PRectangle rcClient = GetClientRectangle();
-			paintingAllText = rcPaint.Contains(rcClient);
 			Paint(surfaceWindow, rcPaint);
 			surfaceWindow->Release();
 			HRESULT hr = pRenderTarget->EndDraw();
