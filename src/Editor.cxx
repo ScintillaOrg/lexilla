@@ -1247,6 +1247,9 @@ Editor::XYScrollPosition Editor::XYScrollToMakeVisible(const SelectionRange rang
 	const Point ptBottomCaret(pt.x, pt.y + vs.lineHeight - 1);
 
 	XYScrollPosition newXY(xOffset, topLine);
+	if (rcClient.Empty()) {
+		return newXY;
+	}
 
 	// Vertical positioning
 	if ((options & xysVertical) && (pt.y < rcClient.top || ptBottomCaret.y >= rcClient.bottom || (caretYPolicy & CARET_STRICT) != 0)) {
