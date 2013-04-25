@@ -259,6 +259,7 @@ class FontCached : Font {
 public:
 	static FontID FindOrCreate(const FontParameters &fp);
 	static void ReleaseId(FontID fid_);
+	static void ReleaseAll();
 };
 
 FontCached *FontCached::first = 0;
@@ -326,6 +327,12 @@ void FontCached::ReleaseId(FontID fid_) {
 		pcur = &cur->next;
 	}
 	FontMutexUnlock();
+}
+
+void FontCached::ReleaseAll() {
+	while (first) {
+		ReleaseId(first->GetID());
+	}
 }
 
 FontID FontCached::CreateNewFont(const FontParameters &fp) {
@@ -2165,5 +2172,6 @@ void Platform_Initialise() {
 }
 
 void Platform_Finalise() {
+	FontCached::ReleaseAll();
 	FontMutexFree();
 }
