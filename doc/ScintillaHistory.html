@@ -473,8 +473,15 @@
 	Composition popups appear near input.
 	</li>
 	<li>
+	Fix lexer problem where no line end was seen at end of document.
+	</li>
+	<li>
 	Fix crash on Cocoa when view deallocated.
-	<a href="http://sourceforge.net/p/scintilla/bugs/1466/">Bug #1466</a>,
+	<a href="http://sourceforge.net/p/scintilla/bugs/1466/">Bug #1466</a>.
+	</li>
+	<li>
+	Fix drawing on Windows with Direct2D when returning from lock screen.
+	The render target had to be recreated and an area would be black since the drawing was not retried.
 	</li>
 	<li>
 	Fix display of DBCS documents on Windows Direct2D/DirectWrite with default character set.
