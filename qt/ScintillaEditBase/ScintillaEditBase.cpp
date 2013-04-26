@@ -241,6 +241,7 @@ void ScintillaEditBase::keyPressEvent(QKeyEvent *event)
 	emit keyPressed(event);
 }
 
+#ifdef Q_WS_X11
 static int modifierTranslated(int sciModifier)
 {
 	switch (sciModifier) {
@@ -256,6 +257,7 @@ static int modifierTranslated(int sciModifier)
 			return 0;
 	}
 }
+#endif
 
 void ScintillaEditBase::mousePressEvent(QMouseEvent *event)
 {
