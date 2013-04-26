@@ -1089,8 +1089,17 @@ public:
 
 	virtual Function FindFunction(const char *name) {
 		if (lib) {
-			void *fnAddress = lib->resolve(name);
-			return static_cast<Function>(fnAddress);
+			// C++ standard doesn't like casts betwen function pointers and void pointers so use a union
+			union {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+				QFunctionPointer fp;
+#else
+				void *fp;
+#endif
+				Function f;
+			} fnConv;
+			fnConv.fp = lib->resolve(name);
+			return fnConv.f;
 		}
 		return NULL;
 	}
