@@ -13,7 +13,9 @@
 #include "PlatQt.h"
 
 #include <QApplication>
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include <QInputContext>
+#endif
 #include <QPainter>
 #include <QScrollBar>
 #include <QTextFormat>
