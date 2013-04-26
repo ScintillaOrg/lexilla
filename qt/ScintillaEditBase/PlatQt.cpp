@@ -1131,7 +1131,7 @@ const char *Platform::DefaultFont()
 	static char fontNameDefault[200] = "";
 	if (!fontNameDefault[0]) {
 		QFont font = QApplication::font();
-		strcpy(fontNameDefault, font.family().toAscii());
+		strcpy(fontNameDefault, font.family().toUtf8());
 	}
 	return fontNameDefault;
 }
