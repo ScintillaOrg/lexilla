@@ -198,13 +198,14 @@ class Document : PerLine, public IDocumentWithLineEnd, public ILoader {
 
 public:
 	/** Used to pair watcher pointer with user data. */
-	class WatcherWithUserData {
-	public:
+	struct WatcherWithUserData {
 		DocWatcher *watcher;
 		void *userData;
-		WatcherWithUserData() {
-			watcher = 0;
-			userData = 0;
+		WatcherWithUserData(DocWatcher *watcher_=0, void *userData_=0) :
+			watcher(watcher_), userData(userData_) {
+		}
+		bool operator==(const WatcherWithUserData &other) {
+			return (watcher == other.watcher) && (userData == other.userData);
 		}
 	};
 
@@ -220,8 +221,7 @@ private:
 	int enteredStyling;
 	int enteredReadOnlyCount;
 
-	WatcherWithUserData *watchers;
-	int lenWatchers;
+	std::vector<WatcherWithUserData> watchers;
 
 	// ldSize is not real data - it is for dimensions and loops
 	enum lineData { ldMarkers, ldLevels, ldState, ldMargin, ldAnnotation, ldSize };

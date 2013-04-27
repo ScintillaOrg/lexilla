@@ -13,6 +13,7 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include "Platform.h"
 
@@ -102,8 +103,6 @@ Document::Document() {
 	useTabs = true;
 	tabIndents = true;
 	backspaceUnindents = false;
-	watchers = 0;
-	lenWatchers = 0;
 
 	matchesValid = false;
 	regex = 0;
@@ -122,16 +121,13 @@ Document::Document() {
 }
 
 Document::~Document() {
-	for (int i = 0; i < lenWatchers; i++) {
-		watchers[i].watcher->NotifyDeleted(this, watchers[i].userData);
+	for (std::vector<WatcherWithUserData>::iterator it = watchers.begin(); it != watchers.end(); ++it) {
+		it->watcher->NotifyDeleted(this, it->userData);
 	}
-	delete []watchers;
 	for (int j=0; j<ldSize; j++) {
 		delete perLineData[j];
 		perLineData[j] = 0;
 	}
-	watchers = 0;
-	lenWatchers = 0;
 	delete regex;
 	regex = 0;
 	delete pli;
@@ -309,9 +305,9 @@ int SCI_METHOD Document::LineEnd(int line) const {
 }
 
 void SCI_METHOD Document::SetErrorStatus(int status) {
-	// Tell the watchers the lexer has changed.
-	for (int i = 0; i < lenWatchers; i++) {
-		watchers[i].watcher->NotifyErrorOccurred(this, watchers[i].userData, status);
+	// Tell the watchers an error has occurred.
+	for (std::vector<WatcherWithUserData>::iterator it = watchers.begin(); it != watchers.end(); ++it) {
+		it->watcher->NotifyErrorOccurred(this, it->userData, status);
 	}
 }
 
@@ -1739,8 +1735,9 @@ void Document::EnsureStyledTo(int pos) {
 			pli->Colourise(endStyledTo, pos);
 		} else {
 			// Ask the watchers to style, and stop as soon as one responds.
-			for (int i = 0; pos > GetEndStyled() && i < lenWatchers; i++) {
-				watchers[i].watcher->NotifyStyleNeeded(this, watchers[i].userData, pos);
+			for (std::vector<WatcherWithUserData>::iterator it = watchers.begin();
+				(pos > GetEndStyled()) && (it != watchers.end()); ++it) {
+				it->watcher->NotifyStyleNeeded(this, it->userData, pos);
 			}
 		}
 	}
@@ -1748,8 +1745,8 @@ void Document::EnsureStyledTo(int pos) {
 
 void Document::LexerChanged() {
 	// Tell the watchers the lexer has changed.
-	for (int i = 0; i < lenWatchers; i++) {
-		watchers[i].watcher->NotifyLexerChanged(this, watchers[i].userData);
+	for (std::vector<WatcherWithUserData>::iterator it = watchers.begin(); it != watchers.end(); ++it) {
+		it->watcher->NotifyLexerChanged(this, it->userData);
 	}
 }
 
@@ -1859,54 +1856,34 @@ void SCI_METHOD Document::DecorationFillRange(int position, int value, int fillL
 }
 
 bool Document::AddWatcher(DocWatcher *watcher, void *userData) {
-	for (int i = 0; i < lenWatchers; i++) {
-		if ((watchers[i].watcher == watcher) &&
-		        (watchers[i].userData == userData))
-			return false;
-	}
-	WatcherWithUserData *pwNew = new WatcherWithUserData[lenWatchers + 1];
-	for (int j = 0; j < lenWatchers; j++)
-		pwNew[j] = watchers[j];
-	pwNew[lenWatchers].watcher = watcher;
-	pwNew[lenWatchers].userData = userData;
-	delete []watchers;
-	watchers = pwNew;
-	lenWatchers++;
+	WatcherWithUserData wwud(watcher, userData);
+	std::vector<WatcherWithUserData>::iterator it = 
+		std::find(watchers.begin(), watchers.end(), wwud);
+	if (it != watchers.end())
+		return false;
+	watchers.push_back(wwud);
 	return true;
 }
 
 bool Document::RemoveWatcher(DocWatcher *watcher, void *userData) {
-	for (int i = 0; i < lenWatchers; i++) {
-		if ((watchers[i].watcher == watcher) &&
-		        (watchers[i].userData == userData)) {
-			if (lenWatchers == 1) {
-				delete []watchers;
-				watchers = 0;
-				lenWatchers = 0;
-			} else {
-				WatcherWithUserData *pwNew = new WatcherWithUserData[lenWatchers];
-				for (int j = 0; j < lenWatchers - 1; j++) {
-					pwNew[j] = (j < i) ? watchers[j] : watchers[j + 1];
-				}
-				delete []watchers;
-				watchers = pwNew;
-				lenWatchers--;
-			}
-			return true;
-		}
+	std::vector<WatcherWithUserData>::iterator it = 
+		std::find(watchers.begin(), watchers.end(), WatcherWithUserData(watcher, userData));
+	if (it != watchers.end()) {
+		watchers.erase(it);
+		return true;
 	}
 	return false;
 }
 
 void Document::NotifyModifyAttempt() {
-	for (int i = 0; i < lenWatchers; i++) {
-		watchers[i].watcher->NotifyModifyAttempt(this, watchers[i].userData);
+	for (std::vector<WatcherWithUserData>::iterator it = watchers.begin(); it != watchers.end(); ++it) {
+		it->watcher->NotifyModifyAttempt(this, it->userData);
 	}
 }
 
 void Document::NotifySavePoint(bool atSavePoint) {
-	for (int i = 0; i < lenWatchers; i++) {
-		watchers[i].watcher->NotifySavePoint(this, watchers[i].userData, atSavePoint);
+	for (std::vector<WatcherWithUserData>::iterator it = watchers.begin(); it != watchers.end(); ++it) {
+		it->watcher->NotifySavePoint(this, it->userData, atSavePoint);
 	}
 }
 
@@ -1916,8 +1893,8 @@ void Document::NotifyModified(DocModification mh) {
 	} else if (mh.modificationType & SC_MOD_DELETETEXT) {
 		decorations.DeleteRange(mh.position, mh.length);
 	}
-	for (int i = 0; i < lenWatchers; i++) {
-		watchers[i].watcher->NotifyModified(this, mh, watchers[i].userData);
+	for (std::vector<WatcherWithUserData>::iterator it = watchers.begin(); it != watchers.end(); ++it) {
+		it->watcher->NotifyModified(this, mh, it->userData);
 	}
 }
 
