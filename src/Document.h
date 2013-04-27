@@ -208,7 +208,6 @@ public:
 		}
 	};
 
-	enum charClassification { ccSpace, ccNewLine, ccWord, ccPunctuation };
 private:
 	int refCount;
 	CellBuffer cb;
@@ -407,8 +406,6 @@ public:
 
 	bool AddWatcher(DocWatcher *watcher, void *userData);
 	bool RemoveWatcher(DocWatcher *watcher, void *userData);
-	const WatcherWithUserData *GetWatchers() const { return watchers; }
-	int GetLenWatchers() const { return lenWatchers; }
 
 	CharClassify::cc WordCharClass(unsigned char ch);
 	bool IsWordPartSeparator(char ch);
