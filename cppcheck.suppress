@@ -2,6 +2,10 @@
 // Does not suppress warnings where an additional occurrence of the warning may be of interest.
 // Does not suppress false positives from cppcheck.
 
+// Coding style is to use assignments in constructor when there are many
+// members to initialize or the initialization is complex or has comments.
+useInitializationList
+
 // Suppress most lexer warnings since the lexers are maintained by others
 variableScope:scintilla/lexers/LexA68k.cxx
 useInitializationList:scintilla/lexers/LexAsm.cxx
