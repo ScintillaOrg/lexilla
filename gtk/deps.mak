@@ -3,7 +3,7 @@ PlatGTK.o: PlatGTK.cxx \
  ../src/UniConversion.h ../src/XPM.h Converter.h
 ScintillaGTK.o: ScintillaGTK.cxx \
  ../include/ILexer.h ../include/Scintilla.h ../include/ScintillaWidget.h \
- ../include/SciLexer.h ../src/SVector.h ../src/SplitVector.h \
+ ../include/SciLexer.h ../src/SplitVector.h \
  ../src/Partitioning.h ../src/RunStyles.h ../src/ContractionState.h \
  ../src/CellBuffer.h ../src/CallTip.h ../src/KeyMap.h ../src/Indicator.h \
  ../src/XPM.h ../src/LineMarker.h ../src/Style.h ../src/AutoComplete.h \

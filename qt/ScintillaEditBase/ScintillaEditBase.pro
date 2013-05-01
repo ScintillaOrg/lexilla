@@ -57,7 +57,6 @@ HEADERS  += \
     ../../src/XPM.h \
     ../../src/ViewStyle.h \
     ../../src/UniConversion.h \
-    ../../src/SVector.h \
     ../../src/Style.h \
     ../../src/SplitVector.h \
     ../../src/Selection.h \

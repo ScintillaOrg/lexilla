@@ -30,7 +30,6 @@
 #ifdef SCI_LEXER
 #include "SciLexer.h"
 #endif
-#include "SVector.h"
 #include "SplitVector.h"
 #include "Partitioning.h"
 #include "RunStyles.h"
