@@ -647,25 +647,23 @@ void Window::SetPositionRelative(PRectangle rc, Window relativeTo)
 	int ox = oPos.x();
 	int oy = oPos.y();
 	ox += rc.left;
-	if (ox < 0)
-		ox = 0;
 	oy += rc.top;
-	if (oy < 0)
-		oy = 0;
 
 	QDesktopWidget *desktop = QApplication::desktop();
-	QRect rectDesk = desktop->availableGeometry(window(wid));
+	QRect rectDesk = desktop->availableGeometry(QPoint(ox, oy));
 	/* do some corrections to fit into screen */
 	int sizex = rc.right - rc.left;
 	int sizey = rc.bottom - rc.top;
 	int screenWidth = rectDesk.width();
 	int screenHeight = rectDesk.height();
+	if (ox < rectDesk.x())
+		ox = rectDesk.x();
 	if (sizex > screenWidth)
-		ox = 0; /* the best we can do */
-	else if (ox + sizex > screenWidth)
-		ox = screenWidth - sizex;
-	if (oy + sizey > screenHeight)
-		oy = screenHeight - sizey;
+		ox = rectDesk.x(); /* the best we can do */
+	else if (ox + sizex > rectDesk.right())
+		ox = rectDesk.right() - sizex;
+	if (oy + sizey > rectDesk.bottom())
+		oy = rectDesk.bottom() - sizey;
 
 	Q_ASSERT(wid);
 	window(wid)->move(ox, oy);
