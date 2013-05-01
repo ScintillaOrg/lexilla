@@ -1722,11 +1722,12 @@ void ScintillaWin::InsertPasteText(const char *text, int len, SelectionPosition 
 	if (isRectangular) {
 		PasteRectangular(selStart, text, len);
 	} else {
-		char *convertedText = 0;
+		std::string convertedText;
 		if (convertPastes) {
 			// Convert line endings of the paste into our local line-endings mode
-			convertedText = Document::TransformLineEnds(&len, text, len, pdoc->eolMode);
-			text = convertedText;
+			convertedText = Document::TransformLineEnds(text, len, pdoc->eolMode);
+			len = static_cast<int>(convertedText.length());
+			text = convertedText.c_str();
 		}
 		if (isLine) {
 			int insertPos = pdoc->LineStart(pdoc->LineFromPosition(sel.MainCaret()));
@@ -1743,7 +1744,6 @@ void ScintillaWin::InsertPasteText(const char *text, int len, SelectionPosition 
 		} else {
 			InsertPaste(selStart, text, len);
 		}
-		delete []convertedText;
 	}
 }
 
@@ -1764,26 +1764,25 @@ void ScintillaWin::Paste() {
 		wchar_t *uptr = static_cast<wchar_t *>(memUSelection.ptr);
 		if (uptr) {
 			unsigned int len;
-			char *putf;
+			std::vector<char> putf;
 			// Default Scintilla behaviour in Unicode mode
 			if (IsUnicodeMode()) {
 				unsigned int bytes = memUSelection.Size();
 				len = UTF8Length(uptr, bytes / 2);
-				putf = new char[len + 1];
-				UTF8FromUTF16(uptr, bytes / 2, putf, len);
+				putf.resize(len + 1);
+				UTF8FromUTF16(uptr, bytes / 2, putf.data(), len);
 			} else {
 				// CF_UNICODETEXT available, but not in Unicode mode
 				// Convert from Unicode to current Scintilla code page
 				UINT cpDest = CodePageOfDocument();
 				len = ::WideCharToMultiByte(cpDest, 0, uptr, -1,
 				                            NULL, 0, NULL, NULL) - 1; // subtract 0 terminator
-				putf = new char[len + 1];
+				putf.resize(len + 1);
 				::WideCharToMultiByte(cpDest, 0, uptr, -1,
-					                      putf, len + 1, NULL, NULL);
+					                      putf.data(), len + 1, NULL, NULL);
 			}
 
-			InsertPasteText(putf, len, selStart, isRectangular, isLine);
-			delete []putf;
+			InsertPasteText(putf.data(), len, selStart, isRectangular, isLine);
 		}
 		memUSelection.Unlock();
 	} else {
@@ -1801,24 +1800,17 @@ void ScintillaWin::Paste() {
 
 				// In Unicode mode, convert clipboard text to UTF-8
 				if (IsUnicodeMode()) {
-					wchar_t *uptr = new wchar_t[len+1];
+					std::vector<wchar_t> uptr(len+1);
 
 					unsigned int ulen = ::MultiByteToWideChar(CP_ACP, 0,
-					                    ptr, len, uptr, len+1);
+					                    ptr, len, uptr.data(), len+1);
 
-					unsigned int mlen = UTF8Length(uptr, ulen);
-					char *putf = new char[mlen + 1];
-					if (putf) {
+					unsigned int mlen = UTF8Length(uptr.data(), ulen);
+					std::vector<char> putf(mlen+1);
 						// CP_UTF8 not available on Windows 95, so use UTF8FromUTF16()
-						UTF8FromUTF16(uptr, ulen, putf, mlen);
-					}
+					UTF8FromUTF16(uptr.data(), ulen, putf.data(), mlen);
 
-					delete []uptr;
-
-					if (putf) {
-						InsertPasteText(putf, mlen, selStart, isRectangular, isLine);
-						delete []putf;
-					}
+					InsertPasteText(putf.data(), mlen, selStart, isRectangular, isLine);
 				} else {
 					InsertPasteText(ptr, len, selStart, isRectangular, isLine);
 				}
@@ -2557,21 +2549,20 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 
 		STGMEDIUM medium = {0, {0}, 0};
 
-		char *data = 0;
-		bool dataAllocated = false;
+		std::vector<char> data;	// Includes terminating NUL
 
 		FORMATETC fmtu = {CF_UNICODETEXT, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 		HRESULT hr = pIDataSource->GetData(&fmtu, &medium);
 		if (SUCCEEDED(hr) && medium.hGlobal) {
-			wchar_t *udata = static_cast<wchar_t *>(::GlobalLock(medium.hGlobal));
+			GlobalMemory memUDrop(medium.hGlobal);
+			wchar_t *udata = static_cast<wchar_t *>(memUDrop.ptr);
 			if (udata) {
 				if (IsUnicodeMode()) {
-					int tlen = ::GlobalSize(medium.hGlobal);
+					int tlen = memUDrop.Size();
 					// Convert UTF-16 to UTF-8
 					int dataLen = UTF8Length(udata, tlen/2);
-					data = new char[dataLen+1];
-					UTF8FromUTF16(udata, tlen/2, data, dataLen);
-					dataAllocated = true;
+					data.resize(dataLen+1);
+					UTF8FromUTF16(udata, tlen/2, data.data(), dataLen);
 				} else {
 					// Convert UTF-16 to ANSI
 					//
@@ -2581,34 +2572,31 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 					UINT cpDest = CodePageOfDocument();
 					int tlen = ::WideCharToMultiByte(cpDest, 0, udata, -1,
 						NULL, 0, NULL, NULL) - 1; // subtract 0 terminator
-					data = new char[tlen + 1];
-					memset(data, 0, (tlen+1));
+					data.resize(tlen + 1);
 					::WideCharToMultiByte(cpDest, 0, udata, -1,
-							data, tlen + 1, NULL, NULL);
-					dataAllocated = true;
+							data.data(), tlen + 1, NULL, NULL);
 				}
 			}
-		}
-
-		if (!data) {
+			memUDrop.Unlock();
+		} else {
 			FORMATETC fmte = {CF_TEXT, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 			hr = pIDataSource->GetData(&fmte, &medium);
 			if (SUCCEEDED(hr) && medium.hGlobal) {
-				data = static_cast<char *>(::GlobalLock(medium.hGlobal));
+				GlobalMemory memDrop(medium.hGlobal);
+				const char *cdata = static_cast<char *>(memDrop.ptr);
+				if (cdata)
+					data.assign(cdata, cdata+strlen(cdata)+1);
+				memDrop.Unlock();
 			}
 		}
 
-		if (data && convertPastes) {
+		if (!data.empty() && convertPastes) {
 			// Convert line endings of the drop into our local line-endings mode
-			int len = static_cast<int>(strlen(data));
-			char *convertedText = Document::TransformLineEnds(&len, data, len, pdoc->eolMode);
-			if (dataAllocated)
-				delete []data;
-			data = convertedText;
-			dataAllocated = true;
+			std::string convertedText = Document::TransformLineEnds(data.data(), data.size() - 1, pdoc->eolMode);
+			data.assign(convertedText.c_str(), convertedText.c_str()+convertedText.length()+1);
 		}
 
-		if (!data) {
+		if (data.empty()) {
 			//Platform::DebugPrintf("Bad data format: 0x%x\n", hres);
 			return hr;
 		}
@@ -2620,18 +2608,13 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 		::ScreenToClient(MainHWND(), &rpt);
 		SelectionPosition movePos = SPositionFromLocation(Point(rpt.x, rpt.y), false, false, UserVirtualSpace());
 
-		DropAt(movePos, data, *pdwEffect == DROPEFFECT_MOVE, hrRectangular == S_OK);
-
-		::GlobalUnlock(medium.hGlobal);
+		DropAt(movePos, data.data(), *pdwEffect == DROPEFFECT_MOVE, hrRectangular == S_OK);
 
 		// Free data
 		if (medium.pUnkForRelease != NULL)
 			medium.pUnkForRelease->Release();
 		else
 			::GlobalFree(medium.hGlobal);
-
-		if (dataAllocated)
-			delete []data;
 
 		return S_OK;
 	} catch (...) {

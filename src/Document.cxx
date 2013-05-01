@@ -1232,6 +1232,28 @@ char *Document::TransformLineEnds(int *pLenOut, const char *s, size_t len, int e
 	return dest;
 }
 
+std::string Document::TransformLineEnds(const char *s, size_t len, int eolModeWanted) {
+	std::string dest;
+	for (size_t i = 0; (i < len) && (s[i]); i++) {
+		if (s[i] == '\n' || s[i] == '\r') {
+			if (eolModeWanted == SC_EOL_CR) {
+				dest.push_back('\r');
+			} else if (eolModeWanted == SC_EOL_LF) {
+				dest.push_back('\n');
+			} else { // eolModeWanted == SC_EOL_CRLF
+				dest.push_back('\r');
+				dest.push_back('\n');
+			}
+			if ((s[i] == '\r') && (i+1 < len) && (s[i+1] == '\n')) {
+				i++;
+			}
+		} else {
+			dest.push_back(s[i]);
+		}
+	}
+	return dest;
+}
+
 void Document::ConvertLineEnds(int eolModeSet) {
 	UndoGroup ug(this);
 
