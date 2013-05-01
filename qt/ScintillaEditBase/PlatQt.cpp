@@ -655,7 +655,6 @@ void Window::SetPositionRelative(PRectangle rc, Window relativeTo)
 	int sizex = rc.right - rc.left;
 	int sizey = rc.bottom - rc.top;
 	int screenWidth = rectDesk.width();
-	int screenHeight = rectDesk.height();
 	if (ox < rectDesk.x())
 		ox = rectDesk.x();
 	if (sizex > screenWidth)
