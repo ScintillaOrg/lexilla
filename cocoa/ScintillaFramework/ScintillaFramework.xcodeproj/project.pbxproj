@@ -145,7 +145,6 @@
 		114B6FD111FA7623004FB6AB /* Selection.h in Headers */ = {isa = PBXBuildFile; fileRef = 114B6FB611FA7623004FB6AB /* Selection.h */; };
 		114B6FD211FA7623004FB6AB /* SplitVector.h in Headers */ = {isa = PBXBuildFile; fileRef = 114B6FB711FA7623004FB6AB /* SplitVector.h */; };
 		114B6FD311FA7623004FB6AB /* Style.h in Headers */ = {isa = PBXBuildFile; fileRef = 114B6FB811FA7623004FB6AB /* Style.h */; };
-		114B6FD411FA7623004FB6AB /* SVector.h in Headers */ = {isa = PBXBuildFile; fileRef = 114B6FB911FA7623004FB6AB /* SVector.h */; };
 		114B6FD511FA7623004FB6AB /* UniConversion.h in Headers */ = {isa = PBXBuildFile; fileRef = 114B6FBA11FA7623004FB6AB /* UniConversion.h */; };
 		114B6FD611FA7623004FB6AB /* ViewStyle.h in Headers */ = {isa = PBXBuildFile; fileRef = 114B6FBB11FA7623004FB6AB /* ViewStyle.h */; };
 		114B6FD711FA7623004FB6AB /* XPM.h in Headers */ = {isa = PBXBuildFile; fileRef = 114B6FBC11FA7623004FB6AB /* XPM.h */; };
@@ -333,7 +332,6 @@
 		114B6FB611FA7623004FB6AB /* Selection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Selection.h; path = ../../src/Selection.h; sourceTree = SOURCE_ROOT; };
 		114B6FB711FA7623004FB6AB /* SplitVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SplitVector.h; path = ../../src/SplitVector.h; sourceTree = SOURCE_ROOT; };
 		114B6FB811FA7623004FB6AB /* Style.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Style.h; path = ../../src/Style.h; sourceTree = SOURCE_ROOT; };
-		114B6FB911FA7623004FB6AB /* SVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SVector.h; path = ../../src/SVector.h; sourceTree = SOURCE_ROOT; };
 		114B6FBA11FA7623004FB6AB /* UniConversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UniConversion.h; path = ../../src/UniConversion.h; sourceTree = SOURCE_ROOT; };
 		114B6FBB11FA7623004FB6AB /* ViewStyle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ViewStyle.h; path = ../../src/ViewStyle.h; sourceTree = SOURCE_ROOT; };
 		114B6FBC11FA7623004FB6AB /* XPM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XPM.h; path = ../../src/XPM.h; sourceTree = SOURCE_ROOT; };
@@ -604,7 +602,6 @@
 				114B6FB611FA7623004FB6AB /* Selection.h */,
 				114B6FB711FA7623004FB6AB /* SplitVector.h */,
 				114B6FB811FA7623004FB6AB /* Style.h */,
-				114B6FB911FA7623004FB6AB /* SVector.h */,
 				114B6FBA11FA7623004FB6AB /* UniConversion.h */,
 				114B6FBB11FA7623004FB6AB /* ViewStyle.h */,
 				114B6FBC11FA7623004FB6AB /* XPM.h */,
@@ -741,7 +738,6 @@
 				114B6FD111FA7623004FB6AB /* Selection.h in Headers */,
 				114B6FD211FA7623004FB6AB /* SplitVector.h in Headers */,
 				114B6FD311FA7623004FB6AB /* Style.h in Headers */,
-				114B6FD411FA7623004FB6AB /* SVector.h in Headers */,
 				114B6FD511FA7623004FB6AB /* UniConversion.h in Headers */,
 				114B6FD611FA7623004FB6AB /* ViewStyle.h in Headers */,
 				114B6FD711FA7623004FB6AB /* XPM.h in Headers */,
