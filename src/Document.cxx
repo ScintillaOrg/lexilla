@@ -2068,10 +2068,9 @@ int Document::BraceMatch(int position, int /*maxReStyle*/) {
  */
 class BuiltinRegex : public RegexSearchBase {
 public:
-	BuiltinRegex(CharClassify *charClassTable) : search(charClassTable), substituted(NULL) {}
+	BuiltinRegex(CharClassify *charClassTable) : search(charClassTable) {}
 
 	virtual ~BuiltinRegex() {
-		delete substituted;
 	}
 
 	virtual long FindText(Document *doc, int minPos, int maxPos, const char *s,
@@ -2082,7 +2081,7 @@ public:
 
 private:
 	RESearch search;
-	char *substituted;
+	std::string substituted;
 };
 
 // Define a way for the Regular Expression code to access the document
@@ -2204,86 +2203,56 @@ long BuiltinRegex::FindText(Document *doc, int minPos, int maxPos, const char *s
 }
 
 const char *BuiltinRegex::SubstituteByPosition(Document *doc, const char *text, int *length) {
-	delete []substituted;
-	substituted = 0;
+	substituted.clear();
 	DocumentIndexer di(doc, doc->Length());
 	if (!search.GrabMatches(di))
 		return 0;
-	unsigned int lenResult = 0;
-	for (int i = 0; i < *length; i++) {
-		if (text[i] == '\\') {
-			if (text[i + 1] >= '0' && text[i + 1] <= '9') {
-				unsigned int patNum = text[i + 1] - '0';
-				lenResult += search.eopat[patNum] - search.bopat[patNum];
-				i++;
-			} else {
-				switch (text[i + 1]) {
-				case 'a':
-				case 'b':
-				case 'f':
-				case 'n':
-				case 'r':
-				case 't':
-				case 'v':
-				case '\\':
-					i++;
-				}
-				lenResult++;
-			}
-		} else {
-			lenResult++;
-		}
-	}
-	substituted = new char[lenResult + 1];
-	char *o = substituted;
 	for (int j = 0; j < *length; j++) {
 		if (text[j] == '\\') {
 			if (text[j + 1] >= '0' && text[j + 1] <= '9') {
 				unsigned int patNum = text[j + 1] - '0';
 				unsigned int len = search.eopat[patNum] - search.bopat[patNum];
 				if (search.pat[patNum])	// Will be null if try for a match that did not occur
-					memcpy(o, search.pat[patNum], len);
-				o += len;
+					substituted.append(search.pat[patNum], len);
 				j++;
 			} else {
 				j++;
 				switch (text[j]) {
 				case 'a':
-					*o++ = '\a';
+					substituted.push_back('\a');
 					break;
 				case 'b':
-					*o++ = '\b';
+					substituted.push_back('\b');
 					break;
 				case 'f':
-					*o++ = '\f';
+					substituted.push_back('\f');
 					break;
 				case 'n':
-					*o++ = '\n';
+					substituted.push_back('\n');
 					break;
 				case 'r':
-					*o++ = '\r';
+					substituted.push_back('\r');
 					break;
 				case 't':
-					*o++ = '\t';
+					substituted.push_back('\t');
 					break;
 				case 'v':
-					*o++ = '\v';
+					substituted.push_back('\v');
 					break;
 				case '\\':
-					*o++ = '\\';
+					substituted.push_back('\\');
 					break;
 				default:
-					*o++ = '\\';
+					substituted.push_back('\\');
 					j--;
 				}
 			}
 		} else {
-			*o++ = text[j];
+			substituted.push_back(text[j]);
 		}
 	}
-	*o = '\0';
-	*length = lenResult;
-	return substituted;
+	*length = static_cast<int>(substituted.length());
+	return substituted.c_str();
 }
 
 #ifndef SCI_OWNREGEX
