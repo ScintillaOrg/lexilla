@@ -133,7 +133,7 @@ void ScintillaEditBase::wheelEvent(QWheelEvent *event)
 		else
 			QAbstractScrollArea::wheelEvent(event);
 	} else {
-		if (event->modifiers() & Qt::ControlModifier) {
+		if (QApplication::keyboardModifiers() & Qt::ControlModifier) {
 			// Zoom! We play with the font sizes in the styles.
 			// Number of steps/line is ignored, we just care if sizing up or down
 			if (event->delta() > 0) {
@@ -178,7 +178,7 @@ void ScintillaEditBase::keyPressEvent(QKeyEvent *event)
 {
 	// All keystrokes containing the meta modifier are
 	// assumed to be shortcuts not handled by scintilla.
-	if (event->modifiers() & Qt::MetaModifier) {
+	if (QApplication::keyboardModifiers() & Qt::MetaModifier) {
 		QAbstractScrollArea::keyPressEvent(event);
 		emit keyPressed(event);
 		return;
@@ -211,9 +211,9 @@ void ScintillaEditBase::keyPressEvent(QKeyEvent *event)
 		default:                    key = event->key(); break;
 	}
 
-	bool shift = event->modifiers() & Qt::ShiftModifier;
-	bool ctrl  = event->modifiers() & Qt::ControlModifier;
-	bool alt   = event->modifiers() & Qt::AltModifier;
+	bool shift = QApplication::keyboardModifiers() & Qt::ShiftModifier;
+	bool ctrl  = QApplication::keyboardModifiers() & Qt::ControlModifier;
+	bool alt   = QApplication::keyboardModifiers() & Qt::AltModifier;
 
 	bool consumed = false;
 	bool added = sqt->KeyDown(key, shift, ctrl, alt, &consumed) != 0;
@@ -281,14 +281,14 @@ void ScintillaEditBase::mousePressEvent(QMouseEvent *event)
 	bool button = event->button() == Qt::LeftButton;
 
 	if (button) {
-		bool shift = event->modifiers() & Qt::ShiftModifier;
-		bool ctrl  = event->modifiers() & Qt::ControlModifier;
+		bool shift = QApplication::keyboardModifiers() & Qt::ShiftModifier;
+		bool ctrl  = QApplication::keyboardModifiers() & Qt::ControlModifier;
 #ifdef Q_WS_X11
 		// On X allow choice of rectangular modifier since most window
 		// managers grab alt + click for moving windows.
-		bool alt   = event->modifiers() & modifierTranslated(sqt->rectangularSelectionModifier);
+		bool alt   = QApplication::keyboardModifiers() & modifierTranslated(sqt->rectangularSelectionModifier);
 #else
-		bool alt   = event->modifiers() & Qt::AltModifier;
+		bool alt   = QApplication::keyboardModifiers() & Qt::AltModifier;
 #endif
 
 		sqt->ButtonDown(pos, time.elapsed(), shift, ctrl, alt);
@@ -298,13 +298,13 @@ void ScintillaEditBase::mousePressEvent(QMouseEvent *event)
 void ScintillaEditBase::mouseReleaseEvent(QMouseEvent *event)
 {
 	Point point = PointFromQPoint(event->pos());
-	bool ctrl  = event->modifiers() & Qt::ControlModifier;
+	bool ctrl  = QApplication::keyboardModifiers() & Qt::ControlModifier;
 	if (event->button() == Qt::LeftButton)
 		sqt->ButtonUp(point, time.elapsed(), ctrl);
 
 	int pos = send(SCI_POSITIONFROMPOINT, point.x, point.y);
 	int line = send(SCI_LINEFROMPOSITION, pos);
-	int modifiers = event->modifiers();
+	int modifiers = QApplication::keyboardModifiers();
 
 	emit textAreaClicked(line, modifiers);
 	emit buttonReleased(event);
