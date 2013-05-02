@@ -450,16 +450,20 @@
 	appearance used for Asian language input composition.
 	</li>
 	<li>
-	On Cocoa implement font quality setting.
+	On Cocoa, implement font quality setting.
 	<a href="http://sourceforge.net/p/scintilla/feature-requests/988/">Feature #988.</a>
 	</li>
 	<li>
-	On Cocoa implement automatic enabling of commands and added clear command.
+	On Cocoa, implement automatic enabling of commands and added clear command.
 	<a href="http://sourceforge.net/p/scintilla/feature-requests/987/">Feature #987.</a>
 	</li>
 	<li>
 	Haskell folder improved.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1459/">Bug #1459 </a>.
+	</li>
+	<li>
+	LaTeX lexer bug fixed for Unicode character following '\'.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1468/">Bug #1468 </a>.
 	</li>
 	<li>
 	PowerShell lexer recognises here strings and doccomment keywords.
@@ -482,6 +486,12 @@
 	<li>
 	Fix crash on Cocoa when view deallocated.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1466/">Bug #1466</a>.
+	</li>
+	<li>
+	Fix Qt window positioning to not assume the top right of a monitor is at 0, 0.
+	</li>
+	<li>
+	Fix Qt to not track mouse when widget is hidden.
 	</li>
 	<li>
 	Fix drawing on Windows with Direct2D when returning from lock screen.
