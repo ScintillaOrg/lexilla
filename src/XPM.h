@@ -48,30 +48,6 @@ public:
 };
 
 /**
- * A collection of pixmaps indexed by integer id.
- */
-class XPMSet {
-	XPM **set;	///< The stored XPMs.
-	int len;	///< Current number of XPMs.
-	int maximum;	///< Current maximum number of XPMs, increased by steps if reached.
-	int height;	///< Memorize largest height of the set.
-	int width;	///< Memorize largest width of the set.
-public:
-	XPMSet();
-	~XPMSet();
-	/// Remove all XPMs.
-	void Clear();
-	/// Add a XPM.
-	void Add(int ident, const char *textForm);
-	/// Get XPM by id.
-	XPM *Get(int ident);
-	/// Give the largest height of the set.
-	int GetHeight();
-	/// Give the largest width of the set.
-	int GetWidth();
-};
-
-/**
  * An translucent image stoed as a sequence of RGBA bytes.
  */
 class RGBAImage {
