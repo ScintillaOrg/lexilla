@@ -202,6 +202,8 @@
 
 #include <stdlib.h>
 
+#include <string>
+
 #include "CharClassify.h"
 #include "RESearch.h"
 
@@ -265,36 +267,29 @@ void RESearch::Init() {
 	sta = NOP;                  /* status of lastpat */
 	bol = 0;
 	for (int i = 0; i < MAXTAG; i++)
-		pat[i] = 0;
+		pat[i].clear();
 	for (int j = 0; j < BITBLK; j++)
 		bittab[j] = 0;
 }
 
 void RESearch::Clear() {
 	for (int i = 0; i < MAXTAG; i++) {
-		delete []pat[i];
-		pat[i] = 0;
+		pat[i].clear();
 		bopat[i] = NOTFOUND;
 		eopat[i] = NOTFOUND;
 	}
 }
 
-bool RESearch::GrabMatches(CharacterIndexer &ci) {
-	bool success = true;
+void RESearch::GrabMatches(CharacterIndexer &ci) {
 	for (unsigned int i = 0; i < MAXTAG; i++) {
 		if ((bopat[i] != NOTFOUND) && (eopat[i] != NOTFOUND)) {
 			unsigned int len = eopat[i] - bopat[i];
-			pat[i] = new char[len + 1];
-			if (pat[i]) {
-				for (unsigned int j = 0; j < len; j++)
-					pat[i][j] = ci.CharAt(bopat[i] + j);
-				pat[i][len] = '\0';
-			} else {
-				success = false;
-			}
+			pat[i] = std::string(len+1, '\0');
+			for (unsigned int j = 0; j < len; j++)
+				pat[i][j] = ci.CharAt(bopat[i] + j);
+			pat[i][len] = '\0';
 		}
 	}
-	return success;
 }
 
 void RESearch::ChSet(unsigned char c) {

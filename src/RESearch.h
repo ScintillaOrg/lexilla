@@ -33,7 +33,7 @@ class RESearch {
 public:
 	RESearch(CharClassify *charClassTable);
 	~RESearch();
-	bool GrabMatches(CharacterIndexer &ci);
+	void GrabMatches(CharacterIndexer &ci);
 	const char *Compile(const char *pattern, int length, bool caseSensitive, bool posix);
 	int Execute(CharacterIndexer &ci, int lp, int endp);
 
@@ -43,7 +43,7 @@ public:
 
 	int bopat[MAXTAG];
 	int eopat[MAXTAG];
-	char *pat[MAXTAG];
+	std::string pat[MAXTAG];
 
 private:
 	void Init();

@@ -2227,15 +2227,14 @@ long BuiltinRegex::FindText(Document *doc, int minPos, int maxPos, const char *s
 const char *BuiltinRegex::SubstituteByPosition(Document *doc, const char *text, int *length) {
 	substituted.clear();
 	DocumentIndexer di(doc, doc->Length());
-	if (!search.GrabMatches(di))
-		return 0;
+	search.GrabMatches(di);
 	for (int j = 0; j < *length; j++) {
 		if (text[j] == '\\') {
 			if (text[j + 1] >= '0' && text[j + 1] <= '9') {
 				unsigned int patNum = text[j + 1] - '0';
 				unsigned int len = search.eopat[patNum] - search.bopat[patNum];
-				if (search.pat[patNum])	// Will be null if try for a match that did not occur
-					substituted.append(search.pat[patNum], len);
+				if (!search.pat[patNum].empty())	// Will be null if try for a match that did not occur
+					substituted.append(search.pat[patNum].c_str(), len);
 				j++;
 			} else {
 				j++;
