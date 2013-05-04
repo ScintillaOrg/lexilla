@@ -2062,45 +2062,24 @@ struct ListItemData {
 	int pixId;
 };
 
-#define _ROUND2(n,pow2) \
-	( ( (n) + (pow2) - 1) & ~((pow2) - 1) )
-
 class LineToItem {
-	char *words;
-	int wordsCount;
-	int wordsSize;
+	std::vector<char> words;
 
-	ListItemData *data;
-	int len;
-	int count;
-
-private:
-	void FreeWords() {
-		delete []words;
-		words = NULL;
-		wordsCount = 0;
-		wordsSize = 0;
-	}
-	char *AllocWord(const char *word);
+	std::vector<ListItemData> data;
 
 public:
-	LineToItem() : words(NULL), wordsCount(0), wordsSize(0), data(NULL), len(0), count(0) {
+	LineToItem() {
 	}
 	~LineToItem() {
 		Clear();
 	}
 	void Clear() {
-		FreeWords();
-		delete []data;
-		data = NULL;
-		len = 0;
-		count = 0;
+		words.clear();
+		data.clear();
 	}
 
-	ListItemData *Append(const char *text, int value);
-
 	ListItemData Get(int index) const {
-		if (index >= 0 && index < count) {
+		if (index >= 0 && index < static_cast<int>(data.size())) {
 			return data[index];
 		} else {
 			ListItemData missing = {"", -1};
@@ -2108,55 +2087,19 @@ public:
 		}
 	}
 	int Count() const {
-		return count;
+		return static_cast<int>(data.size());
 	}
 
-	ListItemData *AllocItem();
+	void AllocItem(const char *text, int pixId) {
+		ListItemData lid = { text, pixId };
+		data.push_back(lid);
+	}
 
-	void SetWords(char *s) {
-		words = s;	// N.B. will be deleted on destruction
+	char *SetWords(const char *s) {
+		words = std::vector<char>(s, s+strlen(s)+1);
+		return words.data();
 	}
 };
-
-char *LineToItem::AllocWord(const char *text) {
-	int chars = static_cast<int>(strlen(text) + 1);
-	int newCount = wordsCount + chars;
-	if (newCount > wordsSize) {
-		wordsSize = _ROUND2(newCount * 2, 8192);
-		char *wordsNew = new char[wordsSize];
-		memcpy(wordsNew, words, wordsCount);
-		int offset = wordsNew - words;
-		for (int i=0; i<count; i++)
-			data[i].text += offset;
-		delete []words;
-		words = wordsNew;
-	}
-	char *s = &words[wordsCount];
-	wordsCount = newCount;
-	strncpy(s, text, chars);
-	return s;
-}
-
-ListItemData *LineToItem::AllocItem() {
-	if (count >= len) {
-		int lenNew = _ROUND2((count+1) * 2, 1024);
-		ListItemData *dataNew = new ListItemData[lenNew];
-		memcpy(dataNew, data, count * sizeof(ListItemData));
-		delete []data;
-		data = dataNew;
-		len = lenNew;
-	}
-	ListItemData *item = &data[count];
-	count++;
-	return item;
-}
-
-ListItemData *LineToItem::Append(const char *text, int imageIndex) {
-	ListItemData *item = AllocItem();
-	item->text = AllocWord(text);
-	item->pixId = imageIndex;
-	return item;
-}
 
 const TCHAR ListBoxX_ClassName[] = TEXT("ListBoxX");
 
@@ -2190,7 +2133,7 @@ class ListBoxX : public ListBox {
 	int wheelDelta; // mouse wheel residue
 
 	HWND GetHWND() const;
-	void AppendListItem(const char *startword, const char *numword);
+	void AppendListItem(const char *text, const char *numword);
 	void AdjustWindowRect(PRectangle *rc) const;
 	int ItemHeight() const;
 	int MinClientWidth() const;
@@ -2365,16 +2308,9 @@ void ListBoxX::Clear() {
 	lti.Clear();
 }
 
-void ListBoxX::Append(char *s, int type) {
-	int index = ::SendMessage(lb, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(s));
-	if (index < 0)
-		return;
-	ListItemData *newItem = lti.Append(s, type);
-	unsigned int len = static_cast<unsigned int>(strlen(s));
-	if (maxItemCharacters < len) {
-		maxItemCharacters = len;
-		widestItem = newItem->text;
-	}
+void ListBoxX::Append(char *, int) {
+	// This method is no longer called in Scintilla
+	PLATFORM_ASSERT(false);
 }
 
 int ListBoxX::Length() {
@@ -2507,24 +2443,21 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 	}
 }
 
-void ListBoxX::AppendListItem(const char *startword, const char *numword) {
-	ListItemData *item = lti.AllocItem();
-	item->text = startword;
+void ListBoxX::AppendListItem(const char *text, const char *numword) {
+	int pixId = -1;
 	if (numword) {
-		int pixId = 0;
+		pixId = 0;
 		char ch;
 		while ((ch = *++numword) != '\0') {
 			pixId = 10 * pixId + (ch - '0');
 		}
-		item->pixId = pixId;
-	} else {
-		item->pixId = -1;
 	}
 
-	unsigned int len = static_cast<unsigned int>(strlen(item->text));
+	lti.AllocItem(text, pixId);
+	unsigned int len = static_cast<unsigned int>(strlen(text));
 	if (maxItemCharacters < len) {
 		maxItemCharacters = len;
-		widestItem = item->text;
+		widestItem = text;
 	}
 }
 
@@ -2534,9 +2467,7 @@ void ListBoxX::SetList(const char *list, char separator, char typesep) {
 	SetRedraw(false);
 	Clear();
 	size_t size = strlen(list);
-	char *words = new char[size+1];
-	lti.SetWords(words);
-	memcpy(words, list, size+1);
+	char *words = lti.SetWords(list);
 	char *startword = words;
 	char *numword = NULL;
 	for (size_t i=0; i < size; i++) {
