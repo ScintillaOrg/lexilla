@@ -141,7 +141,7 @@ static inline bool IsCommentStyle(int style) {
    return (style >= SCE_HA_COMMENTLINE && style <= SCE_HA_COMMENTBLOCK3);
 }
 
-inline int StyleFromNestLevel(const int nestLevel) {
+inline int StyleFromNestLevel(const unsigned int nestLevel) {
       return SCE_HA_COMMENTBLOCK + (nestLevel % 3);
    }
 
@@ -228,11 +228,21 @@ class LexerHaskell : public ILexer {
    OptionsHaskell options;
    OptionSetHaskell osHaskell;
 
-   inline void skipMagicHash(StyleContext &sc, const bool twoHashes) {
+   enum HashCount {
+       oneHash
+      ,twoHashes
+      ,unlimitedHashes
+   };
+
+   inline void skipMagicHash(StyleContext &sc, const HashCount hashes) {
       if (options.magicHash && sc.ch == '#') {
          sc.Forward();
-         if (twoHashes && sc.ch == '#') {
+         if (hashes == twoHashes && sc.ch == '#') {
             sc.Forward();
+         } else if (hashes == unlimitedHashes) {
+            while (sc.ch == '#') {
+               sc.Forward();
+            }
          }
       }
    }
@@ -358,6 +368,8 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
    int nestLevel = state >> 3;
 
    int base = 10;
+   bool dot = false;
+
    bool inDashes = false;
 
    assert(!(IsCommentBlockStyle(initStyle) && nestLevel <= 0));
@@ -366,9 +378,12 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
       // Check for state end
 
       // For line numbering (and by extension, nested comments) to work,
-      // states should either only forward one character at a time, or check
-      // that characters they're skipping are not newlines. If states match on
-      // line end, they should skip it to prevent double counting.
+      // states should always forward one character at a time.
+      // states should match on line ends using OnLineEnd function.
+      // If a state sometimes does _not_ forward a character, it should check
+      // first if it's not on a line end and forward otherwise.
+      // If a state forwards more than one character, it should check every time
+      // that it is not a line end and cease forwarding otherwise.
       if (sc.atLineEnd) {
          // Remember the line state for future incremental lexing
          styler.SetLineState(lineCurrent, (nestLevel << 3) | mode);
@@ -418,8 +433,8 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
          if (reserved_operators.InList(s))
             style = SCE_HA_RESERVED_OPERATOR;
 
-         styler.ColourTo(sc.currentPos - 1, style);
-         sc.ChangeState(SCE_HA_DEFAULT);
+         sc.ChangeState(style);
+         sc.SetState(SCE_HA_DEFAULT);
       }
          // String
       else if (sc.state == SCE_HA_STRING) {
@@ -428,7 +443,7 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
             sc.ForwardSetState(SCE_HA_DEFAULT);
          } else if (sc.ch == '\"') {
             sc.Forward();
-            skipMagicHash(sc, false);
+            skipMagicHash(sc, oneHash);
             sc.SetState(SCE_HA_DEFAULT);
          } else if (sc.ch == '\\') {
             sc.Forward(2);
@@ -443,7 +458,7 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
             sc.ForwardSetState(SCE_HA_DEFAULT);
          } else if (sc.ch == '\'') {
             sc.Forward();
-            skipMagicHash(sc, false);
+            skipMagicHash(sc, oneHash);
             sc.SetState(SCE_HA_DEFAULT);
          } else if (sc.ch == '\\') {
             sc.Forward(2);
@@ -453,9 +468,11 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
       }
          // Number
       else if (sc.state == SCE_HA_NUMBER) {
-         if (IsADigit(sc.ch, base) ||
-            (sc.ch=='.' && IsADigit(sc.chNext, base))) {
+         if (IsADigit(sc.ch, base)) {
             sc.Forward();
+         } else if (sc.ch=='.' && dot && IsADigit(sc.chNext, base)) {
+            sc.Forward(2);
+            dot = false;
          } else if ((base == 10) &&
                     (sc.ch == 'e' || sc.ch == 'E') &&
                     (IsADigit(sc.chNext) || sc.chNext == '+' || sc.chNext == '-')) {
@@ -463,7 +480,7 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
             if (sc.ch == '+' || sc.ch == '-')
                 sc.Forward();
          } else {
-            skipMagicHash(sc, true);
+            skipMagicHash(sc, twoHashes);
             sc.SetState(SCE_HA_DEFAULT);
          }
       }
@@ -478,9 +495,6 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
          while (sc.More()) {
             if (IsAHaskellWordChar(sc.ch)) {
                sc.Forward();
-            } else if (sc.ch == '#' && options.magicHash) {
-               sc.Forward();
-               break;
             } else if (sc.ch == '.' && style == SCE_HA_CAPITAL) {
                if (IsHaskellUpperCase(sc.chNext)) {
                   sc.Forward();
@@ -501,6 +515,8 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
                break;
             }
          }
+
+         skipMagicHash(sc, unlimitedHashes);
 
          char s[100];
          sc.GetCurrent(s, sizeof(s));
@@ -544,7 +560,8 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
             }
          }
 
-         styler.ColourTo(sc.currentPos - 1, style);
+         sc.ChangeState(style);
+         sc.SetState(SCE_HA_DEFAULT);
 
          if (strcmp(s,"import") == 0 && mode != HA_MODE_FFI)
             new_mode = HA_MODE_IMPORT1;
@@ -556,7 +573,6 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
                || strcmp(s,"data") == 0)
             new_mode = HA_MODE_TYPE;
 
-         sc.ChangeState(SCE_HA_DEFAULT);
          mode = new_mode;
       }
 
@@ -580,8 +596,7 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
             sc.SetState(StyleFromNestLevel(nestLevel));
             sc.Forward(2);
             nestLevel++;
-         } else if (sc.Match('-','}')
-                 && !(mode == HA_MODE_PRAGMA && sc.chPrev == '#')) {
+         } else if (sc.Match('-','}')) {
             sc.Forward(2);
             nestLevel--;
             assert(nestLevel >= 0);
@@ -595,8 +610,7 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
       }
             // Pragma
       else if (sc.state == SCE_HA_PRAGMA) {
-         // GHC pragma end should always be indented further than it's start.
-         if (sc.Match("#-}") && !sc.atLineStart) {
+         if (sc.Match("#-}")) {
             mode = HA_MODE_DEFAULT;
             sc.Forward(3);
             sc.SetState(SCE_HA_DEFAULT);
@@ -607,7 +621,7 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
          } else if (sc.Match('{','-')) {
             sc.SetState(StyleFromNestLevel(nestLevel));
             sc.Forward(2);
-            nestLevel++;
+            nestLevel = 1;
          } else {
             sc.Forward();
          }
@@ -632,13 +646,16 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
                // Match anything starting with "0x" or "0X", too
                sc.Forward(2);
                base = 16;
+               dot = false;
             } else if (sc.ch == '0' && (sc.chNext == 'O' || sc.chNext == 'o')) {
                // Match anything starting with "0o" or "0O", too
                sc.Forward(2);
                base = 8;
+               dot = false;
             } else {
                sc.Forward();
                base = 10;
+               dot = true;
             }
             mode = HA_MODE_DEFAULT;
          }
@@ -658,7 +675,7 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
          else if (sc.Match('{','-')) {
             sc.SetState(StyleFromNestLevel(nestLevel));
             sc.Forward(2);
-            nestLevel++;
+            nestLevel = 1;
          }
          // String
          else if (sc.ch == '\"') {
@@ -728,30 +745,78 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
             sc.Forward();
          }
       }
+            // This branch should never be reached.
+      else {
+         assert(false);
+         sc.Forward();
+      }
    }
    styler.SetLineState(lineCurrent, (nestLevel << 3) | mode);
    sc.Complete();
 }
 
-static bool LineStartsWithACommentOrPreprocessor(int line, Accessor &styler) {
+// Mangled version of lexlib/Accessor.cxx IndentAmount.
+// Modified to treat comment blocks as whitespace
+// plus special case for commentline/preprocessor.
+static int HaskellIndentAmount(Accessor &styler, int line) {
+
+   // Determines the indentation level of the current line
+   // Comment blocks are treated as whitespace
+
    int pos = styler.LineStart(line);
    int eol_pos = styler.LineStart(line + 1) - 1;
 
-   for (int i = pos; i < eol_pos; i++) {
-      int style = styler.StyleAt(i);
+   char ch = styler[pos];
+   int style = styler.StyleAt(pos);
 
-      if (IsCommentStyle(style) || style == SCE_HA_PREPROCESSOR) {
-         return true;
+   int indent = 0;
+   bool inPrevPrefix = line > 0;
+
+   int posPrev = inPrevPrefix ? styler.LineStart(line-1) : 0;
+
+   while ((ch == ' ' || ch == '\t' || IsCommentBlockStyle(style)) && (pos < eol_pos)) {
+      if (inPrevPrefix) {
+         char chPrev = styler[posPrev++];
+         if (chPrev != ' ' && chPrev != '\t') {
+            inPrevPrefix = false;
+         }
       }
-
-      int ch = styler[i];
-
-      if (  ch != ' '
-         && ch != '\t') {
-         return false;
+      if (ch == '\t') {
+         indent = (indent / 8 + 1) * 8;
+      } else { // Space or comment block
+         indent++;
       }
+      pos++;
+      ch = styler[pos];
+      style = styler.StyleAt(pos);
    }
-   return true;
+
+   indent += SC_FOLDLEVELBASE;
+   // if completely empty line or the start of a comment or preprocessor...
+   if (  styler.LineStart(line) == styler.Length()
+      || ch == ' '
+      || ch == '\t'
+      || ch == '\n'
+      || ch == '\r'
+      || IsCommentStyle(style)
+      || style == SCE_HA_PREPROCESSOR)
+      return indent | SC_FOLDLEVELWHITEFLAG;
+   else
+      return indent;
+}
+
+static inline int IndentAmountWithOffset(Accessor &styler, int line) {
+   int indent = HaskellIndentAmount(styler, line);
+   int indentLevel = indent & SC_FOLDLEVELNUMBERMASK;
+   return indentLevel == (SC_FOLDLEVELBASE & SC_FOLDLEVELNUMBERMASK)
+            ? indent
+            : (indentLevel + INDENT_OFFSET) | (indent & ~SC_FOLDLEVELNUMBERMASK);
+}
+
+static inline int RemoveIndentOffset(int indentLevel) {
+   return indentLevel == (SC_FOLDLEVELBASE & SC_FOLDLEVELNUMBERMASK)
+         ? indentLevel
+         : indentLevel - INDENT_OFFSET;
 }
 
 void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // initStyle
@@ -772,26 +837,19 @@ void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // ini
    // for any white space lines
    // and so we can fix any preceding fold level (which is why we go back
    // at least one line in all cases)
-   int spaceFlags = 0;
    int lineCurrent = styler.GetLine(startPos);
    bool importHere = LineContainsImport(lineCurrent, styler);
-   int indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, NULL);
+   int indentCurrent = IndentAmountWithOffset(styler, lineCurrent);
 
    while (lineCurrent > 0) {
       lineCurrent--;
       importHere = LineContainsImport(lineCurrent, styler);
-      indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, NULL);
-      if (!(indentCurrent & SC_FOLDLEVELWHITEFLAG) &&
-               !LineStartsWithACommentOrPreprocessor(lineCurrent, styler))
+      indentCurrent = IndentAmountWithOffset(styler, lineCurrent);
+      if (!(indentCurrent & SC_FOLDLEVELWHITEFLAG))
          break;
    }
 
    int indentCurrentLevel = indentCurrent & SC_FOLDLEVELNUMBERMASK;
-   int indentCurrentMask = indentCurrent & ~SC_FOLDLEVELNUMBERMASK;
-
-   if (indentCurrentLevel != (SC_FOLDLEVELBASE & SC_FOLDLEVELNUMBERMASK)) {
-      indentCurrent = (indentCurrentLevel + INDENT_OFFSET) | indentCurrentMask;
-   }
 
    if (lineCurrent <= firstImportLine) {
       firstImportLine = -1; // readjust first import position
@@ -801,11 +859,13 @@ void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // ini
       if (firstImportLine == -1) {
          firstImportLine = lineCurrent;
       }
+      indentCurrentLevel = RemoveIndentOffset(indentCurrentLevel);
       if (firstImportLine != lineCurrent) {
          indentCurrentLevel++;
       }
-      indentCurrent = indentCurrentLevel | indentCurrentMask;
    }
+
+   indentCurrent = indentCurrentLevel | (indentCurrent & ~SC_FOLDLEVELNUMBERMASK);
 
    // Process all characters to end of requested range
    //that hangs over the end of the range.  Cap processing in all cases
@@ -814,12 +874,13 @@ void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // ini
 
       // Gather info
       int lineNext = lineCurrent + 1;
-      importHere = LineContainsImport(lineNext, styler);
+      importHere = false;
       int indentNext = indentCurrent;
 
       if (lineNext <= docLines) {
          // Information about next line is only available if not at end of document
-         indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
+         importHere = LineContainsImport(lineNext, styler);
+         indentNext = IndentAmountWithOffset(styler, lineNext);
       }
       if (indentNext & SC_FOLDLEVELWHITEFLAG)
          indentNext = SC_FOLDLEVELWHITEFLAG | indentCurrentLevel;
@@ -829,30 +890,25 @@ void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // ini
       // which effectively folds them into surrounding code rather
       // than screwing up folding.
 
-      while ((lineNext < docLines) &&
-            ((indentNext & SC_FOLDLEVELWHITEFLAG) ||
-             (lineNext <= docLines && LineStartsWithACommentOrPreprocessor(lineNext, styler)))) {
+      while (lineNext < docLines && (indentNext & SC_FOLDLEVELWHITEFLAG)) {
          lineNext++;
          importHere = LineContainsImport(lineNext, styler);
-         indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
+         indentNext = IndentAmountWithOffset(styler, lineNext);
       }
 
       int indentNextLevel = indentNext & SC_FOLDLEVELNUMBERMASK;
-      int indentNextMask = indentNext & ~SC_FOLDLEVELNUMBERMASK;
-
-      if (indentNextLevel != (SC_FOLDLEVELBASE & SC_FOLDLEVELNUMBERMASK)) {
-         indentNext = (indentNextLevel + INDENT_OFFSET) | indentNextMask;
-      }
 
       if (importHere) {
          if (firstImportLine == -1) {
             firstImportLine = lineNext;
          }
+         indentNextLevel = RemoveIndentOffset(indentNextLevel);
          if (firstImportLine != lineNext) {
             indentNextLevel++;
          }
-         indentNext = indentNextLevel | indentNextMask;
       }
+
+      indentNext = indentNextLevel | (indentNext & ~SC_FOLDLEVELNUMBERMASK);
 
       const int levelBeforeComments = Maximum(indentCurrentLevel,indentNextLevel);
 
@@ -865,7 +921,7 @@ void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // ini
       int skipLevel = indentNextLevel;
 
       while (--skipLine > lineCurrent) {
-         int skipLineIndent = styler.IndentAmount(skipLine, &spaceFlags, NULL);
+         int skipLineIndent = IndentAmountWithOffset(styler, skipLine);
 
          if (options.foldCompact) {
             if ((skipLineIndent & SC_FOLDLEVELNUMBERMASK) > indentNextLevel) {
@@ -877,8 +933,7 @@ void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // ini
             styler.SetLevel(skipLine, skipLevel | whiteFlag);
          } else {
             if (  (skipLineIndent & SC_FOLDLEVELNUMBERMASK) > indentNextLevel
-               && !(skipLineIndent & SC_FOLDLEVELWHITEFLAG)
-               && !LineStartsWithACommentOrPreprocessor(skipLine, styler)) {
+               && !(skipLineIndent & SC_FOLDLEVELWHITEFLAG)) {
                skipLevel = levelBeforeComments;
             }
 
@@ -895,7 +950,9 @@ void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // ini
 
       // Set fold level for this line and move to next line
       styler.SetLevel(lineCurrent, options.foldCompact ? lev : lev & ~SC_FOLDLEVELWHITEFLAG);
+
       indentCurrent = indentNext;
+      indentCurrentLevel = indentNextLevel;
       lineCurrent = lineNext;
    }
 
