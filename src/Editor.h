@@ -91,20 +91,13 @@ public:
 		Free();
 	}
 	void Free() {
-		Set(0, 0, 0, 0, false, false);
-	}
-	void Set(char *s_, int len_, int codePage_, int characterSet_, bool rectangular_, bool lineCopy_) {
 		delete []s;
-		s = s_;
-		if (s)
-			len = len_;
-		else
-			len = 0;
-		codePage = codePage_;
-		characterSet = characterSet_;
-		rectangular = rectangular_;
-		lineCopy = lineCopy_;
-		FixSelectionForClipboard();
+		s = 0;
+		len = 0;
+		rectangular = false;
+		lineCopy = false;
+		codePage = 0;
+		characterSet = 0;
 	}
 	void Copy(const char *s_, int len_, int codePage_, int characterSet_, bool rectangular_, bool lineCopy_) {
 		delete []s;
