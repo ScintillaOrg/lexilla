@@ -979,30 +979,26 @@ void ListBoxImpl::SetList(const char *list, char separator, char typesep)
 	// It is borrowed from the GTK implementation.
 	Clear();
 	int count = strlen(list) + 1;
-	char *words = new char[count];
-	if (words) {
-		memcpy(words, list, count);
-		char *startword = words;
-		char *numword = NULL;
-		int i = 0;
-		for (; words[i]; i++) {
-			if (words[i] == separator) {
-				words[i] = '\0';
-				if (numword)
-					*numword = '\0';
-				Append(startword, numword?atoi(numword + 1):-1);
-				startword = words + i + 1;
-				numword = NULL;
-			} else if (words[i] == typesep) {
-				numword = words + i;
-			}
-		}
-		if (startword) {
+	std::vector<char> words(list, list+count);
+	char *startword = words.data();
+	char *numword = NULL;
+	int i = 0;
+	for (; words[i]; i++) {
+		if (words[i] == separator) {
+			words[i] = '\0';
 			if (numword)
 				*numword = '\0';
 			Append(startword, numword?atoi(numword + 1):-1);
+			startword = words.data() + i + 1;
+			numword = NULL;
+		} else if (words[i] == typesep) {
+			numword = words.data() + i;
 		}
-		delete []words;
+	}
+	if (startword) {
+		if (numword)
+			*numword = '\0';
+		Append(startword, numword?atoi(numword + 1):-1);
 	}
 }
 

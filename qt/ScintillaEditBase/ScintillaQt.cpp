@@ -339,9 +339,9 @@ void ScintillaQt::PasteFromMode(QClipboard::Mode clipboardMode_)
 	QString text = clipboard->text(clipboardMode_);
 	QByteArray utext = BytesForDocument(text);
 	int len = utext.length();
-	char *dest = Document::TransformLineEnds(&len, utext, len, pdoc->eolMode);
+	std::string dest = Document::TransformLineEnds(utext, len, pdoc->eolMode);
 	SelectionText selText;
-	selText.Set(dest, len, pdoc->dbcsCodePage, CharacterSetOfDocument(), isRectangular, false);
+	selText.Copy(dest.c_str(), dest.length(), pdoc->dbcsCodePage, CharacterSetOfDocument(), isRectangular, false);
 
 	UndoGroup ug(pdoc);
 	ClearSelection(multiPasteMode == SC_MULTIPASTE_EACH);
@@ -763,12 +763,10 @@ void ScintillaQt::Drop(const Point &point, const QMimeData *data, bool move)
 	bool rectangular = IsRectangularInMime(data);
 	QByteArray bytes = BytesForDocument(text);
 	int len = bytes.length();
-	char *dest = Document::TransformLineEnds(&len, bytes, len, pdoc->eolMode);
+	std::string dest = Document::TransformLineEnds(bytes, len, pdoc->eolMode);
 
 	SelectionPosition movePos = SPositionFromLocation(point,
 				false, false, UserVirtualSpace());
 
-	DropAt(movePos, dest, move, rectangular);
-
-	delete []dest;
+	DropAt(movePos, dest.c_str(), move, rectangular);
 }
