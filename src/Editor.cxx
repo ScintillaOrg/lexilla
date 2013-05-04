@@ -5017,10 +5017,9 @@ void Editor::ChangeCaseOfSelection(int caseMapping) {
 		SelectionRange current = sel.Range(r);
 		SelectionRange currentNoVS = current;
 		currentNoVS.ClearVirtualSpace();
-		char *text = CopyRange(currentNoVS.Start().Position(), currentNoVS.End().Position());
 		size_t rangeBytes = currentNoVS.Length();
 		if (rangeBytes > 0) {
-			std::string sText(text, rangeBytes);
+			std::string sText = RangeText(currentNoVS.Start().Position(), currentNoVS.End().Position());
 
 			std::string sMapped = CaseMapString(sText, caseMapping);
 
@@ -5043,7 +5042,6 @@ void Editor::ChangeCaseOfSelection(int caseMapping) {
 				sel.Range(r) = current;
 			}
 		}
-		delete []text;
 	}
 }
 
@@ -5055,17 +5053,15 @@ void Editor::LineTranspose() {
 		int endPrev = pdoc->LineEnd(line - 1);
 		int start = pdoc->LineStart(line);
 		int end = pdoc->LineEnd(line);
-		char *line1 = CopyRange(startPrev, endPrev);
+		std::string line1 = RangeText(startPrev, endPrev);
 		int len1 = endPrev - startPrev;
-		char *line2 = CopyRange(start, end);
+		std::string line2 = RangeText(start, end);
 		int len2 = end - start;
 		pdoc->DeleteChars(start, len2);
 		pdoc->DeleteChars(startPrev, len1);
-		pdoc->InsertString(startPrev, line2, len2);
-		pdoc->InsertString(start - len1 + len2, line1, len1);
+		pdoc->InsertString(startPrev, line2.c_str(), len2);
+		pdoc->InsertString(start - len1 + len2, line1.c_str(), len1);
 		MovePositionTo(SelectionPosition(start - len1 + len2));
-		delete []line1;
-		delete []line2;
 	}
 }
 
@@ -5088,11 +5084,10 @@ void Editor::Duplicate(bool forLine) {
 			start = SelectionPosition(pdoc->LineStart(line));
 			end = SelectionPosition(pdoc->LineEnd(line));
 		}
-		char *text = CopyRange(start.Position(), end.Position());
+		std::string text = RangeText(start.Position(), end.Position());
 		if (forLine)
 			pdoc->InsertString(end.Position(), eol, eolLen);
-		pdoc->InsertString(end.Position() + eolLen, text, SelectionRange(end, start).Length());
-		delete []text;
+		pdoc->InsertString(end.Position() + eolLen, text.c_str(), SelectionRange(end, start).Length());
 	}
 	if (sel.Count() && sel.IsRectangular()) {
 		SelectionPosition last = sel.Last();
@@ -6003,19 +5998,6 @@ static bool Close(Point pt1, Point pt2) {
 	return true;
 }
 
-char *Editor::CopyRange(int start, int end) {
-	char *text = 0;
-	if (start < end) {
-		int len = end - start;
-		text = new char[len + 1];
-		for (int i = 0; i < len; i++) {
-			text[i] = pdoc->CharAt(start + i);
-		}
-		text[len] = '\0';
-	}
-	return text;
-}
-
 std::string Editor::RangeText(int start, int end) const {
 	if (start < end) {
 		int len = end - start;
@@ -6035,21 +6017,13 @@ void Editor::CopySelectionRange(SelectionText *ss, bool allowLineCopy) {
 			int start = pdoc->LineStart(currentLine);
 			int end = pdoc->LineEnd(currentLine);
 
-			char *text = CopyRange(start, end);
-			size_t textLen = text ? strlen(text) : 0;
-			// include room for \r\n\0
-			textLen += 3;
-			char *textWithEndl = new char[textLen];
-			textWithEndl[0] = '\0';
-			if (text)
-				strcat(textWithEndl, text);
+			std::string text = RangeText(start, end);
 			if (pdoc->eolMode != SC_EOL_LF)
-				strcat(textWithEndl, "\r");
+				text.append("\r");
 			if (pdoc->eolMode != SC_EOL_CR)
-				strcat(textWithEndl, "\n");
-			ss->Set(textWithEndl, static_cast<int>(strlen(textWithEndl) + 1),
+				text.append("\n");
+			ss->Copy(text.c_str(), static_cast<int>(text.length() + 1),
 				pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false, true);
-			delete []text;
 		}
 	} else {
 		int delimiterLength = 0;
@@ -6061,7 +6035,7 @@ void Editor::CopySelectionRange(SelectionText *ss, bool allowLineCopy) {
 			}
 		}
 		size_t size = sel.Length() + delimiterLength * sel.Count();
-		char *text = new char[size + 1];
+		std::string text(size+1, '\0');
 		int j = 0;
 		std::vector<SelectionRange> rangesInOrder = sel.RangesCopy();
 		if (sel.selType == Selection::selRectangle)
@@ -6083,7 +6057,7 @@ void Editor::CopySelectionRange(SelectionText *ss, bool allowLineCopy) {
 			}
 		}
 		text[size] = '\0';
-		ss->Set(text, static_cast<int>(size + 1), pdoc->dbcsCodePage,
+		ss->Copy(text.data(), static_cast<int>(size + 1), pdoc->dbcsCodePage,
 			vs.styles[STYLE_DEFAULT].characterSet, sel.IsRectangular(), sel.selType == Selection::selLines);
 	}
 }
@@ -6092,7 +6066,8 @@ void Editor::CopyRangeToClipboard(int start, int end) {
 	start = pdoc->ClampPositionIntoDocument(start);
 	end = pdoc->ClampPositionIntoDocument(end);
 	SelectionText selectedText;
-	selectedText.Set(CopyRange(start, end), end - start + 1,
+	std::string text = RangeText(start, end);
+	selectedText.Copy(text.c_str(), end - start + 1,
 		pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false, false);
 	CopyToClipboard(selectedText);
 }
@@ -7288,18 +7263,17 @@ int Editor::WrapCount(int line) {
 void Editor::AddStyledText(char *buffer, int appendLength) {
 	// The buffer consists of alternating character bytes and style bytes
 	int textLength = appendLength / 2;
-	char *text = new char[textLength];
+	std::string text(textLength, '\0');
 	int i;
 	for (i = 0; i < textLength; i++) {
 		text[i] = buffer[i*2];
 	}
-	pdoc->InsertString(CurrentPosition(), text, textLength);
+	pdoc->InsertString(CurrentPosition(), text.c_str(), textLength);
 	for (i = 0; i < textLength; i++) {
 		text[i] = buffer[i*2+1];
 	}
 	pdoc->StartStyling(CurrentPosition(), static_cast<char>(0xff));
-	pdoc->SetStyles(textLength, text);
-	delete []text;
+	pdoc->SetStyles(textLength, text.c_str());
 	SetEmptySelection(sel.MainCaret() + textLength);
 }
 
