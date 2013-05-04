@@ -234,26 +234,23 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface* /* surface_ */, Win
   
   // Create the bitmap.
   bitmapData = new uint8_t[bitmapByteCount];
-  if (bitmapData != NULL)
-  {
-    // create the context
-    gc = CGBitmapContextCreate(bitmapData,
-                               width,
-                               height,
-                               BITS_PER_COMPONENT,
-                               bitmapBytesPerRow,
-                               colorSpace,
-                               kCGImageAlphaPremultipliedLast);
+  // create the context
+  gc = CGBitmapContextCreate(bitmapData,
+                             width,
+                             height,
+                             BITS_PER_COMPONENT,
+                             bitmapBytesPerRow,
+                             colorSpace,
+                             kCGImageAlphaPremultipliedLast);
     
-    if (gc == NULL)
-    {
-      // the context couldn't be created for some reason,
-      // and we have no use for the bitmap without the context
-      delete[] bitmapData;
-      bitmapData = NULL;
-    }
-    textLayout->setContext (gc);
+  if (gc == NULL)
+  {
+    // the context couldn't be created for some reason,
+    // and we have no use for the bitmap without the context
+    delete[] bitmapData;
+    bitmapData = NULL;
   }
+  textLayout->setContext (gc);
   
   // the context retains the color space, so we can release it
   CGColorSpaceRelease(colorSpace);
@@ -406,7 +403,7 @@ void SurfaceImpl::Polygon(Scintilla::Point *pts, int npts, ColourDesired fore,
                           ColourDesired back)
 {
   // Allocate memory for the array of points.
-  CGPoint *points = new CGPoint[npts];
+  std::vector<CGPoint> points(npts);
   
   for (int i = 0;i < npts;i++)
   {
@@ -422,15 +419,11 @@ void SurfaceImpl::Polygon(Scintilla::Point *pts, int npts, ColourDesired fore,
   PenColour(fore);
   
   // Draw the polygon
-  CGContextAddLines(gc, points, npts);
+  CGContextAddLines(gc, points.data(), npts);
   
   // Explicitly close the path, so it is closed for stroking AND filling (implicit close = filling only)
   CGContextClosePath( gc );
   CGContextDrawPath( gc, kCGPathFillStroke );
-  
-  // Deallocate memory.
-  delete points;
-  points = NULL;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1695,36 +1688,31 @@ void ListBoxImpl::SetList(const char* list, char separator, char typesep)
 {
   Clear();
   size_t count = strlen(list) + 1;
-  char* words = new char[count];
-  if (words)
+  std::vector<char> words(list, list+count);
+  char* startword = words.data();
+  char* numword = NULL;
+  int i = 0;
+  for (; words[i]; i++)
   {
-    memcpy(words, list, count);
-    char* startword = words;
-    char* numword = NULL;
-    int i = 0;
-    for (; words[i]; i++)
+    if (words[i] == separator)
     {
-      if (words[i] == separator)
-      {
-        words[i] = '\0';
-        if (numword)
-          *numword = '\0';
-        Append(startword, numword?atoi(numword + 1):-1);
-        startword = words + i + 1;
-        numword = NULL;
-      }
-      else if (words[i] == typesep)
-      {
-        numword = words + i;
-      }
-    }
-    if (startword)
-    {
+      words[i] = '\0';
       if (numword)
         *numword = '\0';
       Append(startword, numword?atoi(numword + 1):-1);
+      startword = words.data() + i + 1;
+      numword = NULL;
     }
-    delete []words;
+    else if (words[i] == typesep)
+    {
+      numword = words.data() + i;
+    }
+  }
+  if (startword)
+  {
+    if (numword)
+      *numword = '\0';
+    Append(startword, numword?atoi(numword + 1):-1);
   }
   [table reloadData];
 }

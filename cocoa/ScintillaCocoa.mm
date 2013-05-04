@@ -1476,19 +1476,18 @@ bool ScintillaCocoa::GetPasteboardData(NSPasteboard* board, SelectionText* selec
       CFStringGetBytes((CFStringRef)data, rangeAll, encoding, '?',
                        false, NULL, 0, &usedLen);
 
-      UInt8 *buffer = new UInt8[usedLen];
+      std::vector<UInt8> buffer(usedLen);
     
       CFStringGetBytes((CFStringRef)data, rangeAll, encoding, '?',
-                       false, buffer,usedLen, NULL);
+                       false, buffer.data(),usedLen, NULL);
 
       bool rectangular = bestType == ScintillaRecPboardType;
 
       int len = static_cast<int>(usedLen);
-      char *dest = Document::TransformLineEnds(&len, (char *)buffer, len, pdoc->eolMode);
+      std::string dest = Document::TransformLineEnds((char *)buffer.data(), len, pdoc->eolMode);
 
-      selectedText->Set(dest, len+1, pdoc->dbcsCodePage, 
+      selectedText->Copy(dest.c_str(), dest.length()+1, pdoc->dbcsCodePage,
                          vs.styles[STYLE_DEFAULT].characterSet , rectangular, false);
-      delete []buffer;
     }
     return true;
   }
@@ -1912,13 +1911,12 @@ int ScintillaCocoa::InsertText(NSString* input)
   CFStringGetBytes((CFStringRef)input, rangeAll, encoding, '?',
                    false, NULL, 0, &usedLen);
     
-  UInt8 *buffer = new UInt8[usedLen];
+  std::vector<UInt8> buffer(usedLen);
     
   CFStringGetBytes((CFStringRef)input, rangeAll, encoding, '?',
-                     false, buffer,usedLen, NULL);
+                     false, buffer.data(),usedLen, NULL);
     
-  AddCharUTF((char*) buffer, static_cast<unsigned int>(usedLen), false);
-  delete []buffer;
+  AddCharUTF((char*) buffer.data(), static_cast<unsigned int>(usedLen), false);
   return static_cast<int>(usedLen);
 }
 

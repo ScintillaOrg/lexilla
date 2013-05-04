@@ -1223,22 +1223,18 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 {
   NSString *result = @"";
   
-  char *buffer(0);
   const long length = mBackend->WndProc(SCI_GETSELTEXT, 0, 0);
   if (length > 0)
   {
-    buffer = new char[length + 1];
+    std::string buffer(length + 1, '\0');
     try
     {
-      mBackend->WndProc(SCI_GETSELTEXT, length + 1, (sptr_t) buffer);
+      mBackend->WndProc(SCI_GETSELTEXT, length + 1, (sptr_t) &buffer[0]);
       
-      result = [NSString stringWithUTF8String: buffer];
-      delete[] buffer;
+      result = [NSString stringWithUTF8String: buffer.c_str()];
     }
     catch (...)
     {
-      delete[] buffer;
-      buffer = 0;
     }
   }
   
@@ -1255,22 +1251,18 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 {
   NSString *result = @"";
   
-  char *buffer(0);
   const long length = mBackend->WndProc(SCI_GETLENGTH, 0, 0);
   if (length > 0)
   {
-    buffer = new char[length + 1];
+    std::string buffer(length + 1, '\0');
     try
     {
-      mBackend->WndProc(SCI_GETTEXT, length + 1, (sptr_t) buffer);
+      mBackend->WndProc(SCI_GETTEXT, length + 1, (sptr_t) &buffer[0]);
       
-      result = [NSString stringWithUTF8String: buffer];
-      delete[] buffer;
+      result = [NSString stringWithUTF8String: buffer.c_str()];
     }
     catch (...)
     {
-      delete[] buffer;
-      buffer = 0;
     }
   }
   
