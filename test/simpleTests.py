@@ -502,6 +502,30 @@ class TestSimple(unittest.TestCase):
 		self.ed.Clear()
 		self.assertEquals(self.ed.Contents(), b"1c")
 
+	def testCopyAllowLine(self):
+		lineEndType = self.ed.EOLMode
+		self.ed.EOLMode = self.ed.SC_EOL_LF
+		self.ed.AddText(5, b"a1\nb2")
+		self.ed.SetSel(1,1)
+		self.ed.CopyAllowLine()
+		self.assertEquals(self.ed.CanPaste(), 1)
+		self.ed.SetSel(0, 0)
+		self.ed.Paste()
+		self.ed.EOLMode = lineEndType
+		self.assertEquals(self.ed.Contents(), "a1\na1\nb2")
+
+	def testDuplicate(self):
+		self.ed.AddText(3, b"1b2")
+		self.ed.SetSel(1,2)
+		self.ed.SelectionDuplicate()
+		self.assertEquals(self.ed.Contents(), b"1bb2")
+
+	def testTransposeLines(self):
+		self.ed.AddText(8, b"a1\nb2\nc3")
+		self.ed.SetSel(3,3)
+		self.ed.LineTranspose()
+		self.assertEquals(self.ed.Contents(), b"b2\na1\nc3")
+
 	def testGetSet(self):
 		self.ed.SetText(0, b"abc")
 		self.assertEquals(self.ed.TextLength, 3)
