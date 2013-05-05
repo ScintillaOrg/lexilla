@@ -9069,9 +9069,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_CREATEDOCUMENT: {
 			Document *doc = new Document();
-			if (doc) {
-				doc->AddRef();
-			}
+			doc->AddRef();
 			return reinterpret_cast<sptr_t>(doc);
 		}
 
@@ -9085,11 +9083,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_CREATELOADER: {
 			Document *doc = new Document();
-			if (doc) {
-				doc->AddRef();
-				doc->Allocate(wParam);
-				doc->SetUndoCollection(false);
-			}
+			doc->AddRef();
+			doc->Allocate(wParam);
+			doc->SetUndoCollection(false);
 			return reinterpret_cast<sptr_t>(static_cast<ILoader *>(doc));
 		}
 

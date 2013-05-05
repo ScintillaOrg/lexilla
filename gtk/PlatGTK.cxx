@@ -301,11 +301,9 @@ FontID FontCached::FindOrCreate(const FontParameters &fp) {
 	}
 	if (ret == 0) {
 		FontCached *fc = new FontCached(fp);
-		if (fc) {
-			fc->next = first;
-			first = fc;
-			ret = fc->fid;
-		}
+		fc->next = first;
+		first = fc;
+		ret = fc->fid;
 	}
 	FontMutexUnlock();
 	return ret;

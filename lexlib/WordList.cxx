@@ -45,26 +45,22 @@ static char **ArrayFromWordList(char *wordlist, int *len, bool onlyLineEnds = fa
 		prev = curr;
 	}
 	char **keywords = new char *[words + 1];
-	if (keywords) {
-		words = 0;
-		prev = '\0';
-		size_t slen = strlen(wordlist);
-		for (size_t k = 0; k < slen; k++) {
-			if (!wordSeparator[static_cast<unsigned char>(wordlist[k])]) {
-				if (!prev) {
-					keywords[words] = &wordlist[k];
-					words++;
-				}
-			} else {
-				wordlist[k] = '\0';
+	words = 0;
+	prev = '\0';
+	size_t slen = strlen(wordlist);
+	for (size_t k = 0; k < slen; k++) {
+		if (!wordSeparator[static_cast<unsigned char>(wordlist[k])]) {
+			if (!prev) {
+				keywords[words] = &wordlist[k];
+				words++;
 			}
-			prev = wordlist[k];
+		} else {
+			wordlist[k] = '\0';
 		}
-		keywords[words] = &wordlist[slen];
-		*len = words;
-	} else {
-		*len = 0;
+		prev = wordlist[k];
 	}
+	keywords[words] = &wordlist[slen];
+	*len = words;
 	return keywords;
 }
 

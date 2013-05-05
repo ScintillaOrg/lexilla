@@ -68,8 +68,6 @@ bool MarkerHandleSet::Contains(int handle) const {
 
 bool MarkerHandleSet::InsertHandle(int handle, int markerNum) {
 	MarkerHandleNumber *mhn = new MarkerHandleNumber;
-	if (!mhn)
-		return false;
 	mhn->handle = handle;
 	mhn->number = markerNum;
 	mhn->next = root;
@@ -200,8 +198,6 @@ int LineMarkers::AddMark(int line, int markerNum, int lines) {
 	if (!markers[line]) {
 		// Need new structure to hold marker handle
 		markers[line] = new MarkerHandleSet();
-		if (!markers[line])
-			return -1;
 	}
 	markers[line]->InsertHandle(handleCurrent, markerNum);
 

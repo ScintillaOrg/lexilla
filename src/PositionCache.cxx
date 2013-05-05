@@ -309,12 +309,10 @@ LineLayout *LineLayoutCache::Retrieve(int lineNumber, int lineCaret, int maxChar
 			if (!cache[pos]) {
 				cache[pos] = new LineLayout(maxChars);
 			}
-			if (cache[pos]) {
-				cache[pos]->lineNumber = lineNumber;
-				cache[pos]->inCache = true;
-				ret = cache[pos];
-				useCount++;
-			}
+			cache[pos]->lineNumber = lineNumber;
+			cache[pos]->inCache = true;
+			ret = cache[pos];
+			useCount++;
 		}
 	}
 
