@@ -512,7 +512,7 @@ class TestSimple(unittest.TestCase):
 		self.ed.SetSel(0, 0)
 		self.ed.Paste()
 		self.ed.EOLMode = lineEndType
-		self.assertEquals(self.ed.Contents(), "a1\na1\nb2")
+		self.assertEquals(self.ed.Contents(), b"a1\na1\nb2")
 
 	def testDuplicate(self):
 		self.ed.AddText(3, b"1b2")
