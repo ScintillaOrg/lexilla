@@ -370,12 +370,12 @@ ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 #endif
 
 #if PLAT_GTK_WIN32
- 	// There does not seem to be a real standard for indicating that the clipboard
+	// There does not seem to be a real standard for indicating that the clipboard
 	// contains a rectangular selection, so copy Developer Studio.
 	cfColumnSelect = static_cast<CLIPFORMAT>(
 		::RegisterClipboardFormat("MSDEVColumnSelect"));
 
-  	// Get intellimouse parameters when running on win32; otherwise use
+	// Get intellimouse parameters when running on win32; otherwise use
 	// reasonable default
 #ifndef SPI_GETWHEELSCROLLLINES
 #define SPI_GETWHEELSCROLLLINES   104
@@ -848,14 +848,14 @@ static std::string ConvertText(char *s, size_t len, const char *charSetDest,
 		char *pout = putf;
 		size_t conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
 		if (conversions == ((size_t)(-1))) {
-            if (!silent) {
-                if (len == 1)
-                    fprintf(stderr, "iconv %s->%s failed for %0x '%s'\n",
-                        charSetSource, charSetDest, (unsigned char)(*s), static_cast<char *>(s));
-                else
-                    fprintf(stderr, "iconv %s->%s failed for %s\n",
-                        charSetSource, charSetDest, static_cast<char *>(s));
-            }
+			if (!silent) {
+				if (len == 1)
+					fprintf(stderr, "iconv %s->%s failed for %0x '%s'\n",
+						charSetSource, charSetDest, (unsigned char)(*s), static_cast<char *>(s));
+				else
+					fprintf(stderr, "iconv %s->%s failed for %s\n",
+						charSetSource, charSetDest, static_cast<char *>(s));
+			}
 			destForm = std::string();
 		} else {
 			destForm.resize(pout - putf);
@@ -948,7 +948,7 @@ sptr_t ScintillaGTK::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 #ifdef SCI_LEXER
 		case SCI_LOADLEXERLIBRARY:
-                        LexerManager::GetInstance()->Load(reinterpret_cast<const char*>(lParam));
+			LexerManager::GetInstance()->Load(reinterpret_cast<const char*>(lParam));
 			break;
 #endif
 		case SCI_TARGETASUTF8:
@@ -1293,9 +1293,9 @@ CaseFolder *ScintillaGTK::CaseFolderForEncoding() {
 				for (int i=0x80; i<0x100; i++) {
 					char sCharacter[2] = "A";
 					sCharacter[0] = i;
-                    // Silent as some bytes have no assigned character
+					// Silent as some bytes have no assigned character
 					std::string sUTF8 = ConvertText(sCharacter, 1,
-                        "UTF-8", charSetBuffer, false, true);
+						"UTF-8", charSetBuffer, false, true);
 					if (!sUTF8.empty()) {
 						gchar *mapped = g_utf8_casefold(sUTF8.c_str(), sUTF8.length());
 						if (mapped) {
@@ -1554,7 +1554,7 @@ void ScintillaGTK::ReceivedDrop(GtkSelectionData *selection_data) {
 		const char *data = reinterpret_cast<const char *>(DataOfGSD(selection_data));
 		std::vector<char> drop(data, data + LengthOfGSD(selection_data));
 		drop.push_back('\0');
- 		NotifyURIDropped(drop.data());
+		NotifyURIDropped(drop.data());
 	} else if ((TypeOfGSD(selection_data) == GDK_TARGET_STRING) || (TypeOfGSD(selection_data) == atomUTF8)) {
 		if (TypeOfGSD(selection_data) > 0) {
 			SelectionText selText;
@@ -1860,8 +1860,7 @@ gint ScintillaGTK::MouseRelease(GtkWidget *widget, GdkEventButton *event) {
 
 // win32gtk and GTK >= 2 use SCROLL_* events instead of passing the
 // button4/5/6/7 events to the GTK app
-gint ScintillaGTK::ScrollEvent(GtkWidget *widget,
-                               GdkEventScroll *event) {
+gint ScintillaGTK::ScrollEvent(GtkWidget *widget, GdkEventScroll *event) {
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	try {
 
