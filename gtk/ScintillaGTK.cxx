@@ -1317,6 +1317,24 @@ CaseFolder *ScintillaGTK::CaseFolderForEncoding() {
 	}
 }
 
+namespace {
+
+struct CaseMapper {
+	gchar *mapped;	// Must be freed with g_free
+	CaseMapper(const std::string &sUTF8, bool toUpperCase) {
+		if (toUpperCase) {
+			mapped = g_utf8_strup(sUTF8.c_str(), sUTF8.length());
+		} else {
+			mapped = g_utf8_strdown(sUTF8.c_str(), sUTF8.length());
+		}
+	}
+	~CaseMapper() {
+		g_free(mapped);
+	}
+};
+
+}
+
 std::string ScintillaGTK::CaseMapString(const std::string &s, int caseMapping) {
 	if (s.size() == 0)
 		return std::string();
@@ -1325,28 +1343,17 @@ std::string ScintillaGTK::CaseMapString(const std::string &s, int caseMapping) {
 		return s;
 
 	const char *charSetBuffer = CharacterSetID();
-	std::string sUTF8 = s;
 
-	// Change text to UTF-8
-	if (!IsUnicodeMode() && *charSetBuffer) {
-		sUTF8 = ConvertText(const_cast<char *>(s.c_str()), s.length(),
-			"UTF-8", charSetBuffer, false);
-	}
-	gchar *mapped;	// Must be freed with g_free
-	if (caseMapping == cmUpper) {
-		mapped = g_utf8_strup(sUTF8.c_str(), sUTF8.length());
+	if (IsUnicodeMode() || !*charSetBuffer) {
+		CaseMapper mapper(s, caseMapping == cmUpper);
+		return std::string(mapper.mapped, strlen(mapper.mapped));
 	} else {
-		mapped = g_utf8_strdown(sUTF8.c_str(), sUTF8.length());
+		// Change text to UTF-8
+		std::string sUTF8 = ConvertText(const_cast<char *>(s.c_str()), s.length(),
+			"UTF-8", charSetBuffer, false);
+		CaseMapper mapper(sUTF8, caseMapping == cmUpper);
+		return ConvertText(mapper.mapped, strlen(mapper.mapped), charSetBuffer, "UTF-8", false);
 	}
-	int mappedLength = strlen(mapped);
-	std::string ret(mapped, mappedLength);
-
-	if (!IsUnicodeMode() && *charSetBuffer) {
-		ret = ConvertText(mapped, mappedLength, charSetBuffer, "UTF-8", false);
-	}
-
-	g_free(mapped);
-	return ret;
 }
 
 int ScintillaGTK::KeyDefault(int key, int modifiers) {
