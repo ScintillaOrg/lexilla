@@ -41,7 +41,7 @@ QByteArray ScintillaEdit::get_text_range(int start, int end) {
     QByteArray ba(length+1, '\0');
     struct TextRange tr = {{start, end}, ba.data()};
 
-    length = send(SCI_GETTEXTRANGE, 0, (sptr_t)&tr);
+    send(SCI_GETTEXTRANGE, 0, (sptr_t)&tr);
     ba.chop(1); // Remove extra NUL
 
     return ba;
