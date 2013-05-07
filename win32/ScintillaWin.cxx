@@ -1770,7 +1770,7 @@ void ScintillaWin::Paste() {
 				unsigned int bytes = memUSelection.Size();
 				len = UTF8Length(uptr, bytes / 2);
 				putf.resize(len + 1);
-				UTF8FromUTF16(uptr, bytes / 2, putf.data(), len);
+				UTF8FromUTF16(uptr, bytes / 2, &putf[0], len);
 			} else {
 				// CF_UNICODETEXT available, but not in Unicode mode
 				// Convert from Unicode to current Scintilla code page
@@ -1779,10 +1779,10 @@ void ScintillaWin::Paste() {
 				                            NULL, 0, NULL, NULL) - 1; // subtract 0 terminator
 				putf.resize(len + 1);
 				::WideCharToMultiByte(cpDest, 0, uptr, -1,
-					                      putf.data(), len + 1, NULL, NULL);
+					                      &putf[0], len + 1, NULL, NULL);
 			}
 
-			InsertPasteText(putf.data(), len, selStart, isRectangular, isLine);
+			InsertPasteText(&putf[0], len, selStart, isRectangular, isLine);
 		}
 		memUSelection.Unlock();
 	} else {
@@ -1803,14 +1803,14 @@ void ScintillaWin::Paste() {
 					std::vector<wchar_t> uptr(len+1);
 
 					unsigned int ulen = ::MultiByteToWideChar(CP_ACP, 0,
-					                    ptr, len, uptr.data(), len+1);
+					                    ptr, len, &uptr[0], len+1);
 
-					unsigned int mlen = UTF8Length(uptr.data(), ulen);
+					unsigned int mlen = UTF8Length(&uptr[0], ulen);
 					std::vector<char> putf(mlen+1);
 						// CP_UTF8 not available on Windows 95, so use UTF8FromUTF16()
-					UTF8FromUTF16(uptr.data(), ulen, putf.data(), mlen);
+					UTF8FromUTF16(&uptr[0], ulen, &putf[0], mlen);
 
-					InsertPasteText(putf.data(), mlen, selStart, isRectangular, isLine);
+					InsertPasteText(&putf[0], mlen, selStart, isRectangular, isLine);
 				} else {
 					InsertPasteText(ptr, len, selStart, isRectangular, isLine);
 				}
@@ -2562,7 +2562,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 					// Convert UTF-16 to UTF-8
 					int dataLen = UTF8Length(udata, tlen/2);
 					data.resize(dataLen+1);
-					UTF8FromUTF16(udata, tlen/2, data.data(), dataLen);
+					UTF8FromUTF16(udata, tlen/2, &data[0], dataLen);
 				} else {
 					// Convert UTF-16 to ANSI
 					//
@@ -2574,7 +2574,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 						NULL, 0, NULL, NULL) - 1; // subtract 0 terminator
 					data.resize(tlen + 1);
 					::WideCharToMultiByte(cpDest, 0, udata, -1,
-							data.data(), tlen + 1, NULL, NULL);
+							&data[0], tlen + 1, NULL, NULL);
 				}
 			}
 			memUDrop.Unlock();
@@ -2592,7 +2592,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 
 		if (!data.empty() && convertPastes) {
 			// Convert line endings of the drop into our local line-endings mode
-			std::string convertedText = Document::TransformLineEnds(data.data(), data.size() - 1, pdoc->eolMode);
+			std::string convertedText = Document::TransformLineEnds(&data[0], data.size() - 1, pdoc->eolMode);
 			data.assign(convertedText.c_str(), convertedText.c_str()+convertedText.length()+1);
 		}
 
@@ -2608,7 +2608,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 		::ScreenToClient(MainHWND(), &rpt);
 		SelectionPosition movePos = SPositionFromLocation(Point(rpt.x, rpt.y), false, false, UserVirtualSpace());
 
-		DropAt(movePos, data.data(), *pdwEffect == DROPEFFECT_MOVE, hrRectangular == S_OK);
+		DropAt(movePos, &data[0], *pdwEffect == DROPEFFECT_MOVE, hrRectangular == S_OK);
 
 		// Free data
 		if (medium.pUnkForRelease != NULL)
@@ -2748,7 +2748,7 @@ BOOL ScintillaWin::CreateSystemCaret() {
 		sysCaretHeight;
 	std::vector<char> bits(bitmapSize);
 	sysCaretBitmap = ::CreateBitmap(sysCaretWidth, sysCaretHeight, 1,
-		1, reinterpret_cast<BYTE *>(bits.data()));
+		1, reinterpret_cast<BYTE *>(&bits[0]));
 	BOOL retval = ::CreateCaret(
 		MainHWND(), sysCaretBitmap,
 		sysCaretWidth, sysCaretHeight);

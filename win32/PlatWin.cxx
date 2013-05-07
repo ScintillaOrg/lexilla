@@ -2095,7 +2095,7 @@ public:
 
 	char *SetWords(const char *s) {
 		words = std::vector<char>(s, s+strlen(s)+1);
-		return words.data();
+		return &words[0];
 	}
 };
 
