@@ -1490,15 +1490,15 @@ void SurfaceD2D::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 
 void SurfaceD2D::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) {
 	if (pRenderTarget) {
-		D2D1_ROUNDED_RECT roundedRectFill = D2D1::RoundedRect(
+		D2D1_ROUNDED_RECT roundedRectFill = {
 			D2D1::RectF(rc.left+1.0, rc.top+1.0, rc.right-1.0, rc.bottom-1.0),
-			8, 8);
+			8, 8};
 		D2DPenColour(back);
 		pRenderTarget->FillRoundedRectangle(roundedRectFill, pBrush);
 
-		D2D1_ROUNDED_RECT roundedRect = D2D1::RoundedRect(
+		D2D1_ROUNDED_RECT roundedRect = {
 			D2D1::RectF(rc.left + 0.5, rc.top+0.5, rc.right - 0.5, rc.bottom-0.5),
-			8, 8);
+			8, 8};
 		D2DPenColour(fore);
 		pRenderTarget->DrawRoundedRectangle(roundedRect, pBrush);
 	}
@@ -1517,15 +1517,16 @@ void SurfaceD2D::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fil
 			D2DPenColour(outline, alphaOutline);
 			pRenderTarget->DrawRectangle(rectOutline, pBrush);
 		} else {
-			D2D1_ROUNDED_RECT roundedRectFill = D2D1::RoundedRect(
+			const float cornerSizeF = static_cast<float>(cornerSize);
+			D2D1_ROUNDED_RECT roundedRectFill = {
 				D2D1::RectF(RoundFloat(rc.left) + 1.0, rc.top + 1.0, RoundFloat(rc.right) - 1.0, rc.bottom - 1.0),
-				cornerSize, cornerSize);
+				cornerSizeF, cornerSizeF};
 			D2DPenColour(fill, alphaFill);
 			pRenderTarget->FillRoundedRectangle(roundedRectFill, pBrush);
 
-			D2D1_ROUNDED_RECT roundedRect = D2D1::RoundedRect(
+			D2D1_ROUNDED_RECT roundedRect = {
 				D2D1::RectF(RoundFloat(rc.left) + 0.5, rc.top + 0.5, RoundFloat(rc.right) - 0.5, rc.bottom - 0.5),
-				cornerSize, cornerSize);
+				cornerSizeF, cornerSizeF};
 			D2DPenColour(outline, alphaOutline);
 			pRenderTarget->DrawRoundedRectangle(roundedRect, pBrush);
 		}
@@ -1571,9 +1572,9 @@ void SurfaceD2D::DrawRGBAImage(PRectangle rc, int width, int height, const unsig
 void SurfaceD2D::Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) {
 	if (pRenderTarget) {
 		FLOAT radius = rc.Width() / 2.0f - 1.0f;
-		D2D1_ELLIPSE ellipse = D2D1::Ellipse(
+		D2D1_ELLIPSE ellipse = {
 			D2D1::Point2F((rc.left + rc.right) / 2.0f, (rc.top + rc.bottom) / 2.0f),
-			radius,radius);
+			radius,radius};
 
 		PenColour(back);
 		pRenderTarget->FillEllipse(ellipse, pBrush);

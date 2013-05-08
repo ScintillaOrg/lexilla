@@ -425,10 +425,21 @@ void ScintillaWin::EnsureRenderTarget() {
 
 		// Create a Direct2D render target.
 #if 1
-		pD2DFactory->CreateHwndRenderTarget(
-			D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT, D2D1::PixelFormat(), 96.0, 96.0),
-			D2D1::HwndRenderTargetProperties(hw, size),
-			&pRenderTarget);
+		D2D1_HWND_RENDER_TARGET_PROPERTIES dhrtp;
+		dhrtp.hwnd = hw;
+		dhrtp.pixelSize = size;
+		dhrtp.presentOptions = D2D1_PRESENT_OPTIONS_NONE;
+
+		D2D1_RENDER_TARGET_PROPERTIES drtp;
+		drtp.type = D2D1_RENDER_TARGET_TYPE_DEFAULT;
+		drtp.pixelFormat.format = DXGI_FORMAT_UNKNOWN;
+		drtp.pixelFormat.alphaMode = D2D1_ALPHA_MODE_UNKNOWN;
+		drtp.dpiX = 96.0;
+		drtp.dpiY = 96.0;
+		drtp.usage = D2D1_RENDER_TARGET_USAGE_NONE;
+		drtp.minLevel = D2D1_FEATURE_LEVEL_DEFAULT;
+
+		pD2DFactory->CreateHwndRenderTarget(drtp, dhrtp, &pRenderTarget);
 #else
 		pD2DFactory->CreateHwndRenderTarget(
 			D2D1::RenderTargetProperties(
@@ -2800,10 +2811,21 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
 						surfaceWindow->Init(ps.hdc, hWnd);
 					} else {
 #if defined(USE_D2D)
-						pD2DFactory->CreateHwndRenderTarget(
-							D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT, D2D1::PixelFormat(), 96.0, 96.0),
-							D2D1::HwndRenderTargetProperties(hWnd, D2D1::SizeU(rc.right - rc.left, rc.bottom - rc.top)),
-							&pCTRenderTarget);
+						D2D1_HWND_RENDER_TARGET_PROPERTIES dhrtp;
+						dhrtp.hwnd = hWnd;
+						dhrtp.pixelSize = D2D1::SizeU(rc.right - rc.left, rc.bottom - rc.top);
+						dhrtp.presentOptions = D2D1_PRESENT_OPTIONS_NONE;
+
+						D2D1_RENDER_TARGET_PROPERTIES drtp;
+						drtp.type = D2D1_RENDER_TARGET_TYPE_DEFAULT;
+						drtp.pixelFormat.format = DXGI_FORMAT_UNKNOWN;
+						drtp.pixelFormat.alphaMode = D2D1_ALPHA_MODE_UNKNOWN;
+						drtp.dpiX = 96.0;
+						drtp.dpiY = 96.0;
+						drtp.usage = D2D1_RENDER_TARGET_USAGE_NONE;
+						drtp.minLevel = D2D1_FEATURE_LEVEL_DEFAULT;
+
+						pD2DFactory->CreateHwndRenderTarget(drtp, dhrtp, &pCTRenderTarget);
 						surfaceWindow->Init(pCTRenderTarget, hWnd);
 						pCTRenderTarget->BeginDraw();
 #endif
