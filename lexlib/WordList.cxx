@@ -64,6 +64,18 @@ static char **ArrayFromWordList(char *wordlist, int *len, bool onlyLineEnds = fa
 	return keywords;
 }
 
+WordList::WordList(bool onlyLineEnds_) :
+	words(0), list(0), len(0), onlyLineEnds(onlyLineEnds_) {
+}
+
+WordList::~WordList() { 
+	Clear();
+}
+
+WordList::operator bool() const {
+	return len ? true : false;
+}
+
 bool WordList::operator!=(const WordList &other) const {
 	if (len != other.len)
 		return true;
@@ -72,6 +84,10 @@ bool WordList::operator!=(const WordList &other) const {
 			return true;
 	}
 	return false;
+}
+
+int WordList::Length() const {
+	return len;
 }
 
 void WordList::Clear() {
@@ -213,3 +229,8 @@ bool WordList::InListAbbreviated(const char *s, const char marker) const {
 	}
 	return false;
 }
+
+const char *WordList::WordAt(int n) const {
+	return words[n];
+}
+
