@@ -1520,6 +1520,26 @@ class TestLexer(unittest.TestCase):
 		length = self.ed.GetLexerLanguage(0, name)
 		name = name[:length]
 		self.assertEquals(name, b"cpp")
+	
+	def testPropertyNames(self):
+		propertyNamesSize = self.ed.PropertyNames()
+		propertyNames = b"x" * propertyNamesSize
+		self.ed.PropertyNames(None, propertyNames)
+		self.assertNotEquals(propertyNames, b"")
+		# The cpp lexer has a boolean property named lexer.cpp.allow.dollars
+		propNameDollars = b"lexer.cpp.allow.dollars"
+		propertyType = self.ed.PropertyType(propNameDollars)
+		self.assertEquals(propertyType, self.ed.SC_TYPE_BOOLEAN)
+		propertyDescriptionSize = self.ed.DescribeProperty(propNameDollars)
+		propertyDescription = b"x" * propertyDescriptionSize
+		self.ed.DescribeProperty(propNameDollars, propertyDescription)
+		self.assertNotEquals(propertyDescription, b"")
+
+	def testWordListDescriptions(self):
+		wordSetSize = self.ed.DescribeKeyWordSets()
+		wordSet = b"x" * wordSetSize
+		self.ed.DescribeKeyWordSets(None, wordSet)
+		self.assertNotEquals(wordSet, b"")
 
 class TestAutoComplete(unittest.TestCase):
 
