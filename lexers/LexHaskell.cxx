@@ -129,7 +129,16 @@ static inline bool IsCommentBlockStyle(int style) {
 }
 
 static inline bool IsCommentStyle(int style) {
-   return (style >= SCE_HA_COMMENTLINE && style <= SCE_HA_COMMENTBLOCK3);
+   return (style >= SCE_HA_COMMENTLINE && style <= SCE_HA_COMMENTBLOCK3)
+       || ( style == SCE_HA_LITERATE_COMMENT
+         || style == SCE_HA_LITERATE_CODEDELIM);
+}
+
+// styles which do not belong to Haskell, but to external tools
+static inline bool IsExternalStyle(int style) {
+   return ( style == SCE_HA_PREPROCESSOR
+         || style == SCE_HA_LITERATE_COMMENT
+         || style == SCE_HA_LITERATE_CODEDELIM);
 }
 
 inline int CommentBlockStyleFromNestLevel(const unsigned int nestLevel) {
@@ -141,29 +150,30 @@ struct OptionsHaskell {
    bool allowQuotes;
    bool implicitParams;
    bool highlightSafe;
+   bool cpp;
    bool stylingWithinPreprocessor;
    bool fold;
    bool foldComment;
    bool foldCompact;
    bool foldImports;
-   bool foldIndentedImports;
    OptionsHaskell() {
       magicHash = true;       // Widespread use, enabled by default.
       allowQuotes = true;     // Widespread use, enabled by default.
       implicitParams = false; // Fell out of favor, seldom used, disabled.
       highlightSafe = true;   // Moderately used, doesn't hurt to enable.
+      cpp = true;             // Widespread use, enabled by default;
       stylingWithinPreprocessor = false;
       fold = false;
       foldComment = false;
       foldCompact = false;
       foldImports = false;
-      foldIndentedImports = true;
    }
 };
 
 static const char * const haskellWordListDesc[] = {
    "Keywords",
    "FFI",
+   "Reserved operators",
    0
 };
 
@@ -188,6 +198,10 @@ struct OptionSetHaskell : public OptionSet<OptionsHaskell> {
          "Set to 0 to disallow \"safe\" keyword in imports "
          "(GHC -XSafe, -XTrustworthy, -XUnsafe extensions)");
 
+      DefineProperty("lexer.haskell.cpp", &OptionsHaskell::cpp,
+         "Set to 0 to disable C-preprocessor highlighting "
+         "(-XCPP extension)");
+
       DefineProperty("styling.within.preprocessor", &OptionsHaskell::stylingWithinPreprocessor,
          "For Haskell code, determines whether all preprocessor code is styled in the "
          "preprocessor style (0, the default) or only from the initial # to the end "
@@ -203,15 +217,12 @@ struct OptionSetHaskell : public OptionSet<OptionsHaskell> {
       DefineProperty("fold.haskell.imports", &OptionsHaskell::foldImports,
          "Set to 1 to enable folding of import declarations");
 
-      DefineProperty("fold.haskell.imports.indented", &OptionsHaskell::foldIndentedImports,
-         "Set this property to 0 to disable folding imports not starting at "
-         "column 0 when fold.haskell.imports=1");
-
       DefineWordListSets(haskellWordListDesc);
    }
 };
 
 class LexerHaskell : public ILexer {
+   const bool literate;
    int firstImportLine;
    WordList keywords;
    WordList ffi;
@@ -235,21 +246,41 @@ class LexerHaskell : public ILexer {
       ,HA_MODE_TYPE    = 6 // after "type" or "data", before "family"
    };
 
+   enum LiterateMode {
+       LITERATE_BIRD  = 0 // if '>' is the first character on the line,
+                          //   color '>' as a codedelim and the rest of
+                          //   the line as code.
+                          // else if "\begin{code}" is the only word on the
+                          //    line except whitespace, switch to LITERATE_BLOCK
+                          // otherwise color the line as a literate comment.
+      ,LITERATE_BLOCK = 1 // if the string "\end{code}" is encountered at column
+                          //   0 ignoring all later characters, color the line
+                          //   as a codedelim and switch to LITERATE_BIRD
+                          // otherwise color the line as code.
+   };
+
    struct HaskellLineInfo {
-      unsigned int nestLevel;
+      unsigned int nestLevel; // 22 bits ought to be enough for anybody
+      unsigned int nonexternalStyle; // 5 bits, widen if number of styles goes
+                                     // beyond 31.
       bool pragma;
+      LiterateMode lmode;
       KeywordMode mode;
 
       HaskellLineInfo(int state) :
-         nestLevel (state >> 4)
-       , pragma (state & 0x8)
+         nestLevel (state >> 10)
+       , nonexternalStyle ((state >> 5) & 0x1F)
+       , pragma ((state >> 4) & 0x1)
+       , lmode (static_cast<LiterateMode>((state >> 3) & 0x1))
        , mode (static_cast<KeywordMode>(state & 0x7))
          {}
 
       int ToLineState() {
          return
-              (nestLevel << 4)
-            | pragma
+              (nestLevel << 10)
+            | (nonexternalStyle << 5)
+            | (pragma << 4)
+            | (lmode << 3)
             | mode;
       }
    };
@@ -272,19 +303,17 @@ class LexerHaskell : public ILexer {
          int currentPos = styler.LineStart(line);
          int style = styler.StyleAt(currentPos);
 
-         if (options.foldIndentedImports) {
-            int eol_pos = styler.LineStart(line + 1) - 1;
+         int eol_pos = styler.LineStart(line + 1) - 1;
 
-            while (currentPos < eol_pos) {
-               int ch = styler[currentPos];
-               style = styler.StyleAt(currentPos);
+         while (currentPos < eol_pos) {
+            int ch = styler[currentPos];
+            style = styler.StyleAt(currentPos);
 
-               if (ch == ' ' || ch == '\t'
-                || IsCommentBlockStyle(style)) {
-                  currentPos++;
-               } else {
-                  break;
-               }
+            if (ch == ' ' || ch == '\t'
+             || IsCommentBlockStyle(style)) {
+               currentPos++;
+            } else {
+               break;
             }
          }
 
@@ -296,7 +325,7 @@ class LexerHaskell : public ILexer {
    }
 
 public:
-   LexerHaskell() : firstImportLine(-1) {}
+   LexerHaskell(const bool literate_) : literate(literate_), firstImportLine(-1) {}
    virtual ~LexerHaskell() {}
 
    void SCI_METHOD Release() {
@@ -336,7 +365,11 @@ public:
    }
 
    static ILexer *LexerFactoryHaskell() {
-      return new LexerHaskell();
+      return new LexerHaskell(false);
+   }
+
+   static ILexer *LexerFactoryLiterateHaskell() {
+      return new LexerHaskell(true);
    }
 };
 
@@ -376,15 +409,17 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
                                  ,IDocument *pAccess) {
    LexAccessor styler(pAccess);
 
-   // Do not leak onto next line
-   if (initStyle == SCE_HA_STRINGEOL)
-      initStyle = SCE_HA_DEFAULT;
-
-   StyleContext sc(startPos, length, initStyle, styler);
-
    int lineCurrent = styler.GetLine(startPos);
 
    HaskellLineInfo hs = HaskellLineInfo(lineCurrent ? styler.GetLineState(lineCurrent-1) : 0);
+
+   // Do not leak onto next line
+   if (initStyle == SCE_HA_STRINGEOL)
+      initStyle = SCE_HA_DEFAULT;
+   else if (initStyle == SCE_HA_LITERATE_CODEDELIM)
+      initStyle = hs.nonexternalStyle;
+
+   StyleContext sc(startPos, length, initStyle, styler);
 
    int base = 10;
    bool dot = false;
@@ -397,11 +432,14 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
    while (sc.More()) {
       // Check for state end
 
-      // For line numbering (and by extension, nested comments) to work,
-      // states should always forward one character at a time.
-      // states should match on line ends using OnLineEnd function.
-      // If a state sometimes does _not_ forward a character, it should check
-      // first if it's not on a line end and forward otherwise.
+      if (!IsExternalStyle(sc.state)) {
+         hs.nonexternalStyle = sc.state;
+      }
+
+      // For lexer to work, states should unconditionally forward at least one
+      // character.
+      // If they don't, they should still check if they are at line end and
+      // forward if so.
       // If a state forwards more than one character, it should check every time
       // that it is not a line end and cease forwarding otherwise.
       if (sc.atLineEnd) {
@@ -410,32 +448,111 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
          lineCurrent++;
       }
 
-      if (sc.atLineStart && (sc.state == SCE_HA_STRING || sc.state == SCE_HA_CHARACTER)) {
-         // Prevent SCE_HA_STRINGEOL from leaking back to previous line
-         sc.SetState(sc.state);
+      // Handle line continuation generically.
+      if (sc.ch == '\\' && (sc.chNext == '\n' || sc.chNext == '\r')
+         && (  sc.state == SCE_HA_STRING
+            || sc.state == SCE_HA_PREPROCESSOR)) {
+         // Remember the line state for future incremental lexing
+         styler.SetLineState(lineCurrent, hs.ToLineState());
+         lineCurrent++;
+
+         sc.Forward();
+         if (sc.ch == '\r' && sc.chNext == '\n') {
+            sc.Forward();
+         }
+         sc.Forward();
+
+         continue;
       }
 
-      // Handle line continuation generically.
-      if (sc.ch == '\\' &&
-         (  sc.state == SCE_HA_STRING
-         || sc.state == SCE_HA_PREPROCESSOR)) {
-         if (sc.chNext == '\n' || sc.chNext == '\r') {
-            sc.Forward();
+      if (sc.atLineStart) {
 
-            // Remember the line state for future incremental lexing
-            styler.SetLineState(lineCurrent, hs.ToLineState());
-            lineCurrent++;
+         if (sc.state == SCE_HA_STRING || sc.state == SCE_HA_CHARACTER) {
+            // Prevent SCE_HA_STRINGEOL from leaking back to previous line
+            sc.SetState(sc.state);
+         }
 
-            if (sc.ch == '\r' && sc.chNext == '\n') {
-               sc.Forward();
+         if (literate && hs.lmode == LITERATE_BIRD) {
+            if (!IsExternalStyle(sc.state)) {
+               sc.SetState(SCE_HA_LITERATE_COMMENT);
             }
-            sc.Forward();
-            continue;
          }
       }
 
+      // External
+         // Literate
+      if (  literate && hs.lmode == LITERATE_BIRD && sc.atLineStart
+         && sc.ch == '>') {
+            sc.SetState(SCE_HA_LITERATE_CODEDELIM);
+            sc.ForwardSetState(hs.nonexternalStyle);
+      }
+      else if (literate && hs.lmode == LITERATE_BIRD && sc.atLineStart
+            && (  sc.ch == ' ' || sc.ch == '\t'
+               || sc.Match("\\begin{code}"))) {
+         sc.SetState(sc.state);
+
+         while ((sc.ch == ' ' || sc.ch == '\t') && sc.More())
+            sc.Forward();
+
+         if (sc.Match("\\begin{code}")) {
+            sc.Forward(strlen("\\begin{code}"));
+
+            bool correct = true;
+
+            while (!sc.atLineEnd && sc.More()) {
+               if (sc.ch != ' ' && sc.ch != '\t') {
+                  correct = false;
+               }
+               sc.Forward();
+            }
+
+            if (correct) {
+               sc.ChangeState(SCE_HA_LITERATE_CODEDELIM); // color the line end
+               hs.lmode = LITERATE_BLOCK;
+            }
+         }
+      }
+      else if (literate && hs.lmode == LITERATE_BLOCK && sc.atLineStart
+            && sc.Match("\\end{code}")) {
+         sc.SetState(SCE_HA_LITERATE_CODEDELIM);
+
+         sc.Forward(strlen("\\end{code}"));
+
+         while (!sc.atLineEnd && sc.More()) {
+            sc.Forward();
+         }
+
+         sc.SetState(SCE_HA_LITERATE_COMMENT);
+         hs.lmode = LITERATE_BIRD;
+      }
+         // Preprocessor
+      else if (sc.atLineStart && sc.ch == '#' && options.cpp) {
+         sc.SetState(SCE_HA_PREPROCESSOR);
+         sc.Forward();
+      }
+            // Literate
+      else if (sc.state == SCE_HA_LITERATE_COMMENT) {
+         sc.Forward();
+      }
+      else if (sc.state == SCE_HA_LITERATE_CODEDELIM) {
+         sc.ForwardSetState(hs.nonexternalStyle);
+      }
+            // Preprocessor
+      else if (sc.state == SCE_HA_PREPROCESSOR) {
+         if (sc.atLineEnd) {
+            sc.SetState(options.stylingWithinPreprocessor
+                        ? SCE_HA_DEFAULT
+                        : hs.nonexternalStyle);
+            sc.Forward(); // prevent double counting a line
+         } else if (options.stylingWithinPreprocessor && !IsHaskellLetter(sc.ch)) {
+            sc.SetState(SCE_HA_DEFAULT);
+         } else {
+            sc.Forward();
+         }
+      }
+      // Haskell
          // Operator
-      if (sc.state == SCE_HA_OPERATOR) {
+      else if (sc.state == SCE_HA_OPERATOR) {
          int style = SCE_HA_OPERATOR;
 
          if ( sc.ch == ':'
@@ -492,7 +609,10 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
       }
          // Number
       else if (sc.state == SCE_HA_NUMBER) {
-         if (IsADigit(sc.ch, base)) {
+         if (sc.atLineEnd) {
+            sc.SetState(SCE_HA_DEFAULT);
+            sc.Forward(); // prevent double counting a line
+         } else if (IsADigit(sc.ch, base)) {
             sc.Forward();
          } else if (sc.ch=='.' && dot && IsADigit(sc.chNext, base)) {
             sc.Forward(2);
@@ -653,17 +773,6 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
             sc.Forward();
          }
       }
-            // Preprocessor
-      else if (sc.state == SCE_HA_PREPROCESSOR) {
-         if (sc.atLineEnd) {
-            sc.SetState(SCE_HA_DEFAULT);
-            sc.Forward(); // prevent double counting a line
-         } else if (options.stylingWithinPreprocessor && !IsHaskellLetter(sc.ch)) {
-            sc.SetState(SCE_HA_DEFAULT);
-         } else {
-            sc.Forward();
-         }
-      }
             // New state?
       else if (sc.state == SCE_HA_DEFAULT) {
          // Digit
@@ -732,8 +841,8 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
                      sc.ChangeState(SCE_HA_OPERATOR);
                   // Promoted list or tuple '[T]
                   } else if (sc.ch == '[' || sc.ch== '(') {
-                     styler.ColourTo(sc.currentPos - 1, SCE_HA_OPERATOR);
-                     sc.ChangeState(SCE_HA_DEFAULT);
+                     sc.ChangeState(SCE_HA_OPERATOR);
+                     sc.ForwardSetState(SCE_HA_DEFAULT);
                   }
                }
             }
@@ -742,6 +851,7 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
          else if (sc.ch == '?') {
             hs.mode = HA_MODE_DEFAULT;
 
+            alreadyInTheMiddleOfOperator = false;
             sc.SetState(SCE_HA_OPERATOR);
 
             if (  options.implicitParams
@@ -750,11 +860,6 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
                sc.Forward();
                sc.ChangeState(SCE_HA_IDENTIFIER);
             }
-         }
-         // Preprocessor
-         else if (sc.atLineStart && sc.ch == '#') {
-            sc.SetState(SCE_HA_PREPROCESSOR);
-            sc.Forward();
          }
          // Operator
          else if (IsAnHaskellOperatorChar(sc.ch)) {
@@ -807,7 +912,10 @@ static int HaskellIndentAmount(Accessor &styler, int line) {
 
    int posPrev = inPrevPrefix ? styler.LineStart(line-1) : 0;
 
-   while ((ch == ' ' || ch == '\t' || IsCommentBlockStyle(style)) && (pos < eol_pos)) {
+   while ((  ch == ' ' || ch == '\t'
+          || IsCommentBlockStyle(style)
+          || style == SCE_HA_LITERATE_CODEDELIM)
+         && (pos < eol_pos)) {
       if (inPrevPrefix) {
          char chPrev = styler[posPrev++];
          if (chPrev != ' ' && chPrev != '\t') {
@@ -995,3 +1103,4 @@ void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // ini
 }
 
 LexerModule lmHaskell(SCLEX_HASKELL, LexerHaskell::LexerFactoryHaskell, "haskell", haskellWordListDesc);
+LexerModule lmLiterateHaskell(SCLEX_LITERATEHASKELL, LexerHaskell::LexerFactoryLiterateHaskell, "literatehaskell", haskellWordListDesc);
