@@ -154,15 +154,16 @@ def RegisterClass(name, func, background = 0):
 	wc.hIcon = 0
 	wc.hCursor = 0
 	wc.hbrBackground = background
-	wc.menu_name = 0
+	wc.menu_name = None
 	wc.lpzClassName = name
 	user32.RegisterClassW(ctypes.byref(wc))
 
 class SciCall:
-	def __init__(self, fn, ptr, msg):
+	def __init__(self, fn, ptr, msg, stringResult=False):
 		self._fn = fn
 		self._ptr = ptr
 		self._msg = msg
+		self._stringResult = stringResult
 	def __call__(self, w=0, l=0):
 		if type(w) == type("x"):
 			ww = c_wchar_p(w)
@@ -172,15 +173,24 @@ class SciCall:
 			ww = WPARAM()
 		else:
 			ww = WPARAM(w)
-		if type(l) == type("x"):
-			ll = c_wchar_p(l)
-		elif type(l) == type(b"x"):
-			ll = c_char_p(l)
-		elif type(l) == type(1):
-			ll = LPARAM(l)
+		if self._stringResult:
+			lengthBytes = self._fn(self._ptr, self._msg, ww, None)
+			if lengthBytes == 0:
+				return bytearray()
+			result = (ctypes.c_byte * lengthBytes)(0)
+			lengthBytes2 = self._fn(self._ptr, self._msg, ww, result)
+			assert lengthBytes == lengthBytes2
+			return bytearray(result)[:lengthBytes]
 		else:
-			ll = l
-		return self._fn(self._ptr, self._msg, ww, ll)
+			if type(l) == type("x"):
+				ll = c_wchar_p(l)
+			elif type(l) == type(b"x"):
+				ll = c_char_p(l)
+			elif type(l) == type(1):
+				ll = LPARAM(l)
+			else:
+				ll = l
+			return self._fn(self._ptr, self._msg, ww, ll)
 
 class Scintilla:
 	def __init__(self, face, hwndParent, hinstance):
@@ -215,7 +225,11 @@ class Scintilla:
 				self.__dict__[name] = value
 				return value
 			else:
-				return SciCall(self._scifn, self._sciptr, value)
+				if feature["Param2Type"] == "stringresult" and \
+					name not in ["GetText", "GetLine", "GetCurLine"]:
+					return SciCall(self._scifn, self._sciptr, value, True)
+				else:
+					return SciCall(self._scifn, self._sciptr, value)
 		elif ("Get" + name) in self.face.features:
 			self.used.add("Get" + name)
 			feature = self.face.features["Get" + name]

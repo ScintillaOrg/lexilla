@@ -109,10 +109,8 @@ class TestSimple(unittest.TestCase):
 		self.ed.SetSel(1, 3)
 		self.assertEquals(self.ed.SelectionStart, 1)
 		self.assertEquals(self.ed.SelectionEnd, 3)
-		result = b"\0" * 5
-		length = self.ed.GetSelText(0, result)
-		self.assertEquals(length, 3)
-		self.assertEquals(result[:length], b"bc\0")
+		result = self.ed.GetSelText(0)
+		self.assertEquals(result, b"bc\0")
 		self.ed.ReplaceSel(0, b"1234")
 		self.assertEquals(self.ed.Length, 6)
 		self.assertEquals(self.ed.Contents(), b"a1234d")
@@ -253,19 +251,16 @@ class TestSimple(unittest.TestCase):
 
 	def testGetCurLine(self):
 		self.ed.AddText(1, b"x")
-		data = b"\0" * 100
+		data = ctypes.create_string_buffer(b"\0" * 100)
 		caret = self.ed.GetCurLine(len(data), data)
-		data = data.rstrip(b"\0")
 		self.assertEquals(caret, 1)
-		self.assertEquals(data, b"x")
+		self.assertEquals(data.value, b"x")
 
 	def testGetLine(self):
 		self.ed.AddText(1, b"x")
-		data = b"\0" * 100
-		length = self.ed.GetLine(0, data)
-		self.assertEquals(length, 1)
-		data = data[:length]
-		self.assertEquals(data, b"x")
+		data = ctypes.create_string_buffer(b"\0" * 100)
+		self.ed.GetLine(0, data)
+		self.assertEquals(data.value, b"x")
 
 	def testLineEnds(self):
 		self.ed.AddText(3, b"x\ny")
@@ -529,10 +524,9 @@ class TestSimple(unittest.TestCase):
 	def testGetSet(self):
 		self.ed.SetText(0, b"abc")
 		self.assertEquals(self.ed.TextLength, 3)
-		result = b"\0" * 5
+		result = ctypes.create_string_buffer(b"\0" * 5)
 		length = self.ed.GetText(4, result)
-		result = result[:length]
-		self.assertEquals(result, b"abc")
+		self.assertEquals(result.value, b"abc")
 
 	def testAppend(self):
 		self.ed.SetText(0, b"abc")
@@ -558,9 +552,7 @@ class TestSimple(unittest.TestCase):
 		searchString = b"\([1-9]+\)"
 		pos = self.ed.SearchInTarget(len(searchString), searchString)
 		self.assertEquals(1, pos)
-		tagString = b"abcdefghijklmnop"
-		lenTag = self.ed.GetTag(1, tagString)
-		tagString = tagString[:lenTag]
+		tagString = self.ed.GetTag(1)
 		self.assertEquals(tagString, b"321")
 		rep = b"\\1"
 		self.ed.TargetStart = 0
@@ -1114,14 +1106,10 @@ class TestProperties(unittest.TestCase):
 	def testSet(self):
 		self.ed.SetProperty(b"test", b"12")
 		self.assertEquals(self.ed.GetPropertyInt(b"test"), 12)
-		result = b"\0" * 10
-		length = self.ed.GetProperty(b"test", result)
-		result = result[:length]
+		result = self.ed.GetProperty(b"test")
 		self.assertEquals(result, b"12")
 		self.ed.SetProperty(b"test.plus", b"[$(test)]")
-		result = b"\0" * 10
-		length = self.ed.GetPropertyExpanded(b"test.plus", result)
-		result = result[:length]
+		result = self.ed.GetPropertyExpanded(b"test.plus")
 		self.assertEquals(result, b"[12]")
 
 class TestTextMargin(unittest.TestCase):
@@ -1150,9 +1138,7 @@ class TestTextMargin(unittest.TestCase):
 
 	def testTextMargin(self):
 		self.ed.MarginSetText(0, self.txt)
-		result = b"\0" * 10
-		length = self.ed.MarginGetText(0, result)
-		result = result[:length]
+		result = self.ed.MarginGetText(0)
 		self.assertEquals(result, self.txt)
 		self.ed.MarginTextClearAll()
 
@@ -1166,9 +1152,7 @@ class TestTextMargin(unittest.TestCase):
 		styles = b"\001\002\003\004"
 		self.ed.MarginSetText(0, self.txt)
 		self.ed.MarginSetStyles(0, styles)
-		result = b"\0" * 10
-		length = self.ed.MarginGetStyles(0, result)
-		result = result[:length]
+		result = self.ed.MarginGetStyles(0)
 		self.assertEquals(result, styles)
 		self.ed.MarginTextClearAll()
 
@@ -1190,10 +1174,8 @@ class TestAnnotation(unittest.TestCase):
 		self.assertEquals(self.ed.AnnotationGetLines(), 0)
 		self.ed.AnnotationSetText(0, self.txt)
 		self.assertEquals(self.ed.AnnotationGetLines(), 1)
-		result = b"\0" * 10
-		length = self.ed.AnnotationGetText(0, result)
-		self.assertEquals(length, 4)
-		result = result[:length]
+		result = self.ed.AnnotationGetText(0)
+		self.assertEquals(len(result), 4)
 		self.assertEquals(result, self.txt)
 		self.ed.AnnotationClearAll()
 
@@ -1207,9 +1189,7 @@ class TestAnnotation(unittest.TestCase):
 		styles = b"\001\002\003\004"
 		self.ed.AnnotationSetText(0, self.txt)
 		self.ed.AnnotationSetStyles(0, styles)
-		result = b"\0" * 10
-		length = self.ed.AnnotationGetStyles(0, result)
-		result = result[:length]
+		result = self.ed.AnnotationGetStyles(0)
 		self.assertEquals(result, styles)
 		self.ed.AnnotationClearAll()
 
@@ -1516,29 +1496,21 @@ class TestLexer(unittest.TestCase):
 	def testLexerName(self):
 		self.ed.LexerLanguage = b"cpp"
 		self.assertEquals(self.ed.GetLexer(), self.ed.SCLEX_CPP)
-		name = b"-" * 100
-		length = self.ed.GetLexerLanguage(0, name)
-		name = name[:length]
+		name = self.ed.GetLexerLanguage(0)
 		self.assertEquals(name, b"cpp")
 	
 	def testPropertyNames(self):
-		propertyNamesSize = self.ed.PropertyNames()
-		propertyNames = b"x" * propertyNamesSize
-		self.ed.PropertyNames(None, propertyNames)
+		propertyNames = self.ed.PropertyNames()
 		self.assertNotEquals(propertyNames, b"")
 		# The cpp lexer has a boolean property named lexer.cpp.allow.dollars
 		propNameDollars = b"lexer.cpp.allow.dollars"
 		propertyType = self.ed.PropertyType(propNameDollars)
 		self.assertEquals(propertyType, self.ed.SC_TYPE_BOOLEAN)
-		propertyDescriptionSize = self.ed.DescribeProperty(propNameDollars)
-		propertyDescription = b"x" * propertyDescriptionSize
-		self.ed.DescribeProperty(propNameDollars, propertyDescription)
+		propertyDescription = self.ed.DescribeProperty(propNameDollars)
 		self.assertNotEquals(propertyDescription, b"")
 
 	def testWordListDescriptions(self):
-		wordSetSize = self.ed.DescribeKeyWordSets()
-		wordSet = b"x" * wordSetSize
-		self.ed.DescribeKeyWordSets(None, wordSet)
+		wordSet = self.ed.DescribeKeyWordSets()
 		self.assertNotEquals(wordSet, b"")
 
 class TestAutoComplete(unittest.TestCase):
@@ -1599,10 +1571,9 @@ class TestAutoComplete(unittest.TestCase):
 		#~ time.sleep(2)
 		self.assertEquals(self.ed.AutoCPosStart(), 0)
 		self.assertEquals(self.ed.AutoCGetCurrent(), 0)
-		t = b"xxx"
-		l = self.ed.AutoCGetCurrentText(5, t)
+		t = self.ed.AutoCGetCurrentText(5)
 		#~ self.assertEquals(l, 3)
-		self.assertEquals(t, b"za\0")
+		self.assertEquals(t, b"za")
 		self.ed.AutoCCancel()
 		self.assertEquals(self.ed.AutoCActive(), 0)
 
@@ -1700,10 +1671,7 @@ class TestWordChars(unittest.TestCase):
 	def testDefaultWordChars(self):
 		# check that the default word chars are as expected
 		import string
-		dataLen = self.ed.GetWordChars(None, None)
-		data = b"\0" * dataLen
-		self.ed.GetWordChars(None, data)
-		self.assertEquals(dataLen, len(data))
+		data = self.ed.GetWordChars(None)
 		expected = set(string.digits + string.ascii_letters + '_') | \
 			set(chr(x) for x in range(0x80, 0x100))
 		self.assertCharSetsEqual(data, expected)
@@ -1711,10 +1679,7 @@ class TestWordChars(unittest.TestCase):
 	def testDefaultWhitespaceChars(self):
 		# check that the default whitespace chars are as expected
 		import string
-		dataLen = self.ed.GetWhitespaceChars(None, None)
-		data = b"\0" * dataLen
-		self.ed.GetWhitespaceChars(None, data)
-		self.assertEquals(dataLen, len(data))
+		data = self.ed.GetWhitespaceChars(None)
 		expected = (set(chr(x) for x in (range(0, 0x20))) | set(' ')) - \
 			set(['\r', '\n'])
 		self.assertCharSetsEqual(data, expected)
@@ -1722,10 +1687,7 @@ class TestWordChars(unittest.TestCase):
 	def testDefaultPunctuationChars(self):
 		# check that the default punctuation chars are as expected
 		import string
-		dataLen = self.ed.GetPunctuationChars(None, None)
-		data = b"\0" * dataLen
-		self.ed.GetPunctuationChars(None, data)
-		self.assertEquals(dataLen, len(data))
+		data = self.ed.GetPunctuationChars(None)
 		expected = set(chr(x) for x in range(0x20, 0x80)) - \
 			set(string.ascii_letters + string.digits + "\r\n_ ")
 		self.assertCharSetsEqual(data, expected)
@@ -1733,19 +1695,13 @@ class TestWordChars(unittest.TestCase):
 	def testCustomWordChars(self):
 		# check that setting things to whitespace chars makes them not words
 		self._setChars("whitespace", range(1, 0x100))
-		dataLen = self.ed.GetWordChars(None, None)
-		data = b"\0" * dataLen
-		self.ed.GetWordChars(None, data)
-		self.assertEquals(dataLen, len(data))
+		data = self.ed.GetWordChars(None)
 		expected = set()
 		self.assertCharSetsEqual(data, expected)
 		# and now set something to make sure that works too
 		expected = set(range(1, 0x100, 2))
 		self._setChars("word", expected)
-		dataLen = self.ed.GetWordChars(None, None)
-		data = b"\0" * dataLen
-		self.ed.GetWordChars(None, data)
-		self.assertEquals(dataLen, len(data))
+		data = self.ed.GetWordChars(None)
 		self.assertCharSetsEqual(data, expected)
 
 	def testCustomWhitespaceChars(self):
@@ -1753,36 +1709,24 @@ class TestWordChars(unittest.TestCase):
 		self._setChars("word", range(1, 0x100))
 		# we can't change chr(0) from being anything but whitespace
 		expected = set([0])
-		dataLen = self.ed.GetWhitespaceChars(None, None)
-		data = b"\0" * dataLen
-		self.ed.GetWhitespaceChars(None, data)
-		self.assertEquals(dataLen, len(data))
+		data = self.ed.GetWhitespaceChars(None)
 		self.assertCharSetsEqual(data, expected)
 		# now try to set it to something custom
 		expected = set(range(1, 0x100, 2)) | set([0])
 		self._setChars("whitespace", expected)
-		dataLen = self.ed.GetWhitespaceChars(None, None)
-		data = b"\0" * dataLen
-		self.ed.GetWhitespaceChars(None, data)
-		self.assertEquals(dataLen, len(data))
+		data = self.ed.GetWhitespaceChars(None)
 		self.assertCharSetsEqual(data, expected)
 
 	def testCustomPunctuationChars(self):
 		# check setting punctuation chars to non-default values
 		self._setChars("word", range(1, 0x100))
 		expected = set()
-		dataLen = self.ed.GetPunctuationChars(None, None)
-		data = b"\0" * dataLen
-		self.ed.GetPunctuationChars(None, data)
-		self.assertEquals(dataLen, len(data))
+		data = self.ed.GetPunctuationChars(0)
 		self.assertEquals(set(data), expected)
 		# now try to set it to something custom
 		expected = set(range(1, 0x100, 1))
 		self._setChars("punctuation", expected)
-		dataLen = self.ed.GetPunctuationChars(None, None)
-		data = b"\0" * dataLen
-		self.ed.GetPunctuationChars(None, data)
-		self.assertEquals(dataLen, len(data))
+		data = self.ed.GetPunctuationChars(None)
 		self.assertCharSetsEqual(data, expected)
 
 #~ import os
