@@ -222,7 +222,7 @@ struct OptionSetHaskell : public OptionSet<OptionsHaskell> {
 };
 
 class LexerHaskell : public ILexer {
-   const bool literate;
+   bool literate;
    int firstImportLine;
    WordList keywords;
    WordList ffi;
@@ -285,7 +285,7 @@ class LexerHaskell : public ILexer {
       }
    };
 
-   inline void skipMagicHash(StyleContext &sc, const HashCount hashes) {
+   inline void skipMagicHash(StyleContext &sc, const HashCount hashes) const {
       if (options.magicHash && sc.ch == '#') {
          sc.Forward();
          if (hashes == twoHashes && sc.ch == '#') {
@@ -298,7 +298,7 @@ class LexerHaskell : public ILexer {
       }
    }
 
-   bool LineContainsImport(const int line, Accessor &styler) {
+   bool LineContainsImport(const int line, Accessor &styler) const {
       if (options.foldImports) {
          int currentPos = styler.LineStart(line);
          int style = styler.StyleAt(currentPos);
@@ -495,7 +495,7 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
             sc.Forward();
 
          if (sc.Match("\\begin{code}")) {
-            sc.Forward(strlen("\\begin{code}"));
+            sc.Forward(static_cast<int>(strlen("\\begin{code}")));
 
             bool correct = true;
 
@@ -516,7 +516,7 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
             && sc.Match("\\end{code}")) {
          sc.SetState(SCE_HA_LITERATE_CODEDELIM);
 
-         sc.Forward(strlen("\\end{code}"));
+         sc.Forward(static_cast<int>(strlen("\\end{code}")));
 
          while (!sc.atLineEnd && sc.More()) {
             sc.Forward();
