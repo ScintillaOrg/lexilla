@@ -685,7 +685,6 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 					} else if (sc.Match('/', '*')) {
 						if (sc.Match("/**") || sc.Match("/*!")) {
 							sc.SetState(SCE_C_PREPROCESSORCOMMENTDOC|activitySet);
-							sc.Forward();
 						} else {
 							sc.SetState(SCE_C_PREPROCESSORCOMMENT|activitySet);
 						}
