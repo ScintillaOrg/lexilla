@@ -7132,7 +7132,7 @@ void Editor::FoldAll(int action) {
 		}
 	}
 	if (expanding) {
-		cs.SetVisible(0, maxLine, true);
+		cs.SetVisible(0, maxLine-1, true);
 		for (int line = 0; line < maxLine; line++) {
 			int levelLine = pdoc->GetLevel(line);
 			if (levelLine & SC_FOLDLEVELHEADERFLAG) {
