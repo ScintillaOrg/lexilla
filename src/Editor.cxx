@@ -4147,7 +4147,7 @@ void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 	if (treatAsDBCS) {
 		NotifyChar((static_cast<unsigned char>(s[0]) << 8) |
 		        static_cast<unsigned char>(s[1]));
-	} else {
+	} else if (len > 0) {
 		int byte = static_cast<unsigned char>(s[0]);
 		if ((byte < 0xC0) || (1 == len)) {
 			// Handles UTF-8 characters between 0x01 and 0x7F and single byte
