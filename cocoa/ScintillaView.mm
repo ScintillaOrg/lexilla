@@ -341,8 +341,15 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 					 wParam: 0
 					 lParam: 0];
   rect = [[[self superview] superview] convertRect:rect toView:nil];
-  rect = [self.window convertRectToScreen:rect];
-  
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_6
+  if ([self.window respondsToSelector:@selector(convertRectToScreen:)])
+      rect = [self.window convertRectToScreen:rect];
+  else // convertRectToScreen not available on 10.6
+      rect.origin = [self.window convertBaseToScreen:rect.origin];
+#else
+  rect.origin = [self.window convertBaseToScreen:rect.origin];
+#endif
+
   return rect;
 }
 
