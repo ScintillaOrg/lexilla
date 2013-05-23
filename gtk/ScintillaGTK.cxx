@@ -1554,7 +1554,7 @@ void ScintillaGTK::ReceivedDrop(GtkSelectionData *selection_data) {
 		const char *data = reinterpret_cast<const char *>(DataOfGSD(selection_data));
 		std::vector<char> drop(data, data + LengthOfGSD(selection_data));
 		drop.push_back('\0');
-		NotifyURIDropped(drop.data());
+		NotifyURIDropped(&drop[0]);
 	} else if ((TypeOfGSD(selection_data) == GDK_TARGET_STRING) || (TypeOfGSD(selection_data) == atomUTF8)) {
 		if (TypeOfGSD(selection_data) > 0) {
 			SelectionText selText;
