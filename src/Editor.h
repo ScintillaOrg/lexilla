@@ -308,7 +308,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	// scroll views where it will be equivalent to the current scroll position.
 	virtual Point GetVisibleOriginInMain();
 	Point DocumentPointFromView(Point ptView);  // Convert a point from view space to document
-	int TopLineOfMain();   // Return the line at Main's y coordinate 0
+	int TopLineOfMain() const;   // Return the line at Main's y coordinate 0
 	virtual PRectangle GetClientRectangle();
 	PRectangle GetTextRectangle();
 
@@ -324,7 +324,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int PositionFromLocation(Point pt, bool canReturnInvalid=false, bool charPosition=false);
 	SelectionPosition SPositionFromLineX(int lineDoc, int x);
 	int PositionFromLineX(int line, int x);
-	int LineFromLocation(Point pt);
+	int LineFromLocation(Point pt) const;
 	void SetTopLine(int topLineNew);
 
 	bool AbandonPaint();
@@ -337,8 +337,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool UserVirtualSpace() const {
 		return ((virtualSpaceOptions & SCVS_USERACCESSIBLE) != 0);
 	}
-	int CurrentPosition();
-	bool SelectionEmpty();
+	int CurrentPosition() const;
+	bool SelectionEmpty() const;
 	SelectionPosition SelectionStart();
 	SelectionPosition SelectionEnd();
 	void SetRectangularRange();
@@ -399,13 +399,13 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void LinesJoin();
 	void LinesSplit(int pixelWidth);
 
-	int SubstituteMarkerIfEmpty(int markerCheck, int markerDefault);
+	int SubstituteMarkerIfEmpty(int markerCheck, int markerDefault) const;
 	void PaintSelMargin(Surface *surface, PRectangle &rc);
 	LineLayout *RetrieveLineLayout(int lineNumber);
 	void LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayout *ll,
 		int width=LineLayout::wrapWidthInfinite);
-	ColourDesired SelectionBackground(ViewStyle &vsDraw, bool main);
-	ColourDesired TextBackground(ViewStyle &vsDraw, bool overrideBackground, ColourDesired background, int inSelection, bool inHotspot, int styleMain, int i, LineLayout *ll);
+	ColourDesired SelectionBackground(ViewStyle &vsDraw, bool main) const;
+	ColourDesired TextBackground(ViewStyle &vsDraw, bool overrideBackground, ColourDesired background, int inSelection, bool inHotspot, int styleMain, int i, LineLayout *ll) const;
 	void DrawIndentGuide(Surface *surface, int lineVisible, int lineHeight, int start, PRectangle rcSegment, bool highlight);
 	void DrawWrapMarker(Surface *surface, PRectangle rcPlace, bool isEndMarker, ColourDesired wrapColour);
 	void DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, LineLayout *ll,
@@ -529,7 +529,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool PositionInSelection(int pos);
 	bool PointInSelection(Point pt);
 	bool PointInSelMargin(Point pt);
-	Window::Cursor GetMarginCursor(Point pt);
+	Window::Cursor GetMarginCursor(Point pt) const;
 	void TrimAndSetSelection(int currentPos_, int anchor_);
 	void LineSelection(int lineCurrentPos_, int lineAnchorPos_, bool wholeLine);
 	void WordSelection(int pos);
@@ -547,7 +547,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual bool HaveMouseCapture() = 0;
 	void SetFocusState(bool focusState);
 
-	int PositionAfterArea(PRectangle rcArea);
+	int PositionAfterArea(PRectangle rcArea) const;
 	void StyleToPositionInView(Position pos);
 	virtual void IdleWork();
 	virtual void QueueIdleWork(WorkNeeded::workItems items, int upTo=0);
@@ -566,7 +566,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void SetFoldExpanded(int lineDoc, bool expanded);
 	void FoldLine(int line, int action);
 	void FoldExpand(int line, int action, int level);
-	int ContractedFoldNext(int lineStart);
+	int ContractedFoldNext(int lineStart) const;
 	void EnsureLineVisible(int lineDoc, bool enforcePolicy);
 	void FoldChanged(int line, int levelNow, int levelPrev);
 	void NeedShown(int pos, int len);
@@ -575,10 +575,10 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int GetTag(char *tagValue, int tagNumber);
 	int ReplaceTarget(bool replacePatterns, const char *text, int length=-1);
 
-	bool PositionIsHotspot(int position);
+	bool PositionIsHotspot(int position) const;
 	bool PointIsHotspot(Point pt);
 	void SetHotSpotRange(Point *pt);
-	void GetHotSpotRange(int &hsStart, int &hsEnd);
+	void GetHotSpotRange(int &hsStart, int &hsEnd) const;
 
 	int CodePage() const;
 	virtual bool ValidCodePage(int /* codePage */) const { return true; }
