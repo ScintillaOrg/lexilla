@@ -2930,7 +2930,10 @@ static void scintilla_init(ScintillaObject *sci) {
 }
 
 GtkWidget* scintilla_new() {
-	return GTK_WIDGET(g_object_new(scintilla_get_type(), NULL));
+	GtkWidget *widget = GTK_WIDGET(g_object_new(scintilla_get_type(), NULL));
+	gtk_widget_set_direction(widget, GTK_TEXT_DIR_LTR);
+
+	return widget;
 }
 
 void scintilla_set_id(ScintillaObject *sci, uptr_t id) {
