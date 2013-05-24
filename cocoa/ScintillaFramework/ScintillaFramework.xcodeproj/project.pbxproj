@@ -168,6 +168,7 @@
 		11BB124D12FF9C1300F6BCF7 /* LexModula.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 11BB124C12FF9C1300F6BCF7 /* LexModula.cxx */; };
 		11BEB6A214EF189600BDE92A /* LexECL.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 11BEB6A114EF189600BDE92A /* LexECL.cxx */; };
 		11F35FDB12AEFAF100F0236D /* LexA68k.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 11F35FDA12AEFAF100F0236D /* LexA68k.cxx */; };
+		11FDAEB7174E1A9800FA161B /* LexSTTXT.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 11FDAEB6174E1A9700FA161B /* LexSTTXT.cxx */; };
 		2744E5A40FC168A100E85C33 /* InfoBar.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E59D0FC168A100E85C33 /* InfoBar.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2744E5AA0FC168A100E85C33 /* ScintillaView.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E5A30FC168A100E85C33 /* ScintillaView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2744E5AC0FC168B200E85C33 /* InfoBarCommunicator.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E5AB0FC168B200E85C33 /* InfoBarCommunicator.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -355,6 +356,7 @@
 		11BB124C12FF9C1300F6BCF7 /* LexModula.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexModula.cxx; path = ../../lexers/LexModula.cxx; sourceTree = SOURCE_ROOT; };
 		11BEB6A114EF189600BDE92A /* LexECL.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexECL.cxx; path = ../../lexers/LexECL.cxx; sourceTree = "<group>"; };
 		11F35FDA12AEFAF100F0236D /* LexA68k.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexA68k.cxx; path = ../../lexers/LexA68k.cxx; sourceTree = SOURCE_ROOT; };
+		11FDAEB6174E1A9700FA161B /* LexSTTXT.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexSTTXT.cxx; path = ../../lexers/LexSTTXT.cxx; sourceTree = "<group>"; };
 		2744E4850FC1678600E85C33 /* Platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Platform.h; path = ../../include/Platform.h; sourceTree = SOURCE_ROOT; };
 		2744E4870FC1678600E85C33 /* SciLexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SciLexer.h; path = ../../include/SciLexer.h; sourceTree = SOURCE_ROOT; };
 		2744E4880FC1678600E85C33 /* Scintilla.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Scintilla.h; path = ../../include/Scintilla.h; sourceTree = SOURCE_ROOT; };
@@ -549,6 +551,7 @@
 				114B6F0011FA7526004FB6AB /* LexSpecman.cxx */,
 				114B6F0111FA7526004FB6AB /* LexSpice.cxx */,
 				114B6F0211FA7526004FB6AB /* LexSQL.cxx */,
+				11FDAEB6174E1A9700FA161B /* LexSTTXT.cxx */,
 				114B6F0311FA7526004FB6AB /* LexTACL.cxx */,
 				114B6F0411FA7526004FB6AB /* LexTADS3.cxx */,
 				114B6F0511FA7526004FB6AB /* LexTAL.cxx */,
@@ -950,6 +953,7 @@
 				11594BEA155B91DF0099E1FA /* LexVisualProlog.cxx in Sources */,
 				1114D6CB1602A951001DC345 /* LexPO.cxx in Sources */,
 				1102C31C169FB49300DC16AB /* LexLaTeX.cxx in Sources */,
+				11FDAEB7174E1A9800FA161B /* LexSTTXT.cxx in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
