@@ -6015,45 +6015,28 @@ void Editor::CopySelectionRange(SelectionText *ss, bool allowLineCopy) {
 
 			std::string text = RangeText(start, end);
 			if (pdoc->eolMode != SC_EOL_LF)
-				text.append("\r");
+				text.push_back('\r');
 			if (pdoc->eolMode != SC_EOL_CR)
-				text.append("\n");
-			ss->Copy(text.c_str(), static_cast<int>(text.length() + 1),
-				pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false, true);
+				text.push_back('\n');
+			ss->Copy(text, pdoc->dbcsCodePage,
+				vs.styles[STYLE_DEFAULT].characterSet, false, true);
 		}
 	} else {
-		int delimiterLength = 0;
-		if (sel.selType == Selection::selRectangle) {
-			if (pdoc->eolMode == SC_EOL_CRLF) {
-				delimiterLength = 2;
-			} else {
-				delimiterLength = 1;
-			}
-		}
-		size_t size = sel.Length() + delimiterLength * sel.Count();
-		std::string text(size+1, '\0');
-		int j = 0;
+		std::string text;
 		std::vector<SelectionRange> rangesInOrder = sel.RangesCopy();
 		if (sel.selType == Selection::selRectangle)
 			std::sort(rangesInOrder.begin(), rangesInOrder.end());
 		for (size_t r=0; r<rangesInOrder.size(); r++) {
 			SelectionRange current = rangesInOrder[r];
-			for (int i = current.Start().Position();
-			        i < current.End().Position();
-			        i++) {
-				text[j++] = pdoc->CharAt(i);
-			}
+			text.append(RangeText(current.Start().Position(), current.End().Position()));
 			if (sel.selType == Selection::selRectangle) {
-				if (pdoc->eolMode != SC_EOL_LF) {
-					text[j++] = '\r';
-				}
-				if (pdoc->eolMode != SC_EOL_CR) {
-					text[j++] = '\n';
-				}
+				if (pdoc->eolMode != SC_EOL_LF)
+					text.push_back('\r');
+				if (pdoc->eolMode != SC_EOL_CR)
+					text.push_back('\n');
 			}
 		}
-		text[size] = '\0';
-		ss->Copy(&text[0], static_cast<int>(size + 1), pdoc->dbcsCodePage,
+		ss->Copy(text, pdoc->dbcsCodePage,
 			vs.styles[STYLE_DEFAULT].characterSet, sel.IsRectangular(), sel.selType == Selection::selLines);
 	}
 }
@@ -6063,7 +6046,7 @@ void Editor::CopyRangeToClipboard(int start, int end) {
 	end = pdoc->ClampPositionIntoDocument(end);
 	SelectionText selectedText;
 	std::string text = RangeText(start, end);
-	selectedText.Copy(text.c_str(), end - start + 1,
+	selectedText.Copy(text,
 		pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false, false);
 	CopyToClipboard(selectedText);
 }
