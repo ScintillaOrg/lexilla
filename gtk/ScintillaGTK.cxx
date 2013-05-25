@@ -839,7 +839,7 @@ void ScintillaGTK::StartDrag() {
 	               reinterpret_cast<GdkEvent *>(evbtn));
 }
 
-static std::string ConvertText(char *s, size_t len, const char *charSetDest,
+static std::string ConvertText(const char *s, size_t len, const char *charSetDest,
 	const char *charSetSource, bool transliterations, bool silent=false) {
 	// s is not const because of different versions of iconv disagreeing about const
 	std::string destForm;
@@ -847,7 +847,8 @@ static std::string ConvertText(char *s, size_t len, const char *charSetDest,
 	if (conv) {
 		size_t outLeft = len*3+1;
 		destForm = std::string(outLeft, '\0');
-		char *pin = s;
+		// g_iconv does not actually write to its input argument so safe to cast away const
+		char *pin = const_cast<char *>(s);
 		size_t inLeft = len;
 		char *putf = &destForm[0];
 		char *pout = putf;
@@ -856,10 +857,10 @@ static std::string ConvertText(char *s, size_t len, const char *charSetDest,
 			if (!silent) {
 				if (len == 1)
 					fprintf(stderr, "iconv %s->%s failed for %0x '%s'\n",
-						charSetSource, charSetDest, (unsigned char)(*s), static_cast<char *>(s));
+						charSetSource, charSetDest, (unsigned char)(*s), s);
 				else
 					fprintf(stderr, "iconv %s->%s failed for %s\n",
-						charSetSource, charSetDest, static_cast<char *>(s));
+						charSetSource, charSetDest, s);
 			}
 			destForm = std::string();
 		} else {
@@ -1264,7 +1265,7 @@ public:
 			folded[0] = mapping[static_cast<unsigned char>(mixed[0])];
 			return 1;
 		} else if (*charSet) {
-			std::string sUTF8 = ConvertText(const_cast<char *>(mixed), lenMixed,
+			std::string sUTF8 = ConvertText(mixed, lenMixed,
 				"UTF-8", charSet, false);
 			if (!sUTF8.empty()) {
 				gchar *mapped = g_utf8_casefold(sUTF8.c_str(), sUTF8.length());
@@ -1354,7 +1355,7 @@ std::string ScintillaGTK::CaseMapString(const std::string &s, int caseMapping) {
 		return std::string(mapper.mapped, strlen(mapper.mapped));
 	} else {
 		// Change text to UTF-8
-		std::string sUTF8 = ConvertText(const_cast<char *>(s.c_str()), s.length(),
+		std::string sUTF8 = ConvertText(s.c_str(), s.length(),
 			"UTF-8", charSetBuffer, false);
 		CaseMapper mapper(sUTF8, caseMapping == cmUpper);
 		return ConvertText(mapper.mapped, strlen(mapper.mapped), charSetBuffer, "UTF-8", false);
@@ -1479,7 +1480,7 @@ void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, Selectio
 
 	// Return empty string if selection is not a string
 	if ((selectionTypeData != GDK_TARGET_STRING) && (selectionTypeData != atomUTF8)) {
-		selText.Copy("", 0, SC_CP_UTF8, 0, false, false);
+		selText.Copy("", 1, SC_CP_UTF8, 0, false, false);
 		return;
 	}
 
@@ -1498,20 +1499,21 @@ void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, Selectio
 		if (IsUnicodeMode()) {
 			// Unknown encoding so assume in Latin1
 			dest = UTF8FromLatin1(dest.c_str(), dest.length());
-			selText.Copy(dest.c_str(), dest.length()+1, SC_CP_UTF8, 0, selText.rectangular, false);
+			selText.Copy(dest, SC_CP_UTF8, 0, isRectangular, false);
 		} else {
 			// Assume buffer is in same encoding as selection
-			selText.Copy(dest.c_str(), dest.length()+1, pdoc->dbcsCodePage,
+			selText.Copy(dest, pdoc->dbcsCodePage,
 				vs.styles[STYLE_DEFAULT].characterSet, isRectangular, false);
 		}
 	} else {	// UTF-8
-		selText.Copy(dest.c_str(), dest.length()+1, SC_CP_UTF8, 0, isRectangular, false);
 		const char *charSetBuffer = CharacterSetID();
 		if (!IsUnicodeMode() && *charSetBuffer) {
 			// Convert to locale
-			dest = ConvertText(selText.s, selText.len, charSetBuffer, "UTF-8", true);
-			selText.Copy(dest.c_str(), dest.length(), pdoc->dbcsCodePage,
-				vs.styles[STYLE_DEFAULT].characterSet, selText.rectangular, false);
+			dest = ConvertText(dest.c_str(), dest.length(), charSetBuffer, "UTF-8", true);
+			selText.Copy(dest, pdoc->dbcsCodePage,
+				vs.styles[STYLE_DEFAULT].characterSet, isRectangular, false);
+		} else {
+			selText.Copy(dest, SC_CP_UTF8, 0, isRectangular, false);
 		}
 	}
 }
@@ -1583,7 +1585,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 	{
 		std::string tmpstr = Document::TransformLineEnds(text->s, text->len, SC_EOL_LF);
 		newline_normalized = new SelectionText();
-		newline_normalized->Copy(tmpstr.c_str(), tmpstr.length()+1, SC_CP_UTF8, 0, text->rectangular, false);
+		newline_normalized->Copy(tmpstr, SC_CP_UTF8, 0, text->rectangular, false);
 		text = newline_normalized;
 	}
 #endif
@@ -1593,9 +1595,9 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 	if ((text->codePage != SC_CP_UTF8) && (info == TARGET_UTF8_STRING)) {
 		const char *charSet = ::CharacterSetID(text->characterSet);
 		if (*charSet) {
-			std::string tmputf = ConvertText(text->s, text->len, "UTF-8", charSet, false);
+			std::string tmputf = ConvertText(text->s, text->len-1, "UTF-8", charSet, false);
 			converted = new SelectionText();
-			converted->Copy(tmputf.c_str(), tmputf.length(), SC_CP_UTF8, 0, text->rectangular, false);
+			converted->Copy(tmputf, SC_CP_UTF8, 0, text->rectangular, false);
 			text = converted;
 		}
 	}
