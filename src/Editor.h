@@ -113,6 +113,9 @@ public:
 		lineCopy = lineCopy_;
 		FixSelectionForClipboard();
 	}
+	void Copy(const std::string &s, int codePage_, int characterSet_, bool rectangular_, bool lineCopy_) {
+		Copy(s.c_str(), s.length()+1, codePage_, characterSet_, rectangular_, lineCopy_);
+	}
 	void Copy(const SelectionText &other) {
 		Copy(other.s, other.len, other.codePage, other.characterSet, other.rectangular, other.lineCopy);
 	}
