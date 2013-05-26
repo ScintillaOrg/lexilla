@@ -75,60 +75,53 @@ public:
 };
 
 /**
- * Hold a piece of text selected for copying or dragging.
- * The text is expected to hold a terminating '\0' and this is counted in len.
+ * Hold a piece of text selected for copying or dragging, along with encoding and selection format information.
  */
 class SelectionText {
+	std::string s;
 public:
-	char *s;
-	int len;
 	bool rectangular;
 	bool lineCopy;
 	int codePage;
 	int characterSet;
-	SelectionText() : s(0), len(0), rectangular(false), lineCopy(false), codePage(0), characterSet(0) {}
+	SelectionText() : rectangular(false), lineCopy(false), codePage(0), characterSet(0) {}
 	~SelectionText() {
-		Free();
 	}
-	void Free() {
-		delete []s;
-		s = 0;
-		len = 0;
+	void Clear() {
+		s.clear();
 		rectangular = false;
 		lineCopy = false;
 		codePage = 0;
 		characterSet = 0;
 	}
-	void Copy(const char *s_, int len_, int codePage_, int characterSet_, bool rectangular_, bool lineCopy_) {
-		delete []s;
-		s = 0;
-		s = new char[len_];
-		len = len_;
-		for (int i = 0; i < len_; i++) {
-			s[i] = s_[i];
-		}
+	void Copy(const std::string &s_, int codePage_, int characterSet_, bool rectangular_, bool lineCopy_) {
+		s = s_;
 		codePage = codePage_;
 		characterSet = characterSet_;
 		rectangular = rectangular_;
 		lineCopy = lineCopy_;
 		FixSelectionForClipboard();
 	}
-	void Copy(const std::string &s, int codePage_, int characterSet_, bool rectangular_, bool lineCopy_) {
-		Copy(s.c_str(), s.length()+1, codePage_, characterSet_, rectangular_, lineCopy_);
-	}
 	void Copy(const SelectionText &other) {
-		Copy(other.s, other.len, other.codePage, other.characterSet, other.rectangular, other.lineCopy);
+		Copy(other.s, other.codePage, other.characterSet, other.rectangular, other.lineCopy);
 	}
-	
+	const char *Data() const {
+		return s.c_str();
+	}
+	size_t Length() const {
+		return s.length();
+	}
+	size_t LengthWithTerminator() const {
+		return s.length() + 1;
+	}
+	bool Empty() const {
+		return s.empty();
+	}
 private:
 	void FixSelectionForClipboard() {
-		// Replace null characters by spaces.
-		// To avoid that the content of the clipboard is truncated in the paste operation 
-		// when the clipboard contains null characters.
-		for (int i = 0; i < len - 1; ++i) {
-			if (s[i] == '\0')
-				s[i] = ' ';
-		}
+		// To avoid truncating the contents of the clipboard when pasted where the 
+		// clipboard contains NUL characters, replace NUL characters by spaces.
+		std::replace(s.begin(), s.end(), '\0', ' ');
 	}
 };
 
@@ -527,6 +520,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual void DisplayCursor(Window::Cursor c);
 	virtual bool DragThreshold(Point ptStart, Point ptNow);
 	virtual void StartDrag();
+	void DropAt(SelectionPosition position, const char *value, size_t lengthValue, bool moving, bool rectangular);
 	void DropAt(SelectionPosition position, const char *value, bool moving, bool rectangular);
 	/** PositionInSelection returns true if position in selection. */
 	bool PositionInSelection(int pos);

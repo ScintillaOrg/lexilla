@@ -956,20 +956,20 @@ void ScintillaCocoa::Paste(bool forceRectangular)
   if (forceRectangular)
     selectedText.rectangular = forceRectangular;
   
-  if (!ok || !selectedText.s)
+  if (!ok || selectedText.Empty())
     // No data or no flavor we support.
     return;
   
   pdoc->BeginUndoAction();
   ClearSelection(false);
-  int length = selectedText.len - 1; // One less to avoid inserting the terminating 0 character.
+  int length = selectedText.Length();
   if (selectedText.rectangular)
   {
     SelectionPosition selStart = sel.RangeMain().Start();
-    PasteRectangular(selStart, selectedText.s, length);
+    PasteRectangular(selStart, selectedText.Data(), length);
   }
   else 
-    if (pdoc->InsertString(sel.RangeMain().caret.Position(), selectedText.s, length))
+    if (pdoc->InsertString(sel.RangeMain().caret.Position(), selectedText.Data(), length))
       SetEmptySelection(sel.RangeMain().caret.Position() + length);
   
   pdoc->EndUndoAction();
@@ -1410,12 +1410,12 @@ bool ScintillaCocoa::PerformDragOperation(id <NSDraggingInfo> info)
     SelectionText text;
     GetPasteboardData(pasteboard, &text);
     
-    if (text.len > 0)
+    if (text.Length() > 0)
     {
       NSDragOperation operation = [info draggingSourceOperationMask];
       bool moving = (operation & NSDragOperationMove) != 0;
       
-      DropAt(posDrag, text.s, moving, text.rectangular);
+      DropAt(posDrag, text.Data(), text.Length(), moving, text.rectangular);
     };
   }
 
@@ -1426,14 +1426,14 @@ bool ScintillaCocoa::PerformDragOperation(id <NSDraggingInfo> info)
 
 void ScintillaCocoa::SetPasteboardData(NSPasteboard* board, const SelectionText &selectedText)
 {
-  if (selectedText.len == 0)
+  if (selectedText.Length() == 0)
     return;
 
   CFStringEncoding encoding = EncodingFromCharacterSet(selectedText.codePage == SC_CP_UTF8,
                                                        selectedText.characterSet);
   CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
-                                               reinterpret_cast<const UInt8 *>(selectedText.s), 
-                                               selectedText.len-1, encoding, false);
+                                               reinterpret_cast<const UInt8 *>(selectedText.Data()),
+                                               selectedText.Length(), encoding, false);
 
   NSArray *pbTypes = selectedText.rectangular ?
     [NSArray arrayWithObjects: NSStringPboardType, ScintillaRecPboardType, nil] :
@@ -1486,7 +1486,7 @@ bool ScintillaCocoa::GetPasteboardData(NSPasteboard* board, SelectionText* selec
       int len = static_cast<int>(usedLen);
       std::string dest = Document::TransformLineEnds((char *)buffer.data(), len, pdoc->eolMode);
 
-      selectedText->Copy(dest.c_str(), dest.length()+1, pdoc->dbcsCodePage,
+      selectedText->Copy(dest, pdoc->dbcsCodePage,
                          vs.styles[STYLE_DEFAULT].characterSet , rectangular, false);
     }
     return true;
