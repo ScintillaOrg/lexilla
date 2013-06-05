@@ -606,6 +606,8 @@ CaseFolder *ScintillaCocoa::CaseFolderForEncoding() {
                 CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
                                                              reinterpret_cast<const UInt8 *>(sCharacter), 
                                                              1, encoding, false);
+                if (!cfsVal)
+                        continue;
                 
                 NSString *sMapped = [(NSString *)cfsVal stringByFoldingWithOptions:NSCaseInsensitiveSearch
                                                                             locale:[NSLocale currentLocale]];
