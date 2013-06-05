@@ -217,8 +217,10 @@ class ScintillaWin :
 
 	virtual void Initialise();
 	virtual void Finalise();
+#if defined(USE_D2D)
 	void EnsureRenderTarget();
 	void DropRenderTarget();
+#endif
 	HWND MainHWND();
 
 	static sptr_t DirectFunction(
@@ -404,15 +406,18 @@ void ScintillaWin::Finalise() {
 	ScintillaBase::Finalise();
 	SetTicking(false);
 	SetIdle(false);
+#if defined(USE_D2D)
 	DropRenderTarget();
+#endif
 	::RevokeDragDrop(MainHWND());
 	if (SUCCEEDED(hrOle)) {
 		::OleUninitialize();
 	}
 }
 
-void ScintillaWin::EnsureRenderTarget() {
 #if defined(USE_D2D)
+
+void ScintillaWin::EnsureRenderTarget() {
 	if (!renderTargetValid) {
 		DropRenderTarget();
 		renderTargetValid = true;
@@ -454,17 +459,16 @@ void ScintillaWin::EnsureRenderTarget() {
 		// need to be recreated.
 		DropGraphics(false);
 	}
-#endif
 }
 
 void ScintillaWin::DropRenderTarget() {
-#if defined(USE_D2D)
 	if (pRenderTarget) {
 		pRenderTarget->Release();
 		pRenderTarget = 0;
 	}
-#endif
 }
+
+#endif
 
 HWND ScintillaWin::MainHWND() {
 	return reinterpret_cast<HWND>(wMain.GetID());
