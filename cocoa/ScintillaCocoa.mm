@@ -1528,6 +1528,8 @@ bool ScintillaCocoa::SyncPaint(void* gc, PRectangle rc)
   {
     CGContextSetAllowsAntialiasing((CGContextRef)gc,
                                    vs.extraFontFlag != SC_EFF_QUALITY_NON_ANTIALIASED);
+    CGContextSetAllowsFontSmoothing((CGContextRef)gc,
+                                    vs.extraFontFlag == SC_EFF_QUALITY_LCD_OPTIMIZED);
 #if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
     if (CGContextSetAllowsFontSubpixelPositioning != NULL)
       CGContextSetAllowsFontSubpixelPositioning((CGContextRef)gc,
