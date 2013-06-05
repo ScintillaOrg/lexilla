@@ -2133,7 +2133,7 @@ class ListBoxX : public ListBox {
 
 	HWND GetHWND() const;
 	void AppendListItem(const char *text, const char *numword);
-	void AdjustWindowRect(PRectangle *rc) const;
+	static void AdjustWindowRect(PRectangle *rc);
 	int ItemHeight() const;
 	int MinClientWidth() const;
 	int TextOffset() const;
@@ -2496,7 +2496,7 @@ void ListBoxX::SetList(const char *list, char separator, char typesep) {
 	SetRedraw(true);
 }
 
-void ListBoxX::AdjustWindowRect(PRectangle *rc) const {
+void ListBoxX::AdjustWindowRect(PRectangle *rc) {
 	RECT rcw = RectFromPRectangle(*rc);
 	::AdjustWindowRectEx(&rcw, WS_THICKFRAME, false, WS_EX_WINDOWEDGE);
 	*rc = PRectangle(rcw.left, rcw.top, rcw.right, rcw.bottom);
