@@ -232,8 +232,10 @@ private:
 	gint FocusOutThis(GtkWidget *widget);
 	static gint FocusOut(GtkWidget *widget, GdkEventFocus *event);
 	static void SizeRequest(GtkWidget *widget, GtkRequisition *requisition);
+#if GTK_CHECK_VERSION(3,0,0)
 	static void GetPreferredWidth(GtkWidget *widget, gint *minimalWidth, gint *naturalWidth);
 	static void GetPreferredHeight(GtkWidget *widget, gint *minimalHeight, gint *naturalHeight);
+#endif
 	static void SizeAllocate(GtkWidget *widget, GtkAllocation *allocation);
 #if GTK_CHECK_VERSION(3,0,0)
 	gboolean DrawTextThis(cairo_t *cr);
@@ -678,6 +680,8 @@ void ScintillaGTK::SizeRequest(GtkWidget *widget, GtkRequisition *requisition) {
 #endif
 }
 
+#if GTK_CHECK_VERSION(3,0,0)
+
 void ScintillaGTK::GetPreferredWidth(GtkWidget *widget, gint *minimalWidth, gint *naturalWidth) {
 	GtkRequisition requisition;
 	SizeRequest(widget, &requisition);
@@ -689,6 +693,8 @@ void ScintillaGTK::GetPreferredHeight(GtkWidget *widget, gint *minimalHeight, gi
 	SizeRequest(widget, &requisition);
 	*minimalHeight = *naturalHeight = requisition.height;
 }
+
+#endif
 
 void ScintillaGTK::SizeAllocate(GtkWidget *widget, GtkAllocation *allocation) {
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
