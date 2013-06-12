@@ -40,6 +40,9 @@ FontNames::~FontNames() {
 }
 
 void FontNames::Clear() {
+	for (std::vector<char *>::const_iterator it=names.begin(); it != names.end(); ++it) {
+		delete []*it;
+	}
 	names.clear();
 }
 
