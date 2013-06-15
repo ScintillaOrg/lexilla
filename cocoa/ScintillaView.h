@@ -131,6 +131,9 @@ extern NSString *SCIUpdateUINotification;
 // Native call through to the backend.
 + (sptr_t) directCall: (ScintillaView*) sender message: (unsigned int) message wParam: (uptr_t) wParam
                lParam: (sptr_t) lParam;
+- (sptr_t) message: (unsigned int) message wParam: (uptr_t) wParam lParam: (sptr_t) lParam;
+- (sptr_t) message: (unsigned int) message wParam: (uptr_t) wParam;
+- (sptr_t) message: (unsigned int) message;
 
 // Back end properties getters and setters.
 - (void) setGeneralProperty: (int) property parameter: (long) parameter value: (long) value;

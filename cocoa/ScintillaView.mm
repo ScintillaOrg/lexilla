@@ -1329,6 +1329,21 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
   return ScintillaCocoa::DirectFunction(sender->mBackend, message, wParam, lParam);
 }
 
+- (sptr_t) message: (unsigned int) message wParam: (uptr_t) wParam lParam: (sptr_t) lParam
+{
+  return mBackend->WndProc(message, wParam, lParam);
+}
+
+- (sptr_t) message: (unsigned int) message wParam: (uptr_t) wParam
+{
+  return mBackend->WndProc(message, wParam, 0);
+}
+
+- (sptr_t) message: (unsigned int) message
+{
+  return mBackend->WndProc(message, 0, 0);
+}
+
 //--------------------------------------------------------------------------------------------------
 
 /**
