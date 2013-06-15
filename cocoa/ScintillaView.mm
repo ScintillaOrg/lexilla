@@ -1610,7 +1610,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 
 - (void)insertText: (NSString*)text
 {
-  [mContent insertText: text];
+  mBackend->InsertText(text);
 }
 
 //--------------------------------------------------------------------------------------------------
