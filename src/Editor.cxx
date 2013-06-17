@@ -1623,7 +1623,7 @@ bool Editor::WrapLines(bool fullWrap, int priorityWrapLineStart) {
 			int subLineTop = topLine - cs.DisplayFromDoc(lineDocTop);
 			PRectangle rcTextArea = GetClientRectangle();
 			rcTextArea.left = vs.textStart;
-			rcTextArea.right -= vs.textStart;
+			rcTextArea.right -= vs.rightMarginWidth;
 			wrapWidth = rcTextArea.Width();
 			RefreshStyleData();
 			AutoSurface surface(this);
