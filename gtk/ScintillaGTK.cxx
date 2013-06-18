@@ -1693,9 +1693,6 @@ void ScintillaGTK::Resize(int width, int height) {
 	// These allocations should never produce negative sizes as they would wrap around to huge
 	// unsigned numbers inside GTK+ causing warnings.
 	bool showSBHorizontal = horizontalScrollBarVisible && (wrapState == eWrapNone);
-	int horizontalScrollBarHeight = scrollBarHeight;
-	if (!showSBHorizontal)
-		horizontalScrollBarHeight = 0;
 
 	GtkAllocation alloc;
 	if (showSBHorizontal) {
@@ -1703,10 +1700,11 @@ void ScintillaGTK::Resize(int width, int height) {
 		alloc.x = 0;
 		alloc.y = height - scrollBarHeight;
 		alloc.width = Platform::Maximum(1, width - scrollBarWidth);
-		alloc.height = horizontalScrollBarHeight;
+		alloc.height = scrollBarHeight;
 		gtk_widget_size_allocate(GTK_WIDGET(PWidget(scrollbarh)), &alloc);
 	} else {
 		gtk_widget_hide(GTK_WIDGET(PWidget(scrollbarh)));
+		scrollBarHeight = 0; // in case horizontalScrollBarVisible is true.
 	}
 
 	if (verticalScrollBarVisible) {
@@ -1715,11 +1713,10 @@ void ScintillaGTK::Resize(int width, int height) {
 		alloc.y = 0;
 		alloc.width = scrollBarWidth;
 		alloc.height = Platform::Maximum(1, height - scrollBarHeight);
-		if (!showSBHorizontal)
-			alloc.height += scrollBarWidth-1;
 		gtk_widget_size_allocate(GTK_WIDGET(PWidget(scrollbarv)), &alloc);
 	} else {
 		gtk_widget_hide(GTK_WIDGET(PWidget(scrollbarv)));
+		scrollBarWidth = 0;
 	}
 	if (IS_WIDGET_MAPPED(PWidget(wMain))) {
 		ChangeSize();
@@ -1729,10 +1726,6 @@ void ScintillaGTK::Resize(int width, int height) {
 	alloc.y = 0;
 	alloc.width = Platform::Maximum(1, width - scrollBarWidth);
 	alloc.height = Platform::Maximum(1, height - scrollBarHeight);
-	if (!showSBHorizontal)
-		alloc.height += scrollBarHeight;
-	if (!verticalScrollBarVisible)
-		alloc.width += scrollBarWidth;
 	gtk_widget_size_allocate(GTK_WIDGET(PWidget(wText)), &alloc);
 }
 
