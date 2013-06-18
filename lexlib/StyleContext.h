@@ -176,6 +176,12 @@ public:
 			Forward();
 		}
 	}
+	void ForwardBytes(int nb) {
+		size_t forwardPos = currentPos + nb;
+		while (forwardPos > currentPos) {
+			Forward();
+		}
+	}
 	void ChangeState(int state_) {
 		state = state_;
 	}
