@@ -238,6 +238,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int theEdge;
 
 	enum { notPainting, painting, paintAbandoned } paintState;
+	bool paintAbandonedByStyling;
 	PRectangle rcPaint;
 	bool paintingAllText;
 	bool willRedrawAll;

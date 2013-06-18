@@ -3543,6 +3543,8 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		return;	// Scroll bars may have changed so need redraw
 	RefreshPixMaps(surfaceWindow);
 
+	paintAbandonedByStyling = false;
+
 	StyleToPositionInView(PositionAfterArea(rcArea));
 
 	PRectangle rcClient = GetClientRectangle();
@@ -3558,7 +3560,6 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		ypos += screenLinePaintFirst * vs.lineHeight;
 	int yposScreen = screenLinePaintFirst * vs.lineHeight;
 
-	bool paintAbandonedByStyling = paintState == paintAbandoned;
 	if (NotifyUpdateUI()) {
 		RefreshStyleData();
 		RefreshPixMaps(surfaceWindow);
@@ -6852,6 +6853,7 @@ void Editor::CheckForChangeOutsidePaint(Range r) {
 
 		if (!PaintContains(rcRange)) {
 			AbandonPaint();
+			paintAbandonedByStyling = true;
 		}
 	}
 }
