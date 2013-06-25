@@ -460,7 +460,7 @@ void SurfaceImpl::MeasureWidths(Font &font,
 		return;
 	SetCodec(font);
 	QString su = codec->toUnicode(s, len);
-	QTextLayout tlay(su, *FontPointer(font));
+	QTextLayout tlay(su, *FontPointer(font), GetPaintDevice());
 	tlay.beginLayout();
 	QTextLine tl = tlay.createLine();
 	tlay.endLayout();
