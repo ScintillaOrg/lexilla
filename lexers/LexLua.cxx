@@ -171,16 +171,16 @@ static void ColouriseLuaDoc(
 							sc.ChangeState(SCE_LUA_LABEL);
 							if (ws1) {
 								sc.SetState(SCE_LUA_DEFAULT);
-								sc.Forward(ws1);
+								sc.ForwardBytes(ws1);
 							}
 							sc.SetState(SCE_LUA_LABEL);
-							sc.Forward(lbl - ws1);
+							sc.ForwardBytes(lbl - ws1);
 							if (ws2) {
 								sc.SetState(SCE_LUA_DEFAULT);
-								sc.Forward(ws2);
+								sc.ForwardBytes(ws2);
 							}
 							sc.SetState(SCE_LUA_LABEL);
-							sc.Forward(2);
+							sc.ForwardBytes(2);
 						}
 					}
 				}
