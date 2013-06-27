@@ -699,6 +699,71 @@ bool Document::NextCharacter(int &pos, int moveDir) const {
 	}
 }
 
+static inline int UnicodeFromBytes(const unsigned char *us) {
+	if (us[0] < 0xC2) {
+		return us[0];
+	} else if (us[0] < 0xE0) {
+		return ((us[0] & 0x1F) << 6) + (us[1] & 0x3F);
+	} else if (us[0] < 0xF0) {
+		return ((us[0] & 0xF) << 12) + ((us[1] & 0x3F) << 6) + (us[2] & 0x3F);
+	} else if (us[0] < 0xF5) {
+		return ((us[0] & 0x7) << 18) + ((us[1] & 0x3F) << 12) + ((us[2] & 0x3F) << 6) + (us[3] & 0x3F);
+	}
+	return us[0];
+}
+
+// Return -1  on out-of-bounds
+int SCI_METHOD Document::GetRelativePosition(int start, int characterOffset, int *character, int *width) const {
+	int pos = start;
+	if (dbcsCodePage) {
+		const int increment = (characterOffset > 0) ? 1 : -1;
+		while (characterOffset != 0) {
+			const int posNext = NextPosition(pos, increment);
+			if (posNext == pos)
+				return -1;
+			pos = posNext;
+			characterOffset -= increment;
+		}
+		const unsigned char leadByte = static_cast<unsigned char>(cb.CharAt(pos));
+		if (SC_CP_UTF8 == dbcsCodePage) {
+			if (UTF8IsAscii(leadByte)) {
+				// Single byte character or invalid
+				*character = leadByte;
+				*width = 1;
+			} else {
+				const int widthCharBytes = UTF8BytesOfLead[leadByte];
+				unsigned char charBytes[UTF8MaxBytes] = {leadByte,0,0,0};
+				for (int b=1; b<widthCharBytes; b++)
+					charBytes[b] = static_cast<unsigned char>(cb.CharAt(pos+b));
+				int utf8status = UTF8Classify(charBytes, widthCharBytes);
+				if (utf8status & UTF8MaskInvalid) {
+					// Report as singleton surrogate values which are invalid in Unicode
+					*character = 0xDC80 + leadByte;
+					*width = 1;
+				} else {
+					*character = UnicodeFromBytes(charBytes);
+					*width = utf8status & UTF8MaskWidth;
+				}
+			}
+		} else if (dbcsCodePage) {
+			if (IsDBCSLeadByte(leadByte)) {
+				*character = (leadByte << 8) | static_cast<unsigned char>(cb.CharAt(pos+1));
+				*width = 2;
+			} else {
+				*character = leadByte;
+				*width = 1;
+			}
+		}
+	} else {
+		pos = start + characterOffset;
+		if ((pos < 0) || (pos > Length()))
+			return -1;
+		*character = cb.CharAt(pos);
+		*width = 1;
+	}
+	return pos;
+}
+
 int SCI_METHOD Document::CodePage() const {
 	return dbcsCodePage;
 }

@@ -48,6 +48,7 @@ public:
 class IDocumentWithLineEnd : public IDocument {
 public:
 	virtual int SCI_METHOD LineEnd(int line) const = 0;
+	virtual int SCI_METHOD GetRelativePosition(int start, int characterOffset, int *character, int *width) const = 0;
 };
 
 enum { lvOriginal=0, lvSubStyles=1 };

@@ -51,35 +51,27 @@ class StyleContext {
 	LexAccessor &styler;
 	unsigned int endPos;
 	unsigned int lengthDocument;
+	
+	// Used for optimizing GetRelativeCharacter
+	unsigned int posRelative;
+	unsigned int currentPosLastRelative;
+	int offsetRelative;
+
 	StyleContext &operator=(const StyleContext &);
 
-	void GetNextChar(unsigned int pos) {
-		chNext = static_cast<unsigned char>(styler.SafeGetCharAt(pos+1, 0));
-		if (styler.Encoding() == encUnicode) {
-			if (chNext >= 0x80) {
-				unsigned char bytes[4] = { static_cast<unsigned char>(chNext), 0, 0, 0 };
-				for (int trail=1; trail<3; trail++) {
-					bytes[trail] = static_cast<unsigned char>(styler.SafeGetCharAt(pos+1+trail, 0));
-					if (!((bytes[trail] >= 0x80) && (bytes[trail] < 0xc0))) {
-						bytes[trail] = 0;
-						break;
-					}
-				}
-				chNext = UnicodeCodePoint(bytes);
-			}
-		} else if (styler.Encoding() == encDBCS) {
-			if (styler.IsLeadByte(static_cast<char>(chNext))) {
-				chNext = chNext << 8;
-				chNext |= static_cast<unsigned char>(styler.SafeGetCharAt(pos+2, 0));
-			}
+	void GetNextChar() {
+		if (styler.Encoding() == enc8bit) {
+			chNext = static_cast<unsigned char>(styler.SafeGetCharAt(currentPos+width, 0));
+			widthNext = 1;
+		} else {
+			styler.GetRelativePosition(currentPos+width, 0, &chNext, &widthNext);
 		}
-		// End of line?
-		// Trigger on CR only (Mac style) or either on LF from CR+LF (Dos/Win)
-		// or on LF alone (Unix). Avoid triggering two times on Dos/Win.
+		// End of line determined from line end position, allowing CR, LF, 
+		// CRLF and Unicode line ends as set by document.
 		if (currentLine < lineDocEnd)
-			atLineEnd = static_cast<int>(pos) >= (lineStartNext-1);
+			atLineEnd = static_cast<int>(currentPos) >= (lineStartNext-1);
 		else // Last line
-			atLineEnd = static_cast<int>(pos) >= lineStartNext;
+			atLineEnd = static_cast<int>(currentPos) >= lineStartNext;
 	}
 
 public:
@@ -92,12 +84,17 @@ public:
 	int state;
 	int chPrev;
 	int ch;
+	int width;
 	int chNext;
+	int widthNext;
 
 	StyleContext(unsigned int startPos, unsigned int length,
                         int initStyle, LexAccessor &styler_, char chMask=31) :
 		styler(styler_),
 		endPos(startPos + length),
+		posRelative(0),
+		currentPosLastRelative(0x7FFFFFFF),
+		offsetRelative(0),
 		currentPos(startPos),
 		currentLine(-1),
 		lineStartNext(-1),
@@ -105,7 +102,9 @@ public:
 		state(initStyle & chMask), // Mask off all bits which aren't in the chMask.
 		chPrev(0),
 		ch(0),
-		chNext(0) {
+		width(0),
+		chNext(0),
+		widthNext(1) {
 		styler.StartAt(startPos, chMask);
 		styler.StartSegment(startPos);
 		currentLine = styler.GetLine(startPos);
@@ -115,21 +114,14 @@ public:
 			endPos++;
 		lineDocEnd = styler.GetLine(lengthDocument);
 		atLineStart = static_cast<unsigned int>(styler.LineStart(currentLine)) == startPos;
-		unsigned int pos = currentPos;
-		ch = static_cast<unsigned char>(styler.SafeGetCharAt(pos, 0));
-		if (styler.Encoding() == encUnicode) {
-			// Get the current char
-			GetNextChar(pos-1);
-			ch = chNext;
-			pos += BytesInUnicodeCodePoint(ch) - 1;
-		} else if (styler.Encoding() == encDBCS) {
-			if (styler.IsLeadByte(static_cast<char>(ch))) {
-				pos++;
-				ch = ch << 8;
-				ch |= static_cast<unsigned char>(styler.SafeGetCharAt(pos, 0));
-			}
-		}
-		GetNextChar(pos);
+
+		// Variable width is now 0 so GetNextChar gets the char at currentPos into chNext/widthNext
+		width = 0;
+		GetNextChar();
+		ch = chNext;
+		width = widthNext;
+
+		GetNextChar();
 	}
 	void Complete() {
 		styler.ColourTo(currentPos - ((currentPos > lengthDocument) ? 2 : 1), state);
@@ -146,23 +138,10 @@ public:
 				lineStartNext = styler.LineStart(currentLine+1);
 			}
 			chPrev = ch;
-			if (styler.Encoding() == encUnicode) {
-				currentPos += BytesInUnicodeCodePoint(ch);
-			} else if (styler.Encoding() == encDBCS) {
-				currentPos++;
-				if (ch >= 0x100)
-					currentPos++;
-			} else {
-				currentPos++;
-			}
+			currentPos += width;
 			ch = chNext;
-			if (styler.Encoding() == encUnicode) {
-				GetNextChar(currentPos + BytesInUnicodeCodePoint(ch)-1);
-			} else if (styler.Encoding() == encDBCS) {
-				GetNextChar(currentPos + ((ch >= 0x100) ? 1 : 0));
-			} else {
-				GetNextChar(currentPos);
-			}
+			width = widthNext;
+			GetNextChar();
 		} else {
 			atLineStart = false;
 			chPrev = ' ';
@@ -199,6 +178,30 @@ public:
 	}
 	int GetRelative(int n) {
 		return static_cast<unsigned char>(styler.SafeGetCharAt(currentPos+n, 0));
+	}
+	int GetRelativeCharacter(int n) {
+		if (n == 0)
+			return ch;
+		if (styler.Encoding() == enc8bit) {
+			// fast version for single byte encodings
+			return static_cast<unsigned char>(styler.SafeGetCharAt(currentPos + n, 0));
+		} else {
+			int ch = 0;
+			int width = 0;
+			//styler.GetRelativePosition(currentPos, n, &ch, &width);
+			if ((currentPosLastRelative != currentPos) ||
+				((n > 0) && ((offsetRelative < 0) || (n < offsetRelative))) ||
+				((n < 0) && ((offsetRelative > 0) || (n > offsetRelative)))) {
+				posRelative = currentPos;
+				offsetRelative = 0;
+			}
+			int diffRelative = n - offsetRelative;
+			int posNew = styler.GetRelativePosition(posRelative, diffRelative, &ch, &width);
+			posRelative = posNew;
+			currentPosLastRelative = currentPos;
+			offsetRelative = n;
+			return ch;
+		}
 	}
 	bool Match(char ch0) const {
 		return ch == static_cast<unsigned char>(ch0);

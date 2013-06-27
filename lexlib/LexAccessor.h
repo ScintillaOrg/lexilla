@@ -126,6 +126,21 @@ public:
 				return startNext - 1;
 		}
 	}
+	int GetRelativePosition(int start, int characterOffset, int *character, int *width) {
+		if (documentVersion >= dvLineEnd) {
+			return (static_cast<IDocumentWithLineEnd *>(pAccess))->GetRelativePosition(
+				start, characterOffset, character, width);
+		} else {
+			// Old version -> byte-oriented only
+			// Handle doc range overflow
+			int posNew = start + characterOffset;
+			if ((posNew < 0) || (posNew > Length()))
+				return -1;
+			*character = SafeGetCharAt(posNew, 0);
+			*width = 1;
+			return start + characterOffset;
+		}
+	}
 	int LevelAt(int line) const {
 		return pAccess->GetLevel(line);
 	}

@@ -6321,13 +6321,18 @@ exception options.</p>
 
 <p>
 To allow lexers to determine the end position of a line and thus more easily support Unicode line ends
-<code>IDocument</code> is extended to <code>IDocumentWithLineEnd</code>.
+<code>IDocument</code> is extended to <code>IDocumentWithLineEnd</code>.</p>
+<p>The <code>GetRelativePosition</code> method allows navigating the document by whole characters and provides a standard
+conversion from UTF-8 bytes to a UTF-32 character or from DBCS to a 16 bit value.
+Invalid UTF-8 is reported as a character for each byte with values 0xDC80+byteValue, which are
+not valid Unicode code points.
 </p>
 
 <div class="highlighted">
 <span class="S5">class</span><span class="S0"> </span>IDocumentWithLineEnd<span class="S0"> </span><span class="S10">:</span><span class="S0"> </span><span class="S5">public</span><span class="S0"> </span>IDocument<span class="S0"> </span><span class="S10">{</span><br />
 <span class="S5">public</span><span class="S10">:</span><br />
 <span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>LineEnd<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>line<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>GetRelativePosition<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>start<span class="S10">,</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>characterOffset<span class="S10">,</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span><span class="S10">*</span>character<span class="S10">,</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span><span class="S10">*</span>width<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S10">};</span><br />
 </div>
 
