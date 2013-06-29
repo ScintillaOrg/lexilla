@@ -580,7 +580,7 @@ void SCI_METHOD LexerPerl::Lex(unsigned int startPos, int length, int initStyle,
 		int Count;
 		int Up, Down;
 		QuoteCls() {
-			this->New(1);
+			New(1);
 		}
 		void New(int r = 1) {
 			Rep   = r;
