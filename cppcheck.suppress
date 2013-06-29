@@ -30,7 +30,6 @@ variableScope:scintilla/lexers/LexOpal.cxx
 variableScope:scintilla/lexers/LexOthers.cxx
 variableScope:scintilla/lexers/LexPB.cxx
 variableScope:scintilla/lexers/LexPS.cxx
-uninitMemberVar:scintilla/lexers/LexPerl.cxx
 variableScope:scintilla/lexers/LexRuby.cxx
 uninitMemberVar:scintilla/lexers/LexRuby.cxx
 variableScope:scintilla/lexers/LexSpecman.cxx
