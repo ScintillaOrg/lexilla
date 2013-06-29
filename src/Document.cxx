@@ -713,55 +713,63 @@ static inline int UnicodeFromBytes(const unsigned char *us) {
 }
 
 // Return -1  on out-of-bounds
-int SCI_METHOD Document::GetRelativePosition(int start, int characterOffset, int *character, int *width) const {
-	int pos = start;
+int SCI_METHOD Document::GetRelativePosition(int positionStart, int characterOffset) const {
+	int pos = positionStart;
 	if (dbcsCodePage) {
 		const int increment = (characterOffset > 0) ? 1 : -1;
 		while (characterOffset != 0) {
 			const int posNext = NextPosition(pos, increment);
 			if (posNext == pos)
-				return -1;
+				return INVALID_POSITION;
 			pos = posNext;
 			characterOffset -= increment;
 		}
-		const unsigned char leadByte = static_cast<unsigned char>(cb.CharAt(pos));
+	} else {
+		pos = positionStart + characterOffset;
+		if ((pos < 0) || (pos > Length()))
+			return INVALID_POSITION;
+	}
+	return pos;
+}
+
+int SCI_METHOD Document::GetCharacterAndWidth(int position, int *pWidth) const {
+	int character;
+	int bytesInCharacter = 1;
+	if (dbcsCodePage) {
+		const unsigned char leadByte = static_cast<unsigned char>(cb.CharAt(position));
 		if (SC_CP_UTF8 == dbcsCodePage) {
 			if (UTF8IsAscii(leadByte)) {
 				// Single byte character or invalid
-				*character = leadByte;
-				*width = 1;
+				character =  leadByte;
 			} else {
 				const int widthCharBytes = UTF8BytesOfLead[leadByte];
 				unsigned char charBytes[UTF8MaxBytes] = {leadByte,0,0,0};
 				for (int b=1; b<widthCharBytes; b++)
-					charBytes[b] = static_cast<unsigned char>(cb.CharAt(pos+b));
+					charBytes[b] = static_cast<unsigned char>(cb.CharAt(position+b));
 				int utf8status = UTF8Classify(charBytes, widthCharBytes);
 				if (utf8status & UTF8MaskInvalid) {
-					// Report as singleton surrogate values which are invalid in Unicode
-					*character = 0xDC80 + leadByte;
-					*width = 1;
+					// Report as singleton surrogate values which are invalid Unicode
+					character =  0xDC80 + leadByte;
 				} else {
-					*character = UnicodeFromBytes(charBytes);
-					*width = utf8status & UTF8MaskWidth;
+					bytesInCharacter = utf8status & UTF8MaskWidth;
+					character = UnicodeFromBytes(charBytes);
 				}
 			}
-		} else if (dbcsCodePage) {
+		} else {
 			if (IsDBCSLeadByte(leadByte)) {
-				*character = (leadByte << 8) | static_cast<unsigned char>(cb.CharAt(pos+1));
-				*width = 2;
+				bytesInCharacter = 2;
+				character = (leadByte << 8) | static_cast<unsigned char>(cb.CharAt(position+1));
 			} else {
-				*character = leadByte;
-				*width = 1;
+				character = leadByte;
 			}
 		}
 	} else {
-		pos = start + characterOffset;
-		if ((pos < 0) || (pos > Length()))
-			return -1;
-		*character = cb.CharAt(pos);
-		*width = 1;
+		character = cb.CharAt(position);
 	}
-	return pos;
+	if (pWidth) {
+		*pWidth = bytesInCharacter;
+	}
+	return character;
 }
 
 int SCI_METHOD Document::CodePage() const {

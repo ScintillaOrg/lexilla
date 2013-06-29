@@ -49,6 +49,7 @@ inline int BytesInUnicodeCodePoint(int codePoint) {
 // syntactically significant. UTF-8 avoids this as all trail bytes are >= 0x80
 class StyleContext {
 	LexAccessor &styler;
+	IDocumentWithLineEnd *multiByteAccess;
 	unsigned int endPos;
 	unsigned int lengthDocument;
 	
@@ -60,11 +61,11 @@ class StyleContext {
 	StyleContext &operator=(const StyleContext &);
 
 	void GetNextChar() {
-		if (styler.Encoding() == enc8bit) {
+		if (multiByteAccess) {
+			chNext = multiByteAccess->GetCharacterAndWidth(currentPos+width, &widthNext);
+		} else {
 			chNext = static_cast<unsigned char>(styler.SafeGetCharAt(currentPos+width, 0));
 			widthNext = 1;
-		} else {
-			styler.GetRelativePosition(currentPos+width, 0, &chNext, &widthNext);
 		}
 		// End of line determined from line end position, allowing CR, LF, 
 		// CRLF and Unicode line ends as set by document.
@@ -91,6 +92,7 @@ public:
 	StyleContext(unsigned int startPos, unsigned int length,
                         int initStyle, LexAccessor &styler_, char chMask=31) :
 		styler(styler_),
+		multiByteAccess(0),
 		endPos(startPos + length),
 		posRelative(0),
 		currentPosLastRelative(0x7FFFFFFF),
@@ -105,6 +107,9 @@ public:
 		width(0),
 		chNext(0),
 		widthNext(1) {
+		if (styler.Encoding() != enc8bit) {
+			multiByteAccess = styler.MultiByteAccess();
+		}
 		styler.StartAt(startPos, chMask);
 		styler.StartSegment(startPos);
 		currentLine = styler.GetLine(startPos);
@@ -182,13 +187,7 @@ public:
 	int GetRelativeCharacter(int n) {
 		if (n == 0)
 			return ch;
-		if (styler.Encoding() == enc8bit) {
-			// fast version for single byte encodings
-			return static_cast<unsigned char>(styler.SafeGetCharAt(currentPos + n, 0));
-		} else {
-			int ch = 0;
-			int width = 0;
-			//styler.GetRelativePosition(currentPos, n, &ch, &width);
+		if (multiByteAccess) {
 			if ((currentPosLastRelative != currentPos) ||
 				((n > 0) && ((offsetRelative < 0) || (n < offsetRelative))) ||
 				((n < 0) && ((offsetRelative > 0) || (n > offsetRelative)))) {
@@ -196,11 +195,15 @@ public:
 				offsetRelative = 0;
 			}
 			int diffRelative = n - offsetRelative;
-			int posNew = styler.GetRelativePosition(posRelative, diffRelative, &ch, &width);
+			int posNew = multiByteAccess->GetRelativePosition(posRelative, diffRelative);
+			int ch = multiByteAccess->GetCharacterAndWidth(posNew, 0);
 			posRelative = posNew;
 			currentPosLastRelative = currentPos;
 			offsetRelative = n;
 			return ch;
+		} else {
+			// fast version for single byte encodings
+			return static_cast<unsigned char>(styler.SafeGetCharAt(currentPos + n, 0));
 		}
 	}
 	bool Match(char ch0) const {
