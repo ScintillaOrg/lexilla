@@ -415,7 +415,7 @@ int SCI_METHOD LexerPerl::WordListSet(int n, const char *wl) {
 int LexerPerl::InputSymbolScan(StyleContext &sc) {
 	// forward scan for matching > on same line; file handles
 	int c, sLen = 0;
-	while ((c = sc.GetRelativeCharacter(++sLen))) {
+	while ((c = sc.GetRelativeCharacter(++sLen)) != 0) {
 		if (c == '\r' || c == '\n') {
 			return 0;
 		} else if (c == '>') {
@@ -901,7 +901,7 @@ void SCI_METHOD LexerPerl::Lex(unsigned int startPos, int length, int initStyle,
 			}
 			while (!sc.atLineEnd) {		// "EOF" and `EOF` interpolated
 				int c, sLen = 0, endType = 0;
-				while ((c = sc.GetRelativeCharacter(sLen))) {
+				while ((c = sc.GetRelativeCharacter(sLen)) != 0) {
 					// scan to break string into segments
 					if (c == '\\') {
 						endType = 1; break;
@@ -973,7 +973,7 @@ void SCI_METHOD LexerPerl::Lex(unsigned int startPos, int length, int initStyle,
 				Quote.Open(sc.ch);
 			} else {
 				int c, sLen = 0, endType = 0;
-				while ((c = sc.GetRelativeCharacter(sLen))) {
+				while ((c = sc.GetRelativeCharacter(sLen)) != 0) {
 					// scan to break string into segments
 					if (IsASpace(c)) {
 						break;
@@ -1009,7 +1009,7 @@ void SCI_METHOD LexerPerl::Lex(unsigned int startPos, int length, int initStyle,
 			} else {
 				int c, sLen = 0, endType = 0;
 				bool isPattern = (Quote.Rep == 2);
-				while ((c = sc.GetRelativeCharacter(sLen))) {
+				while ((c = sc.GetRelativeCharacter(sLen)) != 0) {
 					// scan to break string into segments
 					if (c == '\\' && Quote.Up != '\\') {
 						endType = 2; break;
@@ -1065,7 +1065,7 @@ void SCI_METHOD LexerPerl::Lex(unsigned int startPos, int length, int initStyle,
 				Quote.Open(sc.ch);
 			} else {
 				int c, sLen = 0, endType = 0;
-				while ((c = sc.GetRelativeCharacter(sLen))) {
+				while ((c = sc.GetRelativeCharacter(sLen)) != 0) {
 					// scan to break string into segments
 					if (IsASpace(c)) {
 						break;
