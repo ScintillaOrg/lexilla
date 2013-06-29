@@ -39,6 +39,7 @@ class TestLexers(unittest.TestCase):
 	def LexExample(self, name, lexerName, keywords=None):
 		if keywords is None:
 			keywords = []
+		self.ed.SetCodePage(65001)
 		self.ed.LexerLanguage = lexerName
 		bits = self.ed.StyleBitsNeeded
 		mask = 2 << bits - 1
