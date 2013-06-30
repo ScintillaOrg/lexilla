@@ -7,7 +7,6 @@
 useInitializationList
 
 // Suppress most lexer warnings since the lexers are maintained by others
-variableScope:scintilla/lexers/LexA68k.cxx
 useInitializationList:scintilla/lexers/LexAsm.cxx
 useInitializationList:scintilla/lexers/LexBasic.cxx
 noCopyConstructor:scintilla/lexers/LexBash.cxx
