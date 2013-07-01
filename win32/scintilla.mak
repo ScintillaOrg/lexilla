@@ -61,6 +61,7 @@ SOBJS=\
 	$(DIR_O)\AutoComplete.obj \
 	$(DIR_O)\CallTip.obj \
 	$(DIR_O)\CellBuffer.obj \
+	$(DIR_O)\CharacterCategory.obj \
 	$(DIR_O)\CharacterSet.obj \
 	$(DIR_O)\CharClassify.obj \
 	$(DIR_O)\ContractionState.obj \
@@ -186,6 +187,7 @@ LOBJS=\
 	$(DIR_O)\CallTip.obj \
 	$(DIR_O)\Catalogue.obj \
 	$(DIR_O)\CellBuffer.obj \
+	$(DIR_O)\CharacterCategory.obj \
 	$(DIR_O)\CharacterSet.obj \
 	$(DIR_O)\CharClassify.obj \
 	$(DIR_O)\ContractionState.obj \
@@ -264,6 +266,8 @@ $(DIR_O)\CallTip.obj: ../src/CallTip.cxx ../include/Platform.h \
 $(DIR_O)\CellBuffer.obj: ../src/CellBuffer.cxx ../include/Platform.h \
   ../include/Scintilla.h ../src/SplitVector.h \
   ../src/Partitioning.h ../src/CellBuffer.h
+$(DIR_O)\CharacterCategory.obj: ../lexlib/CharacterCategory.cxx \
+../lexlib/CharacterCategory.h
 $(DIR_O)\CharacterSet.obj: ../lexlib/CharacterSet.cxx ../lexlib/CharacterSet.h
 $(DIR_O)\CharClassify.obj: ../src/CharClassify.cxx ../src/CharClassify.h
 $(DIR_O)\ContractionState.obj: ../src/ContractionState.cxx ../include/Platform.h \

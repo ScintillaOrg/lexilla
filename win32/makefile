@@ -49,6 +49,7 @@ BASEOBJS = \
 	AutoComplete.o \
 	CallTip.o \
 	CellBuffer.o \
+	CharacterCategory.o \
 	CharacterSet.o \
 	CharClassify.o \
 	ContractionState.o \
