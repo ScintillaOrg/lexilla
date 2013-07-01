@@ -9,11 +9,11 @@
 
 #include <algorithm>
 
+#include "CharacterCategory.h"
+
 #ifdef SCI_NAMESPACE
 namespace Scintilla {
 #endif
-
-#include "CharacterCategory.h"
 
 namespace {
 	// Use an unnamed namespace to protect the declarations from name conflicts
