@@ -40,39 +40,36 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 #include "OptionSet.h"
+#include "CharacterCategory.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
 #endif
 
-static int u_iswalpha(int);
-static int u_iswalnum(int);
-static int u_iswupper(int);
-static int u_IsHaskellSymbol(int);
+// See https://github.com/ghc/ghc/blob/master/compiler/parser/Lexer.x#L1682
+// Note, letter modifiers are prohibited.
 
-// #define HASKELL_UNICODE
-
-#ifndef HASKELL_UNICODE
-
-// Stubs
-
-static int u_iswalpha(int) {
-   return 0;
+static int u_iswupper (int ch) {
+   CharacterCategory c = CategoriseCharacter(ch);
+   return c == ccLu || c == ccLt;
 }
 
-static int u_iswalnum(int) {
-   return 0;
+static int u_iswalpha (int ch) {
+   CharacterCategory c = CategoriseCharacter(ch);
+   return c == ccLl || c == ccLu || c == ccLt || c == ccLo;
 }
 
-static int u_iswupper(int) {
-   return 0;
+static int u_iswalnum (int ch) {
+   CharacterCategory c = CategoriseCharacter(ch);
+   return c == ccLl || c == ccLu || c == ccLt || c == ccLo
+       || c == ccNd || c == ccNo;
 }
 
-static int u_IsHaskellSymbol(int) {
-   return 0;
+static int u_IsHaskellSymbol(int ch) {
+   CharacterCategory c = CategoriseCharacter(ch);
+   return c == ccPc || c == ccPd || c == ccPo
+       || c == ccSm || c == ccSc || c == ccSk || c == ccSo;
 }
-
-#endif
 
 static inline bool IsHaskellLetter(const int ch) {
    if (IsASCII(ch)) {
