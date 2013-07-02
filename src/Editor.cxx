@@ -1806,6 +1806,8 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 	if (vs.fixedColumnWidth == 0)
 		return;
 
+	AllocateGraphics();
+	RefreshStyleData();
 	RefreshPixMaps(surfWindow);
 
 	PRectangle rcMargin = GetClientRectangle();
