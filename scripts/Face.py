@@ -1,4 +1,7 @@
-# Module for reading and parsing Scintilla.iface file
+# Face.py - module for reading and parsing Scintilla.iface file
+# Implemented 2000 by Neil Hodgson neilh@scintilla.org
+# Released to the public domain.
+# Requires Python 2.5 or later
 
 def sanitiseLine(line):
 	if line[-1:] == '\n': line = line[:-1]
