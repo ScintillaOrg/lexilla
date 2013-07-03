@@ -470,6 +470,10 @@
 	<a href="http://sourceforge.net/p/scintilla/bugs/1491/">Bug #1491</a>.
 	</li>
 	<li>
+	errorlist lexer only recognises Perl diagnostics when there is a filename between
+	"at" and "line". Had been triggering for MSVC errors containing "at line".
+	</li>
+	<li>
 	Haskell lexer fixed to avoid unnecessary full redraws.
 	Don't highlight CPP inside comments when styling.within.preprocessor is on.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1459/">Bug #1459</a>.
@@ -481,6 +485,10 @@
 	<li>
 	Perl lexer fixes bug in string interpolation with UTF-8 text.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1483/">Bug #1483</a>.
+	</li>
+	<li>
+	Fixed bug where data being inserted and removed was not being reported in
+	notification messages. Bug was introduced in 3.3.2.
 	</li>
 	<li>
 	Word wrap bug fixed where the last line could be shown twice.
