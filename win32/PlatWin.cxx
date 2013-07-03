@@ -1889,7 +1889,10 @@ static RECT RectFromMonitor(HMONITOR hMonitor) {
 	}
 	RECT rc = {0, 0, 0, 0};
 	if (::SystemParametersInfoA(SPI_GETWORKAREA, 0, &rc, 0) == 0) {
-		rc = {0, 0, 0, 0};
+		rc.left = 0;
+		rc.top = 0;
+		rc.right = 0;
+		rc.bottom = 0;
 	}
 	return rc;
 }
