@@ -391,9 +391,8 @@ int CellBuffer::GapPosition() const {
 	return substance.GapPosition();
 }
 
-// The char* returned is to an allocation owned by the undo history
+// The char* returned is to the input argument
 const char *CellBuffer::InsertString(int position, const char *s, int insertLength, bool &startSequence) {
-	char *data = 0;
 	// InsertString and DeleteChars are the bottleneck though which all changes occur
 	if (!readOnly) {
 		if (collectingUndo) {
@@ -404,7 +403,7 @@ const char *CellBuffer::InsertString(int position, const char *s, int insertLeng
 
 		BasicInsertString(position, s, insertLength);
 	}
-	return data;
+	return s;
 }
 
 bool CellBuffer::SetStyleAt(int position, char styleValue, char mask) {
@@ -433,16 +432,16 @@ bool CellBuffer::SetStyleFor(int position, int lengthStyle, char styleValue, cha
 	return changed;
 }
 
-// The char* returned is to an allocation owned by the undo history
+// The char* returned is to data still in the buffer
 const char *CellBuffer::DeleteChars(int position, int deleteLength, bool &startSequence) {
 	// InsertString and DeleteChars are the bottleneck though which all changes occur
 	PLATFORM_ASSERT(deleteLength > 0);
-	char *data = 0;
+	const char *data = 0;
 	if (!readOnly) {
 		if (collectingUndo) {
 			// Save into the undo/redo stack, but only the characters - not the formatting
 			// The gap would be moved to position anyway for the deletion so this doesn't cost extra
-			const char *data = substance.RangePointer(position, deleteLength);
+			data = substance.RangePointer(position, deleteLength);
 			uh.AppendAction(removeAction, position, data, deleteLength, startSequence);
 		}
 
