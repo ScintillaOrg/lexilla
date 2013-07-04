@@ -28,9 +28,9 @@ QPair<int, int>ScintillaEdit::find_text(int flags, const char *text, int cpMin, 
     ft.chrgText.cpMax = cpMax;
     ft.lpstrText = const_cast<char *>(text);
 
-    send(SCI_FINDTEXT, flags, (uptr_t) (&ft));
+    int start = send(SCI_FINDTEXT, flags, (uptr_t) (&ft));
 
-    return QPair<int,int>(ft.chrgText.cpMin, ft.chrgText.cpMax);
+    return QPair<int,int>(start, ft.chrgText.cpMax);
 }
 
 QByteArray ScintillaEdit::get_text_range(int start, int end) {
