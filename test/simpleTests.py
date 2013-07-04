@@ -19,7 +19,7 @@ class TestSimple(unittest.TestCase):
 		self.assertEquals(self.ed.Length, 0)
 
 	def testAddText(self):
-		self.ed.AddText(1, "x")
+		self.ed.AddText(1, b"x")
 		self.assertEquals(self.ed.Length, 1)
 		self.assertEquals(self.ed.GetCharAt(0), ord("x"))
 		self.assertEquals(self.ed.GetStyleAt(0), 0)
@@ -65,7 +65,7 @@ class TestSimple(unittest.TestCase):
 	def testPosition(self):
 		self.assertEquals(self.ed.CurrentPos, 0)
 		self.assertEquals(self.ed.Anchor, 0)
-		self.ed.AddText(1, "x")
+		self.ed.AddText(1, b"x")
 		# Caret has automatically moved
 		self.assertEquals(self.ed.CurrentPos, 1)
 		self.assertEquals(self.ed.Anchor, 1)
@@ -88,7 +88,7 @@ class TestSimple(unittest.TestCase):
 		self.assertEquals(self.ed.Anchor, 0)
 		self.assertEquals(self.ed.SelectionStart, 0)
 		self.assertEquals(self.ed.SelectionEnd, 0)
-		self.ed.AddText(1, "x")
+		self.ed.AddText(1, b"x")
 		self.ed.SelectionStart = 0
 		self.assertEquals(self.ed.CurrentPos, 1)
 		self.assertEquals(self.ed.Anchor, 0)
@@ -268,7 +268,10 @@ class TestSimple(unittest.TestCase):
 		self.assertEquals(self.ed.GetLineEndPosition(1), 3)
 		self.assertEquals(self.ed.LineLength(0), 2)
 		self.assertEquals(self.ed.LineLength(1), 1)
-		self.assertEquals(self.ed.EOLMode, self.ed.SC_EOL_CRLF)
+		if sys.platform == "win32":
+			self.assertEquals(self.ed.EOLMode, self.ed.SC_EOL_CRLF)
+		else:
+			self.assertEquals(self.ed.EOLMode, self.ed.SC_EOL_LF)
 		lineEnds = [b"\r\n", b"\r", b"\n"]
 		for lineEndType in [self.ed.SC_EOL_CR, self.ed.SC_EOL_LF, self.ed.SC_EOL_CRLF]:
 			self.ed.EOLMode = lineEndType
@@ -503,6 +506,7 @@ class TestSimple(unittest.TestCase):
 		self.ed.AddText(5, b"a1\nb2")
 		self.ed.SetSel(1,1)
 		self.ed.CopyAllowLine()
+		self.xite.DoEvents()
 		self.assertEquals(self.ed.CanPaste(), 1)
 		self.ed.SetSel(0, 0)
 		self.ed.Paste()
@@ -1124,7 +1128,6 @@ class TestTextMargin(unittest.TestCase):
 
 	def testAscent(self):
 		lineHeight = self.ed.TextHeight(0)
-		self.ed.ExtraAscent
 		self.assertEquals(self.ed.ExtraAscent, 0)
 		self.assertEquals(self.ed.ExtraDescent, 0)
 		self.ed.ExtraAscent = 1
@@ -1376,7 +1379,10 @@ class TestCaseMapping(unittest.TestCase):
 		self.assertEquals(self.ed.Contents(), r)
 
 	def testRussian(self):
-		self.ed.StyleSetCharacterSet(self.ed.STYLE_DEFAULT, self.ed.SC_CHARSET_RUSSIAN)
+		if sys.platform == "win32":
+			self.ed.StyleSetCharacterSet(self.ed.STYLE_DEFAULT, self.ed.SC_CHARSET_RUSSIAN)
+		else:
+			self.ed.StyleSetCharacterSet(self.ed.STYLE_DEFAULT, self.ed.SC_CHARSET_CYRILLIC)
 		t = "Б".encode("Windows-1251")
 		r = "б".encode("Windows-1251")
 		self.ed.SetText(len(t), t)
@@ -1468,11 +1474,18 @@ class TestCaseInsensitiveSearch(unittest.TestCase):
 		self.assertEquals(2, pos)
 
 	def testUTFDifferentLength(self):
-		# Searching for a two byte string "ı" finds a single byte "I"
+		# Searching for a two byte string finds a single byte
 		self.ed.SetCodePage(65001)
-		text = "Fråndi Ååİ $".encode("UTF-8")
+		# The platforms currently have different folding behaviour (should be fixed)
+		if sys.platform == "win32":
+			# two byte string "İ" single byte "i"
+			text = "Fråndi Ååİ $".encode("UTF-8")
+			searchString = "İ".encode("UTF-8")
+		else:
+			# two byte string "ſ" single byte "s"
+			text = "Frånds Ååſ $".encode("UTF-8")
+			searchString = "ſ".encode("UTF-8")
 		firstPosition = len("Frånd".encode("UTF-8"))
-		searchString = "İ".encode("UTF-8")
 		self.assertEquals(len(searchString), 2)
 		self.ed.SetText(len(text), text)
 		self.ed.TargetStart = 0
