@@ -14,6 +14,7 @@ gdi32=ctypes.windll.gdi32
 kernel32=ctypes.windll.kernel32
 from MessageNumbers import msgs, sgsm
 
+import ScintillaCallable
 import XiteMenu
 
 scintillaDirectory = ".."
@@ -119,29 +120,6 @@ class WNDCLASS(ctypes.Structure):
 		('lpzClassName', LPCWSTR),
 	)
 
-class XTEXTRANGE(ctypes.Structure):
-	_fields_= (\
-		('cpMin', c_long),
-		('cpMax', c_long),
-		('lpstrText', c_char_p),
-	)
-
-class TEXTRANGE(ctypes.Structure):
-	_fields_= (\
-		('cpMin', c_long),
-		('cpMax', c_long),
-		('lpstrText', ctypes.POINTER(ctypes.c_char)),
-	)
-
-class FINDTEXT(ctypes.Structure):
-	_fields_= (\
-		('cpMin', c_long),
-		('cpMax', c_long),
-		('lpstrText', c_char_p),
-		('cpMinText', c_long),
-		('cpMaxText', c_long),
-	)
-
 hinst = ctypes.windll.kernel32.GetModuleHandleW(0)
 
 def RegisterClass(name, func, background = 0):
@@ -159,158 +137,6 @@ def RegisterClass(name, func, background = 0):
 	wc.lpzClassName = name
 	user32.RegisterClassW(ctypes.byref(wc))
 
-class SciCall:
-	def __init__(self, fn, ptr, msg, stringResult=False):
-		self._fn = fn
-		self._ptr = ptr
-		self._msg = msg
-		self._stringResult = stringResult
-	def __call__(self, w=0, l=0):
-		if type(w) == type("x"):
-			ww = c_wchar_p(w)
-		elif type(w) == type(b"x"):
-			ww = c_char_p(w)
-		elif w is None:
-			ww = WPARAM()
-		else:
-			ww = WPARAM(w)
-		if self._stringResult:
-			lengthBytes = self._fn(self._ptr, self._msg, ww, None)
-			if lengthBytes == 0:
-				return bytearray()
-			result = (ctypes.c_byte * lengthBytes)(0)
-			lengthBytes2 = self._fn(self._ptr, self._msg, ww, result)
-			assert lengthBytes == lengthBytes2
-			return bytearray(result)[:lengthBytes]
-		else:
-			if type(l) == type("x"):
-				ll = c_wchar_p(l)
-			elif type(l) == type(b"x"):
-				ll = c_char_p(l)
-			elif type(l) == type(1):
-				ll = LPARAM(l)
-			else:
-				ll = l
-			return self._fn(self._ptr, self._msg, ww, ll)
-
-class Scintilla:
-	def __init__(self, face, hwndParent, hinstance):
-		self.__dict__["face"] = face
-		self.__dict__["used"] = set()
-		self.__dict__["all"] = set()
-		# The k member is for accessing constants as a dictionary
-		self.__dict__["k"] = {}
-		for f in face.features:
-			self.all.add(f)
-			if face.features[f]["FeatureType"] == "val":
-				self.k[f] = int(self.face.features[f]["Value"], 0)
-			elif face.features[f]["FeatureType"] == "evt":
-				self.k["SCN_"+f] = int(self.face.features[f]["Value"], 0)
-		# Get the function first as that also loads the DLL
-		self.__dict__["_scifn"] = ctypes.windll.SciLexer.Scintilla_DirectFunction
-		self.__dict__["_hwnd"] = user32.CreateWindowExW(0,
-			"Scintilla", "Source",
-			WS_CHILD | WS_VSCROLL | WS_HSCROLL | WS_CLIPCHILDREN,
-			0, 0, 100, 100, hwndParent, 0, hinstance, 0)
-		sciptr = c_char_p(user32.SendMessageW(self._hwnd,
-			int(self.face.features["GetDirectPointer"]["Value"], 0), 0,0))
-		self.__dict__["_sciptr"] = sciptr
-		user32.ShowWindow(self._hwnd, SW_SHOW)
-	def __getattr__(self, name):
-		if name in self.face.features:
-			self.used.add(name)
-			feature = self.face.features[name]
-			value = int(feature["Value"], 0)
-			#~ print("Feature", name, feature)
-			if feature["FeatureType"] == "val":
-				self.__dict__[name] = value
-				return value
-			else:
-				if feature["Param2Type"] == "stringresult" and \
-					name not in ["GetText", "GetLine", "GetCurLine"]:
-					return SciCall(self._scifn, self._sciptr, value, True)
-				else:
-					return SciCall(self._scifn, self._sciptr, value)
-		elif ("Get" + name) in self.face.features:
-			self.used.add("Get" + name)
-			feature = self.face.features["Get" + name]
-			value = int(feature["Value"], 0)
-			if feature["FeatureType"] == "get" and \
-				not name.startswith("Get") and \
-				not feature["Param1Type"] and \
-				not feature["Param2Type"] and \
-				feature["ReturnType"] in ["bool", "int", "position"]:
-				#~ print("property", feature)
-				return self._scifn(self._sciptr, value, 0, 0)
-		elif name.startswith("SCN_") and name in self.k:
-			self.used.add(name)
-			feature = self.face.features[name[4:]]
-			value = int(feature["Value"], 0)
-			#~ print("Feature", name, feature)
-			if feature["FeatureType"] == "val":
-				return value
-		raise AttributeError(name)
-	def __setattr__(self, name, val):
-		if ("Set" + name) in self.face.features:
-			self.used.add("Set" + name)
-			feature = self.face.features["Set" + name]
-			value = int(feature["Value"], 0)
-			#~ print("setproperty", feature)
-			if feature["FeatureType"] == "set" and not name.startswith("Set"):
-				if feature["Param1Type"] in ["bool", "int", "position"]:
-					return self._scifn(self._sciptr, value, val, 0)
-				elif feature["Param2Type"] in ["string"]:
-					return self._scifn(self._sciptr, value, 0, val)
-				raise AttributeError(name)
-		raise AttributeError(name)
-	def getvalue(self, name):
-		if name in self.face.features:
-			feature = self.face.features[name]
-			if feature["FeatureType"] != "evt":
-				try:
-					return int(feature["Value"], 0)
-				except ValueError:
-					return -1
-		return -1
-
-
-	def ByteRange(self, start, end):
-		tr = TEXTRANGE()
-		tr.cpMin = start
-		tr.cpMax = end
-		length = end - start
-		tr.lpstrText = ctypes.create_string_buffer(length + 1)
-		self.GetTextRange(0, ctypes.byref(tr))
-		text = tr.lpstrText[:length]
-		text += b"\0" * (length - len(text))
-		return text
-	def StyledTextRange(self, start, end):
-		tr = TEXTRANGE()
-		tr.cpMin = start
-		tr.cpMax = end
-		length = 2 * (end - start)
-		tr.lpstrText = ctypes.create_string_buffer(length + 2)
-		self.GetStyledText(0, ctypes.byref(tr))
-		styledText = tr.lpstrText[:length]
-		styledText += b"\0" * (length - len(styledText))
-		return styledText
-	def FindBytes(self, start, end, s, flags):
-		ft = FINDTEXT()
-		ft.cpMin = start
-		ft.cpMax = end
-		ft.lpstrText = s
-		ft.cpMinText = 0
-		ft.cpMaxText = 0
-		pos = self.FindText(flags, ctypes.byref(ft))
-		#~ print(start, end, ft.cpMinText, ft.cpMaxText)
-		return pos
-
-	def Contents(self):
-		return self.ByteRange(0, self.Length)
-	def SizeTo(self, width, height):
-		user32.SetWindowPos(self._hwnd, 0, 0, 0, width, height, 0)
-	def FocusOn(self):
-		user32.SetFocus(self._hwnd)
 
 class XiteWin():
 	def __init__(self, test=""):
@@ -335,7 +161,7 @@ class XiteWin():
 		self.SetMenus()
 		if args:
 			self.GrabFile(args[0])
-			self.ed.FocusOn()
+			self.FocusOnEditor()
 			self.ed.GotoPos(self.ed.Length)
 
 		if self.test:
@@ -344,15 +170,31 @@ class XiteWin():
 				if self.cmds[k] == "Test":
 					user32.PostMessageW(self.win, msgs["WM_COMMAND"], k, 0)
 
+	def FocusOnEditor(self):
+		user32.SetFocus(self.sciHwnd)
+
 	def OnSize(self):
 		width, height = WindowSize(self.win)
-		self.ed.SizeTo(width, height)
+		user32.SetWindowPos(self.sciHwnd, 0, 0, 0, width, height, 0)
 		user32.InvalidateRect(self.win, 0, 0)
 
 	def OnCreate(self, hwnd):
 		self.win = hwnd
-		self.ed = Scintilla(self.face, hwnd, hinst)
-		self.ed.FocusOn()
+		# Side effect: loads the DLL
+		x = ctypes.windll.SciLexer.Scintilla_DirectFunction
+		self.sciHwnd = user32.CreateWindowExW(0,
+			"Scintilla", "Source",
+			WS_CHILD | WS_VSCROLL | WS_HSCROLL | WS_CLIPCHILDREN,
+			0, 0, 100, 100, self.win, 0, hinst, 0)
+		user32.ShowWindow(self.sciHwnd, SW_SHOW)
+		user32.SendMessageW.restype = WPARAM
+		scifn = user32.SendMessageW(self.sciHwnd,
+			int(self.face.features["GetDirectFunction"]["Value"], 0), 0,0)
+		sciptr = c_char_p(user32.SendMessageW(self.sciHwnd,
+			int(self.face.features["GetDirectPointer"]["Value"], 0), 0,0))
+		self.ed = ScintillaCallable.ScintillaCallable(self.face, scifn, sciptr)
+
+		self.FocusOnEditor()
 
 
 	def Invalidate(self):
@@ -380,7 +222,7 @@ class XiteWin():
 			return 0
 		elif ms == "WM_ACTIVATE":
 			if w != WA_INACTIVE:
-				self.ed.FocusOn()
+				self.FocusOnEditor()
 			return 0
 		else:
 			return user32.DefWindowProcW(h, m, w, l)
@@ -464,7 +306,7 @@ class XiteWin():
 		if ctypes.windll.comdlg32.GetOpenFileNameW(ctypes.byref(ofx)):
 			absPath = opath.replace("\0", "")
 			self.GrabFile(absPath)
-			self.ed.FocusOn()
+			self.FocusOnEditor()
 			self.ed.LexerLanguage = "python"
 			self.ed.Lexer = self.ed.SCLEX_PYTHON
 			self.ed.SetKeyWords(0, b"class def else for from if import print return while")
@@ -494,7 +336,7 @@ class XiteWin():
 			self.fullPath = opath.replace("\0", "")
 			self.Save()
 			self.SetTitle(1)
-			self.ed.FocusOn()
+			self.FocusOnEditor()
 
 	def SetMenus(self):
 		ui = XiteMenu.MenuStructure

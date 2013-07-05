@@ -3,14 +3,17 @@
 from __future__ import with_statement
 from __future__ import unicode_literals
 
-import os, string, time, unittest
+import os, string, sys, time, unittest
 
-import XiteWin
+if sys.platform == "win32":
+	import XiteWin as Xite
+else:
+	import XiteQt as Xite
 
 class TestPerformance(unittest.TestCase):
 
 	def setUp(self):
-		self.xite = XiteWin.xiteFrame
+		self.xite = Xite.xiteFrame
 		self.ed = self.xite.ed
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
@@ -81,4 +84,4 @@ class TestPerformance(unittest.TestCase):
 		self.assert_(self.ed.Length > 0)
 
 if __name__ == '__main__':
-	XiteWin.main("performanceTests")
+	Xite.main("performanceTests")

@@ -5,12 +5,15 @@ from __future__ import unicode_literals
 
 import codecs, ctypes, os, sys, unittest
 
-import XiteWin
+if sys.platform == "win32":
+	import XiteWin as Xite
+else:
+	import XiteQt as Xite
 
 class TestSimple(unittest.TestCase):
 
 	def setUp(self):
-		self.xite = XiteWin.xiteFrame
+		self.xite = Xite.xiteFrame
 		self.ed = self.xite.ed
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
@@ -618,7 +621,7 @@ REDO = 4
 class TestContainerUndo(unittest.TestCase):
 
 	def setUp(self):
-		self.xite = XiteWin.xiteFrame
+		self.xite = Xite.xiteFrame
 		self.ed = self.xite.ed
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
@@ -773,7 +776,7 @@ class TestKeyCommands(unittest.TestCase):
 	""" These commands are normally assigned to keys and take no arguments """
 
 	def setUp(self):
-		self.xite = XiteWin.xiteFrame
+		self.xite = Xite.xiteFrame
 		self.ed = self.xite.ed
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
@@ -854,7 +857,7 @@ class TestKeyCommands(unittest.TestCase):
 class TestMarkers(unittest.TestCase):
 
 	def setUp(self):
-		self.xite = XiteWin.xiteFrame
+		self.xite = Xite.xiteFrame
 		self.ed = self.xite.ed
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
@@ -939,7 +942,7 @@ class TestMarkers(unittest.TestCase):
 class TestIndicators(unittest.TestCase):
 
 	def setUp(self):
-		self.xite = XiteWin.xiteFrame
+		self.xite = Xite.xiteFrame
 		self.ed = self.xite.ed
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
@@ -988,7 +991,7 @@ class TestIndicators(unittest.TestCase):
 class TestScrolling(unittest.TestCase):
 
 	def setUp(self):
-		self.xite = XiteWin.xiteFrame
+		self.xite = Xite.xiteFrame
 		self.ed = self.xite.ed
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
@@ -1019,7 +1022,7 @@ class TestScrolling(unittest.TestCase):
 class TestSearch(unittest.TestCase):
 
 	def setUp(self):
-		self.xite = XiteWin.xiteFrame
+		self.xite = Xite.xiteFrame
 		self.ed = self.xite.ed
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
@@ -1102,7 +1105,7 @@ class TestSearch(unittest.TestCase):
 class TestProperties(unittest.TestCase):
 
 	def setUp(self):
-		self.xite = XiteWin.xiteFrame
+		self.xite = Xite.xiteFrame
 		self.ed = self.xite.ed
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
@@ -1119,7 +1122,7 @@ class TestProperties(unittest.TestCase):
 class TestTextMargin(unittest.TestCase):
 
 	def setUp(self):
-		self.xite = XiteWin.xiteFrame
+		self.xite = Xite.xiteFrame
 		self.ed = self.xite.ed
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
@@ -1166,7 +1169,7 @@ class TestTextMargin(unittest.TestCase):
 class TestAnnotation(unittest.TestCase):
 
 	def setUp(self):
-		self.xite = XiteWin.xiteFrame
+		self.xite = Xite.xiteFrame
 		self.ed = self.xite.ed
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
@@ -1221,7 +1224,7 @@ class TestAnnotation(unittest.TestCase):
 class TestMultiSelection(unittest.TestCase):
 
 	def setUp(self):
-		self.xite = XiteWin.xiteFrame
+		self.xite = Xite.xiteFrame
 		self.ed = self.xite.ed
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
@@ -1347,7 +1350,7 @@ class TestMultiSelection(unittest.TestCase):
 
 class TestCaseMapping(unittest.TestCase):
 	def setUp(self):
-		self.xite = XiteWin.xiteFrame
+		self.xite = Xite.xiteFrame
 		self.ed = self.xite.ed
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
@@ -1412,7 +1415,7 @@ class TestCaseMapping(unittest.TestCase):
 
 class TestCaseInsensitiveSearch(unittest.TestCase):
 	def setUp(self):
-		self.xite = XiteWin.xiteFrame
+		self.xite = Xite.xiteFrame
 		self.ed = self.xite.ed
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
@@ -1497,7 +1500,7 @@ class TestCaseInsensitiveSearch(unittest.TestCase):
 
 class TestLexer(unittest.TestCase):
 	def setUp(self):
-		self.xite = XiteWin.xiteFrame
+		self.xite = Xite.xiteFrame
 		self.ed = self.xite.ed
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
@@ -1529,7 +1532,7 @@ class TestLexer(unittest.TestCase):
 class TestAutoComplete(unittest.TestCase):
 
 	def setUp(self):
-		self.xite = XiteWin.xiteFrame
+		self.xite = Xite.xiteFrame
 		self.ed = self.xite.ed
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
@@ -1614,7 +1617,7 @@ class TestAutoComplete(unittest.TestCase):
 class TestDirectAccess(unittest.TestCase):
 
 	def setUp(self):
-		self.xite = XiteWin.xiteFrame
+		self.xite = Xite.xiteFrame
 		self.ed = self.xite.ed
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
@@ -1644,7 +1647,7 @@ class TestDirectAccess(unittest.TestCase):
 
 class TestWordChars(unittest.TestCase):
 	def setUp(self):
-		self.xite = XiteWin.xiteFrame
+		self.xite = Xite.xiteFrame
 		self.ed = self.xite.ed
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
@@ -1742,13 +1745,8 @@ class TestWordChars(unittest.TestCase):
 		data = self.ed.GetPunctuationChars(None)
 		self.assertCharSetsEqual(data, expected)
 
-#~ import os
-#~ for x in os.getenv("PATH").split(";"):
-	#~ n = "scilexer.dll"
-	#~ nf = x + "\\" + n
-	#~ print os.access(nf, os.R_OK), nf
 if __name__ == '__main__':
-	uu = XiteWin.main("simpleTests")
+	uu = Xite.main("simpleTests")
 	#~ for x in sorted(uu.keys()):
 		#~ print(x, uu[x])
 	#~ print()
