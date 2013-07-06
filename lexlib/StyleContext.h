@@ -1,5 +1,5 @@
 // Scintilla source code edit control
-/** @file StyleContext.cxx
+/** @file StyleContext.h
  ** Lexer infrastructure.
  **/
 // Copyright 1998-2004 by Neil Hodgson <neilh@scintilla.org>
@@ -17,30 +17,6 @@ static inline int MakeLowerCase(int ch) {
 		return ch;
 	else
 		return ch - 'A' + 'a';
-}
-
-inline int UnicodeCodePoint(const unsigned char *us) {
-	if (us[0] < 0xC2) {
-		return us[0];
-	} else if (us[0] < 0xE0) {
-		return ((us[0] & 0x1F) << 6) + (us[1] & 0x3F);
-	} else if (us[0] < 0xF0) {
-		return ((us[0] & 0xF) << 12) + ((us[1] & 0x3F) << 6) + (us[2] & 0x3F);
-	} else if (us[0] < 0xF5) {
-		return ((us[0] & 0x7) << 18) + ((us[1] & 0x3F) << 12) + ((us[2] & 0x3F) << 6) + (us[3] & 0x3F);
-	}
-	return us[0];
-}
-
-inline int BytesInUnicodeCodePoint(int codePoint) {
-	if (codePoint < 0x80)
-		return 1;
-	else if (codePoint < 0x800)
-		return 2;
-	else if (codePoint < 0x10000)
-		return 3;
-	else
-		return 4;
 }
 
 // All languages handled so far can treat all characters >= 0x80 as one class
