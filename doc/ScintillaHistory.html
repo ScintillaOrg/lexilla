@@ -491,6 +491,11 @@
 	<a href="http://sourceforge.net/p/scintilla/bugs/1483/">Bug #1483</a>.
 	</li>
 	<li>
+	Fixed bugs with case conversion when the result was longer or shorter than the original text.
+	Could access past end of string potentially crashing.
+	Selection now updated to result length.
+	</li>
+	<li>
 	Fixed bug where data being inserted and removed was not being reported in
 	notification messages. Bug was introduced in 3.3.2.
 	</li>
