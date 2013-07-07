@@ -50,6 +50,7 @@ SOURCES += \
     ../../lexlib/LexerModule.cxx \
     ../../lexlib/LexerBase.cxx \
     ../../lexlib/CharacterSet.cxx \
+    ../../lexlib/CharacterCategory.cxx \
     ../../lexlib/Accessor.cxx \
     ../../lexers/*.cxx
 

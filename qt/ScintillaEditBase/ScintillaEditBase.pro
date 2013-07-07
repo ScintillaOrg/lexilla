@@ -49,6 +49,7 @@ SOURCES += \
     ../../lexlib/LexerBase.cxx \
     ../../lexlib/CharacterSet.cxx \
     ../../lexlib/Accessor.cxx \
+    ../../lexlib/CharacterCategory.cxx \
     ../../lexers/*.cxx
 
 HEADERS  += \
@@ -96,6 +97,7 @@ HEADERS  += \
     ../../lexlib/LexerBase.h \
     ../../lexlib/LexAccessor.h \
     ../../lexlib/CharacterSet.h \
+    ../../lexlib/CharacterCategory.h \
     ../../lexlib/Accessor.h
 
 OTHER_FILES +=
