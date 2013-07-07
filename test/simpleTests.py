@@ -1413,6 +1413,41 @@ class TestCaseMapping(unittest.TestCase):
 		self.assertEquals(self.ed.Length, 1)
 		self.assertEquals(self.ed.Contents(), r)
 
+	def testUTFGrows(self):
+		# FIXME: change to using Unicode compliant case conversion on Windows
+		if sys.platform != "win32":
+			# This crashed at one point in debug builds due to looking past end of shorter string
+			self.ed.SetCodePage(65001)
+			# ﬖ is a single character ligature taking 3 bytes in UTF8: EF AC 96 
+			t = 'ﬖﬖ'.encode("UTF-8")
+			self.ed.SetText(len(t), t)
+			self.assertEquals(self.ed.Length, 6)
+			self.ed.SetSel(0,self.ed.Length)
+			self.ed.UpperCase()
+			# To convert to upper case the ligature is separated into վ and ն then uppercased to Վ and Ն
+			# each of which takes 2 bytes in UTF-8: D5 8E D5 86
+			r = 'ՎՆՎՆ'.encode("UTF-8")
+			self.assertEquals(self.ed.Length, 8)
+			self.assertEquals(self.ed.Contents(), r)
+			self.assertEquals(self.ed.SelectionEnd, self.ed.Length)
+
+	def testUTFShrinks(self):
+		# FIXME: change to using Unicode compliant case conversion on Windows
+		if sys.platform != "win32":
+			self.ed.SetCodePage(65001)
+			# ﬁ is a single character ligature taking 3 bytes in UTF8: EF AC 81
+			t = 'ﬁﬁ'.encode("UTF-8")
+			self.ed.SetText(len(t), t)
+			self.assertEquals(self.ed.Length, 6)
+			self.ed.SetSel(0,self.ed.Length)
+			self.ed.UpperCase()
+			# To convert to upper case the ligature is separated into f and i then uppercased to F and I
+			# each of which takes 1 byte in UTF-8: 46 49
+			r = 'FIFI'.encode("UTF-8")
+			self.assertEquals(self.ed.Length, 4)
+			self.assertEquals(self.ed.Contents(), r)
+			self.assertEquals(self.ed.SelectionEnd, self.ed.Length)
+
 class TestCaseInsensitiveSearch(unittest.TestCase):
 	def setUp(self):
 		self.xite = Xite.xiteFrame

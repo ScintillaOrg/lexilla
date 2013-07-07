@@ -5000,18 +5000,28 @@ void Editor::ChangeCaseOfSelection(int caseMapping) {
 				size_t firstDifference = 0;
 				while (sMapped[firstDifference] == sText[firstDifference])
 					firstDifference++;
-				size_t lastDifference = sMapped.size() - 1;
-				while (sMapped[lastDifference] == sText[lastDifference])
-					lastDifference--;
-				size_t endSame = sMapped.size() - 1 - lastDifference;
+				size_t lastDifferenceText = sText.size() - 1;
+				size_t lastDifferenceMapped = sMapped.size() - 1;
+				while (sMapped[lastDifferenceMapped] == sText[lastDifferenceText]) {
+					lastDifferenceText--;
+					lastDifferenceMapped--;
+				}
+				size_t endDifferenceText = sText.size() - 1 - lastDifferenceText;
 				pdoc->DeleteChars(
 					static_cast<int>(currentNoVS.Start().Position() + firstDifference),
-					static_cast<int>(rangeBytes - firstDifference - endSame));
+					static_cast<int>(rangeBytes - firstDifference - endDifferenceText));
 				pdoc->InsertString(
 					static_cast<int>(currentNoVS.Start().Position() + firstDifference),
 					sMapped.c_str() + firstDifference,
-					static_cast<int>(lastDifference - firstDifference + 1));
+					static_cast<int>(lastDifferenceMapped - firstDifference + 1));
 				// Automatic movement changes selection so reset to exactly the same as it was.
+				int diffSizes = sMapped.size() - sText.size();
+				if (diffSizes != 0) {
+					if (current.anchor > current.caret)
+						current.anchor.Add(diffSizes);
+					else
+						current.caret.Add(diffSizes);
+				}
 				sel.Range(r) = current;
 			}
 		}
