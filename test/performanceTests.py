@@ -83,5 +83,43 @@ class TestPerformance(unittest.TestCase):
 		self.xite.DoEvents()
 		self.assert_(self.ed.Length > 0)
 
+	def testUTF8CaseSearches(self):
+		self.ed.SetCodePage(65001)
+		oneLine = b"Fold Margin=折りたたみ表示用の余白(&F)\n"
+		manyLines = oneLine * 100000
+		manyLines = manyLines + b"φ\n"
+		self.ed.AddText(len(manyLines), manyLines)
+		searchString = b"φ"
+		start = time.time()
+		for i in range(10):
+			self.ed.TargetStart = 0
+			self.ed.TargetEnd = self.ed.Length-1
+			self.ed.SearchFlags = self.ed.SCFIND_MATCHCASE
+			pos = self.ed.SearchInTarget(len(searchString), searchString)
+			self.assert_(pos > 0)
+		end = time.time()
+		duration = end - start
+		print("%6.3f testUTF8CaseSearches" % duration)
+		self.xite.DoEvents()
+
+	def testUTF8Searches(self):
+		self.ed.SetCodePage(65001)
+		oneLine = b"Fold Margin=折りたたみ表示用の余白(&F)\n"
+		manyLines = oneLine * 100000
+		manyLines = manyLines + b"φ\n"
+		self.ed.AddText(len(manyLines), manyLines)
+		searchString = b"φ"
+		start = time.time()
+		for i in range(10):
+			self.ed.TargetStart = 0
+			self.ed.TargetEnd = self.ed.Length-1
+			self.ed.SearchFlags = 0
+			pos = self.ed.SearchInTarget(len(searchString), searchString)
+			self.assert_(pos > 0)
+		end = time.time()
+		duration = end - start
+		print("%6.3f testUTF8Searches" % duration)
+		self.xite.DoEvents()
+
 if __name__ == '__main__':
 	Xite.main("performanceTests")
