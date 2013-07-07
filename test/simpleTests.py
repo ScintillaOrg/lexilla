@@ -529,14 +529,14 @@ class TestSimple(unittest.TestCase):
 		self.assertEquals(self.ed.Contents(), b"b2\na1\nc3")
 
 	def testGetSet(self):
-		self.ed.SetText(0, b"abc")
+		self.ed.SetContents(b"abc")
 		self.assertEquals(self.ed.TextLength, 3)
 		result = ctypes.create_string_buffer(b"\0" * 5)
 		length = self.ed.GetText(4, result)
 		self.assertEquals(result.value, b"abc")
 
 	def testAppend(self):
-		self.ed.SetText(0, b"abc")
+		self.ed.SetContents(b"abc")
 		self.assertEquals(self.ed.SelectionStart, 0)
 		self.assertEquals(self.ed.SelectionEnd, 0)
 		text = b"12"
@@ -546,7 +546,7 @@ class TestSimple(unittest.TestCase):
 		self.assertEquals(self.ed.Contents(), b"abc12")
 
 	def testTarget(self):
-		self.ed.SetText(0, b"abcd")
+		self.ed.SetContents(b"abcd")
 		self.ed.TargetStart = 1
 		self.ed.TargetEnd = 3
 		self.assertEquals(self.ed.TargetStart, 1)
@@ -573,7 +573,7 @@ class TestSimple(unittest.TestCase):
 
 	def testTargetEscape(self):
 		# Checks that a literal \ can be in the replacement. Bug #2959876
-		self.ed.SetText(0, b"abcd")
+		self.ed.SetContents(b"abcd")
 		self.ed.TargetStart = 1
 		self.ed.TargetEnd = 3
 		rep = b"\\\\n"
@@ -1362,13 +1362,13 @@ class TestCaseMapping(unittest.TestCase):
 	def testEmpty(self):
 		# Trying to upper case an empty string caused a crash at one stage
 		t = b"x"
-		self.ed.SetText(len(t), t)
+		self.ed.SetContents(t)
 		self.ed.UpperCase()
 		self.assertEquals(self.ed.Contents(), b"x")
 
 	def testASCII(self):
 		t = b"x"
-		self.ed.SetText(len(t), t)
+		self.ed.SetContents(t)
 		self.ed.SetSel(0,1)
 		self.ed.UpperCase()
 		self.assertEquals(self.ed.Contents(), b"X")
@@ -1376,7 +1376,7 @@ class TestCaseMapping(unittest.TestCase):
 	def testLatin1(self):
 		t = "å".encode("Latin-1")
 		r = "Å".encode("Latin-1")
-		self.ed.SetText(len(t), t)
+		self.ed.SetContents(t)
 		self.ed.SetSel(0,1)
 		self.ed.UpperCase()
 		self.assertEquals(self.ed.Contents(), r)
@@ -1388,7 +1388,7 @@ class TestCaseMapping(unittest.TestCase):
 			self.ed.StyleSetCharacterSet(self.ed.STYLE_DEFAULT, self.ed.SC_CHARSET_CYRILLIC)
 		t = "Б".encode("Windows-1251")
 		r = "б".encode("Windows-1251")
-		self.ed.SetText(len(t), t)
+		self.ed.SetContents(t)
 		self.ed.SetSel(0,1)
 		self.ed.LowerCase()
 		self.assertEquals(self.ed.Contents(), r)
@@ -1397,7 +1397,7 @@ class TestCaseMapping(unittest.TestCase):
 		self.ed.SetCodePage(65001)
 		t = "å".encode("UTF-8")
 		r = "Å".encode("UTF-8")
-		self.ed.SetText(len(t), t)
+		self.ed.SetContents(t)
 		self.ed.SetSel(0,2)
 		self.ed.UpperCase()
 		self.assertEquals(self.ed.Contents(), r)
@@ -1406,7 +1406,7 @@ class TestCaseMapping(unittest.TestCase):
 		self.ed.SetCodePage(65001)
 		t = "ı".encode("UTF-8")
 		r = "I".encode("UTF-8")
-		self.ed.SetText(len(t), t)
+		self.ed.SetContents(t)
 		self.assertEquals(self.ed.Length, 2)
 		self.ed.SetSel(0,2)
 		self.ed.UpperCase()
@@ -1420,7 +1420,7 @@ class TestCaseMapping(unittest.TestCase):
 			self.ed.SetCodePage(65001)
 			# ﬖ is a single character ligature taking 3 bytes in UTF8: EF AC 96 
 			t = 'ﬖﬖ'.encode("UTF-8")
-			self.ed.SetText(len(t), t)
+			self.ed.SetContents(t)
 			self.assertEquals(self.ed.Length, 6)
 			self.ed.SetSel(0,self.ed.Length)
 			self.ed.UpperCase()
@@ -1437,7 +1437,7 @@ class TestCaseMapping(unittest.TestCase):
 			self.ed.SetCodePage(65001)
 			# ﬁ is a single character ligature taking 3 bytes in UTF8: EF AC 81
 			t = 'ﬁﬁ'.encode("UTF-8")
-			self.ed.SetText(len(t), t)
+			self.ed.SetContents(t)
 			self.assertEquals(self.ed.Length, 6)
 			self.ed.SetSel(0,self.ed.Length)
 			self.ed.UpperCase()
@@ -1462,7 +1462,7 @@ class TestCaseInsensitiveSearch(unittest.TestCase):
 	def testEmpty(self):
 		text = b" x X"
 		searchString = b""
-		self.ed.SetText(len(text), text)
+		self.ed.SetContents(text)
 		self.ed.TargetStart = 0
 		self.ed.TargetEnd = self.ed.Length-1
 		self.ed.SearchFlags = 0
@@ -1472,7 +1472,7 @@ class TestCaseInsensitiveSearch(unittest.TestCase):
 	def testASCII(self):
 		text = b" x X"
 		searchString = b"X"
-		self.ed.SetText(len(text), text)
+		self.ed.SetContents(text)
 		self.ed.TargetStart = 0
 		self.ed.TargetEnd = self.ed.Length-1
 		self.ed.SearchFlags = 0
@@ -1482,7 +1482,7 @@ class TestCaseInsensitiveSearch(unittest.TestCase):
 	def testLatin1(self):
 		text = "Frånd Åå".encode("Latin-1")
 		searchString = "Å".encode("Latin-1")
-		self.ed.SetText(len(text), text)
+		self.ed.SetContents(text)
 		self.ed.TargetStart = 0
 		self.ed.TargetEnd = self.ed.Length-1
 		self.ed.SearchFlags = 0
@@ -1493,7 +1493,7 @@ class TestCaseInsensitiveSearch(unittest.TestCase):
 		self.ed.StyleSetCharacterSet(self.ed.STYLE_DEFAULT, self.ed.SC_CHARSET_RUSSIAN)
 		text = "=(Б tex б)".encode("Windows-1251")
 		searchString = "б".encode("Windows-1251")
-		self.ed.SetText(len(text), text)
+		self.ed.SetContents(text)
 		self.ed.TargetStart = 0
 		self.ed.TargetEnd = self.ed.Length-1
 		self.ed.SearchFlags = 0
@@ -1504,7 +1504,7 @@ class TestCaseInsensitiveSearch(unittest.TestCase):
 		self.ed.SetCodePage(65001)
 		text = "Frånd Åå".encode("UTF-8")
 		searchString = "Å".encode("UTF-8")
-		self.ed.SetText(len(text), text)
+		self.ed.SetContents(text)
 		self.ed.TargetStart = 0
 		self.ed.TargetEnd = self.ed.Length-1
 		self.ed.SearchFlags = 0
@@ -1525,7 +1525,7 @@ class TestCaseInsensitiveSearch(unittest.TestCase):
 			searchString = "ſ".encode("UTF-8")
 		firstPosition = len("Frånd".encode("UTF-8"))
 		self.assertEquals(len(searchString), 2)
-		self.ed.SetText(len(text), text)
+		self.ed.SetContents(text)
 		self.ed.TargetStart = 0
 		self.ed.TargetEnd = self.ed.Length-1
 		self.ed.SearchFlags = 0
@@ -1659,7 +1659,7 @@ class TestDirectAccess(unittest.TestCase):
 
 	def testGapPosition(self):
 		text = b"abcd"
-		self.ed.SetText(len(text), text)
+		self.ed.SetContents(text)
 		self.assertEquals(self.ed.GapPosition, 4)
 		self.ed.TargetStart = 1
 		self.ed.TargetEnd = 1
@@ -1669,7 +1669,7 @@ class TestDirectAccess(unittest.TestCase):
 
 	def testCharacterPointerAndRangePointer(self):
 		text = b"abcd"
-		self.ed.SetText(len(text), text)
+		self.ed.SetContents(text)
 		characterPointer = self.ed.CharacterPointer
 		rangePointer = self.ed.GetRangePointer(0,3)
 		self.assertEquals(characterPointer, rangePointer)
