@@ -85,11 +85,11 @@ class TestPerformance(unittest.TestCase):
 
 	def testUTF8CaseSearches(self):
 		self.ed.SetCodePage(65001)
-		oneLine = b"Fold Margin=折りたたみ表示用の余白(&F)\n"
+		oneLine = "Fold Margin=折りたたみ表示用の余白(&F)\n".encode('utf-8')
 		manyLines = oneLine * 100000
-		manyLines = manyLines + b"φ\n"
+		manyLines = manyLines + "φ\n".encode('utf-8')
 		self.ed.AddText(len(manyLines), manyLines)
-		searchString = b"φ"
+		searchString = "φ".encode('utf-8')
 		start = time.time()
 		for i in range(10):
 			self.ed.TargetStart = 0
@@ -104,11 +104,11 @@ class TestPerformance(unittest.TestCase):
 
 	def testUTF8Searches(self):
 		self.ed.SetCodePage(65001)
-		oneLine = b"Fold Margin=折りたたみ表示用の余白(&F)\n"
+		oneLine = "Fold Margin=折りたたみ表示用の余白(&F)\n".encode('utf-8')
 		manyLines = oneLine * 100000
-		manyLines = manyLines + b"φ\n"
+		manyLines = manyLines + "φ\n".encode('utf-8')
 		self.ed.AddText(len(manyLines), manyLines)
-		searchString = b"φ"
+		searchString = "φ".encode('utf-8')
 		start = time.time()
 		for i in range(10):
 			self.ed.TargetStart = 0
