@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1100F1EB178E393200105727 /* CaseConvert.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 1100F1E6178E393200105727 /* CaseConvert.cxx */; };
+		1100F1EC178E393200105727 /* CaseConvert.h in Headers */ = {isa = PBXBuildFile; fileRef = 1100F1E7178E393200105727 /* CaseConvert.h */; };
+		1100F1ED178E393200105727 /* CaseFolder.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 1100F1E8178E393200105727 /* CaseFolder.cxx */; };
+		1100F1EE178E393200105727 /* CaseFolder.h in Headers */ = {isa = PBXBuildFile; fileRef = 1100F1E9178E393200105727 /* CaseFolder.h */; };
+		1100F1EF178E393200105727 /* UnicodeFromUTF8.h in Headers */ = {isa = PBXBuildFile; fileRef = 1100F1EA178E393200105727 /* UnicodeFromUTF8.h */; };
 		1102C31C169FB49300DC16AB /* LexLaTeX.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 1102C31B169FB49300DC16AB /* LexLaTeX.cxx */; };
 		11126B8214CD3A6200803C49 /* LexAVS.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 11126B8114CD3A6200803C49 /* LexAVS.cxx */; };
 		1114D6CB1602A951001DC345 /* LexPO.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 1114D6CA1602A951001DC345 /* LexPO.cxx */; };
@@ -197,6 +202,11 @@
 		0867D6A5FE840307C02AAC07 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		089C1667FE841158C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		1100F1E6178E393200105727 /* CaseConvert.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CaseConvert.cxx; path = ../../src/CaseConvert.cxx; sourceTree = "<group>"; };
+		1100F1E7178E393200105727 /* CaseConvert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CaseConvert.h; path = ../../src/CaseConvert.h; sourceTree = "<group>"; };
+		1100F1E8178E393200105727 /* CaseFolder.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CaseFolder.cxx; path = ../../src/CaseFolder.cxx; sourceTree = "<group>"; };
+		1100F1E9178E393200105727 /* CaseFolder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CaseFolder.h; path = ../../src/CaseFolder.h; sourceTree = "<group>"; };
+		1100F1EA178E393200105727 /* UnicodeFromUTF8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UnicodeFromUTF8.h; path = ../../src/UnicodeFromUTF8.h; sourceTree = "<group>"; };
 		1102C31B169FB49300DC16AB /* LexLaTeX.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexLaTeX.cxx; path = ../../lexers/LexLaTeX.cxx; sourceTree = "<group>"; };
 		11126B8114CD3A6200803C49 /* LexAVS.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexAVS.cxx; path = ../../lexers/LexAVS.cxx; sourceTree = "<group>"; };
 		1114D6CA1602A951001DC345 /* LexPO.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexPO.cxx; path = ../../lexers/LexPO.cxx; sourceTree = "<group>"; };
@@ -576,21 +586,14 @@
 			isa = PBXGroup;
 			children = (
 				114B6FD811FA7645004FB6AB /* Accessor.h */,
-				11FBA39C17817DA00048C071 /* CharacterCategory.h */,
-				114B6FD911FA7645004FB6AB /* CharacterSet.h */,
-				114B6FDA11FA7645004FB6AB /* LexAccessor.h */,
-				114B6FDB11FA7645004FB6AB /* LexerBase.h */,
-				114B6FDC11FA7645004FB6AB /* LexerModule.h */,
-				114B6FDD11FA7645004FB6AB /* LexerNoExceptions.h */,
-				114B6FDE11FA7645004FB6AB /* LexerSimple.h */,
-				114B6FDF11FA7645004FB6AB /* OptionSet.h */,
-				114B6FE011FA7645004FB6AB /* PropSetSimple.h */,
-				114B6FE111FA7645004FB6AB /* StyleContext.h */,
-				114B6FE211FA7645004FB6AB /* WordList.h */,
 				114B6FA211FA7623004FB6AB /* AutoComplete.h */,
 				114B6FA311FA7623004FB6AB /* CallTip.h */,
+				1100F1E7178E393200105727 /* CaseConvert.h */,
+				1100F1E9178E393200105727 /* CaseFolder.h */,
 				114B6FA411FA7623004FB6AB /* Catalogue.h */,
 				114B6FA511FA7623004FB6AB /* CellBuffer.h */,
+				11FBA39C17817DA00048C071 /* CharacterCategory.h */,
+				114B6FD911FA7645004FB6AB /* CharacterSet.h */,
 				114B6FA611FA7623004FB6AB /* CharClassify.h */,
 				114B6FA711FA7623004FB6AB /* ContractionState.h */,
 				114B6FA811FA7623004FB6AB /* Decoration.h */,
@@ -598,22 +601,32 @@
 				114B6FAA11FA7623004FB6AB /* Editor.h */,
 				114B6FAB11FA7623004FB6AB /* ExternalLexer.h */,
 				114B6FAC11FA7623004FB6AB /* FontQuality.h */,
+				114B6FA011FA75DB004FB6AB /* ILexer.h */,
 				114B6FAD11FA7623004FB6AB /* Indicator.h */,
 				114B6FAE11FA7623004FB6AB /* KeyMap.h */,
+				114B6FDA11FA7645004FB6AB /* LexAccessor.h */,
+				114B6FDB11FA7645004FB6AB /* LexerBase.h */,
+				114B6FDC11FA7645004FB6AB /* LexerModule.h */,
+				114B6FDD11FA7645004FB6AB /* LexerNoExceptions.h */,
+				114B6FDE11FA7645004FB6AB /* LexerSimple.h */,
 				114B6FAF11FA7623004FB6AB /* LineMarker.h */,
+				114B6FDF11FA7645004FB6AB /* OptionSet.h */,
 				114B6FB011FA7623004FB6AB /* Partitioning.h */,
 				114B6FB111FA7623004FB6AB /* PerLine.h */,
 				114B6FB211FA7623004FB6AB /* PositionCache.h */,
+				114B6FE011FA7645004FB6AB /* PropSetSimple.h */,
 				114B6FB311FA7623004FB6AB /* RESearch.h */,
 				114B6FB411FA7623004FB6AB /* RunStyles.h */,
 				114B6FB511FA7623004FB6AB /* ScintillaBase.h */,
 				114B6FB611FA7623004FB6AB /* Selection.h */,
 				114B6FB711FA7623004FB6AB /* SplitVector.h */,
 				114B6FB811FA7623004FB6AB /* Style.h */,
+				114B6FE111FA7645004FB6AB /* StyleContext.h */,
+				1100F1EA178E393200105727 /* UnicodeFromUTF8.h */,
 				114B6FBA11FA7623004FB6AB /* UniConversion.h */,
 				114B6FBB11FA7623004FB6AB /* ViewStyle.h */,
+				114B6FE211FA7645004FB6AB /* WordList.h */,
 				114B6FBC11FA7623004FB6AB /* XPM.h */,
-				114B6FA011FA75DB004FB6AB /* ILexer.h */,
 			);
 			name = "Header Files";
 			sourceTree = "<group>";
@@ -622,19 +635,14 @@
 			isa = PBXGroup;
 			children = (
 				114B6F8E11FA75BE004FB6AB /* Accessor.cxx */,
-				11FBA39B17817DA00048C071 /* CharacterCategory.cxx */,
-				114B6F8F11FA75BE004FB6AB /* CharacterSet.cxx */,
-				114B6F9011FA75BE004FB6AB /* LexerBase.cxx */,
-				114B6F9111FA75BE004FB6AB /* LexerModule.cxx */,
-				114B6F9211FA75BE004FB6AB /* LexerNoExceptions.cxx */,
-				114B6F9311FA75BE004FB6AB /* LexerSimple.cxx */,
-				114B6F9411FA75BE004FB6AB /* PropSetSimple.cxx */,
-				114B6F9511FA75BE004FB6AB /* StyleContext.cxx */,
-				114B6F9611FA75BE004FB6AB /* WordList.cxx */,
 				114B6F6011FA7597004FB6AB /* AutoComplete.cxx */,
 				114B6F6111FA7597004FB6AB /* CallTip.cxx */,
+				1100F1E6178E393200105727 /* CaseConvert.cxx */,
+				1100F1E8178E393200105727 /* CaseFolder.cxx */,
 				114B6F6211FA7597004FB6AB /* Catalogue.cxx */,
 				114B6F6311FA7597004FB6AB /* CellBuffer.cxx */,
+				11FBA39B17817DA00048C071 /* CharacterCategory.cxx */,
+				114B6F8F11FA75BE004FB6AB /* CharacterSet.cxx */,
 				114B6F6411FA7597004FB6AB /* CharClassify.cxx */,
 				114B6F6511FA7597004FB6AB /* ContractionState.cxx */,
 				114B6F6611FA7597004FB6AB /* Decoration.cxx */,
@@ -643,16 +651,23 @@
 				114B6F6911FA7598004FB6AB /* ExternalLexer.cxx */,
 				114B6F6A11FA7598004FB6AB /* Indicator.cxx */,
 				114B6F6B11FA7598004FB6AB /* KeyMap.cxx */,
+				114B6F9011FA75BE004FB6AB /* LexerBase.cxx */,
+				114B6F9111FA75BE004FB6AB /* LexerModule.cxx */,
+				114B6F9211FA75BE004FB6AB /* LexerNoExceptions.cxx */,
+				114B6F9311FA75BE004FB6AB /* LexerSimple.cxx */,
 				114B6F6C11FA7598004FB6AB /* LineMarker.cxx */,
 				114B6F6D11FA7598004FB6AB /* PerLine.cxx */,
 				114B6F6E11FA7598004FB6AB /* PositionCache.cxx */,
+				114B6F9411FA75BE004FB6AB /* PropSetSimple.cxx */,
 				114B6F6F11FA7598004FB6AB /* RESearch.cxx */,
 				114B6F7011FA7598004FB6AB /* RunStyles.cxx */,
 				114B6F7111FA7598004FB6AB /* ScintillaBase.cxx */,
 				114B6F7211FA7598004FB6AB /* Selection.cxx */,
 				114B6F7311FA7598004FB6AB /* Style.cxx */,
+				114B6F9511FA75BE004FB6AB /* StyleContext.cxx */,
 				114B6F7411FA7598004FB6AB /* UniConversion.cxx */,
 				114B6F7511FA7598004FB6AB /* ViewStyle.cxx */,
+				114B6F9611FA75BE004FB6AB /* WordList.cxx */,
 				114B6F7611FA7598004FB6AB /* XPM.cxx */,
 			);
 			name = "Source Files";
@@ -763,6 +778,9 @@
 				114B6FED11FA7645004FB6AB /* WordList.h in Headers */,
 				119FF1BF13C9D1820007CE42 /* QuartzTextStyle.h in Headers */,
 				11FBA39E17817DA00048C071 /* CharacterCategory.h in Headers */,
+				1100F1EC178E393200105727 /* CaseConvert.h in Headers */,
+				1100F1EE178E393200105727 /* CaseFolder.h in Headers */,
+				1100F1EF178E393200105727 /* UnicodeFromUTF8.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -962,6 +980,8 @@
 				1102C31C169FB49300DC16AB /* LexLaTeX.cxx in Sources */,
 				11FDAEB7174E1A9800FA161B /* LexSTTXT.cxx in Sources */,
 				11FBA39D17817DA00048C071 /* CharacterCategory.cxx in Sources */,
+				1100F1EB178E393200105727 /* CaseConvert.cxx in Sources */,
+				1100F1ED178E393200105727 /* CaseFolder.cxx in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
