@@ -155,24 +155,6 @@ public:
 	bool isEnabled;
 };
 
-class CaseFolder {
-public:
-	virtual ~CaseFolder() {
-	}
-	virtual size_t Fold(char *folded, size_t sizeFolded, const char *mixed, size_t lenMixed) = 0;
-};
-
-class CaseFolderTable : public CaseFolder {
-protected:
-	char mapping[256];
-public:
-	CaseFolderTable();
-	virtual ~CaseFolderTable();
-	virtual size_t Fold(char *folded, size_t sizeFolded, const char *mixed, size_t lenMixed);
-	void SetTranslation(char ch, char chTranslation);
-	void StandardASCII();
-};
-
 class Document;
 
 class LexInterface {

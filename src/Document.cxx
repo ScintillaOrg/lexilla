@@ -28,6 +28,7 @@
 #include "CharClassify.h"
 #include "CharacterSet.h"
 #include "Decoration.h"
+#include "CaseFolder.h"
 #include "Document.h"
 #include "RESearch.h"
 #include "UniConversion.h"
@@ -1494,47 +1495,6 @@ bool Document::IsWordEndAt(int pos) const {
  */
 bool Document::IsWordAt(int start, int end) const {
 	return IsWordStartAt(start) && IsWordEndAt(end);
-}
-
-static inline char MakeLowerCase(char ch) {
-	if (ch < 'A' || ch > 'Z')
-		return ch;
-	else
-		return static_cast<char>(ch - 'A' + 'a');
-}
-
-CaseFolderTable::CaseFolderTable() {
-	for (size_t iChar=0; iChar<sizeof(mapping); iChar++) {
-		mapping[iChar] = static_cast<char>(iChar);
-	}
-}
-
-CaseFolderTable::~CaseFolderTable() {
-}
-
-size_t CaseFolderTable::Fold(char *folded, size_t sizeFolded, const char *mixed, size_t lenMixed) {
-	if (lenMixed > sizeFolded) {
-		return 0;
-	} else {
-		for (size_t i=0; i<lenMixed; i++) {
-			folded[i] = mapping[static_cast<unsigned char>(mixed[i])];
-		}
-		return lenMixed;
-	}
-}
-
-void CaseFolderTable::SetTranslation(char ch, char chTranslation) {
-	mapping[static_cast<unsigned char>(ch)] = chTranslation;
-}
-
-void CaseFolderTable::StandardASCII() {
-	for (size_t iChar=0; iChar<sizeof(mapping); iChar++) {
-		if (iChar >= 'A' && iChar <= 'Z') {
-			mapping[iChar] = static_cast<char>(iChar - 'A' + 'a');
-		} else {
-			mapping[iChar] = static_cast<char>(iChar);
-		}
-	}
 }
 
 bool Document::MatchesWordOptions(bool word, bool wordStart, int pos, int length) const {

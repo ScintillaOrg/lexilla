@@ -522,37 +522,6 @@ static char *EncodedBytes(CFStringRef cfsRef, CFStringEncoding encoding) {
  * Case folders.
  */
 
-class CaseFolderUTF8 : public CaseFolderTable {
-public:
-	CaseFolderUTF8() {
-		StandardASCII();
-	}
-	virtual size_t Fold(char *folded, size_t sizeFolded, const char *mixed, size_t lenMixed) {
-		if ((lenMixed == 1) && (sizeFolded > 0)) {
-			folded[0] = mapping[static_cast<unsigned char>(mixed[0])];
-			return 1;
-		} else {
-            CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
-                                                         reinterpret_cast<const UInt8 *>(mixed), 
-                                                         lenMixed, kCFStringEncodingUTF8, false);
-
-            NSString *sMapped = [(NSString *)cfsVal stringByFoldingWithOptions:NSCaseInsensitiveSearch
-                                                            locale:[NSLocale currentLocale]];
-
-            const char *cpMapped = [sMapped UTF8String];
-			size_t lenMapped = cpMapped ? strlen(cpMapped) : 0;
-			if (lenMapped < sizeFolded) {
-				memcpy(folded, cpMapped,  lenMapped);
-			} else {
-				lenMapped = 0;
-			}
-			if (cfsVal)
-				CFRelease(cfsVal);
-			return lenMapped;
-		}
-	}
-};
-
 class CaseFolderDBCS : public CaseFolderTable {
 	CFStringEncoding encoding;
 public:
@@ -592,7 +561,7 @@ public:
 
 CaseFolder *ScintillaCocoa::CaseFolderForEncoding() {
 	if (pdoc->dbcsCodePage == SC_CP_UTF8) {
-		return new CaseFolderUTF8();
+		return new CaseFolderUnicode();
 	} else {
         CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
                                                              vs.styles[STYLE_DEFAULT].characterSet);
@@ -637,6 +606,17 @@ CaseFolder *ScintillaCocoa::CaseFolderForEncoding() {
  */
 std::string ScintillaCocoa::CaseMapString(const std::string &s, int caseMapping)
 {
+  if ((s.size() == 0) || (caseMapping == cmSame))
+    return s;
+  
+  if (IsUnicodeMode()) {
+    std::string retMapped(s.length() * maxExpansionCaseConversion, 0);
+    size_t lenMapped = CaseConvertString(&retMapped[0], retMapped.length(), s.c_str(), s.length(), 
+      (caseMapping == cmUpper) ? CaseConversionUpper : CaseConversionLower);
+    retMapped.resize(lenMapped);
+    return retMapped;
+  }
+
   CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
                                                        vs.styles[STYLE_DEFAULT].characterSet);
   CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,

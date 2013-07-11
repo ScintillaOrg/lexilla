@@ -38,6 +38,8 @@ SOURCES += \
     ../../src/CharClassify.cxx \
     ../../src/CellBuffer.cxx \
     ../../src/Catalogue.cxx \
+    ../../src/CaseFolder.cxx \
+    ../../src/CaseConvert.cxx \
     ../../src/CallTip.cxx \
     ../../src/AutoComplete.cxx \
     ../../lexlib/WordList.cxx \
@@ -59,6 +61,7 @@ HEADERS  += \
     ../../src/XPM.h \
     ../../src/ViewStyle.h \
     ../../src/UniConversion.h \
+    ../../src/UnicodeFromUTF8.h \
     ../../src/Style.h \
     ../../src/SplitVector.h \
     ../../src/Selection.h \
@@ -80,6 +83,8 @@ HEADERS  += \
     ../../src/CharClassify.h \
     ../../src/CellBuffer.h \
     ../../src/Catalogue.h \
+    ../../src/CaseFolder.h \
+    ../../src/CaseConvert.h \
     ../../src/CallTip.h \
     ../../src/AutoComplete.h \
     ../../include/Scintilla.h \

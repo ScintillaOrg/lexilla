@@ -46,12 +46,14 @@
 #include "ViewStyle.h"
 #include "Decoration.h"
 #include "CharClassify.h"
+#include "CaseFolder.h"
 #include "Document.h"
 #include "Selection.h"
 #include "PositionCache.h"
 #include "Editor.h"
 #include "ScintillaBase.h"
 #include "UniConversion.h"
+#include "CaseConvert.h"
 
 #include "scintilla-marshal.h"
 
@@ -1238,29 +1240,6 @@ const char *ScintillaGTK::CharacterSetID() const {
 	return ::CharacterSetID(vs.styles[STYLE_DEFAULT].characterSet);
 }
 
-class CaseFolderUTF8 : public CaseFolderTable {
-public:
-	CaseFolderUTF8() {
-		StandardASCII();
-	}
-	virtual size_t Fold(char *folded, size_t sizeFolded, const char *mixed, size_t lenMixed) {
-		if ((lenMixed == 1) && (sizeFolded > 0)) {
-			folded[0] = mapping[static_cast<unsigned char>(mixed[0])];
-			return 1;
-		} else {
-			gchar *mapped = g_utf8_casefold(mixed, lenMixed);
-			size_t lenMapped = strlen(mapped);
-			if (lenMapped < sizeFolded) {
-				memcpy(folded, mapped,  lenMapped);
-			} else {
-				lenMapped = 0;
-			}
-			g_free(mapped);
-			return lenMapped;
-		}
-	}
-};
-
 class CaseFolderDBCS : public CaseFolderTable {
 	const char *charSet;
 public:
@@ -1295,7 +1274,7 @@ public:
 
 CaseFolder *ScintillaGTK::CaseFolderForEncoding() {
 	if (pdoc->dbcsCodePage == SC_CP_UTF8) {
-		return new CaseFolderUTF8();
+		return new CaseFolderUnicode();
 	} else {
 		const char *charSetBuffer = CharacterSetID();
 		if (charSetBuffer) {
@@ -1349,15 +1328,20 @@ struct CaseMapper {
 }
 
 std::string ScintillaGTK::CaseMapString(const std::string &s, int caseMapping) {
-	if (s.size() == 0)
-		return std::string();
-
-	if (caseMapping == cmSame)
+	if ((s.size() == 0) || (caseMapping == cmSame))
 		return s;
+
+	if (IsUnicodeMode()) {
+		std::string retMapped(s.length() * maxExpansionCaseConversion, 0);
+		size_t lenMapped = CaseConvertString(&retMapped[0], retMapped.length(), s.c_str(), s.length(), 
+			(caseMapping == cmUpper) ? CaseConversionUpper : CaseConversionLower);
+		retMapped.resize(lenMapped);
+		return retMapped;
+	}
 
 	const char *charSetBuffer = CharacterSetID();
 
-	if (IsUnicodeMode() || !*charSetBuffer) {
+	if (!*charSetBuffer) {
 		CaseMapper mapper(s, caseMapping == cmUpper);
 		return std::string(mapper.mapped, strlen(mapper.mapped));
 	} else {

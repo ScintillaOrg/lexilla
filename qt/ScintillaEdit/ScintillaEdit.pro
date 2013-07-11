@@ -40,6 +40,8 @@ SOURCES += \
     ../../src/CharClassify.cxx \
     ../../src/CellBuffer.cxx \
     ../../src/Catalogue.cxx \
+    ../../src/CaseFolder.cxx \
+    ../../src/CaseConvert.cxx \
     ../../src/CallTip.cxx \
     ../../src/AutoComplete.cxx \
     ../../lexlib/WordList.cxx \

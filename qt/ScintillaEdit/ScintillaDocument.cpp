@@ -25,6 +25,7 @@
 #include "ViewStyle.h"
 #include "CharClassify.h"
 #include "Decoration.h"
+#include "CaseFolder.h"
 #include "Document.h"
 
 class WatcherHelper : public DocWatcher {

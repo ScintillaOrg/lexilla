@@ -36,6 +36,7 @@
 #include "ViewStyle.h"
 #include "CharClassify.h"
 #include "Decoration.h"
+#include "CaseFolder.h"
 #include "Document.h"
 #include "UniConversion.h"
 #include "Selection.h"

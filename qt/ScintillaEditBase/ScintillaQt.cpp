@@ -488,30 +488,6 @@ QByteArray ScintillaQt::BytesForDocument(const QString &text) const
 }
 
 
-class CaseFolderUTF8 : public CaseFolderTable {
-public:
-	CaseFolderUTF8() {
-		StandardASCII();
-	}
-	virtual size_t Fold(char *folded, size_t sizeFolded, const char *mixed, size_t lenMixed) {
-		if ((lenMixed == 1) && (sizeFolded > 0)) {
-			folded[0] = mapping[static_cast<unsigned char>(mixed[0])];
-			return 1;
-		} else {
-			QString su = QString::fromUtf8(mixed, lenMixed);
-			QString suFolded = su.toCaseFolded();
-			QByteArray bytesFolded = suFolded.toUtf8();
-			if (bytesFolded.length() < static_cast<int>(sizeFolded)) {
-				memcpy(folded, bytesFolded,  bytesFolded.length());
-				return bytesFolded.length();
-			} else {
-				folded[0] = '\0';
-				return 0;
-			}
-		}
-	}
-};
-
 class CaseFolderDBCS : public CaseFolderTable {
 	QTextCodec *codec;
 public:
@@ -541,7 +517,7 @@ public:
 CaseFolder *ScintillaQt::CaseFolderForEncoding()
 {
 	if (pdoc->dbcsCodePage == SC_CP_UTF8) {
-		return new CaseFolderUTF8();
+		return new CaseFolderUnicode();
 	} else {
 		const char *charSetBuffer = CharacterSetIDOfDocument();
 		if (charSetBuffer) {
@@ -571,20 +547,19 @@ CaseFolder *ScintillaQt::CaseFolderForEncoding()
 
 std::string ScintillaQt::CaseMapString(const std::string &s, int caseMapping)
 {
-	if (s.size() == 0)
-		return std::string();
-
-	if (caseMapping == cmSame)
+	if ((s.size() == 0) || (caseMapping == cmSame))
 		return s;
 
-	QTextCodec *codec = 0;
-	QString text;
 	if (IsUnicodeMode()) {
-		text = QString::fromUtf8(s.c_str(), s.length());
-	} else {
-		codec = QTextCodec::codecForName(CharacterSetIDOfDocument());
-		text = codec->toUnicode(s.c_str(), s.length());
+		std::string retMapped(s.length() * maxExpansionCaseConversion, 0);
+		size_t lenMapped = CaseConvertString(&retMapped[0], retMapped.length(), s.c_str(), s.length(), 
+			(caseMapping == cmUpper) ? CaseConversionUpper : CaseConversionLower);
+		retMapped.resize(lenMapped);
+		return retMapped;
 	}
+
+	QTextCodec *codec = QTextCodec::codecForName(CharacterSetIDOfDocument());
+    QString text = codec->toUnicode(s.c_str(), s.length());
 
 	if (caseMapping == cmUpper) {
 		text = text.toUpper();
