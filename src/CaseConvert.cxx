@@ -598,6 +598,10 @@ CaseConverter *ConverterForConversion(enum CaseConversion conversion) {
 
 }
 
+#ifdef SCI_NAMESPACE
+namespace Scintilla {
+#endif
+
 ICaseConverter *ConverterFor(enum CaseConversion conversion) {
 	CaseConverter *pCaseConv = ConverterForConversion(conversion);
 	if (!pCaseConv->Initialised())
@@ -618,3 +622,7 @@ size_t CaseConvertString(char *converted, size_t sizeConverted, const char *mixe
 		SetupConversions(conversion);
 	return pCaseConv->CaseConvertString(converted, sizeConverted, mixed, lenMixed);
 }
+
+#ifdef SCI_NAMESPACE
+}
+#endif
