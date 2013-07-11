@@ -5015,7 +5015,7 @@ void Editor::ChangeCaseOfSelection(int caseMapping) {
 					sMapped.c_str() + firstDifference,
 					static_cast<int>(lastDifferenceMapped - firstDifference + 1));
 				// Automatic movement changes selection so reset to exactly the same as it was.
-				int diffSizes = sMapped.size() - sText.size();
+				int diffSizes = static_cast<int>(sMapped.size() - sText.size());
 				if (diffSizes != 0) {
 					if (current.anchor > current.caret)
 						current.anchor.Add(diffSizes);
