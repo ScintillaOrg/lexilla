@@ -36,7 +36,7 @@ using namespace Scintilla;
 #define KW_MSSQL_OPERATORS          6
 
 static bool isMSSQLOperator(char ch) {
-	if (isascii(ch) && isalnum(ch))
+	if (IsASCII(ch) && isalnum(ch))
 		return false;
 	// '.' left out as it is used to make up numbers
 	if (ch == '%' || ch == '^' || ch == '&' || ch == '*' ||

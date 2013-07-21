@@ -44,13 +44,13 @@ inline bool isCOBOLoperator(char ch)
 
 inline bool isCOBOLwordchar(char ch)
     {
-    return isascii(ch) && (isalnum(ch) || ch == '-');
+    return IsASCII(ch) && (isalnum(ch) || ch == '-');
 
     }
 
 inline bool isCOBOLwordstart(char ch)
     {
-    return isascii(ch) && isalnum(ch);
+    return IsASCII(ch) && isalnum(ch);
     }
 
 static int CountBits(int nBits)
@@ -205,7 +205,7 @@ static void ColouriseCOBOLDoc(unsigned int startPos, int length, int initStyle, 
         }
 
         if (state == SCE_C_DEFAULT) {
-            if (isCOBOLwordstart(ch) || (ch == '$' && isascii(chNext) && isalpha(chNext))) {
+            if (isCOBOLwordstart(ch) || (ch == '$' && IsASCII(chNext) && isalpha(chNext))) {
                 ColourTo(styler, i-1, state);
                 state = SCE_C_IDENTIFIER;
             } else if (column == 6 && ch == '*') {

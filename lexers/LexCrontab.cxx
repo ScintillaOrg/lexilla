@@ -98,12 +98,12 @@ static void ColouriseNncrontabDoc(unsigned int startPos, int length, int, WordLi
 					// signals an asterisk
 					// no state jump necessary for this simple case...
 					styler.ColourTo(i,SCE_NNCRONTAB_ASTERISK);
-				} else if( (isascii(ch) && isalpha(ch)) || ch == '<' ) {
+				} else if( (IsASCII(ch) && isalpha(ch)) || ch == '<' ) {
 					// signals the start of an identifier
 					bufferCount = 0;
 					buffer[bufferCount++] = ch;
 					state = SCE_NNCRONTAB_IDENTIFIER;
-				} else if( isascii(ch) && isdigit(ch) ) {
+				} else if( IsASCII(ch) && isdigit(ch) ) {
 					// signals the start of a number
 					bufferCount = 0;
 					buffer[bufferCount++] = ch;
@@ -171,7 +171,7 @@ static void ColouriseNncrontabDoc(unsigned int startPos, int length, int, WordLi
 
 			case SCE_NNCRONTAB_IDENTIFIER:
 				// stay  in CONF_IDENTIFIER state until we find a non-alphanumeric
-				if( (isascii(ch) && isalnum(ch)) || (ch == '_') || (ch == '-') || (ch == '/') ||
+				if( (IsASCII(ch) && isalnum(ch)) || (ch == '_') || (ch == '-') || (ch == '/') ||
 					(ch == '$') || (ch == '.') || (ch == '<') || (ch == '>') ||
 					(ch == '@') ) {
 					buffer[bufferCount++] = ch;
@@ -200,7 +200,7 @@ static void ColouriseNncrontabDoc(unsigned int startPos, int length, int, WordLi
 
 			case SCE_NNCRONTAB_NUMBER:
 				// stay  in CONF_NUMBER state until we find a non-numeric
-				if( isascii(ch) && isdigit(ch) /* || ch == '.' */ ) {
+				if( IsASCII(ch) && isdigit(ch) /* || ch == '.' */ ) {
 					buffer[bufferCount++] = ch;
 				} else {
 					state = SCE_NNCRONTAB_DEFAULT;

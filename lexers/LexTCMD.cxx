@@ -30,7 +30,7 @@ using namespace Scintilla;
 
 
 static bool IsAlphabetic(int ch) {
-	return isascii(ch) && isalpha(ch);
+	return IsASCII(ch) && isalpha(ch);
 }
 
 static inline bool AtEOL(Accessor &styler, unsigned int i) {
