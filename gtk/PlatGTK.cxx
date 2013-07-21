@@ -46,6 +46,8 @@
 #define IS_WIDGET_FOCUSSED(w) (GTK_WIDGET_HAS_FOCUS(w))
 #endif
 
+static const double kPi = 3.14159265358979323846;
+
 // The Pango version guard for pango_units_from_double and pango_units_to_double 
 // is more complex than simply implementing these here.
 
@@ -739,7 +741,7 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesi
 }
 
 static void PathRoundRectangle(cairo_t *context, double left, double top, double width, double height, int radius) {
-	double degrees = M_PI / 180.0;
+	double degrees = kPi / 180.0;
 
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 2, 0)
 	cairo_new_sub_path(context);
@@ -820,7 +822,7 @@ void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsi
 void SurfaceImpl::Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) {
 	PenColour(back);
 	cairo_arc(context, (rc.left + rc.right) / 2 + 0.5, (rc.top + rc.bottom) / 2 + 0.5,
-		Platform::Minimum(rc.Width(), rc.Height()) / 2, 0, 2*M_PI);
+		Platform::Minimum(rc.Width(), rc.Height()) / 2, 0, 2*kPi);
 	cairo_fill_preserve(context);
 	PenColour(fore);
 	cairo_stroke(context);
