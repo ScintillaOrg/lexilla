@@ -1157,7 +1157,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 
   // Horizontal offset of the content. Almost always 0 unless the vertical scroller
   // is on the left side.
-  int contentX = 0;
+  CGFloat contentX = 0;
   NSRect scrollRect = {contentX, 0, size.width, size.height};
 
   // Info bar frame.

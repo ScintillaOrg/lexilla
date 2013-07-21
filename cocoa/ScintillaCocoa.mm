@@ -1625,7 +1625,7 @@ bool ScintillaCocoa::SetScrollingSize(void) {
 		NSScrollView *scrollView = ScrollContainer();
 		NSClipView *clipView = [ScrollContainer() contentView];
 		NSRect clipRect = [clipView bounds];
-		int docHeight = (cs.LinesDisplayed()+1) * vs.lineHeight;
+		CGFloat docHeight = (cs.LinesDisplayed()+1) * vs.lineHeight;
 		if (!endAtLastLine)
 			docHeight += (int([scrollView bounds].size.height / vs.lineHeight)-3) * vs.lineHeight;
 		// Allow extra space so that last scroll position places whole line at top
@@ -1634,7 +1634,7 @@ bool ScintillaCocoa::SetScrollingSize(void) {
 		// Ensure all of clipRect covered by Scintilla drawing
 		if (docHeight < clipRect.size.height)
 			docHeight = clipRect.size.height;
-		int docWidth = scrollWidth;
+		CGFloat docWidth = scrollWidth;
 		bool showHorizontalScroll = horizontalScrollBarVisible &&
 			(wrapState == eWrapNone);
 		if (!showHorizontalScroll)
