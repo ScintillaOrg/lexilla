@@ -8,7 +8,7 @@
 
 .SUFFIXES: .cxx .c .o .h .a
 ifdef CLANG
-CC = clang --std=c++0x
+CC = clang
 CCOMP = clang
 else
 CC = g++
@@ -46,7 +46,7 @@ INCLUDEDIRS=-I ../include -I ../src -I ../lexlib
 ifdef CHECK_DEPRECATED
 DEPRECATED=-DGDK_PIXBUF_DISABLE_DEPRECATED -DGDK_DISABLE_DEPRECATED -DGTK_DISABLE_DEPRECATED -DDISABLE_GDK_FONT
 endif
-CXXBASEFLAGS=-Wall -Wno-missing-braces -Wno-char-subscripts -pedantic -DGTK -DSCI_LEXER $(INCLUDEDIRS) $(DEPRECATED)
+CXXBASEFLAGS=--std=c++0x -Wall -Wno-missing-braces -Wno-char-subscripts -pedantic -DGTK -DSCI_LEXER $(INCLUDEDIRS) $(DEPRECATED)
 
 ifdef NOTHREADS
 THREADFLAGS=-DG_THREADS_IMPL_NONE
