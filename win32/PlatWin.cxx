@@ -7,12 +7,12 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <ctype.h>
 #include <stdarg.h>
-#include <stdio.h>
 #include <time.h>
-#include <limits.h>
 #include <math.h>
+#include <limits.h>
 
 #include <vector>
 #include <map>
