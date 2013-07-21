@@ -5,6 +5,13 @@
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
+#ifndef UNICONVERSION_H
+#define UNICONVERSION_H
+
+#ifdef SCI_NAMESPACE
+namespace Scintilla {
+#endif
+
 const int UTF8MaxBytes = 4;
 
 unsigned int UTF8Length(const wchar_t *uptr, unsigned int tlen);
@@ -39,3 +46,9 @@ const int UTF8NELLength = 2;
 inline bool UTF8IsNEL(const unsigned char *us) {
 	return (us[0] == 0xc2) && (us[1] == 0x85);
 }
+
+#ifdef SCI_NAMESPACE
+}
+#endif
+
+#endif
