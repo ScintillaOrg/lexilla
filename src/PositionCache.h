@@ -113,6 +113,31 @@ public:
 	void ResetClock();
 };
 
+class Representation {
+public:
+	std::string stringRep;
+	Representation(const char *value="") : stringRep(value) {
+	}
+};
+
+#ifdef SCINTILLA_NO_UNORDERED_MAP
+typedef std::map<int, Representation> MapRepresentation;
+#else
+typedef std::unordered_map<int, Representation> MapRepresentation;
+#endif
+
+class SpecialRepresentations {
+	MapRepresentation mapReprs;
+	int startByteHasReprs[0x100];
+public:
+	SpecialRepresentations();
+	void SetRepresentation(const char *charBytes, const char *value);
+	void ClearRepresentation(const char *charBytes);
+	Representation *RepresentationFromCharacter(const char *charBytes, size_t len);
+	bool Contains(const char *charBytes, size_t len) const;
+	void Clear();
+};
+
 // Class to break a line of text into shorter runs at sensible places.
 class BreakFinder {
 	LineLayout *ll;
@@ -125,6 +150,7 @@ class BreakFinder {
 	int saeNext;
 	int subBreak;
 	Document *pdoc;
+	SpecialRepresentations *preprs;
 	void Insert(int val);
 	// Private so BreakFinder objects can not be copied
 	BreakFinder(const BreakFinder &);
@@ -135,7 +161,7 @@ public:
 	// Try to make each subdivided run lengthEachSubdivision or shorter.
 	enum { lengthEachSubdivision = 100 };
 	BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posLineStart_,
-		int xStart, bool breakForSelection, Document *pdoc_);
+		int xStart, bool breakForSelection, Document *pdoc_, SpecialRepresentations *preprs_);
 	~BreakFinder();
 	int First() const;
 	int Next();

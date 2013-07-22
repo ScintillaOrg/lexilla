@@ -2326,6 +2326,15 @@ get bool GetCaretLineVisibleAlways=2654(,)
 # Sets the caret line to always visible.
 set void SetCaretLineVisibleAlways=2655(bool alwaysVisible,)
 
+# Set the way a character is drawn.
+set void SetRepresentation=2665(string encodedCharacter, string representation)
+
+# Set the way a character is drawn.
+get int GetRepresentation=2666(string encodedCharacter, stringresult representation)
+
+# Remove a character representation.
+fun void ClearRepresentation=2667(string encodedCharacter,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 

@@ -212,6 +212,7 @@
           <td>o <a class="toc" href="#Searching">Searching and replacing</a></td>
 
           <td>o <a class="toc" href="#Overtype">Overtype</a></td>
+
         </tr>
 
         <tr>
@@ -220,6 +221,7 @@
           <td>o <a class="toc" href="#ErrorHandling">Error handling</a></td>
 
           <td>o <a class="toc" href="#UndoAndRedo">Undo and Redo</a></td>
+
         </tr>
 
         <tr>
@@ -229,6 +231,7 @@
 
           <td>o <a class="toc" href="#ScrollingAndAutomaticScrolling">Scrolling and automatic
           scrolling</a></td>
+
         </tr>
 
         <tr>
@@ -237,6 +240,7 @@
           <td>o <a class="toc" href="#Cursor">Cursor</a></td>
 
           <td>o <a class="toc" href="#MouseCapture">Mouse capture</a></td>
+
         </tr>
 
         <tr>
@@ -245,91 +249,103 @@
           <td>o <a class="toc" href="#Styling">Styling</a></td>
 
           <td>o <a class="toc" href="#StyleDefinition">Style definition</a></td>
+
         </tr>
 
         <tr>
           <td>o <a class="toc" href="#CaretAndSelectionStyles">Caret, selection, and hotspot styles</a></td>
+          
+          <td>o <a class="toc" href="#CharacterRepresentations">Character representations</a></td>
 
           <td>o <a class="toc" href="#Margins">Margins</a></td>
 
-          <td>o <a class="toc" href="#Annotations">Annotations</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#Annotations">Annotations</a></td>
+
           <td>o <a class="toc" href="#OtherSettings">Other settings</a></td>
 
           <td>o <a class="toc" href="#BraceHighlighting">Brace highlighting</a></td>
 
-          <td>o <a class="toc" href="#TabsAndIndentationGuides">Tabs and Indentation
-          Guides</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#TabsAndIndentationGuides">Tabs and Indentation
+          Guides</a></td>
+
           <td>o <a class="toc" href="#Markers">Markers</a></td>
 
           <td>o <a class="toc" href="#Indicators">Indicators</a></td>
 
-	<td>o <a class="toc" href="#Autocompletion">Autocompletion</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#Autocompletion">Autocompletion</a></td>
+
           <td>o <a class="toc" href="#UserLists">User lists</a></td>
 
           <td>o <a class="toc" href="#CallTips">Call tips</a></td>
 
-	<td>o <a class="toc" href="#KeyboardCommands">Keyboard commands</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#KeyboardCommands">Keyboard commands</a></td>
+
           <td>o <a class="toc" href="#KeyBindings">Key bindings</a></td>
 
           <td>o <a class="toc" href="#PopupEditMenu">Popup edit menu</a></td>
 
-          <td>o <a class="toc" href="#MacroRecording">Macro recording</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#MacroRecording">Macro recording</a></td>
+
           <td>o <a class="toc" href="#Printing">Printing</a></td>
 
           <td>o <a class="toc" href="#DirectAccess">Direct access</a></td>
 
-          <td>o <a class="toc" href="#MultipleViews">Multiple views</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#MultipleViews">Multiple views</a></td>
+
           <td>o <a class="toc" href="#BackgroundLoadSave">Background loading and saving</a></td>
 
           <td>o <a class="toc" href="#Folding">Folding</a></td>
 
-          <td>o <a class="toc" href="#LineWrapping">Line wrapping</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#LineWrapping">Line wrapping</a></td>
+
           <td>o <a class="toc" href="#Zooming">Zooming</a></td>
 
           <td>o <a class="toc" href="#LongLines">Long lines</a></td>
 
-          <td>o <a class="toc" href="#Lexer">Lexer</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#Lexer">Lexer</a></td>
+
           <td>o <a class="toc" href="#LexerObjects">Lexer objects</a></td>
 
           <td>o <a class="toc" href="#Notifications">Notifications</a></td>
 
-          <td>o <a class="toc" href="#Images">Images</a></td>
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#Images">Images</a></td>
+
           <td>o <a class="toc" href="#GTK">GTK+</a></td>
 
           <td>o <a class="toc" href="#ProvisionalMessages"><span class="provisional">Provisional messages</span></a></td>
 
-          <td>o <a class="toc" href="#DeprecatedMessages">Deprecated messages</a></td>
-
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#DeprecatedMessages">Deprecated messages</a></td>
+
           <td>o <a class="toc" href="#EditMessagesNeverSupportedByScintilla">Edit messages never
           supported by Scintilla</a></td>
 
@@ -2691,8 +2707,6 @@ struct Sci_TextToFind {
     <a class="message" href="#SCI_GETHOTSPOTACTIVEUNDERLINE">SCI_GETHOTSPOTACTIVEUNDERLINE</a><br />
     <a class="message" href="#SCI_SETHOTSPOTSINGLELINE">SCI_SETHOTSPOTSINGLELINE(bool singleLine)</a><br />
     <a class="message" href="#SCI_GETHOTSPOTSINGLELINE">SCI_GETHOTSPOTSINGLELINE</a><br />
-    <a class="message" href="#SCI_SETCONTROLCHARSYMBOL">SCI_SETCONTROLCHARSYMBOL(int symbol)</a><br />
-     <a class="message" href="#SCI_GETCONTROLCHARSYMBOL">SCI_GETCONTROLCHARSYMBOL</a><br />
      <a class="message" href="#SCI_SETCARETSTICKY">SCI_SETCARETSTICKY(int useCaretStickyBehaviour)</a><br />
      <a class="message" href="#SCI_GETCARETSTICKY">SCI_GETCARETSTICKY</a><br />
      <a class="message" href="#SCI_TOGGLECARETSTICKY">SCI_TOGGLECARETSTICKY</a><br />
@@ -2789,21 +2803,6 @@ struct Sci_TextToFind {
     the default colouring can be modified and an underline drawn with these settings.
     Single line mode stops a hotspot from wrapping onto next line.</p>
 
-    <p><b id="SCI_SETCONTROLCHARSYMBOL">SCI_SETCONTROLCHARSYMBOL(int symbol)</b><br />
-     <b id="SCI_GETCONTROLCHARSYMBOL">SCI_GETCONTROLCHARSYMBOL</b><br />
-     By default, Scintilla displays control characters (characters with codes less than 32) in a
-    rounded rectangle as ASCII mnemonics: "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL",
-    "BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI", "DLE", "DC1", "DC2", "DC3", "DC4", "NAK",
-    "SYN", "ETB", "CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US". These mnemonics come from the
-    early days of signaling, though some are still used (LF = Line Feed, BS = Back Space, CR =
-    Carriage Return, for example).</p>
-
-    <p>You can choose to replace these mnemonics by a nominated symbol with an ASCII code in the
-    range 32 to 255. If you set a symbol value less than 32, all control characters are displayed
-    as mnemonics. The symbol you set is rendered in the font of the style set for the character.
-    You can read back the current symbol with the <code>SCI_GETCONTROLCHARSYMBOL</code> message.
-    The default symbol value is 0.</p>
-
     <p><b id="SCI_SETCARETSTICKY">SCI_SETCARETSTICKY(int useCaretStickyBehaviour)</b><br />
     <b id="SCI_GETCARETSTICKY">SCI_GETCARETSTICKY</b><br />
     <b id="SCI_TOGGLECARETSTICKY">SCI_TOGGLECARETSTICKY</b><br />
@@ -2823,6 +2822,61 @@ struct Sci_TextToFind {
 
     <p><code>SCI_TOGGLECARETSTICKY</code> switches from <code>SC_CARETSTICKY_ON</code> and <code>SC_CARETSTICKY_WHITESPACE</code>
     to <code>SC_CARETSTICKY_OFF</code> and from <code>SC_CARETSTICKY_OFF</code> to <code>SC_CARETSTICKY_ON</code>.</p>
+
+    <h2 id="CharacterRepresentations">Character representations</h2>
+
+    <p>Some characters, such as control characters and invalid bytes, do not have a visual glyph or use a glyph that is hard to distinguish.</p>
+
+    <p>Control characters (characters with codes less than 32, or between 128 and 159 in some encodings)
+    are displayed by Scintilla using their mnemonics inverted in a rounded rectangle. These mnemonics come from the
+    early days of signalling, though some are still used (LF = Line Feed, BS = Back Space, CR =
+    Carriage Return, for example).</p>
+
+    <p>For the low 'C0' values: "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL",
+    "BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI", "DLE", "DC1", "DC2", "DC3", "DC4", "NAK",
+    "SYN", "ETB", "CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US".</p>
+
+    <p>For the high 'C1' values:
+       "PAD", "HOP", "BPH", "NBH", "IND", "NEL", "SSA", "ESA",
+       "HTS", "HTJ", "VTS", "PLD", "PLU", "RI", "SS2", "SS3",
+       "DCS", "PU1", "PU2", "STS", "CCH", "MW", "SPA", "EPA",
+       "SOS", "SGCI", "SCI", "CSI", "ST", "OSC", "PM", "APC".</p>
+
+    <p>Invalid bytes are shown in a similar way with an 'x' followed by their value in hexadecimal, like "xFE".</p>
+
+    <code>
+     <a class="message" href="#SCI_SETREPRESENTATION">SCI_SETREPRESENTATION(const char *encodedCharacter, const char *representation)</a><br />
+     <a class="message" href="#SCI_GETREPRESENTATION">SCI_GETREPRESENTATION(const char *encodedCharacter, char *representation)</a><br />
+     <a class="message" href="#SCI_CLEARREPRESENTATION">SCI_CLEARREPRESENTATION(const char *encodedCharacter)</a><br />
+    <a class="message" href="#SCI_SETCONTROLCHARSYMBOL">SCI_SETCONTROLCHARSYMBOL(int symbol)</a><br />
+     <a class="message" href="#SCI_GETCONTROLCHARSYMBOL">SCI_GETCONTROLCHARSYMBOL</a><br />
+    </code>
+
+    <p><b id="SCI_SETREPRESENTATION">SCI_SETREPRESENTATION(const char *encodedCharacter, const char *representation)</b><br />
+     <b id="SCI_GETREPRESENTATION">SCI_GETREPRESENTATION(const char *encodedCharacter, char *representation)</b><br />
+     <b id="SCI_CLEARREPRESENTATION">SCI_CLEARREPRESENTATION(const char *encodedCharacter)</b><br />
+
+    <p>Any character, including those normally displayed  as mnemonics may be represented by a
+    string inverted in a rounded rectangle.</p>
+
+    <p>For example, the Ohm sign &#x2126; U+2126 looks very similar to the Greek Omega character &#x3a9; U+03C9 so,
+    for the UTF-8 encoding, to distinguish the Ohm sign as "U+2126 &#x2126;" this call could be made:
+    <code>SCI_SETREPRESENTATION("\xe2\x84\xa6", "U+2126 \xe2\x84\xa6")</code></p>
+
+    <p>The encodedCharacter parameter is a NUL-terminated string of the bytes for one character in the
+    current encoding. This can not be used to set a representation for multiple-character strings. </p>
+
+    <p>The NUL (0) character is a special case since the encodedCharacter parameter is NUL terminated, the NUL
+    character is specified as an empty string.</p>
+
+    <p><b id="SCI_SETCONTROLCHARSYMBOL">SCI_SETCONTROLCHARSYMBOL(int symbol)</b><br />
+     <b id="SCI_GETCONTROLCHARSYMBOL">SCI_GETCONTROLCHARSYMBOL</b><br />
+
+    <p>The mnemonics may be replaced by a nominated symbol with an ASCII code in the
+    range 32 to 255. If you set a symbol value less than 32, all control characters are displayed
+    as mnemonics. The symbol you set is rendered in the font of the style set for the character.
+    You can read back the current symbol with the <code>SCI_GETCONTROLCHARSYMBOL</code> message.
+    The default symbol value is 0.</p>
 
     <h2 id="Margins">Margins</h2>
 

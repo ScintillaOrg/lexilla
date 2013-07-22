@@ -231,6 +231,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	LineLayoutCache llc;
 	PositionCache posCache;
+	SpecialRepresentations reprs;
 
 	KeyMap kmap;
 
@@ -332,6 +333,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void InvalidateStyleData();
 	void InvalidateStyleRedraw();
 	void RefreshStyleData();
+	void SetRepresentations();
 	void DropGraphics(bool freeObjects);
 	void AllocateGraphics();
 

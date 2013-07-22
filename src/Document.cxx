@@ -854,6 +854,15 @@ int Document::SafeSegment(const char *text, int length, int lengthSegment) const
 	return lastEncodingAllowedBreak;
 }
 
+EncodingFamily Document::CodePageFamily() const {
+	if (SC_CP_UTF8 == dbcsCodePage)
+		return efUnicode;
+	else if (dbcsCodePage)
+		return efDBCS;
+	else
+		return efEightBit;
+}
+
 void Document::ModifiedAt(int pos) {
 	if (endStyled > pos)
 		endStyled = pos;

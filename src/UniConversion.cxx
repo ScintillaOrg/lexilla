@@ -255,6 +255,11 @@ int UTF8Classify(const unsigned char *us, int len) {
 	}
 }
 
+int UTF8DrawBytes(const unsigned char *us, int len) {
+	int utf8StatusNext = UTF8Classify(us, len);
+	return (utf8StatusNext & UTF8MaskInvalid) ? 1 : (utf8StatusNext & UTF8MaskWidth);
+}
+
 #ifdef SCI_NAMESPACE
 }
 #endif

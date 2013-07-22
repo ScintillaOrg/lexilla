@@ -1104,6 +1104,32 @@ class TestSearch(unittest.TestCase):
 		self.assertEquals(-1, self.ed.FindBytes(0, self.ed.Length, b"\\xAB", flags))
 		self.assertEquals(0, self.ed.FindBytes(0, self.ed.Length, b"\\xAD", flags))
 
+class TestRepresentations(unittest.TestCase):
+
+	def setUp(self):
+		self.xite = Xite.xiteFrame
+		self.ed = self.xite.ed
+		self.ed.ClearAll()
+		self.ed.EmptyUndoBuffer()
+
+	def testGetControl(self):
+		result = self.ed.GetRepresentation(b"\001")
+		self.assertEquals(result, b"SOH")
+
+	def testClearControl(self):
+		result = self.ed.GetRepresentation(b"\002")
+		self.assertEquals(result, b"STX")
+		self.ed.ClearRepresentation(b"\002")
+		result = self.ed.GetRepresentation(b"\002")
+		self.assertEquals(result, b"")
+
+	def testSetOhm(self):
+		ohmSign = b"\xe2\x84\xa6"
+		ohmExplained = b"U+2126 \xe2\x84\xa6"
+		self.ed.SetRepresentation(ohmSign, ohmExplained)
+		result = self.ed.GetRepresentation(ohmSign)
+		self.assertEquals(result, ohmExplained)
+
 class TestProperties(unittest.TestCase):
 
 	def setUp(self):

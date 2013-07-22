@@ -13,6 +13,9 @@
 #include <string>
 #include <vector>
 #include <map>
+#ifndef SCINTILLA_NO_UNORDERED_MAP
+#include <unordered_map>
+#endif
 
 #include "Platform.h"
 
@@ -34,6 +37,7 @@
 #include "ILexer.h"
 #include "CaseFolder.h"
 #include "Document.h"
+#include "UniConversion.h"
 #include "Selection.h"
 #include "PositionCache.h"
 
@@ -336,6 +340,62 @@ void LineLayoutCache::Dispose(LineLayout *ll) {
 	}
 }
 
+// Simply pack the (maximum 4) character bytes into an int
+static inline int KeyFromString(const char *charBytes, size_t len) {
+	PLATFORM_ASSERT(len <= 4);
+	int k=0;
+	for (size_t i=0; i<len && charBytes[i]; i++) {
+		k = k * 0x100;
+		k += charBytes[i];
+	}
+	return k;
+}
+
+SpecialRepresentations::SpecialRepresentations() {
+	std::fill(startByteHasReprs, startByteHasReprs+0x100, 0);
+}
+
+void SpecialRepresentations::SetRepresentation(const char *charBytes, const char *value) {
+	MapRepresentation::iterator it = mapReprs.find(KeyFromString(charBytes, UTF8MaxBytes));
+	if (it == mapReprs.end()) {
+		// New entry so increment for first byte
+		startByteHasReprs[static_cast<unsigned char>(charBytes[0])]++;
+	}
+	mapReprs[KeyFromString(charBytes, UTF8MaxBytes)] = value;
+}
+
+void SpecialRepresentations::ClearRepresentation(const char *charBytes) {
+	MapRepresentation::iterator it = mapReprs.find(KeyFromString(charBytes, UTF8MaxBytes));
+	if (it != mapReprs.end()) {
+		mapReprs.erase(it);
+		startByteHasReprs[static_cast<unsigned char>(charBytes[0])]--;
+	}
+}
+
+Representation *SpecialRepresentations::RepresentationFromCharacter(const char *charBytes, size_t len) {
+	PLATFORM_ASSERT(len <= 4);
+	if (!startByteHasReprs[static_cast<unsigned char>(charBytes[0])])
+		return 0;
+	MapRepresentation::iterator it = mapReprs.find(KeyFromString(charBytes, len));
+	if (it != mapReprs.end()) {
+		return &(it->second);
+	}
+	return 0;
+}
+
+bool SpecialRepresentations::Contains(const char *charBytes, size_t len) const {
+	PLATFORM_ASSERT(len <= 4);
+	if (!startByteHasReprs[static_cast<unsigned char>(charBytes[0])])
+		return false;
+	MapRepresentation::const_iterator it = mapReprs.find(KeyFromString(charBytes, len));
+	return it != mapReprs.end();
+}
+
+void SpecialRepresentations::Clear() {
+	mapReprs.clear();
+	std::fill(startByteHasReprs, startByteHasReprs+0x100, 0);
+}
+
 void BreakFinder::Insert(int val) {
 	if (val >= nextBreak) {
 		for (std::vector<int>::iterator it = selAndEdge.begin(); it != selAndEdge.end(); ++it) {
@@ -352,6 +412,7 @@ void BreakFinder::Insert(int val) {
 	}
 }
 
+/*
 extern bool BadUTF(const char *s, int len, int &trailBytes);
 
 static int NextBadU(const char *s, int p, int len, int &trailBytes) {
@@ -362,9 +423,10 @@ static int NextBadU(const char *s, int p, int len, int &trailBytes) {
 	}
 	return -1;
 }
+*/
 
 BreakFinder::BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posLineStart_,
-	int xStart, bool breakForSelection, Document *pdoc_) :
+	int xStart, bool breakForSelection, Document *pdoc_, SpecialRepresentations *preprs_) :
 	ll(ll_),
 	lineStart(lineStart_),
 	lineEnd(lineEnd_),
@@ -373,7 +435,8 @@ BreakFinder::BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posL
 	saeCurrentPos(0),
 	saeNext(0),
 	subBreak(-1),
-	pdoc(pdoc_) {
+	pdoc(pdoc_),
+	preprs(preprs_) {
 
 	// Search for first visible break
 	// First find the first visible character
@@ -401,14 +464,19 @@ BreakFinder::BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posL
 	Insert(ll->edgeColumn - 1);
 	Insert(lineEnd - 1);
 
-	if (pdoc && (SC_CP_UTF8 == pdoc->dbcsCodePage)) {
-		int trailBytes=0;
-		for (int pos = -1;;) {
-			pos = NextBadU(ll->chars, pos, lineEnd, trailBytes);
-			if (pos < 0)
-				break;
-			Insert(pos-1);
-			Insert(pos);
+	if (pdoc && preprs) {
+		EncodingFamily encodingFamily = pdoc->CodePageFamily();
+		for (int posRepr=0; posRepr<lineEnd;) {
+			int charWidth = 1;
+			if (encodingFamily == efUnicode)
+				charWidth = UTF8DrawBytes(reinterpret_cast<unsigned char *>(ll->chars) + posRepr, lineEnd - posRepr);
+			else if (encodingFamily == efDBCS)
+				charWidth = pdoc->IsDBCSLeadByte(ll->chars[posRepr]) ? 2 : 1;
+			if (preprs->Contains(ll->chars + posRepr, charWidth)) {
+				Insert(posRepr - 1);
+				Insert(posRepr + charWidth - 1);
+			}
+			posRepr += charWidth;
 		}
 	}
 	saeNext = (!selAndEdge.empty()) ? selAndEdge[0] : -1;

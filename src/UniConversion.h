@@ -34,6 +34,10 @@ inline bool UTF8IsAscii(int ch) {
 enum { UTF8MaskWidth=0x7, UTF8MaskInvalid=0x8 };
 int UTF8Classify(const unsigned char *us, int len);
 
+// Similar to UTF8Classify but returns a length of 1 for invalid bytes
+// instead of setting the invalid flag
+int UTF8DrawBytes(const unsigned char *us, int len);
+
 // Line separator is U+2028 \xe2\x80\xa8
 // Paragraph separator is U+2029 \xe2\x80\xa9
 const int UTF8SeparatorLength = 3;
