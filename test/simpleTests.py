@@ -490,6 +490,7 @@ class TestSimple(unittest.TestCase):
 		self.ed.AddText(5, b"a1b2c")
 		self.ed.SetSel(1,3)
 		self.ed.Cut()
+		self.xite.DoEvents()
 		self.assertEquals(self.ed.CanPaste(), 1)
 		self.ed.SetSel(0, 0)
 		self.ed.Paste()
@@ -504,6 +505,7 @@ class TestSimple(unittest.TestCase):
 		self.assertEquals(self.ed.Contents(), b"1c")
 
 	def testCopyAllowLine(self):
+		self.xite.DoEvents()
 		lineEndType = self.ed.EOLMode
 		self.ed.EOLMode = self.ed.SC_EOL_LF
 		self.ed.AddText(5, b"a1\nb2")
