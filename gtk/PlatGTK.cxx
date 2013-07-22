@@ -1053,8 +1053,10 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION 
 					}
 				}
 				if (positionsCalculated < 1 ) {
-					// Either Latin1 or DBCS conversion failed so treat as Latin1.
+					// Either 8-bit or DBCS conversion failed so treat as 8-bit.
 					SetConverter(PFont(font_)->characterSet);
+					const bool rtlCheck = PFont(font_)->characterSet == SC_CHARSET_HEBREW ||
+						PFont(font_)->characterSet == SC_CHARSET_ARABIC;
 					std::string utfForm = UTF8FromIconv(conv, s, len);
 					if (utfForm.empty()) {
 						utfForm = UTF8FromLatin1(s, len);
@@ -1062,13 +1064,23 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION 
 					pango_layout_set_text(layout, utfForm.c_str(), utfForm.length());
 					int i = 0;
 					int clusterStart = 0;
-					// Each Latin1 input character may take 1 or 2 bytes in UTF-8
+					// Each 8-bit input character may take 1 or 2 bytes in UTF-8
 					// and groups of up to 3 may be represented as ligatures.
 					ClusterIterator iti(layout, utfForm.length());
 					while (!iti.finished) {
 						iti.Next();
 						int clusterEnd = iti.curIndex;
 						int ligatureLength = g_utf8_strlen(utfForm.c_str() + clusterStart, clusterEnd - clusterStart);
+						if (rtlCheck && ((clusterEnd <= clusterStart) || (ligatureLength == 0) || (ligatureLength > 3))) {
+							// Something has gone wrong: exit quickly but pretend all the characters are equally spaced:
+							int widthLayout = 0;
+							pango_layout_get_size(layout, &widthLayout, NULL);
+							XYPOSITION widthTotal = doubleFromPangoUnits(widthLayout);
+							for (int bytePos=0;bytePos<lenPositions; bytePos++) {
+								positions[bytePos] = widthTotal / lenPositions * (bytePos + 1);
+							}
+							return;
+						}
 						PLATFORM_ASSERT(ligatureLength > 0 && ligatureLength <= 3);
 						for (int charInLig=0; charInLig<ligatureLength; charInLig++) {
 							positions[i++] = iti.position - (ligatureLength - 1 - charInLig) * iti.distance / ligatureLength;
