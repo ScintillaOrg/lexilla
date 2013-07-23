@@ -36,7 +36,7 @@ static void ColouriseNncrontabDoc(unsigned int startPos, int length, int, WordLi
 	char chNext = styler[startPos];
 	int lengthDoc = startPos + length;
 	// create a buffer large enough to take the largest chunk...
-	char *buffer = new char[length];
+	char *buffer = new char[length+1];
 	int bufferCount = 0;
 	// used when highliting environment variables inside quoted string:
 	bool insideString = false;

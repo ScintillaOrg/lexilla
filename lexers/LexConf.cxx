@@ -37,7 +37,7 @@ static void ColouriseConfDoc(unsigned int startPos, int length, int, WordList *k
 	char chNext = styler[startPos];
 	int lengthDoc = startPos + length;
 	// create a buffer large enough to take the largest chunk...
-	char *buffer = new char[length];
+	char *buffer = new char[length+1];
 	int bufferCount = 0;
 
 	// this assumes that we have 2 keyword list in conf.properties
