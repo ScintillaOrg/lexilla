@@ -21,8 +21,8 @@
 #import <QuartzCore/CAAnimation.h>
 #import <QuartzCore/CATransaction.h>
 
-#include "ScintillaView.h"
-#include "PlatCocoa.h"
+#import "ScintillaView.h"
+#import "PlatCocoa.h"
 
 using namespace Scintilla;
 

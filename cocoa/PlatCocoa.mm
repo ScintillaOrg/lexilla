@@ -12,9 +12,8 @@
  * This file is dual licensed under LGPL v2.1 and the Scintilla license (http://www.scintilla.org/License.txt).
  */
 
-#import <ScintillaView.h>
-
-#include "PlatCocoa.h"
+#import "ScintillaView.h"
+#import "PlatCocoa.h"
 
 #include <cstring>
 #include <cstdio>
@@ -22,6 +21,7 @@
 #include <assert.h>
 #include <sys/time.h>
 #include <stdexcept>
+#include <vector>
 #include <map>
 
 #include "XPM.h"
