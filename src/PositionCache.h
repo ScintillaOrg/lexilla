@@ -120,15 +120,11 @@ public:
 	}
 };
 
-#ifdef SCINTILLA_NO_UNORDERED_MAP
 typedef std::map<int, Representation> MapRepresentation;
-#else
-typedef std::unordered_map<int, Representation> MapRepresentation;
-#endif
 
 class SpecialRepresentations {
 	MapRepresentation mapReprs;
-	int startByteHasReprs[0x100];
+	short startByteHasReprs[0x100];
 public:
 	SpecialRepresentations();
 	void SetRepresentation(const char *charBytes, const char *value);

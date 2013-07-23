@@ -14,9 +14,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#ifndef SCINTILLA_NO_UNORDERED_MAP
-#include <unordered_map>
-#endif
 #include <algorithm>
 
 #include "Platform.h"
