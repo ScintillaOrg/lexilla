@@ -2132,7 +2132,7 @@ void ScintillaWin::ImeStartComposition() {
 			lf.lfItalic = static_cast<BYTE>(vs.styles[styleHere].italic ? 1 : 0);
 			lf.lfCharSet = DEFAULT_CHARSET;
 			lf.lfFaceName[0] = '\0';
-			if (vs.styles[styleHere].fontName)
+			if (vs.styles[styleHere].fontName && (strlen(vs.styles[styleHere].fontName) < sizeof(lf.lfFaceName)))
 				strcpy(lf.lfFaceName, vs.styles[styleHere].fontName);
 
 			::ImmSetCompositionFontA(hIMC, &lf);

@@ -200,6 +200,8 @@ Editor::Editor() {
 	theEdge = 0;
 
 	paintState = notPainting;
+	paintAbandonedByStyling = false;
+	paintingAllText = false;
 	willRedrawAll = false;
 
 	modEventMask = SC_MODEVENTMASKALL;
@@ -2500,11 +2502,9 @@ void Editor::DrawWrapMarker(Surface *surface, PRectangle rcPlace,
 	int w = rcPlace.right - rcPlace.left - xa - 1;
 
 	bool xStraight = isEndMarker;  // x-mirrored symbol for start marker
-	bool yStraight = true;
-	//bool yStraight= isEndMarker; // comment in for start marker y-mirrowed
 
 	int x0 = xStraight ? rcPlace.left : rcPlace.right - 1;
-	int y0 = yStraight ? rcPlace.top : rcPlace.bottom - 1;
+	int y0 = rcPlace.top;
 
 	int dy = (rcPlace.bottom - rcPlace.top) / 5;
 	int y = (rcPlace.bottom - rcPlace.top) / 2 + dy;
@@ -2522,7 +2522,7 @@ void Editor::DrawWrapMarker(Surface *surface, PRectangle rcPlace,
 			surface->LineTo(xBase + xDir * xRelative, yBase + yDir * yRelative);
 		}
 	};
-	Relative rel = {surface, x0, xStraight ? 1 : -1, y0, yStraight ? 1 : -1};
+	Relative rel = {surface, x0, xStraight ? 1 : -1, y0, 1};
 
 	// arrow head
 	rel.MoveTo(xa, y);
@@ -9151,6 +9151,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 				sel.selType = Selection::selStream;
 			}
 			InvalidateSelection(sel.RangeMain(), true);
+			break;
 		}
 	case SCI_GETSELECTIONMODE:
 		switch (sel.selType) {
