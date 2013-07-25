@@ -825,7 +825,7 @@ int Document::SafeSegment(const char *text, int length, int lengthSegment) const
 		return length;
 	int lastSpaceBreak = -1;
 	int lastPunctuationBreak = -1;
-	int lastEncodingAllowedBreak = -1;
+	int lastEncodingAllowedBreak = 0;
 	for (int j=0; j < lengthSegment;) {
 		unsigned char ch = static_cast<unsigned char>(text[j]);
 		if (j > 0) {
