@@ -1264,7 +1264,7 @@ int Platform::DBCSCharMaxLength()
 
 static QTime timer;
 
-ElapsedTime::ElapsedTime()
+ElapsedTime::ElapsedTime() : bigBit(0), littleBit(0)
 {
 	timer.start();
 }
