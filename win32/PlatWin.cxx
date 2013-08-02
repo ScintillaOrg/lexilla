@@ -1747,14 +1747,17 @@ void SurfaceD2D::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *
 	} else {
 
 		// May be more than one byte per position
-		int ui = 0;
+		unsigned int ui = 0;
+		FLOAT position = 0.0f;
 		for (int i=0;i<len;) {
+			if (ui < count)
+				position = poses.buffer[ui];
 			if (Platform::IsDBCSLeadByte(codePageText, s[i])) {
-				positions[i] = poses.buffer[ui];
-				positions[i+1] = poses.buffer[ui];
+				positions[i] = position;
+				positions[i+1] = position;
 				i += 2;
 			} else {
-				positions[i] = poses.buffer[ui];
+				positions[i] = position;
 				i++;
 			}
 
