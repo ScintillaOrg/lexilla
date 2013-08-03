@@ -626,7 +626,11 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 		::EndPaint(MainHWND(), pps);
 	if (paintState == paintAbandoned) {
 		// Painting area was insufficient to cover new styling or brace highlight positions
-		FullPaint();
+		if (IsOcxCtrl) {
+			FullPaintDC(pps->hdc);
+		} else {
+			FullPaint();
+		}
 	}
 	paintState = notPainting;
 
