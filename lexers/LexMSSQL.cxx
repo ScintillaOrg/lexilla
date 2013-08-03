@@ -287,7 +287,7 @@ static void FoldMSSQLDoc(unsigned int startPos, int length, int, WordList *[], A
 	int levelCurrent = levelPrev;
 	char chNext = styler[startPos];
 	bool inComment = (styler.StyleAt(startPos-1) == SCE_MSSQL_COMMENT);
-    char s[10];
+    char s[10] = "";
 	for (unsigned int i = startPos; i < endPos; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
