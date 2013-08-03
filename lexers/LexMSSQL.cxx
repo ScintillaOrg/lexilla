@@ -35,19 +35,6 @@ using namespace Scintilla;
 #define KW_MSSQL_STORED_PROCEDURES  5
 #define KW_MSSQL_OPERATORS          6
 
-static bool isMSSQLOperator(char ch) {
-	if (IsASCII(ch) && isalnum(ch))
-		return false;
-	// '.' left out as it is used to make up numbers
-	if (ch == '%' || ch == '^' || ch == '&' || ch == '*' ||
-        ch == '-' || ch == '+' || ch == '=' || ch == '|' ||
-        ch == '<' || ch == '>' || ch == '/' ||
-        ch == '!' || ch == '~' || ch == '(' || ch == ')' ||
-		ch == ',')
-		return true;
-	return false;
-}
-
 static char classifyWordSQL(unsigned int start,
                             unsigned int end,
                             WordList *keywordlists[],
@@ -220,7 +207,7 @@ static void ColouriseMSSQLDoc(unsigned int startPos, int length,
 				styler.ColourTo(i - 1, SCE_MSSQL_DEFAULT);
 				prevState = state;
 				state = SCE_MSSQL_COLUMN_NAME_2;
-			} else if (isMSSQLOperator(ch)) {
+			} else if (isoperator(ch)) {
 				styler.ColourTo(i - 1, SCE_MSSQL_DEFAULT);
 				styler.ColourTo(i, SCE_MSSQL_OPERATOR);
                 //~ style = SCE_MSSQL_DEFAULT;
