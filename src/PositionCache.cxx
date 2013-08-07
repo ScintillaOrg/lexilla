@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <algorithm>
 
 #include "Platform.h"
 
@@ -343,7 +344,7 @@ static inline int KeyFromString(const char *charBytes, size_t len) {
 	int k=0;
 	for (size_t i=0; i<len && charBytes[i]; i++) {
 		k = k * 0x100;
-		k += charBytes[i];
+		k += static_cast<unsigned char>(charBytes[i]);
 	}
 	return k;
 }
@@ -394,33 +395,15 @@ void SpecialRepresentations::Clear() {
 }
 
 void BreakFinder::Insert(int val) {
-	if (val >= nextBreak) {
-		for (std::vector<int>::iterator it = selAndEdge.begin(); it != selAndEdge.end(); ++it) {
-			if (val == *it) {
-				return;
-			}
-			if (val <*it) {
-				selAndEdge.insert(it, 1, val);
-				return;
-			}
+	if (val > nextBreak) {
+		const std::vector<int>::iterator it = std::lower_bound(selAndEdge.begin(), selAndEdge.end(), val);
+		if (it == selAndEdge.end()) {
+			selAndEdge.push_back(val);
+		} else if (*it != val) {
+			selAndEdge.insert(it, 1, val);
 		}
-		// Not less than any so append
-		selAndEdge.push_back(val);
 	}
 }
-
-/*
-extern bool BadUTF(const char *s, int len, int &trailBytes);
-
-static int NextBadU(const char *s, int p, int len, int &trailBytes) {
-	while (p < len) {
-		p++;
-		if (BadUTF(s + p, len - p, trailBytes))
-			return p;
-	}
-	return -1;
-}
-*/
 
 BreakFinder::BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posLineStart_,
 	int xStart, bool breakForSelection, Document *pdoc_, SpecialRepresentations *preprs_) :
@@ -433,11 +416,13 @@ BreakFinder::BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posL
 	saeNext(0),
 	subBreak(-1),
 	pdoc(pdoc_),
+	encodingFamily(pdoc_->CodePageFamily()),
 	preprs(preprs_) {
 
 	// Search for first visible break
 	// First find the first visible character
-	nextBreak = ll->FindBefore(xStart, lineStart, lineEnd);
+	if (xStart > 0.0f)
+		nextBreak = ll->FindBefore(xStart, lineStart, lineEnd);
 	// Now back to a style break
 	while ((nextBreak > lineStart) && (ll->styles[nextBreak] == ll->styles[nextBreak - 1])) {
 		nextBreak--;
@@ -451,79 +436,78 @@ BreakFinder::BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posL
 			SelectionSegment portion = ll->psel->Range(r).Intersect(segmentLine);
 			if (!(portion.start == portion.end)) {
 				if (portion.start.IsValid())
-					Insert(portion.start.Position() - posLineStart - 1);
+					Insert(portion.start.Position() - posLineStart);
 				if (portion.end.IsValid())
-					Insert(portion.end.Position() - posLineStart - 1);
+					Insert(portion.end.Position() - posLineStart);
 			}
 		}
 	}
 
-	Insert(ll->edgeColumn - 1);
-	Insert(lineEnd - 1);
-
-	if (pdoc && preprs) {
-		EncodingFamily encodingFamily = pdoc->CodePageFamily();
-		for (int posRepr=0; posRepr<lineEnd;) {
-			int charWidth = 1;
-			if (encodingFamily == efUnicode)
-				charWidth = UTF8DrawBytes(reinterpret_cast<unsigned char *>(ll->chars) + posRepr, lineEnd - posRepr);
-			else if (encodingFamily == efDBCS)
-				charWidth = pdoc->IsDBCSLeadByte(ll->chars[posRepr]) ? 2 : 1;
-			if (preprs->Contains(ll->chars + posRepr, charWidth)) {
-				Insert(posRepr - 1);
-				Insert(posRepr + charWidth - 1);
-			}
-			posRepr += charWidth;
-		}
-	}
+	Insert(ll->edgeColumn);
+	Insert(lineEnd);
 	saeNext = (!selAndEdge.empty()) ? selAndEdge[0] : -1;
 }
 
 BreakFinder::~BreakFinder() {
 }
 
-int BreakFinder::First() const {
-	return nextBreak;
-}
-
-int BreakFinder::Next() {
+TextSegment BreakFinder::Next() {
 	if (subBreak == -1) {
 		int prev = nextBreak;
-		while (nextBreak < lineEnd) {
-			if ((ll->styles[nextBreak] != ll->styles[nextBreak + 1]) ||
-					(nextBreak == saeNext) ||
-					IsControlCharacter(ll->chars[nextBreak]) || IsControlCharacter(ll->chars[nextBreak + 1])) {
-				if (nextBreak == saeNext) {
+ 		while (nextBreak < lineEnd) {
+			int charWidth = 1;
+			if (encodingFamily == efUnicode)
+				charWidth = UTF8DrawBytes(reinterpret_cast<unsigned char *>(ll->chars) + nextBreak, lineEnd - nextBreak);
+			else if (encodingFamily == efDBCS)
+				charWidth = pdoc->IsDBCSLeadByte(ll->chars[nextBreak]) ? 2 : 1;
+			Representation *repr = preprs->RepresentationFromCharacter(ll->chars + nextBreak, charWidth);
+			if ((ll->styles[nextBreak] != ll->styles[nextBreak - 1]) ||
+					repr ||
+					(nextBreak == saeNext)) {
+				while ((nextBreak >= saeNext) && (saeNext < lineEnd)) {
 					saeCurrentPos++;
-					saeNext = (saeCurrentPos < selAndEdge.size()) ? selAndEdge[saeCurrentPos] : -1;
+					saeNext = (saeCurrentPos < selAndEdge.size()) ? selAndEdge[saeCurrentPos] : lineEnd;
 				}
-				nextBreak++;
-				if ((nextBreak - prev) < lengthStartSubdivision) {
-					return nextBreak;
+				if ((nextBreak > prev) || repr) {
+					// Have a segment to report
+					if (nextBreak == prev) {
+						nextBreak += charWidth;
+					} else {
+						repr = 0;	// Optimize -> should remember repr
+					}
+					if ((nextBreak - prev) < lengthStartSubdivision) {
+						return TextSegment(prev, nextBreak - prev, repr);
+					} else {
+						break;
+					}
 				}
-				break;
 			}
-			nextBreak++;
+			nextBreak += charWidth;
 		}
 		if ((nextBreak - prev) < lengthStartSubdivision) {
-			return nextBreak;
+			return TextSegment(prev, nextBreak - prev);
 		}
 		subBreak = prev;
 	}
 	// Splitting up a long run from prev to nextBreak in lots of approximately lengthEachSubdivision.
 	// For very long runs add extra breaks after spaces or if no spaces before low punctuation.
+	int startSegment = subBreak;
 	if ((nextBreak - subBreak) <= lengthEachSubdivision) {
 		subBreak = -1;
-		return nextBreak;
+		return TextSegment(startSegment, nextBreak - startSegment);
 	} else {
 		subBreak += pdoc->SafeSegment(ll->chars + subBreak, nextBreak-subBreak, lengthEachSubdivision);
 		if (subBreak >= nextBreak) {
 			subBreak = -1;
-			return nextBreak;
+			return TextSegment(startSegment, nextBreak - startSegment);
 		} else {
-			return subBreak;
+			return TextSegment(startSegment, subBreak - startSegment);
 		}
 	}
+}
+
+bool BreakFinder::More() const {
+	return (subBreak >= 0) || (nextBreak < lineEnd);
 }
 
 PositionCacheEntry::PositionCacheEntry() :
