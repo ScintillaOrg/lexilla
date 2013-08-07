@@ -167,7 +167,7 @@ static void FoldAveDoc(unsigned int startPos, int length, int /* initStyle */, W
 	char chNext = static_cast<char>(tolower(styler[startPos]));
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	int styleNext = styler.StyleAt(startPos);
-	char s[10];
+	char s[10] = "";
 
 	for (unsigned int i = startPos; i < lengthDoc; i++) {
 		char ch = static_cast<char>(tolower(chNext));
