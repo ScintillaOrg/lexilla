@@ -2170,23 +2170,6 @@ LineLayout *Editor::RetrieveLineLayout(int lineNumber) {
 	        LinesOnScreen() + 1, pdoc->LinesTotal());
 }
 
-/*
-bool BadUTF(const char *s, int len, int &trailBytes) {
-	// For the rules: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
-	if (trailBytes) {
-		trailBytes--;
-		return false;
-	}
-	int utf8status = UTF8Classify(reinterpret_cast<const unsigned char *>(s), len);
-	if (utf8status & UTF8MaskInvalid) {
-		return true;
-	} else {
-		trailBytes = (utf8status & UTF8MaskWidth) - 1;
-		return false;
-	}
-}
-*/
-
 /**
  * Fill in the LineLayout data for the given line.
  * Copy the given @a line and its styles from the document into local arrays.
