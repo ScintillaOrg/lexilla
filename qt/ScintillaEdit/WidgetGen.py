@@ -71,9 +71,13 @@ def checkTypes(name, v):
 def arguments(v, stringResult, options):
 	ret = ""
 	p1Type = cppAlias(v["Param1Type"])
+	if p1Type == "int":
+		p1Type = "uptr_t"
 	if p1Type:
 		ret = ret + p1Type + " " + normalisedName(v["Param1Name"], options)
 	p2Type = cppAlias(v["Param2Type"])
+	if p2Type == "int":
+		p2Type = "sptr_t"
 	if p2Type and not stringResult:
 		if p1Type:
 			ret = ret + ", "
@@ -101,7 +105,9 @@ def printHFile(f, options):
 			if feat in ["fun", "get", "set"]:
 				if checkTypes(name, v):
 					constDeclarator = " const" if feat == "get" else ""
-					returnType = cppAlias(v["ReturnType"])
+					returnType = cppAlias(v["ReturnType"])					
+					if returnType == "int":
+						returnType = "sptr_t"
 					stringResult = v["Param2Type"] == "stringresult"
 					if stringResult:
 						returnType = "QByteArray"
@@ -130,6 +136,8 @@ def printCPPFile(f, options):
 					constDeclarator = " const" if feat == "get" else ""
 					featureDefineName = "SCI_" + name.upper()
 					returnType = cppAlias(v["ReturnType"])
+					if returnType == "int":
+						returnType = "sptr_t"
 					stringResult = v["Param2Type"] == "stringresult"
 					if stringResult:
 						returnType = "QByteArray"
