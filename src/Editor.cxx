@@ -232,6 +232,8 @@ Editor::Editor() {
 
 	llc.SetLevel(LineLayoutCache::llcCaret);
 	posCache.SetSize(0x400);
+
+	SetRepresentations();
 }
 
 Editor::~Editor() {
