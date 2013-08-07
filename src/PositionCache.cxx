@@ -461,7 +461,7 @@ TextSegment BreakFinder::Next() {
 			else if (encodingFamily == efDBCS)
 				charWidth = pdoc->IsDBCSLeadByte(ll->chars[nextBreak]) ? 2 : 1;
 			Representation *repr = preprs->RepresentationFromCharacter(ll->chars + nextBreak, charWidth);
-			if ((ll->styles[nextBreak] != ll->styles[nextBreak - 1]) ||
+			if (((nextBreak > 0) && (ll->styles[nextBreak] != ll->styles[nextBreak - 1])) ||
 					repr ||
 					(nextBreak == saeNext)) {
 				while ((nextBreak >= saeNext) && (saeNext < lineEnd)) {
