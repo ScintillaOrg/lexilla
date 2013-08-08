@@ -7681,6 +7681,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return vs.rightMarginWidth;
 
 	case SCI_SETMARGINLEFT:
+		lastXChosen += lParam - vs.leftMarginWidth;
 		vs.leftMarginWidth = lParam;
 		InvalidateStyleRedraw();
 		break;
@@ -8429,6 +8430,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		if (ValidMargin(wParam)) {
 			// Short-circuit if the width is unchanged, to avoid unnecessary redraw.
 			if (vs.ms[wParam].width != lParam) {
+				lastXChosen += lParam - vs.ms[wParam].width;
 				vs.ms[wParam].width = lParam;
 				InvalidateStyleRedraw();
 			}
