@@ -90,6 +90,8 @@ static int classifyWordCOBOL(unsigned int start, unsigned int end, /*WordList &k
     WordList& c_keywords = *keywordlists[2];
 
     char s[100];
+    s[0] = '\0';
+    s[1] = '\0';
     getRange(start, end, styler, s, sizeof(s));
 
     char chAttr = SCE_C_IDENTIFIER;

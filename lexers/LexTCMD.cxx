@@ -445,7 +445,7 @@ static void FoldTCMDDoc(unsigned int startPos, int length, int, WordList *[], Ac
 	int level = styler.LevelAt(line);
 	int levelIndent = 0;
 	unsigned int endPos = startPos + length;
-	char s[16];
+	char s[16] = "";
 
     char chPrev = styler.SafeGetCharAt(startPos - 1);
 
