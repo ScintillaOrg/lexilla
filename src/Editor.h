@@ -186,7 +186,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int printColourMode;
 	int printWrapState;
 	int cursorMode;
-	int controlCharSymbol;
 
 	// Highlight current folding block
 	HighlightDelimiter highlightDelimiter;

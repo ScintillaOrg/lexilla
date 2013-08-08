@@ -137,9 +137,12 @@ public:
 struct TextSegment {
 	int start;
 	int length;
-	Representation *repr;
-	TextSegment(int start_=0, int length_=0, Representation *repr_=0) :
-		start(start_), length(length_), repr(repr_) {
+	Representation *representation;
+	TextSegment(int start_=0, int length_=0, Representation *representation_=0) :
+		start(start_), length(length_), representation(representation_) {
+	}
+	int end() const {
+		return start + length;
 	}
 };
 

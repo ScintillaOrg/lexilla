@@ -112,7 +112,6 @@ Editor::Editor() {
 	printColourMode = SC_PRINT_NORMAL;
 	printWrapState = eWrapWord;
 	cursorMode = SC_CURSORNORMAL;
-	controlCharSymbol = 0;	/* Draw the control characters */
 
 	hasFocus = false;
 	hideSelection = false;
@@ -354,7 +353,7 @@ void Editor::RefreshStyleData() {
 		stylesValid = true;
 		AutoSurface surface(this);
 		if (surface) {
-			vs.Refresh(*surface);
+			vs.Refresh(*surface, pdoc->tabInChars);
 		}
 		SetScrollBars();
 		SetRectangularRange();
@@ -2275,63 +2274,52 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 
 		// Layout the line, determining the position of each character,
 		// with an extra element at the end for the end of the line.
-		int startseg = 0;	// Start of the current segment, in char. number
-		XYACCUMULATOR startsegx = 0;	// Start of the current segment, in pixels
 		ll->positions[0] = 0;
-		XYPOSITION tabWidth = vstyle.spaceWidth * pdoc->tabInChars;
 		bool lastSegItalics = false;
 
 		BreakFinder bfLayout(ll, 0, numCharsInLine, posLineStart, 0, false, pdoc, &reprs);
 		while (bfLayout.More()) {
 
-			TextSegment ts = bfLayout.Next();
-			startseg = ts.start;
+			const TextSegment ts = bfLayout.Next();
 
-			ll->positions[startseg] = 0;
-			if (vstyle.styles[ll->styles[startseg]].visible) {
-				if (ts.repr) {
-					if (ll->chars[startseg] == '\t') {
-						// Tab is a special case of repr, taking a variable amount of space
-						ll->positions[startseg + 1] =
-							((static_cast<int>((startsegx + 2) / tabWidth) + 1) * tabWidth) - startsegx;
-					} else if (controlCharSymbol < 32) {
-						XYPOSITION positionsRepr[256];	// Should expand when needed
-						posCache.MeasureWidths(surface, vstyle, STYLE_CONTROLCHAR, ts.repr->stringRep.c_str(),
-							static_cast<unsigned int>(ts.repr->stringRep.length()), positionsRepr, pdoc);
-						XYPOSITION endRepr = positionsRepr[ts.repr->stringRep.length()-1] + 3;
-						for (int ii=0; ii < ts.length; ii++)
-							ll->positions[startseg + 1 + ii] = endRepr;
+			std::fill(&ll->positions[ts.start+1], &ll->positions[ts.end()+1], 0.0f);
+			if (vstyle.styles[ll->styles[ts.start]].visible) {
+				if (ts.representation) {
+					XYPOSITION representationWidth = vstyle.controlCharWidth;
+					if (ll->chars[ts.start] == '\t') {
+						// Tab is a special case of representation, taking a variable amount of space
+						representationWidth =
+							((static_cast<int>((ll->positions[ts.start] + 2) / vstyle.tabWidth) + 1) * vstyle.tabWidth) - ll->positions[ts.start];
 					} else {
-						char cc[2] = { static_cast<char>(controlCharSymbol), '\0' };
-						surface->MeasureWidths(vstyle.styles[STYLE_CONTROLCHAR].font, cc, 1,
-							    ll->positions + startseg + 1);
- 					}
-					lastSegItalics = false;
+						if (representationWidth <= 0.0) {
+							XYPOSITION positionsRepr[256];	// Should expand when needed
+							posCache.MeasureWidths(surface, vstyle, STYLE_CONTROLCHAR, ts.representation->stringRep.c_str(),
+								static_cast<unsigned int>(ts.representation->stringRep.length()), positionsRepr, pdoc);
+							representationWidth = positionsRepr[ts.representation->stringRep.length()-1] + ctrlCharPadding;
+ 						}
+					}
+					for (int ii=0; ii < ts.length; ii++)
+						ll->positions[ts.start + 1 + ii] = representationWidth;
 				} else {
-					if ((ts.length == 1) && (' ' == ll->chars[startseg])) {
-						lastSegItalics = false;
+					if ((ts.length == 1) && (' ' == ll->chars[ts.start])) {
 						// Over half the segments are single characters and of these about half are space characters.
-						ll->positions[startseg + 1] = vstyle.styles[ll->styles[startseg]].spaceWidth;
+						ll->positions[ts.start + 1] = vstyle.styles[ll->styles[ts.start]].spaceWidth;
 					} else {
-						lastSegItalics = vstyle.styles[ll->styles[startseg]].italic;
-						posCache.MeasureWidths(surface, vstyle, ll->styles[startseg], ll->chars + startseg,
-							    ts.length, ll->positions + startseg + 1, pdoc);
+						posCache.MeasureWidths(surface, vstyle, ll->styles[ts.start], ll->chars + ts.start,
+							    ts.length, ll->positions + ts.start + 1, pdoc);
 					}
 				}
-			} else {    // invisible
-				for (int posToZero = startseg; posToZero <= (startseg + ts.length); posToZero++) {
-					ll->positions[posToZero] = 0;
-				}
+				lastSegItalics = (!ts.representation) && ((ll->chars[ts.end()-1] != ' ') && vstyle.styles[ll->styles[ts.start]].italic);
 			}
-			for (int posToIncrease = startseg; posToIncrease <= (startseg + ts.length); posToIncrease++) {
-				ll->positions[posToIncrease] += startsegx;
+
+			for (int posToIncrease = ts.start+1; posToIncrease <= ts.end(); posToIncrease++) {
+				ll->positions[posToIncrease] += ll->positions[ts.start];
 			}
-			startsegx = ll->positions[startseg + ts.length];
 		}
 
 		// Small hack to make lines that end with italics not cut off the edge of the last character
-		if ((startseg > 0) && lastSegItalics) {
-			ll->positions[startseg] += lastSegItalicsOffset;
+		if (lastSegItalics) {
+			ll->positions[numCharsInLine] += lastSegItalicsOffset;
 		}
 		ll->numCharsInLine = numCharsInLine;
 		ll->numCharsBeforeEOL = numCharsBeforeEOL;
@@ -2821,6 +2809,11 @@ void Editor::DrawAnnotation(Surface *surface, ViewStyle &vsDraw, int line, int x
 void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart,
         PRectangle rcLine, LineLayout *ll, int subLine) {
 
+	if (subLine >= ll->lines) {
+		DrawAnnotation(surface, vsDraw, line, xStart, rcLine, ll, subLine);
+		return; // No further drawing
+	}
+
 	PRectangle rcSegment = rcLine;
 
 	// Using one font for all control characters so it can be controlled independently to ensure
@@ -2867,21 +2860,17 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		}
 	}
 
-	bool drawWhitespaceBackground = (vsDraw.viewWhitespace != wsInvisible) &&
+	const bool drawWhitespaceBackground = (vsDraw.viewWhitespace != wsInvisible) &&
 	        (!overrideBackground) && (vsDraw.whitespaceBackgroundSet);
 
 	bool inIndentation = subLine == 0;	// Do not handle indentation except on first subline.
 	const XYPOSITION indentWidth = pdoc->IndentSize() * vsDraw.spaceWidth;
 	const XYPOSITION epsilon = 0.0001f;	// A small nudge to avoid floating point precision issues
 
-	int posLineStart = pdoc->LineStart(line);
+	const int posLineStart = pdoc->LineStart(line);
 
-	int startseg = ll->LineStart(subLine);
-	XYACCUMULATOR subLineStart = ll->positions[startseg];
-	if (subLine >= ll->lines) {
-		DrawAnnotation(surface, vsDraw, line, xStart, rcLine, ll, subLine);
-		return; // No further drawing
-	}
+	const int startseg = ll->LineStart(subLine);
+	const XYACCUMULATOR subLineStart = ll->positions[startseg];
 	int lineStart = 0;
 	int lineEnd = 0;
 	if (subLine < ll->lines) {
@@ -2892,9 +2881,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		}
 	}
 
-	ColourDesired wrapColour = vsDraw.styles[STYLE_DEFAULT].fore;
-	if (vsDraw.whitespaceForegroundSet)
-		wrapColour = vsDraw.whitespaceForeground;
+	const ColourDesired wrapColour = vsDraw.WrapColour();
 
 	bool drawWrapMarkEnd = false;
 
@@ -2941,76 +2928,76 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		}
 	}
 
-	bool selBackDrawn = vsDraw.selbackset &&
+	const bool selBackDrawn = vsDraw.selbackset &&
 		((vsDraw.selAlpha == SC_ALPHA_NOALPHA) || (vsDraw.selAdditionalAlpha == SC_ALPHA_NOALPHA));
 
 	// Does not take margin into account but not significant
-	int xStartVisible = static_cast<int>(subLineStart) - xStart;
+	const int xStartVisible = static_cast<int>(subLineStart) - xStart;
 
 	ll->psel = &sel;
 
-	BreakFinder bfBack(ll, lineStart, lineEnd, posLineStart, xStartVisible, selBackDrawn, pdoc, &reprs);
+	if (twoPhaseDraw) {
+		BreakFinder bfBack(ll, lineStart, lineEnd, posLineStart, xStartVisible, selBackDrawn, pdoc, &reprs);
 
-	// Background drawing loop
-	while (twoPhaseDraw && bfBack.More()) {
+		// Background drawing loop
+		while (bfBack.More()) {
 
-		TextSegment ts = bfBack.Next();
-		startseg = ts.start;
-		int i = ts.start + ts.length - 1;
-		int iDoc = i + posLineStart;
+			const TextSegment ts = bfBack.Next();
+			const int i = ts.end() - 1;
+			const int iDoc = i + posLineStart;
 
-		rcSegment.left = ll->positions[startseg] + xStart - subLineStart;
-		rcSegment.right = ll->positions[i + 1] + xStart - subLineStart;
-		// Only try to draw if really visible - enhances performance by not calling environment to
-		// draw strings that are completely past the right side of the window.
-		if ((rcSegment.left <= rcLine.right) && (rcSegment.right >= rcLine.left)) {
-			// Clip to line rectangle, since may have a huge position which will not work with some platforms
-			if (rcSegment.left < rcLine.left)
-				rcSegment.left = rcLine.left;
-			if (rcSegment.right > rcLine.right)
-				rcSegment.right = rcLine.right;
+			rcSegment.left = ll->positions[ts.start] + xStart - subLineStart;
+			rcSegment.right = ll->positions[ts.end()] + xStart - subLineStart;
+			// Only try to draw if really visible - enhances performance by not calling environment to
+			// draw strings that are completely past the right side of the window.
+			if (rcSegment.Intersects(rcLine)) {
+				// Clip to line rectangle, since may have a huge position which will not work with some platforms
+				if (rcSegment.left < rcLine.left)
+					rcSegment.left = rcLine.left;
+				if (rcSegment.right > rcLine.right)
+					rcSegment.right = rcLine.right;
 
-			int styleMain = ll->styles[i];
-			const int inSelection = hideSelection ? 0 : sel.CharacterInSelection(iDoc);
-			bool inHotspot = (ll->hsStart != -1) && (iDoc >= ll->hsStart) && (iDoc < ll->hsEnd);
-			ColourDesired textBack = TextBackground(vsDraw, overrideBackground, background, inSelection, inHotspot, styleMain, i, ll);
-			if (ll->chars[i] == '\t') {
-				// Tab display
-				if (drawWhitespaceBackground &&
-				        (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways))
-					textBack = vsDraw.whitespaceBackground;
-				surface->FillRectangle(rcSegment, textBack);
-			} else if (IsControlCharacter(ll->chars[i])) {
-				// Control character display
-				inIndentation = false;
-				surface->FillRectangle(rcSegment, textBack);
-			} else {
-				// Normal text display
-				surface->FillRectangle(rcSegment, textBack);
-				if (vsDraw.viewWhitespace != wsInvisible ||
-				        (inIndentation && vsDraw.viewIndentationGuides == ivReal)) {
-					for (int cpos = 0; cpos <= i - startseg; cpos++) {
-						if (ll->chars[cpos + startseg] == ' ') {
-							if (drawWhitespaceBackground &&
-							        (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways)) {
-								PRectangle rcSpace(ll->positions[cpos + startseg] + xStart - subLineStart,
-									rcSegment.top,
-									ll->positions[cpos + startseg + 1] + xStart - subLineStart,
-									rcSegment.bottom);
-								surface->FillRectangle(rcSpace, vsDraw.whitespaceBackground);
+				const int inSelection = hideSelection ? 0 : sel.CharacterInSelection(iDoc);
+				const bool inHotspot = (ll->hsStart != -1) && (iDoc >= ll->hsStart) && (iDoc < ll->hsEnd);
+				ColourDesired textBack = TextBackground(vsDraw, overrideBackground, background, inSelection,
+					inHotspot, ll->styles[i], i, ll);
+				if (ts.representation) {
+					if (ll->chars[i] == '\t') {
+						// Tab display
+						if (drawWhitespaceBackground &&
+								(!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways))
+							textBack = vsDraw.whitespaceBackground;
+					} else {
+						// Blob display
+						inIndentation = false;
+					}
+					surface->FillRectangle(rcSegment, textBack);
+				} else {
+					// Normal text display
+					surface->FillRectangle(rcSegment, textBack);
+					if (vsDraw.viewWhitespace != wsInvisible ||
+							(inIndentation && vsDraw.viewIndentationGuides == ivReal)) {
+						for (int cpos = 0; cpos <= i - ts.start; cpos++) {
+							if (ll->chars[cpos + ts.start] == ' ') {
+								if (drawWhitespaceBackground &&
+										(!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways)) {
+									PRectangle rcSpace(ll->positions[cpos + ts.start] + xStart - subLineStart,
+										rcSegment.top,
+										ll->positions[cpos + ts.start + 1] + xStart - subLineStart,
+										rcSegment.bottom);
+									surface->FillRectangle(rcSpace, vsDraw.whitespaceBackground);
+								}
+							} else {
+								inIndentation = false;
 							}
-						} else {
-							inIndentation = false;
 						}
 					}
 				}
+			} else if (rcSegment.left > rcLine.right) {
+				break;
 			}
-		} else if (rcSegment.left > rcLine.right) {
-			break;
 		}
-	}
 
-	if (twoPhaseDraw) {
 		DrawEOL(surface, vsDraw, rcLine, ll, line, lineEnd,
 		        xStart, subLine, subLineStart, overrideBackground, background,
 		        drawWrapMarkEnd, wrapColour);
@@ -3047,16 +3034,15 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 
 	while (bfFore.More()) {
 
-		TextSegment ts = bfFore.Next();
-		startseg = ts.start;
-		int i = ts.start + ts.length - 1;
-		int iDoc = i + posLineStart;
+		const TextSegment ts = bfFore.Next();
+		const int i = ts.end() - 1;
+		const int iDoc = i + posLineStart;
 
-		rcSegment.left = ll->positions[startseg] + xStart - subLineStart;
-		rcSegment.right = ll->positions[i + 1] + xStart - subLineStart;
+		rcSegment.left = ll->positions[ts.start] + xStart - subLineStart;
+		rcSegment.right = ll->positions[ts.end()] + xStart - subLineStart;
 		// Only try to draw if really visible - enhances performance by not calling environment to
 		// draw strings that are completely past the right side of the window.
-		if ((rcSegment.left <= rcLine.right) && (rcSegment.right >= rcLine.left)) {
+		if (rcSegment.Intersects(rcLine)) {
 			int styleMain = ll->styles[i];
 			ColourDesired textFore = vsDraw.styles[styleMain].fore;
 			Font &textFont = vsDraw.styles[styleMain].font;
@@ -3069,75 +3055,77 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 			if (inSelection && (vsDraw.selforeset)) {
 				textFore = (inSelection == 1) ? vsDraw.selforeground : vsDraw.selAdditionalForeground;
 			}
-			bool inHotspot = (ll->hsStart != -1) && (iDoc >= ll->hsStart) && (iDoc < ll->hsEnd);
+			const bool inHotspot = (ll->hsStart != -1) && (iDoc >= ll->hsStart) && (iDoc < ll->hsEnd);
 			ColourDesired textBack = TextBackground(vsDraw, overrideBackground, background, inSelection, inHotspot, styleMain, i, ll);
-			if (ll->chars[i] == '\t') {
-				// Tab display
-				if (!twoPhaseDraw) {
-					if (drawWhitespaceBackground &&
-					        (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways))
-						textBack = vsDraw.whitespaceBackground;
-					surface->FillRectangle(rcSegment, textBack);
-				}
-				if (inIndentation && vsDraw.viewIndentationGuides == ivReal) {
-					for (int indentCount = (ll->positions[i] + epsilon) / indentWidth;
-						indentCount <= (ll->positions[i + 1] - epsilon) / indentWidth;
-						indentCount++) {
-						if (indentCount > 0) {
-							int xIndent = indentCount * indentWidth;
-							DrawIndentGuide(surface, lineVisible, vsDraw.lineHeight, xIndent + xStart, rcSegment,
-								    (ll->xHighlightGuide == xIndent));
+			if (ts.representation) {
+				if (ll->chars[i] == '\t') {
+					// Tab display
+					if (!twoPhaseDraw) {
+						if (drawWhitespaceBackground &&
+								(!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways))
+							textBack = vsDraw.whitespaceBackground;
+						surface->FillRectangle(rcSegment, textBack);
+					}
+					if (inIndentation && vsDraw.viewIndentationGuides == ivReal) {
+						for (int indentCount = (ll->positions[i] + epsilon) / indentWidth;
+							indentCount <= (ll->positions[i + 1] - epsilon) / indentWidth;
+							indentCount++) {
+							if (indentCount > 0) {
+								int xIndent = indentCount * indentWidth;
+								DrawIndentGuide(surface, lineVisible, vsDraw.lineHeight, xIndent + xStart, rcSegment,
+										(ll->xHighlightGuide == xIndent));
+							}
 						}
 					}
-				}
-				if (vsDraw.viewWhitespace != wsInvisible) {
-					if (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways) {
-						if (vsDraw.whitespaceForegroundSet)
-							textFore = vsDraw.whitespaceForeground;
-						surface->PenColour(textFore);
-						PRectangle rcTab(rcSegment.left + 1, rcSegment.top + 4,
-						        rcSegment.right - 1, rcSegment.bottom - vsDraw.maxDescent);
-						DrawTabArrow(surface, rcTab, rcSegment.top + vsDraw.lineHeight / 2);
+					if (vsDraw.viewWhitespace != wsInvisible) {
+						if (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways) {
+							if (vsDraw.whitespaceForegroundSet)
+								textFore = vsDraw.whitespaceForeground;
+							surface->PenColour(textFore);
+							PRectangle rcTab(rcSegment.left + 1, rcSegment.top + 4,
+									rcSegment.right - 1, rcSegment.bottom - vsDraw.maxDescent);
+							DrawTabArrow(surface, rcTab, rcSegment.top + vsDraw.lineHeight / 2);
+						}
 					}
-				}
-			} else if (ts.repr) {
-				inIndentation = false;
-				if (controlCharSymbol < 32) {
-					DrawTextBlob(surface, vsDraw, rcSegment, ts.repr->stringRep.c_str(), textBack, textFore, twoPhaseDraw);
 				} else {
-					char cc[2] = { static_cast<char>(controlCharSymbol), '\0' };
-					surface->DrawTextNoClip(rcSegment, ctrlCharsFont,
-					        rcSegment.top + vsDraw.maxAscent,
-					        cc, 1, textBack, textFore);
+					inIndentation = false;
+					if (vsDraw.controlCharSymbol >= 32) {
+						char cc[2] = { static_cast<char>(vsDraw.controlCharSymbol), '\0' };
+						surface->DrawTextNoClip(rcSegment, ctrlCharsFont,
+								rcSegment.top + vsDraw.maxAscent,
+								cc, 1, textBack, textFore);
+					} else {
+						DrawTextBlob(surface, vsDraw, rcSegment, ts.representation->stringRep.c_str(), textBack, textFore, twoPhaseDraw);
+					}
 				}
 			} else {
 				// Normal text display
 				if (vsDraw.styles[styleMain].visible) {
 					if (twoPhaseDraw) {
 						surface->DrawTextTransparent(rcSegment, textFont,
-						        rcSegment.top + vsDraw.maxAscent, ll->chars + startseg,
-						        i - startseg + 1, textFore);
+						        rcSegment.top + vsDraw.maxAscent, ll->chars + ts.start,
+						        i - ts.start + 1, textFore);
 					} else {
 						surface->DrawTextNoClip(rcSegment, textFont,
-						        rcSegment.top + vsDraw.maxAscent, ll->chars + startseg,
-						        i - startseg + 1, textFore, textBack);
+						        rcSegment.top + vsDraw.maxAscent, ll->chars + ts.start,
+						        i - ts.start + 1, textFore, textBack);
 					}
 				}
 				if (vsDraw.viewWhitespace != wsInvisible ||
 				        (inIndentation && vsDraw.viewIndentationGuides != ivNone)) {
-					for (int cpos = 0; cpos <= i - startseg; cpos++) {
-						if (ll->chars[cpos + startseg] == ' ') {
+					for (int cpos = 0; cpos <= i - ts.start; cpos++) {
+						if (ll->chars[cpos + ts.start] == ' ') {
 							if (vsDraw.viewWhitespace != wsInvisible) {
 								if (vsDraw.whitespaceForegroundSet)
 									textFore = vsDraw.whitespaceForeground;
 								if (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways) {
-									XYPOSITION xmid = (ll->positions[cpos + startseg] + ll->positions[cpos + startseg + 1]) / 2;
+									XYPOSITION xmid = (ll->positions[cpos + ts.start] + ll->positions[cpos + ts.start + 1]) / 2;
 									if (!twoPhaseDraw && drawWhitespaceBackground &&
 									        (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways)) {
 										textBack = vsDraw.whitespaceBackground;
-										PRectangle rcSpace(ll->positions[cpos + startseg] + xStart - subLineStart,
+										PRectangle rcSpace(ll->positions[cpos + ts.start] + xStart - subLineStart,
 											rcSegment.top,
-											ll->positions[cpos + startseg + 1] + xStart - subLineStart,
+											ll->positions[cpos + ts.start + 1] + xStart - subLineStart,
 											rcSegment.bottom);
 										surface->FillRectangle(rcSpace, textBack);
 									}
@@ -3148,8 +3136,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 								}
 							}
 							if (inIndentation && vsDraw.viewIndentationGuides == ivReal) {
-								for (int indentCount = (ll->positions[cpos + startseg] + epsilon) / indentWidth;
-									indentCount <= (ll->positions[cpos + startseg + 1] - epsilon) / indentWidth;
+								for (int indentCount = (ll->positions[cpos + ts.start] + epsilon) / indentWidth;
+									indentCount <= (ll->positions[cpos + ts.start + 1] - epsilon) / indentWidth;
 									indentCount++) {
 									if (indentCount > 0) {
 										int xIndent = indentCount * indentWidth;
@@ -3854,14 +3842,14 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 	vsPrint.leftMarginWidth = 0;
 	vsPrint.rightMarginWidth = 0;
 
-	vsPrint.Refresh(*surfaceMeasure);
+	vsPrint.Refresh(*surfaceMeasure, pdoc->tabInChars);
 	// Determining width must hapen after fonts have been realised in Refresh
 	int lineNumberWidth = 0;
 	if (lineNumberIndex >= 0) {
 		lineNumberWidth = surfaceMeasure->WidthText(vsPrint.styles[STYLE_LINENUMBER].font,
 		        "99999" lineNumberPrintSpace, 5 + istrlen(lineNumberPrintSpace));
 		vsPrint.ms[lineNumberIndex].width = lineNumberWidth;
-		vsPrint.Refresh(*surfaceMeasure);	// Recalculate fixedColumnWidth
+		vsPrint.Refresh(*surfaceMeasure, pdoc->tabInChars);	// Recalculate fixedColumnWidth
 	}
 
 	int linePrintStart = pdoc->LineFromPosition(pfr->chrg.cpMin);
@@ -9173,11 +9161,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return cursorMode;
 
 	case SCI_SETCONTROLCHARSYMBOL:
-		controlCharSymbol = wParam;
+		vs.controlCharSymbol = wParam;
+		InvalidateStyleRedraw();
 		break;
 
 	case SCI_GETCONTROLCHARSYMBOL:
-		return controlCharSymbol;
+		return vs.controlCharSymbol;
 
 	case SCI_SETREPRESENTATION:
 		reprs.SetRepresentation(reinterpret_cast<const char *>(wParam), CharPtrFromSPtr(lParam));

@@ -131,6 +131,8 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	whitespaceForeground = source.whitespaceForeground;
 	whitespaceBackgroundSet = source.whitespaceBackgroundSet;
 	whitespaceBackground = source.whitespaceBackground;
+	controlCharSymbol = source.controlCharSymbol;
+	controlCharWidth = source.controlCharWidth;
 	selbar = source.selbar;
 	selbarlight = source.selbarlight;
 	caretcolour = source.caretcolour;
@@ -204,6 +206,7 @@ void ViewStyle::Init(size_t stylesSize_) {
 	maxDescent = 1;
 	aveCharWidth = 8;
 	spaceWidth = 8;
+	tabWidth = spaceWidth * 8;
 
 	selforeset = false;
 	selforeground = ColourDesired(0xff, 0, 0);
@@ -225,6 +228,8 @@ void ViewStyle::Init(size_t stylesSize_) {
 	whitespaceForeground = ColourDesired(0, 0, 0);
 	whitespaceBackgroundSet = false;
 	whitespaceBackground = ColourDesired(0xff, 0xff, 0xff);
+	controlCharSymbol = 0;	/* Draw the control characters */
+	controlCharWidth = 0;
 	selbar = Platform::Chrome();
 	selbarlight = Platform::ChromeHighlight();
 	styles[STYLE_LINENUMBER].fore = ColourDesired(0, 0, 0);
@@ -286,7 +291,7 @@ void ViewStyle::Init(size_t stylesSize_) {
 	braceBadLightIndicator = 0;
 }
 
-void ViewStyle::Refresh(Surface &surface) {
+void ViewStyle::Refresh(Surface &surface, int tabInChars) {
 	for (FontMap::iterator it = fonts.begin(); it != fonts.end(); ++it) {
 		delete it->second;
 	}
@@ -332,6 +337,12 @@ void ViewStyle::Refresh(Surface &surface) {
 
 	aveCharWidth = styles[STYLE_DEFAULT].aveCharWidth;
 	spaceWidth = styles[STYLE_DEFAULT].spaceWidth;
+	tabWidth = spaceWidth * tabInChars;
+
+	controlCharWidth = 0.0;
+	if (controlCharSymbol >= 32) {
+		controlCharWidth = surface.WidthChar(styles[STYLE_CONTROLCHAR].font, controlCharSymbol);
+	}
 
 	fixedColumnWidth = marginInside ? leftMarginWidth : 0;
 	maskInLine = 0xffffffff;
@@ -407,6 +418,13 @@ void ViewStyle::CalcLargestMarkerHeight() {
 			break;
 		}
 	}
+}
+
+ColourDesired ViewStyle::WrapColour() const {
+	if (whitespaceForegroundSet)
+		return whitespaceForeground;
+	else
+		return styles[STYLE_DEFAULT].fore;
 }
 
 void ViewStyle::AllocStyles(size_t sizeNew) {

@@ -73,6 +73,7 @@ public:
 	unsigned int maxDescent;
 	XYPOSITION aveCharWidth;
 	XYPOSITION spaceWidth;
+	XYPOSITION tabWidth;
 	bool selforeset;
 	ColourDesired selforeground;
 	ColourDesired selAdditionalForeground;
@@ -87,6 +88,8 @@ public:
 	ColourDesired whitespaceForeground;
 	bool whitespaceBackgroundSet;
 	ColourDesired whitespaceBackground;
+	int controlCharSymbol;
+	XYPOSITION controlCharWidth;
 	ColourDesired selbar;
 	ColourDesired selbarlight;
 	bool foldmarginColourSet;
@@ -139,7 +142,7 @@ public:
 	ViewStyle(const ViewStyle &source);
 	~ViewStyle();
 	void Init(size_t stylesSize_=64);
-	void Refresh(Surface &surface);
+	void Refresh(Surface &surface, int tabInChars);
 	void ReleaseAllExtendedStyles();
 	int AllocateExtendedStyles(int numberStyles);
 	void EnsureStyle(size_t index);
@@ -149,6 +152,8 @@ public:
 	bool ProtectionActive() const;
 	bool ValidStyle(size_t styleIndex) const;
 	void CalcLargestMarkerHeight();
+	ColourDesired WrapColour() const;
+
 private:
 	void AllocStyles(size_t sizeNew);
 	void CreateFont(const FontSpecification &fs);
