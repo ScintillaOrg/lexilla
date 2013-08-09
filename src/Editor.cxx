@@ -101,6 +101,12 @@ static inline bool IsAllSpacesOrTabs(char *s, unsigned int len) {
 	return true;
 }
 
+PrintParameters::PrintParameters() {
+	magnification = 0;
+	colourMode = SC_PRINT_NORMAL;
+	wrapState = eWrapWord;
+}
+
 Editor::Editor() {
 	ctrlID = 0;
 
@@ -108,9 +114,6 @@ Editor::Editor() {
 	technology = SC_TECHNOLOGY_DEFAULT;
 	scaleRGBAImage = 100;
 
-	printMagnification = 0;
-	printColourMode = SC_PRINT_NORMAL;
-	printWrapState = eWrapWord;
 	cursorMode = SC_CURSORNORMAL;
 
 	hasFocus = false;
@@ -196,8 +199,6 @@ Editor::Editor() {
 	bracesMatchStyle = STYLE_BRACEBAD;
 	highlightGuideColumn = 0;
 
-	theEdge = 0;
-
 	paintState = notPainting;
 	paintAbandonedByStyling = false;
 	paintingAllText = false;
@@ -213,18 +214,9 @@ Editor::Editor() {
 	foldFlags = 0;
 	foldAutomatic = 0;
 
-	wrapState = eWrapNone;
 	wrapWidth = LineLayout::wrapWidthInfinite;
-	wrapVisualFlags = 0;
-	wrapVisualFlagsLocation = 0;
-	wrapVisualStartIndent = 0;
-	wrapIndentMode = SC_WRAPINDENT_FIXED;
 
 	convertPastes = true;
-
-	marginNumberPadding = 3;
-	ctrlCharPadding = 3; // +3 For a blank on front and rounded edge each side
-	lastSegItalicsOffset = 2;
 
 	hsStart = -1;
 	hsEnd = -1;
@@ -1103,7 +1095,7 @@ void Editor::HorizontalScrollTo(int xPos) {
 	//Platform::DebugPrintf("HorizontalScroll %d\n", xPos);
 	if (xPos < 0)
 		xPos = 0;
-	if ((wrapState == eWrapNone) && (xOffset != xPos)) {
+	if (!Wrapping() && (xOffset != xPos)) {
 		xOffset = xPos;
 		ContainerNeedsUpdate(SC_UPDATE_H_SCROLL);
 		SetHorizontalScrollPos();
@@ -1397,7 +1389,7 @@ Editor::XYScrollPosition Editor::XYScrollToMakeVisible(const SelectionRange rang
 	}
 
 	// Horizontal positioning
-	if ((options & xysHorizontal) && (wrapState == eWrapNone)) {
+	if ((options & xysHorizontal) && !Wrapping()) {
 		const int halfScreen = Platform::Maximum(rcClient.Width() - 4, 4) / 2;
 		const bool bSlop = (caretXPolicy & CARET_SLOP) != 0;
 		const bool bStrict = (caretXPolicy & CARET_STRICT) != 0;
@@ -1584,13 +1576,17 @@ void Editor::InvalidateCaret() {
 void Editor::UpdateSystemCaret() {
 }
 
+bool Editor::Wrapping() const {
+	return vs.wrapState != eWrapNone;
+}
+
 void Editor::NeedWrapping(int docLineStart, int docLineEnd) {
 //Platform::DebugPrintf("\nNeedWrapping: %0d..%0d\n", docLineStart, docLineEnd);
 	if (wrapPending.AddRange(docLineStart, docLineEnd)) {
 		llc.Invalidate(LineLayout::llPositions);
 	}
 	// Wrap lines during idle.
-	if ((wrapState != eWrapNone) && wrapPending.NeedsWrap()) {
+	if (Wrapping() && wrapPending.NeedsWrap()) {
 		SetIdle(true);
 	}
 }
@@ -1614,7 +1610,7 @@ bool Editor::WrapOneLine(Surface *surface, int lineToWrap) {
 bool Editor::WrapLines(enum wrapScope ws) {
 	int goodTopLine = topLine;
 	bool wrapOccurred = false;
-	if (wrapState == eWrapNone) {
+	if (!Wrapping()) {
 		if (wrapWidth != LineLayout::wrapWidthInfinite) {
 			wrapWidth = LineLayout::wrapWidthInfinite;
 			for (int lineDoc = 0; lineDoc < pdoc->LinesTotal(); lineDoc++) {
@@ -2074,13 +2070,13 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 						PRectangle rcNumber = rcMarker;
 						// Right justify
 						XYPOSITION width = surface->WidthText(vs.styles[STYLE_LINENUMBER].font, number, istrlen(number));
-						XYPOSITION xpos = rcNumber.right - width - marginNumberPadding;
+						XYPOSITION xpos = rcNumber.right - width - vs.marginNumberPadding;
 						rcNumber.left = xpos;
 						surface->DrawTextNoClip(rcNumber, vs.styles[STYLE_LINENUMBER].font,
 								rcNumber.top + vs.maxAscent, number, istrlen(number),
 								vs.styles[STYLE_LINENUMBER].fore,
 								vs.styles[STYLE_LINENUMBER].back);
-					} else if (wrapVisualFlags & SC_WRAPVISUALFLAG_MARGIN) {
+					} else if (vs.wrapVisualFlags & SC_WRAPVISUALFLAG_MARGIN) {
 						PRectangle rcWrapMarker = rcMarker;
 						rcWrapMarker.right -= 3;
 						rcWrapMarker.left = rcWrapMarker.right - vs.styles[STYLE_LINENUMBER].aveCharWidth;
@@ -2177,6 +2173,7 @@ LineLayout *Editor::RetrieveLineLayout(int lineNumber) {
  * Also determine the x position at which each character starts.
  */
 void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayout *ll, int width) {
+//void LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayout *ll, int width, Document *pdoc, PositionCache &posCache, SpecialRepresentations &reprs) {
 	if (!ll)
 		return;
 
@@ -2233,7 +2230,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 		ll->widthLine = LineLayout::wrapWidthInfinite;
 		ll->lines = 1;
 		if (vstyle.edgeState == EDGE_BACKGROUND) {
-			ll->edgeColumn = pdoc->FindColumn(line, theEdge);
+			ll->edgeColumn = pdoc->FindColumn(line, vstyle.theEdge);
 			if (ll->edgeColumn >= posLineStart) {
 				ll->edgeColumn -= posLineStart;
 			}
@@ -2295,7 +2292,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 							XYPOSITION positionsRepr[256];	// Should expand when needed
 							posCache.MeasureWidths(surface, vstyle, STYLE_CONTROLCHAR, ts.representation->stringRep.c_str(),
 								static_cast<unsigned int>(ts.representation->stringRep.length()), positionsRepr, pdoc);
-							representationWidth = positionsRepr[ts.representation->stringRep.length()-1] + ctrlCharPadding;
+							representationWidth = positionsRepr[ts.representation->stringRep.length()-1] + vstyle.ctrlCharPadding;
  						}
 					}
 					for (int ii=0; ii < ts.length; ii++)
@@ -2319,7 +2316,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 
 		// Small hack to make lines that end with italics not cut off the edge of the last character
 		if (lastSegItalics) {
-			ll->positions[numCharsInLine] += lastSegItalicsOffset;
+			ll->positions[numCharsInLine] += vstyle.lastSegItalicsOffset;
 		}
 		ll->numCharsInLine = numCharsInLine;
 		ll->numCharsBeforeEOL = numCharsBeforeEOL;
@@ -2337,17 +2334,17 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 			// Simple common case where line does not need wrapping.
 			ll->lines = 1;
 		} else {
-			if (wrapVisualFlags & SC_WRAPVISUALFLAG_END) {
+			if (vstyle.wrapVisualFlags & SC_WRAPVISUALFLAG_END) {
 				width -= static_cast<int>(vstyle.aveCharWidth); // take into account the space for end wrap mark
 			}
 			XYPOSITION wrapAddIndent = 0; // This will be added to initial indent of line
-			if (wrapIndentMode == SC_WRAPINDENT_INDENT) {
+			if (vstyle.wrapIndentMode == SC_WRAPINDENT_INDENT) {
 				wrapAddIndent = pdoc->IndentSize() * vstyle.spaceWidth;
-			} else if (wrapIndentMode == SC_WRAPINDENT_FIXED) {
-				wrapAddIndent = wrapVisualStartIndent * vstyle.aveCharWidth;
+			} else if (vstyle.wrapIndentMode == SC_WRAPINDENT_FIXED) {
+				wrapAddIndent = vstyle.wrapVisualStartIndent * vstyle.aveCharWidth;
 			}
 			ll->wrapIndent = wrapAddIndent;
-			if (wrapIndentMode != SC_WRAPINDENT_FIXED)
+			if (vstyle.wrapIndentMode != SC_WRAPINDENT_FIXED)
 				for (int i = 0; i < ll->numCharsInLine; i++) {
 					if (!IsSpaceOrTab(ll->chars[i])) {
 						ll->wrapIndent += ll->positions[i]; // Add line indent
@@ -2358,7 +2355,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 			if (ll->wrapIndent > width - static_cast<int>(vstyle.aveCharWidth) * 15)
 				ll->wrapIndent = wrapAddIndent;
 			// Check for wrapIndent minimum
-			if ((wrapVisualFlags & SC_WRAPVISUALFLAG_START) && (ll->wrapIndent < vstyle.aveCharWidth))
+			if ((vstyle.wrapVisualFlags & SC_WRAPVISUALFLAG_START) && (ll->wrapIndent < vstyle.aveCharWidth))
 				ll->wrapIndent = vstyle.aveCharWidth; // Indent to show start visual
 			ll->lines = 0;
 			// Calculate line start positions based upon width.
@@ -2390,7 +2387,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 					continue;
 				}
 				if (p > 0) {
-					if (wrapState == eWrapChar) {
+					if (vstyle.wrapState == eWrapChar) {
 						lastGoodBreak = pdoc->MovePositionOutsideChar(p + posLineStart, -1)
 						        - posLineStart;
 						p = pdoc->MovePositionOutsideChar(p + 1 + posLineStart, 1) - posLineStart;
@@ -2653,7 +2650,7 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 	if (drawWrapMarkEnd) {
 		PRectangle rcPlace = rcSegment;
 
-		if (wrapVisualFlagsLocation & SC_WRAPVISUALFLAGLOC_END_BY_TEXT) {
+		if (vsDraw.wrapVisualFlagsLocation & SC_WRAPVISUALFLAGLOC_END_BY_TEXT) {
 			rcPlace.left = xEol + xStart + virtualSpace;
 			rcPlace.right = rcPlace.left + vsDraw.aveCharWidth;
 		} else {
@@ -2885,7 +2882,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 
 	bool drawWrapMarkEnd = false;
 
-	if (wrapVisualFlags & SC_WRAPVISUALFLAG_END) {
+	if (vsDraw.wrapVisualFlags & SC_WRAPVISUALFLAG_END) {
 		if (subLine + 1 < ll->lines) {
 			drawWrapMarkEnd = ll->LineStart(subLine + 1) != 0;
 		}
@@ -2914,9 +2911,9 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 			//int styleMain = ll->styles[lineStart];
 			//surface->FillRectangle(rcPlace, vsDraw.styles[styleMain].back);
 
-			if (wrapVisualFlags & SC_WRAPVISUALFLAG_START) {
+			if (vsDraw.wrapVisualFlags & SC_WRAPVISUALFLAG_START) {
 
-				if (wrapVisualFlagsLocation & SC_WRAPVISUALFLAGLOC_START_BY_TEXT)
+				if (vsDraw.wrapVisualFlagsLocation & SC_WRAPVISUALFLAGLOC_START_BY_TEXT)
 					rcPlace.left = rcPlace.right - vsDraw.aveCharWidth;
 				else
 					rcPlace.right = rcPlace.left + vsDraw.aveCharWidth;
@@ -3006,7 +3003,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	DrawIndicators(surface, vsDraw, line, xStart, rcLine, ll, subLine, lineEnd, true);
 
 	if (vsDraw.edgeState == EDGE_LINE) {
-		int edgeX = theEdge * vsDraw.spaceWidth;
+		int edgeX = vsDraw.theEdge * vsDraw.spaceWidth;
 		rcSegment.left = edgeX + xStart;
 		if ((ll->wrapIndent != 0) && (lineStart != 0))
 			rcSegment.left -= ll->wrapIndent;
@@ -3571,7 +3568,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		// Either styling or NotifyUpdateUI noticed that painting is needed
 		// outside the current painting rectangle
 		//Platform::DebugPrintf("Abandoning paint\n");
-		if (wrapState != eWrapNone) {
+		if (Wrapping()) {
 			if (paintAbandonedByStyling) {
 				// Styling has spilled over a line end, such as occurs by starting a multiline
 				// comment. The width of subsequent text may have changed, so rewrap.
@@ -3740,7 +3737,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		if (rcBeyondEOF.top < rcBeyondEOF.bottom) {
 			surfaceWindow->FillRectangle(rcBeyondEOF, vs.styles[STYLE_DEFAULT].back);
 			if (vs.edgeState == EDGE_LINE) {
-				int edgeX = theEdge * vs.spaceWidth;
+				int edgeX = vs.theEdge * vs.spaceWidth;
 				rcBeyondEOF.left = edgeX + xStart;
 				rcBeyondEOF.right = rcBeyondEOF.left + 1;
 				surfaceWindow->FillRectangle(rcBeyondEOF, vs.edgecolour);
@@ -3802,7 +3799,7 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 		}
 	}
 	vsPrint.fixedColumnWidth = 0;
-	vsPrint.zoomLevel = printMagnification;
+	vsPrint.zoomLevel = printParameters.magnification;
 	// Don't show indentation guides
 	// If this ever gets changed, cached pixmap would need to be recreated if technology != SC_TECHNOLOGY_DEFAULT
 	vsPrint.viewIndentationGuides = ivNone;
@@ -3821,15 +3818,15 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 
 	// Set colours for printing according to users settings
 	for (size_t sty = 0; sty < vsPrint.styles.size(); sty++) {
-		if (printColourMode == SC_PRINT_INVERTLIGHT) {
+		if (printParameters.colourMode == SC_PRINT_INVERTLIGHT) {
 			vsPrint.styles[sty].fore = InvertedLight(vsPrint.styles[sty].fore);
 			vsPrint.styles[sty].back = InvertedLight(vsPrint.styles[sty].back);
-		} else if (printColourMode == SC_PRINT_BLACKONWHITE) {
+		} else if (printParameters.colourMode == SC_PRINT_BLACKONWHITE) {
 			vsPrint.styles[sty].fore = ColourDesired(0, 0, 0);
 			vsPrint.styles[sty].back = ColourDesired(0xff, 0xff, 0xff);
-		} else if (printColourMode == SC_PRINT_COLOURONWHITE) {
+		} else if (printParameters.colourMode == SC_PRINT_COLOURONWHITE) {
 			vsPrint.styles[sty].back = ColourDesired(0xff, 0xff, 0xff);
-		} else if (printColourMode == SC_PRINT_COLOURONWHITEDEFAULTBG) {
+		} else if (printParameters.colourMode == SC_PRINT_COLOURONWHITEDEFAULTBG) {
 			if (sty <= STYLE_DEFAULT) {
 				vsPrint.styles[sty].back = ColourDesired(0xff, 0xff, 0xff);
 			}
@@ -3877,7 +3874,7 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 	int nPrintPos = pfr->chrg.cpMin;
 	int visibleLine = 0;
 	int widthPrint = pfr->rc.right - pfr->rc.left - vsPrint.fixedColumnWidth;
-	if (printWrapState == eWrapNone)
+	if (printParameters.wrapState == eWrapNone)
 		widthPrint = LineLayout::wrapWidthInfinite;
 
 	while (lineDoc <= linePrintLast && ypos < pfr->rc.bottom) {
@@ -4004,7 +4001,7 @@ void Editor::SetScrollBars() {
 void Editor::ChangeSize() {
 	DropGraphics(false);
 	SetScrollBars();
-	if (wrapState != eWrapNone) {
+	if (Wrapping()) {
 		PRectangle rcTextArea = GetClientRectangle();
 		rcTextArea.left = vs.textStart;
 		rcTextArea.right -= vs.rightMarginWidth;
@@ -4084,7 +4081,7 @@ void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 				}
 				currentSel->ClearVirtualSpace();
 				// If in wrap mode rewrap current line so EnsureCaretVisible has accurate information
-				if (wrapState != eWrapNone) {
+				if (Wrapping()) {
 					AutoSurface surface(this);
 					if (surface) {
 						if (WrapOneLine(surface, pdoc->LineFromPosition(positionInsert))) {
@@ -4097,7 +4094,7 @@ void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 			}
 		}
 	}
-	if (wrapState != eWrapNone) {
+	if (Wrapping()) {
 		SetScrollBars();
 	}
 	ThinRectangularRange();
@@ -4606,7 +4603,7 @@ void Editor::CheckModificationForWrap(DocModification mh) {
 		llc.Invalidate(LineLayout::llCheckTextAndStyle);
 		int lineDoc = pdoc->LineFromPosition(mh.position);
 		int lines = Platform::Maximum(0, mh.linesAdded);
-		if (wrapState != eWrapNone) {
+		if (Wrapping()) {
 			NeedWrapping(lineDoc, lineDoc + lines + 1);
 		}
 		RefreshStyleData();
@@ -6318,7 +6315,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 					selectionType = selWholeLine;
 				} else if (selectionType != selSubLine && selectionType != selWholeLine) {
 					// If it is neither, reset selection type to line selection.
-					selectionType = ((wrapState != eWrapNone) && (marginOptions & SC_MARGINOPTION_SUBLINESELECT)) ? selSubLine : selWholeLine;
+					selectionType = (Wrapping() && (marginOptions & SC_MARGINOPTION_SUBLINESELECT)) ? selSubLine : selWholeLine;
 				}
 			} else {
 				if (selectionType == selChar) {
@@ -6382,7 +6379,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 			if (!shift) {
 				// Single click in margin: select whole line or only subline if word wrap is enabled
 				lineAnchorPos = newPos.Position();
-				selectionType = ((wrapState != eWrapNone) && (marginOptions & SC_MARGINOPTION_SUBLINESELECT)) ? selSubLine : selWholeLine;
+				selectionType = (Wrapping() && (marginOptions & SC_MARGINOPTION_SUBLINESELECT)) ? selSubLine : selWholeLine;
 				LineSelection(lineAnchorPos, lineAnchorPos, selectionType == selWholeLine);
 			} else {
 				// Single shift+click in margin: select from line anchor to clicked line
@@ -6395,7 +6392,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 				// Otherwise, if there's a non empty selection, reset selection type only if it differs from selSubLine and selWholeLine.
 				// This ensures that we continue selecting in the same selection mode.
 				if (sel.Empty() || (selectionType != selSubLine && selectionType != selWholeLine))
-					selectionType = ((wrapState != eWrapNone) && (marginOptions & SC_MARGINOPTION_SUBLINESELECT)) ? selSubLine : selWholeLine;
+					selectionType = (Wrapping() && (marginOptions & SC_MARGINOPTION_SUBLINESELECT)) ? selSubLine : selWholeLine;
 				LineSelection(newPos.Position(), lineAnchorPos, selectionType == selWholeLine);
 			}
 
@@ -6721,7 +6718,7 @@ bool Editor::Idle() {
 
 	bool idleDone;
 
-	bool wrappingDone = wrapState == eWrapNone;
+	bool wrappingDone = !Wrapping();
 
 	if (!wrappingDone) {
 		// Wrap lines during idle.
@@ -6857,7 +6854,7 @@ void Editor::SetAnnotationHeights(int start, int end) {
 		bool changedHeight = false;
 		for (int line=start; line<end && line<pdoc->LinesTotal(); line++) {
 			int linesWrapped = 1;
-			if (wrapState != eWrapNone) {
+			if (Wrapping()) {
 				AutoSurface surface(this);
 				AutoLineLayout ll(llc, RetrieveLineLayout(line));
 				if (surface && ll) {
@@ -7849,25 +7846,25 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_SETPRINTMAGNIFICATION:
-		printMagnification = wParam;
+		printParameters.magnification = wParam;
 		break;
 
 	case SCI_GETPRINTMAGNIFICATION:
-		return printMagnification;
+		return printParameters.magnification;
 
 	case SCI_SETPRINTCOLOURMODE:
-		printColourMode = wParam;
+		printParameters.colourMode = wParam;
 		break;
 
 	case SCI_GETPRINTCOLOURMODE:
-		return printColourMode;
+		return printParameters.colourMode;
 
 	case SCI_SETPRINTWRAPMODE:
-		printWrapState = (wParam == SC_WRAP_WORD) ? eWrapWord : eWrapNone;
+		printParameters.wrapState = (wParam == SC_WRAP_WORD) ? eWrapWord : eWrapNone;
 		break;
 
 	case SCI_GETPRINTWRAPMODE:
-		return printWrapState;
+		return printParameters.wrapState;
 
 	case SCI_GETSTYLEAT:
 		if (static_cast<int>(wParam) >= pdoc->Length())
@@ -8099,66 +8096,55 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return pdoc->ExtendWordSelect(wParam, 1, lParam != 0);
 
 	case SCI_SETWRAPMODE:
-		switch (wParam) {
-		case SC_WRAP_WORD:
-			wrapState = eWrapWord;
-			break;
-		case SC_WRAP_CHAR:
-			wrapState = eWrapChar;
-			break;
-		default:
-			wrapState = eWrapNone;
-			break;
+		if (vs.SetWrapState(wParam)) {
+			xOffset = 0;
+			ContainerNeedsUpdate(SC_UPDATE_H_SCROLL);
+			InvalidateStyleRedraw();
+			ReconfigureScrollBars();
 		}
-		xOffset = 0;
-		ContainerNeedsUpdate(SC_UPDATE_H_SCROLL);
-		InvalidateStyleRedraw();
-		ReconfigureScrollBars();
 		break;
 
 	case SCI_GETWRAPMODE:
-		return wrapState;
+		return vs.wrapState;
 
 	case SCI_SETWRAPVISUALFLAGS:
-		if (wrapVisualFlags != static_cast<int>(wParam)) {
-			wrapVisualFlags = wParam;
+		if (vs.SetWrapVisualFlags(wParam)) {
 			InvalidateStyleRedraw();
 			ReconfigureScrollBars();
 		}
 		break;
 
 	case SCI_GETWRAPVISUALFLAGS:
-		return wrapVisualFlags;
+		return vs.wrapVisualFlags;
 
 	case SCI_SETWRAPVISUALFLAGSLOCATION:
-		wrapVisualFlagsLocation = wParam;
-		InvalidateStyleRedraw();
+		if (vs.SetWrapVisualFlagsLocation(wParam)) {
+			InvalidateStyleRedraw();
+		}
 		break;
 
 	case SCI_GETWRAPVISUALFLAGSLOCATION:
-		return wrapVisualFlagsLocation;
+		return vs.wrapVisualFlagsLocation;
 
 	case SCI_SETWRAPSTARTINDENT:
-		if (wrapVisualStartIndent != static_cast<int>(wParam)) {
-			wrapVisualStartIndent = wParam;
+		if (vs.SetWrapVisualStartIndent(wParam)) {
 			InvalidateStyleRedraw();
 			ReconfigureScrollBars();
 		}
 		break;
 
 	case SCI_GETWRAPSTARTINDENT:
-		return wrapVisualStartIndent;
+		return vs.wrapVisualStartIndent;
 
 	case SCI_SETWRAPINDENTMODE:
-		if (wrapIndentMode != static_cast<int>(wParam)) {
-			wrapIndentMode = wParam;
+		if (vs.SetWrapIndentMode(wParam)) {
 			InvalidateStyleRedraw();
 			ReconfigureScrollBars();
 		}
 		break;
 
 	case SCI_GETWRAPINDENTMODE:
-		return wrapIndentMode;
+		return vs.wrapIndentMode;
 
 	case SCI_SETLAYOUTCACHE:
 		llc.SetLevel(wParam);
@@ -9003,10 +8989,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return vs.zoomLevel;
 
 	case SCI_GETEDGECOLUMN:
-		return theEdge;
+		return vs.theEdge;
 
 	case SCI_SETEDGECOLUMN:
-		theEdge = wParam;
+		vs.theEdge = wParam;
 		InvalidateStyleRedraw();
 		break;
 

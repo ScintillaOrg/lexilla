@@ -56,6 +56,8 @@ enum WhiteSpaceVisibility {wsInvisible=0, wsVisibleAlways=1, wsVisibleAfterInden
 
 typedef std::map<FontSpecification, FontRealised *> FontMap;
 
+enum WrapMode { eWrapNone, eWrapWord, eWrapChar };
+
 /**
  */
 class ViewStyle {
@@ -137,6 +139,17 @@ public:
 	int braceHighlightIndicator;
 	bool braceBadLightIndicatorSet;
 	int braceBadLightIndicator;
+	int theEdge;
+	int marginNumberPadding; // the right-side padding of the number margin
+	int ctrlCharPadding; // the padding around control character text blobs
+	int lastSegItalicsOffset; // the offset so as not to clip italic characters at EOLs
+
+	// Wrapping support
+	WrapMode wrapState;
+	int wrapVisualFlags;
+	int wrapVisualFlagsLocation;
+	int wrapVisualStartIndent;
+	int wrapIndentMode; // SC_WRAPINDENT_FIXED, _SAME, _INDENT
 
 	ViewStyle();
 	ViewStyle(const ViewStyle &source);
@@ -153,6 +166,11 @@ public:
 	bool ValidStyle(size_t styleIndex) const;
 	void CalcLargestMarkerHeight();
 	ColourDesired WrapColour() const;
+	bool SetWrapState(int wrapState_);
+	bool SetWrapVisualFlags(int wrapVisualFlags_);
+	bool SetWrapVisualFlagsLocation(int wrapVisualFlagsLocation_);
+	bool SetWrapVisualStartIndent(int wrapVisualStartIndent_);
+	bool SetWrapIndentMode(int wrapIndentMode_);
 
 private:
 	void AllocStyles(size_t sizeNew);

@@ -293,7 +293,7 @@ void ScintillaQt::ReconfigureScrollBars()
 		scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	}
 
-	if (horizontalScrollBarVisible && (wrapState == eWrapNone)) {
+	if (horizontalScrollBarVisible && !Wrapping()) {
 		scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 	} else {
 		scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

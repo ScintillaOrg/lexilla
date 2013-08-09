@@ -171,6 +171,18 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	braceHighlightIndicator = source.braceHighlightIndicator;
 	braceBadLightIndicatorSet = source.braceBadLightIndicatorSet;
 	braceBadLightIndicator = source.braceBadLightIndicator;
+
+	theEdge = source.theEdge;
+
+	marginNumberPadding = source.marginNumberPadding;
+	ctrlCharPadding = source.ctrlCharPadding;
+	lastSegItalicsOffset = source.lastSegItalicsOffset;
+
+	wrapState = source.wrapState;
+	wrapVisualFlags = source.wrapVisualFlags;
+	wrapVisualFlagsLocation = source.wrapVisualFlagsLocation;
+	wrapVisualStartIndent = source.wrapVisualStartIndent;
+	wrapIndentMode = source.wrapIndentMode;
 }
 
 ViewStyle::~ViewStyle() {
@@ -289,6 +301,18 @@ void ViewStyle::Init(size_t stylesSize_) {
 	braceHighlightIndicator = 0;
 	braceBadLightIndicatorSet = false;
 	braceBadLightIndicator = 0;
+
+	theEdge = 0;
+
+	marginNumberPadding = 3;
+	ctrlCharPadding = 3; // +3 For a blank on front and rounded edge each side
+	lastSegItalicsOffset = 2;
+
+	wrapState = eWrapNone;
+	wrapVisualFlags = 0;
+	wrapVisualFlagsLocation = 0;
+	wrapVisualStartIndent = 0;
+	wrapIndentMode = SC_WRAPINDENT_FIXED;
 }
 
 void ViewStyle::Refresh(Surface &surface, int tabInChars) {
@@ -425,6 +449,48 @@ ColourDesired ViewStyle::WrapColour() const {
 		return whitespaceForeground;
 	else
 		return styles[STYLE_DEFAULT].fore;
+}
+
+bool ViewStyle::SetWrapState(int wrapState_) {
+	WrapMode wrapStateWanted;
+	switch (wrapState_) {
+	case SC_WRAP_WORD:
+		wrapStateWanted = eWrapWord;
+		break;
+	case SC_WRAP_CHAR:
+		wrapStateWanted = eWrapChar;
+		break;
+	default:
+		wrapStateWanted = eWrapNone;
+		break;
+	}
+	bool changed = wrapState != wrapStateWanted;
+	wrapState = wrapStateWanted;
+	return changed;
+}
+
+bool ViewStyle::SetWrapVisualFlags(int wrapVisualFlags_) {
+	bool changed = wrapVisualFlags != wrapVisualFlags_;
+	wrapVisualFlags = wrapVisualFlags_;
+	return changed;
+}
+
+bool ViewStyle::SetWrapVisualFlagsLocation(int wrapVisualFlagsLocation_) {
+	bool changed = wrapVisualFlagsLocation != wrapVisualFlagsLocation_;
+	wrapVisualFlagsLocation = wrapVisualFlagsLocation_;
+	return changed;
+}
+
+bool ViewStyle::SetWrapVisualStartIndent(int wrapVisualStartIndent_) {
+	bool changed = wrapVisualStartIndent != wrapVisualStartIndent_;
+	wrapVisualStartIndent = wrapVisualStartIndent_;
+	return changed;
+}
+
+bool ViewStyle::SetWrapIndentMode(int wrapIndentMode_) {
+	bool changed = wrapIndentMode != wrapIndentMode_;
+	wrapIndentMode = wrapIndentMode_;
+	return changed;
 }
 
 void ViewStyle::AllocStyles(size_t sizeNew) {

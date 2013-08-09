@@ -160,6 +160,13 @@ struct WrapPending {
 	}
 };
 
+struct PrintParameters {
+	int magnification;
+	int colourMode;
+	WrapMode wrapState;
+	PrintParameters();
+};
+
 /**
  */
 class Editor : public DocWatcher {
@@ -182,9 +189,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	Point sizeRGBAImage;
 	float scaleRGBAImage;
 
-	int printMagnification;
-	int printColourMode;
-	int printWrapState;
+	PrintParameters printParameters;
+
 	int cursorMode;
 
 	// Highlight current folding block
@@ -271,8 +277,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int bracesMatchStyle;
 	int highlightGuideColumn;
 
-	int theEdge;
-
 	enum { notPainting, painting, paintAbandoned } paintState;
 	bool paintAbandonedByStyling;
 	PRectangle rcPaint;
@@ -308,19 +312,10 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int hsEnd;
 
 	// Wrapping support
-	enum { eWrapNone, eWrapWord, eWrapChar } wrapState;
 	int wrapWidth;
 	WrapPending wrapPending;
-	int wrapVisualFlags;
-	int wrapVisualFlagsLocation;
-	int wrapVisualStartIndent;
-	int wrapIndentMode; // SC_WRAPINDENT_FIXED, _SAME, _INDENT
 
 	bool convertPastes;
-
-	int marginNumberPadding; // the right-side padding of the number margin
-	int ctrlCharPadding; // the padding around control character text blobs
-	int lastSegItalicsOffset; // the offset so as not to clip italic characters at EOLs
 
 	Document *pdoc;
 
@@ -425,6 +420,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void InvalidateCaret();
 	virtual void UpdateSystemCaret();
 
+	bool Wrapping() const;
 	void NeedWrapping(int docLineStart=0, int docLineEnd=WrapPending::lineLarge);
 	bool WrapOneLine(Surface *surface, int lineToWrap);
 	enum wrapScope {wsAll, wsVisible, wsIdle};
