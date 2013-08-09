@@ -58,6 +58,20 @@ typedef std::map<FontSpecification, FontRealised *> FontMap;
 
 enum WrapMode { eWrapNone, eWrapWord, eWrapChar };
 
+class ColourOptional : public ColourDesired {
+public:
+	bool isSet;
+	ColourOptional(ColourDesired colour_=ColourDesired(0,0,0), bool isSet_=false) : ColourDesired(colour_), isSet(isSet_) {
+	}
+	ColourOptional(uptr_t wParam, sptr_t lParam) : ColourDesired(lParam), isSet(wParam != 0) {
+	}
+};
+
+struct ForeBackColours {
+	ColourOptional fore;
+	ColourOptional back;
+};
+
 /**
  */
 class ViewStyle {
@@ -76,32 +90,21 @@ public:
 	XYPOSITION aveCharWidth;
 	XYPOSITION spaceWidth;
 	XYPOSITION tabWidth;
-	bool selforeset;
-	ColourDesired selforeground;
+	ForeBackColours selColours;
 	ColourDesired selAdditionalForeground;
-	bool selbackset;
-	ColourDesired selbackground;
 	ColourDesired selAdditionalBackground;
-	ColourDesired selbackground2;
+	ColourDesired selBackground2;
 	int selAlpha;
 	int selAdditionalAlpha;
 	bool selEOLFilled;
-	bool whitespaceForegroundSet;
-	ColourDesired whitespaceForeground;
-	bool whitespaceBackgroundSet;
-	ColourDesired whitespaceBackground;
+	ForeBackColours whitespaceColours;
 	int controlCharSymbol;
 	XYPOSITION controlCharWidth;
 	ColourDesired selbar;
 	ColourDesired selbarlight;
-	bool foldmarginColourSet;
-	ColourDesired foldmarginColour;
-	bool foldmarginHighlightColourSet;
-	ColourDesired foldmarginHighlightColour;
-	bool hotspotForegroundSet;
-	ColourDesired hotspotForeground;
-	bool hotspotBackgroundSet;
-	ColourDesired hotspotBackground;
+	ColourOptional foldmarginColour;
+	ColourOptional foldmarginHighlightColour;
+	ForeBackColours hotspotColours;
 	bool hotspotUnderline;
 	bool hotspotSingleLine;
 	/// Margins are ordered: Line Numbers, Selection Margin, Spacing Margin

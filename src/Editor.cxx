@@ -2408,18 +2408,18 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 
 ColourDesired Editor::SelectionBackground(ViewStyle &vsDraw, bool main) const {
 	return main ?
-		(primarySelection ? vsDraw.selbackground : vsDraw.selbackground2) :
+		(primarySelection ? vsDraw.selColours.back : vsDraw.selBackground2) :
 		vsDraw.selAdditionalBackground;
 }
 
 ColourDesired Editor::TextBackground(ViewStyle &vsDraw, bool overrideBackground,
         ColourDesired background, int inSelection, bool inHotspot, int styleMain, int i, LineLayout *ll) const {
 	if (inSelection == 1) {
-		if (vsDraw.selbackset && (vsDraw.selAlpha == SC_ALPHA_NOALPHA)) {
+		if (vsDraw.selColours.back.isSet && (vsDraw.selAlpha == SC_ALPHA_NOALPHA)) {
 			return SelectionBackground(vsDraw, true);
 		}
 	} else if (inSelection == 2) {
-		if (vsDraw.selbackset && (vsDraw.selAdditionalAlpha == SC_ALPHA_NOALPHA)) {
+		if (vsDraw.selColours.back.isSet && (vsDraw.selAdditionalAlpha == SC_ALPHA_NOALPHA)) {
 			return SelectionBackground(vsDraw, false);
 		}
 	} else {
@@ -2427,8 +2427,8 @@ ColourDesired Editor::TextBackground(ViewStyle &vsDraw, bool overrideBackground,
 		        (i >= ll->edgeColumn) &&
 		        (i < ll->numCharsBeforeEOL))
 			return vsDraw.edgecolour;
-		if (inHotspot && vsDraw.hotspotBackgroundSet)
-			return vsDraw.hotspotBackground;
+		if (inHotspot && vsDraw.hotspotColours.back.isSet)
+			return vsDraw.hotspotColours.back;
 	}
 	if (overrideBackground && (styleMain != STYLE_BRACELIGHT) && (styleMain != STYLE_BRACEBAD)) {
 		return background;
@@ -2586,10 +2586,10 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 			int styleMain = ll->styles[eolPos];
 			ColourDesired textBack = TextBackground(vsDraw, overrideBackground, background, eolInSelection, false, styleMain, eolPos, ll);
 			ColourDesired textFore = vsDraw.styles[styleMain].fore;
-			if (eolInSelection && vsDraw.selforeset) {
-				textFore = (eolInSelection == 1) ? vsDraw.selforeground : vsDraw.selAdditionalForeground;
+			if (eolInSelection && vsDraw.selColours.fore.isSet) {
+				textFore = (eolInSelection == 1) ? vsDraw.selColours.fore : vsDraw.selAdditionalForeground;
 			}
-			if (eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1)) {
+			if (eolInSelection && vsDraw.selColours.back.isSet && (line < pdoc->LinesTotal() - 1)) {
 				if (alpha == SC_ALPHA_NOALPHA) {
 					surface->FillRectangle(rcSegment, SelectionBackground(vsDraw, eolInSelection == 1));
 				} else {
@@ -2599,7 +2599,7 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 				surface->FillRectangle(rcSegment, textBack);
 			}
 			DrawTextBlob(surface, vsDraw, rcSegment, ctrlChar, textBack, textFore, twoPhaseDraw);
-			if (eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1) && (alpha != SC_ALPHA_NOALPHA)) {
+			if (eolInSelection && vsDraw.selColours.back.isSet && (line < pdoc->LinesTotal() - 1) && (alpha != SC_ALPHA_NOALPHA)) {
 				SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw, eolInSelection == 1), alpha);
 			}
 		}
@@ -2609,7 +2609,7 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 	rcSegment.left = xEol + xStart + virtualSpace + blobsWidth;
 	rcSegment.right = rcSegment.left + vsDraw.aveCharWidth;
 
-	if (eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1) && (alpha == SC_ALPHA_NOALPHA)) {
+	if (eolInSelection && vsDraw.selColours.back.isSet && (line < pdoc->LinesTotal() - 1) && (alpha == SC_ALPHA_NOALPHA)) {
 		surface->FillRectangle(rcSegment, SelectionBackground(vsDraw, eolInSelection == 1));
 	} else {
 		if (overrideBackground) {
@@ -2621,7 +2621,7 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 		} else {
 			surface->FillRectangle(rcSegment, vsDraw.styles[STYLE_DEFAULT].back);
 		}
-		if (eolInSelection && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1) && (alpha != SC_ALPHA_NOALPHA)) {
+		if (eolInSelection && vsDraw.selColours.back.isSet && (line < pdoc->LinesTotal() - 1) && (alpha != SC_ALPHA_NOALPHA)) {
 			SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw, eolInSelection == 1), alpha);
 		}
 	}
@@ -2632,7 +2632,7 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 		rcSegment.left = rcLine.left;
 	rcSegment.right = rcLine.right;
 
-	if (eolInSelection && vsDraw.selEOLFilled && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1) && (alpha == SC_ALPHA_NOALPHA)) {
+	if (eolInSelection && vsDraw.selEOLFilled && vsDraw.selColours.back.isSet && (line < pdoc->LinesTotal() - 1) && (alpha == SC_ALPHA_NOALPHA)) {
 		surface->FillRectangle(rcSegment, SelectionBackground(vsDraw, eolInSelection == 1));
 	} else {
 		if (overrideBackground) {
@@ -2642,7 +2642,7 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 		} else {
 			surface->FillRectangle(rcSegment, vsDraw.styles[STYLE_DEFAULT].back);
 		}
-		if (eolInSelection && vsDraw.selEOLFilled && vsDraw.selbackset && (line < pdoc->LinesTotal() - 1) && (alpha != SC_ALPHA_NOALPHA)) {
+		if (eolInSelection && vsDraw.selEOLFilled && vsDraw.selColours.back.isSet && (line < pdoc->LinesTotal() - 1) && (alpha != SC_ALPHA_NOALPHA)) {
 			SimpleAlphaRectangle(surface, rcSegment, SelectionBackground(vsDraw, eolInSelection == 1), alpha);
 		}
 	}
@@ -2858,7 +2858,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	}
 
 	const bool drawWhitespaceBackground = (vsDraw.viewWhitespace != wsInvisible) &&
-	        (!overrideBackground) && (vsDraw.whitespaceBackgroundSet);
+	        (!overrideBackground) && (vsDraw.whitespaceColours.back.isSet);
 
 	bool inIndentation = subLine == 0;	// Do not handle indentation except on first subline.
 	const XYPOSITION indentWidth = pdoc->IndentSize() * vsDraw.spaceWidth;
@@ -2925,7 +2925,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		}
 	}
 
-	const bool selBackDrawn = vsDraw.selbackset &&
+	const bool selBackDrawn = vsDraw.selColours.back.isSet &&
 		((vsDraw.selAlpha == SC_ALPHA_NOALPHA) || (vsDraw.selAdditionalAlpha == SC_ALPHA_NOALPHA));
 
 	// Does not take margin into account but not significant
@@ -2963,7 +2963,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 						// Tab display
 						if (drawWhitespaceBackground &&
 								(!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways))
-							textBack = vsDraw.whitespaceBackground;
+							textBack = vsDraw.whitespaceColours.back;
 					} else {
 						// Blob display
 						inIndentation = false;
@@ -2982,7 +2982,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 										rcSegment.top,
 										ll->positions[cpos + ts.start + 1] + xStart - subLineStart,
 										rcSegment.bottom);
-									surface->FillRectangle(rcSpace, vsDraw.whitespaceBackground);
+									surface->FillRectangle(rcSpace, vsDraw.whitespaceColours.back);
 								}
 							} else {
 								inIndentation = false;
@@ -3027,7 +3027,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 	inIndentation = subLine == 0;	// Do not handle indentation except on first subline.
 	// Foreground drawing loop
 	BreakFinder bfFore(ll, lineStart, lineEnd, posLineStart, xStartVisible,
-		((!twoPhaseDraw && selBackDrawn) || vsDraw.selforeset), pdoc, &reprs);
+		((!twoPhaseDraw && selBackDrawn) || vsDraw.selColours.fore.isSet), pdoc, &reprs);
 
 	while (bfFore.More()) {
 
@@ -3045,12 +3045,12 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 			Font &textFont = vsDraw.styles[styleMain].font;
 			//hotspot foreground
 			if (ll->hsStart != -1 && iDoc >= ll->hsStart && iDoc < hsEnd) {
-				if (vsDraw.hotspotForegroundSet)
-					textFore = vsDraw.hotspotForeground;
+				if (vsDraw.hotspotColours.fore.isSet)
+					textFore = vsDraw.hotspotColours.fore;
 			}
 			const int inSelection = hideSelection ? 0 : sel.CharacterInSelection(iDoc);
-			if (inSelection && (vsDraw.selforeset)) {
-				textFore = (inSelection == 1) ? vsDraw.selforeground : vsDraw.selAdditionalForeground;
+			if (inSelection && (vsDraw.selColours.fore.isSet)) {
+				textFore = (inSelection == 1) ? vsDraw.selColours.fore : vsDraw.selAdditionalForeground;
 			}
 			const bool inHotspot = (ll->hsStart != -1) && (iDoc >= ll->hsStart) && (iDoc < ll->hsEnd);
 			ColourDesired textBack = TextBackground(vsDraw, overrideBackground, background, inSelection, inHotspot, styleMain, i, ll);
@@ -3060,7 +3060,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 					if (!twoPhaseDraw) {
 						if (drawWhitespaceBackground &&
 								(!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways))
-							textBack = vsDraw.whitespaceBackground;
+							textBack = vsDraw.whitespaceColours.back;
 						surface->FillRectangle(rcSegment, textBack);
 					}
 					if (inIndentation && vsDraw.viewIndentationGuides == ivReal) {
@@ -3076,8 +3076,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 					}
 					if (vsDraw.viewWhitespace != wsInvisible) {
 						if (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways) {
-							if (vsDraw.whitespaceForegroundSet)
-								textFore = vsDraw.whitespaceForeground;
+							if (vsDraw.whitespaceColours.fore.isSet)
+								textFore = vsDraw.whitespaceColours.fore;
 							surface->PenColour(textFore);
 							PRectangle rcTab(rcSegment.left + 1, rcSegment.top + 4,
 									rcSegment.right - 1, rcSegment.bottom - vsDraw.maxDescent);
@@ -3113,13 +3113,13 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 					for (int cpos = 0; cpos <= i - ts.start; cpos++) {
 						if (ll->chars[cpos + ts.start] == ' ') {
 							if (vsDraw.viewWhitespace != wsInvisible) {
-								if (vsDraw.whitespaceForegroundSet)
-									textFore = vsDraw.whitespaceForeground;
+								if (vsDraw.whitespaceColours.fore.isSet)
+									textFore = vsDraw.whitespaceColours.fore;
 								if (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways) {
 									XYPOSITION xmid = (ll->positions[cpos + ts.start] + ll->positions[cpos + ts.start + 1]) / 2;
 									if (!twoPhaseDraw && drawWhitespaceBackground &&
 									        (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways)) {
-										textBack = vsDraw.whitespaceBackground;
+										textBack = vsDraw.whitespaceColours.back;
 										PRectangle rcSpace(ll->positions[cpos + ts.start] + xStart - subLineStart,
 											rcSegment.top,
 											ll->positions[cpos + ts.start + 1] + xStart - subLineStart,
@@ -3153,8 +3153,8 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 				PRectangle rcUL = rcSegment;
 				rcUL.top = rcUL.top + vsDraw.maxAscent + 1;
 				rcUL.bottom = rcUL.top + 1;
-				if (vsDraw.hotspotForegroundSet)
-					surface->FillRectangle(rcUL, vsDraw.hotspotForeground);
+				if (vsDraw.hotspotColours.fore.isSet)
+					surface->FillRectangle(rcUL, vsDraw.hotspotColours.fore);
 				else
 					surface->FillRectangle(rcUL, textFore);
 			} else if (vsDraw.styles[styleMain].underline) {
@@ -3370,11 +3370,11 @@ void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 			colourFMFill = vs.selbarlight;
 		}
 
-		if (vs.foldmarginColourSet) {
+		if (vs.foldmarginColour.isSet) {
 			// override default fold margin colour
 			colourFMFill = vs.foldmarginColour;
 		}
-		if (vs.foldmarginHighlightColourSet) {
+		if (vs.foldmarginHighlightColour.isSet) {
 			// override default fold margin highlight colour
 			colourFMStripes = vs.foldmarginHighlightColour;
 		}
@@ -3804,12 +3804,12 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 	// If this ever gets changed, cached pixmap would need to be recreated if technology != SC_TECHNOLOGY_DEFAULT
 	vsPrint.viewIndentationGuides = ivNone;
 	// Don't show the selection when printing
-	vsPrint.selbackset = false;
-	vsPrint.selforeset = false;
+	vsPrint.selColours.back.isSet = false;
+	vsPrint.selColours.fore.isSet = false;
 	vsPrint.selAlpha = SC_ALPHA_NOALPHA;
 	vsPrint.selAdditionalAlpha = SC_ALPHA_NOALPHA;
-	vsPrint.whitespaceBackgroundSet = false;
-	vsPrint.whitespaceForegroundSet = false;
+	vsPrint.whitespaceColours.back.isSet = false;
+	vsPrint.whitespaceColours.fore.isSet = false;
 	vsPrint.showCaretLineBackground = false;
 	vsPrint.alwaysShowCaretLineBackground = false;
 	// Don't highlight matching braces using indicators
@@ -8680,15 +8680,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return LinesOnScreen();
 
 	case SCI_SETSELFORE:
-		vs.selforeset = wParam != 0;
-		vs.selforeground = ColourDesired(lParam);
+		vs.selColours.fore = ColourOptional(wParam, lParam);
 		vs.selAdditionalForeground = ColourDesired(lParam);
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETSELBACK:
-		vs.selbackset = wParam != 0;
-		vs.selbackground = ColourDesired(lParam);
+		vs.selColours.back = ColourOptional(wParam, lParam);
 		vs.selAdditionalBackground = ColourDesired(lParam);
 		InvalidateStyleRedraw();
 		break;
@@ -8711,14 +8709,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_SETWHITESPACEFORE:
-		vs.whitespaceForegroundSet = wParam != 0;
-		vs.whitespaceForeground = ColourDesired(lParam);
+		vs.whitespaceColours.fore = ColourOptional(wParam, lParam);
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETWHITESPACEBACK:
-		vs.whitespaceBackgroundSet = wParam != 0;
-		vs.whitespaceBackground = ColourDesired(lParam);
+		vs.whitespaceColours.back = ColourOptional(wParam, lParam);
 		InvalidateStyleRedraw();
 		break;
 
@@ -9188,34 +9184,30 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_SETFOLDMARGINCOLOUR:
-		vs.foldmarginColourSet = wParam != 0;
-		vs.foldmarginColour = ColourDesired(lParam);
+		vs.foldmarginColour = ColourOptional(wParam, lParam);
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETFOLDMARGINHICOLOUR:
-		vs.foldmarginHighlightColourSet = wParam != 0;
-		vs.foldmarginHighlightColour = ColourDesired(lParam);
+		vs.foldmarginHighlightColour = ColourOptional(wParam, lParam);
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETHOTSPOTACTIVEFORE:
-		vs.hotspotForegroundSet = wParam != 0;
-		vs.hotspotForeground = ColourDesired(lParam);
+		vs.hotspotColours.fore = ColourOptional(wParam, lParam);
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_GETHOTSPOTACTIVEFORE:
-		return vs.hotspotForeground.AsLong();
+		return vs.hotspotColours.fore.AsLong();
 
 	case SCI_SETHOTSPOTACTIVEBACK:
-		vs.hotspotBackgroundSet = wParam != 0;
-		vs.hotspotBackground = ColourDesired(lParam);
+		vs.hotspotColours.back = ColourOptional(wParam, lParam);
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_GETHOTSPOTACTIVEBACK:
-		return vs.hotspotBackground.AsLong();
+		return vs.hotspotColours.back.AsLong();
 
 	case SCI_SETHOTSPOTACTIVEUNDERLINE:
 		vs.hotspotUnderline = wParam != 0;

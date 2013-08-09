@@ -104,33 +104,22 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 		indicators[ind] = source.indicators[ind];
 	}
 
-	selforeset = source.selforeset;
-	selforeground = source.selforeground;
+	selColours = source.selColours;
 	selAdditionalForeground = source.selAdditionalForeground;
-	selbackset = source.selbackset;
-	selbackground = source.selbackground;
 	selAdditionalBackground = source.selAdditionalBackground;
-	selbackground2 = source.selbackground2;
+	selBackground2 = source.selBackground2;
 	selAlpha = source.selAlpha;
 	selAdditionalAlpha = source.selAdditionalAlpha;
 	selEOLFilled = source.selEOLFilled;
 
-	foldmarginColourSet = source.foldmarginColourSet;
 	foldmarginColour = source.foldmarginColour;
-	foldmarginHighlightColourSet = source.foldmarginHighlightColourSet;
 	foldmarginHighlightColour = source.foldmarginHighlightColour;
 
-	hotspotForegroundSet = source.hotspotForegroundSet;
-	hotspotForeground = source.hotspotForeground;
-	hotspotBackgroundSet = source.hotspotBackgroundSet;
-	hotspotBackground = source.hotspotBackground;
+	hotspotColours = source.hotspotColours;
 	hotspotUnderline = source.hotspotUnderline;
 	hotspotSingleLine = source.hotspotSingleLine;
 
-	whitespaceForegroundSet = source.whitespaceForegroundSet;
-	whitespaceForeground = source.whitespaceForeground;
-	whitespaceBackgroundSet = source.whitespaceBackgroundSet;
-	whitespaceBackground = source.whitespaceBackground;
+	whitespaceColours = source.whitespaceColours;
 	controlCharSymbol = source.controlCharSymbol;
 	controlCharWidth = source.controlCharWidth;
 	selbar = source.selbar;
@@ -220,26 +209,20 @@ void ViewStyle::Init(size_t stylesSize_) {
 	spaceWidth = 8;
 	tabWidth = spaceWidth * 8;
 
-	selforeset = false;
-	selforeground = ColourDesired(0xff, 0, 0);
+	selColours.fore = ColourOptional(ColourDesired(0xff, 0, 0));
+	selColours.back = ColourOptional(ColourDesired(0xc0, 0xc0, 0xc0), true);
 	selAdditionalForeground = ColourDesired(0xff, 0, 0);
-	selbackset = true;
-	selbackground = ColourDesired(0xc0, 0xc0, 0xc0);
 	selAdditionalBackground = ColourDesired(0xd7, 0xd7, 0xd7);
-	selbackground2 = ColourDesired(0xb0, 0xb0, 0xb0);
+	selBackground2 = ColourDesired(0xb0, 0xb0, 0xb0);
 	selAlpha = SC_ALPHA_NOALPHA;
 	selAdditionalAlpha = SC_ALPHA_NOALPHA;
 	selEOLFilled = false;
 
-	foldmarginColourSet = false;
-	foldmarginColour = ColourDesired(0xff, 0, 0);
-	foldmarginHighlightColourSet = false;
-	foldmarginHighlightColour = ColourDesired(0xc0, 0xc0, 0xc0);
+	foldmarginColour = ColourOptional(ColourDesired(0xff, 0, 0));
+	foldmarginHighlightColour = ColourOptional(ColourDesired(0xc0, 0xc0, 0xc0));
 
-	whitespaceForegroundSet = false;
-	whitespaceForeground = ColourDesired(0, 0, 0);
-	whitespaceBackgroundSet = false;
-	whitespaceBackground = ColourDesired(0xff, 0xff, 0xff);
+	whitespaceColours.fore = ColourOptional();
+	whitespaceColours.back = ColourOptional(ColourDesired(0xff, 0xff, 0xff));
 	controlCharSymbol = 0;	/* Draw the control characters */
 	controlCharWidth = 0;
 	selbar = Platform::Chrome();
@@ -259,10 +242,8 @@ void ViewStyle::Init(size_t stylesSize_) {
 	someStylesProtected = false;
 	someStylesForceCase = false;
 
-	hotspotForegroundSet = false;
-	hotspotForeground = ColourDesired(0, 0, 0xff);
-	hotspotBackgroundSet = false;
-	hotspotBackground = ColourDesired(0xff, 0xff, 0xff);
+	hotspotColours.fore = ColourOptional(ColourDesired(0, 0, 0xff));
+	hotspotColours.back = ColourOptional(ColourDesired(0xff, 0xff, 0xff));
 	hotspotUnderline = true;
 	hotspotSingleLine = true;
 
@@ -445,8 +426,8 @@ void ViewStyle::CalcLargestMarkerHeight() {
 }
 
 ColourDesired ViewStyle::WrapColour() const {
-	if (whitespaceForegroundSet)
-		return whitespaceForeground;
+	if (whitespaceColours.fore.isSet)
+		return whitespaceColours.fore;
 	else
 		return styles[STYLE_DEFAULT].fore;
 }
