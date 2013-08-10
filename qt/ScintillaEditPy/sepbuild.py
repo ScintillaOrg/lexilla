@@ -76,9 +76,13 @@ injectCheckN = """
 def methodSignature(name, v, options):
 	argTypes = ""
 	p1Type = WidgetGen.cppAlias(v["Param1Type"])
+	if p1Type == "int":
+		p1Type = "uptr_t"
 	if p1Type:
 		argTypes = argTypes + p1Type
 	p2Type = WidgetGen.cppAlias(v["Param2Type"])
+	if p2Type == "int":
+		p2Type = "sptr_t"
 	if p2Type and v["Param2Type"] != "stringresult":
 		if p1Type:
 			argTypes = argTypes + ", "
