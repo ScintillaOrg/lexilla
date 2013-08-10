@@ -197,7 +197,7 @@ class ScintillaWin :
 	bool hasOKText;
 
 	CLIPFORMAT cfColumnSelect;
-	CLIPFORMAT cfColumnSelectBorland;
+	CLIPFORMAT cfBorlandIDEBlockType;
 	CLIPFORMAT cfLineSelect;
 
 	HRESULT hrOle;
@@ -316,7 +316,7 @@ public:
 	friend class DataObject;
 	friend class DropTarget;
 	bool DragIsRectangularOK(CLIPFORMAT fmt) const {
-		return drag.rectangular && ((fmt == cfColumnSelect) || (fmt == cfColumnSelectBorland));
+		return drag.rectangular && (fmt == cfColumnSelect);
 	}
 
 private:
@@ -351,7 +351,7 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	// contains a rectangular selection, so copy Developer Studio and Borland Delphi.
 	cfColumnSelect = static_cast<CLIPFORMAT>(
 		::RegisterClipboardFormat(TEXT("MSDEVColumnSelect")));
-	cfColumnSelectBorland = static_cast<CLIPFORMAT>(
+	cfBorlandIDEBlockType = static_cast<CLIPFORMAT>(
 		::RegisterClipboardFormat(TEXT("Borland IDE Block Type")));
 
 	// Likewise for line-copy (copies a full line when no text is selected)
@@ -1704,7 +1704,16 @@ void ScintillaWin::Paste() {
 	SelectionPosition selStart = sel.IsRectangular() ?
 		sel.Rectangular().Start() :
 		sel.Range(sel.Main()).Start();
-	bool isRectangular = ((::IsClipboardFormatAvailable(cfColumnSelect) != 0) || (::IsClipboardFormatAvailable(cfColumnSelectBorland) != 0));
+	bool isRectangular = (::IsClipboardFormatAvailable(cfColumnSelect) != 0);
+
+	if (!isRectangular) {
+		// Evaluate "Borland IDE Block Type" explicitly
+		GlobalMemory memBorlandSelection(::GetClipboardData(cfBorlandIDEBlockType));
+		if (memBorlandSelection) {
+			isRectangular = (memBorlandSelection.Size() == 1) && (static_cast<BYTE *>(memBorlandSelection.ptr)[0] == 0x02);
+			memBorlandSelection.Unlock();
+		}
+	}
 
 	// Always use CF_UNICODETEXT if available
 	GlobalMemory memUSelection(::GetClipboardData(CF_UNICODETEXT));
@@ -2251,11 +2260,12 @@ void ScintillaWin::CopyToClipboard(const SelectionText &selectedText) {
 
 	if (selectedText.rectangular) {
 		::SetClipboardData(cfColumnSelect, 0);
-		GlobalMemory borlandColumn;
-		borlandColumn.Allocate(1);
-		if (borlandColumn) {
-			static_cast<BYTE *>(borlandColumn.ptr)[0] = 0x02;
-			borlandColumn.SetClip(cfColumnSelectBorland);
+
+		GlobalMemory borlandSelection;
+		borlandSelection.Allocate(1);
+		if (borlandSelection) {
+			static_cast<BYTE *>(borlandSelection.ptr)[0] = 0x02;
+			borlandSelection.SetClip(cfBorlandIDEBlockType);
 		}
 	}
 
