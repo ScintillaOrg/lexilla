@@ -53,6 +53,7 @@
 #endif
 
 #include <QObject>
+#include <QList>
 #include <QAbstractScrollArea>
 #include <QAction>
 #include <QClipboard>
@@ -60,6 +61,41 @@
 
 #ifdef SCI_NAMESPACE
 namespace Scintilla {
+#endif
+
+#ifdef Q_OS_MAC
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+
+class QMacPasteboardMime {
+    char type;
+public:
+    enum QMacPasteboardMimeType { MIME_DND=0x01,
+                                  MIME_CLIP=0x02,
+                                  MIME_QT_CONVERTOR=0x04,
+                                  MIME_QT3_CONVERTOR=0x08,
+                                  MIME_ALL=MIME_DND|MIME_CLIP
+    };
+    explicit QMacPasteboardMime(char t);
+    virtual ~QMacPasteboardMime();
+
+    static void initialize();
+
+    static QList<QMacPasteboardMime*> all(uchar);
+    static QMacPasteboardMime *convertor(uchar, const QString &mime, QString flav);
+    static QString flavorToMime(uchar, QString flav);
+
+    virtual QString convertorName() = 0;
+
+    virtual bool canConvert(const QString &mime, QString flav) = 0;
+    virtual QString mimeFor(QString flav) = 0;
+    virtual QString flavorFor(const QString &mime) = 0;
+    virtual QVariant convertToMime(const QString &mime, QList<QByteArray> data, QString flav) = 0;
+    virtual QList<QByteArray> convertFromMime(const QString &mime, QVariant data, QString flav) = 0;
+};
+
+// ### Qt 5: Add const QStringList& QMacPasteboardMime::supportedFlavours()
+Q_GUI_EXPORT void qRegisterDraggedTypes(const QStringList &types);
+#endif
 #endif
 
 class ScintillaQt : public QObject, public ScintillaBase {

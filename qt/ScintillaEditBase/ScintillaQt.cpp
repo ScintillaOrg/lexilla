@@ -75,6 +75,30 @@ static const QString sMimeRectangularMarker("text/x-rectangular-marker");
 
 #ifdef Q_OS_MAC
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+
+class QMacPasteboardMime;
+typedef QList<QMacPasteboardMime*> MimeList;
+Q_GLOBAL_STATIC(MimeList, globalMimeList)
+
+QMacPasteboardMime::QMacPasteboardMime(char t) : type(t)
+{
+    globalMimeList()->append(this);
+}
+
+QMacPasteboardMime::~QMacPasteboardMime()
+{
+    if(!QApplication::closingDown())
+        globalMimeList()->removeAll(this);
+}
+
+Q_GLOBAL_STATIC(QStringList, globalDraggedTypesList)
+void qRegisterDraggedTypes(const QStringList &types)
+{
+    (*globalDraggedTypesList()) += types;
+}
+#endif
+
 class ScintillaRectangularMime : public QMacPasteboardMime {
 public:
 	ScintillaRectangularMime() : QMacPasteboardMime(MIME_ALL) {
