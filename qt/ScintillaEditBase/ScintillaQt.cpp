@@ -73,7 +73,7 @@ static const QString sScintillaRecMimeType("text/x-scintilla.utf16-plain-text.re
 static const QString sMimeRectangularMarker("text/x-rectangular-marker");
 #endif
 
-#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC) && QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 
 class ScintillaRectangularMime : public QMacPasteboardMime {
 public:
@@ -132,7 +132,7 @@ void ScintillaQt::Initialise()
 	rectangularSelectionModifier = SCMOD_CTRL;
 #endif
 
-#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC) && QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 	if (!singletonMime) {
 		singletonMime = new ScintillaRectangularMime();
 
