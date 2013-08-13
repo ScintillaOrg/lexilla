@@ -1,5 +1,5 @@
 // Scintilla source code edit control
-/** @file KeyWords.cxx
+/** @file Catalogue.cxx
  ** Colourise for particular languages.
  **/
 // Copyright 1998-2002 by Neil Hodgson <neilh@scintilla.org>
@@ -58,11 +58,6 @@ void Catalogue::AddLexerModule(LexerModule *plm) {
 		nextLanguage++;
 	}
 	lexerCatalogue.push_back(plm);
-}
-
-// Alternative historical name for Scintilla_LinkLexers
-int wxForceScintillaLexers(void) {
-	return Scintilla_LinkLexers();
 }
 
 // To add or remove a lexer, add or remove its file and run LexGen.py.
