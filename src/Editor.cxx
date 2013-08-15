@@ -169,6 +169,7 @@ Editor::Editor() {
 	endAtLastLine = true;
 	caretSticky = SC_CARETSTICKY_OFF;
 	marginOptions = SC_MARGINOPTION_NONE;
+	mouseSelectionRectangularSwitch = false;
 	multipleSelection = false;
 	additionalSelectionTyping = false;
 	multiPasteMode = SC_MULTIPASTE_ONCE;
@@ -6495,7 +6496,7 @@ void Editor::GetHotSpotRange(int &hsStart_, int &hsEnd_) const {
 	hsEnd_ = hsEnd;
 }
 
-void Editor::ButtonMove(Point pt) {
+void Editor::ButtonMoveWithModifiers(Point pt, int modifiers) {
 	if ((ptMouseLast.x != pt.x) || (ptMouseLast.y != pt.y)) {
 		DwellEnd(true);
 	}
@@ -6529,6 +6530,9 @@ void Editor::ButtonMove(Point pt) {
 			SetDragPosition(movePos);
 		} else {
 			if (selectionType == selChar) {
+				if (sel.selType == Selection::selStream && (modifiers & SCI_ALT) && mouseSelectionRectangularSwitch) {
+					sel.selType = Selection::selRectangle;
+				}
 				if (sel.IsRectangular()) {
 					sel.Rectangular() = SelectionRange(movePos, sel.Rectangular().anchor);
 					SetSelection(movePos, sel.RangeMain().anchor);
@@ -6605,6 +6609,10 @@ void Editor::ButtonMove(Point pt) {
 			SetHotSpotRange(NULL);
 		}
 	}
+}
+
+void Editor::ButtonMove(Point pt) {
+	ButtonMoveWithModifiers(pt, 0);
 }
 
 void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
@@ -9388,6 +9396,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_ADDUNDOACTION:
 		pdoc->AddUndoAction(wParam, lParam & UNDO_MAY_COALESCE);
 		break;
+
+	case SCI_SETMOUSESELECTIONRECTANGULARSWITCH:
+		mouseSelectionRectangularSwitch = wParam != 0;
+		break;
+
+	case SCI_GETMOUSESELECTIONRECTANGULARSWITCH:
+		return mouseSelectionRectangularSwitch;
 
 	case SCI_SETMULTIPLESELECTION:
 		multipleSelection = wParam != 0;

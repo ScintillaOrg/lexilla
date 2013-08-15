@@ -219,6 +219,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool endAtLastLine;
 	int caretSticky;
 	int marginOptions;
+	bool mouseSelectionRectangularSwitch;
 	bool multipleSelection;
 	bool additionalSelectionTyping;
 	int multiPasteMode;
@@ -566,6 +567,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void DwellEnd(bool mouseMoved);
 	void MouseLeave();
 	virtual void ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, bool alt);
+	void ButtonMoveWithModifiers(Point pt, int modifiers);
 	void ButtonMove(Point pt);
 	void ButtonUp(Point pt, unsigned int curTime, bool ctrl);
 

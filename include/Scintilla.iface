@@ -2127,6 +2127,12 @@ fun position CharPositionFromPoint=2561(int x, int y)
 # Return INVALID_POSITION if not close to text.
 fun position CharPositionFromPointClose=2562(int x, int y)
 
+# Set whether switching to rectangular mode while selecting with the mouse is allowed.
+set void SetMouseSelectionRectangularSwitch=2668(bool mouseSelectionRectangularSwitch,)
+
+# Whether switching to rectangular mode while selecting with the mouse is allowed.
+get bool GetMouseSelectionRectangularSwitch=2669(,)
+
 # Set whether multiple selections can be made
 set void SetMultipleSelection=2563(bool multipleSelection,)
 

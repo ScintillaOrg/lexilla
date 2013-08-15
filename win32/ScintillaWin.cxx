@@ -897,7 +897,10 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 		case WM_MOUSEMOVE:
 			SetTrackMouseLeaveEvent(true);
-			ButtonMove(Point::FromLong(lParam));
+			ButtonMoveWithModifiers(Point::FromLong(lParam),
+				((wParam & MK_SHIFT) != 0 ? SCI_SHIFT : 0) |
+				((wParam & MK_CONTROL) != 0 ? SCI_CTRL : 0) |
+				(Platform::IsKeyDown(VK_MENU) ? SCI_ALT : 0));
 			break;
 
 		case WM_MOUSELEAVE:

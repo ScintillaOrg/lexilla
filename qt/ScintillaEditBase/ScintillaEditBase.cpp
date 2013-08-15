@@ -319,7 +319,20 @@ void ScintillaEditBase::mouseDoubleClickEvent(QMouseEvent *event)
 void ScintillaEditBase::mouseMoveEvent(QMouseEvent *event)
 {
 	Point pos = PointFromQPoint(event->pos());
-	sqt->ButtonMove(pos);
+
+	bool shift = QApplication::keyboardModifiers() & Qt::ShiftModifier;
+	bool ctrl  = QApplication::keyboardModifiers() & Qt::ControlModifier;
+#ifdef Q_WS_X11
+	// On X allow choice of rectangular modifier since most window
+	// managers grab alt + click for moving windows.
+	bool alt   = QApplication::keyboardModifiers() & modifierTranslated(sqt->rectangularSelectionModifier);
+#else
+	bool alt   = QApplication::keyboardModifiers() & Qt::AltModifier;
+#endif
+
+	int modifiers = (shift ? SCI_SHIFT : 0) | (ctrl ? SCI_CTRL : 0) | (alt ? SCI_ALT : 0);
+
+	sqt->ButtonMoveWithModifiers(pos, modifiers);
 }
 
 void ScintillaEditBase::contextMenuEvent(QContextMenuEvent *event)

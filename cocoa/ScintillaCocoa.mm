@@ -1838,6 +1838,24 @@ static inline UniChar KeyTranslate(UniChar unicodeChar)
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Translate NSEvent modifier flags into SCI_* modifier flags. 
+ *
+ * @param modifiers An integer bit set of NSSEvent modifier flags.
+ * @return A set of SCI_* modifier flags.
+ */
+static int TranslateModifierFlags(NSUInteger modifiers)
+{
+  // Signal Control as SCI_META
+  return
+    (((modifiers & NSShiftKeyMask) != 0) ? SCI_SHIFT : 0) |
+    (((modifiers & NSCommandKeyMask) != 0) ? SCI_CTRL : 0) |
+    (((modifiers & NSAlternateKeyMask) != 0) ? SCI_ALT : 0) |
+    (((modifiers & NSControlKeyMask) != 0) ? SCI_META : 0);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Main keyboard input handling method. It is called for any key down event, including function keys,
  * numeric keypad input and whatnot. 
  *
@@ -1847,14 +1865,7 @@ static inline UniChar KeyTranslate(UniChar unicodeChar)
 bool ScintillaCocoa::KeyboardInput(NSEvent* event)
 {
   // For now filter out function keys.
-  NSUInteger modifiers = [event modifierFlags];
-  
   NSString* input = [event characters];
-  
-  bool control = (modifiers & NSControlKeyMask) != 0;
-  bool shift = (modifiers & NSShiftKeyMask) != 0;
-  bool command = (modifiers & NSCommandKeyMask) != 0;
-  bool alt = (modifiers & NSAlternateKeyMask) != 0;
   
   bool handled = false;
   
@@ -1866,13 +1877,7 @@ bool ScintillaCocoa::KeyboardInput(NSEvent* event)
     
     bool consumed = false; // Consumed as command?
     
-    // Signal Control as SCMOD_META
-    int modifierKeys = 
-	  (shift ? SCI_SHIFT : 0) | 
-	  (command ? SCI_CTRL : 0) |
-	  (alt ? SCI_ALT : 0) |
-	  (control ? SCI_META : 0);
-    if (KeyDownWithModifiers(key, modifierKeys, &consumed))
+    if (KeyDownWithModifiers(key, TranslateModifierFlags([event modifierFlags]), &consumed))
       handled = true;
     if (consumed)
       handled = true;
@@ -1977,7 +1982,7 @@ void ScintillaCocoa::MouseMove(NSEvent* event)
 {
   lastMouseEvent = event;
 
-  ButtonMove(ConvertPoint([event locationInWindow]));
+  ButtonMoveWithModifiers(ConvertPoint([event locationInWindow]), TranslateModifierFlags([event modifierFlags]));
 }
 
 //--------------------------------------------------------------------------------------------------

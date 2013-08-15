@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 29/June/2013 NH</p>
+    <p>Last edited 14/August/2013 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -1167,6 +1167,9 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_CHOOSECARETX">SCI_CHOOSECARETX</a><br />
      <a class="message" href="#SCI_MOVESELECTEDLINESUP">SCI_MOVESELECTEDLINESUP</a><br />
      <a class="message" href="#SCI_MOVESELECTEDLINESDOWN">SCI_MOVESELECTEDLINESDOWN</a><br />
+     <a class="message" href="#SCI_SETMOUSESELECTIONRECTANGULARSWITCH">SCI_SETMOUSESELECTIONRECTANGULARSWITCH(bool
+    mouseSelectionRectangularSwitch)</a><br />
+     <a class="message" href="#SCI_GETMOUSESELECTIONRECTANGULARSWITCH">SCI_GETMOUSESELECTIONRECTANGULARSWITCH</a><br />
     </code>
 
     <p><b id="SCI_GETTEXTLENGTH">SCI_GETTEXTLENGTH</b><br />
@@ -1526,6 +1529,15 @@ struct Sci_TextToFind {
      Move the selected lines down one line, shifting the line below before the selection.
      The selection will be automatically extended to the beginning of the selection's first line and the end of the seletion's last line.
      If nothing was selected, the line the cursor is currently at will be selected.</p>
+
+    <p><b id="SCI_SETMOUSESELECTIONRECTANGULARSWITCH">SCI_SETMOUSESELECTIONRECTANGULARSWITCH(bool
+     mouseSelectionRectangularSwitch)</b><br />
+    <b id="SCI_GETMOUSESELECTIONRECTANGULARSWITCH">SCI_GETMOUSESELECTIONRECTANGULARSWITCH</b><br />
+     Enable or disable the ability to switch to rectangular selection mode while making a selection with the mouse.
+     When this option is turned on, mouse selections in stream mode can be switched to rectangular mode by pressing
+     the corresponding modifier key. They then stick to rectangular mode even when the modifier key is released again.
+     When this option is turned off, mouse selections will always stick to the mode the selection was started in. It
+     is off by default.</p>
 
     <h2 id="MultipleSelectionAndVirtualSpace">Multiple Selection and Virtual Space</h2>
 
