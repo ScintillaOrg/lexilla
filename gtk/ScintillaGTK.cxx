@@ -1845,7 +1845,7 @@ gint ScintillaGTK::MouseRelease(GtkWidget *widget, GdkEventButton *event) {
 				// If mouse released on scroll bar then the position is relative to the
 				// scrollbar, not the drawing window so just repeat the most recent point.
 				pt = sciThis->ptMouseLast;
-			sciThis->ButtonUp(pt, event->time, (event->state & 4) != 0);
+			sciThis->ButtonUp(pt, event->time, (event->state & GDK_CONTROL_MASK) != 0);
 		}
 	} catch (...) {
 		sciThis->errorStatus = SC_STATUS_FAILURE;
