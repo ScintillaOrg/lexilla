@@ -366,6 +366,10 @@ void ViewStyle::ReleaseAllExtendedStyles() {
 int ViewStyle::AllocateExtendedStyles(int numberStyles) {
 	int startRange = static_cast<int>(nextExtendedStyle);
 	nextExtendedStyle += numberStyles;
+	EnsureStyle(nextExtendedStyle);
+	for (size_t i=startRange; i<nextExtendedStyle; i++) {
+		styles[i].ClearTo(styles[STYLE_DEFAULT]);
+	}
 	return startRange;
 }
 
