@@ -1376,6 +1376,51 @@ class TestMultiSelection(unittest.TestCase):
 		self.assertEquals(self.ed.GetSelectionNCaret(0), 3)
 		self.assertEquals(self.ed.GetSelectionNCaretVirtualSpace(0), 0)
 
+class TestCharacterNavigation(unittest.TestCase):
+	def setUp(self):
+		self.xite = Xite.xiteFrame
+		self.ed = self.xite.ed
+		self.ed.ClearAll()
+		self.ed.EmptyUndoBuffer()
+		self.ed.SetCodePage(65001)
+
+	def tearDown(self):
+		self.ed.SetCodePage(0)
+
+	def testBeforeAfter(self):
+		t = "aåﬂﬔ-"
+		tv = t.encode("UTF-8")
+		self.ed.SetContents(tv)
+		pos = 0
+		for i in range(len(t)-1):
+			after = self.ed.PositionAfter(pos)
+			self.assert_(after > i)
+			back = self.ed.PositionBefore(after)
+			self.assertEquals(pos, back)
+			pos = after
+
+	def testRelative(self):
+		# \x61  \xc3\xa5  \xef\xac\x82   \xef\xac\x94   \x2d
+		t = "aåﬂﬔ-"
+		tv = t.encode("UTF-8")
+		self.ed.SetContents(tv)
+		self.assertEquals(self.ed.PositionRelative(1, 2), 6)
+		self.assertEquals(self.ed.PositionRelative(6, -2), 1)
+		pos = 0
+		previous = 0
+		for i in range(1, len(t)):
+			after = self.ed.PositionRelative(pos, i)
+			self.assert_(after > pos)
+			self.assert_(after > previous)
+			previous = after
+		pos = len(t)
+		previous = pos
+		for i in range(1, len(t)-1):
+			after = self.ed.PositionRelative(pos, -i)
+			self.assert_(after < pos)
+			self.assert_(after < previous)
+			previous = after
+
 class TestCaseMapping(unittest.TestCase):
 	def setUp(self):
 		self.xite = Xite.xiteFrame

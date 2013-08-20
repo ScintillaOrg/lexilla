@@ -1756,6 +1756,10 @@ fun position PositionBefore=2417(position pos,)
 # page into account. Maximum value returned is the last position in the document.
 fun position PositionAfter=2418(position pos,)
 
+# Given a valid document position, return a position that differs in a number
+# of characters. Returned value is always between 0 and last position in document.
+fun position PositionRelative=2670(position pos, int relative)
+
 # Copy a range of text to the clipboard. Positions are clipped into the document.
 fun void CopyRange=2419(position start, position end)
 

@@ -673,6 +673,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_PARAUPEXTEND 2416
 #define SCI_POSITIONBEFORE 2417
 #define SCI_POSITIONAFTER 2418
+#define SCI_POSITIONRELATIVE 2670
 #define SCI_COPYRANGE 2419
 #define SCI_COPYTEXT 2420
 #define SC_SEL_STREAM 0
