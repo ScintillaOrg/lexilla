@@ -166,6 +166,7 @@ public:
 	void ClearStyles();
 	void SetStyleFontName(int styleIndex, const char *name);
 	bool ProtectionActive() const;
+	int ExternalMarginWidth() const;
 	bool ValidStyle(size_t styleIndex) const;
 	void CalcLargestMarkerHeight();
 	ColourDesired WrapColour() const;

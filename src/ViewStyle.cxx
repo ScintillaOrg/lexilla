@@ -409,6 +409,10 @@ bool ViewStyle::ProtectionActive() const {
 	return someStylesProtected;
 }
 
+int ViewStyle::ExternalMarginWidth() const {
+	return marginInside ? 0 : fixedColumnWidth;
+}
+
 bool ViewStyle::ValidStyle(size_t styleIndex) const {
 	return styleIndex < styles.size();
 }
