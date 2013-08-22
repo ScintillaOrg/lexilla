@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 14/August/2013 NH</p>
+    <p>Last edited 22/August/2013 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -1734,7 +1734,7 @@ struct Sci_TextToFind {
      <b id="SCI_GETADDITIONALSELALPHA">SCI_GETADDITIONALSELALPHA</b><br />
      <b id="SCI_SETADDITIONALSELFORE">SCI_SETADDITIONALSELFORE(int <a class="jump" href="#colour">colour</a>)</b><br />
      <b id="SCI_SETADDITIONALSELBACK">SCI_SETADDITIONALSELBACK(int <a class="jump" href="#colour">colour</a>)</b><br />
-     Modify the appearence of additional selections so that they can be differentiated from the main selection which has its appearence set with
+     Modify the appearance of additional selections so that they can be differentiated from the main selection which has its appearance set with
      <a class="message" href="#SCI_SETSELALPHA"><code>SCI_SETSELALPHA</code></a>,
      <a class="message" href="#SCI_GETSELALPHA"><code>SCI_GETSELALPHA</code></a>,
      <a class="message" href="#SCI_SETSELFORE"><code>SCI_SETSELFORE</code></a>, and
@@ -1745,7 +1745,7 @@ struct Sci_TextToFind {
      <b id="SCI_GETADDITIONALCARETFORE">SCI_GETADDITIONALCARETFORE</b><br />
      <b id="SCI_SETADDITIONALCARETSBLINK">SCI_SETADDITIONALCARETSBLINK(bool additionalCaretsBlink)</b><br />
      <b id="SCI_GETADDITIONALCARETSBLINK">SCI_GETADDITIONALCARETSBLINK</b><br />
-     Modify the appearence of additional carets so that they can be differentiated from the main caret which has its appearence set with
+     Modify the appearance of additional carets so that they can be differentiated from the main caret which has its appearance set with
      <a class="message" href="#SCI_SETCARETFORE"><code>SCI_SETCARETFORE</code></a>,
      <a class="message" href="#SCI_GETCARETFORE"><code>SCI_GETCARETFORE</code></a>,
      <a class="message" href="#SCI_SETCARETPERIOD"><code>SCI_SETCARETPERIOD</code></a>, and
@@ -2237,7 +2237,7 @@ struct Sci_TextToFind {
     <p><b id="SCI_SETMOUSEDOWNCAPTURES">SCI_SETMOUSEDOWNCAPTURES(bool captures)</b><br />
      <b id="SCI_GETMOUSEDOWNCAPTURES">SCI_GETMOUSEDOWNCAPTURES</b><br />
      When the mouse is pressed inside Scintilla, it is captured so future mouse movement events are
-    sent to Scintilla. This behavior may be turned off with
+    sent to Scintilla. This behaviour may be turned off with
     <code>SCI_SETMOUSEDOWNCAPTURES(0)</code>.</p>
 
     <h2 id="LineEndings">Line endings</h2>
@@ -2691,7 +2691,7 @@ struct Sci_TextToFind {
 
     <p>The selection is shown by changing the foreground and/or background colours. If one of these
     is not set then that attribute is not changed for the selection. The default is to show the
-    selection by changing the background to light gray and leaving the foreground the same as when
+    selection by changing the background to light grey and leaving the foreground the same as when
     it was not selected. When there is no selection, the current insertion point is marked by the
     text caret. This is a vertical line that is normally blinking on and off to attract the users
     attention.</p>
@@ -2803,7 +2803,7 @@ struct Sci_TextToFind {
      The width of the line caret can be set with <code>SCI_SETCARETWIDTH</code> to a value of
     0, 1, 2 or 3 pixels. The default width is 1 pixel. You can read back the current width with
     <code>SCI_GETCARETWIDTH</code>. A width of 0 makes the caret invisible (added at version
-    1.50), similar to setting the caret style to CARETSTYLE_INVISIBLE (though not interchangable).
+    1.50), similar to setting the caret style to CARETSTYLE_INVISIBLE (though not interchangeable).
     This setting only affects the width of the cursor when the cursor style is set to line caret
     mode, it does not affect the width for a block caret.</p>
 
@@ -2836,7 +2836,7 @@ struct Sci_TextToFind {
 
     <p>When set to <code>SC_CARETSTICKY_WHITESPACE</code> (2), the caret acts like mode 0 (sticky off) except under one
     special case; when space or tab characters are inserted. (Including pasting <b>only space/tabs</b> -- undo, redo,
-    etc. do not exhibit this behavior..).</p>
+    etc. do not exhibit this behaviour..).</p>
 
     <p><code>SCI_TOGGLECARETSTICKY</code> switches from <code>SC_CARETSTICKY_ON</code> and <code>SC_CARETSTICKY_WHITESPACE</code>
     to <code>SC_CARETSTICKY_OFF</code> and from <code>SC_CARETSTICKY_OFF</code> to <code>SC_CARETSTICKY_ON</code>.</p>
@@ -3064,7 +3064,7 @@ struct Sci_TextToFind {
      <b id="SCI_MARGINGETSTYLEOFFSET">SCI_MARGINGETSTYLEOFFSET</b><br />
     Margin styles may be completely separated from standard text styles by setting a style offset. For example,
     <code>SCI_MARGINSETSTYLEOFFSET(256)</code> would allow the margin styles to be numbered from
-    256 upto 511 so they do not overlap styles set by lexers. Each style number set with <code>SCI_MARGINSETSTYLE</code>
+    256 up to 511 so they do not overlap styles set by lexers. Each style number set with <code>SCI_MARGINSETSTYLE</code>
     or <code>SCI_MARGINSETSTYLES</code> has the offset added before looking up the style.
     </p>
     <p>
@@ -3176,7 +3176,7 @@ struct Sci_TextToFind {
      <b id="SCI_ANNOTATIONGETSTYLEOFFSET">SCI_ANNOTATIONGETSTYLEOFFSET</b><br />
     Annotation styles may be completely separated from standard text styles by setting a style offset. For example,
     <code>SCI_ANNOTATIONSETSTYLEOFFSET(512)</code> would allow the annotation styles to be numbered from
-    512 upto 767 so they do not overlap styles set by lexers (or margins if margins offset is 256).
+    512 up to 767 so they do not overlap styles set by lexers (or margins if margins offset is 256).
     Each style number set with <code>SCI_ANNOTATIONSETSTYLE</code>
     or <code>SCI_ANNOTATIONSETSTYLES</code> has the offset added before looking up the style.
     </p>
@@ -3726,7 +3726,7 @@ struct Sci_TextToFind {
      The width and height must previously been set with the <code>SCI_RGBAIMAGESETWIDTH</code> and
      <code>SCI_RGBAIMAGESETHEIGHT</code> messages.</p>
      <p>A scale factor in percent may be set with <code>SCI_RGBAIMAGESETSCALE</code>. This is useful on OS X with
-     a retina display where each display unit is 2 pixels: use a factor of 200 so that each image pixel is dsplayed using a screen pixel.
+     a retina display where each display unit is 2 pixels: use a factor of 200 so that each image pixel is displayed using a screen pixel.
      The default scale, 100, will stretch each image pixel to cover 4 screen pixels on a retina display.</p>
     <p>Pixmaps use the <code>SC_MARK_RGBAIMAGE</code> marker symbol. </p>
 
@@ -3997,7 +3997,7 @@ struct Sci_TextToFind {
           <td>A version of <code>INDIC_SQUIGGLE</code> that draws using a pixmap instead of
 	  as a series of line segments for performance.
 	  Measured to be between 3 and 6 times faster than <code>INDIC_SQUIGGLE</code> on GTK+.
-	  Apperance will not be as good as <code>INDIC_SQUIGGLE</code> on OS X in HiDPI mode.</td>
+	  Appearance will not be as good as <code>INDIC_SQUIGGLE</code> on OS X in HiDPI mode.</td>
         </tr>
 
         <tr>
@@ -4280,7 +4280,7 @@ struct Sci_TextToFind {
 
     <p><b id="SCI_AUTOCSETCANCELATSTART">SCI_AUTOCSETCANCELATSTART(bool cancel)</b><br />
      <b id="SCI_AUTOCGETCANCELATSTART">SCI_AUTOCGETCANCELATSTART</b><br />
-     The default behavior is for the list to be cancelled if the caret moves to the location it
+     The default behaviour is for the list to be cancelled if the caret moves to the location it
     was at when the list was displayed. By calling this message with a <code>false</code> argument,
     the list is not cancelled until the caret moves at least one character before the word being
     completed.</p>
@@ -4478,7 +4478,7 @@ struct Sci_TextToFind {
     number of characters to highlight. Highlights can extend over line ends if this is
     required.</p>
 
-    <p>Unhighlighted text is drawn in a mid gray. Selected text is drawn in a dark blue. The
+    <p>Unhighlighted text is drawn in a mid grey. Selected text is drawn in a dark blue. The
     background is white. These can be changed with
     <code>SCI_CALLTIPSETBACK</code>,
     <code>SCI_CALLTIPSETFORE</code>, and
@@ -4488,11 +4488,11 @@ struct Sci_TextToFind {
     <p><b id="SCI_CALLTIPSETBACK">SCI_CALLTIPSETBACK(int colour)</b><br />
      The background colour of call tips can be set with this message; the default colour is white.
     It is not a good idea to set a dark colour as the background as the default colour for normal
-    calltip text is mid gray and the defaultcolour for highlighted text is dark blue. This also
+    calltip text is mid grey and the default colour for highlighted text is dark blue. This also
     sets the background colour of <code>STYLE_CALLTIP</code>.</p>
 
     <p><b id="SCI_CALLTIPSETFORE">SCI_CALLTIPSETFORE(int colour)</b><br />
-     The colour of call tip text can be set with this message; the default colour is mid gray.
+     The colour of call tip text can be set with this message; the default colour is mid grey.
     This also sets the foreground colour of <code>STYLE_CALLTIP</code>.</p>
 
     <p><b id="SCI_CALLTIPSETFOREHLT">SCI_CALLTIPSETFOREHLT(int colour)</b><br />
@@ -5477,7 +5477,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     that is adequate for many applications. The <code>automaticFold</code> argument is a bit set defining
     which of the 3 pieces of folding implementation should be enabled. Most applications should be able to use the
     <code>SC_AUTOMATICFOLD_SHOW</code> and <code>SC_AUTOMATICFOLD_CHANGE</code>
-    flags unless they wish to implement quite different behavious such as defining their own fold structure.
+    flags unless they wish to implement quite different behaviour such as defining their own fold structure.
     <code>SC_AUTOMATICFOLD_CLICK</code> is more likely to be set off when an application would
     like to add or change click behaviour such as showing method headers only when Shift+Alt is used in
     conjunction with a click.
@@ -5574,7 +5574,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     line.</p>
 
     <p>Wrapping is not performed immediately there is a change but is delayed until the display
-    is redrawn. This delay improves peformance by allowing a set of changes to be performed
+    is redrawn. This delay improves performance by allowing a set of changes to be performed
     and then wrapped and displayed once. Because of this, some operations may not occur as
     expected. If a file is read and the scroll position moved to a particular line in the text,
     such as occurs when a container tries to restore a previous editing session, then
@@ -6014,7 +6014,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 
     <p>Applications may discover the set of properties used by searching the source code of lexers for lines that contain
     <code>GetProperty</code> and a double quoted string and extract the value of the double quoted string as the property name.
-    The <code>scintilla/src/LexGen.py</code> script does this and can be used as an example.
+    The <code>scintilla/scripts/LexGen.py</code> script does this and can be used as an example.
     Documentation for the property may be located above the call as a multi-line comment starting with
     <br/><code>// property &lt;property-name&gt;</code></p>
 
@@ -6526,7 +6526,7 @@ struct SCNotification {
      When an application creates multiple Scintilla widgets, this allows the source of each notification to be found.
      On Windows, this value is initialised in the <code>CreateWindow</code> call and stored as the
      <code>GWLP_ID</code> attribute of the window.
-     The value should be small, preferrably less than 16 bits,
+     The value should be small, preferably less than 16 bits,
      rather than a pointer as some of the functions will only transmit 16 or 32 bits.
     </p>
 
@@ -6956,7 +6956,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
     <p><b id="SCEN_CHANGE">SCEN_CHANGE</b><br />
      <code>SCEN_CHANGE</code> (768) is fired when the text (not the style) of the document changes.
     This notification is sent using the <code>WM_COMMAND</code> message on Windows and the
-    "Command" signal on GTK+ as this is the behavior of the standard Edit control
+    "Command" signal on GTK+ as this is the behaviour of the standard Edit control
     (<code>SCEN_CHANGE</code> has the same value as the Windows Edit control
     <code>EN_CHANGE</code>). No other information is sent. If you need more detailed information
     use <a class="message" href="#SCN_MODIFIED"><code>SCN_MODIFIED</code></a>. You can filter the
@@ -6986,7 +6986,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
      <code>SCEN_SETFOCUS</code> (512) is fired when Scintilla receives focus and
     <code>SCEN_KILLFOCUS</code> (256) when it loses focus. These notifications are sent using the
     <code>WM_COMMAND</code> message on Windows and the "Command" signal on GTK+ as this is the
-    behavior of the standard Edit control. Unfortunately, these codes do not match the Windows Edit
+    behaviour of the standard Edit control. Unfortunately, these codes do not match the Windows Edit
     notification codes <code>EN_SETFOCUS</code> (256) and <code>EN_KILLFOCUS</code> (512). It is
     now too late to change the Scintilla codes as clients depend on the current values.</p>
 
@@ -7457,10 +7457,10 @@ EM_SETTARGETDEVICE
     <h3>Changing set of lexers</h3>
 
     <p>To change the set of lexers in Scintilla, add and remove lexer source files
-    (<code>Lex*.cxx</code>) from the <code>scintilla/src directory</code> and run the
-    <code>src/LexGen.py</code> script from the <code>src</code> directory to update the make files
-    and <code>KeyWords.cxx</code>. <code>LexGen.py</code> requires Python 2.1 or later. If you do
-    not have access to Python, you can hand edit <code>KeyWords.cxx</code> in a simple-minded way,
+    (<code>Lex*.cxx</code>) from the <code>scintilla/lexers directory</code> and run the
+    <code>scripts/LexGen.py</code> script from the <code>scripts</code> directory to update the make files
+    and <code>Catalogue.cxx</code>. <code>LexGen.py</code> requires Python 2.5 or later. If you do
+    not have access to Python, you can hand edit <code>Catalogue.cxx</code> in a simple-minded way,
     following the patterns of other lexers. The important thing is to include
     <code>LINK_LEXER(lmMyLexer);</code> to correspond with the <code>LexerModule
     lmMyLexer(...);</code> in your lexer source code.</p>
