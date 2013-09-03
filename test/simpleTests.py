@@ -303,6 +303,7 @@ class TestSimple(unittest.TestCase):
 		self.assertEquals(self.ed.LineCount, 1)
 		self.assertEquals(self.ed.LineLength(0), 2)
 		self.assertEquals(self.ed.GetLineEndPosition(0), 2)
+		self.assertEquals(self.ed.LineEndTypesSupported, 1)
 
 	def testUnicodeLineEndsWithCodePage0(self):
 		# Try the Unicode line ends when not in Unicode mode -> should remain 1 line
