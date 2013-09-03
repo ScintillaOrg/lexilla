@@ -387,6 +387,9 @@ public:
 	int SCI_METHOD SubStylesLength(int styleBase) {
 		return subStyles.Length(styleBase);
 	}
+	int SCI_METHOD StyleFromSubStyle(int subStyle) {
+		return subStyles.BaseStyle(subStyle);
+	}
 	void SCI_METHOD FreeSubStyles() {
 		subStyles.Free();
 	}

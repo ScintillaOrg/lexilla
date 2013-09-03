@@ -1627,6 +1627,38 @@ class TestLexer(unittest.TestCase):
 		wordSet = self.ed.DescribeKeyWordSets()
 		self.assertNotEquals(wordSet, b"")
 
+class TestSubStyles(unittest.TestCase):
+	def setUp(self):
+		self.xite = Xite.xiteFrame
+		self.ed = self.xite.ed
+		self.ed.ClearAll()
+		self.ed.EmptyUndoBuffer()
+
+	def testInfo(self):
+		self.ed.Lexer = self.ed.SCLEX_CPP
+		bases = self.ed.GetSubStyleBases()
+		self.assertEquals(bases, b"\x0b\x11")	# IDENTIFIER 11, COMMENTDOCKEYWORD 17
+		self.assertEquals(self.ed.DistanceToSecondaryStyles(), 0x40)
+
+	def testAllocate(self):
+		self.ed.Lexer = self.ed.SCLEX_CPP
+		self.assertEquals(self.ed.GetStyleFromSubStyle(0x80), 0x80)
+		self.assertEquals(self.ed.GetSubStylesStart(self.ed.SCE_C_IDENTIFIER), 0)
+		self.assertEquals(self.ed.GetSubStylesLength(self.ed.SCE_C_IDENTIFIER), 0)
+		numSubStyles = 5
+		subs = self.ed.AllocateSubStyles(self.ed.SCE_C_IDENTIFIER, numSubStyles)
+		self.assertEquals(subs, 0x80)
+		self.assertEquals(self.ed.GetSubStylesStart(self.ed.SCE_C_IDENTIFIER), 0x80)
+		self.assertEquals(self.ed.GetSubStylesLength(self.ed.SCE_C_IDENTIFIER), numSubStyles)
+		self.assertEquals(self.ed.GetStyleFromSubStyle(subs), self.ed.SCE_C_IDENTIFIER)
+		self.assertEquals(self.ed.GetStyleFromSubStyle(subs+numSubStyles-1), self.ed.SCE_C_IDENTIFIER)
+		self.assertEquals(self.ed.GetStyleFromSubStyle(self.ed.SCE_C_IDENTIFIER), self.ed.SCE_C_IDENTIFIER)
+		# Now free and check same as start
+		self.ed.FreeSubStyles()
+		self.assertEquals(self.ed.GetStyleFromSubStyle(subs), subs)
+		self.assertEquals(self.ed.GetSubStylesStart(self.ed.SCE_C_IDENTIFIER), 0)
+		self.assertEquals(self.ed.GetSubStylesLength(self.ed.SCE_C_IDENTIFIER), 0)
+
 class TestAutoComplete(unittest.TestCase):
 
 	def setUp(self):
