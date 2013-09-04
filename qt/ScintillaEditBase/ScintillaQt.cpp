@@ -49,6 +49,7 @@ ScintillaQt::ScintillaQt(QAbstractScrollArea *parent)
 ScintillaQt::~ScintillaQt()
 {
 	SetTicking(false);
+	SetIdle(false);
 }
 
 void ScintillaQt::tick()
