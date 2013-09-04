@@ -103,13 +103,13 @@ static BOOL (WINAPI *GetMonitorInfoFn)(HMONITOR, LPMONITORINFO) = 0;
 
 static HCURSOR reverseArrowCursor = NULL;
 
+#ifdef SCI_NAMESPACE
+namespace Scintilla {
+#endif
+
 bool IsNT() {
 	return onNT;
 }
-
-#ifdef SCI_NAMESPACE
-using namespace Scintilla;
-#endif
 
 Point Point::FromLong(long lpoint) {
 	return Point(static_cast<short>(LOWORD(lpoint)), static_cast<short>(HIWORD(lpoint)));
@@ -498,10 +498,6 @@ public:
 };
 typedef VarBuffer<XYPOSITION, stackBufferLength> TextPositions;
 
-#ifdef SCI_NAMESPACE
-namespace Scintilla {
-#endif
-
 class SurfaceGDI : public Surface {
 	bool unicodeMode;
 	HDC hdc;
@@ -573,10 +569,6 @@ public:
 	void SetUnicodeMode(bool unicodeMode_);
 	void SetDBCSMode(int codePage_);
 };
-
-#ifdef SCI_NAMESPACE
-} //namespace Scintilla
-#endif
 
 SurfaceGDI::SurfaceGDI() :
 	unicodeMode(false),
@@ -1147,10 +1139,6 @@ void SurfaceGDI::SetDBCSMode(int codePage_) {
 
 #if defined(USE_D2D)
 
-#ifdef SCI_NAMESPACE
-namespace Scintilla {
-#endif
-
 class SurfaceD2D : public Surface {
 	bool unicodeMode;
 	int x, y;
@@ -1229,10 +1217,6 @@ public:
 	void SetUnicodeMode(bool unicodeMode_);
 	void SetDBCSMode(int codePage_);
 };
-
-#ifdef SCI_NAMESPACE
-} //namespace Scintilla
-#endif
 
 SurfaceD2D::SurfaceD2D() :
 	unicodeMode(false),
@@ -3262,3 +3246,7 @@ void Platform_Finalise() {
 	ListBoxX_Unregister();
 	::DeleteCriticalSection(&crPlatformLock);
 }
+
+#ifdef SCI_NAMESPACE
+}
+#endif

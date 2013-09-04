@@ -89,15 +89,6 @@ static GdkWindow *WindowFromWidget(GtkWidget *w) {
 #endif
 }
 
-static GdkWindow *PWindow(const Window &w) {
-	GtkWidget *widget = reinterpret_cast<GtkWidget *>(w.GetID());
-#if GTK_CHECK_VERSION(3,0,0)
-	return gtk_widget_get_window(widget);
-#else
-	return widget->window;
-#endif
-}
-
 #ifdef _MSC_VER
 // Constant conditional expressions are because of GTK+ headers
 #pragma warning(disable: 4127)
@@ -110,6 +101,15 @@ static GdkWindow *PWindow(const Window &w) {
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
 #endif
+
+static GdkWindow *PWindow(const Window &w) {
+	GtkWidget *widget = reinterpret_cast<GtkWidget *>(w.GetID());
+#if GTK_CHECK_VERSION(3,0,0)
+	return gtk_widget_get_window(widget);
+#else
+	return widget->window;
+#endif
+}
 
 extern std::string UTF8FromLatin1(const char *s, int len);
 
