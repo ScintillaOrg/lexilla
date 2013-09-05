@@ -388,7 +388,9 @@ public:
 		return subStyles.Length(styleBase);
 	}
 	int SCI_METHOD StyleFromSubStyle(int subStyle) {
-		return subStyles.BaseStyle(subStyle);
+		int styleBase = subStyles.BaseStyle(MaskActive(subStyle));
+		int active = subStyle & activeFlag;
+		return styleBase | active;
 	}
 	void SCI_METHOD FreeSubStyles() {
 		subStyles.Free();

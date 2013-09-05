@@ -1629,6 +1629,9 @@ class TestLexer(unittest.TestCase):
 		self.assertNotEquals(wordSet, b"")
 
 class TestSubStyles(unittest.TestCase):
+	''' These tests include knowledge of the current implementation in the cpp lexer
+	and may have to change when that implementation changes.
+	Currently supports subStyles for IDENTIFIER 11 and COMMENTDOCKEYWORD 17 '''
 	def setUp(self):
 		self.xite = Xite.xiteFrame
 		self.ed = self.xite.ed
@@ -1638,18 +1641,19 @@ class TestSubStyles(unittest.TestCase):
 	def testInfo(self):
 		self.ed.Lexer = self.ed.SCLEX_CPP
 		bases = self.ed.GetSubStyleBases()
-		self.assertEquals(bases, b"\x0b\x11")	# IDENTIFIER 11, COMMENTDOCKEYWORD 17
+		self.assertEquals(bases, b"\x0b\x11")	# 11, 17
 		self.assertEquals(self.ed.DistanceToSecondaryStyles(), 0x40)
 
 	def testAllocate(self):
+		firstSubStyle = 0x80	# Current implementation
 		self.ed.Lexer = self.ed.SCLEX_CPP
-		self.assertEquals(self.ed.GetStyleFromSubStyle(0x80), 0x80)
+		self.assertEquals(self.ed.GetStyleFromSubStyle(firstSubStyle), firstSubStyle)
 		self.assertEquals(self.ed.GetSubStylesStart(self.ed.SCE_C_IDENTIFIER), 0)
 		self.assertEquals(self.ed.GetSubStylesLength(self.ed.SCE_C_IDENTIFIER), 0)
 		numSubStyles = 5
 		subs = self.ed.AllocateSubStyles(self.ed.SCE_C_IDENTIFIER, numSubStyles)
-		self.assertEquals(subs, 0x80)
-		self.assertEquals(self.ed.GetSubStylesStart(self.ed.SCE_C_IDENTIFIER), 0x80)
+		self.assertEquals(subs, firstSubStyle)
+		self.assertEquals(self.ed.GetSubStylesStart(self.ed.SCE_C_IDENTIFIER), firstSubStyle)
 		self.assertEquals(self.ed.GetSubStylesLength(self.ed.SCE_C_IDENTIFIER), numSubStyles)
 		self.assertEquals(self.ed.GetStyleFromSubStyle(subs), self.ed.SCE_C_IDENTIFIER)
 		self.assertEquals(self.ed.GetStyleFromSubStyle(subs+numSubStyles-1), self.ed.SCE_C_IDENTIFIER)
@@ -1659,6 +1663,17 @@ class TestSubStyles(unittest.TestCase):
 		self.assertEquals(self.ed.GetStyleFromSubStyle(subs), subs)
 		self.assertEquals(self.ed.GetSubStylesStart(self.ed.SCE_C_IDENTIFIER), 0)
 		self.assertEquals(self.ed.GetSubStylesLength(self.ed.SCE_C_IDENTIFIER), 0)
+
+	def testInactive(self):
+		firstSubStyle = 0x80	# Current implementation
+		inactiveDistance = self.ed.DistanceToSecondaryStyles()
+		self.ed.Lexer = self.ed.SCLEX_CPP
+		numSubStyles = 5
+		subs = self.ed.AllocateSubStyles(self.ed.SCE_C_IDENTIFIER, numSubStyles)
+		self.assertEquals(subs, firstSubStyle)
+		self.assertEquals(self.ed.GetStyleFromSubStyle(subs), self.ed.SCE_C_IDENTIFIER)
+		self.assertEquals(self.ed.GetStyleFromSubStyle(subs+inactiveDistance), self.ed.SCE_C_IDENTIFIER+inactiveDistance)
+		self.ed.FreeSubStyles()
 
 class TestAutoComplete(unittest.TestCase):
 
