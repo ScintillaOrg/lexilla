@@ -1675,6 +1675,10 @@ class TestSubStyles(unittest.TestCase):
 		self.assertEquals(self.ed.GetStyleFromSubStyle(subs+inactiveDistance), self.ed.SCE_C_IDENTIFIER+inactiveDistance)
 		self.ed.FreeSubStyles()
 
+	def testSecondary(self):
+		inactiveDistance = self.ed.DistanceToSecondaryStyles()
+		self.assertEquals(self.ed.GetPrimaryStyleFromStyle(self.ed.SCE_C_IDENTIFIER+inactiveDistance), self.ed.SCE_C_IDENTIFIER)
+
 class TestAutoComplete(unittest.TestCase):
 
 	def setUp(self):

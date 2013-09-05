@@ -392,6 +392,9 @@ public:
 		int active = subStyle & activeFlag;
 		return styleBase | active;
 	}
+	int SCI_METHOD PrimaryStyleFromStyle(int style) {
+		return MaskActive(style);
+ 	}
 	void SCI_METHOD FreeSubStyles() {
 		subStyles.Free();
 	}

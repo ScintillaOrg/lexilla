@@ -449,9 +449,11 @@
 	Released 3 September 2013.
 	</li>
 	<li>
-	Added SCI_GETSTYLEFROMSUBSTYLE function to find the base style of substyles.
+	Added functions to help convert between substyles and base styles and between secondary and primary styles.
+	SCI_GETSTYLEFROMSUBSTYLE finds the base style of substyles.
 	Can be used to treat all substyles of a style equivalent to that style.
-	A StyleFromSubStyle method was added to ILexerWithSubStyles so each lexer can implement this.
+	SCI_GETPRIMARYSTYLEFROMSTYLE finds the primary style of secondary styles.
+	StyleFromSubStyle and PrimaryStyleFromStyle methods were added to ILexerWithSubStyles so each lexer can implement these.
 	</li>
 	<li>
 	On Qt, turn off idle events on destruction to prevent repeatedly calling idle.

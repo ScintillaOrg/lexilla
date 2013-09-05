@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 3 September 2013 NH</p>
+    <p>Last edited 5 September 2013 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -5931,6 +5931,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_GETSUBSTYLESSTART">SCI_GETSUBSTYLESSTART(int styleBase)</a><br />
      <a class="message" href="#SCI_GETSUBSTYLESLENGTH">SCI_GETSUBSTYLESLENGTH(int styleBase)</a><br />
      <a class="message" href="#SCI_GETSTYLEFROMSUBSTYLE">SCI_GETSTYLEFROMSUBSTYLE(int subStyle)</a><br />
+     <a class="message" href="#SCI_GETPRIMARYSTYLEFROMSTYLE">SCI_GETPRIMARYSTYLEFROMSTYLE(int style)</a><br />
      <a class="message" href="#SCI_SETIDENTIFIERS">SCI_SETIDENTIFIERS(int style, const char *identifiers)</a><br />
 </div>
 
@@ -6107,7 +6108,10 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      Return the start and length of the substyles allocated for a base style.</p>
 
     <p><b id="SCI_GETSTYLEFROMSUBSTYLE">SCI_GETSTYLEFROMSUBSTYLE(int subStyle)</b><br />
-     Returns the base style of a substyle.</p>
+     For a sub style, return the base style, else return the argument.</p>
+
+    <p><b id="SCI_GETPRIMARYSTYLEFROMSTYLE">SCI_GETPRIMARYSTYLEFROMSTYLE(int style)</b><br />
+     For a secondary style, return the primary style, else return the argument.</p>
 
     <p><b id="SCI_SETIDENTIFIERS">SCI_SETIDENTIFIERS(int style, const char *identifiers)</b><br />
      Similar to <code>SCI_SETKEYWORDS</code> but for substyles.</p>
@@ -6242,6 +6246,7 @@ To allow lexers to report which line ends they support, and to support substyles
 <span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>SubStylesStart<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>styleBase<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>SubStylesLength<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>styleBase<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>StyleFromSubStyle<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>subStyle<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>PrimaryStyleFromStyle<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>style<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>FreeSubStyles<span class="S10">()</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>SetIdentifiers<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>style<span class="S10">,</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span>identifiers<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>DistanceToSecondaryStyles<span class="S10">()</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />

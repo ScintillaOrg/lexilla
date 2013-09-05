@@ -504,6 +504,7 @@ public:
 	int SubStylesStart(int styleBase);
 	int SubStylesLength(int styleBase);
 	int StyleFromSubStyle(int subStyle);
+	int PrimaryStyleFromStyle(int style);
 	void FreeSubStyles();
 	void SetIdentifiers(int style, const char *identifiers);
 	int DistanceToSecondaryStyles();
@@ -682,6 +683,13 @@ int LexState::SubStylesLength(int styleBase) {
 int LexState::StyleFromSubStyle(int subStyle) {
 	if (instance && (interfaceVersion >= lvSubStyles)) {
 		return static_cast<ILexerWithSubStyles *>(instance)->StyleFromSubStyle(subStyle);
+	}
+	return 0;
+}
+
+int LexState::PrimaryStyleFromStyle(int style) {
+	if (instance && (interfaceVersion >= lvSubStyles)) {
+		return static_cast<ILexerWithSubStyles *>(instance)->PrimaryStyleFromStyle(style);
 	}
 	return 0;
 }
@@ -993,6 +1001,9 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 
 	case SCI_GETSTYLEFROMSUBSTYLE:
 		return DocumentLexState()->StyleFromSubStyle(wParam);
+
+	case SCI_GETPRIMARYSTYLEFROMSTYLE:
+		return DocumentLexState()->PrimaryStyleFromStyle(wParam);
 
 	case SCI_FREESUBSTYLES:
 		DocumentLexState()->FreeSubStyles();
