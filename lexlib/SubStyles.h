@@ -62,10 +62,12 @@ public:
 	void SetIdentifiers(int style, const char *identifiers) {
 		while (*identifiers) {
 			const char *cpSpace = identifiers;
-			while (*cpSpace && *cpSpace != ' ')
+			while (*cpSpace && !(*cpSpace == ' ' || *cpSpace == '\t' || *cpSpace == '\r' || *cpSpace == '\n'))
 				cpSpace++;
-			std::string word(identifiers, cpSpace - identifiers);
-			wordToStyle[word] = style;
+			if (cpSpace > identifiers) {
+				std::string word(identifiers, cpSpace - identifiers);
+				wordToStyle[word] = style;
+			}
 			identifiers = cpSpace;
 			if (*identifiers)
 				identifiers++;
