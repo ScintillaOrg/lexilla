@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 5 September 2013 NH</p>
+    <p>Last edited 7 September 2013 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -6051,8 +6051,8 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <code>SCI_SETPROPERTY</code></a> will be performed before any numeric interpretation.</p>
 
     <p><b id="SCI_SETKEYWORDS">SCI_SETKEYWORDS(int keyWordSet, const char *keyWordList)</b><br />
-     You can set up to 9 lists of keywords for use by the current lexer. This was increased from 6
-    at revision 1.50. <code>keyWordSet</code> can be 0 to 8 (actually 0 to <code>KEYWORDSET_MAX</code>)
+     You can set up to 9 lists of keywords for use by the current lexer.
+     <code>keyWordSet</code> can be 0 to 8 (actually 0 to <code>KEYWORDSET_MAX</code>)
     and selects which keyword list to replace. <code>keyWordList</code> is a list of keywords
     separated by spaces, tabs, <code>"\n"</code> or <code>"\r"</code> or any combination of these.
     It is expected that the keywords will be composed of standard ASCII printing characters,
@@ -6114,7 +6114,8 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      For a secondary style, return the primary style, else return the argument.</p>
 
     <p><b id="SCI_SETIDENTIFIERS">SCI_SETIDENTIFIERS(int style, const char *identifiers)</b><br />
-     Similar to <code>SCI_SETKEYWORDS</code> but for substyles.</p>
+     Similar to <code>SCI_SETKEYWORDS</code> but for substyles.
+     The prefix feature available with <code>SCI_SETKEYWORDS</code> is not implemented for <code>SCI_SETIDENTIFIERS</code>.</p>
 </div>
 
     <h2 id="LexerObjects">Lexer Objects</h2>
