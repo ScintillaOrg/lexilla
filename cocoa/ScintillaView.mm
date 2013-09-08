@@ -1580,9 +1580,6 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 /**
  * Sets the new control which is displayed as info bar at the top or bottom of the editor.
  * Set newBar to nil if you want to hide the bar again.
- * When aligned to bottom position then the info bar and the horizontal scroller share the available
- * space. The info bar will then only get the width it is currently set to less a minimal amount
- * reserved for the scroller. At the top position it gets the full width of the control.
  * The info bar's height is set to the height of the scrollbar.
  */
 - (void) setInfoBar: (NSView <InfoBarCommunicator>*) newBar top: (BOOL) top
@@ -1597,9 +1594,6 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
     {
       [self addSubview: mInfoBar];
       [mInfoBar setCallback: self];
-      
-      // Keep the initial width as reference for layout changes.
-      mInitialInfoBarWidth = [mInfoBar frame].size.width;
     }
     
     [self positionSubViews];

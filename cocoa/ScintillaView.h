@@ -111,7 +111,6 @@ extern NSString *SCIUpdateUINotification;
   // Area to display additional controls (e.g. zoom info, caret position, status info).
   NSView <InfoBarCommunicator>* mInfoBar;
   BOOL mInfoBarAtTop;
-  int mInitialInfoBarWidth;
 
   id<ScintillaNotificationProtocol> mDelegate;
 }
