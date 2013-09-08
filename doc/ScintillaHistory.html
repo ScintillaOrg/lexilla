@@ -456,6 +456,9 @@
 	StyleFromSubStyle and PrimaryStyleFromStyle methods were added to ILexerWithSubStyles so each lexer can implement these.
 	</li>
 	<li>
+	On Cocoa, the ScintillaView.h header now hides internal implementation details from Platform.h and ScintillaCocoa.h.
+	</li>
+	<li>
 	On Qt, turn off idle events on destruction to prevent repeatedly calling idle.
 	</li>
     </ul>
