@@ -42,7 +42,7 @@ class ScintillaCocoa;
 
 @class ScintillaView;
 
-extern NSString *SCIUpdateUINotification;
+extern NSString *const SCIUpdateUINotification;
 
 @protocol ScintillaNotificationProtocol
 - (void)notification: (Scintilla::SCNotification*)notification;

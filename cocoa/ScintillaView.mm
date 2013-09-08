@@ -22,7 +22,7 @@ static NSCursor* waitCursor;
 // The scintilla indicator used for keyboard input.
 #define INPUT_INDICATOR INDIC_MAX - 1
 
-NSString *SCIUpdateUINotification = @"SCIUpdateUI";
+NSString *const SCIUpdateUINotification = @"SCIUpdateUI";
 
 /**
  * Provide an NSCursor object that matches the Window::Cursor enumeration.
