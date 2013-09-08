@@ -78,26 +78,6 @@ extern "C" NSString* ScintillaRecPboardType;
 namespace Scintilla {
 
 /**
- * On the Mac, there is no WM_COMMAND or WM_NOTIFY message that can be sent
- * back to the parent. Therefore, there must be a callback handler that acts
- * like a Windows WndProc, where Scintilla can send notifications to. Use
- * ScintillaCocoa::RegisterNotifyHandler() to register such a handler.
- * Message format is:
- * <br>
- * WM_COMMAND: HIWORD (wParam) = notification code, LOWORD (wParam) = 0 (no control ID), lParam = ScintillaCocoa*
- * <br>
- * WM_NOTIFY: wParam = 0 (no control ID), lParam = ptr to SCNotification structure, with hwndFrom set to ScintillaCocoa*
- */
-typedef void(*SciNotifyFunc) (intptr_t windowid, unsigned int iMessage, uintptr_t wParam, uintptr_t lParam);
-
-/**
- * Scintilla sends these two messages to the notify handler. Please refer
- * to the Windows API doc for details about the message format.
- */
-#define	WM_COMMAND	1001
-#define WM_NOTIFY	1002
-
-/**
  * Main scintilla class, implemented for OS X (Cocoa).
  */
 class ScintillaCocoa : public ScintillaBase

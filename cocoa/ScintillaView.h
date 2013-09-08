@@ -11,12 +11,34 @@
 
 #import <Cocoa/Cocoa.h>
 
-#import "Platform.h"
 #import "Scintilla.h"
 #import "SciLexer.h"
 
 #import "InfoBarCommunicator.h"
-#import "ScintillaCocoa.h"
+
+/**
+ * Scintilla sends these two messages to the notify handler. Please refer
+ * to the Windows API doc for details about the message format.
+ */
+#define WM_COMMAND 1001
+#define WM_NOTIFY 1002
+
+namespace Scintilla {
+/**
+ * On the Mac, there is no WM_COMMAND or WM_NOTIFY message that can be sent
+ * back to the parent. Therefore, there must be a callback handler that acts
+ * like a Windows WndProc, where Scintilla can send notifications to. Use
+ * ScintillaView registerNotifyCallback() to register such a handler.
+ * Message format is:
+ * <br>
+ * WM_COMMAND: HIWORD (wParam) = notification code, LOWORD (wParam) = control ID, lParam = ScintillaCocoa*
+ * <br>
+ * WM_NOTIFY: wParam = 0 (no control ID), lParam = ptr to SCNotification structure, with hwndFrom set to ScintillaCocoa*
+ */
+typedef void(*SciNotifyFunc) (intptr_t windowid, unsigned int iMessage, uintptr_t wParam, uintptr_t lParam);
+
+class ScintillaCocoa;
+}
 
 @class ScintillaView;
 
@@ -64,7 +86,7 @@ extern NSString *SCIUpdateUINotification;
 
 - (void) dealloc;
 - (void) removeMarkedText;
-- (void) setCursor: (Scintilla::Window::Cursor) cursor;
+- (void) setCursor: (int) cursor;
 
 - (BOOL) canUndo;
 - (BOOL) canRedo;

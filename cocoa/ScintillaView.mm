@@ -9,7 +9,9 @@
  * This file is dual licensed under LGPL v2.1 and the Scintilla license (http://www.scintilla.org/License.txt).
  */
 
+#import "Platform.h"
 #import "ScintillaView.h"
+#import "ScintillaCocoa.h"
 
 using namespace Scintilla;
 
@@ -195,12 +197,13 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 /**
  * Called by the backend if a new cursor must be set for the view.
  */
-- (void) setCursor: (Window::Cursor) cursor
+- (void) setCursor: (int) cursor
 {
+  Window::Cursor eCursor = (Window::Cursor)cursor;
   [mCurrentCursor autorelease];
-  mCurrentCursor = cursorFromEnum(cursor);
+  mCurrentCursor = cursorFromEnum(eCursor);
   [mCurrentCursor retain];
-  
+
   // Trigger recreation of the cursor rectangle(s).
   [[self window] invalidateCursorRectsForView: self];
 }
