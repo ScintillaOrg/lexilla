@@ -1116,6 +1116,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   delete mBackend;
+  [marginView release];
   [super dealloc];
 }
 
