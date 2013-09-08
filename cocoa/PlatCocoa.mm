@@ -55,7 +55,7 @@ PRectangle NSRectToPRectangle(NSRect& rc)
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Converts a PRctangle as used by Scintilla to a Quartz-style rectangle.
+ * Converts a PRectangle as used by Scintilla to a Quartz-style rectangle.
  */
 inline CGRect PRectangleToCGRect(PRectangle& rc)
 {
@@ -196,10 +196,10 @@ bool SurfaceImpl::Initialised()
 void SurfaceImpl::Init(WindowID)
 {
   // To be able to draw, the surface must get a CGContext handle.  We save the graphics port,
-  // then aquire/release the context on an as-need basis (see above).
+  // then acquire/release the context on an as-need basis (see above).
   // XXX Docs on QDBeginCGContext are light, a better way to do this would be good.
   // AFAIK we should not hold onto a context retrieved this way, thus the need for
-  // aquire/release of the context.
+  // acquire/release of the context.
   
   Release();
 }
@@ -387,7 +387,7 @@ void SurfaceImpl::LineTo(int x_, int y_)
   
   // Because Quartz is based on floating point, lines are drawn with half their colour
   // on each side of the line. Integer coordinates specify the INTERSECTION of the pixel
-  // divison lines. If you specify exact pixel values, you get a line that
+  // division lines. If you specify exact pixel values, you get a line that
   // is twice as thick but half as intense. To get pixel aligned rendering,
   // we render the "middle" of the pixels by adding 0.5 to the coordinates.
   CGContextMoveToPoint( gc, x + 0.5, y + 0.5 );
@@ -1869,7 +1869,7 @@ ListBox* ListBox::Allocate()
 @implementation ScintillaContextMenu : NSMenu
 
 // This NSMenu subclass serves also as target for menu commands and forwards them as
-// notfication messages to the front end.
+// notification messages to the front end.
 
 - (void) handleCommand: (NSMenuItem*) sender
 {
@@ -1984,7 +1984,7 @@ int Platform::DefaultFontSize()
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Returns the time span in which two consequtive mouse clicks must occur to be considered as
+ * Returns the time span in which two consecutive mouse clicks must occur to be considered as
  * double click.
  *
  * @return
@@ -2159,7 +2159,7 @@ int Platform::Clamp(int val, int minVal, int maxVal)
  * Implements the platform specific part of library loading.
  * 
  * @param modulePath The path to the module to load.
- * @return A library instance or NULL if the module could not be found or another problem occured.
+ * @return A library instance or NULL if the module could not be found or another problem occurred.
  */
 DynamicLibrary* DynamicLibrary::Load(const char* /* modulePath */)
 {

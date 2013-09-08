@@ -103,7 +103,7 @@
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Called by a connected compontent (usually the info bar) if something changed there.
+ * Called by a connected component (usually the info bar) if something changed there.
  *
  * @param type The type of the notification.
  * @param message Carries the new status message if the type is a status message change.
@@ -427,7 +427,7 @@ static float BarFontSize = 10.0;
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Makes the bar resize to the smallest width that can accomodate the currently enabled items.
+ * Makes the bar resize to the smallest width that can accommodate the currently enabled items.
  */
 - (void) sizeToFit
 {

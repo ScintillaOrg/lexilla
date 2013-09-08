@@ -374,7 +374,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 	if (replacementRange.location == (NSNotFound-1))
 		// This occurs when the accent popup is visible and menu selected.
-		// Its replacing a non-existant position so do nothing.
+		// Its replacing a non-existent position so do nothing.
 		return;
 
 	if (replacementRange.length > 0)
@@ -1001,7 +1001,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
         }
         case SCN_ZOOM:
         {
-          // A zoom change happend. Notify info bar if there is one.
+          // A zoom change happened. Notify info bar if there is one.
           float zoom = [editor getGeneralProperty: SCI_GETZOOM parameter: 0];
           long fontSize = [editor getGeneralProperty: SCI_STYLEGETSIZE parameter: STYLE_DEFAULT];
           float factor = (zoom / fontSize) + 1;
@@ -1650,7 +1650,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Searches and marks the first occurance of the given text and optionally scrolls it into view.
+ * Searches and marks the first occurrence of the given text and optionally scrolls it into view.
  *
  * @result YES if something was found, NO otherwise.
  */
@@ -1670,7 +1670,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
   int selectionStart = [self getGeneralProperty: SCI_GETSELECTIONSTART parameter: 0];
   int selectionEnd = [self getGeneralProperty: SCI_GETSELECTIONEND parameter: 0];
   
-  // Sets the start point for the comming search to the begin of the current selection.
+  // Sets the start point for the coming search to the beginning of the current selection.
   // For forward searches we have therefore to set the selection start to the current selection end
   // for proper incremental search. This does not harm as we either get a new selection if something
   // is found or the previous selection is restored.
@@ -1745,13 +1745,13 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
                  wholeWord: (BOOL) wholeWord
                      doAll: (BOOL) doAll
 {
-  // The current position is where we start searching for single occurences. Otherwise we start at
+  // The current position is where we start searching for single occurrences. Otherwise we start at
   // the beginning of the document.
   int startPosition;
   if (doAll)
     startPosition = 0; // Start at the beginning of the text if we replace all occurrences.
   else
-    // For a signle replacement we start at the current caret position.
+    // For a single replacement we start at the current caret position.
     startPosition = [self getGeneralProperty: SCI_GETCURRENTPOS];
   int endPosition = [self getGeneralProperty: SCI_GETTEXTLENGTH];
 
@@ -1788,7 +1788,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
                                   wParam: targetLength
                                   lParam: (sptr_t) replacement];
 
-      // The replacement changes the target range to the replaced text. Continue after that til the end.
+      // The replacement changes the target range to the replaced text. Continue after that till the end.
       // The text length might be changed by the replacement so make sure the target end is the actual
       // text end.
       [self setGeneralProperty: SCI_SETTARGETSTART value: [self getGeneralProperty: SCI_GETTARGETEND]];

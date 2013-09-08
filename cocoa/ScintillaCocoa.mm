@@ -731,7 +731,7 @@ Scintilla::Point ScintillaCocoa::ConvertPoint(NSPoint point)
 
 /**
  * A function to directly execute code that would usually go the long way via window messages.
- * However this is a Windows metapher and not used here, hence we just call our fake
+ * However this is a Windows metaphor and not used here, hence we just call our fake
  * window proc. The given parameters directly reflect the message parameters used on Windows.
  *
  * @param sciThis The target which is to be called.
@@ -766,7 +766,7 @@ sptr_t scintilla_send_message(void* sci, unsigned int iMessage, uptr_t wParam, s
  * commands (also used to synchronize UI and background threads), which is not the case in Cocoa.
  *
  * Messages handled here are almost solely for special commands of the backend. Everything which
- * would be sytem messages on Windows (e.g. for key down, mouse move etc.) are handled by
+ * would be system messages on Windows (e.g. for key down, mouse move etc.) are handled by
  * directly calling appropriate handlers.
  */
 sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam)
@@ -1679,7 +1679,7 @@ void ScintillaCocoa::UpdateForScroll() {
 
 /**
  * Used to register a callback function for a given window. This is used to emulate the way
- * Windows notfies other controls (mainly up in the view hierarchy) about certain events.
+ * Windows notifies other controls (mainly up in the view hierarchy) about certain events.
  *
  * @param windowid A handle to a window. That value is generic and can be anything. It is passed
  *                 through to the callback.
@@ -1869,7 +1869,7 @@ bool ScintillaCocoa::KeyboardInput(NSEvent* event)
   
   bool handled = false;
   
-  // Handle each entry individually. Usually we only have one entry anway.
+  // Handle each entry individually. Usually we only have one entry anyway.
   for (size_t i = 0; i < input.length; i++)
   {
     const UniChar originalKey = [input characterAtIndex: i];

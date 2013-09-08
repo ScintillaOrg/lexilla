@@ -91,7 +91,7 @@ namespace Scintilla {
 typedef void(*SciNotifyFunc) (intptr_t windowid, unsigned int iMessage, uintptr_t wParam, uintptr_t lParam);
 
 /**
- * Scintilla sends these two messages to the nofity handler. Please refer
+ * Scintilla sends these two messages to the notify handler. Please refer
  * to the Windows API doc for details about the message format.
  */
 #define	WM_COMMAND	1001
