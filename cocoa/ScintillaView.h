@@ -33,7 +33,7 @@ namespace Scintilla {
  * <br>
  * WM_COMMAND: HIWORD (wParam) = notification code, LOWORD (wParam) = control ID, lParam = ScintillaCocoa*
  * <br>
- * WM_NOTIFY: wParam = 0 (no control ID), lParam = ptr to SCNotification structure, with hwndFrom set to ScintillaCocoa*
+ * WM_NOTIFY: wParam = control ID, lParam = ptr to SCNotification structure, with hwndFrom set to ScintillaCocoa*
  */
 typedef void(*SciNotifyFunc) (intptr_t windowid, unsigned int iMessage, uintptr_t wParam, uintptr_t lParam);
 

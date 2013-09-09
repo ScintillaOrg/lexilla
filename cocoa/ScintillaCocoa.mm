@@ -1726,7 +1726,7 @@ void ScintillaCocoa::NotifyParent(SCNotification scn)
   {
     scn.nmhdr.hwndFrom = (void*) this;
     scn.nmhdr.idFrom = GetCtrlID();
-    notifyProc(notifyObj, WM_NOTIFY, (uintptr_t) 0, (uintptr_t) &scn);
+    notifyProc(notifyObj, WM_NOTIFY, GetCtrlID(), (uintptr_t) &scn);
   }
 }
 
