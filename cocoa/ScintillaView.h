@@ -84,7 +84,6 @@ extern NSString *const SCIUpdateUINotification;
 
 @property (nonatomic, assign) ScintillaView* owner;
 
-- (void) dealloc;
 - (void) removeMarkedText;
 - (void) setCursor: (int) cursor;
 
@@ -119,7 +118,6 @@ extern NSString *const SCIUpdateUINotification;
 @property (nonatomic, assign) id<ScintillaNotificationProtocol> delegate;
 @property (nonatomic, readonly) NSScrollView *scrollView;
 
-- (void) dealloc;
 - (void) positionSubViews;
 
 - (void) sendNotification: (NSString*) notificationName;
