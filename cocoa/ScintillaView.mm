@@ -1018,7 +1018,10 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
           NSPoint caretPosition = editor->mBackend->GetCaretPosition();
           [editor->mInfoBar notify: IBNCaretChanged message: nil location: caretPosition value: 0];
           [editor sendNotification: SCIUpdateUINotification];
-          [editor sendNotification: NSTextViewDidChangeSelectionNotification];
+          if (scn->updated & (SC_UPDATE_SELECTION | SC_UPDATE_CONTENT))
+          {
+            [editor sendNotification: NSTextViewDidChangeSelectionNotification];
+          }
           break;
       }
       }
