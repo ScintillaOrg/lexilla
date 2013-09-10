@@ -528,7 +528,6 @@ public:
 #endif
 
 #if defined(__GNUC__) && defined(SCINTILLA_QT)
-#pragma GCC diagnostic ignored "-Wmissing-braces"
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #endif
 

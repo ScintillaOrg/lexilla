@@ -1218,7 +1218,7 @@ void ScintillaGTK::NotifyParent(SCNotification scn) {
 }
 
 void ScintillaGTK::NotifyKey(int key, int modifiers) {
-	SCNotification scn = {0};
+	SCNotification scn = {};
 	scn.nmhdr.code = SCN_KEY;
 	scn.ch = key;
 	scn.modifiers = modifiers;
@@ -1227,7 +1227,7 @@ void ScintillaGTK::NotifyKey(int key, int modifiers) {
 }
 
 void ScintillaGTK::NotifyURIDropped(const char *list) {
-	SCNotification scn = {0};
+	SCNotification scn = {};
 	scn.nmhdr.code = SCN_URIDROPPED;
 	scn.text = list;
 

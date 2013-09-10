@@ -2283,8 +2283,7 @@ void ScintillaWin::ScrollMessage(WPARAM wParam) {
 	//DWORD dwStart = timeGetTime();
 	//Platform::DebugPrintf("Scroll %x %d\n", wParam, lParam);
 
-	SCROLLINFO sci;
-	memset(&sci, 0, sizeof(sci));
+	SCROLLINFO sci = {};
 	sci.cbSize = sizeof(sci);
 	sci.fMask = SIF_ALL;
 

@@ -26,7 +26,7 @@ ifneq "$(shell g++ -c CheckD2D.cxx 2>&1)" ""
 D2DFLAGS=-DDISABLE_D2D
 endif
 
-CXXBASEFLAGS=--std=c++0x -Wall -Wno-missing-braces -pedantic $(INCLUDEDIRS) -fno-rtti $(D2DFLAGS)
+CXXBASEFLAGS=--std=c++0x -Wall -pedantic $(INCLUDEDIRS) -fno-rtti $(D2DFLAGS)
 
 ifdef DEBUG
 CXXFLAGS=-DDEBUG -g $(CXXBASEFLAGS)
