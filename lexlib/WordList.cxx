@@ -32,11 +32,11 @@ static char **ArrayFromWordList(char *wordlist, int *len, bool onlyLineEnds = fa
 	for (int i=0; i<256; i++) {
 		wordSeparator[i] = false;
 	}
-	wordSeparator['\r'] = true;
-	wordSeparator['\n'] = true;
+	wordSeparator[static_cast<unsigned int>('\r')] = true;
+	wordSeparator[static_cast<unsigned int>('\n')] = true;
 	if (!onlyLineEnds) {
-		wordSeparator[' '] = true;
-		wordSeparator['\t'] = true;
+		wordSeparator[static_cast<unsigned int>(' ')] = true;
+		wordSeparator[static_cast<unsigned int>('\t')] = true;
 	}
 	for (int j = 0; wordlist[j]; j++) {
 		int curr = static_cast<unsigned char>(wordlist[j]);
@@ -163,7 +163,7 @@ bool WordList::InList(const char *s) const {
 			j++;
 		}
 	}
-	j = starts['^'];
+	j = starts[static_cast<unsigned int>('^')];
 	if (j >= 0) {
 		while (words[j][0] == '^') {
 			const char *a = words[j] + 1;
@@ -215,7 +215,7 @@ bool WordList::InListAbbreviated(const char *s, const char marker) const {
 			j++;
 		}
 	}
-	j = starts['^'];
+	j = starts[static_cast<unsigned int>('^')];
 	if (j >= 0) {
 		while (words[j][0] == '^') {
 			const char *a = words[j] + 1;
