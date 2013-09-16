@@ -345,22 +345,10 @@ typedef void (*CallBackAction)(void*);
 class Window {
 protected:
 	WindowID wid;
-#if PLAT_MACOSX
-	void *windowRef;
-	void *control;
-#endif
 public:
 	Window() : wid(0), cursorLast(cursorInvalid) {
-#if PLAT_MACOSX
-	  windowRef = 0;
-	  control = 0;
-#endif
 	}
 	Window(const Window &source) : wid(source.wid), cursorLast(cursorInvalid) {
-#if PLAT_MACOSX
-	  windowRef = 0;
-	  control = 0;
-#endif
 	}
 	virtual ~Window();
 	Window &operator=(WindowID wid_) {
@@ -383,10 +371,6 @@ public:
 	void SetCursor(Cursor curs);
 	void SetTitle(const char *s);
 	PRectangle GetMonitorRect(Point pt);
-#if PLAT_MACOSX
-	void SetWindow(void *ref) { windowRef = ref; }
-	void SetControl(void *_control) { control = _control; }
-#endif
 private:
 	Cursor cursorLast;
 };
