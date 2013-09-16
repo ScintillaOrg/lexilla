@@ -28,10 +28,6 @@
 
 using namespace Scintilla;
 
-#ifndef WM_UNICHAR
-#define WM_UNICHAR 0x0109
-#endif
-
 NSString* ScintillaRecPboardType = @"com.scintilla.utf16-plain-text.rectangular";
 
 //--------------------------------------------------------------------------------------------------
@@ -800,19 +796,6 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
       
     case SCI_FINDINDICATORHIDE:
       HideFindIndicator();
-      return 0;
-      
-    case WM_UNICHAR:
-      // Special case not used normally. Characters passed in this way will be inserted
-      // regardless of their value or modifier states. That means no command interpretation is
-      // performed.
-      if (IsUnicodeMode())
-      {
-        NSString* input = [NSString stringWithCharacters: (const unichar*) &wParam length: 1];
-        const char* utf8 = [input UTF8String];
-        AddCharUTF((char*) utf8, static_cast<unsigned int>(strlen(utf8)), false);
-        return 1;
-      }
       return 0;
       
     default:
