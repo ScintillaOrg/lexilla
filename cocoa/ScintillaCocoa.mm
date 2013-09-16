@@ -1170,7 +1170,7 @@ void ScintillaCocoa::StartDrag()
   int endLine = pdoc->LineFromPosition(selEnd);
   Point pt;
   long startPos, endPos, ep;
-  Rect rcSel;
+  PRectangle rcSel;
   
   if (startLine==endLine && WndProc(SCI_GETWRAPMODE, 0, 0) != SC_WRAP_NONE) {
     // Komodo bug http://bugs.activestate.com/show_bug.cgi?id=87571
@@ -1231,10 +1231,9 @@ void ScintillaCocoa::StartDrag()
   }
   // must convert to global coordinates for drag regions, but also save the
   // image rectangle for further calculations and copy operations
-  PRectangle localRectangle = PRectangle(rcSel.left, rcSel.top, rcSel.right, rcSel.bottom);
     
   // Prepare drag image.
-  NSRect selectionRectangle = PRectangleToNSRect(localRectangle);
+  NSRect selectionRectangle = PRectangleToNSRect(rcSel);
   
   NSView* content = ContentView();
     
@@ -1249,7 +1248,7 @@ void ScintillaCocoa::StartDrag()
     pixmap = new SurfaceImpl();
     if (pixmap)
     {
-      PRectangle imageRect = NSRectToPRectangle(selectionRectangle);
+      PRectangle imageRect = rcSel;
       paintState = painting;
       sw->InitPixMap(client.Width(), client.Height(), NULL, NULL);
       paintingAllText = true;
@@ -1259,6 +1258,7 @@ void ScintillaCocoa::StartDrag()
       NSGraphicsContext *nsgc = [NSGraphicsContext graphicsContextWithGraphicsPort: gcsw 
                                                                            flipped: YES];
       [NSGraphicsContext setCurrentContext:nsgc];
+      CGContextTranslateCTM(gcsw, -client.left, -client.top);
       Paint(sw, client);
       paintState = notPainting;
       
@@ -1299,8 +1299,8 @@ void ScintillaCocoa::StartDrag()
   [dragImage unlockFocus];
   
   NSPoint startPoint;
-  startPoint.x = selectionRectangle.origin.x;
-  startPoint.y = selectionRectangle.origin.y + selectionRectangle.size.height;
+  startPoint.x = selectionRectangle.origin.x + client.left;
+  startPoint.y = selectionRectangle.origin.y + selectionRectangle.size.height + client.top;
   [content dragImage: dragImage 
                   at: startPoint
               offset: NSZeroSize
