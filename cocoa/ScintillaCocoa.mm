@@ -1238,8 +1238,6 @@ void ScintillaCocoa::StartDrag()
   
   NSView* content = ContentView();
     
-#if 1
-
   // To get a bitmap of the text we're dragging, we just use Paint on a pixmap surface.
   SurfaceImpl *sw = new SurfaceImpl();
   SurfaceImpl *pixmap = NULL;
@@ -1290,15 +1288,6 @@ void ScintillaCocoa::StartDrag()
     pixmap->Release();
     delete pixmap;
   }
-#else
-  
-  // Poor man's drag image: take a snapshot of the content view.
-  [content lockFocus];
-  NSBitmapImageRep* bitmap = [[[NSBitmapImageRep alloc] initWithFocusedViewRect: selectionRectangle] autorelease];
-  [bitmap setColorSpaceName: NSDeviceRGBColorSpace];
-  [content unlockFocus];
-  
-#endif
   
   NSImage* image = [[[NSImage alloc] initWithSize: selectionRectangle.size] autorelease];
   [image addRepresentation: bitmap];
