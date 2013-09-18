@@ -460,12 +460,19 @@
 	<a href="http://sourceforge.net/p/scintilla/bugs/1521/">Bug #1521</a>.
 	</li>
 	<li>
+	On Cocoa, ScintillaNotificationProtocol adds an optional command:idFrom: method so that client code can more
+	easily receive commands. Clients should use the delegate mechanism or subclass ScintillaView in preference
+	to registerNotifyCallback: which will be deprecated in the future.
+	</li>
+	<li>
 	On Cocoa, the ScintillaView.h header now hides internal implementation details from Platform.h and ScintillaCocoa.h.
 	dealloc removed from @interface.
-	Control ID included in WM_NOTIFY callback to be compatible with other platforms.
 	</li>
 	<li>
 	On Cocoa, memory leak fixed for MarginView.
+	</li>
+	<li>
+	On Cocoa, drag image fixed when view scrolled.
 	</li>
 	<li>
 	On Cocoa, don't send selection change notification when scrolling.
