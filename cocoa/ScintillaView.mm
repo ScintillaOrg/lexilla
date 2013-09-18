@@ -956,93 +956,89 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Notification function used by Scintilla to call us back (e.g. for handling clicks on the 
+ * Method receives notifications from Scintilla (e.g. for handling clicks on the
  * folder margin or changes in the editor).
  * A delegate can be set to receive all notifications. If set no handling takes place here, except
  * for action pertaining to internal stuff (like the info bar).
  */
-static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wParam, uintptr_t lParam)
+- (void) notification: (Scintilla::SCNotification*)scn
 {
-  // WM_NOTIFY means we got a parent notification with a special notification structure.
-  // Here we don't really differentiate between parent and own notifications and handle both.
-  ScintillaView* editor;
-  switch (iMessage)
+  // Parent notification. Details are passed as SCNotification structure.
+  
+  if (mDelegate != nil)
   {
-    case WM_NOTIFY:
+    [mDelegate notification: scn];
+    if (scn->nmhdr.code != SCN_ZOOM && scn->nmhdr.code != SCN_UPDATEUI)
+      return;
+  }
+  
+  switch (scn->nmhdr.code)
+  {
+    case SCN_MARGINCLICK:
     {
-      // Parent notification. Details are passed as SCNotification structure.
-      SCNotification* scn = reinterpret_cast<SCNotification*>(lParam);
-      ScintillaCocoa *psc = reinterpret_cast<ScintillaCocoa*>(scn->nmhdr.hwndFrom);
-      editor = reinterpret_cast<InnerView*>(psc->ContentView()).owner;
+      if (scn->margin == 2)
+      {
+	// Click on the folder margin. Toggle the current line if possible.
+	long line = [self getGeneralProperty: SCI_LINEFROMPOSITION parameter: scn->position];
+	[self setGeneralProperty: SCI_TOGGLEFOLD value: line];
+      }
+      break;
+    };
+    case SCN_MODIFIED:
+    {
+      // Decide depending on the modification type what to do.
+      // There can be more than one modification carried by one notification.
+      if (scn->modificationType & (SC_MOD_INSERTTEXT | SC_MOD_DELETETEXT))
+	[self sendNotification: NSTextDidChangeNotification];
+      break;
+    }
+    case SCN_ZOOM:
+    {
+      // A zoom change happened. Notify info bar if there is one.
+      float zoom = [self getGeneralProperty: SCI_GETZOOM parameter: 0];
+      long fontSize = [self getGeneralProperty: SCI_STYLEGETSIZE parameter: STYLE_DEFAULT];
+      float factor = (zoom / fontSize) + 1;
+      [mInfoBar notify: IBNZoomChanged message: nil location: NSZeroPoint value: factor];
+      break;
+    }
+    case SCN_UPDATEUI:
+    {
+      // Triggered whenever changes in the UI state need to be reflected.
+      // These can be: caret changes, selection changes etc.
+      NSPoint caretPosition = mBackend->GetCaretPosition();
+      [mInfoBar notify: IBNCaretChanged message: nil location: caretPosition value: 0];
+      [self sendNotification: SCIUpdateUINotification];
+      if (scn->updated & (SC_UPDATE_SELECTION | SC_UPDATE_CONTENT))
+      {
+	[self sendNotification: NSTextViewDidChangeSelectionNotification];
+      }
+      break;
+    }
+  }
+}
 
-      if (editor.delegate != nil)
-      {
-        [editor.delegate notification: scn];
-        if (scn->nmhdr.code != SCN_ZOOM && scn->nmhdr.code != SCN_UPDATEUI)
-          return;
-      }
-      
-      switch (scn->nmhdr.code)
-      {
-        case SCN_MARGINCLICK:
-        {
-          if (scn->margin == 2)
-          {
-            // Click on the folder margin. Toggle the current line if possible.
-            long line = [editor getGeneralProperty: SCI_LINEFROMPOSITION parameter: scn->position];
-            [editor setGeneralProperty: SCI_TOGGLEFOLD value: line];
-          }
-          break;
-          };
-        case SCN_MODIFIED:
-        {
-          // Decide depending on the modification type what to do.
-          // There can be more than one modification carried by one notification.
-          if (scn->modificationType & (SC_MOD_INSERTTEXT | SC_MOD_DELETETEXT))
-            [editor sendNotification: NSTextDidChangeNotification];
-          break;
-        }
-        case SCN_ZOOM:
-        {
-          // A zoom change happened. Notify info bar if there is one.
-          float zoom = [editor getGeneralProperty: SCI_GETZOOM parameter: 0];
-          long fontSize = [editor getGeneralProperty: SCI_STYLEGETSIZE parameter: STYLE_DEFAULT];
-          float factor = (zoom / fontSize) + 1;
-          [editor->mInfoBar notify: IBNZoomChanged message: nil location: NSZeroPoint value: factor];
-          break;
-        }
-        case SCN_UPDATEUI:
-        {
-          // Triggered whenever changes in the UI state need to be reflected.
-          // These can be: caret changes, selection changes etc.
-          NSPoint caretPosition = editor->mBackend->GetCaretPosition();
-          [editor->mInfoBar notify: IBNCaretChanged message: nil location: caretPosition value: 0];
-          [editor sendNotification: SCIUpdateUINotification];
-          if (scn->updated & (SC_UPDATE_SELECTION | SC_UPDATE_CONTENT))
-          {
-            [editor sendNotification: NSTextViewDidChangeSelectionNotification];
-          }
-          break;
-      }
-      }
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Method receives notifications from Scintilla for gaining and losing focus and for changes.
+ * A delegate can be set to receive all notifications.
+ */
+- (void) command:(int)command idFrom:(int)idFrom
+{
+  if ((mDelegate != nil) && ([(id)mDelegate respondsToSelector:@selector(command:ctrlID:)]))
+  {
+    [mDelegate command:command idFrom:idFrom];
+  }
+  
+  // Notifications for the editor itself.
+  switch (command)
+  {
+    case SCEN_KILLFOCUS:
+      [self sendNotification: NSTextDidEndEditingNotification];
       break;
-    }
-    case WM_COMMAND:
-    {
-      // Notifications for the editor itself.
-      ScintillaCocoa* backend = reinterpret_cast<ScintillaCocoa*>(lParam);
-      editor = backend->TopContainer();
-      switch (wParam >> 16)
-      {
-        case SCEN_KILLFOCUS:
-          [editor sendNotification: NSTextDidEndEditingNotification];
-          break;
-        case SCEN_SETFOCUS: // Nothing to do for now.
-          break;
-      }
+    case SCEN_SETFOCUS: // Nothing to do for now.
       break;
-    }
-  };
+  }
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1084,7 +1080,7 @@ static void notification(intptr_t windowid, unsigned int iMessage, uintptr_t wPa
 
     // Establish a connection from the back end to this container so we can handle situations
     // which require our attention.
-    mBackend->RegisterNotifyCallback(nil, notification);
+    mBackend->SetDelegate(self);
     
     // Setup a special indicator used in the editor to provide visual feedback for 
     // input composition, depending on language, keyboard etc.

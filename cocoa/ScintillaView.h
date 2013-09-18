@@ -46,6 +46,8 @@ extern NSString *const SCIUpdateUINotification;
 
 @protocol ScintillaNotificationProtocol
 - (void)notification: (Scintilla::SCNotification*)notification;
+@optional
+- (void)command:(int)command idFrom:(int)idFrom;
 @end
 
 /**
@@ -92,7 +94,7 @@ extern NSString *const SCIUpdateUINotification;
 
 @end
 
-@interface ScintillaView : NSView <InfoBarCommunicator>
+@interface ScintillaView : NSView <InfoBarCommunicator, ScintillaNotificationProtocol>
 {
 @private
   // The back end is kind of a controller and model in one.
@@ -126,6 +128,8 @@ extern NSString *const SCIUpdateUINotification;
 - (void) setCallback: (id <InfoBarCommunicator>) callback;
 
 - (void) suspendDrawing: (BOOL) suspend;
+- (void) notification: (Scintilla::SCNotification*) notification;
+- (void) command:(int) command idFrom:(int) idFrom;
 
 // Scroller handling
 - (void) setMarginWidth: (int) width;
@@ -172,6 +176,7 @@ extern NSString *const SCIUpdateUINotification;
 - (void) setLexerProperty: (NSString*) name value: (NSString*) value;
 - (NSString*) getLexerProperty: (NSString*) name;
 
+// The delegate property should be used instead of registerNotifyCallback which will be deprecated.
 - (void) registerNotifyCallback: (intptr_t) windowid value: (Scintilla::SciNotifyFunc) callback;
 
 - (void) setInfoBar: (NSView <InfoBarCommunicator>*) aView top: (BOOL) top;

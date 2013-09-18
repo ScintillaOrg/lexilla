@@ -86,6 +86,9 @@ private:
   TimerTarget* timerTarget;
   NSEvent* lastMouseEvent;
   
+  id<ScintillaNotificationProtocol> delegate;
+  bool delegateHasCommand;
+
   SciNotifyFunc	notifyProc;
   intptr_t notifyObj;
 
@@ -123,6 +126,7 @@ public:
   ScintillaCocoa(InnerView* view, MarginView* viewMargin);
   virtual ~ScintillaCocoa();
 
+  void SetDelegate(id<ScintillaNotificationProtocol> delegate_);
   void RegisterNotifyCallback(intptr_t windowid, SciNotifyFunc callback);
   sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 

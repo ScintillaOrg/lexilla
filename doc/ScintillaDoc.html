@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 7 September 2013 NH</p>
+    <p>Last edited 18 September 2013 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -6437,7 +6437,12 @@ implemented and thus which methods may be called.</p>
 
     <p>Notifications are sent (fired) from the Scintilla control to its container when an event has
     occurred that may interest the container. Notifications are sent using the
-    <code>WM_NOTIFY</code> message on Windows and the "notify" signal on GTK+. The container is
+    <code>WM_NOTIFY</code> message on Windows and the "notify" signal on GTK+.
+    On Cocoa, a delegate implementing the <code>ScintillaNotificationProtocol</code>
+    may be set to receive notifications or the <code>ScintillaView</code> class may be subclassed and the
+    <code>notification:</code> method overridden. Overriding <code>notification:</code> allows the
+    subclass to control whether default handling is performed.
+    The container is
     passed a <code>SCNotification</code> structure containing information about the event.</p>
 <pre id="SCNotification">
 struct NotifyHeader {   // This matches the Win32 NMHDR structure
@@ -6523,7 +6528,10 @@ struct SCNotification {
     </code>
 
     <p>The following additional notifications are sent using the <code>WM_COMMAND</code> message on
-    Windows and the "Command" signal on GTK+. This emulates the Windows Edit control. Only the lower
+    Windows and the "Command" signal on GTK+.
+    On Cocoa, a delegate implementing the
+    <code>ScintillaNotificationProtocol</code> with a <code>command:idFrom:</code> method may be set.
+    This emulates the Windows Edit control. Only the lower
     16 bits of the control's ID is passed in these notifications.</p>
     <code><a class="message" href="#SCEN_CHANGE">SCEN_CHANGE</a><br />
      <a class="message" href="#SCEN_SETFOCUS">SCEN_SETFOCUS</a><br />

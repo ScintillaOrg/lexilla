@@ -384,6 +384,8 @@ ScintillaCocoa::ScintillaCocoa(InnerView* view, MarginView* viewMargin)
   wMargin = viewMargin;
   timerTarget = [[TimerTarget alloc] init: this];
   lastMouseEvent = NULL;
+  delegate = NULL;
+  delegateHasCommand = false;
   notifyObj = NULL;
   notifyProc = NULL;
   capturedMouse = false;
@@ -1652,6 +1654,26 @@ void ScintillaCocoa::UpdateForScroll() {
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Register a delegate that will be called for notifications and commands.
+ * This provides similar functionality to RegisterNotifyCallback but in an
+ * Objective C way.
+ *
+ * @param delegate_ A pointer to an object that implements ScintillaNotificationProtocol.
+ */
+
+void ScintillaCocoa::SetDelegate(id<ScintillaNotificationProtocol> delegate_)
+{
+  delegate = delegate_;
+  delegateHasCommand = false;
+  if (delegate)
+  {
+    delegateHasCommand = [(id)delegate respondsToSelector: @selector(command:ctrlID:)];
+  }
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Used to register a callback function for a given window. This is used to emulate the way
  * Windows notifies other controls (mainly up in the view hierarchy) about certain events.
  *
@@ -1673,6 +1695,8 @@ void ScintillaCocoa::NotifyChange()
   if (notifyProc != NULL)
     notifyProc(notifyObj, WM_COMMAND, Platform::LongFromTwoShorts(GetCtrlID(), SCEN_CHANGE),
 	       (uintptr_t) this);
+  if (delegateHasCommand)
+    [delegate command:SCEN_CHANGE idFrom:GetCtrlID()];
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1682,6 +1706,8 @@ void ScintillaCocoa::NotifyFocus(bool focus)
   if (notifyProc != NULL)
     notifyProc(notifyObj, WM_COMMAND, Platform::LongFromTwoShorts(GetCtrlID(), (focus ? SCEN_SETFOCUS : SCEN_KILLFOCUS)),
 	       (uintptr_t) this);
+  if (delegateHasCommand)
+    [delegate command:(focus ? SCEN_SETFOCUS : SCEN_KILLFOCUS) idFrom:GetCtrlID()];
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1694,12 +1720,12 @@ void ScintillaCocoa::NotifyFocus(bool focus)
  */
 void ScintillaCocoa::NotifyParent(SCNotification scn)
 { 
+  scn.nmhdr.hwndFrom = (void*) this;
+  scn.nmhdr.idFrom = GetCtrlID();
   if (notifyProc != NULL)
-  {
-    scn.nmhdr.hwndFrom = (void*) this;
-    scn.nmhdr.idFrom = GetCtrlID();
     notifyProc(notifyObj, WM_NOTIFY, GetCtrlID(), (uintptr_t) &scn);
-  }
+  if (delegate)
+    [delegate notification:&scn];
 }
 
 //--------------------------------------------------------------------------------------------------
