@@ -72,7 +72,7 @@ def arguments(v, stringResult, options):
 	ret = ""
 	p1Type = cppAlias(v["Param1Type"])
 	if p1Type == "int":
-		p1Type = "uptr_t"
+		p1Type = "sptr_t"
 	if p1Type:
 		ret = ret + p1Type + " " + normalisedName(v["Param1Name"], options)
 	p2Type = cppAlias(v["Param2Type"])
@@ -151,7 +151,7 @@ def printCPPFile(f, options):
 					if stringResult:
 						returns += "    " + returnStatement + "TextReturner(" + featureDefineName + ", "
 						if "*" in cppAlias(v["Param1Type"]):
-							returns += "(uptr_t)"
+							returns += "(sptr_t)"
 						if v["Param1Name"]:
 							returns += normalisedName(v["Param1Name"], options)
 						else:
@@ -160,7 +160,7 @@ def printCPPFile(f, options):
 					else:
 						returns += "    " + returnStatement + "send(" + featureDefineName + ", "
 						if "*" in cppAlias(v["Param1Type"]):
-							returns += "(uptr_t)"
+							returns += "(sptr_t)"
 						if v["Param1Name"]:
 							returns += normalisedName(v["Param1Name"], options)
 						else:
