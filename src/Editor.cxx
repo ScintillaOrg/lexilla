@@ -720,6 +720,8 @@ void Editor::RedrawSelMargin(int line, bool allAfter) {
 				rcSelMargin.top = rcLine.top;
 				if (!allAfter)
 					rcSelMargin.bottom = rcLine.bottom;
+				if (rcSelMargin.Empty())
+					return;
 			}
 			if (wMargin.GetID()) {
 				Point ptOrigin = GetVisibleOriginInMain();
