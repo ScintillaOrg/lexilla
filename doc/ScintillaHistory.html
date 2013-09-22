@@ -456,6 +456,10 @@
 	StyleFromSubStyle and PrimaryStyleFromStyle methods were added to ILexerWithSubStyles so each lexer can implement these.
 	</li>
 	<li>
+	Avoid false matches in errorlist lexer which is used for the SciTE output pane
+	by stricter checking of ctags lines. 
+	</li>
+	<li>
 	For SCI_SETIDENTIFIERS allow \t, \r, and \n as well as space between identifiers.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1521/">Bug #1521</a>.
 	</li>
@@ -489,6 +493,9 @@
 	</li>
 	<li>
 	On Windows, building with gcc will check if Direct2D headers are available and enable Direct2D if they are.
+	</li>
+	<li>
+	Avoid attempts to redraw empty areas when lexing beyond the currently visible lines.
 	</li>
 	<li>
 	Fix SciTE bug with buffers becoming read-only.
