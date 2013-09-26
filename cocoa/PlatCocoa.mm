@@ -594,18 +594,30 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesi
 }
 
 void Scintilla::SurfaceImpl::AlphaRectangle(PRectangle rc, int /*cornerSize*/, ColourDesired fill, int alphaFill,
-                                            ColourDesired /*outline*/, int /*alphaOutline*/, int /*flags*/)
+                                            ColourDesired outline, int alphaOutline, int /*flags*/)
 {
   if ( gc ) {
-    ColourDesired colour( fill.AsLong() );
- 
     // Snap rectangle boundaries to nearest int
     rc.left = lround(rc.left);
     rc.right = lround(rc.right);
     // Set the Fill color to match
-    CGContextSetRGBFillColor( gc, colour.GetRed() / 255.0, colour.GetGreen() / 255.0, colour.GetBlue() / 255.0, alphaFill / 255.0 );
-    CGRect rect = PRectangleToCGRect( rc );
-    CGContextFillRect( gc, rect );
+    CGContextSetRGBFillColor( gc, fill.GetRed() / 255.0, fill.GetGreen() / 255.0, fill.GetBlue() / 255.0, alphaFill / 255.0 );
+    PRectangle rcFill = rc;
+    if ((fill == outline) && (alphaFill == alphaOutline)) {
+      // Optimization for simple case
+      CGRect rect = PRectangleToCGRect( rcFill );
+      CGContextFillRect( gc, rect );
+    } else {
+      rcFill.left += 1.0;
+      rcFill.top += 1.0;
+      rcFill.right -= 1.0;
+      rcFill.bottom -= 1.0;
+      CGRect rect = PRectangleToCGRect( rcFill );
+      CGContextFillRect( gc, rect );
+      CGContextSetRGBStrokeColor( gc, outline.GetRed() / 255.0, outline.GetGreen() / 255.0, outline.GetBlue() / 255.0, alphaOutline / 255.0 );
+      CGContextAddRect( gc, CGRectMake( rc.left + 0.5, rc.top + 0.5, rc.Width() - 1, rc.Height() - 1 ) );
+      CGContextStrokePath( gc );
+    }
   }
 }
 
