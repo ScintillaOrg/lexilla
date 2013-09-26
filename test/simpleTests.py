@@ -86,6 +86,12 @@ class TestSimple(unittest.TestCase):
 		self.assertEquals(self.ed.Anchor, 0)
 		self.assertEquals(self.ed.CurrentPos, 1)
 
+	def testBeyonEnd(self):
+		self.ed.AddText(1, b"x")
+		self.assertEquals(self.ed.GetLineEndPosition(0), 1)
+		self.assertEquals(self.ed.GetLineEndPosition(1), 1)
+		self.assertEquals(self.ed.GetLineEndPosition(2), 1)
+
 	def testSelection(self):
 		self.assertEquals(self.ed.CurrentPos, 0)
 		self.assertEquals(self.ed.Anchor, 0)

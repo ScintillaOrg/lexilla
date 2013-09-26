@@ -1306,9 +1306,9 @@ struct Sci_TextToFind {
 
     <p><b id="SCI_GETLINEENDPOSITION">SCI_GETLINEENDPOSITION(int line)</b><br />
      This returns the position at the end of the line, before any line end characters. If <code>line</code>
-    is the last line in the document (which does not have any end of line characters), the result is the size of the
-    document. If <code>line</code> is negative or <code>line</code> &gt;= <a class="message"
-    href="#SCI_GETLINECOUNT"><code>SCI_GETLINECOUNT()</code></a>, the result is undefined.</p>
+    is the last line in the document (which does not have any end of line characters) or greater,
+    the result is the size of the document.
+    If <code>line</code> is negative the result is undefined.</p>
 
     <p><b id="SCI_LINELENGTH">SCI_LINELENGTH(int line)</b><br />
      This returns the length of the line, including any line end characters. If <code>line</code>
