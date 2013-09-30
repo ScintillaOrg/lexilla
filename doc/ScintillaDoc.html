@@ -6521,6 +6521,8 @@ struct SCNotification {
      <a class="message" href="#SCN_AUTOCSELECTION">SCN_AUTOCSELECTION</a><br />
      <a class="message" href="#SCN_AUTOCCANCELLED">SCN_AUTOCCANCELLED</a><br />
      <a class="message" href="#SCN_AUTOCCHARDELETED">SCN_AUTOCCHARDELETED</a><br />
+     <a class="message" href="#SCN_FOCUSIN">SCN_FOCUSIN</a><br />
+     <a class="message" href="#SCN_FOCUSOUT">SCN_FOCUSOUT</a><br />
     </code>
 
     <p>The following <code>SCI_*</code> messages are associated with these notifications:</p>
@@ -6532,8 +6534,10 @@ struct SCNotification {
      <a class="message" href="#SCI_GETIDENTIFIER">SCI_GETIDENTIFIER</a><br />
     </code>
 
-    <p>The following additional notifications are sent using the <code>WM_COMMAND</code> message on
-    Windows.
+    <p>The following additional notifications are sent using a secondary "command" method and should
+    be avoided in new code as the primary "notification" method provides all the same events with richer
+    information.
+    The <code>WM_COMMAND</code> message is used on Windows.
     This emulates the Windows Edit control. Only the lower
     16 bits of the control's ID is passed in these notifications.</p>
     <p>On GTK+, the "command" signal is sent and the signal handler should have the signature
@@ -7274,6 +7278,11 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     <p><b id="SCN_AUTOCCHARDELETED">SCN_AUTOCCHARDELETED</b><br />
      The user deleted a character while autocompletion list was active.
      There is no other information in SCNotification.</p>
+
+    <p><b id="SCN_FOCUSIN">SCN_FOCUSIN</b><br />
+    <b id="SCN_FOCUSOUT">SCN_FOCUSOUT</b><br />
+    <code>SCN_FOCUSIN</code> (2028) is fired when Scintilla receives focus and
+    <code>SCN_FOCUSOUT</code> (2029) when it loses focus.</p>
 
     <h2 id="Images">Images</h2>
 

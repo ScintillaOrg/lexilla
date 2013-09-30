@@ -4371,6 +4371,8 @@ evt void IndicatorRelease=2024(int modifiers, int position)
 evt void AutoCCancelled=2025(void)
 evt void AutoCCharDeleted=2026(void)
 evt void HotSpotReleaseClick=2027(int modifiers, int position)
+evt void FocusIn=2028(void)
+evt void FocusOut=2029(void)
 
 cat Provisional
 

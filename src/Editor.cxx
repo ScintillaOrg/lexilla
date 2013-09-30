@@ -4414,7 +4414,11 @@ void Editor::DelCharBack(bool allowLineStartDeletion) {
 	ShowCaretAtCurrentPosition();
 }
 
-void Editor::NotifyFocus(bool) {}
+void Editor::NotifyFocus(bool focus) {
+	SCNotification scn = {};
+	scn.nmhdr.code = focus ? SCN_FOCUSIN : SCN_FOCUSOUT;
+	NotifyParent(scn);
+}
 
 void Editor::SetCtrlID(int identifier) {
 	ctrlID = identifier;

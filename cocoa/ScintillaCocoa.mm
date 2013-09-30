@@ -1708,6 +1708,8 @@ void ScintillaCocoa::NotifyFocus(bool focus)
 	       (uintptr_t) this);
   if (delegateHasCommand)
     [delegate command:(focus ? SCEN_SETFOCUS : SCEN_KILLFOCUS) idFrom:GetCtrlID()];
+
+  Editor::NotifyFocus(focus);
 }
 
 //--------------------------------------------------------------------------------------------------
