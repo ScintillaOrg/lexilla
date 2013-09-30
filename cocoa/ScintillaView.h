@@ -46,8 +46,6 @@ extern NSString *const SCIUpdateUINotification;
 
 @protocol ScintillaNotificationProtocol
 - (void)notification: (Scintilla::SCNotification*)notification;
-@optional
-- (void)command:(int)command idFrom:(int)idFrom;
 @end
 
 /**
@@ -129,7 +127,6 @@ extern NSString *const SCIUpdateUINotification;
 
 - (void) suspendDrawing: (BOOL) suspend;
 - (void) notification: (Scintilla::SCNotification*) notification;
-- (void) command:(int) command idFrom:(int) idFrom;
 
 // Scroller handling
 - (void) setMarginWidth: (int) width;

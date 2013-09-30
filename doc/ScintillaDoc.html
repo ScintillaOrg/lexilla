@@ -6542,8 +6542,6 @@ struct SCNotification {
     16 bits of the control's ID is passed in these notifications.</p>
     <p>On GTK+, the "command" signal is sent and the signal handler should have the signature
     <code>handler(GtkWidget *, gint wParam, gpointer lParam, gpointer userData)</code>.</p>
-    <p>On Cocoa, a delegate implementing the
-    <code>ScintillaNotificationProtocol</code> with a <code>command:idFrom:</code> method may be set.</p>
     <code><a class="message" href="#SCEN_CHANGE">SCEN_CHANGE</a><br />
      <a class="message" href="#SCEN_SETFOCUS">SCEN_SETFOCUS</a><br />
      <a class="message" href="#SCEN_KILLFOCUS">SCEN_KILLFOCUS</a><br />

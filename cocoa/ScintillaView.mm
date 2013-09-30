@@ -1014,29 +1014,10 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
       }
       break;
     }
-  }
-}
-
-//--------------------------------------------------------------------------------------------------
-
-/**
- * Method receives notifications from Scintilla for gaining and losing focus and for changes.
- * A delegate can be set to receive all notifications.
- */
-- (void) command:(int)command idFrom:(int)idFrom
-{
-  if ((mDelegate != nil) && ([(id)mDelegate respondsToSelector:@selector(command:ctrlID:)]))
-  {
-    [mDelegate command:command idFrom:idFrom];
-  }
-  
-  // Notifications for the editor itself.
-  switch (command)
-  {
-    case SCEN_KILLFOCUS:
+    case SCN_FOCUSOUT:
       [self sendNotification: NSTextDidEndEditingNotification];
       break;
-    case SCEN_SETFOCUS: // Nothing to do for now.
+    case SCN_FOCUSIN: // Nothing to do for now.
       break;
   }
 }

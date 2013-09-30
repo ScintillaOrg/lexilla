@@ -87,7 +87,6 @@ private:
   NSEvent* lastMouseEvent;
   
   id<ScintillaNotificationProtocol> delegate;
-  bool delegateHasCommand;
 
   SciNotifyFunc	notifyProc;
   intptr_t notifyObj;

@@ -385,7 +385,6 @@ ScintillaCocoa::ScintillaCocoa(InnerView* view, MarginView* viewMargin)
   timerTarget = [[TimerTarget alloc] init: this];
   lastMouseEvent = NULL;
   delegate = NULL;
-  delegateHasCommand = false;
   notifyObj = NULL;
   notifyProc = NULL;
   capturedMouse = false;
@@ -1664,11 +1663,6 @@ void ScintillaCocoa::UpdateForScroll() {
 void ScintillaCocoa::SetDelegate(id<ScintillaNotificationProtocol> delegate_)
 {
   delegate = delegate_;
-  delegateHasCommand = false;
-  if (delegate)
-  {
-    delegateHasCommand = [(id)delegate respondsToSelector: @selector(command:ctrlID:)];
-  }
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1695,8 +1689,6 @@ void ScintillaCocoa::NotifyChange()
   if (notifyProc != NULL)
     notifyProc(notifyObj, WM_COMMAND, Platform::LongFromTwoShorts(GetCtrlID(), SCEN_CHANGE),
 	       (uintptr_t) this);
-  if (delegateHasCommand)
-    [delegate command:SCEN_CHANGE idFrom:GetCtrlID()];
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1706,8 +1698,6 @@ void ScintillaCocoa::NotifyFocus(bool focus)
   if (notifyProc != NULL)
     notifyProc(notifyObj, WM_COMMAND, Platform::LongFromTwoShorts(GetCtrlID(), (focus ? SCEN_SETFOCUS : SCEN_KILLFOCUS)),
 	       (uintptr_t) this);
-  if (delegateHasCommand)
-    [delegate command:(focus ? SCEN_SETFOCUS : SCEN_KILLFOCUS) idFrom:GetCtrlID()];
 
   Editor::NotifyFocus(focus);
 }
