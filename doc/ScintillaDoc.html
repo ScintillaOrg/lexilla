@@ -6442,7 +6442,7 @@ implemented and thus which methods may be called.</p>
     <p>Notifications are sent using the
     <code>WM_NOTIFY</code> message on Windows.</p>
     <p>On GTK+, the "sci-notify" signal is sent and the signal handler should have the signature
-    <code>handler(GtkWidget *, gint, gpointer notification, gpointer  userData)</code>.</p>
+    <code>handler(GtkWidget *, gint, SCNotification *notification, gpointer  userData)</code>.</p>
     <p>On Cocoa, a delegate implementing the <code>ScintillaNotificationProtocol</code>
     may be set to receive notifications or the <code>ScintillaView</code> class may be subclassed and the
     <code>notification:</code> method overridden. Overriding <code>notification:</code> allows the
