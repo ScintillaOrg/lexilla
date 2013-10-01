@@ -464,16 +464,22 @@
 	<a href="http://sourceforge.net/p/scintilla/feature-requests/1020/">Feature #1020.</a>
 	</li>
 	<li>
-	For SCI_SETIDENTIFIERS allow \t, \r, and \n as well as space between identifiers.
+	For SCI_SETIDENTIFIERS, \t, \r, and \n are allowed as well as space between identifiers.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1521/">Bug #1521</a>.
 	</li>
 	<li>
-	On Cocoa, ScintillaNotificationProtocol adds an optional command:idFrom: method so that client code can more
-	easily receive commands. Clients should use the delegate mechanism or subclass ScintillaView in preference
+	Gaining and losing focus is now reported as a notification with the code set to SCN_FOCUSIN 
+	or SCN_FOCUSOUT.
+	This allows clients to uniformly use notifications instead of commands.
+	Since there is no longer a need for commands they will be deprecated in a future version.
+	Clients should switch any code that currently uses SCEN_SETFOCUS or SCEN_KILLFOCUS. 
+	</li>
+	<li>
+	On Cocoa, clients should use the delegate mechanism or subclass ScintillaView in preference
 	to registerNotifyCallback: which will be deprecated in the future.
 	</li>
 	<li>
-	On Cocoa, the ScintillaView.h header now hides internal implementation details from Platform.h and ScintillaCocoa.h.
+	On Cocoa, the ScintillaView.h header hides internal implementation details from Platform.h and ScintillaCocoa.h.
 	dealloc removed from @interface.
 	</li>
 	<li>
