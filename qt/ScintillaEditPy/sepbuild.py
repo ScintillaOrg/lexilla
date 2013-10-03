@@ -77,7 +77,7 @@ def methodSignature(name, v, options):
 	argTypes = ""
 	p1Type = WidgetGen.cppAlias(v["Param1Type"])
 	if p1Type == "int":
-		p1Type = "uptr_t"
+		p1Type = "sptr_t"
 	if p1Type:
 		argTypes = argTypes + p1Type
 	p2Type = WidgetGen.cppAlias(v["Param2Type"])
