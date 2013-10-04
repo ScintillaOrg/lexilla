@@ -1279,7 +1279,7 @@ void ScintillaCocoa::StartDrag()
   NSImage* dragImage = [[[NSImage alloc] initWithSize: selectionRectangle.size] autorelease];
   [dragImage setBackgroundColor: [NSColor clearColor]];
   [dragImage lockFocus];
-  [image dissolveToPoint: NSMakePoint(0.0, 0.0) fraction: 0.5];
+  [image drawAtPoint: NSZeroPoint fromRect: NSZeroRect operation: NSCompositeSourceOver fraction: 0.5];
   [dragImage unlockFocus];
   
   NSPoint startPoint;
