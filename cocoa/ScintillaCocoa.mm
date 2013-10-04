@@ -1140,6 +1140,8 @@ void ScintillaCocoa::StartDrag()
   if (sel.Empty())
     return;
 
+  inDragDrop = ddDragging;
+
   // Put the data to be dragged on the drag pasteboard.
   SelectionText selectedText;
   NSPasteboard* pasteboard = [NSPasteboard pasteboardWithName: NSDragPboard];
@@ -1301,7 +1303,6 @@ void ScintillaCocoa::StartDrag()
  */
 NSDragOperation ScintillaCocoa::DraggingEntered(id <NSDraggingInfo> info)
 {
-  inDragDrop = ddDragging;
   return DraggingUpdated(info);
 }
 
