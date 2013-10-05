@@ -479,6 +479,10 @@
 	to registerNotifyCallback: which will be deprecated in the future.
 	</li>
 	<li>
+	On Cocoa, clients may customize InnerView by subclassing both InnerView and ScintillaView and implementing the
+	innerViewClass class method on the ScintillaView subclass to return the class of the InnerView subclass.
+	</li>
+	<li>
 	On Cocoa, the ScintillaView.h header hides internal implementation details from Platform.h and ScintillaCocoa.h.
 	dealloc removed from @interface.
 	</li>

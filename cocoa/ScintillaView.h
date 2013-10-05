@@ -118,6 +118,8 @@ extern NSString *const SCIUpdateUINotification;
 @property (nonatomic, assign) id<ScintillaNotificationProtocol> delegate;
 @property (nonatomic, readonly) NSScrollView *scrollView;
 
++ (Class) innerViewClass;
+
 - (void) positionSubViews;
 
 - (void) sendNotification: (NSString*) notificationName;

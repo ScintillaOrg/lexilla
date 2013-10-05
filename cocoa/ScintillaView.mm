@@ -873,6 +873,17 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Specify the InnerView class. Can be overridden in a subclass to provide an InnerView subclass.
+ */
+
++ (Class) innerViewClass
+{
+  return [InnerView class];
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Receives zoom messages, for example when a "pinch zoom" is performed on the trackpad.
  */
 - (void) magnifyWithEvent: (NSEvent *) event
@@ -1032,7 +1043,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   self = [super initWithFrame:frame];
   if (self)
   {
-    mContent = [[[InnerView alloc] init] autorelease];
+    mContent = [[[[[self class] innerViewClass] alloc] initWithFrame:NSZeroRect] autorelease];
     mContent.owner = self;
 
     // Initialize the scrollers but don't show them yet.
