@@ -468,11 +468,11 @@
 	<a href="http://sourceforge.net/p/scintilla/bugs/1521/">Bug #1521</a>.
 	</li>
 	<li>
-	Gaining and losing focus is now reported as a notification with the code set to SCN_FOCUSIN 
+	Gaining and losing focus is now reported as a notification with the code set to SCN_FOCUSIN
 	or SCN_FOCUSOUT.
 	This allows clients to uniformly use notifications instead of commands.
 	Since there is no longer a need for commands they will be deprecated in a future version.
-	Clients should switch any code that currently uses SCEN_SETFOCUS or SCEN_KILLFOCUS. 
+	Clients should switch any code that currently uses SCEN_SETFOCUS or SCEN_KILLFOCUS.
 	</li>
 	<li>
 	On Cocoa, clients should use the delegate mechanism or subclass ScintillaView in preference
