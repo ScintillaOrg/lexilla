@@ -167,6 +167,7 @@
 		1152A77315313E58000D4E1A /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1152A77215313E58000D4E1A /* QuartzCore.framework */; };
 		11594BE9155B91DF0099E1FA /* LexOScript.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 11594BE7155B91DF0099E1FA /* LexOScript.cxx */; };
 		11594BEA155B91DF0099E1FA /* LexVisualProlog.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 11594BE8155B91DF0099E1FA /* LexVisualProlog.cxx */; };
+		1160E0381803651C00BCEBCB /* LexRust.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 1160E0371803651C00BCEBCB /* LexRust.cxx */; };
 		117ACE9114A29A1E002876F9 /* LexTCMD.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 117ACE9014A29A1E002876F9 /* LexTCMD.cxx */; };
 		119FF1BF13C9D1820007CE42 /* QuartzTextStyle.h in Headers */ = {isa = PBXBuildFile; fileRef = 119FF1BE13C9D1820007CE42 /* QuartzTextStyle.h */; };
 		11A0A8A1148602DF0018D143 /* LexCoffeeScript.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 11A0A8A0148602DF0018D143 /* LexCoffeeScript.cxx */; };
@@ -363,6 +364,7 @@
 		1152A77215313E58000D4E1A /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = ../../../../../../../../System/Library/Frameworks/QuartzCore.framework; sourceTree = "<group>"; };
 		11594BE7155B91DF0099E1FA /* LexOScript.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexOScript.cxx; path = ../../lexers/LexOScript.cxx; sourceTree = "<group>"; };
 		11594BE8155B91DF0099E1FA /* LexVisualProlog.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexVisualProlog.cxx; path = ../../lexers/LexVisualProlog.cxx; sourceTree = "<group>"; };
+		1160E0371803651C00BCEBCB /* LexRust.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexRust.cxx; path = ../../lexers/LexRust.cxx; sourceTree = "<group>"; };
 		117ACE9014A29A1E002876F9 /* LexTCMD.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexTCMD.cxx; path = ../../lexers/LexTCMD.cxx; sourceTree = "<group>"; };
 		119FF1BE13C9D1820007CE42 /* QuartzTextStyle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = QuartzTextStyle.h; path = ../QuartzTextStyle.h; sourceTree = "<group>"; };
 		11A0A8A0148602DF0018D143 /* LexCoffeeScript.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexCoffeeScript.cxx; path = ../../lexers/LexCoffeeScript.cxx; sourceTree = "<group>"; };
@@ -561,6 +563,7 @@
 				114B6EF911FA7526004FB6AB /* LexR.cxx */,
 				114B6EFA11FA7526004FB6AB /* LexRebol.cxx */,
 				114B6EFB11FA7526004FB6AB /* LexRuby.cxx */,
+				1160E0371803651C00BCEBCB /* LexRust.cxx */,
 				114B6EFC11FA7526004FB6AB /* LexScriptol.cxx */,
 				114B6EFD11FA7526004FB6AB /* LexSmalltalk.cxx */,
 				114B6EFE11FA7526004FB6AB /* LexSML.cxx */,
@@ -986,6 +989,7 @@
 				1100F1EB178E393200105727 /* CaseConvert.cxx in Sources */,
 				1100F1ED178E393200105727 /* CaseFolder.cxx in Sources */,
 				11FDD0E017C480D4001541B9 /* LexKVIrc.cxx in Sources */,
+				1160E0381803651C00BCEBCB /* LexRust.cxx in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
