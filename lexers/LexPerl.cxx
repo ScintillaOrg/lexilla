@@ -191,9 +191,9 @@ static int styleCheckIdentifier(LexAccessor &styler, unsigned int bk) {
 static int podLineScan(LexAccessor &styler, unsigned int &pos, unsigned int endPos) {
 	// forward scan the current line to classify line for POD style
 	int state = -1;
-	while (pos <= endPos) {
+	while (pos < endPos) {
 		int ch = static_cast<unsigned char>(styler.SafeGetCharAt(pos));
-		if (ch == '\n' || ch == '\r' || pos >= endPos) {
+		if (ch == '\n' || ch == '\r') {
 			if (ch == '\r' && styler.SafeGetCharAt(pos + 1) == '\n') pos++;
 			break;
 		}
@@ -943,7 +943,7 @@ void SCI_METHOD LexerPerl::Lex(unsigned int startPos, int length, int initStyle,
 				if (pod == SCE_PL_DEFAULT) {
 					if (sc.state == SCE_PL_POD_VERB) {
 						unsigned int fw2 = fw;
-						while (fw2 <= endPos && pod == SCE_PL_DEFAULT) {
+						while (fw2 < (endPos - 1) && pod == SCE_PL_DEFAULT) {
 							fw = fw2++;	// penultimate line (last blank line)
 							pod = podLineScan(styler, fw2, endPos);
 							styler.SetLineState(styler.GetLine(fw2), pod);
@@ -965,7 +965,7 @@ void SCI_METHOD LexerPerl::Lex(unsigned int startPos, int length, int initStyle,
 					}
 					sc.SetState(pod);
 				}
-				sc.Forward(fw - sc.currentPos);	// commit style
+				sc.ForwardBytes(fw - sc.currentPos);	// commit style
 			}
 			break;
 		case SCE_PL_REGEX:
