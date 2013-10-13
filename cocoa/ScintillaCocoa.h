@@ -55,8 +55,8 @@
 
 extern "C" NSString* ScintillaRecPboardType;
 
-@class InnerView;
-@class MarginView;
+@class SCIContentView;
+@class SCIMarginView;
 @class ScintillaView;
 
 @class FindHighlightLayer;
@@ -122,7 +122,7 @@ protected:
   virtual void CancelModes();
 
 public:
-  ScintillaCocoa(InnerView* view, MarginView* viewMargin);
+  ScintillaCocoa(SCIContentView* view, SCIMarginView* viewMargin);
   virtual ~ScintillaCocoa();
 
   void SetDelegate(id<ScintillaNotificationProtocol> delegate_);
@@ -131,7 +131,7 @@ public:
 
   ScintillaView* TopContainer();
   NSScrollView* ScrollContainer();
-  InnerView* ContentView();
+  SCIContentView* ContentView();
 
   bool SyncPaint(void* gc, PRectangle rc);
   bool Draw(NSRect rect, CGContextRef gc);

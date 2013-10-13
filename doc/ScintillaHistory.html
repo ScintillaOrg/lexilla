@@ -493,12 +493,14 @@
 	to registerNotifyCallback: which will be deprecated in the future.
 	</li>
 	<li>
-	On Cocoa, clients may customize InnerView by subclassing both InnerView and ScintillaView and implementing the
-	innerViewClass class method on the ScintillaView subclass to return the class of the InnerView subclass.
+	On Cocoa, the ScintillaView.h header hides internal implementation details from Platform.h and ScintillaCocoa.h.
+	InnerView was renamed to SCIContentView and MarginView was renamed to SCIMarginView.
+	dealloc removed from @interface.
 	</li>
 	<li>
-	On Cocoa, the ScintillaView.h header hides internal implementation details from Platform.h and ScintillaCocoa.h.
-	dealloc removed from @interface.
+	On Cocoa, clients may customize SCIContentView by subclassing both SCIContentView and ScintillaView
+	and implementing the contentViewClass class method on the ScintillaView subclass to return the class of 
+	the SCIContentView subclass.
 	</li>
 	<li>
 	On Cocoa, fixed appearance of alpha rectangles to use specified alpha and colour for outline as well as corner size.

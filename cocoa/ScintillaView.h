@@ -49,9 +49,9 @@ extern NSString *const SCIUpdateUINotification;
 @end
 
 /**
- * MarginView draws line numbers and other margins next to the text view.
+ * SCIMarginView draws line numbers and other margins next to the text view.
  */
-@interface MarginView : NSRulerView
+@interface SCIMarginView : NSRulerView
 {
 @private
   int marginWidth;
@@ -67,10 +67,10 @@ extern NSString *const SCIUpdateUINotification;
 @end
 
 /**
- * InnerView is the Cocoa interface to the Scintilla backend. It handles text input and
+ * SCIContentView is the Cocoa interface to the Scintilla backend. It handles text input and
  * provides a canvas for painting the output.
  */
-@interface InnerView : NSView <NSTextInputClient, NSUserInterfaceValidations>
+@interface SCIContentView : NSView <NSTextInputClient, NSUserInterfaceValidations>
 {
 @private
   ScintillaView* mOwner;
@@ -100,10 +100,10 @@ extern NSString *const SCIUpdateUINotification;
   Scintilla::ScintillaCocoa* mBackend;
   
   // This is the actual content to which the backend renders itself.
-  InnerView* mContent;
+  SCIContentView* mContent;
   
   NSScrollView *scrollView;
-  MarginView *marginView;
+  SCIMarginView *marginView;
   
   CGFloat zoomDelta;
   
@@ -118,7 +118,7 @@ extern NSString *const SCIUpdateUINotification;
 @property (nonatomic, assign) id<ScintillaNotificationProtocol> delegate;
 @property (nonatomic, readonly) NSScrollView *scrollView;
 
-+ (Class) innerViewClass;
++ (Class) contentViewClass;
 
 - (void) positionSubViews;
 
@@ -133,7 +133,7 @@ extern NSString *const SCIUpdateUINotification;
 // Scroller handling
 - (void) setMarginWidth: (int) width;
 - (void) scrollerAction: (id) sender;
-- (InnerView*) content;
+- (SCIContentView*) content;
 
 // NSTextView compatibility layer.
 - (NSString*) string;

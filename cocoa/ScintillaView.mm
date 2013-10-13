@@ -50,7 +50,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 }
 
 
-@implementation MarginView
+@implementation SCIMarginView
 
 @synthesize marginWidth, owner;
 
@@ -149,7 +149,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 @end
 
-@implementation InnerView
+@implementation SCIContentView
 
 @synthesize owner = mOwner;
 
@@ -873,12 +873,12 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Specify the InnerView class. Can be overridden in a subclass to provide an InnerView subclass.
+ * Specify the SCIContentView class. Can be overridden in a subclass to provide an SCIContentView subclass.
  */
 
-+ (Class) innerViewClass
++ (Class) contentViewClass
 {
-  return [InnerView class];
+  return [SCIContentView class];
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1043,7 +1043,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   self = [super initWithFrame:frame];
   if (self)
   {
-    mContent = [[[[[self class] innerViewClass] alloc] initWithFrame:NSZeroRect] autorelease];
+    mContent = [[[[[self class] contentViewClass] alloc] initWithFrame:NSZeroRect] autorelease];
     mContent.owner = self;
 
     // Initialize the scrollers but don't show them yet.
@@ -1060,7 +1060,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
     //[scrollView setHorizontalScrollElasticity:NSScrollElasticityNone];
     [self addSubview: scrollView];
 
-    marginView = [[MarginView alloc] initWithScrollView:scrollView];
+    marginView = [[SCIMarginView alloc] initWithScrollView:scrollView];
     marginView.owner = self;
     [marginView setRuleThickness:[marginView requiredThickness]];
     [scrollView setVerticalRulerView:marginView];
@@ -1306,7 +1306,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 //--------------------------------------------------------------------------------------------------
 
-- (InnerView*) content
+- (SCIContentView*) content
 {
   return mContent;
 }
