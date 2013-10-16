@@ -685,7 +685,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 					if (IsASpace(sc.ch)) {
 						sc.SetState(SCE_C_DEFAULT|activitySet);
 					}
-				} else if (isStringInPreprocessor && (sc.Match('>') || sc.Match('\"'))) {
+				} else if (isStringInPreprocessor && (sc.Match('>') || sc.Match('\"') || sc.atLineEnd)) {
 					isStringInPreprocessor = false;
 				} else if (!isStringInPreprocessor) {
 					if ((isIncludePreprocessor && sc.Match('<')) || sc.Match('\"')) {
