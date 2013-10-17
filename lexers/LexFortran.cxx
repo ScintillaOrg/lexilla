@@ -38,15 +38,15 @@ static inline bool IsAWordStart(const int ch) {
 	return (ch < 0x80) && (isalnum(ch));
 }
 /***************************************/
-inline bool IsABlank(unsigned int ch) {
+static inline bool IsABlank(unsigned int ch) {
     return (ch == ' ') || (ch == 0x09) || (ch == 0x0b) ;
 }
 /***************************************/
-inline bool IsALineEnd(char ch) {
+static inline bool IsALineEnd(char ch) {
     return ((ch == '\n') || (ch == '\r')) ;
 }
 /***************************************/
-unsigned int GetContinuedPos(unsigned int pos, Accessor &styler) {
+static unsigned int GetContinuedPos(unsigned int pos, Accessor &styler) {
 	while (!IsALineEnd(styler.SafeGetCharAt(pos++))) continue;
 	if (styler.SafeGetCharAt(pos) == '\n') pos++;
 	while (IsABlank(styler.SafeGetCharAt(pos++))) continue;
