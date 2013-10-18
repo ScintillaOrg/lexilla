@@ -738,8 +738,7 @@ PRectangle Window::GetMonitorRect(Point pt)
 	QPoint posGlobal = window(wid)->mapToGlobal(QPoint(pt.x, pt.y));
 	QDesktopWidget *desktop = QApplication::desktop();
 	QRect rectScreen = desktop->availableGeometry(posGlobal);
-	rectScreen.moveLeft(-originGlobal.x());
-	rectScreen.moveTop(-originGlobal.y());
+	rectScreen.translate(-originGlobal.x(), -originGlobal.y());
 	return PRectangle(rectScreen.left(), rectScreen.top(),
 	        rectScreen.right(), rectScreen.bottom());
 }
