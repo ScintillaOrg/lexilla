@@ -271,7 +271,7 @@ static void ScanNumber(Accessor& styler, int& pos) {
     if (c == 'u' || c == 'i') {
 		pos++;
 		c = styler.SafeGetCharAt(pos, '\0');
-		int n = styler.SafeGetCharAt(pos + 1, '\0');
+		n = styler.SafeGetCharAt(pos + 1, '\0');
 		if (c == '8') {
 			pos++;
 		} else if (c == '1' && n == '6') {
@@ -290,7 +290,7 @@ static void ScanNumber(Accessor& styler, int& pos) {
 		if (c == 'f') {
 			pos++;
 			c = styler.SafeGetCharAt(pos, '\0');
-			int n = styler.SafeGetCharAt(pos + 1, '\0');
+			n = styler.SafeGetCharAt(pos + 1, '\0');
 			if (c == '3' && n == '2') {
 				pos += 2;
 			} else if (c == '6' && n == '4') {
