@@ -2766,14 +2766,19 @@ void Editor::DrawAnnotation(Surface *surface, ViewStyle &vsDraw, int line, int x
 	const StyledText stAnnotation  = pdoc->AnnotationStyledText(line);
 	if (stAnnotation.text && ValidStyledText(vsDraw, vsDraw.annotationStyleOffset, stAnnotation)) {
 		surface->FillRectangle(rcSegment, vsDraw.styles[0].back);
-		if (vs.annotationVisible == ANNOTATION_BOXED) {
-			// Only care about calculating width if need to draw box
+		rcSegment.left = xStart;
+		if (trackLineWidth || (vs.annotationVisible == ANNOTATION_BOXED)) {
+			// Only care about calculating width if tracking or need to draw box
 			int widthAnnotation = WidestLineWidth(surface, vsDraw, vsDraw.annotationStyleOffset, stAnnotation);
-			widthAnnotation += vsDraw.spaceWidth * 2; // Margins
-			rcSegment.left = xStart + indent;
-			rcSegment.right = rcSegment.left + widthAnnotation;
-		} else {
-			rcSegment.left = xStart;
+			if (vs.annotationVisible == ANNOTATION_BOXED) {
+				widthAnnotation += vsDraw.spaceWidth * 2; // Margins
+			}
+			if (widthAnnotation > lineWidthMaxSeen)
+				lineWidthMaxSeen = widthAnnotation;
+			if (vs.annotationVisible == ANNOTATION_BOXED) {
+				rcSegment.left = xStart + indent;
+				rcSegment.right = rcSegment.left + widthAnnotation;
+			}
 		}
 		const int annotationLines = pdoc->AnnotationLines(line);
 		size_t start = 0;
