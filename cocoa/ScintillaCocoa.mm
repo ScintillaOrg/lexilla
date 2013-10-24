@@ -931,15 +931,15 @@ void ScintillaCocoa::Paste(bool forceRectangular)
   pdoc->BeginUndoAction();
   ClearSelection(false);
   int length = selectedText.Length();
+  SelectionPosition selStart = sel.RangeMain().Start();
   if (selectedText.rectangular)
   {
-    SelectionPosition selStart = sel.RangeMain().Start();
     PasteRectangular(selStart, selectedText.Data(), length);
   }
-  else 
-    if (pdoc->InsertString(sel.RangeMain().caret.Position(), selectedText.Data(), length))
-      SetEmptySelection(sel.RangeMain().caret.Position() + length);
-  
+  else
+  {
+    InsertPaste(selStart, selectedText.Data(), length);
+  }
   pdoc->EndUndoAction();
   
   Redraw();
