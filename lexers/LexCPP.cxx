@@ -636,6 +636,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 				if (sc.ch == '_') {
 					sc.ChangeState(SCE_C_USERLITERAL|activitySet);
 				} else if (!(setWord.Contains(sc.ch)
+				   || (sc.ch == '\'')
 				   || ((sc.ch == '+' || sc.ch == '-') && (sc.chPrev == 'e' || sc.chPrev == 'E' ||
 				                                          sc.chPrev == 'p' || sc.chPrev == 'P')))) {
 					sc.SetState(SCE_C_DEFAULT|activitySet);
