@@ -105,6 +105,8 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 - (void) mouseDown: (NSEvent *) theEvent
 {
+  NSClipView *textView = [[self scrollView] contentView];
+  [[textView window] makeFirstResponder:textView];
   owner.backend->MouseDown(theEvent);
 }
 
