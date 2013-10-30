@@ -41,7 +41,7 @@ ScintillaEditBase::ScintillaEditBase(QWidget *parent)
 	setFrameStyle(QFrame::NoFrame);
 	setFocusPolicy(Qt::StrongFocus);
 	setAttribute(Qt::WA_StaticContents);
-	setAttribute(Qt::WA_OpaquePaintEvent);
+	viewport()->setAttribute(Qt::WA_OpaquePaintEvent);
 	setAttribute(Qt::WA_KeyCompression);
 	setAttribute(Qt::WA_InputMethodEnabled);
 
