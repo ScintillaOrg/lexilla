@@ -1775,15 +1775,16 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 		// modifier, defaulting to control instead of alt.
 		// This is because most X window managers grab alt + click for moving
 		bool alt = (event->state & modifierTranslated(rectangularSelectionModifier)) != 0;
-		bool meta = false;
 
 		gtk_widget_grab_focus(PWidget(wMain));
 		if (event->button == 1) {
 #if PLAT_GTK_MACOSX
-			meta = ctrl;
+			bool meta = ctrl;
 			// GDK reports the Command modifer key as GDK_MOD2_MASK for button events,
 			// not GDK_META_MASK like in key events.
 			ctrl = (event->state & GDK_MOD2_MASK) != 0;
+#else
+			bool meta = false;
 #endif
 			ButtonDownWithModifiers(pt, event->time, ModifierFlags(shift, ctrl, alt, meta));
 		} else if (event->button == 2) {
