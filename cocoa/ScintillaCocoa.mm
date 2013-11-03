@@ -1521,6 +1521,16 @@ void ScintillaCocoa::PaintMargin(NSRect aRect)
   Surface *sw = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
   if (sw)
   {
+    CGContextSetAllowsAntialiasing(gc,
+                                   vs.extraFontFlag != SC_EFF_QUALITY_NON_ANTIALIASED);
+    CGContextSetAllowsFontSmoothing(gc,
+                                    vs.extraFontFlag == SC_EFF_QUALITY_LCD_OPTIMIZED);
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
+    if (CGContextSetAllowsFontSubpixelPositioning != NULL)
+      CGContextSetAllowsFontSubpixelPositioning(gc,
+						vs.extraFontFlag == SC_EFF_QUALITY_DEFAULT ||
+						vs.extraFontFlag == SC_EFF_QUALITY_LCD_OPTIMIZED);
+#endif
     sw->Init(gc, wMargin.GetID());
     PaintSelMargin(sw, rc);
     sw->Release();
