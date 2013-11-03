@@ -1769,17 +1769,23 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 			return FALSE;
 		}
 
+		bool shift = (event->state & GDK_SHIFT_MASK) != 0;
 		bool ctrl = (event->state & GDK_CONTROL_MASK) != 0;
+		// On X, instead of sending literal modifiers use the user specified
+		// modifier, defaulting to control instead of alt.
+		// This is because most X window managers grab alt + click for moving
+		bool alt = (event->state & modifierTranslated(rectangularSelectionModifier)) != 0;
+		bool meta = false;
 
 		gtk_widget_grab_focus(PWidget(wMain));
 		if (event->button == 1) {
-			// On X, instead of sending literal modifiers use the user specified
-			// modifier, defaulting to control instead of alt.
-			// This is because most X window managers grab alt + click for moving
-			ButtonDown(pt, event->time,
-			        (event->state & GDK_SHIFT_MASK) != 0,
-			        (event->state & GDK_CONTROL_MASK) != 0,
-			        (event->state & modifierTranslated(rectangularSelectionModifier)) != 0);
+#if PLAT_GTK_MACOSX
+			meta = ctrl;
+			// GDK reports the Command modifer key as GDK_MOD2_MASK for button events,
+			// not GDK_META_MASK like in key events.
+			ctrl = (event->state & GDK_MOD2_MASK) != 0;
+#endif
+			ButtonDownWithModifiers(pt, event->time, ModifierFlags(shift, ctrl, alt, meta));
 		} else if (event->button == 2) {
 			// Grab the primary selection if it exists
 			SelectionPosition pos = SPositionFromLocation(pt, false, false, UserVirtualSpace());
