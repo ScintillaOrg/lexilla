@@ -43,7 +43,7 @@ macx {
 	# QMAKE_CXXFLAGS = -arch i386 -arch x86_64
 	# QMAKE_LFLAGS = -arch i386 -arch x86_64
 	LIBS += -L$$PY_LIBDIR -lpython$$PY_VERSION_SUFFIX
-	LIBS += -L$$PYSIDE_LIB
+	LIBS += -L$$PYSIDE_LIB -L$$SHIBOKEN_LIB
 	debug {
 		LIBS += -lshiboken-python$$PY_VERSION_SUFFIX-dbg
 		LIBS += -lpyside-python$$PY_VERSION_SUFFIX-dbg
@@ -63,7 +63,7 @@ win32 {
 		LIBS += -lQtCore
 	}
 	LIBS += -L$$PY_PREFIX/libs # Note python lib is pulled in via a #pragma
-	LIBS += -L$$PYSIDE_LIB
+	LIBS += -L$$PYSIDE_LIB -L$$SHIBOKEN_LIB
 	# PySide uses x.y suffix on Windows even though Python uses xy
 	DebugBuild {
 		LIBS += -lshiboken-python$${PY_VERSION}_d

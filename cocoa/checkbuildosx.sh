@@ -37,14 +37,14 @@ echo Building Qt and PySide
 
 cd scintilla/qt
 cd ScintillaEditBase
-qmake
+qmake -spec macx-xcode
 xcodebuild clean
 xcodebuild
 cd ..
 
 cd ScintillaEdit
 python WidgetGen.py
-qmake
+qmake -spec macx-xcode
 xcodebuild clean
 xcodebuild
 cd ..
