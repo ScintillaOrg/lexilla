@@ -1094,6 +1094,7 @@
 					../../src,
 					../../lexlib,
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 			};
@@ -1112,6 +1113,7 @@
 					../../src,
 					../../lexlib,
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				SDKROOT = macosx;
 			};
 			name = Release;
