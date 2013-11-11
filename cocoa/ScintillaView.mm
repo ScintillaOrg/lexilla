@@ -862,11 +862,11 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   {
     NSBundle* bundle = [NSBundle bundleForClass: [ScintillaView class]];
     
-    NSString* path = [bundle pathForResource: @"mac_cursor_busy" ofType: @"png" inDirectory: nil];
+    NSString* path = [bundle pathForResource: @"mac_cursor_busy" ofType: @"tiff" inDirectory: nil];
     NSImage* image = [[[NSImage alloc] initWithContentsOfFile: path] autorelease];
     waitCursor = [[NSCursor alloc] initWithImage: image hotSpot: NSMakePoint(2, 2)];
     
-    path = [bundle pathForResource: @"mac_cursor_flipped" ofType: @"png" inDirectory: nil];
+    path = [bundle pathForResource: @"mac_cursor_flipped" ofType: @"tiff" inDirectory: nil];
     image = [[[NSImage alloc] initWithContentsOfFile: path] autorelease];
     reverseArrowCursor = [[NSCursor alloc] initWithImage: image hotSpot: NSMakePoint(12, 2)];
   }
