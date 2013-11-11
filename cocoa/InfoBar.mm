@@ -87,7 +87,7 @@
   {
     NSBundle* bundle = [NSBundle bundleForClass: [InfoBar class]];
     
-    NSString* path = [bundle pathForResource: @"info_bar_bg" ofType: @"png" inDirectory: nil];
+    NSString* path = [bundle pathForResource: @"info_bar_bg" ofType: @"tiff" inDirectory: nil];
     mBackground = [[NSImage alloc] initWithContentsOfFile: path];
     if (![mBackground isValid])
       NSLog(@"Background image for info bar is invalid.");
