@@ -2355,6 +2355,10 @@ void ScintillaGTK::Destroy(GObject *object) {
 
 		delete sciThis;
 		scio->pscin = 0;
+		// Always chain up to the parent class
+		GType parent_type = g_type_parent(scintilla_get_type()); // GTK_TYPE_CONTAINER
+		GObjectClass *parent = G_OBJECT_CLASS(g_type_class_peek(parent_type));
+		parent->finalize(object);
 	} catch (...) {
 		// Its dead so nowhere to save the status
 	}
