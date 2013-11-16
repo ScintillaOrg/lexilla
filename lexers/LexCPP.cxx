@@ -769,7 +769,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 					} else {
 						sc.GetCurrentLowered(s, sizeof(s));
 					}
-					if (!IsASpace(sc.ch)) {
+					if (!(IsASpace(sc.ch) || (sc.ch == 0))) {
 						sc.ChangeState(SCE_C_COMMENTDOCKEYWORDERROR|activitySet);
 					} else if (!keywords3.InList(s + 1)) {
 						int subStyleCDKW = classifierDocKeyWords.ValueFor(s+1);
