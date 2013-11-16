@@ -515,6 +515,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 	bool isIncludePreprocessor = false;
 	bool isStringInPreprocessor = false;
 	bool inRERange = false;
+	bool seenDocKeyBrace = false;
 
 	int lineCurrent = styler.GetLine(startPos);
 	if ((MaskActive(initStyle) == SCE_C_PREPROCESSOR) ||
@@ -757,7 +758,11 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 					sc.ChangeState(SCE_C_COMMENTDOCKEYWORDERROR);
 					sc.Forward();
 					sc.ForwardSetState(SCE_C_DEFAULT|activitySet);
-				} else if (!setDoxygen.Contains(sc.ch)) {
+					seenDocKeyBrace = false;
+				} else if (sc.ch == '[' || sc.ch == '{') {
+					seenDocKeyBrace = true;
+				} else if (!setDoxygen.Contains(sc.ch)
+				           && !(seenDocKeyBrace && (sc.ch == ',' || sc.ch == '.'))) {
 					char s[100];
 					if (caseSensitive) {
 						sc.GetCurrent(s, sizeof(s));
@@ -775,6 +780,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 						}
 					}
 					sc.SetState(styleBeforeDCKeyword|activitySet);
+					seenDocKeyBrace = false;
 				}
 				break;
 			case SCE_C_STRING:
