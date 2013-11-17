@@ -11,7 +11,11 @@ CXXFLAGS = /EHsc /wd 4805 $(INCLUDEDIRS)
 # Files in this directory containing tests
 TESTSRC=test*.cxx
 # Files being tested from scintilla/src directory
-TESTEDSRC=../../src/ContractionState.cxx ../../src/RunStyles.cxx ../../src/CharClassify.cxx
+TESTEDSRC=\
+ ../../src/CharClassify.cxx \
+ ../../src/ContractionState.cxx \
+ ../../src/Decoration.cxx \
+ ../../src/RunStyles.cxx 
 
 TESTS=$(EXE)
 

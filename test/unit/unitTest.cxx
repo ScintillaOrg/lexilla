@@ -7,9 +7,9 @@
         RunStyles
         ContractionState
         CharClassify
+        Decoration
 
     To do:
-        Decoration
         DecorationList
         PerLine *
         CellBuffer *
