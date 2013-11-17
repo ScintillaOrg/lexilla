@@ -208,6 +208,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
   // Trigger recreation of the cursor rectangle(s).
   [[self window] invalidateCursorRectsForView: self];
+  [mOwner updateMarginCursors];
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1311,6 +1312,12 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 - (SCIContentView*) content
 {
   return mContent;
+}
+
+//--------------------------------------------------------------------------------------------------
+
+- (void) updateMarginCursors {
+  [[self window] invalidateCursorRectsForView: marginView];
 }
 
 //--------------------------------------------------------------------------------------------------

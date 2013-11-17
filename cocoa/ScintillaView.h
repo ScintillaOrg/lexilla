@@ -134,6 +134,7 @@ extern NSString *const SCIUpdateUINotification;
 - (void) setMarginWidth: (int) width;
 - (void) scrollerAction: (id) sender;
 - (SCIContentView*) content;
+- (void) updateMarginCursors;
 
 // NSTextView compatibility layer.
 - (NSString*) string;
