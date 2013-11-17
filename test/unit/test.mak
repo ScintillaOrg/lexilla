@@ -1,0 +1,27 @@
+# Build all the unit tests with Microsoft Visual C++ using nmake
+# Tested with Visual C++ 2010 and 2013
+
+DEL = del /q
+EXE = unitTest.exe
+
+INCLUDEDIRS = /I../../include /I../../src /I../../lexlib
+
+CXXFLAGS = /EHsc /wd 4805 $(INCLUDEDIRS)
+
+# Files in this directory containing tests
+TESTSRC=test*.cxx
+# Files being tested from scintilla/src directory
+TESTEDSRC=../../src/ContractionState.cxx ../../src/RunStyles.cxx ../../src/CharClassify.cxx
+
+TESTS=$(EXE)
+
+all: $(TESTS)
+
+test: $(TESTS)
+	$(EXE)
+
+clean:
+	$(DEL) $(TESTS) *.o *.obj *.exe
+
+$(EXE): $(TESTSRC) $(TESTEDSRC) $(@B).obj
+	$(CXX) $(CXXFLAGS) /Fe$@ $**

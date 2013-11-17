@@ -6,6 +6,7 @@
         Partitioning
         RunStyles
         ContractionState
+        CharClassify
 
     To do:
         Decoration
@@ -35,16 +36,12 @@
 
 #include "Platform.h"
 
-#include <gtest/gtest.h>
+#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+#include "catch.hpp"
 
 // Needed for PLATFORM_ASSERT in code being tested
 
 void Platform::Assert(const char *c, const char *file, int line) {
 	fprintf(stderr, "Assertion [%s] failed at %s %d\n", c, file, line);
 	abort();
-}
-
-int main(int argc, char **argv) {
-	testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
 }
