@@ -8,9 +8,9 @@
         ContractionState
         CharClassify
         Decoration
+        DecorationList
 
     To do:
-        DecorationList
         PerLine *
         CellBuffer *
         Range
