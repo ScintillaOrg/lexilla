@@ -801,7 +801,7 @@ struct Sci_TextRange {
 <pre>
 struct Sci_TextToFind {
     struct <a class="jump" href="#Sci_CharacterRange">Sci_CharacterRange</a> chrg;     // range to search
-    char *lpstrText;                // the search pattern (zero terminated)
+    const char *lpstrText;                // the search pattern (zero terminated)
     struct Sci_CharacterRange chrgText; // returned as position of matching text
 };
 </pre>
