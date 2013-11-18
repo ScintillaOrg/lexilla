@@ -32,7 +32,8 @@
         WordList
 */
 
-#include <stdio.h>
+#include <cstdio>
+#include <cstdarg>
 
 #include "Platform.h"
 
