@@ -9,10 +9,10 @@
         CharClassify
         Decoration
         DecorationList
+        CellBuffer
 
     To do:
         PerLine *
-        CellBuffer *
         Range
         StyledText
         CaseFolder ...
@@ -44,4 +44,13 @@
 void Platform::Assert(const char *c, const char *file, int line) {
 	fprintf(stderr, "Assertion [%s] failed at %s %d\n", c, file, line);
 	abort();
+}
+
+void Platform::DebugPrintf(const char *format, ...) {
+	char buffer[2000];
+	va_list pArguments;
+	va_start(pArguments, format);
+	vsprintf(buffer, format, pArguments);
+	va_end(pArguments);
+	fprintf(stderr, "%s", buffer);
 }
