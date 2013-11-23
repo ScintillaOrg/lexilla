@@ -615,7 +615,11 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 /**
  * Mouse wheel with command key magnifies text.
+ * Enabling this code causes visual garbage to appear when scrolling
+ * horizontally on OS X 10.9 with a retina display.
+ * Pinch gestures and key commands can be used for magnification.
  */
+#ifdef SCROLL_WHEEL_MAGNIFICATION
 - (void) scrollWheel: (NSEvent *) theEvent
 {
   if (([theEvent modifierFlags] & NSCommandKeyMask) != 0) {
@@ -624,6 +628,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
     [super scrollWheel:theEvent];
   }
 }
+#endif
 
 //--------------------------------------------------------------------------------------------------
 
