@@ -109,6 +109,7 @@ static void ColouriseBashDoc(unsigned int startPos, int length, int initStyle,
 	// note that [+-] are often parts of identifiers in shell scripts
 	CharacterSet setWord(CharacterSet::setAlphaNum, "._+-");
 	CharacterSet setMetaCharacter(CharacterSet::setNone, "|&;()<> \t\r\n");
+	setMetaCharacter.Add(0);
 	CharacterSet setBashOperator(CharacterSet::setNone, "^&%()-+=|{}[]:;>,*/<?!.~@");
 	CharacterSet setSingleCharOp(CharacterSet::setNone, "rwxoRWXOezsfdlpSbctugkTBMACahGLNn");
 	CharacterSet setParam(CharacterSet::setAlphaNum, "$_");
