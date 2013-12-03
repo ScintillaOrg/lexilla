@@ -729,6 +729,28 @@ Scintilla::Point ScintillaCocoa::ConvertPoint(NSPoint point)
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Do not clip like superclass as Cocoa is not reporting all of prepared area.
+ */
+void ScintillaCocoa::RedrawRect(PRectangle rc)
+{
+  if (!rc.Empty())
+    wMain.InvalidateRectangle(rc);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Ensure all of prepared content is also redrawn.
+ */
+void ScintillaCocoa::Redraw()
+{
+  wMargin.InvalidateAll();
+  wMain.InvalidateAll();
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * A function to directly execute code that would usually go the long way via window messages.
  * However this is a Windows metaphor and not used here, hence we just call our fake
  * window proc. The given parameters directly reflect the message parameters used on Windows.

@@ -356,8 +356,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void SetTopLine(int topLineNew);
 
 	bool AbandonPaint();
-	void RedrawRect(PRectangle rc);
-	void Redraw();
+	virtual void RedrawRect(PRectangle rc);
+	virtual void Redraw();
 	void RedrawSelMargin(int line=-1, bool allAfter=false);
 	PRectangle RectangleFromRange(int start, int end);
 	void InvalidateRange(int start, int end);

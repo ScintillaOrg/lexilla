@@ -114,6 +114,8 @@ protected:
   Point GetVisibleOriginInMain();
   PRectangle GetClientRectangle();
   Point ConvertPoint(NSPoint point);
+  virtual void RedrawRect(PRectangle rc);
+  virtual void Redraw();
   
   virtual void Initialise();
   virtual void Finalise();
