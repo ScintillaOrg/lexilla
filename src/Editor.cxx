@@ -2731,7 +2731,10 @@ void Editor::DrawIndicators(Surface *surface, ViewStyle &vsDraw, int line, int x
 					endPos = posLineEnd;
 				DrawIndicator(deco->indicator, startPos - posLineStart, endPos - posLineStart,
 					surface, vsDraw, xStart, rcLine, ll, subLine);
-				startPos = deco->rs.EndRun(endPos);
+				startPos = endPos;
+				if (!deco->rs.ValueAt(startPos)) {
+					startPos = deco->rs.EndRun(startPos);
+				}
 			}
 		}
 	}
