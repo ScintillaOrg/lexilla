@@ -2115,6 +2115,10 @@ void ScintillaCocoa::ActiveStateChanged(bool isActive)
   }
 }
 
+// If building with old SDK, need to define version number for 10.8
+#ifndef NSAppKitVersionNumber10_8
+#define NSAppKitVersionNumber10_8 1187
+#endif
 
 //--------------------------------------------------------------------------------------------------
 
@@ -2127,6 +2131,11 @@ void ScintillaCocoa::ShowFindIndicatorForRange(NSRange charRange, BOOL retaining
     layerFindIndicator = [[FindHighlightLayer alloc] init];
     [content setWantsLayer: YES];
     layerFindIndicator.geometryFlipped = content.layer.geometryFlipped;
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_8)
+    {
+      // Content layer is unflipped on 10.9, but the indicator shows wrong unless flipped
+      layerFindIndicator.geometryFlipped = YES;
+    }
     [[content layer] addSublayer:layerFindIndicator];
   }
   [layerFindIndicator removeAnimationForKey:@"animateFound"];
