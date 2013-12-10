@@ -6329,6 +6329,8 @@ void Editor::ButtonDownWithModifiers(Point pt, unsigned int curTime, int modifie
 	const bool alt = (modifiers & SCI_ALT) != 0;
 	SelectionPosition newPos = SPositionFromLocation(pt, false, false, AllowVirtualSpace(virtualSpaceOptions, alt));
 	newPos = MovePositionOutsideChar(newPos, sel.MainCaret() - newPos.Position());
+	SelectionPosition newCharPos = SPositionFromLocation(pt, false, true, false);
+	newCharPos = MovePositionOutsideChar(newCharPos, -1);
 	inDragDrop = ddNone;
 	sel.SetMoveExtends(false);
 
@@ -6419,8 +6421,8 @@ void Editor::ButtonDownWithModifiers(Point pt, unsigned int curTime, int modifie
 		//Platform::DebugPrintf("Double click: %d - %d\n", anchor, currentPos);
 		if (doubleClick) {
 			NotifyDoubleClick(pt, modifiers);
-			if (PositionIsHotspot(newPos.Position()))
-				NotifyHotSpotDoubleClicked(newPos.Position(), modifiers);
+			if (PositionIsHotspot(newCharPos.Position()))
+				NotifyHotSpotDoubleClicked(newCharPos.Position(), modifiers);
 		}
 	} else {	// Single click
 		if (inSelMargin) {
@@ -6449,8 +6451,8 @@ void Editor::ButtonDownWithModifiers(Point pt, unsigned int curTime, int modifie
 			SetMouseCapture(true);
 		} else {
 			if (PointIsHotspot(pt)) {
-				NotifyHotSpotClicked(newPos.Position(), modifiers);
-				hotSpotClickPos = PositionFromLocation(pt,true,false);
+				NotifyHotSpotClicked(newCharPos.Position(), modifiers);
+				hotSpotClickPos = newCharPos.Position();
 			}
 			if (!shift) {
 				if (PointInSelection(pt) && !SelectionEmpty())
@@ -6503,7 +6505,7 @@ bool Editor::PositionIsHotspot(int position) const {
 }
 
 bool Editor::PointIsHotspot(Point pt) {
-	int pos = PositionFromLocation(pt, true);
+	int pos = PositionFromLocation(pt, true, true);
 	if (pos == INVALID_POSITION)
 		return false;
 	return PositionIsHotspot(pos);
@@ -6511,7 +6513,7 @@ bool Editor::PointIsHotspot(Point pt) {
 
 void Editor::SetHotSpotRange(Point *pt) {
 	if (pt) {
-		int pos = PositionFromLocation(*pt);
+		int pos = PositionFromLocation(*pt, false, true);
 
 		// If we don't limit this to word characters then the
 		// range can encompass more than the run range and then
@@ -6631,10 +6633,10 @@ void Editor::ButtonMoveWithModifiers(Point pt, int modifiers) {
 		}
 		EnsureCaretVisible(false, false, true);
 
-		if (hsStart != -1 && !PositionIsHotspot(movePos.Position()))
+		if (hsStart != -1 && !PointIsHotspot(pt))
 			SetHotSpotRange(NULL);
 
-		if (hotSpotClickPos != INVALID_POSITION && PositionFromLocation(pt,true,false) != hotSpotClickPos) {
+		if (hotSpotClickPos != INVALID_POSITION && PositionFromLocation(pt,true,true) != hotSpotClickPos) {
 			if (inDragDrop == ddNone) {
 				DisplayCursor(Window::cursorText);
 			}
@@ -6679,7 +6681,9 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 	}
 	if (hotSpotClickPos != INVALID_POSITION && PointIsHotspot(pt)) {
 		hotSpotClickPos = INVALID_POSITION;
-		NotifyHotSpotReleaseClick(newPos.Position(), ctrl ? SCI_CTRL : 0);
+		SelectionPosition newCharPos = SPositionFromLocation(pt, false, true, false);
+		newCharPos = MovePositionOutsideChar(newCharPos, -1);
+		NotifyHotSpotReleaseClick(newCharPos.Position(), ctrl ? SCI_CTRL : 0);
 	}
 	if (HaveMouseCapture()) {
 		if (PointInSelMargin(pt)) {
