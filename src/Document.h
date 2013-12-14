@@ -443,12 +443,12 @@ public:
  */
 class DocModification {
 public:
-  	int modificationType;
+	int modificationType;
 	int position;
- 	int length;
- 	int linesAdded;	/**< Negative if lines deleted. */
- 	const char *text;	/**< Only valid for changes to text, not for changes to style. */
- 	int line;
+	int length;
+	int linesAdded;	/**< Negative if lines deleted. */
+	const char *text;	/**< Only valid for changes to text, not for changes to style. */
+	int line;
 	int foldLevelNow;
 	int foldLevelPrev;
 	int annotationLinesAdded;

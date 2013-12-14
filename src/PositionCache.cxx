@@ -454,7 +454,7 @@ BreakFinder::~BreakFinder() {
 TextSegment BreakFinder::Next() {
 	if (subBreak == -1) {
 		int prev = nextBreak;
- 		while (nextBreak < lineEnd) {
+		while (nextBreak < lineEnd) {
 			int charWidth = 1;
 			if (encodingFamily == efUnicode)
 				charWidth = UTF8DrawBytes(reinterpret_cast<unsigned char *>(ll->chars) + nextBreak, lineEnd - nextBreak);

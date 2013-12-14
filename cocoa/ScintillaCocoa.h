@@ -85,7 +85,7 @@ class ScintillaCocoa : public ScintillaBase
 private:
   TimerTarget* timerTarget;
   NSEvent* lastMouseEvent;
-  
+
   id<ScintillaNotificationProtocol> delegate;
 
   SciNotifyFunc	notifyProc;
@@ -101,13 +101,13 @@ private:
 
   bool GetPasteboardData(NSPasteboard* board, SelectionText* selectedText);
   void SetPasteboardData(NSPasteboard* board, const SelectionText& selectedText);
-  
+
   int scrollSpeed;
   int scrollTicks;
   NSTimer* tickTimer;
   NSTimer* idleTimer;
   CFRunLoopObserverRef observer;
-	
+
   FindHighlightLayer *layerFindIndicator;
 
 protected:
@@ -116,7 +116,7 @@ protected:
   Point ConvertPoint(NSPoint point);
   virtual void RedrawRect(PRectangle rc);
   virtual void Redraw();
-  
+
   virtual void Initialise();
   virtual void Finalise();
   virtual CaseFolder *CaseFolderForEncoding();
@@ -173,7 +173,7 @@ public:
   virtual void ClaimSelection();
 
   NSPoint GetCaretPosition();
-  
+
   static sptr_t DirectFunction(ScintillaCocoa *sciThis, unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
   void TimerFired(NSTimer* timer);
@@ -203,14 +203,14 @@ public:
   void DraggingExited(id <NSDraggingInfo> info);
   bool PerformDragOperation(id <NSDraggingInfo> info);
   void DragScroll();
-  
+
   // Promote some methods needed for NSResponder actions.
   virtual void SelectAll();
   void DeleteBackward();
   virtual void Cut();
   virtual void Undo();
   virtual void Redo();
-  
+
   virtual NSMenu* CreateContextMenu(NSEvent* event);
   void HandleCommand(NSInteger command);
 

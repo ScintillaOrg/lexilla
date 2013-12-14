@@ -48,7 +48,7 @@
 
 static const double kPi = 3.14159265358979323846;
 
-// The Pango version guard for pango_units_from_double and pango_units_to_double 
+// The Pango version guard for pango_units_from_double and pango_units_to_double
 // is more complex than simply implementing these here.
 
 static int pangoUnitsFromDouble(double d) {
@@ -339,7 +339,7 @@ void FontCached::ReleaseAll() {
 FontID FontCached::CreateNewFont(const FontParameters &fp) {
 	PangoFontDescription *pfd = pango_font_description_new();
 	if (pfd) {
-		pango_font_description_set_family(pfd, 
+		pango_font_description_set_family(pfd,
 			(fp.faceName[0] == '!') ? fp.faceName+1 : fp.faceName);
 		pango_font_description_set_size(pfd, pangoUnitsFromDouble(fp.size));
 		pango_font_description_set_weight(pfd, static_cast<PangoWeight>(fp.weight));
@@ -666,7 +666,7 @@ void SurfaceImpl::Polygon(Point *pts, int npts, ColourDesired fore,
                           ColourDesired back) {
 	PenColour(back);
 	cairo_move_to(context, pts[0].x + 0.5, pts[0].y + 0.5);
-	for (int i = 1;i < npts;i++) {
+	for (int i = 1; i < npts; i++) {
 		cairo_line_to(context, pts[i].x + 0.5, pts[i].y + 0.5);
 	}
 	cairo_close_path(context);
@@ -842,7 +842,7 @@ void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 std::string UTF8FromLatin1(const char *s, int len) {
 	std::string utfForm(len*2 + 1, '\0');
 	size_t lenU = 0;
-	for (int i=0;i<len;i++) {
+	for (int i=0; i<len; i++) {
 		unsigned int uch = static_cast<unsigned char>(s[i]);
 		if (uch < 0x80) {
 			utfForm[lenU++] = uch;
@@ -936,7 +936,7 @@ void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, 
 void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
                                   ColourDesired fore) {
 	// Avoid drawing spaces in transparent mode
-	for (int i=0;i<len;i++) {
+	for (int i=0; i<len; i++) {
 		if (s[i] != ' ') {
 			DrawTextBase(rc, font_, ybase, s, len, fore);
 			return;
@@ -1064,7 +1064,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION 
 							int widthLayout = 0;
 							pango_layout_get_size(layout, &widthLayout, NULL);
 							XYPOSITION widthTotal = doubleFromPangoUnits(widthLayout);
-							for (int bytePos=0;bytePos<lenPositions; bytePos++) {
+							for (int bytePos=0; bytePos<lenPositions; bytePos++) {
 								positions[bytePos] = widthTotal / lenPositions * (bytePos + 1);
 							}
 							return;
@@ -1598,7 +1598,7 @@ PRectangle ListBoxX::GetDesiredRect() {
 		GtkRequisition req;
 #if GTK_CHECK_VERSION(3,0,0)
 		// This, apparently unnecessary call, ensures gtk_tree_view_column_cell_get_size
-		// returns reasonable values. 
+		// returns reasonable values.
 		gtk_widget_get_preferred_size(GTK_WIDGET(scroller), NULL, &req);
 #endif
 		int height;
@@ -1981,8 +1981,9 @@ public:
 				return static_cast<Function>(fn_address);
 			else
 				return NULL;
-		} else
+		} else {
 			return NULL;
+		}
 	}
 
 	virtual bool IsValid() {

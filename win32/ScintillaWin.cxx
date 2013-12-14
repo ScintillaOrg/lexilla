@@ -1492,9 +1492,9 @@ public:
 					// Maximum length of a case conversion is 6 bytes, 3 characters
 					wchar_t wFolded[20];
 					unsigned int charsConverted = UTF16FromUTF8(foldedUTF8,
-							static_cast<unsigned int>(strlen(foldedUTF8)), 
+							static_cast<unsigned int>(strlen(foldedUTF8)),
 							wFolded, sizeof(wFolded)/sizeof(wFolded[0]));
-					for (size_t j=0;j<charsConverted;j++)
+					for (size_t j=0; j<charsConverted; j++)
 						utf16Folded[lenFlat++] = wFolded[j];
 				} else {
 					utf16Folded[lenFlat++] = utf16Mixed[mixIndex];
@@ -1538,7 +1538,7 @@ CaseFolder *ScintillaWin::CaseFolderForEncoding() {
 					if (caseFolded) {
 						wchar_t wLower[20];
 						unsigned int charsConverted = UTF16FromUTF8(caseFolded,
-							static_cast<unsigned int>(strlen(caseFolded)), 
+							static_cast<unsigned int>(strlen(caseFolded)),
 							wLower, sizeof(wLower)/sizeof(wLower[0]));
 						if (charsConverted == 1) {
 							char sCharacterLowered[20];
@@ -1566,7 +1566,7 @@ std::string ScintillaWin::CaseMapString(const std::string &s, int caseMapping) {
 	UINT cpDoc = CodePageOfDocument();
 	if (cpDoc == SC_CP_UTF8) {
 		std::string retMapped(s.length() * maxExpansionCaseConversion, 0);
-		size_t lenMapped = CaseConvertString(&retMapped[0], retMapped.length(), s.c_str(), s.length(), 
+		size_t lenMapped = CaseConvertString(&retMapped[0], retMapped.length(), s.c_str(), s.length(),
 			(caseMapping == cmUpper) ? CaseConversionUpper : CaseConversionLower);
 		retMapped.resize(lenMapped);
 		return retMapped;

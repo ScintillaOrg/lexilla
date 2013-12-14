@@ -376,7 +376,7 @@ public:
 
 	int SCI_METHOD LineEndTypesSupported() {
 		return SC_LINE_END_TYPE_UNICODE;
-	};
+	}
 
 	int SCI_METHOD AllocateSubStyles(int styleBase, int numberStyles) {
 		return subStyles.Allocate(styleBase, numberStyles);
