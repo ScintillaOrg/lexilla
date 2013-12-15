@@ -524,7 +524,7 @@ static char *EncodedBytes(CFStringRef cfsRef, CFStringEncoding encoding) {
 class CaseFolderDBCS : public CaseFolderTable {
 	CFStringEncoding encoding;
 public:
-	CaseFolderDBCS(CFStringEncoding encoding_) : encoding(encoding_) {
+	explicit CaseFolderDBCS(CFStringEncoding encoding_) : encoding(encoding_) {
 		StandardASCII();
 	}
 	virtual size_t Fold(char *folded, size_t sizeFolded, const char *mixed, size_t lenMixed) {

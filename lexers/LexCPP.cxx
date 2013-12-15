@@ -336,7 +336,7 @@ class LexerCPP : public ILexerWithSubStyles {
 	enum { ssIdentifier, ssDocKeyword };
 	SubStyles subStyles;
 public:
-	LexerCPP(bool caseSensitive_) :
+	explicit LexerCPP(bool caseSensitive_) :
 		caseSensitive(caseSensitive_),
 		setWord(CharacterSet::setAlphaNum, "._", 0x80, true),
 		setNegationOp(CharacterSet::setNone, "!"),
@@ -485,7 +485,7 @@ int SCI_METHOD LexerCPP::WordListSet(int n, const char *wl) {
 // Functor used to truncate history
 struct After {
 	int line;
-	After(int line_) : line(line_) {}
+	explicit After(int line_) : line(line_) {}
 	bool operator()(PPDefinition &p) const {
 		return p.line > line;
 	}

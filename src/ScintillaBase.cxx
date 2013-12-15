@@ -486,7 +486,7 @@ class LexState : public LexInterface {
 public:
 	int lexLanguage;
 
-	LexState(Document *pdoc_);
+	explicit LexState(Document *pdoc_);
 	virtual ~LexState();
 	void SetLexer(uptr_t wParam);
 	void SetLexerLanguage(const char *languageName);

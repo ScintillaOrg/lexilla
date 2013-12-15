@@ -2103,7 +2103,7 @@ int Document::BraceMatch(int position, int /*maxReStyle*/) {
  */
 class BuiltinRegex : public RegexSearchBase {
 public:
-	BuiltinRegex(CharClassify *charClassTable) : search(charClassTable) {}
+	explicit BuiltinRegex(CharClassify *charClassTable) : search(charClassTable) {}
 
 	virtual ~BuiltinRegex() {
 	}

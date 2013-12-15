@@ -253,7 +253,7 @@ class FontCached : Font {
 	int usage;
 	LOGFONT lf;
 	int hash;
-	FontCached(const FontParameters &fp);
+	explicit FontCached(const FontParameters &fp);
 	~FontCached() {}
 	bool SameAs(const FontParameters &fp);
 	virtual void Release();
@@ -1963,7 +1963,7 @@ class DynamicLibraryImpl : public DynamicLibrary {
 protected:
 	GModule* m;
 public:
-	DynamicLibraryImpl(const char *modulePath) {
+	explicit DynamicLibraryImpl(const char *modulePath) {
 		m = g_module_open(modulePath, G_MODULE_BIND_LAZY);
 	}
 

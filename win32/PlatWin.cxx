@@ -334,7 +334,7 @@ class FontCached : Font {
 	LOGFONTA lf;
 	int technology;
 	int hash;
-	FontCached(const FontParameters &fp);
+	explicit FontCached(const FontParameters &fp);
 	~FontCached() {}
 	bool SameAs(const FontParameters &fp);
 	virtual void Release();
@@ -490,7 +490,7 @@ class VarBuffer {
 	VarBuffer &operator=(const VarBuffer &);
 public:
 	T *buffer;
-	VarBuffer(size_t length) : buffer(0) {
+	explicit VarBuffer(size_t length) : buffer(0) {
 		if (length > lengthStandard) {
 			buffer = new T[length];
 		} else {
@@ -3058,7 +3058,7 @@ class DynamicLibraryImpl : public DynamicLibrary {
 protected:
 	HMODULE h;
 public:
-	DynamicLibraryImpl(const char *modulePath) {
+	explicit DynamicLibraryImpl(const char *modulePath) {
 		h = ::LoadLibraryA(modulePath);
 	}
 

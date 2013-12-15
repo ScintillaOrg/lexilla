@@ -4206,7 +4206,7 @@ void Editor::ClearSelection(bool retainMultipleSelections) {
 				sel.Range(r).End().Position())) {
 				pdoc->DeleteChars(sel.Range(r).Start().Position(),
 					sel.Range(r).Length());
-				sel.Range(r) = sel.Range(r).Start();
+				sel.Range(r) = SelectionRange(sel.Range(r).Start());
 			}
 		}
 	}
@@ -4324,9 +4324,9 @@ void Editor::Clear() {
 			if (!RangeContainsProtected(sel.Range(r).caret.Position(), sel.Range(r).caret.Position() + 1)) {
 				if (sel.Range(r).Start().VirtualSpace()) {
 					if (sel.Range(r).anchor < sel.Range(r).caret)
-						sel.Range(r) = SelectionPosition(InsertSpace(sel.Range(r).anchor.Position(), sel.Range(r).anchor.VirtualSpace()));
+						sel.Range(r) = SelectionRange(InsertSpace(sel.Range(r).anchor.Position(), sel.Range(r).anchor.VirtualSpace()));
 					else
-						sel.Range(r) = SelectionPosition(InsertSpace(sel.Range(r).caret.Position(), sel.Range(r).caret.VirtualSpace()));
+						sel.Range(r) = SelectionRange(InsertSpace(sel.Range(r).caret.Position(), sel.Range(r).caret.VirtualSpace()));
 				}
 				if ((sel.Count() == 1) || !pdoc->IsPositionInLineEnd(sel.Range(r).caret.Position())) {
 					pdoc->DelChar(sel.Range(r).caret.Position());

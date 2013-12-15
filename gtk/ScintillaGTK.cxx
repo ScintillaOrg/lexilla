@@ -165,7 +165,7 @@ class ScintillaGTK : public ScintillaBase {
 	ScintillaGTK &operator=(const ScintillaGTK &);
 
 public:
-	ScintillaGTK(_ScintillaObject *sci_);
+	explicit ScintillaGTK(_ScintillaObject *sci_);
 	virtual ~ScintillaGTK();
 	static void ClassInit(OBJECT_CLASS* object_class, GtkWidgetClass *widget_class, GtkContainerClass *container_class);
 private:
@@ -1244,7 +1244,7 @@ const char *ScintillaGTK::CharacterSetID() const {
 class CaseFolderDBCS : public CaseFolderTable {
 	const char *charSet;
 public:
-	CaseFolderDBCS(const char *charSet_) : charSet(charSet_) {
+	explicit CaseFolderDBCS(const char *charSet_) : charSet(charSet_) {
 		StandardASCII();
 	}
 	virtual size_t Fold(char *folded, size_t sizeFolded, const char *mixed, size_t lenMixed) {

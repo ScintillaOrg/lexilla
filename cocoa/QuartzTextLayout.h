@@ -20,7 +20,7 @@ class QuartzTextLayout
 {
 public:
     /** Create a text layout for drawing on the specified context. */
-    QuartzTextLayout( CGContextRef context )
+    explicit QuartzTextLayout( CGContextRef context )
     {
 		mString = NULL;
 		mLine = NULL;

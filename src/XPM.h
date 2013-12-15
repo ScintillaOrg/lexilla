@@ -25,8 +25,8 @@ class XPM {
 	ColourDesired ColourFromCode(int ch) const;
 	void FillRun(Surface *surface, int code, int startX, int y, int x);
 public:
-	XPM(const char *textForm);
-	XPM(const char *const *linesForm);
+	explicit XPM(const char *textForm);
+	explicit XPM(const char *const *linesForm);
 	~XPM();
 	void Init(const char *textForm);
 	void Init(const char *const *linesForm);
@@ -53,7 +53,7 @@ class RGBAImage {
 	std::vector<unsigned char> pixelBytes;
 public:
 	RGBAImage(int width_, int height_, float scale_, const unsigned char *pixels_);
-	RGBAImage(const XPM &xpm);
+	explicit RGBAImage(const XPM &xpm);
 	virtual ~RGBAImage();
 	int GetHeight() const { return height; }
 	int GetWidth() const { return width; }

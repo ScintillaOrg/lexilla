@@ -212,7 +212,7 @@ class ScintillaWin :
 	bool renderTargetValid;
 #endif
 
-	ScintillaWin(HWND hwnd);
+	explicit ScintillaWin(HWND hwnd);
 	ScintillaWin(const ScintillaWin &);
 	virtual ~ScintillaWin();
 	ScintillaWin &operator=(const ScintillaWin &);
@@ -1461,7 +1461,7 @@ class CaseFolderDBCS : public CaseFolderTable {
 	std::vector<wchar_t> utf16Folded;
 	UINT cp;
 public:
-	CaseFolderDBCS(UINT cp_) : cp(cp_) {
+	explicit CaseFolderDBCS(UINT cp_) : cp(cp_) {
 		StandardASCII();
 	}
 	virtual size_t Fold(char *folded, size_t sizeFolded, const char *mixed, size_t lenMixed) {
@@ -1634,7 +1634,7 @@ public:
 	void *ptr;
 	GlobalMemory() : hand(0), ptr(0) {
 	}
-	GlobalMemory(HGLOBAL hand_) : hand(hand_), ptr(0) {
+	explicit GlobalMemory(HGLOBAL hand_) : hand(hand_), ptr(0) {
 		if (hand) {
 			ptr = ::GlobalLock(hand);
 		}
