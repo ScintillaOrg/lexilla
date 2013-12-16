@@ -683,6 +683,8 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 								sc.ChangeState((raw ? SCE_C_STRINGRAW : SCE_C_STRING)|activitySet);
 							else
 								sc.ChangeState(SCE_C_CHARACTER|activitySet);
+						} else {
+							sc.SetState(SCE_C_DEFAULT | activitySet);
 						}
 					} else {
 						sc.SetState(SCE_C_DEFAULT|activitySet);
