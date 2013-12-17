@@ -2176,6 +2176,9 @@ fun int SetSelection=2572(int caret, int anchor)
 # Add a selection
 fun int AddSelection=2573(int caret, int anchor)
 
+# Drop one selection
+fun void DropSelectionN=2671(int selection,)
+
 # Set the main selection
 set void SetMainSelection=2574(int selection,)
 

@@ -1382,6 +1382,40 @@ class TestMultiSelection(unittest.TestCase):
 		self.assertEquals(self.ed.GetSelectionNAnchorVirtualSpace(0), 0)
 		self.assertEquals(self.ed.GetSelectionNCaret(0), 3)
 		self.assertEquals(self.ed.GetSelectionNCaretVirtualSpace(0), 0)
+		
+	def testDropSelectionN(self):
+		self.ed.SetSelection(1, 2)
+		# Only one so dropping has no effect
+		self.ed.DropSelectionN(0)
+		self.assertEquals(self.ed.Selections, 1)
+		self.ed.AddSelection(4, 5)
+		self.assertEquals(self.ed.Selections, 2)
+		# Outside bounds so no effect
+		self.ed.DropSelectionN(2)
+		self.assertEquals(self.ed.Selections, 2)
+		# Dropping before main so main decreases
+		self.ed.DropSelectionN(0)
+		self.assertEquals(self.ed.Selections, 1)
+		self.assertEquals(self.ed.MainSelection, 0)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 4)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 5)
+
+		self.ed.AddSelection(10, 11)
+		self.ed.AddSelection(20, 21)
+		self.assertEquals(self.ed.Selections, 3)
+		self.assertEquals(self.ed.MainSelection, 2)
+		self.ed.MainSelection = 1
+		# Dropping after main so main does not change
+		self.ed.DropSelectionN(2)
+		self.assertEquals(self.ed.MainSelection, 1)
+
+		# Dropping first selection so wraps around to new last.
+		self.ed.AddSelection(30, 31)
+		self.ed.AddSelection(40, 41)
+		self.assertEquals(self.ed.Selections, 4)
+		self.ed.MainSelection = 0
+		self.ed.DropSelectionN(0)
+		self.assertEquals(self.ed.MainSelection, 2)
 
 class TestCharacterNavigation(unittest.TestCase):
 	def setUp(self):

@@ -1565,6 +1565,7 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_CLEARSELECTIONS">SCI_CLEARSELECTIONS</a><br />
      <a class="message" href="#SCI_SETSELECTION">SCI_SETSELECTION(int caret, int anchor)</a><br />
      <a class="message" href="#SCI_ADDSELECTION">SCI_ADDSELECTION(int caret, int anchor)</a><br />
+     <a class="message" href="#SCI_DROPSELECTIONN">SCI_DROPSELECTIONN(int selection)</a><br />
      <a class="message" href="#SCI_SETMAINSELECTION">SCI_SETMAINSELECTION(int selection)</a><br />
      <a class="message" href="#SCI_GETMAINSELECTION">SCI_GETMAINSELECTION</a><br />
      <br />
@@ -1690,6 +1691,12 @@ struct Sci_TextToFind {
      selections as additional selections.
      Since there is always at least one selection, to set a list of selections, the first selection should be
      added with <code>SCI_SETSELECTION</code> and later selections added with <code>SCI_ADDSELECTION</code></p>
+
+    <p>
+    <b id="SCI_DROPSELECTIONN">SCI_DROPSELECTIONN(int selection)</b><br />
+     If there are multiple selections, remove the indicated selection.
+     If this was the main selection then make the previous selection the main and if it was the first then the last selection becomes main.
+     If there is only one selection, or there is no selection <code>selection</code>, then there is no effect.</p>
 
     <p>
     <b id="SCI_SETMAINSELECTION">SCI_SETMAINSELECTION(int selection)</b><br />
