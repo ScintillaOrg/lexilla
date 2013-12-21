@@ -573,6 +573,9 @@ static void ResumeString(Accessor &styler, int& pos, int max) {
 
 static void ResumeRawString(Accessor &styler, int& pos, int max, int num_hashes) {
 	for (;;) {
+		if (pos == styler.LineEnd(styler.GetLine(pos)))
+			styler.SetLineState(styler.GetLine(pos), num_hashes);
+
 		int c = styler.SafeGetCharAt(pos, '\0');
 		if (c == '"') {
 			pos++;
@@ -589,10 +592,9 @@ static void ResumeRawString(Accessor &styler, int& pos, int max, int num_hashes)
 		} else if (c == '\0' || pos >= max) {
 			styler.ColourTo(pos - 1, SCE_RUST_STRINGR);
 			break;
+		} else {		
+			pos++;
 		}
-		if (pos == styler.LineEnd(styler.GetLine(pos)))
-			styler.SetLineState(styler.GetLine(pos), num_hashes);
-		pos++;
 	}
 }
 
