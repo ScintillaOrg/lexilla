@@ -267,6 +267,9 @@ static void ScanNumber(Accessor& styler, int& pos) {
 	} else if (c == '0' && n == 'b') {
 		pos += 2;
 		base = 2;
+	} else if (c == '0' && n == 'o') {
+		pos += 2;
+		base = 8;
 	}
 	int old_pos = pos;
 	ScanDigits(styler, pos, base);
