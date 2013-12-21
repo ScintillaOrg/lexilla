@@ -444,16 +444,24 @@ enum CommentState {
 };
 
 /*
- * The rule for block-doc comments is as follows (use x for asterisk)... /xx and /x! start doc comments
- * unless the entire comment is x's.
+ * The rule for block-doc comments is as follows: /xxN and /x! (where x is an asterisk, N is a non-asterisk) start doc comments.
+ * Otherwise it's a regular comment.
  */
 static void ResumeBlockComment(Accessor &styler, int& pos, int max, CommentState state) {
 	int c = styler.SafeGetCharAt(pos, '\0');
 	bool maybe_doc_comment = false;
-	bool any_non_asterisk = false;
-	if (c == '*' || c == '!') {
+	if (c == '*') {
+		if (pos < max) {
+			pos++;
+			c = styler.SafeGetCharAt(pos, '\0');
+			if (c != '*') {
+				maybe_doc_comment = true;
+			}
+		}
+	} else if (c == '!') {
 		maybe_doc_comment = true;
 	}
+
 	for (;;) {
 		if (pos == styler.LineEnd(styler.GetLine(pos)))
 			styler.SetLineState(styler.GetLine(pos), 0);
@@ -461,14 +469,12 @@ static void ResumeBlockComment(Accessor &styler, int& pos, int max, CommentState
 			int n = styler.SafeGetCharAt(pos + 1, '\0');
 			if (n == '/') {
 				pos += 2;
-				if (state == DocComment || (state == UnknownComment && maybe_doc_comment && any_non_asterisk))
+				if (state == DocComment || (state == UnknownComment && maybe_doc_comment))
 					styler.ColourTo(pos - 1, SCE_RUST_COMMENTBLOCKDOC);
 				else
 					styler.ColourTo(pos - 1, SCE_RUST_COMMENTBLOCK);
 				break;
 			}
-		} else {
-			any_non_asterisk = true;
 		}
 		if (pos >= max) {
 			if (state == DocComment || (state == UnknownComment && maybe_doc_comment))
@@ -483,43 +489,30 @@ static void ResumeBlockComment(Accessor &styler, int& pos, int max, CommentState
 }
 
 /*
- * The rule for line-doc comments is as follows... /// and //! start doc comments
- * unless the comment is composed entirely of /'s followed by whitespace. That is:
- * // - comment
- * /// - doc-comment
- * //// - comment
- * ////a - doc-comment
+ * The rule for line-doc comments is as follows... ///N and //! (where N is a non slash) start doc comments.
+ * Otherwise it's a normal line comment.
  */
 static void ResumeLineComment(Accessor &styler, int& pos, int max, CommentState state) {
 	bool maybe_doc_comment = false;
-	int num_leading_slashes = 0;
 	int c = styler.SafeGetCharAt(pos, '\0');
 	if (c == '/') {
-		num_leading_slashes = 1;
-		while (pos < max) {
+		if (pos < max) {
 			pos++;
 			c = styler.SafeGetCharAt(pos, '\0');
-			if (c == '/') {
-				num_leading_slashes++;
-			} else {
-				break;
+			if (c != '/') {
+				maybe_doc_comment = true;
 			}
 		}
 	} else if (c == '!') {
 		maybe_doc_comment = true;
 	}
 
-	bool non_white_space = false;
 	while (pos < max && c != '\n') {
-		if (!IsWhitespace(c))
-			non_white_space = true;
 		if (pos == styler.LineEnd(styler.GetLine(pos)))
 			styler.SetLineState(styler.GetLine(pos), 0);
 		pos++;
 		c = styler.SafeGetCharAt(pos, '\0');
 	}
-
-	maybe_doc_comment |= num_leading_slashes == 1 || (num_leading_slashes > 1 && non_white_space);
 
 	if (state == DocComment || (state == UnknownComment && maybe_doc_comment))
 		styler.ColourTo(pos - 1, SCE_RUST_COMMENTLINEDOC);
