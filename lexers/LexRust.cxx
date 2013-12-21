@@ -262,16 +262,16 @@ static void ScanNumber(Accessor& styler, int& pos) {
 	int n = styler.SafeGetCharAt(pos + 1, '\0');
 	bool error = false;
 	if (c == '0' && n == 'x') {
-        pos += 2;
-        base = 16;
-    } else if (c == '0' && n == 'b') {
-        pos += 2;
-        base = 2;
-    }
-    int old_pos = pos;
-    ScanDigits(styler, pos, base);
-    c = styler.SafeGetCharAt(pos, '\0');
-    if (c == 'u' || c == 'i') {
+		pos += 2;
+		base = 16;
+	} else if (c == '0' && n == 'b') {
+		pos += 2;
+		base = 2;
+	}
+	int old_pos = pos;
+	ScanDigits(styler, pos, base);
+	c = styler.SafeGetCharAt(pos, '\0');
+	if (c == 'u' || c == 'i') {
 		pos++;
 		c = styler.SafeGetCharAt(pos, '\0');
 		n = styler.SafeGetCharAt(pos + 1, '\0');
