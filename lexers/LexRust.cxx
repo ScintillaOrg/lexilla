@@ -447,34 +447,45 @@ enum CommentState {
  * The rule for block-doc comments is as follows: /xxN and /x! (where x is an asterisk, N is a non-asterisk) start doc comments.
  * Otherwise it's a regular comment.
  */
-static void ResumeBlockComment(Accessor &styler, int& pos, int max, CommentState state) {
+static void ResumeBlockComment(Accessor &styler, int& pos, int max, CommentState state, int level) {
 	int c = styler.SafeGetCharAt(pos, '\0');
 	bool maybe_doc_comment = false;
 	if (c == '*') {
-		if (pos < max) {
-			pos++;
-			c = styler.SafeGetCharAt(pos, '\0');
-			if (c != '*') {
-				maybe_doc_comment = true;
-			}
+		int n = styler.SafeGetCharAt(pos + 1, '\0');
+		if (n != '*' && n != '/') {
+			maybe_doc_comment = true;
 		}
 	} else if (c == '!') {
 		maybe_doc_comment = true;
 	}
 
 	for (;;) {
+		int n = styler.SafeGetCharAt(pos + 1, '\0');
 		if (pos == styler.LineEnd(styler.GetLine(pos)))
-			styler.SetLineState(styler.GetLine(pos), 0);
+			styler.SetLineState(styler.GetLine(pos), level);
 		if (c == '*') {
-			int n = styler.SafeGetCharAt(pos + 1, '\0');
+			pos++;
 			if (n == '/') {
-				pos += 2;
-				if (state == DocComment || (state == UnknownComment && maybe_doc_comment))
-					styler.ColourTo(pos - 1, SCE_RUST_COMMENTBLOCKDOC);
-				else
-					styler.ColourTo(pos - 1, SCE_RUST_COMMENTBLOCK);
-				break;
+				pos++;
+				level--;
+				if (level == 0) {
+					styler.SetLineState(styler.GetLine(pos), 0);
+					if (state == DocComment || (state == UnknownComment && maybe_doc_comment))
+						styler.ColourTo(pos - 1, SCE_RUST_COMMENTBLOCKDOC);
+					else
+						styler.ColourTo(pos - 1, SCE_RUST_COMMENTBLOCK);
+					break;
+				}
 			}
+		} else if (c == '/') {
+			pos++;
+			if (n == '*') {
+				pos++;
+				level++;
+			}
+		}
+		else {
+			pos++;
 		}
 		if (pos >= max) {
 			if (state == DocComment || (state == UnknownComment && maybe_doc_comment))
@@ -483,7 +494,6 @@ static void ResumeBlockComment(Accessor &styler, int& pos, int max, CommentState
 				styler.ColourTo(pos - 1, SCE_RUST_COMMENTBLOCK);
 			break;
 		}
-		pos++;
 		c = styler.SafeGetCharAt(pos, '\0');
 	}
 }
@@ -527,7 +537,7 @@ static void ScanComments(Accessor &styler, int& pos, int max) {
 	if (c == '/')
 		ResumeLineComment(styler, pos, max, UnknownComment);
 	else if (c == '*')
-		ResumeBlockComment(styler, pos, max, UnknownComment);
+		ResumeBlockComment(styler, pos, max, UnknownComment, 1);
 }
 
 static void ResumeString(Accessor &styler, int& pos, int max) {
@@ -619,7 +629,7 @@ void SCI_METHOD LexerRust::Lex(unsigned int startPos, int length, int initStyle,
 	styler.StartSegment(pos);
 
 	if (initStyle == SCE_RUST_COMMENTBLOCK || initStyle == SCE_RUST_COMMENTBLOCKDOC) {
-		ResumeBlockComment(styler, pos, max, initStyle == SCE_RUST_COMMENTBLOCKDOC ? DocComment : NotDocComment);
+		ResumeBlockComment(styler, pos, max, initStyle == SCE_RUST_COMMENTBLOCKDOC ? DocComment : NotDocComment, styler.GetLineState(styler.GetLine(pos) - 1));
 	} else if (initStyle == SCE_RUST_COMMENTLINE || initStyle == SCE_RUST_COMMENTLINEDOC) {
 		ResumeLineComment(styler, pos, max, initStyle == SCE_RUST_COMMENTLINEDOC ? DocComment : NotDocComment);
 	} else if (initStyle == SCE_RUST_STRING) {
