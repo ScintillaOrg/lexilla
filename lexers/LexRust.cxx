@@ -467,7 +467,7 @@ static void ResumeBlockComment(Accessor &styler, int& pos, int max, CommentState
 		} else {
 			any_non_asterisk = true;
 		}
-		if (c == '\0' || pos >= max) {
+		if (pos >= max) {
 			if (state == DocComment || (state == UnknownComment && maybe_doc_comment))
 				styler.ColourTo(pos - 1, SCE_RUST_COMMENTBLOCKDOC);
 			else
@@ -507,7 +507,7 @@ static void ResumeLineComment(Accessor &styler, int& pos, int max, CommentState 
 	}
 
 	bool non_white_space = false;
-	while (pos < max && c != '\n' && c != '\0') {
+	while (pos < max && c != '\n') {
 		if (!IsWhitespace(c))
 			non_white_space = true;
 		if (pos == styler.LineEnd(styler.GetLine(pos)))
@@ -538,7 +538,7 @@ static void ResumeString(Accessor &styler, int& pos, int max) {
 	int c = styler.SafeGetCharAt(pos, '\0');
 	bool error = false;
 	while (c != '"' && !error) {
-		if (c == '\0' || pos >= max) {
+		if (pos >= max) {
 			error = true;
 			break;
 		}
@@ -589,7 +589,7 @@ static void ResumeRawString(Accessor &styler, int& pos, int max, int num_hashes)
 				styler.ColourTo(pos - 1, SCE_RUST_STRINGR);
 				break;
 			}
-		} else if (c == '\0' || pos >= max) {
+		} else if (pos >= max) {
 			styler.ColourTo(pos - 1, SCE_RUST_STRINGR);
 			break;
 		} else {		
