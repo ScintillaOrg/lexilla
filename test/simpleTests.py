@@ -1417,6 +1417,89 @@ class TestMultiSelection(unittest.TestCase):
 		self.ed.DropSelectionN(0)
 		self.assertEquals(self.ed.MainSelection, 2)
 
+class TestStyleAttributes(unittest.TestCase):
+	""" These tests are just to ensure that the calls set and retrieve values.
+	They do not check the visual appearance of the style attributes.
+	"""
+	def setUp(self):
+		self.xite = Xite.xiteFrame
+		self.ed = self.xite.ed
+		self.ed.ClearAll()
+		self.ed.EmptyUndoBuffer()
+		self.testColour = 0x171615
+		self.testFont = b"Georgia"
+
+	def tearDown(self):
+		self.ed.StyleResetDefault()
+
+	def testFont(self):
+		self.ed.StyleSetFont(self.ed.STYLE_DEFAULT, self.testFont)
+		self.assertEquals(self.ed.StyleGetFont(self.ed.STYLE_DEFAULT), self.testFont)
+
+	def testSize(self):
+		self.ed.StyleSetSize(self.ed.STYLE_DEFAULT, 12)
+		self.assertEquals(self.ed.StyleGetSize(self.ed.STYLE_DEFAULT), 12)
+		self.assertEquals(self.ed.StyleGetSizeFractional(self.ed.STYLE_DEFAULT), 12*self.ed.SC_FONT_SIZE_MULTIPLIER)
+		self.ed.StyleSetSizeFractional(self.ed.STYLE_DEFAULT, 1234)
+		self.assertEquals(self.ed.StyleGetSizeFractional(self.ed.STYLE_DEFAULT), 1234)
+
+	def testBold(self):
+		self.ed.StyleSetBold(self.ed.STYLE_DEFAULT, 1)
+		self.assertEquals(self.ed.StyleGetBold(self.ed.STYLE_DEFAULT), 1)
+		self.assertEquals(self.ed.StyleGetWeight(self.ed.STYLE_DEFAULT), self.ed.SC_WEIGHT_BOLD)
+		self.ed.StyleSetWeight(self.ed.STYLE_DEFAULT, 530)
+		self.assertEquals(self.ed.StyleGetWeight(self.ed.STYLE_DEFAULT), 530)
+
+	def testItalic(self):
+		self.ed.StyleSetItalic(self.ed.STYLE_DEFAULT, 1)
+		self.assertEquals(self.ed.StyleGetItalic(self.ed.STYLE_DEFAULT), 1)
+
+	def testUnderline(self):
+		self.assertEquals(self.ed.StyleGetUnderline(self.ed.STYLE_DEFAULT), 0)
+		self.ed.StyleSetUnderline(self.ed.STYLE_DEFAULT, 1)
+		self.assertEquals(self.ed.StyleGetUnderline(self.ed.STYLE_DEFAULT), 1)
+
+	def testFore(self):
+		self.assertEquals(self.ed.StyleGetFore(self.ed.STYLE_DEFAULT), 0)
+		self.ed.StyleSetFore(self.ed.STYLE_DEFAULT, self.testColour)
+		self.assertEquals(self.ed.StyleGetFore(self.ed.STYLE_DEFAULT), self.testColour)
+
+	def testBack(self):
+		self.assertEquals(self.ed.StyleGetBack(self.ed.STYLE_DEFAULT), 0xffffff)
+		self.ed.StyleSetBack(self.ed.STYLE_DEFAULT, self.testColour)
+		self.assertEquals(self.ed.StyleGetBack(self.ed.STYLE_DEFAULT), self.testColour)
+
+	def testEOLFilled(self):
+		self.assertEquals(self.ed.StyleGetEOLFilled(self.ed.STYLE_DEFAULT), 0)
+		self.ed.StyleSetEOLFilled(self.ed.STYLE_DEFAULT, 1)
+		self.assertEquals(self.ed.StyleGetEOLFilled(self.ed.STYLE_DEFAULT), 1)
+
+	def testCharacterSet(self):
+		self.ed.StyleSetCharacterSet(self.ed.STYLE_DEFAULT, self.ed.SC_CHARSET_RUSSIAN)
+		self.assertEquals(self.ed.StyleGetCharacterSet(self.ed.STYLE_DEFAULT), self.ed.SC_CHARSET_RUSSIAN)
+
+	def testCase(self):
+		self.assertEquals(self.ed.StyleGetCase(self.ed.STYLE_DEFAULT), self.ed.SC_CASE_MIXED)
+		self.ed.StyleSetCase(self.ed.STYLE_DEFAULT, self.ed.SC_CASE_UPPER)
+		self.assertEquals(self.ed.StyleGetCase(self.ed.STYLE_DEFAULT), self.ed.SC_CASE_UPPER)
+		self.ed.StyleSetCase(self.ed.STYLE_DEFAULT, self.ed.SC_CASE_LOWER)
+		self.assertEquals(self.ed.StyleGetCase(self.ed.STYLE_DEFAULT), self.ed.SC_CASE_LOWER)
+
+	def testVisible(self):
+		self.assertEquals(self.ed.StyleGetVisible(self.ed.STYLE_DEFAULT), 1)
+		self.ed.StyleSetVisible(self.ed.STYLE_DEFAULT, 0)
+		self.assertEquals(self.ed.StyleGetVisible(self.ed.STYLE_DEFAULT), 0)
+
+	def testChangeable(self):
+		self.assertEquals(self.ed.StyleGetChangeable(self.ed.STYLE_DEFAULT), 1)
+		self.ed.StyleSetChangeable(self.ed.STYLE_DEFAULT, 0)
+		self.assertEquals(self.ed.StyleGetChangeable(self.ed.STYLE_DEFAULT), 0)
+
+	def testHotSpot(self):
+		self.assertEquals(self.ed.StyleGetHotSpot(self.ed.STYLE_DEFAULT), 0)
+		self.ed.StyleSetHotSpot(self.ed.STYLE_DEFAULT, 1)
+		self.assertEquals(self.ed.StyleGetHotSpot(self.ed.STYLE_DEFAULT), 1)
+
 class TestCharacterNavigation(unittest.TestCase):
 	def setUp(self):
 		self.xite = Xite.xiteFrame
@@ -1803,6 +1886,12 @@ class TestAutoComplete(unittest.TestCase):
 		self.assertEquals(self.ed.Contents(), b"defnxxx\n")
 
 		self.assertEquals(self.ed.AutoCActive(), 0)
+
+	def testWriteOnly(self):
+		""" Checks that setting attributes doesn't crash or change tested behaviour
+		but does not check that the changed attributes are effective. """
+		self.ed.AutoCStops(0, b"abcde")
+		self.ed.AutoCSetFillUps(0, b"1234")
 
 class TestDirectAccess(unittest.TestCase):
 
