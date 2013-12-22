@@ -7386,11 +7386,7 @@ sptr_t Editor::StyleGetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 	case SCI_STYLEGETSIZEFRACTIONAL:
 		return vs.styles[wParam].size;
 	case SCI_STYLEGETFONT:
-		if (!vs.styles[wParam].fontName)
-			return 0;
-		if (lParam != 0)
-			strcpy(CharPtrFromSPtr(lParam), vs.styles[wParam].fontName);
-		return strlen(vs.styles[wParam].fontName);
+		return StringResult(lParam, vs.styles[wParam].fontName);
 	case SCI_STYLEGETUNDERLINE:
 		return vs.styles[wParam].underline ? 1 : 0;
 	case SCI_STYLEGETCASE:
@@ -7408,12 +7404,27 @@ sptr_t Editor::StyleGetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 }
 
 sptr_t Editor::StringResult(sptr_t lParam, const char *val) {
-	const size_t n = strlen(val);
-	if (lParam != 0) {
-		char *ptr = reinterpret_cast<char *>(lParam);
-		strcpy(ptr, val);
+	const size_t len = val ? strlen(val) : 0;
+	if (lParam) {
+		char *ptr = CharPtrFromSPtr(lParam);
+		if (val)
+			memcpy(ptr, val, len+1);
+		else
+			*ptr = 0;
 	}
-	return n;	// Not including NUL
+	return len;	// Not including NUL
+}
+
+sptr_t Editor::BytesResult(sptr_t lParam, const unsigned char *val, size_t len) {
+	// No NUL termination: len is number of valid/displayed bytes
+	if (lParam) {
+		char *ptr = CharPtrFromSPtr(lParam);
+		if (val)
+			memcpy(ptr, val, len);
+		else
+			*ptr = 0;
+	}
+	return val ? len : 0;
 }
 
 sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
@@ -9232,9 +9243,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			Representation *repr = reprs.RepresentationFromCharacter(
 				reinterpret_cast<const char *>(wParam), UTF8MaxBytes);
 			if (repr) {
-				if (lParam != 0)
-					strcpy(CharPtrFromSPtr(lParam), repr->stringRep.c_str());
-				return repr->stringRep.size();
+				return StringResult(lParam, repr->stringRep.c_str());
 			}
 			return 0;
 		}
@@ -9350,13 +9359,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_MARGINGETTEXT: {
 			const StyledText st = pdoc->MarginStyledText(wParam);
-			if (lParam) {
-				if (st.text)
-					memcpy(CharPtrFromSPtr(lParam), st.text, st.length);
-				else
-					strcpy(CharPtrFromSPtr(lParam), "");
-			}
-			return st.length;
+			return BytesResult(lParam, reinterpret_cast<const unsigned char *>(st.text), st.length);
 		}
 
 	case SCI_MARGINSETSTYLE:
@@ -9374,13 +9377,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_MARGINGETSTYLES: {
 			const StyledText st = pdoc->MarginStyledText(wParam);
-			if (lParam) {
-				if (st.styles)
-					memcpy(CharPtrFromSPtr(lParam), st.styles, st.length);
-				else
-					strcpy(CharPtrFromSPtr(lParam), "");
-			}
-			return st.styles ? st.length : 0;
+			return BytesResult(lParam, st.styles, st.length);
 		}
 
 	case SCI_MARGINTEXTCLEARALL:
@@ -9393,13 +9390,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_ANNOTATIONGETTEXT: {
 			const StyledText st = pdoc->AnnotationStyledText(wParam);
-			if (lParam) {
-				if (st.text)
-					memcpy(CharPtrFromSPtr(lParam), st.text, st.length);
-				else
-					strcpy(CharPtrFromSPtr(lParam), "");
-			}
-			return st.length;
+			return BytesResult(lParam, reinterpret_cast<const unsigned char *>(st.text), st.length);
 		}
 
 	case SCI_ANNOTATIONGETSTYLE: {
@@ -9417,13 +9408,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_ANNOTATIONGETSTYLES: {
 			const StyledText st = pdoc->AnnotationStyledText(wParam);
-			if (lParam) {
-				if (st.styles)
-					memcpy(CharPtrFromSPtr(lParam), st.styles, st.length);
-				else
-					strcpy(CharPtrFromSPtr(lParam), "");
-			}
-			return st.styles ? st.length : 0;
+			return BytesResult(lParam, st.styles, st.length);
 		}
 
 	case SCI_ANNOTATIONGETLINES:

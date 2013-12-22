@@ -23,8 +23,9 @@
 
 #include "Scintilla.h"
 #include "ScintillaWidget.h"
-#include "UniConversion.h"
+#include "StringCopy.h"
 #include "XPM.h"
+#include "UniConversion.h"
 
 #if defined(__clang__)
 // Clang 3.0 incorrectly displays  sentinel warnings. Fixed by clang 3.1.
@@ -231,7 +232,7 @@ static void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, floa
 	lf.weight = weight;
 	lf.italic = italic;
 	lf.characterSet = characterSet;
-	strncpy(lf.faceName, faceName, sizeof(lf.faceName) - 1);
+	StringCopy(lf.faceName, faceName);
 }
 
 /**
@@ -1830,8 +1831,7 @@ void ListBoxX::GetValue(int n, char *value, int len) {
 		gtk_tree_model_get(model, &iter, TEXT_COLUMN, &text, -1);
 	}
 	if (text && len > 0) {
-		strncpy(value, text, len);
-		value[len - 1] = '\0';
+		g_strlcpy(value, text, len);
 	} else {
 		value[0] = '\0';
 	}
@@ -2142,8 +2142,7 @@ bool Platform::ShowAssertionPopUps(bool assertionPopUps_) {
 
 void Platform::Assert(const char *c, const char *file, int line) {
 	char buffer[2000];
-	sprintf(buffer, "Assertion [%s] failed at %s %d", c, file, line);
-	strcat(buffer, "\r\n");
+	g_snprintf(buffer, sizeof(buffer), "Assertion [%s] failed at %s %d\r\n", c, file, line);
 	Platform::DebugDisplay(buffer);
 	abort();
 }

@@ -381,7 +381,7 @@ int ScintillaBase::AutoCompleteGetCurrentText(char *buffer) const {
 		if (item != -1) {
 			const std::string selected = ac.GetValue(item);
 			if (buffer != NULL)
-				strcpy(buffer, selected.c_str());
+				memcpy(buffer, selected.c_str(), selected.length()+1);
 			return static_cast<int>(selected.length());
 		}
 	}

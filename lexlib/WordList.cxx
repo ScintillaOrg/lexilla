@@ -122,8 +122,9 @@ static void SortWordList(char **words, unsigned int len) {
 
 void WordList::Set(const char *s) {
 	Clear();
-	list = new char[strlen(s) + 1];
-	strcpy(list, s);
+	const size_t lenS = strlen(s) + 1;
+	list = new char[lenS];
+	memcpy(list, s, lenS);
 	words = ArrayFromWordList(list, &len, onlyLineEnds);
 #ifdef _MSC_VER
 	std::sort(words, words + len, cmpWords);

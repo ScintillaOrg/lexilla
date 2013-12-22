@@ -1839,8 +1839,7 @@ void ListBoxImpl::GetValue(int n, char* value, int len)
     value[0] = '\0';
     return;
   }
-  strncpy(value, textString, len);
-  value[len - 1] = '\0';
+  strlcpy(value, textString, len);
 }
 
 void ListBoxImpl::RegisterImage(int type, const char* xpm_data)
@@ -2217,8 +2216,7 @@ bool Platform::ShowAssertionPopUps(bool assertionPopUps_)
 void Platform::Assert(const char *c, const char *file, int line)
 {
   char buffer[2000];
-  sprintf(buffer, "Assertion [%s] failed at %s %d", c, file, line);
-  strcat(buffer, "\r\n");
+  snprintf(buffer, sizeof(buffer), "Assertion [%s] failed at %s %d\r\n", c, file, line);
   Platform::DebugDisplay(buffer);
 #ifdef DEBUG
   // Jump into debugger in assert on Mac (CL269835)

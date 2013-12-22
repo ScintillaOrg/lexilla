@@ -36,8 +36,9 @@
 #endif
 
 #include "Platform.h"
-#include "UniConversion.h"
+#include "StringCopy.h"
 #include "XPM.h"
+#include "UniConversion.h"
 #include "FontQuality.h"
 
 #ifndef IDC_HAND
@@ -307,8 +308,7 @@ static void SetLogFont(LOGFONTA &lf, const char *faceName, int characterSet, flo
 	lf.lfItalic = static_cast<BYTE>(italic ? 1 : 0);
 	lf.lfCharSet = static_cast<BYTE>(characterSet);
 	lf.lfQuality = Win32MapFontQuality(extraFontFlag);
-	strncpy(lf.lfFaceName, faceName, sizeof(lf.lfFaceName));
-	lf.lfFaceName[sizeof(lf.lfFaceName)-1] = '\0';
+	StringCopy(lf.lfFaceName, faceName);
 }
 
 /**
@@ -3214,7 +3214,7 @@ bool Platform::ShowAssertionPopUps(bool assertionPopUps_) {
 
 void Platform::Assert(const char *c, const char *file, int line) {
 	char buffer[2000];
-	sprintf(buffer, "Assertion [%s] failed at %s %d", c, file, line);
+	sprintf(buffer, "Assertion [%s] failed at %s %d%s", c, file, line, assertionPopUps ? "" : "\r\n");
 	if (assertionPopUps) {
 		int idButton = ::MessageBoxA(0, buffer, "Assertion failure",
 			MB_ABORTRETRYIGNORE|MB_ICONHAND|MB_SETFOREGROUND|MB_TASKMODAL);
@@ -3226,7 +3226,6 @@ void Platform::Assert(const char *c, const char *file, int line) {
 			abort();
 		}
 	} else {
-		strcat(buffer, "\r\n");
 		Platform::DebugDisplay(buffer);
 		::DebugBreak();
 		abort();

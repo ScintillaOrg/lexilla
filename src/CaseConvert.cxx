@@ -13,6 +13,7 @@
 #include <vector>
 #include <algorithm>
 
+#include "StringCopy.h"
 #include "CaseConvert.h"
 #include "UniConversion.h"
 #include "UnicodeFromUTF8.h"
@@ -367,6 +368,9 @@ class CaseConverter : public ICaseConverter {
 	enum { maxConversionLength=6 };
 	struct ConversionString {
 		char conversion[maxConversionLength+1];
+		ConversionString() {
+			conversion[0] = '\0';
+		}
 	};
 	// Conversions are initially store in a vector of structs but then decomposed into
 	// parallel arrays as that is about 10% faster to search.
@@ -374,7 +378,7 @@ class CaseConverter : public ICaseConverter {
 		int character;
 		ConversionString conversion;
 		CharacterConversion(int character_=0, const char *conversion_="") : character(character_) {
-			strcpy(conversion.conversion, conversion_);
+			StringCopy(conversion.conversion, conversion_);
 		}
 		bool operator<(const CharacterConversion &other) const {
 			return character < other.character;
