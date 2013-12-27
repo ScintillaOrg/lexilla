@@ -1488,9 +1488,9 @@ Editor::XYScrollPosition Editor::XYScrollToMakeVisible(const SelectionRange rang
 		}
 		// In case of a jump (find result) largely out of display, adjust the offset to display the caret
 		if (pt.x + xOffset < rcClient.left + newXY.xOffset) {
-			newXY.xOffset = pt.x + xOffset - rcClient.left;
+			newXY.xOffset = pt.x + xOffset - rcClient.left - 2;
 		} else if (pt.x + xOffset >= rcClient.right + newXY.xOffset) {
-			newXY.xOffset = pt.x + xOffset - rcClient.right + 1;
+			newXY.xOffset = pt.x + xOffset - rcClient.right + 2;
 			if (vs.caretStyle == CARETSTYLE_BLOCK) {
 				// Ensure we can see a good portion of the block caret
 				newXY.xOffset += static_cast<int>(vs.aveCharWidth);
