@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 9 November 2013 NH</p>
+    <p>Last edited 10 January 2014 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -4467,12 +4467,15 @@ struct Sci_TextToFind {
     '\n' (Line Feed, ASCII code 10) characters. Do not include '\r' (Carriage Return, ASCII
      code 13), as this will most likely print as an empty box. '\t' (Tab, ASCII code 9) is
      supported if you set a tabsize with
-    <code><a class="message" href="#SCI_CALLTIPUSESTYLE">SCI_CALLTIPUSESTYLE</a></code>.<br /></p>
+    <code><a class="message" href="#SCI_CALLTIPUSESTYLE">SCI_CALLTIPUSESTYLE</a></code>.<br />
+    The position of the caret is remembered here so that the call tip can be cancelled automatically if subsequent deletion
+    moves the caret before this position.</p>
 
     <p><b id="SCI_CALLTIPCANCEL">SCI_CALLTIPCANCEL</b><br />
      This message cancels any displayed call tip. Scintilla will also cancel call tips for you if
     you use any keyboard commands that are not compatible with editing the argument list of a
-    function.</p>
+    function.
+    Call tips are cancelled if you delete back past the position where the caret was when the tip was triggered.</p>
 
     <p><b id="SCI_CALLTIPACTIVE">SCI_CALLTIPACTIVE</b><br />
      This returns 1 if a call tip is active and 0 if it is not active.</p>
