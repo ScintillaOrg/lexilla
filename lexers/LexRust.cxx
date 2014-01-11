@@ -240,22 +240,6 @@ static void ScanDigits(Accessor& styler, int& pos, int base) {
 	}
 }
 
-static bool ScanExponent(Accessor& styler, int& pos) {
-	int c = styler.SafeGetCharAt(pos, '\0');
-	if (c == 'e' || c == 'E') {
-		pos++;
-		c = styler.SafeGetCharAt(pos, '\0');
-		if (c == '-' || c == '+')
-			pos++;
-		int old_pos = pos;
-		ScanDigits(styler, pos, 10);
-		if (old_pos == pos)	{
-			return false;
-		}
-	}
-	return true;
-}
-
 static void ScanNumber(Accessor& styler, int& pos) {
 	int base = 10;
 	int c = styler.SafeGetCharAt(pos, '\0');
@@ -287,13 +271,31 @@ static void ScanNumber(Accessor& styler, int& pos) {
 		} else if (c == '6' && n == '4') {
 			pos += 2;
 		}
-	} else if (c == '.') {
-		error = base != 10;
-		pos++;
-		ScanDigits(styler, pos, 10);
-		error |= !ScanExponent(styler, pos);
+	} else {
+		n = styler.SafeGetCharAt(pos + 1, '\0');
+		if (c == '.' && !(IsIdentifierStart(n) || n == '.')) {
+			error |= base != 10;
+			pos++;
+			ScanDigits(styler, pos, 10);
+		}
+
+		c = styler.SafeGetCharAt(pos, '\0');
+		if (c == 'e' || c == 'E') {
+			error |= base != 10;
+			pos++;
+			c = styler.SafeGetCharAt(pos, '\0');
+			if (c == '-' || c == '+')
+				pos++;
+			int old_pos = pos;
+			ScanDigits(styler, pos, 10);
+			if (old_pos == pos) {
+				error = true;
+			}
+		}
+		
 		c = styler.SafeGetCharAt(pos, '\0');
 		if (c == 'f') {
+			error |= base != 10;
 			pos++;
 			c = styler.SafeGetCharAt(pos, '\0');
 			n = styler.SafeGetCharAt(pos + 1, '\0');
