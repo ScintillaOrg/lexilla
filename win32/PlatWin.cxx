@@ -49,42 +49,13 @@
 #define SPI_GETFONTSMOOTHINGCONTRAST	0x200C
 #endif
 
-// Take care of 32/64 bit pointers
-#ifdef GetWindowLongPtr
 static void *PointerFromWindow(HWND hWnd) {
 	return reinterpret_cast<void *>(::GetWindowLongPtr(hWnd, 0));
 }
+
 static void SetWindowPointer(HWND hWnd, void *ptr) {
 	::SetWindowLongPtr(hWnd, 0, reinterpret_cast<LONG_PTR>(ptr));
 }
-#else
-static void *PointerFromWindow(HWND hWnd) {
-	return reinterpret_cast<void *>(::GetWindowLong(hWnd, 0));
-}
-static void SetWindowPointer(HWND hWnd, void *ptr) {
-	::SetWindowLong(hWnd, 0, reinterpret_cast<LONG>(ptr));
-}
-
-#ifndef GWLP_USERDATA
-#define GWLP_USERDATA GWL_USERDATA
-#endif
-
-#ifndef GWLP_WNDPROC
-#define GWLP_WNDPROC GWL_WNDPROC
-#endif
-
-#ifndef LONG_PTR
-#define LONG_PTR LONG
-#endif
-
-static LONG_PTR SetWindowLongPtr(HWND hWnd, int nIndex, LONG_PTR dwNewLong) {
-	return ::SetWindowLong(hWnd, nIndex, dwNewLong);
-}
-
-static LONG_PTR GetWindowLongPtr(HWND hWnd, int nIndex) {
-	return ::GetWindowLong(hWnd, nIndex);
-}
-#endif
 
 extern UINT CodePageFromCharSet(DWORD characterSet, UINT documentCodePage);
 

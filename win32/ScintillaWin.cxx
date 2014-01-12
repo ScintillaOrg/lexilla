@@ -88,10 +88,6 @@
 #define UNICODE_NOCHAR                  0xFFFF
 #endif
 
-#ifndef WM_IME_STARTCOMPOSITION
-#include <imm.h>
-#endif
-
 #include <commctrl.h>
 #include <zmouse.h>
 #include <ole2.h>
@@ -113,28 +109,17 @@ const TCHAR callClassName[] = TEXT("CallTip");
 using namespace Scintilla;
 #endif
 
-// Take care of 32/64 bit pointers
-#ifdef GetWindowLongPtr
 static void *PointerFromWindow(HWND hWnd) {
 	return reinterpret_cast<void *>(::GetWindowLongPtr(hWnd, 0));
 }
+
 static void SetWindowPointer(HWND hWnd, void *ptr) {
 	::SetWindowLongPtr(hWnd, 0, reinterpret_cast<LONG_PTR>(ptr));
 }
+
 static void SetWindowID(HWND hWnd, int identifier) {
 	::SetWindowLongPtr(hWnd, GWLP_ID, identifier);
 }
-#else
-static void *PointerFromWindow(HWND hWnd) {
-	return reinterpret_cast<void *>(::GetWindowLong(hWnd, 0));
-}
-static void SetWindowPointer(HWND hWnd, void *ptr) {
-	::SetWindowLong(hWnd, 0, reinterpret_cast<LONG>(ptr));
-}
-static void SetWindowID(HWND hWnd, int identifier) {
-	::SetWindowLong(hWnd, GWL_ID, identifier);
-}
-#endif
 
 class ScintillaWin; 	// Forward declaration for COM interface subobjects
 
@@ -527,14 +512,6 @@ static int InputCodePage() {
 		return 0;
 	return atoi(sCodePage);
 }
-
-#ifndef VK_OEM_2
-static const int VK_OEM_2=0xbf;
-static const int VK_OEM_3=0xc0;
-static const int VK_OEM_4=0xdb;
-static const int VK_OEM_5=0xdc;
-static const int VK_OEM_6=0xdd;
-#endif
 
 /** Map the key codes to their equivalent SCK_ form. */
 static int KeyTranslate(int keyIn) {
