@@ -1299,6 +1299,7 @@ void ScintillaWin::ScrollText(int /* linesToMove */) {
 	//	vs.lineHeight * linesToMove, 0, 0);
 	//::UpdateWindow(MainHWND());
 	Redraw();
+	UpdateSystemCaret();
 }
 
 void ScintillaWin::UpdateSystemCaret() {
