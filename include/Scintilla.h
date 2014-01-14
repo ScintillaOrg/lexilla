@@ -417,6 +417,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_CALLTIPCANCEL 2201
 #define SCI_CALLTIPACTIVE 2202
 #define SCI_CALLTIPPOSSTART 2203
+#define SCI_CALLTIPSETPOSSTART 2214
 #define SCI_CALLTIPSETHLT 2204
 #define SCI_CALLTIPSETBACK 2205
 #define SCI_CALLTIPSETFORE 2206

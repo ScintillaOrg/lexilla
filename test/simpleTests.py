@@ -1803,6 +1803,27 @@ class TestSubStyles(unittest.TestCase):
 		inactiveDistance = self.ed.DistanceToSecondaryStyles()
 		self.assertEquals(self.ed.GetPrimaryStyleFromStyle(self.ed.SCE_C_IDENTIFIER+inactiveDistance), self.ed.SCE_C_IDENTIFIER)
 
+class TestCallTip(unittest.TestCase):
+
+	def setUp(self):
+		self.xite = Xite.xiteFrame
+		self.ed = self.xite.ed
+		self.ed.ClearAll()
+		self.ed.EmptyUndoBuffer()
+		# 1 line of 4 characters
+		t = b"fun("
+		self.ed.AddText(len(t), t)
+
+	def testBasics(self):
+		self.assertEquals(self.ed.CallTipActive(), 0)
+		self.ed.CallTipShow(1, "fun(int x)")
+		self.assertEquals(self.ed.CallTipActive(), 1)
+		self.assertEquals(self.ed.CallTipPosStart(), 4)
+		self.ed.CallTipSetPosStart(1)
+		self.assertEquals(self.ed.CallTipPosStart(), 1)
+		self.ed.CallTipCancel()
+		self.assertEquals(self.ed.CallTipActive(), 0)
+
 class TestAutoComplete(unittest.TestCase):
 
 	def setUp(self):

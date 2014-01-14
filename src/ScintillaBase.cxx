@@ -893,6 +893,10 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 	case SCI_CALLTIPPOSSTART:
 		return ct.posStartCallTip;
 
+	case SCI_CALLTIPSETPOSSTART:
+		ct.posStartCallTip = wParam;
+		break;
+
 	case SCI_CALLTIPSETHLT:
 		ct.SetHighlight(wParam, lParam);
 		break;

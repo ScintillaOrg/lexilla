@@ -1042,6 +1042,9 @@ fun bool CallTipActive=2202(,)
 # Retrieve the position where the caret was before displaying the call tip.
 fun position CallTipPosStart=2203(,)
 
+# Set the start position in order to change when backspacing removes the calltip.
+set void CallTipSetPosStart=2214(int posStart,)
+
 # Highlight a segment of the definition.
 fun void CallTipSetHlt=2204(int start, int end)
 

@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 10 January 2014 NH</p>
+    <p>Last edited 14 January 2014 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -4446,6 +4446,7 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_CALLTIPCANCEL">SCI_CALLTIPCANCEL</a><br />
      <a class="message" href="#SCI_CALLTIPACTIVE">SCI_CALLTIPACTIVE</a><br />
      <a class="message" href="#SCI_CALLTIPPOSSTART">SCI_CALLTIPPOSSTART</a><br />
+     <a class="message" href="#SCI_CALLTIPSETPOSSTART">SCI_CALLTIPSETPOSSTART(int posStart)</a><br />
      <a class="message" href="#SCI_CALLTIPSETHLT">SCI_CALLTIPSETHLT(int highlightStart, int
     highlightEnd)</a><br />
      <a class="message" href="#SCI_CALLTIPSETBACK">SCI_CALLTIPSETBACK(int colour)</a><br />
@@ -4481,7 +4482,8 @@ struct Sci_TextToFind {
      This returns 1 if a call tip is active and 0 if it is not active.</p>
 
     <p><b id="SCI_CALLTIPPOSSTART">SCI_CALLTIPPOSSTART</b><br />
-     This message returns the value of the current position when <code>SCI_CALLTIPSHOW</code>
+    <b id="SCI_CALLTIPSETPOSSTART">SCI_CALLTIPSETPOSSTART(int posStart)</b><br />
+     This message returns or sets the value of the current position when <code>SCI_CALLTIPSHOW</code>
     started to display the tip.</p>
 
     <p><b id="SCI_CALLTIPSETHLT">SCI_CALLTIPSETHLT(int hlStart, int hlEnd)</b><br />
