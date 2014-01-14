@@ -40,17 +40,19 @@ def printHFile(f):
 	out.append("#endif")
 	return out
 
-f = Face.Face()
-try:
-	f.ReadFromFile("../include/Scintilla.iface")
-	Regenerate("../include/Scintilla.h", "/* ", printHFile(f))
-	Regenerate("../include/SciLexer.h", "/* ", printLexHFile(f))
-	valueSet = set(int(x) for x in f.values if int(x) < 3000)
-	maximumID = max(valueSet)
-	print("Maximum ID is %d" % maximumID)
-	#~ valuesUnused = sorted(x for x in range(2001,maximumID) if x not in valueSet)
-	#~ print("\nUnused values")
-	#~ for v in valuesUnused:
-		#~ print(v)
-except:
-	raise
+def RegenerateAll(root, showMaxID):
+	f = Face.Face()
+	f.ReadFromFile(root + "include/Scintilla.iface")
+	Regenerate(root + "include/Scintilla.h", "/* ", printHFile(f))
+	Regenerate(root + "include/SciLexer.h", "/* ", printLexHFile(f))
+	if showMaxID:
+		valueSet = set(int(x) for x in f.values if int(x) < 3000)
+		maximumID = max(valueSet)
+		print("Maximum ID is %d" % maximumID)
+		#~ valuesUnused = sorted(x for x in range(2001,maximumID) if x not in valueSet)
+		#~ print("\nUnused values")
+		#~ for v in valuesUnused:
+			#~ print(v)
+
+if __name__ == "__main__":
+    RegenerateAll("../", True)
