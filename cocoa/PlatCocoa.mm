@@ -757,60 +757,12 @@ void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsi
 }
 
 void SurfaceImpl::Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) {
-  // Drawing an ellipse with bezier curves. Code modified from:
-  // http://www.codeguru.com/gdi/ellipse.shtml
-  // MAGICAL CONSTANT to map ellipse to beziers 2/3*(sqrt(2)-1)
-  const double EToBConst = 0.2761423749154;
-
-  CGSize offset = CGSizeMake((int)(rc.Width() * EToBConst), (int)(rc.Height() * EToBConst));
-  CGPoint centre = CGPointMake((rc.left + rc.right) / 2, (rc.top + rc.bottom) / 2);
-
-  // The control point array
-  CGPoint cCtlPt[13];
-
-  // Assign values to all the control points
-  cCtlPt[0].x  =
-  cCtlPt[1].x  =
-  cCtlPt[11].x =
-  cCtlPt[12].x = rc.left + 0.5;
-  cCtlPt[5].x  =
-  cCtlPt[6].x  =
-  cCtlPt[7].x  = rc.right - 0.5;
-  cCtlPt[2].x  =
-  cCtlPt[10].x = centre.x - offset.width + 0.5;
-  cCtlPt[4].x  =
-  cCtlPt[8].x  = centre.x + offset.width + 0.5;
-  cCtlPt[3].x  =
-  cCtlPt[9].x  = centre.x + 0.5;
-
-  cCtlPt[2].y  =
-  cCtlPt[3].y  =
-  cCtlPt[4].y  = rc.top + 0.5;
-  cCtlPt[8].y  =
-  cCtlPt[9].y  =
-  cCtlPt[10].y = rc.bottom - 0.5;
-  cCtlPt[7].y  =
-  cCtlPt[11].y = centre.y + offset.height + 0.5;
-  cCtlPt[1].y =
-  cCtlPt[5].y  = centre.y - offset.height + 0.5;
-  cCtlPt[0].y =
-  cCtlPt[12].y =
-  cCtlPt[6].y  = centre.y + 0.5;
-
+  CGRect ellipseRect = CGRectMake(rc.left, rc.top, rc.Width(), rc.Height());
   FillColour(back);
   PenColour(fore);
-
-  CGContextBeginPath( gc );
-  CGContextMoveToPoint( gc, cCtlPt[0].x, cCtlPt[0].y );
-
-  for ( int i = 1; i < 13; i += 3 )
-  {
-    CGContextAddCurveToPoint( gc, cCtlPt[i].x, cCtlPt[i].y, cCtlPt[i+1].x, cCtlPt[i+1].y, cCtlPt[i+2].x, cCtlPt[i+2].y );
-  }
-
-  // Close the path to enclose it for stroking and for filling, then draw it
-  CGContextClosePath( gc );
-  CGContextDrawPath( gc, kCGPathFillStroke );
+  CGContextBeginPath(gc);
+  CGContextAddEllipseInRect(gc, ellipseRect);
+  CGContextDrawPath(gc, kCGPathFillStroke);
 }
 
 void SurfaceImpl::CopyImageRectangle(Surface &surfaceSource, PRectangle srcRect, PRectangle dstRect)
