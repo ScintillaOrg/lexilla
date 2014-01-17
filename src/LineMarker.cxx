@@ -317,17 +317,14 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 		DrawPlus(surface, centreX, centreY, blobSize, tail);
 
 	} else if (markType == SC_MARK_CIRCLEMINUS) {
-		DrawCircle(surface, centreX, centreY, blobSize, fore, head);
-		DrawMinus(surface, centreX, centreY, blobSize, tail);
-
 		surface->PenColour(head);
 		surface->MoveTo(centreX, centreY + blobSize);
 		surface->LineTo(centreX, rcWhole.bottom);
 
-	} else if (markType == SC_MARK_CIRCLEMINUSCONNECTED) {
 		DrawCircle(surface, centreX, centreY, blobSize, fore, head);
 		DrawMinus(surface, centreX, centreY, blobSize, tail);
 
+	} else if (markType == SC_MARK_CIRCLEMINUSCONNECTED) {
 		surface->PenColour(head);
 		surface->MoveTo(centreX, centreY + blobSize);
 		surface->LineTo(centreX, rcWhole.bottom);
@@ -335,6 +332,9 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 		surface->PenColour(body);
 		surface->MoveTo(centreX, rcWhole.top);
 		surface->LineTo(centreX, centreY - blobSize);
+
+		DrawCircle(surface, centreX, centreY, blobSize, fore, head);
+		DrawMinus(surface, centreX, centreY, blobSize, tail);
 
 	} else if (markType >= SC_MARK_CHARACTER) {
 		char character[1];
