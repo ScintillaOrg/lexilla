@@ -822,7 +822,7 @@ void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsi
 
 void SurfaceImpl::Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) {
 	PenColour(back);
-	cairo_arc(context, (rc.left + rc.right) / 2 + 0.5, (rc.top + rc.bottom) / 2 + 0.5,
+	cairo_arc(context, (rc.left + rc.right) / 2, (rc.top + rc.bottom) / 2,
 		Platform::Minimum(rc.Width(), rc.Height()) / 2, 0, 2*kPi);
 	cairo_fill_preserve(context);
 	PenColour(fore);
