@@ -355,10 +355,12 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 	} else if (markType == SC_MARK_ARROWS) {
 		surface->PenColour(fore);
 		int right = centreX - 2;
-		for (int b=0; b<3; b++) {
-			surface->MoveTo(right - 4, centreY - 4);
-			surface->LineTo(right, centreY);
-			surface->LineTo(right - 5, centreY + 5);
+		const int armLength = dimOn2 - 1;
+		for (int b = 0; b<3; b++) {
+			surface->MoveTo(right, centreY);
+			surface->LineTo(right - armLength, centreY - armLength);
+			surface->MoveTo(right, centreY);
+			surface->LineTo(right - armLength, centreY + armLength);
 			right += 4;
 		}
 	} else if (markType == SC_MARK_SHORTARROW) {
