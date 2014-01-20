@@ -1,6 +1,6 @@
 // Scintilla source code edit control
 /** @file LineMarker.cxx
- ** Defines the look of a line marker in the margin .
+ ** Defines the look of a line marker in the margin.
  **/
 // Copyright 1998-2011 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
@@ -380,6 +380,17 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 		PRectangle rcLeft = rcWhole;
 		rcLeft.right = rcLeft.left + 4;
 		surface->FillRectangle(rcLeft, back);
+	} else if (markType == SC_MARK_BOOKMARK) {
+		int halfHeight = minDim / 3;
+		Point pts[] = {
+			Point(rc.left, centreY-halfHeight),
+			Point(rc.right-3, centreY-halfHeight),
+			Point(rc.right-3-halfHeight, centreY),
+			Point(rc.right-3, centreY+halfHeight),
+			Point(rc.left, centreY+halfHeight),
+		};
+		surface->Polygon(pts, sizeof(pts) / sizeof(pts[0]),
+				fore, back);
 	} else { // SC_MARK_FULLRECT
 		surface->FillRectangle(rcWhole, back);
 	}
