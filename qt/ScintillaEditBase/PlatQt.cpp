@@ -528,7 +528,7 @@ XYPOSITION SurfaceImpl::Descent(Font &font)
 	QFontMetrics metrics(*FontPointer(font), device);
 	// Qt returns 1 less than true descent
 	// See: QFontEngineWin::descent which says:
-	// ### we substract 1 to even out the historical +1 in QFontMetrics's
+	// ### we subtract 1 to even out the historical +1 in QFontMetrics's
 	// ### height=asc+desc+1 equation. Fix in Qt5.
 	return metrics.descent() + 1;
 }
@@ -1088,7 +1088,7 @@ public:
 
 	virtual Function FindFunction(const char *name) {
 		if (lib) {
-			// C++ standard doesn't like casts betwen function pointers and void pointers so use a union
+			// C++ standard doesn't like casts between function pointers and void pointers so use a union
 			union {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 				QFunctionPointer fp;
