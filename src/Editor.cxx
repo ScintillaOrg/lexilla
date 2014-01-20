@@ -23,6 +23,7 @@
 #include "ILexer.h"
 #include "Scintilla.h"
 
+#include "StringCopy.h"
 #include "SplitVector.h"
 #include "Partitioning.h"
 #include "RunStyles.h"
@@ -250,7 +251,7 @@ void Editor::SetRepresentations() {
 		"DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",
 		"CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US"
 	};
-	for (size_t j=0; j < (sizeof(reps) / sizeof(reps[0])); j++) {
+	for (size_t j=0; j < ELEMENTS(reps); j++) {
 		char c[2] = { static_cast<char>(j), 0 };
 		reprs.SetRepresentation(c, reps[j]);
 	}
@@ -264,7 +265,7 @@ void Editor::SetRepresentations() {
 			"DCS", "PU1", "PU2", "STS", "CCH", "MW", "SPA", "EPA",
 			"SOS", "SGCI", "SCI", "CSI", "ST", "OSC", "PM", "APC"
 		};
-		for (size_t j=0; j < (sizeof(repsC1) / sizeof(repsC1[0])); j++) {
+		for (size_t j=0; j < ELEMENTS(repsC1); j++) {
 			char c1[3] = { '\xc2',  static_cast<char>(0x80+j), 0 };
 			reprs.SetRepresentation(c1, repsC1[j]);
 		}
@@ -426,7 +427,7 @@ const char *ControlCharacterString(unsigned char ch) {
 		"DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",
 		"CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US"
 	};
-	if (ch < (sizeof(reps) / sizeof(reps[0]))) {
+	if (ch < ELEMENTS(reps)) {
 		return reps[ch];
 	} else {
 		return "BAD";

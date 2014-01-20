@@ -1,6 +1,7 @@
 // Scintilla source code edit control
 /** @file StringCopy.h
  ** Safe string copy function which always NUL terminates.
+ ** ELEMENTS macro for determining array sizes.
  **/
 // Copyright 2013 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
@@ -25,6 +26,8 @@ void StringCopy(T (&dest)[count], const T* source) {
 	}
 	dest[count-1] = 0;
 }
+
+#define ELEMENTS(a) (sizeof(a) / sizeof(a[0]))
 
 #ifdef SCI_NAMESPACE
 }

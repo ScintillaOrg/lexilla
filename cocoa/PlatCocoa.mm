@@ -26,6 +26,7 @@
 #include <vector>
 #include <map>
 
+#include "StringCopy.h"
 #include "XPM.h"
 
 #import <Foundation/NSGeometry.h>
@@ -1053,7 +1054,7 @@ XYPOSITION SurfaceImpl::AverageCharWidth(Font &font_) {
   if (!font_.GetID())
     return 1;
 
-  const int sizeStringLength = (sizeof( sizeString ) / sizeof( sizeString[0] ) - 1);
+  const int sizeStringLength = ELEMENTS( sizeString );
   int width = WidthText( font_, sizeString, sizeStringLength  );
 
   return (int) ((width / (float) sizeStringLength) + 0.5);

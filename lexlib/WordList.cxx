@@ -13,6 +13,7 @@
 
 #include <algorithm>
 
+#include "StringCopy.h"
 #include "WordList.h"
 
 #ifdef SCI_NAMESPACE
@@ -131,7 +132,7 @@ void WordList::Set(const char *s) {
 #else
 	SortWordList(words, len);
 #endif
-	for (unsigned int k = 0; k < (sizeof(starts) / sizeof(starts[0])); k++)
+	for (unsigned int k = 0; k < ELEMENTS(starts); k++)
 		starts[k] = -1;
 	for (int l = len - 1; l >= 0; l--) {
 		unsigned char indexChar = words[l][0];
