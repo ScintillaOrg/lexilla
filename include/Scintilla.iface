@@ -1785,7 +1785,7 @@ val CARET_STRICT=0x04
 val CARET_JUMPS=0x10
 # If CARET_EVEN is not set, instead of having symmetrical UZs,
 # the left and bottom UZs are extended up to right and top UZs respectively.
-# This way, we favour the displaying of useful information: the begining of lines,
+# This way, we favour the displaying of useful information: the beginning of lines,
 # where most code reside, and the lines after the caret, eg. the body of a function.
 val CARET_EVEN=0x08
 
