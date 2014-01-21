@@ -272,7 +272,7 @@ static D2D1_TEXT_ANTIALIAS_MODE DWriteMapFontQuality(int extraFontFlag) {
 #endif
 
 static void SetLogFont(LOGFONTA &lf, const char *faceName, int characterSet, float size, int weight, bool italic, int extraFontFlag) {
-	memset(&lf, 0, sizeof(lf));
+	lf = LOGFONTA();
 	// The negative is to allow for leading
 	lf.lfHeight = -(abs(static_cast<int>(size + 0.5)));
 	lf.lfWeight = weight;
@@ -1013,7 +1013,7 @@ void SurfaceGDI::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *
 		}
 	} else if (IsNT() || (codePage==0) || win9xACPSame) {
 		// Zero positions to avoid random behaviour on failure.
-		memset(positions, 0, len * sizeof(*positions));
+		std::fill(positions, positions + len, 0.0f);
 		// len may be larger than platform supports so loop over segments small enough for platform
 		int startOffset = 0;
 		while (len > 0) {
