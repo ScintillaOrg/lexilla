@@ -1472,7 +1472,7 @@ public:
 					wchar_t wFolded[20];
 					unsigned int charsConverted = UTF16FromUTF8(foldedUTF8,
 							static_cast<unsigned int>(strlen(foldedUTF8)),
-							wFolded, sizeof(wFolded)/sizeof(wFolded[0]));
+							wFolded, ELEMENTS(wFolded));
 					for (size_t j=0; j<charsConverted; j++)
 						utf16Folded[lenFlat++] = wFolded[j];
 				} else {
@@ -1511,19 +1511,19 @@ CaseFolder *ScintillaWin::CaseFolderForEncoding() {
 				sCharacter[0] = static_cast<char>(i);
 				wchar_t wCharacter[20];
 				unsigned int lengthUTF16 = ::MultiByteToWideChar(cpDoc, 0, sCharacter, 1,
-					wCharacter, sizeof(wCharacter)/sizeof(wCharacter[0]));
+					wCharacter, ELEMENTS(wCharacter));
 				if (lengthUTF16 == 1) {
 					const char *caseFolded = CaseConvert(wCharacter[0], CaseConversionFold);
 					if (caseFolded) {
 						wchar_t wLower[20];
 						unsigned int charsConverted = UTF16FromUTF8(caseFolded,
 							static_cast<unsigned int>(strlen(caseFolded)),
-							wLower, sizeof(wLower)/sizeof(wLower[0]));
+							wLower, ELEMENTS(wLower));
 						if (charsConverted == 1) {
 							char sCharacterLowered[20];
 							unsigned int lengthConverted = ::WideCharToMultiByte(cpDoc, 0,
 								wLower, charsConverted,
-								sCharacterLowered, sizeof(sCharacterLowered), NULL, 0);
+								sCharacterLowered, ELEMENTS(sCharacterLowered), NULL, 0);
 							if ((lengthConverted == 1) && (sCharacter[0] != sCharacterLowered[0])) {
 								pcf->SetTranslation(sCharacter[0], sCharacterLowered[0]);
 							}
