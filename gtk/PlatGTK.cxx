@@ -227,7 +227,7 @@ Point Point::FromLong(long lpoint) {
 }
 
 static void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, float size, int weight, bool italic) {
-	memset(&lf, 0, sizeof(lf));
+	lf = LOGFONT();
 	lf.size = size;
 	lf.weight = weight;
 	lf.italic = italic;
@@ -735,7 +735,7 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesi
 		                  Point(rc.left, rc.bottom - 2),
 		                  Point(rc.left, rc.top + 2),
 		              };
-		Polygon(pts, sizeof(pts) / sizeof(pts[0]), fore, back);
+		Polygon(pts, ELEMENTS(pts), fore, back);
 	} else {
 		RectangleDraw(rc, fore, back);
 	}
