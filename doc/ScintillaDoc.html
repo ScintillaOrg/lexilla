@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 14 January 2014 NH</p>
+    <p>Last edited 22 January 2014 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -1745,8 +1745,15 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_SETSELALPHA"><code>SCI_SETSELALPHA</code></a>,
      <a class="message" href="#SCI_GETSELALPHA"><code>SCI_GETSELALPHA</code></a>,
      <a class="message" href="#SCI_SETSELFORE"><code>SCI_SETSELFORE</code></a>, and
-     <a class="message" href="#SCI_SETSELBACK"><code>SCI_SETSELBACK</code></a>.</p>
-
+     <a class="message" href="#SCI_SETSELBACK"><code>SCI_SETSELBACK</code></a>.
+     <code>SCI_SETADDITIONALSELFORE</code> and
+     <code>SCI_SETADDITIONALSELBACK</code> calls have no
+     effect until <a class="message" href="#SCI_SETSELFORE"><code>SCI_SETSELFORE</code></a>
+     and <a class="message" href="#SCI_SETSELBACK"><code>SCI_SETSELBACK</code></a> are
+     called with useSelection*Colour value set to true. Subsequent calls to
+     <a class="message" href="#SCI_SETSELFORE"><code>SCI_SETSELFORE</code></a>, 
+     and <a class="message" href="#SCI_SETSELBACK"><code>SCI_SETSELBACK</code></a> will
+     overwrite the values set by <code>SCI_SETADDITIONALSEL*</code> functions.</p>
     <p>
      <b id="SCI_SETADDITIONALCARETFORE">SCI_SETADDITIONALCARETFORE(int <a class="jump" href="#colour">colour</a>)</b><br />
      <b id="SCI_GETADDITIONALCARETFORE">SCI_GETADDITIONALCARETFORE</b><br />
