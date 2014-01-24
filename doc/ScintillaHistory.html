@@ -465,6 +465,10 @@
 	CallTipSetPosStart API added to change the position at which backspacing removes the calltip.
 	</li>
 	<li>
+	SC_MARK_BOOKMARK marker symbol added which looks like bookmark ribbons used in
+	book reading applications.
+	</li>
+	<li>
 	Basic lexer highlights hex, octal, and binary numbers in FreeBASIC which use the prefixes
 	&amp;h, &amp;o and &amp;b respectively.
 	<a href="http://sourceforge.net/p/scintilla/feature-requests/1041/">Feature #1041.</a>
@@ -505,6 +509,17 @@
 	<li>
 	On Cocoa, GTK+, and Windows/Direct2D draw circles more accurately so that
 	circular folding margin markers appear circular, of consistent size, and centred.
+	</li>
+	<li>
+	SciTE uses a bookmark ribbon symbol for bookmarks as it scales better to higher resolutions
+	than the previous blue gem bitmap.
+	</li>
+	<li>
+	SciTE will change the width of margins while running when the margin.width and fold.margin.width
+	properties are changed.
+	</li>
+	<li>
+	SciTE on Windows can display a larger tool bar with the toolbar.large property.
 	</li>
 	<li>
 	SciTE displays a warning message when asked to open a directory.
