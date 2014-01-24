@@ -1484,13 +1484,13 @@ void SurfaceD2D::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesir
 	if (pRenderTarget) {
 		D2D1_ROUNDED_RECT roundedRectFill = {
 			D2D1::RectF(rc.left+1.0, rc.top+1.0, rc.right-1.0, rc.bottom-1.0),
-			8, 8};
+			4, 4};
 		D2DPenColour(back);
 		pRenderTarget->FillRoundedRectangle(roundedRectFill, pBrush);
 
 		D2D1_ROUNDED_RECT roundedRect = {
 			D2D1::RectF(rc.left + 0.5, rc.top+0.5, rc.right - 0.5, rc.bottom-0.5),
-			8, 8};
+			4, 4};
 		D2DPenColour(fore);
 		pRenderTarget->DrawRoundedRectangle(roundedRect, pBrush);
 	}
