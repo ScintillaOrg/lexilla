@@ -5625,11 +5625,12 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <p><b id="SCI_SETWRAPMODE">SCI_SETWRAPMODE(int wrapMode)</b><br />
      <b id="SCI_GETWRAPMODE">SCI_GETWRAPMODE</b><br />
      Set wrapMode to <code>SC_WRAP_WORD</code> (1) to enable wrapping
-     on word boundaries, <code>SC_WRAP_CHAR</code> (2) to enable wrapping
-     between any characters, and to <code>SC_WRAP_NONE</code> (0) to disable line
-     wrapping. <code>SC_WRAP_CHAR</code> is preferred to
-     <code>SC_WRAP_WORD</code> for Asian languages where there is no white space
-     between words.</p>
+     on word or style boundaries, <code>SC_WRAP_CHAR</code> (2) to enable wrapping
+     between any characters, <code>SC_WRAP_WHITESPACE</code> (3) to enable
+     wrapping on whitespace, and <code>SC_WRAP_NONE</code> (0) to disable line
+     wrapping. <code>SC_WRAP_CHAR</code> is preferred for Asian languages where
+     there is no white space between words.
+    </p>
 
 
     <p><b id="SCI_SETWRAPVISUALFLAGS">SCI_SETWRAPVISUALFLAGS(int wrapVisualFlags)</b><br />

@@ -56,7 +56,7 @@ enum WhiteSpaceVisibility {wsInvisible=0, wsVisibleAlways=1, wsVisibleAfterInden
 
 typedef std::map<FontSpecification, FontRealised *> FontMap;
 
-enum WrapMode { eWrapNone, eWrapWord, eWrapChar };
+enum WrapMode { eWrapNone, eWrapWord, eWrapChar, eWrapWhitespace };
 
 class ColourOptional : public ColourDesired {
 public:
