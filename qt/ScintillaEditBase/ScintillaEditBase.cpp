@@ -411,7 +411,7 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 		// Replace the selection with the commit string.
 		QByteArray commitBytes = sqt->BytesForDocument(event->commitString());
 		char *commitData = commitBytes.data();
-		sqt->AddCharUTF(commitData, strlen(commitData));
+		sqt->AddCharUTF(commitData, static_cast<unsigned int>(strlen(commitData)));
 	}
 
 	// Select the previous preedit string.
@@ -425,7 +425,7 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 	bool recording = sqt->recordingMacro;
 	sqt->recordingMacro = false;
 	send(SCI_SETUNDOCOLLECTION, false);
-	sqt->AddCharUTF(data, strlen(data));
+	sqt->AddCharUTF(data, static_cast<unsigned int>(strlen(data)));
 	send(SCI_SETUNDOCOLLECTION, true);
 	sqt->recordingMacro = recording;
 	sqt->SetSelection(pos, pos);

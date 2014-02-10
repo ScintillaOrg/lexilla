@@ -471,7 +471,7 @@ void SurfaceImpl::MeasureWidths(Font &font,
 		int i=0;
 		while (ui<fit) {
 			size_t lenChar = utf8LengthFromLead(us[i]);
-			size_t codeUnits = (lenChar < 4) ? 1 : 2;
+			int codeUnits = (lenChar < 4) ? 1 : 2;
 			qreal xPosition = tl.cursorToX(ui+codeUnits);
 			for (unsigned int bytePos=0; (bytePos<lenChar) && (i<len); bytePos++) {
 				positions[i++] = qRound(xPosition);
@@ -977,7 +977,7 @@ void ListBoxImpl::SetList(const char *list, char separator, char typesep)
 	// This method is *not* platform dependent.
 	// It is borrowed from the GTK implementation.
 	Clear();
-	int count = strlen(list) + 1;
+	size_t count = strlen(list) + 1;
 	std::vector<char> words(list, list+count);
 	char *startword = &words[0];
 	char *numword = NULL;
