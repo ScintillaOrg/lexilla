@@ -3525,7 +3525,7 @@ struct Sci_TextToFind {
     <p>The markers are drawn in the order of their numbers, so higher numbered markers appear on
     top of lower numbered ones. Markers try to move with their text by tracking where the start of
     their line moves. When a line is deleted, its markers are combined, by an <code>OR</code>
-    operation, with the markers of the previous line.</p>
+    operation, with the markers of the next line.</p>
     <code><a class="message" href="#SCI_MARKERDEFINE">SCI_MARKERDEFINE(int markerNumber, int
     markerSymbols)</a><br />
      <a class="message" href="#SCI_MARKERDEFINEPIXMAP">SCI_MARKERDEFINEPIXMAP(int markerNumber,
