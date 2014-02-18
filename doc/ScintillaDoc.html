@@ -6241,6 +6241,9 @@ A simple approach is to return 0 if there is any possibility that a change requi
 optimisation could be to remember where a setting first affects the document and return that position.
 </p>
 
+<p><code>Version</code> returns an enumerated value specifying which version of the interface is implemented:
+<code>lvOriginal</code> for <code>ILexer</code> and <code>lvSubStyles</code> for <code>ILexerWithSubStyles</code>.</p>
+
 <p><code>Release</code> is called to destroy the lexer object.</p>
 
 <p><code>PrivateCall</code> allows for direct communication between the
