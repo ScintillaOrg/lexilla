@@ -1179,6 +1179,7 @@ void Window::SetPosition(PRectangle rc)
     else
     {
       // NSWindow
+      PLATFORM_ASSERT([idWin isKindOfClass: [NSWindow class]]);
       NSWindow* win = reinterpret_cast<NSWindow*>(idWin);
       int screenHeight = ScreenMax(win);
       NSRect nsrc = NSMakeRect(rc.left, screenHeight - rc.bottom,
