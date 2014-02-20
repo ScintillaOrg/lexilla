@@ -476,11 +476,17 @@
 	<a href="http://sourceforge.net/p/scintilla/bugs/1577/">Bug #1577</a>.
 	</li>
 	<li>
+	Changed position of tall calltips to prefer lower half of screen to cut off end instead of start.
+	</li>
+	<li>
 	Fix Qt bug where double click treated as triple click.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1575/">Bug #1575</a>.
 	</li>
 	<li>
 	Fix bug on Windows when resizing autocompletion list with only short strings caused the list to move.
+	</li>
+	<li>
+	On Cocoa fix calltips which did not appear when they were created in an off-screen position.
 	</li>
     </ul>
     <h3>
@@ -544,9 +550,6 @@
 	to ensure caret is inside visible area.
 	</li>
 	<li>
-	Changed position of tall calltips to prefer lower half of screen to cut off end instead of start.
-	</li>
-	<li>
 	Send SCN_UPDATEUI with SC_UPDATE_SELECTION for Shift+Tab inside text.
 	</li>
 	<li>
@@ -558,9 +561,6 @@
 	circular folding margin markers appear circular, of consistent size, and centred.
 	Make SC_MARK_ARROWS drawing more even.
 	Fix corners of SC_MARK_ROUNDRECT with Direct2D to be similar to other platforms.
-	</li>
-	<li>
-	On Cocoa fix calltips which did not appear when they were created in an off-screen position.
 	</li>
 	<li>
 	SciTE uses a bookmark ribbon symbol for bookmarks as it scales better to higher resolutions
