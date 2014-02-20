@@ -1121,6 +1121,8 @@ bool Window::HasFocus()
 static int ScreenMax(NSWindow* win)
 {
   NSScreen* screen = [win screen];
+  if (!screen)
+    screen = [NSScreen mainScreen];
   NSRect frame = [screen frame];
   return frame.origin.y + frame.size.height;
 }
