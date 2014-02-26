@@ -132,6 +132,10 @@ int LineLayout::LineLastVisible(int line) const {
 	}
 }
 
+Range LineLayout::SubLineRange(int subLine) const {
+	return Range(LineStart(subLine), LineLastVisible(subLine));
+}
+
 bool LineLayout::InLine(int offset, int line) const {
 	return ((offset >= LineStart(line)) && (offset < LineStart(line + 1))) ||
 		((offset == numCharsInLine) && (line == (lines-1)));
@@ -203,6 +207,46 @@ int LineLayout::FindBefore(XYPOSITION x, int lower, int upper) const {
 		}
 	} while (lower < upper);
 	return lower;
+}
+
+
+int LineLayout::FindPositionFromX(XYPOSITION x, Range range, bool charPosition) const {
+	int pos = FindBefore(x, range.start, range.end);
+	while (pos < range.end) {
+		if (charPosition) {
+			if (x < (positions[pos + 1])) {
+				return pos;
+			}
+		} else {
+			if (x < ((positions[pos] + positions[pos + 1]) / 2)) {
+				return pos;
+			}
+		}
+		pos++;
+	}
+	return range.end;
+}
+
+Point LineLayout::PointFromPosition(int posInLine, int lineHeight) const {
+	Point pt;
+	// In case of very long line put x at arbitrary large position
+	if (posInLine > maxLineLength) {
+		pt.x = positions[maxLineLength] - positions[LineStart(lines)];
+	}
+
+	for (int subLine = 0; subLine < lines; subLine++) {
+		const Range rangeSubLine = SubLineRange(subLine);
+		if (posInLine >= rangeSubLine.start) {
+			pt.y = subLine*lineHeight;
+			if (posInLine <= rangeSubLine.end) {
+				pt.x = positions[posInLine] - positions[rangeSubLine.start];
+				if (rangeSubLine.start != 0)	// Wrapped lines may be indented
+					pt.x += wrapIndent;
+				break;
+			}
+		}
+	}
+	return pt;
 }
 
 int LineLayout::EndLineStyle() const {
