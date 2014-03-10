@@ -43,11 +43,6 @@
 using namespace Scintilla;
 #endif
 
-static inline bool IsControlCharacter(int ch) {
-	// iscntrl returns true for lots of chars > 127 which are displayable
-	return ch >= 0 && ch < ' ';
-}
-
 LineLayout::LineLayout(int maxLineLength_) :
 	lineStarts(0),
 	lenLineStarts(0),
