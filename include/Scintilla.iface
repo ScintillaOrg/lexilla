@@ -2658,6 +2658,7 @@ val SCLEX_STTXT=109
 val SCLEX_KVIRC=110
 val SCLEX_RUST=111
 val SCLEX_DMAP=112
+val SCLEX_AS=113
 
 # When a lexer specifies its language as SCLEX_AUTOMATIC it receives a
 # value assigned in sequence from SCLEX_AUTOMATIC+1.
@@ -3247,8 +3248,9 @@ val SCE_SCRIPTOL_IDENTIFIER=12
 val SCE_SCRIPTOL_TRIPLE=13
 val SCE_SCRIPTOL_CLASSNAME=14
 val SCE_SCRIPTOL_PREPROCESSOR=15
-# Lexical states for SCLEX_ASM
+# Lexical states for SCLEX_ASM, SCLEX_AS
 lex Asm=SCLEX_ASM SCE_ASM_
+lex As=SCLEX_AS SCE_ASM_
 val SCE_ASM_DEFAULT=0
 val SCE_ASM_COMMENT=1
 val SCE_ASM_NUMBER=2
