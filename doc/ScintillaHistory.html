@@ -470,6 +470,10 @@
 	Added wrap mode SC_WRAP_WHITESPACE which only wraps on whitespace, not on style changes.
 	</li>
 	<li>
+	SciTE find and replace strips can perform incremental searching and temporary highlighting of all
+	matches with the find.strip.incremental, replace.strip.incremental, and find.indicator.incremental settings.
+	</li>
+	<li>
 	SciTE default settings changed to use strips for find and replace and to draw with Direct2D and
 	DirectWrite on Windows.
 	</li>
@@ -490,6 +494,9 @@
 	<li>
 	Fix Qt bug where double click treated as triple click.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1575/">Bug #1575</a>.
+	</li>
+	<li>
+	On Qt, selecting an item in an autocompletion list that is not currently visible positions it at the top.
 	</li>
 	<li>
 	Fix bug on Windows when resizing autocompletion list with only short strings caused the list to move.
