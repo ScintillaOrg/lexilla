@@ -915,6 +915,13 @@ int ListBoxImpl::Length()
 void ListBoxImpl::Select(int n)
 {
 	ListWidget *list = static_cast<ListWidget *>(wid);
+	QModelIndex index = list->model()->index(n, 0);
+	if (index.isValid()) {
+		QRect row_rect = list->visualRect(index);
+		if (!list->viewport()->rect().contains(row_rect)) {
+			list->scrollTo(index, QAbstractItemView::PositionAtTop);
+		}
+	}
 	list->setCurrentRow(n);
 }
 
