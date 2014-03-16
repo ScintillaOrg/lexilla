@@ -12,7 +12,6 @@ useInitializationList:scintilla/lexers/LexBasic.cxx
 noCopyConstructor:scintilla/lexers/LexBash.cxx
 variableScope:scintilla/lexers/LexBash.cxx
 variableScope:scintilla/lexers/LexCmake.cxx
-variableScope:scintilla/lexers/LexCoffeeScript.cxx
 variableScope:scintilla/lexers/LexCSS.cxx
 useInitializationList:scintilla/lexers/LexD.cxx
 variableScope:scintilla/lexers/LexErlang.cxx
