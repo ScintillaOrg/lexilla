@@ -204,6 +204,13 @@ static void ColouriseCoffeeScriptDoc(unsigned int startPos, int length, int init
 					sc.SetState(SCE_COFFEESCRIPT_DEFAULT);
 				}
 				break;
+			case SCE_COFFEESCRIPT_WORD:
+			case SCE_COFFEESCRIPT_WORD2:
+			case SCE_COFFEESCRIPT_GLOBALCLASS:
+				if (!setWord.Contains(sc.ch)) {
+					sc.SetState(SCE_COFFEESCRIPT_DEFAULT);
+				}
+				break;
 			case SCE_COFFEESCRIPT_PREPROCESSOR:
 				if (sc.atLineStart && !continuationLine) {
 					sc.SetState(SCE_COFFEESCRIPT_DEFAULT);
