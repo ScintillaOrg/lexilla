@@ -185,7 +185,7 @@ static void ColouriseCoffeeScriptDoc(unsigned int startPos, int length, int init
 				break;
 			case SCE_COFFEESCRIPT_NUMBER:
 				// We accept almost anything because of hex. and number suffixes
-				if (!setWord.Contains(sc.ch)) {
+				if (!setWord.Contains(sc.ch) || sc.Match('.', '.')) {
 					sc.SetState(SCE_COFFEESCRIPT_DEFAULT);
 				}
 				break;
