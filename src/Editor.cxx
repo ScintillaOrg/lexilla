@@ -88,6 +88,10 @@ Timer::Timer() :
 Idler::Idler() :
 		state(false), idlerID(0) {}
 
+static int RoundXYPosition(XYPOSITION xyPos) {
+	return int(xyPos+0.5);
+}
+
 static inline bool IsControlCharacter(int ch) {
 	// iscntrl returns true for lots of chars > 127 which are displayable
 	return ch >= 0 && ch < ' ';
@@ -3417,7 +3421,7 @@ void Editor::DrawCarets(Surface *surface, ViewStyle &vsDraw, int lineDoc, int xS
 				bool caretAtEOL = false;
 				bool drawBlockCaret = false;
 				XYPOSITION widthOverstrikeCaret;
-				int caretWidthOffset = 0;
+				XYPOSITION caretWidthOffset = 0;
 				PRectangle rcCaret = rcLine;
 
 				if (posCaret.Position() == pdoc->Length()) {   // At end of document
@@ -3433,11 +3437,11 @@ void Editor::DrawCarets(Surface *surface, ViewStyle &vsDraw, int lineDoc, int xS
 					widthOverstrikeCaret = 3;
 
 				if (xposCaret > 0)
-					caretWidthOffset = 1;	// Move back so overlaps both character cells.
+					caretWidthOffset = 0.51f;	// Move back so overlaps both character cells.
 				xposCaret += xStart;
 				if (posDrag.IsValid()) {
 					/* Dragging text, use a line caret */
-					rcCaret.left = xposCaret - caretWidthOffset;
+					rcCaret.left = RoundXYPosition(xposCaret - caretWidthOffset);
 					rcCaret.right = rcCaret.left + vsDraw.caretWidth;
 				} else if (inOverstrike && drawOverstrikeCaret) {
 					/* Overstrike (insert mode), use a modified bar caret */
@@ -3455,7 +3459,7 @@ void Editor::DrawCarets(Surface *surface, ViewStyle &vsDraw, int lineDoc, int xS
 					}
 				} else {
 					/* Line caret */
-					rcCaret.left = xposCaret - caretWidthOffset;
+					rcCaret.left = RoundXYPosition(xposCaret - caretWidthOffset);
 					rcCaret.right = rcCaret.left + vsDraw.caretWidth;
 				}
 				ColourDesired caretColour = mainCaret ? vsDraw.caretcolour : vsDraw.additionalCaretColour;
