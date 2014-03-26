@@ -383,7 +383,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 		// Its replacing a non-existent position so do nothing.
 		return;
 
-    [mOwner deleteRange: replacementRange];
+	[mOwner deleteRange: replacementRange];
 
 	NSString* newText = @"";
 	if ([aString isKindOfClass:[NSString class]])
