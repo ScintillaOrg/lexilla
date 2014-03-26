@@ -383,13 +383,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 		// Its replacing a non-existent position so do nothing.
 		return;
 
-	if (replacementRange.length > 0)
-	{
-		[ScintillaView directCall: mOwner
-				  message: SCI_DELETERANGE
-				   wParam: replacementRange.location
-				   lParam: replacementRange.length];
-	}
+    [mOwner deleteRange: replacementRange];
 
 	NSString* newText = @"";
 	if ([aString isKindOfClass:[NSString class]])
@@ -459,13 +453,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
     mOwner.backend->SelectOnlyMainSelection();
   }
 
-  if (replacementRange.length > 0)
-  {
-    [ScintillaView directCall: mOwner
-		      message: SCI_DELETERANGE
-		       wParam: replacementRange.location
-		       lParam: replacementRange.length];
-  }
+  [mOwner deleteRange: replacementRange];
 
   // Note: Scintilla internally works almost always with bytes instead chars, so we need to take
   //       this into account when determining selection ranges and such.
@@ -532,11 +520,8 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   if (mMarkedTextRange.length > 0)
   {
     // We have already marked text. Replace that.
-    [mOwner setGeneralProperty: SCI_SETSELECTIONSTART
-                     value: mMarkedTextRange.location];
-    [mOwner setGeneralProperty: SCI_SETSELECTIONEND
-                     value: mMarkedTextRange.location + mMarkedTextRange.length];
-    mOwner.backend->InsertText(@"");
+    [mOwner deleteRange: mMarkedTextRange];
+
     mMarkedTextRange = NSMakeRange(NSNotFound, 0);
 
     // Reenable undo action collection, after we are done with text composition.
@@ -1249,6 +1234,19 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   }
 
   return result;
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Delete a range from the document.
+ */
+- (void) deleteRange: (NSRange) aRange
+{
+    if (aRange.length > 0)
+    {
+        [self message: SCI_DELETERANGE wParam: aRange.location lParam: aRange.length];
+    }
 }
 
 //--------------------------------------------------------------------------------------------------

@@ -146,6 +146,8 @@ extern NSString *const SCIUpdateUINotification;
 
 - (NSString*) selectedString;
 
+- (void) deleteRange: (NSRange) range;
+
 - (void)setFontName: (NSString*) font
                size: (int) size
                bold: (BOOL) bold
