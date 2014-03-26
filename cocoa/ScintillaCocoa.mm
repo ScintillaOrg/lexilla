@@ -1925,12 +1925,15 @@ int ScintillaCocoa::InsertText(NSString* input)
   CFStringGetBytes((CFStringRef)input, rangeAll, encoding, '?',
                    false, NULL, 0, &usedLen);
 
-  std::vector<UInt8> buffer(usedLen);
+  if (usedLen > 0)
+  {
+    std::vector<UInt8> buffer(usedLen);
 
-  CFStringGetBytes((CFStringRef)input, rangeAll, encoding, '?',
-                     false, buffer.data(),usedLen, NULL);
+    CFStringGetBytes((CFStringRef)input, rangeAll, encoding, '?',
+                       false, buffer.data(),usedLen, NULL);
 
-  AddCharUTF((char*) buffer.data(), static_cast<unsigned int>(usedLen), false);
+    AddCharUTF((char*) buffer.data(), static_cast<unsigned int>(usedLen), false);
+  }
   return static_cast<int>(usedLen);
 }
 
