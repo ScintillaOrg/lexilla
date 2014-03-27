@@ -1276,10 +1276,10 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
  */
 - (void) deleteRange: (NSRange) aRange
 {
-    if (aRange.length > 0)
-    {
-        [self message: SCI_DELETERANGE wParam: aRange.location lParam: aRange.length];
-    }
+  if (aRange.length > 0)
+  {
+    [self message: SCI_DELETERANGE wParam: aRange.location lParam: aRange.length];
+  }
 }
 
 //--------------------------------------------------------------------------------------------------
