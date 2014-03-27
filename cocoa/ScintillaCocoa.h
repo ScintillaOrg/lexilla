@@ -113,8 +113,10 @@ private:
 protected:
   Point GetVisibleOriginInMain();
   PRectangle GetClientRectangle();
+  virtual PRectangle GetClientDrawingRectangle();
   Point ConvertPoint(NSPoint point);
   virtual void RedrawRect(PRectangle rc);
+  virtual void DiscardOverdraw();
   virtual void Redraw();
 
   virtual void Initialise();
@@ -144,6 +146,7 @@ public:
   bool SetIdle(bool on);
   void SetMouseCapture(bool on);
   bool HaveMouseCapture();
+  void WillDraw(NSRect rect);
   void ScrollText(int linesToMove);
   void SetVerticalScrollPos();
   void SetHorizontalScrollPos();

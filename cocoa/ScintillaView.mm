@@ -228,6 +228,37 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Called before repainting.
+ */
+- (void) viewWillDraw
+{
+  const NSRect *rects;
+  NSInteger nRects = 0;
+  [self getRectsBeingDrawn:&rects count:&nRects];
+  if (nRects > 0) {
+    NSRect rectUnion = rects[0];
+    for (int i=0;i<nRects;i++) {
+      rectUnion = NSUnionRect(rectUnion, rects[i]);
+    }
+    mOwner.backend->WillDraw(rectUnion);
+  }
+  [super viewWillDraw];
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Called before responsive scrolling overdraw.
+ */
+- (void) prepareContentInRect: (NSRect) rect
+{
+  mOwner.backend->WillDraw(rect);
+  [super prepareContentInRect: rect];
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Gets called by the runtime when the view needs repainting.
  */
 - (void) drawRect: (NSRect) rect

@@ -714,6 +714,22 @@ PRectangle ScintillaCocoa::GetClientRectangle()
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Allow for prepared rectangle
+ */
+PRectangle ScintillaCocoa::GetClientDrawingRectangle() {
+  SCIContentView *content = ContentView();
+  if ([content respondsToSelector: @selector(setPreparedContentRect:)]) {
+    NSRect rcPrepared = [content preparedContentRect];
+    if (!NSIsEmptyRect(rcPrepared))
+      return PRectangle(rcPrepared.origin.x, rcPrepared.origin.y,
+                        rcPrepared.origin.x+rcPrepared.size.width, rcPrepared.origin.y + rcPrepared.size.height);
+  }
+  return ScintillaCocoa::GetClientRectangle();
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Converts the given point from base coordinates to local coordinates and at the same time into
  * a native Point structure. Base coordinates are used for the top window used in the view hierarchy.
  * Returned value is in view coordinates.
@@ -739,12 +755,24 @@ void ScintillaCocoa::RedrawRect(PRectangle rc)
 
 //--------------------------------------------------------------------------------------------------
 
+void ScintillaCocoa::DiscardOverdraw()
+{
+  // If running on 10.9, reset prepared area to visible area
+  SCIContentView *content = ContentView();
+  if ([content respondsToSelector: @selector(setPreparedContentRect:)]) {
+    content.preparedContentRect = [content visibleRect];
+  }
+}
+
+//--------------------------------------------------------------------------------------------------
+
 /**
  * Ensure all of prepared content is also redrawn.
  */
 void ScintillaCocoa::Redraw()
 {
   wMargin.InvalidateAll();
+  DiscardOverdraw();
   wMain.InvalidateAll();
 }
 
@@ -1557,6 +1585,29 @@ void ScintillaCocoa::PaintMargin(NSRect aRect)
     PaintSelMargin(sw, rc);
     sw->Release();
     delete sw;
+  }
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Prepare for drawing.
+ *
+ * @param rect The area that will be drawn, given in the sender's coordinate system.
+ */
+void ScintillaCocoa::WillDraw(NSRect rect)
+{
+  RefreshStyleData();
+  PRectangle rcWillDraw = NSRectToPRectangle(rect);
+  int positionAfterRect = PositionAfterArea(rcWillDraw);
+  pdoc->EnsureStyledTo(positionAfterRect);
+  NotifyUpdateUI();
+  if (WrapLines(wsVisible)) {
+    // Wrap may have reduced number of lines so more lines may need to be styled
+    positionAfterRect = PositionAfterArea(rcWillDraw);
+    pdoc->EnsureStyledTo(positionAfterRect);
+    // The wrapping process has changed the height of some lines so redraw all.
+    Redraw();
   }
 }
 
