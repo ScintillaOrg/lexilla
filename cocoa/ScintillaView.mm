@@ -253,7 +253,9 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 - (void) prepareContentInRect: (NSRect) rect
 {
   mOwner.backend->WillDraw(rect);
+#if MAC_OS_X_VERSION_MAX_ALLOWED > 1080
   [super prepareContentInRect: rect];
+#endif
 }
 
 //--------------------------------------------------------------------------------------------------

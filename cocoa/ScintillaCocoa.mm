@@ -717,6 +717,7 @@ PRectangle ScintillaCocoa::GetClientRectangle()
  * Allow for prepared rectangle
  */
 PRectangle ScintillaCocoa::GetClientDrawingRectangle() {
+#if MAC_OS_X_VERSION_MAX_ALLOWED > 1080
   SCIContentView *content = ContentView();
   if ([content respondsToSelector: @selector(setPreparedContentRect:)]) {
     NSRect rcPrepared = [content preparedContentRect];
@@ -724,6 +725,7 @@ PRectangle ScintillaCocoa::GetClientDrawingRectangle() {
       return PRectangle(rcPrepared.origin.x, rcPrepared.origin.y,
                         rcPrepared.origin.x+rcPrepared.size.width, rcPrepared.origin.y + rcPrepared.size.height);
   }
+#endif
   return ScintillaCocoa::GetClientRectangle();
 }
 
@@ -757,11 +759,13 @@ void ScintillaCocoa::RedrawRect(PRectangle rc)
 
 void ScintillaCocoa::DiscardOverdraw()
 {
+#if MAC_OS_X_VERSION_MAX_ALLOWED > 1080
   // If running on 10.9, reset prepared area to visible area
   SCIContentView *content = ContentView();
   if ([content respondsToSelector: @selector(setPreparedContentRect:)]) {
     content.preparedContentRect = [content visibleRect];
   }
+#endif
 }
 
 //--------------------------------------------------------------------------------------------------
