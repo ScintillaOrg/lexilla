@@ -273,6 +273,8 @@ void Editor::SetRepresentations() {
 			char c1[3] = { '\xc2',  static_cast<char>(0x80+j), 0 };
 			reprs.SetRepresentation(c1, repsC1[j]);
 		}
+		reprs.SetRepresentation("\xe2\x80\xa8", "LS");
+		reprs.SetRepresentation("\xe2\x80\xa9", "PS");
 	}
 
 	// UTF-8 invalid bytes
@@ -2555,14 +2557,20 @@ void Editor::DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, Lin
 			char hexits[4];
 			const char *ctrlChar;
 			unsigned char chEOL = ll->chars[eolPos];
+			int styleMain = ll->styles[eolPos];
+			ColourDesired textBack = TextBackground(vsDraw, overrideBackground, background, eolInSelection, false, styleMain, eolPos, ll);
 			if (UTF8IsAscii(chEOL)) {
 				ctrlChar = ControlCharacterString(chEOL);
 			} else {
-				sprintf(hexits, "x%2X", chEOL);
-				ctrlChar = hexits;
+				Representation *repr = reprs.RepresentationFromCharacter(ll->chars + eolPos, ll->numCharsInLine - eolPos);
+				if (repr) {
+					ctrlChar = repr->stringRep.c_str();
+					eolPos = ll->numCharsInLine;
+				} else {
+					sprintf(hexits, "x%2X", chEOL);
+					ctrlChar = hexits;
+				}
 			}
-			int styleMain = ll->styles[eolPos];
-			ColourDesired textBack = TextBackground(vsDraw, overrideBackground, background, eolInSelection, false, styleMain, eolPos, ll);
 			ColourDesired textFore = vsDraw.styles[styleMain].fore;
 			if (eolInSelection && vsDraw.selColours.fore.isSet) {
 				textFore = (eolInSelection == 1) ? vsDraw.selColours.fore : vsDraw.selAdditionalForeground;
