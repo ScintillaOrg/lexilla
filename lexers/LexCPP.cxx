@@ -235,6 +235,7 @@ struct OptionsCPP {
 	bool updatePreprocessor;
 	bool triplequotedStrings;
 	bool hashquotedStrings;
+	bool backQuotedStrings;
 	bool fold;
 	bool foldSyntaxBased;
 	bool foldComment;
@@ -253,6 +254,7 @@ struct OptionsCPP {
 		updatePreprocessor = true;
 		triplequotedStrings = false;
 		hashquotedStrings = false;
+		backQuotedStrings = false;
 		fold = false;
 		foldSyntaxBased = true;
 		foldComment = false;
@@ -298,6 +300,9 @@ struct OptionSetCPP : public OptionSet<OptionsCPP> {
 
 		DefineProperty("lexer.cpp.hashquoted.strings", &OptionsCPP::hashquotedStrings,
 			"Set to 1 to enable highlighting of hash-quoted strings.");
+
+		DefineProperty("lexer.cpp.backquoted.strings", &OptionsCPP::backQuotedStrings,
+			"Set to 1 to enable highlighting of back-quoted raw strings .");
 
 		DefineProperty("fold", &OptionsCPP::fold);
 
@@ -941,6 +946,10 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 				sc.Forward(2);
 			} else if (options.hashquotedStrings && sc.Match('#', '\"')) {
 				sc.SetState(SCE_C_HASHQUOTEDSTRING|activitySet);
+				sc.Forward();
+			} else if (options.backQuotedStrings && sc.Match('`')) {
+				sc.SetState(SCE_C_STRINGRAW|activitySet);
+				rawStringTerminator = "`";
 				sc.Forward();
 			} else if (IsADigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext))) {
 				if (lastWordWasUUID) {
