@@ -86,10 +86,11 @@ static bool followsReturnKeyword(StyleContext &sc, LexAccessor &styler) {
 static void highlightTaskMarker(StyleContext &sc, LexAccessor &styler,
 		int activity, WordList &markerList, bool caseSensitive){
 	if ((isoperator(sc.chPrev) || IsASpace(sc.chPrev)) && markerList.Length()) {
-		char marker[50];
+		const int lengthMarker = 50;
+		char marker[lengthMarker+1];
 		int currPos = (int) sc.currentPos;
 		int i = 0;
-		while (i < 50) {
+		while (i < lengthMarker) {
 			char ch = styler.SafeGetCharAt(currPos + i);
 			if (IsASpace(ch) || isoperator(ch)) {
 				break;
