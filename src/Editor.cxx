@@ -1542,6 +1542,14 @@ void Editor::DropCaret() {
 	InvalidateCaret();
 }
 
+void Editor::CaretSetPeriod(int period) {
+	if (caret.period != period) {
+		caret.period = period;
+		caret.on = true;
+		InvalidateCaret();
+	}
+}
+
 void Editor::InvalidateCaret() {
 	if (posDrag.IsValid()) {
 		InvalidateRange(posDrag.Position(), posDrag.Position() + 1);
@@ -7816,7 +7824,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return caret.period;
 
 	case SCI_SETCARETPERIOD:
-		caret.period = wParam;
+		CaretSetPeriod(wParam);
 		break;
 
 	case SCI_GETWORDCHARS:

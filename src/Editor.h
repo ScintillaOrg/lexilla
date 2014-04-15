@@ -420,6 +420,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void ScrollRange(SelectionRange range);
 	void ShowCaretAtCurrentPosition();
 	void DropCaret();
+	void CaretSetPeriod(int period);
 	void InvalidateCaret();
 	virtual void UpdateSystemCaret();
 
