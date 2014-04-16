@@ -1658,15 +1658,15 @@ void ScintillaWin::InsertPasteText(const char *text, int len, SelectionPosition 
 		}
 		if (isLine) {
 			int insertPos = pdoc->LineStart(pdoc->LineFromPosition(sel.MainCaret()));
-			pdoc->InsertString(insertPos, text, len);
+			int lengthInserted = pdoc->InsertString(insertPos, text, len);
 			// add the newline if necessary
 			if ((len > 0) && (text[len-1] != '\n' && text[len-1] != '\r')) {
 				const char *endline = StringFromEOLMode(pdoc->eolMode);
-				pdoc->InsertString(insertPos + len, endline, static_cast<int>(strlen(endline)));
-				len += static_cast<int>(strlen(endline));
+				int length = static_cast<int>(strlen(endline));
+				lengthInserted += pdoc->InsertString(insertPos + lengthInserted, endline, length);
 			}
 			if (sel.MainCaret() == insertPos) {
-				SetEmptySelection(sel.MainCaret() + len);
+				SetEmptySelection(sel.MainCaret() + lengthInserted);
 			}
 		} else {
 			InsertPaste(selStart, text, len);

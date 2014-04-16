@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 08 April 2014 NH</p>
+    <p>Last edited 16 April 2014 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -413,6 +413,7 @@
      <a class="message" href="#SCI_ADDSTYLEDTEXT">SCI_ADDSTYLEDTEXT(int length, cell *s)</a><br />
      <a class="message" href="#SCI_APPENDTEXT">SCI_APPENDTEXT(int length, const char *s)</a><br />
      <a class="message" href="#SCI_INSERTTEXT">SCI_INSERTTEXT(int pos, const char *text)</a><br />
+     <a class="message" href="#SCI_CHANGEINSERTION">SCI_CHANGEINSERTION(int length, const char *text)</a><br />
      <a class="message" href="#SCI_CLEARALL">SCI_CLEARALL</a><br />
      <a class="message" href="#SCI_DELETERANGE">SCI_DELETERANGE(int pos, int deleteLength)</a><br />
      <a class="message" href="#SCI_CLEARDOCUMENTSTYLE">SCI_CLEARDOCUMENTSTYLE</a><br />
@@ -545,6 +546,10 @@
      This inserts the zero terminated <code>text</code> string at position <code>pos</code> or at
     the current position if <code>pos</code> is -1. If the current position is after the insertion point
     then it is moved along with its surrounding text but no scrolling is performed.</p>
+
+    <p><b id="SCI_CHANGEINSERTION">SCI_CHANGEINSERTION(int length, const char *text)</b><br />
+     This may only be called from a <a class="message" href="#SC_MOD_INSERTCHECK">SC_MOD_INSERTCHECK</a>
+     notification handler and will change the text being inserted to that provided.</p>
 
     <p><b id="SCI_CLEARALL">SCI_CLEARALL</b><br />
      Unless the document is read-only, this deletes all the text.</p>
@@ -6791,7 +6796,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         <tr>
           <td align="left"><code>SC_MOD_INSERTTEXT</code></td>
 
-          <td align="center">0x01</td>
+          <td align="right">0x01</td>
 
           <td>Text has been inserted into the document.</td>
 
@@ -6801,7 +6806,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         <tr>
           <td align="left"><code>SC_MOD_DELETETEXT</code></td>
 
-          <td align="center">0x02</td>
+          <td align="right">0x02</td>
 
           <td>Text has been removed from the document.</td>
 
@@ -6811,7 +6816,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         <tr>
           <td align="left"><code>SC_MOD_CHANGESTYLE</code></td>
 
-          <td align="center">0x04</td>
+          <td align="right">0x04</td>
 
           <td>A style change has occurred.</td>
 
@@ -6821,7 +6826,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         <tr>
           <td align="left"><code>SC_MOD_CHANGEFOLD</code></td>
 
-          <td align="center">0x08</td>
+          <td align="right">0x08</td>
 
           <td>A folding change has occurred.</td>
 
@@ -6831,7 +6836,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         <tr>
           <td align="left"><code>SC_PERFORMED_USER</code></td>
 
-          <td align="center">0x10</td>
+          <td align="right">0x10</td>
 
           <td>Information: the operation was done by the user.</td>
 
@@ -6841,7 +6846,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         <tr>
           <td align="left"><code>SC_PERFORMED_UNDO</code></td>
 
-          <td align="center">0x20</td>
+          <td align="right">0x20</td>
 
           <td>Information: this was the result of an Undo.</td>
 
@@ -6851,7 +6856,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         <tr>
           <td align="left"><code>SC_PERFORMED_REDO</code></td>
 
-          <td align="center">0x40</td>
+          <td align="right">0x40</td>
 
           <td>Information: this was the result of a Redo.</td>
 
@@ -6861,7 +6866,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         <tr>
           <td align="left"><code>SC_MULTISTEPUNDOREDO</code></td>
 
-          <td align="center">0x80</td>
+          <td align="right">0x80</td>
 
           <td>This is part of a multi-step Undo or Redo transaction.</td>
 
@@ -6871,7 +6876,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         <tr>
           <td align="left"><code>SC_LASTSTEPINUNDOREDO</code></td>
 
-          <td align="center">0x100</td>
+          <td align="right">0x100</td>
 
           <td>This is the final step in an Undo or Redo transaction.</td>
 
@@ -6881,7 +6886,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         <tr>
           <td align="left"><code>SC_MOD_CHANGEMARKER</code></td>
 
-          <td align="center">0x200</td>
+          <td align="right">0x200</td>
 
           <td>One or more markers has changed in a line.</td>
 
@@ -6891,7 +6896,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         <tr>
           <td align="left"><code>SC_MOD_BEFOREINSERT</code></td>
 
-          <td align="center">0x400</td>
+          <td align="right">0x400</td>
 
           <td>Text is about to be inserted into the document.</td>
 
@@ -6901,7 +6906,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         <tr>
           <td align="left"><code>SC_MOD_BEFOREDELETE</code></td>
 
-          <td align="center">0x800</td>
+          <td align="right">0x800</td>
 
           <td>Text is about to be deleted from the document.</td>
 
@@ -6911,7 +6916,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         <tr>
           <td align="left"><code>SC_MOD_CHANGEINDICATOR</code></td>
 
-          <td align="center">0x4000</td>
+          <td align="right">0x4000</td>
 
           <td>An indicator has been added or removed from a range of text.</td>
 
@@ -6921,7 +6926,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         <tr>
           <td align="left"><code id="SC_MOD_CHANGELINESTATE">SC_MOD_CHANGELINESTATE</code></td>
 
-          <td align="center">0x8000</td>
+          <td align="right">0x8000</td>
 
           <td>A line state has changed because <a class="message" href="#SCI_SETLINESTATE">SCI_SETLINESTATE</a>
           was called.</td>
@@ -6932,7 +6937,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         <tr>
           <td align="left"><code id="SC_MOD_LEXERSTATE">SC_MOD_LEXERSTATE</code></td>
 
-          <td align="center">0x80000</td>
+          <td align="right">0x80000</td>
 
           <td>The internal state of a lexer has changed over a range.</td>
 
@@ -6942,7 +6947,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         <tr>
           <td align="left"><code id="SC_MOD_CHANGEMARGIN">SC_MOD_CHANGEMARGIN</code></td>
 
-          <td align="center">0x10000</td>
+          <td align="right">0x10000</td>
 
           <td>A text margin has changed.</td>
 
@@ -6952,7 +6957,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         <tr>
           <td align="left"><code id="SC_MOD_CHANGEANNOTATION">SC_MOD_CHANGEANNOTATION</code></td>
 
-          <td align="center">0x20000</td>
+          <td align="right">0x20000</td>
 
           <td>An annotation has changed.</td>
 
@@ -6960,9 +6965,21 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         </tr>
 
         <tr>
+          <td align="left"><code id="SC_MOD_INSERTCHECK">SC_MOD_INSERTCHECK</code></td>
+
+          <td align="right">0x100000</td>
+
+          <td>Text is about to be inserted. The handler may change the text being inserted by calling
+	  <a class="message" href="#SCI_CHANGEINSERTION">SCI_CHANGEINSERTION</a>.
+	  No other modifications may be made in this handler.</td>
+
+          <td><code>position, length, text</code></td>
+        </tr>
+
+        <tr>
           <td align="left"><code>SC_MULTILINEUNDOREDO</code></td>
 
-          <td align="center">0x1000</td>
+          <td align="right">0x1000</td>
 
           <td>This is part of an Undo or Redo with multi-line changes.</td>
 
@@ -6972,7 +6989,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         <tr>
           <td align="left"><code>SC_STARTACTION</code></td>
 
-          <td align="center">0x2000</td>
+          <td align="right">0x2000</td>
 
           <td>This is set on a SC_PERFORMED_USER action when it is the
           first or only step in an undo transaction. This can be used to integrate the Scintilla
@@ -6987,7 +7004,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         <tr>
           <td align="left"><code id="SC_MOD_CONTAINER">SC_MOD_CONTAINER</code></td>
 
-          <td align="center">0x40000</td>
+          <td align="right">0x40000</td>
 
           <td>This is set on for actions that the container stored into the undo stack with
 	  <a class="message" href="#SCI_ADDUNDOACTION"><code>SCI_ADDUNDOACTION</code></a>.
@@ -6999,7 +7016,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
         <tr>
           <td align="left"><code>SC_MODEVENTMASKALL</code></td>
 
-          <td align="center">0x7FFFF</td>
+          <td align="right">0x1FFFFF</td>
 
           <td>This is a mask for all valid flags. This is the default mask state set by <a
           class="message" href="#SCI_SETMODEVENTMASK"><code>SCI_SETMODEVENTMASK</code></a>.</td>

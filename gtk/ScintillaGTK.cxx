@@ -2168,8 +2168,9 @@ gboolean ScintillaGTK::KeyThis(GdkEventKey *event) {
 		//fprintf(stderr, "SK-key: %d %x %x\n",event->keyval, event->state, consumed);
 		if (event->keyval == 0xffffff && event->length > 0) {
 			ClearSelection();
-			if (pdoc->InsertCString(CurrentPosition(), event->string)) {
-				MovePositionTo(CurrentPosition() + event->length);
+			const int lengthInserted = pdoc->InsertString(CurrentPosition(), event->string, strlen(event->string));
+			if (lengthInserted > 0) {
+				MovePositionTo(CurrentPosition() + lengthInserted);
 			}
 		}
 		return consumed;

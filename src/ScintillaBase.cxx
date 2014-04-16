@@ -198,8 +198,8 @@ void ScintillaBase::AutoCompleteDoubleClick(void *p) {
 void ScintillaBase::AutoCompleteInsert(Position startPos, int removeLen, const char *text, int textLen) {
 	UndoGroup ug(pdoc);
 	pdoc->DeleteChars(startPos, removeLen);
-	pdoc->InsertString(startPos, text, textLen);
-	SetEmptySelection(startPos + textLen);
+	const int lengthInserted = pdoc->InsertString(startPos, text, textLen);
+	SetEmptySelection(startPos + lengthInserted);
 }
 
 void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {

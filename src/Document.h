@@ -205,6 +205,9 @@ private:
 	int enteredStyling;
 	int enteredReadOnlyCount;
 
+	bool insertionSet;
+	std::string insertion;
+
 	std::vector<WatcherWithUserData> watchers;
 
 	// ldSize is not real data - it is for dimensions and loops
@@ -274,7 +277,8 @@ public:
 	void ModifiedAt(int pos);
 	void CheckReadOnly();
 	bool DeleteChars(int pos, int len);
-	bool InsertString(int position, const char *s, int insertLength);
+	int InsertString(int position, const char *s, int insertLength);
+	void ChangeInsertion(const char *s, int length);
 	int SCI_METHOD AddData(char *data, int length);
 	void * SCI_METHOD ConvertToDocument();
 	int Undo();
@@ -296,7 +300,7 @@ public:
 	int GapPosition() const { return cb.GapPosition(); }
 
 	int SCI_METHOD GetLineIndentation(int line);
-	void SetLineIndentation(int line, int indent);
+	int SetLineIndentation(int line, int indent);
 	int GetLineIndentPosition(int line) const;
 	int GetColumn(int position);
 	int CountCharacters(int startPos, int endPos);
@@ -307,8 +311,6 @@ public:
 	void SetReadOnly(bool set) { cb.SetReadOnly(set); }
 	bool IsReadOnly() const { return cb.IsReadOnly(); }
 
-	bool InsertChar(int pos, char ch);
-	bool InsertCString(int position, const char *s);
 	void DelChar(int pos);
 	void DelCharBack(int pos);
 
@@ -390,7 +392,7 @@ public:
 	void AnnotationSetStyles(int line, const unsigned char *styles);
 	int AnnotationLines(int line) const;
 	void AnnotationClearAll();
-
+	
 	bool AddWatcher(DocWatcher *watcher, void *userData);
 	bool RemoveWatcher(DocWatcher *watcher, void *userData);
 
