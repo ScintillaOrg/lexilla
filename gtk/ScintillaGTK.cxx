@@ -842,11 +842,20 @@ void ScintillaGTK::StartDrag() {
 	dragWasDropped = false;
 	inDragDrop = ddDragging;
 	GtkTargetList *tl = gtk_target_list_new(clipboardCopyTargets, nClipboardCopyTargets);
+#if GTK_CHECK_VERSION(3,10,0)
+	gtk_drag_begin_with_coordinates(GTK_WIDGET(PWidget(wMain)),
+	               tl,
+	               static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE),
+	               evbtn->button,
+	               reinterpret_cast<GdkEvent *>(evbtn),
+			-1, -1);
+#else
 	gtk_drag_begin(GTK_WIDGET(PWidget(wMain)),
 	               tl,
 	               static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE),
 	               evbtn->button,
 	               reinterpret_cast<GdkEvent *>(evbtn));
+#endif
 }
 
 static std::string ConvertText(const char *s, size_t len, const char *charSetDest,
@@ -1667,9 +1676,9 @@ void ScintillaGTK::Resize(int width, int height) {
 	// Not always needed, but some themes can have different sizes of scrollbars
 #if GTK_CHECK_VERSION(3,0,0)
 	GtkRequisition requisition;
-	gtk_widget_get_requisition(PWidget(scrollbarv), &requisition);
+	gtk_widget_get_preferred_size(PWidget(scrollbarv), NULL, &requisition);
 	verticalScrollBarWidth = requisition.width;
-	gtk_widget_get_requisition(PWidget(scrollbarh), &requisition);
+	gtk_widget_get_preferred_size(PWidget(scrollbarh), NULL, &requisition);
 	horizontalScrollBarHeight = requisition.height;
 #else
 	verticalScrollBarWidth = GTK_WIDGET(PWidget(scrollbarv))->requisition.width;
