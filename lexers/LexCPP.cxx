@@ -108,6 +108,40 @@ static void highlightTaskMarker(StyleContext &sc, LexAccessor &styler,
 	}
 }
 
+struct EscapeSequence {
+	int digitsLeft;
+	CharacterSet setHexDigits;
+	CharacterSet setOctDigits;
+	CharacterSet setNoneNumeric;
+	CharacterSet *escapeSetValid;
+	EscapeSequence() {
+		digitsLeft = 0;
+		escapeSetValid = 0;
+		setHexDigits = CharacterSet(CharacterSet::setDigits, "ABCDEFabcdef");
+		setOctDigits = CharacterSet(CharacterSet::setNone, "01234567");
+	}
+	void resetEscapeState(int nextChar) {
+		digitsLeft = 0;
+		escapeSetValid = &setNoneNumeric;
+		if (nextChar == 'U') {
+			digitsLeft = 9;
+			escapeSetValid = &setHexDigits;
+		} else if (nextChar == 'u') {
+			digitsLeft = 5;
+			escapeSetValid = &setHexDigits;
+		} else if (nextChar == 'x') {
+			digitsLeft = 5;
+			escapeSetValid = &setHexDigits;
+		} else if (setOctDigits.Contains(nextChar)) {
+			digitsLeft = 3;
+			escapeSetValid = &setOctDigits;
+		}
+	}
+	bool atEscapeEnd(int currChar) const {
+		return (digitsLeft <= 0) || !escapeSetValid->Contains(currChar);
+	}
+};
+
 static std::string GetRestOfLine(LexAccessor &styler, int start, bool allowSpace) {
 	std::string restOfLine;
 	int i =0;
@@ -237,6 +271,7 @@ struct OptionsCPP {
 	bool triplequotedStrings;
 	bool hashquotedStrings;
 	bool backQuotedStrings;
+	bool escapeSequence;
 	bool fold;
 	bool foldSyntaxBased;
 	bool foldComment;
@@ -256,6 +291,7 @@ struct OptionsCPP {
 		triplequotedStrings = false;
 		hashquotedStrings = false;
 		backQuotedStrings = false;
+		escapeSequence = false;
 		fold = false;
 		foldSyntaxBased = true;
 		foldComment = false;
@@ -304,6 +340,9 @@ struct OptionSetCPP : public OptionSet<OptionsCPP> {
 
 		DefineProperty("lexer.cpp.backquoted.strings", &OptionsCPP::backQuotedStrings,
 			"Set to 1 to enable highlighting of back-quoted raw strings .");
+
+		DefineProperty("lexer.cpp.escape.sequence", &OptionsCPP::escapeSequence,
+			"Set to 1 to enable highlighting of escape sequences in strings");
 
 		DefineProperty("fold", &OptionsCPP::fold);
 
@@ -363,6 +402,7 @@ class LexerCPP : public ILexerWithSubStyles {
 	std::map<std::string, std::string> preprocessorDefinitionsStart;
 	OptionsCPP options;
 	OptionSetCPP osCPP;
+	EscapeSequence escapeSeq;
 	SparseState<std::string> rawStringTerminators;
 	enum { activeFlag = 0x40 };
 	enum { ssIdentifier, ssDocKeyword };
@@ -836,14 +876,34 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 						isIncludePreprocessor = false;
 					}
 				} else if (sc.ch == '\\') {
-					if (sc.chNext == '\"' || sc.chNext == '\'' || sc.chNext == '\\') {
-						sc.Forward();
+					if (options.escapeSequence) {
+						sc.SetState(SCE_C_ESCAPESEQUENCE|activitySet);
+						escapeSeq.resetEscapeState(sc.chNext);
 					}
+					sc.Forward(); // Skip all characters after the backslash
 				} else if (sc.ch == '\"') {
 					if (sc.chNext == '_') {
 						sc.ChangeState(SCE_C_USERLITERAL|activitySet);
 					} else {
 						sc.ForwardSetState(SCE_C_DEFAULT|activitySet);
+					}
+				}
+				break;
+			case SCE_C_ESCAPESEQUENCE:
+				escapeSeq.digitsLeft--;
+				if (!escapeSeq.atEscapeEnd(sc.ch)) {
+					break;
+				}
+				if (sc.ch == '"') {
+					sc.SetState(SCE_C_STRING|activitySet);
+					sc.ForwardSetState(SCE_C_DEFAULT|activitySet);
+				} else if (sc.ch == '\\') {
+					escapeSeq.resetEscapeState(sc.chNext);
+					sc.Forward();
+				} else {
+					sc.SetState(SCE_C_STRING|activitySet);
+					if (sc.atLineEnd) {
+						sc.ChangeState(SCE_C_STRINGEOL|activitySet);
 					}
 				}
 				break;
