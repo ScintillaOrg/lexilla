@@ -36,7 +36,10 @@
 using namespace Scintilla;
 #endif
 
-static bool IsSpaceEquiv(int state) {
+namespace {
+	// Use an unnamed namespace to protect the functions and classes from name conflicts
+
+bool IsSpaceEquiv(int state) {
 	return (state <= SCE_C_COMMENTDOC) ||
 		// including SCE_C_DEFAULT, SCE_C_COMMENT, SCE_C_COMMENTLINE
 		(state == SCE_C_COMMENTLINEDOC) || (state == SCE_C_COMMENTDOCKEYWORD) ||
@@ -50,7 +53,7 @@ static bool IsSpaceEquiv(int state) {
 // a = b+++/ptn/...
 // Putting a space between the '++' post-inc operator and the '+' binary op
 // fixes this, and is highly recommended for readability anyway.
-static bool FollowsPostfixOperator(StyleContext &sc, LexAccessor &styler) {
+bool FollowsPostfixOperator(StyleContext &sc, LexAccessor &styler) {
 	int pos = (int) sc.currentPos;
 	while (--pos > 0) {
 		char ch = styler[pos];
@@ -61,7 +64,7 @@ static bool FollowsPostfixOperator(StyleContext &sc, LexAccessor &styler) {
 	return false;
 }
 
-static bool followsReturnKeyword(StyleContext &sc, LexAccessor &styler) {
+bool followsReturnKeyword(StyleContext &sc, LexAccessor &styler) {
 	// Don't look at styles, so no need to flush.
 	int pos = (int) sc.currentPos;
 	int currentLine = styler.GetLine(pos);
@@ -83,7 +86,7 @@ static bool followsReturnKeyword(StyleContext &sc, LexAccessor &styler) {
 	return !*s;
 }
 
-static void highlightTaskMarker(StyleContext &sc, LexAccessor &styler,
+void highlightTaskMarker(StyleContext &sc, LexAccessor &styler,
 		int activity, WordList &markerList, bool caseSensitive){
 	if ((isoperator(sc.chPrev) || IsASpace(sc.chPrev)) && markerList.Length()) {
 		const int lengthMarker = 50;
@@ -142,7 +145,7 @@ struct EscapeSequence {
 	}
 };
 
-static std::string GetRestOfLine(LexAccessor &styler, int start, bool allowSpace) {
+std::string GetRestOfLine(LexAccessor &styler, int start, bool allowSpace) {
 	std::string restOfLine;
 	int i =0;
 	char ch = styler.SafeGetCharAt(start, '\n');
@@ -159,14 +162,14 @@ static std::string GetRestOfLine(LexAccessor &styler, int start, bool allowSpace
 	return restOfLine;
 }
 
-static bool IsStreamCommentStyle(int style) {
+bool IsStreamCommentStyle(int style) {
 	return style == SCE_C_COMMENT ||
 		style == SCE_C_COMMENTDOC ||
 		style == SCE_C_COMMENTDOCKEYWORD ||
 		style == SCE_C_COMMENTDOCKEYWORDERROR;
 }
 
-static std::vector<std::string> Tokenize(const std::string &s) {
+std::vector<std::string> Tokenize(const std::string &s) {
 	// Break into space separated tokens
 	std::string word;
 	std::vector<std::string> tokens;
@@ -306,7 +309,7 @@ struct OptionsCPP {
 	}
 };
 
-static const char *const cppWordLists[] = {
+const char *const cppWordLists[] = {
             "Primary keywords and identifiers",
             "Secondary keywords and identifiers",
             "Documentation comment keywords",
@@ -382,7 +385,9 @@ struct OptionSetCPP : public OptionSet<OptionsCPP> {
 	}
 };
 
-static const char styleSubable[] = {SCE_C_IDENTIFIER, SCE_C_COMMENTDOCKEYWORD, 0};
+const char styleSubable[] = {SCE_C_IDENTIFIER, SCE_C_COMMENTDOCKEYWORD, 0};
+
+}
 
 class LexerCPP : public ILexerWithSubStyles {
 	bool caseSensitive;
