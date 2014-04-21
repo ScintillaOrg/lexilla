@@ -811,8 +811,8 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 			}
 			styler.SetLineState(lineCurrent,
 			                    ((inScriptType & 0x03) << 0) |
-			                    ((tagOpened & 0x01) << 2) |
-			                    ((tagClosing & 0x01) << 3) |
+			                    ((tagOpened ? 1 : 0) << 2) |
+			                    ((tagClosing ? 1 : 0) << 3) |
 			                    ((aspScript & 0x0F) << 4) |
 			                    ((clientScript & 0x0F) << 8) |
 			                    ((beforePreProc & 0xFF) << 12));
