@@ -361,7 +361,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual void DiscardOverdraw();
 	virtual void Redraw();
 	void RedrawSelMargin(int line=-1, bool allAfter=false);
-	PRectangle RectangleFromRange(int start, int end);
+	PRectangle RectangleFromRange(Range r);
 	void InvalidateRange(int start, int end);
 
 	bool UserVirtualSpace() const {

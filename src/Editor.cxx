@@ -679,8 +679,7 @@ void Editor::RedrawSelMargin(int line, bool allAfter) {
 			PRectangle rcSelMargin = GetClientRectangle();
 			rcSelMargin.right = rcSelMargin.left + vs.fixedColumnWidth;
 			if (line != -1) {
-				int position = pdoc->LineStart(line);
-				PRectangle rcLine = RectangleFromRange(position, position);
+				PRectangle rcLine = RectangleFromRange(Range(pdoc->LineStart(line)));
 
 				// Inflate line rectangle if there are image markers with height larger than line height
 				if (vs.largestMarkerHeight > vs.lineHeight) {
@@ -710,16 +709,9 @@ void Editor::RedrawSelMargin(int line, bool allAfter) {
 	}
 }
 
-PRectangle Editor::RectangleFromRange(int start, int end) {
-	int minPos = start;
-	if (minPos > end)
-		minPos = end;
-	int maxPos = start;
-	if (maxPos < end)
-		maxPos = end;
-	int minLine = cs.DisplayFromDoc(pdoc->LineFromPosition(minPos));
-	int lineDocMax = pdoc->LineFromPosition(maxPos);
-	int maxLine = cs.DisplayFromDoc(lineDocMax) + cs.GetHeight(lineDocMax) - 1;
+PRectangle Editor::RectangleFromRange(Range r) {
+	const int minLine = cs.DisplayFromDoc(pdoc->LineFromPosition(r.First()));
+	const int maxLine = cs.DisplayLastFromDoc(pdoc->LineFromPosition(r.Last()));
 	PRectangle rcClient = GetTextRectangle();
 	PRectangle rc;
 	const int leftTextOverlap = ((xOffset == 0) && (vs.leftMarginWidth > 0)) ? 1 : 0;
@@ -734,7 +726,7 @@ PRectangle Editor::RectangleFromRange(int start, int end) {
 }
 
 void Editor::InvalidateRange(int start, int end) {
-	RedrawRect(RectangleFromRange(start, end));
+	RedrawRect(RectangleFromRange(Range(start, end)));
 }
 
 int Editor::CurrentPosition() const {
@@ -1930,18 +1922,18 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 			}
 
 			// Old code does not know about new markers needed to distinguish all cases
-			int folderOpenMid = SubstituteMarkerIfEmpty(SC_MARKNUM_FOLDEROPENMID,
+			const int folderOpenMid = SubstituteMarkerIfEmpty(SC_MARKNUM_FOLDEROPENMID,
 			        SC_MARKNUM_FOLDEROPEN);
-			int folderEnd = SubstituteMarkerIfEmpty(SC_MARKNUM_FOLDEREND,
+			const int folderEnd = SubstituteMarkerIfEmpty(SC_MARKNUM_FOLDEREND,
 			        SC_MARKNUM_FOLDER);
 
 			while ((visibleLine < cs.LinesDisplayed()) && yposScreen < rc.bottom) {
 
 				PLATFORM_ASSERT(visibleLine < cs.LinesDisplayed());
-				int lineDoc = cs.DocFromDisplay(visibleLine);
+				const int lineDoc = cs.DocFromDisplay(visibleLine);
 				PLATFORM_ASSERT(cs.GetVisible(lineDoc));
-				bool firstSubLine = visibleLine == cs.DisplayFromDoc(lineDoc);
-				bool lastSubLine = visibleLine == (cs.DisplayFromDoc(lineDoc + 1) - 1);
+				const bool firstSubLine = visibleLine == cs.DisplayFromDoc(lineDoc);
+				const bool lastSubLine = visibleLine == cs.DisplayLastFromDoc(lineDoc);
 
 				int marks = pdoc->GetMark(lineDoc);
 				if (!firstSubLine)
@@ -1951,10 +1943,10 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 
 				if (vs.ms[margin].mask & SC_MASK_FOLDERS) {
 					// Decide which fold indicator should be displayed
-					int level = pdoc->GetLevel(lineDoc);
-					int levelNext = pdoc->GetLevel(lineDoc + 1);
-					int levelNum = level & SC_FOLDLEVELNUMBERMASK;
-					int levelNextNum = levelNext & SC_FOLDLEVELNUMBERMASK;
+					const int level = pdoc->GetLevel(lineDoc);
+					const int levelNext = pdoc->GetLevel(lineDoc + 1);
+					const int levelNum = level & SC_FOLDLEVELNUMBERMASK;
+					const int levelNextNum = levelNext & SC_FOLDLEVELNUMBERMASK;
 					if (level & SC_FOLDLEVELHEADERFLAG) {
 						if (firstSubLine) {
 							if (levelNum < levelNextNum) {
@@ -1984,9 +1976,9 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 							}
 						}
 						needWhiteClosure = false;
-						int firstFollowupLine = cs.DocFromDisplay(cs.DisplayFromDoc(lineDoc + 1));
-						int firstFollowupLineLevel = pdoc->GetLevel(firstFollowupLine);
-						int secondFollowupLineLevelNum = pdoc->GetLevel(firstFollowupLine + 1) & SC_FOLDLEVELNUMBERMASK;
+						const int firstFollowupLine = cs.DocFromDisplay(cs.DisplayFromDoc(lineDoc + 1));
+						const int firstFollowupLineLevel = pdoc->GetLevel(firstFollowupLine);
+						const int secondFollowupLineLevelNum = pdoc->GetLevel(firstFollowupLine + 1) & SC_FOLDLEVELNUMBERMASK;
 						if (!cs.GetExpanded(lineDoc)) {
 							if ((firstFollowupLineLevel & SC_FOLDLEVELWHITEFLAG) &&
 								(levelNum > secondFollowupLineLevelNum))
@@ -6894,7 +6886,7 @@ void Editor::CheckForChangeOutsidePaint(Range r) {
 		if (!r.Valid())
 			return;
 
-		PRectangle rcRange = RectangleFromRange(r.start, r.end);
+		PRectangle rcRange = RectangleFromRange(r);
 		PRectangle rcText = GetTextRectangle();
 		if (rcRange.top < rcText.top) {
 			rcRange.top = rcText.top;

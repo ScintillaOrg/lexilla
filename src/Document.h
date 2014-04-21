@@ -43,6 +43,14 @@ public:
 		return (start != invalidPosition) && (end != invalidPosition);
 	}
 
+	Position First() const {
+		return (start <= end) ? start : end;
+	}
+
+	Position Last() const {
+		return (start > end) ? start : end;
+	}
+
 	// Is the position within the range?
 	bool Contains(Position pos) const {
 		if (start < end) {
