@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 16 April 2014 NH</p>
+    <p>Last edited 21 April 2014 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -5420,6 +5420,14 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
 
           <td align="left">display hexadecimal fold levels in line margin to aid debugging of
           folding. The appearance of this feature may change in the future.</td>
+        </tr>
+
+        <tr>
+          <td align="left">SC_FOLDFLAG_LINESTATE</td>
+          <td align="left">128</td>
+
+          <td align="left">display hexadecimal line state in line margin to aid debugging of lexing and folding.
+	  May not be used at the same time as <code>SC_FOLDFLAG_LEVELNUMBERS</code>.</td>
         </tr>
       </tbody>
     </table>

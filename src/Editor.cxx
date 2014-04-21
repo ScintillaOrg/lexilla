@@ -2048,14 +2048,19 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 						char number[100] = "";
 						if (lineDoc >= 0)
 							sprintf(number, "%d", lineDoc + 1);
-						if (foldFlags & SC_FOLDFLAG_LEVELNUMBERS) {
-							int lev = pdoc->GetLevel(lineDoc);
-							sprintf(number, "%c%c %03X %03X",
-									(lev & SC_FOLDLEVELHEADERFLAG) ? 'H' : '_',
-									(lev & SC_FOLDLEVELWHITEFLAG) ? 'W' : '_',
-									lev & SC_FOLDLEVELNUMBERMASK,
-									lev >> 16
-								   );
+						if (foldFlags & (SC_FOLDFLAG_LEVELNUMBERS | SC_FOLDFLAG_LINESTATE)) {
+							if (foldFlags & SC_FOLDFLAG_LEVELNUMBERS) {
+								int lev = pdoc->GetLevel(lineDoc);
+								sprintf(number, "%c%c %03X %03X",
+										(lev & SC_FOLDLEVELHEADERFLAG) ? 'H' : '_',
+										(lev & SC_FOLDLEVELWHITEFLAG) ? 'W' : '_',
+										lev & SC_FOLDLEVELNUMBERMASK,
+										lev >> 16
+									);
+							} else {
+								int state = pdoc->GetLineState(lineDoc);
+								sprintf(number, "%0X", state);
+							}
 						}
 						PRectangle rcNumber = rcMarker;
 						// Right justify
