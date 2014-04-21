@@ -98,7 +98,7 @@ fun void AddStyledText=2002(int length, cells c)
 # Insert string at a position.
 fun void InsertText=2003(position pos, string text)
 
-# Change the text that is being inserted in response to SC_MOD_INSERTCHECK 
+# Change the text that is being inserted in response to SC_MOD_INSERTCHECK
 fun void ChangeInsertion=2672(int length, string text)
 
 # Delete all text in the document.
