@@ -712,14 +712,15 @@ void Editor::RedrawSelMargin(int line, bool allAfter) {
 PRectangle Editor::RectangleFromRange(Range r) {
 	const int minLine = cs.DisplayFromDoc(pdoc->LineFromPosition(r.First()));
 	const int maxLine = cs.DisplayLastFromDoc(pdoc->LineFromPosition(r.Last()));
-	PRectangle rcClient = GetTextRectangle();
+	const PRectangle rcClientDrawing = GetClientDrawingRectangle();
 	PRectangle rc;
 	const int leftTextOverlap = ((xOffset == 0) && (vs.leftMarginWidth > 0)) ? 1 : 0;
 	rc.left = vs.textStart - leftTextOverlap;
 	rc.top = (minLine - TopLineOfMain()) * vs.lineHeight;
-	if (rc.top < rcClient.top)
-		rc.top = rcClient.top;
-	rc.right = rcClient.right;
+	if (rc.top < rcClientDrawing.top)
+		rc.top = rcClientDrawing.top;
+	// Extend to right of prepared area if any to prevent artifacts from caret line highlight
+	rc.right = rcClientDrawing.right;
 	rc.bottom = (maxLine - TopLineOfMain() + 1) * vs.lineHeight;
 
 	return rc;
