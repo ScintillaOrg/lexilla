@@ -3258,6 +3258,15 @@ void Platform_Finalise() {
 		customClearTypeRenderingParams->Release();
 		customClearTypeRenderingParams = 0;
 	}
+	if (pIDWriteFactory) {
+		pIDWriteFactory->Release();
+		pIDWriteFactory = 0;
+	}
+	if (pD2DFactory) {
+		pD2DFactory->Release();
+		pD2DFactory = 0;
+	}
+
 #endif
 	if (reverseArrowCursor != NULL)
 		::DestroyCursor(reverseArrowCursor);
