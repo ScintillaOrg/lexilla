@@ -356,7 +356,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int LineFromLocation(Point pt) const;
 	void SetTopLine(int topLineNew);
 
-	bool AbandonPaint();
+	virtual bool AbandonPaint();
 	virtual void RedrawRect(PRectangle rc);
 	virtual void DiscardOverdraw();
 	virtual void Redraw();
