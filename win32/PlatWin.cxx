@@ -103,6 +103,9 @@ ID2D1Factory *pD2DFactory = 0;
 IDWriteRenderingParams *defaultRenderingParams = 0;
 IDWriteRenderingParams *customClearTypeRenderingParams = 0;
 
+static HMODULE hDLLD2D = NULL;
+static HMODULE hDLLDWrite = NULL;
+
 bool LoadD2D() {
 	static bool triedLoadingD2D = false;
 	if (!triedLoadingD2D) {
@@ -111,7 +114,7 @@ bool LoadD2D() {
 		typedef HRESULT (WINAPI *DWriteCFSig)(DWRITE_FACTORY_TYPE factoryType, REFIID iid,
 			IUnknown **factory);
 
-		HMODULE hDLLD2D = ::LoadLibraryEx(TEXT("D2D1.DLL"), 0, 0x00000800 /*LOAD_LIBRARY_SEARCH_SYSTEM32*/);
+		hDLLD2D = ::LoadLibraryEx(TEXT("D2D1.DLL"), 0, 0x00000800 /*LOAD_LIBRARY_SEARCH_SYSTEM32*/);
 		if (hDLLD2D) {
 			D2D1CFSig fnD2DCF = (D2D1CFSig)::GetProcAddress(hDLLD2D, "D2D1CreateFactory");
 			if (fnD2DCF) {
@@ -122,7 +125,7 @@ bool LoadD2D() {
 					reinterpret_cast<IUnknown**>(&pD2DFactory));
 			}
 		}
-		HMODULE hDLLDWrite = ::LoadLibraryEx(TEXT("DWRITE.DLL"), 0, 0x00000800 /*LOAD_LIBRARY_SEARCH_SYSTEM32*/);
+		hDLLDWrite = ::LoadLibraryEx(TEXT("DWRITE.DLL"), 0, 0x00000800 /*LOAD_LIBRARY_SEARCH_SYSTEM32*/);
 		if (hDLLDWrite) {
 			DWriteCFSig fnDWCF = (DWriteCFSig)::GetProcAddress(hDLLDWrite, "DWriteCreateFactory");
 			if (fnDWCF) {
@@ -3266,12 +3269,27 @@ void Platform_Finalise() {
 		pD2DFactory->Release();
 		pD2DFactory = 0;
 	}
-
+	if (hDLLDWrite) {
+		FreeLibrary(hDLLDWrite);
+		hDLLDWrite = NULL;
+	}
+	if (hDLLD2D) {
+		FreeLibrary(hDLLD2D);
+		hDLLD2D = NULL;
+	}
 #endif
 	if (reverseArrowCursor != NULL)
 		::DestroyCursor(reverseArrowCursor);
 	ListBoxX_Unregister();
 	::DeleteCriticalSection(&crPlatformLock);
+	if (hDLLUser32) {
+		FreeLibrary(hDLLUser32);
+		hDLLUser32 = NULL;
+	}
+	if (hDLLImage) {
+		FreeLibrary(hDLLImage);
+		hDLLImage = NULL;
+	}
 }
 
 #ifdef SCI_NAMESPACE

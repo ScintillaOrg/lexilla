@@ -125,6 +125,8 @@ class ScintillaWin; 	// Forward declaration for COM interface subobjects
 
 typedef void VFunction(void);
 
+static HMODULE commctrl32 = 0;
+
 /**
  */
 class FormatEnumerator {
@@ -383,7 +385,8 @@ void ScintillaWin::Initialise() {
 		TrackMouseEventFn = (TrackMouseEventSig)::GetProcAddress(user32, "TrackMouseEvent");
 	if (TrackMouseEventFn == NULL) {
 		// Windows 95 has an emulation in comctl32.dll:_TrackMouseEvent
-		HMODULE commctrl32 = ::LoadLibrary(TEXT("comctl32.dll"));
+		if (!commctrl32)
+			commctrl32 = ::LoadLibrary(TEXT("comctl32.dll"));
 		if (commctrl32 != NULL) {
 			TrackMouseEventFn = (TrackMouseEventSig)
 				::GetProcAddress(commctrl32, "_TrackMouseEvent");
@@ -2872,6 +2875,10 @@ int Scintilla_RegisterClasses(void *hInstance) {
 // This function is externally visible so it can be called from container when building statically.
 int Scintilla_ReleaseResources() {
 	bool result = ScintillaWin::Unregister();
+	if (commctrl32) {
+		FreeLibrary(commctrl32);
+		commctrl32 = NULL;
+	}
 	Platform_Finalise();
 	return result;
 }
