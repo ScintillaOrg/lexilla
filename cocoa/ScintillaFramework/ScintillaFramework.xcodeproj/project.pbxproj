@@ -199,6 +199,7 @@
 		280056FB188DDD2C00F200AE /* SparseState.h in Headers */ = {isa = PBXBuildFile; fileRef = 280056F8188DDD2C00F200AE /* SparseState.h */; };
 		280056FC188DDD2C00F200AE /* StringCopy.h in Headers */ = {isa = PBXBuildFile; fileRef = 280056F9188DDD2C00F200AE /* StringCopy.h */; };
 		280056FD188DDD2C00F200AE /* SubStyles.h in Headers */ = {isa = PBXBuildFile; fileRef = 280056FA188DDD2C00F200AE /* SubStyles.h */; };
+		28064A05190F12E100E6E47F /* LexDMIS.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28064A04190F12E100E6E47F /* LexDMIS.cxx */; };
 		28D516D81830FFCA0047C93D /* info_bar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 28D516D51830FFCA0047C93D /* info_bar_bg@2x.png */; };
 		28D516D91830FFCA0047C93D /* mac_cursor_busy@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 28D516D61830FFCA0047C93D /* mac_cursor_busy@2x.png */; };
 		28D516DA1830FFCA0047C93D /* mac_cursor_flipped@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 28D516D71830FFCA0047C93D /* mac_cursor_flipped@2x.png */; };
@@ -403,6 +404,7 @@
 		280056F8188DDD2C00F200AE /* SparseState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SparseState.h; path = ../../lexlib/SparseState.h; sourceTree = "<group>"; };
 		280056F9188DDD2C00F200AE /* StringCopy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StringCopy.h; path = ../../lexlib/StringCopy.h; sourceTree = "<group>"; };
 		280056FA188DDD2C00F200AE /* SubStyles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SubStyles.h; path = ../../lexlib/SubStyles.h; sourceTree = "<group>"; };
+		28064A04190F12E100E6E47F /* LexDMIS.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexDMIS.cxx; path = ../../lexers/LexDMIS.cxx; sourceTree = "<group>"; };
 		28D516D51830FFCA0047C93D /* info_bar_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "info_bar_bg@2x.png"; sourceTree = "<group>"; };
 		28D516D61830FFCA0047C93D /* mac_cursor_busy@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "mac_cursor_busy@2x.png"; sourceTree = "<group>"; };
 		28D516D71830FFCA0047C93D /* mac_cursor_flipped@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "mac_cursor_flipped@2x.png"; sourceTree = "<group>"; };
@@ -532,6 +534,7 @@
 				114B6ED211FA7526004FB6AB /* LexCSS.cxx */,
 				114B6ED311FA7526004FB6AB /* LexD.cxx */,
 				11FF3FE11810EB3900E13F13 /* LexDMAP.cxx */,
+				28064A04190F12E100E6E47F /* LexDMIS.cxx */,
 				11BEB6A114EF189600BDE92A /* LexECL.cxx */,
 				114B6ED411FA7526004FB6AB /* LexEiffel.cxx */,
 				114B6ED511FA7526004FB6AB /* LexErlang.cxx */,
@@ -916,6 +919,7 @@
 				114B6F2411FA7526004FB6AB /* LexErlang.cxx in Sources */,
 				114B6F2511FA7526004FB6AB /* LexEScript.cxx in Sources */,
 				114B6F2611FA7526004FB6AB /* LexFlagship.cxx in Sources */,
+				28064A05190F12E100E6E47F /* LexDMIS.cxx in Sources */,
 				114B6F2711FA7526004FB6AB /* LexForth.cxx in Sources */,
 				114B6F2811FA7526004FB6AB /* LexFortran.cxx in Sources */,
 				114B6F2911FA7526004FB6AB /* LexGAP.cxx in Sources */,
