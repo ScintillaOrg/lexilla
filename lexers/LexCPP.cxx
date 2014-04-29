@@ -101,7 +101,7 @@ void highlightTaskMarker(StyleContext &sc, LexAccessor &styler,
 			if (caseSensitive)
 				marker[i] = ch;
 			else
-				marker[i] = tolower(ch);
+				marker[i] = static_cast<char>(tolower(ch));
 			i++;
 		}
 		marker[i] = '\0';
@@ -621,7 +621,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 		}
 	}
 
-	StyleContext sc(startPos, length, initStyle, styler, static_cast<char>(0xff));
+	StyleContext sc(startPos, length, initStyle, styler, static_cast<unsigned char>(0xff));
 	LinePPState preproc = vlls.ForLine(lineCurrent);
 
 	bool definitionsChanged = false;
