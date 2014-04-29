@@ -518,7 +518,8 @@ public:
 
 // Shut up annoying Visual C++ warnings:
 #ifdef _MSC_VER
-#pragma warning(disable: 4244 4309 4514 4710)
+// This is: conversion from X to Y, possible loss of data
+#pragma warning(disable: 4244)
 #endif
 
 #if defined(__GNUC__) && defined(SCINTILLA_QT)
