@@ -1487,7 +1487,7 @@ bool ScintillaCocoa::GetPasteboardData(NSPasteboard* board, SelectionText* selec
 
       bool rectangular = bestType == ScintillaRecPboardType;
 
-      std::string dest(buffer.data(), usedLen);
+      std::string dest(reinterpret_cast<const char *>(buffer.data()), usedLen);
 
       selectedText->Copy(dest, pdoc->dbcsCodePage,
                          vs.styles[STYLE_DEFAULT].characterSet , rectangular, false);
