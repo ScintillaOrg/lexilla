@@ -339,7 +339,7 @@ void ScintillaQt::PasteFromMode(QClipboard::Mode clipboardMode_)
 	bool isRectangular = IsRectangularInMime(mimeData);
 	QString text = clipboard->text(clipboardMode_);
 	QByteArray utext = BytesForDocument(text);
-	std::string dest(utext, utext.length());
+	std::string dest(utext.constData(), utext.length());
 	SelectionText selText;
 	selText.Copy(dest, pdoc->dbcsCodePage, CharacterSetOfDocument(), isRectangular, false);
 
