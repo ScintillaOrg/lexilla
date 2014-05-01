@@ -339,21 +339,14 @@ void ScintillaQt::PasteFromMode(QClipboard::Mode clipboardMode_)
 	bool isRectangular = IsRectangularInMime(mimeData);
 	QString text = clipboard->text(clipboardMode_);
 	QByteArray utext = BytesForDocument(text);
-	int len = utext.length();
-	std::string dest = Document::TransformLineEnds(utext, len, pdoc->eolMode);
+	std::string dest(utext, utext.length());
 	SelectionText selText;
 	selText.Copy(dest, pdoc->dbcsCodePage, CharacterSetOfDocument(), isRectangular, false);
 
 	UndoGroup ug(pdoc);
 	ClearSelection(multiPasteMode == SC_MULTIPASTE_EACH);
-	SelectionPosition selStart = sel.IsRectangular() ?
-		sel.Rectangular().Start() :
-		sel.Range(sel.Main()).Start();
-	if (selText.rectangular) {
-		PasteRectangular(selStart, selText.Data(), static_cast<int>(selText.Length()));
-	} else {
-		InsertPaste(selStart, selText.Data(), static_cast<int>(selText.Length()));
-	}
+	InsertPasteShape(selText.Data(), static_cast<int>(selText.Length()),
+		selText.rectangular ? pasteRectangular : pasteStream);
 	EnsureCaretVisible();
 }
 
@@ -741,10 +734,9 @@ void ScintillaQt::Drop(const Point &point, const QMimeData *data, bool move)
 	bool rectangular = IsRectangularInMime(data);
 	QByteArray bytes = BytesForDocument(text);
 	int len = bytes.length();
-	std::string dest = Document::TransformLineEnds(bytes, len, pdoc->eolMode);
 
 	SelectionPosition movePos = SPositionFromLocation(point,
 				false, false, UserVirtualSpace());
 
-	DropAt(movePos, dest.c_str(), dest.length(), move, rectangular);
+	DropAt(movePos, bytes, len, move, rectangular);
 }

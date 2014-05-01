@@ -4152,8 +4152,9 @@ void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 	}
 }
 
-void Editor::InsertPaste(SelectionPosition selStart, const char *text, int len) {
+void Editor::InsertPaste(const char *text, int len) {
 	if (multiPasteMode == SC_MULTIPASTE_ONCE) {
+		SelectionPosition selStart = sel.Start();
 		selStart = SelectionPosition(InsertSpace(selStart.Position(), selStart.VirtualSpace()));
 		const int lengthInserted = pdoc->InsertString(selStart.Position(), text, len);
 		if (lengthInserted > 0) {
@@ -4182,6 +4183,35 @@ void Editor::InsertPaste(SelectionPosition selStart, const char *text, int len) 
 				}
 				sel.Range(r).ClearVirtualSpace();
 			}
+		}
+	}
+}
+
+void Editor::InsertPasteShape(const char *text, int len, PasteShape shape) {
+	std::string convertedText;
+	if (convertPastes) {
+		// Convert line endings of the paste into our local line-endings mode
+		convertedText = Document::TransformLineEnds(text, len, pdoc->eolMode);
+		len = static_cast<int>(convertedText.length());
+		text = convertedText.c_str();
+	}
+	if (shape == pasteRectangular) {
+		PasteRectangular(sel.Start(), text, len);
+	} else {
+		if (shape == pasteLine) {
+			int insertPos = pdoc->LineStart(pdoc->LineFromPosition(sel.MainCaret()));
+			int lengthInserted = pdoc->InsertString(insertPos, text, len);
+			// add the newline if necessary
+			if ((len > 0) && (text[len - 1] != '\n' && text[len - 1] != '\r')) {
+				const char *endline = StringFromEOLMode(pdoc->eolMode);
+				int length = static_cast<int>(strlen(endline));
+				lengthInserted += pdoc->InsertString(insertPos + lengthInserted, endline, length);
+			}
+			if (sel.MainCaret() == insertPos) {
+				SetEmptySelection(sel.MainCaret() + lengthInserted);
+			}
+		} else {
+			InsertPaste(text, len);
 		}
 	}
 }
@@ -6150,14 +6180,17 @@ void Editor::DropAt(SelectionPosition position, const char *value, size_t length
 		}
 		position = positionAfterDeletion;
 
+		std::string convertedText = Document::TransformLineEnds(value, lengthValue, pdoc->eolMode);
+
 		if (rectangular) {
-			PasteRectangular(position, value, static_cast<int>(lengthValue));
+			PasteRectangular(position, convertedText.c_str(), static_cast<int>(convertedText.length()));
 			// Should try to select new rectangle but it may not be a rectangle now so just select the drop position
 			SetEmptySelection(position);
 		} else {
 			position = MovePositionOutsideChar(position, sel.MainCaret() - position.Position());
 			position = SelectionPosition(InsertSpace(position.Position(), position.VirtualSpace()));
-			const int lengthInserted = pdoc->InsertString(position.Position(), value, static_cast<int>(lengthValue));
+			const int lengthInserted = pdoc->InsertString(
+				position.Position(), convertedText.c_str(), static_cast<int>(convertedText.length()));
 			if (lengthInserted > 0) {
 				SelectionPosition posAfterInsertion = position;
 				posAfterInsertion.Add(lengthInserted);

@@ -984,16 +984,8 @@ void ScintillaCocoa::Paste(bool forceRectangular)
 
   pdoc->BeginUndoAction();
   ClearSelection(false);
-  int length = selectedText.Length();
-  SelectionPosition selStart = sel.RangeMain().Start();
-  if (selectedText.rectangular)
-  {
-    PasteRectangular(selStart, selectedText.Data(), length);
-  }
-  else
-  {
-    InsertPaste(selStart, selectedText.Data(), length);
-  }
+  InsertPasteShape(selectedText.Data(), selectedText.Length(),
+	  selectedText.rectangular ? pasteRectangular : pasteStream);
   pdoc->EndUndoAction();
 
   Redraw();
@@ -1495,8 +1487,7 @@ bool ScintillaCocoa::GetPasteboardData(NSPasteboard* board, SelectionText* selec
 
       bool rectangular = bestType == ScintillaRecPboardType;
 
-      int len = static_cast<int>(usedLen);
-      std::string dest = Document::TransformLineEnds((char *)buffer.data(), len, pdoc->eolMode);
+      std::string dest(buffer.data(), usedLen);
 
       selectedText->Copy(dest, pdoc->dbcsCodePage,
                          vs.styles[STYLE_DEFAULT].characterSet , rectangular, false);

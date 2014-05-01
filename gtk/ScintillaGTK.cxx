@@ -1496,7 +1496,7 @@ void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, Selectio
 		len--;	// Forget the extra '\0'
 #endif
 
-	std::string dest = Document::TransformLineEnds(data, len, pdoc->eolMode);
+	std::string dest(data, len);
 	if (selectionTypeData == GDK_TARGET_STRING) {
 		if (IsUnicodeMode()) {
 			// Unknown encoding so assume in Latin1
@@ -1537,15 +1537,9 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 				if (SelectionOfGSD(selection_data) != GDK_SELECTION_PRIMARY) {
 					ClearSelection(multiPasteMode == SC_MULTIPASTE_EACH);
 				}
-				SelectionPosition selStart = sel.IsRectangular() ?
-					sel.Rectangular().Start() :
-					sel.Range(sel.Main()).Start();
 
-				if (selText.rectangular) {
-					PasteRectangular(selStart, selText.Data(), selText.Length());
-				} else {
-					InsertPaste(selStart, selText.Data(), selText.Length());
-				}
+				InsertPasteShape(selText.Data(), selText.Length(),
+					selText.rectangular ? pasteRectangular : pasteStream);
 				EnsureCaretVisible();
 			}
 		}
