@@ -263,7 +263,7 @@ void SCI_METHOD LexerDMIS::Lex(unsigned int startPos, int lengthDoc, int initSty
 						scCTX.ChangeState(SCE_DMIS_UNSUPPORTED_MINOR);
 					};
 
-					if (scCTX.Match('(') && (isIFLine)) {
+					if (scCTX.Match('(') && (!isIFLine)) {
 						scCTX.SetState(SCE_DMIS_LABEL);
 					} else {
 						scCTX.SetState(SCE_DMIS_DEFAULT);
