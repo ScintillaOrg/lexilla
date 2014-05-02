@@ -594,7 +594,7 @@ bool PositionCacheEntry::Retrieve(unsigned int styleNumber_, const char *s_,
 	}
 }
 
-int PositionCacheEntry::Hash(unsigned int styleNumber_, const char *s, unsigned int len_) {
+unsigned int PositionCacheEntry::Hash(unsigned int styleNumber_, const char *s, unsigned int len_) {
 	unsigned int ret = s[0] << 7;
 	for (unsigned int i=0; i<len_; i++) {
 		ret *= 1000003;
@@ -652,7 +652,7 @@ void PositionCache::MeasureWidths(Surface *surface, ViewStyle &vstyle, unsigned 
 		// long comments with only a single comment.
 
 		// Two way associative: try two probe positions.
-		int hashValue = PositionCacheEntry::Hash(styleNumber, s, len);
+		unsigned int hashValue = PositionCacheEntry::Hash(styleNumber, s, len);
 		probe = static_cast<int>(hashValue % pces.size());
 		if (pces[probe].Retrieve(styleNumber, s, len, positions)) {
 			return;
