@@ -1366,7 +1366,8 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 + (sptr_t) directCall: (ScintillaView*) sender message: (unsigned int) message wParam: (uptr_t) wParam
                lParam: (sptr_t) lParam
 {
-  return ScintillaCocoa::DirectFunction(sender->mBackend, message, wParam, lParam);
+  return ScintillaCocoa::DirectFunction(
+    reinterpret_cast<sptr_t>(sender->mBackend), message, wParam, lParam);
 }
 
 - (sptr_t) message: (unsigned int) message wParam: (uptr_t) wParam lParam: (sptr_t) lParam
