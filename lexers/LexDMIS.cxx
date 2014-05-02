@@ -192,7 +192,7 @@ void SCI_METHOD LexerDMIS::Lex(unsigned int startPos, int lengthDoc, int initSty
 	LexAccessor styler(pAccess);
 	StyleContext scCTX(startPos, lengthDoc, initStyle, styler);
 	CharacterSet setDMISNumber(CharacterSet::setDigits, ".-+eE");
-	CharacterSet setDMISWordStart(CharacterSet::setAlpha, "-", 0x80, true);
+	CharacterSet setDMISWordStart(CharacterSet::setAlpha, "-234", 0x80, true);
 	CharacterSet setDMISWord(CharacterSet::setAlpha);
 
 
