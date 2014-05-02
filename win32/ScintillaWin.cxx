@@ -213,7 +213,7 @@ class ScintillaWin :
 	HWND MainHWND();
 
 	static sptr_t DirectFunction(
-		    ScintillaWin *sci, UINT iMessage, uptr_t wParam, sptr_t lParam);
+		    sptr_t ptr, UINT iMessage, uptr_t wParam, sptr_t lParam);
 	static sptr_t PASCAL SWndProc(
 		    HWND hWnd, UINT iMessage, WPARAM wParam, sptr_t lParam);
 	static sptr_t PASCAL CTWndProc(
@@ -2775,9 +2775,9 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
 }
 
 sptr_t ScintillaWin::DirectFunction(
-    ScintillaWin *sci, UINT iMessage, uptr_t wParam, sptr_t lParam) {
+    sptr_t ptr, UINT iMessage, uptr_t wParam, sptr_t lParam) {
 	PLATFORM_ASSERT(::GetCurrentThreadId() == ::GetWindowThreadProcessId(sci->MainHWND(), NULL));
-	return sci->WndProc(iMessage, wParam, lParam);
+	return reinterpret_cast<ScintillaWin *>(ptr)->WndProc(iMessage, wParam, lParam);
 }
 
 extern "C"

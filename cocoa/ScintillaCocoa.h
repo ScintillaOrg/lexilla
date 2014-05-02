@@ -177,7 +177,7 @@ public:
 
   NSPoint GetCaretPosition();
 
-  static sptr_t DirectFunction(ScintillaCocoa *sciThis, unsigned int iMessage, uptr_t wParam, sptr_t lParam);
+  static sptr_t DirectFunction(sptr_t ptr, unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
   void TimerFired(NSTimer* timer);
   void IdleTimerFired();

@@ -675,9 +675,9 @@ sptr_t ScintillaQt::DefWndProc(unsigned int, uptr_t, sptr_t)
 }
 
 sptr_t ScintillaQt::DirectFunction(
-    ScintillaQt *sciThis, unsigned int iMessage, uptr_t wParam, sptr_t lParam)
+    sptr_t ptr, unsigned int iMessage, uptr_t wParam, sptr_t lParam)
 {
-	return sciThis->WndProc(iMessage, wParam, lParam);
+	return reinterpret_cast<ScintillaQt *>(ptr)->WndProc(iMessage, wParam, lParam);
 }
 
 // Additions to merge in Scientific Toolworks widget structure

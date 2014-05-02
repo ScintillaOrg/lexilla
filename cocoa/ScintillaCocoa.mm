@@ -787,16 +787,16 @@ void ScintillaCocoa::Redraw()
  * However this is a Windows metaphor and not used here, hence we just call our fake
  * window proc. The given parameters directly reflect the message parameters used on Windows.
  *
- * @param sciThis The target which is to be called.
+ * @param ptr The target which is to be called.
  * @param iMessage A code that indicates which message was sent.
  * @param wParam One of the two free parameters for the message. Traditionally a word sized parameter
  *               (hence the w prefix).
  * @param lParam The other of the two free parameters. A signed long.
  */
-sptr_t ScintillaCocoa::DirectFunction(ScintillaCocoa *sciThis, unsigned int iMessage, uptr_t wParam,
+sptr_t ScintillaCocoa::DirectFunction(sptr_t ptr, unsigned int iMessage, uptr_t wParam,
                                       sptr_t lParam)
 {
-  return sciThis->WndProc(iMessage, wParam, lParam);
+  return reinterpret_cast<ScintillaCocoa *>(ptr)->WndProc(iMessage, wParam, lParam);
 }
 
 //--------------------------------------------------------------------------------------------------
