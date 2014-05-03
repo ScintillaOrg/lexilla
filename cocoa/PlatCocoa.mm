@@ -52,7 +52,9 @@ NSRect PRectangleToNSRect(PRectangle& rc)
  */
 PRectangle NSRectToPRectangle(NSRect& rc)
 {
-  return PRectangle(rc.origin.x, rc.origin.y, rc.size.width + rc.origin.x, rc.size.height + rc.origin.y);
+  return PRectangle(rc.origin.x, rc.origin.y,
+					static_cast<XYPOSITION>(NSMaxX(rc)),
+					static_cast<XYPOSITION>(NSMaxY(rc)));
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1148,11 +1150,11 @@ PRectangle Window::GetPosition()
       win = reinterpret_cast<NSWindow*>(idWin);
       rect = [win frame];
     }
-    int screenHeight = ScreenMax(win);
+    CGFloat screenHeight = ScreenMax(win);
     // Invert screen positions to match Scintilla
     return PRectangle(
-        NSMinX(rect), screenHeight - NSMaxY(rect),
-        NSMaxX(rect), screenHeight - NSMinY(rect));
+        NSMinX(rect), static_cast<XYPOSITION>(screenHeight - NSMaxY(rect)),
+        NSMaxX(rect), static_cast<XYPOSITION>(screenHeight - NSMinY(rect)));
   }
   else
   {
@@ -1336,11 +1338,11 @@ PRectangle Window::GetMonitorRect(Point)
       NSWindow* win = reinterpret_cast<NSWindow*>(idWin);
       NSScreen* screen = [win screen];
       NSRect rect = [screen frame];
-      int screenHeight = rect.origin.y + rect.size.height;
+      CGFloat screenHeight = rect.origin.y + rect.size.height;
       // Invert screen positions to match Scintilla
       return PRectangle(
-          NSMinX(rect), screenHeight - NSMaxY(rect),
-          NSMaxX(rect), screenHeight - NSMinY(rect));
+          NSMinX(rect), static_cast<XYPOSITION>(screenHeight - NSMaxY(rect)),
+          NSMaxX(rect), static_cast<XYPOSITION>(screenHeight - NSMinY(rect)));
     }
   }
   return PRectangle();

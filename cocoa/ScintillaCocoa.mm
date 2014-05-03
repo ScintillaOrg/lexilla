@@ -693,7 +693,7 @@ Scintilla::Point ScintillaCocoa::GetVisibleOriginInMain()
 {
   NSScrollView *scrollView = ScrollContainer();
   NSRect contentRect = [[scrollView contentView] bounds];
-  return Point(contentRect.origin.x, contentRect.origin.y);
+  return Point(static_cast<XYPOSITION>(contentRect.origin.x), static_cast<XYPOSITION>(contentRect.origin.y));
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -722,8 +722,7 @@ PRectangle ScintillaCocoa::GetClientDrawingRectangle() {
   if ([content respondsToSelector: @selector(setPreparedContentRect:)]) {
     NSRect rcPrepared = [content preparedContentRect];
     if (!NSIsEmptyRect(rcPrepared))
-      return PRectangle(rcPrepared.origin.x, rcPrepared.origin.y,
-                        rcPrepared.origin.x+rcPrepared.size.width, rcPrepared.origin.y + rcPrepared.size.height);
+      return NSRectToPRectangle(rcPrepared);
   }
 #endif
   return ScintillaCocoa::GetClientRectangle();
@@ -741,7 +740,7 @@ Scintilla::Point ScintillaCocoa::ConvertPoint(NSPoint point)
   NSView* container = ContentView();
   NSPoint result = [container convertPoint: point fromView: nil];
   Scintilla::Point ptOrigin = GetVisibleOriginInMain();
-  return Point(result.x - ptOrigin.x, result.y - ptOrigin.y);
+  return Point(static_cast<XYPOSITION>(result.x - ptOrigin.x), static_cast<XYPOSITION>(result.y - ptOrigin.y));
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1061,7 +1060,7 @@ void ScintillaCocoa::CTPaint(void* gc, NSRect rc) {
 
 void ScintillaCocoa::CallTipMouseDown(NSPoint pt) {
     NSRect rectBounds = [(NSView *)(ct.wDraw.GetID()) bounds];
-    Point location(pt.x, rectBounds.size.height - pt.y);
+    Point location(pt.x, static_cast<XYPOSITION>(rectBounds.size.height - pt.y));
     ct.MouseClick(location);
     CallTipClick();
 }
@@ -1301,7 +1300,7 @@ void ScintillaCocoa::StartDrag()
       CGContextTranslateCTM(gc, 0, imageRect.Height());
       CGContextScaleCTM(gc, 1.0, -1.0);
 
-      pixmap->CopyImageRectangle(*sw, imageRect, PRectangle(0, 0, imageRect.Width(), imageRect.Height()));
+      pixmap->CopyImageRectangle(*sw, imageRect, PRectangle(0.0f, 0.0f, imageRect.Width(), imageRect.Height()));
       // XXX TODO: overwrite any part of the image that is not part of the
       //           selection to make it transparent.  right now we just use
       //           the full rectangle which may include non-selected text.
