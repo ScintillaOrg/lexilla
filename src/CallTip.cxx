@@ -125,16 +125,16 @@ void CallTip::DrawChunk(Surface *surface, int &x, const char *s,
 
 					if (upArrow) {      // Up arrow
 						Point pts[] = {
-    						Point(centreX - halfWidth, centreY + quarterWidth),
-    						Point(centreX + halfWidth, centreY + quarterWidth),
-    						Point(centreX, centreY - halfWidth + quarterWidth),
+    						Point::FromInts(centreX - halfWidth, centreY + quarterWidth),
+    						Point::FromInts(centreX + halfWidth, centreY + quarterWidth),
+    						Point::FromInts(centreX, centreY - halfWidth + quarterWidth),
 						};
 						surface->Polygon(pts, ELEMENTS(pts), colourBG, colourBG);
 					} else {            // Down arrow
 						Point pts[] = {
-    						Point(centreX - halfWidth, centreY - quarterWidth),
-    						Point(centreX + halfWidth, centreY - quarterWidth),
-    						Point(centreX, centreY + halfWidth - quarterWidth),
+    						Point::FromInts(centreX - halfWidth, centreY - quarterWidth),
+    						Point::FromInts(centreX + halfWidth, centreY - quarterWidth),
+    						Point::FromInts(centreX, centreY + halfWidth - quarterWidth),
 						};
 						surface->Polygon(pts, ELEMENTS(pts), colourBG, colourBG);
 					}

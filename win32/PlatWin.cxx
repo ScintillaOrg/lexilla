@@ -1878,7 +1878,7 @@ bool Window::HasFocus() {
 PRectangle Window::GetPosition() {
 	RECT rc;
 	::GetWindowRect(reinterpret_cast<HWND>(wid), &rc);
-	return PRectangle(rc.left, rc.top, rc.right, rc.bottom);
+	return PRectangle::FromInts(rc.left, rc.top, rc.right, rc.bottom);
 }
 
 void Window::SetPosition(PRectangle rc) {
@@ -1943,7 +1943,7 @@ PRectangle Window::GetClientPosition() {
 	RECT rc={0,0,0,0};
 	if (wid)
 		::GetClientRect(reinterpret_cast<HWND>(wid), &rc);
-	return  PRectangle(rc.left, rc.top, rc.right, rc.bottom);
+	return PRectangle::FromInts(rc.left, rc.top, rc.right, rc.bottom);
 }
 
 void Window::Show(bool show) {
@@ -2235,7 +2235,7 @@ void ListBoxX::Create(Window &parent_, int ctrlID_, Point location_, int lineHei
 
 	POINT locationw = {static_cast<LONG>(location.x), static_cast<LONG>(location.y)};
 	::MapWindowPoints(hwndParent, NULL, &locationw, 1);
-	location = Point(locationw.x, locationw.y);
+	location = Point::FromInts(locationw.x, locationw.y);
 }
 
 void ListBoxX::SetFont(Font &font) {
@@ -2415,7 +2415,7 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 				if (technology == SCWIN_TECH_GDI) {
 					surfaceItem->Init(pDrawItem->hDC, pDrawItem->hwndItem);
 					long left = pDrawItem->rcItem.left + static_cast<int>(ItemInset.x + ImageInset.x);
-					PRectangle rcImage(left, pDrawItem->rcItem.top,
+					PRectangle rcImage = PRectangle::FromInts(left, pDrawItem->rcItem.top,
 						left + images.GetWidth(), pDrawItem->rcItem.bottom);
 					surfaceItem->DrawRGBAImage(rcImage,
 						pimage->GetWidth(), pimage->GetHeight(), pimage->Pixels());
@@ -2443,7 +2443,7 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 							surfaceItem->Init(pDCRT, pDrawItem->hwndItem);
 							pDCRT->BeginDraw();
 							long left = pDrawItem->rcItem.left + static_cast<long>(ItemInset.x + ImageInset.x);
-							PRectangle rcImage(left, pDrawItem->rcItem.top,
+							PRectangle rcImage = PRectangle::FromInts(left, pDrawItem->rcItem.top,
 								left + images.GetWidth(), pDrawItem->rcItem.bottom);
 							surfaceItem->DrawRGBAImage(rcImage,
 								pimage->GetWidth(), pimage->GetHeight(), pimage->Pixels());
@@ -2520,7 +2520,7 @@ void ListBoxX::SetList(const char *list, char separator, char typesep) {
 void ListBoxX::AdjustWindowRect(PRectangle *rc) {
 	RECT rcw = RectFromPRectangle(*rc);
 	::AdjustWindowRectEx(&rcw, WS_THICKFRAME, false, WS_EX_WINDOWEDGE);
-	*rc = PRectangle(rcw.left, rcw.top, rcw.right, rcw.bottom);
+	*rc = PRectangle::FromInts(rcw.left, rcw.top, rcw.right, rcw.bottom);
 }
 
 int ListBoxX::ItemHeight() const {
@@ -2537,14 +2537,14 @@ int ListBoxX::MinClientWidth() const {
 }
 
 POINT ListBoxX::MinTrackSize() const {
-	PRectangle rc(0, 0, MinClientWidth(), ItemHeight());
+	PRectangle rc = PRectangle::FromInts(0, 0, MinClientWidth(), ItemHeight());
 	AdjustWindowRect(&rc);
 	POINT ret = {static_cast<LONG>(rc.Width()), static_cast<LONG>(rc.Height())};
 	return ret;
 }
 
 POINT ListBoxX::MaxTrackSize() const {
-	PRectangle rc(0, 0,
+	PRectangle rc = PRectangle::FromInts(0, 0,
 		Platform::Maximum(MinClientWidth(), 
 		maxCharWidth * maxItemCharacters + static_cast<int>(TextInset.x) * 2 +
 		 TextOffset() + ::GetSystemMetrics(SM_CXVSCROLL)),
@@ -2578,7 +2578,7 @@ void ListBoxX::ResizeToCursor() {
 	PRectangle rc = GetPosition();
 	POINT ptw;
 	::GetCursorPos(&ptw);
-	Point pt(ptw.x, ptw.y);
+	Point pt = Point::FromInts(ptw.x, ptw.y);
 	pt.x += dragOffset.x;
 	pt.y += dragOffset.y;
 

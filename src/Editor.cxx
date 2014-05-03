@@ -1164,13 +1164,13 @@ void Editor::MoveCaretInsideView(bool ensureVisible) {
 	Point pt = PointMainCaret();
 	if (pt.y < rcClient.top) {
 		MovePositionTo(SPositionFromLocation(
-		            Point(lastXChosen - xOffset, static_cast<int>(rcClient.top)),
+		            Point::FromInts(lastXChosen - xOffset, static_cast<int>(rcClient.top)),
 					false, false, UserVirtualSpace()),
 					Selection::noSel, ensureVisible);
 	} else if ((pt.y + vs.lineHeight - 1) > rcClient.bottom) {
 		int yOfLastLineFullyDisplayed = static_cast<int>(rcClient.top) + (LinesOnScreen() - 1) * vs.lineHeight;
 		MovePositionTo(SPositionFromLocation(
-		            Point(lastXChosen - xOffset, static_cast<int>(rcClient.top) + yOfLastLineFullyDisplayed),
+		            Point::FromInts(lastXChosen - xOffset, static_cast<int>(rcClient.top) + yOfLastLineFullyDisplayed),
 					false, false, UserVirtualSpace()),
 		        Selection::noSel, ensureVisible);
 	}
@@ -2423,8 +2423,8 @@ ColourDesired Editor::TextBackground(ViewStyle &vsDraw, bool overrideBackground,
 }
 
 void Editor::DrawIndentGuide(Surface *surface, int lineVisible, int lineHeight, int start, PRectangle rcSegment, bool highlight) {
-	Point from(0, ((lineVisible & 1) && (lineHeight & 1)) ? 1 : 0);
-	PRectangle rcCopyArea(start + 1, static_cast<int>(rcSegment.top), start + 2, static_cast<int>(rcSegment.bottom));
+	Point from = Point::FromInts(0, ((lineVisible & 1) && (lineHeight & 1)) ? 1 : 0);
+	PRectangle rcCopyArea = PRectangle::FromInts(start + 1, static_cast<int>(rcSegment.top), start + 2, static_cast<int>(rcSegment.bottom));
 	surface->Copy(rcCopyArea, from,
 	        highlight ? *pixmapIndentGuideHighlight : *pixmapIndentGuide);
 }
@@ -3364,7 +3364,7 @@ void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 		// for scroll bars and Visual Studio for its selection margin. The colour of this pattern is half
 		// way between the chrome colour and the chrome highlight colour making a nice transition
 		// between the window chrome and the content area. And it works in low colour depths.
-		PRectangle rcPattern(0, 0, patternSize, patternSize);
+		PRectangle rcPattern = PRectangle::FromInts(0, 0, patternSize, patternSize);
 
 		// Initialize default colours based on the chrome colour scheme.  Typically the highlight is white.
 		ColourDesired colourFMFill = vs.selbar;
@@ -3389,7 +3389,7 @@ void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 		pixmapSelPatternOffset1->FillRectangle(rcPattern, colourFMStripes);
 		for (int y = 0; y < patternSize; y++) {
 			for (int x = y % 2; x < patternSize; x+=2) {
-				PRectangle rcPixel(x, y, x+1, y+1);
+				PRectangle rcPixel = PRectangle::FromInts(x, y, x + 1, y + 1);
 				pixmapSelPattern->FillRectangle(rcPixel, colourFMStripes);
 				pixmapSelPatternOffset1->FillRectangle(rcPixel, colourFMFill);
 			}
@@ -3400,13 +3400,13 @@ void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 		// 1 extra pixel in height so can handle odd/even positions and so produce a continuous line
 		pixmapIndentGuide->InitPixMap(1, vs.lineHeight + 1, surfaceWindow, wMain.GetID());
 		pixmapIndentGuideHighlight->InitPixMap(1, vs.lineHeight + 1, surfaceWindow, wMain.GetID());
-		PRectangle rcIG(0, 0, 1, vs.lineHeight);
+		PRectangle rcIG = PRectangle::FromInts(0, 0, 1, vs.lineHeight);
 		pixmapIndentGuide->FillRectangle(rcIG, vs.styles[STYLE_INDENTGUIDE].back);
 		pixmapIndentGuide->PenColour(vs.styles[STYLE_INDENTGUIDE].fore);
 		pixmapIndentGuideHighlight->FillRectangle(rcIG, vs.styles[STYLE_BRACELIGHT].back);
 		pixmapIndentGuideHighlight->PenColour(vs.styles[STYLE_BRACELIGHT].fore);
 		for (int stripe = 1; stripe < vs.lineHeight + 1; stripe += 2) {
-			PRectangle rcPixel(0, stripe, 1, stripe+1);
+			PRectangle rcPixel = PRectangle::FromInts(0, stripe, 1, stripe + 1);
 			pixmapIndentGuide->FillRectangle(rcPixel, vs.styles[STYLE_INDENTGUIDE].fore);
 			pixmapIndentGuideHighlight->FillRectangle(rcPixel, vs.styles[STYLE_BRACELIGHT].fore);
 		}
@@ -3711,8 +3711,8 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 				DrawCarets(surface, vs, lineDoc, xStart, rcLine, ll, subLine);
 
 				if (bufferedDraw) {
-					Point from(vs.textStart-leftTextOverlap, 0);
-					PRectangle rcCopyArea(vs.textStart-leftTextOverlap, yposScreen,
+					Point from = Point::FromInts(vs.textStart-leftTextOverlap, 0);
+					PRectangle rcCopyArea = PRectangle::FromInts(vs.textStart - leftTextOverlap, yposScreen,
 					        static_cast<int>(rcClient.right - vs.rightMarginWidth),
 					        yposScreen + vs.lineHeight);
 					surfaceWindow->Copy(rcCopyArea, from, *pixmapLine);
@@ -3899,7 +3899,7 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 
 		ll.containsCaret = false;
 
-		PRectangle rcLine(
+		PRectangle rcLine = PRectangle::FromInts(
 			pfr->rc.left,
 			ypos,
 			pfr->rc.right - 1,
@@ -5014,17 +5014,17 @@ void Editor::PageMove(int direction, Selection::selTypes selt, bool stuttered) {
 	int topStutterLine = topLine + caretYSlop;
 	int bottomStutterLine =
 	    pdoc->LineFromPosition(PositionFromLocation(
-	                Point(lastXChosen - xOffset, direction * vs.lineHeight * LinesToScroll())))
+	                Point::FromInts(lastXChosen - xOffset, direction * vs.lineHeight * LinesToScroll())))
 	    - caretYSlop - 1;
 
 	if (stuttered && (direction < 0 && currentLine > topStutterLine)) {
 		topLineNew = topLine;
-		newPos = SPositionFromLocation(Point(lastXChosen - xOffset, vs.lineHeight * caretYSlop),
+		newPos = SPositionFromLocation(Point::FromInts(lastXChosen - xOffset, vs.lineHeight * caretYSlop),
 			false, false, UserVirtualSpace());
 
 	} else if (stuttered && (direction > 0 && currentLine < bottomStutterLine)) {
 		topLineNew = topLine;
-		newPos = SPositionFromLocation(Point(lastXChosen - xOffset, vs.lineHeight * (LinesToScroll() - caretYSlop)),
+		newPos = SPositionFromLocation(Point::FromInts(lastXChosen - xOffset, vs.lineHeight * (LinesToScroll() - caretYSlop)),
 			false, false, UserVirtualSpace());
 
 	} else {
@@ -5033,7 +5033,7 @@ void Editor::PageMove(int direction, Selection::selTypes selt, bool stuttered) {
 		topLineNew = Platform::Clamp(
 		            topLine + direction * LinesToScroll(), 0, MaxScrollPos());
 		newPos = SPositionFromLocation(
-			Point(lastXChosen - xOffset, static_cast<int>(pt.y) + direction * (vs.lineHeight * LinesToScroll())),
+			Point::FromInts(lastXChosen - xOffset, static_cast<int>(pt.y) + direction * (vs.lineHeight * LinesToScroll())),
 			false, false, UserVirtualSpace());
 	}
 
@@ -5232,7 +5232,7 @@ void Editor::CursorUpOrDown(int direction, Selection::selTypes selt) {
 
 	int newY = static_cast<int>(pt.y) + (1 + skipLines) * direction * vs.lineHeight;
 	SelectionPosition posNew = SPositionFromLocation(
-	            Point(lastXChosen - xOffset, newY), false, false, UserVirtualSpace());
+	            Point::FromInts(lastXChosen - xOffset, newY), false, false, UserVirtualSpace());
 
 	if (direction < 0) {
 		// Line wrapping may lead to a location on the same line, so
@@ -8058,19 +8058,19 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_POSITIONFROMPOINT:
-		return PositionFromLocation(Point(static_cast<int>(wParam) - vs.ExternalMarginWidth(), static_cast<int>(lParam)),
+		return PositionFromLocation(Point::FromInts(static_cast<int>(wParam) - vs.ExternalMarginWidth(), static_cast<int>(lParam)),
 					    false, false);
 
 	case SCI_POSITIONFROMPOINTCLOSE:
-		return PositionFromLocation(Point(static_cast<int>(wParam) - vs.ExternalMarginWidth(), static_cast<int>(lParam)),
+		return PositionFromLocation(Point::FromInts(static_cast<int>(wParam) - vs.ExternalMarginWidth(), static_cast<int>(lParam)),
 					    true, false);
 
 	case SCI_CHARPOSITIONFROMPOINT:
-		return PositionFromLocation(Point(static_cast<int>(wParam) - vs.ExternalMarginWidth(), static_cast<int>(lParam)),
+		return PositionFromLocation(Point::FromInts(static_cast<int>(wParam) - vs.ExternalMarginWidth(), static_cast<int>(lParam)),
 					    false, true);
 
 	case SCI_CHARPOSITIONFROMPOINTCLOSE:
-		return PositionFromLocation(Point(static_cast<int>(wParam) - vs.ExternalMarginWidth(), static_cast<int>(lParam)),
+		return PositionFromLocation(Point::FromInts(static_cast<int>(wParam) - vs.ExternalMarginWidth(), static_cast<int>(lParam)),
 					    true, true);
 
 	case SCI_GOTOLINE:

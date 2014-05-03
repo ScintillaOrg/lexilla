@@ -103,9 +103,9 @@ public:
 
 	explicit Point(XYPOSITION x_=0, XYPOSITION y_=0) : x(x_), y(y_) {
 	}
-	explicit Point(int x_, int y_) : x(static_cast<XYPOSITION>(x_)), y(static_cast<XYPOSITION>(y_)) {
-	}
-	explicit Point(long x_, long y_) : x(static_cast<XYPOSITION>(x_)), y(static_cast<XYPOSITION>(y_)) {
+
+	static Point FromInts(int x_, int y_) {
+		return Point(static_cast<XYPOSITION>(x_), static_cast<XYPOSITION>(y_));
 	}
 
 	// Other automatically defined methods (assignment, copy constructor, destructor) are fine
@@ -128,13 +128,10 @@ public:
 	explicit PRectangle(XYPOSITION left_=0, XYPOSITION top_=0, XYPOSITION right_=0, XYPOSITION bottom_ = 0) :
 		left(left_), top(top_), right(right_), bottom(bottom_) {
 	}
-	explicit PRectangle(int left_, int top_, int right_, int bottom_) :
-		left(static_cast<XYPOSITION>(left_)), top(static_cast<XYPOSITION>(top_)),
-		right(static_cast<XYPOSITION>(right_)), bottom(static_cast<XYPOSITION>(bottom_)) {
-	}
-	explicit PRectangle(long left_, long top_, long right_, long bottom_) :
-		left(static_cast<XYPOSITION>(left_)), top(static_cast<XYPOSITION>(top_)),
-		right(static_cast<XYPOSITION>(right_)), bottom(static_cast<XYPOSITION>(bottom_)) {
+
+	static PRectangle FromInts(int left_, int top_, int right_, int bottom_) {
+		return PRectangle(static_cast<XYPOSITION>(left_), static_cast<XYPOSITION>(top_),
+			static_cast<XYPOSITION>(right_), static_cast<XYPOSITION>(bottom_));
 	}
 
 	// Other automatically defined methods (assignment, copy constructor, destructor) are fine

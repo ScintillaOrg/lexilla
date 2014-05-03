@@ -121,6 +121,10 @@ static void SetWindowID(HWND hWnd, int identifier) {
 	::SetWindowLongPtr(hWnd, GWLP_ID, identifier);
 }
 
+static Point PointFromPOINT(POINT pt) {
+	return Point::FromInts(pt.x, pt.y);
+}
+
 class ScintillaWin; 	// Forward declaration for COM interface subobjects
 
 typedef void VFunction(void);
@@ -567,7 +571,7 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 		pps = &ps;
 		::BeginPaint(MainHWND(), pps);
 	}
-	rcPaint = PRectangle(pps->rcPaint.left, pps->rcPaint.top, pps->rcPaint.right, pps->rcPaint.bottom);
+	rcPaint = PRectangle::FromInts(pps->rcPaint.left, pps->rcPaint.top, pps->rcPaint.right, pps->rcPaint.bottom);
 	PRectangle rcClient = GetClientRectangle();
 	paintingAllText = rcPaint.Contains(rcClient);
 	if (technology == SC_TECHNOLOGY_DEFAULT) {
@@ -906,11 +910,11 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 					POINT pt;
 					if (0 != ::GetCursorPos(&pt)) {
 						::ScreenToClient(MainHWND(), &pt);
-						if (PointInSelMargin(Point(pt.x, pt.y))) {
-							DisplayCursor(GetMarginCursor(Point(pt.x, pt.y)));
-						} else if (PointInSelection(Point(pt.x, pt.y)) && !SelectionEmpty()) {
+						if (PointInSelMargin(PointFromPOINT(pt))) {
+							DisplayCursor(GetMarginCursor(PointFromPOINT(pt)));
+						} else if (PointInSelection(PointFromPOINT(pt)) && !SelectionEmpty()) {
 							DisplayCursor(Window::cursorArrow);
-						} else if (PointIsHotspot(Point(pt.x, pt.y))) {
+						} else if (PointIsHotspot(PointFromPOINT(pt))) {
 							DisplayCursor(Window::cursorHand);
 						} else {
 							DisplayCursor(Window::cursorText);
@@ -1047,7 +1051,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 					pt = PointMainCaret();
 					POINT spt = {static_cast<int>(pt.x), static_cast<int>(pt.y)};
 					::ClientToScreen(MainHWND(), &spt);
-					pt = Point(spt.x, spt.y);
+					pt = PointFromPOINT(spt);
 				}
 				ContextMenu(pt);
 				return 0;
@@ -2429,7 +2433,7 @@ STDMETHODIMP ScintillaWin::DragOver(DWORD grfKeyState, POINTL pt, PDWORD pdwEffe
 		// Update the cursor.
 		POINT rpt = {pt.x, pt.y};
 		::ScreenToClient(MainHWND(), &rpt);
-		SetDragPosition(SPositionFromLocation(Point(rpt.x, rpt.y), false, false, UserVirtualSpace()));
+		SetDragPosition(SPositionFromLocation(PointFromPOINT(rpt), false, false, UserVirtualSpace()));
 
 		return S_OK;
 	} catch (...) {
@@ -2511,7 +2515,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 
 		POINT rpt = {pt.x, pt.y};
 		::ScreenToClient(MainHWND(), &rpt);
-		SelectionPosition movePos = SPositionFromLocation(Point(rpt.x, rpt.y), false, false, UserVirtualSpace());
+		SelectionPosition movePos = SPositionFromLocation(PointFromPOINT(rpt), false, false, UserVirtualSpace());
 
 		DropAt(movePos, &data[0], data.size() - 1, *pdwEffect == DROPEFFECT_MOVE, hrRectangular == S_OK);
 
@@ -2751,7 +2755,7 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
 				pt.x = static_cast<short>(LOWORD(lParam));
 				pt.y = static_cast<short>(HIWORD(lParam));
 				ScreenToClient(hWnd, &pt);
-				sciThis->ct.MouseClick(Point(pt.x, pt.y));
+				sciThis->ct.MouseClick(PointFromPOINT(pt));
 				sciThis->CallTipClick();
 				return 0;
 			} else if (iMessage == WM_LBUTTONDOWN) {
