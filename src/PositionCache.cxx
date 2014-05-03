@@ -232,7 +232,7 @@ Point LineLayout::PointFromPosition(int posInLine, int lineHeight) const {
 	for (int subLine = 0; subLine < lines; subLine++) {
 		const Range rangeSubLine = SubLineRange(subLine);
 		if (posInLine >= rangeSubLine.start) {
-			pt.y = subLine*lineHeight;
+			pt.y = static_cast<XYPOSITION>(subLine*lineHeight);
 			if (posInLine <= rangeSubLine.end) {
 				pt.x = positions[posInLine] - positions[rangeSubLine.start];
 				if (rangeSubLine.start != 0)	// Wrapped lines may be indented
@@ -462,7 +462,7 @@ BreakFinder::BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posL
 	// Search for first visible break
 	// First find the first visible character
 	if (xStart > 0.0f)
-		nextBreak = ll->FindBefore(xStart, lineStart, lineEnd);
+		nextBreak = ll->FindBefore(static_cast<XYPOSITION>(xStart), lineStart, lineEnd);
 	// Now back to a style break
 	while ((nextBreak > lineStart) && (ll->styles[nextBreak] == ll->styles[nextBreak - 1])) {
 		nextBreak--;
@@ -563,7 +563,7 @@ void PositionCacheEntry::Set(unsigned int styleNumber_, const char *s_,
 	if (s_ && positions_) {
 		positions = new XYPOSITION[len + (len / 4) + 1];
 		for (unsigned int i=0; i<len; i++) {
-			positions[i] = static_cast<XYPOSITION>(positions_[i]);
+			positions[i] = positions_[i];
 		}
 		memcpy(reinterpret_cast<char *>(positions + len), s_, len);
 	}
