@@ -380,11 +380,11 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 	} else if (markType == SC_MARK_BOOKMARK) {
 		int halfHeight = minDim / 3;
 		Point pts[] = {
-			Point(rc.left, centreY-halfHeight),
-			Point(rc.right-3, centreY-halfHeight),
-			Point(rc.right-3-halfHeight, centreY),
-			Point(rc.right-3, centreY+halfHeight),
-			Point(rc.left, centreY+halfHeight),
+			Point(static_cast<int>(rc.left), centreY-halfHeight),
+			Point(static_cast<int>(rc.right) - 3, centreY - halfHeight),
+			Point(static_cast<int>(rc.right) - 3 - halfHeight, centreY),
+			Point(static_cast<int>(rc.right) - 3, centreY + halfHeight),
+			Point(static_cast<int>(rc.left), centreY + halfHeight),
 		};
 		surface->Polygon(pts, ELEMENTS(pts), fore, back);
 	} else { // SC_MARK_FULLRECT

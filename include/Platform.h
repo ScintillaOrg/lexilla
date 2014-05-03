@@ -103,6 +103,8 @@ public:
 
 	explicit Point(XYPOSITION x_=0, XYPOSITION y_=0) : x(x_), y(y_) {
 	}
+	explicit Point(int x_, int y_) : x(static_cast<XYPOSITION>(x_)), y(static_cast<XYPOSITION>(y_)) {
+	}
 
 	// Other automatically defined methods (assignment, copy constructor, destructor) are fine
 

@@ -114,6 +114,7 @@ void CallTip::DrawChunk(Surface *surface, int &x, const char *s,
 				rcClient.right = rcClient.left + widthArrow;
 				if (draw) {
 					const int halfWidth = widthArrow / 2 - 3;
+					const int quarterWidth = halfWidth / 2;
 					const int centreX = rcClient.left + widthArrow / 2 - 1;
 					const int centreY = (rcClient.top + rcClient.bottom) / 2;
 					surface->FillRectangle(rcClient, colourBG);
@@ -123,16 +124,16 @@ void CallTip::DrawChunk(Surface *surface, int &x, const char *s,
 
 					if (upArrow) {      // Up arrow
 						Point pts[] = {
-    						Point(centreX - halfWidth, centreY + halfWidth / 2),
-    						Point(centreX + halfWidth, centreY + halfWidth / 2),
-    						Point(centreX, centreY - halfWidth + halfWidth / 2),
+    						Point(centreX - halfWidth, centreY + quarterWidth),
+    						Point(centreX + halfWidth, centreY + quarterWidth),
+    						Point(centreX, centreY - halfWidth + quarterWidth),
 						};
 						surface->Polygon(pts, ELEMENTS(pts), colourBG, colourBG);
 					} else {            // Down arrow
 						Point pts[] = {
-    						Point(centreX - halfWidth, centreY - halfWidth / 2),
-    						Point(centreX + halfWidth, centreY - halfWidth / 2),
-    						Point(centreX, centreY + halfWidth - halfWidth / 2),
+    						Point(centreX - halfWidth, centreY - quarterWidth),
+    						Point(centreX + halfWidth, centreY - quarterWidth),
+    						Point(centreX, centreY + halfWidth - quarterWidth),
 						};
 						surface->Polygon(pts, ELEMENTS(pts), colourBG, colourBG);
 					}
