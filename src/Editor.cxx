@@ -88,10 +88,6 @@ Timer::Timer() :
 Idler::Idler() :
 		state(false), idlerID(0) {}
 
-static int RoundXYPosition(XYPOSITION xyPos) {
-	return int(xyPos+0.5);
-}
-
 static inline bool IsControlCharacter(int ch) {
 	// iscntrl returns true for lots of chars > 127 which are displayable
 	return ch >= 0 && ch < ' ';

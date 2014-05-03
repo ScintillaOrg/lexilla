@@ -77,7 +77,9 @@ namespace Scintilla {
 
 typedef float XYPOSITION;
 typedef double XYACCUMULATOR;
-//#define XYPOSITION int
+inline int RoundXYPosition(XYPOSITION xyPos) {
+	return int(xyPos + 0.5);
+}
 
 // Underlying the implementation of the platform classes are platform specific types.
 // Sometimes these need to be passed around by client code so they are defined here
