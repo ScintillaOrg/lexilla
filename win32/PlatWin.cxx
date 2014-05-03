@@ -2158,7 +2158,7 @@ class ListBoxX : public ListBox {
 	void OnDoubleClick();
 	void ResizeToCursor();
 	void StartResize(WPARAM);
-	int NcHitTest(WPARAM, LPARAM) const;
+	LRESULT NcHitTest(WPARAM, LPARAM) const;
 	void CentreItem(int n);
 	void Paint(HDC);
 	static LRESULT PASCAL ControlWndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
@@ -2344,7 +2344,7 @@ void ListBoxX::Select(int n) {
 }
 
 int ListBoxX::GetSelection() {
-	return ::SendMessage(lb, LB_GETCURSEL, 0, 0);
+	return static_cast<int>(::SendMessage(lb, LB_GETCURSEL, 0, 0));
 }
 
 // This is not actually called at present
@@ -2414,7 +2414,7 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 			if (surfaceItem) {
 				if (technology == SCWIN_TECH_GDI) {
 					surfaceItem->Init(pDrawItem->hDC, pDrawItem->hwndItem);
-					int left = pDrawItem->rcItem.left + static_cast<int>(ItemInset.x + ImageInset.x);
+					long left = pDrawItem->rcItem.left + static_cast<int>(ItemInset.x + ImageInset.x);
 					PRectangle rcImage(left, pDrawItem->rcItem.top,
 						left + images.GetWidth(), pDrawItem->rcItem.bottom);
 					surfaceItem->DrawRGBAImage(rcImage,
@@ -2442,7 +2442,7 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 						if (SUCCEEDED(hr)) {
 							surfaceItem->Init(pDCRT, pDrawItem->hwndItem);
 							pDCRT->BeginDraw();
-							int left = pDrawItem->rcItem.left + static_cast<int>(ItemInset.x + ImageInset.x);
+							long left = pDrawItem->rcItem.left + static_cast<long>(ItemInset.x + ImageInset.x);
 							PRectangle rcImage(left, pDrawItem->rcItem.top,
 								left + images.GetWidth(), pDrawItem->rcItem.bottom);
 							surfaceItem->DrawRGBAImage(rcImage,
@@ -2660,11 +2660,11 @@ void ListBoxX::StartResize(WPARAM hitCode) {
 	}
 
 	::SetCapture(GetHWND());
-	resizeHit = hitCode;
+	resizeHit = static_cast<int>(hitCode);
 }
 
-int ListBoxX::NcHitTest(WPARAM wParam, LPARAM lParam) const {
-	int hit = ::DefWindowProc(GetHWND(), WM_NCHITTEST, wParam, lParam);
+LRESULT ListBoxX::NcHitTest(WPARAM wParam, LPARAM lParam) const {
+	LRESULT hit = ::DefWindowProc(GetHWND(), WM_NCHITTEST, wParam, lParam);
 	// There is an apparent bug in the DefWindowProc hit test code whereby it will
 	// return HTTOPXXX if the window in question is shorter than the default
 	// window caption height + frame, even if one is hovering over the bottom edge of
@@ -2730,7 +2730,7 @@ void ListBoxX::CentreItem(int n) {
 		POINT extent = GetClientExtent();
 		int visible = extent.y/ItemHeight();
 		if (visible < Length()) {
-			int top = ::SendMessage(lb, LB_GETTOPINDEX, 0, 0);
+			LRESULT top = ::SendMessage(lb, LB_GETTOPINDEX, 0, 0);
 			int half = (visible - 1) / 2;
 			if (n > (top + half))
 				::SendMessage(lb, LB_SETTOPINDEX, n - half , 0);
@@ -2927,7 +2927,7 @@ LRESULT ListBoxX::WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam
 				linesToScroll = 3;
 			}
 			linesToScroll *= (wheelDelta / WHEEL_DELTA);
-			int top = ::SendMessage(lb, LB_GETTOPINDEX, 0, 0) + linesToScroll;
+			LRESULT top = ::SendMessage(lb, LB_GETTOPINDEX, 0, 0) + linesToScroll;
 			if (top < 0) {
 				top = 0;
 			}
@@ -3126,12 +3126,14 @@ bool Platform::IsKeyDown(int key) {
 }
 
 long Platform::SendScintilla(WindowID w, unsigned int msg, unsigned long wParam, long lParam) {
-	return ::SendMessage(reinterpret_cast<HWND>(w), msg, wParam, lParam);
+	// This should never be called - its here to satisfy an old interface
+	return static_cast<long>(::SendMessage(reinterpret_cast<HWND>(w), msg, wParam, lParam));
 }
 
 long Platform::SendScintillaPointer(WindowID w, unsigned int msg, unsigned long wParam, void *lParam) {
-	return ::SendMessage(reinterpret_cast<HWND>(w), msg, wParam,
-		reinterpret_cast<LPARAM>(lParam));
+	// This should never be called - its here to satisfy an old interface
+	return static_cast<long>(::SendMessage(reinterpret_cast<HWND>(w), msg, wParam,
+		reinterpret_cast<LPARAM>(lParam)));
 }
 
 bool Platform::IsDBCSLeadByte(int codePage, char ch) {

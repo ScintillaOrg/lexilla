@@ -186,8 +186,8 @@ int CallTip::PaintContents(Surface *surfaceWindow, bool draw) {
 			chunkEnd = chunkVal + strlen(chunkVal);
 			moreChunks = false;
 		}
-		int chunkOffset = chunkVal - val.c_str();
-		int chunkLength = chunkEnd - chunkVal;
+		int chunkOffset = static_cast<int>(chunkVal - val.c_str());
+		int chunkLength = static_cast<int>(chunkEnd - chunkVal);
 		int chunkEndOffset = chunkOffset + chunkLength;
 		int thisStartHighlight = Platform::Maximum(startHighlight, chunkOffset);
 		thisStartHighlight = Platform::Minimum(thisStartHighlight, chunkEndOffset);

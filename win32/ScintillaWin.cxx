@@ -465,8 +465,8 @@ HWND ScintillaWin::MainHWND() {
 }
 
 bool ScintillaWin::DragThreshold(Point ptStart, Point ptNow) {
-	int xMove = abs(ptStart.x - ptNow.x);
-	int yMove = abs(ptStart.y - ptNow.y);
+	int xMove = static_cast<int>(abs(ptStart.x - ptNow.x));
+	int yMove = static_cast<int>(abs(ptStart.y - ptNow.y));
 	return (xMove > ::GetSystemMetrics(SM_CXDRAG)) ||
 		(yMove > ::GetSystemMetrics(SM_CYDRAG));
 }
@@ -494,11 +494,11 @@ void ScintillaWin::StartDrag() {
 }
 
 // Avoid warnings everywhere for old style casts by concentrating them here
-static WORD LoWord(DWORD l) {
+static WORD LoWord(uptr_t l) {
 	return LOWORD(l);
 }
 
-static WORD HiWord(DWORD l) {
+static WORD HiWord(uptr_t l) {
 	return HIWORD(l);
 }
 
@@ -643,8 +643,8 @@ sptr_t ScintillaWin::HandleComposition(uptr_t wParam, sptr_t lParam) {
 			Point pos = PointMainCaret();
 			COMPOSITIONFORM CompForm;
 			CompForm.dwStyle = CFS_POINT;
-			CompForm.ptCurrentPos.x = pos.x;
-			CompForm.ptCurrentPos.y = pos.y;
+			CompForm.ptCurrentPos.x = static_cast<int>(pos.x);
+			CompForm.ptCurrentPos.y = static_cast<int>(pos.y);
 			::ImmSetCompositionWindow(hIMC, &CompForm);
 			::ImmReleaseContext(MainHWND(), hIMC);
 		}
@@ -837,7 +837,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 						// the low priority events have a turn (after which the timer will fire again).
 
 						DWORD dwCurrent = GetTickCount();
-						DWORD dwStart = wParam ? wParam : dwCurrent;
+						DWORD dwStart = wParam ? static_cast<DWORD>(wParam) : dwCurrent;
 						const DWORD maxWorkTime = 50;
 
 						if (dwCurrent >= dwStart && dwCurrent > maxWorkTime && dwCurrent - maxWorkTime < dwStart)
@@ -863,7 +863,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			//	Platform::IsKeyDown(VK_CONTROL),
 			//	Platform::IsKeyDown(VK_MENU));
 			::SetFocus(MainHWND());
-			ButtonDown(Point::FromLong(lParam), ::GetMessageTime(),
+			ButtonDown(Point::FromLong(static_cast<long>(lParam)), ::GetMessageTime(),
 				(wParam & MK_SHIFT) != 0,
 				(wParam & MK_CONTROL) != 0,
 				Platform::IsKeyDown(VK_MENU));
@@ -872,7 +872,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 		case WM_MOUSEMOVE:
 			SetTrackMouseLeaveEvent(true);
-			ButtonMoveWithModifiers(Point::FromLong(lParam),
+			ButtonMoveWithModifiers(Point::FromLong(static_cast<long>(lParam)),
 				((wParam & MK_SHIFT) != 0 ? SCI_SHIFT : 0) |
 				((wParam & MK_CONTROL) != 0 ? SCI_CTRL : 0) |
 				(Platform::IsKeyDown(VK_MENU) ? SCI_ALT : 0));
@@ -884,16 +884,16 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 
 		case WM_LBUTTONUP:
-			ButtonUp(Point::FromLong(lParam),
+			ButtonUp(Point::FromLong(static_cast<long>(lParam)),
 				::GetMessageTime(),
 				(wParam & MK_CONTROL) != 0);
 			break;
 
 		case WM_RBUTTONDOWN:
 			::SetFocus(MainHWND());
-			if (!PointInSelection(Point::FromLong(lParam))) {
+			if (!PointInSelection(Point::FromLong(static_cast<long>(lParam)))) {
 				CancelModes();
-				SetEmptySelection(PositionFromLocation(Point::FromLong(lParam)));
+				SetEmptySelection(PositionFromLocation(Point::FromLong(static_cast<long>(lParam))));
 			}
 			break;
 
@@ -923,7 +923,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			}
 
 		case WM_CHAR:
-			if (((wParam >= 128) || !iscntrl(wParam)) || !lastKeyDownConsumed) {
+			if (((wParam >= 128) || !iscntrl(static_cast<int>(wParam))) || !lastKeyDownConsumed) {
 				if (::IsWindowUnicode(MainHWND()) || keysAlwaysUnicode) {
 					wchar_t wcs[2] = {static_cast<wchar_t>(wParam), 0};
 					if (IsUnicodeMode()) {
@@ -972,7 +972,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		case WM_KEYDOWN: {
 			//Platform::DebugPrintf("S keydown %d %x %x %x %x\n",iMessage, wParam, lParam, ::IsKeyDown(VK_SHIFT), ::IsKeyDown(VK_CONTROL));
 				lastKeyDownConsumed = false;
-				int ret = KeyDown(KeyTranslate(wParam),
+				int ret = KeyDown(KeyTranslate(static_cast<int>(wParam)),
 					Platform::IsKeyDown(VK_SHIFT),
 					Platform::IsKeyDown(VK_CONTROL),
 					Platform::IsKeyDown(VK_MENU),
@@ -1041,7 +1041,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 		case WM_CONTEXTMENU:
 			if (displayPopupMenu) {
-				Point pt = Point::FromLong(lParam);
+				Point pt = Point::FromLong(static_cast<long>(lParam));
 				if ((pt.x == -1) && (pt.y == -1)) {
 					// Caused by keyboard so display menu near caret
 					pt = PointMainCaret();
@@ -1089,10 +1089,10 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			if (static_cast<int>(wParam) < 0) {
 				wParam = SelectionStart().Position();
 			}
-			return pdoc->LineFromPosition(wParam);
+			return pdoc->LineFromPosition(static_cast<int>(wParam));
 
 		case EM_EXLINEFROMCHAR:
-			return pdoc->LineFromPosition(lParam);
+			return pdoc->LineFromPosition(static_cast<int>(lParam));
 
 		case EM_GETSEL:
 			if (wParam) {
@@ -1175,7 +1175,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 						return 0;
 #endif
 					}
-					technology = wParam;
+					technology = static_cast<int>(wParam);
 					// Invalidate all cached information including layout.
 					DropGraphics(true);
 					InvalidateStyleRedraw();
@@ -1276,7 +1276,7 @@ bool ScintillaWin::PaintContains(PRectangle rc) {
 			contains = false;
 		} else {
 			// In bounding rectangle so check more accurately using region
-			HRGN hRgnRange = ::CreateRectRgn(rc.left, rc.top, rc.right, rc.bottom);
+			HRGN hRgnRange = ::CreateRectRgn(static_cast<int>(rc.left), static_cast<int>(rc.top), static_cast<int>(rc.right), static_cast<int>(rc.bottom));
 			if (hRgnRange) {
 				HRGN hRgnDest = ::CreateRectRgn(0, 0, 0, 0);
 				if (hRgnDest) {
@@ -1309,7 +1309,7 @@ void ScintillaWin::UpdateSystemCaret() {
 			CreateSystemCaret();
 		}
 		Point pos = PointMainCaret();
-		::SetCaretPos(pos.x, pos.y);
+		::SetCaretPos(static_cast<int>(pos.x), static_cast<int>(pos.y));
 	}
 }
 
@@ -1371,7 +1371,7 @@ bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
 	int horizEndPreferred = scrollWidth;
 	if (horizEndPreferred < 0)
 		horizEndPreferred = 0;
-	unsigned int pageWidth = rcText.Width();
+	unsigned int pageWidth = static_cast<unsigned int>(rcText.Width());
 	if (!horizontalScrollBarVisible || Wrapping())
 		pageWidth = horizEndPreferred + 1;
 	sci.fMask = SIF_PAGE | SIF_RANGE;
@@ -1673,7 +1673,7 @@ void ScintillaWin::Paste() {
 			std::vector<char> putf;
 			// Default Scintilla behaviour in Unicode mode
 			if (IsUnicodeMode()) {
-				unsigned int bytes = memUSelection.Size();
+				unsigned int bytes = static_cast<unsigned int>(memUSelection.Size());
 				len = UTF8Length(uptr, bytes / 2);
 				putf.resize(len + 1);
 				UTF8FromUTF16(uptr, bytes / 2, &putf[0], len);
@@ -1697,7 +1697,7 @@ void ScintillaWin::Paste() {
 		if (memSelection) {
 			char *ptr = static_cast<char *>(memSelection.ptr);
 			if (ptr) {
-				unsigned int bytes = memSelection.Size();
+				unsigned int bytes = static_cast<unsigned int>(memSelection.Size());
 				unsigned int len = bytes;
 				for (unsigned int i = 0; i < bytes; i++) {
 					if ((len == bytes) && (0 == ptr[i]))
@@ -2069,8 +2069,8 @@ void ScintillaWin::ImeStartComposition() {
 		Point pos = PointMainCaret();
 		COMPOSITIONFORM CompForm;
 		CompForm.dwStyle = CFS_POINT;
-		CompForm.ptCurrentPos.x = pos.x;
-		CompForm.ptCurrentPos.y = pos.y;
+		CompForm.ptCurrentPos.x = static_cast<int>(pos.x);
+		CompForm.ptCurrentPos.y = static_cast<int>(pos.y);
 
 		::ImmSetCompositionWindow(hIMC, &CompForm);
 
@@ -2257,7 +2257,7 @@ void ScintillaWin::ScrollMessage(WPARAM wParam) {
 void ScintillaWin::HorizontalScrollMessage(WPARAM wParam) {
 	int xPos = xOffset;
 	PRectangle rcText = GetTextRectangle();
-	int pageWidth = rcText.Width() * 2 / 3;
+	int pageWidth = static_cast<int>(rcText.Width() * 2 / 3);
 	switch (LoWord(wParam)) {
 	case SB_LINEUP:
 		xPos -= 20;
@@ -2271,7 +2271,7 @@ void ScintillaWin::HorizontalScrollMessage(WPARAM wParam) {
 	case SB_PAGEDOWN:
 		xPos += pageWidth;
 		if (xPos > scrollWidth - rcText.Width()) {	// Hit the end exactly
-			xPos = scrollWidth - rcText.Width();
+			xPos = scrollWidth - static_cast<int>(rcText.Width());
 		}
 		break;
 	case SB_TOP:
@@ -2469,7 +2469,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 			wchar_t *udata = static_cast<wchar_t *>(memUDrop.ptr);
 			if (udata) {
 				if (IsUnicodeMode()) {
-					int tlen = memUDrop.Size();
+					int tlen = static_cast<int>(memUDrop.Size());
 					// Convert UTF-16 to UTF-8
 					int dataLen = UTF8Length(udata, tlen/2);
 					data.resize(dataLen+1);
@@ -2756,7 +2756,7 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
 				return 0;
 			} else if (iMessage == WM_LBUTTONDOWN) {
 				// This does not fire due to the hit test code
-				sciThis->ct.MouseClick(Point::FromLong(lParam));
+				sciThis->ct.MouseClick(Point::FromLong(static_cast<long>(lParam)));
 				sciThis->CallTipClick();
 				return 0;
 			} else if (iMessage == WM_SETCURSOR) {

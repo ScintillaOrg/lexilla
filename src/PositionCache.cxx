@@ -646,7 +646,7 @@ void PositionCache::MeasureWidths(Surface *surface, ViewStyle &vstyle, unsigned 
 	const char *s, unsigned int len, XYPOSITION *positions, Document *pdoc) {
 
 	allClear = false;
-	unsigned int probe = pces.size();	// Out of bounds
+	size_t probe = pces.size();	// Out of bounds
 	if ((!pces.empty()) && (len < 30)) {
 		// Only store short strings in the cache so it doesn't churn with
 		// long comments with only a single comment.
