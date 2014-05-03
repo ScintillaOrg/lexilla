@@ -646,18 +646,18 @@ void PositionCache::MeasureWidths(Surface *surface, ViewStyle &vstyle, unsigned 
 	const char *s, unsigned int len, XYPOSITION *positions, Document *pdoc) {
 
 	allClear = false;
-	int probe = -1;
+	unsigned int probe = pces.size();	// Out of bounds
 	if ((!pces.empty()) && (len < 30)) {
 		// Only store short strings in the cache so it doesn't churn with
 		// long comments with only a single comment.
 
 		// Two way associative: try two probe positions.
 		unsigned int hashValue = PositionCacheEntry::Hash(styleNumber, s, len);
-		probe = static_cast<int>(hashValue % pces.size());
+		probe = hashValue % pces.size();
 		if (pces[probe].Retrieve(styleNumber, s, len, positions)) {
 			return;
 		}
-		int probe2 = static_cast<int>((hashValue * 37) % pces.size());
+		unsigned int probe2 = (hashValue * 37) % pces.size();
 		if (pces[probe2].Retrieve(styleNumber, s, len, positions)) {
 			return;
 		}
@@ -682,7 +682,8 @@ void PositionCache::MeasureWidths(Surface *surface, ViewStyle &vstyle, unsigned 
 	} else {
 		surface->MeasureWidths(vstyle.styles[styleNumber].font, s, len, positions);
 	}
-	if (probe >= 0) {
+	if (probe < pces.size()) {
+		// Store into cache
 		clock++;
 		if (clock > 60000) {
 			// Since there are only 16 bits for the clock, wrap it round and
