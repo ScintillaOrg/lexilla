@@ -94,7 +94,7 @@ typedef void *IdlerID;
 
 /**
  * A geometric point class.
- * Point is exactly the same as the Win32 POINT and GTK+ GdkPoint so can be used interchangeably.
+ * Point is similar to the Win32 POINT and GTK+ GdkPoint types.
  */
 class Point {
 public:
@@ -111,7 +111,7 @@ public:
 
 /**
  * A geometric rectangle class.
- * PRectangle is exactly the same as the Win32 RECT so can be used interchangeably.
+ * PRectangle is similar to the Win32 RECT.
  * PRectangles contain their top and left sides, but not their right and bottom sides.
  */
 class PRectangle {
