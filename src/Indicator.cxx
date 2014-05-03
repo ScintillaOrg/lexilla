@@ -20,7 +20,7 @@ using namespace Scintilla;
 
 static PRectangle PixelGridAlign(const PRectangle &rc) {
 	// Move left and right side to nearest pixel to avoid blurry visuals
-	return PRectangle(int(rc.left + 0.5), rc.top, int(rc.right + 0.5), rc.bottom);
+	return PRectangle(int(rc.left + 0.5), int(rc.top), int(rc.right + 0.5), int(rc.bottom));
 }
 
 void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &rcLine) {

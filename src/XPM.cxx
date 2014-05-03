@@ -109,7 +109,7 @@ void XPM::Init(const char *const *linesForm) {
 		if (*colourDef == '#') {
 			colour.Set(colourDef);
 		} else {
-			codeTransparent = code;
+			codeTransparent = static_cast<char>(code);
 		}
 		colourCodeTable[code] = colour;
 	}
@@ -127,8 +127,8 @@ void XPM::Draw(Surface *surface, PRectangle &rc) {
 		return;
 	}
 	// Centre the pixmap
-	int startY = rc.top + (rc.Height() - height) / 2;
-	int startX = rc.left + (rc.Width() - width) / 2;
+	int startY = static_cast<int>(rc.top + (rc.Height() - height) / 2);
+	int startX = static_cast<int>(rc.left + (rc.Width() - width) / 2);
 	for (int y=0; y<height; y++) {
 		int prevCode = 0;
 		int xStartRun = 0;

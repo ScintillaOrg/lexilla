@@ -126,6 +126,10 @@ public:
 	PRectangle(XYPOSITION left_=0, XYPOSITION top_=0, XYPOSITION right_=0, XYPOSITION bottom_ = 0) :
 		left(left_), top(top_), right(right_), bottom(bottom_) {
 	}
+	PRectangle(int left_, int top_, int right_, int bottom_) :
+		left(static_cast<XYPOSITION>(left_)), top(static_cast<XYPOSITION>(top_)),
+		right(static_cast<XYPOSITION>(right_)), bottom(static_cast<XYPOSITION>(bottom_)) {
+	}
 
 	// Other automatically defined methods (assignment, copy constructor, destructor) are fine
 

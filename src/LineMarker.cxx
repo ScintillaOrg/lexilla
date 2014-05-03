@@ -344,11 +344,11 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 			character, 1, fore, back);
 
 	} else if (markType == SC_MARK_DOTDOTDOT) {
-		int right = centreX - 6;
+		XYPOSITION right = static_cast<XYPOSITION>(centreX - 6);
 		for (int b=0; b<3; b++) {
 			PRectangle rcBlob(right, rc.bottom - 4, right + 2, rc.bottom-2);
 			surface->FillRectangle(rcBlob, fore);
-			right += 5;
+			right += 5.0f;
 		}
 	} else if (markType == SC_MARK_ARROWS) {
 		surface->PenColour(fore);

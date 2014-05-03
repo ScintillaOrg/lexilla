@@ -2423,7 +2423,7 @@ ColourDesired Editor::TextBackground(ViewStyle &vsDraw, bool overrideBackground,
 
 void Editor::DrawIndentGuide(Surface *surface, int lineVisible, int lineHeight, int start, PRectangle rcSegment, bool highlight) {
 	Point from(0, ((lineVisible & 1) && (lineHeight & 1)) ? 1 : 0);
-	PRectangle rcCopyArea(start + 1, rcSegment.top, start + 2, rcSegment.bottom);
+	PRectangle rcCopyArea(start + 1, static_cast<int>(rcSegment.top), start + 2, static_cast<int>(rcSegment.bottom));
 	surface->Copy(rcCopyArea, from,
 	        highlight ? *pixmapIndentGuideHighlight : *pixmapIndentGuide);
 }
@@ -3124,7 +3124,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 											rcSegment.bottom);
 										surface->FillRectangle(rcSpace, textBack);
 									}
-									PRectangle rcDot(xmid + xStart - subLineStart, rcSegment.top + vsDraw.lineHeight / 2, 0, 0);
+									PRectangle rcDot(xmid + xStart - subLineStart, rcSegment.top + vsDraw.lineHeight / 2, 0.0f, 0.0f);
 									rcDot.right = rcDot.left + vs.whitespaceSize;
 									rcDot.bottom = rcDot.top + vs.whitespaceSize;
 									surface->FillRectangle(rcDot, textFore);
@@ -3705,7 +3705,8 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 				if (bufferedDraw) {
 					Point from(vs.textStart-leftTextOverlap, 0);
 					PRectangle rcCopyArea(vs.textStart-leftTextOverlap, yposScreen,
-					        rcClient.right - vs.rightMarginWidth, yposScreen + vs.lineHeight);
+					        static_cast<int>(rcClient.right - vs.rightMarginWidth),
+					        yposScreen + vs.lineHeight);
 					surfaceWindow->Copy(rcCopyArea, from, *pixmapLine);
 				}
 

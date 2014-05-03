@@ -165,9 +165,9 @@ void CallTip::DrawChunk(Surface *surface, int &x, const char *s,
 
 int CallTip::PaintContents(Surface *surfaceWindow, bool draw) {
 	PRectangle rcClientPos = wCallTip.GetClientPosition();
-	PRectangle rcClientSize(0, 0, rcClientPos.right - rcClientPos.left,
+	PRectangle rcClientSize(0.0f, 0.0f, rcClientPos.right - rcClientPos.left,
 	                        rcClientPos.bottom - rcClientPos.top);
-	PRectangle rcClient(1, 1, rcClientSize.right - 1, rcClientSize.bottom - 1);
+	PRectangle rcClient(1.0f, 1.0f, rcClientSize.right - 1, rcClientSize.bottom - 1);
 
 	// To make a nice small call tip window, it is only sized to fit most normal characters without accents
 	int ascent = RoundXYPosition(surfaceWindow->Ascent(font) - surfaceWindow->InternalLeading(font));
@@ -218,9 +218,9 @@ void CallTip::PaintCT(Surface *surfaceWindow) {
 	if (val.empty())
 		return;
 	PRectangle rcClientPos = wCallTip.GetClientPosition();
-	PRectangle rcClientSize(0, 0, rcClientPos.right - rcClientPos.left,
+	PRectangle rcClientSize(0.0f, 0.0f, rcClientPos.right - rcClientPos.left,
 	                        rcClientPos.bottom - rcClientPos.top);
-	PRectangle rcClient(1, 1, rcClientSize.right - 1, rcClientSize.bottom - 1);
+	PRectangle rcClient(1.0f, 1.0f, rcClientSize.right - 1, rcClientSize.bottom - 1);
 
 	surfaceWindow->FillRectangle(rcClient, colourBG);
 
