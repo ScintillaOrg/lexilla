@@ -277,6 +277,8 @@ class ScintillaWin :
 	virtual int SetScrollInfo(int nBar, LPCSCROLLINFO lpsi, BOOL bRedraw);
 	virtual bool GetScrollInfo(int nBar, LPSCROLLINFO lpsi);
 	void ChangeScrollPos(int barType, int pos);
+	sptr_t GetTextLength();
+	sptr_t GetText(uptr_t wParam, sptr_t lParam);
 
 public:
 	// Public for benefit of Scintilla_DirectFunction
@@ -678,9 +680,7 @@ static unsigned int SciMessageFromEM(unsigned int iMessage) {
 	case WM_CLEAR: return SCI_CLEAR;
 	case WM_COPY: return SCI_COPY;
 	case WM_CUT: return SCI_CUT;
-	case WM_GETTEXT: return SCI_GETTEXT;
 	case WM_SETTEXT: return SCI_SETTEXT;
-	case WM_GETTEXTLENGTH: return SCI_GETTEXTLENGTH;
 	case WM_PASTE: return SCI_PASTE;
 	case WM_UNDO: return SCI_UNDO;
 	}
@@ -720,6 +720,70 @@ UINT CodePageFromCharSet(DWORD characterSet, UINT documentCodePage) {
 
 UINT ScintillaWin::CodePageOfDocument() {
 	return CodePageFromCharSet(vs.styles[STYLE_DEFAULT].characterSet, pdoc->dbcsCodePage);
+}
+
+sptr_t ScintillaWin::GetTextLength() {
+	if (::IsWindowUnicode(MainHWND())) {
+		if (pdoc->Length() == 0)
+			return 0;
+		std::vector<char> docBytes(pdoc->Length(), '\0');
+		pdoc->GetCharRange(&docBytes[0], 0, pdoc->Length());
+		if (IsUnicodeMode()) {
+			return UTF16Length(&docBytes[0], static_cast<unsigned int>(docBytes.size()));
+		} else {
+			return ::MultiByteToWideChar(CodePageOfDocument(), 0, &docBytes[0],
+				static_cast<int>(docBytes.size()), NULL, 0);
+		}
+	} else {
+		return pdoc->Length();
+	}
+}
+
+sptr_t ScintillaWin::GetText(uptr_t wParam, sptr_t lParam) {
+	if (::IsWindowUnicode(MainHWND())) {
+		wchar_t *ptr = reinterpret_cast<wchar_t *>(lParam);
+		if (pdoc->Length() == 0) {
+			*ptr = L'\0';
+			return 0;
+		}
+		std::vector<char> docBytes(pdoc->Length(), '\0');
+		pdoc->GetCharRange(&docBytes[0], 0, pdoc->Length());
+		if (IsUnicodeMode()) {
+			unsigned int lengthUTF16 = UTF16Length(&docBytes[0], static_cast<unsigned int>(docBytes.size()));
+			if (lParam == 0)
+				return lengthUTF16;
+			if (wParam == 0)
+				return 0;
+			unsigned int uLen = UTF16FromUTF8(&docBytes[0], static_cast<unsigned int>(docBytes.size()),
+				ptr, static_cast<int>(wParam) - 1);
+			ptr[uLen] = L'\0';
+			return uLen;
+		} else {
+			// Not Unicode mode
+			// Convert to Unicode using the current Scintilla code page
+			const UINT cpSrc = CodePageOfDocument();
+			int lengthUTF16 = ::MultiByteToWideChar(cpSrc, 0, &docBytes[0],
+				static_cast<int>(docBytes.size()), NULL, 0);
+			if (lengthUTF16 >= static_cast<int>(wParam))
+				lengthUTF16 = static_cast<int>(wParam)-1;
+			::MultiByteToWideChar(cpSrc, 0, &docBytes[0],
+				static_cast<int>(docBytes.size()),
+				ptr, lengthUTF16);
+			ptr[lengthUTF16] = L'\0';
+			return lengthUTF16;
+		}
+	} else {
+		if (lParam == 0)
+			return pdoc->Length() + 1;
+		if (wParam == 0)
+			return 0;
+		char *ptr = reinterpret_cast<char *>(lParam);
+		unsigned int iChar = 0;
+		for (; iChar < wParam - 1; iChar++)
+			ptr[iChar] = pdoc->CharAt(iChar);
+		ptr[iChar] = '\0';
+		return iChar;
+	}
 }
 
 sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
@@ -1088,6 +1152,12 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		case WM_WINDOWPOSCHANGING:
 		case WM_WINDOWPOSCHANGED:
 			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
+
+		case WM_GETTEXTLENGTH:
+			return GetTextLength();
+
+		case WM_GETTEXT:
+			return GetText(wParam, lParam);
 
 		case EM_LINEFROMCHAR:
 			if (static_cast<int>(wParam) < 0) {
