@@ -1437,13 +1437,13 @@ void LexerCPP::EvaluateTokens(std::vector<std::string> &tokens, const SymbolTabl
 						tokens.erase(tokens.begin() + i, tokens.begin() + tok + 1);
 
 						// Substitute values into macro
-						std::vector<std::string> macroTokens = Tokenize(it->second.value);
 						macroTokens.erase(std::remove_if(macroTokens.begin(), macroTokens.end(), OnlySpaceOrTab), macroTokens.end());
 
 						for (size_t iMacro = 0; iMacro < macroTokens.size();) {
 							if (setWordStart.Contains(static_cast<unsigned char>(macroTokens[iMacro][0]))) {
 								std::map<std::string, std::string>::const_iterator itFind = arguments.find(macroTokens[iMacro]);
 								if (itFind != arguments.end()) {
+									// TODO: Possible that value will be expression so should insert tokenized form
 									macroTokens[iMacro] = itFind->second;
 								}
 							}
