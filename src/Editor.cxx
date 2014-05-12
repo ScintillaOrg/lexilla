@@ -2223,7 +2223,6 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 			ll->edgeColumn = -1;
 		}
 
-		char styleByte;
 		const int styleMask = pdoc->stylingBitsMask;
 		ll->styleBitsSet = 0;
 		// Fill base line layout
@@ -2233,12 +2232,12 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 		int numCharsBeforeEOL = pdoc->LineEnd(line) - posLineStart;
 		const int numCharsInLine = (vstyle.viewEOL) ? lineLength : numCharsBeforeEOL;
 		for (int styleInLine = 0; styleInLine < numCharsInLine; styleInLine++) {
-			styleByte = ll->styles[styleInLine];
+			const unsigned char styleByte = ll->styles[styleInLine];
 			ll->styleBitsSet |= styleByte;
-			ll->styles[styleInLine] = static_cast<char>(styleByte & styleMask);
+			ll->styles[styleInLine] = styleByte & styleMask;
 			ll->indicators[styleInLine] = static_cast<char>(styleByte & ~styleMask);
 		}
-		styleByte = static_cast<char>(((lineLength > 0) ? ll->styles[lineLength-1] : 0) & styleMask);
+		const unsigned char styleByteLast = ((lineLength > 0) ? ll->styles[lineLength-1] : 0) & styleMask;
 		if (vstyle.someStylesForceCase) {
 			for (int charInLine = 0; charInLine<lineLength; charInLine++) {
 				char chDoc = ll->chars[charInLine];
@@ -2251,7 +2250,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 		ll->xHighlightGuide = 0;
 		// Extra element at the end of the line to hold end x position and act as
 		ll->chars[numCharsInLine] = 0;   // Also triggers processing in the loops as this is a control character
-		ll->styles[numCharsInLine] = styleByte;	// For eolFilled
+		ll->styles[numCharsInLine] = styleByteLast;	// For eolFilled
 		ll->indicators[numCharsInLine] = 0;
 
 		// Layout the line, determining the position of each character,
