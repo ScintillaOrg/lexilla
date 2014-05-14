@@ -1208,7 +1208,7 @@ bool ScintillaGTK::ModifyScrollBars(int nMax, int nPage) {
 	}
 #endif
 	if (modified && (paintState == painting)) {
-		paintState = paintAbandoned;
+		repaintFullWindow = true;
 	}
 
 	return modified;
