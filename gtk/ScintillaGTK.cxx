@@ -160,6 +160,7 @@ class ScintillaGTK : public ScintillaBase {
 #else
 	GdkRegion *rgnUpdate;
 #endif
+	bool repaintFullWindow;
 
 	// Private so ScintillaGTK objects can not be copied
 	ScintillaGTK(const ScintillaGTK &);
@@ -172,6 +173,7 @@ public:
 private:
 	virtual void Initialise();
 	virtual void Finalise();
+	virtual bool AbandonPaint();
 	virtual void DisplayCursor(Window::Cursor c);
 	virtual bool DragThreshold(Point ptStart, Point ptNow);
 	virtual void StartDrag();
@@ -365,7 +367,8 @@ ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 		im_context(NULL),
 		lastWheelMouseDirection(0),
 		wheelMouseIntensity(0),
-		rgnUpdate(0) {
+		rgnUpdate(0),
+		repaintFullWindow(false) {
 	sci = sci_;
 	wMain = GTK_WIDGET(sci);
 
@@ -756,10 +759,10 @@ void ScintillaGTK::Initialise() {
 #else
 	g_signal_connect(G_OBJECT(widtxt), "expose_event",
 			   G_CALLBACK(ScintillaGTK::ExposeText), this);
-#endif
-	gtk_widget_set_events(widtxt, GDK_EXPOSURE_MASK);
 	// Avoid background drawing flash
 	gtk_widget_set_double_buffered(widtxt, FALSE);
+#endif
+	gtk_widget_set_events(widtxt, GDK_EXPOSURE_MASK);
 	gtk_widget_set_size_request(widtxt, 100, 100);
 	adjustmentv = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.0, 201.0, 1.0, 20.0, 20.0));
 #if GTK_CHECK_VERSION(3,0,0)
@@ -823,6 +826,13 @@ void ScintillaGTK::Initialise() {
 void ScintillaGTK::Finalise() {
 	SetTicking(false);
 	ScintillaBase::Finalise();
+}
+
+bool ScintillaGTK::AbandonPaint() {
+	if ((paintState == painting) && !paintingAllText) {
+		repaintFullWindow = true;
+	}
+	return false;
 }
 
 void ScintillaGTK::DisplayCursor(Window::Cursor c) {
@@ -2374,6 +2384,7 @@ void ScintillaGTK::Destroy(GObject *object) {
 gboolean ScintillaGTK::DrawTextThis(cairo_t *cr) {
 	try {
 		paintState = painting;
+		repaintFullWindow = false;
 
 		rcPaint = GetClientRectangle();
 
@@ -2401,11 +2412,12 @@ gboolean ScintillaGTK::DrawTextThis(cairo_t *cr) {
 			surfaceWindow->Release();
 			delete surfaceWindow;
 		}
-		if (paintState == paintAbandoned) {
+		if ((paintState == paintAbandoned) || repaintFullWindow) {
 			// Painting area was insufficient to cover new styling or brace highlight positions
 			FullPaint();
 		}
 		paintState = notPainting;
+		repaintFullWindow = false;
 
 		if (rgnUpdate) {
 			cairo_rectangle_list_destroy(rgnUpdate);
@@ -2429,6 +2441,13 @@ gboolean ScintillaGTK::DrawThis(cairo_t *cr) {
 		    GTK_CONTAINER(PWidget(wMain)), PWidget(scrollbarh), cr);
 		gtk_container_propagate_draw(
 		    GTK_CONTAINER(PWidget(wMain)), PWidget(scrollbarv), cr);
+// Starting from the following version, the expose event are not propagated
+// for double buffered non native windows, so we need to call it ourselves
+// or keep the default handler
+#if GTK_CHECK_VERSION(3,9,2)
+		gtk_container_propagate_draw(
+		    GTK_CONTAINER(PWidget(wMain)), PWidget(wText), cr);
+#endif
 	} catch (...) {
 		errorStatus = SC_STATUS_FAILURE;
 	}
