@@ -1412,7 +1412,10 @@ void LexerCPP::EvaluateTokens(std::vector<std::string> &tokens, const SymbolTabl
 	}
 
 	// Evaluate identifiers
-	for (size_t i=0; i<tokens.size();) {
+	const size_t maxIterations = 100;
+	size_t iterations = 0;	// Limit number of iterations in case there is a recursive macro.
+	for (size_t i = 0; (i<tokens.size()) && (iterations < maxIterations);) {
+		iterations++;
 		if (setWordStart.Contains(static_cast<unsigned char>(tokens[i][0]))) {
 			SymbolTable::const_iterator it = preprocessorDefinitions.find(tokens[i]);
 			if (it != preprocessorDefinitions.end()) {
