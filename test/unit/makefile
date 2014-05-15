@@ -9,15 +9,20 @@ ifndef windir
 ifeq ($(shell uname),Darwin)
 # On OS X always use clang as g++ is old version
 CLANG = 1
+USELIBCPP = 1
 endif
 endif
 
 CXXFLAGS += --std=c++11
 
 ifdef CLANG
-CXX = clang
+CXX = clang++
+SANITIZE = -fsanitize=address,undefined
+CXXFLAGS += $(SANITIZE)
+ifdef USELIBCPP
 CXXFLAGS += --stdlib=libc++
 LINKFLAGS = -lc++
+endif
 else
 CXX = g++
 endif
