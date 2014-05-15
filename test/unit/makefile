@@ -17,11 +17,14 @@ CXXFLAGS += --std=c++11
 
 ifdef CLANG
 CXX = clang++
-SANITIZE = -fsanitize=address,undefined
-CXXFLAGS += $(SANITIZE)
 ifdef USELIBCPP
+# OS X, use libc++ but don't have sanitizers
 CXXFLAGS += --stdlib=libc++
 LINKFLAGS = -lc++
+else
+# Linux, have sanitizers
+SANITIZE = -fsanitize=address,undefined
+CXXFLAGS += $(SANITIZE)
 endif
 else
 CXX = g++
