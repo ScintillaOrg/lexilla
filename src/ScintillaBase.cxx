@@ -492,7 +492,6 @@ public:
 	void SetLexerLanguage(const char *languageName);
 	const char *DescribeWordListSets();
 	void SetWordList(int n, const char *wl);
-	int GetStyleBitsNeeded() const;
 	const char *GetName() const;
 	void *PrivateCall(int operation, void *pointer);
 	const char *PropertyNames();
@@ -592,10 +591,6 @@ void LexState::SetWordList(int n, const char *wl) {
 			pdoc->ModifiedAt(firstModification);
 		}
 	}
-}
-
-int LexState::GetStyleBitsNeeded() const {
-	return lexCurrent ? lexCurrent->GetStyleBitsNeeded() : 5;
 }
 
 const char *LexState::GetName() const {
@@ -740,8 +735,7 @@ void ScintillaBase::NotifyStyleToNeeded(int endStyleNeeded) {
 
 void ScintillaBase::NotifyLexerChanged(Document *, void *) {
 #ifdef SCI_LEXER
-	int bits = DocumentLexState()->GetStyleBitsNeeded();
-	vs.EnsureStyle((1 << bits) - 1);
+	vs.EnsureStyle(0xff);
 #endif
 }
 
@@ -982,7 +976,7 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 			DocumentLexState()->PrivateCall(wParam, reinterpret_cast<void *>(lParam)));
 
 	case SCI_GETSTYLEBITSNEEDED:
-		return DocumentLexState()->GetStyleBitsNeeded();
+		return 8;
 
 	case SCI_PROPERTYNAMES:
 		return StringResult(lParam, DocumentLexState()->PropertyNames());

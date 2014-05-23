@@ -59,8 +59,6 @@ LineLayout::LineLayout(int maxLineLength_) :
 	edgeColumn(0),
 	chars(0),
 	styles(0),
-	styleBitsSet(0),
-	indicators(0),
 	positions(0),
 	hsStart(0),
 	hsEnd(0),
@@ -81,7 +79,6 @@ void LineLayout::Resize(int maxLineLength_) {
 		Free();
 		chars = new char[maxLineLength_ + 1];
 		styles = new unsigned char[maxLineLength_ + 1];
-		indicators = new char[maxLineLength_ + 1];
 		// Extra position allocated as sometimes the Windows
 		// GetTextExtentExPoint API writes an extra element.
 		positions = new XYPOSITION[maxLineLength_ + 1 + 1];
@@ -94,8 +91,6 @@ void LineLayout::Free() {
 	chars = 0;
 	delete []styles;
 	styles = 0;
-	delete []indicators;
-	indicators = 0;
 	delete []positions;
 	positions = 0;
 	delete []lineStarts;

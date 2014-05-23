@@ -57,10 +57,6 @@ class TestSimple(unittest.TestCase):
 		self.ed.StartStyling(0,0xf)
 		self.ed.SetStyling(1, 5)
 		self.assertEquals(self.ed.StyledTextRange(0, 2), b"x\005y\003")
-		# Set the mask so 0 bit changed but not 2 bit
-		self.ed.StartStyling(0,0x1)
-		self.ed.SetStyling(1, 0)
-		self.assertEquals(self.ed.StyledTextRange(0, 2), b"x\004y\003")
 
 		self.ed.StartStyling(0,0xff)
 		self.ed.SetStylingEx(2, b"\100\101")
