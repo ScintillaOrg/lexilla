@@ -1338,6 +1338,7 @@ void ScintillaWin::SetTrackMouseLeaveEvent(bool on) {
 		tme.cbSize = sizeof(tme);
 		tme.dwFlags = TME_LEAVE;
 		tme.hwndTrack = MainHWND();
+		tme.dwHoverTime = HOVER_DEFAULT;	// Unused but triggers Dr. Memory if not initialized
 		TrackMouseEventFn(&tme);
 	}
 	trackedMouseLeave = on;
