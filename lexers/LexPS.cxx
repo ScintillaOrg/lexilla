@@ -296,11 +296,10 @@ static void FoldPSDoc(unsigned int startPos, int length, int, WordList *[],
     int levelNext = levelCurrent;
     char chNext = styler[startPos];
     int styleNext = styler.StyleAt(startPos);
-    int style;
     for (unsigned int i = startPos; i < endPos; i++) {
         char ch = chNext;
         chNext = styler.SafeGetCharAt(i + 1);
-        style = styleNext;
+        int style = styleNext;
         styleNext = styler.StyleAt(i + 1);
         bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');  //mac??
         if ((style & 31) == SCE_PS_PAREN_PROC) {
