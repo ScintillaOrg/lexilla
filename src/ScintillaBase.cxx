@@ -57,6 +57,7 @@ ScintillaBase::ScintillaBase() {
 	displayPopupMenu = true;
 	listType = 0;
 	maxListWidth = 0;
+	multiAutoCMode = SC_MULTIAUTOC_ONCE;
 }
 
 ScintillaBase::~ScintillaBase() {
@@ -197,9 +198,29 @@ void ScintillaBase::AutoCompleteDoubleClick(void *p) {
 
 void ScintillaBase::AutoCompleteInsert(Position startPos, int removeLen, const char *text, int textLen) {
 	UndoGroup ug(pdoc);
-	pdoc->DeleteChars(startPos, removeLen);
-	const int lengthInserted = pdoc->InsertString(startPos, text, textLen);
-	SetEmptySelection(startPos + lengthInserted);
+	if (multiAutoCMode == SC_MULTIAUTOC_ONCE) {
+		pdoc->DeleteChars(startPos, removeLen);
+		const int lengthInserted = pdoc->InsertString(startPos, text, textLen);
+		SetEmptySelection(startPos + lengthInserted);
+	} else {
+		// SC_MULTIAUTOC_EACH
+		for (size_t r=0; r<sel.Count(); r++) {
+			if (!RangeContainsProtected(sel.Range(r).Start().Position(),
+				sel.Range(r).End().Position())) {
+				int positionInsert = sel.Range(r).Start().Position();
+				positionInsert = InsertSpace(positionInsert, sel.Range(r).caret.VirtualSpace());
+				if (positionInsert - removeLen >= 0) {
+					pdoc->DeleteChars(positionInsert - removeLen, removeLen);
+				}
+				const int lengthInserted = pdoc->InsertString(positionInsert, text, textLen);
+				if (lengthInserted > 0) {
+					sel.Range(r).caret.SetPosition(positionInsert + lengthInserted);
+					sel.Range(r).anchor.SetPosition(positionInsert + lengthInserted);
+				}
+				sel.Range(r).ClearVirtualSpace();
+			}
+		}
+	}
 }
 
 void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
@@ -812,6 +833,13 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 
 	case SCI_AUTOCGETCASEINSENSITIVEBEHAVIOUR:
 		return ac.ignoreCaseBehaviour;
+
+	case SCI_AUTOCSETMULTI:
+		multiAutoCMode = static_cast<int>(wParam);
+		break;
+
+	case SCI_AUTOCGETMULTI:
+		return multiAutoCMode;
 
 	case SCI_AUTOCSETORDER:
 		ac.autoSort = static_cast<int>(wParam);

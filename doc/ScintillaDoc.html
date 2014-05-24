@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 1 May 2014 NH</p>
+    <p>Last edited 24 May 2014 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -4160,6 +4160,8 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_AUTOCGETIGNORECASE">SCI_AUTOCGETIGNORECASE</a><br />
      <a class="message" href="#SCI_AUTOCSETCASEINSENSITIVEBEHAVIOUR">SCI_AUTOCSETCASEINSENSITIVEBEHAVIOUR(int behaviour)</a><br />
      <a class="message" href="#SCI_AUTOCGETCASEINSENSITIVEBEHAVIOUR">SCI_AUTOCGETCASEINSENSITIVEBEHAVIOUR</a><br />
+     <a class="message" href="#SCI_AUTOCSETMULTI">SCI_AUTOCSETMULTI(int multi)</a><br />
+     <a class="message" href="#SCI_AUTOCGETMULTI">SCI_AUTOCGETMULTI</a><br />
      <a class="message" href="#SCI_AUTOCSETORDER">SCI_AUTOCSETORDER(int order)</a><br />
      <a class="message" href="#SCI_AUTOCGETORDER">SCI_AUTOCGETORDER</a><br />
      <a class="message" href="#SCI_AUTOCSETAUTOHIDE">SCI_AUTOCSETAUTOHIDE(bool autoHide)</a><br />
@@ -4276,6 +4278,12 @@ struct Sci_TextToFind {
     nonetheless select the first list member that matches in a case sensitive way to entered characters.
     This corresponds to a behaviour property of <code>SC_CASEINSENSITIVEBEHAVIOUR_RESPECTCASE</code> (0).
     If you want autocompletion to ignore case at all, choose <code>SC_CASEINSENSITIVEBEHAVIOUR_IGNORECASE</code> (1).</p>
+
+    <p><b id="SCI_AUTOCSETMULTI">SCI_AUTOCSETMULTI(int multi)</b><br />
+    <b id="SCI_AUTOCGETMULTI">SCI_AUTOCGETMULTI</b><br />
+    When autocompleting with multiple selections present, the autocompleted text can go into just the main selection with
+    <code>SC_MULTIAUTOC_ONCE</code> (0) or into each selection with <code>SC_MULTIAUTOC_EACH</code> (1).
+    The default is <code>SC_MULTIAUTOC_ONCE</code>.</p>
 
     <p><b id="SCI_AUTOCSETORDER">SCI_AUTOCSETORDER(int order)</b><br />
     <b id="SCI_AUTOCGETORDER">SCI_AUTOCGETORDER</b><br />
