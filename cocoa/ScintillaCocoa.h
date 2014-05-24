@@ -14,11 +14,11 @@
  */
 
 #include <stdlib.h>
-#include <string>
 #include <stdio.h>
-#include <ctype.h>
 #include <time.h>
+#include <ctype.h>
 
+#include <string>
 #include <vector>
 #include <map>
 
@@ -40,18 +40,18 @@
 #include "XPM.h"
 #include "LineMarker.h"
 #include "Style.h"
-#include "AutoComplete.h"
 #include "ViewStyle.h"
 #include "CharClassify.h"
 #include "Decoration.h"
 #include "CaseFolder.h"
 #include "Document.h"
+#include "CaseConvert.h"
 #include "Selection.h"
 #include "PositionCache.h"
 #include "Editor.h"
 
+#include "AutoComplete.h"
 #include "ScintillaBase.h"
-#include "CaseConvert.h"
 
 extern "C" NSString* ScintillaRecPboardType;
 

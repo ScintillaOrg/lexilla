@@ -8,8 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <ctype.h>
 #include <assert.h>
+#include <ctype.h>
 
 #include <string>
 #include <vector>
@@ -20,13 +20,13 @@
 #include "ILexer.h"
 #include "Scintilla.h"
 
+#include "CharacterSet.h"
 #include "SplitVector.h"
 #include "Partitioning.h"
 #include "RunStyles.h"
 #include "CellBuffer.h"
 #include "PerLine.h"
 #include "CharClassify.h"
-#include "CharacterSet.h"
 #include "Decoration.h"
 #include "CaseFolder.h"
 #include "Document.h"

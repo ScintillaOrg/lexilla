@@ -17,6 +17,7 @@
 
 #include "Platform.h"
 
+#include "ILexer.h"
 #include "Scintilla.h"
 
 #include "SplitVector.h"
@@ -32,7 +33,6 @@
 #include "ViewStyle.h"
 #include "CharClassify.h"
 #include "Decoration.h"
-#include "ILexer.h"
 #include "CaseFolder.h"
 #include "Document.h"
 #include "UniConversion.h"

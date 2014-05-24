@@ -8,8 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <ctype.h>
 #include <assert.h>
+#include <ctype.h>
 
 #include <string>
 #include <vector>
@@ -21,12 +21,17 @@
 #include "ILexer.h"
 #include "Scintilla.h"
 
-#include "PropSetSimple.h"
 #ifdef SCI_LEXER
 #include "SciLexer.h"
+#endif
+
+#include "PropSetSimple.h"
+
+#ifdef SCI_LEXER
 #include "LexerModule.h"
 #include "Catalogue.h"
 #endif
+
 #include "SplitVector.h"
 #include "Partitioning.h"
 #include "RunStyles.h"
@@ -39,7 +44,6 @@
 #include "LineMarker.h"
 #include "Style.h"
 #include "ViewStyle.h"
-#include "AutoComplete.h"
 #include "CharClassify.h"
 #include "Decoration.h"
 #include "CaseFolder.h"
@@ -47,6 +51,7 @@
 #include "Selection.h"
 #include "PositionCache.h"
 #include "Editor.h"
+#include "AutoComplete.h"
 #include "ScintillaBase.h"
 
 #ifdef SCI_NAMESPACE

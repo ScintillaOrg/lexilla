@@ -7,13 +7,13 @@
 #ifndef PLATCOCOA_H
 #define PLATCOCOA_H
 
-#include <cstring>
-#include <cstdio>
-#include <cstdlib>
-
 #include <assert.h>
 
 #include <sys/time.h>
+
+#include <cstdlib>
+#include <cstring>
+#include <cstdio>
 
 #include <Cocoa/Cocoa.h>
 #include "QuartzTextLayout.h"
