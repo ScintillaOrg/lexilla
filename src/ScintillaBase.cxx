@@ -215,7 +215,8 @@ void ScintillaBase::AutoCompleteInsert(Position startPos, int removeLen, const c
 				int positionInsert = sel.Range(r).Start().Position();
 				positionInsert = InsertSpace(positionInsert, sel.Range(r).caret.VirtualSpace());
 				if (positionInsert - removeLen >= 0) {
-					pdoc->DeleteChars(positionInsert - removeLen, removeLen);
+					positionInsert -= removeLen;
+					pdoc->DeleteChars(positionInsert, removeLen);
 				}
 				const int lengthInserted = pdoc->InsertString(positionInsert, text, textLen);
 				if (lengthInserted > 0) {
