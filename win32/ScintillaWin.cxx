@@ -2909,25 +2909,31 @@ int Scintilla_RegisterClasses(void *hInstance) {
 	return result;
 }
 
-// This function is externally visible so it can be called from container when building statically.
-int Scintilla_ReleaseResources() {
+static int ResourcesRelease(bool fromDllMain) {
 	bool result = ScintillaWin::Unregister();
 	if (commctrl32) {
 		FreeLibrary(commctrl32);
 		commctrl32 = NULL;
 	}
-	Platform_Finalise();
+	Platform_Finalise(fromDllMain);
 	return result;
 }
 
+// This function is externally visible so it can be called from container when building statically.
+int Scintilla_ReleaseResources() {
+	return ResourcesRelease(false);
+}
+
 #ifndef STATIC_BUILD
-extern "C" int APIENTRY DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID) {
+extern "C" int APIENTRY DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpvReserved) {
 	//Platform::DebugPrintf("Scintilla::DllMain %d %d\n", hInstance, dwReason);
 	if (dwReason == DLL_PROCESS_ATTACH) {
 		if (!Scintilla_RegisterClasses(hInstance))
 			return FALSE;
 	} else if (dwReason == DLL_PROCESS_DETACH) {
-		Scintilla_ReleaseResources();
+		if (lpvReserved == NULL) {
+			ResourcesRelease(true);
+		}
 	}
 	return TRUE;
 }
