@@ -12,24 +12,26 @@
  * This file is dual licensed under LGPL v2.1 and the Scintilla license (http://www.scintilla.org/License.txt).
  */
 
+#include <assert.h>
+#include <sys/time.h>
+
+#include <cstdlib>
+#include <cstring>
+#include <cstdio>
+
+#include <stdexcept>
+#include <vector>
+#include <map>
+
+#import <Foundation/NSGeometry.h>
+
 #import "Platform.h"
 #import "ScintillaView.h"
 #import "ScintillaCocoa.h"
 #import "PlatCocoa.h"
 
-#include <cstring>
-#include <cstdio>
-#include <cstdlib>
-#include <assert.h>
-#include <sys/time.h>
-#include <stdexcept>
-#include <vector>
-#include <map>
-
 #include "StringCopy.h"
 #include "XPM.h"
-
-#import <Foundation/NSGeometry.h>
 
 using namespace Scintilla;
 
