@@ -1211,7 +1211,7 @@ void SCI_METHOD LexerCPP::Lex(unsigned int startPos, int length, int initStyle, 
 								while ((endName < restOfLine.length()) && setWord.Contains(static_cast<unsigned char>(restOfLine[endName])))
 									endName++;
 								std::string key = restOfLine.substr(startName, endName-startName);
-								if (restOfLine[endName] == '(') {
+								if ((endName < restOfLine.length()) && (restOfLine.at(endName) == '(')) {
 									// Macro
 									size_t endArgs = endName;
 									while ((endArgs < restOfLine.length()) && (restOfLine[endArgs] != ')'))
