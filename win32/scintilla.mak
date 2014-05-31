@@ -17,8 +17,6 @@ COMPONENT=$(DIR_BIN)\Scintilla.dll
 LEXCOMPONENT=$(DIR_BIN)\SciLexer.dll
 LEXLIB=Lexers.lib
 
-CC=cl
-RC=rc
 LD=link
 
 CXXFLAGS=-Zi -TP -MP -W4 -EHsc -Zc:forScope -Zc:wchar_t -D_CRT_SECURE_NO_DEPRECATE=1
@@ -31,7 +29,7 @@ LIBS=KERNEL32.lib USER32.lib GDI32.lib IMM32.lib OLE32.LIB
 NOLOGO=-nologo
 
 !IFDEF QUIET
-CC=@$(CC)
+CXX=@$(CXX)
 CXXFLAGS=$(CXXFLAGS) $(NOLOGO)
 LDFLAGS=$(LDFLAGS) $(NOLOGO)
 !ENDIF
@@ -219,23 +217,23 @@ $(LEXLIB): $(LEXOBJS)
 # Define how to build all the objects and what they depend on
 
 {..\src}.cxx{$(DIR_O)}.obj::
-	$(CC) $(CXXFLAGS) -c $(NAME)$(DIR_O)\ $<
+	$(CXX) $(CXXFLAGS) -c $(NAME)$(DIR_O)\ $<
 {..\lexlib}.cxx{$(DIR_O)}.obj::
-	$(CC) $(CXXFLAGS) -c $(NAME)$(DIR_O)\ $<
+	$(CXX) $(CXXFLAGS) -c $(NAME)$(DIR_O)\ $<
 {..\lexers}.cxx{$(DIR_O)}.obj::
-	$(CC) $(CXXFLAGS) -c $(NAME)$(DIR_O)\ $<
+	$(CXX) $(CXXFLAGS) -c $(NAME)$(DIR_O)\ $<
 {.}.cxx{$(DIR_O)}.obj::
-	$(CC) $(CXXFLAGS) -c $(NAME)$(DIR_O)\ $<
+	$(CXX) $(CXXFLAGS) -c $(NAME)$(DIR_O)\ $<
 
 # Some source files are compiled into more than one object because of different conditional compilation
 $(DIR_O)\ScintillaBaseL.obj: ..\src\ScintillaBase.cxx
-	$(CC) $(CXXFLAGS) -DSCI_LEXER -c $(NAME)$@ ..\src\ScintillaBase.cxx
+	$(CXX) $(CXXFLAGS) -DSCI_LEXER -c $(NAME)$@ ..\src\ScintillaBase.cxx
 
 $(DIR_O)\ScintillaWinL.obj: ScintillaWin.cxx
-	$(CC) $(CXXFLAGS) -DSCI_LEXER -c $(NAME)$@ ScintillaWin.cxx
+	$(CXX) $(CXXFLAGS) -DSCI_LEXER -c $(NAME)$@ ScintillaWin.cxx
 
 $(DIR_O)\ScintillaWinS.obj: ScintillaWin.cxx
-	$(CC) $(CXXFLAGS) -DSTATIC_BUILD -c $(NAME)$@ ScintillaWin.cxx
+	$(CXX) $(CXXFLAGS) -DSTATIC_BUILD -c $(NAME)$@ ScintillaWin.cxx
 
 # Dependencies
 
