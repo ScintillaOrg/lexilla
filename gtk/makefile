@@ -14,11 +14,7 @@ CC = clang
 # thread also need to create Position Independent Executable -> search online documentation
 SANITIZE = address
 #SANITIZE = undefined
-else
-CXX = g++
-CC = gcc
 endif
-AR = ar
 RANLIB = touch
 
 ifdef GTK3
