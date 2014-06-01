@@ -467,11 +467,22 @@
 	Released 27 May 2014.
 	</li>
 	<li>
+	Style byte indicators removed. They were deprecated in 2007. Standard indicators should be used instead.
+	</li>
+	<li>
 	When multiple selections are active, autocompletion text may be inserted at each selection with new
 	SCI_AUTOCSETMULTI method.
 	</li>
 	<li>
 	C++ lexer fixes raw string recognition so that R"xxx(blah)xxx" is styled as SCE_C_STRINGRAW.
+	</li>
+	<li>
+	Fix bug where indicators were not removed when fold highlighting on.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1604/">Bug #1604</a>.
+	</li>
+	<li>
+	For SciTE on Windows, display error message when common dialogs fail.
+	<a href="http://sourceforge.net/p/scintilla/bugs/156/">Bug #156</a>.
 	</li>
     </ul>
     <h3>
