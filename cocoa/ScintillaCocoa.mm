@@ -807,8 +807,7 @@ sptr_t ScintillaCocoa::DirectFunction(sptr_t ptr, unsigned int iMessage, uptr_t 
 sptr_t scintilla_send_message(void* sci, unsigned int iMessage, uptr_t wParam, sptr_t lParam)
 {
   ScintillaView *control = reinterpret_cast<ScintillaView*>(sci);
-  ScintillaCocoa* scintilla = [control backend];
-  return scintilla->WndProc(iMessage, wParam, lParam);
+  return [control message:iMessage wParam:wParam lParam:lParam];
 }
 
 //--------------------------------------------------------------------------------------------------
