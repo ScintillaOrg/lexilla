@@ -21,7 +21,7 @@ enum IBDisplay {
  * ScintillaView implementation. The protocol is used two-way.
  */
 
-enum NotificationType {
+typedef NS_ENUM(NSInteger, NotificationType) {
   IBNZoomChanged,    // The user selected another zoom value.
   IBNCaretChanged,   // The caret in the editor changed.
   IBNStatusChanged,  // The application set a new status message.
