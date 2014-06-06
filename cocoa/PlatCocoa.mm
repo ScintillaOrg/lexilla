@@ -957,7 +957,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION 
 		while (ui<fit) {
 			size_t lenChar = utf8LengthFromLead(us[i]);
 			size_t codeUnits = (lenChar < 4) ? 1 : 2;
-			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, ui+1, NULL);
+			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, ui+codeUnits, NULL);
 			for (unsigned int bytePos=0; (bytePos<lenChar) && (i<len); bytePos++) {
 				positions[i++] = xPosition;
 			}
