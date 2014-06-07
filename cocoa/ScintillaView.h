@@ -179,7 +179,7 @@ extern NSString *const SCIUpdateUINotification;
 - (NSString*) getLexerProperty: (NSString*) name;
 
 // The delegate property should be used instead of registerNotifyCallback which is deprecated.
-- (void) registerNotifyCallback: (intptr_t) windowid value: (SciNotifyFunc) callback __attribute__((deprecated));
+- (void) registerNotifyCallback: (intptr_t) windowid value: (Scintilla::SciNotifyFunc) callback __attribute__((deprecated));
 
 - (void) setInfoBar: (NSView <InfoBarCommunicator>*) aView top: (BOOL) top;
 - (void) setStatusText: (NSString*) text;
