@@ -527,6 +527,22 @@ void SurfaceImpl::Release() {
 }
 
 bool SurfaceImpl::Initialised() {
+	if (inited && context) {
+		if (cairo_status(context) == CAIRO_STATUS_SUCCESS) {
+			// Even when status is success, the target surface may have been
+			// finished whch may cause an assertion to fail crashing the application.
+			// The cairo_surface_has_show_text_glyphs call checks the finished flag
+			// and when set, sets the status to CAIRO_STATUS_SURFACE_FINISHED
+			// which leads to warning messages instead of crashes.
+			// Performing the check in this method as it is called rarely and has no
+			// other side effects.
+			cairo_surface_t *psurfContext = cairo_get_target(context);
+			if (psurfContext) {
+				cairo_surface_has_show_text_glyphs(psurfContext);
+			}
+		}
+		return cairo_status(context) == CAIRO_STATUS_SUCCESS;
+	}
 	return inited;
 }
 

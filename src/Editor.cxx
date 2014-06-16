@@ -1830,6 +1830,13 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 	RefreshStyleData();
 	RefreshPixMaps(surfWindow);
 
+	// On GTK+ with Ubuntu overlay scroll bars, the surface may have been finished
+	// at this point. The Initialised call checks for this case and sets the status
+	// to be bad which avoids crashes in following calls.
+	if (!surfWindow->Initialised()) {
+		return;
+	}
+
 	PRectangle rcMargin = GetClientRectangle();
 	Point ptOrigin = GetVisibleOriginInMain();
 	rcMargin.Move(0, -ptOrigin.y);
