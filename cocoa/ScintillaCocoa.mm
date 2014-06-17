@@ -656,17 +656,6 @@ void ScintillaCocoa::CancelModes() {
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Helper function to get the outer container which represents the Scintilla editor on application side.
- */
-ScintillaView* ScintillaCocoa::TopContainer()
-{
-  NSView* container = static_cast<NSView*>(wMain.GetID());
-  return static_cast<ScintillaView*>([[[container superview] superview] superview]);
-}
-
-//--------------------------------------------------------------------------------------------------
-
-/**
  * Helper function to get the scrolling view.
  */
 NSScrollView* ScintillaCocoa::ScrollContainer() {
@@ -718,7 +707,7 @@ PRectangle ScintillaCocoa::GetClientRectangle()
  */
 PRectangle ScintillaCocoa::GetClientDrawingRectangle() {
 #if MAC_OS_X_VERSION_MAX_ALLOWED > 1080
-  SCIContentView *content = ContentView();
+  NSView *content = ContentView();
   if ([content respondsToSelector: @selector(setPreparedContentRect:)]) {
     NSRect rcPrepared = [content preparedContentRect];
     if (!NSIsEmptyRect(rcPrepared))
@@ -760,7 +749,7 @@ void ScintillaCocoa::DiscardOverdraw()
 {
 #if MAC_OS_X_VERSION_MAX_ALLOWED > 1080
   // If running on 10.9, reset prepared area to visible area
-  SCIContentView *content = ContentView();
+  NSView *content = ContentView();
   if ([content respondsToSelector: @selector(setPreparedContentRect:)]) {
     content.preparedContentRect = [content visibleRect];
   }

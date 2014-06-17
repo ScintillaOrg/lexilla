@@ -133,7 +133,6 @@ public:
   void RegisterNotifyCallback(intptr_t windowid, SciNotifyFunc callback);
   sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
-  ScintillaView* TopContainer();
   NSScrollView* ScrollContainer();
   SCIContentView* ContentView();
 
