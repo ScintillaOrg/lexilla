@@ -298,7 +298,7 @@
 					SCI_LEXER,
 					SCI_NAMESPACE,
 				);
-				HEADER_SEARCH_PATHS = "../..//**";
+				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
@@ -324,7 +324,7 @@
 					SCI_LEXER,
 					SCI_NAMESPACE,
 				);
-				HEADER_SEARCH_PATHS = "../..//**";
+				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
