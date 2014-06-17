@@ -186,13 +186,13 @@
 		2744E5B30FC168C500E85C33 /* PlatCocoa.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2744E5AE0FC168C500E85C33 /* PlatCocoa.mm */; };
 		2744E5B50FC168C500E85C33 /* ScintillaCocoa.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2744E5B00FC168C500E85C33 /* ScintillaCocoa.mm */; };
 		2744E5B60FC168C500E85C33 /* ScintillaView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2744E5B10FC168C500E85C33 /* ScintillaView.mm */; };
-		2791F3C60FC19F71009DBCF9 /* PlatCocoa.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E59E0FC168A100E85C33 /* PlatCocoa.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		2791F3C70FC19F71009DBCF9 /* Platform.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E4850FC1678600E85C33 /* Platform.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2791F3C60FC19F71009DBCF9 /* PlatCocoa.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E59E0FC168A100E85C33 /* PlatCocoa.h */; };
+		2791F3C70FC19F71009DBCF9 /* Platform.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E4850FC1678600E85C33 /* Platform.h */; };
 		2791F3C80FC19F71009DBCF9 /* SciLexer.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E4870FC1678600E85C33 /* SciLexer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2791F3C90FC19F71009DBCF9 /* Scintilla.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E4880FC1678600E85C33 /* Scintilla.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		2791F3E00FC1A390009DBCF9 /* ScintillaCocoa.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E5A20FC168A100E85C33 /* ScintillaCocoa.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		2791F3E30FC1A3AE009DBCF9 /* QuartzTextLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E59F0FC168A100E85C33 /* QuartzTextLayout.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		2791F3E40FC1A3AE009DBCF9 /* QuartzTextStyleAttribute.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E5A00FC168A100E85C33 /* QuartzTextStyleAttribute.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2791F3E00FC1A390009DBCF9 /* ScintillaCocoa.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E5A20FC168A100E85C33 /* ScintillaCocoa.h */; };
+		2791F3E30FC1A3AE009DBCF9 /* QuartzTextLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E59F0FC168A100E85C33 /* QuartzTextLayout.h */; };
+		2791F3E40FC1A3AE009DBCF9 /* QuartzTextStyleAttribute.h in Headers */ = {isa = PBXBuildFile; fileRef = 2744E5A00FC168A100E85C33 /* QuartzTextStyleAttribute.h */; };
 		27FEF4540FC1B413005E115A /* info_bar_bg.png in Resources */ = {isa = PBXBuildFile; fileRef = 27FEF4510FC1B413005E115A /* info_bar_bg.png */; };
 		27FEF4550FC1B413005E115A /* mac_cursor_busy.png in Resources */ = {isa = PBXBuildFile; fileRef = 27FEF4520FC1B413005E115A /* mac_cursor_busy.png */; };
 		27FEF4560FC1B413005E115A /* mac_cursor_flipped.png in Resources */ = {isa = PBXBuildFile; fileRef = 27FEF4530FC1B413005E115A /* mac_cursor_flipped.png */; };
@@ -760,14 +760,14 @@
 			files = (
 				2744E5A40FC168A100E85C33 /* InfoBar.h in Headers */,
 				2744E5AC0FC168B200E85C33 /* InfoBarCommunicator.h in Headers */,
+				2744E5AA0FC168A100E85C33 /* ScintillaView.h in Headers */,
+				280056FB188DDD2C00F200AE /* SparseState.h in Headers */,
+				2791F3C80FC19F71009DBCF9 /* SciLexer.h in Headers */,
 				2791F3C60FC19F71009DBCF9 /* PlatCocoa.h in Headers */,
 				2791F3E30FC1A3AE009DBCF9 /* QuartzTextLayout.h in Headers */,
 				2791F3E40FC1A3AE009DBCF9 /* QuartzTextStyleAttribute.h in Headers */,
 				2791F3E00FC1A390009DBCF9 /* ScintillaCocoa.h in Headers */,
-				2744E5AA0FC168A100E85C33 /* ScintillaView.h in Headers */,
 				2791F3C70FC19F71009DBCF9 /* Platform.h in Headers */,
-				280056FB188DDD2C00F200AE /* SparseState.h in Headers */,
-				2791F3C80FC19F71009DBCF9 /* SciLexer.h in Headers */,
 				2791F3C90FC19F71009DBCF9 /* Scintilla.h in Headers */,
 				114B6FA111FA75DB004FB6AB /* ILexer.h in Headers */,
 				114B6FBD11FA7623004FB6AB /* AutoComplete.h in Headers */,
