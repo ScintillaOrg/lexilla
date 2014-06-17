@@ -8,7 +8,7 @@
  * This file is dual licensed under LGPL v2.1 and the Scintilla license (http://www.scintilla.org/License.txt).
  */
 
-enum IBDisplay {
+typedef NS_OPTIONS(NSUInteger, IBDisplay) {
   IBShowZoom          = 0x01,
   IBShowCaretPosition = 0x02,
   IBShowStatusText    = 0x04,
