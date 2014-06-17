@@ -120,9 +120,6 @@ extern NSString *const SCIUpdateUINotification;
 
 + (Class) contentViewClass;
 
-- (void) positionSubViews;
-
-- (void) sendNotification: (NSString*) notificationName;
 - (void) notify: (NotificationType) type message: (NSString*) message location: (NSPoint) location
           value: (float) value;
 - (void) setCallback: (id <InfoBarCommunicator>) callback;
@@ -132,7 +129,6 @@ extern NSString *const SCIUpdateUINotification;
 
 // Scroller handling
 - (void) setMarginWidth: (int) width;
-- (void) scrollerAction: (id) sender;
 - (SCIContentView*) content;
 - (void) updateMarginCursors;
 
