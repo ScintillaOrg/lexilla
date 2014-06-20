@@ -527,6 +527,7 @@ void SurfaceImpl::Release() {
 }
 
 bool SurfaceImpl::Initialised() {
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 8, 0)
 	if (inited && context) {
 		if (cairo_status(context) == CAIRO_STATUS_SUCCESS) {
 			// Even when status is success, the target surface may have been
@@ -543,6 +544,7 @@ bool SurfaceImpl::Initialised() {
 		}
 		return cairo_status(context) == CAIRO_STATUS_SUCCESS;
 	}
+#endif
 	return inited;
 }
 
