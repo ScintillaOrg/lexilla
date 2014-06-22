@@ -637,7 +637,7 @@ void PositionCache::SetSize(size_t size_) {
 	pces.resize(size_);
 }
 
-void PositionCache::MeasureWidths(Surface *surface, ViewStyle &vstyle, unsigned int styleNumber,
+void PositionCache::MeasureWidths(Surface *surface, const ViewStyle &vstyle, unsigned int styleNumber,
 	const char *s, unsigned int len, XYPOSITION *positions, Document *pdoc) {
 
 	allClear = false;
@@ -667,7 +667,8 @@ void PositionCache::MeasureWidths(Surface *surface, ViewStyle &vstyle, unsigned 
 		XYPOSITION xStartSegment = 0;
 		while (startSegment < len) {
 			unsigned int lenSegment = pdoc->SafeSegment(s + startSegment, len - startSegment, BreakFinder::lengthEachSubdivision);
-			surface->MeasureWidths(vstyle.styles[styleNumber].font, s + startSegment, lenSegment, positions + startSegment);
+			FontAlias fontStyle = vstyle.styles[styleNumber].font;
+			surface->MeasureWidths(fontStyle, s + startSegment, lenSegment, positions + startSegment);
 			for (unsigned int inSeg = 0; inSeg < lenSegment; inSeg++) {
 				positions[startSegment + inSeg] += xStartSegment;
 			}
@@ -675,7 +676,8 @@ void PositionCache::MeasureWidths(Surface *surface, ViewStyle &vstyle, unsigned 
 			startSegment += lenSegment;
 		}
 	} else {
-		surface->MeasureWidths(vstyle.styles[styleNumber].font, s, len, positions);
+		FontAlias fontStyle = vstyle.styles[styleNumber].font;
+		surface->MeasureWidths(fontStyle, s, len, positions);
 	}
 	if (probe < pces.size()) {
 		// Store into cache
