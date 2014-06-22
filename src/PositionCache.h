@@ -61,9 +61,9 @@ public:
 	Range SubLineRange(int line) const;
 	bool InLine(int offset, int line) const;
 	void SetLineStart(int line, int start);
-	void SetBracesHighlight(Range rangeLine, Position braces[],
+	void SetBracesHighlight(Range rangeLine, const Position braces[],
 		char bracesMatchStyle, int xHighlight, bool ignoreStyle);
-	void RestoreBracesHighlight(Range rangeLine, Position braces[], bool ignoreStyle);
+	void RestoreBracesHighlight(Range rangeLine, const Position braces[], bool ignoreStyle);
 	int FindBefore(XYPOSITION x, int lower, int upper) const;
 	int FindPositionFromX(XYPOSITION x, Range range, bool charPosition) const;
 	Point PointFromPosition(int posInLine, int lineHeight) const;
@@ -130,7 +130,7 @@ public:
 	SpecialRepresentations();
 	void SetRepresentation(const char *charBytes, const char *value);
 	void ClearRepresentation(const char *charBytes);
-	Representation *RepresentationFromCharacter(const char *charBytes, size_t len);
+	const Representation *RepresentationFromCharacter(const char *charBytes, size_t len) const;
 	bool Contains(const char *charBytes, size_t len) const;
 	void Clear();
 };
@@ -138,8 +138,8 @@ public:
 struct TextSegment {
 	int start;
 	int length;
-	Representation *representation;
-	TextSegment(int start_=0, int length_=0, Representation *representation_=0) :
+	const Representation *representation;
+	TextSegment(int start_=0, int length_=0, const Representation *representation_=0) :
 		start(start_), length(length_), representation(representation_) {
 	}
 	int end() const {
@@ -149,7 +149,7 @@ struct TextSegment {
 
 // Class to break a line of text into shorter runs at sensible places.
 class BreakFinder {
-	LineLayout *ll;
+	const LineLayout *ll;
 	int lineStart;
 	int lineEnd;
 	int posLineStart;
@@ -158,9 +158,9 @@ class BreakFinder {
 	unsigned int saeCurrentPos;
 	int saeNext;
 	int subBreak;
-	Document *pdoc;
+	const Document *pdoc;
 	EncodingFamily encodingFamily;
-	SpecialRepresentations *preprs;
+	const SpecialRepresentations *preprs;
 	void Insert(int val);
 	// Private so BreakFinder objects can not be copied
 	BreakFinder(const BreakFinder &);
@@ -170,8 +170,8 @@ public:
 	enum { lengthStartSubdivision = 300 };
 	// Try to make each subdivided run lengthEachSubdivision or shorter.
 	enum { lengthEachSubdivision = 100 };
-	BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posLineStart_,
-		int xStart, bool breakForSelection, Document *pdoc_, SpecialRepresentations *preprs_);
+	BreakFinder(const LineLayout *ll_, int lineStart_, int lineEnd_, int posLineStart_,
+		int xStart, bool breakForSelection, const Document *pdoc_, const SpecialRepresentations *preprs_);
 	~BreakFinder();
 	TextSegment Next();
 	bool More() const;

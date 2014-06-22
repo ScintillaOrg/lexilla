@@ -148,7 +148,7 @@ void LineLayout::SetLineStart(int line, int start) {
 	lineStarts[line] = start;
 }
 
-void LineLayout::SetBracesHighlight(Range rangeLine, Position braces[],
+void LineLayout::SetBracesHighlight(Range rangeLine, const Position braces[],
                                     char bracesMatchStyle, int xHighlight, bool ignoreStyle) {
 	if (!ignoreStyle && rangeLine.ContainsCharacter(braces[0])) {
 		int braceOffset = braces[0] - rangeLine.start;
@@ -170,7 +170,7 @@ void LineLayout::SetBracesHighlight(Range rangeLine, Position braces[],
 	}
 }
 
-void LineLayout::RestoreBracesHighlight(Range rangeLine, Position braces[], bool ignoreStyle) {
+void LineLayout::RestoreBracesHighlight(Range rangeLine, const Position braces[], bool ignoreStyle) {
 	if (!ignoreStyle && rangeLine.ContainsCharacter(braces[0])) {
 		int braceOffset = braces[0] - rangeLine.start;
 		if (braceOffset < numCharsInLine) {
@@ -405,11 +405,11 @@ void SpecialRepresentations::ClearRepresentation(const char *charBytes) {
 	}
 }
 
-Representation *SpecialRepresentations::RepresentationFromCharacter(const char *charBytes, size_t len) {
+const Representation *SpecialRepresentations::RepresentationFromCharacter(const char *charBytes, size_t len) const {
 	PLATFORM_ASSERT(len <= 4);
 	if (!startByteHasReprs[static_cast<unsigned char>(charBytes[0])])
 		return 0;
-	MapRepresentation::iterator it = mapReprs.find(KeyFromString(charBytes, len));
+	MapRepresentation::const_iterator it = mapReprs.find(KeyFromString(charBytes, len));
 	if (it != mapReprs.end()) {
 		return &(it->second);
 	}
@@ -440,8 +440,8 @@ void BreakFinder::Insert(int val) {
 	}
 }
 
-BreakFinder::BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posLineStart_,
-	int xStart, bool breakForSelection, Document *pdoc_, SpecialRepresentations *preprs_) :
+BreakFinder::BreakFinder(const LineLayout *ll_, int lineStart_, int lineEnd_, int posLineStart_,
+	int xStart, bool breakForSelection, const Document *pdoc_, const SpecialRepresentations *preprs_) :
 	ll(ll_),
 	lineStart(lineStart_),
 	lineEnd(lineEnd_),
@@ -495,7 +495,7 @@ TextSegment BreakFinder::Next() {
 				charWidth = UTF8DrawBytes(reinterpret_cast<unsigned char *>(ll->chars) + nextBreak, lineEnd - nextBreak);
 			else if (encodingFamily == efDBCS)
 				charWidth = pdoc->IsDBCSLeadByte(ll->chars[nextBreak]) ? 2 : 1;
-			Representation *repr = preprs->RepresentationFromCharacter(ll->chars + nextBreak, charWidth);
+			const Representation *repr = preprs->RepresentationFromCharacter(ll->chars + nextBreak, charWidth);
 			if (((nextBreak > 0) && (ll->styles[nextBreak] != ll->styles[nextBreak - 1])) ||
 					repr ||
 					(nextBreak == saeNext)) {
