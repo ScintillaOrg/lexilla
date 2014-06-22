@@ -2692,9 +2692,9 @@ void Editor::DrawIndicators(Surface *surface, const ViewStyle &vsDraw, int line,
 	}
 
 	// Use indicators to highlight matching braces
-	if ((vs.braceHighlightIndicatorSet && (bracesMatchStyle == STYLE_BRACELIGHT)) ||
-		(vs.braceBadLightIndicatorSet && (bracesMatchStyle == STYLE_BRACEBAD))) {
-		int braceIndicator = (bracesMatchStyle == STYLE_BRACELIGHT) ? vs.braceHighlightIndicator : vs.braceBadLightIndicator;
+	if ((vsDraw.braceHighlightIndicatorSet && (bracesMatchStyle == STYLE_BRACELIGHT)) ||
+		(vsDraw.braceBadLightIndicatorSet && (bracesMatchStyle == STYLE_BRACEBAD))) {
+		int braceIndicator = (bracesMatchStyle == STYLE_BRACELIGHT) ? vsDraw.braceHighlightIndicator : vsDraw.braceBadLightIndicator;
 		if (under == vsDraw.indicators[braceIndicator].under) {
 			Range rangeLine(posLineStart + lineStart, posLineEnd);
 			if (rangeLine.ContainsCharacter(braces[0])) {
@@ -2722,15 +2722,15 @@ void Editor::DrawAnnotation(Surface *surface, const ViewStyle &vsDraw, int line,
 	if (stAnnotation.text && ValidStyledText(vsDraw, vsDraw.annotationStyleOffset, stAnnotation)) {
 		surface->FillRectangle(rcSegment, vsDraw.styles[0].back);
 		rcSegment.left = static_cast<XYPOSITION>(xStart);
-		if (trackLineWidth || (vs.annotationVisible == ANNOTATION_BOXED)) {
+		if (trackLineWidth || (vsDraw.annotationVisible == ANNOTATION_BOXED)) {
 			// Only care about calculating width if tracking or need to draw box
 			int widthAnnotation = WidestLineWidth(surface, vsDraw, vsDraw.annotationStyleOffset, stAnnotation);
-			if (vs.annotationVisible == ANNOTATION_BOXED) {
+			if (vsDraw.annotationVisible == ANNOTATION_BOXED) {
 				widthAnnotation += static_cast<int>(vsDraw.spaceWidth * 2); // Margins
 			}
 			if (widthAnnotation > lineWidthMaxSeen)
 				lineWidthMaxSeen = widthAnnotation;
-			if (vs.annotationVisible == ANNOTATION_BOXED) {
+			if (vsDraw.annotationVisible == ANNOTATION_BOXED) {
 				rcSegment.left = static_cast<XYPOSITION>(xStart + indent);
 				rcSegment.right = rcSegment.left + widthAnnotation;
 			}
@@ -2745,14 +2745,14 @@ void Editor::DrawAnnotation(Surface *surface, const ViewStyle &vsDraw, int line,
 			lineInAnnotation++;
 		}
 		PRectangle rcText = rcSegment;
-		if (vs.annotationVisible == ANNOTATION_BOXED) {
+		if (vsDraw.annotationVisible == ANNOTATION_BOXED) {
 			surface->FillRectangle(rcText,
 				vsDraw.styles[stAnnotation.StyleAt(start) + vsDraw.annotationStyleOffset].back);
 			rcText.left += vsDraw.spaceWidth;
 		}
 		DrawStyledText(surface, vsDraw, vsDraw.annotationStyleOffset, rcText, static_cast<int>(rcText.top + vsDraw.maxAscent),
 			stAnnotation, start, lengthAnnotation);
-		if (vs.annotationVisible == ANNOTATION_BOXED) {
+		if (vsDraw.annotationVisible == ANNOTATION_BOXED) {
 			surface->PenColour(vsDraw.styles[vsDraw.annotationStyleOffset].fore);
 			surface->MoveTo(static_cast<int>(rcSegment.left), static_cast<int>(rcSegment.top));
 			surface->LineTo(static_cast<int>(rcSegment.left), static_cast<int>(rcSegment.bottom));
@@ -3097,8 +3097,8 @@ void Editor::DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int l
 									}
 									PRectangle rcDot(xmid + xStart - static_cast<XYPOSITION>(subLineStart),
 										rcSegment.top + vsDraw.lineHeight / 2, 0.0f, 0.0f);
-									rcDot.right = rcDot.left + vs.whitespaceSize;
-									rcDot.bottom = rcDot.top + vs.whitespaceSize;
+									rcDot.right = rcDot.left + vsDraw.whitespaceSize;
+									rcDot.bottom = rcDot.top + vsDraw.whitespaceSize;
 									surface->FillRectangle(rcDot, textFore);
 								}
 							}
