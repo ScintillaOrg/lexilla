@@ -2258,7 +2258,7 @@ void Editor::LayoutLine(int line, Surface *surface, const ViewStyle &vstyle, Lin
 		ll->positions[0] = 0;
 		bool lastSegItalics = false;
 
-		BreakFinder bfLayout(ll, 0, numCharsInLine, posLineStart, 0, false, pdoc, &reprs);
+		BreakFinder bfLayout(ll, NULL, 0, numCharsInLine, posLineStart, 0, false, pdoc, &reprs);
 		while (bfLayout.More()) {
 
 			const TextSegment ts = bfLayout.Next();
@@ -2898,10 +2898,8 @@ void Editor::DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int l
 	// Does not take margin into account but not significant
 	const int xStartVisible = static_cast<int>(subLineStart) - xStart;
 
-	ll->psel = &sel;
-
 	if (twoPhaseDraw) {
-		BreakFinder bfBack(ll, lineStart, lineEnd, posLineStart, xStartVisible, selBackDrawn, pdoc, &reprs);
+		BreakFinder bfBack(ll, &sel, lineStart, lineEnd, posLineStart, xStartVisible, selBackDrawn, pdoc, &reprs);
 
 		// Background drawing loop
 		while (bfBack.More()) {
@@ -2994,7 +2992,7 @@ void Editor::DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int l
 
 	inIndentation = subLine == 0;	// Do not handle indentation except on first subline.
 	// Foreground drawing loop
-	BreakFinder bfFore(ll, lineStart, lineEnd, posLineStart, xStartVisible,
+	BreakFinder bfFore(ll, &sel, lineStart, lineEnd, posLineStart, xStartVisible,
 		((!twoPhaseDraw && selBackDrawn) || vsDraw.selColours.fore.isSet), pdoc, &reprs);
 
 	while (bfFore.More()) {

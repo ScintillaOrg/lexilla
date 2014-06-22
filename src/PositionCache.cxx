@@ -54,7 +54,6 @@ LineLayout::LineLayout(int maxLineLength_) :
 	validity(llInvalid),
 	xHighlightGuide(0),
 	highlightColumn(0),
-	psel(NULL),
 	containsCaret(false),
 	edgeColumn(0),
 	chars(0),
@@ -440,7 +439,7 @@ void BreakFinder::Insert(int val) {
 	}
 }
 
-BreakFinder::BreakFinder(const LineLayout *ll_, int lineStart_, int lineEnd_, int posLineStart_,
+BreakFinder::BreakFinder(const LineLayout *ll_, const Selection *psel, int lineStart_, int lineEnd_, int posLineStart_,
 	int xStart, bool breakForSelection, const Document *pdoc_, const SpecialRepresentations *preprs_) :
 	ll(ll_),
 	lineStart(lineStart_),
@@ -467,8 +466,8 @@ BreakFinder::BreakFinder(const LineLayout *ll_, int lineStart_, int lineEnd_, in
 		SelectionPosition posStart(posLineStart);
 		SelectionPosition posEnd(posLineStart + lineEnd);
 		SelectionSegment segmentLine(posStart, posEnd);
-		for (size_t r=0; r<ll->psel->Count(); r++) {
-			SelectionSegment portion = ll->psel->Range(r).Intersect(segmentLine);
+		for (size_t r=0; r<psel->Count(); r++) {
+			SelectionSegment portion = psel->Range(r).Intersect(segmentLine);
 			if (!(portion.start == portion.end)) {
 				if (portion.start.IsValid())
 					Insert(portion.start.Position() - posLineStart);
