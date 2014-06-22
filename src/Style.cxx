@@ -19,7 +19,7 @@ using namespace Scintilla;
 FontAlias::FontAlias() {
 }
 
-FontAlias::FontAlias(const FontAlias &other) {
+FontAlias::FontAlias(const FontAlias &other) : Font() {
 	SetID(other.fid);
 }
 
