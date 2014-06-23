@@ -33,7 +33,7 @@ struct FontSpecification {
 
 // Just like Font but only has a copy of the FontID so should not delete it
 class FontAlias : public Font {
-	// Private so FontAlias objects can not be copied
+	// Private so FontAlias objects can not be assigned except for intiialization
 	FontAlias &operator=(const FontAlias &);
 public:
 	FontAlias();
