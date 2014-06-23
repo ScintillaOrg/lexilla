@@ -453,7 +453,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int lineVisible, int xStart,
 		PRectangle rcLine, LineLayout *ll, int subLine);
 	void DrawBlockCaret(Surface *surface, const ViewStyle &vsDraw, LineLayout *ll, int subLine,
-		int xStart, int offset, int posCaret, PRectangle rcCaret, ColourDesired caretColour);
+		int xStart, int offset, int posCaret, PRectangle rcCaret, ColourDesired caretColour) const;
 	void DrawCarets(Surface *surface, const ViewStyle &vsDraw, int line, int xStart,
 		PRectangle rcLine, LineLayout *ll, int subLine);
 	void RefreshPixMaps(Surface *surfaceWindow);

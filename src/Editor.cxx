@@ -3254,7 +3254,7 @@ void Editor::DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int l
 }
 
 void Editor::DrawBlockCaret(Surface *surface, const ViewStyle &vsDraw, LineLayout *ll, int subLine,
-							int xStart, int offset, int posCaret, PRectangle rcCaret, ColourDesired caretColour) {
+							int xStart, int offset, int posCaret, PRectangle rcCaret, ColourDesired caretColour) const {
 
 	int lineStart = ll->LineStart(subLine);
 	int posBefore = posCaret;
