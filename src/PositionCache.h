@@ -42,8 +42,7 @@ public:
 	char bracePreviousStyles[2];
 
 	// Hotspot support
-	int hsStart;
-	int hsEnd;
+	Range hotspot;
 
 	// Wrapped line support
 	int widthLine;

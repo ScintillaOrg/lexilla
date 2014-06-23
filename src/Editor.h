@@ -309,8 +309,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	ContractionState cs;
 
 	// Hotspot support
-	int hsStart;
-	int hsEnd;
+	Range hotspot;
 
 	// Wrapping support
 	int wrapWidth;
@@ -623,7 +622,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool PositionIsHotspot(int position) const;
 	bool PointIsHotspot(Point pt);
 	void SetHotSpotRange(Point *pt);
-	void GetHotSpotRange(int &hsStart, int &hsEnd) const;
+	Range GetHotSpotRange() const;
 
 	int CodePage() const;
 	virtual bool ValidCodePage(int /* codePage */) const { return true; }

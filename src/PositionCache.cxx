@@ -59,8 +59,7 @@ LineLayout::LineLayout(int maxLineLength_) :
 	chars(0),
 	styles(0),
 	positions(0),
-	hsStart(0),
-	hsEnd(0),
+	hotspot(0,0),
 	widthLine(wrapWidthInfinite),
 	lines(1),
 	wrapIndent(0) {

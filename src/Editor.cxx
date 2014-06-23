@@ -220,8 +220,7 @@ Editor::Editor() {
 
 	convertPastes = true;
 
-	hsStart = -1;
-	hsEnd = -1;
+	hotspot = Range(invalidPosition);
 
 	llc.SetLevel(LineLayoutCache::llcCaret);
 	posCache.SetSize(0x400);
@@ -2920,7 +2919,7 @@ void Editor::DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int l
 					rcSegment.right = rcLine.right;
 
 				const int inSelection = hideSelection ? 0 : sel.CharacterInSelection(iDoc);
-				const bool inHotspot = (ll->hsStart != -1) && (iDoc >= ll->hsStart) && (iDoc < ll->hsEnd);
+				const bool inHotspot = (ll->hotspot.Valid()) && ll->hotspot.ContainsCharacter(iDoc);
 				ColourDesired textBack = TextBackground(vsDraw, overrideBackground, background, inSelection,
 					inHotspot, ll->styles[i], i, ll);
 				if (ts.representation) {
@@ -3010,7 +3009,8 @@ void Editor::DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int l
 			ColourDesired textFore = vsDraw.styles[styleMain].fore;
 			FontAlias textFont = vsDraw.styles[styleMain].font;
 			//hotspot foreground
-			if (ll->hsStart != -1 && iDoc >= ll->hsStart && iDoc < hsEnd) {
+			const bool inHotspot = (ll->hotspot.Valid()) && ll->hotspot.ContainsCharacter(iDoc);
+			if (inHotspot) {
 				if (vsDraw.hotspotColours.fore.isSet)
 					textFore = vsDraw.hotspotColours.fore;
 			}
@@ -3018,7 +3018,6 @@ void Editor::DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int l
 			if (inSelection && (vsDraw.selColours.fore.isSet)) {
 				textFore = (inSelection == 1) ? vsDraw.selColours.fore : vsDraw.selAdditionalForeground;
 			}
-			const bool inHotspot = (ll->hsStart != -1) && (iDoc >= ll->hsStart) && (iDoc < ll->hsEnd);
 			ColourDesired textBack = TextBackground(vsDraw, overrideBackground, background, inSelection, inHotspot, styleMain, i, ll);
 			if (ts.representation) {
 				if (ll->chars[i] == '\t') {
@@ -3117,7 +3116,7 @@ void Editor::DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int l
 					}
 				}
 			}
-			if (ll->hsStart != -1 && vsDraw.hotspotUnderline && iDoc >= ll->hsStart && iDoc < ll->hsEnd) {
+			if (ll->hotspot.Valid() && vsDraw.hotspotUnderline && ll->hotspot.ContainsCharacter(iDoc)) {
 				PRectangle rcUL = rcSegment;
 				rcUL.top = rcUL.top + vsDraw.maxAscent + 1;
 				rcUL.bottom = rcUL.top + 1;
@@ -3620,7 +3619,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 					ll->containsCaret = false;
 				}
 
-				GetHotSpotRange(ll->hsStart, ll->hsEnd);
+				ll->hotspot = GetHotSpotRange();
 
 				PRectangle rcLine = rcTextArea;
 				rcLine.top = static_cast<XYPOSITION>(ypos);
@@ -6519,35 +6518,28 @@ void Editor::SetHotSpotRange(Point *pt) {
 		// If we don't limit this to word characters then the
 		// range can encompass more than the run range and then
 		// the underline will not be drawn properly.
-		int hsStart_ = pdoc->ExtendStyleRange(pos, -1, vs.hotspotSingleLine);
-		int hsEnd_ = pdoc->ExtendStyleRange(pos, 1, vs.hotspotSingleLine);
+		Range hsNew;
+		hsNew.start = pdoc->ExtendStyleRange(pos, -1, vs.hotspotSingleLine);
+		hsNew.end = pdoc->ExtendStyleRange(pos, 1, vs.hotspotSingleLine);
 
 		// Only invalidate the range if the hotspot range has changed...
-		if (hsStart_ != hsStart || hsEnd_ != hsEnd) {
-			if (hsStart != -1) {
-				InvalidateRange(hsStart, hsEnd);
+		if (!(hsNew == hotspot)) {
+			if (hotspot.Valid()) {
+				InvalidateRange(hotspot.start, hotspot.end);
 			}
-			hsStart = hsStart_;
-			hsEnd = hsEnd_;
-			InvalidateRange(hsStart, hsEnd);
+			hotspot = hsNew;
+			InvalidateRange(hotspot.start, hotspot.end);
 		}
 	} else {
-		if (hsStart != -1) {
-			int hsStart_ = hsStart;
-			int hsEnd_ = hsEnd;
-			hsStart = -1;
-			hsEnd = -1;
-			InvalidateRange(hsStart_, hsEnd_);
-		} else {
-			hsStart = -1;
-			hsEnd = -1;
+		if (hotspot.Valid()) {
+			InvalidateRange(hotspot.start, hotspot.end);
 		}
+		hotspot = Range(invalidPosition);
 	}
 }
 
-void Editor::GetHotSpotRange(int &hsStart_, int &hsEnd_) const {
-	hsStart_ = hsStart;
-	hsEnd_ = hsEnd;
+Range Editor::GetHotSpotRange() const {
+	return hotspot;
 }
 
 void Editor::ButtonMoveWithModifiers(Point pt, int modifiers) {
@@ -6634,7 +6626,7 @@ void Editor::ButtonMoveWithModifiers(Point pt, int modifiers) {
 		}
 		EnsureCaretVisible(false, false, true);
 
-		if (hsStart != -1 && !PointIsHotspot(pt))
+		if (hotspot.Valid() && !PointIsHotspot(pt))
 			SetHotSpotRange(NULL);
 
 		if (hotSpotClickPos != INVALID_POSITION && PositionFromLocation(pt,true,true) != hotSpotClickPos) {
