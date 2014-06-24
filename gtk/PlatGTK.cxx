@@ -552,7 +552,7 @@ void SurfaceImpl::Init(WindowID wid) {
 	// if we are only created from a window ID, we can't perform drawing
 	psurf = 0;
 	context = 0;
-	createdGC = true;
+	createdGC = false;
 	pcontext = gtk_widget_create_pango_context(PWidget(wid));
 	PLATFORM_ASSERT(pcontext);
 	layout = pango_layout_new(pcontext);
