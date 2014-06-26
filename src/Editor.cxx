@@ -2500,7 +2500,7 @@ void DrawTextBlob(Surface *surface, const ViewStyle &vsDraw, PRectangle rcSegmen
 
 void Editor::DrawEOL(Surface *surface, const ViewStyle &vsDraw, PRectangle rcLine, LineLayout *ll,
         int line, int lineEnd, int xStart, int subLine, XYACCUMULATOR subLineStart,
-        ColourOptional background, bool drawWrapMarkEnd, ColourDesired wrapColour) {
+        ColourOptional background) {
 
 	const int posLineStart = pdoc->LineStart(line);
 	PRectangle rcSegment = rcLine;
@@ -2633,6 +2633,14 @@ void Editor::DrawEOL(Surface *surface, const ViewStyle &vsDraw, PRectangle rcLin
 		}
 	}
 
+	bool drawWrapMarkEnd = false;
+
+	if (vsDraw.wrapVisualFlags & SC_WRAPVISUALFLAG_END) {
+		if (subLine + 1 < ll->lines) {
+			drawWrapMarkEnd = ll->LineStart(subLine + 1) != 0;
+		}
+	}
+
 	if (drawWrapMarkEnd) {
 		PRectangle rcPlace = rcSegment;
 
@@ -2644,7 +2652,7 @@ void Editor::DrawEOL(Surface *surface, const ViewStyle &vsDraw, PRectangle rcLin
 			rcPlace.right = rcLine.right;
 			rcPlace.left = rcPlace.right - vsDraw.aveCharWidth;
 		}
-		DrawWrapMarker(surface, rcPlace, true, wrapColour);
+		DrawWrapMarker(surface, rcPlace, true, vsDraw.WrapColour());
 	}
 }
 
@@ -2804,16 +2812,6 @@ void Editor::DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int l
 		}
 	}
 
-	const ColourDesired wrapColour = vsDraw.WrapColour();
-
-	bool drawWrapMarkEnd = false;
-
-	if (vsDraw.wrapVisualFlags & SC_WRAPVISUALFLAG_END) {
-		if (subLine + 1 < ll->lines) {
-			drawWrapMarkEnd = ll->LineStart(subLine + 1) != 0;
-		}
-	}
-
 	if (ll->wrapIndent != 0) {
 
 		bool continuedWrapLine = false;
@@ -2844,7 +2842,7 @@ void Editor::DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int l
 				else
 					rcPlace.right = rcPlace.left + vsDraw.aveCharWidth;
 
-				DrawWrapMarker(surface, rcPlace, false, wrapColour);
+				DrawWrapMarker(surface, rcPlace, false, vsDraw.WrapColour());
 			}
 
 			xStart += static_cast<int>(ll->wrapIndent);
@@ -2921,8 +2919,7 @@ void Editor::DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int l
 		}
 
 		DrawEOL(surface, vsDraw, rcLine, ll, line, lineEnd,
-		        xStart, subLine, subLineStart, background,
-		        drawWrapMarkEnd, wrapColour);
+		        xStart, subLine, subLineStart, background);
 	}
 
 	DrawIndicators(surface, vsDraw, line, xStart, rcLine, ll, subLine, lineEnd, true);
@@ -3149,8 +3146,7 @@ void Editor::DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int l
 	// End of the drawing of the current line
 	if (!twoPhaseDraw) {
 		DrawEOL(surface, vsDraw, rcLine, ll, line, lineEnd,
-		        xStart, subLine, subLineStart, background,
-		        drawWrapMarkEnd, wrapColour);
+		        xStart, subLine, subLineStart, background);
 	}
 	if (!hideSelection && ((vsDraw.selAlpha != SC_ALPHA_NOALPHA) || (vsDraw.selAdditionalAlpha != SC_ALPHA_NOALPHA))) {
 		// For each selection draw

@@ -442,8 +442,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	static void DrawWrapMarker(Surface *surface, PRectangle rcPlace, bool isEndMarker, ColourDesired wrapColour);
 	void DrawEOL(Surface *surface, const ViewStyle &vsDraw, PRectangle rcLine, LineLayout *ll,
 		int line, int lineEnd, int xStart, int subLine, XYACCUMULATOR subLineStart,
-		ColourOptional background,
-		bool drawWrapMark, ColourDesired wrapColour);
+		ColourOptional background);
 	static void DrawIndicator(int indicNum, int startPos, int endPos, Surface *surface, const ViewStyle &vsDraw,
 		int xStart, PRectangle rcLine, LineLayout *ll, int subLine);
 	void DrawIndicators(Surface *surface, const ViewStyle &vsDraw, int line, int xStart,
