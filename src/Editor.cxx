@@ -2395,8 +2395,8 @@ ColourDesired Editor::SelectionBackground(const ViewStyle &vsDraw, bool main) co
 		vsDraw.selAdditionalBackground;
 }
 
-ColourDesired Editor::TextBackground(const ViewStyle &vsDraw, bool overrideBackground,
-        ColourDesired background, int inSelection, bool inHotspot, int styleMain, int i, LineLayout *ll) const {
+ColourDesired Editor::TextBackground(const ViewStyle &vsDraw,
+        ColourOptional background, int inSelection, bool inHotspot, int styleMain, int i, LineLayout *ll) const {
 	if (inSelection == 1) {
 		if (vsDraw.selColours.back.isSet && (vsDraw.selAlpha == SC_ALPHA_NOALPHA)) {
 			return SelectionBackground(vsDraw, true);
@@ -2413,7 +2413,7 @@ ColourDesired Editor::TextBackground(const ViewStyle &vsDraw, bool overrideBackg
 		if (inHotspot && vsDraw.hotspotColours.back.isSet)
 			return vsDraw.hotspotColours.back;
 	}
-	if (overrideBackground && (styleMain != STYLE_BRACELIGHT) && (styleMain != STYLE_BRACEBAD)) {
+	if (background.isSet && (styleMain != STYLE_BRACELIGHT) && (styleMain != STYLE_BRACEBAD)) {
 		return background;
 	} else {
 		return vsDraw.styles[styleMain].back;
@@ -2503,8 +2503,7 @@ void DrawTextBlob(Surface *surface, const ViewStyle &vsDraw, PRectangle rcSegmen
 
 void Editor::DrawEOL(Surface *surface, const ViewStyle &vsDraw, PRectangle rcLine, LineLayout *ll,
         int line, int lineEnd, int xStart, int subLine, XYACCUMULATOR subLineStart,
-        bool overrideBackground, ColourDesired background,
-        bool drawWrapMarkEnd, ColourDesired wrapColour) {
+        ColourOptional background, bool drawWrapMarkEnd, ColourDesired wrapColour) {
 
 	const int posLineStart = pdoc->LineStart(line);
 	PRectangle rcSegment = rcLine;
@@ -2521,7 +2520,7 @@ void Editor::DrawEOL(Surface *surface, const ViewStyle &vsDraw, PRectangle rcLin
 	if (virtualSpace) {
 		rcSegment.left = xEol + xStart;
 		rcSegment.right = xEol + xStart + virtualSpace;
-		surface->FillRectangle(rcSegment, overrideBackground ? background : vsDraw.styles[ll->styles[ll->numCharsInLine]].back);
+		surface->FillRectangle(rcSegment, background.isSet ? background : vsDraw.styles[ll->styles[ll->numCharsInLine]].back);
 		if (!hideSelection && ((vsDraw.selAlpha == SC_ALPHA_NOALPHA) || (vsDraw.selAdditionalAlpha == SC_ALPHA_NOALPHA))) {
 			SelectionSegment virtualSpaceRange(SelectionPosition(pdoc->LineEnd(line)), SelectionPosition(pdoc->LineEnd(line), sel.VirtualSpaceFor(pdoc->LineEnd(line))));
 			for (size_t r=0; r<sel.Count(); r++) {
@@ -2562,7 +2561,7 @@ void Editor::DrawEOL(Surface *surface, const ViewStyle &vsDraw, PRectangle rcLin
 			const char *ctrlChar;
 			unsigned char chEOL = ll->chars[eolPos];
 			int styleMain = ll->styles[eolPos];
-			ColourDesired textBack = TextBackground(vsDraw, overrideBackground, background, eolInSelection, false, styleMain, eolPos, ll);
+			ColourDesired textBack = TextBackground(vsDraw, background, eolInSelection, false, styleMain, eolPos, ll);
 			if (UTF8IsAscii(chEOL)) {
 				ctrlChar = ControlCharacterString(chEOL);
 			} else {
@@ -2602,7 +2601,7 @@ void Editor::DrawEOL(Surface *surface, const ViewStyle &vsDraw, PRectangle rcLin
 	if (eolInSelection && vsDraw.selColours.back.isSet && (line < pdoc->LinesTotal() - 1) && (alpha == SC_ALPHA_NOALPHA)) {
 		surface->FillRectangle(rcSegment, SelectionBackground(vsDraw, eolInSelection == 1));
 	} else {
-		if (overrideBackground) {
+		if (background.isSet) {
 			surface->FillRectangle(rcSegment, background);
 		} else if (line < pdoc->LinesTotal() - 1) {
 			surface->FillRectangle(rcSegment, vsDraw.styles[ll->styles[ll->numCharsInLine]].back);
@@ -2625,7 +2624,7 @@ void Editor::DrawEOL(Surface *surface, const ViewStyle &vsDraw, PRectangle rcLin
 	if (eolInSelection && vsDraw.selEOLFilled && vsDraw.selColours.back.isSet && (line < pdoc->LinesTotal() - 1) && (alpha == SC_ALPHA_NOALPHA)) {
 		surface->FillRectangle(rcSegment, SelectionBackground(vsDraw, eolInSelection == 1));
 	} else {
-		if (overrideBackground) {
+		if (background.isSet) {
 			surface->FillRectangle(rcSegment, background);
 		} else if (vsDraw.styles[ll->styles[ll->numCharsInLine]].eolFilled) {
 			surface->FillRectangle(rcSegment, vsDraw.styles[ll->styles[ll->numCharsInLine]].back);
@@ -2784,47 +2783,11 @@ void Editor::DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int l
 	// is taken by an individual character - internal leading gives varying results.
 	FontAlias ctrlCharsFont = vsDraw.styles[STYLE_CONTROLCHAR].font;
 
-	// See if something overrides the line background color:  Either if caret is on the line
-	// and background color is set for that, or if a marker is defined that forces its background
-	// color onto the line, or if a marker is defined but has no selection margin in which to
-	// display itself (as long as it's not an SC_MARK_EMPTY marker).  These are checked in order
-	// with the earlier taking precedence.  When multiple markers cause background override,
-	// the color for the highest numbered one is used.
-	bool overrideBackground = false;
-	ColourDesired background;
-	if ((caret.active || vsDraw.alwaysShowCaretLineBackground) && vsDraw.showCaretLineBackground && (vsDraw.caretLineAlpha == SC_ALPHA_NOALPHA) && ll->containsCaret) {
-		overrideBackground = true;
-		background = vsDraw.caretLineBackground;
-	}
-	if (!overrideBackground) {
-		int marks = pdoc->GetMark(line);
-		for (int markBit = 0; (markBit < 32) && marks; markBit++) {
-			if ((marks & 1) && (vsDraw.markers[markBit].markType == SC_MARK_BACKGROUND) &&
-			        (vsDraw.markers[markBit].alpha == SC_ALPHA_NOALPHA)) {
-				background = vsDraw.markers[markBit].back;
-				overrideBackground = true;
-			}
-			marks >>= 1;
-		}
-	}
-	if (!overrideBackground) {
-		if (vsDraw.maskInLine) {
-			int marksMasked = pdoc->GetMark(line) & vsDraw.maskInLine;
-			if (marksMasked) {
-				for (int markBit = 0; (markBit < 32) && marksMasked; markBit++) {
-					if ((marksMasked & 1) && (vsDraw.markers[markBit].markType != SC_MARK_EMPTY) &&
-					        (vsDraw.markers[markBit].alpha == SC_ALPHA_NOALPHA)) {
-						overrideBackground = true;
-						background = vsDraw.markers[markBit].back;
-					}
-					marksMasked >>= 1;
-				}
-			}
-		}
-	}
+	// See if something overrides the line background color.
+	const ColourOptional background = vsDraw.Background(pdoc->GetMark(line), caret.active, ll->containsCaret);
 
 	const bool drawWhitespaceBackground = (vsDraw.viewWhitespace != wsInvisible) &&
-	        (!overrideBackground) && (vsDraw.whitespaceColours.back.isSet);
+	        (!background.isSet) && (vsDraw.whitespaceColours.back.isSet);
 
 	bool inIndentation = subLine == 0;	// Do not handle indentation except on first subline.
 	const XYPOSITION indentWidth = pdoc->IndentSize() * vsDraw.spaceWidth;
@@ -2869,7 +2832,7 @@ void Editor::DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int l
 			rcPlace.right = rcPlace.left + ll->wrapIndent;
 
 			// default bgnd here..
-			surface->FillRectangle(rcSegment, overrideBackground ? background :
+			surface->FillRectangle(rcSegment, background.isSet ? background :
 			        vsDraw.styles[STYLE_DEFAULT].back);
 
 			// main line style would be below but this would be inconsistent with end markers
@@ -2920,7 +2883,7 @@ void Editor::DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int l
 
 				const int inSelection = hideSelection ? 0 : sel.CharacterInSelection(iDoc);
 				const bool inHotspot = (ll->hotspot.Valid()) && ll->hotspot.ContainsCharacter(iDoc);
-				ColourDesired textBack = TextBackground(vsDraw, overrideBackground, background, inSelection,
+				ColourDesired textBack = TextBackground(vsDraw, background, inSelection,
 					inHotspot, ll->styles[i], i, ll);
 				if (ts.representation) {
 					if (ll->chars[i] == '\t') {
@@ -2961,7 +2924,7 @@ void Editor::DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int l
 		}
 
 		DrawEOL(surface, vsDraw, rcLine, ll, line, lineEnd,
-		        xStart, subLine, subLineStart, overrideBackground, background,
+		        xStart, subLine, subLineStart, background,
 		        drawWrapMarkEnd, wrapColour);
 	}
 
@@ -3018,7 +2981,7 @@ void Editor::DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int l
 			if (inSelection && (vsDraw.selColours.fore.isSet)) {
 				textFore = (inSelection == 1) ? vsDraw.selColours.fore : vsDraw.selAdditionalForeground;
 			}
-			ColourDesired textBack = TextBackground(vsDraw, overrideBackground, background, inSelection, inHotspot, styleMain, i, ll);
+			ColourDesired textBack = TextBackground(vsDraw, background, inSelection, inHotspot, styleMain, i, ll);
 			if (ts.representation) {
 				if (ll->chars[i] == '\t') {
 					// Tab display
@@ -3189,7 +3152,7 @@ void Editor::DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int l
 	// End of the drawing of the current line
 	if (!twoPhaseDraw) {
 		DrawEOL(surface, vsDraw, rcLine, ll, line, lineEnd,
-		        xStart, subLine, subLineStart, overrideBackground, background,
+		        xStart, subLine, subLineStart, background,
 		        drawWrapMarkEnd, wrapColour);
 	}
 	if (!hideSelection && ((vsDraw.selAlpha != SC_ALPHA_NOALPHA) || (vsDraw.selAdditionalAlpha != SC_ALPHA_NOALPHA))) {

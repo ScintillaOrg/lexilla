@@ -437,12 +437,12 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void LayoutLine(int line, Surface *surface, const ViewStyle &vstyle, LineLayout *ll,
 		int width=LineLayout::wrapWidthInfinite);
 	ColourDesired SelectionBackground(const ViewStyle &vsDraw, bool main) const;
-	ColourDesired TextBackground(const ViewStyle &vsDraw, bool overrideBackground, ColourDesired background, int inSelection, bool inHotspot, int styleMain, int i, LineLayout *ll) const;
+	ColourDesired TextBackground(const ViewStyle &vsDraw, ColourOptional background, int inSelection, bool inHotspot, int styleMain, int i, LineLayout *ll) const;
 	void DrawIndentGuide(Surface *surface, int lineVisible, int lineHeight, int start, PRectangle rcSegment, bool highlight);
 	static void DrawWrapMarker(Surface *surface, PRectangle rcPlace, bool isEndMarker, ColourDesired wrapColour);
 	void DrawEOL(Surface *surface, const ViewStyle &vsDraw, PRectangle rcLine, LineLayout *ll,
 		int line, int lineEnd, int xStart, int subLine, XYACCUMULATOR subLineStart,
-		bool overrideBackground, ColourDesired background,
+		ColourOptional background,
 		bool drawWrapMark, ColourDesired wrapColour);
 	static void DrawIndicator(int indicNum, int startPos, int endPos, Surface *surface, const ViewStyle &vsDraw,
 		int xStart, PRectangle rcLine, LineLayout *ll, int subLine);
