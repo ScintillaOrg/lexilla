@@ -1788,7 +1788,13 @@ static int WidestLineWidth(Surface *surface, const ViewStyle &vs, int styleOffse
 	return widthMax;
 }
 
-void DrawStyledText(Surface *surface, const ViewStyle &vs, int styleOffset, PRectangle rcText, int ascent,
+static void DrawTextInStyle(Surface *surface, PRectangle rcText, const Style &style, XYPOSITION ybase, const char *s, size_t length) {
+	FontAlias fontText = style.font;
+	surface->DrawTextNoClip(rcText, fontText, ybase, s, static_cast<int>(length),
+		style.fore, style.back);
+}
+
+static void DrawStyledText(Surface *surface, const ViewStyle &vs, int styleOffset, PRectangle rcText,
 	const StyledText &st, size_t start, size_t length) {
 
 	if (st.multipleStyles) {
@@ -1796,32 +1802,25 @@ void DrawStyledText(Surface *surface, const ViewStyle &vs, int styleOffset, PRec
 		size_t i = 0;
 		while (i < length) {
 			size_t end = i;
-			int style = st.styles[i + start];
+			size_t style = st.styles[i + start];
 			while (end < length-1 && st.styles[start+end+1] == style)
 				end++;
 			style += styleOffset;
 			FontAlias fontText = vs.styles[style].font;
-			int width = static_cast<int>(surface->WidthText(fontText,
+			const int width = static_cast<int>(surface->WidthText(fontText,
 				st.text + start + i, static_cast<int>(end - i + 1)));
 			PRectangle rcSegment = rcText;
 			rcSegment.left = static_cast<XYPOSITION>(x);
 			rcSegment.right = static_cast<XYPOSITION>(x + width + 1);
-			surface->DrawTextNoClip(rcSegment, fontText,
-					static_cast<XYPOSITION>(ascent), st.text + start + i,
-					static_cast<int>(end - i + 1),
-					vs.styles[style].fore,
-					vs.styles[style].back);
+			DrawTextInStyle(surface, rcSegment, vs.styles[style], rcText.top + vs.maxAscent,
+				st.text + start + i, end - i + 1);
 			x += width;
 			i = end + 1;
 		}
 	} else {
-		size_t style = st.style + styleOffset;
-		FontAlias fontText = vs.styles[style].font;
-		surface->DrawTextNoClip(rcText, fontText,
-				rcText.top + vs.maxAscent, st.text + start,
-				static_cast<int>(length),
-				vs.styles[style].fore,
-				vs.styles[style].back);
+		const size_t style = st.style + styleOffset;
+		DrawTextInStyle(surface, rcText, vs.styles[style], rcText.top + vs.maxAscent,
+			st.text + start, length);
 	}
 }
 
@@ -2065,10 +2064,8 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 						XYPOSITION width = surface->WidthText(vs.styles[STYLE_LINENUMBER].font, number, istrlen(number));
 						XYPOSITION xpos = rcNumber.right - width - vs.marginNumberPadding;
 						rcNumber.left = xpos;
-						surface->DrawTextNoClip(rcNumber, vs.styles[STYLE_LINENUMBER].font,
-								rcNumber.top + vs.maxAscent, number, istrlen(number),
-								vs.styles[STYLE_LINENUMBER].fore,
-								vs.styles[STYLE_LINENUMBER].back);
+						DrawTextInStyle(surface, rcNumber, vs.styles[STYLE_LINENUMBER],
+							rcNumber.top + vs.maxAscent, number, strlen(number));
 					} else if (vs.wrapVisualFlags & SC_WRAPVISUALFLAG_MARGIN) {
 						PRectangle rcWrapMarker = rcMarker;
 						rcWrapMarker.right -= 3;
@@ -2085,7 +2082,7 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 								int width = WidestLineWidth(surface, vs, vs.marginStyleOffset, stMargin);
 								rcMarker.left = rcMarker.right - width - 3;
 							}
-							DrawStyledText(surface, vs, vs.marginStyleOffset, rcMarker, static_cast<int>(rcMarker.top) + vs.maxAscent,
+							DrawStyledText(surface, vs, vs.marginStyleOffset, rcMarker,
 								stMargin, 0, stMargin.length);
 						}
 					}
@@ -2748,7 +2745,7 @@ void Editor::DrawAnnotation(Surface *surface, const ViewStyle &vsDraw, int line,
 				vsDraw.styles[stAnnotation.StyleAt(start) + vsDraw.annotationStyleOffset].back);
 			rcText.left += vsDraw.spaceWidth;
 		}
-		DrawStyledText(surface, vsDraw, vsDraw.annotationStyleOffset, rcText, static_cast<int>(rcText.top + vsDraw.maxAscent),
+		DrawStyledText(surface, vsDraw, vsDraw.annotationStyleOffset, rcText,
 			stAnnotation, start, lengthAnnotation);
 		if (vsDraw.annotationVisible == ANNOTATION_BOXED) {
 			surface->PenColour(vsDraw.styles[vsDraw.annotationStyleOffset].fore);
