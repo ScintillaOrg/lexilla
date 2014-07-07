@@ -4321,6 +4321,7 @@ void Editor::DelChar() {
 }
 
 void Editor::DelCharBack(bool allowLineStartDeletion) {
+	RefreshStyleData();
 	if (!sel.IsRectangular())
 		FilterSelections();
 	if (sel.IsRectangular())
