@@ -48,6 +48,9 @@
 #include "CaseConvert.h"
 #include "Selection.h"
 #include "PositionCache.h"
+#include "EditModel.h"
+#include "MarginView.h"
+#include "EditView.h"
 #include "Editor.h"
 
 #include "AutoComplete.h"
