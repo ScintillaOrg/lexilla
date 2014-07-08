@@ -200,6 +200,12 @@
 		280056FC188DDD2C00F200AE /* StringCopy.h in Headers */ = {isa = PBXBuildFile; fileRef = 280056F9188DDD2C00F200AE /* StringCopy.h */; };
 		280056FD188DDD2C00F200AE /* SubStyles.h in Headers */ = {isa = PBXBuildFile; fileRef = 280056FA188DDD2C00F200AE /* SubStyles.h */; };
 		28064A05190F12E100E6E47F /* LexDMIS.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28064A04190F12E100E6E47F /* LexDMIS.cxx */; };
+		28A1DD51196BE0CA006EFCDD /* EditModel.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28A1DD4E196BE0CA006EFCDD /* EditModel.cxx */; };
+		28A1DD52196BE0CA006EFCDD /* EditView.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28A1DD4F196BE0CA006EFCDD /* EditView.cxx */; };
+		28A1DD53196BE0CA006EFCDD /* MarginView.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28A1DD50196BE0CA006EFCDD /* MarginView.cxx */; };
+		28A1DD57196BE0ED006EFCDD /* EditModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 28A1DD54196BE0ED006EFCDD /* EditModel.h */; };
+		28A1DD58196BE0ED006EFCDD /* EditView.h in Headers */ = {isa = PBXBuildFile; fileRef = 28A1DD55196BE0ED006EFCDD /* EditView.h */; };
+		28A1DD59196BE0ED006EFCDD /* MarginView.h in Headers */ = {isa = PBXBuildFile; fileRef = 28A1DD56196BE0ED006EFCDD /* MarginView.h */; };
 		28D516D81830FFCA0047C93D /* info_bar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 28D516D51830FFCA0047C93D /* info_bar_bg@2x.png */; };
 		28D516D91830FFCA0047C93D /* mac_cursor_busy@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 28D516D61830FFCA0047C93D /* mac_cursor_busy@2x.png */; };
 		28D516DA1830FFCA0047C93D /* mac_cursor_flipped@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 28D516D71830FFCA0047C93D /* mac_cursor_flipped@2x.png */; };
@@ -405,6 +411,12 @@
 		280056F9188DDD2C00F200AE /* StringCopy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StringCopy.h; path = ../../lexlib/StringCopy.h; sourceTree = "<group>"; };
 		280056FA188DDD2C00F200AE /* SubStyles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SubStyles.h; path = ../../lexlib/SubStyles.h; sourceTree = "<group>"; };
 		28064A04190F12E100E6E47F /* LexDMIS.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexDMIS.cxx; path = ../../lexers/LexDMIS.cxx; sourceTree = "<group>"; };
+		28A1DD4E196BE0CA006EFCDD /* EditModel.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EditModel.cxx; path = ../../src/EditModel.cxx; sourceTree = "<group>"; };
+		28A1DD4F196BE0CA006EFCDD /* EditView.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EditView.cxx; path = ../../src/EditView.cxx; sourceTree = "<group>"; };
+		28A1DD50196BE0CA006EFCDD /* MarginView.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MarginView.cxx; path = ../../src/MarginView.cxx; sourceTree = "<group>"; };
+		28A1DD54196BE0ED006EFCDD /* EditModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EditModel.h; path = ../../src/EditModel.h; sourceTree = "<group>"; };
+		28A1DD55196BE0ED006EFCDD /* EditView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EditView.h; path = ../../src/EditView.h; sourceTree = "<group>"; };
+		28A1DD56196BE0ED006EFCDD /* MarginView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MarginView.h; path = ../../src/MarginView.h; sourceTree = "<group>"; };
 		28D516D51830FFCA0047C93D /* info_bar_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "info_bar_bg@2x.png"; sourceTree = "<group>"; };
 		28D516D61830FFCA0047C93D /* mac_cursor_busy@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "mac_cursor_busy@2x.png"; sourceTree = "<group>"; };
 		28D516D71830FFCA0047C93D /* mac_cursor_flipped@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "mac_cursor_flipped@2x.png"; sourceTree = "<group>"; };
@@ -622,7 +634,9 @@
 				114B6FA711FA7623004FB6AB /* ContractionState.h */,
 				114B6FA811FA7623004FB6AB /* Decoration.h */,
 				114B6FA911FA7623004FB6AB /* Document.h */,
+				28A1DD54196BE0ED006EFCDD /* EditModel.h */,
 				114B6FAA11FA7623004FB6AB /* Editor.h */,
+				28A1DD55196BE0ED006EFCDD /* EditView.h */,
 				114B6FAB11FA7623004FB6AB /* ExternalLexer.h */,
 				114B6FAC11FA7623004FB6AB /* FontQuality.h */,
 				114B6FA011FA75DB004FB6AB /* ILexer.h */,
@@ -634,6 +648,7 @@
 				114B6FDD11FA7645004FB6AB /* LexerNoExceptions.h */,
 				114B6FDE11FA7645004FB6AB /* LexerSimple.h */,
 				114B6FAF11FA7623004FB6AB /* LineMarker.h */,
+				28A1DD56196BE0ED006EFCDD /* MarginView.h */,
 				114B6FDF11FA7645004FB6AB /* OptionSet.h */,
 				114B6FB011FA7623004FB6AB /* Partitioning.h */,
 				114B6FB111FA7623004FB6AB /* PerLine.h */,
@@ -674,7 +689,9 @@
 				114B6F6511FA7597004FB6AB /* ContractionState.cxx */,
 				114B6F6611FA7597004FB6AB /* Decoration.cxx */,
 				114B6F6711FA7597004FB6AB /* Document.cxx */,
+				28A1DD4E196BE0CA006EFCDD /* EditModel.cxx */,
 				114B6F6811FA7597004FB6AB /* Editor.cxx */,
+				28A1DD4F196BE0CA006EFCDD /* EditView.cxx */,
 				114B6F6911FA7598004FB6AB /* ExternalLexer.cxx */,
 				114B6F6A11FA7598004FB6AB /* Indicator.cxx */,
 				114B6F6B11FA7598004FB6AB /* KeyMap.cxx */,
@@ -683,6 +700,7 @@
 				114B6F9211FA75BE004FB6AB /* LexerNoExceptions.cxx */,
 				114B6F9311FA75BE004FB6AB /* LexerSimple.cxx */,
 				114B6F6C11FA7598004FB6AB /* LineMarker.cxx */,
+				28A1DD50196BE0CA006EFCDD /* MarginView.cxx */,
 				114B6F6D11FA7598004FB6AB /* PerLine.cxx */,
 				114B6F6E11FA7598004FB6AB /* PositionCache.cxx */,
 				114B6F9411FA75BE004FB6AB /* PropSetSimple.cxx */,
@@ -781,6 +799,7 @@
 				114B6FC511FA7623004FB6AB /* Editor.h in Headers */,
 				114B6FC611FA7623004FB6AB /* ExternalLexer.h in Headers */,
 				114B6FC711FA7623004FB6AB /* FontQuality.h in Headers */,
+				28A1DD57196BE0ED006EFCDD /* EditModel.h in Headers */,
 				114B6FC811FA7623004FB6AB /* Indicator.h in Headers */,
 				114B6FC911FA7623004FB6AB /* KeyMap.h in Headers */,
 				114B6FCA11FA7623004FB6AB /* LineMarker.h in Headers */,
@@ -788,6 +807,7 @@
 				114B6FCC11FA7623004FB6AB /* PerLine.h in Headers */,
 				114B6FCD11FA7623004FB6AB /* PositionCache.h in Headers */,
 				114B6FCE11FA7623004FB6AB /* RESearch.h in Headers */,
+				28A1DD58196BE0ED006EFCDD /* EditView.h in Headers */,
 				114B6FCF11FA7623004FB6AB /* RunStyles.h in Headers */,
 				280056FD188DDD2C00F200AE /* SubStyles.h in Headers */,
 				114B6FD011FA7623004FB6AB /* ScintillaBase.h in Headers */,
@@ -806,6 +826,7 @@
 				114B6FE811FA7645004FB6AB /* LexerNoExceptions.h in Headers */,
 				114B6FE911FA7645004FB6AB /* LexerSimple.h in Headers */,
 				114B6FEA11FA7645004FB6AB /* OptionSet.h in Headers */,
+				28A1DD59196BE0ED006EFCDD /* MarginView.h in Headers */,
 				114B6FEB11FA7645004FB6AB /* PropSetSimple.h in Headers */,
 				114B6FEC11FA7645004FB6AB /* StyleContext.h in Headers */,
 				114B6FED11FA7645004FB6AB /* WordList.h in Headers */,
@@ -933,6 +954,7 @@
 				114B6F3111FA7526004FB6AB /* LexLua.cxx in Sources */,
 				114B6F3211FA7526004FB6AB /* LexMagik.cxx in Sources */,
 				114B6F3311FA7526004FB6AB /* LexMarkdown.cxx in Sources */,
+				28A1DD52196BE0CA006EFCDD /* EditView.cxx in Sources */,
 				114B6F3411FA7526004FB6AB /* LexMatlab.cxx in Sources */,
 				114B6F3511FA7526004FB6AB /* LexMetapost.cxx in Sources */,
 				114B6F3611FA7526004FB6AB /* LexMMIXAL.cxx in Sources */,
@@ -968,6 +990,7 @@
 				114B6F5411FA7526004FB6AB /* LexTAL.cxx in Sources */,
 				114B6F5511FA7526004FB6AB /* LexTCL.cxx in Sources */,
 				114B6F5611FA7526004FB6AB /* LexTeX.cxx in Sources */,
+				28A1DD53196BE0CA006EFCDD /* MarginView.cxx in Sources */,
 				114B6F5711FA7526004FB6AB /* LexTxt2tags.cxx in Sources */,
 				114B6F5811FA7526004FB6AB /* LexVB.cxx in Sources */,
 				114B6F5911FA7526004FB6AB /* LexVerilog.cxx in Sources */,
@@ -978,6 +1001,7 @@
 				114B6F7911FA7598004FB6AB /* Catalogue.cxx in Sources */,
 				114B6F7A11FA7598004FB6AB /* CellBuffer.cxx in Sources */,
 				114B6F7B11FA7598004FB6AB /* CharClassify.cxx in Sources */,
+				28A1DD51196BE0CA006EFCDD /* EditModel.cxx in Sources */,
 				114B6F7C11FA7598004FB6AB /* ContractionState.cxx in Sources */,
 				114B6F7D11FA7598004FB6AB /* Decoration.cxx in Sources */,
 				114B6F7E11FA7598004FB6AB /* Document.cxx in Sources */,

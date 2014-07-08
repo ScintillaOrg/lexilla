@@ -825,7 +825,7 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 
     case SCI_SETBUFFEREDDRAW:
       // Buffered drawing not supported on Cocoa
-      bufferedDraw = false;
+      view.bufferedDraw = false;
       break;
 
     case SCI_FINDINDICATORSHOW:
@@ -1260,8 +1260,8 @@ void ScintillaCocoa::StartDrag()
   SurfaceImpl *sw = new SurfaceImpl();
   SurfaceImpl *pixmap = NULL;
 
-  bool lastHideSelection = hideSelection;
-  hideSelection = true;
+  bool lastHideSelection = view.hideSelection;
+  view.hideSelection = true;
   if (sw)
   {
     pixmap = new SurfaceImpl();
@@ -1296,7 +1296,7 @@ void ScintillaCocoa::StartDrag()
     sw->Release();
     delete sw;
   }
-  hideSelection = lastHideSelection;
+  view.hideSelection = lastHideSelection;
 
   NSBitmapImageRep* bitmap = NULL;
   if (pixmap)

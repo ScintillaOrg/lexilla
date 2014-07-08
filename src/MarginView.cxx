@@ -50,6 +50,10 @@
 using namespace Scintilla;
 #endif
 
+#ifdef SCI_NAMESPACE
+namespace Scintilla {
+#endif
+
 bool ValidStyledText(const ViewStyle &vs, size_t styleOffset, const StyledText &st) {
 	if (st.multipleStyles) {
 		for (size_t iStyle = 0; iStyle<st.length; iStyle++) {
@@ -530,3 +534,8 @@ void MarginView::PaintMargin(Surface *surface, int topLine, PRectangle rc, PRect
 	rcBlankMargin.left = rcSelMargin.right;
 	surface->FillRectangle(rcBlankMargin, vs.styles[STYLE_DEFAULT].back);
 }
+
+#ifdef SCI_NAMESPACE
+}
+#endif
+
