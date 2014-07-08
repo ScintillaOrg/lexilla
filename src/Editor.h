@@ -168,8 +168,131 @@ struct PrintParameters {
 };
 
 /**
+* EditModel holds the state that needs to be seen by EditView.
+*/
+class EditModel {
+	// Private so EditModel objects can not be copied
+	EditModel(const EditModel &);
+	EditModel &operator=(const EditModel &);
+
+public:
+	bool inOverstrike;
+	int xOffset;		///< Horizontal scrolled amount in pixels
+	bool trackLineWidth;
+
+	SpecialRepresentations reprs;
+	Caret caret;
+	SelectionPosition posDrag;
+	Position braces[2];
+	int bracesMatchStyle;
+	int highlightGuideColumn;
+	Selection sel;
+	bool primarySelection;
+
+	int foldFlags;
+	ContractionState cs;
+
+	// Hotspot support
+	Range hotspot;
+
+	// Wrapping support
+	int wrapWidth;
+
+	Document *pdoc;
+
+	EditModel();
+	~EditModel();
+
+	virtual int TopLineOfMain() const = 0;
+	virtual Point GetVisibleOriginInMain() const = 0;
+	virtual int LinesOnScreen() const = 0;
+	virtual Range GetHotSpotRange() const = 0;
+};
+
+/**
+* MarginView draws the margins.
+*/
+class MarginView {
+public:
+	// Highlight current folding block
+	HighlightDelimiter highlightDelimiter;
+	Surface *pixmapSelMargin;
+	Surface *pixmapSelPattern;
+	Surface *pixmapSelPatternOffset1;
+
+	MarginView();
+
+	void DropGraphics(bool freeObjects);
+	void AllocateGraphics(const ViewStyle &vsDraw);
+	void RefreshPixMaps(Surface *surfaceWindow, WindowID wid, const ViewStyle &vsDraw);
+	void PaintMargin(Surface *surface, int topLine, PRectangle rc, PRectangle rcMargin,
+		const EditModel &model, const ViewStyle &vs);
+};
+
+/**
+* EditView draws the main text area.
+*/
+class EditView {
+public:
+	PrintParameters printParameters;
+
+	bool hideSelection;
+	bool drawOverstrikeCaret;
+
+	/** In bufferedDraw mode, graphics operations are drawn to a pixmap and then copied to
+	* the screen. This avoids flashing but is about 30% slower. */
+	bool bufferedDraw;
+	/** In twoPhaseDraw mode, drawing is performed in two phases, first the background
+	* and then the foreground. This avoids chopping off characters that overlap the next run. */
+	bool twoPhaseDraw;
+
+	int lineWidthMaxSeen;
+	bool additionalCaretsBlink;
+	bool additionalCaretsVisible;
+
+	Surface *pixmapLine;
+	Surface *pixmapIndentGuide;
+	Surface *pixmapIndentGuideHighlight;
+
+	LineLayoutCache llc;
+	PositionCache posCache;
+
+	EditView();
+
+	void DropGraphics(bool freeObjects);
+	void AllocateGraphics(const ViewStyle &vsDraw);
+	void RefreshPixMaps(Surface *surfaceWindow, WindowID wid, const ViewStyle &vsDraw);
+
+	LineLayout *RetrieveLineLayout(int lineNumber, const EditModel &model);
+	void LayoutLine(int line, Surface *surface, const ViewStyle &vstyle, LineLayout *ll,
+		const EditModel &model, int width = LineLayout::wrapWidthInfinite);
+
+	Point LocationFromPosition(Surface *surface, SelectionPosition pos, int topLine, const EditModel &model, const ViewStyle &vs);
+	SelectionPosition SPositionFromLocation(Surface *surface, Point pt, bool canReturnInvalid, bool charPosition, bool virtualSpace,
+		const EditModel &model, const ViewStyle &vs);
+	SelectionPosition SPositionFromLineX(Surface *surface, int lineDoc, int x, const EditModel &model, const ViewStyle &vs);
+	int DisplayFromPosition(Surface *surface, int pos, const EditModel &model, const ViewStyle &vs);
+	int StartEndDisplayLine(Surface *surface, int pos, bool start, const EditModel &model, const ViewStyle &vs);
+
+	void DrawIndentGuide(Surface *surface, int lineVisible, int lineHeight, int start, PRectangle rcSegment, bool highlight);
+	void DrawEOL(Surface *surface, const ViewStyle &vsDraw, PRectangle rcLine, LineLayout *ll,
+		int line, int lineEnd, int xStart, int subLine, XYACCUMULATOR subLineStart,
+		ColourOptional background, const EditModel &model);
+	void DrawAnnotation(Surface *surface, const ViewStyle &vsDraw, int line, int xStart,
+		PRectangle rcLine, LineLayout *ll, int subLine, const EditModel &model);
+	void DrawCarets(Surface *surface, const ViewStyle &vsDraw, int line, int xStart,
+		PRectangle rcLine, LineLayout *ll, int subLine, const EditModel &model) const;
+	void DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int lineVisible, int xStart,
+		PRectangle rcLine, LineLayout *ll, int subLine, const EditModel &model);
+	void PaintText(Surface *surfaceWindow, PRectangle rcArea, PRectangle rcClient,
+		const EditModel &model, const ViewStyle &vsDraw);
+	long FormatRange(bool draw, Sci_RangeToFormat *pfr, Surface *surface, Surface *surfaceMeasure,
+		const EditModel &model, const ViewStyle &vs);
+};
+
+/**
  */
-class Editor : public DocWatcher {
+class Editor : public EditModel, public DocWatcher {
 	// Private so Editor objects can not be copied
 	Editor(const Editor &);
 	Editor &operator=(const Editor &);
@@ -189,32 +312,17 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	Point sizeRGBAImage;
 	float scaleRGBAImage;
 
-	PrintParameters printParameters;
+	MarginView marginView;
+	EditView view;
 
 	int cursorMode;
 
-	// Highlight current folding block
-	HighlightDelimiter highlightDelimiter;
-
 	bool hasFocus;
-	bool hideSelection;
-	bool inOverstrike;
-	bool drawOverstrikeCaret;
 	bool mouseDownCaptures;
 
-	/** In bufferedDraw mode, graphics operations are drawn to a pixmap and then copied to
-	 * the screen. This avoids flashing but is about 30% slower. */
-	bool bufferedDraw;
-	/** In twoPhaseDraw mode, drawing is performed in two phases, first the background
-	* and then the foreground. This avoids chopping off characters that overlap the next run. */
-	bool twoPhaseDraw;
-
-	int xOffset;		///< Horizontal scrolled amount in pixels
 	int xCaretMargin;	///< Ensure this many pixels visible on both sides of caret
 	bool horizontalScrollBarVisible;
 	int scrollWidth;
-	bool trackLineWidth;
-	int lineWidthMaxSeen;
 	bool verticalScrollBarVisible;
 	bool endAtLastLine;
 	int caretSticky;
@@ -223,25 +331,11 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool multipleSelection;
 	bool additionalSelectionTyping;
 	int multiPasteMode;
-	bool additionalCaretsBlink;
-	bool additionalCaretsVisible;
 
 	int virtualSpaceOptions;
 
-	Surface *pixmapLine;
-	Surface *pixmapSelMargin;
-	Surface *pixmapSelPattern;
-	Surface *pixmapSelPatternOffset1;
-	Surface *pixmapIndentGuide;
-	Surface *pixmapIndentGuideHighlight;
-
-	LineLayoutCache llc;
-	PositionCache posCache;
-	SpecialRepresentations reprs;
-
 	KeyMap kmap;
 
-	Caret caret;
 	Timer timer;
 	Timer autoScrollTimer;
 	enum { autoScrollDelay = 200 };
@@ -257,7 +351,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	Point ptMouseLast;
 	enum { ddNone, ddInitial, ddDragging } inDragDrop;
 	bool dropWentOutside;
-	SelectionPosition posDrag;
 	SelectionPosition posDrop;
 	int hotSpotClickPos;
 	int lastXChosen;
@@ -274,9 +367,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int lengthForEncode;
 
 	int needUpdateUI;
-	Position braces[2];
-	int bracesMatchStyle;
-	int highlightGuideColumn;
 
 	enum { notPainting, painting, paintAbandoned } paintState;
 	bool paintAbandonedByStyling;
@@ -288,8 +378,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int modEventMask;
 
 	SelectionText drag;
-	Selection sel;
-	bool primarySelection;
 
 	int caretXPolicy;
 	int caretXSlop;	///< Ensure this many pixels visible on both sides of caret
@@ -304,20 +392,12 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	bool recordingMacro;
 
-	int foldFlags;
 	int foldAutomatic;
-	ContractionState cs;
-
-	// Hotspot support
-	Range hotspot;
 
 	// Wrapping support
-	int wrapWidth;
 	WrapPending wrapPending;
 
 	bool convertPastes;
-
-	Document *pdoc;
 
 	Editor();
 	virtual ~Editor();
@@ -340,7 +420,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual PRectangle GetClientDrawingRectangle();
 	PRectangle GetTextRectangle() const;
 
-	int LinesOnScreen() const;
+	virtual int LinesOnScreen() const;
 	int LinesToScroll() const;
 	int MaxScrollPos() const;
 	SelectionPosition ClampPositionIntoDocument(SelectionPosition sp) const;
@@ -349,7 +429,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int XFromPosition(int pos);
 	int XFromPosition(SelectionPosition sp);
 	SelectionPosition SPositionFromLocation(Point pt, bool canReturnInvalid=false, bool charPosition=false, bool virtualSpace=true);
-	int PositionFromLocation(Point pt, bool canReturnInvalid=false, bool charPosition=false);
+	int PositionFromLocation(Point pt, bool canReturnInvalid = false, bool charPosition = false);
 	SelectionPosition SPositionFromLineX(int lineDoc, int x);
 	int PositionFromLineX(int line, int x);
 	int LineFromLocation(Point pt) const;
@@ -431,30 +511,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void LinesJoin();
 	void LinesSplit(int pixelWidth);
 
-	int SubstituteMarkerIfEmpty(int markerCheck, int markerDefault) const;
 	void PaintSelMargin(Surface *surface, PRectangle &rc);
-	LineLayout *RetrieveLineLayout(int lineNumber);
-	void LayoutLine(int line, Surface *surface, const ViewStyle &vstyle, LineLayout *ll,
-		int width=LineLayout::wrapWidthInfinite);
-	ColourDesired SelectionBackground(const ViewStyle &vsDraw, bool main) const;
-	ColourDesired TextBackground(const ViewStyle &vsDraw, ColourOptional background, int inSelection, bool inHotspot, int styleMain, int i, LineLayout *ll) const;
-	void DrawIndentGuide(Surface *surface, int lineVisible, int lineHeight, int start, PRectangle rcSegment, bool highlight);
-	static void DrawWrapMarker(Surface *surface, PRectangle rcPlace, bool isEndMarker, ColourDesired wrapColour);
-	void DrawEOL(Surface *surface, const ViewStyle &vsDraw, PRectangle rcLine, LineLayout *ll,
-		int line, int lineEnd, int xStart, int subLine, XYACCUMULATOR subLineStart,
-		ColourOptional background);
-	static void DrawIndicator(int indicNum, int startPos, int endPos, Surface *surface, const ViewStyle &vsDraw,
-		int xStart, PRectangle rcLine, LineLayout *ll, int subLine);
-	void DrawIndicators(Surface *surface, const ViewStyle &vsDraw, int line, int xStart,
-		PRectangle rcLine, LineLayout *ll, int subLine, int lineEnd, bool under);
-	void DrawAnnotation(Surface *surface, const ViewStyle &vsDraw, int line, int xStart,
-        PRectangle rcLine, LineLayout *ll, int subLine);
-	void DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int lineVisible, int xStart,
-		PRectangle rcLine, LineLayout *ll, int subLine);
-	void DrawBlockCaret(Surface *surface, const ViewStyle &vsDraw, LineLayout *ll, int subLine,
-		int xStart, int offset, int posCaret, PRectangle rcCaret, ColourDesired caretColour) const;
-	void DrawCarets(Surface *surface, const ViewStyle &vsDraw, int line, int xStart,
-		PRectangle rcLine, LineLayout *ll, int subLine);
 	void RefreshPixMaps(Surface *surfaceWindow);
 	void Paint(Surface *surfaceWindow, PRectangle rcArea);
 	long FormatRange(bool draw, Sci_RangeToFormat *pfr);
