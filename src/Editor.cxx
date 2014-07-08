@@ -359,7 +359,7 @@ Point Editor::GetVisibleOriginInMain() const {
 	return Point(0,0);
 }
 
-Point Editor::DocumentPointFromView(Point ptView) {
+Point Editor::DocumentPointFromView(Point ptView) const {
 	Point ptDocument = ptView;
 	if (wMargin.GetID()) {
 		Point ptOrigin = GetVisibleOriginInMain();
@@ -388,7 +388,7 @@ PRectangle Editor::GetClientDrawingRectangle() {
 	return GetClientRectangle();
 }
 
-PRectangle Editor::GetTextRectangle() {
+PRectangle Editor::GetTextRectangle() const {
 	PRectangle rc = GetClientRectangle();
 	rc.left += vs.textStart;
 	rc.right -= vs.rightMarginWidth;
@@ -402,7 +402,7 @@ int Editor::LinesOnScreen() const {
 	return htClient / vs.lineHeight;
 }
 
-int Editor::LinesToScroll() {
+int Editor::LinesToScroll() const {
 	int retVal = LinesOnScreen() - 1;
 	if (retVal < 1)
 		return 1;
@@ -410,7 +410,7 @@ int Editor::LinesToScroll() {
 		return retVal;
 }
 
-int Editor::MaxScrollPos() {
+int Editor::MaxScrollPos() const {
 	//Platform::DebugPrintf("Lines %d screen = %d maxScroll = %d\n",
 	//LinesTotal(), LinesOnScreen(), LinesTotal() - LinesOnScreen() + 1);
 	int retVal = cs.LinesDisplayed();
@@ -6171,7 +6171,7 @@ bool Editor::PointInSelection(Point pt) {
 	return false;
 }
 
-bool Editor::PointInSelMargin(Point pt) {
+bool Editor::PointInSelMargin(Point pt) const {
 	// Really means: "Point in a margin"
 	if (vs.fixedColumnWidth > 0) {	// There is a margin
 		PRectangle rcSelMargin = GetClientRectangle();
