@@ -192,7 +192,7 @@ private:
 	virtual bool HaveMouseCapture();
 	virtual bool PaintContains(PRectangle rc);
 	void FullPaint();
-	virtual PRectangle GetClientRectangle();
+	virtual PRectangle GetClientRectangle() const;
 	virtual void ScrollText(int linesToMove);
 	virtual void SetVerticalScrollPos();
 	virtual void SetHorizontalScrollPos();
@@ -1121,8 +1121,9 @@ void ScintillaGTK::FullPaint() {
 	wText.InvalidateAll();
 }
 
-PRectangle ScintillaGTK::GetClientRectangle() {
-	PRectangle rc = wMain.GetClientPosition();
+PRectangle ScintillaGTK::GetClientRectangle() const {
+	Window &win = const_cast<Window &>(wMain);
+	PRectangle rc = win.GetClientPosition();
 	if (verticalScrollBarVisible)
 		rc.right -= verticalScrollBarWidth;
 	if (horizontalScrollBarVisible && !Wrapping())

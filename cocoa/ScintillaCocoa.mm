@@ -658,7 +658,7 @@ void ScintillaCocoa::CancelModes() {
 /**
  * Helper function to get the scrolling view.
  */
-NSScrollView* ScintillaCocoa::ScrollContainer() {
+NSScrollView* ScintillaCocoa::ScrollContainer() const {
   NSView* container = static_cast<NSView*>(wMain.GetID());
   return static_cast<NSScrollView*>([[container superview] superview]);
 }
@@ -678,7 +678,7 @@ SCIContentView* ScintillaCocoa::ContentView()
 /**
  * Return the top left visible point relative to the origin point of the whole document.
  */
-Scintilla::Point ScintillaCocoa::GetVisibleOriginInMain()
+Scintilla::Point ScintillaCocoa::GetVisibleOriginInMain() const
 {
   NSScrollView *scrollView = ScrollContainer();
   NSRect contentRect = [[scrollView contentView] bounds];
@@ -692,7 +692,7 @@ Scintilla::Point ScintillaCocoa::GetVisibleOriginInMain()
  * in order to make scrolling working properly.
  * The returned value is in document coordinates.
  */
-PRectangle ScintillaCocoa::GetClientRectangle()
+PRectangle ScintillaCocoa::GetClientRectangle() const
 {
   NSScrollView *scrollView = ScrollContainer();
   NSSize size = [[scrollView contentView] bounds].size;

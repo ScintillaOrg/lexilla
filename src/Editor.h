@@ -333,14 +333,14 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	// The top left visible point in main window coordinates. Will be 0,0 except for
 	// scroll views where it will be equivalent to the current scroll position.
-	virtual Point GetVisibleOriginInMain();
+	virtual Point GetVisibleOriginInMain() const;
 	Point DocumentPointFromView(Point ptView);  // Convert a point from view space to document
 	int TopLineOfMain() const;   // Return the line at Main's y coordinate 0
-	virtual PRectangle GetClientRectangle();
+	virtual PRectangle GetClientRectangle() const;
 	virtual PRectangle GetClientDrawingRectangle();
 	PRectangle GetTextRectangle();
 
-	int LinesOnScreen();
+	int LinesOnScreen() const;
 	int LinesToScroll();
 	int MaxScrollPos();
 	SelectionPosition ClampPositionIntoDocument(SelectionPosition sp) const;

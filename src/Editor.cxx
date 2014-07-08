@@ -355,7 +355,7 @@ void Editor::RefreshStyleData() {
 	}
 }
 
-Point Editor::GetVisibleOriginInMain() {
+Point Editor::GetVisibleOriginInMain() const {
 	return Point(0,0);
 }
 
@@ -379,8 +379,9 @@ int Editor::TopLineOfMain() const {
 		return topLine;
 }
 
-PRectangle Editor::GetClientRectangle() {
-	return wMain.GetClientPosition();
+PRectangle Editor::GetClientRectangle() const {
+	Window &win = const_cast<Window &>(wMain);
+	return win.GetClientPosition();
 }
 
 PRectangle Editor::GetClientDrawingRectangle() {
@@ -394,7 +395,7 @@ PRectangle Editor::GetTextRectangle() {
 	return rc;
 }
 
-int Editor::LinesOnScreen() {
+int Editor::LinesOnScreen() const {
 	PRectangle rcClient = GetClientRectangle();
 	int htClient = static_cast<int>(rcClient.bottom - rcClient.top);
 	//Platform::DebugPrintf("lines on screen = %d\n", htClient / lineHeight + 1);

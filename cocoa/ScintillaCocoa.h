@@ -111,8 +111,8 @@ private:
   FindHighlightLayer *layerFindIndicator;
 
 protected:
-  Point GetVisibleOriginInMain();
-  PRectangle GetClientRectangle();
+  Point GetVisibleOriginInMain() const;
+  PRectangle GetClientRectangle() const;
   virtual PRectangle GetClientDrawingRectangle();
   Point ConvertPoint(NSPoint point);
   virtual void RedrawRect(PRectangle rc);
@@ -133,7 +133,7 @@ public:
   void RegisterNotifyCallback(intptr_t windowid, SciNotifyFunc callback);
   sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
-  NSScrollView* ScrollContainer();
+  NSScrollView* ScrollContainer() const;
   SCIContentView* ContentView();
 
   bool SyncPaint(void* gc, PRectangle rc);
