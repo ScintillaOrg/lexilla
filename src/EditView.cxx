@@ -974,7 +974,8 @@ void EditView::DrawCarets(Surface *surface, const ViewStyle &vsDraw, int lineDoc
 					caretAtEOL = true;
 					widthOverstrikeCaret = vsDraw.aveCharWidth;
 				} else {
-					widthOverstrikeCaret = ll->positions[offset + 1] - ll->positions[offset];
+					const int widthChar = model.pdoc->LenChar(posCaret.Position());
+					widthOverstrikeCaret = ll->positions[offset + widthChar] - ll->positions[offset];
 				}
 				if (widthOverstrikeCaret < 3)	// Make sure its visible
 					widthOverstrikeCaret = 3;
