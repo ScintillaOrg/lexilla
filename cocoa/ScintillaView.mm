@@ -1658,9 +1658,12 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 //--------------------------------------------------------------------------------------------------
 
-- (void)insertText: (NSString*)text
+- (void)insertText: (id) aString
 {
-  mBackend->InsertText(text);
+  if ([aString isKindOfClass:[NSString class]])
+    mBackend->InsertText(aString);
+  else if ([aString isKindOfClass:[NSAttributedString class]])
+    mBackend->InsertText([aString string]);
 }
 
 //--------------------------------------------------------------------------------------------------

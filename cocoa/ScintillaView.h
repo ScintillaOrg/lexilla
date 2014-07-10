@@ -135,7 +135,7 @@ extern NSString *const SCIUpdateUINotification;
 // NSTextView compatibility layer.
 - (NSString*) string;
 - (void) setString: (NSString*) aString;
-- (void) insertText: (NSString*) aString;
+- (void) insertText: (id) aString;
 - (void) setEditable: (BOOL) editable;
 - (BOOL) isEditable;
 - (NSRange) selectedRange;
