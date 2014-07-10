@@ -1106,6 +1106,12 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 					SetFocusState(false);
 					DestroySystemCaret();
 				}
+				// Explicitly complete any IME composition
+				HIMC hIMC = ImmGetContext(MainHWND());
+				if (hIMC) {
+					::ImmNotifyIME(hIMC, NI_COMPOSITIONSTR, CPS_COMPLETE, 0);
+					::ImmReleaseContext(MainHWND(), hIMC);
+				}
 			}
 			break;
 
