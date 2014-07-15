@@ -44,17 +44,18 @@ ScintillaQt::ScintillaQt(QAbstractScrollArea *parent)
 	WndProc(SCI_SETBUFFEREDDRAW, false, 0);
 
 	Initialise();
+
+	for (TickReason tr = tickCaret; tr <= tickDwell; tr = static_cast<TickReason>(tr + 1)) {
+		timers[tr] = 0;
+	}
 }
 
 ScintillaQt::~ScintillaQt()
 {
-	SetTicking(false);
+	for (TickReason tr = tickCaret; tr <= tickDwell; tr = static_cast<TickReason>(tr + 1)) {
+		FineTickerCancel(tr);
+	}
 	SetIdle(false);
-}
-
-void ScintillaQt::tick()
-{
-	Tick();
 }
 
 void ScintillaQt::execCommand(QAction *action)
@@ -148,7 +149,9 @@ void ScintillaQt::Initialise()
 
 void ScintillaQt::Finalise()
 {
-	SetTicking(false);
+	for (TickReason tr = tickCaret; tr <= tickDwell; tr = static_cast<TickReason>(tr + 1)) {
+		FineTickerCancel(tr);
+	}
 	ScintillaBase::Finalise();
 }
 
@@ -396,25 +399,31 @@ void ScintillaQt::NotifyParent(SCNotification scn)
 	emit notifyParent(scn);
 }
 
-void ScintillaQt::SetTicking(bool on)
+/**
+* Report that this Editor subclass has a working implementation of FineTickerStart.
+*/
+bool ScintillaQt::FineTickerAvailable()
 {
-	QTimer *qTimer;
-	if (timer.ticking != on) {
-		timer.ticking = on;
-		if (timer.ticking) {
-			qTimer = new QTimer;
-			connect(qTimer, SIGNAL(timeout()), this, SLOT(tick()));
-			qTimer->start(timer.tickSize);
-			timer.tickerID = qTimer;
-		} else {
-			qTimer = static_cast<QTimer *>(timer.tickerID);
-			qTimer->stop();
-			disconnect(qTimer, SIGNAL(timeout()), 0, 0);
-			delete qTimer;
-			timer.tickerID = 0;
-		}
+	return true;
+}
+
+bool ScintillaQt::FineTickerRunning(TickReason reason)
+{
+	return timers[reason] != 0;
+}
+
+void ScintillaQt::FineTickerStart(TickReason reason, int millis, int /* tolerance */)
+{
+	FineTickerCancel(reason);
+	timers[reason] = startTimer(millis);
+}
+
+void ScintillaQt::FineTickerCancel(TickReason reason)
+{
+	if (timers[reason]) {
+		killTimer(timers[reason]);
+		timers[reason] = 0;
 	}
-	timer.ticksToWait = caret.period;
 }
 
 void ScintillaQt::onIdle()
@@ -739,4 +748,13 @@ void ScintillaQt::Drop(const Point &point, const QMimeData *data, bool move)
 				false, false, UserVirtualSpace());
 
 	DropAt(movePos, bytes, len, move, rectangular);
+}
+
+void ScintillaQt::timerEvent(QTimerEvent *event)
+{
+	for (TickReason tr=tickCaret; tr<=tickDwell; tr = static_cast<TickReason>(tr+1)) {
+		if (timers[tr] == event->timerId()) {
+			TickFor(tr);
+		}
+	}
 }

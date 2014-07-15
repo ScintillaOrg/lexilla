@@ -144,7 +144,11 @@ public:
   void PaintMargin(NSRect aRect);
 
   virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
-  void SetTicking(bool on);
+  void TickFor(TickReason reason);
+  bool FineTickerAvailable();
+  bool FineTickerRunning(TickReason reason);
+  void FineTickerStart(TickReason reason, int millis, int tolerance);
+  void FineTickerCancel(TickReason reason);
   bool SetIdle(bool on);
   void SetMouseCapture(bool on);
   bool HaveMouseCapture();
@@ -181,6 +185,7 @@ public:
 
   static sptr_t DirectFunction(sptr_t ptr, unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
+  NSTimer *timers[tickPlatform+1];
   void TimerFired(NSTimer* timer);
   void IdleTimerFired();
   static void UpdateObserver(CFRunLoopObserverRef observer, CFRunLoopActivity activity, void *sci);

@@ -500,7 +500,13 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	void Tick();
 	bool Idle();
-	virtual void SetTicking(bool on) = 0;
+	virtual void SetTicking(bool on);
+	enum TickReason { tickCaret, tickScroll, tickWiden, tickDwell, tickPlatform };
+	virtual void TickFor(TickReason reason);
+	virtual bool FineTickerAvailable();
+	virtual bool FineTickerRunning(TickReason reason);
+	virtual void FineTickerStart(TickReason reason, int millis, int tolerance);
+	virtual void FineTickerCancel(TickReason reason);
 	virtual bool SetIdle(bool) { return false; }
 	virtual void SetMouseCapture(bool on) = 0;
 	virtual bool HaveMouseCapture() = 0;

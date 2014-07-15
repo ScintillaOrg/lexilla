@@ -189,7 +189,17 @@ public: 	// Public for scintilla_send_message
 	virtual sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 private:
 	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
-	virtual void SetTicking(bool on);
+	struct TimeThunk {
+		TickReason reason;
+		ScintillaGTK *scintilla;
+		guint timer;
+		TimeThunk() : reason(tickCaret), scintilla(NULL), timer(0) {}
+	};
+	TimeThunk timers[tickDwell+1];
+	virtual bool FineTickerAvailable();
+	virtual bool FineTickerRunning(TickReason reason);
+	virtual void FineTickerStart(TickReason reason, int millis, int tolerance);
+	virtual void FineTickerCancel(TickReason reason);
 	virtual bool SetIdle(bool on);
 	virtual void SetMouseCapture(bool on);
 	virtual bool HaveMouseCapture();
@@ -303,7 +313,7 @@ private:
 	                             gint x, gint y, GtkSelectionData *selection_data, guint info, guint time);
 	static void DragDataGet(GtkWidget *widget, GdkDragContext *context,
 	                        GtkSelectionData *selection_data, guint info, guint time);
-	static gboolean TimeOut(ScintillaGTK *sciThis);
+	static gboolean TimeOut(TimeThunk *tt);
 	static gboolean IdleCallback(ScintillaGTK *sciThis);
 	static gboolean StyleIdle(ScintillaGTK *sciThis);
 	virtual void QueueIdleWork(WorkNeeded::workItems items, int upTo);
@@ -832,11 +842,16 @@ void ScintillaGTK::Initialise() {
 		caret.period = 0;
 	}
 
-	SetTicking(true);
+	for (TickReason tr = tickCaret; tr <= tickDwell; tr = static_cast<TickReason>(tr + 1)) {
+		timers[tr].reason = tr;
+		timers[tr].scintilla = this;
+	}
 }
 
 void ScintillaGTK::Finalise() {
-	SetTicking(false);
+	for (TickReason tr = tickCaret; tr <= tickDwell; tr = static_cast<TickReason>(tr + 1)) {
+		FineTickerCancel(tr);
+	}
 	ScintillaBase::Finalise();
 }
 
@@ -1027,17 +1042,27 @@ sptr_t ScintillaGTK::DefWndProc(unsigned int, uptr_t, sptr_t) {
 	return 0;
 }
 
-void ScintillaGTK::SetTicking(bool on) {
-	if (timer.ticking != on) {
-		timer.ticking = on;
-		if (timer.ticking) {
-			timer.tickerID = reinterpret_cast<TickerID>(g_timeout_add(timer.tickSize,
-				reinterpret_cast<GSourceFunc>(TimeOut), this));
-		} else {
-			g_source_remove(GPOINTER_TO_UINT(timer.tickerID));
-		}
+/**
+* Report that this Editor subclass has a working implementation of FineTickerStart.
+*/
+bool ScintillaGTK::FineTickerAvailable() {
+	return true;
+}
+
+bool ScintillaGTK::FineTickerRunning(TickReason reason) {
+	return timers[reason].timer != 0;
+}
+
+void ScintillaGTK::FineTickerStart(TickReason reason, int millis, int /* tolerance */) {
+	FineTickerCancel(reason);
+	timers[reason].timer = g_timeout_add(millis, reinterpret_cast<GSourceFunc>(TimeOut), &timers[reason]);
+}
+
+void ScintillaGTK::FineTickerCancel(TickReason reason) {
+	if (timers[reason].timer) {
+		g_source_remove(timers[reason].timer);
+		timers[reason].timer = 0;
 	}
-	timer.ticksToWait = caret.period;
 }
 
 bool ScintillaGTK::SetIdle(bool on) {
@@ -2715,8 +2740,8 @@ void ScintillaGTK::DragDataGet(GtkWidget *widget, GdkDragContext *context,
 	}
 }
 
-int ScintillaGTK::TimeOut(ScintillaGTK *sciThis) {
-	sciThis->Tick();
+int ScintillaGTK::TimeOut(TimeThunk *tt) {
+	tt->scintilla->TickFor(tt->reason);
 	return 1;
 }
 

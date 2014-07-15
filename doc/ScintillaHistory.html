@@ -469,6 +469,14 @@
 	Released 3 July 2014.
 	</li>
 	<li>
+	Separate timers are used for each type of periodic activity and they are turned on and off
+	as required. This saves power as there are fewer wake ups.
+	On recent releases of OS X Cocoa and Windows, coalescing timers are used to further
+	save power.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1086/">Bug #1086</a>.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1532/">Bug #1532</a>.
+	</li>
+	<li>
 	SciTE adds a "Clean" command to the "Tools" menu which is meant to be bound to a command like
 	"make clean".
 	</li>

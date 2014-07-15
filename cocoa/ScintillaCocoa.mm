@@ -395,6 +395,10 @@ ScintillaCocoa::ScintillaCocoa(SCIContentView* view, SCIMarginView* viewMargin)
   idleTimer = NULL;
   observer = NULL;
   layerFindIndicator = NULL;
+  for (TickReason tr=tickCaret; tr<=tickPlatform; tr = static_cast<TickReason>(tr+1))
+  {
+    timers[tr] = nil;
+  }
   Initialise();
 }
 
@@ -435,7 +439,10 @@ void ScintillaCocoa::Initialise()
 void ScintillaCocoa::Finalise()
 {
   ObserverRemove();
-  SetTicking(false);
+  for (TickReason tr=tickCaret; tr<=tickPlatform; tr = static_cast<TickReason>(tr+1))
+  {
+    FineTickerCancel(tr);
+  }
   ScintillaBase::Finalise();
 }
 
@@ -862,32 +869,72 @@ sptr_t ScintillaCocoa::DefWndProc(unsigned int, uptr_t, sptr_t)
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Enables or disables a timer that can trigger background processing at a regular interval, like
- * drag scrolling or caret blinking.
+ * Handle any ScintillaCocoa-specific ticking or call superclass.
  */
-void ScintillaCocoa::SetTicking(bool on)
+void ScintillaCocoa::TickFor(TickReason reason)
 {
-  if (timer.ticking != on)
+  if (reason == tickPlatform)
   {
-    timer.ticking = on;
-    if (timer.ticking)
-    {
-      // Scintilla ticks = milliseconds
-      tickTimer = [NSTimer scheduledTimerWithTimeInterval: timer.tickSize / 1000.0
-						   target: timerTarget
-						 selector: @selector(timerFired:)
-						 userInfo: nil
-						  repeats: YES];
-      timer.tickerID = reinterpret_cast<TickerID>(tickTimer);
-    }
-    else
-      if (timer.tickerID != NULL)
-      {
-        [reinterpret_cast<NSTimer*>(timer.tickerID) invalidate];
-        timer.tickerID = 0;
-      }
+    DragScroll();
   }
-  timer.ticksToWait = caret.period;
+  else
+  {
+    Editor::TickFor(reason);
+  }
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Report that this Editor subclass has a working implementation of FineTickerStart.
+ */
+bool ScintillaCocoa::FineTickerAvailable()
+{
+  return true;
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Is a particular timer currently running?
+ */
+bool ScintillaCocoa::FineTickerRunning(TickReason reason)
+{
+  return timers[reason] != nil;
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Start a fine-grained timer.
+ */
+void ScintillaCocoa::FineTickerStart(TickReason reason, int millis, int tolerance)
+{
+  FineTickerCancel(reason);
+  NSTimer *fineTimer = [NSTimer scheduledTimerWithTimeInterval: millis / 1000.0
+                                                        target: timerTarget
+                                                      selector: @selector(timerFired:)
+                                                      userInfo: nil
+                                                       repeats: YES];
+  if (tolerance && [fineTimer respondsToSelector: @selector(setTolerance:)])
+  {
+    [fineTimer setTolerance: tolerance / 1000.0];
+  }
+  timers[reason] = fineTimer;
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Cancel a fine-grained timer.
+ */
+void ScintillaCocoa::FineTickerCancel(TickReason reason)
+{
+  if (timers[reason])
+  {
+    [timers[reason] invalidate];
+    timers[reason] = nil;
+  }
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1175,6 +1222,8 @@ void ScintillaCocoa::StartDrag()
 
   inDragDrop = ddDragging;
 
+  FineTickerStart(tickPlatform, timer.tickSize, 0);
+
   // Put the data to be dragged on the drag pasteboard.
   SelectionText selectedText;
   NSPasteboard* pasteboard = [NSPasteboard pasteboardWithName: NSDragPboard];
@@ -1336,6 +1385,7 @@ void ScintillaCocoa::StartDrag()
  */
 NSDragOperation ScintillaCocoa::DraggingEntered(id <NSDraggingInfo> info)
 {
+  FineTickerStart(tickPlatform, timer.tickSize, 0);
   return DraggingUpdated(info);
 }
 
@@ -1378,6 +1428,7 @@ void ScintillaCocoa::DraggingExited(id <NSDraggingInfo> info)
 {
 #pragma unused(info)
   SetDragPosition(SelectionPosition(invalidPosition));
+  FineTickerCancel(tickPlatform);
   inDragDrop = ddNone;
 }
 
@@ -1822,9 +1873,13 @@ bool ScintillaCocoa::CanRedo()
 
 void ScintillaCocoa::TimerFired(NSTimer* timer)
 {
-#pragma unused(timer)
-  Tick();
-  DragScroll();
+  for (TickReason tr=tickCaret; tr<=tickPlatform; tr = static_cast<TickReason>(tr+1))
+  {
+    if (timers[tr] == timer)
+    {
+      TickFor(tr);
+    }
+  }
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -2145,7 +2200,7 @@ void ScintillaCocoa::ActiveStateChanged(bool isActive)
   if (!isActive) {
     DropCaret();
     //SetFocusState( false );
-    SetTicking( false );
+    FineTickerCancel(tickCaret);
   } else {
     ShowCaretAtCurrentPosition();
   }

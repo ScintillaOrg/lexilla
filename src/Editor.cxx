@@ -1311,16 +1311,26 @@ void Editor::ShowCaretAtCurrentPosition() {
 	if (hasFocus) {
 		caret.active = true;
 		caret.on = true;
-		SetTicking(true);
+		if (FineTickerAvailable()) {
+			FineTickerCancel(tickCaret);
+			if (caret.period > 0)
+				FineTickerStart(tickCaret, caret.period, caret.period/10);
+		} else {
+			SetTicking(true);
+		}
 	} else {
 		caret.active = false;
 		caret.on = false;
+		if (FineTickerAvailable()) {
+			FineTickerCancel(tickCaret);
+		}
 	}
 	InvalidateCaret();
 }
 
 void Editor::DropCaret() {
 	caret.active = false;
+	FineTickerCancel(tickCaret);
 	InvalidateCaret();
 }
 
@@ -1328,6 +1338,11 @@ void Editor::CaretSetPeriod(int period) {
 	if (caret.period != period) {
 		caret.period = period;
 		caret.on = true;
+		if (FineTickerAvailable()) {
+			FineTickerCancel(tickCaret);
+			if ((caret.active) && (caret.period > 0))
+				FineTickerStart(tickCaret, caret.period, caret.period/10);
+		}
 		InvalidateCaret();
 	}
 }
@@ -1658,6 +1673,15 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	}
 
 	view.PaintText(surfaceWindow, rcArea, rcClient, *this, vs);
+
+	if (horizontalScrollBarVisible && trackLineWidth && (view.lineWidthMaxSeen > scrollWidth)) {
+		if (FineTickerAvailable()) {
+			scrollWidth = view.lineWidthMaxSeen;
+			if (!FineTickerRunning(tickWiden)) {
+				FineTickerStart(tickWiden, 50, 5);
+			}
+		}
+	}
 
 	NotifyPainted();
 }
@@ -3809,7 +3833,13 @@ void Editor::SetDragPosition(SelectionPosition newPos) {
 	}
 	if (!(posDrag == newPos)) {
 		caret.on = true;
-		SetTicking(true);
+		if (FineTickerAvailable()) {
+			FineTickerCancel(tickCaret);
+			if ((caret.active) && (caret.period > 0) && (newPos.Position() < 0))
+				FineTickerStart(tickCaret, caret.period, caret.period/10);
+		} else {
+			SetTicking(true);
+		}
 		InvalidateCaret();
 		posDrag = newPos;
 		InvalidateCaret();
@@ -4033,6 +4063,12 @@ void Editor::DwellEnd(bool mouseMoved) {
 		dwelling = false;
 		NotifyDwelling(ptMouseLast, dwelling);
 	}
+	if (FineTickerAvailable()) {
+		FineTickerCancel(tickDwell);
+		if (mouseMoved && (dwellDelay < SC_TIME_FOREVER)) {
+			//FineTickerStart(tickDwell, dwellDelay, dwellDelay/10);
+		}
+	}
 }
 
 void Editor::MouseLeave() {
@@ -4080,6 +4116,9 @@ void Editor::ButtonDownWithModifiers(Point pt, unsigned int curTime, int modifie
 	if (((curTime - lastClickTime) < Platform::DoubleClickTime()) && Close(pt, lastClick)) {
 		//Platform::DebugPrintf("Double click %d %d = %d\n", curTime, lastClickTime, curTime - lastClickTime);
 		SetMouseCapture(true);
+		if (FineTickerAvailable()) {
+			FineTickerStart(tickScroll, 100, 10);
+		}
 		if (!ctrl || !multipleSelection || (selectionType != selChar && selectionType != selWord))
 			SetEmptySelection(newPos.Position());
 		bool doubleClick = false;
@@ -4176,6 +4215,9 @@ void Editor::ButtonDownWithModifiers(Point pt, unsigned int curTime, int modifie
 
 			SetDragPosition(SelectionPosition(invalidPosition));
 			SetMouseCapture(true);
+			if (FineTickerAvailable()) {
+				FineTickerStart(tickScroll, 100, 10);
+			}
 		} else {
 			if (PointIsHotspot(pt)) {
 				NotifyHotSpotClicked(newCharPos.Position(), modifiers);
@@ -4188,6 +4230,9 @@ void Editor::ButtonDownWithModifiers(Point pt, unsigned int curTime, int modifie
 					inDragDrop = ddNone;
 			}
 			SetMouseCapture(true);
+			if (FineTickerAvailable()) {
+				FineTickerStart(tickScroll, 100, 10);
+			}
 			if (inDragDrop != ddInitial) {
 				SetDragPosition(SelectionPosition(invalidPosition));
 				if (!shift) {
@@ -4281,6 +4326,9 @@ void Editor::ButtonMoveWithModifiers(Point pt, int modifiers) {
 	if (inDragDrop == ddInitial) {
 		if (DragThreshold(ptMouseLast, pt)) {
 			SetMouseCapture(false);
+			if (FineTickerAvailable()) {
+				FineTickerCancel(tickScroll);
+			}
 			SetDragPosition(movePos);
 			CopySelectionRange(&drag);
 			StartDrag();
@@ -4289,6 +4337,12 @@ void Editor::ButtonMoveWithModifiers(Point pt, int modifiers) {
 	}
 
 	ptMouseLast = pt;
+	PRectangle rcClient = GetClientRectangle();
+	Point ptOrigin = GetVisibleOriginInMain();
+	rcClient.Move(0, -ptOrigin.y);
+	if (FineTickerAvailable() && (dwellDelay < SC_TIME_FOREVER) && rcClient.Contains(pt)) {
+		FineTickerStart(tickDwell, dwellDelay, dwellDelay/10);
+	}
 	//Platform::DebugPrintf("Move %d %d\n", pt.x, pt.y);
 	if (HaveMouseCapture()) {
 
@@ -4340,9 +4394,6 @@ void Editor::ButtonMoveWithModifiers(Point pt, int modifiers) {
 		}
 
 		// Autoscroll
-		PRectangle rcClient = GetClientRectangle();
-		Point ptOrigin = GetVisibleOriginInMain();
-		rcClient.Move(0, -ptOrigin.y);
 		int lineMove = DisplayFromPosition(movePos.Position());
 		if (pt.y > rcClient.bottom) {
 			ScrollTo(lineMove - LinesOnScreen() + 1);
@@ -4414,6 +4465,9 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 		}
 		ptMouseLast = pt;
 		SetMouseCapture(false);
+		if (FineTickerAvailable()) {
+			FineTickerCancel(tickScroll);
+		}
 		NotifyIndicatorClick(false, newPos.Position(), 0);
 		if (inDragDrop == ddDragging) {
 			SelectionPosition selStart = SelectionStart();
@@ -4528,6 +4582,66 @@ bool Editor::Idle() {
 	idleDone = wrappingDone; // && thatDone && theOtherThingDone...
 
 	return !idleDone;
+}
+
+void Editor::SetTicking(bool) {
+	// SetTicking is deprecated. In the past it was pure virtual and was overridden in each
+	// derived platform class but fine grained timers should now be implemented.
+	// Either way, execution should not arrive here so assert failure.
+	assert(false);
+}
+
+void Editor::TickFor(TickReason reason) {
+	switch (reason) {
+		case tickCaret:
+			caret.on = !caret.on;
+			if (caret.active) {
+				InvalidateCaret();
+			}
+			break;
+		case tickScroll:
+			// Auto scroll
+			ButtonMove(ptMouseLast);
+			break;
+		case tickWiden:
+			SetScrollBars();
+			FineTickerCancel(tickWiden);
+			break;
+		case tickDwell:
+			if ((!HaveMouseCapture()) &&
+				(ptMouseLast.y >= 0)) {
+				dwelling = true;
+				NotifyDwelling(ptMouseLast, dwelling);
+			}
+			FineTickerCancel(tickDwell);
+			break;
+		default:
+			// tickPlatform handled by subclass
+			break;
+	}
+}
+
+bool Editor::FineTickerAvailable() {
+	return false;
+}
+
+// FineTickerStart is be overridden by subclasses that support fine ticking so
+// this method should never be called.
+bool Editor::FineTickerRunning(TickReason) {
+	assert(false);
+	return false;
+}
+
+// FineTickerStart is be overridden by subclasses that support fine ticking so
+// this method should never be called.
+void Editor::FineTickerStart(TickReason, int, int) {
+	assert(false);
+}
+
+// FineTickerCancel is be overridden by subclasses that support fine ticking so
+// this method should never be called.
+void Editor::FineTickerCancel(TickReason) {
+	assert(false);
 }
 
 void Editor::SetFocusState(bool focusState) {

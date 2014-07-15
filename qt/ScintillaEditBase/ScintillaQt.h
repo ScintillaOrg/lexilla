@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 #include <ctype.h>
 #include <time.h>
 #include <string>
@@ -88,7 +89,6 @@ signals:
 	void command(uptr_t wParam, sptr_t lParam);
 
 private slots:
-	void tick();
 	void onIdle();
 	void execCommand(QAction *action);
 	void SelectionChanged();
@@ -114,7 +114,11 @@ private:
 	virtual void NotifyChange();
 	virtual void NotifyFocus(bool focus);
 	virtual void NotifyParent(SCNotification scn);
-	virtual void SetTicking(bool on);
+	int timers[tickDwell+1];
+	virtual bool FineTickerAvailable();
+	virtual bool FineTickerRunning(TickReason reason);
+	virtual void FineTickerStart(TickReason reason, int millis, int tolerance);
+	virtual void FineTickerCancel(TickReason reason);
 	virtual bool SetIdle(bool on);
 	virtual void SetMouseCapture(bool on);
 	virtual bool HaveMouseCapture();
@@ -142,6 +146,8 @@ protected:
 	void DragMove(const Point &point);
 	void DragLeave();
 	void Drop(const Point &point, const QMimeData *data, bool move);
+
+	void timerEvent(QTimerEvent *event);
 
 private:
 	QAbstractScrollArea *scrollArea;

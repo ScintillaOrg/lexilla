@@ -103,6 +103,8 @@
 #define SC_WIN_IDLE 5001
 
 typedef BOOL (WINAPI *TrackMouseEventSig)(LPTRACKMOUSEEVENT);
+typedef UINT_PTR (WINAPI *SetCoalescableTimerSig)(HWND hwnd, UINT_PTR nIDEvent,
+	UINT uElapse, TIMERPROC lpTimerFunc, ULONG uToleranceDelay);
 
 // GCC has trouble with the standard COM ABI so do it the old C way with explicit vtables.
 
@@ -183,6 +185,7 @@ class ScintillaWin :
 	bool capturedMouse;
 	bool trackedMouseLeave;
 	TrackMouseEventSig TrackMouseEventFn;
+	SetCoalescableTimerSig SetCoalescableTimerFn;
 
 	unsigned int linesPerScroll;	///< Intellimouse support
 	int wheelDelta; ///< Wheel delta from roll
@@ -227,7 +230,7 @@ class ScintillaWin :
 	static sptr_t PASCAL CTWndProc(
 		    HWND hWnd, UINT iMessage, WPARAM wParam, sptr_t lParam);
 
-	enum { invalidTimerID, standardTimerID, idleTimerID };
+	enum { invalidTimerID, standardTimerID, idleTimerID, fineTimerStart };
 
 	virtual bool DragThreshold(Point ptStart, Point ptNow);
 	virtual void StartDrag();
@@ -237,7 +240,11 @@ class ScintillaWin :
 	virtual bool ValidCodePage(int codePage) const;
 	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 	virtual bool SetIdle(bool on);
-	virtual void SetTicking(bool on);
+	UINT_PTR timers[tickDwell+1];
+	virtual bool FineTickerAvailable();
+	virtual bool FineTickerRunning(TickReason reason);
+	virtual void FineTickerStart(TickReason reason, int millis, int tolerance);
+	virtual void FineTickerCancel(TickReason reason);
 	virtual void SetMouseCapture(bool on);
 	virtual bool HaveMouseCapture();
 	virtual void SetTrackMouseLeaveEvent(bool on);
@@ -334,6 +341,7 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	capturedMouse = false;
 	trackedMouseLeave = false;
 	TrackMouseEventFn = 0;
+	SetCoalescableTimerFn = 0;
 
 	linesPerScroll = 0;
 	wheelDelta = 0;   // Wheel delta from roll
@@ -389,8 +397,10 @@ void ScintillaWin::Initialise() {
 
 	// Find TrackMouseEvent which is available on Windows > 95
 	HMODULE user32 = ::GetModuleHandle(TEXT("user32.dll"));
-	if (user32)
+	if (user32) {
 		TrackMouseEventFn = (TrackMouseEventSig)::GetProcAddress(user32, "TrackMouseEvent");
+		SetCoalescableTimerFn = (SetCoalescableTimerSig)::GetProcAddress(user32, "SetCoalescableTimer");
+	}
 	if (TrackMouseEventFn == NULL) {
 		// Windows 95 has an emulation in comctl32.dll:_TrackMouseEvent
 		if (!commctrl32)
@@ -400,11 +410,16 @@ void ScintillaWin::Initialise() {
 				::GetProcAddress(commctrl32, "_TrackMouseEvent");
 		}
 	}
+	for (TickReason tr = tickCaret; tr <= tickDwell; tr = static_cast<TickReason>(tr + 1)) {
+		timers[tr] = 0;
+	}
 }
 
 void ScintillaWin::Finalise() {
 	ScintillaBase::Finalise();
-	SetTicking(false);
+	for (TickReason tr = tickCaret; tr <= tickDwell; tr = static_cast<TickReason>(tr + 1)) {
+		FineTickerCancel(tr);
+	}
 	SetIdle(false);
 #if defined(USE_D2D)
 	DropRenderTarget();
@@ -912,12 +927,10 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			return 0;
 
 		case WM_TIMER:
-			if (wParam == standardTimerID && timer.ticking) {
-				Tick();
-			} else if (wParam == idleTimerID && idler.state) {
+			if (wParam == idleTimerID && idler.state) {
 				SendMessage(MainHWND(), SC_WIN_IDLE, 0, 1);
 			} else {
-				return 1;
+				TickFor(static_cast<TickReason>(wParam - fineTimerStart));
 			}
 			break;
 
@@ -1319,19 +1332,33 @@ sptr_t ScintillaWin::DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPa
 	return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 }
 
-void ScintillaWin::SetTicking(bool on) {
-	if (timer.ticking != on) {
-		timer.ticking = on;
-		if (timer.ticking) {
-			timer.tickerID = ::SetTimer(MainHWND(), standardTimerID, timer.tickSize, NULL)
-				? reinterpret_cast<TickerID>(standardTimerID) : 0;
-		} else {
-			::KillTimer(MainHWND(), reinterpret_cast<uptr_t>(timer.tickerID));
-			timer.tickerID = 0;
-		}
-	}
-	timer.ticksToWait = caret.period;
+/**
+* Report that this Editor subclass has a working implementation of FineTickerStart.
+*/
+bool ScintillaWin::FineTickerAvailable() {
+	return true;
 }
+
+bool ScintillaWin::FineTickerRunning(TickReason reason) {
+	return timers[reason] != 0;
+}
+
+void ScintillaWin::FineTickerStart(TickReason reason, int millis, int tolerance) {
+	FineTickerCancel(reason);
+	if (SetCoalescableTimerFn && tolerance) {
+		timers[reason] = SetCoalescableTimerFn(MainHWND(), fineTimerStart + reason, millis, NULL, tolerance);
+	} else {
+		timers[reason] = ::SetTimer(MainHWND(), fineTimerStart + reason, millis, NULL);
+	}
+}
+
+void ScintillaWin::FineTickerCancel(TickReason reason) {
+	if (timers[reason]) {
+		::KillTimer(MainHWND(), timers[reason]);
+		timers[reason] = 0;
+	}
+}
+
 
 bool ScintillaWin::SetIdle(bool on) {
 	// On Win32 the Idler is implemented as a Timer on the Scintilla window.  This
