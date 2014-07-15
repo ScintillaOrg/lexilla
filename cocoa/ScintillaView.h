@@ -75,7 +75,7 @@ extern NSString *const SCIUpdateUINotification;
 @private
   ScintillaView* mOwner;
   NSCursor* mCurrentCursor;
-  NSTrackingRectTag mCurrentTrackingRect;
+  NSTrackingArea *trackingArea;
 
   // Set when we are in composition mode and partial input is displayed.
   NSRange mMarkedTextRange;
