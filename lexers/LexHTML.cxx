@@ -828,12 +828,14 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		else if (isMako && makoComment && (ch == '\r' || ch == '\n')) {
 			makoComment = 0;
 			styler.ColourTo(i, SCE_HP_COMMENTLINE);
-			state = SCE_HP_DEFAULT;
 		}
 
 		// Allow falling through to mako handling code if newline is going to end a block
 		if (((ch == '\r' && chNext != '\n') || (ch == '\n')) &&
 			(!isMako || (0 != strcmp(makoBlockType, "%")))) {
+		}
+		// Ignore everything in mako comment until the line ends
+		else if (isMako && makoComment) {
 		}
 
 		// generic end of script processing
