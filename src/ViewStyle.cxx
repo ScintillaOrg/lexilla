@@ -470,6 +470,14 @@ ColourOptional ViewStyle::Background(int marksOfLine, bool caretActive, bool lin
 	return background;
 }
 
+bool ViewStyle::SelectionBackgroundDrawn() const {
+	return selColours.back.isSet &&
+		((selAlpha == SC_ALPHA_NOALPHA) || (selAdditionalAlpha == SC_ALPHA_NOALPHA));
+}
+
+bool ViewStyle::WhitespaceBackgroundDrawn() const {
+	return (viewWhitespace != wsInvisible) && (whitespaceColours.back.isSet);
+}
 
 ColourDesired ViewStyle::WrapColour() const {
 	if (whitespaceColours.fore.isSet)

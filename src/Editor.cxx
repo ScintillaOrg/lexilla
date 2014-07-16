@@ -359,7 +359,7 @@ SelectionPosition Editor::ClampPositionIntoDocument(SelectionPosition sp) const 
 Point Editor::LocationFromPosition(SelectionPosition pos) {
 	RefreshStyleData();
 	AutoSurface surface(this);
-	return view.LocationFromPosition(surface, pos, topLine, *this, vs);
+	return view.LocationFromPosition(surface, *this, pos, topLine, vs);
 }
 
 Point Editor::LocationFromPosition(int pos) {
@@ -393,7 +393,7 @@ SelectionPosition Editor::SPositionFromLocation(Point pt, bool canReturnInvalid,
 			return SelectionPosition(INVALID_POSITION);
 	}
 	pt = DocumentPointFromView(pt);
-	return view.SPositionFromLocation(surface, pt, canReturnInvalid, charPosition, virtualSpace, *this, vs);
+	return view.SPositionFromLocation(surface, *this, pt, canReturnInvalid, charPosition, virtualSpace, vs);
 }
 
 int Editor::PositionFromLocation(Point pt, bool canReturnInvalid, bool charPosition) {
@@ -411,7 +411,7 @@ SelectionPosition Editor::SPositionFromLineX(int lineDoc, int x) {
 		return SelectionPosition(pdoc->Length());
 	//Platform::DebugPrintf("Position of (%d,%d) line = %d top=%d\n", pt.x, pt.y, line, topLine);
 	AutoSurface surface(this);
-	return view.SPositionFromLineX(surface, lineDoc, x, *this, vs);
+	return view.SPositionFromLineX(surface, *this, lineDoc, x, vs);
 }
 
 int Editor::PositionFromLineX(int lineDoc, int x) {
@@ -984,7 +984,7 @@ void Editor::MoveCaretInsideView(bool ensureVisible) {
 
 int Editor::DisplayFromPosition(int pos) {
 	AutoSurface surface(this);
-	return view.DisplayFromPosition(surface, pos, *this, vs);
+	return view.DisplayFromPosition(surface, *this, pos, vs);
 }
 
 /**
@@ -1380,7 +1380,7 @@ bool Editor::WrapOneLine(Surface *surface, int lineToWrap) {
 	AutoLineLayout ll(view.llc, view.RetrieveLineLayout(lineToWrap, *this));
 	int linesWrapped = 1;
 	if (ll) {
-		view.LayoutLine(lineToWrap, surface, vs, ll, *this, wrapWidth);
+		view.LayoutLine(*this, lineToWrap, surface, vs, ll, wrapWidth);
 		linesWrapped = ll->lines;
 	}
 	return cs.SetHeight(lineToWrap, linesWrapped +
@@ -1526,7 +1526,7 @@ void Editor::LinesSplit(int pixelWidth) {
 			AutoLineLayout ll(view.llc, view.RetrieveLineLayout(line, *this));
 			if (surface && ll) {
 				unsigned int posLineStart = pdoc->LineStart(line);
-				view.LayoutLine(line, surface, vs, ll, *this, pixelWidth);
+				view.LayoutLine(*this, line, surface, vs, ll, pixelWidth);
 				int lengthInsertedTotal = 0;
 				for (int subLine = 1; subLine < ll->lines; subLine++) {
 					const int lengthInserted = pdoc->InsertString(
@@ -1672,7 +1672,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		return;
 	}
 
-	view.PaintText(surfaceWindow, rcArea, rcClient, *this, vs);
+	view.PaintText(surfaceWindow, *this, rcArea, rcClient, vs);
 
 	if (horizontalScrollBarVisible && trackLineWidth && (view.lineWidthMaxSeen > scrollWidth)) {
 		if (FineTickerAvailable()) {
@@ -3012,7 +3012,7 @@ void Editor::ParaUpOrDown(int direction, Selection::selTypes selt) {
 int Editor::StartEndDisplayLine(int pos, bool start) {
 	RefreshStyleData();
 	AutoSurface surface(this);
-	int posRet = view.StartEndDisplayLine(surface, pos, start, *this, vs);
+	int posRet = view.StartEndDisplayLine(surface, *this, pos, start, vs);
 	if (posRet == INVALID_POSITION) {
 		return pos;
 	} else {
@@ -4767,7 +4767,7 @@ void Editor::SetAnnotationHeights(int start, int end) {
 				AutoSurface surface(this);
 				AutoLineLayout ll(view.llc, view.RetrieveLineLayout(line, *this));
 				if (surface && ll) {
-					view.LayoutLine(line, surface, vs, ll, *this, wrapWidth);
+					view.LayoutLine(*this, line, surface, vs, ll, wrapWidth);
 					linesWrapped = ll->lines;
 				}
 			}
@@ -5123,7 +5123,7 @@ int Editor::WrapCount(int line) {
 	AutoLineLayout ll(view.llc, view.RetrieveLineLayout(line, *this));
 
 	if (surface && ll) {
-		view.LayoutLine(line, surface, vs, ll, *this, wrapWidth);
+		view.LayoutLine(*this, line, surface, vs, ll, wrapWidth);
 		return ll->lines;
 	} else {
 		return 1;

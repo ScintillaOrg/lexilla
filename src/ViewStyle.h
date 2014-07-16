@@ -170,7 +170,10 @@ public:
 	bool ValidStyle(size_t styleIndex) const;
 	void CalcLargestMarkerHeight();
 	ColourOptional Background(int marksOfLine, bool caretActive, bool lineContainsCaret) const;
+	bool SelectionBackgroundDrawn() const;
+	bool WhitespaceBackgroundDrawn() const;
 	ColourDesired WrapColour() const;
+
 	bool SetWrapState(int wrapState_);
 	bool SetWrapVisualFlags(int wrapVisualFlags_);
 	bool SetWrapVisualFlagsLocation(int wrapVisualFlagsLocation_);

@@ -55,28 +55,36 @@ public:
 	void RefreshPixMaps(Surface *surfaceWindow, WindowID wid, const ViewStyle &vsDraw);
 
 	LineLayout *RetrieveLineLayout(int lineNumber, const EditModel &model);
-	void LayoutLine(int line, Surface *surface, const ViewStyle &vstyle, LineLayout *ll,
-		const EditModel &model, int width = LineLayout::wrapWidthInfinite);
+	void LayoutLine(const EditModel &model, int line, Surface *surface, const ViewStyle &vstyle,
+		LineLayout *ll, int width = LineLayout::wrapWidthInfinite);
 
-	Point LocationFromPosition(Surface *surface, SelectionPosition pos, int topLine, const EditModel &model, const ViewStyle &vs);
-	SelectionPosition SPositionFromLocation(Surface *surface, Point pt, bool canReturnInvalid, bool charPosition, bool virtualSpace,
-		const EditModel &model, const ViewStyle &vs);
-	SelectionPosition SPositionFromLineX(Surface *surface, int lineDoc, int x, const EditModel &model, const ViewStyle &vs);
-	int DisplayFromPosition(Surface *surface, int pos, const EditModel &model, const ViewStyle &vs);
-	int StartEndDisplayLine(Surface *surface, int pos, bool start, const EditModel &model, const ViewStyle &vs);
+	Point LocationFromPosition(Surface *surface, const EditModel &model, SelectionPosition pos, int topLine, const ViewStyle &vs);
+	SelectionPosition SPositionFromLocation(Surface *surface, const EditModel &model, Point pt, bool canReturnInvalid,
+		bool charPosition, bool virtualSpace, const ViewStyle &vs);
+	SelectionPosition SPositionFromLineX(Surface *surface, const EditModel &model, int lineDoc, int x, const ViewStyle &vs);
+	int DisplayFromPosition(Surface *surface, const EditModel &model, int pos, const ViewStyle &vs);
+	int StartEndDisplayLine(Surface *surface, const EditModel &model, int pos, bool start, const ViewStyle &vs);
 
 	void DrawIndentGuide(Surface *surface, int lineVisible, int lineHeight, int start, PRectangle rcSegment, bool highlight);
-	void DrawEOL(Surface *surface, const ViewStyle &vsDraw, PRectangle rcLine, LineLayout *ll,
+	void DrawEOL(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll, PRectangle rcLine,
 		int line, int lineEnd, int xStart, int subLine, XYACCUMULATOR subLineStart,
-		ColourOptional background, const EditModel &model);
-	void DrawAnnotation(Surface *surface, const ViewStyle &vsDraw, int line, int xStart,
-		PRectangle rcLine, LineLayout *ll, int subLine, const EditModel &model);
-	void DrawCarets(Surface *surface, const ViewStyle &vsDraw, int line, int xStart,
-		PRectangle rcLine, LineLayout *ll, int subLine, const EditModel &model) const;
-	void DrawLine(Surface *surface, const ViewStyle &vsDraw, int line, int lineVisible, int xStart,
-		PRectangle rcLine, LineLayout *ll, int subLine, const EditModel &model);
-	void PaintText(Surface *surfaceWindow, PRectangle rcArea, PRectangle rcClient,
-		const EditModel &model, const ViewStyle &vsDraw);
+		ColourOptional background);
+	void DrawAnnotation(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
+		int line, int xStart, PRectangle rcLine, int subLine);
+	void DrawCarets(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll, int line,
+		int xStart, PRectangle rcLine, int subLine) const;
+	void DrawBackground(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll, PRectangle rcLine,
+		Range lineRange, int posLineStart, int xStart,
+		int subLine, ColourOptional background);
+	void DrawForeground(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll, int lineVisible,
+		PRectangle rcLine, Range lineRange, int posLineStart, int xStart,
+		int subLine, ColourOptional background);
+	void DrawIndentGuidesOverEmpty(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
+		int line, int lineVisible, PRectangle rcLine, int xStart, int subLine);
+	void DrawLine(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll, int line, 
+		int lineVisible, int xStart, PRectangle rcLine, int subLine);
+	void PaintText(Surface *surfaceWindow, const EditModel &model, PRectangle rcArea, PRectangle rcClient,
+		const ViewStyle &vsDraw);
 	long FormatRange(bool draw, Sci_RangeToFormat *pfr, Surface *surface, Surface *surfaceMeasure,
 		const EditModel &model, const ViewStyle &vs);
 };
