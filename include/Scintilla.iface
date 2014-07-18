@@ -1291,12 +1291,26 @@ get bool GetVScrollBar=2281(,)
 # Append a string to the end of the document without changing the selection.
 fun void AppendText=2282(int length, string text)
 
-# Is drawing done in two phases with backgrounds drawn before faoregrounds?
+# Is drawing done in two phases with backgrounds drawn before foregrounds?
 get bool GetTwoPhaseDraw=2283(,)
 
 # In twoPhaseDraw mode, drawing is performed in two phases, first the background
 # and then the foreground. This avoids chopping off characters that overlap the next run.
 set void SetTwoPhaseDraw=2284(bool twoPhase,)
+
+enu FontQuality=SC_PHASES_
+val SC_PHASES_ONE=0
+val SC_PHASES_TWO=1
+val SC_PHASES_MULTIPLE=2
+
+# How many phases is drawing done in?
+get int GetPhasesDraw=2673(,)
+
+# In one phase draw, text is drawn in a series of rectangular blocks with no overlap.
+# In two phase draw, text is drawn in a series of lines allowing runs to overlap horizontally.
+# In multiple phase draw, each element is drawn over the whole drawing area, allowing text
+# to overlap from one line to the next.
+set void SetPhasesDraw=2674(int phases,)
 
 # Control font anti-aliasing.
 

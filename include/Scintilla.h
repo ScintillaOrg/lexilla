@@ -517,6 +517,11 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_APPENDTEXT 2282
 #define SCI_GETTWOPHASEDRAW 2283
 #define SCI_SETTWOPHASEDRAW 2284
+#define SC_PHASES_ONE 0
+#define SC_PHASES_TWO 1
+#define SC_PHASES_MULTIPLE 2
+#define SCI_GETPHASESDRAW 2673
+#define SCI_SETPHASESDRAW 2674
 #define SC_EFF_QUALITY_MASK 0xF
 #define SC_EFF_QUALITY_DEFAULT 0
 #define SC_EFF_QUALITY_NON_ANTIALIASED 1

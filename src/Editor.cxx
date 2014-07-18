@@ -484,7 +484,7 @@ void Editor::RedrawSelMargin(int line, bool allAfter) {
 			PRectangle rcSelMargin = GetClientRectangle();
 			rcSelMargin.right = rcSelMargin.left + vs.fixedColumnWidth;
 			if (line != -1) {
-				PRectangle rcLine = RectangleFromRange(Range(pdoc->LineStart(line)));
+				PRectangle rcLine = RectangleFromRange(Range(pdoc->LineStart(line)), 0);
 
 				// Inflate line rectangle if there are image markers with height larger than line height
 				if (vs.largestMarkerHeight > vs.lineHeight) {
@@ -514,25 +514,25 @@ void Editor::RedrawSelMargin(int line, bool allAfter) {
 	}
 }
 
-PRectangle Editor::RectangleFromRange(Range r) {
+PRectangle Editor::RectangleFromRange(Range r, int overlap) {
 	const int minLine = cs.DisplayFromDoc(pdoc->LineFromPosition(r.First()));
 	const int maxLine = cs.DisplayLastFromDoc(pdoc->LineFromPosition(r.Last()));
 	const PRectangle rcClientDrawing = GetClientDrawingRectangle();
 	PRectangle rc;
 	const int leftTextOverlap = ((xOffset == 0) && (vs.leftMarginWidth > 0)) ? 1 : 0;
 	rc.left = static_cast<XYPOSITION>(vs.textStart - leftTextOverlap);
-	rc.top = static_cast<XYPOSITION>((minLine - TopLineOfMain()) * vs.lineHeight);
+	rc.top = static_cast<XYPOSITION>((minLine - TopLineOfMain()) * vs.lineHeight - overlap);
 	if (rc.top < rcClientDrawing.top)
 		rc.top = rcClientDrawing.top;
 	// Extend to right of prepared area if any to prevent artifacts from caret line highlight
 	rc.right = rcClientDrawing.right;
-	rc.bottom = static_cast<XYPOSITION>((maxLine - TopLineOfMain() + 1) * vs.lineHeight);
+	rc.bottom = static_cast<XYPOSITION>((maxLine - TopLineOfMain() + 1) * vs.lineHeight + overlap);
 
 	return rc;
 }
 
 void Editor::InvalidateRange(int start, int end) {
-	RedrawRect(RectangleFromRange(Range(start, end)));
+	RedrawRect(RectangleFromRange(Range(start, end), view.LinesOverlap() ? vs.lineOverlap : 0));
 }
 
 int Editor::CurrentPosition() const {
@@ -4723,7 +4723,7 @@ void Editor::CheckForChangeOutsidePaint(Range r) {
 		if (!r.Valid())
 			return;
 
-		PRectangle rcRange = RectangleFromRange(r);
+		PRectangle rcRange = RectangleFromRange(r, 0);
 		PRectangle rcText = GetTextRectangle();
 		if (rcRange.top < rcText.top) {
 			rcRange.top = rcText.top;
@@ -5944,11 +5944,19 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return view.bufferedDraw;
 
 	case SCI_GETTWOPHASEDRAW:
-		return view.twoPhaseDraw;
+		return view.phasesDraw == EditView::phasesTwo;
 
 	case SCI_SETTWOPHASEDRAW:
-		view.twoPhaseDraw = wParam != 0;
-		InvalidateStyleRedraw();
+		if (view.SetTwoPhaseDraw(wParam != 0))
+			InvalidateStyleRedraw();
+		break;
+
+	case SCI_GETPHASESDRAW:
+		return view.phasesDraw;
+
+	case SCI_SETPHASESDRAW:
+		if (view.SetPhasesDraw(static_cast<int>(wParam)))
+			InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETFONTQUALITY:

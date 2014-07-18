@@ -12,12 +12,6 @@
 namespace Scintilla {
 #endif
 
-bool ValidStyledText(const ViewStyle &vs, size_t styleOffset, const StyledText &st);
-
-void DrawStyledText(Surface *surface, const ViewStyle &vs, int styleOffset, PRectangle rcText,
-	const StyledText &st, size_t start, size_t length);
-int WidestLineWidth(Surface *surface, const ViewStyle &vs, int styleOffset, const StyledText &st);
-
 void DrawWrapMarker(Surface *surface, PRectangle rcPlace, bool isEndMarker, ColourDesired wrapColour);
 
 /**

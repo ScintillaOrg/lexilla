@@ -204,6 +204,7 @@ void ViewStyle::Init(size_t stylesSize_) {
 
 	technology = SC_TECHNOLOGY_DEFAULT;
 	lineHeight = 1;
+	lineOverlap = 0;
 	maxAscent = 1;
 	maxDescent = 1;
 	aveCharWidth = 8;
@@ -329,6 +330,11 @@ void ViewStyle::Refresh(Surface &surface, int tabInChars) {
 	maxAscent += extraAscent;
 	maxDescent += extraDescent;
 	lineHeight = maxAscent + maxDescent;
+	lineOverlap = lineHeight / 10;
+	if (lineOverlap < 2)
+		lineOverlap = 2;
+	if (lineOverlap > lineHeight)
+		lineOverlap = lineHeight;
 
 	someStylesProtected = false;
 	someStylesForceCase = false;

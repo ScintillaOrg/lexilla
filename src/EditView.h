@@ -20,6 +20,29 @@ struct PrintParameters {
 };
 
 /**
+* The view may be drawn in separate phases.
+*/
+enum DrawPhase {
+	drawBack = 0x1,
+	drawIndicatorsBack = 0x2,
+	drawText = 0x4,
+	drawIndentationGuides = 0x8,
+	drawIndicatorsFore = 0x10,
+	drawSelectionTranslucent = 0x20,
+	drawLineTranslucent = 0x40,
+	drawFoldLines = 0x80,
+	drawCarets = 0x100,
+	drawAll = 0x1FF,
+};
+
+bool ValidStyledText(const ViewStyle &vs, size_t styleOffset, const StyledText &st);
+int WidestLineWidth(Surface *surface, const ViewStyle &vs, int styleOffset, const StyledText &st);
+void DrawTextNoClipPhase(Surface *surface, PRectangle rc, const Style &style, XYPOSITION ybase,
+	const char *s, int len, DrawPhase phase);
+void DrawStyledText(Surface *surface, const ViewStyle &vs, int styleOffset, PRectangle rcText,
+	const StyledText &st, size_t start, size_t length, DrawPhase phase);
+
+/**
 * EditView draws the main text area.
 */
 class EditView {
@@ -32,9 +55,13 @@ public:
 	/** In bufferedDraw mode, graphics operations are drawn to a pixmap and then copied to
 	* the screen. This avoids flashing but is about 30% slower. */
 	bool bufferedDraw;
-	/** In twoPhaseDraw mode, drawing is performed in two phases, first the background
-	* and then the foreground. This avoids chopping off characters that overlap the next run. */
-	bool twoPhaseDraw;
+	/** In phasesTwo mode, drawing is performed in two phases, first the background
+	* and then the foreground. This avoids chopping off characters that overlap the next run.
+	* In multiPhaseDraw mode, drawing is performed in multiple phases with each phase drawing
+	* one feature over the whole drawing area, instead of within one line. This allows text to
+	* overlap from one line to the next. */
+	enum PhasesDraw { phasesOne, phasesTwo, phasesMultiple };
+	PhasesDraw phasesDraw;
 
 	int lineWidthMaxSeen;
 
@@ -49,6 +76,10 @@ public:
 	PositionCache posCache;
 
 	EditView();
+
+	bool SetTwoPhaseDraw(bool twoPhaseDraw);
+	bool SetPhasesDraw(int phases);
+	bool LinesOverlap() const;
 
 	void DropGraphics(bool freeObjects);
 	void AllocateGraphics(const ViewStyle &vsDraw);
@@ -70,7 +101,7 @@ public:
 		int line, int lineEnd, int xStart, int subLine, XYACCUMULATOR subLineStart,
 		ColourOptional background);
 	void DrawAnnotation(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
-		int line, int xStart, PRectangle rcLine, int subLine);
+		int line, int xStart, PRectangle rcLine, int subLine, DrawPhase phase);
 	void DrawCarets(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll, int line,
 		int xStart, PRectangle rcLine, int subLine) const;
 	void DrawBackground(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll, PRectangle rcLine,
@@ -82,7 +113,7 @@ public:
 	void DrawIndentGuidesOverEmpty(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
 		int line, int lineVisible, PRectangle rcLine, int xStart, int subLine);
 	void DrawLine(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll, int line, 
-		int lineVisible, int xStart, PRectangle rcLine, int subLine);
+		int lineVisible, int xStart, PRectangle rcLine, int subLine, DrawPhase phase);
 	void PaintText(Surface *surfaceWindow, const EditModel &model, PRectangle rcArea, PRectangle rcClient,
 		const ViewStyle &vsDraw);
 	long FormatRange(bool draw, Sci_RangeToFormat *pfr, Surface *surface, Surface *surfaceMeasure,

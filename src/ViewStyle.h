@@ -85,6 +85,7 @@ public:
 	Indicator indicators[INDIC_MAX + 1];
 	int technology;
 	int lineHeight;
+	int lineOverlap;
 	unsigned int maxAscent;
 	unsigned int maxDescent;
 	XYPOSITION aveCharWidth;

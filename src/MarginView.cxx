@@ -54,92 +54,6 @@ using namespace Scintilla;
 namespace Scintilla {
 #endif
 
-bool ValidStyledText(const ViewStyle &vs, size_t styleOffset, const StyledText &st) {
-	if (st.multipleStyles) {
-		for (size_t iStyle = 0; iStyle<st.length; iStyle++) {
-			if (!vs.ValidStyle(styleOffset + st.styles[iStyle]))
-				return false;
-		}
-	} else {
-		if (!vs.ValidStyle(styleOffset + st.style))
-			return false;
-	}
-	return true;
-}
-
-static int WidthStyledText(Surface *surface, const ViewStyle &vs, int styleOffset,
-	const char *text, const unsigned char *styles, size_t len) {
-	int width = 0;
-	size_t start = 0;
-	while (start < len) {
-		size_t style = styles[start];
-		size_t endSegment = start;
-		while ((endSegment + 1 < len) && (static_cast<size_t>(styles[endSegment + 1]) == style))
-			endSegment++;
-		FontAlias fontText = vs.styles[style + styleOffset].font;
-		width += static_cast<int>(surface->WidthText(fontText, text + start,
-			static_cast<int>(endSegment - start + 1)));
-		start = endSegment + 1;
-	}
-	return width;
-}
-
-int WidestLineWidth(Surface *surface, const ViewStyle &vs, int styleOffset, const StyledText &st) {
-	int widthMax = 0;
-	size_t start = 0;
-	while (start < st.length) {
-		size_t lenLine = st.LineLength(start);
-		int widthSubLine;
-		if (st.multipleStyles) {
-			widthSubLine = WidthStyledText(surface, vs, styleOffset, st.text + start, st.styles + start, lenLine);
-		} else {
-			FontAlias fontText = vs.styles[styleOffset + st.style].font;
-			widthSubLine = static_cast<int>(surface->WidthText(fontText,
-				st.text + start, static_cast<int>(lenLine)));
-		}
-		if (widthSubLine > widthMax)
-			widthMax = widthSubLine;
-		start += lenLine + 1;
-	}
-	return widthMax;
-}
-
-static void DrawTextInStyle(Surface *surface, PRectangle rcText, const Style &style, XYPOSITION ybase, const char *s, size_t length) {
-	FontAlias fontText = style.font;
-	surface->DrawTextNoClip(rcText, fontText, ybase, s, static_cast<int>(length),
-		style.fore, style.back);
-}
-
-void DrawStyledText(Surface *surface, const ViewStyle &vs, int styleOffset, PRectangle rcText,
-	const StyledText &st, size_t start, size_t length) {
-
-	if (st.multipleStyles) {
-		int x = static_cast<int>(rcText.left);
-		size_t i = 0;
-		while (i < length) {
-			size_t end = i;
-			size_t style = st.styles[i + start];
-			while (end < length - 1 && st.styles[start + end + 1] == style)
-				end++;
-			style += styleOffset;
-			FontAlias fontText = vs.styles[style].font;
-			const int width = static_cast<int>(surface->WidthText(fontText,
-				st.text + start + i, static_cast<int>(end - i + 1)));
-			PRectangle rcSegment = rcText;
-			rcSegment.left = static_cast<XYPOSITION>(x);
-			rcSegment.right = static_cast<XYPOSITION>(x + width + 1);
-			DrawTextInStyle(surface, rcSegment, vs.styles[style], rcText.top + vs.maxAscent,
-				st.text + start + i, end - i + 1);
-			x += width;
-			i = end + 1;
-		}
-	} else {
-		const size_t style = st.style + styleOffset;
-		DrawTextInStyle(surface, rcText, vs.styles[style], rcText.top + vs.maxAscent,
-			st.text + start, length);
-	}
-}
-
 void DrawWrapMarker(Surface *surface, PRectangle rcPlace,
 	bool isEndMarker, ColourDesired wrapColour) {
 	surface->PenColour(wrapColour);
@@ -473,8 +387,8 @@ void MarginView::PaintMargin(Surface *surface, int topLine, PRectangle rc, PRect
 						XYPOSITION width = surface->WidthText(fontLineNumber, number, static_cast<int>(strlen(number)));
 						XYPOSITION xpos = rcNumber.right - width - vs.marginNumberPadding;
 						rcNumber.left = xpos;
-						DrawTextInStyle(surface, rcNumber, vs.styles[STYLE_LINENUMBER],
-							rcNumber.top + vs.maxAscent, number, strlen(number));
+						DrawTextNoClipPhase(surface, rcNumber, vs.styles[STYLE_LINENUMBER],
+							rcNumber.top + vs.maxAscent, number, static_cast<int>(strlen(number)), drawAll);
 					} else if (vs.wrapVisualFlags & SC_WRAPVISUALFLAG_MARGIN) {
 						PRectangle rcWrapMarker = rcMarker;
 						rcWrapMarker.right -= 3;
@@ -492,7 +406,7 @@ void MarginView::PaintMargin(Surface *surface, int topLine, PRectangle rc, PRect
 								rcMarker.left = rcMarker.right - width - 3;
 							}
 							DrawStyledText(surface, vs, vs.marginStyleOffset, rcMarker,
-								stMargin, 0, stMargin.length);
+								stMargin, 0, stMargin.length, drawAll);
 						}
 					}
 				}
