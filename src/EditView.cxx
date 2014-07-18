@@ -61,6 +61,10 @@ PrintParameters::PrintParameters() {
 	wrapState = eWrapWord;
 }
 
+#ifdef SCI_NAMESPACE
+namespace Scintilla {
+#endif
+
 bool ValidStyledText(const ViewStyle &vs, size_t styleOffset, const StyledText &st) {
 	if (st.multipleStyles) {
 		for (size_t iStyle = 0; iStyle<st.length; iStyle++) {
@@ -164,6 +168,10 @@ void DrawStyledText(Surface *surface, const ViewStyle &vs, int styleOffset, PRec
 			static_cast<int>(length), phase);
 	}
 }
+
+#ifdef SCI_NAMESPACE
+}
+#endif
 
 const XYPOSITION epsilon = 0.0001f;	// A small nudge to avoid floating point precision issues
 
