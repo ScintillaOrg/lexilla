@@ -1702,7 +1702,7 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 		int lineDocPrevious = -1;	// Used to avoid laying out one document line multiple times
 		AutoLineLayout ll(llc, 0);
 		std::vector<DrawPhase> phases;
-		if (phasesDraw == phasesMultiple) {
+		if ((phasesDraw == phasesMultiple) && !bufferedDraw) {
 			for (DrawPhase phase = drawBack; phase <= drawCarets; phase = static_cast<DrawPhase>(phase * 2)) {
 				phases.push_back(phase);
 			}

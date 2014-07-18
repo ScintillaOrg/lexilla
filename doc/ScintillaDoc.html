@@ -3225,6 +3225,8 @@ struct Sci_TextToFind {
      drawn before any text and then all the text is drawn in transparent mode over this
      combined background without clipping text to the line boundaries. This allows
      extreme ascenders and decenders to overflow into the adjacent lines.
+     This mode is incompatible with buffered drawing and will act as <code>SC_PHASES_TWO</code>
+     if buffered drawing is turned on.
      Multiple phase drawing is slower than two phase drawing.
      Setting the layout cache to <a class="message" href="#SCI_SETLAYOUTCACHE">SC_CACHE_PAGE</a>
      or higher can ensure that multiple phase drawing is not significantly slower.</p>
