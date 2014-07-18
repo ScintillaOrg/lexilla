@@ -303,6 +303,12 @@ public:
 	void AddUndoAction(int token, bool mayCoalesce) { cb.AddUndoAction(token, mayCoalesce); }
 	void SetSavePoint();
 	bool IsSavePoint() const { return cb.IsSavePoint(); }
+
+	void TentativeStart() { cb.TentativeStart(); }
+	void TentativeCommit() { cb.TentativeCommit(); }
+	void TentativeUndo();
+	bool TentativeActive() { return cb.TentativeActive(); }
+
 	const char * SCI_METHOD BufferPointer() { return cb.BufferPointer(); }
 	const char *RangePointer(int position, int rangeLength) { return cb.RangePointer(position, rangeLength); }
 	int GapPosition() const { return cb.GapPosition(); }
