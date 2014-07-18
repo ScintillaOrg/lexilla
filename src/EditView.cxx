@@ -115,12 +115,6 @@ int WidestLineWidth(Surface *surface, const ViewStyle &vs, int styleOffset, cons
 	return widthMax;
 }
 
-void DrawTextInStyle(Surface *surface, PRectangle rcText, const Style &style, XYPOSITION ybase, const char *s, size_t length) {
-	FontAlias fontText = style.font;
-	surface->DrawTextNoClip(rcText, fontText, ybase, s, static_cast<int>(length),
-		style.fore, style.back);
-}
-
 void DrawTextNoClipPhase(Surface *surface, PRectangle rc, const Style &style, XYPOSITION ybase,
 	const char *s, int len, DrawPhase phase) {
 	FontAlias fontText = style.font;
