@@ -205,6 +205,9 @@ class ScintillaWin :
 
 	static HINSTANCE hInstance;
 
+	int tmpCaretStyle;
+	bool compstrExist;
+
 #if defined(USE_D2D)
 	ID2D1HwndRenderTarget *pRenderTarget;
 	bool renderTargetValid;
@@ -236,6 +239,8 @@ class ScintillaWin :
 	virtual void StartDrag();
 	sptr_t WndPaint(uptr_t wParam);
 	sptr_t HandleComposition(uptr_t wParam, sptr_t lParam);
+	static bool KoreanIME();
+	sptr_t HandleCompositionKoreanIME(uptr_t wParam, sptr_t lParam);
 	UINT CodePageOfDocument();
 	virtual bool ValidCodePage(int codePage) const;
 	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
@@ -342,6 +347,9 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	trackedMouseLeave = false;
 	TrackMouseEventFn = 0;
 	SetCoalescableTimerFn = 0;
+
+	tmpCaretStyle = 0;
+	compstrExist = false;
 
 	linesPerScroll = 0;
 	wheelDelta = 0;   // Wheel delta from roll
@@ -701,6 +709,105 @@ sptr_t ScintillaWin::HandleComposition(uptr_t wParam, sptr_t lParam) {
 		return 0;
 	}
 	return ::DefWindowProc(MainHWND(), WM_IME_COMPOSITION, wParam, lParam);
+}
+
+bool ScintillaWin::KoreanIME() {
+	const int codePage = InputCodePage();
+	return codePage == 949 || codePage == 1361;
+}
+
+sptr_t ScintillaWin::HandleCompositionKoreanIME(uptr_t, sptr_t lParam) {
+
+	// copy & paste by johnsonj
+	// Great thanks to
+	// jiniya from http://www.jiniya.net/tt/494  for DBCS input with AddCharUTF()
+	// BLUEnLIVE from http://zockr.tistory.com/1118 for UNDO and inOverstrike
+
+	HIMC hIMC = ::ImmGetContext(MainHWND());
+	if (!hIMC) {
+		return 0;
+	}
+
+	const int maxLenInputIME = 4;
+	wchar_t wcs[maxLenInputIME];
+	int wides = 0;
+
+	// for avoiding inOverstrike condition in AddCharUTF()
+	bool tmpOverstrike = inOverstrike;
+
+	if (pdoc->TentativeActive()) {
+		pdoc->TentativeUndo();
+	} else {
+		// No tentative undo means start of this composition so
+		// fill in any virtual spaces.
+		AddCharUTF("", 0, false);
+	}
+
+	if (lParam & GCS_COMPSTR) {
+		long bytes = ::ImmGetCompositionStringW
+						   (hIMC, GCS_COMPSTR, wcs, maxLenInputIME);
+		wides = bytes / 2;
+		inOverstrike = inOverstrike && (!compstrExist);
+		compstrExist = (wides != 0);
+	} else if (lParam & GCS_RESULTSTR) {
+		long bytes = ::ImmGetCompositionStringW
+						(hIMC, GCS_RESULTSTR, wcs, maxLenInputIME);
+		wides = bytes / 2;
+		compstrExist = (wides == 0);
+		inOverstrike = inOverstrike && (wides >= 2);
+	}
+
+	if (wides >= 1) {
+
+		char hanval[maxLenInputIME];
+		unsigned int hanlen = 0;
+
+		if (IsUnicodeMode()) {
+			hanlen = UTF8Length(wcs, wides);
+			UTF8FromUTF16(wcs, wides, hanval, hanlen);
+			hanval[hanlen] = '\0';
+		} else {
+			hanlen = ::WideCharToMultiByte(InputCodePage(), 0,
+						wcs, wides, hanval, sizeof(hanval) - 1, 0, 0);
+			hanval[hanlen] = '\0';
+		}
+
+		if (compstrExist) {
+			vs.caretStyle = CARETSTYLE_BLOCK;
+
+			bool tmpRecordingMacro = recordingMacro;
+			recordingMacro = false;
+			pdoc->TentativeStart();
+			AddCharUTF(hanval, hanlen, true);
+			recordingMacro = tmpRecordingMacro;
+
+			//NotifyChar() in AddCharUTF() may not know comprStr is deleted by undo.
+			Editor::NotifyChar((static_cast<unsigned char>(hanval[0]) << 8) |
+					static_cast<unsigned char>(hanval[1]));
+
+			for (size_t r = 0; r < sel.Count(); r++) { // for block caret
+				int positionInsert = sel.Range(r).Start().Position();
+				sel.Range(r).caret.SetPosition(positionInsert - hanlen);
+				sel.Range(r).anchor.SetPosition(positionInsert - hanlen);
+			}
+		} else {
+			AddCharUTF(hanval, hanlen, true);
+		}
+	}
+
+	// set the candidate window position for HANJA while composing.
+	Point pos = PointMainCaret();
+	CANDIDATEFORM CandForm;
+	CandForm.dwIndex = 0;
+	CandForm.dwStyle = CFS_CANDIDATEPOS;
+	CandForm.ptCurrentPos.x = static_cast<int>(pos.x);
+	CandForm.ptCurrentPos.y = static_cast<int>(pos.y + vs.lineHeight);
+	::ImmSetCandidateWindow(hIMC, &CandForm);
+
+	ShowCaretAtCurrentPosition();
+	inOverstrike = tmpOverstrike;
+	::ImmReleaseContext(MainHWND(), hIMC);
+	return 0;
 }
 
 // Translate message IDs from WM_* and EM_* to SCI_* so can partly emulate Windows Edit control
@@ -1140,15 +1247,30 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			break;
 
 		case WM_IME_STARTCOMPOSITION: 	// dbcs
+			if (KoreanIME()) {
+				tmpCaretStyle = vs.caretStyle;
+				if (vs.caretStyle > CARETSTYLE_BLOCK) {
+					vs.caretStyle= CARETSTYLE_LINE;
+				}
+				return 0;
+			}
 			ImeStartComposition();
 			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 
 		case WM_IME_ENDCOMPOSITION: 	// dbcs
+			if (KoreanIME()) {
+				vs.caretStyle = tmpCaretStyle;
+				return 0;
+			}
 			ImeEndComposition();
 			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 
 		case WM_IME_COMPOSITION:
-			return HandleComposition(wParam, lParam);
+			if (KoreanIME()) {
+				return HandleCompositionKoreanIME(wParam, lParam);
+			} else {
+				return HandleComposition(wParam, lParam);
+			}
 
 		case WM_IME_CHAR: {
 				AddCharBytes(HIBYTE(wParam), LOBYTE(wParam));
@@ -1184,6 +1306,16 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			capturedMouse = false;
 			return 0;
 
+		case WM_IME_SETCONTEXT:
+			if (KoreanIME()) {
+				if (wParam) {
+					LPARAM NoImeWin = lParam;
+					NoImeWin = NoImeWin & (~ISC_SHOWUICOMPOSITIONWINDOW);
+					return ::DefWindowProc(MainHWND(), iMessage, wParam, NoImeWin);
+				}
+			}
+			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
+
 		// These are not handled in Scintilla and its faster to dispatch them here.
 		// Also moves time out to here so profile doesn't count lots of empty message calls.
 
@@ -1194,7 +1326,6 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		case WM_NCPAINT:
 		case WM_NCMOUSEMOVE:
 		case WM_NCLBUTTONDOWN:
-		case WM_IME_SETCONTEXT:
 		case WM_IME_NOTIFY:
 		case WM_SYSCOMMAND:
 		case WM_WINDOWPOSCHANGING:
