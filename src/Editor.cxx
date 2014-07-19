@@ -88,7 +88,7 @@ Timer::Timer() :
 Idler::Idler() :
 		state(false), idlerID(0) {}
 
-static inline bool IsAllSpacesOrTabs(char *s, unsigned int len) {
+static inline bool IsAllSpacesOrTabs(const char *s, unsigned int len) {
 	for (unsigned int i = 0; i < len; i++) {
 		// This is safe because IsSpaceOrTab() will return false for null terminators
 		if (!IsSpaceOrTab(s[i]))
@@ -1783,7 +1783,7 @@ static bool cmpSelPtrs(const SelectionRange *a, const SelectionRange *b) {
 }
 
 // AddCharUTF inserts an array of bytes which may or may not be in UTF-8.
-void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
+void Editor::AddCharUTF(const char *s, unsigned int len, bool treatAsDBCS) {
 	FilterSelections();
 	{
 		UndoGroup ug(pdoc, (sel.Count() > 1) || !sel.Empty() || inOverstrike);
