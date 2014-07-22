@@ -206,7 +206,6 @@ class ScintillaWin :
 	static HINSTANCE hInstance;
 
 	int tmpCaretStyle;
-	bool compstrExist;
 
 #if defined(USE_D2D)
 	ID2D1HwndRenderTarget *pRenderTarget;
@@ -349,7 +348,6 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	SetCoalescableTimerFn = 0;
 
 	tmpCaretStyle = 0;
-	compstrExist = false;
 
 	linesPerScroll = 0;
 	wheelDelta = 0;   // Wheel delta from roll
@@ -731,30 +729,29 @@ sptr_t ScintillaWin::HandleCompositionKoreanIME(uptr_t, sptr_t lParam) {
 	const int maxLenInputIME = 4;
 	wchar_t wcs[maxLenInputIME];
 	int wides = 0;
-
-	// for avoiding inOverstrike condition in AddCharUTF()
-	bool tmpOverstrike = inOverstrike;
+	bool compstrExist = false;
 
 	if (pdoc->TentativeActive()) {
 		pdoc->TentativeUndo();
 	} else {
 		// No tentative undo means start of this composition so
 		// fill in any virtual spaces.
+		bool tmpOverstrike = inOverstrike;
+		inOverstrike = false;         // not allow to be deleted twice.
 		AddCharUTF("", 0, false);
+		inOverstrike = tmpOverstrike;
 	}
 
 	if (lParam & GCS_COMPSTR) {
 		long bytes = ::ImmGetCompositionStringW
 						   (hIMC, GCS_COMPSTR, wcs, maxLenInputIME);
 		wides = bytes / 2;
-		inOverstrike = inOverstrike && (!compstrExist);
 		compstrExist = (wides != 0);
 	} else if (lParam & GCS_RESULTSTR) {
 		long bytes = ::ImmGetCompositionStringW
 						(hIMC, GCS_RESULTSTR, wcs, maxLenInputIME);
 		wides = bytes / 2;
 		compstrExist = (wides == 0);
-		inOverstrike = inOverstrike && (wides >= 2);
 	}
 
 	if (wides >= 1) {
@@ -805,7 +802,6 @@ sptr_t ScintillaWin::HandleCompositionKoreanIME(uptr_t, sptr_t lParam) {
 	::ImmSetCandidateWindow(hIMC, &CandForm);
 
 	ShowCaretAtCurrentPosition();
-	inOverstrike = tmpOverstrike;
 	::ImmReleaseContext(MainHWND(), hIMC);
 	return 0;
 }
