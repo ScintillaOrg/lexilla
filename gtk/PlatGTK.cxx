@@ -1088,6 +1088,10 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION 
 						}
 						clusterStart = clusterEnd;
 					}
+					while (i < lenPositions) {
+						// If something failed, fill in rest of the positions
+						positions[i++] = clusterStart;
+					}
 					PLATFORM_ASSERT(i == lenPositions);
 				}
 			}
