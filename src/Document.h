@@ -374,7 +374,7 @@ public:
 
 	void SetDefaultCharClasses(bool includeWordClass);
 	void SetCharClasses(const unsigned char *chars, CharClassify::cc newCharClass);
-	int GetCharsOfClass(CharClassify::cc charClass, unsigned char *buffer);
+	int GetCharsOfClass(CharClassify::cc characterClass, unsigned char *buffer);
 	void SCI_METHOD StartStyling(int position, char mask);
 	bool SCI_METHOD SetStyleFor(int length, char style);
 	bool SCI_METHOD SetStyles(int length, const char *styles);

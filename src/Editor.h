@@ -322,8 +322,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool SelectionContainsProtected();
 	int MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd=true) const;
 	SelectionPosition MovePositionOutsideChar(SelectionPosition pos, int moveDir, bool checkLineEnd=true) const;
-	int MovePositionTo(SelectionPosition newPos, Selection::selTypes sel=Selection::noSel, bool ensureVisible=true);
-	int MovePositionTo(int newPos, Selection::selTypes sel=Selection::noSel, bool ensureVisible=true);
+	int MovePositionTo(SelectionPosition newPos, Selection::selTypes selt=Selection::noSel, bool ensureVisible=true);
+	int MovePositionTo(int newPos, Selection::selTypes selt=Selection::noSel, bool ensureVisible=true);
 	SelectionPosition MovePositionSoVisible(SelectionPosition pos, int moveDir);
 	SelectionPosition MovePositionSoVisible(int pos, int moveDir);
 	Point PointMainCaret();
@@ -446,7 +446,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void NotifyMacroRecord(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
 	void ContainerNeedsUpdate(int flags);
-	void PageMove(int direction, Selection::selTypes sel=Selection::noSel, bool stuttered = false);
+	void PageMove(int direction, Selection::selTypes selt=Selection::noSel, bool stuttered = false);
 	enum { cmSame, cmUpper, cmLower };
 	virtual std::string CaseMapString(const std::string &s, int caseMapping);
 	void ChangeCaseOfSelection(int caseMapping);
@@ -454,8 +454,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void Duplicate(bool forLine);
 	virtual void CancelModes();
 	void NewLine();
-	void CursorUpOrDown(int direction, Selection::selTypes sel=Selection::noSel);
-	void ParaUpOrDown(int direction, Selection::selTypes sel=Selection::noSel);
+	void CursorUpOrDown(int direction, Selection::selTypes selt=Selection::noSel);
+	void ParaUpOrDown(int direction, Selection::selTypes selt=Selection::noSel);
 	int StartEndDisplayLine(int pos, bool start);
 	virtual int KeyCommand(unsigned int iMessage);
 	virtual int KeyDefault(int /* key */, int /*modifiers*/);

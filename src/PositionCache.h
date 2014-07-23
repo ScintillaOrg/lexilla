@@ -104,7 +104,7 @@ class PositionCacheEntry {
 public:
 	PositionCacheEntry();
 	~PositionCacheEntry();
-	void Set(unsigned int styleNumber_, const char *s_, unsigned int len_, XYPOSITION *positions_, unsigned int clock);
+	void Set(unsigned int styleNumber_, const char *s_, unsigned int len_, XYPOSITION *positions_, unsigned int clock_);
 	void Clear();
 	bool Retrieve(unsigned int styleNumber_, const char *s_, unsigned int len_, XYPOSITION *positions_) const;
 	static unsigned int Hash(unsigned int styleNumber_, const char *s, unsigned int len);
