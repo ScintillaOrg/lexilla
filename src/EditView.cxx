@@ -1257,7 +1257,7 @@ static void DrawEdgeLine(Surface *surface, const ViewStyle &vsDraw, const LineLa
 }
 
 // Draw underline mark as part of background if not transparent
-static void DrawMarkUnderline(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, 
+static void DrawMarkUnderline(Surface *surface, const EditModel &model, const ViewStyle &vsDraw,
 	int line, PRectangle rcLine) {
 	int marks = model.pdoc->GetMark(line);
 	for (int markBit = 0; (markBit < 32) && marks; markBit++) {
