@@ -307,7 +307,7 @@ public:
 	void TentativeStart() { cb.TentativeStart(); }
 	void TentativeCommit() { cb.TentativeCommit(); }
 	void TentativeUndo();
-	bool TentativeActive() { return cb.TentativeActive(); }
+	bool TentativeActive() const { return cb.TentativeActive(); }
 
 	const char * SCI_METHOD BufferPointer() { return cb.BufferPointer(); }
 	const char *RangePointer(int position, int rangeLength) { return cb.RangePointer(position, rangeLength); }

@@ -106,7 +106,7 @@ public:
 		int xStart, PRectangle rcLine, int subLine) const;
 	void DrawBackground(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll, PRectangle rcLine,
 		Range lineRange, int posLineStart, int xStart,
-		int subLine, ColourOptional background);
+		int subLine, ColourOptional background) const;
 	void DrawForeground(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll, int lineVisible,
 		PRectangle rcLine, Range lineRange, int posLineStart, int xStart,
 		int subLine, ColourOptional background);
