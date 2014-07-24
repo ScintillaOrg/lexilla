@@ -177,6 +177,7 @@ EditView::EditView() {
 	lineWidthMaxSeen = 0;
 	additionalCaretsBlink = true;
 	additionalCaretsVisible = true;
+	imeCaretBlockOverride = false;
 	pixmapLine = 0;
 	pixmapIndentGuide = 0;
 	pixmapIndentGuideHighlight = 0;
@@ -1117,7 +1118,7 @@ void EditView::DrawCarets(Surface *surface, const EditModel &model, const ViewSt
 					rcCaret.top = rcCaret.bottom - 2;
 					rcCaret.left = xposCaret + 1;
 					rcCaret.right = rcCaret.left + widthOverstrikeCaret - 1;
-				} else if (vsDraw.caretStyle == CARETSTYLE_BLOCK) {
+				} else if ((vsDraw.caretStyle == CARETSTYLE_BLOCK) || imeCaretBlockOverride) {
 					/* Block caret */
 					rcCaret.left = xposCaret;
 					if (!caretAtEOL && !caretAtEOF && (ll->chars[offset] != '\t') && !(IsControlCharacter(ll->chars[offset]))) {

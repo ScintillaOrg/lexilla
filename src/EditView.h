@@ -68,6 +68,8 @@ public:
 	bool additionalCaretsBlink;
 	bool additionalCaretsVisible;
 
+	bool imeCaretBlockOverride;
+
 	Surface *pixmapLine;
 	Surface *pixmapIndentGuide;
 	Surface *pixmapIndentGuideHighlight;

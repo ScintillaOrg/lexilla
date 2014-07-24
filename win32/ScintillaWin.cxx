@@ -205,8 +205,6 @@ class ScintillaWin :
 
 	static HINSTANCE hInstance;
 
-	int tmpCaretStyle;
-
 #if defined(USE_D2D)
 	ID2D1HwndRenderTarget *pRenderTarget;
 	bool renderTargetValid;
@@ -346,8 +344,6 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	trackedMouseLeave = false;
 	TrackMouseEventFn = 0;
 	SetCoalescableTimerFn = 0;
-
-	tmpCaretStyle = 0;
 
 	linesPerScroll = 0;
 	wheelDelta = 0;   // Wheel delta from roll
@@ -726,7 +722,7 @@ sptr_t ScintillaWin::HandleCompositionKoreanIME(uptr_t, sptr_t lParam) {
 		return 0;
 	}
 
-	const int maxLenInputIME = 4;
+	const int maxLenInputIME = 200;
 	wchar_t wcs[maxLenInputIME];
 	int wides = 0;
 	bool compstrExist = false;
@@ -742,6 +738,7 @@ sptr_t ScintillaWin::HandleCompositionKoreanIME(uptr_t, sptr_t lParam) {
 		inOverstrike = tmpOverstrike;
 	}
 
+	view.imeCaretBlockOverride = false;
 	if (lParam & GCS_COMPSTR) {
 		long bytes = ::ImmGetCompositionStringW
 						   (hIMC, GCS_COMPSTR, wcs, maxLenInputIME);
@@ -770,7 +767,7 @@ sptr_t ScintillaWin::HandleCompositionKoreanIME(uptr_t, sptr_t lParam) {
 		}
 
 		if (compstrExist) {
-			vs.caretStyle = CARETSTYLE_BLOCK;
+			view.imeCaretBlockOverride = true;
 
 			bool tmpRecordingMacro = recordingMacro;
 			recordingMacro = false;
@@ -1244,20 +1241,12 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 		case WM_IME_STARTCOMPOSITION: 	// dbcs
 			if (KoreanIME()) {
-				tmpCaretStyle = vs.caretStyle;
-				if (vs.caretStyle > CARETSTYLE_BLOCK) {
-					vs.caretStyle= CARETSTYLE_LINE;
-				}
 				return 0;
 			}
 			ImeStartComposition();
 			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 
 		case WM_IME_ENDCOMPOSITION: 	// dbcs
-			if (KoreanIME()) {
-				vs.caretStyle = tmpCaretStyle;
-				return 0;
-			}
 			ImeEndComposition();
 			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 
