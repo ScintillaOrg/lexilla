@@ -829,7 +829,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		else if (isMako && makoComment && (ch == '\r' || ch == '\n')) {
 			makoComment = 0;
 			styler.ColourTo(i, StateToPrint);
-			if (inScriptType == eScriptPython) {
+			if (scriptLanguage == eScriptPython) {
 				state = SCE_HP_DEFAULT;
 			} else {
 				state = SCE_H_DEFAULT;
