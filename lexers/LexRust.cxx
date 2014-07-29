@@ -645,7 +645,7 @@ void SCI_METHOD LexerRust::Lex(unsigned int startPos, int length, int initStyle,
 		int n = styler.SafeGetCharAt(pos + 1, '\0');
 		int n2 = styler.SafeGetCharAt(pos + 2, '\0');
 
-		if (pos == 0 && c == '#' && n == '!') {
+		if (pos == 0 && c == '#' && n == '!' && n2 != '[') {
 			pos += 2;
 			ResumeLineComment(styler, pos, max, NotDocComment);
 		} else if (IsWhitespace(c)) {
