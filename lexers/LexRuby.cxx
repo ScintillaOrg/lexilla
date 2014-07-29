@@ -1260,7 +1260,11 @@ static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
         } else if (state == SCE_RB_CLASS_VAR
                    || state == SCE_RB_INSTANCE_VAR
                    || state == SCE_RB_SYMBOL) {
-            if (!isSafeWordcharOrHigh(ch)) {
+            if (state == SCE_RB_SYMBOL && (ch == '!' || ch == '?') && chNext != '=') {
+                styler.ColourTo(i, state);
+                state = SCE_RB_DEFAULT;
+                preferRE = false;
+            } else if (!isSafeWordcharOrHigh(ch)) {
                 styler.ColourTo(i - 1, state);
                 redo_char(i, ch, chNext, chNext2, state); // pass by ref
                 preferRE = false;
