@@ -772,12 +772,8 @@ sptr_t ScintillaWin::HandleCompositionKoreanIME(uptr_t, sptr_t lParam) {
 			bool tmpRecordingMacro = recordingMacro;
 			recordingMacro = false;
 			pdoc->TentativeStart();
-			AddCharUTF(hanval, hanlen, true);
+			AddCharUTF(hanval, hanlen, !IsUnicodeMode());
 			recordingMacro = tmpRecordingMacro;
-
-			//NotifyChar() in AddCharUTF() may not know comprStr is deleted by undo.
-			Editor::NotifyChar((static_cast<unsigned char>(hanval[0]) << 8) |
-					static_cast<unsigned char>(hanval[1]));
 
 			for (size_t r = 0; r < sel.Count(); r++) { // for block caret
 				int positionInsert = sel.Range(r).Start().Position();
@@ -785,7 +781,7 @@ sptr_t ScintillaWin::HandleCompositionKoreanIME(uptr_t, sptr_t lParam) {
 				sel.Range(r).anchor.SetPosition(positionInsert - hanlen);
 			}
 		} else {
-			AddCharUTF(hanval, hanlen, true);
+			AddCharUTF(hanval, hanlen, !IsUnicodeMode());
 		}
 	}
 
