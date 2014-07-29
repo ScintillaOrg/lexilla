@@ -1285,7 +1285,12 @@ static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
         } else if (state == SCE_RB_CLASS_VAR
                    || state == SCE_RB_INSTANCE_VAR
                    || state == SCE_RB_SYMBOL) {
-            if (state == SCE_RB_SYMBOL && (ch == '!' || ch == '?') && chNext != '=') {
+            if (state == SCE_RB_SYMBOL &&
+                 // FIDs suffices '?' and '!'
+                (((ch == '!' || ch == '?') && chNext != '=') ||
+                 // identifier suffix '='
+                 (ch == '=' && (chNext != '~' && chNext != '>' &&
+                               (chNext != '=' || chNext2 == '>'))))) {
                 styler.ColourTo(i, state);
                 state = SCE_RB_DEFAULT;
                 preferRE = false;
