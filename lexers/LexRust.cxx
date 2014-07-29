@@ -351,7 +351,7 @@ static bool IsValidCharacterEscape(int c) {
 }
 
 static bool IsValidStringEscape(int c) {
-	return IsValidCharacterEscape(c) || c == '\n';
+	return IsValidCharacterEscape(c) || c == '\n' || c == '\r';
 }
 
 static bool ScanNumericEscape(Accessor &styler, int& pos, int num_digits, bool stop_asap) {
