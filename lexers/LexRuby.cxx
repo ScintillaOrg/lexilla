@@ -898,8 +898,8 @@ static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
                         state = SCE_RB_DEFAULT;
                     }
                     i += 3;
+                    ch = styler.SafeGetCharAt(i);
                     chNext = styler.SafeGetCharAt(i+1);
-                    chNext2 = styler.SafeGetCharAt(i+2);
                 } else if (chNext == '$' && strchr("_~*$?!@/\\;,.=:<>\"&`'+", chNext2)) {
                     // single-character special global variables
                     i += 2;
