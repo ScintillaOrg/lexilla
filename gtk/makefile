@@ -8,7 +8,7 @@
 
 .SUFFIXES: .cxx .c .o .h .a
 ifdef CLANG
-CXX = clang++
+CXX = clang++ -Wno-deprecated-register
 CC = clang
 # Can choose aspect to sanitize: address and undefined can simply change SANITIZE but for
 # thread also need to create Position Independent Executable -> search online documentation
