@@ -230,7 +230,9 @@ static void ScanIdentifier(Accessor& styler, int& pos, WordList *keywords) {
 	}
 }
 
-static void ScanDigits(Accessor& styler, int& pos, int base) {
+/* Scans a sequence of digits, returning true if it found any. */
+static bool ScanDigits(Accessor& styler, int& pos, int base) {
+	int old_pos = pos;
 	for (;;) {
 		int c = styler.SafeGetCharAt(pos, '\0');
 		if (IsADigit(c, base) || c == '_')
@@ -238,13 +240,17 @@ static void ScanDigits(Accessor& styler, int& pos, int base) {
 		else
 			break;
 	}
+	return old_pos != pos;
 }
 
+/* Scans an integer and floating point literals. */
 static void ScanNumber(Accessor& styler, int& pos) {
 	int base = 10;
 	int c = styler.SafeGetCharAt(pos, '\0');
 	int n = styler.SafeGetCharAt(pos + 1, '\0');
 	bool error = false;
+	/* Scan the prefix, thus determining the base.
+	 * 10 is default if there's no prefix. */
 	if (c == '0' && n == 'x') {
 		pos += 2;
 		base = 16;
@@ -255,8 +261,11 @@ static void ScanNumber(Accessor& styler, int& pos) {
 		pos += 2;
 		base = 8;
 	}
-	int old_pos = pos;
-	ScanDigits(styler, pos, base);
+
+	/* Scan initial digits. The literal is malformed if there are none. */
+	error |= !ScanDigits(styler, pos, base);
+	/* See if there's an integer suffix. We mimic the Rust's lexer
+	 * and munch it even if there was an error above. */
 	c = styler.SafeGetCharAt(pos, '\0');
 	if (c == 'u' || c == 'i') {
 		pos++;
@@ -271,14 +280,22 @@ static void ScanNumber(Accessor& styler, int& pos) {
 		} else if (c == '6' && n == '4') {
 			pos += 2;
 		}
-	} else {
+	/* See if it's a floating point literal. These literals have to be base 10.
+	 */
+	} else if (!error) {
+		/* If there's a period, it's a floating point literal unless it's
+		 * followed by an identifier (meaning this is a method call, e.g.
+		 * `1.foo()`) or another period, in which case it's a range (e.g. 1..2) 
+		 */
 		n = styler.SafeGetCharAt(pos + 1, '\0');
 		if (c == '.' && !(IsIdentifierStart(n) || n == '.')) {
 			error |= base != 10;
 			pos++;
+			/* It's ok to have no digits after the period. */
 			ScanDigits(styler, pos, 10);
 		}
 
+		/* Look for the exponentiation. */
 		c = styler.SafeGetCharAt(pos, '\0');
 		if (c == 'e' || c == 'E') {
 			error |= base != 10;
@@ -286,13 +303,11 @@ static void ScanNumber(Accessor& styler, int& pos) {
 			c = styler.SafeGetCharAt(pos, '\0');
 			if (c == '-' || c == '+')
 				pos++;
-			int old_pos = pos;
-			ScanDigits(styler, pos, 10);
-			if (old_pos == pos) {
-				error = true;
-			}
+			/* It is invalid to have no digits in the exponent. */
+			error |= !ScanDigits(styler, pos, 10);
 		}
 		
+		/* Scan the floating point suffix. */
 		c = styler.SafeGetCharAt(pos, '\0');
 		if (c == 'f') {
 			error |= base != 10;
@@ -308,9 +323,7 @@ static void ScanNumber(Accessor& styler, int& pos) {
 			}
 		}
 	}
-	if (old_pos == pos) {
-		error = true;
-	}
+
 	if (error)
 		styler.ColourTo(pos - 1, SCE_RUST_LEXERROR);
 	else
