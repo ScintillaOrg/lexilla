@@ -53,7 +53,7 @@ public:
 	Document *pdoc;
 
 	EditModel();
-	~EditModel();
+	virtual ~EditModel();
 	virtual int TopLineOfMain() const = 0;
 	virtual Point GetVisibleOriginInMain() const = 0;
 	virtual int LinesOnScreen() const = 0;
