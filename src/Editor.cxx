@@ -3377,6 +3377,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		break;
 	case SCI_DELWORDRIGHT: {
 			UndoGroup ug(pdoc);
+			InvalidateSelection(sel.RangeMain(), true);
 			sel.RangeMain().caret = SelectionPosition(
 				InsertSpace(sel.RangeMain().caret.Position(), sel.RangeMain().caret.VirtualSpace()));
 			sel.RangeMain().anchor = sel.RangeMain().caret;
@@ -3386,6 +3387,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		break;
 	case SCI_DELWORDRIGHTEND: {
 			UndoGroup ug(pdoc);
+			InvalidateSelection(sel.RangeMain(), true);
 			sel.RangeMain().caret = SelectionPosition(
 				InsertSpace(sel.RangeMain().caret.Position(), sel.RangeMain().caret.VirtualSpace()));
 			int endWord = pdoc->NextWordEnd(sel.MainCaret(), 1);
