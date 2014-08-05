@@ -265,6 +265,10 @@ int ScintillaDocument::move_position_outside_char(int pos, int move_dir, bool ch
     return ((Document *)pdoc)->MovePositionOutsideChar(pos, move_dir, check_line_end);
 }
 
+int ScintillaDocument::get_character(int pos) {
+    return ((Document *)pdoc)->GetCharacterAndWidth(pos, NULL);
+}
+
 // Signal emitters
 
 void ScintillaDocument::emit_modify_attempt() {

@@ -73,6 +73,8 @@ public:
     int get_eol_mode();
     void set_eol_mode(int eol_mode);
     int move_position_outside_char(int pos, int move_dir, bool check_line_end);
+    
+    int get_character(int pos); // Calls GetCharacterAndWidth(pos, NULL)
 
 private:
     void emit_modify_attempt();
