@@ -637,22 +637,37 @@ void ScintillaGTK::MainForAll(GtkContainer *container, gboolean include_internal
 	}
 }
 
+namespace {
+
+class PreEditString {
+public:
+	gchar *str;
+	gint cursor_pos;
+	PangoAttrList *attrs;
+
+	PreEditString(GtkIMContext *im_context) {
+		gtk_im_context_get_preedit_string(im_context, &str, &attrs, &cursor_pos);
+	}
+	~PreEditString() {
+		g_free(str);
+		pango_attr_list_unref(attrs);
+	}
+};
+
+}
+
 gint ScintillaGTK::FocusInThis(GtkWidget *widget) {
 	try {
 		SetFocusState(true);
 		if (im_context != NULL) {
-			gchar *str = NULL;
-			gint cursor_pos;
-
-			gtk_im_context_get_preedit_string(im_context, &str, NULL, &cursor_pos);
+			PreEditString pes(im_context);
 			if (PWidget(wPreedit) != NULL) {
-				if (strlen(str) > 0) {
+				if (strlen(pes.str) > 0) {
 					gtk_widget_show(PWidget(wPreedit));
 				} else {
 					gtk_widget_hide(PWidget(wPreedit));
 				}
 			}
-			g_free(str);
 			gtk_im_context_focus_in(im_context);
 		}
 
@@ -2249,19 +2264,13 @@ gboolean ScintillaGTK::KeyRelease(GtkWidget *widget, GdkEventKey *event) {
 
 gboolean ScintillaGTK::DrawPreeditThis(GtkWidget *widget, cairo_t *cr) {
 	try {
-		gchar *str;
-		gint cursor_pos;
-		PangoAttrList *attrs;
-
-		gtk_im_context_get_preedit_string(im_context, &str, &attrs, &cursor_pos);
-		PangoLayout *layout = gtk_widget_create_pango_layout(PWidget(wText), str);
-		pango_layout_set_attributes(layout, attrs);
+		PreEditString pes(im_context);
+		PangoLayout *layout = gtk_widget_create_pango_layout(PWidget(wText), pes.str);
+		pango_layout_set_attributes(layout, pes.attrs);
 
 		cairo_move_to(cr, 0, 0);
 		pango_cairo_show_layout(cr, layout);
 
-		g_free(str);
-		pango_attr_list_unref(attrs);
 		g_object_unref(layout);
 	} catch (...) {
 		errorStatus = SC_STATUS_FAILURE;
@@ -2277,20 +2286,14 @@ gboolean ScintillaGTK::DrawPreedit(GtkWidget *widget, cairo_t *cr, ScintillaGTK 
 
 gboolean ScintillaGTK::ExposePreeditThis(GtkWidget *widget, GdkEventExpose *ose) {
 	try {
-		gchar *str;
-		gint cursor_pos;
-		PangoAttrList *attrs;
-
-		gtk_im_context_get_preedit_string(im_context, &str, &attrs, &cursor_pos);
-		PangoLayout *layout = gtk_widget_create_pango_layout(PWidget(wText), str);
-		pango_layout_set_attributes(layout, attrs);
+		PreEditString pes(im_context);
+		PangoLayout *layout = gtk_widget_create_pango_layout(PWidget(wText), pes.str);
+		pango_layout_set_attributes(layout, pes.attrs);
 
 		cairo_t *context = gdk_cairo_create(reinterpret_cast<GdkDrawable *>(WindowFromWidget(widget)));
 		cairo_move_to(context, 0, 0);
 		pango_cairo_show_layout(context, layout);
 		cairo_destroy(context);
-		g_free(str);
-		pango_attr_list_unref(attrs);
 		g_object_unref(layout);
 	} catch (...) {
 		errorStatus = SC_STATUS_FAILURE;
@@ -2342,13 +2345,10 @@ void ScintillaGTK::Commit(GtkIMContext *, char  *str, ScintillaGTK *sciThis) {
 
 void ScintillaGTK::PreeditChangedThis() {
 	try {
-		gchar *str;
-		PangoAttrList *attrs;
-		gint cursor_pos;
-		gtk_im_context_get_preedit_string(im_context, &str, &attrs, &cursor_pos);
-		if (strlen(str) > 0) {
-			PangoLayout *layout = gtk_widget_create_pango_layout(PWidget(wText), str);
-			pango_layout_set_attributes(layout, attrs);
+		PreEditString pes(im_context);
+		if (strlen(pes.str) > 0) {
+			PangoLayout *layout = gtk_widget_create_pango_layout(PWidget(wText), pes.str);
+			pango_layout_set_attributes(layout, pes.attrs);
 
 			gint w, h;
 			pango_layout_get_pixel_size(layout, &w, &h);
@@ -2370,8 +2370,6 @@ void ScintillaGTK::PreeditChangedThis() {
 		} else {
 			gtk_widget_hide(PWidget(wPreedit));
 		}
-		g_free(str);
-		pango_attr_list_unref(attrs);
 	} catch (...) {
 		errorStatus = SC_STATUS_FAILURE;
 	}
