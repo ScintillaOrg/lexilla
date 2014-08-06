@@ -34,7 +34,7 @@ INCLUDEPATH += $$PYSIDE_INCLUDES/QtGui
 unix:!mac {
 	LIBS += `pkg-config pyside --libs`
 }
-unix:linux {
+unix:linux-* {
 	# gcc on freebsd 9.2, at least, doesn't support -Wno-empty-body
 	QMAKE_CXXFLAGS += -Wno-unused-parameter -Wno-empty-body
 	LIBS += -ldl
