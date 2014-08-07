@@ -287,7 +287,7 @@ class TestSimple(unittest.TestCase):
 			self.assertEquals(self.ed.LineLength(0), 1 + len(lineEnds[lineEndType]))
 
 	# Several tests for unicode line ends U+2028 and U+2029
-	
+
 	def testUnicodeLineEnds(self):
 		# Add two lines separated with U+2028 and ensure it is seen as two lines
 		# Then remove U+2028 and should be just 1 lines
@@ -372,7 +372,7 @@ class TestSimple(unittest.TestCase):
 		text = b"x\xe2\x80\xa9y";
 		self.ed.AddText(5, text)
 		self.assertEquals(self.ed.LineCount, 2)
-		
+
 		for i in range(len(text)):
 			self.ed.TargetStart = i
 			self.ed.TargetEnd = i + 1
@@ -383,7 +383,7 @@ class TestSimple(unittest.TestCase):
 			else:
 				# Removing byte from line end, removes 1 line
 				self.assertEquals(self.ed.LineCount, 1)
-				
+
 			self.ed.TargetEnd = i
 			self.ed.ReplaceTarget(1, text[i:i+1])
 			self.assertEquals(self.ed.LineCount, 2)
@@ -401,7 +401,7 @@ class TestSimple(unittest.TestCase):
 			self.ed.TargetEnd = i+2
 			self.ed.ReplaceTarget(0, b"")
 			self.assertEquals(self.ed.LineCount, 1)
-		
+
 	# Several tests for unicode NEL line ends U+0085
 
 	def testNELLineEnds(self):
@@ -454,7 +454,7 @@ class TestSimple(unittest.TestCase):
 		text = b"x\xc2\x85y";
 		self.ed.AddText(4, text)
 		self.assertEquals(self.ed.LineCount, 2)
-		
+
 		for i in range(len(text)):
 			self.ed.TargetStart = i
 			self.ed.TargetEnd = i + 1
@@ -465,7 +465,7 @@ class TestSimple(unittest.TestCase):
 			else:
 				# Removing byte from line end, removes 1 line
 				self.assertEquals(self.ed.LineCount, 1)
-				
+
 			self.ed.TargetEnd = i
 			self.ed.ReplaceTarget(1, text[i:i+1])
 			self.assertEquals(self.ed.LineCount, 2)
@@ -481,7 +481,7 @@ class TestSimple(unittest.TestCase):
 			self.ed.TargetEnd = i+2
 			self.ed.ReplaceTarget(0, b"")
 			self.assertEquals(self.ed.LineCount, 1)
-		
+
 	def testGoto(self):
 		self.ed.AddText(5, b"a\nb\nc")
 		self.assertEquals(self.ed.CurrentPos, 5)
@@ -1379,7 +1379,7 @@ class TestMultiSelection(unittest.TestCase):
 		self.assertEquals(self.ed.GetSelectionNAnchorVirtualSpace(0), 0)
 		self.assertEquals(self.ed.GetSelectionNCaret(0), 3)
 		self.assertEquals(self.ed.GetSelectionNCaretVirtualSpace(0), 0)
-		
+
 	def testDropSelectionN(self):
 		self.ed.SetSelection(1, 2)
 		# Only one so dropping has no effect
@@ -1610,7 +1610,7 @@ class TestCaseMapping(unittest.TestCase):
 	def testUTFGrows(self):
 		# This crashed at one point in debug builds due to looking past end of shorter string
 		self.ed.SetCodePage(65001)
-		# ﬖ is a single character ligature taking 3 bytes in UTF8: EF AC 96 
+		# ﬖ is a single character ligature taking 3 bytes in UTF8: EF AC 96
 		t = 'ﬖﬖ'.encode("UTF-8")
 		self.ed.SetContents(t)
 		self.assertEquals(self.ed.Length, 6)
@@ -1733,7 +1733,7 @@ class TestLexer(unittest.TestCase):
 		self.assertEquals(self.ed.GetLexer(), self.ed.SCLEX_CPP)
 		name = self.ed.GetLexerLanguage(0)
 		self.assertEquals(name, b"cpp")
-	
+
 	def testPropertyNames(self):
 		propertyNames = self.ed.PropertyNames()
 		self.assertNotEquals(propertyNames, b"")
