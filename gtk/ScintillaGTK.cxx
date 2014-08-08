@@ -63,6 +63,7 @@
 #include "Editor.h"
 #include "AutoComplete.h"
 #include "ScintillaBase.h"
+#include "UnicodeFromUTF8.h"
 
 #ifdef SCI_LEXER
 #include "ExternalLexer.h"
@@ -293,6 +294,9 @@ private:
 	static void Commit(GtkIMContext *context, char *str, ScintillaGTK *sciThis);
 	void PreeditChangedThis();
 	static void PreeditChanged(GtkIMContext *context, ScintillaGTK *sciThis);
+
+	bool KoreanIME();
+
 	static void StyleSetText(GtkWidget *widget, GtkStyle *previous, void*);
 	static void RealizeText(GtkWidget *widget, void*);
 	static void Destroy(GObject *object);
@@ -2307,9 +2311,43 @@ gboolean ScintillaGTK::ExposePreedit(GtkWidget *widget, GdkEventExpose *ose, Sci
 
 #endif
 
+bool ScintillaGTK::KoreanIME() {
+	// Warn : for KoreanIME use only.
+	if (pdoc->TentativeActive()) {
+		return true;
+	}
+
+	bool koreanIME = false;
+	PreEditString utfval(im_context);
+
+	// Only need to check if the first preedit char is Korean.
+	// The rest will be handled in TentativeActive()
+	// which can handle backspace and CJK commons and so forth.
+
+	if (strlen(utfval.str) == 3) {  // One hangul char has 3byte.
+		int unicode = UnicodeFromUTF8(reinterpret_cast<unsigned char *>(utfval.str));
+		// Korean character ranges which are used for the first preedit chars.
+		// http://www.programminginkorean.com/programming/hangul-in-unicode/
+		bool HangulJamo = (0x1100 <= unicode && unicode <= 0x11FF);
+		bool HangulCompatibleJamo = (0x3130 <= unicode && unicode <= 0x318F);
+		bool HangulJamoExtendedA = (0xA960 <= unicode && unicode <= 0xA97F);
+		bool HangulJamoExtendedB = (0xD7B0 <= unicode && unicode <= 0xD7FF);
+		bool HangulSyllable = (0xAC00 <= unicode && unicode <= 0xD7A3);
+		koreanIME = (HangulJamo | HangulCompatibleJamo  | HangulSyllable
+					| HangulJamoExtendedA | HangulJamoExtendedB);
+	}
+	return koreanIME;
+}
+
 void ScintillaGTK::CommitThis(char *utfVal) {
 	try {
 		//~ fprintf(stderr, "Commit '%s'\n", utfVal);
+		if (pdoc->TentativeActive()) {
+			pdoc->TentativeUndo();
+		}
+
+		view.imeCaretBlockOverride = false;
+
 		if (IsUnicodeMode()) {
 			AddCharUTF(utfVal, strlen(utfVal));
 		} else {
@@ -2317,7 +2355,7 @@ void ScintillaGTK::CommitThis(char *utfVal) {
 			if (*source) {
 				Converter conv(source, "UTF-8", true);
 				if (conv) {
-					char localeVal[4] = "\0\0\0";
+					char localeVal[maxLenInputIME * 2];
 					char *pin = utfVal;
 					size_t inLeft = strlen(utfVal);
 					char *pout = localeVal;
@@ -2325,15 +2363,14 @@ void ScintillaGTK::CommitThis(char *utfVal) {
 					size_t conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
 					if (conversions != ((size_t)(-1))) {
 						*pout = '\0';
-						for (int i = 0; localeVal[i]; i++) {
-							AddChar(localeVal[i]);
-						}
+						AddCharUTF(localeVal, strlen(localeVal));
 					} else {
 						fprintf(stderr, "Conversion failed '%s'\n", utfVal);
 					}
 				}
 			}
 		}
+		ShowCaretAtCurrentPosition();
 	} catch (...) {
 		errorStatus = SC_STATUS_FAILURE;
 	}
@@ -2345,30 +2382,98 @@ void ScintillaGTK::Commit(GtkIMContext *, char  *str, ScintillaGTK *sciThis) {
 
 void ScintillaGTK::PreeditChangedThis() {
 	try {
-		PreEditString pes(im_context);
-		if (strlen(pes.str) > 0) {
-			PangoLayout *layout = gtk_widget_create_pango_layout(PWidget(wText), pes.str);
-			pango_layout_set_attributes(layout, pes.attrs);
+		if (KoreanIME()) {
+			// Copy & paste by johnsonj.
+			// Great thanks to
+			// jiniya from http://www.jiniya.net/tt/494  for DBCS input with AddCharUTF().
+			// BLUEnLIVE from http://zockr.tistory.com/1118 for UNDO and inOverstrike.
+			view.imeCaretBlockOverride = false; // If backspace.
 
-			gint w, h;
-			pango_layout_get_pixel_size(layout, &w, &h);
-			g_object_unref(layout);
+			if (pdoc->TentativeActive()) {
+				pdoc->TentativeUndo();
+			} else {
+				// No tentative undo means start of this composition so
+				// fill in any virtual spaces.
+				bool tmpOverstrike = inOverstrike;
+				inOverstrike = false;   // Not allowed to be deleted twice.
+				AddCharUTF("", 0);
+				inOverstrike = tmpOverstrike;
+			}
 
-			gint x, y;
-			gdk_window_get_origin(PWindow(wText), &x, &y);
+			PreEditString utfval(im_context);
 
-			Point pt = PointMainCaret();
-			if (pt.x < 0)
-				pt.x = 0;
-			if (pt.y < 0)
-				pt.y = 0;
+			if (strlen(utfval.str) >  maxLenInputIME * 3) {
+				return; // Do not allow over 200 chars.
+			}
 
-			gtk_window_move(GTK_WINDOW(PWidget(wPreedit)), x + pt.x, y + pt.y);
-			gtk_window_resize(GTK_WINDOW(PWidget(wPreedit)), w, h);
-			gtk_widget_show(PWidget(wPreedit));
-			gtk_widget_queue_draw_area(PWidget(wPreeditDraw), 0, 0, w, h);
-		} else {
-			gtk_widget_hide(PWidget(wPreedit));
+			char localeVal[maxLenInputIME * 2];
+			char *hanval = (char *)"";
+
+			if (IsUnicodeMode()) {
+				hanval = utfval.str;
+			} else {
+				const char *source = CharacterSetID();
+				if (*source) {
+					Converter conv(source, "UTF-8", true);
+					if (conv) {
+						char *pin = utfval.str;
+						size_t inLeft = strlen(utfval.str);
+						char *pout = localeVal;
+						size_t outLeft = sizeof(localeVal);
+						size_t conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
+						if (conversions != ((size_t)(-1))) {
+							*pout = '\0';
+							hanval = localeVal;
+						} else {
+							fprintf(stderr, "Conversion failed '%s'\n", utfval.str);
+						}
+					}
+				}
+			}
+
+			if (!pdoc->TentativeActive()) {
+				pdoc->TentativeStart();
+			}
+
+			bool tmpRecordingMacro = recordingMacro;
+			recordingMacro = false;
+			int hanlen = strlen(hanval);
+			AddCharUTF(hanval, hanlen);
+			recordingMacro = tmpRecordingMacro;
+
+			// For block caret which means KoreanIME is in composition.
+			view.imeCaretBlockOverride = true;
+			for (size_t r = 0; r < sel.Count(); r++) {
+				int positionInsert = sel.Range(r).Start().Position();
+				sel.Range(r).caret.SetPosition(positionInsert - hanlen);
+				sel.Range(r).anchor.SetPosition(positionInsert - hanlen);
+			}
+		} else { // Original code follows  for other IMEs.
+			PreEditString pes(im_context);
+			if (strlen(pes.str) > 0) {
+				PangoLayout *layout = gtk_widget_create_pango_layout(PWidget(wText), pes.str);
+				pango_layout_set_attributes(layout, pes.attrs);
+
+				gint w, h;
+				pango_layout_get_pixel_size(layout, &w, &h);
+				g_object_unref(layout);
+
+				gint x, y;
+				gdk_window_get_origin(PWindow(wText), &x, &y);
+
+				Point pt = PointMainCaret();
+				if (pt.x < 0)
+					pt.x = 0;
+				if (pt.y < 0)
+					pt.y = 0;
+
+				gtk_window_move(GTK_WINDOW(PWidget(wPreedit)), x + pt.x, y + pt.y);
+				gtk_window_resize(GTK_WINDOW(PWidget(wPreedit)), w, h);
+				gtk_widget_show(PWidget(wPreedit));
+				gtk_widget_queue_draw_area(PWidget(wPreeditDraw), 0, 0, w, h);
+			} else {
+				gtk_widget_hide(PWidget(wPreedit));
+			}
 		}
 	} catch (...) {
 		errorStatus = SC_STATUS_FAILURE;
