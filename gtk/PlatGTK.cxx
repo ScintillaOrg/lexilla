@@ -1805,6 +1805,7 @@ void ListBoxX::Select(int n) {
 }
 
 int ListBoxX::GetSelection() {
+	int index = -1;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
@@ -1814,9 +1815,10 @@ int ListBoxX::GetSelection() {
 		int *indices = gtk_tree_path_get_indices(path);
 		// Don't free indices.
 		if (indices)
-			return indices[0];
+			index = indices[0];
+		gtk_tree_path_free(path);
 	}
-	return -1;
+	return index;
 }
 
 int ListBoxX::Find(const char *prefix) {
