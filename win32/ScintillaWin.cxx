@@ -672,7 +672,6 @@ sptr_t ScintillaWin::HandleComposition(uptr_t wParam, sptr_t lParam) {
 	if (lParam & GCS_RESULTSTR) {
 		HIMC hIMC = ::ImmGetContext(MainHWND());
 		if (hIMC) {
-			const int maxLenInputIME = 200;
 			wchar_t wcs[maxLenInputIME];
 			LONG bytes = ::ImmGetCompositionStringW(hIMC,
 				GCS_RESULTSTR, wcs, (maxLenInputIME-1)*2);
@@ -722,7 +721,6 @@ sptr_t ScintillaWin::HandleCompositionKoreanIME(uptr_t, sptr_t lParam) {
 		return 0;
 	}
 
-	const int maxLenInputIME = 200;
 	wchar_t wcs[maxLenInputIME];
 	int wides = 0;
 	bool compstrExist = false;
@@ -734,7 +732,7 @@ sptr_t ScintillaWin::HandleCompositionKoreanIME(uptr_t, sptr_t lParam) {
 		// fill in any virtual spaces.
 		bool tmpOverstrike = inOverstrike;
 		inOverstrike = false;         // not allow to be deleted twice.
-		AddCharUTF("", 0, false);
+		AddCharUTF("", 0);
 		inOverstrike = tmpOverstrike;
 	}
 
@@ -772,7 +770,7 @@ sptr_t ScintillaWin::HandleCompositionKoreanIME(uptr_t, sptr_t lParam) {
 			bool tmpRecordingMacro = recordingMacro;
 			recordingMacro = false;
 			pdoc->TentativeStart();
-			AddCharUTF(hanval, hanlen, !IsUnicodeMode());
+			AddCharUTF(hanval, hanlen);
 			recordingMacro = tmpRecordingMacro;
 
 			for (size_t r = 0; r < sel.Count(); r++) { // for block caret
@@ -781,7 +779,7 @@ sptr_t ScintillaWin::HandleCompositionKoreanIME(uptr_t, sptr_t lParam) {
 				sel.Range(r).anchor.SetPosition(positionInsert - hanlen);
 			}
 		} else {
-			AddCharUTF(hanval, hanlen, !IsUnicodeMode());
+			AddCharUTF(hanval, hanlen);
 		}
 	}
 
