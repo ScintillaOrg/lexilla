@@ -29,6 +29,7 @@
 #include "RunStyles.h"
 #include "ContractionState.h"
 #include "CellBuffer.h"
+#include "PerLine.h"
 #include "KeyMap.h"
 #include "Indicator.h"
 #include "XPM.h"
@@ -1987,6 +1988,9 @@ void Editor::ClearAll() {
 			pdoc->MarginClearAll();
 		}
 	}
+
+	view.ClearAllTabstops();
+
 	sel.Clear();
 	SetTopLine(0);
 	SetVerticalScrollPos();
@@ -2457,6 +2461,9 @@ void Editor::NotifyModified(Document *, DocModification mh, void *) {
 			Redraw();
 		}
 	}
+	if (mh.modificationType & SC_MOD_CHANGETABSTOPS) {
+		Redraw();
+	}
 	if (mh.modificationType & SC_MOD_LEXERSTATE) {
 		if (paintState == painting) {
 			CheckForChangeOutsidePaint(
@@ -2520,6 +2527,7 @@ void Editor::NotifyModified(Document *, DocModification mh, void *) {
 			} else {
 				cs.DeleteLines(lineOfPos, -mh.linesAdded);
 			}
+			view.LinesAddedOrRemoved(lineOfPos, mh.linesAdded);
 		}
 		if (mh.modificationType & SC_MOD_CHANGEANNOTATION) {
 			int lineDoc = pdoc->LineFromPosition(mh.position);
@@ -4813,6 +4821,8 @@ void Editor::SetDocPointer(Document *document) {
 	view.llc.Deallocate();
 	NeedWrapping();
 
+	view.ClearAllTabstops();
+
 	pdoc->AddWatcher(this, 0);
 	SetScrollBars();
 	Redraw();
@@ -5982,6 +5992,23 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETTABWIDTH:
 		return pdoc->tabInChars;
+
+	case SCI_CLEARTABSTOPS:
+		if (view.ClearTabstops(static_cast<int>(wParam))) {
+			DocModification mh(SC_MOD_CHANGETABSTOPS, 0, 0, 0, 0, static_cast<int>(wParam));
+			NotifyModified(pdoc, mh, NULL);
+		}
+		break;
+
+	case SCI_ADDTABSTOP:
+		if (view.AddTabstop(static_cast<int>(wParam), static_cast<int>(lParam))) {
+			DocModification mh(SC_MOD_CHANGETABSTOPS, 0, 0, 0, 0, static_cast<int>(wParam));
+			NotifyModified(pdoc, mh, NULL);
+		}
+		break;
+
+	case SCI_GETNEXTTABSTOP:
+		return view.GetNextTabstop(static_cast<int>(wParam), static_cast<int>(lParam));
 
 	case SCI_SETINDENT:
 		pdoc->indentInChars = static_cast<int>(wParam);

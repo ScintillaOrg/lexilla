@@ -3380,6 +3380,10 @@ struct Sci_TextToFind {
     syntax. Tabs are normally used in editors to insert a tab character or to pad text with spaces
     up to the next tab.</p>
 
+    <p>When Scintilla is laying out a section of text, text after a tab character will usually be
+    displayed at the next multiple of TABWIDTH columns from the left. However, it is also possible
+    to explicitly set tabstops in pixels for each line.</p>
+
     <p>Scintilla can be set to treat tab and backspace in the white space at the start of a line in
     a special way: inserting a tab indents the line to the next indent position rather than just
     inserting a tab at the current character position and backspace unindents the line rather than
@@ -3387,6 +3391,9 @@ struct Sci_TextToFind {
     you to generate code.</p>
     <code><a class="message" href="#SCI_SETTABWIDTH">SCI_SETTABWIDTH(int widthInChars)</a><br />
      <a class="message" href="#SCI_GETTABWIDTH">SCI_GETTABWIDTH</a><br />
+     <a class="message" href="#SCI_CLEARTABSTOPS">SCI_CLEARTABSTOPS(int line)</a><br />
+     <a class="message" href="#SCI_ADDTABSTOP">SCI_ADDTABSTOP(int line, int x)</a><br />
+     <a class="message" href="#SCI_GETNEXTTABSTOP">SCI_GETNEXTTABSTOP(int line, int x)</a><br />
      <a class="message" href="#SCI_SETUSETABS">SCI_SETUSETABS(bool useTabs)</a><br />
      <a class="message" href="#SCI_GETUSETABS">SCI_GETUSETABS</a><br />
      <a class="message" href="#SCI_SETINDENT">SCI_SETINDENT(int widthInChars)</a><br />
@@ -3412,6 +3419,14 @@ struct Sci_TextToFind {
      <code>SCI_SETTABWIDTH</code> sets the size of a tab as a multiple of the size of a space
     character in <code>STYLE_DEFAULT</code>. The default tab width is 8 characters. There are no
     limits on tab sizes, but values less than 1 or large values may have undesirable effects.</p>
+
+    <p><b id="SCI_CLEARTABSTOPS">SCI_CLEARTABSTOPS(int line)</b><br />
+     <b id="SCI_ADDTABSTOP">SCI_ADDTABSTOP(int line, int x)</b><br />
+     <b id="SCI_GETNEXTTABSTOP">SCI_GETNEXTTABSTOP(int line, int x)</b><br />
+     <code>SCI_CLEARTABSTOPS</code> clears explicit tabstops on a line. <code>SCI_ADDTABSTOP</code>
+    adds an explicit tabstop at the specified distance from the left (in pixels), and
+    <code>SCI_GETNEXTTABSTOP</code> gets the next explicit tabstop position, or zero if there
+    aren't any.</p>
 
     <p><b id="SCI_SETUSETABS">SCI_SETUSETABS(bool useTabs)</b><br />
      <b id="SCI_GETUSETABS">SCI_GETUSETABS</b><br />

@@ -2042,6 +2042,80 @@ class TestWordChars(unittest.TestCase):
 		data = self.ed.GetPunctuationChars(None)
 		self.assertCharSetsEqual(data, expected)
 
+class TestExplicitTabStops(unittest.TestCase):
+
+	def setUp(self):
+		self.xite = Xite.xiteFrame
+		self.ed = self.xite.ed
+		self.ed.ClearAll()
+		self.ed.EmptyUndoBuffer()
+		# 2 lines of 4 characters
+		self.t = b"fun(\nint)"
+		self.ed.AddText(len(self.t), self.t)
+
+	def testAddingAndClearing(self):
+		self.assertEquals(self.ed.GetNextTabStop(0,0), 0)
+
+		# Add a tab stop at 7
+		self.ed.AddTabStop(0, 7)
+		# Check added
+		self.assertEquals(self.ed.GetNextTabStop(0,0), 7)
+		# Check does not affect line 1
+		self.assertEquals(self.ed.GetNextTabStop(1,0), 0)
+
+		# Add a tab stop at 18
+		self.ed.AddTabStop(0, 18)
+		# Check added
+		self.assertEquals(self.ed.GetNextTabStop(0,0), 7)
+		self.assertEquals(self.ed.GetNextTabStop(0,7), 18)
+		# Check does not affect line 1
+		self.assertEquals(self.ed.GetNextTabStop(1,0), 0)
+		self.assertEquals(self.ed.GetNextTabStop(1,7), 0)
+
+		# Add a tab stop between others at 13
+		self.ed.AddTabStop(0, 13)
+		# Check added
+		self.assertEquals(self.ed.GetNextTabStop(0,0), 7)
+		self.assertEquals(self.ed.GetNextTabStop(0,7), 13)
+		self.assertEquals(self.ed.GetNextTabStop(0,13), 18)
+		# Check does not affect line 1
+		self.assertEquals(self.ed.GetNextTabStop(1,0), 0)
+		self.assertEquals(self.ed.GetNextTabStop(1,7), 0)
+
+		self.ed.ClearTabStops(0)
+		# Check back to original state
+		self.assertEquals(self.ed.GetNextTabStop(0,0), 0)
+
+	def testLineInsertionDeletion(self):
+		# Add a tab stop at 7 on line 1
+		self.ed.AddTabStop(1, 7)
+		# Check added
+		self.assertEquals(self.ed.GetNextTabStop(1,0), 7)
+
+		# More text at end
+		self.ed.AddText(len(self.t), self.t)
+		self.assertEquals(self.ed.GetNextTabStop(0,0), 0)
+		self.assertEquals(self.ed.GetNextTabStop(1,0), 7)
+		self.assertEquals(self.ed.GetNextTabStop(2,0), 0)
+		self.assertEquals(self.ed.GetNextTabStop(3,0), 0)
+
+		# Another 2 lines before explicit line moves the explicit tab stop
+		data = b"x\ny\n"
+		self.ed.InsertText(4, data)
+		self.assertEquals(self.ed.GetNextTabStop(0,0), 0)
+		self.assertEquals(self.ed.GetNextTabStop(1,0), 0)
+		self.assertEquals(self.ed.GetNextTabStop(2,0), 0)
+		self.assertEquals(self.ed.GetNextTabStop(3,0), 7)
+		self.assertEquals(self.ed.GetNextTabStop(4,0), 0)
+		self.assertEquals(self.ed.GetNextTabStop(5,0), 0)
+
+		# Undo moves the explicit tab stop back
+		self.ed.Undo()
+		self.assertEquals(self.ed.GetNextTabStop(0,0), 0)
+		self.assertEquals(self.ed.GetNextTabStop(1,0), 7)
+		self.assertEquals(self.ed.GetNextTabStop(2,0), 0)
+		self.assertEquals(self.ed.GetNextTabStop(3,0), 0)
+
 if __name__ == '__main__':
 	uu = Xite.main("simpleTests")
 	#~ for x in sorted(uu.keys()):

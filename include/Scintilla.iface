@@ -226,6 +226,15 @@ set void SetTabWidth=2036(int tabWidth,)
 # Retrieve the visible size of a tab.
 get int GetTabWidth=2121(,)
 
+# Clear explicit tabstops on a line.
+fun void ClearTabStops=2675(int line,)
+
+# Add an explicit tab stop for a line.
+fun void AddTabStop=2676(int line, int x)
+
+# Find the next explicit tab stop position on a line after a position.
+fun int GetNextTabStop=2677(int line, int x)
+
 # The SC_CP_UTF8 value can be used to enter Unicode mode.
 # This is the same value as CP_UTF8 in Windows
 val SC_CP_UTF8=65001
@@ -2523,7 +2532,8 @@ val SC_MOD_CHANGEANNOTATION=0x20000
 val SC_MOD_CONTAINER=0x40000
 val SC_MOD_LEXERSTATE=0x80000
 val SC_MOD_INSERTCHECK=0x100000
-val SC_MODEVENTMASKALL=0x1FFFFF
+val SC_MOD_CHANGETABSTOPS=0x200000
+val SC_MODEVENTMASKALL=0x3FFFFF
 
 enu Update=SC_UPDATE_
 val SC_UPDATE_CONTENT=0x1

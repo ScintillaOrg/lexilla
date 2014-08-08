@@ -48,6 +48,7 @@ void DrawStyledText(Surface *surface, const ViewStyle &vs, int styleOffset, PRec
 class EditView {
 public:
 	PrintParameters printParameters;
+	PerLine *ldTabstops;
 
 	bool hideSelection;
 	bool drawOverstrikeCaret;
@@ -78,10 +79,18 @@ public:
 	PositionCache posCache;
 
 	EditView();
+	virtual ~EditView();
 
 	bool SetTwoPhaseDraw(bool twoPhaseDraw);
 	bool SetPhasesDraw(int phases);
 	bool LinesOverlap() const;
+
+	void ClearAllTabstops();
+	int NextTabstopPos(int line, int x, int tabWidth) const;
+	bool ClearTabstops(int line);
+	bool AddTabstop(int line, int x);
+	int GetNextTabstop(int line, int x) const;
+	void LinesAddedOrRemoved(int lineOfPos, int linesAdded);
 
 	void DropGraphics(bool freeObjects);
 	void AllocateGraphics(const ViewStyle &vsDraw);

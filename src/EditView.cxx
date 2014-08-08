@@ -29,6 +29,7 @@
 #include "RunStyles.h"
 #include "ContractionState.h"
 #include "CellBuffer.h"
+#include "PerLine.h"
 #include "KeyMap.h"
 #include "Indicator.h"
 #include "XPM.h"
@@ -170,6 +171,7 @@ void DrawStyledText(Surface *surface, const ViewStyle &vs, int styleOffset, PRec
 const XYPOSITION epsilon = 0.0001f;	// A small nudge to avoid floating point precision issues
 
 EditView::EditView() {
+	ldTabstops = NULL;
 	hideSelection = false;
 	drawOverstrikeCaret = true;
 	bufferedDraw = true;
@@ -183,6 +185,11 @@ EditView::EditView() {
 	pixmapIndentGuideHighlight = 0;
 	llc.SetLevel(LineLayoutCache::llcCaret);
 	posCache.SetSize(0x400);
+}
+
+EditView::~EditView() {
+	delete ldTabstops;
+	ldTabstops = NULL;
 }
 
 bool EditView::SetTwoPhaseDraw(bool twoPhaseDraw) {
@@ -201,6 +208,54 @@ bool EditView::SetPhasesDraw(int phases) {
 
 bool EditView::LinesOverlap() const {
 	return phasesDraw == phasesMultiple;
+}
+
+void EditView::ClearAllTabstops() {
+	delete ldTabstops;
+	ldTabstops = 0;
+}
+
+int EditView::NextTabstopPos(int line, int x, int tabWidth) const {
+	int next = GetNextTabstop(line, x);
+	if (next > 0)
+		return next;
+	return ((((x + 2) / tabWidth) + 1) * tabWidth);
+}
+
+bool EditView::ClearTabstops(int line) {
+	LineTabstops *lt = static_cast<LineTabstops *>(ldTabstops);
+	return lt && lt->ClearTabstops(line);
+}
+
+bool EditView::AddTabstop(int line, int x) {
+	if (!ldTabstops) {
+		ldTabstops = new LineTabstops();
+	}
+	LineTabstops *lt = static_cast<LineTabstops *>(ldTabstops);
+	return lt && lt->AddTabstop(line, x);
+}
+
+int EditView::GetNextTabstop(int line, int x) const {
+	LineTabstops *lt = static_cast<LineTabstops *>(ldTabstops);
+	if (lt) {
+		return lt->GetNextTabstop(line, x);
+	} else {
+		return 0;
+	}
+}
+
+void EditView::LinesAddedOrRemoved(int lineOfPos, int linesAdded) {
+	if (ldTabstops) {
+		if (linesAdded > 0) {
+			for (int line = lineOfPos; line < lineOfPos + linesAdded; line++) {
+				ldTabstops->InsertLine(line);
+			}
+		} else {
+			for (int line = (lineOfPos + -linesAdded) - 1; line >= lineOfPos; line--) {
+				ldTabstops->RemoveLine(line);
+			}
+		}
+	}
 }
 
 void EditView::DropGraphics(bool freeObjects) {
@@ -397,8 +452,9 @@ void EditView::LayoutLine(const EditModel &model, int line, Surface *surface, co
 					XYPOSITION representationWidth = vstyle.controlCharWidth;
 					if (ll->chars[ts.start] == '\t') {
 						// Tab is a special case of representation, taking a variable amount of space
-						representationWidth =
-							((static_cast<int>((ll->positions[ts.start] + 2) / vstyle.tabWidth) + 1) * vstyle.tabWidth) - ll->positions[ts.start];
+						const int x = static_cast<int>(ll->positions[ts.start]);
+						const int tabWidth = static_cast<int>(vstyle.tabWidth);
+						representationWidth = static_cast<XYPOSITION>(NextTabstopPos(line, x, tabWidth) - ll->positions[ts.start]);
 					} else {
 						if (representationWidth <= 0.0) {
 							XYPOSITION positionsRepr[256];	// Should expand when needed
