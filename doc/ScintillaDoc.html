@@ -3426,7 +3426,9 @@ struct Sci_TextToFind {
      <code>SCI_CLEARTABSTOPS</code> clears explicit tabstops on a line. <code>SCI_ADDTABSTOP</code>
     adds an explicit tabstop at the specified distance from the left (in pixels), and
     <code>SCI_GETNEXTTABSTOP</code> gets the next explicit tabstop position, or zero if there
-    aren't any.</p>
+    aren't any.
+    Changing tab stops produces a <a class="message" href="#SC_MOD_CHANGETABSTOPS">SC_MOD_CHANGETABSTOPS</a> notification.
+    </p>
 
     <p><b id="SCI_SETUSETABS">SCI_SETUSETABS(bool useTabs)</b><br />
      <b id="SCI_GETUSETABS">SCI_GETUSETABS</b><br />
@@ -6919,6 +6921,17 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
 
           <td>A line state has changed because <a class="message" href="#SCI_SETLINESTATE">SCI_SETLINESTATE</a>
           was called.</td>
+
+          <td><code>line</code></td>
+        </tr>
+
+        <tr>
+          <td align="left"><code id="SC_MOD_CHANGETABSTOPS">SC_MOD_CHANGETABSTOPS</code></td>
+
+          <td align="right">0x200000</td>
+
+          <td>The explicit tab stops on a line have changed because <a class="message" href="#SCI_CLEARTABSTOPS">SCI_CLEARTABSTOPS</a> or
+          <a class="message" href="#SCI_ADDTABSTOP">SCI_ADDTABSTOP</a> was called.</td>
 
           <td><code>line</code></td>
         </tr>
