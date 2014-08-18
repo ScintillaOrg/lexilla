@@ -197,6 +197,7 @@ class ScintillaWin :
 	CLIPFORMAT cfColumnSelect;
 	CLIPFORMAT cfBorlandIDEBlockType;
 	CLIPFORMAT cfLineSelect;
+	CLIPFORMAT cfVSLineTag;
 
 	HRESULT hrOle;
 	DropSource ds;
@@ -366,7 +367,8 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	// Likewise for line-copy (copies a full line when no text is selected)
 	cfLineSelect = static_cast<CLIPFORMAT>(
 		::RegisterClipboardFormat(TEXT("MSDEVLineSelect")));
-
+	cfVSLineTag = static_cast<CLIPFORMAT>(
+		::RegisterClipboardFormat(TEXT("VisualStudioEditorOperationsLineCutCopyClipboardTag")));
 	hrOle = E_FAIL;
 
 	wMain = hwnd;
@@ -1884,7 +1886,8 @@ void ScintillaWin::Paste() {
 	if (!::OpenClipboard(MainHWND()))
 		return;
 	UndoGroup ug(pdoc);
-	const bool isLine = SelectionEmpty() && (::IsClipboardFormatAvailable(cfLineSelect) != 0);
+	const bool isLine = SelectionEmpty() && 
+		(::IsClipboardFormatAvailable(cfLineSelect) || ::IsClipboardFormatAvailable(cfVSLineTag));
 	ClearSelection(multiPasteMode == SC_MULTIPASTE_EACH);
 	bool isRectangular = (::IsClipboardFormatAvailable(cfColumnSelect) != 0);
 
@@ -2451,6 +2454,7 @@ void ScintillaWin::CopyToClipboard(const SelectionText &selectedText) {
 
 	if (selectedText.lineCopy) {
 		::SetClipboardData(cfLineSelect, 0);
+		::SetClipboardData(cfVSLineTag, 0);
 	}
 
 	::CloseClipboard();
