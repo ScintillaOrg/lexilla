@@ -119,6 +119,11 @@ static void ColouriseVHDLDoc(
         sc.ChangeState(SCE_VHDL_STRINGEOL);
         sc.ForwardSetState(SCE_VHDL_DEFAULT);
       }
+    } else if (sc.state == SCE_VHDL_BLOCK_COMMENT){
+      if(sc.ch == '*' && sc.chNext == '/'){
+        sc.Forward();
+        sc.ForwardSetState(SCE_VHDL_DEFAULT);
+      }
     }
 
     // Determine if a new state should be entered.
@@ -132,6 +137,8 @@ static void ColouriseVHDLDoc(
           sc.SetState(SCE_VHDL_COMMENTLINEBANG);
         else
           sc.SetState(SCE_VHDL_COMMENT);
+      } else if (sc.Match('/', '*')){
+        sc.SetState(SCE_VHDL_BLOCK_COMMENT);
       } else if (sc.ch == '\"') {
         sc.SetState(SCE_VHDL_STRING);
       } else if (isoperator(static_cast<char>(sc.ch))) {
@@ -154,6 +161,39 @@ static bool IsCommentLine(int line, Accessor &styler) {
 			return false;
 	}
 	return false;
+}
+static bool IsCommentBlockStart(int line, Accessor &styler)
+{
+    int pos = styler.LineStart(line);
+	int eol_pos = styler.LineStart(line + 1) - 1;
+	for (int i = pos; i < eol_pos; i++) {
+		char ch = styler[i];
+		char chNext = styler[i+1];
+        char style = styler.StyleAt(i);
+		if ((style == SCE_VHDL_BLOCK_COMMENT) && (ch == '/') && (chNext == '*'))
+			return true;
+	}
+	return false;
+}
+
+static bool IsCommentBlockEnd(int line, Accessor &styler)
+{
+    int pos = styler.LineStart(line);
+	int eol_pos = styler.LineStart(line + 1) - 1;
+
+	for (int i = pos; i < eol_pos; i++) {
+		char ch = styler[i];
+		char chNext = styler[i+1];
+        char style = styler.StyleAt(i);
+		if ((style == SCE_VHDL_BLOCK_COMMENT) && (ch == '*') && (chNext == '/'))
+			return true;
+	}
+	return false;
+}
+
+static bool IsCommentStyle(char style)
+{
+    return style == SCE_VHDL_BLOCK_COMMENT || style == SCE_VHDL_COMMENT || style == SCE_VHDL_COMMENTLINEBANG;
 }
 
 //=============================================================================
@@ -207,14 +247,14 @@ static void FoldNoBoxVHDLDoc(
     char chPrev   = styler.SafeGetCharAt(j-1);
     int style     = styler.StyleAt(j);
     int stylePrev = styler.StyleAt(j-1);
-    if ((stylePrev != SCE_VHDL_COMMENT) && (stylePrev != SCE_VHDL_STRING))
+    if ((!IsCommentStyle(style)) && (stylePrev != SCE_VHDL_STRING))
     {
       if(IsAWordChar(chPrev) && !IsAWordChar(ch))
       {
         end = j-1;
       }
     }
-    if ((style != SCE_VHDL_COMMENT) && (style != SCE_VHDL_STRING))
+    if ((!IsCommentStyle(style)) && (style != SCE_VHDL_STRING))
     {
       if(!IsAWordChar(chPrev) && IsAWordStart(ch) && (end != 0))
       {
@@ -236,7 +276,7 @@ static void FoldNoBoxVHDLDoc(
   {
     char ch       = styler.SafeGetCharAt(j);
     int style     = styler.StyleAt(j);
-    if ((style != SCE_VHDL_COMMENT) && (style != SCE_VHDL_STRING))
+    if ((!IsCommentStyle(style)) && (style != SCE_VHDL_STRING))
     {
       if((ch == ';') && (strcmp(prevWord, "end") == 0))
       {
@@ -268,15 +308,29 @@ static void FoldNoBoxVHDLDoc(
     styleNext       = styler.StyleAt(i + 1);
     bool atEOL      = (ch == '\r' && chNext != '\n') || (ch == '\n');
 
-		if (foldComment && atEOL && IsCommentLine(lineCurrent, styler))
+    if (foldComment && atEOL)
     {
-      if(!IsCommentLine(lineCurrent-1, styler) && IsCommentLine(lineCurrent+1, styler))
+      if(IsCommentLine(lineCurrent, styler))
       {
-        levelNext++;
+        if(!IsCommentLine(lineCurrent-1, styler) && IsCommentLine(lineCurrent+1, styler))
+        {
+          levelNext++;
+        }
+        else if(IsCommentLine(lineCurrent-1, styler) && !IsCommentLine(lineCurrent+1, styler))
+        {
+          levelNext--;
+        }
       }
-      else if(IsCommentLine(lineCurrent-1, styler) && !IsCommentLine(lineCurrent+1, styler))
+      else
       {
-        levelNext--;
+        if (IsCommentBlockStart(lineCurrent, styler) && !IsCommentBlockEnd(lineCurrent, styler))
+        {
+          levelNext++;
+        }
+        else if (IsCommentBlockEnd(lineCurrent, styler) && !IsCommentBlockStart(lineCurrent, styler))
+        {
+          levelNext--;
+        }
       }
     }
 
@@ -289,7 +343,7 @@ static void FoldNoBoxVHDLDoc(
       }
     }
 
-    if ((style != SCE_VHDL_COMMENT) && (style != SCE_VHDL_STRING))
+    if ((!IsCommentStyle(style)) && (style != SCE_VHDL_STRING))
     {
       if((ch == ';') && (strcmp(prevWord, "end") == 0))
       {
@@ -301,7 +355,7 @@ static void FoldNoBoxVHDLDoc(
         lastStart = i;
       }
 
-      if(iswordchar(ch) && !iswordchar(chNext)) {
+      if(IsAWordChar(ch) && !IsAWordChar(chNext)) {
         char s[32];
         unsigned int k;
         for(k=0; (k<31 ) && (k<i-lastStart+1 ); k++) {
@@ -346,7 +400,7 @@ static void FoldNoBoxVHDLDoc(
                 if(LocalCh == ')') BracketLevel--;
                 if(
                   (BracketLevel == 0) &&
-                  (LocalStyle != SCE_VHDL_COMMENT) &&
+                  (!IsCommentStyle(LocalStyle)) &&
                   (LocalStyle != SCE_VHDL_STRING) &&
                   !iswordchar(styler.SafeGetCharAt(j-1)) &&
                   styler.Match(j, "is") &&
