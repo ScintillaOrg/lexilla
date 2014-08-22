@@ -368,8 +368,6 @@ static void FoldNoBoxVHDLDoc(
           if (
             strcmp(s, "architecture") == 0  ||
             strcmp(s, "case") == 0          ||
-            strcmp(s, "component") == 0     ||
-            strcmp(s, "entity") == 0        ||
             strcmp(s, "generate") == 0      ||
             strcmp(s, "loop") == 0          ||
             strcmp(s, "package") ==0        ||
@@ -385,6 +383,32 @@ static void FoldNoBoxVHDLDoc(
               levelNext++;
             }
           } else if (
+            strcmp(s, "component") == 0      ||
+            strcmp(s, "entity") == 0         ||
+            strcmp(s, "configuration") == 0 )
+          {
+            if (strcmp(prevWord, "end") != 0)
+            { // check for instantiated unit by backward searching for the colon.
+              unsigned pos = lastStart-1;
+              char chAtPos, styleAtPos;
+              do{// skip white spaces
+                styleAtPos = styler.StyleAt(pos);
+                chAtPos = styler.SafeGetCharAt(pos--);
+              }while(pos>0 &&
+                     (chAtPos == ' ' || chAtPos == '\t' ||
+                      chAtPos == '\n' || chAtPos == '\r' ||
+                      IsCommentStyle(styleAtPos)));
+
+              // check for a colon (':') before the instantiated units "entity", "component" or "configuration". Don't fold thereafter.
+              if (chAtPos != ':')
+              {
+                if (levelMinCurrentElse > levelNext) {
+                  levelMinCurrentElse = levelNext;
+                }
+                levelNext++;
+              }
+            }
+          } else if (
             strcmp(s, "procedure") == 0     ||
             strcmp(s, "function") == 0)
           {
@@ -392,19 +416,19 @@ static void FoldNoBoxVHDLDoc(
             { // This code checks to see if the procedure / function is a definition within a "package"
               // rather than the actual code in the body.
               int BracketLevel = 0;
-              for(int j=i+1; j<styler.Length(); j++)
+              for(int pos=i+1; pos<styler.Length(); pos++)
               {
-                int LocalStyle = styler.StyleAt(j);
-                char LocalCh = styler.SafeGetCharAt(j);
-                if(LocalCh == '(') BracketLevel++;
-                if(LocalCh == ')') BracketLevel--;
+                int styleAtPos = styler.StyleAt(pos);
+                char chAtPos = styler.SafeGetCharAt(pos);
+                if(chAtPos == '(') BracketLevel++;
+                if(chAtPos == ')') BracketLevel--;
                 if(
                   (BracketLevel == 0) &&
-                  (!IsCommentStyle(LocalStyle)) &&
-                  (LocalStyle != SCE_VHDL_STRING) &&
-                  !iswordchar(styler.SafeGetCharAt(j-1)) &&
-                  styler.Match(j, "is") &&
-                  !iswordchar(styler.SafeGetCharAt(j+2)))
+                  (!IsCommentStyle(styleAtPos)) &&
+                  (styleAtPos != SCE_VHDL_STRING) &&
+                  !iswordchar(styler.SafeGetCharAt(pos-1)) &&
+                  styler.Match(pos, "is") &&
+                  !iswordchar(styler.SafeGetCharAt(pos+2)))
                 {
                   if (levelMinCurrentElse > levelNext) {
                     levelMinCurrentElse = levelNext;
@@ -412,7 +436,7 @@ static void FoldNoBoxVHDLDoc(
                   levelNext++;
                   break;
                 }
-                if((BracketLevel == 0) && (LocalCh == ';'))
+                if((BracketLevel == 0) && (chAtPos == ';'))
                 {
                   break;
                 }
