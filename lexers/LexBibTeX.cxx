@@ -76,11 +76,6 @@ namespace {
 		return IsEntryStart(sc.chPrev, sc.ch);
 	}
 
-	bool IsNextEntryStart(const StyleContext& sc)
-	{
-		return IsEntryStart(sc.ch, sc.chNext);
-	}
-
 	void ColorizeBibTeX(unsigned start_pos, int length, int /*init_style*/, WordList* keywordlists[], Accessor& styler)
 	{
 	    WordList &EntryNames = *keywordlists[0];
