@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 24 May 2014 NH</p>
+    <p>Last edited 4 September 2014 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -3429,8 +3429,8 @@ struct Sci_TextToFind {
      <b id="SCI_GETNEXTTABSTOP">SCI_GETNEXTTABSTOP(int line, int x)</b><br />
      <code>SCI_CLEARTABSTOPS</code> clears explicit tabstops on a line. <code>SCI_ADDTABSTOP</code>
     adds an explicit tabstop at the specified distance from the left (in pixels), and
-    <code>SCI_GETNEXTTABSTOP</code> gets the next explicit tabstop position, or zero if there
-    aren't any.
+    <code>SCI_GETNEXTTABSTOP</code> gets the next explicit tabstop position set after the given x position,
+    or zero if there aren't any.
     Changing tab stops produces a <a class="message" href="#SC_MOD_CHANGETABSTOPS">SC_MOD_CHANGETABSTOPS</a> notification.
     </p>
 
