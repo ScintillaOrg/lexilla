@@ -86,7 +86,7 @@ public:
 	bool LinesOverlap() const;
 
 	void ClearAllTabstops();
-	int NextTabstopPos(int line, int x, int tabWidth) const;
+	XYPOSITION NextTabstopPos(int line, XYPOSITION x, XYPOSITION tabWidth) const;
 	bool ClearTabstops(int line);
 	bool AddTabstop(int line, int x);
 	int GetNextTabstop(int line, int x) const;
