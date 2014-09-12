@@ -28,6 +28,10 @@
 #include "CaseFolder.h"
 #include "Document.h"
 
+#ifdef SCI_NAMESPACE
+using namespace Scintilla;
+#endif
+
 class WatcherHelper : public DocWatcher {
 	ScintillaDocument *owner;
 public:
