@@ -395,6 +395,7 @@ ScintillaCocoa::ScintillaCocoa(SCIContentView* view, SCIMarginView* viewMargin)
   idleTimer = NULL;
   observer = NULL;
   layerFindIndicator = NULL;
+  imeInteraction = imeInline;
   for (TickReason tr=tickCaret; tr<=tickPlatform; tr = static_cast<TickReason>(tr+1))
   {
     timers[tr] = nil;
@@ -825,6 +826,10 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 
     case SCI_GETDIRECTPOINTER:
       return reinterpret_cast<sptr_t>(this);
+
+    case SCI_SETIMEINTERACTION:
+      // Only inline IME supported on Cocoa
+      break;
 
     case SCI_GRABFOCUS:
       [[ContentView() window] makeFirstResponder:ContentView()];

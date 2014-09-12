@@ -38,6 +38,8 @@ ScintillaQt::ScintillaQt(QAbstractScrollArea *parent)
 
 	wMain = scrollArea->viewport();
 
+	imeInteraction = imeInline;
+
 	// On OS X drawing text into a pixmap moves it around 1 pixel to
 	// the right compared to drawing it directly onto a window.
 	// Buffered drawing turned off by default to avoid this.
@@ -650,6 +652,10 @@ sptr_t ScintillaQt::WndProc(unsigned int message, uptr_t wParam, sptr_t lParam)
 {
 	try {
 		switch (message) {
+
+		case SCI_SETIMEINTERACTION:
+			// Only inline IME supported on Qt
+			break;
 
 		case SCI_GRABFOCUS:
 			scrollArea->setFocus(Qt::OtherFocusReason);

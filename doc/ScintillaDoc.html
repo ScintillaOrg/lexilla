@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 4 September 2014 NH</p>
+    <p>Last edited 12 September 2014 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -3171,6 +3171,8 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_GETFONTQUALITY">SCI_GETFONTQUALITY</a><br />
      <a class="message" href="#SCI_SETCODEPAGE">SCI_SETCODEPAGE(int codePage)</a><br />
      <a class="message" href="#SCI_GETCODEPAGE">SCI_GETCODEPAGE</a><br />
+     <a class="message" href="#SCI_SETIMEINTERACTION">SCI_SETIMEINTERACTION(int imeInteraction)</a><br />
+     <a class="message" href="#SCI_GETIMEINTERACTION">SCI_GETIMEINTERACTION</a><br />
      <a class="message" href="#SCI_SETKEYSUNICODE">SCI_SETKEYSUNICODE(bool keysUnicode)</a><br />
      <a class="message" href="#SCI_GETKEYSUNICODE">SCI_GETKEYSUNICODE</a><br />
      <a class="message" href="#SCI_SETWORDCHARS">SCI_SETWORDCHARS(&lt;unused&gt;, const char *characters)</a><br />
@@ -3280,6 +3282,19 @@ struct Sci_TextToFind {
     <p>Code page can be set to 932 (Japanese Shift-JIS), 936 (Simplified Chinese GBK),
     949 (Korean Unified Hangul Code), 950 (Traditional Chinese Big5), or 1361 (Korean Johab)
     although these may require installation of language specific support.</p>
+
+    <p><b id="SCI_SETIMEINTERACTION">SCI_SETIMEINTERACTION(int imeInteraction)</b><br />
+     <b id="SCI_GETIMEINTERACTION">SCI_GETIMEINTERACTION</b><br />
+     When entering text in Chinese, Japanese, or Korean an Input Method Editor (IME) may be displayed.
+     The IME may be an extra window appearing above Scintilla or may be displayed by Scintilla itself
+     as text. On some platforms there is a choice between the two techniques.
+     A windowed IME <code>SC_IME_WINDOWED</code> (0) may be more similar in appearance and
+     behaviour to the IME in other applications.
+     An inline IME <code>SC_IME_INLINE</code> (1) may work better with some Scintilla features such as
+     rectangular and multiple selection.</p>
+     <p>The windowed behaviour can be chosen with <code>SCI_SETIMEINTERACTION(SC_IME_WINDOWED)</code>
+     and the inline behaviour with <code>SCI_SETIMEINTERACTION(SC_IME_INLINE)</code>.
+     Scintilla may ignore this call in some cases. For example, the inline behaviour might only be supported for some languages.</p>
 
     <p><b id="SCI_SETKEYSUNICODE">SCI_SETKEYSUNICODE(bool keysUnicode)</b><br />
      <b id="SCI_GETKEYSUNICODE">SCI_GETKEYSUNICODE</b><br />

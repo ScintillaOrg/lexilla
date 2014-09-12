@@ -97,6 +97,10 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_GETNEXTTABSTOP 2677
 #define SC_CP_UTF8 65001
 #define SCI_SETCODEPAGE 2037
+#define SC_IME_WINDOWED 0
+#define SC_IME_INLINE 1
+#define SCI_GETIMEINTERACTION 2678
+#define SCI_SETIMEINTERACTION 2679
 #define MARKER_MAX 31
 #define SC_MARK_CIRCLE 0
 #define SC_MARK_ROUNDRECT 1
