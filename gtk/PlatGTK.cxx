@@ -1658,6 +1658,14 @@ int ListBoxX::GetVisibleRows() const {
 
 int ListBoxX::GetRowHeight()
 {
+#if GTK_CHECK_VERSION(3,0,0)
+	// This version sometimes reports erroneous results on GTK2, but the GTK2
+	// version is inaccurate for GTK 3.14.
+	GdkRectangle rect;
+	GtkTreePath *path = gtk_tree_path_new_first();
+	gtk_tree_view_get_background_area(GTK_TREE_VIEW(list), path, NULL, &rect);
+	return rect.height;
+#else
 	int row_height=0;
 	int vertical_separator=0;
 	int expander_size=0;
@@ -1669,6 +1677,7 @@ int ListBoxX::GetRowHeight()
 	row_height += vertical_separator;
 	row_height = Platform::Maximum(row_height, expander_size);
 	return row_height;
+#endif
 }
 
 PRectangle ListBoxX::GetDesiredRect() {
