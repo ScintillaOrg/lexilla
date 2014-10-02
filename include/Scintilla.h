@@ -274,7 +274,9 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define INDIC_DOTBOX 12
 #define INDIC_SQUIGGLEPIXMAP 13
 #define INDIC_COMPOSITIONTHICK 14
-#define INDIC_MAX 31
+#define INDIC_IME 32
+#define INDIC_IME_MAX 35
+#define INDIC_MAX 35
 #define INDIC_CONTAINER 8
 #define INDIC0_MASK 0x20
 #define INDIC1_MASK 0x40

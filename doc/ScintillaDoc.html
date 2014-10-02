@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 25 September 2014 NH</p>
+    <p>Last edited 2 October 2014 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -3890,10 +3890,11 @@ struct Sci_TextToFind {
     line of small 'T' shapes, a line of diagonal hatching, a strike-out or a rectangle around the text.</p>
 
     <p>The <code>SCI_INDIC*</code> messages allow you to get and set the visual appearance of the
-    indicators. They all use an <code>indicatorNumber</code> argument in the range 0 to INDIC_MAX(31)
+    indicators. They all use an <code>indicatorNumber</code> argument in the range 0 to INDIC_MAX(35)
     to set the indicator to style. To prevent interference the set of indicators is divided up into a range for use
-    by lexers (0..7) and a range for use by containers
-    (8=<code>INDIC_CONTAINER</code> .. 31=<code>INDIC_MAX</code>).</p>
+    by lexers (0..7) a range for use by containers
+    (8=<code>INDIC_CONTAINER</code> .. 31=<code>INDIC_IME-1</code>)
+    and a range for IME indicators (32=<code>INDIC_IME</code> .. 35=<code>INDIC_IME_MAX</code>).</p>
 
     <p>Originally, Scintilla used a different technique for indicators but this
     has been <a href="#RemovedFeatures">removed</a>
@@ -4155,6 +4156,7 @@ struct Sci_TextToFind {
     <p>
     <b id="SCI_INDICATORALLONFOR">SCI_INDICATORALLONFOR(int position)</b><br />
     Retrieve a bitmap value representing which indicators are non-zero at a position.
+    Only the first 32 indicators are represented in the result so no IME indicators are included.
     </p>
 
     <p>
