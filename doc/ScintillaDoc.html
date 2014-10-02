@@ -1514,12 +1514,12 @@ struct Sci_TextToFind {
 
     <p><b id="SCI_MOVESELECTEDLINESUP">SCI_MOVESELECTEDLINESUP</b><br />
      Move the selected lines up one line, shifting the line above after the selection.
-     The selection will be automatically extended to the beginning of the selection's first line and the end of the seletion's last line.
+     The selection will be automatically extended to the beginning of the selection's first line and the end of the selection's last line.
      If nothing was selected, the line the cursor is currently at will be selected.</p>
 
     <p><b id="SCI_MOVESELECTEDLINESDOWN">SCI_MOVESELECTEDLINESDOWN</b><br />
      Move the selected lines down one line, shifting the line below before the selection.
-     The selection will be automatically extended to the beginning of the selection's first line and the end of the seletion's last line.
+     The selection will be automatically extended to the beginning of the selection's first line and the end of the selection's last line.
      If nothing was selected, the line the cursor is currently at will be selected.</p>
 
     <p><b id="SCI_SETMOUSESELECTIONRECTANGULARSWITCH">SCI_SETMOUSESELECTIONRECTANGULARSWITCH(bool
@@ -3226,7 +3226,7 @@ struct Sci_TextToFind {
      the appearance in layers or phases. The coloured backgrounds for all lines are
      drawn before any text and then all the text is drawn in transparent mode over this
      combined background without clipping text to the line boundaries. This allows
-     extreme ascenders and decenders to overflow into the adjacent lines.
+     extreme ascenders and descenders to overflow into the adjacent lines.
      This mode is incompatible with buffered drawing and will act as <code>SC_PHASES_TWO</code>
      if buffered drawing is turned on.
      Multiple phase drawing is slower than two phase drawing.
@@ -7550,7 +7550,7 @@ EM_SETTARGETDEVICE
 
     <h2 id="RemovedFeatures">Removed features</h2>
 
-    <p>Previous versions of Scintilla allowed indicators to be stord in bits of each style byte.
+    <p>Previous versions of Scintilla allowed indicators to be stored in bits of each style byte.
     This was deprecated in 2007 and removed in 2014 with release 3.4.3.
     All uses of style byte indicators should be replaced with <a href="#Indicators">standard indicators</a>.</p>
 
