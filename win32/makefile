@@ -27,6 +27,10 @@ endif
 
 CXXBASEFLAGS=--std=c++0x -Wall -pedantic $(INCLUDEDIRS) -fno-rtti $(D2DFLAGS)
 
+ifdef CXX11_REGEX
+REFLAGS=-DCXX11_REGEX
+endif
+
 ifdef DEBUG
 CXXFLAGS=-DDEBUG -g $(CXXBASEFLAGS)
 else
@@ -35,7 +39,7 @@ STRIPFLAG=-s
 endif
 
 .cxx.o:
-	$(CXX) $(CXXFLAGS) -c $<
+	$(CXX) $(CXXFLAGS) $(REFLAGS) -c $<
 
 ALL:	$(COMPONENT) $(LEXCOMPONENT) $(LEXLIB) ScintillaWinS.o
 

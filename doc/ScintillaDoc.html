@@ -606,8 +606,11 @@ struct Sci_TextRange {
 
     <h2 id="Searching">Searching</h2>
     <p>
-    There are methods to search for text and for regular expressions. The regular expression support
-    is limited and should only be used for simple cases and initial development. A different regular expression
+    There are methods to search for text and for regular expressions. The base regular expression support
+    is limited and should only be used for simple cases and initial development.
+    <span class="provisional">When using a C++11 compliant compiler and runtime, it may be possible to use the
+    runtime's implementation of &lt;regex&gt; by compiling Scintilla with <code>CXX11_REGEX</code> defined.</span>
+    A different regular expression
     library can be <a class="jump" href="#AlternativeRegEx">integrated into Scintilla</a>
     or can be called from the container using direct access to the buffer contents through
     <a class="message" href="#SCI_GETCHARACTERPOINTER">SCI_GETCHARACTERPOINTER</a>.
@@ -657,6 +660,17 @@ struct Sci_TextRange {
 
           <td>Treat regular expression in a more POSIX compatible manner
             by interpreting bare ( and ) for tagged sections rather than \( and \).</td>
+        </tr>
+        <tr class="provisional">
+          <td><code>SCFIND_CXX11REGEX</code></td>
+
+          <td>When compiled with <code>CXX11_REGEX</code> this flag
+	  may be set to use &lt;regex&gt; instead of Scintilla's basic regular expressions.
+	  If the regular expression is invalid then -1 is returned and status is set to
+	  <code>SC_STATUS_WARN_REGEX</code>.
+	  The ECMAScript flag is set on the regex object and UTF-8 documents will exhibit Unicode-compliant
+	  behaviour. For MSVC, where wchar_t is 16-bits, the reular expression ".." will match a single
+	  astral-plane character. There may be other differences between compilers.</td>
         </tr>
       </tbody>
     </table>
@@ -971,6 +985,8 @@ struct Sci_TextToFind {
      If an error occurs, Scintilla may set an internal error number that can be retrieved with
     <code>SCI_GETSTATUS</code>.
     To clear the error status call <code>SCI_SETSTATUS(0)</code>.
+    Status values from 1 to 999 are errors and status <code>SC_STATUS_WARN_START</code> (1000)
+    and above are warnings.
     The currently defined statuses are:
     </p>
 
@@ -988,10 +1004,16 @@ struct Sci_TextToFind {
           <td>Generic failure</td>
         </tr>
 
-        <tr>
+        <tr class="provisional">
           <th align="left">SC_STATUS_BADALLOC</th>
           <td>2</td>
           <td>Memory is exhausted</td>
+        </tr>
+
+        <tr>
+          <th align="left">SC_STATUS_WARN_REGEX</th>
+          <td>1001</td>
+          <td>Regular expression is invalid</td>
         </tr>
 
       </tbody>
@@ -7432,6 +7454,8 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     <p>There are currently no provisional messages.
     The <code class="provisional">SC_TECHNOLOGY_DIRECTWRITERETAIN</code> value for
     <a class="message" href="#SCI_SETTECHNOLOGY">SCI_SETTECHNOLOGY</a> is provisional.</p>
+
+    <p>Using C++11 &lt;regex&gt; is provisional.</p>
 
     <p>Some developers may want to only use features that are stable and have graduated from
     provisional status. To avoid using provisional messages compile with the symbol
