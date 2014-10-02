@@ -1306,7 +1306,7 @@ int Document::GetColumn(int pos) {
 	return column;
 }
 
-int Document::CountCharacters(int startPos, int endPos) {
+int Document::CountCharacters(int startPos, int endPos) const {
 	startPos = MovePositionOutsideChar(startPos, 1, false);
 	endPos = MovePositionOutsideChar(endPos, -1, false);
 	int count = 0;

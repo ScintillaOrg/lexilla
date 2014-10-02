@@ -321,7 +321,7 @@ public:
 	int SetLineIndentation(int line, int indent);
 	int GetLineIndentPosition(int line) const;
 	int GetColumn(int position);
-	int CountCharacters(int startPos, int endPos);
+	int CountCharacters(int startPos, int endPos) const;
 	int FindColumn(int line, int column);
 	void Indent(bool forwards, int lineBottom, int lineTop);
 	static std::string TransformLineEnds(const char *s, size_t len, int eolModeWanted);
