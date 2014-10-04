@@ -2106,6 +2106,7 @@ void Editor::Clear() {
 		ClearSelection();
 	}
 	sel.RemoveDuplicates();
+	ShowCaretAtCurrentPosition();		// Avoid blinking
 }
 
 void Editor::SelectAll() {
