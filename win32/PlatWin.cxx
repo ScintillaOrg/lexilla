@@ -3003,7 +3003,7 @@ void Menu::Destroy() {
 
 void Menu::Show(Point pt, Window &w) {
 	::TrackPopupMenu(reinterpret_cast<HMENU>(mid),
-		0, static_cast<int>(pt.x - 4), static_cast<int>(pt.y), 0,
+		TPM_RIGHTBUTTON, static_cast<int>(pt.x - 4), static_cast<int>(pt.y), 0,
 		reinterpret_cast<HWND>(w.GetID()), NULL);
 	Destroy();
 }
