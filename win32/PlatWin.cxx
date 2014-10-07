@@ -1599,7 +1599,10 @@ void SurfaceD2D::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 		D2D1_RECT_F rcSource = {from.x, from.y, from.x + rc.Width(), from.y + rc.Height()};
 		pRenderTarget->DrawBitmap(pBitmap, rcDestination, 1.0f,
 			D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, rcSource);
-		pRenderTarget->Flush();
+		hr = pRenderTarget->Flush();
+		if (FAILED(hr)) {
+			Platform::DebugPrintf("Failed Flush 0x%x\n", hr);
+		}
 		pBitmap->Release();
 	}
 }
