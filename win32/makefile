@@ -5,7 +5,13 @@
 # be needed to use other compilers.
 
 .SUFFIXES: .cxx
-DEL ?= del /q
+ifeq ($(OS),Windows_NT)
+DEL = del /q
+else
+DEL = rm -f
+endif
+RANLIB ?= ranlib
+WINDRES ?= windres
 
 COMPONENT = ../bin/Scintilla.dll
 LEXCOMPONENT = ../bin/SciLexer.dll
@@ -110,7 +116,7 @@ $(LEXCOMPONENT): $(LOBJS) Scintilla.def
 
 $(LEXLIB): $(LEXOBJS)
 	$(AR) rc $@ $^
-	ranlib $@
+	$(RANLIB) $@	
 
 # Automatically generate dependencies for most files with "make deps"
 include deps.mak
@@ -160,5 +166,5 @@ ScintillaWinL.o:
 	$(CXX) $(CXXFLAGS) -D SCI_LEXER -c $< -o $@
 
 ScintRes.o:	ScintRes.rc
-	windres ScintRes.rc $@
+	$(WINDRES) ScintRes.rc $@
 
