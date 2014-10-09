@@ -1564,6 +1564,13 @@ void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, Selectio
 		len--;	// Forget the extra '\0'
 #endif
 
+#if PLAT_GTK_WIN32
+	// Win32 includes an ending '\0' byte in 'len' for clipboard text from
+	// external applications; ignore it.
+	if ((len > 0) && (data[len - 1] == '\0'))
+		len--;
+#endif
+
 	std::string dest(data, len);
 	if (selectionTypeData == GDK_TARGET_STRING) {
 		if (IsUnicodeMode()) {
