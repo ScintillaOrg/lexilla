@@ -425,6 +425,7 @@ ScintillaGTK::~ScintillaGTK() {
 		gdk_event_free(reinterpret_cast<GdkEvent *>(evbtn));
 		evbtn = 0;
 	}
+	wPreedit.Destroy();
 }
 
 static void UnRefCursor(GdkCursor *cursor) {
@@ -483,20 +484,8 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	gdk_window_show(widget->window);
 	UnRefCursor(cursor);
 #endif
-	wPreedit = gtk_window_new(GTK_WINDOW_POPUP);
-	wPreeditDraw = gtk_drawing_area_new();
-	GtkWidget *predrw = PWidget(wPreeditDraw);	// No code inside the G_OBJECT macro
-#if GTK_CHECK_VERSION(3,0,0)
-	g_signal_connect(G_OBJECT(predrw), "draw",
-		G_CALLBACK(DrawPreedit), this);
-#else
-	g_signal_connect(G_OBJECT(predrw), "expose_event",
-		G_CALLBACK(ExposePreedit), this);
-#endif
-	gtk_container_add(GTK_CONTAINER(PWidget(wPreedit)), predrw);
 	gtk_widget_realize(PWidget(wPreedit));
-	gtk_widget_realize(predrw);
-	gtk_widget_show(predrw);
+	gtk_widget_realize(PWidget(wPreeditDraw));
 
 	im_context = gtk_im_multicontext_new();
 	g_signal_connect(G_OBJECT(im_context), "commit",
@@ -843,6 +832,20 @@ void ScintillaGTK::Initialise() {
 	gtk_drag_dest_set(GTK_WIDGET(PWidget(wMain)),
 	                  GTK_DEST_DEFAULT_ALL, clipboardPasteTargets, nClipboardPasteTargets,
 	                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
+
+	/* create pre-edit window */
+	wPreedit = gtk_window_new(GTK_WINDOW_POPUP);
+	wPreeditDraw = gtk_drawing_area_new();
+	GtkWidget *predrw = PWidget(wPreeditDraw);      // No code inside the G_OBJECT macro
+#if GTK_CHECK_VERSION(3,0,0)
+	g_signal_connect(G_OBJECT(predrw), "draw",
+		G_CALLBACK(DrawPreedit), this);
+#else
+	g_signal_connect(G_OBJECT(predrw), "expose_event",
+		G_CALLBACK(ExposePreedit), this);
+#endif
+	gtk_container_add(GTK_CONTAINER(PWidget(wPreedit)), predrw);
+	gtk_widget_show(predrw);
 
 	// Set caret period based on GTK settings
 	gboolean blinkOn = false;
