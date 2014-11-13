@@ -2913,7 +2913,10 @@ BOOL ScintillaWin::CreateSystemCaret() {
 	BOOL retval = ::CreateCaret(
 		MainHWND(), sysCaretBitmap,
 		sysCaretWidth, sysCaretHeight);
-	::ShowCaret(MainHWND());
+	if (technology == SC_TECHNOLOGY_DEFAULT) {
+		// System caret interferes with Direct2D drawing so only show it for GDI.
+		::ShowCaret(MainHWND());
+	}
 	return retval;
 }
 
