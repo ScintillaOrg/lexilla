@@ -818,6 +818,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define ANNOTATION_HIDDEN 0
 #define ANNOTATION_STANDARD 1
 #define ANNOTATION_BOXED 2
+#define ANNOTATION_INDENTED 3
 #define SCI_ANNOTATIONSETVISIBLE 2548
 #define SCI_ANNOTATIONGETVISIBLE 2549
 #define SCI_ANNOTATIONSETSTYLEOFFSET 2550

@@ -2157,6 +2157,7 @@ enu AnnotationVisible=ANNOTATION_
 val ANNOTATION_HIDDEN=0
 val ANNOTATION_STANDARD=1
 val ANNOTATION_BOXED=2
+val ANNOTATION_INDENTED=3
 
 # Set the visibility for the annotations for a view
 set void AnnotationSetVisible=2548(int visible,)

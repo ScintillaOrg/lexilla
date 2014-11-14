@@ -992,6 +992,10 @@ static void DrawIndicators(Surface *surface, const EditModel &model, const ViewS
 	}
 }
 
+static bool AnnotationBoxedOrIndented(int annotationVisible) {
+	return annotationVisible == ANNOTATION_BOXED || annotationVisible == ANNOTATION_INDENTED;
+}
+
 void EditView::DrawAnnotation(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
 	int line, int xStart, PRectangle rcLine, int subLine, DrawPhase phase) {
 	int indent = static_cast<int>(model.pdoc->GetLineIndentation(line) * vsDraw.spaceWidth);
@@ -1003,18 +1007,16 @@ void EditView::DrawAnnotation(Surface *surface, const EditModel &model, const Vi
 			surface->FillRectangle(rcSegment, vsDraw.styles[0].back);
 		}
 		rcSegment.left = static_cast<XYPOSITION>(xStart);
-		if (model.trackLineWidth || (vsDraw.annotationVisible == ANNOTATION_BOXED)) {
-			// Only care about calculating width if tracking or need to draw box
+		if (model.trackLineWidth || AnnotationBoxedOrIndented(vsDraw.annotationVisible)) {
+			// Only care about calculating width if tracking or need to draw indented box
 			int widthAnnotation = WidestLineWidth(surface, vsDraw, vsDraw.annotationStyleOffset, stAnnotation);
-			if (vsDraw.annotationVisible == ANNOTATION_BOXED) {
+			if (AnnotationBoxedOrIndented(vsDraw.annotationVisible)) {
 				widthAnnotation += static_cast<int>(vsDraw.spaceWidth * 2); // Margins
-			}
-			if (widthAnnotation > lineWidthMaxSeen)
-				lineWidthMaxSeen = widthAnnotation;
-			if (vsDraw.annotationVisible == ANNOTATION_BOXED) {
 				rcSegment.left = static_cast<XYPOSITION>(xStart + indent);
 				rcSegment.right = rcSegment.left + widthAnnotation;
 			}
+			if (widthAnnotation > lineWidthMaxSeen)
+				lineWidthMaxSeen = widthAnnotation;
 		}
 		const int annotationLines = model.pdoc->AnnotationLines(line);
 		size_t start = 0;
@@ -1026,7 +1028,7 @@ void EditView::DrawAnnotation(Surface *surface, const EditModel &model, const Vi
 			lineInAnnotation++;
 		}
 		PRectangle rcText = rcSegment;
-		if ((phase & drawBack) && (vsDraw.annotationVisible == ANNOTATION_BOXED)) {
+		if ((phase & drawBack) && AnnotationBoxedOrIndented(vsDraw.annotationVisible)) {
 			surface->FillRectangle(rcText,
 				vsDraw.styles[stAnnotation.StyleAt(start) + vsDraw.annotationStyleOffset].back);
 			rcText.left += vsDraw.spaceWidth;
