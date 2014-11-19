@@ -1082,12 +1082,19 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			}
 			break;
 
-		case WM_MOUSEMOVE:
-			SetTrackMouseLeaveEvent(true);
-			ButtonMoveWithModifiers(Point::FromLong(static_cast<long>(lParam)),
-				((wParam & MK_SHIFT) != 0 ? SCI_SHIFT : 0) |
-				((wParam & MK_CONTROL) != 0 ? SCI_CTRL : 0) |
-				(Platform::IsKeyDown(VK_MENU) ? SCI_ALT : 0));
+		case WM_MOUSEMOVE: {
+				const Point pt = Point::FromLong(static_cast<long>(lParam));
+
+				// Windows might send WM_MOUSEMOVE even though the mouse has not been moved:
+				// http://blogs.msdn.com/b/oldnewthing/archive/2003/10/01/55108.aspx
+				if (ptMouseLast.x != pt.x || ptMouseLast.y != pt.y) {
+					SetTrackMouseLeaveEvent(true);
+					ButtonMoveWithModifiers(pt,
+					                        ((wParam & MK_SHIFT) != 0 ? SCI_SHIFT : 0) |
+					                        ((wParam & MK_CONTROL) != 0 ? SCI_CTRL : 0) |
+					                        (Platform::IsKeyDown(VK_MENU) ? SCI_ALT : 0));
+				}
+			}
 			break;
 
 		case WM_MOUSELEAVE:

@@ -462,6 +462,7 @@
 	<td>Baurzhan Muftakhidinov</td>
       </tr><tr>
 	<td>Erik Angelin</td>
+	<td>Yusuf Ramazan Karagöz</td>
     </tr>
     </table>
     <p>
@@ -513,6 +514,11 @@
 	<li>
 	On Windows, only call ShowCaret in GDI mode as it interferes with caret drawing when using Direct2D.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1643/">Bug #1643</a>.
+	</li>
+	<li>
+	On Windows, avoid processing mouse move events where the mouse has not moved as these can
+	cause unexpected dwell start notifications.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1670/">Bug #1670</a>.
 	</li>
 	<li>
 	For GTK+ on Windows, avoid extra space when pasting from external application.
