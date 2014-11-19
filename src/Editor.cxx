@@ -113,6 +113,7 @@ Editor::Editor() {
 	mouseDownCaptures = true;
 
 	lastClickTime = 0;
+	doubleClickCloseThreshold = Point(3, 3);
 	dwellDelay = SC_TIME_FOREVER;
 	ticksToDwell = SC_TIME_FOREVER;
 	dwelling = false;
@@ -3777,10 +3778,10 @@ void Editor::GoToLine(int lineNo) {
 	EnsureCaretVisible();
 }
 
-static bool Close(Point pt1, Point pt2) {
-	if (abs(pt1.x - pt2.x) > 3)
+static bool Close(Point pt1, Point pt2, Point threshold) {
+	if (abs(pt1.x - pt2.x) > threshold.x)
 		return false;
-	if (abs(pt1.y - pt2.y) > 3)
+	if (abs(pt1.y - pt2.y) > threshold.y)
 		return false;
 	return true;
 }
@@ -4136,7 +4137,7 @@ void Editor::ButtonDownWithModifiers(Point pt, unsigned int curTime, int modifie
 	if (shift && !inSelMargin) {
 		SetSelection(newPos);
 	}
-	if (((curTime - lastClickTime) < Platform::DoubleClickTime()) && Close(pt, lastClick)) {
+	if (((curTime - lastClickTime) < Platform::DoubleClickTime()) && Close(pt, lastClick, doubleClickCloseThreshold)) {
 		//Platform::DebugPrintf("Double click %d %d = %d\n", curTime, lastClickTime, curTime - lastClickTime);
 		SetMouseCapture(true);
 		if (FineTickerAvailable()) {

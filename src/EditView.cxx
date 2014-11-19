@@ -186,6 +186,9 @@ EditView::EditView() {
 	pixmapIndentGuideHighlight = 0;
 	llc.SetLevel(LineLayoutCache::llcCaret);
 	posCache.SetSize(0x400);
+	tabArrowHeight = 4;
+	customDrawTabArrow = NULL;
+	customDrawWrapMarker = NULL;
 }
 
 EditView::~EditView() {
@@ -928,7 +931,11 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 			rcPlace.right = rcLine.right;
 			rcPlace.left = rcPlace.right - vsDraw.aveCharWidth;
 		}
-		DrawWrapMarker(surface, rcPlace, true, vsDraw.WrapColour());
+		if (customDrawWrapMarker == NULL) {
+			DrawWrapMarker(surface, rcPlace, true, vsDraw.WrapColour());
+		} else {
+			customDrawWrapMarker(surface, rcPlace, true, vsDraw.WrapColour());
+		}
 	}
 }
 
@@ -1204,7 +1211,7 @@ void EditView::DrawCarets(Surface *surface, const EditModel &model, const ViewSt
 }
 
 static void DrawWrapIndentAndMarker(Surface *surface, const ViewStyle &vsDraw, const LineLayout *ll,
-	int xStart, PRectangle rcLine, ColourOptional background) {
+	int xStart, PRectangle rcLine, ColourOptional background, DrawWrapMarkerFn customDrawWrapMarker) {
 	// default bgnd here..
 	surface->FillRectangle(rcLine, background.isSet ? background :
 		vsDraw.styles[STYLE_DEFAULT].back);
@@ -1222,7 +1229,11 @@ static void DrawWrapIndentAndMarker(Surface *surface, const ViewStyle &vsDraw, c
 		else
 			rcPlace.right = rcPlace.left + vsDraw.aveCharWidth;
 
-		DrawWrapMarker(surface, rcPlace, false, vsDraw.WrapColour());
+		if (customDrawWrapMarker == NULL) {
+			DrawWrapMarker(surface, rcPlace, false, vsDraw.WrapColour());
+		} else {
+			customDrawWrapMarker(surface, rcPlace, false, vsDraw.WrapColour());
+		}
 	}
 }
 
@@ -1466,9 +1477,12 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 							if (vsDraw.whitespaceColours.fore.isSet)
 								textFore = vsDraw.whitespaceColours.fore;
 							surface->PenColour(textFore);
-							PRectangle rcTab(rcSegment.left + 1, rcSegment.top + 4,
+							PRectangle rcTab(rcSegment.left + 1, rcSegment.top + tabArrowHeight,
 								rcSegment.right - 1, rcSegment.bottom - vsDraw.maxDescent);
-							DrawTabArrow(surface, rcTab, static_cast<int>(rcSegment.top + vsDraw.lineHeight / 2));
+							if (customDrawTabArrow == NULL)
+								DrawTabArrow(surface, rcTab, static_cast<int>(rcSegment.top + vsDraw.lineHeight / 2));
+							else
+								customDrawTabArrow(surface, rcTab, static_cast<int>(rcSegment.top + vsDraw.lineHeight / 2));
 						}
 					}
 				} else {
@@ -1635,7 +1649,7 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 
 	if ((ll->wrapIndent != 0) && (subLine > 0)) {
 		if (phase & drawBack) {
-			DrawWrapIndentAndMarker(surface, vsDraw, ll, xStart, rcLine, background);
+			DrawWrapIndentAndMarker(surface, vsDraw, ll, xStart, rcLine, background, customDrawWrapMarker);
 		}
 		xStart += static_cast<int>(ll->wrapIndent);
 	}
