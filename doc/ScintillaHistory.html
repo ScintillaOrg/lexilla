@@ -521,6 +521,11 @@
 	<a href="http://sourceforge.net/p/scintilla/bugs/1643/">Bug #1643</a>.
 	</li>
 	<li>
+	On Windows another DirectWrite mode SC_TECHNOLOGY_DIRECTWRITEDC added
+	which may avoid drawing failures in some circumstances by drawing into a GDI DC.
+	This feature is provisional and may be changed or removed if a better solution is found.
+	</li>
+	<li>
 	On Windows, avoid processing mouse move events where the mouse has not moved as these can
 	cause unexpected dwell start notifications.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1670/">Bug #1670</a>.

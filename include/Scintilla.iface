@@ -2366,6 +2366,7 @@ fun void ScrollToEnd=2629(,)
 val SC_TECHNOLOGY_DEFAULT=0
 val SC_TECHNOLOGY_DIRECTWRITE=1
 val SC_TECHNOLOGY_DIRECTWRITERETAIN=2
+val SC_TECHNOLOGY_DIRECTWRITEDC=3
 
 # Set the technology used.
 set void SetTechnology=2630(int technology,)
