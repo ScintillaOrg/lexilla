@@ -103,6 +103,11 @@
 
 #define SC_WIN_IDLE 5001
 
+#define SC_INDICATOR_INPUT INDIC_IME
+#define SC_INDICATOR_TARGET INDIC_IME+1
+#define SC_INDICATOR_CONVERTED INDIC_IME+2
+#define SC_INDICATOR_UNKNOWN INDIC_IME_MAX
+
 typedef BOOL (WINAPI *TrackMouseEventSig)(LPTRACKMOUSEEVENT);
 typedef UINT_PTR (WINAPI *SetCoalescableTimerSig)(HWND hwnd, UINT_PTR nIDEvent,
 	UINT uElapse, TIMERPROC lpTimerFunc, ULONG uToleranceDelay);
@@ -239,9 +244,14 @@ class ScintillaWin :
 	virtual bool DragThreshold(Point ptStart, Point ptNow);
 	virtual void StartDrag();
 	sptr_t WndPaint(uptr_t wParam);
-	sptr_t HandleComposition(uptr_t wParam, sptr_t lParam);
+
+	sptr_t HandleCompositionWindowed(uptr_t wParam, sptr_t lParam);
+	sptr_t HandleCompositionInline(uptr_t wParam, sptr_t lParam);
 	static bool KoreanIME();
-	sptr_t HandleCompositionKoreanIME(uptr_t wParam, sptr_t lParam);
+	void MoveImeCarets(int offset);
+	void DrawImeIndicator(int indicator, int len);
+	void SetCandidateWindowPos();
+
 	UINT CodePageOfDocument();
 	virtual bool ValidCodePage(int codePage) const;
 	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
@@ -422,6 +432,10 @@ void ScintillaWin::Initialise() {
 	for (TickReason tr = tickCaret; tr <= tickDwell; tr = static_cast<TickReason>(tr + 1)) {
 		timers[tr] = 0;
 	}
+	vs.indicators[SC_INDICATOR_UNKNOWN] = Indicator(INDIC_HIDDEN, ColourDesired(0, 0, 0xff));
+	vs.indicators[SC_INDICATOR_INPUT] = Indicator(INDIC_DOTS, ColourDesired(0, 0, 0xff));
+	vs.indicators[SC_INDICATOR_CONVERTED] = Indicator(INDIC_COMPOSITIONTHICK, ColourDesired(0, 0, 0xff));
+	vs.indicators[SC_INDICATOR_TARGET] = Indicator(INDIC_STRAIGHTBOX, ColourDesired(0, 0, 0xff));
 }
 
 void ScintillaWin::Finalise() {
@@ -705,7 +719,7 @@ LRESULT ScintillaWin::WndPaint(uptr_t wParam) {
 	return 0l;
 }
 
-sptr_t ScintillaWin::HandleComposition(uptr_t wParam, sptr_t lParam) {
+sptr_t ScintillaWin::HandleCompositionWindowed(uptr_t wParam, sptr_t lParam) {
 	if (lParam & GCS_RESULTSTR) {
 		HIMC hIMC = ::ImmGetContext(MainHWND());
 		if (hIMC) {
@@ -746,21 +760,52 @@ bool ScintillaWin::KoreanIME() {
 	return codePage == 949 || codePage == 1361;
 }
 
-sptr_t ScintillaWin::HandleCompositionKoreanIME(uptr_t, sptr_t lParam) {
+void ScintillaWin::MoveImeCarets(int offset) {
+	// Move carets relatively by bytes.
+	for (size_t r=0; r<sel.Count(); r++) {
+		int positionInsert = sel.Range(r).Start().Position();
+		sel.Range(r).caret.SetPosition(positionInsert + offset);
+		sel.Range(r).anchor.SetPosition(positionInsert + offset);
+	}
+}
 
-	// copy & paste by johnsonj
-	// Great thanks to
-	// jiniya from http://www.jiniya.net/tt/494  for DBCS input with AddCharUTF()
-	// BLUEnLIVE from http://zockr.tistory.com/1118 for UNDO and inOverstrike
+void ScintillaWin::DrawImeIndicator(int indicator, int len) {
+	// Emulate the visual style of IME characters with indicators.
+	// Draw an indicator on the character before caret by the character bytes of len
+	// so it should be called after addCharUTF().
+	// It does not affect caret positions.
+	if (indicator < 8 || indicator > INDIC_MAX) {
+		return;
+	}
+	pdoc->decorations.SetCurrentIndicator(indicator);
+	for (size_t r=0; r<sel.Count(); r++) {
+		int positionInsert = sel.Range(r).Start().Position();
+		pdoc->DecorationFillRange(positionInsert - len, 1, len);
+	}
+}
+
+void ScintillaWin::SetCandidateWindowPos() {
+	HIMC hIMC = ::ImmGetContext(MainHWND());
+	if (hIMC) {
+		Point pos = PointMainCaret();
+		CANDIDATEFORM CandForm;
+		CandForm.dwIndex = 0;
+		CandForm.dwStyle = CFS_CANDIDATEPOS;
+		CandForm.ptCurrentPos.x = static_cast<int>(pos.x);
+		CandForm.ptCurrentPos.y = static_cast<int>(pos.y + vs.lineHeight);
+		::ImmSetCandidateWindow(hIMC, &CandForm);
+		::ImmReleaseContext(MainHWND(), hIMC);
+	}
+}
+
+sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
+	// Copy & paste by johnsonj with a lot of helps of Neil.
+	// Great thanks for my foreruners, jiniya and BLUEnLIVE.
 
 	HIMC hIMC = ::ImmGetContext(MainHWND());
 	if (!hIMC) {
 		return 0;
 	}
-
-	wchar_t wcs[maxLenInputIME];
-	int wides = 0;
-	bool compstrExist = false;
 
 	if (pdoc->TentativeActive()) {
 		pdoc->TentativeUndo();
@@ -774,61 +819,111 @@ sptr_t ScintillaWin::HandleCompositionKoreanIME(uptr_t, sptr_t lParam) {
 	}
 
 	view.imeCaretBlockOverride = false;
+
 	if (lParam & GCS_COMPSTR) {
+		wchar_t wcs[maxLenInputIME] = { 0 };
 		long bytes = ::ImmGetCompositionStringW
-						   (hIMC, GCS_COMPSTR, wcs, maxLenInputIME);
-		wides = bytes / 2;
-		compstrExist = (wides != 0);
-	} else if (lParam & GCS_RESULTSTR) {
-		long bytes = ::ImmGetCompositionStringW
-						(hIMC, GCS_RESULTSTR, wcs, maxLenInputIME);
-		wides = bytes / 2;
-		compstrExist = (wides == 0);
-	}
+			(hIMC, GCS_COMPSTR, wcs, maxLenInputIME);
+		unsigned int wcsLen = bytes / 2;
 
-	if (wides >= 1) {
-
-		char hanval[maxLenInputIME];
-		unsigned int hanlen = 0;
-
-		if (IsUnicodeMode()) {
-			hanlen = UTF8Length(wcs, wides);
-			UTF8FromUTF16(wcs, wides, hanval, hanlen);
-			hanval[hanlen] = '\0';
-		} else {
-			hanlen = ::WideCharToMultiByte(InputCodePage(), 0,
-						wcs, wides, hanval, sizeof(hanval) - 1, 0, 0);
-			hanval[hanlen] = '\0';
+		if ((wcsLen == 0) || (wcsLen >= maxLenInputIME)) {
+			ShowCaretAtCurrentPosition();
+			::ImmReleaseContext(MainHWND(), hIMC);
+			return 0;
 		}
 
-		if (compstrExist) {
-			view.imeCaretBlockOverride = true;
+		pdoc->TentativeStart(); // TentativeActive from now on.
 
-			bool tmpRecordingMacro = recordingMacro;
-			recordingMacro = false;
-			pdoc->TentativeStart();
-			AddCharUTF(hanval, hanlen);
-			recordingMacro = tmpRecordingMacro;
+		// Get attribute information from composition string.
+		BYTE compAttr[maxLenInputIME] = { 0 };
+		unsigned int imeCursorPos = 0;
 
-			for (size_t r = 0; r < sel.Count(); r++) { // for block caret
-				int positionInsert = sel.Range(r).Start().Position();
-				sel.Range(r).caret.SetPosition(positionInsert - hanlen);
-				sel.Range(r).anchor.SetPosition(positionInsert - hanlen);
+		if (lParam & GCS_COMPATTR) {
+			ImmGetCompositionStringW(hIMC, GCS_COMPATTR, compAttr, sizeof(compAttr));
+		}
+		if (lParam & GCS_CURSORPOS) {
+			imeCursorPos = ImmGetCompositionStringW(hIMC, GCS_CURSORPOS, NULL, 0);
+		}
+
+		// Display character by character.
+		int numBytes = 0;
+		int imeCharPos[maxLenInputIME + 1] = { 0 };
+
+		bool tmpRecordingMacro = recordingMacro;
+		recordingMacro = false;
+		for (unsigned int i = 0; i < wcsLen; i++) {
+			wchar_t uniChar[1] = { 0 };
+			char oneChar[UTF8MaxBytes + 1] = "\0\0\0\0"; // Maximum 4 bytes in utf8
+			unsigned int oneCharLen = 0;
+
+			uniChar[0] = wcs[i];
+
+			if (IsUnicodeMode()) {
+				oneCharLen = UTF8Length(uniChar, 1);
+				UTF8FromUTF16(uniChar, 1, oneChar, oneCharLen);
+				oneChar[oneCharLen] = '\0';
+			} else {
+				oneCharLen = ::WideCharToMultiByte(InputCodePage(), 0,
+					uniChar, 1, oneChar, sizeof(oneChar)-1, 0, 0);
+				oneChar[oneCharLen] = '\0';
 			}
-		} else {
-			AddCharUTF(hanval, hanlen);
+
+			// Display a character.
+			AddCharUTF(oneChar, oneCharLen);
+
+			// Record compstr character positions for moving IME carets.
+			numBytes += oneCharLen;
+			imeCharPos[i + 1] = numBytes;
+
+			// Draw an indicator on the character.
+			int indicator = SC_INDICATOR_UNKNOWN;
+			switch ((int)compAttr[i]) {
+			case ATTR_INPUT:
+				indicator = SC_INDICATOR_INPUT;
+				break;
+			case ATTR_TARGET_NOTCONVERTED:
+			case ATTR_TARGET_CONVERTED:
+				indicator = SC_INDICATOR_TARGET;
+				break;
+			case ATTR_CONVERTED:
+				indicator = SC_INDICATOR_CONVERTED;
+				break;
+			}
+			DrawImeIndicator(indicator, oneCharLen);
+		}
+		recordingMacro = tmpRecordingMacro;
+
+		// Move IME caret position.
+		MoveImeCarets(-imeCharPos[wcsLen] + imeCharPos[imeCursorPos]);
+		if (KoreanIME()) {
+			view.imeCaretBlockOverride = true;
+		}
+	} else if (lParam & GCS_RESULTSTR) {
+		wchar_t wcs[maxLenInputIME] = { 0 };
+		long bytes = ::ImmGetCompositionStringW
+			(hIMC, GCS_RESULTSTR, wcs, maxLenInputIME);
+		unsigned int wcsLen = bytes / 2;
+
+		for (unsigned int i = 0; i < wcsLen; i++) {
+			wchar_t uniChar[1] = { 0 };
+			char oneChar[UTF8MaxBytes+1] = "\0\0\0\0"; // Maximum 4 bytes in UTF-8.
+			unsigned int oneCharLen = 0;
+
+			uniChar[0] = wcs[i];
+
+			if (IsUnicodeMode()) {
+				oneCharLen = UTF8Length(uniChar, 1);
+				UTF8FromUTF16(uniChar, 1, oneChar, oneCharLen);
+				oneChar[oneCharLen] = '\0';
+			} else {
+				oneCharLen = ::WideCharToMultiByte(InputCodePage(), 0,
+					uniChar, 1, oneChar, sizeof(oneChar)-1, 0, 0);
+				oneChar[oneCharLen] = '\0';
+			}
+			AddCharUTF(oneChar, oneCharLen);
 		}
 	}
-
-	// set the candidate window position for HANJA while composing.
-	Point pos = PointMainCaret();
-	CANDIDATEFORM CandForm;
-	CandForm.dwIndex = 0;
-	CandForm.dwStyle = CFS_CANDIDATEPOS;
-	CandForm.ptCurrentPos.x = static_cast<int>(pos.x);
-	CandForm.ptCurrentPos.y = static_cast<int>(pos.y + vs.lineHeight);
-	::ImmSetCandidateWindow(hIMC, &CandForm);
-
+	SetCandidateWindowPos();
 	ShowCaretAtCurrentPosition();
 	::ImmReleaseContext(MainHWND(), hIMC);
 	return 0;
@@ -1278,21 +1373,22 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			break;
 
 		case WM_IME_STARTCOMPOSITION: 	// dbcs
-			if (KoreanIME()) {
+			if (KoreanIME() || imeInteraction == imeInline) {
 				return 0;
+			} else {
+				ImeStartComposition();
+				return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 			}
-			ImeStartComposition();
-			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 
 		case WM_IME_ENDCOMPOSITION: 	// dbcs
 			ImeEndComposition();
 			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 
 		case WM_IME_COMPOSITION:
-			if (KoreanIME()) {
-				return HandleCompositionKoreanIME(wParam, lParam);
+			if (KoreanIME() || imeInteraction == imeInline) { 
+				return HandleCompositionInline(wParam, lParam);
 			} else {
-				return HandleComposition(wParam, lParam);
+				return HandleCompositionWindowed(wParam, lParam);
 			}
 
 		case WM_IME_CHAR: {
@@ -1330,7 +1426,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			return 0;
 
 		case WM_IME_SETCONTEXT:
-			if (KoreanIME()) {
+			if (KoreanIME() || imeInteraction == imeInline) {
 				if (wParam) {
 					LPARAM NoImeWin = lParam;
 					NoImeWin = NoImeWin & (~ISC_SHOWUICOMPOSITIONWINDOW);
