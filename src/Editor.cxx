@@ -1898,6 +1898,13 @@ void Editor::AddCharUTF(const char *s, unsigned int len, bool treatAsDBCS) {
 	}
 }
 
+void Editor::FillVirtualSpace() {
+	const bool tmpOverstrike = inOverstrike;
+	inOverstrike = false;         // not allow to be deleted twice.
+	AddCharUTF("", 0);
+	inOverstrike = tmpOverstrike;
+}
+
 void Editor::InsertPaste(const char *text, int len) {
 	if (multiPasteMode == SC_MULTIPASTE_ONCE) {
 		SelectionPosition selStart = sel.Start();

@@ -2405,10 +2405,7 @@ void ScintillaGTK::PreeditChangedThis() {
 			} else {
 				// No tentative undo means start of this composition so
 				// fill in any virtual spaces.
-				bool tmpOverstrike = inOverstrike;
-				inOverstrike = false;   // Not allowed to be deleted twice.
-				AddCharUTF("", 0);
-				inOverstrike = tmpOverstrike;
+				FillVirtualSpace();
 			}
 
 			PreEditString utfval(im_context);
