@@ -58,6 +58,7 @@ public:
 		validLen(0),
 		startSeg(0), startPosStyling(0),
 		documentVersion(pAccess->Version()) {
+		buf[0] = 0;	// Prevent warnings by static analyzers about uninitialized buf.
 		switch (codePage) {
 		case 65001:
 			encodingType = encUnicode;
