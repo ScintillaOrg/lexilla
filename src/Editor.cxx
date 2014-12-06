@@ -1333,7 +1333,9 @@ void Editor::ShowCaretAtCurrentPosition() {
 
 void Editor::DropCaret() {
 	caret.active = false;
-	FineTickerCancel(tickCaret);
+	if (FineTickerAvailable()) {
+		FineTickerCancel(tickCaret);
+	}
 	InvalidateCaret();
 }
 
@@ -3290,7 +3292,6 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		break;
 	case SCI_EDITTOGGLEOVERTYPE:
 		inOverstrike = !inOverstrike;
-		DropCaret();
 		ShowCaretAtCurrentPosition();
 		ContainerNeedsUpdate(SC_UPDATE_CONTENT);
 		NotifyUpdateUI();
@@ -4678,12 +4679,10 @@ void Editor::FineTickerCancel(TickReason) {
 void Editor::SetFocusState(bool focusState) {
 	hasFocus = focusState;
 	NotifyFocus(hasFocus);
-	if (hasFocus) {
-		ShowCaretAtCurrentPosition();
-	} else {
+	if (!hasFocus) {
 		CancelModes();
-		DropCaret();
 	}
+	ShowCaretAtCurrentPosition();
 }
 
 int Editor::PositionAfterArea(PRectangle rcArea) const {
