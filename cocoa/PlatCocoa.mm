@@ -1144,7 +1144,7 @@ PRectangle Window::GetPosition()
       NSView* view = reinterpret_cast<NSView*>(idWin);
       win = [view window];
       rect = [view convertRect: [view bounds] toView: nil];
-      rect.origin = [win convertBaseToScreen:rect.origin];
+      rect = [win convertRectToScreen:rect];
     }
     else
     {
@@ -1177,7 +1177,7 @@ void Window::SetPosition(PRectangle rc)
       // Moves this view inside the parent view
       NSRect nsrc = NSMakeRect(rc.left, rc.bottom, rc.Width(), rc.Height());
       NSView* view = reinterpret_cast<NSView*>(idWin);
-      nsrc.origin = [[view window] convertScreenToBase:nsrc.origin];
+      nsrc = [[view window] convertRectFromScreen:nsrc];
       [view setFrame: nsrc];
     }
     else
@@ -1672,7 +1672,8 @@ PRectangle ListBoxImpl::GetDesiredRect()
   if (Length() > rows)
   {
     [scroller setHasVerticalScroller:YES];
-    rcDesired.right += [NSScroller scrollerWidth];
+    rcDesired.right += [NSScroller scrollerWidthForControlSize:NSRegularControlSize
+						 scrollerStyle:NSScrollerStyleLegacy];
   }
   else
   {
