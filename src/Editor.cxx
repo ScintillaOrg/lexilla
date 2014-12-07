@@ -8,10 +8,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <math.h>
 #include <assert.h>
 #include <ctype.h>
 
+#include <cmath>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -3787,9 +3787,9 @@ void Editor::GoToLine(int lineNo) {
 }
 
 static bool Close(Point pt1, Point pt2, Point threshold) {
-	if (abs(pt1.x - pt2.x) > threshold.x)
+	if (std::abs(pt1.x - pt2.x) > threshold.x)
 		return false;
-	if (abs(pt1.y - pt2.y) > threshold.y)
+	if (std::abs(pt1.y - pt2.y) > threshold.y)
 		return false;
 	return true;
 }
