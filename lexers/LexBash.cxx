@@ -467,7 +467,7 @@ static void ColouriseBashDoc(unsigned int startPos, int length, int initStyle,
 				if (sc.atLineStart) {
 					sc.SetState(SCE_SH_HERE_Q);
 					int prefixws = 0;
-					while (IsASpace(sc.ch) && !sc.atLineEnd) {	// whitespace prefix
+					while (sc.ch == '\t' && !sc.atLineEnd) {	// tabulation prefix
 						sc.Forward();
 						prefixws++;
 					}
