@@ -419,8 +419,6 @@ static void ColouriseBashDoc(unsigned int startPos, int length, int initStyle,
 						sc.Forward();
 						HereDoc.Quoted = true;
 						HereDoc.State = 1;
-					} else if (!HereDoc.Indent && sc.chNext == '-') {	// <<- indent case
-						HereDoc.Indent = true;
 					} else if (setHereDoc.Contains(sc.chNext)) {
 						// an unquoted here-doc delimiter, no special handling
 						// TODO check what exactly bash considers part of the delim
@@ -672,7 +670,12 @@ static void ColouriseBashDoc(unsigned int startPos, int length, int initStyle,
 			} else if (sc.Match('<', '<')) {
 				sc.SetState(SCE_SH_HERE_DELIM);
 				HereDoc.State = 0;
-				HereDoc.Indent = false;
+				if (sc.GetRelative(2) == '-') {	// <<- indent case
+					HereDoc.Indent = true;
+					sc.Forward();
+				} else {
+					HereDoc.Indent = false;
+				}
 			} else if (sc.ch == '-'	&&	// one-char file test operators
 					   setSingleCharOp.Contains(sc.chNext) &&
 					   !setWord.Contains(sc.GetRelative(2)) &&
