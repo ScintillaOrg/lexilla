@@ -479,7 +479,8 @@ static void ColouriseBashDoc(unsigned int startPos, int length, int initStyle,
 					char s[HERE_DELIM_MAX];
 					sc.GetCurrent(s, sizeof(s));
 					if (sc.LengthCurrent() == 0) {  // '' or "" delimiters
-						if (prefixws == 0 && HereDoc.Quoted && HereDoc.DelimiterLength == 0)
+						if ((prefixws == 0 || HereDoc.Indent) &&
+							HereDoc.Quoted && HereDoc.DelimiterLength == 0)
 							sc.SetState(SCE_SH_DEFAULT);
 						break;
 					}
