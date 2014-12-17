@@ -36,13 +36,28 @@ static inline bool IsAWordStart(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '$');
 }
 
+static inline bool AllUpperCase(const char *a) {
+	while (*a) {
+		if (*a >= 'a' && *a <= 'z') return false;
+		a++;
+	}
+	return true;
+}
+
 static void ColouriseVerilogDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
                             Accessor &styler) {
+
+	const int kwOther=0, kwDot=0x100, kwInput=0x200, kwOutput=0x300, kwInout=0x400;
+	int lineState = kwOther;
 
 	WordList &keywords = *keywordlists[0];
 	WordList &keywords2 = *keywordlists[1];
 	WordList &keywords3 = *keywordlists[2];
 	WordList &keywords4 = *keywordlists[3];
+	WordList &keywords5 = *keywordlists[4];
+
+	int curLine = styler.GetLine(startPos);
+	if (curLine > 0) lineState = styler.GetLineState(curLine - 1);
 
 	// Do not leak onto next line
 	if (initStyle == SCE_V_STRINGEOL)
@@ -51,6 +66,12 @@ static void ColouriseVerilogDoc(unsigned int startPos, int length, int initStyle
 	StyleContext sc(startPos, length, initStyle, styler);
 
 	for (; sc.More(); sc.Forward()) {
+		curLine = styler.GetLine(sc.currentPos);
+
+		if (sc.atLineEnd) {
+			// Update the line state, so it can be seen by next line
+			styler.SetLineState(curLine, lineState);
+		}
 
 		if (sc.atLineStart && (sc.state == SCE_V_STRING)) {
 			// Prevent SCE_V_STRINGEOL from leaking back to previous line
@@ -68,42 +89,87 @@ static void ColouriseVerilogDoc(unsigned int startPos, int length, int initStyle
 			}
 		}
 
+		// for comment keyword
+		if (sc.state == SCE_V_COMMENT_WORD && !IsAWordChar(sc.ch)) {
+			char s[100];
+			int state = lineState & 0xff;
+			sc.GetCurrent(s, sizeof(s));
+			if (keywords5.InList(s)) {
+				sc.ChangeState(SCE_V_COMMENT_WORD);
+			} else {
+				sc.ChangeState(state);
+			}
+			sc.SetState(state);
+		}
 		// Determine if the current state should terminate.
 		if (sc.state == SCE_V_OPERATOR) {
 			sc.SetState(SCE_V_DEFAULT);
 		} else if (sc.state == SCE_V_NUMBER) {
-			if (!IsAWordChar(sc.ch)) {
+			if (!(IsAWordChar(sc.ch) || (sc.ch == '?'))) {
 				sc.SetState(SCE_V_DEFAULT);
 			}
 		} else if (sc.state == SCE_V_IDENTIFIER) {
 			if (!IsAWordChar(sc.ch) || (sc.ch == '.')) {
 				char s[100];
-                                sc.GetCurrent(s, sizeof(s));
-				if (keywords.InList(s)) {
+				lineState &= 0xff00;
+
+				sc.GetCurrent(s, sizeof(s));
+
+				if (strcmp(s, "input") == 0) {
+					lineState = kwInput;
+					sc.ChangeState(SCE_V_INPUT);
+				} else if (strcmp(s, "output") == 0) {
+					lineState = kwOutput;
+					sc.ChangeState(SCE_V_OUTPUT);
+				} else if (strcmp(s, "inout") == 0) {
+					lineState = kwInout;
+					sc.ChangeState(SCE_V_INOUT);
+
+				} else if (lineState == kwInput) {
+					sc.ChangeState(SCE_V_INPUT);
+				} else if (lineState == kwOutput) {
+					sc.ChangeState(SCE_V_OUTPUT);
+				} else if (lineState == kwInout) {
+					sc.ChangeState(SCE_V_INOUT);
+				} else if (lineState == kwDot) {
+					lineState = kwOther;
+					sc.ChangeState(SCE_V_PORT_CONNECT);
+
+				} else if (keywords.InList(s)) {
 					sc.ChangeState(SCE_V_WORD);
 				} else if (keywords2.InList(s)) {
 					sc.ChangeState(SCE_V_WORD2);
 				} else if (keywords3.InList(s)) {
 					sc.ChangeState(SCE_V_WORD3);
-                                } else if (keywords4.InList(s)) {
+				} else if (keywords4.InList(s)) {
+					sc.ChangeState(SCE_V_USER);
+
+				} else if (AllUpperCase(s)) {
 					sc.ChangeState(SCE_V_USER);
 				}
+
 				sc.SetState(SCE_V_DEFAULT);
 			}
 		} else if (sc.state == SCE_V_PREPROCESSOR) {
-                        if (!IsAWordChar(sc.ch)) {
-                                sc.SetState(SCE_V_DEFAULT);
-                        }
+			if (!IsAWordChar(sc.ch)) {
+				sc.SetState(SCE_V_DEFAULT);
+			}
 		} else if (sc.state == SCE_V_COMMENT) {
 			if (sc.Match('*', '/')) {
 				sc.Forward();
 				sc.ForwardSetState(SCE_V_DEFAULT);
+			} else if (IsAWordStart(sc.ch)) {
+				lineState = sc.state | (lineState & 0xff00);
+				sc.SetState(SCE_V_COMMENT_WORD);
 			}
 		} else if (sc.state == SCE_V_COMMENTLINE || sc.state == SCE_V_COMMENTLINEBANG) {
 			if (sc.atLineStart) {
 				sc.SetState(SCE_V_DEFAULT);
+			} else if (IsAWordStart(sc.ch)) {
+				lineState = sc.state | (lineState & 0xff00);
+				sc.SetState(SCE_V_COMMENT_WORD);
 			}
-                } else if (sc.state == SCE_V_STRING) {
+		} else if (sc.state == SCE_V_STRING) {
 			if (sc.ch == '\\') {
 				if (sc.chNext == '\"' || sc.chNext == '\'' || sc.chNext == '\\') {
 					sc.Forward();
@@ -123,7 +189,7 @@ static void ColouriseVerilogDoc(unsigned int startPos, int length, int initStyle
 			} else if (IsAWordStart(sc.ch)) {
 				sc.SetState(SCE_V_IDENTIFIER);
 			} else if (sc.Match('/', '*')) {
-                                sc.SetState(SCE_V_COMMENT);
+				sc.SetState(SCE_V_COMMENT);
 				sc.Forward();	// Eat the * so it isn't used for the end of the comment
 			} else if (sc.Match('/', '/')) {
 				if (sc.Match("//!"))	// Nice to have a different comment style
@@ -140,9 +206,12 @@ static void ColouriseVerilogDoc(unsigned int startPos, int length, int initStyle
 				} while ((sc.ch == ' ' || sc.ch == '\t') && sc.More());
 				if (sc.atLineEnd) {
 					sc.SetState(SCE_V_DEFAULT);
+					styler.SetLineState(curLine, lineState);
 				}
 			} else if (isoperator(static_cast<char>(sc.ch)) || sc.ch == '@' || sc.ch == '#') {
 				sc.SetState(SCE_V_OPERATOR);
+				if (sc.ch == '.') lineState = kwDot;
+				if (sc.ch == ';') lineState = kwOther;
 			}
 		}
 	}
@@ -178,12 +247,12 @@ static void FoldNoBoxVerilogDoc(unsigned int startPos, int length, int initStyle
 	bool foldPreprocessor = styler.GetPropertyInt("fold.preprocessor") != 0;
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	bool foldAtElse = styler.GetPropertyInt("fold.at.else", 0) != 0;
-        // Verilog specific folding options:
-        // fold_at_module -
-        //      Generally used methodology in verilog code is
-        //      one module per file, so folding at module definition is useless.
-        // fold_at_brace/parenthese -
-        //      Folding of long port lists can be convenient.
+	// Verilog specific folding options:
+	// fold_at_module -
+	//      Generally used methodology in verilog code is
+	//      one module per file, so folding at module definition is useless.
+	// fold_at_brace/parenthese -
+	//      Folding of long port lists can be convenient.
 	bool foldAtModule = styler.GetPropertyInt("fold.verilog.flags", 0) != 0;
 	bool foldAtBrace  = 1;
 	bool foldAtParenthese  = 1;
@@ -246,63 +315,63 @@ static void FoldNoBoxVerilogDoc(unsigned int startPos, int length, int initStyle
 				}
 			}
 		}
-                if (style == SCE_V_OPERATOR) {
-                    if (foldAtParenthese) {
-			if (ch == '(') {
+		if (style == SCE_V_OPERATOR) {
+			if (foldAtParenthese) {
+				if (ch == '(') {
+					levelNext++;
+				} else if (ch == ')') {
+					levelNext--;
+				}
+			}
+		}
+		if (style == SCE_V_OPERATOR) {
+			if (foldAtBrace) {
+				if (ch == '{') {
+					levelNext++;
+				} else if (ch == '}') {
+					levelNext--;
+				}
+			}
+		}
+		if (style == SCE_V_WORD && stylePrev != SCE_V_WORD) {
+			unsigned int j = i;
+			if (styler.Match(j, "case") ||
+				styler.Match(j, "casex") ||
+				styler.Match(j, "casez") ||
+				styler.Match(j, "class") ||
+				styler.Match(j, "function") ||
+				styler.Match(j, "generate") ||
+				styler.Match(j, "covergroup") ||
+				styler.Match(j, "package") ||
+				styler.Match(j, "primitive") ||
+				styler.Match(j, "program") ||
+				styler.Match(j, "sequence") ||
+				styler.Match(j, "specify") ||
+				styler.Match(j, "table") ||
+				styler.Match(j, "task") ||
+				styler.Match(j, "fork") ||
+				(styler.Match(j, "module") && foldAtModule) ||
+				styler.Match(j, "begin")) {
 				levelNext++;
-			} else if (ch == ')') {
+			} else if (styler.Match(j, "endcase") ||
+				styler.Match(j, "endclass") ||
+				styler.Match(j, "endfunction") ||
+				styler.Match(j, "endgenerate") ||
+				styler.Match(j, "endgroup") ||
+				styler.Match(j, "endpackage") ||
+				styler.Match(j, "endprimitive") ||
+				styler.Match(j, "endprogram") ||
+				styler.Match(j, "endsequence") ||
+				styler.Match(j, "endspecify") ||
+				styler.Match(j, "endtable") ||
+				styler.Match(j, "endtask") ||
+				styler.Match(j, "join") ||
+				styler.Match(j, "join_any") ||
+				styler.Match(j, "join_none") ||
+				(styler.Match(j, "endmodule") && foldAtModule) ||
+				(styler.Match(j, "end") && !IsAWordChar(styler.SafeGetCharAt(j + 3)))) {
 				levelNext--;
 			}
-                    }
-		}
-                if (style == SCE_V_OPERATOR) {
-                    if (foldAtBrace) {
-			if (ch == '{') {
-				levelNext++;
-			} else if (ch == '}') {
-				levelNext--;
-			}
-                    }
-		}
-                if (style == SCE_V_WORD && stylePrev != SCE_V_WORD) {
-                        unsigned int j = i;
-                        if (styler.Match(j, "case") ||
-                            styler.Match(j, "casex") ||
-                            styler.Match(j, "casez") ||
-                            styler.Match(j, "class") ||
-                            styler.Match(j, "function") ||
-                            styler.Match(j, "generate") ||
-                            styler.Match(j, "covergroup") ||
-                            styler.Match(j, "package") ||
-                            styler.Match(j, "primitive") ||
-                            styler.Match(j, "program") ||
-                            styler.Match(j, "sequence") ||
-                            styler.Match(j, "specify") ||
-                            styler.Match(j, "table") ||
-                            styler.Match(j, "task") ||
-                            styler.Match(j, "fork") ||
-                            (styler.Match(j, "module") && foldAtModule) ||
-                            styler.Match(j, "begin")) {
-                                levelNext++;
-                        } else if (styler.Match(j, "endcase") ||
-                                   styler.Match(j, "endclass") ||
-                                   styler.Match(j, "endfunction") ||
-                                   styler.Match(j, "endgenerate") ||
-                                   styler.Match(j, "endgroup") ||
-                                   styler.Match(j, "endpackage") ||
-                                   styler.Match(j, "endprimitive") ||
-                                   styler.Match(j, "endprogram") ||
-                                   styler.Match(j, "endsequence") ||
-                                   styler.Match(j, "endspecify") ||
-                                   styler.Match(j, "endtable") ||
-                                   styler.Match(j, "endtask") ||
-                                   styler.Match(j, "join") ||
-                                   styler.Match(j, "join_any") ||
-                                   styler.Match(j, "join_none") ||
-                                   (styler.Match(j, "endmodule") && foldAtModule) ||
-                                   (styler.Match(j, "end") && !IsAWordChar(styler.SafeGetCharAt(j+3)))) {
-                                levelNext--;
-                        }
 		}
 		if (atEOL) {
 			int levelUse = levelCurrent;
@@ -337,7 +406,7 @@ static const char * const verilogWordLists[] = {
             "Secondary keywords and identifiers",
             "System Tasks",
             "User defined tasks and identifiers",
-            "Unused",
+            "Documentation comment keywords",
             0,
         };
 
