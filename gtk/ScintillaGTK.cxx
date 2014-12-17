@@ -2387,7 +2387,7 @@ void ScintillaGTK::GetImeUnderlines(PangoAttrList *attrs, bool *normalInput) {
 				glong start = attrunderline->start_index;
 				glong end = attrunderline->end_index;
 				PangoUnderline uline = (PangoUnderline)((PangoAttrInt *)attrunderline)->value;
-				for (glong i=start+1; i <= end; ++i) {
+				for (glong i=start; i < end; ++i) {
 					switch (uline) {
 					case PANGO_UNDERLINE_NONE:
 						normalInput[i] = false;
@@ -2417,7 +2417,7 @@ void ScintillaGTK::GetImeBackgrounds(PangoAttrList *attrs, bool *targetInput) {
 			if (backcolor) {
 				glong start = backcolor->start_index;
 				glong end =  backcolor->end_index;
-				for (glong i=start+1; i <= end; ++i) {
+				for (glong i=start; i < end; ++i) {
 					targetInput[i] = true;  // target converted
 				}
 			}
@@ -2516,7 +2516,7 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 
 		// Display preedit characters, one by one
 		glong imeCharPos[maxLenInputIME+1] = { 0 };
-		glong attrPos = 0;
+		glong attrPos = -1; // Start at -1 to designate the last byte of one character.
 		glong charWidth = 0;
 
 		bool tmpRecordingMacro = recordingMacro;
