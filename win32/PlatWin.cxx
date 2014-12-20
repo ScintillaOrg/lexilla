@@ -139,16 +139,17 @@ bool LoadD2D() {
 			HRESULT hr = pIDWriteFactory->CreateRenderingParams(&defaultRenderingParams);
 			if (SUCCEEDED(hr)) {
 				unsigned int clearTypeContrast;
-				::SystemParametersInfo(SPI_GETFONTSMOOTHINGCONTRAST, 0, &clearTypeContrast, 0);
+				if (::SystemParametersInfo(SPI_GETFONTSMOOTHINGCONTRAST, 0, &clearTypeContrast, 0)) {
 
-				FLOAT gamma;
-				if (clearTypeContrast >= 1000 && clearTypeContrast <= 2200)
-					gamma = static_cast<FLOAT>(clearTypeContrast) / 1000.0f;
-				else
-					gamma = defaultRenderingParams->GetGamma();
+					FLOAT gamma;
+					if (clearTypeContrast >= 1000 && clearTypeContrast <= 2200)
+						gamma = static_cast<FLOAT>(clearTypeContrast) / 1000.0f;
+					else
+						gamma = defaultRenderingParams->GetGamma();
 
-				pIDWriteFactory->CreateCustomRenderingParams(gamma, defaultRenderingParams->GetEnhancedContrast(), defaultRenderingParams->GetClearTypeLevel(),
-					defaultRenderingParams->GetPixelGeometry(), defaultRenderingParams->GetRenderingMode(), &customClearTypeRenderingParams);
+					pIDWriteFactory->CreateCustomRenderingParams(gamma, defaultRenderingParams->GetEnhancedContrast(), defaultRenderingParams->GetClearTypeLevel(),
+						defaultRenderingParams->GetPixelGeometry(), defaultRenderingParams->GetRenderingMode(), &customClearTypeRenderingParams);
+				}
 			}
 		}
 
