@@ -485,10 +485,12 @@ void ScintillaWin::EnsureRenderTarget(HDC hdc) {
 
 			ID2D1DCRenderTarget *pDCRT = NULL;
 			HRESULT hr = pD2DFactory->CreateDCRenderTarget(&drtp, &pDCRT);
-			if (FAILED(hr)) {
+			if (SUCCEEDED(hr)) {
+				pRenderTarget = pDCRT;
+			} else {
 				Platform::DebugPrintf("Failed CreateDCRenderTarget 0x%x\n", hr);
+				pRenderTarget = NULL;
 			}
-			pRenderTarget = pDCRT;
 
 		} else {
 			D2D1_HWND_RENDER_TARGET_PROPERTIES dhrtp;
@@ -499,10 +501,12 @@ void ScintillaWin::EnsureRenderTarget(HDC hdc) {
 
 			ID2D1HwndRenderTarget *pHwndRenderTarget = NULL;
 			HRESULT hr = pD2DFactory->CreateHwndRenderTarget(drtp, dhrtp, &pHwndRenderTarget);
-			if (FAILED(hr)) {
+			if (SUCCEEDED(hr)) {
+				pRenderTarget = pHwndRenderTarget;
+			} else {
 				Platform::DebugPrintf("Failed CreateHwndRenderTarget 0x%x\n", hr);
+				pRenderTarget = NULL;
 			}
-			pRenderTarget = pHwndRenderTarget;
 		}
 #else
 		pD2DFactory->CreateHwndRenderTarget(
