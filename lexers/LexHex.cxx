@@ -22,9 +22,9 @@
  *  +----------+
  *  | count    |  2        SCE_SREC_BYTECOUNT, SCE_SREC_BYTECOUNT_WRONG
  *  +----------+
- *  | address  |  4/6/8    SCE_SREC_NOADDRESS, SCE_SREC_DATAADDRESS, SCE_SREC_RECCOUNT, SCE_SREC_STARTADDRESS
+ *  | address  |  4/6/8    SCE_SREC_NOADDRESS, SCE_SREC_DATAADDRESS, SCE_SREC_RECCOUNT, SCE_SREC_STARTADDRESS, (SCE_SREC_ADDRESSFIELD_UNKNOWN)
  *  +----------+
- *  | data     |  0..500   SCE_SREC_DATA_ODD, SCE_SREC_DATA_EVEN
+ *  | data     |  0..500   SCE_SREC_DATA_ODD, SCE_SREC_DATA_EVEN, (SCE_SREC_DATA_UNKNOWN)
  *  +----------+
  *  | checksum |  2        SCE_SREC_CHECKSUM, SCE_SREC_CHECKSUM_WRONG
  *  +----------+
@@ -228,8 +228,8 @@ static int GetSrecAddressFieldType(unsigned int recStartPos, Accessor &styler)
 		case '9':
 			return SCE_SREC_STARTADDRESS;
 
-		default:
-			return SCE_SREC_DEFAULT;
+		default: // handle possible format extension in the future
+			return SCE_SREC_ADDRESSFIELD_UNKNOWN;
 	}
 }
 
@@ -307,24 +307,25 @@ static void ColouriseSrecDoc(unsigned int startPos, int length, int initStyle, W
 				addrFieldSize = GetSrecAddressFieldSize(recStartPos, styler);
 				addrFieldType = GetSrecAddressFieldType(recStartPos, styler);
 
-				if (addrFieldSize > 0) {
-					sc.SetState(addrFieldType);
-					ForwardWithinLine(sc, addrFieldSize * 2);
-				} else {
-					// malformed
-					sc.SetState(SCE_SREC_DEFAULT);
-					ForwardWithinLine(sc);
-				}
+				sc.SetState(addrFieldType);
+				ForwardWithinLine(sc, addrFieldSize * 2);
 				break;
 
 			case SCE_SREC_NOADDRESS:
 			case SCE_SREC_DATAADDRESS:
 			case SCE_SREC_RECCOUNT:
 			case SCE_SREC_STARTADDRESS:
+			case SCE_SREC_ADDRESSFIELD_UNKNOWN:
 				recStartPos = GetSrecRecStartPosition(sc.currentPos, styler);
 				byteCount = GetSrecByteCount(recStartPos, styler);
 				addrFieldSize = GetSrecAddressFieldSize(recStartPos, styler);
 				dataFieldSize = byteCount - addrFieldSize - 1; // -1 for checksum field
+
+				if (sc.state == SCE_SREC_ADDRESSFIELD_UNKNOWN) {
+					sc.SetState(SCE_SREC_DATA_UNKNOWN);
+					ForwardWithinLine(sc, dataFieldSize * 2);
+					break;
+				}
 
 				sc.SetState(SCE_SREC_DATA_ODD);
 
@@ -343,6 +344,7 @@ static void ColouriseSrecDoc(unsigned int startPos, int length, int initStyle, W
 
 			case SCE_SREC_DATA_ODD:
 			case SCE_SREC_DATA_EVEN:
+			case SCE_SREC_DATA_UNKNOWN:
 				recStartPos = GetSrecRecStartPosition(sc.currentPos, styler);
 				cs1 = CalcSrecChecksum(recStartPos, styler);
 				cs2 = GetSrecChecksum(recStartPos, styler);
