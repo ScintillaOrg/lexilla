@@ -154,23 +154,33 @@ static int GetSrecByteCount(unsigned int recStartPos, Accessor &styler)
 	return val;
 }
 
-// Count the number of digit pairs in this record from "address" field to end
-// of line. Has to be equal to the "byte count" field value.
+// Count the number of digit pairs for the "address", "data" and "checksum"
+// fields in this record. Has to be equal to the "byte count" field value.
+// If the record is too short, a negative count may be returned.
 static int CountSrecByteCount(unsigned int recStartPos, Accessor &styler)
 {
+	int cnt;
 	unsigned int pos;
 
-	// start counting at "address" field
-	pos = recStartPos + 4;
+	pos = recStartPos;
 
 	while (!IsNewline(styler.SafeGetCharAt(pos, '\n'))) {
 		pos++;
 	}
 
-	// divide by 2 because of digit pairs
-	// Round up if odd (digit pair incomplete), this way the byte count is
-	// considered to be valid if the checksum is incomplete.
-	return ((pos - (recStartPos + 4)) + 1) / 2;
+	// number of digits in this line minus number of digits of uncounted fields
+	cnt = static_cast<int>(pos - recStartPos) - 4;
+
+	// Prepare round up if odd (digit pair incomplete), this way the byte
+	// count is considered to be valid if the checksum is incomplete.
+	if (cnt >= 0) {
+		cnt++;
+	}
+
+	// digit pairs
+	cnt /= 2;
+
+	return cnt;
 }
 
 // Get the size of the "address" field.
