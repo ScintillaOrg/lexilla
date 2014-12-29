@@ -13,20 +13,20 @@
  *
  * Each record (line) is built as follows:
  *
- *    field       size     states
+ *    field       digits          states
  *
  *  +----------+
- *  | start    |  1 ('S')  SCE_SREC_RECSTART
+ *  | start    |  1 ('S')         SCE_SREC_RECSTART
  *  +----------+
- *  | type     |  1        SCE_SREC_RECTYPE
+ *  | type     |  1               SCE_SREC_RECTYPE
  *  +----------+
- *  | count    |  2        SCE_SREC_BYTECOUNT, SCE_SREC_BYTECOUNT_WRONG
+ *  | count    |  2               SCE_SREC_BYTECOUNT, SCE_SREC_BYTECOUNT_WRONG
  *  +----------+
- *  | address  |  4/6/8    SCE_SREC_NOADDRESS, SCE_SREC_DATAADDRESS, SCE_SREC_RECCOUNT, SCE_SREC_STARTADDRESS, (SCE_SREC_ADDRESSFIELD_UNKNOWN)
+ *  | address  |  4/6/8           SCE_SREC_NOADDRESS, SCE_SREC_DATAADDRESS, SCE_SREC_RECCOUNT, SCE_SREC_STARTADDRESS, (SCE_SREC_ADDRESSFIELD_UNKNOWN)
  *  +----------+
- *  | data     |  0..500   SCE_SREC_DATA_ODD, SCE_SREC_DATA_EVEN, (SCE_SREC_DATA_UNKNOWN)
+ *  | data     |  0..504/502/500  SCE_SREC_DATA_ODD, SCE_SREC_DATA_EVEN, (SCE_SREC_DATA_UNKNOWN)
  *  +----------+
- *  | checksum |  2        SCE_SREC_CHECKSUM, SCE_SREC_CHECKSUM_WRONG
+ *  | checksum |  2               SCE_SREC_CHECKSUM, SCE_SREC_CHECKSUM_WRONG
  *  +----------+
  */
 
@@ -251,7 +251,7 @@ static int CalcSrecChecksum(unsigned int recStartPos, Accessor &styler)
 
 	byteCount = GetSrecByteCount(recStartPos, styler);
 
-	// sum over "byte count", "address" and "data" fields
+	// sum over "byte count", "address" and "data" fields (6..510 digits)
 	for (unsigned int pos = recStartPos + 2; pos < recStartPos + 2 + byteCount * 2; pos += 2) {
 		int val = GetHexaChar(pos, styler);
 
