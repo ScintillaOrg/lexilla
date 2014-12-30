@@ -1,6 +1,6 @@
 // Scintilla source code edit control
 /** @file LexHex.cxx
- ** Lexer for Motorola S-Record.
+ ** Lexers for Motorola S-Record and Intel HEX.
  **
  ** Written by Markus Heidelberg
  **/
@@ -28,6 +28,37 @@
  *  +----------+
  *  | checksum |  2               SCE_HEX_CHECKSUM, SCE_HEX_CHECKSUM_WRONG
  *  +----------+
+ *
+ *
+ *  Intel HEX file format
+ * ===============================
+ *
+ * Each record (line) is built as follows:
+ *
+ *    field       digits          states
+ *
+ *  +----------+
+ *  | start    |  1 (':')         SCE_HEX_RECSTART
+ *  +----------+
+ *  | count    |  2               SCE_HEX_BYTECOUNT, SCE_HEX_BYTECOUNT_WRONG
+ *  +----------+
+ *  | address  |  4               SCE_HEX_NOADDRESS, SCE_HEX_DATAADDRESS, (SCE_HEX_ADDRESSFIELD_UNKNOWN)
+ *  +----------+
+ *  | type     |  2               SCE_HEX_RECTYPE
+ *  +----------+
+ *  | data     |  0..510          SCE_HEX_DATA_ODD, SCE_HEX_DATA_EVEN, SCE_HEX_DATA_EMPTY, SCE_HEX_EXTENDEDADDRESS, SCE_HEX_STARTADDRESS, (SCE_HEX_DATA_UNKNOWN)
+ *  +----------+
+ *  | checksum |  2               SCE_HEX_CHECKSUM, SCE_HEX_CHECKSUM_WRONG
+ *  +----------+
+ *
+ *
+ *  General notes for all lexers
+ * ===============================
+ *
+ * - Depending on where the helper functions are invoked, some of them have to
+ *   read beyond the current position. In case of malformed data (record too
+ *   short), it has to be ensured that this either does not have bad influence
+ *   or will be captured deliberately.
  */
 
 #include <stdlib.h>
@@ -57,6 +88,7 @@ static inline bool IsNewline(const int ch);
 static int GetHexaChar(char hd1, char hd2);
 static int GetHexaChar(unsigned int pos, Accessor &styler);
 static bool ForwardWithinLine(StyleContext &sc, int nb = 1);
+static bool PosInSameRecord(unsigned int pos1, unsigned int pos2, Accessor &styler);
 static int CountByteCount(unsigned int startPos, int uncountedDigits, Accessor &styler);
 static int CalcChecksum(unsigned int startPos, int cnt, bool twosCompl, Accessor &styler);
 
@@ -68,6 +100,15 @@ static int GetSrecAddressFieldSize(unsigned int recStartPos, Accessor &styler);
 static int GetSrecAddressFieldType(unsigned int recStartPos, Accessor &styler);
 static int GetSrecChecksum(unsigned int recStartPos, Accessor &styler);
 static int CalcSrecChecksum(unsigned int recStartPos, Accessor &styler);
+
+static unsigned int GetIHexRecStartPosition(unsigned int pos, Accessor &styler);
+static int GetIHexByteCount(unsigned int recStartPos, Accessor &styler);
+static int CountIHexByteCount(unsigned int recStartPos, Accessor &styler);
+static int GetIHexAddressFieldType(unsigned int recStartPos, Accessor &styler);
+static int GetIHexDataFieldType(unsigned int recStartPos, Accessor &styler);
+static int GetIHexRequiredDataFieldSize(unsigned int recStartPos, Accessor &styler);
+static int GetIHexChecksum(unsigned int recStartPos, Accessor &styler);
+static int CalcIHexChecksum(unsigned int recStartPos, Accessor &styler);
 
 static inline bool IsNewline(const int ch)
 {
@@ -129,6 +170,12 @@ static bool ForwardWithinLine(StyleContext &sc, int nb)
 	}
 
 	return true;
+}
+
+// Checks whether the given positions are in the same record.
+static bool PosInSameRecord(unsigned int pos1, unsigned int pos2, Accessor &styler)
+{
+	return styler.GetLine(pos1) == styler.GetLine(pos2);
 }
 
 // Count the number of digit pairs from <startPos> till end of record, ignoring
@@ -291,6 +338,129 @@ static int CalcSrecChecksum(unsigned int recStartPos, Accessor &styler)
 	return CalcChecksum(recStartPos + 2, byteCount * 2, false, styler);
 }
 
+// Get the position of the record "start" field (first character in line) in
+// the record around position <pos>.
+static unsigned int GetIHexRecStartPosition(unsigned int pos, Accessor &styler)
+{
+	while (styler.SafeGetCharAt(pos) != ':') {
+		pos--;
+	}
+
+	return pos;
+}
+
+// Get the value of the "byte count" field, it counts the number of bytes in
+// the "data" field.
+static int GetIHexByteCount(unsigned int recStartPos, Accessor &styler)
+{
+	int val;
+
+	val = GetHexaChar(recStartPos + 1, styler);
+	if (val < 0) {
+	       val = 0;
+	}
+
+	return val;
+}
+
+// Count the number of digit pairs for the "data" field in this record. Has to
+// be equal to the "byte count" field value.
+// If the record is too short, a negative count may be returned.
+static int CountIHexByteCount(unsigned int recStartPos, Accessor &styler)
+{
+	return CountByteCount(recStartPos, 11, styler);
+}
+
+// Get the type of the "address" field content.
+static int GetIHexAddressFieldType(unsigned int recStartPos, Accessor &styler)
+{
+	if (!PosInSameRecord(recStartPos, recStartPos + 7, styler)) {
+		// malformed (record too short)
+		// type cannot be determined
+		return SCE_HEX_ADDRESSFIELD_UNKNOWN;
+	}
+
+	switch (GetHexaChar(recStartPos + 7, styler)) {
+		case 0x00:
+			return SCE_HEX_DATAADDRESS;
+
+		case 0x01:
+		case 0x02:
+		case 0x03:
+		case 0x04:
+		case 0x05:
+			return SCE_HEX_NOADDRESS;
+
+		default: // handle possible format extension in the future
+			return SCE_HEX_ADDRESSFIELD_UNKNOWN;
+	}
+}
+
+// Get the type of the "data" field content.
+static int GetIHexDataFieldType(unsigned int recStartPos, Accessor &styler)
+{
+	switch (GetHexaChar(recStartPos + 7, styler)) {
+		case 0x00:
+			return SCE_HEX_DATA_ODD;
+
+		case 0x01:
+			return SCE_HEX_DATA_EMPTY;
+
+		case 0x02:
+		case 0x04:
+			return SCE_HEX_EXTENDEDADDRESS;
+
+		case 0x03:
+		case 0x05:
+			return SCE_HEX_STARTADDRESS;
+
+		default: // handle possible format extension in the future
+			return SCE_HEX_DATA_UNKNOWN;
+	}
+}
+
+// Get the required size of the "data" field. Useless for an ordinary data
+// record (type 00), return the "byte count" in this case.
+static int GetIHexRequiredDataFieldSize(unsigned int recStartPos, Accessor &styler)
+{
+	switch (GetHexaChar(recStartPos + 7, styler)) {
+		case 0x01:
+			return 0;
+
+		case 0x02:
+		case 0x04:
+			return 2;
+
+		case 0x03:
+		case 0x05:
+			return 4;
+
+		default:
+			return GetIHexByteCount(recStartPos, styler);
+	}
+}
+
+// Get the value of the "checksum" field.
+static int GetIHexChecksum(unsigned int recStartPos, Accessor &styler)
+{
+	int byteCount;
+
+	byteCount = GetIHexByteCount(recStartPos, styler);
+
+	return GetHexaChar(recStartPos + 9 + byteCount * 2, styler);
+}
+
+// Calculate the checksum of the record.
+static int CalcIHexChecksum(unsigned int recStartPos, Accessor &styler)
+{
+	int byteCount;
+
+	byteCount = GetIHexByteCount(recStartPos, styler);
+
+	// sum over "byte count", "address", "type" and "data" fields (8..518 digits)
+	return CalcChecksum(recStartPos + 1, 8 + byteCount * 2, true, styler);
+}
+
 static void ColouriseSrecDoc(unsigned int startPos, int length, int initStyle, WordList *[], Accessor &styler)
 {
 	StyleContext sc(startPos, length, initStyle, styler);
@@ -394,4 +564,115 @@ static void ColouriseSrecDoc(unsigned int startPos, int length, int initStyle, W
 	sc.Complete();
 }
 
+static void ColouriseIHexDoc(unsigned int startPos, int length, int initStyle, WordList *[], Accessor &styler)
+{
+	StyleContext sc(startPos, length, initStyle, styler);
+
+	while (sc.More()) {
+		unsigned int recStartPos;
+		int byteCount, addrFieldType, dataFieldSize, dataFieldType;
+		int cs1, cs2;
+
+		switch (sc.state) {
+			case SCE_HEX_DEFAULT:
+				if (sc.atLineStart && sc.Match(':')) {
+					sc.SetState(SCE_HEX_RECSTART);
+				}
+				ForwardWithinLine(sc);
+				break;
+
+			case SCE_HEX_RECSTART:
+				recStartPos = sc.currentPos - 1;
+				byteCount = GetIHexByteCount(recStartPos, styler);
+				dataFieldSize = GetIHexRequiredDataFieldSize(recStartPos, styler);
+
+				if (byteCount == CountIHexByteCount(recStartPos, styler)
+						&& byteCount == dataFieldSize) {
+					sc.SetState(SCE_HEX_BYTECOUNT);
+				} else {
+					sc.SetState(SCE_HEX_BYTECOUNT_WRONG);
+				}
+
+				ForwardWithinLine(sc, 2);
+				break;
+
+			case SCE_HEX_BYTECOUNT:
+			case SCE_HEX_BYTECOUNT_WRONG:
+				recStartPos = sc.currentPos - 3;
+				addrFieldType = GetIHexAddressFieldType(recStartPos, styler);
+
+				sc.SetState(addrFieldType);
+				ForwardWithinLine(sc, 4);
+				break;
+
+			case SCE_HEX_NOADDRESS:
+			case SCE_HEX_DATAADDRESS:
+			case SCE_HEX_ADDRESSFIELD_UNKNOWN:
+				sc.SetState(SCE_HEX_RECTYPE);
+				ForwardWithinLine(sc, 2);
+				break;
+
+			case SCE_HEX_RECTYPE:
+				recStartPos = sc.currentPos - 9;
+				dataFieldType = GetIHexDataFieldType(recStartPos, styler);
+
+				sc.SetState(dataFieldType);
+
+				if (dataFieldType == SCE_HEX_DATA_ODD) {
+					dataFieldSize = GetIHexByteCount(recStartPos, styler);
+
+					for (int i = 0; i < dataFieldSize * 2; i++) {
+						if ((i & 0x3) == 0) {
+							sc.SetState(SCE_HEX_DATA_ODD);
+						} else if ((i & 0x3) == 2) {
+							sc.SetState(SCE_HEX_DATA_EVEN);
+						}
+
+						if (!ForwardWithinLine(sc)) {
+							break;
+						}
+					}
+				} else if (dataFieldType == SCE_HEX_DATA_UNKNOWN) {
+					dataFieldSize = GetIHexByteCount(recStartPos, styler);
+					ForwardWithinLine(sc, dataFieldSize * 2);
+				} else {
+					// Using the required size here has the effect that the checksum is
+					// highlighted at a fixed position after this field, independent on
+					// the "byte count" value.
+					dataFieldSize = GetIHexRequiredDataFieldSize(recStartPos, styler);
+					ForwardWithinLine(sc, dataFieldSize * 2);
+				}
+				break;
+
+			case SCE_HEX_DATA_ODD:
+			case SCE_HEX_DATA_EVEN:
+			case SCE_HEX_DATA_EMPTY:
+			case SCE_HEX_EXTENDEDADDRESS:
+			case SCE_HEX_STARTADDRESS:
+			case SCE_HEX_DATA_UNKNOWN:
+				recStartPos = GetIHexRecStartPosition(sc.currentPos, styler);
+				cs1 = CalcIHexChecksum(recStartPos, styler);
+				cs2 = GetIHexChecksum(recStartPos, styler);
+
+				if (cs1 != cs2 || cs1 < 0 || cs2 < 0) {
+					sc.SetState(SCE_HEX_CHECKSUM_WRONG);
+				} else {
+					sc.SetState(SCE_HEX_CHECKSUM);
+				}
+
+				ForwardWithinLine(sc, 2);
+				break;
+
+			case SCE_HEX_CHECKSUM:
+			case SCE_HEX_CHECKSUM_WRONG:
+				// record finished
+				sc.SetState(SCE_HEX_DEFAULT);
+				ForwardWithinLine(sc);
+				break;
+		}
+	}
+	sc.Complete();
+}
+
 LexerModule lmSrec(SCLEX_SREC, ColouriseSrecDoc, "srec", 0, NULL);
+LexerModule lmIHex(SCLEX_IHEX, ColouriseIHexDoc, "ihex", 0, NULL);
