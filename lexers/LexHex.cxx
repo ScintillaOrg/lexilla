@@ -16,17 +16,17 @@
  *    field       digits          states
  *
  *  +----------+
- *  | start    |  1 ('S')         SCE_SREC_RECSTART
+ *  | start    |  1 ('S')         SCE_HEX_RECSTART
  *  +----------+
- *  | type     |  1               SCE_SREC_RECTYPE
+ *  | type     |  1               SCE_HEX_RECTYPE
  *  +----------+
- *  | count    |  2               SCE_SREC_BYTECOUNT, SCE_SREC_BYTECOUNT_WRONG
+ *  | count    |  2               SCE_HEX_BYTECOUNT, SCE_HEX_BYTECOUNT_WRONG
  *  +----------+
- *  | address  |  4/6/8           SCE_SREC_NOADDRESS, SCE_SREC_DATAADDRESS, SCE_SREC_RECCOUNT, SCE_SREC_STARTADDRESS, (SCE_SREC_ADDRESSFIELD_UNKNOWN)
+ *  | address  |  4/6/8           SCE_HEX_NOADDRESS, SCE_HEX_DATAADDRESS, SCE_HEX_RECCOUNT, SCE_HEX_STARTADDRESS, (SCE_HEX_ADDRESSFIELD_UNKNOWN)
  *  +----------+
- *  | data     |  0..504/502/500  SCE_SREC_DATA_ODD, SCE_SREC_DATA_EVEN, (SCE_SREC_DATA_UNKNOWN)
+ *  | data     |  0..504/502/500  SCE_HEX_DATA_ODD, SCE_HEX_DATA_EVEN, (SCE_HEX_DATA_UNKNOWN)
  *  +----------+
- *  | checksum |  2               SCE_SREC_CHECKSUM, SCE_SREC_CHECKSUM_WRONG
+ *  | checksum |  2               SCE_HEX_CHECKSUM, SCE_HEX_CHECKSUM_WRONG
  *  +----------+
  */
 
@@ -120,7 +120,7 @@ static bool ForwardWithinLine(StyleContext &sc, int nb)
 	for (int i = 0; i < nb; i++) {
 		if (sc.atLineEnd) {
 			// line is too short
-			sc.SetState(SCE_SREC_DEFAULT);
+			sc.SetState(SCE_HEX_DEFAULT);
 			sc.Forward();
 			return false;
 		} else {
@@ -249,24 +249,24 @@ static int GetSrecAddressFieldType(unsigned int recStartPos, Accessor &styler)
 {
 	switch (styler.SafeGetCharAt(recStartPos + 1)) {
 		case '0':
-			return SCE_SREC_NOADDRESS;
+			return SCE_HEX_NOADDRESS;
 
 		case '1':
 		case '2':
 		case '3':
-			return SCE_SREC_DATAADDRESS;
+			return SCE_HEX_DATAADDRESS;
 
 		case '5':
 		case '6':
-			return SCE_SREC_RECCOUNT;
+			return SCE_HEX_RECCOUNT;
 
 		case '7':
 		case '8':
 		case '9':
-			return SCE_SREC_STARTADDRESS;
+			return SCE_HEX_STARTADDRESS;
 
 		default: // handle possible format extension in the future
-			return SCE_SREC_ADDRESSFIELD_UNKNOWN;
+			return SCE_HEX_ADDRESSFIELD_UNKNOWN;
 	}
 }
 
@@ -301,33 +301,33 @@ static void ColouriseSrecDoc(unsigned int startPos, int length, int initStyle, W
 		int cs1, cs2;
 
 		switch (sc.state) {
-			case SCE_SREC_DEFAULT:
+			case SCE_HEX_DEFAULT:
 				if (sc.atLineStart && sc.Match('S')) {
-					sc.SetState(SCE_SREC_RECSTART);
+					sc.SetState(SCE_HEX_RECSTART);
 				}
 				ForwardWithinLine(sc);
 				break;
 
-			case SCE_SREC_RECSTART:
-				sc.SetState(SCE_SREC_RECTYPE);
+			case SCE_HEX_RECSTART:
+				sc.SetState(SCE_HEX_RECTYPE);
 				ForwardWithinLine(sc);
 				break;
 
-			case SCE_SREC_RECTYPE:
+			case SCE_HEX_RECTYPE:
 				recStartPos = sc.currentPos - 2;
 				byteCount = GetSrecByteCount(recStartPos, styler);
 
 				if (byteCount == CountSrecByteCount(recStartPos, styler)) {
-					sc.SetState(SCE_SREC_BYTECOUNT);
+					sc.SetState(SCE_HEX_BYTECOUNT);
 				} else {
-					sc.SetState(SCE_SREC_BYTECOUNT_WRONG);
+					sc.SetState(SCE_HEX_BYTECOUNT_WRONG);
 				}
 
 				ForwardWithinLine(sc, 2);
 				break;
 
-			case SCE_SREC_BYTECOUNT:
-			case SCE_SREC_BYTECOUNT_WRONG:
+			case SCE_HEX_BYTECOUNT:
+			case SCE_HEX_BYTECOUNT_WRONG:
 				recStartPos = sc.currentPos - 4;
 				addrFieldSize = GetSrecAddressFieldSize(recStartPos, styler);
 				addrFieldType = GetSrecAddressFieldType(recStartPos, styler);
@@ -336,29 +336,29 @@ static void ColouriseSrecDoc(unsigned int startPos, int length, int initStyle, W
 				ForwardWithinLine(sc, addrFieldSize * 2);
 				break;
 
-			case SCE_SREC_NOADDRESS:
-			case SCE_SREC_DATAADDRESS:
-			case SCE_SREC_RECCOUNT:
-			case SCE_SREC_STARTADDRESS:
-			case SCE_SREC_ADDRESSFIELD_UNKNOWN:
+			case SCE_HEX_NOADDRESS:
+			case SCE_HEX_DATAADDRESS:
+			case SCE_HEX_RECCOUNT:
+			case SCE_HEX_STARTADDRESS:
+			case SCE_HEX_ADDRESSFIELD_UNKNOWN:
 				recStartPos = GetSrecRecStartPosition(sc.currentPos, styler);
 				byteCount = GetSrecByteCount(recStartPos, styler);
 				addrFieldSize = GetSrecAddressFieldSize(recStartPos, styler);
 				dataFieldSize = byteCount - addrFieldSize - 1; // -1 for checksum field
 
-				if (sc.state == SCE_SREC_ADDRESSFIELD_UNKNOWN) {
-					sc.SetState(SCE_SREC_DATA_UNKNOWN);
+				if (sc.state == SCE_HEX_ADDRESSFIELD_UNKNOWN) {
+					sc.SetState(SCE_HEX_DATA_UNKNOWN);
 					ForwardWithinLine(sc, dataFieldSize * 2);
 					break;
 				}
 
-				sc.SetState(SCE_SREC_DATA_ODD);
+				sc.SetState(SCE_HEX_DATA_ODD);
 
 				for (int i = 0; i < dataFieldSize * 2; i++) {
 					if ((i & 0x3) == 0) {
-						sc.SetState(SCE_SREC_DATA_ODD);
+						sc.SetState(SCE_HEX_DATA_ODD);
 					} else if ((i & 0x3) == 2) {
-						sc.SetState(SCE_SREC_DATA_EVEN);
+						sc.SetState(SCE_HEX_DATA_EVEN);
 					}
 
 					if (!ForwardWithinLine(sc)) {
@@ -367,26 +367,26 @@ static void ColouriseSrecDoc(unsigned int startPos, int length, int initStyle, W
 				}
 				break;
 
-			case SCE_SREC_DATA_ODD:
-			case SCE_SREC_DATA_EVEN:
-			case SCE_SREC_DATA_UNKNOWN:
+			case SCE_HEX_DATA_ODD:
+			case SCE_HEX_DATA_EVEN:
+			case SCE_HEX_DATA_UNKNOWN:
 				recStartPos = GetSrecRecStartPosition(sc.currentPos, styler);
 				cs1 = CalcSrecChecksum(recStartPos, styler);
 				cs2 = GetSrecChecksum(recStartPos, styler);
 
 				if (cs1 != cs2 || cs1 < 0 || cs2 < 0) {
-					sc.SetState(SCE_SREC_CHECKSUM_WRONG);
+					sc.SetState(SCE_HEX_CHECKSUM_WRONG);
 				} else {
-					sc.SetState(SCE_SREC_CHECKSUM);
+					sc.SetState(SCE_HEX_CHECKSUM);
 				}
 
 				ForwardWithinLine(sc, 2);
 				break;
 
-			case SCE_SREC_CHECKSUM:
-			case SCE_SREC_CHECKSUM_WRONG:
+			case SCE_HEX_CHECKSUM:
+			case SCE_HEX_CHECKSUM_WRONG:
 				// record finished
-				sc.SetState(SCE_SREC_DEFAULT);
+				sc.SetState(SCE_HEX_DEFAULT);
 				ForwardWithinLine(sc);
 				break;
 		}
