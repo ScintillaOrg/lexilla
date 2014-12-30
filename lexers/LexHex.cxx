@@ -57,6 +57,8 @@ static inline bool IsNewline(const int ch);
 static int GetHexaChar(char hd1, char hd2);
 static int GetHexaChar(unsigned int pos, Accessor &styler);
 static bool ForwardWithinLine(StyleContext &sc, int nb = 1);
+static int CountByteCount(unsigned int startPos, int uncountedDigits, Accessor &styler);
+static int CalcChecksum(unsigned int startPos, int cnt, bool twosCompl, Accessor &styler);
 
 // prototypes for file format specific helper functions
 static unsigned int GetSrecRecStartPosition(unsigned int pos, Accessor &styler);
@@ -129,6 +131,62 @@ static bool ForwardWithinLine(StyleContext &sc, int nb)
 	return true;
 }
 
+// Count the number of digit pairs from <startPos> till end of record, ignoring
+// <uncountedDigits> digits.
+// If the record is too short, a negative count may be returned.
+static int CountByteCount(unsigned int startPos, int uncountedDigits, Accessor &styler)
+{
+	int cnt;
+	unsigned int pos;
+
+	pos = startPos;
+
+	while (!IsNewline(styler.SafeGetCharAt(pos, '\n'))) {
+		pos++;
+	}
+
+	// number of digits in this line minus number of digits of uncounted fields
+	cnt = static_cast<int>(pos - startPos) - uncountedDigits;
+
+	// Prepare round up if odd (digit pair incomplete), this way the byte
+	// count is considered to be valid if the checksum is incomplete.
+	if (cnt >= 0) {
+		cnt++;
+	}
+
+	// digit pairs
+	cnt /= 2;
+
+	return cnt;
+}
+
+// Calculate the checksum of the record.
+// <startPos> is the position of the first character of the starting digit
+// pair, <cnt> is the number of digit pairs.
+static int CalcChecksum(unsigned int startPos, int cnt, bool twosCompl, Accessor &styler)
+{
+	int cs = 0;
+
+	for (unsigned int pos = startPos; pos < startPos + cnt; pos += 2) {
+		int val = GetHexaChar(pos, styler);
+
+		if (val < 0) {
+			return val;
+		}
+
+		// overflow does not matter
+		cs += val;
+	}
+
+	if (twosCompl) {
+		// low byte of two's complement
+		return -cs & 0xFF;
+	} else {
+		// low byte of one's complement
+		return ~cs & 0xFF;
+	}
+}
+
 // Get the position of the record "start" field (first character in line) in
 // the record around position <pos>.
 static unsigned int GetSrecRecStartPosition(unsigned int pos, Accessor &styler)
@@ -159,28 +217,7 @@ static int GetSrecByteCount(unsigned int recStartPos, Accessor &styler)
 // If the record is too short, a negative count may be returned.
 static int CountSrecByteCount(unsigned int recStartPos, Accessor &styler)
 {
-	int cnt;
-	unsigned int pos;
-
-	pos = recStartPos;
-
-	while (!IsNewline(styler.SafeGetCharAt(pos, '\n'))) {
-		pos++;
-	}
-
-	// number of digits in this line minus number of digits of uncounted fields
-	cnt = static_cast<int>(pos - recStartPos) - 4;
-
-	// Prepare round up if odd (digit pair incomplete), this way the byte
-	// count is considered to be valid if the checksum is incomplete.
-	if (cnt >= 0) {
-		cnt++;
-	}
-
-	// digit pairs
-	cnt /= 2;
-
-	return cnt;
+	return CountByteCount(recStartPos, 4, styler);
 }
 
 // Get the size of the "address" field.
@@ -247,23 +284,11 @@ static int GetSrecChecksum(unsigned int recStartPos, Accessor &styler)
 static int CalcSrecChecksum(unsigned int recStartPos, Accessor &styler)
 {
 	int byteCount;
-	unsigned int cs = 0;
 
 	byteCount = GetSrecByteCount(recStartPos, styler);
 
 	// sum over "byte count", "address" and "data" fields (6..510 digits)
-	for (unsigned int pos = recStartPos + 2; pos < recStartPos + 2 + byteCount * 2; pos += 2) {
-		int val = GetHexaChar(pos, styler);
-
-		if (val < 0) {
-			return val;
-		}
-
-		cs += val;
-	}
-
-	// low byte of one's complement
-	return (~cs) & 0xFF;
+	return CalcChecksum(recStartPos + 2, byteCount * 2, false, styler);
 }
 
 static void ColouriseSrecDoc(unsigned int startPos, int length, int initStyle, WordList *[], Accessor &styler)
