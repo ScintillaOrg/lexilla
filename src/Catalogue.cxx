@@ -123,6 +123,7 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmGui4Cli);
 	LINK_LEXER(lmHaskell);
 	LINK_LEXER(lmHTML);
+	LINK_LEXER(lmIHex);
 	LINK_LEXER(lmInno);
 	LINK_LEXER(lmKix);
 	LINK_LEXER(lmKVIrc);
