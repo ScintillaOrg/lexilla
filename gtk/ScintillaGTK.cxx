@@ -314,6 +314,8 @@ private:
 	static void Destroy(GObject *object);
 	static void SelectionReceived(GtkWidget *widget, GtkSelectionData *selection_data,
 	                              guint time);
+	static void ClipboardReceived(GtkClipboard *clipboard, GtkSelectionData *selection_data, 
+	                              gpointer data);
 	static void SelectionGet(GtkWidget *widget, GtkSelectionData *selection_data,
 	                         guint info, guint time);
 	static gint SelectionClear(GtkWidget *widget, GdkEventSelection *selection_event);
@@ -1485,10 +1487,18 @@ void ScintillaGTK::Copy() {
 	}
 }
 
+void ScintillaGTK::ClipboardReceived(GtkClipboard *clipboard, GtkSelectionData *selection_data, gpointer data) {
+	ScintillaGTK *sciThis = static_cast<ScintillaGTK *>(data);
+	sciThis->ReceivedSelection(selection_data);
+}
+
 void ScintillaGTK::Paste() {
 	atomSought = atomUTF8;
-	gtk_selection_convert(GTK_WIDGET(PWidget(wMain)),
-	                      atomClipboard, atomSought, GDK_CURRENT_TIME);
+	GtkClipboard *clipBoard =
+		gtk_widget_get_clipboard(GTK_WIDGET(PWidget(wMain)), atomClipboard);
+	if (clipBoard == NULL)
+		return;
+	gtk_clipboard_request_contents(clipBoard, atomSought, ClipboardReceived, this);
 }
 
 void ScintillaGTK::CreateCallTipWindow(PRectangle rc) {
