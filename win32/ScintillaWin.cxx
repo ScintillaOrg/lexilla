@@ -1999,6 +1999,7 @@ public:
 		PLATFORM_ASSERT(!ptr);
 	}
 	void Allocate(size_t bytes) {
+		assert(!hand);
 		hand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, bytes);
 		if (hand) {
 			ptr = ::GlobalLock(hand);
