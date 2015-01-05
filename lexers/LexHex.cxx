@@ -8,7 +8,7 @@
 // The License.txt file describes the conditions under which this software may be distributed.
 
 /*
- *  Motorola S-Record file format
+ *  Motorola S-Record
  * ===============================
  *
  * Each record (line) is built as follows:
@@ -30,7 +30,7 @@
  *  +----------+
  *
  *
- *  Intel HEX file format
+ *  Intel HEX
  * ===============================
  *
  * Each record (line) is built as follows:
@@ -50,6 +50,17 @@
  *  +----------+
  *  | checksum |  2               SCE_HEX_CHECKSUM, SCE_HEX_CHECKSUM_WRONG
  *  +----------+
+ *
+ *
+ * Folding:
+ *
+ *   Data records (type 0x00), which follow an extended address record (type
+ *   0x02 or 0x04), can be folded. The extended address record is the fold
+ *   point at fold level 0, the corresponding data records are set to level 1.
+ *
+ *   Any record, which is not a data record, sets the fold level back to 0.
+ *   Any line, which is not a record (blank lines and lines starting with a
+ *   character other than ':'), leaves the fold level unchanged.
  *
  *
  *  General notes for all lexers
@@ -674,5 +685,48 @@ static void ColouriseIHexDoc(unsigned int startPos, int length, int initStyle, W
 	sc.Complete();
 }
 
+static void FoldIHexDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler)
+{
+	unsigned int endPos = startPos + length;
+
+	int lineCurrent = styler.GetLine(startPos);
+	int levelCurrent = SC_FOLDLEVELBASE;
+	if (lineCurrent > 0)
+		levelCurrent = styler.LevelAt(lineCurrent - 1);
+
+	unsigned int lineStartNext = styler.LineStart(lineCurrent + 1);
+	int levelNext = SC_FOLDLEVELBASE; // default if no specific line found
+
+	for (unsigned int i = startPos; i < endPos; i++) {
+		bool atEOL = i == (lineStartNext - 1);
+		int style = styler.StyleAt(i);
+
+		// search for specific lines
+		if (style == SCE_HEX_EXTENDEDADDRESS) {
+			// extended addres record
+			levelNext = SC_FOLDLEVELBASE | SC_FOLDLEVELHEADERFLAG;
+		} else if (style == SCE_HEX_DATAADDRESS
+			|| (style == SCE_HEX_DEFAULT
+				&& i == (unsigned int)styler.LineStart(lineCurrent))) {
+			// data record or no record start code at all
+			if (levelCurrent & SC_FOLDLEVELHEADERFLAG) {
+				levelNext = SC_FOLDLEVELBASE + 1;
+			} else {
+				// continue level 0 or 1, no fold point
+				levelNext = levelCurrent;
+			}
+		}
+
+		if (atEOL || (i == endPos - 1)) {
+			styler.SetLevel(lineCurrent, levelNext);
+
+			lineCurrent++;
+			lineStartNext = styler.LineStart(lineCurrent + 1);
+			levelCurrent = levelNext;
+			levelNext = SC_FOLDLEVELBASE;
+		}
+	}
+}
+
 LexerModule lmSrec(SCLEX_SREC, ColouriseSrecDoc, "srec", 0, NULL);
-LexerModule lmIHex(SCLEX_IHEX, ColouriseIHexDoc, "ihex", 0, NULL);
+LexerModule lmIHex(SCLEX_IHEX, ColouriseIHexDoc, "ihex", FoldIHexDoc, NULL);
