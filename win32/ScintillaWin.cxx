@@ -522,7 +522,7 @@ void ScintillaWin::EnsureRenderTarget(HDC hdc) {
 		DropGraphics(false);
 	}
 
-	if (technology == SC_TECHNOLOGY_DIRECTWRITEDC) {
+	if ((technology == SC_TECHNOLOGY_DIRECTWRITEDC) && pRenderTarget) {
 		RECT rcWindow;
 		GetClientRect(MainHWND(), &rcWindow);
 		HRESULT hr = static_cast<ID2D1DCRenderTarget*>(pRenderTarget)->BindDC(hdc, &rcWindow);
