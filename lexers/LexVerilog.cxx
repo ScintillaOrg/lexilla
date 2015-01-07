@@ -13,6 +13,11 @@
 #include <assert.h>
 #include <ctype.h>
 
+#include <string>
+#include <vector>
+#include <map>
+#include <algorithm>
+
 #include "ILexer.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
@@ -23,10 +28,6 @@
 #include "StyleContext.h"
 #include "CharacterSet.h"
 #include "LexerModule.h"
-
-#include <string>
-#include <vector>
-#include <map>
 
 #include "OptionSet.h"
 #include "SubStyles.h"
