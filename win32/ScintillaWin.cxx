@@ -1997,6 +1997,7 @@ public:
 	}
 	~GlobalMemory() {
 		PLATFORM_ASSERT(!ptr);
+		assert(!hand);
 	}
 	void Allocate(size_t bytes) {
 		assert(!hand);
