@@ -62,6 +62,27 @@
  *   Any line, which is not a record (blank lines and lines starting with a
  *   character other than ':'), leaves the fold level unchanged.
  *
+ *  Tektronix extended HEX
+ * ===============================
+ *
+ * Each record (line) is built as follows:
+ *
+ *    field       digits          states
+ *
+ *  +----------+
+ *  | start    |  1 ('%')         SCE_HEX_RECSTART
+ *  +----------+
+ *  | length   |  2               SCE_HEX_BYTECOUNT, SCE_HEX_BYTECOUNT_WRONG
+ *  +----------+
+ *  | type     |  1               SCE_HEX_RECTYPE, SCE_HEX_RECTYPE_UNKNOWN
+ *  +----------+
+ *  | checksum |  2               SCE_HEX_CHECKSUM, SCE_HEX_CHECKSUM_WRONG
+ *  +----------+
+ *  | address  |  9               SCE_HEX_DATAADDRESS
+ *  +----------+
+ *  | data     |  0..241          SCE_HEX_DATA_ODD, SCE_HEX_DATA_EVEN
+ *  +----------+
+ *
  *
  *  General notes for all lexers
  * ===============================
@@ -120,6 +141,11 @@ static int GetIHexDataFieldType(unsigned int recStartPos, Accessor &styler);
 static int GetIHexRequiredDataFieldSize(unsigned int recStartPos, Accessor &styler);
 static int GetIHexChecksum(unsigned int recStartPos, Accessor &styler);
 static int CalcIHexChecksum(unsigned int recStartPos, Accessor &styler);
+
+static int GetTHexDigitCount(unsigned int recStartPos, Accessor &styler);
+static int CountTHexDigitCount(unsigned int recStartPos, Accessor &styler);
+static int GetTHexChecksum(unsigned int recStartPos, Accessor &styler);
+static int CalcTHexChecksum(unsigned int recStartPos, Accessor &styler);
 
 static inline bool IsNewline(const int ch)
 {
@@ -472,6 +498,82 @@ static int CalcIHexChecksum(unsigned int recStartPos, Accessor &styler)
 	return CalcChecksum(recStartPos + 1, 8 + byteCount * 2, true, styler);
 }
 
+
+// Get the value of the "record length" field, it counts the number of digits in
+// the record excluding the percent.
+static int GetTHexDigitCount(unsigned int recStartPos, Accessor &styler)
+{
+	int val = GetHexaChar(recStartPos + 1, styler);
+	if (val < 0)
+	       val = 0;
+
+	return val;
+}
+// Count the number of digits in this record. Has to
+// be equal to the "record length" field value.
+static int CountTHexDigitCount(unsigned int recStartPos, Accessor &styler)
+{
+	unsigned int pos;
+
+	pos = recStartPos+1;
+
+	while (!IsNewline(styler.SafeGetCharAt(pos, '\n'))) {
+		pos++;
+	}
+
+	return static_cast<int>(pos - (recStartPos+1));
+}
+// Get the value of the "checksum" field.
+static int GetTHexChecksum(unsigned int recStartPos, Accessor &styler)
+{
+    return GetHexaChar(recStartPos+4, styler);
+}
+
+static int GetHexaNibble(char hd)
+{
+	int hexValue = 0;
+
+	if (hd >= '0' && hd <= '9') {
+		hexValue += hd - '0';
+	} else if (hd >= 'A' && hd <= 'F') {
+		hexValue += hd - 'A' + 10;
+	} else if (hd >= 'a' && hd <= 'f') {
+		hexValue += hd - 'a' + 10;
+	} else {
+		return -1;
+	}
+
+	return hexValue;
+}
+// Calculate the checksum of the record (excluding the checksum field).
+static int CalcTHexChecksum(unsigned int recStartPos, Accessor &styler)
+{
+	unsigned int pos = recStartPos +1;
+	unsigned int length = GetHexaChar(pos, styler);
+	int cs = GetHexaNibble(styler.SafeGetCharAt(pos++));//length
+	cs += GetHexaNibble(styler.SafeGetCharAt(pos++));//length
+
+	cs += GetHexaNibble(styler.SafeGetCharAt(pos++));//type
+
+    pos += 2;// jump over CS field
+    //while(!IsNewline(styler.SafeGetCharAt(pos, '\n')){
+
+	for (; pos <= recStartPos + length; ++pos) {
+		int val = GetHexaNibble(styler.SafeGetCharAt(pos));
+
+		if (val < 0) {
+			return val;
+		}
+
+		// overflow does not matter
+		cs += val;
+	}
+
+    // low byte
+    return cs & 0xFF;
+
+}
+
 static void ColouriseSrecDoc(unsigned int startPos, int length, int initStyle, WordList *[], Accessor &styler)
 {
 	StyleContext sc(startPos, length, initStyle, styler);
@@ -728,5 +830,106 @@ static void FoldIHexDoc(unsigned int startPos, int length, int, WordList *[], Ac
 	}
 }
 
+static void ColouriseTHexDoc(unsigned int startPos, int length, int initStyle, WordList *[], Accessor &styler)
+{
+	StyleContext sc(startPos, length, initStyle, styler);
+
+	while (sc.More()) {
+		unsigned int recStartPos;
+		int digitCount;
+		int cs1, cs2;
+
+		switch (sc.state) {
+			case SCE_HEX_DEFAULT:
+				if (sc.atLineStart && sc.Match('%')) {
+					sc.SetState(SCE_HEX_RECSTART);
+				}
+				ForwardWithinLine(sc);
+				break;
+
+			case SCE_HEX_RECSTART:
+
+				recStartPos = sc.currentPos - 1;
+
+				if (GetTHexDigitCount(recStartPos, styler) == CountTHexDigitCount(recStartPos, styler)) {
+					sc.SetState(SCE_HEX_BYTECOUNT);
+				} else {
+					sc.SetState(SCE_HEX_BYTECOUNT_WRONG);
+				}
+
+				ForwardWithinLine(sc, 2);
+				break;
+
+			case SCE_HEX_BYTECOUNT:
+			case SCE_HEX_BYTECOUNT_WRONG:
+				//recStartPos = sc.currentPos - 3;
+				if (sc.Match('6') || sc.Match('8')) {
+					sc.SetState(SCE_HEX_RECTYPE);
+				} else {
+					sc.SetState(SCE_HEX_RECTYPE_UNKNOWN);
+				}
+
+				ForwardWithinLine(sc);
+				break;
+
+			case SCE_HEX_RECTYPE:
+			case SCE_HEX_RECTYPE_UNKNOWN:
+				recStartPos = sc.currentPos - 4;
+				cs1 = CalcTHexChecksum(recStartPos, styler);
+				cs2 = GetTHexChecksum(recStartPos, styler);
+
+				if (cs1 != cs2 || cs1 < 0 || cs2 < 0) {
+					sc.SetState(SCE_HEX_CHECKSUM_WRONG);
+				} else {
+					sc.SetState(SCE_HEX_CHECKSUM);
+				}
+
+				ForwardWithinLine(sc, 2);
+				break;
+
+
+			case SCE_HEX_CHECKSUM:
+			case SCE_HEX_CHECKSUM_WRONG:
+				//recStartPos = sc.currentPos - 6;
+				sc.SetState(SCE_HEX_DATAADDRESS);
+				ForwardWithinLine(sc, 9);
+				break;
+			case SCE_HEX_NOADDRESS:
+			case SCE_HEX_DATAADDRESS:
+				recStartPos = sc.currentPos - 15;
+				digitCount = GetTHexDigitCount(recStartPos, styler) - 14;
+
+				sc.SetState(SCE_HEX_DATA_ODD);
+
+				for (int i = 0; i < digitCount; i++) {
+					if ((i & 0x3) == 0) {
+						sc.SetState(SCE_HEX_DATA_ODD);
+					} else if ((i & 0x3) == 2) {
+						sc.SetState(SCE_HEX_DATA_EVEN);
+					}
+
+					if (!ForwardWithinLine(sc)) {
+						break;
+					}
+				}
+				break;
+
+			case SCE_HEX_DATA_ODD:
+			case SCE_HEX_DATA_EVEN:
+			case SCE_HEX_DATA_EMPTY:
+			case SCE_HEX_EXTENDEDADDRESS:
+			case SCE_HEX_STARTADDRESS:
+			case SCE_HEX_DATA_UNKNOWN:
+
+				// line too long
+				sc.SetState(SCE_HEX_DATA_UNKNOWN);
+				ForwardWithinLine(sc);
+				break;
+		}
+	}
+	sc.Complete();
+}
+
 LexerModule lmSrec(SCLEX_SREC, ColouriseSrecDoc, "srec", 0, NULL);
 LexerModule lmIHex(SCLEX_IHEX, ColouriseIHexDoc, "ihex", FoldIHexDoc, NULL);
+LexerModule lmTHex(SCLEX_THEX, ColouriseTHexDoc, "thex", 0, NULL);
