@@ -1,6 +1,6 @@
 // Scintilla source code edit control
 /** @file LexHex.cxx
- ** Lexers for Motorola S-Record and Intel HEX.
+ ** Lexers for Motorola S-Record, Intel HEX and Tektronix extended HEX.
  **
  ** Written by Markus Heidelberg
  **/
@@ -62,6 +62,7 @@
  *   Any line, which is not a record (blank lines and lines starting with a
  *   character other than ':'), leaves the fold level unchanged.
  *
+ *
  *  Tektronix extended HEX
  * ===============================
  *
@@ -74,7 +75,7 @@
  *  +----------+
  *  | length   |  2               SCE_HEX_BYTECOUNT, SCE_HEX_BYTECOUNT_WRONG
  *  +----------+
- *  | type     |  1               SCE_HEX_RECTYPE, SCE_HEX_RECTYPE_UNKNOWN
+ *  | type     |  1               SCE_HEX_RECTYPE, (SCE_HEX_RECTYPE_UNKNOWN)
  *  +----------+
  *  | checksum |  2               SCE_HEX_CHECKSUM, SCE_HEX_CHECKSUM_WRONG
  *  +----------+
@@ -91,6 +92,9 @@
  *   read beyond the current position. In case of malformed data (record too
  *   short), it has to be ensured that this either does not have bad influence
  *   or will be captured deliberately.
+ *
+ * - States in parentheses in the upper format descriptions indicate that they
+ *   should not appear in a valid hex file.
  */
 
 #include <stdlib.h>
@@ -509,6 +513,7 @@ static int GetTEHexDigitCount(unsigned int recStartPos, Accessor &styler)
 
 	return val;
 }
+
 // Count the number of digits in this record. Has to
 // be equal to the "record length" field value.
 static int CountTEHexDigitCount(unsigned int recStartPos, Accessor &styler)
@@ -523,10 +528,11 @@ static int CountTEHexDigitCount(unsigned int recStartPos, Accessor &styler)
 
 	return static_cast<int>(pos - (recStartPos+1));
 }
+
 // Get the value of the "checksum" field.
 static int GetTEHexChecksum(unsigned int recStartPos, Accessor &styler)
 {
-    return GetHexaChar(recStartPos+4, styler);
+	return GetHexaChar(recStartPos+4, styler);
 }
 
 static int GetHexaNibble(char hd)
@@ -545,6 +551,7 @@ static int GetHexaNibble(char hd)
 
 	return hexValue;
 }
+
 // Calculate the checksum of the record (excluding the checksum field).
 static int CalcTEHexChecksum(unsigned int recStartPos, Accessor &styler)
 {
@@ -555,8 +562,7 @@ static int CalcTEHexChecksum(unsigned int recStartPos, Accessor &styler)
 
 	cs += GetHexaNibble(styler.SafeGetCharAt(pos++));//type
 
-    pos += 2;// jump over CS field
-    //while(!IsNewline(styler.SafeGetCharAt(pos, '\n')){
+	pos += 2;// jump over CS field
 
 	for (; pos <= recStartPos + length; ++pos) {
 		int val = GetHexaNibble(styler.SafeGetCharAt(pos));
@@ -569,8 +575,8 @@ static int CalcTEHexChecksum(unsigned int recStartPos, Accessor &styler)
 		cs += val;
 	}
 
-    // low byte
-    return cs & 0xFF;
+	// low byte
+	return cs & 0xFF;
 
 }
 
@@ -894,7 +900,7 @@ static void ColouriseTEHexDoc(unsigned int startPos, int length, int initStyle, 
 				sc.SetState(SCE_HEX_DATAADDRESS);
 				ForwardWithinLine(sc, 9);
 				break;
-			case SCE_HEX_NOADDRESS:
+
 			case SCE_HEX_DATAADDRESS:
 				recStartPos = sc.currentPos - 15;
 				digitCount = GetTEHexDigitCount(recStartPos, styler) - 14;
@@ -916,9 +922,6 @@ static void ColouriseTEHexDoc(unsigned int startPos, int length, int initStyle, 
 
 			case SCE_HEX_DATA_ODD:
 			case SCE_HEX_DATA_EVEN:
-			case SCE_HEX_DATA_EMPTY:
-			case SCE_HEX_EXTENDEDADDRESS:
-			case SCE_HEX_STARTADDRESS:
 			case SCE_HEX_DATA_UNKNOWN:
 
 				// line too long
