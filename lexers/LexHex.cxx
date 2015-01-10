@@ -556,7 +556,8 @@ static int GetHexaNibble(char hd)
 static int CalcTEHexChecksum(unsigned int recStartPos, Accessor &styler)
 {
 	unsigned int pos = recStartPos +1;
-	unsigned int length = GetHexaChar(pos, styler);
+	unsigned int length = GetTEHexDigitCount(recStartPos, styler);
+
 	int cs = GetHexaNibble(styler.SafeGetCharAt(pos++));//length
 	cs += GetHexaNibble(styler.SafeGetCharAt(pos++));//length
 
