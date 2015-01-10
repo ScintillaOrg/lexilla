@@ -4570,6 +4570,7 @@ val SCE_HEX_DATA_EMPTY=14
 val SCE_HEX_CHECKSUM=15
 val SCE_HEX_CHECKSUM_WRONG=16
 val SCE_HEX_RECTYPE_UNKNOWN=17
+val SCE_HEX_GARBAGE=18
 # Lexical state for SCLEX_IHEX (shared with Srec)
 lex IHex=SCLEX_IHEX SCE_HEX_
 # Lexical state for SCLEX_TEHEX (shared with Srec)

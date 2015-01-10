@@ -95,6 +95,9 @@
  *
  * - States in parentheses in the upper format descriptions indicate that they
  *   should not appear in a valid hex file.
+ *
+ * - State SCE_HEX_GARBAGE means garbage data after the intended end of the
+ *   record, the line is too long then. This state is used in all lexers.
  */
 
 #include <stdlib.h>
@@ -692,8 +695,9 @@ static void ColouriseSrecDoc(unsigned int startPos, int length, int initStyle, W
 
 			case SCE_HEX_CHECKSUM:
 			case SCE_HEX_CHECKSUM_WRONG:
-				// record finished
-				sc.SetState(SCE_HEX_DEFAULT);
+			case SCE_HEX_GARBAGE:
+				// record finished or line too long
+				sc.SetState(SCE_HEX_GARBAGE);
 				ForwardWithinLine(sc);
 				break;
 		}
@@ -802,8 +806,9 @@ static void ColouriseIHexDoc(unsigned int startPos, int length, int initStyle, W
 
 			case SCE_HEX_CHECKSUM:
 			case SCE_HEX_CHECKSUM_WRONG:
-				// record finished
-				sc.SetState(SCE_HEX_DEFAULT);
+			case SCE_HEX_GARBAGE:
+				// record finished or line too long
+				sc.SetState(SCE_HEX_GARBAGE);
 				ForwardWithinLine(sc);
 				break;
 		}
@@ -946,10 +951,9 @@ static void ColouriseTEHexDoc(unsigned int startPos, int length, int initStyle, 
 
 			case SCE_HEX_DATA_ODD:
 			case SCE_HEX_DATA_EVEN:
-			case SCE_HEX_DATA_UNKNOWN:
-
-				// line too long
-				sc.SetState(SCE_HEX_DATA_UNKNOWN);
+			case SCE_HEX_GARBAGE:
+				// record finished or line too long
+				sc.SetState(SCE_HEX_GARBAGE);
 				ForwardWithinLine(sc);
 				break;
 		}
