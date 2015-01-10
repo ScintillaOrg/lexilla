@@ -79,7 +79,7 @@
  *  +----------+
  *  | checksum |  2               SCE_HEX_CHECKSUM, SCE_HEX_CHECKSUM_WRONG
  *  +----------+
- *  | address  |  9               SCE_HEX_DATAADDRESS
+ *  | address  |  9               SCE_HEX_DATAADDRESS, SCE_HEX_STARTADDRESS, (SCE_HEX_ADDRESSFIELD_UNKNOWN)
  *  +----------+
  *  | data     |  0..241          SCE_HEX_DATA_ODD, SCE_HEX_DATA_EVEN
  *  +----------+
@@ -149,6 +149,7 @@ static int CalcIHexChecksum(unsigned int recStartPos, Accessor &styler);
 
 static int GetTEHexDigitCount(unsigned int recStartPos, Accessor &styler);
 static int CountTEHexDigitCount(unsigned int recStartPos, Accessor &styler);
+static int GetTEHexAddressFieldType(unsigned int recStartPos, Accessor &styler);
 static int GetTEHexChecksum(unsigned int recStartPos, Accessor &styler);
 static int CalcTEHexChecksum(unsigned int recStartPos, Accessor &styler);
 
@@ -547,6 +548,21 @@ static int CountTEHexDigitCount(unsigned int recStartPos, Accessor &styler)
 	return static_cast<int>(pos - (recStartPos+1));
 }
 
+// Get the type of the "address" field content.
+static int GetTEHexAddressFieldType(unsigned int recStartPos, Accessor &styler)
+{
+	switch (styler.SafeGetCharAt(recStartPos + 3)) {
+		case '6':
+			return SCE_HEX_DATAADDRESS;
+
+		case '8':
+			return SCE_HEX_STARTADDRESS;
+
+		default: // handle possible format extension in the future
+			return SCE_HEX_ADDRESSFIELD_UNKNOWN;
+	}
+}
+
 // Get the value of the "checksum" field.
 static int GetTEHexChecksum(unsigned int recStartPos, Accessor &styler)
 {
@@ -844,7 +860,7 @@ static void ColouriseTEHexDoc(unsigned int startPos, int length, int initStyle, 
 
 	while (sc.More()) {
 		unsigned int recStartPos;
-		int digitCount;
+		int digitCount, addrFieldType;
 		int cs1, cs2;
 
 		switch (sc.state) {
@@ -870,11 +886,13 @@ static void ColouriseTEHexDoc(unsigned int startPos, int length, int initStyle, 
 
 			case SCE_HEX_BYTECOUNT:
 			case SCE_HEX_BYTECOUNT_WRONG:
-				//recStartPos = sc.currentPos - 3;
-				if (sc.Match('6') || sc.Match('8')) {
-					sc.SetState(SCE_HEX_RECTYPE);
-				} else {
+				recStartPos = sc.currentPos - 3;
+				addrFieldType = GetTEHexAddressFieldType(recStartPos, styler);
+
+				if (addrFieldType == SCE_HEX_ADDRESSFIELD_UNKNOWN) {
 					sc.SetState(SCE_HEX_RECTYPE_UNKNOWN);
+				} else {
+					sc.SetState(SCE_HEX_RECTYPE);
 				}
 
 				ForwardWithinLine(sc);
@@ -898,12 +916,16 @@ static void ColouriseTEHexDoc(unsigned int startPos, int length, int initStyle, 
 
 			case SCE_HEX_CHECKSUM:
 			case SCE_HEX_CHECKSUM_WRONG:
-				//recStartPos = sc.currentPos - 6;
-				sc.SetState(SCE_HEX_DATAADDRESS);
+				recStartPos = sc.currentPos - 6;
+				addrFieldType = GetTEHexAddressFieldType(recStartPos, styler);
+
+				sc.SetState(addrFieldType);
 				ForwardWithinLine(sc, 9);
 				break;
 
 			case SCE_HEX_DATAADDRESS:
+			case SCE_HEX_STARTADDRESS:
+			case SCE_HEX_ADDRESSFIELD_UNKNOWN:
 				recStartPos = sc.currentPos - 15;
 				digitCount = GetTEHexDigitCount(recStartPos, styler) - 14;
 
