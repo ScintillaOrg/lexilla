@@ -2721,7 +2721,7 @@ val SCLEX_REGISTRY=115
 val SCLEX_BIBTEX=116
 val SCLEX_SREC=117
 val SCLEX_IHEX=118
-val SCLEX_THEX=119
+val SCLEX_TEHEX=119
 
 # When a lexer specifies its language as SCLEX_AUTOMATIC it receives a
 # value assigned in sequence from SCLEX_AUTOMATIC+1.
@@ -4572,8 +4572,8 @@ val SCE_HEX_CHECKSUM_WRONG=16
 val SCE_HEX_RECTYPE_UNKNOWN=17
 # Lexical state for SCLEX_IHEX (shared with Srec)
 lex IHex=SCLEX_IHEX SCE_HEX_
-# Lexical state for SCLEX_THEX (shared with Srec)
-lex THex=SCLEX_THEX SCE_HEX_
+# Lexical state for SCLEX_TEHEX (shared with Srec)
+lex TEHex=SCLEX_TEHEX SCE_HEX_
 
 # Events
 

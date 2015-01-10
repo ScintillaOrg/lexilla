@@ -142,10 +142,10 @@ static int GetIHexRequiredDataFieldSize(unsigned int recStartPos, Accessor &styl
 static int GetIHexChecksum(unsigned int recStartPos, Accessor &styler);
 static int CalcIHexChecksum(unsigned int recStartPos, Accessor &styler);
 
-static int GetTHexDigitCount(unsigned int recStartPos, Accessor &styler);
-static int CountTHexDigitCount(unsigned int recStartPos, Accessor &styler);
-static int GetTHexChecksum(unsigned int recStartPos, Accessor &styler);
-static int CalcTHexChecksum(unsigned int recStartPos, Accessor &styler);
+static int GetTEHexDigitCount(unsigned int recStartPos, Accessor &styler);
+static int CountTEHexDigitCount(unsigned int recStartPos, Accessor &styler);
+static int GetTEHexChecksum(unsigned int recStartPos, Accessor &styler);
+static int CalcTEHexChecksum(unsigned int recStartPos, Accessor &styler);
 
 static inline bool IsNewline(const int ch)
 {
@@ -501,7 +501,7 @@ static int CalcIHexChecksum(unsigned int recStartPos, Accessor &styler)
 
 // Get the value of the "record length" field, it counts the number of digits in
 // the record excluding the percent.
-static int GetTHexDigitCount(unsigned int recStartPos, Accessor &styler)
+static int GetTEHexDigitCount(unsigned int recStartPos, Accessor &styler)
 {
 	int val = GetHexaChar(recStartPos + 1, styler);
 	if (val < 0)
@@ -511,7 +511,7 @@ static int GetTHexDigitCount(unsigned int recStartPos, Accessor &styler)
 }
 // Count the number of digits in this record. Has to
 // be equal to the "record length" field value.
-static int CountTHexDigitCount(unsigned int recStartPos, Accessor &styler)
+static int CountTEHexDigitCount(unsigned int recStartPos, Accessor &styler)
 {
 	unsigned int pos;
 
@@ -524,7 +524,7 @@ static int CountTHexDigitCount(unsigned int recStartPos, Accessor &styler)
 	return static_cast<int>(pos - (recStartPos+1));
 }
 // Get the value of the "checksum" field.
-static int GetTHexChecksum(unsigned int recStartPos, Accessor &styler)
+static int GetTEHexChecksum(unsigned int recStartPos, Accessor &styler)
 {
     return GetHexaChar(recStartPos+4, styler);
 }
@@ -546,7 +546,7 @@ static int GetHexaNibble(char hd)
 	return hexValue;
 }
 // Calculate the checksum of the record (excluding the checksum field).
-static int CalcTHexChecksum(unsigned int recStartPos, Accessor &styler)
+static int CalcTEHexChecksum(unsigned int recStartPos, Accessor &styler)
 {
 	unsigned int pos = recStartPos +1;
 	unsigned int length = GetHexaChar(pos, styler);
@@ -830,7 +830,7 @@ static void FoldIHexDoc(unsigned int startPos, int length, int, WordList *[], Ac
 	}
 }
 
-static void ColouriseTHexDoc(unsigned int startPos, int length, int initStyle, WordList *[], Accessor &styler)
+static void ColouriseTEHexDoc(unsigned int startPos, int length, int initStyle, WordList *[], Accessor &styler)
 {
 	StyleContext sc(startPos, length, initStyle, styler);
 
@@ -851,7 +851,7 @@ static void ColouriseTHexDoc(unsigned int startPos, int length, int initStyle, W
 
 				recStartPos = sc.currentPos - 1;
 
-				if (GetTHexDigitCount(recStartPos, styler) == CountTHexDigitCount(recStartPos, styler)) {
+				if (GetTEHexDigitCount(recStartPos, styler) == CountTEHexDigitCount(recStartPos, styler)) {
 					sc.SetState(SCE_HEX_BYTECOUNT);
 				} else {
 					sc.SetState(SCE_HEX_BYTECOUNT_WRONG);
@@ -875,8 +875,8 @@ static void ColouriseTHexDoc(unsigned int startPos, int length, int initStyle, W
 			case SCE_HEX_RECTYPE:
 			case SCE_HEX_RECTYPE_UNKNOWN:
 				recStartPos = sc.currentPos - 4;
-				cs1 = CalcTHexChecksum(recStartPos, styler);
-				cs2 = GetTHexChecksum(recStartPos, styler);
+				cs1 = CalcTEHexChecksum(recStartPos, styler);
+				cs2 = GetTEHexChecksum(recStartPos, styler);
 
 				if (cs1 != cs2 || cs1 < 0 || cs2 < 0) {
 					sc.SetState(SCE_HEX_CHECKSUM_WRONG);
@@ -897,7 +897,7 @@ static void ColouriseTHexDoc(unsigned int startPos, int length, int initStyle, W
 			case SCE_HEX_NOADDRESS:
 			case SCE_HEX_DATAADDRESS:
 				recStartPos = sc.currentPos - 15;
-				digitCount = GetTHexDigitCount(recStartPos, styler) - 14;
+				digitCount = GetTEHexDigitCount(recStartPos, styler) - 14;
 
 				sc.SetState(SCE_HEX_DATA_ODD);
 
@@ -932,4 +932,4 @@ static void ColouriseTHexDoc(unsigned int startPos, int length, int initStyle, W
 
 LexerModule lmSrec(SCLEX_SREC, ColouriseSrecDoc, "srec", 0, NULL);
 LexerModule lmIHex(SCLEX_IHEX, ColouriseIHexDoc, "ihex", FoldIHexDoc, NULL);
-LexerModule lmTHex(SCLEX_THEX, ColouriseTHexDoc, "thex", 0, NULL);
+LexerModule lmTEHex(SCLEX_TEHEX, ColouriseTEHexDoc, "tehex", 0, NULL);

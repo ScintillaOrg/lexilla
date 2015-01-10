@@ -182,8 +182,8 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmTAL);
 	LINK_LEXER(lmTCL);
 	LINK_LEXER(lmTCMD);
+	LINK_LEXER(lmTEHex);
 	LINK_LEXER(lmTeX);
-	LINK_LEXER(lmTHex);
 	LINK_LEXER(lmTxt2tags);
 	LINK_LEXER(lmVB);
 	LINK_LEXER(lmVBScript);
