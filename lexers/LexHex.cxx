@@ -121,6 +121,7 @@ using namespace Scintilla;
 
 // prototypes for general helper functions
 static inline bool IsNewline(const int ch);
+static int GetHexaNibble(char hd);
 static int GetHexaChar(char hd1, char hd2);
 static int GetHexaChar(unsigned int pos, Accessor &styler);
 static bool ForwardWithinLine(StyleContext &sc, int nb = 1);
@@ -154,6 +155,23 @@ static int CalcTEHexChecksum(unsigned int recStartPos, Accessor &styler);
 static inline bool IsNewline(const int ch)
 {
     return (ch == '\n' || ch == '\r');
+}
+
+static int GetHexaNibble(char hd)
+{
+	int hexValue = 0;
+
+	if (hd >= '0' && hd <= '9') {
+		hexValue += hd - '0';
+	} else if (hd >= 'A' && hd <= 'F') {
+		hexValue += hd - 'A' + 10;
+	} else if (hd >= 'a' && hd <= 'f') {
+		hexValue += hd - 'a' + 10;
+	} else {
+		return -1;
+	}
+
+	return hexValue;
 }
 
 static int GetHexaChar(char hd1, char hd2)
@@ -533,23 +551,6 @@ static int CountTEHexDigitCount(unsigned int recStartPos, Accessor &styler)
 static int GetTEHexChecksum(unsigned int recStartPos, Accessor &styler)
 {
 	return GetHexaChar(recStartPos+4, styler);
-}
-
-static int GetHexaNibble(char hd)
-{
-	int hexValue = 0;
-
-	if (hd >= '0' && hd <= '9') {
-		hexValue += hd - '0';
-	} else if (hd >= 'A' && hd <= 'F') {
-		hexValue += hd - 'A' + 10;
-	} else if (hd >= 'a' && hd <= 'f') {
-		hexValue += hd - 'a' + 10;
-	} else {
-		return -1;
-	}
-
-	return hexValue;
 }
 
 // Calculate the checksum of the record (excluding the checksum field).
