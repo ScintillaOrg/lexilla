@@ -2561,20 +2561,6 @@ void ScintillaWin::CopyToClipboard(const SelectionText &selectedText) {
 	}
 
 	if (uniText) {
-		if (!IsNT()) {
-			// Copy ANSI text to clipboard on Windows 9x
-			// Convert from Unicode text, so other ANSI programs can
-			// paste the text
-			// Windows NT, 2k, XP automatically generates CF_TEXT
-			GlobalMemory ansiText;
-			ansiText.Allocate(selectedText.LengthWithTerminator());
-			if (ansiText) {
-				::WideCharToMultiByte(CP_ACP, 0, static_cast<wchar_t *>(uniText.ptr), -1,
-					static_cast<char *>(ansiText.ptr),
-					static_cast<int>(selectedText.LengthWithTerminator()), NULL, NULL);
-				ansiText.SetClip(CF_TEXT);
-			}
-		}
 		uniText.SetClip(CF_UNICODETEXT);
 	} else {
 		// There was a failure - try to copy at least ANSI text
@@ -2952,43 +2938,22 @@ bool ScintillaWin::Register(HINSTANCE hInstance_) {
 	bool result;
 
 	// Register the Scintilla class
-	if (IsNT()) {
-
-		// Register Scintilla as a wide character window
-		WNDCLASSEXW wndclass;
-		wndclass.cbSize = sizeof(wndclass);
-		wndclass.style = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW;
-		wndclass.lpfnWndProc = ScintillaWin::SWndProc;
-		wndclass.cbClsExtra = 0;
-		wndclass.cbWndExtra = sizeof(ScintillaWin *);
-		wndclass.hInstance = hInstance;
-		wndclass.hIcon = NULL;
-		wndclass.hCursor = NULL;
-		wndclass.hbrBackground = NULL;
-		wndclass.lpszMenuName = NULL;
-		wndclass.lpszClassName = L"Scintilla";
-		wndclass.hIconSm = 0;
-		scintillaClassAtom = ::RegisterClassExW(&wndclass);
-		result = 0 != scintillaClassAtom;
-	} else {
-
-		// Register Scintilla as a normal character window
-		WNDCLASSEX wndclass;
-		wndclass.cbSize = sizeof(wndclass);
-		wndclass.style = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW;
-		wndclass.lpfnWndProc = ScintillaWin::SWndProc;
-		wndclass.cbClsExtra = 0;
-		wndclass.cbWndExtra = sizeof(ScintillaWin *);
-		wndclass.hInstance = hInstance;
-		wndclass.hIcon = NULL;
-		wndclass.hCursor = NULL;
-		wndclass.hbrBackground = NULL;
-		wndclass.lpszMenuName = NULL;
-		wndclass.lpszClassName = scintillaClassName;
-		wndclass.hIconSm = 0;
-		scintillaClassAtom = ::RegisterClassEx(&wndclass);
-		result = 0 != scintillaClassAtom;
-	}
+	// Register Scintilla as a wide character window
+	WNDCLASSEXW wndclass;
+	wndclass.cbSize = sizeof(wndclass);
+	wndclass.style = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW;
+	wndclass.lpfnWndProc = ScintillaWin::SWndProc;
+	wndclass.cbClsExtra = 0;
+	wndclass.cbWndExtra = sizeof(ScintillaWin *);
+	wndclass.hInstance = hInstance;
+	wndclass.hIcon = NULL;
+	wndclass.hCursor = NULL;
+	wndclass.hbrBackground = NULL;
+	wndclass.lpszMenuName = NULL;
+	wndclass.lpszClassName = L"Scintilla";
+	wndclass.hIconSm = 0;
+	scintillaClassAtom = ::RegisterClassExW(&wndclass);
+	result = 0 != scintillaClassAtom;
 
 	if (result) {
 		// Register the CallTip class
