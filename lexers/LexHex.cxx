@@ -700,6 +700,11 @@ static void ColouriseSrecDoc(unsigned int startPos, int length, int initStyle, W
 				sc.SetState(SCE_HEX_GARBAGE);
 				ForwardWithinLine(sc);
 				break;
+
+			default:
+				// prevent endless loop in faulty state
+				sc.SetState(SCE_HEX_DEFAULT);
+				break;
 		}
 	}
 	sc.Complete();
@@ -810,6 +815,11 @@ static void ColouriseIHexDoc(unsigned int startPos, int length, int initStyle, W
 				// record finished or line too long
 				sc.SetState(SCE_HEX_GARBAGE);
 				ForwardWithinLine(sc);
+				break;
+
+			default:
+				// prevent endless loop in faulty state
+				sc.SetState(SCE_HEX_DEFAULT);
 				break;
 		}
 	}
@@ -955,6 +965,11 @@ static void ColouriseTEHexDoc(unsigned int startPos, int length, int initStyle, 
 				// record finished or line too long
 				sc.SetState(SCE_HEX_GARBAGE);
 				ForwardWithinLine(sc);
+				break;
+
+			default:
+				// prevent endless loop in faulty state
+				sc.SetState(SCE_HEX_DEFAULT);
 				break;
 		}
 	}
