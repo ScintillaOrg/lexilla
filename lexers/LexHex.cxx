@@ -24,7 +24,7 @@
  *  +----------+
  *  | address  |  4/6/8           SCE_HEX_NOADDRESS, SCE_HEX_DATAADDRESS, SCE_HEX_RECCOUNT, SCE_HEX_STARTADDRESS, (SCE_HEX_ADDRESSFIELD_UNKNOWN)
  *  +----------+
- *  | data     |  0..504/502/500  SCE_HEX_DATA_ODD, SCE_HEX_DATA_EVEN, (SCE_HEX_DATA_UNKNOWN)
+ *  | data     |  0..504/502/500  SCE_HEX_DATA_ODD, SCE_HEX_DATA_EVEN, SCE_HEX_DATA_EMPTY, (SCE_HEX_DATA_UNKNOWN)
  *  +----------+
  *  | checksum |  2               SCE_HEX_CHECKSUM, SCE_HEX_CHECKSUM_WRONG
  *  +----------+
@@ -138,6 +138,8 @@ static int GetSrecByteCount(unsigned int recStartPos, Accessor &styler);
 static int CountSrecByteCount(unsigned int recStartPos, Accessor &styler);
 static int GetSrecAddressFieldSize(unsigned int recStartPos, Accessor &styler);
 static int GetSrecAddressFieldType(unsigned int recStartPos, Accessor &styler);
+static int GetSrecDataFieldType(unsigned int recStartPos, Accessor &styler);
+static int GetSrecRequiredDataFieldSize(unsigned int recStartPos, Accessor &styler);
 static int GetSrecChecksum(unsigned int recStartPos, Accessor &styler);
 static int CalcSrecChecksum(unsigned int recStartPos, Accessor &styler);
 
@@ -380,6 +382,48 @@ static int GetSrecAddressFieldType(unsigned int recStartPos, Accessor &styler)
 	}
 }
 
+// Get the type of the "data" field content.
+static int GetSrecDataFieldType(unsigned int recStartPos, Accessor &styler)
+{
+	switch (styler.SafeGetCharAt(recStartPos + 1)) {
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+			return SCE_HEX_DATA_ODD;
+
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+			return SCE_HEX_DATA_EMPTY;
+
+		default: // handle possible format extension in the future
+			return SCE_HEX_DATA_UNKNOWN;
+	}
+}
+
+// Get the required size of the "data" field. Useless for block header and
+// ordinary data records (type S0, S1, S2, S3), return the value calculated
+// from the "byte count" and "address field" size in this case.
+static int GetSrecRequiredDataFieldSize(unsigned int recStartPos, Accessor &styler)
+{
+	switch (styler.SafeGetCharAt(recStartPos + 1)) {
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+			return 0;
+
+		default:
+			return GetSrecByteCount(recStartPos, styler)
+				- GetSrecAddressFieldSize(recStartPos, styler)
+				- 1; // -1 for checksum field
+	}
+}
+
 // Get the value of the "checksum" field.
 static int GetSrecChecksum(unsigned int recStartPos, Accessor &styler)
 {
@@ -607,7 +651,7 @@ static void ColouriseSrecDoc(unsigned int startPos, int length, int initStyle, W
 
 	while (sc.More()) {
 		unsigned int recStartPos;
-		int byteCount, addrFieldSize, addrFieldType, dataFieldSize;
+		int byteCount, reqByteCount, addrFieldSize, addrFieldType, dataFieldSize, dataFieldType;
 		int cs1, cs2;
 
 		switch (sc.state) {
@@ -635,8 +679,12 @@ static void ColouriseSrecDoc(unsigned int startPos, int length, int initStyle, W
 			case SCE_HEX_RECTYPE_UNKNOWN:
 				recStartPos = sc.currentPos - 2;
 				byteCount = GetSrecByteCount(recStartPos, styler);
+				reqByteCount = GetSrecAddressFieldSize(recStartPos, styler)
+						+ GetSrecRequiredDataFieldSize(recStartPos, styler)
+						+ 1; // +1 for checksum field
 
-				if (byteCount == CountSrecByteCount(recStartPos, styler)) {
+				if (byteCount == CountSrecByteCount(recStartPos, styler)
+						&& byteCount == reqByteCount) {
 					sc.SetState(SCE_HEX_BYTECOUNT);
 				} else {
 					sc.SetState(SCE_HEX_BYTECOUNT_WRONG);
@@ -661,33 +709,35 @@ static void ColouriseSrecDoc(unsigned int startPos, int length, int initStyle, W
 			case SCE_HEX_STARTADDRESS:
 			case SCE_HEX_ADDRESSFIELD_UNKNOWN:
 				recStartPos = GetSrecRecStartPosition(sc.currentPos, styler);
-				byteCount = GetSrecByteCount(recStartPos, styler);
-				addrFieldSize = GetSrecAddressFieldSize(recStartPos, styler);
-				dataFieldSize = byteCount - addrFieldSize - 1; // -1 for checksum field
+				dataFieldType = GetSrecDataFieldType(recStartPos, styler);
 
-				if (sc.state == SCE_HEX_ADDRESSFIELD_UNKNOWN) {
-					sc.SetState(SCE_HEX_DATA_UNKNOWN);
+				// Using the required size here if possible has the effect that the
+				// checksum is highlighted at a fixed position after this field for
+				// specific record types, independent on the "byte count" value.
+				dataFieldSize = GetSrecRequiredDataFieldSize(recStartPos, styler);
+
+				sc.SetState(dataFieldType);
+
+				if (dataFieldType == SCE_HEX_DATA_ODD) {
+					for (int i = 0; i < dataFieldSize * 2; i++) {
+						if ((i & 0x3) == 0) {
+							sc.SetState(SCE_HEX_DATA_ODD);
+						} else if ((i & 0x3) == 2) {
+							sc.SetState(SCE_HEX_DATA_EVEN);
+						}
+
+						if (!ForwardWithinLine(sc)) {
+							break;
+						}
+					}
+				} else {
 					ForwardWithinLine(sc, dataFieldSize * 2);
-					break;
-				}
-
-				sc.SetState(SCE_HEX_DATA_ODD);
-
-				for (int i = 0; i < dataFieldSize * 2; i++) {
-					if ((i & 0x3) == 0) {
-						sc.SetState(SCE_HEX_DATA_ODD);
-					} else if ((i & 0x3) == 2) {
-						sc.SetState(SCE_HEX_DATA_EVEN);
-					}
-
-					if (!ForwardWithinLine(sc)) {
-						break;
-					}
 				}
 				break;
 
 			case SCE_HEX_DATA_ODD:
 			case SCE_HEX_DATA_EVEN:
+			case SCE_HEX_DATA_EMPTY:
 			case SCE_HEX_DATA_UNKNOWN:
 				recStartPos = GetSrecRecStartPosition(sc.currentPos, styler);
 				cs1 = CalcSrecChecksum(recStartPos, styler);
@@ -780,11 +830,14 @@ static void ColouriseIHexDoc(unsigned int startPos, int length, int initStyle, W
 				recStartPos = sc.currentPos - 9;
 				dataFieldType = GetIHexDataFieldType(recStartPos, styler);
 
+				// Using the required size here if possible has the effect that the
+				// checksum is highlighted at a fixed position after this field for
+				// specific record types, independent on the "byte count" value.
+				dataFieldSize = GetIHexRequiredDataFieldSize(recStartPos, styler);
+
 				sc.SetState(dataFieldType);
 
 				if (dataFieldType == SCE_HEX_DATA_ODD) {
-					dataFieldSize = GetIHexByteCount(recStartPos, styler);
-
 					for (int i = 0; i < dataFieldSize * 2; i++) {
 						if ((i & 0x3) == 0) {
 							sc.SetState(SCE_HEX_DATA_ODD);
@@ -796,14 +849,7 @@ static void ColouriseIHexDoc(unsigned int startPos, int length, int initStyle, W
 							break;
 						}
 					}
-				} else if (dataFieldType == SCE_HEX_DATA_UNKNOWN) {
-					dataFieldSize = GetIHexByteCount(recStartPos, styler);
-					ForwardWithinLine(sc, dataFieldSize * 2);
 				} else {
-					// Using the required size here has the effect that the checksum is
-					// highlighted at a fixed position after this field, independent on
-					// the "byte count" value.
-					dataFieldSize = GetIHexRequiredDataFieldSize(recStartPos, styler);
 					ForwardWithinLine(sc, dataFieldSize * 2);
 				}
 				break;
