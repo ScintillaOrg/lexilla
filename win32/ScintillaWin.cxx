@@ -1020,12 +1020,12 @@ sptr_t ScintillaWin::GetText(uptr_t wParam, sptr_t lParam) {
 		std::vector<char> docBytes(pdoc->Length(), '\0');
 		pdoc->GetCharRange(&docBytes[0], 0, pdoc->Length());
 		if (IsUnicodeMode()) {
-			unsigned int lengthUTF16 = UTF16Length(&docBytes[0], static_cast<unsigned int>(docBytes.size()));
+			size_t lengthUTF16 = UTF16Length(&docBytes[0], static_cast<unsigned int>(docBytes.size()));
 			if (lParam == 0)
 				return lengthUTF16;
 			if (wParam == 0)
 				return 0;
-			unsigned int uLen = UTF16FromUTF8(&docBytes[0], static_cast<unsigned int>(docBytes.size()),
+			size_t uLen = UTF16FromUTF8(&docBytes[0], docBytes.size(),
 				ptr, static_cast<int>(wParam) - 1);
 			ptr[uLen] = L'\0';
 			return uLen;
@@ -1847,8 +1847,8 @@ public:
 				if (foldedUTF8) {
 					// Maximum length of a case conversion is 6 bytes, 3 characters
 					wchar_t wFolded[20];
-					unsigned int charsConverted = UTF16FromUTF8(foldedUTF8,
-							static_cast<unsigned int>(strlen(foldedUTF8)),
+					size_t charsConverted = UTF16FromUTF8(foldedUTF8,
+							strlen(foldedUTF8),
 							wFolded, ELEMENTS(wFolded));
 					for (size_t j=0; j<charsConverted; j++)
 						utf16Folded[lenFlat++] = wFolded[j];
@@ -1893,13 +1893,13 @@ CaseFolder *ScintillaWin::CaseFolderForEncoding() {
 					const char *caseFolded = CaseConvert(wCharacter[0], CaseConversionFold);
 					if (caseFolded) {
 						wchar_t wLower[20];
-						unsigned int charsConverted = UTF16FromUTF8(caseFolded,
-							static_cast<unsigned int>(strlen(caseFolded)),
+						size_t charsConverted = UTF16FromUTF8(caseFolded,
+							strlen(caseFolded),
 							wLower, ELEMENTS(wLower));
 						if (charsConverted == 1) {
 							char sCharacterLowered[20];
 							unsigned int lengthConverted = ::WideCharToMultiByte(cpDoc, 0,
-								wLower, charsConverted,
+								wLower, static_cast<int>(charsConverted),
 								sCharacterLowered, ELEMENTS(sCharacterLowered), NULL, 0);
 							if ((lengthConverted == 1) && (sCharacter[0] != sCharacterLowered[0])) {
 								pcf->SetTranslation(sCharacter[0], sCharacterLowered[0]);
@@ -2538,11 +2538,11 @@ void ScintillaWin::CopyToClipboard(const SelectionText &selectedText) {
 
 	// Default Scintilla behaviour in Unicode mode
 	if (IsUnicodeMode()) {
-		int uchars = UTF16Length(selectedText.Data(),
+		size_t uchars = UTF16Length(selectedText.Data(),
 			static_cast<int>(selectedText.LengthWithTerminator()));
 		uniText.Allocate(2 * uchars);
 		if (uniText) {
-			UTF16FromUTF8(selectedText.Data(), static_cast<int>(selectedText.LengthWithTerminator()),
+			UTF16FromUTF8(selectedText.Data(), selectedText.LengthWithTerminator(),
 				static_cast<wchar_t *>(uniText.ptr), uchars);
 		}
 	} else {
@@ -2915,10 +2915,10 @@ STDMETHODIMP ScintillaWin::GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM) {
 
 	GlobalMemory text;
 	if (pFEIn->cfFormat == CF_UNICODETEXT) {
-		int uchars = UTF16Length(drag.Data(), static_cast<int>(drag.LengthWithTerminator()));
+		size_t uchars = UTF16Length(drag.Data(), static_cast<int>(drag.LengthWithTerminator()));
 		text.Allocate(2 * uchars);
 		if (text) {
-			UTF16FromUTF8(drag.Data(), static_cast<int>(drag.LengthWithTerminator()),
+			UTF16FromUTF8(drag.Data(), drag.LengthWithTerminator(),
 				static_cast<wchar_t *>(text.ptr), uchars);
 		}
 	} else {
