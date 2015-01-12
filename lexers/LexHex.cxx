@@ -18,7 +18,7 @@
  *  +----------+
  *  | start    |  1 ('S')         SCE_HEX_RECSTART
  *  +----------+
- *  | type     |  1               SCE_HEX_RECTYPE
+ *  | type     |  1               SCE_HEX_RECTYPE, (SCE_HEX_RECTYPE_UNKNOWN)
  *  +----------+
  *  | count    |  2               SCE_HEX_BYTECOUNT, SCE_HEX_BYTECOUNT_WRONG
  *  +----------+
@@ -44,7 +44,7 @@
  *  +----------+
  *  | address  |  4               SCE_HEX_NOADDRESS, SCE_HEX_DATAADDRESS, (SCE_HEX_ADDRESSFIELD_UNKNOWN)
  *  +----------+
- *  | type     |  2               SCE_HEX_RECTYPE
+ *  | type     |  2               SCE_HEX_RECTYPE, (SCE_HEX_RECTYPE_UNKNOWN)
  *  +----------+
  *  | data     |  0..510          SCE_HEX_DATA_ODD, SCE_HEX_DATA_EVEN, SCE_HEX_DATA_EMPTY, SCE_HEX_EXTENDEDADDRESS, SCE_HEX_STARTADDRESS, (SCE_HEX_DATA_UNKNOWN)
  *  +----------+
@@ -619,11 +619,20 @@ static void ColouriseSrecDoc(unsigned int startPos, int length, int initStyle, W
 				break;
 
 			case SCE_HEX_RECSTART:
-				sc.SetState(SCE_HEX_RECTYPE);
+				recStartPos = sc.currentPos - 1;
+				addrFieldType = GetSrecAddressFieldType(recStartPos, styler);
+
+				if (addrFieldType == SCE_HEX_ADDRESSFIELD_UNKNOWN) {
+					sc.SetState(SCE_HEX_RECTYPE_UNKNOWN);
+				} else {
+					sc.SetState(SCE_HEX_RECTYPE);
+				}
+
 				ForwardWithinLine(sc);
 				break;
 
 			case SCE_HEX_RECTYPE:
+			case SCE_HEX_RECTYPE_UNKNOWN:
 				recStartPos = sc.currentPos - 2;
 				byteCount = GetSrecByteCount(recStartPos, styler);
 
@@ -754,11 +763,20 @@ static void ColouriseIHexDoc(unsigned int startPos, int length, int initStyle, W
 			case SCE_HEX_NOADDRESS:
 			case SCE_HEX_DATAADDRESS:
 			case SCE_HEX_ADDRESSFIELD_UNKNOWN:
-				sc.SetState(SCE_HEX_RECTYPE);
+				recStartPos = sc.currentPos - 7;
+				addrFieldType = GetIHexAddressFieldType(recStartPos, styler);
+
+				if (addrFieldType == SCE_HEX_ADDRESSFIELD_UNKNOWN) {
+					sc.SetState(SCE_HEX_RECTYPE_UNKNOWN);
+				} else {
+					sc.SetState(SCE_HEX_RECTYPE);
+				}
+
 				ForwardWithinLine(sc, 2);
 				break;
 
 			case SCE_HEX_RECTYPE:
+			case SCE_HEX_RECTYPE_UNKNOWN:
 				recStartPos = sc.currentPos - 9;
 				dataFieldType = GetIHexDataFieldType(recStartPos, styler);
 
