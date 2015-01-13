@@ -123,6 +123,8 @@ struct OptionsVerilog {
 	bool foldAtModule;
 	bool trackPreprocessor;
 	bool updatePreprocessor;
+	bool portStyling;
+	bool allUppercaseDocKeyword;
 	OptionsVerilog() {
 		foldComment = false;
 		foldPreprocessor = false;
@@ -132,6 +134,10 @@ struct OptionsVerilog {
 		// for backwards compatibility, preprocessor functionality is disabled by default
 		trackPreprocessor = false;
 		updatePreprocessor = false;
+		// for backwards compatibility, treat input/output/inout as regular keywords
+		portStyling = false;
+		// for backwards compatibility, don't treat all uppercase identifiers as documentation keywords
+		allUppercaseDocKeyword = false;
 	}
 };
 
@@ -151,6 +157,10 @@ struct OptionSetVerilog : public OptionSet<OptionsVerilog> {
 			"Set to 1 to interpret `if/`else/`endif to grey out code that is not active.");
 		DefineProperty("lexer.verilog.update.preprocessor", &OptionsVerilog::updatePreprocessor,
 			"Set to 1 to update preprocessor definitions when `define, `undef, or `undefineall found.");
+		DefineProperty("lexer.verilog.portstyling", &OptionsVerilog::portStyling,
+			"Set to 1 to style input, output, and inout ports differently from regular keywords.");
+		DefineProperty("lexer.verilog.allupperkeywords", &OptionsVerilog::allUppercaseDocKeyword,
+			"Set to 1 to style identifiers that are all uppercase as documentation keyword.");
 	}
 };
 
@@ -464,24 +474,23 @@ void SCI_METHOD LexerVerilog::Lex(unsigned int startPos, int length, int initSty
 			}
 		}
 
+		// for comment keyword
+		if (MaskActive(sc.state) == SCE_V_COMMENT_WORD && !IsAWordChar(sc.ch)) {
+			char s[100];
+			int state = lineState & 0xff;
+			sc.GetCurrent(s, sizeof(s));
+			if (keywords5.InList(s)) {
+				sc.ChangeState(SCE_V_COMMENT_WORD|activitySet);
+			} else {
+				sc.ChangeState(state|activitySet);
+			}
+			sc.SetState(state|activitySet);
+		}
+
 		const bool atLineEndBeforeSwitch = sc.atLineEnd;
 
 		// Determine if the current state should terminate.
 		switch (MaskActive(sc.state)) {
-			case SCE_V_COMMENT_WORD:
-				// for comment keyword
-				if (!IsAWordChar(sc.ch)) {
-					char s[100];
-					int state = lineState & 0xff;
-					sc.GetCurrent(s, sizeof(s));
-					if (keywords5.InList(s)) {
-						sc.ChangeState(SCE_V_COMMENT_WORD|activitySet);
-					} else {
-						sc.ChangeState(state|activitySet);
-					}
-				    sc.SetState(state|activitySet);
-				}
-				break;
 			case SCE_V_OPERATOR:
 				sc.SetState(SCE_V_DEFAULT|activitySet);
 				break;
@@ -495,13 +504,13 @@ void SCI_METHOD LexerVerilog::Lex(unsigned int startPos, int length, int initSty
 					char s[100];
 					lineState &= 0xff00;
 					sc.GetCurrent(s, sizeof(s));
-					if (strcmp(s, "input") == 0) {
+					if (options.portStyling && (strcmp(s, "input") == 0)) {
 						lineState = kwInput;
 						sc.ChangeState(SCE_V_INPUT|activitySet);
-					} else if (strcmp(s, "output") == 0) {
+					} else if (options.portStyling && (strcmp(s, "output") == 0)) {
 						lineState = kwOutput;
 						sc.ChangeState(SCE_V_OUTPUT|activitySet);
-					} else if (strcmp(s, "inout") == 0) {
+					} else if (options.portStyling && (strcmp(s, "inout") == 0)) {
 						lineState = kwInout;
 						sc.ChangeState(SCE_V_INOUT|activitySet);
 					} else if (lineState == kwInput) {
@@ -512,7 +521,8 @@ void SCI_METHOD LexerVerilog::Lex(unsigned int startPos, int length, int initSty
 						sc.ChangeState(SCE_V_INOUT|activitySet);
 					} else if (lineState == kwDot) {
 						lineState = kwOther;
-						sc.ChangeState(SCE_V_PORT_CONNECT|activitySet);
+						if (options.portStyling)
+							sc.ChangeState(SCE_V_PORT_CONNECT|activitySet);
 					} else if (keywords.InList(s)) {
 						sc.ChangeState(SCE_V_WORD|activitySet);
 					} else if (keywords2.InList(s)) {
@@ -521,7 +531,7 @@ void SCI_METHOD LexerVerilog::Lex(unsigned int startPos, int length, int initSty
 						sc.ChangeState(SCE_V_WORD3|activitySet);
 					} else if (keywords4.InList(s)) {
 						sc.ChangeState(SCE_V_USER|activitySet);
-					} else if (AllUpperCase(s)) {
+					} else if (options.allUppercaseDocKeyword && AllUpperCase(s)) {
 						sc.ChangeState(SCE_V_USER|activitySet);
 					}
 					sc.SetState(SCE_V_DEFAULT|activitySet);
