@@ -2619,7 +2619,7 @@ void ScintillaGTK::PreeditChangedWindowedThis() {
 }
 
 void ScintillaGTK::PreeditChanged(GtkIMContext *, ScintillaGTK *sciThis) {
-	if (sciThis->imeInteraction == imeInline || sciThis->KoreanIME()) {
+	if (sciThis->imeInteraction == imeInline) {
 		sciThis->PreeditChangedInlineThis();
 	} else {
 		sciThis->PreeditChangedWindowedThis();
