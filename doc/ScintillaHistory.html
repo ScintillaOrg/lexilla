@@ -502,8 +502,10 @@
 	<a href="http://sourceforge.net/p/scintilla/bugs/1672/">Bug #1672</a>.
 	</li>
 	<li>
-	Verilog lexer highlights doc comment keywords; has separate styles for input, output, and inout ports;
-	and fixes a bug in highlighting numbers.
+	Verilog lexer highlights doc comment keywords; has separate styles for input, output, and inout ports
+	(lexer.verilog.portstyling); fixes a bug in highlighting numbers; can treat upper-case identifiers as 
+	keywords (lexer.verilog.allupperkeywords); and can use different styles for code that is inactive due
+	to preprocessor commands (lexer.verilog.track.preprocessor, lexer.verilog.update.preprocessor).
 	</li>
 	<li>
 	When the calltip window is taller than the Scintilla window, leave it in a
