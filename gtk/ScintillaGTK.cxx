@@ -811,8 +811,10 @@ void ScintillaGTK::Initialise() {
 	if (gtk_check_version(3,9,2) != NULL /* on < 3.9.2 */)
 #endif
 	{
+#if !GTK_CHECK_VERSION(3,14,0)
 		// Avoid background drawing flash/missing redraws
 		gtk_widget_set_double_buffered(widtxt, FALSE);
+#endif
 	}
 	gtk_widget_set_events(widtxt, GDK_EXPOSURE_MASK);
 	gtk_widget_set_size_request(widtxt, 100, 100);
