@@ -2347,6 +2347,9 @@ public:
 		doc(doc_), position(position_), characterIndex(0), lenBytes(0), lenCharacters(0) {
 		buffered[0] = 0;
 		buffered[1] = 0;
+		if (doc) {
+			ReadCharacter();
+		}
 	}
 	UTF8Iterator(const UTF8Iterator &other) {
 		doc = other.doc;
@@ -2369,10 +2372,8 @@ public:
 		}
 		return *this;
 	}
-	wchar_t operator*() {
-		if (lenCharacters == 0) {
-			ReadCharacter();
-		}
+	wchar_t operator*() const {
+		assert(lenCharacters != 0);
 		return buffered[characterIndex];
 	}
 	UTF8Iterator &operator++() {
