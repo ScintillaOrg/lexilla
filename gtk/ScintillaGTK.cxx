@@ -305,8 +305,8 @@ private:
 	static void PreeditChanged(GtkIMContext *context, ScintillaGTK *sciThis);
 	void MoveImeCarets(int pos);
 	void DrawImeIndicator(int indicator, int len);
-	void GetImeUnderlines(PangoAttrList *attrs, bool *normalInput);
-	void GetImeBackgrounds(PangoAttrList *attrs, bool *targetInput);
+	static void GetImeUnderlines(PangoAttrList *attrs, bool *normalInput);
+	static void GetImeBackgrounds(PangoAttrList *attrs, bool *targetInput);
 	void SetCandidateWindowPos();
 
 	static void StyleSetText(GtkWidget *widget, GtkStyle *previous, void*);
