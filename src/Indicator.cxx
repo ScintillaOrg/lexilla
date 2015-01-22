@@ -155,6 +155,9 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 	} else if (style == INDIC_COMPOSITIONTHICK) {
 		PRectangle rcComposition(rc.left+1, rcLine.bottom-2, rc.right-1, rcLine.bottom);
 		surface->FillRectangle(rcComposition, fore);
+	} else if (style == INDIC_COMPOSITIONTHIN) {
+		PRectangle rcComposition(rc.left+1, rcLine.bottom-2, rc.right-1, rcLine.bottom-1);
+		surface->FillRectangle(rcComposition, fore);
 	} else {	// Either INDIC_PLAIN or unknown
 		surface->MoveTo(static_cast<int>(rc.left), ymid);
 		surface->LineTo(static_cast<int>(rc.right), ymid);
