@@ -33,6 +33,7 @@
 #include <QTextLayout>
 #include <QTextLine>
 #include <QLibrary>
+#include <QElapsedTimer>
 #include <cstdio>
 
 #ifdef SCI_NAMESPACE
@@ -1304,21 +1305,28 @@ int Platform::DBCSCharMaxLength()
 
 //----------------------------------------------------------------------
 
-static QTime timer;
+static QElapsedTimer timer;
 
 ElapsedTime::ElapsedTime() : bigBit(0), littleBit(0)
 {
-	timer.start();
+	if (!timer.isValid()) {
+		timer.start();
+	}
+	qint64 ns64Now = timer.nsecsElapsed();
+	bigBit = static_cast<unsigned long>(ns64Now >> 32);
+	littleBit = static_cast<unsigned long>(ns64Now & 0xFFFFFFFF);
 }
 
 double ElapsedTime::Duration(bool reset)
 {
-	double result = timer.elapsed();
+	qint64 ns64Now = timer.nsecsElapsed();
+	qint64 ns64Start = (static_cast<qint64>(static_cast<unsigned long>(bigBit)) << 32) + static_cast<unsigned long>(littleBit);
+	double result = ns64Now - ns64Start;
 	if (reset) {
-		timer.restart();
+		bigBit = static_cast<unsigned long>(ns64Now >> 32);
+		littleBit = static_cast<unsigned long>(ns64Now & 0xFFFFFFFF);
 	}
-	result /= 1000.0;
-	return result;
+	return result / 1000000000.0;	// 1 billion nanoseconds in a second
 }
 
 #ifdef SCI_NAMESPACE
