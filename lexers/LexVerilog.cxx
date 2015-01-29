@@ -756,9 +756,20 @@ void SCI_METHOD LexerVerilog::Fold(unsigned int startPos, int length, int initSt
 	bool foldAtBrace  = 1;
 	bool foldAtParenthese  = 1;
 
+	int lineCurrent = styler.GetLine(startPos);
+	// Move back one line to be compatible with LexerModule::Fold behavior, fixes problem with foldComment behavior
+	if (lineCurrent > 0) {
+		lineCurrent--;
+		int newStartPos = styler.LineStart(lineCurrent);
+		length += startPos - newStartPos;
+		startPos = newStartPos;
+		initStyle = 0;
+		if (startPos > 0) {
+			initStyle = styler.StyleAt(startPos - 1);
+		}
+	}
 	unsigned int endPos = startPos + length;
 	int visibleChars = 0;
-	int lineCurrent = styler.GetLine(startPos);
 	int levelCurrent = SC_FOLDLEVELBASE;
 	if (lineCurrent > 0)
 		levelCurrent = styler.LevelAt(lineCurrent-1) >> 16;
