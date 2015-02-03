@@ -101,8 +101,11 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 		markers[mrk] = source.markers[mrk];
 	}
 	CalcLargestMarkerHeight();
+	indicatorsDynamic = 0;
 	for (int ind=0; ind<=INDIC_MAX; ind++) {
 		indicators[ind] = source.indicators[ind];
+		if (indicators[ind].IsDynamic())
+			indicatorsDynamic++;
 	}
 
 	selColours = source.selColours;
@@ -197,6 +200,7 @@ void ViewStyle::Init(size_t stylesSize_) {
 	indicators[2] = Indicator(INDIC_PLAIN, ColourDesired(0xff, 0, 0));
 
 	technology = SC_TECHNOLOGY_DEFAULT;
+	indicatorsDynamic = 0;
 	lineHeight = 1;
 	lineOverlap = 0;
 	maxAscent = 1;
@@ -317,6 +321,11 @@ void ViewStyle::Refresh(Surface &surface, int tabInChars) {
 	for (unsigned int k=0; k<styles.size(); k++) {
 		FontRealised *fr = Find(styles[k]);
 		styles[k].Copy(fr->font, *fr);
+	}
+	indicatorsDynamic = 0;
+	for (int ind = 0; ind <= INDIC_MAX; ind++) {
+		if (indicators[ind].IsDynamic())
+			indicatorsDynamic++;
 	}
 	maxAscent = 1;
 	maxDescent = 1;

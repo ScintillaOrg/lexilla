@@ -3900,8 +3900,12 @@ struct Sci_TextToFind {
     They can be used to show, for example, syntax errors, deprecated names and bad indentation
     by drawing underlines under text or boxes around text.</p>
 
+    <p>Indicators may have a different "hover" colour and style when the mouse is over them or the caret is moved into them.
+    This may be used, for example, to indicate that a URL can be clicked.</p
+
     <p>Indicators may be displayed as simple underlines, squiggly underlines, a
-    line of small 'T' shapes, a line of diagonal hatching, a strike-out or a rectangle around the text.</p>
+    line of small 'T' shapes, a line of diagonal hatching, a strike-out or a rectangle around the text.
+    They may also be invisible when used to track pieces of content for the application as <code>INDIC_HIDDEN</code>.</p>
 
     <p>The <code>SCI_INDIC*</code> messages allow you to get and set the visual appearance of the
     indicators. They all use an <code>indicatorNumber</code> argument in the range 0 to INDIC_MAX(35)
@@ -3909,6 +3913,11 @@ struct Sci_TextToFind {
     by lexers (0..7) a range for use by containers
     (8=<code>INDIC_CONTAINER</code> .. 31=<code>INDIC_IME-1</code>)
     and a range for IME indicators (32=<code>INDIC_IME</code> .. 35=<code>INDIC_IME_MAX</code>).</p>
+
+    <p>Indicators are stored in a format similar to run length encoding which is efficient in both
+    speed and storage for sparse information.</p>
+    <p>An indicator may store different values for each range but currently all values are drawn the same.
+    In the future, it may be possible to draw different values in different styles.</p>
 
     <p>Originally, Scintilla used a different technique for indicators but this
     has been <a href="#RemovedFeatures">removed</a>
@@ -3928,6 +3937,13 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_INDICGETOUTLINEALPHA">SCI_INDICGETOUTLINEALPHA(int indicatorNumber)</a><br />
      <a class="message" href="#SCI_INDICSETUNDER">SCI_INDICSETUNDER(int indicatorNumber, bool under)</a><br />
      <a class="message" href="#SCI_INDICGETUNDER">SCI_INDICGETUNDER(int indicatorNumber)</a><br />
+    <a class="message" href="#SCI_INDICSETHOVERSTYLE">SCI_INDICSETHOVERSTYLE(int indicatorNumber, int
+    indicatorStyle)</a><br />
+     <a class="message" href="#SCI_INDICGETHOVERSTYLE">SCI_INDICGETHOVERSTYLE(int indicatorNumber)</a><br />
+     <a class="message" href="#SCI_INDICSETHOVERFORE">SCI_INDICSETHOVERFORE(int indicatorNumber, int
+    colour)</a><br />
+     <a class="message" href="#SCI_INDICGETHOVERFORE">SCI_INDICGETHOVERFORE(int indicatorNumber)</a><br />
+     <br />
 
      <a class="message" href="#SCI_SETINDICATORCURRENT">SCI_SETINDICATORCURRENT(int indicator)</a><br />
      <a class="message" href="#SCI_GETINDICATORCURRENT">SCI_GETINDICATORCURRENT</a><br />
@@ -4150,10 +4166,18 @@ struct Sci_TextToFind {
      Drawing under text works only for indicators when <a class="message" href="#SCI_SETTWOPHASEDRAW">two phase drawing</a>
      is enabled.</p>
 
-    <p>Indicators are stored in a format similar to run length encoding which is efficient in both
-    speed and storage for sparse information.</p>
-    <p>An indicator may store different values for each range but currently all values are drawn the same.
-    In the future, it may be possible to draw different values in different styles.</p>
+    <p><b id="SCI_INDICSETHOVERSTYLE">SCI_INDICSETHOVERSTYLE(int indicatorNumber, int
+    indicatorStyle)</b><br />
+     <b id="SCI_INDICGETHOVERSTYLE">SCI_INDICGETHOVERSTYLE(int indicatorNumber)</b><br />
+     <b id="SCI_INDICSETHOVERFORE">SCI_INDICSETHOVERFORE(int indicatorNumber, int <a class="jump" href="#colour">colour</a>)</b><br />
+     <b id="SCI_INDICGETHOVERFORE">SCI_INDICGETHOVERFORE(int indicatorNumber)</b><br />
+     These messages set and get the colour and style used to draw indicators when the mouse is over them or the caret moved into them.
+     The mouse cursor also changes when an indicator is drawn in hover style. 
+     The default is for the hover appearance to be the same as the normal appearance and calling
+     <a class="message" href="#SCI_INDICSETFORE">SCI_INDICSETFORE</a> or 
+     <a class="message" href="#SCI_INDICSETSTYLE">SCI_INDICSETSTYLE</a> will
+     also reset the hover attribute.</p>
+
     <p>
     <b id="SCI_SETINDICATORCURRENT">SCI_SETINDICATORCURRENT(int indicator)</b><br />
     <b id="SCI_GETINDICATORCURRENT">SCI_GETINDICATORCURRENT</b><br />

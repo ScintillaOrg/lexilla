@@ -630,6 +630,7 @@ void Editor::SetSelection(SelectionPosition currentPos_, SelectionPosition ancho
 	sel.RangeMain() = rangeNew;
 	SetRectangularRange();
 	ClaimSelection();
+	SetHoverIndicatorPosition(sel.MainCaret());
 
 	if (marginView.highlightDelimiter.NeedsDrawing(currentLine)) {
 		RedrawSelMargin();
@@ -657,6 +658,7 @@ void Editor::SetSelection(SelectionPosition currentPos_) {
 			SelectionRange(SelectionPosition(currentPos_), sel.RangeMain().anchor);
 	}
 	ClaimSelection();
+	SetHoverIndicatorPosition(sel.MainCaret());
 
 	if (marginView.highlightDelimiter.NeedsDrawing(currentLine)) {
 		RedrawSelMargin();
@@ -678,6 +680,7 @@ void Editor::SetEmptySelection(SelectionPosition currentPos_) {
 	sel.RangeMain() = rangeNew;
 	SetRectangularRange();
 	ClaimSelection();
+	SetHoverIndicatorPosition(sel.MainCaret());
 
 	if (marginView.highlightDelimiter.NeedsDrawing(currentLine)) {
 		RedrawSelMargin();
@@ -1988,6 +1991,7 @@ void Editor::ClearSelection(bool retainMultipleSelections) {
 	ThinRectangularRange();
 	sel.RemoveDuplicates();
 	ClaimSelection();
+	SetHoverIndicatorPosition(sel.MainCaret());
 }
 
 void Editor::ClearAll() {
@@ -4117,6 +4121,7 @@ static bool AllowVirtualSpace(int virtualSpaceOptions, bool rectangular) {
 }
 
 void Editor::ButtonDownWithModifiers(Point pt, unsigned int curTime, int modifiers) {
+	SetHoverIndicatorPoint(pt);
 	//Platform::DebugPrintf("ButtonDown %d %d = %d alt=%d %d\n", curTime, lastClickTime, curTime - lastClickTime, alt, inDragDrop);
 	ptMouseLast = pt;
 	const bool ctrl = (modifiers & SCI_CTRL) != 0;
@@ -4315,6 +4320,36 @@ bool Editor::PointIsHotspot(Point pt) {
 	return PositionIsHotspot(pos);
 }
 
+void Editor::SetHoverIndicatorPosition(int position) {
+	int hoverIndicatorPosPrev = hoverIndicatorPos;
+	hoverIndicatorPos = INVALID_POSITION;
+	if (vs.indicatorsDynamic == 0)
+		return;
+	if (position != INVALID_POSITION) {
+		for (Decoration *deco = pdoc->decorations.root; deco; deco = deco->next) {
+			if (vs.indicators[deco->indicator].IsDynamic()) {
+				if (pdoc->decorations.ValueAt(deco->indicator, position)) {
+					hoverIndicatorPos = position;
+				}
+			}
+		}
+	}
+	if (hoverIndicatorPosPrev != hoverIndicatorPos) {
+		if (hoverIndicatorPosPrev != INVALID_POSITION)
+			InvalidateRange(hoverIndicatorPosPrev, hoverIndicatorPosPrev + 1);
+		if (hoverIndicatorPos != INVALID_POSITION)
+			InvalidateRange(hoverIndicatorPos, hoverIndicatorPos + 1);
+	}
+}
+
+void Editor::SetHoverIndicatorPoint(Point pt) {
+	if (vs.indicatorsDynamic == 0) {
+		SetHoverIndicatorPosition(INVALID_POSITION);
+	} else {
+		SetHoverIndicatorPosition(PositionFromLocation(pt, true, true));
+	}
+}
+
 void Editor::SetHotSpotRange(Point *pt) {
 	if (pt) {
 		int pos = PositionFromLocation(*pt, false, true);
@@ -4457,12 +4492,18 @@ void Editor::ButtonMoveWithModifiers(Point pt, int modifiers) {
 		// Display regular (drag) cursor over selection
 		if (PointInSelection(pt) && !SelectionEmpty()) {
 			DisplayCursor(Window::cursorArrow);
-		} else if (PointIsHotspot(pt)) {
-			DisplayCursor(Window::cursorHand);
-			SetHotSpotRange(&pt);
 		} else {
-			DisplayCursor(Window::cursorText);
-			SetHotSpotRange(NULL);
+			SetHoverIndicatorPoint(pt);
+			if (PointIsHotspot(pt)) {
+				DisplayCursor(Window::cursorHand);
+				SetHotSpotRange(&pt);
+			} else {
+				if (hoverIndicatorPos != invalidPosition)
+					DisplayCursor(Window::cursorHand);
+				else
+					DisplayCursor(Window::cursorText);
+				SetHotSpotRange(NULL);
+			}
 		}
 	}
 }
@@ -4475,6 +4516,8 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 	//Platform::DebugPrintf("ButtonUp %d %d\n", HaveMouseCapture(), inDragDrop);
 	SelectionPosition newPos = SPositionFromLocation(pt, false, false,
 		AllowVirtualSpace(virtualSpaceOptions, sel.IsRectangular()));
+	if (hoverIndicatorPos != INVALID_POSITION)
+		InvalidateRange(newPos.Position(), newPos.Position() + 1);
 	newPos = MovePositionOutsideChar(newPos, sel.MainCaret() - newPos.Position());
 	if (inDragDrop == ddInitial) {
 		inDragDrop = ddNone;
@@ -4839,6 +4882,9 @@ void Editor::SetDocPointer(Document *document) {
 	SetAnnotationHeights(0, pdoc->LinesTotal());
 	view.llc.Deallocate();
 	NeedWrapping();
+
+	hotspot = Range(invalidPosition);
+	hoverIndicatorPos = invalidPosition;
 
 	view.ClearAllTabstops();
 
@@ -6765,23 +6811,45 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_INDICSETSTYLE:
 		if (wParam <= INDIC_MAX) {
-			vs.indicators[wParam].style = static_cast<int>(lParam);
+			vs.indicators[wParam].sacNormal.style = static_cast<int>(lParam);
+			vs.indicators[wParam].sacHover.style = static_cast<int>(lParam);
 			InvalidateStyleRedraw();
 		}
 		break;
 
 	case SCI_INDICGETSTYLE:
-		return (wParam <= INDIC_MAX) ? vs.indicators[wParam].style : 0;
+		return (wParam <= INDIC_MAX) ? vs.indicators[wParam].sacNormal.style : 0;
 
 	case SCI_INDICSETFORE:
 		if (wParam <= INDIC_MAX) {
-			vs.indicators[wParam].fore = ColourDesired(static_cast<long>(lParam));
+			vs.indicators[wParam].sacNormal.fore = ColourDesired(static_cast<long>(lParam));
+			vs.indicators[wParam].sacHover.fore = ColourDesired(static_cast<long>(lParam));
 			InvalidateStyleRedraw();
 		}
 		break;
 
 	case SCI_INDICGETFORE:
-		return (wParam <= INDIC_MAX) ? vs.indicators[wParam].fore.AsLong() : 0;
+		return (wParam <= INDIC_MAX) ? vs.indicators[wParam].sacNormal.fore.AsLong() : 0;
+
+	case SCI_INDICSETHOVERSTYLE:
+		if (wParam <= INDIC_MAX) {
+			vs.indicators[wParam].sacHover.style = static_cast<int>(lParam);
+			InvalidateStyleRedraw();
+		}
+		break;
+
+	case SCI_INDICGETHOVERSTYLE:
+		return (wParam <= INDIC_MAX) ? vs.indicators[wParam].sacHover.style : 0;
+
+	case SCI_INDICSETHOVERFORE:
+		if (wParam <= INDIC_MAX) {
+			vs.indicators[wParam].sacHover.fore = ColourDesired(static_cast<long>(lParam));
+			InvalidateStyleRedraw();
+		}
+		break;
+
+	case SCI_INDICGETHOVERFORE:
+		return (wParam <= INDIC_MAX) ? vs.indicators[wParam].sacHover.fore.AsLong() : 0;
 
 	case SCI_INDICSETUNDER:
 		if (wParam <= INDIC_MAX) {

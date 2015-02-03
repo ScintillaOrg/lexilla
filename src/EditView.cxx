@@ -940,18 +940,18 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 }
 
 static void DrawIndicator(int indicNum, int startPos, int endPos, Surface *surface, const ViewStyle &vsDraw,
-	const LineLayout *ll, int xStart, PRectangle rcLine, int subLine) {
+	const LineLayout *ll, int xStart, PRectangle rcLine, int subLine, Indicator::DrawState drawState) {
 	const XYPOSITION subLineStart = ll->positions[ll->LineStart(subLine)];
 	PRectangle rcIndic(
 		ll->positions[startPos] + xStart - subLineStart,
 		rcLine.top + vsDraw.maxAscent,
 		ll->positions[endPos] + xStart - subLineStart,
 		rcLine.top + vsDraw.maxAscent + 3);
-	vsDraw.indicators[indicNum].Draw(surface, rcIndic, rcLine);
+	vsDraw.indicators[indicNum].Draw(surface, rcIndic, rcLine, drawState);
 }
 
 static void DrawIndicators(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
-	int line, int xStart, PRectangle rcLine, int subLine, int lineEnd, bool under) {
+	int line, int xStart, PRectangle rcLine, int subLine, int lineEnd, bool under, int hoverIndicatorPos) {
 	// Draw decorators
 	const int posLineStart = model.pdoc->LineStart(line);
 	const int lineStart = ll->LineStart(subLine);
@@ -967,8 +967,11 @@ static void DrawIndicators(Surface *surface, const EditModel &model, const ViewS
 				int endPos = deco->rs.EndRun(startPos);
 				if (endPos > posLineEnd)
 					endPos = posLineEnd;
+				const bool hover = vsDraw.indicators[deco->indicator].IsDynamic() &&
+					((hoverIndicatorPos >= startPos) && (hoverIndicatorPos <= endPos));
+				Indicator::DrawState drawState = hover ? Indicator::drawHover : Indicator::drawNormal;
 				DrawIndicator(deco->indicator, startPos - posLineStart, endPos - posLineStart,
-					surface, vsDraw, ll, xStart, rcLine, subLine);
+					surface, vsDraw, ll, xStart, rcLine, subLine, drawState);
 				startPos = endPos;
 				if (!deco->rs.ValueAt(startPos)) {
 					startPos = deco->rs.EndRun(startPos);
@@ -986,13 +989,13 @@ static void DrawIndicators(Surface *surface, const EditModel &model, const ViewS
 			if (rangeLine.ContainsCharacter(model.braces[0])) {
 				int braceOffset = model.braces[0] - posLineStart;
 				if (braceOffset < ll->numCharsInLine) {
-					DrawIndicator(braceIndicator, braceOffset, braceOffset + 1, surface, vsDraw, ll, xStart, rcLine, subLine);
+					DrawIndicator(braceIndicator, braceOffset, braceOffset + 1, surface, vsDraw, ll, xStart, rcLine, subLine, Indicator::drawNormal);
 				}
 			}
 			if (rangeLine.ContainsCharacter(model.braces[1])) {
 				int braceOffset = model.braces[1] - posLineStart;
 				if (braceOffset < ll->numCharsInLine) {
-					DrawIndicator(braceIndicator, braceOffset, braceOffset + 1, surface, vsDraw, ll, xStart, rcLine, subLine);
+					DrawIndicator(braceIndicator, braceOffset, braceOffset + 1, surface, vsDraw, ll, xStart, rcLine, subLine, Indicator::drawNormal);
 				}
 			}
 		}
@@ -1662,7 +1665,7 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 	}
 
 	if (phase & drawIndicatorsBack) {
-		DrawIndicators(surface, model, vsDraw, ll, line, xStart, rcLine, subLine, lineRange.end, true);
+		DrawIndicators(surface, model, vsDraw, ll, line, xStart, rcLine, subLine, lineRange.end, true, model.hoverIndicatorPos);
 		DrawEdgeLine(surface, vsDraw, ll, rcLine, lineRange, xStart);
 		DrawMarkUnderline(surface, model, vsDraw, line, rcLine);
 	}
@@ -1677,7 +1680,7 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 	}
 
 	if (phase & drawIndicatorsFore) {
-		DrawIndicators(surface, model, vsDraw, ll, line, xStart, rcLine, subLine, lineRange.end, false);
+		DrawIndicators(surface, model, vsDraw, ll, line, xStart, rcLine, subLine, lineRange.end, false, model.hoverIndicatorPos);
 	}
 
 	// End of the drawing of the current line

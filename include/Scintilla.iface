@@ -633,6 +633,18 @@ set void IndicSetUnder=2510(int indic, bool under)
 # Retrieve whether indicator drawn under or over text.
 get bool IndicGetUnder=2511(int indic,)
 
+# Set a hover indicator to plain, squiggle or TT.
+set void IndicSetHoverStyle=2680(int indic, int style)
+
+# Retrieve the hover style of an indicator.
+get int IndicGetHoverStyle=2681(int indic,)
+
+# Set the foreground hover colour of an indicator.
+set void IndicSetHoverFore=2682(int indic, colour fore)
+
+# Retrieve the foreground hover colour of an indicator.
+get colour IndicGetHoverFore=2683(int indic,)
+
 # Set the foreground colour of all whitespace and whether to use this setting.
 fun void SetWhitespaceFore=2084(bool useSetting, colour fore)
 
