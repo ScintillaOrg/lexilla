@@ -502,8 +502,10 @@
 	Verilog folder fixes a bug with inconsistent folding when fold.comment is on.
 	</li>
 	<li>
-	Add new indicator INDIC_COMPOSITIONTHIN to mimic the appearance of non-target segments
-	in OS X IME.
+	Add new indicators INDIC_COMPOSITIONTHIN and INDIC_FULLBOX.
+	INDIC_COMPOSITIONTHIN is a thin underline that mimics the appearance of non-target segments in OS X IME.
+	INDIC_FULLBOX is similar to INDIC_STRAIGHTBOX but covers the entire character area which means that
+	indicators with this style on contiguous lines may touch.
 	</li>
 	<li>
 	Fix crash in SciTE when saving large files in background when closing application.

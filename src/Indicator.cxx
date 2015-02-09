@@ -116,9 +116,12 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 		surface->LineTo(static_cast<int>(rc.right), static_cast<int>(rcLine.top) + 1);
 		surface->LineTo(static_cast<int>(rc.left), static_cast<int>(rcLine.top) + 1);
 		surface->LineTo(static_cast<int>(rc.left), ymid + 1);
-	} else if (sacDraw.style == INDIC_ROUNDBOX || sacDraw.style == INDIC_STRAIGHTBOX) {
+	} else if (sacDraw.style == INDIC_ROUNDBOX ||
+		sacDraw.style == INDIC_STRAIGHTBOX ||
+		sacDraw.style == INDIC_FULLBOX) {
 		PRectangle rcBox = rcLine;
-		rcBox.top = rcLine.top + 1;
+		if (sacDraw.style != INDIC_FULLBOX)
+			rcBox.top = rcLine.top + 1;
 		rcBox.left = rc.left;
 		rcBox.right = rc.right;
 		surface->AlphaRectangle(rcBox, (sacDraw.style == INDIC_ROUNDBOX) ? 1 : 0, 

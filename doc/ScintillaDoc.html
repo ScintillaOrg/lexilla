@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 10 January 2015 NH</p>
+    <p>Last edited 10 February 2015 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -4058,7 +4058,18 @@ struct Sci_TextToFind {
               interior usually more transparent than the border. You can use
               <a class="message" href="#SCI_INDICSETALPHA">SCI_INDICSETALPHA</a> and
 			  <a class="message" href="#SCI_INDICSETOUTLINEALPHA">SCI_INDICSETOUTLINEALPHA</a>
-              to control the alpha transparency values. The default alpha values are 30 for fill colour and 50 for outline colour.</td>
+              to control the alpha transparency values. The default alpha values are 30 for fill colour and 50 for outline colour.
+              This indicator does not colour the top pixel of the line so that indicators on contiguous lines are visually distinct
+              and disconnected.</td>
+        </tr>
+
+        <tr>
+          <td align="left"><code>INDIC_FULLBOX</code></td>
+
+          <td align="center">16</td>
+
+          <td>A rectangle around the text using translucent drawing similar to <code>INDIC_STRAIGHTBOX</code>
+              but covering the entire character area.</td>
         </tr>
 
         <tr>
