@@ -439,6 +439,7 @@ void SCI_METHOD LexerVerilog::Lex(unsigned int startPos, int length, int initSty
 
 	int activitySet = preproc.IsInactive() ? activeFlag : 0;
 	int lineEndNext = styler.LineEnd(curLine);
+	bool isEscapedId = false;    // true when parsing an escaped Identifier
 
 	for (; sc.More(); sc.Forward()) {
 		if (sc.atLineStart) {
@@ -461,6 +462,7 @@ void SCI_METHOD LexerVerilog::Lex(unsigned int startPos, int length, int initSty
 			vlls.Add(curLine, preproc);
 			// Update the line state, so it can be seen by next line
 			styler.SetLineState(curLine, lineState);
+			isEscapedId = false;    // EOL terminates an escaped Identifier
 		}
 
 		// Handle line continuation generically.
@@ -508,7 +510,8 @@ void SCI_METHOD LexerVerilog::Lex(unsigned int startPos, int length, int initSty
 				}
 				break;
 			case SCE_V_IDENTIFIER:
-				if (!IsAWordChar(sc.ch) || (sc.ch == '.')) {
+				if ((!isEscapedId &&(!IsAWordChar(sc.ch) || (sc.ch == '.'))) ||
+					(isEscapedId && isspacechar(sc.ch))) {
 					char s[100];
 					lineState &= 0xff00;
 					sc.GetCurrent(s, sizeof(s));
@@ -589,6 +592,7 @@ void SCI_METHOD LexerVerilog::Lex(unsigned int startPos, int length, int initSty
 			vlls.Add(curLine, preproc);
 			// Update the line state, so it can be seen by next line
 			styler.SetLineState(curLine, lineState);
+			isEscapedId = false;    // EOL terminates an escaped Identifier
 		}
 
 		// Determine if a new state should be entered.
@@ -721,11 +725,19 @@ void SCI_METHOD LexerVerilog::Lex(unsigned int startPos, int length, int initSty
 						}
 					}
 				}
+			} else if (sc.ch == '\\') {
+				// escaped identifier, everything is ok up to whitespace
+				isEscapedId = true;
+				sc.SetState(SCE_V_IDENTIFIER|activitySet);
 			} else if (isoperator(static_cast<char>(sc.ch)) || sc.ch == '@' || sc.ch == '#') {
 				sc.SetState(SCE_V_OPERATOR|activitySet);
 				if (sc.ch == '.') lineState = kwDot;
 				if (sc.ch == ';') lineState = kwOther;
 			}
+		}
+		if (isEscapedId && isspacechar(sc.ch)) {
+			isEscapedId = false;
+			sc.SetState(SCE_V_DEFAULT|activitySet);
 		}
 	}
 	if (definitionsChanged) {
