@@ -201,8 +201,9 @@ class LexerVerilog : public ILexerWithSubStyles {
 
 	// states at end of line (EOL) during fold operations:
 	//		foldExternFlag: EOL while parsing an extern function/task declaration terminated by ';'
-	//		foldWaitDisable: EOL while parsing wait or disable statement, terminated by "fork" or '('
-	enum {foldExternFlag = 0x01, foldWaitDisableFlag = 0x02};
+	//		foldWaitDisableFlag: EOL while parsing wait or disable statement, terminated by "fork" or '('
+	//		typdefFlag: EOL while parsing typedef statement, terminated by ';'
+	enum {foldExternFlag = 0x01, foldWaitDisableFlag = 0x02, typedefFlag = 0x04};
 	// map using line number as key to store fold state information
 	std::map<int, int> foldState;
 
@@ -878,6 +879,10 @@ void SCI_METHOD LexerVerilog::Fold(unsigned int startPos, int length, int initSt
 				if (stateCurrent & foldWaitDisableFlag) {
 					stateCurrent &= ~foldWaitDisableFlag;
 				}
+				// typedef statements terminated by semicolon
+				if (stateCurrent & typedefFlag) {
+					stateCurrent &= ~typedefFlag;
+				}
 			}
 			// wait and disable statements containing '(' will not contain "fork" keyword, special processing is not needed
 			if (ch == '(') {
@@ -900,7 +905,6 @@ void SCI_METHOD LexerVerilog::Fold(unsigned int startPos, int length, int initSt
 			if (styler.Match(j, "case") ||
 				styler.Match(j, "casex") ||
 				styler.Match(j, "casez") ||
-				styler.Match(j, "class") ||
 				styler.Match(j, "function") ||
 				styler.Match(j, "generate") ||
 				styler.Match(j, "covergroup") ||
@@ -914,6 +918,10 @@ void SCI_METHOD LexerVerilog::Fold(unsigned int startPos, int length, int initSt
 				(styler.Match(j, "module") && options.foldAtModule) ||
 				styler.Match(j, "begin")) {
 				levelNext++;
+			} else if (styler.Match(j, "class")) {
+				// class does not introduce a block when used in a typedef statement
+				if (!(stateCurrent & typedefFlag))
+					levelNext++;
 			} else if (styler.Match(j, "fork")) {
 				// fork does not introduce a block when used in a wait or disable statement
 				if (stateCurrent & foldWaitDisableFlag) {
@@ -946,6 +954,8 @@ void SCI_METHOD LexerVerilog::Fold(unsigned int startPos, int length, int initSt
 				styler.Match(j, "wait")) {
 				// fork does not introduce a block when used in a wait or disable statement
 				stateCurrent |= foldWaitDisableFlag;
+			} else if (styler.Match(j, "typedef")) {
+				stateCurrent |= typedefFlag;
 			}
 		}
 		if (atEOL) {
