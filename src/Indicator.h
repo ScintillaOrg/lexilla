@@ -28,7 +28,7 @@ struct StyleAndColour {
  */
 class Indicator {
 public:
-	enum DrawState { drawNormal, drawHover, drawActive };
+	enum DrawState { drawNormal, drawHover };
 	StyleAndColour sacNormal;
 	StyleAndColour sacHover;
 	bool under;
