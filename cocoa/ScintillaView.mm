@@ -62,7 +62,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
     owner = nil;
     marginWidth = 20;
     currentCursors = [[NSMutableArray arrayWithCapacity:0] retain];
-    for (size_t i=0; i<5; i++)
+    for (size_t i=0; i<=SC_MAX_MARGIN; i++)
     {
       [currentCursors addObject: [reverseArrowCursor retain]];
     }
@@ -137,8 +137,8 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   size_t co = [currentCursors count];
   for (size_t i=0; i<co; i++)
   {
-    int cursType = owner.backend->WndProc(SCI_GETMARGINCURSORN, i, 0);
-    int width =owner.backend->WndProc(SCI_GETMARGINWIDTHN, i, 0);
+    long cursType = owner.backend->WndProc(SCI_GETMARGINCURSORN, i, 0);
+    long width =owner.backend->WndProc(SCI_GETMARGINWIDTHN, i, 0);
     NSCursor *cc = cursorFromEnum(static_cast<Window::Cursor>(cursType));
     [currentCursors replaceObjectAtIndex:i withObject: cc];
     marginRect.origin.x = x;
@@ -378,7 +378,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 				    message: SCI_POINTYFROMPOSITION
 				     wParam: 0
 				     lParam: aRange.location];
-  int rangeEnd = aRange.location + aRange.length;
+  NSUInteger rangeEnd = aRange.location + aRange.length;
   rect.size.width = [ScintillaView directCall: mOwner
 				      message: SCI_POINTXFROMPOSITION
 				       wParam: 0
@@ -520,10 +520,10 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   if (range.length > 0)
   {
     // range is in characters so convert to bytes for selection.
-    int rangeStart = currentPosition;
+    long rangeStart = currentPosition;
     for (size_t characterInComposition=0; characterInComposition<range.location; characterInComposition++)
       rangeStart = [mOwner getGeneralProperty: SCI_POSITIONAFTER parameter: rangeStart];
-    int rangeEnd = rangeStart;
+    long rangeEnd = rangeStart;
     for (size_t characterInRange=0; characterInRange<range.length; characterInRange++)
       rangeEnd = [mOwner getGeneralProperty: SCI_POSITIONAFTER parameter: rangeEnd];
     [mOwner setGeneralProperty: SCI_SETSELECTION parameter: rangeEnd value: rangeStart];
@@ -666,7 +666,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   if ((rc.origin.y > 0) && (NSMaxY(rc) < contentRect.size.height)) {
     // Only snap for positions inside the document - allow outside
     // for overshoot.
-    int lineHeight = mOwner.backend->WndProc(SCI_TEXTHEIGHT, 0, 0);
+    long lineHeight = mOwner.backend->WndProc(SCI_TEXTHEIGHT, 0, 0);
     rc.origin.y = roundf(rc.origin.y / lineHeight) * lineHeight;
   }
   return rc;
@@ -1711,8 +1711,8 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   if (wholeWord)
     searchFlags |= SCFIND_WHOLEWORD;
 
-  int selectionStart = [self getGeneralProperty: SCI_GETSELECTIONSTART parameter: 0];
-  int selectionEnd = [self getGeneralProperty: SCI_GETSELECTIONEND parameter: 0];
+  long selectionStart = [self getGeneralProperty: SCI_GETSELECTIONSTART parameter: 0];
+  long selectionEnd = [self getGeneralProperty: SCI_GETSELECTIONEND parameter: 0];
 
   // Sets the start point for the coming search to the beginning of the current selection.
   // For forward searches we have therefore to set the selection start to the current selection end
@@ -1791,13 +1791,13 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 {
   // The current position is where we start searching for single occurrences. Otherwise we start at
   // the beginning of the document.
-  int startPosition;
+  long startPosition;
   if (doAll)
     startPosition = 0; // Start at the beginning of the text if we replace all occurrences.
   else
     // For a single replacement we start at the current caret position.
     startPosition = [self getGeneralProperty: SCI_GETCURRENTPOS];
-  int endPosition = [self getGeneralProperty: SCI_GETTEXTLENGTH];
+  long endPosition = [self getGeneralProperty: SCI_GETTEXTLENGTH];
 
   int searchFlags= 0;
   if (matchCase)
@@ -1809,9 +1809,9 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   [self setGeneralProperty: SCI_SETTARGETEND value: endPosition];
 
   const char* textToSearch = [searchText UTF8String];
-  int sourceLength = strlen(textToSearch); // Length in bytes.
+  long sourceLength = strlen(textToSearch); // Length in bytes.
   const char* replacement = [newText UTF8String];
-  int targetLength = strlen(replacement);  // Length in bytes.
+  long targetLength = strlen(replacement);  // Length in bytes.
   sptr_t result;
 
   int replaceCount = 0;

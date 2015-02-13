@@ -3657,7 +3657,10 @@ long Editor::FindText(
 	if (!pdoc->HasCaseFolder())
 		pdoc->SetCaseFolder(CaseFolderForEncoding());
 	try {
-		int pos = pdoc->FindText(ft->chrg.cpMin, ft->chrg.cpMax, ft->lpstrText,
+		long pos = pdoc->FindText(
+			static_cast<int>(ft->chrg.cpMin),
+			static_cast<int>(ft->chrg.cpMax),
+			ft->lpstrText,
 			(wParam & SCFIND_MATCHCASE) != 0,
 			(wParam & SCFIND_WHOLEWORD) != 0,
 			(wParam & SCFIND_WORDSTART) != 0,
@@ -3668,7 +3671,7 @@ long Editor::FindText(
 			ft->chrgText.cpMin = pos;
 			ft->chrgText.cpMax = pos + lengthFound;
 		}
-		return pos;
+		return static_cast<int>(pos);
 	} catch (RegexError &) {
 		errorStatus = SC_STATUS_WARN_REGEX;
 		return -1;
@@ -3702,7 +3705,7 @@ long Editor::SearchText(
     sptr_t lParam) {			///< The text to search for.
 
 	const char *txt = reinterpret_cast<char *>(lParam);
-	int pos;
+	long pos;
 	int lengthFound = istrlen(txt);
 	if (!pdoc->HasCaseFolder())
 		pdoc->SetCaseFolder(CaseFolderForEncoding());
@@ -3729,7 +3732,7 @@ long Editor::SearchText(
 		return -1;
 	}
 	if (pos != -1) {
-		SetSelection(pos, pos + lengthFound);
+		SetSelection(static_cast<int>(pos), static_cast<int>(pos + lengthFound));
 	}
 
 	return pos;
@@ -3762,7 +3765,7 @@ long Editor::SearchInTarget(const char *text, int length) {
 	if (!pdoc->HasCaseFolder())
 		pdoc->SetCaseFolder(CaseFolderForEncoding());
 	try {
-		int pos = pdoc->FindText(targetStart, targetEnd, text,
+		long pos = pdoc->FindText(targetStart, targetEnd, text,
 				(searchFlags & SCFIND_MATCHCASE) != 0,
 				(searchFlags & SCFIND_WHOLEWORD) != 0,
 				(searchFlags & SCFIND_WORDSTART) != 0,
@@ -3770,8 +3773,8 @@ long Editor::SearchInTarget(const char *text, int length) {
 				searchFlags,
 				&lengthFound);
 		if (pos != -1) {
-			targetStart = pos;
-			targetEnd = pos + lengthFound;
+			targetStart = static_cast<int>(pos);
+			targetEnd = static_cast<int>(pos + lengthFound);
 		}
 		return pos;
 	} catch (RegexError &) {
@@ -5656,12 +5659,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			if (lParam == 0)
 				return 0;
 			Sci_TextRange *tr = reinterpret_cast<Sci_TextRange *>(lParam);
-			int cpMax = tr->chrg.cpMax;
+			int cpMax = static_cast<int>(tr->chrg.cpMax);
 			if (cpMax == -1)
 				cpMax = pdoc->Length();
 			PLATFORM_ASSERT(cpMax <= pdoc->Length());
-			int len = cpMax - tr->chrg.cpMin; 	// No -1 as cpMin and cpMax are referring to inter character positions
-			pdoc->GetCharRange(tr->lpstrText, tr->chrg.cpMin, len);
+			int len = static_cast<int>(cpMax - tr->chrg.cpMin); 	// No -1 as cpMin and cpMax are referring to inter character positions
+			pdoc->GetCharRange(tr->lpstrText, static_cast<int>(tr->chrg.cpMin), len);
 			// Spec says copied text is terminated with a NUL
 			tr->lpstrText[len] = '\0';
 			return len; 	// Not including NUL
@@ -5899,9 +5902,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 				return 0;
 			Sci_TextRange *tr = reinterpret_cast<Sci_TextRange *>(lParam);
 			int iPlace = 0;
-			for (int iChar = tr->chrg.cpMin; iChar < tr->chrg.cpMax; iChar++) {
-				tr->lpstrText[iPlace++] = pdoc->CharAt(iChar);
-				tr->lpstrText[iPlace++] = pdoc->StyleAt(iChar);
+			for (long iChar = tr->chrg.cpMin; iChar < tr->chrg.cpMax; iChar++) {
+				tr->lpstrText[iPlace++] = pdoc->CharAt(static_cast<int>(iChar));
+				tr->lpstrText[iPlace++] = pdoc->StyleAt(static_cast<int>(iChar));
 			}
 			tr->lpstrText[iPlace] = '\0';
 			tr->lpstrText[iPlace + 1] = '\0';

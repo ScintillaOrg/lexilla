@@ -1023,7 +1023,7 @@ void ScintillaCocoa::Paste(bool forceRectangular)
 
   pdoc->BeginUndoAction();
   ClearSelection(false);
-  InsertPasteShape(selectedText.Data(), selectedText.Length(),
+  InsertPasteShape(selectedText.Data(), static_cast<int>(selectedText.Length()),
 	  selectedText.rectangular ? pasteRectangular : pasteStream);
   pdoc->EndUndoAction();
 
@@ -2241,7 +2241,7 @@ void ScintillaCocoa::ShowFindIndicatorForRange(NSRange charRange, BOOL retaining
     CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
 							 vs.styles[STYLE_DEFAULT].characterSet);
     std::vector<char> buffer(charRange.length);
-    pdoc->GetCharRange(&buffer[0], charRange.location, charRange.length);
+    pdoc->GetCharRange(&buffer[0], static_cast<int>(charRange.location), static_cast<int>(charRange.length));
 
     CFStringRef cfsFind = CFStringCreateWithBytes(kCFAllocatorDefault,
 						  reinterpret_cast<const UInt8 *>(&buffer[0]),
@@ -2250,8 +2250,8 @@ void ScintillaCocoa::ShowFindIndicatorForRange(NSRange charRange, BOOL retaining
     if (cfsFind)
         CFRelease(cfsFind);
     layerFindIndicator.retaining = retaining;
-    layerFindIndicator.positionFind = charRange.location;
-    int style = WndProc(SCI_GETSTYLEAT, charRange.location, 0);
+    layerFindIndicator.positionFind = static_cast<int>(charRange.location);
+    long style = WndProc(SCI_GETSTYLEAT, charRange.location, 0);
     std::vector<char> bufferFontName(WndProc(SCI_STYLEGETFONT, style, 0) + 1);
     WndProc(SCI_STYLEGETFONT, style, (sptr_t)&bufferFontName[0]);
     layerFindIndicator.sFont = [NSString stringWithUTF8String: &bufferFontName[0]];
