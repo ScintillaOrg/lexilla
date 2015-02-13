@@ -108,7 +108,7 @@
  * @param type The type of the notification.
  * @param message Carries the new status message if the type is a status message change.
  * @param location Carries the new location (e.g. caret) if the type is a caret change or similar type.
- * @param location Carries the new zoom value if the type is a zoom change.
+ * @param value Carries the new zoom value if the type is a zoom change.
  */
 - (void) notify: (NotificationType) type message: (NSString*) message location: (NSPoint) location
   value: (float) value

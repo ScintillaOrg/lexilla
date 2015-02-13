@@ -2031,7 +2031,7 @@ int Platform::DefaultFontSize()
  * Returns the time span in which two consecutive mouse clicks must occur to be considered as
  * double click.
  *
- * @return
+ * @return time span in milliseconds
  */
 unsigned int Platform::DoubleClickTime()
 {
