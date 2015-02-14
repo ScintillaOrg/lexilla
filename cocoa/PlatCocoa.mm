@@ -54,7 +54,7 @@ NSRect PRectangleToNSRect(PRectangle& rc)
  */
 PRectangle NSRectToPRectangle(NSRect& rc)
 {
-  return PRectangle(rc.origin.x, rc.origin.y,
+  return PRectangle(static_cast<XYPOSITION>(rc.origin.x), static_cast<XYPOSITION>(rc.origin.y),
 					static_cast<XYPOSITION>(NSMaxX(rc)),
 					static_cast<XYPOSITION>(NSMaxY(rc)));
 }
@@ -541,8 +541,7 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesi
 
   // Create a rectangle with semicircles at the corners
   const int MAX_RADIUS = 4;
-  int radius = Platform::Minimum( MAX_RADIUS, rc.Height()/2 );
-  radius = Platform::Minimum( radius, rc.Width()/2 );
+  const int radius = std::min(MAX_RADIUS, static_cast<int>(std::min(rc.Height()/2, rc.Width()/2)));
 
   // Points go clockwise, starting from just below the top left
   // Corners are kept together, so we can easily create arcs to connect them
@@ -784,10 +783,10 @@ void SurfaceImpl::CopyImageRectangle(Surface &surfaceSource, PRectangle srcRect,
   CGRect drawRect = CGRectMake (0, 0, w, h);
   if (!CGRectEqualToRect (src, dst))
   {
-    float sx = CGRectGetWidth(dst) / CGRectGetWidth(src);
-    float sy = CGRectGetHeight(dst) / CGRectGetHeight(src);
-    float dx = CGRectGetMinX(dst) - (CGRectGetMinX(src) * sx);
-    float dy = CGRectGetMinY(dst) - (CGRectGetMinY(src) * sy);
+    CGFloat sx = CGRectGetWidth(dst) / CGRectGetWidth(src);
+    CGFloat sy = CGRectGetHeight(dst) / CGRectGetHeight(src);
+    CGFloat dx = CGRectGetMinX(dst) - (CGRectGetMinX(src) * sx);
+    CGFloat dy = CGRectGetMinY(dst) - (CGRectGetMinY(src) * sy);
     drawRect = CGRectMake (dx, dy, w*sx, h*sy);
   }
   CGContextSaveGState (gc);
@@ -959,11 +958,11 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION 
 			size_t codeUnits = (lenChar < 4) ? 1 : 2;
 			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, ui+codeUnits, NULL);
 			for (unsigned int bytePos=0; (bytePos<lenChar) && (i<len); bytePos++) {
-				positions[i++] = xPosition;
+				positions[i++] = static_cast<XYPOSITION>(xPosition);
 			}
 			ui += codeUnits;
 		}
-		int lastPos = 0;
+		XYPOSITION lastPos = 0.0f;
 		if (i > 0)
 			lastPos = positions[i-1];
 		while (i<len) {
@@ -975,14 +974,14 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION 
 			size_t lenChar = Platform::IsDBCSLeadByte(codePage, s[i]) ? 2 : 1;
 			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, ui+1, NULL);
 			for (unsigned int bytePos=0; (bytePos<lenChar) && (i<len); bytePos++) {
-				positions[i++] = xPosition;
+				positions[i++] = static_cast<XYPOSITION>(xPosition);
 			}
 			ui++;
 		}
 	} else {	// Single byte encoding
 		for (int i=0;i<len;i++) {
 			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, i+1, NULL);
-			positions[i] = xPosition;
+			positions[i] = static_cast<XYPOSITION>(xPosition);
 		}
 	}
 
@@ -994,7 +993,7 @@ XYPOSITION SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
     CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
     textLayout->setText (reinterpret_cast<const UInt8*>(s), len, encoding, *reinterpret_cast<QuartzTextStyle*>(font_.GetID()));
 
-	return textLayout->MeasureStringWidth();
+	return static_cast<XYPOSITION>(textLayout->MeasureStringWidth());
   }
   return 1;
 }
@@ -1021,7 +1020,7 @@ XYPOSITION SurfaceImpl::Ascent(Font &font_) {
     return 1;
 
 	float ascent = reinterpret_cast<QuartzTextStyle*>( font_.GetID() )->getAscent();
-	return ascent + 0.5;
+	return ascent + 0.5f;
 
 }
 
@@ -1030,7 +1029,7 @@ XYPOSITION SurfaceImpl::Descent(Font &font_) {
     return 1;
 
 	float descent = reinterpret_cast<QuartzTextStyle*>( font_.GetID() )->getDescent();
-	return descent + 0.5;
+	return descent + 0.5f;
 
 }
 
@@ -1043,14 +1042,13 @@ XYPOSITION SurfaceImpl::ExternalLeading(Font &font_) {
     return 1;
 
 	float leading = reinterpret_cast<QuartzTextStyle*>( font_.GetID() )->getLeading();
-	return leading + 0.5;
+	return leading + 0.5f;
 
 }
 
 XYPOSITION SurfaceImpl::Height(Font &font_) {
 
-	int ht = Ascent(font_) + Descent(font_);
-	return ht;
+	return Ascent(font_) + Descent(font_);
 }
 
 XYPOSITION SurfaceImpl::AverageCharWidth(Font &font_) {
@@ -1059,7 +1057,7 @@ XYPOSITION SurfaceImpl::AverageCharWidth(Font &font_) {
     return 1;
 
   const int sizeStringLength = ELEMENTS( sizeString );
-  int width = WidthText( font_, sizeString, sizeStringLength  );
+  XYPOSITION width = WidthText( font_, sizeString, sizeStringLength  );
 
   return (int) ((width / (float) sizeStringLength) + 0.5);
 }
@@ -1122,7 +1120,7 @@ bool Window::HasFocus()
 
 //--------------------------------------------------------------------------------------------------
 
-static int ScreenMax(NSWindow* win)
+static CGFloat ScreenMax(NSWindow* win)
 {
   NSScreen* screen = [win screen];
   if (!screen)
@@ -1155,8 +1153,8 @@ PRectangle Window::GetPosition()
     CGFloat screenHeight = ScreenMax(win);
     // Invert screen positions to match Scintilla
     return PRectangle(
-        NSMinX(rect), static_cast<XYPOSITION>(screenHeight - NSMaxY(rect)),
-        NSMaxX(rect), static_cast<XYPOSITION>(screenHeight - NSMinY(rect)));
+        static_cast<XYPOSITION>(NSMinX(rect)), static_cast<XYPOSITION>(screenHeight - NSMaxY(rect)),
+        static_cast<XYPOSITION>(NSMaxX(rect)), static_cast<XYPOSITION>(screenHeight - NSMinY(rect)));
   }
   else
   {
@@ -1185,7 +1183,7 @@ void Window::SetPosition(PRectangle rc)
       // NSWindow
       PLATFORM_ASSERT([idWin isKindOfClass: [NSWindow class]]);
       NSWindow* win = reinterpret_cast<NSWindow*>(idWin);
-      int screenHeight = ScreenMax(win);
+      CGFloat screenHeight = ScreenMax(win);
       NSRect nsrc = NSMakeRect(rc.left, screenHeight - rc.bottom,
           rc.Width(), rc.Height());
       [win setFrame: nsrc display:YES];
@@ -1343,8 +1341,8 @@ PRectangle Window::GetMonitorRect(Point)
       CGFloat screenHeight = rect.origin.y + rect.size.height;
       // Invert screen positions to match Scintilla
       return PRectangle(
-          NSMinX(rect), static_cast<XYPOSITION>(screenHeight - NSMaxY(rect)),
-          NSMaxX(rect), static_cast<XYPOSITION>(screenHeight - NSMinY(rect)));
+          static_cast<XYPOSITION>(NSMinX(rect)), static_cast<XYPOSITION>(screenHeight - NSMaxY(rect)),
+          static_cast<XYPOSITION>(NSMaxX(rect)), static_cast<XYPOSITION>(screenHeight - NSMinY(rect)));
     }
   }
   return PRectangle();
@@ -1527,9 +1525,9 @@ private:
   int lineHeight;
   bool unicodeMode;
   int desiredVisibleRows;
-  unsigned int maxItemWidth;
+  XYPOSITION maxItemWidth;
   unsigned int aveCharWidth;
-  unsigned int maxIconWidth;
+  XYPOSITION maxIconWidth;
   Font font;
   int maxWidth;
 
@@ -1660,13 +1658,13 @@ PRectangle ListBoxImpl::GetDesiredRect()
   rcDesired = GetPosition();
 
   // There appears to be an extra pixel above and below the row contents
-  int itemHeight = [table rowHeight] + 2;
+  CGFloat itemHeight = [table rowHeight] + 2;
 
   int rows = Length();
   if ((rows == 0) || (rows > desiredVisibleRows))
     rows = desiredVisibleRows;
 
-  rcDesired.bottom = rcDesired.top + itemHeight * rows;
+  rcDesired.bottom = rcDesired.top + static_cast<XYPOSITION>(itemHeight * rows);
   rcDesired.right = rcDesired.left + maxItemWidth + aveCharWidth;
 
   if (Length() > rows)
@@ -1690,7 +1688,7 @@ int ListBoxImpl::CaretFromEdge()
   if ([colIcon isHidden])
     return 3;
   else
-    return 6 + [colIcon width];
+    return 6 + static_cast<int>([colIcon width]);
 }
 
 void ListBoxImpl::Clear()
@@ -1706,7 +1704,7 @@ void ListBoxImpl::Append(char* s, int type)
   ld.Add(count, type, s);
 
   Scintilla::SurfaceImpl surface;
-  unsigned int width = surface.WidthText(font, s, static_cast<int>(strlen(s)));
+  XYPOSITION width = surface.WidthText(font, s, static_cast<int>(strlen(s)));
   if (width > maxItemWidth)
   {
     maxItemWidth = width;
@@ -1718,7 +1716,7 @@ void ListBoxImpl::Append(char* s, int type)
     NSImage* img = it->second;
     if (img)
     {
-      unsigned int widthIcon = img.size.width;
+      XYPOSITION widthIcon = static_cast<XYPOSITION>(img.size.width);
       if (widthIcon > maxIconWidth)
       {
         [colIcon setHidden: NO];

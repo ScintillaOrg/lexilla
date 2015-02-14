@@ -667,7 +667,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
     // Only snap for positions inside the document - allow outside
     // for overshoot.
     long lineHeight = mOwner.backend->WndProc(SCI_TEXTHEIGHT, 0, 0);
-    rc.origin.y = roundf(rc.origin.y / lineHeight) * lineHeight;
+    rc.origin.y = roundf(static_cast<XYPOSITION>(rc.origin.y) / lineHeight) * lineHeight;
   }
   return rc;
 }
@@ -922,8 +922,8 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 #if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
   zoomDelta += event.magnification * 10.0;
 
-  if (fabsf(zoomDelta)>=1.0) {
-    long zoomFactor = [self getGeneralProperty: SCI_GETZOOM] + zoomDelta;
+  if (fabs(zoomDelta)>=1.0) {
+    long zoomFactor = static_cast<long>([self getGeneralProperty: SCI_GETZOOM] + zoomDelta);
     [self setGeneralProperty: SCI_SETZOOM parameter: zoomFactor value:0];
     zoomDelta = 0.0;
   }
@@ -1175,17 +1175,17 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
  */
 - (void) positionSubViews
 {
-  int scrollerWidth = [NSScroller scrollerWidthForControlSize:NSRegularControlSize
+  CGFloat scrollerWidth = [NSScroller scrollerWidthForControlSize:NSRegularControlSize
 						scrollerStyle:NSScrollerStyleLegacy];
 
   NSSize size = [self frame].size;
-  NSRect barFrame = {0, size.height - scrollerWidth, size.width, static_cast<CGFloat>(scrollerWidth)};
+  NSRect barFrame = {{0, size.height - scrollerWidth}, {size.width, scrollerWidth}};
   BOOL infoBarVisible = mInfoBar != nil && ![mInfoBar isHidden];
 
   // Horizontal offset of the content. Almost always 0 unless the vertical scroller
   // is on the left side.
   CGFloat contentX = 0;
-  NSRect scrollRect = {contentX, 0, size.width, size.height};
+  NSRect scrollRect = {{contentX, 0}, {size.width, size.height}};
 
   // Info bar frame.
   if (infoBarVisible)
@@ -1472,9 +1472,9 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 {
   if ([value colorSpaceName] != NSDeviceRGBColorSpace)
     value = [value colorUsingColorSpaceName: NSDeviceRGBColorSpace];
-  long red = [value redComponent] * 255;
-  long green = [value greenComponent] * 255;
-  long blue = [value blueComponent] * 255;
+  long red = static_cast<long>([value redComponent] * 255);
+  long green = static_cast<long>([value greenComponent] * 255);
+  long blue = static_cast<long>([value blueComponent] * 255);
 
   long color = (blue << 16) + (green << 8) + red;
   mBackend->WndProc(property, parameter, color);
@@ -1494,27 +1494,27 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
     int index = 1;
 
     char value[3] = {0, 0, 0};
-    value[0] = [fromHTML characterAtIndex: index++];
+    value[0] = static_cast<char>([fromHTML characterAtIndex: index++]);
     if (longVersion)
-      value[1] = [fromHTML characterAtIndex: index++];
+      value[1] = static_cast<char>([fromHTML characterAtIndex: index++]);
     else
       value[1] = value[0];
 
     unsigned rawRed;
     [[NSScanner scannerWithString: [NSString stringWithUTF8String: value]] scanHexInt: &rawRed];
 
-    value[0] = [fromHTML characterAtIndex: index++];
+    value[0] = static_cast<char>([fromHTML characterAtIndex: index++]);
     if (longVersion)
-      value[1] = [fromHTML characterAtIndex: index++];
+      value[1] = static_cast<char>([fromHTML characterAtIndex: index++]);
     else
       value[1] = value[0];
 
     unsigned rawGreen;
     [[NSScanner scannerWithString: [NSString stringWithUTF8String: value]] scanHexInt: &rawGreen];
 
-    value[0] = [fromHTML characterAtIndex: index++];
+    value[0] = static_cast<char>([fromHTML characterAtIndex: index++]);
     if (longVersion)
-      value[1] = [fromHTML characterAtIndex: index++];
+      value[1] = static_cast<char>([fromHTML characterAtIndex: index++]);
     else
       value[1] = value[0];
 
@@ -1534,9 +1534,9 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 - (NSColor*) getColorProperty: (int) property parameter: (long) parameter
 {
   long color = mBackend->WndProc(property, parameter, 0);
-  float red = (color & 0xFF) / 255.0;
-  float green = ((color >> 8) & 0xFF) / 255.0;
-  float blue = ((color >> 16) & 0xFF) / 255.0;
+  CGFloat red = (color & 0xFF) / 255.0;
+  CGFloat green = ((color >> 8) & 0xFF) / 255.0;
+  CGFloat blue = ((color >> 16) & 0xFF) / 255.0;
   NSColor* result = [NSColor colorWithDeviceRed: red green: green blue: blue alpha: 1];
   return result;
 }

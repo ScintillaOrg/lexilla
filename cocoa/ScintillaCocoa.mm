@@ -578,7 +578,7 @@ CaseFolder *ScintillaCocoa::CaseFolderForEncoding() {
             // Only for single byte encodings
             for (int i=0x80; i<0x100; i++) {
                 char sCharacter[2] = "A";
-                sCharacter[0] = i;
+                sCharacter[0] = static_cast<char>(i);
                 CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
                                                              reinterpret_cast<const UInt8 *>(sCharacter),
                                                              1, encoding, false);
@@ -705,7 +705,8 @@ PRectangle ScintillaCocoa::GetClientRectangle() const
   NSScrollView *scrollView = ScrollContainer();
   NSSize size = [[scrollView contentView] bounds].size;
   Point origin = GetVisibleOriginInMain();
-  return PRectangle(origin.x, origin.y, origin.x+size.width, origin.y + size.height);
+  return PRectangle(origin.x, origin.y, static_cast<XYPOSITION>(origin.x+size.width),
+		    static_cast<XYPOSITION>(origin.y + size.height));
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1100,7 +1101,8 @@ void ScintillaCocoa::CTPaint(void* gc, NSRect rc) {
 
 void ScintillaCocoa::CallTipMouseDown(NSPoint pt) {
     NSRect rectBounds = [(NSView *)(ct.wDraw.GetID()) bounds];
-    Point location(pt.x, static_cast<XYPOSITION>(rectBounds.size.height - pt.y));
+    Point location(static_cast<XYPOSITION>(pt.x),
+		   static_cast<XYPOSITION>(rectBounds.size.height - pt.y));
     ct.MouseClick(location);
     CallTipClick();
 }
@@ -1161,10 +1163,11 @@ void ScintillaCocoa::ClaimSelection()
  */
 NSPoint ScintillaCocoa::GetCaretPosition()
 {
+  const int line = pdoc->LineFromPosition(sel.RangeMain().caret.Position());
   NSPoint result;
 
-  result.y = pdoc->LineFromPosition(sel.RangeMain().caret.Position());
-  result.x = sel.RangeMain().caret.Position() - pdoc->LineStart(result.y);
+  result.y = line;
+  result.x = sel.RangeMain().caret.Position() - pdoc->LineStart(line);
   return result;
 }
 
@@ -1323,7 +1326,7 @@ void ScintillaCocoa::StartDrag()
     {
       PRectangle imageRect = rcSel;
       paintState = painting;
-      sw->InitPixMap(client.Width(), client.Height(), NULL, NULL);
+      sw->InitPixMap(static_cast<int>(client.Width()), static_cast<int>(client.Height()), NULL, NULL);
       paintingAllText = true;
       // Have to create a new context and make current as text drawing goes
       // to the current context, not a passed context.
@@ -1335,7 +1338,7 @@ void ScintillaCocoa::StartDrag()
       Paint(sw, client);
       paintState = notPainting;
 
-      pixmap->InitPixMap(imageRect.Width(), imageRect.Height(), NULL, NULL);
+      pixmap->InitPixMap(static_cast<int>(imageRect.Width()), static_cast<int>(imageRect.Height()), NULL, NULL);
 
       CGContextRef gc = pixmap->GetContext();
       // To make Paint() work on a bitmap, we have to flip our coordinates and translate the origin
@@ -1683,7 +1686,7 @@ void ScintillaCocoa::SetHorizontalScrollPos()
 {
   PRectangle textRect = GetTextRectangle();
 
-  int maxXOffset = scrollWidth - textRect.Width();
+  int maxXOffset = scrollWidth - static_cast<int>(textRect.Width());
   if (maxXOffset < 0)
     maxXOffset = 0;
   if (xOffset > maxXOffset)
@@ -1736,7 +1739,7 @@ bool ScintillaCocoa::SetScrollingSize(void) {
 			!Wrapping();
 		if (!showHorizontalScroll)
 			docWidth = clipRect.size.width;
-		NSRect contentRect = {0, 0, docWidth, docHeight};
+		NSRect contentRect = {{0, 0}, {docWidth, docHeight}};
 		NSRect contentRectNow = [inner frame];
 		changes = (contentRect.size.width != contentRectNow.size.width) ||
 			(contentRect.size.height != contentRectNow.size.height);
@@ -1767,8 +1770,8 @@ void ScintillaCocoa::Resize()
  */
 void ScintillaCocoa::UpdateForScroll() {
   Point ptOrigin = GetVisibleOriginInMain();
-  xOffset = ptOrigin.x;
-  int newTop = Platform::Minimum(ptOrigin.y / vs.lineHeight, MaxScrollPos());
+  xOffset = static_cast<int>(ptOrigin.x);
+  int newTop = Platform::Minimum(static_cast<int>(ptOrigin.y / vs.lineHeight), MaxScrollPos());
   SetTopLine(newTop);
 }
 
@@ -1809,7 +1812,7 @@ void ScintillaCocoa::RegisterNotifyCallback(intptr_t windowid, SciNotifyFunc cal
 void ScintillaCocoa::NotifyChange()
 {
   if (notifyProc != NULL)
-    notifyProc(notifyObj, WM_COMMAND, Platform::LongFromTwoShorts(GetCtrlID(), SCEN_CHANGE),
+    notifyProc(notifyObj, WM_COMMAND, Platform::LongFromTwoShorts(static_cast<short>(GetCtrlID()), SCEN_CHANGE),
 	       (uintptr_t) this);
 }
 
@@ -1818,7 +1821,8 @@ void ScintillaCocoa::NotifyChange()
 void ScintillaCocoa::NotifyFocus(bool focus)
 {
   if (notifyProc != NULL)
-    notifyProc(notifyObj, WM_COMMAND, Platform::LongFromTwoShorts(GetCtrlID(), (focus ? SCEN_SETFOCUS : SCEN_KILLFOCUS)),
+    notifyProc(notifyObj, WM_COMMAND, Platform::LongFromTwoShorts(static_cast<short>(GetCtrlID()),
+	       (focus ? SCEN_SETFOCUS : SCEN_KILLFOCUS)),
 	       (uintptr_t) this);
 
   Editor::NotifyFocus(focus);
