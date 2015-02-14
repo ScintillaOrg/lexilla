@@ -449,7 +449,7 @@ void ScintillaCocoa::Finalise()
 
 //--------------------------------------------------------------------------------------------------
 
-void ScintillaCocoa::UpdateObserver(CFRunLoopObserverRef observer, CFRunLoopActivity activity, void *info) {
+void ScintillaCocoa::UpdateObserver(CFRunLoopObserverRef /* observer */, CFRunLoopActivity /* activity */, void *info) {
   ScintillaCocoa* sci = reinterpret_cast<ScintillaCocoa*>(info);
   sci->IdleWork();
 }
@@ -560,9 +560,6 @@ public:
             CFRelease(cfsVal);
 			return lenMapped;
 		}
-		// Something failed so return a single NUL byte
-		folded[0] = '\0';
-		return 1;
 	}
 };
 
@@ -1657,7 +1654,7 @@ void ScintillaCocoa::WillDraw(NSRect rect)
 /**
  * ScrollText is empty because scrolling is handled by the NSScrollView.
  */
-void ScintillaCocoa::ScrollText(int linesToMove)
+void ScintillaCocoa::ScrollText(int)
 {
 }
 

@@ -744,8 +744,10 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 /**
  * Returns operations we allow as drag source.
  */
-- (NSDragOperation) draggingSourceOperationMaskForLocal: (BOOL) flag
+- (NSDragOperation) draggingSourceOperationMaskForLocal: (BOOL) isLocal
 {
+// Scintilla does not choose different operations for other applications
+#pragma unused(isLocal)
   return NSDragOperationCopy | NSDragOperationMove | NSDragOperationDelete;
 }
 
@@ -932,6 +934,8 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 - (void) beginGestureWithEvent: (NSEvent *) event
 {
+// Scintilla is only interested in this event as the starft of a zoom
+#pragma unused(event)
   zoomDelta = 0.0;
 }
 
@@ -959,6 +963,9 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 - (void) notify: (NotificationType) type message: (NSString*) message location: (NSPoint) location
           value: (float) value
 {
+// These parameters are just to conform to the protocol
+#pragma unused(message)
+#pragma unused(location)
   switch (type)
   {
     case IBNZoomChanged:
@@ -978,7 +985,8 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 - (void) setCallback: (id <InfoBarCommunicator>) callback
 {
-  // Not used. Only here to satisfy protocol.
+// Not used. Only here to satisfy protocol.
+#pragma unused(callback)
 }
 
 //--------------------------------------------------------------------------------------------------
