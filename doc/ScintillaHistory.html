@@ -500,7 +500,8 @@
 	</li>
 	<li>
 	Verilog lexer handles escaped identifiers that begin with \ and end with space like \reset* .
-	Verilog folder fixes a bug with inconsistent folding when fold.comment is on.
+	Verilog folder fixes one bug with inconsistent folding when fold.comment is on and another
+	with typdef class statements creating a fold point, expecting an endclass statement.
 	</li>
 	<li>
 	VHDL folder fixes hang in folding when document starts with "entity".
