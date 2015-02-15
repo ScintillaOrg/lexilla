@@ -489,6 +489,11 @@
 	Indicators may have a different colour and style when the mouse is over them or the caret is moved into them.
 	</li>
 	<li>
+	An indicator may display in a large variety of colours with the SC_INDICFLAG_VALUEFORE
+	flag taking the colour from the indicator's value, which may differ for every character, instead of its
+	foreground colour attribute.
+	</li>
+	<li>
 	Minimum version of Qt supported is now 4.8 due to the use of QElapsedTimer::nsecsElapsed.
 	</li>
 	<li>
@@ -507,10 +512,10 @@
 	VHDL folder fixes hang in folding when document starts with "entity".
 	</li>
 	<li>
-	Add new indicators INDIC_COMPOSITIONTHIN and INDIC_FULLBOX.
+	Add new indicators INDIC_COMPOSITIONTHIN, INDIC_FULLBOX, and INDIC_TEXTFORE.
 	INDIC_COMPOSITIONTHIN is a thin underline that mimics the appearance of non-target segments in OS X IME.
 	INDIC_FULLBOX is similar to INDIC_STRAIGHTBOX but covers the entire character area which means that
-	indicators with this style on contiguous lines may touch.
+	indicators with this style on contiguous lines may touch. INDIC_TEXTFORE changes the text foreground colour.
 	</li>
 	<li>
 	Fix adaptive scrolling speed for GTK+ on OS X with GTK Quartz backend (as opposed to X11 backend).

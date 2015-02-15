@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 10 February 2015 NH</p>
+    <p>Last edited 13 February 2015 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -3943,6 +3943,8 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_INDICSETHOVERFORE">SCI_INDICSETHOVERFORE(int indicatorNumber, int
     colour)</a><br />
      <a class="message" href="#SCI_INDICGETHOVERFORE">SCI_INDICGETHOVERFORE(int indicatorNumber)</a><br />
+     <a class="message" href="#SCI_INDICSETFLAGS">SCI_INDICSETFLAGS(int indicatorNumber, int flags)</a><br />
+     <a class="message" href="#SCI_INDICGETFLAGS">SCI_INDICGETFLAGS(int indicatorNumber)</a><br />
      <br />
 
      <a class="message" href="#SCI_SETINDICATORCURRENT">SCI_SETINDICATORCURRENT(int indicator)</a><br />
@@ -4141,6 +4143,14 @@ struct Sci_TextToFind {
 	  This is similar to an appearance used for non-target ranges in Asian language input composition.</td>
         </tr>
 
+        <tr>
+          <td align="left"><code>INDIC_TEXTFORE</code></td>
+
+          <td align="center">17</td>
+
+          <td>Change the colour of the text to the indicator's fore colour.</td>
+        </tr>
+
       </tbody>
     </table>
 
@@ -4188,6 +4198,16 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_INDICSETFORE">SCI_INDICSETFORE</a> or 
      <a class="message" href="#SCI_INDICSETSTYLE">SCI_INDICSETSTYLE</a> will
      also reset the hover attribute.</p>
+
+    <p><b id="SCI_INDICSETFLAGS">SCI_INDICSETFLAGS(int indicatorNumber, int flags)</b><br />
+     <b id="SCI_INDICGETFLAGS">SCI_INDICGETFLAGS(int indicatorNumber)</b><br />
+     These messages set and get the flags associated with an indicator.
+     There is currently one flag defined, <code>SC_INDICFLAG_VALUEFORE</code>: when this flag is set
+     the colour used by the indicator is not from the indicator's fore setting but instead from the value of the indicator at
+     that point in the file. This allows many colours to be displayed for a single indicator. The value is an <a class="jump"
+    href="#colour">RGB integer colour</a> that has been ored with <code>SC_INDICVALUEBIT</code>(0x1000000)
+    when calling <a class="message" href="#SCI_SETINDICATORVALUE">SCI_SETINDICATORVALUE</a>.
+     </p>
 
     <p>
     <b id="SCI_SETINDICATORCURRENT">SCI_SETINDICATORCURRENT(int indicator)</b><br />

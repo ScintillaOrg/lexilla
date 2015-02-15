@@ -23,8 +23,11 @@ static PRectangle PixelGridAlign(const PRectangle &rc) {
 	return PRectangle::FromInts(int(rc.left + 0.5), int(rc.top), int(rc.right + 0.5), int(rc.bottom));
 }
 
-void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &rcLine, DrawState drawState) const {
+void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &rcLine, DrawState drawState, int value) const {
 	StyleAndColour sacDraw = sacNormal;
+	if (Flags() & SC_INDICFLAG_VALUEFORE) {
+		sacDraw.fore = value & SC_INDICVALUEMASK;
+	}
 	if (drawState == drawHover) {
 		sacDraw = sacHover;
 	}
@@ -108,7 +111,7 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 	} else if (sacDraw.style == INDIC_STRIKE) {
 		surface->MoveTo(static_cast<int>(rc.left), static_cast<int>(rc.top) - 4);
 		surface->LineTo(static_cast<int>(rc.right), static_cast<int>(rc.top) - 4);
-	} else if (sacDraw.style == INDIC_HIDDEN) {
+	} else if ((sacDraw.style == INDIC_HIDDEN) || (sacDraw.style == INDIC_TEXTFORE)) {
 		// Draw nothing
 	} else if (sacDraw.style == INDIC_BOX) {
 		surface->MoveTo(static_cast<int>(rc.left), ymid + 1);
@@ -172,3 +175,6 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 	}
 }
 
+void Indicator::SetFlags(int attributes_) {
+	attributes = attributes_;
+}

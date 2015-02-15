@@ -6855,6 +6855,16 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_INDICGETHOVERFORE:
 		return (wParam <= INDIC_MAX) ? vs.indicators[wParam].sacHover.fore.AsLong() : 0;
 
+	case SCI_INDICSETFLAGS:
+		if (wParam <= INDIC_MAX) {
+			vs.indicators[wParam].SetFlags(static_cast<int>(lParam));
+			InvalidateStyleRedraw();
+		}
+		break;
+
+	case SCI_INDICGETFLAGS:
+		return (wParam <= INDIC_MAX) ? vs.indicators[wParam].Flags() : 0;
+
 	case SCI_INDICSETUNDER:
 		if (wParam <= INDIC_MAX) {
 			vs.indicators[wParam].under = lParam != 0;
