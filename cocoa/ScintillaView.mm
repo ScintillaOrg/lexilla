@@ -413,6 +413,11 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
  */
 - (void) insertText: (id) aString replacementRange: (NSRange) replacementRange
 {
+	if ((mMarkedTextRange.location != NSNotFound) && (replacementRange.location != NSNotFound))
+	{
+		NSLog(@"Trying to insertText when there is both a marked range and a replacement range");
+	}
+
 	// Remove any previously marked text first.
 	[self removeMarkedText];
 
@@ -468,41 +473,61 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
     if ([aString isKindOfClass:[NSAttributedString class]])
       newText = (NSString*) [aString string];
 
-  long currentPosition = [mOwner getGeneralProperty: SCI_GETCURRENTPOS parameter: 0];
+  long currentPosition;
 
   // Replace marked text if there is one.
   if (mMarkedTextRange.length > 0)
   {
-    [mOwner setGeneralProperty: SCI_SETSELECTIONSTART
-                         value: mMarkedTextRange.location];
-    [mOwner setGeneralProperty: SCI_SETSELECTIONEND
-                         value: mMarkedTextRange.location + mMarkedTextRange.length];
+    if (replacementRange.location != NSNotFound)
+    {
+      // This situation makes no sense and has not occurred in practice.
+      // Should the marked range remain marked in addition to the new text
+      // or should it be removed first?
+      NSLog(@"Can not handle a replacement range when there is also a marked range");
+    }
+
+    [mOwner deleteRange: mMarkedTextRange];
     currentPosition = mMarkedTextRange.location;
   }
   else
   {
+    // Must perform deletion before entering composition mode or else
+    // both document and undo history will not contain the deleted text
+    // leading to an inaccurate and unusable undo history.
+
+    if (replacementRange.location != NSNotFound)
+    {
+      [mOwner deleteRange: replacementRange];
+      currentPosition = replacementRange.location;
+    }
+    else  // No marked or replacement range, so replace selection
+    {
+      // Ensure only a single selection
+      mOwner.backend->SelectOnlyMainSelection();
+  
+      NSRange selectionRangeCurrent = [self selectedRange];
+      if (selectionRangeCurrent.length > 0)
+      {
+        [mOwner deleteRange: selectionRangeCurrent];
+      }
+      currentPosition = selectionRangeCurrent.location;
+    }
+    
     // Switching into composition so remember if collecting undo.
     undoCollectionWasActive = [mOwner getGeneralProperty: SCI_GETUNDOCOLLECTION] != 0;
 
     // Keep Scintilla from collecting undo actions for the composition task.
     [mOwner setGeneralProperty: SCI_SETUNDOCOLLECTION value: 0];
-
-    // Ensure only a single selection
-    mOwner.backend->SelectOnlyMainSelection();
   }
 
-  [mOwner deleteRange: replacementRange];
-
+  [mOwner message: SCI_SETEMPTYSELECTION wParam: currentPosition];
   // Note: Scintilla internally works almost always with bytes instead chars, so we need to take
   //       this into account when determining selection ranges and such.
-  std::string raw_text = [newText UTF8String];
   int lengthInserted = mOwner.backend->InsertText(newText);
-
-  mMarkedTextRange.location = currentPosition;
-  mMarkedTextRange.length = lengthInserted;
 
   if (lengthInserted > 0)
   {
+    mMarkedTextRange = NSMakeRange(currentPosition, lengthInserted);
     // Mark the just inserted text. Keep the marked range for later reset.
     [mOwner setGeneralProperty: SCI_SETINDICATORCURRENT value: INPUT_INDICATOR];
     [mOwner setGeneralProperty: SCI_INDICATORFILLRANGE
@@ -511,6 +536,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   }
   else
   {
+    mMarkedTextRange = NSMakeRange(NSNotFound, 0);
     // Re-enable undo action collection if composition ended (indicated by an empty mark string).
     if (undoCollectionWasActive)
       [mOwner setGeneralProperty: SCI_SETUNDOCOLLECTION value: range.length == 0];
