@@ -105,6 +105,8 @@ private:
 
   bool GetPasteboardData(NSPasteboard* board, SelectionText* selectedText);
   void SetPasteboardData(NSPasteboard* board, const SelectionText& selectedText);
+  int TargetAsUTF8(char *text);
+  int EncodedFromUTF8(char *utf8, char *encoded) const;
 
   int scrollSpeed;
   int scrollTicks;

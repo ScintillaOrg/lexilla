@@ -526,6 +526,26 @@ static char *EncodedBytes(CFStringRef cfsRef, CFStringEncoding encoding) {
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Convert a core foundation string into a std::string in a particular encoding
+ */
+
+static std::string EncodedBytesString(CFStringRef cfsRef, CFStringEncoding encoding) {
+	const CFRange rangeAll = {0, CFStringGetLength(cfsRef)};
+	CFIndex usedLen = 0;
+	CFStringGetBytes(cfsRef, rangeAll, encoding, '?', false,
+                         NULL, 0, &usedLen);
+	
+	std::string buffer(usedLen, '\0');
+	if (usedLen > 0) {
+		CFStringGetBytes(cfsRef, rangeAll, encoding, '?', false,
+                                 reinterpret_cast<UInt8 *>(&buffer[0]), usedLen, NULL);
+	}
+	return buffer;
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Case folders.
  */
 
@@ -824,6 +844,13 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 
     case SCI_GETDIRECTPOINTER:
       return reinterpret_cast<sptr_t>(this);
+
+    case SCI_TARGETASUTF8:
+      return TargetAsUTF8(reinterpret_cast<char*>(lParam));
+
+    case SCI_ENCODEDFROMUTF8:
+      return EncodedFromUTF8(reinterpret_cast<char*>(wParam),
+                             reinterpret_cast<char*>(lParam));
 
     case SCI_SETIMEINTERACTION:
       // Only inline IME supported on Cocoa
@@ -1539,6 +1566,68 @@ bool ScintillaCocoa::GetPasteboardData(NSPasteboard* board, SelectionText* selec
   }
 
   return false;
+}
+
+//--------------------------------------------------------------------------------------------------
+
+// Returns the target converted to UTF8.
+// Return the length in bytes.
+int ScintillaCocoa::TargetAsUTF8(char *text)
+{
+  const int targetLength = targetEnd - targetStart;
+  if (IsUnicodeMode())
+  {
+    if (text)
+      pdoc->GetCharRange(text, targetStart, targetLength);
+  }
+  else
+  {
+    // Need to convert
+    const CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
+                                                         vs.styles[STYLE_DEFAULT].characterSet);
+    const std::string s = RangeText(targetStart, targetEnd);
+    CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
+                                                 reinterpret_cast<const UInt8 *>(s.c_str()),
+                                                 s.length(), encoding, false);
+	  
+    const std::string tmputf = EncodedBytesString(cfsVal, kCFStringEncodingUTF8);
+    
+    if (text)
+      memcpy(text, tmputf.c_str(), tmputf.length());
+    CFRelease(cfsVal);
+    return tmputf.length();
+  }
+  return targetLength;
+}
+
+//--------------------------------------------------------------------------------------------------
+
+// Translates a UTF8 string into the document encoding.
+// Return the length of the result in bytes.
+int ScintillaCocoa::EncodedFromUTF8(char *utf8, char *encoded) const
+{
+  const int inputLength = (lengthForEncode >= 0) ? lengthForEncode : strlen(utf8);
+  if (IsUnicodeMode())
+  {
+    if (encoded)
+      memcpy(encoded, utf8, inputLength);
+    return inputLength;
+  }
+  else
+  {
+    // Need to convert
+    const CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
+                                                         vs.styles[STYLE_DEFAULT].characterSet);
+    
+    CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
+                                                 reinterpret_cast<const UInt8 *>(utf8),
+                                                 inputLength, kCFStringEncodingUTF8, false);
+    const std::string sEncoded = EncodedBytesString(cfsVal, encoding);
+    if (encoded)
+      memcpy(encoded, sEncoded.c_str(), sEncoded.length());
+    CFRelease(cfsVal);
+    return sEncoded.length();
+  }
 }
 
 //--------------------------------------------------------------------------------------------------
