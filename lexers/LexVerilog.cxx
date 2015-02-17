@@ -511,8 +511,7 @@ void SCI_METHOD LexerVerilog::Lex(unsigned int startPos, int length, int initSty
 				}
 				break;
 			case SCE_V_IDENTIFIER:
-				if ((!isEscapedId &&(!IsAWordChar(sc.ch) || (sc.ch == '.'))) ||
-					(isEscapedId && isspacechar(sc.ch))) {
+				if (!isEscapedId &&(!IsAWordChar(sc.ch) || (sc.ch == '.'))) {
 					char s[100];
 					lineState &= 0xff00;
 					sc.GetCurrent(s, sizeof(s));
@@ -738,7 +737,6 @@ void SCI_METHOD LexerVerilog::Lex(unsigned int startPos, int length, int initSty
 		}
 		if (isEscapedId && isspacechar(sc.ch)) {
 			isEscapedId = false;
-			sc.SetState(SCE_V_DEFAULT|activitySet);
 		}
 	}
 	if (definitionsChanged) {
