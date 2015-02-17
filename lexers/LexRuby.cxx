@@ -1650,6 +1650,19 @@ static bool keywordDoStartsLoop(int pos,
     return false;
 }
 
+static bool IsCommentLine(int line, Accessor &styler) {
+	int pos = styler.LineStart(line);
+	int eol_pos = styler.LineStart(line + 1) - 1;
+	for (int i = pos; i < eol_pos; i++) {
+		char ch = styler[i];
+		if (ch == '#')
+			return true;
+		else if (ch != ' ' && ch != '\t')
+			return false;
+	}
+	return false;
+}
+
 /*
  *  Folding Ruby
  *
@@ -1728,6 +1741,17 @@ static void FoldRbDoc(unsigned int startPos, int length, int initStyle,
 		int style = styleNext;
 		styleNext = styler.StyleAt(i + 1);
 		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
+
+		/*Mutiline comment patch*/
+		if (foldComment && atEOL && IsCommentLine(lineCurrent, styler)) {
+			if (!IsCommentLine(lineCurrent - 1, styler)
+				&& IsCommentLine(lineCurrent + 1, styler))
+				levelCurrent++;
+			else if (IsCommentLine(lineCurrent - 1, styler)
+					 && !IsCommentLine(lineCurrent + 1, styler))
+				levelCurrent--;
+		}
+
         if (style == SCE_RB_COMMENTLINE) {
             if (foldComment && stylePrev != SCE_RB_COMMENTLINE) {
                 if (chNext == '{') {
