@@ -498,6 +498,10 @@
 	Minimum version of Qt supported is now 4.8 due to the use of QElapsedTimer::nsecsElapsed.
 	</li>
 	<li>
+	C++ lexer adds lexer.cpp.verbatim.strings.allow.escapes option that allows verbatim (@") strings
+	to contain escape sequences. This should remain off (0) for C# and be turned on (1) for Objective C.
+	</li>
+	<li>
 	Rust lexer accepts new 'is'/'us' integer suffixes instead of 'i'/'u'.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1098/">Bug #1098</a>.
 	</li>
