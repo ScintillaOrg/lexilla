@@ -5561,6 +5561,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETTARGETEND:
 		return targetEnd;
 
+	case SCI_SETTARGETRANGE:
+		targetStart = static_cast<int>(wParam);
+		targetEnd = static_cast<int>(lParam);
+		break;
+
 	case SCI_TARGETFROMSELECTION:
 		if (sel.MainCaret() < sel.MainAnchor()) {
 			targetStart = sel.MainCaret();

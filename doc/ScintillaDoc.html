@@ -637,6 +637,7 @@ struct Sci_TextRange {
      <a class="message" href="#SCI_GETTARGETSTART">SCI_GETTARGETSTART</a><br />
      <a class="message" href="#SCI_SETTARGETEND">SCI_SETTARGETEND(int pos)</a><br />
      <a class="message" href="#SCI_GETTARGETEND">SCI_GETTARGETEND</a><br />
+     <a class="message" href="#SCI_SETTARGETRANGE">SCI_SETTARGETRANGE(int start, int end)</a><br />
      <a class="message" href="#SCI_TARGETFROMSELECTION">SCI_TARGETFROMSELECTION</a><br />
      <a class="message" href="#SCI_SETSEARCHFLAGS">SCI_SETSEARCHFLAGS(int searchFlags)</a><br />
      <a class="message" href="#SCI_GETSEARCHFLAGS">SCI_GETSEARCHFLAGS</a><br />
@@ -653,6 +654,7 @@ struct Sci_TextRange {
      <b id="SCI_GETTARGETSTART">SCI_GETTARGETSTART</b><br />
      <b id="SCI_SETTARGETEND">SCI_SETTARGETEND(int pos)</b><br />
      <b id="SCI_GETTARGETEND">SCI_GETTARGETEND</b><br />
+     <b id="SCI_SETTARGETRANGE">SCI_SETTARGETRANGE(int start, int end)</b><br />
      These functions set and return the start and end of the target. When searching
      you can set start greater than end to find the last matching text in the
     target rather than the first matching text. The target is also set by a successful
