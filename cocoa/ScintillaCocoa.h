@@ -197,7 +197,14 @@ public:
   virtual void IdleWork();
   virtual void QueueIdleWork(WorkNeeded::workItems items, int upTo);
   int InsertText(NSString* input);
+  NSRange PositionsFromCharacters(NSRange range) const;
+  NSRange CharactersFromPositions(NSRange range) const;
   void SelectOnlyMainSelection();
+  void ConvertSelectionVirtualSpace();
+  bool ClearAllSelections();
+  void CompositionStart();
+  void CompositionCommit();
+  void CompositionUndo();
   virtual void SetDocPointer(Document *document);
 
   bool KeyboardInput(NSEvent* event);

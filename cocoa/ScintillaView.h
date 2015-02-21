@@ -79,12 +79,10 @@ extern NSString *const SCIUpdateUINotification;
 
   // Set when we are in composition mode and partial input is displayed.
   NSRange mMarkedTextRange;
-  BOOL undoCollectionWasActive;
 }
 
 @property (nonatomic, assign) ScintillaView* owner;
 
-- (void) removeMarkedText;
 - (void) setCursor: (int) cursor;
 
 - (BOOL) canUndo;

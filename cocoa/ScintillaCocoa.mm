@@ -2102,22 +2102,42 @@ bool ScintillaCocoa::KeyboardInput(NSEvent* event)
 int ScintillaCocoa::InsertText(NSString* input)
 {
   CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
-                                                         vs.styles[STYLE_DEFAULT].characterSet);
-  CFRange rangeAll = {0, static_cast<CFIndex>([input length])};
-  CFIndex usedLen = 0;
-  CFStringGetBytes((CFStringRef)input, rangeAll, encoding, '?',
-                   false, NULL, 0, &usedLen);
-
-  if (usedLen > 0)
+                                                       vs.styles[STYLE_DEFAULT].characterSet);
+  std::string encoded = EncodedBytesString((CFStringRef)input, encoding);
+  
+  if (encoded.length() > 0)
   {
-    std::vector<UInt8> buffer(usedLen);
-
-    CFStringGetBytes((CFStringRef)input, rangeAll, encoding, '?',
-                       false, buffer.data(),usedLen, NULL);
-
-    AddCharUTF((char*) buffer.data(), static_cast<unsigned int>(usedLen), false);
+    AddCharUTF((char*) encoded.c_str(), static_cast<unsigned int>(encoded.length()), false);
   }
-  return static_cast<int>(usedLen);
+  return static_cast<int>(encoded.length());
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Convert from a range of characters to a range of bytes.
+ */
+NSRange ScintillaCocoa::PositionsFromCharacters(NSRange range) const
+{
+  long start = pdoc->GetRelativePositionUTF16(0, range.location);
+  if (start == INVALID_POSITION)
+    start = pdoc->Length();
+  long end = pdoc->GetRelativePositionUTF16(start, range.length);
+  if (end == INVALID_POSITION)
+    end = pdoc->Length();
+  return NSMakeRange(start, end - start);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Convert from a range of characters from a range of bytes.
+ */
+NSRange ScintillaCocoa::CharactersFromPositions(NSRange range) const
+{
+  const long start = pdoc->CountUTF16(0, range.location);
+  const long len = pdoc->CountUTF16(range.location, NSMaxRange(range));
+  return NSMakeRange(start, len);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -2125,14 +2145,69 @@ int ScintillaCocoa::InsertText(NSString* input)
 /**
  * Used to ensure that only one selection is active for input composition as composition
  * does not support multi-typing.
- * Also drop virtual space as that is not supported by composition.
  */
 void ScintillaCocoa::SelectOnlyMainSelection()
 {
-  SelectionRange mainSel = sel.RangeMain();
-  mainSel.ClearVirtualSpace();
-  sel.SetSelection(mainSel);
+  sel.SetSelection(sel.RangeMain());
   Redraw();
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Convert virtual space before selection into real space.
+ */
+void ScintillaCocoa::ConvertSelectionVirtualSpace()
+{
+  FillVirtualSpace();
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Erase all selected text and return whether the selection is now empty.
+ * The selection may not be empty if the selection contained protected text.
+ */
+bool ScintillaCocoa::ClearAllSelections()
+{
+  ClearSelection(true);
+  return sel.Empty();
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Start composing for IME.
+ */
+void ScintillaCocoa::CompositionStart()
+{
+  if (!sel.Empty())
+  {
+    NSLog(@"Selection not empty when starting composition");
+  }
+  pdoc->TentativeStart();
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Commit the IME text.
+ */
+void ScintillaCocoa::CompositionCommit()
+{
+  pdoc->TentativeCommit();
+  pdoc->decorations.SetCurrentIndicator(INDIC_IME);
+  pdoc->DecorationFillRange(0, 0, pdoc->Length());
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Remove the IME text.
+ */
+void ScintillaCocoa::CompositionUndo()
+{
+  pdoc->TentativeUndo();
 }
 
 //--------------------------------------------------------------------------------------------------
