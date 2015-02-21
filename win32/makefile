@@ -91,7 +91,8 @@ BASEOBJS = \
 	Style.o \
 	UniConversion.o \
 	ViewStyle.o \
-	XPM.o
+	XPM.o \
+	HanjaDic.o
 
 SOBJS = ScintillaWin.o ScintillaBase.o $(BASEOBJS)
 
