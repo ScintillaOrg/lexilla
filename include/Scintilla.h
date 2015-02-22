@@ -433,6 +433,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_SETTARGETEND 2192
 #define SCI_GETTARGETEND 2193
 #define SCI_SETTARGETRANGE 2686
+#define SCI_GETTARGETTEXT 2687
 #define SCI_REPLACETARGET 2194
 #define SCI_REPLACETARGETRE 2195
 #define SCI_SEARCHINTARGET 2197

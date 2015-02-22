@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 13 February 2015 NH</p>
+    <p>Last edited 22 February 2015 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -643,6 +643,8 @@ struct Sci_TextRange {
      <a class="message" href="#SCI_GETSEARCHFLAGS">SCI_GETSEARCHFLAGS</a><br />
      <a class="message" href="#SCI_SEARCHINTARGET">SCI_SEARCHINTARGET(int length, const char
     *text)</a><br />
+     <a class="message" href="#SCI_GETTARGETTEXT">SCI_GETTARGETTEXT(&lt;unused&gt;,
+     char *text)</a><br />
      <a class="message" href="#SCI_REPLACETARGET">SCI_REPLACETARGET(int length, const char
     *text)</a><br />
      <a class="message" href="#SCI_REPLACETARGETRE">SCI_REPLACETARGETRE(int length, const char
@@ -676,6 +678,9 @@ struct Sci_TextRange {
     set by <code>SCI_SETSEARCHFLAGS</code>. If the search succeeds, the target is set to the found
     text and the return value is the position of the start of the matching text. If the search
     fails, the result is -1.</p>
+
+    <p><b id="SCI_GETTARGETTEXT">SCI_GETTARGETTEXT(&lt;unused&gt;, char *text)</b><br />
+     Retrieve the value in the target.</p>
 
     <p><b id="SCI_REPLACETARGET">SCI_REPLACETARGET(int length, const char *text)</b><br />
      If <code>length</code> is -1, <code>text</code> is a zero terminated string, otherwise

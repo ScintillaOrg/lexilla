@@ -1062,6 +1062,9 @@ get position GetTargetEnd=2193(,)
 # Sets both the start and end of the target in one call.
 fun void SetTargetRange=2686(position start, position end)
 
+# Retrieve the text in the target.
+get int GetTargetText=2687(, stringresult characters)
+
 # Replace the target text with the argument text.
 # Text is counted so it can contain NULs.
 # Returns the length of the replacement text.

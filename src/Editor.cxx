@@ -5343,7 +5343,7 @@ sptr_t Editor::StringResult(sptr_t lParam, const char *val) {
 
 sptr_t Editor::BytesResult(sptr_t lParam, const unsigned char *val, size_t len) {
 	// No NUL termination: len is number of valid/displayed bytes
-	if (lParam) {
+	if ((lParam) && (len > 0)) {
 		char *ptr = CharPtrFromSPtr(lParam);
 		if (val)
 			memcpy(ptr, val, len);
@@ -5575,6 +5575,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			targetEnd = sel.MainCaret();
 		}
 		break;
+
+	case SCI_GETTARGETTEXT: {
+			std::string text = RangeText(targetStart, targetEnd);
+			return BytesResult(lParam, reinterpret_cast<const unsigned char *>(text.c_str()), text.length());
+		}
 
 	case SCI_REPLACETARGET:
 		PLATFORM_ASSERT(lParam);
