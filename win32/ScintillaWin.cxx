@@ -979,22 +979,20 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 
 		bool tmpRecordingMacro = recordingMacro;
 		recordingMacro = false;
-		for (unsigned int i = 0; i < wcsLen; i++) {
-			wchar_t uniChar[1] = { 0 };
+		for (size_t i = 0; i < wcsLen; ) {
+			const size_t ucWidth = UTF16CharLength(wcs[i]);
+			const std::wstring uniChar(wcs+i, ucWidth);
 			char oneChar[UTF8MaxBytes + 1] = "\0\0\0\0"; // Maximum 4 bytes in utf8
 			unsigned int oneCharLen = 0;
 
-			uniChar[0] = wcs[i];
-
 			if (IsUnicodeMode()) {
-				oneCharLen = UTF8Length(uniChar, 1);
-				UTF8FromUTF16(uniChar, 1, oneChar, oneCharLen);
-				oneChar[oneCharLen] = '\0';
+				oneCharLen = UTF8Length(uniChar.c_str(), static_cast<unsigned int>(uniChar.length()));
+				UTF8FromUTF16(uniChar.c_str(), static_cast<unsigned int>(uniChar.length()), oneChar, oneCharLen);
 			} else {
 				oneCharLen = ::WideCharToMultiByte(InputCodePage(), 0,
-					uniChar, 1, oneChar, sizeof(oneChar)-1, 0, 0);
-				oneChar[oneCharLen] = '\0';
+					uniChar.c_str(), static_cast<unsigned int>(uniChar.length()), oneChar, sizeof(oneChar)-1, 0, 0);
 			}
+			oneChar[oneCharLen] = '\0';
 
 			// Display a character.
 			AddCharUTF(oneChar, oneCharLen);
@@ -1018,6 +1016,7 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 				break;
 			}
 			DrawImeIndicator(indicator, oneCharLen);
+			i += ucWidth;
 		}
 		recordingMacro = tmpRecordingMacro;
 
@@ -1032,23 +1031,22 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 			(hIMC, GCS_RESULTSTR, wcs, maxLenInputIME);
 		unsigned int wcsLen = bytes / 2;
 
-		for (unsigned int i = 0; i < wcsLen; i++) {
-			wchar_t uniChar[1] = { 0 };
+		for (size_t i = 0; i < wcsLen;) {
+			const size_t ucWidth = UTF16CharLength(wcs[i]);
+			const std::wstring uniChar(wcs+i, ucWidth);
 			char oneChar[UTF8MaxBytes+1] = "\0\0\0\0"; // Maximum 4 bytes in UTF-8.
 			unsigned int oneCharLen = 0;
 
-			uniChar[0] = wcs[i];
-
 			if (IsUnicodeMode()) {
-				oneCharLen = UTF8Length(uniChar, 1);
-				UTF8FromUTF16(uniChar, 1, oneChar, oneCharLen);
-				oneChar[oneCharLen] = '\0';
+				oneCharLen = UTF8Length(uniChar.c_str(), static_cast<unsigned int>(uniChar.length()));
+				UTF8FromUTF16(uniChar.c_str(), static_cast<unsigned int>(uniChar.length()), oneChar, oneCharLen);
 			} else {
 				oneCharLen = ::WideCharToMultiByte(InputCodePage(), 0,
-					uniChar, 1, oneChar, sizeof(oneChar)-1, 0, 0);
-				oneChar[oneCharLen] = '\0';
+					uniChar.c_str(), static_cast<unsigned int>(uniChar.length()), oneChar, sizeof(oneChar)-1, 0, 0);
 			}
+			oneChar[oneCharLen] = '\0';
 			AddCharUTF(oneChar, oneCharLen);
+			i += ucWidth;
 		}
 	}
 	SetCandidateWindowPos();
@@ -2224,7 +2222,6 @@ void ScintillaWin::Paste() {
 
 					unsigned int mlen = UTF8Length(&uptr[0], ulen);
 					std::vector<char> putf(mlen+1);
-						// CP_UTF8 not available on Windows 95, so use UTF8FromUTF16()
 					UTF8FromUTF16(&uptr[0], ulen, &putf[0], mlen);
 
 					InsertPasteShape(&putf[0], mlen, pasteShape);
