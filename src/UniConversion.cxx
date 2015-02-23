@@ -145,7 +145,7 @@ unsigned int UTF32FromUTF8(const char *s, unsigned int len, unsigned int *tbuf, 
 	unsigned int i=0;
 	while ((i<len) && (ui<tlen)) {
 		unsigned char ch = us[i++];
-		wchar_t value = 0;
+		unsigned int value = 0;
 		if (ch < 0x80) {
 			value = ch;
 		} else if (((len-i) >= 1) && (ch < 0x80 + 0x40 + 0x20)) {
