@@ -1619,6 +1619,7 @@ void ListBoxImpl::Create(Window& /*parent*/, int /*ctrlID*/, Scintilla::Point pt
 
   [table setTarget:ds];
   [table setDoubleAction:@selector(doubleClick:)];
+  table.selectionHighlightStyle = NSTableViewSelectionHighlightStyleSourceList;
   wid = winLB;
 }
 
