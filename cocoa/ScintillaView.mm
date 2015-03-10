@@ -731,6 +731,45 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Implement NSDraggingSource.
+ */
+
+- (NSDragOperation)draggingSession: (NSDraggingSession *) session
+sourceOperationMaskForDraggingContext: (NSDraggingContext) context
+{
+  switch(context)
+  {
+    case NSDraggingContextOutsideApplication:
+      return NSDragOperationCopy | NSDragOperationMove | NSDragOperationDelete;
+      
+    case NSDraggingContextWithinApplication:
+    default:
+      return NSDragOperationCopy | NSDragOperationMove | NSDragOperationDelete;
+  }
+}
+
+- (void)draggingSession:(NSDraggingSession *)session
+           movedToPoint:(NSPoint)screenPoint
+{
+}
+
+- (void)draggingSession:(NSDraggingSession *)session
+           endedAtPoint:(NSPoint)screenPoint
+              operation:(NSDragOperation)operation
+{
+  if (operation == NSDragOperationDelete)
+  {
+    mOwner.backend->WndProc(SCI_CLEAR, 0, 0);
+  }
+}
+
+/**
+ * Implement NSDraggingDestination.
+ */
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Called when an external drag operation enters the view.
  */
 - (NSDragOperation) draggingEntered: (id <NSDraggingInfo>) sender
@@ -771,30 +810,6 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 - (BOOL) performDragOperation: (id <NSDraggingInfo>) sender
 {
   return mOwner.backend->PerformDragOperation(sender);
-}
-
-//--------------------------------------------------------------------------------------------------
-
-/**
- * Returns operations we allow as drag source.
- */
-- (NSDragOperation) draggingSourceOperationMaskForLocal: (BOOL) isLocal
-{
-// Scintilla does not choose different operations for other applications
-#pragma unused(isLocal)
-  return NSDragOperationCopy | NSDragOperationMove | NSDragOperationDelete;
-}
-
-//--------------------------------------------------------------------------------------------------
-
-/**
- * Finished a drag: may need to delete selection.
- */
-
-- (void)draggedImage:(NSImage *)image endedAt:(NSPoint)screenPoint operation:(NSDragOperation)operation {
-    if (operation == NSDragOperationDelete) {
-        mOwner.backend->WndProc(SCI_CLEAR, 0, 0);
-    }
 }
 
 //--------------------------------------------------------------------------------------------------

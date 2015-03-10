@@ -1242,6 +1242,60 @@ void ScintillaCocoa::DragScroll()
 
 }
 
+//----------------- DragProviderSource -------------------------------------------------------
+
+@interface DragProviderSource : NSObject <NSPasteboardItemDataProvider>
+{
+  SelectionText selectedText;
+}
+
+@end
+
+@implementation DragProviderSource
+
+- (id)initWithSelectedText:(const SelectionText *)other
+{
+  self = [super init];
+  
+  if (self) {
+    selectedText.Copy(*other);
+  }
+  
+  return self;
+}
+
+- (void)pasteboard:(NSPasteboard *)pasteboard item:(NSPasteboardItem *)item provideDataForType:(NSString *)type
+{
+  if (selectedText.Length() == 0)
+    return;
+
+  if (([type compare: NSPasteboardTypeString] != NSOrderedSame) &&
+    ([type compare: ScintillaRecPboardType] != NSOrderedSame))
+    return;
+
+  CFStringEncoding encoding = EncodingFromCharacterSet(selectedText.codePage == SC_CP_UTF8,
+                                                       selectedText.characterSet);
+  CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
+                                               reinterpret_cast<const UInt8 *>(selectedText.Data()),
+                                               selectedText.Length(), encoding, false);
+  
+  if ([type compare: NSPasteboardTypeString] == NSOrderedSame)
+  {
+    [pasteboard setString:(NSString *)cfsVal forType: NSStringPboardType];
+  }
+  else if ([type compare: ScintillaRecPboardType] == NSOrderedSame)
+  {
+    // This is specific to scintilla, allows us to drag rectangular selections around the document.
+    if (selectedText.rectangular)
+      [pasteboard setString:(NSString *)cfsVal forType: ScintillaRecPboardType];
+  }
+
+  if (cfsVal)
+    CFRelease(cfsVal);  
+}
+
+@end
+
 //--------------------------------------------------------------------------------------------------
 
 /**
@@ -1335,7 +1389,7 @@ void ScintillaCocoa::StartDrag()
   // Prepare drag image.
   NSRect selectionRectangle = PRectangleToNSRect(rcSel);
 
-  NSView* content = ContentView();
+  SCIContentView* content = ContentView();
 
   // To get a bitmap of the text we're dragging, we just use Paint on a pixmap surface.
   SurfaceImpl *sw = new SurfaceImpl();
@@ -1401,13 +1455,27 @@ void ScintillaCocoa::StartDrag()
   NSPoint startPoint;
   startPoint.x = selectionRectangle.origin.x + client.left;
   startPoint.y = selectionRectangle.origin.y + selectionRectangle.size.height + client.top;
-  [content dragImage: dragImage
-                  at: startPoint
-              offset: NSZeroSize
-               event: lastMouseEvent // Set in MouseMove.
-          pasteboard: pasteboard
-              source: content
-           slideBack: YES];
+  
+  NSPasteboardItem *pbItem = [NSPasteboardItem new];
+  DragProviderSource *dps = [[[DragProviderSource alloc] initWithSelectedText:&selectedText] autorelease];
+  
+  NSArray *pbTypes = selectedText.rectangular ?
+  @[NSPasteboardTypeString, ScintillaRecPboardType] :
+  @[NSPasteboardTypeString];
+  [pbItem setDataProvider:dps forTypes:pbTypes];
+  NSDraggingItem *dragItem = [[NSDraggingItem alloc ]initWithPasteboardWriter:pbItem];
+  [pbItem release];
+  
+  NSScrollView *scrollContainer = ScrollContainer();
+  NSRect contentRect = [[scrollContainer contentView] bounds];
+  NSRect draggingRect = NSOffsetRect(selectionRectangle, contentRect.origin.x, contentRect.origin.y);
+  [dragItem setDraggingFrame:draggingRect contents:dragImage];
+  NSDraggingSession *dragSession =
+  [content beginDraggingSessionWithItems:@[[dragItem autorelease]]
+                                   event:lastMouseEvent
+                                  source:content];
+  dragSession.animatesToStartingPositionsOnCancelOrFail = YES;
+  dragSession.draggingFormation = NSDraggingFormationNone;
 }
 
 //--------------------------------------------------------------------------------------------------
