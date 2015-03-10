@@ -853,7 +853,7 @@ void SCI_METHOD LexerVerilog::Fold(unsigned int startPos, int length, int initSt
 				}
 				if (styler.Match(j, "if")) {
 					levelNext++;
-				} else if (styler.Match(j, "end")) {
+				} else if (styler.Match(j, "endif")) {
 					levelNext--;
 				}
 			}
