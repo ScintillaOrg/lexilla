@@ -254,7 +254,7 @@ class ScintillaWin :
 	void SetCandidateWindowPos();
 	void BytesToUniChar(const char *bytes, const int bytesLen, wchar_t *character, int &charsLen);
 	void UniCharToBytes(const wchar_t *character, const int charsLen, char *bytes, int &bytesLen);
-	void RangeToHangul(int uniStrLen);
+	void SelectionToHangul();
 	void EscapeHanja();
 	void ToggleHanja();
 
@@ -832,40 +832,32 @@ void ScintillaWin::UniCharToBytes(const wchar_t *characters, const int charsLen,
 	}
 }
 
-void ScintillaWin::RangeToHangul(int uniStrLen) {
-	// Convert every hanja to hangul from current position to the length uniStrLen.
-	// Even if not coverted, the caret should advance by 1 character.
-	pdoc->BeginUndoAction();
-	for (int i=0; i<uniStrLen; i++) {
-		unsigned int const safeLength = UTF8MaxBytes+1;
+void ScintillaWin::SelectionToHangul() {
+	// Convert every hanja to hangul within the main range.
+	const int selStart = sel.RangeMain().Start().Position();
+	const int documentStrLen = sel.RangeMain().Length();
+	const int selEnd = selStart + documentStrLen;
+	const int utf16Len = pdoc->CountUTF16(selStart, selEnd);
 
-		int currentPos = CurrentPosition();
-		int oneCharLen = pdoc->LenChar(currentPos);
+	if (utf16Len > 0) {
+		std::vector<wchar_t> uniStr(utf16Len+1, '\0');
+		std::vector<char> documentStr(documentStrLen+1, '\0');
 
-		if (oneCharLen > 1) {
-			wchar_t uniChar[safeLength] = { 0 };
-			int uniCharLen = 1;
-			char oneChar[safeLength] = "\0\0\0\0";
-			pdoc->GetCharRange(oneChar, currentPos, oneCharLen);
+		pdoc->GetCharRange(&documentStr[0], selStart, documentStrLen);
 
-			BytesToUniChar(oneChar, oneCharLen, uniChar, uniCharLen);
+		int countedUniLen = 0;
+		int countedDocLen = 0;
+		BytesToUniChar(&documentStr[0], documentStrLen, &uniStr[0], countedUniLen);
+		int converted = HanjaDict::GetHangulOfHanja(&uniStr[0]);
+		UniCharToBytes(&uniStr[0], countedUniLen, &documentStr[0], countedDocLen);
 
-			int hangul = HanjaDict::GetHangulOfHanja(uniChar[0]);
-			if (hangul > 0) {
-				uniChar[0] = static_cast<wchar_t>(hangul);
-
-				UniCharToBytes(uniChar, uniCharLen, oneChar, oneCharLen);
-
-				pdoc->DelChar(currentPos);
-				InsertPaste(oneChar, oneCharLen);
-			} else {
-				MoveImeCarets(oneCharLen);
-			}
-		} else {
-			MoveImeCarets(oneCharLen);
+		if (converted > 0) {
+			pdoc->BeginUndoAction();
+			ClearSelection();
+			InsertPaste(&documentStr[0], countedDocLen);
+			pdoc->EndUndoAction();
 		}
 	}
-	pdoc->EndUndoAction();
 }
 
 void ScintillaWin::EscapeHanja() {
@@ -914,18 +906,10 @@ void ScintillaWin::ToggleHanja() {
 		return; // Do not allow multi carets.
 	}
 
-	int selStart = sel.RangeMain().Start().Position();
-	int documentStrLen = sel.RangeMain().Length();
-	int selEnd = selStart + documentStrLen;
-	int uniStrLen = pdoc->CountCharacters(selStart, selEnd);
-
-	// Convert one by one from the start of main range.
-	SetSelection(selStart, selStart);
-
-	if (uniStrLen > 0) {
-		RangeToHangul(uniStrLen);
-	} else {
+	if (sel.Empty()) {
 		EscapeHanja();
+	} else {
+		SelectionToHangul();
 	}
 }
 
