@@ -479,7 +479,7 @@ public:
 	}
 };
 
-const int stackBufferLength = 10000;
+const int stackBufferLength = 1000;
 class TextWide : public VarBuffer<wchar_t, stackBufferLength> {
 public:
 	int tlen;
