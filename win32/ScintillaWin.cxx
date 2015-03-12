@@ -351,7 +351,6 @@ private:
 	HBITMAP sysCaretBitmap;
 	int sysCaretWidth;
 	int sysCaretHeight;
-	bool keysAlwaysUnicode;
 };
 
 HINSTANCE ScintillaWin::hInstance = 0;
@@ -402,8 +401,6 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	pRenderTarget = 0;
 	renderTargetValid = true;
 #endif
-
-	keysAlwaysUnicode = false;
 
 	caret.period = ::GetCaretBlinkTime();
 	if (caret.period < 0)
@@ -1103,66 +1100,49 @@ UINT ScintillaWin::CodePageOfDocument() {
 }
 
 sptr_t ScintillaWin::GetTextLength() {
-	if (::IsWindowUnicode(MainHWND())) {
-		if (pdoc->Length() == 0)
-			return 0;
-		std::vector<char> docBytes(pdoc->Length(), '\0');
-		pdoc->GetCharRange(&docBytes[0], 0, pdoc->Length());
-		if (IsUnicodeMode()) {
-			return UTF16Length(&docBytes[0], static_cast<unsigned int>(docBytes.size()));
-		} else {
-			return ::MultiByteToWideChar(CodePageOfDocument(), 0, &docBytes[0],
-				static_cast<int>(docBytes.size()), NULL, 0);
-		}
+	if (pdoc->Length() == 0)
+		return 0;
+	std::vector<char> docBytes(pdoc->Length(), '\0');
+	pdoc->GetCharRange(&docBytes[0], 0, pdoc->Length());
+	if (IsUnicodeMode()) {
+		return UTF16Length(&docBytes[0], static_cast<unsigned int>(docBytes.size()));
 	} else {
-		return pdoc->Length();
+		return ::MultiByteToWideChar(CodePageOfDocument(), 0, &docBytes[0],
+			static_cast<int>(docBytes.size()), NULL, 0);
 	}
 }
 
 sptr_t ScintillaWin::GetText(uptr_t wParam, sptr_t lParam) {
-	if (::IsWindowUnicode(MainHWND())) {
-		wchar_t *ptr = reinterpret_cast<wchar_t *>(lParam);
-		if (pdoc->Length() == 0) {
-			*ptr = L'\0';
-			return 0;
-		}
-		std::vector<char> docBytes(pdoc->Length(), '\0');
-		pdoc->GetCharRange(&docBytes[0], 0, pdoc->Length());
-		if (IsUnicodeMode()) {
-			size_t lengthUTF16 = UTF16Length(&docBytes[0], static_cast<unsigned int>(docBytes.size()));
-			if (lParam == 0)
-				return lengthUTF16;
-			if (wParam == 0)
-				return 0;
-			size_t uLen = UTF16FromUTF8(&docBytes[0], docBytes.size(),
-				ptr, static_cast<int>(wParam) - 1);
-			ptr[uLen] = L'\0';
-			return uLen;
-		} else {
-			// Not Unicode mode
-			// Convert to Unicode using the current Scintilla code page
-			const UINT cpSrc = CodePageOfDocument();
-			int lengthUTF16 = ::MultiByteToWideChar(cpSrc, 0, &docBytes[0],
-				static_cast<int>(docBytes.size()), NULL, 0);
-			if (lengthUTF16 >= static_cast<int>(wParam))
-				lengthUTF16 = static_cast<int>(wParam)-1;
-			::MultiByteToWideChar(cpSrc, 0, &docBytes[0],
-				static_cast<int>(docBytes.size()),
-				ptr, lengthUTF16);
-			ptr[lengthUTF16] = L'\0';
-			return lengthUTF16;
-		}
-	} else {
+	wchar_t *ptr = reinterpret_cast<wchar_t *>(lParam);
+	if (pdoc->Length() == 0) {
+		*ptr = L'\0';
+		return 0;
+	}
+	std::vector<char> docBytes(pdoc->Length(), '\0');
+	pdoc->GetCharRange(&docBytes[0], 0, pdoc->Length());
+	if (IsUnicodeMode()) {
+		size_t lengthUTF16 = UTF16Length(&docBytes[0], static_cast<unsigned int>(docBytes.size()));
 		if (lParam == 0)
-			return pdoc->Length() + 1;
+			return lengthUTF16;
 		if (wParam == 0)
 			return 0;
-		char *ptr = reinterpret_cast<char *>(lParam);
-		unsigned int iChar = 0;
-		for (; iChar < wParam - 1; iChar++)
-			ptr[iChar] = pdoc->CharAt(iChar);
-		ptr[iChar] = '\0';
-		return iChar;
+		size_t uLen = UTF16FromUTF8(&docBytes[0], docBytes.size(),
+			ptr, static_cast<int>(wParam) - 1);
+		ptr[uLen] = L'\0';
+		return uLen;
+	} else {
+		// Not Unicode mode
+		// Convert to Unicode using the current Scintilla code page
+		const UINT cpSrc = CodePageOfDocument();
+		int lengthUTF16 = ::MultiByteToWideChar(cpSrc, 0, &docBytes[0],
+			static_cast<int>(docBytes.size()), NULL, 0);
+		if (lengthUTF16 >= static_cast<int>(wParam))
+			lengthUTF16 = static_cast<int>(wParam)-1;
+		::MultiByteToWideChar(cpSrc, 0, &docBytes[0],
+			static_cast<int>(docBytes.size()),
+			ptr, lengthUTF16);
+		ptr[lengthUTF16] = L'\0';
+		return lengthUTF16;
 	}
 }
 
@@ -1377,28 +1357,20 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 		case WM_CHAR:
 			if (((wParam >= 128) || !iscntrl(static_cast<int>(wParam))) || !lastKeyDownConsumed) {
-				if (::IsWindowUnicode(MainHWND()) || keysAlwaysUnicode) {
-					wchar_t wcs[2] = {static_cast<wchar_t>(wParam), 0};
-					if (IsUnicodeMode()) {
-						// For a wide character version of the window:
-						char utfval[4];
-						unsigned int len = UTF8Length(wcs, 1);
-						UTF8FromUTF16(wcs, 1, utfval, len);
-						AddCharUTF(utfval, len);
-					} else {
-						UINT cpDest = CodePageOfDocument();
-						char inBufferCP[20];
-						int size = ::WideCharToMultiByte(cpDest,
-							0, wcs, 1, inBufferCP, sizeof(inBufferCP) - 1, 0, 0);
-						inBufferCP[size] = '\0';
-						AddCharUTF(inBufferCP, size);
-					}
+				wchar_t wcs[2] = {static_cast<wchar_t>(wParam), 0};
+				if (IsUnicodeMode()) {
+					// For a wide character version of the window:
+					char utfval[4];
+					unsigned int len = UTF8Length(wcs, 1);
+					UTF8FromUTF16(wcs, 1, utfval, len);
+					AddCharUTF(utfval, len);
 				} else {
-					if (IsUnicodeMode()) {
-						AddCharBytes('\0', LOBYTE(wParam));
-					} else {
-						AddChar(LOBYTE(wParam));
-					}
+					UINT cpDest = CodePageOfDocument();
+					char inBufferCP[20];
+					int size = ::WideCharToMultiByte(cpDest,
+						0, wcs, 1, inBufferCP, sizeof(inBufferCP) - 1, 0, 0);
+					inBufferCP[size] = '\0';
+					AddCharUTF(inBufferCP, size);
 				}
 			}
 			return 0;
@@ -1643,11 +1615,10 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			break;
 
 		case SCI_SETKEYSUNICODE:
-			keysAlwaysUnicode = wParam != 0;
 			break;
 
 		case SCI_GETKEYSUNICODE:
-			return keysAlwaysUnicode;
+			return true;
 
 		case SCI_SETTECHNOLOGY:
 			if ((wParam == SC_TECHNOLOGY_DEFAULT) || 

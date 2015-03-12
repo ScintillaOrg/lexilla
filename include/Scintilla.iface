@@ -2092,12 +2092,6 @@ get int GetRangePointer=2643(int position, int rangeLength)
 # the range of a call to GetRangePointer.
 get position GetGapPosition=2644(,)
 
-# Always interpret keyboard input as Unicode
-set void SetKeysUnicode=2521(bool keysUnicode,)
-
-# Are keys always interpreted as Unicode?
-get bool GetKeysUnicode=2522(,)
-
 # Set the alpha fill colour of the given indicator.
 set void IndicSetAlpha=2523(int indicator, int alpha)
 
@@ -4660,3 +4654,11 @@ get bool GetUsePalette=2139(,)
 # In palette mode, Scintilla uses the environment's palette calls to display
 # more colours. This may lead to ugly displays.
 set void SetUsePalette=2039(bool usePalette,)
+
+# Deprecated in 3.5.5
+
+# Always interpret keyboard input as Unicode
+set void SetKeysUnicode=2521(bool keysUnicode,)
+
+# Are keys always interpreted as Unicode?
+get bool GetKeysUnicode=2522(,)
