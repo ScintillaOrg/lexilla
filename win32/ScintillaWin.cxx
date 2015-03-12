@@ -1360,7 +1360,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				wchar_t wcs[2] = {static_cast<wchar_t>(wParam), 0};
 				if (IsUnicodeMode()) {
 					// For a wide character version of the window:
-					char utfval[4];
+					char utfval[UTF8MaxBytes];
 					unsigned int len = UTF8Length(wcs, 1);
 					UTF8FromUTF16(wcs, 1, utfval, len);
 					AddCharUTF(utfval, len);
@@ -1382,7 +1382,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				return 1;
 			} else {
 				if (IsUnicodeMode()) {
-					char utfval[4];
+					char utfval[UTF8MaxBytes];
 					wchar_t wcs[2] = {static_cast<wchar_t>(wParam), 0};
 					unsigned int len = UTF8Length(wcs, 1);
 					UTF8FromUTF16(wcs, 1, utfval, len);
@@ -2579,7 +2579,7 @@ void ScintillaWin::AddCharBytes(char b0, char b1) {
 
 	int inputCodePage = InputCodePage();
 	if (inputCodePage && IsUnicodeMode()) {
-		char utfval[4] = "\0\0\0";
+		char utfval[UTF8MaxBytes] = "\0\0\0";
 		char ansiChars[3];
 		wchar_t wcs[2];
 		if (b0) {	// Two bytes from IME
