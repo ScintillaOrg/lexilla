@@ -2594,7 +2594,6 @@ void ScintillaWin::AddCharBytes(char b0, char b1) {
 		}
 		unsigned int len = UTF8Length(wcs, 1);
 		UTF8FromUTF16(wcs, 1, utfval, len);
-		utfval[len] = '\0';
 		AddCharUTF(utfval, len ? len : 1);
 	} else if (b0) {
 		char dbcsChars[3];
