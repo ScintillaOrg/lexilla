@@ -1131,7 +1131,16 @@ void ScintillaCocoa::CallTipMouseDown(NSPoint pt) {
     CallTipClick();
 }
 
+static bool HeightDifferent(WindowID wCallTip, PRectangle rc) {
+	NSWindow *callTip = (NSWindow *)wCallTip;
+	CGFloat height = NSHeight([callTip frame]);
+	return height != rc.Height();
+}
+
 void ScintillaCocoa::CreateCallTipWindow(PRectangle rc) {
+    if (ct.wCallTip.Created() && HeightDifferent(ct.wCallTip.GetID(), rc)) {
+        ct.wCallTip.Destroy();
+    }
     if (!ct.wCallTip.Created()) {
         NSRect ctRect = NSMakeRect(rc.top,rc.bottom, rc.Width(), rc.Height());
         NSWindow *callTip = [[NSWindow alloc] initWithContentRect: ctRect
