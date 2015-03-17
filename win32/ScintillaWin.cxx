@@ -296,8 +296,6 @@ class ScintillaWin :
 	void ImeStartComposition();
 	void ImeEndComposition();
 
-	void AddCharBytes(char b0, char b1);
-
 	void GetIntelliMouseParameters();
 	virtual void CopyToClipboard(const SelectionText &selectedText);
 	void ScrollMessage(WPARAM wParam);
@@ -1477,11 +1475,6 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				return HandleCompositionWindowed(wParam, lParam);
 			}
 
-		case WM_IME_CHAR: {
-				AddCharBytes(HIBYTE(wParam), LOBYTE(wParam));
-				return 0;
-			}
-
 		case WM_CONTEXTMENU:
 			if (displayPopupMenu) {
 				Point pt = Point::FromLong(static_cast<long>(lParam));
@@ -2573,37 +2566,6 @@ void ScintillaWin::ImeStartComposition() {
 /** Called when IME Window closed. */
 void ScintillaWin::ImeEndComposition() {
 	ShowCaretAtCurrentPosition();
-}
-
-void ScintillaWin::AddCharBytes(char b0, char b1) {
-
-	int inputCodePage = InputCodePage();
-	if (inputCodePage && IsUnicodeMode()) {
-		char utfval[UTF8MaxBytes] = "\0\0\0";
-		char ansiChars[3];
-		wchar_t wcs[2];
-		if (b0) {	// Two bytes from IME
-			ansiChars[0] = b0;
-			ansiChars[1] = b1;
-			ansiChars[2] = '\0';
-			::MultiByteToWideChar(inputCodePage, 0, ansiChars, 2, wcs, 1);
-		} else {
-			ansiChars[0] = b1;
-			ansiChars[1] = '\0';
-			::MultiByteToWideChar(inputCodePage, 0, ansiChars, 1, wcs, 1);
-		}
-		unsigned int len = UTF8Length(wcs, 1);
-		UTF8FromUTF16(wcs, 1, utfval, len);
-		AddCharUTF(utfval, len ? len : 1);
-	} else if (b0) {
-		char dbcsChars[3];
-		dbcsChars[0] = b0;
-		dbcsChars[1] = b1;
-		dbcsChars[2] = '\0';
-		AddCharUTF(dbcsChars, 2, true);
-	} else {
-		AddChar(b1);
-	}
 }
 
 void ScintillaWin::GetIntelliMouseParameters() {
