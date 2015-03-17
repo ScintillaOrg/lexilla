@@ -1094,21 +1094,7 @@ Window::~Window()
 {
 }
 
-//--------------------------------------------------------------------------------------------------
-
-void Window::Destroy()
-{
-  if (wid)
-  {
-    id idWin = reinterpret_cast<id>(wid);
-    if ([idWin isKindOfClass: [NSWindow class]])
-    {
-      NSWindow* win = reinterpret_cast<NSWindow*>(idWin);
-      [win release];
-    }
-  }
-  wid = 0;
-}
+// Window::Destroy needs to see definition of ListBoxImpl so is located after ListBoxImpl
 
 //--------------------------------------------------------------------------------------------------
 
@@ -1379,6 +1365,8 @@ static NSImage* ImageFromXPM(XPM* pxpm)
 
 //----------------- ListBox and related classes ----------------------------------------------------
 
+//----------------- IListBox -----------------------------------------------------------------------
+
 namespace {
 
 // unnamed namespace hides IListBox interface
@@ -1572,6 +1560,9 @@ public:
   }
   void SetList(const char* list, char separator, char typesep);
 
+  // To clean up when closed
+  void ReleaseViews();
+
   // For access from AutoCompletionDataSource implement IListBox
   int Rows();
   NSImage* ImageForRow(NSInteger row);
@@ -1688,6 +1679,20 @@ int ListBoxImpl::CaretFromEdge()
     return 3;
   else
     return 6 + static_cast<int>([colIcon width]);
+}
+
+void ListBoxImpl::ReleaseViews()
+{
+  [table release];
+  table = nil;
+  [scroller release];
+  scroller = nil;
+  [colIcon release];
+  colIcon = nil;
+  [colText release ];
+  colText = nil;
+  [ds release];
+  ds = nil;
 }
 
 void ListBoxImpl::Clear()
@@ -1904,6 +1909,28 @@ ListBox* ListBox::Allocate()
 	ListBoxImpl* lb = new ListBoxImpl();
 	return lb;
 }
+
+//--------------------------------------------------------------------------------------------------
+
+void Window::Destroy()
+{
+  ListBoxImpl *listbox = dynamic_cast<ListBoxImpl *>(this);
+  if (listbox)
+  {
+    listbox->ReleaseViews();
+  }
+  if (wid)
+  {
+    id idWin = reinterpret_cast<id>(wid);
+    if ([idWin isKindOfClass: [NSWindow class]])
+    {
+      NSWindow* win = reinterpret_cast<NSWindow*>(idWin);
+      [win release];
+    }
+  }
+  wid = 0;
+}
+
 
 //----------------- ScintillaContextMenu -----------------------------------------------------------
 
