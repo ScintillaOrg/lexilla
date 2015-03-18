@@ -342,7 +342,7 @@ int SCI_METHOD LexerVerilog::WordListSet(int n, const char *wl) {
 }
 
 static inline bool IsAWordChar(const int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_' || ch == '\''|| ch == '$');
+	return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '\''|| ch == '$');
 }
 
 static inline bool IsAWordStart(const int ch) {
@@ -549,7 +549,7 @@ void SCI_METHOD LexerVerilog::Lex(unsigned int startPos, int length, int initSty
 				}
 				break;
 			case SCE_V_PREPROCESSOR:
-				if (!IsAWordChar(sc.ch) && !sc.atLineEnd) {
+				if (!IsAWordChar(sc.ch) || sc.atLineEnd) {
 					sc.SetState(SCE_V_DEFAULT|activitySet);
 				}
 				break;
