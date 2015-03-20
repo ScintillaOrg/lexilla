@@ -492,7 +492,9 @@
 	and SCI_GETKEYSUNICODE always returns true. These APIs are deprecated and should not be called.
 	</li>
 	<li>
-	Verilog folder fixes bug with `end completing an `if* instead of `endif.
+	Verilog lexer fixes bugs with macro styling.
+	Verilog folder fixes bugs with `end completing an `if* instead of `endif and fold.at.else, and implements
+	folding at preprocessor `else.
 	</li>
 	<li>
 	Fix bug on Cocoa where the calltip would display incorrectly when
