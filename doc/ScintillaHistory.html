@@ -492,6 +492,11 @@
 	and SCI_GETKEYSUNICODE always returns true. These APIs are deprecated and should not be called.
 	</li>
 	<li>
+	The wxWidgets-specific ascent member of Font has been removed which breaks
+	compatibility with current wxStyledTextCtrl.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1682/">Bug #1682</a>.
+	</li>
+	<li>
 	SQL lexer fixes handling of '+' and '-' in numbers so the '-' in '1-1' is seen as an operator and for
 	'1--comment' the comment is recognized.
 	</li>
