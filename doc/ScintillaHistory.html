@@ -492,6 +492,10 @@
 	and SCI_GETKEYSUNICODE always returns true. These APIs are deprecated and should not be called.
 	</li>
 	<li>
+	SQL lexer fixes handling of '+' and '-' in numbers so the '-' in '1-1' is seen as an operator and for
+	'1--comment' the comment is recognized.
+	</li>
+	<li>
 	TCL lexer reverts change to string handling.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1642/">Bug #1642</a>.
 	</li>
