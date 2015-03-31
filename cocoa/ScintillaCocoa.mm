@@ -1446,7 +1446,8 @@ void ScintillaCocoa::StartDrag()
   if (pixmap)
   {
     CGImageRef imagePixmap = pixmap->GetImage();
-    bitmap = [[[NSBitmapImageRep alloc] initWithCGImage: imagePixmap] autorelease];
+    if (imagePixmap)
+      bitmap = [[[NSBitmapImageRep alloc] initWithCGImage: imagePixmap] autorelease];
     CGImageRelease(imagePixmap);
     pixmap->Release();
     delete pixmap;
