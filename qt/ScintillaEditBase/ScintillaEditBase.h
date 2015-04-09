@@ -143,6 +143,10 @@ private:
 	QString preeditString;
 
 	int wheelDelta;
+
+	static bool IsHangul(const QChar qchar);
+	void MoveImeCarets(int offset); 
+	void DrawImeIndicator(int indicator, int len);
 };
 
 #ifdef SCI_NAMESPACE
