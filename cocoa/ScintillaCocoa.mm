@@ -1741,12 +1741,9 @@ bool ScintillaCocoa::SyncPaint(void* gc, PRectangle rc)
                                    vs.extraFontFlag != SC_EFF_QUALITY_NON_ANTIALIASED);
     CGContextSetAllowsFontSmoothing((CGContextRef)gc,
                                     vs.extraFontFlag == SC_EFF_QUALITY_LCD_OPTIMIZED);
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-    if (CGContextSetAllowsFontSubpixelPositioning != NULL)
-      CGContextSetAllowsFontSubpixelPositioning((CGContextRef)gc,
-						vs.extraFontFlag == SC_EFF_QUALITY_DEFAULT ||
-						vs.extraFontFlag == SC_EFF_QUALITY_LCD_OPTIMIZED);
-#endif
+    CGContextSetAllowsFontSubpixelPositioning((CGContextRef)gc,
+                                              vs.extraFontFlag == SC_EFF_QUALITY_DEFAULT ||
+                                              vs.extraFontFlag == SC_EFF_QUALITY_LCD_OPTIMIZED);
     sw->Init(gc, wMain.GetID());
     Paint(sw, rc);
     succeeded = paintState != paintAbandoned;
@@ -1780,12 +1777,9 @@ void ScintillaCocoa::PaintMargin(NSRect aRect)
                                    vs.extraFontFlag != SC_EFF_QUALITY_NON_ANTIALIASED);
     CGContextSetAllowsFontSmoothing(gc,
                                     vs.extraFontFlag == SC_EFF_QUALITY_LCD_OPTIMIZED);
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-    if (CGContextSetAllowsFontSubpixelPositioning != NULL)
-      CGContextSetAllowsFontSubpixelPositioning(gc,
-						vs.extraFontFlag == SC_EFF_QUALITY_DEFAULT ||
-						vs.extraFontFlag == SC_EFF_QUALITY_LCD_OPTIMIZED);
-#endif
+    CGContextSetAllowsFontSubpixelPositioning(gc,
+                                              vs.extraFontFlag == SC_EFF_QUALITY_DEFAULT ||
+                                              vs.extraFontFlag == SC_EFF_QUALITY_LCD_OPTIMIZED);
     sw->Init(gc, wMargin.GetID());
     PaintSelMargin(sw, rc);
     sw->Release();
