@@ -168,8 +168,8 @@ void ScintillaQt::SelectionChanged()
 
 bool ScintillaQt::DragThreshold(Point ptStart, Point ptNow)
 {
-	int xMove = abs(ptStart.x - ptNow.x);
-	int yMove = abs(ptStart.y - ptNow.y);
+	int xMove = std::abs(ptStart.x - ptNow.x);
+	int yMove = std::abs(ptStart.y - ptNow.y);
 	return (xMove > QApplication::startDragDistance()) ||
 		(yMove > QApplication::startDragDistance());
 }

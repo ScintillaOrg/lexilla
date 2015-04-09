@@ -17,6 +17,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <time.h>
+#include <cmath>
 #include <stdexcept>
 #include <string>
 #include <vector>
