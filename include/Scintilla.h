@@ -1155,6 +1155,8 @@ struct SCNotification {
 #define SC_CP_DBCS 1
 #define SCI_SETUSEPALETTE 2039
 #define SCI_GETUSEPALETTE 2139
+#define SCI_SETKEYSUNICODE 2521
+#define SCI_GETKEYSUNICODE 2522
 
 #endif
 

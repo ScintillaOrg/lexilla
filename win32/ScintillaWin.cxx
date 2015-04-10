@@ -1607,11 +1607,13 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			::SetFocus(MainHWND());
 			break;
 
+#ifdef INCLUDE_DEPRECATED_FEATURES
 		case SCI_SETKEYSUNICODE:
 			break;
 
 		case SCI_GETKEYSUNICODE:
 			return true;
+#endif
 
 		case SCI_SETTECHNOLOGY:
 			if ((wParam == SC_TECHNOLOGY_DEFAULT) || 
