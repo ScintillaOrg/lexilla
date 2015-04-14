@@ -139,7 +139,6 @@ class TestSimple(unittest.TestCase):
 		data = b"x" * 70 + b"\n"
 		for i in range(5):
 			self.ed.AddText(len(data), data)
-			self.xite.DoEvents()
 			self.assertEquals(self.ed.LineCount, i + 2)
 		self.assert_(self.ed.Length > 0)
 
@@ -1169,8 +1168,6 @@ class TestTextMargin(unittest.TestCase):
 		self.assertEquals(self.ed.ExtraAscent, 1)
 		self.ed.ExtraDescent = 2
 		self.assertEquals(self.ed.ExtraDescent, 2)
-		# Allow line height to recalculate
-		self.xite.DoEvents()
 		lineHeightIncreased = self.ed.TextHeight(0)
 		self.assertEquals(lineHeightIncreased, lineHeight + 2 + 1)
 
