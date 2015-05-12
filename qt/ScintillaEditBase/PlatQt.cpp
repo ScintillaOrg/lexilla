@@ -780,7 +780,7 @@ private:
 
 class ListWidget : public QListWidget {
 public:
-	ListWidget(QWidget *parent);
+	explicit ListWidget(QWidget *parent);
 	virtual ~ListWidget();
 
 	void setDoubleClickAction(CallBackAction action, void *data);
@@ -1110,7 +1110,7 @@ class DynamicLibraryImpl : public DynamicLibrary {
 protected:
 	QLibrary *lib;
 public:
-	DynamicLibraryImpl(const char *modulePath) {
+	explicit DynamicLibraryImpl(const char *modulePath) {
 		QString path = QString::fromUtf8(modulePath);
 		lib = new QLibrary(path);
 	}

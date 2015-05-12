@@ -36,7 +36,7 @@ using namespace Scintilla;
 class WatcherHelper : public DocWatcher {
 	ScintillaDocument *owner;
 public:
-	WatcherHelper(ScintillaDocument *owner_);
+	explicit WatcherHelper(ScintillaDocument *owner_);
 	virtual ~WatcherHelper();
 
 	void NotifyModifyAttempt(Document *doc, void *userData);
