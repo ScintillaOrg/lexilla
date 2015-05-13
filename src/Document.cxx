@@ -767,24 +767,23 @@ bool Document::NextCharacter(int &pos, int moveDir) const {
 	}
 }
 
-// Return -1  on out-of-bounds
 int SCI_METHOD Document::GetRelativePosition(int positionStart, int characterOffset) const {
 	int pos = positionStart;
 	if (dbcsCodePage) {
 		const int increment = (characterOffset > 0) ? 1 : -1;
 		while (characterOffset != 0) {
 			const int posNext = NextPosition(pos, increment);
-			if (posNext == pos)
+			if (posNext == Length())
+				return posNext;
+			else if (posNext == pos)
 				return INVALID_POSITION;
 			pos = posNext;
 			characterOffset -= increment;
 		}
 	} else {
 		pos = positionStart + characterOffset;
-		if ((pos < 0) || (pos > Length()))
-			return INVALID_POSITION;
 	}
-	return pos;
+	return ClampPositionIntoDocument(pos);
 }
 
 int Document::GetRelativePositionUTF16(int positionStart, int characterOffset) const {
