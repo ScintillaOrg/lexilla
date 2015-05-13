@@ -223,7 +223,7 @@ void SurfaceImpl::Init(SurfaceID sid, WindowID)
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::InitPixMap(int width, int height, Surface* /* surface_ */, WindowID /* wid */)
+void SurfaceImpl::InitPixMap(int width, int height, Surface* surface_, WindowID /* wid */)
 {
   Release();
 
@@ -269,6 +269,10 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface* /* surface_ */, Win
     CGContextSetRGBFillColor( gc, 1.0, 1.0, 1.0, 1.0 );
     CGContextFillRect( gc, CGRectMake( 0, 0, width, height ) );
   }
+
+  SurfaceImpl *psurfOther = static_cast<SurfaceImpl *>(surface_);
+  unicodeMode = psurfOther->unicodeMode;
+  codePage = psurfOther->codePage;
 }
 
 //--------------------------------------------------------------------------------------------------

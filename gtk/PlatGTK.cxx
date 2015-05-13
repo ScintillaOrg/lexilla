@@ -602,6 +602,7 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID 
 	cairo_set_line_width(context, 1);
 	createdGC = true;
 	inited = true;
+	et = surfImpl->et;
 }
 
 void SurfaceImpl::PenColour(ColourDesired fore) {

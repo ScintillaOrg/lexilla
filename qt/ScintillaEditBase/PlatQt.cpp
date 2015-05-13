@@ -182,7 +182,7 @@ void SurfaceImpl::Init(SurfaceID sid, WindowID /*wid*/)
 
 void SurfaceImpl::InitPixMap(int width,
         int height,
-        Surface * /*surface*/,
+        Surface *surface,
         WindowID /*wid*/)
 {
 	Release();
@@ -190,6 +190,9 @@ void SurfaceImpl::InitPixMap(int width,
 	if (height < 1) height = 1;
 	deviceOwned = true;
 	device = new QPixmap(width, height);
+	SurfaceImpl *psurfOther = static_cast<SurfaceImpl *>(surface);
+	SetUnicodeMode(psurfOther->unicodeMode);
+	SetDBCSMode(psurfOther->codePage);
 }
 
 void SurfaceImpl::Release()
