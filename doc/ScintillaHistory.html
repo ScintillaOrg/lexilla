@@ -517,6 +517,11 @@
 	<a href="http://sourceforge.net/p/scintilla/bugs/1703/">Bug #1703</a>.
 	</li>
 	<li>
+	Partial fix for reading a UTF-16 file in SciTE where a non-BMP character is split over a read buffer boundary.
+	The character will not be correctly displayed by Scintilla but will save back to disk correctly.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1710/">Bug #1710</a>.
+	</li>
+	<li>
 	Fix link error on Windows when SCI_NAMESPACE used.
 	</li>
 	<li>
