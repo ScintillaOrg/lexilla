@@ -252,13 +252,11 @@ class ScintillaWin :
 	void MoveImeCarets(int offset);
 	void DrawImeIndicator(int indicator, int len);
 	void SetCandidateWindowPos();
-	void BytesToUniChar(const char *bytes, const int bytesLen, wchar_t *character, int &charsLen);
-	void UniCharToBytes(const wchar_t *character, const int charsLen, char *bytes, int &bytesLen);
 	void SelectionToHangul();
 	void EscapeHanja();
 	void ToggleHanja();
 
-	UINT CodePageOfDocument();
+	UINT CodePageOfDocument() const;
 	virtual bool ValidCodePage(int codePage) const;
 	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 	virtual bool SetIdle(bool on);
@@ -803,27 +801,25 @@ void ScintillaWin::SetCandidateWindowPos() {
 	}
 }
 
-void ScintillaWin::BytesToUniChar(const char *bytes, const int bytesLen, wchar_t *characters, int &charsLen) {
-	// Return results over characters and charsLen.
-	if (IsUnicodeMode()) {
-		charsLen = ::MultiByteToWideChar(SC_CP_UTF8, 0, bytes, bytesLen, NULL, 0);
-		::MultiByteToWideChar(SC_CP_UTF8, 0, bytes, bytesLen, characters, charsLen);
+static std::string StringEncode(std::wstring s, int codePage) {
+	if (s.length()) {
+		int cchMulti = ::WideCharToMultiByte(codePage, 0, s.c_str(), static_cast<int>(s.length()), NULL, 0, NULL, NULL);
+		std::string sMulti(cchMulti, 0);
+		::WideCharToMultiByte(codePage, 0, s.c_str(), static_cast<int>(s.size()), &sMulti[0], cchMulti, NULL, NULL);
+		return sMulti;
 	} else {
-		charsLen = ::MultiByteToWideChar(CodePageOfDocument(), 0, bytes, bytesLen, NULL, 0);
-		::MultiByteToWideChar(CodePageOfDocument(), 0, bytes, bytesLen, characters, charsLen);
+		return std::string();
 	}
 }
 
-void ScintillaWin::UniCharToBytes(const wchar_t *characters, const int charsLen, char *bytes, int &bytesLen) {
-	// Return results over bytes and bytesLen.
-	if (IsUnicodeMode()) {
-		bytesLen = UTF8Length(characters, charsLen);
-		UTF8FromUTF16(characters, charsLen, bytes, bytesLen);
-		bytes[bytesLen] = '\0';
+static std::wstring StringDecode(std::string s, int codePage) {
+	if (s.length()) {
+		int cchWide = ::MultiByteToWideChar(codePage, 0, s.c_str(), static_cast<int>(s.length()), NULL, 0);
+		std::wstring sWide(cchWide, 0);
+		::MultiByteToWideChar(codePage, 0, s.c_str(), static_cast<int>(s.length()), &sWide[0], cchWide);
+		return sWide;
 	} else {
-		bytesLen = ::WideCharToMultiByte(CodePageOfDocument(), 0,
-			characters, charsLen, bytes, bytesLen, 0, 0);
-		bytes[bytesLen] = '\0';
+		return std::wstring();
 	}
 }
 
@@ -835,21 +831,17 @@ void ScintillaWin::SelectionToHangul() {
 	const int utf16Len = pdoc->CountUTF16(selStart, selEnd);
 
 	if (utf16Len > 0) {
-		std::vector<wchar_t> uniStr(utf16Len+1, '\0');
-		std::vector<char> documentStr(documentStrLen+1, '\0');
-
+		std::string documentStr(documentStrLen, '\0');
 		pdoc->GetCharRange(&documentStr[0], selStart, documentStrLen);
 
-		int countedUniLen = 0;
-		int countedDocLen = 0;
-		BytesToUniChar(&documentStr[0], documentStrLen, &uniStr[0], countedUniLen);
+		std::wstring uniStr = StringDecode(documentStr, CodePageOfDocument());
 		int converted = HanjaDict::GetHangulOfHanja(&uniStr[0]);
-		UniCharToBytes(&uniStr[0], countedUniLen, &documentStr[0], countedDocLen);
+		documentStr = StringEncode(uniStr, CodePageOfDocument());
 
 		if (converted > 0) {
 			pdoc->BeginUndoAction();
 			ClearSelection();
-			InsertPaste(&documentStr[0], countedDocLen);
+			InsertPaste(&documentStr[0], static_cast<int>(documentStr.size()));
 			pdoc->EndUndoAction();
 		}
 	}
@@ -872,22 +864,17 @@ void ScintillaWin::EscapeHanja() {
 	// ImmEscapeW() may overwrite uniChar[] with a null terminated string.
 	// So enlarge it enough to Maximum 4 as in UTF-8.
 	unsigned int const safeLength = UTF8MaxBytes+1;
-	wchar_t uniChar[safeLength] = {0};
-	int uniCharLen = 1;
-	char oneChar[safeLength] = "\0\0\0\0";
+	std::string oneChar(safeLength, '\0');
+	pdoc->GetCharRange(&oneChar[0], currentPos, oneCharLen);
 
-	pdoc->GetCharRange(oneChar, currentPos, oneCharLen);
+	std::wstring uniChar = StringDecode(oneChar, CodePageOfDocument());
 
-	BytesToUniChar(oneChar, oneCharLen, uniChar, uniCharLen);
-
-	// Set the candidate box position since IME may show it.
-	SetCandidateWindowPos();
-
-	// IME_ESC_HANJA_MODE appears to receive the first character only.
 	HIMC hIMC=ImmGetContext(MainHWND());
 	if (hIMC) {
-		if (ImmEscapeW(GetKeyboardLayout(0), hIMC, IME_ESC_HANJA_MODE, &uniChar)) { 
-			SetCandidateWindowPos(); // Force it again for sure.
+		// Set the candidate box position since IME may show it.
+		SetCandidateWindowPos();
+		// IME_ESC_HANJA_MODE appears to receive the first character only.
+		if (ImmEscapeW(GetKeyboardLayout(0), hIMC, IME_ESC_HANJA_MODE, &uniChar[0])) { 
 			SetSelection (currentPos, currentPos + oneCharLen);
 		}
 		::ImmReleaseContext(MainHWND(), hIMC);
@@ -1093,7 +1080,7 @@ UINT CodePageFromCharSet(DWORD characterSet, UINT documentCodePage) {
 	return documentCodePage;
 }
 
-UINT ScintillaWin::CodePageOfDocument() {
+UINT ScintillaWin::CodePageOfDocument() const {
 	return CodePageFromCharSet(vs.styles[STYLE_DEFAULT].characterSet, pdoc->dbcsCodePage);
 }
 
