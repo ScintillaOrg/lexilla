@@ -1687,7 +1687,7 @@ struct Sci_TextToFind {
 
     <p>
     <b id="SCI_GETSELECTIONS">SCI_GETSELECTIONS</b><br />
-     Return the number of selections currently active.</p>
+     Return the number of selections currently active. There is always at least one selection.</p>
 
     <p>
     <b id="SCI_GETSELECTIONEMPTY">SCI_GETSELECTIONEMPTY</b><br />
@@ -1738,7 +1738,7 @@ struct Sci_TextToFind {
      <b id="SCI_SETSELECTIONNEND">SCI_SETSELECTIONNEND(int selection, int pos)</b><br />
      <b id="SCI_GETSELECTIONNEND">SCI_GETSELECTIONNEND(int selection)</b><br />
      Set or query the start and end position of each already existing selection.
-     Mostly of use to query each range for its text.</p>
+     Mostly of use to query each range for its text. The selection parameter is zero-based. </p>
 
     <p>
      <b id="SCI_SETRECTANGULARSELECTIONCARET">SCI_SETRECTANGULARSELECTIONCARET(int pos)</b><br />
