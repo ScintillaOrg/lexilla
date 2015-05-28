@@ -1532,9 +1532,21 @@ private:
   void* doubleClickActionData;
 
 public:
-  ListBoxImpl() : lineHeight(10), unicodeMode(false),
-    desiredVisibleRows(5), maxItemWidth(0), aveCharWidth(8), maxIconWidth(0),
-    doubleClickAction(NULL), doubleClickActionData(NULL)
+  ListBoxImpl() :
+    lineHeight(10),
+    unicodeMode(false),
+    desiredVisibleRows(5),
+    maxItemWidth(0),
+    aveCharWidth(8),
+    maxIconWidth(0),
+    maxWidth(2000),
+    table(nil),
+    scroller(nil),
+    colIcon(nil),
+    colText(nil),
+    ds(nil),
+    doubleClickAction(nullptr),
+    doubleClickActionData(nullptr)
   {
   }
   ~ListBoxImpl() {}
