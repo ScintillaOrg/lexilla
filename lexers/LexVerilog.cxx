@@ -445,7 +445,7 @@ void SCI_METHOD LexerVerilog::Lex(unsigned int startPos, int length, int initSty
 	int activitySet = preproc.IsInactive() ? activeFlag : 0;
 	int lineEndNext = styler.LineEnd(curLine);
 	bool isEscapedId = false;    // true when parsing an escaped Identifier
-	bool isProtected = lineState&kwProtected;	// true when parsing a protected region
+	bool isProtected = (lineState&kwProtected) != 0;	// true when parsing a protected region
 
 	for (; sc.More(); sc.Forward()) {
 		if (sc.atLineStart) {
