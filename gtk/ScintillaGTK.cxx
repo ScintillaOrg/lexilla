@@ -475,7 +475,9 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	attrs.colormap = gtk_widget_get_colormap(widget);
 #endif
 	attrs.event_mask = gtk_widget_get_events(widget) | GDK_EXPOSURE_MASK;
-	GdkCursor *cursor = gdk_cursor_new(GDK_XTERM);
+	GdkWindow *pwin = gtk_widget_get_parent_window(widget);
+	GdkDisplay *pdisplay = gdk_window_get_display(pwin);
+	GdkCursor *cursor = gdk_cursor_new_for_display(pdisplay, GDK_XTERM);
 	attrs.cursor = cursor;
 #if GTK_CHECK_VERSION(3,0,0)
 	gtk_widget_set_window(widget, gdk_window_new(gtk_widget_get_parent_window(widget), &attrs,
@@ -516,15 +518,15 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	gtk_widget_realize(PWidget(scrollbarv));
 	gtk_widget_realize(PWidget(scrollbarh));
 
-	cursor = gdk_cursor_new(GDK_XTERM);
+	cursor = gdk_cursor_new_for_display(pdisplay, GDK_XTERM);
 	gdk_window_set_cursor(PWindow(wText), cursor);
 	UnRefCursor(cursor);
 
-	cursor = gdk_cursor_new(GDK_LEFT_PTR);
+	cursor = gdk_cursor_new_for_display(pdisplay, GDK_LEFT_PTR);
 	gdk_window_set_cursor(PWindow(scrollbarv), cursor);
 	UnRefCursor(cursor);
 
-	cursor = gdk_cursor_new(GDK_LEFT_PTR);
+	cursor = gdk_cursor_new_for_display(pdisplay, GDK_LEFT_PTR);
 	gdk_window_set_cursor(PWindow(scrollbarh), cursor);
 	UnRefCursor(cursor);
 

@@ -1338,28 +1338,35 @@ void Window::SetCursor(Cursor curs) {
 		return;
 
 	cursorLast = curs;
+	GdkWindow *pwin = WindowFromWidget(PWidget(wid));
+	if (!pwin)
+		return;
+	GdkDisplay *pdisplay = gdk_window_get_display(pwin);
+	if (!pdisplay)
+		return;
+
 	GdkCursor *gdkCurs;
 	switch (curs) {
 	case cursorText:
-		gdkCurs = gdk_cursor_new(GDK_XTERM);
+		gdkCurs = gdk_cursor_new_for_display(pdisplay, GDK_XTERM);
 		break;
 	case cursorArrow:
-		gdkCurs = gdk_cursor_new(GDK_LEFT_PTR);
+		gdkCurs = gdk_cursor_new_for_display(pdisplay, GDK_LEFT_PTR);
 		break;
 	case cursorUp:
-		gdkCurs = gdk_cursor_new(GDK_CENTER_PTR);
+		gdkCurs = gdk_cursor_new_for_display(pdisplay, GDK_CENTER_PTR);
 		break;
 	case cursorWait:
-		gdkCurs = gdk_cursor_new(GDK_WATCH);
+		gdkCurs = gdk_cursor_new_for_display(pdisplay, GDK_WATCH);
 		break;
 	case cursorHand:
-		gdkCurs = gdk_cursor_new(GDK_HAND2);
+		gdkCurs = gdk_cursor_new_for_display(pdisplay, GDK_HAND2);
 		break;
 	case cursorReverseArrow:
-		gdkCurs = gdk_cursor_new(GDK_RIGHT_PTR);
+		gdkCurs = gdk_cursor_new_for_display(pdisplay, GDK_RIGHT_PTR);
 		break;
 	default:
-		gdkCurs = gdk_cursor_new(GDK_LEFT_PTR);
+		gdkCurs = gdk_cursor_new_for_display(pdisplay, GDK_LEFT_PTR);
 		cursorLast = cursorArrow;
 		break;
 	}
