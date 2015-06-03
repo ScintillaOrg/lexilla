@@ -482,12 +482,8 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	gtk_widget_set_window(widget, gdk_window_new(gtk_widget_get_parent_window(widget), &attrs,
 		GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_CURSOR));
 	gdk_window_set_user_data(gtk_widget_get_window(widget), widget);
-	GtkStyleContext *styleContext = gtk_widget_get_style_context(widget);
-	if (styleContext) {
-		GdkRGBA colourBackWidget;
-		gtk_style_context_get_background_color(styleContext, GTK_STATE_FLAG_NORMAL, &colourBackWidget);
-		gdk_window_set_background_rgba(gtk_widget_get_window(widget), &colourBackWidget);
-	}
+	gtk_style_context_set_background(gtk_widget_get_style_context(widget),
+		gtk_widget_get_window(widget));
 	gdk_window_show(gtk_widget_get_window(widget));
 	UnRefCursor(cursor);
 #else
