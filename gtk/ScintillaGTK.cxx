@@ -276,7 +276,6 @@ private:
 	gboolean Expose(GtkWidget *widget, GdkEventExpose *ose);
 	static gboolean ExposeMain(GtkWidget *widget, GdkEventExpose *ose);
 #endif
-	static void Draw(GtkWidget *widget, GdkRectangle *area);
 	void ForAll(GtkCallback callback, gpointer callback_data);
 	static void MainForAll(GtkContainer *container, gboolean include_internals, GtkCallback callback, gpointer callback_data);
 
