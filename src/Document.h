@@ -384,8 +384,7 @@ public:
 	bool MatchesWordOptions(bool word, bool wordStart, int pos, int length) const;
 	bool HasCaseFolder(void) const;
 	void SetCaseFolder(CaseFolder *pcf_);
-	long FindText(int minPos, int maxPos, const char *search, bool caseSensitive, bool word,
-		bool wordStart, bool regExp, int flags, int *length);
+	long FindText(int minPos, int maxPos, const char *search, int flags, int *length);
 	const char *SubstituteByPosition(const char *text, int *length);
 	int LinesTotal() const;
 

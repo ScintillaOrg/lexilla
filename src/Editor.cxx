@@ -3643,10 +3643,6 @@ long Editor::FindText(
 			static_cast<int>(ft->chrg.cpMin),
 			static_cast<int>(ft->chrg.cpMax),
 			ft->lpstrText,
-			(wParam & SCFIND_MATCHCASE) != 0,
-			(wParam & SCFIND_WHOLEWORD) != 0,
-			(wParam & SCFIND_WORDSTART) != 0,
-			(wParam & SCFIND_REGEXP) != 0,
 			static_cast<int>(wParam),
 			&lengthFound);
 		if (pos != -1) {
@@ -3694,18 +3690,10 @@ long Editor::SearchText(
 	try {
 		if (iMessage == SCI_SEARCHNEXT) {
 			pos = pdoc->FindText(searchAnchor, pdoc->Length(), txt,
-					(wParam & SCFIND_MATCHCASE) != 0,
-					(wParam & SCFIND_WHOLEWORD) != 0,
-					(wParam & SCFIND_WORDSTART) != 0,
-					(wParam & SCFIND_REGEXP) != 0,
 					static_cast<int>(wParam),
 					&lengthFound);
 		} else {
 			pos = pdoc->FindText(searchAnchor, 0, txt,
-					(wParam & SCFIND_MATCHCASE) != 0,
-					(wParam & SCFIND_WHOLEWORD) != 0,
-					(wParam & SCFIND_WORDSTART) != 0,
-					(wParam & SCFIND_REGEXP) != 0,
 					static_cast<int>(wParam),
 					&lengthFound);
 		}
@@ -3748,10 +3736,6 @@ long Editor::SearchInTarget(const char *text, int length) {
 		pdoc->SetCaseFolder(CaseFolderForEncoding());
 	try {
 		long pos = pdoc->FindText(targetStart, targetEnd, text,
-				(searchFlags & SCFIND_MATCHCASE) != 0,
-				(searchFlags & SCFIND_WHOLEWORD) != 0,
-				(searchFlags & SCFIND_WORDSTART) != 0,
-				(searchFlags & SCFIND_REGEXP) != 0,
 				searchFlags,
 				&lengthFound);
 		if (pos != -1) {
