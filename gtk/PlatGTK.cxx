@@ -1338,10 +1338,14 @@ void Window::SetCursor(Cursor curs) {
 		return;
 
 	cursorLast = curs;
+#if GTK_CHECK_VERSION(2,24,0)
 	GdkWindow *pwin = WindowFromWidget(PWidget(wid));
 	if (!pwin)
 		return;
 	GdkDisplay *pdisplay = gdk_window_get_display(pwin);
+#else
+	GdkDisplay *pdisplay = gdk_display_get_default();
+#endif
 	if (!pdisplay)
 		return;
 

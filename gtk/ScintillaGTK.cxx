@@ -474,8 +474,11 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	attrs.colormap = gtk_widget_get_colormap(widget);
 #endif
 	attrs.event_mask = gtk_widget_get_events(widget) | GDK_EXPOSURE_MASK;
-	GdkWindow *pwin = gtk_widget_get_parent_window(widget);
-	GdkDisplay *pdisplay = gdk_window_get_display(pwin);
+#if GTK_CHECK_VERSION(2,24,0)
+	GdkDisplay *pdisplay = gdk_window_get_display(gtk_widget_get_parent_window(widget));
+#else
+	GdkDisplay *pdisplay = gdk_display_get_default();
+#endif
 	GdkCursor *cursor = gdk_cursor_new_for_display(pdisplay, GDK_XTERM);
 	attrs.cursor = cursor;
 #if GTK_CHECK_VERSION(3,0,0)
