@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 22 February 2015 NH</p>
+    <p>Last edited 11 June 2015 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -2372,18 +2372,21 @@ struct Sci_TextToFind {
      The unused argument was used in earlier versions but is now ignored.
      After
     <code>SCI_STARTSTYLING</code>, send multiple <code>SCI_SETSTYLING</code> messages for each
-    lexical entity to style.</p>
+    lexical entity to style or send <code>SCI_SETSTYLINGEX</code> to style in blocks.</p>
 
     <p><b id="SCI_SETSTYLING">SCI_SETSTYLING(int length, int style)</b><br />
      This message sets the style of <code>length</code> characters starting at the styling position
-    and then increases the styling position by <code>length</code>, ready for the next call.<br />
+    and then increases the styling position by <code>length</code>, ready for the next call.
+    <code>SCI_STARTSTYLING</code> should be called before the first call to this.
     </p>
 
     <p><b id="SCI_SETSTYLINGEX">SCI_SETSTYLINGEX(int length, const char *styles)</b><br />
      As an alternative to <code>SCI_SETSTYLING</code>, which applies the same style to each byte,
     you can use this message which specifies the styles for each of <code>length</code> bytes from
     the styling position and then increases the styling position by <code>length</code>, ready for
-    the next call.</p>
+    the next call.
+    <code>SCI_STARTSTYLING</code> should be called before the first call to this.
+    </p>
 
     <p><b id="SCI_SETLINESTATE">SCI_SETLINESTATE(int line, int value)</b><br />
      <b id="SCI_GETLINESTATE">SCI_GETLINESTATE(int line)</b><br />
