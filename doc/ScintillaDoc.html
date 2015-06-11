@@ -1636,6 +1636,7 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_SWAPMAINANCHORCARET">SCI_SWAPMAINANCHORCARET</a><br />
      <a class="message" href="#SCI_ROTATESELECTION">SCI_ROTATESELECTION</a><br />
      <a class="message" href="#SCI_MULTIPLESELECTADDNEXT">SCI_MULTIPLESELECTADDNEXT</a><br />
+     <a class="message" href="#SCI_MULTIPLESELECTADDEACH">SCI_MULTIPLESELECTADDEACH</a><br />
     </code>
 
     <p>
@@ -1802,13 +1803,16 @@ struct Sci_TextToFind {
      <b id="SCI_SWAPMAINANCHORCARET">SCI_SWAPMAINANCHORCARET</b><br />
      <b id="SCI_ROTATESELECTION">SCI_ROTATESELECTION</b><br />
      <b id="SCI_MULTIPLESELECTADDNEXT">SCI_MULTIPLESELECTADDNEXT</b><br />
+     <b id="SCI_MULTIPLESELECTADDEACH">SCI_MULTIPLESELECTADDEACH</b><br />
      These commands may be assigned to keys to make it possible to manipulate multiple selections.
      <code>SCI_SWAPMAINANCHORCARET</code> moves the caret to the opposite end of the main selection.
      <code>SCI_ROTATESELECTION</code> makes the next selection be the main selection.<br />
-     <code>SCI_MULTIPLESELECTADDNEXT</code> adds the next occurrence of the main selection to 
-      the set of selections as main. If the current selection is empty then select word around caret.
+     <code>SCI_MULTIPLESELECTADDNEXT</code> adds the next occurrence of the main selection
+     within the target to the set of selections as main. If the current selection is empty then select word around caret.
       The current <a class="jump" href="#searchFlags"><code>searchFlags</code></a>
-      are used so the application may choose case sensitivity and word search options.
+      are used so the application may choose case sensitivity and word search options.<br />
+     <code>SCI_MULTIPLESELECTADDEACH</code> is similar to
+     <code>SCI_MULTIPLESELECTADDNEXT</code> but adds multiple occurrences instead of just one.
      </p>
 
     <h2 id="ScrollingAndAutomaticScrolling">Scrolling and automatic scrolling</h2>
