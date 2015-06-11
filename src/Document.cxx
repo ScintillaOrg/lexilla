@@ -1603,7 +1603,7 @@ bool Document::IsWordEndAt(int pos) const {
  * ends and where the characters on the inside are word or punctuation characters.
  */
 bool Document::IsWordAt(int start, int end) const {
-	return IsWordStartAt(start) && IsWordEndAt(end);
+	return (start < end) && IsWordStartAt(start) && IsWordEndAt(end);
 }
 
 bool Document::MatchesWordOptions(bool word, bool wordStart, int pos, int length) const {

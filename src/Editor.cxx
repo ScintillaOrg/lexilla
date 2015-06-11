@@ -692,6 +692,59 @@ void Editor::SetEmptySelection(int currentPos_) {
 	SetEmptySelection(SelectionPosition(currentPos_));
 }
 
+void Editor::MultipleSelectAdd(AddNumber addNumber) {
+	if (SelectionEmpty() || !multipleSelection) {
+		// Select word at caret
+		const int startWord = pdoc->ExtendWordSelect(sel.MainCaret(), -1, true);
+		const int endWord = pdoc->ExtendWordSelect(startWord, 1, true);
+		TrimAndSetSelection(endWord, startWord);
+
+	} else {
+
+		if (!pdoc->HasCaseFolder())
+			pdoc->SetCaseFolder(CaseFolderForEncoding());
+
+		const Range rangeMainSelection(sel.RangeMain().Start().Position(), sel.RangeMain().End().Position());
+		const std::string selectedText = RangeText(rangeMainSelection.start, rangeMainSelection.end);
+
+		const Range rangeTarget(targetStart, targetEnd);
+		std::vector<Range> searchRanges;
+		// Search should be over the target range excluding the current selection so
+		// may need to search 2 ranges, after the selection then before the selection.
+		if (rangeTarget.Overlaps(rangeMainSelection)) {
+			// Common case is that the selection is completely within the target but
+			// may also have overlap at start or end.
+			if (rangeMainSelection.end < rangeTarget.end)
+				searchRanges.push_back(Range(rangeMainSelection.end, rangeTarget.end));
+			if (rangeTarget.start < rangeMainSelection.start)
+				searchRanges.push_back(Range(rangeTarget.start, rangeMainSelection.start));
+		} else {
+			// No overlap
+			searchRanges.push_back(rangeTarget);
+		}
+
+		for (std::vector<Range>::const_iterator it = searchRanges.begin(); it != searchRanges.end(); ++it) {
+			int searchStart = it->start;
+			const int searchEnd = it->end;
+			for (;;) {
+				int lengthFound = selectedText.length();
+				int pos = pdoc->FindText(searchStart, searchEnd, selectedText.c_str(),
+					searchFlags, &lengthFound);
+				if (pos >= 0) {
+					sel.AddSelection(SelectionRange(pos + lengthFound, pos));
+					ScrollRange(sel.RangeMain());
+					Redraw();
+					if (addNumber == addOne)
+						return;
+					searchStart = pos + lengthFound;
+				} else {
+					break;
+				}
+			}
+		}
+	}
+}
+
 bool Editor::RangeContainsProtected(int start, int end) const {
 	if (vs.ProtectionActive()) {
 		if (start > end) {
@@ -2895,6 +2948,12 @@ void Editor::Duplicate(bool forLine) {
 
 void Editor::CancelModes() {
 	sel.SetMoveExtends(false);
+	if (sel.Count() > 1) {
+		// Drop additional selections
+		const SelectionRange rangeOnly = sel.RangeMain();
+		InvalidateSelection(rangeOnly, true);
+		sel.SetSelection(rangeOnly);
+	}
 }
 
 void Editor::NewLine() {
@@ -5532,6 +5591,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		targetEnd = static_cast<int>(lParam);
 		break;
 
+	case SCI_TARGETWHOLEDOCUMENT:
+		targetStart = 0;
+		targetEnd = pdoc->Length();
+		break;
+
 	case SCI_TARGETFROMSELECTION:
 		if (sel.MainCaret() < sel.MainAnchor()) {
 			targetStart = sel.MainCaret();
@@ -6112,6 +6176,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_WORDENDPOSITION:
 		return pdoc->ExtendWordSelect(static_cast<int>(wParam), 1, lParam != 0);
+
+	case SCI_ISRANGEWORD:
+		return pdoc->IsWordAt(static_cast<int>(wParam), lParam);
 
 	case SCI_SETWRAPMODE:
 		if (vs.SetWrapState(static_cast<int>(wParam))) {
@@ -7634,6 +7701,14 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SWAPMAINANCHORCARET:
 		InvalidateSelection(sel.RangeMain());
 		sel.RangeMain() = SelectionRange(sel.RangeMain().anchor, sel.RangeMain().caret);
+		break;
+
+	case SCI_MULTIPLESELECTADDNEXT:
+		MultipleSelectAdd(addOne);
+		break;
+
+	case SCI_MULTIPLESELECTADDEACH:
+		MultipleSelectAdd(addEach);
 		break;
 
 	case SCI_CHANGELEXERSTATE:

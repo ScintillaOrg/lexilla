@@ -641,6 +641,7 @@ struct Sci_TextRange {
      <a class="message" href="#SCI_GETTARGETEND">SCI_GETTARGETEND</a><br />
      <a class="message" href="#SCI_SETTARGETRANGE">SCI_SETTARGETRANGE(int start, int end)</a><br />
      <a class="message" href="#SCI_TARGETFROMSELECTION">SCI_TARGETFROMSELECTION</a><br />
+     <a class="message" href="#SCI_TARGETWHOLEDOCUMENT">SCI_TARGETWHOLEDOCUMENT</a><br />
      <a class="message" href="#SCI_SETSEARCHFLAGS">SCI_SETSEARCHFLAGS(int searchFlags)</a><br />
      <a class="message" href="#SCI_GETSEARCHFLAGS">SCI_GETSEARCHFLAGS</a><br />
      <a class="message" href="#SCI_SEARCHINTARGET">SCI_SEARCHINTARGET(int length, const char
@@ -666,6 +667,9 @@ struct Sci_TextRange {
 
      <p><b id="SCI_TARGETFROMSELECTION">SCI_TARGETFROMSELECTION</b><br />
      Set the target start and end to the start and end positions of the selection.</p>
+
+     <p><b id="SCI_TARGETWHOLEDOCUMENT">SCI_TARGETWHOLEDOCUMENT</b><br />
+     Set the target start to the start of the document and target end to the end of the document.</p>
 
     <p><b id="SCI_SETSEARCHFLAGS">SCI_SETSEARCHFLAGS(int searchFlags)</b><br />
      <b id="SCI_GETSEARCHFLAGS">SCI_GETSEARCHFLAGS</b><br />
@@ -1175,6 +1179,7 @@ struct Sci_TextToFind {
     onlyWordCharacters)</a><br />
      <a class="message" href="#SCI_WORDSTARTPOSITION">SCI_WORDSTARTPOSITION(int position, bool
     onlyWordCharacters)</a><br />
+     <a class="message" href="#SCI_ISRANGEWORD">SCI_ISRANGEWORD(int start, int end)</a><br />
      <a class="message" href="#SCI_POSITIONBEFORE">SCI_POSITIONBEFORE(int position)</a><br />
      <a class="message" href="#SCI_POSITIONAFTER">SCI_POSITIONAFTER(int position)</a><br />
      <a class="message" href="#SCI_POSITIONRELATIVE">SCI_POSITIONRELATIVE(int position, int relative)</a><br />
@@ -1398,6 +1403,12 @@ struct Sci_TextToFind {
     <a class="message" href="#SCI_SETWORDCHARS"><code>SCI_SETWORDCHARS</code></a>. The position
     sets the start or the search, which is forwards when searching for the end and backwards when
     searching for the start.</p>
+
+    <p><b id="SCI_ISRANGEWORD">SCI_ISRANGEWORD(int start, int end)</b><br />
+     Is the range start..end a word or set of words? This message checks that start is at a word start transition and that
+     end is at a word end transition. It does not check whether there are any spaces inside the range.</p>
+
+     <a class="message" href="#SCI_ISRANGEWORD">SCI_ISRANGEWORD(int start, int end)</a><br />
 
     <p>Set <code>onlyWordCharacters</code> to <code>true</code> (1) to stop searching at the first
     non-word character in the search direction. If <code>onlyWordCharacters</code> is
@@ -1624,6 +1635,7 @@ struct Sci_TextToFind {
 
      <a class="message" href="#SCI_SWAPMAINANCHORCARET">SCI_SWAPMAINANCHORCARET</a><br />
      <a class="message" href="#SCI_ROTATESELECTION">SCI_ROTATESELECTION</a><br />
+     <a class="message" href="#SCI_MULTIPLESELECTADDNEXT">SCI_MULTIPLESELECTADDNEXT</a><br />
     </code>
 
     <p>
@@ -1789,9 +1801,14 @@ struct Sci_TextToFind {
     <p>
      <b id="SCI_SWAPMAINANCHORCARET">SCI_SWAPMAINANCHORCARET</b><br />
      <b id="SCI_ROTATESELECTION">SCI_ROTATESELECTION</b><br />
+     <b id="SCI_MULTIPLESELECTADDNEXT">SCI_MULTIPLESELECTADDNEXT</b><br />
      These commands may be assigned to keys to make it possible to manipulate multiple selections.
      <code>SCI_SWAPMAINANCHORCARET</code> moves the caret to the opposite end of the main selection.
-     <code>SCI_ROTATESELECTION</code> makes the next selection be the main selection.
+     <code>SCI_ROTATESELECTION</code> makes the next selection be the main selection.<br />
+     <code>SCI_MULTIPLESELECTADDNEXT</code> adds the next occurrence of the main selection to 
+      the set of selections as main. If the current selection is empty then select word around caret.
+      The current <a class="jump" href="#searchFlags"><code>searchFlags</code></a>
+      are used so the application may choose case sensitivity and word search options.
      </p>
 
     <h2 id="ScrollingAndAutomaticScrolling">Scrolling and automatic scrolling</h2>

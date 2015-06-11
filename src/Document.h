@@ -381,6 +381,10 @@ public:
 	};
 	CharacterExtracted ExtractCharacter(int position) const;
 
+	bool IsWordStartAt(int pos) const;
+	bool IsWordEndAt(int pos) const;
+	bool IsWordAt(int start, int end) const;
+
 	bool MatchesWordOptions(bool word, bool wordStart, int pos, int length) const;
 	bool HasCaseFolder(void) const;
 	void SetCaseFolder(CaseFolder *pcf_);
@@ -437,10 +441,6 @@ public:
 	int BraceMatch(int position, int maxReStyle);
 
 private:
-	bool IsWordStartAt(int pos) const;
-	bool IsWordEndAt(int pos) const;
-	bool IsWordAt(int start, int end) const;
-
 	void NotifyModifyAttempt();
 	void NotifySavePoint(bool atSavePoint);
 	void NotifyModified(DocModification mh);
