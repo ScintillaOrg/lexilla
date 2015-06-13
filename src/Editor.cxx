@@ -2948,12 +2948,6 @@ void Editor::Duplicate(bool forLine) {
 
 void Editor::CancelModes() {
 	sel.SetMoveExtends(false);
-	if (sel.Count() > 1) {
-		// Drop additional selections
-		const SelectionRange rangeOnly = sel.RangeMain();
-		InvalidateSelection(rangeOnly, true);
-		sel.SetSelection(rangeOnly);
-	}
 }
 
 void Editor::NewLine() {
@@ -3344,6 +3338,12 @@ int Editor::KeyCommand(unsigned int iMessage) {
 	case SCI_CANCEL:            	// Cancel any modes - handled in subclass
 		// Also unselect text
 		CancelModes();
+		if (sel.Count() > 1) {
+			// Drop additional selections
+			const SelectionRange rangeOnly = sel.RangeMain();
+			InvalidateSelection(rangeOnly, true);
+			sel.SetSelection(rangeOnly);
+		}
 		break;
 	case SCI_DELETEBACK:
 		DelCharBack(true);
