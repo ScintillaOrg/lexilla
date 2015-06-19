@@ -270,9 +270,17 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface* surface_, WindowID 
     CGContextFillRect( gc, CGRectMake( 0, 0, width, height ) );
   }
 
-  SurfaceImpl *psurfOther = static_cast<SurfaceImpl *>(surface_);
-  unicodeMode = psurfOther->unicodeMode;
-  codePage = psurfOther->codePage;
+  if (surface_)
+  {
+    SurfaceImpl *psurfOther = static_cast<SurfaceImpl *>(surface_);
+    unicodeMode = psurfOther->unicodeMode;
+    codePage = psurfOther->codePage;
+  }
+  else
+  {
+    unicodeMode = true;
+    codePage = SC_CP_UTF8;
+  }
 }
 
 //--------------------------------------------------------------------------------------------------
