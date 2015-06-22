@@ -731,7 +731,7 @@ void Editor::MultipleSelectAdd(AddNumber addNumber) {
 			int searchStart = it->start;
 			const int searchEnd = it->end;
 			for (;;) {
-				int lengthFound = selectedText.length();
+				int lengthFound = static_cast<int>(selectedText.length());
 				int pos = pdoc->FindText(searchStart, searchEnd, selectedText.c_str(),
 					searchFlags, &lengthFound);
 				if (pos >= 0) {
@@ -6178,7 +6178,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return pdoc->ExtendWordSelect(static_cast<int>(wParam), 1, lParam != 0);
 
 	case SCI_ISRANGEWORD:
-		return pdoc->IsWordAt(static_cast<int>(wParam), lParam);
+		return pdoc->IsWordAt(static_cast<int>(wParam), static_cast<int>(lParam));
 
 	case SCI_SETWRAPMODE:
 		if (vs.SetWrapState(static_cast<int>(wParam))) {
