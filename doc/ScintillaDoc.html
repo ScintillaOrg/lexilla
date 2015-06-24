@@ -1646,6 +1646,9 @@ struct Sci_TextToFind {
     Any selection apart from the main selection is called an additional selection.
     The calls in the previous section operate on the main selection.
     There is always at least one selection.
+    The selection can be simplified down to just the main selection by
+    <a class="message" href="#SCI_CANCEL"><code>SCI_CANCEL</code></a>
+    which is normally mapped to the Esc key.
     </p>
 
     <p>
@@ -1673,7 +1676,9 @@ struct Sci_TextToFind {
     <p>
     <b id="SCI_SETADDITIONALSELECTIONTYPING">SCI_SETADDITIONALSELECTIONTYPING(bool additionalSelectionTyping)</b><br />
     <b id="SCI_GETADDITIONALSELECTIONTYPING">SCI_GETADDITIONALSELECTIONTYPING</b><br />
-     Whether typing, backspace, or delete works with multiple selections simultaneously.</p>
+     Whether typing, new line, cursor left/right/up/down, backspace, delete, home, and end work
+     with multiple selections simultaneously.
+     Also allows selection and word and line deletion commands.</p>
 
     <p>
     <b id="SCI_SETMULTIPASTE">SCI_SETMULTIPASTE(int multiPaste)</b><br />
@@ -4965,6 +4970,10 @@ struct Sci_TextToFind {
     or end without changing the selection. These commands match OS X platform conventions for the behaviour of the
     <code>home</code> and <code>end</code> keys. Scintilla can be made to match OS X applications
     by binding the <code>home</code> and <code>end</code> keys to these commands.
+     </p>
+
+    <p class="message" id="SCI_CANCEL">The <code>SCI_CANCEL</code> command cancels autocompletion and
+    calltip display and drops any additional selections.
      </p>
 
     <h2 id="KeyBindings">Key bindings</h2>

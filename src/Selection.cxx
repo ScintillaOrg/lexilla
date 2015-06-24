@@ -311,6 +311,14 @@ void Selection::TrimSelection(SelectionRange range) {
 	}
 }
 
+void Selection::TrimOtherSelections(size_t r, SelectionRange range) {
+	for (size_t i = 0; i<ranges.size(); ++i) {
+		if (i != r) {
+			ranges[i].Trim(range);
+		}
+	}
+}
+
 void Selection::SetSelection(SelectionRange range) {
 	ranges.clear();
 	ranges.push_back(range);
