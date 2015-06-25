@@ -3080,8 +3080,8 @@ void Editor::CursorUpOrDown(int direction, Selection::selTypes selt) {
 		SetRectangularRange();
 		MovedCaret(posNew, caretToUse, true);
 	} else {
+		InvalidateWholeSelection();
 		if (!additionalSelectionTyping || (sel.IsRectangular())) {
-			InvalidateWholeSelection();
 			sel.DropAdditionalRanges();
 		}
 		sel.selType = Selection::selStream;
