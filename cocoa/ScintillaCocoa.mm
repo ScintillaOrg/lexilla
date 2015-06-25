@@ -2450,6 +2450,17 @@ void ScintillaCocoa::ActiveStateChanged(bool isActive)
   }
 }
 
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * When the window is about to move, the calltip and autcoimpletion stay in the same spot,
+ * so cancel them.
+ */
+void ScintillaCocoa::WindowWillMove() {
+  AutoCompleteCancel();
+  ct.CallTipCancel();
+}
+
 // If building with old SDK, need to define version number for 10.8
 #ifndef NSAppKitVersionNumber10_8
 #define NSAppKitVersionNumber10_8 1187

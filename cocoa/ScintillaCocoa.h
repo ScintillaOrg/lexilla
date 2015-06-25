@@ -235,6 +235,7 @@ public:
   void HandleCommand(NSInteger command);
 
   virtual void ActiveStateChanged(bool isActive);
+  void WindowWillMove();
 
   // Find indicator
   void ShowFindIndicatorForRange(NSRange charRange, BOOL retaining);

@@ -1192,6 +1192,11 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
                    name:NSApplicationDidBecomeActiveNotification
                  object:nil];
 
+    [center addObserver:self
+               selector:@selector(windowWillMove:)
+                   name:NSWindowWillMoveNotification
+                 object:[self window]];
+    
     [[scrollView contentView] setPostsBoundsChangedNotifications:YES];
     [center addObserver:self
 	       selector:@selector(scrollerAction:)
@@ -1223,6 +1228,13 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 - (void) applicationDidBecomeActive: (NSNotification *)note {
 #pragma unused(note)
     mBackend->ActiveStateChanged(true);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+- (void) windowWillMove: (NSNotification *)note {
+#pragma unused(note)
+  mBackend->WindowWillMove();
 }
 
 //--------------------------------------------------------------------------------------------------
