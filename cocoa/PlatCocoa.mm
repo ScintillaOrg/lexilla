@@ -1329,16 +1329,28 @@ PRectangle Window::GetMonitorRect(Point)
   if (wid)
   {
     id idWin = reinterpret_cast<id>(wid);
+    if ([idWin isKindOfClass: [NSView class]])
+    {
+      NSView* view = reinterpret_cast<NSView*>(idWin);
+      idWin = [view window];
+    }
     if ([idWin isKindOfClass: [NSWindow class]])
     {
+      PRectangle rcPosition = GetPosition();
+
       NSWindow* win = reinterpret_cast<NSWindow*>(idWin);
       NSScreen* screen = [win screen];
-      NSRect rect = [screen frame];
+      NSRect rect = [screen visibleFrame];
       CGFloat screenHeight = rect.origin.y + rect.size.height;
       // Invert screen positions to match Scintilla
-      return PRectangle(
+      PRectangle rcWork(
           static_cast<XYPOSITION>(NSMinX(rect)), static_cast<XYPOSITION>(screenHeight - NSMaxY(rect)),
           static_cast<XYPOSITION>(NSMaxX(rect)), static_cast<XYPOSITION>(screenHeight - NSMinY(rect)));
+      PRectangle rcMonitor(rcWork.left - rcPosition.left,
+                           rcWork.top - rcPosition.top,
+                           rcWork.right - rcPosition.left,
+                           rcWork.bottom - rcPosition.top);
+      return rcMonitor;
     }
   }
   return PRectangle();
