@@ -217,6 +217,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_CASE_MIXED 0
 #define SC_CASE_UPPER 1
 #define SC_CASE_LOWER 2
+#define SC_CASE_CAMEL 3
 #define SCI_STYLEGETFORE 2481
 #define SCI_STYLEGETBACK 2482
 #define SCI_STYLEGETBOLD 2483

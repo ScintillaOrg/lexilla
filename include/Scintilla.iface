@@ -462,6 +462,7 @@ enu CaseVisible=SC_CASE_
 val SC_CASE_MIXED=0
 val SC_CASE_UPPER=1
 val SC_CASE_LOWER=2
+val SC_CASE_CAMEL=3
 
 # Get the foreground colour of a style.
 get colour StyleGetFore=2481(int style,)
