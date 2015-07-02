@@ -168,10 +168,10 @@ int ScintillaBase::KeyCommand(unsigned int iMessage) {
 			EnsureCaretVisible();
 			return 0;
 		case SCI_TAB:
-			AutoCompleteCompleted();
+			AutoCompleteCompleted(0, SC_AC_TAB);
 			return 0;
 		case SCI_NEWLINE:
-			AutoCompleteCompleted();
+			AutoCompleteCompleted(0, SC_AC_NEWLINE);
 			return 0;
 
 		default:
@@ -202,7 +202,7 @@ int ScintillaBase::KeyCommand(unsigned int iMessage) {
 
 void ScintillaBase::AutoCompleteDoubleClick(void *p) {
 	ScintillaBase *sci = reinterpret_cast<ScintillaBase *>(p);
-	sci->AutoCompleteCompleted();
+	sci->AutoCompleteCompleted(0, SC_AC_DOUBLECLICK);
 }
 
 void ScintillaBase::AutoCompleteInsert(Position startPos, int removeLen, const char *text, int textLen) {
@@ -340,7 +340,7 @@ void ScintillaBase::AutoCompleteMoveToCurrentWord() {
 
 void ScintillaBase::AutoCompleteCharacterAdded(char ch) {
 	if (ac.IsFillUpChar(ch)) {
-		AutoCompleteCompleted();
+		AutoCompleteCompleted(ch, SC_AC_FILLUP);
 	} else if (ac.IsStopChar(ch)) {
 		AutoCompleteCancel();
 	} else {
@@ -363,7 +363,7 @@ void ScintillaBase::AutoCompleteCharacterDeleted() {
 	NotifyParent(scn);
 }
 
-void ScintillaBase::AutoCompleteCompleted() {
+void ScintillaBase::AutoCompleteCompleted(char ch, unsigned int completionMethod) {
 	int item = ac.GetSelection();
 	if (item == -1) {
 		AutoCompleteCancel();
@@ -376,6 +376,8 @@ void ScintillaBase::AutoCompleteCompleted() {
 	SCNotification scn = {};
 	scn.nmhdr.code = listType > 0 ? SCN_USERLISTSELECTION : SCN_AUTOCSELECTION;
 	scn.message = 0;
+	scn.ch = ch;
+	scn.listCompletionMethod = completionMethod;
 	scn.wParam = listType;
 	scn.listType = listType;
 	Position firstPos = ac.posStart - ac.startLen;
@@ -398,6 +400,10 @@ void ScintillaBase::AutoCompleteCompleted() {
 		return;
 	AutoCompleteInsert(firstPos, endPos - firstPos, selected.c_str(), static_cast<int>(selected.length()));
 	SetLastXChosen();
+
+	scn.nmhdr.code = SCN_AUTOCCOMPLETED;
+	NotifyParent(scn);
+
 }
 
 int ScintillaBase::AutoCompleteGetCurrent() const {
@@ -788,7 +794,7 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		return ac.posStart;
 
 	case SCI_AUTOCCOMPLETE:
-		AutoCompleteCompleted();
+		AutoCompleteCompleted(0, SC_AC_COMMAND);
 		break;
 
 	case SCI_AUTOCSETSEPARATOR:

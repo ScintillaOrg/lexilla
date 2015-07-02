@@ -472,6 +472,7 @@
 	<td>Stefan Küng</td>
       </tr><tr>
 	<td>Jiří Techet</td>
+	<td>Jonathan Hunt</td>
     </tr>
     </table>
     <p>
@@ -496,6 +497,10 @@
 	line up and down movement and selection commands, word and line deletion commands, and
 	line end insertion.
 	This change in behaviours is conditional on setting the SCI_SETADDITIONALSELECTIONTYPING property.
+	</li>
+	<li>
+	Autocompletion lists send an SCN_AUTOCCOMPLETED notification after the text has been inserted.
+	<a href="http://sourceforge.net/p/scintilla/feature-requests/1109/">Feature #1109.</a>
 	</li>
 	<li>
 	The case mode style attribute can now be SC_CASE_CAMEL.

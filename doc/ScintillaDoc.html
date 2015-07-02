@@ -4325,8 +4325,10 @@ struct Sci_TextToFind {
     <p>When the user makes a selection from the list the container is sent a <code><a class="message"
     href="#SCN_AUTOCSELECTION">SCN_AUTOCSELECTION</a></code> <a class="jump"
     href="#Notifications">notification message</a>. On return from the notification Scintilla will insert
-     the selected text unless the autocompletion list has been cancelled, for example by the container sending
-     <code><a class="message" href="#SCI_AUTOCCANCEL">SCI_AUTOCCANCEL</a></code>.</p>
+     the selected text and the container is sent a <code><a class="message"
+    href="#SCN_AUTOCCOMPLETED">SCN_AUTOCCOMPLETED</a></code> <a class="jump"
+    href="#Notifications">notification message</a> unless the autocompletion list has been cancelled, for example by the container sending
+     <code><a class="message" href="#SCI_AUTOCCANCEL">SCI_AUTOCCANCEL</a></code>. </p>
 
     <p>To make use of autocompletion you must monitor each character added to the document. See
     <code>SciTEBase::CharAdded()</code> in SciTEBase.cxx for an example of autocompletion.</p>
@@ -4555,10 +4557,10 @@ struct Sci_TextToFind {
     <p>o The <code><a class="message"
     href="#SCI_AUTOCSETCHOOSESINGLE">SCI_AUTOCSETCHOOSESINGLE</a></code> message has no
     effect.<br />
-     o When the user makes a selection you are sent a <code><a class="message"
+     o When the user makes a selection you are sent a <code><a class="jump"
     href="#SCN_USERLISTSELECTION">SCN_USERLISTSELECTION</a></code> <a class="jump"
-    href="#Notifications">notification message</a> rather than <code><a class="message"
-    href="#SCN_AUTOCSELECTION">SCN_AUTOCSELECTION</a></code>.</p>
+    href="#Notifications">notification message</a> rather than <code><a class="jump"
+    href="#SCN_AUTOCSELECTION">SCN_AUTOCSELECTION</a></code>.<br>
 
     <p>BEWARE: if you have set fillup characters or stop characters, these will still be active
     with the user list, and may result in items being selected or the user list cancelled due to
@@ -6649,7 +6651,9 @@ struct SCNotification {
 	/* SCN_INDICATORCLICK, SCN_INDICATORRELEASE, */
 	/* SCN_USERLISTSELECTION, SCN_AUTOCSELECTION */
 
-	int ch;		/* SCN_CHARADDED, SCN_KEY */
+	int ch;
+	/* SCN_CHARADDED, SCN_KEY, SCN_AUTOCCOMPLETE, SCN_AUTOCSELECTION, */
+	/* SCN_USERLISTSELECTION */
 	int modifiers;
 	/* SCN_KEY, SCN_DOUBLECLICK, SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK, */
 	/* SCN_HOTSPOTRELEASECLICK, SCN_INDICATORCLICK, SCN_INDICATORRELEASE, */
@@ -6673,6 +6677,9 @@ struct SCNotification {
 	int token;		/* SCN_MODIFIED with SC_MOD_CONTAINER */
 	int annotationLinesAdded;	/* SCN_MODIFIED with SC_MOD_CHANGEANNOTATION */
 	int updated;	/* SCN_UPDATEUI */
+	int listCompletionMethod; 
+	/* SCN_AUTOCSELECTION, SCN_AUTOCCOMPLETED, SCN_USERLISTSELECTION */
+
 };
 </pre>
 
@@ -6707,6 +6714,7 @@ struct SCNotification {
      <a class="message" href="#SCN_AUTOCCHARDELETED">SCN_AUTOCCHARDELETED</a><br />
      <a class="message" href="#SCN_FOCUSIN">SCN_FOCUSIN</a><br />
      <a class="message" href="#SCN_FOCUSOUT">SCN_FOCUSOUT</a><br />
+     <a class="message" href="#SCN_AUTOCCOMPLETED">SCN_AUTOCCOMPLETED</a><br />
     </code>
 
     <p>The following <code>SCI_*</code> messages are associated with these notifications:</p>
@@ -7359,11 +7367,24 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
 
           <td align="left">The position the list was displayed at.</td>
         </tr>
+        <tr>
+          <td align="left"><code>ch</code></td>
+
+          <td align="left">If a fillup character was the method of selection, the used 
+            character, otherwise 0.</td>
+        </tr>
+        <tr>
+          <td align="left"><code>listCompletionMethod</code></td>
+
+          <td align="left">A value indicating the way in which the completion 
+            occurred. See the table below.</td>
+        </tr>
       </tbody>
     </table>
     <br />
-
-
+  
+     See the <code><a class="jump" href="#SCN_AUTOCCOMPLETED">SCN_AUTOCCOMPLETED</a></code> notification
+    for the possible values for <code>listCompletionMethod.</code>
     <p><b id="SCN_URIDROPPED">SCN_URIDROPPED</b><br />
      Only on the GTK+ version. Indicates that the user has dragged a URI such as a file name or Web
     address onto Scintilla. The container could interpret this as a request to open the file. The
@@ -7474,6 +7495,82 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
 
           <td align="left">The text of the selection.</td>
         </tr>
+        <tr>
+          <td align="left"><code>ch</code></td>
+
+          <td align="left">If a fillup character was the method of selection, the used 
+            character, otherwise 0.</td>
+        </tr>
+        <tr>
+          <td align="left"><code>listCompletionMethod</code></td>
+
+          <td align="left">A value indicating the way in which the completion 
+            occurred. See the table below.</td>
+        </tr>
+      </tbody>
+    </table>
+    <br />
+    <table cellpadding="1" cellspacing="2" border="0" summary="Modify notification type flags">
+      <tbody>
+        <tr>
+          <th align="left">Symbol</th>
+
+          <th>Value</th>
+
+          <th align="left">Meaning</th>
+
+        </tr>
+      </tbody>
+
+      <tbody valign="top">
+        <tr>
+          <td align="left"><code>SC_AC_FILLUP</code></td>
+
+          <td align="center">0x01</td>
+
+          <td>A fillup character triggered the completion. The character used is 
+            in ch. </td>
+
+        </tr>
+
+        <tr>
+          <td align="left"><code>SC_AC_DOUBLECLICK</code></td>
+
+          <td align="center">0x02</td>
+
+          <td>A double-click triggered the completion. ch is 0.</td>
+
+        </tr>
+
+        <tr>
+          <td align="left"><code>SC_AC_TAB</code></td>
+
+          <td align="center">0x04</td>
+
+          <td>The tab key or SCI_TAB triggered the completion. ch is 0.</td>
+
+        </tr>
+
+        <tr>
+          <td align="left"><code>SC_AC_NEWLINE</code></td>
+
+          <td align="center">0x08</td>
+
+          <td>A new line or SCI_NEWLINE triggered the completion. ch is 0.</td>
+
+        </tr>
+
+        <tr>
+          <td align="left"><code>SC_AC_COMMAND</code></td>
+
+          <td align="center">0x10</td>
+
+          <td>The
+    <code>
+     <a class="message" href="#SCI_AUTOCSELECT">SCI_AUTOCSELECT</a></code> message 
+          triggered the completion. ch is 0.</td>
+
+        </tr>
       </tbody>
     </table>
 
@@ -7489,6 +7586,13 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     <b id="SCN_FOCUSOUT">SCN_FOCUSOUT</b><br />
     <code>SCN_FOCUSIN</code> (2028) is fired when Scintilla receives focus and
     <code>SCN_FOCUSOUT</code> (2029) when it loses focus.</p>
+
+    <p><b id="SCN_AUTOCCOMPLETED">SCN_AUTOCCOMPLETED<br />
+    </b>This notification is generated after an autocompletion has inserted its 
+    text. The fields are identical to the
+    <code>
+     <a class="jump" href="#SCN_AUTOCSELECTION">SCN_AUTOCSELECTION</a></code>
+     notification.</p>
 
     <h2 id="Images">Images</h2>
 
