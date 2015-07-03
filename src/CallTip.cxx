@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <stdexcept>
 #include <string>
 
 #include "Platform.h"

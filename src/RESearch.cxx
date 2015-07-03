@@ -202,6 +202,7 @@
 
 #include <stdlib.h>
 
+#include <stdexcept>
 #include <string>
 #include <algorithm>
 
