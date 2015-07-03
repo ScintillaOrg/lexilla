@@ -837,50 +837,56 @@ sptr_t scintilla_send_message(void* sci, unsigned int iMessage, uptr_t wParam, s
  */
 sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam)
 {
-  switch (iMessage)
-  {
-    case SCI_GETDIRECTFUNCTION:
-      return reinterpret_cast<sptr_t>(DirectFunction);
-
-    case SCI_GETDIRECTPOINTER:
-      return reinterpret_cast<sptr_t>(this);
-
-    case SCI_TARGETASUTF8:
-      return TargetAsUTF8(reinterpret_cast<char*>(lParam));
-
-    case SCI_ENCODEDFROMUTF8:
-      return EncodedFromUTF8(reinterpret_cast<char*>(wParam),
-                             reinterpret_cast<char*>(lParam));
-
-    case SCI_SETIMEINTERACTION:
-      // Only inline IME supported on Cocoa
-      break;
-
-    case SCI_GRABFOCUS:
-      [[ContentView() window] makeFirstResponder:ContentView()];
-      break;
-
-    case SCI_SETBUFFEREDDRAW:
-      // Buffered drawing not supported on Cocoa
-      view.bufferedDraw = false;
-      break;
-
-    case SCI_FINDINDICATORSHOW:
-      ShowFindIndicatorForRange(NSMakeRange(wParam, lParam-wParam), YES);
-      return 0;
-
-    case SCI_FINDINDICATORFLASH:
-      ShowFindIndicatorForRange(NSMakeRange(wParam, lParam-wParam), NO);
-      return 0;
-
-    case SCI_FINDINDICATORHIDE:
-      HideFindIndicator();
-      return 0;
-
-    default:
-      sptr_t r = ScintillaBase::WndProc(iMessage, wParam, lParam);
-
-      return r;
+  try {
+    switch (iMessage)
+    {
+      case SCI_GETDIRECTFUNCTION:
+        return reinterpret_cast<sptr_t>(DirectFunction);
+        
+      case SCI_GETDIRECTPOINTER:
+        return reinterpret_cast<sptr_t>(this);
+        
+      case SCI_TARGETASUTF8:
+        return TargetAsUTF8(reinterpret_cast<char*>(lParam));
+        
+      case SCI_ENCODEDFROMUTF8:
+        return EncodedFromUTF8(reinterpret_cast<char*>(wParam),
+                               reinterpret_cast<char*>(lParam));
+        
+      case SCI_SETIMEINTERACTION:
+        // Only inline IME supported on Cocoa
+        break;
+        
+      case SCI_GRABFOCUS:
+        [[ContentView() window] makeFirstResponder:ContentView()];
+        break;
+        
+      case SCI_SETBUFFEREDDRAW:
+        // Buffered drawing not supported on Cocoa
+        view.bufferedDraw = false;
+        break;
+        
+      case SCI_FINDINDICATORSHOW:
+        ShowFindIndicatorForRange(NSMakeRange(wParam, lParam-wParam), YES);
+        return 0;
+        
+      case SCI_FINDINDICATORFLASH:
+        ShowFindIndicatorForRange(NSMakeRange(wParam, lParam-wParam), NO);
+        return 0;
+        
+      case SCI_FINDINDICATORHIDE:
+        HideFindIndicator();
+        return 0;
+        
+      default:
+        sptr_t r = ScintillaBase::WndProc(iMessage, wParam, lParam);
+        
+        return r;
+    }
+  } catch (std::bad_alloc &) {
+    errorStatus = SC_STATUS_BADALLOC;
+  } catch (...) {
+    errorStatus = SC_STATUS_FAILURE;
   }
   return 0l;
 }
