@@ -2658,6 +2658,9 @@ void ScintillaGTK::Destroy(GObject *object) {
 		//Platform::DebugPrintf("Destroying %x %x\n", sciThis, object);
 		sciThis->Finalise();
 
+		gtk_widget_unparent(PWidget(sciThis->scrollbarv));
+		gtk_widget_unparent(PWidget(sciThis->scrollbarh));
+
 		delete sciThis;
 		scio->pscin = 0;
 		scintilla_class_parent_class->finalize(object);
