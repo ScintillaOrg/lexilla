@@ -739,6 +739,7 @@ void LexState::FreeSubStyles() {
 void LexState::SetIdentifiers(int style, const char *identifiers) {
 	if (instance && (interfaceVersion >= lvSubStyles)) {
 		static_cast<ILexerWithSubStyles *>(instance)->SetIdentifiers(style, identifiers);
+		pdoc->ModifiedAt(0);
 	}
 }
 
