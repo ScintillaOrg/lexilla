@@ -526,6 +526,11 @@
 	<a href="http://sourceforge.net/p/scintilla/bugs/1740/">Bug #1740</a>.
 	</li>
 	<li>
+	Fix drawing problem when control characters are in a hidden style as they then
+	have a zero width rectangle to draw but modify that rectangle in a way that
+	clears some pixels.
+	</li>
+	<li>
 	Report error when attempt to resize buffer to more than 2GB with SC_STATUS_FAILURE.
 	</li>
 	<li>

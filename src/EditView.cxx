@@ -772,6 +772,8 @@ static void SimpleAlphaRectangle(Surface *surface, PRectangle rc, ColourDesired 
 
 static void DrawTextBlob(Surface *surface, const ViewStyle &vsDraw, PRectangle rcSegment,
 	const char *s, ColourDesired textBack, ColourDesired textFore, bool fillBackground) {
+	if (rcSegment.Empty())
+		return;
 	if (fillBackground) {
 		surface->FillRectangle(rcSegment, textBack);
 	}
@@ -1284,7 +1286,7 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 		rcSegment.right = ll->positions[ts.end()] + xStart - static_cast<XYPOSITION>(subLineStart);
 		// Only try to draw if really visible - enhances performance by not calling environment to
 		// draw strings that are completely past the right side of the window.
-		if (rcSegment.Intersects(rcLine)) {
+		if (!rcSegment.Empty() && rcSegment.Intersects(rcLine)) {
 			// Clip to line rectangle, since may have a huge position which will not work with some platforms
 			if (rcSegment.left < rcLine.left)
 				rcSegment.left = rcLine.left;
