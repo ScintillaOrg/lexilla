@@ -113,6 +113,7 @@ LEXOBJS=\
 	$(DIR_O)\LexBaan.obj \
 	$(DIR_O)\LexBash.obj \
 	$(DIR_O)\LexBasic.obj \
+	$(DIR_O)\LexBatch.obj \
 	$(DIR_O)\LexBibTeX.obj \
 	$(DIR_O)\LexBullant.obj \
 	$(DIR_O)\LexCaml.obj \
@@ -126,11 +127,13 @@ LEXOBJS=\
 	$(DIR_O)\LexCsound.obj \
 	$(DIR_O)\LexCSS.obj \
 	$(DIR_O)\LexD.obj \
+	$(DIR_O)\LexDiff.obj \
 	$(DIR_O)\LexDMAP.obj \
 	$(DIR_O)\LexDMIS.obj \
 	$(DIR_O)\LexECL.obj \
 	$(DIR_O)\LexEiffel.obj \
 	$(DIR_O)\LexErlang.obj \
+	$(DIR_O)\LexErrorList.obj \
 	$(DIR_O)\LexEScript.obj \
 	$(DIR_O)\LexFlagship.obj \
 	$(DIR_O)\LexForth.obj \
@@ -148,6 +151,7 @@ LEXOBJS=\
 	$(DIR_O)\LexLout.obj \
 	$(DIR_O)\LexLua.obj \
 	$(DIR_O)\LexMagik.obj \
+	$(DIR_O)\LexMake.obj \
 	$(DIR_O)\LexMarkdown.obj \
 	$(DIR_O)\LexMatlab.obj \
 	$(DIR_O)\LexMetapost.obj \
@@ -158,9 +162,9 @@ LEXOBJS=\
 	$(DIR_O)\LexMySQL.obj \
 	$(DIR_O)\LexNimrod.obj \
 	$(DIR_O)\LexNsis.obj \
+	$(DIR_O)\LexNull.obj \
 	$(DIR_O)\LexOpal.obj \
 	$(DIR_O)\LexOScript.obj \
-	$(DIR_O)\LexOthers.obj \
 	$(DIR_O)\LexPascal.obj \
 	$(DIR_O)\LexPB.obj \
 	$(DIR_O)\LexPerl.obj \
@@ -170,6 +174,7 @@ LEXOBJS=\
 	$(DIR_O)\LexPowerPro.obj \
 	$(DIR_O)\LexPowerShell.obj \
 	$(DIR_O)\LexProgress.obj \
+	$(DIR_O)\LexProps.obj \
 	$(DIR_O)\LexPS.obj \
 	$(DIR_O)\LexPython.obj \
 	$(DIR_O)\LexR.obj \
@@ -483,6 +488,8 @@ $(DIR_O)\LexBash.obj: ..\lexers\LexBash.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexBasic.obj: ..\lexers\LexBasic.cxx $(LEX_HEADERS)
 
+$(DIR_O)\LexBatch.obj: ..\lexers\LexBatch.cxx $(LEX_HEADERS)
+
 $(DIR_O)\LexBibTeX.obj: ..\lexers\LexBibTeX.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexBullant.obj: ..\lexers\LexBullant.cxx $(LEX_HEADERS)
@@ -509,6 +516,8 @@ $(DIR_O)\LexCSS.obj: ..\lexers\LexCSS.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexD.obj: ..\lexers\LexD.cxx $(LEX_HEADERS)
 
+$(DIR_O)\LexDiff.obj: ..\lexers\LexDiff.cxx $(LEX_HEADERS)
+
 $(DIR_O)\LexDMAP.obj: ..\lexers\LexDMAP.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexDMIS.obj: ..\lexers\LexDMIS.cxx $(LEX_HEADERS)
@@ -518,6 +527,8 @@ $(DIR_O)\LexECL.obj: ..\lexers\LexECL.cxx $(LEX_HEADERS)
 $(DIR_O)\LexEiffel.obj: ..\lexers\LexEiffel.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexErlang.obj: ..\lexers\LexErlang.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexErrorList.obj: ..\lexers\LexErrorList.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexEScript.obj: ..\lexers\LexEScript.cxx $(LEX_HEADERS)
 
@@ -553,6 +564,8 @@ $(DIR_O)\LexLua.obj: ..\lexers\LexLua.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexMagik.obj: ..\lexers\LexMagik.cxx $(LEX_HEADERS)
 
+$(DIR_O)\LexMake.obj: ..\lexers\LexMake.cxx $(LEX_HEADERS)
+
 $(DIR_O)\LexMarkdown.obj: ..\lexers\LexMarkdown.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexMatlab.obj: ..\lexers\LexMatlab.cxx $(LEX_HEADERS)
@@ -573,11 +586,11 @@ $(DIR_O)\LexNimrod.obj: ..\lexers\LexNimrod.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexNsis.obj: ..\lexers\LexNsis.cxx $(LEX_HEADERS)
 
+$(DIR_O)\LexNull.obj: ..\lexers\LexNull.cxx $(LEX_HEADERS)
+
 $(DIR_O)\LexOpal.obj: ..\lexers\LexOpal.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexOScript.obj: ..\lexers\LexOScript.cxx $(LEX_HEADERS)
-
-$(DIR_O)\LexOthers.obj: ..\lexers\LexOthers.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexPascal.obj: ..\lexers\LexPascal.cxx $(LEX_HEADERS)
 
@@ -596,6 +609,8 @@ $(DIR_O)\LexPowerPro.obj: ..\lexers\LexPowerPro.cxx $(LEX_HEADERS)
 $(DIR_O)\LexPowerShell.obj: ..\lexers\LexPowerShell.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexProgress.obj: ..\lexers\LexProgress.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexProps.obj: ..\lexers\LexProps.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexPS.obj: ..\lexers\LexPS.cxx $(LEX_HEADERS)
 
