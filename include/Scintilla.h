@@ -11,6 +11,8 @@
 #ifndef SCINTILLA_H
 #define SCINTILLA_H
 
+#include "Sci_Position.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -1070,8 +1072,8 @@ namespace Scintilla {
 #endif
 
 struct Sci_CharacterRange {
-	long cpMin;
-	long cpMax;
+	Sci_PositionCR cpMin;
+	Sci_PositionCR cpMax;
 };
 
 struct Sci_TextRange {
@@ -1124,7 +1126,7 @@ struct Sci_NotifyHeader {
 
 struct SCNotification {
 	struct Sci_NotifyHeader nmhdr;
-	int position;
+	Sci_Position position;
 	/* SCN_STYLENEEDED, SCN_DOUBLECLICK, SCN_MODIFIED, SCN_MARGINCLICK, */
 	/* SCN_NEEDSHOWN, SCN_DWELLSTART, SCN_DWELLEND, SCN_CALLTIPCLICK, */
 	/* SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK, SCN_HOTSPOTRELEASECLICK, */
@@ -1142,12 +1144,12 @@ struct SCNotification {
 	const char *text;
 	/* SCN_MODIFIED, SCN_USERLISTSELECTION, SCN_AUTOCSELECTION, SCN_URIDROPPED */
 
-	int length;		/* SCN_MODIFIED */
-	int linesAdded;	/* SCN_MODIFIED */
+	Sci_Position length;		/* SCN_MODIFIED */
+	Sci_Position linesAdded;	/* SCN_MODIFIED */
 	int message;	/* SCN_MACRORECORD */
 	uptr_t wParam;	/* SCN_MACRORECORD */
 	sptr_t lParam;	/* SCN_MACRORECORD */
-	int line;		/* SCN_MODIFIED */
+	Sci_Position line;		/* SCN_MODIFIED */
 	int foldLevelNow;	/* SCN_MODIFIED */
 	int foldLevelPrev;	/* SCN_MODIFIED */
 	int margin;		/* SCN_MARGINCLICK */
@@ -1155,7 +1157,7 @@ struct SCNotification {
 	int x;			/* SCN_DWELLSTART, SCN_DWELLEND */
 	int y;		/* SCN_DWELLSTART, SCN_DWELLEND */
 	int token;		/* SCN_MODIFIED with SC_MOD_CONTAINER */
-	int annotationLinesAdded;	/* SCN_MODIFIED with SC_MOD_CHANGEANNOTATION */
+	Sci_Position annotationLinesAdded;	/* SCN_MODIFIED with SC_MOD_CHANGEANNOTATION */
 	int updated;	/* SCN_UPDATEUI */
 	int listCompletionMethod;
 	/* SCN_AUTOCSELECTION, SCN_AUTOCCOMPLETED, SCN_USERLISTSELECTION, */

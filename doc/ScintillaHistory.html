@@ -492,6 +492,14 @@
 	Released 20 June 2015.
 	</li>
 	<li>
+	External interfaces use the Sci_Position and Sci_PositionU typedefs instead of int and unsigned int
+	to allow for changes to a 64-bit interface on 64-bit plactforms in the future.
+	Applications and external lexers should start using the new type names so that
+	they will be compatible when the 64-bit change occurs.
+	There is also Sci_PositionCR (long) for use in the Sci_CharacterRange struct which will
+	also eventually become 64-bit.
+	</li>
+	<li>
 	Multiple selection now works over more key commands.
 	The new multiple-selection handling commands include horizontal movement and selection commands,
 	line up and down movement and selection commands, word and line deletion commands, and
