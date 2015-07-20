@@ -138,13 +138,13 @@ public:
 	const char * SCI_METHOD DescribeProperty(const char *name) {
 		return osRust.DescribeProperty(name);
 	}
-	int SCI_METHOD PropertySet(const char *key, const char *val);
+	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val);
 	const char * SCI_METHOD DescribeWordListSets() {
 		return osRust.DescribeWordListSets();
 	}
-	int SCI_METHOD WordListSet(int n, const char *wl);
-	void SCI_METHOD Lex(unsigned int startPos, int length, int initStyle, IDocument *pAccess);
-	void SCI_METHOD Fold(unsigned int startPos, int length, int initStyle, IDocument *pAccess);
+	Sci_Position SCI_METHOD WordListSet(int n, const char *wl);
+	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess);
+	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess);
 	void * SCI_METHOD PrivateCall(int, void *) {
 		return 0;
 	}
@@ -153,14 +153,14 @@ public:
 	}
 };
 
-int SCI_METHOD LexerRust::PropertySet(const char *key, const char *val) {
+Sci_Position SCI_METHOD LexerRust::PropertySet(const char *key, const char *val) {
 	if (osRust.PropertySet(&options, key, val)) {
 		return 0;
 	}
 	return -1;
 }
 
-int SCI_METHOD LexerRust::WordListSet(int n, const char *wl) {
+Sci_Position SCI_METHOD LexerRust::WordListSet(int n, const char *wl) {
 	int firstModification = -1;
 	if (n < NUM_RUST_KEYWORD_LISTS) {
 		WordList *wordListN = &keywords[n];
@@ -643,7 +643,7 @@ static void ScanRawString(Accessor &styler, int& pos, int max, bool ascii_only) 
 	}
 }
 
-void SCI_METHOD LexerRust::Lex(unsigned int startPos, int length, int initStyle, IDocument *pAccess) {
+void SCI_METHOD LexerRust::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 	PropSetSimple props;
 	Accessor styler(pAccess, &props);
 	int pos = startPos;
@@ -716,7 +716,7 @@ void SCI_METHOD LexerRust::Lex(unsigned int startPos, int length, int initStyle,
 	styler.Flush();
 }
 
-void SCI_METHOD LexerRust::Fold(unsigned int startPos, int length, int initStyle, IDocument *pAccess) {
+void SCI_METHOD LexerRust::Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 
 	if (!options.fold)
 		return;

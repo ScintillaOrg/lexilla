@@ -225,13 +225,13 @@ public:
 	const char * SCI_METHOD DescribeProperty(const char *name) {
 		return osPython.DescribeProperty(name);
 	}
-	int SCI_METHOD PropertySet(const char *key, const char *val);
+	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val);
 	const char * SCI_METHOD DescribeWordListSets() {
 		return osPython.DescribeWordListSets();
 	}
-	int SCI_METHOD WordListSet(int n, const char *wl);
-	void SCI_METHOD Lex(unsigned int startPos, int length, int initStyle, IDocument *pAccess);
-	void SCI_METHOD Fold(unsigned int startPos, int length, int initStyle, IDocument *pAccess);
+	Sci_Position SCI_METHOD WordListSet(int n, const char *wl);
+	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess);
+	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess);
 
 	void * SCI_METHOD PrivateCall(int, void *) {
 		return 0;
@@ -275,14 +275,14 @@ public:
 	}
 };
 
-int SCI_METHOD LexerPython::PropertySet(const char *key, const char *val) {
+Sci_Position SCI_METHOD LexerPython::PropertySet(const char *key, const char *val) {
 	if (osPython.PropertySet(&options, key, val)) {
 		return 0;
 	}
 	return -1;
 }
 
-int SCI_METHOD LexerPython::WordListSet(int n, const char *wl) {
+Sci_Position SCI_METHOD LexerPython::WordListSet(int n, const char *wl) {
 	WordList *wordListN = 0;
 	switch (n) {
 	case 0:
@@ -304,7 +304,7 @@ int SCI_METHOD LexerPython::WordListSet(int n, const char *wl) {
 	return firstModification;
 }
 
-void SCI_METHOD LexerPython::Lex(unsigned int startPos, int length, int initStyle, IDocument *pAccess) {
+void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 	Accessor styler(pAccess, NULL);
 
 	const int endPos = startPos + length;
@@ -595,7 +595,7 @@ static bool IsQuoteLine(int line, Accessor &styler) {
 }
 
 
-void SCI_METHOD LexerPython::Fold(unsigned int startPos, int length, int /*initStyle - unused*/, IDocument *pAccess) {
+void SCI_METHOD LexerPython::Fold(Sci_PositionU startPos, Sci_Position length, int /*initStyle - unused*/, IDocument *pAccess) {
 	if (!options.fold)
 		return;
 

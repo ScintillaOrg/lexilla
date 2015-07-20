@@ -81,8 +81,8 @@ public:
 	static ILexer *LexerFactoryLaTeX() {
 		return new LexerLaTeX();
 	}
-	void SCI_METHOD Lex(unsigned int startPos, int length, int initStyle, IDocument *pAccess);
-	void SCI_METHOD Fold(unsigned int startPos, int length, int initStyle, IDocument *pAccess);
+	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess);
+	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess);
 };
 
 static bool latexIsSpecial(int ch) {
@@ -184,7 +184,7 @@ static inline void latexStateReset(int &mode, int &state) {
 
 // There are cases not handled correctly, like $abcd\textrm{what is $x+y$}z+w$.
 // But I think it's already good enough.
-void SCI_METHOD LexerLaTeX::Lex(unsigned int startPos, int length, int initStyle, IDocument *pAccess) {
+void SCI_METHOD LexerLaTeX::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 	// startPos is assumed to be the first character of a line
 	Accessor styler(pAccess, &props);
 	styler.StartAt(startPos);
@@ -470,7 +470,7 @@ static int latexFoldSaveToInt(const latexFoldSave &save) {
 
 // Change folding state while processing a line
 // Return the level before the first relevant command
-void SCI_METHOD LexerLaTeX::Fold(unsigned int startPos, int length, int, IDocument *pAccess) {
+void SCI_METHOD LexerLaTeX::Fold(Sci_PositionU startPos, Sci_Position length, int, IDocument *pAccess) {
 	const char *structWords[7] = {"part", "chapter", "section", "subsection",
 		"subsubsection", "paragraph", "subparagraph"};
 	Accessor styler(pAccess, &props);

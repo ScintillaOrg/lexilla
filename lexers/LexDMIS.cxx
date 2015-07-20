@@ -76,11 +76,11 @@ class LexerDMIS : public ILexer
 			return NULL;
 		}
 
-		int SCI_METHOD PropertySet(const char *, const char *) {
+		Sci_Position SCI_METHOD PropertySet(const char *, const char *) {
 			return -1;
 		}
 
-		int SCI_METHOD WordListSet(int n, const char *wl);
+		Sci_Position SCI_METHOD WordListSet(int n, const char *wl);
 
 		void * SCI_METHOD PrivateCall(int, void *) {
 			return NULL;
@@ -91,8 +91,8 @@ class LexerDMIS : public ILexer
 		}
 
 		const char * SCI_METHOD DescribeWordListSets();
-		void SCI_METHOD Lex(unsigned int startPos, int lengthDoc, int initStyle, IDocument *pAccess);
-		void SCI_METHOD Fold(unsigned int startPos, int lengthDoc, int initStyle, IDocument *pAccess);
+		void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, IDocument *pAccess);
+		void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, IDocument *pAccess);
 };
 
 
@@ -145,7 +145,7 @@ LexerDMIS::~LexerDMIS(void) {
 	delete[] this->m_wordListSets;
 }
 
-int SCI_METHOD LexerDMIS::WordListSet(int n, const char *wl)
+Sci_Position SCI_METHOD LexerDMIS::WordListSet(int n, const char *wl)
 {
 	switch (n) {
 		case 0:
@@ -185,7 +185,7 @@ const char * SCI_METHOD LexerDMIS::DescribeWordListSets()
 	return this->m_wordListSets;
 }
 
-void SCI_METHOD LexerDMIS::Lex(unsigned int startPos, int lengthDoc, int initStyle, IDocument *pAccess)
+void SCI_METHOD LexerDMIS::Lex(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, IDocument *pAccess)
 {
 	const unsigned int MAX_STR_LEN = 100;
 
@@ -281,7 +281,7 @@ void SCI_METHOD LexerDMIS::Lex(unsigned int startPos, int lengthDoc, int initSty
 	scCTX.Complete();
 }
 
-void SCI_METHOD LexerDMIS::Fold(unsigned int startPos, int lengthDoc, int, IDocument *pAccess)
+void SCI_METHOD LexerDMIS::Fold(Sci_PositionU startPos, Sci_Position lengthDoc, int, IDocument *pAccess)
 {
 	const int MAX_STR_LEN = 100;
 

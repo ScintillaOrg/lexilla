@@ -179,13 +179,13 @@ public:
 	virtual const char *SCI_METHOD DescribeProperty(const char *name) {
 		return optSetRegistry.DescribeProperty(name);
 	}
-	virtual int SCI_METHOD PropertySet(const char *key, const char *val) {
+	virtual Sci_Position SCI_METHOD PropertySet(const char *key, const char *val) {
 		if (optSetRegistry.PropertySet(&options, key, val)) {
 			return 0;
 		}
 		return -1;
 	}
-	virtual int SCI_METHOD WordListSet(int, const char *) {
+	virtual Sci_Position SCI_METHOD WordListSet(int, const char *) {
 		return -1;
 	}
 	virtual void *SCI_METHOD PrivateCall(int, void *) {
@@ -197,18 +197,18 @@ public:
 	virtual const char *SCI_METHOD DescribeWordListSets() {
 		return optSetRegistry.DescribeWordListSets();
 	}
-	virtual void SCI_METHOD Lex(unsigned startPos,
-								int length,
+	virtual void SCI_METHOD Lex(Sci_PositionU startPos,
+								Sci_Position length,
 								int initStyle,
 								IDocument *pAccess);
-	virtual void SCI_METHOD Fold(unsigned startPos,
-								 int length,
+	virtual void SCI_METHOD Fold(Sci_PositionU startPos,
+								 Sci_Position length,
 								 int initStyle,
 								 IDocument *pAccess);
 };
 
-void SCI_METHOD LexerRegistry::Lex(unsigned startPos,
-								   int length,
+void SCI_METHOD LexerRegistry::Lex(Sci_PositionU startPos,
+								   Sci_Position length,
 								   int initStyle,
 								   IDocument *pAccess) {
 	int beforeGUID = SCE_REG_DEFAULT;
@@ -352,8 +352,8 @@ void SCI_METHOD LexerRegistry::Lex(unsigned startPos,
 }
 
 // Folding similar to that of FoldPropsDoc in LexOthers
-void SCI_METHOD LexerRegistry::Fold(unsigned startPos,
-									int length,
+void SCI_METHOD LexerRegistry::Fold(Sci_PositionU startPos,
+									Sci_Position length,
 									int,
 									IDocument *pAccess) {
 	if (!options.fold) {

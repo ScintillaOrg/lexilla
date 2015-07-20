@@ -328,7 +328,7 @@ public :
 		return osSQL.DescribeProperty(name);
 	}
 
-	int SCI_METHOD PropertySet(const char *key, const char *val) {
+	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val) {
 		if (osSQL.PropertySet(&options, key, val)) {
 			return 0;
 		}
@@ -339,9 +339,9 @@ public :
 		return osSQL.DescribeWordListSets();
 	}
 
-	int SCI_METHOD WordListSet(int n, const char *wl);
-	void SCI_METHOD Lex (unsigned int startPos, int lengthDoc, int initStyle, IDocument *pAccess);
-	void SCI_METHOD Fold(unsigned int startPos, int lengthDoc, int initStyle, IDocument *pAccess);
+	Sci_Position SCI_METHOD WordListSet(int n, const char *wl);
+	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, IDocument *pAccess);
+	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, IDocument *pAccess);
 
 	void * SCI_METHOD PrivateCall(int, void *) {
 		return 0;
@@ -400,7 +400,7 @@ private:
 	WordList kw_user4;
 };
 
-int SCI_METHOD LexerSQL::WordListSet(int n, const char *wl) {
+Sci_Position SCI_METHOD LexerSQL::WordListSet(int n, const char *wl) {
 	WordList *wordListN = 0;
 	switch (n) {
 	case 0:
@@ -439,7 +439,7 @@ int SCI_METHOD LexerSQL::WordListSet(int n, const char *wl) {
 	return firstModification;
 }
 
-void SCI_METHOD LexerSQL::Lex(unsigned int startPos, int length, int initStyle, IDocument *pAccess) {
+void SCI_METHOD LexerSQL::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 	LexAccessor styler(pAccess);
 	StyleContext sc(startPos, length, initStyle, styler);
 	int styleBeforeDCKeyword = SCE_SQL_DEFAULT;
@@ -628,7 +628,7 @@ void SCI_METHOD LexerSQL::Lex(unsigned int startPos, int length, int initStyle, 
 	sc.Complete();
 }
 
-void SCI_METHOD LexerSQL::Fold(unsigned int startPos, int length, int initStyle, IDocument *pAccess) {
+void SCI_METHOD LexerSQL::Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 	if (!options.fold)
 		return;
 	LexAccessor styler(pAccess);

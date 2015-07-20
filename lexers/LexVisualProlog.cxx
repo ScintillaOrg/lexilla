@@ -91,13 +91,13 @@ public:
     const char * SCI_METHOD DescribeProperty(const char *name) {
         return osVisualProlog.DescribeProperty(name);
     }
-    int SCI_METHOD PropertySet(const char *key, const char *val);
+    Sci_Position SCI_METHOD PropertySet(const char *key, const char *val);
     const char * SCI_METHOD DescribeWordListSets() {
         return osVisualProlog.DescribeWordListSets();
     }
-    int SCI_METHOD WordListSet(int n, const char *wl);
-    void SCI_METHOD Lex(unsigned int startPos, int length, int initStyle, IDocument *pAccess);
-    void SCI_METHOD Fold(unsigned int startPos, int length, int initStyle, IDocument *pAccess);
+    Sci_Position SCI_METHOD WordListSet(int n, const char *wl);
+    void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess);
+    void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess);
 
     void * SCI_METHOD PrivateCall(int, void *) {
         return 0;
@@ -108,14 +108,14 @@ public:
     }
 };
 
-int SCI_METHOD LexerVisualProlog::PropertySet(const char *key, const char *val) {
+Sci_Position SCI_METHOD LexerVisualProlog::PropertySet(const char *key, const char *val) {
     if (osVisualProlog.PropertySet(&options, key, val)) {
         return 0;
     }
     return -1;
 }
 
-int SCI_METHOD LexerVisualProlog::WordListSet(int n, const char *wl) {
+Sci_Position SCI_METHOD LexerVisualProlog::WordListSet(int n, const char *wl) {
     WordList *wordListN = 0;
     switch (n) {
     case 0:
@@ -244,7 +244,7 @@ static void forwardEscapeLiteral(StyleContext &sc, int EscapeState) {
     }
 }
 
-void SCI_METHOD LexerVisualProlog::Lex(unsigned int startPos, int length, int initStyle, IDocument *pAccess) {
+void SCI_METHOD LexerVisualProlog::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
     LexAccessor styler(pAccess);
     CharacterSet setDoxygen(CharacterSet::setAlpha, "");
     CharacterSet setNumber(CharacterSet::setNone, "+-.0123456789abcdefABCDEFxoXO");
@@ -446,7 +446,7 @@ void SCI_METHOD LexerVisualProlog::Lex(unsigned int startPos, int length, int in
 // level store to make it easy to pick up with each increment
 // and to make it possible to fiddle the current level for "} else {".
 
-void SCI_METHOD LexerVisualProlog::Fold(unsigned int startPos, int length, int initStyle, IDocument *pAccess) {
+void SCI_METHOD LexerVisualProlog::Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 
     LexAccessor styler(pAccess);
 

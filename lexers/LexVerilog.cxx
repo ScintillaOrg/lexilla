@@ -232,15 +232,15 @@ public:
 	const char* SCI_METHOD DescribeProperty(const char* name) {
 		return osVerilog.DescribeProperty(name);
 	}
-	int SCI_METHOD PropertySet(const char* key, const char* val) {
+	Sci_Position SCI_METHOD PropertySet(const char* key, const char* val) {
 	    return osVerilog.PropertySet(&options, key, val);
 	}
 	const char* SCI_METHOD DescribeWordListSets() {
 		return osVerilog.DescribeWordListSets();
 	}
-	int SCI_METHOD WordListSet(int n, const char* wl);
-	void SCI_METHOD Lex(unsigned int startPos, int length, int initStyle, IDocument *pAccess);
-	void SCI_METHOD Fold(unsigned int startPos, int length, int initStyle, IDocument *pAccess);
+	Sci_Position SCI_METHOD WordListSet(int n, const char* wl);
+	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess);
+	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess);
 	void* SCI_METHOD PrivateCall(int, void*) {
 		return 0;
 	}
@@ -285,7 +285,7 @@ public:
 	std::vector<std::string> Tokenize(const std::string &expr) const;
 };
 
-int SCI_METHOD LexerVerilog::WordListSet(int n, const char *wl) {
+Sci_Position SCI_METHOD LexerVerilog::WordListSet(int n, const char *wl) {
 	WordList *wordListN = 0;
 	switch (n) {
 	case 0:
@@ -391,7 +391,7 @@ static bool IsSpaceOrTab(int ch) {
 	return ch == ' ' || ch == '\t';
 }
 
-void SCI_METHOD LexerVerilog::Lex(unsigned int startPos, int length, int initStyle, IDocument *pAccess)
+void SCI_METHOD LexerVerilog::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess)
 {
 	LexAccessor styler(pAccess);
 
@@ -784,7 +784,7 @@ static bool IsCommentLine(int line, LexAccessor &styler) {
 // Store both the current line's fold level and the next lines in the
 // level store to make it easy to pick up with each increment
 // and to make it possible to fiddle the current level for "} else {".
-void SCI_METHOD LexerVerilog::Fold(unsigned int startPos, int length, int initStyle, IDocument *pAccess)
+void SCI_METHOD LexerVerilog::Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess)
 {
 	LexAccessor styler(pAccess);
 	bool foldAtBrace  = 1;

@@ -367,13 +367,13 @@ public:
 	const char *SCI_METHOD DescribeProperty(const char *name) {
 		return osPerl.DescribeProperty(name);
 	}
-	int SCI_METHOD PropertySet(const char *key, const char *val);
+	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val);
 	const char *SCI_METHOD DescribeWordListSets() {
 		return osPerl.DescribeWordListSets();
 	}
-	int SCI_METHOD WordListSet(int n, const char *wl);
-	void SCI_METHOD Lex(unsigned int startPos, int length, int initStyle, IDocument *pAccess);
-	void SCI_METHOD Fold(unsigned int startPos, int length, int initStyle, IDocument *pAccess);
+	Sci_Position SCI_METHOD WordListSet(int n, const char *wl);
+	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess);
+	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess);
 
 	void *SCI_METHOD PrivateCall(int, void *) {
 		return 0;
@@ -386,14 +386,14 @@ public:
 	void InterpolateSegment(StyleContext &sc, int maxSeg, bool isPattern=false);
 };
 
-int SCI_METHOD LexerPerl::PropertySet(const char *key, const char *val) {
+Sci_Position SCI_METHOD LexerPerl::PropertySet(const char *key, const char *val) {
 	if (osPerl.PropertySet(&options, key, val)) {
 		return 0;
 	}
 	return -1;
 }
 
-int SCI_METHOD LexerPerl::WordListSet(int n, const char *wl) {
+Sci_Position SCI_METHOD LexerPerl::WordListSet(int n, const char *wl) {
 	WordList *wordListN = 0;
 	switch (n) {
 	case 0:
@@ -515,7 +515,7 @@ void LexerPerl::InterpolateSegment(StyleContext &sc, int maxSeg, bool isPattern)
 		sc.SetState(sc.state - INTERPOLATE_SHIFT);
 }
 
-void SCI_METHOD LexerPerl::Lex(unsigned int startPos, int length, int initStyle, IDocument *pAccess) {
+void SCI_METHOD LexerPerl::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 	LexAccessor styler(pAccess);
 
 	// keywords that forces /PATTERN/ at all times; should track vim's behaviour
@@ -1557,7 +1557,7 @@ void SCI_METHOD LexerPerl::Lex(unsigned int startPos, int length, int initStyle,
 #define PERL_HEADFOLD_SHIFT		4
 #define PERL_HEADFOLD_MASK		0xF0
 
-void SCI_METHOD LexerPerl::Fold(unsigned int startPos, int length, int /* initStyle */, IDocument *pAccess) {
+void SCI_METHOD LexerPerl::Fold(Sci_PositionU startPos, Sci_Position length, int /* initStyle */, IDocument *pAccess) {
 
 	if (!options.fold)
 		return;

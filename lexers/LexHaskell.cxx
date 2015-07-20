@@ -416,17 +416,17 @@ public:
       return osHaskell.DescribeProperty(name);
    }
 
-   int SCI_METHOD PropertySet(const char *key, const char *val);
+   Sci_Position SCI_METHOD PropertySet(const char *key, const char *val);
 
    const char * SCI_METHOD DescribeWordListSets() {
       return osHaskell.DescribeWordListSets();
    }
 
-   int SCI_METHOD WordListSet(int n, const char *wl);
+   Sci_Position SCI_METHOD WordListSet(int n, const char *wl);
 
-   void SCI_METHOD Lex(unsigned int startPos, int length, int initStyle, IDocument *pAccess);
+   void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess);
 
-   void SCI_METHOD Fold(unsigned int startPos, int length, int initStyle, IDocument *pAccess);
+   void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess);
 
    void * SCI_METHOD PrivateCall(int, void *) {
       return 0;
@@ -441,14 +441,14 @@ public:
    }
 };
 
-int SCI_METHOD LexerHaskell::PropertySet(const char *key, const char *val) {
+Sci_Position SCI_METHOD LexerHaskell::PropertySet(const char *key, const char *val) {
    if (osHaskell.PropertySet(&options, key, val)) {
       return 0;
    }
    return -1;
 }
 
-int SCI_METHOD LexerHaskell::WordListSet(int n, const char *wl) {
+Sci_Position SCI_METHOD LexerHaskell::WordListSet(int n, const char *wl) {
    WordList *wordListN = 0;
    switch (n) {
    case 0:
@@ -473,7 +473,7 @@ int SCI_METHOD LexerHaskell::WordListSet(int n, const char *wl) {
    return firstModification;
 }
 
-void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initStyle
+void SCI_METHOD LexerHaskell::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle
                                  ,IDocument *pAccess) {
    LexAccessor styler(pAccess);
 
@@ -961,7 +961,7 @@ void SCI_METHOD LexerHaskell::Lex(unsigned int startPos, int length, int initSty
    sc.Complete();
 }
 
-void SCI_METHOD LexerHaskell::Fold(unsigned int startPos, int length, int // initStyle
+void SCI_METHOD LexerHaskell::Fold(Sci_PositionU startPos, Sci_Position length, int // initStyle
                                   ,IDocument *pAccess) {
    if (!options.fold)
       return;
