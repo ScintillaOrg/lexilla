@@ -520,6 +520,9 @@
 	SciTE adds support for substyles.
 	</li>
 	<li>
+	SciTE's Export as RTF and Copy as RTF commands support UTF-8.
+	</li>
+	<li>
 	SciTE can display autocompletion on all IME input with ime.autocomplete property.
 	</li>
 	<li>
@@ -544,6 +547,13 @@
 	<li>
 	Fix bug on GTK+ with scroll bars leaking.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1742/">Bug #1742</a>.
+	</li>
+	<li>
+	LexOthers.cxx file split into one file per lexer: LexBatch, LexDiff,
+	LexErrorList, LexMake, LexNull, and LexProps.
+	</li>
+	<li>
+	SciTE exporters handle styles &gt; 127 correctly now.
 	</li>
 	<li>
 	SciTE on Windows can scale window element sizes based on the system DPI setting.
