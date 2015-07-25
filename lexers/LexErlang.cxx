@@ -75,7 +75,7 @@ static inline bool IsAWordChar(const int ch) {
 	return (ch < 0x80) && (ch != ' ') && (isalnum(ch) || ch == '_');
 }
 
-static void ColouriseErlangDoc(unsigned int startPos, int length, int initStyle,
+static void ColouriseErlangDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
 								WordList *keywordlists[], Accessor &styler) {
 
 	StyleContext sc(startPos, length, initStyle, styler);
@@ -521,7 +521,7 @@ static int ClassifyErlangFoldPoint(
 }
 
 static void FoldErlangDoc(
-	unsigned int startPos, int length, int initStyle,
+	Sci_PositionU startPos, Sci_Position length, int initStyle,
 	WordList** /*keywordlists*/, Accessor &styler
 ) {
 	unsigned int endPos = startPos + length;

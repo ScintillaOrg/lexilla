@@ -66,18 +66,18 @@ using namespace Scintilla;
 #endif
 
 static void ColouriseCamlDoc(
-	unsigned int startPos, int length,
+	Sci_PositionU startPos, Sci_Position length,
 	int initStyle,
 	WordList *keywordlists[],
 	Accessor &styler);
 
 static void FoldCamlDoc(
-	unsigned int startPos, int length,
+	Sci_PositionU startPos, Sci_Position length,
 	int initStyle,
 	WordList *keywordlists[],
 	Accessor &styler);
 
-static void InternalLexOrFold(int lexOrFold, unsigned int startPos, int length,
+static void InternalLexOrFold(int lexOrFold, Sci_PositionU startPos, Sci_Position length,
 	int initStyle, char *words[], WindowID window, char *props);
 
 static const char* LexerName = "caml";
@@ -109,7 +109,7 @@ long Platform::SendScintillaPointer(WindowID w, unsigned int msg, unsigned long 
 		reinterpret_cast<LPARAM>(lParam));
 }
 
-void EXT_LEXER_DECL Fold(unsigned int lexer, unsigned int startPos, int length,
+void EXT_LEXER_DECL Fold(unsigned int lexer, Sci_PositionU startPos, Sci_Position length,
 	int initStyle, char *words[], WindowID window, char *props)
 {
 	// below useless evaluation(s) to supress "not used" warnings
@@ -138,7 +138,7 @@ void EXT_LEXER_DECL GetLexerName(unsigned int Index, char *name, int buflength)
 	}
 }
 
-void EXT_LEXER_DECL Lex(unsigned int lexer, unsigned int startPos, int length,
+void EXT_LEXER_DECL Lex(unsigned int lexer, Sci_PositionU startPos, Sci_Position length,
 	int initStyle, char *words[], WindowID window, char *props)
 {
 	// below useless evaluation(s) to supress "not used" warnings
@@ -147,7 +147,7 @@ void EXT_LEXER_DECL Lex(unsigned int lexer, unsigned int startPos, int length,
 	InternalLexOrFold(0, startPos, length, initStyle, words, window, props);
 }
 
-static void InternalLexOrFold(int foldOrLex, unsigned int startPos, int length,
+static void InternalLexOrFold(int foldOrLex, Sci_PositionU startPos, Sci_Position length,
 	int initStyle, char *words[], WindowID window, char *props)
 {
 	// create and initialize a WindowAccessor (including contained PropSet)
@@ -180,7 +180,7 @@ static
 #endif	/* BUILD_AS_EXTERNAL_LEXER */
 
 void ColouriseCamlDoc(
-	unsigned int startPos, int length,
+	Sci_PositionU startPos, Sci_Position length,
 	int initStyle,
 	WordList *keywordlists[],
 	Accessor &styler)

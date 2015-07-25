@@ -18,7 +18,7 @@ class Accessor;
 class WordList;
 class PropSetSimple;
 
-typedef bool (*PFNIsCommentLeader)(Accessor &styler, int pos, int len);
+typedef bool(*PFNIsCommentLeader)(Accessor &styler, Sci_Position pos, Sci_Position len);
 
 class Accessor : public LexAccessor {
 public:

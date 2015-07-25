@@ -40,7 +40,7 @@ static inline bool IsAWordStart(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '_' || ch == '`');
 }
 
-static void ColouriseSpecmanDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+static void ColouriseSpecmanDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
                             Accessor &styler, bool caseSensitive) {
 
 	WordList &keywords = *keywordlists[0];
@@ -200,7 +200,7 @@ static void ColouriseSpecmanDoc(unsigned int startPos, int length, int initStyle
 // Store both the current line's fold level and the next lines in the
 // level store to make it easy to pick up with each increment
 // and to make it possible to fiddle the current level for "} else {".
-static void FoldNoBoxSpecmanDoc(unsigned int startPos, int length, int,
+static void FoldNoBoxSpecmanDoc(Sci_PositionU startPos, Sci_Position length, int,
                             Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
@@ -269,7 +269,7 @@ static void FoldNoBoxSpecmanDoc(unsigned int startPos, int length, int,
 	}
 }
 
-static void FoldSpecmanDoc(unsigned int startPos, int length, int initStyle, WordList *[],
+static void FoldSpecmanDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *[],
                        Accessor &styler) {
 	FoldNoBoxSpecmanDoc(startPos, length, initStyle, styler);
 }
@@ -283,7 +283,7 @@ static const char * const specmanWordLists[] = {
             0,
         };
 
-static void ColouriseSpecmanDocSensitive(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+static void ColouriseSpecmanDocSensitive(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
                                      Accessor &styler) {
 	ColouriseSpecmanDoc(startPos, length, initStyle, keywordlists, styler, true);
 }

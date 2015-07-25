@@ -103,7 +103,7 @@ static bool IsValidHrule(const unsigned int endPos, StyleContext &sc) {
     }
 }
 
-static void ColorizeTxt2tagsDoc(unsigned int startPos, int length, int initStyle,
+static void ColorizeTxt2tagsDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                                WordList **, Accessor &styler) {
     unsigned int endPos = startPos + length;
     int precharCount = 0;

@@ -27,7 +27,7 @@
 using namespace Scintilla;
 #endif
 
-static void ColouriseInnoDoc(unsigned int startPos, int length, int, WordList *keywordLists[], Accessor &styler) {
+static void ColouriseInnoDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *keywordLists[], Accessor &styler) {
 	int state = SCE_INNO_DEFAULT;
 	char chPrev;
 	char ch = 0;
@@ -248,7 +248,7 @@ static const char * const innoWordListDesc[] = {
 	0
 };
 
-static void FoldInnoDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler) {
+static void FoldInnoDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[], Accessor &styler) {
 	unsigned int endPos = startPos + length;
 	char chNext = styler[startPos];
 

@@ -39,7 +39,7 @@ static inline bool IsASpaceChar(int ch) {
 	return (ch < 0x80) && isspace(ch);
 }
 
-static void ColouriseForthDoc(unsigned int startPos, int length, int initStyle, WordList *keywordLists[],
+static void ColouriseForthDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordLists[],
                             Accessor &styler) {
 
     WordList &control = *keywordLists[0];

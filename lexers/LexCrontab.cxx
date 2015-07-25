@@ -29,7 +29,7 @@
 using namespace Scintilla;
 #endif
 
-static void ColouriseNncrontabDoc(unsigned int startPos, int length, int, WordList
+static void ColouriseNncrontabDoc(Sci_PositionU startPos, Sci_Position length, int, WordList
 *keywordLists[], Accessor &styler)
 {
 	int state = SCE_NNCRONTAB_DEFAULT;

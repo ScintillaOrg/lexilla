@@ -122,7 +122,7 @@ static int classifyFoldPointTACL(const char* s) {
 	return lev;
 }
 
-static void ColouriseTACLDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+static void ColouriseTACLDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
 	Accessor &styler) {
 
 	styler.StartAt(startPos);
@@ -280,7 +280,7 @@ static void ColouriseTACLDoc(unsigned int startPos, int length, int initStyle, W
 		ColourTo(styler, lengthDoc - 1, state, bInAsm);
 }
 
-static void FoldTACLDoc(unsigned int startPos, int length, int initStyle, WordList *[],
+static void FoldTACLDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *[],
                             Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool foldPreprocessor = styler.GetPropertyInt("fold.preprocessor") != 0;

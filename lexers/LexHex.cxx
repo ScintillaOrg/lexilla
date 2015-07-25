@@ -645,7 +645,7 @@ static int CalcTEHexChecksum(unsigned int recStartPos, Accessor &styler)
 
 }
 
-static void ColouriseSrecDoc(unsigned int startPos, int length, int initStyle, WordList *[], Accessor &styler)
+static void ColouriseSrecDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *[], Accessor &styler)
 {
 	StyleContext sc(startPos, length, initStyle, styler);
 
@@ -769,7 +769,7 @@ static void ColouriseSrecDoc(unsigned int startPos, int length, int initStyle, W
 	sc.Complete();
 }
 
-static void ColouriseIHexDoc(unsigned int startPos, int length, int initStyle, WordList *[], Accessor &styler)
+static void ColouriseIHexDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *[], Accessor &styler)
 {
 	StyleContext sc(startPos, length, initStyle, styler);
 
@@ -890,7 +890,7 @@ static void ColouriseIHexDoc(unsigned int startPos, int length, int initStyle, W
 	sc.Complete();
 }
 
-static void FoldIHexDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler)
+static void FoldIHexDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[], Accessor &styler)
 {
 	unsigned int endPos = startPos + length;
 
@@ -933,7 +933,7 @@ static void FoldIHexDoc(unsigned int startPos, int length, int, WordList *[], Ac
 	}
 }
 
-static void ColouriseTEHexDoc(unsigned int startPos, int length, int initStyle, WordList *[], Accessor &styler)
+static void ColouriseTEHexDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *[], Accessor &styler)
 {
 	StyleContext sc(startPos, length, initStyle, styler);
 

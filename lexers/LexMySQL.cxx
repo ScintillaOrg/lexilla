@@ -105,7 +105,7 @@ static void ForwardDefaultState(StyleContext& sc, int activeState)
     sc.ForwardSetState(SCE_MYSQL_HIDDENCOMMAND);
 }
 
-static void ColouriseMySQLDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+static void ColouriseMySQLDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
                             Accessor &styler)
 {
 	StyleContext sc(startPos, length, initStyle, styler, 127);
@@ -343,7 +343,7 @@ bool MatchIgnoreCase(Accessor &styler, int currentPos, const char *s)
 
 // Store both the current line's fold level and the next lines in the
 // level store to make it easy to pick up with each increment.
-static void FoldMySQLDoc(unsigned int startPos, int length, int initStyle, WordList *[], Accessor &styler)
+static void FoldMySQLDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *[], Accessor &styler)
 {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;

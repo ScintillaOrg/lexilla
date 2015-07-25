@@ -408,7 +408,7 @@ inline bool HandleSkip( unsigned int & cur, unsigned int one_too_much, Accessor 
 	}
 }
 
-static void ColouriseOpalDoc( unsigned int startPos, int length, int initStyle, WordList *keywordlists[], Accessor & styler )
+static void ColouriseOpalDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[], Accessor & styler)
 {
 	styler.StartAt( startPos );
 	styler.StartSegment( startPos );

@@ -654,7 +654,7 @@ static void synchronizeDocStart(unsigned int &startPos,
     initStyle = SCE_RB_DEFAULT;
 }
 
-static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
+static void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                            WordList *keywordlists[], Accessor &styler) {
 
     // Lexer for Ruby often has to backtrack to start of current style to determine
@@ -1718,7 +1718,7 @@ static bool IsCommentLine(int line, Accessor &styler) {
  *  Later offer to fold POD, here-docs, strings, and blocks of comments
  */
 
-static void FoldRbDoc(unsigned int startPos, int length, int initStyle,
+static void FoldRbDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                       WordList *[], Accessor &styler) {
     const bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
     bool foldComment = styler.GetPropertyInt("fold.comment") != 0;

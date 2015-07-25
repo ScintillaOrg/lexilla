@@ -46,8 +46,8 @@ static inline bool IsAWordStart(unsigned int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '_');
 }
 
-static void ColouriseEiffelDoc(unsigned int startPos,
-                            int length,
+static void ColouriseEiffelDoc(Sci_PositionU startPos,
+                            Sci_Position length,
                             int initStyle,
                             WordList *keywordlists[],
                             Accessor &styler) {
@@ -118,11 +118,11 @@ static void ColouriseEiffelDoc(unsigned int startPos,
 	sc.Complete();
 }
 
-static bool IsEiffelComment(Accessor &styler, int pos, int len) {
+static bool IsEiffelComment(Accessor &styler, Sci_Position pos, Sci_Position len) {
 	return len>1 && styler[pos]=='-' && styler[pos+1]=='-';
 }
 
-static void FoldEiffelDocIndent(unsigned int startPos, int length, int,
+static void FoldEiffelDocIndent(Sci_PositionU startPos, Sci_Position length, int,
 						   WordList *[], Accessor &styler) {
 	int lengthDoc = startPos + length;
 
@@ -164,7 +164,7 @@ static void FoldEiffelDocIndent(unsigned int startPos, int length, int,
 	}
 }
 
-static void FoldEiffelDocKeyWords(unsigned int startPos, int length, int /* initStyle */, WordList *[],
+static void FoldEiffelDocKeyWords(Sci_PositionU startPos, Sci_Position length, int /* initStyle */, WordList *[],
                        Accessor &styler) {
 	unsigned int lengthDoc = startPos + length;
 	int visibleChars = 0;

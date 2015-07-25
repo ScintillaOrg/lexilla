@@ -60,7 +60,7 @@ static void ClassifySTTXTWord(WordList *keywordlists[], StyleContext &sc)
 	sc.SetState(SCE_STTXT_DEFAULT);
 }
 
-static void ColouriseSTTXTDoc (unsigned int startPos, int length, int initStyle,
+static void ColouriseSTTXTDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
 							  WordList *keywordlists[], Accessor &styler)
 {
 	StyleContext sc(startPos, length, initStyle, styler);
@@ -321,7 +321,7 @@ static void ClassifySTTXTWordFoldPoint(int &levelCurrent,unsigned int lastStart,
 	}
 }
 
-static void FoldSTTXTDoc(unsigned int startPos, int length, int initStyle, WordList *[],Accessor &styler)
+static void FoldSTTXTDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *[], Accessor &styler)
 {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool foldPreprocessor = styler.GetPropertyInt("fold.preprocessor") != 0;

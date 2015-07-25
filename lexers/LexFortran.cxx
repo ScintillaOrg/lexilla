@@ -59,7 +59,7 @@ static unsigned int GetContinuedPos(unsigned int pos, Accessor &styler) {
 	}
 }
 /***************************************/
-static void ColouriseFortranDoc(unsigned int startPos, int length, int initStyle,
+static void ColouriseFortranDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
         WordList *keywordlists[], Accessor &styler, bool isFixFormat) {
 	WordList &keywords = *keywordlists[0];
 	WordList &keywords2 = *keywordlists[1];
@@ -295,7 +295,7 @@ static int classifyFoldPointFortran(const char* s, const char* prevWord, const c
 }
 /***************************************/
 // Folding the code
-static void FoldFortranDoc(unsigned int startPos, int length, int initStyle,
+static void FoldFortranDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
         Accessor &styler, bool isFixFormat) {
 	//
 	// bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
@@ -490,22 +490,22 @@ static const char * const FortranWordLists[] = {
 	0,
 };
 /***************************************/
-static void ColouriseFortranDocFreeFormat(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+static void ColouriseFortranDocFreeFormat(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
         Accessor &styler) {
 	ColouriseFortranDoc(startPos, length, initStyle, keywordlists, styler, false);
 }
 /***************************************/
-static void ColouriseFortranDocFixFormat(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+static void ColouriseFortranDocFixFormat(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
         Accessor &styler) {
 	ColouriseFortranDoc(startPos, length, initStyle, keywordlists, styler, true);
 }
 /***************************************/
-static void FoldFortranDocFreeFormat(unsigned int startPos, int length, int initStyle,
+static void FoldFortranDocFreeFormat(Sci_PositionU startPos, Sci_Position length, int initStyle,
         WordList *[], Accessor &styler) {
 	FoldFortranDoc(startPos, length, initStyle,styler, false);
 }
 /***************************************/
-static void FoldFortranDocFixFormat(unsigned int startPos, int length, int initStyle,
+static void FoldFortranDocFixFormat(Sci_PositionU startPos, Sci_Position length, int initStyle,
         WordList *[], Accessor &styler) {
 	FoldFortranDoc(startPos, length, initStyle,styler, true);
 }

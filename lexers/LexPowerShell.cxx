@@ -32,7 +32,7 @@ static inline bool IsAWordChar(int ch) {
 	return ch >= 0x80 || isalnum(ch) || ch == '-' || ch == '_';
 }
 
-static void ColourisePowerShellDoc(unsigned int startPos, int length, int initStyle,
+static void ColourisePowerShellDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                            WordList *keywordlists[], Accessor &styler) {
 
 	WordList &keywords = *keywordlists[0];
@@ -158,7 +158,7 @@ static void ColourisePowerShellDoc(unsigned int startPos, int length, int initSt
 // Store both the current line's fold level and the next lines in the
 // level store to make it easy to pick up with each increment
 // and to make it possible to fiddle the current level for "} else {".
-static void FoldPowerShellDoc(unsigned int startPos, int length, int initStyle,
+static void FoldPowerShellDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                            WordList *[], Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;

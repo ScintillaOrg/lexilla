@@ -62,7 +62,7 @@ static bool IsSpaceEquiv(int state) {
 	}
 }
 
-static void ColouriseEclDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+static void ColouriseEclDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
                             Accessor &styler) {
 	WordList &keywords0 = *keywordlists[0];
 	WordList &keywords1 = *keywordlists[1];
@@ -405,7 +405,7 @@ bool MatchNoCase(Accessor & styler, unsigned int & pos, const char *s) {
 // Store both the current line's fold level and the next lines in the
 // level store to make it easy to pick up with each increment
 // and to make it possible to fiddle the current level for "} else {".
-static void FoldEclDoc(unsigned int startPos, int length, int initStyle, 
+static void FoldEclDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
 					   WordList *[], Accessor &styler) {
 	bool foldComment = true;
 	bool foldPreprocessor = true;

@@ -44,8 +44,8 @@ static inline bool IsANumberChar(int ch) {
 }
 
 static void ColouriseAvsDoc(
-	unsigned int startPos,
-	int length,
+	Sci_PositionU startPos,
+	Sci_Position length,
 	int initStyle,
 	WordList *keywordlists[],
 	Accessor &styler) {
@@ -208,8 +208,8 @@ static void ColouriseAvsDoc(
 }
 
 static void FoldAvsDoc(
-	unsigned int startPos,
-	int length,
+	Sci_PositionU startPos,
+	Sci_Position length,
 	int initStyle,
 	WordList *[],
 	Accessor &styler) {

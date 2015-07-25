@@ -21,8 +21,8 @@ public:
 	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, IDocument *pAccess);
 	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, IDocument *);
 
-	virtual void Lexer(unsigned int startPos, int length, int initStyle, IDocument *pAccess, Accessor &styler) = 0;
-	virtual void Folder(unsigned int startPos, int length, int initStyle, IDocument *pAccess, Accessor &styler) = 0;
+	virtual void Lexer(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess, Accessor &styler) = 0;
+	virtual void Folder(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess, Accessor &styler) = 0;
 };
 
 #ifdef SCI_NAMESPACE

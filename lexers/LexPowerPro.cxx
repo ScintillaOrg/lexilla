@@ -128,7 +128,7 @@ static bool IsFunction(Accessor &styler, unsigned int currentPos) {
 	return false;
 }
 
-static void ColourisePowerProDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+static void ColourisePowerProDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
                             Accessor &styler, bool caseSensitive) {
 
 	WordList &keywords  = *keywordlists[0];
@@ -360,7 +360,7 @@ static void ColourisePowerProDoc(unsigned int startPos, int length, int initStyl
 	sc.Complete();
 }
 
-static void FoldPowerProDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler)
+static void FoldPowerProDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[], Accessor &styler)
 {
 	//define the character sets
 	CharacterSet setWordStart(CharacterSet::setAlpha, "_@", 0x80, true);
@@ -620,7 +620,7 @@ static const char * const powerProWordLists[] = {
             0,
         };
 
-static void ColourisePowerProDocWrapper(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+static void ColourisePowerProDocWrapper(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
                                        Accessor &styler) {
 	ColourisePowerProDoc(startPos, length, initStyle, keywordlists, styler, false);
 }

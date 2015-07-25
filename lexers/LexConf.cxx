@@ -31,7 +31,7 @@
 using namespace Scintilla;
 #endif
 
-static void ColouriseConfDoc(unsigned int startPos, int length, int, WordList *keywordLists[], Accessor &styler)
+static void ColouriseConfDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *keywordLists[], Accessor &styler)
 {
 	int state = SCE_CONF_DEFAULT;
 	char chNext = styler[startPos];

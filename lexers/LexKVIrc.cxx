@@ -49,7 +49,7 @@ static inline bool IsAWordStart(int ch) {
 
 /* Interface function called by Scintilla to request some text to be
  syntax highlighted */
-static void ColouriseKVIrcDoc(unsigned int startPos, int length,
+static void ColouriseKVIrcDoc(Sci_PositionU startPos, Sci_Position length,
                               int initStyle, WordList *keywordlists[],
                               Accessor &styler)
 {
@@ -355,7 +355,7 @@ static void ColouriseKVIrcDoc(unsigned int startPos, int length,
     sc.Complete();
 }
 
-static void FoldKVIrcDoc(unsigned int startPos, int length, int /*initStyle - unused*/,
+static void FoldKVIrcDoc(Sci_PositionU startPos, Sci_Position length, int /*initStyle - unused*/,
                       WordList *[], Accessor &styler)
 {
     /* Based on CMake's folder */

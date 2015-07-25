@@ -80,7 +80,7 @@ static bool followsReturnKeyword(StyleContext &sc, Accessor &styler) {
 	return !*s;
 }
 
-static void ColouriseCoffeeScriptDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+static void ColouriseCoffeeScriptDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
                             Accessor &styler) {
 
 	WordList &keywords = *keywordlists[0];
@@ -281,7 +281,7 @@ static bool IsCommentLine(int line, Accessor &styler) {
 	return false;
 }
 
-static void FoldCoffeeScriptDoc(unsigned int startPos, int length, int,
+static void FoldCoffeeScriptDoc(Sci_PositionU startPos, Sci_Position length, int,
 				WordList *[], Accessor &styler) {
 	// A simplified version of FoldPyDoc
 	const int maxPos = startPos + length;

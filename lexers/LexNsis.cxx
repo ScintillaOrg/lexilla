@@ -280,7 +280,7 @@ static int classifyWordNsis(unsigned int start, unsigned int end, WordList *keyw
 	return SCE_NSIS_DEFAULT;
 }
 
-static void ColouriseNsisDoc(unsigned int startPos, int length, int, WordList *keywordLists[], Accessor &styler)
+static void ColouriseNsisDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *keywordLists[], Accessor &styler)
 {
 	int state = SCE_NSIS_DEFAULT;
   if( startPos > 0 )
@@ -552,7 +552,7 @@ static void ColouriseNsisDoc(unsigned int startPos, int length, int, WordList *k
 	styler.ColourTo(nLengthDoc-1,state);
 }
 
-static void FoldNsisDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler)
+static void FoldNsisDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[], Accessor &styler)
 {
 	// No folding enabled, no reason to continue...
 	if( styler.GetPropertyInt("fold") == 0 )

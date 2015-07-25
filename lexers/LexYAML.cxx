@@ -168,7 +168,7 @@ static void ColouriseYAMLLine(
 	styler.ColourTo(endPos, SCE_YAML_DEFAULT);
 }
 
-static void ColouriseYAMLDoc(unsigned int startPos, int length, int, WordList *keywordLists[], Accessor &styler) {
+static void ColouriseYAMLDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *keywordLists[], Accessor &styler) {
 	char lineBuffer[1024] = "";
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
@@ -201,7 +201,7 @@ static bool IsCommentLine(int line, Accessor &styler) {
 	return false;
 }
 
-static void FoldYAMLDoc(unsigned int startPos, int length, int /*initStyle - unused*/,
+static void FoldYAMLDoc(Sci_PositionU startPos, Sci_Position length, int /*initStyle - unused*/,
                       WordList *[], Accessor &styler) {
 	const int maxPos = startPos + length;
 	const int maxLines = styler.GetLine(maxPos - 1);             // Requested last line

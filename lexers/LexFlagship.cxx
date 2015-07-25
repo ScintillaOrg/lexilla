@@ -37,7 +37,7 @@ static inline bool IsAWordChar(int ch)
 				(isalnum(ch) || ch == '_');
 }
 
-static void ColouriseFlagShipDoc(unsigned int startPos, int length, int initStyle,
+static void ColouriseFlagShipDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                                  WordList *keywordlists[], Accessor &styler)
 {
 
@@ -302,7 +302,7 @@ static void ColouriseFlagShipDoc(unsigned int startPos, int length, int initStyl
 	sc.Complete();
 }
 
-static void FoldFlagShipDoc(unsigned int startPos, int length, int,
+static void FoldFlagShipDoc(Sci_PositionU startPos, Sci_Position length, int,
 									WordList *[], Accessor &styler)
 {
 

@@ -37,8 +37,8 @@ static void GetRange(unsigned int start,
 	s[i] = '\0';
 }
 
-static void ColourisePlmDoc(unsigned int startPos,
-                            int length,
+static void ColourisePlmDoc(Sci_PositionU startPos,
+                            Sci_Position length,
                             int initStyle,
                             WordList *keywordlists[],
                             Accessor &styler)
@@ -125,8 +125,8 @@ static void ColourisePlmDoc(unsigned int startPos,
 	styler.ColourTo(endPos - 1, state);
 }
 
-static void FoldPlmDoc(unsigned int startPos,
-                       int length,
+static void FoldPlmDoc(Sci_PositionU startPos,
+                       Sci_Position length,
                        int initStyle,
                        WordList *[],
                        Accessor &styler)

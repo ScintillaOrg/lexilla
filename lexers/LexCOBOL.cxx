@@ -142,7 +142,7 @@ static int classifyWordCOBOL(unsigned int start, unsigned int end, /*WordList &k
     return ret;
 }
 
-static void ColouriseCOBOLDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+static void ColouriseCOBOLDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
     Accessor &styler) {
 
     styler.StartAt(startPos);
@@ -309,7 +309,7 @@ static void ColouriseCOBOLDoc(unsigned int startPos, int length, int initStyle, 
     ColourTo(styler, lengthDoc - 1, state);
 }
 
-static void FoldCOBOLDoc(unsigned int startPos, int length, int, WordList *[],
+static void FoldCOBOLDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[],
                             Accessor &styler) {
     bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
     unsigned int endPos = startPos + length;

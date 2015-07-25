@@ -53,8 +53,8 @@ static inline bool IsANumberChar(int ch) {
 }
 
 static void ColourisePovDoc(
-	unsigned int startPos,
-	int length,
+	Sci_PositionU startPos,
+	Sci_Position length,
 	int initStyle,
 	WordList *keywordlists[],
     Accessor &styler) {
@@ -226,8 +226,8 @@ static void ColourisePovDoc(
 }
 
 static void FoldPovDoc(
-	unsigned int startPos,
-	int length,
+	Sci_PositionU startPos,
+	Sci_Position length,
 	int initStyle,
 	WordList *[],
 	Accessor &styler) {

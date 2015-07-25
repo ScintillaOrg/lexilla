@@ -43,7 +43,7 @@ enum literalsAllowed { litNone = 0, litU = 1, litB = 2 };
 
 const int indicatorWhitespace = 1;
 
-bool IsPyComment(Accessor &styler, int pos, int len) {
+bool IsPyComment(Accessor &styler, Sci_Position pos, Sci_Position len) {
 	return len > 0 && styler[pos] == '#';
 }
 

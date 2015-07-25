@@ -162,7 +162,7 @@ static int classifyWordCmake(unsigned int start, unsigned int end, WordList *key
     return SCE_CMAKE_DEFAULT;
 }
 
-static void ColouriseCmakeDoc(unsigned int startPos, int length, int, WordList *keywordLists[], Accessor &styler)
+static void ColouriseCmakeDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *keywordLists[], Accessor &styler)
 {
     int state = SCE_CMAKE_DEFAULT;
     if ( startPos > 0 )
@@ -377,7 +377,7 @@ static void ColouriseCmakeDoc(unsigned int startPos, int length, int, WordList *
     styler.ColourTo(nLengthDoc-1,state);
 }
 
-static void FoldCmakeDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler)
+static void FoldCmakeDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[], Accessor &styler)
 {
     // No folding enabled, no reason to continue...
     if ( styler.GetPropertyInt("fold") == 0 )

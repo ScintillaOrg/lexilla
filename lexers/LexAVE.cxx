@@ -59,8 +59,8 @@ inline bool isAveOperator(char ch) {
 }
 
 static void ColouriseAveDoc(
-	unsigned int startPos,
-	int length,
+	Sci_PositionU startPos,
+	Sci_Position length,
 	int initStyle,
 	WordList *keywordlists[],
 	Accessor &styler) {
@@ -157,7 +157,7 @@ static void ColouriseAveDoc(
 	sc.Complete();
 }
 
-static void FoldAveDoc(unsigned int startPos, int length, int /* initStyle */, WordList *[],
+static void FoldAveDoc(Sci_PositionU startPos, Sci_Position length, int /* initStyle */, WordList *[],
                        Accessor &styler) {
 	unsigned int lengthDoc = startPos + length;
 	int visibleChars = 0;

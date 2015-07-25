@@ -34,8 +34,8 @@ using namespace Scintilla;
  */
 
 static void ColouriseDocument(
-    unsigned int startPos,
-    int length,
+    Sci_PositionU startPos,
+    Sci_Position length,
     int initStyle,
     WordList *keywordlists[],
     Accessor &styler);
@@ -136,8 +136,8 @@ static void ColouriseWord(StyleContext& sc, WordList& keywords, WordList& keywor
 // ColouriseDocument
 //
 static void ColouriseDocument(
-    unsigned int startPos,
-    int length,
+    Sci_PositionU startPos,
+    Sci_Position length,
     int initStyle,
     WordList *keywordlists[],
     Accessor &styler) {

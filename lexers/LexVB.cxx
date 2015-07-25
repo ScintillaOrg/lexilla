@@ -31,7 +31,7 @@ using namespace Scintilla;
 #define SCE_B_FILENUMBER SCE_B_DEFAULT+100
 
 
-static bool IsVBComment(Accessor &styler, int pos, int len) {
+static bool IsVBComment(Accessor &styler, Sci_Position pos, Sci_Position len) {
 	return len > 0 && styler[pos] == '\'';
 }
 
@@ -58,7 +58,7 @@ static inline bool IsANumberChar(int ch) {
              ch == '.' || ch == '-' || ch == '+');
 }
 
-static void ColouriseVBDoc(unsigned int startPos, int length, int initStyle,
+static void ColouriseVBDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                            WordList *keywordlists[], Accessor &styler, bool vbScriptSyntax) {
 
 	WordList &keywords = *keywordlists[0];
@@ -254,7 +254,7 @@ static void ColouriseVBDoc(unsigned int startPos, int length, int initStyle,
 	sc.Complete();
 }
 
-static void FoldVBDoc(unsigned int startPos, int length, int,
+static void FoldVBDoc(Sci_PositionU startPos, Sci_Position length, int,
 						   WordList *[], Accessor &styler) {
 	int endPos = startPos + length;
 
@@ -296,12 +296,12 @@ static void FoldVBDoc(unsigned int startPos, int length, int,
 	}
 }
 
-static void ColouriseVBNetDoc(unsigned int startPos, int length, int initStyle,
+static void ColouriseVBNetDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                            WordList *keywordlists[], Accessor &styler) {
 	ColouriseVBDoc(startPos, length, initStyle, keywordlists, styler, false);
 }
 
-static void ColouriseVBScriptDoc(unsigned int startPos, int length, int initStyle,
+static void ColouriseVBScriptDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                            WordList *keywordlists[], Accessor &styler) {
 	ColouriseVBDoc(startPos, length, initStyle, keywordlists, styler, true);
 }

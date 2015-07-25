@@ -80,7 +80,7 @@ static void ColourisePropsLine(
 	}
 }
 
-static void ColourisePropsDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler) {
+static void ColourisePropsDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[], Accessor &styler) {
 	char lineBuffer[1024];
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
@@ -110,7 +110,7 @@ static void ColourisePropsDoc(unsigned int startPos, int length, int, WordList *
 
 // adaption by ksc, using the "} else {" trick of 1.53
 // 030721
-static void FoldPropsDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler) {
+static void FoldPropsDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[], Accessor &styler) {
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 
 	unsigned int endPos = startPos + length;

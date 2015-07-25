@@ -42,8 +42,8 @@ static int LongDelimCheck(StyleContext &sc) {
 }
 
 static void ColouriseLuaDoc(
-	unsigned int startPos,
-	int length,
+	Sci_PositionU startPos,
+	Sci_Position length,
 	int initStyle,
 	WordList *keywordlists[],
 	Accessor &styler) {
@@ -347,7 +347,7 @@ static void ColouriseLuaDoc(
 	sc.Complete();
 }
 
-static void FoldLuaDoc(unsigned int startPos, int length, int /* initStyle */, WordList *[],
+static void FoldLuaDoc(Sci_PositionU startPos, Sci_Position length, int /* initStyle */, WordList *[],
                        Accessor &styler) {
 	unsigned int lengthDoc = startPos + length;
 	int visibleChars = 0;

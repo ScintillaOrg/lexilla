@@ -214,7 +214,7 @@ static void ClassifyPascalWord(WordList *keywordlists[], StyleContext &sc, int &
 	sc.SetState(SCE_PAS_DEFAULT);
 }
 
-static void ColourisePascalDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+static void ColourisePascalDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
 		Accessor &styler) {
 	bool bSmartHighlighting = styler.GetPropertyInt("lexer.pascal.smart.highlighting", 1) != 0;
 
@@ -516,7 +516,7 @@ static void ClassifyPascalWordFoldPoint(int &levelCurrent, int &lineFoldStateCur
 	}
 }
 
-static void FoldPascalDoc(unsigned int startPos, int length, int initStyle, WordList *[],
+static void FoldPascalDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *[],
 		Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool foldPreprocessor = styler.GetPropertyInt("fold.preprocessor") != 0;

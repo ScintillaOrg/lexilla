@@ -34,7 +34,7 @@ using namespace Scintilla;
 #endif
 
 void ColouriseSMLDoc(
-	unsigned int startPos, int length,
+	Sci_PositionU startPos, Sci_Position length,
 	int initStyle,
 	WordList *keywordlists[],
 	Accessor &styler)

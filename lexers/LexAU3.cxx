@@ -195,8 +195,8 @@ static bool IsContinuationLine(unsigned int szLine, Accessor &styler)
 
 //
 // syntax highlighting logic
-static void ColouriseAU3Doc(unsigned int startPos,
-							int length, int initStyle,
+static void ColouriseAU3Doc(Sci_PositionU startPos,
+							Sci_Position length, int initStyle,
 							WordList *keywordlists[],
 							Accessor &styler) {
 
@@ -674,7 +674,7 @@ static int GetStyleFirstWord(unsigned int szLine, Accessor &styler)
 
 
 //
-static void FoldAU3Doc(unsigned int startPos, int length, int, WordList *[], Accessor &styler)
+static void FoldAU3Doc(Sci_PositionU startPos, Sci_Position length, int, WordList *[], Accessor &styler)
 {
 	int endPos = startPos + length;
 	// get settings from the config files for folding comments and preprocessor lines

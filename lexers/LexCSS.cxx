@@ -73,7 +73,7 @@ inline int NestingLevelLookBehind(unsigned int startPos, Accessor &styler) {
 	return nestingLevel;
 }
 
-static void ColouriseCssDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[], Accessor &styler) {
+static void ColouriseCssDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[], Accessor &styler) {
 	WordList &css1Props = *keywordlists[0];
 	WordList &pseudoClasses = *keywordlists[1];
 	WordList &css2Props = *keywordlists[2];
@@ -502,7 +502,7 @@ static void ColouriseCssDoc(unsigned int startPos, int length, int initStyle, Wo
 	sc.Complete();
 }
 
-static void FoldCSSDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler) {
+static void FoldCSSDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[], Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	unsigned int endPos = startPos + length;

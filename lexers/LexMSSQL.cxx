@@ -101,7 +101,7 @@ static char classifyWordSQL(unsigned int start,
 	return chAttr;
 }
 
-static void ColouriseMSSQLDoc(unsigned int startPos, int length,
+static void ColouriseMSSQLDoc(Sci_PositionU startPos, Sci_Position length,
                               int initStyle, WordList *keywordlists[], Accessor &styler) {
 
 
@@ -277,7 +277,7 @@ static void ColouriseMSSQLDoc(unsigned int startPos, int length,
 	styler.ColourTo(lengthDoc - 1, state);
 }
 
-static void FoldMSSQLDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler) {
+static void FoldMSSQLDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[], Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	unsigned int endPos = startPos + length;

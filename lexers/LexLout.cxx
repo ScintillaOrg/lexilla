@@ -40,7 +40,7 @@ static inline bool IsAnOther(const int ch) {
 	ch == ']' || ch == '^' || ch == '`' || ch == '|' || ch == '~');
 }
 
-static void ColouriseLoutDoc(unsigned int startPos, int length, int initStyle,
+static void ColouriseLoutDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
 			     WordList *keywordlists[], Accessor &styler) {
 
 	WordList &keywords = *keywordlists[0];
@@ -140,7 +140,7 @@ static void ColouriseLoutDoc(unsigned int startPos, int length, int initStyle,
 	sc.Complete();
 }
 
-static void FoldLoutDoc(unsigned int startPos, int length, int, WordList *[],
+static void FoldLoutDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[],
                         Accessor &styler) {
 
 	unsigned int endPos = startPos + length;

@@ -174,7 +174,7 @@ inline bool GetNextWordUpper(Accessor &styler, unsigned int uiStartPos, int iLen
 }
 
 // Clarion Language Colouring Procedure
-static void ColouriseClarionDoc(unsigned int uiStartPos, int iLength, int iInitStyle, WordList *wlKeywords[], Accessor &accStyler, bool bCaseSensitive) {
+static void ColouriseClarionDoc(Sci_PositionU uiStartPos, Sci_Position iLength, int iInitStyle, WordList *wlKeywords[], Accessor &accStyler, bool bCaseSensitive) {
 
 	int iParenthesesLevel = 0;		// Parenthese Level
 	int iColumn1Label = false;		// Label starts in Column 1
@@ -521,13 +521,13 @@ static void ColouriseClarionDoc(unsigned int uiStartPos, int iLength, int iInitS
 }
 
 // Clarion Language Case Sensitive Colouring Procedure
-static void ColouriseClarionDocSensitive(unsigned int uiStartPos, int iLength, int iInitStyle, WordList *wlKeywords[], Accessor &accStyler) {
+static void ColouriseClarionDocSensitive(Sci_PositionU uiStartPos, Sci_Position iLength, int iInitStyle, WordList *wlKeywords[], Accessor &accStyler) {
 
 	ColouriseClarionDoc(uiStartPos, iLength, iInitStyle, wlKeywords, accStyler, true);
 }
 
 // Clarion Language Case Insensitive Colouring Procedure
-static void ColouriseClarionDocInsensitive(unsigned int uiStartPos, int iLength, int iInitStyle, WordList *wlKeywords[], Accessor &accStyler) {
+static void ColouriseClarionDocInsensitive(Sci_PositionU uiStartPos, Sci_Position iLength, int iInitStyle, WordList *wlKeywords[], Accessor &accStyler) {
 
 	ColouriseClarionDoc(uiStartPos, iLength, iInitStyle, wlKeywords, accStyler, false);
 }
@@ -599,7 +599,7 @@ static int ClassifyClarionFoldPoint(int iLevel, const char* szString) {
 }
 
 // Clarion Language Folding Procedure
-static void FoldClarionDoc(unsigned int uiStartPos, int iLength, int iInitStyle, WordList *[], Accessor &accStyler) {
+static void FoldClarionDoc(Sci_PositionU uiStartPos, Sci_Position iLength, int iInitStyle, WordList *[], Accessor &accStyler) {
 
 	unsigned int uiEndPos = uiStartPos + iLength;
 	int iLineCurrent = accStyler.GetLine(uiStartPos);

@@ -183,7 +183,7 @@ public:
 // ------------------------------------------------
 // Function colourising an excerpt of OScript code.
 
-static void ColouriseOScriptDoc(unsigned int startPos, int length,
+static void ColouriseOScriptDoc(Sci_PositionU startPos, Sci_Position length,
 								int initStyle, WordList *keywordlists[],
 								Accessor &styler) {
 	// I wonder how whole-line styles ended by EOLN can escape the resetting
@@ -451,7 +451,7 @@ static void UpdateKeywordFoldLevel(int &levelCurrent, unsigned int lastStart,
 // ------------------------------
 // Function folding OScript code.
 
-static void FoldOScriptDoc(unsigned int startPos, int length, int initStyle,
+static void FoldOScriptDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
 						   WordList *[], Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool foldPreprocessor = styler.GetPropertyInt("fold.preprocessor") != 0;

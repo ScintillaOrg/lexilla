@@ -45,7 +45,7 @@ static inline bool IsANumberChar(int ch) {
 	        ch == '.' || ch == '-' || ch == '+');
 }
 
-static void ColouriseTCLDoc(unsigned int startPos, int length, int , WordList *keywordlists[], Accessor &styler) {
+static void ColouriseTCLDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *keywordlists[], Accessor &styler) {
 #define  isComment(s) (s==SCE_TCL_COMMENT || s==SCE_TCL_COMMENTLINE || s==SCE_TCL_COMMENT_BOX || s==SCE_TCL_BLOCK_COMMENT)
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool commentLevel = false;

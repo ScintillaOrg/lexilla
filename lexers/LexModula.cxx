@@ -174,8 +174,8 @@ static inline bool checkKeyIdentOper(
 	return true;
 }
 
-static void FoldModulaDoc( unsigned int startPos,
-						 int length,
+static void FoldModulaDoc( Sci_PositionU startPos,
+						 Sci_Position length,
 						 int , WordList *[],
 						 Accessor &styler)
 {
@@ -325,8 +325,8 @@ static inline bool skipWhiteSpaces( StyleContext & sc ) {
 	return true;
 }
 
-static void ColouriseModulaDoc(	unsigned int startPos,
-									int length,
+static void ColouriseModulaDoc(	Sci_PositionU startPos,
+									Sci_Position length,
 									int initStyle,
 									WordList *wl[],
 									Accessor &styler ) {

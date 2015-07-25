@@ -35,7 +35,7 @@
 using namespace Scintilla;
 #endif
 
-static void ColourisePODoc(unsigned int startPos, int length, int initStyle, WordList *[], Accessor &styler) {
+static void ColourisePODoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *[], Accessor &styler) {
 	StyleContext sc(startPos, length, initStyle, styler);
 	bool escaped = false;
 	int curLine = styler.GetLine(startPos);
@@ -158,7 +158,7 @@ static int FindNextNonEmptyLineState(unsigned int startPos, Accessor &styler) {
 	return 0;
 }
 
-static void FoldPODoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler) {
+static void FoldPODoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[], Accessor &styler) {
 	if (! styler.GetPropertyInt("fold"))
 		return;
 	bool foldCompact = styler.GetPropertyInt("fold.compact") != 0;

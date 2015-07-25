@@ -401,7 +401,7 @@ ColorizeArg:
 	styler.ColourTo(endPos, SCE_TCMD_DEFAULT);
 }
 
-static void ColouriseTCMDDoc( unsigned int startPos, int length, int /*initStyle*/, WordList *keywordlists[], Accessor &styler )
+static void ColouriseTCMDDoc(Sci_PositionU startPos, Sci_Position length, int /*initStyle*/, WordList *keywordlists[], Accessor &styler)
 {
 	char lineBuffer[16384];
 
@@ -434,7 +434,7 @@ static void StrUpr(char *s) {
 }
 
 // Folding support (for DO, IFF, SWITCH, TEXT, and command groups)
-static void FoldTCMDDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler)
+static void FoldTCMDDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[], Accessor &styler)
 {
 	int line = styler.GetLine(startPos);
 	int level = styler.LevelAt(line);

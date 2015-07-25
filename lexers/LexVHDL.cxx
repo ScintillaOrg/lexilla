@@ -33,8 +33,8 @@ using namespace Scintilla;
 #endif
 
 static void ColouriseVHDLDoc(
-  unsigned int startPos,
-  int length,
+  Sci_PositionU startPos,
+  Sci_Position length,
   int initStyle,
   WordList *keywordlists[],
   Accessor &styler);
@@ -57,8 +57,8 @@ static inline bool IsABlank(unsigned int ch) {
 
 /***************************************/
 static void ColouriseVHDLDoc(
-  unsigned int startPos,
-  int length,
+  Sci_PositionU startPos,
+  Sci_Position length,
   int initStyle,
   WordList *keywordlists[],
   Accessor &styler)
@@ -207,8 +207,8 @@ static bool IsCommentStyle(char style)
 //=============================================================================
 // Folding the code
 static void FoldNoBoxVHDLDoc(
-  unsigned int startPos,
-  int length,
+  Sci_PositionU startPos,
+  Sci_Position length,
   int,
   Accessor &styler)
 {
@@ -510,7 +510,7 @@ static void FoldNoBoxVHDLDoc(
 }
 
 //=============================================================================
-static void FoldVHDLDoc(unsigned int startPos, int length, int initStyle, WordList *[],
+static void FoldVHDLDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *[],
                        Accessor &styler) {
   FoldNoBoxVHDLDoc(startPos, length, initStyle, styler);
 }

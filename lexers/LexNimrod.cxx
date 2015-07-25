@@ -179,7 +179,7 @@ static int scanNumber(Accessor &styler, int pos) {
 /* rewritten from scratch, because I couldn't get rid of the bugs...
    (A character based approach sucks!)
 */
-static void ColouriseNimrodDoc(unsigned int startPos, int length, int initStyle,
+static void ColouriseNimrodDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                                 WordList *keywordlists[], Accessor &styler) {
   int pos = startPos;
   int max = startPos + length;
@@ -283,7 +283,7 @@ static bool IsQuoteLine(int line, Accessor &styler) {
 }
 
 
-static void FoldNimrodDoc(unsigned int startPos, int length,
+static void FoldNimrodDoc(Sci_PositionU startPos, Sci_Position length,
                           int /*initStyle - unused*/,
                           WordList *[], Accessor &styler) {
 	const int maxPos = startPos + length;

@@ -96,7 +96,7 @@ static int opposite(int ch) {
 	return ch;
 }
 
-static void ColouriseBashDoc(unsigned int startPos, int length, int initStyle,
+static void ColouriseBashDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
 							 WordList *keywordlists[], Accessor &styler) {
 
 	WordList &keywords = *keywordlists[0];
@@ -765,7 +765,7 @@ static bool IsCommentLine(int line, Accessor &styler) {
 	return false;
 }
 
-static void FoldBashDoc(unsigned int startPos, int length, int, WordList *[],
+static void FoldBashDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[],
 						Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;

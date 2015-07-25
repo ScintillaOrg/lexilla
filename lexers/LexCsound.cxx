@@ -51,7 +51,7 @@ static inline bool IsCsoundOperator(char ch) {
 	return false;
 }
 
-static void ColouriseCsoundDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+static void ColouriseCsoundDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
 				Accessor &styler) {
 
 	WordList &opcode = *keywordlists[0];
@@ -150,7 +150,7 @@ static void ColouriseCsoundDoc(unsigned int startPos, int length, int initStyle,
 	sc.Complete();
 }
 
-static void FoldCsoundInstruments(unsigned int startPos, int length, int /* initStyle */, WordList *[],
+static void FoldCsoundInstruments(Sci_PositionU startPos, Sci_Position length, int /* initStyle */, WordList *[],
 		Accessor &styler) {
 	unsigned int lengthDoc = startPos + length;
 	int visibleChars = 0;

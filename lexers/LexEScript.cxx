@@ -37,7 +37,7 @@ static inline bool IsAWordStart(const int ch) {
 
 
 
-static void ColouriseESCRIPTDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+static void ColouriseESCRIPTDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
                             Accessor &styler) {
 
 	WordList &keywords = *keywordlists[0];
@@ -176,7 +176,7 @@ static bool IsStreamCommentStyle(int style) {
 	       style == SCE_ESCRIPT_COMMENTLINE;
 }
 
-static void FoldESCRIPTDoc(unsigned int startPos, int length, int initStyle, WordList *[], Accessor &styler) {
+static void FoldESCRIPTDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *[], Accessor &styler) {
 	//~ bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	// Do not know how to fold the comment at the moment.
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;

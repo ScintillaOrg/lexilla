@@ -119,8 +119,8 @@ static inline bool isMETAPOSTequal(int ch) {
 }
 
 static int CheckMETAPOSTInterface(
-    unsigned int startPos,
-    int length,
+    Sci_PositionU startPos,
+    Sci_Position length,
     Accessor &styler,
 	int defaultInterface) {
 
@@ -154,8 +154,8 @@ static int CheckMETAPOSTInterface(
 }
 
 static void ColouriseMETAPOSTDoc(
-    unsigned int startPos,
-    int length,
+    Sci_PositionU startPos,
+    Sci_Position length,
     int,
     WordList *keywordlists[],
     Accessor &styler) {
@@ -351,7 +351,7 @@ static int ParseMetapostWord(unsigned int pos, Accessor &styler, char *word)
   return length;
 }
 
-static void FoldMetapostDoc(unsigned int startPos, int length, int, WordList *keywordlists[], Accessor &styler)
+static void FoldMetapostDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *keywordlists[], Accessor &styler)
 {
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	unsigned int endPos = startPos+length;

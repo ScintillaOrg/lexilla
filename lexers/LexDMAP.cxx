@@ -38,7 +38,7 @@ static inline bool IsAWordStart(const int ch) {
     return (ch < 0x80) && (isalnum(ch));
 }
 /***************************************/
-static void ColouriseDMAPDoc(unsigned int startPos, int length, int initStyle,
+static void ColouriseDMAPDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
             WordList *keywordlists[], Accessor &styler) {
     WordList &keywords = *keywordlists[0];
     WordList &keywords2 = *keywordlists[1];
@@ -151,7 +151,7 @@ static int classifyFoldPointDMAP(const char* s, const char* prevWord) {
     return lev;
 }
 // Folding the code
-static void FoldDMAPDoc(unsigned int startPos, int length, int initStyle,
+static void FoldDMAPDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                            WordList *[], Accessor &styler) {
     //
     // bool foldComment = styler.GetPropertyInt("fold.comment") != 0;

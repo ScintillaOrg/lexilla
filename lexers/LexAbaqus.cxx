@@ -38,7 +38,7 @@ static inline bool IsASetChar(const int ch) {
 	return (ch < 0x80 && (isalnum(ch) || (ch == '_') || (ch == '.') || (ch == '-')));
 }
 
-static void ColouriseABAQUSDoc(unsigned int startPos, int length, int initStyle, WordList*[] /* *keywordlists[] */,
+static void ColouriseABAQUSDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList*[] /* *keywordlists[] */,
                             Accessor &styler) {
 	enum localState { KW_LINE_KW, KW_LINE_COMMA, KW_LINE_PAR, KW_LINE_EQ, KW_LINE_VAL, \
 					  DAT_LINE_VAL, DAT_LINE_COMMA,\
@@ -432,7 +432,7 @@ static void SafeSetLevel(int line, int level, Accessor &styler)
         styler.SetLevel(line, level) ;
 }
 
-static void FoldABAQUSDoc(unsigned int startPos, int length, int,
+static void FoldABAQUSDoc(Sci_PositionU startPos, Sci_Position length, int,
 WordList *[], Accessor &styler) {
     int startLine = styler.GetLine(startPos) ;
     int endLine   = styler.GetLine(startPos+length-1) ;

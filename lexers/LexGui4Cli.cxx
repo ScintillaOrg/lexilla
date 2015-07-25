@@ -119,7 +119,7 @@ static void colorFirstWord(WordList *keywordlists[], Accessor &styler,
 
 // Main colorizing function called by Scintilla
 static void
-ColouriseGui4CliDoc(unsigned int startPos, int length, int initStyle,
+ColouriseGui4CliDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                     WordList *keywordlists[], Accessor &styler)
 {
 	styler.StartAt(startPos);
@@ -243,7 +243,7 @@ ColouriseGui4CliDoc(unsigned int startPos, int length, int initStyle,
 }
 
 // Main folding function called by Scintilla - (based on props (.ini) files function)
-static void FoldGui4Cli(unsigned int startPos, int length, int,
+static void FoldGui4Cli(Sci_PositionU startPos, Sci_Position length, int,
 								WordList *[], Accessor &styler)
 {
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;

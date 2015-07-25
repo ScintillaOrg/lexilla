@@ -68,7 +68,7 @@ static inline bool IsBinaryStart(const int ch, const int ch2, const int ch3, con
 }
 
 
-static void ColouriseRebolDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[], Accessor &styler) {
+static void ColouriseRebolDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[], Accessor &styler) {
 
 	WordList &keywords = *keywordlists[0];
 	WordList &keywords2 = *keywordlists[1];
@@ -273,7 +273,7 @@ static void ColouriseRebolDoc(unsigned int startPos, int length, int initStyle, 
 }
 
 
-static void FoldRebolDoc(unsigned int startPos, int length, int /* initStyle */, WordList *[],
+static void FoldRebolDoc(Sci_PositionU startPos, Sci_Position length, int /* initStyle */, WordList *[],
                             Accessor &styler) {
 	unsigned int lengthDoc = startPos + length;
 	int visibleChars = 0;

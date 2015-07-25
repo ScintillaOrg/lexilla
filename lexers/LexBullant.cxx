@@ -58,7 +58,7 @@ static int classifyWordBullant(unsigned int start, unsigned int end, WordList &k
 	return lev;
 }
 
-static void ColouriseBullantDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+static void ColouriseBullantDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
 	Accessor &styler) {
 	WordList &keywords = *keywordlists[0];
 

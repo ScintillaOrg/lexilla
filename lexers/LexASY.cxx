@@ -23,7 +23,7 @@
 using namespace Scintilla;
 #endif
 
-static void ColouriseAsyDoc(unsigned int startPos, int length, int initStyle,
+static void ColouriseAsyDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
 		WordList *keywordlists[], Accessor &styler) {
 
 	WordList &keywords = *keywordlists[0];
@@ -186,7 +186,7 @@ static bool IsASYDrawingLine(int line, Accessor &styler) {
 	return false;
 }
 
-static void FoldAsyDoc(unsigned int startPos, int length, int initStyle,
+static void FoldAsyDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
 					   WordList *[], Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;

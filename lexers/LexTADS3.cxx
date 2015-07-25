@@ -513,7 +513,7 @@ static void ColouriseTADS3Number(StyleContext &sc) {
         sc.SetState(endState);
 }
 
-static void ColouriseTADS3Doc(unsigned int startPos, int length, int initStyle,
+static void ColouriseTADS3Doc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                                                            WordList *keywordlists[], Accessor &styler) {
         int visibleChars = 0;
         int bracketLevel = 0;
@@ -728,7 +728,7 @@ static char peekAhead(unsigned int startPos, unsigned int endPos,
         return ' ';
 }
 
-static void FoldTADS3Doc(unsigned int startPos, int length, int initStyle,
+static void FoldTADS3Doc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                             WordList *[], Accessor &styler) {
         unsigned int endPos = startPos + length;
         int lineCurrent = styler.GetLine(startPos);

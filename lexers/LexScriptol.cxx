@@ -109,7 +109,7 @@ static int GetSolStringState(Accessor &styler, int i, int *nextIndex)
 }
 
 
-static void ColouriseSolDoc(unsigned int startPos, int length, int initStyle,
+static void ColouriseSolDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
                             WordList *keywordlists[], Accessor &styler)
  {
 
@@ -317,7 +317,7 @@ static void ColouriseSolDoc(unsigned int startPos, int length, int initStyle,
 	}
 }
 
-static void FoldSolDoc(unsigned int startPos, int length, int initStyle,
+static void FoldSolDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
 						   WordList *[], Accessor &styler)
  {
 	int lengthDoc = startPos + length;

@@ -48,7 +48,7 @@ static void GetRange(unsigned int start, unsigned int end, Accessor &styler, cha
 	s[i] = '\0';
 }
 
-static void ColouriseGAPDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[], Accessor &styler) {
+static void ColouriseGAPDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[], Accessor &styler) {
 
 	WordList &keywords1 = *keywordlists[0];
 	WordList &keywords2 = *keywordlists[1];
@@ -197,7 +197,7 @@ static int ClassifyFoldPointGAP(const char* s) {
 	return level;
 }
 
-static void FoldGAPDoc( unsigned int startPos, int length, int initStyle,   WordList** , Accessor &styler) {
+static void FoldGAPDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList**, Accessor &styler) {
 	unsigned int endPos = startPos + length;
 	int visibleChars = 0;
 	int lineCurrent = styler.GetLine(startPos);

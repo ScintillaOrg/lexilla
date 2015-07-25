@@ -43,7 +43,7 @@ static inline bool IsAnOperator(char ch) {
 	return false;
 }
 
-static void ColouriseAPDLDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+static void ColouriseAPDLDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
                             Accessor &styler) {
 
 	int stringStart = ' ';
@@ -184,7 +184,7 @@ static int CheckAPDLFoldPoint(char const *token, int &level) {
 	return 0;
 }
 
-static void FoldAPDLDoc(unsigned int startPos, int length, int,
+static void FoldAPDLDoc(Sci_PositionU startPos, Sci_Position length, int,
 	WordList *[], Accessor &styler) {
 
 	int line = styler.GetLine(startPos);

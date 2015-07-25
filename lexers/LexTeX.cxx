@@ -122,8 +122,8 @@ static inline bool isTeXseven(int ch) {
 // Interface determination
 
 static int CheckTeXInterface(
-    unsigned int startPos,
-    int length,
+    Sci_PositionU startPos,
+    Sci_Position length,
     Accessor &styler,
 	int defaultInterface) {
 
@@ -170,8 +170,8 @@ static int CheckTeXInterface(
 }
 
 static void ColouriseTeXDoc(
-    unsigned int startPos,
-    int length,
+    Sci_PositionU startPos,
+    Sci_Position length,
     int,
     WordList *keywordlists[],
     Accessor &styler) {
@@ -380,7 +380,7 @@ static bool IsTeXCommentLine(int line, Accessor &styler) {
 
 // FoldTeXDoc: borrowed from VisualTeX with modifications
 
-static void FoldTexDoc(unsigned int startPos, int length, int, WordList *[], Accessor &styler)
+static void FoldTexDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[], Accessor &styler)
 {
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	unsigned int endPos = startPos+length;

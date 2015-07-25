@@ -74,7 +74,7 @@ static void classifyWordLisp(unsigned int start, unsigned int end, WordList &key
 }
 
 
-static void ColouriseLispDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
+static void ColouriseLispDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
                             Accessor &styler) {
 
 	WordList &keywords = *keywordlists[0];
@@ -233,7 +233,7 @@ static void ColouriseLispDoc(unsigned int startPos, int length, int initStyle, W
 	styler.ColourTo(lengthDoc - 1, state);
 }
 
-static void FoldLispDoc(unsigned int startPos, int length, int /* initStyle */, WordList *[],
+static void FoldLispDoc(Sci_PositionU startPos, Sci_Position length, int /* initStyle */, WordList *[],
                             Accessor &styler) {
 	unsigned int lengthDoc = startPos + length;
 	int visibleChars = 0;
