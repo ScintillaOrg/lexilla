@@ -7,6 +7,7 @@
 
 #include "Platform.h"
 
+#include "Position.h"
 #include "SplitVector.h"
 
 #include "catch.hpp"

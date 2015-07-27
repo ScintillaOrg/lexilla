@@ -13,6 +13,7 @@
 #include "ILexer.h"
 #include "Scintilla.h"
 
+#include "Position.h"
 #include "SplitVector.h"
 #include "Partitioning.h"
 #include "RunStyles.h"

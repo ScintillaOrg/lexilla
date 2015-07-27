@@ -15,6 +15,7 @@
 
 #include "Scintilla.h"
 
+#include "Position.h"
 #include "Selection.h"
 
 #ifdef SCI_NAMESPACE
