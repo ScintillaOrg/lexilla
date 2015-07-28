@@ -94,11 +94,11 @@ void LexerModule::Lex(Sci_PositionU startPos, Sci_Position lengthDoc, int initSt
 void LexerModule::Fold(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle,
 	  WordList *keywordlists[], Accessor &styler) const {
 	if (fnFolder) {
-		int lineCurrent = styler.GetLine(startPos);
+		Sci_Position lineCurrent = styler.GetLine(startPos);
 		// Move back one line in case deletion wrecked current line fold state
 		if (lineCurrent > 0) {
 			lineCurrent--;
-			int newStartPos = styler.LineStart(lineCurrent);
+			Sci_Position newStartPos = styler.LineStart(lineCurrent);
 			lengthDoc += startPos - newStartPos;
 			startPos = newStartPos;
 			initStyle = 0;
