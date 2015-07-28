@@ -568,6 +568,7 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 
 		// Set candidate box position for Qt::ImMicroFocus.
 		preeditPos = sqt->CurrentPosition();
+		sqt->EnsureCaretVisible();
 		updateMicroFocus();
 	}
 	sqt->ShowCaretAtCurrentPosition();

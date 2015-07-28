@@ -2584,6 +2584,7 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 			MoveImeCarets( - (imeCharPos[preeditStr.uniStrLen]) + imeCharPos[preeditStr.cursor_pos]);
 		}
 
+		EnsureCaretVisible();
 		SetCandidateWindowPos();
 		ShowCaretAtCurrentPosition();
 	} catch (...) {
