@@ -229,7 +229,7 @@ Sci_Position SCI_METHOD LexerD::WordListSet(int n, const char *wl) {
 		wordListN = &keywords7;
 		break;
 	}
-	int firstModification = -1;
+	Sci_Position firstModification = -1;
 	if (wordListN) {
 		WordList wlNew;
 		wlNew.Set(wl);
@@ -248,7 +248,7 @@ void SCI_METHOD LexerD::Lex(Sci_PositionU startPos, Sci_Position length, int ini
 
 	StyleContext sc(startPos, length, initStyle, styler);
 
-	int curLine = styler.GetLine(startPos);
+	Sci_Position curLine = styler.GetLine(startPos);
 	int curNcLevel = curLine > 0? styler.GetLineState(curLine-1): 0;
 	bool numFloat = false; // Float literals have '+' and '-' signs
 	bool numHex = false;
@@ -478,9 +478,9 @@ void SCI_METHOD LexerD::Fold(Sci_PositionU startPos, Sci_Position length, int in
 
 	LexAccessor styler(pAccess);
 
-	unsigned int endPos = startPos + length;
+	Sci_PositionU endPos = startPos + length;
 	int visibleChars = 0;
-	int lineCurrent = styler.GetLine(startPos);
+	Sci_Position lineCurrent = styler.GetLine(startPos);
 	int levelCurrent = SC_FOLDLEVELBASE;
 	if (lineCurrent > 0)
 		levelCurrent = styler.LevelAt(lineCurrent-1) >> 16;
@@ -491,7 +491,7 @@ void SCI_METHOD LexerD::Fold(Sci_PositionU startPos, Sci_Position length, int in
 	int style = initStyle;
 	bool foldAtElse = options.foldAtElseInt >= 0 ? options.foldAtElseInt != 0 : options.foldAtElse;
 	const bool userDefinedFoldMarkers = !options.foldExplicitStart.empty() && !options.foldExplicitEnd.empty();
-	for (unsigned int i = startPos; i < endPos; i++) {
+	for (Sci_PositionU i = startPos; i < endPos; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 		int stylePrev = style;

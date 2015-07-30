@@ -35,7 +35,7 @@ static bool IsAlphabetic(int ch) {
 	return IsASCII(ch) && isalpha(ch);
 }
 
-static inline bool AtEOL(Accessor &styler, unsigned int i) {
+static inline bool AtEOL(Accessor &styler, Sci_PositionU i) {
 	return (styler[i] == '\n') ||
 	       ((styler[i] == '\r') && (styler.SafeGetCharAt(i + 1) != '\n'));
 }
@@ -54,17 +54,17 @@ static bool IsBSeparator(char ch) {
 
 static void ColouriseBatchLine(
     char *lineBuffer,
-    unsigned int lengthLine,
-    unsigned int startLine,
-    unsigned int endPos,
+    Sci_PositionU lengthLine,
+    Sci_PositionU startLine,
+    Sci_PositionU endPos,
     WordList *keywordlists[],
     Accessor &styler) {
 
-	unsigned int offset = 0;	// Line Buffer Offset
-	unsigned int cmdLoc;		// External Command / Program Location
+	Sci_PositionU offset = 0;	// Line Buffer Offset
+	Sci_PositionU cmdLoc;		// External Command / Program Location
 	char wordBuffer[81];		// Word Buffer - large to catch long paths
-	unsigned int wbl;		// Word Buffer Length
-	unsigned int wbo;		// Word Buffer Offset - also Special Keyword Buffer Length
+	Sci_PositionU wbl;		// Word Buffer Length
+	Sci_PositionU wbo;		// Word Buffer Offset - also Special Keyword Buffer Length
 	WordList &keywords = *keywordlists[0];      // Internal Commands
 	WordList &keywords2 = *keywordlists[1];     // External Commands (optional)
 
@@ -219,7 +219,7 @@ static void ColouriseBatchLine(
 			//     Affected Commands are in Length range 2-6
 			//     Good that ERRORLEVEL, EXIST, CALL, DO, LOADHIGH, and LH are unaffected
 			sKeywordFound = false;
-			for (unsigned int keywordLength = 2; keywordLength < wbl && keywordLength < 7 && !sKeywordFound; keywordLength++) {
+			for (Sci_PositionU keywordLength = 2; keywordLength < wbl && keywordLength < 7 && !sKeywordFound; keywordLength++) {
 				wbo = 0;
 				// Copy Keyword Length from Word Buffer into Special Keyword Buffer
 				for (; wbo < keywordLength; wbo++) {
@@ -472,9 +472,9 @@ static void ColouriseBatchDoc(
 
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
-	unsigned int linePos = 0;
-	unsigned int startLine = startPos;
-	for (unsigned int i = startPos; i < startPos + length; i++) {
+	Sci_PositionU linePos = 0;
+	Sci_PositionU startLine = startPos;
+	for (Sci_PositionU i = startPos; i < startPos + length; i++) {
 		lineBuffer[linePos++] = styler[i];
 		if (AtEOL(styler, i) || (linePos >= sizeof(lineBuffer) - 1)) {
 			// End of line (or of line buffer) met, colourise it

@@ -181,19 +181,19 @@ static void FoldESCRIPTDoc(Sci_PositionU startPos, Sci_Position length, int init
 	// Do not know how to fold the comment at the moment.
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
         bool foldComment = true;
-	unsigned int endPos = startPos + length;
+	Sci_PositionU endPos = startPos + length;
 	int visibleChars = 0;
-	int lineCurrent = styler.GetLine(startPos);
+	Sci_Position lineCurrent = styler.GetLine(startPos);
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
 	char chNext = styler[startPos];
 	int styleNext = styler.StyleAt(startPos);
 	int style = initStyle;
 
-	int lastStart = 0;
+	Sci_Position lastStart = 0;
 	char prevWord[32] = "";
 
-	for (unsigned int i = startPos; i < endPos; i++) {
+	for (Sci_PositionU i = startPos; i < endPos; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 		int stylePrev = style;
@@ -231,7 +231,7 @@ static void FoldESCRIPTDoc(Sci_PositionU startPos, Sci_Position length, int init
 		if (style == SCE_ESCRIPT_WORD3) {
 			if(iswordchar(ch) && !iswordchar(chNext)) {
 				char s[32];
-				unsigned int j;
+				Sci_PositionU j;
 				for(j = 0; ( j < 31 ) && ( j < i-lastStart+1 ); j++) {
 					s[j] = static_cast<char>(tolower(styler[lastStart + j]));
 				}

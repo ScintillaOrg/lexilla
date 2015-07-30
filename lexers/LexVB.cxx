@@ -256,10 +256,10 @@ static void ColouriseVBDoc(Sci_PositionU startPos, Sci_Position length, int init
 
 static void FoldVBDoc(Sci_PositionU startPos, Sci_Position length, int,
 						   WordList *[], Accessor &styler) {
-	int endPos = startPos + length;
+	Sci_Position endPos = startPos + length;
 
 	// Backtrack to previous line in case need to fix its fold status
-	int lineCurrent = styler.GetLine(startPos);
+	Sci_Position lineCurrent = styler.GetLine(startPos);
 	if (startPos > 0) {
 		if (lineCurrent > 0) {
 			lineCurrent--;
@@ -269,7 +269,7 @@ static void FoldVBDoc(Sci_PositionU startPos, Sci_Position length, int,
 	int spaceFlags = 0;
 	int indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, IsVBComment);
 	char chNext = styler[startPos];
-	for (int i = startPos; i < endPos; i++) {
+	for (Sci_Position i = startPos; i < endPos; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 

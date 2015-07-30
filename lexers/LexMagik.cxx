@@ -141,7 +141,7 @@ static void ColouriseMagikDoc(Sci_PositionU startPos, Sci_Position length, int i
 	                char keywordChar = static_cast<char>(
                         tolower(styler.SafeGetCharAt(
                             scanPosition +
-                                static_cast<int>(sc.currentPos+1), ' ')));
+                                static_cast<Sci_Position>(sc.currentPos+1), ' ')));
                     if(IsAlpha(keywordChar)) {
                         keyword[scanPosition] = keywordChar;
                     } else {
@@ -365,18 +365,18 @@ static void FoldMagikDoc(Sci_PositionU startPos, Sci_Position length, int,
     bool compact = styler.GetPropertyInt("fold.compact") != 0;
 
     WordList &foldingElements = *keywordslists[5];
-    int endPos = startPos + length;
-    int line = styler.GetLine(startPos);
+    Sci_Position endPos = startPos + length;
+    Sci_Position line = styler.GetLine(startPos);
     int level = styler.LevelAt(line) & SC_FOLDLEVELNUMBERMASK;
     int flags = styler.LevelAt(line) & ~SC_FOLDLEVELNUMBERMASK;
 
     for(
-        int currentPos = startPos;
+        Sci_Position currentPos = startPos;
         currentPos < endPos;
         currentPos++) {
             char currentState = styler.StyleAt(currentPos);
             char c = styler.SafeGetCharAt(currentPos, ' ');
-            int prevLine = styler.GetLine(currentPos - 1);
+            Sci_Position prevLine = styler.GetLine(currentPos - 1);
             line = styler.GetLine(currentPos);
 
             // Default situation

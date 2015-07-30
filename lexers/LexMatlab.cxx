@@ -58,7 +58,7 @@ static bool IsOctaveComment(Accessor &styler, Sci_Position pos, Sci_Position len
 }
 
 static void ColouriseMatlabOctaveDoc(
-	Sci_PositionU startPos, Sci_Position length, int initStyle,
+            Sci_PositionU startPos, Sci_Position length, int initStyle,
             WordList *keywordlists[], Accessor &styler,
             bool (*IsCommentChar)(int),
             bool ismatlab) {
@@ -77,7 +77,7 @@ static void ColouriseMatlabOctaveDoc(
 	int column = 0;
 
         // use the line state of each line to store the block comment depth
-	int curLine = styler.GetLine(startPos);
+	Sci_Position curLine = styler.GetLine(startPos);
         int commentDepth = curLine > 0 ? styler.GetLineState(curLine-1) : 0;
 
 
@@ -247,12 +247,12 @@ static void ColouriseOctaveDoc(Sci_PositionU startPos, Sci_Position length, int 
 
 static void FoldMatlabOctaveDoc(Sci_PositionU startPos, Sci_Position length, int,
                                 WordList *[], Accessor &styler,
-                                bool(*IsComment)(Accessor&, Sci_Position, Sci_Position)) {
+                                bool (*IsComment)(Accessor&, Sci_Position, Sci_Position)) {
 
-	int endPos = startPos + length;
+	Sci_Position endPos = startPos + length;
 
 	// Backtrack to previous line in case need to fix its fold status
-	int lineCurrent = styler.GetLine(startPos);
+	Sci_Position lineCurrent = styler.GetLine(startPos);
 	if (startPos > 0) {
 		if (lineCurrent > 0) {
 			lineCurrent--;
@@ -262,7 +262,7 @@ static void FoldMatlabOctaveDoc(Sci_PositionU startPos, Sci_Position length, int
 	int spaceFlags = 0;
 	int indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, IsComment);
 	char chNext = styler[startPos];
-	for (int i = startPos; i < endPos; i++) {
+	for (Sci_Position i = startPos; i < endPos; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 

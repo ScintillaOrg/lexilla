@@ -57,10 +57,10 @@ static inline bool IsLineEndChar(unsigned char ch) {
 			|| ch == 0x0d;	//CR
 }
 
-static bool IsContinuationLine(unsigned int szLine, Accessor &styler)
+static bool IsContinuationLine(Sci_PositionU szLine, Accessor &styler)
 {
-	int startPos = styler.LineStart(szLine);
-	int endPos = styler.LineStart(szLine + 1) - 2;
+	Sci_Position startPos = styler.LineStart(szLine);
+	Sci_Position endPos = styler.LineStart(szLine + 1) - 2;
 	while (startPos < endPos)
 	{
 		char stylech = styler.StyleAt(startPos);
@@ -78,10 +78,10 @@ static bool IsContinuationLine(unsigned int szLine, Accessor &styler)
 
 // Routine to find first none space on the current line and return its Style
 // needed for comment lines not starting on pos 1
-static int GetStyleFirstWord(int szLine, Accessor &styler)
+static int GetStyleFirstWord(Sci_Position szLine, Accessor &styler)
 {
-	int startPos = styler.LineStart(szLine);
-	int endPos = styler.LineStart(szLine + 1) - 1;
+	Sci_Position startPos = styler.LineStart(szLine);
+	Sci_Position endPos = styler.LineStart(szLine + 1) - 1;
 	char ch = styler.SafeGetCharAt(startPos);
 
 	while (ch > 0 && isspacechar(ch) && startPos < endPos)
@@ -97,15 +97,15 @@ static int GetStyleFirstWord(int szLine, Accessor &styler)
 //note:
 //		sample line (without quotes): "\tfunction asdf()
 //		currentPos will be the position of 'a'
-static bool IsFunction(Accessor &styler, unsigned int currentPos) {
+static bool IsFunction(Accessor &styler, Sci_PositionU currentPos) {
 
 	const char function[10] = "function "; //10 includes \0
 	unsigned int numberOfCharacters = sizeof(function) - 1;
-	unsigned int position = currentPos - numberOfCharacters;
+	Sci_PositionU position = currentPos - numberOfCharacters;
 
 	//compare each character with the letters in the function array
 	//return false if ALL don't match
-	for (unsigned int i = 0; i < numberOfCharacters; i++) {
+	for (Sci_PositionU i = 0; i < numberOfCharacters; i++) {
 		char c = styler.SafeGetCharAt(position++);
 		if (c != function[i])
 			return false;
@@ -114,7 +114,7 @@ static bool IsFunction(Accessor &styler, unsigned int currentPos) {
 	//make sure that there are only spaces (or tabs) between the beginning
 	//of the line and the function declaration
 	position = currentPos - numberOfCharacters - 1; 		//-1 to move to char before 'function'
-	for (unsigned int j = 0; j < 16; j++) {					//check up to 16 preceeding characters
+	for (Sci_PositionU j = 0; j < 16; j++) {					//check up to 16 preceeding characters
 		char c = styler.SafeGetCharAt(position--, '\0');	//if can't read char, return NUL (past beginning of document)
 		if (c <= 0)	//reached beginning of document
 			return true;
@@ -369,8 +369,8 @@ static void FoldPowerProDoc(Sci_PositionU startPos, Sci_Position length, int, Wo
 	//used to tell if we're recursively folding the whole document, or just a small piece (ie: if statement or 1 function)
 	bool isFoldingAll = true;
 
-	int endPos = startPos + length;
-	int lastLine = styler.GetLine(styler.Length()); //used to help fold the last line correctly
+	Sci_Position endPos = startPos + length;
+	Sci_Position lastLine = styler.GetLine(styler.Length()); //used to help fold the last line correctly
 
 	// get settings from the config files for folding comments and preprocessor lines
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
@@ -378,7 +378,7 @@ static void FoldPowerProDoc(Sci_PositionU startPos, Sci_Position length, int, Wo
 	bool foldCompact = true;
 
 	// Backtrack to previous line in case need to fix its fold status
-	int lineCurrent = styler.GetLine(startPos);
+	Sci_Position lineCurrent = styler.GetLine(startPos);
 	if (startPos > 0) {
 		isFoldingAll = false;
 		if (lineCurrent > 0) {
@@ -427,7 +427,7 @@ static void FoldPowerProDoc(Sci_PositionU startPos, Sci_Position length, int, Wo
 	char chPrevPrev = '\0';
 	char chPrevPrevPrev = '\0';
 
-	for (int i = startPos; i < endPos; i++) {
+	for (Sci_Position i = startPos; i < endPos; i++) {
 
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);

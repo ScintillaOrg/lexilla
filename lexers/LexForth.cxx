@@ -151,7 +151,7 @@ static void ColouriseForthDoc(Sci_PositionU startPos, Sci_Position length, int i
 	sc.Complete();
 }
 
-static void FoldForthDoc(unsigned int, int, int, WordList *[],
+static void FoldForthDoc(Sci_PositionU, Sci_Position, int, WordList *[],
 						Accessor &) {
 }
 

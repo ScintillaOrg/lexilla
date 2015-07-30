@@ -27,7 +27,7 @@
 using namespace Scintilla;
 #endif
 
-static inline bool AtEOL(Accessor &styler, unsigned int i) {
+static inline bool AtEOL(Accessor &styler, Sci_PositionU i) {
 	return (styler[i] == '\n') ||
 	       ((styler[i] == '\r') && (styler.SafeGetCharAt(i + 1) != '\n'));
 }
@@ -36,7 +36,7 @@ static inline bool AtEOL(Accessor &styler, unsigned int i) {
 // Note that ColouriseDiffLine analyzes only the first DIFF_BUFFER_START_SIZE
 // characters of each line to classify the line.
 
-static void ColouriseDiffLine(char *lineBuffer, int endLine, Accessor &styler) {
+static void ColouriseDiffLine(char *lineBuffer, Sci_Position endLine, Accessor &styler) {
 	// It is needed to remember the current state to recognize starting
 	// comment lines before the first "diff " or "--- ". If a real
 	// difference starts then each line starting with ' ' is a whitespace
@@ -95,8 +95,8 @@ static void ColouriseDiffDoc(Sci_PositionU startPos, Sci_Position length, int, W
 	char lineBuffer[DIFF_BUFFER_START_SIZE] = "";
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
-	unsigned int linePos = 0;
-	for (unsigned int i = startPos; i < startPos + length; i++) {
+	Sci_PositionU linePos = 0;
+	for (Sci_PositionU i = startPos; i < startPos + length; i++) {
 		if (AtEOL(styler, i)) {
 			if (linePos < DIFF_BUFFER_START_SIZE) {
 				lineBuffer[linePos] = 0;
@@ -118,8 +118,8 @@ static void ColouriseDiffDoc(Sci_PositionU startPos, Sci_Position length, int, W
 }
 
 static void FoldDiffDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[], Accessor &styler) {
-	int curLine = styler.GetLine(startPos);
-	int curLineStart = styler.LineStart(curLine);
+	Sci_Position curLine = styler.GetLine(startPos);
+	Sci_Position curLineStart = styler.LineStart(curLine);
 	int prevLevel = curLine > 0 ? styler.LevelAt(curLine - 1) : SC_FOLDLEVELBASE;
 	int nextLevel;
 
@@ -143,7 +143,7 @@ static void FoldDiffDoc(Sci_PositionU startPos, Sci_Position length, int, WordLi
 		prevLevel = nextLevel;
 
 		curLineStart = styler.LineStart(++curLine);
-	} while (static_cast<int>(startPos) + length > curLineStart);
+	} while (static_cast<Sci_Position>(startPos)+length > curLineStart);
 }
 
 static const char *const emptyWordListDesc[] = {

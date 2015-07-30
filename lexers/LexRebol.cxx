@@ -79,7 +79,7 @@ static void ColouriseRebolDoc(Sci_PositionU startPos, Sci_Position length, int i
 	WordList &keywords7 = *keywordlists[6];
 	WordList &keywords8 = *keywordlists[7];
 
-	int currentLine = styler.GetLine(startPos);
+	Sci_Position currentLine = styler.GetLine(startPos);
 	// Initialize the braced string {.. { ... } ..} nesting level, if we are inside such a string.
 	int stringLevel = 0;
 	if (initStyle == SCE_REBOL_BRACEDSTRING || initStyle == SCE_REBOL_COMMENTBLOCK) {
@@ -275,14 +275,14 @@ static void ColouriseRebolDoc(Sci_PositionU startPos, Sci_Position length, int i
 
 static void FoldRebolDoc(Sci_PositionU startPos, Sci_Position length, int /* initStyle */, WordList *[],
                             Accessor &styler) {
-	unsigned int lengthDoc = startPos + length;
+	Sci_PositionU lengthDoc = startPos + length;
 	int visibleChars = 0;
-	int lineCurrent = styler.GetLine(startPos);
+	Sci_Position lineCurrent = styler.GetLine(startPos);
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
 	char chNext = styler[startPos];
 	int styleNext = styler.StyleAt(startPos);
-	for (unsigned int i = startPos; i < lengthDoc; i++) {
+	for (Sci_PositionU i = startPos; i < lengthDoc; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 		int style = styleNext;

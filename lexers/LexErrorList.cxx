@@ -43,12 +43,12 @@ static bool IsAlphabetic(int ch) {
 	return IsASCII(ch) && isalpha(ch);
 }
 
-static inline bool AtEOL(Accessor &styler, unsigned int i) {
+static inline bool AtEOL(Accessor &styler, Sci_PositionU i) {
 	return (styler[i] == '\n') ||
 	       ((styler[i] == '\r') && (styler.SafeGetCharAt(i + 1) != '\n'));
 }
 
-static int RecogniseErrorListLine(const char *lineBuffer, unsigned int lengthLine, int &startValue) {
+static int RecogniseErrorListLine(const char *lineBuffer, Sci_PositionU lengthLine, Sci_Position &startValue) {
 	if (lineBuffer[0] == '>') {
 		// Command or return status
 		return SCE_ERR_CMD;
@@ -146,7 +146,7 @@ static int RecogniseErrorListLine(const char *lineBuffer, unsigned int lengthLin
 			stCtagsStart, stCtagsFile, stCtagsStartString, stCtagsStringDollar, stCtags,
 			stUnrecognized
 		} state = stInitial;
-		for (unsigned int i = 0; i < lengthLine; i++) {
+		for (Sci_PositionU i = 0; i < lengthLine; i++) {
 			char ch = lineBuffer[i];
 			char chNext = ' ';
 			if ((i + 1) < lengthLine)
@@ -203,7 +203,7 @@ static int RecogniseErrorListLine(const char *lineBuffer, unsigned int lengthLin
 				} else if ((ch == ':' && chNext == ' ') || (ch == ' ')) {
 					// Possibly Delphi.. don't test against chNext as it's one of the strings below.
 					char word[512];
-					unsigned int j, chPos;
+					Sci_PositionU j, chPos;
 					unsigned numstep;
 					chPos = 0;
 					if (ch == ' ')
@@ -261,11 +261,11 @@ static int RecogniseErrorListLine(const char *lineBuffer, unsigned int lengthLin
 
 static void ColouriseErrorListLine(
     char *lineBuffer,
-    unsigned int lengthLine,
-    unsigned int endPos,
+    Sci_PositionU lengthLine,
+    Sci_PositionU endPos,
     Accessor &styler,
 	bool valueSeparate) {
-	int startValue = -1;
+	Sci_Position startValue = -1;
 	int style = RecogniseErrorListLine(lineBuffer, lengthLine, startValue);
 	if (valueSeparate && (startValue >= 0)) {
 		styler.ColourTo(endPos - (lengthLine - startValue), style);
@@ -279,7 +279,7 @@ static void ColouriseErrorListDoc(Sci_PositionU startPos, Sci_Position length, i
 	char lineBuffer[10000];
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
-	unsigned int linePos = 0;
+	Sci_PositionU linePos = 0;
 
 	// property lexer.errorlist.value.separate
 	//	For lines in the output pane that are matches from Find in Files or GCC-style
@@ -287,7 +287,7 @@ static void ColouriseErrorListDoc(Sci_PositionU startPos, Sci_Position length, i
 	//	line with style 21 used for the rest of the line.
 	//	This allows matched text to be more easily distinguished from its location.
 	bool valueSeparate = styler.GetPropertyInt("lexer.errorlist.value.separate", 0) != 0;
-	for (unsigned int i = startPos; i < startPos + length; i++) {
+	for (Sci_PositionU i = startPos; i < startPos + length; i++) {
 		lineBuffer[linePos++] = styler[i];
 		if (AtEOL(styler, i) || (linePos >= sizeof(lineBuffer) - 1)) {
 			// End of line (or of line buffer) met, colourise it

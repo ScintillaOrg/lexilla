@@ -313,10 +313,10 @@ static void ColouriseKVIrcDoc(Sci_PositionU startPos, Sci_Position length,
                      * fetching the current word, NULL-terminated like
                      * the keyword list */
                     char s[100];
-                    int wordLen = sc.currentPos - styler.GetStartSegment();
+                    Sci_Position wordLen = sc.currentPos - styler.GetStartSegment();
                     if (wordLen > 99)
                         wordLen = 99;  /* Include '\0' in buffer */
-                    int i;
+                    Sci_Position i;
                     for( i = 0; i < wordLen; ++i )
                     {
                         s[i] = styler.SafeGetCharAt( styler.GetStartSegment() + i );
@@ -365,11 +365,11 @@ static void FoldKVIrcDoc(Sci_PositionU startPos, Sci_Position length, int /*init
         return;
 
     /* Obtaining current line number*/
-    int currentLine = styler.GetLine(startPos);
+    Sci_Position currentLine = styler.GetLine(startPos);
 
     /* Obtaining starting character - indentation is done on a line basis,
      * not character */
-    unsigned int safeStartPos = styler.LineStart( currentLine );
+    Sci_PositionU safeStartPos = styler.LineStart( currentLine );
 
     /* Initialising current level - this is defined as indentation level
      * in the low 12 bits, with flag bits in the upper four bits.
@@ -386,7 +386,7 @@ static void FoldKVIrcDoc(Sci_PositionU startPos, Sci_Position length, int /*init
     int nextLevel = currentLevel;
 
     // Looping for characters in range
-    for (unsigned int i = safeStartPos; i < startPos + length; ++i)
+    for (Sci_PositionU i = safeStartPos; i < startPos + length; ++i)
     {
         /* Folding occurs after syntax highlighting, meaning Scintilla
          * already knows where the comments are

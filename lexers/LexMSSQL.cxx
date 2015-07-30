@@ -35,8 +35,8 @@ using namespace Scintilla;
 #define KW_MSSQL_STORED_PROCEDURES  5
 #define KW_MSSQL_OPERATORS          6
 
-static char classifyWordSQL(unsigned int start,
-                            unsigned int end,
+static char classifyWordSQL(Sci_PositionU start,
+                            Sci_PositionU end,
                             WordList *keywordlists[],
                             Accessor &styler,
                             unsigned int actualState,
@@ -52,7 +52,7 @@ static char classifyWordSQL(unsigned int start,
     WordList &kwStoredProcedures    = *keywordlists[KW_MSSQL_STORED_PROCEDURES];
     WordList &kwOperators           = *keywordlists[KW_MSSQL_OPERATORS];
 
-	for (unsigned int i = 0; i < end - start + 1 && i < 128; i++) {
+	for (Sci_PositionU i = 0; i < end - start + 1 && i < 128; i++) {
 		s[i] = static_cast<char>(tolower(styler[start + i]));
 		s[i + 1] = '\0';
 	}
@@ -108,7 +108,7 @@ static void ColouriseMSSQLDoc(Sci_PositionU startPos, Sci_Position length,
 	styler.StartAt(startPos);
 
 	bool fold = styler.GetPropertyInt("fold") != 0;
-	int lineCurrent = styler.GetLine(startPos);
+	Sci_Position lineCurrent = styler.GetLine(startPos);
 	int spaceFlags = 0;
 
 	int state = initStyle;
@@ -116,8 +116,8 @@ static void ColouriseMSSQLDoc(Sci_PositionU startPos, Sci_Position length,
 	char chPrev = ' ';
 	char chNext = styler[startPos];
 	styler.StartSegment(startPos);
-	unsigned int lengthDoc = startPos + length;
-	for (unsigned int i = startPos; i < lengthDoc; i++) {
+	Sci_PositionU lengthDoc = startPos + length;
+	for (Sci_PositionU i = startPos; i < lengthDoc; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 
@@ -280,15 +280,15 @@ static void ColouriseMSSQLDoc(Sci_PositionU startPos, Sci_Position length,
 static void FoldMSSQLDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[], Accessor &styler) {
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
-	unsigned int endPos = startPos + length;
+	Sci_PositionU endPos = startPos + length;
 	int visibleChars = 0;
-	int lineCurrent = styler.GetLine(startPos);
+	Sci_Position lineCurrent = styler.GetLine(startPos);
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
 	char chNext = styler[startPos];
 	bool inComment = (styler.StyleAt(startPos-1) == SCE_MSSQL_COMMENT);
     char s[10] = "";
-	for (unsigned int i = startPos; i < endPos; i++) {
+	for (Sci_PositionU i = startPos; i < endPos; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 		int style = styler.StyleAt(i);
@@ -304,7 +304,7 @@ static void FoldMSSQLDoc(Sci_PositionU startPos, Sci_Position length, int, WordL
         if (style == SCE_MSSQL_STATEMENT) {
             // Folding between begin or case and end
             if (ch == 'b' || ch == 'B' || ch == 'c' || ch == 'C' || ch == 'e' || ch == 'E') {
-                for (unsigned int j = 0; j < 5; j++) {
+                for (Sci_PositionU j = 0; j < 5; j++) {
 					if (!iswordchar(styler[i + j])) {
 						break;
 					}

@@ -44,8 +44,8 @@ static void ColouriseDMAPDoc(Sci_PositionU startPos, Sci_Position length, int in
     WordList &keywords2 = *keywordlists[1];
     WordList &keywords3 = *keywordlists[2];
     /***************************************/
-    int posLineStart = 0, numNonBlank = 0;
-    int endPos = startPos + length;
+    Sci_Position posLineStart = 0, numNonBlank = 0;
+    Sci_Position endPos = startPos + length;
     /***************************************/
     // backtrack to the nearest keyword
     while ((startPos > 1) && (styler.StyleAt(startPos) != SCE_DMAP_WORD)) {
@@ -65,7 +65,7 @@ static void ColouriseDMAPDoc(Sci_PositionU startPos, Sci_Position length, int in
         if (!IsASpaceOrTab(sc.ch)) numNonBlank ++;
         /***********************************************/
         // Handle data appearing after column 72; it is ignored
-        int toLineStart = sc.currentPos - posLineStart;
+        Sci_Position toLineStart = sc.currentPos - posLineStart;
         if (toLineStart >= 72 || sc.ch == '$') {
             sc.SetState(SCE_DMAP_COMMENT);
             while (!sc.atLineEnd && sc.More()) sc.Forward(); // Until line end
@@ -158,19 +158,19 @@ static void FoldDMAPDoc(Sci_PositionU startPos, Sci_Position length, int initSty
     // Do not know how to fold the comment at the moment.
     //
     bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
-    unsigned int endPos = startPos + length;
+    Sci_PositionU endPos = startPos + length;
     int visibleChars = 0;
-    int lineCurrent = styler.GetLine(startPos);
+    Sci_Position lineCurrent = styler.GetLine(startPos);
     int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
     int levelCurrent = levelPrev;
     char chNext = styler[startPos];
     int styleNext = styler.StyleAt(startPos);
     int style = initStyle;
     /***************************************/
-    int lastStart = 0;
+    Sci_Position lastStart = 0;
     char prevWord[32] = "";
     /***************************************/
-    for (unsigned int i = startPos; i < endPos; i++) {
+    for (Sci_PositionU i = startPos; i < endPos; i++) {
         char ch = chNext;
         chNext = styler.SafeGetCharAt(i + 1);
         int stylePrev = style;
@@ -186,7 +186,7 @@ static void FoldDMAPDoc(Sci_PositionU startPos, Sci_Position length, int initSty
         if (style == SCE_DMAP_WORD) {
             if(iswordchar(ch) && !iswordchar(chNext)) {
                 char s[32];
-                unsigned int k;
+                Sci_PositionU k;
                 for(k=0; (k<31 ) && (k<i-lastStart+1 ); k++) {
                     s[k] = static_cast<char>(tolower(styler[lastStart+k]));
                 }

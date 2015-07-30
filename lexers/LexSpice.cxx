@@ -145,7 +145,7 @@ static void ColouriseDocument(
     WordList &keywords2 = *keywordlists[1];
     WordList &keywords3 = *keywordlists[2];
     StyleContext sc(startPos, length, initStyle, styler);
-    int lineCurrent = styler.GetLine(startPos);
+    Sci_Position lineCurrent = styler.GetLine(startPos);
     bool apostropheStartsAttribute = (styler.GetLineState(lineCurrent) & 1) != 0;
     while (sc.More()) {
         if (sc.atLineEnd) {

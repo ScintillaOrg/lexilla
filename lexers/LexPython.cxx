@@ -69,7 +69,7 @@ bool IsPyStringStart(int ch, int chNext, int chNext2, literalsAllowed allowed) {
 }
 
 /* Return the state to use for the string starting at i; *nextIndex will be set to the first index following the quote(s) */
-int GetPyStringState(Accessor &styler, int i, unsigned int *nextIndex, literalsAllowed allowed) {
+int GetPyStringState(Accessor &styler, Sci_Position i, Sci_PositionU *nextIndex, literalsAllowed allowed) {
 	char ch = styler.SafeGetCharAt(i);
 	char chNext = styler.SafeGetCharAt(i + 1);
 
@@ -292,7 +292,7 @@ Sci_Position SCI_METHOD LexerPython::WordListSet(int n, const char *wl) {
 		wordListN = &keywords2;
 		break;
 	}
-	int firstModification = -1;
+	Sci_Position firstModification = -1;
 	if (wordListN) {
 		WordList wlNew;
 		wlNew.Set(wl);
@@ -307,16 +307,16 @@ Sci_Position SCI_METHOD LexerPython::WordListSet(int n, const char *wl) {
 void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 	Accessor styler(pAccess, NULL);
 
-	const int endPos = startPos + length;
+	const Sci_Position endPos = startPos + length;
 
 	// Backtrack to previous line in case need to fix its tab whinging
-	int lineCurrent = styler.GetLine(startPos);
+	Sci_Position lineCurrent = styler.GetLine(startPos);
 	if (startPos > 0) {
 		if (lineCurrent > 0) {
 			lineCurrent--;
 			// Look for backslash-continued lines
 			while (lineCurrent > 0) {
-				int eolPos = styler.LineStart(lineCurrent) - 1;
+				Sci_Position eolPos = styler.LineStart(lineCurrent) - 1;
 				int eolStyle = styler.StyleAt(eolPos);
 				if (eolStyle == SCE_P_STRING
 				    || eolStyle == SCE_P_CHARACTER
@@ -348,7 +348,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 	StyleContext sc(startPos, endPos - startPos, initStyle, styler);
 
 	bool indentGood = true;
-	int startIndicator = sc.currentPos;
+	Sci_Position startIndicator = sc.currentPos;
 	bool inContinuedString = false;
 
 	for (; sc.More(); sc.Forward()) {
@@ -417,7 +417,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 				} else if (kwLast == kwDef) {
 					style = SCE_P_DEFNAME;
 				} else if (kwLast == kwCDef || kwLast == kwCPDef) {
-					int pos = sc.currentPos;
+					Sci_Position pos = sc.currentPos;
 					unsigned char ch = styler.SafeGetCharAt(pos, '\0');
 					while (ch != '\0') {
 						if (ch == '(') {
@@ -438,7 +438,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 						// We don't want to highlight keywords2
 						// that are used as a sub-identifier,
 						// i.e. not open in "foo.open".
-						int pos = styler.GetStartSegment() - 1;
+						Sci_Position pos = styler.GetStartSegment() - 1;
 						if (pos < 0 || (styler.SafeGetCharAt(pos, '\0') != '.'))
 							style = SCE_P_WORD2;
 					} else {
@@ -562,7 +562,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 			} else if (sc.ch == '@') {
 				sc.SetState(SCE_P_DECORATOR);
 			} else if (IsPyStringStart(sc.ch, sc.chNext, sc.GetRelative(2), allowedLiterals)) {
-				unsigned int nextIndex = 0;
+				Sci_PositionU nextIndex = 0;
 				sc.SetState(GetPyStringState(styler, sc.currentPos, &nextIndex, allowedLiterals));
 				while (nextIndex > (sc.currentPos + 1) && sc.More()) {
 					sc.Forward();
@@ -576,10 +576,10 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 	sc.Complete();
 }
 
-static bool IsCommentLine(int line, Accessor &styler) {
-	int pos = styler.LineStart(line);
-	int eol_pos = styler.LineStart(line + 1) - 1;
-	for (int i = pos; i < eol_pos; i++) {
+static bool IsCommentLine(Sci_Position line, Accessor &styler) {
+	Sci_Position pos = styler.LineStart(line);
+	Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
+	for (Sci_Position i = pos; i < eol_pos; i++) {
 		char ch = styler[i];
 		if (ch == '#')
 			return true;
@@ -589,7 +589,7 @@ static bool IsCommentLine(int line, Accessor &styler) {
 	return false;
 }
 
-static bool IsQuoteLine(int line, Accessor &styler) {
+static bool IsQuoteLine(Sci_Position line, Accessor &styler) {
 	int style = styler.StyleAt(styler.LineStart(line)) & 31;
 	return ((style == SCE_P_TRIPLE) || (style == SCE_P_TRIPLEDOUBLE));
 }
@@ -601,16 +601,16 @@ void SCI_METHOD LexerPython::Fold(Sci_PositionU startPos, Sci_Position length, i
 
 	Accessor styler(pAccess, NULL);
 
-	const int maxPos = startPos + length;
-	const int maxLines = (maxPos == styler.Length()) ? styler.GetLine(maxPos) : styler.GetLine(maxPos - 1);	// Requested last line
-	const int docLines = styler.GetLine(styler.Length());	// Available last line
+	const Sci_Position maxPos = startPos + length;
+	const Sci_Position maxLines = (maxPos == styler.Length()) ? styler.GetLine(maxPos) : styler.GetLine(maxPos - 1);	// Requested last line
+	const Sci_Position docLines = styler.GetLine(styler.Length());	// Available last line
 
 	// Backtrack to previous non-blank line so we can determine indent level
 	// for any white space lines (needed esp. within triple quoted strings)
 	// and so we can fix any preceding fold level (which is why we go back
 	// at least one line in all cases)
 	int spaceFlags = 0;
-	int lineCurrent = styler.GetLine(startPos);
+	Sci_Position lineCurrent = styler.GetLine(startPos);
 	int indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, NULL);
 	while (lineCurrent > 0) {
 		lineCurrent--;
@@ -636,13 +636,13 @@ void SCI_METHOD LexerPython::Fold(Sci_PositionU startPos, Sci_Position length, i
 
 		// Gather info
 		int lev = indentCurrent;
-		int lineNext = lineCurrent + 1;
+		Sci_Position lineNext = lineCurrent + 1;
 		int indentNext = indentCurrent;
 		int quote = false;
 		if (lineNext <= docLines) {
 			// Information about next line is only available if not at end of document
 			indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
-			int lookAtPos = (styler.LineStart(lineNext) == styler.Length()) ? styler.Length() - 1 : styler.LineStart(lineNext);
+			Sci_Position lookAtPos = (styler.LineStart(lineNext) == styler.Length()) ? styler.Length() - 1 : styler.LineStart(lineNext);
 			int style = styler.StyleAt(lookAtPos) & 31;
 			quote = options.foldQuotes && ((style == SCE_P_TRIPLE) || (style == SCE_P_TRIPLEDOUBLE));
 		}
@@ -685,7 +685,7 @@ void SCI_METHOD LexerPython::Fold(Sci_PositionU startPos, Sci_Position length, i
 		// which is indented more than the line after the end of
 		// the comment-block, use the level of the block before
 
-		int skipLine = lineNext;
+		Sci_Position skipLine = lineNext;
 		int skipLevel = levelAfterComments;
 
 		while (--skipLine > lineCurrent) {

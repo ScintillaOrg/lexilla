@@ -27,7 +27,7 @@
 using namespace Scintilla;
 #endif
 
-static inline bool AtEOL(Accessor &styler, unsigned int i) {
+static inline bool AtEOL(Accessor &styler, Sci_PositionU i) {
 	return (styler[i] == '\n') ||
 	       ((styler[i] == '\r') && (styler.SafeGetCharAt(i + 1) != '\n'));
 }
@@ -38,13 +38,13 @@ static inline bool isassignchar(unsigned char ch) {
 
 static void ColourisePropsLine(
     char *lineBuffer,
-    unsigned int lengthLine,
-    unsigned int startLine,
-    unsigned int endPos,
+    Sci_PositionU lengthLine,
+    Sci_PositionU startLine,
+    Sci_PositionU endPos,
     Accessor &styler,
     bool allowInitialSpaces) {
 
-	unsigned int i = 0;
+	Sci_PositionU i = 0;
 	if (allowInitialSpaces) {
 		while ((i < lengthLine) && isspacechar(lineBuffer[i]))	// Skip initial spaces
 			i++;
@@ -84,8 +84,8 @@ static void ColourisePropsDoc(Sci_PositionU startPos, Sci_Position length, int, 
 	char lineBuffer[1024];
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
-	unsigned int linePos = 0;
-	unsigned int startLine = startPos;
+	Sci_PositionU linePos = 0;
+	Sci_PositionU startLine = startPos;
 
 	// property lexer.props.allow.initial.spaces
 	//	For properties files, set to 0 to style all lines that start with whitespace in the default style.
@@ -93,7 +93,7 @@ static void ColourisePropsDoc(Sci_PositionU startPos, Sci_Position length, int, 
 	//	can be used for RFC2822 text where indentation is used for continuation lines.
 	bool allowInitialSpaces = styler.GetPropertyInt("lexer.props.allow.initial.spaces", 1) != 0;
 
-	for (unsigned int i = startPos; i < startPos + length; i++) {
+	for (Sci_PositionU i = startPos; i < startPos + length; i++) {
 		lineBuffer[linePos++] = styler[i];
 		if (AtEOL(styler, i) || (linePos >= sizeof(lineBuffer) - 1)) {
 			// End of line (or of line buffer) met, colourise it
@@ -113,16 +113,16 @@ static void ColourisePropsDoc(Sci_PositionU startPos, Sci_Position length, int, 
 static void FoldPropsDoc(Sci_PositionU startPos, Sci_Position length, int, WordList *[], Accessor &styler) {
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 
-	unsigned int endPos = startPos + length;
+	Sci_PositionU endPos = startPos + length;
 	int visibleChars = 0;
-	int lineCurrent = styler.GetLine(startPos);
+	Sci_Position lineCurrent = styler.GetLine(startPos);
 
 	char chNext = styler[startPos];
 	int styleNext = styler.StyleAt(startPos);
 	bool headerPoint = false;
 	int lev;
 
-	for (unsigned int i = startPos; i < endPos; i++) {
+	for (Sci_PositionU i = startPos; i < endPos; i++) {
 		char ch = chNext;
 		chNext = styler[i+1];
 

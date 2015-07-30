@@ -300,7 +300,7 @@ Sci_Position SCI_METHOD LexerBasic::WordListSet(int n, const char *wl) {
 		wordListN = &keywordlists[3];
 		break;
 	}
-	int firstModification = -1;
+	Sci_Position firstModification = -1;
 	if (wordListN) {
 		WordList wlNew;
 		wlNew.Set(wl);
@@ -478,10 +478,10 @@ void SCI_METHOD LexerBasic::Fold(Sci_PositionU startPos, Sci_Position length, in
 
 	LexAccessor styler(pAccess);
 
-	int line = styler.GetLine(startPos);
+	Sci_Position line = styler.GetLine(startPos);
 	int level = styler.LevelAt(line);
 	int go = 0, done = 0;
-	int endPos = startPos + length;
+	Sci_Position endPos = startPos + length;
 	char word[256];
 	int wordlen = 0;
 	const bool userDefinedFoldMarkers = !options.foldExplicitStart.empty() && !options.foldExplicitEnd.empty();
@@ -489,7 +489,7 @@ void SCI_METHOD LexerBasic::Fold(Sci_PositionU startPos, Sci_Position length, in
 
 	// Scan for tokens at the start of the line (they may include
 	// whitespace, for tokens like "End Function"
-	for (int i = startPos; i < endPos; i++) {
+	for (Sci_Position i = startPos; i < endPos; i++) {
 		int c = cNext;
 		cNext = styler.SafeGetCharAt(i + 1);
 		bool atEOL = (c == '\r' && cNext != '\n') || (c == '\n');

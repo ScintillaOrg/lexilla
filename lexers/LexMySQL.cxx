@@ -150,7 +150,7 @@ static void ColouriseMySQLDoc(Sci_PositionU startPos, Sci_Position length, int i
       case SCE_MYSQL_SYSTEMVARIABLE:
         if (!IsAWordChar(sc.ch))
         {
-          int length = sc.LengthCurrent() + 1;
+          Sci_Position length = sc.LengthCurrent() + 1;
           char* s = new char[length];
           sc.GetCurrentLowered(s, length);
 
@@ -328,9 +328,9 @@ static bool IsStreamCommentStyle(int style)
  * Code copied from StyleContext and modified to work here. Should go into Accessor as a
  * companion to Match()...
  */
-bool MatchIgnoreCase(Accessor &styler, int currentPos, const char *s)
+bool MatchIgnoreCase(Accessor &styler, Sci_Position currentPos, const char *s)
 {
-  for (int n = 0; *s; n++)
+  for (Sci_Position n = 0; *s; n++)
   {
     if (*s != tolower(styler.SafeGetCharAt(currentPos + n)))
       return false;
@@ -350,7 +350,7 @@ static void FoldMySQLDoc(Sci_PositionU startPos, Sci_Position length, int initSt
 	bool foldOnlyBegin = styler.GetPropertyInt("fold.sql.only.begin", 0) != 0;
 
 	int visibleChars = 0;
-	int lineCurrent = styler.GetLine(startPos);
+	Sci_Position lineCurrent = styler.GetLine(startPos);
 	int levelCurrent = SC_FOLDLEVELBASE;
 	if (lineCurrent > 0)
 		levelCurrent = styler.LevelAt(lineCurrent - 1) >> 16;
@@ -365,7 +365,7 @@ static void FoldMySQLDoc(Sci_PositionU startPos, Sci_Position length, int initSt
 	bool elseIfPending = false;
 
   char nextChar = styler.SafeGetCharAt(startPos);
-  for (unsigned int i = startPos; length > 0; i++, length--)
+  for (Sci_PositionU i = startPos; length > 0; i++, length--)
   {
 		int stylePrev = style;
     int lastActiveState = activeState;

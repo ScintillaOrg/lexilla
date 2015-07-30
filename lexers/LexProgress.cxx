@@ -210,9 +210,9 @@ static void FoldNoBox4glDoc(Sci_PositionU startPos, Sci_Position length, int ini
 	bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
 	bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
 	bool foldAtElse = styler.GetPropertyInt("fold.at.else", 0) != 0;
-	unsigned int endPos = startPos + length;
+	Sci_PositionU endPos = startPos + length;
 	int visibleChars = 0;
-	int lineCurrent = styler.GetLine(startPos);
+	Sci_Position lineCurrent = styler.GetLine(startPos);
 	int levelCurrent = SC_FOLDLEVELBASE;
 	if (lineCurrent > 0)
 		levelCurrent = styler.LevelAt(lineCurrent-1) >> 16;
@@ -221,7 +221,7 @@ static void FoldNoBox4glDoc(Sci_PositionU startPos, Sci_Position length, int ini
 	char chNext = static_cast<char>(tolower(styler[startPos]));
 	int styleNext = styler.StyleAt(startPos);
 	int style = initStyle;
-	for (unsigned int i = startPos; i < endPos; i++) {
+	for (Sci_PositionU i = startPos; i < endPos; i++) {
 		char ch = chNext;
 		chNext = static_cast<char>(tolower(styler.SafeGetCharAt(i + 1)));
 		int stylePrev = style;

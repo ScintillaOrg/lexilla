@@ -124,10 +124,10 @@ static bool IsEiffelComment(Accessor &styler, Sci_Position pos, Sci_Position len
 
 static void FoldEiffelDocIndent(Sci_PositionU startPos, Sci_Position length, int,
 						   WordList *[], Accessor &styler) {
-	int lengthDoc = startPos + length;
+	Sci_Position lengthDoc = startPos + length;
 
 	// Backtrack to previous line in case need to fix its fold status
-	int lineCurrent = styler.GetLine(startPos);
+	Sci_Position lineCurrent = styler.GetLine(startPos);
 	if (startPos > 0) {
 		if (lineCurrent > 0) {
 			lineCurrent--;
@@ -137,7 +137,7 @@ static void FoldEiffelDocIndent(Sci_PositionU startPos, Sci_Position length, int
 	int spaceFlags = 0;
 	int indentCurrent = styler.IndentAmount(lineCurrent, &spaceFlags, IsEiffelComment);
 	char chNext = styler[startPos];
-	for (int i = startPos; i < lengthDoc; i++) {
+	for (Sci_Position i = startPos; i < lengthDoc; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 
@@ -166,9 +166,9 @@ static void FoldEiffelDocIndent(Sci_PositionU startPos, Sci_Position length, int
 
 static void FoldEiffelDocKeyWords(Sci_PositionU startPos, Sci_Position length, int /* initStyle */, WordList *[],
                        Accessor &styler) {
-	unsigned int lengthDoc = startPos + length;
+	Sci_PositionU lengthDoc = startPos + length;
 	int visibleChars = 0;
-	int lineCurrent = styler.GetLine(startPos);
+	Sci_Position lineCurrent = styler.GetLine(startPos);
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
 	char chNext = styler[startPos];
@@ -177,7 +177,7 @@ static void FoldEiffelDocKeyWords(Sci_PositionU startPos, Sci_Position length, i
 	// lastDeferred should be determined by looking back to last keyword in case
 	// the "deferred" is on a line before "class"
 	bool lastDeferred = false;
-	for (unsigned int i = startPos; i < lengthDoc; i++) {
+	for (Sci_PositionU i = startPos; i < lengthDoc; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 		int style = styleNext;
@@ -185,7 +185,7 @@ static void FoldEiffelDocKeyWords(Sci_PositionU startPos, Sci_Position length, i
 		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 		if ((stylePrev != SCE_EIFFEL_WORD) && (style == SCE_EIFFEL_WORD)) {
 			char s[20];
-			unsigned int j = 0;
+			Sci_PositionU j = 0;
 			while ((j < (sizeof(s) - 1)) && (iswordchar(styler[i + j]))) {
 				s[j] = styler[i + j];
 				j++;

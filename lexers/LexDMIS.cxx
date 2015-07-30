@@ -187,7 +187,7 @@ const char * SCI_METHOD LexerDMIS::DescribeWordListSets()
 
 void SCI_METHOD LexerDMIS::Lex(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, IDocument *pAccess)
 {
-	const unsigned int MAX_STR_LEN = 100;
+	const Sci_PositionU MAX_STR_LEN = 100;
 
 	LexAccessor styler(pAccess);
 	StyleContext scCTX(startPos, lengthDoc, initStyle, styler);
@@ -286,9 +286,9 @@ void SCI_METHOD LexerDMIS::Fold(Sci_PositionU startPos, Sci_Position lengthDoc, 
 	const int MAX_STR_LEN = 100;
 
 	LexAccessor styler(pAccess);
-	unsigned int endPos = startPos + lengthDoc;
+	Sci_PositionU endPos = startPos + lengthDoc;
 	char chNext = styler[startPos];
-	int lineCurrent = styler.GetLine(startPos);
+	Sci_Position lineCurrent = styler.GetLine(startPos);
 	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
 	int levelCurrent = levelPrev;
 	int strPos = 0;
@@ -300,7 +300,7 @@ void SCI_METHOD LexerDMIS::Fold(Sci_PositionU startPos, Sci_Position lengthDoc, 
 	tmpStr = new char[MAX_STR_LEN];
 	memset(tmpStr, 0, MAX_STR_LEN*sizeof(char));
 
-	for (unsigned int i=startPos; i<endPos; i++) {
+	for (Sci_PositionU i=startPos; i<endPos; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i+1);
 

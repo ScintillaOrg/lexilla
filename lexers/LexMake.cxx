@@ -27,20 +27,20 @@
 using namespace Scintilla;
 #endif
 
-static inline bool AtEOL(Accessor &styler, unsigned int i) {
+static inline bool AtEOL(Accessor &styler, Sci_PositionU i) {
 	return (styler[i] == '\n') ||
 	       ((styler[i] == '\r') && (styler.SafeGetCharAt(i + 1) != '\n'));
 }
 
 static void ColouriseMakeLine(
     char *lineBuffer,
-    unsigned int lengthLine,
-    unsigned int startLine,
-    unsigned int endPos,
+    Sci_PositionU lengthLine,
+    Sci_PositionU startLine,
+    Sci_PositionU endPos,
     Accessor &styler) {
 
-	unsigned int i = 0;
-	int lastNonSpace = -1;
+	Sci_PositionU i = 0;
+	Sci_Position lastNonSpace = -1;
 	unsigned int state = SCE_MAKE_DEFAULT;
 	bool bSpecial = false;
 
@@ -120,9 +120,9 @@ static void ColouriseMakeDoc(Sci_PositionU startPos, Sci_Position length, int, W
 	char lineBuffer[1024];
 	styler.StartAt(startPos);
 	styler.StartSegment(startPos);
-	unsigned int linePos = 0;
-	unsigned int startLine = startPos;
-	for (unsigned int i = startPos; i < startPos + length; i++) {
+	Sci_PositionU linePos = 0;
+	Sci_PositionU startLine = startPos;
+	for (Sci_PositionU i = startPos; i < startPos + length; i++) {
 		lineBuffer[linePos++] = styler[i];
 		if (AtEOL(styler, i) || (linePos >= sizeof(lineBuffer) - 1)) {
 			// End of line (or of line buffer) met, colourise it
