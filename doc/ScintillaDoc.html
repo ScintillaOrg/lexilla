@@ -575,10 +575,14 @@
      These structures are defined to be exactly the same shape as the Win32 <code>TEXTRANGE</code>
     and <code>CHARRANGE</code>, so that older code that treats Scintilla as a RichEdit will
     work.</p>
+    <p>In a future release the type <code>Sci_PositionCR</code> will be redefined to be 64-bits when Scintilla is
+    built for 64-bits on all platforms.</p>
 <pre>
+typedef long Sci_PositionCR;
+
 struct Sci_CharacterRange {
-    long cpMin;
-    long cpMax;
+    Sci_PositionCR cpMin;
+    Sci_PositionCR cpMax;
 };
 
 struct Sci_TextRange {
@@ -6503,7 +6507,7 @@ implemented and thus which methods may be called.</p>
     <p>The container is
     passed a <code>SCNotification</code> structure containing information about the event.</p>
 <pre id="SCNotification">
-struct NotifyHeader {   // This matches the Win32 NMHDR structure
+struct Sci_NotifyHeader {   // This matches the Win32 NMHDR structure
     void *hwndFrom;     // environment specific window handle/pointer
     uptr_t idFrom;        // CtrlID of the window issuing the notification
     unsigned int code;  // The SCN_* notification code
@@ -6511,7 +6515,7 @@ struct NotifyHeader {   // This matches the Win32 NMHDR structure
 
 struct SCNotification {
 	struct Sci_NotifyHeader nmhdr;
-	int position;
+	Sci_Position position;
 	/* SCN_STYLENEEDED, SCN_DOUBLECLICK, SCN_MODIFIED, SCN_MARGINCLICK, */
 	/* SCN_NEEDSHOWN, SCN_DWELLSTART, SCN_DWELLEND, SCN_CALLTIPCLICK, */
 	/* SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK, SCN_HOTSPOTRELEASECLICK, */
@@ -6529,12 +6533,12 @@ struct SCNotification {
 	const char *text;
 	/* SCN_MODIFIED, SCN_USERLISTSELECTION, SCN_AUTOCSELECTION, SCN_URIDROPPED */
 
-	int length;		/* SCN_MODIFIED */
-	int linesAdded;	/* SCN_MODIFIED */
+	Sci_Position length;		/* SCN_MODIFIED */
+	Sci_Position linesAdded;	/* SCN_MODIFIED */
 	int message;	/* SCN_MACRORECORD */
 	uptr_t wParam;	/* SCN_MACRORECORD */
 	sptr_t lParam;	/* SCN_MACRORECORD */
-	int line;		/* SCN_MODIFIED */
+	Sci_Position line;		/* SCN_MODIFIED */
 	int foldLevelNow;	/* SCN_MODIFIED */
 	int foldLevelPrev;	/* SCN_MODIFIED */
 	int margin;		/* SCN_MARGINCLICK */
