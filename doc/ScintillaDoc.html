@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 11 June 2015 NH</p>
+    <p>Last edited 31 July 2015 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -6336,60 +6336,32 @@ SCI_METHOD<span class="S0"> </span>PropertyNames<span class="S10">()</span>
 <span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span>
 <span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>DescribeProperty<span class="S10">(</span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span>name<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span>
-<span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>PropertySet<span class="S10">(</span><span class="S5">const</span>
-<span class="S0"> </span><span class="S5">char</span>
-<span class="S0"> </span><span class="S10">*</span>key<span class="S10">,</span>
-<span class="S0"> </span><span class="S5">const</span><span class="S0"> </span>
-<span class="S5">char</span><span class="S0"> </span><span class="S10">*</span>val<span class="S10">)</span>
-<span class="S0"> </span><span class="S10">=</span>
-<span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
-<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span><span class="S0"> </span>
-<span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span>
-<span class="S10">*</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>DescribeWordListSets<span class="S10">()</span>
-<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>
-<span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0"> </span>Sci_Position<span class="S0"> </span>SCI_METHOD
+<span class="S0"> </span>PropertySet<span class="S10">(</span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span>key<span class="S10">,</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span>val<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span>
-<span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>WordListSet<span class="S10">(</span><span class="S5">int</span>
-<span class="S0"> </span>n<span class="S10">,</span>
-<span class="S0"> </span><span class="S5">const</span><span class="S0"> </span>
-<span class="S5">char</span><span class="S0"> </span><span class="S10">*</span>wl<span class="S10">)</span>
-<span class="S0"> </span><span class="S10">=</span>
-<span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span><span class="S0"> </span>SCI_METHOD
+<span class="S0"> </span>DescribeWordListSets<span class="S10">()</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span>
+<span class="S0"> </span>Sci_Position<span class="S0"> </span>SCI_METHOD
+<span class="S0"> </span>WordListSet<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>n<span class="S10">,</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span>wl<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span>
 <span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>Lex<span class="S10">(</span><span class="S5">unsigned</span>
-<span class="S0"> </span><span class="S5">int</span>
-<span class="S0"> </span>startPos<span class="S10">,</span>
-<span class="S0"> </span><span class="S5">int</span>
-<span class="S0"> </span>lengthDoc<span class="S10">,</span><span class="S0">
-</span><span class="S5">int</span><span class="S0"> </span>initStyle<span class="S10">,</span>
-<span class="S0"> </span>IDocument<span class="S0">
-</span><span class="S10">*</span>pAccess<span class="S10">)</span>
-<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>
-<span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0"> </span>Lex<span class="S10">(</span>Sci_PositionU<span class="S0"> </span>startPos<span class="S10">,</span><span class="S0"> </span>Sci_Position<span class="S0"> </span>lengthDoc<span class="S10">,</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>initStyle<span class="S10">,</span><span class="S0"> </span>IDocument<span class="S0"> </span><span class="S10">*</span>pAccess<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span>
 <span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>Fold<span class="S10">(</span><span class="S5">unsigned</span>
-<span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>startPos<span class="S10">,</span>
-<span class="S0"> </span><span class="S5">int</span>
-<span class="S0"> </span>lengthDoc<span class="S10">,</span><span class="S0">
-</span><span class="S5">int</span><span class="S0"> </span>initStyle<span class="S10">,</span>
-<span class="S0"> </span>IDocument<span class="S0">
-</span><span class="S10">*</span>pAccess<span class="S10">)</span>
-<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>
-<span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0"> </span>Fold<span class="S10">(</span>Sci_PositionU<span class="S0"> </span>startPos<span class="S10">,</span><span class="S0"> </span>Sci_Position<span class="S0"> </span>lengthDoc<span class="S10">,</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>initStyle<span class="S10">,</span><span class="S0"> </span>IDocument<span class="S0"> </span><span class="S10">*</span>pAccess<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span>
-<span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>
-<span class="S10">*</span><span class="S0"> </span>SCI_METHOD<span class="S0">
-</span>PrivateCall<span class="S10">(</span><span class="S5">int</span>
-<span class="S0"> </span>operation<span class="S10">,</span><span class="S0">
-</span><span class="S5">void</span><span class="S0"> </span>
-<span class="S10">*</span>pointer<span class="S10">)</span><span class="S0"> </span>
-<span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0"> </span><span class="S5">void</span><span class="S0"> </span><span class="S10">*</span><span class="S0"> </span>SCI_METHOD
+<span class="S0"> </span>PrivateCall<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>operation<span class="S10">,</span><span class="S0"> </span><span class="S5">void</span><span class="S0"> </span><span class="S10">*</span>pointer<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S10">};</span><br />
 </div>
+
+<p>
+The types <code>Sci_Position</code> and <code>Sci_PositionU</code> are used for positions and line numbers in the document.
+Before release 3.6.0 the types <code>int</code> and <code>unsigned int</code> were used instead and, for 3.6.0,
+<code>Sci_Position</code> is defined as <code>int</code> and <code>Sci_PositionU</code> is defined as <code>unsigned int</code>.
+In a future release, 64-bit builds will define these as 64-bit types to allow documents larger than 2 GB.
+</p>
 
 <p>
 The return values from PropertySet and WordListSet are used to indicate whether the change requires
@@ -6444,134 +6416,29 @@ To allow lexers to report which line ends they support, and to support substyles
 <h4>IDocument</h4>
 
 <div class="highlighted">
-<span class="S5">class</span><span class="S0"> </span>IDocument
-<span class="S0"> </span><span class="S10">{</span><br />
+<span class="S5">class</span><span class="S0"> </span>IDocument<span class="S0"> </span><span class="S10">{</span><br />
 <span class="S5">public</span><span class="S10">:</span><br />
-<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span>
-<span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>Version<span class="S10">()</span><span class="S0"> </span>
-<span class="S5">const</span><span class="S0"> </span><span class="S10">=</span>
-<span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
-<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span>
-<span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>SetErrorStatus<span class="S10">(</span><span class="S5">int</span>
-<span class="S0"> </span>status<span class="S10">)</span>
-<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>
-<span class="S4">0</span><span class="S10">;</span><br />
-<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span>
-<span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>Length<span class="S10">()</span><span class="S0"> </span>
-<span class="S5">const</span><span class="S0"> </span><span class="S10">=</span>
-<span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
-<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span>
-<span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>GetCharRange<span class="S10">(</span><span class="S5">char</span>
-<span class="S0"> </span><span class="S10">*</span>buffer<span class="S10">,</span>
-<span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>
-position<span class="S10">,</span><span class="S0"> </span>
-<span class="S5">int</span><span class="S0"> </span>lengthRetrieve<span class="S10">)</span>
-<span class="S0"> </span><span class="S5">const</span>
-<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>
-<span class="S4">0</span><span class="S10">;</span><br />
-<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span>
-<span class="S0"> </span><span class="S5">char</span><span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>StyleAt<span class="S10">(</span><span class="S5">int</span>
-<span class="S0"> </span>position<span class="S10">)</span><span class="S0"> </span>
-<span class="S5">const</span><span class="S0"> </span><span class="S10">=</span>
-<span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
-<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span>
-<span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>LineFromPosition<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>position<span class="S10">)</span>
-<span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span>
-<span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
-<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span><span class="S0"> </span>
-<span class="S5">int</span><span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>LineStart<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>line<span class="S10">)</span>
-<span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span>
-<span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
-<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span><span class="S0"> </span>
-<span class="S5">int</span><span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>GetLevel<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>line<span class="S10">)</span>
-<span class="S0"> </span>
-<span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>
-<span class="S4">0</span><span class="S10">;</span><br />
-<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span><span class="S0"> </span>
-<span class="S5">int</span><span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>SetLevel<span class="S10">(</span><span class="S5">int</span>
-<span class="S0"> </span>line<span class="S10">,</span><span class="S0"> </span>
-<span class="S5">int</span><span class="S0"> </span>level<span class="S10">)</span>
-<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>
-<span class="S4">0</span><span class="S10">;</span><br />
-<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span>
-<span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>GetLineState<span class="S10">(</span><span class="S5">int</span>
-<span class="S0"> </span>line<span class="S10">)</span>
-<span class="S0"> </span><span class="S5">const</span><span class="S0"> </span>
-<span class="S10">=</span><span class="S0"> </span><span class="S4">0</span>
-<span class="S10">;</span><br />
-<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span>
-<span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>SetLineState<span class="S10">(</span><span class="S5">int</span>
-<span class="S0"> </span>line<span class="S10">,</span>
-<span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>state<span class="S10">)</span>
-<span class="S0"> </span><span class="S10">=</span>
-<span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
-<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span>
-<span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>StartStyling<span class="S10">(</span><span class="S5">int</span>
-<span class="S0"> </span>position<span class="S10">,</span>
-<span class="S0"> </span><span class="S5">char</span><span class="S0"> </span>mask<span class="S10">)</span>
-<span class="S0"> </span><span class="S10">=</span>
-<span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
-<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">bool</span>
-<span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>SetStyleFor<span class="S10">(</span><span class="S5">int</span>
-<span class="S0"> </span>length<span class="S10">,</span>
-<span class="S0"> </span><span class="S5">char</span><span class="S0"> </span>style<span class="S10">)</span>
-<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span>
-<span class="S10">;</span><br />
- <span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span>
-<span class="S0"> </span><span class="S5">bool</span><span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>SetStyles<span class="S10">(</span><span class="S5">int</span>
-<span class="S0"> </span>length<span class="S10">,</span><span class="S0"> </span>
-<span class="S5">const</span><span class="S0"> </span><span class="S5">char</span>
-<span class="S0"> </span><span class="S10">*</span>styles<span class="S10">)</span>
-<span class="S0"> </span><span class="S10">=</span><span class="S0"> </span>
-<span class="S4">0</span><span class="S10">;</span><br />
-<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">void</span>
-<span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>DecorationSetCurrentIndicator<span class="S10">(</span><span class="S5">int</span>
-<span class="S0"> </span>indicator<span class="S10">)</span>
-<span class="S0"> </span><span class="S10">=</span>
-<span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
-<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span>
-<span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>DecorationFillRange<span class="S10">(</span><span class="S5">int</span>
-<span class="S0"> </span>position<span class="S10">,</span>
-<span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>value<span class="S10">,</span>
-<span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>fillLength<span class="S10">)</span>
-<span class="S0">
- </span><span class="S10">=</span><span class="S0"> </span>
-<span class="S4">0</span><span class="S10">;</span><br />
-<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span>
-<span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>ChangeLexerState<span class="S10">(</span><span class="S5">int</span>
-<span class="S0"> </span>start<span class="S10">,</span>
-<span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>end<span class="S10">)</span>
-<span class="S0"> </span><span class="S10">=</span>
-<span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
-<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span>
-<span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>CodePage<span class="S10">()</span><span class="S0">
- </span><span class="S5">const</span><span class="S0"> </span>
-<span class="S10">=</span><span class="S0"> </span><span class="S4">0</span>
-<span class="S10">;</span><br />
-<span class="S0">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">bool</span>
-<span class="S0"> </span>SCI_METHOD
-<span class="S0"> </span>IsDBCSLeadByte<span class="S10">(</span><span class="S5">char</span>
-<span class="S0"> </span>ch<span class="S10">)</span>
-<span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span>
-<span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>Version<span class="S10">()</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>SetErrorStatus<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>status<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span>Sci_Position<span class="S0"> </span>SCI_METHOD<span class="S0"> </span>Length<span class="S10">()</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>GetCharRange<span class="S10">(</span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span>buffer<span class="S10">,</span><span class="S0"> </span>Sci_Position<span class="S0"> </span>position<span class="S10">,</span><span class="S0"> </span>Sci_Position<span class="S0"> </span>lengthRetrieve<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>StyleAt<span class="S10">(</span>Sci_Position<span class="S0"> </span>position<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span>Sci_Position<span class="S0"> </span>SCI_METHOD<span class="S0"> </span>LineFromPosition<span class="S10">(</span>Sci_Position<span class="S0"> </span>position<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span>Sci_Position<span class="S0"> </span>SCI_METHOD<span class="S0"> </span>LineStart<span class="S10">(</span>Sci_Position<span class="S0"> </span>line<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>GetLevel<span class="S10">(</span>Sci_Position<span class="S0"> </span>line<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>SetLevel<span class="S10">(</span>Sci_Position<span class="S0"> </span>line<span class="S10">,</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>level<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>GetLineState<span class="S10">(</span>Sci_Position<span class="S0"> </span>line<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>SetLineState<span class="S10">(</span>Sci_Position<span class="S0"> </span>line<span class="S10">,</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>state<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>StartStyling<span class="S10">(</span>Sci_Position<span class="S0"> </span>position<span class="S10">,</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span>mask<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">bool</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>SetStyleFor<span class="S10">(</span>Sci_Position<span class="S0"> </span>length<span class="S10">,</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span>style<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">bool</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>SetStyles<span class="S10">(</span>Sci_Position<span class="S0"> </span>length<span class="S10">,</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span>styles<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>DecorationSetCurrentIndicator<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>indicator<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>DecorationFillRange<span class="S10">(</span>Sci_Position<span class="S0"> </span>position<span class="S10">,</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>value<span class="S10">,</span><span class="S0"> </span>Sci_Position<span class="S0"> </span>fillLength<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>ChangeLexerState<span class="S10">(</span>Sci_Position<span class="S0"> </span>start<span class="S10">,</span><span class="S0"> </span>Sci_Position<span class="S0"> </span>end<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>CodePage<span class="S10">()</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">bool</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>IsDBCSLeadByte<span class="S10">(</span><span class="S5">char</span><span class="S0"> </span>ch<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>BufferPointer<span class="S10">()</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>GetLineIndentation<span class="S10">(</span>Sci_Position<span class="S0"> </span>line<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S10">};</span><br />
 </div>
 
@@ -6609,9 +6476,9 @@ bytes in the character.
 <div class="highlighted">
 <span class="S5">class</span><span class="S0"> </span>IDocumentWithLineEnd<span class="S0"> </span><span class="S10">:</span><span class="S0"> </span><span class="S5">public</span><span class="S0"> </span>IDocument<span class="S0"> </span><span class="S10">{</span><br />
 <span class="S5">public</span><span class="S10">:</span><br />
-<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>LineEnd<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>line<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
-<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>GetRelativePosition<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>positionStart<span class="S10">,</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>characterOffset<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
-<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>GetCharacterAndWidth<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>position<span class="S10">,</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span><span class="S10">*</span>pWidth<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span>Sci_Position<span class="S0"> </span>SCI_METHOD<span class="S0"> </span>LineEnd<span class="S10">(</span>Sci_Position<span class="S0"> </span>line<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span>Sci_Position<span class="S0"> </span>SCI_METHOD<span class="S0"> </span>GetRelativePosition<span class="S10">(</span>Sci_Position<span class="S0"> </span>positionStart<span class="S10">,</span><span class="S0"> </span>Sci_Position<span class="S0"> </span>characterOffset<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>GetCharacterAndWidth<span class="S10">(</span>Sci_Position<span class="S0"> </span>position<span class="S10">,</span><span class="S0"> </span>Sci_Position<span class="S0"> </span><span class="S10">*</span>pWidth<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S10">};</span><br />
 </div>
 
