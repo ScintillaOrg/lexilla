@@ -1211,6 +1211,10 @@ PRectangle ScintillaGTK::GetClientRectangle() const {
 	// Move to origin
 	rc.right -= rc.left;
 	rc.bottom -= rc.top;
+	if (rc.bottom < 0)
+		rc.bottom = 0;
+	if (rc.right < 0)
+		rc.right = 0;
 	rc.left = 0;
 	rc.top = 0;
 	return rc;
