@@ -19,8 +19,15 @@ extern "C" {
 #define SCINTILLA_CLASS(klass)  G_TYPE_CHECK_CLASS_CAST (klass, scintilla_get_type (), ScintillaClass)
 #define IS_SCINTILLA(obj)       G_TYPE_CHECK_INSTANCE_TYPE (obj, scintilla_get_type ())
 
+#define SCINTILLA_TYPE_OBJECT             (scintilla_object_get_type())
+#define SCINTILLA_OBJECT(obj)             (G_TYPE_CHECK_INSTANCE_CAST((obj), SCINTILLA_TYPE_OBJECT, ScintillaObject))
+#define SCINTILLA_IS_OBJECT(obj)          (G_TYPE_CHECK_INSTANCE_TYPE ((obj), SCINTILLA_TYPE_OBJECT))
+#define SCINTILLA_OBJECT_CLASS(klass)     (G_TYPE_CHECK_CLASS_CAST((klass), SCINTILLA_TYPE_OBJECT, ScintillaObjectClass))
+#define SCINTILLA_IS_OBJECT_CLASS(klass)  (G_TYPE_CHECK_CLASS_TYPE((klass), SCINTILLA_TYPE_OBJECT))
+#define SCINTILLA_OBJECT_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS((obj), SCINTILLA_TYPE_OBJECT, ScintillaObjectClass))
+
 typedef struct _ScintillaObject ScintillaObject;
-typedef struct _ScintillaClass  ScintillaClass;
+typedef struct _ScintillaClass  ScintillaObjectClass;
 
 struct _ScintillaObject {
 	GtkContainer cont;
@@ -34,11 +41,21 @@ struct _ScintillaClass {
 	void (* notify) (ScintillaObject *ttt);
 };
 
+GType		scintilla_object_get_type		(void);
+GtkWidget*	scintilla_object_new			(void);
+long		scintilla_object_send_message	(ScintillaObject *sci, unsigned int iMessage, guintptr wParam, gintptr lParam);
+
+#ifndef G_IR_SCANNING
+/* The following declarations are preserved for compatibility reasons. However, they confuse
+ * the g-ir-scanner program */
+typedef struct _ScintillaClass  ScintillaClass;
+
 GType		scintilla_get_type	(void);
 GtkWidget*	scintilla_new		(void);
 void		scintilla_set_id	(ScintillaObject *sci, uptr_t id);
 sptr_t		scintilla_send_message	(ScintillaObject *sci,unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 void		scintilla_release_resources(void);
+#endif
 
 #define SCINTILLA_NOTIFY "sci-notify"
 

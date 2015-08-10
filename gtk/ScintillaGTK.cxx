@@ -3058,9 +3058,15 @@ sptr_t ScintillaGTK::DirectFunction(
 	return reinterpret_cast<ScintillaGTK *>(ptr)->WndProc(iMessage, wParam, lParam);
 }
 
+/* old name for compatibility */
 sptr_t scintilla_send_message(ScintillaObject *sci, unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	ScintillaGTK *psci = static_cast<ScintillaGTK *>(sci->pscin);
 	return psci->WndProc(iMessage, wParam, lParam);
+}
+
+sptr_t scintilla_object_send_message(ScintillaObject *sci, unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
+
+	return scintilla_send_message(sci, iMessage, wParam, lParam);
 }
 
 static void scintilla_class_init(ScintillaClass *klass);
@@ -3069,15 +3075,16 @@ static void scintilla_init(ScintillaObject *sci);
 extern void Platform_Initialise();
 extern void Platform_Finalise();
 
+/* old name for compatibility */
 GType scintilla_get_type() {
 	static GType scintilla_type = 0;
 	try {
 
 		if (!scintilla_type) {
-			scintilla_type = g_type_from_name("Scintilla");
+			scintilla_type = g_type_from_name("ScintillaObject");
 			if (!scintilla_type) {
 				static GTypeInfo scintilla_info = {
-					(guint16) sizeof (ScintillaClass),
+					(guint16) sizeof (ScintillaObjectClass),
 					NULL, //(GBaseInitFunc)
 					NULL, //(GBaseFinalizeFunc)
 					(GClassInitFunc) scintilla_class_init,
@@ -3088,15 +3095,19 @@ GType scintilla_get_type() {
 					(GInstanceInitFunc) scintilla_init,
 					NULL //(GTypeValueTable*)
 				};
-
 				scintilla_type = g_type_register_static(
-				            GTK_TYPE_CONTAINER, "Scintilla", &scintilla_info, (GTypeFlags) 0);
+				            GTK_TYPE_CONTAINER, "ScintillaObject", &scintilla_info, (GTypeFlags) 0);
 			}
 		}
 
 	} catch (...) {
 	}
 	return scintilla_type;
+}
+
+GType scintilla_object_get_type() {
+
+	return scintilla_get_type();
 }
 
 void ScintillaGTK::ClassInit(OBJECT_CLASS* object_class, GtkWidgetClass *widget_class, GtkContainerClass *container_class) {
@@ -3203,11 +3214,17 @@ static void scintilla_init(ScintillaObject *sci) {
 	}
 }
 
+/* old name for compatibility */
 GtkWidget* scintilla_new() {
 	GtkWidget *widget = GTK_WIDGET(g_object_new(scintilla_get_type(), NULL));
 	gtk_widget_set_direction(widget, GTK_TEXT_DIR_LTR);
 
 	return widget;
+}
+
+GtkWidget *scintilla_object_new() {
+
+	return scintilla_new();
 }
 
 void scintilla_set_id(ScintillaObject *sci, uptr_t id) {
