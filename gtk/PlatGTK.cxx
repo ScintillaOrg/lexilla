@@ -459,6 +459,8 @@ const char *CharacterSetID(int characterSet) {
 		return "ASCII";
 	case SC_CHARSET_RUSSIAN:
 		return "KOI8-R";
+	case SC_CHARSET_OEM866:
+		return "CP866";
 	case SC_CHARSET_CYRILLIC:
 		return "CP1251";
 	case SC_CHARSET_SHIFTJIS:
