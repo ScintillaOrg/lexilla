@@ -1426,6 +1426,7 @@ void ScintillaCocoa::StartDrag()
       CGContextRef gcsw = sw->GetContext();
       NSGraphicsContext *nsgc = [NSGraphicsContext graphicsContextWithGraphicsPort: gcsw
                                                                            flipped: YES];
+      [NSGraphicsContext saveGraphicsState];
       [NSGraphicsContext setCurrentContext:nsgc];
       CGContextTranslateCTM(gcsw, -client.left, -client.top);
       Paint(sw, client);
@@ -1444,6 +1445,8 @@ void ScintillaCocoa::StartDrag()
       // XXX TODO: overwrite any part of the image that is not part of the
       //           selection to make it transparent.  right now we just use
       //           the full rectangle which may include non-selected text.
+
+      [NSGraphicsContext restoreGraphicsState];
     }
     sw->Release();
     delete sw;
