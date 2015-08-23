@@ -1949,10 +1949,15 @@ void Editor::AddCharUTF(const char *s, unsigned int len, bool treatAsDBCS) {
 }
 
 void Editor::FillVirtualSpace() {
-	const bool tmpOverstrike = inOverstrike;
-	inOverstrike = false;         // not allow to be deleted twice.
-	AddCharUTF("", 0);
-	inOverstrike = tmpOverstrike;
+	// Make positions for the first composition string.
+	for (size_t r=0; r<sel.Count(); r++) {
+		if (!RangeContainsProtected(sel.Range(r).Start().Position(),
+			sel.Range(r).End().Position())) {
+			int positionInsert = sel.Range(r).Start().Position();
+			InsertSpace(positionInsert, sel.Range(r).caret.VirtualSpace());
+			sel.Range(r).ClearVirtualSpace();
+		}
+	}
 }
 
 void Editor::InsertPaste(const char *text, int len) {
