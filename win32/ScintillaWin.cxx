@@ -183,6 +183,23 @@ public:
 	DropTarget();
 };
 
+namespace {
+
+class IMContext {
+	HWND hwnd;
+public:
+	HIMC hIMC;
+	IMContext(HWND hwnd_) :
+		hwnd(hwnd_), hIMC(::ImmGetContext(hwnd_)) {
+	}
+	~IMContext() {
+		if (hIMC)
+			::ImmReleaseContext(hwnd, hIMC);
+	}
+};
+
+}
+
 /**
  */
 class ScintillaWin :
@@ -777,10 +794,10 @@ sptr_t ScintillaWin::WndPaint(uptr_t wParam) {
 
 sptr_t ScintillaWin::HandleCompositionWindowed(uptr_t wParam, sptr_t lParam) {
 	if (lParam & GCS_RESULTSTR) {
-		HIMC hIMC = ::ImmGetContext(MainHWND());
-		if (hIMC) {
+		IMContext imc(MainHWND());
+		if (imc.hIMC) {
 			wchar_t wcs[maxLenInputIME];
-			LONG bytes = ::ImmGetCompositionStringW(hIMC,
+			LONG bytes = ::ImmGetCompositionStringW(imc.hIMC,
 				GCS_RESULTSTR, wcs, (maxLenInputIME-1)*2);
 			int wides = bytes / 2;
 			if (IsUnicodeMode()) {
@@ -803,8 +820,7 @@ sptr_t ScintillaWin::HandleCompositionWindowed(uptr_t wParam, sptr_t lParam) {
 			CompForm.dwStyle = CFS_POINT;
 			CompForm.ptCurrentPos.x = static_cast<int>(pos.x);
 			CompForm.ptCurrentPos.y = static_cast<int>(pos.y);
-			::ImmSetCompositionWindow(hIMC, &CompForm);
-			::ImmReleaseContext(MainHWND(), hIMC);
+			::ImmSetCompositionWindow(imc.hIMC, &CompForm);
 		}
 		return 0;
 	}
@@ -841,16 +857,15 @@ void ScintillaWin::DrawImeIndicator(int indicator, int len) {
 }
 
 void ScintillaWin::SetCandidateWindowPos() {
-	HIMC hIMC = ::ImmGetContext(MainHWND());
-	if (hIMC) {
+	IMContext imc(MainHWND());
+	if (imc.hIMC) {
 		Point pos = PointMainCaret();
 		CANDIDATEFORM CandForm;
 		CandForm.dwIndex = 0;
 		CandForm.dwStyle = CFS_CANDIDATEPOS;
 		CandForm.ptCurrentPos.x = static_cast<int>(pos.x);
 		CandForm.ptCurrentPos.y = static_cast<int>(pos.y + vs.lineHeight);
-		::ImmSetCandidateWindow(hIMC, &CandForm);
-		::ImmReleaseContext(MainHWND(), hIMC);
+		::ImmSetCandidateWindow(imc.hIMC, &CandForm);
 	}
 }
 
@@ -922,15 +937,14 @@ void ScintillaWin::EscapeHanja() {
 
 	std::wstring uniChar = StringDecode(oneChar, CodePageOfDocument());
 
-	HIMC hIMC=ImmGetContext(MainHWND());
-	if (hIMC) {
+	IMContext imc(MainHWND());
+	if (imc.hIMC) {
 		// Set the candidate box position since IME may show it.
 		SetCandidateWindowPos();
 		// IME_ESC_HANJA_MODE appears to receive the first character only.
-		if (ImmEscapeW(GetKeyboardLayout(0), hIMC, IME_ESC_HANJA_MODE, &uniChar[0])) { 
+		if (ImmEscapeW(GetKeyboardLayout(0), imc.hIMC, IME_ESC_HANJA_MODE, &uniChar[0])) {
 			SetSelection (currentPos, currentPos + oneCharLen);
 		}
-		::ImmReleaseContext(MainHWND(), hIMC);
 	}
 }
 
@@ -952,8 +966,8 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 	// Copy & paste by johnsonj with a lot of helps of Neil.
 	// Great thanks for my foreruners, jiniya and BLUEnLIVE.
 
-	HIMC hIMC = ::ImmGetContext(MainHWND());
-	if (!hIMC) {
+	IMContext imc(MainHWND());
+	if (!imc.hIMC) {
 		return 0;
 	}
 
@@ -970,12 +984,11 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 	if (lParam & GCS_COMPSTR) {
 		wchar_t wcs[maxLenInputIME] = { 0 };
 		long bytes = ::ImmGetCompositionStringW
-			(hIMC, GCS_COMPSTR, wcs, maxLenInputIME);
+			(imc.hIMC, GCS_COMPSTR, wcs, maxLenInputIME);
 		unsigned int wcsLen = bytes / 2;
 
 		if ((wcsLen == 0) || (wcsLen >= maxLenInputIME)) {
 			ShowCaretAtCurrentPosition();
-			::ImmReleaseContext(MainHWND(), hIMC);
 			return 0;
 		}
 
@@ -986,10 +999,10 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 		unsigned int imeCursorPos = 0;
 
 		if (lParam & GCS_COMPATTR) {
-			ImmGetCompositionStringW(hIMC, GCS_COMPATTR, compAttr, sizeof(compAttr));
+			ImmGetCompositionStringW(imc.hIMC, GCS_COMPATTR, compAttr, sizeof(compAttr));
 		}
 		if (lParam & GCS_CURSORPOS) {
-			imeCursorPos = ImmGetCompositionStringW(hIMC, GCS_CURSORPOS, NULL, 0);
+			imeCursorPos = ImmGetCompositionStringW(imc.hIMC, GCS_CURSORPOS, NULL, 0);
 		}
 
 		// Display character by character.
@@ -1047,7 +1060,7 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 	} else if (lParam & GCS_RESULTSTR) {
 		wchar_t wcs[maxLenInputIME] = { 0 };
 		long bytes = ::ImmGetCompositionStringW
-			(hIMC, GCS_RESULTSTR, wcs, maxLenInputIME);
+			(imc.hIMC, GCS_RESULTSTR, wcs, maxLenInputIME);
 		unsigned int wcsLen = bytes / 2;
 
 		for (size_t i = 0; i < wcsLen;) {
@@ -1071,7 +1084,6 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 	EnsureCaretVisible();
 	SetCandidateWindowPos();
 	ShowCaretAtCurrentPosition();
-	::ImmReleaseContext(MainHWND(), hIMC);
 	return 0;
 }
 
@@ -1319,9 +1331,8 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 		case WM_LBUTTONDOWN: {
 			// For IME, set the composition string as the result string.
-			HIMC hIMC = ::ImmGetContext(MainHWND());
-			::ImmNotifyIME(hIMC, NI_COMPOSITIONSTR, CPS_COMPLETE, 0);
-			::ImmReleaseContext(MainHWND(), hIMC);
+			IMContext imc(MainHWND());
+			::ImmNotifyIME(imc.hIMC, NI_COMPOSITIONSTR, CPS_COMPLETE, 0);
 			//
 			//Platform::DebugPrintf("Buttdown %d %x %x %x %x %x\n",iMessage, wParam, lParam,
 			//	Platform::IsKeyDown(VK_SHIFT),
@@ -1478,10 +1489,9 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 					DestroySystemCaret();
 				}
 				// Explicitly complete any IME composition
-				HIMC hIMC = ImmGetContext(MainHWND());
-				if (hIMC) {
-					::ImmNotifyIME(hIMC, NI_COMPOSITIONSTR, CPS_COMPLETE, 0);
-					::ImmReleaseContext(MainHWND(), hIMC);
+				IMContext imc(MainHWND());
+				if (imc.hIMC) {
+					::ImmNotifyIME(imc.hIMC, NI_COMPOSITIONSTR, CPS_COMPLETE, 0);
 				}
 			}
 			break;
@@ -2571,14 +2581,14 @@ DropTarget::DropTarget() {
 void ScintillaWin::ImeStartComposition() {
 	if (caret.active) {
 		// Move IME Window to current caret position
-		HIMC hIMC = ::ImmGetContext(MainHWND());
+		IMContext imc(MainHWND());
 		Point pos = PointMainCaret();
 		COMPOSITIONFORM CompForm;
 		CompForm.dwStyle = CFS_POINT;
 		CompForm.ptCurrentPos.x = static_cast<int>(pos.x);
 		CompForm.ptCurrentPos.y = static_cast<int>(pos.y);
 
-		::ImmSetCompositionWindow(hIMC, &CompForm);
+		::ImmSetCompositionWindow(imc.hIMC, &CompForm);
 
 		// Set font of IME window to same as surrounded text.
 		if (stylesValid) {
@@ -2605,9 +2615,8 @@ void ScintillaWin::ImeStartComposition() {
 				UTF16FromUTF8(fontName, strlen(fontName)+1, lf.lfFaceName, LF_FACESIZE);
 			}
 
-			::ImmSetCompositionFontW(hIMC, &lf);
+			::ImmSetCompositionFontW(imc.hIMC, &lf);
 		}
-		::ImmReleaseContext(MainHWND(), hIMC);
 		// Caret is displayed in IME window. So, caret in Scintilla is useless.
 		DropCaret();
 	}
