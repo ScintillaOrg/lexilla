@@ -1433,6 +1433,7 @@ class ListBoxX : public ListBox {
 	WindowID scroller;
 	void *pixhash;
 	GtkCellRenderer* pixbuf_renderer;
+	GtkCellRenderer* renderer;
 	RGBAImageSet images;
 	int desiredVisibleRows;
 	unsigned int maxItemCharacters;
@@ -1442,6 +1443,7 @@ public:
 	void *doubleClickActionData;
 
 	ListBoxX() : widCached(0), frame(0), list(0), scroller(0), pixhash(NULL), pixbuf_renderer(0),
+		renderer(0),
 		desiredVisibleRows(5), maxItemCharacters(0),
 		aveCharWidth(1), doubleClickAction(NULL), doubleClickActionData(NULL) {
 	}
@@ -1636,7 +1638,7 @@ void ListBoxX::Create(Window &, int, Point, int, bool, int) {
 	gtk_tree_view_column_add_attribute(column, pixbuf_renderer,
 										"pixbuf", PIXBUF_COLUMN);
 
-	GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
+	renderer = gtk_cell_renderer_text_new();
 	gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer), 1);
 	gtk_tree_view_column_pack_start(column, renderer, TRUE);
 	gtk_tree_view_column_add_attribute(column, renderer,
@@ -1659,6 +1661,8 @@ void ListBoxX::SetFont(Font &scint_font) {
 		// Current font is Pango font
 #if GTK_CHECK_VERSION(3,0,0)
 		gtk_widget_override_font(PWidget(list), PFont(scint_font)->pfd);
+		gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer), -1);
+		gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer), 1);
 #else
 		gtk_widget_modify_font(PWidget(list), PFont(scint_font)->pfd);
 #endif
