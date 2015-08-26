@@ -1571,7 +1571,11 @@ static void StyleSet(GtkWidget *w, GtkStyle*, void*) {
 	recursive calls to this function after the value is updated and w->style to
 	be set to a new object */
 
-#if GTK_CHECK_VERSION(3,0,0)
+#if GTK_CHECK_VERSION(3,16,0)
+	// On recent releases of GTK+, it does not appear necessary to set the list box colours.
+	// This may be because of common themes and may be needed with other themes.
+	// The *override* calls are deprecated now, so only call them for older versions of GTK+.
+#elif GTK_CHECK_VERSION(3,0,0)
 	GtkStyleContext *styleContext = gtk_widget_get_style_context(w);
 	if (styleContext == NULL)
 		return;
