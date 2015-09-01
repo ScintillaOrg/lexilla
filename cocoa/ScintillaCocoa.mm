@@ -947,16 +947,17 @@ bool ScintillaCocoa::FineTickerRunning(TickReason reason)
 void ScintillaCocoa::FineTickerStart(TickReason reason, int millis, int tolerance)
 {
   FineTickerCancel(reason);
-  NSTimer *fineTimer = [NSTimer scheduledTimerWithTimeInterval: millis / 1000.0
-                                                        target: timerTarget
-                                                      selector: @selector(timerFired:)
-                                                      userInfo: nil
-                                                       repeats: YES];
+  NSTimer *fineTimer = [NSTimer timerWithTimeInterval: millis / 1000.0
+                                               target: timerTarget
+                                             selector: @selector(timerFired:)
+                                             userInfo: nil
+                                              repeats: YES];
   if (tolerance && [fineTimer respondsToSelector: @selector(setTolerance:)])
   {
     [fineTimer setTolerance: tolerance / 1000.0];
   }
   timers[reason] = fineTimer;
+  [[NSRunLoop currentRunLoop] addTimer:fineTimer forMode:NSDefaultRunLoopMode];
 }
 
 //--------------------------------------------------------------------------------------------------
