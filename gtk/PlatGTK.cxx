@@ -42,12 +42,6 @@
 
 #include "Converter.h"
 
-#if GTK_CHECK_VERSION(2,20,0)
-#define IS_WIDGET_FOCUSSED(w) (gtk_widget_has_focus(GTK_WIDGET(w)))
-#else
-#define IS_WIDGET_FOCUSSED(w) (GTK_WIDGET_HAS_FOCUS(w))
-#endif
-
 static const double kPi = 3.14159265358979323846;
 
 // The Pango version guard for pango_units_from_double and pango_units_to_double
@@ -1246,7 +1240,7 @@ void Window::Destroy() {
 }
 
 bool Window::HasFocus() {
-	return IS_WIDGET_FOCUSSED(wid);
+	return gtk_widget_has_focus(GTK_WIDGET(wid));
 }
 
 PRectangle Window::GetPosition() {

@@ -83,11 +83,9 @@
 #if GTK_CHECK_VERSION(2,20,0)
 #define IS_WIDGET_REALIZED(w) (gtk_widget_get_realized(GTK_WIDGET(w)))
 #define IS_WIDGET_MAPPED(w) (gtk_widget_get_mapped(GTK_WIDGET(w)))
-#define IS_WIDGET_VISIBLE(w) (gtk_widget_get_visible(GTK_WIDGET(w)))
 #else
 #define IS_WIDGET_REALIZED(w) (GTK_WIDGET_REALIZED(w))
 #define IS_WIDGET_MAPPED(w) (GTK_WIDGET_MAPPED(w))
-#define IS_WIDGET_VISIBLE(w) (GTK_WIDGET_VISIBLE(w))
 #endif
 
 #define SC_INDICATOR_INPUT INDIC_IME
@@ -573,7 +571,7 @@ void ScintillaGTK::UnRealize(GtkWidget *widget) {
 
 static void MapWidget(GtkWidget *widget) {
 	if (widget &&
-	        IS_WIDGET_VISIBLE(widget) &&
+	        gtk_widget_get_visible(GTK_WIDGET(widget)) &&
 	        !IS_WIDGET_MAPPED(widget)) {
 		gtk_widget_map(widget);
 	}
@@ -752,11 +750,7 @@ void ScintillaGTK::GetPreferredHeight(GtkWidget *widget, gint *minimalHeight, gi
 void ScintillaGTK::SizeAllocate(GtkWidget *widget, GtkAllocation *allocation) {
 	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
 	try {
-#if GTK_CHECK_VERSION(2,20,0)
 		gtk_widget_set_allocation(widget, allocation);
-#else
-		widget->allocation = *allocation;
-#endif
 		if (IS_WIDGET_REALIZED(widget))
 			gdk_window_move_resize(WindowFromWidget(widget),
 			        allocation->x,
@@ -776,13 +770,8 @@ void ScintillaGTK::Initialise() {
 	parentClass = reinterpret_cast<GtkWidgetClass *>(
 	                  g_type_class_ref(gtk_container_get_type()));
 
-#if GTK_CHECK_VERSION(2,20,0)
 	gtk_widget_set_can_focus(PWidget(wMain), TRUE);
 	gtk_widget_set_sensitive(PWidget(wMain), TRUE);
-#else
-	GTK_WIDGET_SET_FLAGS(PWidget(wMain), GTK_CAN_FOCUS);
-	GTK_WIDGET_SET_FLAGS(GTK_WIDGET(PWidget(wMain)), GTK_SENSITIVE);
-#endif
 	gtk_widget_set_events(PWidget(wMain),
 	                      GDK_EXPOSURE_MASK
 	                      | GDK_SCROLL_MASK
@@ -826,11 +815,7 @@ void ScintillaGTK::Initialise() {
 #else
 	scrollbarv = gtk_vscrollbar_new(GTK_ADJUSTMENT(adjustmentv));
 #endif
-#if GTK_CHECK_VERSION(2,20,0)
 	gtk_widget_set_can_focus(PWidget(scrollbarv), FALSE);
-#else
-	GTK_WIDGET_UNSET_FLAGS(PWidget(scrollbarv), GTK_CAN_FOCUS);
-#endif
 	g_signal_connect(G_OBJECT(adjustmentv), "value_changed",
 			   G_CALLBACK(ScrollSignal), this);
 	gtk_widget_set_parent(PWidget(scrollbarv), PWidget(wMain));
@@ -842,11 +827,7 @@ void ScintillaGTK::Initialise() {
 #else
 	scrollbarh = gtk_hscrollbar_new(GTK_ADJUSTMENT(adjustmenth));
 #endif
-#if GTK_CHECK_VERSION(2,20,0)
 	gtk_widget_set_can_focus(PWidget(scrollbarh), FALSE);
-#else
-	GTK_WIDGET_UNSET_FLAGS(PWidget(scrollbarh), GTK_CAN_FOCUS);
-#endif
 	g_signal_connect(G_OBJECT(adjustmenth), "value_changed",
 			   G_CALLBACK(ScrollHSignal), this);
 	gtk_widget_set_parent(PWidget(scrollbarh), PWidget(wMain));
@@ -3270,11 +3251,7 @@ static void scintilla_class_init(ScintillaClass *klass) {
 
 static void scintilla_init(ScintillaObject *sci) {
 	try {
-#if GTK_CHECK_VERSION(2,20,0)
 		gtk_widget_set_can_focus(GTK_WIDGET(sci), TRUE);
-#else
-		GTK_WIDGET_SET_FLAGS(sci, GTK_CAN_FOCUS);
-#endif
 		sci->pscin = new ScintillaGTK(sci);
 	} catch (...) {
 	}
