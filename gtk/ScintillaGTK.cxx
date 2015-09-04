@@ -2508,7 +2508,7 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 		} else {
 			// No tentative undo means start of this composition so
 			// fill in any virtual spaces.
-			FillVirtualSpace();
+			ClearBeforeTentativeStart();
 		}
 
 		PreEditString preeditStr(im_context);

@@ -976,7 +976,7 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 	} else {
 		// No tentative undo means start of this composition so
 		// fill in any virtual spaces.
-		FillVirtualSpace();
+		ClearBeforeTentativeStart();
 	}
 
 	view.imeCaretBlockOverride = false;

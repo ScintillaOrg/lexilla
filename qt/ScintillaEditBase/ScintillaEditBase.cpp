@@ -448,7 +448,7 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 	} else {
 		// No tentative undo means start of this composition so
 		// Fill in any virtual spaces.
-		sqt->FillVirtualSpace();
+		sqt->ClearBeforeTentativeStart();
 	}
 
 	sqt->view.imeCaretBlockOverride = false;

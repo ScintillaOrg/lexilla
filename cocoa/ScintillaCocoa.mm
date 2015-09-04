@@ -2221,7 +2221,7 @@ void ScintillaCocoa::SelectOnlyMainSelection()
  */
 void ScintillaCocoa::ConvertSelectionVirtualSpace()
 {
-  FillVirtualSpace();
+  ClearBeforeTentativeStart();
 }
 
 //--------------------------------------------------------------------------------------------------

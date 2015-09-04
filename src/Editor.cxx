@@ -1948,12 +1948,21 @@ void Editor::AddCharUTF(const char *s, unsigned int len, bool treatAsDBCS) {
 	}
 }
 
-void Editor::FillVirtualSpace() {
+void Editor::ClearBeforeTentativeStart() {
 	// Make positions for the first composition string.
-	for (size_t r=0; r<sel.Count(); r++) {
+	for (size_t r = 0; r<sel.Count(); r++) {
 		if (!RangeContainsProtected(sel.Range(r).Start().Position(),
 			sel.Range(r).End().Position())) {
 			int positionInsert = sel.Range(r).Start().Position();
+			if (!sel.Range(r).Empty()) {
+				if (sel.Range(r).Length()) {
+					pdoc->DeleteChars(positionInsert, sel.Range(r).Length());
+					sel.Range(r).ClearVirtualSpace();
+				} else {
+					// Range is all virtual so collapse to start of virtual space
+					sel.Range(r).MinimizeVirtualSpace();
+				}
+			}
 			InsertSpace(positionInsert, sel.Range(r).caret.VirtualSpace());
 			sel.Range(r).ClearVirtualSpace();
 		}
