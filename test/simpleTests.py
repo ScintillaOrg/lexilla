@@ -1577,6 +1577,7 @@ class TestCharacterNavigation(unittest.TestCase):
 		tv = t.encode("UTF-8")
 		self.ed.SetContents(tv)
 		self.assertEquals(self.ed.PositionRelative(1, 2), 6)
+		self.assertEquals(self.ed.CountCharacters(1, 6), 2)
 		self.assertEquals(self.ed.PositionRelative(6, -2), 1)
 		pos = 0
 		previous = 0
@@ -1592,6 +1593,13 @@ class TestCharacterNavigation(unittest.TestCase):
 			self.assert_(after < pos)
 			self.assert_(after < previous)
 			previous = after
+
+	def testLineEnd(self):
+		t = "a\r\nb\nc"
+		tv = t.encode("UTF-8")
+		self.ed.SetContents(tv)
+		for i in range(0, len(t)):
+			self.assertEquals(self.ed.CountCharacters(0, i), i)
 
 class TestCaseMapping(unittest.TestCase):
 	def setUp(self):
