@@ -74,11 +74,7 @@ static cairo_surface_t *CreateSimilarSurface(GdkWindow *window, cairo_content_t 
 }
 
 static GdkWindow *WindowFromWidget(GtkWidget *w) {
-#if GTK_CHECK_VERSION(3,0,0)
 	return gtk_widget_get_window(w);
-#else
-	return w->window;
-#endif
 }
 
 #ifdef _MSC_VER
@@ -1248,11 +1244,7 @@ PRectangle Window::GetPosition() {
 	PRectangle rc(0, 0, 1000, 1000);
 	if (wid) {
 		GtkAllocation allocation;
-#if GTK_CHECK_VERSION(3,0,0)
 		gtk_widget_get_allocation(PWidget(wid), &allocation);
-#else
-		allocation = PWidget(wid)->allocation;
-#endif
 		rc.left = allocation.x;
 		rc.top = allocation.y;
 		if (allocation.width > 20) {
@@ -1911,14 +1903,12 @@ void ListBoxX::Select(int n) {
 #if GTK_CHECK_VERSION(3,0,0)
 		GtkAdjustment *adj =
 			gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(list));
-		gfloat value = ((gfloat)n / total) * (gtk_adjustment_get_upper(adj) - gtk_adjustment_get_lower(adj))
-							+ gtk_adjustment_get_lower(adj) - gtk_adjustment_get_page_size(adj) / 2;
 #else
 		GtkAdjustment *adj =
 			gtk_tree_view_get_vadjustment(GTK_TREE_VIEW(list));
-		gfloat value = ((gfloat)n / total) * (adj->upper - adj->lower)
-							+ adj->lower - adj->page_size / 2;
 #endif
+		gfloat value = ((gfloat)n / total) * (gtk_adjustment_get_upper(adj) - gtk_adjustment_get_lower(adj))
+							+ gtk_adjustment_get_lower(adj) - gtk_adjustment_get_page_size(adj) / 2;
 		// Get cell height
 		int row_height = GetRowHeight();
 
@@ -1932,13 +1922,8 @@ void ListBoxX::Select(int n) {
 		}
 		// Clamp it.
 		value = (value < 0)? 0 : value;
-#if GTK_CHECK_VERSION(3,0,0)
 		value = (value > (gtk_adjustment_get_upper(adj) - gtk_adjustment_get_page_size(adj)))?
 					(gtk_adjustment_get_upper(adj) - gtk_adjustment_get_page_size(adj)) : value;
-#else
-		value = (value > (adj->upper - adj->page_size))?
-					(adj->upper - adj->page_size) : value;
-#endif
 
 		// Set it.
 		gtk_adjustment_set_value(adj, value);

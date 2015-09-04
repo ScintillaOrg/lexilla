@@ -94,11 +94,7 @@
 #define SC_INDICATOR_UNKNOWN INDIC_IME_MAX
 
 static GdkWindow *WindowFromWidget(GtkWidget *w) {
-#if GTK_CHECK_VERSION(3,0,0)
 	return gtk_widget_get_window(w);
-#else
-	return w->window;
-#endif
 }
 
 #ifdef _MSC_VER
@@ -116,11 +112,7 @@ using namespace Scintilla;
 
 static GdkWindow *PWindow(const Window &w) {
 	GtkWidget *widget = reinterpret_cast<GtkWidget *>(w.GetID());
-#if GTK_CHECK_VERSION(3,0,0)
 	return gtk_widget_get_window(widget);
-#else
-	return widget->window;
-#endif
 }
 
 extern std::string UTF8FromLatin1(const char *s, int len);
@@ -458,11 +450,7 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	GdkWindowAttr attrs;
 	attrs.window_type = GDK_WINDOW_CHILD;
 	GtkAllocation allocation;
-#if GTK_CHECK_VERSION(3,0,0)
 	gtk_widget_get_allocation(widget, &allocation);
-#else
-	allocation = widget->allocation;
-#endif
 	attrs.x = allocation.x;
 	attrs.y = allocation.y;
 	attrs.width = allocation.width;
@@ -1228,7 +1216,6 @@ bool ScintillaGTK::ModifyScrollBars(int nMax, int nPage) {
 	bool modified = false;
 	int pageScroll = LinesToScroll();
 
-#if GTK_CHECK_VERSION(3,0,0)
 	if (gtk_adjustment_get_upper(adjustmentv) != (nMax + 1) ||
 	        gtk_adjustment_get_page_size(adjustmentv) != nPage ||
 	        gtk_adjustment_get_page_increment(adjustmentv) != pageScroll) {
@@ -1238,17 +1225,6 @@ bool ScintillaGTK::ModifyScrollBars(int nMax, int nPage) {
 		gtk_adjustment_changed(GTK_ADJUSTMENT(adjustmentv));
 		modified = true;
 	}
-#else
-	if (GTK_ADJUSTMENT(adjustmentv)->upper != (nMax + 1) ||
-	        GTK_ADJUSTMENT(adjustmentv)->page_size != nPage ||
-	        GTK_ADJUSTMENT(adjustmentv)->page_increment != pageScroll) {
-		GTK_ADJUSTMENT(adjustmentv)->upper = nMax + 1;
-		GTK_ADJUSTMENT(adjustmentv)->page_size = nPage;
-		GTK_ADJUSTMENT(adjustmentv)->page_increment = pageScroll;
-		gtk_adjustment_changed(GTK_ADJUSTMENT(adjustmentv));
-		modified = true;
-	}
-#endif
 
 	PRectangle rcText = GetTextRectangle();
 	int horizEndPreferred = scrollWidth;
@@ -1257,7 +1233,6 @@ bool ScintillaGTK::ModifyScrollBars(int nMax, int nPage) {
 	unsigned int pageWidth = rcText.Width();
 	unsigned int pageIncrement = pageWidth / 3;
 	unsigned int charWidth = vs.styles[STYLE_DEFAULT].aveCharWidth;
-#if GTK_CHECK_VERSION(3,0,0)
 	if (gtk_adjustment_get_upper(adjustmenth) != horizEndPreferred ||
 	        gtk_adjustment_get_page_size(adjustmenth) != pageWidth ||
 	        gtk_adjustment_get_page_increment(adjustmenth) != pageIncrement ||
@@ -1269,19 +1244,6 @@ bool ScintillaGTK::ModifyScrollBars(int nMax, int nPage) {
 		gtk_adjustment_changed(GTK_ADJUSTMENT(adjustmenth));
 		modified = true;
 	}
-#else
-	if (GTK_ADJUSTMENT(adjustmenth)->upper != horizEndPreferred ||
-	        GTK_ADJUSTMENT(adjustmenth)->page_size != pageWidth ||
-	        GTK_ADJUSTMENT(adjustmenth)->page_increment != pageIncrement ||
-	        GTK_ADJUSTMENT(adjustmenth)->step_increment != charWidth) {
-		GTK_ADJUSTMENT(adjustmenth)->upper = horizEndPreferred;
-		GTK_ADJUSTMENT(adjustmenth)->step_increment = charWidth;
-		GTK_ADJUSTMENT(adjustmenth)->page_size = pageWidth;
-		GTK_ADJUSTMENT(adjustmenth)->page_increment = pageIncrement;
-		gtk_adjustment_changed(GTK_ADJUSTMENT(adjustmenth));
-		modified = true;
-	}
-#endif
 	if (modified && (paintState == painting)) {
 		repaintFullWindow = true;
 	}
@@ -1555,17 +1517,10 @@ void ScintillaGTK::ClaimSelection() {
 	}
 }
 
-#if GTK_CHECK_VERSION(3,0,0)
 static const guchar *DataOfGSD(GtkSelectionData *sd) { return gtk_selection_data_get_data(sd); }
 static gint LengthOfGSD(GtkSelectionData *sd) { return gtk_selection_data_get_length(sd); }
 static GdkAtom TypeOfGSD(GtkSelectionData *sd) { return gtk_selection_data_get_data_type(sd); }
 static GdkAtom SelectionOfGSD(GtkSelectionData *sd) { return gtk_selection_data_get_selection(sd); }
-#else
-static const guchar *DataOfGSD(GtkSelectionData *sd) { return sd->data; }
-static gint LengthOfGSD(GtkSelectionData *sd) { return sd->length; }
-static GdkAtom TypeOfGSD(GtkSelectionData *sd) { return sd->type; }
-static GdkAtom SelectionOfGSD(GtkSelectionData *sd) { return sd->selection; }
-#endif
 
 // Detect rectangular text, convert line ends to current mode, convert from or to UTF-8
 void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, SelectionText &selText) {
@@ -1820,13 +1775,8 @@ void ScintillaGTK::Resize(int width, int height) {
 
 static void SetAdjustmentValue(GtkAdjustment *object, int value) {
 	GtkAdjustment *adjustment = GTK_ADJUSTMENT(object);
-#if GTK_CHECK_VERSION(3,0,0)
 	int maxValue = static_cast<int>(
 		gtk_adjustment_get_upper(adjustment) - gtk_adjustment_get_page_size(adjustment));
-#else
-	int maxValue = static_cast<int>(
-		adjustment->upper - adjustment->page_size);
-#endif
 
 	if (value > maxValue)
 		value = maxValue;
@@ -2830,11 +2780,7 @@ gboolean ScintillaGTK::Expose(GtkWidget *, GdkEventExpose *ose) {
 
 void ScintillaGTK::ScrollSignal(GtkAdjustment *adj, ScintillaGTK *sciThis) {
 	try {
-#if GTK_CHECK_VERSION(3,0,0)
 		sciThis->ScrollTo(static_cast<int>(gtk_adjustment_get_value(adj)), false);
-#else
-		sciThis->ScrollTo(static_cast<int>(adj->value), false);
-#endif
 	} catch (...) {
 		sciThis->errorStatus = SC_STATUS_FAILURE;
 	}
@@ -2842,11 +2788,7 @@ void ScintillaGTK::ScrollSignal(GtkAdjustment *adj, ScintillaGTK *sciThis) {
 
 void ScintillaGTK::ScrollHSignal(GtkAdjustment *adj, ScintillaGTK *sciThis) {
 	try {
-#if GTK_CHECK_VERSION(3,0,0)
 		sciThis->HorizontalScrollTo(static_cast<int>(gtk_adjustment_get_value(adj)));
-#else
-		sciThis->HorizontalScrollTo(static_cast<int>(adj->value));
-#endif
 	} catch (...) {
 		sciThis->errorStatus = SC_STATUS_FAILURE;
 	}
@@ -2890,7 +2832,7 @@ gboolean ScintillaGTK::DragMotionThis(GdkDragContext *context,
 	try {
 		Point npt(x, y);
 		SetDragPosition(SPositionFromLocation(npt, false, false, UserVirtualSpace()));
-#if GTK_CHECK_VERSION(3,0,0)
+#if GTK_CHECK_VERSION(2,22,0)
 		GdkDragAction preferredAction = gdk_drag_context_get_suggested_action(context);
 		GdkDragAction actions = gdk_drag_context_get_actions(context);
 #else
@@ -2974,7 +2916,7 @@ void ScintillaGTK::DragDataGet(GtkWidget *widget, GdkDragContext *context,
 		if (!sciThis->sel.Empty()) {
 			sciThis->GetSelection(selection_data, info, &sciThis->drag);
 		}
-#if GTK_CHECK_VERSION(3,0,0)
+#if GTK_CHECK_VERSION(2,22,0)
 		GdkDragAction action = gdk_drag_context_get_selected_action(context);
 #else
 		GdkDragAction action = context->action;
