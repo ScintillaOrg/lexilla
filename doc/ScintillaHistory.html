@@ -509,6 +509,10 @@
 	This is sufficient to colour diagnotic output from gcc and clang when -fdiagnostics-color set.
 	</li>
 	<li>
+	The errorlist lexer allows the line number to be 0 in GCC errors as some tools report whole file
+	errors as line 0.
+	</li>
+	<li>
 	MySql lexer fixes empty comments /**/ so the comment state does not continue.
 	</li>
 	<li>
@@ -533,6 +537,10 @@
 	<li>
 	On Cocoa fix bug with drag and drop that could lead to crashes.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1751/">Bug #1751</a>.
+	</li>
+	<li>
+	Fix SciTE disk exhaustion bug by reporting failures when writing files.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1760/">Bug #1760</a>.
 	</li>
 	<li>
 	Fix find strip in SciTE on Windows XP to be visible.
