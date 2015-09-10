@@ -540,7 +540,7 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 
 			// Record character positions for moving ime caret.
 			numBytes += oneCharLen;
-			imeCharPos[i+1] = numBytes;
+			imeCharPos[i + ucWidth] = numBytes;
 
 			sqt->AddCharUTF(oneChar.data(), oneCharLen);
 

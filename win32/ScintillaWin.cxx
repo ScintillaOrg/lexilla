@@ -1031,7 +1031,7 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 
 			// Record compstr character positions for moving IME carets.
 			numBytes += oneCharLen;
-			imeCharPos[i + 1] = numBytes;
+			imeCharPos[i + ucWidth] = numBytes;
 
 			// Draw an indicator on the character.
 			int indicator = SC_INDICATOR_UNKNOWN;
