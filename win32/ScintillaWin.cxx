@@ -111,6 +111,12 @@
 #define SC_INDICATOR_CONVERTED INDIC_IME+2
 #define SC_INDICATOR_UNKNOWN INDIC_IME_MAX
 
+#ifndef SCS_CAP_SETRECONVERTSTRING
+#define SCS_CAP_SETRECONVERTSTRING 0x00000004
+#define SCS_QUERYRECONVERTSTRING 0x00020000
+#define SCS_SETRECONVERTSTRING 0x00010000
+#endif
+
 typedef BOOL (WINAPI *TrackMouseEventSig)(LPTRACKMOUSEEVENT);
 typedef UINT_PTR (WINAPI *SetCoalescableTimerSig)(HWND hwnd, UINT_PTR nIDEvent,
 	UINT uElapse, TIMERPROC lpTimerFunc, ULONG uToleranceDelay);
@@ -313,6 +319,7 @@ class ScintillaWin :
 	// DBCS
 	void ImeStartComposition();
 	void ImeEndComposition();
+	LRESULT ImeOnReconvert(LPARAM lParam);
 
 	void GetIntelliMouseParameters();
 	virtual void CopyToClipboard(const SelectionText &selectedText);
@@ -1464,6 +1471,13 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				}
 				return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 			}
+
+		case WM_IME_REQUEST: {
+			if  (wParam == IMR_RECONVERTSTRING) {
+				return ImeOnReconvert(lParam);
+			}
+			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
+		}
 
 		case WM_KEYUP:
 			//Platform::DebugPrintf("S keyup %d %x %x\n",iMessage, wParam, lParam);
@@ -2625,6 +2639,88 @@ void ScintillaWin::ImeStartComposition() {
 /** Called when IME Window closed. */
 void ScintillaWin::ImeEndComposition() {
 	ShowCaretAtCurrentPosition();
+}
+
+LRESULT ScintillaWin::ImeOnReconvert(LPARAM lParam) {
+	// Reconversion on windows limits within one line without eol.
+	// Look around:   baseStart  <--  (|mainStart|  -- mainEnd)  --> baseEnd.
+	const int mainStart = sel.RangeMain().Start().Position();
+	const int mainEnd = sel.RangeMain().End().Position();
+	const int curLine = pdoc->LineFromPosition(mainStart);
+	if (curLine != pdoc->LineFromPosition(mainEnd))
+		return 0;
+	const int baseStart = pdoc->LineStart(curLine);
+	const int baseEnd = pdoc->LineEnd(curLine);
+	if ((baseStart == baseEnd) || (mainEnd > baseEnd))
+		return 0;
+
+	const int codePage = CodePageOfDocument();
+	const std::wstring rcFeed = StringDecode(RangeText(baseStart, baseEnd), codePage);
+	const int rcFeedLen = static_cast<int>(rcFeed.length()) * sizeof(wchar_t);
+	const int rcSize = sizeof(RECONVERTSTRING) + rcFeedLen + sizeof(wchar_t);
+
+	RECONVERTSTRING *rc = (RECONVERTSTRING *)lParam;
+	if (!rc)
+		return rcSize; // Immediately be back with rcSize of memory block.
+
+	wchar_t *rcFeedStart = (wchar_t*)(rc + 1);
+	memcpy(rcFeedStart, &rcFeed[0], rcFeedLen);
+
+	std::string rcCompString = RangeText(mainStart, mainEnd);
+	std::wstring rcCompWstring = StringDecode(rcCompString, codePage);
+	std::string rcCompStart = RangeText(baseStart, mainStart);
+	std::wstring rcCompWstart = StringDecode(rcCompStart, codePage);
+
+	// Map selection to dwCompStr.
+	// No selection assumes current caret as rcCompString without length.
+	rc->dwVersion = 0; // It should be absolutely 0.
+	rc->dwStrLen = (DWORD)static_cast<int>(rcFeed.length());
+	rc->dwStrOffset = sizeof(RECONVERTSTRING);
+	rc->dwCompStrLen = (DWORD)static_cast<int>(rcCompWstring.length());
+	rc->dwCompStrOffset = (DWORD)static_cast<int>(rcCompWstart.length()) * sizeof(wchar_t);
+	rc->dwTargetStrLen = rc->dwCompStrLen;
+	rc->dwTargetStrOffset =rc->dwCompStrOffset; 
+
+	IMContext imc(MainHWND());
+	if (!imc.hIMC)
+		return 0;
+
+	if (!::ImmSetCompositionStringW(imc.hIMC, SCS_QUERYRECONVERTSTRING, rc, rcSize, NULL, 0))
+		return 0;
+
+	// No selection asks IME to fill target fields with its own value.
+	int tgWlen = rc->dwTargetStrLen;
+	int tgWstart = rc->dwTargetStrOffset / sizeof(wchar_t);
+
+	std::string tgCompStart = StringEncode(rcFeed.substr(0, tgWstart), codePage);
+	std::string tgComp = StringEncode(rcFeed.substr(tgWstart, tgWlen), codePage);
+
+	// No selection needs to adjust reconvert start position for IME set. 
+	int adjust = static_cast<int>(tgCompStart.length() - rcCompStart.length());
+	int docCompLen = static_cast<int>(tgComp.length());
+
+	// Make place for next composition string to sit in.
+	for (size_t r=0; r<sel.Count(); r++) {
+		int rBase = sel.Range(r).Start().Position();
+		int docCompStart = rBase + adjust;
+
+		if (inOverstrike) { // the docCompLen of bytes will be overstriked.
+			sel.Range(r).caret.SetPosition(docCompStart);
+			sel.Range(r).anchor.SetPosition(docCompStart);
+		} else {
+			// Ensure docCompStart+docCompLen be not beyond lineEnd.
+			// since docCompLen by byte might break eol.
+			int lineEnd = pdoc->LineEnd(pdoc->LineFromPosition(rBase));
+			int overflow = (docCompStart + docCompLen) - lineEnd;
+			if (overflow > 0) {
+				pdoc->DeleteChars(docCompStart, docCompLen - overflow);
+			} else {
+				pdoc->DeleteChars(docCompStart, docCompLen);
+			}
+		}
+	}
+	// Immediately Target Input or candidate box choice with GCS_COMPSTR.
+	return rcSize;
 }
 
 void ScintillaWin::GetIntelliMouseParameters() {
