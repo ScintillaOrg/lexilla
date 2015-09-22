@@ -478,7 +478,7 @@ void Editor::Redraw() {
 }
 
 void Editor::RedrawSelMargin(int line, bool allAfter) {
-	const bool markersInText = vs.maskInLine != 0;
+	const bool markersInText = vs.maskInLine || vs.maskDrawInText;
 	if (!wMargin.GetID() || markersInText) {	// May affect text area so may need to abandon and retry
 		if (AbandonPaint()) {
 			return;

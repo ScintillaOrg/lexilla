@@ -1408,27 +1408,26 @@ static void DrawTranslucentLineState(Surface *surface, const EditModel &model, c
 	if ((model.caret.active || vsDraw.alwaysShowCaretLineBackground) && vsDraw.showCaretLineBackground && ll->containsCaret) {
 		SimpleAlphaRectangle(surface, rcLine, vsDraw.caretLineBackground, vsDraw.caretLineAlpha);
 	}
-	int marks = model.pdoc->GetMark(line);
-	for (int markBit = 0; (markBit < 32) && marks; markBit++) {
-		if ((marks & 1) && (vsDraw.markers[markBit].markType == SC_MARK_BACKGROUND)) {
-			SimpleAlphaRectangle(surface, rcLine, vsDraw.markers[markBit].back, vsDraw.markers[markBit].alpha);
-		} else if ((marks & 1) && (vsDraw.markers[markBit].markType == SC_MARK_UNDERLINE)) {
-			PRectangle rcUnderline = rcLine;
-			rcUnderline.top = rcUnderline.bottom - 2;
-			SimpleAlphaRectangle(surface, rcUnderline, vsDraw.markers[markBit].back, vsDraw.markers[markBit].alpha);
-		}
-		marks >>= 1;
-	}
-	if (vsDraw.maskInLine) {
-		int marksMasked = model.pdoc->GetMark(line) & vsDraw.maskInLine;
-		if (marksMasked) {
-			for (int markBit = 0; (markBit < 32) && marksMasked; markBit++) {
-				if ((marksMasked & 1) && (vsDraw.markers[markBit].markType != SC_MARK_EMPTY)) {
-					SimpleAlphaRectangle(surface, rcLine, vsDraw.markers[markBit].back, vsDraw.markers[markBit].alpha);
-				}
-				marksMasked >>= 1;
+	const int marksOfLine = model.pdoc->GetMark(line);
+	int marksDrawnInText = marksOfLine & vsDraw.maskDrawInText;
+	for (int markBit = 0; (markBit < 32) && marksDrawnInText; markBit++) {
+		if (marksDrawnInText & 1) {
+			if (vsDraw.markers[markBit].markType == SC_MARK_BACKGROUND) {
+				SimpleAlphaRectangle(surface, rcLine, vsDraw.markers[markBit].back, vsDraw.markers[markBit].alpha);
+			} else if (vsDraw.markers[markBit].markType == SC_MARK_UNDERLINE) {
+				PRectangle rcUnderline = rcLine;
+				rcUnderline.top = rcUnderline.bottom - 2;
+				SimpleAlphaRectangle(surface, rcUnderline, vsDraw.markers[markBit].back, vsDraw.markers[markBit].alpha);
 			}
 		}
+		marksDrawnInText >>= 1;
+	}
+	int marksDrawnInLine = marksOfLine & vsDraw.maskInLine;
+	for (int markBit = 0; (markBit < 32) && marksDrawnInLine; markBit++) {
+		if (marksDrawnInLine & 1) {
+			SimpleAlphaRectangle(surface, rcLine, vsDraw.markers[markBit].back, vsDraw.markers[markBit].alpha);
+		}
+		marksDrawnInLine >>= 1;
 	}
 }
 

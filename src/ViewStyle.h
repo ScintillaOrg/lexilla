@@ -114,6 +114,7 @@ public:
 	int leftMarginWidth;	///< Spacing margin on left of text
 	int rightMarginWidth;	///< Spacing margin on right of text
 	int maskInLine;	///< Mask for markers to be put into text because there is nowhere for them to go in margin
+	int maskDrawInText;	///< Mask for markers that always draw in text
 	MarginStyle ms[SC_MAX_MARGIN+1];
 	int fixedColumnWidth;	///< Total width of margins
 	bool marginInside;	///< true: margin included in text view, false: separate views
@@ -160,6 +161,7 @@ public:
 	ViewStyle();
 	ViewStyle(const ViewStyle &source);
 	~ViewStyle();
+	void CalculateMarginWidthAndMask();
 	void Init(size_t stylesSize_=256);
 	void Refresh(Surface &surface, int tabInChars);
 	void ReleaseAllExtendedStyles();

@@ -497,6 +497,12 @@
 	The Scintilla framework on Cocoa now contains version numbers.
 	</li>
 	<li>
+	Optimise marker redrawing by only drawing affected lines when markers shown in the text.
+	</li>
+	<li>
+	When SC_MARK_UNDERLINE if not assigned to a margin, stop drawing the whole line.
+	</li>
+	<li>
 	When reverting an untitled document in SciTE, just clear it with no message about a file.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1764/">Bug #1764</a>.
 	</li>
