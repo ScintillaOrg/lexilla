@@ -585,31 +585,31 @@ SurfaceGDI::~SurfaceGDI() {
 
 void SurfaceGDI::Release() {
 	if (penOld) {
-		::SelectObject(reinterpret_cast<HDC>(hdc), penOld);
+		::SelectObject(hdc, penOld);
 		::DeleteObject(pen);
 		penOld = 0;
 	}
 	pen = 0;
 	if (brushOld) {
-		::SelectObject(reinterpret_cast<HDC>(hdc), brushOld);
+		::SelectObject(hdc, brushOld);
 		::DeleteObject(brush);
 		brushOld = 0;
 	}
 	brush = 0;
 	if (fontOld) {
 		// Fonts are not deleted as they are owned by a Font object
-		::SelectObject(reinterpret_cast<HDC>(hdc), fontOld);
+		::SelectObject(hdc, fontOld);
 		fontOld = 0;
 	}
 	font = 0;
 	if (bitmapOld) {
-		::SelectObject(reinterpret_cast<HDC>(hdc), bitmapOld);
+		::SelectObject(hdc, bitmapOld);
 		::DeleteObject(bitmap);
 		bitmapOld = 0;
 	}
 	bitmap = 0;
 	if (hdcOwned) {
-		::DeleteDC(reinterpret_cast<HDC>(hdc));
+		::DeleteDC(hdc);
 		hdc = 0;
 		hdcOwned = false;
 	}
@@ -623,13 +623,13 @@ void SurfaceGDI::Init(WindowID) {
 	Release();
 	hdc = ::CreateCompatibleDC(NULL);
 	hdcOwned = true;
-	::SetTextAlign(reinterpret_cast<HDC>(hdc), TA_BASELINE);
+	::SetTextAlign(hdc, TA_BASELINE);
 }
 
 void SurfaceGDI::Init(SurfaceID sid, WindowID) {
 	Release();
 	hdc = reinterpret_cast<HDC>(sid);
-	::SetTextAlign(reinterpret_cast<HDC>(hdc), TA_BASELINE);
+	::SetTextAlign(hdc, TA_BASELINE);
 }
 
 void SurfaceGDI::InitPixMap(int width, int height, Surface *surface_, WindowID) {
@@ -639,7 +639,7 @@ void SurfaceGDI::InitPixMap(int width, int height, Surface *surface_, WindowID) 
 	hdcOwned = true;
 	bitmap = ::CreateCompatibleBitmap(psurfOther->hdc, width, height);
 	bitmapOld = static_cast<HBITMAP>(::SelectObject(hdc, bitmap));
-	::SetTextAlign(reinterpret_cast<HDC>(hdc), TA_BASELINE);
+	::SetTextAlign(hdc, TA_BASELINE);
 	SetUnicodeMode(psurfOther->unicodeMode);
 	SetDBCSMode(psurfOther->codePage);
 }
@@ -652,7 +652,7 @@ void SurfaceGDI::PenColour(ColourDesired fore) {
 		penOld = 0;
 	}
 	pen = ::CreatePen(0,1,fore.AsLong());
-	penOld = static_cast<HPEN>(::SelectObject(reinterpret_cast<HDC>(hdc), pen));
+	penOld = static_cast<HPEN>(::SelectObject(hdc, pen));
 }
 
 void SurfaceGDI::BrushColor(ColourDesired back) {
@@ -775,14 +775,14 @@ void SurfaceGDI::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fil
 		ColourDesired outline, int alphaOutline, int /* flags*/ ) {
 	const RECT rcw = RectFromPRectangle(rc);
 	if (AlphaBlendFn && rc.Width() > 0) {
-		HDC hMemDC = ::CreateCompatibleDC(reinterpret_cast<HDC>(hdc));
+		HDC hMemDC = ::CreateCompatibleDC(hdc);
 		int width = static_cast<int>(rc.Width());
 		int height = static_cast<int>(rc.Height());
 		// Ensure not distorted too much by corners when small
 		cornerSize = Platform::Minimum(cornerSize, (Platform::Minimum(width, height) / 2) - 2);
 		BITMAPINFO bpih = {{sizeof(BITMAPINFOHEADER), width, height, 1, 32, BI_RGB, 0, 0, 0, 0, 0}};
 		void *image = 0;
-		HBITMAP hbmMem = CreateDIBSection(reinterpret_cast<HDC>(hMemDC), &bpih,
+		HBITMAP hbmMem = CreateDIBSection(hMemDC, &bpih,
 			DIB_RGB_COLORS, &image, NULL, 0);
 
 		if (hbmMem) {
@@ -820,7 +820,7 @@ void SurfaceGDI::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fil
 
 			BLENDFUNCTION merge = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
 
-			AlphaBlendFn(reinterpret_cast<HDC>(hdc), rcw.left, rcw.top, width, height, hMemDC, 0, 0, width, height, merge);
+			AlphaBlendFn(hdc, rcw.left, rcw.top, width, height, hMemDC, 0, 0, width, height, merge);
 
 			SelectBitmap(hMemDC, hbmOld);
 			::DeleteObject(hbmMem);
@@ -834,7 +834,7 @@ void SurfaceGDI::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fil
 
 void SurfaceGDI::DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) {
 	if (AlphaBlendFn && rc.Width() > 0) {
-		HDC hMemDC = ::CreateCompatibleDC(reinterpret_cast<HDC>(hdc));
+		HDC hMemDC = ::CreateCompatibleDC(hdc);
 		if (rc.Width() > width)
 			rc.left += static_cast<int>((rc.Width() - width) / 2);
 		rc.right = rc.left + width;
@@ -844,7 +844,7 @@ void SurfaceGDI::DrawRGBAImage(PRectangle rc, int width, int height, const unsig
 
 		BITMAPINFO bpih = {{sizeof(BITMAPINFOHEADER), width, height, 1, 32, BI_RGB, 0, 0, 0, 0, 0}};
 		unsigned char *image = 0;
-		HBITMAP hbmMem = CreateDIBSection(reinterpret_cast<HDC>(hMemDC), &bpih,
+		HBITMAP hbmMem = CreateDIBSection(hMemDC, &bpih,
 			DIB_RGB_COLORS, reinterpret_cast<void **>(&image), NULL, 0);
 		if (hbmMem) {
 			HBITMAP hbmOld = SelectBitmap(hMemDC, hbmMem);
@@ -863,7 +863,7 @@ void SurfaceGDI::DrawRGBAImage(PRectangle rc, int width, int height, const unsig
 
 			BLENDFUNCTION merge = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
 
-			AlphaBlendFn(reinterpret_cast<HDC>(hdc), static_cast<int>(rc.left), static_cast<int>(rc.top),
+			AlphaBlendFn(hdc, static_cast<int>(rc.left), static_cast<int>(rc.top),
 				static_cast<int>(rc.Width()), static_cast<int>(rc.Height()), hMemDC, 0, 0, width, height, merge);
 
 			SelectBitmap(hMemDC, hbmOld);
