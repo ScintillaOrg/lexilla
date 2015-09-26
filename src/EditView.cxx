@@ -1301,8 +1301,7 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 			if (ts.representation) {
 				if (ll->chars[i] == '\t') {
 					// Tab display
-					if (drawWhitespaceBackground &&
-						(!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways))
+					if (drawWhitespaceBackground && vsDraw.WhiteSpaceVisible(inIndentation))
 						textBack = vsDraw.whitespaceColours.back;
 				} else {
 					// Blob display
@@ -1316,8 +1315,7 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 					(inIndentation && vsDraw.viewIndentationGuides == ivReal)) {
 					for (int cpos = 0; cpos <= i - ts.start; cpos++) {
 						if (ll->chars[cpos + ts.start] == ' ') {
-							if (drawWhitespaceBackground &&
-								(!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways)) {
+							if (drawWhitespaceBackground && vsDraw.WhiteSpaceVisible(inIndentation)) {
 								PRectangle rcSpace(
 									ll->positions[cpos + ts.start] + xStart - static_cast<XYPOSITION>(subLineStart),
 									rcSegment.top,
@@ -1503,8 +1501,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 				if (ll->chars[i] == '\t') {
 					// Tab display
 					if (phasesDraw == phasesOne) {
-						if (drawWhitespaceBackground &&
-							(!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways))
+						if (drawWhitespaceBackground && vsDraw.WhiteSpaceVisible(inIndentation))
 							textBack = vsDraw.whitespaceColours.back;
 						surface->FillRectangle(rcSegment, textBack);
 					}
@@ -1520,7 +1517,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 						}
 					}
 					if (vsDraw.viewWhitespace != wsInvisible) {
-						if (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways) {
+						if (vsDraw.WhiteSpaceVisible(inIndentation)) {
 							if (vsDraw.whitespaceColours.fore.isSet)
 								textFore = vsDraw.whitespaceColours.fore;
 							surface->PenColour(textFore);
@@ -1568,10 +1565,9 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 							if (vsDraw.viewWhitespace != wsInvisible) {
 								if (vsDraw.whitespaceColours.fore.isSet)
 									textFore = vsDraw.whitespaceColours.fore;
-								if (!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways) {
+								if (vsDraw.WhiteSpaceVisible(inIndentation)) {
 									XYPOSITION xmid = (ll->positions[cpos + ts.start] + ll->positions[cpos + ts.start + 1]) / 2;
-									if ((phasesDraw == phasesOne) && drawWhitespaceBackground &&
-										(!inIndentation || vsDraw.viewWhitespace == wsVisibleAlways)) {
+									if ((phasesDraw == phasesOne) && drawWhitespaceBackground) {
 										textBack = vsDraw.whitespaceColours.back;
 										PRectangle rcSpace(
 											ll->positions[cpos + ts.start] + xStart - static_cast<XYPOSITION>(subLineStart),

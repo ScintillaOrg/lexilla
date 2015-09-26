@@ -512,6 +512,12 @@ bool ViewStyle::WhitespaceBackgroundDrawn() const {
 	return (viewWhitespace != wsInvisible) && (whitespaceColours.back.isSet);
 }
 
+bool ViewStyle::WhiteSpaceVisible(bool inIndent) const {
+	return !inIndent && viewWhitespace == wsVisibleAfterIndent ||
+		inIndent && viewWhitespace == wsVisibleOnlyInIndent ||
+		viewWhitespace == wsVisibleAlways;
+}
+
 ColourDesired ViewStyle::WrapColour() const {
 	if (whitespaceColours.fore.isSet)
 		return whitespaceColours.fore;

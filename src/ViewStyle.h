@@ -52,7 +52,7 @@ public:
 
 enum IndentView {ivNone, ivReal, ivLookForward, ivLookBoth};
 
-enum WhiteSpaceVisibility {wsInvisible=0, wsVisibleAlways=1, wsVisibleAfterIndent=2};
+enum WhiteSpaceVisibility {wsInvisible=0, wsVisibleAlways=1, wsVisibleAfterIndent=2, wsVisibleOnlyInIndent=3};
 
 typedef std::map<FontSpecification, FontRealised *> FontMap;
 
@@ -184,6 +184,8 @@ public:
 	bool SetWrapVisualFlagsLocation(int wrapVisualFlagsLocation_);
 	bool SetWrapVisualStartIndent(int wrapVisualStartIndent_);
 	bool SetWrapIndentMode(int wrapIndentMode_);
+
+	bool WhiteSpaceVisible(bool inIndent) const;
 
 private:
 	void AllocStyles(size_t sizeNew);
