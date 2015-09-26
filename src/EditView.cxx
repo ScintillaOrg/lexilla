@@ -1311,8 +1311,7 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 			} else {
 				// Normal text display
 				surface->FillRectangle(rcSegment, textBack);
-				if (vsDraw.viewWhitespace != wsInvisible ||
-					(inIndentation && vsDraw.viewIndentationGuides == ivReal)) {
+				if (vsDraw.viewWhitespace != wsInvisible) {
 					for (int cpos = 0; cpos <= i - ts.start; cpos++) {
 						if (ll->chars[cpos + ts.start] == ' ') {
 							if (drawWhitespaceBackground && vsDraw.WhiteSpaceVisible(inIndentation)) {
