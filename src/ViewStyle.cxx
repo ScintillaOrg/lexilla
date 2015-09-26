@@ -513,8 +513,8 @@ bool ViewStyle::WhitespaceBackgroundDrawn() const {
 }
 
 bool ViewStyle::WhiteSpaceVisible(bool inIndent) const {
-	return !inIndent && viewWhitespace == wsVisibleAfterIndent ||
-		inIndent && viewWhitespace == wsVisibleOnlyInIndent ||
+	return (!inIndent && viewWhitespace == wsVisibleAfterIndent) ||
+		(inIndent && viewWhitespace == wsVisibleOnlyInIndent) ||
 		viewWhitespace == wsVisibleAlways;
 }
 
