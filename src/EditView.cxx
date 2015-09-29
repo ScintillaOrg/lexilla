@@ -291,7 +291,7 @@ void EditView::AllocateGraphics(const ViewStyle &vsDraw) {
 		pixmapIndentGuideHighlight = Surface::Allocate(vsDraw.technology);
 }
 
-const char *ControlCharacterString(unsigned char ch) {
+static const char *ControlCharacterString(unsigned char ch) {
 	const char *reps[] = {
 		"NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL",
 		"BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI",
@@ -305,7 +305,7 @@ const char *ControlCharacterString(unsigned char ch) {
 	}
 }
 
-void DrawTabArrow(Surface *surface, PRectangle rcTab, int ymid) {
+static void DrawTabArrow(Surface *surface, PRectangle rcTab, int ymid) {
 	int ydiff = static_cast<int>(rcTab.bottom - rcTab.top) / 2;
 	int xhead = static_cast<int>(rcTab.right) - 1 - ydiff;
 	if (xhead <= rcTab.left) {
@@ -1935,7 +1935,7 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 // Space (3 space characters) between line numbers and text when printing.
 #define lineNumberPrintSpace "   "
 
-ColourDesired InvertedLight(ColourDesired orig) {
+static ColourDesired InvertedLight(ColourDesired orig) {
 	unsigned int r = orig.GetRed();
 	unsigned int g = orig.GetGreen();
 	unsigned int b = orig.GetBlue();

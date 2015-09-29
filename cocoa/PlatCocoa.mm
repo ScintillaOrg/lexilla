@@ -480,14 +480,14 @@ void SurfaceImpl::FillRectangle(PRectangle rc, ColourDesired back)
 
 //--------------------------------------------------------------------------------------------------
 
-void drawImageRefCallback(CGImageRef pattern, CGContextRef gc)
+static void drawImageRefCallback(CGImageRef pattern, CGContextRef gc)
 {
   CGContextDrawImage(gc, CGRectMake(0, 0, CGImageGetWidth(pattern), CGImageGetHeight(pattern)), pattern);
 }
 
 //--------------------------------------------------------------------------------------------------
 
-void releaseImageRefCallback(CGImageRef pattern)
+static void releaseImageRefCallback(CGImageRef pattern)
 {
   CGImageRelease(pattern);
 }
