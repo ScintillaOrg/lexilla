@@ -618,7 +618,6 @@ CaseFolder *ScintillaCocoa::CaseFolderForEncoding() {
         } else {
             return new CaseFolderDBCS(encoding);
         }
-		return 0;
 	}
 }
 
