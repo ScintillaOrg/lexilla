@@ -1282,6 +1282,7 @@ void ScintillaCocoa::DragScroll()
 
 - (void)pasteboard:(NSPasteboard *)pasteboard item:(NSPasteboardItem *)item provideDataForType:(NSString *)type
 {
+#pragma unused(item)
   if (selectedText.Length() == 0)
     return;
 

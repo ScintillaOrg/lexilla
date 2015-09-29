@@ -404,6 +404,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 - (NSRect) firstRectForCharacterRange: (NSRange) aRange actualRange: (NSRangePointer) actualRange
 {
+#pragma unused(actualRange)
   const NSRange posRange = mOwner.backend->PositionsFromCharacters(aRange);
 
   NSRect rect;
@@ -737,6 +738,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 - (NSDragOperation)draggingSession: (NSDraggingSession *) session
 sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 {
+#pragma unused(session)
   switch(context)
   {
     case NSDraggingContextOutsideApplication:
@@ -751,12 +753,14 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 - (void)draggingSession:(NSDraggingSession *)session
            movedToPoint:(NSPoint)screenPoint
 {
+#pragma unused(session, screenPoint)
 }
 
 - (void)draggingSession:(NSDraggingSession *)session
            endedAtPoint:(NSPoint)screenPoint
               operation:(NSDragOperation)operation
 {
+#pragma unused(session, screenPoint)
   if (operation == NSDragOperationDelete)
   {
     mOwner.backend->WndProc(SCI_CLEAR, 0, 0);
@@ -1310,6 +1314,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
  */
 - (void) scrollerAction: (id) sender
 {
+#pragma unused(sender)
   mBackend->UpdateForScroll();
 }
 
