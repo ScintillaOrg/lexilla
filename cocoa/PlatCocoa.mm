@@ -1118,7 +1118,7 @@ bool Window::HasFocus()
 
 //--------------------------------------------------------------------------------------------------
 
-static CGFloat ScreenMax(NSWindow* win)
+static CGFloat ScreenMax()
 {
   return NSMaxY([[NSScreen mainScreen] frame]);
 }
@@ -1146,7 +1146,7 @@ PRectangle Window::GetPosition()
       win = reinterpret_cast<NSWindow*>(idWin);
       rect = [win frame];
     }
-    CGFloat screenHeight = ScreenMax(win);
+    CGFloat screenHeight = ScreenMax();
     // Invert screen positions to match Scintilla
     return PRectangle(
         static_cast<XYPOSITION>(NSMinX(rect)), static_cast<XYPOSITION>(screenHeight - NSMaxY(rect)),
@@ -1179,7 +1179,7 @@ void Window::SetPosition(PRectangle rc)
       // NSWindow
       PLATFORM_ASSERT([idWin isKindOfClass: [NSWindow class]]);
       NSWindow* win = reinterpret_cast<NSWindow*>(idWin);
-      CGFloat screenHeight = ScreenMax(win);
+      CGFloat screenHeight = ScreenMax();
       NSRect nsrc = NSMakeRect(rc.left, screenHeight - rc.bottom,
           rc.Width(), rc.Height());
       [win setFrame: nsrc display:YES];
