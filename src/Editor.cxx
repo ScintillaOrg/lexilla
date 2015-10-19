@@ -6267,7 +6267,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_SETSTYLING:
-		pdoc->SetStyleFor(static_cast<int>(wParam), static_cast<char>(lParam));
+		if (static_cast<int>(wParam) < 0)
+			errorStatus = SC_STATUS_FAILURE;
+		else
+			pdoc->SetStyleFor(static_cast<int>(wParam), static_cast<char>(lParam));
 		break;
 
 	case SCI_SETSTYLINGEX:             // Specify a complete styling buffer
