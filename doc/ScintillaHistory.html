@@ -504,6 +504,17 @@
 	The Scintilla framework on Cocoa now contains version numbers.
 	</li>
 	<li>
+	SciTE's standard properties collect values from all active .properties file to produce the Language menu
+	and the file types pull-down in the File open dialog.
+	</li>
+	<li>
+	The single executable version of SciTE, Sc1, uses 'module' statements within its embedded
+	properties. This makes it act more like the full distribution allowing languages to be turned on
+	and off by setting imports.include and imports.exclude.
+	The default imports.exclude property adds eiffel, erlang, ps, and pov so these languages are
+	turned off by default.
+	</li>
+	<li>
 	SciTE adds an output.blank.margin.left property to allow setting the output pane
 	margin to a different width that the edit pane.
 	</li>
