@@ -509,6 +509,12 @@
                                     <action selector="runToolbarCustomizationPalette:" target="-1" id="365"/>
                                 </connections>
                             </menuItem>
+                            <menuItem isSeparatorItem="YES" id="K3d-cY-vZn"/>
+                            <menuItem title="Add or Remove Extra Scintilla" keyEquivalent="d" id="zQU-z1-l5t">
+                                <connections>
+                                    <action selector="addRemoveExtra:" target="450" id="9HG-Le-GbA"/>
+                                </connections>
+                            </menuItem>
                         </items>
                     </menu>
                 </menuItem>
