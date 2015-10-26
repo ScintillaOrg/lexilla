@@ -111,8 +111,6 @@ private:
 
   int scrollSpeed;
   int scrollTicks;
-  NSTimer* tickTimer;
-  NSTimer* idleTimer;
   CFRunLoopObserverRef observer;
 
   FindHighlightLayer *layerFindIndicator;
