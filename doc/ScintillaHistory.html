@@ -530,6 +530,13 @@
 	Optimise marker redrawing by only drawing affected lines when markers shown in the text.
 	</li>
 	<li>
+	On Cocoa, timers and idling now work in modal dialogs. This also stops some crashes.
+	</li>
+	<li>
+	On Cocoa, fix crashes when deleting a ScintillaView. These crashes could occur when scrolling
+	at the time the ScintillaView was deleted although there may have been other cases.
+	</li>
+	<li>
 	Report error (SC_STATUS_FAILURE) when negative length passed to SCI_SETSTYLING.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1768/">Bug #1768</a>.
 	</li>
