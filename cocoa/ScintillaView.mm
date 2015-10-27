@@ -241,8 +241,10 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
  */
 - (void) viewWillDraw
 {
-  if (!mOwner)
+  if (!mOwner) {
+    [super viewWillDraw];
     return;
+  }
 
   const NSRect *rects;
   NSInteger nRects = 0;
