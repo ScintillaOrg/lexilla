@@ -1801,13 +1801,15 @@ void ScintillaCocoa::WillDraw(NSRect rect)
 {
   RefreshStyleData();
   PRectangle rcWillDraw = NSRectToPRectangle(rect);
-  int positionAfterRect = PositionAfterArea(rcWillDraw);
-  pdoc->EnsureStyledTo(positionAfterRect);
+  const int posAfterArea = PositionAfterArea(rcWillDraw);
+  const int posAfterMax = PositionAfterMaxStyling(posAfterArea, true);
+  pdoc->StyleToAdjustingLineDuration(posAfterMax);
+  StartIdleStyling(posAfterMax < posAfterArea);
   NotifyUpdateUI();
   if (WrapLines(wsVisible)) {
     // Wrap may have reduced number of lines so more lines may need to be styled
-    positionAfterRect = PositionAfterArea(rcWillDraw);
-    pdoc->EnsureStyledTo(positionAfterRect);
+    const int posAfterAreaWrapped = PositionAfterArea(rcWillDraw);
+    pdoc->EnsureStyledTo(posAfterAreaWrapped);
     // The wrapping process has changed the height of some lines so redraw all.
     Redraw();
   }

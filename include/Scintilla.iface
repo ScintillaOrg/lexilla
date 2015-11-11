@@ -1260,6 +1260,18 @@ fun int WordEndPosition=2267(position pos, bool onlyWordCharacters)
 # Is the range start..end considered a word?
 fun bool IsRangeWord=2691(position start, position end)
 
+enu IdleStyling=SC_IDLESTYLING_
+val SC_IDLESTYLING_NONE=0
+val SC_IDLESTYLING_TOVISIBLE=1
+val SC_IDLESTYLING_AFTERVISIBLE=2
+val SC_IDLESTYLING_ALL=3
+
+# Sets limits to idle styling.
+set void SetIdleStyling=2692(int idleStyling,)
+
+# Retrieve the limits to idle styling.
+get int GetIdleStyling=2693(,)
+
 enu Wrap=SC_WRAP_
 val SC_WRAP_NONE=0
 val SC_WRAP_WORD=1

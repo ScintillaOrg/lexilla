@@ -246,6 +246,7 @@ public:
 	bool useTabs;
 	bool tabIndents;
 	bool backspaceUnindents;
+	double durationStyleOneLine;
 
 	DecorationList decorations;
 
@@ -400,6 +401,7 @@ public:
 	bool SCI_METHOD SetStyles(Sci_Position length, const char *styles);
 	int GetEndStyled() const { return endStyled; }
 	void EnsureStyledTo(int pos);
+	void StyleToAdjustingLineDuration(int pos);
 	void LexerChanged();
 	int GetStyleClock() const { return styleClock; }
 	void IncrementStyleClock();

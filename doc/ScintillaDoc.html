@@ -82,7 +82,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 31 July 2015 NH</p>
+    <p>Last edited 11 November 2015 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -2391,6 +2391,8 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_SETSTYLING">SCI_SETSTYLING(int length, int style)</a><br />
      <a class="message" href="#SCI_SETSTYLINGEX">SCI_SETSTYLINGEX(int length, const char
     *styles)</a><br />
+     <a class="message" href="#SCI_SETIDLESTYLING">SCI_SETIDLESTYLING(int idleStyling)</a><br />
+     <a class="message" href="#SCI_GETIDLESTYLING">SCI_GETIDLESTYLING</a><br />
      <a class="message" href="#SCI_SETLINESTATE">SCI_SETLINESTATE(int line, int value)</a><br />
      <a class="message" href="#SCI_GETLINESTATE">SCI_GETLINESTATE(int line)</a><br />
      <a class="message" href="#SCI_GETMAXLINESTATE">SCI_GETMAXLINESTATE</a><br />
@@ -2424,6 +2426,23 @@ struct Sci_TextToFind {
     the styling position and then increases the styling position by <code>length</code>, ready for
     the next call.
     <code>SCI_STARTSTYLING</code> should be called before the first call to this.
+    </p>
+
+    <p><b id="SCI_SETIDLESTYLING">SCI_SETIDLESTYLING(int idleStyling)</b><br />
+     <b id="SCI_GETIDLESTYLING">SCI_GETIDLESTYLING</b><br />
+     By default, <code>SC_IDLESTYLING_NONE</code> (0),
+     syntax styling is performed for all the currently visible text before displaying it.
+     On very large files, this may make scrolling down slow.
+     With <code>SC_IDLESTYLING_TOVISIBLE</code> (1),
+     a small amount of styling is performed before display and then
+     further styling is performed incrementally in the background as an idle-time task.
+     This may result in the text initially appearing uncoloured and then, some time later, it is coloured.
+     Text after the currently visible portion may be styled in the background with <code>SC_IDLESTYLING_AFTERVISIBLE</code> (2).
+     To style both before and after the visible text in the background use <code>SC_IDLESTYLING_ALL</code> (3).
+    </p>
+    <p>
+     Since wrapping also needs to perform styling and also uses idle time, this setting has no effect when
+     the document is displayed wrapped.
     </p>
 
     <p><b id="SCI_SETLINESTATE">SCI_SETLINESTATE(int line, int value)</b><br />

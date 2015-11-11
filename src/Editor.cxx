@@ -173,6 +173,8 @@ Editor::Editor() {
 	paintAbandonedByStyling = false;
 	paintingAllText = false;
 	willRedrawAll = false;
+	idleStyling = SC_IDLESTYLING_NONE;
+	needIdleStyling = false;
 
 	modEventMask = SC_MODEVENTMASKALL;
 
@@ -919,7 +921,7 @@ void Editor::ScrollTo(int line, bool moveThumb) {
 		SetTopLine(topLineNew);
 		// Optimize by styling the view as this will invalidate any needed area
 		// which could abort the initial paint if discovered later.
-		StyleToPositionInView(PositionAfterArea(GetClientRectangle()));
+		StyleAreaBounded(GetClientRectangle(), true);
 #ifndef UNDER_CE
 		// Perform redraw rather than scroll if many lines would be redrawn anyway.
 		if (performBlit) {
@@ -1692,7 +1694,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 
 	paintAbandonedByStyling = false;
 
-	StyleToPositionInView(PositionAfterArea(rcArea));
+	StyleAreaBounded(rcArea, false);
 
 	PRectangle rcClient = GetClientRectangle();
 	//Platform::DebugPrintf("Client: (%3d,%3d) ... (%3d,%3d)   %d\n",
@@ -4893,6 +4895,8 @@ bool Editor::Idle() {
 		// No more wrapping
 		if (!wrapPending.NeedsWrap())
 			wrappingDone = true;
+	} else if (needIdleStyling) {
+		IdleStyling();
 	}
 
 	// Add more idle things to do here, but make sure idleDone is
@@ -4900,7 +4904,7 @@ bool Editor::Idle() {
 	// false will stop calling this idle function until SetIdle() is
 	// called again.
 
-	idleDone = wrappingDone; // && thatDone && theOtherThingDone...
+	idleDone = wrappingDone && !needIdleStyling; // && thatDone && theOtherThingDone...
 
 	return !idleDone;
 }
@@ -5003,12 +5007,71 @@ void Editor::StyleToPositionInView(Position pos) {
 	}
 }
 
+int Editor::PositionAfterMaxStyling(int posMax, bool scrolling) const {
+	if ((idleStyling == SC_IDLESTYLING_NONE) || (idleStyling == SC_IDLESTYLING_AFTERVISIBLE)) {
+		// Both states do not limit styling
+		return posMax;
+	}
+
+	// Try to keep time taken by styling reasonable so interaction remains smooth.
+	// When scrolling, allow less time to ensure responsive
+	const double secondsAllowed = scrolling ? 0.005 : 0.02;
+
+	const int linesToStyle = Platform::Clamp(static_cast<int>(secondsAllowed / pdoc->durationStyleOneLine),
+		10, 0x10000);
+	const int stylingMaxLine = std::min(
+		static_cast<int>(pdoc->LineFromPosition(pdoc->GetEndStyled()) + linesToStyle),
+		pdoc->LinesTotal());
+	return std::min(static_cast<int>(pdoc->LineStart(stylingMaxLine)), posMax);
+}
+
+void Editor::StartIdleStyling(bool truncatedLastStyling) {
+	if ((idleStyling == SC_IDLESTYLING_ALL) || (idleStyling == SC_IDLESTYLING_AFTERVISIBLE)) {
+		if (pdoc->GetEndStyled() < pdoc->Length()) {
+			// Style remainder of document in idle time
+			needIdleStyling = true;
+		}
+	} else if (truncatedLastStyling) {
+		needIdleStyling = true;
+	}
+
+	if (needIdleStyling) {
+		SetIdle(true);
+	}
+}
+
+// Style for an area but bound the amount of styling to remain responsive
+void Editor::StyleAreaBounded(PRectangle rcArea, bool scrolling) {
+	const int posAfterArea = PositionAfterArea(rcArea);
+	const int posAfterMax = PositionAfterMaxStyling(posAfterArea, scrolling);
+	if (posAfterMax < posAfterArea) {
+		// Idle styling may be performed before current visible area
+		// Style a bit now then style further in idle time
+		pdoc->StyleToAdjustingLineDuration(posAfterMax);
+	} else {
+		// Can style all wanted now.
+		StyleToPositionInView(posAfterArea);
+	}
+	StartIdleStyling(posAfterMax < posAfterArea);
+}
+
+void Editor::IdleStyling() {
+	const int posAfterArea = PositionAfterArea(GetClientRectangle());
+	const int endGoal = (idleStyling >= SC_IDLESTYLING_AFTERVISIBLE) ?
+		pdoc->Length() : posAfterArea;
+	const int posAfterMax = PositionAfterMaxStyling(endGoal, false);
+	pdoc->StyleToAdjustingLineDuration(posAfterMax);
+	if (pdoc->GetEndStyled() >= endGoal) {
+		needIdleStyling = false;
+	}
+}
+
 void Editor::IdleWork() {
 	// Style the line after the modification as this allows modifications that change just the
 	// line of the modification to heal instead of propagating to the rest of the window.
-	if (workNeeded.items & WorkNeeded::workStyle)
+	if (workNeeded.items & WorkNeeded::workStyle) {
 		StyleToPositionInView(pdoc->LineStart(pdoc->LineFromPosition(workNeeded.upTo) + 2));
-
+	}
 	NotifyUpdateUI();
 	workNeeded.Reset();
 }
@@ -6400,6 +6463,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_ISRANGEWORD:
 		return pdoc->IsWordAt(static_cast<int>(wParam), static_cast<int>(lParam));
+	
+	case SCI_SETIDLESTYLING:
+		idleStyling = static_cast<int>(wParam);
+		break;
+
+	case SCI_GETIDLESTYLING:
+		return idleStyling;
 
 	case SCI_SETWRAPMODE:
 		if (vs.SetWrapState(static_cast<int>(wParam))) {

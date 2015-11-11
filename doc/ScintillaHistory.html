@@ -497,6 +497,12 @@
 	Released 6 November 2015.
 	</li>
 	<li>
+	Allow painting without first styling all visible text then styling in the background
+	using idle-time. This helps performance when scrolling down in very large documents.
+	Can also incrementally style after the visible area to the end of the document so that
+	the document is already styled when the user scrolls to it.
+	</li>
+	<li>
 	On GTK+ on OS X, fix warning during destruction.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1777/">Bug #1777</a>.
 	</li>
