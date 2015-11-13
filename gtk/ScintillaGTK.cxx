@@ -618,8 +618,10 @@ void ScintillaGTK::UnMap(GtkWidget *widget) {
 void ScintillaGTK::ForAll(GtkCallback callback, gpointer callback_data) {
 	try {
 		(*callback) (PWidget(wText), callback_data);
-		(*callback) (PWidget(scrollbarv), callback_data);
-		(*callback) (PWidget(scrollbarh), callback_data);
+		if (PWidget(scrollbarv))
+			(*callback) (PWidget(scrollbarv), callback_data);
+		if (PWidget(scrollbarh))
+			(*callback) (PWidget(scrollbarh), callback_data);
 	} catch (...) {
 		errorStatus = SC_STATUS_FAILURE;
 	}
