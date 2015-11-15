@@ -7830,6 +7830,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_CLEARSELECTIONS:
 		sel.Clear();
+		ContainerNeedsUpdate(SC_UPDATE_SELECTION);
 		Redraw();
 		break;
 
@@ -7840,16 +7841,19 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_ADDSELECTION:
 		sel.AddSelection(SelectionRange(static_cast<int>(wParam), static_cast<int>(lParam)));
+		ContainerNeedsUpdate(SC_UPDATE_SELECTION);
 		Redraw();
 		break;
 
 	case SCI_DROPSELECTIONN:
 		sel.DropSelection(static_cast<int>(wParam));
+		ContainerNeedsUpdate(SC_UPDATE_SELECTION);
 		Redraw();
 		break;
 
 	case SCI_SETMAINSELECTION:
 		sel.SetMain(static_cast<int>(wParam));
+		ContainerNeedsUpdate(SC_UPDATE_SELECTION);
 		Redraw();
 		break;
 
@@ -7858,6 +7862,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETSELECTIONNCARET:
 		sel.Range(wParam).caret.SetPosition(static_cast<int>(lParam));
+		ContainerNeedsUpdate(SC_UPDATE_SELECTION);
 		Redraw();
 		break;
 
@@ -7866,6 +7871,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETSELECTIONNANCHOR:
 		sel.Range(wParam).anchor.SetPosition(static_cast<int>(lParam));
+		ContainerNeedsUpdate(SC_UPDATE_SELECTION);
 		Redraw();
 		break;
 	case SCI_GETSELECTIONNANCHOR:
@@ -7873,6 +7879,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETSELECTIONNCARETVIRTUALSPACE:
 		sel.Range(wParam).caret.SetVirtualSpace(static_cast<int>(lParam));
+		ContainerNeedsUpdate(SC_UPDATE_SELECTION);
 		Redraw();
 		break;
 
@@ -7881,6 +7888,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETSELECTIONNANCHORVIRTUALSPACE:
 		sel.Range(wParam).anchor.SetVirtualSpace(static_cast<int>(lParam));
+		ContainerNeedsUpdate(SC_UPDATE_SELECTION);
 		Redraw();
 		break;
 
@@ -7889,6 +7897,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETSELECTIONNSTART:
 		sel.Range(wParam).anchor.SetPosition(static_cast<int>(lParam));
+		ContainerNeedsUpdate(SC_UPDATE_SELECTION);
 		Redraw();
 		break;
 
@@ -7897,6 +7906,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETSELECTIONNEND:
 		sel.Range(wParam).caret.SetPosition(static_cast<int>(lParam));
+		ContainerNeedsUpdate(SC_UPDATE_SELECTION);
 		Redraw();
 		break;
 
