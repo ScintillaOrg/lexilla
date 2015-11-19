@@ -478,6 +478,7 @@
 	<td>Jordan Jueckstock</td>
       </tr><tr>
 	<td>Yury Dubinsky</td>
+	<td>Sam Hocevar</td>
     </tr>
     </table>
     <p>
@@ -505,6 +506,11 @@
 	<li>
 	Send SCN_UPDATEUI with SC_UPDATE_SELECTION when the application changes multiple
 	selection.
+	</li>
+	<li>
+	On Windows, fix non-BMP input through WM_CHAR and allow WM_UNICHAR to work
+	with non-BMP characters and on non-Unicode documents.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1779/">Bug #1779</a>.
 	</li>
 	<li>
 	On GTK+ on OS X, fix warning during destruction.
