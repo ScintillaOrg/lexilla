@@ -271,7 +271,7 @@ void Document::TentativeUndo() {
 			bool endSavePoint = cb.IsSavePoint();
 			if (startSavePoint != endSavePoint)
 				NotifySavePoint(endSavePoint);
-				
+
 			cb.TentativeCommit();
 		}
 		enteredModification--;
@@ -1277,7 +1277,7 @@ int Document::SetLineIndentation(int line, int indent) {
 		int indentPos = GetLineIndentPosition(line);
 		UndoGroup ug(this);
 		DeleteChars(thisLineStart, indentPos - thisLineStart);
-		return thisLineStart + InsertString(thisLineStart, linebuf.c_str(), 
+		return thisLineStart + InsertString(thisLineStart, linebuf.c_str(),
 			static_cast<int>(linebuf.length()));
 	} else {
 		return GetLineIndentPosition(line);
@@ -2554,10 +2554,10 @@ public:
 		return doc != other.doc || position != other.position;
 	}
 	int Pos() const {
-		return position; 
+		return position;
 	}
 	int PosRoundUp() const {
-		return position; 
+		return position;
 	}
 };
 
@@ -2654,7 +2654,7 @@ long Cxx11RegexFindText(Document *doc, int minPos, int maxPos, const char *s,
 			std::wregex regexp;
 #if defined(__APPLE__)
 			// Using a UTF-8 locale doesn't change to Unicode over a byte buffer so '.'
-			// is one byte not one character. 
+			// is one byte not one character.
 			// However, on OS X this makes wregex act as Unicode
 			std::locale localeU("en_US.UTF-8");
 			regexp.imbue(localeU);

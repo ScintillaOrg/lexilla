@@ -3111,7 +3111,7 @@ void Editor::CursorUpOrDown(int direction, Selection::selTypes selt) {
 			const SelectionPosition spCaretNow = sel.Range(r).caret;
 			const SelectionPosition posNew = MovePositionSoVisible(
 				PositionUpOrDown(spCaretNow, direction, lastX), direction);
-			sel.Range(r) = selt == Selection::selStream ? 
+			sel.Range(r) = selt == Selection::selStream ?
 				SelectionRange(posNew, sel.Range(r).anchor) : SelectionRange(posNew);
 		}
 		sel.RemoveDuplicates();
@@ -3477,7 +3477,7 @@ int Editor::DelWordOrLine(unsigned int iMessage) {
 	// which means 2 actions so wrap in an undo group.
 
 	// Rightwards and leftwards deletions differ in treatment of virtual space.
-	// Clear virtual space for leftwards, realise for rightwards. 
+	// Clear virtual space for leftwards, realise for rightwards.
 	const bool leftwards = (iMessage == SCI_DELWORDLEFT) || (iMessage == SCI_DELLINELEFT);
 
 	if (!additionalSelectionTyping) {
@@ -3496,7 +3496,7 @@ int Editor::DelWordOrLine(unsigned int iMessage) {
 			sel.Range(r) = SelectionRange(
 				InsertSpace(sel.Range(r).caret.Position(), sel.Range(r).caret.VirtualSpace()));
 		}
-		
+
 		Range rangeDelete;
 		switch (iMessage) {
 		case SCI_DELWORDLEFT:
@@ -6463,7 +6463,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_ISRANGEWORD:
 		return pdoc->IsWordAt(static_cast<int>(wParam), static_cast<int>(lParam));
-	
+
 	case SCI_SETIDLESTYLING:
 		idleStyling = static_cast<int>(wParam);
 		break;
@@ -6669,7 +6669,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETIMEINTERACTION:
 		return imeInteraction;
-		
+
 #ifdef INCLUDE_DEPRECATED_FEATURES
 	case SCI_SETUSEPALETTE:
 		InvalidateStyleRedraw();

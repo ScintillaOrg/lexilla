@@ -117,7 +117,7 @@ $(LEXCOMPONENT): $(LOBJS) Scintilla.def
 
 $(LEXLIB): $(LEXOBJS)
 	$(AR) rc $@ $^
-	$(RANLIB) $@	
+	$(RANLIB) $@
 
 # Automatically generate dependencies for most files with "make deps"
 include deps.mak

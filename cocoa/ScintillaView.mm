@@ -181,7 +181,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 {
   if (trackingArea)
     [self removeTrackingArea:trackingArea];
-  
+
   int opts = (NSTrackingActiveAlways | NSTrackingInVisibleRect | NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved);
   trackingArea = [[NSTrackingArea alloc] initWithRect:[self bounds]
                                               options:opts
@@ -199,7 +199,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 - (void) setFrame: (NSRect) frame
 {
   [super setFrame: frame];
-	
+
   mOwner.backend->Resize();
 }
 
@@ -537,7 +537,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
     // Must perform deletion before entering composition mode or else
     // both document and undo history will not contain the deleted text
     // leading to an inaccurate and unusable undo history.
-    
+
     // Convert selection virtual space into real space
     mOwner.backend->ConvertSelectionVirtualSpace();
 
@@ -568,7 +568,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   {
     // Switching into composition.
     mOwner.backend->CompositionStart();
-    
+
     NSRange posRangeCurrent = mOwner.backend->PositionsFromCharacters(NSMakeRange(replacementRange.location, 0));
     // Note: Scintilla internally works almost always with bytes instead chars, so we need to take
     //       this into account when determining selection ranges and such.
@@ -751,7 +751,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
   {
     case NSDraggingContextOutsideApplication:
       return NSDragOperationCopy | NSDragOperationMove | NSDragOperationDelete;
-      
+
     case NSDraggingContextWithinApplication:
     default:
       return NSDragOperationCopy | NSDragOperationMove | NSDragOperationDelete;
@@ -1208,7 +1208,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
                selector:@selector(windowWillMove:)
                    name:NSWindowWillMoveNotification
                  object:[self window]];
-    
+
     [[scrollView contentView] setPostsBoundsChangedNotifications:YES];
     [center addObserver:self
 	       selector:@selector(scrollerAction:)

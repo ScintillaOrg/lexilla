@@ -545,7 +545,7 @@ static std::string EncodedBytesString(CFStringRef cfsRef, CFStringEncoding encod
 	CFIndex usedLen = 0;
 	CFStringGetBytes(cfsRef, rangeAll, encoding, '?', false,
                          NULL, 0, &usedLen);
-	
+
 	std::string buffer(usedLen, '\0');
 	if (usedLen > 0) {
 		CFStringGetBytes(cfsRef, rangeAll, encoding, '?', false,
@@ -852,45 +852,45 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
     {
       case SCI_GETDIRECTFUNCTION:
         return reinterpret_cast<sptr_t>(DirectFunction);
-        
+
       case SCI_GETDIRECTPOINTER:
         return reinterpret_cast<sptr_t>(this);
-        
+
       case SCI_TARGETASUTF8:
         return TargetAsUTF8(reinterpret_cast<char*>(lParam));
-        
+
       case SCI_ENCODEDFROMUTF8:
         return EncodedFromUTF8(reinterpret_cast<char*>(wParam),
                                reinterpret_cast<char*>(lParam));
-        
+
       case SCI_SETIMEINTERACTION:
         // Only inline IME supported on Cocoa
         break;
-        
+
       case SCI_GRABFOCUS:
         [[ContentView() window] makeFirstResponder:ContentView()];
         break;
-        
+
       case SCI_SETBUFFEREDDRAW:
         // Buffered drawing not supported on Cocoa
         view.bufferedDraw = false;
         break;
-        
+
       case SCI_FINDINDICATORSHOW:
         ShowFindIndicatorForRange(NSMakeRange(wParam, lParam-wParam), YES);
         return 0;
-        
+
       case SCI_FINDINDICATORFLASH:
         ShowFindIndicatorForRange(NSMakeRange(wParam, lParam-wParam), NO);
         return 0;
-        
+
       case SCI_FINDINDICATORHIDE:
         HideFindIndicator();
         return 0;
-        
+
       default:
         sptr_t r = ScintillaBase::WndProc(iMessage, wParam, lParam);
-        
+
         return r;
     }
   } catch (std::bad_alloc &) {
@@ -1284,11 +1284,11 @@ void ScintillaCocoa::DragScroll()
 - (id)initWithSelectedText:(const SelectionText *)other
 {
   self = [super init];
-  
+
   if (self) {
     selectedText.Copy(*other);
   }
-  
+
   return self;
 }
 
@@ -1307,7 +1307,7 @@ void ScintillaCocoa::DragScroll()
   CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
                                                reinterpret_cast<const UInt8 *>(selectedText.Data()),
                                                selectedText.Length(), encoding, false);
-  
+
   if ([type compare: NSPasteboardTypeString] == NSOrderedSame)
   {
     [pasteboard setString:(NSString *)cfsVal forType: NSStringPboardType];
@@ -1320,7 +1320,7 @@ void ScintillaCocoa::DragScroll()
   }
 
   if (cfsVal)
-    CFRelease(cfsVal);  
+    CFRelease(cfsVal);
 }
 
 @end
@@ -1468,17 +1468,17 @@ void ScintillaCocoa::StartDrag()
   NSPoint startPoint;
   startPoint.x = selectionRectangle.origin.x + client.left;
   startPoint.y = selectionRectangle.origin.y + selectionRectangle.size.height + client.top;
-  
+
   NSPasteboardItem *pbItem = [NSPasteboardItem new];
   DragProviderSource *dps = [[[DragProviderSource alloc] initWithSelectedText:&selectedText] autorelease];
-  
+
   NSArray *pbTypes = selectedText.rectangular ?
   @[NSPasteboardTypeString, ScintillaRecPboardType] :
   @[NSPasteboardTypeString];
   [pbItem setDataProvider:dps forTypes:pbTypes];
   NSDraggingItem *dragItem = [[NSDraggingItem alloc ]initWithPasteboardWriter:pbItem];
   [pbItem release];
-  
+
   NSScrollView *scrollContainer = ScrollContainer();
   NSRect contentRect = [[scrollContainer contentView] bounds];
   NSRect draggingRect = NSOffsetRect(selectionRectangle, contentRect.origin.x, contentRect.origin.y);
@@ -1670,9 +1670,9 @@ int ScintillaCocoa::TargetAsUTF8(char *text)
     CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
                                                  reinterpret_cast<const UInt8 *>(s.c_str()),
                                                  s.length(), encoding, false);
-	  
+
     const std::string tmputf = EncodedBytesString(cfsVal, kCFStringEncodingUTF8);
-    
+
     if (text)
       memcpy(text, tmputf.c_str(), tmputf.length());
     CFRelease(cfsVal);
@@ -1699,7 +1699,7 @@ int ScintillaCocoa::EncodedFromUTF8(char *utf8, char *encoded) const
     // Need to convert
     const CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
                                                          vs.styles[STYLE_DEFAULT].characterSet);
-    
+
     CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
                                                  reinterpret_cast<const UInt8 *>(utf8),
                                                  inputLength, kCFStringEncodingUTF8, false);
@@ -2181,7 +2181,7 @@ int ScintillaCocoa::InsertText(NSString* input)
   CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
                                                        vs.styles[STYLE_DEFAULT].characterSet);
   std::string encoded = EncodedBytesString((CFStringRef)input, encoding);
-  
+
   if (encoded.length() > 0)
   {
     AddCharUTF((char*) encoded.c_str(), static_cast<unsigned int>(encoded.length()), false);

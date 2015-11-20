@@ -409,10 +409,10 @@ bool ScintillaEditBase::IsHangul(const QChar qchar)
 	const bool HangulJamoExtendedB = (0xD7B0 <= unicode && unicode <= 0xD7FF);
 	const bool HangulSyllable = (0xAC00 <= unicode && unicode <= 0xD7A3);
 	return HangulJamo || HangulCompatibleJamo  || HangulSyllable ||
-				HangulJamoExtendedA || HangulJamoExtendedB; 
+				HangulJamoExtendedA || HangulJamoExtendedB;
 }
 
-void ScintillaEditBase::MoveImeCarets(int offset) 
+void ScintillaEditBase::MoveImeCarets(int offset)
 {
 	// Move carets relatively by bytes
 	for (size_t r=0; r < sqt->sel.Count(); r++) {
@@ -421,8 +421,8 @@ void ScintillaEditBase::MoveImeCarets(int offset)
 		sqt->sel.Range(r).anchor.SetPosition(positionInsert + offset);
  	}
 }
- 
-void ScintillaEditBase::DrawImeIndicator(int indicator, int len) 
+
+void ScintillaEditBase::DrawImeIndicator(int indicator, int len)
 {
 	// Emulate the visual style of IME characters with indicators.
 	// Draw an indicator on the character before caret by the character bytes of len
@@ -506,7 +506,7 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 					case QTextCharFormat::SpellCheckUnderline:
 						indicator = SC_INDICATOR_CONVERTED;
 						break;
-		
+
 					default:
 						indicator = SC_INDICATOR_UNKNOWN;
 				}
@@ -555,7 +555,7 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 			DrawImeIndicator(imeIndicator[i], oneCharLen);
 #endif
 			i += ucWidth;
-		} 
+		}
 		sqt->recordingMacro = recording;
 
 		// Move IME carets.

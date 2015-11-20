@@ -394,7 +394,7 @@ void EditView::LayoutLine(const EditModel &model, int line, Surface *surface, co
 					allSame = allSame &&
 					(ll->chars[numCharsInLine] == static_cast<char>(toupper(chDoc)));
 				else	{ // Style::caseCamel
-					if ((model.pdoc->WordCharClass(ll->chars[numCharsInLine]) == CharClassify::ccWord) && 
+					if ((model.pdoc->WordCharClass(ll->chars[numCharsInLine]) == CharClassify::ccWord) &&
 					  ((numCharsInLine == 0) || (model.pdoc->WordCharClass(ll->chars[numCharsInLine - 1]) != CharClassify::ccWord))) {
 						allSame = allSame && (ll->chars[numCharsInLine] == static_cast<char>(toupper(chDoc)));
 					} else {
@@ -444,13 +444,13 @@ void EditView::LayoutLine(const EditModel &model, int line, Surface *surface, co
 				else if (vstyle.styles[ll->styles[charInLine]].caseForce == Style::caseLower)
 					ll->chars[charInLine] = static_cast<char>(tolower(chDoc));
 				else if (vstyle.styles[ll->styles[charInLine]].caseForce == Style::caseCamel) {
-					if ((model.pdoc->WordCharClass(ll->chars[charInLine]) == CharClassify::ccWord) && 
+					if ((model.pdoc->WordCharClass(ll->chars[charInLine]) == CharClassify::ccWord) &&
 					  ((charInLine == 0) || (model.pdoc->WordCharClass(ll->chars[charInLine - 1]) != CharClassify::ccWord))) {
 						ll->chars[charInLine] = static_cast<char>(toupper(chDoc));
 					} else {
 						ll->chars[charInLine] = static_cast<char>(tolower(chDoc));
 					}
-				}				
+				}
 			}
 		}
 		ll->xHighlightGuide = 0;
@@ -1476,7 +1476,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 					if (indicatorValue) {
 						const Indicator &indicator = vsDraw.indicators[deco->indicator];
 						const bool hover = indicator.IsDynamic() &&
-							((model.hoverIndicatorPos >= ts.start + posLineStart) && 
+							((model.hoverIndicatorPos >= ts.start + posLineStart) &&
 							(model.hoverIndicatorPos <= ts.end() + posLineStart));
 						if (hover) {
 							if (indicator.sacHover.style == INDIC_TEXTFORE) {
