@@ -981,7 +981,7 @@ void ScintillaWin::EscapeHanja() {
 		SetCandidateWindowPos();
 		// IME_ESC_HANJA_MODE appears to receive the first character only.
 		if (ImmEscapeW(GetKeyboardLayout(0), imc.hIMC, IME_ESC_HANJA_MODE, &uniChar[0])) {
-			SetSelection (currentPos, currentPos + oneCharLen);
+			SetSelection(currentPos, currentPos + oneCharLen);
 		}
 	}
 }
@@ -1496,7 +1496,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			}
 
 		case WM_IME_REQUEST: {
-			if  (wParam == IMR_RECONVERTSTRING) {
+			if (wParam == IMR_RECONVERTSTRING) {
 				return ImeOnReconvert(lParam);
 			}
 			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
