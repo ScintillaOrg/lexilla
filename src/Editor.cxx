@@ -1956,6 +1956,8 @@ void Editor::AddCharUTF(const char *s, unsigned int len, bool treatAsDBCS) {
 
 void Editor::ClearBeforeTentativeStart() {
 	// Make positions for the first composition string.
+	FilterSelections();
+	UndoGroup ug(pdoc, (sel.Count() > 1) || !sel.Empty() || inOverstrike);
 	for (size_t r = 0; r<sel.Count(); r++) {
 		if (!RangeContainsProtected(sel.Range(r).Start().Position(),
 			sel.Range(r).End().Position())) {
