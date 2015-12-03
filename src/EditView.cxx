@@ -986,11 +986,10 @@ static void DrawIndicators(Surface *surface, const EditModel &model, const ViewS
 				startPos = deco->rs.EndRun(startPos);
 			}
 			while ((startPos < posLineEnd) && (deco->rs.ValueAt(startPos))) {
-				int endPos = deco->rs.EndRun(startPos);
-				if (endPos > posLineEnd)
-					endPos = posLineEnd;
+				const Range rangeRun(deco->rs.StartRun(startPos), deco->rs.EndRun(startPos));
+				const int endPos = std::min(rangeRun.end, posLineEnd);
 				const bool hover = vsDraw.indicators[deco->indicator].IsDynamic() &&
-					((hoverIndicatorPos >= startPos) && (hoverIndicatorPos <= endPos));
+					rangeRun.ContainsCharacter(hoverIndicatorPos);
 				const int value = deco->rs.ValueAt(startPos);
 				Indicator::DrawState drawState = hover ? Indicator::drawHover : Indicator::drawNormal;
 				DrawIndicator(deco->indicator, startPos - posLineStart, endPos - posLineStart,
