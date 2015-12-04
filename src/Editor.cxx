@@ -794,15 +794,15 @@ SelectionPosition Editor::MovePositionOutsideChar(SelectionPosition pos, int mov
 		pos.SetPosition(posMoved);
 	if (vs.ProtectionActive()) {
 		if (moveDir > 0) {
-			if ((pos.Position() > 0) && vs.styles[pdoc->StyleAt(pos.Position() - 1)].IsProtected()) {
+			if ((pos.Position() > 0) && vs.styles[pdoc->StyleIndexAt(pos.Position() - 1)].IsProtected()) {
 				while ((pos.Position() < pdoc->Length()) &&
-				        (vs.styles[pdoc->StyleAt(pos.Position())].IsProtected()))
+				        (vs.styles[pdoc->StyleIndexAt(pos.Position())].IsProtected()))
 					pos.Add(1);
 			}
 		} else if (moveDir < 0) {
-			if (vs.styles[pdoc->StyleAt(pos.Position())].IsProtected()) {
+			if (vs.styles[pdoc->StyleIndexAt(pos.Position())].IsProtected()) {
 				while ((pos.Position() > 0) &&
-				        (vs.styles[pdoc->StyleAt(pos.Position() - 1)].IsProtected()))
+				        (vs.styles[pdoc->StyleIndexAt(pos.Position() - 1)].IsProtected()))
 					pos.Add(-1);
 			}
 		}
