@@ -1005,7 +1005,10 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 	// Great thanks for my foreruners, jiniya and BLUEnLIVE.
 
 	IMContext imc(MainHWND());
-	if (!imc.hIMC) {
+	if (!imc.hIMC)
+		return 0;
+	if (pdoc->IsReadOnly()) {
+		::ImmNotifyIME(imc.hIMC, NI_COMPOSITIONSTR, CPS_CANCEL, 0);
 		return 0;
 	}
 
