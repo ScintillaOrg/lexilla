@@ -126,14 +126,13 @@ static void ColouriseBashDoc(Sci_PositionU startPos, Sci_Position length, int in
 		bool Quoted;		// true if Quote in ('\'','"','`')
 		bool Indent;		// indented delimiter (for <<-)
 		int DelimiterLength;	// strlen(Delimiter)
-		char *Delimiter;	// the Delimiter, 256: sizeof PL_tokenbuf
+		char Delimiter[HERE_DELIM_MAX];	// the Delimiter
 		HereDocCls() {
 			State = 0;
 			Quote = 0;
 			Quoted = false;
 			Indent = 0;
 			DelimiterLength = 0;
-			Delimiter = new char[HERE_DELIM_MAX];
 			Delimiter[0] = '\0';
 		}
 		void Append(int ch) {
@@ -141,7 +140,6 @@ static void ColouriseBashDoc(Sci_PositionU startPos, Sci_Position length, int in
 			Delimiter[DelimiterLength] = '\0';
 		}
 		~HereDocCls() {
-			delete []Delimiter;
 		}
 	};
 	HereDocCls HereDoc;
@@ -173,18 +171,15 @@ static void ColouriseBashDoc(Sci_PositionU startPos, Sci_Position length, int in
 		int Up, Down;
 		int Style;
 		int Depth;			// levels pushed
-		int *CountStack;
-		int *UpStack;
-		int *StyleStack;
+		int CountStack[BASH_DELIM_STACK_MAX];
+		int UpStack   [BASH_DELIM_STACK_MAX];
+		int StyleStack[BASH_DELIM_STACK_MAX];
 		QuoteStackCls() {
 			Count = 0;
 			Up    = '\0';
 			Down  = '\0';
 			Style = 0;
 			Depth = 0;
-			CountStack = new int[BASH_DELIM_STACK_MAX];
-			UpStack    = new int[BASH_DELIM_STACK_MAX];
-			StyleStack = new int[BASH_DELIM_STACK_MAX];
 		}
 		void Start(int u, int s) {
 			Count = 1;
@@ -214,9 +209,6 @@ static void ColouriseBashDoc(Sci_PositionU startPos, Sci_Position length, int in
 			Down  = opposite(Up);
 		}
 		~QuoteStackCls() {
-			delete []CountStack;
-			delete []UpStack;
-			delete []StyleStack;
 		}
 	};
 	QuoteStackCls QuoteStack;
@@ -584,12 +576,14 @@ static void ColouriseBashDoc(Sci_PositionU startPos, Sci_Position length, int in
 			HereDoc.State = 2;
 			if (HereDoc.Quoted) {
 				if (sc.state == SCE_SH_HERE_DELIM) {
-					// Missing quote at end of string! We are stricter than bash.
-					// Colour here-doc anyway while marking this bit as an error.
+					// Missing quote at end of string! Syntax error in bash 4.3
+					// Mark this bit as an error, do not colour any here-doc
 					sc.ChangeState(SCE_SH_ERROR);
+					sc.SetState(SCE_SH_DEFAULT);
+				} else {
+					// HereDoc.Quote always == '\''
+					sc.SetState(SCE_SH_HERE_Q);
 				}
-				// HereDoc.Quote always == '\''
-				sc.SetState(SCE_SH_HERE_Q);
 			} else if (HereDoc.DelimiterLength == 0) {
 				// no delimiter, illegal (but '' and "" are legal)
 				sc.ChangeState(SCE_SH_ERROR);
