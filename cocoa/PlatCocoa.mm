@@ -1719,6 +1719,7 @@ int ListBoxImpl::CaretFromEdge()
 
 void ListBoxImpl::ReleaseViews()
 {
+  [table setDataSource:nil];
   [table release];
   table = nil;
   [scroller release];
