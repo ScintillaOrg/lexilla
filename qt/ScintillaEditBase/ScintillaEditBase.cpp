@@ -443,6 +443,11 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 	// Copy & paste by johnsonj with a lot of helps of Neil
 	// Great thanks for my forerunners, jiniya and BLUEnLIVE
 
+	if (sqt->pdoc->IsReadOnly()) {
+		// Here, a canceling and/or completing composition function is needed.
+		return;
+	}
+
 	if (sqt->pdoc->TentativeActive()) {
 		sqt->pdoc->TentativeUndo();
 	} else {
