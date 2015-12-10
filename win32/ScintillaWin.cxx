@@ -1471,7 +1471,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				return 1;
 			} else {
 				wchar_t wcs[3] = {0};
-				unsigned int wclen = UTF16FromUTF32Character(wParam, wcs);
+				unsigned int wclen = UTF16FromUTF32Character(static_cast<unsigned int>(wParam), wcs);
 				AddCharUTF16(wcs, wclen);
 				return FALSE;
 			}
