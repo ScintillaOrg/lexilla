@@ -819,7 +819,8 @@ void ListBoxImpl::Create(Window &parent,
 #if defined(Q_OS_WIN)
 	// On Windows, Qt::ToolTip causes a crash when the list is clicked on
 	// so Qt::Tool is used.
-	list->setParent(0, Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+	list->setParent(0, Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint |
+		Qt::WindowDoesNotAcceptFocus);
 #else
 	// On OS X, Qt::Tool takes focus so main window loses focus so
 	// keyboard stops working. Qt::ToolTip works but its only really
