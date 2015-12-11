@@ -2518,12 +2518,11 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 		recordingMacro = tmpRecordingMacro;
 
 		// Move caret to ime cursor position.
-		if (KoreanIME()) {
-			view.imeCaretBlockOverride = true;
-			MoveImeCarets( - (imeCharPos[preeditStr.uniStrLen]));
+		MoveImeCarets( - (imeCharPos[preeditStr.uniStrLen]) + imeCharPos[preeditStr.cursor_pos]);
 
-		} else {
-			MoveImeCarets( - (imeCharPos[preeditStr.uniStrLen]) + imeCharPos[preeditStr.cursor_pos]);
+		if (KoreanIME()) {
+			MoveImeCarets( - imeCharPos[1]); // always 2 bytes for DBCS or 3 bytes for UTF8.
+			view.imeCaretBlockOverride = true;
 		}
 
 		EnsureCaretVisible();
