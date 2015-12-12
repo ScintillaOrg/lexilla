@@ -537,7 +537,7 @@ void SCI_METHOD LexerPerl::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	CharacterSet &setPOD = setModifiers;
 	CharacterSet setNonHereDoc(CharacterSet::setDigits, "=$@");
 	CharacterSet setHereDocDelim(CharacterSet::setAlphaNum, "_");
-	CharacterSet setSubPrototype(CharacterSet::setNone, "\\[$@%&*+];");
+	CharacterSet setSubPrototype(CharacterSet::setNone, "\\[$@%&*+];_");
 	// for format identifiers
 	CharacterSet setFormatStart(CharacterSet::setAlpha, "_=");
 	CharacterSet &setFormat = setHereDocDelim;
@@ -555,13 +555,12 @@ void SCI_METHOD LexerPerl::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		int Quote;		// the char after '<<'
 		bool Quoted;		// true if Quote in ('\'','"','`')
 		int DelimiterLength;	// strlen(Delimiter)
-		char *Delimiter;	// the Delimiter, 256: sizeof PL_tokenbuf
+		char Delimiter[HERE_DELIM_MAX];	// the Delimiter
 		HereDocCls() {
 			State = 0;
 			Quote = 0;
 			Quoted = false;
 			DelimiterLength = 0;
-			Delimiter = new char[HERE_DELIM_MAX];
 			Delimiter[0] = '\0';
 		}
 		void Append(int ch) {
@@ -569,7 +568,6 @@ void SCI_METHOD LexerPerl::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			Delimiter[DelimiterLength] = '\0';
 		}
 		~HereDocCls() {
-			delete []Delimiter;
 		}
 	};
 	HereDocCls HereDoc;		// TODO: FIFO for stacked here-docs
