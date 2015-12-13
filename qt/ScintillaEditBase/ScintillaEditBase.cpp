@@ -564,11 +564,11 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 		sqt->recordingMacro = recording;
 
 		// Move IME carets.
+		MoveImeCarets(- imeCharPos[preeditStrLen] + imeCharPos[imeCaretPos]);
+
 		if (IsHangul(preeditStr.at(0))) {
+			MoveImeCarets(- imeCharPos[1]);
 			sqt->view.imeCaretBlockOverride = true;
-			MoveImeCarets(- imeCharPos[preeditStrLen]);
-		} else {
-			MoveImeCarets(- imeCharPos[preeditStrLen] + imeCharPos[imeCaretPos]);
 		}
 
 		// Set candidate box position for Qt::ImMicroFocus.
