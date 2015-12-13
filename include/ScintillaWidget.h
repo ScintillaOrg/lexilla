@@ -46,8 +46,7 @@ GtkWidget*	scintilla_object_new			(void);
 long		scintilla_object_send_message	(ScintillaObject *sci, unsigned int iMessage, guintptr wParam, gintptr lParam);
 
 #ifndef G_IR_SCANNING
-/* The following declarations are preserved for compatibility reasons. However, they confuse
- * the g-ir-scanner program */
+/* The legacy names confuse the g-ir-scanner program */
 typedef struct _ScintillaClass  ScintillaClass;
 
 GType		scintilla_get_type	(void);
