@@ -2401,23 +2401,13 @@ void ScintillaGTK::CommitThis(char *commitStr) {
 		glong uniStrLen = 0;
 		gunichar *uniStr = g_utf8_to_ucs4_fast(commitStr, strlen(commitStr), &uniStrLen);
 		for (glong i = 0; i < uniStrLen; i++) {
+			gchar u8Char[UTF8MaxBytes+2] = {0};
+			gint u8CharLen = g_unichar_to_utf8(uniStr[i], u8Char);
+			std::string docChar = u8Char;
+			if (!IsUnicodeMode())
+				docChar = ConvertText(u8Char, u8CharLen, charSetSource, "UTF-8", true);
 
-			gunichar uniChar[1] = {0};
-			uniChar[0] = uniStr[i];
-
-			glong oneCharLen = 0;
-			gchar *oneChar = g_ucs4_to_utf8(uniChar, 1, NULL, &oneCharLen, NULL);
-
-			if (IsUnicodeMode()) {
-				// Do nothing ;
-			} else {
-				std::string oneCharSTD = ConvertText(oneChar, oneCharLen, charSetSource, "UTF-8", true);
-				oneCharLen = oneCharSTD.copy(oneChar,oneCharSTD.length(), 0);
-				oneChar[oneCharLen] = '\0';
-			}
-
-			AddCharUTF(oneChar, oneCharLen);
-			g_free(oneChar);
+			AddCharUTF(docChar.c_str(), docChar.size());
 		}
 		g_free(uniStr);
 		ShowCaretAtCurrentPosition();
@@ -2473,47 +2463,34 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 
 		// Display preedit characters, one by one
 		glong imeCharPos[maxLenInputIME+1] = { 0 };
-		glong attrPos = -1; // Start at -1 to designate the last byte of one character.
+		glong attrPos = 0;
 		glong charWidth = 0;
 
 		bool tmpRecordingMacro = recordingMacro;
 		recordingMacro = false;
 		for (glong i = 0; i < preeditStr.uniStrLen; i++) {
+			gchar u8Char[UTF8MaxBytes+2] = {0};
+			gint u8CharLen = g_unichar_to_utf8(preeditStr.uniStr[i], u8Char);
+			std::string docChar = u8Char;
+			if (!IsUnicodeMode())
+				docChar = ConvertText(u8Char, u8CharLen, charSetSource, "UTF-8", true);
 
-			gunichar uniChar[1] = {0};
-			uniChar[0] = preeditStr.uniStr[i];
-
-			glong oneCharLen = 0;
-			gchar *oneChar = g_ucs4_to_utf8(uniChar, 1, NULL, &oneCharLen, NULL);
-
-			// Record attribute positions in UTF-8 bytes
-			attrPos += oneCharLen;
-
-			if (IsUnicodeMode()) {
-				// Do nothing
-			} else {
-				std::string oneCharSTD = ConvertText(oneChar, oneCharLen, charSetSource, "UTF-8", true);
-				oneCharLen = oneCharSTD.copy(oneChar,oneCharSTD.length(), 0);
-				oneChar[oneCharLen] = '\0';
-			}
-
-			// Record character positions in UTF-8 or DBCS bytes
-
-			charWidth += oneCharLen;
-			imeCharPos[i+1] = charWidth;
-
-			// Display one character
-			AddCharUTF(oneChar, oneCharLen);
+			AddCharUTF(docChar.c_str(), docChar.size());
 
 			// Draw an indicator on the character,
 			// Overlapping allowed
 			if (normalInput[attrPos]) {
-				DrawImeIndicator(SC_INDICATOR_INPUT, oneCharLen);
+				DrawImeIndicator(SC_INDICATOR_INPUT, docChar.size());
 			}
 			if (targetInput[attrPos]) {
-				DrawImeIndicator(SC_INDICATOR_TARGET, oneCharLen);
+				DrawImeIndicator(SC_INDICATOR_TARGET, docChar.size());
 			}
-			g_free(oneChar);
+
+ 			// Record attribute positions in UTF-8 bytes
+			attrPos += u8CharLen;
+ 			// Record character positions in UTF-8 or DBCS bytes
+			charWidth += docChar.size();
+ 			imeCharPos[i+1] = charWidth;
 		}
 		recordingMacro = tmpRecordingMacro;
 
