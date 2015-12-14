@@ -1007,7 +1007,7 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 	IMContext imc(MainHWND());
 	if (!imc.hIMC)
 		return 0;
-	if (pdoc->IsReadOnly()) {
+	if (pdoc->IsReadOnly() || SelectionContainsProtected()) {
 		::ImmNotifyIME(imc.hIMC, NI_COMPOSITIONSTR, CPS_CANCEL, 0);
 		return 0;
 	}

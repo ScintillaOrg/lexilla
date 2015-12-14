@@ -2434,7 +2434,7 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 	// Copy & paste by johnsonj with a lot of helps of Neil
 	// Great thanks for my foreruners, jiniya and BLUEnLIVE
 	try {
-		if (pdoc->IsReadOnly()) {
+		if (pdoc->IsReadOnly() || SelectionContainsProtected()) {
 			gtk_im_context_reset(im_context);
 			return;
 		}
