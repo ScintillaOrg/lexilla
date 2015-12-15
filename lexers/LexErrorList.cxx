@@ -127,6 +127,10 @@ static int RecogniseErrorListLine(const char *lineBuffer, Sci_PositionU lengthLi
 	           strstart(lineBuffer, "                 from ")) {
 		// GCC showing include path to following error
 		return SCE_ERR_GCC_INCLUDED_FROM;
+	} else if (strstr(lineBuffer, "warning LNK")) {
+		// Microsoft linker warning:
+		// {<object> : } warning LNK9999
+		return SCE_ERR_MS;
 	} else {
 		// Look for one of the following formats:
 		// GCC: <filename>:<line>:<message>
