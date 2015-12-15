@@ -3065,7 +3065,6 @@ sptr_t scintilla_send_message(ScintillaObject *sci, unsigned int iMessage, uptr_
 }
 
 sptr_t scintilla_object_send_message(ScintillaObject *sci, unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
-
 	return scintilla_send_message(sci, iMessage, wParam, lParam);
 }
 
@@ -3106,7 +3105,6 @@ GType scintilla_get_type() {
 }
 
 GType scintilla_object_get_type() {
-
 	return scintilla_get_type();
 }
 
@@ -3223,7 +3221,6 @@ GtkWidget* scintilla_new() {
 }
 
 GtkWidget *scintilla_object_new() {
-
 	return scintilla_new();
 }
 

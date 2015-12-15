@@ -36,7 +36,7 @@ clean:
 	$(MAKE) -C ../../gtk clean
 
 test: Scintilla-0.1.gir
-	@echo Verifing Scintilla-0.1.gir file
+	@echo Verifying Scintilla-0.1.gir file
 	@diff $^.good $^ || (echo "GIR FILE MISMATCH!"; exit 1)
 	@echo Launching gi-test.py python program
 	GI_TYPELIB_PATH=$(PWD) LD_LIBRARY_PATH=$(PWD) \

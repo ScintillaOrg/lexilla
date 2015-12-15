@@ -1,8 +1,9 @@
 /* Scintilla source code edit control */
-/** @file ScintillaWidget.h
- ** Definition of Scintilla widget for GTK+.
- ** Only needed by GTK+ code but is harmless on other platforms.
- **/
+/* @file ScintillaWidget.h
+ * Definition of Scintilla widget for GTK+.
+ * Only needed by GTK+ code but is harmless on other platforms.
+ * This comment is not a doc-comment as that causes warnings from g-ir-scanner.
+ */
 /* Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
  * The License.txt file describes the conditions under which this software may be distributed. */
 
