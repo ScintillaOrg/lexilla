@@ -52,10 +52,10 @@ using namespace Scintilla;
 
 #define HERE_DELIM_MAX 256		// maximum length of HERE doc delimiter
 
-#define PERLNUM_BINARY		1	// order is significant: 1-4 cannot have a dot
-#define PERLNUM_HEX			2
-#define PERLNUM_OCTAL		3
-#define PERLNUM_FLOAT_EXP	4	// exponent part only
+#define PERLNUM_BINARY		1	// order is significant: 1-3 cannot have a dot
+#define PERLNUM_OCTAL		2
+#define PERLNUM_FLOAT_EXP	3	// exponent part only
+#define PERLNUM_HEX			4	// may be a hex float
 #define PERLNUM_DECIMAL		5	// 1-5 are numbers; 6-7 are strings
 #define PERLNUM_VECTOR		6
 #define PERLNUM_V_VECTOR	7
@@ -760,6 +760,14 @@ void SCI_METHOD LexerPerl::Lex(Sci_PositionU startPos, Sci_Position length, int 
 							break;
 						}
 						// number then dot (go through)
+					} else if (numState == PERLNUM_HEX) {
+						if (dotCount <= 1 && IsADigit(sc.chNext, 16)) {
+							break;	// hex with one dot is a hex float
+						} else {
+							sc.SetState(SCE_PL_OPERATOR);
+							break;
+						}
+						// hex then dot (go through)
 					} else if (IsADigit(sc.chNext))	// vectors
 						break;
 					// vector then dot (go through)
@@ -778,8 +786,15 @@ void SCI_METHOD LexerPerl::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					break;
 				// number then word (go through)
 			} else if (numState == PERLNUM_HEX) {
-				if (IsADigit(sc.ch, 16))
+				if (sc.ch == 'P' || sc.ch == 'p') {	// hex float exponent, sign
+					numState = PERLNUM_FLOAT_EXP;
+					if (sc.chNext == '+' || sc.chNext == '-') {
+						sc.Forward();
+					}
 					break;
+				} else if (IsADigit(sc.ch, 16))
+					break;
+				// hex or hex float then word (go through)
 			} else if (numState == PERLNUM_VECTOR || numState == PERLNUM_V_VECTOR) {
 				if (IsADigit(sc.ch))	// vector
 					break;
@@ -1263,7 +1278,7 @@ void SCI_METHOD LexerPerl::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					fw++;
 				} else if (sc.ch == 'x' && (sc.chNext == '=' ||	// repetition
 				        !setWord.Contains(sc.chNext) ||
-				        (IsADigit(sc.chPrev) && IsADigit(sc.chNext)))) {
+				        ((IsADigit(sc.chPrev) || sc.chPrev == ')') && IsADigit(sc.chNext)))) {
 					sc.ChangeState(SCE_PL_OPERATOR);
 				}
 				// if potentially a keyword, scan forward and grab word, then check
@@ -1436,7 +1451,10 @@ void SCI_METHOD LexerPerl::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				}
 				backFlag = BACK_NONE;
 				if (isHereDoc) {	// handle '<<', HERE doc
-					if (preferRE) {
+					if (sc.Match("<<>>")) {		// double-diamond operator (5.22)
+						sc.SetState(SCE_PL_OPERATOR);
+						sc.Forward(3);
+					} else if (preferRE) {
 						sc.SetState(SCE_PL_HERE_DELIM);
 						HereDoc.State = 0;
 					} else {		// << operator
