@@ -513,14 +513,12 @@
 	</li>
 	<li>
 	Bash lexer flags incomplete here doc delimiters as syntax errors.
-	<a href="http://sourceforge.net/p/scintilla/bugs/1789/">Bug #1789</a>.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1789/">Bug #1789</a>.<br />
+	Support added for using '#' in non-comment ways as is possible with zsh.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1794/">Bug #1794</a>.
 	</li>
 	<li>
 	Errorlist lexer highlights warning messages from the Microsoft linker.
-	</li>
-	<li>
-	On Windows, Scintilla no longer uses a .DEF file during linking as it duplicates
-	source code directives.
 	</li>
 	<li>
 	Lua lexer includes '&amp;' and '|' bitwise operators for Lua 5.3.
@@ -556,6 +554,10 @@
 	On Windows using DirectWrite, for ligatures and other character clusters,
 	display caret and selections part-way through clusters so that the caret doesn't stick
 	to the end of the cluster making it easier to understand editing actions.
+	</li>
+	<li>
+	On Windows, Scintilla no longer uses a .DEF file during linking as it duplicates
+	source code directives.
 	</li>
 	<li>
 	On GTK+ and Qt, Korean input by word fixed.

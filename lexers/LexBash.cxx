@@ -96,6 +96,19 @@ static int opposite(int ch) {
 	return ch;
 }
 
+static int GlobScan(StyleContext &sc) {
+	// forward scan for a glob-like (...), no whitespace allowed
+	int c, sLen = 0;
+	while ((c = sc.GetRelativeCharacter(++sLen)) != 0) {
+		if (IsASpace(c)) {
+			return 0;
+		} else if (c == ')') {
+			return sLen;
+		}
+	}
+	return 0;
+}
+
 static void ColouriseBashDoc(Sci_PositionU startPos, Sci_Position length, int initStyle,
 							 WordList *keywordlists[], Accessor &styler) {
 
@@ -336,6 +349,8 @@ static void ColouriseBashDoc(Sci_PositionU startPos, Sci_Position length, int in
 				if (sc.chPrev == '\\') {	// for escaped chars
 					sc.ForwardSetState(SCE_SH_DEFAULT);
 				} else if (!setWord.Contains(sc.ch)) {
+					sc.SetState(SCE_SH_DEFAULT);
+				} else if (cmdState == BASH_CMD_ARITH && !setWordStart.Contains(sc.ch)) {
 					sc.SetState(SCE_SH_DEFAULT);
 				}
 				break;
@@ -628,6 +643,24 @@ static void ColouriseBashDoc(Sci_PositionU startPos, Sci_Position length, int in
 				} else {
 					sc.SetState(SCE_SH_WORD);
 				}
+				// handle some zsh features within arithmetic expressions only
+				if (cmdState == BASH_CMD_ARITH) {
+					if (sc.chPrev == '[') {	// [#8] [##8] output digit setting
+						sc.SetState(SCE_SH_WORD);
+						if (sc.chNext == '#') {
+							sc.Forward();
+						}
+					} else if (sc.chNext == '#' && !IsASpace(sc.GetRelative(2))) {	// ##a
+						sc.SetState(SCE_SH_IDENTIFIER);
+						sc.Forward(2);
+					} else if (sc.Match("##^") && IsUpperCase(sc.GetRelative(3))) {	// ##^A
+						sc.SetState(SCE_SH_IDENTIFIER);
+						sc.Forward(3);
+						continue;
+					} else if (setWordStart.Contains(sc.chNext)) {
+						sc.SetState(SCE_SH_IDENTIFIER);
+					}
+				}
 			} else if (sc.ch == '\"') {
 				sc.SetState(SCE_SH_STRING);
 				QuoteStack.Start(sc.ch, BASH_DELIM_STRING);
@@ -681,6 +714,15 @@ static void ColouriseBashDoc(Sci_PositionU startPos, Sci_Position length, int in
 				char s[10];
 				bool isCmdDelim = false;
 				sc.SetState(SCE_SH_OPERATOR);
+				// globs have no whitespace, do not appear in arithmetic expressions
+				if (cmdState != BASH_CMD_ARITH && sc.ch == '(' && sc.chNext != '(') {
+					int i = GlobScan(sc);
+					if (i > 1) {
+						sc.SetState(SCE_SH_IDENTIFIER);
+						sc.Forward(i);
+						continue;
+					}
+				}
 				// handle opening delimiters for test/arithmetic expressions - ((,[[,[
 				if (cmdState == BASH_CMD_START
 				 || cmdState == BASH_CMD_BODY) {
