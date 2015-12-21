@@ -650,14 +650,13 @@ static void ColouriseBashDoc(Sci_PositionU startPos, Sci_Position length, int in
 						if (sc.chNext == '#') {
 							sc.Forward();
 						}
-					} else if (sc.chNext == '#' && !IsASpace(sc.GetRelative(2))) {	// ##a
-						sc.SetState(SCE_SH_IDENTIFIER);
-						sc.Forward(2);
 					} else if (sc.Match("##^") && IsUpperCase(sc.GetRelative(3))) {	// ##^A
 						sc.SetState(SCE_SH_IDENTIFIER);
 						sc.Forward(3);
-						continue;
-					} else if (setWordStart.Contains(sc.chNext)) {
+					} else if (sc.chNext == '#' && !IsASpace(sc.GetRelative(2))) {	// ##a
+						sc.SetState(SCE_SH_IDENTIFIER);
+						sc.Forward(2);
+					} else if (setWordStart.Contains(sc.chNext)) {	// #name
 						sc.SetState(SCE_SH_IDENTIFIER);
 					}
 				}
