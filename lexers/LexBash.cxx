@@ -126,9 +126,9 @@ static void ColouriseBashDoc(Sci_PositionU startPos, Sci_Position length, int in
 	CharacterSet setBashOperator(CharacterSet::setNone, "^&%()-+=|{}[]:;>,*/<?!.~@");
 	CharacterSet setSingleCharOp(CharacterSet::setNone, "rwxoRWXOezsfdlpSbctugkTBMACahGLNn");
 	CharacterSet setParam(CharacterSet::setAlphaNum, "$_");
-	CharacterSet setHereDoc(CharacterSet::setAlpha, "_\\-+!");
-	CharacterSet setHereDoc2(CharacterSet::setAlphaNum, "_-+!");
-	CharacterSet setLeftShift(CharacterSet::setDigits, "=$");
+	CharacterSet setHereDoc(CharacterSet::setAlpha, "_\\-+!%*,./:?@[]^`{}~");
+	CharacterSet setHereDoc2(CharacterSet::setAlphaNum, "_-+!%*,./:=?@[]^`{}~");
+	CharacterSet setLeftShift(CharacterSet::setDigits, "$");
 
 	class HereDocCls {	// Class to manage HERE document elements
 	public:
@@ -426,17 +426,18 @@ static void ColouriseBashDoc(Sci_PositionU startPos, Sci_Position length, int in
 						sc.Forward();
 						HereDoc.Quoted = true;
 						HereDoc.State = 1;
-					} else if (setHereDoc.Contains(sc.chNext)) {
+					} else if (setHereDoc.Contains(sc.chNext) ||
+					           (sc.chNext == '=' && cmdState != BASH_CMD_ARITH)) {
 						// an unquoted here-doc delimiter, no special handling
-						// TODO check what exactly bash considers part of the delim
 						HereDoc.State = 1;
 					} else if (sc.chNext == '<') {	// HERE string <<<
 						sc.Forward();
 						sc.ForwardSetState(SCE_SH_DEFAULT);
 					} else if (IsASpace(sc.chNext)) {
 						// eat whitespace
-					} else if (setLeftShift.Contains(sc.chNext)) {
-						// left shift << or <<= operator cases
+					} else if (setLeftShift.Contains(sc.chNext) ||
+					           (sc.chNext == '=' && cmdState == BASH_CMD_ARITH)) {
+						// left shift <<$var or <<= cases
 						sc.ChangeState(SCE_SH_OPERATOR);
 						sc.ForwardSetState(SCE_SH_DEFAULT);
 					} else {
