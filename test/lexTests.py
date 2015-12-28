@@ -131,7 +131,7 @@ class TestLexers(unittest.TestCase):
 					return
 
 	# Test lexing just once from beginning to end in text form.
-	# This is used for test cases that are too long to be exhasutively tested by lines and
+	# This is used for test cases that are too long to be exhaustively tested by lines and
 	# may be sensitive to line ends so are tested as if using Unix LF line ends.
 	def LexLongCase(self, name, lexerName, keywords, fileMode="b"):
 		self.LexExample(name, lexerName, keywords, "t")
