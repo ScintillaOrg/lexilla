@@ -130,6 +130,12 @@ class TestLexers(unittest.TestCase):
 					# Give up after one failure
 					return
 
+	# Test lexing just once from beginning to end in text form.
+	# This is used for test cases that are too long to be exhasutively tested by lines and
+	# may be sensitive to line ends so are tested as if using Unix LF line ends.
+	def LexLongCase(self, name, lexerName, keywords, fileMode="b"):
+		self.LexExample(name, lexerName, keywords, "t")
+
 	def testCXX(self):
 		self.LexExample("x.cxx", b"cpp", [b"int"])
 
@@ -158,8 +164,11 @@ class TestLexers(unittest.TestCase):
 	def testPerl(self):
 		self.LexExample("x.pl", b"perl", keywordsPerl)
 
-	def testPerlCases(self):
-		self.LexExample("perl-test-5220delta.pl", b"perl", keywordsPerl, "t")
+	def testPerl52(self):
+		self.LexLongCase("perl-test-5220delta.pl", b"perl", keywordsPerl)
+
+	def testPerlPrototypes(self):
+		self.LexLongCase("perl-test-sub-prototypes.pl", b"perl", keywordsPerl)
 
 	def testD(self):
 		self.LexExample("x.d", b"d",

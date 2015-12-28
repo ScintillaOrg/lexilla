@@ -65,6 +65,12 @@ using namespace Scintilla;
 #define BACK_OPERATOR	1	// whitespace/comments are insignificant
 #define BACK_KEYWORD	2	// operators/keywords are needed for disambiguation
 
+#define SUB_BEGIN		0	// states for subroutine prototype scan:
+#define SUB_HAS_PROTO	1	// only 'prototype' attribute allows prototypes
+#define SUB_HAS_ATTRIB	2	// other attributes can exist leftward
+#define SUB_HAS_MODULE	3	// sub name can have a ::identifier part
+#define SUB_HAS_SUB		4	// 'sub' keyword
+
 // all interpolated styles are different from their parent styles by a constant difference
 // we also assume SCE_PL_STRING_VAR is the interpolated style with the smallest value
 #define	INTERPOLATE_SHIFT	(SCE_PL_STRING_VAR - SCE_PL_STRING)
@@ -134,6 +140,22 @@ static void skipWhitespaceComment(LexAccessor &styler, Sci_PositionU &p) {
 	while ((p > 0) && (style = styler.StyleAt(p),
 	        style == SCE_PL_DEFAULT || style == SCE_PL_COMMENTLINE))
 		p--;
+}
+
+static int findPrevLexeme(LexAccessor &styler, Sci_PositionU &bk, int &style) {
+	// scan backward past whitespace and comments to find a lexeme
+	skipWhitespaceComment(styler, bk);
+	if (bk == 0)
+		return 0;
+	int sz = 1;
+	style = styler.StyleAt(bk);
+	while (bk > 0) {	// find extent of lexeme
+		if (styler.StyleAt(bk - 1) == style) {
+			bk--; sz++;
+		} else
+			break;
+	}
+	return sz;
 }
 
 static int styleBeforeBracePair(LexAccessor &styler, Sci_PositionU bk) {
@@ -214,20 +236,59 @@ static int podLineScan(LexAccessor &styler, Sci_PositionU &pos, Sci_PositionU en
 
 static bool styleCheckSubPrototype(LexAccessor &styler, Sci_PositionU bk) {
 	// backtrack to identify if we're starting a subroutine prototype
-	// we also need to ignore whitespace/comments:
-	// 'sub' [whitespace|comment] <identifier> [whitespace|comment]
+	// we also need to ignore whitespace/comments, format is like:
+	//     sub abc::pqr :const :prototype(...)
+	// lexemes are tested in pairs, e.g. '::'+'pqr', ':'+'const', etc.
+	// and a state machine generates legal subroutine syntax matches
 	styler.Flush();
-	skipWhitespaceComment(styler, bk);
-	if (bk == 0 || styler.StyleAt(bk) != SCE_PL_IDENTIFIER)	// check identifier
-		return false;
-	while (bk > 0 && (styler.StyleAt(bk) == SCE_PL_IDENTIFIER)) {
-		bk--;
-	}
-	skipWhitespaceComment(styler, bk);
-	if (bk < 2 || styler.StyleAt(bk) != SCE_PL_WORD	// check "sub" keyword
-	        || !styler.Match(bk - 2, "sub"))	// assume suffix is unique!
-		return false;
-	return true;
+	int state = SUB_BEGIN;
+	do {
+		// find two lexemes, lexeme 2 follows lexeme 1
+		int style2 = SCE_PL_DEFAULT;
+		Sci_PositionU pos2 = bk;
+		int len2 = findPrevLexeme(styler, pos2, style2);
+		int style1 = SCE_PL_DEFAULT;
+		Sci_PositionU pos1 = pos2;
+		if (pos1 > 0) pos1--;
+		int len1 = findPrevLexeme(styler, pos1, style1);
+		if (len1 == 0 || len2 == 0)		// lexeme pair must exist
+			break;
+
+		// match parts of syntax, if invalid subroutine syntax, break off
+		if (style1 == SCE_PL_OPERATOR && len1 == 1 &&
+		    styler.SafeGetCharAt(pos1) == ':') {	// ':'
+			if (style2 == SCE_PL_IDENTIFIER || style2 == SCE_PL_WORD) {
+				if (len2 == 9 && styler.Match(pos2, "prototype")) {	// ':' 'prototype'
+					if (state == SUB_BEGIN) {
+						state = SUB_HAS_PROTO;
+					} else
+						break;
+				} else {	// ':' <attribute>
+					if (state == SUB_HAS_PROTO || state == SUB_HAS_ATTRIB) {
+						state = SUB_HAS_ATTRIB;
+					} else
+						break;
+				}
+			} else
+				break;
+		} else if (style1 == SCE_PL_OPERATOR && len1 == 2 &&
+		           styler.Match(pos1, "::")) {	// '::'
+			if (style2 == SCE_PL_IDENTIFIER) {	// '::' <identifier>
+				state = SUB_HAS_MODULE;
+			} else
+				break;
+		} else if (style1 == SCE_PL_WORD && len1 == 3 &&
+		           styler.Match(pos1, "sub")) {	// 'sub'
+			if (style2 == SCE_PL_IDENTIFIER) {	// 'sub' <identifier>
+				state = SUB_HAS_SUB;
+			} else
+				break;
+		} else
+			break;
+		bk = pos1;			// set position for finding next lexeme pair
+		if (bk > 0) bk--;
+	} while (state != SUB_HAS_SUB);
+	return (state == SUB_HAS_SUB);
 }
 
 static int actualNumStyle(int numberStyle) {
@@ -537,7 +598,7 @@ void SCI_METHOD LexerPerl::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	CharacterSet &setPOD = setModifiers;
 	CharacterSet setNonHereDoc(CharacterSet::setDigits, "=$@");
 	CharacterSet setHereDocDelim(CharacterSet::setAlphaNum, "_");
-	CharacterSet setSubPrototype(CharacterSet::setNone, "\\[$@%&*+];_");
+	CharacterSet setSubPrototype(CharacterSet::setNone, "\\[$@%&*+];_ \t");
 	// for format identifiers
 	CharacterSet setFormatStart(CharacterSet::setAlpha, "_=");
 	CharacterSet &setFormat = setHereDocDelim;
