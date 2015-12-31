@@ -2579,17 +2579,24 @@ void Editor::NotifyModified(Document *, DocModification mh, void *) {
 		}
 		if ((mh.modificationType & (SC_MOD_BEFOREINSERT | SC_MOD_BEFOREDELETE)) && cs.HiddenLines()) {
 			// Some lines are hidden so may need shown.
-			// TODO: check if the modified area is hidden.
+			const int lineOfPos = pdoc->LineFromPosition(mh.position);
+			int endNeedShown = mh.position;
 			if (mh.modificationType & SC_MOD_BEFOREINSERT) {
-				int lineOfPos = pdoc->LineFromPosition(mh.position);
-				const bool insertingNewLine = pdoc->ContainsLineEnd(mh.text, mh.length);
-				if (insertingNewLine && (mh.position != pdoc->LineStart(lineOfPos)))
-					NeedShown(mh.position, pdoc->LineStart(lineOfPos+1) - mh.position);
-				else
-					NeedShown(mh.position, 0);
+				if (pdoc->ContainsLineEnd(mh.text, mh.length) && (mh.position != pdoc->LineStart(lineOfPos)))
+					endNeedShown = pdoc->LineStart(lineOfPos+1);
 			} else if (mh.modificationType & SC_MOD_BEFOREDELETE) {
-				NeedShown(mh.position, mh.length);
+				// Extend the need shown area over any folded lines
+				endNeedShown = mh.position + mh.length;
+				int lineLast = pdoc->LineFromPosition(mh.position+mh.length);
+				for (int line = lineOfPos; line <= lineLast; line++) {
+					const int lineMaxSubord = pdoc->GetLastChild(line, -1, -1);
+					if (lineLast < lineMaxSubord) {
+						lineLast = lineMaxSubord;
+						endNeedShown = pdoc->LineEnd(lineLast);
+					}
+				}
 			}
+			NeedShown(mh.position, endNeedShown - mh.position);
 		}
 		if (mh.linesAdded != 0) {
 			// Update contraction state for inserted and removed lines
