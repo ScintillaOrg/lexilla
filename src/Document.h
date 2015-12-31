@@ -273,6 +273,7 @@ public:
 
 	Sci_Position SCI_METHOD LineFromPosition(Sci_Position pos) const;
 	int ClampPositionIntoDocument(int pos) const;
+	bool ContainsLineEnd(const char *s, int length) const { return cb.ContainsLineEnd(s, length); }
 	bool IsCrLf(int pos) const;
 	int LenChar(int pos);
 	bool InGoodUTF8(int pos, int &start, int &end) const;

@@ -2582,11 +2582,7 @@ void Editor::NotifyModified(Document *, DocModification mh, void *) {
 			// TODO: check if the modified area is hidden.
 			if (mh.modificationType & SC_MOD_BEFOREINSERT) {
 				int lineOfPos = pdoc->LineFromPosition(mh.position);
-				bool insertingNewLine = false;
-				for (int i=0; i < mh.length; i++) {
-					if ((mh.text[i] == '\n') || (mh.text[i] == '\r'))
-						insertingNewLine = true;
-				}
+				const bool insertingNewLine = pdoc->ContainsLineEnd(mh.text, mh.length);
 				if (insertingNewLine && (mh.position != pdoc->LineStart(lineOfPos)))
 					NeedShown(mh.position, pdoc->LineStart(lineOfPos+1) - mh.position);
 				else
