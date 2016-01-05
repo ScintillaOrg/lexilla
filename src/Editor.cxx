@@ -4886,17 +4886,13 @@ void Editor::Tick() {
 }
 
 bool Editor::Idle() {
+	bool needWrap = Wrapping() && wrapPending.NeedsWrap();
 
-	bool idleDone;
-
-	bool wrappingDone = !Wrapping();
-
-	if (!wrappingDone) {
+	if (needWrap) {
 		// Wrap lines during idle.
 		WrapLines(wsIdle);
 		// No more wrapping
-		if (!wrapPending.NeedsWrap())
-			wrappingDone = true;
+		needWrap = wrapPending.NeedsWrap();
 	} else if (needIdleStyling) {
 		IdleStyling();
 	}
@@ -4906,7 +4902,7 @@ bool Editor::Idle() {
 	// false will stop calling this idle function until SetIdle() is
 	// called again.
 
-	idleDone = wrappingDone && !needIdleStyling; // && thatDone && theOtherThingDone...
+	const bool idleDone = !needWrap && !needIdleStyling; // && thatDone && theOtherThingDone...
 
 	return !idleDone;
 }
