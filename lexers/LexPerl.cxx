@@ -111,9 +111,11 @@ static int disambiguateBareword(LexAccessor &styler, Sci_PositionU bk, Sci_Posit
 	        // &bareword: subroutine call
 	        || styler.Match(bk - 1, "->")
 	        // ->bareword: part of variable spec
+	        || styler.Match(bk - 1, "::")
+	        // ::bareword: part of module spec
 	        || styler.Match(bk - 2, "sub")) {
-		// sub bareword: subroutine declaration
-		// (implied BACK_KEYWORD, no keywords end in 'sub'!)
+	        // sub bareword: subroutine declaration
+	        // (implied BACK_KEYWORD, no keywords end in 'sub'!)
 		result |= 1;
 	}
 	// next, scan forward after word past tab/spaces only;
@@ -127,7 +129,7 @@ static int disambiguateBareword(LexAccessor &styler, Sci_PositionU bk, Sci_Posit
 		if ((ch == '}' && brace)
 		        // {bareword}: variable spec
 		        || styler.Match(fw, "=>")) {
-			// [{(, bareword=>: hash literal
+		        // [{(, bareword=>: hash literal
 			result |= 2;
 		}
 	}
@@ -599,6 +601,7 @@ void SCI_METHOD LexerPerl::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	CharacterSet setNonHereDoc(CharacterSet::setDigits, "=$@");
 	CharacterSet setHereDocDelim(CharacterSet::setAlphaNum, "_");
 	CharacterSet setSubPrototype(CharacterSet::setNone, "\\[$@%&*+];_ \t");
+	CharacterSet setRepetition(CharacterSet::setDigits, ")\"'");
 	// for format identifiers
 	CharacterSet setFormatStart(CharacterSet::setAlpha, "_=");
 	CharacterSet &setFormat = setHereDocDelim;
@@ -1339,7 +1342,7 @@ void SCI_METHOD LexerPerl::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					fw++;
 				} else if (sc.ch == 'x' && (sc.chNext == '=' ||	// repetition
 				        !setWord.Contains(sc.chNext) ||
-				        ((IsADigit(sc.chPrev) || sc.chPrev == ')') && IsADigit(sc.chNext)))) {
+				        (setRepetition.Contains(sc.chPrev) && IsADigit(sc.chNext)))) {
 					sc.ChangeState(SCE_PL_OPERATOR);
 				}
 				// if potentially a keyword, scan forward and grab word, then check
