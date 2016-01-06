@@ -1501,6 +1501,7 @@ struct Sci_TextToFind {
     <p><b id="SCI_POSITIONRELATIVE">SCI_POSITIONRELATIVE(int position, int relative)</b><br />
      Count a number of whole characters before or after the argument position and return that position.
      The minimum position returned is 0 and the maximum is the last position in the document.
+     If the position goes past the document end then 0 is returned.
      </p>
 
     <p><b id="SCI_COUNTCHARACTERS">SCI_COUNTCHARACTERS(int startPos, int endPos)</b><br />
