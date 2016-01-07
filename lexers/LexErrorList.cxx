@@ -378,6 +378,7 @@ static void ColouriseErrorListDoc(Sci_PositionU startPos, Sci_Position length, i
 		}
 	}
 	if (linePos > 0) {	// Last line does not have ending characters
+		lineBuffer[linePos] = '\0';
 		ColouriseErrorListLine(lineBuffer, linePos, startPos + length - 1, styler, valueSeparate, escapeSequences);
 	}
 }
