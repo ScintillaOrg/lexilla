@@ -438,6 +438,68 @@ void ScintillaEditBase::DrawImeIndicator(int indicator, int len)
 	}
 }
 
+static int GetImeCaretPos(QInputMethodEvent *event)
+{
+	foreach (QInputMethodEvent::Attribute attr, event->attributes()) {
+		if (attr.type == QInputMethodEvent::Cursor)
+			return attr.start;
+	}
+	return 0;
+}
+
+static std::vector<int> MapImeIndicators(QInputMethodEvent *event, bool preeditNotChanged)
+{
+#ifndef Q_OS_LINUX
+	Q_UNUSED(preeditNotChanged)
+#endif
+	const QString preeditStr = event->preeditString();
+	std::vector<int> imeIndicator(preeditStr.length(), SC_INDICATOR_UNKNOWN);
+#ifdef Q_OS_LINUX
+	const int imeCaretPos = GetImeCaretPos(event);
+#endif
+
+	foreach (QInputMethodEvent::Attribute attr, event->attributes()) {
+		if (attr.type == QInputMethodEvent::TextFormat) {
+			QTextFormat format = attr.value.value<QTextFormat>();
+			QTextCharFormat charFormat = format.toCharFormat();
+
+			int indicator = SC_INDICATOR_UNKNOWN;
+			switch (charFormat.underlineStyle()) {
+				case QTextCharFormat::NoUnderline:
+					indicator = SC_INDICATOR_TARGET; //target input
+					break;
+				case QTextCharFormat::SingleUnderline:
+				case QTextCharFormat::DashUnderline:
+					indicator = SC_INDICATOR_INPUT; //normal input
+					break;
+				case QTextCharFormat::DotLine:
+				case QTextCharFormat::DashDotLine:
+				case QTextCharFormat::WaveUnderline:
+				case QTextCharFormat::SpellCheckUnderline:
+					indicator = SC_INDICATOR_CONVERTED;
+					break;
+
+				default:
+					indicator = SC_INDICATOR_UNKNOWN;
+			}
+#ifdef Q_OS_LINUX
+			// ibus-qt has a bug to return only one underline style.
+			// Q_OS_LINUX blocks are temporary work around to cope with it.
+			if ((attr.length > 0) && (attr.start == imeCaretPos)) {
+				indicator = SC_INDICATOR_TARGET;
+				if ((imeCaretPos == 0) && (preeditNotChanged)) { // moved by an arrow key.
+					indicator = SC_INDICATOR_INPUT;
+				}
+			}
+#endif
+			for (int i = attr.start; i < attr.start+attr.length; i++) {
+				imeIndicator[i] = indicator;
+			}
+		}
+	}
+	return imeIndicator;
+}
+
 void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 {
 	// Copy & paste by johnsonj with a lot of helps of Neil
@@ -482,55 +544,11 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 
 		sqt->pdoc->TentativeStart(); // TentativeActive() from now on.
 
-		// Mark segments and get ime caret position.
-		unsigned int imeCaretPos = 0;
-		unsigned int imeIndicator[MAXLENINPUTIME] = {0};
+		std::vector<int> imeIndicator = MapImeIndicators(event, preeditString == preeditStr);
 #ifdef Q_OS_LINUX
-		// ibus-qt has a bug to return only one underline style.
-		// Q_OS_LINUX blocks are temporary work around to cope with it.
-		unsigned int attrSegment = 0;
-#endif
-
-		foreach (QInputMethodEvent::Attribute attr, event->attributes()) {
-			if (attr.type == QInputMethodEvent::TextFormat) {
-				QTextFormat format = attr.value.value<QTextFormat>();
-				QTextCharFormat charFormat = format.toCharFormat();
-
-				unsigned int indicator = SC_INDICATOR_UNKNOWN;
-				switch (charFormat.underlineStyle()) {
-					case QTextCharFormat::NoUnderline:
-						indicator = SC_INDICATOR_TARGET; //target input
-						break;
-					case QTextCharFormat::SingleUnderline:
-					case QTextCharFormat::DashUnderline:
-						indicator = SC_INDICATOR_INPUT; //normal input
-						break;
-					case QTextCharFormat::DotLine:
-					case QTextCharFormat::DashDotLine:
-					case QTextCharFormat::WaveUnderline:
-					case QTextCharFormat::SpellCheckUnderline:
-						indicator = SC_INDICATOR_CONVERTED;
-						break;
-
-					default:
-						indicator = SC_INDICATOR_UNKNOWN;
-				}
-
-#ifdef Q_OS_LINUX
-				attrSegment++;
-				indicator = attr.start;
-#endif
-				for (int i = attr.start; i < attr.start+attr.length; i++) {
-					imeIndicator[i] = indicator;
-				}
-			} else if (attr.type == QInputMethodEvent::Cursor) {
-				imeCaretPos = attr.start;
-			}
-		}
-#ifdef Q_OS_LINUX
-		const bool targetInput = (attrSegment > 1) || ((imeCaretPos == 0) && (preeditStr != preeditString));
 		preeditString = preeditStr;
 #endif
+
 		// Display preedit characters one by one.
 		int imeCharPos[MAXLENINPUTIME] = {0};
 		int numBytes = 0;
@@ -549,21 +567,14 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 
 			sqt->AddCharUTF(oneChar.data(), oneCharLen);
 
-#ifdef Q_OS_LINUX
-			// Segment marked with imeCaretPos is for target input.
-			if ((imeIndicator[i] == imeCaretPos) && (targetInput)) {
-				DrawImeIndicator(SC_INDICATOR_TARGET, oneCharLen);
-			} else {
-				DrawImeIndicator(SC_INDICATOR_INPUT, oneCharLen);
-			}
-#else
 			DrawImeIndicator(imeIndicator[i], oneCharLen);
-#endif
+
 			i += ucWidth;
 		}
 		sqt->recordingMacro = recording;
 
 		// Move IME carets.
+		int imeCaretPos = GetImeCaretPos(event);
 		MoveImeCarets(- imeCharPos[preeditStrLen] + imeCharPos[imeCaretPos]);
 
 		if (IsHangul(preeditStr.at(0))) {
