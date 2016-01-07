@@ -3161,12 +3161,6 @@ int Platform::Clamp(int val, int minVal, int maxVal) {
 	return val;
 }
 
-#ifdef _MSC_VER
-// GetVersionEx has been deprecated fro Windows 8.1 but called here to determine if Windows 9x.
-// Too dangerous to find alternate check.
-#pragma warning(disable: 4996)
-#endif
-
 void Platform_Initialise(void *hInstance) {
 	::InitializeCriticalSection(&crPlatformLock);
 	hinstPlatformRes = static_cast<HINSTANCE>(hInstance);
@@ -3189,10 +3183,6 @@ void Platform_Initialise(void *hInstance) {
 
 	ListBoxX_Register();
 }
-
-#ifdef _MSC_VER
-#pragma warning(default: 4996)
-#endif
 
 void Platform_Finalise(bool fromDllMain) {
 #if defined(USE_D2D)
