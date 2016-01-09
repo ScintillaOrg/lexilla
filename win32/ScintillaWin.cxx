@@ -1000,6 +1000,39 @@ void ScintillaWin::ToggleHanja() {
 	}
 }
 
+static unsigned int GetImeCaretPos(HIMC hIMC) {
+	return ImmGetCompositionStringW(hIMC, GCS_CURSORPOS, NULL, 0);
+}
+
+static std::vector<BYTE> GetImeAttributes(HIMC hIMC) {
+	int attrLen = ::ImmGetCompositionStringW(hIMC, GCS_COMPATTR, NULL, 0);
+	std::vector<BYTE> attr(attrLen, 0);
+	::ImmGetCompositionStringW(hIMC, GCS_COMPATTR, &attr[0], static_cast<DWORD>(attr.size()));
+	return attr;
+}
+
+static std::vector<int> MapImeIndicators(std::vector<BYTE> inputStyle) {
+	std::vector<int> imeIndicator(inputStyle.size(), SC_INDICATOR_UNKNOWN);
+	for (size_t i = 0; i < inputStyle.size(); i++) {
+		switch (static_cast<int>(inputStyle.at(i))) {
+		case ATTR_INPUT:
+			imeIndicator[i] = SC_INDICATOR_INPUT;
+			break;
+		case ATTR_TARGET_NOTCONVERTED:
+		case ATTR_TARGET_CONVERTED:
+			imeIndicator[i] = SC_INDICATOR_TARGET;
+			break;
+		case ATTR_CONVERTED:
+			imeIndicator[i] = SC_INDICATOR_CONVERTED;
+			break;
+		default:
+			imeIndicator[i] = SC_INDICATOR_UNKNOWN;
+			break;
+		}
+	}
+	return imeIndicator;
+}
+
 sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 	// Copy & paste by johnsonj with a lot of helps of Neil.
 	// Great thanks for my foreruners, jiniya and BLUEnLIVE.
@@ -1035,16 +1068,7 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 
 		pdoc->TentativeStart(); // TentativeActive from now on.
 
-		// Get attribute information from composition string.
-		BYTE compAttr[maxLenInputIME] = { 0 };
-		unsigned int imeCursorPos = 0;
-
-		if (lParam & GCS_COMPATTR) {
-			ImmGetCompositionStringW(imc.hIMC, GCS_COMPATTR, compAttr, sizeof(compAttr));
-		}
-		if (lParam & GCS_CURSORPOS) {
-			imeCursorPos = ImmGetCompositionStringW(imc.hIMC, GCS_CURSORPOS, NULL, 0);
-		}
+		std::vector<int> imeIndicator = MapImeIndicators(GetImeAttributes(imc.hIMC));
 
 		// Display character by character.
 		int numBytes = 0;
@@ -1074,26 +1098,13 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 			numBytes += oneCharLen;
 			imeCharPos[i + ucWidth] = numBytes;
 
-			// Draw an indicator on the character.
-			int indicator = SC_INDICATOR_UNKNOWN;
-			switch ((int)compAttr[i]) {
-			case ATTR_INPUT:
-				indicator = SC_INDICATOR_INPUT;
-				break;
-			case ATTR_TARGET_NOTCONVERTED:
-			case ATTR_TARGET_CONVERTED:
-				indicator = SC_INDICATOR_TARGET;
-				break;
-			case ATTR_CONVERTED:
-				indicator = SC_INDICATOR_CONVERTED;
-				break;
-			}
-			DrawImeIndicator(indicator, oneCharLen);
+			DrawImeIndicator(imeIndicator[i], oneCharLen);
 			i += ucWidth;
 		}
 		recordingMacro = tmpRecordingMacro;
 
 		// Move IME caret position.
+		unsigned int imeCursorPos = GetImeCaretPos(imc.hIMC);
 		MoveImeCarets(-imeCharPos[wcsLen] + imeCharPos[imeCursorPos]);
 		if (KoreanIME()) {
 			view.imeCaretBlockOverride = true;
