@@ -107,6 +107,9 @@ HEADERS  += \
     ../ScintillaEditBase/ScintillaEditBase.h
 
 DEFINES += SCINTILLA_QT=1 MAKING_LIBRARY=1 SCI_LEXER=1 _CRT_SECURE_NO_DEPRECATE=1
+CONFIG(release, debug|release) {
+    DEFINES += NDEBUG=1
+}
 
 DESTDIR = ../../bin
 
