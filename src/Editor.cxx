@@ -5422,12 +5422,20 @@ void Editor::FoldChanged(int line, int levelNow, int levelPrev) {
 			FoldExpand(line, SC_FOLDACTION_EXPAND, levelPrev);
 		}
 	} else if (levelPrev & SC_FOLDLEVELHEADERFLAG) {
+		const int prevLine = line - 1;
+		const int prevLineLevel = pdoc->GetLevel(prevLine);
+
+		// Combining two blocks where the first block is collapsed (e.g. by deleting the line(s) which separate(s) the two blocks)
+		if ((LevelNumber(prevLineLevel) == LevelNumber(levelNow)) && !cs.GetVisible(prevLine))
+			FoldLine(pdoc->GetFoldParent(prevLine), SC_FOLDACTION_EXPAND);
+
 		if (!cs.GetExpanded(line)) {
 			// Removing the fold from one that has been contracted so should expand
 			// otherwise lines are left invisible with no way to make them visible
 			if (cs.SetExpanded(line, true)) {
 				RedrawSelMargin();
 			}
+			// Combining two blocks where the second one is collapsed (e.g. by adding characters in the line which separates the two blocks)
 			FoldExpand(line, SC_FOLDACTION_EXPAND, levelPrev);
 		}
 	}
@@ -5441,6 +5449,15 @@ void Editor::FoldChanged(int line, int levelNow, int levelPrev) {
 				SetScrollBars();
 				Redraw();
 			}
+		}
+	}
+
+	// Combining two blocks where the first one is collapsed (e.g. by adding characters in the line which separates the two blocks)
+	if (!(levelNow & SC_FOLDLEVELWHITEFLAG) && (LevelNumber(levelPrev) < LevelNumber(levelNow))) {
+		if (cs.HiddenLines()) {
+			const int parentLine = pdoc->GetFoldParent(line);
+			if (!cs.GetExpanded(parentLine) && cs.GetExpanded(line))
+				FoldLine(parentLine, SC_FOLDACTION_EXPAND);
 		}
 	}
 }
