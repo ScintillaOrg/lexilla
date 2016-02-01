@@ -1086,26 +1086,15 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 		for (size_t i = 0; i < wcs.size(); ) {
 			const size_t ucWidth = UTF16CharLength(wcs[i]);
 			const std::wstring uniChar(wcs, i, ucWidth);
-			char oneChar[UTF8MaxBytes + 1] = "\0\0\0\0"; // Maximum 4 bytes in utf8
-			unsigned int oneCharLen = 0;
+			std::string docChar = StringEncode(uniChar, CodePageOfDocument());
 
-			if (IsUnicodeMode()) {
-				oneCharLen = UTF8Length(uniChar.c_str(), static_cast<unsigned int>(uniChar.length()));
-				UTF8FromUTF16(uniChar.c_str(), static_cast<unsigned int>(uniChar.length()), oneChar, oneCharLen);
-			} else {
-				oneCharLen = ::WideCharToMultiByte(InputCodePage(), 0,
-					uniChar.c_str(), static_cast<unsigned int>(uniChar.length()), oneChar, sizeof(oneChar)-1, 0, 0);
-			}
-			oneChar[oneCharLen] = '\0';
-
-			// Display a character.
-			AddCharUTF(oneChar, oneCharLen);
+			AddCharUTF(docChar.c_str(), static_cast<unsigned int>(docChar.size()));
 
 			// Record compstr character positions for moving IME carets.
-			numBytes += oneCharLen;
+			numBytes += static_cast<unsigned int>(docChar.size());
 			imeCharPos[i + ucWidth] = numBytes;
 
-			DrawImeIndicator(imeIndicator[i], oneCharLen);
+			DrawImeIndicator(imeIndicator[i], static_cast<unsigned int>(docChar.size()));
 			i += ucWidth;
 		}
 		recordingMacro = tmpRecordingMacro;
@@ -1121,18 +1110,9 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 		for (size_t i = 0; i < wcs.size();) {
 			const size_t ucWidth = UTF16CharLength(wcs[i]);
 			const std::wstring uniChar(wcs, i, ucWidth);
-			char oneChar[UTF8MaxBytes+1] = "\0\0\0\0"; // Maximum 4 bytes in UTF-8.
-			unsigned int oneCharLen = 0;
+			std::string docChar = StringEncode(uniChar, CodePageOfDocument());
 
-			if (IsUnicodeMode()) {
-				oneCharLen = UTF8Length(uniChar.c_str(), static_cast<unsigned int>(uniChar.length()));
-				UTF8FromUTF16(uniChar.c_str(), static_cast<unsigned int>(uniChar.length()), oneChar, oneCharLen);
-			} else {
-				oneCharLen = ::WideCharToMultiByte(InputCodePage(), 0,
-					uniChar.c_str(), static_cast<unsigned int>(uniChar.length()), oneChar, sizeof(oneChar)-1, 0, 0);
-			}
-			oneChar[oneCharLen] = '\0';
-			AddCharUTF(oneChar, oneCharLen);
+			AddCharUTF(docChar.c_str(), static_cast<unsigned int>(docChar.size()));
 			i += ucWidth;
 		}
 	}
