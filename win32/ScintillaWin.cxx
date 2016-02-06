@@ -210,6 +210,24 @@ public:
 		if (hIMC)
 			::ImmReleaseContext(hwnd, hIMC);
 	}
+
+	unsigned int GetImeCaretPos() {
+		return ImmGetCompositionStringW(hIMC, GCS_CURSORPOS, NULL, 0);
+	}
+
+	std::vector<BYTE> GetImeAttributes() {
+		int attrLen = ::ImmGetCompositionStringW(hIMC, GCS_COMPATTR, NULL, 0);
+		std::vector<BYTE> attr(attrLen, 0);
+		::ImmGetCompositionStringW(hIMC, GCS_COMPATTR, &attr[0], static_cast<DWORD>(attr.size()));
+		return attr;
+	}
+
+	std::wstring GetCompositionString(DWORD dwIndex) {
+		const LONG byteLen = ::ImmGetCompositionStringW(hIMC, dwIndex, NULL, 0);
+		std::wstring wcs(byteLen / 2, 0);
+		::ImmGetCompositionStringW(hIMC, dwIndex, &wcs[0], byteLen);
+		return wcs;
+	}
 };
 
 }
@@ -1002,17 +1020,6 @@ void ScintillaWin::ToggleHanja() {
 
 namespace {
 
-unsigned int GetImeCaretPos(HIMC hIMC) {
-	return ImmGetCompositionStringW(hIMC, GCS_CURSORPOS, NULL, 0);
-}
-
-std::vector<BYTE> GetImeAttributes(HIMC hIMC) {
-	int attrLen = ::ImmGetCompositionStringW(hIMC, GCS_COMPATTR, NULL, 0);
-	std::vector<BYTE> attr(attrLen, 0);
-	::ImmGetCompositionStringW(hIMC, GCS_COMPATTR, &attr[0], static_cast<DWORD>(attr.size()));
-	return attr;
-}
-
 std::vector<int> MapImeIndicators(std::vector<BYTE> inputStyle) {
 	std::vector<int> imeIndicator(inputStyle.size(), SC_INDICATOR_UNKNOWN);
 	for (size_t i = 0; i < inputStyle.size(); i++) {
@@ -1033,13 +1040,6 @@ std::vector<int> MapImeIndicators(std::vector<BYTE> inputStyle) {
 		}
 	}
 	return imeIndicator;
-}
-
-std::wstring GetCompositionString(HIMC hIMC, DWORD dwIndex) {
-	const LONG byteLen = ::ImmGetCompositionStringW(hIMC, dwIndex, NULL, 0);
-	std::wstring wcs(byteLen / 2, 0);
-	::ImmGetCompositionStringW(hIMC, dwIndex, &wcs[0], byteLen);
-	return wcs;
 }
 
 }
@@ -1067,7 +1067,7 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 	view.imeCaretBlockOverride = false;
 
 	if (lParam & GCS_COMPSTR) {
-		const std::wstring wcs = GetCompositionString(imc.hIMC, GCS_COMPSTR);
+		const std::wstring wcs = imc.GetCompositionString(GCS_COMPSTR);
 		if ((wcs.size() == 0) || (wcs.size() >= maxLenInputIME)) {
 			ShowCaretAtCurrentPosition();
 			return 0;
@@ -1075,7 +1075,7 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 
 		pdoc->TentativeStart(); // TentativeActive from now on.
 
-		std::vector<int> imeIndicator = MapImeIndicators(GetImeAttributes(imc.hIMC));
+		std::vector<int> imeIndicator = MapImeIndicators(imc.GetImeAttributes());
 
 		// Display character by character.
 		int numBytes = 0;
@@ -1100,13 +1100,13 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 		recordingMacro = tmpRecordingMacro;
 
 		// Move IME caret position.
-		unsigned int imeCursorPos = GetImeCaretPos(imc.hIMC);
+		unsigned int imeCursorPos = imc.GetImeCaretPos();
 		MoveImeCarets(-imeCharPos[wcs.size()] + imeCharPos[imeCursorPos]);
 		if (KoreanIME()) {
 			view.imeCaretBlockOverride = true;
 		}
 	} else if (lParam & GCS_RESULTSTR) {
-		const std::wstring wcs = GetCompositionString(imc.hIMC, GCS_RESULTSTR);
+		const std::wstring wcs = imc.GetCompositionString(GCS_RESULTSTR);
 		for (size_t i = 0; i < wcs.size();) {
 			const size_t ucWidth = UTF16CharLength(wcs[i]);
 			const std::wstring uniChar(wcs, i, ucWidth);
