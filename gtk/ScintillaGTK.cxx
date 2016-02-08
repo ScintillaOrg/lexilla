@@ -3051,7 +3051,7 @@ sptr_t scintilla_send_message(ScintillaObject *sci, unsigned int iMessage, uptr_
 	return psci->WndProc(iMessage, wParam, lParam);
 }
 
-sptr_t scintilla_object_send_message(ScintillaObject *sci, unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
+gintptr scintilla_object_send_message(ScintillaObject *sci, unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	return scintilla_send_message(sci, iMessage, wParam, lParam);
 }
 

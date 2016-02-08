@@ -53,7 +53,7 @@ and/or use gtk-doc annotations.  -->
       </virtual-method>
       <method name="send_message" c:identifier="scintilla_object_send_message">
         <return-value transfer-ownership="none">
-          <type name="glong" c:type="long"/>
+          <type name="gintptr" c:type="gintptr"/>
         </return-value>
         <parameters>
           <instance-parameter name="sci" transfer-ownership="none">
