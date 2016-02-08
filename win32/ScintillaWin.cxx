@@ -309,6 +309,7 @@ class ScintillaWin :
 	void SelectionToHangul();
 	void EscapeHanja();
 	void ToggleHanja();
+	void AddWString(std::wstring wcs);
 
 	UINT CodePageOfDocument() const;
 	virtual bool ValidCodePage(int codePage) const;
@@ -852,24 +853,8 @@ sptr_t ScintillaWin::HandleCompositionWindowed(uptr_t wParam, sptr_t lParam) {
 	if (lParam & GCS_RESULTSTR) {
 		IMContext imc(MainHWND());
 		if (imc.hIMC) {
-			wchar_t wcs[maxLenInputIME];
-			LONG bytes = ::ImmGetCompositionStringW(imc.hIMC,
-				GCS_RESULTSTR, wcs, (maxLenInputIME-1)*2);
-			int wides = bytes / 2;
-			if (IsUnicodeMode()) {
-				char utfval[maxLenInputIME * 3];
-				unsigned int len = UTF8Length(wcs, wides);
-				UTF8FromUTF16(wcs, wides, utfval, len);
-				utfval[len] = '\0';
-				AddCharUTF(utfval, len);
-			} else {
-				char dbcsval[maxLenInputIME * 2];
-				int size = ::WideCharToMultiByte(InputCodePage(),
-					0, wcs, wides, dbcsval, sizeof(dbcsval) - 1, 0, 0);
-				for (int i=0; i<size; i++) {
-					AddChar(dbcsval[i]);
-				}
-			}
+			AddWString(imc.GetCompositionString(GCS_RESULTSTR));
+
 			// Set new position after converted
 			Point pos = PointMainCaret();
 			COMPOSITIONFORM CompForm;
@@ -1044,6 +1029,21 @@ std::vector<int> MapImeIndicators(std::vector<BYTE> inputStyle) {
 
 }
 
+void ScintillaWin::AddWString(std::wstring wcs) {
+	if (wcs.empty())
+		return;
+
+	int codePage = CodePageOfDocument();
+	for (size_t i = 0; i < wcs.size(); ) {
+		const size_t ucWidth = UTF16CharLength(wcs[i]);
+		const std::wstring uniChar(wcs, i, ucWidth);
+		std::string docChar = StringEncode(uniChar, codePage);
+
+		AddCharUTF(docChar.c_str(), static_cast<unsigned int>(docChar.size()));
+		i += ucWidth;
+	}
+}
+
 sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 	// Copy & paste by johnsonj with a lot of helps of Neil.
 	// Great thanks for my foreruners, jiniya and BLUEnLIVE.
@@ -1106,15 +1106,7 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 			view.imeCaretBlockOverride = true;
 		}
 	} else if (lParam & GCS_RESULTSTR) {
-		const std::wstring wcs = imc.GetCompositionString(GCS_RESULTSTR);
-		for (size_t i = 0; i < wcs.size();) {
-			const size_t ucWidth = UTF16CharLength(wcs[i]);
-			const std::wstring uniChar(wcs, i, ucWidth);
-			std::string docChar = StringEncode(uniChar, CodePageOfDocument());
-
-			AddCharUTF(docChar.c_str(), static_cast<unsigned int>(docChar.size()));
-			i += ucWidth;
-		}
+		AddWString(imc.GetCompositionString(GCS_RESULTSTR));
 	}
 	EnsureCaretVisible();
 	SetCandidateWindowPos();
