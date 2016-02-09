@@ -1077,31 +1077,27 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 
 		std::vector<int> imeIndicator = MapImeIndicators(imc.GetImeAttributes());
 
-		// Display character by character.
-		int numBytes = 0;
-		int imeCharPos[maxLenInputIME + 1] = { 0 };
-
 		bool tmpRecordingMacro = recordingMacro;
 		recordingMacro = false;
+		int codePage = CodePageOfDocument();
 		for (size_t i = 0; i < wcs.size(); ) {
 			const size_t ucWidth = UTF16CharLength(wcs[i]);
 			const std::wstring uniChar(wcs, i, ucWidth);
-			std::string docChar = StringEncode(uniChar, CodePageOfDocument());
+			std::string docChar = StringEncode(uniChar, codePage);
 
 			AddCharUTF(docChar.c_str(), static_cast<unsigned int>(docChar.size()));
-
-			// Record compstr character positions for moving IME carets.
-			numBytes += static_cast<unsigned int>(docChar.size());
-			imeCharPos[i + ucWidth] = numBytes;
 
 			DrawImeIndicator(imeIndicator[i], static_cast<unsigned int>(docChar.size()));
 			i += ucWidth;
 		}
 		recordingMacro = tmpRecordingMacro;
 
-		// Move IME caret position.
-		unsigned int imeCursorPos = imc.GetImeCaretPos();
-		MoveImeCarets(-imeCharPos[wcs.size()] + imeCharPos[imeCursorPos]);
+		// Move IME caret from current last position to imeCaretPos.
+		int toImeStart = static_cast<unsigned int>(StringEncode(wcs, codePage).size());
+		std::string imeCaret(StringEncode(wcs.substr(0, imc.GetImeCaretPos()), codePage));
+		int toImeCaret = static_cast<unsigned int>(imeCaret.size());
+		MoveImeCarets(- toImeStart + toImeCaret);
+
 		if (KoreanIME()) {
 			view.imeCaretBlockOverride = true;
 		}
