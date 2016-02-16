@@ -519,8 +519,12 @@
 	extends nested comments to unlimited levels.
 	</li>
 	<li>
-	Ruby lexer treats alternate hash key syntax 'key:' as a symbol.
+	Ruby lexer treats alternate hash key syntax "key:" as a symbol.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1810/">Bug #1810</a>.
+	</li>
+	<li>
+	Rust lexer handles bracketed Unicode string escapes like "\u{123abc}".
+	<a href="http://sourceforge.net/p/scintilla/bugs/1809/">Bug #1809</a>.
 	</li>
 	<li>
 	For GTK+ on Windows fix 64-bit build which was broken in 3.6.3.
