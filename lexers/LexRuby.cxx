@@ -466,6 +466,7 @@ static bool sureThisIsNotHeredoc(Sci_Position lt2StartPos,
     prevStyle = styler.StyleAt(firstWordPosn);
     // If we have '<<' following a keyword, it's not a heredoc
     if (prevStyle != SCE_RB_IDENTIFIER
+            && prevStyle != SCE_RB_SYMBOL
             && prevStyle != SCE_RB_INSTANCE_VAR
             && prevStyle != SCE_RB_CLASS_VAR) {
         return definitely_not_a_here_doc;
@@ -1088,6 +1089,10 @@ static void ColouriseRbDoc(Sci_PositionU startPos, Sci_Position length, int init
                     // <name>= is a name only when being def'd -- Get it the next time
                     // This means that <name>=<name> is always lexed as
                     // <name>, (op, =), <name>
+                } else if (ch == ':'
+                           && isSafeWordcharOrHigh(chPrev)
+                           && strchr(" \t\n\r", chNext) != NULL) {
+                    state = SCE_RB_SYMBOL;
                 } else if ((ch == '?' || ch == '!')
                            && isSafeWordcharOrHigh(chPrev)
                            && !isSafeWordcharOrHigh(chNext)) {
