@@ -504,6 +504,16 @@ static bool sureThisIsNotHeredoc(Sci_Position lt2StartPos,
     }
     // Skip next batch of white-space
     firstWordPosn = skipWhitespace(firstWordPosn, lt2StartPos, styler);
+    // possible symbol for an implicit hash argument
+    if (firstWordPosn < lt2StartPos && styler.StyleAt(firstWordPosn) == SCE_RB_SYMBOL) {
+        for (; firstWordPosn <= lt2StartPos; firstWordPosn += 1) {
+            if (styler.StyleAt(firstWordPosn) != SCE_RB_SYMBOL) {
+                break;
+            }
+        }
+        // Skip next batch of white-space
+        firstWordPosn = skipWhitespace(firstWordPosn, lt2StartPos, styler);
+    }
     if (firstWordPosn != lt2StartPos) {
         // Have [[^ws[identifier]ws[*something_else*]ws<<
         return definitely_not_a_here_doc;
