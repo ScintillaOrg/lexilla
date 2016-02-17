@@ -433,6 +433,32 @@ static bool haveTargetMatch(Sci_Position currPos,
     return true;
 }
 
+// Finds the start position of the expression containing @p pos
+// @p min_pos should be a known expression start, e.g. the start of the line
+static Sci_Position findExpressionStart(Sci_Position pos,
+                                        Sci_Position min_pos,
+                                        Accessor &styler) {
+    int depth = 0;
+    for (; pos > min_pos; pos -= 1) {
+        int style = styler.StyleAt(pos - 1);
+        if (style == SCE_RB_OPERATOR) {
+            int ch = styler[pos - 1];
+            if (ch == '}' || ch == ')' || ch == ']') {
+                depth += 1;
+            } else if (ch == '{' || ch == '(' || ch == '[') {
+                if (depth == 0) {
+                    break;
+                } else {
+                    depth -= 1;
+                }
+            } else if (ch == ';' && depth == 0) {
+                break;
+            }
+        }
+    }
+    return pos;
+}
+
 // We need a check because the form
 // [identifier] <<[target]
 // is ambiguous.  The Ruby lexer/parser resolves it by
@@ -458,8 +484,11 @@ static bool sureThisIsNotHeredoc(Sci_Position lt2StartPos,
     const bool definitely_not_a_here_doc = true;
     const bool looks_like_a_here_doc = false;
 
+    // find the expression start rather than the line start
+    Sci_Position exprStartPosn = findExpressionStart(lt2StartPos, lineStartPosn, styler);
+
     // Find the first word after some whitespace
-    Sci_Position firstWordPosn = skipWhitespace(lineStartPosn, lt2StartPos, styler);
+    Sci_Position firstWordPosn = skipWhitespace(exprStartPosn, lt2StartPos, styler);
     if (firstWordPosn >= lt2StartPos) {
         return definitely_not_a_here_doc;
     }
