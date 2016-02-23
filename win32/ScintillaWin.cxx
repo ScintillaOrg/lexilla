@@ -2184,9 +2184,25 @@ public:
 	}
 };
 
+// OpenClipboard may fail if another application has opened the clipboard.
+// Try up to 8 times, with an initial delay of 1 ms and an exponential back off
+// for a maximum total delay of 127 ms (1+2+4+8+16+32+64).
+static bool OpenClipboardRetry(HWND hwnd) {
+	for (int attempt=0; attempt<8; attempt++) {
+		if (attempt > 0) {
+			::Sleep(1 << (attempt-1));
+		}
+		if (::OpenClipboard(hwnd)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 void ScintillaWin::Paste() {
-	if (!::OpenClipboard(MainHWND()))
+	if (!::OpenClipboardRetry(MainHWND())) {
 		return;
+	}
 	UndoGroup ug(pdoc);
 	const bool isLine = SelectionEmpty() &&
 		(::IsClipboardFormatAvailable(cfLineSelect) || ::IsClipboardFormatAvailable(cfVSLineTag));
@@ -2737,8 +2753,9 @@ void ScintillaWin::GetIntelliMouseParameters() {
 }
 
 void ScintillaWin::CopyToClipboard(const SelectionText &selectedText) {
-	if (!::OpenClipboard(MainHWND()))
+	if (!::OpenClipboardRetry(MainHWND())) {
 		return;
+	}
 	::EmptyClipboard();
 
 	GlobalMemory uniText;
