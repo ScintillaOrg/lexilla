@@ -121,7 +121,9 @@ static void Colourise4glDoc(Sci_PositionU startPos, Sci_Position length, int ini
 				sc.SetState(SCE_4GL_DEFAULT | mask);
 				break;
 			case SCE_4GL_NUMBER:
-				if (!(IsADigit(sc.ch))) {
+				// Hex numbers (0xnnnn) are supported so accept any
+				// alphanumeric character if it follows a leading digit.
+				if (!(IsAlphaNumeric(sc.ch))) {
 					sc.SetState(SCE_4GL_DEFAULT | mask);
 				}
 				break;
