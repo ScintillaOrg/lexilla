@@ -25,7 +25,6 @@
 #include <QScrollBar>
 #include <QTimer>
 #include <QTextCodec>
-#include <QThread>
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -307,36 +306,21 @@ void ScintillaQt::ReconfigureScrollBars()
 	}
 }
 
-static bool clipboardAccessFailed;
-static void ClipboardMessageHandler(QtMsgType, const QMessageLogContext &, const QString &)
-{
-	clipboardAccessFailed = true;
-}
-
 void ScintillaQt::CopyToModeClipboard(const SelectionText &selectedText, QClipboard::Mode clipboardMode_)
 {
-	// Try up to 8 times, with an initial delay of 1 ms and an exponential
-	// back off for a maximum total delay of 127 ms (1+2+4+8+16+32+64).
-	QString text = StringFromSelectedText(selectedText);
-	for (int attempt = 0; attempt < 8; attempt++) {
-		if (attempt > 0)
-			QThread::msleep(1 << (attempt-1));
-
-		QMimeData *mimeData = new QMimeData;
-		mimeData->setText(text);
-		if (selectedText.rectangular)
-			AddRectangularToMime(mimeData, text);
-
-		// Allow client code to add additional data (e.g rich text).
-		emit aboutToCopy(mimeData);
-
-		clipboardAccessFailed = false;
-		QtMessageHandler handler = qInstallMessageHandler(ClipboardMessageHandler);
-		QApplication::clipboard()->setMimeData(mimeData, clipboardMode_);
-		qInstallMessageHandler(handler);
-		if (!clipboardAccessFailed)
-			return;
+	QClipboard *clipboard = QApplication::clipboard();
+	clipboard->clear(clipboardMode_);
+	QString su = StringFromSelectedText(selectedText);
+	QMimeData *mimeData = new QMimeData();
+	mimeData->setText(su);
+	if (selectedText.rectangular) {
+		AddRectangularToMime(mimeData, su);
 	}
+
+	// Allow client code to add additional data (e.g rich text).
+	emit aboutToCopy(mimeData);
+
+	clipboard->setMimeData(mimeData, clipboardMode_);
 }
 
 void ScintillaQt::Copy()
