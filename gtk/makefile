@@ -37,6 +37,7 @@ PICFLAGS = -fPIC
 endif
 
 ifdef windir
+CC = gcc
 DEL = del /q
 COMPLIB=..\bin\scintilla.a
 else
@@ -74,7 +75,7 @@ CTFLAGS=-DNDEBUG -Os $(CXXBASEFLAGS) $(THREADFLAGS)
 endif
 
 CFLAGS:=$(CTFLAGS)
-CXXTFLAGS:=--std=c++0x $(CTFLAGS) $(REFLAGS)
+CXXTFLAGS:=--std=gnu++0x $(CTFLAGS) $(REFLAGS)
 
 CONFIGFLAGS:=$(shell pkg-config --cflags $(GTKVERSION))
 MARSHALLER=scintilla-marshal.o
