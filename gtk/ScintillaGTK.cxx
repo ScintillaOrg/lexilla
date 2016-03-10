@@ -2485,7 +2485,9 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 		MoveImeCarets( - (imeCharPos[preeditStr.uniStrLen]) + imeCharPos[preeditStr.cursor_pos]);
 
 		if (KoreanIME()) {
+#if !PLAT_GTK_WIN32
 			MoveImeCarets( - imeCharPos[1]); // always 2 bytes for DBCS or 3 bytes for UTF8.
+#endif
 			view.imeCaretBlockOverride = true;
 		}
 

@@ -570,7 +570,9 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 		MoveImeCarets(- imeCharPos[preeditStrLen] + imeCharPos[imeCaretPos]);
 
 		if (IsHangul(preeditStr.at(0))) {
+#ifndef Q_OS_WIN
 			MoveImeCarets(- imeCharPos[1]);
+#endif
 			sqt->view.imeCaretBlockOverride = true;
 		}
 
