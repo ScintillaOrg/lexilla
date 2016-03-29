@@ -2192,6 +2192,7 @@ gboolean ScintillaGTK::KeyThis(GdkEventKey *event) {
 		bool shift = (event->state & GDK_SHIFT_MASK) != 0;
 		bool ctrl = (event->state & GDK_CONTROL_MASK) != 0;
 		bool alt = (event->state & GDK_MOD1_MASK) != 0;
+		bool super = (event->state & GDK_MOD4_MASK) != 0;
 		guint key = event->keyval;
 		if ((ctrl || alt) && (key < 128))
 			key = toupper(key);
@@ -2208,15 +2209,12 @@ gboolean ScintillaGTK::KeyThis(GdkEventKey *event) {
 
 		bool consumed = false;
 #if !(PLAT_GTK_MACOSX)
-		bool added = KeyDown(key, shift, ctrl, alt, &consumed) != 0;
+		bool meta = false;
 #else
 		bool meta = ctrl;
 		ctrl = (event->state & GDK_META_MASK) != 0;
-		bool added = KeyDownWithModifiers(key, (shift ? SCI_SHIFT : 0) |
-		                                       (ctrl ? SCI_CTRL : 0) |
-		                                       (alt ? SCI_ALT : 0) |
-		                                       (meta ? SCI_META : 0), &consumed) != 0;
 #endif
+		bool added = KeyDownWithModifiers(key, ModifierFlags(shift, ctrl, alt, meta, super), &consumed) != 0;
 		if (!consumed)
 			consumed = added;
 		//fprintf(stderr, "SK-key: %d %x %x\n",event->keyval, event->state, consumed);
