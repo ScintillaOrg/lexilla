@@ -26,12 +26,13 @@
 #import <Foundation/NSGeometry.h>
 
 #import "Platform.h"
-#import "ScintillaView.h"
-#import "ScintillaCocoa.h"
-#import "PlatCocoa.h"
 
 #include "StringCopy.h"
 #include "XPM.h"
+
+#import "ScintillaView.h"
+#import "ScintillaCocoa.h"
+#import "PlatCocoa.h"
 
 using namespace Scintilla;
 
