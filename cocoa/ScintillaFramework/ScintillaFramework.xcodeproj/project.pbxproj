@@ -214,6 +214,7 @@
 		28B647101B54C0720009DC49 /* LexNull.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28B6470A1B54C0720009DC49 /* LexNull.cxx */; };
 		28B647111B54C0720009DC49 /* LexProps.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28B6470B1B54C0720009DC49 /* LexProps.cxx */; };
 		28BC38EC1B74C6AD008BF9EB /* Sci_Position.h in Headers */ = {isa = PBXBuildFile; fileRef = 28BC38EB1B74C6AD008BF9EB /* Sci_Position.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		28C40CA81CB7321200B089F2 /* LexJSON.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28C40CA71CB7321200B089F2 /* LexJSON.cxx */; };
 		28D516D81830FFCA0047C93D /* info_bar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 28D516D51830FFCA0047C93D /* info_bar_bg@2x.png */; };
 		28D516D91830FFCA0047C93D /* mac_cursor_busy@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 28D516D61830FFCA0047C93D /* mac_cursor_busy@2x.png */; };
 		28D516DA1830FFCA0047C93D /* mac_cursor_flipped@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 28D516D71830FFCA0047C93D /* mac_cursor_flipped@2x.png */; };
@@ -434,6 +435,7 @@
 		28B6470A1B54C0720009DC49 /* LexNull.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexNull.cxx; path = ../../lexers/LexNull.cxx; sourceTree = "<group>"; };
 		28B6470B1B54C0720009DC49 /* LexProps.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexProps.cxx; path = ../../lexers/LexProps.cxx; sourceTree = "<group>"; };
 		28BC38EB1B74C6AD008BF9EB /* Sci_Position.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Sci_Position.h; path = ../../include/Sci_Position.h; sourceTree = "<group>"; };
+		28C40CA71CB7321200B089F2 /* LexJSON.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexJSON.cxx; path = ../../lexers/LexJSON.cxx; sourceTree = "<group>"; };
 		28D516D51830FFCA0047C93D /* info_bar_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "info_bar_bg@2x.png"; sourceTree = "<group>"; };
 		28D516D61830FFCA0047C93D /* mac_cursor_busy@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "mac_cursor_busy@2x.png"; sourceTree = "<group>"; };
 		28D516D71830FFCA0047C93D /* mac_cursor_flipped@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "mac_cursor_flipped@2x.png"; sourceTree = "<group>"; };
@@ -582,6 +584,7 @@
 				28A067101A36B42600B4966A /* LexHex.cxx */,
 				114B6EDD11FA7526004FB6AB /* LexHTML.cxx */,
 				114B6EDE11FA7526004FB6AB /* LexInno.cxx */,
+				28C40CA71CB7321200B089F2 /* LexJSON.cxx */,
 				114B6EDF11FA7526004FB6AB /* LexKix.cxx */,
 				11FDD0DF17C480D4001541B9 /* LexKVIrc.cxx */,
 				1102C31B169FB49300DC16AB /* LexLaTeX.cxx */,
@@ -959,6 +962,7 @@
 				114B6F1911FA7526004FB6AB /* LexCaml.cxx in Sources */,
 				114B6F1A11FA7526004FB6AB /* LexCLW.cxx in Sources */,
 				114B6F1B11FA7526004FB6AB /* LexCmake.cxx in Sources */,
+				28C40CA81CB7321200B089F2 /* LexJSON.cxx in Sources */,
 				114B6F1C11FA7526004FB6AB /* LexCOBOL.cxx in Sources */,
 				114B6F1D11FA7526004FB6AB /* LexConf.cxx in Sources */,
 				28B647101B54C0720009DC49 /* LexNull.cxx in Sources */,
