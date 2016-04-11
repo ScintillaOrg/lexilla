@@ -524,6 +524,11 @@
 	For GTK+, fix some crashes when using multiple threads.
 	</li>
 	<li>
+	Platform layer font cache removed on GTK+ as platform-independent caches are used.
+	This avoids the use of thread locking and initialisation of threads so any GTK+
+	applications that rely on Scintilla initialising threads will have to do that themselves.
+	</li>
+	<li>
 	SciTE bug fixed with exported HTML where extra line shown.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1816/">Bug #1816</a>.
 	</li>
