@@ -2453,12 +2453,7 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 
 		pdoc->TentativeStart(); // TentativeActive() from now on
 
-		// Get preedit string attribues
 		std::vector<int> indicator = MapImeIndicators(preeditStr.attrs, preeditStr.str);
-
-		// Display preedit characters, one by one
-		glong imeCharPos[maxLenInputIME+1] = { 0 };
-		glong charWidth = 0;
 
 		bool tmpRecordingMacro = recordingMacro;
 		recordingMacro = false;
@@ -2471,21 +2466,22 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 
 			AddCharUTF(docChar.c_str(), docChar.size());
 
-			// Draw an indicator on the character,
 			DrawImeIndicator(indicator[i], docChar.size());
-
-			// Record character positions in UTF-8 or DBCS bytes
-			charWidth += docChar.size();
-			imeCharPos[i+1] = charWidth;
 		}
 		recordingMacro = tmpRecordingMacro;
 
 		// Move caret to ime cursor position.
-		MoveImeCarets( - (imeCharPos[preeditStr.uniStrLen]) + imeCharPos[preeditStr.cursor_pos]);
+		int imeEndToImeCaretU32 = preeditStr.cursor_pos - preeditStr.uniStrLen;
+		int imeCaretPosDoc = pdoc->GetRelativePosition(CurrentPosition(), imeEndToImeCaretU32);
+
+		MoveImeCarets(- CurrentPosition() + imeCaretPosDoc);
 
 		if (KoreanIME()) {
 #if !PLAT_GTK_WIN32
-			MoveImeCarets( - imeCharPos[1]); // always 2 bytes for DBCS or 3 bytes for UTF8.
+			if (preeditStr.cursor_pos > 0) {
+				int oneCharBefore = pdoc->GetRelativePosition(CurrentPosition(), -1);
+				MoveImeCarets(- CurrentPosition() + oneCharBefore);
+			}
 #endif
 			view.imeCaretBlockOverride = true;
 		}

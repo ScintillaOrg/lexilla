@@ -541,10 +541,6 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 
 		std::vector<int> imeIndicator = MapImeIndicators(event);
 
-		// Display preedit characters one by one.
-		int imeCharPos[MAXLENINPUTIME] = {0};
-		int numBytes = 0;
-
 		const bool recording = sqt->recordingMacro;
 		sqt->recordingMacro = false;
 		for (unsigned int i = 0; i < preeditStrLen;) {
@@ -553,25 +549,26 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 			const QByteArray oneChar = sqt->BytesForDocument(oneCharUTF16);
 			const int oneCharLen = oneChar.length();
 
-			// Record character positions for moving ime caret.
-			numBytes += oneCharLen;
-			imeCharPos[i + ucWidth] = numBytes;
-
 			sqt->AddCharUTF(oneChar.data(), oneCharLen);
 
 			DrawImeIndicator(imeIndicator[i], oneCharLen);
-
 			i += ucWidth;
 		}
 		sqt->recordingMacro = recording;
 
 		// Move IME carets.
 		int imeCaretPos = GetImeCaretPos(event);
-		MoveImeCarets(- imeCharPos[preeditStrLen] + imeCharPos[imeCaretPos]);
+		int imeEndToImeCaretU16 = imeCaretPos - preeditStrLen;
+		int imeCaretPosDoc = sqt->pdoc->GetRelativePositionUTF16(sqt->CurrentPosition(), imeEndToImeCaretU16);
+
+		MoveImeCarets(- sqt->CurrentPosition() + imeCaretPosDoc);
 
 		if (IsHangul(preeditStr.at(0))) {
 #ifndef Q_OS_WIN
-			MoveImeCarets(- imeCharPos[1]);
+			if (imeCaretPos > 0) {
+				int oneCharBefore = sqt->pdoc->GetRelativePosition(sqt->CurrentPosition(), -1);
+				MoveImeCarets(- sqt->CurrentPosition() + oneCharBefore);
+			}
 #endif
 			sqt->view.imeCaretBlockOverride = true;
 		}
