@@ -78,7 +78,6 @@ CFLAGS:=$(CTFLAGS)
 CXXTFLAGS:=--std=gnu++0x $(CTFLAGS) $(REFLAGS)
 
 CONFIGFLAGS:=$(shell pkg-config --cflags $(GTKVERSION))
-MARSHALLER=scintilla-marshal.o
 
 .cxx.o:
 	$(CXX) $(CONFIGFLAGS) $(CXXTFLAGS) $(CXXFLAGS) -c $<
@@ -104,7 +103,7 @@ $(COMPLIB): Accessor.o CharacterSet.o LexerBase.o LexerModule.o LexerSimple.o St
 	PropSetSimple.o PlatGTK.o \
 	KeyMap.o LineMarker.o PositionCache.o ScintillaGTK.o CellBuffer.o CharacterCategory.o ViewStyle.o \
 	RESearch.o RunStyles.o Selection.o Style.o Indicator.o AutoComplete.o UniConversion.o XPM.o \
-	$(MARSHALLER) $(LEXOBJS)
+	$(LEXOBJS)
 	$(AR) rc $@ $^
 	$(RANLIB) $@
 

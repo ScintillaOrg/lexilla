@@ -15,7 +15,7 @@ ScintillaGTK.o: ScintillaGTK.cxx \
  ../src/Selection.h ../src/PositionCache.h ../src/EditModel.h \
  ../src/MarginView.h ../src/EditView.h ../src/Editor.h \
  ../src/AutoComplete.h ../src/ScintillaBase.h ../src/ExternalLexer.h \
- scintilla-marshal.h Converter.h
+ Converter.h
 AutoComplete.o: ../src/AutoComplete.cxx ../include/Platform.h \
  ../include/Scintilla.h ../include/Sci_Position.h \
  ../lexlib/CharacterSet.h ../src/Position.h ../src/AutoComplete.h

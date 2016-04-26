@@ -14,6 +14,24 @@ and/or use gtk-doc annotations.  -->
              shared-library="libscintilla.so"
              c:identifier-prefixes="Scintilla"
              c:symbol-prefixes="scintilla">
+    <alias name="Sci_Position" c:type="Sci_Position">
+      <type name="gint" c:type="int"/>
+    </alias>
+    <alias name="Sci_PositionCR" c:type="Sci_PositionCR">
+      <type name="glong" c:type="long"/>
+    </alias>
+    <alias name="Sci_PositionU" c:type="Sci_PositionU">
+      <type name="guint" c:type="unsigned int"/>
+    </alias>
+    <alias name="Sci_SurfaceID" c:type="Sci_SurfaceID">
+      <type name="gpointer" c:type="gpointer"/>
+    </alias>
+    <alias name="sptr_t" c:type="sptr_t">
+      <type name="glong" c:type="long"/>
+    </alias>
+    <alias name="uptr_t" c:type="uptr_t">
+      <type name="gulong" c:type="unsigned long"/>
+    </alias>
     <constant name="NOTIFY" value="sci-notify" c:type="SCINTILLA_NOTIFY">
       <type name="utf8" c:type="gchar*"/>
     </constant>
@@ -36,9 +54,15 @@ and/or use gtk-doc annotations.  -->
           <type name="none" c:type="void"/>
         </return-value>
         <parameters>
-          <instance-parameter name="ttt" transfer-ownership="none">
+          <instance-parameter name="sci" transfer-ownership="none">
             <type name="Object" c:type="ScintillaObject*"/>
           </instance-parameter>
+          <parameter name="cmd" transfer-ownership="none">
+            <type name="gint" c:type="int"/>
+          </parameter>
+          <parameter name="window" transfer-ownership="none">
+            <type name="Gtk.Widget" c:type="GtkWidget*"/>
+          </parameter>
         </parameters>
       </virtual-method>
       <virtual-method name="notify">
@@ -46,9 +70,15 @@ and/or use gtk-doc annotations.  -->
           <type name="none" c:type="void"/>
         </return-value>
         <parameters>
-          <instance-parameter name="ttt" transfer-ownership="none">
+          <instance-parameter name="sci" transfer-ownership="none">
             <type name="Object" c:type="ScintillaObject*"/>
           </instance-parameter>
+          <parameter name="id" transfer-ownership="none">
+            <type name="gint" c:type="int"/>
+          </parameter>
+          <parameter name="scn" transfer-ownership="none">
+            <type name="SCNotification" c:type="SCNotification*"/>
+          </parameter>
         </parameters>
       </virtual-method>
       <method name="send_message" c:identifier="scintilla_object_send_message">
@@ -85,7 +115,7 @@ and/or use gtk-doc annotations.  -->
             <type name="gint" c:type="gint"/>
           </parameter>
           <parameter name="p0" transfer-ownership="none">
-            <type name="gpointer" c:type="gpointer"/>
+            <type name="Gtk.Widget"/>
           </parameter>
         </parameters>
       </glib:signal>
@@ -98,7 +128,7 @@ and/or use gtk-doc annotations.  -->
             <type name="gint" c:type="gint"/>
           </parameter>
           <parameter name="p0" transfer-ownership="none">
-            <type name="gpointer" c:type="gpointer"/>
+            <type name="SCNotification"/>
           </parameter>
         </parameters>
       </glib:signal>
@@ -115,8 +145,14 @@ and/or use gtk-doc annotations.  -->
             <type name="none" c:type="void"/>
           </return-value>
           <parameters>
-            <parameter name="ttt" transfer-ownership="none">
+            <parameter name="sci" transfer-ownership="none">
               <type name="Object" c:type="ScintillaObject*"/>
+            </parameter>
+            <parameter name="cmd" transfer-ownership="none">
+              <type name="gint" c:type="int"/>
+            </parameter>
+            <parameter name="window" transfer-ownership="none">
+              <type name="Gtk.Widget" c:type="GtkWidget*"/>
             </parameter>
           </parameters>
         </callback>
@@ -127,12 +163,183 @@ and/or use gtk-doc annotations.  -->
             <type name="none" c:type="void"/>
           </return-value>
           <parameters>
-            <parameter name="ttt" transfer-ownership="none">
+            <parameter name="sci" transfer-ownership="none">
               <type name="Object" c:type="ScintillaObject*"/>
+            </parameter>
+            <parameter name="id" transfer-ownership="none">
+              <type name="gint" c:type="int"/>
+            </parameter>
+            <parameter name="scn" transfer-ownership="none">
+              <type name="SCNotification" c:type="SCNotification*"/>
             </parameter>
           </parameters>
         </callback>
       </field>
     </record>
+    <record name="SCNotification"
+            c:type="SCNotification"
+            glib:type-name="SCNotification"
+            glib:get-type="scnotification_get_type"
+            c:symbol-prefix="scnotification">
+      <field name="nmhdr" writable="1">
+        <type name="Sci_NotifyHeader" c:type="Sci_NotifyHeader"/>
+      </field>
+      <field name="position" writable="1">
+        <type name="Sci_Position" c:type="Sci_Position"/>
+      </field>
+      <field name="ch" writable="1">
+        <type name="gint" c:type="int"/>
+      </field>
+      <field name="modifiers" writable="1">
+        <type name="gint" c:type="int"/>
+      </field>
+      <field name="modificationType" writable="1">
+        <type name="gint" c:type="int"/>
+      </field>
+      <field name="text" writable="1">
+        <type name="utf8" c:type="const char*"/>
+      </field>
+      <field name="length" writable="1">
+        <type name="Sci_Position" c:type="Sci_Position"/>
+      </field>
+      <field name="linesAdded" writable="1">
+        <type name="Sci_Position" c:type="Sci_Position"/>
+      </field>
+      <field name="message" writable="1">
+        <type name="gint" c:type="int"/>
+      </field>
+      <field name="wParam" writable="1">
+        <type name="uptr_t" c:type="uptr_t"/>
+      </field>
+      <field name="lParam" writable="1">
+        <type name="sptr_t" c:type="sptr_t"/>
+      </field>
+      <field name="line" writable="1">
+        <type name="Sci_Position" c:type="Sci_Position"/>
+      </field>
+      <field name="foldLevelNow" writable="1">
+        <type name="gint" c:type="int"/>
+      </field>
+      <field name="foldLevelPrev" writable="1">
+        <type name="gint" c:type="int"/>
+      </field>
+      <field name="margin" writable="1">
+        <type name="gint" c:type="int"/>
+      </field>
+      <field name="listType" writable="1">
+        <type name="gint" c:type="int"/>
+      </field>
+      <field name="x" writable="1">
+        <type name="gint" c:type="int"/>
+      </field>
+      <field name="y" writable="1">
+        <type name="gint" c:type="int"/>
+      </field>
+      <field name="token" writable="1">
+        <type name="gint" c:type="int"/>
+      </field>
+      <field name="annotationLinesAdded" writable="1">
+        <type name="Sci_Position" c:type="Sci_Position"/>
+      </field>
+      <field name="updated" writable="1">
+        <type name="gint" c:type="int"/>
+      </field>
+      <field name="listCompletionMethod" writable="1">
+        <type name="gint" c:type="int"/>
+      </field>
+    </record>
+    <callback name="SciFnDirect">
+      <return-value transfer-ownership="none">
+        <type name="sptr_t" c:type="sptr_t"/>
+      </return-value>
+      <parameters>
+        <parameter name="ptr" transfer-ownership="none">
+          <type name="sptr_t" c:type="sptr_t"/>
+        </parameter>
+        <parameter name="iMessage" transfer-ownership="none">
+          <type name="guint" c:type="unsigned int"/>
+        </parameter>
+        <parameter name="wParam" transfer-ownership="none">
+          <type name="uptr_t" c:type="uptr_t"/>
+        </parameter>
+        <parameter name="lParam" transfer-ownership="none">
+          <type name="sptr_t" c:type="sptr_t"/>
+        </parameter>
+      </parameters>
+    </callback>
+    <record name="Sci_CharacterRange" c:type="Sci_CharacterRange">
+      <field name="cpMin" writable="1">
+        <type name="Sci_PositionCR" c:type="Sci_PositionCR"/>
+      </field>
+      <field name="cpMax" writable="1">
+        <type name="Sci_PositionCR" c:type="Sci_PositionCR"/>
+      </field>
+    </record>
+    <record name="Sci_NotifyHeader" c:type="Sci_NotifyHeader">
+      <field name="hwndFrom" writable="1">
+        <type name="gpointer" c:type="void*"/>
+      </field>
+      <field name="idFrom" writable="1">
+        <type name="uptr_t" c:type="uptr_t"/>
+      </field>
+      <field name="code" writable="1">
+        <type name="guint" c:type="unsigned"/>
+      </field>
+    </record>
+    <record name="Sci_RangeToFormat" c:type="Sci_RangeToFormat">
+      <field name="hdc" writable="1">
+        <type name="Sci_SurfaceID" c:type="Sci_SurfaceID"/>
+      </field>
+      <field name="hdcTarget" writable="1">
+        <type name="Sci_SurfaceID" c:type="Sci_SurfaceID"/>
+      </field>
+      <field name="rc" writable="1">
+        <type name="gpointer" c:type="Sci_Rectangle"/>
+      </field>
+      <field name="rcPage" writable="1">
+        <type name="gpointer" c:type="Sci_Rectangle"/>
+      </field>
+      <field name="chrg" writable="1">
+        <type name="gpointer" c:type="Sci_CharacterRange"/>
+      </field>
+    </record>
+    <record name="Sci_Rectangle" c:type="Sci_Rectangle">
+      <field name="left" writable="1">
+        <type name="gint" c:type="int"/>
+      </field>
+      <field name="top" writable="1">
+        <type name="gint" c:type="int"/>
+      </field>
+      <field name="right" writable="1">
+        <type name="gint" c:type="int"/>
+      </field>
+      <field name="bottom" writable="1">
+        <type name="gint" c:type="int"/>
+      </field>
+    </record>
+    <record name="Sci_TextRange" c:type="Sci_TextRange">
+      <field name="chrg" writable="1">
+        <type name="gpointer" c:type="Sci_CharacterRange"/>
+      </field>
+      <field name="lpstrText" writable="1">
+        <type name="utf8" c:type="char*"/>
+      </field>
+    </record>
+    <record name="Sci_TextToFind" c:type="Sci_TextToFind">
+      <field name="chrg" writable="1">
+        <type name="gpointer" c:type="Sci_CharacterRange"/>
+      </field>
+      <field name="lpstrText" writable="1">
+        <type name="utf8" c:type="const char*"/>
+      </field>
+      <field name="chrgText" writable="1">
+        <type name="gpointer" c:type="Sci_CharacterRange"/>
+      </field>
+    </record>
+    <function name="Scintilla_LinkLexers" c:identifier="Scintilla_LinkLexers">
+      <return-value transfer-ownership="none">
+        <type name="gint" c:type="int"/>
+      </return-value>
+    </function>
   </namespace>
 </repository>
