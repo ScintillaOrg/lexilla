@@ -2618,7 +2618,7 @@ LRESULT ListBoxX::NcHitTest(WPARAM wParam, LPARAM lParam) const {
 		case HTBOTTOMRIGHT: {
 				PRectangle rc = const_cast<ListBoxX*>(this)->GetPosition();
 				// Valid only if caret above list
-				if (rc.bottom < location.y)
+				if (rc.bottom <= location.y)
 					hit = HTERROR;
 			}
 			break;
