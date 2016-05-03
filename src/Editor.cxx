@@ -303,7 +303,7 @@ int Editor::TopLineOfMain() const {
 }
 
 PRectangle Editor::GetClientRectangle() const {
-	Window &win = const_cast<Window &>(wMain);
+	Window win = wMain;
 	return win.GetClientPosition();
 }
 
