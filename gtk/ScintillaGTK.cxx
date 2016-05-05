@@ -926,15 +926,15 @@ static std::string ConvertText(const char *s, size_t len, const char *charSetDes
 	std::string destForm;
 	Converter conv(charSetDest, charSetSource, transliterations);
 	if (conv) {
-		size_t outLeft = len*3+1;
+		gsize outLeft = len*3+1;
 		destForm = std::string(outLeft, '\0');
 		// g_iconv does not actually write to its input argument so safe to cast away const
 		char *pin = const_cast<char *>(s);
-		size_t inLeft = len;
+		gsize inLeft = len;
 		char *putf = &destForm[0];
 		char *pout = putf;
-		size_t conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
-		if (conversions == ((size_t)(-1))) {
+		gsize conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
+		if (conversions == sizeFailure) {
 			if (!silent) {
 				if (len == 1)
 					fprintf(stderr, "iconv %s->%s failed for %0x '%s'\n",
