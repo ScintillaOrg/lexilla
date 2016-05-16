@@ -6,7 +6,7 @@
 # Builds for GTK+ 2 and no longer supports GTK+ 1.
 # Also works with ming32-make on Windows.
 
-.SUFFIXES: .cxx .c .o .h .a
+.SUFFIXES: .cxx .c .o .h .a .list
 ifdef CLANG
 CXX = clang++ -Wno-deprecated-register
 CC = clang
@@ -84,6 +84,14 @@ MARSHALLER=scintilla-marshal.o
 	$(CXX) $(CONFIGFLAGS) $(CXXTFLAGS) $(CXXFLAGS) -c $<
 .c.o:
 	$(CC) $(CONFIGFLAGS) $(CFLAGS) -w -c $<
+
+GLIB_GENMARSHAL = glib-genmarshal
+GLIB_GENMARSHAL_FLAGS = --prefix=scintilla_marshal
+
+.list.h:
+	$(GLIB_GENMARSHAL) --header $(GLIB_GENMARSHAL_FLAGS) $< > $@
+.list.c:
+	$(GLIB_GENMARSHAL) --body $(GLIB_GENMARSHAL_FLAGS) $< > $@
 
 LEXOBJS:=$(addsuffix .o,$(basename $(notdir $(wildcard ../lexers/Lex*.cxx))))
 
