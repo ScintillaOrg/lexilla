@@ -3162,9 +3162,6 @@ void ScintillaGTK::ClassInit(OBJECT_CLASS* object_class, GtkWidgetClass *widget_
 	container_class->forall = MainForAll;
 }
 
-#define SIG_MARSHAL scintilla_marshal_NONE__INT_POINTER
-#define MARSHAL_ARGUMENTS G_TYPE_INT, G_TYPE_POINTER
-
 static void scintilla_class_init(ScintillaClass *klass) {
 	try {
 		OBJECT_CLASS *object_class = (OBJECT_CLASS*) klass;
@@ -3179,20 +3176,20 @@ static void scintilla_class_init(ScintillaClass *klass) {
 		            G_STRUCT_OFFSET(ScintillaClass, command),
 		            NULL, //(GSignalAccumulator)
 		            NULL, //(gpointer)
-		            SIG_MARSHAL,
+		            scintilla_marshal_VOID__INT_OBJECT,
 		            G_TYPE_NONE,
-		            2, MARSHAL_ARGUMENTS);
+		            2, G_TYPE_INT, GTK_TYPE_WIDGET);
 
 		scintilla_signals[NOTIFY_SIGNAL] = g_signal_new(
 		            SCINTILLA_NOTIFY,
 		            G_TYPE_FROM_CLASS(object_class),
 		            sigflags,
 		            G_STRUCT_OFFSET(ScintillaClass, notify),
-		            NULL,
-		            NULL,
-		            SIG_MARSHAL,
+		            NULL, //(GSignalAccumulator)
+		            NULL, //(gpointer)
+		            scintilla_marshal_VOID__INT_BOXED,
 		            G_TYPE_NONE,
-		            2, MARSHAL_ARGUMENTS);
+		            2, G_TYPE_INT, SCINTILLA_TYPE_NOTIFICATION);
 
 		klass->command = NULL;
 		klass->notify = NULL;
@@ -3232,4 +3229,24 @@ void scintilla_release_resources(void) {
 		Platform_Finalise();
 	} catch (...) {
 	}
+}
+
+/* Define a dummy boxed type because g-ir-scanner is unable to
+ * recognize gpointer-derived types. Note that SCNotificaiton
+ * is always allocated on stack so copying is not appropriate. */
+static void        *copy_(void *src) { return src; }
+static void         free_(void *doc) { }
+
+GType scnotification_get_type(void)
+{
+	static gsize type_id = 0;
+	if (g_once_init_enter (&type_id))
+	{
+		gsize id = (gsize) g_boxed_type_register_static(
+		                             g_intern_static_string ("SCNotification"),
+		                            (GBoxedCopyFunc) copy_,
+		                            (GBoxedFreeFunc) free_);
+		g_once_init_leave(&type_id, id);
+	}
+	return (GType) type_id;
 }
