@@ -72,6 +72,8 @@
 #include "ExternalLexer.h"
 #endif
 
+#include "scintilla-marshal.h"
+
 #include "Converter.h"
 
 #if defined(__clang__)
@@ -3160,6 +3162,9 @@ void ScintillaGTK::ClassInit(OBJECT_CLASS* object_class, GtkWidgetClass *widget_
 	container_class->forall = MainForAll;
 }
 
+#define SIG_MARSHAL scintilla_marshal_NONE__INT_POINTER
+#define MARSHAL_ARGUMENTS G_TYPE_INT, G_TYPE_POINTER
+
 static void scintilla_class_init(ScintillaClass *klass) {
 	try {
 		OBJECT_CLASS *object_class = (OBJECT_CLASS*) klass;
@@ -3174,9 +3179,9 @@ static void scintilla_class_init(ScintillaClass *klass) {
 		            G_STRUCT_OFFSET(ScintillaClass, command),
 		            NULL, //(GSignalAccumulator)
 		            NULL, //(gpointer)
-		            NULL,
+		            SIG_MARSHAL,
 		            G_TYPE_NONE,
-		            2, G_TYPE_INT, GTK_TYPE_WIDGET);
+		            2, MARSHAL_ARGUMENTS);
 
 		scintilla_signals[NOTIFY_SIGNAL] = g_signal_new(
 		            SCINTILLA_NOTIFY,
@@ -3185,9 +3190,9 @@ static void scintilla_class_init(ScintillaClass *klass) {
 		            G_STRUCT_OFFSET(ScintillaClass, notify),
 		            NULL,
 		            NULL,
-		            NULL,
+		            SIG_MARSHAL,
 		            G_TYPE_NONE,
-		            2, G_TYPE_INT, SCINTILLA_TYPE_NOTIFICATION);
+		            2, MARSHAL_ARGUMENTS);
 
 		klass->command = NULL;
 		klass->notify = NULL;
@@ -3228,10 +3233,3 @@ void scintilla_release_resources(void) {
 	} catch (...) {
 	}
 }
-
-/* Define a dummy boxed type because g-ir-scanner is unable to
- * recognize gpointer-derived types. Note that SCNotificaiton
- * is always allocated on stack so copying is not appropriate. */
-static void        *copy_(void *src) { return src; }
-static void         free_(void *doc) { }
-G_DEFINE_BOXED_TYPE(SCNotification, scnotification, copy_, free_)
