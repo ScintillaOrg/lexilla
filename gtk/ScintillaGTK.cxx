@@ -3234,16 +3234,14 @@ void scintilla_release_resources(void) {
 /* Define a dummy boxed type because g-ir-scanner is unable to
  * recognize gpointer-derived types. Note that SCNotificaiton
  * is always allocated on stack so copying is not appropriate. */
-static void        *copy_(void *src) { return src; }
-static void         free_(void *doc) { }
+static void *copy_(void *src) { return src; }
+static void free_(void *doc) { }
 
-GType scnotification_get_type(void)
-{
+GType scnotification_get_type(void) {
 	static gsize type_id = 0;
-	if (g_once_init_enter (&type_id))
-	{
+	if (g_once_init_enter(&type_id)) {
 		gsize id = (gsize) g_boxed_type_register_static(
-		                             g_intern_static_string ("SCNotification"),
+		                            g_intern_static_string("SCNotification"),
 		                            (GBoxedCopyFunc) copy_,
 		                            (GBoxedFreeFunc) free_);
 		g_once_init_leave(&type_id, id);
