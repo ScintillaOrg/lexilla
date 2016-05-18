@@ -13,14 +13,14 @@ CONFIG += lib_bundle
 
 unix {
     # <regex> requires C++11 support
-    greaterThan(QT_MAJOR_VERSION, 4){    
+    greaterThan(QT_MAJOR_VERSION, 4){
         CONFIG += c++11
     } else {
         QMAKE_CXXFLAGS += -std=c++0x
     }
 }
 
-VERSION = 3.6.5
+VERSION = 3.6.6
 
 SOURCES += \
     ScintillaEdit.cpp \
