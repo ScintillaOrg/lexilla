@@ -3989,8 +3989,9 @@ struct Sci_TextToFind {
 
     <p>Indicators are stored in a format similar to run length encoding which is efficient in both
     speed and storage for sparse information.</p>
-    <p>An indicator may store different values for each range but currently all values are drawn the same.
-    In the future, it may be possible to draw different values in different styles.</p>
+    <p>An indicator may store different values for each range but normally all values are drawn the same.
+    The <a class="message" href="#SCI_INDICSETFLAGS">SCI_INDICSETFLAGS</a>
+    API may be used to display different colours for different values.</p>
 
     <p>Originally, Scintilla used a different technique for indicators but this
     has been <a href="#RemovedFeatures">removed</a>
