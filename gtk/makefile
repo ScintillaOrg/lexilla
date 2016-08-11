@@ -15,6 +15,7 @@ CC = clang
 SANITIZE = address
 #SANITIZE = undefined
 endif
+ARFLAGS = rc
 RANLIB = touch
 
 ifdef GTK3
@@ -113,7 +114,7 @@ $(COMPLIB): Accessor.o CharacterSet.o LexerBase.o LexerModule.o LexerSimple.o St
 	KeyMap.o LineMarker.o PositionCache.o ScintillaGTK.o CellBuffer.o CharacterCategory.o ViewStyle.o \
 	RESearch.o RunStyles.o Selection.o Style.o Indicator.o AutoComplete.o UniConversion.o XPM.o \
 	$(MARSHALLER) $(LEXOBJS)
-	$(AR) rc $@ $^
+	$(AR) $(ARFLAGS) $@ $^
 	$(RANLIB) $@
 
 # Automatically generate header dependencies with "make deps"
