@@ -3312,7 +3312,14 @@ struct Sci_TextToFind {
      These messages turn buffered drawing on or off and report the buffered drawing state. Buffered
     drawing draws each line into a bitmap rather than directly to the screen and then copies the
     bitmap to the screen. This avoids flickering although it does take longer. The default is for
-    drawing to be buffered.</p>
+    drawing to be buffered on Win32 and GTK+ and to not be buffered on Cocoa and Qt.
+    Buffered drawing is not supported on Cocoa.
+    </p>
+
+    <p>Current platforms perform window buffering so it is almost always better for this option to be turned off.
+    For Win32 and GTK+, client code should turn off buffering at initialisation.
+    There are some older platforms and unusual modes where buffering may still be useful.
+    </p>
 
     <p><b id="SCI_SETPHASESDRAW">SCI_SETPHASESDRAW(int phases)</b><br />
      <b id="SCI_GETPHASESDRAW">SCI_GETPHASESDRAW</b><br />
