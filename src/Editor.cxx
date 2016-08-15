@@ -5293,6 +5293,9 @@ void Editor::FoldExpand(int line, int action, int level) {
 	if (action == SC_FOLDACTION_TOGGLE) {
 		expanding = !cs.GetExpanded(line);
 	}
+	// Ensure child lines lexed and fold information extracted before
+	// flipping the state.
+	pdoc->GetLastChild(line, LevelNumber(level));
 	SetFoldExpanded(line, expanding);
 	if (expanding && (cs.HiddenLines() == 0))
 		// Nothing to do
