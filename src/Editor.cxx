@@ -3283,7 +3283,7 @@ int Editor::HorizontalMove(unsigned int iMessage) {
 		case SCI_CHARLEFTRECTEXTEND:
 			if (pdoc->IsLineEndPosition(spCaret.Position()) && spCaret.VirtualSpace()) {
 				spCaret.SetVirtualSpace(spCaret.VirtualSpace() - 1);
-			} else {
+			} else if ((virtualSpaceOptions & SCVS_NOWRAPLINESTART) == 0 || pdoc->GetColumn(spCaret.Position()) > 0) {
 				spCaret = SelectionPosition(spCaret.Position() - 1);
 			}
 			break;
@@ -3328,7 +3328,7 @@ int Editor::HorizontalMove(unsigned int iMessage) {
 			case SCI_CHARLEFTEXTEND:
 				if (spCaret.VirtualSpace()) {
 					spCaret.SetVirtualSpace(spCaret.VirtualSpace() - 1);
-				} else {
+				} else if ((virtualSpaceOptions & SCVS_NOWRAPLINESTART) == 0 || pdoc->GetColumn(spCaret.Position()) > 0) {
 					spCaret = SelectionPosition(spCaret.Position() - 1);
 				}
 				break;
