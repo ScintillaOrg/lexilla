@@ -6,6 +6,8 @@
 # Builds for GTK+ 2 and no longer supports GTK+ 1.
 # Also works with ming32-make on Windows.
 
+srcdir ?= .
+
 .SUFFIXES: .cxx .c .o .h .a .list
 ifdef CLANG
 CXX = clang++ -Wno-deprecated-register
@@ -40,16 +42,17 @@ endif
 ifdef windir
 CC = gcc
 DEL = del /q
-COMPLIB=..\bin\scintilla.a
+COMPLIB=$(srcdir)\..\bin\scintilla.a
 else
 DEL = rm -f
-COMPLIB=../bin/scintilla.a
+COMPLIB=$(srcdir)/../bin/scintilla.a
 endif
 
-vpath %.h ../src ../include ../lexlib
-vpath %.cxx ../src ../lexlib ../lexers
+vpath %.h $(srcdir) $(srcdir)/../src $(srcdir)/../include $(srcdir)/../lexlib
+vpath %.c $(srcdir)
+vpath %.cxx $(srcdir) $(srcdir)/../src $(srcdir)/../lexlib $(srcdir)/../lexers
 
-INCLUDEDIRS=-I ../include -I ../src -I ../lexlib
+INCLUDEDIRS=-I $(srcdir)/../include -I $(srcdir)/../src -I $(srcdir)/../lexlib
 ifdef CHECK_DEPRECATED
 DEPRECATED=-DGDK_PIXBUF_DISABLE_DEPRECATED -DGDK_DISABLE_DEPRECATED -DGTK_DISABLE_DEPRECATED -DDISABLE_GDK_FONT
 endif
@@ -93,7 +96,7 @@ GLIB_GENMARSHAL_FLAGS = --prefix=scintilla_marshal
 .list.c:
 	$(GLIB_GENMARSHAL) --body $(GLIB_GENMARSHAL_FLAGS) $< > $@
 
-LEXOBJS:=$(addsuffix .o,$(basename $(notdir $(wildcard ../lexers/Lex*.cxx))))
+LEXOBJS:=$(addsuffix .o,$(basename $(notdir $(wildcard $(srcdir)/../lexers/Lex*.cxx))))
 
 all: $(COMPLIB)
 
@@ -101,11 +104,11 @@ clean:
 	$(DEL) *.o $(COMPLIB) *.plist
 
 analyze:
-	clang --analyze $(CONFIGFLAGS) $(CXXTFLAGS) $(CXXFLAGS) *.cxx ../src/*.cxx ../lexlib/*.cxx ../lexers/*.cxx
+	clang --analyze $(CONFIGFLAGS) $(CXXTFLAGS) $(CXXFLAGS) $(srcdir)/*.cxx $(srcdir)/../src/*.cxx $(srcdir)/../lexlib/*.cxx $(srcdir)/../lexers/*.cxx
 
 deps: deps.mak
 deps.mak:
-	$(CXX) -MM $(CONFIGFLAGS) $(CXXTFLAGS) *.cxx ../src/*.cxx ../lexlib/*.cxx ../lexers/*.cxx | sed -e 's/\/usr.* //' | grep [a-zA-Z] > $@
+	$(CXX) -MM $(CONFIGFLAGS) $(CXXTFLAGS) $(srcdir)/*.cxx $(srcdir)/../src/*.cxx $(srcdir)/../lexlib/*.cxx $(srcdir)/../lexers/*.cxx | sed -e 's/\/usr.* //' | grep [a-zA-Z] > $@
 
 $(COMPLIB): Accessor.o CharacterSet.o LexerBase.o LexerModule.o LexerSimple.o StyleContext.o WordList.o \
 	CharClassify.o Decoration.o Document.o PerLine.o Catalogue.o CallTip.o CaseConvert.o CaseFolder.o \
