@@ -520,6 +520,12 @@
 	<a href="http://sourceforge.net/p/scintilla/bugs/1648/">Bug #1648</a>.
 	</li>
 	<li>
+	SC_CHARSET_DEFAULT now means code page 1252 on Windows unless a code page is set.
+	This prevents unexpected behaviour and crashes on East Asian systems where default locales are commonly DBCS.
+	Projects which want to default to DBCS code pages in East Asian locales should set the code page and
+	character set explicitly.
+	</li>
+	<li>
 	The HTML lexer no longer treats "&lt;?" inside a string in a script as potentially starting an XML document.
 	<a href="http://sourceforge.net/p/scintilla/bugs/767/">Bug #767</a>.
 	</li>

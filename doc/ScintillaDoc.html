@@ -2723,24 +2723,66 @@ struct Sci_TextToFind {
     <code>SCI_STYLESETCHARACTERSET(SCE_C_STRING, SC_CHARSET_RUSSIAN)</code> would ensure that
     strings in Russian would display correctly in C and C++ (<code>SCE_C_STRING</code> is the style
     number used by the C and C++ lexer to display literal strings; it has the value 6). This
-    feature works differently on Windows and GTK+.</p>
+    feature works differently on Windows and GTK+.<br />
+    The default character set is <code>SC_CHARSET_DEFAULT</code>.</p>
 
     <p>The character sets supported on Windows are:<br />
-     <code>SC_CHARSET_ANSI</code>, <code>SC_CHARSET_ARABIC</code>, <code>SC_CHARSET_BALTIC</code>,
-    <code>SC_CHARSET_CHINESEBIG5</code>, <code>SC_CHARSET_DEFAULT</code>,
-    <code>SC_CHARSET_EASTEUROPE</code>, <code>SC_CHARSET_GB2312</code>,
-    <code>SC_CHARSET_GREEK</code>, <code>SC_CHARSET_HANGUL</code>, <code>SC_CHARSET_HEBREW</code>,
-    <code>SC_CHARSET_JOHAB</code>, <code>SC_CHARSET_MAC</code>, <code>SC_CHARSET_OEM</code>,
-    <code>SC_CHARSET_RUSSIAN</code> (code page 1251),
-    <code>SC_CHARSET_SHIFTJIS</code>, <code>SC_CHARSET_SYMBOL</code>, <code>SC_CHARSET_THAI</code>,
-    <code>SC_CHARSET_TURKISH</code>, and <code>SC_CHARSET_VIETNAMESE</code>.</p>
+     <code>SC_CHARSET_ANSI</code>,
+     <code>SC_CHARSET_ARABIC</code>,
+     <code>SC_CHARSET_BALTIC</code>,
+     <code>SC_CHARSET_CHINESEBIG5</code>,
+     <code>SC_CHARSET_DEFAULT</code>,
+     <code>SC_CHARSET_EASTEUROPE</code>,
+     <code>SC_CHARSET_GB2312</code>,
+     <code>SC_CHARSET_GREEK</code>,
+     <code>SC_CHARSET_HANGUL</code>,
+     <code>SC_CHARSET_HEBREW</code>,
+     <code>SC_CHARSET_JOHAB</code>,
+     <code>SC_CHARSET_MAC</code>,
+     <code>SC_CHARSET_OEM</code>,
+     <code>SC_CHARSET_RUSSIAN</code> (code page 1251),
+     <code>SC_CHARSET_SHIFTJIS</code>,
+     <code>SC_CHARSET_SYMBOL</code>,
+     <code>SC_CHARSET_THAI</code>,
+     <code>SC_CHARSET_TURKISH</code>, and
+     <code>SC_CHARSET_VIETNAMESE</code>.<br />
+     <code>SC_CHARSET_ANSI</code> and <code>SC_CHARSET_DEFAULT</code> specify European Windows
+     code page 1252 unless the code page is set.</p>
 
     <p>The character sets supported on GTK+ are:<br />
-     <code>SC_CHARSET_ANSI</code>, <code>SC_CHARSET_OEM866</code> (code page 866), <code>SC_CHARSET_CYRILLIC</code> (code page 1251),
+     <code>SC_CHARSET_ANSI</code>,
+     <code>SC_CHARSET_DEFAULT</code> (8859-1), 
+     <code>SC_CHARSET_OEM866</code> (code page 866),
+     <code>SC_CHARSET_CYRILLIC</code> (code page 1251),
      <code>SC_CHARSET_EASTEUROPE</code>,
-    <code>SC_CHARSET_GB2312</code>, <code>SC_CHARSET_HANGUL</code>,
-    <code>SC_CHARSET_RUSSIAN</code> (KOI8-R), <code>SC_CHARSET_SHIFTJIS</code>, and
-    <code>SC_CHARSET_8859_15</code>.</p>
+     <code>SC_CHARSET_GB2312</code>,
+     <code>SC_CHARSET_HANGUL</code>,
+     <code>SC_CHARSET_RUSSIAN</code> (KOI8-R),
+     <code>SC_CHARSET_SHIFTJIS</code>, and
+     <code>SC_CHARSET_8859_15</code>.</p>
+
+    <p>The character sets supported on Cocoa are:<br />
+     <code>SC_CHARSET_8859_15</code>,
+     <code>SC_CHARSET_ANSI</code> (8859-1),
+     <code>SC_CHARSET_ARABIC</code>,
+     <code>SC_CHARSET_BALTIC</code>,
+     <code>SC_CHARSET_CHINESEBIG5</code>,
+     <code>SC_CHARSET_CYRILLIC</code> (code page 1251),
+     <code>SC_CHARSET_DEFAULT</code> (8859-1), 
+     <code>SC_CHARSET_EASTEUROPE</code>,
+     <code>SC_CHARSET_GB2312</code>,
+     <code>SC_CHARSET_GREEK</code>,
+     <code>SC_CHARSET_HANGUL</code>,
+     <code>SC_CHARSET_HEBREW</code>,
+     <code>SC_CHARSET_JOHAB</code>,
+     <code>SC_CHARSET_MAC</code>,
+     <code>SC_CHARSET_OEM</code>,
+     <code>SC_CHARSET_RUSSIAN</code> (code page 1251),
+     <code>SC_CHARSET_SHIFTJIS</code>,
+     <code>SC_CHARSET_SYMBOL</code>,
+     <code>SC_CHARSET_THAI</code>,
+     <code>SC_CHARSET_TURKISH</code>,
+     <code>SC_CHARSET_VIETNAMESE</code>.</p>
 
     <p><b id="SCI_STYLESETCASE">SCI_STYLESETCASE(int styleNumber, int caseMode)</b><br />
     <b id="SCI_STYLEGETCASE">SCI_STYLEGETCASE(int styleNumber)</b><br />
