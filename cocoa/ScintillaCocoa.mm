@@ -2150,7 +2150,7 @@ static int TranslateModifierFlags(NSUInteger modifiers)
 bool ScintillaCocoa::KeyboardInput(NSEvent* event)
 {
   // For now filter out function keys.
-  NSString* input = [event characters];
+  NSString* input = [event charactersIgnoringModifiers];
 
   bool handled = false;
 
