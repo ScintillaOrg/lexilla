@@ -494,6 +494,8 @@
       </tr><tr>
 	<td>Van de Bugger</td>
 	<td>Tse Kit Yam</td>
+	<td>Morten Brørup</td>
+	<td>Alexey Denisov</td>
     </tr>
     </table>
     <p>
@@ -525,6 +527,10 @@
 	This prevents unexpected behaviour and crashes on East Asian systems where default locales are commonly DBCS.
 	Projects which want to default to DBCS code pages in East Asian locales should set the code page and
 	character set explicitly.
+	</li>
+	<li>
+	The C++ lexer can fold on #else and #elif with the fold.cpp.preprocessor.at.else property.
+	<a href="http://sourceforge.net/p/scintilla/feature-requests/210/">Bug #210</a>.
 	</li>
 	<li>
 	The HTML lexer no longer treats "&lt;?" inside a string in a script as potentially starting an XML document.
