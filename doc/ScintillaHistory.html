@@ -588,7 +588,7 @@
 	C++ 11 &lt;regex&gt; support built by default. Can be disabled by defining NO_CXX11_REGEX.
 	</li>
 	<li>
-	SciTE_USERHOME environment variable allows separate location for writable properties files.
+	SciTE_USERHOME environment variable allows separate location for writeable properties files.
 	<a href="http://sourceforge.net/p/scintilla/feature-requests/965/">Feature #965.</a>
 	</li>
 	<li>
@@ -949,7 +949,7 @@
 	</li>
 	<li>
 	The errorlist lexer understands some ANSI escape sequences to change foreground colour and intensity.
-	This is sufficient to colour diagnotic output from gcc and clang when -fdiagnostics-color set.
+	This is sufficient to colour diagnostic output from gcc and clang when -fdiagnostics-color set.
 	</li>
 	<li>
 	The errorlist lexer allows the line number to be 0 in GCC errors as some tools report whole file
@@ -1012,7 +1012,7 @@
 	</li>
 	<li>
 	External interfaces use the Sci_Position and Sci_PositionU typedefs instead of int and unsigned int
-	to allow for changes to a 64-bit interface on 64-bit plactforms in the future.
+	to allow for changes to a 64-bit interface on 64-bit platforms in the future.
 	Applications and external lexers should start using the new type names so that
 	they will be compatible when the 64-bit change occurs.
 	There is also Sci_PositionCR (long) for use in the Sci_CharacterRange struct which will
