@@ -496,6 +496,8 @@
 	<td>Tse Kit Yam</td>
 	<td>Morten Brørup</td>
 	<td>Alexey Denisov</td>
+      </tr><tr>
+	<td>jedailey</td>
     </tr>
     </table>
     <p>
@@ -543,6 +545,11 @@
 	The HTML lexer fixes a problem resuming at a script start where the starting state continued
 	past where it should.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1849/">Bug #1849</a>.
+	</li>
+	<li>
+	When inserting spaces for virtual space and the position is in indentation and tabs are enabled
+	for indentation then use tabs.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1850/">Bug #1850</a>.
 	</li>
 	<li>
 	Fix fold expand when some child text not styled.
