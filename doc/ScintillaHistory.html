@@ -514,21 +514,21 @@
     </h3>
     <ul>
 	<li>
-	Released 24 May 2016.
+	Released 4 September 2016.
 	</li>
 	<li>
 	C++11 range-based for loops used in SciTE so GCC 4.6 is now the minimum supported version.
-	</li>
-	<li>
-	SCVS_NOWRAPLINESTART option stops left arrow from wrapping to the previous line.
-	Most commonly wanted when virtual space is used.
-	<a href="http://sourceforge.net/p/scintilla/bugs/1648/">Bug #1648</a>.
 	</li>
 	<li>
 	SC_CHARSET_DEFAULT now means code page 1252 on Windows unless a code page is set.
 	This prevents unexpected behaviour and crashes on East Asian systems where default locales are commonly DBCS.
 	Projects which want to default to DBCS code pages in East Asian locales should set the code page and
 	character set explicitly.
+	</li>
+	<li>
+	SCVS_NOWRAPLINESTART option stops left arrow from wrapping to the previous line.
+	Most commonly wanted when virtual space is used.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1648/">Bug #1648</a>.
 	</li>
 	<li>
 	The C++ lexer can fold on #else and #elif with the fold.cpp.preprocessor.at.else property.
