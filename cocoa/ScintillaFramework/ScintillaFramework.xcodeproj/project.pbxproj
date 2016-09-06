@@ -125,7 +125,7 @@
 		114B6F9D11FA75BE004FB6AB /* PropSetSimple.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 114B6F9411FA75BE004FB6AB /* PropSetSimple.cxx */; };
 		114B6F9E11FA75BE004FB6AB /* StyleContext.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 114B6F9511FA75BE004FB6AB /* StyleContext.cxx */; };
 		114B6F9F11FA75BE004FB6AB /* WordList.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 114B6F9611FA75BE004FB6AB /* WordList.cxx */; };
-		114B6FA111FA75DB004FB6AB /* ILexer.h in Headers */ = {isa = PBXBuildFile; fileRef = 114B6FA011FA75DB004FB6AB /* ILexer.h */; };
+		114B6FA111FA75DB004FB6AB /* ILexer.h in Headers */ = {isa = PBXBuildFile; fileRef = 114B6FA011FA75DB004FB6AB /* ILexer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		114B6FBD11FA7623004FB6AB /* AutoComplete.h in Headers */ = {isa = PBXBuildFile; fileRef = 114B6FA211FA7623004FB6AB /* AutoComplete.h */; };
 		114B6FBE11FA7623004FB6AB /* CallTip.h in Headers */ = {isa = PBXBuildFile; fileRef = 114B6FA311FA7623004FB6AB /* CallTip.h */; };
 		114B6FBF11FA7623004FB6AB /* Catalogue.h in Headers */ = {isa = PBXBuildFile; fileRef = 114B6FA411FA7623004FB6AB /* Catalogue.h */; };
@@ -807,6 +807,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				28BC38EC1B74C6AD008BF9EB /* Sci_Position.h in Headers */,
+				114B6FA111FA75DB004FB6AB /* ILexer.h in Headers */,
 				2744E5A40FC168A100E85C33 /* InfoBar.h in Headers */,
 				2744E5AC0FC168B200E85C33 /* InfoBarCommunicator.h in Headers */,
 				2744E5AA0FC168A100E85C33 /* ScintillaView.h in Headers */,
@@ -818,7 +819,6 @@
 				2791F3E00FC1A390009DBCF9 /* ScintillaCocoa.h in Headers */,
 				2791F3C70FC19F71009DBCF9 /* Platform.h in Headers */,
 				2791F3C90FC19F71009DBCF9 /* Scintilla.h in Headers */,
-				114B6FA111FA75DB004FB6AB /* ILexer.h in Headers */,
 				114B6FBD11FA7623004FB6AB /* AutoComplete.h in Headers */,
 				114B6FBE11FA7623004FB6AB /* CallTip.h in Headers */,
 				114B6FBF11FA7623004FB6AB /* Catalogue.h in Headers */,
