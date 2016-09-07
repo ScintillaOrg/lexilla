@@ -29,6 +29,22 @@ TEST_CASE("WordList") {
 		REQUIRE(0 == strcmp(wl.WordAt(0), "else"));
 	}
 
+	SECTION("InListAbbreviated") {
+		wl.Set("else stru~ct w~hile");
+		REQUIRE(wl.InListAbbreviated("else", '~'));
+
+		REQUIRE(wl.InListAbbreviated("struct", '~'));
+		REQUIRE(wl.InListAbbreviated("stru", '~'));
+		REQUIRE(wl.InListAbbreviated("struc", '~'));
+		REQUIRE(!wl.InListAbbreviated("str", '~'));
+
+		REQUIRE(wl.InListAbbreviated("while", '~'));
+		REQUIRE(wl.InListAbbreviated("wh", '~'));
+		// TODO: Next line fails but should allow single character prefixes
+		//REQUIRE(wl.InListAbbreviated("w", '~'));
+		REQUIRE(!wl.InListAbbreviated("", '~'));
+	}
+
 	SECTION("InListAbridged") {
 		wl.Set("list w.~.active bo~k a~z ~_frozen");
 		REQUIRE(wl.InListAbridged("list", '~'));
