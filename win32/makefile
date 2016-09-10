@@ -33,8 +33,8 @@ endif
 
 CXXBASEFLAGS=--std=gnu++0x -Wall -pedantic $(INCLUDEDIRS) $(D2DFLAGS)
 
-ifdef CXX11_REGEX
-REFLAGS=-DCXX11_REGEX
+ifdef NO_CXX11_REGEX
+REFLAGS=-DNO_CXX11_REGEX
 endif
 
 ifdef DEBUG
