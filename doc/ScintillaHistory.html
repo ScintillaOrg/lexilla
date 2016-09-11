@@ -519,6 +519,13 @@
 	Released 4 September 2016.
 	</li>
 	<li>
+	Two enums changed in Scintilla.iface which may lead to changed bindings.
+	There were 2 FontQuality enums and the first is now PhasesDraw.
+	The prefix for FoldAction was SC_FOLDACTION and is now SC_FOLDACTION_
+	which is similar to other enums.
+	These changes do not affect the standard C/C++ binding.
+	</li>
+	<li>
 	The WordList class in lexlib used by lexers adds an InListAbridged method for
 	matching keywords that have particular prefixes and/or suffixes.
 	</li>
