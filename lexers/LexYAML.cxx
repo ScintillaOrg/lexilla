@@ -46,7 +46,7 @@ static unsigned int SpaceCount(char* lineBuffer) {
 	while (*headBuffer == ' ')
 		headBuffer++;
 
-	return headBuffer - lineBuffer;
+	return static_cast<unsigned int>(headBuffer - lineBuffer);
 }
 
 #define YAML_STATE_BITSIZE 16

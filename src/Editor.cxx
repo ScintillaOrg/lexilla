@@ -739,8 +739,8 @@ void Editor::MultipleSelectAdd(AddNumber addNumber) {
 			const int searchEnd = it->end;
 			for (;;) {
 				int lengthFound = static_cast<int>(selectedText.length());
-				int pos = pdoc->FindText(searchStart, searchEnd, selectedText.c_str(),
-					searchFlags, &lengthFound);
+				int pos = static_cast<int>(pdoc->FindText(searchStart, searchEnd,
+					selectedText.c_str(), searchFlags, &lengthFound));
 				if (pos >= 0) {
 					sel.AddSelection(SelectionRange(pos + lengthFound, pos));
 					ScrollRange(sel.RangeMain());

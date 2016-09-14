@@ -1676,7 +1676,7 @@ int ScintillaCocoa::TargetAsUTF8(char *text)
     if (text)
       memcpy(text, tmputf.c_str(), tmputf.length());
     CFRelease(cfsVal);
-    return tmputf.length();
+    return static_cast<int>(tmputf.length());
   }
   return targetLength;
 }
@@ -1687,7 +1687,7 @@ int ScintillaCocoa::TargetAsUTF8(char *text)
 // Return the length of the result in bytes.
 int ScintillaCocoa::EncodedFromUTF8(char *utf8, char *encoded) const
 {
-  const int inputLength = (lengthForEncode >= 0) ? lengthForEncode : strlen(utf8);
+  const int inputLength = (lengthForEncode >= 0) ? lengthForEncode : static_cast<int>(strlen(utf8));
   if (IsUnicodeMode())
   {
     if (encoded)
@@ -1707,7 +1707,7 @@ int ScintillaCocoa::EncodedFromUTF8(char *utf8, char *encoded) const
     if (encoded)
       memcpy(encoded, sEncoded.c_str(), sEncoded.length());
     CFRelease(cfsVal);
-    return sEncoded.length();
+    return static_cast<int>(sEncoded.length());
   }
 }
 
@@ -2196,10 +2196,10 @@ int ScintillaCocoa::InsertText(NSString* input)
  */
 NSRange ScintillaCocoa::PositionsFromCharacters(NSRange range) const
 {
-  long start = pdoc->GetRelativePositionUTF16(0, range.location);
+  long start = pdoc->GetRelativePositionUTF16(0, static_cast<int>(range.location));
   if (start == INVALID_POSITION)
     start = pdoc->Length();
-  long end = pdoc->GetRelativePositionUTF16(start, range.length);
+  long end = pdoc->GetRelativePositionUTF16(static_cast<int>(start), static_cast<int>(range.length));
   if (end == INVALID_POSITION)
     end = pdoc->Length();
   return NSMakeRange(start, end - start);
@@ -2212,8 +2212,8 @@ NSRange ScintillaCocoa::PositionsFromCharacters(NSRange range) const
  */
 NSRange ScintillaCocoa::CharactersFromPositions(NSRange range) const
 {
-  const long start = pdoc->CountUTF16(0, range.location);
-  const long len = pdoc->CountUTF16(range.location, NSMaxRange(range));
+  const long start = pdoc->CountUTF16(0, static_cast<int>(range.location));
+  const long len = pdoc->CountUTF16(static_cast<int>(range.location), static_cast<int>(NSMaxRange(range)));
   return NSMakeRange(start, len);
 }
 
