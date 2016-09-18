@@ -3319,13 +3319,13 @@ int Editor::HorizontalMove(unsigned int iMessage) {
 		sel.selType = Selection::selRectangle;
 		sel.Rectangular() = SelectionRange(spCaret, rangeBase.anchor);
 		SetRectangularRange();
+	} else if (sel.IsRectangular()) {
+		// Not a rectangular extension so switch to stream.
+		const SelectionPosition selAtLimit = 
+			(NaturalDirection(iMessage) > 0) ? sel.Limits().end : sel.Limits().start;
+		sel.selType = Selection::selStream;
+		sel.SetSelection(SelectionRange(selAtLimit));
 	} else {
-		if (sel.IsRectangular()) {
-			// Not a rectangular extension so switch to stream.
-			SelectionPosition selAtLimit = (NaturalDirection(iMessage) > 0) ? sel.Limits().end : sel.Limits().start;
-			sel.selType = Selection::selStream;
-			sel.SetSelection(SelectionRange(selAtLimit));
-		}
 		if (!additionalSelectionTyping) {
 			InvalidateWholeSelection();
 			sel.DropAdditionalRanges();
