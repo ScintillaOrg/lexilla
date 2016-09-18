@@ -3421,7 +3421,7 @@ int Editor::HorizontalMove(unsigned int iMessage) {
 			const int directionMove = (spCaret < spCaretNow) ? -1 : 1;
 			spCaret = MovePositionSoVisible(spCaret, directionMove);
 
-			// Handle move versus extend, and special behaviour for non-emoty left/right
+			// Handle move versus extend, and special behaviour for non-empty left/right
 			switch (iMessage) {
 			case SCI_CHARLEFT:
 			case SCI_CHARRIGHT:
