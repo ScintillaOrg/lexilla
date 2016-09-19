@@ -3395,7 +3395,9 @@ struct Sci_TextToFind {
      This mode is incompatible with buffered drawing and will act as <code>SC_PHASES_TWO</code>
      if buffered drawing is turned on.
      Multiple phase drawing is slower than two phase drawing.
-     Setting the layout cache to <a class="message" href="#SCI_SETLAYOUTCACHE">SC_CACHE_PAGE</a>
+     Setting the layout cache with
+     <a class="message" href="#SCI_SETLAYOUTCACHE"><code>
+     SCI_SETLAYOUTCACHE(SC_CACHE_PAGE)</code></a>
      or higher can ensure that multiple phase drawing is not significantly slower.</p>
 
     <p><b id="SCI_SETTWOPHASEDRAW">SCI_SETTWOPHASEDRAW(bool twoPhase)</b><br />
