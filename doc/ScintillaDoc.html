@@ -20,6 +20,8 @@
 	A.message { text-decoration: none; font-weight: bold; font-family: Consolas,Bitstream Vera Sans Mono,Courier New,monospace; }
 	A.toc { text-decoration: none; }
 	A.jump { text-decoration: none; }
+	LI.message { text-decoration: none; font-weight: bold; font-family: Consolas,Bitstream Vera Sans Mono,Courier New,monospace; }
+	H2 { background: #E0EAFF; }
 	.S0 {
 		color: #808080;
 	}
@@ -82,7 +84,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 8 May 2016 NH</p>
+    <p>Last edited 20 September 2016 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -250,109 +252,113 @@
         <tr>
           <td>o <a class="toc" href="#LineEndings">Line endings</a></td>
 
-          <td>o <a class="toc" href="#Styling">Styling</a></td>
+          <td>o <a class="toc" href="#Words">Words</a></td>
 
-          <td>o <a class="toc" href="#StyleDefinition">Style definition</a></td>
+          <td>o <a class="toc" href="#Styling">Styling</a></td>
 
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#StyleDefinition">Style definition</a></td>
+
           <td>o <a class="toc" href="#CaretAndSelectionStyles">Caret, selection, and hotspot styles</a></td>
 
           <td>o <a class="toc" href="#CharacterRepresentations">Character representations</a></td>
 
-          <td>o <a class="toc" href="#Margins">Margins</a></td>
-
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#Margins">Margins</a></td>
+
           <td>o <a class="toc" href="#Annotations">Annotations</a></td>
 
           <td>o <a class="toc" href="#OtherSettings">Other settings</a></td>
 
-          <td>o <a class="toc" href="#BraceHighlighting">Brace highlighting</a></td>
-
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#BraceHighlighting">Brace highlighting</a></td>
+
           <td>o <a class="toc" href="#TabsAndIndentationGuides">Tabs and Indentation
           Guides</a></td>
 
           <td>o <a class="toc" href="#Markers">Markers</a></td>
 
-          <td>o <a class="toc" href="#Indicators">Indicators</a></td>
-
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#Indicators">Indicators</a></td>
+
           <td>o <a class="toc" href="#Autocompletion">Autocompletion</a></td>
 
           <td>o <a class="toc" href="#UserLists">User lists</a></td>
 
-          <td>o <a class="toc" href="#CallTips">Call tips</a></td>
-
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#CallTips">Call tips</a></td>
+
           <td>o <a class="toc" href="#KeyboardCommands">Keyboard commands</a></td>
 
           <td>o <a class="toc" href="#KeyBindings">Key bindings</a></td>
 
-          <td>o <a class="toc" href="#PopupEditMenu">Popup edit menu</a></td>
-
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#PopupEditMenu">Popup edit menu</a></td>
+
           <td>o <a class="toc" href="#MacroRecording">Macro recording</a></td>
 
           <td>o <a class="toc" href="#Printing">Printing</a></td>
 
-          <td>o <a class="toc" href="#DirectAccess">Direct access</a></td>
-
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#DirectAccess">Direct access</a></td>
+
           <td>o <a class="toc" href="#MultipleViews">Multiple views</a></td>
 
           <td>o <a class="toc" href="#BackgroundLoadSave">Background loading and saving</a></td>
 
-          <td>o <a class="toc" href="#Folding">Folding</a></td>
-
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#Folding">Folding</a></td>
+
           <td>o <a class="toc" href="#LineWrapping">Line wrapping</a></td>
 
           <td>o <a class="toc" href="#Zooming">Zooming</a></td>
 
-          <td>o <a class="toc" href="#LongLines">Long lines</a></td>
-
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#LongLines">Long lines</a></td>
+
           <td>o <a class="toc" href="#Lexer">Lexer</a></td>
 
           <td>o <a class="toc" href="#LexerObjects">Lexer objects</a></td>
 
-          <td>o <a class="toc" href="#Notifications">Notifications</a></td>
-
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#Notifications">Notifications</a></td>
+
           <td>o <a class="toc" href="#Images">Images</a></td>
 
           <td>o <a class="toc" href="#GTK">GTK+</a></td>
 
-          <td>o <a class="toc" href="#ProvisionalMessages"><span class="provisional">Provisional messages</span></a></td>
-
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#ProvisionalMessages"><span class="provisional">Provisional messages</span></a></td>
+
           <td>o <a class="toc" href="#DeprecatedMessages">Deprecated messages</a></td>
 
           <td>o <a class="toc" href="#EditMessagesNeverSupportedByScintilla">Edit messages never
           supported by Scintilla</a></td>
 
+        </tr>
+        <tr>
           <td>o <a class="toc" href="#BuildingScintilla">Building Scintilla</a></td>
 
         </tr>
@@ -1187,11 +1193,6 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_GETLINESELSTARTPOSITION">SCI_GETLINESELSTARTPOSITION(int line)</a><br />
      <a class="message" href="#SCI_GETLINESELENDPOSITION">SCI_GETLINESELENDPOSITION(int line)</a><br />
      <a class="message" href="#SCI_MOVECARETINSIDEVIEW">SCI_MOVECARETINSIDEVIEW</a><br />
-     <a class="message" href="#SCI_WORDENDPOSITION">SCI_WORDENDPOSITION(int position, bool
-    onlyWordCharacters)</a><br />
-     <a class="message" href="#SCI_WORDSTARTPOSITION">SCI_WORDSTARTPOSITION(int position, bool
-    onlyWordCharacters)</a><br />
-     <a class="message" href="#SCI_ISRANGEWORD">SCI_ISRANGEWORD(int start, int end)</a><br />
      <a class="message" href="#SCI_POSITIONBEFORE">SCI_POSITIONBEFORE(int position)</a><br />
      <a class="message" href="#SCI_POSITIONAFTER">SCI_POSITIONAFTER(int position)</a><br />
      <a class="message" href="#SCI_POSITIONRELATIVE">SCI_POSITIONRELATIVE(int position, int relative)</a><br />
@@ -1400,98 +1401,6 @@ struct Sci_TextToFind {
     <p><b id="SCI_MOVECARETINSIDEVIEW">SCI_MOVECARETINSIDEVIEW</b><br />
      If the caret is off the top or bottom of the view, it is moved to the nearest line that is
     visible to its current position. Any selection is lost.</p>
-
-    <p><b id="SCI_WORDENDPOSITION">SCI_WORDENDPOSITION(int position, bool
-    onlyWordCharacters)</b><br />
-     <b id="SCI_WORDSTARTPOSITION">SCI_WORDSTARTPOSITION(int position, bool
-    onlyWordCharacters)</b><br />
-     These messages return the start and end of words using the same definition of words as used
-    internally within Scintilla. You can set your own list of characters that count as words with
-    <a class="message" href="#SCI_SETWORDCHARS"><code>SCI_SETWORDCHARS</code></a>. The position
-    sets the start or the search, which is forwards when searching for the end and backwards when
-    searching for the start.</p>
-
-    <p><b id="SCI_ISRANGEWORD">SCI_ISRANGEWORD(int start, int end)</b><br />
-     Is the range start..end a word or set of words? This message checks that start is at a word start transition and that
-     end is at a word end transition. It does not check whether there are any spaces inside the range.</p>
-
-     <a class="message" href="#SCI_ISRANGEWORD">SCI_ISRANGEWORD(int start, int end)</a><br />
-
-    <p>Set <code>onlyWordCharacters</code> to <code>true</code> (1) to stop searching at the first
-    non-word character in the search direction. If <code>onlyWordCharacters</code> is
-    <code>false</code> (0), the first character in the search direction sets the type of the search
-    as word or non-word and the search stops at the first non-matching character. Searches are also
-    terminated by the start or end of the document.</p>
-
-    <p>If "w" represents word characters and "." represents non-word characters and "|" represents
-    the position and <code>true</code> or <code>false</code> is the state of
-    <code>onlyWordCharacters</code>:</p>
-
-    <table cellpadding="3" cellspacing="0" border="1" summary="Word start and end positions">
-      <thead align="center">
-        <tr>
-          <th>Initial state</th>
-
-          <th>end, true</th>
-
-          <th>end, false</th>
-
-          <th>start, true</th>
-
-          <th>start, false</th>
-        </tr>
-      </thead>
-
-      <tbody align="center">
-        <tr>
-          <td>..ww..|..ww..</td>
-
-          <td>..ww..|..ww..</td>
-
-          <td>..ww....|ww..</td>
-
-          <td>..ww..|..ww..</td>
-
-          <td>..ww|....ww..</td>
-        </tr>
-
-        <tr>
-          <td>....ww|ww....</td>
-
-          <td>....wwww|....</td>
-
-          <td>....wwww|....</td>
-
-          <td>....|wwww....</td>
-
-          <td>....|wwww....</td>
-        </tr>
-
-        <tr>
-          <td>..ww|....ww..</td>
-
-          <td>..ww|....ww..</td>
-
-          <td>..ww....|ww..</td>
-
-          <td>..|ww....ww..</td>
-
-          <td>..|ww....ww..</td>
-        </tr>
-
-        <tr>
-          <td>..ww....|ww..</td>
-
-          <td>..ww....ww|..</td>
-
-          <td>..ww....ww|..</td>
-
-          <td>..ww....|ww..</td>
-
-          <td>..ww|....ww..</td>
-        </tr>
-      </tbody>
-    </table>
 
     <p><b id="SCI_POSITIONBEFORE">SCI_POSITIONBEFORE(int position)</b><br />
      <b id="SCI_POSITIONAFTER">SCI_POSITIONAFTER(int position)</b><br />
@@ -2394,6 +2303,191 @@ struct Sci_TextToFind {
     <p><b id="SCI_GETLINEENDTYPESACTIVE">SCI_GETLINEENDTYPESACTIVE</b><br />
      <code>SCI_GETLINEENDTYPESACTIVE</code> reports the set of line ends currently interpreted
      by Scintilla. It is <code>SCI_GETLINEENDTYPESSUPPORTED &amp; SCI_GETLINEENDTYPESALLOWED</code>.</p>
+
+    <h2 id="Words">Words</h2>
+
+    <p>There is support for selecting, navigating by, and searching for words.</p>
+
+    <p>
+    Words are contiguous sequences of characters from a particular set of characters.
+    4 categories define words: word, whitespace, punctuation, and line ends with each category
+    having a role in word functions.
+    Double clicking selects the word at that point, which may be a sequence of word, punctuation,
+    or whitespace bytes.
+    Line ends are not selected by double clicking but do act as word separators.
+    </p>
+
+    <p>Words are defined in terms of bytes, not characters so there are some issues with
+    UTF-8 and DCBS documents.</p>
+
+    <p>Identifiers in programming languages are often sequences of words with capitalisation
+     (aCamelCaseIdentifier) or underscores (an_under_bar_ident) used to mark word boundaries.
+     The <code>SCI_WORDPART*</code> commands are used for moving between word parts:
+     <a class="message" href="#SCI_WORDPARTLEFT"><code>SCI_WORDPARTLEFT</code></a>,
+     <a class="message" href="#SCI_WORDPARTLEFTEXTEND"><code>SCI_WORDPARTLEFTEXTEND</code></a>,
+     <a class="message" href="#SCI_WORDPARTRIGHT"><code>SCI_WORDPARTRIGHT</code></a>, and
+     <a class="message" href="#SCI_WORDPARTRIGHTEXTEND"><code>SCI_WORDPARTRIGHTEXTEND</code></a>.
+     </p>
+
+     <a class="message" href="#SCI_WORDENDPOSITION">SCI_WORDENDPOSITION(int position, bool
+    onlyWordCharacters)</a><br />
+     <a class="message" href="#SCI_WORDSTARTPOSITION">SCI_WORDSTARTPOSITION(int position, bool
+    onlyWordCharacters)</a><br />
+     <a class="message" href="#SCI_ISRANGEWORD">SCI_ISRANGEWORD(int start, int end)</a><br />
+
+     <a class="message" href="#SCI_SETWORDCHARS">SCI_SETWORDCHARS(&lt;unused&gt;, const char *characters)</a><br />
+     <a class="message" href="#SCI_GETWORDCHARS">SCI_GETWORDCHARS(&lt;unused&gt;, char *characters)</a><br />
+     <a class="message" href="#SCI_SETWHITESPACECHARS">SCI_SETWHITESPACECHARS(&lt;unused&gt;, const char *characters)</a><br />
+     <a class="message" href="#SCI_GETWHITESPACECHARS">SCI_GETWHITESPACECHARS(&lt;unused&gt;, char *characters)</a><br />
+     <a class="message" href="#SCI_SETPUNCTUATIONCHARS">SCI_SETPUNCTUATIONCHARS(&lt;unused&gt;, const char *characters)</a><br />
+     <a class="message" href="#SCI_GETPUNCTUATIONCHARS">SCI_GETPUNCTUATIONCHARS(&lt;unused&gt;, char *characters)</a><br />
+     <a class="message" href="#SCI_SETCHARSDEFAULT">SCI_SETCHARSDEFAULT</a><br />
+
+    <p><b id="SCI_WORDENDPOSITION">SCI_WORDENDPOSITION(int position, bool
+    onlyWordCharacters)</b><br />
+     <b id="SCI_WORDSTARTPOSITION">SCI_WORDSTARTPOSITION(int position, bool
+    onlyWordCharacters)</b><br />
+     These messages return the start and end of words using the same definition of words as used
+    internally within Scintilla. You can set your own list of characters that count as words with
+    <a class="message" href="#SCI_SETWORDCHARS"><code>SCI_SETWORDCHARS</code></a>. The position
+    sets the start or the search, which is forwards when searching for the end and backwards when
+    searching for the start.</p>
+
+    <p><b id="SCI_ISRANGEWORD">SCI_ISRANGEWORD(int start, int end)</b><br />
+     Is the range start..end a word or set of words? This message checks that start is at a word start transition and that
+     end is at a word end transition. It does not check whether there are any spaces inside the range.</p>
+
+     <a class="message" href="#SCI_ISRANGEWORD">SCI_ISRANGEWORD(int start, int end)</a><br />
+
+    <p>Set <code>onlyWordCharacters</code> to <code>true</code> (1) to stop searching at the first
+    non-word character in the search direction. If <code>onlyWordCharacters</code> is
+    <code>false</code> (0), the first character in the search direction sets the type of the search
+    as word or non-word and the search stops at the first non-matching character. Searches are also
+    terminated by the start or end of the document.</p>
+
+    <p>If "w" represents word characters and "." represents non-word characters and "|" represents
+    the position and <code>true</code> or <code>false</code> is the state of
+    <code>onlyWordCharacters</code>:</p>
+
+    <table cellpadding="3" cellspacing="0" border="1" summary="Word start and end positions">
+      <thead align="center">
+        <tr>
+          <th>Initial state</th>
+
+          <th>end, true</th>
+
+          <th>end, false</th>
+
+          <th>start, true</th>
+
+          <th>start, false</th>
+        </tr>
+      </thead>
+
+      <tbody align="center">
+        <tr>
+          <td>..ww..|..ww..</td>
+
+          <td>..ww..|..ww..</td>
+
+          <td>..ww....|ww..</td>
+
+          <td>..ww..|..ww..</td>
+
+          <td>..ww|....ww..</td>
+        </tr>
+
+        <tr>
+          <td>....ww|ww....</td>
+
+          <td>....wwww|....</td>
+
+          <td>....wwww|....</td>
+
+          <td>....|wwww....</td>
+
+          <td>....|wwww....</td>
+        </tr>
+
+        <tr>
+          <td>..ww|....ww..</td>
+
+          <td>..ww|....ww..</td>
+
+          <td>..ww....|ww..</td>
+
+          <td>..|ww....ww..</td>
+
+          <td>..|ww....ww..</td>
+        </tr>
+
+        <tr>
+          <td>..ww....|ww..</td>
+
+          <td>..ww....ww|..</td>
+
+          <td>..ww....ww|..</td>
+
+          <td>..ww....|ww..</td>
+
+          <td>..ww|....ww..</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><b id="SCI_SETWORDCHARS">SCI_SETWORDCHARS(&lt;unused&gt;, const char *characters)</b><br />
+     This message defines which characters (bytes) are members of the word category.
+     The character categories are set to default values before processing this function.
+    For example, if you don't allow '_' in your set of characters
+    use:<br />
+     <code>SCI_SETWORDCHARS(0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")</code>;</p>
+
+    <p><b id="SCI_GETWORDCHARS">SCI_GETWORDCHARS(&lt;unused&gt;, char *characters)</b><br />
+     This fills the characters parameter with all the characters included in words.
+     The characters parameter must be large enough to hold all of the characters.
+     If the characters parameter is 0 then the length that should be allocated
+     to store the entire set is returned.</p>
+
+    <p><b id="SCI_SETWHITESPACECHARS">SCI_SETWHITESPACECHARS(&lt;unused&gt;, const char *characters)</b><br />
+    <b id="SCI_GETWHITESPACECHARS">SCI_GETWHITESPACECHARS(&lt;unused&gt;, char *characters)</b><br />
+     Similar to <code>SCI_SETWORDCHARS</code>, this message allows the user to define which chars Scintilla considers
+          as whitespace.  Setting the whitespace chars allows the user to fine-tune Scintilla's behaviour doing
+          such things as moving the cursor to the start or end of a word; for example, by defining punctuation chars
+          as whitespace, they will be skipped over when the user presses ctrl+left or ctrl+right.
+          This function should be called after <code>SCI_SETWORDCHARS</code> as it will
+          reset the whitespace characters to the default set.
+	  <code>SCI_GETWHITESPACECHARS</code> behaves similarly to <code>SCI_GETWORDCHARS</code>.</p>
+
+    <p><b id="SCI_SETPUNCTUATIONCHARS">SCI_SETPUNCTUATIONCHARS(&lt;unused&gt;, const char *characters)</b><br />
+    <b id="SCI_GETPUNCTUATIONCHARS">SCI_GETPUNCTUATIONCHARS(&lt;unused&gt;, char *characters)</b><br />
+     Similar to <code>SCI_SETWORDCHARS</code> and <code>SCI_SETWHITESPACECHARS</code>, this message
+     allows the user to define which chars Scintilla considers as punctuation.
+	  <code>SCI_GETPUNCTUATIONCHARS</code> behaves similarly to <code>SCI_GETWORDCHARS</code>.</p>
+
+    <p><b id="SCI_SETCHARSDEFAULT">SCI_SETCHARSDEFAULT</b><br />
+     Use the default sets of word and whitespace characters. This sets whitespace to space, tab and other
+     characters with codes less than 0x20, with word characters set to alphanumeric and '_'.
+    </p>
+
+<p>Word keyboard commands are:
+    <ul>
+    <li class="message" id="SCI_WORDLEFT">SCI_WORDLEFT</li>
+    <li class="message" id="SCI_WORDLEFTEXTEND">SCI_WORDLEFTEXTEND</li>
+    <li class="message" id="SCI_WORDRIGHT">SCI_WORDRIGHT</li>
+    <li class="message" id="SCI_WORDRIGHTEXTEND">SCI_WORDRIGHTEXTEND</li>
+    <li class="message" id="SCI_WORDLEFTEND">SCI_WORDLEFTEND</li>
+    <li class="message" id="SCI_WORDLEFTENDEXTEND">SCI_WORDLEFTENDEXTEND</li>
+    <li class="message" id="SCI_WORDRIGHTEND">SCI_WORDRIGHTEND</li>
+    <li class="message" id="SCI_WORDRIGHTENDEXTEND">SCI_WORDRIGHTENDEXTEND</li>
+    <li class="message" id="SCI_WORDPARTLEFT">SCI_WORDPARTLEFT</li>
+    <li class="message" id="SCI_WORDPARTLEFTEXTEND">SCI_WORDPARTLEFTEXTEND</li>
+    <li class="message" id="SCI_WORDPARTRIGHT">SCI_WORDPARTRIGHT</li>
+    <li class="message" id="SCI_WORDPARTRIGHTEXTEND">SCI_WORDPARTRIGHTEXTEND</li>
+    <li class="message" id="SCI_DELWORDLEFT">SCI_DELWORDLEFT</li>
+    <li class="message" id="SCI_DELWORDRIGHT">SCI_DELWORDRIGHT</li>
+    <li class="message" id="SCI_DELWORDRIGHTEND">SCI_DELWORDRIGHTEND</li>
+    </ul>
+    </p>
 
     <h2 id="Styling">Styling</h2>
 
@@ -3339,13 +3433,6 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_GETCODEPAGE">SCI_GETCODEPAGE</a><br />
      <a class="message" href="#SCI_SETIMEINTERACTION">SCI_SETIMEINTERACTION(int imeInteraction)</a><br />
      <a class="message" href="#SCI_GETIMEINTERACTION">SCI_GETIMEINTERACTION</a><br />
-     <a class="message" href="#SCI_SETWORDCHARS">SCI_SETWORDCHARS(&lt;unused&gt;, const char *characters)</a><br />
-     <a class="message" href="#SCI_GETWORDCHARS">SCI_GETWORDCHARS(&lt;unused&gt;, char *characters)</a><br />
-     <a class="message" href="#SCI_SETWHITESPACECHARS">SCI_SETWHITESPACECHARS(&lt;unused&gt;, const char *characters)</a><br />
-     <a class="message" href="#SCI_GETWHITESPACECHARS">SCI_GETWHITESPACECHARS(&lt;unused&gt;, char *characters)</a><br />
-     <a class="message" href="#SCI_SETPUNCTUATIONCHARS">SCI_SETPUNCTUATIONCHARS(&lt;unused&gt;, const char *characters)</a><br />
-     <a class="message" href="#SCI_GETPUNCTUATIONCHARS">SCI_GETPUNCTUATIONCHARS(&lt;unused&gt;, char *characters)</a><br />
-     <a class="message" href="#SCI_SETCHARSDEFAULT">SCI_SETCHARSDEFAULT</a><br />
      <a class="message" href="#SCI_GRABFOCUS">SCI_GRABFOCUS</a><br />
      <a class="message" href="#SCI_SETFOCUS">SCI_SETFOCUS(bool focus)</a><br />
      <a class="message" href="#SCI_GETFOCUS">SCI_GETFOCUS</a><br />
@@ -3474,43 +3561,6 @@ struct Sci_TextToFind {
      <p>The windowed behaviour can be chosen with <code>SCI_SETIMEINTERACTION(SC_IME_WINDOWED)</code>
      and the inline behaviour with <code>SCI_SETIMEINTERACTION(SC_IME_INLINE)</code>.
      Scintilla may ignore this call in some cases. For example, the inline behaviour might only be supported for some languages.</p>
-
-    <p><b id="SCI_SETWORDCHARS">SCI_SETWORDCHARS(&lt;unused&gt;, const char *characters)</b><br />
-     Scintilla has several functions that operate on words, which are defined to be contiguous
-    sequences of characters from a particular set of characters. This message defines which
-    characters are members of that set. The character sets are set to default values before processing this
-    function.
-    For example, if you don't allow '_' in your set of characters
-    use:<br />
-     <code>SCI_SETWORDCHARS(0, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")</code>;</p>
-
-    <p><b id="SCI_GETWORDCHARS">SCI_GETWORDCHARS(&lt;unused&gt;, char *characters)</b><br />
-     This fills the characters parameter with all the characters included in words.
-     The characters parameter must be large enough to hold all of the characters.
-     If the characters parameter is 0 then the length that should be allocated
-     to store the entire set is returned.</p>
-
-    <p><b id="SCI_SETWHITESPACECHARS">SCI_SETWHITESPACECHARS(&lt;unused&gt;, const char *characters)</b><br />
-    <b id="SCI_GETWHITESPACECHARS">SCI_GETWHITESPACECHARS(&lt;unused&gt;, char *characters)</b><br />
-     Similar to <code>SCI_SETWORDCHARS</code>, this message allows the user to define which chars Scintilla considers
-          as whitespace.  Setting the whitespace chars allows the user to fine-tune Scintilla's behaviour doing
-          such things as moving the cursor to the start or end of a word; for example, by defining punctuation chars
-          as whitespace, they will be skipped over when the user presses ctrl+left or ctrl+right.
-          This function should be called after <code>SCI_SETWORDCHARS</code> as it will
-          reset the whitespace characters to the default set.
-	  <code>SCI_GETWHITESPACECHARS</code> behaves similarly to <code>SCI_GETWORDCHARS</code>.</p>
-
-    <p><b id="SCI_SETPUNCTUATIONCHARS">SCI_SETPUNCTUATIONCHARS(&lt;unused&gt;, const char *characters)</b><br />
-    <b id="SCI_GETPUNCTUATIONCHARS">SCI_GETPUNCTUATIONCHARS(&lt;unused&gt;, char *characters)</b><br />
-     Similar to <code>SCI_SETWORDCHARS</code> and <code>SCI_SETWHITESPACECHARS</code>, this message
-     allows the user to define which chars Scintilla considers as punctuation.
-	  <code>SCI_GETPUNCTUATIONCHARS</code> behaves similarly to <code>SCI_GETWORDCHARS</code>.</p>
-
-    <p><b id="SCI_SETCHARSDEFAULT">SCI_SETCHARSDEFAULT</b><br />
-     Use the default sets of word and whitespace characters. This sets whitespace to space, tab and other
-     characters with codes less than 0x20, with word characters set to alphanumeric and '_'.
-    </p>
-
 
     <p><b id="SCI_GRABFOCUS">SCI_GRABFOCUS</b><br />
      <b id="SCI_SETFOCUS">SCI_SETFOCUS(bool focus)</b><br />
