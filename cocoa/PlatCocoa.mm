@@ -1299,7 +1299,7 @@ void Window::SetCursor(Cursor curs)
   if (wid)
   {
     id idWin = reinterpret_cast<id>(wid);
-    if ([idWin isMemberOfClass: [SCIContentView class]])
+    if ([idWin isKindOfClass: [SCIContentView class]])
     {
       SCIContentView* container = reinterpret_cast<SCIContentView*>(idWin);
       [container setCursor: curs];
