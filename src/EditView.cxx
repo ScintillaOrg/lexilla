@@ -417,7 +417,7 @@ void EditView::LayoutLine(const EditModel &model, int line, Surface *surface, co
 		ll->widthLine = LineLayout::wrapWidthInfinite;
 		ll->lines = 1;
 		if (vstyle.edgeState == EDGE_BACKGROUND) {
-			ll->edgeColumn = model.pdoc->FindColumn(line, vstyle.theEdge);
+			ll->edgeColumn = model.pdoc->FindColumn(line, vstyle.theEdge.column);
 			if (ll->edgeColumn >= posLineStart) {
 				ll->edgeColumn -= posLineStart;
 			}
@@ -749,7 +749,7 @@ static ColourDesired TextBackground(const EditModel &model, const ViewStyle &vsD
 		if ((vsDraw.edgeState == EDGE_BACKGROUND) &&
 			(i >= ll->edgeColumn) &&
 			(i < ll->numCharsBeforeEOL))
-			return vsDraw.edgecolour;
+			return vsDraw.theEdge.colour;
 		if (inHotspot && vsDraw.hotspotColours.back.isSet)
 			return vsDraw.hotspotColours.back;
 	}
@@ -1339,12 +1339,24 @@ static void DrawEdgeLine(Surface *surface, const ViewStyle &vsDraw, const LineLa
 	Range lineRange, int xStart) {
 	if (vsDraw.edgeState == EDGE_LINE) {
 		PRectangle rcSegment = rcLine;
-		int edgeX = static_cast<int>(vsDraw.theEdge * vsDraw.spaceWidth);
+		int edgeX = static_cast<int>(vsDraw.theEdge.column * vsDraw.spaceWidth);
 		rcSegment.left = static_cast<XYPOSITION>(edgeX + xStart);
 		if ((ll->wrapIndent != 0) && (lineRange.start != 0))
 			rcSegment.left -= ll->wrapIndent;
 		rcSegment.right = rcSegment.left + 1;
-		surface->FillRectangle(rcSegment, vsDraw.edgecolour);
+		surface->FillRectangle(rcSegment, vsDraw.theEdge.colour);
+	} else if (vsDraw.edgeState == EDGE_MULTILINE) {
+		for (size_t edge = 0; edge < vsDraw.theMultiEdge.size(); edge++) {
+			if (vsDraw.theMultiEdge[edge].column >= 0) {
+				PRectangle rcSegment = rcLine;
+				int edgeX = static_cast<int>(vsDraw.theMultiEdge[edge].column * vsDraw.spaceWidth);
+				rcSegment.left = static_cast<XYPOSITION>(edgeX + xStart);
+				if ((ll->wrapIndent != 0) && (lineRange.start != 0))
+					rcSegment.left -= ll->wrapIndent;
+				rcSegment.right = rcSegment.left + 1;
+				surface->FillRectangle(rcSegment, vsDraw.theMultiEdge[edge].colour);
+			}
+		}
 	}
 }
 
@@ -1919,10 +1931,19 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 		if (rcBeyondEOF.top < rcBeyondEOF.bottom) {
 			surfaceWindow->FillRectangle(rcBeyondEOF, vsDraw.styles[STYLE_DEFAULT].back);
 			if (vsDraw.edgeState == EDGE_LINE) {
-				int edgeX = static_cast<int>(vsDraw.theEdge * vsDraw.spaceWidth);
+				int edgeX = static_cast<int>(vsDraw.theEdge.column * vsDraw.spaceWidth);
 				rcBeyondEOF.left = static_cast<XYPOSITION>(edgeX + xStart);
 				rcBeyondEOF.right = rcBeyondEOF.left + 1;
-				surfaceWindow->FillRectangle(rcBeyondEOF, vsDraw.edgecolour);
+				surfaceWindow->FillRectangle(rcBeyondEOF, vsDraw.theEdge.colour);
+			} else if (vsDraw.edgeState == EDGE_MULTILINE) {
+				for (size_t edge = 0; edge < vsDraw.theMultiEdge.size(); edge++) {
+					if (vsDraw.theMultiEdge[edge].column >= 0) {
+						int edgeX = static_cast<int>(vsDraw.theMultiEdge[edge].column * vsDraw.spaceWidth);
+						rcBeyondEOF.left = static_cast<XYPOSITION>(edgeX + xStart);
+						rcBeyondEOF.right = rcBeyondEOF.left + 1;
+						surfaceWindow->FillRectangle(rcBeyondEOF, vsDraw.theMultiEdge[edge].colour);
+					}
+				}
 			}
 		}
 		//Platform::DebugPrintf("start display %d, offset = %d\n", pdoc->Length(), xOffset);

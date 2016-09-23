@@ -6177,6 +6177,9 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <a class="message" href="#SCI_GETEDGECOLUMN">SCI_GETEDGECOLUMN</a><br />
      <a class="message" href="#SCI_SETEDGECOLOUR">SCI_SETEDGECOLOUR(int colour)</a><br />
      <a class="message" href="#SCI_GETEDGECOLOUR">SCI_GETEDGECOLOUR</a><br />
+     <br />
+     <a class="message" href="#SCI_MULTIEDGEADDLINE">SCI_MULTIEDGEADDLINE(int column, int colour)</a><br />
+     <a class="message" href="#SCI_MULTIEDGECLEARALL">SCI_MULTIEDGECLEARALL</a><br />
     </code>
 
     <p><b id="SCI_SETEDGEMODE">SCI_SETEDGEMODE(int edgeMode)</b><br />
@@ -6225,6 +6228,17 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
           <td>The background colour of characters after the column limit is changed to the colour
           set by <code>SCI_SETEDGECOLOUR</code>. This is recommended for proportional fonts.</td>
         </tr>
+
+        <tr>
+          <td align="left"><code>EDGE_MULTILINE</code></td>
+
+          <td align="center">3</td>
+
+          <td>This is similar to <code>EDGE_LINE</code> but in contrary to showing only one single
+          line a configurable set of vertical lines can be shown simultaneously. This <code>edgeMode
+          </code> uses a completely independent dataset that can only be configured by using the
+          <code>SCI_MULTIEDGE*</code> messages.</td>
+        </tr>
       </tbody>
     </table>
 
@@ -6240,6 +6254,14 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
      <b id="SCI_GETEDGECOLOUR">SCI_GETEDGECOLOUR</b><br />
      These messages set and get the colour of the marker used to show that a line has exceeded the
     length set by <code>SCI_SETEDGECOLUMN</code>.</p>
+
+    <p><b id="SCI_MULTIEDGEADDLINE">SCI_MULTIEDGEADDLINE(int column, int <a class="jump"
+    href="#colour">colour</a>)</b><br />
+     <b id="SCI_MULTIEDGECLEARALL">SCI_MULTIEDGECLEARALL</b><br />
+     <code>SCI_MULTIEDGEADDLINE</code> adds a new vertical edge to the view. The edge will be
+    displayed at the given column number. The resulting edge position depends on the metric
+    of a space character in <code>STYLE_DEFAULT</code>. All the edges can be cleared with
+    <code>SCI_MULTIEDGECLEARALL</code>.</p>
 
     <h2 id="Lexer">Lexer</h2>
 

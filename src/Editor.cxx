@@ -7433,10 +7433,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return vs.zoomLevel;
 
 	case SCI_GETEDGECOLUMN:
-		return vs.theEdge;
+		return vs.theEdge.column;
 
 	case SCI_SETEDGECOLUMN:
-		vs.theEdge = static_cast<int>(wParam);
+		vs.theEdge.column = static_cast<int>(wParam);
 		InvalidateStyleRedraw();
 		break;
 
@@ -7449,10 +7449,20 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_GETEDGECOLOUR:
-		return vs.edgecolour.AsLong();
+		return vs.theEdge.colour.AsLong();
 
 	case SCI_SETEDGECOLOUR:
-		vs.edgecolour = ColourDesired(static_cast<long>(wParam));
+		vs.theEdge.colour = ColourDesired(static_cast<long>(wParam));
+		InvalidateStyleRedraw();
+		break;
+
+	case SCI_MULTIEDGEADDLINE:
+		vs.theMultiEdge.push_back(EdgeProperties(wParam, lParam));
+		InvalidateStyleRedraw();
+		break;
+
+	case SCI_MULTIEDGECLEARALL:
+		std::vector<EdgeProperties>().swap(vs.theMultiEdge); // Free vector and memory, C++03 compatible
 		InvalidateStyleRedraw();
 		break;
 

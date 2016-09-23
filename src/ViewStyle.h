@@ -72,6 +72,17 @@ struct ForeBackColours {
 	ColourOptional back;
 };
 
+struct EdgeProperties {
+	int column;
+	ColourDesired colour;
+	EdgeProperties(int column_ = 0, ColourDesired colour_ = ColourDesired(0)) :
+		column(column_), colour(colour_) {
+	}
+	EdgeProperties(uptr_t wParam, sptr_t lParam) :
+		column(static_cast<int>(wParam)), colour(static_cast<long>(lParam)) {
+	}
+};
+
 /**
  */
 class ViewStyle {
@@ -130,8 +141,6 @@ public:
 	bool alwaysShowCaretLineBackground;
 	ColourDesired caretLineBackground;
 	int caretLineAlpha;
-	ColourDesired edgecolour;
-	int edgeState;
 	int caretStyle;
 	int caretWidth;
 	bool someStylesProtected;
@@ -146,7 +155,9 @@ public:
 	int braceHighlightIndicator;
 	bool braceBadLightIndicatorSet;
 	int braceBadLightIndicator;
-	int theEdge;
+	int edgeState;
+	EdgeProperties theEdge;
+	std::vector<EdgeProperties> theMultiEdge;
 	int marginNumberPadding; // the right-side padding of the number margin
 	int ctrlCharPadding; // the padding around control character text blobs
 	int lastSegItalicsOffset; // the offset so as not to clip italic characters at EOLs

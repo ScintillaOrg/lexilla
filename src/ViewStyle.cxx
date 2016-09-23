@@ -139,8 +139,6 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	alwaysShowCaretLineBackground = source.alwaysShowCaretLineBackground;
 	caretLineBackground = source.caretLineBackground;
 	caretLineAlpha = source.caretLineAlpha;
-	edgecolour = source.edgecolour;
-	edgeState = source.edgeState;
 	caretStyle = source.caretStyle;
 	caretWidth = source.caretWidth;
 	someStylesProtected = false;
@@ -171,7 +169,9 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	braceBadLightIndicatorSet = source.braceBadLightIndicatorSet;
 	braceBadLightIndicator = source.braceBadLightIndicator;
 
+	edgeState = source.edgeState;
 	theEdge = source.theEdge;
+	theMultiEdge = source.theMultiEdge;
 
 	marginNumberPadding = source.marginNumberPadding;
 	ctrlCharPadding = source.ctrlCharPadding;
@@ -268,8 +268,6 @@ void ViewStyle::Init(size_t stylesSize_) {
 	alwaysShowCaretLineBackground = false;
 	caretLineBackground = ColourDesired(0xff, 0xff, 0);
 	caretLineAlpha = SC_ALPHA_NOALPHA;
-	edgecolour = ColourDesired(0xc0, 0xc0, 0xc0);
-	edgeState = EDGE_NONE;
 	caretStyle = CARETSTYLE_LINE;
 	caretWidth = 1;
 	someStylesProtected = false;
@@ -310,7 +308,8 @@ void ViewStyle::Init(size_t stylesSize_) {
 	braceBadLightIndicatorSet = false;
 	braceBadLightIndicator = 0;
 
-	theEdge = 0;
+	edgeState = EDGE_NONE;
+	theEdge = EdgeProperties(0, ColourDesired(0xc0, 0xc0, 0xc0));
 
 	marginNumberPadding = 3;
 	ctrlCharPadding = 3; // +3 For a blank on front and rounded edge each side

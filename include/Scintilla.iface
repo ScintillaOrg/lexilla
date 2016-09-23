@@ -1667,6 +1667,7 @@ enu EdgeVisualStyle=EDGE_
 val EDGE_NONE=0
 val EDGE_LINE=1
 val EDGE_BACKGROUND=2
+val EDGE_MULTILINE=3
 
 # Retrieve the column number which text should be kept within.
 get int GetEdgeColumn=2360(,)
@@ -1678,7 +1679,7 @@ set void SetEdgeColumn=2361(int column,)
 # Retrieve the edge highlight mode.
 get int GetEdgeMode=2362(,)
 
-# The edge may be displayed by a line (EDGE_LINE) or by highlighting text that
+# The edge may be displayed by a line (EDGE_LINE/EDGE_MULTILINE) or by highlighting text that
 # goes beyond it (EDGE_BACKGROUND) or not displayed at all (EDGE_NONE).
 set void SetEdgeMode=2363(int mode,)
 
@@ -1687,6 +1688,12 @@ get colour GetEdgeColour=2364(,)
 
 # Change the colour used in edge indication.
 set void SetEdgeColour=2365(colour edgeColour,)
+
+# Add a new vertical edge to the view.
+fun void MultiEdgeAddLine=2694(int column, colour edgeColour)
+
+# Clear all vertical edges.
+fun void MultiEdgeClearAll=2695(,)
 
 # Sets the current caret position to be the search anchor.
 fun void SearchAnchor=2366(,)
