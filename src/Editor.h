@@ -176,6 +176,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	bool hasFocus;
 	bool mouseDownCaptures;
+	bool mouseWheelCaptures;
 
 	int xCaretMargin;	///< Ensure this many pixels visible on both sides of caret
 	bool horizontalScrollBarVisible;

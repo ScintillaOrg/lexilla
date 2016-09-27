@@ -112,6 +112,7 @@ Editor::Editor() {
 	hasFocus = false;
 	errorStatus = 0;
 	mouseDownCaptures = true;
+	mouseWheelCaptures = true;
 
 	lastClickTime = 0;
 	doubleClickCloseThreshold = Point(3, 3);
@@ -7593,6 +7594,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETMOUSEDOWNCAPTURES:
 		return mouseDownCaptures;
+
+	case SCI_SETMOUSEWHEELCAPTURES:
+		mouseWheelCaptures = wParam != 0;
+		break;
+
+	case SCI_GETMOUSEWHEELCAPTURES:
+		return mouseWheelCaptures;
 
 	case SCI_SETCURSOR:
 		cursorMode = static_cast<int>(wParam);

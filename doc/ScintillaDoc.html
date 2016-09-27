@@ -2231,12 +2231,23 @@ struct Sci_TextToFind {
     <h2 id="MouseCapture">Mouse capture</h2>
     <a class="message" href="#SCI_SETMOUSEDOWNCAPTURES">SCI_SETMOUSEDOWNCAPTURES(bool captures)</a><br />
      <a class="message" href="#SCI_GETMOUSEDOWNCAPTURES">SCI_GETMOUSEDOWNCAPTURES</a><br />
+     <a class="message" href="#SCI_SETMOUSEWHEELCAPTURES">SCI_SETMOUSEWHEELCAPTURES(bool captures)</a><br />
+     <a class="message" href="#SCI_GETMOUSEWHEELCAPTURES">SCI_GETMOUSEWHEELCAPTURES</a><br />
 
     <p><b id="SCI_SETMOUSEDOWNCAPTURES">SCI_SETMOUSEDOWNCAPTURES(bool captures)</b><br />
      <b id="SCI_GETMOUSEDOWNCAPTURES">SCI_GETMOUSEDOWNCAPTURES</b><br />
      When the mouse is pressed inside Scintilla, it is captured so future mouse movement events are
     sent to Scintilla. This behaviour may be turned off with
     <code>SCI_SETMOUSEDOWNCAPTURES(0)</code>.</p>
+
+    <p><b id="SCI_SETMOUSEWHEELCAPTURES">SCI_SETMOUSEWHEELCAPTURES(bool captures)</b><br />
+     <b id="SCI_GETMOUSEWHEELCAPTURES">SCI_GETMOUSEWHEELCAPTURES</b><br />
+     On Windows, Scintilla captures all <code>WM_MOUSEWHEEL</code> messages if it has the
+     focus, even if the mouse pointer is nowhere near the Scintilla editor window. This
+     behavior can be changed with <code>SCI_SETMOUSEWHEELCAPTURES(0)</code> so that
+     Scintilla passes the <code>WM_MOUSEWHEEL</code> messages to its parent window.
+     Scintilla will still react to the mouse wheel if the mouse pointer is over
+     the editor window.</p>
 
     <h2 id="LineEndings">Line endings</h2>
 

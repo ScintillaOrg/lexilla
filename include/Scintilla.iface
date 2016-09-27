@@ -1755,6 +1755,11 @@ set void SetMouseDownCaptures=2384(bool captures,)
 # Get whether mouse gets captured.
 get bool GetMouseDownCaptures=2385(,)
 
+# Set whether the mouse wheel can be active outside the window.
+set void SetMouseWheelCaptures=2696(bool captures,)
+# Get whether mouse wheel can be active outside the window.
+get bool GetMouseWheelCaptures=2697(,)
+
 enu CursorShape=SC_CURSOR
 val SC_CURSORNORMAL=-1
 val SC_CURSORARROW=2
