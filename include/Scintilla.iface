@@ -360,6 +360,7 @@ val SC_MARGIN_BACK=2
 val SC_MARGIN_FORE=3
 val SC_MARGIN_TEXT=4
 val SC_MARGIN_RTEXT=5
+val SC_MARGIN_COLOUR=6
 
 # Set a margin to be either numeric or symbolic.
 set void SetMarginTypeN=2240(int margin, int marginType)
@@ -390,6 +391,12 @@ set void SetMarginCursorN=2248(int margin, int cursor)
 
 # Retrieve the cursor shown in a margin.
 get int GetMarginCursorN=2249(int margin,)
+
+# Set the background colour of a margin. Only visible for SC_MARGIN_COLOUR.
+set void SetMarginBackN=2250(int margin, colour back)
+
+# Retrieve the background colour of a margin
+get colour GetMarginBackN=2251(int margin,)
 
 # Styles in range 32..38 are predefined for parts of the UI and are not used as normal styles.
 # Style 39 is for future use.

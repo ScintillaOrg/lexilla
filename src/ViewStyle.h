@@ -17,6 +17,7 @@ namespace Scintilla {
 class MarginStyle {
 public:
 	int style;
+	ColourDesired back;
 	int width;
 	int mask;
 	bool sensitive;

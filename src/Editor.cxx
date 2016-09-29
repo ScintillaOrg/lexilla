@@ -6884,6 +6884,19 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		else
 			return 0;
 
+	case SCI_SETMARGINBACKN:
+		if (ValidMargin(wParam)) {
+			vs.ms[wParam].back = ColourDesired(static_cast<long>(lParam));
+			InvalidateStyleRedraw();
+		}
+		break;
+
+	case SCI_GETMARGINBACKN:
+		if (ValidMargin(wParam))
+			return vs.ms[wParam].back.AsLong();
+		else
+			return 0;
+
 	case SCI_STYLECLEARALL:
 		vs.ClearStyles();
 		InvalidateStyleRedraw();

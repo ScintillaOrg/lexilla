@@ -167,6 +167,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_MARGIN_FORE 3
 #define SC_MARGIN_TEXT 4
 #define SC_MARGIN_RTEXT 5
+#define SC_MARGIN_COLOUR 6
 #define SCI_SETMARGINTYPEN 2240
 #define SCI_GETMARGINTYPEN 2241
 #define SCI_SETMARGINWIDTHN 2242
@@ -177,6 +178,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_GETMARGINSENSITIVEN 2247
 #define SCI_SETMARGINCURSORN 2248
 #define SCI_GETMARGINCURSORN 2249
+#define SCI_SETMARGINBACKN 2250
+#define SCI_GETMARGINBACKN 2251
 #define STYLE_DEFAULT 32
 #define STYLE_LINENUMBER 33
 #define STYLE_BRACELIGHT 34

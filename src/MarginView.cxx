@@ -216,6 +216,9 @@ void MarginView::PaintMargin(Surface *surface, int topLine, PRectangle rc, PRect
 					case SC_MARGIN_FORE:
 						colour = vs.styles[STYLE_DEFAULT].fore;
 						break;
+					case SC_MARGIN_COLOUR:
+						colour = vs.ms[margin].back;
+						break;
 					default:
 						colour = vs.styles[STYLE_LINENUMBER].back;
 						break;

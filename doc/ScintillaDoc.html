@@ -3172,6 +3172,8 @@ struct Sci_TextToFind {
     cursor)</a><br />
      <a class="message" href="#SCI_GETMARGINCURSORN">SCI_GETMARGINCURSORN(int
     margin)</a><br />
+     <a class="message" href="#SCI_SETMARGINBACKN">SCI_SETMARGINBACKN(int margin, int colour)</a><br />
+     <a class="message" href="#SCI_GETMARGINBACKN">SCI_GETMARGINBACKN(int margin)</a><br />
      <a class="message" href="#SCI_SETMARGINLEFT">SCI_SETMARGINLEFT(&lt;unused&gt;, int
     pixels)</a><br />
      <a class="message" href="#SCI_GETMARGINLEFT">SCI_GETMARGINLEFT</a><br />
@@ -3201,9 +3203,10 @@ struct Sci_TextToFind {
     A margin with application defined text may use <code>SC_MARGIN_TEXT</code> (4) or
     <code>SC_MARGIN_RTEXT</code> (5) to right justify the text.
     By convention, margin 0 is used for line numbers and the next two are used for symbols. You can
-    also use the constants <code>SC_MARGIN_BACK</code> (2) and <code>SC_MARGIN_FORE</code> (3) for
+    also use the constants <code>SC_MARGIN_BACK</code> (2), <code>SC_MARGIN_FORE</code> (3),
+    and <code>SC_MARGIN_COLOUR</code> (6) for
     symbol margins that set their background colour to match the STYLE_DEFAULT background and
-    foreground colours.</p>
+    foreground colours or a specified colour.</p>
 
     <p><b id="SCI_SETMARGINWIDTHN">SCI_SETMARGINWIDTHN(int margin, int pixelWidth)</b><br />
      <b id="SCI_GETMARGINWIDTHN">SCI_GETMARGINWIDTHN(int margin)</b><br />
@@ -3258,6 +3261,11 @@ struct Sci_TextToFind {
      <code>SCI_SETMARGINCURSORN(margin, SC_CURSORARROW)</code> or restored to a
      reversed arrow with
      <code>SCI_SETMARGINCURSORN(margin, SC_CURSORREVERSEARROW)</code>.</p>
+
+    <p><b id="SCI_SETMARGINBACKN">SCI_SETMARGINBACKN(int margin, int <a class="jump" href="#colour">colour</a>)</b><br />
+     <b id="SCI_GETMARGINBACKN">SCI_GETMARGINBACKN(int margin)</b><br />
+     A margin of type <code>SC_MARGIN_COLOUR</code>
+     may have its colour set with <code>SCI_SETMARGINBACKN</code>.</p>
 
     <p><b id="SCI_SETMARGINLEFT">SCI_SETMARGINLEFT(&lt;unused&gt;, int pixels)</b><br />
      <b id="SCI_GETMARGINLEFT">SCI_GETMARGINLEFT</b><br />
