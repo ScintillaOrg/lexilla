@@ -217,7 +217,7 @@ static inline bool IsPreProcLine(Sci_Position line, IDocument *pAccess) {
 	Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
 	for (Sci_Position i = pos; i < eol_pos; i++) {
 		char ch = styler[i];
-		if (ch == '#')
+		if (ch == '#' || ch == '|' || ch == '^')
 			return true;
 		else if (ch != ' ' && ch != '\t')
 			return false;
@@ -574,7 +574,8 @@ void SCI_METHOD LexerBaan::Lex(Sci_PositionU startPos, Sci_Position length, int 
 void SCI_METHOD LexerBaan::Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 
 	char word[100];
-	bool notForLoop = false;
+	bool foldStart = true;
+	bool foldNextSelect = true;
 	int wordlen = 0;
 
 	std::string startTags[6] = { "for", "if", "on", "repeat", "select", "while" };
@@ -646,13 +647,33 @@ void SCI_METHOD LexerBaan::Fold(Sci_PositionU startPos, Sci_Position length, int
 					}
 					if (styler.Match(j, "update")) {
 						// Means this is a "for update" used by Select which is already folded.
-						notForLoop = true;
+						foldStart = false;
 					}
 				}
-				else {
-					notForLoop = false;
+				else if (strcmp(word, "on") == 0) {
+					Sci_PositionU j = i + 1;
+					while ((j < endPos) && IsASpaceOrTab(styler.SafeGetCharAt(j))) {
+						j++;
+					}
+					if (!styler.Match(j, "case")) {
+						// Means this is not a "on Case" statement... could be "on" used by index.
+						foldStart = false;
+					}
 				}
-				if (!notForLoop) {
+				else if (strcmp(word, "exists") == 0) {
+					// Select following an exists clause is a subquery select, do not fold.
+					foldNextSelect = false;
+				}
+				else if (strcmp(word, "select") == 0 && !foldNextSelect) {
+					// in continuation to the exists clause.
+					foldStart = false;
+					// The next select can be folded, but not this one.
+					foldNextSelect = true;
+				}
+				else {
+					foldStart = true;
+				}
+				if (foldStart) {
 					if (wordInArray(word, startTags, 6)) {
 						levelCurrent++;
 					}
