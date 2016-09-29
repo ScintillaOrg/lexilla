@@ -145,9 +145,7 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	someStylesForceCase = false;
 	leftMarginWidth = source.leftMarginWidth;
 	rightMarginWidth = source.rightMarginWidth;
-	for (int margin=0; margin <= SC_MAX_MARGIN; margin++) {
-		ms[margin] = source.ms[margin];
-	}
+	ms = source.ms;
 	maskInLine = source.maskInLine;
 	maskDrawInText = source.maskDrawInText;
 	fixedColumnWidth = source.fixedColumnWidth;
@@ -196,7 +194,7 @@ void ViewStyle::CalculateMarginWidthAndMask() {
 	fixedColumnWidth = marginInside ? leftMarginWidth : 0;
 	maskInLine = 0xffffffff;
 	int maskDefinedMarkers = 0;
-	for (int margin = 0; margin <= SC_MAX_MARGIN; margin++) {
+	for (size_t margin = 0; margin < ms.size(); margin++) {
 		fixedColumnWidth += ms[margin].width;
 		if (ms[margin].width > 0)
 			maskInLine &= ~ms[margin].mask;
@@ -280,6 +278,7 @@ void ViewStyle::Init(size_t stylesSize_) {
 
 	leftMarginWidth = 1;
 	rightMarginWidth = 1;
+	ms.resize(SC_MAX_MARGIN + 1);
 	ms[0].style = SC_MARGIN_NUMBER;
 	ms[0].width = 0;
 	ms[0].mask = 0;

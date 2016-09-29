@@ -127,7 +127,7 @@ public:
 	int rightMarginWidth;	///< Spacing margin on right of text
 	int maskInLine;	///< Mask for markers to be put into text because there is nowhere for them to go in margin
 	int maskDrawInText;	///< Mask for markers that always draw in text
-	MarginStyle ms[SC_MAX_MARGIN+1];
+	std::vector<MarginStyle> ms;
 	int fixedColumnWidth;	///< Total width of margins
 	bool marginInside;	///< true: margin included in text view, false: separate views
 	int textStart;	///< Starting x position of text within the view

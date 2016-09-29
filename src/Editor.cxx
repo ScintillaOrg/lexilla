@@ -2426,9 +2426,9 @@ void Editor::NotifyIndicatorClick(bool click, int position, bool shift, bool ctr
 bool Editor::NotifyMarginClick(Point pt, int modifiers) {
 	int marginClicked = -1;
 	int x = vs.textStart - vs.fixedColumnWidth;
-	for (int margin = 0; margin <= SC_MAX_MARGIN; margin++) {
+	for (size_t margin = 0; margin < vs.ms.size(); margin++) {
 		if ((pt.x >= x) && (pt.x < x + vs.ms[margin].width))
-			marginClicked = margin;
+			marginClicked = static_cast<int>(margin);
 		x += vs.ms[margin].width;
 	}
 	if ((marginClicked >= 0) && vs.ms[marginClicked].sensitive) {
@@ -4289,7 +4289,7 @@ bool Editor::PointInSelMargin(Point pt) const {
 
 Window::Cursor Editor::GetMarginCursor(Point pt) const {
 	int x = 0;
-	for (int margin = 0; margin <= SC_MAX_MARGIN; margin++) {
+	for (size_t margin = 0; margin < vs.ms.size(); margin++) {
 		if ((pt.x >= x) && (pt.x < x + vs.ms[margin].width))
 			return static_cast<Window::Cursor>(vs.ms[margin].cursor);
 		x += vs.ms[margin].width;
@@ -5569,8 +5569,8 @@ void Editor::AddStyledText(char *buffer, int appendLength) {
 	SetEmptySelection(sel.MainCaret() + lengthInserted);
 }
 
-static bool ValidMargin(uptr_t wParam) {
-	return wParam <= SC_MAX_MARGIN;
+bool Editor::ValidMargin(uptr_t wParam) {
+	return wParam < vs.ms.size();
 }
 
 static char *CharPtrFromSPtr(sptr_t lParam) {
@@ -6896,6 +6896,14 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			return vs.ms[wParam].back.AsLong();
 		else
 			return 0;
+
+	case SCI_SETMARGINS:
+		if (wParam < 1000)
+			vs.ms.resize(wParam);
+		break;
+
+	case SCI_GETMARGINS:
+		return vs.ms.size();
 
 	case SCI_STYLECLEARALL:
 		vs.ClearStyles();

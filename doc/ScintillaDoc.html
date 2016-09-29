@@ -3132,10 +3132,12 @@ struct Sci_TextToFind {
 
     <h2 id="Margins">Margins</h2>
 
-    <p>There may be up to five margins, numbered 0 to <code>SC_MAX_MARGIN</code> (4)
-    to the left of the text display, plus a gap either side of
-    the text. Each margin can be set to display only symbols, line numbers, or text with <a
-    class="message" href="#SCI_SETMARGINTYPEN"><code>SCI_SETMARGINTYPEN</code></a>.
+    <p>There may be multiple margins to the left of the text display plus a gap either side of the text.
+    5 margins are allocated initially numbered from 0 to <code>SC_MAX_MARGIN</code> (4)
+    but this may be changed by calling
+    <a class="message" href="#SCI_SETMARGINS"><code>SCI_SETMARGINS</code></a>.
+    Each margin can be set to display only symbols, line numbers, or text with 
+    <a class="message" href="#SCI_SETMARGINTYPEN"><code>SCI_SETMARGINTYPEN</code></a>.
     Textual margins may also display symbols.
     The markers
     that can be displayed in each margin are set with <a class="message"
@@ -3146,7 +3148,7 @@ struct Sci_TextToFind {
     href="#SCN_MARGINCLICK"><code>SCN_MARGINCLICK</code></a> notification to the container or
     selects a line of text.</p>
 
-    <p>The margins are numbered 0 to 4. Using a margin number outside the valid range has no
+    <p>Using a margin number outside the valid range has no
     effect. By default, margin 0 is set to display line numbers, but is given a width of 0, so it
     is hidden. Margin 1 is set to display non-folding symbols and is given a width of 16 pixels, so
     it is visible. Margin 2 is set to display the folding symbols, but is given a width of 0, so it
@@ -3155,8 +3157,10 @@ struct Sci_TextToFind {
     <p>Styled text margins used to show revision and blame information:</p>
     <p><img src="styledmargin.png" alt="Styled text margins used to show revision and blame information" /></p>
 
-    <code><a class="message" href="#SCI_SETMARGINTYPEN">SCI_SETMARGINTYPEN(int margin, int
-    type)</a><br />
+    <code>
+     <a class="message" href="#SCI_SETMARGINS">SCI_SETMARGINS(int margins)</a><br />
+     <a class="message" href="#SCI_GETMARGINS">SCI_GETMARGINS</a><br />
+     <a class="message" href="#SCI_SETMARGINTYPEN">SCI_SETMARGINTYPEN(int margin, int type)</a><br />
      <a class="message" href="#SCI_GETMARGINTYPEN">SCI_GETMARGINTYPEN(int margin)</a><br />
      <a class="message" href="#SCI_SETMARGINWIDTHN">SCI_SETMARGINWIDTHN(int margin, int
     pixelWidth)</a><br />
@@ -3194,6 +3198,10 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_SETMARGINOPTIONS">SCI_SETMARGINOPTIONS(int marginOptions)</a><br />
      <a class="message" href="#SCI_GETMARGINOPTIONS">SCI_GETMARGINOPTIONS</a><br />
     </code>
+
+<p><b id="SCI_SETMARGINS">SCI_SETMARGINS(int margins)</b><br />
+     <b id="SCI_GETMARGINS">SCI_GETMARGINS</b><br />
+     Allocate the number of margins or find the number of margins currently allocated.</p>
 
     <p><b id="SCI_SETMARGINTYPEN">SCI_SETMARGINTYPEN(int margin, int iType)</b><br />
      <b id="SCI_GETMARGINTYPEN">SCI_GETMARGINTYPEN(int margin)</b><br />

@@ -398,6 +398,12 @@ set void SetMarginBackN=2250(int margin, colour back)
 # Retrieve the background colour of a margin
 get colour GetMarginBackN=2251(int margin,)
 
+# Allocate a non-standard number of margins.
+set void SetMargins=2252(int margins,)
+
+# How many margins are there?.
+get int GetMargins=2253(,)
+
 # Styles in range 32..38 are predefined for parts of the UI and are not used as normal styles.
 # Style 39 is for future use.
 enu StylesCommon=STYLE_
