@@ -580,6 +580,7 @@ void SCI_METHOD LexerBaan::Fold(Sci_PositionU startPos, Sci_Position length, int
 
 	std::string startTags[6] = { "for", "if", "on", "repeat", "select", "while" };
 	std::string endTags[6] = { "endcase", "endfor", "endif", "endselect", "endwhile", "until" };
+	std::string selectCloseTags[5] = { "selectdo", "selecteos", "selectempty", "selecterror", "endselect" };
 
 	LexAccessor styler(pAccess);
 	Sci_PositionU endPos = startPos + length;
@@ -660,15 +661,21 @@ void SCI_METHOD LexerBaan::Fold(Sci_PositionU startPos, Sci_Position length, int
 						foldStart = false;
 					}
 				}
-				else if (strcmp(word, "exists") == 0) {
-					// Select following an exists clause is a subquery select, do not fold.
-					foldNextSelect = false;
+				else if (strcmp(word, "select") == 0) {
+					if (foldNextSelect) {
+						// Next Selects are sub-clause till reach of selectCloseTags[] array.
+						foldNextSelect = false;
+						foldStart = true;
+					}
+					else {
+						foldNextSelect = false;
+						foldStart = false;
+					}
 				}
-				else if (strcmp(word, "select") == 0 && !foldNextSelect) {
-					// in continuation to the exists clause.
-					foldStart = false;
-					// The next select can be folded, but not this one.
+				else if (wordInArray(word, selectCloseTags, 5)) {
+					// select clause ends, next select clause can be folded.
 					foldNextSelect = true;
+					foldStart = true;
 				}
 				else {
 					foldStart = true;
