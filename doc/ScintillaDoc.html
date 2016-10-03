@@ -5104,6 +5104,9 @@ struct Sci_TextToFind {
     <p>The <code>SCI_WORDPART*</code> commands are used to move between word segments marked by
     capitalisation (aCamelCaseIdentifier) or underscores (an_under_bar_ident).</p>
 
+    <p>The <code>SCI_WORD[LEFT|RIGHT]END*</code> commands are 
+    similar to <code>SCI_WORD[LEFT|RIGHT]*</code> but move between word ends instead of word starts.</p>
+
     <p>The <code>SCI_HOME*</code> commands move the caret to the start of the line, while the
     <code>SCI_VCHOME*</code> commands move the caret to the first non-blank character of the line
     (ie. just after the indentation) unless it is already there; in this case, it acts as SCI_HOME*.</p>
