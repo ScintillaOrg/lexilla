@@ -523,6 +523,13 @@
 	Released 4 September 2016.
 	</li>
 	<li>
+	Word selection, navigation, and manipulation is now performed on characters instead of bytes
+	leading to more natural behaviour for multi-byte encodings like UTF-8.
+	For UTF-8 characters 0x80 and above, classification into word; punctuation; space; or line-end
+	is based on the Unicode general category of the character and is not customizable.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1832/">Bug #1832</a>.
+	</li>
+	<li>
 	Two enums changed in Scintilla.iface which may lead to changed bindings.
 	There were 2 FontQuality enums and the first is now PhasesDraw.
 	The prefix for FoldAction was SC_FOLDACTION and is now SC_FOLDACTION_

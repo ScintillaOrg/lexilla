@@ -25,6 +25,7 @@
 #include "Scintilla.h"
 
 #include "StringCopy.h"
+#include "CharacterSet.h"
 #include "Position.h"
 #include "SplitVector.h"
 #include "Partitioning.h"
@@ -389,16 +390,16 @@ void EditView::LayoutLine(const EditModel &model, int line, Surface *surface, co
 					(ll->chars[numCharsInLine] == chDoc);
 				else if (vstyle.styles[ll->styles[numCharsInLine]].caseForce == Style::caseLower)
 					allSame = allSame &&
-					(ll->chars[numCharsInLine] == static_cast<char>(tolower(chDoc)));
+					(ll->chars[numCharsInLine] == MakeLowerCase(chDoc));
 				else if (vstyle.styles[ll->styles[numCharsInLine]].caseForce == Style::caseUpper)
 					allSame = allSame &&
-					(ll->chars[numCharsInLine] == static_cast<char>(toupper(chDoc)));
+					(ll->chars[numCharsInLine] == MakeUpperCase(chDoc));
 				else	{ // Style::caseCamel
-					if ((model.pdoc->WordCharClass(ll->chars[numCharsInLine]) == CharClassify::ccWord) &&
-					  ((numCharsInLine == 0) || (model.pdoc->WordCharClass(ll->chars[numCharsInLine - 1]) != CharClassify::ccWord))) {
-						allSame = allSame && (ll->chars[numCharsInLine] == static_cast<char>(toupper(chDoc)));
+					if ((model.pdoc->IsASCIIWordByte(ll->chars[numCharsInLine])) &&
+					  ((numCharsInLine == 0) || (!model.pdoc->IsASCIIWordByte(ll->chars[numCharsInLine - 1])))) {
+						allSame = allSame && (ll->chars[numCharsInLine] == MakeUpperCase(chDoc));
 					} else {
-						allSame = allSame && (ll->chars[numCharsInLine] == static_cast<char>(tolower(chDoc)));
+						allSame = allSame && (ll->chars[numCharsInLine] == MakeLowerCase(chDoc));
 					}
 				}
 				numCharsInLine++;
@@ -440,15 +441,15 @@ void EditView::LayoutLine(const EditModel &model, int line, Surface *surface, co
 			for (int charInLine = 0; charInLine<lineLength; charInLine++) {
 				char chDoc = ll->chars[charInLine];
 				if (vstyle.styles[ll->styles[charInLine]].caseForce == Style::caseUpper)
-					ll->chars[charInLine] = static_cast<char>(toupper(chDoc));
+					ll->chars[charInLine] = static_cast<char>(MakeUpperCase(chDoc));
 				else if (vstyle.styles[ll->styles[charInLine]].caseForce == Style::caseLower)
-					ll->chars[charInLine] = static_cast<char>(tolower(chDoc));
+					ll->chars[charInLine] = static_cast<char>(MakeLowerCase(chDoc));
 				else if (vstyle.styles[ll->styles[charInLine]].caseForce == Style::caseCamel) {
-					if ((model.pdoc->WordCharClass(ll->chars[charInLine]) == CharClassify::ccWord) &&
-					  ((charInLine == 0) || (model.pdoc->WordCharClass(ll->chars[charInLine - 1]) != CharClassify::ccWord))) {
-						ll->chars[charInLine] = static_cast<char>(toupper(chDoc));
+					if ((model.pdoc->IsASCIIWordByte(ll->chars[charInLine])) &&
+					  ((charInLine == 0) || (!model.pdoc->IsASCIIWordByte(ll->chars[charInLine - 1])))) {
+						ll->chars[charInLine] = static_cast<char>(MakeUpperCase(chDoc));
 					} else {
-						ll->chars[charInLine] = static_cast<char>(tolower(chDoc));
+						ll->chars[charInLine] = static_cast<char>(MakeLowerCase(chDoc));
 					}
 				}
 			}

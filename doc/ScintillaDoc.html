@@ -2322,8 +2322,13 @@ struct Sci_TextToFind {
     Line ends are not selected by double clicking but do act as word separators.
     </p>
 
-    <p>Words are defined in terms of bytes, not characters so there are some issues with
-    UTF-8 and DCBS documents.</p>
+    <p>Words are defined in terms of characters and the sets of characters in each category can be customized to an extent.
+    The NUL character (0) is always a space as the APIs to set categories use NUL-terminated strings.
+    For single-byte encodings a category may be assigned to any character (1 to 0xFF).
+    For multi-byte encodings a category may be assigned to characters from 1 to 0x7F with static behaviour from 0x80.
+    For UTF-8, characters from 0x80 will use a category based on their Unicode general category.
+    For Asian encodings, code pages 932, 936, 949, 950, and 1361, characters from 0x80 are treated as word characters.
+    </p>
 
     <p>Identifiers in programming languages are often sequences of words with capitalisation
      (aCamelCaseIdentifier) or underscores (an_under_bar_ident) used to mark word boundaries.
@@ -2437,7 +2442,7 @@ struct Sci_TextToFind {
     </table>
 
     <p><b id="SCI_SETWORDCHARS">SCI_SETWORDCHARS(&lt;unused&gt;, const char *characters)</b><br />
-     This message defines which characters (bytes) are members of the word category.
+     This message defines which characters are members of the word category.
      The character categories are set to default values before processing this function.
     For example, if you don't allow '_' in your set of characters
     use:<br />
@@ -2448,6 +2453,8 @@ struct Sci_TextToFind {
      The characters parameter must be large enough to hold all of the characters.
      If the characters parameter is 0 then the length that should be allocated
      to store the entire set is returned.</p>
+
+    <p>For multi-byte encodings, this API will not return meaningful values for 0x80 and above.</p>
 
     <p><b id="SCI_SETWHITESPACECHARS">SCI_SETWHITESPACECHARS(&lt;unused&gt;, const char *characters)</b><br />
     <b id="SCI_GETWHITESPACECHARS">SCI_GETWHITESPACECHARS(&lt;unused&gt;, char *characters) &rarr; int</b><br />
