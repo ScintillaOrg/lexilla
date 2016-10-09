@@ -307,8 +307,6 @@ private:
 	static void Destroy(GObject *object);
 	static void SelectionReceived(GtkWidget *widget, GtkSelectionData *selection_data,
 	                              guint time);
-	static void ClipboardReceived(GtkClipboard *clipboard, GtkSelectionData *selection_data,
-	                              gpointer data);
 	static void SelectionGet(GtkWidget *widget, GtkSelectionData *selection_data,
 	                         guint info, guint time);
 	static gint SelectionClear(GtkWidget *widget, GdkEventSelection *selection_event);
@@ -1452,10 +1450,39 @@ void ScintillaGTK::Copy() {
 	}
 }
 
-void ScintillaGTK::ClipboardReceived(GtkClipboard *clipboard, GtkSelectionData *selection_data, gpointer data) {
-	ScintillaGTK *sciThis = static_cast<ScintillaGTK *>(data);
-	sciThis->ReceivedSelection(selection_data);
-}
+// helper class to watch a GObject lifetime and get notified when it dies
+class GObjectWatcher {
+	GObject *weakRef;
+
+	void WeakNotifyThis(GObject *obj) {
+		PLATFORM_ASSERT(obj == weakRef);
+
+		Destroyed();
+		weakRef = 0;
+	}
+
+	static void WeakNotify(gpointer data, GObject *obj) {
+		static_cast<GObjectWatcher*>(data)->WeakNotifyThis(obj);
+	}
+
+public:
+	GObjectWatcher(GObject *obj) :
+			weakRef(obj) {
+		g_object_weak_ref(weakRef, WeakNotify, this);
+	}
+
+	virtual ~GObjectWatcher() {
+		if (weakRef) {
+			g_object_weak_unref(weakRef, WeakNotify, this);
+		}
+	}
+
+	virtual void Destroyed() {}
+
+	bool IsDestroyed() {
+		return weakRef != 0;
+	}
+};
 
 void ScintillaGTK::Paste() {
 	atomSought = atomUTF8;
@@ -1463,7 +1490,31 @@ void ScintillaGTK::Paste() {
 		gtk_widget_get_clipboard(GTK_WIDGET(PWidget(wMain)), atomClipboard);
 	if (clipBoard == NULL)
 		return;
-	gtk_clipboard_request_contents(clipBoard, atomSought, ClipboardReceived, this);
+
+	// helper class for the asynchronous paste not to risk calling in a destroyed ScintillaGTK
+	class Helper : GObjectWatcher {
+		ScintillaGTK *sci;
+
+		virtual void Destroyed() {
+			sci = 0;
+		}
+
+	public:
+		Helper(ScintillaGTK *sci_) :
+				GObjectWatcher(G_OBJECT(PWidget(sci_->wMain))),
+				sci(sci_) {
+		}
+
+		static void ClipboardReceived(GtkClipboard *, GtkSelectionData *selection_data, gpointer data) {
+			Helper *self = static_cast<Helper*>(data);
+			if (self->sci != 0) {
+				self->sci->ReceivedSelection(selection_data);
+			}
+			delete self;
+		}
+	};
+
+	gtk_clipboard_request_contents(clipBoard, atomSought, Helper::ClipboardReceived, new Helper(this));
 }
 
 void ScintillaGTK::CreateCallTipWindow(PRectangle rc) {
