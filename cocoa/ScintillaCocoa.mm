@@ -198,6 +198,12 @@ static const KeyToCommand macMapDefault[] =
 
 }
 
+- (void) dealloc {
+	[sFind release];
+	[sFont release];
+	[super dealloc];
+}
+
 const CGFloat paddingHighlightX = 4;
 const CGFloat paddingHighlightY = 2;
 
