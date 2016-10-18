@@ -613,7 +613,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 - (NSArray*) validAttributesForMarkedText
 {
-  return nil;
+  return @[];
 }
 
 // End of the NSTextInputClient protocol adoption.
