@@ -4498,6 +4498,9 @@ void Editor::ButtonDownWithModifiers(Point pt, unsigned int curTime, int modifie
 		}
 	} else {	// Single click
 		if (inSelMargin) {
+			if (sel.IsRectangular() || (sel.Count() > 1)) {
+				sel.Clear();
+			}
 			sel.selType = Selection::selStream;
 			if (!shift) {
 				// Single click in margin: select whole line or only subline if word wrap is enabled
