@@ -197,29 +197,42 @@ static inline int IsAnyOtherIdentifier(char *s, int sLength) {
 	return(SCE_BAAN_DEFAULT);
 }
 
-static inline bool IsCommentLine(Sci_Position line, IDocument *pAccess) {
-	LexAccessor styler(pAccess);
+static bool IsCommentLine(Sci_Position line, LexAccessor &styler) {
 	Sci_Position pos = styler.LineStart(line);
 	Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
 	for (Sci_Position i = pos; i < eol_pos; i++) {
 		char ch = styler[i];
-		if (ch == '|')
+		int style = styler.StyleAt(i);
+		if (ch == '|' && style == SCE_BAAN_COMMENT)
 			return true;
-		else if (ch != ' ' && ch != '\t')
+		else if (!IsASpaceOrTab(ch))
 			return false;
 	}
 	return false;
 }
 
-static inline bool IsPreProcLine(Sci_Position line, IDocument *pAccess) {
-	LexAccessor styler(pAccess);
+static bool IsPreProcLine(Sci_Position line, LexAccessor &styler) {
 	Sci_Position pos = styler.LineStart(line);
 	Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
 	for (Sci_Position i = pos; i < eol_pos; i++) {
 		char ch = styler[i];
 		if (ch == '#' || ch == '|' || ch == '^')
 			return true;
-		else if (ch != ' ' && ch != '\t')
+		else if (!IsASpaceOrTab(ch))
+			return false;
+	}
+	return false;
+}
+
+static bool IsMainSectionLine(Sci_Position line, LexAccessor &styler) {
+	Sci_Position pos = styler.LineStart(line);
+	Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
+	for (Sci_Position i = pos; i < eol_pos; i++) {
+		char ch = styler[i];
+		int style = styler.StyleAt(i);
+		if (style == SCE_BAAN_WORD5)
+			return true;
+		else if (!IsASpaceOrTab(ch))
 			return false;
 	}
 	return false;
@@ -421,6 +434,14 @@ void SCI_METHOD LexerBaan::Lex(Sci_PositionU startPos, Sci_Position length, int 
 						lineHasFunction = true;
 					}
 				}
+				else if (lineHasDomain) {
+					sc.ChangeState(SCE_BAAN_DOMDEF);
+					lineHasDomain = false;
+				}
+				else if (lineHasFunction) {
+					sc.ChangeState(SCE_BAAN_FUNCDEF);
+					lineHasFunction = false;
+				}
 				else if ((keywords2.kwHasSection && (sc.ch == ':')) ? keywords2.Contains(s1) : keywords2.Contains(s)) {
 					sc.ChangeState(SCE_BAAN_WORD2);
 				}
@@ -444,14 +465,6 @@ void SCI_METHOD LexerBaan::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				}
 				else if ((keywords9.kwHasSection && (sc.ch == ':')) ? keywords9.Contains(s1) : keywords9.Contains(s)) {
 					sc.ChangeState(SCE_BAAN_WORD9);
-				}
-				else if (lineHasDomain) {
-					sc.ChangeState(SCE_BAAN_DOMDEF);
-					lineHasDomain = false;
-				}
-				else if (lineHasFunction) {
-					sc.ChangeState(SCE_BAAN_FUNCDEF);
-					lineHasFunction = false;
 				}
 				else if (lineHasPreProc) {
 					sc.ChangeState(SCE_BAAN_OBJECTDEF);
@@ -572,12 +585,16 @@ void SCI_METHOD LexerBaan::Lex(Sci_PositionU startPos, Sci_Position length, int 
 }
 
 void SCI_METHOD LexerBaan::Fold(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
+	if (!options.fold)
+		return;
 
 	char word[100];
+	int wordlen = 0;
 	bool foldStart = true;
 	bool foldNextSelect = true;
-	int wordlen = 0;
-
+	bool afterFunctionSection = false;
+	bool beforeDeclarationSection = false;
+	
 	std::string startTags[6] = { "for", "if", "on", "repeat", "select", "while" };
 	std::string endTags[6] = { "endcase", "endfor", "endif", "endselect", "endwhile", "until" };
 	std::string selectCloseTags[5] = { "selectdo", "selecteos", "selectempty", "selecterror", "endselect" };
@@ -586,44 +603,58 @@ void SCI_METHOD LexerBaan::Fold(Sci_PositionU startPos, Sci_Position length, int
 	Sci_PositionU endPos = startPos + length;
 	int visibleChars = 0;
 	Sci_Position lineCurrent = styler.GetLine(startPos);
-	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
+
+	// Backtrack to previous line in case need to fix its fold status
+	if (startPos > 0) {
+		if (lineCurrent > 0) {
+			lineCurrent--;
+			startPos = styler.LineStart(lineCurrent);
+		}
+	}
+
+	int levelPrev = SC_FOLDLEVELBASE;
+	if (lineCurrent > 0)
+		levelPrev = styler.LevelAt(lineCurrent - 1) >> 16;
 	int levelCurrent = levelPrev;
 	char chNext = styler[startPos];
-	int styleNext = styler.StyleAt(startPos);
 	int style = initStyle;
+	int styleNext = styler.StyleAt(startPos);
 
 	for (Sci_PositionU i = startPos; i < endPos; i++) {
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
-		int stylePrev = style;
 		style = styleNext;
 		styleNext = styler.StyleAt(i + 1);
+		int stylePrev = (i) ? styler.StyleAt(i - 1) : SCE_BAAN_DEFAULT;
 		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
+
+		// Comment folding
 		if (options.foldComment && style == SCE_BAAN_COMMENTDOC) {
 			if (style != stylePrev) {
 				levelCurrent++;
 			}
-			else if ((style != styleNext) && !atEOL) {
-				// Comments don't end at end of line and the next character may be unstyled.
+			else if (style != styleNext) {
 				levelCurrent--;
 			}
 		}
-		if (options.foldComment && atEOL && IsCommentLine(lineCurrent, pAccess)) {
-			if (!IsCommentLine(lineCurrent - 1, pAccess)
-				&& IsCommentLine(lineCurrent + 1, pAccess))
+		if (options.foldComment && atEOL && IsCommentLine(lineCurrent, styler)) {
+			if (!IsCommentLine(lineCurrent - 1, styler)
+				&& IsCommentLine(lineCurrent + 1, styler))
 				levelCurrent++;
-			else if (IsCommentLine(lineCurrent - 1, pAccess)
-				&& !IsCommentLine(lineCurrent + 1, pAccess))
+			else if (IsCommentLine(lineCurrent - 1, styler)
+				&& !IsCommentLine(lineCurrent + 1, styler))
 				levelCurrent--;
 		}
-		if (options.foldPreprocessor && atEOL && IsPreProcLine(lineCurrent, pAccess)) {
-			if (!IsPreProcLine(lineCurrent - 1, pAccess)
-				&& IsPreProcLine(lineCurrent + 1, pAccess))
+		// PreProcessor Folding
+		if (options.foldPreprocessor && atEOL && IsPreProcLine(lineCurrent, styler)) {
+			if (!IsPreProcLine(lineCurrent - 1, styler)
+				&& IsPreProcLine(lineCurrent + 1, styler))
 				levelCurrent++;
-			else if (IsPreProcLine(lineCurrent - 1, pAccess)
-				&& !IsPreProcLine(lineCurrent + 1, pAccess))
+			else if (IsPreProcLine(lineCurrent - 1, styler)
+				&& !IsPreProcLine(lineCurrent + 1, styler))
 				levelCurrent--;
 		}
+		//Syntax Folding
 		if (options.baanFoldSyntaxBased && (style == SCE_BAAN_OPERATOR)) {
 			if (ch == '{' || ch == '(') {
 				levelCurrent++;
@@ -632,6 +663,7 @@ void SCI_METHOD LexerBaan::Fold(Sci_PositionU startPos, Sci_Position length, int
 				levelCurrent--;
 			}
 		}
+		//Keywords Folding
 		if (options.baanFoldKeywordsBased && style == SCE_BAAN_WORD) {
 			word[wordlen++] = static_cast<char>(ToLowerCase(ch));
 			if (wordlen == 100) {                   // prevent overflow
@@ -690,8 +722,65 @@ void SCI_METHOD LexerBaan::Fold(Sci_PositionU startPos, Sci_Position length, int
 				}
 			}
 		}
+		// Main Section Foldings.
+		// One way of implementing Section Foldings, as there is no END markings of sections.
+		// first section ends on the previous line of next section.
+		// Re-written whole folding to accomodate this.
+		if (options.baanFoldKeywordsBased && atEOL) {
+			if (IsMainSectionLine(lineCurrent, styler)) {
+				if (levelCurrent < levelPrev)
+					--levelPrev;
+				for (Sci_Position j = styler.LineStart(lineCurrent); j < styler.LineStart(lineCurrent + 1) - 1; j++) {
+					if (IsASpaceOrTab(styler[j])) 
+						continue;
+					else if (styler.StyleAt(j) == SCE_BAAN_WORD5) {
+						if (styler.Match(j, "functions:")) {		
+							// Means functions: is the end of MainSections.
+							// Nothing to fold after this.
+							afterFunctionSection = true;
+							break;
+						}
+						else {
+							afterFunctionSection = false;
+							break;
+						}
+					}
+					else {
+						afterFunctionSection = false;
+						break;
+					}
+				}
+				if (!afterFunctionSection)
+					levelCurrent++;
+			}
+			else if (IsMainSectionLine(lineCurrent + 1, styler)) {
+				for (Sci_Position j = styler.LineStart(lineCurrent + 1); j < styler.LineStart(lineCurrent + 1 + 1) - 1; j++) {
+					if (IsASpaceOrTab(styler[j]))
+						continue;
+					else if (styler.StyleAt(j) == SCE_BAAN_WORD5) {
+						if (styler.Match(j, "declaration:")) {		
+							// Means declaration: is the start of MainSections.
+							// Nothing to fold before this.
+							beforeDeclarationSection = true;
+							break;
+						}
+						else {
+							beforeDeclarationSection = false;
+							break;
+						}
+					}
+					else {
+						beforeDeclarationSection = false;
+						break;
+					}
+				}
+				if (!beforeDeclarationSection)
+					levelCurrent--;
+			}
+		}
 		if (atEOL) {
 			int lev = levelPrev;
+			lev |= levelCurrent << 16;
 			if (visibleChars == 0 && options.foldCompact)
 				lev |= SC_FOLDLEVELWHITEFLAG;
 			if ((levelCurrent > levelPrev) && (visibleChars > 0))
@@ -706,7 +795,6 @@ void SCI_METHOD LexerBaan::Fold(Sci_PositionU startPos, Sci_Position length, int
 		if (!isspacechar(ch))
 			visibleChars++;
 	}
-	// Fill in the real level of the next line, keeping the current flags as they will be filled in later
 	int flagsNext = styler.LevelAt(lineCurrent) & ~SC_FOLDLEVELNUMBERMASK;
 	styler.SetLevel(lineCurrent, levelPrev | flagsNext);
 }
