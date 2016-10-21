@@ -44,6 +44,7 @@
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
+#include <gtk/gtk-a11y.h>
 
 // Windows headers
 #include <windows.h>
@@ -138,7 +139,9 @@
 #include "HanjaDic.h"
 
 // gtk
+#include "ScintillaGTK.h"
 #include "scintilla-marshal.h"
+#include "ScintillaGTKAccessible.h"
 #include "Converter.h"
 
 // cocoa
