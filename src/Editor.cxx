@@ -4499,6 +4499,7 @@ void Editor::ButtonDownWithModifiers(Point pt, unsigned int curTime, int modifie
 	} else {	// Single click
 		if (inSelMargin) {
 			if (sel.IsRectangular() || (sel.Count() > 1)) {
+				InvalidateWholeSelection();
 				sel.Clear();
 			}
 			sel.selType = Selection::selStream;
