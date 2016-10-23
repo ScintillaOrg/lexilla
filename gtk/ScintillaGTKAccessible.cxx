@@ -949,7 +949,7 @@ static gpointer scintilla_object_accessible_parent_class = NULL;
 
 
 // @p parent_type is only required on GTK 3.2 to 3.6, and only on the first call
-static GType scintilla_object_accessible_get_type(GType parent_type) {
+static GType scintilla_object_accessible_get_type(GType parent_type G_GNUC_UNUSED) {
 	static volatile gsize type_id_result = 0;
 
 	if (g_once_init_enter(&type_id_result)) {
@@ -1033,7 +1033,7 @@ static AtkObject *scintilla_object_accessible_new(GType parent_type, GObject *ob
 // @p widget the widget.
 // @p cache pointer to store the AtkObject between repeated calls.  Might or might not be filled.
 // @p widget_parent_class pointer to the widget's parent class (to chain up method calls).
-AtkObject *ScintillaGTKAccessible::WidgetGetAccessibleImpl(GtkWidget *widget, AtkObject **cache, gpointer widget_parent_class) {
+AtkObject *ScintillaGTKAccessible::WidgetGetAccessibleImpl(GtkWidget *widget, AtkObject **cache, gpointer widget_parent_class G_GNUC_UNUSED) {
 #if HAVE_GTK_A11Y_H // just instantiate the accessible
 	if (*cache == NULL) {
 		*cache = scintilla_object_accessible_new(0, G_OBJECT(widget));

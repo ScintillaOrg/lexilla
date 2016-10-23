@@ -451,7 +451,7 @@ public:
 
 }
 
-gint ScintillaGTK::FocusInThis(GtkWidget *widget) {
+gint ScintillaGTK::FocusInThis(GtkWidget *) {
 	try {
 		SetFocusState(true);
 		if (im_context != NULL) {
@@ -477,7 +477,7 @@ gint ScintillaGTK::FocusIn(GtkWidget *widget, GdkEventFocus * /*event*/) {
 	return sciThis->FocusInThis(widget);
 }
 
-gint ScintillaGTK::FocusOutThis(GtkWidget *widget) {
+gint ScintillaGTK::FocusOutThis(GtkWidget *) {
 	try {
 		SetFocusState(false);
 
@@ -2101,7 +2101,7 @@ gboolean ScintillaGTK::KeyRelease(GtkWidget *widget, GdkEventKey *event) {
 
 #if GTK_CHECK_VERSION(3,0,0)
 
-gboolean ScintillaGTK::DrawPreeditThis(GtkWidget *widget, cairo_t *cr) {
+gboolean ScintillaGTK::DrawPreeditThis(GtkWidget *, cairo_t *cr) {
 	try {
 		PreEditString pes(im_context);
 		PangoLayout *layout = gtk_widget_create_pango_layout(PWidget(wText), pes.str);
@@ -2123,7 +2123,7 @@ gboolean ScintillaGTK::DrawPreedit(GtkWidget *widget, cairo_t *cr, ScintillaGTK 
 
 #else
 
-gboolean ScintillaGTK::ExposePreeditThis(GtkWidget *widget, GdkEventExpose *ose) {
+gboolean ScintillaGTK::ExposePreeditThis(GtkWidget *widget, GdkEventExpose *) {
 	try {
 		PreEditString pes(im_context);
 		PangoLayout *layout = gtk_widget_create_pango_layout(PWidget(wText), pes.str);
@@ -3097,7 +3097,7 @@ void scintilla_release_resources(void) {
  * recognize gpointer-derived types. Note that SCNotificaiton
  * is always allocated on stack so copying is not appropriate. */
 static void *copy_(void *src) { return src; }
-static void free_(void *doc) { }
+static void free_(void *) { }
 
 GType scnotification_get_type(void) {
 	static gsize type_id = 0;

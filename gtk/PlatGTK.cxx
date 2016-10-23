@@ -550,7 +550,7 @@ static void PathRoundRectangle(cairo_t *context, double left, double top, double
 }
 
 void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
-		ColourDesired outline, int alphaOutline, int flags) {
+		ColourDesired outline, int alphaOutline, int /*flags*/) {
 	if (context && rc.Width() > 0) {
 		ColourDesired cdFill(fill.AsLong());
 		cairo_set_source_rgba(context,
