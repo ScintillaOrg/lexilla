@@ -537,6 +537,10 @@
 	Margin click to select line now clears rectangular and additional selections.
 	</li>
 	<li>
+	Fixed a NULL access bug on GTK+ where the scrollbars could be used during destruction.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1873/">Bug #1873</a>.
+	</li>
+	<li>
 	A potential bug on GTK+ fixed where asynchronous clipboard could be delivered after its
 	target Scintilla instance was destroyed.
 	</li>
