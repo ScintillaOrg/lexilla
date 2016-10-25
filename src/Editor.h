@@ -571,7 +571,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void AddStyledText(char *buffer, int appendLength);
 
 	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) = 0;
-	bool ValidMargin(uptr_t wParam);
+	bool ValidMargin(uptr_t wParam) const;
 	void StyleSetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 	sptr_t StyleGetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
