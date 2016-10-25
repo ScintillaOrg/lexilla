@@ -10,6 +10,10 @@
 namespace Scintilla {
 #endif
 
+#ifndef ATK_CHECK_VERSION
+# define ATK_CHECK_VERSION(x, y, z) 0
+#endif
+
 class ScintillaGTKAccessible {
 private:
 	GtkAccessible *accessible;
@@ -72,7 +76,9 @@ private:
 	gchar *GetTextAfterOffset(int charOffset, AtkTextBoundary boundaryType, int *startChar, int *endChar);
 	gchar *GetTextBeforeOffset(int charOffset, AtkTextBoundary boundaryType, int *startChar, int *endChar);
 	gchar *GetTextAtOffset(int charOffset, AtkTextBoundary boundaryType, int *startChar, int *endChar);
+#if ATK_CHECK_VERSION(2, 10, 0)
 	gchar *GetStringAtOffset(int charOffset, AtkTextGranularity granularity, int *startChar, int *endChar);
+#endif
 	gunichar GetCharacterAtOffset(int charOffset);
 	gint GetCharacterCount();
 	gint GetCaretOffset();
@@ -124,7 +130,9 @@ public:
 		static gchar *GetTextAfterOffset(AtkText *text, int offset, AtkTextBoundary boundary_type, int *start_offset, int *end_offset);
 		static gchar *GetTextBeforeOffset(AtkText *text, int offset, AtkTextBoundary boundary_type, int *start_offset, int *end_offset);
 		static gchar *GetTextAtOffset(AtkText *text, gint offset, AtkTextBoundary boundary_type, gint *start_offset, gint *end_offset);
+#if ATK_CHECK_VERSION(2, 10, 0)
 		static gchar *GetStringAtOffset(AtkText *text, gint offset, AtkTextGranularity granularity, gint *start_offset, gint *end_offset);
+#endif
 		static gunichar GetCharacterAtOffset(AtkText *text, gint offset);
 		static gint GetCharacterCount(AtkText *text);
 		static gint GetCaretOffset(AtkText *text);

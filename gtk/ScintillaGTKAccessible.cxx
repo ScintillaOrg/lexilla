@@ -53,6 +53,10 @@
 # include <gtk/gtk-a11y.h>
 #endif
 
+#if defined(__WIN32__) || defined(_MSC_VER)
+#include <windows.h>
+#endif
+
 // ScintillaGTK.h and stuff it needs
 #include "Platform.h"
 
@@ -350,6 +354,7 @@ gchar *ScintillaGTKAccessible::GetTextAtOffset(int charOffset,
 	return GetTextRangeUTF8(startByte, endByte);
 }
 
+#if ATK_CHECK_VERSION(2, 10, 0)
 gchar *ScintillaGTKAccessible::GetStringAtOffset(int charOffset,
 		AtkTextGranularity granularity, int *startChar, int *endChar) {
 	g_return_val_if_fail(charOffset >= 0, NULL);
@@ -380,6 +385,7 @@ gchar *ScintillaGTKAccessible::GetStringAtOffset(int charOffset,
 	CharacterRangeFromByteRange(startByte, endByte, startChar, endChar);
 	return GetTextRangeUTF8(startByte, endByte);
 }
+#endif
 
 gunichar ScintillaGTKAccessible::GetCharacterAtOffset(int charOffset) {
 	g_return_val_if_fail(charOffset >= 0, 0);
@@ -875,9 +881,11 @@ gchar *ScintillaGTKAccessible::AtkTextIface::GetTextBeforeOffset(AtkText *text, 
 gchar *ScintillaGTKAccessible::AtkTextIface::GetTextAtOffset(AtkText *text, gint offset, AtkTextBoundary boundary_type, gint *start_offset, gint *end_offset) {
 	WRAPPER_METHOD_BODY(text, GetTextAtOffset(offset, boundary_type, start_offset, end_offset), NULL)
 }
+#if ATK_CHECK_VERSION(2, 10, 0)
 gchar *ScintillaGTKAccessible::AtkTextIface::GetStringAtOffset(AtkText *text, gint offset, AtkTextGranularity granularity, gint *start_offset, gint *end_offset) {
 	WRAPPER_METHOD_BODY(text, GetStringAtOffset(offset, granularity, start_offset, end_offset), NULL)
 }
+#endif
 gunichar ScintillaGTKAccessible::AtkTextIface::GetCharacterAtOffset(AtkText *text, gint offset) {
 	WRAPPER_METHOD_BODY(text, GetCharacterAtOffset(offset), 0)
 }
