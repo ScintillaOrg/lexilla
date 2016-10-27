@@ -272,7 +272,7 @@ public:
 
 	virtual void Destroyed() {}
 
-	bool IsDestroyed() {
+	bool IsDestroyed() const {
 		return weakRef != 0;
 	}
 };
