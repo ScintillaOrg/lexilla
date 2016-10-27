@@ -630,6 +630,14 @@ size_t CaseConvertString(char *converted, size_t sizeConverted, const char *mixe
 	return pCaseConv->CaseConvertString(converted, sizeConverted, mixed, lenMixed);
 }
 
+std::string CaseConvertString(const std::string &s, enum CaseConversion conversion) {
+	std::string retMapped(s.length() * maxExpansionCaseConversion, 0);
+	size_t lenMapped = CaseConvertString(&retMapped[0], retMapped.length(), s.c_str(), s.length(),
+		conversion);
+	retMapped.resize(lenMapped);
+	return retMapped;
+}
+
 #ifdef SCI_NAMESPACE
 }
 #endif
