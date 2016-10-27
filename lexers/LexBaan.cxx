@@ -94,7 +94,7 @@ struct OptionSetBaan : public OptionSet<OptionsBaan> {
 			"Also folds declarations which are grouped together.");
 
 		DefineProperty("fold.baan.sections", &OptionsBaan::baanFoldSections,
-			"Set this property to 0 to disable folding of Main Sections.");
+			"Set this property to 0 to disable folding of Main Sections as well as Sub Sections.");
 
 		DefineProperty("lexer.baan.styling.within.preprocessor", &OptionsBaan::baanStylingWithinPreprocessor,
 			"For Baan code, determines whether all preprocessor code is styled in the "
@@ -235,16 +235,39 @@ static bool IsPreProcLine(Sci_Position line, LexAccessor &styler) {
 	return false;
 }
 
-static bool IsMainSectionLine(Sci_Position line, LexAccessor &styler) {
+static int mainOrSubSectionLine(Sci_Position line, LexAccessor &styler) {
 	Sci_Position pos = styler.LineStart(line);
 	Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
 	for (Sci_Position i = pos; i < eol_pos; i++) {
 		char ch = styler[i];
 		int style = styler.StyleAt(i);
-		if (style == SCE_BAAN_WORD5)
-			return true;
-		else if (!IsASpaceOrTab(ch))
-			return false;
+		if (style == SCE_BAAN_WORD5 || style == SCE_BAAN_WORD4)
+			return style;
+		else if (IsASpaceOrTab(ch))
+			continue;
+		else
+			break;
+	}
+	return 0;
+}
+
+static bool priorSectionIsSubSection(Sci_Position line, LexAccessor &styler){
+	while (line != 0) {
+		Sci_Position pos = styler.LineStart(line);
+		Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
+		for (Sci_Position i = pos; i < eol_pos; i++) {
+			char ch = styler[i];
+			int style = styler.StyleAt(i);
+			if (style == SCE_BAAN_WORD4)
+				return true;
+			else if (style == SCE_BAAN_WORD5)
+				return false;
+			else if (IsASpaceOrTab(ch))
+				continue;
+			else
+				break;
+		}
+		line--;
 	}
 	return false;
 }
@@ -593,7 +616,7 @@ void SCI_METHOD LexerBaan::Lex(Sci_PositionU startPos, Sci_Position length, int 
 				sc.SetState(SCE_BAAN_PREPROCESSOR);
 				word[0] = '\0';
 				wordlen = 0;
-				while (sc.More() && !IsASpace(sc.chNext)) {
+				while (sc.More() && !(IsASpace(sc.chNext) || IsAnOperator(sc.chNext))) {
 					sc.Forward();
 					wordlen++;
 				}
@@ -647,6 +670,8 @@ void SCI_METHOD LexerBaan::Fold(Sci_PositionU startPos, Sci_Position length, int
 	bool foldNextSelect = true;
 	bool afterFunctionSection = false;
 	bool beforeDeclarationSection = false;
+	int currLineStyle = 0;
+	int nextLineStyle = 0;
 
 	std::string startTags[6] = { "for", "if", "on", "repeat", "select", "while" };
 	std::string endTags[6] = { "endcase", "endfor", "endif", "endselect", "endwhile", "until" };
@@ -796,12 +821,14 @@ void SCI_METHOD LexerBaan::Fold(Sci_PositionU startPos, Sci_Position length, int
 				}
 			}
 		}
-		// Main Section Foldings.
+		// Section Foldings.
 		// One way of implementing Section Foldings, as there is no END markings of sections.
 		// first section ends on the previous line of next section.
 		// Re-written whole folding to accomodate this.
 		if (options.baanFoldSections && atEOL) {
-			if (IsMainSectionLine(lineCurrent, styler)) {
+			currLineStyle = mainOrSubSectionLine(lineCurrent, styler);
+			nextLineStyle = mainOrSubSectionLine(lineCurrent + 1, styler);
+			if (currLineStyle != 0 && currLineStyle != nextLineStyle) {
 				if (levelCurrent < levelPrev)
 					--levelPrev;
 				for (Sci_Position j = styler.LineStart(lineCurrent); j < styler.LineStart(lineCurrent + 1) - 1; j++) {
@@ -827,7 +854,7 @@ void SCI_METHOD LexerBaan::Fold(Sci_PositionU startPos, Sci_Position length, int
 				if (!afterFunctionSection)
 					levelCurrent++;
 			}
-			else if (IsMainSectionLine(lineCurrent + 1, styler)) {
+			else if (nextLineStyle != 0 && currLineStyle != nextLineStyle) {
 				for (Sci_Position j = styler.LineStart(lineCurrent + 1); j < styler.LineStart(lineCurrent + 1 + 1) - 1; j++) {
 					if (IsASpaceOrTab(styler[j]))
 						continue;
@@ -848,8 +875,13 @@ void SCI_METHOD LexerBaan::Fold(Sci_PositionU startPos, Sci_Position length, int
 						break;
 					}
 				}
-				if (!beforeDeclarationSection)
+				if (!beforeDeclarationSection) {
 					levelCurrent--;
+					if (nextLineStyle == SCE_BAAN_WORD5 && priorSectionIsSubSection(lineCurrent-1, styler))
+						// next levelCurrent--; is to unfold previous subsection fold.
+						// On reaching the next main section, the previous main as well sub section ends.
+						levelCurrent--;
+				}
 			}
 		}
 		if (atEOL) {
