@@ -1349,6 +1349,12 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 						// when there's a message posted.  So, several times a second, we stop and let
 						// the low priority events have a turn (after which the timer will fire again).
 
+						// Suppress a warning from Code Analysis that the GetTickCount function
+						// wraps after 49 days. The WM_TIMER will kick off another SC_WIN_IDLE
+						// after the wrap.
+#ifdef _MSC_VER
+#pragma warning(suppress: 28159)
+#endif
 						DWORD dwCurrent = GetTickCount();
 						DWORD dwStart = wParam ? static_cast<DWORD>(wParam) : dwCurrent;
 						const DWORD maxWorkTime = 50;
