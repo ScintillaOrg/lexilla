@@ -5582,8 +5582,9 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     <code>AddData</code> will return SC_STATUS_OK unless a failure, such as memory exhaustion occurs.
     If a failure occurs in <code>AddData</code> or in a file reading call then loading can be abandoned and the loader released with
     the <code>Release</code> call.
-    When the whole file has been read, the <code>ConvertToDocument</code> method should be called to produce a Scintilla
-    document pointer which can be used in the same way as a document pointer returned from
+    When the whole file has been read, <code>ConvertToDocument</code> should be called to produce a Scintilla
+    document pointer. The newly created document will have a reference count of 1 in the same way as a document pointer
+    returned from 
     <a class="seealso" href="#SCI_CREATEDOCUMENT">SCI_CREATEDOCUMENT</a>.
     There is no need to call <code>Release</code> after <code>ConvertToDocument</code>.</p>
 
