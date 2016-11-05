@@ -74,7 +74,8 @@ extern NSString *const SCIUpdateUINotification;
   NSTextInputClient,
   NSUserInterfaceValidations,
   NSDraggingSource,
-  NSDraggingDestination>
+  NSDraggingDestination,
+  NSAccessibilityStaticText>
 {
 @private
   ScintillaView* mOwner;

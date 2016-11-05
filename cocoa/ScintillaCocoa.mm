@@ -1689,6 +1689,79 @@ int ScintillaCocoa::TargetAsUTF8(char *text)
 
 //--------------------------------------------------------------------------------------------------
 
+// Returns the text in the range converted to an NSString.
+NSString *ScintillaCocoa::RangeTextAsString(NSRange rangePositions) const {
+  const std::string text = RangeText(static_cast<int>(rangePositions.location),
+				     static_cast<int>(NSMaxRange(rangePositions)));
+  if (IsUnicodeMode())
+  {
+    return [NSString stringWithUTF8String: text.c_str()];
+  }
+  else
+  {
+    // Need to convert
+    const CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
+							       vs.styles[STYLE_DEFAULT].characterSet);
+    CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
+						 reinterpret_cast<const UInt8 *>(text.c_str()),
+						 text.length(), encoding, false);
+
+    return (NSString *)cfsVal;
+  }
+}
+
+//--------------------------------------------------------------------------------------------------
+
+// Return character range of a line.
+NSRange ScintillaCocoa::RangeForVisibleLine(NSInteger lineVisible) {
+  const Range posRangeLine = RangeDisplayLine(static_cast<int>(lineVisible));
+  return CharactersFromPositions(NSMakeRange(posRangeLine.First(),
+					     posRangeLine.Last() - posRangeLine.First()));
+}
+
+//--------------------------------------------------------------------------------------------------
+
+// Returns visible line number of a text position in characters.
+NSInteger ScintillaCocoa::VisibleLineForIndex(NSInteger index) {
+  const NSRange rangePosition = PositionsFromCharacters(NSMakeRange(index, 0));
+  const int lineVisible = DisplayFromPosition(static_cast<int>(rangePosition.location));
+  return lineVisible;
+}
+
+//--------------------------------------------------------------------------------------------------
+
+// Returns a rectangle that frames the range for use by the VoiceOver cursor.
+NSRect ScintillaCocoa::FrameForRange(NSRange rangeCharacters) {
+  const NSRange posRange = PositionsFromCharacters(rangeCharacters);
+
+  NSUInteger rangeEnd = NSMaxRange(posRange);
+  const bool endsWithLineEnd = rangeCharacters.length &&
+    (pdoc->GetColumn(static_cast<int>(rangeEnd)) == 0);
+
+  Point ptStart = LocationFromPosition(static_cast<int>(posRange.location));
+  const PointEnd peEndRange = static_cast<PointEnd>(peSubLineEnd|peLineEnd);
+  Point ptEnd = LocationFromPosition(static_cast<int>(rangeEnd), peEndRange);
+
+  NSRect rect = NSMakeRect(ptStart.x, ptStart.y,
+			   ptEnd.x - ptStart.x,
+			   ptEnd.y - ptStart.y);
+
+  rect.size.width += 2;	// Shows the last character better
+  if (endsWithLineEnd) {
+    // Add a block to the right to indicate a line end is selected
+    rect.size.width += 20;
+  }
+
+  rect.size.height += vs.lineHeight;
+
+  // Adjust for margin and scroll
+  rect.origin.x = rect.origin.x - vs.textStart + vs.fixedColumnWidth;
+
+  return rect;
+}
+
+//--------------------------------------------------------------------------------------------------
+
 // Translates a UTF8 string into the document encoding.
 // Return the length of the result in bytes.
 int ScintillaCocoa::EncodedFromUTF8(char *utf8, char *encoded) const
@@ -2013,6 +2086,15 @@ void ScintillaCocoa::NotifyParent(SCNotification scn)
     notifyProc(notifyObj, WM_NOTIFY, GetCtrlID(), (uintptr_t) &scn);
   if (delegate)
     [delegate notification:&scn];
+  if (scn.nmhdr.code == SCN_UPDATEUI) {
+    NSView *content = ContentView();
+    if (scn.updated & SC_UPDATE_CONTENT) {
+      NSAccessibilityPostNotification(content, NSAccessibilityValueChangedNotification);
+    }
+    if (scn.updated & SC_UPDATE_SELECTION) {
+      NSAccessibilityPostNotification(content, NSAccessibilitySelectedTextChangedNotification);
+    }
+  }
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -2217,12 +2299,12 @@ int ScintillaCocoa::InsertText(NSString* input)
 /**
  * Convert from a range of characters to a range of bytes.
  */
-NSRange ScintillaCocoa::PositionsFromCharacters(NSRange range) const
+NSRange ScintillaCocoa::PositionsFromCharacters(NSRange rangeCharacters) const
 {
-  long start = pdoc->GetRelativePositionUTF16(0, static_cast<int>(range.location));
+  long start = pdoc->GetRelativePositionUTF16(0, static_cast<int>(rangeCharacters.location));
   if (start == INVALID_POSITION)
     start = pdoc->Length();
-  long end = pdoc->GetRelativePositionUTF16(static_cast<int>(start), static_cast<int>(range.length));
+  long end = pdoc->GetRelativePositionUTF16(static_cast<int>(start), static_cast<int>(rangeCharacters.length));
   if (end == INVALID_POSITION)
     end = pdoc->Length();
   return NSMakeRange(start, end - start);
@@ -2233,10 +2315,11 @@ NSRange ScintillaCocoa::PositionsFromCharacters(NSRange range) const
 /**
  * Convert from a range of characters from a range of bytes.
  */
-NSRange ScintillaCocoa::CharactersFromPositions(NSRange range) const
+NSRange ScintillaCocoa::CharactersFromPositions(NSRange rangePositions) const
 {
-  const long start = pdoc->CountUTF16(0, static_cast<int>(range.location));
-  const long len = pdoc->CountUTF16(static_cast<int>(range.location), static_cast<int>(NSMaxRange(range)));
+  const long start = pdoc->CountUTF16(0, static_cast<int>(rangePositions.location));
+  const long len = pdoc->CountUTF16(static_cast<int>(rangePositions.location),
+				    static_cast<int>(NSMaxRange(rangePositions)));
   return NSMakeRange(start, len);
 }
 

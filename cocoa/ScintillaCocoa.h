@@ -196,8 +196,12 @@ public:
   virtual void IdleWork();
   virtual void QueueIdleWork(WorkNeeded::workItems items, int upTo);
   int InsertText(NSString* input);
-  NSRange PositionsFromCharacters(NSRange range) const;
-  NSRange CharactersFromPositions(NSRange range) const;
+  NSRange PositionsFromCharacters(NSRange rangeCharacters) const;
+  NSRange CharactersFromPositions(NSRange rangePositions) const;
+  NSString *RangeTextAsString(NSRange rangePositions) const;
+  NSInteger VisibleLineForIndex(NSInteger index);
+  NSRange RangeForVisibleLine(NSInteger lineVisible);
+  NSRect FrameForRange(NSRange rangeCharacters);
   void SelectOnlyMainSelection();
   void ConvertSelectionVirtualSpace();
   bool ClearAllSelections();

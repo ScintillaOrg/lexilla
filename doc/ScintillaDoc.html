@@ -347,22 +347,24 @@
         <tr>
           <td>o <a class="toc" href="#Notifications">Notifications</a></td>
 
-          <td>o <a class="toc" href="#Images">Images</a></td>
+          <td>o <a class="toc" href="#Accessibility">Accessibility</a></td>
 
-          <td>o <a class="toc" href="#GTK">GTK+</a></td>
+          <td>o <a class="toc" href="#Images">Images</a></td>
 
         </tr>
 
         <tr>
+          <td>o <a class="toc" href="#GTK">GTK+</a></td>
+
           <td>o <a class="toc" href="#ProvisionalMessages"><span class="provisional">Provisional messages</span></a></td>
 
           <td>o <a class="toc" href="#DeprecatedMessages">Deprecated messages</a></td>
 
+        </tr>
+        <tr>
           <td>o <a class="toc" href="#EditMessagesNeverSupportedByScintilla">Edit messages never
           supported by Scintilla</a></td>
 
-        </tr>
-        <tr>
           <td>o <a class="toc" href="#BuildingScintilla">Building Scintilla</a></td>
 
         </tr>
@@ -7671,6 +7673,15 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     <code>
      <a class="jump" href="#SCN_AUTOCSELECTION">SCN_AUTOCSELECTION</a></code>
      notification.</p>
+
+    <h2 id="Accessibility">Accessibility</h2>
+
+    <p>Scintilla supports some platform accessibility features.
+    This support differs between platforms.
+    On GTK+ and Cocoa the platform accessibility APIs are implemented sufficiently to
+    make screen readers work.
+    On Win32, the system caret is manipulated to help screen readers.
+    </p>
 
     <h2 id="Images">Images</h2>
 
