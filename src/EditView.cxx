@@ -596,24 +596,54 @@ void EditView::LayoutLine(const EditModel &model, int line, Surface *surface, co
 	}
 }
 
-Point EditView::LocationFromPosition(Surface *surface, const EditModel &model, SelectionPosition pos, int topLine, const ViewStyle &vs) {
+Point EditView::LocationFromPosition(Surface *surface, const EditModel &model, SelectionPosition pos, int topLine,
+				     const ViewStyle &vs, PointEnd pe) {
 	Point pt;
 	if (pos.Position() == INVALID_POSITION)
 		return pt;
-	const int line = model.pdoc->LineFromPosition(pos.Position());
-	const int lineVisible = model.cs.DisplayFromDoc(line);
-	//Platform::DebugPrintf("line=%d\n", line);
-	AutoLineLayout ll(llc, RetrieveLineLayout(line, model));
+	int lineDoc = model.pdoc->LineFromPosition(pos.Position());
+	int posLineStart = model.pdoc->LineStart(lineDoc);
+	if ((pe & peLineEnd) && (lineDoc > 0) && (pos.Position() == posLineStart)) {
+		// Want point at end of first line
+		lineDoc--;
+		posLineStart = model.pdoc->LineStart(lineDoc);
+	}
+	const int lineVisible = model.cs.DisplayFromDoc(lineDoc);
+	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc, model));
 	if (surface && ll) {
-		const int posLineStart = model.pdoc->LineStart(line);
-		LayoutLine(model, line, surface, vs, ll, model.wrapWidth);
+		LayoutLine(model, lineDoc, surface, vs, ll, model.wrapWidth);
 		const int posInLine = pos.Position() - posLineStart;
-		pt = ll->PointFromPosition(posInLine, vs.lineHeight);
+		pt = ll->PointFromPosition(posInLine, vs.lineHeight, pe);
 		pt.y += (lineVisible - topLine) * vs.lineHeight;
 		pt.x += vs.textStart - model.xOffset;
 	}
 	pt.x += pos.VirtualSpace() * vs.styles[ll->EndLineStyle()].spaceWidth;
 	return pt;
+}
+
+Range EditView::RangeDisplayLine(Surface *surface, const EditModel &model, int lineVisible, const ViewStyle &vs) {
+	Range rangeSubLine = Range(0,0);
+	if (lineVisible < 0) {
+		return rangeSubLine;
+	}
+	const int lineDoc = model.cs.DocFromDisplay(lineVisible);
+	const int positionLineStart = model.pdoc->LineStart(lineDoc);
+	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc, model));
+	if (surface && ll) {
+		LayoutLine(model, lineDoc, surface, vs, ll, model.wrapWidth);
+		const int lineStartSet = model.cs.DisplayFromDoc(lineDoc);
+		const int subLine = lineVisible - lineStartSet;
+		if (subLine < ll->lines) {
+			rangeSubLine = ll->SubLineRange(subLine);
+			if (subLine == ll->lines-1) {
+				rangeSubLine.end = model.pdoc->LineStart(lineDoc + 1) -
+					positionLineStart;
+			}
+		}
+	}
+	rangeSubLine.start += positionLineStart;
+	rangeSubLine.end += positionLineStart;
+	return rangeSubLine;
 }
 
 SelectionPosition EditView::SPositionFromLocation(Surface *surface, const EditModel &model, Point pt, bool canReturnInvalid, bool charPosition, bool virtualSpace, const ViewStyle &vs) {

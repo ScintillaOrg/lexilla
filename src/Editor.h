@@ -285,8 +285,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int LinesToScroll() const;
 	int MaxScrollPos() const;
 	SelectionPosition ClampPositionIntoDocument(SelectionPosition sp) const;
-	Point LocationFromPosition(SelectionPosition pos);
-	Point LocationFromPosition(int pos);
+	Point LocationFromPosition(SelectionPosition pos, PointEnd pe=peDefault);
+	Point LocationFromPosition(int pos, PointEnd pe=peDefault);
 	int XFromPosition(int pos);
 	int XFromPosition(SelectionPosition sp);
 	SelectionPosition SPositionFromLocation(Point pt, bool canReturnInvalid=false, bool charPosition=false, bool virtualSpace=true);
@@ -465,6 +465,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	SelectionPosition PositionUpOrDown(SelectionPosition spStart, int direction, int lastX);
 	void CursorUpOrDown(int direction, Selection::selTypes selt);
 	void ParaUpOrDown(int direction, Selection::selTypes selt);
+	Range RangeDisplayLine(int lineVisible);
 	int StartEndDisplayLine(int pos, bool start);
 	int VCHomeDisplayPosition(int position);
 	int VCHomeWrapPosition(int position);

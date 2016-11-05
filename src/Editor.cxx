@@ -363,14 +363,14 @@ SelectionPosition Editor::ClampPositionIntoDocument(SelectionPosition sp) const 
 	}
 }
 
-Point Editor::LocationFromPosition(SelectionPosition pos) {
+Point Editor::LocationFromPosition(SelectionPosition pos, PointEnd pe) {
 	RefreshStyleData();
 	AutoSurface surface(this);
-	return view.LocationFromPosition(surface, *this, pos, topLine, vs);
+	return view.LocationFromPosition(surface, *this, pos, topLine, vs, pe);
 }
 
-Point Editor::LocationFromPosition(int pos) {
-	return LocationFromPosition(SelectionPosition(pos));
+Point Editor::LocationFromPosition(int pos, PointEnd pe) {
+	return LocationFromPosition(SelectionPosition(pos), pe);
 }
 
 int Editor::XFromPosition(int pos) {
@@ -3148,6 +3148,12 @@ void Editor::ParaUpOrDown(int direction, Selection::selTypes selt) {
 			}
 		}
 	} while (!cs.GetVisible(lineDoc));
+}
+
+Range Editor::RangeDisplayLine(int lineVisible) {
+	RefreshStyleData();
+	AutoSurface surface(this);
+	return view.RangeDisplayLine(surface, *this, lineVisible, vs);
 }
 
 int Editor::StartEndDisplayLine(int pos, bool start) {
