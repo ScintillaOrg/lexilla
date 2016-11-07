@@ -78,11 +78,6 @@
 
 #include "Converter.h"
 
-#if defined(__clang__)
-// Clang 3.0 incorrectly displays  sentinel warnings. Fixed by clang 3.1.
-#pragma GCC diagnostic ignored "-Wsentinel"
-#endif
-
 #if GTK_CHECK_VERSION(2,20,0)
 #define IS_WIDGET_REALIZED(w) (gtk_widget_get_realized(GTK_WIDGET(w)))
 #define IS_WIDGET_MAPPED(w) (gtk_widget_get_mapped(GTK_WIDGET(w)))
