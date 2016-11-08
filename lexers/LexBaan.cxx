@@ -50,6 +50,7 @@ struct OptionsBaan {
 	bool baanFoldSyntaxBased;
 	bool baanFoldKeywordsBased;
 	bool baanFoldSections;
+	bool baanFoldInnerLevel;
 	bool baanStylingWithinPreprocessor;
 	OptionsBaan() {
 		fold = false;
@@ -59,6 +60,7 @@ struct OptionsBaan {
 		baanFoldSyntaxBased = false;
 		baanFoldKeywordsBased = false;
 		baanFoldSections = false;
+		baanFoldInnerLevel = false;
 		baanStylingWithinPreprocessor = false;
 	}
 };
@@ -95,6 +97,10 @@ struct OptionSetBaan : public OptionSet<OptionsBaan> {
 
 		DefineProperty("fold.baan.sections", &OptionsBaan::baanFoldSections,
 			"Set this property to 0 to disable folding of Main Sections as well as Sub Sections.");
+
+		DefineProperty("fold.baan.inner.level", &OptionsBaan::baanFoldInnerLevel,
+			"Set this property to 1 to enable folding of inner levels of select statements."
+			"Disabled by default. case and if statements are also eligible" );
 
 		DefineProperty("lexer.baan.styling.within.preprocessor", &OptionsBaan::baanStylingWithinPreprocessor,
 			"For Baan code, determines whether all preprocessor code is styled in the "
@@ -299,6 +305,24 @@ static bool IsDeclarationLine(Sci_Position line, LexAccessor &styler) {
 				return false;
 		}
 		else if (!IsASpaceOrTab(ch))
+			return false;
+	}
+	return false;
+}
+
+static bool IsInnerLevelFold(Sci_Position line, LexAccessor &styler) {
+	Sci_Position pos = styler.LineStart(line);
+	Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
+	for (Sci_Position i = pos; i < eol_pos; i++) {
+		char ch = styler[i];
+		int style = styler.StyleAt(i);
+		if (style == SCE_BAAN_WORD && (styler.Match(i, "else" ) || styler.Match(i, "case")
+			|| styler.Match(i, "default") || styler.Match(i, "selectdo") || styler.Match(i, "selecteos")
+			|| styler.Match(i, "selectempty") || styler.Match(i, "selecterror")))
+			return true;
+		else if (IsASpaceOrTab(ch))
+			continue;
+		else
 			return false;
 	}
 	return false;
@@ -819,6 +843,17 @@ void SCI_METHOD LexerBaan::Fold(Sci_PositionU startPos, Sci_Position length, int
 						}
 					}
 				}
+			}
+		}
+		// Fold inner level of if/select/case statements
+		if (options.baanFoldInnerLevel && atEOL) {
+			bool currLineInnerLevel = IsInnerLevelFold(lineCurrent, styler);
+			bool nextLineInnerLevel = IsInnerLevelFold(lineCurrent + 1, styler);
+			if (currLineInnerLevel && currLineInnerLevel != nextLineInnerLevel) {
+				levelCurrent++;
+			}
+			else if (nextLineInnerLevel && nextLineInnerLevel != currLineInnerLevel) {
+				levelCurrent--;
 			}
 		}
 		// Section Foldings.
