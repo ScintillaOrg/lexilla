@@ -130,6 +130,8 @@ extern NSString *const SCIUpdateUINotification;
 - (void) suspendDrawing: (BOOL) suspend;
 - (void) notification: (Scintilla::SCNotification*) notification;
 
+- (void) updateIndicatorIME;
+
 // Scroller handling
 - (void) setMarginWidth: (int) width;
 - (SCIContentView*) content;

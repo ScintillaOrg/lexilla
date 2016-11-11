@@ -1386,6 +1386,21 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Setup a special indicator used in the editor to provide visual feedback for
+ * input composition, depending on language, keyboard etc.
+ */
+- (void) updateIndicatorIME
+{
+  [self setColorProperty: SCI_INDICSETFORE parameter: INDIC_IME fromHTML: @"#FF0000"];
+  const bool drawInBackground = [self message: SCI_GETPHASESDRAW] != 0;
+  [self setGeneralProperty: SCI_INDICSETUNDER parameter: INDIC_IME value: drawInBackground];
+  [self setGeneralProperty: SCI_INDICSETSTYLE parameter: INDIC_IME value: INDIC_PLAIN];
+  [self setGeneralProperty: SCI_INDICSETALPHA parameter: INDIC_IME value: 100];
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Initialization of the view. Used to setup a few other things we need.
  */
 - (id) initWithFrame: (NSRect) frame
@@ -1424,12 +1439,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
     // which require our attention.
     mBackend->SetDelegate(self);
 
-    // Setup a special indicator used in the editor to provide visual feedback for
-    // input composition, depending on language, keyboard etc.
-    [self setColorProperty: SCI_INDICSETFORE parameter: INDIC_IME fromHTML: @"#FF0000"];
-    [self setGeneralProperty: SCI_INDICSETUNDER parameter: INDIC_IME value: 1];
-    [self setGeneralProperty: SCI_INDICSETSTYLE parameter: INDIC_IME value: INDIC_PLAIN];
-    [self setGeneralProperty: SCI_INDICSETALPHA parameter: INDIC_IME value: 100];
+    [self updateIndicatorIME];
 
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
     [center addObserver:self

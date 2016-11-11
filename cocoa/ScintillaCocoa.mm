@@ -894,6 +894,12 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
         HideFindIndicator();
         return 0;
 
+      case SCI_SETPHASESDRAW: {
+          sptr_t r = ScintillaBase::WndProc(iMessage, wParam, lParam);
+          [ContentView().owner updateIndicatorIME];
+          return r;
+        }
+
       default:
         sptr_t r = ScintillaBase::WndProc(iMessage, wParam, lParam);
 
