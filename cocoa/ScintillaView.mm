@@ -365,6 +365,10 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 - (NSAttributedString *)attributedSubstringForProposedRange:(NSRange)aRange actualRange:(NSRangePointer)actualRange
 {
+  const NSInteger lengthCharacters = self.accessibilityNumberOfCharacters;
+  if (aRange.location > lengthCharacters) {
+    return nil;
+  }
   const NSRange posRange = mOwner.backend->PositionsFromCharacters(aRange);
   // The backend validated aRange and may have removed characters beyond the end of the document.
   const NSRange charRange = mOwner.backend->CharactersFromPositions(posRange);
@@ -505,9 +509,11 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 - (NSRange) selectedRange
 {
-  const long positionBegin = [mOwner message: SCI_GETSELECTIONSTART];
-  const long positionEnd = [mOwner message: SCI_GETSELECTIONEND];
-  NSRange posRangeSel = NSMakeRange(positionBegin, positionEnd-positionBegin);
+  const NSRange posRangeSel = [mOwner selectedRangePositions];
+  if (posRangeSel.length == 0)
+  {
+    return NSMakeRange(NSNotFound, 0);
+  }
   return mOwner.backend->CharactersFromPositions(posRangeSel);
 }
 
@@ -571,7 +577,8 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
       }
       // Ensure only a single selection.
       mOwner.backend->SelectOnlyMainSelection();
-      replacementRange = [self selectedRange];
+      const NSRange posRangeSel = [mOwner selectedRangePositions];
+      replacementRange = mOwner.backend->CharactersFromPositions(posRangeSel);
     }
   }
 
@@ -1990,6 +1997,21 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 {
   return [mContent selectedRange];
 }
+
+//--------------------------------------------------------------------------------------------------
+
+/**
+ * Return the main selection as an NSRange of positions (not characters).
+ * Unlike selectedRange, this can return empty ranges inside the document.
+ */
+
+- (NSRange) selectedRangePositions
+{
+  const sptr_t positionBegin = [self message: SCI_GETSELECTIONSTART];
+  const sptr_t positionEnd = [self message: SCI_GETSELECTIONEND];
+  return NSMakeRange(positionBegin, positionEnd-positionBegin);
+}
+
 
 //--------------------------------------------------------------------------------------------------
 

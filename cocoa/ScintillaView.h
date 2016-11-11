@@ -142,6 +142,7 @@ extern NSString *const SCIUpdateUINotification;
 - (void) setEditable: (BOOL) editable;
 - (BOOL) isEditable;
 - (NSRange) selectedRange;
+- (NSRange) selectedRangePositions;
 
 - (NSString*) selectedString;
 
