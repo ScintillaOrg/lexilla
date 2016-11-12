@@ -1,3 +1,7 @@
+# Build gir and test
+# For Ubuntu, these may be needed:
+#     apt-get install gobject-introspection
+#     apt-get install libgirepository1.0-dev
 all: Scintilla-0.1.typelib
 
 ifdef GTK3
@@ -38,7 +42,7 @@ Scintilla-0.1.typelib: Scintilla-0.1.gir
 	$(GI_COMPILER) $^ -o $@
 
 clean:
-	rm -f libscintilla.so Scintilla-0.1.gir Scintilla-0.1.typelib
+	rm -f libscintilla.so Scintilla-0.1.gir Scintilla-0.1.typelib Scintilla-filtered.h
 	$(MAKE) -C ../../gtk clean
 
 test: Scintilla-0.1.gir Scintilla-0.1.typelib
