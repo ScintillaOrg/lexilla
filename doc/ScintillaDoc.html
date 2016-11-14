@@ -2107,6 +2107,8 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_SETWHITESPACESIZE">SCI_SETWHITESPACESIZE(int
     size)</a><br />
      <a class="message" href="#SCI_GETWHITESPACESIZE">SCI_GETWHITESPACESIZE &rarr; int</a><br />
+     <a class="message" href="#SCI_SETTABDRAWMODE">SCI_SETTABDRAWMODE(int tabDrawMode)</a><br />
+     <a class="message" href="#SCI_GETTABDRAWMODE">SCI_GETTABDRAWMODE &rarr; int</a><br />
      <a class="message" href="#SCI_SETEXTRAASCENT">SCI_SETEXTRAASCENT(int extraAscent)</a><br />
      <a class="message" href="#SCI_GETEXTRAASCENT">SCI_GETEXTRAASCENT &rarr; int</a><br />
      <a class="message" href="#SCI_SETEXTRADESCENT">SCI_SETEXTRADESCENT(int extraDescent)</a><br />
@@ -2173,6 +2175,33 @@ struct Sci_TextToFind {
      <code>SCI_SETWHITESPACESIZE</code> sets the size of the dots used for mark space characters.
      The <code>SCI_GETWHITESPACESIZE</code> message retrieves the current size.
     </p>
+
+    <p><b id="SCI_SETTABDRAWMODE">SCI_SETTABDRAWMODE(int tabDrawMode)</b><br />
+     <b id="SCI_GETTABDRAWMODE">SCI_GETTABDRAWMODE &rarr; int</b><br />
+    These two messages get and set how tab characters are drawn when white space is visible.
+    The <code class="parameter">tabDrawMode</code> argument can be one of:</p>
+
+    <table cellpadding="1" cellspacing="2" border="0" summary="White space policy">
+      <tbody valign="top">
+        <tr>
+          <th align="left"><code>SCTD_LONGARROW</code></th>
+
+          <td>0</td>
+
+          <td>The default mode of an arrow stretching until the tabstop.</td>
+        </tr>
+
+        <tr>
+          <th align="left"><code>SCTD_STRIKEOUT</code></th>
+
+          <td>1</td>
+
+          <td>A horizontal line stretching until the tabstop.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>The effect of using any other <code class="parameter">tabDrawMode</code> value is undefined.</p>
 
     <p>
      <b id="SCI_SETEXTRAASCENT">SCI_SETEXTRAASCENT(int extraAscent)</b><br />
