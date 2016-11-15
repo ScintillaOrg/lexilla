@@ -7853,23 +7853,13 @@ EM_FORMATRANGE
     <code>INCLUDE_DEPRECATED_FEATURES</code> in <code>Scintilla.h</code>. To ensure future
     compatibility you should change them as indicated.</p>
 
-    <code><a class="message" href="#SCI_SETUSEPALETTE">SCI_SETUSEPALETTE(bool usePalette)</a><br />
-     <a class="message" href="#SCI_GETUSEPALETTE">SCI_GETUSEPALETTE &rarr; bool</a><br />
+    <code>
      <a class="message" href="#SCI_SETKEYSUNICODE">SCI_SETKEYSUNICODE(bool keysUnicode)</a><br />
      <a class="message" href="#SCI_GETKEYSUNICODE">SCI_GETKEYSUNICODE &rarr; bool</a><br />
      <a class="message" href="#SCI_SETSTYLEBITS">SCI_SETSTYLEBITS(int bits)</a><br />
      <a class="message" href="#SCI_GETSTYLEBITS">SCI_GETSTYLEBITS &rarr; int</a><br />
      <a class="message" href="#SCI_GETSTYLEBITSNEEDED">SCI_GETSTYLEBITSNEEDED &rarr; int</a><br />
     </code>
-
-    <p><b id="SC_CP_DBCS">SC_CP_DBCS</b> Deprecated<br />
-     This was used to set a DBCS (Double Byte Character Set) mode on GTK+.
-     An explicit DBCS code page should be used when calling <a class="seealso" href="#SCI_SETCODEPAGE">SCI_SETCODEPAGE</a></p>
-
-    <p><b id="SCI_SETUSEPALETTE">SCI_SETUSEPALETTE(bool usePalette)</b> Deprecated<br />
-    <b id="SCI_GETUSEPALETTE">SCI_GETUSEPALETTE &rarr; bool</b> Deprecated<br />
-     Scintilla no longer supports palette mode. The last version to support palettes was 2.29.
-     Any calls to these methods should be removed.</p>
 
     <p><b id="SCI_SETKEYSUNICODE">SCI_SETKEYSUNICODE(bool keysUnicode)</b> Deprecated<br />
      <b id="SCI_GETKEYSUNICODE">SCI_GETKEYSUNICODE &rarr; bool</b> Deprecated<br />
@@ -7886,6 +7876,19 @@ EM_FORMATRANGE
      Any use of these symbols should be removed and replaced with <a href="#Indicators">standard indicators</a>.
     <code>SCI_GETSTYLEBITS</code> and <code>SCI_GETSTYLEBITSNEEDED</code> always return 8,
     indicating that 8 bits are used for styling and there are 256 styles.</p>
+    
+    <h3 id="RemovedMessages">Features that have been removed</h2>
+
+    <p>These features have now been removed completely.</p>
+
+    <p><b id="SC_CP_DBCS">SC_CP_DBCS</b> Removed<br />
+     This was used to set a DBCS (Double Byte Character Set) mode on GTK+.
+     An explicit DBCS code page should be used when calling <a class="seealso" href="#SCI_SETCODEPAGE">SCI_SETCODEPAGE</a></p>
+
+    <p><b id="SCI_SETUSEPALETTE">SCI_SETUSEPALETTE(bool usePalette)</b> Removed<br />
+    <b id="SCI_GETUSEPALETTE">SCI_GETUSEPALETTE &rarr; bool</b> Removed<br />
+     Scintilla no longer supports palette mode. The last version to support palettes was 2.29.
+     Any calls to these methods must be removed.</p>
 
     <h2 id="EditMessagesNeverSupportedByScintilla">Edit messages never supported by Scintilla</h2>
 <pre>
