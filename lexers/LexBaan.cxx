@@ -398,7 +398,7 @@ public:
 		return osBaan.DescribeProperty(name);
 	}
 
-	int SCI_METHOD PropertySet(const char *key, const char *val);
+	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val);
 
 	const char * SCI_METHOD DescribeWordListSets() {
 		return osBaan.DescribeWordListSets();
