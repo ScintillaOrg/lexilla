@@ -524,6 +524,16 @@
 	Released 16 October 2016.
 	</li>
 	<li>
+	Structure names in Scintilla.h without prefixes are deprecated and will now only
+	be usable with INCLUDE_DEPRECATED_FEATURES defined.<br />
+	Use the newer names with the "Sci_" prefix:<br />
+	CharacterRange &rarr; Sci_CharacterRange<br />
+	TextRange &rarr; Sci_TextRange<br />
+	TextToFind &rarr; Sci_TextToFind<br />
+	RangeToFormat &rarr; Sci_RangeToFormat<br />
+	NotifyHeader &rarr; Sci_NotifyHeader
+	</li>
+	<li>
 	Accessibility support allowing screen readers to work added on GTK+ and Cocoa.
 	</li>
 	<li>

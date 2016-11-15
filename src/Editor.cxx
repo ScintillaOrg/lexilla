@@ -3932,7 +3932,7 @@ CaseFolder *Editor::CaseFolderForEncoding() {
 long Editor::FindText(
     uptr_t wParam,		///< Search modes : @c SCFIND_MATCHCASE, @c SCFIND_WHOLEWORD,
     ///< @c SCFIND_WORDSTART, @c SCFIND_REGEXP or @c SCFIND_POSIX.
-    sptr_t lParam) {	///< @c TextToFind structure: The text to search for in the given range.
+    sptr_t lParam) {	///< @c Sci_TextToFind structure: The text to search for in the given range.
 
 	Sci_TextToFind *ft = reinterpret_cast<Sci_TextToFind *>(lParam);
 	int lengthFound = istrlen(ft->lpstrText);
