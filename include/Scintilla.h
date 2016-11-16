@@ -11,8 +11,6 @@
 #ifndef SCINTILLA_H
 #define SCINTILLA_H
 
-#include "Sci_Position.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -28,19 +26,20 @@ int Scintilla_LinkLexers(void);
 }
 #endif
 
-/* Here should be placed typedefs for uptr_t, an unsigned integer type large enough to
- * hold a pointer and sptr_t, a signed integer large enough to hold a pointer.
- * May need to be changed for 64 bit platforms. */
-#if defined(_WIN32)
-#include <basetsd.h>
-#endif
-#ifdef MAXULONG_PTR
-typedef ULONG_PTR uptr_t;
-typedef LONG_PTR sptr_t;
+// Include header that defines basic numeric types.
+#if defined(_MSC_VER)
+// Older releases of MSVC did not have stdint.h.
+#include <stddef.h>
 #else
-typedef unsigned long uptr_t;
-typedef long sptr_t;
+#include <stdint.h>
 #endif
+
+// Define uptr_t, an unsigned integer type large enough to hold a pointer.
+typedef uintptr_t uptr_t;
+// Define sptr_t, a signed integer large enough to hold a pointer. 
+typedef intptr_t sptr_t;
+
+#include "Sci_Position.h"
 
 typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
