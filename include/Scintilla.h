@@ -36,7 +36,7 @@ int Scintilla_LinkLexers(void);
 
 // Define uptr_t, an unsigned integer type large enough to hold a pointer.
 typedef uintptr_t uptr_t;
-// Define sptr_t, a signed integer large enough to hold a pointer. 
+// Define sptr_t, a signed integer large enough to hold a pointer.
 typedef intptr_t sptr_t;
 
 #include "Sci_Position.h"
@@ -1091,10 +1091,6 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
  * CHARRANGE, TEXTRANGE, FINDTEXTEX, FORMATRANGE, and NMHDR structs.
  * So older code that treats Scintilla as a RichEdit will work. */
 
-#if defined(__cplusplus) && defined(SCI_NAMESPACE)
-namespace Scintilla {
-#endif
-
 struct Sci_CharacterRange {
 	Sci_PositionCR cpMin;
 	Sci_PositionCR cpMax;
@@ -1185,10 +1181,6 @@ struct SCNotification {
 	int listCompletionMethod;
 	/* SCN_AUTOCSELECTION, SCN_AUTOCCOMPLETED, SCN_USERLISTSELECTION, */
 };
-
-#if defined(__cplusplus) && defined(SCI_NAMESPACE)
-}
-#endif
 
 #ifdef INCLUDE_DEPRECATED_FEATURES
 

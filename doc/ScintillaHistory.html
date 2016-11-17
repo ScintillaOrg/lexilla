@@ -524,6 +524,11 @@
 	Released 16 October 2016.
 	</li>
 	<li>
+	The Scintilla namespace is no longer applied to struct definitions in Scintilla.h even
+	when SCI_NAMESPACE defined.
+	Client code should not define SCI_NAMESPACE.
+	</li>
+	<li>
 	Structure names in Scintilla.h without prefixes are deprecated and will now only
 	be usable with INCLUDE_DEPRECATED_FEATURES defined.<br />
 	Use the newer names with the "Sci_" prefix:<br />
