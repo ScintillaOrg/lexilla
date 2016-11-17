@@ -88,7 +88,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 29 September 2016 NH</p>
+    <p>Last edited 17 November 2016 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -3158,7 +3158,7 @@ struct Sci_TextToFind {
     5 margins are allocated initially numbered from 0 to <code>SC_MAX_MARGIN</code> (4)
     but this may be changed by calling
     <a class="message" href="#SCI_SETMARGINS"><code>SCI_SETMARGINS</code></a>.
-    Each margin can be set to display only symbols, line numbers, or text with 
+    Each margin can be set to display only symbols, line numbers, or text with
     <a class="message" href="#SCI_SETMARGINTYPEN"><code>SCI_SETMARGINTYPEN</code></a>.
     Textual margins may also display symbols.
     The markers
@@ -5160,7 +5160,7 @@ struct Sci_TextToFind {
     <p>The <code>SCI_WORDPART*</code> commands are used to move between word segments marked by
     capitalisation (aCamelCaseIdentifier) or underscores (an_under_bar_ident).</p>
 
-    <p>The <code>SCI_WORD[LEFT|RIGHT]END*</code> commands are 
+    <p>The <code>SCI_WORD[LEFT|RIGHT]END*</code> commands are
     similar to <code>SCI_WORD[LEFT|RIGHT]*</code> but move between word ends instead of word starts.</p>
 
     <p>The <code>SCI_HOME*</code> commands move the caret to the start of the line, while the
@@ -5617,7 +5617,7 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
     the <code>Release</code> call.
     When the whole file has been read, <code>ConvertToDocument</code> should be called to produce a Scintilla
     document pointer. The newly created document will have a reference count of 1 in the same way as a document pointer
-    returned from 
+    returned from
     <a class="seealso" href="#SCI_CREATEDOCUMENT">SCI_CREATEDOCUMENT</a>.
     There is no need to call <code>Release</code> after <code>ConvertToDocument</code>.</p>
 
