@@ -15,6 +15,11 @@
 
 using namespace Scintilla;
 
+// Add backend property as a private category
+@interface ScintillaView ()
+@property (nonatomic, readonly) Scintilla::ScintillaCocoa* backend;
+@end
+
 // Two additional cursors we need, which aren't provided by Cocoa.
 static NSCursor* reverseArrowCursor;
 static NSCursor* waitCursor;
@@ -1181,7 +1186,11 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 
 //--------------------------------------------------------------------------------------------------
 
-@implementation ScintillaView
+@implementation ScintillaView {
+  // The back end is kind of a controller and model in one.
+  // It uses the content view for display.
+  Scintilla::ScintillaCocoa* mBackend;
+}
 
 @synthesize backend = mBackend;
 @synthesize delegate = mDelegate;
@@ -1322,7 +1331,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
  * A delegate can be set to receive all notifications. If set no handling takes place here, except
  * for action pertaining to internal stuff (like the info bar).
  */
-- (void) notification: (Scintilla::SCNotification*)scn
+- (void) notification: (SCNotification*)scn
 {
   // Parent notification. Details are passed as SCNotification structure.
 
@@ -1959,7 +1968,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 /**
  * Sets the notification callback
  */
-- (void) registerNotifyCallback: (intptr_t) windowid value: (Scintilla::SciNotifyFunc) callback
+- (void) registerNotifyCallback: (intptr_t) windowid value: (SciNotifyFunc) callback
 {
 	mBackend->RegisterNotifyCallback(windowid, callback);
 }

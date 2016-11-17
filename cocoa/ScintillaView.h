@@ -23,7 +23,6 @@
 #define WM_COMMAND 1001
 #define WM_NOTIFY 1002
 
-namespace Scintilla {
 /**
  * On the Mac, there is no WM_COMMAND or WM_NOTIFY message that can be sent
  * back to the parent. Therefore, there must be a callback handler that acts
@@ -37,15 +36,12 @@ namespace Scintilla {
  */
 typedef void(*SciNotifyFunc) (intptr_t windowid, unsigned int iMessage, uintptr_t wParam, uintptr_t lParam);
 
-class ScintillaCocoa;
-}
-
 @class ScintillaView;
 
 extern NSString *const SCIUpdateUINotification;
 
 @protocol ScintillaNotificationProtocol
-- (void)notification: (Scintilla::SCNotification*)notification;
+- (void)notification: (SCNotification*)notification;
 @end
 
 /**
@@ -98,10 +94,6 @@ extern NSString *const SCIUpdateUINotification;
 @interface ScintillaView : NSView <InfoBarCommunicator, ScintillaNotificationProtocol>
 {
 @private
-  // The back end is kind of a controller and model in one.
-  // It uses the content view for display.
-  Scintilla::ScintillaCocoa* mBackend;
-
   // This is the actual content to which the backend renders itself.
   SCIContentView* mContent;
 
@@ -117,7 +109,6 @@ extern NSString *const SCIUpdateUINotification;
   id<ScintillaNotificationProtocol> mDelegate;
 }
 
-@property (nonatomic, readonly) Scintilla::ScintillaCocoa* backend;
 @property (nonatomic, assign) id<ScintillaNotificationProtocol> delegate;
 @property (nonatomic, readonly) NSScrollView *scrollView;
 
@@ -128,7 +119,7 @@ extern NSString *const SCIUpdateUINotification;
 - (void) setCallback: (id <InfoBarCommunicator>) callback;
 
 - (void) suspendDrawing: (BOOL) suspend;
-- (void) notification: (Scintilla::SCNotification*) notification;
+- (void) notification: (SCNotification*) notification;
 
 - (void) updateIndicatorIME;
 
@@ -181,7 +172,7 @@ extern NSString *const SCIUpdateUINotification;
 - (NSString*) getLexerProperty: (NSString*) name;
 
 // The delegate property should be used instead of registerNotifyCallback which is deprecated.
-- (void) registerNotifyCallback: (intptr_t) windowid value: (Scintilla::SciNotifyFunc) callback __attribute__((deprecated));
+- (void) registerNotifyCallback: (intptr_t) windowid value: (SciNotifyFunc) callback __attribute__((deprecated));
 
 - (void) setInfoBar: (NSView <InfoBarCommunicator>*) aView top: (BOOL) top;
 - (void) setStatusText: (NSString*) text;
