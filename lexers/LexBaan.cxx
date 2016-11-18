@@ -258,7 +258,7 @@ static int mainOrSubSectionLine(Sci_Position line, LexAccessor &styler) {
 }
 
 static bool priorSectionIsSubSection(Sci_Position line, LexAccessor &styler){
-	while (line != 0) {
+	while (line > 0) {
 		Sci_Position pos = styler.LineStart(line);
 		Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
 		for (Sci_Position i = pos; i < eol_pos; i++) {
@@ -274,6 +274,27 @@ static bool priorSectionIsSubSection(Sci_Position line, LexAccessor &styler){
 				break;
 		}
 		line--;
+	}
+	return false;
+}
+
+static bool nextSectionIsSubSection(Sci_Position line, LexAccessor &styler) {
+	while (line > 0) {
+		Sci_Position pos = styler.LineStart(line);
+		Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
+		for (Sci_Position i = pos; i < eol_pos; i++) {
+			char ch = styler[i];
+			int style = styler.StyleAt(i);
+			if (style == SCE_BAAN_WORD4)
+				return true;
+			else if (style == SCE_BAAN_WORD5)
+				return false;
+			else if (IsASpaceOrTab(ch))
+				continue;
+			else
+				break;
+		}
+		line++;
 	}
 	return false;
 }
@@ -889,7 +910,9 @@ void SCI_METHOD LexerBaan::Fold(Sci_PositionU startPos, Sci_Position length, int
 				if (!afterFunctionSection)
 					levelCurrent++;
 			}
-			else if (nextLineStyle != 0 && currLineStyle != nextLineStyle) {
+			else if (nextLineStyle != 0 && currLineStyle != nextLineStyle
+				&& (priorSectionIsSubSection(lineCurrent -1 ,styler) 
+					|| !nextSectionIsSubSection(lineCurrent + 1, styler))) {
 				for (Sci_Position j = styler.LineStart(lineCurrent + 1); j < styler.LineStart(lineCurrent + 1 + 1) - 1; j++) {
 					if (IsASpaceOrTab(styler[j]))
 						continue;
