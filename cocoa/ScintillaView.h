@@ -36,8 +36,6 @@
  */
 typedef void(*SciNotifyFunc) (intptr_t windowid, unsigned int iMessage, uintptr_t wParam, uintptr_t lParam);
 
-@class ScintillaView;
-
 extern NSString *const SCIUpdateUINotification;
 
 @protocol ScintillaNotificationProtocol
@@ -47,18 +45,7 @@ extern NSString *const SCIUpdateUINotification;
 /**
  * SCIMarginView draws line numbers and other margins next to the text view.
  */
-@interface SCIMarginView : NSRulerView
-{
-@private
-  int marginWidth;
-  ScintillaView *owner;
-  NSMutableArray *currentCursors;
-}
-
-@property (assign) int marginWidth;
-@property (assign) ScintillaView *owner;
-
-- (id)initWithScrollView:(NSScrollView *)aScrollView;
+@interface SCIMarginView : NSRulerView;
 
 @end
 
@@ -71,43 +58,18 @@ extern NSString *const SCIUpdateUINotification;
   NSUserInterfaceValidations,
   NSDraggingSource,
   NSDraggingDestination,
-  NSAccessibilityStaticText>
-{
-@private
-  ScintillaView* mOwner;
-  NSCursor* mCurrentCursor;
-  NSTrackingArea *trackingArea;
+  NSAccessibilityStaticText>;
 
-  // Set when we are in composition mode and partial input is displayed.
-  NSRange mMarkedTextRange;
-}
-
-@property (nonatomic, assign) ScintillaView* owner;
-
-- (void) setCursor: (int) cursor;
-
-- (BOOL) canUndo;
-- (BOOL) canRedo;
+- (void) setCursor: (int) cursor; // Needed by ScintillaCocoa
 
 @end
 
-@interface ScintillaView : NSView <InfoBarCommunicator, ScintillaNotificationProtocol>
-{
-@private
-  // This is the actual content to which the backend renders itself.
-  SCIContentView* mContent;
-
-  NSScrollView *scrollView;
-  SCIMarginView *marginView;
-
-  CGFloat zoomDelta;
-
-  // Area to display additional controls (e.g. zoom info, caret position, status info).
-  NSView <InfoBarCommunicator>* mInfoBar;
-  BOOL mInfoBarAtTop;
-
-  id<ScintillaNotificationProtocol> mDelegate;
-}
+/**
+ * ScintillaView is the class instantiated by client code.
+ * It contains an NSScrollView which contains a SCIMarginView and a SCIContentView.
+ * It is responsible for providing an API and communicating to a delegate.
+ */
+@interface ScintillaView : NSView <InfoBarCommunicator, ScintillaNotificationProtocol>;
 
 @property (nonatomic, assign) id<ScintillaNotificationProtocol> delegate;
 @property (nonatomic, readonly) NSScrollView *scrollView;

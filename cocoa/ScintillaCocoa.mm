@@ -395,11 +395,15 @@ const CGFloat paddingHighlightY = 2;
 
 //----------------- ScintillaCocoa -----------------------------------------------------------------
 
-ScintillaCocoa::ScintillaCocoa(SCIContentView* view, SCIMarginView* viewMargin)
+ScintillaCocoa::ScintillaCocoa(ScintillaView* sciView_, SCIContentView* viewContent, SCIMarginView* viewMargin)
 {
   vs.marginInside = false;
-  wMain = view; // Don't retain since we're owned by view, which would cause a cycle
+
+  // Don't retain since we're owned by view, which would cause a cycle
+  sciView = sciView_;
+  wMain = viewContent;
   wMargin = viewMargin;
+
   timerTarget = [[TimerTarget alloc] init: this];
   lastMouseEvent = NULL;
   delegate = NULL;
@@ -896,7 +900,7 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 
       case SCI_SETPHASESDRAW: {
           sptr_t r = ScintillaBase::WndProc(iMessage, wParam, lParam);
-          [ContentView().owner updateIndicatorIME];
+          [sciView updateIndicatorIME];
           return r;
         }
 
@@ -1999,7 +2003,7 @@ bool ScintillaCocoa::SetScrollingSize(void) {
 		SetVerticalScrollPos();
 		enteredSetScrollingSize = false;
 	}
-	[inner.owner setMarginWidth: vs.fixedColumnWidth];
+	[sciView setMarginWidth: vs.fixedColumnWidth];
 	return changes;
 }
 

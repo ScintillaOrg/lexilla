@@ -88,6 +88,7 @@ namespace Scintilla {
 class ScintillaCocoa : public ScintillaBase
 {
 private:
+  ScintillaView* sciView;
   TimerTarget* timerTarget;
   NSEvent* lastMouseEvent;
 
@@ -131,7 +132,7 @@ protected:
   virtual void CancelModes();
 
 public:
-  ScintillaCocoa(SCIContentView* view, SCIMarginView* viewMargin);
+  ScintillaCocoa(ScintillaView* sciView_, SCIContentView* viewContent, SCIMarginView* viewMargin);
   virtual ~ScintillaCocoa();
 
   void SetDelegate(id<ScintillaNotificationProtocol> delegate_);

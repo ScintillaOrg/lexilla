@@ -15,7 +15,8 @@
 
 using namespace Scintilla;
 
-// Add backend property as a private category
+// Add backend property to ScintillaView as a private category.
+// Specified here as backend accessed by SCIMarginView and SCIContentView.
 @interface ScintillaView ()
 @property (nonatomic, readonly) Scintilla::ScintillaCocoa* backend;
 @end
@@ -51,8 +52,17 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   }
 }
 
+// Add marginWidth and owner properties as a private category.
+@interface SCIMarginView ()
+@property (assign) int marginWidth;
+@property (nonatomic, assign) ScintillaView* owner;
+@end
 
-@implementation SCIMarginView
+@implementation SCIMarginView {
+  int marginWidth;
+  ScintillaView *owner;
+  NSMutableArray *currentCursors;
+}
 
 @synthesize marginWidth, owner;
 
@@ -160,7 +170,19 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 @end
 
-@implementation SCIContentView
+// Add owner property as a private category.
+@interface SCIContentView ()
+@property (nonatomic, assign) ScintillaView* owner;
+@end
+
+@implementation SCIContentView {
+  ScintillaView* mOwner;
+  NSCursor* mCurrentCursor;
+  NSTrackingArea *trackingArea;
+
+  // Set when we are in composition mode and partial input is displayed.
+  NSRange mMarkedTextRange;
+}
 
 @synthesize owner = mOwner;
 
@@ -1190,6 +1212,20 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
   // The back end is kind of a controller and model in one.
   // It uses the content view for display.
   Scintilla::ScintillaCocoa* mBackend;
+
+  // This is the actual content to which the backend renders itself.
+  SCIContentView* mContent;
+
+  NSScrollView *scrollView;
+  SCIMarginView *marginView;
+
+  CGFloat zoomDelta;
+
+  // Area to display additional controls (e.g. zoom info, caret position, status info).
+  NSView <InfoBarCommunicator>* mInfoBar;
+  BOOL mInfoBarAtTop;
+
+  id<ScintillaNotificationProtocol> mDelegate;
 }
 
 @synthesize backend = mBackend;
@@ -1442,7 +1478,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
     [scrollView setHasVerticalRuler:YES];
     [scrollView setRulersVisible:YES];
 
-    mBackend = new ScintillaCocoa(mContent, marginView);
+    mBackend = new ScintillaCocoa(self, mContent, marginView);
 
     // Establish a connection from the back end to this container so we can handle situations
     // which require our attention.
