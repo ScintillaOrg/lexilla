@@ -845,7 +845,7 @@ sptr_t ScintillaWin::WndPaint(uptr_t wParam) {
 			Paint(surfaceWindow, rcPaint);
 			surfaceWindow->Release();
 			HRESULT hr = pRenderTarget->EndDraw();
-			if (hr == D2DERR_RECREATE_TARGET) {
+			if (hr == static_cast<HRESULT>(D2DERR_RECREATE_TARGET)) {
 				DropRenderTarget();
 				paintState = paintAbandoned;
 			}
@@ -2932,7 +2932,7 @@ void ScintillaWin::FullPaintDC(HDC hdc) {
 			Paint(surfaceWindow, rcPaint);
 			surfaceWindow->Release();
 			HRESULT hr = pRenderTarget->EndDraw();
-			if (hr == D2DERR_RECREATE_TARGET) {
+			if (hr == static_cast<HRESULT>(D2DERR_RECREATE_TARGET)) {
 				DropRenderTarget();
 			}
 		}
