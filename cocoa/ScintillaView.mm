@@ -116,11 +116,33 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   }
 }
 
+/**
+ * Called by the framework if it wants to show a context menu for the margin.
+ */
+- (NSMenu*) menuForEvent: (NSEvent*) theEvent
+{
+  NSMenu *menu = [owner menuForEvent: theEvent];
+  if (menu) {
+    return menu;
+  } else if (owner.backend->ShouldDisplayPopupOnMargin()) {
+    return owner.backend->CreateContextMenu(theEvent);
+  } else {
+    return nil;
+  }
+}
+
 - (void) mouseDown: (NSEvent *) theEvent
 {
   NSClipView *textView = [[self scrollView] contentView];
   [[textView window] makeFirstResponder:textView];
   owner.backend->MouseDown(theEvent);
+}
+
+- (void) rightMouseDown: (NSEvent *) theEvent
+{
+  [NSMenu popUpContextMenu:[self menuForEvent: theEvent] withEvent:theEvent forView:self];
+
+  owner.backend->RightMouseDown(theEvent);
 }
 
 - (void) mouseDragged: (NSEvent *) theEvent
@@ -380,10 +402,14 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
  */
 - (NSMenu*) menuForEvent: (NSEvent*) theEvent
 {
-  if (![mOwner respondsToSelector: @selector(menuForEvent:)])
+  NSMenu *menu = [mOwner menuForEvent: theEvent];
+  if (menu) {
+    return menu;
+  } else if (mOwner.backend->ShouldDisplayPopupOnText()) {
     return mOwner.backend->CreateContextMenu(theEvent);
-  else
-    return [mOwner menuForEvent: theEvent];
+  } else {
+    return nil;
+  }
 }
 
 //--------------------------------------------------------------------------------------------------

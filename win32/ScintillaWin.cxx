@@ -1418,11 +1418,17 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				(wParam & MK_CONTROL) != 0);
 			break;
 
-		case WM_RBUTTONDOWN:
-			::SetFocus(MainHWND());
-			if (!PointInSelection(Point::FromLong(static_cast<long>(lParam)))) {
-				CancelModes();
-				SetEmptySelection(PositionFromLocation(Point::FromLong(static_cast<long>(lParam))));
+		case WM_RBUTTONDOWN: {
+				::SetFocus(MainHWND());
+				Point pt = Point::FromLong(static_cast<long>(lParam));
+				if (!PointInSelection(pt)) {
+					CancelModes();
+					SetEmptySelection(PositionFromLocation(Point::FromLong(static_cast<long>(lParam))));
+				}
+
+				RightButtonDownWithModifiers(pt, ::GetMessageTime(), ModifierFlags((wParam & MK_SHIFT) != 0,
+										      (wParam & MK_CONTROL) != 0,
+										      Platform::IsKeyDown(VK_MENU)));
 			}
 			break;
 
@@ -1571,18 +1577,22 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				return HandleCompositionWindowed(wParam, lParam);
 			}
 
-		case WM_CONTEXTMENU:
-			if (displayPopupMenu) {
+		case WM_CONTEXTMENU: {
 				Point pt = Point::FromLong(static_cast<long>(lParam));
-				if ((pt.x == -1) && (pt.y == -1)) {
-					// Caused by keyboard so display menu near caret
-					pt = PointMainCaret();
-					POINT spt = {static_cast<int>(pt.x), static_cast<int>(pt.y)};
-					::ClientToScreen(MainHWND(), &spt);
-					pt = PointFromPOINT(spt);
+				POINT rpt = {static_cast<int>(pt.x), static_cast<int>(pt.y)};
+				::ScreenToClient(MainHWND(), &rpt);
+				const Point ptClient = PointFromPOINT(rpt);
+				if (ShouldDisplayPopup(ptClient)) {
+					if ((pt.x == -1) && (pt.y == -1)) {
+						// Caused by keyboard so display menu near caret
+						pt = PointMainCaret();
+						POINT spt = {static_cast<int>(pt.x), static_cast<int>(pt.y)};
+						::ClientToScreen(MainHWND(), &spt);
+						pt = PointFromPOINT(spt);
+					}
+					ContextMenu(pt);
+					return 0;
 				}
-				ContextMenu(pt);
-				return 0;
 			}
 			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 

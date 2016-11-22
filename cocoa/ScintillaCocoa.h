@@ -213,6 +213,7 @@ public:
 
   bool KeyboardInput(NSEvent* event);
   void MouseDown(NSEvent* event);
+  void RightMouseDown(NSEvent* event);
   void MouseMove(NSEvent* event);
   void MouseUp(NSEvent* event);
   void MouseEntered(NSEvent* event);
@@ -235,6 +236,8 @@ public:
   virtual void Undo();
   virtual void Redo();
 
+  virtual bool ShouldDisplayPopupOnMargin();
+  virtual bool ShouldDisplayPopupOnText();
   virtual NSMenu* CreateContextMenu(NSEvent* event);
   void HandleCommand(NSInteger command);
 

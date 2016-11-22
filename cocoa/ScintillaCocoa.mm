@@ -2455,6 +2455,17 @@ void ScintillaCocoa::MouseDown(NSEvent* event)
   ButtonDown(Point(location.x, location.y), (int) (time * 1000), shift, command, alt);
 }
 
+void ScintillaCocoa::RightMouseDown(NSEvent *event)
+{
+  Point location = ConvertPoint([event locationInWindow]);
+  NSTimeInterval time = [event timestamp];
+  bool command = ([event modifierFlags] & NSCommandKeyMask) != 0;
+  bool shift = ([event modifierFlags] & NSShiftKeyMask) != 0;
+  bool alt = ([event modifierFlags] & NSAlternateKeyMask) != 0;
+
+  RightButtonDownWithModifiers(Point(location.x, location.y), (int) (time * 1000), ModifierFlags(shift, command, alt));
+}
+
 //--------------------------------------------------------------------------------------------------
 
 void ScintillaCocoa::MouseMove(NSEvent* event)
@@ -2532,6 +2543,16 @@ void ScintillaCocoa::Redo()
 }
 
 //--------------------------------------------------------------------------------------------------
+
+bool ScintillaCocoa::ShouldDisplayPopupOnMargin()
+{
+  return displayPopupMenu == SC_POPUP_ALL;
+}
+
+bool ScintillaCocoa::ShouldDisplayPopupOnText()
+{
+  return displayPopupMenu == SC_POPUP_ALL || displayPopupMenu == SC_POPUP_TEXT;
+}
 
 /**
  * Creates and returns a popup menu, which is then displayed by the Cocoa framework.

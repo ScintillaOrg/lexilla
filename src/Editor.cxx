@@ -2465,6 +2465,22 @@ bool Editor::NotifyMarginClick(Point pt, bool shift, bool ctrl, bool alt) {
 	return NotifyMarginClick(pt, ModifierFlags(shift, ctrl, alt));
 }
 
+bool Editor::NotifyMarginRightClick(Point pt, int modifiers) {
+	int marginRightClicked = vs.MarginFromLocation(pt);
+	if ((marginRightClicked >= 0) && vs.ms[marginRightClicked].sensitive) {
+		int position = pdoc->LineStart(LineFromLocation(pt));
+		SCNotification scn = {};
+		scn.nmhdr.code = SCN_MARGINRIGHTCLICK;
+		scn.modifiers = modifiers;
+		scn.position = position;
+		scn.margin = marginRightClicked;
+		NotifyParent(scn);
+		return true;
+	} else {
+		return false;
+	}
+}
+
 void Editor::NotifyNeedShown(int pos, int len) {
 	SCNotification scn = {};
 	scn.nmhdr.code = SCN_NEEDSHOWN;
@@ -4576,6 +4592,11 @@ void Editor::ButtonDownWithModifiers(Point pt, unsigned int curTime, int modifie
 	lastClick = pt;
 	lastXChosen = static_cast<int>(pt.x) + xOffset;
 	ShowCaretAtCurrentPosition();
+}
+
+void Editor::RightButtonDownWithModifiers(Point pt, unsigned int, int modifiers) {
+	if (NotifyMarginRightClick(pt, modifiers))
+		return;
 }
 
 void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, bool alt) {

@@ -439,6 +439,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void NotifyIndicatorClick(bool click, int position, bool shift, bool ctrl, bool alt);
 	bool NotifyMarginClick(Point pt, int modifiers);
 	bool NotifyMarginClick(Point pt, bool shift, bool ctrl, bool alt);
+	bool NotifyMarginRightClick(Point pt, int modifiers);
 	void NotifyNeedShown(int pos, int len);
 	void NotifyDwelling(Point pt, bool state);
 	void NotifyZoom();
@@ -508,6 +509,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void DwellEnd(bool mouseMoved);
 	void MouseLeave();
 	virtual void ButtonDownWithModifiers(Point pt, unsigned int curTime, int modifiers);
+	virtual void RightButtonDownWithModifiers(Point pt, unsigned int curTime, int modifiers);
 	virtual void ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, bool alt);
 	void ButtonMoveWithModifiers(Point pt, int modifiers);
 	void ButtonMove(Point pt);

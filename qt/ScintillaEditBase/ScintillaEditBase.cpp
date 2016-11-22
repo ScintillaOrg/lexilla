@@ -289,9 +289,7 @@ void ScintillaEditBase::mousePressEvent(QMouseEvent *event)
 		return;
 	}
 
-	bool button = event->button() == Qt::LeftButton;
-
-	if (button) {
+	if (event->button() == Qt::LeftButton) {
 		bool shift = QApplication::keyboardModifiers() & Qt::ShiftModifier;
 		bool ctrl  = QApplication::keyboardModifiers() & Qt::ControlModifier;
 #ifdef Q_WS_X11
@@ -303,6 +301,14 @@ void ScintillaEditBase::mousePressEvent(QMouseEvent *event)
 #endif
 
 		sqt->ButtonDown(pos, time.elapsed(), shift, ctrl, alt);
+	}
+
+	if (event->button() == Qt::RightButton) {
+		bool shift = QApplication::keyboardModifiers() & Qt::ShiftModifier;
+		bool ctrl  = QApplication::keyboardModifiers() & Qt::ControlModifier;
+		bool alt   = QApplication::keyboardModifiers() & Qt::AltModifier;
+
+		sqt->RightButtonDownWithModifiers(pos, time.elapsed(), ScintillaQt::ModifierFlags(shift, ctrl, alt));
 	}
 }
 
@@ -350,9 +356,12 @@ void ScintillaEditBase::contextMenuEvent(QContextMenuEvent *event)
 {
 	Point pos = PointFromQPoint(event->globalPos());
 	Point pt = PointFromQPoint(event->pos());
-	if (!sqt->PointInSelection(pt))
+	if (!sqt->PointInSelection(pt)) {
 		sqt->SetEmptySelection(sqt->PositionFromLocation(pt));
-	sqt->ContextMenu(pos);
+	}
+	if (sqt->ShouldDisplayPopup(pt)) {
+		sqt->ContextMenu(pos);
+	}
 }
 
 void ScintillaEditBase::dragEnterEvent(QDragEnterEvent *event)

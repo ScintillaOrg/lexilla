@@ -1703,7 +1703,7 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 		} else if (event->button == 3) {
 			if (!PointInSelection(pt))
 				SetEmptySelection(PositionFromLocation(pt));
-			if (displayPopupMenu) {
+			if (ShouldDisplayPopup(pt)) {
 				// PopUp menu
 				// Convert to screen
 				int ox = 0;
@@ -1711,7 +1711,15 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 				gdk_window_get_origin(PWindow(wMain), &ox, &oy);
 				ContextMenu(Point(pt.x + ox, pt.y + oy));
 			} else {
-				return FALSE;
+#if PLAT_GTK_MACOSX
+				bool meta = ctrl;
+				// GDK reports the Command modifer key as GDK_MOD2_MASK for button events,
+				// not GDK_META_MASK like in key events.
+				ctrl = (event->state & GDK_MOD2_MASK) != 0;
+#else
+				bool meta = false;
+#endif
+				RightButtonDownWithModifiers(pt, event->time, ModifierFlags(shift, ctrl, alt, meta));
 			}
 		} else if (event->button == 4) {
 			// Wheel scrolling up (only GTK 1.x does it this way)
