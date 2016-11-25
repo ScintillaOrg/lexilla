@@ -1669,11 +1669,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				if (nStart == -1) {
 					nStart = nEnd;	// Remove selection
 				}
-				if (nStart > nEnd) {
-					SetSelection(nEnd, nStart);
-				} else {
-					SetSelection(nStart, nEnd);
-				}
+				SetSelection(nEnd, nStart);
 				EnsureCaretVisible();
 			}
 			break;
