@@ -136,6 +136,7 @@ LEXOBJS=\
 	$(DIR_O)\LexDMAP.obj \
 	$(DIR_O)\LexDMIS.obj \
 	$(DIR_O)\LexECL.obj \
+	$(DIR_O)\LexEDIFACT.obj \
 	$(DIR_O)\LexEiffel.obj \
 	$(DIR_O)\LexErlang.obj \
 	$(DIR_O)\LexErrorList.obj \
@@ -555,6 +556,8 @@ $(DIR_O)\LexDMAP.obj: ..\lexers\LexDMAP.cxx $(LEX_HEADERS)
 $(DIR_O)\LexDMIS.obj: ..\lexers\LexDMIS.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexECL.obj: ..\lexers\LexECL.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexEDIFACT.obj: ..\lexers\LexEDIFACT.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexEiffel.obj: ..\lexers\LexEiffel.cxx $(LEX_HEADERS)
 
