@@ -216,6 +216,7 @@
 		28BC38EC1B74C6AD008BF9EB /* Sci_Position.h in Headers */ = {isa = PBXBuildFile; fileRef = 28BC38EB1B74C6AD008BF9EB /* Sci_Position.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		28C40CA81CB7321200B089F2 /* LexJSON.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28C40CA71CB7321200B089F2 /* LexJSON.cxx */; };
 		28D191A21DEA72C800159938 /* LexEDIFACT.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28D191A11DEA72C800159938 /* LexEDIFACT.cxx */; };
+		28D1919E1DE69FC100159938 /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
 		28D516D81830FFCA0047C93D /* info_bar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 28D516D51830FFCA0047C93D /* info_bar_bg@2x.png */; };
 		28D516D91830FFCA0047C93D /* mac_cursor_busy@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 28D516D61830FFCA0047C93D /* mac_cursor_busy@2x.png */; };
 		28D516DA1830FFCA0047C93D /* mac_cursor_flipped@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 28D516D71830FFCA0047C93D /* mac_cursor_flipped@2x.png */; };
@@ -505,6 +506,7 @@
 		08FB77AEFE84172EC02AAC07 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				28D1919E1DE69FC100159938 /* module.modulemap */,
 				2744E4980FC167ED00E85C33 /* Source Files */,
 				2744E4970FC167E400E85C33 /* Header Files */,
 			);
@@ -1114,6 +1116,7 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
+				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXCLUDED_RECURSIVE_SEARCH_PATH_SUBDIRECTORIES = ".bzr *.nib *.lproj *.framework *.gch (*) CVS .svn *.xcodeproj *.xcode *.pbproj *.pbxproj";
@@ -1134,6 +1137,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MODULEMAP_FILE = module.modulemap;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.sun.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = Scintilla;
 				SKIP_INSTALL = YES;
@@ -1148,6 +1152,7 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				FRAMEWORK_VERSION = A;
@@ -1165,6 +1170,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MODULEMAP_FILE = module.modulemap;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.sun.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = Scintilla;
 				SKIP_INSTALL = YES;
