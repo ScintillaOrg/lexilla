@@ -1221,7 +1221,7 @@ val SC_FOLDDISPLAYTEXT_STANDARD=1
 val SC_FOLDDISPLAYTEXT_BOXED=2
 
 # Set the style of fold display text
-fun void foldDisplayTextSetStyle=2701(int style,)
+set void FoldDisplayTextSetStyle=2701(int style,)
 
 enu FoldAction=SC_FOLDACTION_
 val SC_FOLDACTION_CONTRACT=0
