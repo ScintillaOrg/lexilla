@@ -192,6 +192,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define STYLE_CONTROLCHAR 36
 #define STYLE_INDENTGUIDE 37
 #define STYLE_CALLTIP 38
+#define STYLE_FOLDDISPLAYTEXT 39
 #define STYLE_LASTPREDEFINED 39
 #define STYLE_MAX 255
 #define SC_CHARSET_ANSI 0
@@ -485,6 +486,11 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_SETFOLDEXPANDED 2229
 #define SCI_GETFOLDEXPANDED 2230
 #define SCI_TOGGLEFOLD 2231
+#define SCI_TOGGLEFOLDSHOWTEXT 2700
+#define SC_FOLDDISPLAYTEXT_HIDDEN 0
+#define SC_FOLDDISPLAYTEXT_STANDARD 1
+#define SC_FOLDDISPLAYTEXT_BOXED 2
+#define SCI_FOLDDISPLAYTEXTSETSTYLE 2701
 #define SC_FOLDACTION_CONTRACT 0
 #define SC_FOLDACTION_EXPAND 1
 #define SC_FOLDACTION_TOGGLE 2

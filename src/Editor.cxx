@@ -7059,6 +7059,16 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		Redraw();
 		break;
 
+	case SCI_TOGGLEFOLDSHOWTEXT:
+		cs.SetFoldDisplayText(static_cast<int>(wParam), CharPtrFromSPtr(lParam));
+		FoldLine(static_cast<int>(wParam), SC_FOLDACTION_TOGGLE);
+		break;
+
+	case SCI_FOLDDISPLAYTEXTSETSTYLE:
+		foldDisplayTextStyle = static_cast<int>(wParam);
+		Redraw();
+		break;
+
 	case SCI_TOGGLEFOLD:
 		FoldLine(static_cast<int>(wParam), SC_FOLDACTION_TOGGLE);
 		break;
