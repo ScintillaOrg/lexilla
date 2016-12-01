@@ -29,6 +29,17 @@
 #define SC_INDICATOR_CONVERTED INDIC_IME+2
 #define SC_INDICATOR_UNKNOWN INDIC_IME_MAX
 
+// Q_WS_MAC and Q_WS_X11 aren't defined in Qt5
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#ifdef Q_OS_MAC
+#define Q_WS_MAC 1
+#endif
+
+#if !defined(Q_OS_MAC) && !defined(Q_OS_WIN)
+#define Q_WS_X11 1
+#endif
+#endif // QT_VERSION >= 5.0.0
+
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
 #endif
