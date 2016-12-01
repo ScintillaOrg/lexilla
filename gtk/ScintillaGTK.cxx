@@ -1720,6 +1720,7 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 				bool meta = false;
 #endif
 				RightButtonDownWithModifiers(pt, event->time, ModifierFlags(shift, ctrl, alt, meta));
+				return FALSE;
 			}
 		} else if (event->button == 4) {
 			// Wheel scrolling up (only GTK 1.x does it this way)
