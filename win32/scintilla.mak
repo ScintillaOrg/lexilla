@@ -349,6 +349,7 @@ $(DIR_O)\ContractionState.obj: \
 	../src/SplitVector.h \
 	../src/Partitioning.h \
 	../src/RunStyles.h \
+	../src/SparseVector.h \
 	../src/ContractionState.h
 $(DIR_O)\Decoration.obj: \
 	../src/Decoration.cxx \
@@ -367,6 +368,7 @@ $(DIR_O)\Document.obj: \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
 	../lexlib/CharacterSet.h \
+	../lexlib/CharacterCategory.h \
 	../src/Position.h \
 	../src/SplitVector.h \
 	../src/Partitioning.h \
@@ -445,6 +447,7 @@ $(DIR_O)\EditView.obj: \
 	../include/Sci_Position.h \
 	../include/Scintilla.h \
 	../lexlib/StringCopy.h \
+	../lexlib/CharacterSet.h \
 	../src/Position.h \
 	../src/SplitVector.h \
 	../src/Partitioning.h \
@@ -1044,7 +1047,8 @@ $(DIR_O)\StyleContext.obj: \
 	../include/Sci_Position.h \
 	../lexlib/LexAccessor.h \
 	../lexlib/Accessor.h \
-	../lexlib/StyleContext.h
+	../lexlib/StyleContext.h \
+	../lexlib/CharacterSet.h
 $(DIR_O)\UniConversion.obj: \
 	../src/UniConversion.cxx \
 	../src/UniConversion.h
@@ -1070,7 +1074,7 @@ $(DIR_O)\XPM.obj: \
 	../src/XPM.cxx \
 	../include/Platform.h \
 	../src/XPM.h
-$(DIR_O)\HanjaDic: \
+$(DIR_O)\HanjaDic.obj: \
 	HanjaDic.cxx \
 	../src/UniConversion.h \
 	HanjaDic.h
