@@ -1545,6 +1545,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
   delete mBackend;
   mBackend = NULL;
   mContent.owner = nil;
+  [marginView setClientView:nil];
   [scrollView removeFromSuperview];
   [marginView release];
   [super dealloc];
