@@ -671,7 +671,8 @@ SelectionPosition EditView::SPositionFromLocation(Surface *surface, const EditMo
 			const XYPOSITION subLineStart = ll->positions[rangeSubLine.start];
 			if (subLine > 0)	// Wrapped
 				pt.x -= ll->wrapIndent;
-			const int positionInLine = ll->FindPositionFromX(pt.x + subLineStart, rangeSubLine, charPosition);
+			const int positionInLine = ll->FindPositionFromX(static_cast<XYPOSITION>(pt.x + subLineStart),
+				rangeSubLine, charPosition);
 			if (positionInLine < rangeSubLine.end) {
 				return SelectionPosition(model.pdoc->MovePositionOutsideChar(positionInLine + posLineStart, 1));
 			}
