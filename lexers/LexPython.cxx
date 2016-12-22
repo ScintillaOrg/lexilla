@@ -25,6 +25,7 @@
 #include "Accessor.h"
 #include "StyleContext.h"
 #include "CharacterSet.h"
+#include "CharacterCategory.h"
 #include "LexerModule.h"
 #include "OptionSet.h"
 #include "SubStyles.h"
@@ -110,12 +111,32 @@ int GetPyStringState(Accessor &styler, Sci_Position i, Sci_PositionU *nextIndex,
 	}
 }
 
-inline bool IsAWordChar(int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_');
+inline bool IsAWordChar(int ch, bool unicodeIdentifiers) {
+	if (ch < 0x80)
+		return (isalnum(ch) || ch == '.' || ch == '_');
+
+	if (!unicodeIdentifiers)
+		return false;
+
+	// Approximation, Python uses the XID_Continue set from unicode data
+	// see http://unicode.org/reports/tr31/
+	CharacterCategory c = CategoriseCharacter(ch);
+	return (c == ccLl || c == ccLu || c == ccLt || c == ccLm || c == ccLo
+		|| c == ccNl || c == ccMn || c == ccMc || c == ccNd || c == ccPc);
 }
 
-inline bool IsAWordStart(int ch) {
-	return (ch < 0x80) && (isalnum(ch) || ch == '_');
+inline bool IsAWordStart(int ch, bool unicodeIdentifiers) {
+	if (ch < 0x80) 
+		return (isalpha(ch) || ch == '_');
+
+	if (!unicodeIdentifiers)
+		return false;
+	
+	// Approximation, Python uses the XID_Start set from unicode data
+	// see http://unicode.org/reports/tr31/
+	CharacterCategory c = CategoriseCharacter(ch);
+	return (c == ccLl || c == ccLu || c == ccLt || c == ccLm || c == ccLo
+		|| c == ccNl);
 }
 
 static bool IsFirstNonWhitespace(Sci_Position pos, Accessor &styler) {
@@ -141,6 +162,7 @@ struct OptionsPython {
 	bool fold;
 	bool foldQuotes;
 	bool foldCompact;
+	bool unicodeIdentifiers;
 
 	OptionsPython() {
 		whingeLevel = 0;
@@ -153,6 +175,7 @@ struct OptionsPython {
 		fold = false;
 		foldQuotes = false;
 		foldCompact = false;
+		unicodeIdentifiers = true;
 	}
 
 	literalsAllowed AllowedLiterals() const {
@@ -207,6 +230,9 @@ struct OptionSetPython : public OptionSet<OptionsPython> {
 			"This option enables folding multi-line quoted strings when using the Python lexer.");
 
 		DefineProperty("fold.compact", &OptionsPython::foldCompact);
+
+		DefineProperty("lexer.python.unicode.identifiers", &OptionsPython::unicodeIdentifiers,
+			"Set to 0 to not recognise Python 3 unicode identifiers.");
 
 		DefineWordListSets(pythonWordListDesc);
 	}
@@ -418,12 +444,12 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 			kwLast = kwOther;
 			sc.SetState(SCE_P_DEFAULT);
 		} else if (sc.state == SCE_P_NUMBER) {
-			if (!IsAWordChar(sc.ch) &&
+			if (!IsAWordChar(sc.ch, false) &&
 			        !(!base_n_number && ((sc.ch == '+' || sc.ch == '-') && (sc.chPrev == 'e' || sc.chPrev == 'E')))) {
 				sc.SetState(SCE_P_DEFAULT);
 			}
 		} else if (sc.state == SCE_P_IDENTIFIER) {
-			if ((sc.ch == '.') || (!IsAWordChar(sc.ch))) {
+			if ((sc.ch == '.') || (!IsAWordChar(sc.ch, options.unicodeIdentifiers))) {
 				char s[100];
 				sc.GetCurrent(s, sizeof(s));
 				int style = SCE_P_IDENTIFIER;
@@ -495,7 +521,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 				sc.SetState(SCE_P_DEFAULT);
 			}
 		} else if (sc.state == SCE_P_DECORATOR) {
-			if (!IsAWordChar(sc.ch)) {
+			if (!IsAWordChar(sc.ch, options.unicodeIdentifiers)) {
 				sc.SetState(SCE_P_DEFAULT);
 			}
 		} else if ((sc.state == SCE_P_STRING) || (sc.state == SCE_P_CHARACTER)) {
@@ -589,7 +615,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 				while (nextIndex > (sc.currentPos + 1) && sc.More()) {
 					sc.Forward();
 				}
-			} else if (IsAWordStart(sc.ch)) {
+			} else if (IsAWordStart(sc.ch, options.unicodeIdentifiers)) {
 				sc.SetState(SCE_P_IDENTIFIER);
 			}
 		}
