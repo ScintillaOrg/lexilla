@@ -521,7 +521,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 				sc.SetState(SCE_P_DEFAULT);
 			}
 		} else if (sc.state == SCE_P_DECORATOR) {
-			if (!IsAWordChar(sc.ch, options.unicodeIdentifiers)) {
+			if (!IsAWordStart(sc.ch, options.unicodeIdentifiers)) {
 				sc.SetState(SCE_P_DEFAULT);
 			}
 		} else if ((sc.state == SCE_P_STRING) || (sc.state == SCE_P_CHARACTER)) {
