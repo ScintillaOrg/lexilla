@@ -39,7 +39,7 @@ namespace {
 /* kwCDef, kwCTypeName only used for Cython */
 enum kwType { kwOther, kwClass, kwDef, kwImport, kwCDef, kwCTypeName, kwCPDef };
 
-enum literalsAllowed { litNone = 0, litU = 1, litB = 2 };
+enum literalsAllowed { litNone = 0, litU = 1, litB = 2, litF = 4 };
 
 const int indicatorWhitespace = 1;
 
@@ -50,7 +50,8 @@ bool IsPyComment(Accessor &styler, Sci_Position pos, Sci_Position len) {
 bool IsPyStringTypeChar(int ch, literalsAllowed allowed) {
 	return
 		((allowed & litB) && (ch == 'b' || ch == 'B')) ||
-		((allowed & litU) && (ch == 'u' || ch == 'U'));
+		((allowed & litU) && (ch == 'u' || ch == 'U')) ||
+		((allowed & litF) && (ch == 'f' || ch == 'F'));
 }
 
 bool IsPyStringStart(int ch, int chNext, int chNext2, literalsAllowed allowed) {
@@ -73,7 +74,7 @@ int GetPyStringState(Accessor &styler, Sci_Position i, Sci_PositionU *nextIndex,
 	char ch = styler.SafeGetCharAt(i);
 	char chNext = styler.SafeGetCharAt(i + 1);
 
-	// Advance beyond r, u, or ur prefix (or r, b, or br in Python 3.0), but bail if there are any unexpected chars
+	// Advance beyond r, u, or ur prefix (or r, b, or br in Python 2.7+ and r, f, or fr in Python 3.6+), but bail if there are any unexpected chars
 	if (ch == 'r' || ch == 'R') {
 		i++;
 		ch = styler.SafeGetCharAt(i);
@@ -134,6 +135,7 @@ struct OptionsPython {
 	bool base2or8Literals;
 	bool stringsU;
 	bool stringsB;
+	bool stringsF;
 	bool stringsOverNewline;
 	bool keywords2NoSubIdentifiers;
 	bool fold;
@@ -145,6 +147,7 @@ struct OptionsPython {
 		base2or8Literals = true;
 		stringsU = true;
 		stringsB = true;
+		stringsF = true;
 		stringsOverNewline = false;
 		keywords2NoSubIdentifiers = false;
 		fold = false;
@@ -156,6 +159,8 @@ struct OptionsPython {
 		literalsAllowed allowedLiterals = stringsU ? litU : litNone;
 		if (stringsB)
 			allowedLiterals = static_cast<literalsAllowed>(allowedLiterals | litB);
+		if (stringsF)
+			allowedLiterals = static_cast<literalsAllowed>(allowedLiterals | litF);
 		return allowedLiterals;
 	}
 };
@@ -185,6 +190,9 @@ struct OptionSetPython : public OptionSet<OptionsPython> {
 
 		DefineProperty("lexer.python.strings.b", &OptionsPython::stringsB,
 			"Set to 0 to not recognise Python 3 bytes literals b\"x\".");
+
+		DefineProperty("lexer.python.strings.f", &OptionsPython::stringsF,
+			"Set to 0 to not recognise Python 3.6 f-string literals f\"var={var}\".");
 
 		DefineProperty("lexer.python.strings.over.newline", &OptionsPython::stringsOverNewline,
 			"Set to 1 to allow strings to span newline characters.");
