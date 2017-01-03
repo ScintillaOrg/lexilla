@@ -1301,6 +1301,9 @@ void ScintillaGTK::CreateCallTipWindow(PRectangle rc) {
 				   G_CALLBACK(ScintillaGTK::PressCT), static_cast<void *>(this));
 		gtk_widget_set_events(widcdrw,
 			GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
+		GtkWidget *top = gtk_widget_get_toplevel(static_cast<GtkWidget *>(wMain.GetID()));
+		gtk_window_set_transient_for(GTK_WINDOW(static_cast<GtkWidget *>(PWidget(ct.wCallTip))),
+			GTK_WINDOW(top));
 	}
 	gtk_widget_set_size_request(PWidget(ct.wDraw), rc.Width(), rc.Height());
 	ct.wDraw.Show();

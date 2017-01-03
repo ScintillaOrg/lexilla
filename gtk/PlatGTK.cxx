@@ -1401,7 +1401,7 @@ static void StyleSet(GtkWidget *w, GtkStyle*, void*) {
 #endif
 }
 
-void ListBoxX::Create(Window &, int, Point, int, bool, int) {
+void ListBoxX::Create(Window &parent, int, Point, int, bool, int) {
 	if (widCached != 0) {
 		wid = widCached;
 		return;
@@ -1475,6 +1475,10 @@ void ListBoxX::Create(Window &, int, Point, int, bool, int) {
 	gtk_widget_show(widget);
 	g_signal_connect(G_OBJECT(widget), "button_press_event",
 	                   G_CALLBACK(ButtonPress), this);
+
+	GtkWidget *top = gtk_widget_get_toplevel(static_cast<GtkWidget *>(parent.GetID()));
+	gtk_window_set_transient_for(GTK_WINDOW(static_cast<GtkWidget *>(wid)),
+		GTK_WINDOW(top));
 }
 
 void ListBoxX::SetFont(Font &scint_font) {
