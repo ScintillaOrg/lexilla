@@ -1034,10 +1034,30 @@ void Window::SetPosition(PRectangle rc) {
 	gtk_widget_size_allocate(PWidget(wid), &alloc);
 }
 
+namespace {
+
+GdkRectangle MonitorRectangleForWidget(GtkWidget *wid) {
+	GdkWindow *wnd = WindowFromWidget(wid);
+	GdkRectangle rcScreen = GdkRectangle();
+#if GTK_CHECK_VERSION(3,22,0)
+	GdkDisplay *pdisplay = gtk_widget_get_display(wid);
+	GdkMonitor *monitor = gdk_display_get_monitor_at_window(pdisplay, wnd);
+	gdk_monitor_get_geometry(monitor, &rcScreen);
+#else
+	GdkScreen* screen = gtk_widget_get_screen(wid);
+	gint monitor_num = gdk_screen_get_monitor_at_window(screen, wnd);
+	gdk_screen_get_monitor_geometry(screen, monitor_num, &rcScreen);
+#endif
+	return rcScreen;
+}
+
+}
+
 void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
 	int ox = 0;
 	int oy = 0;
-	gdk_window_get_origin(WindowFromWidget(PWidget(relativeTo.wid)), &ox, &oy);
+	GdkWindow *wndRelativeTo = WindowFromWidget(PWidget(relativeTo.wid));
+	gdk_window_get_origin(wndRelativeTo, &ox, &oy);
 	ox += rc.left;
 	if (ox < 0)
 		ox = 0;
@@ -1045,11 +1065,13 @@ void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
 	if (oy < 0)
 		oy = 0;
 
+	GdkRectangle rcScreen = MonitorRectangleForWidget(PWidget(relativeTo.wid));
+
 	/* do some corrections to fit into screen */
 	int sizex = rc.right - rc.left;
 	int sizey = rc.bottom - rc.top;
-	int screenWidth = gdk_screen_width();
-	int screenHeight = gdk_screen_height();
+	const int screenWidth = rcScreen.width;
+	const int screenHeight = rcScreen.height;
 	if (sizex > screenWidth)
 		ox = 0; /* the best we can do */
 	else if (ox + sizex > screenWidth)
@@ -1145,13 +1167,19 @@ PRectangle Window::GetMonitorRect(Point pt) {
 
 	gdk_window_get_origin(WindowFromWidget(PWidget(wid)), &x_offset, &y_offset);
 
-	GdkScreen* screen;
-	gint monitor_num;
 	GdkRectangle rect;
 
-	screen = gtk_widget_get_screen(PWidget(wid));
-	monitor_num = gdk_screen_get_monitor_at_point(screen, pt.x + x_offset, pt.y + y_offset);
+#if GTK_CHECK_VERSION(3,22,0)
+	GdkDisplay *pdisplay = gtk_widget_get_display(PWidget(wid));
+	GdkMonitor *monitor = gdk_display_get_monitor_at_point(pdisplay,
+		pt.x + x_offset, pt.y + y_offset);
+	gdk_monitor_get_geometry(monitor, &rect);
+#else
+	GdkScreen* screen = gtk_widget_get_screen(PWidget(wid));
+	gint monitor_num = gdk_screen_get_monitor_at_point(screen,
+		pt.x + x_offset, pt.y + y_offset);
 	gdk_screen_get_monitor_geometry(screen, monitor_num, &rect);
+#endif
 	rect.x -= x_offset;
 	rect.y -= y_offset;
 	return PRectangle(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
