@@ -1914,17 +1914,24 @@ void Menu::Destroy() {
 	mid = 0;
 }
 
+#if !GTK_CHECK_VERSION(3,22,0)
 static void MenuPositionFunc(GtkMenu *, gint *x, gint *y, gboolean *, gpointer userData) {
 	sptr_t intFromPointer = GPOINTER_TO_INT(userData);
 	*x = intFromPointer & 0xffff;
 	*y = intFromPointer >> 16;
 }
+#endif
 
-void Menu::Show(Point pt, Window &) {
-	int screenHeight = gdk_screen_height();
-	int screenWidth = gdk_screen_width();
+void Menu::Show(Point pt, Window &wnd) {
 	GtkMenu *widget = static_cast<GtkMenu *>(mid);
 	gtk_widget_show_all(GTK_WIDGET(widget));
+#if GTK_CHECK_VERSION(3,22,0)
+	// Rely on GTK+ to do the right thing with positioning
+	gtk_menu_popup_at_pointer(widget, NULL);
+#else
+	GdkRectangle rcScreen = MonitorRectangleForWidget(PWidget(wnd.GetID()));
+	const int screenWidth = rcScreen.width;
+	const int screenHeight = rcScreen.height;
 	GtkRequisition requisition;
 #if GTK_CHECK_VERSION(3,0,0)
 	gtk_widget_get_preferred_size(GTK_WIDGET(widget), NULL, &requisition);
@@ -1940,6 +1947,7 @@ void Menu::Show(Point pt, Window &) {
 	gtk_menu_popup(widget, NULL, NULL, MenuPositionFunc,
 		GINT_TO_POINTER((static_cast<int>(pt.y) << 16) | static_cast<int>(pt.x)), 0,
 		gtk_get_current_event_time());
+#endif
 }
 
 ElapsedTime::ElapsedTime() {
