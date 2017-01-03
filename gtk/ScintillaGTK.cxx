@@ -2400,7 +2400,9 @@ void ScintillaGTK::StyleSetText(GtkWidget *widget, GtkStyle *, void*) {
 void ScintillaGTK::RealizeText(GtkWidget *widget, void*) {
 	// Set NULL background to avoid automatic clearing so Scintilla responsible for all drawing
 	if (WindowFromWidget(widget)) {
-#if GTK_CHECK_VERSION(3,0,0)
+#if GTK_CHECK_VERSION(3,22,0)
+		// Appears unnecessary
+#elif GTK_CHECK_VERSION(3,0,0)
 		gdk_window_set_background_pattern(WindowFromWidget(widget), NULL);
 #else
 		gdk_window_set_back_pixmap(WindowFromWidget(widget), NULL, FALSE);
