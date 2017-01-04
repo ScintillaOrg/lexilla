@@ -2085,7 +2085,7 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 }
 
 void EditView::FillLineRemainder(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
-	int line, PRectangle rcArea, int subLine) {
+	int line, PRectangle rcArea, int subLine) const {
 		int eolInSelection = 0;
 		int alpha = SC_ALPHA_NOALPHA;
 		if (!hideSelection) {
