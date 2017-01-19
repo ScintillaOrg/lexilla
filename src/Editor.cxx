@@ -5500,7 +5500,7 @@ void Editor::FoldChanged(int line, int levelNow, int levelPrev) {
 	if (!(levelNow & SC_FOLDLEVELWHITEFLAG) && (LevelNumber(levelPrev) < LevelNumber(levelNow))) {
 		if (cs.HiddenLines()) {
 			const int parentLine = pdoc->GetFoldParent(line);
-			if (!cs.GetExpanded(parentLine) && cs.GetExpanded(line))
+			if (!cs.GetExpanded(parentLine) && cs.GetVisible(line))
 				FoldLine(parentLine, SC_FOLDACTION_EXPAND);
 		}
 	}
