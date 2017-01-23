@@ -357,7 +357,7 @@ const CGFloat paddingHighlightY = 2;
  */
 - (void) timerFired: (NSTimer*) timer
 {
-  reinterpret_cast<ScintillaCocoa*>(mTarget)->TimerFired(timer);
+  static_cast<ScintillaCocoa*>(mTarget)->TimerFired(timer);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -388,7 +388,7 @@ const CGFloat paddingHighlightY = 2;
 - (void) idleTriggered: (NSNotification*) notification
 {
 #pragma unused(notification)
-  reinterpret_cast<ScintillaCocoa*>(mTarget)->IdleTimerFired();
+  static_cast<ScintillaCocoa*>(mTarget)->IdleTimerFired();
 }
 
 @end
@@ -471,7 +471,7 @@ void ScintillaCocoa::Finalise()
 //--------------------------------------------------------------------------------------------------
 
 void ScintillaCocoa::UpdateObserver(CFRunLoopObserverRef /* observer */, CFRunLoopActivity /* activity */, void *info) {
-  ScintillaCocoa* sci = reinterpret_cast<ScintillaCocoa*>(info);
+  ScintillaCocoa* sci = static_cast<ScintillaCocoa*>(info);
   sci->IdleWork();
 }
 
@@ -1017,7 +1017,7 @@ bool ScintillaCocoa::SetIdle(bool on)
                                                           userInfo: nil
                                                            repeats: YES];
       [NSRunLoop.currentRunLoop addTimer: idleTimer forMode: NSModalPanelRunLoopMode];
-      idler.idlerID = reinterpret_cast<IdlerID>(idleTimer);
+      idler.idlerID = idleTimer;
     }
     else
       if (idler.idlerID != NULL)

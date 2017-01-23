@@ -708,7 +708,7 @@ void Scintilla::SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, Colou
 }
 
 static void ProviderReleaseData(void *, const void *data, size_t) {
-	const unsigned char *pixels = reinterpret_cast<const unsigned char *>(data);
+	const unsigned char *pixels = static_cast<const unsigned char *>(data);
 	delete []pixels;
 }
 
