@@ -217,7 +217,7 @@ void SurfaceImpl::Init(WindowID)
 void SurfaceImpl::Init(SurfaceID sid, WindowID)
 {
   Release();
-  gc = reinterpret_cast<CGContextRef>(sid);
+  gc = static_cast<CGContextRef>(sid);
   CGContextSetLineWidth(gc, 1.0);
   textLayout->setContext(gc);
 }
@@ -1112,7 +1112,7 @@ Window::~Window()
 
 bool Window::HasFocus()
 {
-  NSView* container = reinterpret_cast<NSView*>(wid);
+  NSView* container = static_cast<NSView*>(wid);
   return [[container window] firstResponder] == container;
 }
 
@@ -1130,12 +1130,12 @@ PRectangle Window::GetPosition()
   if (wid)
   {
     NSRect rect;
-    id idWin = reinterpret_cast<id>(wid);
+    id idWin = static_cast<id>(wid);
     NSWindow* win;
     if ([idWin isKindOfClass: [NSView class]])
     {
       // NSView
-      NSView* view = reinterpret_cast<NSView*>(idWin);
+      NSView* view = idWin;
       win = [view window];
       rect = [view convertRect: [view bounds] toView: nil];
       rect = [win convertRectToScreen:rect];
@@ -1143,7 +1143,7 @@ PRectangle Window::GetPosition()
     else
     {
       // NSWindow
-      win = reinterpret_cast<NSWindow*>(idWin);
+      win = idWin;
       rect = [win frame];
     }
     CGFloat screenHeight = ScreenMax();
@@ -1164,13 +1164,13 @@ void Window::SetPosition(PRectangle rc)
 {
   if (wid)
   {
-    id idWin = reinterpret_cast<id>(wid);
+    id idWin = static_cast<id>(wid);
     if ([idWin isKindOfClass: [NSView class]])
     {
       // NSView
       // Moves this view inside the parent view
       NSRect nsrc = NSMakeRect(rc.left, rc.bottom, rc.Width(), rc.Height());
-      NSView* view = reinterpret_cast<NSView*>(idWin);
+      NSView* view = idWin;
       nsrc = [[view window] convertRectFromScreen:nsrc];
       [view setFrame: nsrc];
     }
@@ -1178,7 +1178,7 @@ void Window::SetPosition(PRectangle rc)
     {
       // NSWindow
       PLATFORM_ASSERT([idWin isKindOfClass: [NSWindow class]]);
-      NSWindow* win = reinterpret_cast<NSWindow*>(idWin);
+      NSWindow* win = idWin;
       CGFloat screenHeight = ScreenMax();
       NSRect nsrc = NSMakeRect(rc.left, screenHeight - rc.bottom,
           rc.Width(), rc.Height());
@@ -1213,10 +1213,10 @@ void Window::Show(bool show)
 {
   if (wid)
   {
-    id idWin = reinterpret_cast<id>(wid);
+    id idWin = static_cast<id>(wid);
     if ([idWin isKindOfClass: [NSWindow class]])
     {
-      NSWindow* win = reinterpret_cast<NSWindow*>(idWin);
+      NSWindow* win = idWin;
       if (show)
       {
         [win orderFront:nil];
@@ -1238,17 +1238,17 @@ void Window::InvalidateAll()
 {
   if (wid)
   {
-    id idWin = reinterpret_cast<id>(wid);
+    id idWin = static_cast<id>(wid);
     NSView* container;
     if ([idWin isKindOfClass: [NSView class]])
     {
-      container = reinterpret_cast<NSView*>(idWin);
+      container = idWin;
     }
     else
     {
       // NSWindow
-      NSWindow* win = reinterpret_cast<NSWindow*>(idWin);
-      container = reinterpret_cast<NSView*>([win contentView]);
+      NSWindow* win = idWin;
+      container = [win contentView];
       container.needsDisplay = YES;
     }
     container.needsDisplay = YES;
@@ -1264,17 +1264,17 @@ void Window::InvalidateRectangle(PRectangle rc)
 {
   if (wid)
   {
-    id idWin = reinterpret_cast<id>(wid);
+    id idWin = static_cast<id>(wid);
     NSView* container;
     if ([idWin isKindOfClass: [NSView class]])
     {
-      container = reinterpret_cast<NSView*>(idWin);
+      container = idWin;
     }
     else
     {
       // NSWindow
-      NSWindow* win = reinterpret_cast<NSWindow*>(idWin);
-      container = reinterpret_cast<NSView*>([win contentView]);
+      NSWindow* win = idWin;
+      container = [win contentView];
     }
     [container setNeedsDisplayInRect: PRectangleToNSRect(rc)];
   }
@@ -1297,10 +1297,10 @@ void Window::SetCursor(Cursor curs)
 {
   if (wid)
   {
-    id idWin = reinterpret_cast<id>(wid);
+    id idWin = static_cast<id>(wid);
     if ([idWin isKindOfClass: [SCIContentView class]])
     {
-      SCIContentView* container = reinterpret_cast<SCIContentView*>(idWin);
+      SCIContentView* container = idWin;
       [container setCursor: curs];
     }
   }
@@ -1312,10 +1312,10 @@ void Window::SetTitle(const char* s)
 {
   if (wid)
   {
-    id idWin = reinterpret_cast<id>(wid);
+    id idWin = static_cast<id>(wid);
     if ([idWin isKindOfClass: [NSWindow class]])
     {
-      NSWindow* win = reinterpret_cast<NSWindow*>(idWin);
+      NSWindow* win = idWin;
       NSString* sTitle = [NSString stringWithUTF8String:s];
       [win setTitle:sTitle];
     }
@@ -1328,17 +1328,17 @@ PRectangle Window::GetMonitorRect(Point)
 {
   if (wid)
   {
-    id idWin = reinterpret_cast<id>(wid);
+    id idWin = static_cast<id>(wid);
     if ([idWin isKindOfClass: [NSView class]])
     {
-      NSView* view = reinterpret_cast<NSView*>(idWin);
+      NSView* view = idWin;
       idWin = [view window];
     }
     if ([idWin isKindOfClass: [NSWindow class]])
     {
       PRectangle rcPosition = GetPosition();
 
-      NSWindow* win = reinterpret_cast<NSWindow*>(idWin);
+      NSWindow* win = idWin;
       NSScreen* screen = [win screen];
       NSRect rect = [screen visibleFrame];
       CGFloat screenHeight = rect.origin.y + rect.size.height;
@@ -1958,10 +1958,10 @@ void Window::Destroy()
   }
   if (wid)
   {
-    id idWin = reinterpret_cast<id>(wid);
+    id idWin = static_cast<id>(wid);
     if ([idWin isKindOfClass: [NSWindow class]])
     {
-      NSWindow* win = reinterpret_cast<NSWindow*>(idWin);
+      NSWindow* win = static_cast<NSWindow*>(idWin);
       [win release];
     }
   }
@@ -2009,7 +2009,7 @@ void Menu::CreatePopUp()
 
 void Menu::Destroy()
 {
-  ScintillaContextMenu* menu = reinterpret_cast<ScintillaContextMenu*>(mid);
+  ScintillaContextMenu* menu = static_cast<ScintillaContextMenu*>(mid);
   [menu release];
   mid = NULL;
 }
