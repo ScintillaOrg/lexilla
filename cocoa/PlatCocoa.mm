@@ -114,7 +114,7 @@ Font::~Font()
 //--------------------------------------------------------------------------------------------------
 
 static int FontCharacterSet(Font &f) {
-	return reinterpret_cast<QuartzTextStyle *>(f.GetID())->getCharacterSet();
+	return static_cast<QuartzTextStyle *>(f.GetID())->getCharacterSet();
 }
 
 /**
@@ -138,7 +138,7 @@ void Font::Create(const FontParameters &fp)
 void Font::Release()
 {
   if (fid)
-    delete reinterpret_cast<QuartzTextStyle*>( fid );
+    delete static_cast<QuartzTextStyle*>( fid );
   fid = 0;
 }
 
@@ -929,12 +929,12 @@ void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION yba
 	ColourDesired colour(fore.AsLong());
 	CGColorRef color = CGColorCreateGenericRGB(colour.GetRed()/255.0,colour.GetGreen()/255.0,colour.GetBlue()/255.0,1.0);
 
-	QuartzTextStyle* style = reinterpret_cast<QuartzTextStyle*>(font_.GetID());
+	QuartzTextStyle* style = static_cast<QuartzTextStyle*>(font_.GetID());
 	style->setCTStyleColor(color);
 
 	CGColorRelease(color);
 
-	textLayout->setText (reinterpret_cast<const UInt8*>(s), len, encoding, *reinterpret_cast<QuartzTextStyle*>(font_.GetID()));
+	textLayout->setText (reinterpret_cast<const UInt8*>(s), len, encoding, *static_cast<QuartzTextStyle*>(font_.GetID()));
 	textLayout->draw(rc.left, ybase);
 }
 
@@ -955,7 +955,7 @@ static size_t utf8LengthFromLead(unsigned char uch) {
 void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions)
 {
 	CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
-	textLayout->setText (reinterpret_cast<const UInt8*>(s), len, encoding, *reinterpret_cast<QuartzTextStyle*>(font_.GetID()));
+	textLayout->setText (reinterpret_cast<const UInt8*>(s), len, encoding, *static_cast<QuartzTextStyle*>(font_.GetID()));
 
 	CTLineRef mLine = textLayout->getCTLine();
 	assert(mLine != NULL);
@@ -1004,7 +1004,7 @@ XYPOSITION SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
   if (font_.GetID())
   {
     CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
-    textLayout->setText (reinterpret_cast<const UInt8*>(s), len, encoding, *reinterpret_cast<QuartzTextStyle*>(font_.GetID()));
+    textLayout->setText (reinterpret_cast<const UInt8*>(s), len, encoding, *static_cast<QuartzTextStyle*>(font_.GetID()));
 
 	return static_cast<XYPOSITION>(textLayout->MeasureStringWidth());
   }
@@ -1016,7 +1016,7 @@ XYPOSITION SurfaceImpl::WidthChar(Font &font_, char ch) {
   if (font_.GetID())
   {
     CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
-    textLayout->setText (reinterpret_cast<const UInt8*>(str), 1, encoding, *reinterpret_cast<QuartzTextStyle*>(font_.GetID()));
+    textLayout->setText (reinterpret_cast<const UInt8*>(str), 1, encoding, *static_cast<QuartzTextStyle*>(font_.GetID()));
 
     return textLayout->MeasureStringWidth();
   }
@@ -1032,7 +1032,7 @@ XYPOSITION SurfaceImpl::Ascent(Font &font_) {
   if (!font_.GetID())
     return 1;
 
-	float ascent = reinterpret_cast<QuartzTextStyle*>( font_.GetID() )->getAscent();
+	float ascent = static_cast<QuartzTextStyle*>( font_.GetID() )->getAscent();
 	return ascent + 0.5f;
 
 }
@@ -1041,7 +1041,7 @@ XYPOSITION SurfaceImpl::Descent(Font &font_) {
   if (!font_.GetID())
     return 1;
 
-	float descent = reinterpret_cast<QuartzTextStyle*>( font_.GetID() )->getDescent();
+	float descent = static_cast<QuartzTextStyle*>( font_.GetID() )->getDescent();
 	return descent + 0.5f;
 
 }
@@ -1054,7 +1054,7 @@ XYPOSITION SurfaceImpl::ExternalLeading(Font &font_) {
   if (!font_.GetID())
     return 1;
 
-	float leading = reinterpret_cast<QuartzTextStyle*>( font_.GetID() )->getLeading();
+	float leading = static_cast<QuartzTextStyle*>( font_.GetID() )->getLeading();
 	return leading + 0.5f;
 
 }
@@ -1655,7 +1655,7 @@ void ListBoxImpl::SetFont(Font& font_)
 {
   // NSCell setFont takes an NSFont* rather than a CTFontRef but they
   // are the same thing toll-free bridged.
-  QuartzTextStyle* style = reinterpret_cast<QuartzTextStyle*>(font_.GetID());
+  QuartzTextStyle* style = static_cast<QuartzTextStyle*>(font_.GetID());
   font.Release();
   font.SetID(new QuartzTextStyle(*style));
   NSFont *pfont = (NSFont *)style->getFontRef();
