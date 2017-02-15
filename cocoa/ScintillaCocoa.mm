@@ -388,7 +388,8 @@ const CGFloat paddingHighlightY = 2;
 - (void) idleTriggered: (NSNotification*) notification
 {
 #pragma unused(notification)
-  static_cast<ScintillaCocoa*>(mTarget)->IdleTimerFired();
+  if (mTarget)
+    static_cast<ScintillaCocoa*>(mTarget)->IdleTimerFired();
 }
 
 @end
