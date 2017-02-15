@@ -351,6 +351,9 @@ public:
 	static ILexer *LexerFactoryPython() {
 		return new LexerPython();
 	}
+
+private:
+	void ProcessLineEnd(StyleContext &sc, int *fstringStateStack, bool &inContinuedString) const;
 };
 
 Sci_Position SCI_METHOD LexerPython::PropertySet(const char *key, const char *val) {
@@ -382,10 +385,33 @@ Sci_Position SCI_METHOD LexerPython::WordListSet(int n, const char *wl) {
 	return firstModification;
 }
 
+void LexerPython::ProcessLineEnd(StyleContext &sc, int *fstringStateStack, bool &inContinuedString) const {
+	// Restore to to outermost string state if in an f-string expression and 
+	// let code below decide what to do
+	while (fstringStateStack[0] != 0) {
+		sc.SetState(PopFromStateStack(fstringStateStack, 4));
+	}
+
+	if ((sc.state == SCE_P_DEFAULT)
+		|| IsPyTripleQuoteStringState(sc.state)) {
+		// Perform colourisation of white space and triple quoted strings at end of each line to allow
+		// tab marking to work inside white space and triple quoted strings
+		sc.SetState(sc.state);
+	}
+	if (IsPySingleQuoteStringState(sc.state)) {
+		if (inContinuedString || options.stringsOverNewline) {
+			inContinuedString = false;
+		} else {
+			sc.ChangeState(SCE_P_STRINGEOL);
+			sc.ForwardSetState(SCE_P_DEFAULT);
+		}
+	}
+}
+
 void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 	Accessor styler(pAccess, NULL);
 
-	// Track whether in f-string exp; an array is used for a stack to
+	// Track whether in f-string expression; an array is used for a stack to
 	// handle nested f-strings such as f"""{f'''{f"{f'{1}'}"}'''}"""
 	int fstringStateStack[4] = { 0, };
 	const Sci_Position endPos = startPos + length;
@@ -453,21 +479,8 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 		}
 
 		if (sc.atLineEnd) {
-			if ((sc.state == SCE_P_DEFAULT)
-				|| IsPyTripleQuoteStringState(sc.state)) {
-				// Perform colourisation of white space and triple quoted strings at end of each line to allow
-				// tab marking to work inside white space and triple quoted strings
-				sc.SetState(sc.state);
-			}
+			ProcessLineEnd(sc, fstringStateStack, inContinuedString);
 			lineCurrent++;
-			if (IsPySingleQuoteStringState(sc.state)) {
-				if (inContinuedString || options.stringsOverNewline) {
-					inContinuedString = false;
-				} else {
-					sc.ChangeState(SCE_P_STRINGEOL);
-					sc.ForwardSetState(SCE_P_DEFAULT);
-				}
-			}
 			if (!sc.More())
 				break;
 		}
@@ -608,6 +621,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 				PushStateToStack(sc.state, fstringStateStack, ELEMENTS(fstringStateStack));
 				sc.ForwardSetState(SCE_P_DEFAULT);
 			}
+			needEOLCheck = true;
 		}
 		// End of code to find the end of a state
 
@@ -624,17 +638,21 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 
 		// State exit code may have moved on to end of line
 		if (needEOLCheck && sc.atLineEnd) {
+			ProcessLineEnd(sc, fstringStateStack, inContinuedString);
 			lineCurrent++;
 			styler.IndentAmount(lineCurrent, &spaceFlags, IsPyComment);
 			if (!sc.More())
 				break;
 		}
 
+		// If in f-string expression, check for } to resume f-string state
+		if (fstringStateStack[0] != 0 && sc.ch == '}') {
+			sc.SetState(PopFromStateStack(fstringStateStack, ELEMENTS(fstringStateStack)));
+		}
+
 		// Check for a new state starting character
 		if (sc.state == SCE_P_DEFAULT) {
-			if (fstringStateStack[0] != 0 && sc.ch == '}') {
-				sc.SetState(PopFromStateStack(fstringStateStack, ELEMENTS(fstringStateStack)));
-			} else if (IsADigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext))) {
+			if (IsADigit(sc.ch) || (sc.ch == '.' && IsADigit(sc.chNext))) {
 				if (sc.ch == '0' && (sc.chNext == 'x' || sc.chNext == 'X')) {
 					base_n_number = true;
 					sc.SetState(SCE_P_NUMBER);
