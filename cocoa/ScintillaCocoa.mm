@@ -357,7 +357,8 @@ const CGFloat paddingHighlightY = 2;
  */
 - (void) timerFired: (NSTimer*) timer
 {
-  static_cast<ScintillaCocoa*>(mTarget)->TimerFired(timer);
+  if (mTarget)
+    static_cast<ScintillaCocoa*>(mTarget)->TimerFired(timer);
 }
 
 //--------------------------------------------------------------------------------------------------
