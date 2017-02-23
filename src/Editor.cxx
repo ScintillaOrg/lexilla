@@ -3111,6 +3111,9 @@ SelectionPosition Editor::PositionUpOrDown(SelectionPosition spStart, int direct
 }
 
 void Editor::CursorUpOrDown(int direction, Selection::selTypes selt) {
+	if ((selt == Selection::noSel) && sel.MoveExtends()) {
+		selt = Selection::selStream;
+	}
 	SelectionPosition caretToUse = sel.Range(sel.Main()).caret;
 	if (sel.IsRectangular()) {
 		if (selt ==  Selection::noSel) {
