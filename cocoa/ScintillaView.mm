@@ -79,7 +79,8 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
       [currentCursors addObject: [reverseArrowCursor retain]];
     }
     [self setClientView:[aScrollView documentView]];
-    self.accessibilityLabel = @"Scintilla Margin";
+    if ([self respondsToSelector: @selector(setAccessibilityLabel:)])
+       self.accessibilityLabel = @"Scintilla Margin";
   }
   return self;
 }
@@ -225,12 +226,15 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
                                    NSStringPboardType, ScintillaRecPboardType, NSFilenamesPboardType, nil]];
 
     // Set up accessibility in the text role
-    self.accessibilityElement = TRUE;
-    self.accessibilityEnabled = TRUE;
-    self.accessibilityLabel = NSLocalizedString(@"Scintilla", nil);	// No real localization
-    self.accessibilityRoleDescription = @"source code editor";
-    self.accessibilityRole = NSAccessibilityTextAreaRole;
-    self.accessibilityIdentifier = @"Scintilla";
+    if ([self respondsToSelector: @selector(setAccessibilityElement:)])
+    {
+       self.accessibilityElement = TRUE;
+       self.accessibilityEnabled = TRUE;
+       self.accessibilityLabel = NSLocalizedString(@"Scintilla", nil);	// No real localization
+       self.accessibilityRoleDescription = @"source code editor";
+       self.accessibilityRole = NSAccessibilityTextAreaRole;
+       self.accessibilityIdentifier = @"Scintilla";
+    }
   }
 
   return self;
