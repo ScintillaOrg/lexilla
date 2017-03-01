@@ -48,6 +48,7 @@
 #include "CaseFolder.h"
 #include "Document.h"
 #include "CaseConvert.h"
+#include "UniConversion.h"
 #include "Selection.h"
 #include "PositionCache.h"
 #include "EditModel.h"

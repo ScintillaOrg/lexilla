@@ -437,6 +437,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   [mOwner message: SCI_SETTARGETRANGE wParam: posRange.location lParam: NSMaxRange(posRange)];
   std::string text([mOwner message: SCI_TARGETASUTF8] + 1, 0);
   [mOwner message: SCI_TARGETASUTF8 wParam: 0 lParam: reinterpret_cast<sptr_t>(&text[0])];
+  text = FixInvalidUTF8(text);
   NSString *result = [NSString stringWithUTF8String: text.c_str()];
   NSMutableAttributedString *asResult = [[[NSMutableAttributedString alloc] initWithString:result] autorelease];
 
