@@ -569,7 +569,17 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   const NSRange posRangeSel = [mOwner selectedRangePositions];
   if (posRangeSel.length == 0)
   {
-    return NSMakeRange(NSNotFound, 0);
+    NSTextInputContext *tic = [NSTextInputContext currentInputContext];
+    // Chinese input causes malloc crash when empty selection returned with actual
+    // position so return NSNotFound.
+    // If this is applied to European input, it stops the accented character
+    // chooser from appearing.
+    // May need to add more input source names.
+    if ([tic.selectedKeyboardInputSource
+         isEqualToString:@"com.apple.inputmethod.TCIM.Cangjie"])
+    {
+      return NSMakeRange(NSNotFound, 0);
+    }
   }
   return mOwner.backend->CharactersFromPositions(posRangeSel);
 }
