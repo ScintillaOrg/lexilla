@@ -2643,7 +2643,9 @@ void ScintillaCocoa::ShowFindIndicatorForRange(NSRange charRange, BOOL retaining
         CFRelease(cfsFind);
     layerFindIndicator.retaining = retaining;
     layerFindIndicator.positionFind = static_cast<int>(charRange.location);
-    long style = WndProc(SCI_GETSTYLEAT, charRange.location, 0);
+    // SCI_GETSTYLEAT reports a signed byte but want an unsigned to index into styles
+    const char styleByte = static_cast<char>(WndProc(SCI_GETSTYLEAT, charRange.location, 0));
+    const long style = static_cast<unsigned char>(styleByte);
     std::vector<char> bufferFontName(WndProc(SCI_STYLEGETFONT, style, 0) + 1);
     WndProc(SCI_STYLEGETFONT, style, (sptr_t)&bufferFontName[0]);
     layerFindIndicator.sFont = [NSString stringWithUTF8String: &bufferFontName[0]];

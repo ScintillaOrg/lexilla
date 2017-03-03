@@ -442,7 +442,9 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   NSMutableAttributedString *asResult = [[[NSMutableAttributedString alloc] initWithString:result] autorelease];
 
   const NSRange rangeAS = NSMakeRange(0, [asResult length]);
-  const long style = [mOwner message: SCI_GETSTYLEAT wParam:posRange.location];
+  // SCI_GETSTYLEAT reports a signed byte but want an unsigned to index into styles
+  const char styleByte = static_cast<char>([mOwner message: SCI_GETSTYLEAT wParam:posRange.location]);
+  const long style = static_cast<unsigned char>(styleByte);
   std::string fontName([mOwner message: SCI_STYLEGETFONT wParam:style lParam:0] + 1, 0);
   [mOwner message: SCI_STYLEGETFONT wParam:style lParam:(sptr_t)&fontName[0]];
   const CGFloat fontSize = [mOwner message: SCI_STYLEGETSIZEFRACTIONAL wParam:style] / 100.0f;
