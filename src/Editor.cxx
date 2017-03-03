@@ -3934,7 +3934,7 @@ public:
 	CaseFolderASCII() {
 		StandardASCII();
 	}
-	~CaseFolderASCII() {
+	~CaseFolderASCII() override {
 	}
 };
 

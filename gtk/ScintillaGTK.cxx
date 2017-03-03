@@ -1133,7 +1133,7 @@ public:
 	explicit CaseFolderDBCS(const char *charSet_) : charSet(charSet_) {
 		StandardASCII();
 	}
-	virtual size_t Fold(char *folded, size_t sizeFolded, const char *mixed, size_t lenMixed) {
+	size_t Fold(char *folded, size_t sizeFolded, const char *mixed, size_t lenMixed) override {
 		if ((lenMixed == 1) && (sizeFolded > 0)) {
 			folded[0] = mapping[static_cast<unsigned char>(mixed[0])];
 			return 1;
@@ -1278,7 +1278,7 @@ void ScintillaGTK::Paste() {
 	class Helper : GObjectWatcher {
 		ScintillaGTK *sci;
 
-		virtual void Destroyed() {
+		void Destroyed() override {
 			sci = 0;
 		}
 

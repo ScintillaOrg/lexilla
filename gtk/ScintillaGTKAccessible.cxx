@@ -736,7 +736,7 @@ void ScintillaGTKAccessible::PasteText(int charPosition) {
 		ScintillaGTKAccessible *scia;
 		Position bytePosition;
 
-		virtual void Destroyed() {
+		void Destroyed() override {
 			scia = 0;
 		}
 
