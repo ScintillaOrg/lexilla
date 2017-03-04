@@ -1569,41 +1569,41 @@ public:
     doubleClickActionData(nullptr)
   {
   }
-  ~ListBoxImpl() {}
+  ~ListBoxImpl() override {}
 
   // ListBox methods
-  void SetFont(Font& font);
-  void Create(Window& parent, int ctrlID, Scintilla::Point pt, int lineHeight_, bool unicodeMode_, int technology_);
-  void SetAverageCharWidth(int width);
-  void SetVisibleRows(int rows);
-  int GetVisibleRows() const;
-  PRectangle GetDesiredRect();
-  int CaretFromEdge();
-  void Clear();
-  void Append(char* s, int type = -1);
-  int Length();
-  void Select(int n);
-  int GetSelection();
-  int Find(const char* prefix);
-  void GetValue(int n, char* value, int len);
-  void RegisterImage(int type, const char* xpm_data);
-  void RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage);
-  void ClearRegisteredImages();
-  void SetDoubleClickAction(CallBackAction action, void* data)
+  void SetFont(Font& font) override;
+  void Create(Window& parent, int ctrlID, Scintilla::Point pt, int lineHeight_, bool unicodeMode_, int technology_) override;
+  void SetAverageCharWidth(int width) override;
+  void SetVisibleRows(int rows) override;
+  int GetVisibleRows() const override;
+  PRectangle GetDesiredRect() override;
+  int CaretFromEdge() override;
+  void Clear() override;
+  void Append(char* s, int type = -1) override;
+  int Length() override;
+  void Select(int n) override;
+  int GetSelection() override;
+  int Find(const char* prefix) override;
+  void GetValue(int n, char* value, int len) override;
+  void RegisterImage(int type, const char* xpm_data) override;
+  void RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage) override;
+  void ClearRegisteredImages() override;
+  void SetDoubleClickAction(CallBackAction action, void* data) override
   {
     doubleClickAction = action;
     doubleClickActionData = data;
   }
-  void SetList(const char* list, char separator, char typesep);
+  void SetList(const char* list, char separator, char typesep) override;
 
   // To clean up when closed
   void ReleaseViews();
 
   // For access from AutoCompletionDataSource implement IListBox
-  int Rows();
-  NSImage* ImageForRow(NSInteger row);
-  NSString* TextForRow(NSInteger row);
-  void DoubleClick();
+  int Rows() override;
+  NSImage* ImageForRow(NSInteger row) override;
+  NSString* TextForRow(NSInteger row) override;
+  void DoubleClick() override;
 };
 
 void ListBoxImpl::Create(Window& /*parent*/, int /*ctrlID*/, Scintilla::Point pt,

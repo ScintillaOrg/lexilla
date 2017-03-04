@@ -68,55 +68,55 @@ private:
   static const int BYTES_PER_PIXEL = BITS_PER_PIXEL / 8;
 public:
   SurfaceImpl();
-  ~SurfaceImpl();
+  ~SurfaceImpl() override;
 
-  void Init(WindowID wid);
-  void Init(SurfaceID sid, WindowID wid);
-  void InitPixMap(int width, int height, Surface *surface_, WindowID wid);
+  void Init(WindowID wid) override;
+  void Init(SurfaceID sid, WindowID wid) override;
+  void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
   CGContextRef GetContext() { return gc; }
 
-  void Release();
-  bool Initialised();
-  void PenColour(ColourDesired fore);
+  void Release() override;
+  bool Initialised() override;
+  void PenColour(ColourDesired fore) override;
 
   /** Returns a CGImageRef that represents the surface. Returns NULL if this is not possible. */
   CGImageRef GetImage();
   void CopyImageRectangle(Surface &surfaceSource, PRectangle srcRect, PRectangle dstRect);
 
-  int LogPixelsY();
-  int DeviceHeightFont(int points);
-  void MoveTo(int x_, int y_);
-  void LineTo(int x_, int y_);
-  void Polygon(Scintilla::Point *pts, int npts, ColourDesired fore, ColourDesired back);
-  void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back);
-  void FillRectangle(PRectangle rc, ColourDesired back);
-  void FillRectangle(PRectangle rc, Surface &surfacePattern);
-  void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back);
+  int LogPixelsY() override;
+  int DeviceHeightFont(int points) override;
+  void MoveTo(int x_, int y_) override;
+  void LineTo(int x_, int y_) override;
+  void Polygon(Scintilla::Point *pts, int npts, ColourDesired fore, ColourDesired back) override;
+  void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;
+  void FillRectangle(PRectangle rc, ColourDesired back) override;
+  void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
+  void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
   void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
-                     ColourDesired outline, int alphaOutline, int flags);
-  void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage);
-  void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back);
-  void Copy(PRectangle rc, Scintilla::Point from, Surface &surfaceSource);
+                     ColourDesired outline, int alphaOutline, int flags) override;
+  void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) override;
+  void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
+  void Copy(PRectangle rc, Scintilla::Point from, Surface &surfaceSource) override;
   void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore,
-                     ColourDesired back);
+                     ColourDesired back) override;
   void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore,
-                      ColourDesired back);
-  void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore);
-  void MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions);
-  XYPOSITION WidthText(Font &font_, const char *s, int len);
-  XYPOSITION WidthChar(Font &font_, char ch);
-  XYPOSITION Ascent(Font &font_);
-  XYPOSITION Descent(Font &font_);
-  XYPOSITION InternalLeading(Font &font_);
-  XYPOSITION ExternalLeading(Font &font_);
-  XYPOSITION Height(Font &font_);
-  XYPOSITION AverageCharWidth(Font &font_);
+                      ColourDesired back) override;
+  void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore) override;
+  void MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions) override;
+  XYPOSITION WidthText(Font &font_, const char *s, int len) override;
+  XYPOSITION WidthChar(Font &font_, char ch) override;
+  XYPOSITION Ascent(Font &font_) override;
+  XYPOSITION Descent(Font &font_) override;
+  XYPOSITION InternalLeading(Font &font_) override;
+  XYPOSITION ExternalLeading(Font &font_) override;
+  XYPOSITION Height(Font &font_) override;
+  XYPOSITION AverageCharWidth(Font &font_) override;
 
-  void SetClip(PRectangle rc);
-  void FlushCachedState();
+  void SetClip(PRectangle rc) override;
+  void FlushCachedState() override;
 
-  void SetUnicodeMode(bool unicodeMode_);
-  void SetDBCSMode(int codePage_);
+  void SetUnicodeMode(bool unicodeMode_) override;
+  void SetDBCSMode(int codePage_) override;
 }; // SurfaceImpl class
 
 } // Scintilla namespace
