@@ -525,12 +525,13 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 		return;
 	}
 
+	bool initialCompose = false;
 	if (sqt->pdoc->TentativeActive()) {
 		sqt->pdoc->TentativeUndo();
 	} else {
 		// No tentative undo means start of this composition so
 		// Fill in any virtual spaces.
-		sqt->ClearBeforeTentativeStart();
+		initialCompose = true;
 	}
 
 	sqt->view.imeCaretBlockOverride = false;
@@ -557,6 +558,8 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 			return;
 		}
 
+		if (initialCompose)
+			sqt->ClearBeforeTentativeStart();
 		sqt->pdoc->TentativeStart(); // TentativeActive() from now on.
 
 		std::vector<int> imeIndicator = MapImeIndicators(event);

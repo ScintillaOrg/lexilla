@@ -1061,12 +1061,13 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 		return 0;
 	}
 
+	bool initialCompose = false;
 	if (pdoc->TentativeActive()) {
 		pdoc->TentativeUndo();
 	} else {
 		// No tentative undo means start of this composition so
 		// fill in any virtual spaces.
-		ClearBeforeTentativeStart();
+		initialCompose = true;
 	}
 
 	view.imeCaretBlockOverride = false;
@@ -1078,6 +1079,8 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 			return 0;
 		}
 
+		if (initialCompose)
+			ClearBeforeTentativeStart();
 		pdoc->TentativeStart(); // TentativeActive from now on.
 
 		std::vector<int> imeIndicator = MapImeIndicators(imc.GetImeAttributes());

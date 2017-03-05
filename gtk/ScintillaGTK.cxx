@@ -2323,12 +2323,13 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 
 		view.imeCaretBlockOverride = false; // If backspace.
 
+		bool initialCompose = false;
 		if (pdoc->TentativeActive()) {
 			pdoc->TentativeUndo();
 		} else {
 			// No tentative undo means start of this composition so
 			// fill in any virtual spaces.
-			ClearBeforeTentativeStart();
+			initialCompose = true;
 		}
 
 		PreEditString preeditStr(im_context);
@@ -2345,6 +2346,8 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 			return;
 		}
 
+		if (initialCompose)
+			ClearBeforeTentativeStart();
 		pdoc->TentativeStart(); // TentativeActive() from now on
 
 		std::vector<int> indicator = MapImeIndicators(preeditStr.attrs, preeditStr.str);
