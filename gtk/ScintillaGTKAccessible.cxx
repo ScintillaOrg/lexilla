@@ -60,6 +60,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <memory>
 
 #include <glib.h>
 #include <gtk/gtk.h>

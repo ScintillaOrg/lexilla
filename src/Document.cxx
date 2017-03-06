@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <memory>
 
 #define NOEXCEPT
 
@@ -140,8 +141,7 @@ Document::~Document() {
 		delete perLineData[j];
 		perLineData[j] = 0;
 	}
-	delete regex;
-	regex = 0;
+	regex.release();
 	delete pli;
 	pli = 0;
 	delete pcf;
@@ -1848,7 +1848,7 @@ long Document::FindText(int minPos, int maxPos, const char *search,
 	const bool regExp = (flags & SCFIND_REGEXP) != 0;
 	if (regExp) {
 		if (!regex)
-			regex = CreateRegexSearch(&charClass);
+			regex = std::unique_ptr<RegexSearchBase>(CreateRegexSearch(&charClass));
 		return regex->FindText(this, minPos, maxPos, search, caseSensitive, word, wordStart, flags, length);
 	} else {
 

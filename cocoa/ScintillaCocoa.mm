@@ -1897,7 +1897,7 @@ void ScintillaCocoa::WillDraw(NSRect rect)
   pdoc->StyleToAdjustingLineDuration(posAfterMax);
   StartIdleStyling(posAfterMax < posAfterArea);
   NotifyUpdateUI();
-  if (WrapLines(wsVisible)) {
+  if (WrapLines(WrapScope::wsVisible)) {
     // Wrap may have reduced number of lines so more lines may need to be styled
     const int posAfterAreaWrapped = PositionAfterArea(rcWillDraw);
     pdoc->EnsureStyledTo(posAfterAreaWrapped);

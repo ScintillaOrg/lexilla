@@ -19,6 +19,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <memory>
 
 #undef _WIN32_WINNT
 #define _WIN32_WINNT 0x0500

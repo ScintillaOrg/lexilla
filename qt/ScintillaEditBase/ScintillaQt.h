@@ -23,6 +23,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <memory>
 
 #include "Scintilla.h"
 #include "Platform.h"
