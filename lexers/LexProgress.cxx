@@ -277,10 +277,15 @@ void SCI_METHOD LexerABL::Lex(Sci_PositionU startPos, Sci_Position length, int i
 
          // commentNestingLevel is a non-visible state, used to identify the nesting level of a comment
          if (checkCommentNestingLevel) {
-            if (chPrev == '/' && ch == '*')
+            if (chPrev == '/' && ch == '*') {
                commentNestingLevel++;
+               // eat the '/' so we don't miscount a */ if we see /*/*
+               --back;
+            }
             if (chPrev == '*' && ch == '/') {
                commentNestingLevel--;
+               // eat the '*' so we don't miscount a /* if we see */*/
+               --back;
             }
          }         
          --back;
