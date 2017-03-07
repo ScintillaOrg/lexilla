@@ -1887,7 +1887,7 @@ long Document::FindText(int minPos, int maxPos, const char *search,
 			}
 		} else if (SC_CP_UTF8 == dbcsCodePage) {
 			const size_t maxFoldingExpansion = 4;
-			std::vector<char> searchThing(lengthFind * UTF8MaxBytes * maxFoldingExpansion + 1);
+			std::vector<char> searchThing((lengthFind+1) * UTF8MaxBytes * maxFoldingExpansion + 1);
 			const int lenSearch = static_cast<int>(
 				pcf->Fold(&searchThing[0], searchThing.size(), search, lengthFind));
 			char bytes[UTF8MaxBytes + 1];
@@ -1914,6 +1914,8 @@ long Document::FindText(int minPos, int maxPos, const char *search,
 						break;
 					const int lenFlat = static_cast<int>(pcf->Fold(folded, sizeof(folded), bytes, widthChar));
 					folded[lenFlat] = 0;
+					// memcmp may examine lenFlat bytes in both arguments so assert it doesn't read past end of searchThing
+					assert(static_cast<size_t>(indexSearch + lenFlat) <= searchThing.size());
 					// Does folded match the buffer
 					characterMatches = 0 == memcmp(folded, &searchThing[0] + indexSearch, lenFlat);
 					if (!characterMatches)
@@ -1939,7 +1941,7 @@ long Document::FindText(int minPos, int maxPos, const char *search,
 		} else if (dbcsCodePage) {
 			const size_t maxBytesCharacter = 2;
 			const size_t maxFoldingExpansion = 4;
-			std::vector<char> searchThing(lengthFind * maxBytesCharacter * maxFoldingExpansion + 1);
+			std::vector<char> searchThing((lengthFind+1) * maxBytesCharacter * maxFoldingExpansion + 1);
 			const int lenSearch = static_cast<int>(
 				pcf->Fold(&searchThing[0], searchThing.size(), search, lengthFind));
 			while (forward ? (pos < endPos) : (pos >= endPos)) {
@@ -1959,6 +1961,8 @@ long Document::FindText(int minPos, int maxPos, const char *search,
 					char folded[maxBytesCharacter * maxFoldingExpansion + 1];
 					const int lenFlat = static_cast<int>(pcf->Fold(folded, sizeof(folded), bytes, widthChar));
 					folded[lenFlat] = 0;
+					// memcmp may examine lenFlat bytes in both arguments so assert it doesn't read past end of searchThing
+					assert(static_cast<size_t>(indexSearch + lenFlat) <= searchThing.size());
 					// Does folded match the buffer
 					characterMatches = 0 == memcmp(folded, &searchThing[0] + indexSearch, lenFlat);
 					indexDocument += widthChar;
