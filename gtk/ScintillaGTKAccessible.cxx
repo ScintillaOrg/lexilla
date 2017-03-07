@@ -788,6 +788,10 @@ void ScintillaGTKAccessible::AtkEditableTextIface::init(::AtkEditableTextIface *
 	//~ iface->set_run_attributes = SetRunAttributes;
 }
 
+bool ScintillaGTKAccessible::Enabled() const {
+	return sci->accessibilityEnabled == SC_ACCESSIBILITY_ENABLED;
+}
+
 // Callbacks
 
 void ScintillaGTKAccessible::UpdateCursor() {
@@ -820,6 +824,10 @@ void ScintillaGTKAccessible::UpdateCursor() {
 }
 
 void ScintillaGTKAccessible::ChangeDocument(Document *oldDoc, Document *newDoc) {
+	if (!Enabled()) {
+		return;
+	}
+
 	if (oldDoc == newDoc) {
 		return;
 	}
@@ -854,9 +862,24 @@ void ScintillaGTKAccessible::NotifyReadOnly() {
 #endif
 }
 
+void ScintillaGTKAccessible::SetAccessibility() {
+	// Called by ScintillaGTK when application has enabled or disabled accessibility
+	character_offsets.resize(0);
+	character_offsets.push_back(0);
+}
+
 void ScintillaGTKAccessible::Notify(GtkWidget *, gint, SCNotification *nt) {
+	if (!Enabled())
+		return;
 	switch (nt->nmhdr.code) {
 		case SCN_MODIFIED: {
+			if (nt->modificationType & (SC_MOD_INSERTTEXT | SC_MOD_DELETETEXT)) {
+				// invalidate character offset cache if applicable
+				const Position line = sci->pdoc->LineFromPosition(nt->position);
+				if (character_offsets.size() > static_cast<size_t>(line + 1)) {
+					character_offsets.resize(line + 1);
+				}
+			}
 			if (nt->modificationType & (SC_MOD_INSERTTEXT | SC_MOD_DELETETEXT)) {
 				// invalidate character offset cache if applicable
 				const Position line = sci->pdoc->LineFromPosition(nt->position);

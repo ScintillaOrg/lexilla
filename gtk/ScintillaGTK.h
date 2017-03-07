@@ -68,6 +68,7 @@ class ScintillaGTK : public ScintillaBase {
 	bool repaintFullWindow;
 
 	guint styleIdleID;
+	int accessibilityEnabled;
 	AtkObject *accessible;
 
 	// Private so ScintillaGTK objects can not be copied

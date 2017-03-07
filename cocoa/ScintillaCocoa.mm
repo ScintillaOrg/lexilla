@@ -906,6 +906,9 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
           return r;
         }
 
+      case SCI_GETACCESSIBILITY:
+          return SC_ACCESSIBILITY_ENABLED;
+
       default:
         sptr_t r = ScintillaBase::WndProc(iMessage, wParam, lParam);
 

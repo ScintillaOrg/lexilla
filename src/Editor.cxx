@@ -7554,6 +7554,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		std::vector<EdgeProperties>().swap(vs.theMultiEdge); // Free vector and memory, C++03 compatible
 		InvalidateStyleRedraw();
 		break;
+	
+	case SCI_GETACCESSIBILITY:
+		return SC_ACCESSIBILITY_DISABLED;
+
+	case SCI_SETACCESSIBILITY:
+		// May be implemented by platform code.
+		break;
 
 	case SCI_GETDOCPOINTER:
 		return reinterpret_cast<sptr_t>(pdoc);

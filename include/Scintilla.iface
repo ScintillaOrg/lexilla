@@ -1476,6 +1476,16 @@ fun void SetFoldMarginColour=2290(bool useSetting, colour back)
 # Set the other colour used as a chequerboard pattern in the fold margin
 fun void SetFoldMarginHiColour=2291(bool useSetting, colour fore)
 
+enu Accessibility=SC_ACCESSIBILITY_
+val SC_ACCESSIBILITY_DISABLED=0
+val SC_ACCESSIBILITY_ENABLED=1
+
+# Enable or disable accessibility.
+set void SetAccessibility=2702(int accessibility,)
+
+# Report accessibility status.
+get int GetAccessibility=2703(,)
+
 ## New messages go here
 
 ## Start of key messages

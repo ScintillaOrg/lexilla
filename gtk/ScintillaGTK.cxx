@@ -175,6 +175,7 @@ ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 		rgnUpdate(0),
 		repaintFullWindow(false),
 		styleIdleID(0),
+		accessibilityEnabled(SC_ACCESSIBILITY_ENABLED),
 		accessible(0) {
 	sci = sci_;
 	wMain = GTK_WIDGET(sci);
@@ -874,6 +875,19 @@ sptr_t ScintillaGTK::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			}
 			return ret;
 		}
+
+		case SCI_GETACCESSIBILITY:
+			return accessibilityEnabled;
+
+		case SCI_SETACCESSIBILITY:
+			accessibilityEnabled = wParam;
+			if (accessible) {
+				ScintillaGTKAccessible *sciAccessible = ScintillaGTKAccessible::FromAccessible(accessible);
+				if (sciAccessible) {
+					sciAccessible->SetAccessibility();
+				}
+			}
+			break;
 
 		default:
 			return ScintillaBase::WndProc(iMessage, wParam, lParam);

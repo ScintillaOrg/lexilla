@@ -23,12 +23,16 @@ private:
 	// cache holding character offset for each line start, see CharacterOffsetFromByteOffset()
 	std::vector<Position> character_offsets;
 
+	// cache holding character offset for each line start, see CharacterOffsetFromByteOffset()
+	std::vector<Position> character_offsets;
+
 	// cached length of the deletion, in characters (see Notify())
 	int deletionLengthChar;
 	// local state for comparing
 	Position old_pos;
 	std::vector<SelectionRange> old_sels;
 
+	bool Enabled() const;
 	void UpdateCursor();
 	void Notify(GtkWidget *widget, gint code, SCNotification *nt);
 	static void SciNotify(GtkWidget *widget, gint code, SCNotification *nt, gpointer data) {
@@ -136,6 +140,7 @@ public:
 	// So ScintillaGTK can notify us
 	void ChangeDocument(Document *oldDoc, Document *newDoc);
 	void NotifyReadOnly();
+	void SetAccessibility();
 
 	// Helper GtkWidget methods
 	static AtkObject *WidgetGetAccessibleImpl(GtkWidget *widget, AtkObject **cache, gpointer widget_parent_class);
