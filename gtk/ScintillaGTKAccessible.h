@@ -23,9 +23,6 @@ private:
 	// cache holding character offset for each line start, see CharacterOffsetFromByteOffset()
 	std::vector<Position> character_offsets;
 
-	// cache holding character offset for each line start, see CharacterOffsetFromByteOffset()
-	std::vector<Position> character_offsets;
-
 	// cached length of the deletion, in characters (see Notify())
 	int deletionLengthChar;
 	// local state for comparing
