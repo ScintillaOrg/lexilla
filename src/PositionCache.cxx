@@ -392,7 +392,7 @@ static inline int KeyFromString(const char *charBytes, size_t len) {
 }
 
 SpecialRepresentations::SpecialRepresentations() {
-	std::fill(startByteHasReprs, startByteHasReprs+0x100, 0);
+	std::fill(startByteHasReprs, startByteHasReprs+0x100, static_cast<short>(0));
 }
 
 void SpecialRepresentations::SetRepresentation(const char *charBytes, const char *value) {
@@ -433,7 +433,7 @@ bool SpecialRepresentations::Contains(const char *charBytes, size_t len) const {
 
 void SpecialRepresentations::Clear() {
 	mapReprs.clear();
-	std::fill(startByteHasReprs, startByteHasReprs+0x100, 0);
+	std::fill(startByteHasReprs, startByteHasReprs+0x100, static_cast<short>(0));
 }
 
 void BreakFinder::Insert(int val) {
