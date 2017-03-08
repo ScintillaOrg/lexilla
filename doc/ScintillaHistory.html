@@ -538,6 +538,14 @@
 	are adjacent like "/*/*" or "*/*/".
 	</li>
 	<li>
+	In the Python lexer, improve f-string support.
+	Add support for multiline expressions in triple quoted f-strings.
+	Handle nested "()", "[]", and "{}" in f-string expressions and terminate expression coloring at ":" or "!".
+	End f-string if ending quote is seen in a "{}" expression.  
+	Fix terminating single quoted f-string at EOL.
+	<a href="http://sourceforge.net/p/scintilla/bugs/1918/">Bug #1918</a>.
+	</li>
+	<li>
 	The VHDL folder folds an "entity" on the first line of the file.
 	</li>
 	<li>

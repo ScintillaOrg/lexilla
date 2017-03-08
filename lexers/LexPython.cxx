@@ -38,6 +38,28 @@ using namespace Scintilla;
 namespace {
 	// Use an unnamed namespace to protect the functions and classes from name conflicts
 
+/* Notes on f-strings: f-strings are strings prefixed with f (e.g. f'') that may
+   have arbitrary expressions in {}.  The tokens in the expressions are lexed as if
+   they were outside of any string.  Expressions may contain { and } characters as
+   long as there is a closing } for every {, may be 2+ lines in a triple quoted
+   string, and may have a formatting specifier following a ! or :, but both !
+   and : are valid inside of a bracketed expression and != is a valid
+   expression token even outside of a bracketed expression.
+
+   When in an f-string expression, the lexer keeps track of the state value of
+   the f-string and the nesting count for the expression (# of [, (, { seen - # of
+   }, ), ] seen).  f-strings may be nested (e.g. f'{ a + f"{1+2}"') so a stack of
+   states and nesting counts is kept.  If a f-string expression continues beyond
+   the end of a line, this stack is saved in a std::map that maps a line number to
+   the stack at the end of that line.  std::vector is used for the stack.
+
+   The PEP for f-strings is at https://www.python.org/dev/peps/pep-0498/
+*/
+struct SingleFStringExpState {
+	int state;
+	int nestingCount;
+};
+
 /* kwCDef, kwCTypeName only used for Cython */
 enum kwType { kwOther, kwClass, kwDef, kwImport, kwCDef, kwCTypeName, kwCPDef };
 
@@ -86,20 +108,40 @@ bool IsPyTripleQuoteStringState(int st) {
 		(st == SCE_P_FTRIPLE) || (st == SCE_P_FTRIPLEDOUBLE));
 }
 
-void PushStateToStack(int state, int *stack, int stackSize) {
-	for (int i = stackSize-1; i > 0; i--) {
-		stack[i] = stack[i-1];
-	}
-	stack[0] = state;
+char GetPyStringQuoteChar(int st) {
+	if ((st == SCE_P_CHARACTER) || (st == SCE_P_FCHARACTER) ||
+			(st == SCE_P_TRIPLE) || (st == SCE_P_FTRIPLE))
+		return '\'';
+	if ((st == SCE_P_STRING) || (st == SCE_P_FSTRING) ||
+			(st == SCE_P_TRIPLEDOUBLE) || (st == SCE_P_FTRIPLEDOUBLE))
+		return '"';
+
+	return '\0';
 }
 
-int PopFromStateStack(int *stack, int stackSize) {
-	int top = stack[0];
-	for (int i = 0; i < stackSize - 1; i++) {
-		stack[i] = stack[i+1];
+void PushStateToStack(int state, std::vector<SingleFStringExpState>& stack, SingleFStringExpState*& currentFStringExp) {
+	SingleFStringExpState single = {state, 0};
+	stack.push_back(single);
+
+	currentFStringExp = &stack.back();
+}
+
+int PopFromStateStack(std::vector<SingleFStringExpState>& stack, SingleFStringExpState*& currentFStringExp) {
+	int state = 0;
+
+	if (!stack.empty()) {
+		state = stack.back().state;
+		stack.pop_back();
 	}
-	stack[stackSize-1] = 0;
-	return top;
+
+	if (stack.empty()) {
+		currentFStringExp = NULL;
+	}
+	else {
+		currentFStringExp = &stack.back();
+	}
+
+	return state;
 }
 
 /* Return the state to use for the string starting at i; *nextIndex will be set to the first index following the quote(s) */
@@ -282,6 +324,7 @@ class LexerPython : public ILexerWithSubStyles {
 	OptionSetPython osPython;
 	enum { ssIdentifier };
 	SubStyles subStyles;
+	std::map<int, std::vector<SingleFStringExpState> > ftripleStateAtEol;
 public:
 	explicit LexerPython() :
 		subStyles(styleSubable, 0x80, 0x40, 0) {
@@ -353,7 +396,7 @@ public:
 	}
 
 private:
-	void ProcessLineEnd(StyleContext &sc, int *fstringStateStack, bool &inContinuedString) const;
+	void ProcessLineEnd(StyleContext &sc, std::vector<SingleFStringExpState>& fstringStateStack, SingleFStringExpState*& currentFStringExp, bool &inContinuedString);
 };
 
 Sci_Position SCI_METHOD LexerPython::PropertySet(const char *key, const char *val) {
@@ -385,11 +428,30 @@ Sci_Position SCI_METHOD LexerPython::WordListSet(int n, const char *wl) {
 	return firstModification;
 }
 
-void LexerPython::ProcessLineEnd(StyleContext &sc, int *fstringStateStack, bool &inContinuedString) const {
-	// Restore to to outermost string state if in an f-string expression and 
-	// let code below decide what to do
-	while (fstringStateStack[0] != 0) {
-		sc.SetState(PopFromStateStack(fstringStateStack, 4));
+void LexerPython::ProcessLineEnd(StyleContext &sc, std::vector<SingleFStringExpState>& fstringStateStack, SingleFStringExpState*& currentFStringExp, bool &inContinuedString) {
+	long deepestSingleStateIndex = -1;
+	unsigned long i;
+
+	// Find the deepest single quote state because that string will end; no \ continuation in f-string
+	for (i = 0; i < fstringStateStack.size(); i++) {
+		if (IsPySingleQuoteStringState(fstringStateStack[i].state)) {
+			deepestSingleStateIndex = i;
+			break;
+		}
+	}
+
+	if (deepestSingleStateIndex != -1) {
+		sc.SetState(fstringStateStack[deepestSingleStateIndex].state);
+		while (fstringStateStack.size() > (unsigned long)deepestSingleStateIndex) {
+			PopFromStateStack(fstringStateStack, currentFStringExp);
+		}
+	}
+	if (!fstringStateStack.empty()) {
+		std::pair<int, std::vector<SingleFStringExpState> > val;
+		val.first = sc.currentLine;
+		val.second = fstringStateStack;
+
+		ftripleStateAtEol.insert(val);
 	}
 
 	if ((sc.state == SCE_P_DEFAULT)
@@ -411,9 +473,11 @@ void LexerPython::ProcessLineEnd(StyleContext &sc, int *fstringStateStack, bool 
 void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 	Accessor styler(pAccess, NULL);
 
-	// Track whether in f-string expression; an array is used for a stack to
+	// Track whether in f-string expression; vector is used for a stack to
 	// handle nested f-strings such as f"""{f'''{f"{f'{1}'}"}'''}"""
-	int fstringStateStack[4] = { 0, };
+	std::vector<SingleFStringExpState> fstringStateStack;
+	SingleFStringExpState* currentFStringExp = NULL;
+
 	const Sci_Position endPos = startPos + length;
 
 	// Backtrack to previous line in case need to fix its tab whinging
@@ -443,6 +507,17 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 	initStyle = initStyle & 31;
 	if (initStyle == SCE_P_STRINGEOL) {
 		initStyle = SCE_P_DEFAULT;
+	}
+
+	// Set up fstate stack from last line and remove any subsequent ftriple at eol states
+	std::map<int, std::vector<SingleFStringExpState> >::iterator it;
+	it = ftripleStateAtEol.find(lineCurrent - 1);
+	if (it != ftripleStateAtEol.end()) {
+		fstringStateStack = it->second;
+	}
+	it = ftripleStateAtEol.lower_bound(lineCurrent);
+	if (it != ftripleStateAtEol.end()) {
+		ftripleStateAtEol.erase(it, ftripleStateAtEol.end());
 	}
 
 	kwType kwLast = kwOther;
@@ -479,7 +554,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 		}
 
 		if (sc.atLineEnd) {
-			ProcessLineEnd(sc, fstringStateStack, inContinuedString);
+			ProcessLineEnd(sc, fstringStateStack, currentFStringExp, inContinuedString);
 			lineCurrent++;
 			if (!sc.More())
 				break;
@@ -583,12 +658,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 					// Don't roll over the newline.
 					sc.Forward();
 				}
-			} else if (((sc.state == SCE_P_STRING || sc.state == SCE_P_FSTRING))
-				   && (sc.ch == '\"')) {
-				sc.ForwardSetState(SCE_P_DEFAULT);
-				needEOLCheck = true;
-			} else if (((sc.state == SCE_P_CHARACTER) || (sc.state == SCE_P_FCHARACTER))
-				   && (sc.ch == '\'')) {
+			} else if (sc.ch == GetPyStringQuoteChar(sc.state)) {
 				sc.ForwardSetState(SCE_P_DEFAULT);
 				needEOLCheck = true;
 			}
@@ -611,17 +681,50 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 				needEOLCheck = true;
 			}
 		}
-		
+
 		// Note if used and not if else because string states also match
 		// some of the above clauses
 		if (IsPyFStringState(sc.state) && sc.ch == '{') {
 			if (sc.chNext == '{') {
 				sc.Forward();
 			} else {
-				PushStateToStack(sc.state, fstringStateStack, ELEMENTS(fstringStateStack));
+				PushStateToStack(sc.state, fstringStateStack, currentFStringExp);
 				sc.ForwardSetState(SCE_P_DEFAULT);
 			}
 			needEOLCheck = true;
+		}
+
+		// If in an f-string expression, check for the ending quote(s)
+		// and end f-string to handle syntactically incorrect cases like
+		// f'{' and f"""{"""
+		if (!fstringStateStack.empty() && (sc.ch == '\'' || sc.ch == '"')) {
+			long matching_stack_i = -1;
+			for (unsigned long stack_i = 0; stack_i < fstringStateStack.size() && matching_stack_i == -1; stack_i++) {
+				int stack_state = fstringStateStack[stack_i].state;
+				char quote = GetPyStringQuoteChar(stack_state);
+				if (sc.ch == quote) {
+					if (IsPySingleQuoteStringState(stack_state)) {
+						matching_stack_i = stack_i;
+					}
+					else if (quote == '"' ? sc.Match("\"\"\"") : sc.Match("'''")) {
+						matching_stack_i = stack_i;
+					}
+				}
+			}
+
+			if (matching_stack_i != -1) {
+				sc.SetState(fstringStateStack[matching_stack_i].state);
+				if (IsPyTripleQuoteStringState(fstringStateStack[matching_stack_i].state)) {
+					sc.Forward();
+					sc.Forward();
+				}
+				sc.ForwardSetState(SCE_P_DEFAULT);
+				needEOLCheck = true;
+
+				while (fstringStateStack.size() > (unsigned long)matching_stack_i) {
+					PopFromStateStack(fstringStateStack, currentFStringExp);
+				}
+			}
 		}
 		// End of code to find the end of a state
 
@@ -638,16 +741,26 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 
 		// State exit code may have moved on to end of line
 		if (needEOLCheck && sc.atLineEnd) {
-			ProcessLineEnd(sc, fstringStateStack, inContinuedString);
+			ProcessLineEnd(sc, fstringStateStack, currentFStringExp, inContinuedString);
 			lineCurrent++;
 			styler.IndentAmount(lineCurrent, &spaceFlags, IsPyComment);
 			if (!sc.More())
 				break;
 		}
 
-		// If in f-string expression, check for } to resume f-string state
-		if (fstringStateStack[0] != 0 && sc.ch == '}') {
-			sc.SetState(PopFromStateStack(fstringStateStack, ELEMENTS(fstringStateStack)));
+		// If in f-string expression, check for }, :, ! to resume f-string state or update nesting count
+		if (currentFStringExp != NULL && !IsPySingleQuoteStringState(sc.state) && !IsPyTripleQuoteStringState(sc.state)) {
+			if (currentFStringExp->nestingCount == 0 && (sc.ch == '}' || sc.ch == ':' || (sc.ch == '!' && sc.chNext != '='))) {
+				sc.SetState(PopFromStateStack(fstringStateStack, currentFStringExp));
+			}
+			else {
+				if (sc.ch == '{' || sc.ch == '[' || sc.ch == '(') {
+					currentFStringExp->nestingCount++;
+				}
+				else if (sc.ch == '}' || sc.ch == ']' || sc.ch == ')') {
+					currentFStringExp->nestingCount--;
+				}
+			}
 		}
 
 		// Check for a new state starting character
