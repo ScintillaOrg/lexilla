@@ -49,11 +49,14 @@ public:
 		}
 	}
 	CharacterSet &operator=(CharacterSet &&other) {
-		size = other.size;
-		valueAfter = other.valueAfter;
-		bset = other.bset;
-		other.size = 0;
-		other.bset = nullptr;
+		if (this != &other) {
+			delete []bset;
+			size = other.size;
+			valueAfter = other.valueAfter;
+			bset = other.bset;
+			other.size = 0;
+			other.bset = nullptr;
+		}
 		return *this;
 	}
 	~CharacterSet() {
