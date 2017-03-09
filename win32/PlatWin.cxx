@@ -46,6 +46,10 @@
 #define SPI_GETFONTSMOOTHINGCONTRAST	0x200C
 #endif
 
+#ifndef LOAD_LIBRARY_SEARCH_SYSTEM32
+#define LOAD_LIBRARY_SEARCH_SYSTEM32 0x00000800
+#endif
+
 static void *PointerFromWindow(HWND hWnd) {
 	return reinterpret_cast<void *>(::GetWindowLongPtr(hWnd, 0));
 }
@@ -58,8 +62,6 @@ extern UINT CodePageFromCharSet(DWORD characterSet, UINT documentCodePage);
 
 static CRITICAL_SECTION crPlatformLock;
 static HINSTANCE hinstPlatformRes = 0;
-
-static HMODULE hDLLUser32 = 0;
 
 static HCURSOR reverseArrowCursor = NULL;
 
@@ -89,12 +91,23 @@ static HMODULE hDLLDWrite = NULL;
 bool LoadD2D() {
 	static bool triedLoadingD2D = false;
 	if (!triedLoadingD2D) {
+		DWORD loadLibraryFlags = 0;
+		HMODULE kernel32 = ::GetModuleHandle(TEXT("kernel32.dll"));
+		if (kernel32) {
+			if (::GetProcAddress(kernel32, "SetDefaultDllDirectories")) {
+				// Availability of SetDefaultDllDirectories implies Windows 8+ or
+				// that KB2533623 has been installed so LoadLibraryEx can be called
+				// with LOAD_LIBRARY_SEARCH_SYSTEM32.
+				loadLibraryFlags = LOAD_LIBRARY_SEARCH_SYSTEM32;
+			}
+		}
+
 		typedef HRESULT (WINAPI *D2D1CFSig)(D2D1_FACTORY_TYPE factoryType, REFIID riid,
 			CONST D2D1_FACTORY_OPTIONS *pFactoryOptions, IUnknown **factory);
 		typedef HRESULT (WINAPI *DWriteCFSig)(DWRITE_FACTORY_TYPE factoryType, REFIID iid,
 			IUnknown **factory);
 
-		hDLLD2D = ::LoadLibraryEx(TEXT("D2D1.DLL"), 0, 0x00000800 /*LOAD_LIBRARY_SEARCH_SYSTEM32*/);
+		hDLLD2D = ::LoadLibraryEx(TEXT("D2D1.DLL"), 0, loadLibraryFlags);
 		if (hDLLD2D) {
 			D2D1CFSig fnD2DCF = (D2D1CFSig)::GetProcAddress(hDLLD2D, "D2D1CreateFactory");
 			if (fnD2DCF) {
@@ -105,7 +118,7 @@ bool LoadD2D() {
 					reinterpret_cast<IUnknown**>(&pD2DFactory));
 			}
 		}
-		hDLLDWrite = ::LoadLibraryEx(TEXT("DWRITE.DLL"), 0, 0x00000800 /*LOAD_LIBRARY_SEARCH_SYSTEM32*/);
+		hDLLDWrite = ::LoadLibraryEx(TEXT("DWRITE.DLL"), 0, loadLibraryFlags);
 		if (hDLLDWrite) {
 			DWriteCFSig fnDWCF = (DWriteCFSig)::GetProcAddress(hDLLDWrite, "DWriteCreateFactory");
 			if (fnDWCF) {
@@ -3135,7 +3148,6 @@ int Platform::Clamp(int val, int minVal, int maxVal) {
 void Platform_Initialise(void *hInstance) {
 	::InitializeCriticalSection(&crPlatformLock);
 	hinstPlatformRes = static_cast<HINSTANCE>(hInstance);
-
 	ListBoxX_Register();
 }
 
