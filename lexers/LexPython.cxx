@@ -511,8 +511,9 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 	// Set up fstate stack from last line and remove any subsequent ftriple at eol states
 	std::map<int, std::vector<SingleFStringExpState> >::iterator it;
 	it = ftripleStateAtEol.find(lineCurrent - 1);
-	if (it != ftripleStateAtEol.end()) {
+	if (it != ftripleStateAtEol.end() && !it->second.empty()) {
 		fstringStateStack = it->second;
+		currentFStringExp = &fstringStateStack.back();
 	}
 	it = ftripleStateAtEol.lower_bound(lineCurrent);
 	if (it != ftripleStateAtEol.end()) {
