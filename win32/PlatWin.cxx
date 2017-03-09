@@ -42,10 +42,6 @@
 #include "UniConversion.h"
 #include "FontQuality.h"
 
-#ifndef IDC_HAND
-#define IDC_HAND MAKEINTRESOURCE(32649)
-#endif
-
 #ifndef SPI_GETFONTSMOOTHINGCONTRAST
 #define SPI_GETFONTSMOOTHINGCONTRAST	0x200C
 #endif
@@ -60,22 +56,10 @@ static void SetWindowPointer(HWND hWnd, void *ptr) {
 
 extern UINT CodePageFromCharSet(DWORD characterSet, UINT documentCodePage);
 
-// Declarations needed for functions dynamically loaded as not available on all Windows versions.
-typedef BOOL (WINAPI *AlphaBlendSig)(HDC, int, int, int, int, HDC, int, int, int, int, BLENDFUNCTION);
-typedef HMONITOR (WINAPI *MonitorFromPointSig)(POINT, DWORD);
-typedef HMONITOR (WINAPI *MonitorFromRectSig)(LPCRECT, DWORD);
-typedef BOOL (WINAPI *GetMonitorInfoSig)(HMONITOR, LPMONITORINFO);
-
 static CRITICAL_SECTION crPlatformLock;
 static HINSTANCE hinstPlatformRes = 0;
 
-static HMODULE hDLLImage = 0;
-static AlphaBlendSig AlphaBlendFn = 0;
-
 static HMODULE hDLLUser32 = 0;
-static HMONITOR (WINAPI *MonitorFromPointFn)(POINT, DWORD) = 0;
-static HMONITOR (WINAPI *MonitorFromRectFn)(LPCRECT, DWORD) = 0;
-static BOOL (WINAPI *GetMonitorInfoFn)(HMONITOR, LPMONITORINFO) = 0;
 
 static HCURSOR reverseArrowCursor = NULL;
 
@@ -753,13 +737,6 @@ static void AllFour(DWORD *pixels, int width, int height, int x, int y, DWORD va
 	pixels[(height-1-y)*width+width-1-x] = val;
 }
 
-#ifndef AC_SRC_OVER
-#define AC_SRC_OVER                 0x00
-#endif
-#ifndef AC_SRC_ALPHA
-#define AC_SRC_ALPHA		0x01
-#endif
-
 static DWORD dwordFromBGRA(byte b, byte g, byte r, byte a) {
 	union {
 		byte pixVal[4];
@@ -775,7 +752,7 @@ static DWORD dwordFromBGRA(byte b, byte g, byte r, byte a) {
 void SurfaceGDI::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
 		ColourDesired outline, int alphaOutline, int /* flags*/ ) {
 	const RECT rcw = RectFromPRectangle(rc);
-	if (AlphaBlendFn && rc.Width() > 0) {
+	if (rc.Width() > 0) {
 		HDC hMemDC = ::CreateCompatibleDC(hdc);
 		int width = static_cast<int>(rc.Width());
 		int height = static_cast<int>(rc.Height());
@@ -821,7 +798,7 @@ void SurfaceGDI::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fil
 
 			BLENDFUNCTION merge = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
 
-			AlphaBlendFn(hdc, rcw.left, rcw.top, width, height, hMemDC, 0, 0, width, height, merge);
+			AlphaBlend(hdc, rcw.left, rcw.top, width, height, hMemDC, 0, 0, width, height, merge);
 
 			SelectBitmap(hMemDC, hbmOld);
 			::DeleteObject(hbmMem);
@@ -834,7 +811,7 @@ void SurfaceGDI::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fil
 }
 
 void SurfaceGDI::DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) {
-	if (AlphaBlendFn && rc.Width() > 0) {
+	if (rc.Width() > 0) {
 		HDC hMemDC = ::CreateCompatibleDC(hdc);
 		if (rc.Width() > width)
 			rc.left += static_cast<int>((rc.Width() - width) / 2);
@@ -864,7 +841,7 @@ void SurfaceGDI::DrawRGBAImage(PRectangle rc, int width, int height, const unsig
 
 			BLENDFUNCTION merge = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
 
-			AlphaBlendFn(hdc, static_cast<int>(rc.left), static_cast<int>(rc.top),
+			AlphaBlend(hdc, static_cast<int>(rc.left), static_cast<int>(rc.top),
 				static_cast<int>(rc.Width()), static_cast<int>(rc.Height()), hMemDC, 0, 0, width, height, merge);
 
 			SelectBitmap(hMemDC, hbmOld);
@@ -1806,12 +1783,10 @@ void Window::SetPosition(PRectangle rc) {
 }
 
 static RECT RectFromMonitor(HMONITOR hMonitor) {
-	if (GetMonitorInfoFn) {
-		MONITORINFO mi = {0};
-		mi.cbSize = sizeof(mi);
-		if (GetMonitorInfoFn(hMonitor, &mi)) {
-			return mi.rcWork;
-		}
+	MONITORINFO mi = {0};
+	mi.cbSize = sizeof(mi);
+	if (GetMonitorInfo(hMonitor, &mi)) {
+		return mi.rcWork;
 	}
 	RECT rc = {0, 0, 0, 0};
 	if (::SystemParametersInfoA(SPI_GETWORKAREA, 0, &rc, 0) == 0) {
@@ -1832,11 +1807,8 @@ void Window::SetPositionRelative(PRectangle rc, Window w) {
 
 		RECT rcMonitor = RectFromPRectangle(rc);
 
-		HMONITOR hMonitor = NULL;
-		if (MonitorFromRectFn)
-			hMonitor = MonitorFromRectFn(&rcMonitor, MONITOR_DEFAULTTONEAREST);
+		HMONITOR hMonitor = MonitorFromRect(&rcMonitor, MONITOR_DEFAULTTONEAREST);
 		// If hMonitor is NULL, that's just the main screen anyways.
-		//::GetMonitorInfo(hMonitor, &mi);
 		RECT rcWork = RectFromMonitor(hMonitor);
 
 		if (rcWork.left < rcWork.right) {
@@ -1967,13 +1939,10 @@ void Window::SetTitle(const char *s) {
 /* Returns rectangle of monitor pt is on, both rect and pt are in Window's
    coordinates */
 PRectangle Window::GetMonitorRect(Point pt) {
-	// MonitorFromPoint and GetMonitorInfo are not available on Windows 95 and NT 4.
 	PRectangle rcPosition = GetPosition();
 	POINT ptDesktop = {static_cast<LONG>(pt.x + rcPosition.left),
 		static_cast<LONG>(pt.y + rcPosition.top)};
-	HMONITOR hMonitor = NULL;
-	if (MonitorFromPointFn)
-		hMonitor = MonitorFromPointFn(ptDesktop, MONITOR_DEFAULTTONEAREST);
+	HMONITOR hMonitor = MonitorFromPoint(ptDesktop, MONITOR_DEFAULTTONEAREST);
 
 	RECT rcWork = RectFromMonitor(hMonitor);
 	if (rcWork.left < rcWork.right) {
@@ -3166,22 +3135,6 @@ int Platform::Clamp(int val, int minVal, int maxVal) {
 void Platform_Initialise(void *hInstance) {
 	::InitializeCriticalSection(&crPlatformLock);
 	hinstPlatformRes = static_cast<HINSTANCE>(hInstance);
-	// This may be called from DllMain, in which case the call to LoadLibrary
-	// is bad because it can upset the DLL load order.
-	if (!hDLLImage) {
-		hDLLImage = ::LoadLibrary(TEXT("Msimg32"));
-	}
-	if (hDLLImage) {
-		AlphaBlendFn = (AlphaBlendSig)::GetProcAddress(hDLLImage, "AlphaBlend");
-	}
-	if (!hDLLUser32) {
-		hDLLUser32 = ::LoadLibrary(TEXT("User32"));
-	}
-	if (hDLLUser32) {
-		MonitorFromPointFn = (MonitorFromPointSig)::GetProcAddress(hDLLUser32, "MonitorFromPoint");
-		MonitorFromRectFn = (MonitorFromRectSig)::GetProcAddress(hDLLUser32, "MonitorFromRect");
-		GetMonitorInfoFn = (GetMonitorInfoSig)::GetProcAddress(hDLLUser32, "GetMonitorInfoA");
-	}
 
 	ListBoxX_Register();
 }
@@ -3219,14 +3172,6 @@ void Platform_Finalise(bool fromDllMain) {
 		::DestroyCursor(reverseArrowCursor);
 	ListBoxX_Unregister();
 	::DeleteCriticalSection(&crPlatformLock);
-	if (hDLLUser32) {
-		FreeLibrary(hDLLUser32);
-		hDLLUser32 = NULL;
-	}
-	if (hDLLImage) {
-		FreeLibrary(hDLLImage);
-		hDLLImage = NULL;
-	}
 }
 
 #ifdef SCI_NAMESPACE

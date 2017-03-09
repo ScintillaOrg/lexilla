@@ -158,7 +158,6 @@ class ScintillaWin; 	// Forward declaration for COM interface subobjects
 
 typedef void VFunction(void);
 
-static HMODULE commctrl32 = 0;
 
 /**
  */
@@ -243,7 +242,6 @@ class ScintillaWin :
 
 	bool capturedMouse;
 	bool trackedMouseLeave;
-	TrackMouseEventSig TrackMouseEventFn;
 	SetCoalescableTimerSig SetCoalescableTimerFn;
 
 	unsigned int linesPerScroll;	///< Intellimouse support
@@ -418,7 +416,6 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 
 	capturedMouse = false;
 	trackedMouseLeave = false;
-	TrackMouseEventFn = 0;
 	SetCoalescableTimerFn = 0;
 
 	linesPerScroll = 0;
@@ -472,21 +469,12 @@ void ScintillaWin::Initialise() {
 	// it just so this internal feature works.
 	hrOle = ::OleInitialize(NULL);
 
-	// Find TrackMouseEvent which is available on Windows > 95
+	// Find SetCoalescableTimer which is only available from Windows 8+
 	HMODULE user32 = ::GetModuleHandle(TEXT("user32.dll"));
 	if (user32) {
-		TrackMouseEventFn = (TrackMouseEventSig)::GetProcAddress(user32, "TrackMouseEvent");
 		SetCoalescableTimerFn = (SetCoalescableTimerSig)::GetProcAddress(user32, "SetCoalescableTimer");
 	}
-	if (TrackMouseEventFn == NULL) {
-		// Windows 95 has an emulation in comctl32.dll:_TrackMouseEvent
-		if (!commctrl32)
-			commctrl32 = ::LoadLibrary(TEXT("comctl32.dll"));
-		if (commctrl32 != NULL) {
-			TrackMouseEventFn = (TrackMouseEventSig)
-				::GetProcAddress(commctrl32, "_TrackMouseEvent");
-		}
-	}
+
 	for (TickReason tr = tickCaret; tr <= tickDwell; tr = static_cast<TickReason>(tr + 1)) {
 		timers[tr] = 0;
 	}
@@ -1844,13 +1832,13 @@ bool ScintillaWin::HaveMouseCapture() {
 }
 
 void ScintillaWin::SetTrackMouseLeaveEvent(bool on) {
-	if (on && TrackMouseEventFn && !trackedMouseLeave) {
+	if (on && !trackedMouseLeave) {
 		TRACKMOUSEEVENT tme;
 		tme.cbSize = sizeof(tme);
 		tme.dwFlags = TME_LEAVE;
 		tme.hwndTrack = MainHWND();
 		tme.dwHoverTime = HOVER_DEFAULT;	// Unused but triggers Dr. Memory if not initialized
-		TrackMouseEventFn(&tme);
+		TrackMouseEvent(&tme);
 	}
 	trackedMouseLeave = on;
 }
@@ -3441,10 +3429,6 @@ int Scintilla_RegisterClasses(void *hInstance) {
 
 static int ResourcesRelease(bool fromDllMain) {
 	bool result = ScintillaWin::Unregister();
-	if (commctrl32) {
-		FreeLibrary(commctrl32);
-		commctrl32 = NULL;
-	}
 	Platform_Finalise(fromDllMain);
 	return result;
 }
