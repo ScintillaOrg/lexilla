@@ -544,7 +544,7 @@
 	In the Python lexer, improve f-string support.
 	Add support for multiline expressions in triple quoted f-strings.
 	Handle nested "()", "[]", and "{}" in f-string expressions and terminate expression coloring at ":" or "!".
-	End f-string if ending quote is seen in a "{}" expression.  
+	End f-string if ending quote is seen in a "{}" expression.
 	Fix terminating single quoted f-string at EOL.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1918/">Bug #1918</a>.
 	</li>
@@ -584,6 +584,10 @@
 	<li>
 	Fix to prevent double scrolling on GTK+ with X11.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1901/">Bug #1901</a>.
+	</li>
+	<li>
+	SciTE on GTK+ adds an "accessibility" property to allow disabling accessibility
+	on GTK+ as an optimization.
 	</li>
 	<li>
 	SciTE on GTK+ has changed file chooser behaviour for some actions:
