@@ -89,6 +89,18 @@ TEST_CASE("SparseVector") {
 		st.Check();
 	}
 
+	SECTION("InsertStringAtStartThenInsertSpaceAtStart") {
+		REQUIRE(1 == st.Elements());
+		st.InsertSpace(0, 5);
+		st.SetValueAt(0, "3");
+		REQUIRE(1 == st.Elements());
+		REQUIRE("3----" == Representation(st));
+		st.InsertSpace(0, 1);
+		REQUIRE(2 == st.Elements());
+		REQUIRE("-3----" == Representation(st));
+		st.Check();
+	}
+
 	SECTION("InsertAndDeleteAtEnd") {
 		REQUIRE(1 == st.Elements());
 		st.InsertSpace(0, 5);
