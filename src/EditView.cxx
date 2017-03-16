@@ -1857,8 +1857,10 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 
 	if (phase & drawIndicatorsBack) {
 		DrawIndicators(surface, model, vsDraw, ll, line, xStart, rcLine, subLine, lineRange.end, true, model.hoverIndicatorPos);
-		DrawEdgeLine(surface, vsDraw, ll, rcLine, lineRange, xStart);
-		DrawMarkUnderline(surface, model, vsDraw, line, rcLine);
+		if (phasesDraw != phasesOne) {
+			DrawEdgeLine(surface, vsDraw, ll, rcLine, lineRange, xStart);
+			DrawMarkUnderline(surface, model, vsDraw, line, rcLine);
+		}
 	}
 
 	if (phase & drawText) {
@@ -1874,13 +1876,14 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 		DrawIndicators(surface, model, vsDraw, ll, line, xStart, rcLine, subLine, lineRange.end, false, model.hoverIndicatorPos);
 	}
 
-	// End of the drawing of the current line
+	DrawFoldDisplayText(surface, model, vsDraw, ll, line, xStart, rcLine, subLine, subLineStart, phase);
+
 	if (phasesDraw == phasesOne) {
 		DrawEOL(surface, model, vsDraw, ll, rcLine, line, lineRange.end,
 			xStart, subLine, subLineStart, background);
+		DrawEdgeLine(surface, vsDraw, ll, rcLine, lineRange, xStart);
+		DrawMarkUnderline(surface, model, vsDraw, line, rcLine);
 	}
-
-	DrawFoldDisplayText(surface, model, vsDraw, ll, line, xStart, rcLine, subLine, subLineStart, phase);
 
 	if (!hideSelection && (phase & drawSelectionTranslucent)) {
 		DrawTranslucentSelection(surface, model, vsDraw, ll, line, rcLine, subLine, lineRange, xStart);
