@@ -1111,7 +1111,7 @@ void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, con
 
 		// Fill Remainder of the line
 		PRectangle rcRemainder = rcSegment;
-		rcRemainder.left = rcRemainder.right + 1;
+		rcRemainder.left = rcRemainder.right;
 		if (rcRemainder.left < rcLine.left)
 			rcRemainder.left = rcLine.left;
 		rcRemainder.right = rcLine.right;
