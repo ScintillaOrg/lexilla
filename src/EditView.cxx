@@ -1849,6 +1849,8 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 	if ((phasesDraw != phasesOne) && (phase & drawBack)) {
 		DrawBackground(surface, model, vsDraw, ll, rcLine, lineRange, posLineStart, xStart,
 			subLine, background);
+		DrawFoldDisplayText(surface, model, vsDraw, ll, line, xStart, rcLine, subLine, subLineStart, drawBack);
+		phase = static_cast<DrawPhase>(phase & ~drawBack);
 		DrawEOL(surface, model, vsDraw, ll, rcLine, line, lineRange.end,
 			xStart, subLine, subLineStart, background);
 	}
