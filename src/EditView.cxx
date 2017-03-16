@@ -1133,14 +1133,17 @@ void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, con
 	if (phase & drawIndicatorsFore) {
 		if (model.foldDisplayTextStyle == SC_FOLDDISPLAYTEXT_BOXED) {
 			surface->PenColour(textFore);
-			surface->MoveTo(static_cast<int>(rcSegment.left), static_cast<int>(rcSegment.top));
-			surface->LineTo(static_cast<int>(rcSegment.left), static_cast<int>(rcSegment.bottom));
-			surface->MoveTo(static_cast<int>(rcSegment.right), static_cast<int>(rcSegment.top));
-			surface->LineTo(static_cast<int>(rcSegment.right), static_cast<int>(rcSegment.bottom));
-			surface->MoveTo(static_cast<int>(rcSegment.left), static_cast<int>(rcSegment.top));
-			surface->LineTo(static_cast<int>(rcSegment.right), static_cast<int>(rcSegment.top));
-			surface->MoveTo(static_cast<int>(rcSegment.left), static_cast<int>(rcSegment.bottom - 1));
-			surface->LineTo(static_cast<int>(rcSegment.right), static_cast<int>(rcSegment.bottom - 1));
+			PRectangle rcBox = rcSegment;
+			rcBox.left = static_cast<XYPOSITION>(RoundXYPosition(rcSegment.left));
+			rcBox.right = static_cast<XYPOSITION>(RoundXYPosition(rcSegment.right));
+			surface->MoveTo(static_cast<int>(rcBox.left), static_cast<int>(rcBox.top));
+			surface->LineTo(static_cast<int>(rcBox.left), static_cast<int>(rcBox.bottom));
+			surface->MoveTo(static_cast<int>(rcBox.right), static_cast<int>(rcBox.top));
+			surface->LineTo(static_cast<int>(rcBox.right), static_cast<int>(rcBox.bottom));
+			surface->MoveTo(static_cast<int>(rcBox.left), static_cast<int>(rcBox.top));
+			surface->LineTo(static_cast<int>(rcBox.right), static_cast<int>(rcBox.top));
+			surface->MoveTo(static_cast<int>(rcBox.left), static_cast<int>(rcBox.bottom - 1));
+			surface->LineTo(static_cast<int>(rcBox.right), static_cast<int>(rcBox.bottom - 1));
 		}
 	}
 
