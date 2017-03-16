@@ -1106,7 +1106,7 @@ void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, con
 		}
 	}
 
-	if ((phasesDraw != phasesOne) && (phase & drawBack)) {
+	if (phase & drawBack) {
 		surface->FillRectangle(rcSegment, textBack);
 
 		// Fill Remainder of the line
