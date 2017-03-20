@@ -665,7 +665,7 @@ struct Sci_TextRange {
     The base regular expression support
     is limited and should only be used for simple cases and initial development.
     The C++ runtime &lt;regex&gt; library may be used by setting the <code>SCFIND_CXX11REGEX</code> search flag.
-    When using an older C++ compiler that does not support C++11, this may be turned off by
+    The C++11 &lt;regex&gt; support may be disabled by
     compiling Scintilla with <code>NO_CXX11_REGEX</code> defined.
     A different regular expression
     library can be <a class="jump" href="#AlternativeRegEx">integrated into Scintilla</a>
@@ -8165,8 +8165,10 @@ EM_SETTARGETDEVICE
     <h2 id="BuildingScintilla">Building Scintilla</h2>
 
     <p>To build Scintilla or SciTE, see the README file present in both the Scintilla and SciTE
-    directories. For Windows, GCC 4.7 or Microsoft Visual C++ 2010 can be used
-    for building. For GTK+, GCC 4.4 or newer should be used. GTK+ 2.18+ and 3.x are
+    directories.
+    The compiler must support C++11.
+    For Windows, GCC 4.8 or Microsoft Visual C++ 2015 can be used
+    for building. For GTK+, GCC 4.8 or newer should be used. GTK+ 2.18+ and 3.x are
     supported with glib 2.22+. The version of GTK+ installed should be detected automatically.
     When both GTK+ 2 and GTK+ 3 are present, building for GTK+ 3.x requires defining GTK3
     on the command line.</p>
