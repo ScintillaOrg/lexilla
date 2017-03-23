@@ -192,11 +192,8 @@ inline bool IsAWordChar(int ch, bool unicodeIdentifiers) {
 	if (!unicodeIdentifiers)
 		return false;
 
-	// Approximation, Python uses the XID_Continue set from unicode data
-	// see http://unicode.org/reports/tr31/
-	CharacterCategory c = CategoriseCharacter(ch);
-	return (c == ccLl || c == ccLu || c == ccLt || c == ccLm || c == ccLo
-		|| c == ccNl || c == ccMn || c == ccMc || c == ccNd || c == ccPc);
+	// Python uses the XID_Continue set from unicode data
+	return IsXidContinue(ch);
 }
 
 inline bool IsAWordStart(int ch, bool unicodeIdentifiers) {
@@ -206,11 +203,8 @@ inline bool IsAWordStart(int ch, bool unicodeIdentifiers) {
 	if (!unicodeIdentifiers)
 		return false;
 
-	// Approximation, Python uses the XID_Start set from unicode data
-	// see http://unicode.org/reports/tr31/
-	CharacterCategory c = CategoriseCharacter(ch);
-	return (c == ccLl || c == ccLu || c == ccLt || c == ccLm || c == ccLo
-		|| c == ccNl);
+	// Python uses the XID_Start set from unicode data
+	return IsXidStart(ch);
 }
 
 static bool IsFirstNonWhitespace(Sci_Position pos, Accessor &styler) {
