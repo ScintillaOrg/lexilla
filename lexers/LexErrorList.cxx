@@ -315,9 +315,9 @@ static void ColouriseErrorListLine(
 	Sci_Position startValue = -1;
 	int style = RecogniseErrorListLine(lineBuffer, lengthLine, startValue);
 	if (escapeSequences && strstr(lineBuffer, CSI)) {
-		const int startPos = endPos - lengthLine;
+		const Sci_Position startPos = endPos - lengthLine;
 		const char *linePortion = lineBuffer;
-		int startPortion = startPos;
+		Sci_Position startPortion = startPos;
 		int portionStyle = style;
 		while (const char *startSeq = strstr(linePortion, CSI)) {
 			if (startSeq > linePortion) {
@@ -326,7 +326,7 @@ static void ColouriseErrorListLine(
 			const char *endSeq = startSeq + 2;
 			while (!SequenceEnd(*endSeq))
 				endSeq++;
-			const int endSeqPosition = startPortion + static_cast<int>(endSeq - linePortion) + 1;
+			const Sci_Position endSeqPosition = startPortion + (endSeq - linePortion) + 1;
 			switch (*endSeq) {
 			case 0:
 				styler.ColourTo(endPos, SCE_ERR_ESCSEQ_UNKNOWN);
