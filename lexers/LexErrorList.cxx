@@ -326,7 +326,7 @@ static void ColouriseErrorListLine(
 			const char *endSeq = startSeq + 2;
 			while (!SequenceEnd(*endSeq))
 				endSeq++;
-			const Sci_Position endSeqPosition = startPortion + (endSeq - linePortion) + 1;
+			const Sci_Position endSeqPosition = startPortion + static_cast<Sci_Position>(endSeq - linePortion) + 1;
 			switch (*endSeq) {
 			case 0:
 				styler.ColourTo(endPos, SCE_ERR_ESCSEQ_UNKNOWN);
