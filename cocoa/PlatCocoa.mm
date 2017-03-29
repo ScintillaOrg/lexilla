@@ -1692,6 +1692,7 @@ PRectangle ListBoxImpl::GetDesiredRect()
 
   rcDesired.bottom = rcDesired.top + static_cast<XYPOSITION>(itemHeight * rows);
   rcDesired.right = rcDesired.left + maxItemWidth + aveCharWidth;
+  rcDesired.right += 4; // Ensures no truncation of text
 
   if (Length() > rows)
   {
@@ -1704,7 +1705,7 @@ PRectangle ListBoxImpl::GetDesiredRect()
     [scroller setHasVerticalScroller:NO];
   }
   rcDesired.right += maxIconWidth;
-  rcDesired.right += 6;
+  rcDesired.right += 6; // For icon space
 
   return rcDesired;
 }
