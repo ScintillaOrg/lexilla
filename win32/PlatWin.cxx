@@ -2069,7 +2069,7 @@ class ListBoxX : public ListBox {
 
 public:
 	ListBoxX() : lineHeight(10), fontCopy(0), technology(0), lb(0), unicodeMode(false),
-		desiredVisibleRows(5), maxItemCharacters(0), aveCharWidth(8),
+		desiredVisibleRows(9), maxItemCharacters(0), aveCharWidth(8),
 		parent(NULL), ctrlID(0), doubleClickAction(NULL), doubleClickActionData(NULL),
 		widestItem(NULL), maxCharWidth(1), resizeHit(0), wheelDelta(0) {
 	}
@@ -2302,9 +2302,6 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 			::DrawTextW(pDrawItem->hDC, tbuf.buffer, tbuf.tlen, &rcText, DT_NOPREFIX|DT_END_ELLIPSIS|DT_SINGLELINE|DT_NOCLIP);
 		} else {
 			::DrawTextA(pDrawItem->hDC, text, len, &rcText, DT_NOPREFIX|DT_END_ELLIPSIS|DT_SINGLELINE|DT_NOCLIP);
-		}
-		if (pDrawItem->itemState & ODS_SELECTED) {
-			::DrawFocusRect(pDrawItem->hDC, &rcBox);
 		}
 
 		// Draw the image, if any
