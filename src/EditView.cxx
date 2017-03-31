@@ -1780,7 +1780,7 @@ void EditView::DrawIndentGuidesOverEmpty(Surface *surface, const EditModel &mode
 		// Find the most recent line with some text
 
 		Sci::Line lineLastWithText = line;
-		while (lineLastWithText > Platform::Maximum(line - 20, 0) && model.pdoc->IsWhiteLine(lineLastWithText)) {
+		while (lineLastWithText > std::max(line - 20, 0) && model.pdoc->IsWhiteLine(lineLastWithText)) {
 			lineLastWithText--;
 		}
 		if (lineLastWithText < line) {
@@ -1795,21 +1795,21 @@ void EditView::DrawIndentGuidesOverEmpty(Surface *surface, const EditModel &mode
 			if (vsDraw.viewIndentationGuides == ivLookForward) {
 				// In viLookForward mode, previous line only used if it is a fold header
 				if (isFoldHeader) {
-					indentSpace = Platform::Maximum(indentSpace, indentLastWithText);
+					indentSpace = std::max(indentSpace, indentLastWithText);
 				}
 			} else {	// viLookBoth
-				indentSpace = Platform::Maximum(indentSpace, indentLastWithText);
+				indentSpace = std::max(indentSpace, indentLastWithText);
 			}
 		}
 
 		Sci::Line lineNextWithText = line;
-		while (lineNextWithText < Platform::Minimum(line + 20, model.pdoc->LinesTotal()) && model.pdoc->IsWhiteLine(lineNextWithText)) {
+		while (lineNextWithText < std::min(line + 20, model.pdoc->LinesTotal()) && model.pdoc->IsWhiteLine(lineNextWithText)) {
 			lineNextWithText++;
 		}
 		if (lineNextWithText > line) {
 			xStartText = 100000;	// Don't limit to visible indentation on empty line
 			// This line is empty, so use indentation of first next line with text
-			indentSpace = Platform::Maximum(indentSpace,
+			indentSpace = std::max(indentSpace,
 				model.pdoc->GetLineIndentation(lineNextWithText));
 		}
 
@@ -2050,7 +2050,7 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 						surfaceWindow->Copy(rcCopyArea, from, *pixmapLine);
 					}
 
-					lineWidthMaxSeen = Platform::Maximum(
+					lineWidthMaxSeen = std::max(
 						lineWidthMaxSeen, static_cast<int>(ll->positions[ll->numCharsInLine]));
 					//durCopy += et.Duration(true);
 				}
@@ -2140,7 +2140,7 @@ static ColourDesired InvertedLight(ColourDesired orig) {
 	r = r * il / l;
 	g = g * il / l;
 	b = b * il / l;
-	return ColourDesired(Platform::Minimum(r, 0xff), Platform::Minimum(g, 0xff), Platform::Minimum(b, 0xff));
+	return ColourDesired(std::min(r, 0xffu), std::min(g, 0xffu), std::min(b, 0xffu));
 }
 
 long EditView::FormatRange(bool draw, Sci_RangeToFormat *pfr, Surface *surface, Surface *surfaceMeasure,

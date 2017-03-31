@@ -1263,7 +1263,7 @@ void ScintillaCocoa::DragScroll()
   // TODO: does not work for wrapped lines, fix it.
   Sci::Line line = pdoc->LineFromPosition(posDrag.Position());
   Sci::Line currentVisibleLine = cs.DisplayFromDoc(line);
-  Sci::Line lastVisibleLine = Platform::Minimum(topLine + LinesOnScreen(), cs.LinesDisplayed()) - 2;
+  Sci::Line lastVisibleLine = std::min(topLine + LinesOnScreen(), cs.LinesDisplayed()) - 2;
 
   if (currentVisibleLine <= topLine && topLine > 0)
     ScrollTo(topLine - scrollSpeed);

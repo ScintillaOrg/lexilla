@@ -11,6 +11,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <algorithm>
 
 #include "Platform.h"
 
@@ -191,11 +192,11 @@ int CallTip::PaintContents(Surface *surfaceWindow, bool draw) {
 		int chunkOffset = static_cast<int>(chunkVal - val.c_str());
 		int chunkLength = static_cast<int>(chunkEnd - chunkVal);
 		int chunkEndOffset = chunkOffset + chunkLength;
-		int thisStartHighlight = Platform::Maximum(startHighlight, chunkOffset);
-		thisStartHighlight = Platform::Minimum(thisStartHighlight, chunkEndOffset);
+		int thisStartHighlight = std::max(startHighlight, chunkOffset);
+		thisStartHighlight = std::min(thisStartHighlight, chunkEndOffset);
 		thisStartHighlight -= chunkOffset;
-		int thisEndHighlight = Platform::Maximum(endHighlight, chunkOffset);
-		thisEndHighlight = Platform::Minimum(thisEndHighlight, chunkEndOffset);
+		int thisEndHighlight = std::max(endHighlight, chunkOffset);
+		thisEndHighlight = std::min(thisEndHighlight, chunkEndOffset);
 		thisEndHighlight -= chunkOffset;
 		rcClient.top = static_cast<XYPOSITION>(ytext - ascent - 1);
 
@@ -211,7 +212,7 @@ int CallTip::PaintContents(Surface *surfaceWindow, bool draw) {
 		chunkVal = chunkEnd + 1;
 		ytext += lineHeight;
 		rcClient.bottom += lineHeight;
-		maxWidth = Platform::Maximum(maxWidth, x);
+		maxWidth = std::max(maxWidth, x);
 	}
 	return maxWidth;
 }

@@ -600,16 +600,16 @@ void Editor::InvalidateSelection(SelectionRange newMain, bool invalidateWholeSel
 	if (sel.Count() > 1 || !(sel.RangeMain().anchor == newMain.anchor) || sel.IsRectangular()) {
 		invalidateWholeSelection = true;
 	}
-	Sci::Position firstAffected = Platform::Minimum(sel.RangeMain().Start().Position(), newMain.Start().Position());
+	Sci::Position firstAffected = std::min(sel.RangeMain().Start().Position(), newMain.Start().Position());
 	// +1 for lastAffected ensures caret repainted
-	Sci::Position lastAffected = Platform::Maximum(newMain.caret.Position()+1, newMain.anchor.Position());
-	lastAffected = Platform::Maximum(lastAffected, sel.RangeMain().End().Position());
+	Sci::Position lastAffected = std::max(newMain.caret.Position()+1, newMain.anchor.Position());
+	lastAffected = std::max(lastAffected, sel.RangeMain().End().Position());
 	if (invalidateWholeSelection) {
 		for (size_t r=0; r<sel.Count(); r++) {
-			firstAffected = Platform::Minimum(firstAffected, sel.Range(r).caret.Position());
-			firstAffected = Platform::Minimum(firstAffected, sel.Range(r).anchor.Position());
-			lastAffected = Platform::Maximum(lastAffected, sel.Range(r).caret.Position()+1);
-			lastAffected = Platform::Maximum(lastAffected, sel.Range(r).anchor.Position());
+			firstAffected = std::min(firstAffected, sel.Range(r).caret.Position());
+			firstAffected = std::min(firstAffected, sel.Range(r).anchor.Position());
+			lastAffected = std::max(lastAffected, sel.Range(r).caret.Position()+1);
+			lastAffected = std::max(lastAffected, sel.Range(r).anchor.Position());
 		}
 	}
 	ContainerNeedsUpdate(SC_UPDATE_SELECTION);
@@ -1132,7 +1132,7 @@ Editor::XYScrollPosition Editor::XYScrollToMakeVisible(const SelectionRange &ran
 	if ((options & xysVertical) && (pt.y < rcClient.top || ptBottomCaret.y >= rcClient.bottom || (caretYPolicy & CARET_STRICT) != 0)) {
 		const Sci::Line lineCaret = DisplayFromPosition(range.caret.Position());
 		const Sci::Line linesOnScreen = LinesOnScreen();
-		const Sci::Line halfScreen = Platform::Maximum(linesOnScreen - 1, 2) / 2;
+		const Sci::Line halfScreen = std::max(linesOnScreen - 1, 2) / 2;
 		const bool bSlop = (caretYPolicy & CARET_SLOP) != 0;
 		const bool bStrict = (caretYPolicy & CARET_STRICT) != 0;
 		const bool bJump = (caretYPolicy & CARET_JUMPS) != 0;
@@ -1231,7 +1231,7 @@ Editor::XYScrollPosition Editor::XYScrollToMakeVisible(const SelectionRange &ran
 
 	// Horizontal positioning
 	if ((options & xysHorizontal) && !Wrapping()) {
-		const int halfScreen = Platform::Maximum(static_cast<int>(rcClient.Width()) - 4, 4) / 2;
+		const int halfScreen = std::max(static_cast<int>(rcClient.Width()) - 4, 4) / 2;
 		const bool bSlop = (caretXPolicy & CARET_SLOP) != 0;
 		const bool bStrict = (caretXPolicy & CARET_STRICT) != 0;
 		const bool bJump = (caretXPolicy & CARET_JUMPS) != 0;
@@ -2101,7 +2101,7 @@ void Editor::ClearDocumentStyle() {
 		// Save next in case deco deleted
 		Decoration *decoNext = deco->next;
 		if (deco->indicator < INDIC_CONTAINER) {
-			pdoc->decorations.SetCurrentIndicator(deco->indicator);
+			pdoc->DecorationSetCurrentIndicator(deco->indicator);
 			pdoc->DecorationFillRange(0, 0, pdoc->Length());
 		}
 		deco = decoNext;
@@ -3906,8 +3906,8 @@ void Editor::Indent(bool forwards) {
 			Sci::Position anchorPosOnLine = sel.Range(r).anchor.Position() - pdoc->LineStart(lineOfAnchor);
 			Sci::Position currentPosPosOnLine = caretPosition - pdoc->LineStart(lineCurrentPos);
 			// Multiple lines selected so indent / dedent
-			Sci::Line lineTopSel = Platform::Minimum(lineOfAnchor, lineCurrentPos);
-			Sci::Line lineBottomSel = Platform::Maximum(lineOfAnchor, lineCurrentPos);
+			Sci::Line lineTopSel = std::min(lineOfAnchor, lineCurrentPos);
+			Sci::Line lineBottomSel = std::max(lineOfAnchor, lineCurrentPos);
 			if (pdoc->LineStart(lineBottomSel) == sel.Range(r).anchor.Position() || pdoc->LineStart(lineBottomSel) == caretPosition)
 				lineBottomSel--;  	// If not selecting any characters on a line, do not indent
 			pdoc->Indent(forwards, lineBottomSel, lineTopSel);
@@ -6262,7 +6262,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return sel.LimitsForRectangularElseMain().start.Position();
 
 	case SCI_SETSELECTIONEND:
-		SetSelection(static_cast<Sci::Position>(wParam), Platform::Minimum(sel.MainAnchor(), static_cast<Sci::Position>(wParam)));
+		SetSelection(static_cast<Sci::Position>(wParam), std::min(sel.MainAnchor(), static_cast<Sci::Position>(wParam)));
 		break;
 
 	case SCI_GETSELECTIONEND:
