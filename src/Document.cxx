@@ -2221,6 +2221,10 @@ void Document::IncrementStyleClock() {
 	styleClock = (styleClock + 1) % 0x100000;
 }
 
+void SCI_METHOD Document::DecorationSetCurrentIndicator(int indicator) {
+	decorations.SetCurrentIndicator(indicator);
+}
+
 void SCI_METHOD Document::DecorationFillRange(Sci_Position position, int value, Sci_Position fillLength) {
 	if (decorations.FillRange(position, value, fillLength)) {
 		DocModification mh(SC_MOD_CHANGEINDICATOR | SC_PERFORMED_USER,

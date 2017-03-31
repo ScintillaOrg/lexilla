@@ -7354,7 +7354,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return (wParam <= INDIC_MAX) ? vs.indicators[wParam].outlineAlpha : 0;
 
 	case SCI_SETINDICATORCURRENT:
-		pdoc->decorations.SetCurrentIndicator(static_cast<int>(wParam));
+		pdoc->DecorationSetCurrentIndicator(static_cast<int>(wParam));
 		break;
 	case SCI_GETINDICATORCURRENT:
 		return pdoc->decorations.GetCurrentIndicator();

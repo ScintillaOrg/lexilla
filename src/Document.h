@@ -410,9 +410,7 @@ public:
 	void LexerChanged();
 	int GetStyleClock() const { return styleClock; }
 	void IncrementStyleClock();
-	void SCI_METHOD DecorationSetCurrentIndicator(int indicator) {
-		decorations.SetCurrentIndicator(indicator);
-	}
+	void SCI_METHOD DecorationSetCurrentIndicator(int indicator);
 	void SCI_METHOD DecorationFillRange(Sci_Position position, int value, Sci_Position fillLength);
 
 	int SCI_METHOD SetLineState(Sci_Position line, int state);

@@ -2394,7 +2394,7 @@ void ScintillaCocoa::CompositionStart()
 void ScintillaCocoa::CompositionCommit()
 {
   pdoc->TentativeCommit();
-  pdoc->decorations.SetCurrentIndicator(INDIC_IME);
+  pdoc->DecorationSetCurrentIndicator(INDIC_IME);
   pdoc->DecorationFillRange(0, 0, pdoc->Length());
 }
 
