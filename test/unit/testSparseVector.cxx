@@ -1,8 +1,7 @@
 // Unit Tests for Scintilla internal data structures
 
-#include <string.h>
-
 #include <cassert>
+#include <cstring>
 
 #include <stdexcept>
 #include <algorithm>

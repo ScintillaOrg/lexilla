@@ -11,12 +11,13 @@
 #ifndef SCINTILLAQT_H
 #define SCINTILLAQT_H
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <assert.h>
-#include <ctype.h>
-#include <time.h>
+#include <cstddef>
+#include <cstdlib>
+#include <cassert>
+#include <cstring>
+#include <cctype>
+#include <cstdio>
+#include <ctime>
 #include <cmath>
 #include <stdexcept>
 #include <string>

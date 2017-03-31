@@ -13,10 +13,11 @@
  * This file is dual licensed under LGPL v2.1 and the Scintilla license (http://www.scintilla.org/License.txt).
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
-#include <ctype.h>
+#include <cstddef>
+#include <cstdlib>
+#include <cctype>
+#include <cstdio>
+#include <ctime>
 
 #include <stdexcept>
 #include <string>

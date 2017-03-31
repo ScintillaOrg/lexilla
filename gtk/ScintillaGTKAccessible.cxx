@@ -51,8 +51,9 @@
 
 // FIXME: optimize character/byte offset conversion (with a cache?)
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstddef>
+#include <cstdlib>
+#include <cstring>
 
 #include <stdexcept>
 #include <new>

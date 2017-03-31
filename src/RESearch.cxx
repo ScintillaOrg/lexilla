@@ -200,7 +200,7 @@
  *  matches:    foo-foo fo-fo fob-fob foobar-foobar ...
  */
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include <stdexcept>
 #include <string>

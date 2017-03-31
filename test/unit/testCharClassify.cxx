@@ -1,6 +1,6 @@
 // Unit Tests for Scintilla internal data structures
 
-#include <string.h>
+#include <cstring>
 
 #include <algorithm>
 #include <iostream>

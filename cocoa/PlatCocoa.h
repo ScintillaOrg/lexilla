@@ -7,11 +7,10 @@
 #ifndef PLATCOCOA_H
 #define PLATCOCOA_H
 
-#include <assert.h>
-
 #include <sys/time.h>
 
 #include <cstdlib>
+#include <cassert>
 #include <cstring>
 #include <cstdio>
 

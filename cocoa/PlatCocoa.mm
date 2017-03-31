@@ -12,10 +12,11 @@
  * This file is dual licensed under LGPL v2.1 and the Scintilla license (http://www.scintilla.org/License.txt).
  */
 
-#include <assert.h>
 #include <sys/time.h>
 
+#include <cstddef>
 #include <cstdlib>
+#include <cassert>
 #include <cstring>
 #include <cstdio>
 
