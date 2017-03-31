@@ -41,7 +41,7 @@ public:
 	Window wCallTip;
 	Window wDraw;
 	bool inCallTipMode;
-	int posStartCallTip;
+	Sci::Position posStartCallTip;
 	ColourDesired colourBG;
 	ColourDesired colourUnSel;
 	ColourDesired colourSel;
@@ -63,7 +63,7 @@ public:
 	void MouseClick(Point pt);
 
 	/// Setup the calltip and return a rectangle of the area required.
-	PRectangle CallTipStart(int pos, Point pt, int textHeight, const char *defn,
+	PRectangle CallTipStart(Sci::Position pos, Point pt, int textHeight, const char *defn,
 		const char *faceName, int size, int codePage_,
 		int characterSet, int technology, Window &wParent);
 

@@ -522,7 +522,7 @@ void ScintillaCocoa::IdleWork() {
 
 //--------------------------------------------------------------------------------------------------
 
-void ScintillaCocoa::QueueIdleWork(WorkNeeded::workItems items, int upTo) {
+void ScintillaCocoa::QueueIdleWork(WorkNeeded::workItems items, Sci::Position upTo) {
   Editor::QueueIdleWork(items, upTo);
   ObserverAdd();
 }
@@ -1236,7 +1236,7 @@ void ScintillaCocoa::ClaimSelection()
  */
 NSPoint ScintillaCocoa::GetCaretPosition()
 {
-  const int line = pdoc->LineFromPosition(sel.RangeMain().caret.Position());
+  const Sci::Line line = pdoc->LineFromPosition(sel.RangeMain().caret.Position());
   NSPoint result;
 
   result.y = line;
@@ -1261,9 +1261,9 @@ void ScintillaCocoa::DragScroll()
   }
 
   // TODO: does not work for wrapped lines, fix it.
-  int line = pdoc->LineFromPosition(posDrag.Position());
-  int currentVisibleLine = cs.DisplayFromDoc(line);
-  int lastVisibleLine = Platform::Minimum(topLine + LinesOnScreen(), cs.LinesDisplayed()) - 2;
+  Sci::Line line = pdoc->LineFromPosition(posDrag.Position());
+  Sci::Line currentVisibleLine = cs.DisplayFromDoc(line);
+  Sci::Line lastVisibleLine = Platform::Minimum(topLine + LinesOnScreen(), cs.LinesDisplayed()) - 2;
 
   if (currentVisibleLine <= topLine && topLine > 0)
     ScrollTo(topLine - scrollSpeed);
@@ -1368,10 +1368,10 @@ void ScintillaCocoa::StartDrag()
 
   // calculate the bounds of the selection
   PRectangle client = GetTextRectangle();
-  int selStart = sel.RangeMain().Start().Position();
-  int selEnd = sel.RangeMain().End().Position();
-  int startLine = pdoc->LineFromPosition(selStart);
-  int endLine = pdoc->LineFromPosition(selEnd);
+  Sci::Position selStart = sel.RangeMain().Start().Position();
+  Sci::Position selEnd = sel.RangeMain().End().Position();
+  Sci::Line startLine = pdoc->LineFromPosition(selStart);
+  Sci::Line endLine = pdoc->LineFromPosition(selEnd);
   Point pt;
   long startPos, endPos, ep;
   PRectangle rcSel;
@@ -1561,7 +1561,7 @@ NSDragOperation ScintillaCocoa::DraggingUpdated(id <NSDraggingInfo> info)
 void ScintillaCocoa::DraggingExited(id <NSDraggingInfo> info)
 {
 #pragma unused(info)
-  SetDragPosition(SelectionPosition(invalidPosition));
+  SetDragPosition(SelectionPosition(Sci::invalidPosition));
   FineTickerCancel(tickPlatform);
   inDragDrop = ddNone;
 }
@@ -1914,7 +1914,7 @@ void ScintillaCocoa::WillDraw(NSRect rect)
 /**
  * ScrollText is empty because scrolling is handled by the NSScrollView.
  */
-void ScintillaCocoa::ScrollText(int)
+void ScintillaCocoa::ScrollText(Sci::Line)
 {
 }
 
@@ -1968,7 +1968,7 @@ void ScintillaCocoa::SetHorizontalScrollPos()
  * @param nPage Number of lines per scroll page.
  * @return True if there was a change, otherwise false.
  */
-bool ScintillaCocoa::ModifyScrollBars(int nMax, int nPage)
+bool ScintillaCocoa::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage)
 {
 #pragma unused(nMax, nPage)
   return SetScrollingSize();

@@ -111,10 +111,10 @@ private:
 	virtual bool PaintContains(PRectangle rc);
 	void FullPaint();
 	virtual PRectangle GetClientRectangle() const;
-	virtual void ScrollText(int linesToMove);
+	virtual void ScrollText(Sci::Line linesToMove);
 	virtual void SetVerticalScrollPos();
 	virtual void SetHorizontalScrollPos();
-	virtual bool ModifyScrollBars(int nMax, int nPage);
+	virtual bool ModifyScrollBars(Sci::Line nMax, Sci::Line nPage);
 	void ReconfigureScrollBars();
 	virtual void NotifyChange();
 	virtual void NotifyFocus(bool focus);
@@ -231,7 +231,7 @@ private:
 	static gboolean IdleCallback(gpointer pSci);
 	static gboolean StyleIdle(gpointer pSci);
 	virtual void IdleWork();
-	virtual void QueueIdleWork(WorkNeeded::workItems items, int upTo);
+	virtual void QueueIdleWork(WorkNeeded::workItems items, Sci::Position upTo);
 	virtual void SetDocPointer(Document *document);
 	static void PopUpCB(GtkMenuItem *menuItem, ScintillaGTK *sciThis);
 

@@ -22,10 +22,10 @@
 using namespace Scintilla;
 #endif
 
-void SelectionPosition::MoveForInsertDelete(bool insertion, int startChange, int length) {
+void SelectionPosition::MoveForInsertDelete(bool insertion, Sci::Position startChange, Sci::Position length) {
 	if (insertion) {
 		if (position == startChange) {
-			int virtualLengthRemove = std::min(length, virtualSpace);
+			Sci::Position virtualLengthRemove = std::min(length, virtualSpace);
 			virtualSpace -= virtualLengthRemove;
 			position += virtualLengthRemove;
 		} else if (position > startChange) {
@@ -36,7 +36,7 @@ void SelectionPosition::MoveForInsertDelete(bool insertion, int startChange, int
 			virtualSpace = 0;
 		}
 		if (position > startChange) {
-			int endDeletion = startChange + length;
+			Sci::Position endDeletion = startChange + length;
 			if (position > endDeletion) {
 				position -= length;
 			} else {
@@ -75,7 +75,7 @@ bool SelectionPosition::operator >=(const SelectionPosition &other) const {
 		return *this > other;
 }
 
-int SelectionRange::Length() const {
+Sci::Position SelectionRange::Length() const {
 	if (anchor > caret) {
 		return anchor.Position() - caret.Position();
 	} else {
@@ -83,12 +83,12 @@ int SelectionRange::Length() const {
 	}
 }
 
-void SelectionRange::MoveForInsertDelete(bool insertion, int startChange, int length) {
+void SelectionRange::MoveForInsertDelete(bool insertion, Sci::Position startChange, Sci::Position length) {
 	caret.MoveForInsertDelete(insertion, startChange, length);
 	anchor.MoveForInsertDelete(insertion, startChange, length);
 }
 
-bool SelectionRange::Contains(int pos) const {
+bool SelectionRange::Contains(Sci::Position pos) const {
 	if (anchor > caret)
 		return (pos >= caret.Position()) && (pos <= anchor.Position());
 	else
@@ -102,7 +102,7 @@ bool SelectionRange::Contains(SelectionPosition sp) const {
 		return (sp >= anchor) && (sp <= caret);
 }
 
-bool SelectionRange::ContainsCharacter(int posCharacter) const {
+bool SelectionRange::ContainsCharacter(Sci::Position posCharacter) const {
 	if (anchor > caret)
 		return (posCharacter >= caret.Position()) && (posCharacter < anchor.Position());
 	else
@@ -168,7 +168,7 @@ bool SelectionRange::Trim(SelectionRange range) {
 // If range is all virtual collapse to start of virtual space
 void SelectionRange::MinimizeVirtualSpace() {
 	if (caret.Position() == anchor.Position()) {
-		int virtualSpace = caret.VirtualSpace();
+		Sci::Position virtualSpace = caret.VirtualSpace();
 		if (virtualSpace > anchor.VirtualSpace())
 			virtualSpace = anchor.VirtualSpace();
 		caret.SetVirtualSpace(virtualSpace);
@@ -187,11 +187,11 @@ bool Selection::IsRectangular() const {
 	return (selType == selRectangle) || (selType == selThin);
 }
 
-int Selection::MainCaret() const {
+Sci::Position Selection::MainCaret() const {
 	return ranges[mainRange].caret.Position();
 }
 
-int Selection::MainAnchor() const {
+Sci::Position Selection::MainAnchor() const {
 	return ranges[mainRange].anchor.Position();
 }
 
@@ -284,15 +284,15 @@ SelectionPosition Selection::Last() const {
 	return lastPosition;
 }
 
-int Selection::Length() const {
-	int len = 0;
+Sci::Position Selection::Length() const {
+	Sci::Position len = 0;
 	for (size_t i=0; i<ranges.size(); i++) {
 		len += ranges[i].Length();
 	}
 	return len;
 }
 
-void Selection::MovePositions(bool insertion, int startChange, int length) {
+void Selection::MovePositions(bool insertion, Sci::Position startChange, Sci::Position length) {
 	for (size_t i=0; i<ranges.size(); i++) {
 		ranges[i].MoveForInsertDelete(insertion, startChange, length);
 	}
@@ -376,7 +376,7 @@ void Selection::CommitTentative() {
 	tentativeMain = false;
 }
 
-int Selection::CharacterInSelection(int posCharacter) const {
+int Selection::CharacterInSelection(Sci::Position posCharacter) const {
 	for (size_t i=0; i<ranges.size(); i++) {
 		if (ranges[i].ContainsCharacter(posCharacter))
 			return i == mainRange ? 1 : 2;
@@ -384,7 +384,7 @@ int Selection::CharacterInSelection(int posCharacter) const {
 	return 0;
 }
 
-int Selection::InSelectionForEOL(int pos) const {
+int Selection::InSelectionForEOL(Sci::Position pos) const {
 	for (size_t i=0; i<ranges.size(); i++) {
 		if (!ranges[i].Empty() && (pos > ranges[i].Start().Position()) && (pos <= ranges[i].End().Position()))
 			return i == mainRange ? 1 : 2;
@@ -392,8 +392,8 @@ int Selection::InSelectionForEOL(int pos) const {
 	return 0;
 }
 
-int Selection::VirtualSpaceFor(int pos) const {
-	int virtualSpace = 0;
+Sci::Position Selection::VirtualSpaceFor(Sci::Position pos) const {
+	Sci::Position virtualSpace = 0;
 	for (size_t i=0; i<ranges.size(); i++) {
 		if ((ranges[i].caret.Position() == pos) && (virtualSpace < ranges[i].caret.VirtualSpace()))
 			virtualSpace = ranges[i].caret.VirtualSpace();

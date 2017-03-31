@@ -250,7 +250,7 @@ void CallTip::MouseClick(Point pt) {
 		clickPlace = 2;
 }
 
-PRectangle CallTip::CallTipStart(int pos, Point pt, int textHeight, const char *defn,
+PRectangle CallTip::CallTipStart(Sci::Position pos, Point pt, int textHeight, const char *defn,
                                  const char *faceName, int size,
                                  int codePage_, int characterSet,
 								 int technology, Window &wParent) {

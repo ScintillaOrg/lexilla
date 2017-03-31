@@ -107,7 +107,7 @@ private:
 	virtual void ScrollText(int linesToMove);
 	virtual void SetVerticalScrollPos();
 	virtual void SetHorizontalScrollPos();
-	virtual bool ModifyScrollBars(int nMax, int nPage);
+	virtual bool ModifyScrollBars(Sci::Line nMax, Sci::Line nPage);
 	virtual void ReconfigureScrollBars();
 	void CopyToModeClipboard(const SelectionText &selectedText, QClipboard::Mode clipboardMode_);
 	virtual void Copy();

@@ -50,7 +50,7 @@ private:
 	int *lineStarts;
 	int lenLineStarts;
 	/// Drawing is only performed for @a maxLineLength characters on each line.
-	int lineNumber;
+	Sci::Line lineNumber;
 	bool inCache;
 public:
 	enum { wrapWidthInfinite = 0x7ffffff };
@@ -86,9 +86,9 @@ public:
 	Range SubLineRange(int line) const;
 	bool InLine(int offset, int line) const;
 	void SetLineStart(int line, int start);
-	void SetBracesHighlight(Range rangeLine, const Position braces[],
+	void SetBracesHighlight(Range rangeLine, const Sci::Position braces[],
 		char bracesMatchStyle, int xHighlight, bool ignoreStyle);
-	void RestoreBracesHighlight(Range rangeLine, const Position braces[], bool ignoreStyle);
+	void RestoreBracesHighlight(Range rangeLine, const Sci::Position braces[], bool ignoreStyle);
 	int FindBefore(XYPOSITION x, int lower, int upper) const;
 	int FindPositionFromX(XYPOSITION x, Range range, bool charPosition) const;
 	Point PointFromPosition(int posInLine, int lineHeight, PointEnd pe) const;
@@ -104,7 +104,7 @@ class LineLayoutCache {
 	int styleClock;
 	int useCount;
 	void Allocate(size_t length_);
-	void AllocateForLevel(int linesOnScreen, int linesInDoc);
+	void AllocateForLevel(Sci::Line linesOnScreen, Sci::Line linesInDoc);
 public:
 	LineLayoutCache();
 	virtual ~LineLayoutCache();
@@ -118,8 +118,8 @@ public:
 	void Invalidate(LineLayout::validLevel validity_);
 	void SetLevel(int level_);
 	int GetLevel() const { return level; }
-	LineLayout *Retrieve(int lineNumber, int lineCaret, int maxChars, int styleClock_,
-		int linesOnScreen, int linesInDoc);
+	LineLayout *Retrieve(Sci::Line lineNumber, Sci::Line lineCaret, int maxChars, int styleClock_,
+		Sci::Line linesOnScreen, Sci::Line linesInDoc);
 	void Dispose(LineLayout *ll);
 };
 
@@ -176,7 +176,7 @@ struct TextSegment {
 class BreakFinder {
 	const LineLayout *ll;
 	Range lineRange;
-	int posLineStart;
+	Sci::Position posLineStart;
 	int nextBreak;
 	std::vector<int> selAndEdge;
 	unsigned int saeCurrentPos;
@@ -194,7 +194,7 @@ public:
 	enum { lengthStartSubdivision = 300 };
 	// Try to make each subdivided run lengthEachSubdivision or shorter.
 	enum { lengthEachSubdivision = 100 };
-	BreakFinder(const LineLayout *ll_, const Selection *psel, Range rangeLine_, int posLineStart_,
+	BreakFinder(const LineLayout *ll_, const Selection *psel, Range rangeLine_, Sci::Position posLineStart_,
 		int xStart, bool breakForSelection, const Document *pdoc_, const SpecialRepresentations *preprs_, const ViewStyle *pvsDraw);
 	~BreakFinder();
 	TextSegment Next();

@@ -294,15 +294,15 @@ class ScintillaWin :
 
 	bool DragThreshold(Point ptStart, Point ptNow) override;
 	void StartDrag() override;
-	int TargetAsUTF8(char *text);
+	Sci::Position TargetAsUTF8(char *text);
 	void AddCharUTF16(wchar_t const *wcs, unsigned int wclen);
-	int EncodedFromUTF8(char *utf8, char *encoded) const;
+	Sci::Position EncodedFromUTF8(char *utf8, char *encoded) const;
 	sptr_t WndPaint(uptr_t wParam);
 
 	sptr_t HandleCompositionWindowed(uptr_t wParam, sptr_t lParam);
 	sptr_t HandleCompositionInline(uptr_t wParam, sptr_t lParam);
 	static bool KoreanIME();
-	void MoveImeCarets(int offset);
+	void MoveImeCarets(Sci::Position offset);
 	void DrawImeIndicator(int indicator, int len);
 	void SetCandidateWindowPos();
 	void SelectionToHangul();
@@ -323,12 +323,12 @@ class ScintillaWin :
 	bool HaveMouseCapture() override;
 	void SetTrackMouseLeaveEvent(bool on);
 	bool PaintContains(PRectangle rc) override;
-	void ScrollText(int linesToMove) override;
+	void ScrollText(Sci::Line linesToMove) override;
 	void NotifyCaretMove() override;
 	void UpdateSystemCaret() override;
 	void SetVerticalScrollPos() override;
 	void SetHorizontalScrollPos() override;
-	bool ModifyScrollBars(int nMax, int nPage) override;
+	bool ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) override;
 	void NotifyChange() override;
 	void NotifyFocus(bool focus) override;
 	void SetCtrlID(int identifier) override;
@@ -361,7 +361,7 @@ class ScintillaWin :
 
 	int SetScrollInfo(int nBar, LPCSCROLLINFO lpsi, BOOL bRedraw);
 	bool GetScrollInfo(int nBar, LPSCROLLINFO lpsi);
-	void ChangeScrollPos(int barType, int pos);
+	void ChangeScrollPos(int barType, Sci::Position pos);
 	sptr_t GetTextLength();
 	sptr_t GetText(uptr_t wParam, sptr_t lParam);
 
@@ -618,7 +618,7 @@ void ScintillaWin::StartDrag() {
 		}
 	}
 	inDragDrop = ddNone;
-	SetDragPosition(SelectionPosition(invalidPosition));
+	SetDragPosition(SelectionPosition(Sci::invalidPosition));
 }
 
 // Avoid warnings everywhere for old style casts by concentrating them here
@@ -730,8 +730,8 @@ static std::wstring StringMapCase(const std::wstring &ws, DWORD mapFlags) {
 
 // Returns the target converted to UTF8.
 // Return the length in bytes.
-int ScintillaWin::TargetAsUTF8(char *text) {
-	int targetLength = targetEnd - targetStart;
+Sci::Position ScintillaWin::TargetAsUTF8(char *text) {
+	Sci::Position targetLength = targetEnd - targetStart;
 	if (IsUnicodeMode()) {
 		if (text) {
 			pdoc->GetCharRange(text, targetStart, targetLength);
@@ -752,8 +752,8 @@ int ScintillaWin::TargetAsUTF8(char *text) {
 
 // Translates a nul terminated UTF8 string into the document encoding.
 // Return the length of the result in bytes.
-int ScintillaWin::EncodedFromUTF8(char *utf8, char *encoded) const {
-	int inputLength = (lengthForEncode >= 0) ? lengthForEncode : static_cast<int>(strlen(utf8));
+Sci::Position ScintillaWin::EncodedFromUTF8(char *utf8, char *encoded) const {
+	Sci::Position inputLength = (lengthForEncode >= 0) ? lengthForEncode : static_cast<Sci::Position>(strlen(utf8));
 	if (IsUnicodeMode()) {
 		if (encoded) {
 			memcpy(encoded, utf8, inputLength);
@@ -889,10 +889,10 @@ bool ScintillaWin::KoreanIME() {
 	return codePage == 949 || codePage == 1361;
 }
 
-void ScintillaWin::MoveImeCarets(int offset) {
+void ScintillaWin::MoveImeCarets(Sci::Position offset) {
 	// Move carets relatively by bytes.
 	for (size_t r=0; r<sel.Count(); r++) {
-		int positionInsert = sel.Range(r).Start().Position();
+		Sci::Position positionInsert = sel.Range(r).Start().Position();
 		sel.Range(r).caret.SetPosition(positionInsert + offset);
 		sel.Range(r).anchor.SetPosition(positionInsert + offset);
 	}
@@ -908,7 +908,7 @@ void ScintillaWin::DrawImeIndicator(int indicator, int len) {
 	}
 	pdoc->decorations.SetCurrentIndicator(indicator);
 	for (size_t r=0; r<sel.Count(); r++) {
-		int positionInsert = sel.Range(r).Start().Position();
+		Sci::Position positionInsert = sel.Range(r).Start().Position();
 		pdoc->DecorationFillRange(positionInsert - len, 1, len);
 	}
 }
@@ -928,10 +928,10 @@ void ScintillaWin::SetCandidateWindowPos() {
 
 void ScintillaWin::SelectionToHangul() {
 	// Convert every hanja to hangul within the main range.
-	const int selStart = sel.RangeMain().Start().Position();
-	const int documentStrLen = sel.RangeMain().Length();
-	const int selEnd = selStart + documentStrLen;
-	const int utf16Len = pdoc->CountUTF16(selStart, selEnd);
+	const Sci::Position selStart = sel.RangeMain().Start().Position();
+	const Sci::Position documentStrLen = sel.RangeMain().Length();
+	const Sci::Position selEnd = selStart + documentStrLen;
+	const Sci::Position utf16Len = pdoc->CountUTF16(selStart, selEnd);
 
 	if (utf16Len > 0) {
 		std::string documentStr(documentStrLen, '\0');
@@ -957,7 +957,7 @@ void ScintillaWin::EscapeHanja() {
 	if (sel.Count() > 1) {
 		return; // Do not allow multi carets.
 	}
-	int currentPos = CurrentPosition();
+	Sci::Position currentPos = CurrentPosition();
 	int oneCharLen = pdoc->LenChar(currentPos);
 
 	if (oneCharLen < 2) {
@@ -1091,7 +1091,7 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 
 		// Move IME caret from current last position to imeCaretPos.
 		int imeEndToImeCaretU16 = imc.GetImeCaretPos() - static_cast<unsigned int>(wcs.size());
-		int imeCaretPosDoc = pdoc->GetRelativePositionUTF16(CurrentPosition(), imeEndToImeCaretU16);
+		Sci::Position imeCaretPosDoc = pdoc->GetRelativePositionUTF16(CurrentPosition(), imeEndToImeCaretU16);
 
 		MoveImeCarets(- CurrentPosition() + imeCaretPosDoc);
 
@@ -1298,7 +1298,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			// Either SCROLL or ZOOM. We handle the wheel steppings calculation
 			wheelDelta -= static_cast<short>(HiWord(wParam));
 			if (abs(wheelDelta) >= WHEEL_DELTA && linesPerScroll > 0) {
-				int linesToScroll = linesPerScroll;
+				Sci::Line linesToScroll = linesPerScroll;
 				if (linesPerScroll == WHEEL_PAGESCROLL)
 					linesToScroll = LinesOnScreen() - 1;
 				if (linesToScroll == 0) {
@@ -1663,8 +1663,8 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			break;
 
 		case EM_SETSEL: {
-				int nStart = static_cast<int>(wParam);
-				int nEnd = static_cast<int>(lParam);
+				Sci::Position nStart = static_cast<Sci::Position>(wParam);
+				Sci::Position nEnd = static_cast<Sci::Position>(lParam);
 				if (nStart == 0 && nEnd == -1) {
 					nEnd = pdoc->Length();
 				}
@@ -1850,7 +1850,7 @@ bool ScintillaWin::PaintContains(PRectangle rc) {
 	return true;
 }
 
-void ScintillaWin::ScrollText(int /* linesToMove */) {
+void ScintillaWin::ScrollText(Sci::Line /* linesToMove */) {
 	//Platform::DebugPrintf("ScintillaWin::ScrollText %d\n", linesToMove);
 	//::ScrollWindow(MainHWND(), 0,
 	//	vs.lineHeight * linesToMove, 0, 0);
@@ -1883,7 +1883,7 @@ bool ScintillaWin::GetScrollInfo(int nBar, LPSCROLLINFO lpsi) {
 }
 
 // Change the scroll position but avoid repaint if changing to same value
-void ScintillaWin::ChangeScrollPos(int barType, int pos) {
+void ScintillaWin::ChangeScrollPos(int barType, Sci::Position pos) {
 	SCROLLINFO sci = {
 		sizeof(sci), 0, 0, 0, 0, 0, 0
 	};
@@ -1904,14 +1904,14 @@ void ScintillaWin::SetHorizontalScrollPos() {
 	ChangeScrollPos(SB_HORZ, xOffset);
 }
 
-bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
+bool ScintillaWin::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) {
 	bool modified = false;
 	SCROLLINFO sci = {
 		sizeof(sci), 0, 0, 0, 0, 0, 0
 	};
 	sci.fMask = SIF_PAGE | SIF_RANGE;
 	GetScrollInfo(SB_VERT, &sci);
-	int vertEndPreferred = nMax;
+	Sci::Line vertEndPreferred = nMax;
 	if (!verticalScrollBarVisible)
 		nPage = vertEndPreferred + 1;
 	if ((sci.nMin != 0) ||
@@ -1932,14 +1932,14 @@ bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
 	int horizEndPreferred = scrollWidth;
 	if (horizEndPreferred < 0)
 		horizEndPreferred = 0;
-	unsigned int pageWidth = static_cast<unsigned int>(rcText.Width());
+	int pageWidth = static_cast<int>(rcText.Width());
 	if (!horizontalScrollBarVisible || Wrapping())
 		pageWidth = horizEndPreferred + 1;
 	sci.fMask = SIF_PAGE | SIF_RANGE;
 	GetScrollInfo(SB_HORZ, &sci);
 	if ((sci.nMin != 0) ||
 		(sci.nMax != horizEndPreferred) ||
-		(sci.nPage != pageWidth) ||
+		(sci.nPage != static_cast<unsigned int>(pageWidth)) ||
 	        (sci.nPos != 0)) {
 		sci.fMask = SIF_PAGE | SIF_RANGE;
 		sci.nMin = 0;
@@ -1949,7 +1949,7 @@ bool ScintillaWin::ModifyScrollBars(int nMax, int nPage) {
 		sci.nTrackPos = 1;
 		SetScrollInfo(SB_HORZ, &sci, TRUE);
 		modified = true;
-		if (scrollWidth < static_cast<int>(pageWidth)) {
+		if (scrollWidth < pageWidth) {
 			HorizontalScrollTo(0);
 		}
 	}
@@ -2673,13 +2673,13 @@ void ScintillaWin::ImeEndComposition() {
 LRESULT ScintillaWin::ImeOnReconvert(LPARAM lParam) {
 	// Reconversion on windows limits within one line without eol.
 	// Look around:   baseStart  <--  (|mainStart|  -- mainEnd)  --> baseEnd.
-	const int mainStart = sel.RangeMain().Start().Position();
-	const int mainEnd = sel.RangeMain().End().Position();
-	const int curLine = pdoc->LineFromPosition(mainStart);
+	const Sci::Position mainStart = sel.RangeMain().Start().Position();
+	const Sci::Position mainEnd = sel.RangeMain().End().Position();
+	const Sci::Line curLine = pdoc->LineFromPosition(mainStart);
 	if (curLine != pdoc->LineFromPosition(mainEnd))
 		return 0;
-	const int baseStart = pdoc->LineStart(curLine);
-	const int baseEnd = pdoc->LineEnd(curLine);
+	const Sci::Position baseStart = pdoc->LineStart(curLine);
+	const Sci::Position baseEnd = pdoc->LineEnd(curLine);
 	if ((baseStart == baseEnd) || (mainEnd > baseEnd))
 		return 0;
 
@@ -2730,8 +2730,8 @@ LRESULT ScintillaWin::ImeOnReconvert(LPARAM lParam) {
 
 	// Make place for next composition string to sit in.
 	for (size_t r=0; r<sel.Count(); r++) {
-		int rBase = sel.Range(r).Start().Position();
-		int docCompStart = rBase + adjust;
+		Sci::Position rBase = sel.Range(r).Start().Position();
+		Sci::Position docCompStart = rBase + adjust;
 
 		if (inOverstrike) { // the docCompLen of bytes will be overstriked.
 			sel.Range(r).caret.SetPosition(docCompStart);
@@ -2739,8 +2739,8 @@ LRESULT ScintillaWin::ImeOnReconvert(LPARAM lParam) {
 		} else {
 			// Ensure docCompStart+docCompLen be not beyond lineEnd.
 			// since docCompLen by byte might break eol.
-			int lineEnd = pdoc->LineEnd(pdoc->LineFromPosition(rBase));
-			int overflow = (docCompStart + docCompLen) - lineEnd;
+			Sci::Position lineEnd = pdoc->LineEnd(pdoc->LineFromPosition(rBase));
+			Sci::Position overflow = (docCompStart + docCompLen) - lineEnd;
 			if (overflow > 0) {
 				pdoc->DeleteChars(docCompStart, docCompLen - overflow);
 			} else {
@@ -2833,7 +2833,7 @@ void ScintillaWin::ScrollMessage(WPARAM wParam) {
 	//Platform::DebugPrintf("ScrollInfo %d mask=%x min=%d max=%d page=%d pos=%d track=%d\n", b,sci.fMask,
 	//sci.nMin, sci.nMax, sci.nPage, sci.nPos, sci.nTrackPos);
 
-	int topLineNew = topLine;
+	Sci::Line topLineNew = topLine;
 	switch (LoWord(wParam)) {
 	case SB_LINEUP:
 		topLineNew -= 1;
@@ -3038,7 +3038,7 @@ STDMETHODIMP ScintillaWin::DragOver(DWORD grfKeyState, POINTL pt, PDWORD pdwEffe
 
 STDMETHODIMP ScintillaWin::DragLeave() {
 	try {
-		SetDragPosition(SelectionPosition(invalidPosition));
+		SetDragPosition(SelectionPosition(Sci::invalidPosition));
 		return S_OK;
 	} catch (...) {
 		errorStatus = SC_STATUS_FAILURE;
@@ -3054,7 +3054,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 		if (pIDataSource == NULL)
 			return E_POINTER;
 
-		SetDragPosition(SelectionPosition(invalidPosition));
+		SetDragPosition(SelectionPosition(Sci::invalidPosition));
 
 		STGMEDIUM medium = {0, {0}, 0};
 

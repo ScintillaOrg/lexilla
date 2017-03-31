@@ -239,7 +239,7 @@ bool ScintillaQt::ValidCodePage(int codePage) const
 }
 
 
-void ScintillaQt::ScrollText(int linesToMove)
+void ScintillaQt::ScrollText(Sci::Line linesToMove)
 {
 	int dy = vs.lineHeight * (linesToMove);
 	scrollArea->viewport()->scroll(0, dy);
@@ -257,7 +257,7 @@ void ScintillaQt::SetHorizontalScrollPos()
 	emit horizontalScrolled(xOffset);
 }
 
-bool ScintillaQt::ModifyScrollBars(int nMax, int nPage)
+bool ScintillaQt::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage)
 {
 	bool modified = false;
 
@@ -613,7 +613,7 @@ void ScintillaQt::StartDrag()
 		}
 	}
 	inDragDrop = ddNone;
-	SetDragPosition(SelectionPosition(invalidPosition));
+	SetDragPosition(SelectionPosition(Sci::invalidPosition));
 }
 
 void ScintillaQt::CreateCallTipWindow(PRectangle rc)
@@ -740,7 +740,7 @@ void ScintillaQt::DragMove(const Point &point)
 
 void ScintillaQt::DragLeave()
 {
-	SetDragPosition(SelectionPosition(invalidPosition));
+	SetDragPosition(SelectionPosition(Sci::invalidPosition));
 }
 
 void ScintillaQt::Drop(const Point &point, const QMimeData *data, bool move)

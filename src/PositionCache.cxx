@@ -149,7 +149,7 @@ void LineLayout::SetLineStart(int line, int start) {
 	lineStarts[line] = start;
 }
 
-void LineLayout::SetBracesHighlight(Range rangeLine, const Position braces[],
+void LineLayout::SetBracesHighlight(Range rangeLine, const Sci::Position braces[],
                                     char bracesMatchStyle, int xHighlight, bool ignoreStyle) {
 	if (!ignoreStyle && rangeLine.ContainsCharacter(braces[0])) {
 		int braceOffset = braces[0] - rangeLine.start;
@@ -171,7 +171,7 @@ void LineLayout::SetBracesHighlight(Range rangeLine, const Position braces[],
 	}
 }
 
-void LineLayout::RestoreBracesHighlight(Range rangeLine, const Position braces[], bool ignoreStyle) {
+void LineLayout::RestoreBracesHighlight(Range rangeLine, const Sci::Position braces[], bool ignoreStyle) {
 	if (!ignoreStyle && rangeLine.ContainsCharacter(braces[0])) {
 		int braceOffset = braces[0] - rangeLine.start;
 		if (braceOffset < numCharsInLine) {
@@ -267,7 +267,7 @@ void LineLayoutCache::Allocate(size_t length_) {
 	cache.resize(length_);
 }
 
-void LineLayoutCache::AllocateForLevel(int linesOnScreen, int linesInDoc) {
+void LineLayoutCache::AllocateForLevel(Sci::Line linesOnScreen, Sci::Line linesInDoc) {
 	PLATFORM_ASSERT(useCount == 0);
 	size_t lengthForLevel = 0;
 	if (level == llcCaret) {
@@ -320,15 +320,15 @@ void LineLayoutCache::SetLevel(int level_) {
 	}
 }
 
-LineLayout *LineLayoutCache::Retrieve(int lineNumber, int lineCaret, int maxChars, int styleClock_,
-                                      int linesOnScreen, int linesInDoc) {
+LineLayout *LineLayoutCache::Retrieve(Sci::Line lineNumber, Sci::Line lineCaret, int maxChars, int styleClock_,
+                                      Sci::Line linesOnScreen, Sci::Line linesInDoc) {
 	AllocateForLevel(linesOnScreen, linesInDoc);
 	if (styleClock != styleClock_) {
 		Invalidate(LineLayout::llCheckTextAndStyle);
 		styleClock = styleClock_;
 	}
 	allInvalidated = false;
-	int pos = -1;
+	Sci::Position pos = -1;
 	LineLayout *ret = 0;
 	if (level == llcCaret) {
 		pos = 0;
@@ -447,7 +447,7 @@ void BreakFinder::Insert(int val) {
 	}
 }
 
-BreakFinder::BreakFinder(const LineLayout *ll_, const Selection *psel, Range lineRange_, int posLineStart_,
+BreakFinder::BreakFinder(const LineLayout *ll_, const Selection *psel, Range lineRange_, Sci::Position posLineStart_,
 	int xStart, bool breakForSelection, const Document *pdoc_, const SpecialRepresentations *preprs_, const ViewStyle *pvsDraw) :
 	ll(ll_),
 	lineRange(lineRange_),
@@ -486,7 +486,7 @@ BreakFinder::BreakFinder(const LineLayout *ll_, const Selection *psel, Range lin
 	if (pvsDraw && pvsDraw->indicatorsSetFore > 0) {
 		for (Decoration *deco = pdoc->decorations.root; deco; deco = deco->next) {
 			if (pvsDraw->indicators[deco->indicator].OverridesTextFore()) {
-				int startPos = deco->rs.EndRun(posLineStart);
+				Sci::Position startPos = deco->rs.EndRun(posLineStart);
 				while (startPos < (posLineStart + lineRange.end)) {
 					Insert(startPos - posLineStart);
 					startPos = deco->rs.EndRun(startPos);

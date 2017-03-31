@@ -207,24 +207,24 @@ void ScintillaBase::AutoCompleteDoubleClick(void *p) {
 	sci->AutoCompleteCompleted(0, SC_AC_DOUBLECLICK);
 }
 
-void ScintillaBase::AutoCompleteInsert(Position startPos, int removeLen, const char *text, int textLen) {
+void ScintillaBase::AutoCompleteInsert(Sci::Position startPos, int removeLen, const char *text, int textLen) {
 	UndoGroup ug(pdoc);
 	if (multiAutoCMode == SC_MULTIAUTOC_ONCE) {
 		pdoc->DeleteChars(startPos, removeLen);
-		const int lengthInserted = pdoc->InsertString(startPos, text, textLen);
+		const Sci::Position lengthInserted = pdoc->InsertString(startPos, text, textLen);
 		SetEmptySelection(startPos + lengthInserted);
 	} else {
 		// SC_MULTIAUTOC_EACH
 		for (size_t r=0; r<sel.Count(); r++) {
 			if (!RangeContainsProtected(sel.Range(r).Start().Position(),
 				sel.Range(r).End().Position())) {
-				int positionInsert = sel.Range(r).Start().Position();
+				Sci::Position positionInsert = sel.Range(r).Start().Position();
 				positionInsert = RealizeVirtualSpace(positionInsert, sel.Range(r).caret.VirtualSpace());
 				if (positionInsert - removeLen >= 0) {
 					positionInsert -= removeLen;
 					pdoc->DeleteChars(positionInsert, removeLen);
 				}
-				const int lengthInserted = pdoc->InsertString(positionInsert, text, textLen);
+				const Sci::Position lengthInserted = pdoc->InsertString(positionInsert, text, textLen);
 				if (lengthInserted > 0) {
 					sel.Range(r).caret.SetPosition(positionInsert + lengthInserted);
 					sel.Range(r).anchor.SetPosition(positionInsert + lengthInserted);
@@ -382,7 +382,7 @@ void ScintillaBase::AutoCompleteCompleted(char ch, unsigned int completionMethod
 	scn.listCompletionMethod = completionMethod;
 	scn.wParam = listType;
 	scn.listType = listType;
-	Position firstPos = ac.posStart - ac.startLen;
+	Sci::Position firstPos = ac.posStart - ac.startLen;
 	scn.position = firstPos;
 	scn.lParam = firstPos;
 	scn.text = selected.c_str();
@@ -395,7 +395,7 @@ void ScintillaBase::AutoCompleteCompleted(char ch, unsigned int completionMethod
 	if (listType > 0)
 		return;
 
-	Position endPos = sel.MainCaret();
+	Sci::Position endPos = sel.MainCaret();
 	if (ac.dropRestOfWord)
 		endPos = pdoc->ExtendWordSelect(endPos, 1, true);
 	if (endPos < firstPos)
@@ -771,11 +771,11 @@ const char *LexState::GetSubStyleBases() {
 
 #endif
 
-void ScintillaBase::NotifyStyleToNeeded(int endStyleNeeded) {
+void ScintillaBase::NotifyStyleToNeeded(Sci::Position endStyleNeeded) {
 #ifdef SCI_LEXER
 	if (DocumentLexState()->lexLanguage != SCLEX_CONTAINER) {
-		int lineEndStyled = pdoc->LineFromPosition(pdoc->GetEndStyled());
-		int endStyled = pdoc->LineStart(lineEndStyled);
+		Sci::Line lineEndStyled = pdoc->LineFromPosition(pdoc->GetEndStyled());
+		Sci::Position endStyled = pdoc->LineStart(lineEndStyled);
 		DocumentLexState()->Colourise(endStyled, endStyleNeeded);
 		return;
 	}
@@ -994,10 +994,10 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 
 	case SCI_COLOURISE:
 		if (DocumentLexState()->lexLanguage == SCLEX_CONTAINER) {
-			pdoc->ModifiedAt(static_cast<int>(wParam));
-			NotifyStyleToNeeded((lParam == -1) ? pdoc->Length() : static_cast<int>(lParam));
+			pdoc->ModifiedAt(static_cast<Sci::Position>(wParam));
+			NotifyStyleToNeeded((lParam == -1) ? pdoc->Length() : static_cast<Sci::Position>(lParam));
 		} else {
-			DocumentLexState()->Colourise(static_cast<int>(wParam), static_cast<int>(lParam));
+			DocumentLexState()->Colourise(static_cast<Sci::Position>(wParam), static_cast<Sci::Position>(lParam));
 		}
 		Redraw();
 		break;
