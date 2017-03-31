@@ -379,7 +379,6 @@ public:
 	Sci::Line GetFoldParent(Sci::Line line) const;
 	void GetHighlightDelimiters(HighlightDelimiter &hDelimiter, Sci::Line line, Sci::Line lastLine);
 
-	void Indent(bool forwards);
 	Sci::Position ExtendWordSelect(Sci::Position pos, int delta, bool onlyWordCharacters=false) const;
 	Sci::Position NextWordStart(Sci::Position pos, int delta) const;
 	Sci::Position NextWordEnd(Sci::Position pos, int delta) const;
