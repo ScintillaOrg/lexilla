@@ -638,6 +638,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_LINECUT 2337
 #define SCI_LINEDELETE 2338
 #define SCI_LINETRANSPOSE 2339
+#define SCI_LINEREVERSE 2354
 #define SCI_LINEDUPLICATE 2404
 #define SCI_LOWERCASE 2340
 #define SCI_UPPERCASE 2341

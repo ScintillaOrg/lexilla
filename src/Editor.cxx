@@ -2800,6 +2800,7 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 	case SCI_LINECUT:
 	case SCI_LINEDELETE:
 	case SCI_LINETRANSPOSE:
+	case SCI_LINEREVERSE:
 	case SCI_LINEDUPLICATE:
 	case SCI_LOWERCASE:
 	case SCI_UPPERCASE:
@@ -2965,6 +2966,32 @@ void Editor::LineTranspose() {
 		// Move caret to start of current line
 		MovePositionTo(SelectionPosition(startCurrent));
 	}
+}
+
+void Editor::LineReverse() {
+	const Sci::Line lineStart = pdoc->LineFromPosition(sel.RangeMain().Start().Position());
+	const Sci::Line lineEnd = pdoc->LineFromPosition(sel.RangeMain().End().Position()-1);
+	const Sci::Line lineDiff = lineEnd - lineStart;
+	if (lineDiff <= 0)
+		return;
+	UndoGroup ug(pdoc);
+	for (Sci::Line i=(lineDiff+1)/2-1; i>=0; --i) {
+		const Sci::Line lineNum2 = lineEnd - i;
+		const Sci::Line lineNum1 = lineStart + i;
+		Sci::Position lineStart2 = pdoc->LineStart(lineNum2);
+		const Sci::Position lineStart1 = pdoc->LineStart(lineNum1);
+		const std::string line2 = RangeText(lineStart2, pdoc->LineEnd(lineNum2));
+		const std::string line1 = RangeText(lineStart1, pdoc->LineEnd(lineNum1));
+		const Sci::Position lineLen2 = static_cast<Sci::Position>(line2.length());
+		const Sci::Position lineLen1 = static_cast<Sci::Position>(line1.length());
+		pdoc->DeleteChars(lineStart2, lineLen2);
+		pdoc->DeleteChars(lineStart1, lineLen1);
+		lineStart2 -= lineLen1;
+		pdoc->InsertString(lineStart2, line1.c_str(), lineLen1);
+		pdoc->InsertString(lineStart1, line2.c_str(), lineLen2);
+	}
+	// Wholly select all affected lines
+	sel.RangeMain() = SelectionRange(pdoc->LineStart(lineStart), pdoc->LineStart(lineEnd+1));
 }
 
 void Editor::Duplicate(bool forLine) {
@@ -3808,6 +3835,9 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		break;
 	case SCI_LINETRANSPOSE:
 		LineTranspose();
+		break;
+	case SCI_LINEREVERSE:
+		LineReverse();
 		break;
 	case SCI_LINEDUPLICATE:
 		Duplicate(true);
@@ -7453,6 +7483,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_LINECUT:
 	case SCI_LINEDELETE:
 	case SCI_LINETRANSPOSE:
+	case SCI_LINEREVERSE:
 	case SCI_LINEDUPLICATE:
 	case SCI_LOWERCASE:
 	case SCI_UPPERCASE:

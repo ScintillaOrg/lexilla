@@ -1614,6 +1614,9 @@ fun void LineDelete=2338(,)
 # Switch the current line with the previous.
 fun void LineTranspose=2339(,)
 
+# Reverse order of selected lines.
+fun void LineReverse=2354(,)
+
 # Duplicate the current line.
 fun void LineDuplicate=2404(,)
 

@@ -460,6 +460,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual std::string CaseMapString(const std::string &s, int caseMapping);
 	void ChangeCaseOfSelection(int caseMapping);
 	void LineTranspose();
+	void LineReverse();
 	void Duplicate(bool forLine);
 	virtual void CancelModes();
 	void NewLine();
