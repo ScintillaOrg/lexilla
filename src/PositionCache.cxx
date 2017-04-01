@@ -483,8 +483,8 @@ BreakFinder::BreakFinder(const LineLayout *ll_, const Selection *psel, Range lin
 		}
 	}
 	if (pvsDraw && pvsDraw->indicatorsSetFore > 0) {
-		for (Decoration *deco = pdoc->decorations.root; deco; deco = deco->next) {
-			if (pvsDraw->indicators[deco->indicator].OverridesTextFore()) {
+		for (Decoration *deco = pdoc->decorations.Root(); deco; deco = deco->Next()) {
+			if (pvsDraw->indicators[deco->Indicator()].OverridesTextFore()) {
 				Sci::Position startPos = deco->rs.EndRun(posLineStart);
 				while (startPos < (posLineStart + lineRange.end)) {
 					Insert(startPos - posLineStart);

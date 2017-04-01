@@ -1015,8 +1015,8 @@ static void DrawIndicators(Surface *surface, const EditModel &model, const ViewS
 	const Sci::Position lineStart = ll->LineStart(subLine);
 	const Sci::Position posLineEnd = posLineStart + lineEnd;
 
-	for (Decoration *deco = model.pdoc->decorations.root; deco; deco = deco->next) {
-		if (under == vsDraw.indicators[deco->indicator].under) {
+	for (Decoration *deco = model.pdoc->decorations.Root(); deco; deco = deco->Next()) {
+		if (under == vsDraw.indicators[deco->Indicator()].under) {
 			Sci::Position startPos = posLineStart + lineStart;
 			if (!deco->rs.ValueAt(startPos)) {
 				startPos = deco->rs.EndRun(startPos);
@@ -1024,12 +1024,12 @@ static void DrawIndicators(Surface *surface, const EditModel &model, const ViewS
 			while ((startPos < posLineEnd) && (deco->rs.ValueAt(startPos))) {
 				const Range rangeRun(deco->rs.StartRun(startPos), deco->rs.EndRun(startPos));
 				const Sci::Position endPos = std::min(rangeRun.end, posLineEnd);
-				const bool hover = vsDraw.indicators[deco->indicator].IsDynamic() &&
+				const bool hover = vsDraw.indicators[deco->Indicator()].IsDynamic() &&
 					rangeRun.ContainsCharacter(hoverIndicatorPos);
 				const int value = deco->rs.ValueAt(startPos);
 				Indicator::DrawState drawState = hover ? Indicator::drawHover : Indicator::drawNormal;
 				const Sci::Position posSecond = model.pdoc->MovePositionOutsideChar(rangeRun.First() + 1, 1);
-				DrawIndicator(deco->indicator, startPos - posLineStart, endPos - posLineStart,
+				DrawIndicator(deco->Indicator(), startPos - posLineStart, endPos - posLineStart,
 					surface, vsDraw, ll, xStart, rcLine, posSecond - posLineStart, subLine, drawState, value);
 				startPos = endPos;
 				if (!deco->rs.ValueAt(startPos)) {
@@ -1619,10 +1619,10 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 			}
 			if (vsDraw.indicatorsSetFore > 0) {
 				// At least one indicator sets the text colour so see if it applies to this segment
-				for (Decoration *deco = model.pdoc->decorations.root; deco; deco = deco->next) {
+				for (Decoration *deco = model.pdoc->decorations.Root(); deco; deco = deco->Next()) {
 					const int indicatorValue = deco->rs.ValueAt(ts.start + posLineStart);
 					if (indicatorValue) {
-						const Indicator &indicator = vsDraw.indicators[deco->indicator];
+						const Indicator &indicator = vsDraw.indicators[deco->Indicator()];
 						const bool hover = indicator.IsDynamic() &&
 							((model.hoverIndicatorPos >= ts.start + posLineStart) &&
 							(model.hoverIndicatorPos <= ts.end() + posLineStart));

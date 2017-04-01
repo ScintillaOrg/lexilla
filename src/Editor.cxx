@@ -2097,12 +2097,12 @@ void Editor::ClearAll() {
 }
 
 void Editor::ClearDocumentStyle() {
-	Decoration *deco = pdoc->decorations.root;
+	Decoration *deco = pdoc->decorations.Root();
 	while (deco) {
 		// Save next in case deco deleted
-		Decoration *decoNext = deco->next;
-		if (deco->indicator < INDIC_CONTAINER) {
-			pdoc->DecorationSetCurrentIndicator(deco->indicator);
+		Decoration *decoNext = deco->Next();
+		if (deco->Indicator() < INDIC_CONTAINER) {
+			pdoc->DecorationSetCurrentIndicator(deco->Indicator());
 			pdoc->DecorationFillRange(0, 0, pdoc->Length());
 		}
 		deco = decoNext;
@@ -2407,9 +2407,9 @@ void Editor::NotifyPainted() {
 
 void Editor::NotifyIndicatorClick(bool click, Sci::Position position, int modifiers) {
 	int mask = pdoc->decorations.AllOnFor(position);
-	if ((click && mask) || pdoc->decorations.clickNotified) {
+	if ((click && mask) || pdoc->decorations.ClickNotified()) {
 		SCNotification scn = {};
-		pdoc->decorations.clickNotified = click;
+		pdoc->decorations.SetClickNotified(click);
 		scn.nmhdr.code = click ? SCN_INDICATORCLICK : SCN_INDICATORRELEASE;
 		scn.modifiers = modifiers;
 		scn.position = position;
@@ -4622,9 +4622,9 @@ void Editor::SetHoverIndicatorPosition(Sci::Position position) {
 	if (vs.indicatorsDynamic == 0)
 		return;
 	if (position != INVALID_POSITION) {
-		for (Decoration *deco = pdoc->decorations.root; deco; deco = deco->next) {
-			if (vs.indicators[deco->indicator].IsDynamic()) {
-				if (pdoc->decorations.ValueAt(deco->indicator, position)) {
+		for (Decoration *deco = pdoc->decorations.Root(); deco; deco = deco->Next()) {
+			if (vs.indicators[deco->Indicator()].IsDynamic()) {
+				if (pdoc->decorations.ValueAt(deco->Indicator(), position)) {
 					hoverIndicatorPos = position;
 				}
 			}
