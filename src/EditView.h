@@ -117,7 +117,7 @@ public:
 	SelectionPosition SPositionFromLocation(Surface *surface, const EditModel &model, PointDocument pt, bool canReturnInvalid,
 		bool charPosition, bool virtualSpace, const ViewStyle &vs);
 	SelectionPosition SPositionFromLineX(Surface *surface, const EditModel &model, Sci::Line lineDoc, int x, const ViewStyle &vs);
-	Sci::Line DisplayFromPosition(Surface *surface, const EditModel &model, int pos, const ViewStyle &vs);
+	Sci::Line DisplayFromPosition(Surface *surface, const EditModel &model, Sci::Position pos, const ViewStyle &vs);
 	Sci::Position StartEndDisplayLine(Surface *surface, const EditModel &model, Sci::Position pos, bool start, const ViewStyle &vs);
 
 	void DrawIndentGuide(Surface *surface, Sci::Line lineVisible, int lineHeight, Sci::Position start, PRectangle rcSegment, bool highlight);

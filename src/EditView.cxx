@@ -720,7 +720,7 @@ SelectionPosition EditView::SPositionFromLineX(Surface *surface, const EditModel
 	return SelectionPosition(0);
 }
 
-Sci::Line EditView::DisplayFromPosition(Surface *surface, const EditModel &model, int pos, const ViewStyle &vs) {
+Sci::Line EditView::DisplayFromPosition(Surface *surface, const EditModel &model, Sci::Position pos, const ViewStyle &vs) {
 	Sci::Line lineDoc = model.pdoc->LineFromPosition(pos);
 	Sci::Line lineDisplay = model.cs.DisplayFromDoc(lineDoc);
 	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc, model));
