@@ -89,10 +89,12 @@ void DecorationList::Delete(int indicator) {
 			decoToDelete = root;
 			root = root->Next();
 		} else {
-			Decoration *deco=root;
-			while (deco->Next() && !decoToDelete) {
-				if (deco->Next() && deco->Next()->Indicator() == indicator) {
-					decoToDelete = deco->Next();
+			Decoration *deco = root;
+			while (deco && deco->Next() && !decoToDelete) {
+				// decoNext ensures no warning from MSVC Code Analysis
+				Decoration *decoNext = deco->Next();
+				if (decoNext && deco->Next()->Indicator() == indicator) {
+					decoToDelete = decoNext;
 					deco->next = decoToDelete->Next();
 				} else {
 					deco = deco->Next();
