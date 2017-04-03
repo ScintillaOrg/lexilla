@@ -24,7 +24,7 @@ TEST_CASE("Decoration") {
 	Decoration deco(indicator);
 
 	SECTION("HasCorrectIndicator") {
-		REQUIRE(indicator == deco.indicator);
+		REQUIRE(indicator == deco.Indicator());
 	}
 
 	SECTION("IsEmptyInitially") {
