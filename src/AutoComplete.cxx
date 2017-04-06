@@ -131,9 +131,9 @@ struct Sorter {
 	}
 
 	bool operator()(int a, int b) {
-		int lenA = indices[a * 2 + 1] - indices[a * 2];
-		int lenB = indices[b * 2 + 1] - indices[b * 2];
-		int len  = std::min(lenA, lenB);
+		const int lenA = indices[a * 2 + 1] - indices[a * 2];
+		const int lenB = indices[b * 2 + 1] - indices[b * 2];
+		const int len  = std::min(lenA, lenB);
 		int cmp;
 		if (ac->ignoreCase)
 			cmp = CompareNCaseInsensitive(list + indices[a * 2], list + indices[b * 2], len);
@@ -217,7 +217,7 @@ void AutoComplete::Cancel() {
 
 
 void AutoComplete::Move(int delta) {
-	int count = lb->Length();
+	const int count = lb->Length();
 	int current = lb->GetSelection();
 	current += delta;
 	if (current >= count)

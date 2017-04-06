@@ -214,7 +214,7 @@ public:
 	void SetSize(size_t size_);
 	size_t GetSize() const { return pces.size(); }
 	void MeasureWidths(Surface *surface, const ViewStyle &vstyle, unsigned int styleNumber,
-		const char *s, unsigned int len, XYPOSITION *positions, Document *pdoc);
+		const char *s, unsigned int len, XYPOSITION *positions, const Document *pdoc);
 };
 
 inline bool IsSpaceOrTab(int ch) {

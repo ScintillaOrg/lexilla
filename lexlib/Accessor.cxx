@@ -29,7 +29,7 @@ int Accessor::GetPropertyInt(const char *key, int defaultValue) const {
 }
 
 int Accessor::IndentAmount(Sci_Position line, int *flags, PFNIsCommentLeader pfnIsCommentLeader) {
-	Sci_Position end = Length();
+	const Sci_Position end = Length();
 	int spaceFlags = 0;
 
 	// Determines the indentation level of the current line and also checks for consistent
@@ -44,7 +44,7 @@ int Accessor::IndentAmount(Sci_Position line, int *flags, PFNIsCommentLeader pfn
 	Sci_Position posPrev = inPrevPrefix ? LineStart(line-1) : 0;
 	while ((ch == ' ' || ch == '\t') && (pos < end)) {
 		if (inPrevPrefix) {
-			char chPrev = (*this)[posPrev++];
+			const char chPrev = (*this)[posPrev++];
 			if (chPrev == ' ' || chPrev == '\t') {
 				if (chPrev != ch)
 					spaceFlags |= wsInconsistent;

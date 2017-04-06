@@ -189,7 +189,7 @@ void LineLayout::RestoreBracesHighlight(Range rangeLine, const Sci::Position bra
 int LineLayout::FindBefore(XYPOSITION x, int lower, int upper) const {
 	do {
 		int middle = (upper + lower + 1) / 2; 	// Round high
-		XYPOSITION posMiddle = positions[middle];
+		const XYPOSITION posMiddle = positions[middle];
 		if (x < posMiddle) {
 			upper = middle - 1;
 		} else {
@@ -469,11 +469,11 @@ BreakFinder::BreakFinder(const LineLayout *ll_, const Selection *psel, Range lin
 	}
 
 	if (breakForSelection) {
-		SelectionPosition posStart(posLineStart);
-		SelectionPosition posEnd(posLineStart + lineRange.end);
-		SelectionSegment segmentLine(posStart, posEnd);
+		const SelectionPosition posStart(posLineStart);
+		const SelectionPosition posEnd(posLineStart + lineRange.end);
+		const SelectionSegment segmentLine(posStart, posEnd);
 		for (size_t r=0; r<psel->Count(); r++) {
-			SelectionSegment portion = psel->Range(r).Intersect(segmentLine);
+			const SelectionSegment portion = psel->Range(r).Intersect(segmentLine);
 			if (!(portion.start == portion.end)) {
 				if (portion.start.IsValid())
 					Insert(portion.start.Position() - posLineStart);
@@ -653,7 +653,7 @@ void PositionCache::SetSize(size_t size_) {
 }
 
 void PositionCache::MeasureWidths(Surface *surface, const ViewStyle &vstyle, unsigned int styleNumber,
-	const char *s, unsigned int len, XYPOSITION *positions, Document *pdoc) {
+	const char *s, unsigned int len, XYPOSITION *positions, const Document *pdoc) {
 
 	allClear = false;
 	size_t probe = pces.size();	// Out of bounds

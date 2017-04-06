@@ -358,7 +358,7 @@ int RESearch::GetBackslashExpression(
 	incr = 0;	// Most of the time, will skip the char "naturally".
 	int c;
 	int result = -1;
-	unsigned char bsc = *pattern;
+	const unsigned char bsc = *pattern;
 	if (!bsc) {
 		// Avoid overrun
 		result = '\\';	// \ at end of pattern, take it literally
@@ -376,9 +376,9 @@ int RESearch::GetBackslashExpression(
 		result = escapeValue(bsc);
 		break;
 	case 'x': {
-			unsigned char hd1 = *(pattern + 1);
-			unsigned char hd2 = *(pattern + 2);
-			int hexValue = GetHexaChar(hd1, hd2);
+			const unsigned char hd1 = *(pattern + 1);
+			const unsigned char hd2 = *(pattern + 2);
+			const int hexValue = GetHexaChar(hd1, hd2);
 			if (hexValue >= 0) {
 				result = hexValue;
 				incr = 2;	// Must skip the digits

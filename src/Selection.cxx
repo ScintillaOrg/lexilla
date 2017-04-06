@@ -36,7 +36,7 @@ void SelectionPosition::MoveForInsertDelete(bool insertion, Sci::Position startC
 			virtualSpace = 0;
 		}
 		if (position > startChange) {
-			Sci::Position endDeletion = startChange + length;
+			const Sci::Position endDeletion = startChange + length;
 			if (position > endDeletion) {
 				position -= length;
 			} else {
@@ -131,8 +131,8 @@ void SelectionRange::Swap() {
 }
 
 bool SelectionRange::Trim(SelectionRange range) {
-	SelectionPosition startRange = range.Start();
-	SelectionPosition endRange = range.End();
+	const SelectionPosition startRange = range.Start();
+	const SelectionPosition endRange = range.End();
 	SelectionPosition start = Start();
 	SelectionPosition end = End();
 	PLATFORM_ASSERT(start <= end);

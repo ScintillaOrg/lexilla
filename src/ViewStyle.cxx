@@ -565,31 +565,31 @@ bool ViewStyle::SetWrapState(int wrapState_) {
 		wrapStateWanted = eWrapNone;
 		break;
 	}
-	bool changed = wrapState != wrapStateWanted;
+	const bool changed = wrapState != wrapStateWanted;
 	wrapState = wrapStateWanted;
 	return changed;
 }
 
 bool ViewStyle::SetWrapVisualFlags(int wrapVisualFlags_) {
-	bool changed = wrapVisualFlags != wrapVisualFlags_;
+	const bool changed = wrapVisualFlags != wrapVisualFlags_;
 	wrapVisualFlags = wrapVisualFlags_;
 	return changed;
 }
 
 bool ViewStyle::SetWrapVisualFlagsLocation(int wrapVisualFlagsLocation_) {
-	bool changed = wrapVisualFlagsLocation != wrapVisualFlagsLocation_;
+	const bool changed = wrapVisualFlagsLocation != wrapVisualFlagsLocation_;
 	wrapVisualFlagsLocation = wrapVisualFlagsLocation_;
 	return changed;
 }
 
 bool ViewStyle::SetWrapVisualStartIndent(int wrapVisualStartIndent_) {
-	bool changed = wrapVisualStartIndent != wrapVisualStartIndent_;
+	const bool changed = wrapVisualStartIndent != wrapVisualStartIndent_;
 	wrapVisualStartIndent = wrapVisualStartIndent_;
 	return changed;
 }
 
 bool ViewStyle::SetWrapIndentMode(int wrapIndentMode_) {
-	bool changed = wrapIndentMode != wrapIndentMode_;
+	const bool changed = wrapIndentMode != wrapIndentMode_;
 	wrapIndentMode = wrapIndentMode_;
 	return changed;
 }

@@ -125,7 +125,7 @@ bool DecorationList::FillRange(int &position, int value, int &fillLength) {
 			current = Create(currentIndicator, lengthDocument);
 		}
 	}
-	bool changed = current->rs.FillRange(position, value, fillLength);
+	const bool changed = current->rs.FillRange(position, value, fillLength);
 	if (current->Empty()) {
 		Delete(currentIndicator);
 	}
@@ -177,7 +177,7 @@ int DecorationList::AllOnFor(int position) const {
 }
 
 int DecorationList::ValueAt(int indicator, int position) {
-	Decoration *deco = DecorationFromIndicator(indicator);
+	const Decoration *deco = DecorationFromIndicator(indicator);
 	if (deco) {
 		return deco->rs.ValueAt(position);
 	}
@@ -185,7 +185,7 @@ int DecorationList::ValueAt(int indicator, int position) {
 }
 
 int DecorationList::Start(int indicator, int position) {
-	Decoration *deco = DecorationFromIndicator(indicator);
+	const Decoration *deco = DecorationFromIndicator(indicator);
 	if (deco) {
 		return deco->rs.StartRun(position);
 	}
@@ -193,7 +193,7 @@ int DecorationList::Start(int indicator, int position) {
 }
 
 int DecorationList::End(int indicator, int position) {
-	Decoration *deco = DecorationFromIndicator(indicator);
+	const Decoration *deco = DecorationFromIndicator(indicator);
 	if (deco) {
 		return deco->rs.EndRun(position);
 	}

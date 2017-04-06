@@ -122,11 +122,11 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 	int minDim = Platform::Minimum(static_cast<int>(rc.Width()), static_cast<int>(rc.Height()));
 	minDim--;	// Ensure does not go beyond edge
 	int centreX = static_cast<int>(floor((rc.right + rc.left) / 2.0));
-	int centreY = static_cast<int>(floor((rc.bottom + rc.top) / 2.0));
-	int dimOn2 = minDim / 2;
-	int dimOn4 = minDim / 4;
+	const int centreY = static_cast<int>(floor((rc.bottom + rc.top) / 2.0));
+	const int dimOn2 = minDim / 2;
+	const int dimOn4 = minDim / 4;
 	int blobSize = dimOn2-1;
-	int armSize = dimOn2-2;
+	const int armSize = dimOn2-2;
 	if (marginStyle == SC_MARGIN_NUMBER || marginStyle == SC_MARGIN_TEXT || marginStyle == SC_MARGIN_RTEXT) {
 		// On textual margins move marker to the left to try to avoid overlapping the text
 		centreX = static_cast<int>(rc.left) + dimOn2 + 1;
@@ -384,7 +384,7 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 		rcLeft.right = rcLeft.left + 4;
 		surface->FillRectangle(rcLeft, back);
 	} else if (markType == SC_MARK_BOOKMARK) {
-		int halfHeight = minDim / 3;
+		const int halfHeight = minDim / 3;
 		Point pts[] = {
 			Point::FromInts(static_cast<int>(rc.left), centreY-halfHeight),
 			Point::FromInts(static_cast<int>(rc.right) - 3, centreY - halfHeight),

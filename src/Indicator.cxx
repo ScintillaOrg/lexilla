@@ -36,7 +36,7 @@ void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &r
 	int ymid = static_cast<int>(rc.bottom + rc.top) / 2;
 	if (sacDraw.style == INDIC_SQUIGGLE) {
 		int x = int(rc.left+0.5);
-		int xLast = int(rc.right+0.5);
+		const int xLast = int(rc.right+0.5);
 		int y = 0;
 		surface->MoveTo(x, static_cast<int>(rc.top) + y);
 		while (x < xLast) {

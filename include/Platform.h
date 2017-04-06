@@ -136,7 +136,7 @@ public:
 
 	// Other automatically defined methods (assignment, copy constructor, destructor) are fine
 
-	bool operator==(PRectangle &rc) const {
+	bool operator==(const PRectangle &rc) const {
 		return (rc.left == left) && (rc.right == right) &&
 			(rc.top == top) && (rc.bottom == bottom);
 	}

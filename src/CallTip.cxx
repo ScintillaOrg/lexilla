@@ -90,7 +90,7 @@ void CallTip::DrawChunk(Surface *surface, int &x, const char *s,
 	int posStart, int posEnd, int ytext, PRectangle rcClient,
 	bool highlight, bool draw) {
 	s += posStart;
-	int len = posEnd - posStart;
+	const int len = posEnd - posStart;
 
 	// Divide the text into sections that are all text, or that are
 	// single arrows or single tab characters (if tabSize > 0).
@@ -113,7 +113,7 @@ void CallTip::DrawChunk(Surface *surface, int &x, const char *s,
 		if (endSeg > startSeg) {
 			if (IsArrowCharacter(s[startSeg])) {
 				xEnd = x + widthArrow;
-				bool upArrow = s[startSeg] == '\001';
+				const bool upArrow = s[startSeg] == '\001';
 				rcClient.left = static_cast<XYPOSITION>(x);
 				rcClient.right = static_cast<XYPOSITION>(xEnd);
 				if (draw) {
@@ -189,9 +189,9 @@ int CallTip::PaintContents(Surface *surfaceWindow, bool draw) {
 			chunkEnd = chunkVal + strlen(chunkVal);
 			moreChunks = false;
 		}
-		int chunkOffset = static_cast<int>(chunkVal - val.c_str());
-		int chunkLength = static_cast<int>(chunkEnd - chunkVal);
-		int chunkEndOffset = chunkOffset + chunkLength;
+		const int chunkOffset = static_cast<int>(chunkVal - val.c_str());
+		const int chunkLength = static_cast<int>(chunkEnd - chunkVal);
+		const int chunkEndOffset = chunkOffset + chunkLength;
 		int thisStartHighlight = std::max(startHighlight, chunkOffset);
 		thisStartHighlight = std::min(thisStartHighlight, chunkEndOffset);
 		thisStartHighlight -= chunkOffset;

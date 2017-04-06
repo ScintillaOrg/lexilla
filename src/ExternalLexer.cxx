@@ -65,7 +65,7 @@ LexerLibrary::LexerLibrary(const char *ModuleName) {
 			GetLexerNameFn GetLexerName = (GetLexerNameFn)(sptr_t)lib->FindFunction("GetLexerName");
 			GetLexerFactoryFunction fnFactory = (GetLexerFactoryFunction)(sptr_t)lib->FindFunction("GetLexerFactory");
 
-			int nl = GetLexerCount();
+			const int nl = GetLexerCount();
 
 			for (int i = 0; i < nl; i++) {
 				// Assign a buffer for the lexer name.

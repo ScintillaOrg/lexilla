@@ -3808,11 +3808,11 @@ bool IsIdStart(int character) {
 	if (IsIdPattern(character)) {
 		return false;
 	}
-	OtherID oid = OtherIDOfCharacter(character);
+	const OtherID oid = OtherIDOfCharacter(character);
 	if (oid == OtherID::oidStart) {
 		return true;
 	}
-	CharacterCategory c = CategoriseCharacter(character);
+	const CharacterCategory c = CategoriseCharacter(character);
 	return (c == ccLl || c == ccLu || c == ccLt || c == ccLm || c == ccLo
 		|| c == ccNl);
 }
@@ -3823,11 +3823,11 @@ bool IsIdContinue(int character) {
 	if (IsIdPattern(character)) {
 		return false;
 	}
-	OtherID oid = OtherIDOfCharacter(character);
+	const OtherID oid = OtherIDOfCharacter(character);
 	if (oid != OtherID::oidNone) {
 		return true;
 	}
-	CharacterCategory c = CategoriseCharacter(character);
+	const CharacterCategory c = CategoriseCharacter(character);
 	return (c == ccLl || c == ccLu || c == ccLt || c == ccLm || c == ccLo
 		|| c == ccNl || c == ccMn || c == ccMc || c == ccNd || c == ccPc);
 }

@@ -79,7 +79,7 @@ void ScintillaBase::Finalise() {
 }
 
 void ScintillaBase::AddCharUTF(const char *s, unsigned int len, bool treatAsDBCS) {
-	bool isFillUp = ac.Active() && ac.IsFillUpChar(*s);
+	const bool isFillUp = ac.Active() && ac.IsFillUpChar(*s);
 	if (!isFillUp) {
 		Editor::AddCharUTF(s, len, treatAsDBCS);
 	}
@@ -365,7 +365,7 @@ void ScintillaBase::AutoCompleteCharacterDeleted() {
 }
 
 void ScintillaBase::AutoCompleteCompleted(char ch, unsigned int completionMethod) {
-	int item = ac.GetSelection();
+	const int item = ac.GetSelection();
 	if (item == -1) {
 		AutoCompleteCancel();
 		return;
@@ -415,7 +415,7 @@ int ScintillaBase::AutoCompleteGetCurrent() const {
 
 int ScintillaBase::AutoCompleteGetCurrentText(char *buffer) const {
 	if (ac.Active()) {
-		int item = ac.GetSelection();
+		const int item = ac.GetSelection();
 		if (item != -1) {
 			const std::string selected = ac.GetValue(item);
 			if (buffer != NULL)
@@ -453,7 +453,7 @@ void ScintillaBase::CallTipShow(Point pt, const char *defn) {
 		wMain);
 	// If the call-tip window would be out of the client
 	// space
-	PRectangle rcClient = GetClientRectangle();
+	const PRectangle rcClient = GetClientRectangle();
 	int offset = vs.lineHeight + static_cast<int>(rc.Height());
 	// adjust so it displays above the text.
 	if (rc.bottom > rcClient.bottom && rc.Height() < rcClient.Height()) {
@@ -485,7 +485,7 @@ bool ScintillaBase::ShouldDisplayPopup(Point ptInWindowCoordinates) const {
 
 void ScintillaBase::ContextMenu(Point pt) {
 	if (displayPopupMenu) {
-		bool writable = !WndProc(SCI_GETREADONLY, 0, 0);
+		const bool writable = !WndProc(SCI_GETREADONLY, 0, 0);
 		popup.CreatePopUp();
 		AddToPopUp("Undo", idcmdUndo, writable && pdoc->CanUndo());
 		AddToPopUp("Redo", idcmdRedo, writable && pdoc->CanRedo());

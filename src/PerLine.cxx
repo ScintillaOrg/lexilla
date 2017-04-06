@@ -181,9 +181,9 @@ int LineMarkers::MarkValue(Sci::Line line) {
 Sci::Line LineMarkers::MarkerNext(Sci::Line lineStart, int mask) const {
 	if (lineStart < 0)
 		lineStart = 0;
-	Sci::Line length = markers.Length();
+	const Sci::Line length = markers.Length();
 	for (Sci::Line iLine = lineStart; iLine < length; iLine++) {
-		MarkerHandleSet *onLine = markers[iLine];
+		const MarkerHandleSet *onLine = markers[iLine];
 		if (onLine && ((onLine->MarkValue() & mask) != 0))
 		//if ((pdoc->GetMark(iLine) & lParam) != 0)
 			return iLine;
@@ -318,7 +318,7 @@ void LineState::RemoveLine(Sci::Line line) {
 
 int LineState::SetLineState(Sci::Line line, int state) {
 	lineStates.EnsureLength(line + 1);
-	int stateOld = lineStates[line];
+	const int stateOld = lineStates[line];
 	lineStates[line] = state;
 	return stateOld;
 }
@@ -410,7 +410,7 @@ const unsigned char *LineAnnotation::Styles(Sci::Line line) const {
 }
 
 static char *AllocateAnnotation(int length, int style) {
-	size_t len = sizeof(AnnotationHeader) + length + ((style == IndividualStyles) ? length : 0);
+	const size_t len = sizeof(AnnotationHeader) + length + ((style == IndividualStyles) ? length : 0);
 	char *ret = new char[len]();
 	return ret;
 }
@@ -418,7 +418,7 @@ static char *AllocateAnnotation(int length, int style) {
 void LineAnnotation::SetText(Sci::Line line, const char *text) {
 	if (text && (line >= 0)) {
 		annotations.EnsureLength(line+1);
-		int style = Style(line);
+		const int style = Style(line);
 		if (annotations[line]) {
 			delete []annotations[line];
 		}

@@ -162,7 +162,7 @@ void UndoHistory::EnsureUndoRoom() {
 	// as two actions may be created by the calling function
 	if (currentAction >= (lenActions - 2)) {
 		// Run out of undo nodes so extend the array
-		int lenActionsNew = lenActions * 2;
+		const int lenActionsNew = lenActions * 2;
 		Action *actionsNew = new Action[lenActionsNew];
 		for (int act = 0; act <= currentAction; act++)
 			actionsNew[act].Grab(&actions[act]);
@@ -240,7 +240,7 @@ const char *UndoHistory::AppendAction(actionType at, Sci::Position position, con
 		currentAction++;
 	}
 	startSequence = oldCurrentAction != currentAction;
-	int actionWithData = currentAction;
+	const int actionWithData = currentAction;
 	actions[currentAction].Create(at, position, data, lengthData, mayCoalesce);
 	currentAction++;
 	actions[currentAction].Create(startAction);
@@ -439,7 +439,7 @@ const char *CellBuffer::InsertString(Sci::Position position, const char *s, Sci:
 }
 
 bool CellBuffer::SetStyleAt(Sci::Position position, char styleValue) {
-	char curVal = style.ValueAt(position);
+	const char curVal = style.ValueAt(position);
 	if (curVal != styleValue) {
 		style.SetValueAt(position, styleValue);
 		return true;
@@ -453,7 +453,7 @@ bool CellBuffer::SetStyleFor(Sci::Position position, Sci::Position lengthStyle, 
 	PLATFORM_ASSERT(lengthStyle == 0 ||
 		(lengthStyle > 0 && lengthStyle + position <= style.Length()));
 	while (lengthStyle--) {
-		char curVal = style.ValueAt(position);
+		const char curVal = style.ValueAt(position);
 		if (curVal != styleValue) {
 			style.SetValueAt(position, styleValue);
 			changed = true;
@@ -505,7 +505,7 @@ bool CellBuffer::ContainsLineEnd(const char *s, Sci::Position length) const {
 		if ((ch == '\r') || (ch == '\n')) {
 			return true;
 		} else if (utf8LineEnds) {
-			unsigned char back3[3] = { chBeforePrev, chPrev, ch };
+			const unsigned char back3[3] = { chBeforePrev, chPrev, ch };
 			if (UTF8IsSeparator(back3) || UTF8IsNEL(back3 + 1)) {
 				return true;
 			}
@@ -576,7 +576,7 @@ void CellBuffer::RemoveLine(Sci::Line line) {
 }
 
 bool CellBuffer::UTF8LineEndOverlaps(Sci::Position position) const {
-	unsigned char bytes[] = {
+	const unsigned char bytes[] = {
 		static_cast<unsigned char>(substance.ValueAt(position-2)),
 		static_cast<unsigned char>(substance.ValueAt(position-1)),
 		static_cast<unsigned char>(substance.ValueAt(position)),
@@ -597,7 +597,7 @@ void CellBuffer::ResetLineEnds() {
 	unsigned char chBeforePrev = 0;
 	unsigned char chPrev = 0;
 	for (Sci::Position i = 0; i < length; i++) {
-		unsigned char ch = substance.ValueAt(position + i);
+		const unsigned char ch = substance.ValueAt(position + i);
 		if (ch == '\r') {
 			InsertLine(lineInsert, (position + i) + 1, atLineStart);
 			lineInsert++;
@@ -610,7 +610,7 @@ void CellBuffer::ResetLineEnds() {
 				lineInsert++;
 			}
 		} else if (utf8LineEnds) {
-			unsigned char back3[3] = {chBeforePrev, chPrev, ch};
+			const unsigned char back3[3] = {chBeforePrev, chPrev, ch};
 			if (UTF8IsSeparator(back3) || UTF8IsNEL(back3+1)) {
 				InsertLine(lineInsert, (position + i) + 1, atLineStart);
 				lineInsert++;
@@ -626,7 +626,7 @@ void CellBuffer::BasicInsertString(Sci::Position position, const char *s, Sci::P
 		return;
 	PLATFORM_ASSERT(insertLength > 0);
 
-	unsigned char chAfter = substance.ValueAt(position);
+	const unsigned char chAfter = substance.ValueAt(position);
 	bool breakingUTF8LineEnd = false;
 	if (utf8LineEnds && UTF8IsTrailByte(chAfter)) {
 		breakingUTF8LineEnd = UTF8LineEndOverlaps(position);
@@ -664,7 +664,7 @@ void CellBuffer::BasicInsertString(Sci::Position position, const char *s, Sci::P
 				lineInsert++;
 			}
 		} else if (utf8LineEnds) {
-			unsigned char back3[3] = {chBeforePrev, chPrev, ch};
+			const unsigned char back3[3] = {chBeforePrev, chPrev, ch};
 			if (UTF8IsSeparator(back3) || UTF8IsNEL(back3+1)) {
 				InsertLine(lineInsert, (position + i) + 1, atLineStart);
 				lineInsert++;
@@ -682,8 +682,8 @@ void CellBuffer::BasicInsertString(Sci::Position position, const char *s, Sci::P
 	} else if (utf8LineEnds && !UTF8IsAscii(chAfter)) {
 		// May have end of UTF-8 line end in buffer and start in insertion
 		for (int j = 0; j < UTF8SeparatorLength-1; j++) {
-			unsigned char chAt = substance.ValueAt(position + insertLength + j);
-			unsigned char back3[3] = {chBeforePrev, chPrev, chAt};
+			const unsigned char chAt = substance.ValueAt(position + insertLength + j);
+			const unsigned char back3[3] = {chBeforePrev, chPrev, chAt};
 			if (UTF8IsSeparator(back3)) {
 				InsertLine(lineInsert, (position + insertLength + j) + 1, atLineStart);
 				lineInsert++;
@@ -712,8 +712,8 @@ void CellBuffer::BasicDeleteChars(Sci::Position position, Sci::Position deleteLe
 
 		Sci::Line lineRemove = lv.LineFromPosition(position) + 1;
 		lv.InsertText(lineRemove-1, - (deleteLength));
-		unsigned char chPrev = substance.ValueAt(position - 1);
-		unsigned char chBefore = chPrev;
+		const unsigned char chPrev = substance.ValueAt(position - 1);
+		const unsigned char chBefore = chPrev;
 		unsigned char chNext = substance.ValueAt(position);
 		bool ignoreNL = false;
 		if (chPrev == '\r' && chNext == '\n') {
@@ -743,7 +743,7 @@ void CellBuffer::BasicDeleteChars(Sci::Position position, Sci::Position deleteLe
 				}
 			} else if (utf8LineEnds) {
 				if (!UTF8IsAscii(ch)) {
-					unsigned char next3[3] = {ch, chNext,
+					const unsigned char next3[3] = {ch, chNext,
 						static_cast<unsigned char>(substance.ValueAt(position + i + 2))};
 					if (UTF8IsSeparator(next3) || UTF8IsNEL(next3)) {
 						RemoveLine(lineRemove);
@@ -755,7 +755,7 @@ void CellBuffer::BasicDeleteChars(Sci::Position position, Sci::Position deleteLe
 		}
 		// May have to fix up end if last deletion causes cr to be next to lf
 		// or removes one of a crlf pair
-		char chAfter = substance.ValueAt(position + deleteLength);
+		const char chAfter = substance.ValueAt(position + deleteLength);
 		if (chBefore == '\r' && chAfter == '\n') {
 			// Using lineRemove-1 as cr ended line before start of deletion
 			RemoveLine(lineRemove - 1);
