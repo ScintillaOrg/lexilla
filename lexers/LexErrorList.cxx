@@ -142,7 +142,7 @@ static int RecogniseErrorListLine(const char *lineBuffer, Sci_PositionU lengthLi
 		// CTags: <identifier>\t<filename>\t<message>
 		// Lua 5 traceback: \t<filename>:<line>:<message>
 		// Lua 5.1: <exe>: <filename>:<line>:<message>
-		bool initialTab = (lineBuffer[0] == '\t');
+		const bool initialTab = (lineBuffer[0] == '\t');
 		bool initialColonPart = false;
 		bool canBeCtags = !initialTab;	// For ctags must have an identifier with no spaces then a tab
 		enum { stInitial,
@@ -152,7 +152,7 @@ static int RecogniseErrorListLine(const char *lineBuffer, Sci_PositionU lengthLi
 			stUnrecognized
 		} state = stInitial;
 		for (Sci_PositionU i = 0; i < lengthLine; i++) {
-			char ch = lineBuffer[i];
+			const char ch = lineBuffer[i];
 			char chNext = ' ';
 			if ((i + 1) < lengthLine)
 				chNext = lineBuffer[i + 1];
@@ -367,7 +367,7 @@ static void ColouriseErrorListDoc(Sci_PositionU startPos, Sci_Position length, i
 	//	diagnostics, style the path and line number separately from the rest of the
 	//	line with style 21 used for the rest of the line.
 	//	This allows matched text to be more easily distinguished from its location.
-	bool valueSeparate = styler.GetPropertyInt("lexer.errorlist.value.separate", 0) != 0;
+	const bool valueSeparate = styler.GetPropertyInt("lexer.errorlist.value.separate", 0) != 0;
 
 	// property lexer.errorlist.escape.sequences
 	//	Set to 1 to interpret escape sequences.

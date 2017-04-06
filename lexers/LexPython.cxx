@@ -147,7 +147,7 @@ int PopFromStateStack(std::vector<SingleFStringExpState> &stack, SingleFStringEx
 int GetPyStringState(Accessor &styler, Sci_Position i, Sci_PositionU *nextIndex, literalsAllowed allowed) {
 	char ch = styler.SafeGetCharAt(i);
 	char chNext = styler.SafeGetCharAt(i + 1);
-	int firstIsF = (ch == 'f' || ch == 'F');
+	const int firstIsF = (ch == 'f' || ch == 'F');
 
 	// Advance beyond r, u, or ur prefix (or r, b, or br in Python 2.7+ and r, f, or fr in Python 3.6+), but bail if there are any unexpected chars
 	if (ch == 'r' || ch == 'R') {
@@ -211,7 +211,7 @@ static bool IsFirstNonWhitespace(Sci_Position pos, Accessor &styler) {
 	Sci_Position line = styler.GetLine(pos);
 	Sci_Position start_pos = styler.LineStart(line);
 	for (Sci_Position i = start_pos; i < pos; i++) {
-		char ch = styler[i];
+		const char ch = styler[i];
 		if (!(ch == ' ' || ch == '\t'))
 			return false;
 	}
@@ -365,7 +365,7 @@ public:
 		return subStyles.Length(styleBase);
 	}
 	int SCI_METHOD StyleFromSubStyle(int subStyle) override {
-		int styleBase = subStyles.BaseStyle(subStyle);
+		const int styleBase = subStyles.BaseStyle(subStyle);
 		return styleBase;
 	}
 	int SCI_METHOD PrimaryStyleFromStyle(int style) override {
@@ -481,7 +481,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 			// Look for backslash-continued lines
 			while (lineCurrent > 0) {
 				Sci_Position eolPos = styler.LineStart(lineCurrent) - 1;
-				int eolStyle = styler.StyleAt(eolPos);
+				const int eolStyle = styler.StyleAt(eolPos);
 				if (eolStyle == SCE_P_STRING
 						|| eolStyle == SCE_P_CHARACTER
 						|| eolStyle == SCE_P_STRINGEOL) {
@@ -694,8 +694,8 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 		if (!fstringStateStack.empty() && (sc.ch == '\'' || sc.ch == '"')) {
 			long matching_stack_i = -1;
 			for (unsigned long stack_i = 0; stack_i < fstringStateStack.size() && matching_stack_i == -1; stack_i++) {
-				int stack_state = fstringStateStack[stack_i].state;
-				char quote = GetPyStringQuoteChar(stack_state);
+				const int stack_state = fstringStateStack[stack_i].state;
+				const char quote = GetPyStringQuoteChar(stack_state);
 				if (sc.ch == quote) {
 					if (IsPySingleQuoteStringState(stack_state)) {
 						matching_stack_i = stack_i;
@@ -799,9 +799,9 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 
 static bool IsCommentLine(Sci_Position line, Accessor &styler) {
 	Sci_Position pos = styler.LineStart(line);
-	Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
+	const Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
 	for (Sci_Position i = pos; i < eol_pos; i++) {
-		char ch = styler[i];
+		const char ch = styler[i];
 		if (ch == '#')
 			return true;
 		else if (ch != ' ' && ch != '\t')
@@ -810,8 +810,8 @@ static bool IsCommentLine(Sci_Position line, Accessor &styler) {
 	return false;
 }
 
-static bool IsQuoteLine(Sci_Position line, Accessor &styler) {
-	int style = styler.StyleAt(styler.LineStart(line)) & 31;
+static bool IsQuoteLine(Sci_Position line, const Accessor &styler) {
+	const int style = styler.StyleAt(styler.LineStart(line)) & 31;
 	return ((style == SCE_P_TRIPLE) || (style == SCE_P_TRIPLEDOUBLE));
 }
 
@@ -864,7 +864,7 @@ void SCI_METHOD LexerPython::Fold(Sci_PositionU startPos, Sci_Position length, i
 			// Information about next line is only available if not at end of document
 			indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
 			Sci_Position lookAtPos = (styler.LineStart(lineNext) == styler.Length()) ? styler.Length() - 1 : styler.LineStart(lineNext);
-			int style = styler.StyleAt(lookAtPos) & 31;
+			const int style = styler.StyleAt(lookAtPos) & 31;
 			quote = options.foldQuotes && ((style == SCE_P_TRIPLE) || (style == SCE_P_TRIPLEDOUBLE));
 		}
 		const int quote_start = (quote && !prevQuote);
@@ -910,7 +910,7 @@ void SCI_METHOD LexerPython::Fold(Sci_PositionU startPos, Sci_Position length, i
 		int skipLevel = levelAfterComments;
 
 		while (--skipLine > lineCurrent) {
-			int skipLineIndent = styler.IndentAmount(skipLine, &spaceFlags, NULL);
+			const int skipLineIndent = styler.IndentAmount(skipLine, &spaceFlags, NULL);
 
 			if (options.foldCompact) {
 				if ((skipLineIndent & SC_FOLDLEVELNUMBERMASK) > levelAfterComments)
