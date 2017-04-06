@@ -141,6 +141,7 @@ public:
 	bool viewEOL;
 	ColourDesired caretcolour;
 	ColourDesired additionalCaretColour;
+	int caretLineFrame;
 	bool showCaretLineBackground;
 	bool alwaysShowCaretLineBackground;
 	ColourDesired caretLineBackground;
@@ -190,6 +191,8 @@ public:
 	int MarginFromLocation(Point pt) const;
 	bool ValidStyle(size_t styleIndex) const;
 	void CalcLargestMarkerHeight();
+	int GetFrameWidth() const;
+	bool IsLineFrameOpaque(bool caretActive, bool lineContainsCaret) const;
 	ColourOptional Background(int marksOfLine, bool caretActive, bool lineContainsCaret) const;
 	bool SelectionBackgroundDrawn() const;
 	bool WhitespaceBackgroundDrawn() const;

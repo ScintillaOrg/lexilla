@@ -136,6 +136,7 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	selbarlight = source.selbarlight;
 	caretcolour = source.caretcolour;
 	additionalCaretColour = source.additionalCaretColour;
+	caretLineFrame = source.caretLineFrame;
 	showCaretLineBackground = source.showCaretLineBackground;
 	alwaysShowCaretLineBackground = source.alwaysShowCaretLineBackground;
 	caretLineBackground = source.caretLineBackground;
@@ -264,6 +265,7 @@ void ViewStyle::Init(size_t stylesSize_) {
 	styles[STYLE_LINENUMBER].back = Platform::Chrome();
 	caretcolour = ColourDesired(0, 0, 0);
 	additionalCaretColour = ColourDesired(0x7f, 0x7f, 0x7f);
+	caretLineFrame = 0;
 	showCaretLineBackground = false;
 	alwaysShowCaretLineBackground = false;
 	caretLineBackground = ColourDesired(0xff, 0xff, 0);
@@ -479,6 +481,15 @@ void ViewStyle::CalcLargestMarkerHeight() {
 	}
 }
 
+int ViewStyle::GetFrameWidth() const {
+	return Platform::Clamp(caretLineFrame, 1, lineHeight / 3);
+}
+
+bool ViewStyle::IsLineFrameOpaque(bool caretActive, bool lineContainsCaret) const {
+	return caretLineFrame && (caretActive || alwaysShowCaretLineBackground) && showCaretLineBackground &&
+		(caretLineAlpha == SC_ALPHA_NOALPHA) && lineContainsCaret;
+}
+
 // See if something overrides the line background color:  Either if caret is on the line
 // and background color is set for that, or if a marker is defined that forces its background
 // color onto the line, or if a marker is defined but has no selection margin in which to
@@ -487,7 +498,8 @@ void ViewStyle::CalcLargestMarkerHeight() {
 // the color for the highest numbered one is used.
 ColourOptional ViewStyle::Background(int marksOfLine, bool caretActive, bool lineContainsCaret) const {
 	ColourOptional background;
-	if ((caretActive || alwaysShowCaretLineBackground) && showCaretLineBackground && (caretLineAlpha == SC_ALPHA_NOALPHA) && lineContainsCaret) {
+	if (!caretLineFrame && (caretActive || alwaysShowCaretLineBackground) && showCaretLineBackground &&
+		(caretLineAlpha == SC_ALPHA_NOALPHA) && lineContainsCaret) {
 		background = ColourOptional(caretLineBackground, true);
 	}
 	if (!background.isSet && marksOfLine) {

@@ -836,6 +836,37 @@ static void DrawTextBlob(Surface *surface, const ViewStyle &vsDraw, PRectangle r
 		textBack, textFore);
 }
 
+static void DrawFrame(Surface *surface, ColourDesired colour, int alpha, PRectangle rcFrame) {
+	if (alpha != SC_ALPHA_NOALPHA)
+		surface->AlphaRectangle(rcFrame, 0, colour, alpha, colour, alpha, 0);
+	else
+		surface->FillRectangle(rcFrame, colour);
+}
+
+static void DrawCaretLineFramed(Surface *surface, const ViewStyle &vsDraw, const LineLayout *ll, PRectangle rcLine, int subLine) {
+	const int width = vsDraw.GetFrameWidth();
+	if (subLine == 0 || ll->wrapIndent == 0 || vsDraw.caretLineAlpha != SC_ALPHA_NOALPHA) {
+		// Left
+		DrawFrame(surface, vsDraw.caretLineBackground, vsDraw.caretLineAlpha,
+			PRectangle(rcLine.left, rcLine.top, rcLine.left + width, rcLine.bottom));
+	}
+	if (subLine == 0) {
+		// Top
+		DrawFrame(surface, vsDraw.caretLineBackground, vsDraw.caretLineAlpha,
+			PRectangle(rcLine.left + width, rcLine.top, rcLine.right - width, rcLine.top + width));
+	}
+	if (subLine == ll->lines - 1 || vsDraw.caretLineAlpha != SC_ALPHA_NOALPHA) {
+		// Right
+		DrawFrame(surface, vsDraw.caretLineBackground, vsDraw.caretLineAlpha,
+			PRectangle(rcLine.right - width, rcLine.top, rcLine.right, rcLine.bottom));
+	}
+	if (subLine == ll->lines - 1) {
+		// Bottom
+		DrawFrame(surface, vsDraw.caretLineBackground, vsDraw.caretLineAlpha,
+			PRectangle(rcLine.left + width, rcLine.bottom - width, rcLine.right - width, rcLine.bottom));
+	}
+}
+
 void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
 	PRectangle rcLine, Sci::Line line, Sci::Position lineEnd, int xStart, int subLine, XYACCUMULATOR subLineStart,
 	ColourOptional background) {
@@ -963,9 +994,15 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 
 	bool drawWrapMarkEnd = false;
 
-	if (vsDraw.wrapVisualFlags & SC_WRAPVISUALFLAG_END) {
-		if (subLine + 1 < ll->lines) {
+	if (subLine + 1 < ll->lines) {
+		if (vsDraw.wrapVisualFlags & SC_WRAPVISUALFLAG_END) {
 			drawWrapMarkEnd = ll->LineStart(subLine + 1) != 0;
+		}
+		if (vsDraw.IsLineFrameOpaque(model.caret.active, ll->containsCaret)) {
+			const int width = vsDraw.GetFrameWidth();
+			// Draw right of frame under marker
+			DrawFrame(surface, vsDraw.caretLineBackground, vsDraw.caretLineAlpha,
+				PRectangle(rcLine.right - width, rcLine.top, rcLine.right, rcLine.bottom));
 		}
 	}
 
@@ -1373,10 +1410,18 @@ void EditView::DrawCarets(Surface *surface, const EditModel &model, const ViewSt
 }
 
 static void DrawWrapIndentAndMarker(Surface *surface, const ViewStyle &vsDraw, const LineLayout *ll,
-	int xStart, PRectangle rcLine, ColourOptional background, DrawWrapMarkerFn customDrawWrapMarker) {
+	int xStart, PRectangle rcLine, ColourOptional background, DrawWrapMarkerFn customDrawWrapMarker,
+	bool caretActive) {
 	// default bgnd here..
 	surface->FillRectangle(rcLine, background.isSet ? background :
 		vsDraw.styles[STYLE_DEFAULT].back);
+
+	if (vsDraw.IsLineFrameOpaque(caretActive, ll->containsCaret)) {
+		const int width = vsDraw.GetFrameWidth();
+		// Draw left of frame under marker
+		DrawFrame(surface, vsDraw.caretLineBackground, vsDraw.caretLineAlpha,
+			PRectangle(rcLine.left, rcLine.top, rcLine.left + width, rcLine.bottom));
+	}
 
 	if (vsDraw.wrapVisualFlags & SC_WRAPVISUALFLAG_START) {
 
@@ -1551,9 +1596,14 @@ static void DrawTranslucentSelection(Surface *surface, const EditModel &model, c
 
 // Draw any translucent whole line states
 static void DrawTranslucentLineState(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
-	Sci::Line line, PRectangle rcLine) {
-	if ((model.caret.active || vsDraw.alwaysShowCaretLineBackground) && vsDraw.showCaretLineBackground && ll->containsCaret) {
-		SimpleAlphaRectangle(surface, rcLine, vsDraw.caretLineBackground, vsDraw.caretLineAlpha);
+	Sci::Line line, PRectangle rcLine, int subLine) {
+	if ((model.caret.active || vsDraw.alwaysShowCaretLineBackground) && vsDraw.showCaretLineBackground && ll->containsCaret &&
+		vsDraw.caretLineAlpha != SC_ALPHA_NOALPHA) {
+		if (vsDraw.caretLineFrame) {
+			DrawCaretLineFramed(surface, vsDraw, ll, rcLine, subLine);
+		} else {
+			SimpleAlphaRectangle(surface, rcLine, vsDraw.caretLineBackground, vsDraw.caretLineAlpha);
+		}
 	}
 	const int marksOfLine = model.pdoc->GetMark(line);
 	int marksDrawnInText = marksOfLine & vsDraw.maskDrawInText;
@@ -1842,7 +1892,7 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 
 	if ((ll->wrapIndent != 0) && (subLine > 0)) {
 		if (phase & drawBack) {
-			DrawWrapIndentAndMarker(surface, vsDraw, ll, xStart, rcLine, background, customDrawWrapMarker);
+			DrawWrapIndentAndMarker(surface, vsDraw, ll, xStart, rcLine, background, customDrawWrapMarker, model.caret.active);
 		}
 		xStart += static_cast<int>(ll->wrapIndent);
 	}
@@ -1855,6 +1905,8 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 			phase = static_cast<DrawPhase>(phase & ~drawBack);	// Remove drawBack to not draw again in DrawFoldDisplayText
 			DrawEOL(surface, model, vsDraw, ll, rcLine, line, lineRange.end,
 				xStart, subLine, subLineStart, background);
+			if (vsDraw.IsLineFrameOpaque(model.caret.active, ll->containsCaret))
+				DrawCaretLineFramed(surface, vsDraw, ll, rcLine, subLine);
 		}
 
 		if (phase & drawIndicatorsBack) {
@@ -1882,6 +1934,8 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 	if (phasesDraw == phasesOne) {
 		DrawEOL(surface, model, vsDraw, ll, rcLine, line, lineRange.end,
 			xStart, subLine, subLineStart, background);
+		if (vsDraw.IsLineFrameOpaque(model.caret.active, ll->containsCaret))
+			DrawCaretLineFramed(surface, vsDraw, ll, rcLine, subLine);
 		DrawEdgeLine(surface, vsDraw, ll, rcLine, lineRange, xStart);
 		DrawMarkUnderline(surface, model, vsDraw, line, rcLine);
 	}
@@ -1891,7 +1945,7 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 	}
 
 	if (phase & drawLineTranslucent) {
-		DrawTranslucentLineState(surface, model, vsDraw, ll, line, rcLine);
+		DrawTranslucentLineState(surface, model, vsDraw, ll, line, rcLine, subLine);
 	}
 }
 

@@ -7067,6 +7067,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		InvalidateStyleRedraw();
 		break;
 
+	case SCI_GETCARETLINEFRAME:
+		return vs.caretLineFrame;
+	case SCI_SETCARETLINEFRAME:
+		vs.caretLineFrame = static_cast<int>(wParam);
+		InvalidateStyleRedraw();
+		break;
 	case SCI_GETCARETLINEBACK:
 		return vs.caretLineBackground.AsLong();
 	case SCI_SETCARETLINEBACK:
