@@ -2689,11 +2689,11 @@ LRESULT ScintillaWin::ImeOnReconvert(LPARAM lParam) {
 	const int rcFeedLen = static_cast<int>(rcFeed.length()) * sizeof(wchar_t);
 	const int rcSize = sizeof(RECONVERTSTRING) + rcFeedLen + sizeof(wchar_t);
 
-	RECONVERTSTRING *rc = (RECONVERTSTRING *)lParam;
+	RECONVERTSTRING *rc = reinterpret_cast<RECONVERTSTRING *>(lParam);
 	if (!rc)
 		return rcSize; // Immediately be back with rcSize of memory block.
 
-	wchar_t *rcFeedStart = (wchar_t*)(rc + 1);
+	wchar_t *rcFeedStart = reinterpret_cast<wchar_t*>(rc + 1);
 	memcpy(rcFeedStart, &rcFeed[0], rcFeedLen);
 
 	std::string rcCompString = RangeText(mainStart, mainEnd);
@@ -2704,10 +2704,10 @@ LRESULT ScintillaWin::ImeOnReconvert(LPARAM lParam) {
 	// Map selection to dwCompStr.
 	// No selection assumes current caret as rcCompString without length.
 	rc->dwVersion = 0; // It should be absolutely 0.
-	rc->dwStrLen = (DWORD)static_cast<int>(rcFeed.length());
+	rc->dwStrLen = static_cast<DWORD>(rcFeed.length());
 	rc->dwStrOffset = sizeof(RECONVERTSTRING);
-	rc->dwCompStrLen = (DWORD)static_cast<int>(rcCompWstring.length());
-	rc->dwCompStrOffset = (DWORD)static_cast<int>(rcCompWstart.length()) * sizeof(wchar_t);
+	rc->dwCompStrLen = static_cast<DWORD>(rcCompWstring.length());
+	rc->dwCompStrOffset = static_cast<DWORD>(rcCompWstart.length()) * sizeof(wchar_t);
 	rc->dwTargetStrLen = rc->dwCompStrLen;
 	rc->dwTargetStrOffset =rc->dwCompStrOffset;
 

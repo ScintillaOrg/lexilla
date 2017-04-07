@@ -156,7 +156,7 @@ void AutoComplete::SetList(const char *list) {
 
 	Sorter IndexSort(this, list);
 	sortMatrix.clear();
-	for (int i = 0; i < (int)IndexSort.indices.size() / 2; ++i)
+	for (int i = 0; i < static_cast<int>(IndexSort.indices.size()) / 2; ++i)
 		sortMatrix.push_back(i);
 	std::sort(sortMatrix.begin(), sortMatrix.end(), IndexSort);
 	if (autoSort == SC_ORDER_CUSTOM || sortMatrix.size() < 2) {
@@ -186,7 +186,7 @@ void AutoComplete::SetList(const char *list) {
 		item[wordLen] = '\0';
 		sortedList += item;
 	}
-	for (int i = 0; i < (int)sortMatrix.size(); ++i)
+	for (int i = 0; i < static_cast<int>(sortMatrix.size()); ++i)
 		sortMatrix[i] = i;
 	lb->SetList(sortedList.c_str(), separator, typesep);
 }

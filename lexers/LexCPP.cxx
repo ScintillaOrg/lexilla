@@ -54,7 +54,7 @@ bool IsSpaceEquiv(int state) {
 // Putting a space between the '++' post-inc operator and the '+' binary op
 // fixes this, and is highly recommended for readability anyway.
 bool FollowsPostfixOperator(StyleContext &sc, LexAccessor &styler) {
-	Sci_Position pos = (Sci_Position) sc.currentPos;
+	Sci_Position pos = static_cast<Sci_Position>(sc.currentPos);
 	while (--pos > 0) {
 		const char ch = styler[pos];
 		if (ch == '+' || ch == '-') {
@@ -66,7 +66,7 @@ bool FollowsPostfixOperator(StyleContext &sc, LexAccessor &styler) {
 
 bool followsReturnKeyword(StyleContext &sc, LexAccessor &styler) {
 	// Don't look at styles, so no need to flush.
-	Sci_Position pos = (Sci_Position) sc.currentPos;
+	Sci_Position pos = static_cast<Sci_Position>(sc.currentPos);
 	Sci_Position currentLine = styler.GetLine(pos);
 	const Sci_Position lineStartPos = styler.LineStart(currentLine);
 	while (--pos > lineStartPos) {
@@ -145,7 +145,7 @@ void highlightTaskMarker(StyleContext &sc, LexAccessor &styler,
 	if ((isoperator(sc.chPrev) || IsASpace(sc.chPrev)) && markerList.Length()) {
 		const int lengthMarker = 50;
 		char marker[lengthMarker+1];
-		Sci_Position currPos = (Sci_Position) sc.currentPos;
+		Sci_Position currPos = static_cast<Sci_Position>(sc.currentPos);
 		int i = 0;
 		while (i < lengthMarker) {
 			const char ch = styler.SafeGetCharAt(currPos + i);

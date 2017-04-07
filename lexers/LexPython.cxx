@@ -435,7 +435,7 @@ void LexerPython::ProcessLineEnd(StyleContext &sc, std::vector<SingleFStringExpS
 
 	if (deepestSingleStateIndex != -1) {
 		sc.SetState(fstringStateStack[deepestSingleStateIndex].state);
-		while (fstringStateStack.size() > (unsigned long)deepestSingleStateIndex) {
+		while (fstringStateStack.size() > static_cast<unsigned long>(deepestSingleStateIndex)) {
 			PopFromStateStack(fstringStateStack, currentFStringExp);
 		}
 	}
@@ -714,7 +714,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 				sc.ForwardSetState(SCE_P_DEFAULT);
 				needEOLCheck = true;
 
-				while (fstringStateStack.size() > (unsigned long)matching_stack_i) {
+				while (fstringStateStack.size() > static_cast<unsigned long>(matching_stack_i)) {
 					PopFromStateStack(fstringStateStack, currentFStringExp);
 				}
 			}

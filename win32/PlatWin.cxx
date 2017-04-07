@@ -1292,7 +1292,7 @@ static int Delta(int difference) {
 }
 
 static float RoundFloat(float f) {
-	return float(int(f+0.5f));
+	return static_cast<float>(static_cast<int>(f+0.5f));
 }
 
 void SurfaceD2D::LineTo(int x_, int y_) {
@@ -1899,7 +1899,7 @@ static HCURSOR GetReverseArrowCursor() {
 				FlipBitmap(info.hbmMask, bmp.bmWidth, bmp.bmHeight);
 				if (info.hbmColor != NULL)
 					FlipBitmap(info.hbmColor, bmp.bmWidth, bmp.bmHeight);
-				info.xHotspot = (DWORD)bmp.bmWidth - 1 - info.xHotspot;
+				info.xHotspot = static_cast<DWORD>(bmp.bmWidth) - 1 - info.xHotspot;
 
 				reverseArrowCursor = ::CreateIconIndirect(&info);
 				if (reverseArrowCursor != NULL)
