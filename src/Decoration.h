@@ -66,10 +66,10 @@ public:
 	int Start(int indicator, int position);
 	int End(int indicator, int position);
 
-	virtual bool ClickNotified() const {
+	bool ClickNotified() const {
 		return clickNotified;
 	}
-	virtual void SetClickNotified(bool notified) {
+	void SetClickNotified(bool notified) {
 		clickNotified = notified;
 	}
 };
