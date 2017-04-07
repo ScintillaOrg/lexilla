@@ -334,7 +334,7 @@ public:
 	int SCI_METHOD GetLineIndentation(Sci_Position line);
 	Sci::Position SetLineIndentation(Sci::Line line, Sci::Position indent);
 	Sci::Position GetLineIndentPosition(Sci::Line line) const;
-	Sci::Position GetColumn(Sci::Position position);
+	Sci::Position GetColumn(Sci::Position pos);
 	Sci::Position CountCharacters(Sci::Position startPos, Sci::Position endPos) const;
 	Sci::Position CountUTF16(Sci::Position startPos, Sci::Position endPos) const;
 	Sci::Position FindColumn(Sci::Line line, Sci::Position column);
@@ -377,7 +377,7 @@ public:
 	void ClearLevels();
 	Sci::Line GetLastChild(Sci::Line lineParent, int level=-1, Sci::Line lastLine=-1);
 	Sci::Line GetFoldParent(Sci::Line line) const;
-	void GetHighlightDelimiters(HighlightDelimiter &hDelimiter, Sci::Line line, Sci::Line lastLine);
+	void GetHighlightDelimiters(HighlightDelimiter &highlightDelimiter, Sci::Line line, Sci::Line lastLine);
 
 	Sci::Position ExtendWordSelect(Sci::Position pos, int delta, bool onlyWordCharacters=false) const;
 	Sci::Position NextWordStart(Sci::Position pos, int delta) const;

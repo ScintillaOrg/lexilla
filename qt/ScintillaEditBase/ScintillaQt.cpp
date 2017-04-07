@@ -648,10 +648,10 @@ void ScintillaQt::AddToPopUp(const char *label,
 	        this, SLOT(execCommand(QAction *)));
 }
 
-sptr_t ScintillaQt::WndProc(unsigned int message, uptr_t wParam, sptr_t lParam)
+sptr_t ScintillaQt::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam)
 {
 	try {
-		switch (message) {
+		switch (iMessage) {
 
 		case SCI_SETIMEINTERACTION:
 			// Only inline IME supported on Qt
@@ -674,7 +674,7 @@ sptr_t ScintillaQt::WndProc(unsigned int message, uptr_t wParam, sptr_t lParam)
 #endif
 
 		default:
-			return ScintillaBase::WndProc(message, wParam, lParam);
+			return ScintillaBase::WndProc(iMessage, wParam, lParam);
 		}
 	} catch (std::bad_alloc &) {
 		errorStatus = SC_STATUS_BADALLOC;

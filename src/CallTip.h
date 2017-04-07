@@ -34,7 +34,7 @@ class CallTip {
 		int posStart, int posEnd, int ytext, PRectangle rcClient,
 		bool highlight, bool draw);
 	int PaintContents(Surface *surfaceWindow, bool draw);
-	bool IsTabCharacter(char c) const;
+	bool IsTabCharacter(char ch) const;
 	int NextTabPos(int x) const;
 
 public:

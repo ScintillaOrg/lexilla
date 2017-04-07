@@ -1627,18 +1627,18 @@ void Editor::LinesSplit(int pixelWidth) {
 	}
 }
 
-void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
+void Editor::PaintSelMargin(Surface *surfaceWindow, PRectangle &rc) {
 	if (vs.fixedColumnWidth == 0)
 		return;
 
 	AllocateGraphics();
 	RefreshStyleData();
-	RefreshPixMaps(surfWindow);
+	RefreshPixMaps(surfaceWindow);
 
 	// On GTK+ with Ubuntu overlay scroll bars, the surface may have been finished
 	// at this point. The Initialised call checks for this case and sets the status
 	// to be bad which avoids crashes in following calls.
-	if (!surfWindow->Initialised()) {
+	if (!surfaceWindow->Initialised()) {
 		return;
 	}
 
@@ -1655,7 +1655,7 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 	if (view.bufferedDraw) {
 		surface = marginView.pixmapSelMargin;
 	} else {
-		surface = surfWindow;
+		surface = surfaceWindow;
 	}
 
 	// Clip vertically to paint area to avoid drawing line numbers
@@ -1667,7 +1667,7 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 	marginView.PaintMargin(surface, topLine, rc, rcMargin, *this, vs);
 
 	if (view.bufferedDraw) {
-		surfWindow->Copy(rcMargin, Point(rcMargin.left, rcMargin.top), *marginView.pixmapSelMargin);
+		surfaceWindow->Copy(rcMargin, Point(rcMargin.left, rcMargin.top), *marginView.pixmapSelMargin);
 	}
 }
 

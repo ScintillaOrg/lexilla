@@ -90,7 +90,7 @@ public:
 	UndoHistory();
 	~UndoHistory();
 
-	const char *AppendAction(actionType at, Sci::Position position, const char *data, Sci::Position length, bool &startSequence, bool mayCoalesce=true);
+	const char *AppendAction(actionType at, Sci::Position position, const char *data, Sci::Position lengthData, bool &startSequence, bool mayCoalesce=true);
 
 	void BeginUndoAction();
 	void EndUndoAction();
@@ -173,7 +173,7 @@ public:
 	/// Setting styles for positions outside the range of the buffer is safe and has no effect.
 	/// @return true if the style of a character is changed.
 	bool SetStyleAt(Sci::Position position, char styleValue);
-	bool SetStyleFor(Sci::Position position, Sci::Position length, char styleValue);
+	bool SetStyleFor(Sci::Position position, Sci::Position lengthStyle, char styleValue);
 
 	const char *DeleteChars(Sci::Position position, Sci::Position deleteLength, bool &startSequence);
 

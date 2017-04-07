@@ -83,7 +83,7 @@ public:
 	void Invalidate(validLevel validity_);
 	int LineStart(int line) const;
 	int LineLastVisible(int line) const;
-	Range SubLineRange(int line) const;
+	Range SubLineRange(int subLine) const;
 	bool InLine(int offset, int line) const;
 	void SetLineStart(int line, int start);
 	void SetBracesHighlight(Range rangeLine, const Sci::Position braces[],
@@ -134,7 +134,7 @@ public:
 	void Set(unsigned int styleNumber_, const char *s_, unsigned int len_, XYPOSITION *positions_, unsigned int clock_);
 	void Clear();
 	bool Retrieve(unsigned int styleNumber_, const char *s_, unsigned int len_, XYPOSITION *positions_) const;
-	static unsigned int Hash(unsigned int styleNumber_, const char *s, unsigned int len);
+	static unsigned int Hash(unsigned int styleNumber_, const char *s, unsigned int len_);
 	bool NewerThan(const PositionCacheEntry &other) const;
 	void ResetClock();
 };
@@ -194,7 +194,7 @@ public:
 	enum { lengthStartSubdivision = 300 };
 	// Try to make each subdivided run lengthEachSubdivision or shorter.
 	enum { lengthEachSubdivision = 100 };
-	BreakFinder(const LineLayout *ll_, const Selection *psel, Range rangeLine_, Sci::Position posLineStart_,
+	BreakFinder(const LineLayout *ll_, const Selection *psel, Range lineRange_, Sci::Position posLineStart_,
 		int xStart, bool breakForSelection, const Document *pdoc_, const SpecialRepresentations *preprs_, const ViewStyle *pvsDraw);
 	~BreakFinder();
 	TextSegment Next();

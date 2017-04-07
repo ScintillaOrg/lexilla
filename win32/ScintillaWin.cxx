@@ -356,8 +356,8 @@ class ScintillaWin :
 	void ScrollMessage(WPARAM wParam);
 	void HorizontalScrollMessage(WPARAM wParam);
 	void FullPaint();
-	void FullPaintDC(HDC dc);
-	bool IsCompatibleDC(HDC dc);
+	void FullPaintDC(HDC hdc);
+	bool IsCompatibleDC(HDC hOtherDC);
 	DWORD EffectFromState(DWORD grfKeyState) const;
 
 	int SetScrollInfo(int nBar, LPCSCROLLINFO lpsi, BOOL bRedraw);

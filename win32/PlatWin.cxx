@@ -1811,11 +1811,11 @@ static RECT RectFromMonitor(HMONITOR hMonitor) {
 	return rc;
 }
 
-void Window::SetPositionRelative(PRectangle rc, Window w) {
+void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
 	const LONG style = ::GetWindowLong(static_cast<HWND>(wid), GWL_STYLE);
 	if (style & WS_POPUP) {
 		POINT ptOther = {0, 0};
-		::ClientToScreen(static_cast<HWND>(w.GetID()), &ptOther);
+		::ClientToScreen(static_cast<HWND>(relativeTo.GetID()), &ptOther);
 		rc.Move(static_cast<XYPOSITION>(ptOther.x), static_cast<XYPOSITION>(ptOther.y));
 
 		RECT rcMonitor = RectFromPRectangle(rc);
@@ -2657,9 +2657,9 @@ void ListBoxX::Paint(HDC hDC) {
 	::DeleteObject(hBitmap);
 }
 
-LRESULT PASCAL ListBoxX::ControlWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT PASCAL ListBoxX::ControlWndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	try {
-		switch (uMsg) {
+		switch (iMessage) {
 		case WM_ERASEBKGND:
 			return TRUE;
 
@@ -2706,13 +2706,13 @@ LRESULT PASCAL ListBoxX::ControlWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPA
 
 		WNDPROC prevWndProc = reinterpret_cast<WNDPROC>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 		if (prevWndProc) {
-			return ::CallWindowProc(prevWndProc, hWnd, uMsg, wParam, lParam);
+			return ::CallWindowProc(prevWndProc, hWnd, iMessage, wParam, lParam);
 		} else {
-			return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+			return ::DefWindowProc(hWnd, iMessage, wParam, lParam);
 		}
 	} catch (...) {
 	}
-	return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+	return ::DefWindowProc(hWnd, iMessage, wParam, lParam);
 }
 
 LRESULT ListBoxX::WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam) {

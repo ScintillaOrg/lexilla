@@ -135,7 +135,7 @@ private:
 	void GetGtkSelectionText(GtkSelectionData *selectionData, SelectionText &selText);
 	void ReceivedSelection(GtkSelectionData *selection_data);
 	void ReceivedDrop(GtkSelectionData *selection_data);
-	static void GetSelection(GtkSelectionData *selection_data, guint info, SelectionText *selected);
+	static void GetSelection(GtkSelectionData *selection_data, guint info, SelectionText *text);
 	void StoreOnClipboard(SelectionText *clipText);
 	static void ClipboardGetSelection(GtkClipboard* clip, GtkSelectionData *selection_data, guint info, void *data);
 	static void ClipboardClearSelection(GtkClipboard* clip, void *data);
@@ -197,7 +197,7 @@ private:
 	static AtkObject* GetAccessible(GtkWidget *widget);
 
 	bool KoreanIME();
-	void CommitThis(char *str);
+	void CommitThis(char *commitStr);
 	static void Commit(GtkIMContext *context, char *str, ScintillaGTK *sciThis);
 	void PreeditChangedInlineThis();
 	void PreeditChangedWindowedThis();
@@ -238,7 +238,7 @@ private:
 #if GTK_CHECK_VERSION(3,0,0)
 	static gboolean DrawCT(GtkWidget *widget, cairo_t *cr, CallTip *ctip);
 #else
-	static gboolean ExposeCT(GtkWidget *widget, GdkEventExpose *ose, CallTip *ct);
+	static gboolean ExposeCT(GtkWidget *widget, GdkEventExpose *ose, CallTip *ctip);
 #endif
 	static gboolean PressCT(GtkWidget *widget, GdkEventButton *event, ScintillaGTK *sciThis);
 

@@ -1505,13 +1505,13 @@ void ListBoxX::Create(Window &parent, int, Point, int, bool, int) {
 		GTK_WINDOW(top));
 }
 
-void ListBoxX::SetFont(Font &scint_font) {
+void ListBoxX::SetFont(Font &font) {
 	// Only do for Pango font as there have been crashes for GDK fonts
-	if (Created() && PFont(scint_font)->pfd) {
+	if (Created() && PFont(font)->pfd) {
 		// Current font is Pango font
 #if GTK_CHECK_VERSION(3,0,0)
 		if (cssProvider) {
-			PangoFontDescription *pfd = PFont(scint_font)->pfd;
+			PangoFontDescription *pfd = PFont(font)->pfd;
 			std::ostringstream ssFontSetting;
 			ssFontSetting << "GtkTreeView, treeview { ";
 			ssFontSetting << "font-family: " << pango_font_description_get_family(pfd) <<  "; ";
@@ -1532,7 +1532,7 @@ void ListBoxX::SetFont(Font &scint_font) {
 				ssFontSetting.str().c_str(), -1, NULL);
 		}
 #else
-		gtk_widget_modify_font(PWidget(list), PFont(scint_font)->pfd);
+		gtk_widget_modify_font(PWidget(list), PFont(font)->pfd);
 #endif
 		gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer), -1);
 		gtk_cell_renderer_text_set_fixed_height_from_font(GTK_CELL_RENDERER_TEXT(renderer), 1);
@@ -1918,14 +1918,14 @@ static void MenuPositionFunc(GtkMenu *, gint *x, gint *y, gboolean *, gpointer u
 }
 #endif
 
-void Menu::Show(Point pt, Window &wnd) {
+void Menu::Show(Point pt, Window &w) {
 	GtkMenu *widget = static_cast<GtkMenu *>(mid);
 	gtk_widget_show_all(GTK_WIDGET(widget));
 #if GTK_CHECK_VERSION(3,22,0)
 	// Rely on GTK+ to do the right thing with positioning
 	gtk_menu_popup_at_pointer(widget, NULL);
 #else
-	GdkRectangle rcMonitor = MonitorRectangleForWidget(PWidget(wnd.GetID()));
+	GdkRectangle rcMonitor = MonitorRectangleForWidget(PWidget(w.GetID()));
 	GtkRequisition requisition;
 #if GTK_CHECK_VERSION(3,0,0)
 	gtk_widget_get_preferred_size(GTK_WIDGET(widget), NULL, &requisition);

@@ -128,7 +128,7 @@ public:
 		Sci::Line line, int xStart, PRectangle rcLine, int subLine, XYACCUMULATOR subLineStart, DrawPhase phase);
 	void DrawAnnotation(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll,
 		Sci::Line line, int xStart, PRectangle rcLine, int subLine, DrawPhase phase);
-	void DrawCarets(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll, Sci::Line line,
+	void DrawCarets(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll, Sci::Line lineDoc,
 		int xStart, PRectangle rcLine, int subLine) const;
 	void DrawBackground(Surface *surface, const EditModel &model, const ViewStyle &vsDraw, const LineLayout *ll, PRectangle rcLine,
 		Range lineRange, Sci::Position posLineStart, int xStart,

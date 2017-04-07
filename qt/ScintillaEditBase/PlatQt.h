@@ -75,8 +75,8 @@ public:
 	virtual void PenColour(ColourDesired fore);
 	virtual int LogPixelsY();
 	virtual int DeviceHeightFont(int points);
-	virtual void MoveTo(int x, int y);
-	virtual void LineTo(int x, int y);
+	virtual void MoveTo(int x_, int y_);
+	virtual void LineTo(int x_, int y_);
 	virtual void Polygon(Point *pts, int npts, ColourDesired fore,
 		ColourDesired back);
 	virtual void RectangleDraw(PRectangle rc, ColourDesired fore,
@@ -85,7 +85,7 @@ public:
 	virtual void FillRectangle(PRectangle rc, Surface &surfacePattern);
 	virtual void RoundedRectangle(PRectangle rc, ColourDesired fore,
 		ColourDesired back);
-	virtual void AlphaRectangle(PRectangle rc, int corner, ColourDesired fill,
+	virtual void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill,
 		int alphaFill, ColourDesired outline, int alphaOutline, int flags);
 	virtual void DrawRGBAImage(PRectangle rc, int width, int height,
 		const unsigned char *pixelsImage);
@@ -113,8 +113,8 @@ public:
 	virtual void SetClip(PRectangle rc);
 	virtual void FlushCachedState();
 
-	virtual void SetUnicodeMode(bool unicodeMode);
-	virtual void SetDBCSMode(int codePage);
+	virtual void SetUnicodeMode(bool unicodeMode_);
+	virtual void SetDBCSMode(int codePage_);
 
 	void BrushColour(ColourDesired back);
 	void SetCodec(Font &font);

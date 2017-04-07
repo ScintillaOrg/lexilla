@@ -292,7 +292,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	SelectionPosition SPositionFromLocation(Point pt, bool canReturnInvalid=false, bool charPosition=false, bool virtualSpace=true);
 	Sci::Position PositionFromLocation(Point pt, bool canReturnInvalid = false, bool charPosition = false);
 	SelectionPosition SPositionFromLineX(Sci::Line lineDoc, int x);
-	Sci::Position PositionFromLineX(Sci::Line line, int x);
+	Sci::Position PositionFromLineX(Sci::Line lineDoc, int x);
 	Sci::Line LineFromLocation(Point pt) const;
 	void SetTopLine(Sci::Line topLineNew);
 
@@ -377,7 +377,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void LinesJoin();
 	void LinesSplit(int pixelWidth);
 
-	void PaintSelMargin(Surface *surface, PRectangle &rc);
+	void PaintSelMargin(Surface *surfaceWindow, PRectangle &rc);
 	void RefreshPixMaps(Surface *surfaceWindow);
 	void Paint(Surface *surfaceWindow, PRectangle rcArea);
 	long FormatRange(bool draw, Sci_RangeToFormat *pfr);
@@ -449,7 +449,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void CheckModificationForWrap(DocModification mh);
 	void NotifyModified(Document *document, DocModification mh, void *userData) override;
 	void NotifyDeleted(Document *document, void *userData) override;
-	void NotifyStyleNeeded(Document *doc, void *userData, Sci::Position endPos) override;
+	void NotifyStyleNeeded(Document *doc, void *userData, Sci::Position endStyleNeeded) override;
 	void NotifyLexerChanged(Document *doc, void *userData) override;
 	void NotifyErrorOccurred(Document *doc, void *userData, int status) override;
 	void NotifyMacroRecord(unsigned int iMessage, uptr_t wParam, sptr_t lParam);

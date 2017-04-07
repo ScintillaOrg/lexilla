@@ -54,7 +54,7 @@ public:
 
 	int MarkValue(Sci::Line line);
 	Sci::Line MarkerNext(Sci::Line lineStart, int mask) const;
-	int AddMark(Sci::Line line, int marker, Sci::Line lines);
+	int AddMark(Sci::Line line, int markerNum, Sci::Line lines);
 	void MergeMarkers(Sci::Line line);
 	bool DeleteMark(Sci::Line line, int markerNum, bool all);
 	void DeleteMarkFromHandle(int markerHandle);

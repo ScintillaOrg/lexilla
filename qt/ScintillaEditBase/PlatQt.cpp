@@ -755,7 +755,7 @@ public:
 
 	virtual void SetFont(Font &font);
 	virtual void Create(Window &parent, int ctrlID, Point location,
-						int lineHeight, bool unicodeMode, int technology);
+						int lineHeight, bool unicodeMode_, int technology);
 	virtual void SetAverageCharWidth(int width);
 	virtual void SetVisibleRows(int rows);
 	virtual int GetVisibleRows() const;

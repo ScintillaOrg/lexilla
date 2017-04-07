@@ -109,7 +109,7 @@ private:
 	gboolean SetCaretOffset(int charOffset);
 	gint GetOffsetAtPoint(gint x, gint y, AtkCoordType coords);
 	void GetCharacterExtents(int charOffset, gint *x, gint *y, gint *width, gint *height, AtkCoordType coords);
-	AtkAttributeSet *GetAttributesForStyle(unsigned int style);
+	AtkAttributeSet *GetAttributesForStyle(unsigned int styleNum);
 	AtkAttributeSet *GetRunAttributes(int charOffset, int *startChar, int *endChar);
 	AtkAttributeSet *GetDefaultAttributes();
 	gint GetNSelections();
@@ -120,14 +120,14 @@ private:
 	// for AtkEditableText
 	bool InsertStringUTF8(Sci::Position bytePos, const gchar *utf8, Sci::Position lengthBytes);
 	void SetTextContents(const gchar *contents);
-	void InsertText(const gchar *contents, int lengthBytes, int *charPosition);
+	void InsertText(const gchar *text, int lengthBytes, int *charPosition);
 	void CopyText(int startChar, int endChar);
 	void CutText(int startChar, int endChar);
 	void DeleteText(int startChar, int endChar);
 	void PasteText(int charPosition);
 
 public:
-	ScintillaGTKAccessible(GtkAccessible *accessible, GtkWidget *widget);
+	ScintillaGTKAccessible(GtkAccessible *accessible_, GtkWidget *widget_);
 	~ScintillaGTKAccessible();
 
 	static ScintillaGTKAccessible *FromAccessible(GtkAccessible *accessible);
