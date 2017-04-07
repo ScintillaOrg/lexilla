@@ -4301,7 +4301,7 @@ bool Editor::PointInSelection(Point pt) {
 	const SelectionPosition pos = SPositionFromLocation(pt, false, true);
 	const Point ptPos = LocationFromPosition(pos);
 	for (size_t r=0; r<sel.Count(); r++) {
-		const SelectionRange range = sel.Range(r);
+		const SelectionRange &range = sel.Range(r);
 		if (range.Contains(pos)) {
 			bool hit = true;
 			if (pos == range.Start()) {
