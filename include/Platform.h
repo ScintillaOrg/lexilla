@@ -363,6 +363,14 @@ public:
 	virtual ~Window();
 	Window &operator=(WindowID wid_) {
 		wid = wid_;
+		cursorLast = cursorInvalid;
+		return *this;
+	}
+	Window &operator=(const Window &other) {
+		if (this != &other) {
+			wid = other.wid;
+			cursorLast = other.cursorLast;
+		}
 		return *this;
 	}
 	WindowID GetID() const { return wid; }
