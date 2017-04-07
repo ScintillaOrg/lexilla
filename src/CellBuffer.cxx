@@ -348,12 +348,12 @@ bool UndoHistory::CanRedo() const {
 
 int UndoHistory::StartRedo() {
 	// Drop any leading startAction
-	if (actions[currentAction].at == startAction && currentAction < maxAction)
+	if (currentAction < maxAction && actions[currentAction].at == startAction)
 		currentAction++;
 
 	// Count the steps in this action
 	int act = currentAction;
-	while (actions[act].at != startAction && act < maxAction) {
+	while (act < maxAction && actions[act].at != startAction) {
 		act++;
 	}
 	return act - currentAction;
