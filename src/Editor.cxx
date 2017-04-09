@@ -4147,9 +4147,8 @@ void Editor::CopySelectionRange(SelectionText *ss, bool allowLineCopy) {
 		std::vector<SelectionRange> rangesInOrder = sel.RangesCopy();
 		if (sel.selType == Selection::selRectangle)
 			std::sort(rangesInOrder.begin(), rangesInOrder.end());
-		for (size_t r=0; r<rangesInOrder.size(); r++) {
-			const SelectionRange current = rangesInOrder[r];
-			text.append(RangeText(current.Start().Position(), current.End().Position()));
+		for (const SelectionRange &current : rangesInOrder) {
+				text.append(RangeText(current.Start().Position(), current.End().Position()));
 			if (sel.selType == Selection::selRectangle) {
 				if (pdoc->eolMode != SC_EOL_LF)
 					text.push_back('\r');

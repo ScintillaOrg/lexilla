@@ -91,8 +91,8 @@ bool IsSpaceOrTab(int ch) {
 }
 
 bool OnlySpaceOrTab(const std::string &s) {
-	for (std::string::const_iterator it = s.begin(); it != s.end(); ++it) {
-		if (!IsSpaceOrTab(*it))
+	for (const char ch : s) {
+		if (!IsSpaceOrTab(ch))
 			return false;
 	}
 	return true;
@@ -100,11 +100,11 @@ bool OnlySpaceOrTab(const std::string &s) {
 
 std::vector<std::string> StringSplit(const std::string &text, int separator) {
 	std::vector<std::string> vs(text.empty() ? 0 : 1);
-	for (std::string::const_iterator it = text.begin(); it != text.end(); ++it) {
-		if (*it == separator) {
+	for (const char ch : text) {
+		if (ch == separator) {
 			vs.push_back(std::string());
 		} else {
-			vs.back() += *it;
+			vs.back() += ch;
 		}
 	}
 	return vs;
@@ -709,11 +709,11 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 	}
 
 	SymbolTable preprocessorDefinitions = preprocessorDefinitionsStart;
-	for (std::vector<PPDefinition>::iterator itDef = ppDefineHistory.begin(); itDef != ppDefineHistory.end(); ++itDef) {
-		if (itDef->isUndef)
-			preprocessorDefinitions.erase(itDef->key);
+	for (const PPDefinition &ppDef : ppDefineHistory) {
+		if (ppDef.isUndef)
+			preprocessorDefinitions.erase(ppDef.key);
 		else
-			preprocessorDefinitions[itDef->key] = SymbolValue(itDef->value, itDef->arguments);
+			preprocessorDefinitions[ppDef.key] = SymbolValue(ppDef.value, ppDef.arguments);
 	}
 
 	std::string rawStringTerminator = rawStringTerminators.ValueAt(lineCurrent-1);

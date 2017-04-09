@@ -653,9 +653,9 @@ public:
 		std::sort(characterToConversion.begin(), characterToConversion.end());
 		characters.reserve(characterToConversion.size());
 		conversions.reserve(characterToConversion.size());
-		for (CharacterToConversion::iterator it = characterToConversion.begin(); it != characterToConversion.end(); ++it) {
-			characters.push_back(it->character);
-			conversions.push_back(it->conversion);
+		for (const CharacterConversion &chConv : characterToConversion) {
+			characters.push_back(chConv.character);
+			conversions.push_back(chConv.conversion);
 		}
 		// Empty the original calculated data completely
 		CharacterToConversion().swap(characterToConversion);

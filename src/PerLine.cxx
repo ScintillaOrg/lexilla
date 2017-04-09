@@ -548,9 +548,9 @@ int LineTabstops::GetNextTabstop(Sci::Line line, int x) const {
 	if (line < tabstops.Length()) {
 		TabstopList *tl = tabstops[line];
 		if (tl) {
-			for (size_t i = 0; i < tl->size(); i++) {
-				if ((*tl)[i] > x) {
-					return (*tl)[i];
+			for (const int i : *tl) {
+				if (i > x) {
+					return i;
 				}
 			}
 		}

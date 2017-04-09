@@ -282,9 +282,9 @@ RGBAImage *RGBAImageSet::Get(int ident) {
 /// Give the largest height of the set.
 int RGBAImageSet::GetHeight() const {
 	if (height < 0) {
-		for (ImageMap::const_iterator it=images.begin(); it != images.end(); ++it) {
-			if (height < it->second->GetHeight()) {
-				height = it->second->GetHeight();
+		for (const std::pair<int, RGBAImage*> &image : images) {
+			if (height < image.second->GetHeight()) {
+				height = image.second->GetHeight();
 			}
 		}
 	}
@@ -294,9 +294,9 @@ int RGBAImageSet::GetHeight() const {
 /// Give the largest width of the set.
 int RGBAImageSet::GetWidth() const {
 	if (width < 0) {
-		for (ImageMap::const_iterator it=images.begin(); it != images.end(); ++it) {
-			if (width < it->second->GetWidth()) {
-				width = it->second->GetWidth();
+		for (const std::pair<int, RGBAImage*> &image : images) {
+			if (width < image.second->GetWidth()) {
+				width = image.second->GetWidth();
 			}
 		}
 	}

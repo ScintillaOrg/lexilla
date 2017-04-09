@@ -2036,7 +2036,7 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 		} else {
 			phases.push_back(drawAll);
 		}
-		for (std::vector<DrawPhase>::iterator it = phases.begin(); it != phases.end(); ++it) {
+		for (const DrawPhase &phase : phases) {
 			int ypos = 0;
 			if (!bufferedDraw)
 				ypos += screenLinePaintFirst * vsDraw.lineHeight;
@@ -2075,7 +2075,7 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 					ll->SetBracesHighlight(rangeLine, model.braces, static_cast<char>(model.bracesMatchStyle),
 						static_cast<int>(model.highlightGuideColumn * vsDraw.spaceWidth), bracesIgnoreStyle);
 
-					if (leftTextOverlap && (bufferedDraw || ((phasesDraw < phasesMultiple) && (*it & drawBack)))) {
+					if (leftTextOverlap && (bufferedDraw || ((phasesDraw < phasesMultiple) && (phase & drawBack)))) {
 						// Clear the left margin
 						PRectangle rcSpacer = rcLine;
 						rcSpacer.right = rcSpacer.left;
@@ -2083,17 +2083,17 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 						surface->FillRectangle(rcSpacer, vsDraw.styles[STYLE_DEFAULT].back);
 					}
 
-					DrawLine(surface, model, vsDraw, ll, lineDoc, visibleLine, xStart, rcLine, subLine, *it);
+					DrawLine(surface, model, vsDraw, ll, lineDoc, visibleLine, xStart, rcLine, subLine, phase);
 					//durPaint += et.Duration(true);
 
 					// Restore the previous styles for the brace highlights in case layout is in cache.
 					ll->RestoreBracesHighlight(rangeLine, model.braces, bracesIgnoreStyle);
 
-					if (*it & drawFoldLines) {
+					if (phase & drawFoldLines) {
 						DrawFoldLines(surface, model, vsDraw, lineDoc, rcLine);
 					}
 
-					if (*it & drawCarets) {
+					if (phase & drawCarets) {
 						DrawCarets(surface, model, vsDraw, ll, lineDoc, xStart, rcLine, subLine);
 					}
 

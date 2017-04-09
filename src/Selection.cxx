@@ -266,8 +266,8 @@ void Selection::SetMoveExtends(bool moveExtends_) {
 }
 
 bool Selection::Empty() const {
-	for (size_t i=0; i<ranges.size(); i++) {
-		if (!ranges[i].Empty())
+	for (const SelectionRange &range : ranges) {
+		if (!range.Empty())
 			return false;
 	}
 	return true;
@@ -275,26 +275,26 @@ bool Selection::Empty() const {
 
 SelectionPosition Selection::Last() const {
 	SelectionPosition lastPosition;
-	for (size_t i=0; i<ranges.size(); i++) {
-		if (lastPosition < ranges[i].caret)
-			lastPosition = ranges[i].caret;
-		if (lastPosition < ranges[i].anchor)
-			lastPosition = ranges[i].anchor;
+	for (const SelectionRange &range : ranges) {
+		if (lastPosition < range.caret)
+			lastPosition = range.caret;
+		if (lastPosition < range.anchor)
+			lastPosition = range.anchor;
 	}
 	return lastPosition;
 }
 
 Sci::Position Selection::Length() const {
 	Sci::Position len = 0;
-	for (size_t i=0; i<ranges.size(); i++) {
-		len += ranges[i].Length();
+	for (const SelectionRange &range : ranges) {
+		len += range.Length();
 	}
 	return len;
 }
 
 void Selection::MovePositions(bool insertion, Sci::Position startChange, Sci::Position length) {
-	for (size_t i=0; i<ranges.size(); i++) {
-		ranges[i].MoveForInsertDelete(insertion, startChange, length);
+	for (SelectionRange &range : ranges) {
+		range.MoveForInsertDelete(insertion, startChange, length);
 	}
 	if (selType == selRectangle) {
 		rangeRectangular.MoveForInsertDelete(insertion, startChange, length);
@@ -394,11 +394,11 @@ int Selection::InSelectionForEOL(Sci::Position pos) const {
 
 Sci::Position Selection::VirtualSpaceFor(Sci::Position pos) const {
 	Sci::Position virtualSpace = 0;
-	for (size_t i=0; i<ranges.size(); i++) {
-		if ((ranges[i].caret.Position() == pos) && (virtualSpace < ranges[i].caret.VirtualSpace()))
-			virtualSpace = ranges[i].caret.VirtualSpace();
-		if ((ranges[i].anchor.Position() == pos) && (virtualSpace < ranges[i].anchor.VirtualSpace()))
-			virtualSpace = ranges[i].anchor.VirtualSpace();
+	for (const SelectionRange &range : ranges) {
+		if ((range.caret.Position() == pos) && (virtualSpace < range.caret.VirtualSpace()))
+			virtualSpace = range.caret.VirtualSpace();
+		if ((range.anchor.Position() == pos) && (virtualSpace < range.anchor.VirtualSpace()))
+			virtualSpace = range.anchor.VirtualSpace();
 	}
 	return virtualSpace;
 }

@@ -134,12 +134,12 @@ Document::Document() {
 }
 
 Document::~Document() {
-	for (std::vector<WatcherWithUserData>::iterator it = watchers.begin(); it != watchers.end(); ++it) {
-		it->watcher->NotifyDeleted(this, it->userData);
+	for (const WatcherWithUserData &watcher : watchers) {
+		watcher.watcher->NotifyDeleted(this, watcher.userData);
 	}
-	for (int j=0; j<ldSize; j++) {
-		delete perLineData[j];
-		perLineData[j] = 0;
+	for (PerLine *&pl : perLineData) {
+		delete pl;
+		pl = nullptr;
 	}
 	regex.release();
 	delete pli;
@@ -149,9 +149,9 @@ Document::~Document() {
 }
 
 void Document::Init() {
-	for (int j=0; j<ldSize; j++) {
-		if (perLineData[j])
-			perLineData[j]->Init();
+	for (PerLine *pl : perLineData) {
+		if (pl)
+			pl->Init();
 	}
 }
 
@@ -190,16 +190,16 @@ bool Document::SetLineEndTypesAllowed(int lineEndBitSet_) {
 }
 
 void Document::InsertLine(Sci::Line line) {
-	for (int j=0; j<ldSize; j++) {
-		if (perLineData[j])
-			perLineData[j]->InsertLine(line);
+	for (PerLine *pl : perLineData) {
+		if (pl)
+			pl->InsertLine(line);
 	}
 }
 
 void Document::RemoveLine(Sci::Line line) {
-	for (int j=0; j<ldSize; j++) {
-		if (perLineData[j])
-			perLineData[j]->RemoveLine(line);
+	for (PerLine *pl : perLineData) {
+		if (pl)
+			pl->RemoveLine(line);
 	}
 }
 
@@ -383,8 +383,8 @@ Sci_Position SCI_METHOD Document::LineEnd(Sci_Position line) const {
 
 void SCI_METHOD Document::SetErrorStatus(int status) {
 	// Tell the watchers an error has occurred.
-	for (std::vector<WatcherWithUserData>::iterator it = watchers.begin(); it != watchers.end(); ++it) {
-		it->watcher->NotifyErrorOccurred(this, it->userData, status);
+	for (const WatcherWithUserData &watcher : watchers) {
+		watcher.watcher->NotifyErrorOccurred(this, watcher.userData, status);
 	}
 }
 
@@ -2119,8 +2119,8 @@ void Document::StyleToAdjustingLineDuration(Sci::Position pos) {
 
 void Document::LexerChanged() {
 	// Tell the watchers the lexer has changed.
-	for (std::vector<WatcherWithUserData>::iterator it = watchers.begin(); it != watchers.end(); ++it) {
-		it->watcher->NotifyLexerChanged(this, it->userData);
+	for (const WatcherWithUserData &watcher : watchers) {
+		watcher.watcher->NotifyLexerChanged(this, watcher.userData);
 	}
 }
 
@@ -2254,14 +2254,14 @@ bool Document::RemoveWatcher(DocWatcher *watcher, void *userData) {
 }
 
 void Document::NotifyModifyAttempt() {
-	for (std::vector<WatcherWithUserData>::iterator it = watchers.begin(); it != watchers.end(); ++it) {
-		it->watcher->NotifyModifyAttempt(this, it->userData);
+	for (const WatcherWithUserData &watcher : watchers) {
+		watcher.watcher->NotifyModifyAttempt(this, watcher.userData);
 	}
 }
 
 void Document::NotifySavePoint(bool atSavePoint) {
-	for (std::vector<WatcherWithUserData>::iterator it = watchers.begin(); it != watchers.end(); ++it) {
-		it->watcher->NotifySavePoint(this, it->userData, atSavePoint);
+	for (const WatcherWithUserData &watcher : watchers) {
+		watcher.watcher->NotifySavePoint(this, watcher.userData, atSavePoint);
 	}
 }
 
@@ -2271,8 +2271,8 @@ void Document::NotifyModified(DocModification mh) {
 	} else if (mh.modificationType & SC_MOD_DELETETEXT) {
 		decorations.DeleteRange(mh.position, mh.length);
 	}
-	for (std::vector<WatcherWithUserData>::iterator it = watchers.begin(); it != watchers.end(); ++it) {
-		it->watcher->NotifyModified(this, mh, it->userData);
+	for (const WatcherWithUserData &watcher : watchers) {
+		watcher.watcher->NotifyModified(this, mh, watcher.userData);
 	}
 }
 
