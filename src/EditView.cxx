@@ -1667,7 +1667,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 				if (vsDraw.hotspotColours.fore.isSet)
 					textFore = vsDraw.hotspotColours.fore;
 			}
-			if (vsDraw.indicatorsSetFore > 0) {
+			if (vsDraw.indicatorsSetFore) {
 				// At least one indicator sets the text colour so see if it applies to this segment
 				for (Decoration *deco = model.pdoc->decorations.Root(); deco; deco = deco->Next()) {
 					const int indicatorValue = deco->rs.ValueAt(ts.start + posLineStart);

@@ -4337,10 +4337,10 @@ bool Editor::PointInSelMargin(Point pt) const {
 
 Window::Cursor Editor::GetMarginCursor(Point pt) const {
 	int x = 0;
-	for (size_t margin = 0; margin < vs.ms.size(); margin++) {
-		if ((pt.x >= x) && (pt.x < x + vs.ms[margin].width))
-			return static_cast<Window::Cursor>(vs.ms[margin].cursor);
-		x += vs.ms[margin].width;
+	for (const MarginStyle &m : vs.ms) {
+		if ((pt.x >= x) && (pt.x < x + m.width))
+			return static_cast<Window::Cursor>(m.cursor);
+		x += m.width;
 	}
 	return Window::cursorReverseArrow;
 }
@@ -4649,7 +4649,7 @@ bool Editor::PointIsHotspot(Point pt) {
 void Editor::SetHoverIndicatorPosition(Sci::Position position) {
 	const Sci::Position hoverIndicatorPosPrev = hoverIndicatorPos;
 	hoverIndicatorPos = INVALID_POSITION;
-	if (vs.indicatorsDynamic == 0)
+	if (!vs.indicatorsDynamic)
 		return;
 	if (position != INVALID_POSITION) {
 		for (Decoration *deco = pdoc->decorations.Root(); deco; deco = deco->Next()) {
@@ -4666,7 +4666,7 @@ void Editor::SetHoverIndicatorPosition(Sci::Position position) {
 }
 
 void Editor::SetHoverIndicatorPoint(Point pt) {
-	if (vs.indicatorsDynamic == 0) {
+	if (!vs.indicatorsDynamic) {
 		SetHoverIndicatorPosition(INVALID_POSITION);
 	} else {
 		SetHoverIndicatorPosition(PositionFromLocation(pt, true, true));
