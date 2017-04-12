@@ -46,6 +46,7 @@ public:
 struct FontMeasurements {
 	unsigned int ascent;
 	unsigned int descent;
+	XYPOSITION capitalHeight;	// Top of capital letter to baseline: ascent - internal leading
 	XYPOSITION aveCharWidth;
 	XYPOSITION spaceWidth;
 	int sizeZoomed;
