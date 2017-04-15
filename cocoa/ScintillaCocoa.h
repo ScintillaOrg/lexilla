@@ -129,7 +129,6 @@ protected:
   void Redraw() override;
 
   void Init();
-  void Finalise() override;
   CaseFolder *CaseFolderForEncoding() override;
   std::string CaseMapString(const std::string &s, int caseMapping) override;
   void CancelModes() override;
@@ -137,6 +136,7 @@ protected:
 public:
   ScintillaCocoa(ScintillaView* sciView_, SCIContentView* viewContent, SCIMarginView* viewMargin);
   ~ScintillaCocoa() override;
+  void Finalise() override;
 
   void SetDelegate(id<ScintillaNotificationProtocol> delegate_);
   void RegisterNotifyCallback(intptr_t windowid, SciNotifyFunc callback);

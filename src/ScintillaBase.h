@@ -60,12 +60,12 @@ protected:
 	ScintillaBase();
 	virtual ~ScintillaBase();
 	void Initialise() override {}
-	virtual void Finalise();
+	void Finalise() override;
 
-	virtual void AddCharUTF(const char *s, unsigned int len, bool treatAsDBCS=false);
+	void AddCharUTF(const char *s, unsigned int len, bool treatAsDBCS=false) override;
 	void Command(int cmdId);
-	virtual void CancelModes();
-	virtual int KeyCommand(unsigned int iMessage);
+	void CancelModes() override;
+	int KeyCommand(unsigned int iMessage) override;
 
 	void AutoCompleteInsert(Sci::Position startPos, int removeLen, const char *text, int textLen);
 	void AutoCompleteStart(int lenEntered, const char *list);
@@ -87,16 +87,16 @@ protected:
 	bool ShouldDisplayPopup(Point ptInWindowCoordinates) const;
 	void ContextMenu(Point pt);
 
-	virtual void ButtonDownWithModifiers(Point pt, unsigned int curTime, int modifiers);
-	virtual void ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, bool alt);
-	virtual void RightButtonDownWithModifiers(Point pt, unsigned int curTime, int modifiers);
+	void ButtonDownWithModifiers(Point pt, unsigned int curTime, int modifiers) override;
+	void ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, bool alt) override;
+	void RightButtonDownWithModifiers(Point pt, unsigned int curTime, int modifiers) override;
 
-	void NotifyStyleToNeeded(Sci::Position endStyleNeeded);
-	void NotifyLexerChanged(Document *doc, void *userData);
+	void NotifyStyleToNeeded(Sci::Position endStyleNeeded) override;
+	void NotifyLexerChanged(Document *doc, void *userData) override;
 
 public:
 	// Public so scintilla_send_message can use it
-	virtual sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
+	sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;
 };
 
 #ifdef SCI_NAMESPACE

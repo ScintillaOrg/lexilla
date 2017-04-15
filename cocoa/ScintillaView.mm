@@ -1559,6 +1559,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 - (void) dealloc
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+  mBackend->Finalise();
   delete mBackend;
   mBackend = NULL;
   mContent.owner = nil;

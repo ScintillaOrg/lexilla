@@ -429,7 +429,6 @@ ScintillaCocoa::ScintillaCocoa(ScintillaView* sciView_, SCIContentView* viewCont
 
 ScintillaCocoa::~ScintillaCocoa()
 {
-  Finalise();
   [timerTarget ownerDestroyed];
   [timerTarget release];
 }
