@@ -1031,16 +1031,18 @@ PRectangle ScintillaGTK::GetClientRectangle() const {
 }
 
 void ScintillaGTK::ScrollText(Sci::Line linesToMove) {
-	int diff = vs.lineHeight * -linesToMove;
-	//Platform::DebugPrintf("ScintillaGTK::ScrollText %d %d %0d,%0d %0d,%0d\n", linesToMove, diff,
-	//	rc.left, rc.top, rc.right, rc.bottom);
-	GtkWidget *wi = PWidget(wText);
 	NotifyUpdateUI();
 
+#if GTK_CHECK_VERSION(3,22,0)
+	Redraw();
+#else
+	GtkWidget *wi = PWidget(wText);
 	if (IS_WIDGET_REALIZED(wi)) {
+		const int diff = vs.lineHeight * -linesToMove;
 		gdk_window_scroll(WindowFromWidget(wi), 0, -diff);
 		gdk_window_process_updates(WindowFromWidget(wi), FALSE);
 	}
+#endif
 }
 
 void ScintillaGTK::SetVerticalScrollPos() {
