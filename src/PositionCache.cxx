@@ -55,7 +55,7 @@ LineLayout::LineLayout(int maxLineLength_) :
 	numCharsBeforeEOL(0),
 	validity(llInvalid),
 	xHighlightGuide(0),
-	highlightColumn(0),
+	highlightColumn(false),
 	containsCaret(false),
 	edgeColumn(0),
 	chars(0),

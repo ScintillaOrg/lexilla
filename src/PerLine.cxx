@@ -385,7 +385,7 @@ bool LineAnnotation::MultipleStyles(Sci::Line line) const {
 	if (annotations.Length() && (line >= 0) && (line < annotations.Length()) && annotations[line])
 		return reinterpret_cast<AnnotationHeader *>(annotations[line])->style == IndividualStyles;
 	else
-		return 0;
+		return false;
 }
 
 int LineAnnotation::Style(Sci::Line line) const {
