@@ -81,7 +81,7 @@ public:
 	static ScintillaGTK *FromWidget(GtkWidget *widget);
 	static void ClassInit(OBJECT_CLASS* object_class, GtkWidgetClass *widget_class, GtkContainerClass *container_class);
 private:
-	virtual void Initialise();
+	void Init();
 	virtual void Finalise();
 	virtual bool AbandonPaint();
 	virtual void DisplayCursor(Window::Cursor c);

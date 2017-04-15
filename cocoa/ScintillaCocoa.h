@@ -128,7 +128,7 @@ protected:
   void DiscardOverdraw() override;
   void Redraw() override;
 
-  void Initialise() override;
+  void Init();
   void Finalise() override;
   CaseFolder *CaseFolderForEncoding() override;
   std::string CaseMapString(const std::string &s, int caseMapping) override;

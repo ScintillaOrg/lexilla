@@ -99,7 +99,7 @@ private slots:
 	void SelectionChanged();
 
 private:
-	virtual void Initialise();
+	void Init();
 	virtual void Finalise();
 	virtual bool DragThreshold(Point ptStart, Point ptNow);
 	virtual bool ValidCodePage(int codePage) const;

@@ -59,7 +59,7 @@ protected:
 
 	ScintillaBase();
 	virtual ~ScintillaBase();
-	virtual void Initialise() = 0;
+	void Initialise() override {}
 	virtual void Finalise();
 
 	virtual void AddCharUTF(const char *s, unsigned int len, bool treatAsDBCS=false);

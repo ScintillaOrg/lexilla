@@ -168,6 +168,7 @@ public:
 	void Init(SurfaceID sid, WindowID wid) override;
 	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
 
+	void Clear();
 	void Release() override;
 	bool Initialised() override;
 	void PenColour(ColourDesired fore) override;
@@ -276,10 +277,10 @@ x(0), y(0), inited(false), createdGC(false)
 }
 
 SurfaceImpl::~SurfaceImpl() {
-	Release();
+	Clear();
 }
 
-void SurfaceImpl::Release() {
+void SurfaceImpl::Clear() {
 	et = singleByte;
 	if (createdGC) {
 		createdGC = false;
@@ -301,6 +302,10 @@ void SurfaceImpl::Release() {
 	y = 0;
 	inited = false;
 	createdGC = false;
+}
+
+void SurfaceImpl::Release() {
+	Clear();
 }
 
 bool SurfaceImpl::Initialised() {

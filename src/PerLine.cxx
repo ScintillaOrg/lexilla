@@ -121,7 +121,11 @@ void MarkerHandleSet::CombineWith(MarkerHandleSet *other) {
 }
 
 LineMarkers::~LineMarkers() {
-	Init();
+	for (int line = 0; line < markers.Length(); line++) {
+		delete markers[line];
+		markers[line] = 0;
+	}
+	markers.DeleteAll();
 }
 
 void LineMarkers::Init() {
@@ -490,7 +494,10 @@ int LineAnnotation::Lines(Sci::Line line) const {
 }
 
 LineTabstops::~LineTabstops() {
-	Init();
+	for (int line = 0; line < tabstops.Length(); line++) {
+		delete tabstops[line];
+	}
+	tabstops.DeleteAll();
 }
 
 void LineTabstops::Init() {

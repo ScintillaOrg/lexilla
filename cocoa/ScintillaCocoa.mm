@@ -422,7 +422,7 @@ ScintillaCocoa::ScintillaCocoa(ScintillaView* sciView_, SCIContentView* viewCont
   {
     timers[tr] = nil;
   }
-  Initialise();
+  Init();
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -439,7 +439,7 @@ ScintillaCocoa::~ScintillaCocoa()
 /**
  * Core initialization of the control. Everything that needs to be set up happens here.
  */
-void ScintillaCocoa::Initialise()
+void ScintillaCocoa::Init()
 {
   Scintilla_LinkLexers();
 

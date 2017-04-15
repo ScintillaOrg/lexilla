@@ -45,7 +45,7 @@ ScintillaQt::ScintillaQt(QAbstractScrollArea *parent)
 	// Buffered drawing turned off by default to avoid this.
 	WndProc(SCI_SETBUFFEREDDRAW, false, 0);
 
-	Initialise();
+	Init();
 
 	for (TickReason tr = tickCaret; tr <= tickDwell; tr = static_cast<TickReason>(tr + 1)) {
 		timers[tr] = 0;
@@ -128,7 +128,7 @@ static ScintillaRectangularMime *singletonMime = 0;
 
 #endif
 
-void ScintillaQt::Initialise()
+void ScintillaQt::Init()
 {
 #if defined(Q_OS_WIN) || defined(Q_OS_MAC)
 	rectangularSelectionModifier = SCMOD_ALT;
