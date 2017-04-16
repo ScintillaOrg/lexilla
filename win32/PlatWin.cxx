@@ -1291,8 +1291,9 @@ static int Delta(int difference) {
 		return 0;
 }
 
+// Round to integer, with halfway cases rounding down. 
 static float RoundFloat(float f) {
-	return static_cast<float>(static_cast<int>(f+0.5f));
+	return std::floor(f+0.5f);
 }
 
 void SurfaceD2D::LineTo(int x_, int y_) {
