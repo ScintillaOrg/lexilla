@@ -120,14 +120,6 @@ static void ColouriseFortranDoc(Sci_PositionU startPos, Sci_Position length, int
 			continue;
 		}
 		/***************************************/
-		// Hanndle preprocessor directives
-		if (sc.ch == '#' && numNonBlank == 1)
-		{
-			sc.SetState(SCE_F_PREPROCESSOR);
-			while (!sc.atLineEnd && sc.More())
-				sc.Forward(); // Until line end
-		}
-		/***************************************/
 		// Handle line continuation generically.
 		if (!isFixFormat && sc.ch == '&' && sc.state != SCE_F_COMMENT) {
 			char chTemp = ' ';
@@ -143,13 +135,25 @@ static void ColouriseFortranDoc(Sci_PositionU startPos, Sci_Position length, int
 				int currentState = sc.state;
 				sc.SetState(SCE_F_CONTINUATION);
 				sc.ForwardSetState(SCE_F_DEFAULT);
-				while (IsASpace(sc.ch) && sc.More()) sc.Forward();
+				while (IsASpace(sc.ch) && sc.More()) {
+					sc.Forward();
+					if (sc.atLineStart) numNonBlank = 0;
+					if (!IsASpaceOrTab(sc.ch)) numNonBlank ++;
+				}
 				if (sc.ch == '&') {
 					sc.SetState(SCE_F_CONTINUATION);
 					sc.Forward();
 				}
 				sc.SetState(currentState);
 			}
+		}
+		/***************************************/
+		// Hanndle preprocessor directives
+		if (sc.ch == '#' && numNonBlank == 1)
+		{
+			sc.SetState(SCE_F_PREPROCESSOR);
+			while (!sc.atLineEnd && sc.More())
+				sc.Forward(); // Until line end
 		}
 		/***************************************/
 		// Determine if the current state should terminate.
