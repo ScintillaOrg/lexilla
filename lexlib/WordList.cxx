@@ -6,6 +6,7 @@
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <cstdlib>
+#include <cassert>
 #include <cstring>
 
 #include <algorithm>
@@ -56,6 +57,7 @@ static char **ArrayFromWordList(char *wordlist, int *len, bool onlyLineEnds = fa
 			prev = wordlist[k];
 		}
 	}
+	assert(wordsStore < (words + 1));
 	keywords[wordsStore] = &wordlist[slen];
 	*len = wordsStore;
 	return keywords;
