@@ -2080,28 +2080,28 @@ public:
 			fontCopy = 0;
 		}
 	}
-	virtual void SetFont(Font &font) override;
-	virtual void Create(Window &parent_, int ctrlID_, Point location_, int lineHeight_, bool unicodeMode_, int technology_) override;
-	virtual void SetAverageCharWidth(int width) override;
-	virtual void SetVisibleRows(int rows) override;
-	virtual int GetVisibleRows() const override;
-	virtual PRectangle GetDesiredRect() override;
-	virtual int CaretFromEdge() override;
-	virtual void Clear() override;
-	virtual void Append(char *s, int type = -1) override;
-	virtual int Length() override;
-	virtual void Select(int n) override;
-	virtual int GetSelection() override;
-	virtual int Find(const char *prefix) override;
-	virtual void GetValue(int n, char *value, int len) override;
-	virtual void RegisterImage(int type, const char *xpm_data) override;
-	virtual void RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage) override;
-	virtual void ClearRegisteredImages() override;
-	virtual void SetDoubleClickAction(CallBackAction action, void *data) override {
+	void SetFont(Font &font) override;
+	void Create(Window &parent_, int ctrlID_, Point location_, int lineHeight_, bool unicodeMode_, int technology_) override;
+	void SetAverageCharWidth(int width) override;
+	void SetVisibleRows(int rows) override;
+	int GetVisibleRows() const override;
+	PRectangle GetDesiredRect() override;
+	int CaretFromEdge() override;
+	void Clear() override;
+	void Append(char *s, int type = -1) override;
+	int Length() override;
+	void Select(int n) override;
+	int GetSelection() override;
+	int Find(const char *prefix) override;
+	void GetValue(int n, char *value, int len) override;
+	void RegisterImage(int type, const char *xpm_data) override;
+	void RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage) override;
+	void ClearRegisteredImages() override;
+	void SetDoubleClickAction(CallBackAction action, void *data) override {
 		doubleClickAction = action;
 		doubleClickActionData = data;
 	}
-	virtual void SetList(const char *list, char separator, char typesep) override;
+	void SetList(const char *list, char separator, char typesep) override;
 	void Draw(DRAWITEMSTRUCT *pDrawItem);
 	LRESULT WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 	static LRESULT PASCAL StaticWndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
