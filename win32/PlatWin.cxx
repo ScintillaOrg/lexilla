@@ -457,9 +457,6 @@ void Font::Release() {
 template<typename T, int lengthStandard>
 class VarBuffer {
 	T bufferStandard[lengthStandard];
-	// Private so VarBuffer objects can not be copied
-	VarBuffer(const VarBuffer &);
-	VarBuffer &operator=(const VarBuffer &);
 public:
 	T *buffer;
 	explicit VarBuffer(size_t length) : buffer(0) {
@@ -469,6 +466,9 @@ public:
 			buffer = bufferStandard;
 		}
 	}
+	// Deleted so VarBuffer objects can not be copied
+	VarBuffer(const VarBuffer &) = delete;
+	VarBuffer &operator=(const VarBuffer &) = delete;
 	~VarBuffer() {
 		if (buffer != bufferStandard) {
 			delete []buffer;
@@ -513,11 +513,11 @@ class SurfaceGDI : public Surface {
 	void BrushColor(ColourDesired back);
 	void SetFont(Font &font_);
 
-	// Private so SurfaceGDI objects can not be copied
-	SurfaceGDI(const SurfaceGDI &);
-	SurfaceGDI &operator=(const SurfaceGDI &);
 public:
 	SurfaceGDI();
+	// Deleted so SurfaceGDI objects can not be copied
+	SurfaceGDI(const SurfaceGDI &) = delete;
+	SurfaceGDI &operator=(const SurfaceGDI &) = delete;
 	~SurfaceGDI() override;
 
 	void Init(WindowID wid) override;
@@ -1071,11 +1071,11 @@ class SurfaceD2D : public Surface {
 
 	void SetFont(Font &font_);
 
-	// Private so SurfaceD2D objects can not be copied
-	SurfaceD2D(const SurfaceD2D &);
-	SurfaceD2D &operator=(const SurfaceD2D &);
 public:
 	SurfaceD2D();
+	// Deleted so SurfaceD2D objects can not be copied
+	SurfaceD2D(const SurfaceD2D &) = delete;
+	SurfaceD2D &operator=(const SurfaceD2D &) = delete;
 	virtual ~SurfaceD2D() override;
 
 	void SetScale();

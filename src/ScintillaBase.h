@@ -19,10 +19,6 @@ class LexState;
 /**
  */
 class ScintillaBase : public Editor {
-	// Private so ScintillaBase objects can not be copied
-	explicit ScintillaBase(const ScintillaBase &);
-	ScintillaBase &operator=(const ScintillaBase &);
-
 protected:
 	/** Enumeration of commands and child windows. */
 	enum {
@@ -58,6 +54,9 @@ protected:
 #endif
 
 	ScintillaBase();
+	// Deleted so ScintillaBase objects can not be copied
+	explicit ScintillaBase(const ScintillaBase &) = delete;
+	ScintillaBase &operator=(const ScintillaBase &) = delete;
 	virtual ~ScintillaBase();
 	void Initialise() override {}
 	void Finalise() override;

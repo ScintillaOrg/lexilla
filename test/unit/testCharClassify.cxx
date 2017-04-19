@@ -14,8 +14,8 @@
 // Test CharClassify.
 
 class CharClassifyTest {
-	// Avoid warnings, private so never called. 
-	CharClassifyTest(const CharClassifyTest &);
+	// Avoid warnings, deleted so never called. 
+	CharClassifyTest(const CharClassifyTest &) = delete;
 protected:
 	CharClassifyTest() {
 		pcc = new CharClassify();
