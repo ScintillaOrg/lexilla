@@ -27,8 +27,6 @@ class StyleContext {
 	Sci_PositionU currentPosLastRelative;
 	Sci_Position offsetRelative;
 
-	StyleContext &operator=(const StyleContext &);
-
 	void GetNextChar() {
 		if (multiByteAccess) {
 			chNext = multiByteAccess->GetCharacterAndWidth(currentPos+width, &widthNext);
@@ -97,6 +95,9 @@ public:
 
 		GetNextChar();
 	}
+	// Deleted so StyleContext objects can not be copied
+	StyleContext(const StyleContext &) = delete;
+	StyleContext &operator=(const StyleContext &) = delete;
 	void Complete() {
 		styler.ColourTo(currentPos - ((currentPos > lengthDocument) ? 2 : 1), state);
 		styler.Flush();

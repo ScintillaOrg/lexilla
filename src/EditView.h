@@ -154,9 +154,10 @@ public:
 class AutoLineLayout {
 	LineLayoutCache &llc;
 	LineLayout *ll;
-	AutoLineLayout &operator=(const AutoLineLayout &);
 public:
 	AutoLineLayout(LineLayoutCache &llc_, LineLayout *ll_) : llc(llc_), ll(ll_) {}
+	explicit AutoLineLayout(const AutoLineLayout &) = delete;
+	AutoLineLayout &operator=(const AutoLineLayout &) = delete;
 	~AutoLineLayout() {
 		llc.Dispose(ll);
 		ll = 0;
