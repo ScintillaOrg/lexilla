@@ -50,7 +50,7 @@ class RGBAImage {
 public:
 	RGBAImage(int width_, int height_, float scale_, const unsigned char *pixels_);
 	explicit RGBAImage(const XPM &xpm);
-	// Deleted so RGBAImage objects can not be copied
+	// Deleted so RGBAImage objects can not be copied.
 	RGBAImage(const RGBAImage &) = delete;
 	RGBAImage &operator=(const RGBAImage &) = delete;
 	virtual ~RGBAImage();

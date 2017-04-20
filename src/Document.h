@@ -260,6 +260,9 @@ public:
 	DecorationList decorations;
 
 	Document();
+	// Deleted so Document objects can not be copied.
+	Document(const Document &) = delete;
+	void operator=(const Document &) = delete;
 	virtual ~Document();
 
 	int AddRef();

@@ -466,7 +466,7 @@ public:
 			buffer = bufferStandard;
 		}
 	}
-	// Deleted so VarBuffer objects can not be copied
+	// Deleted so VarBuffer objects can not be copied.
 	VarBuffer(const VarBuffer &) = delete;
 	VarBuffer &operator=(const VarBuffer &) = delete;
 	~VarBuffer() {
@@ -515,7 +515,7 @@ class SurfaceGDI : public Surface {
 
 public:
 	SurfaceGDI();
-	// Deleted so SurfaceGDI objects can not be copied
+	// Deleted so SurfaceGDI objects can not be copied.
 	SurfaceGDI(const SurfaceGDI &) = delete;
 	SurfaceGDI &operator=(const SurfaceGDI &) = delete;
 	~SurfaceGDI() override;
@@ -1073,7 +1073,7 @@ class SurfaceD2D : public Surface {
 
 public:
 	SurfaceD2D();
-	// Deleted so SurfaceD2D objects can not be copied
+	// Deleted so SurfaceD2D objects can not be copied.
 	SurfaceD2D(const SurfaceD2D &) = delete;
 	SurfaceD2D &operator=(const SurfaceD2D &) = delete;
 	virtual ~SurfaceD2D() override;

@@ -131,7 +131,7 @@ protected:
 
 public:
   ScintillaCocoa(ScintillaView* sciView_, SCIContentView* viewContent, SCIMarginView* viewMargin);
-  // Deleted so ScintillaCocoa objects can not be copied
+  // Deleted so ScintillaCocoa objects can not be copied.
   ScintillaCocoa(const ScintillaCocoa &) = delete;
   ScintillaCocoa &operator=(const ScintillaCocoa &) = delete;
   ~ScintillaCocoa() override;

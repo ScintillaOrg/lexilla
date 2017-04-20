@@ -272,7 +272,7 @@ class ScintillaWin :
 #endif
 
 	explicit ScintillaWin(HWND hwnd);
-	// Deleted so ScintillaWin objects can not be copied
+	// Deleted so ScintillaWin objects can not be copied.
 	ScintillaWin(const ScintillaWin &) = delete;
 	ScintillaWin &operator=(const ScintillaWin &) = delete;
 	~ScintillaWin() override;

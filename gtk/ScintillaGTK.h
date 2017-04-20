@@ -73,7 +73,7 @@ class ScintillaGTK : public ScintillaBase {
 
 public:
 	explicit ScintillaGTK(_ScintillaObject *sci_);
-	// Deleted so ScintillaGTK objects can not be copied
+	// Deleted so ScintillaGTK objects can not be copied.
 	ScintillaGTK(const ScintillaGTK &) = delete;
 	ScintillaGTK &operator=(const ScintillaGTK &) = delete;
 	virtual ~ScintillaGTK();

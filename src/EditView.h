@@ -90,6 +90,9 @@ public:
 	DrawWrapMarkerFn customDrawWrapMarker;
 
 	EditView();
+	// Deleted so EditView objects can not be copied.
+	EditView(const EditView &) = delete;
+	void operator=(const EditView &) = delete;
 	virtual ~EditView();
 
 	bool SetTwoPhaseDraw(bool twoPhaseDraw);

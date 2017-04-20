@@ -95,7 +95,7 @@ public:
 
 		GetNextChar();
 	}
-	// Deleted so StyleContext objects can not be copied
+	// Deleted so StyleContext objects can not be copied.
 	StyleContext(const StyleContext &) = delete;
 	StyleContext &operator=(const StyleContext &) = delete;
 	void Complete() {
