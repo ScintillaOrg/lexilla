@@ -228,6 +228,7 @@ private:
 
 	bool matchesValid;
 	std::unique_ptr<RegexSearchBase> regex;
+	std::unique_ptr<LexInterface> pli;
 
 public:
 
@@ -242,8 +243,6 @@ public:
 			return CharacterExtracted((lead << 8) | trail, 2);
 		}
 	};
-
-	LexInterface *pli;
 
 	int eolMode;
 	/// Can also be SC_CP_UTF8 to enable UTF-8 mode
@@ -415,6 +414,8 @@ public:
 	void IncrementStyleClock();
 	void SCI_METHOD DecorationSetCurrentIndicator(int indicator);
 	void SCI_METHOD DecorationFillRange(Sci_Position position, int value, Sci_Position fillLength);
+	LexInterface *GetLexInterface() const;
+	void SetLexInterface(LexInterface *pLexInterface);
 
 	int SCI_METHOD SetLineState(Sci_Position line, int state);
 	int SCI_METHOD GetLineState(Sci_Position line) const;

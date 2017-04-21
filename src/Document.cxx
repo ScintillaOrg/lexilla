@@ -129,8 +129,6 @@ Document::Document() {
 	perLineData[ldAnnotation] = new LineAnnotation();
 
 	cb.SetPerLine(this);
-
-	pli = 0;
 }
 
 Document::~Document() {
@@ -142,8 +140,6 @@ Document::~Document() {
 		pl = nullptr;
 	}
 	regex.release();
-	delete pli;
-	pli = 0;
 	delete pcf;
 	pcf = 0;
 }
@@ -2122,6 +2118,14 @@ void Document::LexerChanged() {
 	for (const WatcherWithUserData &watcher : watchers) {
 		watcher.watcher->NotifyLexerChanged(this, watcher.userData);
 	}
+}
+
+LexInterface *Document::GetLexInterface() const {
+	return pli.get();
+}
+
+void Document::SetLexInterface(LexInterface *pLexInterface) {
+	pli.reset(pLexInterface);
 }
 
 int SCI_METHOD Document::SetLineState(Sci_Position line, int state) {
