@@ -249,10 +249,6 @@ RGBAImageSet::~RGBAImageSet() {
 
 /// Remove all images.
 void RGBAImageSet::Clear() {
-	for (ImageMap::iterator it=images.begin(); it != images.end(); ++it) {
-		delete it->second;
-		it->second = 0;
-	}
 	images.clear();
 	height = -1;
 	width = -1;
@@ -262,10 +258,9 @@ void RGBAImageSet::Clear() {
 void RGBAImageSet::Add(int ident, RGBAImage *image) {
 	ImageMap::iterator it=images.find(ident);
 	if (it == images.end()) {
-		images[ident] = image;
+		images[ident] = std::unique_ptr<RGBAImage>(image);
 	} else {
-		delete it->second;
-		it->second = image;
+		it->second.reset(image);
 	}
 	height = -1;
 	width = -1;
@@ -275,15 +270,15 @@ void RGBAImageSet::Add(int ident, RGBAImage *image) {
 RGBAImage *RGBAImageSet::Get(int ident) {
 	ImageMap::iterator it = images.find(ident);
 	if (it != images.end()) {
-		return it->second;
+		return it->second.get();
 	}
-	return NULL;
+	return nullptr;
 }
 
 /// Give the largest height of the set.
 int RGBAImageSet::GetHeight() const {
 	if (height < 0) {
-		for (const std::pair<int, RGBAImage*> &image : images) {
+		for (const std::pair<const int, std::unique_ptr<RGBAImage>> &image : images) {
 			if (height < image.second->GetHeight()) {
 				height = image.second->GetHeight();
 			}
@@ -295,7 +290,7 @@ int RGBAImageSet::GetHeight() const {
 /// Give the largest width of the set.
 int RGBAImageSet::GetWidth() const {
 	if (width < 0) {
-		for (const std::pair<int, RGBAImage*> &image : images) {
+		for (const std::pair<const int, std::unique_ptr<RGBAImage>> &image : images) {
 			if (width < image.second->GetWidth()) {
 				width = image.second->GetWidth();
 			}

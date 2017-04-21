@@ -210,7 +210,7 @@ private:
 	int refCount;
 	CellBuffer cb;
 	CharClassify charClass;
-	CaseFolder *pcf;
+	std::unique_ptr<CaseFolder> pcf;
 	Sci::Position endStyled;
 	int styleClock;
 	int enteredModification;

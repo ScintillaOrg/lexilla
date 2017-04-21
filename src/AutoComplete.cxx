@@ -33,7 +33,6 @@ AutoComplete::AutoComplete() :
 	typesep('?'),
 	ignoreCase(false),
 	chooseSingle(false),
-	lb(0),
 	posStart(0),
 	startLen(0),
 	cancelAtStartPos(true),
@@ -43,14 +42,12 @@ AutoComplete::AutoComplete() :
 	widthLBDefault(100),
 	heightLBDefault(100),
 	autoSort(SC_ORDER_PRESORTED) {
-	lb = ListBox::Allocate();
+	lb.reset(ListBox::Allocate());
 }
 
 AutoComplete::~AutoComplete() {
 	if (lb) {
 		lb->Destroy();
-		delete lb;
-		lb = 0;
 	}
 }
 
