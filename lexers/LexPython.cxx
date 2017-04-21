@@ -887,18 +887,24 @@ void SCI_METHOD LexerPython::Fold(Sci_PositionU startPos, Sci_Position length, i
 		// Skip past any blank lines for next indent level info; we skip also
 		// comments (all comments, not just those starting in column 0)
 		// which effectively folds them into surrounding code rather
-		// than screwing up folding.
+		// than screwing up folding.  If comments end file, use the min
+		// comment indent as the level after
 
+		int minCommentLevel = indentCurrentLevel;
 		while (!quote &&
 				(lineNext < docLines) &&
 				((indentNext & SC_FOLDLEVELWHITEFLAG) ||
 				 (lineNext <= docLines && IsCommentLine(lineNext, styler)))) {
 
+			if (IsCommentLine(lineNext, styler) && indentNext < minCommentLevel) {
+				minCommentLevel = indentNext;
+			}
+
 			lineNext++;
 			indentNext = styler.IndentAmount(lineNext, &spaceFlags, NULL);
 		}
 
-		const int levelAfterComments = indentNext & SC_FOLDLEVELNUMBERMASK;
+		const int levelAfterComments = ((lineNext < docLines) ? indentNext & SC_FOLDLEVELNUMBERMASK : minCommentLevel);
 		const int levelBeforeComments = Maximum(indentCurrentLevel, levelAfterComments);
 
 		// Now set all the indent levels on the lines we skipped
