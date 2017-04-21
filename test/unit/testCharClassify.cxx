@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include <algorithm>
+#include <memory>
 #include <iostream>
 
 #include "Platform.h"

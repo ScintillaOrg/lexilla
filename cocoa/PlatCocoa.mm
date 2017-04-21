@@ -23,6 +23,7 @@
 #include <stdexcept>
 #include <vector>
 #include <map>
+#include <memory>
 
 #import <Foundation/NSGeometry.h>
 

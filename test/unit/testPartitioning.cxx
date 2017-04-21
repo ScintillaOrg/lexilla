@@ -4,6 +4,7 @@
 
 #include <stdexcept>
 #include <algorithm>
+#include <memory>
 
 #include "Platform.h"
 

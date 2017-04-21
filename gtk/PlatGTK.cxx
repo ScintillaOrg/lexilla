@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
 #include <sstream>
 
 #include <glib.h>
