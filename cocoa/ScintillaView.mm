@@ -248,7 +248,10 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 - (void) updateTrackingAreas
 {
   if (trackingArea)
+  {
     [self removeTrackingArea:trackingArea];
+    [trackingArea release];
+  }
 
   int opts = (NSTrackingActiveAlways | NSTrackingInVisibleRect | NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved);
   trackingArea = [[NSTrackingArea alloc] initWithRect:[self bounds]
@@ -1244,6 +1247,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 - (void) dealloc
 {
   [mCurrentCursor release];
+  [trackingArea release];
   [super dealloc];
 }
 
