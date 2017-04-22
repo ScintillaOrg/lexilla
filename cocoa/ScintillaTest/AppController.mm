@@ -72,25 +72,30 @@ const char user_keywords[] = // Definition of own keywords, not used by MySQL.
   [mEditor setAutoresizingMask: NSViewWidthSizable | NSViewHeightSizable];
   
   // Let's load some text for the editor, as initial content.
-  NSError* error = nil;
-  
-  NSString* path = [[NSBundle mainBundle] pathForResource: @"TestData" 
-                                                   ofType: @"sql" inDirectory: nil];
-  
-  sql = [NSString stringWithContentsOfFile: path
-                                            encoding: NSUTF8StringEncoding
-                                               error: &error];
+  NSString *sql = [self exampleText];
 
-  [sql retain];
-
-  if (error && [[error domain] isEqual: NSCocoaErrorDomain])
-    NSLog(@"%@", error);
-  
   [mEditor setString: sql];
 
   [self setupEditor];
   
   sciExtra = nil;
+}
+
+- (NSString *) exampleText
+{
+  NSError* error = nil;
+
+  NSString* path = [[NSBundle mainBundle] pathForResource: @"TestData"
+                                                   ofType: @"sql" inDirectory: nil];
+
+  NSString *sql = [NSString stringWithContentsOfFile: path
+                                            encoding: NSUTF8StringEncoding
+                                               error: &error];
+
+  if (error && [[error domain] isEqual: NSCocoaErrorDomain])
+    NSLog(@"%@", error);
+  
+  return sql;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -291,6 +296,7 @@ static const char * box_xpm[] = {
 		sciExtra = [[[ScintillaView alloc] initWithFrame: newFrame] autorelease];
 		[[[mEditHost window]contentView] addSubview: sciExtra];
 		[sciExtra setGeneralProperty: SCI_SETWRAPMODE parameter: SC_WRAP_WORD value: 1];
+		NSString *sql = [self exampleText];
 		[sciExtra setString: sql];
 	}
 }
