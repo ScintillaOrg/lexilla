@@ -1524,13 +1524,10 @@ public:
   }
 };
 
-// Map from icon type to an NSImage*
-typedef std::map<NSInteger, NSImage*> ImageMap;
-
 class ListBoxImpl : public ListBox, IListBox
 {
 private:
-  ImageMap images;
+  NSMutableDictionary *images;
   int lineHeight;
   bool unicodeMode;
   int desiredVisibleRows;
@@ -1552,6 +1549,7 @@ private:
 
 public:
   ListBoxImpl() :
+    images(nil),
     lineHeight(10),
     unicodeMode(false),
     desiredVisibleRows(5),
@@ -1567,8 +1565,11 @@ public:
     doubleClickAction(nullptr),
     doubleClickActionData(nullptr)
   {
+    images = [[NSMutableDictionary alloc] init];
   }
-  ~ListBoxImpl() override {}
+  ~ListBoxImpl() override {
+    [images release];
+  }
 
   // ListBox methods
   void SetFont(Font& font) override;
@@ -1751,19 +1752,15 @@ void ListBoxImpl::Append(char* s, int type)
     maxItemWidth = width;
     [colText setWidth: maxItemWidth];
   }
-  ImageMap::iterator it = images.find(type);
-  if (it != images.end())
+  NSImage *img = images[@(type)];
+  if (img)
   {
-    NSImage* img = it->second;
-    if (img)
+    XYPOSITION widthIcon = static_cast<XYPOSITION>(img.size.width);
+    if (widthIcon > maxIconWidth)
     {
-      XYPOSITION widthIcon = static_cast<XYPOSITION>(img.size.width);
-      if (widthIcon > maxIconWidth)
-      {
-        [colIcon setHidden: NO];
-        maxIconWidth = widthIcon;
-        [colIcon setWidth: maxIconWidth];
-      }
+      [colIcon setHidden: NO];
+      maxIconWidth = widthIcon;
+      [colIcon setWidth: maxIconWidth];
     }
   }
 }
@@ -1846,17 +1843,8 @@ void ListBoxImpl::RegisterImage(int type, const char* xpm_data)
 {
   XPM xpm(xpm_data);
   NSImage* img = ImageFromXPM(&xpm);
-  [img retain];
-  ImageMap::iterator it=images.find(type);
-  if (it == images.end())
-  {
-    images[type] = img;
-  }
-  else
-  {
-    [it->second release];
-    it->second = img;
-  }
+  [images setObject:img forKey:@(type)];
+  [img release];
 }
 
 void ListBoxImpl::RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage)
@@ -1864,27 +1852,13 @@ void ListBoxImpl::RegisterRGBAImage(int type, int width, int height, const unsig
   CGImageRef imageRef = ImageCreateFromRGBA(width, height, pixelsImage, false);
   NSImage *img = [[NSImage alloc] initWithCGImage:imageRef size: NSZeroSize];
   CGImageRelease(imageRef);
-  ImageMap::iterator it=images.find(type);
-  if (it == images.end())
-  {
-    images[type] = img;
-  }
-  else
-  {
-    [it->second release];
-    it->second = img;
-  }
+  [images setObject:img forKey:@(type)];
+  [img release];
 }
 
 void ListBoxImpl::ClearRegisteredImages()
 {
-  for (ImageMap::iterator it=images.begin();
-      it != images.end(); ++it)
-  {
-    [it->second release];
-    it->second = nil;
-  }
-  images.clear();
+  [images removeAllObjects];
 }
 
 int ListBoxImpl::Rows()
@@ -1894,16 +1868,7 @@ int ListBoxImpl::Rows()
 
 NSImage* ListBoxImpl::ImageForRow(NSInteger row)
 {
-  ImageMap::iterator it = images.find(ld.GetType(row));
-  if (it != images.end())
-  {
-    NSImage* img = it->second;
-    return img;
-  }
-  else
-  {
-    return nil;
-  }
+  return images[@(ld.GetType(row))];
 }
 
 NSString* ListBoxImpl::TextForRow(NSInteger row)
