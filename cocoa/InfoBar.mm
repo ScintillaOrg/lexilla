@@ -154,7 +154,7 @@ static float BarFontSize = 10.0;
   unsigned numberOfDefaultItems = sizeof(DefaultScaleMenuLabels) / sizeof(NSString *);
 
   // Create the popup button.
-  mZoomPopup = [[NSPopUpButton allocWithZone:[self zone]] initWithFrame: NSMakeRect(0.0, 0.0, 1.0, 1.0) pullsDown: NO];
+  mZoomPopup = [[NSPopUpButton alloc] initWithFrame: NSMakeRect(0.0, 0.0, 1.0, 1.0) pullsDown: NO];
 
   // No border or background please.
   [[mZoomPopup cell] setBordered: NO];
