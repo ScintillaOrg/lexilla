@@ -1776,6 +1776,13 @@ NSRect ScintillaCocoa::FrameForRange(NSRange rangeCharacters) {
 
 //--------------------------------------------------------------------------------------------------
 
+// Returns a rectangle that frames the range for use by the VoiceOver cursor.
+NSRect ScintillaCocoa::GetBounds() const {
+  return PRectangleToNSRect(GetClientRectangle());
+}
+
+//--------------------------------------------------------------------------------------------------
+
 // Translates a UTF8 string into the document encoding.
 // Return the length of the result in bytes.
 int ScintillaCocoa::EncodedFromUTF8(char *utf8, char *encoded) const

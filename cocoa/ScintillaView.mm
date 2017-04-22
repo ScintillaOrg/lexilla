@@ -301,7 +301,8 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   [super resetCursorRects];
 
   // We only have one cursor rect: our bounds.
-  [self addCursorRect: [self bounds] cursor: mCurrentCursor];
+  const NSRect visibleBounds = mOwner.backend->GetBounds();
+  [self addCursorRect: visibleBounds cursor: mCurrentCursor];
   [mCurrentCursor setOnMouseEntered: YES];
 }
 

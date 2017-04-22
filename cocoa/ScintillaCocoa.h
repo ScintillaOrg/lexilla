@@ -205,6 +205,7 @@ public:
   NSInteger VisibleLineForIndex(NSInteger index);
   NSRange RangeForVisibleLine(NSInteger lineVisible);
   NSRect FrameForRange(NSRange rangeCharacters);
+  NSRect GetBounds() const;
   void SelectOnlyMainSelection();
   void ConvertSelectionVirtualSpace();
   bool ClearAllSelections();

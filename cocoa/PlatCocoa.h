@@ -21,7 +21,7 @@
 
 #include "QuartzTextLayout.h"
 
-NSRect PRectangleToNSRect(Scintilla::PRectangle& rc);
+NSRect PRectangleToNSRect(const Scintilla::PRectangle& rc);
 Scintilla::PRectangle NSRectToPRectangle(NSRect& rc);
 CFStringEncoding EncodingFromCharacterSet(bool unicode, int characterSet);
 

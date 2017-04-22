@@ -45,7 +45,7 @@ extern sptr_t scintilla_send_message(void* sci, unsigned int iMessage, uptr_t wP
 /**
  * Converts a PRectangle as used by Scintilla to standard Obj-C NSRect structure .
  */
-NSRect PRectangleToNSRect(PRectangle& rc)
+NSRect PRectangleToNSRect(const PRectangle& rc)
 {
   return NSMakeRect(rc.left, rc.top, rc.Width(), rc.Height());
 }
