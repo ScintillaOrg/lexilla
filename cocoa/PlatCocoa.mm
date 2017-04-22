@@ -1377,11 +1377,8 @@ static NSImage* ImageFromXPM(XPM* pxpm)
       SurfaceImpl* surfaceIXPM = static_cast<SurfaceImpl*>(surfaceXPM);
       CGContextClearRect(surfaceIXPM->GetContext(), CGRectMake(0, 0, width, height));
       pxpm->Draw(surfaceXPM, rcxpm);
-      img = [[[NSImage alloc] initWithSize:NSZeroSize] autorelease];
       CGImageRef imageRef = surfaceIXPM->GetImage();
-      NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage: imageRef];
-      [img addRepresentation: bitmapRep];
-      [bitmapRep release];
+      img = [[NSImage alloc] initWithCGImage:imageRef size: NSZeroSize];
       CGImageRelease(imageRef);
       delete surfaceXPM;
     }
@@ -1862,25 +1859,21 @@ void ListBoxImpl::RegisterImage(int type, const char* xpm_data)
   }
 }
 
-void ListBoxImpl::RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage) {
-	CGImageRef imageRef = ImageCreateFromRGBA(width, height, pixelsImage, false);
-	NSSize sz = {static_cast<CGFloat>(width), static_cast<CGFloat>(height)};
-	NSImage *img = [[[NSImage alloc] initWithSize: sz] autorelease];
-	NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage: imageRef];
-	[img addRepresentation: bitmapRep];
-	[bitmapRep release];
-	CGImageRelease(imageRef);
-	[img retain];
-	ImageMap::iterator it=images.find(type);
-	if (it == images.end())
-	{
-		images[type] = img;
-	}
-	else
-	{
-		[it->second release];
-		it->second = img;
-	}
+void ListBoxImpl::RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage)
+{
+  CGImageRef imageRef = ImageCreateFromRGBA(width, height, pixelsImage, false);
+  NSImage *img = [[NSImage alloc] initWithCGImage:imageRef size: NSZeroSize];
+  CGImageRelease(imageRef);
+  ImageMap::iterator it=images.find(type);
+  if (it == images.end())
+  {
+    images[type] = img;
+  }
+  else
+  {
+    [it->second release];
+    it->second = img;
+  }
 }
 
 void ListBoxImpl::ClearRegisteredImages()
