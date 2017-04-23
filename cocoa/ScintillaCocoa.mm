@@ -529,26 +529,7 @@ void ScintillaCocoa::QueueIdleWork(WorkNeeded::workItems items, Sci::Position up
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Convert a core foundation string into an array of bytes in a particular encoding
- */
-
-static char *EncodedBytes(CFStringRef cfsRef, CFStringEncoding encoding) {
-    CFRange rangeAll = {0, CFStringGetLength(cfsRef)};
-    CFIndex usedLen = 0;
-    CFStringGetBytes(cfsRef, rangeAll, encoding, '?',
-                     false, NULL, 0, &usedLen);
-
-    char *buffer = new char[usedLen+1];
-    CFStringGetBytes(cfsRef, rangeAll, encoding, '?',
-                     false, (UInt8 *)buffer,usedLen, NULL);
-    buffer[usedLen] = '\0';
-    return buffer;
-}
-
-//--------------------------------------------------------------------------------------------------
-
-/**
- * Convert a core foundation string into a std::string in a particular encoding
+ * Convert a Core Foundation string into a std::string in a particular encoding.
  */
 
 static std::string EncodedBytesString(CFStringRef cfsRef, CFStringEncoding encoding) {
@@ -568,6 +549,21 @@ static std::string EncodedBytesString(CFStringRef cfsRef, CFStringEncoding encod
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Create a Core Foundation string from a string.
+ * This is a simple wrapper that specifies common arguments (the default allocator and
+ * false for isExternalRepresentation) and avoids casting since strings in Scintilla
+ * contain char, not UInt8 (unsigned char).
+ */
+
+static CFStringRef CFStringFromString(const char *s, size_t len, CFStringEncoding encoding) {
+	return CFStringCreateWithBytes(kCFAllocatorDefault,
+				       reinterpret_cast<const UInt8 *>(s),
+				       len, encoding, false);
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Case folders.
  */
 
@@ -582,23 +578,20 @@ public:
 			folded[0] = mapping[static_cast<unsigned char>(mixed[0])];
 			return 1;
 		} else {
-			CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
-								     reinterpret_cast<const UInt8 *>(mixed),
-								     lenMixed, encoding, false);
+			CFStringRef cfsVal = CFStringFromString(mixed, lenMixed, encoding);
 
 			NSString *sMapped = [(NSString *)cfsVal stringByFoldingWithOptions:NSCaseInsensitiveSearch
 										    locale:[NSLocale currentLocale]];
 
-			char *encoded = EncodedBytes((CFStringRef)sMapped, encoding);
+			std::string encoded = EncodedBytesString((CFStringRef)sMapped, encoding);
 
-			size_t lenMapped = strlen(encoded);
+			size_t lenMapped = encoded.length();
 			if (lenMapped < sizeFolded) {
-				memcpy(folded, encoded,  lenMapped);
+				memcpy(folded, encoded.c_str(), lenMapped);
 			} else {
 				folded[0] = '\0';
 				lenMapped = 1;
 			}
-			delete []encoded;
 			CFRelease(cfsVal);
 			return lenMapped;
 		}
@@ -618,22 +611,19 @@ CaseFolder *ScintillaCocoa::CaseFolderForEncoding() {
 			for (int i=0x80; i<0x100; i++) {
 				char sCharacter[2] = "A";
 				sCharacter[0] = static_cast<char>(i);
-				CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
-									     reinterpret_cast<const UInt8 *>(sCharacter),
-									     1, encoding, false);
+				CFStringRef cfsVal = CFStringFromString(sCharacter, 1, encoding);
 				if (!cfsVal)
 					continue;
 
 				NSString *sMapped = [(NSString *)cfsVal stringByFoldingWithOptions:NSCaseInsensitiveSearch
 											    locale:[NSLocale currentLocale]];
 
-				char *encoded = EncodedBytes((CFStringRef)sMapped, encoding);
+				std::string encoded = EncodedBytesString((CFStringRef)sMapped, encoding);
 
-				if (strlen(encoded) == 1) {
+				if (encoded.length() == 1) {
 					pcf->SetTranslation(sCharacter[0], encoded[0]);
 				}
 
-				delete []encoded;
 				CFRelease(cfsVal);
 			}
 			return pcf;
@@ -664,9 +654,8 @@ std::string ScintillaCocoa::CaseMapString(const std::string &s, int caseMapping)
 
   CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
                                                        vs.styles[STYLE_DEFAULT].characterSet);
-  CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
-                                               reinterpret_cast<const UInt8 *>(s.c_str()),
-                                               s.length(), encoding, false);
+
+  CFStringRef cfsVal = CFStringFromString(s.c_str(), s.length(), encoding);
 
   NSString *sMapped;
   switch (caseMapping)
@@ -682,9 +671,7 @@ std::string ScintillaCocoa::CaseMapString(const std::string &s, int caseMapping)
   }
 
   // Back to encoding
-  char *encoded = EncodedBytes((CFStringRef)sMapped, encoding);
-  std::string result(encoded);
-  delete []encoded;
+  std::string result = EncodedBytesString((CFStringRef)sMapped, encoding);
   CFRelease(cfsVal);
   return result;
 }
@@ -1324,9 +1311,8 @@ void ScintillaCocoa::DragScroll()
 
   CFStringEncoding encoding = EncodingFromCharacterSet(selectedText.codePage == SC_CP_UTF8,
                                                        selectedText.characterSet);
-  CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
-                                               reinterpret_cast<const UInt8 *>(selectedText.Data()),
-                                               selectedText.Length(), encoding, false);
+
+  CFStringRef cfsVal = CFStringFromString(selectedText.Data(), selectedText.Length(), encoding);
 
   if ([type compare: NSPasteboardTypeString] == NSOrderedSame)
   {
@@ -1606,9 +1592,8 @@ void ScintillaCocoa::SetPasteboardData(NSPasteboard* board, const SelectionText 
 
   CFStringEncoding encoding = EncodingFromCharacterSet(selectedText.codePage == SC_CP_UTF8,
                                                        selectedText.characterSet);
-  CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
-                                               reinterpret_cast<const UInt8 *>(selectedText.Data()),
-                                               selectedText.Length(), encoding, false);
+
+  CFStringRef cfsVal = CFStringFromString(selectedText.Data(), selectedText.Length(), encoding);
 
   NSArray *pbTypes = selectedText.rectangular ?
     [NSArray arrayWithObjects: NSStringPboardType, ScintillaRecPboardType, nil] :
@@ -1687,9 +1672,7 @@ int ScintillaCocoa::TargetAsUTF8(char *text)
     const CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
                                                          vs.styles[STYLE_DEFAULT].characterSet);
     const std::string s = RangeText(targetStart, targetEnd);
-    CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
-                                                 reinterpret_cast<const UInt8 *>(s.c_str()),
-                                                 s.length(), encoding, false);
+    CFStringRef cfsVal = CFStringFromString(s.c_str(), s.length(), encoding);
 
     const std::string tmputf = EncodedBytesString(cfsVal, kCFStringEncodingUTF8);
 
@@ -1716,9 +1699,7 @@ NSString *ScintillaCocoa::RangeTextAsString(NSRange rangePositions) const {
     // Need to convert
     const CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
 							       vs.styles[STYLE_DEFAULT].characterSet);
-    CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
-						 reinterpret_cast<const UInt8 *>(text.c_str()),
-						 text.length(), encoding, false);
+    CFStringRef cfsVal = CFStringFromString(text.c_str(), text.length(), encoding);
 
     return (NSString *)cfsVal;
   }
@@ -1800,9 +1781,7 @@ int ScintillaCocoa::EncodedFromUTF8(char *utf8, char *encoded) const
     const CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
                                                          vs.styles[STYLE_DEFAULT].characterSet);
 
-    CFStringRef cfsVal = CFStringCreateWithBytes(kCFAllocatorDefault,
-                                                 reinterpret_cast<const UInt8 *>(utf8),
-                                                 inputLength, kCFStringEncodingUTF8, false);
+    CFStringRef cfsVal = CFStringFromString(utf8, inputLength, encoding);
     const std::string sEncoded = EncodedBytesString(cfsVal, encoding);
     if (encoded)
       memcpy(encoded, sEncoded.c_str(), sEncoded.length());
@@ -2644,9 +2623,7 @@ void ScintillaCocoa::ShowFindIndicatorForRange(NSRange charRange, BOOL retaining
     std::vector<char> buffer(charRange.length);
     pdoc->GetCharRange(&buffer[0], static_cast<int>(charRange.location), static_cast<int>(charRange.length));
 
-    CFStringRef cfsFind = CFStringCreateWithBytes(kCFAllocatorDefault,
-						  reinterpret_cast<const UInt8 *>(&buffer[0]),
-						  charRange.length, encoding, false);
+    CFStringRef cfsFind = CFStringFromString(&buffer[0], charRange.length, encoding);
     layerFindIndicator.sFind = (NSString *)cfsFind;
     if (cfsFind)
         CFRelease(cfsFind);
