@@ -2289,7 +2289,7 @@ int ScintillaCocoa::InsertText(NSString* input)
 
   if (encoded.length() > 0)
   {
-    AddCharUTF((char*) encoded.c_str(), static_cast<unsigned int>(encoded.length()), false);
+    AddCharUTF(encoded.c_str(), static_cast<unsigned int>(encoded.length()), false);
   }
   return static_cast<int>(encoded.length());
 }
