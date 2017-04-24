@@ -3745,7 +3745,7 @@ int Editor::KeyCommand(unsigned int iMessage) {
 	case SCI_CANCEL:            	// Cancel any modes - handled in subclass
 		// Also unselect text
 		CancelModes();
-		if (sel.Count() > 1) {
+		if ((sel.Count() > 1) && !sel.IsRectangular()) {
 			// Drop additional selections
 			InvalidateWholeSelection();
 			sel.DropAdditionalRanges();
