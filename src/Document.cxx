@@ -261,7 +261,7 @@ void Document::TentativeUndo() {
 						modFlags |= SC_MULTILINEUNDOREDO;
 				}
 				NotifyModified(DocModification(modFlags, action.position, action.lenData,
-											   linesAdded, action.data));
+											   linesAdded, action.data.get()));
 			}
 
 			bool endSavePoint = cb.IsSavePoint();
@@ -1208,7 +1208,7 @@ Sci::Position Document::Undo() {
 						modFlags |= SC_MULTILINEUNDOREDO;
 				}
 				NotifyModified(DocModification(modFlags, action.position, action.lenData,
-											   linesAdded, action.data));
+											   linesAdded, action.data.get()));
 			}
 
 			bool endSavePoint = cb.IsSavePoint();
@@ -1268,7 +1268,7 @@ Sci::Position Document::Redo() {
 				}
 				NotifyModified(
 					DocModification(modFlags, action.position, action.lenData,
-									linesAdded, action.data));
+									linesAdded, action.data.get()));
 			}
 
 			bool endSavePoint = cb.IsSavePoint();

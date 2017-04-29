@@ -513,7 +513,7 @@ public:
 		position(act.position),
 		length(act.lenData),
 		linesAdded(linesAdded_),
-		text(act.data),
+		text(act.data.get()),
 		line(0),
 		foldLevelNow(0),
 		foldLevelPrev(0),
