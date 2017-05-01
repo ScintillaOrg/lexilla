@@ -26,8 +26,7 @@
 using namespace Scintilla;
 #endif
 
-ContractionState::ContractionState() : visible(0), expanded(0), heights(0), foldDisplayTexts(0), displayLines(0), linesInDocument(1) {
-	//InsertLine(0);
+ContractionState::ContractionState() : linesInDocument(1) {
 }
 
 ContractionState::~ContractionState() {
@@ -36,26 +35,21 @@ ContractionState::~ContractionState() {
 
 void ContractionState::EnsureData() {
 	if (OneToOne()) {
-		visible = new RunStyles();
-		expanded = new RunStyles();
-		heights = new RunStyles();
-		foldDisplayTexts = new SparseVector<const char *>();
-		displayLines = new Partitioning(4);
+		visible.reset(new RunStyles());
+		expanded.reset(new RunStyles());
+		heights.reset(new RunStyles());
+		foldDisplayTexts.reset(new SparseVector<const char *>());
+		displayLines.reset(new Partitioning(4));
 		InsertLines(0, linesInDocument);
 	}
 }
 
 void ContractionState::Clear() {
-	delete visible;
-	visible = 0;
-	delete expanded;
-	expanded = 0;
-	delete heights;
-	heights = 0;
-	delete foldDisplayTexts;
-	foldDisplayTexts = 0;
-	delete displayLines;
-	displayLines = 0;
+	visible.reset();
+	expanded.reset();
+	heights.reset();
+	foldDisplayTexts.reset();
+	displayLines.reset();
 	linesInDocument = 1;
 }
 
