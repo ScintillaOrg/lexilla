@@ -1370,18 +1370,14 @@ static NSImage* ImageFromXPM(XPM* pxpm)
     const int width = pxpm->GetWidth();
     const int height = pxpm->GetHeight();
     PRectangle rcxpm(0, 0, width, height);
-    Surface* surfaceXPM = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
-    if (surfaceXPM)
-    {
-      surfaceXPM->InitPixMap(width, height, NULL, NULL);
-      SurfaceImpl* surfaceIXPM = static_cast<SurfaceImpl*>(surfaceXPM);
-      CGContextClearRect(surfaceIXPM->GetContext(), CGRectMake(0, 0, width, height));
-      pxpm->Draw(surfaceXPM, rcxpm);
-      CGImageRef imageRef = surfaceIXPM->GetImage();
-      img = [[NSImage alloc] initWithCGImage:imageRef size: NSZeroSize];
-      CGImageRelease(imageRef);
-      delete surfaceXPM;
-    }
+    std::unique_ptr<Surface> surfaceXPM(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
+    surfaceXPM->InitPixMap(width, height, NULL, NULL);
+    SurfaceImpl* surfaceIXPM = static_cast<SurfaceImpl*>(surfaceXPM.get());
+    CGContextClearRect(surfaceIXPM->GetContext(), CGRectMake(0, 0, width, height));
+    pxpm->Draw(surfaceXPM.get(), rcxpm);
+    CGImageRef imageRef = surfaceIXPM->GetImage();
+    img = [[NSImage alloc] initWithCGImage:imageRef size: NSZeroSize];
+    CGImageRelease(imageRef);
   }
   return img;
 }

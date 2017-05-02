@@ -1086,15 +1086,12 @@ void ScintillaCocoa::Paste(bool forceRectangular)
 
 void ScintillaCocoa::CTPaint(void* gc, NSRect rc) {
 #pragma unused(rc)
-    Surface *surfaceWindow = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
-    if (surfaceWindow) {
-        surfaceWindow->Init(gc, wMain.GetID());
-        surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == ct.codePage);
-        surfaceWindow->SetDBCSMode(ct.codePage);
-        ct.PaintCT(surfaceWindow);
-        surfaceWindow->Release();
-        delete surfaceWindow;
-    }
+    std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
+    surfaceWindow->Init(gc, wMain.GetID());
+    surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == ct.codePage);
+    surfaceWindow->SetDBCSMode(ct.codePage);
+    ct.PaintCT(surfaceWindow.get());
+    surfaceWindow->Release();
 }
 
 @interface CallTipView : NSControl {
@@ -1815,23 +1812,18 @@ bool ScintillaCocoa::SyncPaint(void* gc, PRectangle rc)
   rcPaint = rc;
   PRectangle rcText = GetTextRectangle();
   paintingAllText = rcPaint.Contains(rcText);
-  bool succeeded = true;
-  Surface *sw = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
-  if (sw)
-  {
-    CGContextSetAllowsAntialiasing((CGContextRef)gc,
-                                   vs.extraFontFlag != SC_EFF_QUALITY_NON_ANTIALIASED);
-    CGContextSetAllowsFontSmoothing((CGContextRef)gc,
-                                    vs.extraFontFlag == SC_EFF_QUALITY_LCD_OPTIMIZED);
-    CGContextSetAllowsFontSubpixelPositioning((CGContextRef)gc,
-                                              vs.extraFontFlag == SC_EFF_QUALITY_DEFAULT ||
-                                              vs.extraFontFlag == SC_EFF_QUALITY_LCD_OPTIMIZED);
-    sw->Init(gc, wMain.GetID());
-    Paint(sw, rc);
-    succeeded = paintState != paintAbandoned;
-    sw->Release();
-    delete sw;
-  }
+  std::unique_ptr<Surface> sw(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
+  CGContextSetAllowsAntialiasing((CGContextRef)gc,
+                                 vs.extraFontFlag != SC_EFF_QUALITY_NON_ANTIALIASED);
+  CGContextSetAllowsFontSmoothing((CGContextRef)gc,
+                                  vs.extraFontFlag == SC_EFF_QUALITY_LCD_OPTIMIZED);
+  CGContextSetAllowsFontSubpixelPositioning((CGContextRef)gc,
+                                            vs.extraFontFlag == SC_EFF_QUALITY_DEFAULT ||
+                                            vs.extraFontFlag == SC_EFF_QUALITY_LCD_OPTIMIZED);
+  sw->Init(gc, wMain.GetID());
+  Paint(sw.get(), rc);
+  const bool succeeded = paintState != paintAbandoned;
+  sw->Release();
   paintState = notPainting;
   if (!succeeded)
   {
