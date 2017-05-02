@@ -2533,13 +2533,10 @@ gboolean ScintillaGTK::DrawTextThis(cairo_t *cr) {
 		rcPaint.bottom = y2;
 		PRectangle rcClient = GetClientRectangle();
 		paintingAllText = rcPaint.Contains(rcClient);
-		Surface *surfaceWindow = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
-		if (surfaceWindow) {
-			surfaceWindow->Init(cr, PWidget(wText));
-			Paint(surfaceWindow, rcPaint);
-			surfaceWindow->Release();
-			delete surfaceWindow;
-		}
+		std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
+		surfaceWindow->Init(cr, PWidget(wText));
+		Paint(surfaceWindow.get(), rcPaint);
+		surfaceWindow->Release();
 		if ((paintState == paintAbandoned) || repaintFullWindow) {
 			// Painting area was insufficient to cover new styling or brace highlight positions
 			FullPaint();
@@ -2623,15 +2620,12 @@ gboolean ScintillaGTK::ExposeTextThis(GtkWidget * /*widget*/, GdkEventExpose *os
 		rgnUpdate = gdk_region_copy(ose->region);
 		PRectangle rcClient = GetClientRectangle();
 		paintingAllText = rcPaint.Contains(rcClient);
-		Surface *surfaceWindow = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
-		if (surfaceWindow) {
-			cairo_t *cr = gdk_cairo_create(PWindow(wText));
-			surfaceWindow->Init(cr, PWidget(wText));
-			Paint(surfaceWindow, rcPaint);
-			surfaceWindow->Release();
-			delete surfaceWindow;
-			cairo_destroy(cr);
-		}
+		std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
+		cairo_t *cr = gdk_cairo_create(PWindow(wText));
+		surfaceWindow->Init(cr, PWidget(wText));
+		Paint(surfaceWindow.get(), rcPaint);
+		surfaceWindow->Release();
+		cairo_destroy(cr);
 		if (paintState == paintAbandoned) {
 			// Painting area was insufficient to cover new styling or brace highlight positions
 			FullPaint();
@@ -2929,15 +2923,12 @@ gboolean ScintillaGTK::PressCT(GtkWidget *widget, GdkEventButton *event, Scintil
 
 gboolean ScintillaGTK::DrawCT(GtkWidget *widget, cairo_t *cr, CallTip *ctip) {
 	try {
-		Surface *surfaceWindow = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
-		if (surfaceWindow) {
-			surfaceWindow->Init(cr, widget);
-			surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == ctip->codePage);
-			surfaceWindow->SetDBCSMode(ctip->codePage);
-			ctip->PaintCT(surfaceWindow);
-			surfaceWindow->Release();
-			delete surfaceWindow;
-		}
+		std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
+		surfaceWindow->Init(cr, widget);
+		surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == ctip->codePage);
+		surfaceWindow->SetDBCSMode(ctip->codePage);
+		ctip->PaintCT(surfaceWindow.get());
+		surfaceWindow->Release();
 	} catch (...) {
 		// No pointer back to Scintilla to save status
 	}
@@ -2948,17 +2939,14 @@ gboolean ScintillaGTK::DrawCT(GtkWidget *widget, cairo_t *cr, CallTip *ctip) {
 
 gboolean ScintillaGTK::ExposeCT(GtkWidget *widget, GdkEventExpose * /*ose*/, CallTip *ctip) {
 	try {
-		Surface *surfaceWindow = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
-		if (surfaceWindow) {
-			cairo_t *cr = gdk_cairo_create(WindowFromWidget(widget));
-			surfaceWindow->Init(cr, widget);
-			surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == ctip->codePage);
-			surfaceWindow->SetDBCSMode(ctip->codePage);
-			ctip->PaintCT(surfaceWindow);
-			surfaceWindow->Release();
-			delete surfaceWindow;
-			cairo_destroy(cr);
-		}
+		std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
+		cairo_t *cr = gdk_cairo_create(WindowFromWidget(widget));
+		surfaceWindow->Init(cr, widget);
+		surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == ctip->codePage);
+		surfaceWindow->SetDBCSMode(ctip->codePage);
+		ctip->PaintCT(surfaceWindow.get());
+		surfaceWindow->Release();
+		cairo_destroy(cr);
 	} catch (...) {
 		// No pointer back to Scintilla to save status
 	}
