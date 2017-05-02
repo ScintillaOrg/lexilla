@@ -175,7 +175,6 @@ void DrawStyledText(Surface *surface, const ViewStyle &vs, int styleOffset, PRec
 const XYPOSITION epsilon = 0.0001f;	// A small nudge to avoid floating point precision issues
 
 EditView::EditView() {
-	ldTabstops = NULL;
 	tabWidthMinimumPixels = 2; // needed for calculating tab stops for fractional proportional fonts
 	hideSelection = false;
 	drawOverstrikeCaret = true;
@@ -185,9 +184,6 @@ EditView::EditView() {
 	additionalCaretsBlink = true;
 	additionalCaretsVisible = true;
 	imeCaretBlockOverride = false;
-	pixmapLine = 0;
-	pixmapIndentGuide = 0;
-	pixmapIndentGuideHighlight = 0;
 	llc.SetLevel(LineLayoutCache::llcCaret);
 	posCache.SetSize(0x400);
 	tabArrowHeight = 4;
@@ -196,8 +192,6 @@ EditView::EditView() {
 }
 
 EditView::~EditView() {
-	delete ldTabstops;
-	ldTabstops = NULL;
 }
 
 bool EditView::SetTwoPhaseDraw(bool twoPhaseDraw) {
@@ -219,8 +213,7 @@ bool EditView::LinesOverlap() const {
 }
 
 void EditView::ClearAllTabstops() {
-	delete ldTabstops;
-	ldTabstops = 0;
+	ldTabstops.reset();
 }
 
 XYPOSITION EditView::NextTabstopPos(Sci::Line line, XYPOSITION x, XYPOSITION tabWidth) const {
@@ -231,20 +224,20 @@ XYPOSITION EditView::NextTabstopPos(Sci::Line line, XYPOSITION x, XYPOSITION tab
 }
 
 bool EditView::ClearTabstops(Sci::Line line) {
-	LineTabstops *lt = static_cast<LineTabstops *>(ldTabstops);
+	LineTabstops *lt = static_cast<LineTabstops *>(ldTabstops.get());
 	return lt && lt->ClearTabstops(line);
 }
 
 bool EditView::AddTabstop(Sci::Line line, int x) {
 	if (!ldTabstops) {
-		ldTabstops = new LineTabstops();
+		ldTabstops.reset(new LineTabstops());
 	}
-	LineTabstops *lt = static_cast<LineTabstops *>(ldTabstops);
+	LineTabstops *lt = static_cast<LineTabstops *>(ldTabstops.get());
 	return lt && lt->AddTabstop(line, x);
 }
 
 int EditView::GetNextTabstop(Sci::Line line, int x) const {
-	const LineTabstops *lt = static_cast<LineTabstops *>(ldTabstops);
+	const LineTabstops *lt = static_cast<LineTabstops *>(ldTabstops.get());
 	if (lt) {
 		return lt->GetNextTabstop(line, x);
 	} else {
@@ -268,12 +261,9 @@ void EditView::LinesAddedOrRemoved(Sci::Line lineOfPos, Sci::Line linesAdded) {
 
 void EditView::DropGraphics(bool freeObjects) {
 	if (freeObjects) {
-		delete pixmapLine;
-		pixmapLine = 0;
-		delete pixmapIndentGuide;
-		pixmapIndentGuide = 0;
-		delete pixmapIndentGuideHighlight;
-		pixmapIndentGuideHighlight = 0;
+		pixmapLine.reset();
+		pixmapIndentGuide.reset();
+		pixmapIndentGuideHighlight.reset();
 	} else {
 		if (pixmapLine)
 			pixmapLine->Release();
@@ -286,11 +276,11 @@ void EditView::DropGraphics(bool freeObjects) {
 
 void EditView::AllocateGraphics(const ViewStyle &vsDraw) {
 	if (!pixmapLine)
-		pixmapLine = Surface::Allocate(vsDraw.technology);
+		pixmapLine.reset(Surface::Allocate(vsDraw.technology));
 	if (!pixmapIndentGuide)
-		pixmapIndentGuide = Surface::Allocate(vsDraw.technology);
+		pixmapIndentGuide.reset(Surface::Allocate(vsDraw.technology));
 	if (!pixmapIndentGuideHighlight)
-		pixmapIndentGuideHighlight = Surface::Allocate(vsDraw.technology);
+		pixmapIndentGuideHighlight.reset(Surface::Allocate(vsDraw.technology));
 }
 
 static const char *ControlCharacterString(unsigned char ch) {
@@ -1984,7 +1974,7 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 
 		Surface *surface = surfaceWindow;
 		if (bufferedDraw) {
-			surface = pixmapLine;
+			surface = pixmapLine.get();
 			PLATFORM_ASSERT(pixmapLine->Initialised());
 		}
 		surface->SetUnicodeMode(SC_CP_UTF8 == model.pdoc->dbcsCodePage);

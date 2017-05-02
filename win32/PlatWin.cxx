@@ -2309,54 +2309,46 @@ void ListBoxX::Draw(DRAWITEMSTRUCT *pDrawItem) {
 		// Draw the image, if any
 		const RGBAImage *pimage = images.Get(pixId);
 		if (pimage) {
-			Surface *surfaceItem = Surface::Allocate(technology);
-			if (surfaceItem) {
-				if (technology == SCWIN_TECH_GDI) {
-					surfaceItem->Init(pDrawItem->hDC, pDrawItem->hwndItem);
-					const long left = pDrawItem->rcItem.left + static_cast<int>(ItemInset.x + ImageInset.x);
-					PRectangle rcImage = PRectangle::FromInts(left, pDrawItem->rcItem.top,
-						left + images.GetWidth(), pDrawItem->rcItem.bottom);
-					surfaceItem->DrawRGBAImage(rcImage,
-						pimage->GetWidth(), pimage->GetHeight(), pimage->Pixels());
-					delete surfaceItem;
-					::SetTextAlign(pDrawItem->hDC, TA_TOP);
-				} else {
+			std::unique_ptr<Surface> surfaceItem(Surface::Allocate(technology));
+			if (technology == SCWIN_TECH_GDI) {
+				surfaceItem->Init(pDrawItem->hDC, pDrawItem->hwndItem);
+				const long left = pDrawItem->rcItem.left + static_cast<int>(ItemInset.x + ImageInset.x);
+				PRectangle rcImage = PRectangle::FromInts(left, pDrawItem->rcItem.top,
+					left + images.GetWidth(), pDrawItem->rcItem.bottom);
+				surfaceItem->DrawRGBAImage(rcImage,
+					pimage->GetWidth(), pimage->GetHeight(), pimage->Pixels());
+				::SetTextAlign(pDrawItem->hDC, TA_TOP);
+			} else {
 #if defined(USE_D2D)
-					D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
-						D2D1_RENDER_TARGET_TYPE_DEFAULT,
-						D2D1::PixelFormat(
-							DXGI_FORMAT_B8G8R8A8_UNORM,
-							D2D1_ALPHA_MODE_IGNORE),
-						0,
-						0,
-						D2D1_RENDER_TARGET_USAGE_NONE,
-						D2D1_FEATURE_LEVEL_DEFAULT
-						);
-					ID2D1DCRenderTarget *pDCRT = 0;
-					HRESULT hr = pD2DFactory->CreateDCRenderTarget(&props, &pDCRT);
+				D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
+					D2D1_RENDER_TARGET_TYPE_DEFAULT,
+					D2D1::PixelFormat(
+						DXGI_FORMAT_B8G8R8A8_UNORM,
+						D2D1_ALPHA_MODE_IGNORE),
+					0,
+					0,
+					D2D1_RENDER_TARGET_USAGE_NONE,
+					D2D1_FEATURE_LEVEL_DEFAULT
+					);
+				ID2D1DCRenderTarget *pDCRT = 0;
+				HRESULT hr = pD2DFactory->CreateDCRenderTarget(&props, &pDCRT);
+				if (SUCCEEDED(hr)) {
+					RECT rcWindow;
+					GetClientRect(pDrawItem->hwndItem, &rcWindow);
+					hr = pDCRT->BindDC(pDrawItem->hDC, &rcWindow);
 					if (SUCCEEDED(hr)) {
-						RECT rcWindow;
-						GetClientRect(pDrawItem->hwndItem, &rcWindow);
-						hr = pDCRT->BindDC(pDrawItem->hDC, &rcWindow);
-						if (SUCCEEDED(hr)) {
-							surfaceItem->Init(pDCRT, pDrawItem->hwndItem);
-							pDCRT->BeginDraw();
-							const long left = pDrawItem->rcItem.left + static_cast<long>(ItemInset.x + ImageInset.x);
-							PRectangle rcImage = PRectangle::FromInts(left, pDrawItem->rcItem.top,
-								left + images.GetWidth(), pDrawItem->rcItem.bottom);
-							surfaceItem->DrawRGBAImage(rcImage,
-								pimage->GetWidth(), pimage->GetHeight(), pimage->Pixels());
-							delete surfaceItem;
-							pDCRT->EndDraw();
-							pDCRT->Release();
-						} else {
-							delete surfaceItem;
-						}
-					} else {
-						delete surfaceItem;
+						surfaceItem->Init(pDCRT, pDrawItem->hwndItem);
+						pDCRT->BeginDraw();
+						const long left = pDrawItem->rcItem.left + static_cast<long>(ItemInset.x + ImageInset.x);
+						PRectangle rcImage = PRectangle::FromInts(left, pDrawItem->rcItem.top,
+							left + images.GetWidth(), pDrawItem->rcItem.bottom);
+						surfaceItem->DrawRGBAImage(rcImage,
+							pimage->GetWidth(), pimage->GetHeight(), pimage->Pixels());
+						pDCRT->EndDraw();
+						pDCRT->Release();
 					}
-#endif
 				}
+#endif
 			}
 		}
 	}

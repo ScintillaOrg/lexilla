@@ -3289,57 +3289,53 @@ LRESULT PASCAL ScintillaWin::CTWndProc(
 			} else if (iMessage == WM_PAINT) {
 				PAINTSTRUCT ps;
 				::BeginPaint(hWnd, &ps);
-				Surface *surfaceWindow = Surface::Allocate(sciThis->technology);
-				if (surfaceWindow) {
+				std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(sciThis->technology));
 #if defined(USE_D2D)
-					ID2D1HwndRenderTarget *pCTRenderTarget = 0;
+				ID2D1HwndRenderTarget *pCTRenderTarget = 0;
 #endif
-					RECT rc;
-					GetClientRect(hWnd, &rc);
-					// Create a Direct2D render target.
-					if (sciThis->technology == SC_TECHNOLOGY_DEFAULT) {
-						surfaceWindow->Init(ps.hdc, hWnd);
-					} else {
+				RECT rc;
+				GetClientRect(hWnd, &rc);
+				// Create a Direct2D render target.
+				if (sciThis->technology == SC_TECHNOLOGY_DEFAULT) {
+					surfaceWindow->Init(ps.hdc, hWnd);
+				} else {
 #if defined(USE_D2D)
-						D2D1_HWND_RENDER_TARGET_PROPERTIES dhrtp;
-						dhrtp.hwnd = hWnd;
-						dhrtp.pixelSize = D2D1::SizeU(rc.right - rc.left, rc.bottom - rc.top);
-						dhrtp.presentOptions = (sciThis->technology == SC_TECHNOLOGY_DIRECTWRITERETAIN) ?
-							D2D1_PRESENT_OPTIONS_RETAIN_CONTENTS : D2D1_PRESENT_OPTIONS_NONE;
+					D2D1_HWND_RENDER_TARGET_PROPERTIES dhrtp;
+					dhrtp.hwnd = hWnd;
+					dhrtp.pixelSize = D2D1::SizeU(rc.right - rc.left, rc.bottom - rc.top);
+					dhrtp.presentOptions = (sciThis->technology == SC_TECHNOLOGY_DIRECTWRITERETAIN) ?
+						D2D1_PRESENT_OPTIONS_RETAIN_CONTENTS : D2D1_PRESENT_OPTIONS_NONE;
 
-						D2D1_RENDER_TARGET_PROPERTIES drtp;
-						drtp.type = D2D1_RENDER_TARGET_TYPE_DEFAULT;
-						drtp.pixelFormat.format = DXGI_FORMAT_UNKNOWN;
-						drtp.pixelFormat.alphaMode = D2D1_ALPHA_MODE_UNKNOWN;
-						drtp.dpiX = 96.0;
-						drtp.dpiY = 96.0;
-						drtp.usage = D2D1_RENDER_TARGET_USAGE_NONE;
-						drtp.minLevel = D2D1_FEATURE_LEVEL_DEFAULT;
+					D2D1_RENDER_TARGET_PROPERTIES drtp;
+					drtp.type = D2D1_RENDER_TARGET_TYPE_DEFAULT;
+					drtp.pixelFormat.format = DXGI_FORMAT_UNKNOWN;
+					drtp.pixelFormat.alphaMode = D2D1_ALPHA_MODE_UNKNOWN;
+					drtp.dpiX = 96.0;
+					drtp.dpiY = 96.0;
+					drtp.usage = D2D1_RENDER_TARGET_USAGE_NONE;
+					drtp.minLevel = D2D1_FEATURE_LEVEL_DEFAULT;
 
-						if (!SUCCEEDED(pD2DFactory->CreateHwndRenderTarget(drtp, dhrtp, &pCTRenderTarget))) {
-							surfaceWindow->Release();
-							delete surfaceWindow;
-							::EndPaint(hWnd, &ps);
-							return 0;
-						}
-						surfaceWindow->Init(pCTRenderTarget, hWnd);
-						pCTRenderTarget->BeginDraw();
-#endif
+					if (!SUCCEEDED(pD2DFactory->CreateHwndRenderTarget(drtp, dhrtp, &pCTRenderTarget))) {
+						surfaceWindow->Release();
+						::EndPaint(hWnd, &ps);
+						return 0;
 					}
-					surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == sciThis->ct.codePage);
-					surfaceWindow->SetDBCSMode(sciThis->ct.codePage);
-					sciThis->ct.PaintCT(surfaceWindow);
-#if defined(USE_D2D)
-					if (pCTRenderTarget)
-						pCTRenderTarget->EndDraw();
-#endif
-					surfaceWindow->Release();
-					delete surfaceWindow;
-#if defined(USE_D2D)
-					if (pCTRenderTarget)
-						pCTRenderTarget->Release();
+					surfaceWindow->Init(pCTRenderTarget, hWnd);
+					pCTRenderTarget->BeginDraw();
 #endif
 				}
+				surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == sciThis->ct.codePage);
+				surfaceWindow->SetDBCSMode(sciThis->ct.codePage);
+				sciThis->ct.PaintCT(surfaceWindow.get());
+#if defined(USE_D2D)
+				if (pCTRenderTarget)
+					pCTRenderTarget->EndDraw();
+#endif
+				surfaceWindow->Release();
+#if defined(USE_D2D)
+				if (pCTRenderTarget)
+					pCTRenderTarget->Release();
+#endif
 				::EndPaint(hWnd, &ps);
 				return 0;
 			} else if ((iMessage == WM_NCLBUTTONDOWN) || (iMessage == WM_NCLBUTTONDBLCLK)) {
