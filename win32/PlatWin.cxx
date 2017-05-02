@@ -481,7 +481,7 @@ public:
 const int stackBufferLength = 1000;
 class TextWide : public VarBuffer<wchar_t, stackBufferLength> {
 public:
-	int tlen;
+	int tlen;	// Using int instead of size_t as most Win32 APIs take int.
 	TextWide(const char *s, int len, bool unicodeMode, int codePage=0) :
 		VarBuffer<wchar_t, stackBufferLength>(len) {
 		if (unicodeMode) {

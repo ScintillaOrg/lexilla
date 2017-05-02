@@ -2883,7 +2883,7 @@ Sci::Position Cxx11RegexFindText(Document *doc, Sci::Position minPos, Sci::Posit
 
 		bool matched = false;
 		if (SC_CP_UTF8 == doc->dbcsCodePage) {
-			unsigned int lenS = static_cast<unsigned int>(strlen(s));
+			size_t lenS = strlen(s);
 			std::vector<wchar_t> ws(lenS + 1);
 #if WCHAR_T_IS_16
 			size_t outLen = UTF16FromUTF8(s, lenS, &ws[0], lenS);

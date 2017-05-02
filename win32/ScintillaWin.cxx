@@ -782,10 +782,10 @@ Sci::Position ScintillaWin::EncodedFromUTF8(char *utf8, char *encoded) const {
 void ScintillaWin::AddCharUTF16(wchar_t const *wcs, unsigned int wclen) {
 	if (IsUnicodeMode()) {
 		char utfval[maxLenInputIME * 3];
-		unsigned int len = UTF8Length(wcs, wclen);
+		size_t len = UTF8Length(wcs, wclen);
 		UTF8FromUTF16(wcs, wclen, utfval, len);
 		utfval[len] = '\0';
-		AddCharUTF(utfval, len);
+		AddCharUTF(utfval, static_cast<unsigned int>(len));
 	} else {
 		UINT cpDest = CodePageOfDocument();
 		char inBufferCP[maxLenInputIME * 2];
@@ -1178,7 +1178,7 @@ sptr_t ScintillaWin::GetTextLength() {
 	std::vector<char> docBytes(pdoc->Length(), '\0');
 	pdoc->GetCharRange(&docBytes[0], 0, pdoc->Length());
 	if (IsUnicodeMode()) {
-		return UTF16Length(&docBytes[0], static_cast<unsigned int>(docBytes.size()));
+		return UTF16Length(&docBytes[0], docBytes.size());
 	} else {
 		return ::MultiByteToWideChar(CodePageOfDocument(), 0, &docBytes[0],
 			static_cast<int>(docBytes.size()), NULL, 0);
@@ -1200,7 +1200,7 @@ sptr_t ScintillaWin::GetText(uptr_t wParam, sptr_t lParam) {
 		if (wParam == 0)
 			return 0;
 		size_t uLen = UTF16FromUTF8(&docBytes[0], docBytes.size(),
-			ptr, static_cast<int>(wParam) - 1);
+			ptr, wParam - 1);
 		ptr[uLen] = L'\0';
 		return uLen;
 	} else {
@@ -2231,11 +2231,11 @@ void ScintillaWin::Paste() {
 	if (memUSelection) {
 		wchar_t *uptr = static_cast<wchar_t *>(memUSelection.ptr);
 		if (uptr) {
-			unsigned int len;
+			size_t len;
 			std::vector<char> putf;
 			// Default Scintilla behaviour in Unicode mode
 			if (IsUnicodeMode()) {
-				const unsigned int bytes = static_cast<unsigned int>(memUSelection.Size());
+				const size_t bytes = memUSelection.Size();
 				len = UTF8Length(uptr, bytes / 2);
 				putf.resize(len + 1);
 				UTF8FromUTF16(uptr, bytes / 2, &putf[0], len);
@@ -2247,10 +2247,10 @@ void ScintillaWin::Paste() {
 				                            NULL, 0, NULL, NULL) - 1; // subtract 0 terminator
 				putf.resize(len + 1);
 				::WideCharToMultiByte(cpDest, 0, uptr, -1,
-					                      &putf[0], len + 1, NULL, NULL);
+					                      &putf[0], static_cast<int>(len) + 1, NULL, NULL);
 			}
 
-			InsertPasteShape(&putf[0], len, pasteShape);
+			InsertPasteShape(&putf[0], static_cast<int>(len), pasteShape);
 		}
 		memUSelection.Unlock();
 	} else {
@@ -2259,27 +2259,28 @@ void ScintillaWin::Paste() {
 		if (memSelection) {
 			char *ptr = static_cast<char *>(memSelection.ptr);
 			if (ptr) {
-				const unsigned int bytes = static_cast<unsigned int>(memSelection.Size());
-				unsigned int len = bytes;
-				for (unsigned int i = 0; i < bytes; i++) {
+				const size_t bytes = memSelection.Size();
+				size_t len = bytes;
+				for (size_t i = 0; i < bytes; i++) {
 					if ((len == bytes) && (0 == ptr[i]))
 						len = i;
 				}
+				const int ilen = static_cast<int>(len);
 
 				// In Unicode mode, convert clipboard text to UTF-8
 				if (IsUnicodeMode()) {
 					std::vector<wchar_t> uptr(len+1);
 
-					const unsigned int ulen = ::MultiByteToWideChar(CP_ACP, 0,
-					                    ptr, len, &uptr[0], len+1);
+					const size_t ulen = ::MultiByteToWideChar(CP_ACP, 0,
+					                    ptr, ilen, &uptr[0], ilen +1);
 
-					unsigned int mlen = UTF8Length(&uptr[0], ulen);
+					const size_t mlen = UTF8Length(&uptr[0], ulen);
 					std::vector<char> putf(mlen+1);
 					UTF8FromUTF16(&uptr[0], ulen, &putf[0], mlen);
 
-					InsertPasteShape(&putf[0], mlen, pasteShape);
+					InsertPasteShape(&putf[0], static_cast<int>(mlen), pasteShape);
 				} else {
-					InsertPasteShape(ptr, len, pasteShape);
+					InsertPasteShape(ptr, ilen, pasteShape);
 				}
 			}
 			memSelection.Unlock();
@@ -2770,7 +2771,7 @@ void ScintillaWin::CopyToClipboard(const SelectionText &selectedText) {
 	// Default Scintilla behaviour in Unicode mode
 	if (IsUnicodeMode()) {
 		size_t uchars = UTF16Length(selectedText.Data(),
-			static_cast<int>(selectedText.LengthWithTerminator()));
+			selectedText.LengthWithTerminator());
 		uniText.Allocate(2 * uchars);
 		if (uniText) {
 			UTF16FromUTF8(selectedText.Data(), selectedText.LengthWithTerminator(),
@@ -3069,9 +3070,9 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 			wchar_t *udata = static_cast<wchar_t *>(memUDrop.ptr);
 			if (udata) {
 				if (IsUnicodeMode()) {
-					const int tlen = static_cast<int>(memUDrop.Size());
+					const size_t tlen = memUDrop.Size();
 					// Convert UTF-16 to UTF-8
-					int dataLen = UTF8Length(udata, tlen/2);
+					const size_t dataLen = UTF8Length(udata, tlen/2);
 					data.resize(dataLen+1);
 					UTF8FromUTF16(udata, tlen/2, &data[0], dataLen);
 				} else {
@@ -3146,7 +3147,7 @@ STDMETHODIMP ScintillaWin::GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM) {
 
 	GlobalMemory text;
 	if (pFEIn->cfFormat == CF_UNICODETEXT) {
-		size_t uchars = UTF16Length(drag.Data(), static_cast<int>(drag.LengthWithTerminator()));
+		size_t uchars = UTF16Length(drag.Data(), drag.LengthWithTerminator());
 		text.Allocate(2 * uchars);
 		if (text) {
 			UTF16FromUTF8(drag.Data(), drag.LengthWithTerminator(),
