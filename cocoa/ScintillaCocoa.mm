@@ -1844,7 +1844,7 @@ void ScintillaCocoa::PaintMargin(NSRect aRect)
 
   PRectangle rc = NSRectToPRectangle(aRect);
   rcPaint = rc;
-  Surface *sw = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
+  std::unique_ptr<Surface> sw(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
   if (sw)
   {
     CGContextSetAllowsAntialiasing(gc,
@@ -1855,9 +1855,8 @@ void ScintillaCocoa::PaintMargin(NSRect aRect)
                                               vs.extraFontFlag == SC_EFF_QUALITY_DEFAULT ||
                                               vs.extraFontFlag == SC_EFF_QUALITY_LCD_OPTIMIZED);
     sw->Init(gc, wMargin.GetID());
-    PaintSelMargin(sw, rc);
+    PaintSelMargin(sw.get(), rc);
     sw->Release();
-    delete sw;
   }
 }
 

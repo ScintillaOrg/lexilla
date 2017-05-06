@@ -153,11 +153,11 @@ SurfaceImpl::SurfaceImpl()
   y = 0;
   gc = NULL;
 
-  textLayout = new QuartzTextLayout(NULL);
+  textLayout.reset(new QuartzTextLayout(nullptr));
   codePage = 0;
   verticalDeviceResolution = 0;
 
-  bitmapData = NULL; // Release will try and delete bitmapData if != NULL
+  bitmapData.reset(); // Release will try and delete bitmapData if != nullptr
   bitmapWidth = 0;
   bitmapHeight = 0;
 
@@ -169,22 +169,20 @@ SurfaceImpl::SurfaceImpl()
 SurfaceImpl::~SurfaceImpl()
 {
   Release();
-  delete textLayout;
 }
 
 //--------------------------------------------------------------------------------------------------
 
 void SurfaceImpl::Release()
 {
-  textLayout->setContext (NULL);
-  if ( bitmapData != NULL )
+  textLayout->setContext(nullptr);
+  if (bitmapData)
   {
-    delete[] bitmapData;
+    bitmapData.reset();
     // We only "own" the graphics context if we are a bitmap context
-    if (gc != NULL)
+    if (gc)
       CGContextRelease(gc);
   }
-  bitmapData = NULL;
   gc = NULL;
 
   bitmapWidth = 0;
@@ -243,9 +241,9 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface* surface_, WindowID 
     return;
 
   // Create the bitmap.
-  bitmapData = new uint8_t[bitmapByteCount];
+  bitmapData.reset(new uint8_t[bitmapByteCount]);
   // create the context
-  gc = CGBitmapContextCreate(bitmapData,
+  gc = CGBitmapContextCreate(bitmapData.get(),
                              width,
                              height,
                              BITS_PER_COMPONENT,
@@ -257,15 +255,14 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface* surface_, WindowID 
   {
     // the context couldn't be created for some reason,
     // and we have no use for the bitmap without the context
-    delete[] bitmapData;
-    bitmapData = NULL;
+    bitmapData.reset();
   }
   textLayout->setContext (gc);
 
   // the context retains the color space, so we can release it
   CGColorSpaceRelease(colorSpace);
 
-  if (gc != NULL && bitmapData != NULL)
+  if (gc && bitmapData)
   {
     // "Erase" to white.
     CGContextClearRect( gc, CGRectMake( 0, 0, width, height ) );
@@ -319,8 +316,8 @@ void SurfaceImpl::FillColour(const ColourDesired& back)
 CGImageRef SurfaceImpl::GetImage()
 {
   // For now, assume that GetImage can only be called on PixMap surfaces.
-  if (bitmapData == NULL)
-    return NULL;
+  if (!bitmapData)
+    return nullptr;
 
   CGContextFlush(gc);
 
@@ -334,7 +331,7 @@ CGImageRef SurfaceImpl::GetImage()
 
   // Make a copy of the bitmap data for the image creation and divorce it
   // From the SurfaceImpl lifetime
-  CFDataRef dataRef = CFDataCreate(kCFAllocatorDefault, bitmapData, bitmapByteCount);
+  CFDataRef dataRef = CFDataCreate(kCFAllocatorDefault, bitmapData.get(), bitmapByteCount);
 
   // Create a data provider.
   CGDataProviderRef dataProvider = CGDataProviderCreateWithCFData(dataRef);
