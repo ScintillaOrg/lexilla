@@ -1500,24 +1500,24 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 	// GDK on Win32 expands any \n into \r\n, so make a copy of
 	// the clip text now with newlines converted to \n.  Use { } to hide symbols
 	// from code below
-	SelectionText *newline_normalized = NULL;
+	std::unique_ptr<SelectionText> newline_normalized;
 	{
 		std::string tmpstr = Document::TransformLineEnds(text->Data(), text->Length(), SC_EOL_LF);
-		newline_normalized = new SelectionText();
+		newline_normalized.reset(new SelectionText());
 		newline_normalized->Copy(tmpstr, SC_CP_UTF8, 0, text->rectangular, false);
-		text = newline_normalized;
+		text = newline_normalized.get();
 	}
 #endif
 
 	// Convert text to utf8 if it isn't already
-	SelectionText *converted = 0;
+	std::unique_ptr<SelectionText> converted;
 	if ((text->codePage != SC_CP_UTF8) && (info == TARGET_UTF8_STRING)) {
 		const char *charSet = ::CharacterSetID(text->characterSet);
 		if (*charSet) {
 			std::string tmputf = ConvertText(text->Data(), text->Length(), "UTF-8", charSet, false);
-			converted = new SelectionText();
+			converted.reset(new SelectionText());
 			converted->Copy(tmputf, SC_CP_UTF8, 0, text->rectangular, false);
-			text = converted;
+			text = converted.get();
 		}
 	}
 
@@ -1542,11 +1542,6 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 			static_cast<GdkAtom>(GDK_SELECTION_TYPE_STRING),
 			8, reinterpret_cast<const unsigned char *>(textData), len);
 	}
-	delete converted;
-
-#if PLAT_GTK_WIN32
-	delete newline_normalized;
-#endif
 }
 
 void ScintillaGTK::StoreOnClipboard(SelectionText *clipText) {
