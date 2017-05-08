@@ -1593,40 +1593,44 @@ XYPOSITION SurfaceD2D::WidthText(Font &font_, const char *s, int len) {
 
 void SurfaceD2D::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions) {
 	SetFont(font_);
-	int fit = 0;
+	if (!pIDWriteFactory || !pTextFormat) {
+		// SetFont failed or no access to DirectWrite so give up.
+		return;
+	}
 	const TextWide tbuf(s, len, unicodeMode, codePageText);
 	TextPositions poses(tbuf.tlen);
-	fit = tbuf.tlen;
+	// Initialize poses for safety.
+	std::fill(poses.buffer, poses.buffer + tbuf.tlen, 0.0f);
+	// Create a layout
+	IDWriteTextLayout *pTextLayout = 0;
+	const HRESULT hrCreate = pIDWriteFactory->CreateTextLayout(tbuf.buffer, tbuf.tlen, pTextFormat, 10000.0, 1000.0, &pTextLayout);
+	if (!SUCCEEDED(hrCreate)) {
+		return;
+	}
 	const int clusters = 1000;
 	DWRITE_CLUSTER_METRICS clusterMetrics[clusters];
 	UINT32 count = 0;
-	if (pIDWriteFactory && pTextFormat) {
-		SetFont(font_);
-		// Create a layout
-		IDWriteTextLayout *pTextLayout = 0;
-		const HRESULT hr = pIDWriteFactory->CreateTextLayout(tbuf.buffer, tbuf.tlen, pTextFormat, 10000.0, 1000.0, &pTextLayout);
-		if (!SUCCEEDED(hr))
-			return;
-		if (!SUCCEEDED(pTextLayout->GetClusterMetrics(clusterMetrics, clusters, &count)))
-			return;
-		// A cluster may be more than one WCHAR, such as for "ffi" which is a ligature in the Candara font
-		FLOAT position = 0.0f;
-		size_t ti=0;
-		for (size_t ci=0; ci<count; ci++) {
-			for (size_t inCluster=0; inCluster<clusterMetrics[ci].length; inCluster++) {
-				poses.buffer[ti++] = position + clusterMetrics[ci].width * (inCluster + 1) / clusterMetrics[ci].length;
-			}
-			position += clusterMetrics[ci].width;
-		}
-		PLATFORM_ASSERT(ti == static_cast<size_t>(tbuf.tlen));
-		pTextLayout->Release();
+	const HRESULT hrGetCluster = pTextLayout->GetClusterMetrics(clusterMetrics, clusters, &count);
+	pTextLayout->Release();
+	if (!SUCCEEDED(hrGetCluster)) {
+		return;
 	}
+	// A cluster may be more than one WCHAR, such as for "ffi" which is a ligature in the Candara font
+	FLOAT position = 0.0f;
+	size_t ti=0;
+	for (size_t ci=0; ci<count; ci++) {
+		for (size_t inCluster=0; inCluster<clusterMetrics[ci].length; inCluster++) {
+			poses.buffer[ti++] = position + clusterMetrics[ci].width * (inCluster + 1) / clusterMetrics[ci].length;
+		}
+		position += clusterMetrics[ci].width;
+	}
+	PLATFORM_ASSERT(ti == static_cast<size_t>(tbuf.tlen));
 	if (unicodeMode) {
 		// Map the widths given for UTF-16 characters back onto the UTF-8 input string
 		int ui=0;
 		const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
 		int i=0;
-		while (ui<fit) {
+		while (ui<tbuf.tlen) {
 			const unsigned char uch = us[i];
 			unsigned int lenChar = 1;
 			if (uch >= (0x80 + 0x40 + 0x20 + 0x10)) {
@@ -1650,26 +1654,22 @@ void SurfaceD2D::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *
 		}
 	} else if (codePageText == 0) {
 
-		// One character per position
+		// One char per position
 		PLATFORM_ASSERT(len == tbuf.tlen);
-		for (size_t kk=0; kk<static_cast<size_t>(len); kk++) {
+		for (int kk=0; kk<tbuf.tlen; kk++) {
 			positions[kk] = poses.buffer[kk];
 		}
 
 	} else {
 
-		// May be more than one byte per position
-		unsigned int ui = 0;
-		FLOAT position = 0.0f;
-		for (int i=0; i<len;) {
-			if (ui < count)
-				position = poses.buffer[ui];
+		// May be one or two bytes per position
+		int ui = 0;
+		for (int i=0; i<len && ui<tbuf.tlen;) {
+			positions[i] = poses.buffer[ui];
 			if (Platform::IsDBCSLeadByte(codePageText, s[i])) {
-				positions[i] = position;
-				positions[i+1] = position;
+				positions[i+1] = poses.buffer[ui];
 				i += 2;
 			} else {
-				positions[i] = position;
 				i++;
 			}
 
