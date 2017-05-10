@@ -1041,7 +1041,7 @@ static void DrawIndicators(Surface *surface, const EditModel &model, const ViewS
 	const Sci::Position lineStart = ll->LineStart(subLine);
 	const Sci::Position posLineEnd = posLineStart + lineEnd;
 
-	for (Decoration *deco = model.pdoc->decorations.Root(); deco; deco = deco->Next()) {
+	for (const Decoration *deco : model.pdoc->decorations.View()) {
 		if (under == vsDraw.indicators[deco->Indicator()].under) {
 			Sci::Position startPos = posLineStart + lineStart;
 			if (!deco->rs.ValueAt(startPos)) {
@@ -1658,7 +1658,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 			}
 			if (vsDraw.indicatorsSetFore) {
 				// At least one indicator sets the text colour so see if it applies to this segment
-				for (Decoration *deco = model.pdoc->decorations.Root(); deco; deco = deco->Next()) {
+				for (const Decoration *deco : model.pdoc->decorations.View()) {
 					const int indicatorValue = deco->rs.ValueAt(ts.start + posLineStart);
 					if (indicatorValue) {
 						const Indicator &indicator = vsDraw.indicators[deco->Indicator()];

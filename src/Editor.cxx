@@ -2097,16 +2097,7 @@ void Editor::ClearAll() {
 }
 
 void Editor::ClearDocumentStyle() {
-	Decoration *deco = pdoc->decorations.Root();
-	while (deco) {
-		// Save next in case deco deleted
-		Decoration *decoNext = deco->Next();
-		if (deco->Indicator() < INDIC_CONTAINER) {
-			pdoc->DecorationSetCurrentIndicator(deco->Indicator());
-			pdoc->DecorationFillRange(0, 0, pdoc->Length());
-		}
-		deco = decoNext;
-	}
+	pdoc->decorations.DeleteLexerDecorations();
 	pdoc->StartStyling(0, '\377');
 	pdoc->SetStyleFor(pdoc->Length(), 0);
 	cs.ShowAll();
@@ -4651,7 +4642,7 @@ void Editor::SetHoverIndicatorPosition(Sci::Position position) {
 	if (!vs.indicatorsDynamic)
 		return;
 	if (position != INVALID_POSITION) {
-		for (Decoration *deco = pdoc->decorations.Root(); deco; deco = deco->Next()) {
+		for (const Decoration *deco : pdoc->decorations.View()) {
 			if (vs.indicators[deco->Indicator()].IsDynamic()) {
 				if (pdoc->decorations.ValueAt(deco->Indicator(), position)) {
 					hoverIndicatorPos = position;
