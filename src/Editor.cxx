@@ -2629,7 +2629,9 @@ void Editor::NotifyModified(Document *, DocModification mh, void *) {
 		if (mh.modificationType & SC_MOD_CHANGEANNOTATION) {
 			Sci::Line lineDoc = pdoc->LineFromPosition(mh.position);
 			if (vs.annotationVisible) {
-				cs.SetHeight(lineDoc, cs.GetHeight(lineDoc) + mh.annotationLinesAdded);
+				if (cs.SetHeight(lineDoc, cs.GetHeight(lineDoc) + mh.annotationLinesAdded)) {
+					SetScrollBars();
+				}
 				Redraw();
 			}
 		}
@@ -5276,6 +5278,7 @@ void Editor::SetAnnotationVisible(int visible) {
 					cs.SetHeight(line, cs.GetHeight(line) + annotationLines * dir);
 				}
 			}
+			SetScrollBars();
 		}
 		Redraw();
 	}
