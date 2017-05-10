@@ -17,8 +17,8 @@ namespace Scintilla {
 template <typename T>
 class SparseVector {
 private:
-	Partitioning *starts;
-	SplitVector<T> *values;
+	std::unique_ptr<Partitioning> starts;
+	std::unique_ptr<SplitVector<T>> values;
 	// Deleted so SparseVector objects can not be copied.
 	SparseVector(const SparseVector &) = delete;
 	void operator=(const SparseVector &) = delete;
@@ -55,19 +55,17 @@ private:
 	}
 public:
 	SparseVector() {
-		starts = new Partitioning(8);
-		values = new SplitVector<T>();
+		starts.reset(new Partitioning(8));
+		values.reset(new SplitVector<T>());
 		values->InsertValue(0, 2, T());
 	}
 	~SparseVector() {
-		delete starts;
-		starts = NULL;
+		starts.reset();
 		// starts dead here but not used by ClearValue.
 		for (int part = 0; part < values->Length(); part++) {
 			ClearValue(part);
 		}
-		delete values;
-		values = NULL;
+		values.reset();
 	}
 	int Length() const {
 		return starts->PositionFromPartition(starts->Partitions());

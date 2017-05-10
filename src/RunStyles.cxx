@@ -71,16 +71,12 @@ void RunStyles::RemoveRunIfSameAsPrevious(int run) {
 }
 
 RunStyles::RunStyles() {
-	starts = new Partitioning(8);
-	styles = new SplitVector<int>();
+	starts.reset(new Partitioning(8));
+	styles.reset(new SplitVector<int>());
 	styles->InsertValue(0, 2, 0);
 }
 
 RunStyles::~RunStyles() {
-	delete starts;
-	starts = NULL;
-	delete styles;
-	styles = NULL;
 }
 
 int RunStyles::Length() const {
@@ -201,12 +197,8 @@ void RunStyles::InsertSpace(int position, int insertLength) {
 }
 
 void RunStyles::DeleteAll() {
-	delete starts;
-	starts = NULL;
-	delete styles;
-	styles = NULL;
-	starts = new Partitioning(8);
-	styles = new SplitVector<int>();
+	starts.reset(new Partitioning(8));
+	styles.reset(new SplitVector<int>());
 	styles->InsertValue(0, 2, 0);
 }
 

@@ -423,8 +423,8 @@ void EditView::LayoutLine(const EditModel &model, Sci::Line line, Surface *surfa
 
 		// Fill base line layout
 		const int lineLength = posLineEnd - posLineStart;
-		model.pdoc->GetCharRange(ll->chars, posLineStart, lineLength);
-		model.pdoc->GetStyleRange(ll->styles, posLineStart, lineLength);
+		model.pdoc->GetCharRange(ll->chars.get(), posLineStart, lineLength);
+		model.pdoc->GetStyleRange(ll->styles.get(), posLineStart, lineLength);
 		const int numCharsBeforeEOL = model.pdoc->LineEnd(line) - posLineStart;
 		const int numCharsInLine = (vstyle.viewEOL) ? lineLength : numCharsBeforeEOL;
 		for (Sci::Position styleInLine = 0; styleInLine < numCharsInLine; styleInLine++) {
@@ -487,8 +487,8 @@ void EditView::LayoutLine(const EditModel &model, Sci::Line line, Surface *surfa
 						// Over half the segments are single characters and of these about half are space characters.
 						ll->positions[ts.start + 1] = vstyle.styles[ll->styles[ts.start]].spaceWidth;
 					} else {
-						posCache.MeasureWidths(surface, vstyle, ll->styles[ts.start], ll->chars + ts.start,
-							ts.length, ll->positions + ts.start + 1, model.pdoc);
+						posCache.MeasureWidths(surface, vstyle, ll->styles[ts.start], &ll->chars[ts.start],
+							ts.length, &ll->positions[ts.start + 1], model.pdoc);
 					}
 				}
 				lastSegItalics = (!ts.representation) && ((ll->chars[ts.end() - 1] != ' ') && vstyle.styles[ll->styles[ts.start]].italic);
@@ -920,7 +920,7 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 			if (UTF8IsAscii(chEOL)) {
 				ctrlChar = ControlCharacterString(chEOL);
 			} else {
-				const Representation *repr = model.reprs.RepresentationFromCharacter(ll->chars + eolPos, ll->numCharsInLine - eolPos);
+				const Representation *repr = model.reprs.RepresentationFromCharacter(&ll->chars[eolPos], ll->numCharsInLine - eolPos);
 				if (repr) {
 					ctrlChar = repr->stringRep.c_str();
 					eolPos = ll->numCharsInLine;
@@ -1303,7 +1303,7 @@ static void DrawBlockCaret(Surface *surface, const EditModel &model, const ViewS
 	int styleMain = ll->styles[offsetFirstChar];
 	FontAlias fontText = vsDraw.styles[styleMain].font;
 	surface->DrawTextClipped(rcCaret, fontText,
-		rcCaret.top + vsDraw.maxAscent, ll->chars + offsetFirstChar,
+		rcCaret.top + vsDraw.maxAscent, &ll->chars[offsetFirstChar],
 		numCharsToDraw, vsDraw.styles[styleMain].back,
 		caretColour);
 }
@@ -1738,11 +1738,11 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 				if (vsDraw.styles[styleMain].visible) {
 					if (phasesDraw != phasesOne) {
 						surface->DrawTextTransparent(rcSegment, textFont,
-							rcSegment.top + vsDraw.maxAscent, ll->chars + ts.start,
+							rcSegment.top + vsDraw.maxAscent, &ll->chars[ts.start],
 							i - ts.start + 1, textFore);
 					} else {
 						surface->DrawTextNoClip(rcSegment, textFont,
-							rcSegment.top + vsDraw.maxAscent, ll->chars + ts.start,
+							rcSegment.top + vsDraw.maxAscent, &ll->chars[ts.start],
 							i - ts.start + 1, textFore, textBack);
 					}
 				}
