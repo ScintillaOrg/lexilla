@@ -3029,15 +3029,19 @@ struct Sci_TextToFind {
     <b id="SCI_STYLEGETVISIBLE">SCI_STYLEGETVISIBLE(int style) &rarr; bool</b><br />
     Text is normally visible. However, you can completely hide it by giving it a style with the
     <code class="parameter">visible</code> set to 0. This could be used to hide embedded formatting instructions or
-    hypertext keywords in HTML or XML.</p>
+    hypertext keywords in HTML or XML.
+    Invisible text may not be deleted by user actions but the application may delete invisible text by calling
+    <a class="seealso" href="#SCI_DELETERANGE">SCI_DELETERANGE</a>.</p>
 
     <p><b id="SCI_STYLESETCHANGEABLE">SCI_STYLESETCHANGEABLE(int style, bool
     changeable)</b><br />
     <b id="SCI_STYLEGETCHANGEABLE">SCI_STYLEGETCHANGEABLE(int style) &rarr; bool</b><br />
     This is an experimental and incompletely implemented style attribute. The default setting is
     <code class="parameter">changeable</code> set <code>true</code> but when set <code>false</code> it makes text
-    read-only. Currently it only stops the caret from being within not-changeable text and does not
-    yet stop deleting a range that contains not-changeable text.</p>
+    read-only. The user can not move the caret within not-changeable text and not-changeable
+    text may not be deleted by the user.
+    The application may delete not-changeable text by calling
+    <a class="seealso" href="#SCI_DELETERANGE">SCI_DELETERANGE</a>.</p>
 
     <p><b id="SCI_STYLESETHOTSPOT">SCI_STYLESETHOTSPOT(int style, bool
     hotspot)</b><br />
