@@ -4,6 +4,7 @@
 ** Based heavily on LexCPP.cxx
 **/
 // Copyright 2001- by Vamsi Potluru <vamsi@who.net> & Praveen Ambekar <ambekarpraveen@yahoo.com>
+// Maintainer Email: oirfeodent@yahoo.co.in
 // The License.txt file describes the conditions under which this software may be distributed.
 
 // C standard library
@@ -606,7 +607,7 @@ void SCI_METHOD LexerBaan::Lex(Sci_PositionU startPos, Sci_Position length, int 
 			}
 			break;
 		case SCE_BAAN_COMMENT:
-			if (sc.atLineEnd) {
+			if (sc.ch == '\r' || sc.ch == '\n') {
 				sc.SetState(SCE_BAAN_DEFAULT);
 			}
 			break;
