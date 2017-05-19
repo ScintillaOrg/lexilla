@@ -281,13 +281,12 @@ void SurfaceImpl::Polygon(Point *pts,
 	PenColour(fore);
 	BrushColour(back);
 
-	QPoint *qpts = new QPoint[npts];
+	std::vector<QPoint> qpts(npts);
 	for (int i = 0; i < npts; i++) {
 		qpts[i] = QPoint(pts[i].x, pts[i].y);
 	}
 
-	GetPainter()->drawPolygon(qpts, npts);
-	delete [] qpts;
+	GetPainter()->drawPolygon(&qpts[0], npts);
 }
 
 void SurfaceImpl::RectangleDraw(PRectangle rc,
