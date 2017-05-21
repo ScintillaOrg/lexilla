@@ -55,6 +55,7 @@
 #include "LexerModule.h"
 #endif
 #include "Position.h"
+#include "UniqueString.h"
 #include "SplitVector.h"
 #include "Partitioning.h"
 #include "RunStyles.h"

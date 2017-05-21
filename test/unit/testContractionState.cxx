@@ -10,6 +10,7 @@
 #include "Platform.h"
 
 #include "Position.h"
+#include "UniqueString.h"
 #include "SplitVector.h"
 #include "Partitioning.h"
 #include "RunStyles.h"
@@ -139,6 +140,16 @@ TEST_CASE("ContractionState") {
 		REQUIRE(1 == cs.GetHeight(0));
 		REQUIRE(2 == cs.GetHeight(1));
 		REQUIRE(1 == cs.GetHeight(2));
+	}
+
+	SECTION("SetFoldDisplayText") {
+		cs.InsertLines(0, 4);
+		cs.SetFoldDisplayText(1, "abc");
+		REQUIRE(strcmp(cs.GetFoldDisplayText(1), "abc") == 0);
+		cs.SetFoldDisplayText(1, "def");
+		REQUIRE(strcmp(cs.GetFoldDisplayText(1), "def") == 0);
+		cs.SetFoldDisplayText(1, nullptr);
+		REQUIRE(static_cast<const char *>(nullptr) == cs.GetFoldDisplayText(1));
 	}
 
 }
