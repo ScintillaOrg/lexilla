@@ -135,9 +135,8 @@ Style.o: ../src/Style.cxx ../include/Platform.h ../include/Scintilla.h \
 UniConversion.o: ../src/UniConversion.cxx ../src/UniConversion.h
 ViewStyle.o: ../src/ViewStyle.cxx ../include/Platform.h \
  ../include/Scintilla.h ../include/Sci_Position.h ../src/Position.h \
- ../src/SplitVector.h ../src/Partitioning.h ../src/RunStyles.h \
- ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h ../src/Style.h \
- ../src/ViewStyle.h
+ ../src/UniqueString.h ../src/Indicator.h ../src/XPM.h \
+ ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h
 XPM.o: ../src/XPM.cxx ../include/Platform.h ../src/XPM.h
 Accessor.o: ../lexlib/Accessor.cxx ../include/ILexer.h \
  ../include/Sci_Position.h ../include/Scintilla.h ../include/SciLexer.h \

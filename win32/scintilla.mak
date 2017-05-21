@@ -1072,9 +1072,7 @@ $(DIR_O)\ViewStyle.obj: \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/Position.h \
-	../src/SplitVector.h \
-	../src/Partitioning.h \
-	../src/RunStyles.h \
+	../src/UniqueString.h \
 	../src/Indicator.h \
 	../src/XPM.h \
 	../src/LineMarker.h \
