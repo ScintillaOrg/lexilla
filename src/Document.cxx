@@ -14,6 +14,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <forward_list>
 #include <algorithm>
 #include <memory>
 

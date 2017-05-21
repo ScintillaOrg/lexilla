@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <forward_list>
 #include <algorithm>
 #include <memory>
 

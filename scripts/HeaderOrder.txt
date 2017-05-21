@@ -37,6 +37,7 @@
 #include <deque>
 #include <map>
 #include <set>
+#include <forward_list>
 #include <algorithm>
 #include <functional>
 #include <memory>
