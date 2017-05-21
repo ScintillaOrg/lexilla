@@ -163,7 +163,8 @@ template<>
 inline void SparseVector<const char *>::ClearValue(int partition) {
 	const char *value = values->ValueAt(partition);
 	delete []value;
-	values->SetValueAt(partition, NULL);
+	value = nullptr;
+	values->SetValueAt(partition, value);
 }
 
 template<>
@@ -175,7 +176,7 @@ inline void SparseVector<const char *>::SetValueAt(int position, const char *val
 		std::copy(value, value + len, valueCopy);
 		CommonSetValueAt(position, valueCopy);
 	} else {
-		CommonSetValueAt(position, NULL);
+		CommonSetValueAt(position, nullptr);
 	}
 }
 

@@ -11,6 +11,7 @@
 #include <cstdarg>
 
 #include <stdexcept>
+#include <vector>
 #include <algorithm>
 #include <memory>
 

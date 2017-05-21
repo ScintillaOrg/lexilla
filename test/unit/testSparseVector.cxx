@@ -4,6 +4,7 @@
 #include <cstring>
 
 #include <stdexcept>
+#include <vector>
 #include <algorithm>
 #include <memory>
 
@@ -45,9 +46,9 @@ TEST_CASE("SparseVector") {
 	SECTION("InsertSpace") {
 		st.InsertSpace(0, 5);
 		REQUIRE(1 == st.Elements());
-		REQUIRE(static_cast<const char *>(NULL) == st.ValueAt(0));
-		REQUIRE(static_cast<const char *>(NULL) == st.ValueAt(1));
-		REQUIRE(static_cast<const char *>(NULL) == st.ValueAt(4));
+		REQUIRE(static_cast<const char *>(nullptr) == st.ValueAt(0));
+		REQUIRE(static_cast<const char *>(nullptr) == st.ValueAt(1));
+		REQUIRE(static_cast<const char *>(nullptr) == st.ValueAt(4));
 		st.Check();
 	}
 
@@ -119,7 +120,7 @@ TEST_CASE("SparseVector") {
 		st.SetValueAt(4, "5");
 		REQUIRE(2 == st.Elements());
 		REQUIRE("----5" == Representation(st));
-		st.SetValueAt(4, NULL);
+		st.SetValueAt(4, nullptr);
 		REQUIRE(1 == st.Elements());
 		REQUIRE("-----" == Representation(st));
 		st.Check();

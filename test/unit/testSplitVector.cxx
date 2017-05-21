@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include <stdexcept>
+#include <vector>
 #include <algorithm>
 #include <memory>
 
@@ -280,11 +281,19 @@ TEST_CASE("SplitVector") {
 	}
 
 	SECTION("BufferPointer") {
+		// Low-level access to the data
 		sv.InsertFromArray(0, testArray, 0, lengthTestArray);
+		sv.Insert(0, 99);	// This moves the gap so that BufferPointer() must also move
+		REQUIRE(1 == sv.GapPosition());
+		const int lengthAfterInsertion = 1 + lengthTestArray;
+		REQUIRE(lengthAfterInsertion == (sv.Length()));
 		int *retrievePointer = sv.BufferPointer();
-		for (int i=0; i<sv.Length(); i++) {
-			REQUIRE((i+3) == retrievePointer[i]);
+		for (int i=1; i<sv.Length(); i++) {
+			REQUIRE((i+3-1) == retrievePointer[i]);
 		}
+		REQUIRE(lengthAfterInsertion == sv.Length());
+		// Gap was moved to end.
+		REQUIRE(lengthAfterInsertion == sv.GapPosition());
 	}
 
 	SECTION("DeleteBackAndForth") {
