@@ -78,11 +78,7 @@ bool MarkerHandleSet::RemoveNumber(int markerNum, bool all) {
 }
 
 void MarkerHandleSet::CombineWith(MarkerHandleSet *other) {
-	if (mhList.empty()) {
-		mhList = std::move(other->mhList);
-	} else {
-		mhList.splice_after(mhList.cbegin(), other->mhList);
-	}
+	mhList.splice_after(mhList.before_begin(), other->mhList);
 }
 
 LineMarkers::~LineMarkers() {
