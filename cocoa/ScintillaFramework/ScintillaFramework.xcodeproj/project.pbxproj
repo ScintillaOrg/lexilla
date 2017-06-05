@@ -216,7 +216,6 @@
 		28BC38EC1B74C6AD008BF9EB /* Sci_Position.h in Headers */ = {isa = PBXBuildFile; fileRef = 28BC38EB1B74C6AD008BF9EB /* Sci_Position.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		28C40CA81CB7321200B089F2 /* LexJSON.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28C40CA71CB7321200B089F2 /* LexJSON.cxx */; };
 		28D191A21DEA72C800159938 /* LexEDIFACT.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28D191A11DEA72C800159938 /* LexEDIFACT.cxx */; };
-		28D1919E1DE69FC100159938 /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
 		28D516D81830FFCA0047C93D /* info_bar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 28D516D51830FFCA0047C93D /* info_bar_bg@2x.png */; };
 		28D516D91830FFCA0047C93D /* mac_cursor_busy@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 28D516D61830FFCA0047C93D /* mac_cursor_busy@2x.png */; };
 		28D516DA1830FFCA0047C93D /* mac_cursor_flipped@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 28D516D71830FFCA0047C93D /* mac_cursor_flipped@2x.png */; };
@@ -423,6 +422,7 @@
 		280056F9188DDD2C00F200AE /* StringCopy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StringCopy.h; path = ../../lexlib/StringCopy.h; sourceTree = "<group>"; };
 		280056FA188DDD2C00F200AE /* SubStyles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SubStyles.h; path = ../../lexlib/SubStyles.h; sourceTree = "<group>"; };
 		28064A04190F12E100E6E47F /* LexDMIS.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexDMIS.cxx; path = ../../lexers/LexDMIS.cxx; sourceTree = "<group>"; };
+		282E41F3B9E2BFEDD6A05BE7 /* LexIndent.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexIndent.cxx; path = ../../lexers/LexIndent.cxx; sourceTree = SOURCE_ROOT; };
 		28A067101A36B42600B4966A /* LexHex.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexHex.cxx; path = ../../lexers/LexHex.cxx; sourceTree = "<group>"; };
 		28A1DD4E196BE0CA006EFCDD /* EditModel.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EditModel.cxx; path = ../../src/EditModel.cxx; sourceTree = "<group>"; };
 		28A1DD4F196BE0CA006EFCDD /* EditView.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EditView.cxx; path = ../../src/EditView.cxx; sourceTree = "<group>"; };
@@ -439,6 +439,7 @@
 		28B6470B1B54C0720009DC49 /* LexProps.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexProps.cxx; path = ../../lexers/LexProps.cxx; sourceTree = "<group>"; };
 		28BC38EB1B74C6AD008BF9EB /* Sci_Position.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Sci_Position.h; path = ../../include/Sci_Position.h; sourceTree = "<group>"; };
 		28C40CA71CB7321200B089F2 /* LexJSON.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexJSON.cxx; path = ../../lexers/LexJSON.cxx; sourceTree = "<group>"; };
+		28D1919E1DE69FC100159938 /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
 		28D191A11DEA72C800159938 /* LexEDIFACT.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexEDIFACT.cxx; path = ../../lexers/LexEDIFACT.cxx; sourceTree = "<group>"; };
 		28D516D51830FFCA0047C93D /* info_bar_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "info_bar_bg@2x.png"; sourceTree = "<group>"; };
 		28D516D61830FFCA0047C93D /* mac_cursor_busy@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "mac_cursor_busy@2x.png"; sourceTree = "<group>"; };
@@ -448,7 +449,6 @@
 		8DC2EF5A0486A6940098B216 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8DC2EF5B0486A6940098B216 /* Scintilla.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Scintilla.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D2F7E79907B2D74100F64583 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
-		282E41F3B9E2BFEDD6A05BE7 /* LexIndent.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexIndent.cxx; path = ../../lexers/LexIndent.cxx; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1118,6 +1118,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEFINES_MODULE = YES;
@@ -1154,6 +1155,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEFINES_MODULE = YES;

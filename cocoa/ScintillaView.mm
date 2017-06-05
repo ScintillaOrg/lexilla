@@ -55,12 +55,12 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 // Add marginWidth and owner properties as a private category.
 @interface SCIMarginView ()
 @property (assign) int marginWidth;
-@property (nonatomic, assign) ScintillaView* owner;
+@property (nonatomic, weak) ScintillaView* owner;
 @end
 
 @implementation SCIMarginView {
   int marginWidth;
-  ScintillaView *owner;
+  ScintillaView *__weak owner;
   NSMutableArray *currentCursors;
 }
 
@@ -73,10 +73,10 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   {
     owner = nil;
     marginWidth = 20;
-    currentCursors = [[NSMutableArray arrayWithCapacity:0] retain];
+    currentCursors = [NSMutableArray arrayWithCapacity:0];
     for (size_t i=0; i<=SC_MAX_MARGIN; i++)
     {
-      [currentCursors addObject: [reverseArrowCursor retain]];
+      [currentCursors addObject: reverseArrowCursor];
     }
     [self setClientView:[aScrollView documentView]];
     if ([self respondsToSelector: @selector(setAccessibilityLabel:)])
@@ -85,11 +85,6 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   return self;
 }
 
-- (void) dealloc
-{
-  [currentCursors release];
-  [super dealloc];
-}
 
 - (void) setFrame: (NSRect) frame
 {
@@ -195,11 +190,11 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 // Add owner property as a private category.
 @interface SCIContentView ()
-@property (nonatomic, assign) ScintillaView* owner;
+@property (nonatomic, weak) ScintillaView* owner;
 @end
 
 @implementation SCIContentView {
-  ScintillaView* mOwner;
+  ScintillaView* __weak mOwner;
   NSCursor* mCurrentCursor;
   NSTrackingArea *trackingArea;
 
@@ -218,7 +213,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   if (self != nil)
   {
     // Some initialization for our view.
-    mCurrentCursor = [[NSCursor arrowCursor] retain];
+    mCurrentCursor = [NSCursor arrowCursor];
     trackingArea = nil;
     mMarkedTextRange = NSMakeRange(NSNotFound, 0);
 
@@ -250,7 +245,6 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   if (trackingArea)
   {
     [self removeTrackingArea:trackingArea];
-    [trackingArea release];
   }
 
   int opts = (NSTrackingActiveAlways | NSTrackingInVisibleRect | NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved);
@@ -282,9 +276,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 - (void) setCursor: (int) cursor
 {
   Window::Cursor eCursor = (Window::Cursor)cursor;
-  [mCurrentCursor autorelease];
   mCurrentCursor = cursorFromEnum(eCursor);
-  [mCurrentCursor retain];
 
   // Trigger recreation of the cursor rectangle(s).
   [[self window] invalidateCursorRectsForView: self];
@@ -443,7 +435,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   [mOwner message: SCI_TARGETASUTF8 wParam: 0 lParam: reinterpret_cast<sptr_t>(&text[0])];
   text = FixInvalidUTF8(text);
   NSString *result = [NSString stringWithUTF8String: text.c_str()];
-  NSMutableAttributedString *asResult = [[[NSMutableAttributedString alloc] initWithString:result] autorelease];
+  NSMutableAttributedString *asResult = [[NSMutableAttributedString alloc] initWithString:result];
 
   const NSRange rangeAS = NSMakeRange(0, [asResult length]);
   // SCI_GETSTYLEAT reports a signed byte but want an unsigned to index into styles
@@ -485,8 +477,11 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 - (void) doCommandBySelector: (SEL) selector
 {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
   if ([self respondsToSelector: @selector(selector)])
     [self performSelector: selector withObject: nil];
+#pragma clang diagnostic pop
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1211,7 +1206,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 - (NSAttributedString *) accessibilityAttributedStringForRange:(NSRange)range {
   const NSRange posRange = mOwner.backend->PositionsFromCharacters(range);
   NSString *result = mOwner.backend->RangeTextAsString(posRange);
-  return [[[NSMutableAttributedString alloc] initWithString:result] autorelease];
+  return [[NSMutableAttributedString alloc] initWithString:result];
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1245,12 +1240,6 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 
 //--------------------------------------------------------------------------------------------------
 
-- (void) dealloc
-{
-  [mCurrentCursor release];
-  [trackingArea release];
-  [super dealloc];
-}
 
 @end
 
@@ -1273,7 +1262,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
   NSView <InfoBarCommunicator>* mInfoBar;
   BOOL mInfoBarAtTop;
 
-  id<ScintillaNotificationProtocol> mDelegate;
+  id<ScintillaNotificationProtocol> __unsafe_unretained mDelegate;
 }
 
 @synthesize backend = mBackend;
@@ -1298,11 +1287,11 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
     NSBundle* bundle = [NSBundle bundleForClass: [ScintillaView class]];
 
     NSString* path = [bundle pathForResource: @"mac_cursor_busy" ofType: @"tiff" inDirectory: nil];
-    NSImage* image = [[[NSImage alloc] initWithContentsOfFile: path] autorelease];
+    NSImage* image = [[NSImage alloc] initWithContentsOfFile: path];
     waitCursor = [[NSCursor alloc] initWithImage: image hotSpot: NSMakePoint(2, 2)];
 
     path = [bundle pathForResource: @"mac_cursor_flipped" ofType: @"tiff" inDirectory: nil];
-    image = [[[NSImage alloc] initWithContentsOfFile: path] autorelease];
+    image = [[NSImage alloc] initWithContentsOfFile: path];
     reverseArrowCursor = [[NSCursor alloc] initWithImage: image hotSpot: NSMakePoint(12, 2)];
   }
 }
@@ -1501,14 +1490,14 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
   self = [super initWithFrame:frame];
   if (self)
   {
-    mContent = [[[[[self class] contentViewClass] alloc] initWithFrame:NSZeroRect] autorelease];
+    mContent = [[[[self class] contentViewClass] alloc] initWithFrame:NSZeroRect];
     mContent.owner = self;
 
     // Initialize the scrollers but don't show them yet.
     // Pick an arbitrary size, just to make NSScroller selecting the proper scroller direction
     // (horizontal or vertical).
     NSRect scrollerRect = NSMakeRect(0, 0, 100, 10);
-    scrollView = [[[NSScrollView alloc] initWithFrame: scrollerRect] autorelease];
+    scrollView = [[NSScrollView alloc] initWithFrame: scrollerRect];
     [scrollView setDocumentView: mContent];
     [scrollView setHasVerticalScroller:YES];
     [scrollView setHasHorizontalScroller:YES];
@@ -1570,8 +1559,6 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
   mContent.owner = nil;
   [marginView setClientView:nil];
   [scrollView removeFromSuperview];
-  [marginView release];
-  [super dealloc];
 }
 
 //--------------------------------------------------------------------------------------------------

@@ -1111,7 +1111,7 @@ Window::~Window()
 
 bool Window::HasFocus()
 {
-  NSView* container = static_cast<NSView*>(wid);
+  NSView* container = (__bridge NSView *)(wid);
   return [[container window] firstResponder] == container;
 }
 
@@ -1129,7 +1129,7 @@ PRectangle Window::GetPosition()
   if (wid)
   {
     NSRect rect;
-    id idWin = static_cast<id>(wid);
+    id idWin = (__bridge id)(wid);
     NSWindow* win;
     if ([idWin isKindOfClass: [NSView class]])
     {
@@ -1163,7 +1163,7 @@ void Window::SetPosition(PRectangle rc)
 {
   if (wid)
   {
-    id idWin = static_cast<id>(wid);
+    id idWin = (__bridge id)(wid);
     if ([idWin isKindOfClass: [NSView class]])
     {
       // NSView
@@ -1212,7 +1212,7 @@ void Window::Show(bool show)
 {
   if (wid)
   {
-    id idWin = static_cast<id>(wid);
+    id idWin = (__bridge id)(wid);
     if ([idWin isKindOfClass: [NSWindow class]])
     {
       NSWindow* win = idWin;
@@ -1237,7 +1237,7 @@ void Window::InvalidateAll()
 {
   if (wid)
   {
-    id idWin = static_cast<id>(wid);
+    id idWin = (__bridge id)(wid);
     NSView* container;
     if ([idWin isKindOfClass: [NSView class]])
     {
@@ -1263,7 +1263,7 @@ void Window::InvalidateRectangle(PRectangle rc)
 {
   if (wid)
   {
-    id idWin = static_cast<id>(wid);
+    id idWin = (__bridge id)(wid);
     NSView* container;
     if ([idWin isKindOfClass: [NSView class]])
     {
@@ -1296,7 +1296,7 @@ void Window::SetCursor(Cursor curs)
 {
   if (wid)
   {
-    id idWin = static_cast<id>(wid);
+    id idWin = (__bridge id)(wid);
     if ([idWin isKindOfClass: [SCIContentView class]])
     {
       SCIContentView* container = idWin;
@@ -1311,7 +1311,7 @@ void Window::SetTitle(const char* s)
 {
   if (wid)
   {
-    id idWin = static_cast<id>(wid);
+    id idWin = (__bridge id)(wid);
     if ([idWin isKindOfClass: [NSWindow class]])
     {
       NSWindow* win = idWin;
@@ -1327,7 +1327,7 @@ PRectangle Window::GetMonitorRect(Point)
 {
   if (wid)
   {
-    id idWin = static_cast<id>(wid);
+    id idWin = (__bridge id)(wid);
     if ([idWin isKindOfClass: [NSView class]])
     {
       NSView* view = idWin;
@@ -1561,7 +1561,6 @@ public:
     images = [[NSMutableDictionary alloc] init];
   }
   ~ListBoxImpl() override {
-    [images release];
   }
 
   // ListBox methods
@@ -1613,9 +1612,8 @@ void ListBoxImpl::Create(Window& /*parent*/, int /*ctrlID*/, Scintilla::Point pt
     defer: NO];
   [winLB setLevel:NSFloatingWindowLevel];
   [winLB setHasShadow:YES];
-  scroller = [NSScrollView alloc];
   NSRect scRect = NSMakeRect(0, 0, lbRect.size.width, lbRect.size.height);
-  [scroller initWithFrame: scRect];
+  scroller = [[NSScrollView alloc] initWithFrame: scRect];
   [scroller setHasVerticalScroller:YES];
   table = [[NSTableView alloc] initWithFrame: scRect];
   [table setHeaderView:nil];
@@ -1624,7 +1622,7 @@ void ListBoxImpl::Create(Window& /*parent*/, int /*ctrlID*/, Scintilla::Point pt
   [colIcon setWidth: 20];
   [colIcon setEditable:NO];
   [colIcon setHidden:YES];
-  NSImageCell* imCell = [[[NSImageCell alloc] init] autorelease];
+  NSImageCell* imCell = [[NSImageCell alloc] init];
   [colIcon setDataCell:imCell];
   [table addTableColumn:colIcon];
   colText = [[NSTableColumn alloc] initWithIdentifier:@"name"];
@@ -1640,7 +1638,7 @@ void ListBoxImpl::Create(Window& /*parent*/, int /*ctrlID*/, Scintilla::Point pt
   [table setTarget:ds];
   [table setDoubleAction:@selector(doubleClick:)];
   table.selectionHighlightStyle = NSTableViewSelectionHighlightStyleSourceList;
-  wid = winLB;
+  wid = (__bridge_retained WindowID)winLB;
 }
 
 void ListBoxImpl::SetFont(Font& font_)
@@ -1650,7 +1648,7 @@ void ListBoxImpl::SetFont(Font& font_)
   QuartzTextStyle* style = static_cast<QuartzTextStyle*>(font_.GetID());
   font.Release();
   font.SetID(new QuartzTextStyle(*style));
-  NSFont *pfont = (NSFont *)style->getFontRef();
+  NSFont *pfont = (__bridge NSFont *)style->getFontRef();
   [[colText dataCell] setFont: pfont];
   CGFloat itemHeight = ceil([pfont boundingRectForFont].size.height);
   [table setRowHeight:itemHeight];
@@ -1714,15 +1712,10 @@ int ListBoxImpl::CaretFromEdge()
 void ListBoxImpl::ReleaseViews()
 {
   [table setDataSource:nil];
-  [table release];
   table = nil;
-  [scroller release];
   scroller = nil;
-  [colIcon release];
   colIcon = nil;
-  [colText release ];
   colText = nil;
-  [ds release];
   ds = nil;
 }
 
@@ -1837,7 +1830,6 @@ void ListBoxImpl::RegisterImage(int type, const char* xpm_data)
   XPM xpm(xpm_data);
   NSImage* img = ImageFromXPM(&xpm);
   [images setObject:img forKey:@(type)];
-  [img release];
 }
 
 void ListBoxImpl::RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage)
@@ -1846,7 +1838,6 @@ void ListBoxImpl::RegisterRGBAImage(int type, int width, int height, const unsig
   NSImage *img = [[NSImage alloc] initWithCGImage:imageRef size: NSZeroSize];
   CGImageRelease(imageRef);
   [images setObject:img forKey:@(type)];
-  [img release];
 }
 
 void ListBoxImpl::ClearRegisteredImages()
@@ -1912,14 +1903,13 @@ void Window::Destroy()
   }
   if (wid)
   {
-    id idWin = static_cast<id>(wid);
+    id idWin = (__bridge id)(wid);
     if ([idWin isKindOfClass: [NSWindow class]])
     {
-      NSWindow* win = static_cast<NSWindow*>(idWin);
-      [win release];
+      CFBridgingRelease(wid);
     }
   }
-  wid = 0;
+  wid = nullptr;
 }
 
 
@@ -1956,16 +1946,15 @@ Menu::Menu()
 void Menu::CreatePopUp()
 {
   Destroy();
-  mid = [[ScintillaContextMenu alloc] initWithTitle: @""];
+  mid = (__bridge_retained MenuID)[[ScintillaContextMenu alloc] initWithTitle: @""];
 }
 
 //--------------------------------------------------------------------------------------------------
 
 void Menu::Destroy()
 {
-  ScintillaContextMenu* menu = static_cast<ScintillaContextMenu*>(mid);
-  [menu release];
-  mid = NULL;
+  CFBridgingRelease(mid);
+  mid = nullptr;
 }
 
 //--------------------------------------------------------------------------------------------------

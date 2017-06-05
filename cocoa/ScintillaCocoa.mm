@@ -179,7 +179,7 @@ static const KeyToCommand macMapDefault[] =
 		// A gold to slightly redder gradient to match other applications
 		CGColorRef colGold = CGColorCreateGenericRGB(1.0, 1.0, 0, 1.0);
 		CGColorRef colGoldRed = CGColorCreateGenericRGB(1.0, 0.8, 0, 1.0);
-		self.colors = [NSArray arrayWithObjects:(id)colGoldRed, (id)colGold, nil];
+		self.colors = [NSArray arrayWithObjects:(__bridge id)colGoldRed, (__bridge id)colGold, nil];
 		CGColorRelease(colGoldRed);
 		CGColorRelease(colGold);
 
@@ -198,11 +198,6 @@ static const KeyToCommand macMapDefault[] =
 
 }
 
-- (void) dealloc {
-	[sFind release];
-	[sFont release];
-	[super dealloc];
-}
 
 const CGFloat paddingHighlightX = 4;
 const CGFloat paddingHighlightY = 2;
@@ -211,7 +206,7 @@ const CGFloat paddingHighlightY = 2;
 	if (!sFind || !sFont)
 		return;
 
-	CFStringRef str = CFStringRef(sFind);
+	CFStringRef str = (__bridge CFStringRef)(sFind);
 
 	CFMutableDictionaryRef styleDict = CFDictionaryCreateMutable(kCFAllocatorDefault, 2,
 								     &kCFTypeDictionaryKeyCallBacks,
@@ -333,8 +328,6 @@ const CGFloat paddingHighlightY = 2;
 {
   NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
   [center removeObserver:self];
-  [notificationQueue release];
-  [super dealloc];
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -345,7 +338,6 @@ const CGFloat paddingHighlightY = 2;
 - (void) ownerDestroyed
 {
   mTarget = NULL;
-  [notificationQueue release];
   notificationQueue = nil;
 }
 
@@ -403,8 +395,8 @@ ScintillaCocoa::ScintillaCocoa(ScintillaView* sciView_, SCIContentView* viewCont
 
   // Don't retain since we're owned by view, which would cause a cycle
   sciView = sciView_;
-  wMain = viewContent;
-  wMargin = viewMargin;
+  wMain = (__bridge WindowID)viewContent;
+  wMargin = (__bridge WindowID)viewMargin;
 
   timerTarget = [[TimerTarget alloc] init: this];
   lastMouseEvent = NULL;
@@ -430,7 +422,6 @@ ScintillaCocoa::ScintillaCocoa(ScintillaView* sciView_, SCIContentView* viewCont
 ScintillaCocoa::~ScintillaCocoa()
 {
   [timerTarget ownerDestroyed];
-  [timerTarget release];
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -580,10 +571,10 @@ public:
 		} else {
 			CFStringRef cfsVal = CFStringFromString(mixed, lenMixed, encoding);
 
-			NSString *sMapped = [(NSString *)cfsVal stringByFoldingWithOptions:NSCaseInsensitiveSearch
+			NSString *sMapped = [(__bridge NSString *)cfsVal stringByFoldingWithOptions:NSCaseInsensitiveSearch
 										    locale:[NSLocale currentLocale]];
 
-			std::string encoded = EncodedBytesString((CFStringRef)sMapped, encoding);
+			std::string encoded = EncodedBytesString((__bridge CFStringRef)sMapped, encoding);
 
 			size_t lenMapped = encoded.length();
 			if (lenMapped < sizeFolded) {
@@ -615,10 +606,10 @@ CaseFolder *ScintillaCocoa::CaseFolderForEncoding() {
 				if (!cfsVal)
 					continue;
 
-				NSString *sMapped = [(NSString *)cfsVal stringByFoldingWithOptions:NSCaseInsensitiveSearch
+				NSString *sMapped = [(__bridge NSString *)cfsVal stringByFoldingWithOptions:NSCaseInsensitiveSearch
 											    locale:[NSLocale currentLocale]];
 
-				std::string encoded = EncodedBytesString((CFStringRef)sMapped, encoding);
+				std::string encoded = EncodedBytesString((__bridge CFStringRef)sMapped, encoding);
 
 				if (encoded.length() == 1) {
 					pcf->SetTranslation(sCharacter[0], encoded[0]);
@@ -661,17 +652,17 @@ std::string ScintillaCocoa::CaseMapString(const std::string &s, int caseMapping)
   switch (caseMapping)
   {
     case cmUpper:
-      sMapped = [(NSString *)cfsVal uppercaseString];
+      sMapped = [(__bridge NSString *)cfsVal uppercaseString];
       break;
     case cmLower:
-      sMapped = [(NSString *)cfsVal lowercaseString];
+      sMapped = [(__bridge NSString *)cfsVal lowercaseString];
       break;
     default:
-      sMapped = (NSString *)cfsVal;
+      sMapped = (__bridge NSString *)cfsVal;
   }
 
   // Back to encoding
-  std::string result = EncodedBytesString((CFStringRef)sMapped, encoding);
+  std::string result = EncodedBytesString((__bridge CFStringRef)sMapped, encoding);
   CFRelease(cfsVal);
   return result;
 }
@@ -692,7 +683,7 @@ void ScintillaCocoa::CancelModes() {
  * Helper function to get the scrolling view.
  */
 NSScrollView* ScintillaCocoa::ScrollContainer() const {
-  NSView* container = static_cast<NSView*>(wMain.GetID());
+  NSView* container = (__bridge NSView*)(wMain.GetID());
   return static_cast<NSScrollView*>([[container superview] superview]);
 }
 
@@ -703,7 +694,7 @@ NSScrollView* ScintillaCocoa::ScrollContainer() const {
  */
 SCIContentView* ScintillaCocoa::ContentView()
 {
-  return static_cast<SCIContentView*>(wMain.GetID());
+  return (__bridge SCIContentView*)(wMain.GetID());
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -829,7 +820,7 @@ sptr_t ScintillaCocoa::DirectFunction(sptr_t ptr, unsigned int iMessage, uptr_t 
  */
 sptr_t scintilla_send_message(void* sci, unsigned int iMessage, uptr_t wParam, sptr_t lParam)
 {
-  ScintillaView *control = static_cast<ScintillaView*>(sci);
+  ScintillaView *control = (__bridge ScintillaView*)(sci);
   return [control message:iMessage wParam:wParam lParam:lParam];
 }
 
@@ -1008,12 +999,12 @@ bool ScintillaCocoa::SetIdle(bool on)
                                                           userInfo: nil
                                                            repeats: YES];
       [NSRunLoop.currentRunLoop addTimer: idleTimer forMode: NSModalPanelRunLoopMode];
-      idler.idlerID = idleTimer;
+      idler.idlerID = (__bridge IdlerID)idleTimer;
     }
     else
       if (idler.idlerID != NULL)
       {
-        [static_cast<NSTimer*>(idler.idlerID) invalidate];
+        [(__bridge NSTimer*)(idler.idlerID) invalidate];
         idler.idlerID = 0;
       }
   }
@@ -1112,9 +1103,6 @@ void ScintillaCocoa::CTPaint(void* gc, NSRect rc) {
 	return self;
 }
 
-- (void) dealloc {
-	[super dealloc];
-}
 
 - (BOOL) isFlipped {
 	return YES;
@@ -1147,7 +1135,7 @@ void ScintillaCocoa::CTPaint(void* gc, NSRect rc) {
 @end
 
 void ScintillaCocoa::CallTipMouseDown(NSPoint pt) {
-    NSRect rectBounds = [(NSView *)(ct.wDraw.GetID()) bounds];
+    NSRect rectBounds = [(__bridge NSView *)(ct.wDraw.GetID()) bounds];
     Point location(static_cast<XYPOSITION>(pt.x),
 		   static_cast<XYPOSITION>(rectBounds.size.height - pt.y));
     ct.MouseClick(location);
@@ -1155,7 +1143,7 @@ void ScintillaCocoa::CallTipMouseDown(NSPoint pt) {
 }
 
 static bool HeightDifferent(WindowID wCallTip, PRectangle rc) {
-	NSWindow *callTip = (NSWindow *)wCallTip;
+	NSWindow *callTip = (__bridge NSWindow *)wCallTip;
 	CGFloat height = NSHeight([callTip frame]);
 	return height != rc.Height();
 }
@@ -1178,22 +1166,22 @@ void ScintillaCocoa::CreateCallTipWindow(PRectangle rc) {
         [caption setSci: this];
         [[callTip contentView] addSubview: caption];
         [callTip orderFront:caption];
-        ct.wCallTip = callTip;
-        ct.wDraw = caption;
+        ct.wCallTip = (__bridge_retained WindowID)callTip;
+        ct.wDraw = (__bridge WindowID)caption;
     }
 }
 
 void ScintillaCocoa::AddToPopUp(const char *label, int cmd, bool enabled)
 {
   NSMenuItem* item;
-  ScintillaContextMenu *menu = static_cast<ScintillaContextMenu*>(popup.GetID());
+  ScintillaContextMenu *menu = (__bridge ScintillaContextMenu*)(popup.GetID());
   [menu setOwner: this];
   [menu setAutoenablesItems: NO];
 
   if (cmd == 0) {
     item = [NSMenuItem separatorItem];
   } else {
-    item = [[[NSMenuItem alloc] init] autorelease];
+    item = [[NSMenuItem alloc] init];
     [item setTitle: [NSString stringWithUTF8String: label]];
   }
   [item setTarget: menu];
@@ -1313,13 +1301,13 @@ void ScintillaCocoa::DragScroll()
 
   if ([type compare: NSPasteboardTypeString] == NSOrderedSame)
   {
-    [pasteboard setString:(NSString *)cfsVal forType: NSStringPboardType];
+    [pasteboard setString:(__bridge NSString *)cfsVal forType: NSStringPboardType];
   }
   else if ([type compare: ScintillaRecPboardType] == NSOrderedSame)
   {
     // This is specific to scintilla, allows us to drag rectangular selections around the document.
     if (selectedText.rectangular)
-      [pasteboard setString:(NSString *)cfsVal forType: ScintillaRecPboardType];
+      [pasteboard setString:(__bridge NSString *)cfsVal forType: ScintillaRecPboardType];
   }
 
   if (cfsVal)
@@ -1456,13 +1444,13 @@ void ScintillaCocoa::StartDrag()
   NSBitmapImageRep* bitmap = NULL;
   CGImageRef imagePixmap = pixmap.GetImage();
   if (imagePixmap)
-    bitmap = [[[NSBitmapImageRep alloc] initWithCGImage: imagePixmap] autorelease];
+    bitmap = [[NSBitmapImageRep alloc] initWithCGImage: imagePixmap];
   CGImageRelease(imagePixmap);
 
-  NSImage* image = [[[NSImage alloc] initWithSize: selectionRectangle.size] autorelease];
+  NSImage* image = [[NSImage alloc] initWithSize: selectionRectangle.size];
   [image addRepresentation: bitmap];
 
-  NSImage* dragImage = [[[NSImage alloc] initWithSize: selectionRectangle.size] autorelease];
+  NSImage* dragImage = [[NSImage alloc] initWithSize: selectionRectangle.size];
   [dragImage setBackgroundColor: [NSColor clearColor]];
   [dragImage lockFocus];
   [image drawAtPoint: NSZeroPoint fromRect: NSZeroRect operation: NSCompositeSourceOver fraction: 0.5];
@@ -1473,21 +1461,20 @@ void ScintillaCocoa::StartDrag()
   startPoint.y = selectionRectangle.origin.y + selectionRectangle.size.height + client.top;
 
   NSPasteboardItem *pbItem = [NSPasteboardItem new];
-  DragProviderSource *dps = [[[DragProviderSource alloc] initWithSelectedText:&selectedText] autorelease];
+  DragProviderSource *dps = [[DragProviderSource alloc] initWithSelectedText:&selectedText];
 
   NSArray *pbTypes = selectedText.rectangular ?
   @[NSPasteboardTypeString, ScintillaRecPboardType] :
   @[NSPasteboardTypeString];
   [pbItem setDataProvider:dps forTypes:pbTypes];
   NSDraggingItem *dragItem = [[NSDraggingItem alloc ]initWithPasteboardWriter:pbItem];
-  [pbItem release];
 
   NSScrollView *scrollContainer = ScrollContainer();
   NSRect contentRect = [[scrollContainer contentView] bounds];
   NSRect draggingRect = NSOffsetRect(selectionRectangle, contentRect.origin.x, contentRect.origin.y);
   [dragItem setDraggingFrame:draggingRect contents:dragImage];
   NSDraggingSession *dragSession =
-  [content beginDraggingSessionWithItems:@[[dragItem autorelease]]
+  [content beginDraggingSessionWithItems:@[dragItem]
                                    event:lastMouseEvent
                                   source:content];
   dragSession.animatesToStartingPositionsOnCancelOrFail = YES;
@@ -1600,10 +1587,10 @@ void ScintillaCocoa::SetPasteboardData(NSPasteboard* board, const SelectionText 
   if (selectedText.rectangular)
   {
     // This is specific to scintilla, allows us to drag rectangular selections around the document.
-    [board setString: (NSString *)cfsVal forType: ScintillaRecPboardType];
+    [board setString: (__bridge NSString *)cfsVal forType: ScintillaRecPboardType];
   }
 
-  [board setString: (NSString *)cfsVal forType: NSStringPboardType];
+  [board setString: (__bridge NSString *)cfsVal forType: NSStringPboardType];
 
   if (cfsVal)
     CFRelease(cfsVal);
@@ -1698,7 +1685,7 @@ NSString *ScintillaCocoa::RangeTextAsString(NSRange rangePositions) const {
 							       vs.styles[STYLE_DEFAULT].characterSet);
     CFStringRef cfsVal = CFStringFromString(text.c_str(), text.length(), encoding);
 
-    return (NSString *)cfsVal;
+    return (__bridge NSString *)cfsVal;
   }
 }
 
@@ -1827,7 +1814,7 @@ bool ScintillaCocoa::SyncPaint(void* gc, PRectangle rc)
   paintState = notPainting;
   if (!succeeded)
   {
-    NSView *marginView = static_cast<NSView*>(wMargin.GetID());
+    NSView *marginView = (__bridge NSView*)(wMargin.GetID());
     [marginView setNeedsDisplay:YES];
   }
   return succeeded;
@@ -2276,7 +2263,7 @@ int ScintillaCocoa::InsertText(NSString* input)
 {
   CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
                                                        vs.styles[STYLE_DEFAULT].characterSet);
-  std::string encoded = EncodedBytesString((CFStringRef)input, encoding);
+  std::string encoded = EncodedBytesString((__bridge CFStringRef)input, encoding);
 
   if (encoded.length() > 0)
   {
@@ -2543,7 +2530,7 @@ NSMenu* ScintillaCocoa::CreateContextMenu(NSEvent* /* event */)
   // Call ScintillaBase to create the context menu.
   ContextMenu(Point(0, 0));
 
-  return static_cast<NSMenu*>(popup.GetID());
+  return (__bridge NSMenu*)(popup.GetID());
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -2615,7 +2602,7 @@ void ScintillaCocoa::ShowFindIndicatorForRange(NSRange charRange, BOOL retaining
     pdoc->GetCharRange(&buffer[0], static_cast<int>(charRange.location), static_cast<int>(charRange.length));
 
     CFStringRef cfsFind = CFStringFromString(&buffer[0], charRange.length, encoding);
-    layerFindIndicator.sFind = (NSString *)cfsFind;
+    layerFindIndicator.sFind = (__bridge NSString *)cfsFind;
     if (cfsFind)
         CFRelease(cfsFind);
     layerFindIndicator.retaining = retaining;

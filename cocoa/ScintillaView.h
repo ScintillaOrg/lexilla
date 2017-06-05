@@ -71,7 +71,7 @@ extern NSString *const SCIUpdateUINotification;
  */
 @interface ScintillaView : NSView <InfoBarCommunicator, ScintillaNotificationProtocol>;
 
-@property (nonatomic, assign) id<ScintillaNotificationProtocol> delegate;
+@property (nonatomic, unsafe_unretained) id<ScintillaNotificationProtocol> delegate;
 @property (nonatomic, readonly) NSScrollView *scrollView;
 
 + (Class) contentViewClass;

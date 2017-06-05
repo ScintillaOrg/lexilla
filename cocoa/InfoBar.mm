@@ -185,7 +185,6 @@ static float BarFontSize = 10.0;
 
   // put it in the scrollview.
   [self addSubview: mZoomPopup];
-  [mZoomPopup release];
 
   // 2) The caret position label.
   Class oldCellClass = [NSTextField cellClass];
@@ -204,7 +203,6 @@ static float BarFontSize = 10.0;
   [cell setAlignment: NSCenterTextAlignment];
 
   [self addSubview: mCaretPositionLabel];
-  [mCaretPositionLabel release];
 
   // 3) The status text.
   mStatusTextLabel = [[NSTextField alloc] initWithFrame: NSMakeRect(0.0, 0.0, 1.0, 1.0)];
@@ -219,7 +217,6 @@ static float BarFontSize = 10.0;
   [cell setPlaceholderString: @""];
 
   [self addSubview: mStatusTextLabel];
-  [mStatusTextLabel release];
 
   // Restore original cell class so that everything else doesn't get broken
   [NSTextField setCellClass: oldCellClass];
@@ -227,11 +224,6 @@ static float BarFontSize = 10.0;
 
 //--------------------------------------------------------------------------------------------------
 
-- (void) dealloc
-{
-  [mBackground release];
-  [super dealloc];
-}
 
 //--------------------------------------------------------------------------------------------------
 
