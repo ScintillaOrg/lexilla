@@ -66,7 +66,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 @synthesize marginWidth, owner;
 
-- (id)initWithScrollView:(NSScrollView *)aScrollView
+- (instancetype)initWithScrollView:(NSScrollView *)aScrollView
 {
   self = [super initWithScrollView:aScrollView orientation:NSVerticalRuler];
   if (self != nil)
@@ -1485,7 +1485,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 /**
  * Initialization of the view. Used to setup a few other things we need.
  */
-- (id) initWithFrame: (NSRect) frame
+- (instancetype) initWithFrame: (NSRect) frame
 {
   self = [super initWithFrame:frame];
   if (self)
