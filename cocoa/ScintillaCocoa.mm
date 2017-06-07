@@ -179,7 +179,7 @@ static const KeyToCommand macMapDefault[] =
 		// A gold to slightly redder gradient to match other applications
 		CGColorRef colGold = CGColorCreateGenericRGB(1.0, 1.0, 0, 1.0);
 		CGColorRef colGoldRed = CGColorCreateGenericRGB(1.0, 0.8, 0, 1.0);
-		self.colors = [NSArray arrayWithObjects:(__bridge id)colGoldRed, (__bridge id)colGold, nil];
+		self.colors = @[(__bridge id)colGoldRed, (__bridge id)colGold];
 		CGColorRelease(colGoldRed);
 		CGColorRelease(colGold);
 
@@ -249,7 +249,7 @@ const CGFloat paddingHighlightY = 2;
 	ptText.y -= flipper * height / 2.0;
 
 	[CATransaction begin];
-	[CATransaction setValue:[NSNumber numberWithFloat:0.0] forKey:kCATransactionAnimationDuration];
+	[CATransaction setValue:@0.0f forKey:kCATransactionAnimationDuration];
 	self.bounds = CGRectMake(0,0, width, height);
 	self.position = ptText;
 	if (bounce) {
@@ -265,8 +265,8 @@ const CGFloat paddingHighlightY = 2;
 		animBounce.duration = 0.15;
 		animBounce.autoreverses = YES;
 		animBounce.removedOnCompletion = NO;
-		animBounce.fromValue = [NSNumber numberWithFloat: 1.0];
-		animBounce.toValue = [NSNumber numberWithFloat: 1.25];
+		animBounce.fromValue = @1.0f;
+		animBounce.toValue = @1.25f;
 
 		if (self.retaining) {
 
@@ -278,14 +278,14 @@ const CGFloat paddingHighlightY = 2;
 			animFade.duration = 0.1;
 			animFade.beginTime = 0.4;
 			animFade.removedOnCompletion = NO;
-			animFade.fromValue = [NSNumber numberWithFloat: 1.0];
-			animFade.toValue = [NSNumber numberWithFloat: 0.0];
+			animFade.fromValue = @1.0f;
+			animFade.toValue = @0.0f;
 
 			CAAnimationGroup *group = [CAAnimationGroup animation];
 			[group setDuration:0.5];
 			group.removedOnCompletion = NO;
 			group.fillMode = kCAFillModeForwards;
-			[group setAnimations:[NSArray arrayWithObjects:animBounce, animFade, nil]];
+			[group setAnimations:@[animBounce, animFade]];
 
 			[self addAnimation:group forKey:@"animateFound"];
 		}
@@ -1182,7 +1182,7 @@ void ScintillaCocoa::AddToPopUp(const char *label, int cmd, bool enabled)
     item = [NSMenuItem separatorItem];
   } else {
     item = [[NSMenuItem alloc] init];
-    [item setTitle: [NSString stringWithUTF8String: label]];
+    [item setTitle: @(label)];
   }
   [item setTarget: menu];
   [item setAction: @selector(handleCommand:)];
@@ -1580,8 +1580,8 @@ void ScintillaCocoa::SetPasteboardData(NSPasteboard* board, const SelectionText 
   CFStringRef cfsVal = CFStringFromString(selectedText.Data(), selectedText.Length(), encoding);
 
   NSArray *pbTypes = selectedText.rectangular ?
-    [NSArray arrayWithObjects: NSStringPboardType, ScintillaRecPboardType, nil] :
-    [NSArray arrayWithObjects: NSStringPboardType, nil];
+    @[NSStringPboardType, ScintillaRecPboardType] :
+    @[NSStringPboardType];
   [board declareTypes:pbTypes owner:nil];
 
   if (selectedText.rectangular)
@@ -1603,9 +1603,8 @@ void ScintillaCocoa::SetPasteboardData(NSPasteboard* board, const SelectionText 
  */
 bool ScintillaCocoa::GetPasteboardData(NSPasteboard* board, SelectionText* selectedText)
 {
-  NSArray* supportedTypes = [NSArray arrayWithObjects: ScintillaRecPboardType,
-                             NSStringPboardType,
-                             nil];
+  NSArray* supportedTypes = @[ScintillaRecPboardType,
+                             NSStringPboardType];
   NSString *bestType = [board availableTypeFromArray: supportedTypes];
   NSString* data = [board stringForType: bestType];
 
@@ -1676,7 +1675,7 @@ NSString *ScintillaCocoa::RangeTextAsString(NSRange rangePositions) const {
 				     static_cast<int>(NSMaxRange(rangePositions)));
   if (IsUnicodeMode())
   {
-    return [NSString stringWithUTF8String: text.c_str()];
+    return @(text.c_str());
   }
   else
   {
@@ -2612,7 +2611,7 @@ void ScintillaCocoa::ShowFindIndicatorForRange(NSRange charRange, BOOL retaining
     const long style = static_cast<unsigned char>(styleByte);
     std::vector<char> bufferFontName(WndProc(SCI_STYLEGETFONT, style, 0) + 1);
     WndProc(SCI_STYLEGETFONT, style, (sptr_t)&bufferFontName[0]);
-    layerFindIndicator.sFont = [NSString stringWithUTF8String: &bufferFontName[0]];
+    layerFindIndicator.sFont = @(&bufferFontName[0]);
 
     layerFindIndicator.fontSize = WndProc(SCI_STYLEGETSIZEFRACTIONAL, style, 0) /
       (float)SC_FONT_SIZE_MULTIPLIER;

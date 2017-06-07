@@ -177,7 +177,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
     long cursType = owner.backend->WndProc(SCI_GETMARGINCURSORN, i, 0);
     long width =owner.backend->WndProc(SCI_GETMARGINWIDTHN, i, 0);
     NSCursor *cc = cursorFromEnum(static_cast<Window::Cursor>(cursType));
-    [currentCursors replaceObjectAtIndex:i withObject: cc];
+    currentCursors[i] = cc;
     marginRect.origin.x = x;
     marginRect.size.width = width;
     [self addCursorRect: marginRect cursor: cc];
@@ -217,8 +217,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
     trackingArea = nil;
     mMarkedTextRange = NSMakeRange(NSNotFound, 0);
 
-    [self registerForDraggedTypes: [NSArray arrayWithObjects:
-                                   NSStringPboardType, ScintillaRecPboardType, NSFilenamesPboardType, nil]];
+    [self registerForDraggedTypes: @[NSStringPboardType, ScintillaRecPboardType, NSFilenamesPboardType]];
 
     // Set up accessibility in the text role
     if ([self respondsToSelector: @selector(setAccessibilityElement:)])
@@ -434,7 +433,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   std::string text([mOwner message: SCI_TARGETASUTF8] + 1, 0);
   [mOwner message: SCI_TARGETASUTF8 wParam: 0 lParam: reinterpret_cast<sptr_t>(&text[0])];
   text = FixInvalidUTF8(text);
-  NSString *result = [NSString stringWithUTF8String: text.c_str()];
+  NSString *result = @(text.c_str());
   NSMutableAttributedString *asResult = [[NSMutableAttributedString alloc] initWithString:result];
 
   const NSRange rangeAS = NSMakeRange(0, [asResult length]);
@@ -444,7 +443,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   std::string fontName([mOwner message: SCI_STYLEGETFONT wParam:style lParam:0] + 1, 0);
   [mOwner message: SCI_STYLEGETFONT wParam:style lParam:(sptr_t)&fontName[0]];
   const CGFloat fontSize = [mOwner message: SCI_STYLEGETSIZEFRACTIONAL wParam:style] / 100.0f;
-  NSString *sFontName = [NSString stringWithUTF8String: fontName.c_str()];
+  NSString *sFontName = @(fontName.c_str());
   NSFont *font = [NSFont fontWithName:sFontName size:fontSize];
   [asResult addAttribute:NSFontAttributeName value:font range:rangeAS];
 
@@ -720,7 +719,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 {
   if (mMarkedTextRange.length == 0)
 	mOwner.backend->KeyboardInput(theEvent);
-  NSArray* events = [NSArray arrayWithObject: theEvent];
+  NSArray* events = @[theEvent];
   [self interpretKeyEvents: events];
 }
 
@@ -1692,7 +1691,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
     {
       mBackend->WndProc(SCI_GETSELTEXT, length + 1, (sptr_t) &buffer[0]);
 
-      result = [NSString stringWithUTF8String: buffer.c_str()];
+      result = @(buffer.c_str());
     }
     catch (...)
     {
@@ -1734,7 +1733,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
     {
       mBackend->WndProc(SCI_GETTEXT, length + 1, (sptr_t) &buffer[0]);
 
-      result = [NSString stringWithUTF8String: buffer.c_str()];
+      result = @(buffer.c_str());
     }
     catch (...)
     {
@@ -1929,7 +1928,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
       value[1] = value[0];
 
     unsigned rawRed;
-    [[NSScanner scannerWithString: [NSString stringWithUTF8String: value]] scanHexInt: &rawRed];
+    [[NSScanner scannerWithString: @(value)] scanHexInt: &rawRed];
 
     value[0] = static_cast<char>([fromHTML characterAtIndex: index++]);
     if (longVersion)
@@ -1938,7 +1937,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
       value[1] = value[0];
 
     unsigned rawGreen;
-    [[NSScanner scannerWithString: [NSString stringWithUTF8String: value]] scanHexInt: &rawGreen];
+    [[NSScanner scannerWithString: @(value)] scanHexInt: &rawGreen];
 
     value[0] = static_cast<char>([fromHTML characterAtIndex: index++]);
     if (longVersion)
@@ -1947,7 +1946,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
       value[1] = value[0];
 
     unsigned rawBlue;
-    [[NSScanner scannerWithString: [NSString stringWithUTF8String: value]] scanHexInt: &rawBlue];
+    [[NSScanner scannerWithString: @(value)] scanHexInt: &rawBlue];
 
     long color = (rawBlue << 16) + (rawGreen << 8) + rawRed;
     mBackend->WndProc(property, parameter, color);
@@ -2009,7 +2008,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 - (NSString*) getStringProperty: (int) property parameter: (long) parameter
 {
   const char* rawValue = (const char*) mBackend->WndProc(property, parameter, 0);
-  return [NSString stringWithUTF8String: rawValue];
+  return @(rawValue);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -2033,7 +2032,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 {
   const char* rawName = [name UTF8String];
   const char* result = (const char*) mBackend->WndProc(SCI_SETPROPERTY, (sptr_t) rawName, 0);
-  return [NSString stringWithUTF8String: result];
+  return @(result);
 }
 
 //--------------------------------------------------------------------------------------------------

@@ -166,7 +166,7 @@ static float BarFontSize = 10.0;
     [mZoomPopup addItemWithTitle: NSLocalizedStringFromTable(DefaultScaleMenuLabels[count], @"ZoomValues", nil)];
     id currentItem = [mZoomPopup itemAtIndex: count];
     if (DefaultScaleMenuFactors[count] != 0.0)
-      [currentItem setRepresentedObject: [NSNumber numberWithFloat: DefaultScaleMenuFactors[count]]];
+      [currentItem setRepresentedObject: @(DefaultScaleMenuFactors[count])];
   }
   [mZoomPopup selectItemAtIndex: DefaultScaleMenuSelectedItemIndex];
 

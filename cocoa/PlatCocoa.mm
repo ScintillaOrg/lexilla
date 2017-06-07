@@ -1315,7 +1315,7 @@ void Window::SetTitle(const char* s)
     if ([idWin isKindOfClass: [NSWindow class]])
     {
       NSWindow* win = idWin;
-      NSString* sTitle = [NSString stringWithUTF8String:s];
+      NSString* sTitle = @(s);
       [win setTitle:sTitle];
     }
   }
@@ -1829,7 +1829,7 @@ void ListBoxImpl::RegisterImage(int type, const char* xpm_data)
 {
   XPM xpm(xpm_data);
   NSImage* img = ImageFromXPM(&xpm);
-  [images setObject:img forKey:@(type)];
+  images[@(type)] = img;
 }
 
 void ListBoxImpl::RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage)
@@ -1837,7 +1837,7 @@ void ListBoxImpl::RegisterRGBAImage(int type, int width, int height, const unsig
   CGImageRef imageRef = ImageCreateFromRGBA(width, height, pixelsImage, false);
   NSImage *img = [[NSImage alloc] initWithCGImage:imageRef size: NSZeroSize];
   CGImageRelease(imageRef);
-  [images setObject:img forKey:@(type)];
+  images[@(type)] = img;
 }
 
 void ListBoxImpl::ClearRegisteredImages()
@@ -1860,7 +1860,7 @@ NSString* ListBoxImpl::TextForRow(NSInteger row)
   const char* textString = ld.GetString(row);
   NSString* sTitle;
   if (unicodeMode)
-    sTitle = [NSString stringWithUTF8String:textString];
+    sTitle = @(textString);
   else
     sTitle = [NSString stringWithCString:textString encoding:NSWindowsCP1252StringEncoding];
   return sTitle;
