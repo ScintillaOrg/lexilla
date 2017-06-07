@@ -89,7 +89,7 @@
 
     NSString* path = [bundle pathForResource: @"info_bar_bg" ofType: @"tiff" inDirectory: nil];
     mBackground = [[NSImage alloc] initWithContentsOfFile: path];
-    if (![mBackground isValid])
+    if (!mBackground.valid)
       NSLog(@"Background image for info bar is invalid.");
 
     mScaleFactor = 1.0;
@@ -122,7 +122,7 @@
       [self setCaretPosition: location];
       break;
     case IBNStatusChanged:
-      [mStatusTextLabel setStringValue: message];
+      mStatusTextLabel.stringValue = message;
       break;
   }
 }
@@ -157,8 +157,8 @@ static float BarFontSize = 10.0;
   mZoomPopup = [[NSPopUpButton alloc] initWithFrame: NSMakeRect(0.0, 0.0, 1.0, 1.0) pullsDown: NO];
 
   // No border or background please.
-  [[mZoomPopup cell] setBordered: NO];
-  [[mZoomPopup cell] setArrowPosition: NSPopUpArrowAtBottom];
+  [mZoomPopup.cell setBordered: NO];
+  [mZoomPopup.cell setArrowPosition: NSPopUpArrowAtBottom];
 
   // Fill it.
   for (unsigned count = 0; count < numberOfDefaultItems; count++)
@@ -171,11 +171,11 @@ static float BarFontSize = 10.0;
   [mZoomPopup selectItemAtIndex: DefaultScaleMenuSelectedItemIndex];
 
   // Hook it up.
-  [mZoomPopup setTarget: self];
-  [mZoomPopup setAction: @selector(zoomItemAction:)];
+  mZoomPopup.target = self;
+  mZoomPopup.action = @selector(zoomItemAction:);
 
   // Set a suitable font.
-  [mZoomPopup setFont: [NSFont menuBarFontOfSize: BarFontSize]];
+  mZoomPopup.font = [NSFont menuBarFontOfSize: BarFontSize];
 
   // Make sure the popup is big enough to fit the cells.
   [mZoomPopup sizeToFit];
@@ -196,11 +196,11 @@ static float BarFontSize = 10.0;
   [mCaretPositionLabel setEditable: NO];
   [mCaretPositionLabel setSelectable: NO];
   [mCaretPositionLabel setDrawsBackground: NO];
-  [mCaretPositionLabel setFont: [NSFont menuBarFontOfSize: BarFontSize]];
+  mCaretPositionLabel.font = [NSFont menuBarFontOfSize: BarFontSize];
 
-  NSTextFieldCell* cell = [mCaretPositionLabel cell];
-  [cell setPlaceholderString: @"0:0"];
-  [cell setAlignment: NSCenterTextAlignment];
+  NSTextFieldCell* cell = mCaretPositionLabel.cell;
+  cell.placeholderString = @"0:0";
+  cell.alignment = NSCenterTextAlignment;
 
   [self addSubview: mCaretPositionLabel];
 
@@ -211,10 +211,10 @@ static float BarFontSize = 10.0;
   [mStatusTextLabel setEditable: NO];
   [mStatusTextLabel setSelectable: NO];
   [mStatusTextLabel setDrawsBackground: NO];
-  [mStatusTextLabel setFont: [NSFont menuBarFontOfSize: BarFontSize]];
+  mStatusTextLabel.font = [NSFont menuBarFontOfSize: BarFontSize];
 
-  cell = [mStatusTextLabel cell];
-  [cell setPlaceholderString: @""];
+  cell = mStatusTextLabel.cell;
+  cell.placeholderString = @"";
 
   [self addSubview: mStatusTextLabel];
 
@@ -248,7 +248,7 @@ static float BarFontSize = 10.0;
 
   if (mDisplayMask & IBShowZoom)
   {
-    verticalLineRect = [mZoomPopup frame];
+    verticalLineRect = mZoomPopup.frame;
     verticalLineRect.origin.x += verticalLineRect.size.width + 1.0;
     verticalLineRect.size.width = 1.0;
     if (NSIntersectsRect(rect, verticalLineRect))
@@ -260,7 +260,7 @@ static float BarFontSize = 10.0;
 
   if (mDisplayMask & IBShowCaretPosition)
   {
-    verticalLineRect = [mCaretPositionLabel frame];
+    verticalLineRect = mCaretPositionLabel.frame;
     verticalLineRect.origin.x += verticalLineRect.size.width + 1.0;
     verticalLineRect.size.width = 1.0;
     if (NSIntersectsRect(rect, verticalLineRect))
@@ -285,7 +285,7 @@ static float BarFontSize = 10.0;
  */
 - (void) setFrame: (NSRect) newFrame
 {
-  [super setFrame: newFrame];
+  super.frame = newFrame;
   [self positionSubViews];
 }
 
@@ -293,12 +293,12 @@ static float BarFontSize = 10.0;
 
 - (void) positionSubViews
 {
-  NSRect currentBounds = {{0, 0}, {0, [self frame].size.height}};
+  NSRect currentBounds = {{0, 0}, {0, self.frame.size.height}};
   if (mDisplayMask & IBShowZoom)
   {
     [mZoomPopup setHidden: NO];
-    currentBounds.size.width = [mZoomPopup frame].size.width;
-    [mZoomPopup setFrame: currentBounds];
+    currentBounds.size.width = mZoomPopup.frame.size.width;
+    mZoomPopup.frame = currentBounds;
     currentBounds.origin.x += currentBounds.size.width + 1; // Add 1 for the separator.
   }
   else
@@ -307,8 +307,8 @@ static float BarFontSize = 10.0;
   if (mDisplayMask & IBShowCaretPosition)
   {
     [mCaretPositionLabel setHidden: NO];
-    currentBounds.size.width = [mCaretPositionLabel frame].size.width;
-    [mCaretPositionLabel setFrame: currentBounds];
+    currentBounds.size.width = mCaretPositionLabel.frame.size.width;
+    mCaretPositionLabel.frame = currentBounds;
     currentBounds.origin.x += currentBounds.size.width + 1;
   }
   else
@@ -318,8 +318,8 @@ static float BarFontSize = 10.0;
   {
     // The status text always takes the rest of the available space.
     [mStatusTextLabel setHidden: NO];
-    currentBounds.size.width = [self frame].size.width - currentBounds.origin.x;
-    [mStatusTextLabel setFrame: currentBounds];
+    currentBounds.size.width = self.frame.size.width - currentBounds.origin.x;
+    mStatusTextLabel.frame = currentBounds;
   }
   else
     [mStatusTextLabel setHidden: YES];
@@ -358,7 +358,7 @@ static float BarFontSize = 10.0;
   }
   else
   {
-    [self setScaleFactor: [selectedFactorObject floatValue] adjustPopup: NO];
+    [self setScaleFactor: selectedFactorObject.floatValue adjustPopup: NO];
   }
 }
 
@@ -412,7 +412,7 @@ static float BarFontSize = 10.0;
     mCurrentCaretX = newX;
     mCurrentCaretY = newY;
 
-    [mCaretPositionLabel setStringValue: [NSString stringWithFormat: @"%d:%d", newX, newY]];
+    mCaretPositionLabel.stringValue = [NSString stringWithFormat: @"%d:%d", newX, newY];
   }
 }
 
@@ -423,18 +423,18 @@ static float BarFontSize = 10.0;
  */
 - (void) sizeToFit
 {
-  NSRect frame = [self frame];
+  NSRect frame = self.frame;
   frame.size.width = 0;
   if (mDisplayMask & IBShowZoom)
-    frame.size.width += [mZoomPopup frame].size.width;
+    frame.size.width += mZoomPopup.frame.size.width;
 
   if (mDisplayMask & IBShowCaretPosition)
-    frame.size.width += [mCaretPositionLabel frame].size.width;
+    frame.size.width += mCaretPositionLabel.frame.size.width;
 
   if (mDisplayMask & IBShowStatusText)
-    frame.size.width += [mStatusTextLabel frame].size.width;
+    frame.size.width += mStatusTextLabel.frame.size.width;
 
-  [self setFrame: frame];
+  self.frame = frame;
 }
 
 @end

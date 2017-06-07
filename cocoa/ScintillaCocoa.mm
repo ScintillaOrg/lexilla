@@ -230,7 +230,7 @@ const CGFloat paddingHighlightY = 2;
 }
 
 - (void) animateMatch: (CGPoint)ptText bounce:(BOOL)bounce {
-	if (!self.sFind || ![self.sFind length]) {
+	if (!self.sFind || !(self.sFind).length) {
 		[self hideMatch];
 		return;
 	}
@@ -282,10 +282,10 @@ const CGFloat paddingHighlightY = 2;
 			animFade.toValue = @0.0f;
 
 			CAAnimationGroup *group = [CAAnimationGroup animation];
-			[group setDuration:0.5];
+			group.duration = 0.5;
 			group.removedOnCompletion = NO;
 			group.fillMode = kCAFillModeForwards;
-			[group setAnimations:@[animBounce, animFade]];
+			group.animations = @[animBounce, animFade];
 
 			[self addAnimation:group forKey:@"animateFound"];
 		}
@@ -652,10 +652,10 @@ std::string ScintillaCocoa::CaseMapString(const std::string &s, int caseMapping)
   switch (caseMapping)
   {
     case cmUpper:
-      sMapped = [(__bridge NSString *)cfsVal uppercaseString];
+      sMapped = ((__bridge NSString *)cfsVal).uppercaseString;
       break;
     case cmLower:
-      sMapped = [(__bridge NSString *)cfsVal lowercaseString];
+      sMapped = ((__bridge NSString *)cfsVal).lowercaseString;
       break;
     default:
       sMapped = (__bridge NSString *)cfsVal;
@@ -684,7 +684,7 @@ void ScintillaCocoa::CancelModes() {
  */
 NSScrollView* ScintillaCocoa::ScrollContainer() const {
   NSView* container = (__bridge NSView*)(wMain.GetID());
-  return static_cast<NSScrollView*>([[container superview] superview]);
+  return static_cast<NSScrollView*>(container.superview.superview);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -705,7 +705,7 @@ SCIContentView* ScintillaCocoa::ContentView()
 Scintilla::Point ScintillaCocoa::GetVisibleOriginInMain() const
 {
   NSScrollView *scrollView = ScrollContainer();
-  NSRect contentRect = [[scrollView contentView] bounds];
+  NSRect contentRect = scrollView.contentView.bounds;
   return Point(static_cast<XYPOSITION>(contentRect.origin.x), static_cast<XYPOSITION>(contentRect.origin.y));
 }
 
@@ -719,7 +719,7 @@ Scintilla::Point ScintillaCocoa::GetVisibleOriginInMain() const
 PRectangle ScintillaCocoa::GetClientRectangle() const
 {
   NSScrollView *scrollView = ScrollContainer();
-  NSSize size = [[scrollView contentView] bounds].size;
+  NSSize size = scrollView.contentView.bounds.size;
   Point origin = GetVisibleOriginInMain();
   return PRectangle(origin.x, origin.y, static_cast<XYPOSITION>(origin.x+size.width),
 		    static_cast<XYPOSITION>(origin.y + size.height));
@@ -734,7 +734,7 @@ PRectangle ScintillaCocoa::GetClientDrawingRectangle() {
 #if MAC_OS_X_VERSION_MAX_ALLOWED > 1080
   NSView *content = ContentView();
   if ([content respondsToSelector: @selector(setPreparedContentRect:)]) {
-    NSRect rcPrepared = [content preparedContentRect];
+    NSRect rcPrepared = content.preparedContentRect;
     if (!NSIsEmptyRect(rcPrepared))
       return NSRectToPRectangle(rcPrepared);
   }
@@ -776,7 +776,7 @@ void ScintillaCocoa::DiscardOverdraw()
   // If running on 10.9, reset prepared area to visible area
   NSView *content = ContentView();
   if ([content respondsToSelector: @selector(setPreparedContentRect:)]) {
-    content.preparedContentRect = [content visibleRect];
+    content.preparedContentRect = content.visibleRect;
   }
 #endif
 }
@@ -857,7 +857,7 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
         break;
 
       case SCI_GRABFOCUS:
-        [[ContentView() window] makeFirstResponder:ContentView()];
+        [ContentView().window makeFirstResponder:ContentView()];
         break;
 
       case SCI_SETBUFFEREDDRAW:
@@ -962,7 +962,7 @@ void ScintillaCocoa::FineTickerStart(TickReason reason, int millis, int toleranc
                                               repeats: YES];
   if (tolerance && [fineTimer respondsToSelector: @selector(setTolerance:)])
   {
-    [fineTimer setTolerance: tolerance / 1000.0];
+    fineTimer.tolerance = tolerance / 1000.0;
   }
   timers[reason] = fineTimer;
   [NSRunLoop.currentRunLoop addTimer: fineTimer forMode: NSDefaultRunLoopMode];
@@ -1114,14 +1114,14 @@ void ScintillaCocoa::CTPaint(void* gc, NSRect rc) {
 
 - (void) drawRect: (NSRect) needsDisplayInRect {
     if (sci) {
-        CGContextRef context = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
+        CGContextRef context = (CGContextRef) [NSGraphicsContext currentContext].graphicsPort;
         sci->CTPaint(context, needsDisplayInRect);
     }
 }
 
 - (void) mouseDown: (NSEvent *) event {
     if (sci) {
-        sci->CallTipMouseDown([event locationInWindow]);
+        sci->CallTipMouseDown(event.locationInWindow);
     }
 }
 
@@ -1135,7 +1135,7 @@ void ScintillaCocoa::CTPaint(void* gc, NSRect rc) {
 @end
 
 void ScintillaCocoa::CallTipMouseDown(NSPoint pt) {
-    NSRect rectBounds = [(__bridge NSView *)(ct.wDraw.GetID()) bounds];
+    NSRect rectBounds = ((__bridge NSView *)(ct.wDraw.GetID())).bounds;
     Point location(static_cast<XYPOSITION>(pt.x),
 		   static_cast<XYPOSITION>(rectBounds.size.height - pt.y));
     ct.MouseClick(location);
@@ -1144,7 +1144,7 @@ void ScintillaCocoa::CallTipMouseDown(NSPoint pt) {
 
 static bool HeightDifferent(WindowID wCallTip, PRectangle rc) {
 	NSWindow *callTip = (__bridge NSWindow *)wCallTip;
-	CGFloat height = NSHeight([callTip frame]);
+	CGFloat height = NSHeight(callTip.frame);
 	return height != rc.Height();
 }
 
@@ -1162,9 +1162,9 @@ void ScintillaCocoa::CreateCallTipWindow(PRectangle rc) {
         [callTip setHasShadow:YES];
         NSRect ctContent = NSMakeRect(0,0, rc.Width(), rc.Height());
         CallTipView *caption = [[CallTipView alloc] initWithFrame: ctContent];
-        [caption setAutoresizingMask: NSViewWidthSizable | NSViewMaxYMargin];
+        caption.autoresizingMask = NSViewWidthSizable | NSViewMaxYMargin;
         [caption setSci: this];
-        [[callTip contentView] addSubview: caption];
+        [callTip.contentView addSubview: caption];
         [callTip orderFront:caption];
         ct.wCallTip = (__bridge_retained WindowID)callTip;
         ct.wDraw = (__bridge WindowID)caption;
@@ -1182,12 +1182,12 @@ void ScintillaCocoa::AddToPopUp(const char *label, int cmd, bool enabled)
     item = [NSMenuItem separatorItem];
   } else {
     item = [[NSMenuItem alloc] init];
-    [item setTitle: @(label)];
+    item.title = @(label);
   }
-  [item setTarget: menu];
-  [item setAction: @selector(handleCommand:)];
-  [item setTag: cmd];
-  [item setEnabled: enabled];
+  item.target = menu;
+  item.action = @selector(handleCommand:);
+  item.tag = cmd;
+  item.enabled = enabled;
 
   [menu addItem: item];
 }
@@ -1451,7 +1451,7 @@ void ScintillaCocoa::StartDrag()
   [image addRepresentation: bitmap];
 
   NSImage* dragImage = [[NSImage alloc] initWithSize: selectionRectangle.size];
-  [dragImage setBackgroundColor: [NSColor clearColor]];
+  dragImage.backgroundColor = [NSColor clearColor];
   [dragImage lockFocus];
   [image drawAtPoint: NSZeroPoint fromRect: NSZeroRect operation: NSCompositeSourceOver fraction: 0.5];
   [dragImage unlockFocus];
@@ -1470,7 +1470,7 @@ void ScintillaCocoa::StartDrag()
   NSDraggingItem *dragItem = [[NSDraggingItem alloc ]initWithPasteboardWriter:pbItem];
 
   NSScrollView *scrollContainer = ScrollContainer();
-  NSRect contentRect = [[scrollContainer contentView] bounds];
+  NSRect contentRect = scrollContainer.contentView.bounds;
   NSRect draggingRect = NSOffsetRect(selectionRectangle, contentRect.origin.x, contentRect.origin.y);
   [dragItem setDraggingFrame:draggingRect contents:dragImage];
   NSDraggingSession *dragSession =
@@ -1513,11 +1513,11 @@ NSDragOperation ScintillaCocoa::DraggingUpdated(id <NSDraggingInfo> info)
   NSPasteboard* pasteboard = [info draggingPasteboard];
 
   // Return what type of operation we will perform. Prefer move over copy.
-  if ([[pasteboard types] containsObject: NSStringPboardType] ||
-      [[pasteboard types] containsObject: ScintillaRecPboardType])
+  if ([pasteboard.types containsObject: NSStringPboardType] ||
+      [pasteboard.types containsObject: ScintillaRecPboardType])
     return (sourceDragMask & NSDragOperationMove) ? NSDragOperationMove : NSDragOperationCopy;
 
-  if ([[pasteboard types] containsObject: NSFilenamesPboardType])
+  if ([pasteboard.types containsObject: NSFilenamesPboardType])
     return (sourceDragMask & NSDragOperationGeneric);
   return NSDragOperationNone;
 }
@@ -1544,11 +1544,11 @@ bool ScintillaCocoa::PerformDragOperation(id <NSDraggingInfo> info)
 {
   NSPasteboard* pasteboard = [info draggingPasteboard];
 
-  if ([[pasteboard types] containsObject: NSFilenamesPboardType])
+  if ([pasteboard.types containsObject: NSFilenamesPboardType])
   {
     NSArray* files = [pasteboard propertyListForType: NSFilenamesPboardType];
     for (NSString* uri in files)
-      NotifyURIDropped([uri UTF8String]);
+      NotifyURIDropped(uri.UTF8String);
   }
   else
   {
@@ -1614,7 +1614,7 @@ bool ScintillaCocoa::GetPasteboardData(NSPasteboard* board, SelectionText* selec
     {
       CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
                                                            vs.styles[STYLE_DEFAULT].characterSet);
-      CFRange rangeAll = {0, static_cast<CFIndex>([data length])};
+      CFRange rangeAll = {0, static_cast<CFIndex>(data.length)};
       CFIndex usedLen = 0;
       CFStringGetBytes((CFStringRef)data, rangeAll, encoding, '?',
                        false, NULL, 0, &usedLen);
@@ -1826,7 +1826,7 @@ bool ScintillaCocoa::SyncPaint(void* gc, PRectangle rc)
  */
 void ScintillaCocoa::PaintMargin(NSRect aRect)
 {
-  CGContextRef gc = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
+  CGContextRef gc = (CGContextRef) [NSGraphicsContext currentContext].graphicsPort;
 
   PRectangle rc = NSRectToPRectangle(aRect);
   rcPaint = rc;
@@ -1889,8 +1889,8 @@ void ScintillaCocoa::SetVerticalScrollPos()
 {
   NSScrollView *scrollView = ScrollContainer();
   if (scrollView) {
-    NSClipView *clipView = [scrollView contentView];
-    NSRect contentRect = [clipView bounds];
+    NSClipView *clipView = scrollView.contentView;
+    NSRect contentRect = clipView.bounds;
     [clipView scrollToPoint: NSMakePoint(contentRect.origin.x, topLine * vs.lineHeight)];
     [scrollView reflectScrolledClipView:clipView];
   }
@@ -1912,8 +1912,8 @@ void ScintillaCocoa::SetHorizontalScrollPos()
     xOffset = maxXOffset;
   NSScrollView *scrollView = ScrollContainer();
   if (scrollView) {
-    NSClipView * clipView = [scrollView contentView];
-    NSRect contentRect = [clipView bounds];
+    NSClipView * clipView = scrollView.contentView;
+    NSRect contentRect = clipView.bounds;
     [clipView scrollToPoint: NSMakePoint(xOffset, contentRect.origin.y)];
     [scrollView reflectScrolledClipView:clipView];
   }
@@ -1942,11 +1942,11 @@ bool ScintillaCocoa::SetScrollingSize(void) {
 	if (!enteredSetScrollingSize) {
 		enteredSetScrollingSize = true;
 		NSScrollView *scrollView = ScrollContainer();
-		NSClipView *clipView = [ScrollContainer() contentView];
-		NSRect clipRect = [clipView bounds];
+		NSClipView *clipView = ScrollContainer().contentView;
+		NSRect clipRect = clipView.bounds;
 		CGFloat docHeight = cs.LinesDisplayed() * vs.lineHeight;
 		if (!endAtLastLine)
-			docHeight += (int([scrollView bounds].size.height / vs.lineHeight)-3) * vs.lineHeight;
+			docHeight += (int(scrollView.bounds.size.height / vs.lineHeight)-3) * vs.lineHeight;
 		// Allow extra space so that last scroll position places whole line at top
 		int clipExtra = int(clipRect.size.height) % vs.lineHeight;
 		docHeight += clipExtra;
@@ -1959,14 +1959,14 @@ bool ScintillaCocoa::SetScrollingSize(void) {
 		if (!showHorizontalScroll)
 			docWidth = clipRect.size.width;
 		NSRect contentRect = {{0, 0}, {docWidth, docHeight}};
-		NSRect contentRectNow = [inner frame];
+		NSRect contentRectNow = inner.frame;
 		changes = (contentRect.size.width != contentRectNow.size.width) ||
 			(contentRect.size.height != contentRectNow.size.height);
 		if (changes) {
-			[inner setFrame: contentRect];
+			inner.frame = contentRect;
 		}
-		[scrollView setHasVerticalScroller: verticalScrollBarVisible];
-		[scrollView setHasHorizontalScroller: showHorizontalScroll];
+		scrollView.hasVerticalScroller = verticalScrollBarVisible;
+		scrollView.hasHorizontalScroller = showHorizontalScroll;
 		SetVerticalScrollPos();
 		enteredSetScrollingSize = false;
 	}
@@ -2230,7 +2230,7 @@ static int TranslateModifierFlags(NSUInteger modifiers)
 bool ScintillaCocoa::KeyboardInput(NSEvent* event)
 {
   // For now filter out function keys.
-  NSString* input = [event charactersIgnoringModifiers];
+  NSString* input = event.charactersIgnoringModifiers;
 
   bool handled = false;
 
@@ -2238,7 +2238,7 @@ bool ScintillaCocoa::KeyboardInput(NSEvent* event)
   for (size_t i = 0; i < input.length; i++)
   {
     const UniChar originalKey = [input characterAtIndex: i];
-    NSEventModifierFlags modifierFlags = [event modifierFlags];
+    NSEventModifierFlags modifierFlags = event.modifierFlags;
       
     UniChar key = KeyTranslate(originalKey, modifierFlags);
 
@@ -2397,7 +2397,7 @@ void ScintillaCocoa::MouseEntered(NSEvent* event)
     WndProc(SCI_SETCURSOR, (long int)SC_CURSORNORMAL, 0);
 
     // Mouse location is given in screen coordinates and might also be outside of our bounds.
-    Point location = ConvertPoint([event locationInWindow]);
+    Point location = ConvertPoint(event.locationInWindow);
     ButtonMove(location);
   }
 }
@@ -2413,22 +2413,22 @@ void ScintillaCocoa::MouseExited(NSEvent* /* event */)
 
 void ScintillaCocoa::MouseDown(NSEvent* event)
 {
-  Point location = ConvertPoint([event locationInWindow]);
-  NSTimeInterval time = [event timestamp];
-  bool command = ([event modifierFlags] & NSCommandKeyMask) != 0;
-  bool shift = ([event modifierFlags] & NSShiftKeyMask) != 0;
-  bool alt = ([event modifierFlags] & NSAlternateKeyMask) != 0;
+  Point location = ConvertPoint(event.locationInWindow);
+  NSTimeInterval time = event.timestamp;
+  bool command = (event.modifierFlags & NSCommandKeyMask) != 0;
+  bool shift = (event.modifierFlags & NSShiftKeyMask) != 0;
+  bool alt = (event.modifierFlags & NSAlternateKeyMask) != 0;
 
   ButtonDown(Point(location.x, location.y), (int) (time * 1000), shift, command, alt);
 }
 
 void ScintillaCocoa::RightMouseDown(NSEvent *event)
 {
-  Point location = ConvertPoint([event locationInWindow]);
-  NSTimeInterval time = [event timestamp];
-  bool command = ([event modifierFlags] & NSCommandKeyMask) != 0;
-  bool shift = ([event modifierFlags] & NSShiftKeyMask) != 0;
-  bool alt = ([event modifierFlags] & NSAlternateKeyMask) != 0;
+  Point location = ConvertPoint(event.locationInWindow);
+  NSTimeInterval time = event.timestamp;
+  bool command = (event.modifierFlags & NSCommandKeyMask) != 0;
+  bool shift = (event.modifierFlags & NSShiftKeyMask) != 0;
+  bool alt = (event.modifierFlags & NSAlternateKeyMask) != 0;
 
   RightButtonDownWithModifiers(Point(location.x, location.y), (int) (time * 1000), ModifierFlags(shift, command, alt));
 }
@@ -2439,32 +2439,32 @@ void ScintillaCocoa::MouseMove(NSEvent* event)
 {
   lastMouseEvent = event;
 
-  ButtonMoveWithModifiers(ConvertPoint([event locationInWindow]), TranslateModifierFlags([event modifierFlags]));
+  ButtonMoveWithModifiers(ConvertPoint(event.locationInWindow), TranslateModifierFlags(event.modifierFlags));
 }
 
 //--------------------------------------------------------------------------------------------------
 
 void ScintillaCocoa::MouseUp(NSEvent* event)
 {
-  NSTimeInterval time = [event timestamp];
-  bool control = ([event modifierFlags] & NSControlKeyMask) != 0;
+  NSTimeInterval time = event.timestamp;
+  bool control = (event.modifierFlags & NSControlKeyMask) != 0;
 
-  ButtonUp(ConvertPoint([event locationInWindow]), (int) (time * 1000), control);
+  ButtonUp(ConvertPoint(event.locationInWindow), (int) (time * 1000), control);
 }
 
 //--------------------------------------------------------------------------------------------------
 
 void ScintillaCocoa::MouseWheel(NSEvent* event)
 {
-  bool command = ([event modifierFlags] & NSCommandKeyMask) != 0;
+  bool command = (event.modifierFlags & NSCommandKeyMask) != 0;
   int dY = 0;
 
     // In order to make scrolling with larger offset smoother we scroll less lines the larger the
     // delta value is.
-    if ([event deltaY] < 0)
-    dY = -(int) sqrt(-10.0 * [event deltaY]);
+    if (event.deltaY < 0)
+    dY = -(int) sqrt(-10.0 * event.deltaY);
     else
-    dY = (int) sqrt(10.0 * [event deltaY]);
+    dY = (int) sqrt(10.0 * event.deltaY);
 
   if (command)
   {
@@ -2589,7 +2589,7 @@ void ScintillaCocoa::ShowFindIndicatorForRange(NSRange charRange, BOOL retaining
       // Content layer is unflipped on 10.9, but the indicator shows wrong unless flipped
       layerFindIndicator.geometryFlipped = YES;
     }
-    [[content layer] addSublayer:layerFindIndicator];
+    [content.layer addSublayer:layerFindIndicator];
   }
   [layerFindIndicator removeAnimationForKey:@"animateFound"];
 

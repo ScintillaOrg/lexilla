@@ -1112,14 +1112,14 @@ Window::~Window()
 bool Window::HasFocus()
 {
   NSView* container = (__bridge NSView *)(wid);
-  return [[container window] firstResponder] == container;
+  return container.window.firstResponder == container;
 }
 
 //--------------------------------------------------------------------------------------------------
 
 static CGFloat ScreenMax()
 {
-  return NSMaxY([[NSScreen mainScreen] frame]);
+  return NSMaxY([NSScreen mainScreen].frame);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1135,15 +1135,15 @@ PRectangle Window::GetPosition()
     {
       // NSView
       NSView* view = idWin;
-      win = [view window];
-      rect = [view convertRect: [view bounds] toView: nil];
+      win = view.window;
+      rect = [view convertRect: view.bounds toView: nil];
       rect = [win convertRectToScreen:rect];
     }
     else
     {
       // NSWindow
       win = idWin;
-      rect = [win frame];
+      rect = win.frame;
     }
     CGFloat screenHeight = ScreenMax();
     // Invert screen positions to match Scintilla
@@ -1170,8 +1170,8 @@ void Window::SetPosition(PRectangle rc)
       // Moves this view inside the parent view
       NSRect nsrc = NSMakeRect(rc.left, rc.bottom, rc.Width(), rc.Height());
       NSView* view = idWin;
-      nsrc = [[view window] convertRectFromScreen:nsrc];
-      [view setFrame: nsrc];
+      nsrc = [view.window convertRectFromScreen:nsrc];
+      view.frame = nsrc;
     }
     else
     {
@@ -1247,7 +1247,7 @@ void Window::InvalidateAll()
     {
       // NSWindow
       NSWindow* win = idWin;
-      container = [win contentView];
+      container = win.contentView;
       container.needsDisplay = YES;
     }
     container.needsDisplay = YES;
@@ -1273,7 +1273,7 @@ void Window::InvalidateRectangle(PRectangle rc)
     {
       // NSWindow
       NSWindow* win = idWin;
-      container = [win contentView];
+      container = win.contentView;
     }
     [container setNeedsDisplayInRect: PRectangleToNSRect(rc)];
   }
@@ -1316,7 +1316,7 @@ void Window::SetTitle(const char* s)
     {
       NSWindow* win = idWin;
       NSString* sTitle = @(s);
-      [win setTitle:sTitle];
+      win.title = sTitle;
     }
   }
 }
@@ -1331,15 +1331,15 @@ PRectangle Window::GetMonitorRect(Point)
     if ([idWin isKindOfClass: [NSView class]])
     {
       NSView* view = idWin;
-      idWin = [view window];
+      idWin = view.window;
     }
     if ([idWin isKindOfClass: [NSWindow class]])
     {
       PRectangle rcPosition = GetPosition();
 
       NSWindow* win = idWin;
-      NSScreen* screen = [win screen];
-      NSRect rect = [screen visibleFrame];
+      NSScreen* screen = win.screen;
+      NSRect rect = screen.visibleFrame;
       CGFloat screenHeight = rect.origin.y + rect.size.height;
       // Invert screen positions to match Scintilla
       PRectangle rcWork(
@@ -1430,7 +1430,7 @@ NSObject
 #pragma unused(aTableView)
 	if (!box)
 		return nil;
-	if ([(NSString*)[aTableColumn identifier] isEqualToString: @"icon"])
+	if ([(NSString*)aTableColumn.identifier isEqualToString: @"icon"])
 	{
 		return box->ImageForRow(rowIndex);
 	}
@@ -1617,26 +1617,26 @@ void ListBoxImpl::Create(Window& /*parent*/, int /*ctrlID*/, Scintilla::Point pt
   [scroller setHasVerticalScroller:YES];
   table = [[NSTableView alloc] initWithFrame: scRect];
   [table setHeaderView:nil];
-  [scroller setDocumentView: table];
+  scroller.documentView = table;
   colIcon = [[NSTableColumn alloc] initWithIdentifier:@"icon"];
-  [colIcon setWidth: 20];
+  colIcon.width = 20;
   [colIcon setEditable:NO];
   [colIcon setHidden:YES];
   NSImageCell* imCell = [[NSImageCell alloc] init];
-  [colIcon setDataCell:imCell];
+  colIcon.dataCell = imCell;
   [table addTableColumn:colIcon];
   colText = [[NSTableColumn alloc] initWithIdentifier:@"name"];
-  [colText setResizingMask:NSTableColumnAutoresizingMask];
+  colText.resizingMask = NSTableColumnAutoresizingMask;
   [colText setEditable:NO];
   [table addTableColumn:colText];
   ds = [[AutoCompletionDataSource alloc] init];
-  [ds setBox:this];
-  [table setDataSource: ds];	// Weak reference
-  [scroller setAutoresizingMask: NSViewWidthSizable | NSViewHeightSizable];
-  [[winLB contentView] addSubview: scroller];
+  ds.box = this;
+  table.dataSource = ds;	// Weak reference
+  scroller.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+  [winLB.contentView addSubview: scroller];
 
-  [table setTarget:ds];
-  [table setDoubleAction:@selector(doubleClick:)];
+  table.target = ds;
+  table.doubleAction = @selector(doubleClick:);
   table.selectionHighlightStyle = NSTableViewSelectionHighlightStyleSourceList;
   wid = (__bridge_retained WindowID)winLB;
 }
@@ -1649,9 +1649,9 @@ void ListBoxImpl::SetFont(Font& font_)
   font.Release();
   font.SetID(new QuartzTextStyle(*style));
   NSFont *pfont = (__bridge NSFont *)style->getFontRef();
-  [[colText dataCell] setFont: pfont];
-  CGFloat itemHeight = ceil([pfont boundingRectForFont].size.height);
-  [table setRowHeight:itemHeight];
+  [colText.dataCell setFont: pfont];
+  CGFloat itemHeight = ceil(pfont.boundingRectForFont.size.height);
+  table.rowHeight = itemHeight;
 }
 
 void ListBoxImpl::SetAverageCharWidth(int width)
@@ -1675,7 +1675,7 @@ PRectangle ListBoxImpl::GetDesiredRect()
   rcDesired = GetPosition();
 
   // There appears to be an extra pixel above and below the row contents
-  CGFloat itemHeight = [table rowHeight] + 2;
+  CGFloat itemHeight = table.rowHeight + 2;
 
   int rows = Length();
   if ((rows == 0) || (rows > desiredVisibleRows))
@@ -1703,10 +1703,10 @@ PRectangle ListBoxImpl::GetDesiredRect()
 
 int ListBoxImpl::CaretFromEdge()
 {
-  if ([colIcon isHidden])
+  if (colIcon.hidden)
     return 3;
   else
-    return 6 + static_cast<int>([colIcon width]);
+    return 6 + static_cast<int>(colIcon.width);
 }
 
 void ListBoxImpl::ReleaseViews()
@@ -1736,7 +1736,7 @@ void ListBoxImpl::Append(char* s, int type)
   if (width > maxItemWidth)
   {
     maxItemWidth = width;
-    [colText setWidth: maxItemWidth];
+    colText.width = maxItemWidth;
   }
   NSImage *img = images[@(type)];
   if (img)
@@ -1746,7 +1746,7 @@ void ListBoxImpl::Append(char* s, int type)
     {
       [colIcon setHidden: NO];
       maxIconWidth = widthIcon;
-      [colIcon setWidth: maxIconWidth];
+      colIcon.width = maxIconWidth;
     }
   }
 }
@@ -1797,7 +1797,7 @@ void ListBoxImpl::Select(int n)
 
 int ListBoxImpl::GetSelection()
 {
-  return static_cast<int>([table selectedRow]);
+  return static_cast<int>(table.selectedRow);
 }
 
 int ListBoxImpl::Find(const char* prefix)
@@ -1922,7 +1922,7 @@ void Window::Destroy()
 
 - (void) handleCommand: (NSMenuItem*) sender
 {
-  owner->HandleCommand([sender tag]);
+  owner->HandleCommand(sender.tag);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -2015,7 +2015,7 @@ ColourDesired Platform::ChromeHighlight()
 const char *Platform::DefaultFont()
 {
   NSString* name = [[NSUserDefaults standardUserDefaults] stringForKey: @"NSFixedPitchFont"];
-  return [name UTF8String];
+  return name.UTF8String;
 }
 
 //--------------------------------------------------------------------------------------------------

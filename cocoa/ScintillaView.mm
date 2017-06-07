@@ -78,7 +78,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
     {
       [currentCursors addObject: reverseArrowCursor];
     }
-    [self setClientView:[aScrollView documentView]];
+    self.clientView = aScrollView.documentView;
     if ([self respondsToSelector: @selector(setAccessibilityLabel:)])
        self.accessibilityLabel = @"Scintilla Margin";
   }
@@ -88,9 +88,9 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 - (void) setFrame: (NSRect) frame
 {
-  [super setFrame: frame];
+  super.frame = frame;
 
-  [[self window] invalidateCursorRectsForView: self];
+  [self.window invalidateCursorRectsForView: self];
 }
 
 - (CGFloat)requiredThickness
@@ -101,8 +101,8 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 - (void)drawHashMarksAndLabelsInRect:(NSRect)aRect
 {
   if (owner) {
-    NSRect contentRect = [[[self scrollView] contentView] bounds];
-    NSRect marginRect = [self bounds];
+    NSRect contentRect = self.scrollView.contentView.bounds;
+    NSRect marginRect = self.bounds;
     // Ensure paint to bottom of view to avoid glitches
     if (marginRect.size.height > contentRect.size.height) {
       // Legacy scroll bar mode leaves a poorly painted corner
@@ -129,8 +129,8 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 
 - (void) mouseDown: (NSEvent *) theEvent
 {
-  NSClipView *textView = [[self scrollView] contentView];
-  [[textView window] makeFirstResponder:textView];
+  NSClipView *textView = self.scrollView.contentView;
+  [textView.window makeFirstResponder:textView];
   owner.backend->MouseDown(theEvent);
 }
 
@@ -170,8 +170,8 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   [super resetCursorRects];
 
   int x = 0;
-  NSRect marginRect = [self bounds];
-  size_t co = [currentCursors count];
+  NSRect marginRect = self.bounds;
+  size_t co = currentCursors.count;
   for (size_t i=0; i<co; i++)
   {
     long cursType = owner.backend->WndProc(SCI_GETMARGINCURSORN, i, 0);
@@ -247,7 +247,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   }
 
   int opts = (NSTrackingActiveAlways | NSTrackingInVisibleRect | NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved);
-  trackingArea = [[NSTrackingArea alloc] initWithRect:[self bounds]
+  trackingArea = [[NSTrackingArea alloc] initWithRect:self.bounds
                                               options:opts
                                                 owner:self
                                              userInfo:nil];
@@ -262,7 +262,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
  */
 - (void) setFrame: (NSRect) frame
 {
-  [super setFrame: frame];
+  super.frame = frame;
 
   mOwner.backend->Resize();
 }
@@ -278,7 +278,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   mCurrentCursor = cursorFromEnum(eCursor);
 
   // Trigger recreation of the cursor rectangle(s).
-  [[self window] invalidateCursorRectsForView: self];
+  [self.window invalidateCursorRectsForView: self];
   [mOwner updateMarginCursors];
 }
 
@@ -343,7 +343,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
  */
 - (void) drawRect: (NSRect) rect
 {
-  CGContextRef context = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
+  CGContextRef context = (CGContextRef) [NSGraphicsContext currentContext].graphicsPort;
 
   if (!mOwner.backend->Draw(rect, context)) {
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -436,7 +436,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   NSString *result = @(text.c_str());
   NSMutableAttributedString *asResult = [[NSMutableAttributedString alloc] initWithString:result];
 
-  const NSRange rangeAS = NSMakeRange(0, [asResult length]);
+  const NSRange rangeAS = NSMakeRange(0, asResult.length);
   // SCI_GETSTYLEAT reports a signed byte but want an unsigned to index into styles
   const char styleByte = static_cast<char>([mOwner message: SCI_GETSTYLEAT wParam:posRange.location]);
   const long style = static_cast<unsigned char>(styleByte);
@@ -456,7 +456,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
 {
   const NSRect rectPoint = {point, NSZeroSize};
   const NSRect rectInWindow = [self.window convertRectFromScreen:rectPoint];
-  const NSRect rectLocal = [[[self superview] superview] convertRect:rectInWindow fromView:nil];
+  const NSRect rectLocal = [self.superview.superview convertRect:rectInWindow fromView:nil];
 
   const long position = [mOwner message: SCI_CHARPOSITIONFROMPOINT
                                  wParam: rectLocal.origin.x
@@ -497,7 +497,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   rect.size.width = [mOwner message: SCI_POINTXFROMPOSITION wParam: 0 lParam: rangeEnd] - rect.origin.x;
   rect.size.height = [mOwner message: SCI_POINTYFROMPOSITION wParam: 0 lParam: rangeEnd] - rect.origin.y;
   rect.size.height += [mOwner message: SCI_TEXTHEIGHT wParam: 0 lParam: 0];
-  const NSRect rectInWindow = [[[self superview] superview] convertRect:rect toView:nil];
+  const NSRect rectInWindow = [self.superview.superview convertRect:rect toView:nil];
   const NSRect rectScreen = [self.window convertRectToScreen:rectInWindow];
 
   return rectScreen;
@@ -654,7 +654,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
   // need to insert newText at each selection, mark each piece of new text and then
   // select range relative to each insertion.
 
-  if ([newText length])
+  if (newText.length)
   {
     // Switching into composition.
     mOwner.backend->CompositionStart();
@@ -795,7 +795,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor)
     return proposedVisibleRect;
   NSRect rc = proposedVisibleRect;
   // Snap to lines
-  NSRect contentRect = [self bounds];
+  NSRect contentRect = self.bounds;
   if ((rc.origin.y > 0) && (NSMaxY(rc) < contentRect.size.height)) {
     // Only snap for positions inside the document - allow outside
     // for overshoot.
@@ -995,7 +995,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 
 - (BOOL) validateUserInterfaceItem: (id <NSValidatedUserInterfaceItem>) anItem
 {
-  SEL action = [anItem action];
+  SEL action = anItem.action;
   if (action==@selector(undo:)) {
     return [self canUndo];
   }
@@ -1182,7 +1182,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
  */
 - (NSRect)accessibilityFrameForRange:(NSRange)range {
   const NSRect rectInView = mOwner.backend->FrameForRange(range);
-  const NSRect rectInWindow = [[[self superview] superview] convertRect:rectInView toView:nil];
+  const NSRect rectInWindow = [self.superview.superview convertRect:rectInView toView:nil];
   return [self.window convertRectToScreen:rectInWindow];
 }
 
@@ -1221,13 +1221,13 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
   rect.origin.y += [mOwner message: SCI_TEXTHEIGHT wParam: 0 lParam: 0];
   rect.size.width = 1.0;
   rect.size.height = 1.0;
-  NSRect rectInWindow = [[[self superview] superview] convertRect:rect toView:nil];
+  NSRect rectInWindow = [self.superview.superview convertRect:rect toView:nil];
   NSPoint pt = rectInWindow.origin;
   NSEvent *event = [NSEvent mouseEventWithType: NSRightMouseDown
 				      location: pt
 				 modifierFlags: 0
 				     timestamp: 0
-				  windowNumber: [[self window] windowNumber]
+				  windowNumber: self.window.windowNumber
 				       context: nil
 				   eventNumber: 0
 				    clickCount: 1
@@ -1390,9 +1390,9 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 - (void) suspendDrawing: (BOOL) suspend
 {
   if (suspend)
-    [[self window] disableFlushWindow];
+    [self.window disableFlushWindow];
   else
-    [[self window] enableFlushWindow];
+    [self.window enableFlushWindow];
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1497,10 +1497,10 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
     // (horizontal or vertical).
     NSRect scrollerRect = NSMakeRect(0, 0, 100, 10);
     scrollView = [[NSScrollView alloc] initWithFrame: scrollerRect];
-    [scrollView setDocumentView: mContent];
+    scrollView.documentView = mContent;
     [scrollView setHasVerticalScroller:YES];
     [scrollView setHasHorizontalScroller:YES];
-    [scrollView setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+    scrollView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
     //[scrollView setScrollerStyle:NSScrollerStyleLegacy];
     //[scrollView setScrollerKnobStyle:NSScrollerKnobStyleDark];
     //[scrollView setHorizontalScrollElasticity:NSScrollElasticityNone];
@@ -1508,8 +1508,8 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 
     marginView = [[SCIMarginView alloc] initWithScrollView:scrollView];
     marginView.owner = self;
-    [marginView setRuleThickness:[marginView requiredThickness]];
-    [scrollView setVerticalRulerView:marginView];
+    marginView.ruleThickness = marginView.requiredThickness;
+    scrollView.verticalRulerView = marginView;
     [scrollView setHasHorizontalRuler:NO];
     [scrollView setHasVerticalRuler:YES];
     [scrollView setRulersVisible:YES];
@@ -1536,13 +1536,13 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
     [center addObserver:self
                selector:@selector(windowWillMove:)
                    name:NSWindowWillMoveNotification
-                 object:[self window]];
+                 object:self.window];
 
-    [[scrollView contentView] setPostsBoundsChangedNotifications:YES];
+    [scrollView.contentView setPostsBoundsChangedNotifications:YES];
     [center addObserver:self
 	       selector:@selector(scrollerAction:)
 		   name:NSViewBoundsDidChangeNotification
-		 object:[scrollView contentView]];
+		 object:scrollView.contentView];
   }
   return self;
 }
@@ -1590,7 +1590,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
   [self positionSubViews];
 
   // Enable also mouse move events for our window (and so this view).
-  [[self window] setAcceptsMouseMovedEvents: YES];
+  [self.window setAcceptsMouseMovedEvents: YES];
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1603,9 +1603,9 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
   CGFloat scrollerWidth = [NSScroller scrollerWidthForControlSize:NSRegularControlSize
 						scrollerStyle:NSScrollerStyleLegacy];
 
-  NSSize size = [self frame].size;
+  NSSize size = self.frame.size;
   NSRect barFrame = {{0, size.height - scrollerWidth}, {size.width, scrollerWidth}};
-  BOOL infoBarVisible = mInfoBar != nil && ![mInfoBar isHidden];
+  BOOL infoBarVisible = mInfoBar != nil && !mInfoBar.hidden;
 
   // Horizontal offset of the content. Almost always 0 unless the vertical scroller
   // is on the left side.
@@ -1624,12 +1624,12 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
     }
   }
 
-  if (!NSEqualRects([scrollView frame], scrollRect)) {
-    [scrollView setFrame: scrollRect];
+  if (!NSEqualRects(scrollView.frame, scrollRect)) {
+    scrollView.frame = scrollRect;
   }
 
   if (infoBarVisible)
-    [mInfoBar setFrame: barFrame];
+    mInfoBar.frame = barFrame;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1642,7 +1642,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
   if (marginView.ruleThickness != width)
   {
     marginView.marginWidth = width;
-    [marginView setRuleThickness:[marginView requiredThickness]];
+    marginView.ruleThickness = marginView.requiredThickness;
   }
 }
 
@@ -1665,8 +1665,8 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
  */
 - (void) setFrame: (NSRect) newFrame
 {
-  NSRect previousFrame = [self frame];
-  [super setFrame: newFrame];
+  NSRect previousFrame = self.frame;
+  super.frame = newFrame;
   [self positionSubViews];
   if (!NSEqualRects(previousFrame, newFrame)) {
     mBackend->Resize();
@@ -1750,7 +1750,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
  */
 - (void) setString: (NSString*) aString
 {
-  const char* text = [aString UTF8String];
+  const char* text = aString.UTF8String;
   mBackend->WndProc(SCI_SETTEXT, 0, (long) text);
 }
 
@@ -1758,7 +1758,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 
 - (void) insertString: (NSString*) aString atOffset: (int)offset
 {
-  const char* text = [aString UTF8String];
+  const char* text = aString.UTF8String;
   mBackend->WndProc(SCI_ADDTEXT, offset, (long) text);
 }
 
@@ -1786,7 +1786,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
 //--------------------------------------------------------------------------------------------------
 
 - (void) updateMarginCursors {
-  [[self window] invalidateCursorRectsForView: marginView];
+  [self.window invalidateCursorRectsForView: marginView];
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -1897,11 +1897,11 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
  */
 - (void) setColorProperty: (int) property parameter: (long) parameter value: (NSColor*) value
 {
-  if ([value colorSpaceName] != NSDeviceRGBColorSpace)
+  if (value.colorSpaceName != NSDeviceRGBColorSpace)
     value = [value colorUsingColorSpaceName: NSDeviceRGBColorSpace];
-  long red = static_cast<long>([value redComponent] * 255);
-  long green = static_cast<long>([value greenComponent] * 255);
-  long blue = static_cast<long>([value blueComponent] * 255);
+  long red = static_cast<long>(value.redComponent * 255);
+  long green = static_cast<long>(value.greenComponent * 255);
+  long blue = static_cast<long>(value.blueComponent * 255);
 
   long color = (blue << 16) + (green << 8) + red;
   mBackend->WndProc(property, parameter, color);
@@ -1915,9 +1915,9 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
  */
 - (void) setColorProperty: (int) property parameter: (long) parameter fromHTML: (NSString*) fromHTML
 {
-  if ([fromHTML length] > 3 && [fromHTML characterAtIndex: 0] == '#')
+  if (fromHTML.length > 3 && [fromHTML characterAtIndex: 0] == '#')
   {
-    bool longVersion = [fromHTML length] > 6;
+    bool longVersion = fromHTML.length > 6;
     int index = 1;
 
     char value[3] = {0, 0, 0};
@@ -1995,7 +1995,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
  */
 - (void) setStringProperty: (int) property parameter: (long) parameter value: (NSString*) value
 {
-  const char* rawValue = [value UTF8String];
+  const char* rawValue = value.UTF8String;
   mBackend->WndProc(property, parameter, (sptr_t) rawValue);
 }
 
@@ -2018,8 +2018,8 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
  */
 - (void) setLexerProperty: (NSString*) name value: (NSString*) value
 {
-  const char* rawName = [name UTF8String];
-  const char* rawValue = [value UTF8String];
+  const char* rawName = name.UTF8String;
+  const char* rawValue = value.UTF8String;
   mBackend->WndProc(SCI_SETPROPERTY, (sptr_t) rawName, (sptr_t) rawValue);
 }
 
@@ -2030,7 +2030,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
  */
 - (NSString*) getLexerProperty: (NSString*) name
 {
-  const char* rawName = [name UTF8String];
+  const char* rawName = name.UTF8String;
   const char* result = (const char*) mBackend->WndProc(SCI_SETPROPERTY, (sptr_t) rawName, 0);
   return @(result);
 }
@@ -2164,7 +2164,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
     [self getGeneralProperty: SCI_SETSELECTIONSTART parameter: selectionEnd];
   [self setGeneralProperty: SCI_SEARCHANCHOR value: 0];
   sptr_t result;
-  const char* textToSearch = [searchText UTF8String];
+  const char* textToSearch = searchText.UTF8String;
 
   // The following call will also set the selection if something was found.
   if (backwards)
@@ -2250,9 +2250,9 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
   [self setGeneralProperty: SCI_SETTARGETSTART value: startPosition];
   [self setGeneralProperty: SCI_SETTARGETEND value: endPosition];
 
-  const char* textToSearch = [searchText UTF8String];
+  const char* textToSearch = searchText.UTF8String;
   long sourceLength = strlen(textToSearch); // Length in bytes.
-  const char* replacement = [newText UTF8String];
+  const char* replacement = newText.UTF8String;
   long targetLength = strlen(replacement);  // Length in bytes.
   sptr_t result;
 
@@ -2316,7 +2316,7 @@ sourceOperationMaskForDraggingContext: (NSDraggingContext) context
   {
     [self setGeneralProperty: SCI_STYLESETFONT
                    parameter: i
-                       value: (sptr_t)[font UTF8String]];
+                       value: (sptr_t)font.UTF8String];
     [self setGeneralProperty: SCI_STYLESETSIZE
                    parameter: i
                        value: size];
