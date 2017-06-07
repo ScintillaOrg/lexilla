@@ -338,7 +338,7 @@ static float BarFontSize = 10.0;
   {
     mDisplayMask = display;
     [self positionSubViews];
-    [self needsDisplay];
+    self.needsDisplay = YES;
   }
 }
 
