@@ -271,7 +271,7 @@ static void ScanNumber(Accessor& styler, Sci_Position& pos) {
 		pos++;
 		c = styler.SafeGetCharAt(pos, '\0');
 		n = styler.SafeGetCharAt(pos + 1, '\0');
-		if (c == '8' || c == 's') {
+		if (c == '8') {
 			pos++;
 		} else if (c == '1' && n == '6') {
 			pos += 2;
@@ -279,6 +279,8 @@ static void ScanNumber(Accessor& styler, Sci_Position& pos) {
 			pos += 2;
 		} else if (c == '6' && n == '4') {
 			pos += 2;
+		} else if (styler.Match(pos, "size")) {
+			pos += 4;
 		} else {
 			error = true;
 		}
