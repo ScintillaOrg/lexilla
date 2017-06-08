@@ -16,39 +16,33 @@
 #include "QuartzTextStyle.h"
 
 
-class QuartzTextLayout
-{
+class QuartzTextLayout {
 public:
-    /** Create a text layout for drawing on the specified context. */
-    explicit QuartzTextLayout( CGContextRef context )
-    {
+	/** Create a text layout for drawing on the specified context. */
+	explicit QuartzTextLayout(CGContextRef context) {
 		mString = NULL;
 		mLine = NULL;
 		stringLength = 0;
-        setContext(context);
-    }
+		setContext(context);
+	}
 
-    ~QuartzTextLayout()
-    {
-		if ( mString != NULL )
-		{
+	~QuartzTextLayout() {
+		if (mString != NULL) {
 			CFRelease(mString);
 			mString = NULL;
 		}
-		if ( mLine != NULL )
-		{
+		if (mLine != NULL) {
 			CFRelease(mLine);
 			mLine = NULL;
 		}
-    }
+	}
 
-    inline void setText( const UInt8* buffer, size_t byteLength, CFStringEncoding encoding, const QuartzTextStyle& r )
-    {
-		CFStringRef str = CFStringCreateWithBytes( NULL, buffer, byteLength, encoding, false );
-        if (!str)
-            return;
+	inline void setText(const UInt8 *buffer, size_t byteLength, CFStringEncoding encoding, const QuartzTextStyle &r) {
+		CFStringRef str = CFStringCreateWithBytes(NULL, buffer, byteLength, encoding, false);
+		if (!str)
+			return;
 
-	        stringLength = CFStringGetLength(str);
+		stringLength = CFStringGetLength(str);
 
 		CFMutableDictionaryRef stringAttribs = r.getCTStyle();
 
@@ -60,14 +54,13 @@ public:
 			CFRelease(mLine);
 		mLine = ::CTLineCreateWithAttributedString(mString);
 
-		CFRelease( str );
-    }
+		CFRelease(str);
+	}
 
-    /** Draw the text layout into the current CGContext at the specified position.
-    * @param x The x axis position to draw the baseline in the current CGContext.
-    * @param y The y axis position to draw the baseline in the current CGContext. */
-    void draw( float x, float y )
-    {
+	/** Draw the text layout into the current CGContext at the specified position.
+	* @param x The x axis position to draw the baseline in the current CGContext.
+	* @param y The y axis position to draw the baseline in the current CGContext. */
+	void draw(float x, float y) {
 		if (mLine == NULL)
 			return;
 
@@ -78,31 +71,29 @@ public:
 
 		// And finally, draw!
 		::CTLineDraw(mLine, gc);
-    }
+	}
 
-	float MeasureStringWidth()
-	{
+	float MeasureStringWidth() {
 		if (mLine == NULL)
 			return 0.0f;
 
 		return static_cast<float>(::CTLineGetTypographicBounds(mLine, NULL, NULL, NULL));
 	}
 
-    CTLineRef getCTLine() {
-        return mLine;
-    }
+	CTLineRef getCTLine() {
+		return mLine;
+	}
 
-    CFIndex getStringLength() {
-	    return stringLength;
-    }
+	CFIndex getStringLength() {
+		return stringLength;
+	}
 
-    inline void setContext (CGContextRef context)
-    {
-        gc = context;
-    }
+	inline void setContext(CGContextRef context) {
+		gc = context;
+	}
 
 private:
-    CGContextRef gc;
+	CGContextRef gc;
 	CFAttributedStringRef mString;
 	CTLineRef mLine;
 	CFIndex stringLength;
