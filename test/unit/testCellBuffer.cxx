@@ -21,7 +21,7 @@
 TEST_CASE("CellBuffer") {
 
 	const char sText[] = "Scintilla";
-	const size_t sLength = strlen(sText);
+	const Sci::Position sLength = static_cast<Sci::Position>(strlen(sText));
 
 	CellBuffer cb;
 	
@@ -42,7 +42,7 @@ TEST_CASE("CellBuffer") {
 
 	SECTION("InsertTwoLines") {
 		const char sText2[] = "Two\nLines";
-		const size_t sLength2 = strlen(sText2);
+		const Sci::Position sLength2 = static_cast<Sci::Position>(strlen(sText2));
 		bool startSequence = false;
 		const char *cpChange = cb.InsertString(0, sText2, static_cast<int>(sLength), startSequence);
 		REQUIRE(startSequence);
