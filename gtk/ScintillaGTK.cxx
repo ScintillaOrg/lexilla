@@ -85,13 +85,8 @@
 
 #include "Converter.h"
 
-#if GTK_CHECK_VERSION(2,20,0)
 #define IS_WIDGET_REALIZED(w) (gtk_widget_get_realized(GTK_WIDGET(w)))
 #define IS_WIDGET_MAPPED(w) (gtk_widget_get_mapped(GTK_WIDGET(w)))
-#else
-#define IS_WIDGET_REALIZED(w) (GTK_WIDGET_REALIZED(w))
-#define IS_WIDGET_MAPPED(w) (GTK_WIDGET_MAPPED(w))
-#endif
 
 #define SC_INDICATOR_INPUT INDIC_IME
 #define SC_INDICATOR_TARGET INDIC_IME+1
@@ -231,11 +226,7 @@ static void UnRefCursor(GdkCursor *cursor) {
 
 void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	//Platform::DebugPrintf("ScintillaGTK::realize this\n");
-#if GTK_CHECK_VERSION(2,20,0)
 	gtk_widget_set_realized(widget, TRUE);
-#else
-	GTK_WIDGET_SET_FLAGS(widget, GTK_REALIZED);
-#endif
 	GdkWindowAttr attrs;
 	attrs.window_type = GDK_WINDOW_CHILD;
 	GtkAllocation allocation;
@@ -322,11 +313,7 @@ void ScintillaGTK::UnRealizeThis(GtkWidget *widget) {
 		if (IS_WIDGET_MAPPED(widget)) {
 			gtk_widget_unmap(widget);
 		}
-#if GTK_CHECK_VERSION(2,20,0)
 		gtk_widget_set_realized(widget, FALSE);
-#else
-		GTK_WIDGET_UNSET_FLAGS(widget, GTK_REALIZED);
-#endif
 		gtk_widget_unrealize(PWidget(wText));
 		if (PWidget(scrollbarv))
 			gtk_widget_unrealize(PWidget(scrollbarv));
@@ -361,11 +348,7 @@ static void MapWidget(GtkWidget *widget) {
 void ScintillaGTK::MapThis() {
 	try {
 		//Platform::DebugPrintf("ScintillaGTK::map this\n");
-#if GTK_CHECK_VERSION(2,20,0)
 		gtk_widget_set_mapped(PWidget(wMain), TRUE);
-#else
-		GTK_WIDGET_SET_FLAGS(PWidget(wMain), GTK_MAPPED);
-#endif
 		MapWidget(PWidget(wText));
 		MapWidget(PWidget(scrollbarh));
 		MapWidget(PWidget(scrollbarv));
@@ -387,11 +370,7 @@ void ScintillaGTK::Map(GtkWidget *widget) {
 void ScintillaGTK::UnMapThis() {
 	try {
 		//Platform::DebugPrintf("ScintillaGTK::unmap this\n");
-#if GTK_CHECK_VERSION(2,20,0)
 		gtk_widget_set_mapped(PWidget(wMain), FALSE);
-#else
-		GTK_WIDGET_UNSET_FLAGS(PWidget(wMain), GTK_MAPPED);
-#endif
 		DropGraphics(false);
 		gdk_window_hide(PWindow(wMain));
 		gtk_widget_unmap(PWidget(wText));
@@ -2723,13 +2702,8 @@ gboolean ScintillaGTK::DragMotionThis(GdkDragContext *context,
 	try {
 		Point npt(x, y);
 		SetDragPosition(SPositionFromLocation(npt, false, false, UserVirtualSpace()));
-#if GTK_CHECK_VERSION(2,22,0)
 		GdkDragAction preferredAction = gdk_drag_context_get_suggested_action(context);
 		GdkDragAction actions = gdk_drag_context_get_actions(context);
-#else
-		GdkDragAction preferredAction = context->suggested_action;
-		GdkDragAction actions = context->actions;
-#endif
 		SelectionPosition pos = SPositionFromLocation(npt);
 		if ((inDragDrop == ddDragging) && (PositionInSelection(pos.Position()))) {
 			// Avoid dragging selection onto itself as that produces a move
@@ -2807,11 +2781,7 @@ void ScintillaGTK::DragDataGet(GtkWidget *widget, GdkDragContext *context,
 		if (!sciThis->sel.Empty()) {
 			sciThis->GetSelection(selection_data, info, &sciThis->drag);
 		}
-#if GTK_CHECK_VERSION(2,22,0)
 		GdkDragAction action = gdk_drag_context_get_selected_action(context);
-#else
-		GdkDragAction action = context->action;
-#endif
 		if (action == GDK_ACTION_MOVE) {
 			for (size_t r=0; r<sciThis->sel.Count(); r++) {
 				if (sciThis->posDrop >= sciThis->sel.Range(r).Start()) {

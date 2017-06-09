@@ -45,21 +45,7 @@ static double doubleFromPangoUnits(int pu) {
 }
 
 static cairo_surface_t *CreateSimilarSurface(GdkWindow *window, cairo_content_t content, int width, int height) {
-#if GTK_CHECK_VERSION(2,22,0)
 	return gdk_window_create_similar_surface(window, content, width, height);
-#else
-	cairo_surface_t *window_surface, *surface;
-
-	g_return_val_if_fail(GDK_IS_WINDOW(window), NULL);
-
-	window_surface = GDK_DRAWABLE_GET_CLASS(window)->ref_cairo_surface(window);
-
-	surface = cairo_surface_create_similar(window_surface, content, width, height);
-
-	cairo_surface_destroy(window_surface);
-
-	return surface;
-#endif
 }
 
 static GdkWindow *WindowFromWidget(GtkWidget *w) {
@@ -310,7 +296,6 @@ void SurfaceImpl::Release() {
 }
 
 bool SurfaceImpl::Initialised() {
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 8, 0)
 	if (inited && context) {
 		if (cairo_status(context) == CAIRO_STATUS_SUCCESS) {
 			// Even when status is success, the target surface may have been
@@ -327,7 +312,6 @@ bool SurfaceImpl::Initialised() {
 		}
 		return cairo_status(context) == CAIRO_STATUS_SUCCESS;
 	}
-#endif
 	return inited;
 }
 
@@ -537,12 +521,7 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesi
 static void PathRoundRectangle(cairo_t *context, double left, double top, double width, double height, int radius) {
 	double degrees = kPi / 180.0;
 
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 2, 0)
 	cairo_new_sub_path(context);
-#else
-	// First arc is in the top-right corner and starts from a point on the top line
-	cairo_move_to(context, left + width - radius, top);
-#endif
 	cairo_arc(context, left + width - radius, top + radius, radius, -90 * degrees, 0 * degrees);
 	cairo_arc(context, left + width - radius, top + height - radius, radius, 0 * degrees, 90 * degrees);
 	cairo_arc(context, left + radius, top + height - radius, radius, 90 * degrees, 180 * degrees);
@@ -588,11 +567,7 @@ void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsi
 		rc.top += (rc.Height() - height) / 2;
 	rc.bottom = rc.top + height;
 
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1,6,0)
 	int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
-#else
-	int stride = width * 4;
-#endif
 	int ucs = stride * height;
 	std::vector<unsigned char> image(ucs);
 	for (int iy=0; iy<height; iy++) {
@@ -706,11 +681,7 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, XYPOSITION ybase, con
 			}
 			pango_layout_set_font_description(layout, PFont(font_)->pfd);
 			pango_cairo_update_layout(context, layout);
-#ifdef PANGO_VERSION
 			PangoLayoutLine *pll = pango_layout_get_line_readonly(layout,0);
-#else
-			PangoLayoutLine *pll = pango_layout_get_line(layout,0);
-#endif
 			cairo_move_to(context, xText, ybase);
 			pango_cairo_show_layout_line(context, pll);
 		}
@@ -897,11 +868,7 @@ XYPOSITION SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 				}
 				pango_layout_set_text(layout, utfForm.c_str(), utfForm.length());
 			}
-#ifdef PANGO_VERSION
 			PangoLayoutLine *pangoLine = pango_layout_get_line_readonly(layout,0);
-#else
-			PangoLayoutLine *pangoLine = pango_layout_get_line(layout,0);
-#endif
 			pango_layout_line_get_extents(pangoLine, NULL, &pos);
 			return doubleFromPangoUnits(pos.width);
 		}
