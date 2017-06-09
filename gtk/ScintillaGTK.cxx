@@ -1614,7 +1614,7 @@ void ScintillaGTK::Resize(int width, int height) {
 		gtk_widget_show(GTK_WIDGET(PWidget(scrollbarh)));
 		alloc.x = 0;
 		alloc.y = height - horizontalScrollBarHeight;
-		alloc.width = Platform::Maximum(minHScrollBarWidth, width - verticalScrollBarWidth);
+		alloc.width = std::max(minHScrollBarWidth, width - verticalScrollBarWidth);
 		alloc.height = horizontalScrollBarHeight;
 		gtk_widget_size_allocate(GTK_WIDGET(PWidget(scrollbarh)), &alloc);
 	} else {
@@ -1627,7 +1627,7 @@ void ScintillaGTK::Resize(int width, int height) {
 		alloc.x = width - verticalScrollBarWidth;
 		alloc.y = 0;
 		alloc.width = verticalScrollBarWidth;
-		alloc.height = Platform::Maximum(minVScrollBarHeight, height - horizontalScrollBarHeight);
+		alloc.height = std::max(minVScrollBarHeight, height - horizontalScrollBarHeight);
 		gtk_widget_size_allocate(GTK_WIDGET(PWidget(scrollbarv)), &alloc);
 	} else {
 		gtk_widget_hide(GTK_WIDGET(PWidget(scrollbarv)));
@@ -1648,8 +1648,8 @@ void ScintillaGTK::Resize(int width, int height) {
 	alloc.width = requisition.width;
 	alloc.height = requisition.height;
 #endif
-	alloc.width = Platform::Maximum(alloc.width, width - verticalScrollBarWidth);
-	alloc.height = Platform::Maximum(alloc.height, height - horizontalScrollBarHeight);
+	alloc.width = std::max(alloc.width, width - verticalScrollBarWidth);
+	alloc.height = std::max(alloc.height, height - horizontalScrollBarHeight);
 	gtk_widget_size_allocate(GTK_WIDGET(PWidget(wText)), &alloc);
 }
 

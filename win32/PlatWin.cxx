@@ -17,8 +17,13 @@
 
 #include <vector>
 #include <map>
+#include <algorithm>
 #include <memory>
 
+// Want to use std::min and std::max so don't want Windows.h version of min and max
+#if !defined(NOMINMAX)
+#define NOMINMAX
+#endif
 #undef _WIN32_WINNT
 #define _WIN32_WINNT 0x0500
 #undef WINVER
@@ -771,7 +776,7 @@ void SurfaceGDI::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fil
 		int width = static_cast<int>(rc.Width());
 		int height = static_cast<int>(rc.Height());
 		// Ensure not distorted too much by corners when small
-		cornerSize = Platform::Minimum(cornerSize, (Platform::Minimum(width, height) / 2) - 2);
+		cornerSize = std::min(cornerSize, (std::min(width, height) / 2) - 2);
 		BITMAPINFO bpih = {{sizeof(BITMAPINFOHEADER), width, height, 1, 32, BI_RGB, 0, 0, 0, 0, 0}};
 		void *image = 0;
 		HBITMAP hbmMem = CreateDIBSection(hMemDC, &bpih,
@@ -929,7 +934,7 @@ XYPOSITION SurfaceGDI::WidthText(Font &font_, const char *s, int len) {
 	SetFont(font_);
 	SIZE sz={0,0};
 	if (!unicodeMode) {
-		::GetTextExtentPoint32A(hdc, s, Platform::Minimum(len, maxLenText), &sz);
+		::GetTextExtentPoint32A(hdc, s, std::min(len, maxLenText), &sz);
 	} else {
 		const TextWide tbuf(s, len, unicodeMode, codePage);
 		::GetTextExtentPoint32W(hdc, tbuf.buffer, tbuf.tlen, &sz);
@@ -1306,10 +1311,10 @@ void SurfaceD2D::LineTo(int x_, int y_) {
 		if ((xDiff == 0) || (yDiff == 0)) {
 			// Horizontal or vertical lines can be more precisely drawn as a filled rectangle
 			const int xEnd = x_ - xDelta;
-			const int left = Platform::Minimum(x, xEnd);
+			const int left = std::min(x, xEnd);
 			const int width = abs(x - xEnd) + 1;
 			const int yEnd = y_ - yDelta;
-			const int top = Platform::Minimum(y, yEnd);
+			const int top = std::min(y, yEnd);
 			const int height = abs(y - yEnd) + 1;
 			D2D1_RECT_F rectangle1 = D2D1::RectF(static_cast<float>(left), static_cast<float>(top),
 				static_cast<float>(left+width), static_cast<float>(top+height));
@@ -2196,7 +2201,7 @@ PRectangle ListBoxX::GetDesiredRect() {
 	SelectFont(hdc, oldFont);
 	::ReleaseDC(lb, hdc);
 
-	const int widthDesired = Platform::Maximum(textSize.cx, (len + 1) * tm.tmAveCharWidth);
+	const int widthDesired = std::max(textSize.cx, (len + 1) * tm.tmAveCharWidth);
 	if (width < widthDesired)
 		width = widthDesired;
 
@@ -2436,7 +2441,7 @@ POINT ListBoxX::MinTrackSize() const {
 
 POINT ListBoxX::MaxTrackSize() const {
 	PRectangle rc = PRectangle::FromInts(0, 0,
-		Platform::Maximum(MinClientWidth(),
+		std::max(static_cast<unsigned int>(MinClientWidth()),
 		maxCharWidth * maxItemCharacters + static_cast<int>(TextInset.x) * 2 +
 		 TextOffset() + ::GetSystemMetrics(SM_CXVSCROLL)),
 		ItemHeight() * lti.Count());

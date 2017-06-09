@@ -1887,7 +1887,7 @@ void ScintillaCocoa::Resize() {
 void ScintillaCocoa::UpdateForScroll() {
 	Point ptOrigin = GetVisibleOriginInMain();
 	xOffset = static_cast<int>(ptOrigin.x);
-	int newTop = Platform::Minimum(static_cast<int>(ptOrigin.y / vs.lineHeight), MaxScrollPos());
+	Sci::Line newTop = std::min(static_cast<Sci::Line>(ptOrigin.y / vs.lineHeight), MaxScrollPos());
 	SetTopLine(newTop);
 }
 

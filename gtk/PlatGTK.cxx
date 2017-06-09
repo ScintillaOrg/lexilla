@@ -432,10 +432,10 @@ void SurfaceImpl::LineTo(int x_, int y_) {
 		if ((xDiff == 0) || (yDiff == 0)) {
 			// Horizontal or vertical lines can be more precisely drawn as a filled rectangle
 			int xEnd = x_ - xDelta;
-			int left = Platform::Minimum(x, xEnd);
+			int left = std::min(x, xEnd);
 			int width = abs(x - xEnd) + 1;
 			int yEnd = y_ - yDelta;
-			int top = Platform::Minimum(y, yEnd);
+			int top = std::min(y, yEnd);
 			int height = abs(y - yEnd) + 1;
 			cairo_rectangle(context, left, top, width, height);
 			cairo_fill(context);
@@ -618,7 +618,7 @@ void SurfaceImpl::Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back)
 	PLATFORM_ASSERT(context);
 	PenColour(back);
 	cairo_arc(context, (rc.left + rc.right) / 2, (rc.top + rc.bottom) / 2,
-		Platform::Minimum(rc.Width(), rc.Height()) / 2, 0, 2*kPi);
+		std::min(rc.Width(), rc.Height()) / 2, 0, 2*kPi);
 	cairo_fill_preserve(context);
 	PenColour(fore);
 	cairo_stroke(context);
@@ -1307,7 +1307,7 @@ static int treeViewGetRowHeight(GtkTreeView *view) {
 		"vertical-separator", &vertical_separator,
 		"expander-size", &expander_size, NULL);
 	row_height += vertical_separator;
-	row_height = Platform::Maximum(row_height, expander_size);
+	row_height = std::max(row_height, expander_size);
 	return row_height;
 #endif
 }
