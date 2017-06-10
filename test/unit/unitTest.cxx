@@ -38,6 +38,14 @@
 
 #include "Platform.h"
 
+#if defined(__GNUC__)
+// Want to avoid misleading indentation warnings in catch.hpp but the pragma
+// may not be available so protect by turning off pragma warnings 
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wmisleading-indentation"
+#endif
+
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 #include "catch.hpp"
 
