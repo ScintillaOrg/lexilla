@@ -772,7 +772,7 @@ public:
 		const unsigned char *pixelsImage) override;
 	virtual void RegisterQPixmapImage(int type, const QPixmap& pm);
 	void ClearRegisteredImages() override;
-	void SetDoubleClickAction(CallBackAction action, void *data) override;
+	void SetDelegate(IListBoxDelegate *lbDelegate) override;
 	void SetList(const char *list, char separator, char typesep) override;
 private:
 	bool unicodeMode;
@@ -785,15 +785,16 @@ public:
 	explicit ListWidget(QWidget *parent);
 	virtual ~ListWidget();
 
-	void setDoubleClickAction(CallBackAction action, void *data);
+	void setDelegate(IListBoxDelegate *lbDelegate);
+	void selectionChanged();
 
 protected:
+	void mouseReleaseEvent(QMouseEvent * event) override;
 	void mouseDoubleClickEvent(QMouseEvent *event) override;
 	QStyleOptionViewItem viewOptions() const override;
 
 private:
-	CallBackAction doubleClickAction;
-	void *doubleClickActionData;
+	IListBoxDelegate *delegate;
 };
 
 
@@ -946,6 +947,7 @@ void ListBoxImpl::Select(int n)
 		}
 	}
 	list->setCurrentRow(n);
+	list->selectionChanged();
 }
 
 int ListBoxImpl::GetSelection()
@@ -1014,10 +1016,10 @@ void ListBoxImpl::ClearRegisteredImages()
 		list->setIconSize(QSize(0, 0));
 }
 
-void ListBoxImpl::SetDoubleClickAction(CallBackAction action, void *data)
+void ListBoxImpl::SetDelegate(IListBoxDelegate *lbDelegate)
 {
 	ListWidget *list = static_cast<ListWidget *>(wid);
-	list->setDoubleClickAction(action, data);
+	list->setDelegate(lbDelegate);
 }
 
 void ListBoxImpl::SetList(const char *list, char separator, char typesep)
@@ -1059,22 +1061,34 @@ ListBox *ListBox::Allocate()
 }
 
 ListWidget::ListWidget(QWidget *parent)
-: QListWidget(parent), doubleClickAction(0), doubleClickActionData(0)
+: QListWidget(parent), delegate(0)
 {}
 
 ListWidget::~ListWidget() {}
 
-void ListWidget::setDoubleClickAction(CallBackAction action, void *data)
+void ListWidget::setDelegate(IListBoxDelegate *lbDelegate)
 {
-	doubleClickAction = action;
-	doubleClickActionData = data;
+	delegate = lbDelegate;
+}
+
+void ListWidget::selectionChanged() {
+	if (delegate) {
+		ListBoxEvent event(ListBoxEvent::EventType::selectionChange);
+		delegate->ListNotify(&event);
+	}
 }
 
 void ListWidget::mouseDoubleClickEvent(QMouseEvent * /* event */)
 {
-	if (doubleClickAction != 0) {
-		doubleClickAction(doubleClickActionData);
+	if (delegate) {
+		ListBoxEvent event(ListBoxEvent::EventType::doubleClick);
+		delegate->ListNotify(&event);
 	}
+}
+
+void ListWidget::mouseReleaseEvent(QMouseEvent * /* event */)
+{
+	selectionChanged();
 }
 
 QStyleOptionViewItem ListWidget::viewOptions() const

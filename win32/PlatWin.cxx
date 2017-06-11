@@ -2042,8 +2042,7 @@ class ListBoxX : public ListBox {
 	unsigned int aveCharWidth;
 	Window *parent;
 	int ctrlID;
-	CallBackAction doubleClickAction;
-	void *doubleClickActionData;
+	IListBoxDelegate *delegate;
 	const char *widestItem;
 	unsigned int maxCharWidth;
 	int resizeHit;
@@ -2063,6 +2062,7 @@ class ListBoxX : public ListBox {
 	POINT MaxTrackSize() const;
 	void SetRedraw(bool on);
 	void OnDoubleClick();
+	void OnSelChange();
 	void ResizeToCursor();
 	void StartResize(WPARAM);
 	LRESULT NcHitTest(WPARAM, LPARAM) const;
@@ -2077,7 +2077,8 @@ class ListBoxX : public ListBox {
 public:
 	ListBoxX() : lineHeight(10), fontCopy(0), technology(0), lb(0), unicodeMode(false),
 		desiredVisibleRows(9), maxItemCharacters(0), aveCharWidth(8),
-		parent(NULL), ctrlID(0), doubleClickAction(NULL), doubleClickActionData(NULL),
+		parent(NULL), ctrlID(0),
+		delegate(nullptr),
 		widestItem(NULL), maxCharWidth(1), resizeHit(0), wheelDelta(0) {
 	}
 	~ListBoxX() override {
@@ -2103,10 +2104,7 @@ public:
 	void RegisterImage(int type, const char *xpm_data) override;
 	void RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage) override;
 	void ClearRegisteredImages() override;
-	void SetDoubleClickAction(CallBackAction action, void *data) override {
-		doubleClickAction = action;
-		doubleClickActionData = data;
-	}
+	virtual void SetDelegate(IListBoxDelegate *lbDelegate) override;
 	void SetList(const char *list, char separator, char typesep) override;
 	void Draw(DRAWITEMSTRUCT *pDrawItem);
 	LRESULT WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
@@ -2247,6 +2245,7 @@ void ListBoxX::Select(int n) {
 	SetRedraw(false);
 	CentreItem(n);
 	::SendMessage(lb, LB_SETCURSEL, n, 0);
+	OnSelChange();
 	SetRedraw(true);
 }
 
@@ -2375,6 +2374,10 @@ void ListBoxX::AppendListItem(const char *text, const char *numword) {
 		maxItemCharacters = len;
 		widestItem = text;
 	}
+}
+
+void ListBoxX::SetDelegate(IListBoxDelegate *lbDelegate) {
+	delegate = lbDelegate;
 }
 
 void ListBoxX::SetList(const char *list, char separator, char typesep) {
@@ -2606,9 +2609,16 @@ LRESULT ListBoxX::NcHitTest(WPARAM wParam, LPARAM lParam) const {
 }
 
 void ListBoxX::OnDoubleClick() {
+	if (delegate) {
+		ListBoxEvent event(ListBoxEvent::EventType::doubleClick);
+		delegate->ListNotify(&event);
+	}
+}
 
-	if (doubleClickAction != NULL) {
-		doubleClickAction(doubleClickActionData);
+void ListBoxX::OnSelChange() {
+	if (delegate) {
+		ListBoxEvent event(ListBoxEvent::EventType::selectionChange);
+		delegate->ListNotify(&event);
 	}
 }
 
@@ -2683,6 +2693,10 @@ LRESULT PASCAL ListBoxX::ControlWndProc(HWND hWnd, UINT iMessage, WPARAM wParam,
 				int item = LOWORD(lResult);
 				if (HIWORD(lResult) == 0 && item >= 0) {
 					::SendMessage(hWnd, LB_SETCURSEL, item, 0);
+					ListBoxX *lbx = static_cast<ListBoxX *>(PointerFromWindow(::GetParent(hWnd)));
+					if (lbx) {
+						lbx->OnSelChange();
+					}
 				}
 			}
 			return 0;

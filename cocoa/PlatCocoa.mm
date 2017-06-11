@@ -1274,7 +1274,9 @@ static NSImage *ImageFromXPM(XPM *pxpm) {
 
 namespace {
 
-// unnamed namespace hides IListBox interface
+// Unnamed namespace hides local IListBox interface.
+// IListBox is used to cross languages to send events from Objective C++
+// AutoCompletionDelegate and AutoCompletionDataSource to C++ ListBoxImpl.
 
 class IListBox {
 public:
@@ -1282,18 +1284,43 @@ public:
 	virtual NSImage *ImageForRow(NSInteger row) = 0;
 	virtual NSString *TextForRow(NSInteger row) = 0;
 	virtual void DoubleClick() = 0;
+	virtual void SelectionChange() = 0;
 };
 
-} // unnamed namespace
+}
+
+//----------------- AutoCompletionDelegate ---------------------------------------------------------
+
+// AutoCompletionDelegate is an Objective C++ class so it can implement
+// NSTableViewDelegate and receive tableViewSelectionDidChange events.
+
+@interface AutoCompletionDelegate : NSObject <NSTableViewDelegate> {
+	IListBox *box;
+}
+
+@property IListBox *box;
+
+@end
+
+@implementation AutoCompletionDelegate
+
+@synthesize box;
+
+- (void) tableViewSelectionDidChange: (NSNotification *) notification {
+#pragma unused(notification)
+	if (box) {
+		box->SelectionChange();
+	}
+}
+
+@end
 
 //----------------- AutoCompletionDataSource -------------------------------------------------------
 
-@interface AutoCompletionDataSource :
-	NSObject
-#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
-	<NSTableViewDataSource>
-#endif
-{
+// AutoCompletionDataSource provides data to display in the list box.
+// It is also the target of the NSTableView so it receives double clicks.
+
+@interface AutoCompletionDataSource : NSObject <NSTableViewDataSource> {
 	IListBox *box;
 }
 
@@ -1400,10 +1427,10 @@ private:
 	NSTableColumn *colIcon;
 	NSTableColumn *colText;
 	AutoCompletionDataSource *ds;
+	AutoCompletionDelegate *acd;
 
 	LinesData ld;
-	CallBackAction doubleClickAction;
-	void *doubleClickActionData;
+	IListBoxDelegate *delegate;
 
 public:
 	ListBoxImpl() :
@@ -1420,8 +1447,8 @@ public:
 		colIcon(nil),
 		colText(nil),
 		ds(nil),
-		doubleClickAction(nullptr),
-		doubleClickActionData(nullptr) {
+		acd(nil),
+		delegate(nullptr) {
 		images = [[NSMutableDictionary alloc] init];
 	}
 	~ListBoxImpl() override {
@@ -1445,9 +1472,8 @@ public:
 	void RegisterImage(int type, const char *xpm_data) override;
 	void RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage) override;
 	void ClearRegisteredImages() override;
-	void SetDoubleClickAction(CallBackAction action, void *data) override {
-		doubleClickAction = action;
-		doubleClickActionData = data;
+	void SetDelegate(IListBoxDelegate *lbDelegate) override {
+		delegate = lbDelegate;
 	}
 	void SetList(const char *list, char separator, char typesep) override;
 
@@ -1459,6 +1485,7 @@ public:
 	NSImage *ImageForRow(NSInteger row) override;
 	NSString *TextForRow(NSInteger row) override;
 	void DoubleClick() override;
+	void SelectionChange() override;
 };
 
 void ListBoxImpl::Create(Window & /*parent*/, int /*ctrlID*/, Scintilla::Point pt,
@@ -1494,6 +1521,9 @@ void ListBoxImpl::Create(Window & /*parent*/, int /*ctrlID*/, Scintilla::Point p
 	ds = [[AutoCompletionDataSource alloc] init];
 	ds.box = this;
 	table.dataSource = ds;	// Weak reference
+	acd = [[AutoCompletionDelegate alloc] init];
+	[acd setBox: this];
+	table.delegate = acd;
 	scroller.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
 	[winLB.contentView addSubview: scroller];
 
@@ -1568,6 +1598,7 @@ void ListBoxImpl::ReleaseViews() {
 	scroller = nil;
 	colIcon = nil;
 	colText = nil;
+	acd = nil;
 	ds = nil;
 }
 
@@ -1694,14 +1725,24 @@ NSString *ListBoxImpl::TextForRow(NSInteger row) {
 }
 
 void ListBoxImpl::DoubleClick() {
-	if (doubleClickAction) {
-		doubleClickAction(doubleClickActionData);
+	if (delegate) {
+		ListBoxEvent event(ListBoxEvent::EventType::doubleClick);
+		delegate->ListNotify(&event);
+	}
+}
+
+void ListBoxImpl::SelectionChange() {
+	if (delegate) {
+		ListBoxEvent event(ListBoxEvent::EventType::selectionChange);
+		delegate->ListNotify(&event);
 	}
 }
 
 } // unnamed namespace
 
 //----------------- ListBox ------------------------------------------------------------------------
+
+// ListBox is implemented by the ListBoxImpl class.
 
 ListBox::ListBox() {
 }

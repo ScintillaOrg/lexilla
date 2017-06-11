@@ -397,6 +397,19 @@ private:
  * Listbox management.
  */
 
+// ScintillaBase implements IListBoxDelegate to receive ListBoxEvents from a ListBox
+
+struct ListBoxEvent {
+	enum class EventType { selectionChange, doubleClick } event;
+	ListBoxEvent(EventType event_) : event(event_) {
+	}
+};
+
+class IListBoxDelegate {
+public:
+	virtual void ListNotify(ListBoxEvent *plbe)=0;
+};
+
 class ListBox : public Window {
 public:
 	ListBox();
@@ -420,7 +433,7 @@ public:
 	virtual void RegisterImage(int type, const char *xpm_data)=0;
 	virtual void RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage) = 0;
 	virtual void ClearRegisteredImages()=0;
-	virtual void SetDoubleClickAction(CallBackAction, void *)=0;
+	virtual void SetDelegate(IListBoxDelegate *lbDelegate)=0;
 	virtual void SetList(const char* list, char separator, char typesep)=0;
 };
 

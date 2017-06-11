@@ -1196,8 +1196,7 @@ class ListBoxX : public ListBox {
 	GtkCssProvider *cssProvider;
 #endif
 public:
-	CallBackAction doubleClickAction;
-	void *doubleClickActionData;
+	IListBoxDelegate *delegate;
 
 	ListBoxX() : widCached(0), frame(0), list(0), scroller(0), pixhash(NULL), pixbuf_renderer(0),
 		renderer(0),
@@ -1206,7 +1205,7 @@ public:
 #if GTK_CHECK_VERSION(3,0,0)
 		cssProvider(NULL),
 #endif
-		doubleClickAction(NULL), doubleClickActionData(NULL) {
+		delegate(nullptr) {
 	}
 	~ListBoxX() override {
 		if (pixhash) {
@@ -1243,10 +1242,7 @@ public:
 	void RegisterImage(int type, const char *xpm_data) override;
 	void RegisterRGBAImage(int type, int width, int height, const unsigned char *pixelsImage) override;
 	void ClearRegisteredImages() override;
-	void SetDoubleClickAction(CallBackAction action, void *data) override {
-		doubleClickAction = action;
-		doubleClickActionData = data;
-	}
+	void SetDelegate(IListBoxDelegate *lbDelegate) override;
 	void SetList(const char *listText, char separator, char typesep) override;
 };
 
@@ -1337,11 +1333,26 @@ static void small_scroller_init(SmallScroller *){}
 static gboolean ButtonPress(GtkWidget *, GdkEventButton* ev, gpointer p) {
 	try {
 		ListBoxX* lb = static_cast<ListBoxX*>(p);
-		if (ev->type == GDK_2BUTTON_PRESS && lb->doubleClickAction != NULL) {
-			lb->doubleClickAction(lb->doubleClickActionData);
+		if (ev->type == GDK_2BUTTON_PRESS && lb->delegate) {
+			ListBoxEvent event(ListBoxEvent::EventType::doubleClick);
+			lb->delegate->ListNotify(&event);
 			return TRUE;
 		}
 
+	} catch (...) {
+		// No pointer back to Scintilla to save status
+	}
+	return FALSE;
+}
+
+static gboolean ButtonRelease(GtkWidget *, GdkEventButton* ev, gpointer p) {
+	try {
+		ListBoxX* lb = static_cast<ListBoxX*>(p);
+		if (ev->type != GDK_2BUTTON_PRESS && lb->delegate) {
+			ListBoxEvent event(ListBoxEvent::EventType::selectionChange);
+			lb->delegate->ListNotify(&event);
+			return TRUE;
+		}
 	} catch (...) {
 		// No pointer back to Scintilla to save status
 	}
@@ -1472,6 +1483,8 @@ void ListBoxX::Create(Window &parent, int, Point, int, bool, int) {
 	gtk_widget_show(widget);
 	g_signal_connect(G_OBJECT(widget), "button_press_event",
 	                   G_CALLBACK(ButtonPress), this);
+	g_signal_connect(G_OBJECT(widget), "button_release_event",
+	                   G_CALLBACK(ButtonRelease), this);
 
 	GtkWidget *top = gtk_widget_get_toplevel(static_cast<GtkWidget *>(parent.GetID()));
 	gtk_window_set_transient_for(GTK_WINDOW(static_cast<GtkWidget *>(wid)),
@@ -1747,6 +1760,11 @@ void ListBoxX::Select(int n) {
 	} else {
 		gtk_tree_selection_unselect_all(selection);
 	}
+
+	if (delegate) {
+		ListBoxEvent event(ListBoxEvent::EventType::selectionChange);
+		delegate->ListNotify(&event);
+	}
 }
 
 int ListBoxX::GetSelection() {
@@ -1841,6 +1859,10 @@ void ListBoxX::RegisterRGBAImage(int type, int width, int height, const unsigned
 
 void ListBoxX::ClearRegisteredImages() {
 	images.Clear();
+}
+
+void ListBoxX::SetDelegate(IListBoxDelegate *lbDelegate) {
+	delegate = lbDelegate;
 }
 
 void ListBoxX::SetList(const char *listText, char separator, char typesep) {

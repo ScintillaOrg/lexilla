@@ -7011,7 +7011,7 @@ struct SCNotification {
 	/* SCN_MARGINRIGHTCLICK, SCN_NEEDSHOWN, SCN_DWELLSTART, SCN_DWELLEND, */
 	/* SCN_CALLTIPCLICK, SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK, */
 	/* SCN_HOTSPOTRELEASECLICK, SCN_INDICATORCLICK, SCN_INDICATORRELEASE, */
-	/* SCN_USERLISTSELECTION, SCN_AUTOCSELECTION */
+	/* SCN_USERLISTSELECTION, SCN_AUTOCSELECTION, SCN_AUTOCSELECTIONCHANGE */
 
 	int ch;
 	/* SCN_CHARADDED, SCN_KEY, SCN_AUTOCCOMPLETE, SCN_AUTOCSELECTION, */
@@ -7022,7 +7022,8 @@ struct SCNotification {
 
 	int modificationType;	/* SCN_MODIFIED */
 	const char *text;
-	/* SCN_MODIFIED, SCN_USERLISTSELECTION, SCN_AUTOCSELECTION, SCN_URIDROPPED */
+	/* SCN_MODIFIED, SCN_USERLISTSELECTION, SCN_AUTOCSELECTION, SCN_URIDROPPED, */
+	/* SCN_AUTOCSELECTIONCHANGE */
 
 	Sci_Position length;		/* SCN_MODIFIED */
 	Sci_Position linesAdded;	/* SCN_MODIFIED */
@@ -7033,7 +7034,7 @@ struct SCNotification {
 	int foldLevelNow;	/* SCN_MODIFIED */
 	int foldLevelPrev;	/* SCN_MODIFIED */
 	int margin;		/* SCN_MARGINCLICK, SCN_MARGINRIGHTCLICK */
-	int listType;	/* SCN_USERLISTSELECTION */
+	int listType;	/* SCN_USERLISTSELECTION, SCN_AUTOCSELECTIONCHANGE */
 	int x;			/* SCN_DWELLSTART, SCN_DWELLEND */
 	int y;		/* SCN_DWELLSTART, SCN_DWELLEND */
 	int token;		/* SCN_MODIFIED with SC_MOD_CONTAINER */
@@ -7078,6 +7079,7 @@ struct SCNotification {
      <a class="message" href="#SCN_FOCUSOUT">SCN_FOCUSOUT</a><br />
      <a class="message" href="#SCN_AUTOCCOMPLETED">SCN_AUTOCCOMPLETED</a><br />
      <a class="message" href="#SCN_MARGINRIGHTCLICK">SCN_MARGINRIGHTCLICK</a><br />
+     <a class="message" href="#SCN_AUTOCSELECTIONCHANGE">SCN_AUTOCSELECTIONCHANGE</a><br />
     </code>
 
     <p>The following <code>SCI_*</code> messages are associated with these notifications:</p>
@@ -7946,10 +7948,6 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
      The user deleted a character while autocompletion list was active.
      There is no other information in SCNotification.</p>
 
-    <p><b id="SCN_FOCUSIN">SCN_FOCUSIN</b><br />
-    <b id="SCN_FOCUSOUT">SCN_FOCUSOUT</b><br />
-    <code>SCN_FOCUSIN</code> (2028) is fired when Scintilla receives focus and
-    <code>SCN_FOCUSOUT</code> (2029) when it loses focus.</p>
 
     <p><b id="SCN_AUTOCCOMPLETED">SCN_AUTOCCOMPLETED<br />
     </b>This notification is generated after an autocompletion has inserted its
@@ -7957,6 +7955,48 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     <code>
      <a class="jump" href="#SCN_AUTOCSELECTION">SCN_AUTOCSELECTION</a></code>
      notification.</p>
+
+    <p><b id="SCN_AUTOCSELECTIONCHANGE">SCN_AUTOCSELECTIONCHANGE<br />
+    </b>This notification is sent when items are highlighted in an autocompletion or user list.
+     The
+    <code>SCNotification</code> fields used are:</p>
+
+    <table class="standard" summary="User list notification">
+      <tbody>
+        <tr>
+          <th align="left">Field</th>
+
+          <th align="left">Usage</th>
+        </tr>
+      </tbody>
+
+      <tbody valign="top">
+        <tr>
+          <td align="left"><code>listType</code></td>
+
+          <td align="left">This is set to the <code>listType</code> parameter from the <a
+          class="message" href="#SCI_USERLISTSHOW"><code>SCI_USERLISTSHOW</code></a> message
+	  or 0 for an autocompletion.</td>
+        </tr>
+
+        <tr>
+          <td align="left"><code>text</code></td>
+
+          <td align="left">The text of the selection.</td>
+        </tr>
+
+        <tr>
+          <td align="left"><code>position</code></td>
+
+          <td align="left">The position the list was displayed at.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><b id="SCN_FOCUSIN">SCN_FOCUSIN</b><br />
+    <b id="SCN_FOCUSOUT">SCN_FOCUSOUT</b><br />
+    <code>SCN_FOCUSIN</code> (2028) is fired when Scintilla receives focus and
+    <code>SCN_FOCUSOUT</code> (2029) when it loses focus.</p>
 
     <h2 id="Images">Images</h2>
 
