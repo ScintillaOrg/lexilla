@@ -1673,7 +1673,7 @@ int ScintillaCocoa::EncodedFromUTF8(char *utf8, char *encoded) const {
 		const CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
 						  vs.styles[STYLE_DEFAULT].characterSet);
 
-		CFStringRef cfsVal = CFStringFromString(utf8, inputLength, encoding);
+		CFStringRef cfsVal = CFStringFromString(utf8, inputLength, kCFStringEncodingUTF8);
 		const std::string sEncoded = EncodedBytesString(cfsVal, encoding);
 		if (encoded)
 			memcpy(encoded, sEncoded.c_str(), sEncoded.length());
