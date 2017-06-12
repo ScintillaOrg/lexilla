@@ -401,14 +401,6 @@ void ScintillaQt::NotifyParent(SCNotification scn)
 	emit notifyParent(scn);
 }
 
-/**
-* Report that this Editor subclass has a working implementation of FineTickerStart.
-*/
-bool ScintillaQt::FineTickerAvailable()
-{
-	return true;
-}
-
 bool ScintillaQt::FineTickerRunning(TickReason reason)
 {
 	return timers[reason] != 0;

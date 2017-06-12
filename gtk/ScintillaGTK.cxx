@@ -884,13 +884,6 @@ sptr_t ScintillaGTK::DefWndProc(unsigned int, uptr_t, sptr_t) {
 	return 0;
 }
 
-/**
-* Report that this Editor subclass has a working implementation of FineTickerStart.
-*/
-bool ScintillaGTK::FineTickerAvailable() {
-	return true;
-}
-
 bool ScintillaGTK::FineTickerRunning(TickReason reason) {
 	return timers[reason].timer != 0;
 }

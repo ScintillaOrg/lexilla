@@ -100,7 +100,6 @@ private:
 		TimeThunk() : reason(tickCaret), scintilla(NULL), timer(0) {}
 	};
 	TimeThunk timers[tickDwell+1];
-	bool FineTickerAvailable() override;
 	bool FineTickerRunning(TickReason reason) override;
 	void FineTickerStart(TickReason reason, int millis, int tolerance) override;
 	void FineTickerCancel(TickReason reason) override;

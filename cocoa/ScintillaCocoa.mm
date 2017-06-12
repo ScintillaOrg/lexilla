@@ -897,15 +897,6 @@ void ScintillaCocoa::TickFor(TickReason reason) {
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Report that this Editor subclass has a working implementation of FineTickerStart.
- */
-bool ScintillaCocoa::FineTickerAvailable() {
-	return true;
-}
-
-//--------------------------------------------------------------------------------------------------
-
-/**
  * Is a particular timer currently running?
  */
 bool ScintillaCocoa::FineTickerRunning(TickReason reason) {

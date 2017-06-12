@@ -506,12 +506,9 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void ButtonMoveWithModifiers(Point pt, unsigned int curTime, int modifiers);
 	void ButtonUpWithModifiers(Point pt, unsigned int curTime, int modifiers);
 
-	void Tick();
 	bool Idle();
-	virtual void SetTicking(bool on);
 	enum TickReason { tickCaret, tickScroll, tickWiden, tickDwell, tickPlatform };
 	virtual void TickFor(TickReason reason);
-	virtual bool FineTickerAvailable();
 	virtual bool FineTickerRunning(TickReason reason);
 	virtual void FineTickerStart(TickReason reason, int millis, int tolerance);
 	virtual void FineTickerCancel(TickReason reason);

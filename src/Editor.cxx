@@ -1393,28 +1393,20 @@ void Editor::ShowCaretAtCurrentPosition() {
 	if (hasFocus) {
 		caret.active = true;
 		caret.on = true;
-		if (FineTickerAvailable()) {
-			FineTickerCancel(tickCaret);
-			if (caret.period > 0)
-				FineTickerStart(tickCaret, caret.period, caret.period/10);
-		} else {
-			SetTicking(true);
-		}
+		FineTickerCancel(tickCaret);
+		if (caret.period > 0)
+			FineTickerStart(tickCaret, caret.period, caret.period/10);
 	} else {
 		caret.active = false;
 		caret.on = false;
-		if (FineTickerAvailable()) {
-			FineTickerCancel(tickCaret);
-		}
+		FineTickerCancel(tickCaret);
 	}
 	InvalidateCaret();
 }
 
 void Editor::DropCaret() {
 	caret.active = false;
-	if (FineTickerAvailable()) {
-		FineTickerCancel(tickCaret);
-	}
+	FineTickerCancel(tickCaret);
 	InvalidateCaret();
 }
 
@@ -1422,11 +1414,9 @@ void Editor::CaretSetPeriod(int period) {
 	if (caret.period != period) {
 		caret.period = period;
 		caret.on = true;
-		if (FineTickerAvailable()) {
-			FineTickerCancel(tickCaret);
-			if ((caret.active) && (caret.period > 0))
-				FineTickerStart(tickCaret, caret.period, caret.period/10);
-		}
+		FineTickerCancel(tickCaret);
+		if ((caret.active) && (caret.period > 0))
+			FineTickerStart(tickCaret, caret.period, caret.period/10);
 		InvalidateCaret();
 	}
 }
@@ -1762,11 +1752,9 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	view.PaintText(surfaceWindow, *this, rcArea, rcClient, vs);
 
 	if (horizontalScrollBarVisible && trackLineWidth && (view.lineWidthMaxSeen > scrollWidth)) {
-		if (FineTickerAvailable()) {
-			scrollWidth = view.lineWidthMaxSeen;
-			if (!FineTickerRunning(tickWiden)) {
-				FineTickerStart(tickWiden, 50, 5);
-			}
+		scrollWidth = view.lineWidthMaxSeen;
+		if (!FineTickerRunning(tickWiden)) {
+			FineTickerStart(tickWiden, 50, 5);
 		}
 	}
 
@@ -4160,13 +4148,9 @@ void Editor::SetDragPosition(SelectionPosition newPos) {
 	}
 	if (!(posDrag == newPos)) {
 		caret.on = true;
-		if (FineTickerAvailable()) {
-			FineTickerCancel(tickCaret);
-			if ((caret.active) && (caret.period > 0) && (newPos.Position() < 0))
-				FineTickerStart(tickCaret, caret.period, caret.period/10);
-		} else {
-			SetTicking(true);
-		}
+		FineTickerCancel(tickCaret);
+		if ((caret.active) && (caret.period > 0) && (newPos.Position() < 0))
+			FineTickerStart(tickCaret, caret.period, caret.period/10);
 		InvalidateCaret();
 		posDrag = newPos;
 		InvalidateCaret();
@@ -4390,12 +4374,7 @@ void Editor::DwellEnd(bool mouseMoved) {
 		dwelling = false;
 		NotifyDwelling(ptMouseLast, dwelling);
 	}
-	if (FineTickerAvailable()) {
-		FineTickerCancel(tickDwell);
-		if (mouseMoved && (dwellDelay < SC_TIME_FOREVER)) {
-			//FineTickerStart(tickDwell, dwellDelay, dwellDelay/10);
-		}
-	}
+	FineTickerCancel(tickDwell);
 }
 
 void Editor::MouseLeave() {
@@ -4444,9 +4423,7 @@ void Editor::ButtonDownWithModifiers(Point pt, unsigned int curTime, int modifie
 	if (((curTime - lastClickTime) < Platform::DoubleClickTime()) && Close(pt, lastClick, doubleClickCloseThreshold)) {
 		//Platform::DebugPrintf("Double click %d %d = %d\n", curTime, lastClickTime, curTime - lastClickTime);
 		SetMouseCapture(true);
-		if (FineTickerAvailable()) {
-			FineTickerStart(tickScroll, 100, 10);
-		}
+		FineTickerStart(tickScroll, 100, 10);
 		if (!ctrl || !multipleSelection || (selectionType != selChar && selectionType != selWord))
 			SetEmptySelection(newPos.Position());
 		bool doubleClick = false;
@@ -4544,9 +4521,7 @@ void Editor::ButtonDownWithModifiers(Point pt, unsigned int curTime, int modifie
 
 			SetDragPosition(SelectionPosition(Sci::invalidPosition));
 			SetMouseCapture(true);
-			if (FineTickerAvailable()) {
-				FineTickerStart(tickScroll, 100, 10);
-			}
+			FineTickerStart(tickScroll, 100, 10);
 		} else {
 			if (PointIsHotspot(pt)) {
 				NotifyHotSpotClicked(newCharPos.Position(), modifiers);
@@ -4559,9 +4534,7 @@ void Editor::ButtonDownWithModifiers(Point pt, unsigned int curTime, int modifie
 					inDragDrop = ddNone;
 			}
 			SetMouseCapture(true);
-			if (FineTickerAvailable()) {
-				FineTickerStart(tickScroll, 100, 10);
-			}
+			FineTickerStart(tickScroll, 100, 10);
 			if (inDragDrop != ddInitial) {
 				SetDragPosition(SelectionPosition(Sci::invalidPosition));
 				if (!shift) {
@@ -4683,9 +4656,7 @@ void Editor::ButtonMoveWithModifiers(Point pt, unsigned int, int modifiers) {
 	if (inDragDrop == ddInitial) {
 		if (DragThreshold(ptMouseLast, pt)) {
 			SetMouseCapture(false);
-			if (FineTickerAvailable()) {
-				FineTickerCancel(tickScroll);
-			}
+			FineTickerCancel(tickScroll);
 			SetDragPosition(movePos);
 			CopySelectionRange(&drag);
 			StartDrag();
@@ -4697,7 +4668,7 @@ void Editor::ButtonMoveWithModifiers(Point pt, unsigned int, int modifiers) {
 	PRectangle rcClient = GetClientRectangle();
 	Point ptOrigin = GetVisibleOriginInMain();
 	rcClient.Move(0, -ptOrigin.y);
-	if (FineTickerAvailable() && (dwellDelay < SC_TIME_FOREVER) && rcClient.Contains(pt)) {
+	if ((dwellDelay < SC_TIME_FOREVER) && rcClient.Contains(pt)) {
 		FineTickerStart(tickDwell, dwellDelay, dwellDelay/10);
 	}
 	//Platform::DebugPrintf("Move %d %d\n", pt.x, pt.y);
@@ -4737,7 +4708,7 @@ void Editor::ButtonMoveWithModifiers(Point pt, unsigned int, int modifiers) {
 					// the selection for a fancier definition of "word" (for
 					// example, in Perl it is useful to include the leading
 					// '$', '%' or '@' on variables for word selection). In this
-					// the ButtonMove() called via Tick() for auto-scrolling
+					// the ButtonMove() called via TickFor() for auto-scrolling
 					// could result in the fancier word selection adjustment
 					// being unmade.
 				} else {
@@ -4826,9 +4797,7 @@ void Editor::ButtonUpWithModifiers(Point pt, unsigned int curTime, int modifiers
 		}
 		ptMouseLast = pt;
 		SetMouseCapture(false);
-		if (FineTickerAvailable()) {
-			FineTickerCancel(tickScroll);
-		}
+		FineTickerCancel(tickScroll);
 		NotifyIndicatorClick(false, newPos.Position(), 0);
 		if (inDragDrop == ddDragging) {
 			SelectionPosition selStart = SelectionStart();
@@ -4888,39 +4857,6 @@ void Editor::ButtonUpWithModifiers(Point pt, unsigned int curTime, int modifiers
 	}
 }
 
-// Called frequently to perform background UI including
-// caret blinking and automatic scrolling.
-void Editor::Tick() {
-	if (HaveMouseCapture()) {
-		// Auto scroll
-		ButtonMoveWithModifiers(ptMouseLast, 0, 0);
-	}
-	if (caret.period > 0) {
-		timer.ticksToWait -= timer.tickSize;
-		if (timer.ticksToWait <= 0) {
-			caret.on = !caret.on;
-			timer.ticksToWait = caret.period;
-			if (caret.active) {
-				InvalidateCaret();
-			}
-		}
-	}
-	if (horizontalScrollBarVisible && trackLineWidth && (view.lineWidthMaxSeen > scrollWidth)) {
-		scrollWidth = view.lineWidthMaxSeen;
-		SetScrollBars();
-	}
-	if ((dwellDelay < SC_TIME_FOREVER) &&
-	        (ticksToDwell > 0) &&
-	        (!HaveMouseCapture()) &&
-	        (ptMouseLast.y >= 0)) {
-		ticksToDwell -= timer.tickSize;
-		if (ticksToDwell <= 0) {
-			dwelling = true;
-			NotifyDwelling(ptMouseLast, dwelling);
-		}
-	}
-}
-
 bool Editor::Idle() {
 	bool needWrap = Wrapping() && wrapPending.NeedsWrap();
 
@@ -4941,13 +4877,6 @@ bool Editor::Idle() {
 	const bool idleDone = !needWrap && !needIdleStyling; // && thatDone && theOtherThingDone...
 
 	return !idleDone;
-}
-
-void Editor::SetTicking(bool) {
-	// SetTicking is deprecated. In the past it was pure virtual and was overridden in each
-	// derived platform class but fine grained timers should now be implemented.
-	// Either way, execution should not arrive here so assert failure.
-	assert(false);
 }
 
 void Editor::TickFor(TickReason reason) {
@@ -4978,10 +4907,6 @@ void Editor::TickFor(TickReason reason) {
 			// tickPlatform handled by subclass
 			break;
 	}
-}
-
-bool Editor::FineTickerAvailable() {
-	return false;
 }
 
 // FineTickerStart is be overridden by subclasses that support fine ticking so

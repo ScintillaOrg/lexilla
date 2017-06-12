@@ -328,7 +328,6 @@ class ScintillaWin :
 	sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;
 	bool SetIdle(bool on) override;
 	UINT_PTR timers[tickDwell+1];
-	bool FineTickerAvailable() override;
 	bool FineTickerRunning(TickReason reason) override;
 	void FineTickerStart(TickReason reason, int millis, int tolerance) override;
 	void FineTickerCancel(TickReason reason) override;
@@ -1778,13 +1777,6 @@ bool ScintillaWin::ValidCodePage(int codePage) const {
 
 sptr_t ScintillaWin::DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
-}
-
-/**
-* Report that this Editor subclass has a working implementation of FineTickerStart.
-*/
-bool ScintillaWin::FineTickerAvailable() {
-	return true;
 }
 
 bool ScintillaWin::FineTickerRunning(TickReason reason) {

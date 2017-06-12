@@ -121,7 +121,6 @@ private:
 	void NotifyFocus(bool focus) override;
 	void NotifyParent(SCNotification scn) override;
 	int timers[tickDwell+1];
-	bool FineTickerAvailable() override;
 	bool FineTickerRunning(TickReason reason) override;
 	void FineTickerStart(TickReason reason, int millis, int tolerance) override;
 	void FineTickerCancel(TickReason reason) override;
