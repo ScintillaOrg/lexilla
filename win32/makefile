@@ -13,7 +13,7 @@ else
 LDMINGW = -Wl,--enable-runtime-pseudo-reloc-v2 -Wl,--add-stdcall-alias
 LIBSMINGW = -lstdc++
 STRIPOPTION = -s
-CXXSTD = gnu++0x
+CXXSTD = gnu++17
 endif
 
 .SUFFIXES: .cxx
@@ -83,6 +83,7 @@ BASEOBJS = \
 	CharacterSet.o \
 	CharClassify.o \
 	ContractionState.o \
+	DBCS.o \
 	Decoration.o \
 	Document.o \
 	EditModel.o \

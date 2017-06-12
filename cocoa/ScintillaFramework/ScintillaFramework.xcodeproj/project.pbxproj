@@ -199,6 +199,7 @@
 		280056FC188DDD2C00F200AE /* StringCopy.h in Headers */ = {isa = PBXBuildFile; fileRef = 280056F9188DDD2C00F200AE /* StringCopy.h */; };
 		280056FD188DDD2C00F200AE /* SubStyles.h in Headers */ = {isa = PBXBuildFile; fileRef = 280056FA188DDD2C00F200AE /* SubStyles.h */; };
 		28064A05190F12E100E6E47F /* LexDMIS.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28064A04190F12E100E6E47F /* LexDMIS.cxx */; };
+		28804B2C1EEE232E00C0D154 /* DBCS.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28804B2B1EEE232E00C0D154 /* DBCS.cxx */; };
 		28A067111A36B42600B4966A /* LexHex.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28A067101A36B42600B4966A /* LexHex.cxx */; };
 		28A1DD51196BE0CA006EFCDD /* EditModel.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28A1DD4E196BE0CA006EFCDD /* EditModel.cxx */; };
 		28A1DD52196BE0CA006EFCDD /* EditView.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28A1DD4F196BE0CA006EFCDD /* EditView.cxx */; };
@@ -423,6 +424,7 @@
 		280056FA188DDD2C00F200AE /* SubStyles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SubStyles.h; path = ../../lexlib/SubStyles.h; sourceTree = "<group>"; };
 		28064A04190F12E100E6E47F /* LexDMIS.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexDMIS.cxx; path = ../../lexers/LexDMIS.cxx; sourceTree = "<group>"; };
 		282E41F3B9E2BFEDD6A05BE7 /* LexIndent.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexIndent.cxx; path = ../../lexers/LexIndent.cxx; sourceTree = SOURCE_ROOT; };
+		28804B2B1EEE232E00C0D154 /* DBCS.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DBCS.cxx; path = ../../src/DBCS.cxx; sourceTree = "<group>"; };
 		28A067101A36B42600B4966A /* LexHex.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexHex.cxx; path = ../../lexers/LexHex.cxx; sourceTree = "<group>"; };
 		28A1DD4E196BE0CA006EFCDD /* EditModel.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EditModel.cxx; path = ../../src/EditModel.cxx; sourceTree = "<group>"; };
 		28A1DD4F196BE0CA006EFCDD /* EditView.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EditView.cxx; path = ../../src/EditView.cxx; sourceTree = "<group>"; };
@@ -724,6 +726,7 @@
 				114B6F8F11FA75BE004FB6AB /* CharacterSet.cxx */,
 				114B6F6411FA7597004FB6AB /* CharClassify.cxx */,
 				114B6F6511FA7597004FB6AB /* ContractionState.cxx */,
+				28804B2B1EEE232E00C0D154 /* DBCS.cxx */,
 				114B6F6611FA7597004FB6AB /* Decoration.cxx */,
 				114B6F6711FA7597004FB6AB /* Document.cxx */,
 				28A1DD4E196BE0CA006EFCDD /* EditModel.cxx */,
@@ -1010,6 +1013,7 @@
 				114B6F3911FA7526004FB6AB /* LexMySQL.cxx in Sources */,
 				114B6F3A11FA7526004FB6AB /* LexNimrod.cxx in Sources */,
 				114B6F3B11FA7526004FB6AB /* LexNsis.cxx in Sources */,
+				28804B2C1EEE232E00C0D154 /* DBCS.cxx in Sources */,
 				114B6F3C11FA7526004FB6AB /* LexOpal.cxx in Sources */,
 				114B6F3E11FA7526004FB6AB /* LexPascal.cxx in Sources */,
 				28B6470D1B54C0720009DC49 /* LexDiff.cxx in Sources */,

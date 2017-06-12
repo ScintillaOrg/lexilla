@@ -83,18 +83,6 @@ inline PRectangle CGRectToPRectangle(const CGRect &rect) {
 	return rc;
 }
 
-//----------------- Point --------------------------------------------------------------------------
-
-/**
- * Converts a point given as a long into a native Point structure.
- */
-Scintilla::Point Scintilla::Point::FromLong(long lpoint) {
-	return Scintilla::Point(
-		       Platform::LowShortFromLong(lpoint),
-		       Platform::HighShortFromLong(lpoint)
-	       );
-}
-
 //----------------- Font ---------------------------------------------------------------------------
 
 Font::Font(): fid(0) {
@@ -921,7 +909,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION 
 	} else if (codePage) {
 		int ui = 0;
 		for (int i=0; i<len;) {
-			size_t lenChar = Platform::IsDBCSLeadByte(codePage, s[i]) ? 2 : 1;
+			size_t lenChar = DBCSIsLeadByte(codePage, s[i]) ? 2 : 1;
 			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, ui+1, NULL);
 			for (unsigned int bytePos=0; (bytePos<lenChar) && (i<len); bytePos++) {
 				positions[i++] = static_cast<XYPOSITION>(xPosition);
@@ -984,15 +972,6 @@ XYPOSITION SurfaceImpl::InternalLeading(Font &) {
 	return 0;
 }
 
-XYPOSITION SurfaceImpl::ExternalLeading(Font &font_) {
-	if (!font_.GetID())
-		return 1;
-
-	float leading = static_cast<QuartzTextStyle *>(font_.GetID())->getLeading();
-	return leading + 0.5f;
-
-}
-
 XYPOSITION SurfaceImpl::Height(Font &font_) {
 
 	return Ascent(font_) + Descent(font_);
@@ -1040,13 +1019,6 @@ Window::~Window() {
 }
 
 // Window::Destroy needs to see definition of ListBoxImpl so is located after ListBoxImpl
-
-//--------------------------------------------------------------------------------------------------
-
-bool Window::HasFocus() {
-	NSView *container = (__bridge NSView *)(wid);
-	return container.window.firstResponder == container;
-}
 
 //--------------------------------------------------------------------------------------------------
 
@@ -1199,19 +1171,6 @@ void Window::SetCursor(Cursor curs) {
 		if ([idWin isKindOfClass: [SCIContentView class]]) {
 			SCIContentView *container = idWin;
 			[container setCursor: curs];
-		}
-	}
-}
-
-//--------------------------------------------------------------------------------------------------
-
-void Window::SetTitle(const char *s) {
-	if (wid) {
-		id idWin = (__bridge id)(wid);
-		if ([idWin isKindOfClass: [NSWindow class]]) {
-			NSWindow *win = idWin;
-			NSString *sTitle = @(s);
-			win.title = sTitle;
 		}
 	}
 }
@@ -1897,85 +1856,6 @@ unsigned int Platform::DoubleClickTime() {
 
 //--------------------------------------------------------------------------------------------------
 
-bool Platform::MouseButtonBounce() {
-	return false;
-}
-
-//--------------------------------------------------------------------------------------------------
-
-/**
- * Helper method for the backend to reach through to the scintilla window.
- */
-long Platform::SendScintilla(WindowID w, unsigned int msg, unsigned long wParam, long lParam) {
-	return scintilla_send_message(w, msg, wParam, lParam);
-}
-
-//--------------------------------------------------------------------------------------------------
-
-/**
- * Helper method for the backend to reach through to the scintilla window.
- */
-long Platform::SendScintillaPointer(WindowID w, unsigned int msg, unsigned long wParam, void *lParam) {
-	return scintilla_send_message(w, msg, wParam, (long) lParam);
-}
-
-//--------------------------------------------------------------------------------------------------
-
-bool Platform::IsDBCSLeadByte(int codePage, char ch) {
-	// Byte ranges found in Wikipedia articles with relevant search strings in each case
-	unsigned char uch = static_cast<unsigned char>(ch);
-	switch (codePage) {
-	case 932:
-		// Shift_jis
-		return ((uch >= 0x81) && (uch <= 0x9F)) ||
-		       ((uch >= 0xE0) && (uch <= 0xFC));
-	// Lead bytes F0 to FC may be a Microsoft addition.
-	case 936:
-		// GBK
-		return (uch >= 0x81) && (uch <= 0xFE);
-	case 949:
-		// Korean Wansung KS C-5601-1987
-		return (uch >= 0x81) && (uch <= 0xFE);
-	case 950:
-		// Big5
-		return (uch >= 0x81) && (uch <= 0xFE);
-	case 1361:
-		// Korean Johab KS C-5601-1992
-		return
-			((uch >= 0x84) && (uch <= 0xD3)) ||
-			((uch >= 0xD8) && (uch <= 0xDE)) ||
-			((uch >= 0xE0) && (uch <= 0xF9));
-	}
-	return false;
-}
-
-//--------------------------------------------------------------------------------------------------
-
-int Platform::DBCSCharLength(int /* codePage */, const char * /* s */) {
-	// DBCS no longer uses this.
-	return 1;
-}
-
-//--------------------------------------------------------------------------------------------------
-
-int Platform::DBCSCharMaxLength() {
-	return 2;
-}
-
-//--------------------------------------------------------------------------------------------------
-
-int Platform::Minimum(int a, int b) {
-	return (a < b) ? a : b;
-}
-
-//--------------------------------------------------------------------------------------------------
-
-int Platform::Maximum(int a, int b) {
-	return (a > b) ? a : b;
-}
-
-//--------------------------------------------------------------------------------------------------
-
 //#define TRACE
 #ifdef TRACE
 
@@ -2024,16 +1904,6 @@ void Platform::Assert(const char *c, const char *file, int line) {
 	// Jump into debugger in assert on Mac (CL269835)
 	::Debugger();
 #endif
-}
-
-//--------------------------------------------------------------------------------------------------
-
-int Platform::Clamp(int val, int minVal, int maxVal) {
-	if (val > maxVal)
-		val = maxVal;
-	if (val < minVal)
-		val = minVal;
-	return val;
 }
 
 //----------------- DynamicLibrary -----------------------------------------------------------------

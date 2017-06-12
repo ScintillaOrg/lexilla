@@ -46,6 +46,7 @@
 #include "StringCopy.h"
 #include "XPM.h"
 #include "UniConversion.h"
+#include "DBCS.h"
 #include "FontQuality.h"
 
 #ifndef SPI_GETFONTSMOOTHINGCONTRAST
@@ -74,10 +75,6 @@ static HCURSOR reverseArrowCursor = NULL;
 #ifdef SCI_NAMESPACE
 namespace Scintilla {
 #endif
-
-Point Point::FromLong(long lpoint) {
-	return Point(static_cast<short>(LOWORD(lpoint)), static_cast<short>(HIWORD(lpoint)));
-}
 
 static RECT RectFromPRectangle(PRectangle prc) {
 	RECT rc = {static_cast<LONG>(prc.left), static_cast<LONG>(prc.top),
@@ -558,7 +555,6 @@ public:
 	XYPOSITION Ascent(Font &font_) override;
 	XYPOSITION Descent(Font &font_) override;
 	XYPOSITION InternalLeading(Font &font_) override;
-	XYPOSITION ExternalLeading(Font &font_) override;
 	XYPOSITION Height(Font &font_) override;
 	XYPOSITION AverageCharWidth(Font &font_) override;
 
@@ -1010,13 +1006,6 @@ XYPOSITION SurfaceGDI::InternalLeading(Font &font_) {
 	return static_cast<XYPOSITION>(tm.tmInternalLeading);
 }
 
-XYPOSITION SurfaceGDI::ExternalLeading(Font &font_) {
-	SetFont(font_);
-	TEXTMETRIC tm;
-	::GetTextMetrics(hdc, &tm);
-	return static_cast<XYPOSITION>(tm.tmExternalLeading);
-}
-
 XYPOSITION SurfaceGDI::Height(Font &font_) {
 	SetFont(font_);
 	TEXTMETRIC tm;
@@ -1121,7 +1110,6 @@ public:
 	XYPOSITION Ascent(Font &font_) override;
 	XYPOSITION Descent(Font &font_) override;
 	XYPOSITION InternalLeading(Font &font_) override;
-	XYPOSITION ExternalLeading(Font &font_) override;
 	XYPOSITION Height(Font &font_) override;
 	XYPOSITION AverageCharWidth(Font &font_) override;
 
@@ -1671,7 +1659,7 @@ void SurfaceD2D::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *
 		int ui = 0;
 		for (int i=0; i<len && ui<tbuf.tlen;) {
 			positions[i] = poses.buffer[ui];
-			if (Platform::IsDBCSLeadByte(codePageText, s[i])) {
+			if (DBCSIsLeadByte(codePageText, s[i])) {
 				positions[i+1] = poses.buffer[ui];
 				i += 2;
 			} else {
@@ -1714,11 +1702,6 @@ XYPOSITION SurfaceD2D::Descent(Font &font_) {
 XYPOSITION SurfaceD2D::InternalLeading(Font &font_) {
 	SetFont(font_);
 	return floor(yInternalLeading);
-}
-
-XYPOSITION SurfaceD2D::ExternalLeading(Font &) {
-	// Not implemented, always return one
-	return 1;
 }
 
 XYPOSITION SurfaceD2D::Height(Font &font_) {
@@ -1784,10 +1767,6 @@ void Window::Destroy() {
 	if (wid)
 		::DestroyWindow(static_cast<HWND>(wid));
 	wid = 0;
-}
-
-bool Window::HasFocus() {
-	return ::GetFocus() == wid;
 }
 
 PRectangle Window::GetPosition() {
@@ -1950,10 +1929,6 @@ void Window::SetCursor(Cursor curs) {
 		::SetCursor(::LoadCursor(NULL,IDC_ARROW));
 		break;
 	}
-}
-
-void Window::SetTitle(const char *s) {
-	::SetWindowTextA(static_cast<HWND>(wid), s);
 }
 
 /* Returns rectangle of monitor pt is on, both rect and pt are in Window's
@@ -3024,83 +2999,8 @@ unsigned int Platform::DoubleClickTime() {
 	return ::GetDoubleClickTime();
 }
 
-bool Platform::MouseButtonBounce() {
-	return false;
-}
-
 void Platform::DebugDisplay(const char *s) {
 	::OutputDebugStringA(s);
-}
-
-bool Platform::IsKeyDown(int key) {
-	return (::GetKeyState(key) & 0x80000000) != 0;
-}
-
-long Platform::SendScintilla(WindowID w, unsigned int msg, unsigned long wParam, long lParam) {
-	// This should never be called - its here to satisfy an old interface
-	return static_cast<long>(::SendMessage(static_cast<HWND>(w), msg, wParam, lParam));
-}
-
-long Platform::SendScintillaPointer(WindowID w, unsigned int msg, unsigned long wParam, void *lParam) {
-	// This should never be called - its here to satisfy an old interface
-	return static_cast<long>(::SendMessage(static_cast<HWND>(w), msg, wParam,
-		reinterpret_cast<LPARAM>(lParam)));
-}
-
-bool Platform::IsDBCSLeadByte(int codePage, char ch) {
-	// Byte ranges found in Wikipedia articles with relevant search strings in each case
-	const unsigned char uch = static_cast<unsigned char>(ch);
-	switch (codePage) {
-	case 932:
-		// Shift_jis
-		return ((uch >= 0x81) && (uch <= 0x9F)) ||
-		       ((uch >= 0xE0) && (uch <= 0xEF));
-	case 936:
-		// GBK
-		return (uch >= 0x81) && (uch <= 0xFE);
-	case 949:
-		// Korean Wansung KS C-5601-1987
-		return (uch >= 0x81) && (uch <= 0xFE);
-	case 950:
-		// Big5
-		return (uch >= 0x81) && (uch <= 0xFE);
-	case 1361:
-		// Korean Johab KS C-5601-1992
-		return
-		    ((uch >= 0x84) && (uch <= 0xD3)) ||
-		    ((uch >= 0xD8) && (uch <= 0xDE)) ||
-		    ((uch >= 0xE0) && (uch <= 0xF9));
-	}
-	return false;
-}
-
-int Platform::DBCSCharLength(int codePage, const char *s) {
-	if (codePage == 932 || codePage == 936 || codePage == 949 ||
-	        codePage == 950 || codePage == 1361) {
-		return Platform::IsDBCSLeadByte(codePage, s[0]) ? 2 : 1;
-	} else {
-		return 1;
-	}
-}
-
-int Platform::DBCSCharMaxLength() {
-	return 2;
-}
-
-// These are utility functions not really tied to a platform
-
-int Platform::Minimum(int a, int b) {
-	if (a < b)
-		return a;
-	else
-		return b;
-}
-
-int Platform::Maximum(int a, int b) {
-	if (a > b)
-		return a;
-	else
-		return b;
 }
 
 //#define TRACE
@@ -3145,14 +3045,6 @@ void Platform::Assert(const char *c, const char *file, int line) {
 		::DebugBreak();
 		abort();
 	}
-}
-
-int Platform::Clamp(int val, int minVal, int maxVal) {
-	if (val > maxVal)
-		val = maxVal;
-	if (val < minVal)
-		val = minVal;
-	return val;
 }
 
 void Platform_Initialise(void *hInstance) {

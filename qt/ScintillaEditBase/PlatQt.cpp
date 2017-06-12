@@ -10,6 +10,7 @@
 
 #include "PlatQt.h"
 #include "Scintilla.h"
+#include "DBCS.h"
 #include "FontQuality.h"
 
 #include <QApplication>
@@ -489,7 +490,7 @@ void SurfaceImpl::MeasureWidths(Font &font,
 		// DBCS
 		int ui = 0;
 		for (int i=0; i<len;) {
-			size_t lenChar = Platform::IsDBCSLeadByte(codePage, s[i]) ? 2 : 1;
+			size_t lenChar = DBCSIsLeadByte(codePage, s[i]) ? 2 : 1;
 			qreal xPosition = tl.cursorToX(ui+1);
 			for (unsigned int bytePos=0; (bytePos<lenChar) && (i<len); bytePos++) {
 				positions[i++] = xPosition;
@@ -537,12 +538,6 @@ XYPOSITION SurfaceImpl::Descent(Font &font)
 XYPOSITION SurfaceImpl::InternalLeading(Font & /* font */)
 {
 	return 0;
-}
-
-XYPOSITION SurfaceImpl::ExternalLeading(Font &font)
-{
-	QFontMetricsF metrics(*FontPointer(font), device);
-	return metrics.leading();
 }
 
 XYPOSITION SurfaceImpl::Height(Font &font)
@@ -623,11 +618,6 @@ void Window::Destroy()
 		delete window(wid);
 
 	wid = 0;
-}
-
-bool Window::HasFocus()
-{
-	return wid ? window(wid)->hasFocus() : false;
 }
 
 PRectangle Window::GetPosition()
@@ -723,12 +713,6 @@ void Window::SetCursor(Cursor curs)
 			cursorLast = curs;
 		}
 	}
-}
-
-void Window::SetTitle(const char *s)
-{
-	if (wid)
-		window(wid)->setWindowTitle(s);
 }
 
 /* Returns rectangle of monitor pt is on, both rect and pt are in Window's
@@ -1201,47 +1185,6 @@ unsigned int Platform::DoubleClickTime()
 	return QApplication::doubleClickInterval();
 }
 
-bool Platform::MouseButtonBounce()
-{
-	return false;
-}
-
-bool Platform::IsKeyDown(int /*key*/)
-{
-	return false;
-}
-
-long Platform::SendScintilla(WindowID /*w*/,
-                             unsigned int /*msg*/,
-                             unsigned long /*wParam*/,
-                             long /*lParam*/)
-{
-	return 0;
-}
-
-long Platform::SendScintillaPointer(WindowID /*w*/,
-                                    unsigned int /*msg*/,
-                                    unsigned long /*wParam*/,
-                                    void * /*lParam*/)
-{
-	return 0;
-}
-
-int Platform::Minimum(int a, int b)
-{
-	return qMin(a, b);
-}
-
-int Platform::Maximum(int a, int b)
-{
-	return qMax(a, b);
-}
-
-int Platform::Clamp(int val, int minVal, int maxVal)
-{
-	return qBound(minVal, val, maxVal);
-}
-
 void Platform::DebugDisplay(const char *s)
 {
 	qWarning("Scintilla: %s", s);
@@ -1275,51 +1218,6 @@ void Platform::Assert(const char *c, const char *file, int line)
 		Platform::DebugDisplay(buffer);
 	}
 }
-
-
-bool Platform::IsDBCSLeadByte(int codePage, char ch)
-{
-	// Byte ranges found in Wikipedia articles with relevant search strings in each case
-	unsigned char uch = static_cast<unsigned char>(ch);
-	switch (codePage) {
-	case 932:
-		// Shift_jis
-		return ((uch >= 0x81) && (uch <= 0x9F)) ||
-		       ((uch >= 0xE0) && (uch <= 0xEF));
-	case 936:
-		// GBK
-		return (uch >= 0x81) && (uch <= 0xFE);
-	case 949:
-		// Korean Wansung KS C-5601-1987
-		return (uch >= 0x81) && (uch <= 0xFE);
-	case 950:
-		// Big5
-		return (uch >= 0x81) && (uch <= 0xFE);
-	case 1361:
-		// Korean Johab KS C-5601-1992
-		return
-		    ((uch >= 0x84) && (uch <= 0xD3)) ||
-		    ((uch >= 0xD8) && (uch <= 0xDE)) ||
-		    ((uch >= 0xE0) && (uch <= 0xF9));
-	}
-	return false;
-}
-
-int Platform::DBCSCharLength(int codePage, const char *s)
-{
-	if (codePage == 932 || codePage == 936 || codePage == 949 ||
-	        codePage == 950 || codePage == 1361) {
-		return IsDBCSLeadByte(codePage, s[0]) ? 2 : 1;
-	} else {
-		return 1;
-	}
-}
-
-int Platform::DBCSCharMaxLength()
-{
-	return 2;
-}
-
 
 //----------------------------------------------------------------------
 

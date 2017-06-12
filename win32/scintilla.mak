@@ -25,7 +25,7 @@ XP_LINK=-SUBSYSTEM:WINDOWS,5.01
 !ENDIF
 
 CRTFLAGS=-D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 -D_CRT_SECURE_NO_DEPRECATE=1 -D_SCL_SECURE_NO_WARNINGS=1 $(XP_DEFINE)
-CXXFLAGS=-Zi -TP -MP -W4 -EHsc $(CRTFLAGS)
+CXXFLAGS=-Zi -TP -MP -W4 -EHsc -std:c++latest $(CRTFLAGS)
 CXXDEBUG=-Od -MTd -DDEBUG
 CXXNDEBUG=-O1 -MT -DNDEBUG -GL
 NAME=-Fo
@@ -75,6 +75,7 @@ SHAREDOBJS=\
 	$(DIR_O)\CharacterSet.obj \
 	$(DIR_O)\CharClassify.obj \
 	$(DIR_O)\ContractionState.obj \
+	$(DIR_O)\DBCS.obj \
 	$(DIR_O)\Decoration.obj \
 	$(DIR_O)\Document.obj \
 	$(DIR_O)\EditModel.obj \

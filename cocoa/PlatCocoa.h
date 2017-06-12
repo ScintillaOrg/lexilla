@@ -105,7 +105,6 @@ public:
 	XYPOSITION Ascent(Font &font_) override;
 	XYPOSITION Descent(Font &font_) override;
 	XYPOSITION InternalLeading(Font &font_) override;
-	XYPOSITION ExternalLeading(Font &font_) override;
 	XYPOSITION Height(Font &font_) override;
 	XYPOSITION AverageCharWidth(Font &font_) override;
 

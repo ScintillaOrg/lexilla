@@ -10,17 +10,13 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = ScintillaEditBase
 TEMPLATE = lib
 CONFIG += lib_bundle
-
-unix {
-    # <regex> requires C++11 support
-    greaterThan(QT_MAJOR_VERSION, 4){
-        CONFIG += c++11
-    } else {
-        QMAKE_CXXFLAGS += -std=c++0x
-    }
-}
+CONFIG += c++14
 
 VERSION = 3.7.5
+
+win32 {
+        QMAKE_CXXFLAGS += -std:c++latest
+}
 
 SOURCES += \
     PlatQt.cpp \
@@ -46,6 +42,7 @@ SOURCES += \
     ../../src/EditModel.cxx \
     ../../src/Document.cxx \
     ../../src/Decoration.cxx \
+    ../../src/DBCS.cxx \
     ../../src/ContractionState.cxx \
     ../../src/CharClassify.cxx \
     ../../src/CellBuffer.cxx \

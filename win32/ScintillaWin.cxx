@@ -156,6 +156,14 @@ static Point PointFromPOINT(POINT pt) {
 	return Point::FromInts(pt.x, pt.y);
 }
 
+static Point PointFromLong(long lpoint) {
+	return Point(static_cast<short>(LOWORD(lpoint)), static_cast<short>(HIWORD(lpoint)));
+}
+
+static bool KeyboardIsKeyDown(int key) {
+	return (::GetKeyState(key) & 0x80000000) != 0;
+}
+
 class ScintillaWin; 	// Forward declaration for COM interface subobjects
 
 typedef void VFunction(void);
@@ -1376,19 +1384,19 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			::ImmNotifyIME(imc.hIMC, NI_COMPOSITIONSTR, CPS_COMPLETE, 0);
 			//
 			//Platform::DebugPrintf("Buttdown %d %x %x %x %x %x\n",iMessage, wParam, lParam,
-			//	Platform::IsKeyDown(VK_SHIFT),
-			//	Platform::IsKeyDown(VK_CONTROL),
-			//	Platform::IsKeyDown(VK_MENU));
+			//	KeyboardIsKeyDown(VK_SHIFT),
+			//	KeyboardIsKeyDown(VK_CONTROL),
+			//	KeyboardIsKeyDown(VK_MENU));
 			::SetFocus(MainHWND());
-			ButtonDown(Point::FromLong(static_cast<long>(lParam)), ::GetMessageTime(),
+			ButtonDown(PointFromLong(static_cast<long>(lParam)), ::GetMessageTime(),
 				(wParam & MK_SHIFT) != 0,
 				(wParam & MK_CONTROL) != 0,
-				Platform::IsKeyDown(VK_MENU));
+				KeyboardIsKeyDown(VK_MENU));
 			}
 			break;
 
 		case WM_MOUSEMOVE: {
-				const Point pt = Point::FromLong(static_cast<long>(lParam));
+				const Point pt = PointFromLong(static_cast<long>(lParam));
 
 				// Windows might send WM_MOUSEMOVE even though the mouse has not been moved:
 				// http://blogs.msdn.com/b/oldnewthing/archive/2003/10/01/55108.aspx
@@ -1397,7 +1405,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 					ButtonMoveWithModifiers(pt,
 					                        ((wParam & MK_SHIFT) != 0 ? SCI_SHIFT : 0) |
 					                        ((wParam & MK_CONTROL) != 0 ? SCI_CTRL : 0) |
-					                        (Platform::IsKeyDown(VK_MENU) ? SCI_ALT : 0));
+					                        (KeyboardIsKeyDown(VK_MENU) ? SCI_ALT : 0));
 				}
 			}
 			break;
@@ -1408,22 +1416,22 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 
 		case WM_LBUTTONUP:
-			ButtonUp(Point::FromLong(static_cast<long>(lParam)),
+			ButtonUp(PointFromLong(static_cast<long>(lParam)),
 				::GetMessageTime(),
 				(wParam & MK_CONTROL) != 0);
 			break;
 
 		case WM_RBUTTONDOWN: {
 				::SetFocus(MainHWND());
-				Point pt = Point::FromLong(static_cast<long>(lParam));
+				Point pt = PointFromLong(static_cast<long>(lParam));
 				if (!PointInSelection(pt)) {
 					CancelModes();
-					SetEmptySelection(PositionFromLocation(Point::FromLong(static_cast<long>(lParam))));
+					SetEmptySelection(PositionFromLocation(PointFromLong(static_cast<long>(lParam))));
 				}
 
 				RightButtonDownWithModifiers(pt, ::GetMessageTime(), ModifierFlags((wParam & MK_SHIFT) != 0,
 										      (wParam & MK_CONTROL) != 0,
-										      Platform::IsKeyDown(VK_MENU)));
+										      KeyboardIsKeyDown(VK_MENU)));
 			}
 			break;
 
@@ -1487,9 +1495,9 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			//Platform::DebugPrintf("S keydown %d %x %x %x %x\n",iMessage, wParam, lParam, ::IsKeyDown(VK_SHIFT), ::IsKeyDown(VK_CONTROL));
 				lastKeyDownConsumed = false;
 				const int ret = KeyDown(KeyTranslate(static_cast<int>(wParam)),
-					Platform::IsKeyDown(VK_SHIFT),
-					Platform::IsKeyDown(VK_CONTROL),
-					Platform::IsKeyDown(VK_MENU),
+					KeyboardIsKeyDown(VK_SHIFT),
+					KeyboardIsKeyDown(VK_CONTROL),
+					KeyboardIsKeyDown(VK_MENU),
 					&lastKeyDownConsumed);
 				if (!ret && !lastKeyDownConsumed) {
 					return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
@@ -1573,7 +1581,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			}
 
 		case WM_CONTEXTMENU: {
-				Point pt = Point::FromLong(static_cast<long>(lParam));
+				Point pt = PointFromLong(static_cast<long>(lParam));
 				POINT rpt = {static_cast<int>(pt.x), static_cast<int>(pt.y)};
 				::ScreenToClient(MainHWND(), &rpt);
 				const Point ptClient = PointFromPOINT(rpt);
@@ -3350,7 +3358,7 @@ LRESULT PASCAL ScintillaWin::CTWndProc(
 				return 0;
 			} else if (iMessage == WM_LBUTTONDOWN) {
 				// This does not fire due to the hit test code
-				sciThis->ct.MouseClick(Point::FromLong(static_cast<long>(lParam)));
+				sciThis->ct.MouseClick(PointFromLong(static_cast<long>(lParam)));
 				sciThis->CallTipClick();
 				return 0;
 			} else if (iMessage == WM_SETCURSOR) {

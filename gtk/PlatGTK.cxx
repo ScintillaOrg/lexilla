@@ -107,12 +107,6 @@ static GtkWidget *PWidget(WindowID wid) {
 	return static_cast<GtkWidget *>(wid);
 }
 
-Point Point::FromLong(long lpoint) {
-	return Point(
-	           Platform::LowShortFromLong(lpoint),
-	           Platform::HighShortFromLong(lpoint));
-}
-
 Font::Font() : fid(0) {}
 
 Font::~Font() {}
@@ -184,7 +178,6 @@ public:
 	XYPOSITION Ascent(Font &font_) override;
 	XYPOSITION Descent(Font &font_) override;
 	XYPOSITION InternalLeading(Font &font_) override;
-	XYPOSITION ExternalLeading(Font &font_) override;
 	XYPOSITION Height(Font &font_) override;
 	XYPOSITION AverageCharWidth(Font &font_) override;
 
@@ -925,10 +918,6 @@ XYPOSITION SurfaceImpl::InternalLeading(Font &) {
 	return 0;
 }
 
-XYPOSITION SurfaceImpl::ExternalLeading(Font &) {
-	return 0;
-}
-
 XYPOSITION SurfaceImpl::Height(Font &font_) {
 	return Ascent(font_) + Descent(font_);
 }
@@ -976,10 +965,6 @@ void Window::Destroy() {
 		}
 		wid = 0;
 	}
-}
-
-bool Window::HasFocus() {
-	return gtk_widget_has_focus(GTK_WIDGET(wid));
 }
 
 PRectangle Window::GetPosition() {
@@ -1123,10 +1108,6 @@ void Window::SetCursor(Cursor curs) {
 #else
 	gdk_cursor_unref(gdkCurs);
 #endif
-}
-
-void Window::SetTitle(const char *s) {
-	gtk_window_set_title(GTK_WINDOW(wid), s);
 }
 
 /* Returns rectangle of monitor pt is on, both rect and pt are in Window's
@@ -2025,81 +2006,8 @@ unsigned int Platform::DoubleClickTime() {
 	return 500; 	// Half a second
 }
 
-bool Platform::MouseButtonBounce() {
-	return true;
-}
-
 void Platform::DebugDisplay(const char *s) {
 	fprintf(stderr, "%s", s);
-}
-
-bool Platform::IsKeyDown(int) {
-	// TODO: discover state of keys in GTK+/X
-	return false;
-}
-
-long Platform::SendScintilla(
-    WindowID w, unsigned int msg, unsigned long wParam, long lParam) {
-	return scintilla_send_message(SCINTILLA(w), msg, wParam, lParam);
-}
-
-long Platform::SendScintillaPointer(
-    WindowID w, unsigned int msg, unsigned long wParam, void *lParam) {
-	return scintilla_send_message(SCINTILLA(w), msg, wParam,
-	                              reinterpret_cast<sptr_t>(lParam));
-}
-
-bool Platform::IsDBCSLeadByte(int codePage, char ch) {
-	// Byte ranges found in Wikipedia articles with relevant search strings in each case
-	unsigned char uch = static_cast<unsigned char>(ch);
-	switch (codePage) {
-		case 932:
-			// Shift_jis
-			return ((uch >= 0x81) && (uch <= 0x9F)) ||
-				((uch >= 0xE0) && (uch <= 0xFC));
-				// Lead bytes F0 to FC may be a Microsoft addition.
-		case 936:
-			// GBK
-			return (uch >= 0x81) && (uch <= 0xFE);
-		case 950:
-			// Big5
-			return (uch >= 0x81) && (uch <= 0xFE);
-		// Korean EUC-KR may be code page 949.
-	}
-	return false;
-}
-
-int Platform::DBCSCharLength(int codePage, const char *s) {
-	if (codePage == 932 || codePage == 936 || codePage == 950) {
-		return IsDBCSLeadByte(codePage, s[0]) ? 2 : 1;
-	} else {
-		int bytes = mblen(s, MB_CUR_MAX);
-		if (bytes >= 1)
-			return bytes;
-		else
-			return 1;
-	}
-}
-
-int Platform::DBCSCharMaxLength() {
-	return MB_CUR_MAX;
-	//return 2;
-}
-
-// These are utility functions not really tied to a platform
-
-int Platform::Minimum(int a, int b) {
-	if (a < b)
-		return a;
-	else
-		return b;
-}
-
-int Platform::Maximum(int a, int b) {
-	if (a > b)
-		return a;
-	else
-		return b;
 }
 
 //#define TRACE
@@ -2132,14 +2040,6 @@ void Platform::Assert(const char *c, const char *file, int line) {
 	g_snprintf(buffer, sizeof(buffer), "Assertion [%s] failed at %s %d\r\n", c, file, line);
 	Platform::DebugDisplay(buffer);
 	abort();
-}
-
-int Platform::Clamp(int val, int minVal, int maxVal) {
-	if (val > maxVal)
-		val = maxVal;
-	if (val < minVal)
-		val = minVal;
-	return val;
 }
 
 void Platform_Initialise() {
