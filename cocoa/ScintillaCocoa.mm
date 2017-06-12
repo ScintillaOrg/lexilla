@@ -2262,7 +2262,9 @@ void ScintillaCocoa::MouseEntered(NSEvent *event) {
 
 		// Mouse location is given in screen coordinates and might also be outside of our bounds.
 		Point location = ConvertPoint(event.locationInWindow);
-		ButtonMove(location);
+		ButtonMoveWithModifiers(location,
+					(int)(event.timestamp * 1000),
+					TranslateModifierFlags(event.modifierFlags));
 	}
 }
 
@@ -2276,22 +2278,16 @@ void ScintillaCocoa::MouseExited(NSEvent * /* event */) {
 
 void ScintillaCocoa::MouseDown(NSEvent *event) {
 	Point location = ConvertPoint(event.locationInWindow);
-	NSTimeInterval time = event.timestamp;
-	bool command = (event.modifierFlags & NSCommandKeyMask) != 0;
-	bool shift = (event.modifierFlags & NSShiftKeyMask) != 0;
-	bool alt = (event.modifierFlags & NSAlternateKeyMask) != 0;
-
-	ButtonDown(Point(location.x, location.y), (int)(time * 1000), shift, command, alt);
+	ButtonDownWithModifiers(location,
+				(int)(event.timestamp * 1000),
+				TranslateModifierFlags(event.modifierFlags));
 }
 
 void ScintillaCocoa::RightMouseDown(NSEvent *event) {
 	Point location = ConvertPoint(event.locationInWindow);
-	NSTimeInterval time = event.timestamp;
-	bool command = (event.modifierFlags & NSCommandKeyMask) != 0;
-	bool shift = (event.modifierFlags & NSShiftKeyMask) != 0;
-	bool alt = (event.modifierFlags & NSAlternateKeyMask) != 0;
-
-	RightButtonDownWithModifiers(Point(location.x, location.y), (int)(time * 1000), ModifierFlags(shift, command, alt));
+	RightButtonDownWithModifiers(location,
+				     (int)(event.timestamp * 1000),
+				     TranslateModifierFlags(event.modifierFlags));
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -2299,16 +2295,17 @@ void ScintillaCocoa::RightMouseDown(NSEvent *event) {
 void ScintillaCocoa::MouseMove(NSEvent *event) {
 	lastMouseEvent = event;
 
-	ButtonMoveWithModifiers(ConvertPoint(event.locationInWindow), TranslateModifierFlags(event.modifierFlags));
+	ButtonMoveWithModifiers(ConvertPoint(event.locationInWindow),
+				(int)(event.timestamp * 1000),
+				TranslateModifierFlags(event.modifierFlags));
 }
 
 //--------------------------------------------------------------------------------------------------
 
 void ScintillaCocoa::MouseUp(NSEvent *event) {
-	NSTimeInterval time = event.timestamp;
-	bool control = (event.modifierFlags & NSControlKeyMask) != 0;
-
-	ButtonUp(ConvertPoint(event.locationInWindow), (int)(time * 1000), control);
+	ButtonUpWithModifiers(ConvertPoint(event.locationInWindow),
+		 (int)(event.timestamp * 1000),
+		 TranslateModifierFlags(event.modifierFlags));
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -2344,7 +2341,7 @@ void ScintillaCocoa::SelectAll() {
 }
 
 void ScintillaCocoa::DeleteBackward() {
-	KeyDown(SCK_BACK, false, false, false, nil);
+	KeyDownWithModifiers(SCK_BACK, 0, nil);
 }
 
 void ScintillaCocoa::Cut() {

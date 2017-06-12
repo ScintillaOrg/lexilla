@@ -1775,7 +1775,11 @@ gint ScintillaGTK::MouseRelease(GtkWidget *widget, GdkEventButton *event) {
 				// If mouse released on scroll bar then the position is relative to the
 				// scrollbar, not the drawing window so just repeat the most recent point.
 				pt = sciThis->ptMouseLast;
-			sciThis->ButtonUp(pt, event->time, (event->state & GDK_CONTROL_MASK) != 0);
+			const int modifiers = ModifierFlags(
+				(event->state & GDK_SHIFT_MASK) != 0,
+				(event->state & GDK_CONTROL_MASK) != 0,
+				(event->state & modifierTranslated(sciThis->rectangularSelectionModifier)) != 0);
+			sciThis->ButtonUpWithModifiers(pt, event->time, modifiers);
 		}
 	} catch (...) {
 		sciThis->errorStatus = SC_STATUS_FAILURE;
@@ -1912,10 +1916,11 @@ gint ScintillaGTK::Motion(GtkWidget *widget, GdkEventMotion *event) {
 		//Platform::DebugPrintf("Move %x %x %d %c %d %d\n",
 		//	sciThis,event->window,event->time,event->is_hint? 'h' :'.', x, y);
 		Point pt(x, y);
-		int modifiers = ((event->state & GDK_SHIFT_MASK) != 0 ? SCI_SHIFT : 0) |
-		                ((event->state & GDK_CONTROL_MASK) != 0 ? SCI_CTRL : 0) |
-		                ((event->state & modifierTranslated(sciThis->rectangularSelectionModifier)) != 0 ? SCI_ALT : 0);
-		sciThis->ButtonMoveWithModifiers(pt, modifiers);
+		const int modifiers = ModifierFlags(
+				(event->state & GDK_SHIFT_MASK) != 0,
+				(event->state & GDK_CONTROL_MASK) != 0,
+				(event->state & modifierTranslated(sciThis->rectangularSelectionModifier)) != 0);
+		sciThis->ButtonMoveWithModifiers(pt, event->time, modifiers);
 	} catch (...) {
 		sciThis->errorStatus = SC_STATUS_FAILURE;
 	}

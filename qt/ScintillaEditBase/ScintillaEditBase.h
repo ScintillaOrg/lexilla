@@ -147,6 +147,7 @@ private:
 	static bool IsHangul(const QChar qchar);
 	void MoveImeCarets(int offset);
 	void DrawImeIndicator(int indicator, int len);
+	int ModifiersOfKeyboard() const;
 };
 
 #ifdef SCI_NAMESPACE

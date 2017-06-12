@@ -537,10 +537,6 @@ void ScintillaBase::ButtonDownWithModifiers(Point pt, unsigned int curTime, int 
 	Editor::ButtonDownWithModifiers(pt, curTime, modifiers);
 }
 
-void ScintillaBase::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, bool alt) {
-	ButtonDownWithModifiers(pt, curTime, ModifierFlags(shift, ctrl, alt));
-}
-
 void ScintillaBase::RightButtonDownWithModifiers(Point pt, unsigned int curTime, int modifiers) {
 	CancelModes();
 	Editor::RightButtonDownWithModifiers(pt, curTime, modifiers);

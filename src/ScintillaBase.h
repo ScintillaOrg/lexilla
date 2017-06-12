@@ -88,7 +88,6 @@ protected:
 	void ContextMenu(Point pt);
 
 	void ButtonDownWithModifiers(Point pt, unsigned int curTime, int modifiers) override;
-	void ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, bool alt) override;
 	void RightButtonDownWithModifiers(Point pt, unsigned int curTime, int modifiers) override;
 
 	void NotifyStyleToNeeded(Sci::Position endStyleNeeded) override;

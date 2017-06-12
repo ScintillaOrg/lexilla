@@ -2340,20 +2340,12 @@ void Editor::NotifyDoubleClick(Point pt, int modifiers) {
 	NotifyParent(scn);
 }
 
-void Editor::NotifyDoubleClick(Point pt, bool shift, bool ctrl, bool alt) {
-	NotifyDoubleClick(pt, ModifierFlags(shift, ctrl, alt));
-}
-
 void Editor::NotifyHotSpotDoubleClicked(Sci::Position position, int modifiers) {
 	SCNotification scn = {};
 	scn.nmhdr.code = SCN_HOTSPOTDOUBLECLICK;
 	scn.position = position;
 	scn.modifiers = modifiers;
 	NotifyParent(scn);
-}
-
-void Editor::NotifyHotSpotDoubleClicked(Sci::Position position, bool shift, bool ctrl, bool alt) {
-	NotifyHotSpotDoubleClicked(position, ModifierFlags(shift, ctrl, alt));
 }
 
 void Editor::NotifyHotSpotClicked(Sci::Position position, int modifiers) {
@@ -2364,20 +2356,12 @@ void Editor::NotifyHotSpotClicked(Sci::Position position, int modifiers) {
 	NotifyParent(scn);
 }
 
-void Editor::NotifyHotSpotClicked(Sci::Position position, bool shift, bool ctrl, bool alt) {
-	NotifyHotSpotClicked(position, ModifierFlags(shift, ctrl, alt));
-}
-
 void Editor::NotifyHotSpotReleaseClick(Sci::Position position, int modifiers) {
 	SCNotification scn = {};
 	scn.nmhdr.code = SCN_HOTSPOTRELEASECLICK;
 	scn.position = position;
 	scn.modifiers = modifiers;
 	NotifyParent(scn);
-}
-
-void Editor::NotifyHotSpotReleaseClick(Sci::Position position, bool shift, bool ctrl, bool alt) {
-	NotifyHotSpotReleaseClick(position, ModifierFlags(shift, ctrl, alt));
 }
 
 bool Editor::NotifyUpdateUI() {
@@ -2408,10 +2392,6 @@ void Editor::NotifyIndicatorClick(bool click, Sci::Position position, int modifi
 		scn.position = position;
 		NotifyParent(scn);
 	}
-}
-
-void Editor::NotifyIndicatorClick(bool click, Sci::Position position, bool shift, bool ctrl, bool alt) {
-	NotifyIndicatorClick(click, position, ModifierFlags(shift, ctrl, alt));
 }
 
 bool Editor::NotifyMarginClick(Point pt, int modifiers) {
@@ -2450,10 +2430,6 @@ bool Editor::NotifyMarginClick(Point pt, int modifiers) {
 	} else {
 		return false;
 	}
-}
-
-bool Editor::NotifyMarginClick(Point pt, bool shift, bool ctrl, bool alt) {
-	return NotifyMarginClick(pt, ModifierFlags(shift, ctrl, alt));
 }
 
 bool Editor::NotifyMarginRightClick(Point pt, int modifiers) {
@@ -3882,10 +3858,6 @@ int Editor::KeyDownWithModifiers(int key, int modifiers, bool *consumed) {
 	}
 }
 
-int Editor::KeyDown(int key, bool shift, bool ctrl, bool alt, bool *consumed) {
-	return KeyDownWithModifiers(key, ModifierFlags(shift, ctrl, alt), consumed);
-}
-
 void Editor::Indent(bool forwards) {
 	UndoGroup ug(pdoc);
 	for (size_t r=0; r<sel.Count(); r++) {
@@ -4630,10 +4602,6 @@ void Editor::RightButtonDownWithModifiers(Point pt, unsigned int, int modifiers)
 		return;
 }
 
-void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, bool alt) {
-	return ButtonDownWithModifiers(pt, curTime, ModifierFlags(shift, ctrl, alt));
-}
-
 bool Editor::PositionIsHotspot(Sci::Position position) const {
 	return vs.styles[pdoc->StyleIndexAt(position)].hotspot;
 }
@@ -4703,7 +4671,7 @@ Range Editor::GetHotSpotRange() const {
 	return hotspot;
 }
 
-void Editor::ButtonMoveWithModifiers(Point pt, int modifiers) {
+void Editor::ButtonMoveWithModifiers(Point pt, unsigned int, int modifiers) {
 	if ((ptMouseLast.x != pt.x) || (ptMouseLast.y != pt.y)) {
 		DwellEnd(true);
 	}
@@ -4830,11 +4798,7 @@ void Editor::ButtonMoveWithModifiers(Point pt, int modifiers) {
 	}
 }
 
-void Editor::ButtonMove(Point pt) {
-	ButtonMoveWithModifiers(pt, 0);
-}
-
-void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
+void Editor::ButtonUpWithModifiers(Point pt, unsigned int curTime, int modifiers) {
 	//Platform::DebugPrintf("ButtonUp %d %d\n", HaveMouseCapture(), inDragDrop);
 	SelectionPosition newPos = SPositionFromLocation(pt, false, false,
 		AllowVirtualSpace(virtualSpaceOptions, sel.IsRectangular()));
@@ -4851,7 +4815,7 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 		hotSpotClickPos = INVALID_POSITION;
 		SelectionPosition newCharPos = SPositionFromLocation(pt, false, true, false);
 		newCharPos = MovePositionOutsideChar(newCharPos, -1);
-		NotifyHotSpotReleaseClick(newCharPos.Position(), ctrl ? SCI_CTRL : 0);
+		NotifyHotSpotReleaseClick(newCharPos.Position(), modifiers & SCI_CTRL);
 	}
 	if (HaveMouseCapture()) {
 		if (PointInSelMargin(pt)) {
@@ -4872,7 +4836,7 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 			if (selStart < selEnd) {
 				if (drag.Length()) {
 					const int length = static_cast<int>(drag.Length());
-					if (ctrl) {
+					if (modifiers & SCI_CTRL) {
 						const Sci::Position lengthInserted = pdoc->InsertString(
 							newPos.Position(), drag.Data(), length);
 						if (lengthInserted > 0) {
@@ -4929,7 +4893,7 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 void Editor::Tick() {
 	if (HaveMouseCapture()) {
 		// Auto scroll
-		ButtonMove(ptMouseLast);
+		ButtonMoveWithModifiers(ptMouseLast, 0, 0);
 	}
 	if (caret.period > 0) {
 		timer.ticksToWait -= timer.tickSize;
@@ -4996,7 +4960,7 @@ void Editor::TickFor(TickReason reason) {
 			break;
 		case tickScroll:
 			// Auto scroll
-			ButtonMove(ptMouseLast);
+			ButtonMoveWithModifiers(ptMouseLast, 0, 0);
 			break;
 		case tickWiden:
 			SetScrollBars();
