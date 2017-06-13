@@ -97,9 +97,10 @@ SOURCES += \
     ../ScintillaEditBase/PlatQt.cpp \
     ../ScintillaEditBase/ScintillaQt.cpp \
     ../ScintillaEditBase/ScintillaEditBase.cpp \
-    ../../src/*.cxx \
-    ../../lexlib/*.cxx \
-    ../../lexers/*.cxx
+    $$files(../../src/*.cxx, false) \
+    $$files(../../lexlib/*.cxx, false) \
+    $$files(../../lexers/*.cxx, false)
+
 
 # HEADERS is used to find what needs to be run through moc
 HEADERS  += \

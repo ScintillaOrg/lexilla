@@ -63,7 +63,7 @@ SOURCES += \
     ../../lexlib/CharacterSet.cxx \
     ../../lexlib/CharacterCategory.cxx \
     ../../lexlib/Accessor.cxx \
-    ../../lexers/*.cxx
+    $$files(../../lexers/*.cxx, false)
 
 HEADERS  += \
     ScintillaEdit.h \

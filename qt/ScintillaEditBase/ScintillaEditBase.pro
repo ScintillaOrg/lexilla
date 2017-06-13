@@ -61,7 +61,7 @@ SOURCES += \
     ../../lexlib/CharacterSet.cxx \
     ../../lexlib/Accessor.cxx \
     ../../lexlib/CharacterCategory.cxx \
-    ../../lexers/*.cxx
+    $$files(../../lexers/*.cxx, false)
 
 HEADERS  += \
     PlatQt.h \
