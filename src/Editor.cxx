@@ -818,8 +818,11 @@ void Editor::MovedCaret(SelectionPosition newPos, SelectionPosition previousPos,
 	const Sci::Line currentLine = pdoc->LineFromPosition(newPos.Position());
 	if (ensureVisible) {
 		// In case in need of wrapping to ensure DisplayFromDoc works.
-		if (currentLine >= wrapPending.start)
-			WrapLines(WrapScope::wsAll);
+		if (currentLine >= wrapPending.start) {
+			if (WrapLines(WrapScope::wsAll)) {
+				Redraw();
+			}
+		}
 		XYScrollPosition newXY = XYScrollToMakeVisible(
 			SelectionRange(posDrag.IsValid() ? posDrag : newPos), xysDefault);
 		if (previousPos.IsValid() && (newXY.xOffset == xOffset)) {
@@ -5290,8 +5293,11 @@ Sci::Line Editor::ContractedFoldNext(Sci::Line lineStart) const {
 void Editor::EnsureLineVisible(Sci::Line lineDoc, bool enforcePolicy) {
 
 	// In case in need of wrapping to ensure DisplayFromDoc works.
-	if (lineDoc >= wrapPending.start)
-		WrapLines(WrapScope::wsAll);
+	if (lineDoc >= wrapPending.start) {
+		if (WrapLines(WrapScope::wsAll)) {
+			Redraw();
+		}
+	}
 
 	if (!cs.GetVisible(lineDoc)) {
 		// Back up to find a non-blank line
