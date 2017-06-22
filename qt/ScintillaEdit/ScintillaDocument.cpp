@@ -217,8 +217,8 @@ int ScintillaDocument::lines_total() {
     return (static_cast<Document *>(pdoc))->LinesTotal();
 }
 
-void ScintillaDocument::start_styling(int position, char flags) {
-    (static_cast<Document *>(pdoc))->StartStyling(position, flags);
+void ScintillaDocument::start_styling(int position) {
+    (static_cast<Document *>(pdoc))->StartStyling(position);
 }
 
 bool ScintillaDocument::set_style_for(int length, char style) {

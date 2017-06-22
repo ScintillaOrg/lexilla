@@ -2033,8 +2033,8 @@ int Document::GetCharsOfClass(CharClassify::cc characterClass, unsigned char *bu
     return charClass.GetCharsOfClass(characterClass, buffer);
 }
 
-void SCI_METHOD Document::StartStyling(Sci_Position position, char) {
-	endStyled = position;
+void SCI_METHOD Document::StartStyling(Sci_Position position) {
+	endStyled = static_cast<Sci::Position>(position);
 }
 
 bool SCI_METHOD Document::SetStyleFor(Sci_Position length, char style) {
