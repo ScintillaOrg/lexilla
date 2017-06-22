@@ -127,3 +127,19 @@ int SCI_METHOD LexerBase::DistanceToSecondaryStyles() {
 const char * SCI_METHOD LexerBase::GetSubStyleBases() {
 	return styleSubable;
 }
+
+int SCI_METHOD LexerBase::NamedStyles() {
+	return 0;
+}
+
+const char * SCI_METHOD LexerBase::NameOfStyle(int) {
+	return "";
+}
+
+const char * SCI_METHOD LexerBase::TagsOfStyle(int) {
+	return "";
+}
+
+const char * SCI_METHOD LexerBase::DescriptionOfStyle(int) {
+	return "";
+}

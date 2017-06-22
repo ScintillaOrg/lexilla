@@ -545,6 +545,18 @@ public:
 	const char * SCI_METHOD GetSubStyleBases() override {
 		return styleSubable;
 	}
+	int SCI_METHOD NamedStyles() {
+		return 0;
+	}
+	const char * SCI_METHOD NameOfStyle(int) {
+		return "";
+	}
+	const char * SCI_METHOD TagsOfStyle(int) {
+		return "";
+	}
+	const char * SCI_METHOD DescriptionOfStyle(int) {
+		return "";
+	}
 
 	static ILexer4 *LexerFactoryCPP() {
 		return new LexerCPP(true);

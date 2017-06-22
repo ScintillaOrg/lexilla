@@ -582,6 +582,10 @@ public:
 	void SetIdentifiers(int style, const char *identifiers);
 	int DistanceToSecondaryStyles();
 	const char *GetSubStyleBases();
+	int NamedStyles();
+	const char *NameOfStyle(int style);
+	const char *TagsOfStyle(int style);
+	const char *DescriptionOfStyle(int style);
 };
 
 #ifdef SCI_NAMESPACE
@@ -788,6 +792,38 @@ const char *LexState::GetSubStyleBases() {
 		return instance->GetSubStyleBases();
 	}
 	return "";
+}
+
+int LexState::NamedStyles() {
+	if (instance) {
+		return instance->NamedStyles();
+	} else {
+		return -1;
+	}
+}
+
+const char *LexState::NameOfStyle(int style) {
+	if (instance) {
+		return instance->NameOfStyle(style);
+	} else {
+		return 0;
+	}
+}
+
+const char *LexState::TagsOfStyle(int style) {
+	if (instance) {
+		return instance->TagsOfStyle(style);
+	} else {
+		return 0;
+	}
+}
+
+const char *LexState::DescriptionOfStyle(int style) {
+	if (instance) {
+		return instance->DescriptionOfStyle(style);
+	} else {
+		return 0;
+	}
 }
 
 #endif
@@ -1101,6 +1137,19 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 
 	case SCI_GETSUBSTYLEBASES:
 		return StringResult(lParam, DocumentLexState()->GetSubStyleBases());
+
+	case SCI_GETNAMEDSTYLES:
+		return DocumentLexState()->NamedStyles();
+
+	case SCI_NAMEOFSTYLE:
+		return StringResult(lParam, DocumentLexState()->NameOfStyle(wParam));
+
+	case SCI_TAGSOFSTYLE:
+		return StringResult(lParam, DocumentLexState()->TagsOfStyle(wParam));
+
+	case SCI_DESCRIPTIONOFSTYLE:
+		return StringResult(lParam, DocumentLexState()->DescriptionOfStyle(wParam));
+
 #endif
 
 	default:

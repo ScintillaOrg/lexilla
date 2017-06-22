@@ -75,6 +75,10 @@ public:
 	virtual void SCI_METHOD SetIdentifiers(int style, const char *identifiers) = 0;
 	virtual int SCI_METHOD DistanceToSecondaryStyles() = 0;
 	virtual const char * SCI_METHOD GetSubStyleBases() = 0;
+	virtual int SCI_METHOD NamedStyles() = 0;
+	virtual const char * SCI_METHOD NameOfStyle(int style) = 0;
+	virtual const char * SCI_METHOD TagsOfStyle(int style) = 0;
+	virtual const char * SCI_METHOD DescriptionOfStyle(int style) = 0;
 };
 
 class ILoader {
