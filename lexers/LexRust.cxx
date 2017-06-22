@@ -29,6 +29,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 #include "OptionSet.h"
+#include "DefaultLexer.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -116,7 +117,7 @@ struct OptionSetRust : public OptionSet<OptionsRust> {
 	}
 };
 
-class LexerRust : public ILexer {
+class LexerRust : public DefaultLexer {
 	WordList keywords[NUM_RUST_KEYWORD_LISTS];
 	OptionsRust options;
 	OptionSetRust osRust;

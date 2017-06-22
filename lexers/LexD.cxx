@@ -27,6 +27,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 #include "OptionSet.h"
+#include "DefaultLexer.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -145,7 +146,7 @@ struct OptionSetD : public OptionSet<OptionsD> {
 	}
 };
 
-class LexerD : public ILexer {
+class LexerD : public DefaultLexer {
 	bool caseSensitive;
 	WordList keywords;
 	WordList keywords2;

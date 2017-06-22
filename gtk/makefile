@@ -113,7 +113,7 @@ deps: deps.mak
 deps.mak:
 	$(CXX) -MM $(CONFIGFLAGS) $(CXXTFLAGS) $(DEPSRCS) | sed -e 's/\/usr.* //' | grep [a-zA-Z] > $@
 
-$(COMPLIB): Accessor.o CharacterSet.o LexerBase.o LexerModule.o LexerSimple.o StyleContext.o WordList.o \
+$(COMPLIB): Accessor.o CharacterSet.o DefaultLexer.o LexerBase.o LexerModule.o LexerSimple.o StyleContext.o WordList.o \
 	CharClassify.o Decoration.o Document.o PerLine.o Catalogue.o CallTip.o CaseConvert.o CaseFolder.o \
 	ScintillaBase.o ContractionState.o EditModel.o Editor.o EditView.o ExternalLexer.o MarginView.o \
 	PropSetSimple.o PlatGTK.o \

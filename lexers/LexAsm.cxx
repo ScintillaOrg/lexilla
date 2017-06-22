@@ -30,6 +30,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 #include "OptionSet.h"
+#include "DefaultLexer.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -139,7 +140,7 @@ struct OptionSetAsm : public OptionSet<OptionsAsm> {
 	}
 };
 
-class LexerAsm : public ILexer {
+class LexerAsm : public DefaultLexer {
 	WordList cpuInstruction;
 	WordList mathInstruction;
 	WordList registers;

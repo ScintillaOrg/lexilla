@@ -34,6 +34,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 #include "OptionSet.h"
+#include "DefaultLexer.h"
 
 # ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -381,7 +382,7 @@ public:
 
 }
 
-class LexerBaan : public ILexer {
+class LexerBaan : public DefaultLexer {
 	WordListAbridged keywords;
 	WordListAbridged keywords2;
 	WordListAbridged keywords3;

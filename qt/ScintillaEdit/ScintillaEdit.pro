@@ -60,6 +60,7 @@ SOURCES += \
     ../../lexlib/LexerNoExceptions.cxx \
     ../../lexlib/LexerModule.cxx \
     ../../lexlib/LexerBase.cxx \
+    ../../lexlib/DefaultLexer.cxx \
     ../../lexlib/CharacterSet.cxx \
     ../../lexlib/CharacterCategory.cxx \
     ../../lexlib/Accessor.cxx \

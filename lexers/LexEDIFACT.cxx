@@ -18,12 +18,13 @@
 
 #include "LexAccessor.h"
 #include "LexerModule.h"
+#include "DefaultLexer.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
 #endif
 
-class LexerEDIFACT : public ILexer
+class LexerEDIFACT : public DefaultLexer
 {
 public:
 	LexerEDIFACT();

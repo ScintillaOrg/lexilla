@@ -39,6 +39,7 @@
 #include "CharacterCategory.h"
 #include "LexerModule.h"
 #include "OptionSet.h"
+#include "DefaultLexer.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -64,7 +65,7 @@ struct OptionSetVisualProlog : public OptionSet<OptionsVisualProlog> {
     }
 };
 
-class LexerVisualProlog : public ILexer {
+class LexerVisualProlog : public DefaultLexer {
     WordList majorKeywords;
     WordList minorKeywords;
     WordList directiveKeywords;

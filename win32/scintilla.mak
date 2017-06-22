@@ -219,6 +219,7 @@ LOBJS=\
 	$(DIR_O)\Accessor.obj \
 	$(DIR_O)\Catalogue.obj \
 	$(DIR_O)\ExternalLexer.obj \
+	$(DIR_O)\DefaultLexer.obj \
 	$(DIR_O)\LexerBase.obj \
 	$(DIR_O)\LexerModule.obj \
 	$(DIR_O)\LexerSimple.obj \

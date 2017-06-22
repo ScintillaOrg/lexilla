@@ -215,6 +215,8 @@
 		28B647101B54C0720009DC49 /* LexNull.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28B6470A1B54C0720009DC49 /* LexNull.cxx */; };
 		28B647111B54C0720009DC49 /* LexProps.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28B6470B1B54C0720009DC49 /* LexProps.cxx */; };
 		28BC38EC1B74C6AD008BF9EB /* Sci_Position.h in Headers */ = {isa = PBXBuildFile; fileRef = 28BC38EB1B74C6AD008BF9EB /* Sci_Position.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		28BDA1221EFB8F7C00EBD3F3 /* DefaultLexer.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28BDA1211EFB8F7C00EBD3F3 /* DefaultLexer.cxx */; };
+		28BDA1241EFB8FB200EBD3F3 /* DefaultLexer.h in Headers */ = {isa = PBXBuildFile; fileRef = 28BDA1231EFB8FB200EBD3F3 /* DefaultLexer.h */; };
 		28C40CA81CB7321200B089F2 /* LexJSON.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28C40CA71CB7321200B089F2 /* LexJSON.cxx */; };
 		28D191A21DEA72C800159938 /* LexEDIFACT.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28D191A11DEA72C800159938 /* LexEDIFACT.cxx */; };
 		28D516D81830FFCA0047C93D /* info_bar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 28D516D51830FFCA0047C93D /* info_bar_bg@2x.png */; };
@@ -440,6 +442,8 @@
 		28B6470A1B54C0720009DC49 /* LexNull.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexNull.cxx; path = ../../lexers/LexNull.cxx; sourceTree = "<group>"; };
 		28B6470B1B54C0720009DC49 /* LexProps.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexProps.cxx; path = ../../lexers/LexProps.cxx; sourceTree = "<group>"; };
 		28BC38EB1B74C6AD008BF9EB /* Sci_Position.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Sci_Position.h; path = ../../include/Sci_Position.h; sourceTree = "<group>"; };
+		28BDA1211EFB8F7C00EBD3F3 /* DefaultLexer.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DefaultLexer.cxx; path = ../../lexlib/DefaultLexer.cxx; sourceTree = "<group>"; };
+		28BDA1231EFB8FB200EBD3F3 /* DefaultLexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DefaultLexer.h; path = ../../lexlib/DefaultLexer.h; sourceTree = "<group>"; };
 		28C40CA71CB7321200B089F2 /* LexJSON.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexJSON.cxx; path = ../../lexers/LexJSON.cxx; sourceTree = "<group>"; };
 		28D1919E1DE69FC100159938 /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
 		28D191A11DEA72C800159938 /* LexEDIFACT.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexEDIFACT.cxx; path = ../../lexers/LexEDIFACT.cxx; sourceTree = "<group>"; };
@@ -672,6 +676,7 @@
 				114B6FA611FA7623004FB6AB /* CharClassify.h */,
 				114B6FA711FA7623004FB6AB /* ContractionState.h */,
 				114B6FA811FA7623004FB6AB /* Decoration.h */,
+				28BDA1231EFB8FB200EBD3F3 /* DefaultLexer.h */,
 				114B6FA911FA7623004FB6AB /* Document.h */,
 				28A1DD54196BE0ED006EFCDD /* EditModel.h */,
 				114B6FAA11FA7623004FB6AB /* Editor.h */,
@@ -728,6 +733,7 @@
 				114B6F6511FA7597004FB6AB /* ContractionState.cxx */,
 				28804B2B1EEE232E00C0D154 /* DBCS.cxx */,
 				114B6F6611FA7597004FB6AB /* Decoration.cxx */,
+				28BDA1211EFB8F7C00EBD3F3 /* DefaultLexer.cxx */,
 				114B6F6711FA7597004FB6AB /* Document.cxx */,
 				28A1DD4E196BE0CA006EFCDD /* EditModel.cxx */,
 				114B6F6811FA7597004FB6AB /* Editor.cxx */,
@@ -822,6 +828,7 @@
 				2744E5A40FC168A100E85C33 /* InfoBar.h in Headers */,
 				2744E5AC0FC168B200E85C33 /* InfoBarCommunicator.h in Headers */,
 				2744E5AA0FC168A100E85C33 /* ScintillaView.h in Headers */,
+				28BDA1241EFB8FB200EBD3F3 /* DefaultLexer.h in Headers */,
 				280056FB188DDD2C00F200AE /* SparseState.h in Headers */,
 				2791F3C80FC19F71009DBCF9 /* SciLexer.h in Headers */,
 				2791F3C60FC19F71009DBCF9 /* PlatCocoa.h in Headers */,
@@ -957,6 +964,7 @@
 				2744E5B50FC168C500E85C33 /* ScintillaCocoa.mm in Sources */,
 				2744E5B60FC168C500E85C33 /* ScintillaView.mm in Sources */,
 				28D191A21DEA72C800159938 /* LexEDIFACT.cxx in Sources */,
+				28BDA1221EFB8F7C00EBD3F3 /* DefaultLexer.cxx in Sources */,
 				114B6F0D11FA7526004FB6AB /* LexAbaqus.cxx in Sources */,
 				114B6F0E11FA7526004FB6AB /* LexAda.cxx in Sources */,
 				28B6470C1B54C0720009DC49 /* LexBatch.cxx in Sources */,

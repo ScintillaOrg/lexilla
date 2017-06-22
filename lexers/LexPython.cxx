@@ -30,6 +30,7 @@
 #include "LexerModule.h"
 #include "OptionSet.h"
 #include "SubStyles.h"
+#include "DefaultLexer.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -310,7 +311,7 @@ const char styleSubable[] = { SCE_P_IDENTIFIER, 0 };
 
 }
 
-class LexerPython : public ILexerWithSubStyles {
+class LexerPython : public DefaultLexer {
 	WordList keywords;
 	WordList keywords2;
 	OptionsPython options;

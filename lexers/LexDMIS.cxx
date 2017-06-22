@@ -21,6 +21,7 @@
 #include "StyleContext.h"
 #include "CharacterSet.h"
 #include "LexerModule.h"
+#include "DefaultLexer.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -38,7 +39,7 @@ static const char *const DMISWordListDesc[] = {
 };
 
 
-class LexerDMIS : public ILexer
+class LexerDMIS : public DefaultLexer
 {
 	private:
 		char *m_wordListSets;
