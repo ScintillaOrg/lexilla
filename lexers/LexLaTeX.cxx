@@ -26,6 +26,7 @@
 #include "StyleContext.h"
 #include "CharacterSet.h"
 #include "LexerModule.h"
+#include "DefaultLexer.h"
 #include "LexerBase.h"
 
 #ifdef SCI_NAMESPACE
@@ -78,7 +79,7 @@ private:
 			saves.resize(numLines + 128);
 	}
 public:
-	static ILexer *LexerFactoryLaTeX() {
+	static ILexer4 *LexerFactoryLaTeX() {
 		return new LexerLaTeX();
 	}
 	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) override;

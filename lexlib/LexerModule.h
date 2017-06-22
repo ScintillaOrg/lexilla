@@ -17,7 +17,7 @@ class WordList;
 
 typedef void (*LexerFunction)(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle,
                   WordList *keywordlists[], Accessor &styler);
-typedef ILexer *(*LexerFactoryFunction)();
+typedef ILexer4 *(*LexerFactoryFunction)();
 
 /**
  * A LexerModule is responsible for lexing and folding a particular language.
@@ -51,7 +51,7 @@ public:
 	int GetNumWordLists() const;
 	const char *GetWordListDescription(int index) const;
 
-	ILexer *Create() const;
+	ILexer4 *Create() const;
 
 	virtual void Lex(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle,
                   WordList *keywordlists[], Accessor &styler) const;

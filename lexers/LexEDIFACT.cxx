@@ -30,13 +30,13 @@ public:
 	LexerEDIFACT();
 	virtual ~LexerEDIFACT() {} // virtual destructor, as we inherit from ILexer
 
-	static ILexer *Factory() {
+	static ILexer4 *Factory() {
 		return new LexerEDIFACT;
 	}
 
 	int SCI_METHOD Version() const override
 	{
-		return lvOriginal;
+		return lvRelease4;
 	}
 	void SCI_METHOD Release() override
 	{

@@ -58,7 +58,7 @@ class LexerDMIS : public DefaultLexer
 		virtual ~LexerDMIS(void);
 
 		int SCI_METHOD Version() const override {
-			return lvOriginal;
+			return lvRelease4;
 		}
 
 		void SCI_METHOD Release() override {
@@ -87,7 +87,7 @@ class LexerDMIS : public DefaultLexer
 			return NULL;
 		}
 
-		static ILexer *LexerFactoryDMIS() {
+		static ILexer4 *LexerFactoryDMIS() {
 			return new LexerDMIS;
 		}
 

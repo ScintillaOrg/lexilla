@@ -15,7 +15,7 @@ namespace Scintilla {
 #endif
 
 // A simple lexer with no state
-class DefaultLexer : public ILexerWithSubStyles {
+class DefaultLexer : public ILexer4 {
 public:
 	DefaultLexer();
 	virtual ~DefaultLexer();

@@ -128,7 +128,7 @@ public:
 		delete this;
 	}
 	int SCI_METHOD Version() const override {
-		return lvOriginal;
+		return lvRelease4;
 	}
 	const char * SCI_METHOD PropertyNames() override {
 		return osRust.PropertyNames();
@@ -149,7 +149,7 @@ public:
 	void * SCI_METHOD PrivateCall(int, void *) override {
 		return 0;
 	}
-	static ILexer *LexerFactoryRust() {
+	static ILexer4 *LexerFactoryRust() {
 		return new LexerRust();
 	}
 };

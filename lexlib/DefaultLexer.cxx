@@ -37,7 +37,7 @@ void SCI_METHOD DefaultLexer::Release() {
 }
 
 int SCI_METHOD DefaultLexer::Version() const {
-	return lvOriginal;
+	return lvRelease4;
 }
 
 const char * SCI_METHOD DefaultLexer::PropertyNames() {

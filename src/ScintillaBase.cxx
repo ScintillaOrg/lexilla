@@ -591,7 +591,7 @@ public:
 LexState::LexState(Document *pdoc_) : LexInterface(pdoc_) {
 	lexCurrent = 0;
 	performingStyle = false;
-	interfaceVersion = lvOriginal;
+	interfaceVersion = lvRelease4;
 	lexLanguage = SCLEX_CONTAINER;
 }
 
@@ -615,7 +615,7 @@ void LexState::SetLexerModule(const LexerModule *lex) {
 			instance->Release();
 			instance = 0;
 		}
-		interfaceVersion = lvOriginal;
+		interfaceVersion = lvRelease4;
 		lexCurrent = lex;
 		if (lexCurrent) {
 			instance = lexCurrent->Create();
@@ -722,70 +722,70 @@ int LexState::PropGetExpanded(const char *key, char *result) const {
 }
 
 int LexState::LineEndTypesSupported() {
-	if (instance && (interfaceVersion >= lvSubStyles)) {
-		return static_cast<ILexerWithSubStyles *>(instance)->LineEndTypesSupported();
+	if (instance) {
+		return instance->LineEndTypesSupported();
 	}
 	return 0;
 }
 
 int LexState::AllocateSubStyles(int styleBase, int numberStyles) {
-	if (instance && (interfaceVersion >= lvSubStyles)) {
-		return static_cast<ILexerWithSubStyles *>(instance)->AllocateSubStyles(styleBase, numberStyles);
+	if (instance) {
+		return instance->AllocateSubStyles(styleBase, numberStyles);
 	}
 	return -1;
 }
 
 int LexState::SubStylesStart(int styleBase) {
-	if (instance && (interfaceVersion >= lvSubStyles)) {
-		return static_cast<ILexerWithSubStyles *>(instance)->SubStylesStart(styleBase);
+	if (instance) {
+		return instance->SubStylesStart(styleBase);
 	}
 	return -1;
 }
 
 int LexState::SubStylesLength(int styleBase) {
-	if (instance && (interfaceVersion >= lvSubStyles)) {
-		return static_cast<ILexerWithSubStyles *>(instance)->SubStylesLength(styleBase);
+	if (instance) {
+		return instance->SubStylesLength(styleBase);
 	}
 	return 0;
 }
 
 int LexState::StyleFromSubStyle(int subStyle) {
-	if (instance && (interfaceVersion >= lvSubStyles)) {
-		return static_cast<ILexerWithSubStyles *>(instance)->StyleFromSubStyle(subStyle);
+	if (instance) {
+		return instance->StyleFromSubStyle(subStyle);
 	}
 	return 0;
 }
 
 int LexState::PrimaryStyleFromStyle(int style) {
-	if (instance && (interfaceVersion >= lvSubStyles)) {
-		return static_cast<ILexerWithSubStyles *>(instance)->PrimaryStyleFromStyle(style);
+	if (instance) {
+		return instance->PrimaryStyleFromStyle(style);
 	}
 	return 0;
 }
 
 void LexState::FreeSubStyles() {
-	if (instance && (interfaceVersion >= lvSubStyles)) {
-		static_cast<ILexerWithSubStyles *>(instance)->FreeSubStyles();
+	if (instance) {
+		instance->FreeSubStyles();
 	}
 }
 
 void LexState::SetIdentifiers(int style, const char *identifiers) {
-	if (instance && (interfaceVersion >= lvSubStyles)) {
-		static_cast<ILexerWithSubStyles *>(instance)->SetIdentifiers(style, identifiers);
+	if (instance) {
+		instance->SetIdentifiers(style, identifiers);
 		pdoc->ModifiedAt(0);
 	}
 }
 
 int LexState::DistanceToSecondaryStyles() {
-	if (instance && (interfaceVersion >= lvSubStyles)) {
-		return static_cast<ILexerWithSubStyles *>(instance)->DistanceToSecondaryStyles();
+	if (instance) {
+		return instance->DistanceToSecondaryStyles();
 	}
 	return 0;
 }
 
 const char *LexState::GetSubStyleBases() {
-	if (instance && (interfaceVersion >= lvSubStyles)) {
-		return static_cast<ILexerWithSubStyles *>(instance)->GetSubStyleBases();
+	if (instance) {
+		return instance->GetSubStyleBases();
 	}
 	return "";
 }

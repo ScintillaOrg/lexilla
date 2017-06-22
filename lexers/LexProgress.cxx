@@ -150,7 +150,7 @@ public:
       delete this;
    }
    int SCI_METHOD Version() const override {
-      return lvOriginal;
+      return lvRelease4;
    }
    const char * SCI_METHOD PropertyNames() override {
       return osABL.PropertyNames();
@@ -176,7 +176,7 @@ public:
    int SCI_METHOD LineEndTypesSupported() override {
       return SC_LINE_END_TYPE_DEFAULT;
    }
-   static ILexer *LexerFactoryABL() {
+   static ILexer4 *LexerFactoryABL() {
       return new LexerABL();
    }
 };

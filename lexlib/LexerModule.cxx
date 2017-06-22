@@ -74,7 +74,7 @@ const char *LexerModule::GetWordListDescription(int index) const {
 	}
 }
 
-ILexer *LexerModule::Create() const {
+ILexer4 *LexerModule::Create() const {
 	if (fnFactory)
 		return fnFactory();
 	else

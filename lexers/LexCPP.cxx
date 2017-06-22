@@ -434,7 +434,7 @@ const char styleSubable[] = {SCE_C_IDENTIFIER, SCE_C_COMMENTDOCKEYWORD, 0};
 
 }
 
-class LexerCPP : public ILexerWithSubStyles {
+class LexerCPP : public ILexer4 {
 	bool caseSensitive;
 	CharacterSet setWord;
 	CharacterSet setNegationOp;
@@ -489,7 +489,7 @@ public:
 		delete this;
 	}
 	int SCI_METHOD Version() const override {
-		return lvSubStyles;
+		return lvRelease4;
 	}
 	const char * SCI_METHOD PropertyNames() override {
 		return osCPP.PropertyNames();
@@ -546,10 +546,10 @@ public:
 		return styleSubable;
 	}
 
-	static ILexer *LexerFactoryCPP() {
+	static ILexer4 *LexerFactoryCPP() {
 		return new LexerCPP(true);
 	}
-	static ILexer *LexerFactoryCPPInsensitive() {
+	static ILexer4 *LexerFactoryCPPInsensitive() {
 		return new LexerCPP(false);
 	}
 	static int MaskActive(int style) {

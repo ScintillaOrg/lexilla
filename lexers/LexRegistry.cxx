@@ -166,7 +166,7 @@ public:
 	LexerRegistry() {}
 	virtual ~LexerRegistry() {}
 	int SCI_METHOD Version() const override {
-		return lvOriginal;
+		return lvRelease4;
 	}
 	void SCI_METHOD Release() override {
 		delete this;
@@ -192,7 +192,7 @@ public:
 	void *SCI_METHOD PrivateCall(int, void *) override {
 		return 0;
 	}
-	static ILexer *LexerFactoryRegistry() {
+	static ILexer4 *LexerFactoryRegistry() {
 		return new LexerRegistry;
 	}
 	const char *SCI_METHOD DescribeWordListSets() override {
