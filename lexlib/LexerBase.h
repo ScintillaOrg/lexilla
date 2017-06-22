@@ -21,17 +21,17 @@ protected:
 public:
 	LexerBase();
 	virtual ~LexerBase();
-	void SCI_METHOD Release();
-	int SCI_METHOD Version() const;
-	const char * SCI_METHOD PropertyNames();
-	int SCI_METHOD PropertyType(const char *name);
-	const char * SCI_METHOD DescribeProperty(const char *name);
-	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val);
-	const char * SCI_METHOD DescribeWordListSets();
-	Sci_Position SCI_METHOD WordListSet(int n, const char *wl);
+	void SCI_METHOD Release() override;
+	int SCI_METHOD Version() const override;
+	const char * SCI_METHOD PropertyNames() override;
+	int SCI_METHOD PropertyType(const char *name) override;
+	const char * SCI_METHOD DescribeProperty(const char *name) override;
+	Sci_Position SCI_METHOD PropertySet(const char *key, const char *val) override;
+	const char * SCI_METHOD DescribeWordListSets() override;
+	Sci_Position SCI_METHOD WordListSet(int n, const char *wl) override;
 	void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, IDocument *pAccess) = 0;
 	void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle, IDocument *pAccess) = 0;
-	void * SCI_METHOD PrivateCall(int operation, void *pointer);
+	void * SCI_METHOD PrivateCall(int operation, void *pointer) override;
 };
 
 #ifdef SCI_NAMESPACE
