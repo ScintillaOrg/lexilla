@@ -15,11 +15,13 @@ namespace Scintilla {
 // A simple lexer with no state
 class LexerBase : public ILexer4 {
 protected:
+	const LexicalClass *lexClasses;
+	size_t nClasses;
 	PropSetSimple props;
 	enum {numWordLists=KEYWORDSET_MAX+1};
 	WordList *keyWordLists[numWordLists+1];
 public:
-	LexerBase();
+	LexerBase(const LexicalClass *lexClasses_=nullptr, size_t nClasses_=0);
 	virtual ~LexerBase();
 	void SCI_METHOD Release() override;
 	int SCI_METHOD Version() const override;

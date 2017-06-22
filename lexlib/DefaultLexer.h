@@ -16,8 +16,10 @@ namespace Scintilla {
 
 // A simple lexer with no state
 class DefaultLexer : public ILexer4 {
+	const LexicalClass *lexClasses;
+	size_t nClasses;
 public:
-	DefaultLexer();
+	DefaultLexer(const LexicalClass *lexClasses_ = nullptr, size_t nClasses_ = 0);
 	virtual ~DefaultLexer();
 	void SCI_METHOD Release() override;
 	int SCI_METHOD Version() const override;

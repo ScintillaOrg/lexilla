@@ -184,6 +184,13 @@ public:
 	}
 };
 
+struct LexicalClass {
+	int value;
+	const char *name;
+	const char *tags;
+	const char *description;
+};
+
 #ifdef SCI_NAMESPACE
 }
 #endif

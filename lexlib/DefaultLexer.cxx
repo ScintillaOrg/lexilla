@@ -26,7 +26,8 @@ using namespace Scintilla;
 
 static const char styleSubable[] = { 0 };
 
-DefaultLexer::DefaultLexer() {
+DefaultLexer::DefaultLexer(const LexicalClass *lexClasses_, size_t nClasses_) :
+	lexClasses(lexClasses_), nClasses(nClasses_) {
 }
 
 DefaultLexer::~DefaultLexer() {
@@ -110,17 +111,17 @@ const char * SCI_METHOD DefaultLexer::GetSubStyleBases() {
 }
 
 int SCI_METHOD DefaultLexer::NamedStyles() {
-	return 0;
+	return static_cast<int>(nClasses);
 }
 
-const char * SCI_METHOD DefaultLexer::NameOfStyle(int) {
-	return "";
+const char * SCI_METHOD DefaultLexer::NameOfStyle(int style) {
+	return (style < NamedStyles()) ? lexClasses[style].name : "";
 }
 
-const char * SCI_METHOD DefaultLexer::TagsOfStyle(int) {
-	return "";
+const char * SCI_METHOD DefaultLexer::TagsOfStyle(int style) {
+	return (style < NamedStyles()) ? lexClasses[style].tags : "";
 }
 
-const char * SCI_METHOD DefaultLexer::DescriptionOfStyle(int) {
-	return "";
+const char * SCI_METHOD DefaultLexer::DescriptionOfStyle(int style) {
+	return (style < NamedStyles()) ? lexClasses[style].description : "";
 }

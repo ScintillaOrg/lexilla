@@ -30,12 +30,16 @@ LexerModule::LexerModule(int language_,
 	LexerFunction fnLexer_,
 	const char *languageName_,
 	LexerFunction fnFolder_,
-        const char *const wordListDescriptions_[]) :
+	const char *const wordListDescriptions_[],
+	const LexicalClass *lexClasses_,
+	size_t nClasses_) :
 	language(language_),
 	fnLexer(fnLexer_),
 	fnFolder(fnFolder_),
 	fnFactory(0),
 	wordListDescriptions(wordListDescriptions_),
+	lexClasses(lexClasses_),
+	nClasses(nClasses_),
 	languageName(languageName_) {
 }
 
@@ -48,6 +52,8 @@ LexerModule::LexerModule(int language_,
 	fnFolder(0),
 	fnFactory(fnFactory_),
 	wordListDescriptions(wordListDescriptions_),
+	lexClasses(nullptr),
+	nClasses(0),
 	languageName(languageName_) {
 }
 
@@ -72,6 +78,14 @@ const char *LexerModule::GetWordListDescription(int index) const {
 	} else {
 		return wordListDescriptions[index];
 	}
+}
+
+const LexicalClass *LexerModule::LexClasses() const {
+	return lexClasses;
+}
+
+size_t LexerModule::NamedStyles() const {
+	return nClasses;
 }
 
 ILexer4 *LexerModule::Create() const {
