@@ -360,10 +360,10 @@ public:
 
 	char CharAt(Sci::Position position) const { return cb.CharAt(position); }
 	void SCI_METHOD GetCharRange(char *buffer, Sci_Position position, Sci_Position lengthRetrieve) const {
-		cb.GetCharRange(buffer, position, lengthRetrieve);
+		cb.GetCharRange(buffer, static_cast<Sci::Position>(position), static_cast<Sci::Position>(lengthRetrieve));
 	}
-	char SCI_METHOD StyleAt(Sci_Position position) const { return cb.StyleAt(position); }
-	int StyleIndexAt(Sci_Position position) const { return static_cast<unsigned char>(cb.StyleAt(position)); }
+	char SCI_METHOD StyleAt(Sci_Position position) const { return cb.StyleAt(static_cast<Sci::Position>(position)); }
+	int StyleIndexAt(Sci_Position position) const { return static_cast<unsigned char>(cb.StyleAt(static_cast<Sci::Position>(position))); }
 	void GetStyleRange(unsigned char *buffer, Sci::Position position, Sci::Position lengthRetrieve) const {
 		cb.GetStyleRange(buffer, position, lengthRetrieve);
 	}
