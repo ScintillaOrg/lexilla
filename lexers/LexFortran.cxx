@@ -257,7 +257,7 @@ static void ColouriseFortranDoc(Sci_PositionU startPos, Sci_Position length, int
 }
 /***************************************/
 static void CheckLevelCommentLine(const unsigned int nComL,
-				  int nComColB[], int nComColF[], int &nComCur,
+				  Sci_Position nComColB[], Sci_Position nComColF[], Sci_Position &nComCur,
 				  bool comLineB[], bool comLineF[], bool &comLineCur,
 				  int &levelDeltaNext) {
 	levelDeltaNext = 0;
