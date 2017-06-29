@@ -100,6 +100,9 @@ static void ColouriseMatlabOctaveDoc(
 	// of a string
 	bool transpose = false;
 
+	// count of brackets as boolean for when end could be an operator not a keyword
+	int allow_end_op = 0;
+
 	// approximate position of first non space character in a line
 	int nonSpaceColumn = -1;
 	// approximate column position of the current character in a line
@@ -153,7 +156,11 @@ static void ColouriseMatlabOctaveDoc(
 			if (!isalnum(sc.ch) && sc.ch != '_') {
 				char s[100];
 				sc.GetCurrentLowered(s, sizeof(s));
+
 				if (keywords.InList(s)) {
+					if (strcmp ("end", s) == 0 && allow_end_op) {
+						sc.ChangeState(SCE_MATLAB_NUMBER);
+					}
 					sc.SetState(SCE_MATLAB_DEFAULT);
 					transpose = false;
 				} else {
@@ -253,6 +260,12 @@ static void ColouriseMatlabOctaveDoc(
 			} else if (isalpha(sc.ch)) {
 				sc.SetState(SCE_MATLAB_KEYWORD);
 			} else if (isoperator(static_cast<char>(sc.ch)) || sc.ch == '@' || sc.ch == '\\') {
+				if (sc.ch == '(' || sc.ch == '[' || sc.ch == '{') {
+					allow_end_op ++;
+				} else if ((sc.ch == ')' || sc.ch == ']' || sc.ch == '}') && (allow_end_op > 0)) {
+					allow_end_op --;
+				}
+
 				if (sc.ch == ')' || sc.ch == ']' || sc.ch == '}') {
 					transpose = true;
 				} else {
