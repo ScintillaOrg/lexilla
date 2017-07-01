@@ -181,7 +181,6 @@ void ScintillaEditBase::wheelEvent(QWheelEvent *event)
 void ScintillaEditBase::focusInEvent(QFocusEvent *event)
 {
 	sqt->SetFocusState(true);
-	emit updateUi();
 
 	QAbstractScrollArea::focusInEvent(event);
 }
@@ -701,7 +700,7 @@ void ScintillaEditBase::notifyParent(SCNotification scn)
 			break;
 
 		case SCN_UPDATEUI:
-			emit updateUi();
+			emit updateUi(scn.updated);
 			break;
 
 		case SCN_MODIFIED:

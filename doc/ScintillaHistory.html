@@ -498,7 +498,7 @@
 	<td>Morten Brørup</td>
       </tr><tr>
 	<td>Alexey Denisov</td>
-	<td>jedailey</td>
+	<td>Justin Dailey</td>
 	<td>oirfeodent</td>
 	<td>A-R-C-A</td>
       </tr><tr>
@@ -560,6 +560,11 @@
 	Fix drawing failure when in wrap mode for delete to start/end of line which
 	affects later lines but did not redraw them.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1949/">Bug #1949</a>.
+	</li>
+	<li>
+	On Qt, the updateUi signal includes the 'updated' flags.
+	No updateUi signal is sent for focus in events.
+	These changes make Qt behave more like the other platforms.
 	</li>
 	<li>
 	On Qt, mouse tracking is reenabled when the window is reshown.
