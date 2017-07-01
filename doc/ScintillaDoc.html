@@ -6853,9 +6853,7 @@ SCI_METHOD<span class="S0"> </span>PropertyNames<span class="S10">()</span>
 
 <p>
 The types <code>Sci_Position</code> and <code>Sci_PositionU</code> are used for positions and line numbers in the document.
-Before release 3.6.0 the types <code>int</code> and <code>unsigned int</code> were used instead and, for 3.6.0,
-<code>Sci_Position</code> is defined as <code>int</code> and <code>Sci_PositionU</code> is defined as <code>unsigned int</code>.
-In a future release, 64-bit builds will define these as 64-bit types to allow documents larger than 2 GB.
+With Scintilla 4, 64-bit builds define these as 64-bit types to allow future implementation of documents larger than 2 GB.
 </p>
 
 <p>
@@ -6924,7 +6922,7 @@ To allow lexers to report which line ends they support, and to support substyles
 <span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>SetLevel<span class="S10">(</span>Sci_Position<span class="S0"> </span>line<span class="S10">,</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>level<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>GetLineState<span class="S10">(</span>Sci_Position<span class="S0"> </span>line<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>SetLineState<span class="S10">(</span>Sci_Position<span class="S0"> </span>line<span class="S10">,</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>state<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
-<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>StartStyling<span class="S10">(</span>Sci_Position<span class="S0"> </span>position<span class="S10">,</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span>mask<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>StartStyling<span class="S10">(</span>Sci_Position<span class="S0"> </span>position<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">bool</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>SetStyleFor<span class="S10">(</span>Sci_Position<span class="S0"> </span>length<span class="S10">,</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span>style<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">bool</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>SetStyles<span class="S10">(</span>Sci_Position<span class="S0"> </span>length<span class="S10">,</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span>styles<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">void</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>DecorationSetCurrentIndicator<span class="S10">(</span><span class="S5">int</span><span class="S0"> </span>indicator<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
@@ -6934,6 +6932,9 @@ To allow lexers to report which line ends they support, and to support substyles
 <span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">bool</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>IsDBCSLeadByte<span class="S10">(</span><span class="S5">char</span><span class="S0"> </span>ch<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S5">char</span><span class="S0"> </span><span class="S10">*</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>BufferPointer<span class="S10">()</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>GetLineIndentation<span class="S10">(</span>Sci_Position<span class="S0"> </span>line<span class="S10">)</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span>Sci_Position<span class="S0"> </span>SCI_METHOD<span class="S0"> </span>LineEnd<span class="S10">(</span>Sci_Position<span class="S0"> </span>line<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span>Sci_Position<span class="S0"> </span>SCI_METHOD<span class="S0"> </span>GetRelativePosition<span class="S10">(</span>Sci_Position<span class="S0"> </span>positionStart<span class="S10">,</span><span class="S0"> </span>Sci_Position<span class="S0"> </span>characterOffset<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
+<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>GetCharacterAndWidth<span class="S10">(</span>Sci_Position<span class="S0"> </span>position<span class="S10">,</span><span class="S0"> </span>Sci_Position<span class="S0"> </span><span class="S10">*</span>pWidth<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
 <span class="S10">};</span><br />
 </div>
 
@@ -6953,11 +6954,10 @@ exceptions. Exceptions should not be thrown over build boundaries as the
  two sides may be built with different compilers or incompatible
 exception options.</p>
 
-<h4>IDocumentWithLineEnd</h4>
-
 <p>
 To allow lexers to determine the end position of a line and thus more easily support Unicode line ends
-<code>IDocument</code> is extended to <code>IDocumentWithLineEnd</code>.</p>
+<code>IDocument</code> includes <code>LineEnd</code> which should be used rather than testing for specific
+line end characters.</p>
 <p><code>GetRelativePosition</code> navigates the document by whole characters,
 returning <code>INVALID_POSITION</code> for movement beyond the start and end of the document.</p>
 <p><code>GetCharacterAndWidth</code> provides a standard
@@ -6968,20 +6968,14 @@ The <code class="parameter">pWidth</code> argument can be NULL if the caller doe
 bytes in the character.
 </p>
 
-<div class="highlighted">
-<span class="S5">class</span><span class="S0"> </span>IDocumentWithLineEnd<span class="S0"> </span><span class="S10">:</span><span class="S0"> </span><span class="S5">public</span><span class="S0"> </span>IDocument<span class="S0"> </span><span class="S10">{</span><br />
-<span class="S5">public</span><span class="S10">:</span><br />
-<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span>Sci_Position<span class="S0"> </span>SCI_METHOD<span class="S0"> </span>LineEnd<span class="S10">(</span>Sci_Position<span class="S0"> </span>line<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
-<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span>Sci_Position<span class="S0"> </span>SCI_METHOD<span class="S0"> </span>GetRelativePosition<span class="S10">(</span>Sci_Position<span class="S0"> </span>positionStart<span class="S10">,</span><span class="S0"> </span>Sci_Position<span class="S0"> </span>characterOffset<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
-<span class="S0">&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="S5">virtual</span><span class="S0"> </span><span class="S5">int</span><span class="S0"> </span>SCI_METHOD<span class="S0"> </span>GetCharacterAndWidth<span class="S10">(</span>Sci_Position<span class="S0"> </span>position<span class="S10">,</span><span class="S0"> </span>Sci_Position<span class="S0"> </span><span class="S10">*</span>pWidth<span class="S10">)</span><span class="S0"> </span><span class="S5">const</span><span class="S0"> </span><span class="S10">=</span><span class="S0"> </span><span class="S4">0</span><span class="S10">;</span><br />
-<span class="S10">};</span><br />
-</div>
-
-<p>The <code>ILexer</code>, <code>ILexerWithSubStyles</code>, <code>IDocument</code>, and
-<code>IDocumentWithLineEnd</code>  interfaces may be
+<p>The <code>ILexer</code>, <code>ILexerWithSubStyles</code>, and <code>IDocument</code>  interfaces may be
 expanded in the future with extended versions (<code>ILexer2</code>...).
  The <code>Version</code> method indicates which interface is
 implemented and thus which methods may be called.</p>
+
+<p>Scintilla 4 changed the definition of <code>IDocument</code> by merging the previously separate
+<code>IDocumentWithLineEnd</code> interface and
+removing the mask parameter to <code>StartStyling</code>.</p>
 
     <h2 id="Notifications">Notifications</h2>
 
