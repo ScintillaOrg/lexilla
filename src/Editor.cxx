@@ -6413,6 +6413,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETBUFFEREDDRAW:
 		return view.bufferedDraw;
 
+#ifdef INCLUDE_DEPRECATED_FEATURES
 	case SCI_GETTWOPHASEDRAW:
 		return view.phasesDraw == EditView::phasesTwo;
 
@@ -6420,6 +6421,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		if (view.SetTwoPhaseDraw(wParam != 0))
 			InvalidateStyleRedraw();
 		break;
+#endif
 
 	case SCI_GETPHASESDRAW:
 		return view.phasesDraw;

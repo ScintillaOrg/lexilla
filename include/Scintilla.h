@@ -571,8 +571,6 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_SETVSCROLLBAR 2280
 #define SCI_GETVSCROLLBAR 2281
 #define SCI_APPENDTEXT 2282
-#define SCI_GETTWOPHASEDRAW 2283
-#define SCI_SETTWOPHASEDRAW 2284
 #define SC_PHASES_ONE 0
 #define SC_PHASES_TWO 1
 #define SC_PHASES_MULTIPLE 2
@@ -1204,6 +1202,9 @@ struct SCNotification {
 
 #define SCI_SETKEYSUNICODE 2521
 #define SCI_GETKEYSUNICODE 2522
+
+#define SCI_GETTWOPHASEDRAW 2283
+#define SCI_SETTWOPHASEDRAW 2284
 
 #define CharacterRange Sci_CharacterRange
 #define TextRange Sci_TextRange

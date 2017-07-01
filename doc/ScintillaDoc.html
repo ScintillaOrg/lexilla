@@ -95,6 +95,9 @@
 	.provisional {
 		background: #FFB000;
         }
+	.deprecated {
+		text-decoration: line-through red;
+        }
 	.parameter {
 		font-style:italic;
         }
@@ -3578,8 +3581,6 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_GETBUFFEREDDRAW">SCI_GETBUFFEREDDRAW &rarr; bool</a><br />
      <a class="message" href="#SCI_SETPHASESDRAW">SCI_SETPHASESDRAW(int phases)</a><br />
      <a class="message" href="#SCI_GETPHASESDRAW">SCI_GETPHASESDRAW &rarr; int</a><br />
-     <a class="message" href="#SCI_SETTWOPHASEDRAW">SCI_SETTWOPHASEDRAW(bool twoPhase)</a><br />
-     <a class="message" href="#SCI_GETTWOPHASEDRAW">SCI_GETTWOPHASEDRAW &rarr; bool</a><br />
      <a class="message" href="#SCI_SETTECHNOLOGY">SCI_SETTECHNOLOGY(int technology)</a><br />
      <a class="message" href="#SCI_GETTECHNOLOGY">SCI_GETTECHNOLOGY &rarr; int</a><br />
      <a class="message" href="#SCI_SETFONTQUALITY">SCI_SETFONTQUALITY(int fontQuality)</a><br />
@@ -3620,12 +3621,15 @@ struct Sci_TextToFind {
      <b id="SCI_GETPHASESDRAW">SCI_GETPHASESDRAW &rarr; int</b><br />
      There are several orders in which the text area may be drawn offering a trade-off between speed
      and allowing all pixels of text to be seen even when they overlap other elements.</p>
-     <p>In single phase drawing (<code>SC_PHASES_ONE</code>) each
+     <p>In single phase drawing (<code class="deprecated">SC_PHASES_ONE</code>) each
      run of characters in one style is drawn along with its background.
      If a character overhangs the end of a run, such as in "<i>V</i>_" where the
      "<i>V</i>" is in a different style from the "_", then this can cause the right hand
      side of the "<i>V</i>" to be overdrawn by the background of the "_" which
      cuts it off.</p>
+     <p>
+     Single phase drawing is deprecated and should not be used by applications.
+     </p>
      <p>Two phase drawing (<code>SC_PHASES_TWO</code>)
      fixes this by drawing all the backgrounds of a line first and then drawing the text
      in transparent mode. Lines are drawn separately and no line will overlap another
@@ -3647,11 +3651,6 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_SETLAYOUTCACHE"><code>
      SCI_SETLAYOUTCACHE(SC_CACHE_PAGE)</code></a>
      or higher can ensure that multiple phase drawing is not significantly slower.</p>
-
-    <p><b id="SCI_SETTWOPHASEDRAW">SCI_SETTWOPHASEDRAW(bool twoPhase)</b><br />
-     <b id="SCI_GETTWOPHASEDRAW">SCI_GETTWOPHASEDRAW &rarr; bool</b><br />
-     This property has been replaced with the preceding PHASESDRAW property which is more general,
-     allowing multiple phase drawing as well as one and two phase drawing.</p>
 
     <p><b id="SCI_SETTECHNOLOGY">SCI_SETTECHNOLOGY(int technology)</b><br />
      <b id="SCI_GETTECHNOLOGY">SCI_GETTECHNOLOGY &rarr; int</b><br />
@@ -4531,8 +4530,8 @@ struct Sci_TextToFind {
     <p><b id="SCI_INDICSETUNDER">SCI_INDICSETUNDER(int indicator, bool under)</b><br />
      <b id="SCI_INDICGETUNDER">SCI_INDICGETUNDER(int indicator) &rarr; bool</b><br />
      These two messages set and get whether an indicator is drawn under text or over(default).
-     Drawing under text works only for indicators when <a class="message" href="#SCI_SETTWOPHASEDRAW">two phase drawing</a>
-     is enabled.</p>
+     Drawing under text does not work with the deprecated <a class="message" href="#SCI_SETPHASESDRAW">single phase drawing</a>
+     mode.</p>
 
     <p><b id="SCI_INDICSETHOVERSTYLE">SCI_INDICSETHOVERSTYLE(int indicator, int
     indicatorStyle)</b><br />
@@ -8136,6 +8135,8 @@ EM_FORMATRANGE
     <code>
      <a class="message" href="#SCI_SETKEYSUNICODE">SCI_SETKEYSUNICODE(bool keysUnicode)</a><br />
      <a class="message" href="#SCI_GETKEYSUNICODE">SCI_GETKEYSUNICODE &rarr; bool</a><br />
+     <a class="message" href="#SCI_SETTWOPHASEDRAW">SCI_SETTWOPHASEDRAW(bool twoPhase)</a><br />
+     <a class="message" href="#SCI_GETTWOPHASEDRAW">SCI_GETTWOPHASEDRAW &rarr; bool</a><br />
      <a class="message" href="#SCI_SETSTYLEBITS">SCI_SETSTYLEBITS(int bits)</a><br />
      <a class="message" href="#SCI_GETSTYLEBITS">SCI_GETSTYLEBITS &rarr; int</a><br />
      <a class="message" href="#SCI_GETSTYLEBITSNEEDED">SCI_GETSTYLEBITSNEEDED &rarr; int</a><br />
@@ -8144,6 +8145,15 @@ EM_FORMATRANGE
     <p><b id="SCI_SETKEYSUNICODE">SCI_SETKEYSUNICODE(bool keysUnicode)</b> Deprecated<br />
      <b id="SCI_GETKEYSUNICODE">SCI_GETKEYSUNICODE &rarr; bool</b> Deprecated<br />
      On Windows, Scintilla no longer supports narrow character windows so input is always treated as Unicode.</p>
+
+    <p><b id="SCI_SETTWOPHASEDRAW">SCI_SETTWOPHASEDRAW(bool twoPhase)</b><br />
+     <b id="SCI_GETTWOPHASEDRAW">SCI_GETTWOPHASEDRAW &rarr; bool</b><br />
+     This property has been replaced with the preceding PHASESDRAW property which is more general,
+     allowing multiple phase drawing as well as one and two phase drawing.</p>
+
+    <p>Single phase drawing <code>SC_PHASES_ONE</code>, is deprecated and should be replaced with
+    2-phase <code>SC_PHASES_TWO</code> or multi-phase <code>SC_PHASES_MULTIPLE</code> drawing.
+    </p>
 
     <p>The following are features that should be removed from calling code but are still
     defined to avoid breaking callers.</p>
