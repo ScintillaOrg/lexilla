@@ -120,6 +120,7 @@ private:
 	void NotifyChange() override;
 	void NotifyFocus(bool focus) override;
 	void NotifyParent(SCNotification scn) override;
+	void NotifyURIDropped(const char *uri);
 	int timers[tickDwell+1];
 	bool FineTickerRunning(TickReason reason) override;
 	void FineTickerStart(TickReason reason, int millis, int tolerance) override;
@@ -151,6 +152,7 @@ protected:
 	void DragMove(const Point &point);
 	void DragLeave();
 	void Drop(const Point &point, const QMimeData *data, bool move);
+	void DropUrls(const QMimeData *data);
 
 	void timerEvent(QTimerEvent *event) override;
 

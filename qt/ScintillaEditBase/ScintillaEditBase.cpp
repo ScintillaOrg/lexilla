@@ -376,7 +376,9 @@ void ScintillaEditBase::contextMenuEvent(QContextMenuEvent *event)
 
 void ScintillaEditBase::dragEnterEvent(QDragEnterEvent *event)
 {
-	if (event->mimeData()->hasText()) {
+	if (event->mimeData()->hasUrls()) {
+		event->acceptProposedAction();
+	} else if (event->mimeData()->hasText()) {
 		event->acceptProposedAction();
 
 		Point point = PointFromQPoint(event->pos());
@@ -393,7 +395,9 @@ void ScintillaEditBase::dragLeaveEvent(QDragLeaveEvent * /* event */)
 
 void ScintillaEditBase::dragMoveEvent(QDragMoveEvent *event)
 {
-	if (event->mimeData()->hasText()) {
+	if (event->mimeData()->hasUrls()) {
+		event->acceptProposedAction();
+	} else if (event->mimeData()->hasText()) {
 		event->acceptProposedAction();
 
 		Point point = PointFromQPoint(event->pos());
@@ -405,7 +409,10 @@ void ScintillaEditBase::dragMoveEvent(QDragMoveEvent *event)
 
 void ScintillaEditBase::dropEvent(QDropEvent *event)
 {
-	if (event->mimeData()->hasText()) {
+	if (event->mimeData()->hasUrls()) {
+		event->acceptProposedAction();
+		sqt->DropUrls(event->mimeData());
+	} else if (event->mimeData()->hasText()) {
 		event->acceptProposedAction();
 
 		Point point = PointFromQPoint(event->pos());
@@ -746,7 +753,7 @@ void ScintillaEditBase::notifyParent(SCNotification scn)
 			break;
 
 		case SCN_URIDROPPED:
-			emit uriDropped();
+			emit uriDropped(QString::fromUtf8(scn.text));
 			break;
 
 		case SCN_DWELLSTART:

@@ -95,7 +95,7 @@ signals:
 	void needShown(int position, int length);
 	void painted();
 	void userListSelection(); // Wants some args.
-	void uriDropped();        // Wants some args.
+	void uriDropped(const QString &uri);
 	void dwellStart(int x, int y);
 	void dwellEnd(int x, int y);
 	void zoom(int zoom);

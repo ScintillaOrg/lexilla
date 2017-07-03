@@ -401,6 +401,15 @@ void ScintillaQt::NotifyParent(SCNotification scn)
 	emit notifyParent(scn);
 }
 
+void ScintillaQt::NotifyURIDropped(const char *uri)
+{
+	SCNotification scn = {};
+	scn.nmhdr.code = SCN_URIDROPPED;
+	scn.text = uri;
+
+	NotifyParent(scn);
+}
+
 bool ScintillaQt::FineTickerRunning(TickReason reason)
 {
 	return timers[reason] != 0;
@@ -746,6 +755,13 @@ void ScintillaQt::Drop(const Point &point, const QMimeData *data, bool move)
 				false, false, UserVirtualSpace());
 
 	DropAt(movePos, bytes, len, move, rectangular);
+}
+
+void ScintillaQt::DropUrls(const QMimeData *data)
+{
+	foreach(const QUrl &url, data->urls()) {
+		NotifyURIDropped(url.toString().toUtf8().constData());
+	}
 }
 
 void ScintillaQt::timerEvent(QTimerEvent *event)
