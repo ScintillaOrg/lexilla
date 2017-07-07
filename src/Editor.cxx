@@ -3733,9 +3733,8 @@ int Editor::KeyCommand(unsigned int iMessage) {
 		break;
 	case SCI_EDITTOGGLEOVERTYPE:
 		inOverstrike = !inOverstrike;
+		ContainerNeedsUpdate(SC_UPDATE_SELECTION);
 		ShowCaretAtCurrentPosition();
-		ContainerNeedsUpdate(SC_UPDATE_CONTENT);
-		NotifyUpdateUI();
 		break;
 	case SCI_CANCEL:            	// Cancel any modes - handled in subclass
 		// Also unselect text
@@ -7637,7 +7636,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		}
 
 	case SCI_SETOVERTYPE:
-		inOverstrike = wParam != 0;
+		if (inOverstrike != (wParam != 0)) {
+			inOverstrike = wParam != 0;
+			ContainerNeedsUpdate(SC_UPDATE_SELECTION);
+			ShowCaretAtCurrentPosition();
+		}
 		break;
 
 	case SCI_GETOVERTYPE:

@@ -565,6 +565,11 @@
 	<a href="http://sourceforge.net/p/scintilla/bugs/1919/">Bug #1919</a>.
 	</li>
 	<li>
+	Ensure redraw when application changes overtype mode so caret change visible even when not blinking.
+	Notify application with SC_UPDATE_SELECTION when overtype changed - previously
+	sent SC_UPDATE_CONTENT.
+	</li>
+	<li>
 	Fix drawing failure when in wrap mode for delete to start/end of line which
 	affects later lines but did not redraw them.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1949/">Bug #1949</a>.
