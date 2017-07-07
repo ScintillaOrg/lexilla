@@ -2599,11 +2599,12 @@ gboolean ScintillaGTK::ExposeTextThis(GtkWidget * /*widget*/, GdkEventExpose *os
 		Paint(surfaceWindow.get(), rcPaint);
 		surfaceWindow->Release();
 		cairo_destroy(cr);
-		if (paintState == paintAbandoned) {
+		if ((paintState == paintAbandoned) || repaintFullWindow) {
 			// Painting area was insufficient to cover new styling or brace highlight positions
 			FullPaint();
 		}
 		paintState = notPainting;
+		repaintFullWindow = false;
 
 		if (rgnUpdate) {
 			gdk_region_destroy(rgnUpdate);
