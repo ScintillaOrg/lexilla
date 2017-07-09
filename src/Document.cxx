@@ -1138,7 +1138,7 @@ void Document::ChangeInsertion(const char *s, Sci::Position length) {
 	insertion.assign(s, length);
 }
 
-int SCI_METHOD Document::AddData(char *data, Sci_Position length) {
+int SCI_METHOD Document::AddData(const char *data, Sci_Position length) {
 	try {
 		Sci::Position position = static_cast<Sci::Position>(Length());
 		InsertString(position, data, static_cast<Sci::Position>(length));
