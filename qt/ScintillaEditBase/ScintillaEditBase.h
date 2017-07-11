@@ -104,6 +104,7 @@ signals:
 	void callTipClick();
 	void autoCompleteSelection(int position, const QString &text);
 	void autoCompleteCancelled();
+	void focusChanged(bool focused);
 
 	// Base notifications for compatibility with other Scintilla implementations
 	void notify(SCNotification *pscn);

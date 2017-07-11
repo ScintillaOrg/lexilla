@@ -788,6 +788,14 @@ void ScintillaEditBase::notifyParent(SCNotification scn)
 			emit autoCompleteCancelled();
 			break;
 
+		case SCN_FOCUSIN:
+			emit focusChanged(true);
+			break;
+
+		case SCN_FOCUSOUT:
+			emit focusChanged(false);
+			break;
+
 		default:
 			return;
 	}
