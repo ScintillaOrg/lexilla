@@ -13,6 +13,7 @@
 
 #include "Platform.h"
 
+#include <QUrl>
 #include <QPaintDevice>
 #include <QPainter>
 #include <QHash>
