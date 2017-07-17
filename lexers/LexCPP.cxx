@@ -579,12 +579,12 @@ public:
 	const char * SCI_METHOD GetSubStyleBases() override {
 		return styleSubable;
 	}
-	int SCI_METHOD NamedStyles() {
+	int SCI_METHOD NamedStyles() override {
 		return std::max(subStyles.LastAllocated() + 1,
 			static_cast<int>(ELEMENTS(lexicalClasses))) +
 			activeFlag;
 	}
-	const char * SCI_METHOD NameOfStyle(int style) {
+	const char * SCI_METHOD NameOfStyle(int style) override {
 		if (style >= NamedStyles())
 			return "";
 		if (style < ELEMENTS(lexicalClasses))
@@ -592,7 +592,7 @@ public:
 		// TODO: inactive and substyles
 		return "";
 	}
-	const char * SCI_METHOD TagsOfStyle(int style) {
+	const char * SCI_METHOD TagsOfStyle(int style) override {
 		if (style >= NamedStyles())
 			return "Excess";
 		returnBuffer.clear();
@@ -624,7 +624,7 @@ public:
 		}
 		return "";
 	}
-	const char * SCI_METHOD DescriptionOfStyle(int style) {
+	const char * SCI_METHOD DescriptionOfStyle(int style) override {
 		if (style >= NamedStyles())
 			return "";
 		if (style < ELEMENTS(lexicalClasses))
