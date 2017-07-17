@@ -587,7 +587,7 @@ public:
 	const char * SCI_METHOD NameOfStyle(int style) override {
 		if (style >= NamedStyles())
 			return "";
-		if (style < ELEMENTS(lexicalClasses))
+		if (style < static_cast<int>(ELEMENTS(lexicalClasses)))
 			return lexicalClasses[style].name;
 		// TODO: inactive and substyles
 		return "";
@@ -611,12 +611,12 @@ public:
 				return returnBuffer.c_str();
 			}
 		}
-		if (style < ELEMENTS(lexicalClasses))
+		if (style < static_cast<int>(ELEMENTS(lexicalClasses)))
 			return lexicalClasses[style].tags;
 		if (style >= activeFlag) {
 			returnBuffer = "inactive ";
 			const int styleActive = style - activeFlag;
-			if (styleActive < ELEMENTS(lexicalClasses))
+			if (styleActive < static_cast<int>(ELEMENTS(lexicalClasses)))
 				returnBuffer += lexicalClasses[styleActive].tags;
 			else
 				returnBuffer = "";
@@ -627,7 +627,7 @@ public:
 	const char * SCI_METHOD DescriptionOfStyle(int style) override {
 		if (style >= NamedStyles())
 			return "";
-		if (style < ELEMENTS(lexicalClasses))
+		if (style < static_cast<int>(ELEMENTS(lexicalClasses)))
 			return lexicalClasses[style].description;
 		// TODO: inactive and substyles
 		return "";
