@@ -214,7 +214,7 @@ static void ScanIdentifier(Accessor& styler, Sci_Position& pos, WordList *keywor
 		styler.ColourTo(pos - 1, SCE_RUST_MACRO);
 	} else {
 		char s[MAX_RUST_IDENT_CHARS + 1];
-		int len = pos - start;
+		Sci_Position len = pos - start;
 		len = len > MAX_RUST_IDENT_CHARS ? MAX_RUST_IDENT_CHARS : len;
 		GrabString(s, styler, start, len);
 		bool keyword = false;

@@ -131,7 +131,7 @@ static inline bool IsAnOperator(int ch) {
 	return false;
 }
 
-static inline int IsAnyOtherIdentifier(char *s, int sLength) {
+static inline int IsAnyOtherIdentifier(char *s, Sci_Position sLength) {
 
 	/*	IsAnyOtherIdentifier uses standard templates used in baan.
 	The matching template is shown as comments just above the return condition.

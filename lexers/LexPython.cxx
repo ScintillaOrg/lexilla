@@ -342,7 +342,7 @@ class LexerPython : public DefaultLexer {
 	OptionSetPython osPython;
 	enum { ssIdentifier };
 	SubStyles subStyles;
-	std::map<int, std::vector<SingleFStringExpState> > ftripleStateAtEol;
+	std::map<Sci_Position, std::vector<SingleFStringExpState> > ftripleStateAtEol;
 public:
 	explicit LexerPython() :
 		DefaultLexer(lexicalClasses, ELEMENTS(lexicalClasses)),
@@ -466,7 +466,7 @@ void LexerPython::ProcessLineEnd(StyleContext &sc, std::vector<SingleFStringExpS
 		}
 	}
 	if (!fstringStateStack.empty()) {
-		std::pair<int, std::vector<SingleFStringExpState> > val;
+		std::pair<Sci_Position, std::vector<SingleFStringExpState> > val;
 		val.first = sc.currentLine;
 		val.second = fstringStateStack;
 
@@ -529,7 +529,7 @@ void SCI_METHOD LexerPython::Lex(Sci_PositionU startPos, Sci_Position length, in
 	}
 
 	// Set up fstate stack from last line and remove any subsequent ftriple at eol states
-	std::map<int, std::vector<SingleFStringExpState> >::iterator it;
+	std::map<Sci_Position, std::vector<SingleFStringExpState> >::iterator it;
 	it = ftripleStateAtEol.find(lineCurrent - 1);
 	if (it != ftripleStateAtEol.end() && !it->second.empty()) {
 		fstringStateStack = it->second;
