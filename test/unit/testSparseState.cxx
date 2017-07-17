@@ -7,6 +7,8 @@
 
 #include "Platform.h"
 
+#include "Sci_Position.h"
+
 #include "SparseState.h"
 
 #include "catch.hpp"
