@@ -660,9 +660,9 @@ const char *LexState::DescribeWordListSets() {
 
 void LexState::SetWordList(int n, const char *wl) {
 	if (instance) {
-		int firstModification = instance->WordListSet(n, wl);
+		Sci_Position firstModification = instance->WordListSet(n, wl);
 		if (firstModification >= 0) {
-			pdoc->ModifiedAt(firstModification);
+			pdoc->ModifiedAt(static_cast<Sci::Position>(firstModification));
 		}
 	}
 }
@@ -706,9 +706,9 @@ const char *LexState::DescribeProperty(const char *name) {
 void LexState::PropSet(const char *key, const char *val) {
 	props.Set(key, val);
 	if (instance) {
-		int firstModification = instance->PropertySet(key, val);
+		Sci_Position firstModification = instance->PropertySet(key, val);
 		if (firstModification >= 0) {
-			pdoc->ModifiedAt(firstModification);
+			pdoc->ModifiedAt(static_cast<Sci::Position>(firstModification));
 		}
 	}
 }
@@ -831,8 +831,10 @@ const char *LexState::DescriptionOfStyle(int style) {
 void ScintillaBase::NotifyStyleToNeeded(Sci::Position endStyleNeeded) {
 #ifdef SCI_LEXER
 	if (DocumentLexState()->lexLanguage != SCLEX_CONTAINER) {
-		Sci::Line lineEndStyled = pdoc->LineFromPosition(pdoc->GetEndStyled());
-		Sci::Position endStyled = pdoc->LineStart(lineEndStyled);
+		Sci::Line lineEndStyled = static_cast<Sci::Line>(
+			pdoc->LineFromPosition(pdoc->GetEndStyled()));
+		Sci::Position endStyled = static_cast<Sci::Position>(
+			pdoc->LineStart(lineEndStyled));
 		DocumentLexState()->Colourise(endStyled, endStyleNeeded);
 		return;
 	}
@@ -1052,7 +1054,8 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 	case SCI_COLOURISE:
 		if (DocumentLexState()->lexLanguage == SCLEX_CONTAINER) {
 			pdoc->ModifiedAt(static_cast<Sci::Position>(wParam));
-			NotifyStyleToNeeded((lParam == -1) ? pdoc->Length() : static_cast<Sci::Position>(lParam));
+			NotifyStyleToNeeded((lParam == -1) ? static_cast<Sci::Position>(pdoc->Length()) :
+					    static_cast<Sci::Position>(lParam));
 		} else {
 			DocumentLexState()->Colourise(static_cast<Sci::Position>(wParam), static_cast<Sci::Position>(lParam));
 		}
@@ -1142,13 +1145,16 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		return DocumentLexState()->NamedStyles();
 
 	case SCI_NAMEOFSTYLE:
-		return StringResult(lParam, DocumentLexState()->NameOfStyle(wParam));
+		return StringResult(lParam, DocumentLexState()->
+				    NameOfStyle(static_cast<int>(wParam)));
 
 	case SCI_TAGSOFSTYLE:
-		return StringResult(lParam, DocumentLexState()->TagsOfStyle(wParam));
+		return StringResult(lParam, DocumentLexState()->
+				    TagsOfStyle(static_cast<int>(wParam)));
 
 	case SCI_DESCRIPTIONOFSTYLE:
-		return StringResult(lParam, DocumentLexState()->DescriptionOfStyle(wParam));
+		return StringResult(lParam, DocumentLexState()->
+				    DescriptionOfStyle(static_cast<int>(wParam)));
 
 #endif
 

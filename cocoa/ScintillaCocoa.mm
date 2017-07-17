@@ -1144,7 +1144,8 @@ void ScintillaCocoa::ClaimSelection() {
  * as a row:column pair. The result is zero-based.
  */
 NSPoint ScintillaCocoa::GetCaretPosition() {
-	const Sci::Line line = pdoc->LineFromPosition(sel.RangeMain().caret.Position());
+	const Sci::Line line = static_cast<Sci::Line>(
+		pdoc->LineFromPosition(sel.RangeMain().caret.Position()));
 	NSPoint result;
 
 	result.y = line;
@@ -1167,7 +1168,7 @@ void ScintillaCocoa::DragScroll() {
 	}
 
 	// TODO: does not work for wrapped lines, fix it.
-	Sci::Line line = pdoc->LineFromPosition(posDrag.Position());
+	Sci::Line line = static_cast<Sci::Line>(pdoc->LineFromPosition(posDrag.Position()));
 	Sci::Line currentVisibleLine = cs.DisplayFromDoc(line);
 	Sci::Line lastVisibleLine = std::min(topLine + LinesOnScreen(), cs.LinesDisplayed()) - 2;
 
@@ -1264,8 +1265,8 @@ void ScintillaCocoa::StartDrag() {
 	PRectangle client = GetTextRectangle();
 	Sci::Position selStart = sel.RangeMain().Start().Position();
 	Sci::Position selEnd = sel.RangeMain().End().Position();
-	Sci::Line startLine = pdoc->LineFromPosition(selStart);
-	Sci::Line endLine = pdoc->LineFromPosition(selEnd);
+	Sci::Line startLine = static_cast<Sci::Line>(pdoc->LineFromPosition(selStart));
+	Sci::Line endLine = static_cast<Sci::Line>(pdoc->LineFromPosition(selEnd));
 	Point pt;
 	long startPos, endPos, ep;
 	PRectangle rcSel;
