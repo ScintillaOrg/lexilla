@@ -438,7 +438,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 - (void) doCommandBySelector: (SEL) selector {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-	if ([self respondsToSelector: @selector(selector)])
+	if ([self respondsToSelector: selector])
 		[self performSelector: selector withObject: nil];
 #pragma clang diagnostic pop
 }
@@ -648,10 +648,13 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
  * its own input handling (character composition via NSTextInputClient protocol):
  */
 - (void) keyDown: (NSEvent *) theEvent {
+	bool handled = false;
 	if (mMarkedTextRange.length == 0)
-		mOwner.backend->KeyboardInput(theEvent);
-	NSArray *events = @[theEvent];
-	[self interpretKeyEvents: events];
+		handled = mOwner.backend->KeyboardInput(theEvent);
+	if (!handled) {
+		NSArray *events = @[theEvent];
+		[self interpretKeyEvents: events];
+	}
 }
 
 //--------------------------------------------------------------------------------------------------
