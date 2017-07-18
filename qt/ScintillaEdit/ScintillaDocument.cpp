@@ -37,18 +37,18 @@ using namespace Scintilla;
 #endif
 
 class WatcherHelper : public DocWatcher {
-	ScintillaDocument *owner;
+    ScintillaDocument *owner;
 public:
-	explicit WatcherHelper(ScintillaDocument *owner_);
-	virtual ~WatcherHelper();
+    explicit WatcherHelper(ScintillaDocument *owner_);
+    virtual ~WatcherHelper();
 
-	void NotifyModifyAttempt(Document *doc, void *userData);
-	void NotifySavePoint(Document *doc, void *userData, bool atSavePoint);
-	void NotifyModified(Document *doc, DocModification mh, void *userData);
-	void NotifyDeleted(Document *doc, void *userData);
-	void NotifyStyleNeeded(Document *doc, void *userData, Sci::Position endPos);
-	void NotifyLexerChanged(Document *doc, void *userData);
-	void NotifyErrorOccurred(Document *doc, void *userData, int status);
+    void NotifyModifyAttempt(Document *doc, void *userData);
+    void NotifySavePoint(Document *doc, void *userData, bool atSavePoint);
+    void NotifyModified(Document *doc, DocModification mh, void *userData);
+    void NotifyDeleted(Document *doc, void *userData);
+    void NotifyStyleNeeded(Document *doc, void *userData, Sci::Position endPos);
+    void NotifyLexerChanged(Document *doc, void *userData);
+    void NotifyErrorOccurred(Document *doc, void *userData, int status);
 };
 
 WatcherHelper::WatcherHelper(ScintillaDocument *owner_) : owner(owner_) {
@@ -58,11 +58,11 @@ WatcherHelper::~WatcherHelper() {
 }
 
 void WatcherHelper::NotifyModifyAttempt(Document *, void *) {
-	owner->emit_modify_attempt();
+    emit owner->modify_attempt();
 }
 
 void WatcherHelper::NotifySavePoint(Document *, void *, bool atSavePoint) {
-	owner->emit_save_point(atSavePoint);
+    emit owner->save_point(atSavePoint);
 }
 
 void WatcherHelper::NotifyModified(Document *, DocModification mh, void *) {
@@ -70,23 +70,23 @@ void WatcherHelper::NotifyModified(Document *, DocModification mh, void *) {
     if (!mh.text)
         length = 0;
     QByteArray ba = QByteArray::fromRawData(mh.text, length);
-    owner->emit_modified(mh.position, mh.modificationType, ba, length,
-        mh.linesAdded, mh.line, mh.foldLevelNow, mh.foldLevelPrev);
+    emit owner->modified(mh.position, mh.modificationType, ba, length,
+                         mh.linesAdded, mh.line, mh.foldLevelNow, mh.foldLevelPrev);
 }
 
 void WatcherHelper::NotifyDeleted(Document *, void *) {
 }
 
 void WatcherHelper::NotifyStyleNeeded(Document *, void *, Sci::Position endPos) {
-	owner->emit_style_needed(endPos);
+    emit owner->style_needed(endPos);
 }
 
 void WatcherHelper::NotifyLexerChanged(Document *, void *) {
-    owner->emit_lexer_changed();
+    emit owner->lexer_changed();
 }
 
 void WatcherHelper::NotifyErrorOccurred(Document *, void *, int status) {
-    owner->emit_error_occurred(status);
+    emit owner->error_occurred(status);
 }
 
 ScintillaDocument::ScintillaDocument(QObject *parent, void *pdoc_) :
@@ -111,7 +111,7 @@ ScintillaDocument::~ScintillaDocument() {
 }
 
 void *ScintillaDocument::pointer() {
-	return pdoc;
+    return pdoc;
 }
 
 int ScintillaDocument::line_from_position(int pos) {
@@ -276,32 +276,3 @@ int ScintillaDocument::move_position_outside_char(int pos, int move_dir, bool ch
 int ScintillaDocument::get_character(int pos) {
     return (static_cast<Document *>(pdoc))->GetCharacterAndWidth(pos, NULL);
 }
-
-// Signal emitters
-
-void ScintillaDocument::emit_modify_attempt() {
-    emit modify_attempt();
-}
-
-void ScintillaDocument::emit_save_point(bool atSavePoint) {
-    emit save_point(atSavePoint);
-}
-
-void ScintillaDocument::emit_modified(int position, int modification_type, const QByteArray& text, int length,
-    int linesAdded, int line, int foldLevelNow, int foldLevelPrev) {
-    emit modified(position, modification_type, text, length,
-        linesAdded, line, foldLevelNow, foldLevelPrev);
-}
-
-void ScintillaDocument::emit_style_needed(int pos) {
-    emit style_needed(pos);
-}
-
-void ScintillaDocument::emit_lexer_changed() {
-    emit lexer_changed();
-}
-
-void ScintillaDocument::emit_error_occurred(int status) {
-    emit error_occurred(status);
-}
-
