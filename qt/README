@@ -22,6 +22,8 @@ Alternatively, run "qmake" to build make files and then use the platform
 make to build. Most commonly, use "make" on Unix and "nmake"
 on Windows.
 
+On Linux, qmake may be called qmake-qt5 or qmake-qt4.
+
 ScintillaEdit requires a generation command be run first. From the 
 ScintillaEdit directory:
 

@@ -26,8 +26,9 @@ On apt-based systems, the packages are libshiboken-dev, shiboken, libpyside-dev,
 and python-pyside. python-dev is also needed for Python language headers.
 On yum-based systems the packages are shiboken-devel, python-pyside-devel,
 and python-devel.
-The qmake program may not be in the path and can be found with
-"find /usr -name qmake".
+The qmake program may be called qmake-qt5 or qmake-qt4.
+It can be found with:
+which qmake-qt5 || which qmake-qt4 || which qmake
 
 On Windows, the PySide library packages can be downloaded from 
 http://developer.qt.nokia.com/wiki/PySide_Binaries_Windows
