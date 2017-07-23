@@ -10,12 +10,15 @@ srcdir ?= .
 
 .SUFFIXES: .cxx .c .o .h .a .list
 ifdef CLANG
-CXX = clang++ -Wno-deprecated-register
+CXX = clang++
+CXXWARNFLAGS = -Wall -pedantic -Wno-deprecated-register -Wno-missing-braces
 CC = clang
 # Can choose aspect to sanitize: address and undefined can simply change SANITIZE but for
 # thread also need to create Position Independent Executable -> search online documentation
 SANITIZE = address
 #SANITIZE = undefined
+else
+CXXWARNFLAGS = -Wall -pedantic
 endif
 ARFLAGS = rc
 RANLIB = touch
@@ -56,7 +59,7 @@ INCLUDEDIRS=-I $(srcdir)/../include -I $(srcdir)/../src -I $(srcdir)/../lexlib
 ifdef CHECK_DEPRECATED
 DEPRECATED=-DGDK_PIXBUF_DISABLE_DEPRECATED -DGDK_DISABLE_DEPRECATED -DGTK_DISABLE_DEPRECATED -DDISABLE_GDK_FONT
 endif
-CXXBASEFLAGS=-Wall -pedantic $(PICFLAGS) -DGTK -DSCI_LEXER $(INCLUDEDIRS) $(DEPRECATED)
+CXXBASEFLAGS=$(CXXWARNFLAGS) $(PICFLAGS) -DGTK -DSCI_LEXER $(INCLUDEDIRS) $(DEPRECATED)
 
 ifdef NOTHREADS
 THREADFLAGS=-DG_THREADS_IMPL_NONE
