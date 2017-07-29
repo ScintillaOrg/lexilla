@@ -297,7 +297,9 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	gdk_window_set_cursor(PWindow(scrollbarh), cursor);
 	UnRefCursor(cursor);
 
-	gtk_selection_add_targets(widget, GDK_SELECTION_PRIMARY,
+	g_signal_connect(PWidget(wSelection), "selection_get", G_CALLBACK(PrimarySelection), (gpointer) this);
+	g_signal_connect(PWidget(wSelection), "selection_clear_event", G_CALLBACK(PrimaryClear), (gpointer) this);
+	gtk_selection_add_targets(PWidget(wSelection), GDK_SELECTION_PRIMARY,
 	                          clipboardCopyTargets, nClipboardCopyTargets);
 }
 
@@ -308,7 +310,7 @@ void ScintillaGTK::Realize(GtkWidget *widget) {
 
 void ScintillaGTK::UnRealizeThis(GtkWidget *widget) {
 	try {
-		gtk_selection_clear_targets(widget, GDK_SELECTION_PRIMARY);
+		gtk_selection_clear_targets(PWidget(wSelection), GDK_SELECTION_PRIMARY);
 
 		if (IS_WIDGET_MAPPED(widget)) {
 			gtk_widget_unmap(widget);
@@ -542,6 +544,8 @@ void ScintillaGTK::Init() {
 	}
 #endif
 
+	wSelection = gtk_invisible_new();
+
 	gtk_widget_set_can_focus(PWidget(wMain), TRUE);
 	gtk_widget_set_sensitive(PWidget(wMain), TRUE);
 	gtk_widget_set_events(PWidget(wMain),
@@ -663,6 +667,8 @@ void ScintillaGTK::Finalise() {
 		g_object_unref(accessible);
 		accessible = 0;
 	}
+
+	wSelection.Destroy();
 
 	ScintillaBase::Finalise();
 }
@@ -1336,16 +1342,16 @@ void ScintillaGTK::AddToPopUp(const char *label, int cmd, bool enabled) {
 
 bool ScintillaGTK::OwnPrimarySelection() {
 	return ((gdk_selection_owner_get(GDK_SELECTION_PRIMARY)
-		== PWindow(wMain)) &&
-			(PWindow(wMain) != NULL));
+		== PWindow(wSelection)) &&
+			(PWindow(wSelection) != NULL));
 }
 
 void ScintillaGTK::ClaimSelection() {
 	// X Windows has a 'primary selection' as well as the clipboard.
 	// Whenever the user selects some text, we become the primary selection
-	if (!sel.Empty() && IS_WIDGET_REALIZED(GTK_WIDGET(PWidget(wMain)))) {
+	if (!sel.Empty() && IS_WIDGET_REALIZED(GTK_WIDGET(PWidget(wSelection)))) {
 		primarySelection = true;
-		gtk_selection_owner_set(GTK_WIDGET(PWidget(wMain)),
+		gtk_selection_owner_set(GTK_WIDGET(PWidget(wSelection)),
 		                        GDK_SELECTION_PRIMARY, GDK_CURRENT_TIME);
 		primary.Clear();
 	} else if (OwnPrimarySelection()) {
@@ -1552,6 +1558,27 @@ void ScintillaGTK::UnclaimSelection(GdkEventSelection *selection_event) {
 	} catch (...) {
 		errorStatus = SC_STATUS_FAILURE;
 	}
+}
+
+void ScintillaGTK::PrimarySelection(GtkWidget *, GtkSelectionData *selection_data, guint info, guint, ScintillaGTK *sciThis) {
+	try {
+		if (SelectionOfGSD(selection_data) == GDK_SELECTION_PRIMARY) {
+			if (sciThis->primary.Empty()) {
+				sciThis->CopySelectionRange(&sciThis->primary);
+			}
+			sciThis->GetSelection(selection_data, info, &sciThis->primary);
+		}
+	} catch (...) {
+		sciThis->errorStatus = SC_STATUS_FAILURE;
+	}
+}
+
+gboolean ScintillaGTK::PrimaryClear(GtkWidget *widget, GdkEventSelection *event, ScintillaGTK *sciThis) {					 
+	sciThis->UnclaimSelection(event);
+	if (GTK_WIDGET_CLASS(sciThis->parentClass)->selection_clear_event) {
+		return GTK_WIDGET_CLASS(sciThis->parentClass)->selection_clear_event(widget, event);
+	}
+	return TRUE;
 }
 
 void ScintillaGTK::Resize(int width, int height) {

@@ -23,6 +23,7 @@ class ScintillaGTK : public ScintillaBase {
 	Window scrollbarh;
 	GtkAdjustment *adjustmentv;
 	GtkAdjustment *adjustmenth;
+	Window wSelection;
 	int verticalScrollBarWidth;
 	int horizontalScrollBarHeight;
 
@@ -139,6 +140,8 @@ private:
 	static void ClipboardClearSelection(GtkClipboard* clip, void *data);
 
 	void UnclaimSelection(GdkEventSelection *selection_event);
+	static void PrimarySelection(GtkWidget *widget, GtkSelectionData *selection_data, guint info, guint time_stamp, ScintillaGTK *sciThis);
+	static gboolean PrimaryClear(GtkWidget *widget, GdkEventSelection *event, ScintillaGTK *sciThis);
 	void Resize(int width, int height);
 
 	// Callback functions
