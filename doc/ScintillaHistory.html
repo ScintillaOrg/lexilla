@@ -584,6 +584,12 @@
 	<a href="http://sourceforge.net/p/scintilla/bugs/1876">Bug #1876</a>.
 	</li>
 	<li>
+	On Linux, both for GTK+ and Qt, the default modifier key for rectangular selection is now Alt.
+	This is the same as Windows and macOS.
+	This was changed from Ctrl as window managers are less likely to intercept Alt+Drag for
+	moving windows than in the past.
+	</li>
+	<li>
 	On Cocoa, fix doCommandBySelector but avoid double effect of 'delete'
 	key.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1958">Bug #1958</a>.

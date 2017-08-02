@@ -177,11 +177,7 @@ ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 	sci = sci_;
 	wMain = GTK_WIDGET(sci);
 
-#if PLAT_GTK_WIN32
 	rectangularSelectionModifier = SCMOD_ALT;
-#else
-	rectangularSelectionModifier = SCMOD_CTRL;
-#endif
 
 #if PLAT_GTK_WIN32
 	// There does not seem to be a real standard for indicating that the clipboard

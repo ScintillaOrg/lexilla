@@ -1651,9 +1651,9 @@ struct Sci_TextToFind {
     <p>
     <b id="SCI_SETRECTANGULARSELECTIONMODIFIER">SCI_SETRECTANGULARSELECTIONMODIFIER(int modifier)</b><br />
     <b id="SCI_GETRECTANGULARSELECTIONMODIFIER">SCI_GETRECTANGULARSELECTIONMODIFIER &rarr; int</b><br />
-     On GTK+, the key used to indicate that a rectangular selection should be created when combined with a mouse drag can be set.
-     The three possible values are <code>SCMOD_CTRL</code>=2 (default), <code>SCMOD_ALT</code>=4 or <code>SCMOD_SUPER</code>=8.
-     Since <code>SCMOD_ALT</code> is often already used by a window manager, the window manager may need configuring to allow this choice.
+     On GTK+ and Qt, the key used to indicate that a rectangular selection should be created when combined with a mouse drag can be set.
+     The three possible values are <code>SCMOD_CTRL</code>=2, <code>SCMOD_ALT</code>=4 (default) or <code>SCMOD_SUPER</code>=8.
+     Since <code>SCMOD_ALT</code> may already be used by a window manager, the window manager may need configuring to allow this choice.
      <code>SCMOD_SUPER</code> is often a system dependent modifier key such as the Left Windows key on a Windows keyboard or the
      Command key on a Mac.</p>
 

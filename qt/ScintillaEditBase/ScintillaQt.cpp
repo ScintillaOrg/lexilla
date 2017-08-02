@@ -130,11 +130,7 @@ static ScintillaRectangularMime *singletonMime = 0;
 
 void ScintillaQt::Init()
 {
-#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
 	rectangularSelectionModifier = SCMOD_ALT;
-#else
-	rectangularSelectionModifier = SCMOD_CTRL;
-#endif
 
 #if defined(Q_OS_MAC) && QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 	if (!singletonMime) {
