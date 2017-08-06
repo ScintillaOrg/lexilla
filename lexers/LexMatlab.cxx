@@ -294,6 +294,12 @@ static void FoldMatlabOctaveDoc(Sci_PositionU startPos, Sci_Position length, int
                                 WordList *[], Accessor &styler,
                                 bool (*IsComment)(int ch)) {
 
+	if (styler.GetPropertyInt("fold") == 0)
+		return;
+
+	const bool foldComment = styler.GetPropertyInt("fold.comment") != 0;
+	const bool foldCompact = styler.GetPropertyInt("fold.compact", 1) != 0;
+
 	Sci_PositionU endPos = startPos + length;
 	int visibleChars = 0;
 	Sci_Position lineCurrent = styler.GetLine(startPos);
@@ -314,7 +320,7 @@ static void FoldMatlabOctaveDoc(Sci_PositionU startPos, Sci_Position length, int
 		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 
 		// a line that starts with a comment
-		if (style == SCE_MATLAB_COMMENT && IsComment(ch) && visibleChars == 0) {
+		if (foldComment && style == SCE_MATLAB_COMMENT && IsComment(ch) && visibleChars == 0) {
 			// start/end of block comment
 			if (chNext == '{' && IsSpaceToEOL(i+2, styler))
 				levelNext ++;
@@ -340,7 +346,7 @@ static void FoldMatlabOctaveDoc(Sci_PositionU startPos, Sci_Position length, int
 		if (atEOL || (i == endPos-1)) {
 			int levelUse = levelCurrent;
 			int lev = levelUse | levelNext << 16;
-			if (visibleChars == 0)
+			if (visibleChars == 0 && foldCompact)
 				lev |= SC_FOLDLEVELWHITEFLAG;
 			if (levelUse < levelNext)
 				lev |= SC_FOLDLEVELHEADERFLAG;
