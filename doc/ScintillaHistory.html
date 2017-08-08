@@ -557,9 +557,6 @@
 	'Ctrl+L|SCI_LINEDELETE|'.
 	</li>
 	<li>
-	The Baan lexer correctly highlights numbers when followed by an operator.
-	</li>
-	<li>
 	The Matlab lexer treats 'end' as a number rather than a keyword when used as a index.
 	This also stops incorrect folding.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1951/">Bug #1951</a>.
@@ -626,6 +623,25 @@
 	<a href="http://sourceforge.net/p/scintilla/bugs/1254/">Bug #1254</a>,
 	<a href="http://sourceforge.net/p/scintilla/bugs/1762/">Bug #1762</a>,
 	<a href="http://sourceforge.net/p/scintilla/feature-requests/849/">Feature #849</a>.
+	</li>
+    </ul>
+    <h3>
+       <a href="http://www.scintilla.org/scintilla376.zip">Release 3.7.6</a>
+    </h3>
+    <ul>
+	<li>
+	Released 8 August 2017.
+	</li>
+	<li>
+	This is the first release of the
+	<a href="http://www.scintilla.org/LongTermDownload.html">long term branch</a>
+	which avoids using features from C++14 or later in order to support older systems.
+	</li>
+	<li>
+	The Baan lexer correctly highlights numbers when followed by an operator.
+	</li>
+	<li>
+	On Cocoa, fix a bug with retrieving encoded bytes.
 	</li>
     </ul>
     <h3>
