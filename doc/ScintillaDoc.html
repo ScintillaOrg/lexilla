@@ -119,7 +119,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 7 December 2016 NH</p>
+    <p>Last edited 11 August 2017 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -3657,19 +3657,16 @@ struct Sci_TextToFind {
     The technology property allows choosing between different drawing APIs and options.
     On most platforms, the only choice is <code>SC_TECHNOLOGY_DEFAULT</code> (0).
     On Windows Vista or later, <code>SC_TECHNOLOGY_DIRECTWRITE</code> (1),
-    <code class="provisional">SC_TECHNOLOGY_DIRECTWRITERETAIN</code> (2), or
-    <code class="provisional">SC_TECHNOLOGY_DIRECTWRITEDC</code> (3)
+    <code>SC_TECHNOLOGY_DIRECTWRITERETAIN</code> (2), or
+    <code>SC_TECHNOLOGY_DIRECTWRITEDC</code> (3)
     can be chosen to use the Direct2D and DirectWrite APIs for higher quality antialiased drawing.
-    <code class="provisional">SC_TECHNOLOGY_DIRECTWRITERETAIN</code> differs from
+    <code>SC_TECHNOLOGY_DIRECTWRITERETAIN</code> differs from
     <code>SC_TECHNOLOGY_DIRECTWRITE</code> by requesting that the frame
     is retained after being presented which may prevent drawing failures on some cards and drivers.
-    <code class="provisional">SC_TECHNOLOGY_DIRECTWRITEDC</code> differs from
+    <code>SC_TECHNOLOGY_DIRECTWRITEDC</code> differs from
     <code>SC_TECHNOLOGY_DIRECTWRITE</code> by using DirectWrite to draw into a GDI DC.
     Since Direct2D buffers drawing, Scintilla's buffering can be turned off with
-    <code>SCI_SETBUFFEREDDRAW(0)</code>.
-    <span class="provisional">Since <code>SC_TECHNOLOGY_DIRECTWRITERETAIN</code> and
-    <code>SC_TECHNOLOGY_DIRECTWRITEDC</code>
-    are provisional, they may be changed or removed in a future release if a better solution is found.</span></p>
+    <code>SCI_SETBUFFEREDDRAW(0)</code>.</p>
 
     <p><b id="SCI_SETFONTQUALITY">SCI_SETFONTQUALITY(int fontQuality)</b><br />
      <b id="SCI_GETFONTQUALITY">SCI_GETFONTQUALITY &rarr; int</b><br />
@@ -8050,10 +8047,7 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
 
     <p>Provisional features are displayed in this document with <span class="provisional">a distinctive background colour</span>.</p>
 
-    <p>There are currently no provisional messages.
-    The <code class="provisional">SC_TECHNOLOGY_DIRECTWRITERETAIN</code> and
-    <code class="provisional">SC_TECHNOLOGY_DIRECTWRITEDC</code> values for
-    <a class="seealso" href="#SCI_SETTECHNOLOGY">SCI_SETTECHNOLOGY</a> are provisional.</p>
+    <p>There are currently no provisional messages or values.</p>
 
     <p>Some developers may want to only use features that are stable and have graduated from
     provisional status. To avoid using provisional messages compile with the symbol

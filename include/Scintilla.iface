@@ -4869,7 +4869,7 @@ evt void AutoCCompleted=2030(string text, int position, int ch, CompletionMethod
 evt void MarginRightClick=2031(int modifiers, int position, int margin)
 evt void AutoCSelectionChange=2032(int listType, string text, int position)
 
-# There are no provisional APIs currently, but some arguments to SCI_SETTECHNOLOGY are provisional.
+# There are no provisional APIs currently.
 
 cat Provisional
 
