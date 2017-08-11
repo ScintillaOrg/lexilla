@@ -530,10 +530,32 @@
 	Released 15 August 2017.
 	</li>
 	<li>
+	This is an unstable release with changes to interfaces used for lexers and platform access.
+	Some more changes may occur to internal and external interfaces before stability is regained with 4.1.0.
+	</li>
+	<li>
 	Uses C++14 features. Requires Microsoft Visual C++ 2017, GCC 7, and Clang 4.0 or newer.
 	</li>
 	<li>
 	Support dropped for GTK+ versions before 2.24.
+	</li>
+	<li>
+	The lexer interfaces ILexer and ILexerWithSubStyles, along with additional style metadata methods, were merged into ILexer4.
+	Most lexers will need to be updated to match the new interfaces.
+	</li>
+	<li>
+	The IDocumentWithLineEnd interface was merged into IDocument.
+	</li>
+	<li>
+	The platform layer interface has changed with unused methods removed, a new mechanism for
+	reporting events, removal of methods that take individual keyboard modifiers, and removal of old timer methods.
+	</li>
+	<li>
+	<a href="StyleMetadata.html">Style metadata</a> may be retrieved from lexers that support this through the SCI_GETNAMEDSTYLES, SCI_NAMEOFSTYLE,
+	SCI_TAGSOFSTYLE, and SCI_DESCRIPTIONOFSTYLE APIs.
+	</li>
+	<li>
+	The Cocoa platform layer uses Automatic Reference Counting (ARC).
 	</li>
 	<li>
 	The default encoding in Scintilla is UTF-8.
