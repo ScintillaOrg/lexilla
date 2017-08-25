@@ -75,9 +75,7 @@ class TestLexers(unittest.TestCase):
 		self.ed.EmptyUndoBuffer()
 		self.ed.SetCodePage(65001)
 		self.ed.LexerLanguage = lexerName
-		bits = self.ed.StyleBitsNeeded
-		mask = 2 << bits - 1
-		self.ed.StyleBits = bits
+		mask = 0xff
 		for i in range(len(keywords)):
 			self.ed.SetKeyWords(i, keywords[i])
 
