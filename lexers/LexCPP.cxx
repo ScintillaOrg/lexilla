@@ -1333,6 +1333,8 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 									while ((startValue < restOfLine.length()) && IsSpaceOrTab(restOfLine[startValue]))
 										startValue++;
 									std::string value = restOfLine.substr(startValue);
+									if (OnlySpaceOrTab(value))
+										value = "1";	// No value defaults to 1
 									preprocessorDefinitions[key] = value;
 									ppDefineHistory.push_back(PPDefinition(lineCurrent, key, value));
 									definitionsChanged = true;
