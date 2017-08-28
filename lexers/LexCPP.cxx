@@ -1522,6 +1522,7 @@ void LexerCPP::EvaluateTokens(std::vector<std::string> &tokens, const SymbolTabl
 				if (it != preprocessorDefinitions.end()) {
 					val = "1";
 				}
+				tokens.erase(tokens.begin() + i + 1, tokens.begin() + i + 2);
 			}
 			tokens[i] = val;
 		} else {
