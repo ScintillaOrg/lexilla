@@ -1582,8 +1582,8 @@ void LexerCPP::EvaluateTokens(std::vector<std::string> &tokens, const SymbolTabl
 					tokens.insert(tokens.begin() + i, macroTokens.begin(), macroTokens.end());
 				}
 			} else {
-				// Identifier not found
-				tokens.erase(tokens.begin() + i);
+				// Identifier not found and value defaults to zero
+				tokens[i] = "0";
 			}
 		} else {
 			i++;
