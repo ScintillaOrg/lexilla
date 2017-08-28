@@ -28,6 +28,7 @@
 
 #include "Scintilla.h"
 #include "Platform.h"
+#include "ILoader.h"
 #include "ILexer.h"
 #include "Position.h"
 #include "UniqueString.h"

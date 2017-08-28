@@ -533,6 +533,10 @@
 	Released 16 August 2017.
 	</li>
 	<li>
+	The ILoader interface is defined in its own header ILoader.h as it is not
+	related to lexing so doesn't belong in ILexer.h.
+	</li>
+	<li>
 	The C++ lexer improved preprocessor conformance.<br />
 	Default value of 0 for undefined preprocessor symbols.<br />
 	#define A is treated as #define A 1.<br />

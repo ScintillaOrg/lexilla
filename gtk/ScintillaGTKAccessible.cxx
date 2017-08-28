@@ -84,6 +84,7 @@
 // ScintillaGTK.h and stuff it needs
 #include "Platform.h"
 
+#include "ILoader.h"
 #include "ILexer.h"
 #include "Scintilla.h"
 #include "ScintillaWidget.h"

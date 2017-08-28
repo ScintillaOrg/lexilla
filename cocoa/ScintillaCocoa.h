@@ -25,6 +25,7 @@
 #include <map>
 #include <memory>
 
+#include "ILoader.h"
 #include "ILexer.h"
 
 #ifdef SCI_LEXER
