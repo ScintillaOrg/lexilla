@@ -568,7 +568,10 @@ void SCI_METHOD LexerBaan::Lex(Sci_PositionU startPos, Sci_Position length, int 
 					sc.ChangeState(SCE_BAAN_WORD2);
 				}
 				else if ((keywords3.kwHasSection && (sc.ch == ':')) ? keywords3.Contains(s1) : keywords3.Contains(s)) {
-					sc.ChangeState(SCE_BAAN_WORD3);
+					if (sc.ch == '(')
+						sc.ChangeState(SCE_BAAN_WORD3);
+					else
+						sc.ChangeState(SCE_BAAN_IDENTIFIER);
 				}
 				else if ((keywords4.kwHasSection && (sc.ch == ':')) ? keywords4.Contains(s1) : keywords4.Contains(s)) {
 					sc.ChangeState(SCE_BAAN_WORD4);
