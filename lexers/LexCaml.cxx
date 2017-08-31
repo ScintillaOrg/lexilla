@@ -368,6 +368,7 @@ void ColouriseCamlDoc(
 				break;
 			}/* else
 				// fall through for SML char literal (handle like string) */
+			// Falls through.
 
 		case SCE_CAML_STRING:
 			// [try to] interpret as [additional] [SML char/] string literal char

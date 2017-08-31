@@ -314,6 +314,7 @@ next:
 					break;
 				case '[':
 					expected = true;
+					// Falls through.
 				case ']':
 				case '(':
 				case ')':

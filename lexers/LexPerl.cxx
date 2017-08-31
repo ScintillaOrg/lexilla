@@ -1175,6 +1175,7 @@ void SCI_METHOD LexerPerl::Lex(Sci_PositionU startPos, Sci_Position length, int 
 							break;
 						}
 						// (continued for ' delim)
+						// Falls through.
 					default:	// non-interpolated path
 						sc.Forward(sLen);
 					}
