@@ -26,9 +26,7 @@
 #include <QTimer>
 #include <QTextCodec>
 
-#ifdef SCI_NAMESPACE
 using namespace Scintilla;
-#endif
 
 
 ScintillaQt::ScintillaQt(QAbstractScrollArea *parent)

@@ -31,9 +31,7 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
-#ifdef SCI_NAMESPACE
 using namespace Scintilla;
-#endif
 
 
 static inline bool IsAWordChar(const unsigned int ch) {

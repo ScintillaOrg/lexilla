@@ -40,9 +40,7 @@
 #endif
 #endif // QT_VERSION >= 5.0.0
 
-#ifdef SCI_NAMESPACE
 using namespace Scintilla;
-#endif
 
 ScintillaEditBase::ScintillaEditBase(QWidget *parent)
 : QAbstractScrollArea(parent), sqt(0), preeditPos(-1), wheelDelta(0)

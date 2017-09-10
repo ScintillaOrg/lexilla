@@ -69,9 +69,9 @@
 #include <QClipboard>
 #include <QPaintEvent>
 
-#ifdef SCI_NAMESPACE
+class ScintillaEditBase;
+
 namespace Scintilla {
-#endif
 
 class ScintillaQt : public QObject, public ScintillaBase {
 	Q_OBJECT
@@ -167,11 +167,9 @@ private:
 	bool dragWasDropped;
 	int rectangularSelectionModifier;
 
-	friend class ScintillaEditBase;
+	friend class ::ScintillaEditBase;
 };
 
-#ifdef SCI_NAMESPACE
 }
-#endif
 
 #endif // SCINTILLAQT_H

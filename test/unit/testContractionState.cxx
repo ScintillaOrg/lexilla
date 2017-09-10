@@ -18,6 +18,8 @@
 
 #include "catch.hpp"
 
+using namespace Scintilla;
+
 // Test ContractionState.
 
 TEST_CASE("ContractionState") {

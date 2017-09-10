@@ -18,9 +18,7 @@
 #include <QPainter>
 #include <QHash>
 
-#ifdef SCI_NAMESPACE
 namespace Scintilla {
-#endif
 
 const char *CharacterSetID(int characterSet);
 
@@ -125,8 +123,6 @@ public:
 	QPainter *GetPainter();
 };
 
-#ifdef SCI_NAMESPACE
 }
-#endif
 
 #endif

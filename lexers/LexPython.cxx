@@ -32,9 +32,7 @@
 #include "SubStyles.h"
 #include "DefaultLexer.h"
 
-#ifdef SCI_NAMESPACE
 using namespace Scintilla;
-#endif
 
 namespace {
 // Use an unnamed namespace to protect the functions and classes from name conflicts

@@ -6,6 +6,8 @@
 
 #include "catch.hpp"
 
+using namespace Scintilla;
+
 // Test WordList.
 
 TEST_CASE("WordList") {

@@ -9,10 +9,6 @@
 
 class WatcherHelper;
 
-#ifdef SCI_NAMESPACE
-namespace Scintilla {
-#endif
-
 #ifndef EXPORT_IMPORT_API
 #ifdef WIN32
 #ifdef MAKING_LIBRARY
@@ -91,9 +87,5 @@ signals:
     
     friend class ::WatcherHelper;
 };
-
-#ifdef SCI_NAMESPACE
-}
-#endif
 
 #endif // SCINTILLADOCUMENT_H

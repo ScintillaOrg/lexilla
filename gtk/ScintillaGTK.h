@@ -6,9 +6,7 @@
 #ifndef SCINTILLAGTK_H
 #define SCINTILLAGTK_H
 
-#ifdef SCI_NAMESPACE
 namespace Scintilla {
-#endif
 
 class ScintillaGTKAccessible;
 
@@ -284,8 +282,6 @@ public:
 std::string ConvertText(const char *s, size_t len, const char *charSetDest,
                         const char *charSetSource, bool transliterations, bool silent=false);
 
-#ifdef SCI_NAMESPACE
 }
-#endif
 
 #endif

@@ -13,6 +13,8 @@
 
 #include "catch.hpp"
 
+using namespace Scintilla;
+
 // Test SparseState.
 
 TEST_CASE("SparseState") {

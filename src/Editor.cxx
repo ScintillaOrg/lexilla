@@ -54,9 +54,7 @@
 #include "EditView.h"
 #include "Editor.h"
 
-#ifdef SCI_NAMESPACE
 using namespace Scintilla;
-#endif
 
 /*
 	return whether this modification represents an operation that

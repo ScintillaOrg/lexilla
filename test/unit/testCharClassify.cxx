@@ -12,6 +12,8 @@
 
 #include "catch.hpp"
 
+using namespace Scintilla;
+
 // Test CharClassify.
 
 class CharClassifyTest {

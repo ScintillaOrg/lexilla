@@ -57,9 +57,7 @@ static GdkWindow *WindowFromWidget(GtkWidget *w) {
 #pragma warning(disable: 4505)
 #endif
 
-#ifdef SCI_NAMESPACE
 using namespace Scintilla;
-#endif
 
 enum encodingType { singleByte, UTF8, dbcs};
 
@@ -123,9 +121,7 @@ void Font::Release() {
 }
 
 // Required on OS X
-#ifdef SCI_NAMESPACE
 namespace Scintilla {
-#endif
 
 // SurfaceID is a cairo_t*
 class SurfaceImpl : public Surface {
@@ -187,9 +183,7 @@ public:
 	void SetUnicodeMode(bool unicodeMode_) override;
 	void SetDBCSMode(int codePage) override;
 };
-#ifdef SCI_NAMESPACE
 }
-#endif
 
 const char *CharacterSetID(int characterSet) {
 	switch (characterSet) {

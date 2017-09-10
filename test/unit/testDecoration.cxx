@@ -19,6 +19,8 @@
 
 const int indicator=4;
 
+using namespace Scintilla;
+
 // Test Decoration.
 
 TEST_CASE("Decoration") {

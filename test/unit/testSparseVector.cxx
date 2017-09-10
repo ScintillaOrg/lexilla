@@ -18,6 +18,8 @@
 
 #include "catch.hpp"
 
+using namespace Scintilla;
+
 // Test SparseVector.
 
 // Helper to produce a string representation of a SparseVector<const char *>

@@ -16,6 +16,8 @@
 
 #include "catch.hpp"
 
+using namespace Scintilla;
+
 // Test RunStyles.
 
 TEST_CASE("RunStyles") {

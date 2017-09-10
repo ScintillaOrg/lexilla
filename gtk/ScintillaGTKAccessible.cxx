@@ -128,9 +128,7 @@
 #include "ScintillaGTK.h"
 #include "ScintillaGTKAccessible.h"
 
-#ifdef SCI_NAMESPACE
 using namespace Scintilla;
-#endif
 
 struct ScintillaObjectAccessiblePrivate {
 	ScintillaGTKAccessible *pscin;

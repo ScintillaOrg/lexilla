@@ -105,9 +105,7 @@ static GdkWindow *WindowFromWidget(GtkWidget *w) {
 #pragma warning(disable: 4505)
 #endif
 
-#ifdef SCI_NAMESPACE
 using namespace Scintilla;
-#endif
 
 static GdkWindow *PWindow(const Window &w) {
 	GtkWidget *widget = static_cast<GtkWidget *>(w.GetID());
@@ -710,9 +708,7 @@ void ScintillaGTK::StartDrag() {
 #endif
 }
 
-#ifdef SCI_NAMESPACE
 namespace Scintilla {
-#endif
 std::string ConvertText(const char *s, size_t len, const char *charSetDest,
 	const char *charSetSource, bool transliterations, bool silent) {
 	// s is not const because of different versions of iconv disagreeing about const
@@ -745,9 +741,7 @@ std::string ConvertText(const char *s, size_t len, const char *charSetDest,
 	}
 	return destForm;
 }
-#ifdef SCI_NAMESPACE
 }
-#endif
 
 // Returns the target converted to UTF8.
 // Return the length in bytes.

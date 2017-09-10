@@ -51,13 +51,9 @@
 #include "MarginView.h"
 #include "EditView.h"
 
-#ifdef SCI_NAMESPACE
 using namespace Scintilla;
-#endif
 
-#ifdef SCI_NAMESPACE
 namespace Scintilla {
-#endif
 
 void DrawWrapMarker(Surface *surface, PRectangle rcPlace,
 	bool isEndMarker, ColourDesired wrapColour) {
@@ -466,7 +462,5 @@ void MarginView::PaintMargin(Surface *surface, Sci::Line topLine, PRectangle rc,
 	surface->FillRectangle(rcBlankMargin, vs.styles[STYLE_DEFAULT].back);
 }
 
-#ifdef SCI_NAMESPACE
 }
-#endif
 

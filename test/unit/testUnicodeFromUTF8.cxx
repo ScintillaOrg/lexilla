@@ -10,6 +10,8 @@
 
 #include "catch.hpp"
 
+using namespace Scintilla;
+
 // Test UnicodeFromUTF8.
 // Use examples from Wikipedia:
 // http://en.wikipedia.org/wiki/UTF-8

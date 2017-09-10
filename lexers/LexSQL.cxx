@@ -33,9 +33,7 @@
 #include "SparseState.h"
 #include "DefaultLexer.h"
 
-#ifdef SCI_NAMESPACE
 using namespace Scintilla;
-#endif
 
 static inline bool IsAWordChar(int ch, bool sqlAllowDottedWord) {
 	if (!sqlAllowDottedWord)

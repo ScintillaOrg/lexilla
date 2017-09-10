@@ -15,6 +15,8 @@
 
 #include "catch.hpp"
 
+using namespace Scintilla;
+
 const int growSize = 4;
 
 const int lengthTestArray = 8;

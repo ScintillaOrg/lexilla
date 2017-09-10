@@ -41,9 +41,7 @@
 #include "OptionSet.h"
 #include "DefaultLexer.h"
 
-#ifdef SCI_NAMESPACE
 using namespace Scintilla;
-#endif
 
 // Options used for LexerVisualProlog
 struct OptionsVisualProlog {

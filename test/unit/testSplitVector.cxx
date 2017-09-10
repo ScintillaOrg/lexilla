@@ -14,6 +14,8 @@
 
 #include "catch.hpp"
 
+using namespace Scintilla;
+
 // Test SplitVector.
 
 struct StringSetHolder {

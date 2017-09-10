@@ -37,9 +37,7 @@
 #include <QElapsedTimer>
 #include <cstdio>
 
-#ifdef SCI_NAMESPACE
 namespace Scintilla {
-#endif
 
 //----------------------------------------------------------------------
 
@@ -1245,6 +1243,4 @@ double ElapsedTime::Duration(bool reset)
 	return result / 1000000000.0;	// 1 billion nanoseconds in a second
 }
 
-#ifdef SCI_NAMESPACE
 }
-#endif

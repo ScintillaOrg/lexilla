@@ -16,6 +16,8 @@
 
 #include "catch.hpp"
 
+using namespace Scintilla;
+
 // Test CellBuffer.
 
 TEST_CASE("CellBuffer") {

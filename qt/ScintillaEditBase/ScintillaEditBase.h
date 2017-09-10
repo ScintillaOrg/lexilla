@@ -19,13 +19,12 @@
 #include <QMimeData>
 #include <QTime>
 
-#ifdef SCI_NAMESPACE
 namespace Scintilla {
-#endif
 
 class ScintillaQt;
 class SurfaceImpl;
-struct SCNotification;
+
+}
 
 #ifndef EXPORT_IMPORT_API
 #ifdef WIN32
@@ -138,7 +137,7 @@ protected:
 	void scrollContentsBy(int, int) override {}
 
 private:
-	ScintillaQt *sqt;
+	Scintilla::ScintillaQt *sqt;
 
 	QTime time;
 
@@ -152,9 +151,5 @@ private:
 	void DrawImeIndicator(int indicator, int len);
 	int ModifiersOfKeyboard() const;
 };
-
-#ifdef SCI_NAMESPACE
-}
-#endif
 
 #endif /* SCINTILLAEDITBASE_H */

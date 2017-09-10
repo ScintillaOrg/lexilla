@@ -295,7 +295,6 @@
 				GCC_PREFIX_HEADER = ScintillaTest_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					SCI_LEXER,
-					SCI_NAMESPACE,
 				);
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = Info.plist;
@@ -321,7 +320,6 @@
 				GCC_PREFIX_HEADER = ScintillaTest_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					SCI_LEXER,
-					SCI_NAMESPACE,
 				);
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = Info.plist;

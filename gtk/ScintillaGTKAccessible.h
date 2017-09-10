@@ -6,9 +6,7 @@
 #ifndef SCINTILLAGTKACCESSIBLE_H
 #define SCINTILLAGTKACCESSIBLE_H
 
-#ifdef SCI_NAMESPACE
 namespace Scintilla {
-#endif
 
 #ifndef ATK_CHECK_VERSION
 # define ATK_CHECK_VERSION(x, y, z) 0
@@ -188,9 +186,7 @@ public:
 	};
 };
 
-#ifdef SCI_NAMESPACE
 }
-#endif
 
 
 #endif /* SCINTILLAGTKACCESSIBLE_H */
