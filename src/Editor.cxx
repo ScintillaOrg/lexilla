@@ -4320,6 +4320,8 @@ bool Editor::PointInSelMargin(Point pt) const {
 		PRectangle rcSelMargin = GetClientRectangle();
 		rcSelMargin.right = static_cast<XYPOSITION>(vs.textStart - vs.leftMarginWidth);
 		rcSelMargin.left = static_cast<XYPOSITION>(vs.textStart - vs.fixedColumnWidth);
+		const Point ptOrigin = GetVisibleOriginInMain();
+		rcSelMargin.Move(0, -ptOrigin.y);
 		return rcSelMargin.ContainsWholePixel(pt);
 	} else {
 		return false;
