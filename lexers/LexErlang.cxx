@@ -1,11 +1,12 @@
 // Scintilla source code edit control
+// Encoding: UTF-8
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 /** @file LexErlang.cxx
  ** Lexer for Erlang.
  ** Enhanced by Etienne 'Lenain' Girondel (lenaing@gmail.com)
  ** Originally wrote by Peter-Henry Mander,
- ** based on Matlab lexer by José Fonseca.
+ ** based on Matlab lexer by JosÃ© Fonseca.
  **/
 
 #include <stdlib.h>

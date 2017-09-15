@@ -1,7 +1,8 @@
 // Scintilla source code edit control
+// Encoding: UTF-8
 /** @file LexCSS.cxx
  ** Lexer for Cascading Style Sheets
- ** Written by Jakub Vr·na
+ ** Written by Jakub Vr√°na
  ** Improved by Philippe Lhoste (CSS2)
  ** Improved by Ross McKay (SCSS mode; see http://sass-lang.com/ )
  **/

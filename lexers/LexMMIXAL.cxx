@@ -1,7 +1,8 @@
 // Scintilla source code edit control
+// Encoding: UTF-8
 /** @file LexMMIXAL.cxx
  ** Lexer for MMIX Assembler Language.
- ** Written by Christoph Hösler <christoph.hoesler@student.uni-tuebingen.de>
+ ** Written by Christoph HÃ¶sler <christoph.hoesler@student.uni-tuebingen.de>
  ** For information about MMIX visit http://www-cs-faculty.stanford.edu/~knuth/mmix.html
  **/
 // Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
