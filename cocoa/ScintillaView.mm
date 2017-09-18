@@ -696,20 +696,20 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 //--------------------------------------------------------------------------------------------------
 
 /**
- * Mouse wheel with command key magnifies text.
- * Enabling this code causes visual garbage to appear when scrolling
- * horizontally on OS X 10.9 with a retina display.
- * Pinch gestures and key commands can be used for magnification.
+ * Implementing scrollWheel makes scrolling work better even if just
+ * calling super.
+ * Mouse wheel with command key may magnify text if enabled.
+ * Pinch gestures and key commands can also be used for magnification.
  */
-#ifdef SCROLL_WHEEL_MAGNIFICATION
 - (void) scrollWheel: (NSEvent *) theEvent {
+#ifdef SCROLL_WHEEL_MAGNIFICATION
 	if (([theEvent modifierFlags] & NSCommandKeyMask) != 0) {
 		mOwner.backend->MouseWheel(theEvent);
-	} else {
-		[super scrollWheel: theEvent];
+		return;
 	}
-}
 #endif
+	[super scrollWheel: theEvent];
+}
 
 //--------------------------------------------------------------------------------------------------
 
@@ -727,6 +727,13 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 		// for overshoot.
 		long lineHeight = mOwner.backend->WndProc(SCI_TEXTHEIGHT, 0, 0);
 		rc.origin.y = roundf(static_cast<XYPOSITION>(rc.origin.y) / lineHeight) * lineHeight;
+	}
+	// Snap to whole points - on retina displays this avoids visual debris
+	// when scrolling horizontally.
+	if ((rc.origin.x > 0) && (NSMaxX(rc) < contentRect.size.width)) {
+		// Only snap for positions inside the document - allow outside
+		// for overshoot.
+		rc.origin.x = roundf(static_cast<XYPOSITION>(rc.origin.x));
 	}
 	return rc;
 }
