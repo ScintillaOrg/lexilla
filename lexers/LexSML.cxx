@@ -24,6 +24,10 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wcomma"
+#endif
+
 inline int  issml(int c) {return isalnum(c) || c == '_';}
 inline int issmlf(int c) {return isalpha(c) || c == '_';}
 inline int issmld(int c) {return isdigit(c) || c == '_';}

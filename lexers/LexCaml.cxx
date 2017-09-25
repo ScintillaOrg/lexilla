@@ -37,6 +37,10 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wcomma"
+#endif
+
 //	Since the Microsoft __iscsym[f] funcs are not ANSI...
 inline int  iscaml(int c) {return isalnum(c) || c == '_';}
 inline int iscamlf(int c) {return isalpha(c) || c == '_';}
