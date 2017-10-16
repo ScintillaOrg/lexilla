@@ -238,7 +238,7 @@ using namespace Scintilla;
 #define BLKIND  0370
 #define BITIND  07
 
-const char bitarr[] = { 1, 2, 4, 8, 16, 32, 64, '\200' };
+static const char bitarr[] = { 1, 2, 4, 8, 16, 32, 64, '\200' };
 
 #define badpat(x)	(*nfa = END, x)
 
@@ -833,7 +833,9 @@ int RESearch::Execute(CharacterIndexer &ci, Sci::Position lp, Sci::Position endp
 
 extern void re_fail(char *,char);
 
-#define isinset(x,y)	((x)[((y)&BLKIND)>>3] & bitarr[(y)&BITIND])
+static inline int isinset(const char *ap, unsigned char c) {
+	return ap[(c & BLKIND) >> 3] & bitarr[c & BITIND];
+}
 
 /*
  * skip values for CLO XXX to skip past the closure
@@ -865,8 +867,7 @@ Sci::Position RESearch::PMatch(CharacterIndexer &ci, Sci::Position lp, Sci::Posi
 		case CCL:
 			if (lp >= endp)
 				return NOTFOUND;
-			c = ci.CharAt(lp++);
-			if (!isinset(ap,c))
+			if (!isinset(ap, ci.CharAt(lp++)))
 				return NOTFOUND;
 			ap += BITBLK;
 			break;
@@ -925,7 +926,7 @@ Sci::Position RESearch::PMatch(CharacterIndexer &ci, Sci::Position lp, Sci::Posi
 				n = CHRSKIP;
 				break;
 			case CCL:
-				while ((lp < endp) && isinset(ap+1,ci.CharAt(lp)))
+				while ((lp < endp) && isinset(ap+1, ci.CharAt(lp)))
 					lp++;
 				n = CCLSKIP;
 				break;
