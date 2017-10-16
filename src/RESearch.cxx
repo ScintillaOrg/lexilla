@@ -272,7 +272,7 @@ void RESearch::Clear() {
 	}
 }
 
-void RESearch::GrabMatches(CharacterIndexer &ci) {
+void RESearch::GrabMatches(const CharacterIndexer &ci) {
 	for (unsigned int i = 0; i < MAXTAG; i++) {
 		if ((bopat[i] != NOTFOUND) && (eopat[i] != NOTFOUND)) {
 			Sci::Position len = eopat[i] - bopat[i];
@@ -753,7 +753,7 @@ const char *RESearch::Compile(const char *pattern, Sci::Position length, bool ca
  *  respectively.
  *
  */
-int RESearch::Execute(CharacterIndexer &ci, Sci::Position lp, Sci::Position endp) {
+int RESearch::Execute(const CharacterIndexer &ci, Sci::Position lp, Sci::Position endp) {
 	unsigned char c;
 	Sci::Position ep = NOTFOUND;
 	char *ap = nfa;
@@ -845,7 +845,7 @@ static inline int isinset(const char *ap, unsigned char c) {
 #define CHRSKIP 3	/* [CLO] CHR chr END      */
 #define CCLSKIP 34	/* [CLO] CCL 32 bytes END */
 
-Sci::Position RESearch::PMatch(CharacterIndexer &ci, Sci::Position lp, Sci::Position endp, char *ap) {
+Sci::Position RESearch::PMatch(const CharacterIndexer &ci, Sci::Position lp, Sci::Position endp, char *ap) {
 	int op, c, n;
 	Sci::Position e;		/* extra pointer for CLO  */
 	Sci::Position bp;		/* beginning of subpat... */
