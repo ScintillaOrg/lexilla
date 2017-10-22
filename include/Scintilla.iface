@@ -2696,15 +2696,15 @@ get int GetNamedStyles=4029(,)
 
 # Retrieve the name of a style.
 # Result is NUL-terminated.
-fun int NameOfStyle=4030(int style, stringresult names)
+fun int NameOfStyle=4030(int style, stringresult name)
 
 # Retrieve a ' ' separated list of style tags like "literal quoted string".
 # Result is NUL-terminated.
-fun int TagsOfStyle=4031(int style, stringresult names)
+fun int TagsOfStyle=4031(int style, stringresult tags)
 
 # Retrieve a description of a style.
 # Result is NUL-terminated.
-fun int DescriptionOfStyle=4032(int style, stringresult names)
+fun int DescriptionOfStyle=4032(int style, stringresult description)
 
 # Notifications
 # Type of modification and the action which caused the modification.
