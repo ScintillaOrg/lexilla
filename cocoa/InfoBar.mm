@@ -81,6 +81,10 @@
 		NSBundle *bundle = [NSBundle bundleForClass: [InfoBar class]];
 
 		NSString *path = [bundle pathForResource: @"info_bar_bg" ofType: @"tiff" inDirectory: nil];
+		// macOS 10.13 introduced bug where pathForResource: fails on SMB share
+		if (path == nil) {
+			path = [bundle.bundlePath stringByAppendingPathComponent: @"Resources/info_bar_bg.tiff"];
+		}
 		mBackground = [[NSImage alloc] initWithContentsOfFile: path];
 		if (!mBackground.valid)
 			NSLog(@"Background image for info bar is invalid.");
@@ -221,10 +225,12 @@ static float BarFontSize = 10.0;
 - (void) drawRect: (NSRect) rect {
 	// Since the background is seamless, we don't need to take care for the proper offset.
 	// Simply tile the background over the invalid rectangle.
-	NSPoint target = {rect.origin.x, 0};
-	while (target.x < rect.origin.x + rect.size.width) {
-		[mBackground drawAtPoint: target fromRect: NSZeroRect operation: NSCompositeCopy fraction: 1];
-		target.x += mBackground.size.width;
+	if (mBackground.size.width != 0) {
+		NSPoint target = {rect.origin.x, 0};
+		while (target.x < rect.origin.x + rect.size.width) {
+			[mBackground drawAtPoint: target fromRect: NSZeroRect operation: NSCompositeCopy fraction: 1];
+			target.x += mBackground.size.width;
+		}
 	}
 
 	// Draw separator lines between items.
