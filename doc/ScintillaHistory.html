@@ -534,6 +534,10 @@
 	Released 23 October 2017.
 	</li>
 	<li>
+	Fix HTML lexer handling of Django so that nesting a  &#123;&#123; &#125;&#125; or &#123;% %&#125;
+	Django tag inside of a &#123;# #&#125; Django comment does not break highlighting of rest of file
+	</li>
+	<li>
 	Fix Cocoa hang when Scintilla loaded from SMB share on macOS 10.13.
 	<a href="http://sourceforge.net/p/scintilla/bugs/1979/">Bug #1979</a>.
 	</li>
