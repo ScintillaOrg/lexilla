@@ -12,7 +12,7 @@ TEMPLATE = lib
 CONFIG += lib_bundle
 CONFIG += c++14
 
-VERSION = 4.0.1
+VERSION = 4.0.2
 
 win32 {
         QMAKE_CXXFLAGS += -std:c++latest
