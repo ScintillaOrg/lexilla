@@ -800,6 +800,20 @@ sptr_t scintilla_send_message(void *sci, unsigned int iMessage, uptr_t wParam, s
 
 //--------------------------------------------------------------------------------------------------
 
+namespace {
+
+/**
+ * The animated find indicator fails with a "bogus layer size" message on macOS 10.13.
+ */
+
+bool SupportAnimatedFind() {
+	return floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_12_2;
+}
+
+}
+
+//--------------------------------------------------------------------------------------------------
+
 /**
  * That's our fake window procedure. On Windows each window has a dedicated procedure to handle
  * commands (also used to synchronize UI and background threads), which is not the case in Cocoa.
@@ -838,11 +852,15 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 			break;
 
 		case SCI_FINDINDICATORSHOW:
-			ShowFindIndicatorForRange(NSMakeRange(wParam, lParam-wParam), YES);
+			if (SupportAnimatedFind()) {
+				ShowFindIndicatorForRange(NSMakeRange(wParam, lParam-wParam), YES);
+			}
 			return 0;
 
 		case SCI_FINDINDICATORFLASH:
-			ShowFindIndicatorForRange(NSMakeRange(wParam, lParam-wParam), NO);
+			if (SupportAnimatedFind()) {
+				ShowFindIndicatorForRange(NSMakeRange(wParam, lParam-wParam), NO);
+			}
 			return 0;
 
 		case SCI_FINDINDICATORHIDE:
