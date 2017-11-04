@@ -50,7 +50,7 @@ static inline bool IsAWordStart(const int ch) {
 
 /***************************************/
 static inline bool IsABlank(unsigned int ch) {
-    return (ch == ' ') || (ch == 0x09) || (ch == 0x0b) ;
+  return (ch == ' ') || (ch == 0x09) || (ch == 0x0b) ;
 }
 
 /***************************************/
@@ -156,50 +156,50 @@ static void ColouriseVHDLDoc(
 }
 //=============================================================================
 static bool IsCommentLine(Sci_Position line, Accessor &styler) {
-	Sci_Position pos = styler.LineStart(line);
-	Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
-	for (Sci_Position i = pos; i < eol_pos; i++) {
-		char ch = styler[i];
-		char chNext = styler[i+1];
-		if ((ch == '-') && (chNext == '-'))
-			return true;
-		else if (ch != ' ' && ch != '\t')
-			return false;
-	}
-	return false;
+  Sci_Position pos = styler.LineStart(line);
+  Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
+  for (Sci_Position i = pos; i < eol_pos; i++) {
+    char ch = styler[i];
+    char chNext = styler[i+1];
+    if ((ch == '-') && (chNext == '-'))
+      return true;
+    else if (ch != ' ' && ch != '\t')
+      return false;
+  }
+  return false;
 }
 static bool IsCommentBlockStart(Sci_Position line, Accessor &styler)
 {
-    Sci_Position pos = styler.LineStart(line);
-	Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
-	for (Sci_Position i = pos; i < eol_pos; i++) {
-		char ch = styler[i];
-		char chNext = styler[i+1];
-        char style = styler.StyleAt(i);
-		if ((style == SCE_VHDL_BLOCK_COMMENT) && (ch == '/') && (chNext == '*'))
-			return true;
-	}
-	return false;
+  Sci_Position pos = styler.LineStart(line);
+  Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
+  for (Sci_Position i = pos; i < eol_pos; i++) {
+    char ch = styler[i];
+    char chNext = styler[i+1];
+    char style = styler.StyleAt(i);
+    if ((style == SCE_VHDL_BLOCK_COMMENT) && (ch == '/') && (chNext == '*'))
+      return true;
+  }
+  return false;
 }
 
 static bool IsCommentBlockEnd(Sci_Position line, Accessor &styler)
 {
-    Sci_Position pos = styler.LineStart(line);
-	Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
+  Sci_Position pos = styler.LineStart(line);
+  Sci_Position eol_pos = styler.LineStart(line + 1) - 1;
 
-	for (Sci_Position i = pos; i < eol_pos; i++) {
-		char ch = styler[i];
-		char chNext = styler[i+1];
-        char style = styler.StyleAt(i);
-		if ((style == SCE_VHDL_BLOCK_COMMENT) && (ch == '*') && (chNext == '/'))
-			return true;
-	}
-	return false;
+  for (Sci_Position i = pos; i < eol_pos; i++) {
+    char ch = styler[i];
+    char chNext = styler[i+1];
+    char style = styler.StyleAt(i);
+    if ((style == SCE_VHDL_BLOCK_COMMENT) && (ch == '*') && (chNext == '/'))
+      return true;
+  }
+  return false;
 }
 
 static bool IsCommentStyle(char style)
 {
-    return style == SCE_VHDL_BLOCK_COMMENT || style == SCE_VHDL_COMMENT || style == SCE_VHDL_COMMENTLINEBANG;
+  return style == SCE_VHDL_BLOCK_COMMENT || style == SCE_VHDL_COMMENT || style == SCE_VHDL_COMMENTLINEBANG;
 }
 
 //=============================================================================
