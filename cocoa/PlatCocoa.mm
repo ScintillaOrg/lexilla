@@ -1724,7 +1724,7 @@ void Window::Destroy() {
 	if (wid) {
 		id idWin = (__bridge id)(wid);
 		if ([idWin isKindOfClass: [NSWindow class]]) {
-			CFBridgingRelease(wid);
+			[idWin close];
 		}
 	}
 	wid = nullptr;
