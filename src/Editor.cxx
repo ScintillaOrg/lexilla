@@ -7625,6 +7625,8 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		default:	// ?!
 			return SC_SEL_STREAM;
 		}
+	case SCI_GETMOVEEXTENDSSELECTION:
+		return sel.MoveExtends();
 	case SCI_GETLINESELSTARTPOSITION:
 	case SCI_GETLINESELENDPOSITION: {
 			SelectionSegment segmentLine(

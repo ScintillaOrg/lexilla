@@ -1964,6 +1964,9 @@ set void SetSelectionMode=2422(int selectionMode,)
 # Get the mode of the current selection.
 get int GetSelectionMode=2423(,)
 
+# Get whether or not regular caret moves will extend or reduce the selection.
+get bool GetMoveExtendsSelection=2706(,)
+
 # Retrieve the position of the start of the selection at the given line (INVALID_POSITION if no selection on this line).
 fun position GetLineSelStartPosition=2424(int line,)
 
