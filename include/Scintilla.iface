@@ -4861,9 +4861,18 @@ evt void AutoCCompleted=2030(string text, int position, int ch, CompletionMethod
 evt void MarginRightClick=2031(int modifiers, int position, int margin)
 evt void AutoCSelectionChange=2032(int listType, string text, int position)
 
-# There are no provisional APIs currently.
-
 cat Provisional
+
+enu Bidirectional=SC_BIDIRECTIONAL_
+val SC_BIDIRECTIONAL_DISABLED=0
+val SC_BIDIRECTIONAL_L2R=1
+val SC_BIDIRECTIONAL_R2L=2
+
+# Retrieve bidirectional text display state.
+get int GetBidirectional=2708(,)
+
+# Set bidirectional text display state.
+set void SetBidirectional=2709(int bidirectional,)
 
 cat Deprecated
 

@@ -1744,6 +1744,17 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			}
 			break;
 
+		case SCI_SETBIDIRECTIONAL:
+			if (technology == SC_TECHNOLOGY_DEFAULT) {
+				bidirectional = EditModel::Bidirectional::bidiDisabled;
+			} else if ((wParam >= SC_BIDIRECTIONAL_DISABLED) && (wParam <= SC_BIDIRECTIONAL_R2L)) {
+				bidirectional = static_cast<EditModel::Bidirectional>(wParam);
+			}
+			// Invalidate all cached information including layout.
+			DropGraphics(true);
+			InvalidateStyleRedraw();
+			break;
+
 #ifdef SCI_LEXER
 		case SCI_LOADLEXERLIBRARY:
 			LexerManager::GetInstance()->Load(reinterpret_cast<const char *>(lParam));

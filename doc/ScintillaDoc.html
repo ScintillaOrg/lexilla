@@ -119,7 +119,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 11 August 2017 NH</p>
+    <p>Last edited 10 January 2018 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -3594,6 +3594,10 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_GETCODEPAGE">SCI_GETCODEPAGE &rarr; int</a><br />
      <a class="message" href="#SCI_SETIMEINTERACTION">SCI_SETIMEINTERACTION(int imeInteraction)</a><br />
      <a class="message" href="#SCI_GETIMEINTERACTION">SCI_GETIMEINTERACTION &rarr; int</a><br />
+<div  class="provisional">
+     <a class="message" href="#SCI_SETBIDIRECTIONAL"><span class="provisional">SCI_SETBIDIRECTIONAL(int bidirectional)</span></a><br />
+     <a class="message" href="#SCI_GETBIDIRECTIONAL">SCI_GETBIDIRECTIONAL &rarr; int</a><br />
+</div>
      <a class="message" href="#SCI_GRABFOCUS">SCI_GRABFOCUS</a><br />
      <a class="message" href="#SCI_SETFOCUS">SCI_SETFOCUS(bool focus)</a><br />
      <a class="message" href="#SCI_GETFOCUS">SCI_GETFOCUS &rarr; bool</a><br />
@@ -3717,6 +3721,27 @@ struct Sci_TextToFind {
      <p>The windowed behaviour can be chosen with <code>SCI_SETIMEINTERACTION(SC_IME_WINDOWED)</code>
      and the inline behaviour with <code>SCI_SETIMEINTERACTION(SC_IME_INLINE)</code>.
      Scintilla may ignore this call in some cases. For example, the inline behaviour might only be supported for some languages.</p>
+
+<div  class="provisional">
+    <a href="#ProvisionalMessages">These bidirectional features are not yet implemented and the API is provisional</a><br />
+    <p><b id="SCI_SETBIDIRECTIONAL">SCI_SETBIDIRECTIONAL(int bidirectional)</b><br />
+     <b id="SCI_GETBIDIRECTIONAL">SCI_GETBIDIRECTIONAL &rarr; int</b><br />
+     Some languages, like Arabic and Hebrew, are written from right to left instead of from left to right as English is.
+     Documents that use multiple languages may contain both directions and this is termed "bidirectional".
+     The default text direction may be right to left or left to right.
+     Scintilla only correctly displays bidirectional text on some platforms and there can be additional processing and storage
+     costs to this.
+     Currently, bidirectional text only works on Win32 using DirectWrite.
+     As some applications may not want to pay the costs, bidirectional support must be explicitly enabled by calling
+     <code>SCI_SETBIDIRECTIONAL(SC_BIDIRECTIONAL_L2R)</code> (1) which chooses left to right as the default direction or
+     <code>SCI_SETBIDIRECTIONAL(SC_BIDIRECTIONAL_R2L)</code> (2) for default right to left.
+     This should be done after setting the technology to <code>SC_TECHNOLOGY_DIRECTWRITE</code>,
+     <code>SC_TECHNOLOGY_DIRECTWRITERETAIN</code>, or
+     <code>SC_TECHNOLOGY_DIRECTWRITEDC</code>.</p>
+     <p>If the call succeeded <code>SCI_GETBIDIRECTIONAL</code> will return the same value otherwise
+     <code>SC_BIDIRECTIONAL_DISABLED</code> (0) is returned.
+     </p>
+</div>
 
     <p><b id="SCI_GRABFOCUS">SCI_GRABFOCUS</b><br />
      <b id="SCI_SETFOCUS">SCI_SETFOCUS(bool focus)</b><br />
@@ -8072,8 +8097,6 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     Provisional features may even be removed if experience shows they are a mistake.</p>
 
     <p>Provisional features are displayed in this document with <span class="provisional">a distinctive background colour</span>.</p>
-
-    <p>There are currently no provisional messages or values.</p>
 
     <p>Some developers may want to only use features that are stable and have graduated from
     provisional status. To avoid using provisional messages compile with the symbol

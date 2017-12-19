@@ -6736,6 +6736,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETIMEINTERACTION:
 		return imeInteraction;
 
+	case SCI_SETBIDIRECTIONAL:
+		// SCI_SETBIDIRECTIONAL is implemented on platform subclasses if they support bidirectional text.
+		break;
+
+	case SCI_GETBIDIRECTIONAL:
+		return static_cast<sptr_t>(bidirectional);
+
 		// Marker definition and setting
 	case SCI_MARKERDEFINE:
 		if (wParam <= MARKER_MAX) {
