@@ -11,6 +11,8 @@
 
 // Needed for PLATFORM_ASSERT in code being tested
 
+namespace Scintilla {
+
 void Platform::Assert(const char *c, const char *file, int line) {
 	fprintf(stderr, "Assertion [%s] failed at %s %d\n", c, file, line);
 	abort();
@@ -23,6 +25,8 @@ void Platform::DebugPrintf(const char *format, ...) {
 	vsprintf(buffer, format, pArguments);
 	va_end(pArguments);
 	fprintf(stderr, "%s", buffer);
+}
+
 }
 
 int main(int argc, char* const argv[]) {
