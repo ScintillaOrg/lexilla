@@ -16,7 +16,7 @@ namespace Scintilla {
 
 class SplitVectorWithRangeAdd : public SplitVector<int> {
 public:
-	explicit SplitVectorWithRangeAdd(int growSize_) {
+	explicit SplitVectorWithRangeAdd(ptrdiff_t growSize_) {
 		SetGrowSize(growSize_);
 		ReAllocate(growSize_);
 	}
@@ -25,12 +25,12 @@ public:
 	void operator=(const SplitVectorWithRangeAdd &) = delete;
 	~SplitVectorWithRangeAdd() {
 	}
-	void RangeAddDelta(int start, int end, int delta) {
+	void RangeAddDelta(ptrdiff_t start, ptrdiff_t end, int delta) {
 		// end is 1 past end, so end-start is number of elements to change
-		int i = 0;
-		const int rangeLength = end - start;
-		int range1Length = rangeLength;
-		const int part1Left = part1Length - start;
+		ptrdiff_t i = 0;
+		const ptrdiff_t rangeLength = end - start;
+		ptrdiff_t range1Length = rangeLength;
+		const ptrdiff_t part1Left = part1Length - start;
 		if (range1Length > part1Left)
 			range1Length = part1Left;
 		while (i < range1Length) {
@@ -67,7 +67,7 @@ private:
 		}
 		stepPartition = partitionUpTo;
 		if (stepPartition >= body->Length()-1) {
-			stepPartition = body->Length()-1;
+			stepPartition = Partitions();
 			stepLength = 0;
 		}
 	}
@@ -80,7 +80,7 @@ private:
 		stepPartition = partitionDownTo;
 	}
 
-	void Allocate(int growSize) {
+	void Allocate(ptrdiff_t growSize) {
 		body.reset(new SplitVectorWithRangeAdd(growSize));
 		stepPartition = 0;
 		stepLength = 0;
@@ -101,7 +101,7 @@ public:
 	}
 
 	int Partitions() const {
-		return body->Length()-1;
+		return static_cast<int>(body->Length()-1);
 	}
 
 	void InsertPartition(int partition, int pos) {
@@ -132,7 +132,7 @@ public:
 				BackStep(partitionInsert);
 				stepLength += delta;
 			} else {
-				ApplyStep(body->Length()-1);
+				ApplyStep(Partitions());
 				stepPartition = partitionInsert;
 				stepLength = delta;
 			}
@@ -168,10 +168,10 @@ public:
 	int PartitionFromPosition(int pos) const {
 		if (body->Length() <= 1)
 			return 0;
-		if (pos >= (PositionFromPartition(body->Length()-1)))
-			return body->Length() - 1 - 1;
+		if (pos >= (PositionFromPartition(Partitions())))
+			return Partitions() - 1;
 		int lower = 0;
-		int upper = body->Length()-1;
+		int upper = Partitions();
 		do {
 			const int middle = (upper + lower + 1) / 2; 	// Round high
 			int posMiddle = body->ValueAt(middle);
