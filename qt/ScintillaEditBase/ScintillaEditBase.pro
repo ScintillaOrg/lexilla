@@ -10,7 +10,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = ScintillaEditBase
 TEMPLATE = lib
 CONFIG += lib_bundle
-CONFIG += c++14
+CONFIG += c++1z
 
 VERSION = 4.0.2
 
