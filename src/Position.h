@@ -21,15 +21,6 @@ typedef int Line;
 
 const Position invalidPosition = -1;
 
-template <typename T>
-inline constexpr T clamp(T val, T minVal, T maxVal) {
-	if (val > maxVal)
-		val = maxVal;
-	if (val < minVal)
-		val = minVal;
-	return val;
-}
-
 }
 
 #endif
