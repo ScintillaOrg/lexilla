@@ -11,8 +11,8 @@
 #include <cstring>
 #include <cctype>
 #include <cstdio>
-
 #include <cmath>
+
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -934,7 +934,7 @@ void Editor::ScrollTo(Sci::Line line, bool moveThumb) {
 		// Try to optimise small scrolls
 #ifndef UNDER_CE
 		const Sci::Line linesToMove = topLine - topLineNew;
-		const bool performBlit = (abs(linesToMove) <= 10) && (paintState == notPainting);
+		const bool performBlit = (std::abs(linesToMove) <= 10) && (paintState == notPainting);
 		willRedrawAll = !performBlit;
 #endif
 		SetTopLine(topLineNew);

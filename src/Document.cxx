@@ -10,6 +10,7 @@
 #include <cassert>
 #include <cstring>
 #include <cstdio>
+#include <cmath>
 
 #include <stdexcept>
 #include <string>
@@ -877,7 +878,7 @@ Sci::Position Document::GetRelativePositionUTF16(Sci::Position positionStart, Sc
 			const Sci::Position posNext = NextPosition(pos, increment);
 			if (posNext == pos)
 				return INVALID_POSITION;
-			if (abs(pos-posNext) > 3)	// 4 byte character = 2*UTF16.
+			if (std::abs(pos-posNext) > 3)	// 4 byte character = 2*UTF16.
 				characterOffset -= increment;
 			pos = posNext;
 			characterOffset -= increment;
