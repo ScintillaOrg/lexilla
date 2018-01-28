@@ -107,7 +107,7 @@ private:
 	bool ValidCodePage(int codePage) const override;
 
 private:
-	void ScrollText(int linesToMove) override;
+	void ScrollText(Sci::Line linesToMove) override;
 	void SetVerticalScrollPos() override;
 	void SetHorizontalScrollPos() override;
 	bool ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) override;
