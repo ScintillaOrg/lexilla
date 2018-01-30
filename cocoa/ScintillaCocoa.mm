@@ -803,11 +803,12 @@ sptr_t scintilla_send_message(void *sci, unsigned int iMessage, uptr_t wParam, s
 namespace {
 
 /**
- * The animated find indicator fails with a "bogus layer size" message on macOS 10.13.
+ * The animated find indicator fails with a "bogus layer size" message on macOS 10.13
+ * and causes drawing failures on macOS 10.12.
  */
 
 bool SupportAnimatedFind() {
-	return floor(NSAppKitVersionNumber) <= NSAppKitVersionNumber10_12_2;
+	return floor(NSAppKitVersionNumber) < NSAppKitVersionNumber10_12;
 }
 
 }
