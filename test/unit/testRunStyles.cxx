@@ -22,7 +22,7 @@ using namespace Scintilla;
 
 TEST_CASE("RunStyles") {
 
-	RunStyles rs;
+	RunStyles<int, int> rs;
 
 	SECTION("IsEmptyInitially") {
 		REQUIRE(0 == rs.Length());
