@@ -70,7 +70,7 @@ void RunStyles::RemoveRunIfSameAsPrevious(int run) {
 }
 
 RunStyles::RunStyles() {
-	starts.reset(new Partitioning(8));
+	starts.reset(new Partitioning<int>(8));
 	styles.reset(new SplitVector<int>());
 	styles->InsertValue(0, 2, 0);
 }
@@ -196,7 +196,7 @@ void RunStyles::InsertSpace(int position, int insertLength) {
 }
 
 void RunStyles::DeleteAll() {
-	starts.reset(new Partitioning(8));
+	starts.reset(new Partitioning<int>(8));
 	styles.reset(new SplitVector<int>());
 	styles->InsertValue(0, 2, 0);
 }

@@ -21,7 +21,7 @@ class ContractionState {
 	std::unique_ptr<RunStyles> expanded;
 	std::unique_ptr<RunStyles> heights;
 	std::unique_ptr<SparseVector<UniqueString>> foldDisplayTexts;
-	std::unique_ptr<Partitioning> displayLines;
+	std::unique_ptr<Partitioning<int>> displayLines;
 	Sci::Line linesInDocument;
 
 	void EnsureData();

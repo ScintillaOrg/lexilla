@@ -39,7 +39,7 @@ void ContractionState::EnsureData() {
 		expanded.reset(new RunStyles());
 		heights.reset(new RunStyles());
 		foldDisplayTexts.reset(new SparseVector<UniqueString>());
-		displayLines.reset(new Partitioning(4));
+		displayLines.reset(new Partitioning<int>(4));
 		InsertLines(0, linesInDocument);
 	}
 }

@@ -26,7 +26,7 @@ static const int testArray[lengthTestArray] = {3, 4, 5, 6, 7, 8, 9, 10};
 
 TEST_CASE("SplitVectorWithRangeAdd") {
 
-	SplitVectorWithRangeAdd svwra(growSize);
+	SplitVectorWithRangeAdd<int> svwra(growSize);
 
 	SECTION("IsEmptyInitially") {
 		REQUIRE(0 == svwra.Length());
@@ -49,7 +49,7 @@ TEST_CASE("SplitVectorWithRangeAdd") {
 
 TEST_CASE("Partitioning") {
 
-	Partitioning part(growSize);
+	Partitioning<int> part(growSize);
 
 	SECTION("IsEmptyInitially") {
 		REQUIRE(1 == part.Partitions());
