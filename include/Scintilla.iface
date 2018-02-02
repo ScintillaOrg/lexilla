@@ -1773,6 +1773,7 @@ get int GetZoom=2374(,)
 
 enu DocumentOption=SC_DOCUMENTOPTION_
 val SC_DOCUMENTOPTION_DEFAULT=0
+val SC_DOCUMENTOPTION_STYLES_NONE=1
 
 # Create a new document object.
 # Starts with reference count of 1 and not selected into editor.

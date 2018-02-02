@@ -90,7 +90,8 @@ int LexInterface::LineEndTypesSupported() {
 	return 0;
 }
 
-Document::Document() {
+Document::Document(int options) :
+	cb((options & SC_DOCUMENTOPTION_STYLES_NONE) == 0) {
 	refCount = 0;
 #ifdef _WIN32
 	eolMode = SC_EOL_CRLF;

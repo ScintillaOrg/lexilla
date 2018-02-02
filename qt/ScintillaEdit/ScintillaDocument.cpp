@@ -91,7 +91,7 @@ void WatcherHelper::NotifyErrorOccurred(Document *, void *, int status) {
 ScintillaDocument::ScintillaDocument(QObject *parent, void *pdoc_) :
     QObject(parent), pdoc(pdoc_), docWatcher(0) {
     if (!pdoc) {
-        pdoc = new Document();
+        pdoc = new Document(SC_DOCUMENTOPTION_DEFAULT);
     }
     docWatcher = new WatcherHelper(this);
     (static_cast<Document *>(pdoc))->AddRef();

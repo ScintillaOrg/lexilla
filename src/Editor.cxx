@@ -5162,7 +5162,7 @@ void Editor::SetDocPointer(Document *document) {
 	pdoc->RemoveWatcher(this, 0);
 	pdoc->Release();
 	if (document == NULL) {
-		pdoc = new Document();
+		pdoc = new Document(SC_DOCUMENTOPTION_DEFAULT);
 	} else {
 		pdoc = document;
 	}
@@ -7554,7 +7554,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return 0;
 
 	case SCI_CREATEDOCUMENT: {
-			Document *doc = new Document();
+			Document *doc = new Document(static_cast<int>(lParam));
 			doc->AddRef();
 			doc->Allocate(static_cast<int>(wParam));
 			return reinterpret_cast<sptr_t>(doc);
@@ -7569,7 +7569,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_CREATELOADER: {
-			Document *doc = new Document();
+			Document *doc = new Document(static_cast<int>(lParam));
 			doc->AddRef();
 			doc->Allocate(static_cast<int>(wParam));
 			doc->SetUndoCollection(false);
