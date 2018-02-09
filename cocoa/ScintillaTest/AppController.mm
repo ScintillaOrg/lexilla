@@ -109,9 +109,6 @@ const char user_keywords[] = // Definition of own keywords, not used by MySQL.
   [mEditor setGeneralProperty: SCI_SETLEXER parameter: SCLEX_MYSQL value: 0];
   // alternatively: [mEditor setEditorProperty: SCI_SETLEXERLANGUAGE parameter: nil value: (sptr_t) "mysql"];
   
-  // Number of styles we use with this lexer.
-  [mEditor setGeneralProperty: SCI_SETSTYLEBITS value: [mEditor getGeneralProperty: SCI_GETSTYLEBITSNEEDED]];
-  
   // Keywords to highlight. Indices are:
   // 0 - Major keywords (reserved keywords)
   // 1 - Normal keywords (everything not reserved but integral part of the language)
