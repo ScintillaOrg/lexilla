@@ -3359,8 +3359,19 @@ int Editor::HorizontalMove(unsigned int iMessage) {
 		SetRectangularRange();
 	} else if (sel.IsRectangular()) {
 		// Not a rectangular extension so switch to stream.
-		const SelectionPosition selAtLimit = 
-			(NaturalDirection(iMessage) > 0) ? sel.Limits().end : sel.Limits().start;
+		SelectionPosition selAtLimit = (NaturalDirection(iMessage) > 0) ? sel.Limits().end : sel.Limits().start;
+		switch (iMessage) {
+		case SCI_HOME:
+			selAtLimit = SelectionPosition(
+				static_cast<Sci::Position>(pdoc->LineStart(pdoc->LineFromPosition(selAtLimit.Position()))));
+			break;
+		case SCI_VCHOME:
+			selAtLimit = SelectionPosition(pdoc->VCHomePosition(selAtLimit.Position()));
+			break;
+		case SCI_LINEEND:
+			selAtLimit = SelectionPosition(pdoc->LineEndPosition(selAtLimit.Position()));
+			break;
+		}
 		sel.selType = Selection::selStream;
 		sel.SetSelection(SelectionRange(selAtLimit));
 	} else {
@@ -7537,7 +7548,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		std::vector<EdgeProperties>().swap(vs.theMultiEdge); // Free vector and memory, C++03 compatible
 		InvalidateStyleRedraw();
 		break;
-	
+
 	case SCI_GETACCESSIBILITY:
 		return SC_ACCESSIBILITY_DISABLED;
 
