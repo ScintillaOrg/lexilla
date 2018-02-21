@@ -18,7 +18,7 @@ endif
 
 .SUFFIXES: .cxx
 ifeq ($(OS),Windows_NT)
-DEL = del /q
+DEL = $(if $(wildcard $(dir $(SHELL))rm.exe), $(dir $(SHELL))rm.exe -f, del /q)
 else
 DEL = rm -f
 endif
