@@ -1466,6 +1466,88 @@ class TestMultiSelection(unittest.TestCase):
 		self.ed.DropSelectionN(0)
 		self.assertEquals(self.ed.MainSelection, 2)
 
+class TestModalSelection(unittest.TestCase):
+
+	def setUp(self):
+		self.xite = Xite.xiteFrame
+		self.ed = self.xite.ed
+		self.ed.ClearAll()
+		self.ed.EmptyUndoBuffer()
+		# 3 lines of 3 characters
+		t = b"xxx\nxxx\nxxx"
+		self.ed.AddText(len(t), t)
+
+	def testCharacterSelection(self):
+		self.ed.SetSelection(1, 1)
+		self.assertEquals(self.ed.Selections, 1)
+		self.assertEquals(self.ed.MainSelection, 0)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 1)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 1)
+		self.ed.SelectionMode = self.ed.SC_SEL_STREAM
+		self.assertEquals(self.ed.Selections, 1)
+		self.assertEquals(self.ed.MainSelection, 0)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 1)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 1)
+		self.ed.CharRight()
+		self.assertEquals(self.ed.Selections, 1)
+		self.assertEquals(self.ed.MainSelection, 0)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 2)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 1)
+		self.ed.LineDown()
+		self.assertEquals(self.ed.Selections, 1)
+		self.assertEquals(self.ed.MainSelection, 0)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 6)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 1)
+		self.ed.ClearSelections()
+
+	def testRectangleSelection(self):
+		self.ed.SetSelection(1, 1)
+		self.assertEquals(self.ed.Selections, 1)
+		self.assertEquals(self.ed.MainSelection, 0)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 1)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 1)
+		self.ed.SelectionMode = self.ed.SC_SEL_RECTANGLE
+		self.assertEquals(self.ed.Selections, 1)
+		self.assertEquals(self.ed.MainSelection, 0)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 1)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 1)
+		self.ed.CharRight()
+		self.assertEquals(self.ed.Selections, 1)
+		self.assertEquals(self.ed.MainSelection, 0)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 2)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 1)
+		self.ed.LineDown()
+		self.assertEquals(self.ed.Selections, 2)
+		self.assertEquals(self.ed.MainSelection, 1)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 2)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 1)
+		self.assertEquals(self.ed.GetSelectionNCaret(1), 6)
+		self.assertEquals(self.ed.GetSelectionNAnchor(1), 5)
+		self.ed.ClearSelections()
+
+	def testLinesSelection(self):
+		self.ed.SetSelection(1, 1)
+		self.assertEquals(self.ed.Selections, 1)
+		self.assertEquals(self.ed.MainSelection, 0)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 1)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 1)
+		self.ed.SelectionMode = self.ed.SC_SEL_LINES
+		self.assertEquals(self.ed.Selections, 1)
+		self.assertEquals(self.ed.MainSelection, 0)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 0)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 3)
+		self.ed.CharRight()
+		self.assertEquals(self.ed.Selections, 1)
+		self.assertEquals(self.ed.MainSelection, 0)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 0)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 3)
+		self.ed.LineDown()
+		self.assertEquals(self.ed.Selections, 1)
+		self.assertEquals(self.ed.MainSelection, 0)
+		self.assertEquals(self.ed.GetSelectionNCaret(0), 7)
+		self.assertEquals(self.ed.GetSelectionNAnchor(0), 0)
+		self.ed.ClearSelections()
+
 class TestStyleAttributes(unittest.TestCase):
 	""" These tests are just to ensure that the calls set and retrieve values.
 	They do not check the visual appearance of the style attributes.

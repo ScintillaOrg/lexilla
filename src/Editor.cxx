@@ -626,26 +626,31 @@ void Editor::InvalidateWholeSelection() {
 	InvalidateSelection(sel.RangeMain(), true);
 }
 
+/* For Line selection - the anchor and caret are always
+   at the beginning and end of the region lines. */
+SelectionRange Editor::LineSelectionRange(SelectionPosition currentPos_, SelectionPosition anchor_) const {
+	if (currentPos_ > anchor_) {
+		anchor_ = SelectionPosition(static_cast<Sci::Position>(
+			pdoc->LineStart(pdoc->LineFromPosition(anchor_.Position()))));
+		currentPos_ = SelectionPosition(static_cast<Sci::Position>(
+			pdoc->LineEnd(pdoc->LineFromPosition(currentPos_.Position()))));
+	} else {
+		currentPos_ = SelectionPosition(static_cast<Sci::Position>(
+			pdoc->LineStart(pdoc->LineFromPosition(currentPos_.Position()))));
+		anchor_ = SelectionPosition(static_cast<Sci::Position>(
+			pdoc->LineEnd(pdoc->LineFromPosition(anchor_.Position()))));
+	}
+	return SelectionRange(currentPos_, anchor_);
+}
+
 void Editor::SetSelection(SelectionPosition currentPos_, SelectionPosition anchor_) {
 	currentPos_ = ClampPositionIntoDocument(currentPos_);
 	anchor_ = ClampPositionIntoDocument(anchor_);
 	Sci::Line currentLine = static_cast<Sci::Line>(pdoc->LineFromPosition(currentPos_.Position()));
-	/* For Line selection - ensure the anchor and caret are always
-	   at the beginning and end of the region lines. */
-	if (sel.selType == Selection::selLines) {
-		if (currentPos_ > anchor_) {
-			anchor_ = SelectionPosition(static_cast<Sci::Position>(
-				pdoc->LineStart(pdoc->LineFromPosition(anchor_.Position()))));
-			currentPos_ = SelectionPosition(static_cast<Sci::Position>(
-				pdoc->LineEnd(pdoc->LineFromPosition(currentPos_.Position()))));
-		} else {
-			currentPos_ = SelectionPosition(static_cast<Sci::Position>(
-				pdoc->LineStart(pdoc->LineFromPosition(currentPos_.Position()))));
-			anchor_ = SelectionPosition(static_cast<Sci::Position>(
-				pdoc->LineEnd(pdoc->LineFromPosition(anchor_.Position()))));
-		}
-	}
 	SelectionRange rangeNew(currentPos_, anchor_);
+	if (sel.selType == Selection::selLines) {
+		rangeNew = LineSelectionRange(currentPos_, anchor_);
+	}
 	if (sel.Count() > 1 || !(sel.RangeMain() == rangeNew)) {
 		InvalidateSelection(rangeNew);
 	}
@@ -675,6 +680,8 @@ void Editor::SetSelection(SelectionPosition currentPos_) {
 		sel.Rectangular() =
 			SelectionRange(SelectionPosition(currentPos_), sel.Rectangular().anchor);
 		SetRectangularRange();
+	} else if (sel.selType == Selection::selLines) {
+		sel.RangeMain() = LineSelectionRange(currentPos_, sel.RangeMain().anchor);
 	} else {
 		sel.RangeMain() =
 			SelectionRange(SelectionPosition(currentPos_), sel.RangeMain().anchor);
@@ -3120,7 +3127,7 @@ SelectionPosition Editor::PositionUpOrDown(SelectionPosition spStart, int direct
 
 void Editor::CursorUpOrDown(int direction, Selection::selTypes selt) {
 	if ((selt == Selection::noSel) && sel.MoveExtends()) {
-		selt = Selection::selStream;
+		selt = !sel.IsRectangular() ? Selection::selStream : Selection::selRectangle;
 	}
 	SelectionPosition caretToUse = sel.Range(sel.Main()).caret;
 	if (sel.IsRectangular()) {
@@ -3142,6 +3149,11 @@ void Editor::CursorUpOrDown(int direction, Selection::selTypes selt) {
 		sel.Rectangular() = SelectionRange(posNew, rangeBase.anchor);
 		SetRectangularRange();
 		MovedCaret(posNew, caretToUse, true);
+	} else if (sel.selType == Selection::selLines && sel.MoveExtends()) {
+		// Calculate new caret position and call SetSelection(), which will ensure whole lines are selected.
+		const SelectionPosition posNew = MovePositionSoVisible(
+			PositionUpOrDown(caretToUse, direction, -1), direction);
+		SetSelection(posNew, sel.Range(sel.Main()).anchor);
 	} else {
 		InvalidateWholeSelection();
 		if (!additionalSelectionTyping || (sel.IsRectangular())) {
@@ -3263,7 +3275,7 @@ int NaturalDirection(unsigned int iMessage) {
 	}
 }
 
-bool IsRectExtend(unsigned int iMessage) {
+bool IsRectExtend(unsigned int iMessage, bool isRectMoveExtends) {
 	switch (iMessage) {
 	case SCI_CHARLEFTRECTEXTEND:
 	case SCI_CHARRIGHTRECTEXTEND:
@@ -3272,6 +3284,19 @@ bool IsRectExtend(unsigned int iMessage) {
 	case SCI_LINEENDRECTEXTEND:
 		return true;
 	default:
+		if (isRectMoveExtends) {
+			// Handle SCI_SETSELECTIONMODE(SC_SEL_RECTANGLE) and subsequent movements.
+			switch (iMessage) {
+			case SCI_CHARLEFTEXTEND:
+			case SCI_CHARRIGHTEXTEND:
+			case SCI_HOMEEXTEND:
+			case SCI_VCHOMEEXTEND:
+			case SCI_LINEENDEXTEND:
+				return true;
+			default:
+				return false;
+			}
+		}
 		return false;
 	}
 }
@@ -3307,6 +3332,9 @@ Sci::Position Editor::LineEndWrapPosition(Sci::Position position) {
 }
 
 int Editor::HorizontalMove(unsigned int iMessage) {
+	if (sel.selType == Selection::selLines) {
+		return 0; // horizontal moves with line selection have no effect
+	}
 	if (sel.MoveExtends()) {
 		iMessage = WithExtends(iMessage);
 	}
@@ -3319,7 +3347,7 @@ int Editor::HorizontalMove(unsigned int iMessage) {
 	// Invalidate each of the current selections
 	InvalidateWholeSelection();
 
-	if (IsRectExtend(iMessage)) {
+	if (IsRectExtend(iMessage, sel.IsRectangular() && sel.MoveExtends())) {
 		const SelectionRange rangeBase = sel.IsRectangular() ? sel.Rectangular() : sel.RangeMain();
 		if (!sel.IsRectangular()) {
 			sel.DropAdditionalRanges();
@@ -3328,6 +3356,7 @@ int Editor::HorizontalMove(unsigned int iMessage) {
 		SelectionPosition spCaret = rangeBase.caret;
 		switch (iMessage) {
 		case SCI_CHARLEFTRECTEXTEND:
+		case SCI_CHARLEFTEXTEND: // only when sel.IsRectangular() && sel.MoveExtends()
 			if (pdoc->IsLineEndPosition(spCaret.Position()) && spCaret.VirtualSpace()) {
 				spCaret.SetVirtualSpace(spCaret.VirtualSpace() - 1);
 			} else if ((virtualSpaceOptions & SCVS_NOWRAPLINESTART) == 0 || pdoc->GetColumn(spCaret.Position()) > 0) {
@@ -3335,6 +3364,7 @@ int Editor::HorizontalMove(unsigned int iMessage) {
 			}
 			break;
 		case SCI_CHARRIGHTRECTEXTEND:
+		case SCI_CHARRIGHTEXTEND: // only when sel.IsRectangular() && sel.MoveExtends()
 			if ((virtualSpaceOptions & SCVS_RECTANGULARSELECTION) && pdoc->IsLineEndPosition(sel.MainCaret())) {
 				spCaret.SetVirtualSpace(spCaret.VirtualSpace() + 1);
 			} else {
@@ -3342,13 +3372,16 @@ int Editor::HorizontalMove(unsigned int iMessage) {
 			}
 			break;
 		case SCI_HOMERECTEXTEND:
+		case SCI_HOMEEXTEND: // only when sel.IsRectangular() && sel.MoveExtends()
 			spCaret = SelectionPosition(
 				static_cast<Sci::Position>(pdoc->LineStart(pdoc->LineFromPosition(spCaret.Position()))));
 			break;
 		case SCI_VCHOMERECTEXTEND:
+		case SCI_VCHOMEEXTEND: // only when sel.IsRectangular() && sel.MoveExtends()
 			spCaret = SelectionPosition(pdoc->VCHomePosition(spCaret.Position()));
 			break;
 		case SCI_LINEENDRECTEXTEND:
+		case SCI_LINEENDEXTEND: // only when sel.IsRectangular() && sel.MoveExtends()
 			spCaret = SelectionPosition(pdoc->LineEndPosition(spCaret.Position()));
 			break;
 		}
@@ -7615,10 +7648,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			case SC_SEL_RECTANGLE:
 				sel.SetMoveExtends(!sel.MoveExtends() || (sel.selType != Selection::selRectangle));
 				sel.selType = Selection::selRectangle;
+				sel.Rectangular() = sel.RangeMain(); // adjust current selection
 				break;
 			case SC_SEL_LINES:
 				sel.SetMoveExtends(!sel.MoveExtends() || (sel.selType != Selection::selLines));
 				sel.selType = Selection::selLines;
+				SetSelection(sel.RangeMain().caret, sel.RangeMain().anchor); // adjust current selection
 				break;
 			case SC_SEL_THIN:
 				sel.SetMoveExtends(!sel.MoveExtends() || (sel.selType != Selection::selThin));
