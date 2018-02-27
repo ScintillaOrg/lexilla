@@ -569,7 +569,7 @@ public:
 	int PropGetInt(const char *key, int defaultValue=0) const;
 	int PropGetExpanded(const char *key, char *result) const;
 
-	int LineEndTypesSupported();
+	int LineEndTypesSupported() override;
 	int AllocateSubStyles(int styleBase, int numberStyles);
 	int SubStylesStart(int styleBase);
 	int SubStylesLength(int styleBase);

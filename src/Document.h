@@ -181,7 +181,7 @@ public:
 	virtual ~LexInterface() {
 	}
 	void Colourise(Sci::Position start, Sci::Position end);
-	int LineEndTypesSupported();
+	virtual int LineEndTypesSupported();
 	bool UseContainerLexing() const {
 		return instance == 0;
 	}
