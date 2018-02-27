@@ -12,8 +12,6 @@
  * This file is dual licensed under LGPL v2.1 and the Scintilla license (http://www.scintilla.org/License.txt).
  */
 
-#include <sys/time.h>
-
 #include <cstddef>
 #include <cstdlib>
 #include <cassert>
@@ -24,6 +22,8 @@
 #include <vector>
 #include <map>
 #include <memory>
+
+#include <sys/time.h>
 
 #import <Foundation/NSGeometry.h>
 

@@ -7,12 +7,12 @@
 #ifndef PLATCOCOA_H
 #define PLATCOCOA_H
 
-#include <sys/time.h>
-
 #include <cstdlib>
 #include <cassert>
 #include <cstring>
 #include <cstdio>
+
+#include <sys/time.h>
 
 #include <Cocoa/Cocoa.h>
 
