@@ -589,6 +589,7 @@ class CaseConverter : public ICaseConverter {
 public:
 	CaseConverter() {
 	}
+	virtual ~CaseConverter() = default;
 	bool Initialised() const {
 		return characters.size() > 0;
 	}
