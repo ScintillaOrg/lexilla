@@ -6738,7 +6738,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return verticalScrollBarVisible;
 
 	case SCI_SETINDENTATIONGUIDES:
-		vs.viewIndentationGuides = IndentView(wParam);
+		vs.viewIndentationGuides = static_cast<IndentView>(wParam);
 		Redraw();
 		break;
 
