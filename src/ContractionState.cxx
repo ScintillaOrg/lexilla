@@ -35,11 +35,11 @@ ContractionState::~ContractionState() {
 
 void ContractionState::EnsureData() {
 	if (OneToOne()) {
-		visible.reset(new RunStyles<int, int>());
-		expanded.reset(new RunStyles<int, int>());
-		heights.reset(new RunStyles<int, int>());
-		foldDisplayTexts.reset(new SparseVector<UniqueString>());
-		displayLines.reset(new Partitioning<int>(4));
+		visible = std::make_unique<RunStyles<int, int>>();
+		expanded = std::make_unique<RunStyles<int, int>>();
+		heights = std::make_unique<RunStyles<int, int>>();
+		foldDisplayTexts = std::make_unique<SparseVector<UniqueString>>();
+		displayLines = std::make_unique<Partitioning<int>>(4);
 		InsertLines(0, linesInDocument);
 	}
 }

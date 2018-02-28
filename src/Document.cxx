@@ -118,11 +118,11 @@ Document::Document(int options) :
 
 	UTF8BytesOfLeadInitialise();
 
-	perLineData[ldMarkers].reset(new LineMarkers());
-	perLineData[ldLevels].reset(new LineLevels());
-	perLineData[ldState].reset(new LineState());
-	perLineData[ldMargin].reset(new LineAnnotation());
-	perLineData[ldAnnotation].reset(new LineAnnotation());
+	perLineData[ldMarkers] = std::make_unique<LineMarkers>();
+	perLineData[ldLevels] = std::make_unique<LineLevels>();
+	perLineData[ldState] = std::make_unique<LineState>();
+	perLineData[ldMargin] = std::make_unique<LineAnnotation>();
+	perLineData[ldAnnotation] = std::make_unique<LineAnnotation>();
 
 	cb.SetPerLine(this);
 }

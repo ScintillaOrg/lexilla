@@ -227,7 +227,7 @@ bool EditView::ClearTabstops(Sci::Line line) {
 
 bool EditView::AddTabstop(Sci::Line line, int x) {
 	if (!ldTabstops) {
-		ldTabstops.reset(new LineTabstops());
+		ldTabstops = std::make_unique<LineTabstops>();
 	}
 	LineTabstops *lt = static_cast<LineTabstops *>(ldTabstops.get());
 	return lt && lt->AddTabstop(line, x);

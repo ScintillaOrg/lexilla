@@ -25,17 +25,17 @@
 using namespace Scintilla;
 
 void LineMarker::SetXPM(const char *textForm) {
-	pxpm.reset(new XPM(textForm));
+	pxpm = std::make_unique<XPM>(textForm);
 	markType = SC_MARK_PIXMAP;
 }
 
 void LineMarker::SetXPM(const char *const *linesForm) {
-	pxpm.reset(new XPM(linesForm));
+	pxpm = std::make_unique<XPM>(linesForm);
 	markType = SC_MARK_PIXMAP;
 }
 
 void LineMarker::SetRGBAImage(Point sizeRGBAImage, float scale, const unsigned char *pixelsRGBAImage) {
-	image.reset(new RGBAImage(static_cast<int>(sizeRGBAImage.x), static_cast<int>(sizeRGBAImage.y), scale, pixelsRGBAImage));
+	image = std::make_unique<RGBAImage>(static_cast<int>(sizeRGBAImage.x), static_cast<int>(sizeRGBAImage.y), scale, pixelsRGBAImage);
 	markType = SC_MARK_RGBAIMAGE;
 }
 
