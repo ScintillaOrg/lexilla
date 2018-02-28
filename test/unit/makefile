@@ -13,7 +13,7 @@ USELIBCPP = 1
 endif
 endif
 
-CXXFLAGS += --std=c++11
+CXXFLAGS += --std=c++17
 
 ifdef CLANG
 CXX = clang++
