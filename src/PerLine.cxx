@@ -179,7 +179,7 @@ bool LineMarkers::DeleteMark(Sci::Line line, int markerNum, bool all) {
 }
 
 void LineMarkers::DeleteMarkFromHandle(int markerHandle) {
-	Sci::Line line = LineFromHandle(markerHandle);
+	const Sci::Line line = LineFromHandle(markerHandle);
 	if (line >= 0) {
 		markers[line]->RemoveHandle(markerHandle);
 		if (markers[line]->Empty()) {
@@ -197,7 +197,7 @@ void LineLevels::Init() {
 
 void LineLevels::InsertLine(Sci::Line line) {
 	if (levels.Length()) {
-		int level = (line < levels.Length()) ? levels[line] : SC_FOLDLEVELBASE;
+		const int level = (line < levels.Length()) ? levels[line] : SC_FOLDLEVELBASE;
 		levels.InsertValue(line, 1, level);
 	}
 }
@@ -255,7 +255,7 @@ void LineState::Init() {
 void LineState::InsertLine(Sci::Line line) {
 	if (lineStates.Length()) {
 		lineStates.EnsureLength(line);
-		int val = (line < lineStates.Length()) ? lineStates[line] : 0;
+		const int val = (line < lineStates.Length()) ? lineStates[line] : 0;
 		lineStates.Insert(line, val);
 	}
 }
@@ -401,7 +401,7 @@ void LineAnnotation::SetStyles(Sci::Line line, const unsigned char *styles) {
 		if (!annotations[line]) {
 			annotations[line] = AllocateAnnotation(0, IndividualStyles);
 		} else {
-			AnnotationHeader *pahSource = reinterpret_cast<AnnotationHeader *>(annotations[line].get());
+			const AnnotationHeader *pahSource = reinterpret_cast<AnnotationHeader *>(annotations[line].get());
 			if (pahSource->style != IndividualStyles) {
 				std::unique_ptr<char[]>allocation = AllocateAnnotation(pahSource->length, IndividualStyles);
 				AnnotationHeader *pahAlloc = reinterpret_cast<AnnotationHeader *>(allocation.get());

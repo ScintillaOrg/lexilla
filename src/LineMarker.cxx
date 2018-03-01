@@ -40,7 +40,7 @@ void LineMarker::SetRGBAImage(Point sizeRGBAImage, float scale, const unsigned c
 }
 
 static void DrawBox(Surface *surface, int centreX, int centreY, int armSize, ColourDesired fore, ColourDesired back) {
-	PRectangle rc = PRectangle::FromInts(
+	const PRectangle rc = PRectangle::FromInts(
 		centreX - armSize,
 		centreY - armSize,
 		centreX + armSize + 1,
@@ -49,7 +49,7 @@ static void DrawBox(Surface *surface, int centreX, int centreY, int armSize, Col
 }
 
 static void DrawCircle(Surface *surface, int centreX, int centreY, int armSize, ColourDesired fore, ColourDesired back) {
-	PRectangle rcCircle = PRectangle::FromInts(
+	const PRectangle rcCircle = PRectangle::FromInts(
 		centreX - armSize,
 		centreY - armSize,
 		centreX + armSize + 1,
@@ -58,14 +58,14 @@ static void DrawCircle(Surface *surface, int centreX, int centreY, int armSize, 
 }
 
 static void DrawPlus(Surface *surface, int centreX, int centreY, int armSize, ColourDesired fore) {
-	PRectangle rcV = PRectangle::FromInts(centreX, centreY - armSize + 2, centreX + 1, centreY + armSize - 2 + 1);
+	const PRectangle rcV = PRectangle::FromInts(centreX, centreY - armSize + 2, centreX + 1, centreY + armSize - 2 + 1);
 	surface->FillRectangle(rcV, fore);
-	PRectangle rcH = PRectangle::FromInts(centreX - armSize + 2, centreY, centreX + armSize - 2 + 1, centreY + 1);
+	const PRectangle rcH = PRectangle::FromInts(centreX - armSize + 2, centreY, centreX + armSize - 2 + 1, centreY + 1);
 	surface->FillRectangle(rcH, fore);
 }
 
 static void DrawMinus(Surface *surface, int centreX, int centreY, int armSize, ColourDesired fore) {
-	PRectangle rcH = PRectangle::FromInts(centreX - armSize + 2, centreY, centreX + armSize - 2 + 1, centreY + 1);
+	const PRectangle rcH = PRectangle::FromInts(centreX - armSize + 2, centreY, centreX + armSize - 2 + 1, centreY + 1);
 	surface->FillRectangle(rcH, fore);
 }
 
@@ -122,7 +122,7 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 	const int centreY = static_cast<int>(floor((rc.bottom + rc.top) / 2.0));
 	const int dimOn2 = minDim / 2;
 	const int dimOn4 = minDim / 4;
-	int blobSize = dimOn2-1;
+	const int blobSize = dimOn2-1;
 	const int armSize = dimOn2-2;
 	if (marginStyle == SC_MARGIN_NUMBER || marginStyle == SC_MARGIN_TEXT || marginStyle == SC_MARGIN_RTEXT) {
 		// On textual margins move marker to the left to try to avoid overlapping the text
@@ -134,7 +134,7 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 		rcRounded.right = rc.right - 1;
 		surface->RoundedRectangle(rcRounded, fore, back);
 	} else if (markType == SC_MARK_CIRCLE) {
-		PRectangle rcCircle = PRectangle::FromInts(
+		const PRectangle rcCircle = PRectangle::FromInts(
 			centreX - dimOn2,
 			centreY - dimOn2,
 			centreX + dimOn2,
@@ -340,7 +340,7 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 	} else if (markType >= SC_MARK_CHARACTER) {
 		char character[1];
 		character[0] = static_cast<char>(markType - SC_MARK_CHARACTER);
-		XYPOSITION width = surface->WidthText(fontForCharacter, character, 1);
+		const XYPOSITION width = surface->WidthText(fontForCharacter, character, 1);
 		rc.left += (rc.Width() - width) / 2;
 		rc.right = rc.left + width;
 		surface->DrawTextClipped(rc, fontForCharacter, rc.bottom - 2,
@@ -349,7 +349,7 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 	} else if (markType == SC_MARK_DOTDOTDOT) {
 		XYPOSITION right = static_cast<XYPOSITION>(centreX - 6);
 		for (int b=0; b<3; b++) {
-			PRectangle rcBlob(right, rc.bottom - 4, right + 2, rc.bottom-2);
+			const PRectangle rcBlob(right, rc.bottom - 4, right + 2, rc.bottom-2);
 			surface->FillRectangle(rcBlob, fore);
 			right += 5.0f;
 		}

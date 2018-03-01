@@ -621,11 +621,11 @@ public:
 				for (int b=1; b<widthCharBytes; b++) {
 					bytes[b] = (mixedPos+b < lenMixed) ? mixed[mixedPos+b] : 0;
 				}
-				int classified = UTF8Classify(bytes, widthCharBytes);
+				const int classified = UTF8Classify(bytes, widthCharBytes);
 				if (!(classified & UTF8MaskInvalid)) {
 					// valid UTF-8
 					lenMixedChar = classified & UTF8MaskWidth;
-					int character = UnicodeFromUTF8(bytes);
+					const int character = UnicodeFromUTF8(bytes);
 					caseConverted = Find(character);
 				}
 			}
@@ -759,7 +759,7 @@ void SetupConversions(enum CaseConversion conversion) {
 		sComplex++;
 		lowerUTF8[i] = 0;
 
-		int character = UnicodeFromUTF8(reinterpret_cast<unsigned char *>(originUTF8));
+		const int character = UnicodeFromUTF8(reinterpret_cast<unsigned char *>(originUTF8));
 
 		if (conversion == CaseConversionFold && foldedUTF8[0]) {
 			caseConvFold.Add(character, foldedUTF8);
@@ -826,7 +826,7 @@ size_t CaseConvertString(char *converted, size_t sizeConverted, const char *mixe
 
 std::string CaseConvertString(const std::string &s, enum CaseConversion conversion) {
 	std::string retMapped(s.length() * maxExpansionCaseConversion, 0);
-	size_t lenMapped = CaseConvertString(&retMapped[0], retMapped.length(), s.c_str(), s.length(),
+	const size_t lenMapped = CaseConvertString(&retMapped[0], retMapped.length(), s.c_str(), s.length(),
 		conversion);
 	retMapped.resize(lenMapped);
 	return retMapped;
