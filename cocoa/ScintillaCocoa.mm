@@ -1321,7 +1321,7 @@ void ScintillaCocoa::StartDrag() {
 		}
 	} else {
 		rcSel.top = rcSel.bottom = rcSel.right = rcSel.left = -1;
-		for (int l = startLine; l <= endLine; l++) {
+		for (Sci::Line l = startLine; l <= endLine; l++) {
 			startPos = WndProc(SCI_GETLINESELSTARTPOSITION, l, 0);
 			endPos = WndProc(SCI_GETLINESELENDPOSITION, l, 0);
 			if (endPos == startPos) continue;
@@ -1573,7 +1573,7 @@ bool ScintillaCocoa::GetPasteboardData(NSPasteboard *board, SelectionText *selec
 // Returns the target converted to UTF8.
 // Return the length in bytes.
 int ScintillaCocoa::TargetAsUTF8(char *text) {
-	const int targetLength = targetEnd - targetStart;
+	const Sci::Position targetLength = targetEnd - targetStart;
 	if (IsUnicodeMode()) {
 		if (text)
 			pdoc->GetCharRange(text, targetStart, targetLength);
@@ -1616,7 +1616,7 @@ NSString *ScintillaCocoa::RangeTextAsString(NSRange rangePositions) const {
 
 // Return character range of a line.
 NSRange ScintillaCocoa::RangeForVisibleLine(NSInteger lineVisible) {
-	const Range posRangeLine = RangeDisplayLine(static_cast<int>(lineVisible));
+	const Range posRangeLine = RangeDisplayLine(static_cast<Sci::Line>(lineVisible));
 	return CharactersFromPositions(NSMakeRange(posRangeLine.First(),
 				       posRangeLine.Last() - posRangeLine.First()));
 }
@@ -1626,7 +1626,7 @@ NSRange ScintillaCocoa::RangeForVisibleLine(NSInteger lineVisible) {
 // Returns visible line number of a text position in characters.
 NSInteger ScintillaCocoa::VisibleLineForIndex(NSInteger index) {
 	const NSRange rangePosition = PositionsFromCharacters(NSMakeRange(index, 0));
-	const int lineVisible = DisplayFromPosition(static_cast<int>(rangePosition.location));
+	const Sci::Line lineVisible = DisplayFromPosition(static_cast<Sci::Position>(rangePosition.location));
 	return lineVisible;
 }
 
@@ -1770,14 +1770,14 @@ void ScintillaCocoa::PaintMargin(NSRect aRect) {
 void ScintillaCocoa::WillDraw(NSRect rect) {
 	RefreshStyleData();
 	PRectangle rcWillDraw = NSRectToPRectangle(rect);
-	const int posAfterArea = PositionAfterArea(rcWillDraw);
-	const int posAfterMax = PositionAfterMaxStyling(posAfterArea, true);
+	const Sci::Position posAfterArea = PositionAfterArea(rcWillDraw);
+	const Sci::Position posAfterMax = PositionAfterMaxStyling(posAfterArea, true);
 	pdoc->StyleToAdjustingLineDuration(posAfterMax);
 	StartIdleStyling(posAfterMax < posAfterArea);
 	NotifyUpdateUI();
 	if (WrapLines(WrapScope::wsVisible)) {
 		// Wrap may have reduced number of lines so more lines may need to be styled
-		const int posAfterAreaWrapped = PositionAfterArea(rcWillDraw);
+		const Sci::Position posAfterAreaWrapped = PositionAfterArea(rcWillDraw);
 		pdoc->EnsureStyledTo(posAfterAreaWrapped);
 		// The wrapping process has changed the height of some lines so redraw all.
 		Redraw();
