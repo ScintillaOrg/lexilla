@@ -1572,7 +1572,7 @@ bool ScintillaCocoa::GetPasteboardData(NSPasteboard *board, SelectionText *selec
 
 // Returns the target converted to UTF8.
 // Return the length in bytes.
-int ScintillaCocoa::TargetAsUTF8(char *text) {
+ptrdiff_t ScintillaCocoa::TargetAsUTF8(char *text) {
 	const Sci::Position targetLength = targetEnd - targetStart;
 	if (IsUnicodeMode()) {
 		if (text)
@@ -1589,7 +1589,7 @@ int ScintillaCocoa::TargetAsUTF8(char *text) {
 		if (text)
 			memcpy(text, tmputf.c_str(), tmputf.length());
 		CFRelease(cfsVal);
-		return static_cast<int>(tmputf.length());
+		return static_cast<ptrdiff_t>(tmputf.length());
 	}
 	return targetLength;
 }
@@ -1673,12 +1673,12 @@ NSRect ScintillaCocoa::GetBounds() const {
 
 // Translates a UTF8 string into the document encoding.
 // Return the length of the result in bytes.
-int ScintillaCocoa::EncodedFromUTF8(char *utf8, char *encoded) const {
-	const int inputLength = (lengthForEncode >= 0) ? lengthForEncode : static_cast<int>(strlen(utf8));
+ptrdiff_t ScintillaCocoa::EncodedFromUTF8(char *utf8, char *encoded) const {
+	const size_t inputLength = (lengthForEncode >= 0) ? lengthForEncode : strlen(utf8);
 	if (IsUnicodeMode()) {
 		if (encoded)
 			memcpy(encoded, utf8, inputLength);
-		return inputLength;
+		return static_cast<ptrdiff_t>(inputLength);
 	} else {
 		// Need to convert
 		const CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
@@ -1689,7 +1689,7 @@ int ScintillaCocoa::EncodedFromUTF8(char *utf8, char *encoded) const {
 		if (encoded)
 			memcpy(encoded, sEncoded.c_str(), sEncoded.length());
 		CFRelease(cfsVal);
-		return static_cast<int>(sEncoded.length());
+		return static_cast<ptrdiff_t>(sEncoded.length());
 	}
 }
 
