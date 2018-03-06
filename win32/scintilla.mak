@@ -167,6 +167,7 @@ LEXOBJS=\
 	$(DIR_O)\LexMake.obj \
 	$(DIR_O)\LexMarkdown.obj \
 	$(DIR_O)\LexMatlab.obj \
+	$(DIR_O)\LexMaxima.obj \
 	$(DIR_O)\LexMetapost.obj \
 	$(DIR_O)\LexMMIXAL.obj \
 	$(DIR_O)\LexModula.obj \
@@ -622,6 +623,8 @@ $(DIR_O)\LexMake.obj: ..\lexers\LexMake.cxx $(LEX_HEADERS)
 $(DIR_O)\LexMarkdown.obj: ..\lexers\LexMarkdown.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexMatlab.obj: ..\lexers\LexMatlab.cxx $(LEX_HEADERS)
+
+$(DIR_O)\LexMaxima.obj: ..\lexers\LexMaxima.cxx $(LEX_HEADERS)
 
 $(DIR_O)\LexMetapost.obj: ..\lexers\LexMetapost.cxx $(LEX_HEADERS)
 
