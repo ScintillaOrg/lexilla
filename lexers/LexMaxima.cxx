@@ -34,18 +34,28 @@ static inline bool isMaximaoperator(char ch) {
 	  ch == '-');
 }
 
-static void ColouriseMaximaDoc(Sci_PositionU startPos, Sci_Position length, int,
+static void ColouriseMaximaDoc(Sci_PositionU startPos, Sci_Position length, int lastStyle,
 			       WordList *[],
 			       Accessor &styler) {
 
   styler.StartAt(startPos);
 
-  char chNext = styler[startPos];
   Sci_PositionU lengthDoc = startPos + length;
   styler.StartSegment(startPos);
-  for (Sci_PositionU i = startPos; i < lengthDoc; i++) {
+
+  Sci_PositionU i = startPos;
+
+  // If we are in the middle of a comment we go back to its start before highlighting
+  if(lastStyle == SCE_MAXIMA_COMMENT)
+    {
+      while((i>0) &&
+	    !((styler.SafeGetCharAt(i+1) == '*') && (styler.SafeGetCharAt(i) == '/')))
+	i--;
+    }
+  
+  for (; i < lengthDoc; i++) {
     char ch = styler.SafeGetCharAt(i);
-    chNext = styler.SafeGetCharAt(i + 1);
+    char chNext = styler.SafeGetCharAt(i + 1);
 
     if (styler.IsLeadByte(ch))
       continue;
@@ -141,7 +151,7 @@ static void ColouriseMaximaDoc(Sci_PositionU startPos, Sci_Position length, int,
       }
     
     // Handle keywords. Maxima treats Non-ASCII chars as ordinary letters.
-    if(((!IsASCII(ch))) || isalpha(ch))
+    if(((!IsASCII(ch))) || isalpha(ch) || (ch == '_'))
       {
 	char cmd[100];
 	int cmdidx = 0;
@@ -161,7 +171,7 @@ static void ColouriseMaximaDoc(Sci_PositionU startPos, Sci_Position length, int,
 		  cmd[cmdidx++] = ch;
 		continue;
 	      }
-	    if(isMaximaoperator(ch) || ((IsASCII(ch) && !isalpha(ch) && !isdigit(ch))))
+	    if(isMaximaoperator(ch) || ((IsASCII(ch) && !isalpha(ch) && !isdigit(ch) && (ch != '_'))))
 	      {
 		i--;
 		break;
@@ -182,7 +192,6 @@ static void ColouriseMaximaDoc(Sci_PositionU startPos, Sci_Position length, int,
 	   )
 	  {
 	    styler.ColourTo(i, SCE_MAXIMA_COMMAND);
-	    chNext = styler.SafeGetCharAt(i + 1);
 	    continue;
 	  }
 	      
@@ -192,7 +201,7 @@ static void ColouriseMaximaDoc(Sci_PositionU startPos, Sci_Position length, int,
 	for (Sci_PositionU o = i + 1; o < lengthDoc; o++)
 	  {
 	    nextNonwhitespace = styler.SafeGetCharAt(o);
-	    if(!IsASCII(ch) || !isspacechar(nextNonwhitespace))
+	    if(!IsASCII(nextNonwhitespace) || !isspacechar(nextNonwhitespace))
 	      break;
 	  }
 	if(nextNonwhitespace == '(')
@@ -203,7 +212,6 @@ static void ColouriseMaximaDoc(Sci_PositionU startPos, Sci_Position length, int,
 	  {
 	    styler.ColourTo(i, SCE_MAXIMA_VARIABLE);
 	  }
-	chNext = styler.SafeGetCharAt(i + 1);
 	continue;
       }
 	  
