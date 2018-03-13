@@ -98,6 +98,15 @@ size_t UTF16Length(const char *s, size_t len) {
 	return ulen;
 }
 
+constexpr unsigned char TrailByteValue(unsigned char c) {
+	// The top 2 bits are 0b10 to indicate a trail byte.
+	// The lower 6 bits contain the value.
+	return c & 0b0011'1111;
+}
+
+const unsigned char utf8Start3 = 0b1110'0000;
+const unsigned char utf8Start4 = 0b1111'0000;
+
 size_t UTF16FromUTF8(const char *s, size_t len, wchar_t *tbuf, size_t tlen) {
 	size_t ui = 0;
 	const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
@@ -106,25 +115,25 @@ size_t UTF16FromUTF8(const char *s, size_t len, wchar_t *tbuf, size_t tlen) {
 		unsigned char ch = us[i++];
 		if (ch < 0x80) {
 			tbuf[ui] = ch;
-		} else if (ch < 0x80 + 0x40 + 0x20) {
+		} else if (ch < utf8Start3) {
 			tbuf[ui] = static_cast<wchar_t>((ch & 0x1F) << 6);
 			ch = us[i++];
-			tbuf[ui] = static_cast<wchar_t>(tbuf[ui] + (ch & 0x7F));
-		} else if (ch < 0x80 + 0x40 + 0x20 + 0x10) {
+			tbuf[ui] = static_cast<wchar_t>(tbuf[ui] + TrailByteValue(ch));
+		} else if (ch < utf8Start4) {
 			tbuf[ui] = static_cast<wchar_t>((ch & 0xF) << 12);
 			ch = us[i++];
-			tbuf[ui] = static_cast<wchar_t>(tbuf[ui] + ((ch & 0x7F) << 6));
+			tbuf[ui] = static_cast<wchar_t>(tbuf[ui] + (TrailByteValue(ch) << 6));
 			ch = us[i++];
-			tbuf[ui] = static_cast<wchar_t>(tbuf[ui] + (ch & 0x7F));
+			tbuf[ui] = static_cast<wchar_t>(tbuf[ui] + TrailByteValue(ch));
 		} else {
 			// Outside the BMP so need two surrogates
 			int val = (ch & 0x7) << 18;
 			ch = us[i++];
-			val += (ch & 0x3F) << 12;
+			val += TrailByteValue(ch) << 12;
 			ch = us[i++];
-			val += (ch & 0x3F) << 6;
+			val += TrailByteValue(ch) << 6;
 			ch = us[i++];
-			val += (ch & 0x3F);
+			val += TrailByteValue(ch);
 			tbuf[ui] = static_cast<wchar_t>(((val - 0x10000) >> 10) + SURROGATE_LEAD_FIRST);
 			ui++;
 			tbuf[ui] = static_cast<wchar_t>((val & 0x3ff) + SURROGATE_TRAIL_FIRST);
@@ -143,24 +152,24 @@ size_t UTF32FromUTF8(const char *s, size_t len, unsigned int *tbuf, size_t tlen)
 		unsigned int value = 0;
 		if (ch < 0x80) {
 			value = ch;
-		} else if (((len-i) >= 1) && (ch < 0x80 + 0x40 + 0x20)) {
+		} else if (((len-i) >= 1) && (ch < utf8Start3)) {
 			value = (ch & 0x1F) << 6;
 			ch = us[i++];
-			value += ch & 0x7F;
-		} else if (((len-i) >= 2) && (ch < 0x80 + 0x40 + 0x20 + 0x10)) {
+			value += TrailByteValue(ch);
+		} else if (((len-i) >= 2) && (ch < utf8Start4)) {
 			value = (ch & 0xF) << 12;
 			ch = us[i++];
-			value += (ch & 0x7F) << 6;
+			value += TrailByteValue(ch) << 6;
 			ch = us[i++];
-			value += ch & 0x7F;
+			value += TrailByteValue(ch);
 		} else if ((len-i) >= 3) {
 			value = (ch & 0x7) << 18;
 			ch = us[i++];
-			value += (ch & 0x3F) << 12;
+			value += TrailByteValue(ch) << 12;
 			ch = us[i++];
-			value += (ch & 0x3F) << 6;
+			value += TrailByteValue(ch) << 6;
 			ch = us[i++];
-			value += ch & 0x3F;
+			value += TrailByteValue(ch);
 		}
 		tbuf[ui] = value;
 		ui++;
