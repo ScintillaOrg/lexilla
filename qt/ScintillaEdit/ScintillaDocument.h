@@ -84,7 +84,7 @@ signals:
     void style_needed(int pos);
     void lexer_changed();
     void error_occurred(int status);
-    
+
     friend class ::WatcherHelper;
 };
 

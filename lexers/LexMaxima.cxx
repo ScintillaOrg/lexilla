@@ -52,7 +52,7 @@ static void ColouriseMaximaDoc(Sci_PositionU startPos, Sci_Position length, int 
 	    !((styler.SafeGetCharAt(i+1) == '*') && (styler.SafeGetCharAt(i) == '/')))
 	i--;
     }
-  
+
   for (; i < lengthDoc; i++) {
     char ch = styler.SafeGetCharAt(i);
     char chNext = styler.SafeGetCharAt(i + 1);
@@ -65,7 +65,7 @@ static void ColouriseMaximaDoc(Sci_PositionU startPos, Sci_Position length, int 
     if((ch == '/') && (chNext == '*'))
       {
 	i++;i++;
-	      
+
 	chNext = styler.SafeGetCharAt(i);
 	for (; i < lengthDoc; i++)
 	  {
@@ -84,7 +84,7 @@ static void ColouriseMaximaDoc(Sci_PositionU startPos, Sci_Position length, int 
 	styler.ColourTo(i, SCE_MAXIMA_COMMENT);
 	continue;
       }
-    
+
     // Handle Operators
     if(isMaximaoperator(ch))
       {
@@ -98,7 +98,7 @@ static void ColouriseMaximaDoc(Sci_PositionU startPos, Sci_Position length, int 
 	styler.ColourTo(i, SCE_MAXIMA_COMMANDENDING);
 	continue;
       }
-	  
+
     // Handle numbers. Numbers always begin with a digit.
     if(IsASCII(ch) && isdigit(ch))
       {
@@ -110,7 +110,7 @@ static void ColouriseMaximaDoc(Sci_PositionU startPos, Sci_Position length, int 
 
 	    if(ch == '.')
 	      continue;
-	    
+
 	    // A "e" or similar can be followed by a "+" or a "-"
 	    if(((ch == 'e') || (ch == 'b') || (ch == 'g') || (ch == 'f')) &&
 	       ((chNext == '+') || (chNext == '-')))
@@ -119,7 +119,7 @@ static void ColouriseMaximaDoc(Sci_PositionU startPos, Sci_Position length, int 
 		chNext = styler.SafeGetCharAt(i + 1);
 		continue;
 	      }
-			  
+
 	    if(!IsASCII(ch) || !(isdigit(ch) || islower(ch) || isupper(ch)))
 	      {
 		i--;
@@ -149,7 +149,7 @@ static void ColouriseMaximaDoc(Sci_PositionU startPos, Sci_Position length, int 
 	styler.ColourTo(i, SCE_MAXIMA_STRING);
 	continue;
       }
-    
+
     // Handle keywords. Maxima treats Non-ASCII chars as ordinary letters.
     if(((!IsASCII(ch))) || isalpha(ch) || (ch == '_'))
       {
@@ -194,7 +194,7 @@ static void ColouriseMaximaDoc(Sci_PositionU startPos, Sci_Position length, int 
 	    styler.ColourTo(i, SCE_MAXIMA_COMMAND);
 	    continue;
 	  }
-	      
+
 	// All other keywords are functions if they are followed
 	// by an opening parenthesis
 	char nextNonwhitespace = ' ';
@@ -214,7 +214,7 @@ static void ColouriseMaximaDoc(Sci_PositionU startPos, Sci_Position length, int 
 	  }
 	continue;
       }
-	  
+
     styler.ColourTo(i-1, SCE_MAXIMA_UNKNOWN);
   }
 }

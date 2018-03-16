@@ -317,7 +317,7 @@ void ViewStyle::Refresh(Surface &surface, int tabInChars) {
 	for (Style &style : styles) {
 		style.extraFontFlag = extraFontFlag;
 	}
-	
+
 	// Create a FontRealised object for each unique font in the styles.
 	CreateAndAddFont(styles[STYLE_DEFAULT]);
 	for (const Style &style : styles) {

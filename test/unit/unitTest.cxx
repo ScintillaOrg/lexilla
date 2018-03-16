@@ -40,7 +40,7 @@
 
 #if defined(__GNUC__)
 // Want to avoid misleading indentation warnings in catch.hpp but the pragma
-// may not be available so protect by turning off pragma warnings 
+// may not be available so protect by turning off pragma warnings
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wmisleading-indentation"

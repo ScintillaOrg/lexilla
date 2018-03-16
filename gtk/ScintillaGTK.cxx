@@ -1563,7 +1563,7 @@ void ScintillaGTK::PrimarySelection(GtkWidget *, GtkSelectionData *selection_dat
 	}
 }
 
-gboolean ScintillaGTK::PrimaryClear(GtkWidget *widget, GdkEventSelection *event, ScintillaGTK *sciThis) {					 
+gboolean ScintillaGTK::PrimaryClear(GtkWidget *widget, GdkEventSelection *event, ScintillaGTK *sciThis) {
 	sciThis->UnclaimSelection(event);
 	if (GTK_WIDGET_CLASS(sciThis->parentClass)->selection_clear_event) {
 		return GTK_WIDGET_CLASS(sciThis->parentClass)->selection_clear_event(widget, event);

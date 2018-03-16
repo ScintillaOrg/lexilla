@@ -296,7 +296,7 @@ void Selection::MovePositions(bool insertion, Sci::Position startChange, Sci::Po
 	}
 	if (selType == selRectangle) {
 		rangeRectangular.MoveForInsertDelete(insertion, startChange, length);
-	} 
+	}
 }
 
 void Selection::TrimSelection(SelectionRange range) {

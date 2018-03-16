@@ -59,11 +59,11 @@ Decoration *DecorationList::Create(int indicator, Sci::Position length) {
 	decoNew->rs.InsertSpace(0, length);
 
 	std::vector<std::unique_ptr<Decoration>>::iterator it = std::lower_bound(
-		decorationList.begin(), decorationList.end(), decoNew, 
+		decorationList.begin(), decorationList.end(), decoNew,
 		[](const std::unique_ptr<Decoration> &a, const std::unique_ptr<Decoration> &b) {
 		return a->Indicator() < b->Indicator();
 	});
-	std::vector<std::unique_ptr<Decoration>>::iterator itAdded = 
+	std::vector<std::unique_ptr<Decoration>>::iterator itAdded =
 		decorationList.insert(it, std::move(decoNew));
 
 	SetView();

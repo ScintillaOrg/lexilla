@@ -17,7 +17,7 @@ TESTEDSRC=\
  ../../src/CharClassify.cxx \
  ../../src/ContractionState.cxx \
  ../../src/Decoration.cxx \
- ../../src/RunStyles.cxx 
+ ../../src/RunStyles.cxx
 
 TESTS=$(EXE)
 

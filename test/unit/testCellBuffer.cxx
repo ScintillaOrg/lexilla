@@ -26,7 +26,7 @@ TEST_CASE("CellBuffer") {
 	const Sci::Position sLength = static_cast<Sci::Position>(strlen(sText));
 
 	CellBuffer cb(true);
-	
+
 	SECTION("InsertOneLine") {
 		bool startSequence = false;
 		const char *cpChange = cb.InsertString(0, sText, static_cast<int>(sLength), startSequence);
@@ -119,7 +119,7 @@ TEST_CASE("CellBuffer") {
 		REQUIRE(memcmp(cb.BufferPointer(), sTextAfterDeletion, strlen(sTextAfterDeletion)) == 0);
 		REQUIRE(cb.CanUndo());
 		REQUIRE(!cb.CanRedo());
-		
+
 		cb.DeleteUndoHistory();
 		REQUIRE(!cb.CanUndo());
 		REQUIRE(!cb.CanRedo());

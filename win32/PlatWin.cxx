@@ -1283,7 +1283,7 @@ static int Delta(int difference) {
 		return 0;
 }
 
-// Round to integer, with halfway cases rounding down. 
+// Round to integer, with halfway cases rounding down.
 static float RoundFloat(float f) {
 	return std::floor(f+0.5f);
 }
