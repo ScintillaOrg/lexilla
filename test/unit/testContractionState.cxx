@@ -1,5 +1,6 @@
 // Unit Tests for Scintilla internal data structures
 
+#include <cstddef>
 #include <cstring>
 
 #include <stdexcept>
