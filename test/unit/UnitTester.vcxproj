@@ -152,6 +152,7 @@
     <ClCompile Include="..\..\src\ContractionState.cxx" />
     <ClCompile Include="..\..\src\Decoration.cxx" />
     <ClCompile Include="..\..\src\RunStyles.cxx" />
+    <ClCompile Include="..\..\src\UniConversion.cxx" />
     <ClCompile Include="test*.cxx" />
     <ClCompile Include="UnitTester.cxx" />
   </ItemGroup>

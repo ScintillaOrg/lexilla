@@ -11,6 +11,7 @@
         DecorationList
         CellBuffer
         UnicodeFromUTF8
+        UniConversion
 
     To do:
         PerLine *
@@ -20,7 +21,6 @@
         Document
         RESearch
         Selection
-        UniConversion
         Style
 
         lexlib:
