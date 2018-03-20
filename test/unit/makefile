@@ -5,15 +5,18 @@
 # clang works only with libc++, not libstdc++
 # Tested with clang 3.3 and g++ 4.8
 
+CXXSTD=c++17
+
 ifndef windir
 ifeq ($(shell uname),Darwin)
 # On OS X always use clang as g++ is old version
 CLANG = 1
 USELIBCPP = 1
+CXXSTD=c++1z
 endif
 endif
 
-CXXFLAGS += --std=c++17
+CXXFLAGS += --std=$(CXXSTD)
 
 ifdef CLANG
 CXX = clang++
