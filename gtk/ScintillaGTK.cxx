@@ -1329,15 +1329,15 @@ void ScintillaGTK::AddToPopUp(const char *label, int cmd, bool enabled) {
 }
 
 bool ScintillaGTK::OwnPrimarySelection() {
-	return ((gdk_selection_owner_get(GDK_SELECTION_PRIMARY)
-		== PWindow(wSelection)) &&
-			(PWindow(wSelection) != NULL));
+	return (wSelection.Created() &&
+		(gdk_selection_owner_get(GDK_SELECTION_PRIMARY) == PWindow(wSelection)) &&
+		(PWindow(wSelection) != NULL));
 }
 
 void ScintillaGTK::ClaimSelection() {
 	// X Windows has a 'primary selection' as well as the clipboard.
 	// Whenever the user selects some text, we become the primary selection
-	if (!sel.Empty() && IS_WIDGET_REALIZED(GTK_WIDGET(PWidget(wSelection)))) {
+	if (!sel.Empty() && wSelection.Created() && IS_WIDGET_REALIZED(GTK_WIDGET(PWidget(wSelection)))) {
 		primarySelection = true;
 		gtk_selection_owner_set(GTK_WIDGET(PWidget(wSelection)),
 		                        GDK_SELECTION_PRIMARY, GDK_CURRENT_TIME);
