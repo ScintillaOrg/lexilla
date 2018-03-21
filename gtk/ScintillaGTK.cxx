@@ -291,6 +291,7 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	gdk_window_set_cursor(PWindow(scrollbarh), cursor);
 	UnRefCursor(cursor);
 
+	wSelection = gtk_invisible_new();
 	g_signal_connect(PWidget(wSelection), "selection_get", G_CALLBACK(PrimarySelection), (gpointer) this);
 	g_signal_connect(PWidget(wSelection), "selection_clear_event", G_CALLBACK(PrimaryClear), (gpointer) this);
 	gtk_selection_add_targets(PWidget(wSelection), GDK_SELECTION_PRIMARY,
@@ -305,6 +306,7 @@ void ScintillaGTK::Realize(GtkWidget *widget) {
 void ScintillaGTK::UnRealizeThis(GtkWidget *widget) {
 	try {
 		gtk_selection_clear_targets(PWidget(wSelection), GDK_SELECTION_PRIMARY);
+		wSelection.Destroy();
 
 		if (IS_WIDGET_MAPPED(widget)) {
 			gtk_widget_unmap(widget);
@@ -538,8 +540,6 @@ void ScintillaGTK::Init() {
 	}
 #endif
 
-	wSelection = gtk_invisible_new();
-
 	gtk_widget_set_can_focus(PWidget(wMain), TRUE);
 	gtk_widget_set_sensitive(PWidget(wMain), TRUE);
 	gtk_widget_set_events(PWidget(wMain),
@@ -661,8 +661,6 @@ void ScintillaGTK::Finalise() {
 		g_object_unref(accessible);
 		accessible = 0;
 	}
-
-	wSelection.Destroy();
 
 	ScintillaBase::Finalise();
 }
