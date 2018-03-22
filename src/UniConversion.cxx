@@ -65,35 +65,15 @@ void UTF8FromUTF16(const wchar_t *uptr, size_t tlen, char *putf, size_t len) {
 		putf[k] = '\0';
 }
 
-unsigned int UTF8CharLength(unsigned char ch) {
-	if (ch < 0x80) {
-		return 1;
-	} else if (ch < 0x80 + 0x40 + 0x20) {
-		return 2;
-	} else if (ch < 0x80 + 0x40 + 0x20 + 0x10) {
-		return 3;
-	} else {
-		return 4;
-	}
-}
-
 size_t UTF16Length(const char *s, size_t len) {
 	size_t ulen = 0;
-	size_t charLen;
-	for (size_t i = 0; i<len;) {
-		const unsigned char ch = static_cast<unsigned char>(s[i]);
-		if (ch < 0x80) {
-			charLen = 1;
-		} else if (ch < 0x80 + 0x40 + 0x20) {
-			charLen = 2;
-		} else if (ch < 0x80 + 0x40 + 0x20 + 0x10) {
-			charLen = 3;
-		} else {
-			charLen = 4;
-			ulen++;
-		}
-		i += charLen;
-		ulen++;
+	const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
+	for (size_t i = 0; i < len;) {
+		const unsigned char ch = us[i];
+		const unsigned int byteCount = UTF8BytesOfLead[ch];
+		const unsigned int utf16Len = UTF16LengthFromUTF8ByteCount(byteCount);
+		i += byteCount;
+		ulen += (i > len) ? 1 : utf16Len;
 	}
 	return ulen;
 }
@@ -104,65 +84,49 @@ constexpr unsigned char TrailByteValue(unsigned char c) {
 	return c & 0b0011'1111;
 }
 
-const unsigned char utf8Start3 = 0b1110'0000;
-const unsigned char utf8Start4 = 0b1111'0000;
-
 size_t UTF16FromUTF8(const char *s, size_t len, wchar_t *tbuf, size_t tlen) {
 	size_t ui = 0;
 	const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
-	size_t i = 0;
-	while ((i<len) && (ui<tlen)) {
-		unsigned char ch = us[i++];
-		if (ch < 0x80) {
-			tbuf[ui] = ch;
-		} else if (ch < utf8Start3) {
-			tbuf[ui] = static_cast<wchar_t>((ch & 0x1F) << 6);
-			ch = us[i++];
-			tbuf[ui] = static_cast<wchar_t>(tbuf[ui] + TrailByteValue(ch));
-		} else if (ch < utf8Start4) {
-			tbuf[ui] = static_cast<wchar_t>((ch & 0xF) << 12);
-			ch = us[i++];
-			tbuf[ui] = static_cast<wchar_t>(tbuf[ui] + (TrailByteValue(ch) << 6));
-			ch = us[i++];
-			tbuf[ui] = static_cast<wchar_t>(tbuf[ui] + TrailByteValue(ch));
-		} else {
-			// Outside the BMP so need two surrogates
-			int val = (ch & 0x7) << 18;
-			ch = us[i++];
-			val += TrailByteValue(ch) << 12;
-			ch = us[i++];
-			val += TrailByteValue(ch) << 6;
-			ch = us[i++];
-			val += TrailByteValue(ch);
-			tbuf[ui] = static_cast<wchar_t>(((val - 0x10000) >> 10) + SURROGATE_LEAD_FIRST);
-			ui++;
-			tbuf[ui] = static_cast<wchar_t>((val & 0x3ff) + SURROGATE_TRAIL_FIRST);
-		}
-		ui++;
-	}
-	return ui;
-}
+	for (size_t i = 0; i < len;) {
+		unsigned char ch = us[i];
+		const unsigned int byteCount = UTF8BytesOfLead[ch];
+		unsigned int value;
 
-size_t UTF32FromUTF8(const char *s, size_t len, unsigned int *tbuf, size_t tlen) {
-	size_t ui=0;
-	const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
-	size_t i=0;
-	while ((i<len) && (ui<tlen)) {
-		unsigned char ch = us[i++];
-		unsigned int value = 0;
-		if (ch < 0x80) {
-			value = ch;
-		} else if (((len-i) >= 1) && (ch < utf8Start3)) {
+		if (i + byteCount > len) {
+			// Trying to read past end but still have space to write
+			if (ui < tlen) {
+				tbuf[ui] = ch;
+				ui++;
+			}
+			break;
+		}
+
+		const size_t outLen = (byteCount < 4) ? 1 : 2;
+		if (ui + outLen > tlen) {
+			throw std::runtime_error("UTF16FromUTF8: attempted write beyond end");
+		}
+
+		i++;
+		switch (byteCount) {
+		case 1:
+			tbuf[ui] = ch;
+			break;
+		case 2:
 			value = (ch & 0x1F) << 6;
 			ch = us[i++];
 			value += TrailByteValue(ch);
-		} else if (((len-i) >= 2) && (ch < utf8Start4)) {
+			tbuf[ui] = static_cast<wchar_t>(value);
+			break;
+		case 3:
 			value = (ch & 0xF) << 12;
 			ch = us[i++];
-			value += TrailByteValue(ch) << 6;
+			value += (TrailByteValue(ch) << 6);
 			ch = us[i++];
 			value += TrailByteValue(ch);
-		} else if ((len-i) >= 3) {
+			tbuf[ui] = static_cast<wchar_t>(value);
+			break;
+		default:
+			// Outside the BMP so need two surrogates
 			value = (ch & 0x7) << 18;
 			ch = us[i++];
 			value += TrailByteValue(ch) << 12;
@@ -170,6 +134,63 @@ size_t UTF32FromUTF8(const char *s, size_t len, unsigned int *tbuf, size_t tlen)
 			value += TrailByteValue(ch) << 6;
 			ch = us[i++];
 			value += TrailByteValue(ch);
+			tbuf[ui] = static_cast<wchar_t>(((value - 0x10000) >> 10) + SURROGATE_LEAD_FIRST);
+			ui++;
+			tbuf[ui] = static_cast<wchar_t>((value & 0x3ff) + SURROGATE_TRAIL_FIRST);
+			break;
+		}
+		ui++;
+	}
+	return ui;
+}
+
+size_t UTF32FromUTF8(const char *s, size_t len, unsigned int *tbuf, size_t tlen) {
+	size_t ui = 0;
+	const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
+	for (size_t i = 0; i < len;) {
+		unsigned char ch = us[i];
+		const unsigned int byteCount = UTF8BytesOfLead[ch];
+		unsigned int value;
+
+		if (i + byteCount > len) {
+			// Trying to read past end but still have space to write
+			if (ui < tlen) {
+				tbuf[ui] = ch;
+				ui++;
+			}
+			break;
+		}
+
+		if (ui == tlen) {
+			throw std::runtime_error("UTF32FromUTF8: attempted write beyond end");
+		}
+
+		i++;
+		switch (byteCount) {
+		case 1:
+			value = ch;
+			break;
+		case 2:
+			value = (ch & 0x1F) << 6;
+			ch = us[i++];
+			value += TrailByteValue(ch);
+			break;
+		case 3:
+			value = (ch & 0xF) << 12;
+			ch = us[i++];
+			value += TrailByteValue(ch) << 6;
+			ch = us[i++];
+			value += TrailByteValue(ch);
+			break;
+		default:
+			value = (ch & 0x7) << 18;
+			ch = us[i++];
+			value += TrailByteValue(ch) << 12;
+			ch = us[i++];
+			value += TrailByteValue(ch) << 6;
+			ch = us[i++];
+			value += TrailByteValue(ch);
+			break;
 		}
 		tbuf[ui] = value;
 		ui++;
@@ -188,33 +209,24 @@ unsigned int UTF16FromUTF32Character(unsigned int val, wchar_t *tbuf) {
 	}
 }
 
-int UTF8BytesOfLead[256];
-static bool initialisedBytesOfLead = false;
-
-static int BytesFromLead(int leadByte) {
-	if (leadByte < 0xC2) {
-		// Single byte or invalid
-		return 1;
-	} else if (leadByte < 0xE0) {
-		return 2;
-	} else if (leadByte < 0xF0) {
-		return 3;
-	} else if (leadByte < 0xF5) {
-		return 4;
-	} else {
-		// Characters longer than 4 bytes not possible in current UTF-8
-		return 1;
-	}
-}
-
-void UTF8BytesOfLeadInitialise() {
-	if (!initialisedBytesOfLead) {
-		for (int i=0; i<256; i++) {
-			UTF8BytesOfLead[i] = BytesFromLead(i);
-		}
-		initialisedBytesOfLead = true;
-	}
-}
+const unsigned char UTF8BytesOfLead[256] = {
+1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 00 - 0F
+1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 10 - 1F
+1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 20 - 2F
+1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 30 - 3F
+1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 40 - 4F
+1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 50 - 5F
+1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 60 - 6F
+1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 70 - 7F
+1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 80 - 8F
+1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 90 - 9F
+1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // A0 - AF
+1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // B0 - BF
+1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, // C0 - CF
+2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, // D0 - DF
+3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, // E0 - EF
+4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // F0 - FF
+};
 
 // Return both the width of the first character in the string and a status
 // saying whether it is valid or invalid.

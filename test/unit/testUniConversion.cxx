@@ -53,6 +53,24 @@ TEST_CASE("UTF16Length") {
 		size_t len = UTF16Length(s, strlen(s));
 		REQUIRE(len == 2U);
 	}
+
+	SECTION("UTF16Length Invalid Trail byte in lead position") {
+		const char *s = "a\xB5yz";
+		size_t len = UTF16Length(s, strlen(s));
+		REQUIRE(len == 4U);
+	}
+
+	SECTION("UTF16Length Invalid Lead byte at end") {
+		const char *s = "a\xC2";
+		size_t len = UTF16Length(s, strlen(s));
+		REQUIRE(len == 2U);
+	}
+
+	SECTION("UTF16Length Invalid Lead byte implies 3 trails but only 2") {
+		const char *s = "a\xF1yz";
+		size_t len = UTF16Length(s, strlen(s));
+		REQUIRE(len == 2U);
+	}
 }
 
 TEST_CASE("UniConversion") {
@@ -100,6 +118,35 @@ TEST_CASE("UniConversion") {
 		REQUIRE(tbuf[1] == 0xDF48);
 	}
 
+	SECTION("UTF16FromUTF8 Invalid Trail byte in lead position") {
+		const char s[] = "a\xB5yz";
+		wchar_t tbuf[4] = {};
+		size_t tlen = UTF16FromUTF8(s, 4, tbuf, 4);
+		REQUIRE(tlen == 4U);
+		REQUIRE(tbuf[0] == 'a');
+		REQUIRE(tbuf[1] == 0xB5);
+		REQUIRE(tbuf[2] == 'y');
+		REQUIRE(tbuf[3] == 'z');
+	}
+
+	SECTION("UTF16FromUTF8 Invalid Lead byte at end") {
+		const char s[] = "a\xC2";
+		wchar_t tbuf[2] = {};
+		size_t tlen = UTF16FromUTF8(s, 2, tbuf, 2);
+		REQUIRE(tlen == 2U);
+		REQUIRE(tbuf[0] == 'a');
+		REQUIRE(tbuf[1] == 0xC2);
+	}
+
+	SECTION("UTF16FromUTF8 Invalid Lead byte implies 3 trails but only 2") {
+		const char *s = "a\xF1yz";
+		wchar_t tbuf[4] = {};
+		size_t tlen = UTF16FromUTF8(s, 4, tbuf, 4);
+		REQUIRE(tlen == 2U);
+		REQUIRE(tbuf[0] == 'a');
+		REQUIRE(tbuf[1] == 0xF1);
+	}
+
 	// UTF32FromUTF8
 
 	SECTION("UTF32FromUTF8 ASCII") {
@@ -141,6 +188,44 @@ TEST_CASE("UniConversion") {
 		REQUIRE(tlen == 1U);
 		REQUIRE(tbuf[0] == 0x10348);
 	}
+
+	SECTION("UTF32FromUTF8 Invalid Trail byte in lead position") {
+		const char s[] = "a\xB5yz";
+		unsigned int tbuf[4] = {};
+		size_t tlen = UTF32FromUTF8(s, 4, tbuf, 4);
+		REQUIRE(tlen == 4U);
+		REQUIRE(tbuf[0] == static_cast<unsigned int>('a'));
+		REQUIRE(tbuf[1] == 0xB5);
+		REQUIRE(tbuf[2] == static_cast<unsigned int>('y'));
+		REQUIRE(tbuf[3] == static_cast<unsigned int>('z'));
+	}
+
+	SECTION("UTF32FromUTF8 Invalid Lead byte at end") {
+		const char s[] = "a\xC2";
+		unsigned int tbuf[2] = {};
+		size_t tlen = UTF32FromUTF8(s, 2, tbuf, 2);
+		REQUIRE(tlen == 2U);
+		REQUIRE(tbuf[0] == static_cast<unsigned int>('a'));
+		REQUIRE(tbuf[1] == 0xC2);
+	}
+
+	SECTION("UTF32FromUTF8 Invalid Lead byte implies 3 trails but only 2") {
+		const char *s = "a\xF1yz";
+		unsigned int tbuf[4] = {};
+		size_t tlen = UTF32FromUTF8(s, 4, tbuf, 4);
+		REQUIRE(tlen == 2U);
+		REQUIRE(tbuf[0] == static_cast<unsigned int>('a'));
+		REQUIRE(tbuf[1] == 0xF1);
+	}
+}
+
+namespace {
+
+// Simple adapter to avoid casting
+int UTFClass(const char *s) {
+	return UTF8Classify(reinterpret_cast<const unsigned char *>(s), static_cast<int>(strlen(s)));
+}
+
 }
 
 TEST_CASE("UTF8Classify") {
@@ -151,114 +236,76 @@ TEST_CASE("UTF8Classify") {
 	// Single byte
 
 	SECTION("UTF8Classify Simple ASCII") {
-		const char *s = "a";
-		REQUIRE(UTF8Classify(reinterpret_cast<const unsigned char *>(s), strlen(s)) == 1);
+		REQUIRE(UTFClass("a") == 1);
 	}
-
 	SECTION("UTF8Classify Invalid Too large lead") {
-		const char *s = "\xF5";
-		REQUIRE(UTF8Classify(reinterpret_cast<const unsigned char *>(s), strlen(s)) == (1|UTF8MaskInvalid));
+		REQUIRE(UTFClass("\xF5") == (1|UTF8MaskInvalid));
 	}
 
 	// 4 byte lead
 
 	SECTION("UTF8Classify 4 byte lead, string less than 4 long") {
-		const char *s = "\xF0";
-		REQUIRE(UTF8Classify(reinterpret_cast<const unsigned char *>(s), strlen(s)) == (1 | UTF8MaskInvalid));
+		REQUIRE(UTFClass("\xF0") == (1 | UTF8MaskInvalid));
 	}
-
 	SECTION("UTF8Classify 1FFFF non-character") {
-		const char *s = "\xF0\x9F\xBF\xBF";
-		REQUIRE(UTF8Classify(reinterpret_cast<const unsigned char *>(s), strlen(s)) == (4 | UTF8MaskInvalid));
+		REQUIRE(UTFClass("\xF0\x9F\xBF\xBF") == (4 | UTF8MaskInvalid));
 	}
-
 	SECTION("UTF8Classify 1 Greater than max Unicode 110000") {
 		// Maximum Unicode value is 10FFFF so 110000 is out of range
-		const char *s = "\xF4\x90\x80\x80";
-		REQUIRE(UTF8Classify(reinterpret_cast<const unsigned char *>(s), strlen(s)) == (1 | UTF8MaskInvalid));
+		REQUIRE(UTFClass("\xF4\x90\x80\x80") == (1 | UTF8MaskInvalid));
 	}
-
 	SECTION("UTF8Classify 4 byte overlong") {
-		const char *s = "\xF0\x80\x80\x80";
-		REQUIRE(UTF8Classify(reinterpret_cast<const unsigned char *>(s), strlen(s)) == (1 | UTF8MaskInvalid));
+		REQUIRE(UTFClass("\xF0\x80\x80\x80") == (1 | UTF8MaskInvalid));
 	}
-
 	SECTION("UTF8Classify 4 byte valid character") {
-		const char *s = "\xF0\x9F\x8C\x90";
-		REQUIRE(UTF8Classify(reinterpret_cast<const unsigned char *>(s), strlen(s)) == 4);
+		REQUIRE(UTFClass("\xF0\x9F\x8C\x90") == 4);
 	}
-
 	SECTION("UTF8Classify 4 byte bad trails") {
-		const char *s = "\xF0xyz";
-		REQUIRE(UTF8Classify(reinterpret_cast<const unsigned char *>(s), strlen(s)) == (1 | UTF8MaskInvalid));
+		REQUIRE(UTFClass("\xF0xyz") == (1 | UTF8MaskInvalid));
 	}
 
 	// 3 byte lead
 
 	SECTION("UTF8Classify 3 byte lead, string less than 3 long") {
-		const char *s = "\xEF";
-		REQUIRE(UTF8Classify(reinterpret_cast<const unsigned char *>(s), strlen(s)) == (1 | UTF8MaskInvalid));
+		REQUIRE(UTFClass("\xEF") == (1 | UTF8MaskInvalid));
 	}
-
 	SECTION("UTF8Classify 3 byte lead, overlong") {
-		const char *s = "\xE0\x80\xAF";
-		REQUIRE(UTF8Classify(reinterpret_cast<const unsigned char *>(s), strlen(s)) == (1 | UTF8MaskInvalid));
+		REQUIRE(UTFClass("\xE0\x80\xAF") == (1 | UTF8MaskInvalid));
 	}
-
 	SECTION("UTF8Classify 3 byte lead, surrogate") {
-		const char *s = "\xED\xA0\x80";
-		REQUIRE(UTF8Classify(reinterpret_cast<const unsigned char *>(s), strlen(s)) == (1 | UTF8MaskInvalid));
+		REQUIRE(UTFClass("\xED\xA0\x80") == (1 | UTF8MaskInvalid));
 	}
-
 	SECTION("UTF8Classify FFFE non-character") {
-		const char *s = "\xEF\xBF\xBE";
-		REQUIRE(UTF8Classify(reinterpret_cast<const unsigned char *>(s), strlen(s)) == (3 | UTF8MaskInvalid));
+		REQUIRE(UTFClass("\xEF\xBF\xBE") == (3 | UTF8MaskInvalid));
 	}
-
 	SECTION("UTF8Classify FFFF non-character") {
-		const char *s = "\xEF\xBF\xBF";
-		REQUIRE(UTF8Classify(reinterpret_cast<const unsigned char *>(s), strlen(s)) == (3 | UTF8MaskInvalid));
+		REQUIRE(UTFClass("\xEF\xBF\xBF") == (3 | UTF8MaskInvalid));
 	}
-
 	SECTION("UTF8Classify FDD0 non-character") {
-		const char *s = "\xEF\xB7\x90";
-		REQUIRE(UTF8Classify(reinterpret_cast<const unsigned char *>(s), strlen(s)) == (3 | UTF8MaskInvalid));
+		REQUIRE(UTFClass("\xEF\xB7\x90") == (3 | UTF8MaskInvalid));
 	}
-
 	SECTION("UTF8Classify 3 byte valid character") {
-		const char *s = "\xE2\x82\xAC";
-		REQUIRE(UTF8Classify(reinterpret_cast<const unsigned char *>(s), strlen(s)) == 3);
+		REQUIRE(UTFClass("\xE2\x82\xAC") == 3);
 	}
-
 	SECTION("UTF8Classify 3 byte bad trails") {
-		const char *s = "\xE2qq";
-		REQUIRE(UTF8Classify(reinterpret_cast<const unsigned char *>(s), strlen(s)) == (1 | UTF8MaskInvalid));
+		REQUIRE(UTFClass("\xE2qq") == (1 | UTF8MaskInvalid));
 	}
 
 	// 2 byte lead
 
 	SECTION("UTF8Classify 2 byte lead, string less than 2 long") {
-		const char *s = "\xD0";
-		REQUIRE(UTF8Classify(reinterpret_cast<const unsigned char *>(s), strlen(s)) == (1 | UTF8MaskInvalid));
+		REQUIRE(UTFClass("\xD0") == (1 | UTF8MaskInvalid));
 	}
-
 	SECTION("UTF8Classify 2 byte valid character") {
-		const char *s = "\xD0\x80";
-		REQUIRE(UTF8Classify(reinterpret_cast<const unsigned char *>(s), strlen(s)) == 2);
+		REQUIRE(UTFClass("\xD0\x80") == 2);
 	}
-
 	SECTION("UTF8Classify 2 byte lead trail is invalid") {
-		const char *s = "\xD0q";
-		REQUIRE(UTF8Classify(reinterpret_cast<const unsigned char *>(s), strlen(s)) == (1 | UTF8MaskInvalid));
+		REQUIRE(UTFClass("\xD0q") == (1 | UTF8MaskInvalid));
 	}
-
 	SECTION("UTF8Classify Overlong") {
-		const char *s = "\xC0";
-		REQUIRE(UTF8Classify(reinterpret_cast<const unsigned char *>(s), strlen(s)) == (1 | UTF8MaskInvalid));
+		REQUIRE(UTFClass("\xC0") == (1 | UTF8MaskInvalid));
 	}
-
 	SECTION("UTF8Classify single trail byte") {
-		const char *s = "\x80";
-		REQUIRE(UTF8Classify(reinterpret_cast<const unsigned char *>(s), strlen(s)) == (1 | UTF8MaskInvalid));
+		REQUIRE(UTFClass("\x80") == (1 | UTF8MaskInvalid));
 	}
 }

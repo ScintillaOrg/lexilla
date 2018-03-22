@@ -10,6 +10,7 @@
 
 #include "PlatQt.h"
 #include "Scintilla.h"
+#include "UniConversion.h"
 #include "DBCS.h"
 #include "FontQuality.h"
 
@@ -438,19 +439,6 @@ void SurfaceImpl::SetClip(PRectangle rc)
 	GetPainter()->setClipRect(QRectFFromPRect(rc));
 }
 
-static size_t utf8LengthFromLead(unsigned char uch)
-{
-	if (uch >= (0x80 + 0x40 + 0x20 + 0x10)) {
-		return 4;
-	} else if (uch >= (0x80 + 0x40 + 0x20)) {
-		return 3;
-	} else if (uch >= (0x80)) {
-		return 2;
-	} else {
-		return 1;
-	}
-}
-
 void SurfaceImpl::MeasureWidths(Font &font,
                                 const char *s,
                                 int len,
@@ -470,10 +458,10 @@ void SurfaceImpl::MeasureWidths(Font &font,
 		const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
 		int i=0;
 		while (ui<fit) {
-			size_t lenChar = utf8LengthFromLead(us[i]);
-			int codeUnits = (lenChar < 4) ? 1 : 2;
+			const unsigned int byteCount = UTF8BytesOfLead[us[i]];
+			const int codeUnits = UTF16LengthFromUTF8ByteCount(byteCount);
 			qreal xPosition = tl.cursorToX(ui+codeUnits);
-			for (unsigned int bytePos=0; (bytePos<lenChar) && (i<len); bytePos++) {
+			for (unsigned int bytePos=0; (bytePos<byteCount) && (i<len); bytePos++) {
 				positions[i++] = xPosition;
 			}
 			ui += codeUnits;

@@ -66,7 +66,7 @@ CXXFLAGS=$(CXXFLAGS) $(INCLUDEDIRS)
 all:	$(COMPONENT) $(LEXCOMPONENT) $(LIBSCI)
 
 clean:
-	-del /q $(DIR_O)\*.obj $(DIR_O)\*.pdb $(COMPONENT) $(LEXCOMPONENT) \
+	-del /q $(DIR_O)\*.obj $(DIR_O)\*.pdb $(DIR_O)\*.asm $(COMPONENT) $(LEXCOMPONENT) \
 	$(DIR_O)\*.res $(DIR_BIN)\*.map $(DIR_BIN)\*.exp $(DIR_BIN)\*.pdb $(DIR_BIN)\*.lib
 
 # Required for base Scintilla

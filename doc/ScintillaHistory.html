@@ -546,6 +546,12 @@
 	The statically linked version of SciTE, Sc1, links to this static library.
 	</li>
 	<li>
+	In some cases, invalid UTF-8 is handled in a way that is a little friendlier.
+	For example, when copying to the clipboard on Windows, an invalid lead byte will be copied as the
+	equivalent ISO 8859-1 character and will not hide the following byte.
+	<a href="http://sourceforge.net/p/scintilla/feature-requests/1211/">Feature #1211.</a>
+	</li>
+	<li>
 	Lexer added for the Maxima computer algebra language.
 	<a href="http://sourceforge.net/p/scintilla/feature-requests/1210/">Feature #1210.</a>
 	</li>

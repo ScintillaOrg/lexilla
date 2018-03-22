@@ -781,7 +781,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION 
 									positions[i++] = iti.position - (places - place) * iti.distance / places;
 									positionsCalculated++;
 								}
-								clusterStart += UTF8CharLength(static_cast<unsigned char>(utfForm.c_str()[clusterStart]));
+								clusterStart += UTF8BytesOfLead[static_cast<unsigned char>(utfForm.c_str()[clusterStart])];
 								place++;
 							}
 						}
