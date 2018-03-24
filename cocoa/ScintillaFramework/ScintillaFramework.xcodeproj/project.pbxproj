@@ -11,7 +11,6 @@
 		1100F1EC178E393200105727 /* CaseConvert.h in Headers */ = {isa = PBXBuildFile; fileRef = 1100F1E7178E393200105727 /* CaseConvert.h */; };
 		1100F1ED178E393200105727 /* CaseFolder.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 1100F1E8178E393200105727 /* CaseFolder.cxx */; };
 		1100F1EE178E393200105727 /* CaseFolder.h in Headers */ = {isa = PBXBuildFile; fileRef = 1100F1E9178E393200105727 /* CaseFolder.h */; };
-		1100F1EF178E393200105727 /* UnicodeFromUTF8.h in Headers */ = {isa = PBXBuildFile; fileRef = 1100F1EA178E393200105727 /* UnicodeFromUTF8.h */; };
 		1102C31C169FB49300DC16AB /* LexLaTeX.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 1102C31B169FB49300DC16AB /* LexLaTeX.cxx */; };
 		11126B8214CD3A6200803C49 /* LexAVS.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 11126B8114CD3A6200803C49 /* LexAVS.cxx */; };
 		1114D6CB1602A951001DC345 /* LexPO.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 1114D6CA1602A951001DC345 /* LexPO.cxx */; };
@@ -239,7 +238,6 @@
 		1100F1E7178E393200105727 /* CaseConvert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CaseConvert.h; path = ../../src/CaseConvert.h; sourceTree = "<group>"; };
 		1100F1E8178E393200105727 /* CaseFolder.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CaseFolder.cxx; path = ../../src/CaseFolder.cxx; sourceTree = "<group>"; };
 		1100F1E9178E393200105727 /* CaseFolder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CaseFolder.h; path = ../../src/CaseFolder.h; sourceTree = "<group>"; };
-		1100F1EA178E393200105727 /* UnicodeFromUTF8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UnicodeFromUTF8.h; path = ../../src/UnicodeFromUTF8.h; sourceTree = "<group>"; };
 		1102C31B169FB49300DC16AB /* LexLaTeX.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexLaTeX.cxx; path = ../../lexers/LexLaTeX.cxx; sourceTree = "<group>"; };
 		11126B8114CD3A6200803C49 /* LexAVS.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexAVS.cxx; path = ../../lexers/LexAVS.cxx; sourceTree = "<group>"; };
 		1114D6CA1602A951001DC345 /* LexPO.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexPO.cxx; path = ../../lexers/LexPO.cxx; sourceTree = "<group>"; };
@@ -714,7 +712,6 @@
 				114B6FB811FA7623004FB6AB /* Style.h */,
 				114B6FE111FA7645004FB6AB /* StyleContext.h */,
 				280056FA188DDD2C00F200AE /* SubStyles.h */,
-				1100F1EA178E393200105727 /* UnicodeFromUTF8.h */,
 				114B6FBA11FA7623004FB6AB /* UniConversion.h */,
 				114B6FBB11FA7623004FB6AB /* ViewStyle.h */,
 				114B6FE211FA7645004FB6AB /* WordList.h */,
@@ -890,7 +887,6 @@
 				11FBA39E17817DA00048C071 /* CharacterCategory.h in Headers */,
 				1100F1EC178E393200105727 /* CaseConvert.h in Headers */,
 				1100F1EE178E393200105727 /* CaseFolder.h in Headers */,
-				1100F1EF178E393200105727 /* UnicodeFromUTF8.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

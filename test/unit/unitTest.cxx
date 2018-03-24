@@ -10,7 +10,6 @@
         Decoration
         DecorationList
         CellBuffer
-        UnicodeFromUTF8
         UniConversion
 
     To do:

@@ -16,6 +16,7 @@ const int unicodeReplacementChar = 0xFFFD;
 
 size_t UTF8Length(const wchar_t *uptr, size_t tlen);
 void UTF8FromUTF16(const wchar_t *uptr, size_t tlen, char *putf, size_t len);
+void UTF8FromUTF32Character(int uch, char *putf);
 size_t UTF16Length(const char *s, size_t len);
 size_t UTF16FromUTF8(const char *s, size_t len, wchar_t *tbuf, size_t tlen);
 size_t UTF32FromUTF8(const char *s, size_t len, unsigned int *tbuf, size_t tlen);
@@ -23,6 +24,19 @@ unsigned int UTF16FromUTF32Character(unsigned int val, wchar_t *tbuf);
 std::string FixInvalidUTF8(const std::string &text);
 
 extern const unsigned char UTF8BytesOfLead[256];
+
+inline int UnicodeFromUTF8(const unsigned char *us) {
+	switch (UTF8BytesOfLead[us[0]]) {
+	case 1:
+		return us[0];
+	case 2:
+		return ((us[0] & 0x1F) << 6) + (us[1] & 0x3F);
+	case 3:
+		return ((us[0] & 0xF) << 12) + ((us[1] & 0x3F) << 6) + (us[2] & 0x3F);
+	default:
+		return ((us[0] & 0x7) << 18) + ((us[1] & 0x3F) << 12) + ((us[2] & 0x3F) << 6) + (us[3] & 0x3F);
+	}
+}
 
 inline bool UTF8IsTrailByte(unsigned char ch) {
 	return (ch >= 0x80) && (ch < 0xc0);
@@ -63,7 +77,7 @@ inline unsigned int UTF16CharLength(wchar_t uch) {
 }
 
 inline unsigned int UTF16LengthFromUTF8ByteCount(unsigned int byteCount) {
-    return (byteCount < 4) ? 1 : 2;
+	return (byteCount < 4) ? 1 : 2;
 }
 
 }

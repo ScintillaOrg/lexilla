@@ -65,6 +65,26 @@ void UTF8FromUTF16(const wchar_t *uptr, size_t tlen, char *putf, size_t len) {
 		putf[k] = '\0';
 }
 
+void UTF8FromUTF32Character(int uch, char *putf) {
+	size_t k = 0;
+	if (uch < 0x80) {
+		putf[k++] = static_cast<char>(uch);
+	} else if (uch < 0x800) {
+		putf[k++] = static_cast<char>(0xC0 | (uch >> 6));
+		putf[k++] = static_cast<char>(0x80 | (uch & 0x3f));
+	} else if (uch < 0x10000) {
+		putf[k++] = static_cast<char>(0xE0 | (uch >> 12));
+		putf[k++] = static_cast<char>(0x80 | ((uch >> 6) & 0x3f));
+		putf[k++] = static_cast<char>(0x80 | (uch & 0x3f));
+	} else {
+		putf[k++] = static_cast<char>(0xF0 | (uch >> 18));
+		putf[k++] = static_cast<char>(0x80 | ((uch >> 12) & 0x3f));
+		putf[k++] = static_cast<char>(0x80 | ((uch >> 6) & 0x3f));
+		putf[k++] = static_cast<char>(0x80 | (uch & 0x3f));
+	}
+	putf[k] = '\0';
+}
+
 size_t UTF16Length(const char *s, size_t len) {
 	size_t ulen = 0;
 	const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
@@ -101,7 +121,7 @@ size_t UTF16FromUTF8(const char *s, size_t len, wchar_t *tbuf, size_t tlen) {
 			break;
 		}
 
-		const size_t outLen = (byteCount < 4) ? 1 : 2;
+		const size_t outLen = UTF16LengthFromUTF8ByteCount(byteCount);
 		if (ui + outLen > tlen) {
 			throw std::runtime_error("UTF16FromUTF8: attempted write beyond end");
 		}

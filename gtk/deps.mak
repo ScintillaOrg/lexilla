@@ -9,11 +9,11 @@ ScintillaGTKAccessible.o: ScintillaGTKAccessible.cxx \
  ../src/Position.h ../src/UniqueString.h ../src/SplitVector.h \
  ../src/Partitioning.h ../src/RunStyles.h ../src/ContractionState.h \
  ../src/CellBuffer.h ../src/CallTip.h ../src/KeyMap.h ../src/Indicator.h \
- ../src/XPM.h ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
+ ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
  ../src/CharClassify.h ../src/Decoration.h ../src/CaseFolder.h \
  ../src/Document.h ../src/CaseConvert.h ../src/UniConversion.h \
- ../src/UnicodeFromUTF8.h ../src/Selection.h ../src/PositionCache.h \
- ../src/EditModel.h ../src/MarginView.h ../src/EditView.h ../src/Editor.h \
+ ../src/Selection.h ../src/PositionCache.h ../src/EditModel.h \
+ ../src/MarginView.h ../src/EditView.h ../src/Editor.h \
  ../src/AutoComplete.h ../src/ScintillaBase.h ScintillaGTK.h \
  ScintillaGTKAccessible.h
 ScintillaGTK.o: ScintillaGTK.cxx \
@@ -23,11 +23,11 @@ ScintillaGTK.o: ScintillaGTK.cxx \
  ../src/Position.h ../src/UniqueString.h ../src/SplitVector.h \
  ../src/Partitioning.h ../src/RunStyles.h ../src/ContractionState.h \
  ../src/CellBuffer.h ../src/CallTip.h ../src/KeyMap.h ../src/Indicator.h \
- ../src/XPM.h ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
+ ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
  ../src/CharClassify.h ../src/Decoration.h ../src/CaseFolder.h \
  ../src/Document.h ../src/CaseConvert.h ../src/UniConversion.h \
- ../src/UnicodeFromUTF8.h ../src/Selection.h ../src/PositionCache.h \
- ../src/EditModel.h ../src/MarginView.h ../src/EditView.h ../src/Editor.h \
+ ../src/Selection.h ../src/PositionCache.h ../src/EditModel.h \
+ ../src/MarginView.h ../src/EditView.h ../src/Editor.h \
  ../src/AutoComplete.h ../src/ScintillaBase.h ../src/ExternalLexer.h \
  ScintillaGTK.h scintilla-marshal.h ScintillaGTKAccessible.h Converter.h
 AutoComplete.o: ../src/AutoComplete.cxx ../include/Platform.h \
@@ -37,7 +37,7 @@ CallTip.o: ../src/CallTip.cxx ../include/Platform.h \
  ../include/Scintilla.h ../include/Sci_Position.h ../lexlib/StringCopy.h \
  ../src/Position.h ../src/CallTip.h
 CaseConvert.o: ../src/CaseConvert.cxx ../lexlib/StringCopy.h \
- ../src/CaseConvert.h ../src/UniConversion.h ../src/UnicodeFromUTF8.h
+ ../src/CaseConvert.h ../src/UniConversion.h
 CaseFolder.o: ../src/CaseFolder.cxx ../src/CaseFolder.h \
  ../src/CaseConvert.h ../src/UniConversion.h
 Catalogue.o: ../src/Catalogue.cxx ../include/ILexer.h \
@@ -64,34 +64,33 @@ Document.o: ../src/Document.cxx ../include/Platform.h \
  ../src/Partitioning.h ../src/RunStyles.h ../src/CellBuffer.h \
  ../src/PerLine.h ../src/CharClassify.h ../src/Decoration.h \
  ../src/CaseFolder.h ../src/Document.h ../src/RESearch.h \
- ../src/UniConversion.h ../src/UnicodeFromUTF8.h
+ ../src/UniConversion.h
 EditModel.o: ../src/EditModel.cxx ../include/Platform.h \
  ../include/ILoader.h ../include/Sci_Position.h ../include/ILexer.h \
  ../include/Scintilla.h ../lexlib/StringCopy.h ../src/Position.h \
  ../src/UniqueString.h ../src/SplitVector.h ../src/Partitioning.h \
  ../src/RunStyles.h ../src/ContractionState.h ../src/CellBuffer.h \
- ../src/KeyMap.h ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h \
- ../src/Style.h ../src/ViewStyle.h ../src/CharClassify.h \
- ../src/Decoration.h ../src/CaseFolder.h ../src/Document.h \
- ../src/UniConversion.h ../src/Selection.h ../src/PositionCache.h \
- ../src/EditModel.h
+ ../src/KeyMap.h ../src/Indicator.h ../src/LineMarker.h ../src/Style.h \
+ ../src/ViewStyle.h ../src/CharClassify.h ../src/Decoration.h \
+ ../src/CaseFolder.h ../src/Document.h ../src/UniConversion.h \
+ ../src/Selection.h ../src/PositionCache.h ../src/EditModel.h
 Editor.o: ../src/Editor.cxx ../include/Platform.h ../include/ILoader.h \
  ../include/Sci_Position.h ../include/ILexer.h ../include/Scintilla.h \
  ../lexlib/StringCopy.h ../src/Position.h ../src/UniqueString.h \
  ../src/SplitVector.h ../src/Partitioning.h ../src/RunStyles.h \
  ../src/ContractionState.h ../src/CellBuffer.h ../src/PerLine.h \
- ../src/KeyMap.h ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h \
- ../src/Style.h ../src/ViewStyle.h ../src/CharClassify.h \
- ../src/Decoration.h ../src/CaseFolder.h ../src/Document.h \
- ../src/UniConversion.h ../src/Selection.h ../src/PositionCache.h \
- ../src/EditModel.h ../src/MarginView.h ../src/EditView.h ../src/Editor.h
+ ../src/KeyMap.h ../src/Indicator.h ../src/LineMarker.h ../src/Style.h \
+ ../src/ViewStyle.h ../src/CharClassify.h ../src/Decoration.h \
+ ../src/CaseFolder.h ../src/Document.h ../src/UniConversion.h \
+ ../src/Selection.h ../src/PositionCache.h ../src/EditModel.h \
+ ../src/MarginView.h ../src/EditView.h ../src/Editor.h
 EditView.o: ../src/EditView.cxx ../include/Platform.h \
  ../include/ILoader.h ../include/Sci_Position.h ../include/ILexer.h \
  ../include/Scintilla.h ../lexlib/StringCopy.h ../lexlib/CharacterSet.h \
  ../src/Position.h ../src/UniqueString.h ../src/SplitVector.h \
  ../src/Partitioning.h ../src/RunStyles.h ../src/ContractionState.h \
  ../src/CellBuffer.h ../src/PerLine.h ../src/KeyMap.h ../src/Indicator.h \
- ../src/XPM.h ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
+ ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
  ../src/CharClassify.h ../src/Decoration.h ../src/CaseFolder.h \
  ../src/Document.h ../src/UniConversion.h ../src/Selection.h \
  ../src/PositionCache.h ../src/EditModel.h ../src/MarginView.h \
@@ -113,11 +112,11 @@ MarginView.o: ../src/MarginView.cxx ../include/Platform.h \
  ../include/Scintilla.h ../lexlib/StringCopy.h ../src/Position.h \
  ../src/UniqueString.h ../src/SplitVector.h ../src/Partitioning.h \
  ../src/RunStyles.h ../src/ContractionState.h ../src/CellBuffer.h \
- ../src/KeyMap.h ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h \
- ../src/Style.h ../src/ViewStyle.h ../src/CharClassify.h \
- ../src/Decoration.h ../src/CaseFolder.h ../src/Document.h \
- ../src/UniConversion.h ../src/Selection.h ../src/PositionCache.h \
- ../src/EditModel.h ../src/MarginView.h ../src/EditView.h
+ ../src/KeyMap.h ../src/Indicator.h ../src/LineMarker.h ../src/Style.h \
+ ../src/ViewStyle.h ../src/CharClassify.h ../src/Decoration.h \
+ ../src/CaseFolder.h ../src/Document.h ../src/UniConversion.h \
+ ../src/Selection.h ../src/PositionCache.h ../src/EditModel.h \
+ ../src/MarginView.h ../src/EditView.h
 PerLine.o: ../src/PerLine.cxx ../include/Platform.h \
  ../include/Scintilla.h ../include/Sci_Position.h ../src/Position.h \
  ../src/SplitVector.h ../src/Partitioning.h ../src/CellBuffer.h \
@@ -127,10 +126,10 @@ PositionCache.o: ../src/PositionCache.cxx ../include/Platform.h \
  ../include/Scintilla.h ../src/Position.h ../src/UniqueString.h \
  ../src/SplitVector.h ../src/Partitioning.h ../src/RunStyles.h \
  ../src/ContractionState.h ../src/CellBuffer.h ../src/KeyMap.h \
- ../src/Indicator.h ../src/XPM.h ../src/LineMarker.h ../src/Style.h \
- ../src/ViewStyle.h ../src/CharClassify.h ../src/Decoration.h \
- ../src/CaseFolder.h ../src/Document.h ../src/UniConversion.h \
- ../src/Selection.h ../src/PositionCache.h
+ ../src/Indicator.h ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
+ ../src/CharClassify.h ../src/Decoration.h ../src/CaseFolder.h \
+ ../src/Document.h ../src/UniConversion.h ../src/Selection.h \
+ ../src/PositionCache.h
 RESearch.o: ../src/RESearch.cxx ../src/Position.h ../src/CharClassify.h \
  ../src/RESearch.h
 RunStyles.o: ../src/RunStyles.cxx ../include/Platform.h \
@@ -142,11 +141,11 @@ ScintillaBase.o: ../src/ScintillaBase.cxx ../include/Platform.h \
  ../lexlib/LexerModule.h ../src/Catalogue.h ../src/Position.h \
  ../src/UniqueString.h ../src/SplitVector.h ../src/Partitioning.h \
  ../src/RunStyles.h ../src/ContractionState.h ../src/CellBuffer.h \
- ../src/CallTip.h ../src/KeyMap.h ../src/Indicator.h ../src/XPM.h \
- ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
- ../src/CharClassify.h ../src/Decoration.h ../src/CaseFolder.h \
- ../src/Document.h ../src/Selection.h ../src/PositionCache.h \
- ../src/EditModel.h ../src/MarginView.h ../src/EditView.h ../src/Editor.h \
+ ../src/CallTip.h ../src/KeyMap.h ../src/Indicator.h ../src/LineMarker.h \
+ ../src/Style.h ../src/ViewStyle.h ../src/CharClassify.h \
+ ../src/Decoration.h ../src/CaseFolder.h ../src/Document.h \
+ ../src/Selection.h ../src/PositionCache.h ../src/EditModel.h \
+ ../src/MarginView.h ../src/EditView.h ../src/Editor.h \
  ../src/AutoComplete.h ../src/ScintillaBase.h
 Selection.o: ../src/Selection.cxx ../include/Platform.h \
  ../include/Scintilla.h ../include/Sci_Position.h ../src/Position.h \

@@ -75,6 +75,33 @@ TEST_CASE("UTF16Length") {
 
 TEST_CASE("UniConversion") {
 
+	// UnicodeFromUTF8
+
+	SECTION("UnicodeFromUTF8 ASCII") {
+		const unsigned char s[]={'a', 0};
+		REQUIRE(UnicodeFromUTF8(s) == 'a');
+	}
+
+	SECTION("UnicodeFromUTF8 Example1") {
+		const unsigned char s[]={0x24, 0};
+		REQUIRE(UnicodeFromUTF8(s) == 0x24);
+	}
+
+	SECTION("UnicodeFromUTF8 Example2") {
+		const unsigned char s[]={0xC2, 0xA2, 0};
+		REQUIRE(UnicodeFromUTF8(s) == 0xA2);
+	}
+
+	SECTION("UnicodeFromUTF8 Example3") {
+		const unsigned char s[]={0xE2, 0x82, 0xAC, 0};
+		REQUIRE(UnicodeFromUTF8(s) == 0x20AC);
+	}
+
+	SECTION("UnicodeFromUTF8 Example4") {
+		const unsigned char s[]={0xF0, 0x90, 0x8D, 0x88, 0};
+		REQUIRE(UnicodeFromUTF8(s) == 0x10348);
+	}
+
 	// UTF16FromUTF8
 
 	SECTION("UTF16FromUTF8 ASCII") {
