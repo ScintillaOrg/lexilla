@@ -39,7 +39,7 @@ CallTip.o: ../src/CallTip.cxx ../include/Platform.h \
 CaseConvert.o: ../src/CaseConvert.cxx ../lexlib/StringCopy.h \
  ../src/CaseConvert.h ../src/UniConversion.h
 CaseFolder.o: ../src/CaseFolder.cxx ../src/CaseFolder.h \
- ../src/CaseConvert.h ../src/UniConversion.h
+ ../src/CaseConvert.h
 Catalogue.o: ../src/Catalogue.cxx ../include/ILexer.h \
  ../include/Sci_Position.h ../include/Scintilla.h ../include/SciLexer.h \
  ../lexlib/LexerModule.h ../src/Catalogue.h

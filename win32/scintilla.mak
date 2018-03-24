@@ -324,8 +324,7 @@ $(DIR_O)\CaseConvert.obj: \
 $(DIR_O)\CaseFolder.obj: \
 	../src/CaseFolder.cxx \
 	../src/CaseFolder.h \
-	../src/CaseConvert.h \
-	../src/UniConversion.h
+	../src/CaseConvert.h
 $(DIR_O)\Catalogue.obj: \
 	../src/Catalogue.cxx \
 	../include/ILexer.h \
