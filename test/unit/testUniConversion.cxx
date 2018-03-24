@@ -257,8 +257,8 @@ int UTFClass(const char *s) {
 
 TEST_CASE("UTF8Classify") {
 
-	// These tests are supposed to hit every return statement in UTF8Classify once in order
-	// except the last which is hit twice.
+	// These tests are supposed to hit every return statement in UTF8Classify in order
+	// with some hit multiple times.
 
 	// Single byte
 
@@ -268,34 +268,45 @@ TEST_CASE("UTF8Classify") {
 	SECTION("UTF8Classify Invalid Too large lead") {
 		REQUIRE(UTFClass("\xF5") == (1|UTF8MaskInvalid));
 	}
+	SECTION("UTF8Classify Overlong") {
+		REQUIRE(UTFClass("\xC0\x80") == (1 | UTF8MaskInvalid));
+	}
+	SECTION("UTF8Classify single trail byte") {
+		REQUIRE(UTFClass("\x80") == (1 | UTF8MaskInvalid));
+	}
 
-	// 4 byte lead
+	// Invalid length tests
 
+	SECTION("UTF8Classify 2 byte lead, string less than 2 long") {
+		REQUIRE(UTFClass("\xD0") == (1 | UTF8MaskInvalid));
+	}
+	SECTION("UTF8Classify 3 byte lead, string less than 3 long") {
+		REQUIRE(UTFClass("\xEF") == (1 | UTF8MaskInvalid));
+	}
 	SECTION("UTF8Classify 4 byte lead, string less than 4 long") {
 		REQUIRE(UTFClass("\xF0") == (1 | UTF8MaskInvalid));
 	}
-	SECTION("UTF8Classify 1FFFF non-character") {
-		REQUIRE(UTFClass("\xF0\x9F\xBF\xBF") == (4 | UTF8MaskInvalid));
+
+	// Invalid first trail byte tests
+
+	SECTION("UTF8Classify 2 byte lead trail is invalid") {
+		REQUIRE(UTFClass("\xD0q") == (1 | UTF8MaskInvalid));
 	}
-	SECTION("UTF8Classify 1 Greater than max Unicode 110000") {
-		// Maximum Unicode value is 10FFFF so 110000 is out of range
-		REQUIRE(UTFClass("\xF4\x90\x80\x80") == (1 | UTF8MaskInvalid));
-	}
-	SECTION("UTF8Classify 4 byte overlong") {
-		REQUIRE(UTFClass("\xF0\x80\x80\x80") == (1 | UTF8MaskInvalid));
-	}
-	SECTION("UTF8Classify 4 byte valid character") {
-		REQUIRE(UTFClass("\xF0\x9F\x8C\x90") == 4);
+	SECTION("UTF8Classify 3 byte lead invalid trails") {
+		REQUIRE(UTFClass("\xE2qq") == (1 | UTF8MaskInvalid));
 	}
 	SECTION("UTF8Classify 4 byte bad trails") {
 		REQUIRE(UTFClass("\xF0xyz") == (1 | UTF8MaskInvalid));
 	}
 
+	// 2 byte lead
+
+	SECTION("UTF8Classify 2 byte valid character") {
+		REQUIRE(UTFClass("\xD0\x80") == 2);
+	}
+
 	// 3 byte lead
 
-	SECTION("UTF8Classify 3 byte lead, string less than 3 long") {
-		REQUIRE(UTFClass("\xEF") == (1 | UTF8MaskInvalid));
-	}
 	SECTION("UTF8Classify 3 byte lead, overlong") {
 		REQUIRE(UTFClass("\xE0\x80\xAF") == (1 | UTF8MaskInvalid));
 	}
@@ -314,25 +325,31 @@ TEST_CASE("UTF8Classify") {
 	SECTION("UTF8Classify 3 byte valid character") {
 		REQUIRE(UTFClass("\xE2\x82\xAC") == 3);
 	}
-	SECTION("UTF8Classify 3 byte bad trails") {
-		REQUIRE(UTFClass("\xE2qq") == (1 | UTF8MaskInvalid));
+
+	// 4 byte lead
+
+	SECTION("UTF8Classify 1FFFF non-character") {
+		REQUIRE(UTFClass("\xF0\x9F\xBF\xBF") == (4 | UTF8MaskInvalid));
+	}
+	SECTION("UTF8Classify 1 Greater than max Unicode 110000") {
+		// Maximum Unicode value is 10FFFF so 110000 is out of range
+		REQUIRE(UTFClass("\xF4\x90\x80\x80") == (1 | UTF8MaskInvalid));
+	}
+	SECTION("UTF8Classify 4 byte overlong") {
+		REQUIRE(UTFClass("\xF0\x80\x80\x80") == (1 | UTF8MaskInvalid));
+	}
+	SECTION("UTF8Classify 4 byte valid character") {
+		REQUIRE(UTFClass("\xF0\x9F\x8C\x90") == 4);
 	}
 
-	// 2 byte lead
-
-	SECTION("UTF8Classify 2 byte lead, string less than 2 long") {
-		REQUIRE(UTFClass("\xD0") == (1 | UTF8MaskInvalid));
+	// Invalid 2nd or 3rd continuation bytes
+	SECTION("UTF8Classify 3 byte lead invalid 2nd trail") {
+		REQUIRE(UTFClass("\xE2\x82q") == (1 | UTF8MaskInvalid));
 	}
-	SECTION("UTF8Classify 2 byte valid character") {
-		REQUIRE(UTFClass("\xD0\x80") == 2);
+	SECTION("UTF8Classify 4 byte lead invalid 2nd trail") {
+		REQUIRE(UTFClass("\xF0\x9Fq\x9F") == (1 | UTF8MaskInvalid));
 	}
-	SECTION("UTF8Classify 2 byte lead trail is invalid") {
-		REQUIRE(UTFClass("\xD0q") == (1 | UTF8MaskInvalid));
-	}
-	SECTION("UTF8Classify Overlong") {
-		REQUIRE(UTFClass("\xC0") == (1 | UTF8MaskInvalid));
-	}
-	SECTION("UTF8Classify single trail byte") {
-		REQUIRE(UTFClass("\x80") == (1 | UTF8MaskInvalid));
+	SECTION("UTF8Classify 4 byte lead invalid 3rd trail") {
+		REQUIRE(UTFClass("\xF0\x9F\x9Fq") == (1 | UTF8MaskInvalid));
 	}
 }
