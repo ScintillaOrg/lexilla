@@ -275,14 +275,6 @@ int UTF8Classify(const unsigned char *us, int len) {
 				// Check if encoding a value beyond the last Unicode character 10FFFF
 				if (us[1] > 0x8f) {
 					return UTF8MaskInvalid | 1;
-				} else if (us[1] == 0x8f) {
-					if (us[2] > 0xbf) {
-						return UTF8MaskInvalid | 1;
-					} else if (us[2] == 0xbf) {
-						if (us[3] > 0xbf) {
-							return UTF8MaskInvalid | 1;
-						}
-					}
 				}
 			} else if ((*us == 0xf0) && ((us[1] & 0xf0) == 0x80)) {
 				// Overlong
