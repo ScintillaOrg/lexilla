@@ -26,7 +26,7 @@ using namespace Scintilla;
 
 TEST_CASE("Decoration") {
 
-	std::unique_ptr<IDecoration> deco = DecorationCreate(indicator);
+	std::unique_ptr<IDecoration> deco = DecorationCreate(false, indicator);
 
 	SECTION("HasCorrectIndicator") {
 		REQUIRE(indicator == deco->Indicator());
@@ -54,7 +54,7 @@ TEST_CASE("Decoration") {
 
 TEST_CASE("DecorationList") {
 
-	std::unique_ptr<IDecorationList> decol = DecorationListCreate();
+	std::unique_ptr<IDecorationList> decol = DecorationListCreate(false);
 
 	SECTION("HasCorrectIndicator") {
 		decol->SetCurrentIndicator(indicator);

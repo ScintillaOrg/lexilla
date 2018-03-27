@@ -113,7 +113,7 @@ Document::Document(int options) :
 	perLineData[ldMargin] = std::make_unique<LineAnnotation>();
 	perLineData[ldAnnotation] = std::make_unique<LineAnnotation>();
 
-	decorations = DecorationListCreate();
+	decorations = DecorationListCreate(false);
 
 	cb.SetPerLine(this);
 }
