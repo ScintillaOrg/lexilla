@@ -26,7 +26,69 @@
 
 using namespace Scintilla;
 
-ContractionState::ContractionState() : linesInDocument(1) {
+namespace {
+
+class ContractionState final : public IContractionState {
+	// These contain 1 element for every document line.
+	std::unique_ptr<RunStyles<Sci::Line, char>> visible;
+	std::unique_ptr<RunStyles<Sci::Line, char>> expanded;
+	std::unique_ptr<RunStyles<Sci::Line, int>> heights;
+	std::unique_ptr<SparseVector<UniqueString>> foldDisplayTexts;
+	std::unique_ptr<Partitioning<Sci::Line>> displayLines;
+	Sci::Line linesInDocument;
+
+	void EnsureData();
+
+	bool OneToOne() const noexcept {
+		// True when each document line is exactly one display line so need for
+		// complex data structures.
+		return visible == nullptr;
+	}
+
+	void InsertLine(Sci::Line lineDoc);
+	void DeleteLine(Sci::Line lineDoc);
+
+public:
+	ContractionState() noexcept;
+	// Deleted so ContractionState objects can not be copied.
+	ContractionState(const ContractionState &) = delete;
+	void operator=(const ContractionState &) = delete;
+	ContractionState(ContractionState &&) = delete;
+	void operator=(ContractionState &&) = delete;
+	~ContractionState();
+
+	void Clear() noexcept override;
+
+	Sci::Line LinesInDoc() const override;
+	Sci::Line LinesDisplayed() const override;
+	Sci::Line DisplayFromDoc(Sci::Line lineDoc) const override;
+	Sci::Line DisplayLastFromDoc(Sci::Line lineDoc) const override;
+	Sci::Line DocFromDisplay(Sci::Line lineDisplay) const override;
+
+	void InsertLines(Sci::Line lineDoc, Sci::Line lineCount) override;
+	void DeleteLines(Sci::Line lineDoc, Sci::Line lineCount) override;
+
+	bool GetVisible(Sci::Line lineDoc) const override;
+	bool SetVisible(Sci::Line lineDocStart, Sci::Line lineDocEnd, bool isVisible) override;
+	bool HiddenLines() const override;
+
+	const char *GetFoldDisplayText(Sci::Line lineDoc) const override;
+	bool GetFoldDisplayTextShown(Sci::Line lineDoc) const override;
+	bool SetFoldDisplayText(Sci::Line lineDoc, const char *text) override;
+
+	bool GetExpanded(Sci::Line lineDoc) const override;
+	bool SetExpanded(Sci::Line lineDoc, bool isExpanded) override;
+	Sci::Line ContractedNext(Sci::Line lineDocStart) const override;
+
+	int GetHeight(Sci::Line lineDoc) const override;
+	bool SetHeight(Sci::Line lineDoc, int height) override;
+
+	void ShowAll() override;
+
+	void Check() const;
+};
+
+ContractionState::ContractionState() noexcept : linesInDocument(1) {
 }
 
 ContractionState::~ContractionState() {
@@ -44,7 +106,40 @@ void ContractionState::EnsureData() {
 	}
 }
 
-void ContractionState::Clear() {
+void ContractionState::InsertLine(Sci::Line lineDoc) {
+	if (OneToOne()) {
+		linesInDocument++;
+	} else {
+		visible->InsertSpace(lineDoc, 1);
+		visible->SetValueAt(lineDoc, 1);
+		expanded->InsertSpace(lineDoc, 1);
+		expanded->SetValueAt(lineDoc, 1);
+		heights->InsertSpace(lineDoc, 1);
+		heights->SetValueAt(lineDoc, 1);
+		foldDisplayTexts->InsertSpace(lineDoc, 1);
+		foldDisplayTexts->SetValueAt(lineDoc, nullptr);
+		const Sci::Line lineDisplay = DisplayFromDoc(lineDoc);
+		displayLines->InsertPartition(lineDoc, lineDisplay);
+		displayLines->InsertText(lineDoc, 1);
+	}
+}
+
+void ContractionState::DeleteLine(Sci::Line lineDoc) {
+	if (OneToOne()) {
+		linesInDocument--;
+	} else {
+		if (GetVisible(lineDoc)) {
+			displayLines->InsertText(lineDoc, -heights->ValueAt(lineDoc));
+		}
+		displayLines->RemovePartition(lineDoc);
+		visible->DeleteRange(lineDoc, 1);
+		expanded->DeleteRange(lineDoc, 1);
+		heights->DeleteRange(lineDoc, 1);
+		foldDisplayTexts->DeletePosition(lineDoc);
+	}
+}
+
+void ContractionState::Clear() noexcept {
 	visible.reset();
 	expanded.reset();
 	heights.reset();
@@ -99,44 +194,11 @@ Sci::Line ContractionState::DocFromDisplay(Sci::Line lineDisplay) const {
 	}
 }
 
-void ContractionState::InsertLine(Sci::Line lineDoc) {
-	if (OneToOne()) {
-		linesInDocument++;
-	} else {
-		visible->InsertSpace(lineDoc, 1);
-		visible->SetValueAt(lineDoc, 1);
-		expanded->InsertSpace(lineDoc, 1);
-		expanded->SetValueAt(lineDoc, 1);
-		heights->InsertSpace(lineDoc, 1);
-		heights->SetValueAt(lineDoc, 1);
-		foldDisplayTexts->InsertSpace(lineDoc, 1);
-		foldDisplayTexts->SetValueAt(lineDoc, nullptr);
-		const Sci::Line lineDisplay = DisplayFromDoc(lineDoc);
-		displayLines->InsertPartition(lineDoc, lineDisplay);
-		displayLines->InsertText(lineDoc, 1);
-	}
-}
-
 void ContractionState::InsertLines(Sci::Line lineDoc, Sci::Line lineCount) {
 	for (int l = 0; l < lineCount; l++) {
 		InsertLine(lineDoc + l);
 	}
 	Check();
-}
-
-void ContractionState::DeleteLine(Sci::Line lineDoc) {
-	if (OneToOne()) {
-		linesInDocument--;
-	} else {
-		if (GetVisible(lineDoc)) {
-			displayLines->InsertText(lineDoc, -heights->ValueAt(lineDoc));
-		}
-		displayLines->RemovePartition(lineDoc);
-		visible->DeleteRange(lineDoc, 1);
-		expanded->DeleteRange(lineDoc, 1);
-		heights->DeleteRange(lineDoc, 1);
-		foldDisplayTexts->DeletePosition(lineDoc);
-	}
 }
 
 void ContractionState::DeleteLines(Sci::Line lineDoc, Sci::Line lineCount) {
@@ -193,6 +255,10 @@ const char *ContractionState::GetFoldDisplayText(Sci::Line lineDoc) const {
 	return foldDisplayTexts->ValueAt(lineDoc).get();
 }
 
+bool ContractionState::GetFoldDisplayTextShown(Sci::Line lineDoc) const {
+	return !GetExpanded(lineDoc) && GetFoldDisplayText(lineDoc);
+}
+
 bool ContractionState::SetFoldDisplayText(Sci::Line lineDoc, const char *text) {
 	EnsureData();
 	const char *foldText = foldDisplayTexts->ValueAt(lineDoc).get();
@@ -229,10 +295,6 @@ bool ContractionState::SetExpanded(Sci::Line lineDoc, bool isExpanded) {
 			return false;
 		}
 	}
-}
-
-bool ContractionState::GetFoldDisplayTextShown(Sci::Line lineDoc) const {
-	return !GetExpanded(lineDoc) && GetFoldDisplayText(lineDoc);
 }
 
 Sci::Line ContractionState::ContractedNext(Sci::Line lineDocStart) const {
@@ -309,4 +371,14 @@ void ContractionState::Check() const {
 		}
 	}
 #endif
+}
+
+}
+
+namespace Scintilla {
+
+std::unique_ptr<IContractionState> ContractionStateCreate() {
+	return std::make_unique<ContractionState>();
+}
+
 }

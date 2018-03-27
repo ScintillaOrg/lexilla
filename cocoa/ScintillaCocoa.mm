@@ -1188,8 +1188,8 @@ void ScintillaCocoa::DragScroll() {
 
 	// TODO: does not work for wrapped lines, fix it.
 	Sci::Line line = static_cast<Sci::Line>(pdoc->LineFromPosition(posDrag.Position()));
-	Sci::Line currentVisibleLine = cs.DisplayFromDoc(line);
-	Sci::Line lastVisibleLine = std::min(topLine + LinesOnScreen(), cs.LinesDisplayed()) - 2;
+	Sci::Line currentVisibleLine = pcs->DisplayFromDoc(line);
+	Sci::Line lastVisibleLine = std::min(topLine + LinesOnScreen(), pcs->LinesDisplayed()) - 2;
 
 	if (currentVisibleLine <= topLine && topLine > 0)
 		ScrollTo(topLine - scrollSpeed);
@@ -1853,7 +1853,7 @@ bool ScintillaCocoa::SetScrollingSize(void) {
 		NSScrollView *scrollView = ScrollContainer();
 		NSClipView *clipView = ScrollContainer().contentView;
 		NSRect clipRect = clipView.bounds;
-		CGFloat docHeight = cs.LinesDisplayed() * vs.lineHeight;
+		CGFloat docHeight = pcs->LinesDisplayed() * vs.lineHeight;
 		if (!endAtLastLine)
 			docHeight += (int(scrollView.bounds.size.height / vs.lineHeight)-3) * vs.lineHeight;
 		// Allow extra space so that last scroll position places whole line at top

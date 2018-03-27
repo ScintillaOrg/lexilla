@@ -229,9 +229,9 @@ void MarginView::PaintMargin(Surface *surface, Sci::Line topLine, PRectangle rc,
 			// be displayed until the last of a sequence of whitespace.
 			bool needWhiteClosure = false;
 			if (vs.ms[margin].mask & SC_MASK_FOLDERS) {
-				const int level = model.pdoc->GetLevel(model.cs.DocFromDisplay(visibleLine));
+				const int level = model.pdoc->GetLevel(model.pcs->DocFromDisplay(visibleLine));
 				if (level & SC_FOLDLEVELWHITEFLAG) {
-					Sci::Line lineBack = model.cs.DocFromDisplay(visibleLine);
+					Sci::Line lineBack = model.pcs->DocFromDisplay(visibleLine);
 					int levelPrev = level;
 					while ((lineBack > 0) && (levelPrev & SC_FOLDLEVELWHITEFLAG)) {
 						lineBack--;
@@ -243,7 +243,7 @@ void MarginView::PaintMargin(Surface *surface, Sci::Line topLine, PRectangle rc,
 					}
 				}
 				if (highlightDelimiter.isEnabled) {
-					const Sci::Line lastLine = model.cs.DocFromDisplay(topLine + model.LinesOnScreen()) + 1;
+					const Sci::Line lastLine = model.pcs->DocFromDisplay(topLine + model.LinesOnScreen()) + 1;
 					model.pdoc->GetHighlightDelimiters(highlightDelimiter,
 						static_cast<Sci::Line>(model.pdoc->LineFromPosition(model.sel.MainCaret())), lastLine);
 				}
@@ -255,13 +255,13 @@ void MarginView::PaintMargin(Surface *surface, Sci::Line topLine, PRectangle rc,
 			const int folderEnd = SubstituteMarkerIfEmpty(SC_MARKNUM_FOLDEREND,
 				SC_MARKNUM_FOLDER, vs);
 
-			while ((visibleLine < model.cs.LinesDisplayed()) && yposScreen < rc.bottom) {
+			while ((visibleLine < model.pcs->LinesDisplayed()) && yposScreen < rc.bottom) {
 
-				PLATFORM_ASSERT(visibleLine < model.cs.LinesDisplayed());
-				const Sci::Line lineDoc = model.cs.DocFromDisplay(visibleLine);
-				PLATFORM_ASSERT(model.cs.GetVisible(lineDoc));
-				const Sci::Line firstVisibleLine = model.cs.DisplayFromDoc(lineDoc);
-				const Sci::Line lastVisibleLine = model.cs.DisplayLastFromDoc(lineDoc);
+				PLATFORM_ASSERT(visibleLine < model.pcs->LinesDisplayed());
+				const Sci::Line lineDoc = model.pcs->DocFromDisplay(visibleLine);
+				PLATFORM_ASSERT(model.pcs->GetVisible(lineDoc));
+				const Sci::Line firstVisibleLine = model.pcs->DisplayFromDoc(lineDoc);
+				const Sci::Line lastVisibleLine = model.pcs->DisplayLastFromDoc(lineDoc);
 				const bool firstSubLine = visibleLine == firstVisibleLine;
 				const bool lastSubLine = visibleLine == lastVisibleLine;
 
@@ -280,7 +280,7 @@ void MarginView::PaintMargin(Surface *surface, Sci::Line topLine, PRectangle rc,
 					if (level & SC_FOLDLEVELHEADERFLAG) {
 						if (firstSubLine) {
 							if (levelNum < levelNextNum) {
-								if (model.cs.GetExpanded(lineDoc)) {
+								if (model.pcs->GetExpanded(lineDoc)) {
 									if (levelNum == SC_FOLDLEVELBASE)
 										marks |= 1 << SC_MARKNUM_FOLDEROPEN;
 									else
@@ -296,7 +296,7 @@ void MarginView::PaintMargin(Surface *surface, Sci::Line topLine, PRectangle rc,
 							}
 						} else {
 							if (levelNum < levelNextNum) {
-								if (model.cs.GetExpanded(lineDoc)) {
+								if (model.pcs->GetExpanded(lineDoc)) {
 									marks |= 1 << SC_MARKNUM_FOLDERSUB;
 								} else if (levelNum > SC_FOLDLEVELBASE) {
 									marks |= 1 << SC_MARKNUM_FOLDERSUB;
@@ -306,10 +306,10 @@ void MarginView::PaintMargin(Surface *surface, Sci::Line topLine, PRectangle rc,
 							}
 						}
 						needWhiteClosure = false;
-						const Sci::Line firstFollowupLine = model.cs.DocFromDisplay(model.cs.DisplayFromDoc(lineDoc + 1));
+						const Sci::Line firstFollowupLine = model.pcs->DocFromDisplay(model.pcs->DisplayFromDoc(lineDoc + 1));
 						const int firstFollowupLineLevel = model.pdoc->GetLevel(firstFollowupLine);
 						const int secondFollowupLineLevelNum = LevelNumber(model.pdoc->GetLevel(firstFollowupLine + 1));
-						if (!model.cs.GetExpanded(lineDoc)) {
+						if (!model.pcs->GetExpanded(lineDoc)) {
 							if ((firstFollowupLineLevel & SC_FOLDLEVELWHITEFLAG) &&
 								(levelNum > secondFollowupLineLevelNum))
 								needWhiteClosure = true;
@@ -434,7 +434,7 @@ void MarginView::PaintMargin(Surface *surface, Sci::Line topLine, PRectangle rc,
 									if (firstSubLine) {
 										tFold = headWithTail ? LineMarker::headWithTail : LineMarker::head;
 									} else {
-										if (model.cs.GetExpanded(lineDoc) || headWithTail) {
+										if (model.pcs->GetExpanded(lineDoc) || headWithTail) {
 											tFold = LineMarker::body;
 										} else {
 											tFold = LineMarker::undefined;
