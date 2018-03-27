@@ -2109,7 +2109,7 @@ void Editor::ClearAll() {
 }
 
 void Editor::ClearDocumentStyle() {
-	pdoc->decorations.DeleteLexerDecorations();
+	pdoc->decorations->DeleteLexerDecorations();
 	pdoc->StartStyling(0);
 	pdoc->SetStyleFor(pdoc->Length(), 0);
 	pcs->ShowAll();
@@ -2394,10 +2394,10 @@ void Editor::NotifyPainted() {
 }
 
 void Editor::NotifyIndicatorClick(bool click, Sci::Position position, int modifiers) {
-	const int mask = pdoc->decorations.AllOnFor(position);
-	if ((click && mask) || pdoc->decorations.ClickNotified()) {
+	const int mask = pdoc->decorations->AllOnFor(position);
+	if ((click && mask) || pdoc->decorations->ClickNotified()) {
 		SCNotification scn = {};
-		pdoc->decorations.SetClickNotified(click);
+		pdoc->decorations->SetClickNotified(click);
 		scn.nmhdr.code = click ? SCN_INDICATORCLICK : SCN_INDICATORRELEASE;
 		scn.modifiers = modifiers;
 		scn.position = position;
@@ -4671,9 +4671,9 @@ void Editor::SetHoverIndicatorPosition(Sci::Position position) {
 	if (!vs.indicatorsDynamic)
 		return;
 	if (position != INVALID_POSITION) {
-		for (const Decoration *deco : pdoc->decorations.View()) {
+		for (const IDecoration *deco : pdoc->decorations->View()) {
 			if (vs.indicators[deco->Indicator()].IsDynamic()) {
-				if (pdoc->decorations.ValueAt(deco->Indicator(), position)) {
+				if (pdoc->decorations->ValueAt(deco->Indicator(), position)) {
 					hoverIndicatorPos = position;
 				}
 			}
@@ -7383,15 +7383,15 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		pdoc->DecorationSetCurrentIndicator(static_cast<int>(wParam));
 		break;
 	case SCI_GETINDICATORCURRENT:
-		return pdoc->decorations.GetCurrentIndicator();
+		return pdoc->decorations->GetCurrentIndicator();
 	case SCI_SETINDICATORVALUE:
-		pdoc->decorations.SetCurrentValue(static_cast<int>(wParam));
+		pdoc->decorations->SetCurrentValue(static_cast<int>(wParam));
 		break;
 	case SCI_GETINDICATORVALUE:
-		return pdoc->decorations.GetCurrentValue();
+		return pdoc->decorations->GetCurrentValue();
 
 	case SCI_INDICATORFILLRANGE:
-		pdoc->DecorationFillRange(static_cast<int>(wParam), pdoc->decorations.GetCurrentValue(), static_cast<int>(lParam));
+		pdoc->DecorationFillRange(static_cast<int>(wParam), pdoc->decorations->GetCurrentValue(), static_cast<int>(lParam));
 		break;
 
 	case SCI_INDICATORCLEARRANGE:
@@ -7399,16 +7399,16 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_INDICATORALLONFOR:
-		return pdoc->decorations.AllOnFor(static_cast<int>(wParam));
+		return pdoc->decorations->AllOnFor(static_cast<int>(wParam));
 
 	case SCI_INDICATORVALUEAT:
-		return pdoc->decorations.ValueAt(static_cast<int>(wParam), static_cast<int>(lParam));
+		return pdoc->decorations->ValueAt(static_cast<int>(wParam), static_cast<int>(lParam));
 
 	case SCI_INDICATORSTART:
-		return pdoc->decorations.Start(static_cast<int>(wParam), static_cast<int>(lParam));
+		return pdoc->decorations->Start(static_cast<int>(wParam), static_cast<int>(lParam));
 
 	case SCI_INDICATOREND:
-		return pdoc->decorations.End(static_cast<int>(wParam), static_cast<int>(lParam));
+		return pdoc->decorations->End(static_cast<int>(wParam), static_cast<int>(lParam));
 
 	case SCI_LINEDOWN:
 	case SCI_LINEDOWNEXTEND:

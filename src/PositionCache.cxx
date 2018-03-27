@@ -470,12 +470,12 @@ BreakFinder::BreakFinder(const LineLayout *ll_, const Selection *psel, Range lin
 		}
 	}
 	if (pvsDraw && pvsDraw->indicatorsSetFore) {
-		for (const Decoration *deco : pdoc->decorations.View()) {
+		for (const IDecoration *deco : pdoc->decorations->View()) {
 			if (pvsDraw->indicators[deco->Indicator()].OverridesTextFore()) {
-				Sci::Position startPos = deco->rs.EndRun(posLineStart);
+				Sci::Position startPos = deco->EndRun(posLineStart);
 				while (startPos < (posLineStart + lineRange.end)) {
 					Insert(static_cast<int>(startPos - posLineStart));
-					startPos = deco->rs.EndRun(startPos);
+					startPos = deco->EndRun(startPos);
 				}
 			}
 		}

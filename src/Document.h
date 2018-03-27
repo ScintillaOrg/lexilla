@@ -263,7 +263,7 @@ public:
 	bool backspaceUnindents;
 	double durationStyleOneLine;
 
-	DecorationList decorations;
+	std::unique_ptr<IDecorationList> decorations;
 
 	Document(int options);
 	// Deleted so Document objects can not be copied.

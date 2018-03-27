@@ -121,6 +121,8 @@ Document::Document(int options) :
 	perLineData[ldMargin] = std::make_unique<LineAnnotation>();
 	perLineData[ldAnnotation] = std::make_unique<LineAnnotation>();
 
+	decorations = DecorationListCreate();
+
 	cb.SetPerLine(this);
 }
 
@@ -2239,11 +2241,11 @@ void Document::IncrementStyleClock() {
 }
 
 void SCI_METHOD Document::DecorationSetCurrentIndicator(int indicator) {
-	decorations.SetCurrentIndicator(indicator);
+	decorations->SetCurrentIndicator(indicator);
 }
 
 void SCI_METHOD Document::DecorationFillRange(Sci_Position position, int value, Sci_Position fillLength) {
-	const FillResult<Sci::Position> fr = decorations.FillRange(
+	const FillResult<Sci::Position> fr = decorations->FillRange(
 		static_cast<Sci::Position>(position), value, static_cast<Sci::Position>(fillLength));
 	if (fr.changed) {
 		const DocModification mh(SC_MOD_CHANGEINDICATOR | SC_PERFORMED_USER,
@@ -2286,9 +2288,9 @@ void Document::NotifySavePoint(bool atSavePoint) {
 
 void Document::NotifyModified(DocModification mh) {
 	if (mh.modificationType & SC_MOD_INSERTTEXT) {
-		decorations.InsertSpace(mh.position, mh.length);
+		decorations->InsertSpace(mh.position, mh.length);
 	} else if (mh.modificationType & SC_MOD_DELETETEXT) {
-		decorations.DeleteRange(mh.position, mh.length);
+		decorations->DeleteRange(mh.position, mh.length);
 	}
 	for (const WatcherWithUserData &watcher : watchers) {
 		watcher.watcher->NotifyModified(this, mh, watcher.userData);
