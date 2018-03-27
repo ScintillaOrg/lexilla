@@ -2243,11 +2243,11 @@ void SCI_METHOD Document::DecorationSetCurrentIndicator(int indicator) {
 }
 
 void SCI_METHOD Document::DecorationFillRange(Sci_Position position, int value, Sci_Position fillLength) {
-	Sci::Position sciPosition = static_cast<Sci::Position>(position);
-	Sci::Position sciFillLength = static_cast<Sci::Position>(fillLength);
-	if (decorations.FillRange(sciPosition, value, sciFillLength)) {
+	const FillResult<Sci::Position> fr = decorations.FillRange(
+		static_cast<Sci::Position>(position), value, static_cast<Sci::Position>(fillLength));
+	if (fr.changed) {
 		const DocModification mh(SC_MOD_CHANGEINDICATOR | SC_PERFORMED_USER,
-							sciPosition, sciFillLength);
+							fr.position, fr.fillLength);
 		NotifyModified(mh);
 	}
 }

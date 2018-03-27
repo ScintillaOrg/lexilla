@@ -51,8 +51,8 @@ public:
 	void SetCurrentValue(int value);
 	int GetCurrentValue() const { return currentValue; }
 
-	// Returns true if some values may have changed
-	bool FillRange(Sci::Position &position, int value, Sci::Position &fillLength);
+	// Returns with changed=true if some values may have changed
+	FillResult<Sci::Position> FillRange(Sci::Position position, int value, Sci::Position fillLength);
 
 	void InsertSpace(Sci::Position position, Sci::Position insertLength);
 	void DeleteRange(Sci::Position position, Sci::Position deleteLength);

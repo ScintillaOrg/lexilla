@@ -90,18 +90,18 @@ void DecorationList::SetCurrentValue(int value) {
 	currentValue = value ? value : 1;
 }
 
-bool DecorationList::FillRange(Sci::Position &position, int value, Sci::Position &fillLength) {
+FillResult<Sci::Position> DecorationList::FillRange(Sci::Position position, int value, Sci::Position fillLength) {
 	if (!current) {
 		current = DecorationFromIndicator(currentIndicator);
 		if (!current) {
 			current = Create(currentIndicator, lengthDocument);
 		}
 	}
-	const bool changed = current->rs.FillRange(position, value, fillLength);
+	const FillResult<Sci::Position> fr = current->rs.FillRange(position, value, fillLength);
 	if (current->Empty()) {
 		Delete(currentIndicator);
 	}
-	return changed;
+	return fr;
 }
 
 void DecorationList::InsertSpace(Sci::Position position, Sci::Position insertLength) {
