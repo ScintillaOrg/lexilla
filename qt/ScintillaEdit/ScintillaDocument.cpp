@@ -232,7 +232,7 @@ void ScintillaDocument::ensure_styled_to(int position) {
 }
 
 void ScintillaDocument::set_current_indicator(int indic) {
-    (static_cast<Document *>(pdoc))->decorations.SetCurrentIndicator(indic);
+    (static_cast<Document *>(pdoc))->decorations->SetCurrentIndicator(indic);
 }
 
 void ScintillaDocument::decoration_fill_range(int position, int value, int fillLength) {
@@ -240,15 +240,15 @@ void ScintillaDocument::decoration_fill_range(int position, int value, int fillL
 }
 
 int ScintillaDocument::decorations_value_at(int indic, int position) {
-    return (static_cast<Document *>(pdoc))->decorations.ValueAt(indic, position);
+    return (static_cast<Document *>(pdoc))->decorations->ValueAt(indic, position);
 }
 
 int ScintillaDocument::decorations_start(int indic, int position) {
-    return (static_cast<Document *>(pdoc))->decorations.Start(indic, position);
+    return (static_cast<Document *>(pdoc))->decorations->Start(indic, position);
 }
 
 int ScintillaDocument::decorations_end(int indic, int position) {
-    return (static_cast<Document *>(pdoc))->decorations.End(indic, position);
+    return (static_cast<Document *>(pdoc))->decorations->End(indic, position);
 }
 
 int ScintillaDocument::get_code_page() {
