@@ -12,7 +12,6 @@ ifeq ($(shell uname),Darwin)
 # On OS X always use clang as g++ is old version
 CLANG = 1
 USELIBCPP = 1
-CXXSTD=c++1z
 endif
 endif
 
