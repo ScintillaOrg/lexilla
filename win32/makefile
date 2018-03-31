@@ -15,14 +15,14 @@ LIBSCI = $(DIR_BIN)/libscintilla.a
 ifdef CLANG
 # Common location for 32-bit clang on Windows
 CXX = "C:\Program Files (x86)\LLVM\bin\clang++"
-CXXSTD = c++14
 else
 # MinGW GCC
 LDMINGW = -Wl,--enable-runtime-pseudo-reloc-v2 -Wl,--add-stdcall-alias
 LIBSMINGW = -lstdc++
 STRIPOPTION = -s
-CXXSTD = gnu++17
 endif
+
+CXXSTD = c++17
 
 ifeq ($(OS),Windows_NT)
 DEL = $(if $(wildcard $(dir $(SHELL))rm.exe), $(dir $(SHELL))rm.exe -f, del /q)
