@@ -13,8 +13,11 @@ LEXCOMPONENT = $(DIR_BIN)/SciLexer.dll
 LIBSCI = $(DIR_BIN)/libscintilla.a
 
 ifdef CLANG
-# Common location for 32-bit clang on Windows
-CXX = "C:\Program Files (x86)\LLVM\bin\clang++"
+CXX = clang++
+# Clang doesn't like omitting braces in array initialization but they just add noise,
+# __uuidof is a Microsoft extension but makes COM code neater,
+# public visibility avoids warnings like 'locally defined symbol __std_terminate imported'
+CLANG_OPTS = -Wno-missing-braces -Wno-language-extension-token -Xclang -flto-visibility-public-std
 else
 # MinGW GCC
 LDMINGW = -Wl,--enable-runtime-pseudo-reloc-v2 -Wl,--add-stdcall-alias
@@ -50,7 +53,7 @@ ifdef ENABLE_BIDIRECTIONAL
 BIDIFLAGS=-DENABLE_BIDIRECTIONAL
 endif
 
-CXXBASEFLAGS=--std=$(CXXSTD) -Wall -pedantic $(INCLUDEDIRS) $(D2DFLAGS) $(BIDIFLAGS) -D_CRT_SECURE_NO_DEPRECATE=1
+CXXBASEFLAGS=--std=$(CXXSTD) -Wall -pedantic $(INCLUDEDIRS) $(D2DFLAGS) $(BIDIFLAGS) -D_CRT_SECURE_NO_DEPRECATE=1 $(CLANG_OPTS)
 
 ifdef NO_CXX11_REGEX
 REFLAGS=-DNO_CXX11_REGEX
