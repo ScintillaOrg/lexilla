@@ -771,7 +771,8 @@ void SurfaceGDI::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fil
 		int height = static_cast<int>(rc.Height());
 		// Ensure not distorted too much by corners when small
 		cornerSize = std::min(cornerSize, (std::min(width, height) / 2) - 2);
-		BITMAPINFO bpih = {{sizeof(BITMAPINFOHEADER), width, height, 1, 32, BI_RGB, 0, 0, 0, 0, 0}};
+		const BITMAPINFO bpih = {{sizeof(BITMAPINFOHEADER), width, height, 1, 32, BI_RGB, 0, 0, 0, 0, 0},
+			{{0, 0, 0, 0}}};
 		void *image = 0;
 		HBITMAP hbmMem = CreateDIBSection(hMemDC, &bpih,
 			DIB_RGB_COLORS, &image, NULL, 0);
@@ -833,7 +834,8 @@ void SurfaceGDI::DrawRGBAImage(PRectangle rc, int width, int height, const unsig
 			rc.top += static_cast<int>((rc.Height() - height) / 2);
 		rc.bottom = rc.top + height;
 
-		BITMAPINFO bpih = {{sizeof(BITMAPINFOHEADER), width, height, 1, 32, BI_RGB, 0, 0, 0, 0, 0}};
+		const BITMAPINFO bpih = {{sizeof(BITMAPINFOHEADER), width, height, 1, 32, BI_RGB, 0, 0, 0, 0, 0},
+			{{0, 0, 0, 0}}};
 		unsigned char *image = 0;
 		HBITMAP hbmMem = CreateDIBSection(hMemDC, &bpih,
 			DIB_RGB_COLORS, reinterpret_cast<void **>(&image), NULL, 0);
@@ -1777,7 +1779,7 @@ void Window::SetPosition(PRectangle rc) {
 }
 
 static RECT RectFromMonitor(HMONITOR hMonitor) {
-	MONITORINFO mi = {0};
+	MONITORINFO mi = {};
 	mi.cbSize = sizeof(mi);
 	if (GetMonitorInfo(hMonitor, &mi)) {
 		return mi.rcWork;
