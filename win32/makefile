@@ -117,7 +117,7 @@ BASEOBJS = \
 	XPM.o \
 	HanjaDic.o
 
-SOBJS = ScintillaWin.o ScintillaBase.o $(BASEOBJS)
+SOBJS = ScintillaDLL.o ScintillaWin.o ScintillaBase.o $(BASEOBJS)
 
 # Required by lexers
 LEXLIBOBJS=\
@@ -141,10 +141,10 @@ SCILEXOBJS=\
 $(COMPONENT): $(SOBJS) Scintilla.def
 	$(CXX) $(LDFLAGS) -o $@ $(STRIPFLAG) $(SOBJS) $(CXXFLAGS) $(LIBS)
 
-$(LEXCOMPONENT): ScintillaWinL.o $(SCILEXOBJS) Scintilla.def
-	$(CXX) $(LDFLAGS) -o $@ $(STRIPFLAG) ScintillaWinL.o $(SCILEXOBJS) $(CXXFLAGS) $(LIBS)
+$(LEXCOMPONENT): ScintillaDLL.o ScintillaWinL.o $(SCILEXOBJS) Scintilla.def
+	$(CXX) $(LDFLAGS) -o $@ $(STRIPFLAG) ScintillaDLL.o ScintillaWinL.o $(SCILEXOBJS) $(CXXFLAGS) $(LIBS)
 
-$(LIBSCI): ScintillaWinS.o $(SCILEXOBJS)
+$(LIBSCI): ScintillaWin.o $(SCILEXOBJS)
 	$(AR) rc $@ $^
 	$(RANLIB) $@
 
@@ -176,21 +176,8 @@ ScintillaWinL.o: ScintillaWin.cxx Platform.h \
  LexerModule.h Catalogue.h CaseConvert.h \
  CaseFolder.h
 
-ScintillaWinS.o: ScintillaWin.cxx Platform.h \
- ILexer.h Scintilla.h SplitVector.h \
- Partitioning.h RunStyles.h ContractionState.h \
- CellBuffer.h CallTip.h KeyMap.h Indicator.h \
- XPM.h LineMarker.h Style.h AutoComplete.h \
- ViewStyle.h CharClassify.h Decoration.h \
- Document.h Selection.h PositionCache.h \
- EditModel.h Editor.h EditView.h ScintillaBase.h UniConversion.h \
- CaseConvert.h CaseFolder.h
-
 ScintillaBaseL.o:
 	$(CXX) $(CXXFLAGS) -D SCI_LEXER -c $< -o $@
-
-ScintillaWinS.o:
-	$(CXX) $(CXXFLAGS) -D STATIC_BUILD -c $< -o $@
 
 ScintillaWinL.o:
 	$(CXX) $(CXXFLAGS) -D SCI_LEXER -c $< -o $@

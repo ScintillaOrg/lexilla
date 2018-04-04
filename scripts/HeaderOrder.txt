@@ -155,6 +155,7 @@
 // win32
 #include "PlatWin.h"
 #include "HanjaDic.h"
+#include "ScintillaWin.h"
 
 // gtk
 #include "ScintillaGTK.h"

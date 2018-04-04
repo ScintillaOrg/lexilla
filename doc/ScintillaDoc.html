@@ -8298,12 +8298,11 @@ EM_SETTARGETDEVICE
 
     <p>On Windows, Scintilla is normally used as a dynamic library as a .DLL file. If you want to
     link Scintilla directly into your application .EXE or .DLL file, then you can link to the static library
-    bin/libscintilla.lib (or .a if using GCC) and call <code>Scintilla_RegisterClasses</code>. Otherwise, if using an IDE or other build system, then the
-    <code>STATIC_BUILD</code> preprocessor symbol should be defined and
-    <code>Scintilla_RegisterClasses</code> called. <code>STATIC_BUILD</code> prevents compiling the
-    <code>DllMain</code> function which will conflict with any <code>DllMain</code> defined in your
-    code. <code>Scintilla_RegisterClasses</code> takes the <code>HINSTANCE</code> of your
+    bin/libscintilla.lib (or .a if using GCC) and call <code>Scintilla_RegisterClasses</code>.
+    <code>Scintilla_RegisterClasses</code> takes the <code>HINSTANCE</code> of your
     application and ensures that the "Scintilla" window class is registered.</p>
+    <p>When producing a stand-alone Scintilla DLL, the ScintillaDLL.cxx file should be compiled and
+    linked in to provide <code>DllMain</code> and <code>Scintilla_RegisterClasses</code>.</p>
 
     <h3>Ensuring lexers are linked into Scintilla</h3>
 

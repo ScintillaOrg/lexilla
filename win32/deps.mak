@@ -2,6 +2,7 @@ CheckD2D.o: CheckD2D.cxx
 HanjaDic.o: HanjaDic.cxx ../src/UniConversion.h HanjaDic.h
 PlatWin.o: PlatWin.cxx ../include/Platform.h ../lexlib/StringCopy.h \
  ../src/XPM.h ../src/UniConversion.h ../src/DBCS.h ../src/FontQuality.h
+ScintillaDLL.o: ScintillaDLL.cxx
 ScintillaWin.o: ScintillaWin.cxx ../include/Platform.h \
  ../include/ILoader.h ../include/Sci_Position.h ../include/ILexer.h \
  ../include/Scintilla.h ../lexlib/StringCopy.h ../src/Position.h \

@@ -543,7 +543,10 @@
 	</li>
 	<li>
 	On Win32, the standard makefiles build a libscintilla static library as well as the existing dynamic libraries.
-	The statically linked version of SciTE, Sc1, links to this static library.
+	The statically linked version of SciTE, Sc1, links to this static library. A new file, ScintillaDLL.cxx, provides
+	the DllMain function required for a stand-alone Scintilla DLL. Build and project files should include this
+	file when producing a DLL and omit it when producing a static library or linking Scintilla statically.
+	The STATIC_BUILD preprocessor symbol is no longer used.
 	</li>
 	<li>
 	In some cases, invalid UTF-8 is handled in a way that is a little friendlier.

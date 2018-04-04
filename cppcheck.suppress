@@ -15,9 +15,6 @@ unusedFunction:scintilla/qt/ScintillaEdit/ScintillaDocument.cpp
 // code legibility.
 passedByValue
 
-// The three private methods DefWndProc, ScrollText, and ModifyScrollBars are called by superclasses
-unusedPrivateFunction:scintilla/win32/ScintillaWin.cxx
-
 // Suppress most lexer warnings since the lexers are maintained by others
 redundantCondition:scintilla/lexers/LexA68k.cxx
 useInitializationList:scintilla/lexers/LexAsm.cxx
