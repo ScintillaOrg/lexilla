@@ -43,17 +43,11 @@ LIBS=-lgdi32 -luser32 -limm32 -lole32 -luuid -loleaut32 -lmsimg32 $(LIBSMINGW)
 # Add -MMD to get dependencies
 INCLUDEDIRS=-I ../include -I ../src -I../lexlib
 
-# Check if Direct2D headers are available by trying to compile a file that includes them.
-# Most distributions of MinGW32 do not include Direct2D support but MinGW64 does.
-ifneq "$(shell $(CXX) -c CheckD2D.cxx 2>&1)" ""
-D2DFLAGS=-DDISABLE_D2D
-endif
-
 ifdef ENABLE_BIDIRECTIONAL
 BIDIFLAGS=-DENABLE_BIDIRECTIONAL
 endif
 
-CXXBASEFLAGS=--std=$(CXXSTD) -Wall -pedantic $(INCLUDEDIRS) $(D2DFLAGS) $(BIDIFLAGS) -D_CRT_SECURE_NO_DEPRECATE=1 $(CLANG_OPTS)
+CXXBASEFLAGS=--std=$(CXXSTD) -Wall -pedantic $(INCLUDEDIRS) $(BIDIFLAGS) -D_CRT_SECURE_NO_DEPRECATE=1 $(CLANG_OPTS)
 
 ifdef NO_CXX11_REGEX
 REFLAGS=-DNO_CXX11_REGEX
@@ -75,7 +69,7 @@ clean:
 	$(CXX) $(CXXFLAGS) $(REFLAGS) -c $<
 
 analyze:
-	$(CXX) --analyze $(D2DFLAGS) $(CXXFLAGS) *.cxx ../src/*.cxx ../lexlib/*.cxx ../lexers/*.cxx
+	$(CXX) --analyze $(CXXFLAGS) *.cxx ../src/*.cxx ../lexlib/*.cxx ../lexers/*.cxx
 
 deps:
 	$(CXX) -MM $(CXXFLAGS) *.cxx ../src/*.cxx ../lexlib/*.cxx ../lexers/*.cxx >deps.mak

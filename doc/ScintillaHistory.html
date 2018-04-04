@@ -549,6 +549,10 @@
 	The STATIC_BUILD preprocessor symbol is no longer used.
 	</li>
 	<li>
+	On Win32, Direct2D support is no longer automatically detected during build.
+	DISABLE_D2D may still be defined to remove Direct2D features.
+	</li>
+	<li>
 	In some cases, invalid UTF-8 is handled in a way that is a little friendlier.
 	For example, when copying to the clipboard on Windows, an invalid lead byte will be copied as the
 	equivalent ISO 8859-1 character and will not hide the following byte.

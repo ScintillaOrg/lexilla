@@ -44,11 +44,6 @@ LDFLAGS=$(LDFLAGS) $(NOLOGO)
 CXXFLAGS=$(CXXFLAGS) -DENABLE_BIDIRECTIONAL
 !ENDIF
 
-!IF [cl -c -nologo CheckD2D.cxx >NUL:]
-CXXFLAGS=$(CXXFLAGS) -DDISABLE_D2D
-!MESSAGE Direct2D is not available
-!ENDIF
-
 !IFDEF NO_CXX11_REGEX
 CXXFLAGS=$(CXXFLAGS) -DNO_CXX11_REGEX
 !ENDIF
@@ -351,8 +346,6 @@ $(DIR_O)\CharacterSet.obj: \
 $(DIR_O)\CharClassify.obj: \
 	../src/CharClassify.cxx \
 	../src/CharClassify.h
-$(DIR_O)\CheckD2D.obj: \
-	CheckD2D.cxx
 $(DIR_O)\ContractionState.obj: \
 	../src/ContractionState.cxx \
 	../include/Platform.h \

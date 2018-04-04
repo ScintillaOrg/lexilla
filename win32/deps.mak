@@ -1,4 +1,3 @@
-CheckD2D.o: CheckD2D.cxx
 HanjaDic.o: HanjaDic.cxx ../src/UniConversion.h HanjaDic.h
 PlatWin.o: PlatWin.cxx ../include/Platform.h ../lexlib/StringCopy.h \
  ../src/XPM.h ../src/UniConversion.h ../src/DBCS.h ../src/FontQuality.h
