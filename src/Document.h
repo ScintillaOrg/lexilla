@@ -10,6 +10,14 @@
 
 namespace Scintilla {
 
+class DocWatcher;
+class DocModification;
+class Document;
+class LineMarkers;
+class LineLevels;
+class LineState;
+class LineAnnotation;
+
 enum EncodingFamily { efEightBit, efUnicode, efDBCS };
 
 /**
@@ -76,10 +84,6 @@ public:
 		other.Contains(end);
 	}
 };
-
-class DocWatcher;
-class DocModification;
-class Document;
 
 /**
  * Interface class for regular expression searching
@@ -159,12 +163,6 @@ public:
 	Sci::Line firstChangeableLineAfter;	// First line that triggers repaint after starting line that determined current fold block
 	bool isEnabled;
 };
-
-class Document;
-class LineMarkers;
-class LineLevels;
-class LineState;
-class LineAnnotation;
 
 inline int LevelNumber(int level) {
 	return level & SC_FOLDLEVELNUMBERMASK;
