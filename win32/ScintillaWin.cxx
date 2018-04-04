@@ -833,7 +833,7 @@ sptr_t ScintillaWin::WndPaint(uptr_t wParam) {
 		::BeginPaint(MainHWND(), pps);
 	}
 	rcPaint = PRectangle::FromInts(pps->rcPaint.left, pps->rcPaint.top, pps->rcPaint.right, pps->rcPaint.bottom);
-	const PRectangle rcClient = GetClientRectangle();
+	const PRectangle rcClient = view.ViewRectangle();
 	paintingAllText = BoundsContains(rcPaint, hRgnUpdate, rcClient);
 	if (technology == SC_TECHNOLOGY_DEFAULT) {
 		AutoSurface surfaceWindow(pps->hdc, this);
@@ -2926,7 +2926,7 @@ void ScintillaWin::FullPaint() {
  */
 void ScintillaWin::FullPaintDC(HDC hdc) {
 	paintState = painting;
-	rcPaint = GetClientRectangle();
+	rcPaint = view.ViewRectangle();
 	paintingAllText = true;
 	if (technology == SC_TECHNOLOGY_DEFAULT) {
 		AutoSurface surfaceWindow(hdc, this);

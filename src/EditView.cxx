@@ -190,6 +190,14 @@ EditView::EditView() {
 EditView::~EditView() {
 }
 
+PRectangle EditView::ViewRectangle() const {
+	return rectangleView;
+}
+
+void EditView::SetViewRectangle(PRectangle rectangle) {
+	rectangleView = rectangle;
+}
+
 bool EditView::SetTwoPhaseDraw(bool twoPhaseDraw) {
 	const PhasesDraw phasesDrawNew = twoPhaseDraw ? phasesTwo : phasesOne;
 	const bool redraw = phasesDraw != phasesDrawNew;

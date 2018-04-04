@@ -696,7 +696,7 @@ void ScintillaQt::PartialPaint(const PRectangle &rect)
 {
 	rcPaint = rect;
 	paintState = painting;
-	PRectangle rcClient = GetClientRectangle();
+	PRectangle rcClient = view.ViewRectangle();
 	paintingAllText = rcPaint.Contains(rcClient);
 
 	AutoSurface surface(this);

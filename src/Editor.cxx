@@ -310,18 +310,18 @@ PRectangle Editor::GetClientRectangle() const {
 }
 
 PRectangle Editor::GetClientDrawingRectangle() {
-	return GetClientRectangle();
+	return view.ViewRectangle();
 }
 
 PRectangle Editor::GetTextRectangle() const {
-	PRectangle rc = GetClientRectangle();
+	PRectangle rc = view.ViewRectangle();
 	rc.left += vs.textStart;
 	rc.right -= vs.rightMarginWidth;
 	return rc;
 }
 
 Sci::Line Editor::LinesOnScreen() const {
-	const PRectangle rcClient = GetClientRectangle();
+	const PRectangle rcClient = view.ViewRectangle();
 	const int htClient = static_cast<int>(rcClient.bottom - rcClient.top);
 	//Platform::DebugPrintf("lines on screen = %d\n", htClient / lineHeight + 1);
 	return htClient / vs.lineHeight;
@@ -453,7 +453,7 @@ void Editor::RedrawRect(PRectangle rc) {
 	//Platform::DebugPrintf("Redraw %0d,%0d - %0d,%0d\n", rc.left, rc.top, rc.right, rc.bottom);
 
 	// Clip the redraw rectangle into the client area
-	const PRectangle rcClient = GetClientRectangle();
+	const PRectangle rcClient = view.ViewRectangle();
 	if (rc.top < rcClient.top)
 		rc.top = rcClient.top;
 	if (rc.bottom > rcClient.bottom)
@@ -474,7 +474,7 @@ void Editor::DiscardOverdraw() {
 
 void Editor::Redraw() {
 	//Platform::DebugPrintf("Redraw all\n");
-	const PRectangle rcClient = GetClientRectangle();
+	const PRectangle rcClient = view.ViewRectangle();
 	wMain.InvalidateRectangle(rcClient);
 	if (wMargin.GetID())
 		wMargin.InvalidateAll();
@@ -492,7 +492,7 @@ void Editor::RedrawSelMargin(Sci::Line line, bool allAfter) {
 		Redraw();
 		return;
 	}
-	PRectangle rcMarkers = GetClientRectangle();
+	PRectangle rcMarkers = view.ViewRectangle();
 	if (!markersInText) {
 		// Normal case: just draw the margin
 		rcMarkers.right = rcMarkers.left + vs.fixedColumnWidth;
@@ -946,7 +946,7 @@ void Editor::ScrollTo(Sci::Line line, bool moveThumb) {
 		SetTopLine(topLineNew);
 		// Optimize by styling the view as this will invalidate any needed area
 		// which could abort the initial paint if discovered later.
-		StyleAreaBounded(GetClientRectangle(), true);
+		StyleAreaBounded(view.ViewRectangle(), true);
 #ifndef UNDER_CE
 		// Perform redraw rather than scroll if many lines would be redrawn anyway.
 		if (performBlit) {
@@ -977,7 +977,7 @@ void Editor::HorizontalScrollTo(int xPos) {
 		xOffset = xPos;
 		ContainerNeedsUpdate(SC_UPDATE_H_SCROLL);
 		SetHorizontalScrollPos();
-		RedrawRect(GetClientRectangle());
+		RedrawRect(view.ViewRectangle());
 	}
 }
 
@@ -988,7 +988,7 @@ void Editor::VerticalCentreCaret() {
 	const Sci::Line newTop = lineDisplay - (LinesOnScreen() / 2);
 	if (topLine != newTop) {
 		SetTopLine(newTop > 0 ? newTop : 0);
-		RedrawRect(GetClientRectangle());
+		RedrawRect(view.ViewRectangle());
 	}
 }
 
@@ -1543,7 +1543,7 @@ bool Editor::WrapLines(WrapScope ws) {
 
 		if (lineToWrap < lineToWrapEnd) {
 
-			PRectangle rcTextArea = GetClientRectangle();
+			PRectangle rcTextArea = view.ViewRectangle();
 			rcTextArea.left = static_cast<XYPOSITION>(vs.textStart);
 			rcTextArea.right -= vs.rightMarginWidth;
 			wrapWidth = static_cast<int>(rcTextArea.Width());
@@ -1655,7 +1655,7 @@ void Editor::PaintSelMargin(Surface *surfaceWindow, PRectangle &rc) {
 		return;
 	}
 
-	PRectangle rcMargin = GetClientRectangle();
+	PRectangle rcMargin = view.ViewRectangle();
 	const Point ptOrigin = GetVisibleOriginInMain();
 	rcMargin.Move(0, -ptOrigin.y);
 	rcMargin.left = 0;
@@ -1688,7 +1688,7 @@ void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 	view.RefreshPixMaps(surfaceWindow, wMain.GetID(), vs);
 	marginView.RefreshPixMaps(surfaceWindow, wMain.GetID(), vs);
 	if (view.bufferedDraw) {
-		const PRectangle rcClient = GetClientRectangle();
+		const PRectangle rcClient = view.ViewRectangle();
 		if (!view.pixmapLine->Initialised()) {
 
 			view.pixmapLine->InitPixMap(static_cast<int>(rcClient.Width()), vs.lineHeight,
@@ -1715,7 +1715,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 
 	StyleAreaBounded(rcArea, false);
 
-	const PRectangle rcClient = GetClientRectangle();
+	const PRectangle rcClient = view.ViewRectangle();
 	//Platform::DebugPrintf("Client: (%3d,%3d) ... (%3d,%3d)   %d\n",
 	//	rcClient.left, rcClient.top, rcClient.right, rcClient.bottom);
 
@@ -1839,8 +1839,10 @@ void Editor::SetScrollBars() {
 void Editor::ChangeSize() {
 	DropGraphics(false);
 	SetScrollBars();
+	const PRectangle rectangleClientArea = GetClientRectangle();
+	view.SetViewRectangle(rectangleClientArea);
 	if (Wrapping()) {
-		PRectangle rcTextArea = GetClientRectangle();
+		PRectangle rcTextArea = rectangleClientArea;
 		rcTextArea.left = static_cast<XYPOSITION>(vs.textStart);
 		rcTextArea.right -= vs.rightMarginWidth;
 		if (wrapWidth != rcTextArea.Width()) {
@@ -4361,7 +4363,7 @@ bool Editor::PointInSelection(Point pt) {
 bool Editor::PointInSelMargin(Point pt) const {
 	// Really means: "Point in a margin"
 	if (vs.fixedColumnWidth > 0) {	// There is a margin
-		PRectangle rcSelMargin = GetClientRectangle();
+		PRectangle rcSelMargin = view.ViewRectangle();
 		rcSelMargin.right = static_cast<XYPOSITION>(vs.textStart - vs.leftMarginWidth);
 		rcSelMargin.left = static_cast<XYPOSITION>(vs.textStart - vs.fixedColumnWidth);
 		const Point ptOrigin = GetVisibleOriginInMain();
@@ -4744,7 +4746,7 @@ void Editor::ButtonMoveWithModifiers(Point pt, unsigned int, int modifiers) {
 	}
 
 	ptMouseLast = pt;
-	PRectangle rcClient = GetClientRectangle();
+	PRectangle rcClient = view.ViewRectangle();
 	const Point ptOrigin = GetVisibleOriginInMain();
 	rcClient.Move(0, -ptOrigin.y);
 	if ((dwellDelay < SC_TIME_FOREVER) && rcClient.Contains(pt)) {
@@ -5094,7 +5096,7 @@ void Editor::StyleAreaBounded(PRectangle rcArea, bool scrolling) {
 }
 
 void Editor::IdleStyling() {
-	const Sci::Position posAfterArea = PositionAfterArea(GetClientRectangle());
+	const Sci::Position posAfterArea = PositionAfterArea(view.ViewRectangle());
 	const Sci::Position endGoal = (idleStyling >= SC_IDLESTYLING_AFTERVISIBLE) ?
 		static_cast<Sci::Position>(pdoc->Length()) : posAfterArea;
 	const Sci::Position posAfterMax = PositionAfterMaxStyling(endGoal, false);
@@ -5132,7 +5134,7 @@ bool Editor::PaintContainsMargin() {
 		// never contains margin.
 		return false;
 	}
-	PRectangle rcSelMargin = GetClientRectangle();
+	PRectangle rcSelMargin = view.ViewRectangle();
 	rcSelMargin.right = static_cast<XYPOSITION>(vs.textStart);
 	return PaintContains(rcSelMargin);
 }
