@@ -38,7 +38,7 @@
     <script type="text/javascript">
    	function IsRemote() {
 		var loc = '' + window.location;
-		return loc.indexOf('http:') != -1;
+		return (loc.indexOf('http:')) != -1 || (loc.indexOf('https:') != -1);
    	}
     </script>
      <title>
@@ -66,7 +66,7 @@
     </table>
     <table bgcolor="#000000" width="100%" cellspacing="0" cellpadding="0" border="0">
       <tr>
-        <td width="100%" style="background: url(http://www.scintilla.org/SciBreak.jpg) no-repeat;height:150px;">
+        <td width="100%" style="background: url(https://www.scintilla.org/SciBreak.jpg) no-repeat;height:150px;">
           &nbsp;
         </td>
       </tr>
@@ -79,14 +79,14 @@
       <li>Version 3.7.6 was a minor long term release.</li>
     </ul>
     <ul id="menu">
-      <li id="remote1"><a href="http://www.scintilla.org/SciTEImage.html">Screenshot</a></li>
-      <li id="remote2"><a href="http://www.scintilla.org/ScintillaDownload.html">Download</a></li>
-      <li><a href="http://www.scintilla.org/ScintillaDoc.html">Documentation</a></li>
-      <li><a href="http://www.scintilla.org/ScintillaToDo.html">Bugs</a></li>
-      <li id="remote3"><a href="http://www.scintilla.org/SciTE.html">SciTE</a></li>
-      <li><a href="http://www.scintilla.org/ScintillaHistory.html">History</a></li>
-      <li><a href="http://www.scintilla.org/ScintillaRelated.html">Related</a></li>
-      <li id="remote4"><a href="http://www.scintilla.org/Privacy.html">Privacy</a></li>
+      <li id="remote1"><a href="https://www.scintilla.org/SciTEImage.html">Screenshot</a></li>
+      <li id="remote2"><a href="https://www.scintilla.org/ScintillaDownload.html">Download</a></li>
+      <li><a href="https://www.scintilla.org/ScintillaDoc.html">Documentation</a></li>
+      <li><a href="https://www.scintilla.org/ScintillaToDo.html">Bugs</a></li>
+      <li id="remote3"><a href="https://www.scintilla.org/SciTE.html">SciTE</a></li>
+      <li><a href="https://www.scintilla.org/ScintillaHistory.html">History</a></li>
+      <li><a href="https://www.scintilla.org/ScintillaRelated.html">Related</a></li>
+      <li id="remote4"><a href="https://www.scintilla.org/Privacy.html">Privacy</a></li>
     </ul>
 <script type="text/javascript" language="JavaScript"><!--
 if (!IsRemote()) { //if NOT remote...
@@ -97,8 +97,8 @@ if (!IsRemote()) { //if NOT remote...
 }
 //--></script>
     <p>
-       <a href="http://www.scintilla.org/ScintillaDoc.html">Scintilla</a> is a free source code editing component.
-       It comes with complete source code and a <a href="http://www.scintilla.org/License.txt">license</a> that
+       <a href="https://www.scintilla.org/ScintillaDoc.html">Scintilla</a> is a free source code editing component.
+       It comes with complete source code and a <a href="https://www.scintilla.org/License.txt">license</a> that
        permits use in any free project or commercial product.
     </p>
     <p>
@@ -118,7 +118,7 @@ if (!IsRemote()) { //if NOT remote...
        For projects that need to work with older systems, a LongTerm3 branch is available which uses only features from C++11.
     </p>
     <p>
-       <a href="http://www.scintilla.org/SciTE.html">SciTE</a> is a SCIntilla based Text Editor. Originally built to
+       <a href="https://www.scintilla.org/SciTE.html">SciTE</a> is a SCIntilla based Text Editor. Originally built to
       demonstrate Scintilla, it has grown to be a generally useful editor with facilities for
       building and running programs. It is best used for jobs with simple configurations - I use it
       for building test and demonstration programs as well as SciTE and Scintilla, themselves.
@@ -134,27 +134,27 @@ if (!IsRemote()) { //if NOT remote...
     <p>
        Scintilla and SciTE are currently available for Intel Win32, OS X, and Linux compatible operating
       systems with GTK+. They have been run on Windows XP, Windows 7, OS X 10.7+, and on Ubuntu 14.04
-      with GTK+ 2.24. <a href="http://www.scintilla.org/SciTEImage.html">Here is a screenshot of
+      with GTK+ 2.24. <a href="https://www.scintilla.org/SciTEImage.html">Here is a screenshot of
       SciTE.</a><br />
     </p>
     <p>
-       You can <a href="http://www.scintilla.org/ScintillaDownload.html">download Scintilla.</a>
+       You can <a href="https://www.scintilla.org/ScintillaDownload.html">download Scintilla.</a>
     </p>
     <p>
        The source code can be downloaded via Mercurial at the Source Forge
-	<a href="http://sourceforge.net/projects/scintilla/">Scintilla project page</a>.
+	<a href="https://sourceforge.net/projects/scintilla/">Scintilla project page</a>.
     </p>
     <p>
-       <a href="http://www.scintilla.org/ScintillaRelated.html">Related sites.</a>
+       <a href="https://www.scintilla.org/ScintillaRelated.html">Related sites.</a>
     </p>
     <p>
-       <a href="http://www.scintilla.org/ScintillaToDo.html">Bugs and To Do list.</a>
+       <a href="https://www.scintilla.org/ScintillaToDo.html">Bugs and To Do list.</a>
     </p>
     <p>
-       <a href="http://www.scintilla.org/ScintillaHistory.html">History and contribution credits.</a>
+       <a href="https://www.scintilla.org/ScintillaHistory.html">History and contribution credits.</a>
     </p>
     <p>
-       <a href="http://www.scintilla.org/Icons.html">Icons that can be used with Scintilla.</a>
+       <a href="https://www.scintilla.org/Icons.html">Icons that can be used with Scintilla.</a>
     </p>
     <p>
        The <a href="https://scintilla.sourceforge.io/LongTermDownload.html">LongTerm3</a>
@@ -174,21 +174,21 @@ if (!IsRemote()) { //if NOT remote...
       may receive no response.
       <br />
     </p>
-There is a <a href="http://sourceforge.net/projects/scintilla/">Scintilla project page</a>
+There is a <a href="https://sourceforge.net/projects/scintilla/">Scintilla project page</a>
 hosted on
 <script type="text/javascript" language="JavaScript">
 <!--
 if (IsRemote()) {
-    document.write('<a href="http://sourceforge.net/projects/scintilla/">');
-    document.write('<img src="http://sflogo.sourceforge.net/sflogo.php?group_id=2439&amp;type=8" width="80" height="15" alt="Get Scintilla at SourceForge.net. Fast, secure and Free Open Source software downloads" /></a> ');
+    document.write('<a href="https://sourceforge.net/projects/scintilla/">');
+    document.write('<img src="https://sflogo.sourceforge.net/sflogo.php?group_id=2439&amp;type=8" width="80" height="15" alt="Get Scintilla at SourceForge.net. Fast, secure and Free Open Source software downloads" /></a> ');
 } else {
-    document.write('<a href="http://sourceforge.net/projects/scintilla/">SourceForge<\/a>');
+    document.write('<a href="https://sourceforge.net/projects/scintilla/">SourceForge<\/a>');
 }
 //-->
 </script>
 <noscript>
-<a href="http://sourceforge.net/projects/scintilla/">
-<img src="http://sflogo.sourceforge.net/sflogo.php?group_id=2439&amp;type=8" width="80" height="15" alt="Get Scintilla at SourceForge.net. Fast, secure and Free Open Source software downloads" /></a>
+<a href="https://sourceforge.net/projects/scintilla/">
+<img src="https://sflogo.sourceforge.net/sflogo.php?group_id=2439&amp;type=8" width="80" height="15" alt="Get Scintilla at SourceForge.net. Fast, secure and Free Open Source software downloads" /></a>
 </noscript>
   </body>
 </html>
