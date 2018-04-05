@@ -47,7 +47,6 @@ typedef void (*DrawTabArrowFn)(Surface *surface, PRectangle rcTab, int ymid);
 */
 class EditView {
 public:
-	PRectangle rectangleView;
 	PrintParameters printParameters;
 	std::unique_ptr<PerLine> ldTabstops;
 	int tabWidthMinimumPixels;
@@ -93,9 +92,6 @@ public:
 	EditView(const EditView &) = delete;
 	void operator=(const EditView &) = delete;
 	virtual ~EditView();
-
-	PRectangle ViewRectangle() const;
-	void SetViewRectangle(PRectangle rectangle);
 
 	bool SetTwoPhaseDraw(bool twoPhaseDraw);
 	bool SetPhasesDraw(int phases);

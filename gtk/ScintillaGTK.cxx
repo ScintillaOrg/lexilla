@@ -1681,7 +1681,7 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 		Point pt;
 		pt.x = int(event->x);
 		pt.y = int(event->y);
-		PRectangle rcClient = view.ViewRectangle();
+		PRectangle rcClient = GetClientRectangle();
 		//Platform::DebugPrintf("Press %0d,%0d in %0d,%0d %0d,%0d\n",
 		//	pt.x, pt.y, rcClient.left, rcClient.top, rcClient.right, rcClient.bottom);
 		if ((pt.x > rcClient.right) || (pt.y > rcClient.bottom)) {
@@ -2501,7 +2501,7 @@ gboolean ScintillaGTK::DrawTextThis(cairo_t *cr) {
 		paintState = painting;
 		repaintFullWindow = false;
 
-		rcPaint = view.ViewRectangle();
+		rcPaint = GetClientRectangle();
 
 		PLATFORM_ASSERT(rgnUpdate == NULL);
 		rgnUpdate = cairo_copy_clip_rectangle_list(cr);
@@ -2518,7 +2518,7 @@ gboolean ScintillaGTK::DrawTextThis(cairo_t *cr) {
 		rcPaint.top = y1;
 		rcPaint.right = x2;
 		rcPaint.bottom = y2;
-		PRectangle rcClient = view.ViewRectangle();
+		PRectangle rcClient = GetClientRectangle();
 		paintingAllText = rcPaint.Contains(rcClient);
 		std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
 		surfaceWindow->Init(cr, PWidget(wText));
@@ -2553,7 +2553,7 @@ gboolean ScintillaGTK::DrawThis(cairo_t *cr) {
 		// if both scrollbars are visible, paint the little square on the bottom right corner
 		if (verticalScrollBarVisible && horizontalScrollBarVisible && !Wrapping()) {
 			GtkStyleContext *styleContext = gtk_widget_get_style_context(PWidget(wMain));
-			PRectangle rc = view.ViewRectangle();
+			PRectangle rc = GetClientRectangle();
 
 			gtk_style_context_save(styleContext);
 			gtk_style_context_add_class(styleContext, GTK_STYLE_CLASS_SCROLLBARS_JUNCTION);
@@ -2605,7 +2605,7 @@ gboolean ScintillaGTK::ExposeTextThis(GtkWidget * /*widget*/, GdkEventExpose *os
 
 		PLATFORM_ASSERT(rgnUpdate == NULL);
 		rgnUpdate = gdk_region_copy(ose->region);
-		PRectangle rcClient = view.ViewRectangle();
+		PRectangle rcClient = GetClientRectangle();
 		paintingAllText = rcPaint.Contains(rcClient);
 		std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
 		cairo_t *cr = gdk_cairo_create(PWindow(wText));

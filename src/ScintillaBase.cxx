@@ -261,7 +261,7 @@ void ScintillaBase::AutoCompleteStart(Sci::Position lenEntered, const char *list
 	ac.Start(wMain, idAutoComplete, sel.MainCaret(), PointMainCaret(),
 				lenEntered, vs.lineHeight, IsUnicodeMode(), technology);
 
-	const PRectangle rcClient = view.ViewRectangle();
+	const PRectangle rcClient = GetClientRectangle();
 	Point pt = LocationFromPosition(sel.MainCaret() - lenEntered);
 	PRectangle rcPopupBounds = wMain.GetMonitorRect(pt);
 	if (rcPopupBounds.Height() == 0)
@@ -477,7 +477,7 @@ void ScintillaBase::CallTipShow(Point pt, const char *defn) {
 		wMain);
 	// If the call-tip window would be out of the client
 	// space
-	const PRectangle rcClient = view.ViewRectangle();
+	const PRectangle rcClient = GetClientRectangle();
 	const int offset = vs.lineHeight + static_cast<int>(rc.Height());
 	// adjust so it displays above the text.
 	if (rc.bottom > rcClient.bottom && rc.Height() < rcClient.Height()) {
