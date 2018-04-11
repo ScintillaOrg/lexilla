@@ -5948,6 +5948,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			const Sci::Position lengthInserted = pdoc->InsertString(
 				sel.MainCaret(), replacement, istrlen(replacement));
 			SetEmptySelection(sel.MainCaret() + lengthInserted);
+			SetLastXChosen();
 			EnsureCaretVisible();
 		}
 		break;
