@@ -2533,25 +2533,13 @@ public:
 	RESearchRange(const Document *doc_, Sci::Position minPos, Sci::Position maxPos) : doc(doc_) {
 		increment = (minPos <= maxPos) ? 1 : -1;
 
-		// Range endpoints should not be inside DBCS characters, but just in case, move them.
-		startPos = doc->MovePositionOutsideChar(minPos, 1, false);
-		endPos = doc->MovePositionOutsideChar(maxPos, 1, false);
+		// Range endpoints should not be inside DBCS characters or between a CR and LF,
+		// but just in case, move them.
+		startPos = doc->MovePositionOutsideChar(minPos, 1, true);
+		endPos = doc->MovePositionOutsideChar(maxPos, 1, true);
 
 		lineRangeStart = static_cast<Sci::Line>(doc->LineFromPosition(startPos));
 		lineRangeEnd = static_cast<Sci::Line>(doc->LineFromPosition(endPos));
-		if ((increment == 1) &&
-			(startPos >= doc->LineEnd(lineRangeStart)) &&
-			(lineRangeStart < lineRangeEnd)) {
-			// the start position is at end of line or between line end characters.
-			lineRangeStart++;
-			startPos = static_cast<Sci::Position>(doc->LineStart(lineRangeStart));
-		} else if ((increment == -1) &&
-			(startPos <= doc->LineStart(lineRangeStart)) &&
-			(lineRangeStart > lineRangeEnd)) {
-			// the start position is at beginning of line.
-			lineRangeStart--;
-			startPos = static_cast<Sci::Position>(doc->LineEnd(lineRangeStart));
-		}
 		lineRangeBreak = lineRangeEnd + increment;
 	}
 	Range LineRange(Sci::Line line) const {
