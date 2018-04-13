@@ -14,6 +14,7 @@
 #include <ctype.h>
 
 #include <string>
+#include <utility>
 #include <vector>
 #include <map>
 #include <algorithm>
@@ -101,7 +102,7 @@ std::vector<std::string> StringSplit(const std::string &text, int separator) {
 	std::vector<std::string> vs(text.empty() ? 0 : 1);
 	for (const char ch : text) {
 		if (ch == separator) {
-			vs.push_back(std::string());
+			vs.emplace_back();
 		} else {
 			vs.back() += ch;
 		}
@@ -228,8 +229,8 @@ struct PPDefinition {
 	std::string value;
 	bool isUndef;
 	std::string arguments;
-	PPDefinition(Sci_Position line_, const std::string &key_, const std::string &value_, bool isUndef_ = false, const std::string &arguments_="") :
-		line(line_), key(key_), value(value_), isUndef(isUndef_), arguments(arguments_) {
+	PPDefinition(Sci_Position line_, std::string key_, std::string value_, bool isUndef_ = false, std::string arguments_="") :
+		line(line_), key(std::move(key_)), value(std::move(value_)), isUndef(isUndef_), arguments(std::move(arguments_)) {
 	}
 };
 
@@ -484,7 +485,7 @@ class LexerCPP : public ILexer4 {
 	struct SymbolValue {
 		std::string value;
 		std::string arguments;
-		SymbolValue(const std::string &value_="", const std::string &arguments_="") : value(value_), arguments(arguments_) {
+		SymbolValue(std::string value_="", std::string arguments_="") : value(std::move(value_)), arguments(std::move(arguments_)) {
 		}
 		SymbolValue &operator = (const std::string &value_) {
 			value = value_;
@@ -1145,7 +1146,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 				}
 				break;
 			case SCE_C_TRIPLEVERBATIM:
-				if (sc.Match("\"\"\"")) {
+				if (sc.Match(R"(""")")) {
 					while (sc.Match('"')) {
 						sc.Forward();
 					}
@@ -1176,7 +1177,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 			if (sc.Match('@', '\"')) {
 				sc.SetState(SCE_C_VERBATIM|activitySet);
 				sc.Forward();
-			} else if (options.triplequotedStrings && sc.Match("\"\"\"")) {
+			} else if (options.triplequotedStrings && sc.Match(R"(""")")) {
 				sc.SetState(SCE_C_TRIPLEVERBATIM|activitySet);
 				sc.Forward(2);
 			} else if (options.hashquotedStrings && sc.Match('#', '\"')) {
@@ -1323,7 +1324,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 									if (startValue < restOfLine.length())
 										value = restOfLine.substr(startValue);
 									preprocessorDefinitions[key] = SymbolValue(value, args);
-									ppDefineHistory.push_back(PPDefinition(lineCurrent, key, value, false, args));
+									ppDefineHistory.emplace_back(lineCurrent, key, value, false, args);
 									definitionsChanged = true;
 								} else {
 									// Value
@@ -1334,7 +1335,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 									if (OnlySpaceOrTab(value))
 										value = "1";	// No value defaults to 1
 									preprocessorDefinitions[key] = value;
-									ppDefineHistory.push_back(PPDefinition(lineCurrent, key, value));
+									ppDefineHistory.emplace_back(lineCurrent, key, value);
 									definitionsChanged = true;
 								}
 							}
@@ -1345,7 +1346,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 								if (tokens.size() >= 1) {
 									const std::string key = tokens[0];
 									preprocessorDefinitions.erase(key);
-									ppDefineHistory.push_back(PPDefinition(lineCurrent, key, "", true));
+									ppDefineHistory.emplace_back(lineCurrent, key, "", true);
 									definitionsChanged = true;
 								}
 							}

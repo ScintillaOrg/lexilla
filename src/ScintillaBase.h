@@ -55,7 +55,7 @@ protected:
 	// Deleted so ScintillaBase objects can not be copied.
 	explicit ScintillaBase(const ScintillaBase &) = delete;
 	ScintillaBase &operator=(const ScintillaBase &) = delete;
-	virtual ~ScintillaBase();
+	~ScintillaBase() override;
 	void Initialise() override {}
 	void Finalise() override;
 

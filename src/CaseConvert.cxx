@@ -593,7 +593,7 @@ public:
 		return characters.size() > 0;
 	}
 	void Add(int character, const char *conversion) {
-		characterToConversion.push_back(CharacterConversion(character, conversion));
+		characterToConversion.emplace_back(character, conversion);
 	}
 	const char *Find(int character) {
 		const std::vector<int>::iterator it = std::lower_bound(characters.begin(), characters.end(), character);

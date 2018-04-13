@@ -55,7 +55,7 @@ public:
 	void operator=(const ContractionState &) = delete;
 	ContractionState(ContractionState &&) = delete;
 	void operator=(ContractionState &&) = delete;
-	~ContractionState();
+	~ContractionState() override;
 
 	void Clear() noexcept override;
 

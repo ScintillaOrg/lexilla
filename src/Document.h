@@ -267,7 +267,7 @@ public:
 	// Deleted so Document objects can not be copied.
 	Document(const Document &) = delete;
 	void operator=(const Document &) = delete;
-	virtual ~Document();
+	~Document() override;
 
 	int AddRef();
 	int SCI_METHOD Release() override;

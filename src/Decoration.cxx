@@ -35,7 +35,7 @@ public:
 
 	explicit Decoration(int indicator_) : indicator(indicator_) {
 	}
-	~Decoration() {
+	~Decoration() override {
 	}
 
 	bool Empty() const override {
@@ -85,7 +85,7 @@ class DecorationList : public IDecorationList {
 public:
 
 	DecorationList();
-	~DecorationList();
+	~DecorationList() override;
 
 	const std::vector<const IDecoration*> &View() const override {
 		return decorationView;

@@ -52,7 +52,7 @@ public:
 	LineVector() : starts(256), perLine(0) {
 		Init();
  	}
-	~LineVector() {
+	~LineVector() override {
 		starts.DeleteAll();
  	}
 	void Init() override {
