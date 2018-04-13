@@ -13,8 +13,8 @@
 #include <assert.h>
 #include <ctype.h>
 
-#include <string>
 #include <utility>
+#include <string>
 #include <vector>
 #include <map>
 #include <algorithm>
@@ -229,8 +229,8 @@ struct PPDefinition {
 	std::string value;
 	bool isUndef;
 	std::string arguments;
-	PPDefinition(Sci_Position line_, std::string key_, std::string value_, bool isUndef_ = false, std::string arguments_="") :
-		line(line_), key(std::move(key_)), value(std::move(value_)), isUndef(isUndef_), arguments(std::move(arguments_)) {
+	PPDefinition(Sci_Position line_, const std::string &key_, const std::string &value_, bool isUndef_ = false, const std::string &arguments_="") :
+		line(line_), key(key_), value(value_), isUndef(isUndef_), arguments(arguments_) {
 	}
 };
 
@@ -485,7 +485,7 @@ class LexerCPP : public ILexer4 {
 	struct SymbolValue {
 		std::string value;
 		std::string arguments;
-		SymbolValue(std::string value_="", std::string arguments_="") : value(std::move(value_)), arguments(std::move(arguments_)) {
+		SymbolValue(const std::string &value_="", const std::string &arguments_="") : value(value_), arguments(arguments_) {
 		}
 		SymbolValue &operator = (const std::string &value_) {
 			value = value_;
@@ -1324,7 +1324,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 									if (startValue < restOfLine.length())
 										value = restOfLine.substr(startValue);
 									preprocessorDefinitions[key] = SymbolValue(value, args);
-									ppDefineHistory.emplace_back(lineCurrent, key, value, false, args);
+									ppDefineHistory.push_back(PPDefinition(lineCurrent, key, value, false, args));
 									definitionsChanged = true;
 								} else {
 									// Value
@@ -1335,7 +1335,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 									if (OnlySpaceOrTab(value))
 										value = "1";	// No value defaults to 1
 									preprocessorDefinitions[key] = value;
-									ppDefineHistory.emplace_back(lineCurrent, key, value);
+									ppDefineHistory.push_back(PPDefinition(lineCurrent, key, value));
 									definitionsChanged = true;
 								}
 							}
@@ -1346,7 +1346,7 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 								if (tokens.size() >= 1) {
 									const std::string key = tokens[0];
 									preprocessorDefinitions.erase(key);
-									ppDefineHistory.emplace_back(lineCurrent, key, "", true);
+									ppDefineHistory.push_back(PPDefinition(lineCurrent, key, "", true));
 									definitionsChanged = true;
 								}
 							}
