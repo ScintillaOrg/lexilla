@@ -27,12 +27,7 @@ int Scintilla_LinkLexers(void);
 #endif
 
 // Include header that defines basic numeric types.
-#if defined(_MSC_VER)
-// Older releases of MSVC did not have stdint.h.
-#include <stddef.h>
-#else
 #include <stdint.h>
-#endif
 
 // Define uptr_t, an unsigned integer type large enough to hold a pointer.
 typedef uintptr_t uptr_t;
