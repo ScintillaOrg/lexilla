@@ -513,6 +513,7 @@ class SurfaceGDI : public Surface {
 
 	void BrushColor(ColourDesired back);
 	void SetFont(Font &font_);
+	void Clear();
 
 public:
 	SurfaceGDI();
@@ -578,10 +579,10 @@ SurfaceGDI::SurfaceGDI() :
 }
 
 SurfaceGDI::~SurfaceGDI() {
-	Release();
+	Clear();
 }
 
-void SurfaceGDI::Release() {
+void SurfaceGDI::Clear() {
 	if (penOld) {
 		::SelectObject(hdc, penOld);
 		::DeleteObject(pen);
@@ -611,6 +612,10 @@ void SurfaceGDI::Release() {
 		hdc = 0;
 		hdcOwned = false;
 	}
+}
+
+void SurfaceGDI::Release() {
+	Clear();
 }
 
 bool SurfaceGDI::Initialised() {
@@ -1066,6 +1071,7 @@ class SurfaceD2D : public Surface {
 	float dpiScaleX;
 	float dpiScaleY;
 
+	void Clear();
 	void SetFont(Font &font_);
 
 public:
@@ -1147,10 +1153,10 @@ SurfaceD2D::SurfaceD2D() :
 }
 
 SurfaceD2D::~SurfaceD2D() {
-	Release();
+	Clear();
 }
 
-void SurfaceD2D::Release() {
+void SurfaceD2D::Clear() {
 	if (pBrush) {
 		pBrush->Release();
 		pBrush = 0;
@@ -1165,6 +1171,10 @@ void SurfaceD2D::Release() {
 		}
 		pRenderTarget = 0;
 	}
+}
+
+void SurfaceD2D::Release() {
+	Clear();
 }
 
 void SurfaceD2D::SetScale() {

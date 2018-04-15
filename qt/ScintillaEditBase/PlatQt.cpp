@@ -165,7 +165,23 @@ SurfaceImpl::SurfaceImpl()
 
 SurfaceImpl::~SurfaceImpl()
 {
-	Release();
+	Clear();
+}
+
+void SurfaceImpl::Clear()
+{
+	if (painterOwned && painter) {
+		delete painter;
+	}
+
+	if (deviceOwned && device) {
+		delete device;
+	}
+
+	device = 0;
+	painter = 0;
+	deviceOwned = false;
+	painterOwned = false;
 }
 
 void SurfaceImpl::Init(WindowID wid)
@@ -197,18 +213,7 @@ void SurfaceImpl::InitPixMap(int width,
 
 void SurfaceImpl::Release()
 {
-	if (painterOwned && painter) {
-		delete painter;
-	}
-
-	if (deviceOwned && device) {
-		delete device;
-	}
-
-	device = 0;
-	painter = 0;
-	deviceOwned = false;
-	painterOwned = false;
+	Clear();
 }
 
 bool SurfaceImpl::Initialised()

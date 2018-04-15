@@ -63,6 +63,9 @@ private:
 	static const int BITS_PER_COMPONENT = 8;
 	static const int BITS_PER_PIXEL = BITS_PER_COMPONENT * 4;
 	static const int BYTES_PER_PIXEL = BITS_PER_PIXEL / 8;
+
+	void Clear();
+
 public:
 	SurfaceImpl();
 	~SurfaceImpl() override;

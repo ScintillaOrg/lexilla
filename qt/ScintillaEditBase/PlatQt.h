@@ -60,6 +60,8 @@ private:
 	const char *codecName;
 	QTextCodec *codec;
 
+	void Clear();
+
 public:
 	SurfaceImpl();
 	virtual ~SurfaceImpl();
