@@ -2978,30 +2978,32 @@ Sci::Position BuiltinRegex::FindText(Document *doc, Sci::Position minPos, Sci::P
 	//     Replace: $(\1-\2)
 	Sci::Position pos = -1;
 	Sci::Position lenRet = 0;
+	const bool searchforLineStart = s[0] == '^';
 	const char searchEnd = s[*length - 1];
 	const char searchEndPrev = (*length > 1) ? s[*length - 2] : '\0';
+	const bool searchforLineEnd = (searchEnd == '$') && (searchEndPrev != '\\');
 	for (Sci::Line line = resr.lineRangeStart; line != resr.lineRangeBreak; line += resr.increment) {
 		Sci::Position startOfLine = static_cast<Sci::Position>(doc->LineStart(line));
 		Sci::Position endOfLine = static_cast<Sci::Position>(doc->LineEnd(line));
 		if (resr.increment == 1) {
 			if (line == resr.lineRangeStart) {
-				if ((resr.startPos != startOfLine) && (s[0] == '^'))
+				if ((resr.startPos != startOfLine) && searchforLineStart)
 					continue;	// Can't match start of line if start position after start of line
 				startOfLine = resr.startPos;
 			}
 			if (line == resr.lineRangeEnd) {
-				if ((resr.endPos != endOfLine) && (searchEnd == '$') && (searchEndPrev != '\\'))
+				if ((resr.endPos != endOfLine) && searchforLineEnd)
 					continue;	// Can't match end of line if end position before end of line
 				endOfLine = resr.endPos;
 			}
 		} else {
 			if (line == resr.lineRangeEnd) {
-				if ((resr.endPos != startOfLine) && (s[0] == '^'))
+				if ((resr.endPos != startOfLine) && searchforLineStart)
 					continue;	// Can't match start of line if end position after start of line
 				startOfLine = resr.endPos;
 			}
 			if (line == resr.lineRangeStart) {
-				if ((resr.startPos != endOfLine) && (searchEnd == '$') && (searchEndPrev != '\\'))
+				if ((resr.startPos != endOfLine) && searchforLineEnd)
 					continue;	// Can't match end of line if start position before end of line
 				endOfLine = resr.startPos;
 			}
@@ -3015,7 +3017,7 @@ Sci::Position BuiltinRegex::FindText(Document *doc, Sci::Position minPos, Sci::P
 			search.eopat[0] = doc->MovePositionOutsideChar(search.eopat[0], 1, false);
 			lenRet = search.eopat[0] - search.bopat[0];
 			// There can be only one start of a line, so no need to look for last match in line
-			if ((resr.increment == -1) && (s[0] != '^')) {
+			if ((resr.increment == -1) && !searchforLineStart) {
 				// Check for the last match on this line.
 				int repetitions = 1000;	// Break out of infinite loop
 				while (success && (search.eopat[0] <= endOfLine) && (repetitions--)) {
