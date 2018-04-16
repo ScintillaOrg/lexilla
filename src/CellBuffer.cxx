@@ -45,8 +45,9 @@ public:
 
 using namespace Scintilla;
 
+template <typename POS>
 class LineVector : public ILineVector {
-	Partitioning<int> starts;
+	Partitioning<POS> starts;
 	PerLine *perLine;
 public:
 	LineVector() : starts(256), perLine(0) {
@@ -65,10 +66,10 @@ public:
 		perLine = pl;
 	}
 	void InsertText(Sci::Line line, Sci::Position delta) override {
-		starts.InsertText(line, delta);
+		starts.InsertText(static_cast<POS>(line), static_cast<POS>(delta));
 	}
 	void InsertLine(Sci::Line line, Sci::Position position, bool lineStart) override {
-		starts.InsertPartition(line, position);
+		starts.InsertPartition(static_cast<POS>(line), static_cast<POS>(position));
 		if (perLine) {
 			if ((line > 0) && lineStart)
 				line--;
@@ -76,10 +77,10 @@ public:
 		}
 	}
 	void SetLineStart(Sci::Line line, Sci::Position position) override {
-		starts.SetPartitionStartPosition(line, position);
+		starts.SetPartitionStartPosition(static_cast<POS>(line), static_cast<POS>(position));
 	}
 	void RemoveLine(Sci::Line line) override {
-		starts.RemovePartition(line);
+		starts.RemovePartition(static_cast<POS>(line));
 		if (perLine) {
 			perLine->RemoveLine(line);
 		}
@@ -88,10 +89,10 @@ public:
 		return starts.Partitions();
 	}
 	Sci::Line LineFromPosition(Sci::Position pos) const override {
-		return starts.PartitionFromPosition(pos);
+		return starts.PartitionFromPosition(static_cast<POS>(pos));
 	}
 	Sci::Position LineStart(Sci::Line line) const override {
-		return starts.PositionFromPartition(line);
+		return starts.PositionFromPartition(static_cast<POS>(line));
 	}
 };
 
@@ -368,7 +369,7 @@ CellBuffer::CellBuffer(bool hasStyles_) :
 	readOnly = false;
 	utf8LineEnds = 0;
 	collectingUndo = true;
-	plv = std::make_unique<LineVector>();
+	plv = std::make_unique<LineVector<Sci::Position>>();
 }
 
 CellBuffer::~CellBuffer() {
