@@ -2561,7 +2561,8 @@ void Editor::NotifyModified(Document *, DocModification mh, void *) {
 			pdoc->IncrementStyleClock();
 		}
 		if (paintState == notPainting) {
-			if (mh.position < pdoc->LineStart(topLine)) {
+			const Sci::Line lineDocTop = pcs->DocFromDisplay(topLine);
+			if (mh.position < pdoc->LineStart(lineDocTop)) {
 				// Styling performed before this view
 				Redraw();
 			} else {
