@@ -26,7 +26,7 @@ TEST_CASE("CellBuffer") {
 	const char sText[] = "Scintilla";
 	const Sci::Position sLength = static_cast<Sci::Position>(strlen(sText));
 
-	CellBuffer cb(true);
+	CellBuffer cb(true, false);
 
 	SECTION("InsertOneLine") {
 		bool startSequence = false;

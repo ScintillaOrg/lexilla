@@ -25,7 +25,7 @@ using namespace Scintilla;
 
 TEST_CASE("ContractionState") {
 
-	std::unique_ptr<IContractionState> pcs = ContractionStateCreate();
+	std::unique_ptr<IContractionState> pcs = ContractionStateCreate(false);
 
 	SECTION("IsEmptyInitially") {
 		REQUIRE(1 == pcs->LinesInDoc());

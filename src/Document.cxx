@@ -82,7 +82,7 @@ int LexInterface::LineEndTypesSupported() {
 }
 
 Document::Document(int options) :
-	cb((options & SC_DOCUMENTOPTION_STYLES_NONE) == 0) {
+	cb((options & SC_DOCUMENTOPTION_STYLES_NONE) == 0, (options & SC_DOCUMENTOPTION_TEXT_LARGE) != 0) {
 	refCount = 0;
 #ifdef _WIN32
 	eolMode = SC_EOL_CRLF;
@@ -113,7 +113,7 @@ Document::Document(int options) :
 	perLineData[ldMargin] = std::make_unique<LineAnnotation>();
 	perLineData[ldAnnotation] = std::make_unique<LineAnnotation>();
 
-	decorations = DecorationListCreate(false);
+	decorations = DecorationListCreate(IsLarge());
 
 	cb.SetPerLine(this);
 }
@@ -1518,6 +1518,11 @@ void Document::ConvertLineEnds(int eolModeSet) {
 		}
 	}
 
+}
+
+int Document::Options() const {
+	return (IsLarge() ? SC_DOCUMENTOPTION_TEXT_LARGE : 0) |
+		(cb.HasStyles() ? 0 : SC_DOCUMENTOPTION_STYLES_NONE);
 }
 
 bool Document::IsWhiteLine(Sci::Line line) const {

@@ -50,7 +50,7 @@ TEST_CASE("SplitVectorWithRangeAdd") {
 
 TEST_CASE("Partitioning") {
 
-	Partitioning<int> part(growSize);
+	Partitioning<Sci::Position> part(growSize);
 
 	SECTION("IsEmptyInitially") {
 		REQUIRE(1 == part.Partitions());

@@ -108,6 +108,7 @@ public:
 class CellBuffer {
 private:
 	bool hasStyles;
+	bool largeDocument;
 	SplitVector<char> substance;
 	SplitVector<char> style;
 	bool readOnly;
@@ -126,7 +127,7 @@ private:
 
 public:
 
-	CellBuffer(bool hasStyles_);
+	CellBuffer(bool hasStyles_, bool largeDocument_);
 	// Deleted so CellBuffer objects can not be copied.
 	CellBuffer(const CellBuffer &) = delete;
 	void operator=(const CellBuffer &) = delete;
@@ -163,6 +164,8 @@ public:
 
 	bool IsReadOnly() const;
 	void SetReadOnly(bool set);
+	bool IsLarge() const;
+	bool HasStyles() const;
 
 	/// The save point is a marker in the undo stack where the container has stated that
 	/// the buffer was saved. Undo and redo can move over the save point.

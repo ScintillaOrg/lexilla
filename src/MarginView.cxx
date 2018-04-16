@@ -367,10 +367,12 @@ void MarginView::PaintMargin(Surface *surface, Sci::Line topLine, PRectangle rc,
 				rcMarker.bottom = static_cast<XYPOSITION>(yposScreen + vs.lineHeight);
 				if (vs.ms[margin].style == SC_MARGIN_NUMBER) {
 					if (firstSubLine) {
-						char number[100] = "";
-						if (lineDoc >= 0)
-							sprintf(number, "%d", lineDoc + 1);
+						std::string sNumber;
+						if (lineDoc >= 0) {
+							sNumber = std::to_string(lineDoc + 1);
+						}
 						if (model.foldFlags & (SC_FOLDFLAG_LEVELNUMBERS | SC_FOLDFLAG_LINESTATE)) {
+							char number[100] = "";
 							if (model.foldFlags & SC_FOLDFLAG_LEVELNUMBERS) {
 								const int lev = model.pdoc->GetLevel(lineDoc);
 								sprintf(number, "%c%c %03X %03X",
@@ -383,14 +385,15 @@ void MarginView::PaintMargin(Surface *surface, Sci::Line topLine, PRectangle rc,
 								const int state = model.pdoc->GetLineState(lineDoc);
 								sprintf(number, "%0X", state);
 							}
+							sNumber = number;
 						}
 						PRectangle rcNumber = rcMarker;
 						// Right justify
-						const XYPOSITION width = surface->WidthText(fontLineNumber, number, static_cast<int>(strlen(number)));
+						const XYPOSITION width = surface->WidthText(fontLineNumber, sNumber.c_str(), static_cast<int>(sNumber.length()));
 						const XYPOSITION xpos = rcNumber.right - width - vs.marginNumberPadding;
 						rcNumber.left = xpos;
 						DrawTextNoClipPhase(surface, rcNumber, vs.styles[STYLE_LINENUMBER],
-							rcNumber.top + vs.maxAscent, number, static_cast<int>(strlen(number)), drawAll);
+							rcNumber.top + vs.maxAscent, sNumber.c_str(), static_cast<int>(sNumber.length()), drawAll);
 					} else if (vs.wrapVisualFlags & SC_WRAPVISUALFLAG_MARGIN) {
 						PRectangle rcWrapMarker = rcMarker;
 						rcWrapMarker.right -= wrapMarkerPaddingRight;

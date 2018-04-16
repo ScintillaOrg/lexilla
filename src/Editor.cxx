@@ -5212,7 +5212,7 @@ void Editor::SetDocPointer(Document *document) {
 		pdoc = document;
 	}
 	pdoc->AddRef();
-	pcs = ContractionStateCreate();
+	pcs = ContractionStateCreate(pdoc->IsLarge());
 
 	// Ensure all positions within document
 	sel.Clear();
@@ -7604,7 +7604,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			Document *doc = new Document(static_cast<int>(lParam));
 			doc->AddRef();
 			doc->Allocate(static_cast<int>(wParam));
-			pcs = ContractionStateCreate();
+			pcs = ContractionStateCreate(pdoc->IsLarge());
 			return reinterpret_cast<sptr_t>(doc);
 		}
 
@@ -7616,12 +7616,15 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		(reinterpret_cast<Document *>(lParam))->Release();
 		break;
 
+	case SCI_GETDOCUMENTOPTIONS:
+		return pdoc->Options();
+
 	case SCI_CREATELOADER: {
 			Document *doc = new Document(static_cast<int>(lParam));
 			doc->AddRef();
 			doc->Allocate(static_cast<int>(wParam));
 			doc->SetUndoCollection(false);
-			pcs = ContractionStateCreate();
+			pcs = ContractionStateCreate(pdoc->IsLarge());
 			return reinterpret_cast<sptr_t>(static_cast<ILoader *>(doc));
 		}
 

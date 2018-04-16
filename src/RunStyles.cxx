@@ -306,3 +306,5 @@ void RunStyles<DISTANCE, STYLE>::Check() const {
 
 template class Scintilla::RunStyles<int, int>;
 template class Scintilla::RunStyles<int, char>;
+template class Scintilla::RunStyles<ptrdiff_t, int>;
+template class Scintilla::RunStyles<ptrdiff_t, char>;

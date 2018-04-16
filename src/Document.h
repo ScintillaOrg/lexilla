@@ -352,6 +352,8 @@ public:
 	void ConvertLineEnds(int eolModeSet);
 	void SetReadOnly(bool set) { cb.SetReadOnly(set); }
 	bool IsReadOnly() const { return cb.IsReadOnly(); }
+	bool IsLarge() const { return cb.IsLarge(); }
+	int Options() const;
 
 	void DelChar(Sci::Position pos);
 	void DelCharBack(Sci::Position pos);
