@@ -157,7 +157,8 @@ public:
 	T PositionFromPartition(T partition) const {
 		PLATFORM_ASSERT(partition >= 0);
 		PLATFORM_ASSERT(partition < body->Length());
-		if ((partition < 0) || (partition >= body->Length())) {
+		const ptrdiff_t lengthBody = body->Length();
+		if ((partition < 0) || (partition >= lengthBody)) {
 			return 0;
 		}
 		T pos = body->ValueAt(partition);
