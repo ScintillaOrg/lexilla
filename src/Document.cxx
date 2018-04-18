@@ -1890,14 +1890,14 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 		} else if (SC_CP_UTF8 == dbcsCodePage) {
 			const size_t maxFoldingExpansion = 4;
 			std::vector<char> searchThing((lengthFind+1) * UTF8MaxBytes * maxFoldingExpansion + 1);
-			const int lenSearch = static_cast<int>(
-				pcf->Fold(&searchThing[0], searchThing.size(), search, lengthFind));
+			const size_t lenSearch =
+				pcf->Fold(&searchThing[0], searchThing.size(), search, lengthFind);
 			char bytes[UTF8MaxBytes + 1];
 			char folded[UTF8MaxBytes * maxFoldingExpansion + 1];
 			while (forward ? (pos < endPos) : (pos >= endPos)) {
 				int widthFirstCharacter = 0;
 				Sci::Position posIndexDocument = pos;
-				int indexSearch = 0;
+				size_t indexSearch = 0;
 				bool characterMatches = true;
 				for (;;) {
 					const unsigned char leadByte = static_cast<unsigned char>(cb.CharAt(posIndexDocument));
@@ -1914,10 +1914,9 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 						widthFirstCharacter = widthChar;
 					if ((posIndexDocument + widthChar) > limitPos)
 						break;
-					const int lenFlat = static_cast<int>(pcf->Fold(folded, sizeof(folded), bytes, widthChar));
-					folded[lenFlat] = 0;
+					const size_t lenFlat = pcf->Fold(folded, sizeof(folded), bytes, widthChar);
 					// memcmp may examine lenFlat bytes in both arguments so assert it doesn't read past end of searchThing
-					assert(static_cast<size_t>(indexSearch + lenFlat) <= searchThing.size());
+					assert((indexSearch + lenFlat) <= searchThing.size());
 					// Does folded match the buffer
 					characterMatches = 0 == memcmp(folded, &searchThing[0] + indexSearch, lenFlat);
 					if (!characterMatches)
@@ -1927,7 +1926,7 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 					if (indexSearch >= lenSearch)
 						break;
 				}
-				if (characterMatches && (indexSearch == static_cast<int>(lenSearch))) {
+				if (characterMatches && (indexSearch == lenSearch)) {
 					if (MatchesWordOptions(word, wordStart, pos, posIndexDocument - pos)) {
 						*length = posIndexDocument - pos;
 						return pos;
@@ -1944,33 +1943,31 @@ Sci::Position Document::FindText(Sci::Position minPos, Sci::Position maxPos, con
 			const size_t maxBytesCharacter = 2;
 			const size_t maxFoldingExpansion = 4;
 			std::vector<char> searchThing((lengthFind+1) * maxBytesCharacter * maxFoldingExpansion + 1);
-			const int lenSearch = static_cast<int>(
-				pcf->Fold(&searchThing[0], searchThing.size(), search, lengthFind));
+			const size_t lenSearch = pcf->Fold(&searchThing[0], searchThing.size(), search, lengthFind);
 			while (forward ? (pos < endPos) : (pos >= endPos)) {
-				int indexDocument = 0;
-				int indexSearch = 0;
+				Sci::Position indexDocument = 0;
+				size_t indexSearch = 0;
 				bool characterMatches = true;
 				while (characterMatches &&
 					((pos + indexDocument) < limitPos) &&
 					(indexSearch < lenSearch)) {
 					char bytes[maxBytesCharacter + 1];
 					bytes[0] = cb.CharAt(pos + indexDocument);
-					const int widthChar = IsDBCSLeadByte(bytes[0]) ? 2 : 1;
+					const Sci::Position widthChar = IsDBCSLeadByte(bytes[0]) ? 2 : 1;
 					if (widthChar == 2)
 						bytes[1] = cb.CharAt(pos + indexDocument + 1);
 					if ((pos + indexDocument + widthChar) > limitPos)
 						break;
 					char folded[maxBytesCharacter * maxFoldingExpansion + 1];
-					const int lenFlat = static_cast<int>(pcf->Fold(folded, sizeof(folded), bytes, widthChar));
-					folded[lenFlat] = 0;
+					const size_t lenFlat = pcf->Fold(folded, sizeof(folded), bytes, widthChar);
 					// memcmp may examine lenFlat bytes in both arguments so assert it doesn't read past end of searchThing
-					assert(static_cast<size_t>(indexSearch + lenFlat) <= searchThing.size());
+					assert((indexSearch + lenFlat) <= searchThing.size());
 					// Does folded match the buffer
 					characterMatches = 0 == memcmp(folded, &searchThing[0] + indexSearch, lenFlat);
 					indexDocument += widthChar;
 					indexSearch += lenFlat;
 				}
-				if (characterMatches && (indexSearch == static_cast<int>(lenSearch))) {
+				if (characterMatches && (indexSearch == lenSearch)) {
 					if (MatchesWordOptions(word, wordStart, pos, indexDocument)) {
 						*length = indexDocument;
 						return pos;
