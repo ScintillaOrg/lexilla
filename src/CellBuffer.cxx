@@ -54,7 +54,6 @@ public:
 		Init();
  	}
 	~LineVector() override {
-		starts.DeleteAll();
  	}
 	void Init() override {
 		starts.DeleteAll();
