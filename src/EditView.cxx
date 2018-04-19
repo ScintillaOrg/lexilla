@@ -1674,7 +1674,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 						} else {
 							if (indicator.sacNormal.style == INDIC_TEXTFORE) {
 								if (indicator.Flags() & SC_INDICFLAG_VALUEFORE)
-									textFore = indicatorValue & SC_INDICVALUEMASK;
+									textFore = ColourDesired(indicatorValue & SC_INDICVALUEMASK);
 								else
 									textFore = indicator.sacNormal.fore;
 							}
