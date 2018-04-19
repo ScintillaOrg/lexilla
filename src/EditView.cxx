@@ -785,10 +785,10 @@ static ColourDesired TextBackground(const EditModel &model, const ViewStyle &vsD
 	}
 }
 
-void EditView::DrawIndentGuide(Surface *surface, Sci::Line lineVisible, int lineHeight, Sci::Position start, PRectangle rcSegment, bool highlight) {
+void EditView::DrawIndentGuide(Surface *surface, Sci::Line lineVisible, int lineHeight, XYPOSITION start, PRectangle rcSegment, bool highlight) {
 	const Point from = Point::FromInts(0, ((lineVisible & 1) && (lineHeight & 1)) ? 1 : 0);
-	const PRectangle rcCopyArea = PRectangle::FromInts(static_cast<int>(start + 1), static_cast<int>(rcSegment.top),
-		static_cast<int>(start + 2), static_cast<int>(rcSegment.bottom));
+	const PRectangle rcCopyArea(start + 1, rcSegment.top,
+		start + 2, rcSegment.bottom);
 	surface->Copy(rcCopyArea, from,
 		highlight ? *pixmapIndentGuideHighlight : *pixmapIndentGuide);
 }
@@ -1700,7 +1700,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 							indentCount <= (ll->positions[i + 1] - epsilon) / indentWidth;
 							indentCount++) {
 							if (indentCount > 0) {
-								const int xIndent = static_cast<int>(indentCount * indentWidth);
+								const XYPOSITION xIndent = floor(indentCount * indentWidth);
 								DrawIndentGuide(surface, lineVisible, vsDraw.lineHeight, xIndent + xStart, rcSegment,
 									(ll->xHighlightGuide == xIndent));
 							}
@@ -1779,7 +1779,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 									indentCount <= (ll->positions[cpos + ts.start + 1] - epsilon) / indentWidth;
 									indentCount++) {
 									if (indentCount > 0) {
-										const int xIndent = static_cast<int>(indentCount * indentWidth);
+										const XYPOSITION xIndent = floor(indentCount * indentWidth);
 										DrawIndentGuide(surface, lineVisible, vsDraw.lineHeight, xIndent + xStart, rcSegment,
 											(ll->xHighlightGuide == xIndent));
 									}
@@ -1856,7 +1856,7 @@ void EditView::DrawIndentGuidesOverEmpty(Surface *surface, const EditModel &mode
 		}
 
 		for (int indentPos = model.pdoc->IndentSize(); indentPos < indentSpace; indentPos += model.pdoc->IndentSize()) {
-			const int xIndent = static_cast<int>(indentPos * vsDraw.spaceWidth);
+			const XYPOSITION xIndent = floor(indentPos * vsDraw.spaceWidth);
 			if (xIndent < xStartText) {
 				DrawIndentGuide(surface, lineVisible, vsDraw.lineHeight, xIndent + xStart, rcLine,
 					(ll->xHighlightGuide == xIndent));
