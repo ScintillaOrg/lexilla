@@ -85,10 +85,10 @@ public:
 		}
 	}
 	Sci::Line Lines() const override {
-		return starts.Partitions();
+		return static_cast<Sci::Line>(starts.Partitions());
 	}
 	Sci::Line LineFromPosition(Sci::Position pos) const override {
-		return starts.PartitionFromPosition(static_cast<POS>(pos));
+		return static_cast<Sci::Line>(starts.PartitionFromPosition(static_cast<POS>(pos)));
 	}
 	Sci::Position LineStart(Sci::Line line) const override {
 		return starts.PositionFromPartition(static_cast<POS>(line));
