@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
+#include <cmath>
 
 #include <stdexcept>
 #include <string>
@@ -150,7 +151,7 @@ void CallTip::DrawChunk(Surface *surface, int &x, const char *s,
 			} else if (IsTabCharacter(s[startSeg])) {
 				xEnd = NextTabPos(x);
 			} else {
-				xEnd = x + RoundXYPosition(surface->WidthText(font, s + startSeg, endSeg - startSeg));
+				xEnd = x + lround(surface->WidthText(font, s + startSeg, endSeg - startSeg));
 				if (draw) {
 					rcClient.left = static_cast<XYPOSITION>(x);
 					rcClient.right = static_cast<XYPOSITION>(xEnd);
@@ -172,7 +173,7 @@ int CallTip::PaintContents(Surface *surfaceWindow, bool draw) {
 	PRectangle rcClient(1.0f, 1.0f, rcClientSize.right - 1, rcClientSize.bottom - 1);
 
 	// To make a nice small call tip window, it is only sized to fit most normal characters without accents
-	const int ascent = RoundXYPosition(surfaceWindow->Ascent(font) - surfaceWindow->InternalLeading(font));
+	const int ascent = lround(surfaceWindow->Ascent(font) - surfaceWindow->InternalLeading(font));
 
 	// For each line...
 	// Draw the definition in three parts: before highlight, highlighted, after highlight
@@ -281,7 +282,7 @@ PRectangle CallTip::CallTipStart(Sci::Position pos, Point pt, int textHeight, co
 		look = newline + 1;
 		numLines++;
 	}
-	lineHeight = RoundXYPosition(surfaceMeasure->Height(font));
+	lineHeight = lround(surfaceMeasure->Height(font));
 
 	// The returned
 	// rectangle is aligned to the right edge of the last arrow encountered in
