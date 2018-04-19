@@ -433,15 +433,15 @@ void EditView::LayoutLine(const EditModel &model, Sci::Line line, Surface *surfa
 			for (int charInLine = 0; charInLine<lineLength; charInLine++) {
 				const char chDoc = ll->chars[charInLine];
 				if (vstyle.styles[ll->styles[charInLine]].caseForce == Style::caseUpper)
-					ll->chars[charInLine] = static_cast<char>(MakeUpperCase(chDoc));
+					ll->chars[charInLine] = MakeUpperCase(chDoc);
 				else if (vstyle.styles[ll->styles[charInLine]].caseForce == Style::caseLower)
-					ll->chars[charInLine] = static_cast<char>(MakeLowerCase(chDoc));
+					ll->chars[charInLine] = MakeLowerCase(chDoc);
 				else if (vstyle.styles[ll->styles[charInLine]].caseForce == Style::caseCamel) {
 					if ((model.pdoc->IsASCIIWordByte(ll->chars[charInLine])) &&
 					  ((charInLine == 0) || (!model.pdoc->IsASCIIWordByte(ll->chars[charInLine - 1])))) {
-						ll->chars[charInLine] = static_cast<char>(MakeUpperCase(chDoc));
+						ll->chars[charInLine] = MakeUpperCase(chDoc);
 					} else {
-						ll->chars[charInLine] = static_cast<char>(MakeLowerCase(chDoc));
+						ll->chars[charInLine] = MakeLowerCase(chDoc);
 					}
 				}
 			}
