@@ -217,15 +217,15 @@ public:
 		return co;
 	}
 
-	unsigned int GetRed() const {
+	unsigned char GetRed() const {
 		return co & 0xff;
 	}
 
-	unsigned int GetGreen() const {
+	unsigned char GetGreen() const {
 		return (co >> 8) & 0xff;
 	}
 
-	unsigned int GetBlue() const {
+	unsigned char GetBlue() const {
 		return (co >> 16) & 0xff;
 	}
 };
