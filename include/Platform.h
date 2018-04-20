@@ -99,7 +99,7 @@ public:
 	XYPOSITION x;
 	XYPOSITION y;
 
-	explicit Point(XYPOSITION x_=0, XYPOSITION y_=0) : x(x_), y(y_) {
+	constexpr explicit Point(XYPOSITION x_=0, XYPOSITION y_=0) : x(x_), y(y_) {
 	}
 
 	static Point FromInts(int x_, int y_) {
