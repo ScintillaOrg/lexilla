@@ -185,7 +185,7 @@ int CallTip::PaintContents(Surface *surfaceWindow, bool draw) {
 
 	while (moreChunks) {
 		const char *chunkEnd = strchr(chunkVal, '\n');
-		if (chunkEnd == NULL) {
+		if (!chunkEnd) {
 			chunkEnd = chunkVal + strlen(chunkVal);
 			moreChunks = false;
 		}
@@ -271,17 +271,11 @@ PRectangle CallTip::CallTipStart(Sci::Position pos, Point pt, int textHeight, co
 	font.Create(fp);
 	// Look for multiple lines in the text
 	// Only support \n here - simply means container must avoid \r!
-	int numLines = 1;
-	const char *newline;
-	const char *look = val.c_str();
+	const int numLines = 1 + static_cast<int>(std::count(val.begin(), val.end(), '\n'));
 	rectUp = PRectangle(0,0,0,0);
 	rectDown = PRectangle(0,0,0,0);
 	offsetMain = insetX;            // changed to right edge of any arrows
 	const int width = PaintContents(surfaceMeasure.get(), false) + insetX;
-	while ((newline = strchr(look, '\n')) != NULL) {
-		look = newline + 1;
-		numLines++;
-	}
 	lineHeight = static_cast<int>(lround(surfaceMeasure->Height(font)));
 
 	// The returned
