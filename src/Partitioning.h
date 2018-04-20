@@ -102,7 +102,7 @@ public:
 	~Partitioning() {
 	}
 
-	T Partitions() const {
+	T Partitions() const noexcept {
 		return static_cast<T>(body->Length())-1;
 	}
 
@@ -154,7 +154,7 @@ public:
 		body->Delete(partition);
 	}
 
-	T PositionFromPartition(T partition) const {
+	T PositionFromPartition(T partition) const noexcept {
 		PLATFORM_ASSERT(partition >= 0);
 		PLATFORM_ASSERT(partition < body->Length());
 		const ptrdiff_t lengthBody = body->Length();
@@ -168,7 +168,7 @@ public:
 	}
 
 	/// Return value in range [0 .. Partitions() - 1] even for arguments outside interval
-	T PartitionFromPosition(T pos) const {
+	T PartitionFromPosition(T pos) const noexcept {
 		if (body->Length() <= 1)
 			return 0;
 		if (pos >= (PositionFromPartition(Partitions())))

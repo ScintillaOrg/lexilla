@@ -104,7 +104,7 @@ public:
 
 	/// Retrieve the element at a particular position.
 	/// Retrieving positions outside the range of the buffer returns empty or 0.
-	const T& ValueAt(ptrdiff_t position) const {
+	const T& ValueAt(ptrdiff_t position) const noexcept {
 		if (position < part1Length) {
 			if (position < 0) {
 				return empty;
@@ -144,7 +144,7 @@ public:
 
 	/// Retrieve the element at a particular position.
 	/// The position must be within bounds or an assertion is triggered.
-	const T &operator[](ptrdiff_t position) const {
+	const T &operator[](ptrdiff_t position) const noexcept {
 		PLATFORM_ASSERT(position >= 0 && position < lengthBody);
 		if (position < part1Length) {
 			return body[position];
@@ -156,7 +156,7 @@ public:
 	/// Retrieve reference to the element at a particular position.
 	/// This, instead of the const variant, can be used to mutate in-place.
 	/// The position must be within bounds or an assertion is triggered.
-	T &operator[](ptrdiff_t position) {
+	T &operator[](ptrdiff_t position) noexcept {
 		PLATFORM_ASSERT(position >= 0 && position < lengthBody);
 		if (position < part1Length) {
 			return body[position];
@@ -166,7 +166,7 @@ public:
 	}
 
 	/// Retrieve the length of the buffer.
-	ptrdiff_t Length() const {
+	ptrdiff_t Length() const noexcept {
 		return lengthBody;
 	}
 
