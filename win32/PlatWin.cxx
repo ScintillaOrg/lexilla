@@ -1997,7 +1997,7 @@ public:
 	}
 
 	ListItemData Get(size_t index) const {
-		if (index >= 0 && index < data.size()) {
+		if (index < data.size()) {
 			return data[index];
 		} else {
 			ListItemData missing = {"", -1};
