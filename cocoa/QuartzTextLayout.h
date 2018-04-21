@@ -37,8 +37,9 @@ public:
 		}
 	}
 
-	inline void setText(const UInt8 *buffer, size_t byteLength, CFStringEncoding encoding, const QuartzTextStyle &r) {
-		CFStringRef str = CFStringCreateWithBytes(NULL, buffer, byteLength, encoding, false);
+	void setText(const char *buffer, size_t byteLength, CFStringEncoding encoding, const QuartzTextStyle &r) {
+		const UInt8 *puiBuffer = reinterpret_cast<const UInt8 *>(buffer);
+		CFStringRef str = CFStringCreateWithBytes(NULL, puiBuffer, byteLength, encoding, false);
 		if (!str)
 			return;
 

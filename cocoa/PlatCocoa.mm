@@ -97,9 +97,17 @@ Font::~Font() {
 
 //--------------------------------------------------------------------------------------------------
 
-static int FontCharacterSet(Font &f) {
-	return static_cast<QuartzTextStyle *>(f.GetID())->getCharacterSet();
+static QuartzTextStyle *TextStyleFromFont(Font &f) {
+	return static_cast<QuartzTextStyle *>(f.GetID());
 }
+
+//--------------------------------------------------------------------------------------------------
+
+static int FontCharacterSet(Font &f) {
+	return TextStyleFromFont(f)->getCharacterSet();
+}
+
+//--------------------------------------------------------------------------------------------------
 
 /**
  * Creates a CTFontRef with the given properties.
@@ -862,12 +870,12 @@ void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION yba
 	ColourDesired colour(fore.AsLong());
 	CGColorRef color = CGColorCreateGenericRGB(colour.GetRed()/255.0, colour.GetGreen()/255.0, colour.GetBlue()/255.0, 1.0);
 
-	QuartzTextStyle *style = static_cast<QuartzTextStyle *>(font_.GetID());
+	QuartzTextStyle *style = TextStyleFromFont(font_);
 	style->setCTStyleColor(color);
 
 	CGColorRelease(color);
 
-	textLayout->setText(reinterpret_cast<const UInt8 *>(s), len, encoding, *static_cast<QuartzTextStyle *>(font_.GetID()));
+	textLayout->setText(s, len, encoding, *style);
 	textLayout->draw(rc.left, ybase);
 }
 
@@ -875,7 +883,7 @@ void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION yba
 
 void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions) {
 	CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
-	textLayout->setText(reinterpret_cast<const UInt8 *>(s), len, encoding, *static_cast<QuartzTextStyle *>(font_.GetID()));
+	textLayout->setText(s, len, encoding, *TextStyleFromFont(font_));
 
 	CTLineRef mLine = textLayout->getCTLine();
 	assert(mLine != NULL);
@@ -923,7 +931,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION 
 XYPOSITION SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 	if (font_.GetID()) {
 		CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
-		textLayout->setText(reinterpret_cast<const UInt8 *>(s), len, encoding, *static_cast<QuartzTextStyle *>(font_.GetID()));
+		textLayout->setText(s, len, encoding, *TextStyleFromFont(font_));
 
 		return static_cast<XYPOSITION>(textLayout->MeasureStringWidth());
 	}
@@ -934,7 +942,7 @@ XYPOSITION SurfaceImpl::WidthChar(Font &font_, char ch) {
 	char str[2] = { ch, '\0' };
 	if (font_.GetID()) {
 		CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
-		textLayout->setText(reinterpret_cast<const UInt8 *>(str), 1, encoding, *static_cast<QuartzTextStyle *>(font_.GetID()));
+		textLayout->setText(str, 1, encoding, *TextStyleFromFont(font_));
 
 		return textLayout->MeasureStringWidth();
 	} else
@@ -949,7 +957,7 @@ XYPOSITION SurfaceImpl::Ascent(Font &font_) {
 	if (!font_.GetID())
 		return 1;
 
-	float ascent = static_cast<QuartzTextStyle *>(font_.GetID())->getAscent();
+	float ascent = TextStyleFromFont(font_)->getAscent();
 	return ascent + 0.5f;
 
 }
@@ -958,7 +966,7 @@ XYPOSITION SurfaceImpl::Descent(Font &font_) {
 	if (!font_.GetID())
 		return 1;
 
-	float descent = static_cast<QuartzTextStyle *>(font_.GetID())->getDescent();
+	float descent = TextStyleFromFont(font_)->getDescent();
 	return descent + 0.5f;
 
 }
@@ -1490,7 +1498,7 @@ void ListBoxImpl::Create(Window & /*parent*/, int /*ctrlID*/, Scintilla::Point p
 void ListBoxImpl::SetFont(Font &font_) {
 	// NSCell setFont takes an NSFont* rather than a CTFontRef but they
 	// are the same thing toll-free bridged.
-	QuartzTextStyle *style = static_cast<QuartzTextStyle *>(font_.GetID());
+	QuartzTextStyle *style = TextStyleFromFont(font_);
 	font.Release();
 	font.SetID(new QuartzTextStyle(*style));
 	NSFont *pfont = (__bridge NSFont *)style->getFontRef();
