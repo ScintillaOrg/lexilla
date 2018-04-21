@@ -23,10 +23,12 @@ public:
 	}
 	// Deleted so SplitVectorWithRangeAdd objects can not be copied.
 	SplitVectorWithRangeAdd(const SplitVectorWithRangeAdd &) = delete;
+	SplitVectorWithRangeAdd(SplitVectorWithRangeAdd &&) = delete;
 	void operator=(const SplitVectorWithRangeAdd &) = delete;
+	void operator=(SplitVectorWithRangeAdd &&) = delete;
 	~SplitVectorWithRangeAdd() {
 	}
-	void RangeAddDelta(ptrdiff_t start, ptrdiff_t end, T delta) {
+	void RangeAddDelta(ptrdiff_t start, ptrdiff_t end, T delta) noexcept {
 		// end is 1 past end, so end-start is number of elements to change
 		ptrdiff_t i = 0;
 		const ptrdiff_t rangeLength = end - start;
@@ -63,7 +65,7 @@ private:
 	std::unique_ptr<SplitVectorWithRangeAdd<T>> body;
 
 	// Move step forward
-	void ApplyStep(T partitionUpTo) {
+	void ApplyStep(T partitionUpTo) noexcept {
 		if (stepLength != 0) {
 			body->RangeAddDelta(stepPartition+1, partitionUpTo + 1, stepLength);
 		}
@@ -75,7 +77,7 @@ private:
 	}
 
 	// Move step backward
-	void BackStep(T partitionDownTo) {
+	void BackStep(T partitionDownTo) noexcept {
 		if (stepLength != 0) {
 			body->RangeAddDelta(partitionDownTo+1, stepPartition+1, -stepLength);
 		}
@@ -91,13 +93,15 @@ private:
 	}
 
 public:
-	explicit Partitioning(int growSize) {
+	explicit Partitioning(int growSize) : stepPartition(0), stepLength(0) {
 		Allocate(growSize);
 	}
 
 	// Deleted so Partitioning objects can not be copied.
 	Partitioning(const Partitioning &) = delete;
+	Partitioning(Partitioning &&) = delete;
 	void operator=(const Partitioning &) = delete;
+	void operator=(Partitioning &&) = delete;
 
 	~Partitioning() {
 	}
@@ -114,7 +118,7 @@ public:
 		stepPartition++;
 	}
 
-	void SetPartitionStartPosition(T partition, T pos) {
+	void SetPartitionStartPosition(T partition, T pos) noexcept {
 		ApplyStep(partition+1);
 		if ((partition < 0) || (partition > body->Length())) {
 			return;

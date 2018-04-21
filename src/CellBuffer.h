@@ -130,7 +130,9 @@ public:
 	CellBuffer(bool hasStyles_, bool largeDocument_);
 	// Deleted so CellBuffer objects can not be copied.
 	CellBuffer(const CellBuffer &) = delete;
+	CellBuffer(CellBuffer &&) = delete;
 	void operator=(const CellBuffer &) = delete;
+	void operator=(CellBuffer &&) = delete;
 	~CellBuffer();
 
 	/// Retrieving positions outside the range of the buffer works and returns 0
