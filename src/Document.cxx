@@ -604,10 +604,10 @@ bool Document::InGoodUTF8(Sci::Position pos, Sci::Position &start, Sci::Position
 		if (len > trailBytes)
 			// pos too far from lead
 			return false;
-		char charBytes[UTF8MaxBytes] = {static_cast<char>(leadByte),0,0,0};
+		unsigned char charBytes[UTF8MaxBytes] = {leadByte,0,0,0};
 		for (Sci::Position b=1; b<widthCharBytes && ((start+b) < Length()); b++)
 			charBytes[b] = cb.CharAt(start+b);
-		const int utf8status = UTF8Classify(reinterpret_cast<const unsigned char *>(charBytes), widthCharBytes);
+		const int utf8status = UTF8Classify(charBytes, widthCharBytes);
 		if (utf8status & UTF8MaskInvalid)
 			return false;
 		end = start + widthCharBytes;
@@ -705,10 +705,10 @@ Sci::Position Document::NextPosition(Sci::Position pos, int moveDir) const noexc
 					pos++;
 				} else {
 					const int widthCharBytes = UTF8BytesOfLead[leadByte];
-					char charBytes[UTF8MaxBytes] = {static_cast<char>(leadByte),0,0,0};
+					unsigned char charBytes[UTF8MaxBytes] = {leadByte,0,0,0};
 					for (int b=1; b<widthCharBytes; b++)
 						charBytes[b] = cb.CharAt(pos+b);
-					const int utf8status = UTF8Classify(reinterpret_cast<const unsigned char *>(charBytes), widthCharBytes);
+					const int utf8status = UTF8Classify(charBytes, widthCharBytes);
 					if (utf8status & UTF8MaskInvalid)
 						pos++;
 					else
@@ -940,7 +940,7 @@ bool SCI_METHOD Document::IsDBCSLeadByte(char ch) const {
 bool Document::IsDBCSLeadByteNoExcept(char ch) const noexcept {
 	// Used inside core Scintilla
 	// Byte ranges found in Wikipedia articles with relevant search strings in each case
-	const unsigned char uch = static_cast<unsigned char>(ch);
+	const unsigned char uch = ch;
 	switch (dbcsCodePage) {
 		case 932:
 			// Shift_jis
@@ -988,7 +988,7 @@ int Document::SafeSegment(const char *text, int length, int lengthSegment) const
 	int lastPunctuationBreak = -1;
 	int lastEncodingAllowedBreak = 0;
 	for (int j=0; j < lengthSegment;) {
-		const unsigned char ch = static_cast<unsigned char>(text[j]);
+		const unsigned char ch = text[j];
 		if (j > 0) {
 			if (IsSpaceOrTab(text[j - 1]) && !IsSpaceOrTab(text[j])) {
 				lastSpaceBreak = j;
@@ -2609,7 +2609,7 @@ public:
 	const Document *doc;
 	Sci::Position position;
 
-	ByteIterator(const Document *doc_=nullptr, Sci::Position position_=0) noexcept : 
+	ByteIterator(const Document *doc_=nullptr, Sci::Position position_=0) noexcept :
 		doc(doc_), position(position_) {
 	}
 	ByteIterator(const ByteIterator &other) noexcept {

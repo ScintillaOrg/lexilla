@@ -382,7 +382,7 @@ char CellBuffer::CharAt(Sci::Position position) const noexcept {
 }
 
 unsigned char CellBuffer::UCharAt(Sci::Position position) const noexcept {
-	return static_cast<unsigned char>(substance.ValueAt(position));
+	return substance.ValueAt(position);
 }
 
 void CellBuffer::GetCharRange(char *buffer, Sci::Position position, Sci::Position lengthRetrieve) const {

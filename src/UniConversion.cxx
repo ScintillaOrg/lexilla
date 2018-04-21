@@ -87,9 +87,8 @@ void UTF8FromUTF32Character(int uch, char *putf) {
 
 size_t UTF16Length(const char *s, size_t len) {
 	size_t ulen = 0;
-	const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
 	for (size_t i = 0; i < len;) {
-		const unsigned char ch = us[i];
+		const unsigned char ch = s[i];
 		const unsigned int byteCount = UTF8BytesOfLead[ch];
 		const unsigned int utf16Len = UTF16LengthFromUTF8ByteCount(byteCount);
 		i += byteCount;
