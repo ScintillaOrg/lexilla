@@ -144,7 +144,7 @@ static const KeyToCommand macMapDefault[] = {
 @interface FindHighlightLayer : CAGradientLayer {
 @private
 	NSString *sFind;
-	int positionFind;
+	long positionFind;
 	BOOL retaining;
 	CGFloat widthText;
 	CGFloat heightLine;
@@ -153,7 +153,7 @@ static const KeyToCommand macMapDefault[] = {
 }
 
 @property(copy) NSString *sFind;
-@property(assign) int positionFind;
+@property(assign) long positionFind;
 @property(assign) BOOL retaining;
 @property(assign) CGFloat widthText;
 @property(assign) CGFloat heightLine;
@@ -1024,7 +1024,7 @@ void ScintillaCocoa::Paste(bool forceRectangular) {
 
 	pdoc->BeginUndoAction();
 	ClearSelection(false);
-	InsertPasteShape(selectedText.Data(), static_cast<int>(selectedText.Length()),
+	InsertPasteShape(selectedText.Data(), selectedText.Length(),
 			 selectedText.rectangular ? pasteRectangular : pasteStream);
 	pdoc->EndUndoAction();
 
@@ -1287,7 +1287,9 @@ void ScintillaCocoa::StartDrag() {
 	Sci::Line startLine = static_cast<Sci::Line>(pdoc->LineFromPosition(selStart));
 	Sci::Line endLine = static_cast<Sci::Line>(pdoc->LineFromPosition(selEnd));
 	Point pt;
-	long startPos, endPos, ep;
+	Sci::Position startPos;
+	Sci::Position endPos;
+	Sci::Position ep;
 	PRectangle rcSel;
 
 	if (startLine==endLine && WndProc(SCI_GETWRAPMODE, 0, 0) != SC_WRAP_NONE) {
@@ -1302,8 +1304,8 @@ void ScintillaCocoa::StartDrag() {
 		// step back a position if we're counting the newline
 		ep =       WndProc(SCI_GETLINEENDPOSITION,      startLine, 0);
 		if (endPos > ep) endPos = ep;
-		ptStart = LocationFromPosition(static_cast<int>(startPos));
-		ptEnd =   LocationFromPosition(static_cast<int>(endPos));
+		ptStart = LocationFromPosition(startPos);
+		ptEnd =   LocationFromPosition(endPos);
 		if (ptStart.y == ptEnd.y) {
 			// We're just selecting part of one visible line
 			rcSel.left = ptStart.x;
@@ -1311,7 +1313,7 @@ void ScintillaCocoa::StartDrag() {
 		} else {
 			// Find the bounding box.
 			startPos = WndProc(SCI_POSITIONFROMLINE, startLine, 0);
-			rcSel.left = LocationFromPosition(static_cast<int>(startPos)).x;
+			rcSel.left = LocationFromPosition(startPos).x;
 			rcSel.right = client.right;
 		}
 		rcSel.top = ptStart.y;
@@ -1328,10 +1330,10 @@ void ScintillaCocoa::StartDrag() {
 			// step back a position if we're counting the newline
 			ep = WndProc(SCI_GETLINEENDPOSITION, l, 0);
 			if (endPos > ep) endPos = ep;
-			pt = LocationFromPosition(static_cast<int>(startPos)); // top left of line selection
+			pt = LocationFromPosition(startPos); // top left of line selection
 			if (pt.x < rcSel.left || rcSel.left < 0) rcSel.left = pt.x;
 			if (pt.y < rcSel.top || rcSel.top < 0) rcSel.top = pt.y;
-			pt = LocationFromPosition(static_cast<int>(endPos)); // top right of line selection
+			pt = LocationFromPosition(endPos); // top right of line selection
 			pt.y += vs.lineHeight; // get to the bottom of the line
 			if (pt.x > rcSel.right || rcSel.right < 0) {
 				if (pt.x > client.right)
@@ -1589,7 +1591,7 @@ ptrdiff_t ScintillaCocoa::TargetAsUTF8(char *text) {
 		if (text)
 			memcpy(text, tmputf.c_str(), tmputf.length());
 		CFRelease(cfsVal);
-		return static_cast<ptrdiff_t>(tmputf.length());
+		return tmputf.length();
 	}
 	return targetLength;
 }
@@ -1598,8 +1600,8 @@ ptrdiff_t ScintillaCocoa::TargetAsUTF8(char *text) {
 
 // Returns the text in the range converted to an NSString.
 NSString *ScintillaCocoa::RangeTextAsString(NSRange rangePositions) const {
-	const std::string text = RangeText(static_cast<int>(rangePositions.location),
-					   static_cast<int>(NSMaxRange(rangePositions)));
+	const std::string text = RangeText(rangePositions.location,
+					   NSMaxRange(rangePositions));
 	if (IsUnicodeMode()) {
 		return @(text.c_str());
 	} else {
@@ -1626,7 +1628,7 @@ NSRange ScintillaCocoa::RangeForVisibleLine(NSInteger lineVisible) {
 // Returns visible line number of a text position in characters.
 NSInteger ScintillaCocoa::VisibleLineForIndex(NSInteger index) {
 	const NSRange rangePosition = PositionsFromCharacters(NSMakeRange(index, 0));
-	const Sci::Line lineVisible = DisplayFromPosition(static_cast<Sci::Position>(rangePosition.location));
+	const Sci::Line lineVisible = DisplayFromPosition(rangePosition.location);
 	return lineVisible;
 }
 
@@ -1638,11 +1640,11 @@ NSRect ScintillaCocoa::FrameForRange(NSRange rangeCharacters) {
 
 	NSUInteger rangeEnd = NSMaxRange(posRange);
 	const bool endsWithLineEnd = rangeCharacters.length &&
-				     (pdoc->GetColumn(static_cast<int>(rangeEnd)) == 0);
+				     (pdoc->GetColumn(rangeEnd) == 0);
 
-	Point ptStart = LocationFromPosition(static_cast<int>(posRange.location));
+	Point ptStart = LocationFromPosition(posRange.location);
 	const PointEnd peEndRange = static_cast<PointEnd>(peSubLineEnd|peLineEnd);
-	Point ptEnd = LocationFromPosition(static_cast<int>(rangeEnd), peEndRange);
+	Point ptEnd = LocationFromPosition(rangeEnd, peEndRange);
 
 	NSRect rect = NSMakeRect(ptStart.x, ptStart.y,
 				 ptEnd.x - ptStart.x,
@@ -1678,7 +1680,7 @@ ptrdiff_t ScintillaCocoa::EncodedFromUTF8(char *utf8, char *encoded) const {
 	if (IsUnicodeMode()) {
 		if (encoded)
 			memcpy(encoded, utf8, inputLength);
-		return static_cast<ptrdiff_t>(inputLength);
+		return inputLength;
 	} else {
 		// Need to convert
 		const CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
@@ -1689,7 +1691,7 @@ ptrdiff_t ScintillaCocoa::EncodedFromUTF8(char *utf8, char *encoded) const {
 		if (encoded)
 			memcpy(encoded, sEncoded.c_str(), sEncoded.length());
 		CFRelease(cfsVal);
-		return static_cast<ptrdiff_t>(sEncoded.length());
+		return sEncoded.length();
 	}
 }
 
@@ -2147,7 +2149,7 @@ bool ScintillaCocoa::KeyboardInput(NSEvent *event) {
 /**
  * Used to insert already processed text provided by the Cocoa text input system.
  */
-int ScintillaCocoa::InsertText(NSString *input) {
+ptrdiff_t ScintillaCocoa::InsertText(NSString *input) {
 	CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
 				    vs.styles[STYLE_DEFAULT].characterSet);
 	std::string encoded = EncodedBytesString((__bridge CFStringRef)input, encoding);
@@ -2155,7 +2157,7 @@ int ScintillaCocoa::InsertText(NSString *input) {
 	if (encoded.length() > 0) {
 		AddCharUTF(encoded.c_str(), static_cast<unsigned int>(encoded.length()), false);
 	}
-	return static_cast<int>(encoded.length());
+	return encoded.length();
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -2164,10 +2166,10 @@ int ScintillaCocoa::InsertText(NSString *input) {
  * Convert from a range of characters to a range of bytes.
  */
 NSRange ScintillaCocoa::PositionsFromCharacters(NSRange rangeCharacters) const {
-	long start = pdoc->GetRelativePositionUTF16(0, static_cast<int>(rangeCharacters.location));
+	Sci::Position start = pdoc->GetRelativePositionUTF16(0, rangeCharacters.location);
 	if (start == INVALID_POSITION)
 		start = pdoc->Length();
-	long end = pdoc->GetRelativePositionUTF16(static_cast<int>(start), static_cast<int>(rangeCharacters.length));
+	Sci::Position end = pdoc->GetRelativePositionUTF16(start, rangeCharacters.length);
 	if (end == INVALID_POSITION)
 		end = pdoc->Length();
 	return NSMakeRange(start, end - start);
@@ -2179,9 +2181,9 @@ NSRange ScintillaCocoa::PositionsFromCharacters(NSRange rangeCharacters) const {
  * Convert from a range of characters from a range of bytes.
  */
 NSRange ScintillaCocoa::CharactersFromPositions(NSRange rangePositions) const {
-	const long start = pdoc->CountUTF16(0, static_cast<int>(rangePositions.location));
-	const long len = pdoc->CountUTF16(static_cast<int>(rangePositions.location),
-					  static_cast<int>(NSMaxRange(rangePositions)));
+	const Sci::Position start = pdoc->CountUTF16(0, rangePositions.location);
+	const Sci::Position len = pdoc->CountUTF16(rangePositions.location,
+					  NSMaxRange(rangePositions));
 	return NSMakeRange(start, len);
 }
 
@@ -2447,14 +2449,14 @@ void ScintillaCocoa::ShowFindIndicatorForRange(NSRange charRange, BOOL retaining
 		CFStringEncoding encoding = EncodingFromCharacterSet(IsUnicodeMode(),
 					    vs.styles[STYLE_DEFAULT].characterSet);
 		std::vector<char> buffer(charRange.length);
-		pdoc->GetCharRange(&buffer[0], static_cast<int>(charRange.location), static_cast<int>(charRange.length));
+		pdoc->GetCharRange(&buffer[0], charRange.location, charRange.length);
 
 		CFStringRef cfsFind = CFStringFromString(&buffer[0], charRange.length, encoding);
 		layerFindIndicator.sFind = (__bridge NSString *)cfsFind;
 		if (cfsFind)
 			CFRelease(cfsFind);
 		layerFindIndicator.retaining = retaining;
-		layerFindIndicator.positionFind = static_cast<int>(charRange.location);
+		layerFindIndicator.positionFind = charRange.location;
 		// SCI_GETSTYLEAT reports a signed byte but want an unsigned to index into styles
 		const char styleByte = static_cast<char>(WndProc(SCI_GETSTYLEAT, charRange.location, 0));
 		const long style = static_cast<unsigned char>(styleByte);

@@ -600,7 +600,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 		NSRange posRangeCurrent = mOwner.backend->PositionsFromCharacters(NSMakeRange(replacementRange.location, 0));
 		// Note: Scintilla internally works almost always with bytes instead chars, so we need to take
 		//       this into account when determining selection ranges and such.
-		int lengthInserted = mOwner.backend->InsertText(newText);
+		ptrdiff_t lengthInserted = mOwner.backend->InsertText(newText);
 		posRangeCurrent.length = lengthInserted;
 		mMarkedTextRange = mOwner.backend->CharactersFromPositions(posRangeCurrent);
 		// Mark the just inserted text. Keep the marked range for later reset.
@@ -941,7 +941,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
  */
 - (id) accessibilityValue {
 	const sptr_t length = [mOwner message: SCI_GETLENGTH];
-	return mOwner.backend->RangeTextAsString(NSMakeRange(0, static_cast<int>(length)));
+	return mOwner.backend->RangeTextAsString(NSMakeRange(0, length));
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -950,7 +950,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
  * NSAccessibility : Line of the caret.
  */
 - (NSInteger) accessibilityInsertionPointLineNumber {
-	const int caret = static_cast<int>([mOwner message: SCI_GETCURRENTPOS]);
+	const Sci::Position caret = [mOwner message: SCI_GETCURRENTPOS];
 	const NSRange rangeCharactersCaret = mOwner.backend->CharactersFromPositions(NSMakeRange(caret, 0));
 	return mOwner.backend->VisibleLineForIndex(rangeCharactersCaret.location);
 }
