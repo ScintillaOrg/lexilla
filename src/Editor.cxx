@@ -5573,7 +5573,7 @@ Sci::Line Editor::WrapCount(Sci::Line line) {
 	}
 }
 
-void Editor::AddStyledText(char *buffer, Sci::Position appendLength) {
+void Editor::AddStyledText(const char *buffer, Sci::Position appendLength) {
 	// The buffer consists of alternating character bytes and style bytes
 	const Sci::Position textLength = appendLength / 2;
 	std::string text(textLength, '\0');
