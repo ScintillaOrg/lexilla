@@ -1781,34 +1781,6 @@ void Menu::Show(Point, Window &) {
 	// takes care to show it properly.
 }
 
-//----------------- ElapsedTime --------------------------------------------------------------------
-
-// ElapsedTime is used for precise performance measurements during development
-// and not for anything a user sees.
-
-ElapsedTime::ElapsedTime() {
-	struct timeval curTime;
-	gettimeofday(&curTime, NULL);
-
-	bigBit = curTime.tv_sec;
-	littleBit = curTime.tv_usec;
-}
-
-double ElapsedTime::Duration(bool reset) {
-	struct timeval curTime;
-	gettimeofday(&curTime, NULL);
-	long endBigBit = curTime.tv_sec;
-	long endLittleBit = curTime.tv_usec;
-	double result = 1000000.0 * (endBigBit - bigBit);
-	result += endLittleBit - littleBit;
-	result /= 1000000.0;
-	if (reset) {
-		bigBit = endBigBit;
-		littleBit = endLittleBit;
-	}
-	return result;
-}
-
 //----------------- Platform -----------------------------------------------------------------------
 
 ColourDesired Platform::Chrome() {

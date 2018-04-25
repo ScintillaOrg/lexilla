@@ -2901,54 +2901,6 @@ void Menu::Show(Point pt, Window &w) {
 	Destroy();
 }
 
-static bool initialisedET = false;
-static bool usePerformanceCounter = false;
-static LARGE_INTEGER frequency;
-
-ElapsedTime::ElapsedTime() {
-	if (!initialisedET) {
-		usePerformanceCounter = ::QueryPerformanceFrequency(&frequency) != 0;
-		initialisedET = true;
-	}
-	if (usePerformanceCounter) {
-		LARGE_INTEGER timeVal;
-		::QueryPerformanceCounter(&timeVal);
-		bigBit = timeVal.HighPart;
-		littleBit = timeVal.LowPart;
-	} else {
-		bigBit = clock();
-		littleBit = 0;
-	}
-}
-
-double ElapsedTime::Duration(bool reset) {
-	double result;
-	long endBigBit;
-	long endLittleBit;
-
-	if (usePerformanceCounter) {
-		LARGE_INTEGER lEnd;
-		::QueryPerformanceCounter(&lEnd);
-		endBigBit = lEnd.HighPart;
-		endLittleBit = lEnd.LowPart;
-		LARGE_INTEGER lBegin;
-		lBegin.HighPart = bigBit;
-		lBegin.LowPart = littleBit;
-		const double elapsed = static_cast<double>(lEnd.QuadPart - lBegin.QuadPart);
-		result = elapsed / static_cast<double>(frequency.QuadPart);
-	} else {
-		endBigBit = clock();
-		endLittleBit = 0;
-		const double elapsed = endBigBit - bigBit;
-		result = elapsed / CLOCKS_PER_SEC;
-	}
-	if (reset) {
-		bigBit = endBigBit;
-		littleBit = endLittleBit;
-	}
-	return result;
-}
-
 class DynamicLibraryImpl : public DynamicLibrary {
 protected:
 	HMODULE h;

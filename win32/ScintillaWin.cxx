@@ -21,6 +21,7 @@
 #include <map>
 #include <algorithm>
 #include <memory>
+#include <chrono>
 
 #undef _WIN32_WINNT
 #define _WIN32_WINNT 0x0500
@@ -80,6 +81,7 @@
 #include "MarginView.h"
 #include "EditView.h"
 #include "Editor.h"
+#include "ElapsedPeriod.h"
 
 #include "AutoComplete.h"
 #include "ScintillaBase.h"
@@ -813,7 +815,7 @@ void ScintillaWin::AddCharUTF16(wchar_t const *wcs, unsigned int wclen) {
 }
 
 sptr_t ScintillaWin::WndPaint(uptr_t wParam) {
-	//ElapsedTime et;
+	//ElapsedPeriod ep;
 
 	// Redirect assertions to debug output and save current state
 	const bool assertsPopup = Platform::ShowAssertionPopUps(false);
@@ -878,7 +880,7 @@ sptr_t ScintillaWin::WndPaint(uptr_t wParam) {
 	// Restore debug output state
 	Platform::ShowAssertionPopUps(assertsPopup);
 
-	//Platform::DebugPrintf("Paint took %g\n", et.Duration());
+	//Platform::DebugPrintf("Paint took %g\n", ep.Duration());
 	return 0l;
 }
 

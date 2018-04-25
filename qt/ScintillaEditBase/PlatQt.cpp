@@ -35,7 +35,6 @@
 #include <QTextLayout>
 #include <QTextLine>
 #include <QLibrary>
-#include <QElapsedTimer>
 #include <cstdio>
 
 namespace Scintilla {
@@ -1208,32 +1207,6 @@ void Platform::Assert(const char *c, const char *file, int line)
 		strcat(buffer, "\n");
 		Platform::DebugDisplay(buffer);
 	}
-}
-
-//----------------------------------------------------------------------
-
-static QElapsedTimer timer;
-
-ElapsedTime::ElapsedTime() : bigBit(0), littleBit(0)
-{
-	if (!timer.isValid()) {
-		timer.start();
-	}
-	qint64 ns64Now = timer.nsecsElapsed();
-	bigBit = static_cast<unsigned long>(ns64Now >> 32);
-	littleBit = static_cast<unsigned long>(ns64Now & 0xFFFFFFFF);
-}
-
-double ElapsedTime::Duration(bool reset)
-{
-	qint64 ns64Now = timer.nsecsElapsed();
-	qint64 ns64Start = (static_cast<qint64>(static_cast<unsigned long>(bigBit)) << 32) + static_cast<unsigned long>(littleBit);
-	double result = ns64Now - ns64Start;
-	if (reset) {
-		bigBit = static_cast<unsigned long>(ns64Now >> 32);
-		littleBit = static_cast<unsigned long>(ns64Now & 0xFFFFFFFF);
-	}
-	return result / 1000000000.0;	// 1 billion nanoseconds in a second
 }
 
 }

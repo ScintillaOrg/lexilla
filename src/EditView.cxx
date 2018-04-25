@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <iterator>
 #include <memory>
+#include <chrono>
 
 #include "Platform.h"
 
@@ -53,6 +54,7 @@
 #include "EditModel.h"
 #include "MarginView.h"
 #include "EditView.h"
+#include "ElapsedPeriod.h"
 
 using namespace Scintilla;
 
@@ -2010,11 +2012,12 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 		}
 
 		// Loop on visible lines
-		//double durLayout = 0.0;
-		//double durPaint = 0.0;
-		//double durCopy = 0.0;
-		//ElapsedTime etWhole;
-
+#if defined(TIME_PAINTING)
+		double durLayout = 0.0;
+		double durPaint = 0.0;
+		double durCopy = 0.0;
+		ElapsedPeriod epWhole;
+#endif
 		const bool bracesIgnoreStyle = ((vsDraw.braceHighlightIndicatorSet && (model.bracesMatchStyle == STYLE_BRACELIGHT)) ||
 			(vsDraw.braceBadLightIndicatorSet && (model.bracesMatchStyle == STYLE_BRACEBAD)));
 
@@ -2044,15 +2047,18 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 
 				// Copy this line and its styles from the document into local arrays
 				// and determine the x position at which each character starts.
-				//ElapsedTime et;
+#if defined(TIME_PAINTING)
+				ElapsedPeriod ep;
+#endif
 				if (lineDoc != lineDocPrevious) {
 					ll.Set(0);
 					ll.Set(RetrieveLineLayout(lineDoc, model));
 					LayoutLine(model, lineDoc, surface, vsDraw, ll, model.wrapWidth);
 					lineDocPrevious = lineDoc;
 				}
-				//durLayout += et.Duration(true);
-
+#if defined(TIME_PAINTING)
+				durLayout += ep.Duration(true);
+#endif
 				if (ll) {
 					ll->containsCaret = !hideSelection && (lineDoc == lineCaret);
 					ll->hotspot = model.GetHotSpotRange();
@@ -2077,8 +2083,9 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 					}
 
 					DrawLine(surface, model, vsDraw, ll, lineDoc, visibleLine, xStart, rcLine, subLine, phase);
-					//durPaint += et.Duration(true);
-
+#if defined(TIME_PAINTING)
+					durPaint += ep.Duration(true);
+#endif
 					// Restore the previous styles for the brace highlights in case layout is in cache.
 					ll->RestoreBracesHighlight(rangeLine, model.braces, bracesIgnoreStyle);
 
@@ -2100,7 +2107,9 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 
 					lineWidthMaxSeen = std::max(
 						lineWidthMaxSeen, static_cast<int>(ll->positions[ll->numCharsInLine]));
-					//durCopy += et.Duration(true);
+#if defined(TIME_PAINTING)
+					durCopy += ep.Duration(true);
+#endif
 				}
 
 				if (!bufferedDraw) {
@@ -2112,9 +2121,10 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 			}
 		}
 		ll.Set(0);
-		//if (durPaint < 0.00000001)
-		//	durPaint = 0.00000001;
-
+#if defined(TIME_PAINTING)
+		if (durPaint < 0.00000001)
+			durPaint = 0.00000001;
+#endif
 		// Right column limit indicator
 		PRectangle rcBeyondEOF = (vsDraw.marginInside) ? rcClient : rcArea;
 		rcBeyondEOF.left = static_cast<XYPOSITION>(vsDraw.textStart);
@@ -2138,11 +2148,12 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 				}
 			}
 		}
-		//Platform::DebugPrintf("start display %d, offset = %d\n", pdoc->Length(), xOffset);
-
-		//Platform::DebugPrintf(
-		//"Layout:%9.6g    Paint:%9.6g    Ratio:%9.6g   Copy:%9.6g   Total:%9.6g\n",
-		//durLayout, durPaint, durLayout / durPaint, durCopy, etWhole.Duration());
+		//Platform::DebugPrintf("start display %d, offset = %d\n", model.pdoc->Length(), model.xOffset);
+#if defined(TIME_PAINTING)
+		Platform::DebugPrintf(
+		"Layout:%9.6g    Paint:%9.6g    Ratio:%9.6g   Copy:%9.6g   Total:%9.6g\n",
+		durLayout, durPaint, durLayout / durPaint, durCopy, epWhole.Duration());
+#endif
 	}
 }
 
