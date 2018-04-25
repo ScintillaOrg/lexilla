@@ -28,7 +28,7 @@ QPair<int, int>ScintillaEdit::find_text(int flags, const char *text, int cpMin, 
     ft.chrg.cpMax = cpMax;
     ft.chrgText.cpMin = cpMin;
     ft.chrgText.cpMax = cpMax;
-    ft.lpstrText = const_cast<char *>(text);
+    ft.lpstrText = text;
 
     int start = send(SCI_FINDTEXT, flags, (uptr_t) (&ft));
 
