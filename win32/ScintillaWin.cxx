@@ -1673,7 +1673,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 		case EM_SETSEL: {
 				Sci::Position nStart = static_cast<Sci::Position>(wParam);
-				Sci::Position nEnd = static_cast<Sci::Position>(lParam);
+				Sci::Position nEnd = lParam;
 				if (nStart == 0 && nEnd == -1) {
 					nEnd = pdoc->Length();
 				}
