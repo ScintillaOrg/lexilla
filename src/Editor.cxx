@@ -4015,7 +4015,7 @@ Sci::Position Editor::FindText(
     ///< @c SCFIND_WORDSTART, @c SCFIND_REGEXP or @c SCFIND_POSIX.
     sptr_t lParam) {	///< @c Sci_TextToFind structure: The text to search for in the given range.
 
-	Sci_TextToFind *ft = reinterpret_cast<Sci_TextToFind *>(lParam);
+	Sci_TextToFind *ft = static_cast<Sci_TextToFind *>(PtrFromSPtr(lParam));
 	Sci::Position lengthFound = strlen(ft->lpstrText);
 	if (!pdoc->HasCaseFolder())
 		pdoc->SetCaseFolder(CaseFolderForEncoding());
@@ -4063,7 +4063,7 @@ Sci::Position Editor::SearchText(
     ///< @c SCFIND_WORDSTART, @c SCFIND_REGEXP or @c SCFIND_POSIX.
     sptr_t lParam) {			///< The text to search for.
 
-	const char *txt = reinterpret_cast<char *>(lParam);
+	const char *txt = CharPtrFromSPtr(lParam);
 	Sci::Position pos;
 	Sci::Position lengthFound = strlen(txt);
 	if (!pdoc->HasCaseFolder())
@@ -5594,10 +5594,6 @@ bool Editor::ValidMargin(uptr_t wParam) const {
 	return wParam < vs.ms.size();
 }
 
-static char *CharPtrFromSPtr(sptr_t lParam) {
-	return reinterpret_cast<char *>(lParam);
-}
-
 void Editor::StyleSetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	vs.EnsureStyle(wParam);
 	switch (iMessage) {
@@ -6072,7 +6068,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETTEXTRANGE: {
 			if (lParam == 0)
 				return 0;
-			Sci_TextRange *tr = reinterpret_cast<Sci_TextRange *>(lParam);
+			Sci_TextRange *tr = static_cast<Sci_TextRange *>(PtrFromSPtr(lParam));
 			Sci::Position cpMax = static_cast<Sci::Position>(tr->chrg.cpMax);
 			if (cpMax == -1)
 				cpMax = pdoc->Length();
@@ -6090,7 +6086,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_FORMATRANGE:
-		return FormatRange(wParam != 0, reinterpret_cast<Sci_RangeToFormat *>(lParam));
+		return FormatRange(wParam != 0, static_cast<Sci_RangeToFormat *>(PtrFromSPtr(lParam)));
 
 	case SCI_GETMARGINLEFT:
 		return vs.leftMarginWidth;
@@ -6185,33 +6181,33 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_GETWORDCHARS:
-		return pdoc->GetCharsOfClass(CharClassify::ccWord, reinterpret_cast<unsigned char *>(lParam));
+		return pdoc->GetCharsOfClass(CharClassify::ccWord, UCharPtrFromSPtr(lParam));
 
 	case SCI_SETWORDCHARS: {
 			pdoc->SetDefaultCharClasses(false);
 			if (lParam == 0)
 				return 0;
-			pdoc->SetCharClasses(reinterpret_cast<unsigned char *>(lParam), CharClassify::ccWord);
+			pdoc->SetCharClasses(ConstUCharPtrFromSPtr(lParam), CharClassify::ccWord);
 		}
 		break;
 
 	case SCI_GETWHITESPACECHARS:
-		return pdoc->GetCharsOfClass(CharClassify::ccSpace, reinterpret_cast<unsigned char *>(lParam));
+		return pdoc->GetCharsOfClass(CharClassify::ccSpace, UCharPtrFromSPtr(lParam));
 
 	case SCI_SETWHITESPACECHARS: {
 			if (lParam == 0)
 				return 0;
-			pdoc->SetCharClasses(reinterpret_cast<unsigned char *>(lParam), CharClassify::ccSpace);
+			pdoc->SetCharClasses(ConstUCharPtrFromSPtr(lParam), CharClassify::ccSpace);
 		}
 		break;
 
 	case SCI_GETPUNCTUATIONCHARS:
-		return pdoc->GetCharsOfClass(CharClassify::ccPunctuation, reinterpret_cast<unsigned char *>(lParam));
+		return pdoc->GetCharsOfClass(CharClassify::ccPunctuation, UCharPtrFromSPtr(lParam));
 
 	case SCI_SETPUNCTUATIONCHARS: {
 			if (lParam == 0)
 				return 0;
-			pdoc->SetCharClasses(reinterpret_cast<unsigned char *>(lParam), CharClassify::ccPunctuation);
+			pdoc->SetCharClasses(ConstUCharPtrFromSPtr(lParam), CharClassify::ccPunctuation);
 		}
 		break;
 
@@ -6315,7 +6311,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETSTYLEDTEXT: {
 			if (lParam == 0)
 				return 0;
-			Sci_TextRange *tr = reinterpret_cast<Sci_TextRange *>(lParam);
+			Sci_TextRange *tr = static_cast<Sci_TextRange *>(PtrFromSPtr(lParam));
 			int iPlace = 0;
 			for (long iChar = tr->chrg.cpMin; iChar < tr->chrg.cpMax; iChar++) {
 				tr->lpstrText[iPlace++] = pdoc->CharAt(iChar);
@@ -6878,7 +6874,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_MARKERDEFINERGBAIMAGE:
 		if (wParam <= MARKER_MAX) {
-			vs.markers[wParam].SetRGBAImage(sizeRGBAImage, scaleRGBAImage / 100.0f, reinterpret_cast<unsigned char *>(lParam));
+			vs.markers[wParam].SetRGBAImage(sizeRGBAImage, scaleRGBAImage / 100.0f, ConstUCharPtrFromSPtr(lParam));
 			vs.CalcLargestMarkerHeight();
 		}
 		InvalidateStyleData();
@@ -7590,7 +7586,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETDOCPOINTER:
 		CancelModes();
-		SetDocPointer(reinterpret_cast<Document *>(lParam));
+		SetDocPointer(static_cast<Document *>(PtrFromSPtr(lParam)));
 		return 0;
 
 	case SCI_CREATEDOCUMENT: {
@@ -7602,11 +7598,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		}
 
 	case SCI_ADDREFDOCUMENT:
-		(reinterpret_cast<Document *>(lParam))->AddRef();
+		(static_cast<Document *>(PtrFromSPtr(lParam)))->AddRef();
 		break;
 
 	case SCI_RELEASEDOCUMENT:
-		(reinterpret_cast<Document *>(lParam))->Release();
+		(static_cast<Document *>(PtrFromSPtr(lParam)))->Release();
 		break;
 
 	case SCI_GETDOCUMENTOPTIONS:
@@ -7752,12 +7748,12 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return vs.controlCharSymbol;
 
 	case SCI_SETREPRESENTATION:
-		reprs.SetRepresentation(reinterpret_cast<const char *>(wParam), CharPtrFromSPtr(lParam));
+		reprs.SetRepresentation(ConstCharPtrFromUPtr(wParam), ConstCharPtrFromSPtr(lParam));
 		break;
 
 	case SCI_GETREPRESENTATION: {
 			const Representation *repr = reprs.RepresentationFromCharacter(
-				reinterpret_cast<const char *>(wParam), UTF8MaxBytes);
+				ConstCharPtrFromUPtr(wParam), UTF8MaxBytes);
 			if (repr) {
 				return StringResult(lParam, repr->stringRep.c_str());
 			}
@@ -7765,7 +7761,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		}
 
 	case SCI_CLEARREPRESENTATION:
-		reprs.ClearRepresentation(reinterpret_cast<const char *>(wParam));
+		reprs.ClearRepresentation(ConstCharPtrFromUPtr(wParam));
 		break;
 
 	case SCI_STARTRECORD:
@@ -7889,7 +7885,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		}
 
 	case SCI_MARGINSETSTYLES:
-		pdoc->MarginSetStyles(static_cast<Sci::Line>(wParam), reinterpret_cast<const unsigned char *>(lParam));
+		pdoc->MarginSetStyles(static_cast<Sci::Line>(wParam), ConstUCharPtrFromSPtr(lParam));
 		break;
 
 	case SCI_MARGINGETSTYLES: {
@@ -7920,7 +7916,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_ANNOTATIONSETSTYLES:
-		pdoc->AnnotationSetStyles(static_cast<Sci::Line>(wParam), reinterpret_cast<const unsigned char *>(lParam));
+		pdoc->AnnotationSetStyles(static_cast<Sci::Line>(wParam), ConstUCharPtrFromSPtr(lParam));
 		break;
 
 	case SCI_ANNOTATIONGETSTYLES: {

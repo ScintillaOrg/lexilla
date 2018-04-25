@@ -833,11 +833,11 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 			return reinterpret_cast<sptr_t>(this);
 
 		case SCI_TARGETASUTF8:
-			return TargetAsUTF8(reinterpret_cast<char *>(lParam));
+			return TargetAsUTF8(CharPtrFromSPtr(lParam));
 
 		case SCI_ENCODEDFROMUTF8:
-			return EncodedFromUTF8(reinterpret_cast<char *>(wParam),
-					       reinterpret_cast<char *>(lParam));
+			return EncodedFromUTF8(ConstCharPtrFromUPtr(wParam),
+					       CharPtrFromSPtr(lParam));
 
 		case SCI_SETIMEINTERACTION:
 			// Only inline IME supported on Cocoa

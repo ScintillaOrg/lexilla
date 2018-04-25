@@ -568,6 +568,29 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	static const char *StringFromEOLMode(int eolMode);
 
+	// Coercion functions for transforming WndProc parameters into pointers
+	static void *PtrFromSPtr(sptr_t lParam) {
+		return reinterpret_cast<void *>(lParam);
+	}
+	static const char *ConstCharPtrFromSPtr(sptr_t lParam) {
+		return static_cast<const char *>(PtrFromSPtr(lParam));
+	}
+	static const unsigned char *ConstUCharPtrFromSPtr(sptr_t lParam) {
+		return static_cast<const unsigned char *>(PtrFromSPtr(lParam));
+	}
+	static char *CharPtrFromSPtr(sptr_t lParam) {
+		return static_cast<char *>(PtrFromSPtr(lParam));
+	}
+	static unsigned char *UCharPtrFromSPtr(sptr_t lParam) {
+		return static_cast<unsigned char *>(PtrFromSPtr(lParam));
+	}
+	static void *PtrFromUPtr(uptr_t wParam) {
+		return reinterpret_cast<void *>(wParam);
+	}
+	static const char *ConstCharPtrFromUPtr(uptr_t wParam) {
+		return static_cast<const char *>(PtrFromUPtr(wParam));
+	}
+
 	static sptr_t StringResult(sptr_t lParam, const char *val);
 	static sptr_t BytesResult(sptr_t lParam, const unsigned char *val, size_t len);
 

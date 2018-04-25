@@ -1201,7 +1201,7 @@ sptr_t ScintillaWin::GetTextLength() {
 }
 
 sptr_t ScintillaWin::GetText(uptr_t wParam, sptr_t lParam) {
-	wchar_t *ptr = reinterpret_cast<wchar_t *>(lParam);
+	wchar_t *ptr = static_cast<wchar_t *>(PtrFromSPtr(lParam));
 	if (pdoc->Length() == 0) {
 		*ptr = L'\0';
 		return 0;
@@ -1757,16 +1757,16 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 #ifdef SCI_LEXER
 		case SCI_LOADLEXERLIBRARY:
-			LexerManager::GetInstance()->Load(reinterpret_cast<const char *>(lParam));
+			LexerManager::GetInstance()->Load(ConstCharPtrFromSPtr(lParam));
 			break;
 #endif
 
 		case SCI_TARGETASUTF8:
-			return TargetAsUTF8(reinterpret_cast<char*>(lParam));
+			return TargetAsUTF8(CharPtrFromSPtr(lParam));
 
 		case SCI_ENCODEDFROMUTF8:
-			return EncodedFromUTF8(reinterpret_cast<const char*>(wParam),
-			        reinterpret_cast<char*>(lParam));
+			return EncodedFromUTF8(ConstCharPtrFromUPtr(wParam),
+				CharPtrFromSPtr(lParam));
 
 		default:
 			return ScintillaBase::WndProc(iMessage, wParam, lParam);
@@ -2702,7 +2702,7 @@ LRESULT ScintillaWin::ImeOnReconvert(LPARAM lParam) {
 	const int rcFeedLen = static_cast<int>(rcFeed.length()) * sizeof(wchar_t);
 	const int rcSize = sizeof(RECONVERTSTRING) + rcFeedLen + sizeof(wchar_t);
 
-	RECONVERTSTRING *rc = reinterpret_cast<RECONVERTSTRING *>(lParam);
+	RECONVERTSTRING *rc = static_cast<RECONVERTSTRING *>(PtrFromSPtr(lParam));
 	if (!rc)
 		return rcSize; // Immediately be back with rcSize of memory block.
 
@@ -3288,7 +3288,7 @@ LRESULT PASCAL ScintillaWin::CTWndProc(
 		if (sciThis == 0) {
 			if (iMessage == WM_CREATE) {
 				// Associate CallTip object with window
-				CREATESTRUCT *pCreate = reinterpret_cast<CREATESTRUCT *>(lParam);
+				CREATESTRUCT *pCreate = static_cast<CREATESTRUCT *>(PtrFromSPtr(lParam));
 				SetWindowPointer(hWnd, pCreate->lpCreateParams);
 				return 0;
 			} else {
