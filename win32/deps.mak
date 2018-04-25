@@ -277,10 +277,10 @@ LexCOBOL.o: ../lexers/LexCOBOL.cxx ../include/ILexer.h \
  ../lexlib/WordList.h ../lexlib/LexAccessor.h ../lexlib/Accessor.h \
  ../lexlib/StyleContext.h ../lexlib/CharacterSet.h \
  ../lexlib/LexerModule.h
-LexCoffeeScript.o: ../lexers/LexCoffeeScript.cxx ../include/Platform.h \
- ../include/ILexer.h ../include/Sci_Position.h ../include/Scintilla.h \
- ../include/SciLexer.h ../lexlib/WordList.h ../lexlib/LexAccessor.h \
- ../lexlib/Accessor.h ../lexlib/StyleContext.h ../lexlib/CharacterSet.h \
+LexCoffeeScript.o: ../lexers/LexCoffeeScript.cxx ../include/ILexer.h \
+ ../include/Sci_Position.h ../include/Scintilla.h ../include/SciLexer.h \
+ ../lexlib/WordList.h ../lexlib/LexAccessor.h ../lexlib/Accessor.h \
+ ../lexlib/StyleContext.h ../lexlib/CharacterSet.h \
  ../lexlib/LexerModule.h
 LexConf.o: ../lexers/LexConf.cxx ../include/ILexer.h \
  ../include/Sci_Position.h ../include/Scintilla.h ../include/SciLexer.h \
