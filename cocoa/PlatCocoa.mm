@@ -892,10 +892,10 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION 
 		// Map the widths given for UTF-16 characters back onto the UTF-8 input string
 		CFIndex fit = textLayout->getStringLength();
 		int ui=0;
-		const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
 		int i=0;
 		while (ui<fit) {
-			const unsigned int byteCount = UTF8BytesOfLead[us[i]];
+			const unsigned char uch = s[i];
+			const unsigned int byteCount = UTF8BytesOfLead[uch];
 			const int codeUnits = UTF16LengthFromUTF8ByteCount(byteCount);
 			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, ui+codeUnits, NULL);
 			for (unsigned int bytePos=0; (bytePos<byteCount) && (i<len); bytePos++) {

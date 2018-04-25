@@ -460,10 +460,10 @@ void SurfaceImpl::MeasureWidths(Font &font,
 	if (unicodeMode) {
 		int fit = su.size();
 		int ui=0;
-		const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
 		int i=0;
 		while (ui<fit) {
-			const unsigned int byteCount = UTF8BytesOfLead[us[i]];
+			const unsigned char uch = s[i];
+			const unsigned int byteCount = UTF8BytesOfLead[uch];
 			const int codeUnits = UTF16LengthFromUTF8ByteCount(byteCount);
 			qreal xPosition = tl.cursorToX(ui+codeUnits);
 			for (unsigned int bytePos=0; (bytePos<byteCount) && (i<len); bytePos++) {
