@@ -64,7 +64,7 @@ Document.o: ../src/Document.cxx ../include/Platform.h \
  ../src/Partitioning.h ../src/RunStyles.h ../src/CellBuffer.h \
  ../src/PerLine.h ../src/CharClassify.h ../src/Decoration.h \
  ../src/CaseFolder.h ../src/Document.h ../src/RESearch.h \
- ../src/UniConversion.h
+ ../src/UniConversion.h ../src/ElapsedPeriod.h
 EditModel.o: ../src/EditModel.cxx ../include/Platform.h \
  ../include/ILoader.h ../include/Sci_Position.h ../include/ILexer.h \
  ../include/Scintilla.h ../lexlib/StringCopy.h ../src/Position.h \
@@ -76,14 +76,14 @@ EditModel.o: ../src/EditModel.cxx ../include/Platform.h \
  ../src/Selection.h ../src/PositionCache.h ../src/EditModel.h
 Editor.o: ../src/Editor.cxx ../include/Platform.h ../include/ILoader.h \
  ../include/Sci_Position.h ../include/ILexer.h ../include/Scintilla.h \
- ../lexlib/StringCopy.h ../src/Position.h ../src/UniqueString.h \
- ../src/SplitVector.h ../src/Partitioning.h ../src/RunStyles.h \
- ../src/ContractionState.h ../src/CellBuffer.h ../src/PerLine.h \
- ../src/KeyMap.h ../src/Indicator.h ../src/LineMarker.h ../src/Style.h \
- ../src/ViewStyle.h ../src/CharClassify.h ../src/Decoration.h \
- ../src/CaseFolder.h ../src/Document.h ../src/UniConversion.h \
- ../src/Selection.h ../src/PositionCache.h ../src/EditModel.h \
- ../src/MarginView.h ../src/EditView.h ../src/Editor.h
+ ../lexlib/StringCopy.h ../lexlib/CharacterSet.h ../src/Position.h \
+ ../src/UniqueString.h ../src/SplitVector.h ../src/Partitioning.h \
+ ../src/RunStyles.h ../src/ContractionState.h ../src/CellBuffer.h \
+ ../src/PerLine.h ../src/KeyMap.h ../src/Indicator.h ../src/LineMarker.h \
+ ../src/Style.h ../src/ViewStyle.h ../src/CharClassify.h \
+ ../src/Decoration.h ../src/CaseFolder.h ../src/Document.h \
+ ../src/UniConversion.h ../src/Selection.h ../src/PositionCache.h \
+ ../src/EditModel.h ../src/MarginView.h ../src/EditView.h ../src/Editor.h
 EditView.o: ../src/EditView.cxx ../include/Platform.h \
  ../include/ILoader.h ../include/Sci_Position.h ../include/ILexer.h \
  ../include/Scintilla.h ../lexlib/StringCopy.h ../lexlib/CharacterSet.h \
@@ -94,7 +94,7 @@ EditView.o: ../src/EditView.cxx ../include/Platform.h \
  ../src/CharClassify.h ../src/Decoration.h ../src/CaseFolder.h \
  ../src/Document.h ../src/UniConversion.h ../src/Selection.h \
  ../src/PositionCache.h ../src/EditModel.h ../src/MarginView.h \
- ../src/EditView.h
+ ../src/EditView.h ../src/ElapsedPeriod.h
 ExternalLexer.o: ../src/ExternalLexer.cxx ../include/Platform.h \
  ../include/ILexer.h ../include/Sci_Position.h ../include/Scintilla.h \
  ../include/SciLexer.h ../lexlib/LexerModule.h ../src/Catalogue.h \
@@ -163,7 +163,7 @@ Accessor.o: ../lexlib/Accessor.cxx ../include/ILexer.h \
  ../lexlib/PropSetSimple.h ../lexlib/WordList.h ../lexlib/LexAccessor.h \
  ../lexlib/Accessor.h
 CharacterCategory.o: ../lexlib/CharacterCategory.cxx \
- ../lexlib/StringCopy.h ../lexlib/CharacterCategory.h
+ ../lexlib/CharacterCategory.h
 CharacterSet.o: ../lexlib/CharacterSet.cxx ../lexlib/CharacterSet.h
 DefaultLexer.o: ../lexlib/DefaultLexer.cxx ../include/ILexer.h \
  ../include/Sci_Position.h ../include/Scintilla.h ../include/SciLexer.h \
@@ -294,10 +294,10 @@ LexCOBOL.o: ../lexers/LexCOBOL.cxx ../include/ILexer.h \
  ../lexlib/WordList.h ../lexlib/LexAccessor.h ../lexlib/Accessor.h \
  ../lexlib/StyleContext.h ../lexlib/CharacterSet.h \
  ../lexlib/LexerModule.h
-LexCoffeeScript.o: ../lexers/LexCoffeeScript.cxx ../include/Platform.h \
- ../include/ILexer.h ../include/Sci_Position.h ../include/Scintilla.h \
- ../include/SciLexer.h ../lexlib/WordList.h ../lexlib/LexAccessor.h \
- ../lexlib/Accessor.h ../lexlib/StyleContext.h ../lexlib/CharacterSet.h \
+LexCoffeeScript.o: ../lexers/LexCoffeeScript.cxx ../include/ILexer.h \
+ ../include/Sci_Position.h ../include/Scintilla.h ../include/SciLexer.h \
+ ../lexlib/WordList.h ../lexlib/LexAccessor.h ../lexlib/Accessor.h \
+ ../lexlib/StyleContext.h ../lexlib/CharacterSet.h \
  ../lexlib/LexerModule.h
 LexConf.o: ../lexers/LexConf.cxx ../include/ILexer.h \
  ../include/Sci_Position.h ../include/Scintilla.h ../include/SciLexer.h \
