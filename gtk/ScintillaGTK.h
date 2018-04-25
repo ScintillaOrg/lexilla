@@ -85,8 +85,8 @@ private:
 	void DisplayCursor(Window::Cursor c) override;
 	bool DragThreshold(Point ptStart, Point ptNow) override;
 	void StartDrag() override;
-	int TargetAsUTF8(char *text);
-	int EncodedFromUTF8(char *utf8, char *encoded) const;
+	Sci::Position TargetAsUTF8(char *text) const;
+	Sci::Position EncodedFromUTF8(const char *utf8, char *encoded) const;
 	bool ValidCodePage(int codePage) const override;
 public: 	// Public for scintilla_send_message
 	sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;

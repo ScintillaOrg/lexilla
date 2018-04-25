@@ -306,7 +306,7 @@ class ScintillaWin :
 	void StartDrag() override;
 	static int MouseModifiers(uptr_t wParam);
 
-	Sci::Position TargetAsUTF8(char *text);
+	Sci::Position TargetAsUTF8(char *text) const;
 	void AddCharUTF16(wchar_t const *wcs, unsigned int wclen);
 	Sci::Position EncodedFromUTF8(const char *utf8, char *encoded) const;
 	sptr_t WndPaint(uptr_t wParam);
@@ -747,7 +747,7 @@ static std::wstring StringMapCase(const std::wstring &ws, DWORD mapFlags) {
 
 // Returns the target converted to UTF8.
 // Return the length in bytes.
-Sci::Position ScintillaWin::TargetAsUTF8(char *text) {
+Sci::Position ScintillaWin::TargetAsUTF8(char *text) const {
 	Sci::Position targetLength = targetEnd - targetStart;
 	if (IsUnicodeMode()) {
 		if (text) {

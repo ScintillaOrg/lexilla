@@ -106,8 +106,8 @@ private:
 
 	bool GetPasteboardData(NSPasteboard *board, SelectionText *selectedText);
 	void SetPasteboardData(NSPasteboard *board, const SelectionText &selectedText);
-	ptrdiff_t TargetAsUTF8(char *text);
-	ptrdiff_t EncodedFromUTF8(char *utf8, char *encoded) const;
+	Sci::Position TargetAsUTF8(char *text) const;
+	Sci::Position EncodedFromUTF8(const char *utf8, char *encoded) const;
 
 	int scrollSpeed;
 	int scrollTicks;

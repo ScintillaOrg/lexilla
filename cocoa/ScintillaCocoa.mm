@@ -1574,7 +1574,7 @@ bool ScintillaCocoa::GetPasteboardData(NSPasteboard *board, SelectionText *selec
 
 // Returns the target converted to UTF8.
 // Return the length in bytes.
-ptrdiff_t ScintillaCocoa::TargetAsUTF8(char *text) {
+Sci::Position ScintillaCocoa::TargetAsUTF8(char *text) const {
 	const Sci::Position targetLength = targetEnd - targetStart;
 	if (IsUnicodeMode()) {
 		if (text)
@@ -1675,7 +1675,7 @@ NSRect ScintillaCocoa::GetBounds() const {
 
 // Translates a UTF8 string into the document encoding.
 // Return the length of the result in bytes.
-ptrdiff_t ScintillaCocoa::EncodedFromUTF8(char *utf8, char *encoded) const {
+Sci::Position ScintillaCocoa::EncodedFromUTF8(const char *utf8, char *encoded) const {
 	const size_t inputLength = (lengthForEncode >= 0) ? lengthForEncode : strlen(utf8);
 	if (IsUnicodeMode()) {
 		if (encoded)

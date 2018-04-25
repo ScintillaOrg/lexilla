@@ -741,8 +741,8 @@ std::string ConvertText(const char *s, size_t len, const char *charSetDest,
 
 // Returns the target converted to UTF8.
 // Return the length in bytes.
-int ScintillaGTK::TargetAsUTF8(char *text) {
-	int targetLength = targetEnd - targetStart;
+Sci::Position ScintillaGTK::TargetAsUTF8(char *text) const {
+	Sci::Position targetLength = targetEnd - targetStart;
 	if (IsUnicodeMode()) {
 		if (text) {
 			pdoc->GetCharRange(text, targetStart, targetLength);
@@ -768,8 +768,8 @@ int ScintillaGTK::TargetAsUTF8(char *text) {
 
 // Translates a nul terminated UTF8 string into the document encoding.
 // Return the length of the result in bytes.
-int ScintillaGTK::EncodedFromUTF8(char *utf8, char *encoded) const {
-	int inputLength = (lengthForEncode >= 0) ? lengthForEncode : strlen(utf8);
+Sci::Position ScintillaGTK::EncodedFromUTF8(const char *utf8, char *encoded) const {
+	Sci::Position inputLength = (lengthForEncode >= 0) ? lengthForEncode : strlen(utf8);
 	if (IsUnicodeMode()) {
 		if (encoded) {
 			memcpy(encoded, utf8, inputLength);
