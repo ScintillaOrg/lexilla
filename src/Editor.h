@@ -581,7 +581,6 @@ public:
 	// Public so COM methods for drag and drop can set it.
 	int errorStatus;
 	friend class AutoSurface;
-	friend class SelectionLineIterator;
 };
 
 /**
