@@ -186,8 +186,8 @@ EditView::EditView() {
 	llc.SetLevel(LineLayoutCache::llcCaret);
 	posCache.SetSize(0x400);
 	tabArrowHeight = 4;
-	customDrawTabArrow = NULL;
-	customDrawWrapMarker = NULL;
+	customDrawTabArrow = nullptr;
+	customDrawWrapMarker = nullptr;
 }
 
 EditView::~EditView() {
@@ -1007,7 +1007,7 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 			rcPlace.right = rcLine.right;
 			rcPlace.left = rcPlace.right - vsDraw.aveCharWidth;
 		}
-		if (customDrawWrapMarker == NULL) {
+		if (!customDrawWrapMarker) {
 			DrawWrapMarker(surface, rcPlace, true, vsDraw.WrapColour());
 		} else {
 			customDrawWrapMarker(surface, rcPlace, true, vsDraw.WrapColour());
@@ -1427,7 +1427,7 @@ static void DrawWrapIndentAndMarker(Surface *surface, const ViewStyle &vsDraw, c
 		else
 			rcPlace.right = rcPlace.left + vsDraw.aveCharWidth;
 
-		if (customDrawWrapMarker == NULL) {
+		if (!customDrawWrapMarker) {
 			DrawWrapMarker(surface, rcPlace, false, vsDraw.WrapColour());
 		} else {
 			customDrawWrapMarker(surface, rcPlace, false, vsDraw.WrapColour());
@@ -1713,10 +1713,11 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 							surface->PenColour(textFore);
 							const PRectangle rcTab(rcSegment.left + 1, rcSegment.top + tabArrowHeight,
 								rcSegment.right - 1, rcSegment.bottom - vsDraw.maxDescent);
-							if (customDrawTabArrow == NULL)
-								DrawTabArrow(surface, rcTab, static_cast<int>(rcSegment.top + vsDraw.lineHeight / 2), vsDraw);
+							const int segmentTop = static_cast<int>(rcSegment.top + vsDraw.lineHeight / 2);
+							if (!customDrawTabArrow)
+								DrawTabArrow(surface, rcTab, segmentTop, vsDraw);
 							else
-								customDrawTabArrow(surface, rcTab, static_cast<int>(rcSegment.top + vsDraw.lineHeight / 2));
+								customDrawTabArrow(surface, rcTab, segmentTop);
 						}
 					}
 				} else {
