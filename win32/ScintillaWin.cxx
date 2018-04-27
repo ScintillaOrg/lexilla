@@ -131,7 +131,6 @@
 #define SCS_SETRECONVERTSTRING 0x00010000
 #endif
 
-typedef BOOL (WINAPI *TrackMouseEventSig)(LPTRACKMOUSEEVENT);
 typedef UINT_PTR (WINAPI *SetCoalescableTimerSig)(HWND hwnd, UINT_PTR nIDEvent,
 	UINT uElapse, TIMERPROC lpTimerFunc, ULONG uToleranceDelay);
 
@@ -429,7 +428,7 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 
 	capturedMouse = false;
 	trackedMouseLeave = false;
-	SetCoalescableTimerFn = 0;
+	SetCoalescableTimerFn = nullptr;
 
 	linesPerScroll = 0;
 	wheelDelta = 0;   // Wheel delta from roll
