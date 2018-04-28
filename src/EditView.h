@@ -92,7 +92,9 @@ public:
 	EditView();
 	// Deleted so EditView objects can not be copied.
 	EditView(const EditView &) = delete;
+	EditView(EditView &&) = delete;
 	void operator=(const EditView &) = delete;
+	void operator=(EditView &&) = delete;
 	virtual ~EditView();
 
 	bool SetTwoPhaseDraw(bool twoPhaseDraw);
@@ -159,8 +161,10 @@ class AutoLineLayout {
 	LineLayout *ll;
 public:
 	AutoLineLayout(LineLayoutCache &llc_, LineLayout *ll_) : llc(llc_), ll(ll_) {}
-	explicit AutoLineLayout(const AutoLineLayout &) = delete;
+	AutoLineLayout(const AutoLineLayout &) = delete;
+	AutoLineLayout(AutoLineLayout &&) = delete;
 	AutoLineLayout &operator=(const AutoLineLayout &) = delete;
+	AutoLineLayout &operator=(AutoLineLayout &&) = delete;
 	~AutoLineLayout() {
 		llc.Dispose(ll);
 		ll = 0;

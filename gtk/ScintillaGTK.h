@@ -74,7 +74,9 @@ public:
 	explicit ScintillaGTK(_ScintillaObject *sci_);
 	// Deleted so ScintillaGTK objects can not be copied.
 	ScintillaGTK(const ScintillaGTK &) = delete;
+	ScintillaGTK(ScintillaGTK &&) = delete;
 	ScintillaGTK &operator=(const ScintillaGTK &) = delete;
+	ScintillaGTK &operator=(ScintillaGTK &&) = delete;
 	virtual ~ScintillaGTK();
 	static ScintillaGTK *FromWidget(GtkWidget *widget);
 	static void ClassInit(OBJECT_CLASS* object_class, GtkWidgetClass *widget_class, GtkContainerClass *container_class);

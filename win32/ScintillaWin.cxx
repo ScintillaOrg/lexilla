@@ -216,6 +216,11 @@ public:
 	IMContext(HWND hwnd_) :
 		hwnd(hwnd_), hIMC(::ImmGetContext(hwnd_)) {
 	}
+	// Deleted so IMContext objects can not be copied.
+	IMContext(const IMContext &) = delete;
+	IMContext(IMContext &&) = delete;
+	IMContext &operator=(const IMContext &) = delete;
+	IMContext &operator=(IMContext &&) = delete;
 	~IMContext() {
 		if (hIMC)
 			::ImmReleaseContext(hwnd, hIMC);
@@ -283,7 +288,9 @@ class ScintillaWin :
 	explicit ScintillaWin(HWND hwnd);
 	// Deleted so ScintillaWin objects can not be copied.
 	ScintillaWin(const ScintillaWin &) = delete;
+	ScintillaWin(ScintillaWin &&) = delete;
 	ScintillaWin &operator=(const ScintillaWin &) = delete;
+	ScintillaWin &operator=(ScintillaWin &&) = delete;
 	~ScintillaWin() override;
 
 	void Init();
@@ -2170,6 +2177,11 @@ public:
 			ptr = ::GlobalLock(hand);
 		}
 	}
+	// Deleted so GlobalMemory objects can not be copied.
+	GlobalMemory(const GlobalMemory &) = delete;
+	GlobalMemory(GlobalMemory &&) = delete;
+	GlobalMemory &operator=(const GlobalMemory &) = delete;
+	GlobalMemory &operator=(GlobalMemory &&) = delete;
 	~GlobalMemory() {
 		PLATFORM_ASSERT(!ptr);
 		assert(!hand);
