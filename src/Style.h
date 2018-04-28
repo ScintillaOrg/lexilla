@@ -49,7 +49,7 @@ struct FontMeasurements {
 	XYPOSITION spaceWidth;
 	int sizeZoomed;
 	FontMeasurements();
-	void Clear();
+	void ClearMeasurements();
 };
 
 /**
