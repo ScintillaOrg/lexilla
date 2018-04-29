@@ -155,11 +155,9 @@ static void SetWindowID(HWND hWnd, int identifier) {
 static Point PointFromPOINT(POINT pt) {
 	return Point::FromInts(pt.x, pt.y);
 }
-
 static Point PointFromLParam(sptr_t lpoint) {
-	return Point(static_cast<short>(LOWORD(lpoint)), static_cast<short>(HIWORD(lpoint)));
+	return Point::FromInts(GET_X_LPARAM(lpoint), GET_Y_LPARAM(lpoint));
 }
-
 static bool KeyboardIsKeyDown(int key) {
 	return (::GetKeyState(key) & 0x80000000) != 0;
 }
@@ -643,16 +641,6 @@ int ScintillaWin::MouseModifiers(uptr_t wParam) {
 		(wParam & MK_CONTROL) != 0,
 		KeyboardIsKeyDown(VK_MENU));
 }
-
-// Avoid warnings everywhere for old style casts by concentrating them here
-static WORD LoWord(uptr_t l) {
-	return LOWORD(l);
-}
-
-static WORD HiWord(uptr_t l) {
-	return HIWORD(l);
-}
-
 static int InputCodePage() {
 	HKL inputLocale = ::GetKeyboardLayout(0);
 	LANGID inputLang = LOWORD(inputLocale);
@@ -1252,11 +1240,9 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			GetIntelliMouseParameters();
 			::RegisterDragDrop(MainHWND(), reinterpret_cast<IDropTarget *>(&dt));
 			break;
-
 		case WM_COMMAND:
-			Command(LoWord(wParam));
+			Command(LOWORD(wParam));
 			break;
-
 		case WM_PAINT:
 			return WndPaint(wParam);
 
@@ -1285,7 +1271,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 					renderTargetValid = false;
 				}
 #endif
-				//Platform::DebugPrintf("Scintilla WM_SIZE %d %d\n", LoWord(lParam), HiWord(lParam));
+				//Platform::DebugPrintf("Scintilla WM_SIZE %d %d\n", LOWORD(lParam), HIWORD(lParam));
 				ChangeSize();
 			}
 			break;
@@ -1317,9 +1303,8 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			if (wParam & MK_SHIFT) {
 				return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 			}
-
 			// Either SCROLL or ZOOM. We handle the wheel steppings calculation
-			wheelDelta -= static_cast<short>(HiWord(wParam));
+			wheelDelta -= GET_WHEEL_DELTA_WPARAM(wParam);
 			if (abs(wheelDelta) >= WHEEL_DELTA && linesPerScroll > 0) {
 				Sci::Line linesToScroll = linesPerScroll;
 				if (linesPerScroll == WHEEL_PAGESCROLL)
@@ -1438,9 +1423,8 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				RightButtonDownWithModifiers(pt, ::GetMessageTime(), MouseModifiers(wParam));
 			}
 			break;
-
 		case WM_SETCURSOR:
-			if (LoWord(lParam) == HTCLIENT) {
+			if (LOWORD(lParam) == HTCLIENT) {
 				if (inDragDrop == ddDragging) {
 					DisplayCursor(Window::cursorUp);
 				} else {
@@ -1602,11 +1586,8 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				}
 			}
 			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
-
 		case WM_INPUTLANGCHANGE:
-			//::SetThreadLocale(LOWORD(lParam));
 			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
-
 		case WM_INPUTLANGCHANGEREQUEST:
 			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 
@@ -2857,9 +2838,8 @@ void ScintillaWin::ScrollMessage(WPARAM wParam) {
 
 	//Platform::DebugPrintf("ScrollInfo %d mask=%x min=%d max=%d page=%d pos=%d track=%d\n", b,sci.fMask,
 	//sci.nMin, sci.nMax, sci.nPage, sci.nPos, sci.nTrackPos);
-
 	Sci::Line topLineNew = topLine;
-	switch (LoWord(wParam)) {
+	switch (LOWORD(wParam)) {
 	case SB_LINEUP:
 		topLineNew -= 1;
 		break;
@@ -2881,7 +2861,7 @@ void ScintillaWin::HorizontalScrollMessage(WPARAM wParam) {
 	int xPos = xOffset;
 	const PRectangle rcText = GetTextRectangle();
 	const int pageWidth = static_cast<int>(rcText.Width() * 2 / 3);
-	switch (LoWord(wParam)) {
+	switch (LOWORD(wParam)) {
 	case SB_LINEUP:
 		xPos -= 20;
 		break;
@@ -3362,9 +3342,7 @@ LRESULT PASCAL ScintillaWin::CTWndProc(
 				::EndPaint(hWnd, &ps);
 				return 0;
 			} else if ((iMessage == WM_NCLBUTTONDOWN) || (iMessage == WM_NCLBUTTONDBLCLK)) {
-				POINT pt;
-				pt.x = static_cast<short>(LOWORD(lParam));
-				pt.y = static_cast<short>(HIWORD(lParam));
+				POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
 				ScreenToClient(hWnd, &pt);
 				sciThis->ct.MouseClick(PointFromPOINT(pt));
 				sciThis->CallTipClick();
