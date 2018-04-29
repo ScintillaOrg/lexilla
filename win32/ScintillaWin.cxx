@@ -522,8 +522,8 @@ void ScintillaWin::EnsureRenderTarget(HDC hdc) {
 		renderTargetValid = true;
 	}
 	if (pD2DFactory && !pRenderTarget) {
-		RECT rc;
 		HWND hw = MainHWND();
+		RECT rc;
 		GetClientRect(hw, &rc);
 
 		D2D1_SIZE_U size = D2D1::SizeU(rc.right - rc.left, rc.bottom - rc.top);
@@ -790,8 +790,8 @@ Sci::Position ScintillaWin::EncodedFromUTF8(const char *utf8, char *encoded) con
 // the current codepage. Code is similar to HandleCompositionWindowed().
 void ScintillaWin::AddCharUTF16(wchar_t const *wcs, unsigned int wclen) {
 	if (IsUnicodeMode()) {
-		char utfval[maxLenInputIME * 3];
 		size_t len = UTF8Length(wcs, wclen);
+		char utfval[maxLenInputIME * 3];
 		UTF8FromUTF16(wcs, wclen, utfval, len);
 		utfval[len] = '\0';
 		AddCharUTF(utfval, static_cast<unsigned int>(len));
@@ -1676,7 +1676,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				if (lParam == 0) {
 					return 0;
 				}
-				Sci_CharacterRange *pCR = reinterpret_cast<Sci_CharacterRange *>(lParam);
+				const Sci_CharacterRange *pCR = reinterpret_cast<const Sci_CharacterRange *>(lParam);
 				sel.selType = Selection::selStream;
 				if (pCR->cpMin == 0 && pCR->cpMax == -1) {
 					SetSelection(pCR->cpMin, pdoc->Length());
@@ -2232,7 +2232,7 @@ void ScintillaWin::Paste() {
 	// Always use CF_UNICODETEXT if available
 	GlobalMemory memUSelection(::GetClipboardData(CF_UNICODETEXT));
 	if (memUSelection) {
-		wchar_t *uptr = static_cast<wchar_t *>(memUSelection.ptr);
+		const wchar_t *uptr = static_cast<const wchar_t *>(memUSelection.ptr);
 		if (uptr) {
 			size_t len;
 			std::vector<char> putf;
@@ -2260,7 +2260,7 @@ void ScintillaWin::Paste() {
 		// CF_UNICODETEXT not available, paste ANSI text
 		GlobalMemory memSelection(::GetClipboardData(CF_TEXT));
 		if (memSelection) {
-			char *ptr = static_cast<char *>(memSelection.ptr);
+			const char *ptr = static_cast<char *>(memSelection.ptr);
 			if (ptr) {
 				const size_t bytes = memSelection.Size();
 				size_t len = bytes;
@@ -3069,7 +3069,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 		HRESULT hr = pIDataSource->GetData(&fmtu, &medium);
 		if (SUCCEEDED(hr) && medium.hGlobal) {
 			GlobalMemory memUDrop(medium.hGlobal);
-			wchar_t *udata = static_cast<wchar_t *>(memUDrop.ptr);
+			const wchar_t *udata = static_cast<wchar_t *>(memUDrop.ptr);
 			if (udata) {
 				if (IsUnicodeMode()) {
 					const size_t tlen = memUDrop.Size();
@@ -3169,7 +3169,6 @@ STDMETHODIMP ScintillaWin::GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM) {
 bool ScintillaWin::Register(HINSTANCE hInstance_) {
 
 	hInstance = hInstance_;
-	bool result;
 
 	// Register the Scintilla class
 	// Register Scintilla as a wide character window
@@ -3187,7 +3186,7 @@ bool ScintillaWin::Register(HINSTANCE hInstance_) {
 	wndclass.lpszClassName = L"Scintilla";
 	wndclass.hIconSm = 0;
 	scintillaClassAtom = ::RegisterClassExW(&wndclass);
-	result = 0 != scintillaClassAtom;
+	bool result = 0 != scintillaClassAtom;
 
 	if (result) {
 		// Register the CallTip class
