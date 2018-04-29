@@ -110,7 +110,7 @@ bool LoadD2D() {
 
 		hDLLD2D = ::LoadLibraryEx(TEXT("D2D1.DLL"), 0, loadLibraryFlags);
 		if (hDLLD2D) {
-			D2D1CFSig fnD2DCF = (D2D1CFSig)::GetProcAddress(hDLLD2D, "D2D1CreateFactory");
+			D2D1CFSig fnD2DCF = reinterpret_cast<D2D1CFSig>(::GetProcAddress(hDLLD2D, "D2D1CreateFactory"));
 			if (fnD2DCF) {
 				// A single threaded factory as Scintilla always draw on the GUI thread
 				fnD2DCF(D2D1_FACTORY_TYPE_SINGLE_THREADED,
@@ -121,7 +121,7 @@ bool LoadD2D() {
 		}
 		hDLLDWrite = ::LoadLibraryEx(TEXT("DWRITE.DLL"), 0, loadLibraryFlags);
 		if (hDLLDWrite) {
-			DWriteCFSig fnDWCF = (DWriteCFSig)::GetProcAddress(hDLLDWrite, "DWriteCreateFactory");
+			DWriteCFSig fnDWCF = reinterpret_cast<DWriteCFSig>(::GetProcAddress(hDLLDWrite, "DWriteCreateFactory"));
 			if (fnDWCF) {
 				fnDWCF(DWRITE_FACTORY_TYPE_SHARED,
 					__uuidof(IDWriteFactory),
@@ -473,7 +473,7 @@ class VarBuffer {
 	T bufferStandard[lengthStandard];
 public:
 	T *buffer;
-	explicit VarBuffer(size_t length) : buffer(0) {
+	explicit VarBuffer(size_t length) : buffer(nullptr) {
 		if (length > lengthStandard) {
 			buffer = new T[length];
 		} else {
