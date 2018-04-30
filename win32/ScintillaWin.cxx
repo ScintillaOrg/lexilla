@@ -885,7 +885,7 @@ sptr_t ScintillaWin::WndPaint(uptr_t wParam) {
 	Platform::ShowAssertionPopUps(assertsPopup);
 
 	//Platform::DebugPrintf("Paint took %g\n", ep.Duration());
-	return 0l;
+	return 0;
 }
 
 sptr_t ScintillaWin::HandleCompositionWindowed(uptr_t wParam, sptr_t lParam) {
@@ -1782,7 +1782,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 	} catch (...) {
 		errorStatus = SC_STATUS_FAILURE;
 	}
-	return 0l;
+	return 0;
 }
 
 bool ScintillaWin::ValidCodePage(int codePage) const {
