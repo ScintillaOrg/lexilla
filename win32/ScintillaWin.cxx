@@ -229,7 +229,7 @@ public:
 	}
 
 	std::vector<BYTE> GetImeAttributes() {
-		int attrLen = ::ImmGetCompositionStringW(hIMC, GCS_COMPATTR, NULL, 0);
+		const int attrLen = ::ImmGetCompositionStringW(hIMC, GCS_COMPATTR, NULL, 0);
 		std::vector<BYTE> attr(attrLen, 0);
 		::ImmGetCompositionStringW(hIMC, GCS_COMPATTR, &attr[0], static_cast<DWORD>(attr.size()));
 		return attr;
@@ -796,7 +796,7 @@ void ScintillaWin::AddCharUTF16(wchar_t const *wcs, unsigned int wclen) {
 		utfval[len] = '\0';
 		AddCharUTF(utfval, static_cast<unsigned int>(len));
 	} else {
-		UINT cpDest = CodePageOfDocument();
+		const UINT cpDest = CodePageOfDocument();
 		char inBufferCP[maxLenInputIME * 2];
 		const int size = ::WideCharToMultiByte(cpDest,
 			0, wcs, wclen, inBufferCP, sizeof(inBufferCP) - 1, 0, 0);
@@ -883,7 +883,7 @@ sptr_t ScintillaWin::HandleCompositionWindowed(uptr_t wParam, sptr_t lParam) {
 			AddWString(imc.GetCompositionString(GCS_RESULTSTR));
 
 			// Set new position after converted
-			Point pos = PointMainCaret();
+			const Point pos = PointMainCaret();
 			COMPOSITIONFORM CompForm;
 			CompForm.dwStyle = CFS_POINT;
 			CompForm.ptCurrentPos.x = static_cast<int>(pos.x);
@@ -903,7 +903,7 @@ bool ScintillaWin::KoreanIME() {
 void ScintillaWin::MoveImeCarets(Sci::Position offset) {
 	// Move carets relatively by bytes.
 	for (size_t r=0; r<sel.Count(); r++) {
-		Sci::Position positionInsert = sel.Range(r).Start().Position();
+		const Sci::Position positionInsert = sel.Range(r).Start().Position();
 		sel.Range(r).caret.SetPosition(positionInsert + offset);
 		sel.Range(r).anchor.SetPosition(positionInsert + offset);
 	}
@@ -919,7 +919,7 @@ void ScintillaWin::DrawImeIndicator(int indicator, int len) {
 	}
 	pdoc->DecorationSetCurrentIndicator(indicator);
 	for (size_t r=0; r<sel.Count(); r++) {
-		Sci::Position positionInsert = sel.Range(r).Start().Position();
+		const Sci::Position positionInsert = sel.Range(r).Start().Position();
 		pdoc->DecorationFillRange(positionInsert - len, 1, len);
 	}
 }
@@ -927,7 +927,7 @@ void ScintillaWin::DrawImeIndicator(int indicator, int len) {
 void ScintillaWin::SetCandidateWindowPos() {
 	IMContext imc(MainHWND());
 	if (imc.hIMC) {
-		Point pos = PointMainCaret();
+		const Point pos = PointMainCaret();
 		CANDIDATEFORM CandForm;
 		CandForm.dwIndex = 0;
 		CandForm.dwStyle = CFS_CANDIDATEPOS;
@@ -968,8 +968,8 @@ void ScintillaWin::EscapeHanja() {
 	if (sel.Count() > 1) {
 		return; // Do not allow multi carets.
 	}
-	Sci::Position currentPos = CurrentPosition();
-	int oneCharLen = pdoc->LenChar(currentPos);
+	const Sci::Position currentPos = CurrentPosition();
+	const int oneCharLen = pdoc->LenChar(currentPos);
 
 	if (oneCharLen < 2) {
 		return; // No need to handle SBCS.
@@ -1102,7 +1102,7 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 
 		// Move IME caret from current last position to imeCaretPos.
 		const int imeEndToImeCaretU16 = imc.GetImeCaretPos() - static_cast<unsigned int>(wcs.size());
-		Sci::Position imeCaretPosDoc = pdoc->GetRelativePositionUTF16(CurrentPosition(), imeEndToImeCaretU16);
+		const Sci::Position imeCaretPosDoc = pdoc->GetRelativePositionUTF16(CurrentPosition(), imeEndToImeCaretU16);
 
 		MoveImeCarets(- CurrentPosition() + imeCaretPosDoc);
 
@@ -2058,7 +2058,7 @@ public:
 };
 
 CaseFolder *ScintillaWin::CaseFolderForEncoding() {
-	UINT cpDest = CodePageOfDocument();
+	const UINT cpDest = CodePageOfDocument();
 	if (cpDest == SC_CP_UTF8) {
 		return new CaseFolderUnicode();
 	} else {
@@ -2066,12 +2066,11 @@ CaseFolder *ScintillaWin::CaseFolderForEncoding() {
 			CaseFolderTable *pcf = new CaseFolderTable();
 			pcf->StandardASCII();
 			// Only for single byte encodings
-			UINT cpDoc = CodePageOfDocument();
 			for (int i=0x80; i<0x100; i++) {
 				char sCharacter[2] = "A";
 				sCharacter[0] = static_cast<char>(i);
 				wchar_t wCharacter[20];
-				const unsigned int lengthUTF16 = ::MultiByteToWideChar(cpDoc, 0, sCharacter, 1,
+				const unsigned int lengthUTF16 = ::MultiByteToWideChar(cpDest, 0, sCharacter, 1,
 					wCharacter, ELEMENTS(wCharacter));
 				if (lengthUTF16 == 1) {
 					const char *caseFolded = CaseConvert(wCharacter[0], CaseConversionFold);
@@ -2082,7 +2081,7 @@ CaseFolder *ScintillaWin::CaseFolderForEncoding() {
 							wLower, ELEMENTS(wLower));
 						if (charsConverted == 1) {
 							char sCharacterLowered[20];
-							const unsigned int lengthConverted = ::WideCharToMultiByte(cpDoc, 0,
+							const unsigned int lengthConverted = ::WideCharToMultiByte(cpDest, 0,
 								wLower, static_cast<int>(charsConverted),
 								sCharacterLowered, ELEMENTS(sCharacterLowered), NULL, 0);
 							if ((lengthConverted == 1) && (sCharacter[0] != sCharacterLowered[0])) {
@@ -2245,7 +2244,7 @@ void ScintillaWin::Paste() {
 			} else {
 				// CF_UNICODETEXT available, but not in Unicode mode
 				// Convert from Unicode to current Scintilla code page
-				UINT cpDest = CodePageOfDocument();
+				const UINT cpDest = CodePageOfDocument();
 				len = ::WideCharToMultiByte(cpDest, 0, uptr, -1,
 				                            NULL, 0, NULL, NULL) - 1; // subtract 0 terminator
 				putf.resize(len + 1);
@@ -2260,7 +2259,7 @@ void ScintillaWin::Paste() {
 		// CF_UNICODETEXT not available, paste ANSI text
 		GlobalMemory memSelection(::GetClipboardData(CF_TEXT));
 		if (memSelection) {
-			const char *ptr = static_cast<char *>(memSelection.ptr);
+			const char *ptr = static_cast<const char *>(memSelection.ptr);
 			if (ptr) {
 				const size_t bytes = memSelection.Size();
 				size_t len = bytes;
@@ -2631,7 +2630,7 @@ void ScintillaWin::ImeStartComposition() {
 	if (caret.active) {
 		// Move IME Window to current caret position
 		IMContext imc(MainHWND());
-		Point pos = PointMainCaret();
+		const Point pos = PointMainCaret();
 		COMPOSITIONFORM CompForm;
 		CompForm.dwStyle = CFS_POINT;
 		CompForm.ptCurrentPos.x = static_cast<int>(pos.x);
@@ -2724,20 +2723,20 @@ LRESULT ScintillaWin::ImeOnReconvert(LPARAM lParam) {
 		return 0;
 
 	// No selection asks IME to fill target fields with its own value.
-	int tgWlen = rc->dwTargetStrLen;
-	int tgWstart = rc->dwTargetStrOffset / sizeof(wchar_t);
+	const int tgWlen = rc->dwTargetStrLen;
+	const int tgWstart = rc->dwTargetStrOffset / sizeof(wchar_t);
 
 	std::string tgCompStart = StringEncode(rcFeed.substr(0, tgWstart), codePage);
 	std::string tgComp = StringEncode(rcFeed.substr(tgWstart, tgWlen), codePage);
 
 	// No selection needs to adjust reconvert start position for IME set.
-	int adjust = static_cast<int>(tgCompStart.length() - rcCompStart.length());
-	int docCompLen = static_cast<int>(tgComp.length());
+	const int adjust = static_cast<int>(tgCompStart.length() - rcCompStart.length());
+	const int docCompLen = static_cast<int>(tgComp.length());
 
 	// Make place for next composition string to sit in.
 	for (size_t r=0; r<sel.Count(); r++) {
-		Sci::Position rBase = sel.Range(r).Start().Position();
-		Sci::Position docCompStart = rBase + adjust;
+		const Sci::Position rBase = sel.Range(r).Start().Position();
+		const Sci::Position docCompStart = rBase + adjust;
 
 		if (inOverstrike) { // the docCompLen of bytes will be overstriked.
 			sel.Range(r).caret.SetPosition(docCompStart);
@@ -2745,8 +2744,8 @@ LRESULT ScintillaWin::ImeOnReconvert(LPARAM lParam) {
 		} else {
 			// Ensure docCompStart+docCompLen be not beyond lineEnd.
 			// since docCompLen by byte might break eol.
-			Sci::Position lineEnd = pdoc->LineEnd(pdoc->LineFromPosition(rBase));
-			Sci::Position overflow = (docCompStart + docCompLen) - lineEnd;
+			const Sci::Position lineEnd = pdoc->LineEnd(pdoc->LineFromPosition(rBase));
+			const Sci::Position overflow = (docCompStart + docCompLen) - lineEnd;
 			if (overflow > 0) {
 				pdoc->DeleteChars(docCompStart, docCompLen - overflow);
 			} else {
@@ -2783,7 +2782,7 @@ void ScintillaWin::CopyToClipboard(const SelectionText &selectedText) {
 	} else {
 		// Not Unicode mode
 		// Convert to Unicode using the current Scintilla code page
-		UINT cpSrc = CodePageFromCharSet(
+		const UINT cpSrc = CodePageFromCharSet(
 					selectedText.characterSet, selectedText.codePage);
 		int uLen = ::MultiByteToWideChar(cpSrc, 0, selectedText.Data(),
 			static_cast<int>(selectedText.LengthWithTerminator()), 0, 0);
@@ -3069,7 +3068,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 		HRESULT hr = pIDataSource->GetData(&fmtu, &medium);
 		if (SUCCEEDED(hr) && medium.hGlobal) {
 			GlobalMemory memUDrop(medium.hGlobal);
-			const wchar_t *udata = static_cast<wchar_t *>(memUDrop.ptr);
+			const wchar_t *udata = static_cast<const wchar_t *>(memUDrop.ptr);
 			if (udata) {
 				if (IsUnicodeMode()) {
 					const size_t tlen = memUDrop.Size();
@@ -3083,7 +3082,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 					// Default Scintilla behavior in Unicode mode
 					// CF_UNICODETEXT available, but not in Unicode mode
 					// Convert from Unicode to current Scintilla code page
-					UINT cpDest = CodePageOfDocument();
+					const UINT cpDest = CodePageOfDocument();
 					int tlen = ::WideCharToMultiByte(cpDest, 0, udata, -1,
 						NULL, 0, NULL, NULL) - 1; // subtract 0 terminator
 					data.resize(tlen + 1);
@@ -3097,7 +3096,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 			hr = pIDataSource->GetData(&fmte, &medium);
 			if (SUCCEEDED(hr) && medium.hGlobal) {
 				GlobalMemory memDrop(medium.hGlobal);
-				const char *cdata = static_cast<char *>(memDrop.ptr);
+				const char *cdata = static_cast<const char *>(memDrop.ptr);
 				if (cdata)
 					data.assign(cdata, cdata+strlen(cdata)+1);
 				memDrop.Unlock();
