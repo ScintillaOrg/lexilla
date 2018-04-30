@@ -136,30 +136,37 @@ typedef UINT_PTR (WINAPI *SetCoalescableTimerSig)(HWND hwnd, UINT_PTR nIDEvent,
 
 // GCC has trouble with the standard COM ABI so do it the old C way with explicit vtables.
 
-const TCHAR callClassName[] = TEXT("CallTip");
-
 using namespace Scintilla;
 
-static void *PointerFromWindow(HWND hWnd) {
+namespace {
+
+const TCHAR callClassName[] = TEXT("CallTip");
+
+void *PointerFromWindow(HWND hWnd) {
 	return reinterpret_cast<void *>(::GetWindowLongPtr(hWnd, 0));
 }
 
-static void SetWindowPointer(HWND hWnd, void *ptr) {
+void SetWindowPointer(HWND hWnd, void *ptr) {
 	::SetWindowLongPtr(hWnd, 0, reinterpret_cast<LONG_PTR>(ptr));
 }
 
-static void SetWindowID(HWND hWnd, int identifier) {
+void SetWindowID(HWND hWnd, int identifier) {
 	::SetWindowLongPtr(hWnd, GWLP_ID, identifier);
 }
 
-static Point PointFromPOINT(POINT pt) {
+Point PointFromPOINT(POINT pt) {
 	return Point::FromInts(pt.x, pt.y);
 }
-static Point PointFromLParam(sptr_t lpoint) {
+Point PointFromLParam(sptr_t lpoint) {
 	return Point::FromInts(GET_X_LPARAM(lpoint), GET_Y_LPARAM(lpoint));
 }
-static bool KeyboardIsKeyDown(int key) {
+POINT POINTFromPoint(Point pt) {
+	return POINT{ static_cast<LONG>(pt.x), static_cast<LONG>(pt.y) };
+}
+bool KeyboardIsKeyDown(int key) {
 	return (::GetKeyState(key) & 0x80000000) != 0;
+}
+
 }
 
 class ScintillaWin; 	// Forward declaration for COM interface subobjects
@@ -641,7 +648,10 @@ int ScintillaWin::MouseModifiers(uptr_t wParam) {
 		(wParam & MK_CONTROL) != 0,
 		KeyboardIsKeyDown(VK_MENU));
 }
-static int InputCodePage() {
+
+namespace {
+
+int InputCodePage() {
 	HKL inputLocale = ::GetKeyboardLayout(0);
 	const LANGID inputLang = LOWORD(inputLocale);
 	char sCodePage[10];
@@ -653,7 +663,7 @@ static int InputCodePage() {
 }
 
 /** Map the key codes to their equivalent SCK_ form. */
-static int KeyTranslate(int keyIn) {
+int KeyTranslate(int keyIn) {
 //PLATFORM_ASSERT(!keyIn);
 	switch (keyIn) {
 		case VK_DOWN:		return SCK_DOWN;
@@ -685,7 +695,7 @@ static int KeyTranslate(int keyIn) {
 	}
 }
 
-static bool BoundsContains(PRectangle rcBounds, HRGN hRgnBounds, PRectangle rcCheck) {
+bool BoundsContains(PRectangle rcBounds, HRGN hRgnBounds, PRectangle rcCheck) {
 	bool contains = true;
 	if (!rcCheck.Empty()) {
 		if (!rcBounds.Contains(rcCheck)) {
@@ -710,7 +720,7 @@ static bool BoundsContains(PRectangle rcBounds, HRGN hRgnBounds, PRectangle rcCh
 	return contains;
 }
 
-static std::string StringEncode(const std::wstring &s, int codePage) {
+std::string StringEncode(const std::wstring &s, int codePage) {
 	const int cchMulti = s.length() ? ::WideCharToMultiByte(codePage, 0, s.c_str(), static_cast<int>(s.length()), NULL, 0, NULL, NULL) : 0;
 	std::string sMulti(cchMulti, 0);
 	if (cchMulti) {
@@ -719,7 +729,7 @@ static std::string StringEncode(const std::wstring &s, int codePage) {
 	return sMulti;
 }
 
-static std::wstring StringDecode(const std::string &s, int codePage) {
+std::wstring StringDecode(const std::string &s, int codePage) {
 	const int cchWide = s.length() ? ::MultiByteToWideChar(codePage, 0, s.c_str(), static_cast<int>(s.length()), NULL, 0) : 0;
 	std::wstring sWide(cchWide, 0);
 	if (cchWide) {
@@ -728,7 +738,7 @@ static std::wstring StringDecode(const std::string &s, int codePage) {
 	return sWide;
 }
 
-static std::wstring StringMapCase(const std::wstring &ws, DWORD mapFlags) {
+std::wstring StringMapCase(const std::wstring &ws, DWORD mapFlags) {
 	const int charsConverted = ::LCMapStringW(LOCALE_SYSTEM_DEFAULT, mapFlags,
 		ws.c_str(), static_cast<int>(ws.length()), NULL, 0);
 	std::wstring wsConverted(charsConverted, 0);
@@ -737,6 +747,8 @@ static std::wstring StringMapCase(const std::wstring &ws, DWORD mapFlags) {
 			ws.c_str(), static_cast<int>(ws.length()), &wsConverted[0], charsConverted);
 	}
 	return wsConverted;
+}
+
 }
 
 // Returns the target converted to UTF8.
@@ -816,7 +828,7 @@ sptr_t ScintillaWin::WndPaint(uptr_t wParam) {
 	PAINTSTRUCT *pps;
 
 	const bool IsOcxCtrl = (wParam != 0); // if wParam != 0, it contains
-								   // a PAINSTRUCT* from the OCX
+								   // a PAINTSTRUCT* from the OCX
 	// Removed since this interferes with reporting other assertions as it occurs repeatedly
 	//PLATFORM_ASSERT(hRgnUpdate == NULL);
 	hRgnUpdate = ::CreateRectRgn(0, 0, 0, 0);
@@ -886,8 +898,7 @@ sptr_t ScintillaWin::HandleCompositionWindowed(uptr_t wParam, sptr_t lParam) {
 			const Point pos = PointMainCaret();
 			COMPOSITIONFORM CompForm;
 			CompForm.dwStyle = CFS_POINT;
-			CompForm.ptCurrentPos.x = static_cast<int>(pos.x);
-			CompForm.ptCurrentPos.y = static_cast<int>(pos.y);
+			CompForm.ptCurrentPos = POINTFromPoint(pos);
 			::ImmSetCompositionWindow(imc.hIMC, &CompForm);
 		}
 		return 0;
@@ -1118,8 +1129,10 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 	return 0;
 }
 
+namespace {
+
 // Translate message IDs from WM_* and EM_* to SCI_* so can partly emulate Windows Edit control
-static unsigned int SciMessageFromEM(unsigned int iMessage) {
+unsigned int SciMessageFromEM(unsigned int iMessage) {
 	switch (iMessage) {
 	case EM_CANPASTE: return SCI_CANPASTE;
 	case EM_CANUNDO: return SCI_CANUNDO;
@@ -1145,6 +1158,10 @@ static unsigned int SciMessageFromEM(unsigned int iMessage) {
 	}
 	return iMessage;
 }
+
+}
+
+namespace Scintilla {
 
 UINT CodePageFromCharSet(DWORD characterSet, UINT documentCodePage) {
 	if (documentCodePage == SC_CP_UTF8) {
@@ -1175,6 +1192,8 @@ UINT CodePageFromCharSet(DWORD characterSet, UINT documentCodePage) {
 	case SC_CHARSET_SYMBOL: return documentCodePage;
 	}
 	return documentCodePage;
+}
+
 }
 
 UINT ScintillaWin::CodePageOfDocument() const {
@@ -1577,7 +1596,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 					if ((pt.x == -1) && (pt.y == -1)) {
 						// Caused by keyboard so display menu near caret
 						pt = PointMainCaret();
-						POINT spt = {static_cast<int>(pt.x), static_cast<int>(pt.y)};
+						POINT spt = POINTFromPoint(pt);
 						::ClientToScreen(MainHWND(), &spt);
 						pt = PointFromPOINT(spt);
 					}
@@ -2147,6 +2166,8 @@ bool ScintillaWin::CanPaste() {
 	return false;
 }
 
+namespace {
+
 class GlobalMemory {
 	HGLOBAL hand;
 public:
@@ -2196,7 +2217,7 @@ public:
 // OpenClipboard may fail if another application has opened the clipboard.
 // Try up to 8 times, with an initial delay of 1 ms and an exponential back off
 // for a maximum total delay of 127 ms (1+2+4+8+16+32+64).
-static bool OpenClipboardRetry(HWND hwnd) {
+bool OpenClipboardRetry(HWND hwnd) {
 	for (int attempt=0; attempt<8; attempt++) {
 		if (attempt > 0) {
 			::Sleep(1 << (attempt-1));
@@ -2206,6 +2227,8 @@ static bool OpenClipboardRetry(HWND hwnd) {
 		}
 	}
 	return false;
+}
+
 }
 
 void ScintillaWin::Paste() {
@@ -2633,8 +2656,7 @@ void ScintillaWin::ImeStartComposition() {
 		const Point pos = PointMainCaret();
 		COMPOSITIONFORM CompForm;
 		CompForm.dwStyle = CFS_POINT;
-		CompForm.ptCurrentPos.x = static_cast<int>(pos.x);
-		CompForm.ptCurrentPos.y = static_cast<int>(pos.y);
+		CompForm.ptCurrentPos = POINTFromPoint(pos);
 
 		::ImmSetCompositionWindow(imc.hIMC, &CompForm);
 
@@ -2943,8 +2965,12 @@ void ScintillaWin::FullPaintDC(HDC hdc) {
 	paintState = notPainting;
 }
 
-static bool CompareDevCap(HDC hdc, HDC hOtherDC, int nIndex) {
+namespace {
+
+bool CompareDevCap(HDC hdc, HDC hOtherDC, int nIndex) {
 	return ::GetDeviceCaps(hdc, nIndex) == ::GetDeviceCaps(hOtherDC, nIndex);
+}
+
 }
 
 bool ScintillaWin::IsCompatibleDC(HDC hOtherDC) {
