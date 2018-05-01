@@ -344,7 +344,7 @@ void ScintillaQt::PasteFromMode(QClipboard::Mode clipboardMode_)
 
 	UndoGroup ug(pdoc);
 	ClearSelection(multiPasteMode == SC_MULTIPASTE_EACH);
-	InsertPasteShape(selText.Data(), static_cast<int>(selText.Length()),
+	InsertPasteShape(selText.Data(), selText.Length(),
 		selText.rectangular ? pasteRectangular : pasteStream);
 	EnsureCaretVisible();
 }
