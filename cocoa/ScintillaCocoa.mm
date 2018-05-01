@@ -2344,9 +2344,9 @@ void ScintillaCocoa::MouseWheel(NSEvent *event) {
 	// In order to make scrolling with larger offset smoother we scroll less lines the larger the
 	// delta value is.
 	if (event.deltaY < 0)
-		dY = -(int) sqrt(-10.0 * event.deltaY);
+		dY = -static_cast<int>(sqrt(-10.0 * event.deltaY));
 	else
-		dY = (int) sqrt(10.0 * event.deltaY);
+		dY = static_cast<int>(sqrt(10.0 * event.deltaY));
 
 	if (command) {
 		// Zoom! We play with the font sizes in the styles.
