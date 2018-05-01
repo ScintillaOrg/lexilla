@@ -70,20 +70,6 @@ inline CGRect PRectangleToCGRect(PRectangle &rc) {
 	return CGRectMake(rc.left, rc.top, rc.Width(), rc.Height());
 }
 
-//--------------------------------------------------------------------------------------------------
-
-/**
- * Converts a Quartz-style rectangle to a PRectangle structure as used by Scintilla.
- */
-inline PRectangle CGRectToPRectangle(const CGRect &rect) {
-	PRectangle rc;
-	rc.left = (int)(rect.origin.x + 0.5);
-	rc.top = (int)(rect.origin.y + 0.5);
-	rc.right = (int)(rect.origin.x + rect.size.width + 0.5);
-	rc.bottom = (int)(rect.origin.y + rect.size.height + 0.5);
-	return rc;
-}
-
 //----------------- Font ---------------------------------------------------------------------------
 
 Font::Font(): fid(0) {
@@ -293,7 +279,7 @@ void SurfaceImpl::FillColour(const ColourDesired &back) {
 CGImageRef SurfaceImpl::GetImage() {
 	// For now, assume that GetImage can only be called on PixMap surfaces.
 	if (!bitmapData)
-		return nullptr;
+		return NULL;
 
 	CGContextFlush(gc);
 
@@ -302,8 +288,8 @@ CGImageRef SurfaceImpl::GetImage() {
 	if (colorSpace == NULL)
 		return NULL;
 
-	const int bitmapBytesPerRow = ((int) bitmapWidth * BYTES_PER_PIXEL);
-	const int bitmapByteCount = (bitmapBytesPerRow * (int) bitmapHeight);
+	const int bitmapBytesPerRow = bitmapWidth * BYTES_PER_PIXEL;
+	const int bitmapByteCount = bitmapBytesPerRow * bitmapHeight;
 
 	// Make a copy of the bitmap data for the image creation and divorce it
 	// From the SurfaceImpl lifetime
@@ -668,8 +654,8 @@ static CGImageRef ImageCreateFromRGBA(int width, int height, const unsigned char
 	// Create an RGB color space.
 	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
 	if (colorSpace) {
-		const int bitmapBytesPerRow = ((int) width * 4);
-		const int bitmapByteCount = (bitmapBytesPerRow * (int) height);
+		const int bitmapBytesPerRow = width * 4;
+		const int bitmapByteCount = bitmapBytesPerRow * height;
 
 		// Create a data provider.
 		CGDataProviderRef dataProvider = 0;
@@ -739,8 +725,8 @@ void SurfaceImpl::CopyImageRectangle(Surface &surfaceSource, PRectangle srcRect,
 	CGRect dst = PRectangleToCGRect(dstRect);
 
 	/* source from QuickDrawToQuartz2D.pdf on developer.apple.com */
-	float w = (float) CGImageGetWidth(image);
-	float h = (float) CGImageGetHeight(image);
+	const float w = static_cast<float>(CGImageGetWidth(image));
+	const float h = static_cast<float>(CGImageGetHeight(image));
 	CGRect drawRect = CGRectMake(0, 0, w, h);
 	if (!CGRectEqualToRect(src, dst)) {
 		CGFloat sx = CGRectGetWidth(dst) / CGRectGetWidth(src);
@@ -988,7 +974,7 @@ XYPOSITION SurfaceImpl::AverageCharWidth(Font &font_) {
 	const int sizeStringLength = ELEMENTS(sizeString);
 	XYPOSITION width = WidthText(font_, sizeString, sizeStringLength);
 
-	return (int)((width / (float) sizeStringLength) + 0.5);
+	return round(width / sizeStringLength);
 }
 
 void SurfaceImpl::SetClip(PRectangle rc) {
@@ -1596,7 +1582,7 @@ void ListBoxImpl::SetList(const char *list, char separator, char typesep) {
 	size_t count = strlen(list) + 1;
 	std::vector<char> words(list, list+count);
 	char *startword = words.data();
-	char *numword = NULL;
+	char *numword = nullptr;
 	int i = 0;
 	for (; words[i]; i++) {
 		if (words[i] == separator) {
@@ -1605,7 +1591,7 @@ void ListBoxImpl::SetList(const char *list, char separator, char typesep) {
 				*numword = '\0';
 			Append(startword, numword?atoi(numword + 1):-1);
 			startword = words.data() + i + 1;
-			numword = NULL;
+			numword = nullptr;
 		} else if (words[i] == typesep) {
 			numword = words.data() + i;
 		}
@@ -1887,11 +1873,11 @@ void Platform::Assert(const char *c, const char *file, int line) {
  * Implements the platform specific part of library loading.
  *
  * @param modulePath The path to the module to load.
- * @return A library instance or NULL if the module could not be found or another problem occurred.
+ * @return A library instance or nullptr if the module could not be found or another problem occurred.
  */
 DynamicLibrary *DynamicLibrary::Load(const char * /* modulePath */) {
 	// Not implemented.
-	return NULL;
+	return nullptr;
 }
 
 //--------------------------------------------------------------------------------------------------

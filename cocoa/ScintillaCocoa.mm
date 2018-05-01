@@ -2267,6 +2267,20 @@ void ScintillaCocoa::SetDocPointer(Document *document) {
 //--------------------------------------------------------------------------------------------------
 
 /**
+ * Convert NSEvent timestamp NSTimeInterval into unsigned int milliseconds wanted by Editor methods.
+ */
+
+namespace {
+
+unsigned int TimeOfEvent(NSEvent *event) {
+	return static_cast<unsigned int>(event.timestamp * 1000);
+}
+
+}
+
+//--------------------------------------------------------------------------------------------------
+
+/**
  * Called by the owning view when the mouse pointer enters the control.
  */
 void ScintillaCocoa::MouseEntered(NSEvent *event) {
@@ -2276,7 +2290,7 @@ void ScintillaCocoa::MouseEntered(NSEvent *event) {
 		// Mouse location is given in screen coordinates and might also be outside of our bounds.
 		Point location = ConvertPoint(event.locationInWindow);
 		ButtonMoveWithModifiers(location,
-					(int)(event.timestamp * 1000),
+					TimeOfEvent(event),
 					TranslateModifierFlags(event.modifierFlags));
 	}
 }
@@ -2292,14 +2306,14 @@ void ScintillaCocoa::MouseExited(NSEvent * /* event */) {
 void ScintillaCocoa::MouseDown(NSEvent *event) {
 	Point location = ConvertPoint(event.locationInWindow);
 	ButtonDownWithModifiers(location,
-				(int)(event.timestamp * 1000),
+				TimeOfEvent(event),
 				TranslateModifierFlags(event.modifierFlags));
 }
 
 void ScintillaCocoa::RightMouseDown(NSEvent *event) {
 	Point location = ConvertPoint(event.locationInWindow);
 	RightButtonDownWithModifiers(location,
-				     (int)(event.timestamp * 1000),
+				     TimeOfEvent(event),
 				     TranslateModifierFlags(event.modifierFlags));
 }
 
@@ -2309,7 +2323,7 @@ void ScintillaCocoa::MouseMove(NSEvent *event) {
 	lastMouseEvent = event;
 
 	ButtonMoveWithModifiers(ConvertPoint(event.locationInWindow),
-				(int)(event.timestamp * 1000),
+				TimeOfEvent(event),
 				TranslateModifierFlags(event.modifierFlags));
 }
 
@@ -2317,7 +2331,7 @@ void ScintillaCocoa::MouseMove(NSEvent *event) {
 
 void ScintillaCocoa::MouseUp(NSEvent *event) {
 	ButtonUpWithModifiers(ConvertPoint(event.locationInWindow),
-		 (int)(event.timestamp * 1000),
+		 TimeOfEvent(event),
 		 TranslateModifierFlags(event.modifierFlags));
 }
 
@@ -2330,9 +2344,9 @@ void ScintillaCocoa::MouseWheel(NSEvent *event) {
 	// In order to make scrolling with larger offset smoother we scroll less lines the larger the
 	// delta value is.
 	if (event.deltaY < 0)
-		dY = -(int) sqrt(-10.0 * event.deltaY);
+		dY = -static_cast<int>(sqrt(-10.0 * event.deltaY));
 	else
-		dY = (int) sqrt(10.0 * event.deltaY);
+		dY = static_cast<int>(sqrt(10.0 * event.deltaY));
 
 	if (command) {
 		// Zoom! We play with the font sizes in the styles.
