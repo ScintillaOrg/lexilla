@@ -702,8 +702,8 @@ bool BoundsContains(PRectangle rcBounds, HRGN hRgnBounds, PRectangle rcCheck) {
 			contains = false;
 		} else if (hRgnBounds) {
 			// In bounding rectangle so check more accurately using region
-			HRGN hRgnCheck = ::CreateRectRgn(static_cast<int>(rcCheck.left), static_cast<int>(rcCheck.top),
-				static_cast<int>(rcCheck.right), static_cast<int>(rcCheck.bottom));
+			const RECT rcw = RectFromPRectangle(rcCheck);
+			HRGN hRgnCheck = ::CreateRectRgnIndirect(&rcw);
 			if (hRgnCheck) {
 				HRGN hRgnDifference = ::CreateRectRgn(0, 0, 0, 0);
 				if (hRgnDifference) {

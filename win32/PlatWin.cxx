@@ -49,6 +49,8 @@
 #include "DBCS.h"
 #include "FontQuality.h"
 
+#include "PlatWin.h"
+
 #ifndef SPI_GETFONTSMOOTHINGCONTRAST
 #define SPI_GETFONTSMOOTHINGCONTRAST	0x200C
 #endif
@@ -61,7 +63,7 @@ namespace Scintilla {
 
 UINT CodePageFromCharSet(DWORD characterSet, UINT documentCodePage);
 
-static RECT RectFromPRectangle(PRectangle prc) {
+RECT RectFromPRectangle(PRectangle prc) {
 	RECT rc = {static_cast<LONG>(prc.left), static_cast<LONG>(prc.top),
 		static_cast<LONG>(prc.right), static_cast<LONG>(prc.bottom)};
 	return rc;
