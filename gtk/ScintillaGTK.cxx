@@ -147,6 +147,8 @@ static const GtkTargetEntry clipboardPasteTargets[] = {
 };
 static const gint nClipboardPasteTargets = ELEMENTS(clipboardPasteTargets);
 
+static const GdkDragAction actionCopyOrMove = static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE);
+
 static GtkWidget *PWidget(Window &w) {
 	return static_cast<GtkWidget *>(w.GetID());
 }
@@ -159,7 +161,7 @@ ScintillaGTK *ScintillaGTK::FromWidget(GtkWidget *widget) {
 ScintillaGTK::ScintillaGTK(_ScintillaObject *sci_) :
 		adjustmentv(0), adjustmenth(0),
 		verticalScrollBarWidth(30), horizontalScrollBarHeight(30),
-		evbtn(0), capturedMouse(false), dragWasDropped(false),
+		evbtn(nullptr), capturedMouse(false), dragWasDropped(false),
 		lastKey(0), rectangularSelectionModifier(SCMOD_CTRL), parentClass(0),
 		im_context(NULL), lastNonCommonScript(PANGO_SCRIPT_INVALID_CODE),
 		lastWheelMouseDirection(0),
@@ -203,8 +205,8 @@ ScintillaGTK::~ScintillaGTK() {
 		styleIdleID = 0;
 	}
 	if (evbtn) {
-		gdk_event_free(reinterpret_cast<GdkEvent *>(evbtn));
-		evbtn = 0;
+		gdk_event_free(evbtn);
+		evbtn = nullptr;
 	}
 	wPreedit.Destroy();
 }
@@ -607,7 +609,7 @@ void ScintillaGTK::Init() {
 
 	gtk_drag_dest_set(GTK_WIDGET(PWidget(wMain)),
 	                  GTK_DEST_DEFAULT_ALL, clipboardPasteTargets, nClipboardPasteTargets,
-	                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
+	                  actionCopyOrMove);
 
 	/* create pre-edit window */
 	wPreedit = gtk_window_new(GTK_WINDOW_POPUP);
@@ -684,23 +686,23 @@ bool ScintillaGTK::DragThreshold(Point ptStart, Point ptNow) {
 }
 
 void ScintillaGTK::StartDrag() {
-	PLATFORM_ASSERT(evbtn != 0);
+	PLATFORM_ASSERT(evbtn);
 	dragWasDropped = false;
 	inDragDrop = ddDragging;
 	GtkTargetList *tl = gtk_target_list_new(clipboardCopyTargets, nClipboardCopyTargets);
 #if GTK_CHECK_VERSION(3,10,0)
 	gtk_drag_begin_with_coordinates(GTK_WIDGET(PWidget(wMain)),
 	               tl,
-	               static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE),
-	               evbtn->button,
-	               reinterpret_cast<GdkEvent *>(evbtn),
+	               actionCopyOrMove,
+	               buttonMouse,
+	               evbtn,
 			-1, -1);
 #else
 	gtk_drag_begin(GTK_WIDGET(PWidget(wMain)),
 	               tl,
-	               static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE),
-	               evbtn->button,
-	               reinterpret_cast<GdkEvent *>(evbtn));
+	               actionCopyOrMove,
+	               buttonMouse,
+	               evbtn);
 #endif
 }
 
@@ -898,7 +900,7 @@ bool ScintillaGTK::SetIdle(bool on) {
 		// Start idler, if it's not running.
 		if (!idler.state) {
 			idler.state = true;
-			idler.idlerID = reinterpret_cast<IdlerID>(
+			idler.idlerID = GUINT_TO_POINTER(
 				gdk_threads_add_idle_full(G_PRIORITY_DEFAULT_IDLE, IdleCallback, this, NULL));
 		}
 	} else {
@@ -1297,7 +1299,7 @@ void ScintillaGTK::CreateCallTipWindow(PRectangle rc) {
 				   G_CALLBACK(ScintillaGTK::ExposeCT), &ct);
 #endif
 		g_signal_connect(G_OBJECT(widcdrw), "button_press_event",
-				   G_CALLBACK(ScintillaGTK::PressCT), static_cast<void *>(this));
+				   G_CALLBACK(ScintillaGTK::PressCT), this);
 		gtk_widget_set_events(widcdrw,
 			GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
 		GtkWidget *top = gtk_widget_get_toplevel(static_cast<GtkWidget *>(wMain.GetID()));
@@ -1506,7 +1508,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 	} else {
 		gtk_selection_data_set(selection_data,
 			static_cast<GdkAtom>(GDK_SELECTION_TYPE_STRING),
-			8, reinterpret_cast<const unsigned char *>(textData), len);
+			8, reinterpret_cast<const guchar *>(textData), len);
 	}
 }
 
@@ -1674,13 +1676,13 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 			return FALSE;
 
 		if (evbtn) {
-			gdk_event_free(reinterpret_cast<GdkEvent *>(evbtn));
-			evbtn = 0;
+			gdk_event_free(evbtn);
 		}
-		evbtn = reinterpret_cast<GdkEventButton *>(gdk_event_copy(reinterpret_cast<GdkEvent *>(event)));
+		evbtn = gdk_event_copy(reinterpret_cast<GdkEvent *>(event));
+		buttonMouse = event->button;
 		Point pt;
-		pt.x = int(event->x);
-		pt.y = int(event->y);
+		pt.x = floor(event->x);
+		pt.y = floor(event->y);
 		PRectangle rcClient = GetClientRectangle();
 		//Platform::DebugPrintf("Press %0d,%0d in %0d,%0d %0d,%0d\n",
 		//	pt.x, pt.y, rcClient.left, rcClient.top, rcClient.right, rcClient.bottom);
@@ -2456,8 +2458,8 @@ static GObjectClass *scintilla_class_parent_class;
 
 void ScintillaGTK::Dispose(GObject *object) {
 	try {
-		ScintillaObject *scio = reinterpret_cast<ScintillaObject *>(object);
-		ScintillaGTK *sciThis = reinterpret_cast<ScintillaGTK *>(scio->pscin);
+		ScintillaObject *scio = SCINTILLA(object);
+		ScintillaGTK *sciThis = static_cast<ScintillaGTK *>(scio->pscin);
 
 		if (PWidget(sciThis->scrollbarv)) {
 			gtk_widget_unparent(PWidget(sciThis->scrollbarv));
@@ -2722,8 +2724,7 @@ gboolean ScintillaGTK::DragMotionThis(GdkDragContext *context,
 			// Avoid dragging selection onto itself as that produces a move
 			// with no real effect but which creates undo actions.
 			preferredAction = static_cast<GdkDragAction>(0);
-		} else if (actions == static_cast<GdkDragAction>
-		        (GDK_ACTION_COPY | GDK_ACTION_MOVE)) {
+		} else if (actions == actionCopyOrMove) {
 			preferredAction = GDK_ACTION_MOVE;
 		}
 		gdk_drag_status(context, preferredAction, dragtime);

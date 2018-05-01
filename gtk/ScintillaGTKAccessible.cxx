@@ -761,7 +761,7 @@ void ScintillaGTKAccessible::PasteText(int charPosition) {
 		}
 
 		static void TextReceivedCallback(GtkClipboard *clipboard, const gchar *text, gpointer data) {
-			Helper *helper = reinterpret_cast<Helper*>(data);
+			Helper *helper = static_cast<Helper*>(data);
 			try {
 				if (helper->scia != 0) {
 					helper->TextReceived(clipboard, text);

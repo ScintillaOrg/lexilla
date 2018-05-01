@@ -32,7 +32,7 @@ private:
 	void Notify(GtkWidget *widget, gint code, SCNotification *nt);
 	static void SciNotify(GtkWidget *widget, gint code, SCNotification *nt, gpointer data) {
 		try {
-			reinterpret_cast<ScintillaGTKAccessible*>(data)->Notify(widget, code, nt);
+			static_cast<ScintillaGTKAccessible*>(data)->Notify(widget, code, nt);
 		} catch (...) {}
 	}
 

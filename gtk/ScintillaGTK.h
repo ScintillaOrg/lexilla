@@ -27,7 +27,8 @@ class ScintillaGTK : public ScintillaBase {
 
 	SelectionText primary;
 
-	GdkEventButton *evbtn;
+	GdkEvent *evbtn;
+	guint buttonMouse;
 	bool capturedMouse;
 	bool dragWasDropped;
 	int lastKey;
