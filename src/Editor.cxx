@@ -376,11 +376,6 @@ Point Editor::LocationFromPosition(Sci::Position pos, PointEnd pe) {
 	return LocationFromPosition(SelectionPosition(pos), pe);
 }
 
-int Editor::XFromPosition(Sci::Position pos) {
-	const Point pt = LocationFromPosition(pos);
-	return static_cast<int>(pt.x) - vs.textStart + xOffset;
-}
-
 int Editor::XFromPosition(SelectionPosition sp) {
 	const Point pt = LocationFromPosition(sp);
 	return static_cast<int>(pt.x) - vs.textStart + xOffset;
@@ -2150,8 +2145,8 @@ void Editor::PasteRectangular(SelectionPosition pos, const char *ptr, Sci::Posit
 			}
 			// Pad the end of lines with spaces if required
 			sel.RangeMain().caret.SetPosition(PositionFromLineX(line, xInsert));
-			if ((XFromPosition(sel.MainCaret()) < xInsert) && (i + 1 < len)) {
-				while (XFromPosition(sel.MainCaret()) < xInsert) {
+			if ((XFromPosition(sel.RangeMain().caret) < xInsert) && (i + 1 < len)) {
+				while (XFromPosition(sel.RangeMain().caret) < xInsert) {
 					assert(pdoc);
 					const Sci::Position lengthInserted = pdoc->InsertString(sel.MainCaret(), " ", 1);
 					sel.RangeMain().caret.Add(lengthInserted);
