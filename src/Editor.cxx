@@ -4228,10 +4228,10 @@ void Editor::DisplayCursor(Window::Cursor c) {
 }
 
 bool Editor::DragThreshold(Point ptStart, Point ptNow) {
-	const int xMove = static_cast<int>(ptStart.x - ptNow.x);
-	const int yMove = static_cast<int>(ptStart.y - ptNow.y);
-	const int distanceSquared = xMove * xMove + yMove * yMove;
-	return distanceSquared > 16;
+	const XYPOSITION xMove = ptStart.x - ptNow.x;
+	const XYPOSITION yMove = ptStart.y - ptNow.y;
+	const XYPOSITION distanceSquared = xMove * xMove + yMove * yMove;
+	return distanceSquared > 16.0f;
 }
 
 void Editor::StartDrag() {
