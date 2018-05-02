@@ -718,8 +718,23 @@ PRectangle Window::GetMonitorRect(Point pt)
 	        rectScreen.right(), rectScreen.bottom());
 }
 
-
 //----------------------------------------------------------------------
+class ListWidget : public QListWidget {
+public:
+	explicit ListWidget(QWidget *parent);
+	virtual ~ListWidget();
+
+	void setDelegate(IListBoxDelegate *lbDelegate);
+	void selectionChanged();
+
+protected:
+	void mouseReleaseEvent(QMouseEvent * event) override;
+	void mouseDoubleClickEvent(QMouseEvent *event) override;
+	QStyleOptionViewItem viewOptions() const override;
+
+private:
+	IListBoxDelegate *delegate;
+};
 
 class ListBoxImpl : public ListBox {
 public:
@@ -748,30 +763,13 @@ public:
 	void ClearRegisteredImages() override;
 	void SetDelegate(IListBoxDelegate *lbDelegate) override;
 	void SetList(const char *list, char separator, char typesep) override;
+
+	ListWidget *GetWidget() const;
 private:
 	bool unicodeMode;
 	int visibleRows;
 	QMap<int,QPixmap> images;
 };
-
-class ListWidget : public QListWidget {
-public:
-	explicit ListWidget(QWidget *parent);
-	virtual ~ListWidget();
-
-	void setDelegate(IListBoxDelegate *lbDelegate);
-	void selectionChanged();
-
-protected:
-	void mouseReleaseEvent(QMouseEvent * event) override;
-	void mouseDoubleClickEvent(QMouseEvent *event) override;
-	QStyleOptionViewItem viewOptions() const override;
-
-private:
-	IListBoxDelegate *delegate;
-};
-
-
 ListBoxImpl::ListBoxImpl()
 : unicodeMode(false), visibleRows(5)
 {}
@@ -824,13 +822,11 @@ void ListBoxImpl::Create(Window &parent,
 
 	wid = list;
 }
-
 void ListBoxImpl::SetFont(Font &font)
 {
-	ListWidget *list = static_cast<ListWidget *>(wid);
+	ListWidget *list = GetWidget();
 	list->setFont(*FontPointer(font));
 }
-
 void ListBoxImpl::SetAverageCharWidth(int /*width*/) {}
 
 void ListBoxImpl::SetVisibleRows(int rows)
@@ -842,11 +838,9 @@ int ListBoxImpl::GetVisibleRows() const
 {
 	return visibleRows;
 }
-
 PRectangle ListBoxImpl::GetDesiredRect()
 {
-	ListWidget *list = static_cast<ListWidget *>(wid);
-
+	ListWidget *list = GetWidget();
 	int rows = Length();
 	if (rows == 0 || rows > visibleRows) {
 		rows = visibleRows;
@@ -862,11 +856,9 @@ PRectangle ListBoxImpl::GetDesiredRect()
 
 	return PRectangle(0, 0, width, height);
 }
-
 int ListBoxImpl::CaretFromEdge()
 {
-	ListWidget *list = static_cast<ListWidget *>(wid);
-
+	ListWidget *list = GetWidget();
 	int maxIconWidth = 0;
 	foreach (QPixmap im, images) {
 		if (maxIconWidth < im.width())
@@ -884,17 +876,14 @@ int ListBoxImpl::CaretFromEdge()
 #endif
 	return maxIconWidth + (2 * list->frameWidth()) + extra;
 }
-
 void ListBoxImpl::Clear()
 {
-	ListWidget *list = static_cast<ListWidget *>(wid);
+	ListWidget *list = GetWidget();
 	list->clear();
 }
-
 void ListBoxImpl::Append(char *s, int type)
 {
-	ListWidget *list = static_cast<ListWidget *>(wid);
-
+	ListWidget *list = GetWidget();
 	QString str = unicodeMode ? QString::fromUtf8(s) : QString::fromLocal8Bit(s);
 	QIcon icon;
 	if (type >= 0) {
@@ -903,16 +892,14 @@ void ListBoxImpl::Append(char *s, int type)
 	}
 	new QListWidgetItem(icon, str, list);
 }
-
 int ListBoxImpl::Length()
 {
-	ListWidget *list = static_cast<ListWidget *>(wid);
+	ListWidget *list = GetWidget();
 	return list->count();
 }
-
 void ListBoxImpl::Select(int n)
 {
-	ListWidget *list = static_cast<ListWidget *>(wid);
+	ListWidget *list = GetWidget();
 	QModelIndex index = list->model()->index(n, 0);
 	if (index.isValid()) {
 		QRect row_rect = list->visualRect(index);
@@ -923,19 +910,16 @@ void ListBoxImpl::Select(int n)
 	list->setCurrentRow(n);
 	list->selectionChanged();
 }
-
 int ListBoxImpl::GetSelection()
 {
-	ListWidget *list = static_cast<ListWidget *>(wid);
+	ListWidget *list = GetWidget();
 	return list->currentRow();
 }
-
 int ListBoxImpl::Find(const char *prefix)
 {
-	ListWidget *list = static_cast<ListWidget *>(wid);
+	ListWidget *list = GetWidget();
 	QString sPrefix = unicodeMode ? QString::fromUtf8(prefix) : QString::fromLocal8Bit(prefix);
 	QList<QListWidgetItem *> ms = list->findItems(sPrefix, Qt::MatchStartsWith);
-
 	int result = -1;
 	if (!ms.isEmpty()) {
 		result = list->row(ms.first());
@@ -943,10 +927,9 @@ int ListBoxImpl::Find(const char *prefix)
 
 	return result;
 }
-
 void ListBoxImpl::GetValue(int n, char *value, int len)
 {
-	ListWidget *list = static_cast<ListWidget *>(wid);
+	ListWidget *list = GetWidget();
 	QListWidgetItem *item = list->item(n);
 	QString str = item->data(Qt::DisplayRole).toString();
 	QByteArray bytes = unicodeMode ? str.toUtf8() : str.toLocal8Bit();
@@ -958,9 +941,8 @@ void ListBoxImpl::GetValue(int n, char *value, int len)
 void ListBoxImpl::RegisterQPixmapImage(int type, const QPixmap& pm)
 {
 	images[type] = pm;
-
-	ListWidget *list = static_cast<ListWidget *>(wid);
-	if (list != NULL) {
+	ListWidget *list = GetWidget();
+	if (list) {
 		QSize iconSize = list->iconSize();
 		if (pm.width() > iconSize.width() || pm.height() > iconSize.height())
 			list->setIconSize(QSize(qMax(pm.width(), iconSize.width()),
@@ -984,18 +966,15 @@ void ListBoxImpl::RegisterRGBAImage(int type, int width, int height, const unsig
 void ListBoxImpl::ClearRegisteredImages()
 {
 	images.clear();
-
-	ListWidget *list = static_cast<ListWidget *>(wid);
-	if (list != NULL)
+	ListWidget *list = GetWidget();
+	if (list)
 		list->setIconSize(QSize(0, 0));
 }
-
 void ListBoxImpl::SetDelegate(IListBoxDelegate *lbDelegate)
 {
-	ListWidget *list = static_cast<ListWidget *>(wid);
+	ListWidget *list = GetWidget();
 	list->setDelegate(lbDelegate);
 }
-
 void ListBoxImpl::SetList(const char *list, char separator, char typesep)
 {
 	// This method is *not* platform dependent.
@@ -1024,9 +1003,12 @@ void ListBoxImpl::SetList(const char *list, char separator, char typesep)
 		Append(startword, numword?atoi(numword + 1):-1);
 	}
 }
+ListWidget *ListBoxImpl::GetWidget() const
+{
+	return static_cast<ListWidget *>(wid);
+}
 
 ListBox::ListBox() {}
-
 ListBox::~ListBox() {}
 
 ListBox *ListBox::Allocate()
