@@ -101,10 +101,9 @@ public:
 	}
 	~FontAndCharacterSet() {
 		delete pfont;
-		pfont = 0;
+		pfont = nullptr;
 	}
 };
-
 static int FontCharacterSet(Font &f)
 {
 	return reinterpret_cast<FontAndCharacterSet *>(f.GetID())->characterSet;
@@ -114,15 +113,12 @@ static QFont *FontPointer(Font &f)
 {
 	return reinterpret_cast<FontAndCharacterSet *>(f.GetID())->pfont;
 }
-
-Font::Font() : fid(0) {}
-
+Font::Font() : fid(nullptr) {}
 Font::~Font()
 {
 	delete reinterpret_cast<FontAndCharacterSet *>(fid);
-	fid = 0;
+	fid = nullptr;
 }
-
 static QFont::StyleStrategy ChooseStrategy(int eff)
 {
 	switch (eff) {
@@ -152,16 +148,12 @@ void Font::Release()
 {
 	if (fid)
 		delete reinterpret_cast<FontAndCharacterSet *>(fid);
-
-	fid = 0;
+	fid = nullptr;
 }
-
-
 SurfaceImpl::SurfaceImpl()
-: device(0), painter(0), deviceOwned(false), painterOwned(false), x(0), y(0),
-	  unicodeMode(false), codePage(0), codecName(0), codec(0)
+: device(nullptr), painter(nullptr), deviceOwned(false), painterOwned(false), x(0), y(0),
+	  unicodeMode(false), codePage(0), codecName(nullptr), codec(nullptr)
 {}
-
 SurfaceImpl::~SurfaceImpl()
 {
 	Clear();
@@ -176,9 +168,8 @@ void SurfaceImpl::Clear()
 	if (deviceOwned && device) {
 		delete device;
 	}
-
-	device = 0;
-	painter = 0;
+	device = nullptr;
+	painter = nullptr;
 	deviceOwned = false;
 	painterOwned = false;
 }
@@ -568,8 +559,7 @@ QPaintDevice *SurfaceImpl::GetPaintDevice()
 QPainter *SurfaceImpl::GetPainter()
 {
 	Q_ASSERT(device);
-
-	if (painter == 0) {
+	if (!painter) {
 		if (device->paintingActive()) {
 			painter = device->paintEngine()->painter();
 		} else {
@@ -606,10 +596,8 @@ void Window::Destroy()
 {
 	if (wid)
 		delete window(wid);
-
-	wid = 0;
+	wid = nullptr;
 }
-
 PRectangle Window::GetPosition()
 {
 	// Before any size allocated pretend its 1000 wide so not scrolled
@@ -791,7 +779,7 @@ void ListBoxImpl::Create(Window &parent,
 #if defined(Q_OS_WIN)
 	// On Windows, Qt::ToolTip causes a crash when the list is clicked on
 	// so Qt::Tool is used.
-	list->setParent(0, Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint
+	list->setParent(nullptr, Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 		| Qt::WindowDoesNotAcceptFocus
 #endif
@@ -801,7 +789,7 @@ void ListBoxImpl::Create(Window &parent,
 	// keyboard stops working. Qt::ToolTip works but its only really
 	// documented for tooltips.
 	// On Linux / X this setting allows clicking on list items.
-	list->setParent(0, Qt::ToolTip | Qt::FramelessWindowHint);
+	list->setParent(nullptr, Qt::ToolTip | Qt::FramelessWindowHint);
 #endif
 	list->setAttribute(Qt::WA_ShowWithoutActivating);
 	list->setFocusPolicy(Qt::NoFocus);
@@ -983,7 +971,7 @@ void ListBoxImpl::SetList(const char *list, char separator, char typesep)
 	size_t count = strlen(list) + 1;
 	std::vector<char> words(list, list+count);
 	char *startword = &words[0];
-	char *numword = NULL;
+	char *numword = nullptr;
 	int i = 0;
 	for (; words[i]; i++) {
 		if (words[i] == separator) {
@@ -992,7 +980,7 @@ void ListBoxImpl::SetList(const char *list, char separator, char typesep)
 				*numword = '\0';
 			Append(startword, numword?atoi(numword + 1):-1);
 			startword = &words[0] + i + 1;
-			numword = NULL;
+			numword = nullptr;
 		} else if (words[i] == typesep) {
 			numword = &words[0] + i;
 		}
@@ -1015,11 +1003,9 @@ ListBox *ListBox::Allocate()
 {
 	return new ListBoxImpl();
 }
-
 ListWidget::ListWidget(QWidget *parent)
-: QListWidget(parent), delegate(0)
+: QListWidget(parent), delegate(nullptr)
 {}
-
 ListWidget::~ListWidget() {}
 
 void ListWidget::setDelegate(IListBoxDelegate *lbDelegate)
@@ -1053,11 +1039,8 @@ QStyleOptionViewItem ListWidget::viewOptions() const
 	result.state |= QStyle::State_Active;
 	return result;
 }
-
 //----------------------------------------------------------------------
-
-Menu::Menu() : mid(0) {}
-
+Menu::Menu() : mid(nullptr) {}
 void Menu::CreatePopUp()
 {
 	Destroy();
@@ -1070,9 +1053,8 @@ void Menu::Destroy()
 		QMenu *menu = static_cast<QMenu *>(mid);
 		delete menu;
 	}
-	mid = 0;
+	mid = nullptr;
 }
-
 void Menu::Show(Point pt, Window & /*w*/)
 {
 	QMenu *menu = static_cast<QMenu *>(mid);
@@ -1094,9 +1076,8 @@ public:
 	virtual ~DynamicLibraryImpl() {
 		if (lib)
 			lib->unload();
-		lib = 0;
+		lib = nullptr;
 	}
-
 	Function FindFunction(const char *name) override {
 		if (lib) {
 			// C++ standard doesn't like casts between function pointers and void pointers so use a union
@@ -1111,14 +1092,12 @@ public:
 			fnConv.fp = lib->resolve(name);
 			return fnConv.f;
 		}
-		return NULL;
+		return nullptr;
 	}
-
 	bool IsValid() override {
-		return lib != NULL;
+		return lib != nullptr;
 	}
 };
-
 DynamicLibrary *DynamicLibrary::Load(const char *modulePath)
 {
 	return static_cast<DynamicLibrary *>(new DynamicLibraryImpl(modulePath));
