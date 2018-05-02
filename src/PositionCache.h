@@ -160,7 +160,7 @@ public:
 	}
 };
 
-typedef std::map<int, Representation> MapRepresentation;
+typedef std::map<unsigned int, Representation> MapRepresentation;
 
 class SpecialRepresentations {
 	MapRepresentation mapReprs;

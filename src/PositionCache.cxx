@@ -367,25 +367,28 @@ void LineLayoutCache::Dispose(LineLayout *ll) {
 }
 
 // Simply pack the (maximum 4) character bytes into an int
-static inline int KeyFromString(const char *charBytes, size_t len) {
+static unsigned int KeyFromString(const char *charBytes, size_t len) {
 	PLATFORM_ASSERT(len <= 4);
-	int k=0;
+	unsigned int k=0;
 	for (size_t i=0; i<len && charBytes[i]; i++) {
 		k = k * 0x100;
-		k += static_cast<unsigned char>(charBytes[i]);
+		const unsigned char uc = charBytes[i];
+		k += uc;
 	}
 	return k;
 }
 
 SpecialRepresentations::SpecialRepresentations() {
-	std::fill(startByteHasReprs, std::end(startByteHasReprs), static_cast<short>(0));
+	const short none = 0;
+	std::fill(startByteHasReprs, std::end(startByteHasReprs), none);
 }
 
 void SpecialRepresentations::SetRepresentation(const char *charBytes, const char *value) {
 	MapRepresentation::iterator it = mapReprs.find(KeyFromString(charBytes, UTF8MaxBytes));
 	if (it == mapReprs.end()) {
 		// New entry so increment for first byte
-		startByteHasReprs[static_cast<unsigned char>(charBytes[0])]++;
+		const unsigned char ucStart = charBytes[0];
+		startByteHasReprs[ucStart]++;
 	}
 	mapReprs[KeyFromString(charBytes, UTF8MaxBytes)] = Representation(value);
 }
@@ -394,13 +397,15 @@ void SpecialRepresentations::ClearRepresentation(const char *charBytes) {
 	MapRepresentation::iterator it = mapReprs.find(KeyFromString(charBytes, UTF8MaxBytes));
 	if (it != mapReprs.end()) {
 		mapReprs.erase(it);
-		startByteHasReprs[static_cast<unsigned char>(charBytes[0])]--;
+		const unsigned char ucStart = charBytes[0];
+		startByteHasReprs[ucStart]--;
 	}
 }
 
 const Representation *SpecialRepresentations::RepresentationFromCharacter(const char *charBytes, size_t len) const {
 	PLATFORM_ASSERT(len <= 4);
-	if (!startByteHasReprs[static_cast<unsigned char>(charBytes[0])])
+	const unsigned char ucStart = charBytes[0];
+	if (!startByteHasReprs[ucStart])
 		return 0;
 	MapRepresentation::const_iterator it = mapReprs.find(KeyFromString(charBytes, len));
 	if (it != mapReprs.end()) {
@@ -411,7 +416,8 @@ const Representation *SpecialRepresentations::RepresentationFromCharacter(const 
 
 bool SpecialRepresentations::Contains(const char *charBytes, size_t len) const {
 	PLATFORM_ASSERT(len <= 4);
-	if (!startByteHasReprs[static_cast<unsigned char>(charBytes[0])])
+	const unsigned char ucStart = charBytes[0];
+	if (!startByteHasReprs[ucStart])
 		return false;
 	MapRepresentation::const_iterator it = mapReprs.find(KeyFromString(charBytes, len));
 	return it != mapReprs.end();
@@ -419,7 +425,8 @@ bool SpecialRepresentations::Contains(const char *charBytes, size_t len) const {
 
 void SpecialRepresentations::Clear() {
 	mapReprs.clear();
-	std::fill(startByteHasReprs, std::end(startByteHasReprs), static_cast<short>(0));
+	const short none = 0;
+	std::fill(startByteHasReprs, std::end(startByteHasReprs), none);
 }
 
 void BreakFinder::Insert(int val) {
