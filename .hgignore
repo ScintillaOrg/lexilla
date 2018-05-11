@@ -62,3 +62,4 @@ ScintillaEditBase.intermediate.manifest
 ScintillaEdit.intermediate.manifest
 qt/*/Makefile
 cov-int
+.vs
