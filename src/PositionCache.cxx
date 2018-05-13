@@ -104,18 +104,18 @@ int LineLayout::LineStart(int line) const {
 	}
 }
 
-int LineLayout::LineLastVisible(int line) const {
+int LineLayout::LineLastVisible(int line, Scope scope) const {
 	if (line < 0) {
 		return 0;
 	} else if ((line >= lines-1) || !lineStarts) {
-		return numCharsBeforeEOL;
+		return scope == Scope::visibleOnly ? numCharsBeforeEOL : numCharsInLine;
 	} else {
 		return lineStarts[line+1];
 	}
 }
 
-Range LineLayout::SubLineRange(int subLine) const {
-	return Range(LineStart(subLine), LineLastVisible(subLine));
+Range LineLayout::SubLineRange(int subLine, Scope scope) const {
+	return Range(LineStart(subLine), LineLastVisible(subLine, scope));
 }
 
 bool LineLayout::InLine(int offset, int line) const {
@@ -218,7 +218,7 @@ Point LineLayout::PointFromPosition(int posInLine, int lineHeight, PointEnd pe) 
 	}
 
 	for (int subLine = 0; subLine < lines; subLine++) {
-		const Range rangeSubLine = SubLineRange(subLine);
+		const Range rangeSubLine = SubLineRange(subLine, Scope::visibleOnly);
 		if (posInLine >= rangeSubLine.start) {
 			pt.y = static_cast<XYPOSITION>(subLine*lineHeight);
 			if (posInLine <= rangeSubLine.end) {

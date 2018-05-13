@@ -628,7 +628,7 @@ Range EditView::RangeDisplayLine(Surface *surface, const EditModel &model, Sci::
 		const Sci::Line lineStartSet = model.pcs->DisplayFromDoc(lineDoc);
 		const int subLine = static_cast<int>(lineVisible - lineStartSet);
 		if (subLine < ll->lines) {
-			rangeSubLine = ll->SubLineRange(subLine);
+			rangeSubLine = ll->SubLineRange(subLine, LineLayout::Scope::visibleOnly);
 			if (subLine == ll->lines-1) {
 				rangeSubLine.end = model.pdoc->LineStart(lineDoc + 1) -
 					positionLineStart;
@@ -658,7 +658,7 @@ SelectionPosition EditView::SPositionFromLocation(Surface *surface, const EditMo
 		const Sci::Line lineStartSet = model.pcs->DisplayFromDoc(lineDoc);
 		const int subLine = static_cast<int>(visibleLine - lineStartSet);
 		if (subLine < ll->lines) {
-			const Range rangeSubLine = ll->SubLineRange(subLine);
+			const Range rangeSubLine = ll->SubLineRange(subLine, LineLayout::Scope::visibleOnly);
 			const XYPOSITION subLineStart = ll->positions[rangeSubLine.start];
 			if (subLine > 0)	// Wrapped
 				pt.x -= ll->wrapIndent;
@@ -696,7 +696,7 @@ SelectionPosition EditView::SPositionFromLineX(Surface *surface, const EditModel
 	if (surface && ll) {
 		const Sci::Position posLineStart = model.pdoc->LineStart(lineDoc);
 		LayoutLine(model, lineDoc, surface, vs, ll, model.wrapWidth);
-		const Range rangeSubLine = ll->SubLineRange(0);
+		const Range rangeSubLine = ll->SubLineRange(0, LineLayout::Scope::visibleOnly);
 		const XYPOSITION subLineStart = ll->positions[rangeSubLine.start];
 		const Sci::Position positionInLine = ll->FindPositionFromX(x + subLineStart, rangeSubLine, false);
 		if (positionInLine < rangeSubLine.end) {
@@ -1883,7 +1883,8 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 
 	const Sci::Position posLineStart = model.pdoc->LineStart(line);
 
-	const Range lineRange = ll->SubLineRange(subLine);
+	const Range lineRange = ll->SubLineRange(subLine, LineLayout::Scope::visibleOnly);
+	const Range lineRangeIncludingEnd = ll->SubLineRange(subLine, LineLayout::Scope::includeEnd);
 	const XYACCUMULATOR subLineStart = ll->positions[lineRange.start];
 
 	if ((ll->wrapIndent != 0) && (subLine > 0)) {
@@ -1906,7 +1907,7 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 		}
 
 		if (phase & drawIndicatorsBack) {
-			DrawIndicators(surface, model, vsDraw, ll, line, xStart, rcLine, subLine, lineRange.end, true, model.hoverIndicatorPos);
+			DrawIndicators(surface, model, vsDraw, ll, line, xStart, rcLine, subLine, lineRangeIncludingEnd.end, true, model.hoverIndicatorPos);
 			DrawEdgeLine(surface, vsDraw, ll, rcLine, lineRange, xStart);
 			DrawMarkUnderline(surface, model, vsDraw, line, rcLine);
 		}
@@ -1922,7 +1923,7 @@ void EditView::DrawLine(Surface *surface, const EditModel &model, const ViewStyl
 	}
 
 	if (phase & drawIndicatorsFore) {
-		DrawIndicators(surface, model, vsDraw, ll, line, xStart, rcLine, subLine, lineRange.end, false, model.hoverIndicatorPos);
+		DrawIndicators(surface, model, vsDraw, ll, line, xStart, rcLine, subLine, lineRangeIncludingEnd.end, false, model.hoverIndicatorPos);
 	}
 
 	DrawFoldDisplayText(surface, model, vsDraw, ll, line, xStart, rcLine, subLine, subLineStart, phase);

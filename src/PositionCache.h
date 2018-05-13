@@ -85,8 +85,9 @@ public:
 	void Free();
 	void Invalidate(validLevel validity_);
 	int LineStart(int line) const;
-	int LineLastVisible(int line) const;
-	Range SubLineRange(int subLine) const;
+	enum class Scope { visibleOnly, includeEnd };
+	int LineLastVisible(int line, Scope scope) const;
+	Range SubLineRange(int subLine, Scope scope) const;
 	bool InLine(int offset, int line) const;
 	void SetLineStart(int line, int start);
 	void SetBracesHighlight(Range rangeLine, const Sci::Position braces[],
