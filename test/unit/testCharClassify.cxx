@@ -2,6 +2,7 @@
 
 #include <cstring>
 
+#include <string_view>
 #include <algorithm>
 #include <memory>
 #include <iostream>

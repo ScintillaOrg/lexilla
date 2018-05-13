@@ -8,6 +8,8 @@
 #include <cstdio>
 #include <cstdarg>
 
+#include <string_view>
+
 #include "Platform.h"
 
 #define CATCH_CONFIG_WINDOWS_CRTDBG
