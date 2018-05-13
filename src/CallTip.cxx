@@ -20,9 +20,9 @@
 
 #include "Scintilla.h"
 
-#include "IntegerRectangle.h"
 #include "StringCopy.h"
 #include "Position.h"
+#include "IntegerRectangle.h"
 #include "CallTip.h"
 
 using namespace Scintilla;
