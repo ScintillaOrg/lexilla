@@ -257,12 +257,12 @@ public:
  * A surface abstracts a place to draw.
  */
 class Surface {
-private:
-	// Private so Surface objects can not be copied
-	Surface(const Surface &) {}
-	Surface &operator=(const Surface &) { return *this; }
 public:
-	Surface() {}
+	Surface() noexcept = default;
+	Surface(const Surface &) = delete;
+	Surface(Surface &&) = delete;
+	Surface &operator=(const Surface &) = delete;
+	Surface &operator=(Surface &&) = delete;
 	virtual ~Surface() {}
 	static Surface *Allocate(int technology);
 
@@ -277,7 +277,7 @@ public:
 	virtual int DeviceHeightFont(int points)=0;
 	virtual void MoveTo(int x_, int y_)=0;
 	virtual void LineTo(int x_, int y_)=0;
-	virtual void Polygon(Point *pts, int npts, ColourDesired fore, ColourDesired back)=0;
+	virtual void Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back)=0;
 	virtual void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back)=0;
 	virtual void FillRectangle(PRectangle rc, ColourDesired back)=0;
 	virtual void FillRectangle(PRectangle rc, Surface &surfacePattern)=0;
@@ -293,7 +293,6 @@ public:
 	virtual void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore)=0;
 	virtual void MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions)=0;
 	virtual XYPOSITION WidthText(Font &font_, const char *s, int len)=0;
-	virtual XYPOSITION WidthChar(Font &font_, char ch)=0;
 	virtual XYPOSITION Ascent(Font &font_)=0;
 	virtual XYPOSITION Descent(Font &font_)=0;
 	virtual XYPOSITION InternalLeading(Font &font_)=0;

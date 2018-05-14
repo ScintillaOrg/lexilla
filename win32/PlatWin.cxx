@@ -554,7 +554,7 @@ public:
 	int DeviceHeightFont(int points) override;
 	void MoveTo(int x_, int y_) override;
 	void LineTo(int x_, int y_) override;
-	void Polygon(Point *pts, int npts, ColourDesired fore, ColourDesired back) override;
+	void Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back) override;
 	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
@@ -571,7 +571,6 @@ public:
 	void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore) override;
 	void MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions) override;
 	XYPOSITION WidthText(Font &font_, const char *s, int len) override;
-	XYPOSITION WidthChar(Font &font_, char ch) override;
 	XYPOSITION Ascent(Font &font_) override;
 	XYPOSITION Descent(Font &font_) override;
 	XYPOSITION InternalLeading(Font &font_) override;
@@ -720,15 +719,15 @@ void SurfaceGDI::LineTo(int x_, int y_) {
 	::LineTo(hdc, x_, y_);
 }
 
-void SurfaceGDI::Polygon(Point *pts, int npts, ColourDesired fore, ColourDesired back) {
+void SurfaceGDI::Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back) {
 	PenColour(fore);
 	BrushColor(back);
 	std::vector<POINT> outline;
-	for (int i=0; i<npts; i++) {
+	for (size_t i=0; i<npts; i++) {
 		POINT pt = {static_cast<LONG>(pts[i].x), static_cast<LONG>(pts[i].y)};
 		outline.push_back(pt);
 	}
-	::Polygon(hdc, &outline[0], npts);
+	::Polygon(hdc, &outline[0], static_cast<int>(npts));
 }
 
 void SurfaceGDI::RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) {
@@ -1009,13 +1008,6 @@ void SurfaceGDI::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *
 	std::fill(positions+i, positions + len, lastPos);
 }
 
-XYPOSITION SurfaceGDI::WidthChar(Font &font_, char ch) {
-	SetFont(font_);
-	SIZE sz;
-	::GetTextExtentPoint32A(hdc, &ch, 1, &sz);
-	return static_cast<XYPOSITION>(sz.cx);
-}
-
 XYPOSITION SurfaceGDI::Ascent(Font &font_) {
 	SetFont(font_);
 	TEXTMETRIC tm;
@@ -1123,7 +1115,7 @@ public:
 	int DeviceHeightFont(int points) override;
 	void MoveTo(int x_, int y_) override;
 	void LineTo(int x_, int y_) override;
-	void Polygon(Point *pts, int npts, ColourDesired fore, ColourDesired back) override;
+	void Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back) override;
 	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
@@ -1140,7 +1132,6 @@ public:
 	void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore) override;
 	void MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions) override;
 	XYPOSITION WidthText(Font &font_, const char *s, int len) override;
-	XYPOSITION WidthChar(Font &font_, char ch) override;
 	XYPOSITION Ascent(Font &font_) override;
 	XYPOSITION Descent(Font &font_) override;
 	XYPOSITION InternalLeading(Font &font_) override;
@@ -1354,7 +1345,7 @@ void SurfaceD2D::LineTo(int x_, int y_) {
 	}
 }
 
-void SurfaceD2D::Polygon(Point *pts, int npts, ColourDesired fore, ColourDesired back) {
+void SurfaceD2D::Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back) {
 	if (pRenderTarget) {
 		ID2D1Factory *pFactory = 0;
 		pRenderTarget->GetFactory(&pFactory);
@@ -1365,7 +1356,7 @@ void SurfaceD2D::Polygon(Point *pts, int npts, ColourDesired fore, ColourDesired
 			hr = geometry->Open(&sink);
 			if (SUCCEEDED(hr)) {
 				sink->BeginFigure(D2D1::Point2F(pts[0].x + 0.5f, pts[0].y + 0.5f), D2D1_FIGURE_BEGIN_FILLED);
-				for (int i=1; i<npts; i++) {
+				for (size_t i=1; i<npts; i++) {
 					sink->AddLine(D2D1::Point2F(pts[i].x + 0.5f, pts[i].y + 0.5f));
 				}
 				sink->EndFigure(D2D1_FIGURE_END_CLOSED);
@@ -1696,24 +1687,6 @@ void SurfaceD2D::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *
 			ui++;
 		}
 	}
-}
-
-XYPOSITION SurfaceD2D::WidthChar(Font &font_, char ch) {
-	FLOAT width = 1.0;
-	SetFont(font_);
-	if (pIDWriteFactory && pTextFormat) {
-		// Create a layout
-		IDWriteTextLayout *pTextLayout = 0;
-		const WCHAR wch = ch;
-		const HRESULT hr = pIDWriteFactory->CreateTextLayout(&wch, 1, pTextFormat, 1000.0, 1000.0, &pTextLayout);
-		if (SUCCEEDED(hr)) {
-			DWRITE_TEXT_METRICS textMetrics;
-			if (SUCCEEDED(pTextLayout->GetMetrics(&textMetrics)))
-				width = textMetrics.widthIncludingTrailingWhitespace;
-			pTextLayout->Release();
-		}
-	}
-	return width;
 }
 
 XYPOSITION SurfaceD2D::Ascent(Font &font_) {

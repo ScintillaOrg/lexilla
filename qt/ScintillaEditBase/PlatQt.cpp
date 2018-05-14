@@ -269,7 +269,7 @@ void SurfaceImpl::LineTo(int x_, int y_)
 }
 
 void SurfaceImpl::Polygon(Point *pts,
-                          int npts,
+			  size_t npts,
                           ColourDesired fore,
                           ColourDesired back)
 {
@@ -277,11 +277,11 @@ void SurfaceImpl::Polygon(Point *pts,
 	BrushColour(back);
 
 	std::vector<QPoint> qpts(npts);
-	for (int i = 0; i < npts; i++) {
+	for (size_t i = 0; i < npts; i++) {
 		qpts[i] = QPoint(pts[i].x, pts[i].y);
 	}
 
-	GetPainter()->drawPolygon(&qpts[0], npts);
+	GetPainter()->drawPolygon(&qpts[0], static_cast<int>(npts));
 }
 
 void SurfaceImpl::RectangleDraw(PRectangle rc,
@@ -492,12 +492,6 @@ XYPOSITION SurfaceImpl::WidthText(Font &font, const char *s, int len)
 	SetCodec(font);
 	QString string = codec->toUnicode(s, len);
 	return metrics.width(string);
-}
-
-XYPOSITION SurfaceImpl::WidthChar(Font &font, char ch)
-{
-	QFontMetricsF metrics(*FontPointer(font), device);
-	return metrics.width(ch);
 }
 
 XYPOSITION SurfaceImpl::Ascent(Font &font)

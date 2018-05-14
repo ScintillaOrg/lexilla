@@ -376,12 +376,12 @@ void SurfaceImpl::LineTo(int x_, int y_) {
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::Polygon(Scintilla::Point *pts, int npts, ColourDesired fore,
+void SurfaceImpl::Polygon(Scintilla::Point *pts, size_t npts, ColourDesired fore,
 			  ColourDesired back) {
 	// Allocate memory for the array of points.
 	std::vector<CGPoint> points(npts);
 
-	for (int i = 0; i < npts; i++) {
+	for (size_t i = 0; i < npts; i++) {
 		// Quartz floating point issues: plot the MIDDLE of the pixels
 		points[i].x = pts[i].x + 0.5;
 		points[i].y = pts[i].y + 0.5;
@@ -923,17 +923,6 @@ XYPOSITION SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 		return static_cast<XYPOSITION>(textLayout->MeasureStringWidth());
 	}
 	return 1;
-}
-
-XYPOSITION SurfaceImpl::WidthChar(Font &font_, char ch) {
-	char str[2] = { ch, '\0' };
-	if (font_.GetID()) {
-		CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
-		textLayout->setText(str, 1, encoding, *TextStyleFromFont(font_));
-
-		return textLayout->MeasureStringWidth();
-	} else
-		return 1;
 }
 
 // This string contains a good range of characters to test for size.

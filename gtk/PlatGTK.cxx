@@ -154,7 +154,7 @@ public:
 	int DeviceHeightFont(int points) override;
 	void MoveTo(int x_, int y_) override;
 	void LineTo(int x_, int y_) override;
-	void Polygon(Point *pts, int npts, ColourDesired fore, ColourDesired back) override;
+	void Polygon(Point *pts, size_t npts, ColourDesired fore, ColourDesired back) override;
 	void RectangleDraw(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, ColourDesired back) override;
 	void FillRectangle(PRectangle rc, Surface &surfacePattern) override;
@@ -171,7 +171,6 @@ public:
 	void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore) override;
 	void MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions) override;
 	XYPOSITION WidthText(Font &font_, const char *s, int len) override;
-	XYPOSITION WidthChar(Font &font_, char ch) override;
 	XYPOSITION Ascent(Font &font_) override;
 	XYPOSITION Descent(Font &font_) override;
 	XYPOSITION InternalLeading(Font &font_) override;
@@ -426,12 +425,12 @@ void SurfaceImpl::LineTo(int x_, int y_) {
 	y = y_;
 }
 
-void SurfaceImpl::Polygon(Point *pts, int npts, ColourDesired fore,
+void SurfaceImpl::Polygon(Point *pts, size_t npts, ColourDesired fore,
                           ColourDesired back) {
 	PLATFORM_ASSERT(context);
 	PenColour(back);
 	cairo_move_to(context, pts[0].x + 0.5, pts[0].y + 0.5);
-	for (int i = 1; i < npts; i++) {
+	for (size_t i = 1; i < npts; i++) {
 		cairo_line_to(context, pts[i].x + 0.5, pts[i].y + 0.5);
 	}
 	cairo_close_path(context);
@@ -500,7 +499,7 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesi
 		                  Point(rc.left, rc.bottom - 2),
 		                  Point(rc.left, rc.top + 2),
 		              };
-		Polygon(pts, ELEMENTS(pts), fore, back);
+		Polygon(pts, std::size(pts), fore, back);
 	} else {
 		RectangleDraw(rc, fore, back);
 	}
@@ -866,17 +865,6 @@ XYPOSITION SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 	}
 }
 
-XYPOSITION SurfaceImpl::WidthChar(Font &font_, char ch) {
-	if (font_.GetID()) {
-		if (PFont(font_)->pfd) {
-			return WidthText(font_, &ch, 1);
-		}
-		return 1;
-	} else {
-		return 1;
-	}
-}
-
 // Ascent and descent determined by Pango font metrics.
 
 XYPOSITION SurfaceImpl::Ascent(Font &font_) {
@@ -918,7 +906,7 @@ XYPOSITION SurfaceImpl::Height(Font &font_) {
 }
 
 XYPOSITION SurfaceImpl::AverageCharWidth(Font &font_) {
-	return WidthChar(font_, 'n');
+	return WidthText(font_, "n", 1);
 }
 
 void SurfaceImpl::SetClip(PRectangle rc) {

@@ -80,7 +80,7 @@ public:
 	int DeviceHeightFont(int points) override;
 	void MoveTo(int x_, int y_) override;
 	void LineTo(int x_, int y_) override;
-	void Polygon(Point *pts, int npts, ColourDesired fore,
+	void Polygon(Point *pts, size_t npts, ColourDesired fore,
 		ColourDesired back) override;
 	void RectangleDraw(PRectangle rc, ColourDesired fore,
 		ColourDesired back) override;
@@ -105,7 +105,6 @@ public:
 	void MeasureWidths(Font &font, const char *s, int len,
 		XYPOSITION *positions) override;
 	XYPOSITION WidthText(Font &font, const char *s, int len) override;
-	XYPOSITION WidthChar(Font &font, char ch) override;
 	XYPOSITION Ascent(Font &font) override;
 	XYPOSITION Descent(Font &font) override;
 	XYPOSITION InternalLeading(Font &font) override;
