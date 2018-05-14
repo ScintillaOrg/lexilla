@@ -754,7 +754,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *
 						i++;
 					}
 				}
-				PLATFORM_ASSERT(i == text.length());
+				PLATFORM_ASSERT(static_cast<size_t>(i) == text.length());
 			} else {
 				int positionsCalculated = 0;
 				if (et == dbcs) {
@@ -784,7 +784,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *
 								place++;
 							}
 						}
-						PLATFORM_ASSERT(i == text.length());
+						PLATFORM_ASSERT(static_cast<size_t>(i) == text.length());
 					}
 				}
 				if (positionsCalculated < 1 ) {
@@ -827,7 +827,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *
 						// If something failed, fill in rest of the positions
 						positions[i++] = clusterStart;
 					}
-					PLATFORM_ASSERT(i == text.length());
+					PLATFORM_ASSERT(static_cast<size_t>(i) == text.length());
 				}
 			}
 		}
