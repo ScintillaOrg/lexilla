@@ -2939,12 +2939,13 @@ Sci::Position Cxx11RegexFindText(const Document *doc, Sci::Position minPos, Sci:
 
 		bool matched = false;
 		if (SC_CP_UTF8 == doc->dbcsCodePage) {
-			const size_t lenS = strlen(s);
-			std::vector<wchar_t> ws(lenS + 1);
+			const std::string_view sv(s);
+			const size_t lenS = sv.length();
+			std::vector<wchar_t> ws(sv.length() + 1);
 #if WCHAR_T_IS_16
-			const size_t outLen = UTF16FromUTF8(s, lenS, &ws[0], lenS);
+			const size_t outLen = UTF16FromUTF8(sv, &ws[0], lenS);
 #else
-			const size_t outLen = UTF32FromUTF8(s, lenS, reinterpret_cast<unsigned int *>(&ws[0]), lenS);
+			const size_t outLen = UTF32FromUTF8(sv, reinterpret_cast<unsigned int *>(&ws[0]), lenS);
 #endif
 			ws[outLen] = 0;
 			std::wregex regexp;

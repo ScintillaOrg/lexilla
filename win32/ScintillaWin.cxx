@@ -803,9 +803,10 @@ Sci::Position ScintillaWin::EncodedFromUTF8(const char *utf8, char *encoded) con
 // the current codepage. Code is similar to HandleCompositionWindowed().
 void ScintillaWin::AddCharUTF16(wchar_t const *wcs, unsigned int wclen) {
 	if (IsUnicodeMode()) {
-		size_t len = UTF8Length(wcs, wclen);
+		const std::wstring_view wsv(wcs, wclen);
+		size_t len = UTF8Length(wsv);
 		char utfval[maxLenInputIME * 3];
-		UTF8FromUTF16(wcs, wclen, utfval, len);
+		UTF8FromUTF16(wsv, utfval, len);
 		utfval[len] = '\0';
 		AddCharUTF(utfval, static_cast<unsigned int>(len));
 	} else {
@@ -1207,7 +1208,7 @@ sptr_t ScintillaWin::GetTextLength() {
 	std::vector<char> docBytes(pdoc->Length(), '\0');
 	pdoc->GetCharRange(&docBytes[0], 0, pdoc->Length());
 	if (IsUnicodeMode()) {
-		return UTF16Length(&docBytes[0], docBytes.size());
+		return UTF16Length(std::string_view(&docBytes[0], docBytes.size()));
 	} else {
 		return ::MultiByteToWideChar(CodePageOfDocument(), 0, &docBytes[0],
 			static_cast<int>(docBytes.size()), NULL, 0);
@@ -1223,12 +1224,13 @@ sptr_t ScintillaWin::GetText(uptr_t wParam, sptr_t lParam) {
 	std::vector<char> docBytes(pdoc->Length(), '\0');
 	pdoc->GetCharRange(&docBytes[0], 0, pdoc->Length());
 	if (IsUnicodeMode()) {
-		const size_t lengthUTF16 = UTF16Length(&docBytes[0], docBytes.size());
+                const std::string_view sv(&docBytes[0], docBytes.size());
+		const size_t lengthUTF16 = UTF16Length(sv);
 		if (lParam == 0)
 			return lengthUTF16;
 		if (wParam == 0)
 			return 0;
-		size_t uLen = UTF16FromUTF8(&docBytes[0], docBytes.size(),
+		size_t uLen = UTF16FromUTF8(sv,
 			ptr, wParam - 1);
 		ptr[uLen] = L'\0';
 		return uLen;
@@ -2051,8 +2053,7 @@ public:
 				if (foldedUTF8) {
 					// Maximum length of a case conversion is 6 bytes, 3 characters
 					wchar_t wFolded[20];
-					const size_t charsConverted = UTF16FromUTF8(foldedUTF8,
-							strlen(foldedUTF8),
+					const size_t charsConverted = UTF16FromUTF8(std::string_view(foldedUTF8),
 							wFolded, ELEMENTS(wFolded));
 					for (size_t j=0; j<charsConverted; j++)
 						utf16Folded[lenFlat++] = wFolded[j];
@@ -2096,8 +2097,7 @@ CaseFolder *ScintillaWin::CaseFolderForEncoding() {
 					const char *caseFolded = CaseConvert(wCharacter[0], CaseConversionFold);
 					if (caseFolded) {
 						wchar_t wLower[20];
-						const size_t charsConverted = UTF16FromUTF8(caseFolded,
-							strlen(caseFolded),
+						const size_t charsConverted = UTF16FromUTF8(std::string_view(caseFolded),
 							wLower, ELEMENTS(wLower));
 						if (charsConverted == 1) {
 							char sCharacterLowered[20];
@@ -2262,9 +2262,10 @@ void ScintillaWin::Paste() {
 			// Default Scintilla behaviour in Unicode mode
 			if (IsUnicodeMode()) {
 				const size_t bytes = memUSelection.Size();
-				len = UTF8Length(uptr, bytes / 2);
+				const std::wstring_view wsv(uptr, bytes / 2);
+				len = UTF8Length(wsv);
 				putf.resize(len + 1);
-				UTF8FromUTF16(uptr, bytes / 2, &putf[0], len);
+				UTF8FromUTF16(wsv, &putf[0], len);
 			} else {
 				// CF_UNICODETEXT available, but not in Unicode mode
 				// Convert from Unicode to current Scintilla code page
@@ -2300,9 +2301,10 @@ void ScintillaWin::Paste() {
 					const size_t ulen = ::MultiByteToWideChar(CP_ACP, 0,
 					                    ptr, ilen, &uptr[0], ilen +1);
 
-					const size_t mlen = UTF8Length(&uptr[0], ulen);
+					const std::wstring_view wsv(&uptr[0], ulen);
+					const size_t mlen = UTF8Length(wsv);
 					std::vector<char> putf(mlen+1);
-					UTF8FromUTF16(&uptr[0], ulen, &putf[0], mlen);
+					UTF8FromUTF16(wsv, &putf[0], mlen);
 
 					InsertPasteShape(&putf[0], mlen, pasteShape);
 				} else {
@@ -2684,7 +2686,7 @@ void ScintillaWin::ImeStartComposition() {
 			lf.lfFaceName[0] = L'\0';
 			if (vs.styles[styleHere].fontName) {
 				const char* fontName = vs.styles[styleHere].fontName;
-				UTF16FromUTF8(fontName, strlen(fontName)+1, lf.lfFaceName, LF_FACESIZE);
+				UTF16FromUTF8(std::string_view(fontName), lf.lfFaceName, LF_FACESIZE);
 			}
 
 			::ImmSetCompositionFontW(imc.hIMC, &lf);
@@ -2796,11 +2798,11 @@ void ScintillaWin::CopyToClipboard(const SelectionText &selectedText) {
 
 	// Default Scintilla behaviour in Unicode mode
 	if (IsUnicodeMode()) {
-		const size_t uchars = UTF16Length(selectedText.Data(),
-			selectedText.LengthWithTerminator());
+                const std::string_view sv(selectedText.Data(), selectedText.LengthWithTerminator());
+		const size_t uchars = UTF16Length(sv);
 		uniText.Allocate(2 * uchars);
 		if (uniText) {
-			UTF16FromUTF8(selectedText.Data(), selectedText.LengthWithTerminator(),
+			UTF16FromUTF8(sv,
 				static_cast<wchar_t *>(uniText.ptr), uchars);
 		}
 	} else {
@@ -3101,9 +3103,10 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 				if (IsUnicodeMode()) {
 					const size_t tlen = memUDrop.Size();
 					// Convert UTF-16 to UTF-8
-					const size_t dataLen = UTF8Length(udata, tlen/2);
+					const std::wstring_view wsv(udata, tlen / 2);
+					const size_t dataLen = UTF8Length(wsv);
 					data.resize(dataLen+1);
-					UTF8FromUTF16(udata, tlen/2, &data[0], dataLen);
+					UTF8FromUTF16(wsv, &data[0], dataLen);
 				} else {
 					// Convert UTF-16 to ANSI
 					//
@@ -3176,10 +3179,11 @@ STDMETHODIMP ScintillaWin::GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM) {
 
 	GlobalMemory text;
 	if (pFEIn->cfFormat == CF_UNICODETEXT) {
-		const size_t uchars = UTF16Length(drag.Data(), drag.LengthWithTerminator());
+                const std::string_view sv(drag.Data(), drag.LengthWithTerminator());
+		const size_t uchars = UTF16Length(sv);
 		text.Allocate(2 * uchars);
 		if (text) {
-			UTF16FromUTF8(drag.Data(), drag.LengthWithTerminator(),
+			UTF16FromUTF8(sv,
 				static_cast<wchar_t *>(text.ptr), uchars);
 		}
 	} else {

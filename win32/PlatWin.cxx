@@ -291,7 +291,7 @@ void SetLogFont(LOGFONTW &lf, const char *faceName, int characterSet, float size
 	lf.lfItalic = italic ? 1 : 0;
 	lf.lfCharSet = static_cast<BYTE>(characterSet);
 	lf.lfQuality = Win32MapFontQuality(extraFontFlag);
-	UTF16FromUTF8(faceName, strlen(faceName)+1, lf.lfFaceName, LF_FACESIZE);
+	UTF16FromUTF8(faceName, lf.lfFaceName, LF_FACESIZE);
 }
 
 /**
@@ -345,8 +345,8 @@ FontCached::FontCached(const FontParameters &fp) :
 #if defined(USE_D2D)
 		IDWriteTextFormat *pTextFormat;
 		const int faceSize = 200;
-		WCHAR wszFace[faceSize];
-		UTF16FromUTF8(fp.faceName, strlen(fp.faceName)+1, wszFace, faceSize);
+		WCHAR wszFace[faceSize] = L"";
+		UTF16FromUTF8(fp.faceName, wszFace, faceSize);
 		const FLOAT fHeight = fp.size;
 		const DWRITE_FONT_STYLE style = fp.italic ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL;
 		HRESULT hr = pIDWriteFactory->CreateTextFormat(wszFace, NULL,
@@ -395,8 +395,8 @@ bool FontCached::SameAs(const FontParameters &fp) {
 		(lf.lfCharSet == fp.characterSet) &&
 		(lf.lfQuality == Win32MapFontQuality(fp.extraFontFlag)) &&
 		(technology == fp.technology)) {
-			wchar_t wszFace[LF_FACESIZE];
-			UTF16FromUTF8(fp.faceName, strlen(fp.faceName)+1, wszFace, LF_FACESIZE);
+			wchar_t wszFace[LF_FACESIZE] = L"";
+			UTF16FromUTF8(fp.faceName, wszFace, LF_FACESIZE);
 			return 0 == wcscmp(lf.lfFaceName,wszFace);
 	}
 	return false;
@@ -503,7 +503,7 @@ public:
 	TextWide(std::string_view text, bool unicodeMode, int codePage=0) :
 		VarBuffer<wchar_t, stackBufferLength>(text.length()) {
 		if (unicodeMode) {
-			tlen = static_cast<int>(UTF16FromUTF8(text.data(), text.length(), buffer, text.length()));
+			tlen = static_cast<int>(UTF16FromUTF8(text, buffer, text.length()));
 		} else {
 			// Support Asian string display in 9x English
 			tlen = ::MultiByteToWideChar(codePage, 0, text.data(), static_cast<int>(text.length()),
