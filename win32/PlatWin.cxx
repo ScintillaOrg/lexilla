@@ -1668,7 +1668,7 @@ void SurfaceD2D::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *p
 	} else if (codePageText == 0) {
 
 		// One char per position
-		PLATFORM_ASSERT(text.length() == tbuf.tlen);
+		PLATFORM_ASSERT(text.length() == static_cast<size_t>(tbuf.tlen));
 		for (int kk=0; kk<tbuf.tlen; kk++) {
 			positions[kk] = poses.buffer[kk];
 		}
