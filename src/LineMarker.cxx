@@ -9,6 +9,7 @@
 #include <cmath>
 
 #include <stdexcept>
+#include <string>
 #include <string_view>
 #include <vector>
 #include <map>
@@ -377,14 +378,13 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 		DrawMinus(surface, centreX, centreY, blobSize, colourTail);
 
 	} else if (markType >= SC_MARK_CHARACTER) {
-		char character[1];
-		character[0] = static_cast<char>(markType - SC_MARK_CHARACTER);
-		const XYPOSITION width = surface->WidthText(fontForCharacter, character, 1);
+		std::string character(1, static_cast<char>(markType - SC_MARK_CHARACTER));
+		const XYPOSITION width = surface->WidthText(fontForCharacter, character);
 		PRectangle rcText = rc;
 		rcText.left += (rc.Width() - width) / 2;
 		rcText.right = rc.left + width;
 		surface->DrawTextClipped(rcText, fontForCharacter, rcText.bottom - 2,
-			character, 1, fore, back);
+			character, fore, back);
 
 	} else if (markType == SC_MARK_DOTDOTDOT) {
 		XYPOSITION right = static_cast<XYPOSITION>(centreX - 6);

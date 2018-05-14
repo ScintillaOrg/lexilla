@@ -92,6 +92,10 @@ const char *CharacterSetID(int characterSet)
 	}
 }
 
+QString UnicodeFromText(QTextCodec *codec, std::string_view text) {
+	return codec->toUnicode(text.data(), static_cast<int>(text.length()));
+}
+
 class FontAndCharacterSet {
 public:
 	int characterSet;
@@ -387,8 +391,7 @@ void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource)
 void SurfaceImpl::DrawTextNoClip(PRectangle rc,
                                  Font &font,
                                  XYPOSITION ybase,
-                                 const char *s,
-                                 int len,
+				 std::string_view text,
                                  ColourDesired fore,
                                  ColourDesired back)
 {
@@ -397,35 +400,33 @@ void SurfaceImpl::DrawTextNoClip(PRectangle rc,
 
 	GetPainter()->setBackground(QColorFromCA(back));
 	GetPainter()->setBackgroundMode(Qt::OpaqueMode);
-	QString su = codec->toUnicode(s, len);
+	QString su = UnicodeFromText(codec, text);
 	GetPainter()->drawText(QPointF(rc.left, ybase), su);
 }
 
 void SurfaceImpl::DrawTextClipped(PRectangle rc,
                                   Font &font,
                                   XYPOSITION ybase,
-                                  const char *s,
-                                  int len,
+				  std::string_view text,
                                   ColourDesired fore,
                                   ColourDesired back)
 {
 	SetClip(rc);
-	DrawTextNoClip(rc, font, ybase, s, len, fore, back);
+	DrawTextNoClip(rc, font, ybase, text, fore, back);
 	GetPainter()->setClipping(false);
 }
 
 void SurfaceImpl::DrawTextTransparent(PRectangle rc,
                                       Font &font,
                                       XYPOSITION ybase,
-                                      const char *s,
-                                      int len,
+				      std::string_view text,
         ColourDesired fore)
 {
 	SetFont(font);
 	PenColour(fore);
 
 	GetPainter()->setBackgroundMode(Qt::TransparentMode);
-	QString su = codec->toUnicode(s, len);
+	QString su = UnicodeFromText(codec, text);
 	GetPainter()->drawText(QPointF(rc.left, ybase), su);
 }
 
@@ -435,14 +436,13 @@ void SurfaceImpl::SetClip(PRectangle rc)
 }
 
 void SurfaceImpl::MeasureWidths(Font &font,
-                                const char *s,
-                                int len,
+				std::string_view text,
                                 XYPOSITION *positions)
 {
 	if (!font.GetID())
 		return;
 	SetCodec(font);
-	QString su = codec->toUnicode(s, len);
+	QString su = UnicodeFromText(codec, text);
 	QTextLayout tlay(su, *FontPointer(font), GetPaintDevice());
 	tlay.beginLayout();
 	QTextLine tl = tlay.createLine();
@@ -450,13 +450,13 @@ void SurfaceImpl::MeasureWidths(Font &font,
 	if (unicodeMode) {
 		int fit = su.size();
 		int ui=0;
-		int i=0;
+		size_t i=0;
 		while (ui<fit) {
-			const unsigned char uch = s[i];
+			const unsigned char uch = text[i];
 			const unsigned int byteCount = UTF8BytesOfLead[uch];
 			const int codeUnits = UTF16LengthFromUTF8ByteCount(byteCount);
 			qreal xPosition = tl.cursorToX(ui+codeUnits);
-			for (unsigned int bytePos=0; (bytePos<byteCount) && (i<len); bytePos++) {
+			for (size_t bytePos=0; (bytePos<byteCount) && (i<text.length()); bytePos++) {
 				positions[i++] = xPosition;
 			}
 			ui += codeUnits;
@@ -464,34 +464,34 @@ void SurfaceImpl::MeasureWidths(Font &font,
 		XYPOSITION lastPos = 0;
 		if (i > 0)
 			lastPos = positions[i-1];
-		while (i<len) {
+		while (i<text.length()) {
 			positions[i++] = lastPos;
 		}
 	} else if (codePage) {
 		// DBCS
 		int ui = 0;
-		for (int i=0; i<len;) {
-			size_t lenChar = DBCSIsLeadByte(codePage, s[i]) ? 2 : 1;
+		for (size_t i=0; i<text.length();) {
+			size_t lenChar = DBCSIsLeadByte(codePage, text[i]) ? 2 : 1;
 			qreal xPosition = tl.cursorToX(ui+1);
-			for (unsigned int bytePos=0; (bytePos<lenChar) && (i<len); bytePos++) {
+			for (unsigned int bytePos=0; (bytePos<lenChar) && (i<text.length()); bytePos++) {
 				positions[i++] = xPosition;
 			}
 			ui++;
 		}
 	} else {
 		// Single byte encoding
-		for (int i=0; i<len; i++) {
+		for (int i=0; i<static_cast<int>(text.length()); i++) {
 			positions[i] = tl.cursorToX(i+1);
 		}
 	}
 }
 
-XYPOSITION SurfaceImpl::WidthText(Font &font, const char *s, int len)
+XYPOSITION SurfaceImpl::WidthText(Font &font, std::string_view text)
 {
 	QFontMetricsF metrics(*FontPointer(font), device);
 	SetCodec(font);
-	QString string = codec->toUnicode(s, len);
-	return metrics.width(string);
+	QString su = UnicodeFromText(codec, text);
+	return metrics.width(su);
 }
 
 XYPOSITION SurfaceImpl::Ascent(Font &font)

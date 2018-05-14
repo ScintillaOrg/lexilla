@@ -691,7 +691,7 @@ void PositionCache::MeasureWidths(Surface *surface, const ViewStyle &vstyle, uns
 		while (startSegment < len) {
 			const unsigned int lenSegment = pdoc->SafeSegment(s + startSegment, len - startSegment, BreakFinder::lengthEachSubdivision);
 			FontAlias fontStyle = vstyle.styles[styleNumber].font;
-			surface->MeasureWidths(fontStyle, s + startSegment, lenSegment, positions + startSegment);
+			surface->MeasureWidths(fontStyle, std::string_view(s + startSegment, lenSegment), positions + startSegment);
 			for (unsigned int inSeg = 0; inSeg < lenSegment; inSeg++) {
 				positions[startSegment + inSeg] += xStartSegment;
 			}
@@ -700,7 +700,7 @@ void PositionCache::MeasureWidths(Surface *surface, const ViewStyle &vstyle, uns
 		}
 	} else {
 		FontAlias fontStyle = vstyle.styles[styleNumber].font;
-		surface->MeasureWidths(fontStyle, s, len, positions);
+		surface->MeasureWidths(fontStyle, std::string_view(s, len), positions);
 	}
 	if (probe < pces.size()) {
 		// Store into cache

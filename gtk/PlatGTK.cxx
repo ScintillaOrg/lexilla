@@ -165,12 +165,12 @@ public:
 	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource) override;
 
-	void DrawTextBase(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore);
-	void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore, ColourDesired back) override;
-	void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore, ColourDesired back) override;
-	void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len, ColourDesired fore) override;
-	void MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions) override;
-	XYPOSITION WidthText(Font &font_, const char *s, int len) override;
+	void DrawTextBase(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore);
+	void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
+	void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
+	void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
+	void MeasureWidths(Font &font_, std::string_view text, XYPOSITION *positions) override;
+	XYPOSITION WidthText(Font &font_, std::string_view text) override;
 	XYPOSITION Ascent(Font &font_) override;
 	XYPOSITION Descent(Font &font_) override;
 	XYPOSITION InternalLeading(Font &font_) override;
@@ -598,11 +598,11 @@ void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	}
 }
 
-std::string UTF8FromLatin1(const char *s, int len) {
-	std::string utfForm(len*2 + 1, '\0');
+std::string UTF8FromLatin1(std::string_view text) {
+	std::string utfForm(text.length()*2 + 1, '\0');
 	size_t lenU = 0;
-	for (int i=0; i<len; i++) {
-		unsigned int uch = static_cast<unsigned char>(s[i]);
+	for (size_t i=0; i<text.length(); i++) {
+		unsigned int uch = static_cast<unsigned char>(text[i]);
 		if (uch < 0x80) {
 			utfForm[lenU++] = uch;
 		} else {
@@ -614,14 +614,14 @@ std::string UTF8FromLatin1(const char *s, int len) {
 	return utfForm;
 }
 
-static std::string UTF8FromIconv(const Converter &conv, const char *s, int len) {
+static std::string UTF8FromIconv(const Converter &conv, std::string_view text) {
 	if (conv) {
-		std::string utfForm(len*3+1, '\0');
-		char *pin = const_cast<char *>(s);
-		gsize inLeft = len;
+		std::string utfForm(text.length()*3+1, '\0');
+		char *pin = const_cast<char *>(text.data());
+		gsize inLeft = text.length();
 		char *putf = &utfForm[0];
 		char *pout = putf;
-		gsize outLeft = len*3+1;
+		gsize outLeft = text.length()*3+1;
 		gsize conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
 		if (conversions != sizeFailure) {
 			*pout = '\0';
@@ -649,7 +649,7 @@ static size_t MultiByteLenFromIconv(const Converter &conv, const char *s, size_t
 	return 1;
 }
 
-void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
+void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
                                  ColourDesired fore) {
 	PenColour(fore);
 	if (context) {
@@ -657,12 +657,12 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, XYPOSITION ybase, con
 		if (PFont(font_)->pfd) {
 			std::string utfForm;
 			if (et == UTF8) {
-				pango_layout_set_text(layout, s, len);
+				pango_layout_set_text(layout, text.data(), text.length());
 			} else {
 				SetConverter(PFont(font_)->characterSet);
-				utfForm = UTF8FromIconv(conv, s, len);
+				utfForm = UTF8FromIconv(conv, text);
 				if (utfForm.empty()) {	// iconv failed so treat as Latin1
-					utfForm = UTF8FromLatin1(s, len);
+					utfForm = UTF8FromLatin1(text);
 				}
 				pango_layout_set_text(layout, utfForm.c_str(), utfForm.length());
 			}
@@ -675,25 +675,25 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, XYPOSITION ybase, con
 	}
 }
 
-void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
+void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
                                  ColourDesired fore, ColourDesired back) {
 	FillRectangle(rc, back);
-	DrawTextBase(rc, font_, ybase, s, len, fore);
+	DrawTextBase(rc, font_, ybase, text, fore);
 }
 
 // On GTK+, exactly same as DrawTextNoClip
-void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
+void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
                                   ColourDesired fore, ColourDesired back) {
 	FillRectangle(rc, back);
-	DrawTextBase(rc, font_, ybase, s, len, fore);
+	DrawTextBase(rc, font_, ybase, text, fore);
 }
 
-void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
+void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
                                   ColourDesired fore) {
 	// Avoid drawing spaces in transparent mode
-	for (int i=0; i<len; i++) {
-		if (s[i] != ' ') {
-			DrawTextBase(rc, font_, ybase, s, len, fore);
+	for (size_t i=0; i<text.length(); i++) {
+		if (text[i] != ' ') {
+			DrawTextBase(rc, font_, ybase, text, fore);
 			return;
 		}
 	}
@@ -702,14 +702,14 @@ void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION yba
 class ClusterIterator {
 	PangoLayoutIter *iter;
 	PangoRectangle pos;
-	int lenPositions;
+	size_t lenPositions;
 public:
 	bool finished;
 	XYPOSITION positionStart;
 	XYPOSITION position;
 	XYPOSITION distance;
 	int curIndex;
-	ClusterIterator(PangoLayout *layout, int len) : lenPositions(len), finished(false),
+	ClusterIterator(PangoLayout *layout, size_t len) : lenPositions(len), finished(false),
 		positionStart(0), position(0), distance(0), curIndex(0) {
 		iter = pango_layout_get_iter(layout);
 		pango_layout_iter_get_cluster_extents(iter, NULL, &pos);
@@ -733,16 +733,15 @@ public:
 	}
 };
 
-void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions) {
+void SurfaceImpl::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *positions) {
 	if (font_.GetID()) {
-		const int lenPositions = len;
 		if (PFont(font_)->pfd) {
 			pango_layout_set_font_description(layout, PFont(font_)->pfd);
 			if (et == UTF8) {
 				// Simple and direct as UTF-8 is native Pango encoding
 				int i = 0;
-				pango_layout_set_text(layout, s, len);
-				ClusterIterator iti(layout, lenPositions);
+				pango_layout_set_text(layout, text.data(), text.length());
+				ClusterIterator iti(layout, text.length());
 				while (!iti.finished) {
 					iti.Next();
 					int places = iti.curIndex - i;
@@ -755,12 +754,12 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION 
 						i++;
 					}
 				}
-				PLATFORM_ASSERT(i == lenPositions);
+				PLATFORM_ASSERT(i == text.length());
 			} else {
 				int positionsCalculated = 0;
 				if (et == dbcs) {
 					SetConverter(PFont(font_)->characterSet);
-					std::string utfForm = UTF8FromIconv(conv, s, len);
+					std::string utfForm = UTF8FromIconv(conv, text);
 					if (!utfForm.empty()) {
 						// Convert to UTF-8 so can ask Pango for widths, then
 						// Loop through UTF-8 and DBCS forms, taking account of different
@@ -776,7 +775,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION 
 							int places = g_utf8_strlen(utfForm.c_str() + clusterStart, clusterEnd - clusterStart);
 							int place = 1;
 							while (clusterStart < clusterEnd) {
-								size_t lenChar = MultiByteLenFromIconv(convMeasure, s+i, len-i);
+								size_t lenChar = MultiByteLenFromIconv(convMeasure, text.data()+i, text.length()-i);
 								while (lenChar--) {
 									positions[i++] = iti.position - (places - place) * iti.distance / places;
 									positionsCalculated++;
@@ -785,17 +784,18 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION 
 								place++;
 							}
 						}
-						PLATFORM_ASSERT(i == lenPositions);
+						PLATFORM_ASSERT(i == text.length());
 					}
 				}
 				if (positionsCalculated < 1 ) {
+					const int lenPositions = static_cast<int>(text.length());
 					// Either 8-bit or DBCS conversion failed so treat as 8-bit.
 					SetConverter(PFont(font_)->characterSet);
 					const bool rtlCheck = PFont(font_)->characterSet == SC_CHARSET_HEBREW ||
 						PFont(font_)->characterSet == SC_CHARSET_ARABIC;
-					std::string utfForm = UTF8FromIconv(conv, s, len);
+					std::string utfForm = UTF8FromIconv(conv, text);
 					if (utfForm.empty()) {
-						utfForm = UTF8FromLatin1(s, len);
+						utfForm = UTF8FromLatin1(text);
 					}
 					pango_layout_set_text(layout, utfForm.c_str(), utfForm.length());
 					int i = 0;
@@ -827,31 +827,31 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION 
 						// If something failed, fill in rest of the positions
 						positions[i++] = clusterStart;
 					}
-					PLATFORM_ASSERT(i == lenPositions);
+					PLATFORM_ASSERT(i == text.length());
 				}
 			}
 		}
 	} else {
 		// No font so return an ascending range of values
-		for (int i = 0; i < len; i++) {
+		for (size_t i = 0; i < text.length(); i++) {
 			positions[i] = i + 1;
 		}
 	}
 }
 
-XYPOSITION SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
+XYPOSITION SurfaceImpl::WidthText(Font &font_, std::string_view text) {
 	if (font_.GetID()) {
 		if (PFont(font_)->pfd) {
 			std::string utfForm;
 			pango_layout_set_font_description(layout, PFont(font_)->pfd);
 			PangoRectangle pos;
 			if (et == UTF8) {
-				pango_layout_set_text(layout, s, len);
+				pango_layout_set_text(layout, text.data(), text.length());
 			} else {
 				SetConverter(PFont(font_)->characterSet);
-				utfForm = UTF8FromIconv(conv, s, len);
+				utfForm = UTF8FromIconv(conv, text);
 				if (utfForm.empty()) {	// iconv failed so treat as Latin1
-					utfForm = UTF8FromLatin1(s, len);
+					utfForm = UTF8FromLatin1(text);
 				}
 				pango_layout_set_text(layout, utfForm.c_str(), utfForm.length());
 			}
@@ -906,7 +906,7 @@ XYPOSITION SurfaceImpl::Height(Font &font_) {
 }
 
 XYPOSITION SurfaceImpl::AverageCharWidth(Font &font_) {
-	return WidthText(font_, "n", 1);
+	return WidthText(font_, "n");
 }
 
 void SurfaceImpl::SetClip(PRectangle rc) {

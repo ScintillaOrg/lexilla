@@ -778,19 +778,19 @@ void SurfaceImpl::Copy(PRectangle rc, Scintilla::Point from, Surface &surfaceSou
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
+void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
 				 ColourDesired fore, ColourDesired back) {
 	FillRectangle(rc, back);
-	DrawTextTransparent(rc, font_, ybase, s, len, fore);
+	DrawTextTransparent(rc, font_, ybase, text, fore);
 }
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
+void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
 				  ColourDesired fore, ColourDesired back) {
 	CGContextSaveGState(gc);
 	CGContextClipToRect(gc, PRectangleToCGRect(rc));
-	DrawTextNoClip(rc, font_, ybase, s, len, fore, back);
+	DrawTextNoClip(rc, font_, ybase, text, fore, back);
 	CGContextRestoreGState(gc);
 }
 
@@ -851,7 +851,7 @@ CFStringEncoding EncodingFromCharacterSet(bool unicode, int characterSet) {
 	}
 }
 
-void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
+void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
 				      ColourDesired fore) {
 	CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
 	ColourDesired colour(fore.AsInteger());
@@ -862,15 +862,15 @@ void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION yba
 
 	CGColorRelease(color);
 
-	textLayout->setText(s, len, encoding, *style);
+	textLayout->setText(text, encoding, *style);
 	textLayout->draw(rc.left, ybase);
 }
 
 //--------------------------------------------------------------------------------------------------
 
-void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION *positions) {
+void SurfaceImpl::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *positions) {
 	CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
-	textLayout->setText(s, len, encoding, *TextStyleFromFont(font_));
+	textLayout->setText(text, encoding, *TextStyleFromFont(font_));
 
 	CTLineRef mLine = textLayout->getCTLine();
 	assert(mLine != NULL);
@@ -881,11 +881,11 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION 
 		int ui=0;
 		int i=0;
 		while (ui<fit) {
-			const unsigned char uch = s[i];
+			const unsigned char uch = text[i];
 			const unsigned int byteCount = UTF8BytesOfLead[uch];
 			const int codeUnits = UTF16LengthFromUTF8ByteCount(byteCount);
 			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, ui+codeUnits, NULL);
-			for (unsigned int bytePos=0; (bytePos<byteCount) && (i<len); bytePos++) {
+			for (unsigned int bytePos=0; (bytePos<byteCount) && (i<text.length()); bytePos++) {
 				positions[i++] = static_cast<XYPOSITION>(xPosition);
 			}
 			ui += codeUnits;
@@ -893,21 +893,21 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION 
 		XYPOSITION lastPos = 0.0f;
 		if (i > 0)
 			lastPos = positions[i-1];
-		while (i<len) {
+		while (i<text.length()) {
 			positions[i++] = lastPos;
 		}
 	} else if (codePage) {
 		int ui = 0;
-		for (int i=0; i<len;) {
-			size_t lenChar = DBCSIsLeadByte(codePage, s[i]) ? 2 : 1;
+		for (int i=0; i<text.length();) {
+			size_t lenChar = DBCSIsLeadByte(codePage, text[i]) ? 2 : 1;
 			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, ui+1, NULL);
-			for (unsigned int bytePos=0; (bytePos<lenChar) && (i<len); bytePos++) {
+			for (unsigned int bytePos=0; (bytePos<lenChar) && (i<text.length()); bytePos++) {
 				positions[i++] = static_cast<XYPOSITION>(xPosition);
 			}
 			ui++;
 		}
 	} else {	// Single byte encoding
-		for (int i=0; i<len; i++) {
+		for (int i=0; i<text.length(); i++) {
 			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, i+1, NULL);
 			positions[i] = static_cast<XYPOSITION>(xPosition);
 		}
@@ -915,10 +915,10 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, XYPOSITION 
 
 }
 
-XYPOSITION SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
+XYPOSITION SurfaceImpl::WidthText(Font &font_, std::string_view text) {
 	if (font_.GetID()) {
 		CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
-		textLayout->setText(s, len, encoding, *TextStyleFromFont(font_));
+		textLayout->setText(text, encoding, *TextStyleFromFont(font_));
 
 		return static_cast<XYPOSITION>(textLayout->MeasureStringWidth());
 	}
@@ -961,10 +961,9 @@ XYPOSITION SurfaceImpl::AverageCharWidth(Font &font_) {
 	if (!font_.GetID())
 		return 1;
 
-	const int sizeStringLength = ELEMENTS(sizeString);
-	XYPOSITION width = WidthText(font_, sizeString, sizeStringLength);
+	XYPOSITION width = WidthText(font_, sizeString);
 
-	return round(width / sizeStringLength);
+	return round(width / strlen(sizeString));
 }
 
 void SurfaceImpl::SetClip(PRectangle rc) {
@@ -1551,7 +1550,7 @@ void ListBoxImpl::Append(char *s, int type) {
 	ld.Add(count, type, s);
 
 	Scintilla::SurfaceImpl surface;
-	XYPOSITION width = surface.WidthText(font, s, static_cast<int>(strlen(s)));
+	XYPOSITION width = surface.WidthText(font, s);
 	if (width > maxItemWidth) {
 		maxItemWidth = width;
 		colText.width = maxItemWidth;

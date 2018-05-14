@@ -111,7 +111,7 @@ static GdkWindow *PWindow(const Window &w) {
 	return gtk_widget_get_window(widget);
 }
 
-extern std::string UTF8FromLatin1(const char *s, int len);
+extern std::string UTF8FromLatin1(std::string_view text);
 
 enum {
     COMMAND_SIGNAL,
@@ -1391,7 +1391,7 @@ void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, Selectio
 	if (selectionTypeData == GDK_TARGET_STRING) {
 		if (IsUnicodeMode()) {
 			// Unknown encoding so assume in Latin1
-			dest = UTF8FromLatin1(dest.c_str(), dest.length());
+			dest = UTF8FromLatin1(dest);
 			selText.Copy(dest, SC_CP_UTF8, 0, isRectangular, false);
 		} else {
 			// Assume buffer is in same encoding as selection

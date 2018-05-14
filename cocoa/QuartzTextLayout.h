@@ -37,9 +37,9 @@ public:
 		}
 	}
 
-	void setText(const char *buffer, size_t byteLength, CFStringEncoding encoding, const QuartzTextStyle &r) {
-		const UInt8 *puiBuffer = reinterpret_cast<const UInt8 *>(buffer);
-		CFStringRef str = CFStringCreateWithBytes(NULL, puiBuffer, byteLength, encoding, false);
+	void setText(std::string_view sv, CFStringEncoding encoding, const QuartzTextStyle &r) {
+		const UInt8 *puiBuffer = reinterpret_cast<const UInt8 *>(sv.data());
+		CFStringRef str = CFStringCreateWithBytes(NULL, puiBuffer, sv.length(), encoding, false);
 		if (!str)
 			return;
 

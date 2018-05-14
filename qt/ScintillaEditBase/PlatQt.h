@@ -97,14 +97,14 @@ public:
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource) override;
 
 	void DrawTextNoClip(PRectangle rc, Font &font, XYPOSITION ybase,
-		const char *s, int len, ColourDesired fore, ColourDesired back) override;
+		std::string_view text, ColourDesired fore, ColourDesired back) override;
 	void DrawTextClipped(PRectangle rc, Font &font, XYPOSITION ybase,
-		const char *s, int len, ColourDesired fore, ColourDesired back) override;
+		std::string_view text, ColourDesired fore, ColourDesired back) override;
 	void DrawTextTransparent(PRectangle rc, Font &font, XYPOSITION ybase,
-		const char *s, int len, ColourDesired fore) override;
-	void MeasureWidths(Font &font, const char *s, int len,
+		std::string_view text, ColourDesired fore) override;
+	void MeasureWidths(Font &font, std::string_view text,
 		XYPOSITION *positions) override;
-	XYPOSITION WidthText(Font &font, const char *s, int len) override;
+	XYPOSITION WidthText(Font &font, std::string_view text) override;
 	XYPOSITION Ascent(Font &font) override;
 	XYPOSITION Descent(Font &font) override;
 	XYPOSITION InternalLeading(Font &font) override;
