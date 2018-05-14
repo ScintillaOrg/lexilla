@@ -27,7 +27,6 @@
 #include "ILexer.h"
 #include "Scintilla.h"
 
-#include "StringCopy.h"
 #include "Position.h"
 #include "IntegerRectangle.h"
 #include "UniqueString.h"

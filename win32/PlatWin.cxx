@@ -44,7 +44,6 @@
 #endif
 
 #include "Platform.h"
-#include "StringCopy.h"
 #include "XPM.h"
 #include "UniConversion.h"
 #include "DBCS.h"

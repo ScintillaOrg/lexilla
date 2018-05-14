@@ -29,7 +29,6 @@
 #include "ILexer.h"
 #include "Scintilla.h"
 
-#include "StringCopy.h"
 #include "CharacterSet.h"
 #include "Position.h"
 #include "UniqueString.h"
@@ -1957,7 +1956,7 @@ void Editor::AddCharUTF(const char *s, unsigned int len, bool treatAsDBCS) {
 			// characters representing themselves.
 		} else {
 			unsigned int utf32[1] = { 0 };
-			UTF32FromUTF8(std::string_view(s, len), utf32, ELEMENTS(utf32));
+			UTF32FromUTF8(std::string_view(s, len), utf32, std::size(utf32));
 			byte = utf32[0];
 		}
 		NotifyChar(byte);

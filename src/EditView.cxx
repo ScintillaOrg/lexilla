@@ -30,7 +30,6 @@
 #include "ILexer.h"
 #include "Scintilla.h"
 
-#include "StringCopy.h"
 #include "CharacterSet.h"
 #include "Position.h"
 #include "IntegerRectangle.h"
