@@ -2318,12 +2318,13 @@ void ScintillaWin::Paste() {
 
 void ScintillaWin::CreateCallTipWindow(PRectangle) {
 	if (!ct.wCallTip.Created()) {
-		ct.wCallTip = ::CreateWindow(callClassName, TEXT("ACallTip"),
+		HWND wnd = ::CreateWindow(callClassName, TEXT("ACallTip"),
 					     WS_POPUP, 100, 100, 150, 20,
 					     MainHWND(), 0,
 					     GetWindowInstance(MainHWND()),
 					     this);
-		ct.wDraw = ct.wCallTip;
+		ct.wCallTip = wnd;
+		ct.wDraw = wnd;
 	}
 }
 

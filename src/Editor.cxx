@@ -308,8 +308,7 @@ Sci::Line Editor::TopLineOfMain() const {
 }
 
 PRectangle Editor::GetClientRectangle() const {
-	Window win = wMain;
-	return win.GetClientPosition();
+	return wMain.GetClientPosition();
 }
 
 PRectangle Editor::GetClientDrawingRectangle() {

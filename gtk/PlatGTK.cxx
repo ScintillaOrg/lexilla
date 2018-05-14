@@ -106,7 +106,7 @@ static GtkWidget *PWidget(WindowID wid) {
 	return static_cast<GtkWidget *>(wid);
 }
 
-Font::Font() : fid(0) {}
+Font::Font() noexcept : fid(0) {}
 
 Font::~Font() {}
 
@@ -962,7 +962,7 @@ void Window::Destroy() {
 	}
 }
 
-PRectangle Window::GetPosition() {
+PRectangle Window::GetPosition() const {
 	// Before any size allocated pretend its 1000 wide so not scrolled
 	PRectangle rc(0, 0, 1000, 1000);
 	if (wid) {
@@ -1006,15 +1006,15 @@ GdkRectangle MonitorRectangleForWidget(GtkWidget *wid) {
 
 }
 
-void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
+void Window::SetPositionRelative(PRectangle rc, const Window *relativeTo) {
 	int ox = 0;
 	int oy = 0;
-	GdkWindow *wndRelativeTo = WindowFromWidget(PWidget(relativeTo.wid));
+	GdkWindow *wndRelativeTo = WindowFromWidget(PWidget(relativeTo->wid));
 	gdk_window_get_origin(wndRelativeTo, &ox, &oy);
 	ox += rc.left;
 	oy += rc.top;
 
-	GdkRectangle rcMonitor = MonitorRectangleForWidget(PWidget(relativeTo.wid));
+	GdkRectangle rcMonitor = MonitorRectangleForWidget(PWidget(relativeTo->wid));
 
 	/* do some corrections to fit into screen */
 	int sizex = rc.right - rc.left;
@@ -1033,7 +1033,7 @@ void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
 	gtk_window_resize(GTK_WINDOW(wid), sizex, sizey);
 }
 
-PRectangle Window::GetClientPosition() {
+PRectangle Window::GetClientPosition() const {
 	// On GTK+, the client position is the window position
 	return GetPosition();
 }
@@ -1144,7 +1144,7 @@ static void list_image_free(gpointer, gpointer value, gpointer) {
 	g_free(list_image);
 }
 
-ListBox::ListBox() {
+ListBox::ListBox() noexcept {
 }
 
 ListBox::~ListBox() {
@@ -1867,7 +1867,7 @@ void ListBoxX::SetList(const char *listText, char separator, char typesep) {
 	}
 }
 
-Menu::Menu() : mid(0) {}
+Menu::Menu() noexcept : mid(0) {}
 
 void Menu::CreatePopUp() {
 	Destroy();

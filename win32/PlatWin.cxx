@@ -447,8 +447,7 @@ void FontCached::ReleaseId(FontID fid_) {
 	::LeaveCriticalSection(&crPlatformLock);
 }
 
-Font::Font() {
-	fid = 0;
+Font::Font() noexcept : fid(0) {
 }
 
 Font::~Font() {
@@ -1805,7 +1804,7 @@ void Window::Destroy() {
 	wid = nullptr;
 }
 
-PRectangle Window::GetPosition() {
+PRectangle Window::GetPosition() const {
 	RECT rc;
 	::GetWindowRect(HwndFromWindowID(wid), &rc);
 	return PRectangle::FromInts(rc.left, rc.top, rc.right, rc.bottom);
@@ -1837,11 +1836,11 @@ static RECT RectFromMonitor(HMONITOR hMonitor) {
 
 }
 
-void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
+void Window::SetPositionRelative(PRectangle rc, const Window *relativeTo) {
 	const LONG style = ::GetWindowLong(HwndFromWindowID(wid), GWL_STYLE);
 	if (style & WS_POPUP) {
 		POINT ptOther = {0, 0};
-		::ClientToScreen(HwndFromWindowID(relativeTo.GetID()), &ptOther);
+		::ClientToScreen(HwndFromWindowID(relativeTo->GetID()), &ptOther);
 		rc.Move(static_cast<XYPOSITION>(ptOther.x), static_cast<XYPOSITION>(ptOther.y));
 
 		const RECT rcMonitor = RectFromPRectangle(rc);
@@ -1868,7 +1867,7 @@ void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
 	SetPosition(rc);
 }
 
-PRectangle Window::GetClientPosition() {
+PRectangle Window::GetClientPosition() const {
 	RECT rc={0,0,0,0};
 	if (wid)
 		::GetClientRect(HwndFromWindowID(wid), &rc);
@@ -2033,7 +2032,7 @@ public:
 
 const TCHAR ListBoxX_ClassName[] = TEXT("ListBoxX");
 
-ListBox::ListBox() {
+ListBox::ListBox() noexcept {
 }
 
 ListBox::~ListBox() {
@@ -2559,8 +2558,7 @@ void ListBoxX::StartResize(WPARAM hitCode) {
 }
 
 LRESULT ListBoxX::NcHitTest(WPARAM wParam, LPARAM lParam) const {
-	Window win = *this;	// Copy HWND to avoid const problems
-	const PRectangle rc = win.GetPosition();
+	const PRectangle rc = GetPosition();
 
 	LRESULT hit = ::DefWindowProc(GetHWND(), WM_NCHITTEST, wParam, lParam);
 	// There is an apparent bug in the DefWindowProc hit test code whereby it will
@@ -2894,7 +2892,7 @@ bool ListBoxX_Unregister() {
 
 }
 
-Menu::Menu() : mid(0) {
+Menu::Menu() noexcept : mid(0) {
 }
 
 void Menu::CreatePopUp() {

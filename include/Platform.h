@@ -250,7 +250,7 @@ struct FontParameters {
 		bool italic_=false,
 		int extraFontFlag_=0,
 		int technology_=0,
-		int characterSet_=0) :
+		int characterSet_=0) noexcept :
 
 		faceName(faceName_),
 		size(size_),
@@ -267,19 +267,21 @@ struct FontParameters {
 class Font {
 protected:
 	FontID fid;
-	// Private so Font objects can not be copied
-	Font(const Font &);
-	Font &operator=(const Font &);
 public:
-	Font();
+	Font() noexcept;
+	// Deleted so Font objects can not be copied
+	Font(const Font &) = delete;
+	Font(Font &&) = delete;
+	Font &operator=(const Font &) = delete;
+	Font &operator=(Font &&) = delete;
 	virtual ~Font();
 
 	virtual void Create(const FontParameters &fp);
 	virtual void Release();
 
-	FontID GetID() { return fid; }
+	FontID GetID() const noexcept { return fid; }
 	// Alias another font - caller guarantees not to Release
-	void SetID(FontID fid_) { fid = fid_; }
+	void SetID(FontID fid_) noexcept { fid = fid_; }
 	friend class Surface;
 	friend class SurfaceImpl;
 };
@@ -346,30 +348,25 @@ class Window {
 protected:
 	WindowID wid;
 public:
-	Window() : wid(0), cursorLast(cursorInvalid) {
+	Window() noexcept : wid(0), cursorLast(cursorInvalid) {
 	}
-	Window(const Window &source) : wid(source.wid), cursorLast(cursorInvalid) {
-	}
-	virtual ~Window();
-	Window &operator=(WindowID wid_) {
+	Window(const Window &source) = delete;
+	Window(Window &&) = delete;
+	Window &operator=(WindowID wid_) noexcept {
 		wid = wid_;
 		cursorLast = cursorInvalid;
 		return *this;
 	}
-	Window &operator=(const Window &other) {
-		if (this != &other) {
-			wid = other.wid;
-			cursorLast = other.cursorLast;
-		}
-		return *this;
-	}
-	WindowID GetID() const { return wid; }
-	bool Created() const { return wid != 0; }
+	Window &operator=(const Window &) = delete;
+	Window &operator=(Window &&) = delete;
+	virtual ~Window();
+	WindowID GetID() const noexcept { return wid; }
+	bool Created() const noexcept { return wid != 0; }
 	void Destroy();
-	PRectangle GetPosition();
+	PRectangle GetPosition() const;
 	void SetPosition(PRectangle rc);
-	void SetPositionRelative(PRectangle rc, Window relativeTo);
-	PRectangle GetClientPosition();
+	void SetPositionRelative(PRectangle rc, const Window *relativeTo);
+	PRectangle GetClientPosition() const;
 	void Show(bool show=true);
 	void InvalidateAll();
 	void InvalidateRectangle(PRectangle rc);
@@ -389,7 +386,7 @@ private:
 
 struct ListBoxEvent {
 	enum class EventType { selectionChange, doubleClick } event;
-	ListBoxEvent(EventType event_) : event(event_) {
+	ListBoxEvent(EventType event_) noexcept : event(event_) {
 	}
 };
 
@@ -400,7 +397,7 @@ public:
 
 class ListBox : public Window {
 public:
-	ListBox();
+	ListBox() noexcept;
 	~ListBox() override;
 	static ListBox *Allocate();
 
@@ -431,8 +428,8 @@ public:
 class Menu {
 	MenuID mid;
 public:
-	Menu();
-	MenuID GetID() { return mid; }
+	Menu() noexcept;
+	MenuID GetID() const noexcept { return mid; }
 	void CreatePopUp();
 	void Destroy();
 	void Show(Point pt, Window &w);
@@ -451,7 +448,7 @@ public:
  */
 class DynamicLibrary {
 public:
-	virtual ~DynamicLibrary() {}
+	virtual ~DynamicLibrary() = default;
 
 	/// @return Pointer to function "name", or NULL on failure.
 	virtual Function FindFunction(const char *name) = 0;
@@ -478,21 +475,20 @@ public:
  * and chrome colour. Not a creatable object, more of a module with several functions.
  */
 class Platform {
-	// Private so Platform objects can not be copied
-	Platform(const Platform &) {}
-	Platform &operator=(const Platform &) { return *this; }
 public:
-	// Should be private because no new Platforms are ever created
-	// but gcc warns about this
-	Platform() {}
-	~Platform() {}
+	Platform() = default;
+	Platform(const Platform &) = delete;
+	Platform(Platform &&) = delete;
+	Platform &operator=(const Platform &) = delete;
+	Platform &operator=(Platform &&) = delete;
+	~Platform() = default;
 	static ColourDesired Chrome();
 	static ColourDesired ChromeHighlight();
 	static const char *DefaultFont();
 	static int DefaultFontSize();
 	static unsigned int DoubleClickTime();
 	static void DebugDisplay(const char *s);
-	static long LongFromTwoShorts(short a,short b) {
+	static long LongFromTwoShorts(short a,short b) noexcept {
 		return (a) | ((b) << 16);
 	}
 

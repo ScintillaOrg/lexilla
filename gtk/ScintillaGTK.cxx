@@ -980,8 +980,7 @@ void ScintillaGTK::FullPaint() {
 }
 
 PRectangle ScintillaGTK::GetClientRectangle() const {
-	Window win = wMain;
-	PRectangle rc = win.GetClientPosition();
+	PRectangle rc = wMain.GetClientPosition();
 	if (verticalScrollBarVisible)
 		rc.right -= verticalScrollBarWidth;
 	if (horizontalScrollBarVisible && !Wrapping())

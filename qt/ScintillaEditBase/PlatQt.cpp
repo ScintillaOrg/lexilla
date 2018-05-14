@@ -113,7 +113,7 @@ static QFont *FontPointer(Font &f)
 {
 	return reinterpret_cast<FontAndCharacterSet *>(f.GetID())->pfont;
 }
-Font::Font() : fid(nullptr) {}
+Font::Font() noexcept : fid(nullptr) {}
 Font::~Font()
 {
 	delete reinterpret_cast<FontAndCharacterSet *>(fid);
@@ -584,7 +584,7 @@ Surface *Surface::Allocate(int)
 //----------------------------------------------------------------------
 
 namespace {
-QWidget *window(WindowID wid)
+QWidget *window(WindowID wid) noexcept
 {
 	return static_cast<QWidget *>(wid);
 }
@@ -598,7 +598,7 @@ void Window::Destroy()
 		delete window(wid);
 	wid = nullptr;
 }
-PRectangle Window::GetPosition()
+PRectangle Window::GetPosition() const
 {
 	// Before any size allocated pretend its 1000 wide so not scrolled
 	return wid ? PRectFromQRect(window(wid)->frameGeometry()) : PRectangle(0, 0, 1000, 1000);
@@ -610,9 +610,9 @@ void Window::SetPosition(PRectangle rc)
 		window(wid)->setGeometry(QRectFromPRect(rc));
 }
 
-void Window::SetPositionRelative(PRectangle rc, Window relativeTo)
+void Window::SetPositionRelative(PRectangle rc, const Window *relativeTo)
 {
-	QPoint oPos = window(relativeTo.wid)->mapToGlobal(QPoint(0,0));
+	QPoint oPos = window(relativeTo->wid)->mapToGlobal(QPoint(0,0));
 	int ox = oPos.x();
 	int oy = oPos.y();
 	ox += rc.left;
@@ -638,7 +638,7 @@ void Window::SetPositionRelative(PRectangle rc, Window relativeTo)
 	window(wid)->resize(sizex, sizey);
 }
 
-PRectangle Window::GetClientPosition()
+PRectangle Window::GetClientPosition() const
 {
 	// The client position is the window position
 	return GetPosition();
@@ -996,7 +996,7 @@ ListWidget *ListBoxImpl::GetWidget() const
 	return static_cast<ListWidget *>(wid);
 }
 
-ListBox::ListBox() {}
+ListBox::ListBox() noexcept {}
 ListBox::~ListBox() {}
 
 ListBox *ListBox::Allocate()
@@ -1040,7 +1040,7 @@ QStyleOptionViewItem ListWidget::viewOptions() const
 	return result;
 }
 //----------------------------------------------------------------------
-Menu::Menu() : mid(nullptr) {}
+Menu::Menu() noexcept : mid(nullptr) {}
 void Menu::CreatePopUp()
 {
 	Destroy();
