@@ -26,7 +26,7 @@ const char *CharacterSetID(int characterSet);
 
 inline QColor QColorFromCA(ColourDesired ca)
 {
-	long c = ca.AsLong();
+	long c = ca.AsInteger();
 	return QColor(c & 0xff, (c >> 8) & 0xff, (c >> 16) & 0xff);
 }
 

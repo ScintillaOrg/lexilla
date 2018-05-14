@@ -675,7 +675,7 @@ void SurfaceGDI::PenColour(ColourDesired fore) {
 		pen = 0;
 		penOld = 0;
 	}
-	pen = ::CreatePen(0,1,fore.AsLong());
+	pen = ::CreatePen(0,1,fore.AsInteger());
 	penOld = static_cast<HPEN>(::SelectObject(hdc, pen));
 }
 
@@ -687,8 +687,8 @@ void SurfaceGDI::BrushColor(ColourDesired back) {
 		brushOld = 0;
 	}
 	// Only ever want pure, non-dithered brushes
-	const ColourDesired colourNearest = ColourDesired(::GetNearestColor(hdc, back.AsLong()));
-	brush = ::CreateSolidBrush(colourNearest.AsLong());
+	const ColourDesired colourNearest = ColourDesired(::GetNearestColor(hdc, back.AsInteger()));
+	brush = ::CreateSolidBrush(colourNearest.AsInteger());
 	brushOld = SelectBrush(hdc, brush);
 }
 void SurfaceGDI::SetFont(Font &font_) {
@@ -742,7 +742,7 @@ void SurfaceGDI::FillRectangle(PRectangle rc, ColourDesired back) {
 	// Using ExtTextOut rather than a FillRect ensures that no dithering occurs.
 	// There is no need to allocate a brush either.
 	const RECT rcw = RectFromPRectangle(rc);
-	::SetBkColor(hdc, back.AsLong());
+	::SetBkColor(hdc, back.AsInteger());
 	::ExtTextOut(hdc, rcw.left, rcw.top, ETO_OPAQUE, &rcw, TEXT(""), 0, NULL);
 }
 
@@ -930,15 +930,15 @@ void SurfaceGDI::DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, co
 
 void SurfaceGDI::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
 	ColourDesired fore, ColourDesired back) {
-	::SetTextColor(hdc, fore.AsLong());
-	::SetBkColor(hdc, back.AsLong());
+	::SetTextColor(hdc, fore.AsInteger());
+	::SetBkColor(hdc, back.AsInteger());
 	DrawTextCommon(rc, font_, ybase, s, len, ETO_OPAQUE);
 }
 
 void SurfaceGDI::DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
 	ColourDesired fore, ColourDesired back) {
-	::SetTextColor(hdc, fore.AsLong());
-	::SetBkColor(hdc, back.AsLong());
+	::SetTextColor(hdc, fore.AsInteger());
+	::SetBkColor(hdc, back.AsInteger());
 	DrawTextCommon(rc, font_, ybase, s, len, ETO_OPAQUE | ETO_CLIPPED);
 }
 
@@ -947,7 +947,7 @@ void SurfaceGDI::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybas
 	// Avoid drawing spaces in transparent mode
 	for (int i=0; i<len; i++) {
 		if (s[i] != ' ') {
-			::SetTextColor(hdc, fore.AsLong());
+			::SetTextColor(hdc, fore.AsInteger());
 			::SetBkMode(hdc, TRANSPARENT);
 			DrawTextCommon(rc, font_, ybase, s, len, 0);
 			::SetBkMode(hdc, OPAQUE);
@@ -1261,9 +1261,9 @@ void SurfaceD2D::PenColour(ColourDesired fore) {
 void SurfaceD2D::D2DPenColour(ColourDesired fore, int alpha) {
 	if (pRenderTarget) {
 		D2D_COLOR_F col;
-		col.r = (fore.AsLong() & 0xff) / 255.0f;
-		col.g = ((fore.AsLong() & 0xff00) >> 8) / 255.0f;
-		col.b = (fore.AsLong() >> 16) / 255.0f;
+		col.r = (fore.AsInteger() & 0xff) / 255.0f;
+		col.g = ((fore.AsInteger() & 0xff00) >> 8) / 255.0f;
+		col.b = (fore.AsInteger() >> 16) / 255.0f;
 		col.a = alpha / 255.0f;
 		if (pBrush) {
 			pBrush->SetColor(col);

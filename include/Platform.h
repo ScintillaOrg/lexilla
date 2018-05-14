@@ -75,9 +75,6 @@ namespace Scintilla {
 
 typedef float XYPOSITION;
 typedef double XYACCUMULATOR;
-inline int RoundXYPosition(XYPOSITION xyPos) {
-	return static_cast<int>(xyPos + 0.5);
-}
 
 // Underlying the implementation of the platform classes are platform specific types.
 // Sometimes these need to be passed around by client code so they are defined here
@@ -99,10 +96,10 @@ public:
 	XYPOSITION x;
 	XYPOSITION y;
 
-	constexpr explicit Point(XYPOSITION x_=0, XYPOSITION y_=0) : x(x_), y(y_) {
+	constexpr explicit Point(XYPOSITION x_=0, XYPOSITION y_=0) noexcept : x(x_), y(y_) {
 	}
 
-	static Point FromInts(int x_, int y_) {
+	static Point FromInts(int x_, int y_) noexcept {
 		return Point(static_cast<XYPOSITION>(x_), static_cast<XYPOSITION>(y_));
 	}
 
@@ -111,7 +108,7 @@ public:
 
 /**
  * A geometric rectangle class.
- * PRectangle is similar to the Win32 RECT.
+ * PRectangle is similar to Win32 RECT.
  * PRectangles contain their top and left sides, but not their right and bottom sides.
  */
 class PRectangle {
@@ -121,47 +118,47 @@ public:
 	XYPOSITION right;
 	XYPOSITION bottom;
 
-	explicit PRectangle(XYPOSITION left_=0, XYPOSITION top_=0, XYPOSITION right_=0, XYPOSITION bottom_ = 0) :
+	constexpr explicit PRectangle(XYPOSITION left_=0, XYPOSITION top_=0, XYPOSITION right_=0, XYPOSITION bottom_ = 0) noexcept :
 		left(left_), top(top_), right(right_), bottom(bottom_) {
 	}
 
-	static PRectangle FromInts(int left_, int top_, int right_, int bottom_) {
+	static PRectangle FromInts(int left_, int top_, int right_, int bottom_) noexcept {
 		return PRectangle(static_cast<XYPOSITION>(left_), static_cast<XYPOSITION>(top_),
 			static_cast<XYPOSITION>(right_), static_cast<XYPOSITION>(bottom_));
 	}
 
 	// Other automatically defined methods (assignment, copy constructor, destructor) are fine
 
-	bool operator==(const PRectangle &rc) const {
+	bool operator==(const PRectangle &rc) const noexcept {
 		return (rc.left == left) && (rc.right == right) &&
 			(rc.top == top) && (rc.bottom == bottom);
 	}
-	bool Contains(Point pt) const {
+	bool Contains(Point pt) const noexcept {
 		return (pt.x >= left) && (pt.x <= right) &&
 			(pt.y >= top) && (pt.y <= bottom);
 	}
-	bool ContainsWholePixel(Point pt) const {
+	bool ContainsWholePixel(Point pt) const noexcept {
 		// Does the rectangle contain all of the pixel to left/below the point
 		return (pt.x >= left) && ((pt.x+1) <= right) &&
 			(pt.y >= top) && ((pt.y+1) <= bottom);
 	}
-	bool Contains(PRectangle rc) const {
+	bool Contains(PRectangle rc) const noexcept {
 		return (rc.left >= left) && (rc.right <= right) &&
 			(rc.top >= top) && (rc.bottom <= bottom);
 	}
-	bool Intersects(PRectangle other) const {
+	bool Intersects(PRectangle other) const noexcept {
 		return (right > other.left) && (left < other.right) &&
 			(bottom > other.top) && (top < other.bottom);
 	}
-	void Move(XYPOSITION xDelta, XYPOSITION yDelta) {
+	void Move(XYPOSITION xDelta, XYPOSITION yDelta) noexcept {
 		left += xDelta;
 		top += yDelta;
 		right += xDelta;
 		bottom += yDelta;
 	}
-	XYPOSITION Width() const { return right - left; }
-	XYPOSITION Height() const { return bottom - top; }
-	bool Empty() const {
+	XYPOSITION Width() const noexcept { return right - left; }
+	XYPOSITION Height() const noexcept { return bottom - top; }
+	bool Empty() const noexcept {
 		return (Height() <= 0) || (Width() <= 0);
 	}
 };
@@ -170,62 +167,32 @@ public:
  * Holds a desired RGB colour.
  */
 class ColourDesired {
-	long co;
+	int co;
 public:
-	ColourDesired(long lcol=0) {
-		co = lcol;
+	ColourDesired(int co_=0) noexcept : co(co_) {
 	}
 
-	ColourDesired(unsigned int red, unsigned int green, unsigned int blue) {
-		Set(red, green, blue);
+	ColourDesired(unsigned int red, unsigned int green, unsigned int blue) noexcept :
+		co(red | (green << 8) | (blue << 16)) {
 	}
 
-	bool operator==(const ColourDesired &other) const {
+	bool operator==(const ColourDesired &other) const noexcept {
 		return co == other.co;
 	}
 
-	void Set(long lcol) {
-		co = lcol;
-	}
-
-	void Set(unsigned int red, unsigned int green, unsigned int blue) {
-		co = red | (green << 8) | (blue << 16);
-	}
-
-	static inline unsigned int ValueOfHex(const char ch) {
-		if (ch >= '0' && ch <= '9')
-			return ch - '0';
-		else if (ch >= 'A' && ch <= 'F')
-			return ch - 'A' + 10;
-		else if (ch >= 'a' && ch <= 'f')
-			return ch - 'a' + 10;
-		else
-			return 0;
-	}
-
-	void Set(const char *val) {
-		if (*val == '#') {
-			val++;
-		}
-		unsigned int r = ValueOfHex(val[0]) * 16 + ValueOfHex(val[1]);
-		unsigned int g = ValueOfHex(val[2]) * 16 + ValueOfHex(val[3]);
-		unsigned int b = ValueOfHex(val[4]) * 16 + ValueOfHex(val[5]);
-		Set(r, g, b);
-	}
-
-	long AsLong() const {
+	int AsInteger() const noexcept {
 		return co;
 	}
 
-	unsigned char GetRed() const {
+	unsigned char GetRed() const noexcept {
 		return co & 0xff;
 	}
 
-	unsigned char GetGreen() const {
+	unsigned char GetGreen() const noexcept {
 		return (co >> 8) & 0xff;
 	}
 
-	unsigned char GetBlue() const {
+	unsigned char GetBlue() const noexcept {
 		return (co >> 16) & 0xff;
 	}
 };

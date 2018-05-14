@@ -362,7 +362,7 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID 
 
 void SurfaceImpl::PenColour(ColourDesired fore) {
 	if (context) {
-		ColourDesired cdFore(fore.AsLong());
+		ColourDesired cdFore(fore.AsInteger());
 		cairo_set_source_rgb(context,
 			cdFore.GetRed() / 255.0,
 			cdFore.GetGreen() / 255.0,
@@ -520,7 +520,7 @@ static void PathRoundRectangle(cairo_t *context, double left, double top, double
 void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
 		ColourDesired outline, int alphaOutline, int /*flags*/) {
 	if (context && rc.Width() > 0) {
-		ColourDesired cdFill(fill.AsLong());
+		ColourDesired cdFill(fill.AsInteger());
 		cairo_set_source_rgba(context,
 			cdFill.GetRed() / 255.0,
 			cdFill.GetGreen() / 255.0,
@@ -532,7 +532,7 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fi
 			cairo_rectangle(context, rc.left + 1.0, rc.top + 1.0, rc.right - rc.left - 2.0, rc.bottom - rc.top - 2.0);
 		cairo_fill(context);
 
-		ColourDesired cdOutline(outline.AsLong());
+		ColourDesired cdOutline(outline.AsInteger());
 		cairo_set_source_rgba(context,
 			cdOutline.GetRed() / 255.0,
 			cdOutline.GetGreen() / 255.0,

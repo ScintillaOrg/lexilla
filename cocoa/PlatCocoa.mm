@@ -255,7 +255,7 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID 
 
 void SurfaceImpl::PenColour(ColourDesired fore) {
 	if (gc) {
-		ColourDesired colour(fore.AsLong());
+		ColourDesired colour(fore.AsInteger());
 
 		// Set the Stroke color to match
 		CGContextSetRGBStrokeColor(gc, colour.GetRed() / 255.0, colour.GetGreen() / 255.0,
@@ -267,7 +267,7 @@ void SurfaceImpl::PenColour(ColourDesired fore) {
 
 void SurfaceImpl::FillColour(const ColourDesired &back) {
 	if (gc) {
-		ColourDesired colour(back.AsLong());
+		ColourDesired colour(back.AsInteger());
 
 		// Set the Fill color to match
 		CGContextSetRGBFillColor(gc, colour.GetRed() / 255.0, colour.GetGreen() / 255.0,
@@ -854,7 +854,7 @@ CFStringEncoding EncodingFromCharacterSet(bool unicode, int characterSet) {
 void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, const char *s, int len,
 				      ColourDesired fore) {
 	CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
-	ColourDesired colour(fore.AsLong());
+	ColourDesired colour(fore.AsInteger());
 	CGColorRef color = CGColorCreateGenericRGB(colour.GetRed()/255.0, colour.GetGreen()/255.0, colour.GetBlue()/255.0, 1.0);
 
 	QuartzTextStyle *style = TextStyleFromFont(font_);
