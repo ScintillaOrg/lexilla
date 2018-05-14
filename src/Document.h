@@ -174,14 +174,14 @@ protected:
 	ILexer4 *instance;
 	bool performingStyle;	///< Prevent reentrance
 public:
-	explicit LexInterface(Document *pdoc_) : pdoc(pdoc_), instance(0), performingStyle(false) {
+	explicit LexInterface(Document *pdoc_) : pdoc(pdoc_), instance(nullptr), performingStyle(false) {
 	}
 	virtual ~LexInterface() {
 	}
 	void Colourise(Sci::Position start, Sci::Position end);
 	virtual int LineEndTypesSupported();
 	bool UseContainerLexing() const {
-		return instance == 0;
+		return instance == nullptr;
 	}
 };
 
@@ -198,7 +198,7 @@ public:
 	struct WatcherWithUserData {
 		DocWatcher *watcher;
 		void *userData;
-		WatcherWithUserData(DocWatcher *watcher_=0, void *userData_=0) :
+		WatcherWithUserData(DocWatcher *watcher_=nullptr, void *userData_=nullptr) :
 			watcher(watcher_), userData(userData_) {
 		}
 		bool operator==(const WatcherWithUserData &other) const {
@@ -509,7 +509,7 @@ public:
 	Sci::Position token;
 
 	DocModification(int modificationType_, Sci::Position position_=0, Sci::Position length_=0,
-		Sci::Line linesAdded_=0, const char *text_=0, Sci::Line line_=0) :
+		Sci::Line linesAdded_=0, const char *text_=nullptr, Sci::Line line_=0) :
 		modificationType(modificationType_),
 		position(position_),
 		length(length_),

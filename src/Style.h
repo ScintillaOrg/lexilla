@@ -18,7 +18,7 @@ struct FontSpecification {
 	int characterSet;
 	int extraFontFlag;
 	FontSpecification() :
-		fontName(0),
+		fontName(nullptr),
 		weight(SC_WEIGHT_NORMAL),
 		italic(false),
 		size(10 * SC_FONT_SIZE_MULTIPLIER),
