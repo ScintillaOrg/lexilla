@@ -9,6 +9,8 @@
  * This file is dual licensed under LGPL v2.1 and the Scintilla license (http://www.scintilla.org/License.txt).
  */
 
+#include <string_view>
+
 #import "Platform.h"
 #import "ScintillaView.h"
 #import "ScintillaCocoa.h"

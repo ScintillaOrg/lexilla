@@ -12,6 +12,8 @@
 #ifndef SCINTILLAEDITBASE_H
 #define SCINTILLAEDITBASE_H
 
+#include <string_view>
+
 #include "Platform.h"
 #include "Scintilla.h"
 

@@ -11,6 +11,8 @@
 #ifndef PLATQT_H
 #define PLATQT_H
 
+#include <string_view>
+
 #include "Platform.h"
 
 #include <QUrl>

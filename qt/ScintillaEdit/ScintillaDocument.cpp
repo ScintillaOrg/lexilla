@@ -3,6 +3,7 @@
 // Copyright (c) 2011 Archaeopteryx Software, Inc. d/b/a Wingware
 
 #include <stdexcept>
+#include <string_view>
 #include <vector>
 #include <map>
 #include <memory>
