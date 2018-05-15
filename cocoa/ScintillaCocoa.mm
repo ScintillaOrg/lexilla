@@ -557,6 +557,10 @@ public:
 			return 1;
 		} else {
 			CFStringRef cfsVal = CFStringFromString(mixed, lenMixed, encoding);
+			if (!cfsVal) {
+				folded[0] = '\0';
+				return 1;
+			}
 
 			NSString *sMapped = [(__bridge NSString *)cfsVal stringByFoldingWithOptions: NSCaseInsensitiveSearch
 											     locale: [NSLocale currentLocale]];
@@ -633,6 +637,9 @@ std::string ScintillaCocoa::CaseMapString(const std::string &s, int caseMapping)
 				    vs.styles[STYLE_DEFAULT].characterSet);
 
 	CFStringRef cfsVal = CFStringFromString(s.c_str(), s.length(), encoding);
+	if (!cfsVal) {
+		return s;
+	}
 
 	NSString *sMapped;
 	switch (caseMapping) {
@@ -1248,6 +1255,8 @@ void ScintillaCocoa::DragScroll() {
 				    selectedText.characterSet);
 
 	CFStringRef cfsVal = CFStringFromString(selectedText.Data(), selectedText.Length(), encoding);
+	if (!cfsVal)
+		return;
 
 	if ([type compare: NSPasteboardTypeString] == NSOrderedSame) {
 		[pasteboard setString: (__bridge NSString *)cfsVal forType: NSStringPboardType];
@@ -1517,6 +1526,8 @@ void ScintillaCocoa::SetPasteboardData(NSPasteboard *board, const SelectionText 
 				    selectedText.characterSet);
 
 	CFStringRef cfsVal = CFStringFromString(selectedText.Data(), selectedText.Length(), encoding);
+	if (!cfsVal)
+		return;
 
 	NSArray *pbTypes = selectedText.rectangular ?
 			   @[NSStringPboardType, ScintillaRecPboardType] :
@@ -1587,6 +1598,9 @@ Sci::Position ScintillaCocoa::TargetAsUTF8(char *text) const {
 						  vs.styles[STYLE_DEFAULT].characterSet);
 		const std::string s = RangeText(targetStart, targetEnd);
 		CFStringRef cfsVal = CFStringFromString(s.c_str(), s.length(), encoding);
+		if (!cfsVal) {
+			return 0;
+		}
 
 		const std::string tmputf = EncodedBytesString(cfsVal, kCFStringEncodingUTF8);
 
