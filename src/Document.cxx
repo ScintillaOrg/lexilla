@@ -2949,13 +2949,6 @@ Sci::Position Cxx11RegexFindText(const Document *doc, Sci::Position minPos, Sci:
 #endif
 			ws[outLen] = 0;
 			std::wregex regexp;
-#if defined(__APPLE__)
-			// Using a UTF-8 locale doesn't change to Unicode over a byte buffer so '.'
-			// is one byte not one character.
-			// However, on OS X this makes wregex act as Unicode
-			std::locale localeU("en_US.UTF-8");
-			regexp.imbue(localeU);
-#endif
 			regexp.assign(&ws[0], flagsRe);
 			matched = MatchOnLines<UTF8Iterator>(doc, regexp, resr, search);
 
