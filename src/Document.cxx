@@ -608,7 +608,7 @@ bool Document::InGoodUTF8(Sci::Position pos, Sci::Position &start, Sci::Position
 			// pos too far from lead
 			return false;
 		unsigned char charBytes[UTF8MaxBytes] = {leadByte,0,0,0};
-		for (Sci::Position b=1; b<widthCharBytes && ((start+b) < Length()); b++)
+		for (Sci::Position b=1; b<widthCharBytes && ((start+b) < cb.Length()); b++)
 			charBytes[b] = cb.CharAt(start+b);
 		const int utf8status = UTF8Classify(charBytes, widthCharBytes);
 		if (utf8status & UTF8MaskInvalid)
