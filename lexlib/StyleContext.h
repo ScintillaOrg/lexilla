@@ -57,7 +57,7 @@ public:
 	StyleContext(Sci_PositionU startPos, Sci_PositionU length,
                         int initStyle, LexAccessor &styler_, char chMask='\377') :
 		styler(styler_),
-		multiByteAccess(0),
+		multiByteAccess(nullptr),
 		endPos(startPos + length),
 		posRelative(0),
 		currentPosLastRelative(0x7FFFFFFF),
@@ -169,7 +169,7 @@ public:
 			}
 			Sci_Position diffRelative = n - offsetRelative;
 			Sci_Position posNew = multiByteAccess->GetRelativePosition(posRelative, diffRelative);
-			const int chReturn = multiByteAccess->GetCharacterAndWidth(posNew, 0);
+			const int chReturn = multiByteAccess->GetCharacterAndWidth(posNew, nullptr);
 			posRelative = posNew;
 			currentPosLastRelative = currentPos;
 			offsetRelative = n;

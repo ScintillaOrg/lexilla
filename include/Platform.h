@@ -314,7 +314,7 @@ class Window {
 protected:
 	WindowID wid;
 public:
-	Window() noexcept : wid(0), cursorLast(cursorInvalid) {
+	Window() noexcept : wid(nullptr), cursorLast(cursorInvalid) {
 	}
 	Window(const Window &source) = delete;
 	Window(Window &&) = delete;
@@ -327,7 +327,7 @@ public:
 	Window &operator=(Window &&) = delete;
 	virtual ~Window();
 	WindowID GetID() const noexcept { return wid; }
-	bool Created() const noexcept { return wid != 0; }
+	bool Created() const noexcept { return wid != nullptr; }
 	void Destroy();
 	PRectangle GetPosition() const;
 	void SetPosition(PRectangle rc);
