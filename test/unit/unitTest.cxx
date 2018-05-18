@@ -36,6 +36,7 @@
 #include <cstdarg>
 
 #include <string_view>
+#include <vector>
 
 #include "Platform.h"
 

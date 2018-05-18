@@ -10,6 +10,7 @@
  */
 
 #include <string_view>
+#include <vector>
 
 #import "Platform.h"
 #import "ScintillaView.h"

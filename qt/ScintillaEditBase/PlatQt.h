@@ -12,6 +12,7 @@
 #define PLATQT_H
 
 #include <string_view>
+#include <vector>
 
 #include "Platform.h"
 
