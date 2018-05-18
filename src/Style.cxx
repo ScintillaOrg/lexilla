@@ -28,7 +28,7 @@ FontAlias::~FontAlias() {
 	// ~Font will not release the actual font resource since it is now 0
 }
 
-void FontAlias::MakeAlias(Font &fontOrigin) {
+void FontAlias::MakeAlias(const Font &fontOrigin) {
 	SetID(fontOrigin.GetID());
 }
 

@@ -39,7 +39,7 @@ public:
 	FontAlias &operator=(const FontAlias &) = delete;
 	FontAlias &operator=(FontAlias &&) = delete;
 	~FontAlias() override;
-	void MakeAlias(Font &fontOrigin);
+	void MakeAlias(const Font &fontOrigin);
 	void ClearFont();
 };
 
