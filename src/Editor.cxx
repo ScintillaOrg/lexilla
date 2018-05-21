@@ -242,6 +242,17 @@ void Editor::SetRepresentations() {
 			sprintf(hexits, "x%2X", k);
 			reprs.SetRepresentation(hiByte, hexits);
 		}
+	} else if (pdoc->dbcsCodePage) {
+		// DBCS invalid single lead bytes
+		for (int k = 0x80; k < 0x100; k++) {
+			char ch = static_cast<char>(k);
+			if (pdoc->IsDBCSLeadByteNoExcept(ch)  || pdoc->IsDBCSLeadByteInvalid(ch)) {
+				const char hiByte[2] = { ch, 0 };
+				char hexits[5];	// Really only needs 4 but that causes warning from gcc 7.1
+				sprintf(hexits, "x%2X", k);
+				reprs.SetRepresentation(hiByte, hexits);
+			}
+		}
 	}
 }
 

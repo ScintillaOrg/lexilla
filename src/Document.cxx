@@ -969,6 +969,93 @@ bool Document::IsDBCSLeadByteNoExcept(char ch) const noexcept {
 	return false;
 }
 
+bool Document::IsDBCSLeadByteInvalid(char ch) const noexcept {
+	const unsigned char lead = ch;
+	switch (dbcsCodePage) {
+	case 932:
+		// Shift_jis
+		return
+			(lead == 0x85) ||
+			(lead == 0x86) ||
+			(lead == 0xEB) ||
+			(lead == 0xEC) ||
+			(lead == 0xEF) ||
+			(lead == 0xFA) ||
+			(lead == 0xFB) ||
+			(lead == 0xFC);
+	case 936:
+		// GBK
+		return (lead == 0x80) || (lead == 0xFF);
+	case 949:
+		// Korean Wansung KS C-5601-1987
+		return (lead == 0x80) || (lead == 0xC9) || (lead >= 0xFE);
+	case 950:
+		// Big5
+		return
+			((lead >= 0x80) && (lead <= 0xA0)) ||
+			(lead == 0xC8) ||
+			(lead >= 0xFA);
+	case 1361:
+		// Korean Johab KS C-5601-1992
+		return
+			((lead >= 0x80) && (lead <= 0x83)) ||
+			((lead >= 0xD4) && (lead <= 0xD8)) ||
+			(lead == 0xDF) ||
+			(lead >= 0xFA);
+	}
+	return false;
+}
+
+bool Document::IsDBCSTrailByteInvalid(char ch) const noexcept {
+	const unsigned char trail = ch;
+	switch (dbcsCodePage) {
+	case 932:
+		// Shift_jis
+		return
+			(trail <= 0x3F) ||
+			(trail == 0x7F) ||
+			(trail >= 0xFD);
+	case 936:
+		// GBK
+		return
+			(trail <= 0x3F) ||
+			(trail == 0x7F) ||
+			(trail == 0xFF);
+	case 949:
+		// Korean Wansung KS C-5601-1987
+		return
+			(trail <= 0x40) ||
+			((trail >= 0x5B) && (trail <= 0x60)) ||
+			((trail >= 0x7B) && (trail <= 0x80)) ||
+			(trail == 0xFF);
+	case 950:
+		// Big5
+		return
+			(trail <= 0x3F) ||
+			((trail >= 0x7F) && (trail <= 0xA0)) ||
+			(trail == 0xFF);
+	case 1361:
+		// Korean Johab KS C-5601-1992
+		return
+			(trail <= 0x30) ||
+			(trail == 0x7F) ||
+			(trail == 0x80) ||
+			(trail == 0xFF);
+	}
+	return false;
+}
+
+int Document::DBCSDrawBytes(std::string_view text) const noexcept {
+	if (text.length() <= 1) {
+		return static_cast<int>(text.length());
+	}
+	if (IsDBCSLeadByteNoExcept(text[0])) {
+		return IsDBCSTrailByteInvalid(text[1]) ? 1 : 2;
+	} else {
+		return 1;
+	}
+}
+
 static inline bool IsSpaceOrTab(int ch) noexcept {
 	return ch == ' ' || ch == '\t';
 }
