@@ -353,6 +353,26 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc,
 	GetPainter()->drawRoundedRect(rect, radius, radius);
 }
 
+void SurfaceImpl::GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) {
+	QRectF rect = QRectFFromPRect(rc);
+	QLinearGradient linearGradient;
+	switch (options) {
+	case GradientOptions::leftToRight:
+		linearGradient = QLinearGradient(rc.left, rc.top, rc.right, rc.top);
+		break;
+	case GradientOptions::topToBottom:
+	default:
+		linearGradient = QLinearGradient(rc.left, rc.top, rc.left, rc.bottom);
+		break;
+	}
+	linearGradient.setSpread(QGradient::RepeatSpread);
+	for (const ColourStop &stop : stops) {
+		linearGradient.setColorAt(stop.position, QColorFromColourAlpha(stop.colour));
+	}
+	QBrush brush = QBrush(linearGradient);
+	GetPainter()->fillRect(rect, brush);
+}
+
 static std::vector<unsigned char> ImageByteSwapped(int width, int height, const unsigned char *pixelsImage)
 {
 	// Input is RGBA, but Format_ARGB32 is BGRA, so swap the red bytes and blue bytes

@@ -641,6 +641,50 @@ void Scintilla::SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, Colou
 	}
 }
 
+void Scintilla::SurfaceImpl::GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) {
+	if (!gc) {
+		return;
+	}
+
+	CGPoint ptStart = CGPointMake(rc.left, rc.top);
+	CGPoint ptEnd = CGPointMake(rc.left, rc.bottom);
+	if (options == GradientOptions::leftToRight) {
+		ptEnd = CGPointMake(rc.right, rc.top);
+	}
+
+	std::vector<CGFloat> components;
+	std::vector<CGFloat> locations;
+	for (const ColourStop &stop : stops) {
+		locations.push_back(stop.position);
+		components.push_back(stop.colour.GetRedComponent());
+		components.push_back(stop.colour.GetGreenComponent());
+		components.push_back(stop.colour.GetBlueComponent());
+		components.push_back(stop.colour.GetAlphaComponent());
+	}
+
+	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+	if (!colorSpace) {
+		return;
+	}
+
+	CGGradientRef gradiantRef = CGGradientCreateWithColorComponents(colorSpace,
+									components.data(),
+									locations.data(),
+									locations.size());
+	if (gradiantRef) {
+		CGContextSaveGState(gc);
+		CGRect rect = PRectangleToCGRect(rc);
+		CGContextClipToRect(gc, rect);
+		CGContextBeginPath(gc);
+		CGContextAddRect(gc, rect);
+		CGContextClosePath(gc);
+		CGContextDrawLinearGradient(gc, gradiantRef, ptStart, ptEnd, 0);
+		CGGradientRelease(gradiantRef);
+		CGContextRestoreGState(gc);
+	}
+	CGColorSpaceRelease(colorSpace);
+}
+
 static void ProviderReleaseData(void *, const void *data, size_t) {
 	const unsigned char *pixels = static_cast<const unsigned char *>(data);
 	delete []pixels;

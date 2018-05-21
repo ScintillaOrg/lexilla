@@ -164,12 +164,13 @@ public:
 };
 
 /**
- * Holds a desired RGB colour.
+ * Holds an RGB colour with 8 bits for each component.
  */
+constexpr const float componentMaximum = 255.0f;
 class ColourDesired {
 	int co;
 public:
-	ColourDesired(int co_=0) noexcept : co(co_) {
+	explicit ColourDesired(int co_=0) noexcept : co(co_) {
 	}
 
 	ColourDesired(unsigned int red, unsigned int green, unsigned int blue) noexcept :
@@ -184,16 +185,79 @@ public:
 		return co;
 	}
 
+	// Red, green and blue values as bytes 0..255
 	unsigned char GetRed() const noexcept {
 		return co & 0xff;
 	}
-
 	unsigned char GetGreen() const noexcept {
 		return (co >> 8) & 0xff;
 	}
-
 	unsigned char GetBlue() const noexcept {
 		return (co >> 16) & 0xff;
+	}
+
+	// Red, green and blue values as float 0..1.0
+	float GetRedComponent() const noexcept {
+		return GetRed() / componentMaximum;
+	}
+	float GetGreenComponent() const noexcept {
+		return GetGreen() / componentMaximum;
+	}
+	float GetBlueComponent() const noexcept {
+		return GetBlue() / componentMaximum;
+	}
+};
+
+/**
+* Holds an RGBA colour.
+*/
+class ColourAlpha : public ColourDesired {
+public:
+	explicit ColourAlpha(int co_ = 0) noexcept : ColourDesired(co_) {
+	}
+
+	ColourAlpha(unsigned int red, unsigned int green, unsigned int blue) noexcept :
+		ColourDesired(red | (green << 8) | (blue << 16)) {
+	}
+
+	ColourAlpha(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha) noexcept :
+		ColourDesired(red | (green << 8) | (blue << 16) | (alpha << 24)) {
+	}
+
+	ColourAlpha(ColourDesired cd, unsigned int alpha) noexcept :
+		ColourDesired(cd.AsInteger() | (alpha << 24)) {
+	}
+
+	ColourDesired GetColour() const noexcept {
+		return ColourDesired(AsInteger() & 0xffffff);
+	}
+
+	unsigned char GetAlpha() const noexcept {
+		return (AsInteger() >> 24) & 0xff;
+	}
+
+	float GetAlphaComponent() const noexcept {
+		return GetAlpha() / componentMaximum;
+	}
+
+	ColourAlpha MixedWith(ColourAlpha other) const noexcept {
+		const unsigned int red = (GetRed() + other.GetRed()) / 2;
+		const unsigned int green = (GetGreen() + other.GetGreen()) / 2;
+		const unsigned int blue = (GetBlue() + other.GetBlue()) / 2;
+		const unsigned int alpha = (GetAlpha() + other.GetAlpha()) / 2;
+		return ColourAlpha(red, green, blue, alpha);
+	}
+};
+
+/**
+* Holds an element of a gradient with an RGBA colour and a relative position.
+*/
+class ColourStop {
+public:
+	float position;
+	ColourAlpha colour;
+	ColourStop(float position_, ColourAlpha colour_) noexcept :
+		position(position_), colour(colour_) {
 	}
 };
 
@@ -284,6 +348,8 @@ public:
 	virtual void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back)=0;
 	virtual void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
 		ColourDesired outline, int alphaOutline, int flags)=0;
+	enum class GradientOptions { leftToRight, topToBottom };
+	virtual void GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options)=0;
 	virtual void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) = 0;
 	virtual void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back)=0;
 	virtual void Copy(PRectangle rc, Point from, Surface &surfaceSource)=0;

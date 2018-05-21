@@ -161,6 +161,7 @@ public:
 	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
 		ColourDesired outline, int alphaOutline, int flags) override;
+	void GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) override;
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) override;
 	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource) override;
@@ -542,6 +543,32 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fi
 		else
 			cairo_rectangle(context, rc.left + 0.5, rc.top + 0.5, rc.right - rc.left - 1, rc.bottom - rc.top - 1);
 		cairo_stroke(context);
+	}
+}
+
+void SurfaceImpl::GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) {
+	if (context) {
+		cairo_pattern_t *pattern;
+		switch (options) {
+		case GradientOptions::leftToRight:
+			pattern = cairo_pattern_create_linear(rc.left, rc.top, rc.right, rc.top);
+			break;
+		case GradientOptions::topToBottom:
+		default:
+			pattern = cairo_pattern_create_linear(rc.left, rc.top, rc.left, rc.bottom);
+			break;
+		}
+		for (const ColourStop &stop : stops) {
+			cairo_pattern_add_color_stop_rgba(pattern, stop.position,
+				stop.colour.GetRedComponent(),
+				stop.colour.GetGreenComponent(),
+				stop.colour.GetBlueComponent(),
+				stop.colour.GetAlphaComponent());
+		}
+		cairo_rectangle(context, rc.left, rc.top, rc.Width(), rc.Height());
+		cairo_set_source(context, pattern);
+		cairo_fill(context);
+		cairo_pattern_destroy(pattern);
 	}
 }
 

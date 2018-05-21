@@ -561,6 +561,7 @@ public:
 	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
 		ColourDesired outline, int alphaOutline, int flags) override;
+	void GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) override;
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) override;
 	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource) override;
@@ -853,6 +854,13 @@ void SurfaceGDI::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fil
 	}
 }
 
+void SurfaceGDI::GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions) {
+	// Would be better to average start and end.
+	const ColourAlpha colourAverage = stops[0].colour.MixedWith(stops[1].colour);
+	AlphaRectangle(rc, 0, colourAverage.GetColour(), colourAverage.GetAlpha(),
+		colourAverage.GetColour(), colourAverage.GetAlpha(), 0);
+}
+
 void SurfaceGDI::DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) {
 	if (rc.Width() > 0) {
 		HDC hMemDC = ::CreateCompatibleDC(hdc);
@@ -1123,6 +1131,7 @@ public:
 	void RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
 		ColourDesired outline, int alphaOutline, int flags) override;
+	void GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) override;
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) override;
 	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource) override;
@@ -1459,6 +1468,55 @@ void SurfaceD2D::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fil
 			D2DPenColour(outline, alphaOutline);
 			pRenderTarget->DrawRoundedRectangle(roundedRect, pBrush);
 		}
+	}
+}
+
+namespace {
+
+D2D_COLOR_F ColorFromColourAlpha(ColourAlpha colour) noexcept {
+	D2D_COLOR_F col;
+	col.r = colour.GetRedComponent();
+	col.g = colour.GetGreenComponent();
+	col.b = colour.GetBlueComponent();
+	col.a = colour.GetAlphaComponent();
+	return col;
+}
+
+}
+
+void SurfaceD2D::GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options) {
+	if (pRenderTarget) {
+		D2D1_LINEAR_GRADIENT_BRUSH_PROPERTIES lgbp;
+		lgbp.startPoint = D2D1::Point2F(rc.left, rc.top);
+		switch (options) {
+		case GradientOptions::leftToRight:
+			lgbp.endPoint = D2D1::Point2F(rc.right, rc.top);
+			break;
+		case GradientOptions::topToBottom:
+		default:
+			lgbp.endPoint = D2D1::Point2F(rc.left, rc.bottom);
+			break;
+		}
+
+		std::vector<D2D1_GRADIENT_STOP> gradientStops;
+		for (const ColourStop &stop : stops) {
+			gradientStops.push_back({ stop.position, ColorFromColourAlpha(stop.colour) });
+		}
+		ID2D1GradientStopCollection *pGradientStops = nullptr;
+		HRESULT hr = pRenderTarget->CreateGradientStopCollection(
+			gradientStops.data(), static_cast<UINT32>(gradientStops.size()), &pGradientStops);
+		if (FAILED(hr)) {
+			return;
+		}
+		ID2D1LinearGradientBrush *pBrushLinear = nullptr;
+		hr = pRenderTarget->CreateLinearGradientBrush(
+			lgbp, pGradientStops, &pBrushLinear);
+		if (SUCCEEDED(hr)) {
+			const D2D1_RECT_F rectangle = D2D1::RectF(round(rc.left), rc.top, round(rc.right), rc.bottom);
+			pRenderTarget->FillRectangle(&rectangle, pBrushLinear);
+			pBrushLinear->Release();
+		}
+		pGradientStops->Release();
 	}
 }
 
