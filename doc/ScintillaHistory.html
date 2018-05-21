@@ -552,6 +552,10 @@
 	and ensure something is shown.
 	</li>
 	<li>
+	On Cocoa, invalid text in DBCS encodings will be interpreted through the
+	single-byte MacRoman encoding as that will accept any byte.
+	</li>
+	<li>
 	Crashes fixed on macOS for invalid DBCS characters when dragging text,
 	changing case of text, case-insensitive searching, and retrieving text as UTF-8.
 	</li>

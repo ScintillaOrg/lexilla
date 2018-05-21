@@ -23,35 +23,49 @@ public:
 	}
 
 	~QuartzTextLayout() {
-		if (mString != NULL) {
+		if (mString) {
 			CFRelease(mString);
 			mString = NULL;
 		}
-		if (mLine != NULL) {
+		if (mLine) {
 			CFRelease(mLine);
 			mLine = NULL;
 		}
 	}
 
-	void setText(std::string_view sv, CFStringEncoding encoding, const QuartzTextStyle &r) {
+	CFStringEncoding setText(std::string_view sv, CFStringEncoding encoding, const QuartzTextStyle &r) {
+		// First clear current values in case of failure.
+		if (mString) {
+			CFRelease(mString);
+			mString = NULL;
+		}
+		if (mLine) {
+			CFRelease(mLine);
+			mLine = NULL;
+		}
+
 		const UInt8 *puiBuffer = reinterpret_cast<const UInt8 *>(sv.data());
 		CFStringRef str = CFStringCreateWithBytes(NULL, puiBuffer, sv.length(), encoding, false);
-		if (!str)
-			return;
+		if (!str) {
+			// Failed to decode bytes into string with given encoding so try
+			// MacRoman which should accept any byte.
+			encoding = kCFStringEncodingMacRoman;
+			str = CFStringCreateWithBytes(NULL, puiBuffer, sv.length(), encoding, false);
+		}
+		if (!str) {
+			return encoding;
+		}
 
 		stringLength = CFStringGetLength(str);
 
 		CFMutableDictionaryRef stringAttribs = r.getCTStyle();
 
-		if (mString != NULL)
-			CFRelease(mString);
 		mString = ::CFAttributedStringCreate(NULL, str, stringAttribs);
 
-		if (mLine != NULL)
-			CFRelease(mLine);
 		mLine = ::CTLineCreateWithAttributedString(mString);
 
 		CFRelease(str);
+		return encoding;
 	}
 
 	/** Draw the text layout into a CGContext at the specified position.

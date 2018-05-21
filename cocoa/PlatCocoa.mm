@@ -867,10 +867,20 @@ void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION yba
 
 void SurfaceImpl::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *positions) {
 	CFStringEncoding encoding = EncodingFromCharacterSet(unicodeMode, FontCharacterSet(font_));
-	textLayout->setText(text, encoding, *TextStyleFromFont(font_));
+	const CFStringEncoding encodingUsed =
+		textLayout->setText(text, encoding, *TextStyleFromFont(font_));
 
 	CTLineRef mLine = textLayout->getCTLine();
-	assert(mLine != NULL);
+	assert(mLine);
+
+	if (encodingUsed != encoding) {
+		// Switched to MacRoman to make work so treat as single byte encoding.
+		for (int i=0; i<text.length(); i++) {
+			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, i+1, nullptr);
+			positions[i] = static_cast<XYPOSITION>(xPosition);
+		}
+		return;
+	}
 
 	if (unicodeMode) {
 		// Map the widths given for UTF-16 characters back onto the UTF-8 input string
