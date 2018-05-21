@@ -18,12 +18,8 @@
 
 class QuartzTextLayout {
 public:
-	/** Create a text layout for drawing on the specified context. */
-	explicit QuartzTextLayout(CGContextRef context) {
-		mString = NULL;
-		mLine = NULL;
-		stringLength = 0;
-		setContext(context);
+	/** Create a text layout for drawing. */
+	QuartzTextLayout() : mString(NULL), mLine(NULL), stringLength(0) {
 	}
 
 	~QuartzTextLayout() {
@@ -58,11 +54,12 @@ public:
 		CFRelease(str);
 	}
 
-	/** Draw the text layout into the current CGContext at the specified position.
+	/** Draw the text layout into a CGContext at the specified position.
+	* @param gc The CGContext in which to draw the text.
 	* @param x The x axis position to draw the baseline in the current CGContext.
 	* @param y The y axis position to draw the baseline in the current CGContext. */
-	void draw(float x, float y) {
-		if (mLine == NULL)
+	void draw(CGContextRef gc, float x, float y) {
+		if (!mLine)
 			return;
 
 		::CGContextSetTextMatrix(gc, CGAffineTransformMakeScale(1.0, -1.0));
@@ -89,12 +86,7 @@ public:
 		return stringLength;
 	}
 
-	inline void setContext(CGContextRef context) {
-		gc = context;
-	}
-
 private:
-	CGContextRef gc;
 	CFAttributedStringRef mString;
 	CTLineRef mLine;
 	CFIndex stringLength;
