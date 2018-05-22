@@ -26,6 +26,8 @@
 
 using namespace Scintilla;
 
+namespace {
+
 #define SCE_HA_JS (SCE_HJA_START - SCE_HJ_START)
 #define SCE_HA_VBS (SCE_HBA_START - SCE_HB_START)
 #define SCE_HA_PYTHON (SCE_HPA_START - SCE_HP_START)
@@ -33,11 +35,11 @@ using namespace Scintilla;
 enum script_type { eScriptNone = 0, eScriptJS, eScriptVBS, eScriptPython, eScriptPHP, eScriptXML, eScriptSGML, eScriptSGMLblock, eScriptComment };
 enum script_mode { eHtml = 0, eNonHtmlScript, eNonHtmlPreProc, eNonHtmlScriptPreProc };
 
-static inline bool IsAWordChar(const int ch) {
+inline bool IsAWordChar(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '.' || ch == '_');
 }
 
-static inline bool IsAWordStart(const int ch) {
+inline bool IsAWordStart(const int ch) {
 	return (ch < 0x80) && (isalnum(ch) || ch == '_');
 }
 
@@ -55,7 +57,7 @@ inline bool IsOperator(int ch) {
 	return false;
 }
 
-static void GetTextSegment(Accessor &styler, Sci_PositionU start, Sci_PositionU end, char *s, size_t len) {
+void GetTextSegment(Accessor &styler, Sci_PositionU start, Sci_PositionU end, char *s, size_t len) {
 	Sci_PositionU i = 0;
 	for (; (i < end - start + 1) && (i < len-1); i++) {
 		s[i] = MakeLowerCase(styler[start + i]);
@@ -63,7 +65,7 @@ static void GetTextSegment(Accessor &styler, Sci_PositionU start, Sci_PositionU 
 	s[i] = '\0';
 }
 
-static const char *GetNextWord(Accessor &styler, Sci_PositionU start, char *s, size_t sLen) {
+const char *GetNextWord(Accessor &styler, Sci_PositionU start, char *s, size_t sLen) {
 
 	Sci_PositionU i = 0;
 	for (; i < sLen-1; i++) {
@@ -79,7 +81,7 @@ static const char *GetNextWord(Accessor &styler, Sci_PositionU start, char *s, s
 	return s;
 }
 
-static script_type segIsScriptingIndicator(Accessor &styler, Sci_PositionU start, Sci_PositionU end, script_type prevValue) {
+script_type segIsScriptingIndicator(Accessor &styler, Sci_PositionU start, Sci_PositionU end, script_type prevValue) {
 	char s[100];
 	GetTextSegment(styler, start, end, s, sizeof(s));
 	//Platform::DebugPrintf("Scripting indicator [%s]\n", s);
@@ -108,7 +110,7 @@ static script_type segIsScriptingIndicator(Accessor &styler, Sci_PositionU start
 	return prevValue;
 }
 
-static int PrintScriptingIndicatorOffset(Accessor &styler, Sci_PositionU start, Sci_PositionU end) {
+int PrintScriptingIndicatorOffset(Accessor &styler, Sci_PositionU start, Sci_PositionU end) {
 	int iResult = 0;
 	char s[100];
 	GetTextSegment(styler, start, end, s, sizeof(s));
@@ -119,7 +121,7 @@ static int PrintScriptingIndicatorOffset(Accessor &styler, Sci_PositionU start, 
 	return iResult;
 }
 
-static script_type ScriptOfState(int state) {
+script_type ScriptOfState(int state) {
 	if ((state >= SCE_HP_START) && (state <= SCE_HP_IDENTIFIER)) {
 		return eScriptPython;
 	} else if ((state >= SCE_HB_START) && (state <= SCE_HB_STRINGEOL)) {
@@ -137,7 +139,7 @@ static script_type ScriptOfState(int state) {
 	}
 }
 
-static int statePrintForState(int state, script_mode inScriptType) {
+int statePrintForState(int state, script_mode inScriptType) {
 	int StateToPrint = state;
 
 	if (state >= SCE_HJ_START) {
@@ -153,7 +155,7 @@ static int statePrintForState(int state, script_mode inScriptType) {
 	return StateToPrint;
 }
 
-static int stateForPrintState(int StateToPrint) {
+int stateForPrintState(int StateToPrint) {
 	int state;
 
 	if ((StateToPrint >= SCE_HPA_START) && (StateToPrint <= SCE_HPA_IDENTIFIER)) {
@@ -169,12 +171,12 @@ static int stateForPrintState(int StateToPrint) {
 	return state;
 }
 
-static inline bool IsNumber(Sci_PositionU start, Accessor &styler) {
+inline bool IsNumber(Sci_PositionU start, Accessor &styler) {
 	return IsADigit(styler[start]) || (styler[start] == '.') ||
 	       (styler[start] == '-') || (styler[start] == '#');
 }
 
-static inline bool isStringState(int state) {
+inline bool isStringState(int state) {
 	bool bResult;
 
 	switch (state) {
@@ -205,7 +207,7 @@ static inline bool isStringState(int state) {
 	return bResult;
 }
 
-static inline bool stateAllowsTermination(int state) {
+inline bool stateAllowsTermination(int state) {
 	bool allowTermination = !isStringState(state);
 	if (allowTermination) {
 		switch (state) {
@@ -220,7 +222,7 @@ static inline bool stateAllowsTermination(int state) {
 }
 
 // not really well done, since it's only comments that should lex the %> and <%
-static inline bool isCommentASPState(int state) {
+inline bool isCommentASPState(int state) {
 	bool bResult;
 
 	switch (state) {
@@ -240,7 +242,7 @@ static inline bool isCommentASPState(int state) {
 	return bResult;
 }
 
-static void classifyAttribHTML(Sci_PositionU start, Sci_PositionU end, WordList &keywords, Accessor &styler) {
+void classifyAttribHTML(Sci_PositionU start, Sci_PositionU end, WordList &keywords, Accessor &styler) {
 	bool wordIsNumber = IsNumber(start, styler);
 	char chAttr = SCE_H_ATTRIBUTEUNKNOWN;
 	if (wordIsNumber) {
@@ -257,7 +259,7 @@ static void classifyAttribHTML(Sci_PositionU start, Sci_PositionU end, WordList 
 	styler.ColourTo(end, chAttr);
 }
 
-static int classifyTagHTML(Sci_PositionU start, Sci_PositionU end,
+int classifyTagHTML(Sci_PositionU start, Sci_PositionU end,
                            WordList &keywords, Accessor &styler, bool &tagDontFold,
 			   bool caseSensitive, bool isXml, bool allowScripts) {
 	char withSpace[30 + 2] = " ";
@@ -316,7 +318,7 @@ static int classifyTagHTML(Sci_PositionU start, Sci_PositionU end,
 	return chAttr;
 }
 
-static void classifyWordHTJS(Sci_PositionU start, Sci_PositionU end,
+void classifyWordHTJS(Sci_PositionU start, Sci_PositionU end,
                              WordList &keywords, Accessor &styler, script_mode inScriptType) {
 	char s[30 + 1];
 	Sci_PositionU i = 0;
@@ -335,7 +337,7 @@ static void classifyWordHTJS(Sci_PositionU start, Sci_PositionU end,
 	styler.ColourTo(end, statePrintForState(chAttr, inScriptType));
 }
 
-static int classifyWordHTVB(Sci_PositionU start, Sci_PositionU end, WordList &keywords, Accessor &styler, script_mode inScriptType) {
+int classifyWordHTVB(Sci_PositionU start, Sci_PositionU end, WordList &keywords, Accessor &styler, script_mode inScriptType) {
 	char chAttr = SCE_HB_IDENTIFIER;
 	bool wordIsNumber = IsADigit(styler[start]) || (styler[start] == '.');
 	if (wordIsNumber) {
@@ -356,7 +358,7 @@ static int classifyWordHTVB(Sci_PositionU start, Sci_PositionU end, WordList &ke
 		return SCE_HB_DEFAULT;
 }
 
-static void classifyWordHTPy(Sci_PositionU start, Sci_PositionU end, WordList &keywords, Accessor &styler, char *prevWord, script_mode inScriptType, bool isMako) {
+void classifyWordHTPy(Sci_PositionU start, Sci_PositionU end, WordList &keywords, Accessor &styler, char *prevWord, script_mode inScriptType, bool isMako) {
 	bool wordIsNumber = IsADigit(styler[start]);
 	char s[30 + 1];
 	Sci_PositionU i = 0;
@@ -381,7 +383,7 @@ static void classifyWordHTPy(Sci_PositionU start, Sci_PositionU end, WordList &k
 
 // Update the word colour to default or keyword
 // Called when in a PHP word
-static void classifyWordHTPHP(Sci_PositionU start, Sci_PositionU end, WordList &keywords, Accessor &styler) {
+void classifyWordHTPHP(Sci_PositionU start, Sci_PositionU end, WordList &keywords, Accessor &styler) {
 	char chAttr = SCE_HPHP_DEFAULT;
 	bool wordIsNumber = IsADigit(styler[start]) || (styler[start] == '.' && start+1 <= end && IsADigit(styler[start+1]));
 	if (wordIsNumber) {
@@ -395,7 +397,7 @@ static void classifyWordHTPHP(Sci_PositionU start, Sci_PositionU end, WordList &
 	styler.ColourTo(end, chAttr);
 }
 
-static bool isWordHSGML(Sci_PositionU start, Sci_PositionU end, WordList &keywords, Accessor &styler) {
+bool isWordHSGML(Sci_PositionU start, Sci_PositionU end, WordList &keywords, Accessor &styler) {
 	char s[30 + 1];
 	Sci_PositionU i = 0;
 	for (; i < end - start + 1 && i < 30; i++) {
@@ -405,7 +407,7 @@ static bool isWordHSGML(Sci_PositionU start, Sci_PositionU end, WordList &keywor
 	return keywords.InList(s);
 }
 
-static bool isWordCdata(Sci_PositionU start, Sci_PositionU end, Accessor &styler) {
+bool isWordCdata(Sci_PositionU start, Sci_PositionU end, Accessor &styler) {
 	char s[30 + 1];
 	Sci_PositionU i = 0;
 	for (; i < end - start + 1 && i < 30; i++) {
@@ -416,7 +418,7 @@ static bool isWordCdata(Sci_PositionU start, Sci_PositionU end, Accessor &styler
 }
 
 // Return the first state to reach when entering a scripting language
-static int StateForScript(script_type scriptLanguage) {
+int StateForScript(script_type scriptLanguage) {
 	int Result;
 	switch (scriptLanguage) {
 	case eScriptVBS:
@@ -444,20 +446,20 @@ static int StateForScript(script_type scriptLanguage) {
 	return Result;
 }
 
-static inline bool issgmlwordchar(int ch) {
+inline bool issgmlwordchar(int ch) {
 	return !IsASCII(ch) ||
 		(isalnum(ch) || ch == '.' || ch == '_' || ch == ':' || ch == '!' || ch == '#' || ch == '[');
 }
 
-static inline bool IsPhpWordStart(int ch) {
+inline bool IsPhpWordStart(int ch) {
 	return (IsASCII(ch) && (isalpha(ch) || (ch == '_'))) || (ch >= 0x7f);
 }
 
-static inline bool IsPhpWordChar(int ch) {
+inline bool IsPhpWordChar(int ch) {
 	return IsADigit(ch) || IsPhpWordStart(ch);
 }
 
-static bool InTagState(int state) {
+bool InTagState(int state) {
 	return state == SCE_H_TAG || state == SCE_H_TAGUNKNOWN ||
 	       state == SCE_H_SCRIPT ||
 	       state == SCE_H_ATTRIBUTE || state == SCE_H_ATTRIBUTEUNKNOWN ||
@@ -465,20 +467,20 @@ static bool InTagState(int state) {
 	       state == SCE_H_DOUBLESTRING || state == SCE_H_SINGLESTRING;
 }
 
-static bool IsCommentState(const int state) {
+bool IsCommentState(const int state) {
 	return state == SCE_H_COMMENT || state == SCE_H_SGML_COMMENT;
 }
 
-static bool IsScriptCommentState(const int state) {
+bool IsScriptCommentState(const int state) {
 	return state == SCE_HJ_COMMENT || state == SCE_HJ_COMMENTLINE || state == SCE_HJA_COMMENT ||
 		   state == SCE_HJA_COMMENTLINE || state == SCE_HB_COMMENTLINE || state == SCE_HBA_COMMENTLINE;
 }
 
-static bool isLineEnd(int ch) {
+bool isLineEnd(int ch) {
 	return ch == '\r' || ch == '\n';
 }
 
-static bool isMakoBlockEnd(const int ch, const int chNext, const char *blockType) {
+bool isMakoBlockEnd(const int ch, const int chNext, const char *blockType) {
 	if (strlen(blockType) == 0) {
 		return ((ch == '%') && (chNext == '>'));
 	} else if ((0 == strcmp(blockType, "inherit")) ||
@@ -498,7 +500,7 @@ static bool isMakoBlockEnd(const int ch, const int chNext, const char *blockType
 	}
 }
 
-static bool isDjangoBlockEnd(const int ch, const int chNext, const char *blockType) {
+bool isDjangoBlockEnd(const int ch, const int chNext, const char *blockType) {
 	if (strlen(blockType) == 0) {
 		return false;
 	} else if (0 == strcmp(blockType, "%")) {
@@ -510,7 +512,7 @@ static bool isDjangoBlockEnd(const int ch, const int chNext, const char *blockTy
 	}
 }
 
-static bool isPHPStringState(int state) {
+bool isPHPStringState(int state) {
 	return
 	    (state == SCE_HPHP_HSTRING) ||
 	    (state == SCE_HPHP_SIMPLESTRING) ||
@@ -518,7 +520,7 @@ static bool isPHPStringState(int state) {
 	    (state == SCE_HPHP_COMPLEX_VARIABLE);
 }
 
-static Sci_Position FindPhpStringDelimiter(char *phpStringDelimiter, const int phpStringDelimiterSize, Sci_Position i, const Sci_Position lengthDoc, Accessor &styler, bool &isSimpleString) {
+Sci_Position FindPhpStringDelimiter(char *phpStringDelimiter, const int phpStringDelimiterSize, Sci_Position i, const Sci_Position lengthDoc, Accessor &styler, bool &isSimpleString) {
 	Sci_Position j;
 	const Sci_Position beginning = i - 1;
 	bool isValidSimpleString = false;
@@ -563,6 +565,196 @@ static Sci_Position FindPhpStringDelimiter(char *phpStringDelimiter, const int p
 	}
 	phpStringDelimiter[j-i+1 - (isSimpleString ? 1 : 0)] = '\0';
 	return j - 1;
+}
+
+static const char * const htmlWordListDesc[] = {
+	"HTML elements and attributes",
+	"JavaScript keywords",
+	"VBScript keywords",
+	"Python keywords",
+	"PHP keywords",
+	"SGML and DTD keywords",
+	0,
+};
+
+static const char * const phpscriptWordListDesc[] = {
+	"", //Unused
+	"", //Unused
+	"", //Unused
+	"", //Unused
+	"PHP keywords",
+	"", //Unused
+	0,
+};
+
+LexicalClass lexicalClassesHTML[] = {
+	// Lexer HTML SCLEX_HTML SCE_H_ SCE_HJ_ SCE_HJA_ SCE_HB_ SCE_HBA_ SCE_HP_ SCE_HPHP_ SCE_HPA_:
+	0, "SCE_H_DEFAULT", "default", "Text",
+	1, "SCE_H_TAG", "tag", "Tags",
+	2, "SCE_H_ERRORTAGUNKNOWN", "error tag", "Unknown Tags",
+	3, "SCE_H_ATTRIBUTE", "attribute", "Attributes",
+	4, "SCE_H_ATTRIBUTEUNKNOWN", "error attribute", "Unknown Attributes",
+	5, "SCE_H_NUMBER", "literal numeric", "Numbers",
+	6, "SCE_H_DOUBLESTRING", "literal string", "Double quoted strings",
+	7, "SCE_H_SINGLESTRING", "literal string", "Single quoted strings",
+	8, "SCE_H_OTHER", "tag operator", "Other inside tag, including space and '='",
+	9, "SCE_H_COMMENT", "comment", "Comment",
+	10, "SCE_H_ENTITY", "literal", "Entities",
+	11, "SCE_H_TAGEND", "tag", "XML style tag ends '/>'",
+	12, "SCE_H_XMLSTART", "identifier", "XML identifier start '<?'",
+	13, "SCE_H_XMLEND", "identifier", "XML identifier end '?>'",
+	14, "SCE_H_SCRIPT", "error", "Internal state which should never be visible",
+	15, "SCE_H_ASP", "preprocessor", "ASP <% ... %>",
+	16, "SCE_H_ASPAT", "preprocessor", "ASP <% ... %>",
+	17, "SCE_H_CDATA", "literal", "CDATA",
+	18, "SCE_H_QUESTION", "preprocessor", "PHP",
+	19, "SCE_H_VALUE", "literal string", "Unquoted values",
+	20, "SCE_H_XCCOMMENT", "comment", "JSP Comment <%-- ... --%>",
+	21, "SCE_H_SGML_DEFAULT", "default", "SGML tags <! ... >",
+	22, "SCE_H_SGML_COMMAND", "preprocessor", "SGML command",
+	23, "SCE_H_SGML_1ST_PARAM", "preprocessor", "SGML 1st param",
+	24, "SCE_H_SGML_DOUBLESTRING", "literal string", "SGML double string",
+	25, "SCE_H_SGML_SIMPLESTRING", "literal string", "SGML single string",
+	26, "SCE_H_SGML_ERROR", "error", "SGML error",
+	27, "SCE_H_SGML_SPECIAL", "literal", "SGML special (#XXXX type)",
+	28, "SCE_H_SGML_ENTITY", "literal", "SGML entity",
+	29, "SCE_H_SGML_COMMENT", "comment", "SGML comment",
+	30, "SCE_H_SGML_1ST_PARAM_COMMENT", "error comment", "SGML first parameter - lexer internal. It is an error if any text is in this style.",
+	31, "SCE_H_SGML_BLOCK_DEFAULT", "default", "SGML block",
+	32, "", "predefined", "",
+	33, "", "predefined", "",
+	34, "", "predefined", "",
+	35, "", "predefined", "",
+	36, "", "predefined", "",
+	37, "", "predefined", "",
+	38, "", "predefined", "",
+	39, "", "predefined", "",
+	40, "SCE_HJ_START", "client javascript default", "JS Start - allows eol filled background to not start on same line as SCRIPT tag",
+	41, "SCE_HJ_DEFAULT", "client javascript default", "JS Default",
+	42, "SCE_HJ_COMMENT", "client javascript comment", "JS Comment",
+	43, "SCE_HJ_COMMENTLINE", "client javascript comment line", "JS Line Comment",
+	44, "SCE_HJ_COMMENTDOC", "client javascript comment documentation", "JS Doc comment",
+	45, "SCE_HJ_NUMBER", "client javascript literal numeric", "JS Number",
+	46, "SCE_HJ_WORD", "client javascript identifier", "JS Word",
+	47, "SCE_HJ_KEYWORD", "client javascript keyword", "JS Keyword",
+	48, "SCE_HJ_DOUBLESTRING", "client javascript literal string", "JS Double quoted string",
+	49, "SCE_HJ_SINGLESTRING", "client javascript literal string", "JS Single quoted string",
+	50, "SCE_HJ_SYMBOLS", "client javascript operator", "JS Symbols",
+	51, "SCE_HJ_STRINGEOL", "client javascript error literal string", "JavaScript EOL",
+	52, "SCE_HJ_REGEX", "client javascript literal regex", "JavaScript RegEx",
+	53, "", "unused", "",
+	54, "", "unused", "",
+	55, "SCE_HJA_START", "server javascript default", "JS Start - allows eol filled background to not start on same line as SCRIPT tag",
+	56, "SCE_HJA_DEFAULT", "server javascript default", "JS Default",
+	57, "SCE_HJA_COMMENT", "server javascript comment", "JS Comment",
+	58, "SCE_HJA_COMMENTLINE", "server javascript comment line", "JS Line Comment",
+	59, "SCE_HJA_COMMENTDOC", "server javascript comment documentation", "JS Doc comment",
+	60, "SCE_HJA_NUMBER", "server javascript literal numeric", "JS Number",
+	61, "SCE_HJA_WORD", "server javascript identifier", "JS Word",
+	62, "SCE_HJA_KEYWORD", "server javascript keyword", "JS Keyword",
+	63, "SCE_HJA_DOUBLESTRING", "server javascript literal string", "JS Double quoted string",
+	64, "SCE_HJA_SINGLESTRING", "server javascript literal string", "JS Single quoted string",
+	65, "SCE_HJA_SYMBOLS", "server javascript operator", "JS Symbols",
+	66, "SCE_HJA_STRINGEOL", "server javascript error literal string", "JavaScript EOL",
+	67, "SCE_HJA_REGEX", "server javascript literal regex", "JavaScript RegEx",
+	68, "", "unused", "",
+	69, "", "unused", "",
+	70, "SCE_HB_START", "client basic default", "Start",
+	71, "SCE_HB_DEFAULT", "client basic default", "Default",
+	72, "SCE_HB_COMMENTLINE", "client basic comment line", "Comment",
+	73, "SCE_HB_NUMBER", "client basic literal numeric", "Number",
+	74, "SCE_HB_WORD", "client basic keyword", "KeyWord",
+	75, "SCE_HB_STRING", "client basic literal string", "String",
+	76, "SCE_HB_IDENTIFIER", "client basic identifier", "Identifier",
+	77, "SCE_HB_STRINGEOL", "client basic literal string", "Unterminated string",
+	78, "", "unused", "",
+	79, "", "unused", "",
+	80, "SCE_HBA_START", "server basic default", "Start",
+	81, "SCE_HBA_DEFAULT", "server basic default", "Default",
+	82, "SCE_HBA_COMMENTLINE", "server basic comment line", "Comment",
+	83, "SCE_HBA_NUMBER", "server basic literal numeric", "Number",
+	84, "SCE_HBA_WORD", "server basic keyword", "KeyWord",
+	85, "SCE_HBA_STRING", "server basic literal string", "String",
+	86, "SCE_HBA_IDENTIFIER", "server basic identifier", "Identifier",
+	87, "SCE_HBA_STRINGEOL", "server basic literal string", "Unterminated string",
+	88, "", "unused", "",
+	89, "", "unused", "",
+	90, "SCE_HP_START", "client python default", "Embedded Python",
+	91, "SCE_HP_DEFAULT", "client python default", "Embedded Python",
+	92, "SCE_HP_COMMENTLINE", "client python comment line", "Comment",
+	93, "SCE_HP_NUMBER", "client python literal numeric", "Number",
+	94, "SCE_HP_STRING", "client python literal string", "String",
+	95, "SCE_HP_CHARACTER", "client python literal string character", "Single quoted string",
+	96, "SCE_HP_WORD", "client python keyword", "Keyword",
+	97, "SCE_HP_TRIPLE", "client python literal string", "Triple quotes",
+	98, "SCE_HP_TRIPLEDOUBLE", "client python literal string", "Triple double quotes",
+	99, "SCE_HP_CLASSNAME", "client python identifier", "Class name definition",
+	100, "SCE_HP_DEFNAME", "client python identifier", "Function or method name definition",
+	101, "SCE_HP_OPERATOR", "client python operator", "Operators",
+	102, "SCE_HP_IDENTIFIER", "client python identifier", "Identifiers",
+	103, "", "unused", "",
+	104, "SCE_HPHP_COMPLEX_VARIABLE", "server php identifier", "PHP complex variable",
+	105, "SCE_HPA_START", "server python default", "ASP Python",
+	106, "SCE_HPA_DEFAULT", "server python default", "ASP Python",
+	107, "SCE_HPA_COMMENTLINE", "server python comment line", "Comment",
+	108, "SCE_HPA_NUMBER", "server python literal numeric", "Number",
+	109, "SCE_HPA_STRING", "server python literal string", "String",
+	110, "SCE_HPA_CHARACTER", "server python literal string character", "Single quoted string",
+	111, "SCE_HPA_WORD", "server python keyword", "Keyword",
+	112, "SCE_HPA_TRIPLE", "server python literal string", "Triple quotes",
+	113, "SCE_HPA_TRIPLEDOUBLE", "server python literal string", "Triple double quotes",
+	114, "SCE_HPA_CLASSNAME", "server python identifier", "Class name definition",
+	115, "SCE_HPA_DEFNAME", "server python identifier", "Function or method name definition",
+	116, "SCE_HPA_OPERATOR", "server python operator", "Operators",
+	117, "SCE_HPA_IDENTIFIER", "server python identifier", "Identifiers",
+	118, "SCE_HPHP_DEFAULT", "server php default", "Default",
+	119, "SCE_HPHP_HSTRING", "server php literal string", "Double quoted String",
+	120, "SCE_HPHP_SIMPLESTRING", "server php literal string", "Single quoted string",
+	121, "SCE_HPHP_WORD", "server php keyword", "Keyword",
+	122, "SCE_HPHP_NUMBER", "server php literal numeric", "Number",
+	123, "SCE_HPHP_VARIABLE", "server php identifier", "Variable",
+	124, "SCE_HPHP_COMMENT", "server php comment", "Comment",
+	125, "SCE_HPHP_COMMENTLINE", "server php comment line", "One line comment",
+	126, "SCE_HPHP_HSTRING_VARIABLE", "server php literal string identifier", "PHP variable in double quoted string",
+	127, "SCE_HPHP_OPERATOR", "server php operator", "PHP operator",
+};
+
+LexicalClass lexicalClassesXML[] = {
+	// Lexer.Secondary XML SCLEX_XML SCE_H_:
+	0, "SCE_H_DEFAULT", "default", "Default",
+	1, "SCE_H_TAG", "tag", "Tags",
+	2, "SCE_H_TAGUNKNOWN", "error tag", "Unknown Tags",
+	3, "SCE_H_ATTRIBUTE", "attribute", "Attributes",
+	4, "SCE_H_ERRORATTRIBUTEUNKNOWN", "error attribute", "Unknown Attributes",
+	5, "SCE_H_NUMBER", "literal numeric", "Numbers",
+	6, "SCE_H_DOUBLESTRING", "literal string", "Double quoted strings",
+	7, "SCE_H_SINGLESTRING", "literal string", "Single quoted strings",
+	8, "SCE_H_OTHER", "tag operator", "Other inside tag, including space and '='",
+	9, "SCE_H_COMMENT", "comment", "Comment",
+	10, "SCE_H_ENTITY", "literal", "Entities",
+	11, "SCE_H_TAGEND", "tag", "XML style tag ends '/>'",
+	12, "SCE_H_XMLSTART", "identifier", "XML identifier start '<?'",
+	13, "SCE_H_XMLEND", "identifier", "XML identifier end '?>'",
+	14, "", "unused", "",
+	15, "", "unused", "",
+	16, "", "unused", "",
+	17, "SCE_H_CDATA", "literal", "CDATA",
+	18, "SCE_H_QUESTION", "preprocessor", "Question",
+	19, "SCE_H_VALUE", "literal string", "Unquoted Value",
+	20, "", "unused", "",
+	21, "SCE_H_SGML_DEFAULT", "default", "SGML tags <! ... >",
+	22, "SCE_H_SGML_COMMAND", "preprocessor", "SGML command",
+	23, "SCE_H_SGML_1ST_PARAM", "preprocessor", "SGML 1st param",
+	24, "SCE_H_SGML_DOUBLESTRING", "literal string", "SGML double string",
+	25, "SCE_H_SGML_SIMPLESTRING", "literal string", "SGML single string",
+	26, "SCE_H_SGML_ERROR", "error", "SGML error",
+	27, "SCE_H_SGML_SPECIAL", "literal", "SGML special (#XXXX type)",
+	28, "SCE_H_SGML_ENTITY", "literal", "SGML entity",
+	29, "SCE_H_SGML_COMMENT", "comment", "SGML comment",
+	30, "", "unused", "",
+	31, "SCE_H_SGML_BLOCK_DEFAULT", "default", "SGML block",
+};
+
 }
 
 static void ColouriseHyperTextDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordlists[],
@@ -2174,198 +2366,6 @@ static void ColourisePHPScriptDoc(Sci_PositionU startPos, Sci_Position length, i
 	if (startPos == 0)
 		initStyle = SCE_HPHP_DEFAULT;
 	ColouriseHTMLDoc(startPos, length, initStyle, keywordlists, styler);
-}
-
-static const char * const htmlWordListDesc[] = {
-	"HTML elements and attributes",
-	"JavaScript keywords",
-	"VBScript keywords",
-	"Python keywords",
-	"PHP keywords",
-	"SGML and DTD keywords",
-	0,
-};
-
-static const char * const phpscriptWordListDesc[] = {
-	"", //Unused
-	"", //Unused
-	"", //Unused
-	"", //Unused
-	"PHP keywords",
-	"", //Unused
-	0,
-};
-
-namespace {
-
-LexicalClass lexicalClassesHTML[] = {
-	// Lexer HTML SCLEX_HTML SCE_H_ SCE_HJ_ SCE_HJA_ SCE_HB_ SCE_HBA_ SCE_HP_ SCE_HPHP_ SCE_HPA_:
-	0, "SCE_H_DEFAULT", "default", "Text",
-	1, "SCE_H_TAG", "tag", "Tags",
-	2, "SCE_H_ERRORTAGUNKNOWN", "error tag", "Unknown Tags",
-	3, "SCE_H_ATTRIBUTE", "attribute", "Attributes",
-	4, "SCE_H_ATTRIBUTEUNKNOWN", "error attribute", "Unknown Attributes",
-	5, "SCE_H_NUMBER", "literal numeric", "Numbers",
-	6, "SCE_H_DOUBLESTRING", "literal string", "Double quoted strings",
-	7, "SCE_H_SINGLESTRING", "literal string", "Single quoted strings",
-	8, "SCE_H_OTHER", "tag operator", "Other inside tag, including space and '='",
-	9, "SCE_H_COMMENT", "comment", "Comment",
-	10, "SCE_H_ENTITY", "literal", "Entities",
-	11, "SCE_H_TAGEND", "tag", "XML style tag ends '/>'",
-	12, "SCE_H_XMLSTART", "identifier", "XML identifier start '<?'",
-	13, "SCE_H_XMLEND", "identifier", "XML identifier end '?>'",
-	14, "SCE_H_SCRIPT", "error", "Internal state which should never be visible",
-	15, "SCE_H_ASP", "preprocessor", "ASP <% ... %>",
-	16, "SCE_H_ASPAT", "preprocessor", "ASP <% ... %>",
-	17, "SCE_H_CDATA", "literal", "CDATA",
-	18, "SCE_H_QUESTION", "preprocessor", "PHP",
-	19, "SCE_H_VALUE", "literal string", "Unquoted values",
-	20, "SCE_H_XCCOMMENT", "comment", "JSP Comment <%-- ... --%>",
-	21, "SCE_H_SGML_DEFAULT", "default", "SGML tags <! ... >",
-	22, "SCE_H_SGML_COMMAND", "preprocessor", "SGML command",
-	23, "SCE_H_SGML_1ST_PARAM", "preprocessor", "SGML 1st param",
-	24, "SCE_H_SGML_DOUBLESTRING", "literal string", "SGML double string",
-	25, "SCE_H_SGML_SIMPLESTRING", "literal string", "SGML single string",
-	26, "SCE_H_SGML_ERROR", "error", "SGML error",
-	27, "SCE_H_SGML_SPECIAL", "literal", "SGML special (#XXXX type)",
-	28, "SCE_H_SGML_ENTITY", "literal", "SGML entity",
-	29, "SCE_H_SGML_COMMENT", "comment", "SGML comment",
-	30, "SCE_H_SGML_1ST_PARAM_COMMENT", "error comment", "SGML first parameter - lexer internal. It is an error if any text is in this style.",
-	31, "SCE_H_SGML_BLOCK_DEFAULT", "default", "SGML block",
-	32, "", "predefined", "",
-	33, "", "predefined", "",
-	34, "", "predefined", "",
-	35, "", "predefined", "",
-	36, "", "predefined", "",
-	37, "", "predefined", "",
-	38, "", "predefined", "",
-	39, "", "predefined", "",
-	40, "SCE_HJ_START", "client javascript default", "JS Start - allows eol filled background to not start on same line as SCRIPT tag",
-	41, "SCE_HJ_DEFAULT", "client javascript default", "JS Default",
-	42, "SCE_HJ_COMMENT", "client javascript comment", "JS Comment",
-	43, "SCE_HJ_COMMENTLINE", "client javascript comment line", "JS Line Comment",
-	44, "SCE_HJ_COMMENTDOC", "client javascript comment documentation", "JS Doc comment",
-	45, "SCE_HJ_NUMBER", "client javascript literal numeric", "JS Number",
-	46, "SCE_HJ_WORD", "client javascript identifier", "JS Word",
-	47, "SCE_HJ_KEYWORD", "client javascript keyword", "JS Keyword",
-	48, "SCE_HJ_DOUBLESTRING", "client javascript literal string", "JS Double quoted string",
-	49, "SCE_HJ_SINGLESTRING", "client javascript literal string", "JS Single quoted string",
-	50, "SCE_HJ_SYMBOLS", "client javascript operator", "JS Symbols",
-	51, "SCE_HJ_STRINGEOL", "client javascript error literal string", "JavaScript EOL",
-	52, "SCE_HJ_REGEX", "client javascript literal regex", "JavaScript RegEx",
-	53, "", "unused", "",
-	54, "", "unused", "",
-	55, "SCE_HJA_START", "server javascript default", "JS Start - allows eol filled background to not start on same line as SCRIPT tag",
-	56, "SCE_HJA_DEFAULT", "server javascript default", "JS Default",
-	57, "SCE_HJA_COMMENT", "server javascript comment", "JS Comment",
-	58, "SCE_HJA_COMMENTLINE", "server javascript comment line", "JS Line Comment",
-	59, "SCE_HJA_COMMENTDOC", "server javascript comment documentation", "JS Doc comment",
-	60, "SCE_HJA_NUMBER", "server javascript literal numeric", "JS Number",
-	61, "SCE_HJA_WORD", "server javascript identifier", "JS Word",
-	62, "SCE_HJA_KEYWORD", "server javascript keyword", "JS Keyword",
-	63, "SCE_HJA_DOUBLESTRING", "server javascript literal string", "JS Double quoted string",
-	64, "SCE_HJA_SINGLESTRING", "server javascript literal string", "JS Single quoted string",
-	65, "SCE_HJA_SYMBOLS", "server javascript operator", "JS Symbols",
-	66, "SCE_HJA_STRINGEOL", "server javascript error literal string", "JavaScript EOL",
-	67, "SCE_HJA_REGEX", "server javascript literal regex", "JavaScript RegEx",
-	68, "", "unused", "",
-	69, "", "unused", "",
-	70, "SCE_HB_START", "client basic default", "Start",
-	71, "SCE_HB_DEFAULT", "client basic default", "Default",
-	72, "SCE_HB_COMMENTLINE", "client basic comment line", "Comment",
-	73, "SCE_HB_NUMBER", "client basic literal numeric", "Number",
-	74, "SCE_HB_WORD", "client basic keyword", "KeyWord",
-	75, "SCE_HB_STRING", "client basic literal string", "String",
-	76, "SCE_HB_IDENTIFIER", "client basic identifier", "Identifier",
-	77, "SCE_HB_STRINGEOL", "client basic literal string", "Unterminated string",
-	78, "", "unused", "",
-	79, "", "unused", "",
-	80, "SCE_HBA_START", "server basic default", "Start",
-	81, "SCE_HBA_DEFAULT", "server basic default", "Default",
-	82, "SCE_HBA_COMMENTLINE", "server basic comment line", "Comment",
-	83, "SCE_HBA_NUMBER", "server basic literal numeric", "Number",
-	84, "SCE_HBA_WORD", "server basic keyword", "KeyWord",
-	85, "SCE_HBA_STRING", "server basic literal string", "String",
-	86, "SCE_HBA_IDENTIFIER", "server basic identifier", "Identifier",
-	87, "SCE_HBA_STRINGEOL", "server basic literal string", "Unterminated string",
-	88, "", "unused", "",
-	89, "", "unused", "",
-	90, "SCE_HP_START", "client python default", "Embedded Python",
-	91, "SCE_HP_DEFAULT", "client python default", "Embedded Python",
-	92, "SCE_HP_COMMENTLINE", "client python comment line", "Comment",
-	93, "SCE_HP_NUMBER", "client python literal numeric", "Number",
-	94, "SCE_HP_STRING", "client python literal string", "String",
-	95, "SCE_HP_CHARACTER", "client python literal string character", "Single quoted string",
-	96, "SCE_HP_WORD", "client python keyword", "Keyword",
-	97, "SCE_HP_TRIPLE", "client python literal string", "Triple quotes",
-	98, "SCE_HP_TRIPLEDOUBLE", "client python literal string", "Triple double quotes",
-	99, "SCE_HP_CLASSNAME", "client python identifier", "Class name definition",
-	100, "SCE_HP_DEFNAME", "client python identifier", "Function or method name definition",
-	101, "SCE_HP_OPERATOR", "client python operator", "Operators",
-	102, "SCE_HP_IDENTIFIER", "client python identifier", "Identifiers",
-	103, "", "unused", "",
-	104, "SCE_HPHP_COMPLEX_VARIABLE", "server php identifier", "PHP complex variable",
-	105, "SCE_HPA_START", "server python default", "ASP Python",
-	106, "SCE_HPA_DEFAULT", "server python default", "ASP Python",
-	107, "SCE_HPA_COMMENTLINE", "server python comment line", "Comment",
-	108, "SCE_HPA_NUMBER", "server python literal numeric", "Number",
-	109, "SCE_HPA_STRING", "server python literal string", "String",
-	110, "SCE_HPA_CHARACTER", "server python literal string character", "Single quoted string",
-	111, "SCE_HPA_WORD", "server python keyword", "Keyword",
-	112, "SCE_HPA_TRIPLE", "server python literal string", "Triple quotes",
-	113, "SCE_HPA_TRIPLEDOUBLE", "server python literal string", "Triple double quotes",
-	114, "SCE_HPA_CLASSNAME", "server python identifier", "Class name definition",
-	115, "SCE_HPA_DEFNAME", "server python identifier", "Function or method name definition",
-	116, "SCE_HPA_OPERATOR", "server python operator", "Operators",
-	117, "SCE_HPA_IDENTIFIER", "server python identifier", "Identifiers",
-	118, "SCE_HPHP_DEFAULT", "server php default", "Default",
-	119, "SCE_HPHP_HSTRING", "server php literal string", "Double quoted String",
-	120, "SCE_HPHP_SIMPLESTRING", "server php literal string", "Single quoted string",
-	121, "SCE_HPHP_WORD", "server php keyword", "Keyword",
-	122, "SCE_HPHP_NUMBER", "server php literal numeric", "Number",
-	123, "SCE_HPHP_VARIABLE", "server php identifier", "Variable",
-	124, "SCE_HPHP_COMMENT", "server php comment", "Comment",
-	125, "SCE_HPHP_COMMENTLINE", "server php comment line", "One line comment",
-	126, "SCE_HPHP_HSTRING_VARIABLE", "server php literal string identifier", "PHP variable in double quoted string",
-	127, "SCE_HPHP_OPERATOR", "server php operator", "PHP operator",
-};
-
-LexicalClass lexicalClassesXML[] = {
-	// Lexer.Secondary XML SCLEX_XML SCE_H_:
-	0, "SCE_H_DEFAULT", "default", "Default",
-	1, "SCE_H_TAG", "tag", "Tags",
-	2, "SCE_H_TAGUNKNOWN", "error tag", "Unknown Tags",
-	3, "SCE_H_ATTRIBUTE", "attribute", "Attributes",
-	4, "SCE_H_ERRORATTRIBUTEUNKNOWN", "error attribute", "Unknown Attributes",
-	5, "SCE_H_NUMBER", "literal numeric", "Numbers",
-	6, "SCE_H_DOUBLESTRING", "literal string", "Double quoted strings",
-	7, "SCE_H_SINGLESTRING", "literal string", "Single quoted strings",
-	8, "SCE_H_OTHER", "tag operator", "Other inside tag, including space and '='",
-	9, "SCE_H_COMMENT", "comment", "Comment",
-	10, "SCE_H_ENTITY", "literal", "Entities",
-	11, "SCE_H_TAGEND", "tag", "XML style tag ends '/>'",
-	12, "SCE_H_XMLSTART", "identifier", "XML identifier start '<?'",
-	13, "SCE_H_XMLEND", "identifier", "XML identifier end '?>'",
-	14, "", "unused", "",
-	15, "", "unused", "",
-	16, "", "unused", "",
-	17, "SCE_H_CDATA", "literal", "CDATA",
-	18, "SCE_H_QUESTION", "preprocessor", "Question",
-	19, "SCE_H_VALUE", "literal string", "Unquoted Value",
-	20, "", "unused", "",
-	21, "SCE_H_SGML_DEFAULT", "default", "SGML tags <! ... >",
-	22, "SCE_H_SGML_COMMAND", "preprocessor", "SGML command",
-	23, "SCE_H_SGML_1ST_PARAM", "preprocessor", "SGML 1st param",
-	24, "SCE_H_SGML_DOUBLESTRING", "literal string", "SGML double string",
-	25, "SCE_H_SGML_SIMPLESTRING", "literal string", "SGML single string",
-	26, "SCE_H_SGML_ERROR", "error", "SGML error",
-	27, "SCE_H_SGML_SPECIAL", "literal", "SGML special (#XXXX type)",
-	28, "SCE_H_SGML_ENTITY", "literal", "SGML entity",
-	29, "SCE_H_SGML_COMMENT", "comment", "SGML comment",
-	30, "", "unused", "",
-	31, "SCE_H_SGML_BLOCK_DEFAULT", "default", "SGML block",
-};
-
 }
 
 LexerModule lmHTML(SCLEX_HTML, ColouriseHTMLDoc, "hypertext", 0, htmlWordListDesc, lexicalClassesHTML, ELEMENTS(lexicalClassesHTML));
