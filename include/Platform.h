@@ -535,7 +535,7 @@ public:
 	static int DefaultFontSize();
 	static unsigned int DoubleClickTime();
 	static void DebugDisplay(const char *s);
-	static long LongFromTwoShorts(short a,short b) noexcept {
+	static constexpr long LongFromTwoShorts(short a,short b) noexcept {
 		return (a) | ((b) << 16);
 	}
 

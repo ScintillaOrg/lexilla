@@ -63,12 +63,11 @@ LineLayout::LineLayout(int maxLineLength_) :
 	highlightColumn(false),
 	containsCaret(false),
 	edgeColumn(0),
+	bracePreviousStyles{},
 	hotspot(0,0),
 	widthLine(wrapWidthInfinite),
 	lines(1),
 	wrapIndent(0) {
-	bracePreviousStyles[0] = 0;
-	bracePreviousStyles[1] = 0;
 	Resize(maxLineLength_);
 }
 
@@ -422,7 +421,7 @@ LineLayout *LineLayoutCache::Retrieve(Sci::Line lineNumber, Sci::Line lineCaret,
 	}
 	allInvalidated = false;
 	Sci::Position pos = -1;
-	LineLayout *ret = 0;
+	LineLayout *ret = nullptr;
 	if (level == llcCaret) {
 		pos = 0;
 	} else if (level == llcPage) {
@@ -512,12 +511,12 @@ const Representation *SpecialRepresentations::RepresentationFromCharacter(const 
 	PLATFORM_ASSERT(len <= 4);
 	const unsigned char ucStart = charBytes[0];
 	if (!startByteHasReprs[ucStart])
-		return 0;
+		return nullptr;
 	MapRepresentation::const_iterator it = mapReprs.find(KeyFromString(charBytes, len));
 	if (it != mapReprs.end()) {
 		return &(it->second);
 	}
-	return 0;
+	return nullptr;
 }
 
 bool SpecialRepresentations::Contains(const char *charBytes, size_t len) const {
@@ -536,7 +535,7 @@ void SpecialRepresentations::Clear() {
 }
 
 void BreakFinder::Insert(Sci::Position val) {
-	int posInLine = static_cast<int>(val);
+	const int posInLine = static_cast<int>(val);
 	if (posInLine > nextBreak) {
 		const std::vector<int>::iterator it = std::lower_bound(selAndEdge.begin(), selAndEdge.end(), posInLine);
 		if (it == selAndEdge.end()) {
@@ -626,7 +625,7 @@ TextSegment BreakFinder::Next() {
 					if (nextBreak == prev) {
 						nextBreak += charWidth;
 					} else {
-						repr = 0;	// Optimize -> should remember repr
+						repr = nullptr;	// Optimize -> should remember repr
 					}
 					if ((nextBreak - prev) < lengthStartSubdivision) {
 						return TextSegment(prev, nextBreak - prev, repr);

@@ -58,9 +58,9 @@ unsigned int ValueOfHex(const char ch) noexcept {
 }
 
 ColourDesired ColourFromHex(const char *val) noexcept {
-	unsigned int r = ValueOfHex(val[0]) * 16 + ValueOfHex(val[1]);
-	unsigned int g = ValueOfHex(val[2]) * 16 + ValueOfHex(val[3]);
-	unsigned int b = ValueOfHex(val[4]) * 16 + ValueOfHex(val[5]);
+	const unsigned int r = ValueOfHex(val[0]) * 16 + ValueOfHex(val[1]);
+	const unsigned int g = ValueOfHex(val[2]) * 16 + ValueOfHex(val[3]);
+	const unsigned int b = ValueOfHex(val[4]) * 16 + ValueOfHex(val[5]);
 	return ColourDesired(r, g, b);
 }
 

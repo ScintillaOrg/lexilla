@@ -160,7 +160,7 @@ Point PointFromPOINT(POINT pt) {
 Point PointFromLParam(sptr_t lpoint) {
 	return Point::FromInts(GET_X_LPARAM(lpoint), GET_Y_LPARAM(lpoint));
 }
-POINT POINTFromPoint(Point pt) {
+constexpr POINT POINTFromPoint(Point pt) noexcept {
 	return POINT{ static_cast<LONG>(pt.x), static_cast<LONG>(pt.y) };
 }
 bool KeyboardIsKeyDown(int key) {
@@ -491,7 +491,7 @@ void ScintillaWin::Init() {
 	// Initialize COM.  If the app has already done this it will have
 	// no effect.  If the app hasn't, we really shouldn't ask them to call
 	// it just so this internal feature works.
-	hrOle = ::OleInitialize(NULL);
+	hrOle = ::OleInitialize(nullptr);
 
 	// Find SetCoalescableTimer which is only available from Windows 8+
 	HMODULE user32 = ::GetModuleHandle(TEXT("user32.dll"));
@@ -551,13 +551,13 @@ void ScintillaWin::EnsureRenderTarget(HDC hdc) {
 			drtp.pixelFormat = D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,
 				D2D1_ALPHA_MODE_IGNORE);
 
-			ID2D1DCRenderTarget *pDCRT = NULL;
+			ID2D1DCRenderTarget *pDCRT = nullptr;
 			const HRESULT hr = pD2DFactory->CreateDCRenderTarget(&drtp, &pDCRT);
 			if (SUCCEEDED(hr)) {
 				pRenderTarget = pDCRT;
 			} else {
 				Platform::DebugPrintf("Failed CreateDCRenderTarget 0x%x\n", hr);
-				pRenderTarget = NULL;
+				pRenderTarget = nullptr;
 			}
 
 		} else {
@@ -567,13 +567,13 @@ void ScintillaWin::EnsureRenderTarget(HDC hdc) {
 			dhrtp.presentOptions = (technology == SC_TECHNOLOGY_DIRECTWRITERETAIN) ?
 			D2D1_PRESENT_OPTIONS_RETAIN_CONTENTS : D2D1_PRESENT_OPTIONS_NONE;
 
-			ID2D1HwndRenderTarget *pHwndRenderTarget = NULL;
+			ID2D1HwndRenderTarget *pHwndRenderTarget = nullptr;
 			const HRESULT hr = pD2DFactory->CreateHwndRenderTarget(drtp, dhrtp, &pHwndRenderTarget);
 			if (SUCCEEDED(hr)) {
 				pRenderTarget = pHwndRenderTarget;
 			} else {
 				Platform::DebugPrintf("Failed CreateHwndRenderTarget 0x%x\n", hr);
-				pRenderTarget = NULL;
+				pRenderTarget = nullptr;
 			}
 		}
 #else
@@ -758,7 +758,7 @@ std::wstring StringDecode(const std::string &s, int codePage) {
 
 std::wstring StringMapCase(const std::wstring &ws, DWORD mapFlags) {
 	const int charsConverted = ::LCMapStringW(LOCALE_SYSTEM_DEFAULT, mapFlags,
-		ws.c_str(), static_cast<int>(ws.length()), NULL, 0);
+		ws.c_str(), static_cast<int>(ws.length()), nullptr, 0);
 	std::wstring wsConverted(charsConverted, 0);
 	if (charsConverted) {
 		::LCMapStringW(LOCALE_SYSTEM_DEFAULT, mapFlags,
@@ -802,7 +802,7 @@ Sci::Position ScintillaWin::EncodedFromUTF8(const char *utf8, char *encoded) con
 		return inputLength;
 	} else {
 		// Need to convert
-		std::string_view utf8Input(utf8, inputLength);
+		const std::string_view utf8Input(utf8, inputLength);
 		const int charsLen = WideCharLenFromMultiByte(CP_UTF8, utf8Input);
 		std::wstring characters(charsLen, L'\0');
 		WideCharFromMultiByte(CP_UTF8, utf8Input, &characters[0], charsLen);
@@ -2357,7 +2357,7 @@ void ScintillaWin::ClaimSelection() {
 STDMETHODIMP_(ULONG)FormatEnumerator_AddRef(FormatEnumerator *fe);
 STDMETHODIMP FormatEnumerator_QueryInterface(FormatEnumerator *fe, REFIID riid, PVOID *ppv) {
 	//Platform::DebugPrintf("EFE QI");
-	*ppv = NULL;
+	*ppv = nullptr;
 	if (riid == IID_IUnknown)
 		*ppv = reinterpret_cast<IEnumFORMATETC *>(fe);
 	if (riid == IID_IEnumFORMATETC)
@@ -2379,7 +2379,7 @@ STDMETHODIMP_(ULONG)FormatEnumerator_Release(FormatEnumerator *fe) {
 }
 /// Implement IEnumFORMATETC
 STDMETHODIMP FormatEnumerator_Next(FormatEnumerator *fe, ULONG celt, FORMATETC *rgelt, ULONG *pceltFetched) {
-	if (rgelt == NULL) return E_POINTER;
+	if (!rgelt) return E_POINTER;
 	unsigned int putPos = 0;
 	while ((fe->pos < fe->formats.size()) && (putPos < celt)) {
 		rgelt->cfFormat = fe->formats[fe->pos];
@@ -3012,7 +3012,7 @@ DWORD ScintillaWin::EffectFromState(DWORD grfKeyState) const {
 
 /// Implement IUnknown
 STDMETHODIMP ScintillaWin::QueryInterface(REFIID riid, PVOID *ppv) {
-	*ppv = NULL;
+	*ppv = nullptr;
 	if (riid == IID_IUnknown)
 		*ppv = reinterpret_cast<IDropTarget *>(&dt);
 	if (riid == IID_IDropSource)
@@ -3037,13 +3037,13 @@ STDMETHODIMP_(ULONG) ScintillaWin::Release() {
 /// Implement IDropTarget
 STDMETHODIMP ScintillaWin::DragEnter(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
                                      POINTL, PDWORD pdwEffect) {
-	if (pIDataSource == NULL)
+	if (!pIDataSource )
 		return E_POINTER;
-	FORMATETC fmtu = {CF_UNICODETEXT, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
+	FORMATETC fmtu = {CF_UNICODETEXT, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 	const HRESULT hrHasUText = pIDataSource->QueryGetData(&fmtu);
 	hasOKText = (hrHasUText == S_OK);
 	if (!hasOKText) {
-		FORMATETC fmte = {CF_TEXT, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
+		FORMATETC fmte = {CF_TEXT, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 		const HRESULT hrHasText = pIDataSource->QueryGetData(&fmte);
 		hasOKText = (hrHasText == S_OK);
 	}
@@ -3092,7 +3092,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 	try {
 		*pdwEffect = EffectFromState(grfKeyState);
 
-		if (pIDataSource == NULL)
+		if (!pIDataSource)
 			return E_POINTER;
 
 		SetDragPosition(SelectionPosition(Sci::invalidPosition));
@@ -3101,7 +3101,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 
 		std::vector<char> data;	// Includes terminating NUL
 
-		FORMATETC fmtu = {CF_UNICODETEXT, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
+		FORMATETC fmtu = {CF_UNICODETEXT, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 		HRESULT hr = pIDataSource->GetData(&fmtu, &medium);
 		if (SUCCEEDED(hr) && medium.hGlobal) {
 			GlobalMemory memUDrop(medium.hGlobal);
@@ -3128,7 +3128,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 			}
 			memUDrop.Unlock();
 		} else {
-			FORMATETC fmte = {CF_TEXT, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
+			FORMATETC fmte = {CF_TEXT, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 			hr = pIDataSource->GetData(&fmte, &medium);
 			if (SUCCEEDED(hr) && medium.hGlobal) {
 				GlobalMemory memDrop(medium.hGlobal);
@@ -3144,7 +3144,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 			return hr;
 		}
 
-		FORMATETC fmtr = {cfColumnSelect, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL};
+		FORMATETC fmtr = {cfColumnSelect, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL};
 		const HRESULT hrRectangular = pIDataSource->QueryGetData(&fmtr);
 
 		POINT rpt = {pt.x, pt.y};
@@ -3154,7 +3154,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 		DropAt(movePos, &data[0], data.size(), *pdwEffect == DROPEFFECT_MOVE, hrRectangular == S_OK);
 
 		// Free data
-		if (medium.pUnkForRelease != NULL)
+		if (medium.pUnkForRelease)
 			medium.pUnkForRelease->Release();
 		else
 			::GlobalFree(medium.hGlobal);
@@ -3329,7 +3329,7 @@ LRESULT PASCAL ScintillaWin::CTWndProc(
 				::BeginPaint(hWnd, &ps);
 				std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(sciThis->technology));
 #if defined(USE_D2D)
-				ID2D1HwndRenderTarget *pCTRenderTarget = 0;
+				ID2D1HwndRenderTarget *pCTRenderTarget = nullptr;
 #endif
 				RECT rc;
 				GetClientRect(hWnd, &rc);
@@ -3405,7 +3405,7 @@ LRESULT PASCAL ScintillaWin::CTWndProc(
 
 sptr_t ScintillaWin::DirectFunction(
     sptr_t ptr, UINT iMessage, uptr_t wParam, sptr_t lParam) {
-	PLATFORM_ASSERT(::GetCurrentThreadId() == ::GetWindowThreadProcessId(reinterpret_cast<ScintillaWin *>(ptr)->MainHWND(), NULL));
+	PLATFORM_ASSERT(::GetCurrentThreadId() == ::GetWindowThreadProcessId(reinterpret_cast<ScintillaWin *>(ptr)->MainHWND(), nullptr));
 	return reinterpret_cast<ScintillaWin *>(ptr)->WndProc(iMessage, wParam, lParam);
 }
 

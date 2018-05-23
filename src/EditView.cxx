@@ -59,7 +59,7 @@
 
 using namespace Scintilla;
 
-static inline bool IsControlCharacter(int ch) {
+static constexpr bool IsControlCharacter(int ch) noexcept {
 	// iscntrl returns true for lots of chars > 127 which are displayable
 	return ch >= 0 && ch < ' ';
 }
@@ -95,7 +95,7 @@ static int WidthStyledText(Surface *surface, const ViewStyle &vs, int styleOffse
 		while ((endSegment + 1 < len) && (styles[endSegment + 1] == style))
 			endSegment++;
 		FontAlias fontText = vs.styles[style + styleOffset].font;
-		std::string_view sv(text + start, endSegment - start + 1);
+		const std::string_view sv(text + start, endSegment - start + 1);
 		width += static_cast<int>(surface->WidthText(fontText, sv));
 		start = endSegment + 1;
 	}
@@ -112,7 +112,7 @@ int WidestLineWidth(Surface *surface, const ViewStyle &vs, int styleOffset, cons
 			widthSubLine = WidthStyledText(surface, vs, styleOffset, st.text + start, st.styles + start, lenLine);
 		} else {
 			FontAlias fontText = vs.styles[styleOffset + st.style].font;
-			std::string_view text(st.text + start, lenLine);
+			const std::string_view text(st.text + start, lenLine);
 			widthSubLine = static_cast<int>(surface->WidthText(fontText, text));
 		}
 		if (widthSubLine > widthMax)
@@ -151,7 +151,7 @@ void DrawStyledText(Surface *surface, const ViewStyle &vs, int styleOffset, PRec
 				end++;
 			style += styleOffset;
 			FontAlias fontText = vs.styles[style].font;
-			std::string_view text(st.text + start + i, end - i + 1);
+			const std::string_view text(st.text + start + i, end - i + 1);
 			const int width = static_cast<int>(surface->WidthText(fontText, text));
 			PRectangle rcSegment = rcText;
 			rcSegment.left = static_cast<XYPOSITION>(x);
@@ -457,7 +457,7 @@ void EditView::LayoutLine(const EditModel &model, Sci::Line line, Surface *surfa
 		ll->positions[0] = 0;
 		bool lastSegItalics = false;
 
-		BreakFinder bfLayout(ll, NULL, Range(0, numCharsInLine), posLineStart, 0, false, model.pdoc, &model.reprs, NULL);
+		BreakFinder bfLayout(ll, nullptr, Range(0, numCharsInLine), posLineStart, 0, false, model.pdoc, &model.reprs, nullptr);
 		while (bfLayout.More()) {
 
 			const TextSegment ts = bfLayout.Next();
@@ -931,7 +931,7 @@ void EditView::DrawEOL(Surface *surface, const EditModel &model, const ViewStyle
 		const XYPOSITION spaceWidth = vsDraw.styles[ll->EndLineStyle()].spaceWidth;
 		virtualSpace = model.sel.VirtualSpaceFor(model.pdoc->LineEnd(line)) * spaceWidth;
 	}
-	XYPOSITION xEol = static_cast<XYPOSITION>(ll->positions[lineEnd] - subLineStart);
+	const XYPOSITION xEol = static_cast<XYPOSITION>(ll->positions[lineEnd] - subLineStart);
 
 	// Fill the virtual space and show selections within it
 	if (virtualSpace > 0.0f) {
@@ -1273,7 +1273,7 @@ void EditView::DrawFoldDisplayText(Surface *surface, const EditModel &model, con
 	}
 }
 
-static bool AnnotationBoxedOrIndented(int annotationVisible) {
+static constexpr bool AnnotationBoxedOrIndented(int annotationVisible) noexcept {
 	return annotationVisible == ANNOTATION_BOXED || annotationVisible == ANNOTATION_INDENTED;
 }
 
@@ -1395,7 +1395,7 @@ static void DrawBlockCaret(Surface *surface, const EditModel &model, const ViewS
 	// (inversed) for drawing the caret here.
 	const int styleMain = ll->styles[offsetFirstChar];
 	FontAlias fontText = vsDraw.styles[styleMain].font;
-	std::string_view text(&ll->chars[offsetFirstChar], numCharsToDraw);
+	const std::string_view text(&ll->chars[offsetFirstChar], numCharsToDraw);
 	surface->DrawTextClipped(rcCaret, fontText,
 		rcCaret.top + vsDraw.maxAscent, text, vsDraw.styles[styleMain].back,
 		caretColour);
@@ -1547,7 +1547,7 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 	// Does not take margin into account but not significant
 	const int xStartVisible = static_cast<int>(subLineStart)-xStart;
 
-	BreakFinder bfBack(ll, &model.sel, lineRange, posLineStart, xStartVisible, selBackDrawn, model.pdoc, &model.reprs, NULL);
+	BreakFinder bfBack(ll, &model.sel, lineRange, posLineStart, xStartVisible, selBackDrawn, model.pdoc, &model.reprs, nullptr);
 
 	const bool drawWhitespaceBackground = vsDraw.WhitespaceBackgroundDrawn() && !background.isSet;
 
@@ -1859,7 +1859,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 			} else {
 				// Normal text display
 				if (vsDraw.styles[styleMain].visible) {
-					std::string_view text(&ll->chars[ts.start], i - ts.start + 1);
+					const std::string_view text(&ll->chars[ts.start], i - ts.start + 1);
 					if (phasesDraw != phasesOne) {
 						surface->DrawTextTransparent(rcSegment, textFont,
 							rcSegment.top + vsDraw.maxAscent, text, textFore);
@@ -2143,7 +2143,7 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 			(vsDraw.braceBadLightIndicatorSet && (model.bracesMatchStyle == STYLE_BRACEBAD)));
 
 		Sci::Line lineDocPrevious = -1;	// Used to avoid laying out one document line multiple times
-		AutoLineLayout ll(llc, 0);
+		AutoLineLayout ll(llc, nullptr);
 		std::vector<DrawPhase> phases;
 		if ((phasesDraw == phasesMultiple) && !bufferedDraw) {
 			for (DrawPhase phase = drawBack; phase <= drawCarets; phase = static_cast<DrawPhase>(phase * 2)) {
@@ -2172,7 +2172,7 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 				ElapsedPeriod ep;
 #endif
 				if (lineDoc != lineDocPrevious) {
-					ll.Set(0);
+					ll.Set(nullptr);
 					ll.Set(RetrieveLineLayout(lineDoc, model));
 					LayoutLine(model, lineDoc, surface, vsDraw, ll, model.wrapWidth);
 					lineDocPrevious = lineDoc;
@@ -2246,7 +2246,7 @@ void EditView::PaintText(Surface *surfaceWindow, const EditModel &model, PRectan
 				visibleLine++;
 			}
 		}
-		ll.Set(0);
+		ll.Set(nullptr);
 #if defined(TIME_PAINTING)
 		if (durPaint < 0.00000001)
 			durPaint = 0.00000001;

@@ -10,8 +10,12 @@
 
 namespace Scintilla {
 
-static inline bool IsEOLChar(char ch) {
+inline constexpr bool IsEOLChar(int ch) noexcept {
 	return (ch == '\r') || (ch == '\n');
+}
+
+inline constexpr bool IsSpaceOrTab(int ch) noexcept {
+	return ch == ' ' || ch == '\t';
 }
 
 /**
@@ -122,6 +126,11 @@ struct ScreenLine : public IScreenLine {
 	int tabWidthMinimumPixels;
 
 	ScreenLine(const LineLayout *ll_, int subLine, const ViewStyle &vs, XYPOSITION width_, int tabWidthMinimumPixels_);
+	// Deleted so ScreenLine objects can not be copied.
+	ScreenLine(const ScreenLine &) = delete;
+	ScreenLine(ScreenLine &&) = delete;
+	void operator=(const ScreenLine &) = delete;
+	void operator=(ScreenLine &&) = delete;
 	virtual ~ScreenLine();
 
 	std::string_view Text() const override;
@@ -273,10 +282,6 @@ public:
 	void MeasureWidths(Surface *surface, const ViewStyle &vstyle, unsigned int styleNumber,
 		const char *s, unsigned int len, XYPOSITION *positions, const Document *pdoc);
 };
-
-inline bool IsSpaceOrTab(int ch) {
-	return ch == ' ' || ch == '\t';
-}
 
 }
 

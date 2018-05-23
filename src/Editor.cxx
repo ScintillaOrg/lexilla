@@ -245,7 +245,7 @@ void Editor::SetRepresentations() {
 	} else if (pdoc->dbcsCodePage) {
 		// DBCS invalid single lead bytes
 		for (int k = 0x80; k < 0x100; k++) {
-			char ch = static_cast<char>(k);
+			const char ch = static_cast<char>(k);
 			if (pdoc->IsDBCSLeadByteNoExcept(ch)  || pdoc->IsDBCSLeadByteInvalid(ch)) {
 				const char hiByte[2] = { ch, 0 };
 				char hexits[5];	// Really only needs 4 but that causes warning from gcc 7.1
@@ -2284,7 +2284,7 @@ void Editor::DelCharBack(bool allowLineStartDeletion) {
 	ShowCaretAtCurrentPosition();
 }
 
-int Editor::ModifierFlags(bool shift, bool ctrl, bool alt, bool meta, bool super) {
+int Editor::ModifierFlags(bool shift, bool ctrl, bool alt, bool meta, bool super) noexcept {
 	return
 		(shift ? SCI_SHIFT : 0) |
 		(ctrl ? SCI_CTRL : 0) |
@@ -3210,11 +3210,11 @@ Sci::Position Editor::StartEndDisplayLine(Sci::Position pos, bool start) {
 
 namespace {
 
-short HighShortFromLong(long x) {
+constexpr short HighShortFromWParam(uptr_t x) {
 	return static_cast<short>(x >> 16);
 }
 
-short LowShortFromLong(long x) {
+constexpr short LowShortFromWParam(uptr_t x) {
 	return static_cast<short>(x & 0xffff);
 }
 
@@ -4072,7 +4072,7 @@ Sci::Position Editor::SearchText(
     sptr_t lParam) {			///< The text to search for.
 
 	const char *txt = CharPtrFromSPtr(lParam);
-	Sci::Position pos;
+	Sci::Position pos = INVALID_POSITION;
 	Sci::Position lengthFound = strlen(txt);
 	if (!pdoc->HasCaseFolder())
 		pdoc->SetCaseFolder(CaseFolderForEncoding());
@@ -4088,9 +4088,9 @@ Sci::Position Editor::SearchText(
 		}
 	} catch (RegexError &) {
 		errorStatus = SC_STATUS_WARN_REGEX;
-		return -1;
+		return INVALID_POSITION;
 	}
-	if (pos != -1) {
+	if (pos != INVALID_POSITION) {
 		SetSelection(pos, pos + lengthFound);
 	}
 
@@ -4463,7 +4463,7 @@ void Editor::MouseLeave() {
 	}
 }
 
-static bool AllowVirtualSpace(int virtualSpaceOptions, bool rectangular) {
+static constexpr bool AllowVirtualSpace(int virtualSpaceOptions, bool rectangular) noexcept {
 	return (!rectangular && ((virtualSpaceOptions & SCVS_USERACCESSIBLE) != 0))
 		|| (rectangular && ((virtualSpaceOptions & SCVS_RECTANGULARSELECTION) != 0));
 }
@@ -7276,13 +7276,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return vs.caretWidth;
 
 	case SCI_ASSIGNCMDKEY:
-		kmap.AssignCmdKey(LowShortFromLong(static_cast<long>(wParam)),
-			HighShortFromLong(static_cast<long>(wParam)), static_cast<unsigned int>(lParam));
+		kmap.AssignCmdKey(LowShortFromWParam(wParam),
+			HighShortFromWParam(wParam), static_cast<unsigned int>(lParam));
 		break;
 
 	case SCI_CLEARCMDKEY:
-		kmap.AssignCmdKey(LowShortFromLong(static_cast<long>(wParam)),
-			HighShortFromLong(static_cast<long>(wParam)), SCI_NULL);
+		kmap.AssignCmdKey(LowShortFromWParam(wParam),
+			HighShortFromWParam(wParam), SCI_NULL);
 		break;
 
 	case SCI_CLEARALLCMDKEYS:
