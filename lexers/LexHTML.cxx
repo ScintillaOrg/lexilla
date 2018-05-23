@@ -250,8 +250,8 @@ inline bool isCommentASPState(int state) {
 	return bResult;
 }
 
-void classifyAttribHTML(Sci_PositionU start, Sci_PositionU end, WordList &keywords, Accessor &styler) {
-	bool wordIsNumber = IsNumber(start, styler);
+void classifyAttribHTML(Sci_PositionU start, Sci_PositionU end, const WordList &keywords, Accessor &styler) {
+	const bool wordIsNumber = IsNumber(start, styler);
 	char chAttr = SCE_H_ATTRIBUTEUNKNOWN;
 	if (wordIsNumber) {
 		chAttr = SCE_H_NUMBER;
@@ -267,7 +267,7 @@ void classifyAttribHTML(Sci_PositionU start, Sci_PositionU end, WordList &keywor
 }
 
 int classifyTagHTML(Sci_PositionU start, Sci_PositionU end,
-                           WordList &keywords, Accessor &styler, bool &tagDontFold,
+                           const WordList &keywords, Accessor &styler, bool &tagDontFold,
                     bool caseSensitive, bool isXml, bool allowScripts,
                     const std::set<std::string> &nonFoldingTags) {
 	std::string tag;
@@ -315,7 +315,7 @@ int classifyTagHTML(Sci_PositionU start, Sci_PositionU end,
 }
 
 void classifyWordHTJS(Sci_PositionU start, Sci_PositionU end,
-                             WordList &keywords, Accessor &styler, script_mode inScriptType) {
+                             const WordList &keywords, Accessor &styler, script_mode inScriptType) {
 	char s[30 + 1];
 	Sci_PositionU i = 0;
 	for (; i < end - start + 1 && i < 30; i++) {
@@ -324,7 +324,7 @@ void classifyWordHTJS(Sci_PositionU start, Sci_PositionU end,
 	s[i] = '\0';
 
 	char chAttr = SCE_HJ_WORD;
-	bool wordIsNumber = IsADigit(s[0]) || ((s[0] == '.') && IsADigit(s[1]));
+	const bool wordIsNumber = IsADigit(s[0]) || ((s[0] == '.') && IsADigit(s[1]));
 	if (wordIsNumber) {
 		chAttr = SCE_HJ_NUMBER;
 	} else if (keywords.InList(s)) {
@@ -333,9 +333,9 @@ void classifyWordHTJS(Sci_PositionU start, Sci_PositionU end,
 	styler.ColourTo(end, statePrintForState(chAttr, inScriptType));
 }
 
-int classifyWordHTVB(Sci_PositionU start, Sci_PositionU end, WordList &keywords, Accessor &styler, script_mode inScriptType) {
+int classifyWordHTVB(Sci_PositionU start, Sci_PositionU end, const WordList &keywords, Accessor &styler, script_mode inScriptType) {
 	char chAttr = SCE_HB_IDENTIFIER;
-	bool wordIsNumber = IsADigit(styler[start]) || (styler[start] == '.');
+	const bool wordIsNumber = IsADigit(styler[start]) || (styler[start] == '.');
 	if (wordIsNumber) {
 		chAttr = SCE_HB_NUMBER;
 	} else {
@@ -353,8 +353,8 @@ int classifyWordHTVB(Sci_PositionU start, Sci_PositionU end, WordList &keywords,
 		return SCE_HB_DEFAULT;
 }
 
-void classifyWordHTPy(Sci_PositionU start, Sci_PositionU end, WordList &keywords, Accessor &styler, std::string &prevWord, script_mode inScriptType, bool isMako) {
-	bool wordIsNumber = IsADigit(styler[start]);
+void classifyWordHTPy(Sci_PositionU start, Sci_PositionU end, const WordList &keywords, Accessor &styler, std::string &prevWord, script_mode inScriptType, bool isMako) {
+	const bool wordIsNumber = IsADigit(styler[start]);
 	std::string s;
 	for (Sci_PositionU i = 0; i < end - start + 1 && i < 30; i++) {
 		s.push_back(styler[start + i]);
@@ -376,9 +376,9 @@ void classifyWordHTPy(Sci_PositionU start, Sci_PositionU end, WordList &keywords
 
 // Update the word colour to default or keyword
 // Called when in a PHP word
-void classifyWordHTPHP(Sci_PositionU start, Sci_PositionU end, WordList &keywords, Accessor &styler) {
+void classifyWordHTPHP(Sci_PositionU start, Sci_PositionU end, const WordList &keywords, Accessor &styler) {
 	char chAttr = SCE_HPHP_DEFAULT;
-	bool wordIsNumber = IsADigit(styler[start]) || (styler[start] == '.' && start+1 <= end && IsADigit(styler[start+1]));
+	const bool wordIsNumber = IsADigit(styler[start]) || (styler[start] == '.' && start+1 <= end && IsADigit(styler[start+1]));
 	if (wordIsNumber) {
 		chAttr = SCE_HPHP_NUMBER;
 	} else {
@@ -389,7 +389,7 @@ void classifyWordHTPHP(Sci_PositionU start, Sci_PositionU end, WordList &keyword
 	styler.ColourTo(end, chAttr);
 }
 
-bool isWordHSGML(Sci_PositionU start, Sci_PositionU end, WordList &keywords, Accessor &styler) {
+bool isWordHSGML(Sci_PositionU start, Sci_PositionU end, const WordList &keywords, Accessor &styler) {
 	std::string s;
 	for (Sci_PositionU i = 0; i < end - start + 1 && i < 30; i++) {
 		s.push_back(styler[start + i]);
@@ -562,7 +562,7 @@ struct OptionsHTML {
 	bool foldCompact = true;
 	bool foldComment = false;
 	bool foldHeredoc = false;
-	OptionsHTML() noexcept{
+	OptionsHTML() noexcept {
 	}
 };
 
@@ -932,7 +932,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 	// If inside a tag, it may be a script tag, so reread from the start of line starting tag to ensure any language tags are seen
 	if (InTagState(state)) {
 		while ((startPos > 0) && (InTagState(styler.StyleAt(startPos - 1)))) {
-			Sci_Position backLineStart = styler.LineStart(styler.GetLine(startPos-1));
+			const Sci_Position backLineStart = styler.LineStart(styler.GetLine(startPos-1));
 			length += startPos - backLineStart;
 			startPos = backLineStart;
 		}
@@ -970,13 +970,13 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		lineState = eScriptJS << 8;
 		lineState |= options.aspDefaultLanguage << 4;
 	}
-	script_mode inScriptType = script_mode((lineState >> 0) & 0x03); // 2 bits of scripting mode
+	script_mode inScriptType = static_cast<script_mode>((lineState >> 0) & 0x03); // 2 bits of scripting mode
 
 	bool tagOpened = (lineState >> 2) & 0x01; // 1 bit to know if we are in an opened tag
 	bool tagClosing = (lineState >> 3) & 0x01; // 1 bit to know if we are in a closing tag
 	bool tagDontFold = false; //some HTML tags should not be folded
-	script_type aspScript = script_type((lineState >> 4) & 0x0F); // 4 bits of script name
-	script_type clientScript = script_type((lineState >> 8) & 0x0F); // 4 bits of script name
+	script_type aspScript = static_cast<script_type>((lineState >> 4) & 0x0F); // 4 bits of script name
+	script_type clientScript = static_cast<script_type>((lineState >> 8) & 0x0F); // 4 bits of script name
 	int beforePreProc = (lineState >> 12) & 0xFF; // 8 bits of state
 
 	script_type scriptLanguage = ScriptOfState(state);
@@ -1086,7 +1086,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 						// check if the number of tabs is lower than the level
 						int Findlevel = (levelCurrent & ~SC_FOLDLEVELBASE) * 8;
 						for (Sci_Position j = 0; Findlevel > 0; j++) {
-							char chTmp = styler.SafeGetCharAt(i + j + 1);
+							const char chTmp = styler.SafeGetCharAt(i + j + 1);
 							if (chTmp == '\t') {
 								Findlevel -= 8;
 							} else if (chTmp == ' ') {
@@ -1760,7 +1760,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		case SCE_H_ATTRIBUTE:
 			if (!setAttributeContinue.Contains(ch)) {
 				if (inScriptType == eNonHtmlScript) {
-					int scriptLanguagePrev = scriptLanguage;
+					const int scriptLanguagePrev = scriptLanguage;
 					clientScript = segIsScriptingIndicator(styler, styler.GetStartSegment(), i - 1, scriptLanguage);
 					scriptLanguage = clientScript;
 					if ((scriptLanguagePrev != scriptLanguage) && (scriptLanguage == eScriptNone))
@@ -2394,7 +2394,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 		// Some of the above terminated their lexeme but since the same character starts
 		// the same class again, only reenter if non empty segment.
 
-		bool nonEmptySegment = i >= static_cast<Sci_Position>(styler.GetStartSegment());
+		const bool nonEmptySegment = i >= static_cast<Sci_Position>(styler.GetStartSegment());
 		if (state == SCE_HB_DEFAULT) {    // One of the above succeeded
 			if ((ch == '\"') && (nonEmptySegment)) {
 				state = SCE_HB_STRING;
@@ -2457,7 +2457,7 @@ void SCI_METHOD LexerHTML::Lex(Sci_PositionU startPos, Sci_Position length, int 
 
 	// Fill in the real level of the next line, keeping the current flags as they will be filled in later
 	if (fold) {
-		int flagsNext = styler.LevelAt(lineCurrent) & ~SC_FOLDLEVELNUMBERMASK;
+		const int flagsNext = styler.LevelAt(lineCurrent) & ~SC_FOLDLEVELNUMBERMASK;
 		styler.SetLevel(lineCurrent, levelPrev | flagsNext);
 	}
 	styler.Flush();
