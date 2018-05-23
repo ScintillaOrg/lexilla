@@ -77,3 +77,12 @@ EditModel::~EditModel() {
 	pdoc->Release();
 	pdoc = 0;
 }
+
+bool EditModel::BidirectionalEnabled() const {
+	return (bidirectional != Bidirectional::bidiDisabled) &&
+		(SC_CP_UTF8 == pdoc->dbcsCodePage);
+}
+
+bool EditModel::BidirectionalR2L() const {
+	return bidirectional == Bidirectional::bidiR2L;
+}

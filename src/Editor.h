@@ -618,6 +618,7 @@ public:
 			surf->Init(ed->wMain.GetID());
 			surf->SetUnicodeMode(SC_CP_UTF8 == ed->CodePage());
 			surf->SetDBCSMode(ed->CodePage());
+			surf->SetBidiR2L(ed->BidirectionalR2L());
 		}
 	}
 	AutoSurface(SurfaceID sid, Editor *ed, int technology = -1) {
@@ -626,6 +627,7 @@ public:
 			surf->Init(sid, ed->wMain.GetID());
 			surf->SetUnicodeMode(SC_CP_UTF8 == ed->CodePage());
 			surf->SetDBCSMode(ed->CodePage());
+			surf->SetBidiR2L(ed->BidirectionalR2L());
 		}
 	}
 	// Deleted so AutoSurface objects can not be copied.

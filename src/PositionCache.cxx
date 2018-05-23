@@ -46,6 +46,11 @@
 
 using namespace Scintilla;
 
+void BidiData::Resize(size_t maxLineLength_) {
+	stylesFonts.resize(maxLineLength_ + 1);
+	widthReprs.resize(maxLineLength_ + 1);
+}
+
 LineLayout::LineLayout(int maxLineLength_) :
 	lenLineStarts(0),
 	lineNumber(-1),
@@ -79,7 +84,18 @@ void LineLayout::Resize(int maxLineLength_) {
 		// Extra position allocated as sometimes the Windows
 		// GetTextExtentExPoint API writes an extra element.
 		positions = std::make_unique<XYPOSITION []>(maxLineLength_ + 1 + 1);
+		if (bidiData) {
+			bidiData->Resize(maxLineLength_);
+		}
+
 		maxLineLength = maxLineLength_;
+	}
+}
+
+void LineLayout::EnsureBidiData() {
+	if (!bidiData) {
+		bidiData = std::make_unique<BidiData>();
+		bidiData->Resize(maxLineLength);
 	}
 }
 
@@ -88,6 +104,7 @@ void LineLayout::Free() {
 	styles.reset();
 	positions.reset();
 	lineStarts.reset();
+	bidiData.reset();
 }
 
 void LineLayout::Invalidate(validLevel validity_) {
@@ -102,6 +119,16 @@ int LineLayout::LineStart(int line) const {
 		return numCharsInLine;
 	} else {
 		return lineStarts[line];
+	}
+}
+
+int Scintilla::LineLayout::LineLength(int line) const {
+	if (!lineStarts) {
+		return numCharsInLine;
+	} if (line >= lines - 1) {
+		return numCharsInLine - lineStarts[line];
+	} else {
+		return lineStarts[line + 1] - lineStarts[line];
 	}
 }
 
@@ -122,6 +149,25 @@ Range LineLayout::SubLineRange(int subLine, Scope scope) const {
 bool LineLayout::InLine(int offset, int line) const {
 	return ((offset >= LineStart(line)) && (offset < LineStart(line + 1))) ||
 		((offset == numCharsInLine) && (line == (lines-1)));
+}
+
+int LineLayout::SubLineFromPosition(int posInLine, PointEnd pe) const {
+	if (!lineStarts || (posInLine > maxLineLength)) {
+		return lines - 1;
+	}
+
+	for (int line = 0; line < lines; line++) {
+		if (pe & peSubLineEnd) {
+			// Return subline not start of next
+			if (lineStarts[line + 1] <= posInLine + 1)
+				return line;
+		} else {
+			if (lineStarts[line + 1] <= posInLine)
+				return line;
+		}
+	}
+
+	return lines - 1;
 }
 
 void LineLayout::SetLineStart(int line, int start) {
@@ -242,6 +288,63 @@ Point LineLayout::PointFromPosition(int posInLine, int lineHeight, PointEnd pe) 
 
 int LineLayout::EndLineStyle() const {
 	return styles[numCharsBeforeEOL > 0 ? numCharsBeforeEOL-1 : 0];
+}
+
+ScreenLine::ScreenLine(
+	const LineLayout *ll_,
+	int subLine,
+	const ViewStyle &vs,
+	XYPOSITION width_,
+	int tabWidthMinimumPixels_) :
+	ll(ll_),
+	start(ll->LineStart(subLine)),
+	len(ll->LineLength(subLine)),
+	width(width_),
+	height(static_cast<float>(vs.lineHeight)),
+	ctrlCharPadding(vs.ctrlCharPadding),
+	tabWidth(vs.tabWidth),
+	tabWidthMinimumPixels(tabWidthMinimumPixels_) {
+}
+
+ScreenLine::~ScreenLine() {
+}
+
+std::string_view ScreenLine::Text() const {
+	return std::string_view(&ll->chars[start], len);
+}
+
+size_t ScreenLine::Length() const {
+	return len;
+}
+
+size_t ScreenLine::RepresentationCount() const {
+	return std::count_if(&ll->bidiData->widthReprs[start],
+		&ll->bidiData->widthReprs[start + len],
+		[](XYPOSITION w) {return w > 0.0f; });
+}
+
+XYPOSITION ScreenLine::Width() const {
+	return width;
+}
+
+XYPOSITION ScreenLine::Height() const {
+	return height;
+}
+
+XYPOSITION ScreenLine::TabWidth() const {
+	return tabWidth;
+}
+
+XYPOSITION ScreenLine::TabWidthMinimumPixels() const {
+	return static_cast<XYPOSITION>(tabWidthMinimumPixels);
+}
+
+const Font *ScreenLine::FontOfPosition(size_t position) const {
+	return &ll->bidiData->stylesFonts[start + position];
+}
+
+XYPOSITION ScreenLine::RepresentationWidth(size_t position) const {
+	return ll->bidiData->widthReprs[start + position];
 }
 
 LineLayoutCache::LineLayoutCache() :

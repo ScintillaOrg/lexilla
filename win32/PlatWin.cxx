@@ -1094,6 +1094,8 @@ void SurfaceGDI::SetBidiR2L(bool) {
 
 #if defined(USE_D2D)
 
+class BlobInline;
+
 class SurfaceD2D : public Surface {
 	bool unicodeMode;
 	int x, y;
@@ -1159,6 +1161,11 @@ public:
 	size_t PositionFromX(const IScreenLine *screenLine, XYPOSITION xDistance, bool charPosition) override;
 	XYPOSITION XFromPosition(const IScreenLine *screenLine, size_t caretPosition) override;
 	std::vector<Interval> FindRangeIntervals(const IScreenLine *screenLine, size_t start, size_t end) override;
+
+	static void FillTextLayoutFormats(const IScreenLine *screenLine, IDWriteTextLayout *textLayout, std::vector<BlobInline> &blobs);
+	static std::wstring ReplaceRepresentation(std::string_view text);
+	static size_t GetPositionInLayout(std::string_view text, size_t position);
+	static size_t GetPositionInString(std::string_view text, size_t position);
 
 	void DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, UINT fuOptions);
 	void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
@@ -1615,16 +1622,422 @@ void SurfaceD2D::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	}
 }
 
-size_t SurfaceD2D::PositionFromX(const IScreenLine *, XYPOSITION, bool) {
-	return 0;
+class BlobInline : public IDWriteInlineObject {
+	XYPOSITION width;
+
+	// IUnknown
+	STDMETHODIMP QueryInterface(REFIID riid, PVOID *ppv) override;
+	STDMETHODIMP_(ULONG)AddRef() override;
+	STDMETHODIMP_(ULONG)Release() override;
+
+	// IDWriteInlineObject
+	STDMETHODIMP Draw(
+		void *clientDrawingContext,
+		IDWriteTextRenderer *renderer,
+		FLOAT originX,
+		FLOAT originY,
+		BOOL isSideways,
+		BOOL isRightToLeft,
+		IUnknown *clientDrawingEffect
+		) override;
+	STDMETHODIMP GetMetrics(DWRITE_INLINE_OBJECT_METRICS *metrics) override;
+	STDMETHODIMP GetOverhangMetrics(DWRITE_OVERHANG_METRICS *overhangs) override;
+	STDMETHODIMP GetBreakConditions(
+		DWRITE_BREAK_CONDITION *breakConditionBefore,
+		DWRITE_BREAK_CONDITION *breakConditionAfter) override;
+public:
+	BlobInline(XYPOSITION width_=0.0f) noexcept : width(width_) {
+	}
+	virtual ~BlobInline() {
+	}
+};
+
+/// Implement IUnknown
+STDMETHODIMP BlobInline::QueryInterface(REFIID riid, PVOID *ppv) {
+	// Never called so not checked.
+	*ppv = NULL;
+	if (riid == IID_IUnknown)
+		*ppv = static_cast<IUnknown *>(this);
+	if (riid == __uuidof(IDWriteInlineObject))
+		*ppv = static_cast<IDWriteInlineObject *>(this);
+	if (!*ppv)
+		return E_NOINTERFACE;
+	return S_OK;
 }
 
-XYPOSITION SurfaceD2D::XFromPosition(const IScreenLine *, size_t) {
-	return 0;
+STDMETHODIMP_(ULONG) BlobInline::AddRef() {
+	// Lifetime tied to Platform methods so ignore any reference operations.
+	return 1;
 }
 
-std::vector<Interval> SurfaceD2D::FindRangeIntervals(const IScreenLine *, size_t, size_t) {
-	return std::vector<Interval>();
+STDMETHODIMP_(ULONG) BlobInline::Release() {
+	// Lifetime tied to Platform methods so ignore any reference operations.
+	return 1;
+}
+
+/// Implement IDWriteInlineObject
+HRESULT STDMETHODCALLTYPE BlobInline::Draw(
+	void*,
+	IDWriteTextRenderer*,
+	FLOAT,
+	FLOAT,
+	BOOL,
+	BOOL,
+	IUnknown*) {
+	// Since not performing drawing, not necessary to implement
+	// Could be implemented by calling back into platform-independent code.
+	// This would allow more of the drawing to be mediated through DirectWrite.
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE BlobInline::GetMetrics(
+	DWRITE_INLINE_OBJECT_METRICS *metrics
+) {
+	metrics->width = width;
+	metrics->height = 2;
+	metrics->baseline = 1;
+	metrics->supportsSideways = FALSE;
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE BlobInline::GetOverhangMetrics(
+	DWRITE_OVERHANG_METRICS *overhangs
+) {
+	overhangs->left = 0;
+	overhangs->top = 0;
+	overhangs->right = 0;
+	overhangs->bottom = 0;
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE BlobInline::GetBreakConditions(
+	DWRITE_BREAK_CONDITION *breakConditionBefore,
+	DWRITE_BREAK_CONDITION *breakConditionAfter
+) {
+	// Since not performing 2D layout, not necessary to implement
+	*breakConditionBefore = DWRITE_BREAK_CONDITION_NEUTRAL;
+	*breakConditionAfter = DWRITE_BREAK_CONDITION_NEUTRAL;
+	return S_OK;
+}
+
+// Get the position from the provided x
+
+size_t SurfaceD2D::PositionFromX(const IScreenLine *screenLine, XYPOSITION xDistance, bool charPosition) {
+	// If the text is empty, then no need to go through this function
+	if (!screenLine->Length())
+		return 0;
+
+	// Get textFormat
+	FormatAndMetrics *pfm = static_cast<FormatAndMetrics *>(screenLine->FontOfPosition(0)->GetID());
+
+	if (!pIDWriteFactory || !pfm->pTextFormat) {
+		return 0;
+	}
+
+	// Convert the string to wstring and replace the original control characters with their representative chars.
+	std::wstring buffer = ReplaceRepresentation(screenLine->Text());
+
+	// Create a text layout
+	IDWriteTextLayout *textLayout = 0;
+
+	const HRESULT hrCreate = pIDWriteFactory->CreateTextLayout(buffer.c_str(), static_cast<UINT32>(buffer.length()),
+		pfm->pTextFormat, screenLine->Width(), screenLine->Height(), &textLayout);
+	if (!SUCCEEDED(hrCreate)) {
+		return 0;
+	}
+
+	std::vector<BlobInline> blobs;
+
+	// Fill the textLayout chars with their own formats
+	FillTextLayoutFormats(screenLine, textLayout, blobs);
+
+	// Returns the text position corresponding to the mouse x,y.
+	// If hitting the trailing side of a cluster, return the
+	// leading edge of the following text position.
+
+	BOOL isTrailingHit;
+	BOOL isInside;
+	DWRITE_HIT_TEST_METRICS caretMetrics;
+
+	textLayout->HitTestPoint(
+		xDistance,
+		0.0f,
+		&isTrailingHit,
+		&isInside,
+		&caretMetrics
+	);
+
+	DWRITE_HIT_TEST_METRICS hitTestMetrics = {};
+	if (isTrailingHit) {
+		FLOAT caretX = 0.0f;
+		FLOAT caretY = 0.0f;
+
+		// Uses hit-testing to align the current caret position to a whole cluster,
+		// rather than residing in the middle of a base character + diacritic,
+		// surrogate pair, or character + UVS.
+
+		// Align the caret to the nearest whole cluster.
+		textLayout->HitTestTextPosition(
+			caretMetrics.textPosition,
+			false,
+			&caretX,
+			&caretY,
+			&hitTestMetrics
+		);
+	}
+
+	textLayout->Release();
+	size_t pos;
+	if (charPosition) {
+		pos = isTrailingHit ? hitTestMetrics.textPosition : caretMetrics.textPosition;
+	} else {
+		pos = isTrailingHit ? hitTestMetrics.textPosition + hitTestMetrics.length : caretMetrics.textPosition;
+	}
+
+	// Get the character position in original string
+	return GetPositionInString(screenLine->Text(), pos);
+}
+
+// Finds the point of the caret position
+
+XYPOSITION SurfaceD2D::XFromPosition(const IScreenLine *screenLine, size_t caretPosition) {
+	// If the text is empty, then no need to go through this function
+	if (!screenLine->Length())
+		return 0.0f;
+
+	// Convert byte positions to wchar_t positions
+	const size_t position = GetPositionInLayout(screenLine->Text(), caretPosition);
+
+	// Get textFormat
+	FormatAndMetrics *pfm = static_cast<FormatAndMetrics *>(screenLine->FontOfPosition(0)->GetID());
+
+	if (!pIDWriteFactory || !pfm->pTextFormat) {
+		return 0.0f;
+	}
+
+	// Convert the string to wstring and replace the original control characters with their representative chars.
+	std::wstring buffer = ReplaceRepresentation(screenLine->Text());
+
+	// Create a text layout
+	IDWriteTextLayout *textLayout = 0;
+
+	const HRESULT hrCreate = pIDWriteFactory->CreateTextLayout(buffer.c_str(), static_cast<UINT32>(buffer.length()+1),
+		pfm->pTextFormat, screenLine->Width(), screenLine->Height(), &textLayout);
+
+	if (!SUCCEEDED(hrCreate)) {
+		return 0.0f;
+	}
+
+	std::vector<BlobInline> blobs;
+
+	// Fill the textLayout chars with their own formats
+	FillTextLayoutFormats(screenLine, textLayout, blobs);
+
+	// Translate text character offset to point x,y.
+	DWRITE_HIT_TEST_METRICS caretMetrics;
+	Point pt;
+
+	textLayout->HitTestTextPosition(
+		static_cast<UINT32>(position),
+		false, // trailing if false, else leading edge
+		&pt.x,
+		&pt.y,
+		&caretMetrics
+	);
+
+	textLayout->Release();
+
+	return pt.x;
+}
+
+// Find the selection range rectangles
+
+std::vector<Interval> SurfaceD2D::FindRangeIntervals(const IScreenLine *screenLine, size_t start, size_t end) {
+	std::vector<Interval> ret;
+
+	// If the text is empty, then no need to go through this function
+	if (!screenLine->Length()) {
+		return ret;
+	}
+
+	// Convert byte positions to wchar_t positions
+	const size_t startPos = GetPositionInLayout(screenLine->Text(), start);
+	const size_t endPos = GetPositionInLayout(screenLine->Text(), end);
+
+	// Get textFormat
+	FormatAndMetrics *pfm = static_cast<FormatAndMetrics *>(screenLine->FontOfPosition(0)->GetID());
+
+	if (!pIDWriteFactory || !pfm->pTextFormat) {
+		return ret;
+	}
+
+	// Convert the string to wstring and replace the original control characters with their representative chars.
+	std::wstring buffer = ReplaceRepresentation(screenLine->Text());
+
+	// Create a text layout
+	IDWriteTextLayout *textLayout = 0;
+
+	const HRESULT hrCreate = pIDWriteFactory->CreateTextLayout(buffer.c_str(), static_cast<UINT32>(buffer.length() + 1),
+		pfm->pTextFormat, screenLine->Width(), screenLine->Height(), &textLayout);
+
+	if (!SUCCEEDED(hrCreate)) {
+		return ret;
+	}
+
+	std::vector<BlobInline> blobs;
+
+	// Fill the textLayout chars with their own formats
+	FillTextLayoutFormats(screenLine, textLayout, blobs);
+
+	// Find selection range length
+	size_t rangeLength = (endPos > startPos) ? (endPos - startPos) : (startPos - endPos);
+
+	// Determine actual number of hit-test ranges
+	UINT32 actualHitTestCount = 0;
+
+	if (rangeLength > 0) {
+		textLayout->HitTestTextRange(
+			static_cast<UINT32>(startPos),
+			static_cast<UINT32>(rangeLength),
+			0, // x
+			0, // y
+			NULL,
+			0, // metrics count
+			&actualHitTestCount
+		);
+	}
+
+	// Allocate enough room to return all hit-test metrics.
+	std::vector<DWRITE_HIT_TEST_METRICS> hitTestMetrics(actualHitTestCount);
+
+	if (rangeLength > 0) {
+		textLayout->HitTestTextRange(
+			static_cast<UINT32>(startPos),
+			static_cast<UINT32>(rangeLength),
+			0, // x
+			0, // y
+			&hitTestMetrics[0],
+			static_cast<UINT32>(hitTestMetrics.size()),
+			&actualHitTestCount
+		);
+	}
+
+	// Get the selection ranges behind the text.
+
+	if (actualHitTestCount > 0) {
+		for (size_t i = 0; i < actualHitTestCount; ++i) {
+			// Draw selection rectangle
+			const DWRITE_HIT_TEST_METRICS &htm = hitTestMetrics[i];
+			Interval selectionInterval;
+
+			selectionInterval.left = htm.left;
+			selectionInterval.right = htm.left + htm.width;
+
+			ret.push_back(selectionInterval);
+		}
+	}
+	return ret;
+}
+
+// Each char can have its own style, so we fill the textLayout with the textFormat of each char
+
+void SurfaceD2D::FillTextLayoutFormats(const IScreenLine *screenLine, IDWriteTextLayout *textLayout, std::vector<BlobInline> &blobs) {
+	// Reserve enough entries up front so they are not moved and the pointers handed
+	// to textLayout remain valid.
+	const ptrdiff_t numRepresentations = screenLine->RepresentationCount();
+	std::string_view text = screenLine->Text();
+	const ptrdiff_t numTabs = std::count(std::begin(text), std::end(text), '\t');
+	blobs.reserve(numRepresentations + numTabs);
+
+	UINT32 layoutPosition = 0;
+
+	for (size_t bytePosition = 0; bytePosition < screenLine->Length();) {
+		const unsigned char uch = screenLine->Text()[bytePosition];
+		const unsigned int byteCount = UTF8BytesOfLead[uch];
+		const UINT32 codeUnits = static_cast<UINT32>(UTF16LengthFromUTF8ByteCount(byteCount));
+		const DWRITE_TEXT_RANGE textRange = { layoutPosition, codeUnits };
+
+		XYPOSITION representationWidth = screenLine->RepresentationWidth(bytePosition);
+		if ((representationWidth == 0.0f) && (screenLine->Text()[bytePosition] == '\t')) {
+			Point realPt;
+			DWRITE_HIT_TEST_METRICS realCaretMetrics;
+			textLayout->HitTestTextPosition(
+				layoutPosition,
+				false, // trailing if false, else leading edge
+				&realPt.x,
+				&realPt.y,
+				&realCaretMetrics
+			);
+
+			const XYPOSITION nextTab = (static_cast<int>((realPt.x + screenLine->TabWidthMinimumPixels()) / screenLine->TabWidth()) + 1) * screenLine->TabWidth();
+			representationWidth = nextTab - realPt.x;
+		}
+		if (representationWidth > 0.0f) {
+			blobs.push_back(BlobInline(representationWidth));
+			textLayout->SetInlineObject(&blobs.back(), textRange);
+		};
+
+		FormatAndMetrics *pfm =
+			static_cast<FormatAndMetrics *>(screenLine->FontOfPosition(bytePosition)->GetID());
+
+		const unsigned int fontFamilyNameSize = pfm->pTextFormat->GetFontFamilyNameLength();
+		std::vector<WCHAR> fontFamilyName(fontFamilyNameSize + 1);
+
+		pfm->pTextFormat->GetFontFamilyName(fontFamilyName.data(), fontFamilyNameSize + 1);
+		textLayout->SetFontFamilyName(fontFamilyName.data(), textRange);
+
+		textLayout->SetFontSize(pfm->pTextFormat->GetFontSize(), textRange);
+		textLayout->SetFontWeight(pfm->pTextFormat->GetFontWeight(), textRange);
+		textLayout->SetFontStyle(pfm->pTextFormat->GetFontStyle(), textRange);
+
+		const unsigned int localNameSize = pfm->pTextFormat->GetLocaleNameLength();
+		std::vector<WCHAR> localName(localNameSize + 1);
+
+		pfm->pTextFormat->GetLocaleName(localName.data(), localNameSize);
+		textLayout->SetLocaleName(localName.data(), textRange);
+
+		textLayout->SetFontStretch(pfm->pTextFormat->GetFontStretch(), textRange);
+
+		IDWriteFontCollection *fontCollection;
+		if (SUCCEEDED(pfm->pTextFormat->GetFontCollection(&fontCollection))) {
+			textLayout->SetFontCollection(fontCollection, textRange);
+		}
+
+		bytePosition += byteCount;
+		layoutPosition += codeUnits;
+	}
+
+}
+
+/* Convert to a wide character string and replace tabs with X to stop DirectWrite tab expansion */
+
+std::wstring SurfaceD2D::ReplaceRepresentation(std::string_view text) {
+	const TextWide wideText(text, true);
+	std::wstring ws(wideText.buffer, wideText.tlen);
+	std::replace(ws.begin(), ws.end(), L'\t', L'X');
+	return ws;
+}
+
+// Finds the position in the wide character version of the text.
+
+size_t SurfaceD2D::GetPositionInLayout(std::string_view text, size_t position) {
+	const std::string_view textUptoPosition = text.substr(0, position);
+	return UTF16Length(textUptoPosition);
+}
+
+// Converts position in wide character string to position in string.
+
+size_t SurfaceD2D::GetPositionInString(std::string_view text, size_t position) {
+	size_t posInString = 0;
+	for (size_t wLength = 0; (!text.empty()) && (wLength < position);) {
+		const unsigned char uch = text[0];
+		const unsigned int byteCount = UTF8BytesOfLead[uch];
+		wLength += UTF16LengthFromUTF8ByteCount(byteCount);
+		posInString += byteCount;
+		text.remove_prefix(byteCount);
+	}
+
+	return posInString;
 }
 
 void SurfaceD2D::DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, UINT fuOptions) {
