@@ -317,6 +317,24 @@ public:
 	friend class SurfaceImpl;
 };
 
+class IScreenLine {
+public:
+	virtual std::string_view Text() const = 0;
+	virtual size_t Length() const = 0;
+	virtual size_t RepresentationCount() const = 0;
+	virtual XYPOSITION Width() const = 0;
+	virtual XYPOSITION Height() const = 0;
+	virtual XYPOSITION TabWidth() const = 0;
+	virtual XYPOSITION TabWidthMinimumPixels() const = 0;
+	virtual const Font *FontOfPosition(size_t position) const = 0;
+	virtual XYPOSITION RepresentationWidth(size_t position) const = 0;
+};
+
+struct Interval {
+	XYPOSITION left;
+	XYPOSITION right;
+};
+
 /**
  * A surface abstracts a place to draw.
  */
@@ -354,6 +372,10 @@ public:
 	virtual void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back)=0;
 	virtual void Copy(PRectangle rc, Point from, Surface &surfaceSource)=0;
 
+	virtual size_t PositionFromX(const IScreenLine *screenLine, XYPOSITION xDistance, bool charPosition)=0;
+	virtual XYPOSITION XFromPosition(const IScreenLine *screenLine, size_t caretPosition)=0;
+	virtual std::vector<Interval> FindRangeIntervals(const IScreenLine *screenLine, size_t start, size_t end)=0;
+
 	virtual void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) = 0;
 	virtual void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) = 0;
 	virtual void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) = 0;
@@ -370,6 +392,7 @@ public:
 
 	virtual void SetUnicodeMode(bool unicodeMode_)=0;
 	virtual void SetDBCSMode(int codePage)=0;
+	virtual void SetBidiR2L(bool bidiR2L_)=0;
 };
 
 /**

@@ -819,6 +819,22 @@ void SurfaceImpl::Copy(PRectangle rc, Scintilla::Point from, Surface &surfaceSou
 
 //--------------------------------------------------------------------------------------------------
 
+// Bidirectional text support for Arabic and Hebrew not currently implemented on Cocoa.
+
+size_t SurfaceImpl::PositionFromX(const IScreenLine *, XYPOSITION, bool) {
+	return 0;
+}
+
+XYPOSITION SurfaceImpl::XFromPosition(const IScreenLine *, size_t) {
+	return 0;
+}
+
+std::vector<Interval> SurfaceImpl::FindRangeIntervals(const IScreenLine *, size_t, size_t) {
+	return std::vector<Interval>();
+}
+
+//--------------------------------------------------------------------------------------------------
+
 void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text,
 				 ColourDesired fore, ColourDesired back) {
 	FillRectangle(rc, back);
@@ -1032,6 +1048,9 @@ void SurfaceImpl::SetUnicodeMode(bool unicodeMode_) {
 void SurfaceImpl::SetDBCSMode(int codePage_) {
 	if (codePage_ && (codePage_ != SC_CP_UTF8))
 		codePage = codePage_;
+}
+
+void SurfaceImpl::SetBidiR2L(bool) {
 }
 
 Surface *Surface::Allocate(int) {

@@ -566,6 +566,10 @@ public:
 	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource) override;
 
+	size_t PositionFromX(const IScreenLine *screenLine, XYPOSITION xDistance, bool charPosition) override;
+	XYPOSITION XFromPosition(const IScreenLine *screenLine, size_t caretPosition) override;
+	std::vector<Interval> FindRangeIntervals(const IScreenLine *screenLine, size_t start, size_t end) override;
+
 	void DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, UINT fuOptions);
 	void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
 	void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
@@ -583,6 +587,7 @@ public:
 
 	void SetUnicodeMode(bool unicodeMode_) override;
 	void SetDBCSMode(int codePage_) override;
+	void SetBidiR2L(bool bidiR2L_) override;
 };
 
 SurfaceGDI::SurfaceGDI() :
@@ -919,6 +924,18 @@ void SurfaceGDI::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 		static_cast<int>(from.x), static_cast<int>(from.y), SRCCOPY);
 }
 
+size_t SurfaceGDI::PositionFromX(const IScreenLine *, XYPOSITION, bool) {
+	return 0;
+}
+
+XYPOSITION SurfaceGDI::XFromPosition(const IScreenLine *, size_t) {
+	return 0;
+}
+
+std::vector<Interval> SurfaceGDI::FindRangeIntervals(const IScreenLine *, size_t, size_t) {
+	return std::vector<Interval>();
+}
+
 typedef VarBuffer<int, stackBufferLength> TextPositionsI;
 
 void SurfaceGDI::DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, UINT fuOptions) {
@@ -1072,6 +1089,9 @@ void SurfaceGDI::SetDBCSMode(int codePage_) {
 	codePage = codePage_;
 }
 
+void SurfaceGDI::SetBidiR2L(bool) {
+}
+
 #if defined(USE_D2D)
 
 class SurfaceD2D : public Surface {
@@ -1136,6 +1156,10 @@ public:
 	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource) override;
 
+	size_t PositionFromX(const IScreenLine *screenLine, XYPOSITION xDistance, bool charPosition) override;
+	XYPOSITION XFromPosition(const IScreenLine *screenLine, size_t caretPosition) override;
+	std::vector<Interval> FindRangeIntervals(const IScreenLine *screenLine, size_t start, size_t end) override;
+
 	void DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, UINT fuOptions);
 	void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
 	void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
@@ -1153,6 +1177,7 @@ public:
 
 	void SetUnicodeMode(bool unicodeMode_) override;
 	void SetDBCSMode(int codePage_) override;
+	void SetBidiR2L(bool bidiR2L_) override;
 };
 
 SurfaceD2D::SurfaceD2D() :
@@ -1590,6 +1615,18 @@ void SurfaceD2D::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	}
 }
 
+size_t SurfaceD2D::PositionFromX(const IScreenLine *, XYPOSITION, bool) {
+	return 0;
+}
+
+XYPOSITION SurfaceD2D::XFromPosition(const IScreenLine *, size_t) {
+	return 0;
+}
+
+std::vector<Interval> SurfaceD2D::FindRangeIntervals(const IScreenLine *, size_t, size_t) {
+	return std::vector<Interval>();
+}
+
 void SurfaceD2D::DrawTextCommon(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, UINT fuOptions) {
 	SetFont(font_);
 
@@ -1806,6 +1843,10 @@ void SurfaceD2D::SetDBCSMode(int codePage_) {
 	// No action on window as automatically handled by system.
 	codePage = codePage_;
 }
+
+void SurfaceD2D::SetBidiR2L(bool) {
+}
+
 #endif
 
 Surface *Surface::Allocate(int technology) {

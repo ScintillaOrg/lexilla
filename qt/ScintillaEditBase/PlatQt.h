@@ -103,6 +103,10 @@ public:
 		ColourDesired back) override;
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource) override;
 
+	size_t PositionFromX(const IScreenLine *screenLine, XYPOSITION xDistance, bool charPosition) override;
+	XYPOSITION XFromPosition(const IScreenLine *screenLine, size_t caretPosition) override;
+	std::vector<Interval> FindRangeIntervals(const IScreenLine *screenLine, size_t start, size_t end) override;
+
 	void DrawTextNoClip(PRectangle rc, Font &font, XYPOSITION ybase,
 		std::string_view text, ColourDesired fore, ColourDesired back) override;
 	void DrawTextClipped(PRectangle rc, Font &font, XYPOSITION ybase,
@@ -123,6 +127,7 @@ public:
 
 	void SetUnicodeMode(bool unicodeMode_) override;
 	void SetDBCSMode(int codePage_) override;
+	void SetBidiR2L(bool bidiR2L_) override;
 
 	void BrushColour(ColourDesired back);
 	void SetCodec(Font &font);

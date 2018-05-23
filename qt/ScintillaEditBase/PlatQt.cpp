@@ -408,6 +408,21 @@ void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource)
 	GetPainter()->drawPixmap(rc.left, rc.top, *pixmap, from.x, from.y, -1, -1);
 }
 
+size_t SurfaceImpl::PositionFromX(const IScreenLine *, XYPOSITION, bool)
+{
+	return 0;
+}
+
+XYPOSITION SurfaceImpl::XFromPosition(const IScreenLine *, size_t)
+{
+	return 0;
+}
+
+std::vector<Interval> SurfaceImpl::FindRangeIntervals(const IScreenLine *, size_t, size_t)
+{
+	return std::vector<Interval>();
+}
+
 void SurfaceImpl::DrawTextNoClip(PRectangle rc,
                                  Font &font,
                                  XYPOSITION ybase,
@@ -563,6 +578,10 @@ void SurfaceImpl::SetUnicodeMode(bool unicodeMode_)
 void SurfaceImpl::SetDBCSMode(int codePage_)
 {
 	codePage = codePage_;
+}
+
+void SurfaceImpl::SetBidiR2L(bool)
+{
 }
 
 QPaintDevice *SurfaceImpl::GetPaintDevice()

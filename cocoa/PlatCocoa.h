@@ -98,6 +98,9 @@ public:
 	void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) override;
 	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void Copy(PRectangle rc, Scintilla::Point from, Surface &surfaceSource) override;
+	size_t PositionFromX(const IScreenLine *screenLine, XYPOSITION xDistance, bool charPosition) override;
+	XYPOSITION XFromPosition(const IScreenLine *screenLine, size_t caretPosition) override;
+	std::vector<Interval> FindRangeIntervals(const IScreenLine *screenLine, size_t start, size_t end) override;
 	void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore,
 			    ColourDesired back) override;
 	void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore,
@@ -116,6 +119,7 @@ public:
 
 	void SetUnicodeMode(bool unicodeMode_) override;
 	void SetDBCSMode(int codePage_) override;
+	void SetBidiR2L(bool bidiR2L_) override;
 }; // SurfaceImpl class
 
 } // Scintilla namespace
