@@ -17,9 +17,9 @@
 #include <QInputContext>
 #endif
 #include <QPainter>
+#include <QVarLengthArray>
 #include <QScrollBar>
 #include <QTextFormat>
-#include <QVarLengthArray>
 
 #define INDIC_INPUTMETHOD 24
 

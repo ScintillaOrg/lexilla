@@ -8,6 +8,8 @@
 // Additions Copyright (c) 2011 Archaeopteryx Software, Inc. d/b/a Wingware
 // Scintilla platform layer for Qt
 
+#include <cstdio>
+
 #include "PlatQt.h"
 #include "Scintilla.h"
 #include "UniConversion.h"
@@ -35,7 +37,6 @@
 #include <QTextLayout>
 #include <QTextLine>
 #include <QLibrary>
-#include <cstdio>
 
 namespace Scintilla {
 

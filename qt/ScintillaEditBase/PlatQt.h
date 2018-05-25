@@ -11,6 +11,8 @@
 #ifndef PLATQT_H
 #define PLATQT_H
 
+#include <cstddef>
+
 #include <string_view>
 #include <vector>
 
