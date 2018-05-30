@@ -37,6 +37,7 @@
 
 #include <string_view>
 #include <vector>
+#include <memory>
 
 #include "Platform.h"
 
