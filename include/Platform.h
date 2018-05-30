@@ -328,6 +328,7 @@ public:
 	virtual XYPOSITION TabWidthMinimumPixels() const = 0;
 	virtual const Font *FontOfPosition(size_t position) const = 0;
 	virtual XYPOSITION RepresentationWidth(size_t position) const = 0;
+	virtual XYPOSITION TabPositionAfter(XYPOSITION xPosition) const = 0;
 };
 
 struct Interval {

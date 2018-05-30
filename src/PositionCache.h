@@ -142,6 +142,7 @@ struct ScreenLine : public IScreenLine {
 	XYPOSITION TabWidthMinimumPixels() const override;
 	const Font *FontOfPosition(size_t position) const override;
 	XYPOSITION RepresentationWidth(size_t position) const override;
+	XYPOSITION TabPositionAfter(XYPOSITION xPosition) const override;
 };
 
 /**
