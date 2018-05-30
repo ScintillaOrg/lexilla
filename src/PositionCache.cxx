@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include <cmath>
 
 #include <stdexcept>
 #include <string>
