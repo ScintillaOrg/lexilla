@@ -15,6 +15,7 @@ const int UTF8MaxBytes = 4;
 const int unicodeReplacementChar = 0xFFFD;
 
 size_t UTF8Length(std::wstring_view wsv);
+size_t UTF8PositionFromUTF16Position(std::string_view u8Text, size_t positionUTF16) noexcept;
 void UTF8FromUTF16(std::wstring_view wsv, char *putf, size_t len);
 void UTF8FromUTF32Character(int uch, char *putf);
 size_t UTF16Length(std::string_view sv);
