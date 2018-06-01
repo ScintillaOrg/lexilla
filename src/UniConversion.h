@@ -39,11 +39,11 @@ inline int UnicodeFromUTF8(const unsigned char *us) noexcept {
 	}
 }
 
-inline bool UTF8IsTrailByte(unsigned char ch) noexcept {
+inline constexpr bool UTF8IsTrailByte(unsigned char ch) noexcept {
 	return (ch >= 0x80) && (ch < 0xc0);
 }
 
-inline bool UTF8IsAscii(int ch) noexcept {
+inline constexpr bool UTF8IsAscii(int ch) noexcept {
 	return ch < 0x80;
 }
 
@@ -73,11 +73,11 @@ enum { SURROGATE_TRAIL_FIRST = 0xDC00 };
 enum { SURROGATE_TRAIL_LAST = 0xDFFF };
 enum { SUPPLEMENTAL_PLANE_FIRST = 0x10000 };
 
-inline unsigned int UTF16CharLength(wchar_t uch) noexcept {
+inline constexpr unsigned int UTF16CharLength(wchar_t uch) noexcept {
 	return ((uch >= SURROGATE_LEAD_FIRST) && (uch <= SURROGATE_LEAD_LAST)) ? 2 : 1;
 }
 
-inline unsigned int UTF16LengthFromUTF8ByteCount(unsigned int byteCount) noexcept {
+inline constexpr unsigned int UTF16LengthFromUTF8ByteCount(unsigned int byteCount) noexcept {
 	return (byteCount < 4) ? 1 : 2;
 }
 
