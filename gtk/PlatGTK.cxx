@@ -166,9 +166,7 @@ public:
 	void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource) override;
 
-	size_t PositionFromX(const IScreenLine *screenLine, XYPOSITION xDistance, bool charPosition) override;
-	XYPOSITION XFromPosition(const IScreenLine *screenLine, size_t caretPosition) override;
-	std::vector<Interval> FindRangeIntervals(const IScreenLine *screenLine, size_t start, size_t end) override;
+	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
 
 	void DrawTextBase(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore);
 	void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
@@ -630,16 +628,8 @@ void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	}
 }
 
-size_t SurfaceImpl::PositionFromX(const IScreenLine *, XYPOSITION, bool) {
-	return 0;
-}
-
-XYPOSITION SurfaceImpl::XFromPosition(const IScreenLine *, size_t) {
-	return 0;
-}
-
-std::vector<Interval> SurfaceImpl::FindRangeIntervals(const IScreenLine *, size_t, size_t) {
-	return std::vector<Interval>();
+std::unique_ptr<IScreenLineLayout> SurfaceImpl::Layout(const IScreenLine *) {
+	return {};
 }
 
 std::string UTF8FromLatin1(std::string_view text) {

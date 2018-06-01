@@ -105,9 +105,7 @@ public:
 		ColourDesired back) override;
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource) override;
 
-	size_t PositionFromX(const IScreenLine *screenLine, XYPOSITION xDistance, bool charPosition) override;
-	XYPOSITION XFromPosition(const IScreenLine *screenLine, size_t caretPosition) override;
-	std::vector<Interval> FindRangeIntervals(const IScreenLine *screenLine, size_t start, size_t end) override;
+	std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override;
 
 	void DrawTextNoClip(PRectangle rc, Font &font, XYPOSITION ybase,
 		std::string_view text, ColourDesired fore, ColourDesired back) override;

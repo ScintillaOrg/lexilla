@@ -336,6 +336,14 @@ struct Interval {
 	XYPOSITION right;
 };
 
+class IScreenLineLayout {
+public:
+	virtual ~IScreenLineLayout() = default;
+	virtual size_t PositionFromX(XYPOSITION xDistance, bool charPosition) = 0;
+	virtual XYPOSITION XFromPosition(size_t caretPosition) = 0;
+	virtual std::vector<Interval> FindRangeIntervals(size_t start, size_t end) = 0;
+};
+
 /**
  * A surface abstracts a place to draw.
  */
@@ -373,9 +381,7 @@ public:
 	virtual void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back)=0;
 	virtual void Copy(PRectangle rc, Point from, Surface &surfaceSource)=0;
 
-	virtual size_t PositionFromX(const IScreenLine *screenLine, XYPOSITION xDistance, bool charPosition)=0;
-	virtual XYPOSITION XFromPosition(const IScreenLine *screenLine, size_t caretPosition)=0;
-	virtual std::vector<Interval> FindRangeIntervals(const IScreenLine *screenLine, size_t start, size_t end)=0;
+	virtual std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) = 0;
 
 	virtual void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) = 0;
 	virtual void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) = 0;

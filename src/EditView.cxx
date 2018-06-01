@@ -650,7 +650,8 @@ Point EditView::LocationFromPosition(Surface *surface, const EditModel &model, S
 
 			// Get the point from current position
 			const ScreenLine screenLine(ll, subLine, vs, rcClient.right, tabWidthMinimumPixels);
-			pt.x = surface->XFromPosition(&screenLine, caretPosition);
+			std::unique_ptr<IScreenLineLayout> slLayout = surface->Layout(&screenLine);
+			pt.x = slLayout->XFromPosition(caretPosition);
 
 			pt.x += vs.textStart - model.xOffset;
 
@@ -719,7 +720,8 @@ SelectionPosition EditView::SPositionFromLocation(Surface *surface, const EditMo
 				UpdateBidiData(model, vs, ll);
 
 				const ScreenLine screenLine(ll, subLine, vs, rcClient.right, tabWidthMinimumPixels);
-				positionInLine = surface->PositionFromX(&screenLine, static_cast<XYPOSITION>(pt.x), charPosition) +
+				std::unique_ptr<IScreenLineLayout> slLayout = surface->Layout(&screenLine);
+				positionInLine = slLayout->PositionFromX(static_cast<XYPOSITION>(pt.x), charPosition) +
 					rangeSubLine.start;
 			} else {
 				positionInLine = ll->FindPositionFromX(static_cast<XYPOSITION>(pt.x + subLineStart),
@@ -1096,7 +1098,8 @@ static void DrawIndicator(int indicNum, Sci::Position startPos, Sci::Position en
 		ScreenLine screenLine(ll, subLine, vsDraw, rcLine.right - xStart, tabWidthMinimumPixels);
 		const Range lineRange = ll->SubLineRange(subLine, LineLayout::Scope::visibleOnly);
 
-		std::vector<Interval> intervals = surface->FindRangeIntervals(&screenLine, 
+		std::unique_ptr<IScreenLineLayout> slLayout = surface->Layout(&screenLine);
+		std::vector<Interval> intervals = slLayout->FindRangeIntervals(
 			startPos - lineRange.start, endPos - lineRange.start);
 		for (const Interval &interval : intervals) {
 			PRectangle rcInterval = rcIndic;
@@ -1429,7 +1432,8 @@ void EditView::DrawCarets(Surface *surface, const EditModel &model, const ViewSt
 
 				const int caretPosition = static_cast<int>(posCaret.Position() - posLineStart - ll->LineStart(subLine));
 
-				const XYPOSITION caretLeft = surface->XFromPosition(&screenLine, caretPosition);
+				std::unique_ptr<IScreenLineLayout> slLayout = surface->Layout(&screenLine);
+				const XYPOSITION caretLeft = slLayout->XFromPosition(caretPosition);
 
 				// In case of start of line, the cursor should be at the right
 				xposCaret = caretLeft + virtualOffset;
@@ -1675,8 +1679,9 @@ static void DrawTranslucentSelection(Surface *surface, const EditModel &model, c
 						const ColourDesired background = SelectionBackground(vsDraw, r == model.sel.Main(), model.primarySelection);
 
 						const ScreenLine screenLine(ll, subLine, vsDraw, rcLine.right, tabWidthMinimumPixels);
+						std::unique_ptr<IScreenLineLayout> slLayout = surface->Layout(&screenLine);
 
-						const std::vector<Interval> intervals = surface->FindRangeIntervals(&screenLine, selectionStart, selectionEnd);
+						const std::vector<Interval> intervals = slLayout->FindRangeIntervals(selectionStart, selectionEnd);
 						for (const Interval &interval : intervals) {
 							const XYPOSITION rcRight = interval.right + xStart;
 							const XYPOSITION rcLeft = interval.left + xStart;

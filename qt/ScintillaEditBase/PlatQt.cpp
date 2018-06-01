@@ -409,19 +409,9 @@ void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource)
 	GetPainter()->drawPixmap(rc.left, rc.top, *pixmap, from.x, from.y, -1, -1);
 }
 
-size_t SurfaceImpl::PositionFromX(const IScreenLine *, XYPOSITION, bool)
+std::unique_ptr<IScreenLineLayout> SurfaceImpl::Layout(const IScreenLine *)
 {
-	return 0;
-}
-
-XYPOSITION SurfaceImpl::XFromPosition(const IScreenLine *, size_t)
-{
-	return 0;
-}
-
-std::vector<Interval> SurfaceImpl::FindRangeIntervals(const IScreenLine *, size_t, size_t)
-{
-	return std::vector<Interval>();
+	return {};
 }
 
 void SurfaceImpl::DrawTextNoClip(PRectangle rc,
