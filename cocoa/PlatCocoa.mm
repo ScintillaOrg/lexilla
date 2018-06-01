@@ -22,7 +22,9 @@
 #include <string_view>
 #include <vector>
 #include <map>
+#include <functional>
 #include <memory>
+#include <numeric>
 
 #include <sys/time.h>
 
@@ -84,7 +86,7 @@ Font::~Font() {
 
 //--------------------------------------------------------------------------------------------------
 
-static QuartzTextStyle *TextStyleFromFont(Font &f) {
+static QuartzTextStyle *TextStyleFromFont(const Font &f) {
 	return static_cast<QuartzTextStyle *>(f.GetID());
 }
 
@@ -117,6 +119,209 @@ void Font::Release() {
 	if (fid)
 		delete static_cast<QuartzTextStyle *>(fid);
 	fid = 0;
+}
+
+//--------------------------------------------------------------------------------------------------
+
+// Bidirectional text support for Arabic and Hebrew.
+
+namespace {
+
+CFIndex IndexFromPosition(std::string_view text, size_t position) {
+	const std::string_view textUptoPosition = text.substr(0, position);
+	return UTF16Length(textUptoPosition);
+}
+
+// Handling representations and tabs
+
+struct Blob {
+	XYPOSITION width;
+	Blob(XYPOSITION width_) : width(width_) {
+	}
+};
+
+static void BlobDealloc(void *refCon) {
+	Blob *blob = static_cast<Blob *>(refCon);
+	delete blob;
+}
+
+static CGFloat BlobGetWidth(void *refCon) {
+	Blob *blob = static_cast<Blob *>(refCon);
+	return blob->width;
+}
+
+class ScreenLineLayout : public IScreenLineLayout {
+	CTLineRef line = NULL;
+	const std::string text;
+public:
+	ScreenLineLayout(const IScreenLine *screenLine);
+	~ScreenLineLayout();
+	// IScreenLineLayout implementation
+	size_t PositionFromX(XYPOSITION xDistance, bool charPosition) override;
+	XYPOSITION XFromPosition(size_t caretPosition) override;
+	std::vector<Interval> FindRangeIntervals(size_t start, size_t end) override;
+};
+
+ScreenLineLayout::ScreenLineLayout(const IScreenLine *screenLine) : text(screenLine->Text()) {
+	const UInt8 *puiBuffer = reinterpret_cast<const UInt8 *>(text.data());
+
+	// Start with an empty mutable attributed string and add each character to it.
+	CFMutableAttributedStringRef mas = CFAttributedStringCreateMutable(NULL, 0);
+
+	for (size_t bp=0; bp<text.length();) {
+		const unsigned char uch = text[bp];
+		const unsigned int byteCount = UTF8BytesOfLead[uch];
+		XYPOSITION repWidth = screenLine->RepresentationWidth(bp);
+		if (uch == '\t') {
+			// Find the size up to the tab
+			NSMutableAttributedString *nas = (__bridge NSMutableAttributedString *)mas;
+			const NSSize sizeUpTo = [nas size];
+			const XYPOSITION nextTab = screenLine->TabPositionAfter(sizeUpTo.width);
+			repWidth = nextTab - sizeUpTo.width;
+		}
+		CFAttributedStringRef as = NULL;
+		if (repWidth > 0.0f) {
+			CTRunDelegateCallbacks callbacks = {
+				.version = kCTRunDelegateVersion1,
+				.dealloc = BlobDealloc,
+				.getWidth = BlobGetWidth
+			};
+			CTRunDelegateRef runDelegate = CTRunDelegateCreate(&callbacks, new Blob(repWidth));
+			NSMutableAttributedString *masBlob = [[NSMutableAttributedString alloc] initWithString:@"X"];
+			NSRange rangeX = NSMakeRange(0, 1);
+			[masBlob addAttribute: (NSString *)kCTRunDelegateAttributeName value: (__bridge id)runDelegate range:rangeX];
+			CFRelease(runDelegate);
+			as = (CFAttributedStringRef)CFBridgingRetain(masBlob);
+		} else {
+			CFStringRef piece = CFStringCreateWithBytes(NULL,
+								    &puiBuffer[bp],
+								    byteCount,
+								    kCFStringEncodingUTF8,
+								    false);
+			QuartzTextStyle *qts = static_cast<QuartzTextStyle *>(screenLine->FontOfPosition(bp)->GetID());
+			CFMutableDictionaryRef pieceAttributes = qts->getCTStyle();
+			as = CFAttributedStringCreate(NULL, piece, pieceAttributes);
+			CFRelease(piece);
+		}
+		CFAttributedStringReplaceAttributedString(mas,
+							  CFRangeMake(CFAttributedStringGetLength(mas), 0),
+							  as);
+		bp += byteCount;
+		CFRelease(as);
+	}
+
+	line = CTLineCreateWithAttributedString(mas);
+	CFRelease(mas);
+}
+
+ScreenLineLayout::~ScreenLineLayout() {
+	CFRelease(line);
+}
+
+size_t ScreenLineLayout::PositionFromX(XYPOSITION xDistance, bool charPosition) {
+	if (!line) {
+		return 0;
+	}
+	const CGPoint ptDistance = CGPointMake(xDistance, 0);
+	const CFIndex offset = CTLineGetStringIndexForPosition(line, ptDistance);
+	if (offset == kCFNotFound) {
+		return 0;
+	}
+	// Convert back to UTF-8 positions
+	return UTF8PositionFromUTF16Position(text, offset);
+}
+
+XYPOSITION ScreenLineLayout::XFromPosition(size_t caretPosition) {
+	if (!line) {
+		return 0.0;
+	}
+	// Convert from UTF-8 position
+	const CFIndex caretIndex = IndexFromPosition(text, caretPosition);
+
+	const CGFloat distance = CTLineGetOffsetForStringIndex(line, caretIndex, nullptr);
+	return distance;
+}
+
+void AddToIntervalVector(std::vector<Interval> &vi, XYPOSITION left, XYPOSITION right) {
+	const Interval interval = {left, right};
+	if (vi.empty()) {
+		vi.push_back(interval);
+	} else {
+		Interval &last = vi.back();
+		if (fabs(last.right-interval.left) < 0.01) {
+			// If new left is very close to previous right then extend last item
+			last.right = interval.right;
+		} else {
+			vi.push_back(interval);
+		}
+	}
+}
+
+std::vector<Interval> ScreenLineLayout::FindRangeIntervals(size_t start, size_t end) {
+	if (!line) {
+		return {};
+	}
+
+	std::vector<Interval> ret;
+
+	// Convert from UTF-8 position
+	const CFIndex startIndex = IndexFromPosition(text, start);
+	const CFIndex endIndex = IndexFromPosition(text, end);
+
+	CFArrayRef runs = CTLineGetGlyphRuns(line);
+	const CFIndex runCount = CFArrayGetCount(runs);
+	for (CFIndex run=0; run<runCount; run++) {
+		CTRunRef aRun = static_cast<CTRunRef>(CFArrayGetValueAtIndex(runs, run));
+		const CFIndex glyphCount = CTRunGetGlyphCount(aRun);
+		const CFRange rangeAll = CFRangeMake(0, glyphCount);
+		std::vector<CFIndex> indices(glyphCount);
+		CTRunGetStringIndices(aRun, rangeAll, indices.data());
+		std::vector<CGPoint> positions(glyphCount);
+		CTRunGetPositions(aRun, rangeAll, positions.data());
+		std::vector<CGSize> advances(glyphCount);
+		CTRunGetAdvances(aRun, rangeAll, advances.data());
+		for (CFIndex glyph=0; glyph<glyphCount; glyph++) {
+			const CFIndex glyphIndex = indices[glyph];
+			const XYPOSITION xPosition = positions[glyph].x;
+			const XYPOSITION width = advances[glyph].width;
+			if ((glyphIndex >= startIndex) && (glyphIndex < endIndex)) {
+				AddToIntervalVector(ret, xPosition, xPosition + width);
+			}
+		}
+	}
+	return ret;
+}
+
+// Helper for SurfaceImpl::MeasureWidths that examines the glyph runs in a layout
+
+void GetPositions(CTLineRef line, std::vector<CGFloat> &positions) {
+
+	// Find the advances of the text
+	std::vector<CGFloat> lineAdvances(positions.size());
+	CFArrayRef runs = CTLineGetGlyphRuns(line);
+	const CFIndex runCount = CFArrayGetCount(runs);
+	for (CFIndex run=0; run<runCount; run++) {
+		CTRunRef aRun = static_cast<CTRunRef>(CFArrayGetValueAtIndex(runs, run));
+		const CFIndex glyphCount = CTRunGetGlyphCount(aRun);
+		const CFRange rangeAll = CFRangeMake(0, glyphCount);
+		std::vector<CFIndex> indices(glyphCount);
+		CTRunGetStringIndices(aRun, rangeAll, indices.data());
+		std::vector<CGSize> advances(glyphCount);
+		CTRunGetAdvances(aRun, rangeAll, advances.data());
+		for (CFIndex glyph=0; glyph<glyphCount; glyph++) {
+			const CFIndex glyphIndex = indices[glyph];
+			if (glyphIndex >= positions.size()) {
+				return;
+			}
+			lineAdvances[glyphIndex] = advances[glyph].width;
+		}
+	}
+
+	// Accumulate advances into positions
+	std::partial_sum(lineAdvances.begin(), lineAdvances.end(),
+			 positions.begin(), std::plus<CGFloat>());
+}
+
 }
 
 //----------------- SurfaceImpl --------------------------------------------------------------------
@@ -819,10 +1024,10 @@ void SurfaceImpl::Copy(PRectangle rc, Scintilla::Point from, Surface &surfaceSou
 
 //--------------------------------------------------------------------------------------------------
 
-// Bidirectional text support for Arabic and Hebrew not currently implemented on Cocoa.
+// Bidirectional text support for Arabic and Hebrew.
 
 std::unique_ptr<IScreenLineLayout> SurfaceImpl::Layout(const IScreenLine *screenLine) {
-	return {};
+	return std::make_unique<ScreenLineLayout>(screenLine);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -939,11 +1144,13 @@ void SurfaceImpl::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *
 		CFIndex fit = textLayout->getStringLength();
 		int ui=0;
 		int i=0;
+		std::vector<CGFloat> linePositions(fit);
+		GetPositions(mLine, linePositions);
 		while (ui<fit) {
 			const unsigned char uch = text[i];
 			const unsigned int byteCount = UTF8BytesOfLead[uch];
 			const int codeUnits = UTF16LengthFromUTF8ByteCount(byteCount);
-			CGFloat xPosition = CTLineGetOffsetForStringIndex(mLine, ui+codeUnits, NULL);
+			const CGFloat xPosition = linePositions[ui];
 			for (unsigned int bytePos=0; (bytePos<byteCount) && (i<text.length()); bytePos++) {
 				positions[i++] = static_cast<XYPOSITION>(xPosition);
 			}

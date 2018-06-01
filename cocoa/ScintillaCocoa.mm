@@ -842,6 +842,13 @@ sptr_t ScintillaCocoa::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 		case SCI_GETDIRECTPOINTER:
 			return reinterpret_cast<sptr_t>(this);
 
+		case SCI_SETBIDIRECTIONAL:
+			bidirectional = static_cast<EditModel::Bidirectional>(wParam);
+			// Invalidate all cached information including layout.
+			DropGraphics(true);
+			InvalidateStyleRedraw();
+			return 0;
+
 		case SCI_TARGETASUTF8:
 			return TargetAsUTF8(CharPtrFromSPtr(lParam));
 
