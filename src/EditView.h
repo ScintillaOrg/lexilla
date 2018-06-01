@@ -116,7 +116,7 @@ public:
 	void LayoutLine(const EditModel &model, Sci::Line line, Surface *surface, const ViewStyle &vstyle,
 		LineLayout *ll, int width = LineLayout::wrapWidthInfinite);
 
-	void UpdateBidiData(const EditModel &model, const ViewStyle &vstyle, LineLayout *ll);
+	static void UpdateBidiData(const EditModel &model, const ViewStyle &vstyle, LineLayout *ll);
 
 	Point LocationFromPosition(Surface *surface, const EditModel &model, SelectionPosition pos, Sci::Line topLine,
 		const ViewStyle &vs, PointEnd pe, const PRectangle rcClient);
