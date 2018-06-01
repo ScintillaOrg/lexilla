@@ -1672,6 +1672,7 @@ static void DrawTranslucentSelection(Surface *surface, const EditModel &model, c
 			if (alpha != SC_ALPHA_NOALPHA) {
 				const SelectionSegment portion = model.sel.Range(r).Intersect(virtualSpaceRange);
 				if (!portion.Empty()) {
+					const XYPOSITION spaceWidth = vsDraw.styles[ll->EndLineStyle()].spaceWidth;
 					if (model.BidirectionalEnabled()) {
 						const int selectionStart = static_cast<int>(portion.start.Position() - posLineStart - lineRange.start);
 						const int selectionEnd = static_cast<int>(portion.end.Position() - posLineStart - lineRange.start);
@@ -1688,8 +1689,16 @@ static void DrawTranslucentSelection(Surface *surface, const EditModel &model, c
 							const PRectangle rcSelection(rcLeft, rcLine.top, rcRight, rcLine.bottom);
 							SimpleAlphaRectangle(surface, rcSelection, background, alpha);
 						}
+
+						if (portion.end.VirtualSpace()) {
+							const XYPOSITION xStartVirtual = ll->positions[lineRange.end] -
+								static_cast<XYPOSITION>(subLineStart) + xStart;
+							PRectangle rcSegment = rcLine;
+							rcSegment.left = xStartVirtual + portion.start.VirtualSpace() * spaceWidth;
+							rcSegment.right = xStartVirtual + portion.end.VirtualSpace() * spaceWidth;
+							SimpleAlphaRectangle(surface, rcSegment, background, alpha);
+						}
 					} else {
-						const XYPOSITION spaceWidth = vsDraw.styles[ll->EndLineStyle()].spaceWidth;
 						PRectangle rcSegment = rcLine;
 						rcSegment.left = xStart + ll->positions[portion.start.Position() - posLineStart] -
 							static_cast<XYPOSITION>(subLineStart) + portion.start.VirtualSpace() * spaceWidth;
