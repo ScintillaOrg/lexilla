@@ -167,8 +167,8 @@ public:
 				posRelative = currentPos;
 				offsetRelative = 0;
 			}
-			Sci_Position diffRelative = n - offsetRelative;
-			Sci_Position posNew = multiByteAccess->GetRelativePosition(posRelative, diffRelative);
+			const Sci_Position diffRelative = n - offsetRelative;
+			const Sci_Position posNew = multiByteAccess->GetRelativePosition(posRelative, diffRelative);
 			const int chReturn = multiByteAccess->GetCharacterAndWidth(posNew, nullptr);
 			posRelative = posNew;
 			currentPosLastRelative = currentPos;
