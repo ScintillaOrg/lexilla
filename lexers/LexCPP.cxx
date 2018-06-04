@@ -719,15 +719,6 @@ Sci_Position SCI_METHOD LexerCPP::WordListSet(int n, const char *wl) {
 	return firstModification;
 }
 
-// Functor used to truncate history
-struct After {
-	Sci_Position line;
-	explicit After(Sci_Position line_) : line(line_) {}
-	bool operator()(const PPDefinition &p) const {
-		return p.line > line;
-	}
-};
-
 void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 	LexAccessor styler(pAccess);
 
@@ -788,7 +779,8 @@ void SCI_METHOD LexerCPP::Lex(Sci_PositionU startPos, Sci_Position length, int i
 	if (!options.updatePreprocessor)
 		ppDefineHistory.clear();
 
-	std::vector<PPDefinition>::iterator itInvalid = std::find_if(ppDefineHistory.begin(), ppDefineHistory.end(), After(lineCurrent-1));
+	std::vector<PPDefinition>::iterator itInvalid = std::find_if(ppDefineHistory.begin(), ppDefineHistory.end(),
+		[lineCurrent](const PPDefinition &p) { return p.line >= lineCurrent; });
 	if (itInvalid != ppDefineHistory.end()) {
 		ppDefineHistory.erase(itInvalid, ppDefineHistory.end());
 		definitionsChanged = true;
