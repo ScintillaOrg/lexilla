@@ -548,6 +548,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_WRAPINDENT_FIXED 0
 #define SC_WRAPINDENT_SAME 1
 #define SC_WRAPINDENT_INDENT 2
+#define SC_WRAPINDENT_DEEPINDENT 3
 #define SCI_SETWRAPINDENTMODE 2472
 #define SCI_GETWRAPINDENTMODE 2473
 #define SC_CACHE_NONE 0

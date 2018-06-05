@@ -521,10 +521,16 @@ void EditView::LayoutLine(const EditModel &model, Sci::Line line, Surface *surfa
 				width -= static_cast<int>(vstyle.aveCharWidth); // take into account the space for end wrap mark
 			}
 			XYPOSITION wrapAddIndent = 0; // This will be added to initial indent of line
-			if (vstyle.wrapIndentMode == SC_WRAPINDENT_INDENT) {
-				wrapAddIndent = model.pdoc->IndentSize() * vstyle.spaceWidth;
-			} else if (vstyle.wrapIndentMode == SC_WRAPINDENT_FIXED) {
+			switch (vstyle.wrapIndentMode) {
+			case SC_WRAPINDENT_FIXED:
 				wrapAddIndent = vstyle.wrapVisualStartIndent * vstyle.aveCharWidth;
+				break;
+			case SC_WRAPINDENT_INDENT:
+				wrapAddIndent = model.pdoc->IndentSize() * vstyle.spaceWidth;
+				break;
+			case SC_WRAPINDENT_DEEPINDENT:
+				wrapAddIndent = model.pdoc->IndentSize() * 2 * vstyle.spaceWidth;
+				break;
 			}
 			ll->wrapIndent = wrapAddIndent;
 			if (vstyle.wrapIndentMode != SC_WRAPINDENT_FIXED)

@@ -1359,6 +1359,7 @@ enu WrapIndentMode=SC_WRAPINDENT_
 val SC_WRAPINDENT_FIXED=0
 val SC_WRAPINDENT_SAME=1
 val SC_WRAPINDENT_INDENT=2
+val SC_WRAPINDENT_DEEPINDENT=3
 
 # Sets how wrapped sublines are placed. Default is fixed.
 set void SetWrapIndentMode=2472(int wrapIndentMode,)

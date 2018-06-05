@@ -119,7 +119,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 2 June 2018 NH</p>
+    <p>Last edited 6 June 2018 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -6429,8 +6429,10 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
         <tr>
           <td align="left"><code>SC_WRAPINDENT_FIXED</code></td>
           <td align="center">0</td>
-          <td>Wrapped sublines aligned to left of window plus amount set by
-	  <a class="seealso" href="#SCI_SETWRAPSTARTINDENT">SCI_SETWRAPSTARTINDENT</a></td>
+          <td>
+              Wrapped sublines aligned to left of window plus amount set by
+              <a class="seealso" href="#SCI_SETWRAPSTARTINDENT">SCI_SETWRAPSTARTINDENT</a>
+          </td>
         </tr>
 
         <tr>
@@ -6443,6 +6445,12 @@ sptr_t CallScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam){
           <td align="left"><code>SC_WRAPINDENT_INDENT</code></td>
           <td align="center">2</td>
           <td>Wrapped sublines are aligned to first subline indent plus one more level of indentation</td>
+        </tr>
+
+        <tr>
+          <td align="left"><code>SC_WRAPINDENT_DEEPINDENT</code></td>
+          <td align="center">3</td>
+          <td>Wrapped sublines are aligned to first subline indent plus two more levels of indentation</td>
         </tr>
       </tbody>
     </table>
