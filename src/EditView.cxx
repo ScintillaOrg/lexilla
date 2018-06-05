@@ -533,11 +533,12 @@ void EditView::LayoutLine(const EditModel &model, Sci::Line line, Surface *surfa
 				break;
 			}
 			ll->wrapIndent = wrapAddIndent;
-			if (vstyle.wrapIndentMode != SC_WRAPINDENT_FIXED)
-			for (int i = 0; i < ll->numCharsInLine; i++) {
-				if (!IsSpaceOrTab(ll->chars[i])) {
-					ll->wrapIndent += ll->positions[i]; // Add line indent
-					break;
+			if (vstyle.wrapIndentMode != SC_WRAPINDENT_FIXED) {
+				for (int i = 0; i < ll->numCharsInLine; i++) {
+					if (!IsSpaceOrTab(ll->chars[i])) {
+						ll->wrapIndent += ll->positions[i]; // Add line indent
+						break;
+					}
 				}
 			}
 			// Check for text width minimum
@@ -673,7 +674,7 @@ Point EditView::LocationFromPosition(Surface *surface, const EditModel &model, S
 }
 
 Range EditView::RangeDisplayLine(Surface *surface, const EditModel &model, Sci::Line lineVisible, const ViewStyle &vs) {
-	Range rangeSubLine = Range(0,0);
+	Range rangeSubLine = Range(0, 0);
 	if (lineVisible < 0) {
 		return rangeSubLine;
 	}
