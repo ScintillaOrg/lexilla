@@ -192,7 +192,7 @@ static float BarFontSize = 10.0;
 
 	NSTextFieldCell *cell = mCaretPositionLabel.cell;
 	cell.placeholderString = @"0:0";
-	cell.alignment = NSCenterTextAlignment;
+	cell.alignment = NSTextAlignmentCenter;
 
 	[self addSubview: mCaretPositionLabel];
 
@@ -228,7 +228,7 @@ static float BarFontSize = 10.0;
 	if (mBackground.size.width != 0) {
 		NSPoint target = {rect.origin.x, 0};
 		while (target.x < rect.origin.x + rect.size.width) {
-			[mBackground drawAtPoint: target fromRect: NSZeroRect operation: NSCompositeCopy fraction: 1];
+			[mBackground drawAtPoint: target fromRect: NSZeroRect operation: NSCompositingOperationCopy fraction: 1];
 			target.x += mBackground.size.width;
 		}
 	}

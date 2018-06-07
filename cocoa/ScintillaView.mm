@@ -706,7 +706,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
  */
 - (void) scrollWheel: (NSEvent *) theEvent {
 #ifdef SCROLL_WHEEL_MAGNIFICATION
-	if (([theEvent modifierFlags] & NSCommandKeyMask) != 0) {
+	if (([theEvent modifierFlags] & NSEventModifierFlagCommand) != 0) {
 		mOwner.backend->MouseWheel(theEvent);
 		return;
 	}
@@ -1129,7 +1129,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 	rect.size.height = 1.0;
 	NSRect rectInWindow = [self.superview.superview convertRect: rect toView: nil];
 	NSPoint pt = rectInWindow.origin;
-	NSEvent *event = [NSEvent mouseEventWithType: NSRightMouseDown
+	NSEvent *event = [NSEvent mouseEventWithType: NSEventTypeRightMouseDown
 					    location: pt
 				       modifierFlags: 0
 					   timestamp: 0
@@ -1480,7 +1480,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
  * Used to position and size the parts of the editor (content, scrollers, info bar).
  */
 - (void) positionSubViews {
-	CGFloat scrollerWidth = [NSScroller scrollerWidthForControlSize: NSRegularControlSize
+	CGFloat scrollerWidth = [NSScroller scrollerWidthForControlSize: NSControlSizeRegular
 							  scrollerStyle: NSScrollerStyleLegacy];
 
 	NSSize size = self.frame.size;

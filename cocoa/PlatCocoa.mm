@@ -1702,7 +1702,7 @@ void ListBoxImpl::Create(Window & /*parent*/, int /*ctrlID*/, Scintilla::Point p
 
 	NSRect lbRect = NSMakeRect(pt.x, pt.y, 120, lineHeight * desiredVisibleRows);
 	NSWindow *winLB = [[NSWindow alloc] initWithContentRect: lbRect
-						      styleMask: NSBorderlessWindowMask
+						      styleMask: NSWindowStyleMaskBorderless
 							backing: NSBackingStoreBuffered
 							  defer: NO];
 	[winLB setLevel: NSFloatingWindowLevel];
@@ -1780,7 +1780,7 @@ PRectangle ListBoxImpl::GetDesiredRect() {
 
 	if (Length() > rows) {
 		[scroller setHasVerticalScroller: YES];
-		rcDesired.right += [NSScroller scrollerWidthForControlSize: NSRegularControlSize
+		rcDesired.right += [NSScroller scrollerWidthForControlSize: NSControlSizeRegular
 							     scrollerStyle: NSScrollerStyleLegacy];
 	} else {
 		[scroller setHasVerticalScroller: NO];
