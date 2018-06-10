@@ -2960,14 +2960,19 @@ bool MatchOnLines(const Document *doc, const Regex &regexp, const RESearchRange 
 	bool matched = false;
 	std::match_results<Iterator> match;
 
-	// MSVC and libc++ have problems with ^ and $ matching line ends inside a range
-	// If they didn't then the line by line iteration could be removed for the forwards
-	// case and replaced with the following 4 lines:
-	//	Iterator uiStart(doc, startPos);
-	//	Iterator uiEnd(doc, endPos);
-	//	flagsMatch = MatchFlags(doc, startPos, endPos);
-	//	matched = std::regex_search(uiStart, uiEnd, match, regexp, flagsMatch);
-
+	// MSVC and libc++ have problems with ^ and $ matching line ends inside a range.
+	// CRLF line ends are also a problem as ^ and $ only treat LF as a line end.
+	// The std::regex::multiline option was added to C++17 to improve behaviour but
+	// has not been implemented by compiler runtimes with MSVC always in multiline
+	// mode and libc++ and libstdc++ always in single-line mode.
+	// If multiline regex worked well then the line by line iteration could be removed
+	// for the forwards case and replaced with the following 4 lines:
+#ifdef REGEX_MULTILINE
+	Iterator itStart(doc, resr.startPos);
+	Iterator itEnd(doc, resr.endPos);
+	const std::regex_constants::match_flag_type flagsMatch = MatchFlags(doc, resr.startPos, resr.endPos);
+	matched = std::regex_search(itStart, itEnd, match, regexp, flagsMatch);
+#else
 	// Line by line.
 	for (Sci::Line line = resr.lineRangeStart; line != resr.lineRangeBreak; line += resr.increment) {
 		const Range lineRange = resr.LineRange(line);
@@ -2996,6 +3001,7 @@ bool MatchOnLines(const Document *doc, const Regex &regexp, const RESearchRange 
 			break;
 		}
 	}
+#endif
 	if (matched) {
 		for (size_t co = 0; co < match.size(); co++) {
 			search.bopat[co] = match[co].first.Pos();
