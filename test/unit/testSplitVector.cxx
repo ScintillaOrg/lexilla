@@ -305,8 +305,8 @@ TEST_CASE("SplitVector") {
 		for (int i=0; i<10; i+=2) {
 			int len = 10 - i;
 			REQUIRE(len == sv.Length());
-			for (int i=0; i<sv.Length(); i++) {
-				REQUIRE(87 == sv.ValueAt(i));
+			for (int j=0; j<sv.Length(); j++) {
+				REQUIRE(87 == sv.ValueAt(j));
 			}
 			sv.Delete(len-1);
 			sv.Delete(0);
