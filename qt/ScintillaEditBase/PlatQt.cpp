@@ -1096,6 +1096,11 @@ public:
 		QString path = QString::fromUtf8(modulePath);
 		lib = new QLibrary(path);
 	}
+	// Deleted so DynamicLibraryImpl objects can not be copied
+	DynamicLibraryImpl(const DynamicLibraryImpl &) = delete;
+	DynamicLibraryImpl(DynamicLibraryImpl &&) = delete;
+	DynamicLibraryImpl &operator=(const DynamicLibraryImpl &) = delete;
+	DynamicLibraryImpl &operator=(DynamicLibraryImpl &&) = delete;
 
 	virtual ~DynamicLibraryImpl() {
 		if (lib)
