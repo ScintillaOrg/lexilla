@@ -1631,6 +1631,76 @@ class TestStyleAttributes(unittest.TestCase):
 		self.ed.StyleSetHotSpot(self.ed.STYLE_DEFAULT, 1)
 		self.assertEquals(self.ed.StyleGetHotSpot(self.ed.STYLE_DEFAULT), 1)
 
+class TestIndices(unittest.TestCase):
+	def setUp(self):
+		self.xite = Xite.xiteFrame
+		self.ed = self.xite.ed
+		self.ed.ClearAll()
+		self.ed.EmptyUndoBuffer()
+		self.ed.SetCodePage(65001)
+		# Text includes one non-BMP character
+		t = "aå\U00010348ﬂﬔ-\n"
+		self.tv = t.encode("UTF-8")
+
+	def tearDown(self):
+		self.ed.SetCodePage(0)
+
+	def testAllocation(self):
+		self.assertEquals(self.ed.GetLineCharacterIndex(), self.ed.SC_LINECHARACTERINDEX_NONE)
+		self.ed.AllocateLineCharacterIndex(self.ed.SC_LINECHARACTERINDEX_UTF32)
+		self.assertEquals(self.ed.GetLineCharacterIndex(), self.ed.SC_LINECHARACTERINDEX_UTF32)
+		self.ed.ReleaseLineCharacterIndex(self.ed.SC_LINECHARACTERINDEX_UTF32)
+		self.assertEquals(self.ed.GetLineCharacterIndex(), self.ed.SC_LINECHARACTERINDEX_NONE)
+
+	def testUTF32(self):
+		self.assertEquals(self.ed.GetLineCharacterIndex(), self.ed.SC_LINECHARACTERINDEX_NONE)
+		self.ed.SetContents(self.tv)
+		self.ed.AllocateLineCharacterIndex(self.ed.SC_LINECHARACTERINDEX_UTF32)
+		self.assertEquals(self.ed.IndexPositionFromLine(0, self.ed.SC_LINECHARACTERINDEX_UTF32), 0)
+		self.assertEquals(self.ed.IndexPositionFromLine(1, self.ed.SC_LINECHARACTERINDEX_UTF32), 7)
+		self.ed.ReleaseLineCharacterIndex(self.ed.SC_LINECHARACTERINDEX_UTF32)
+		self.assertEquals(self.ed.GetLineCharacterIndex(), self.ed.SC_LINECHARACTERINDEX_NONE)
+
+	def testUTF16(self):
+		self.assertEquals(self.ed.GetLineCharacterIndex(), self.ed.SC_LINECHARACTERINDEX_NONE)
+		t = "aå\U00010348ﬂﬔ-"
+		tv = t.encode("UTF-8")
+		self.ed.SetContents(self.tv)
+		self.ed.AllocateLineCharacterIndex(self.ed.SC_LINECHARACTERINDEX_UTF16)
+		self.assertEquals(self.ed.IndexPositionFromLine(0, self.ed.SC_LINECHARACTERINDEX_UTF16), 0)
+		self.assertEquals(self.ed.IndexPositionFromLine(1, self.ed.SC_LINECHARACTERINDEX_UTF16), 8)
+		self.ed.ReleaseLineCharacterIndex(self.ed.SC_LINECHARACTERINDEX_UTF16)
+		self.assertEquals(self.ed.GetLineCharacterIndex(), self.ed.SC_LINECHARACTERINDEX_NONE)
+
+	def testBoth(self):
+		# Set text before turning indices on
+		self.assertEquals(self.ed.GetLineCharacterIndex(), self.ed.SC_LINECHARACTERINDEX_NONE)
+		self.ed.SetContents(self.tv)
+		self.ed.AllocateLineCharacterIndex(self.ed.SC_LINECHARACTERINDEX_UTF32+self.ed.SC_LINECHARACTERINDEX_UTF16)
+		self.assertEquals(self.ed.IndexPositionFromLine(0, self.ed.SC_LINECHARACTERINDEX_UTF32), 0)
+		self.assertEquals(self.ed.IndexPositionFromLine(1, self.ed.SC_LINECHARACTERINDEX_UTF32), 7)
+		self.assertEquals(self.ed.IndexPositionFromLine(0, self.ed.SC_LINECHARACTERINDEX_UTF16), 0)
+		self.assertEquals(self.ed.IndexPositionFromLine(1, self.ed.SC_LINECHARACTERINDEX_UTF16), 8)
+		# Test the inverse: position->line
+		self.assertEquals(self.ed.LineFromIndexPosition(0, self.ed.SC_LINECHARACTERINDEX_UTF32), 0)
+		self.assertEquals(self.ed.LineFromIndexPosition(7, self.ed.SC_LINECHARACTERINDEX_UTF32), 1)
+		self.assertEquals(self.ed.LineFromIndexPosition(0, self.ed.SC_LINECHARACTERINDEX_UTF16), 0)
+		self.assertEquals(self.ed.LineFromIndexPosition(8, self.ed.SC_LINECHARACTERINDEX_UTF16), 1)
+		self.ed.ReleaseLineCharacterIndex(self.ed.SC_LINECHARACTERINDEX_UTF32+self.ed.SC_LINECHARACTERINDEX_UTF16)
+		self.assertEquals(self.ed.GetLineCharacterIndex(), self.ed.SC_LINECHARACTERINDEX_NONE)
+
+	def testMaintenance(self):
+		# Set text after turning indices on
+		self.assertEquals(self.ed.GetLineCharacterIndex(), self.ed.SC_LINECHARACTERINDEX_NONE)
+		self.ed.AllocateLineCharacterIndex(self.ed.SC_LINECHARACTERINDEX_UTF32+self.ed.SC_LINECHARACTERINDEX_UTF16)
+		self.ed.SetContents(self.tv)
+		self.assertEquals(self.ed.IndexPositionFromLine(0, self.ed.SC_LINECHARACTERINDEX_UTF32), 0)
+		self.assertEquals(self.ed.IndexPositionFromLine(1, self.ed.SC_LINECHARACTERINDEX_UTF32), 7)
+		self.assertEquals(self.ed.IndexPositionFromLine(0, self.ed.SC_LINECHARACTERINDEX_UTF16), 0)
+		self.assertEquals(self.ed.IndexPositionFromLine(1, self.ed.SC_LINECHARACTERINDEX_UTF16), 8)
+		self.ed.ReleaseLineCharacterIndex(self.ed.SC_LINECHARACTERINDEX_UTF32+self.ed.SC_LINECHARACTERINDEX_UTF16)
+		self.assertEquals(self.ed.GetLineCharacterIndex(), self.ed.SC_LINECHARACTERINDEX_NONE)
+
 class TestCharacterNavigation(unittest.TestCase):
 	def setUp(self):
 		self.xite = Xite.xiteFrame
@@ -1675,6 +1745,31 @@ class TestCharacterNavigation(unittest.TestCase):
 			after = self.ed.PositionRelative(pos, -i)
 			self.assert_(after < pos)
 			self.assert_(after < previous)
+			previous = after
+
+	def testRelativeNonBOM(self):
+		# \x61  \xF0\x90\x8D\x88  \xef\xac\x82   \xef\xac\x94   \x2d
+		t = "a\U00010348ﬂﬔ-"
+		tv = t.encode("UTF-8")
+		self.ed.SetContents(tv)
+		self.assertEquals(self.ed.PositionRelative(1, 2), 8)
+		self.assertEquals(self.ed.CountCharacters(1, 8), 2)
+		self.assertEquals(self.ed.CountCodeUnits(1, 8), 3)
+		self.assertEquals(self.ed.PositionRelative(8, -2), 1)
+		self.assertEquals(self.ed.PositionRelativeCodeUnits(8, -3), 1)
+		pos = 0
+		previous = 0
+		for i in range(1, len(t)):
+			after = self.ed.PositionRelative(pos, i)
+			self.assert_(after > pos)
+			self.assert_(after > previous)
+			previous = after
+		pos = len(t)
+		previous = pos
+		for i in range(1, len(t)-1):
+			after = self.ed.PositionRelative(pos, -i)
+			self.assert_(after < pos)
+			self.assert_(after <= previous)
 			previous = after
 
 	def testLineEnd(self):
