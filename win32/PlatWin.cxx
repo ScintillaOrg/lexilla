@@ -1844,6 +1844,10 @@ ScreenLineLayout::ScreenLineLayout(const IScreenLine *screenLine) {
 }
 
 ScreenLineLayout::~ScreenLineLayout() {
+	if (textLayout) {
+		textLayout->Release();
+		textLayout = nullptr;
+	}
 }
 
 // Get the position from the provided x
@@ -1888,7 +1892,6 @@ size_t ScreenLineLayout::PositionFromX(XYPOSITION xDistance, bool charPosition) 
 		);
 	}
 
-	textLayout->Release();
 	size_t pos;
 	if (charPosition) {
 		pos = isTrailingHit ? hitTestMetrics.textPosition : caretMetrics.textPosition;
@@ -1920,8 +1923,6 @@ XYPOSITION ScreenLineLayout::XFromPosition(size_t caretPosition) {
 		&pt.y,
 		&caretMetrics
 	);
-
-	textLayout->Release();
 
 	return pt.x;
 }
