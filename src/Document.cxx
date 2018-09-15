@@ -2980,7 +2980,6 @@ std::regex_constants::match_flag_type MatchFlags(const Document *doc, Sci::Posit
 
 template<typename Iterator, typename Regex>
 bool MatchOnLines(const Document *doc, const Regex &regexp, const RESearchRange &resr, RESearch &search) {
-	bool matched = false;
 	std::match_results<Iterator> match;
 
 	// MSVC and libc++ have problems with ^ and $ matching line ends inside a range.
@@ -2994,9 +2993,10 @@ bool MatchOnLines(const Document *doc, const Regex &regexp, const RESearchRange 
 	Iterator itStart(doc, resr.startPos);
 	Iterator itEnd(doc, resr.endPos);
 	const std::regex_constants::match_flag_type flagsMatch = MatchFlags(doc, resr.startPos, resr.endPos);
-	matched = std::regex_search(itStart, itEnd, match, regexp, flagsMatch);
+	const bool matched = std::regex_search(itStart, itEnd, match, regexp, flagsMatch);
 #else
 	// Line by line.
+	bool matched = false;
 	for (Sci::Line line = resr.lineRangeStart; line != resr.lineRangeBreak; line += resr.increment) {
 		const Range lineRange = resr.LineRange(line);
 		Iterator itStart(doc, lineRange.start);
