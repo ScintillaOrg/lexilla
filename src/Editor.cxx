@@ -206,7 +206,7 @@ void Editor::SetRepresentations() {
 	reprs.Clear();
 
 	// C0 control set
-	const char * const reps[] = {
+	const char *const reps[] = {
 		"NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL",
 		"BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI",
 		"DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",
@@ -220,7 +220,7 @@ void Editor::SetRepresentations() {
 	// C1 control set
 	// As well as Unicode mode, ISO-8859-1 should use these
 	if (IsUnicodeMode()) {
-		const char * const repsC1[] = {
+		const char *const repsC1[] = {
 			"PAD", "HOP", "BPH", "NBH", "IND", "NEL", "SSA", "ESA",
 			"HTS", "HTJ", "VTS", "PLD", "PLU", "RI", "SS2", "SS3",
 			"DCS", "PU1", "PU2", "STS", "CCH", "MW", "SPA", "EPA",
@@ -294,7 +294,7 @@ void Editor::RefreshStyleData() {
 }
 
 Point Editor::GetVisibleOriginInMain() const {
-	return Point(0,0);
+	return Point(0, 0);
 }
 
 PointDocument Editor::DocumentPointFromView(Point ptView) const {
@@ -4458,7 +4458,7 @@ void Editor::DwellEnd(bool mouseMoved) {
 void Editor::MouseLeave() {
 	SetHotSpotRange(nullptr);
 	if (!HaveMouseCapture()) {
-		ptMouseLast = Point(-1,-1);
+		ptMouseLast = Point(-1, -1);
 		DwellEnd(true);
 	}
 }
@@ -4813,7 +4813,7 @@ void Editor::ButtonMoveWithModifiers(Point pt, unsigned int, int modifiers) {
 		if (hotspot.Valid() && !PointIsHotspot(pt))
 			SetHotSpotRange(nullptr);
 
-		if (hotSpotClickPos != INVALID_POSITION && PositionFromLocation(pt,true,true) != hotSpotClickPos) {
+		if (hotSpotClickPos != INVALID_POSITION && PositionFromLocation(pt, true, true) != hotSpotClickPos) {
 			if (inDragDrop == ddNone) {
 				DisplayCursor(Window::cursorText);
 			}
