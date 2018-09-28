@@ -8216,7 +8216,6 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_COUNTCHARACTERS:
 		return pdoc->CountCharacters(static_cast<Sci::Position>(wParam), lParam);
-		//return pdoc->CountCharacters(static_cast<Sci::Position>(wParam), static_cast<Sci::Position>(lParam));
 
 	case SCI_COUNTCODEUNITS:
 		return pdoc->CountUTF16(static_cast<Sci::Position>(wParam), lParam);
