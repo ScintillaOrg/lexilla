@@ -5204,7 +5204,7 @@ void Editor::SetDocPointer(Document *document) {
 	//Platform::DebugPrintf("** %x setdoc to %x\n", pdoc, document);
 	pdoc->RemoveWatcher(this, 0);
 	pdoc->Release();
-	if (document == NULL) {
+	if (!document) {
 		pdoc = new Document(SC_DOCUMENTOPTION_DEFAULT);
 	} else {
 		pdoc = document;
@@ -5523,7 +5523,7 @@ void Editor::NeedShown(Sci::Position pos, Sci::Position len) {
 }
 
 Sci::Position Editor::GetTag(char *tagValue, int tagNumber) {
-	const char *text = 0;
+	const char *text = nullptr;
 	Sci::Position length = 0;
 	if ((tagNumber >= 1) && (tagNumber <= 9)) {
 		char name[3] = "\\?";
@@ -6501,15 +6501,15 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_CLEARTABSTOPS:
 		if (view.ClearTabstops(static_cast<Sci::Line>(wParam))) {
-			const DocModification mh(SC_MOD_CHANGETABSTOPS, 0, 0, 0, 0, static_cast<Sci::Line>(wParam));
-			NotifyModified(pdoc, mh, NULL);
+			const DocModification mh(SC_MOD_CHANGETABSTOPS, 0, 0, 0, nullptr, static_cast<Sci::Line>(wParam));
+			NotifyModified(pdoc, mh, nullptr);
 		}
 		break;
 
 	case SCI_ADDTABSTOP:
 		if (view.AddTabstop(static_cast<Sci::Line>(wParam), static_cast<int>(lParam))) {
-			const DocModification mh(SC_MOD_CHANGETABSTOPS, 0, 0, 0, 0, static_cast<Sci::Line>(wParam));
-			NotifyModified(pdoc, mh, NULL);
+			const DocModification mh(SC_MOD_CHANGETABSTOPS, 0, 0, 0, nullptr, static_cast<Sci::Line>(wParam));
+			NotifyModified(pdoc, mh, nullptr);
 		}
 		break;
 
