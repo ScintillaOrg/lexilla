@@ -7556,11 +7556,15 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		InvalidateStyleRedraw();
 		break;
 
-	case SCI_SETZOOM:
-		vs.zoomLevel = static_cast<int>(wParam);
-		InvalidateStyleRedraw();
-		NotifyZoom();
-		break;
+	case SCI_SETZOOM: {
+			const int zoomLevel = static_cast<int>(wParam);
+			if (zoomLevel != vs.zoomLevel) {
+				vs.zoomLevel = zoomLevel;
+				InvalidateStyleRedraw();
+				NotifyZoom();
+			}
+			break;
+		}
 
 	case SCI_GETZOOM:
 		return vs.zoomLevel;
