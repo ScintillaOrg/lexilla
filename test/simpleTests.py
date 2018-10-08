@@ -273,6 +273,9 @@ class TestSimple(unittest.TestCase):
 		self.assertEquals(self.ed.GetLineEndPosition(1), 3)
 		self.assertEquals(self.ed.LineLength(0), 2)
 		self.assertEquals(self.ed.LineLength(1), 1)
+		# Test lines out of range.
+		self.assertEquals(self.ed.LineLength(2), 0)
+		self.assertEquals(self.ed.LineLength(-1), 0)
 		if sys.platform == "win32":
 			self.assertEquals(self.ed.EOLMode, self.ed.SC_EOL_CRLF)
 		else:
