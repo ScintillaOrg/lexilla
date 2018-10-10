@@ -380,10 +380,12 @@ void ScintillaQt::NotifyChange()
 
 void ScintillaQt::NotifyFocus(bool focus)
 {
-	emit command(
-			Platform::LongFromTwoShorts
-					(GetCtrlID(), focus ? SCEN_SETFOCUS : SCEN_KILLFOCUS),
-			reinterpret_cast<sptr_t>(wMain.GetID()));
+	if (commandEvents) {
+		emit command(
+				Platform::LongFromTwoShorts
+						(GetCtrlID(), focus ? SCEN_SETFOCUS : SCEN_KILLFOCUS),
+				reinterpret_cast<sptr_t>(wMain.GetID()));
+	}
 
 	Editor::NotifyFocus(focus);
 }
