@@ -5055,7 +5055,8 @@ Sci::Position Editor::PositionAfterMaxStyling(Sci::Position posMax, bool scrolli
 	// When scrolling, allow less time to ensure responsive
 	const double secondsAllowed = scrolling ? 0.005 : 0.02;
 
-	const Sci::Line linesToStyle = std::clamp(static_cast<int>(secondsAllowed / pdoc->durationStyleOneLine),
+	const Sci::Line linesToStyle = std::clamp(
+		static_cast<int>(secondsAllowed / pdoc->durationStyleOneLine.Duration()),
 		10, 0x10000);
 	const Sci::Line stylingMaxLine = std::min(
 		pdoc->SciLineFromPosition(pdoc->GetEndStyled()) + linesToStyle,
