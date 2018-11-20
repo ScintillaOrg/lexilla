@@ -564,6 +564,11 @@
 	Updated case conversion and character categories to Unicode 11.
 	</li>
 	<li>
+	On Cocoa, fix a crash that occurred when entering a dead key diacritic then a character
+	that can not take that diacritic, such as option+e (acute accent) followed by g.
+	<a href="https://sourceforge.net/p/scintilla/bugs/2061/">Bug #2061</a>.
+	</li>
+	<li>
 	On Cocoa, use dark info bar background when system is set to Dark Appearance.
 	<a href="https://sourceforge.net/p/scintilla/bugs/2055/">Bug #2055</a>.
 	</li>
