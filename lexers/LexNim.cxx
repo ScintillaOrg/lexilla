@@ -203,9 +203,7 @@ static int IsNumBinary(StyleContext &sc) {
 }
 
 static int IsNumOctal(StyleContext &sc) {
-    return IsADigit(sc.chNext)
-        || sc.chNext == 'o'
-        || sc.chNext == 'c' || sc.chNext == 'C';
+    return IsADigit(sc.chNext) || sc.chNext == 'o';
 }
 
 static bool IsNewline(const int ch) {
@@ -273,8 +271,10 @@ void SCI_METHOD LexerNim::Lex(Sci_PositionU startPos, Sci_Position length,
             case SCE_NIM_NUMBER:
                 // For a type suffix, such as 0x80'u8
                 if (sc.ch == '\'') {
-                    if (sc.chNext == 'i' || sc.chNext == 'u' ||
-                        sc.chNext == 'f' || sc.chNext == 'd') {
+                    if (sc.chNext == 'i' || sc.chNext == 'I' || 
+                        sc.chNext == 'u' || sc.chNext == 'U' ||
+                        sc.chNext == 'f' || sc.chNext == 'F' || 
+                        sc.chNext == 'd' || sc.chNext == 'D') {
                         sc.Forward(2);
                     }
                 } else if (sc.ch == '.') {
