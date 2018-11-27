@@ -163,8 +163,7 @@ struct OptionSetBash : public OptionSet<OptionsBash> {
 	OptionSetBash() {
 		DefineProperty("fold", &OptionsBash::fold);
 
-		DefineProperty("fold.comment", &OptionsBash::foldComment,
-			"This option enables folding multi-line comments.");
+		DefineProperty("fold.comment", &OptionsBash::foldComment);
 
 		DefineProperty("fold.compact", &OptionsBash::foldCompact);
 
