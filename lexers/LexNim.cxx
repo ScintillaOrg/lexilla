@@ -35,6 +35,110 @@
 
 using namespace Scintilla;
 
+namespace {
+    // Use an unnamed namespace to protect the functions and classes from name conflicts
+
+enum NumType {
+    Binary,
+    Octal,
+    Exponent,
+    Hexadecimal,
+    Decimal,
+    FormatError
+};
+
+int GetNumStyle(const int numType) {
+    if (numType == NumType::FormatError) {
+        return SCE_NIM_NUMERROR;
+    }
+
+    return SCE_NIM_NUMBER;
+}
+
+bool IsAWordChar(const int ch) {
+    return ch < 0x80 && (isalnum(ch) || ch == '_' || ch == '.');
+}
+
+int IsNumHex(const StyleContext &sc) {
+    return sc.chNext == 'x' || sc.chNext == 'X';
+}
+
+int IsNumBinary(const StyleContext &sc) {
+    return sc.chNext == 'b' || sc.chNext == 'B';
+}
+
+int IsNumOctal(const StyleContext &sc) {
+    return IsADigit(sc.chNext) || sc.chNext == 'o';
+}
+
+bool IsNewline(const int ch) {
+    return (ch == '\n' || ch == '\r');
+}
+
+constexpr bool IsTripleLiteral(const int style) noexcept {
+    return style == SCE_NIM_TRIPLE || style == SCE_NIM_TRIPLEDOUBLE;
+}
+
+constexpr bool IsLineComment(const int style) noexcept {
+    return style == SCE_NIM_COMMENTLINE || style == SCE_NIM_COMMENTLINEDOC;
+}
+
+constexpr bool IsStreamComment(const int style) noexcept {
+    return style == SCE_NIM_COMMENT || style == SCE_NIM_COMMENTDOC;
+}
+
+// Adopted from Accessor.cxx
+int GetIndent(const Sci_Position line, Accessor &styler) {
+    Sci_Position startPos = styler.LineStart(line);
+    Sci_Position eolPos = styler.LineStart(line + 1) - 1;
+
+    char ch = styler[startPos];
+    int style = styler.StyleAt(startPos);
+
+    int indent = 0;
+    bool inPrevPrefix = line > 0;
+    Sci_Position posPrev = inPrevPrefix ? styler.LineStart(line - 1) : 0;
+
+    // No fold points inside block comments and triple literals
+    while ((IsASpaceOrTab(ch) 
+        || IsStreamComment(style) 
+        || IsTripleLiteral(style)) && (startPos < eolPos)) {
+        if (inPrevPrefix) {
+            char chPrev = styler[posPrev++];
+            if (chPrev != ' ' && chPrev != '\t') {
+                inPrevPrefix = false;
+            }
+        }
+
+        if (ch == '\t') {
+            indent = (indent / 8 + 1) * 8;
+        } else {
+            indent++;
+        }
+
+        startPos++;
+        ch = styler[startPos];
+        style = styler.StyleAt(startPos);
+    }
+
+    indent += SC_FOLDLEVELBASE;
+
+    if (styler.LineStart(line) == styler.Length() 
+        || IsASpaceOrTab(ch) 
+        || IsNewline(ch) 
+        || IsLineComment(style)) {
+        return indent | SC_FOLDLEVELWHITEFLAG;
+    } else {
+        return indent;
+    }
+}
+
+int IndentAmount(const Sci_Position line, Accessor &styler) {
+    const int indent = GetIndent(line, styler);
+    const int indentLevel = indent & SC_FOLDLEVELNUMBERMASK;
+    return indentLevel <= SC_FOLDLEVELBASE ? indent : indentLevel | (indent & ~SC_FOLDLEVELNUMBERMASK);
+}
+
 struct OptionsNim {
     bool fold;
     bool foldCompact;
@@ -79,6 +183,8 @@ LexicalClass lexicalClasses[] = {
     15, "SCE_NIM_OPERATOR",       "operator",             "Operators",
     16, "SCE_NIM_IDENTIFIER",     "identifier",           "Identifiers",
 };
+
+}
 
 class LexerNim : public DefaultLexer {
     CharacterSet setWord;
@@ -171,55 +277,6 @@ Sci_Position SCI_METHOD LexerNim::WordListSet(int n, const char *wl) {
     }
 
     return firstModification;
-}
-
-enum NumType {
-    Binary,
-    Octal,
-    Exponent,
-    Hexadecimal,
-    Decimal,
-    FormatError
-};
-
-static int GetNumStyle(int numType) {
-    if (numType == NumType::FormatError) {
-        return SCE_NIM_NUMERROR;
-    }
-
-    return SCE_NIM_NUMBER;
-}
-
-static bool IsAWordChar(const int ch) {
-    return ch < 0x80 && (isalnum(ch) || ch == '_' || ch == '.');
-}
-
-static int IsNumHex(StyleContext &sc) {
-    return sc.chNext == 'x' || sc.chNext == 'X';
-}
-
-static int IsNumBinary(StyleContext &sc) {
-    return sc.chNext == 'b' || sc.chNext == 'B';
-}
-
-static int IsNumOctal(StyleContext &sc) {
-    return IsADigit(sc.chNext) || sc.chNext == 'o';
-}
-
-static bool IsNewline(const int ch) {
-    return (ch == '\n' || ch == '\r');
-}
-
-static bool IsTripleLiteral(const int style) {
-    return style == SCE_NIM_TRIPLE || style == SCE_NIM_TRIPLEDOUBLE;
-}
-
-static bool IsLineComment(const int style) {
-    return style == SCE_NIM_COMMENTLINE || style == SCE_NIM_COMMENTLINEDOC;
-}
-
-static bool IsStreamComment(const int style) {
-    return style == SCE_NIM_COMMENT || style == SCE_NIM_COMMENTDOC;
 }
 
 void SCI_METHOD LexerNim::Lex(Sci_PositionU startPos, Sci_Position length,
@@ -558,58 +615,6 @@ void SCI_METHOD LexerNim::Lex(Sci_PositionU startPos, Sci_Position length,
     }
 
     sc.Complete();
-}
-
-// Adopted from Accessor.cxx
-static int GetIndent(const Sci_Position line, Accessor &styler) {
-    Sci_Position startPos = styler.LineStart(line);
-    Sci_Position eolPos = styler.LineStart(line + 1) - 1;
-
-    char ch = styler[startPos];
-    int style = styler.StyleAt(startPos);
-
-    int indent = 0;
-    bool inPrevPrefix = line > 0;
-    Sci_Position posPrev = inPrevPrefix ? styler.LineStart(line - 1) : 0;
-
-    // No fold points inside block comments and triple literals
-    while ((IsASpaceOrTab(ch) 
-        || IsStreamComment(style) 
-        || IsTripleLiteral(style)) && (startPos < eolPos)) {
-        if (inPrevPrefix) {
-            char chPrev = styler[posPrev++];
-            if (chPrev != ' ' && chPrev != '\t') {
-                inPrevPrefix = false;
-            }
-        }
-
-        if (ch == '\t') {
-            indent = (indent / 8 + 1) * 8;
-        } else {
-            indent++;
-        }
-
-        startPos++;
-        ch = styler[startPos];
-        style = styler.StyleAt(startPos);
-    }
-
-    indent += SC_FOLDLEVELBASE;
-
-    if (styler.LineStart(line) == styler.Length() 
-        || IsASpaceOrTab(ch) 
-        || IsNewline(ch) 
-        || IsLineComment(style)) {
-        return indent | SC_FOLDLEVELWHITEFLAG;
-    } else {
-        return indent;
-    }
-}
-
-static int IndentAmount(const Sci_Position line, Accessor &styler) {
-    const int indent = GetIndent(line, styler);
-    const int indentLevel = indent & SC_FOLDLEVELNUMBERMASK;
-    return indentLevel <= SC_FOLDLEVELBASE ? indent : indentLevel | (indent & ~SC_FOLDLEVELNUMBERMASK);
 }
 
 void SCI_METHOD LexerNim::Fold(Sci_PositionU startPos, Sci_Position length, int, IDocument *pAccess) {
