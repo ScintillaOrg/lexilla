@@ -1671,11 +1671,9 @@ void LexerCPP::EvaluateTokens(std::vector<std::string> &tokens, const SymbolTabl
 					result = valA || valB;
 				else if (tokens[k+1] == "&&")
 					result = valA && valB;
-				char sResult[30];
-				sprintf(sResult, "%d", result);
 				std::vector<std::string>::iterator itInsert =
 					tokens.erase(tokens.begin() + k, tokens.begin() + k + 3);
-				tokens.insert(itInsert, sResult);
+				tokens.insert(itInsert, std::to_string(result));
 			} else {
 				k++;
 			}
