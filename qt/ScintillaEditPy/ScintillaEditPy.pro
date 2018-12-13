@@ -13,7 +13,6 @@ include(sepbuild.pri)
 VERSION = $$SCINTILLA_VERSION
 
 win32 {
-        QMAKE_CXXFLAGS += -std:c++latest
 	DebugBuild {
 		TARGET_EXT = _d.pyd
 	}

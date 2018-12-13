@@ -14,10 +14,6 @@ CONFIG += c++1z
 
 VERSION = 4.1.2
 
-win32 {
-        QMAKE_CXXFLAGS += -std:c++latest
-}
-
 SOURCES += \
     PlatQt.cpp \
     ScintillaQt.cpp \

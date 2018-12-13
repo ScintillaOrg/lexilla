@@ -619,6 +619,10 @@
 	Improve performance of text insertion when Unicode line indexing off.
 	</li>
 	<li>
+	For Qt on Windows, stop specifying -std:c++latest as that is no longer needed
+	to enable C++17 with MSVC 2017 and Qt 5.12 and it caused duplicate flag warnings.
+	</li>
+	<li>
 	On Linux, enable Lua to access dynamic libraries.
 	<a href="https://sourceforge.net/p/scintilla/bugs/2058/">Bug #2058</a>.
 	</li>
