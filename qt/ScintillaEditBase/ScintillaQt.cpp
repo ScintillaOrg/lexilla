@@ -701,9 +701,9 @@ void ScintillaQt::PartialPaint(const PRectangle &rect)
 	PRectangle rcClient = GetClientRectangle();
 	paintingAllText = rcPaint.Contains(rcClient);
 
-	AutoSurface surface(this);
-	Paint(surface, rcPaint);
-	surface->Release();
+	AutoSurface surfacePaint(this);
+	Paint(surfacePaint, rcPaint);
+	surfacePaint->Release();
 
 	if (paintState == paintAbandoned) {
 		// FIXME: Failure to paint the requested rectangle in each
