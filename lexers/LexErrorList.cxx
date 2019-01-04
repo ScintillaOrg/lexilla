@@ -175,7 +175,7 @@ static int RecogniseErrorListLine(const char *lineBuffer, Sci_PositionU lengthLi
 					canBeCtags = false;
 				}
 			} else if (state == stGccStart) {	// <filename>:
-				state = Is0To9(ch) ? stGccDigit : stUnrecognized;
+				state = ((ch == '-') || Is0To9(ch)) ? stGccDigit : stUnrecognized;
 			} else if (state == stGccDigit) {	// <filename>:<line>
 				if (ch == ':') {
 					state = stGccColumn;	// :9.*: is GCC

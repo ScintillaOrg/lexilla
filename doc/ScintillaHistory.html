@@ -566,6 +566,11 @@
 	<li>
 	Updated case conversion and character categories to Unicode 11.
 	</li>
+	<li>
+	Errorlist lexer recognizes negative line numbers as some programs show whole-file
+	errors occurring on line -1.
+	SciTE's parsing of diagnostics also updated to handle this case.
+	</li>
  	<li>
 	Added "nim" lexer (SCLEX_NIM) for the Nim language which was previously called Nimrod.
 	For compatibility, the old "nimrod" lexer is still present but is deprecated and will be removed at the
