@@ -3191,7 +3191,7 @@ const char *BuiltinRegex::SubstituteByPosition(Document *doc, const char *text, 
 	substituted.clear();
 	const DocumentIndexer di(doc, doc->Length());
 	search.GrabMatches(di);
-	for (int j = 0; j < *length; j++) {
+	for (Sci::Position j = 0; j < *length; j++) {
 		if (text[j] == '\\') {
 			if (text[j + 1] >= '0' && text[j + 1] <= '9') {
 				const unsigned int patNum = text[j + 1] - '0';
