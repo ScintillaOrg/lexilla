@@ -298,6 +298,7 @@ void SCI_METHOD LexerNim::Lex(Sci_PositionU startPos, Sci_Position length,
 
     bool funcNameExists = false;
     bool isStylingRawString = false;
+    bool isStylingRawStringIdent = false;
 
     for (; sc.More(); sc.Forward()) {
         if (sc.atLineStart) {
@@ -432,6 +433,11 @@ void SCI_METHOD LexerNim::Lex(Sci_PositionU startPos, Sci_Position length,
                         funcNameExists = false;
                     }
                 }
+
+                if (IsAlphaNumeric(sc.ch) && sc.chNext == '\"') {
+                    isStylingRawStringIdent = true;
+                    sc.ForwardSetState(SCE_NIM_DEFAULT);
+                }
                 break;
             case SCE_NIM_COMMENT:
                 if (sc.Match(']', '#')) {
@@ -478,10 +484,14 @@ void SCI_METHOD LexerNim::Lex(Sci_PositionU startPos, Sci_Position length,
                 }
                 break;
             case SCE_NIM_STRING:
-                if (sc.ch == '\\' && !isStylingRawString) {
+                if (!isStylingRawStringIdent && !isStylingRawString && sc.ch == '\\') {
                     if (sc.chNext == '\"' || sc.chNext == '\'' || sc.chNext == '\\') {
                         sc.Forward();
                     }
+                } else if (isStylingRawString && sc.ch == '\"' && sc.chNext == '\"') {
+                    // Forward in situations such as r"a""bc\" so that "bc\" wouldn't be
+                    // considered a string of its own
+                    sc.Forward();
                 } else if (sc.ch == '\"') {
                     sc.ForwardSetState(SCE_NIM_DEFAULT);
                 } else if (sc.atLineEnd) {
@@ -508,8 +518,17 @@ void SCI_METHOD LexerNim::Lex(Sci_PositionU startPos, Sci_Position length,
                 break;
             case SCE_NIM_TRIPLEDOUBLE:
                 if (sc.Match(R"(""")")) {
-                    sc.Forward(2);
-                    sc.ForwardSetState(SCE_NIM_DEFAULT);
+
+                    // Outright forward all " after the closing """ as a triple double
+                    //
+                    // A valid example where this is needed is: """8 double quotes->""""""""
+                    // You can have as many """ at the end as you wish, as long as the actual
+                    // closing literal is there
+                    while (sc.ch == '"') {
+                        sc.Forward();
+                    }
+
+                    sc.SetState(SCE_NIM_DEFAULT);
                 }
                 break;
             case SCE_NIM_TRIPLE:
@@ -543,11 +562,28 @@ void SCI_METHOD LexerNim::Lex(Sci_PositionU startPos, Sci_Position length,
                 }
             }
             // Raw string
-            else if ((sc.ch == 'r' || sc.ch == 'R') && sc.chNext == '\"') {
+            else if (IsAlphaNumeric(sc.ch) && sc.chNext == '\"') {
                 isStylingRawString = true;
 
-                sc.SetState(SCE_NIM_STRING);
-                sc.Forward();
+                // Triple doubles can be raw strings too. How sweet
+                if (styler.SafeGetCharAt(sc.currentPos + 2) == '\"' &&
+                    styler.SafeGetCharAt(sc.currentPos + 3) == '\"') {
+                    sc.SetState(SCE_NIM_TRIPLEDOUBLE);
+                } else {
+                    sc.SetState(SCE_NIM_STRING);
+                }
+
+                if (sc.ch == 'r' || sc.ch == 'R') {
+                    sc.Forward();
+
+                    if (sc.state == SCE_NIM_TRIPLEDOUBLE) {
+                        sc.Forward(2);
+                    }
+                } else {
+                    // Anything other than r/R is considered a general raw string identifier
+                    isStylingRawStringIdent = true;
+                    sc.SetState(SCE_NIM_IDENTIFIER);
+                }
             }
             // String and triple double literal
             else if (sc.ch == '\"') {
@@ -555,6 +591,17 @@ void SCI_METHOD LexerNim::Lex(Sci_PositionU startPos, Sci_Position length,
 
                 if (sc.Match(R"(""")")) {
                     sc.SetState(SCE_NIM_TRIPLEDOUBLE);
+                    
+                    // Keep forwarding until the total opening literal count is 5
+                    // A valid example where this is needed is: """""<-5 double quotes"""
+                    while (sc.ch == '"') {
+                        sc.Forward();
+
+                        if (sc.Match(R"(""")")) {
+                            sc.Forward();
+                            break;
+                        }
+                    }
                 } else {
                     sc.SetState(SCE_NIM_STRING);
                 }
@@ -616,6 +663,8 @@ void SCI_METHOD LexerNim::Lex(Sci_PositionU startPos, Sci_Position length,
 
         if (sc.atLineEnd) {
             funcNameExists = false;
+            isStylingRawString = false;
+            isStylingRawStringIdent = false;
         }
     }
 
