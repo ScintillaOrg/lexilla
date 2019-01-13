@@ -15,7 +15,6 @@
 
 #include <cstddef>
 #include <cstdlib>
-#include <cctype>
 #include <cstdio>
 #include <ctime>
 
