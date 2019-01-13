@@ -99,10 +99,8 @@ int GetIndent(const Sci_Position line, Accessor &styler) {
     bool inPrevPrefix = line > 0;
     Sci_Position posPrev = inPrevPrefix ? styler.LineStart(line - 1) : 0;
 
-    // No fold points inside block comments and triple literals
-    while ((IsASpaceOrTab(ch) 
-        || IsStreamComment(style) 
-        || IsTripleLiteral(style)) && (startPos < eolPos)) {
+    // No fold points inside triple literals
+    while ((IsASpaceOrTab(ch) || IsTripleLiteral(style)) && (startPos < eolPos)) {
         if (inPrevPrefix) {
             char chPrev = styler[posPrev++];
             if (chPrev != ' ' && chPrev != '\t') {
@@ -121,11 +119,14 @@ int GetIndent(const Sci_Position line, Accessor &styler) {
         style = styler.StyleAt(startPos);
     }
 
-    indent += SC_FOLDLEVELBASE;
+    // Prevent creating fold lines for comments if indented
+    if (!(IsStreamComment(style) || IsLineComment(style)))
+        indent += SC_FOLDLEVELBASE;
 
     if (styler.LineStart(line) == styler.Length() 
         || IsASpaceOrTab(ch) 
         || IsNewline(ch) 
+        || IsStreamComment(style)
         || IsLineComment(style)) {
         return indent | SC_FOLDLEVELWHITEFLAG;
     } else {
