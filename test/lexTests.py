@@ -156,6 +156,9 @@ class TestLexers(unittest.TestCase):
 	def testLua(self):
 		self.LexExample("x.lua", b"lua", [b"function end"])
 
+	def testNim(self):
+		self.LexExample("x.nim", b"nim", [b"else end if let"])
+
 	def testRuby(self):
 		self.LexExample("x.rb", b"ruby", [b"class def end"])
 

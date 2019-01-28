@@ -424,13 +424,17 @@ void SCI_METHOD LexerNim::Lex(Sci_PositionU startPos, Sci_Position length,
                 sc.SetState(SCE_NIM_DEFAULT);
                 break;
             case SCE_NIM_IDENTIFIER:
-                if (!IsAWordChar(sc.ch)) {
+                if (sc.ch == '.' || !IsAWordChar(sc.ch)) {
                     char s[100];
                     sc.GetCurrent(s, sizeof(s));
                     int style = SCE_NIM_IDENTIFIER;
 
                     if (keywords.InList(s) && !funcNameExists) {
-                        style = SCE_NIM_WORD;
+                        // Prevent styling keywords if they are sub-identifiers
+                        Sci_Position segStart = styler.GetStartSegment() - 1;
+                        if (segStart < 0 || styler.SafeGetCharAt(segStart, '\0') != '.') {
+                            style = SCE_NIM_WORD;
+                        }
                     } else if (funcNameExists) {
                         style = SCE_NIM_FUNCNAME;
                     }

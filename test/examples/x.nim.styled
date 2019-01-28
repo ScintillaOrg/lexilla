@@ -1,0 +1,6 @@
+{3}# Tests for Nim
+{8}let{0} {16}s{0} {15}={0} {6}"foobar"{0}
+
+{3}# Feature #1260
+{15}{.{16}ident{15}.}{0}
+{16}stdin{15}.{16}readLine{15}.{16}split{15}.{16}map{15}({16}parseInt{15}).{16}max{15}.{11}`$`{15}.{16}echo{15}({6}" is the maximum!"{15}){0}
