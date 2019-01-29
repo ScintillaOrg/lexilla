@@ -22,6 +22,7 @@
 **.vb = native
 **.d = native
 **.lua = native
+**.nim = native
 **.rb = native
 **.pl = native
 **.txt = native
