@@ -619,7 +619,9 @@ public:
 		: QWidget(nullptr, Qt::ToolTip),
 		  pct(pct_)
 	{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
 		setWindowFlag(Qt::WindowTransparentForInput);
+#endif
 	}
 
 	void paintEvent(QPaintEvent *) override
