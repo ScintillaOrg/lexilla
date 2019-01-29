@@ -23,8 +23,9 @@
 **.d = native
 **.lua = native
 **.nim = native
-**.rb = native
 **.pl = native
+**.rb = native
+**.tcl = native
 **.txt = native
 **.pch = native
 **.hgeol = native
