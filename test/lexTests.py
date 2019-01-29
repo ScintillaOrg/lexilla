@@ -176,5 +176,8 @@ class TestLexers(unittest.TestCase):
 			[b"keyword1", b"keyword2", b"", b"keyword4", b"keyword5",
 			b"keyword6", b"keyword7"])
 
+	def testTCL(self):
+		self.LexExample("x.tcl", b"tcl", [b"proc set socket vwait"])
+
 if __name__ == '__main__':
 	Xite.main("lexTests")
