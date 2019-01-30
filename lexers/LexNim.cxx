@@ -454,6 +454,18 @@ void SCI_METHOD LexerNim::Lex(Sci_PositionU startPos, Sci_Position length,
                     sc.ForwardSetState(SCE_NIM_DEFAULT);
                 }
                 break;
+            case SCE_NIM_FUNCNAME:
+                if (sc.ch == '`') {
+                    funcNameExists = false;
+                    sc.ForwardSetState(SCE_NIM_DEFAULT);
+                } else if (sc.atLineEnd) {
+                    // Prevent leaking the style to the next line if not closed
+                    funcNameExists = false;
+
+                    sc.ChangeState(SCE_NIM_STRINGEOL);
+                    sc.ForwardSetState(SCE_NIM_DEFAULT);
+                }
+                break;
             case SCE_NIM_COMMENT:
                 if (sc.Match(']', '#')) {
                     if (commentNestLevel > 0) {
@@ -527,7 +539,10 @@ void SCI_METHOD LexerNim::Lex(Sci_PositionU startPos, Sci_Position length,
                 }
                 break;
             case SCE_NIM_BACKTICKS:
-                if (sc.ch == '`' || sc.atLineEnd) {
+                if (sc.ch == '`' ) {
+                    sc.ForwardSetState(SCE_NIM_DEFAULT);
+                } else if (sc.atLineEnd) {
+                    sc.ChangeState(SCE_NIM_STRINGEOL);
                     sc.ForwardSetState(SCE_NIM_DEFAULT);
                 }
                 break;
@@ -631,10 +646,10 @@ void SCI_METHOD LexerNim::Lex(Sci_PositionU startPos, Sci_Position length,
             }
             // Operator definition
             else if (sc.ch == '`') {
-                sc.SetState(SCE_NIM_BACKTICKS);
-
                 if (funcNameExists) {
-                    funcNameExists = false;
+                    sc.SetState(SCE_NIM_FUNCNAME);
+                } else {
+                    sc.SetState(SCE_NIM_BACKTICKS);
                 }
             }
             // Keyword
