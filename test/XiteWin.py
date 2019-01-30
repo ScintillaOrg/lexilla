@@ -4,7 +4,7 @@
 from __future__ import with_statement
 from __future__ import unicode_literals
 
-import os, sys, unittest
+import os, platform, sys, unittest
 
 import ctypes
 from ctypes import wintypes
@@ -188,6 +188,7 @@ class XiteWin():
 			x = ctypes.windll.SciLexer.Scintilla_DirectFunction
 		except OSError:
 			print("Can't find SciLexer.DLL")
+			print("Python is built for " + " ".join(platform.architecture()))
 			sys.exit()
 		self.sciHwnd = user32.CreateWindowExW(0,
 			"Scintilla", "Source",
