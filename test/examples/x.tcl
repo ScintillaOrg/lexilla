@@ -4,7 +4,7 @@
 
 proc Echo_Server {port} {
     set s [socket -server EchoAccept $port]
-    vwait forever
+    vwait forever;
 }
 
 # Bug #1947
