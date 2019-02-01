@@ -10,3 +10,11 @@ stdin.readLine.split.map(parseInt).max.`$`.echo(" is the maximum!")
 proc `$` (x: myDataType): string = ...
 # Style ticks as SCE_NIM_BACKTICKS:
 if `==`( `+`(3,4),7): echo "True"
+
+# Feature #1262
+# Standard raw string identifier:
+let standardDoubleLitRawStr = R"A raw string\"
+let standardTripleLitRawStr = R"""A triple-double raw string\""""
+# Style of 'customIdent' is determined by lexer.nim.raw.strings.highlight.ident. 16 if false, 6 or 10 if true
+let customDoubleLitRawStr = customIdent"A string\"
+let customTripleLitRawStr = customIdent"""A triple-double raw string\""""
