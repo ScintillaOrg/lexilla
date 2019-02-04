@@ -572,6 +572,19 @@ bool ViewStyle::SetWrapIndentMode(int wrapIndentMode_) {
 	return changed;
 }
 
+bool ViewStyle::IsBlockCaretStyle() const noexcept {
+	return (caretStyle == CARETSTYLE_BLOCK) || (caretStyle & CARETSTYLE_OVERSTRIKE_BLOCK) != 0;
+}
+
+ViewStyle::CaretShape ViewStyle::CaretShapeForMode(bool inOverstrike) const noexcept {
+	if (inOverstrike) {
+		return (caretStyle & CARETSTYLE_OVERSTRIKE_BLOCK) ? CaretShape::block : CaretShape::bar;
+	}
+
+	const int caret = caretStyle & CARETSTYLE_INS_MASK;
+	return (caret <= CARETSTYLE_BLOCK) ? static_cast<CaretShape>(caret) : CaretShape::line;
+}
+
 void ViewStyle::AllocStyles(size_t sizeNew) {
 	size_t i=styles.size();
 	styles.resize(sizeNew);
