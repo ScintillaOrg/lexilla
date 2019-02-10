@@ -1048,7 +1048,6 @@ void Editor::MoveSelectedLines(int lineDelta) {
 	SelectionText selectedText;
 	CopySelectionRange(&selectedText);
 
-	Sci::Position selectionLength = SelectionRange(selectionStart, selectionEnd).Length();
 	const Point currentLocation = LocationFromPosition(CurrentPosition());
 	const Sci::Line currentLine = LineFromLocation(currentLocation);
 
@@ -1061,7 +1060,7 @@ void Editor::MoveSelectedLines(int lineDelta) {
 		pdoc->InsertString(pdoc->Length(), eol, strlen(eol));
 	GoToLine(currentLine + lineDelta);
 
-	selectionLength = pdoc->InsertString(CurrentPosition(), selectedText.Data(), selectedText.Length());
+	Sci::Position selectionLength = pdoc->InsertString(CurrentPosition(), selectedText.Data(), selectedText.Length());
 	if (appendEol) {
 		const Sci::Position lengthInserted = pdoc->InsertString(CurrentPosition() + selectionLength, eol, strlen(eol));
 		selectionLength += lengthInserted;
