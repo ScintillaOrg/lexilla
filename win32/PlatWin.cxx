@@ -62,12 +62,6 @@ namespace Scintilla {
 
 UINT CodePageFromCharSet(DWORD characterSet, UINT documentCodePage);
 
-RECT RectFromPRectangle(PRectangle prc) noexcept {
-	RECT rc = {static_cast<LONG>(prc.left), static_cast<LONG>(prc.top),
-		static_cast<LONG>(prc.right), static_cast<LONG>(prc.bottom)};
-	return rc;
-}
-
 #if defined(USE_D2D)
 IDWriteFactory *pIDWriteFactory = nullptr;
 ID2D1Factory *pD2DFactory = nullptr;
@@ -152,7 +146,7 @@ struct FormatAndMetrics {
 	FLOAT yAscent;
 	FLOAT yDescent;
 	FLOAT yInternalLeading;
-	FormatAndMetrics(HFONT hfont_, int extraFontFlag_, int characterSet_) :
+	FormatAndMetrics(HFONT hfont_, int extraFontFlag_, int characterSet_) noexcept :
 		technology(SCWIN_TECH_GDI), hfont(hfont_),
 #if defined(USE_D2D)
 		pTextFormat(nullptr),
@@ -165,7 +159,7 @@ struct FormatAndMetrics {
 	        int characterSet_,
 	        FLOAT yAscent_,
 	        FLOAT yDescent_,
-	        FLOAT yInternalLeading_) :
+	        FLOAT yInternalLeading_) noexcept :
 		technology(SCWIN_TECH_DIRECTWRITE),
 		hfont{},
 		pTextFormat(pTextFormat_),
@@ -228,11 +222,11 @@ HFONT FormatAndMetrics::HFont() {
 
 namespace {
 
-void *PointerFromWindow(HWND hWnd) {
+void *PointerFromWindow(HWND hWnd) noexcept {
 	return reinterpret_cast<void *>(::GetWindowLongPtr(hWnd, 0));
 }
 
-void SetWindowPointer(HWND hWnd, void *ptr) {
+void SetWindowPointer(HWND hWnd, void *ptr) noexcept {
 	::SetWindowLongPtr(hWnd, 0, reinterpret_cast<LONG_PTR>(ptr));
 }
 
@@ -241,11 +235,11 @@ HINSTANCE hinstPlatformRes {};
 
 HCURSOR reverseArrowCursor {};
 
-FormatAndMetrics *FamFromFontID(void *fid) {
+FormatAndMetrics *FamFromFontID(void *fid) noexcept {
 	return static_cast<FormatAndMetrics *>(fid);
 }
 
-BYTE Win32MapFontQuality(int extraFontFlag) {
+constexpr BYTE Win32MapFontQuality(int extraFontFlag) noexcept {
 	switch (extraFontFlag & SC_EFF_QUALITY_MASK) {
 
 		case SC_EFF_QUALITY_NON_ANTIALIASED:
@@ -263,7 +257,7 @@ BYTE Win32MapFontQuality(int extraFontFlag) {
 }
 
 #if defined(USE_D2D)
-D2D1_TEXT_ANTIALIAS_MODE DWriteMapFontQuality(int extraFontFlag) {
+constexpr D2D1_TEXT_ANTIALIAS_MODE DWriteMapFontQuality(int extraFontFlag) noexcept {
 	switch (extraFontFlag & SC_EFF_QUALITY_MASK) {
 
 		case SC_EFF_QUALITY_NON_ANTIALIASED:
@@ -431,17 +425,17 @@ class SurfaceGDI : public Surface {
 
 	void BrushColor(ColourDesired back);
 	void SetFont(Font &font_);
-	void Clear();
+	void Clear() noexcept;
 
 public:
-	SurfaceGDI();
+	SurfaceGDI() noexcept;
 	// Deleted so SurfaceGDI objects can not be copied.
 	SurfaceGDI(const SurfaceGDI &) = delete;
 	SurfaceGDI(SurfaceGDI &&) = delete;
 	SurfaceGDI &operator=(const SurfaceGDI &) = delete;
 	SurfaceGDI &operator=(SurfaceGDI &&) = delete;
 
-	~SurfaceGDI() override;
+	~SurfaceGDI() noexcept override;
 
 	void Init(WindowID wid) override;
 	void Init(SurfaceID sid, WindowID wid) override;
@@ -488,14 +482,14 @@ public:
 	void SetBidiR2L(bool bidiR2L_) override;
 };
 
-SurfaceGDI::SurfaceGDI() {
+SurfaceGDI::SurfaceGDI() noexcept {
 }
 
-SurfaceGDI::~SurfaceGDI() {
+SurfaceGDI::~SurfaceGDI() noexcept {
 	Clear();
 }
 
-void SurfaceGDI::Clear() {
+void SurfaceGDI::Clear() noexcept {
 	if (penOld) {
 		::SelectObject(hdc, penOld);
 		::DeleteObject(pen);
@@ -662,7 +656,7 @@ void SurfaceGDI::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesir
 namespace {
 
 // Plot a point into a DWORD buffer symmetrically to all 4 quadrants
-void AllFour(DWORD *pixels, int width, int height, int x, int y, DWORD val) {
+void AllFour(DWORD *pixels, int width, int height, int x, int y, DWORD val) noexcept {
 	pixels[y*width+x] = val;
 	pixels[y*width+width-1-x] = val;
 	pixels[(height-1-y)*width+x] = val;
@@ -681,7 +675,7 @@ DWORD dwordFromBGRA(byte b, byte g, byte r, byte a) noexcept {
 	return converter.val;
 }
 
-DWORD dwordMultiplied(ColourDesired colour, unsigned int alpha) {
+DWORD dwordMultiplied(ColourDesired colour, unsigned int alpha) noexcept {
 	return dwordFromBGRA(
 		static_cast<byte>(colour.GetBlue() * alpha / 255),
 		static_cast<byte>(colour.GetGreen() * alpha / 255),
@@ -997,11 +991,11 @@ class SurfaceD2D : public Surface {
 	float dpiScaleX;
 	float dpiScaleY;
 
-	void Clear();
+	void Clear() noexcept;
 	void SetFont(Font &font_);
 
 public:
-	SurfaceD2D();
+	SurfaceD2D() noexcept;
 	// Deleted so SurfaceD2D objects can not be copied.
 	SurfaceD2D(const SurfaceD2D &) = delete;
 	SurfaceD2D(SurfaceD2D &&) = delete;
@@ -1059,7 +1053,7 @@ public:
 	void SetBidiR2L(bool bidiR2L_) override;
 };
 
-SurfaceD2D::SurfaceD2D() :
+SurfaceD2D::SurfaceD2D() noexcept :
 	unicodeMode(false),
 	x(0), y(0) {
 
@@ -1087,7 +1081,7 @@ SurfaceD2D::~SurfaceD2D() {
 	Clear();
 }
 
-void SurfaceD2D::Clear() {
+void SurfaceD2D::Clear() noexcept {
 	if (pBrush) {
 		pBrush->Release();
 		pBrush = nullptr;
@@ -1219,7 +1213,7 @@ void SurfaceD2D::MoveTo(int x_, int y_) {
 	y = y_;
 }
 
-static int Delta(int difference) {
+static constexpr int Delta(int difference) noexcept {
 	if (difference < 0)
 		return -1;
 	else if (difference > 0)
@@ -2120,7 +2114,7 @@ Surface *Surface::Allocate(int technology) {
 
 namespace {
 
-HWND HwndFromWindowID(WindowID wid) {
+HWND HwndFromWindowID(WindowID wid) noexcept {
 	return static_cast<HWND>(wid);
 }
 
@@ -2149,7 +2143,7 @@ void Window::SetPosition(PRectangle rc) {
 
 namespace {
 
-static RECT RectFromMonitor(HMONITOR hMonitor) {
+static RECT RectFromMonitor(HMONITOR hMonitor) noexcept {
 	MONITORINFO mi = {};
 	mi.cbSize = sizeof(mi);
 	if (GetMonitorInfo(hMonitor, &mi)) {
@@ -2228,7 +2222,7 @@ void Window::SetFont(Font &font) {
 
 namespace {
 
-void FlipBitmap(HBITMAP bitmap, int width, int height) {
+void FlipBitmap(HBITMAP bitmap, int width, int height) noexcept {
 	HDC hdc = ::CreateCompatibleDC(NULL);
 	if (hdc) {
 		HBITMAP prevBmp = SelectBitmap(hdc, bitmap);
@@ -2238,7 +2232,7 @@ void FlipBitmap(HBITMAP bitmap, int width, int height) {
 	}
 }
 
-HCURSOR GetReverseArrowCursor() {
+HCURSOR GetReverseArrowCursor() noexcept {
 	if (reverseArrowCursor)
 		return reverseArrowCursor;
 
@@ -2333,7 +2327,7 @@ class LineToItem {
 	std::vector<ListItemData> data;
 
 public:
-	void Clear() {
+	void Clear() noexcept {
 		words.clear();
 		data.clear();
 	}
@@ -2346,7 +2340,7 @@ public:
 			return missing;
 		}
 	}
-	int Count() const {
+	int Count() const noexcept {
 		return static_cast<int>(data.size());
 	}
 
@@ -3196,7 +3190,7 @@ LRESULT PASCAL ListBoxX::StaticWndProc(
 
 namespace {
 
-bool ListBoxX_Register() {
+bool ListBoxX_Register() noexcept {
 	WNDCLASSEX wndclassc;
 	wndclassc.cbSize = sizeof(wndclassc);
 	// We need CS_HREDRAW and CS_VREDRAW because of the ellipsis that might be drawn for
@@ -3217,7 +3211,7 @@ bool ListBoxX_Register() {
 	return ::RegisterClassEx(&wndclassc) != 0;
 }
 
-bool ListBoxX_Unregister() {
+bool ListBoxX_Unregister() noexcept {
 	return ::UnregisterClass(ListBoxX_ClassName, hinstPlatformRes) != 0;
 }
 
@@ -3248,7 +3242,7 @@ class DynamicLibraryImpl : public DynamicLibrary {
 protected:
 	HMODULE h;
 public:
-	explicit DynamicLibraryImpl(const char *modulePath) {
+	explicit DynamicLibraryImpl(const char *modulePath) noexcept {
 		h = ::LoadLibraryA(modulePath);
 	}
 
@@ -3258,7 +3252,7 @@ public:
 	}
 
 	// Use GetProcAddress to get a pointer to the relevant function.
-	Function FindFunction(const char *name) override {
+	Function FindFunction(const char *name) noexcept override {
 		if (h) {
 			// C++ standard doesn't like casts between function pointers and void pointers so use a union
 			union {
@@ -3272,7 +3266,7 @@ public:
 		}
 	}
 
-	bool IsValid() override {
+	bool IsValid() noexcept override {
 		return h != NULL;
 	}
 };
