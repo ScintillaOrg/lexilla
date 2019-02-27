@@ -230,6 +230,7 @@
 		FDC7442CAD70B9A67EF1639D /* LexSAS.cxx in Sources */ = {isa = PBXBuildFile; fileRef = A95147A1AB7CADB00DAFE724 /* LexSAS.cxx */; };
 		5F804AA6B60FE695863A39FE /* LexStata.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 7623427695416AB1270EE023 /* LexStata.cxx */; };
 		0ED84236A703D57578EBFD2F /* LexNim.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 47814937A6B72D2B0F065B61 /* LexNim.cxx */; }; 
+		00724A59981D34F11A3D162F /* LexCIL.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 577F46B88F633198B56D088D /* LexCIL.cxx */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -463,6 +464,7 @@
 		A95147A1AB7CADB00DAFE724 /* LexSAS.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexSAS.cxx; path = ../../lexers/LexSAS.cxx; sourceTree = SOURCE_ROOT; };
 		7623427695416AB1270EE023 /* LexStata.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexStata.cxx; path = ../../lexers/LexStata.cxx; sourceTree = SOURCE_ROOT; };
 		47814937A6B72D2B0F065B61 /* LexNim.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexNim.cxx; path = ../../lexers/LexNim.cxx; sourceTree = SOURCE_ROOT; };
+		577F46B88F633198B56D088D /* LexCIL.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexCIL.cxx; path = ../../lexers/LexCIL.cxx; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -577,6 +579,7 @@
 				28FDA42019B6967B00BE27D7 /* LexBibTeX.cxx */,
 				114B6EC911FA7526004FB6AB /* LexBullant.cxx */,
 				114B6ECA11FA7526004FB6AB /* LexCaml.cxx */,
+				577F46B88F633198B56D088D /* LexCIL.cxx */,
 				114B6ECB11FA7526004FB6AB /* LexCLW.cxx */,
 				114B6ECC11FA7526004FB6AB /* LexCmake.cxx */,
 				114B6ECD11FA7526004FB6AB /* LexCOBOL.cxx */,
@@ -1124,6 +1127,7 @@
 				FDC7442CAD70B9A67EF1639D /* LexSAS.cxx in Sources */,
 				5F804AA6B60FE695863A39FE /* LexStata.cxx in Sources */,
 				0ED84236A703D57578EBFD2F /* LexNim.cxx in Sources */,
+				00724A59981D34F11A3D162F /* LexCIL.cxx in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
