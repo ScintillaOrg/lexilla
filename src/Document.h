@@ -507,6 +507,11 @@ public:
 			pdoc->BeginUndoAction();
 		}
 	}
+	// Deleted so UndoGroup objects can not be copied.
+	UndoGroup(const UndoGroup &) = delete;
+	UndoGroup(UndoGroup &&) = delete;
+	void operator=(const UndoGroup &) = delete;
+	UndoGroup &operator=(UndoGroup &&) = delete;
 	~UndoGroup() {
 		if (groupNeeded) {
 			pdoc->EndUndoAction();
