@@ -164,7 +164,7 @@ public:
 	bool isEnabled;
 };
 
-inline int LevelNumber(int level) noexcept {
+constexpr int LevelNumber(int level) noexcept {
 	return level & SC_FOLDLEVELNUMBERMASK;
 }
 
