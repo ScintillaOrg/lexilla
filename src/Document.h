@@ -126,11 +126,11 @@ struct StyledText {
 
 class HighlightDelimiter {
 public:
-	HighlightDelimiter() : isEnabled(false) {
+	HighlightDelimiter() noexcept : isEnabled(false) {
 		Clear();
 	}
 
-	void Clear() {
+	void Clear() noexcept {
 		beginFoldBlock = -1;
 		endFoldBlock = -1;
 		firstChangeableLineBefore = -1;
@@ -174,13 +174,13 @@ protected:
 	ILexer4 *instance;
 	bool performingStyle;	///< Prevent reentrance
 public:
-	explicit LexInterface(Document *pdoc_) : pdoc(pdoc_), instance(nullptr), performingStyle(false) {
+	explicit LexInterface(Document *pdoc_) noexcept : pdoc(pdoc_), instance(nullptr), performingStyle(false) {
 	}
 	virtual ~LexInterface() {
 	}
 	void Colourise(Sci::Position start, Sci::Position end);
 	virtual int LineEndTypesSupported();
-	bool UseContainerLexing() const {
+	bool UseContainerLexing() const noexcept {
 		return instance == nullptr;
 	}
 };
@@ -578,7 +578,7 @@ public:
 	virtual void NotifyModifyAttempt(Document *doc, void *userData) = 0;
 	virtual void NotifySavePoint(Document *doc, void *userData, bool atSavePoint) = 0;
 	virtual void NotifyModified(Document *doc, DocModification mh, void *userData) = 0;
-	virtual void NotifyDeleted(Document *doc, void *userData) = 0;
+	virtual void NotifyDeleted(Document *doc, void *userData) noexcept = 0;
 	virtual void NotifyStyleNeeded(Document *doc, void *userData, Sci::Position endPos) = 0;
 	virtual void NotifyLexerChanged(Document *doc, void *userData) = 0;
 	virtual void NotifyErrorOccurred(Document *doc, void *userData, int status) = 0;

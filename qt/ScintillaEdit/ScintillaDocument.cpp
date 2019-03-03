@@ -44,7 +44,7 @@ public:
     void NotifyModifyAttempt(Document *doc, void *userData) override;
     void NotifySavePoint(Document *doc, void *userData, bool atSavePoint) override;
     void NotifyModified(Document *doc, DocModification mh, void *userData) override;
-    void NotifyDeleted(Document *doc, void *userData) override;
+    void NotifyDeleted(Document *doc, void *userData) noexcept override;
     void NotifyStyleNeeded(Document *doc, void *userData, Sci::Position endPos);
     void NotifyLexerChanged(Document *doc, void *userData) override;
     void NotifyErrorOccurred(Document *doc, void *userData, int status) override;
@@ -73,7 +73,7 @@ void WatcherHelper::NotifyModified(Document *, DocModification mh, void *) {
                          mh.linesAdded, mh.line, mh.foldLevelNow, mh.foldLevelPrev);
 }
 
-void WatcherHelper::NotifyDeleted(Document *, void *) {
+void WatcherHelper::NotifyDeleted(Document *, void *) noexcept {
 }
 
 void WatcherHelper::NotifyStyleNeeded(Document *, void *, Sci::Position endPos) {
