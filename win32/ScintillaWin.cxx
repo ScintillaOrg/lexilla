@@ -883,6 +883,7 @@ sptr_t ScintillaWin::WndPaint() {
 	if (paintState == paintAbandoned) {
 		// Painting area was insufficient to cover new styling or brace highlight positions
 		FullPaint();
+		::ValidateRect(MainHWND(), nullptr);
 	}
 	paintState = notPainting;
 
