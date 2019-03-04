@@ -117,7 +117,15 @@
 #define MK_ALT 32
 #endif
 
-#define SC_WIN_IDLE 5001
+// Two idle messages SC_WIN_IDLE and SC_WORK_IDLE.
+
+// SC_WIN_IDLE is low priority so should occur after the next WM_PAINT
+// It is for lengthy actions like wrapping and background styling 
+constexpr UINT SC_WIN_IDLE = 5001;
+// SC_WORK_IDLE is high priority and should occur before the next WM_PAINT
+// It is for shorter actions like restyling the text just inserted
+// and delivering SCN_UPDATEUI
+constexpr UINT SC_WORK_IDLE = 5002;
 
 #define SC_INDICATOR_INPUT INDIC_IME
 #define SC_INDICATOR_TARGET INDIC_IME+1
@@ -337,6 +345,8 @@ class ScintillaWin :
 	UINT CodePageOfDocument() const;
 	bool ValidCodePage(int codePage) const override;
 	sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;
+	void IdleWork() override;
+	void QueueIdleWork(WorkNeeded::workItems items, Sci::Position upTo) override;
 	bool SetIdle(bool on) override;
 	UINT_PTR timers[tickDwell+1] {};
 	bool FineTickerRunning(TickReason reason) override;
@@ -426,6 +436,7 @@ private:
 	HBITMAP sysCaretBitmap;
 	int sysCaretWidth;
 	int sysCaretHeight;
+	bool styleIdleInQueue;
 };
 
 HINSTANCE ScintillaWin::hInstance {};
@@ -471,6 +482,8 @@ ScintillaWin::ScintillaWin(HWND hwnd) {
 	sysCaretBitmap = 0;
 	sysCaretWidth = 0;
 	sysCaretHeight = 0;
+
+	styleIdleInQueue = false;
 
 #if defined(USE_D2D)
 	pRenderTarget = nullptr;
@@ -1394,6 +1407,10 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			}
 			break;
 
+		case SC_WORK_IDLE:
+			IdleWork();
+			break;
+
 		case WM_GETMINMAXINFO:
 			return ::DefWindowProc(MainHWND(), iMessage, wParam, lParam);
 
@@ -1837,6 +1854,20 @@ bool ScintillaWin::SetIdle(bool on) {
 		idler.state = idler.idlerID != 0;
 	}
 	return idler.state;
+}
+
+void ScintillaWin::IdleWork() {
+	styleIdleInQueue = false;
+	Editor::IdleWork();
+}
+
+void ScintillaWin::QueueIdleWork(WorkNeeded::workItems items, Sci::Position upTo) {
+	Editor::QueueIdleWork(items, upTo);
+	if (!styleIdleInQueue) {
+		if (PostMessage(MainHWND(), SC_WORK_IDLE, 0, 0)) {
+			styleIdleInQueue = true;
+		}
+	}
 }
 
 void ScintillaWin::SetMouseCapture(bool on) {
