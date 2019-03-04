@@ -321,7 +321,7 @@ class ScintillaWin :
 	Sci::Position TargetAsUTF8(char *text) const;
 	void AddCharUTF16(wchar_t const *wcs, unsigned int wclen);
 	Sci::Position EncodedFromUTF8(const char *utf8, char *encoded) const;
-	sptr_t WndPaint(uptr_t wParam);
+	sptr_t WndPaint();
 
 	sptr_t HandleCompositionWindowed(uptr_t wParam, sptr_t lParam);
 	sptr_t HandleCompositionInline(uptr_t wParam, sptr_t lParam);
@@ -836,39 +836,31 @@ void ScintillaWin::AddCharUTF16(wchar_t const *wcs, unsigned int wclen) {
 	}
 }
 
-sptr_t ScintillaWin::WndPaint(uptr_t wParam) {
+sptr_t ScintillaWin::WndPaint() {
 	//ElapsedPeriod ep;
 
 	// Redirect assertions to debug output and save current state
 	const bool assertsPopup = Platform::ShowAssertionPopUps(false);
 	paintState = painting;
 	PAINTSTRUCT ps;
-	PAINTSTRUCT *pps;
 
-	const bool IsOcxCtrl = (wParam != 0); // if wParam != 0, it contains
-								   // a PAINTSTRUCT* from the OCX
 	// Removed since this interferes with reporting other assertions as it occurs repeatedly
 	//PLATFORM_ASSERT(hRgnUpdate == NULL);
 	hRgnUpdate = ::CreateRectRgn(0, 0, 0, 0);
-	if (IsOcxCtrl) {
-		pps = reinterpret_cast<PAINTSTRUCT*>(wParam);
-	} else {
-		::GetUpdateRgn(MainHWND(), hRgnUpdate, FALSE);
-		pps = &ps;
-		::BeginPaint(MainHWND(), pps);
-	}
-	rcPaint = PRectangle::FromInts(pps->rcPaint.left, pps->rcPaint.top, pps->rcPaint.right, pps->rcPaint.bottom);
+	::GetUpdateRgn(MainHWND(), hRgnUpdate, FALSE);
+	::BeginPaint(MainHWND(), &ps);
+	rcPaint = PRectangle::FromInts(ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right, ps.rcPaint.bottom);
 	const PRectangle rcClient = GetClientRectangle();
 	paintingAllText = BoundsContains(rcPaint, hRgnUpdate, rcClient);
 	if (technology == SC_TECHNOLOGY_DEFAULT) {
-		AutoSurface surfaceWindow(pps->hdc, this);
+		AutoSurface surfaceWindow(ps.hdc, this);
 		if (surfaceWindow) {
 			Paint(surfaceWindow, rcPaint);
 			surfaceWindow->Release();
 		}
 	} else {
 #if defined(USE_D2D)
-		EnsureRenderTarget(pps->hdc);
+		EnsureRenderTarget(ps.hdc);
 		AutoSurface surfaceWindow(pRenderTarget, this);
 		if (surfaceWindow) {
 			pRenderTarget->BeginDraw();
@@ -887,15 +879,10 @@ sptr_t ScintillaWin::WndPaint(uptr_t wParam) {
 		hRgnUpdate = 0;
 	}
 
-	if (!IsOcxCtrl)
-		::EndPaint(MainHWND(), pps);
+	::EndPaint(MainHWND(), &ps);
 	if (paintState == paintAbandoned) {
 		// Painting area was insufficient to cover new styling or brace highlight positions
-		if (IsOcxCtrl) {
-			FullPaintDC(pps->hdc);
-		} else {
-			FullPaint();
-		}
+		FullPaint();
 	}
 	paintState = notPainting;
 
@@ -1278,7 +1265,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			Command(LOWORD(wParam));
 			break;
 		case WM_PAINT:
-			return WndPaint(wParam);
+			return WndPaint();
 
 		case WM_PRINTCLIENT: {
 				HDC hdc = reinterpret_cast<HDC>(wParam);
