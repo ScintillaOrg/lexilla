@@ -316,7 +316,7 @@ const CGFloat paddingHighlightY = 2;
 		// main thread). We need that later for idle event processing.
 		NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
 		notificationQueue = [[NSNotificationQueue alloc] initWithNotificationCenter: center];
-		[center addObserver: self selector: @selector(idleTriggered:) name: @"Idle" object: nil];
+		[center addObserver: self selector: @selector(idleTriggered:) name: @"Idle" object: self];
 	}
 	return self;
 }
