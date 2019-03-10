@@ -941,6 +941,7 @@
 				Japanese,
 				French,
 				German,
+				Base,
 			);
 			mainGroup = 0867D691FE84028FC02AAC07 /* Scintilla */;
 			productRefGroup = 034768DFFF38A50411DB9C8B /* Products */;

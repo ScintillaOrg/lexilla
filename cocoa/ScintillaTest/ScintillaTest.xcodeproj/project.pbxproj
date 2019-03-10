@@ -202,6 +202,7 @@
 				Japanese,
 				French,
 				German,
+				Base,
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* ScintillaTest */;
 			projectDirPath = "";
