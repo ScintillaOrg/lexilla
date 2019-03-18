@@ -149,28 +149,28 @@ namespace {
 
 const TCHAR callClassName[] = TEXT("CallTip");
 
-void *PointerFromWindow(HWND hWnd) {
+void *PointerFromWindow(HWND hWnd) noexcept {
 	return reinterpret_cast<void *>(::GetWindowLongPtr(hWnd, 0));
 }
 
-void SetWindowPointer(HWND hWnd, void *ptr) {
+void SetWindowPointer(HWND hWnd, void *ptr) noexcept {
 	::SetWindowLongPtr(hWnd, 0, reinterpret_cast<LONG_PTR>(ptr));
 }
 
-void SetWindowID(HWND hWnd, int identifier) {
+void SetWindowID(HWND hWnd, int identifier) noexcept {
 	::SetWindowLongPtr(hWnd, GWLP_ID, identifier);
 }
 
-Point PointFromPOINT(POINT pt) {
+Point PointFromPOINT(POINT pt) noexcept {
 	return Point::FromInts(pt.x, pt.y);
 }
-Point PointFromLParam(sptr_t lpoint) {
+Point PointFromLParam(sptr_t lpoint) noexcept {
 	return Point::FromInts(GET_X_LPARAM(lpoint), GET_Y_LPARAM(lpoint));
 }
 constexpr POINT POINTFromPoint(Point pt) noexcept {
 	return POINT{ static_cast<LONG>(pt.x), static_cast<LONG>(pt.y) };
 }
-bool KeyboardIsKeyDown(int key) {
+bool KeyboardIsKeyDown(int key) noexcept {
 	return (::GetKeyState(key) & 0x80000000) != 0;
 }
 
@@ -198,7 +198,7 @@ class DropSource {
 public:
 	VFunction **vtbl;
 	ScintillaWin *sci;
-	DropSource();
+	DropSource() noexcept;
 };
 
 /**
@@ -207,7 +207,7 @@ class DataObject {
 public:
 	VFunction **vtbl;
 	ScintillaWin *sci;
-	DataObject();
+	DataObject() noexcept;
 };
 
 /**
@@ -216,7 +216,7 @@ class DropTarget {
 public:
 	VFunction **vtbl;
 	ScintillaWin *sci;
-	DropTarget();
+	DropTarget() noexcept;
 };
 
 namespace {
@@ -225,7 +225,7 @@ class IMContext {
 	HWND hwnd;
 public:
 	HIMC hIMC;
-	IMContext(HWND hwnd_) :
+	IMContext(HWND hwnd_) noexcept :
 		hwnd(hwnd_), hIMC(::ImmGetContext(hwnd_)) {
 	}
 	// Deleted so IMContext objects can not be copied.
@@ -238,7 +238,7 @@ public:
 			::ImmReleaseContext(hwnd, hIMC);
 	}
 
-	unsigned int GetImeCaretPos() {
+	unsigned int GetImeCaretPos() const noexcept {
 		return ImmGetCompositionStringW(hIMC, GCS_CURSORPOS, NULL, 0);
 	}
 
@@ -311,7 +311,7 @@ class ScintillaWin :
 	void EnsureRenderTarget(HDC hdc);
 	void DropRenderTarget();
 #endif
-	HWND MainHWND();
+	HWND MainHWND() const noexcept;
 
 	static sptr_t DirectFunction(
 		    sptr_t ptr, UINT iMessage, uptr_t wParam, sptr_t lParam);
@@ -324,7 +324,7 @@ class ScintillaWin :
 
 	bool DragThreshold(Point ptStart, Point ptNow) override;
 	void StartDrag() override;
-	static int MouseModifiers(uptr_t wParam);
+	static int MouseModifiers(uptr_t wParam) noexcept;
 
 	Sci::Position TargetAsUTF8(char *text) const;
 	void AddCharUTF16(wchar_t const *wcs, unsigned int wclen);
@@ -333,7 +333,7 @@ class ScintillaWin :
 
 	sptr_t HandleCompositionWindowed(uptr_t wParam, sptr_t lParam);
 	sptr_t HandleCompositionInline(uptr_t wParam, sptr_t lParam);
-	static bool KoreanIME();
+	static bool KoreanIME() noexcept;
 	void MoveImeCarets(Sci::Position offset);
 	void DrawImeIndicator(int indicator, int len);
 	void SetCandidateWindowPos();
@@ -354,7 +354,7 @@ class ScintillaWin :
 	void FineTickerCancel(TickReason reason) override;
 	void SetMouseCapture(bool on) override;
 	bool HaveMouseCapture() override;
-	void SetTrackMouseLeaveEvent(bool on);
+	void SetTrackMouseLeaveEvent(bool on) noexcept;
 	bool PaintContains(PRectangle rc) override;
 	void ScrollText(Sci::Line linesToMove) override;
 	void NotifyCaretMove() override;
@@ -383,17 +383,17 @@ class ScintillaWin :
 	void ImeEndComposition();
 	LRESULT ImeOnReconvert(LPARAM lParam);
 
-	void GetIntelliMouseParameters();
+	void GetIntelliMouseParameters() noexcept;
 	void CopyToClipboard(const SelectionText &selectedText) override;
 	void ScrollMessage(WPARAM wParam);
 	void HorizontalScrollMessage(WPARAM wParam);
 	void FullPaint();
 	void FullPaintDC(HDC hdc);
-	bool IsCompatibleDC(HDC hOtherDC);
-	DWORD EffectFromState(DWORD grfKeyState) const;
+	bool IsCompatibleDC(HDC hOtherDC) noexcept;
+	DWORD EffectFromState(DWORD grfKeyState) const noexcept;
 
-	int SetScrollInfo(int nBar, LPCSCROLLINFO lpsi, BOOL bRedraw);
-	bool GetScrollInfo(int nBar, LPSCROLLINFO lpsi);
+	int SetScrollInfo(int nBar, LPCSCROLLINFO lpsi, BOOL bRedraw) noexcept;
+	bool GetScrollInfo(int nBar, LPSCROLLINFO lpsi) noexcept;
 	void ChangeScrollPos(int barType, Sci::Position pos);
 	sptr_t GetTextLength();
 	sptr_t GetText(uptr_t wParam, sptr_t lParam);
@@ -418,21 +418,21 @@ public:
 	/// Implement important part of IDataObject
 	STDMETHODIMP GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM);
 
-	static bool Register(HINSTANCE hInstance_);
-	static bool Unregister();
+	static bool Register(HINSTANCE hInstance_) noexcept;
+	static bool Unregister() noexcept;
 
 	friend class DropSource;
 	friend class DataObject;
 	friend class DropTarget;
-	bool DragIsRectangularOK(CLIPFORMAT fmt) const {
+	bool DragIsRectangularOK(CLIPFORMAT fmt) const noexcept {
 		return drag.rectangular && (fmt == cfColumnSelect);
 	}
 
 private:
 	// For use in creating a system caret
-	bool HasCaretSizeChanged() const;
+	bool HasCaretSizeChanged() const noexcept;
 	BOOL CreateSystemCaret();
-	BOOL DestroySystemCaret();
+	BOOL DestroySystemCaret() noexcept;
 	HBITMAP sysCaretBitmap;
 	int sysCaretWidth;
 	int sysCaretHeight;
@@ -622,7 +622,7 @@ void ScintillaWin::DropRenderTarget() {
 
 #endif
 
-HWND ScintillaWin::MainHWND() {
+HWND ScintillaWin::MainHWND() const noexcept {
 	return static_cast<HWND>(wMain.GetID());
 }
 
@@ -655,7 +655,7 @@ void ScintillaWin::StartDrag() {
 	SetDragPosition(SelectionPosition(Sci::invalidPosition));
 }
 
-int ScintillaWin::MouseModifiers(uptr_t wParam) {
+int ScintillaWin::MouseModifiers(uptr_t wParam) noexcept {
 	return ModifierFlags((wParam & MK_SHIFT) != 0,
 		(wParam & MK_CONTROL) != 0,
 		KeyboardIsKeyDown(VK_MENU));
@@ -663,7 +663,7 @@ int ScintillaWin::MouseModifiers(uptr_t wParam) {
 
 namespace {
 
-int InputCodePage() {
+int InputCodePage() noexcept {
 	HKL inputLocale = ::GetKeyboardLayout(0);
 	const LANGID inputLang = LOWORD(inputLocale);
 	char sCodePage[10];
@@ -675,7 +675,7 @@ int InputCodePage() {
 }
 
 /** Map the key codes to their equivalent SCK_ form. */
-int KeyTranslate(int keyIn) {
+int KeyTranslate(int keyIn) noexcept {
 //PLATFORM_ASSERT(!keyIn);
 	switch (keyIn) {
 		case VK_DOWN:		return SCK_DOWN;
@@ -707,7 +707,7 @@ int KeyTranslate(int keyIn) {
 	}
 }
 
-bool BoundsContains(PRectangle rcBounds, HRGN hRgnBounds, PRectangle rcCheck) {
+bool BoundsContains(PRectangle rcBounds, HRGN hRgnBounds, PRectangle rcCheck) noexcept {
 	bool contains = true;
 	if (!rcCheck.Empty()) {
 		if (!rcBounds.Contains(rcCheck)) {
@@ -734,19 +734,19 @@ bool BoundsContains(PRectangle rcBounds, HRGN hRgnBounds, PRectangle rcCheck) {
 
 // Simplify calling WideCharToMultiByte and MultiByteToWideChar by providing default parameters and using string view.
 
-int MultiByteFromWideChar(UINT codePage, std::wstring_view wsv, LPSTR lpMultiByteStr, ptrdiff_t cbMultiByte) {
+int MultiByteFromWideChar(UINT codePage, std::wstring_view wsv, LPSTR lpMultiByteStr, ptrdiff_t cbMultiByte) noexcept {
 	return ::WideCharToMultiByte(codePage, 0, wsv.data(), static_cast<int>(wsv.length()), lpMultiByteStr, static_cast<int>(cbMultiByte), nullptr, nullptr);
 }
 
-int MultiByteLenFromWideChar(UINT codePage, std::wstring_view wsv) {
+int MultiByteLenFromWideChar(UINT codePage, std::wstring_view wsv) noexcept {
 	return MultiByteFromWideChar(codePage, wsv, nullptr, 0);
 }
 
-int WideCharFromMultiByte(UINT codePage, std::string_view sv, LPWSTR lpWideCharStr, ptrdiff_t cchWideChar) {
+int WideCharFromMultiByte(UINT codePage, std::string_view sv, LPWSTR lpWideCharStr, ptrdiff_t cchWideChar) noexcept {
 	return ::MultiByteToWideChar(codePage, 0, sv.data(), static_cast<int>(sv.length()), lpWideCharStr, static_cast<int>(cchWideChar));
 }
 
-int WideCharLenFromMultiByte(UINT codePage, std::string_view sv) {
+int WideCharLenFromMultiByte(UINT codePage, std::string_view sv) noexcept {
 	return WideCharFromMultiByte(codePage, sv, nullptr, 0);
 }
 
@@ -925,7 +925,7 @@ sptr_t ScintillaWin::HandleCompositionWindowed(uptr_t wParam, sptr_t lParam) {
 	return ::DefWindowProc(MainHWND(), WM_IME_COMPOSITION, wParam, lParam);
 }
 
-bool ScintillaWin::KoreanIME() {
+bool ScintillaWin::KoreanIME() noexcept {
 	const int codePage = InputCodePage();
 	return codePage == 949 || codePage == 1361;
 }
@@ -1151,7 +1151,7 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 namespace {
 
 // Translate message IDs from WM_* and EM_* to SCI_* so can partly emulate Windows Edit control
-unsigned int SciMessageFromEM(unsigned int iMessage) {
+unsigned int SciMessageFromEM(unsigned int iMessage) noexcept {
 	switch (iMessage) {
 	case EM_CANPASTE: return SCI_CANPASTE;
 	case EM_CANUNDO: return SCI_CANUNDO;
@@ -1182,7 +1182,7 @@ unsigned int SciMessageFromEM(unsigned int iMessage) {
 
 namespace Scintilla {
 
-UINT CodePageFromCharSet(DWORD characterSet, UINT documentCodePage) {
+UINT CodePageFromCharSet(DWORD characterSet, UINT documentCodePage) noexcept {
 	if (documentCodePage == SC_CP_UTF8) {
 		return SC_CP_UTF8;
 	}
@@ -1887,7 +1887,7 @@ bool ScintillaWin::HaveMouseCapture() {
 	//return capturedMouse && (::GetCapture() == MainHWND());
 }
 
-void ScintillaWin::SetTrackMouseLeaveEvent(bool on) {
+void ScintillaWin::SetTrackMouseLeaveEvent(bool on) noexcept {
 	if (on && !trackedMouseLeave) {
 		TRACKMOUSEEVENT tme;
 		tme.cbSize = sizeof(tme);
@@ -1930,11 +1930,11 @@ void ScintillaWin::UpdateSystemCaret() {
 	}
 }
 
-int ScintillaWin::SetScrollInfo(int nBar, LPCSCROLLINFO lpsi, BOOL bRedraw) {
+int ScintillaWin::SetScrollInfo(int nBar, LPCSCROLLINFO lpsi, BOOL bRedraw) noexcept {
 	return ::SetScrollInfo(MainHWND(), nBar, lpsi, bRedraw);
 }
 
-bool ScintillaWin::GetScrollInfo(int nBar, LPSCROLLINFO lpsi) {
+bool ScintillaWin::GetScrollInfo(int nBar, LPSCROLLINFO lpsi) noexcept {
 	return ::GetScrollInfo(MainHWND(), nBar, lpsi) ? true : false;
 }
 
@@ -2206,9 +2206,9 @@ class GlobalMemory {
 	HGLOBAL hand {};
 public:
 	void *ptr {};
-	GlobalMemory() {
+	GlobalMemory() noexcept {
 	}
-	explicit GlobalMemory(HGLOBAL hand_) : hand(hand_) {
+	explicit GlobalMemory(HGLOBAL hand_) noexcept : hand(hand_) {
 		if (hand) {
 			ptr = ::GlobalLock(hand);
 		}
@@ -2222,7 +2222,7 @@ public:
 		PLATFORM_ASSERT(!ptr);
 		assert(!hand);
 	}
-	void Allocate(size_t bytes) {
+	void Allocate(size_t bytes) noexcept {
 		assert(!hand);
 		hand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, bytes);
 		if (hand) {
@@ -2240,10 +2240,10 @@ public:
 	void SetClip(UINT uFormat) {
 		::SetClipboardData(uFormat, Unlock());
 	}
-	operator bool() const {
+	operator bool() const noexcept {
 		return ptr != nullptr;
 	}
-	SIZE_T Size() {
+	SIZE_T Size() const noexcept {
 		return ::GlobalSize(hand);
 	}
 };
@@ -2251,7 +2251,7 @@ public:
 // OpenClipboard may fail if another application has opened the clipboard.
 // Try up to 8 times, with an initial delay of 1 ms and an exponential back off
 // for a maximum total delay of 127 ms (1+2+4+8+16+32+64).
-bool OpenClipboardRetry(HWND hwnd) {
+bool OpenClipboardRetry(HWND hwnd) noexcept {
 	for (int attempt=0; attempt<8; attempt++) {
 		if (attempt > 0) {
 			::Sleep(1 << (attempt-1));
@@ -2486,7 +2486,7 @@ static VFunction *vtDropSource[] = {
 	(VFunction *)(DropSource_GiveFeedback)
 };
 
-DropSource::DropSource() {
+DropSource::DropSource() noexcept {
 	vtbl = vtDropSource;
 	sci = nullptr;
 }
@@ -2612,7 +2612,7 @@ static VFunction *vtDataObject[] = {
 	(VFunction *)(DataObject_EnumDAdvise)
 };
 
-DataObject::DataObject() {
+DataObject::DataObject() noexcept {
 	vtbl = vtDataObject;
 	sci = nullptr;
 }
@@ -2675,7 +2675,7 @@ static VFunction *vtDropTarget[] = {
 	(VFunction *)(DropTarget_Drop)
 };
 
-DropTarget::DropTarget() {
+DropTarget::DropTarget() noexcept {
 	vtbl = vtDropTarget;
 	sci = nullptr;
 }
@@ -2814,7 +2814,7 @@ LRESULT ScintillaWin::ImeOnReconvert(LPARAM lParam) {
 	return rcSize;
 }
 
-void ScintillaWin::GetIntelliMouseParameters() {
+void ScintillaWin::GetIntelliMouseParameters() noexcept {
 	// This retrieves the number of lines per scroll as configured inthe Mouse Properties sheet in Control Panel
 	::SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, &linesPerScroll, 0);
 }
@@ -3001,13 +3001,13 @@ void ScintillaWin::FullPaintDC(HDC hdc) {
 
 namespace {
 
-bool CompareDevCap(HDC hdc, HDC hOtherDC, int nIndex) {
+bool CompareDevCap(HDC hdc, HDC hOtherDC, int nIndex) noexcept {
 	return ::GetDeviceCaps(hdc, nIndex) == ::GetDeviceCaps(hOtherDC, nIndex);
 }
 
 }
 
-bool ScintillaWin::IsCompatibleDC(HDC hOtherDC) {
+bool ScintillaWin::IsCompatibleDC(HDC hOtherDC) noexcept {
 	HDC hdc = ::GetDC(MainHWND());
 	const bool isCompatible =
 		CompareDevCap(hdc, hOtherDC, TECHNOLOGY) &&
@@ -3019,7 +3019,7 @@ bool ScintillaWin::IsCompatibleDC(HDC hOtherDC) {
 	return isCompatible;
 }
 
-DWORD ScintillaWin::EffectFromState(DWORD grfKeyState) const {
+DWORD ScintillaWin::EffectFromState(DWORD grfKeyState) const noexcept {
 	// These are the Wordpad semantics.
 	DWORD dwEffect;
 	if (inDragDrop == ddDragging)	// Internal defaults to move
@@ -3225,7 +3225,7 @@ STDMETHODIMP ScintillaWin::GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM) {
 	return S_OK;
 }
 
-bool ScintillaWin::Register(HINSTANCE hInstance_) {
+bool ScintillaWin::Register(HINSTANCE hInstance_) noexcept {
 
 	hInstance = hInstance_;
 
@@ -3270,7 +3270,7 @@ bool ScintillaWin::Register(HINSTANCE hInstance_) {
 	return result;
 }
 
-bool ScintillaWin::Unregister() {
+bool ScintillaWin::Unregister() noexcept {
 	bool result = true;
 	if (0 != scintillaClassAtom) {
 		if (::UnregisterClass(MAKEINTATOM(scintillaClassAtom), hInstance) == 0) {
@@ -3287,7 +3287,7 @@ bool ScintillaWin::Unregister() {
 	return result;
 }
 
-bool ScintillaWin::HasCaretSizeChanged() const {
+bool ScintillaWin::HasCaretSizeChanged() const noexcept {
 	if (
 		( (0 != vs.caretWidth) && (sysCaretWidth != vs.caretWidth) )
 		|| ((0 != vs.lineHeight) && (sysCaretHeight != vs.lineHeight))
@@ -3318,7 +3318,7 @@ BOOL ScintillaWin::CreateSystemCaret() {
 	return retval;
 }
 
-BOOL ScintillaWin::DestroySystemCaret() {
+BOOL ScintillaWin::DestroySystemCaret() noexcept {
 	::HideCaret(MainHWND());
 	const BOOL retval = ::DestroyCaret();
 	if (sysCaretBitmap) {
