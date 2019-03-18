@@ -855,7 +855,7 @@ sptr_t ScintillaWin::WndPaint() {
 	// Redirect assertions to debug output and save current state
 	const bool assertsPopup = Platform::ShowAssertionPopUps(false);
 	paintState = painting;
-	PAINTSTRUCT ps;
+	PAINTSTRUCT ps = {};
 
 	// Removed since this interferes with reporting other assertions as it occurs repeatedly
 	//PLATFORM_ASSERT(hRgnUpdate == NULL);
@@ -2081,7 +2081,7 @@ public:
 				return 1;
 			}
 
-			unsigned int lenFlat = 0;
+			size_t lenFlat = 0;
 			for (size_t mixIndex=0; mixIndex < nUtf16Mixed; mixIndex++) {
 				if ((lenFlat + 20) > utf16Folded.size())
 					utf16Folded.resize(lenFlat + 60);
@@ -2233,7 +2233,7 @@ public:
 		PLATFORM_ASSERT(ptr);
 		HGLOBAL handCopy = hand;
 		::GlobalUnlock(hand);
-		ptr = 0;
+		ptr = nullptr;
 		hand = 0;
 		return handCopy;
 	}
@@ -2328,9 +2328,8 @@ void ScintillaWin::Paste() {
 				if (IsUnicodeMode()) {
 					std::vector<wchar_t> uptr(len+1);
 
-					const int ilen = static_cast<int>(len);
 					const size_t ulen = WideCharFromMultiByte(CP_ACP,
-					                    std::string_view(ptr, ilen), &uptr[0], ilen +1);
+					                    std::string_view(ptr, len), &uptr[0], len + 1);
 
 					const std::wstring_view wsv(&uptr[0], ulen);
 					const size_t mlen = UTF8Length(wsv);
@@ -2842,7 +2841,7 @@ void ScintillaWin::CopyToClipboard(const SelectionText &selectedText) {
 		const UINT cpSrc = CodePageFromCharSet(
 					selectedText.characterSet, selectedText.codePage);
 		const std::string_view svSelected(selectedText.Data(), selectedText.LengthWithTerminator());
-		const int uLen = WideCharLenFromMultiByte(cpSrc, svSelected);
+		const size_t uLen = WideCharLenFromMultiByte(cpSrc, svSelected);
 		uniText.Allocate(2 * uLen);
 		if (uniText) {
 			WideCharFromMultiByte(cpSrc, svSelected,
