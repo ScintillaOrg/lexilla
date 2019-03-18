@@ -303,7 +303,7 @@ class ScintillaWin :
 	ScintillaWin(ScintillaWin &&) = delete;
 	ScintillaWin &operator=(const ScintillaWin &) = delete;
 	ScintillaWin &operator=(ScintillaWin &&) = delete;
-	~ScintillaWin() override;
+	// ~ScintillaWin() in public section
 
 	void Init();
 	void Finalise() override;
@@ -399,6 +399,8 @@ class ScintillaWin :
 	sptr_t GetText(uptr_t wParam, sptr_t lParam);
 
 public:
+	~ScintillaWin() override;
+
 	// Public for benefit of Scintilla_DirectFunction
 	sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;
 
