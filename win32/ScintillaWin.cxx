@@ -627,8 +627,9 @@ HWND ScintillaWin::MainHWND() const noexcept {
 }
 
 bool ScintillaWin::DragThreshold(Point ptStart, Point ptNow) {
-	const int xMove = static_cast<int>(std::abs(ptStart.x - ptNow.x));
-	const int yMove = static_cast<int>(std::abs(ptStart.y - ptNow.y));
+	const Point ptDifference = ptStart - ptNow;
+	const XYPOSITION xMove = std::trunc(std::abs(ptDifference.x));
+	const XYPOSITION yMove = std::trunc(std::abs(ptDifference.y));
 	return (xMove > ::GetSystemMetrics(SM_CXDRAG)) ||
 		(yMove > ::GetSystemMetrics(SM_CYDRAG));
 }
@@ -1434,7 +1435,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 
 				// Windows might send WM_MOUSEMOVE even though the mouse has not been moved:
 				// http://blogs.msdn.com/b/oldnewthing/archive/2003/10/01/55108.aspx
-				if (ptMouseLast.x != pt.x || ptMouseLast.y != pt.y) {
+				if (ptMouseLast != pt) {
 					SetTrackMouseLeaveEvent(true);
 					ButtonMoveWithModifiers(pt, ::GetMessageTime(), MouseModifiers(wParam));
 				}
