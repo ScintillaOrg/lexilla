@@ -20,7 +20,11 @@ void UTF8FromUTF16(std::wstring_view wsv, char *putf, size_t len);
 void UTF8FromUTF32Character(int uch, char *putf);
 size_t UTF16Length(std::string_view sv);
 size_t UTF16FromUTF8(std::string_view sv, wchar_t *tbuf, size_t tlen);
+size_t UTF32Length(std::string_view svu8) noexcept;
 size_t UTF32FromUTF8(std::string_view sv, unsigned int *tbuf, size_t tlen);
+// WStringFromUTF8 does the right thing when wchar_t is 2 or 4 bytes so
+// works on both Windows and Unix.
+std::wstring WStringFromUTF8(std::string_view svu8);
 unsigned int UTF16FromUTF32Character(unsigned int val, wchar_t *tbuf) noexcept;
 bool UTF8IsValid(std::string_view sv) noexcept;
 std::string FixInvalidUTF8(const std::string &text);

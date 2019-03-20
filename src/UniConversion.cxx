@@ -175,6 +175,17 @@ size_t UTF16FromUTF8(std::string_view sv, wchar_t *tbuf, size_t tlen) {
 	return ui;
 }
 
+size_t UTF32Length(std::string_view svu8) noexcept {
+	size_t ulen = 0;
+	for (size_t i = 0; i < svu8.length();) {
+		const unsigned char ch = svu8[i];
+		const unsigned int byteCount = UTF8BytesOfLead[ch];
+		i += byteCount;
+		ulen++;
+	}
+	return ulen;
+}
+
 size_t UTF32FromUTF8(std::string_view sv, unsigned int *tbuf, size_t tlen) {
 	size_t ui = 0;
 	for (size_t i = 0; i < sv.length();) {
@@ -226,6 +237,20 @@ size_t UTF32FromUTF8(std::string_view sv, unsigned int *tbuf, size_t tlen) {
 		ui++;
 	}
 	return ui;
+}
+
+std::wstring WStringFromUTF8(std::string_view svu8) {
+	if constexpr (sizeof(wchar_t) == 2) {
+		const size_t len16 = UTF16Length(svu8);
+		std::wstring ws(len16, 0);
+		UTF16FromUTF8(svu8, &ws[0], len16);
+		return ws;
+	} else {
+		const size_t len32 = UTF32Length(svu8);
+		std::wstring ws(len32, 0);
+		UTF32FromUTF8(svu8, reinterpret_cast<unsigned int *>(&ws[0]), len32);
+		return ws;
+	}
 }
 
 unsigned int UTF16FromUTF32Character(unsigned int val, wchar_t *tbuf) noexcept {
