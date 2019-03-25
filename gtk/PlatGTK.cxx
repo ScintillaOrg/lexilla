@@ -635,8 +635,8 @@ std::unique_ptr<IScreenLineLayout> SurfaceImpl::Layout(const IScreenLine *) {
 std::string UTF8FromLatin1(std::string_view text) {
 	std::string utfForm(text.length()*2 + 1, '\0');
 	size_t lenU = 0;
-	for (size_t i=0; i<text.length(); i++) {
-		unsigned int uch = static_cast<unsigned char>(text[i]);
+	for (char ch : text) {
+		const unsigned char uch = ch;
 		if (uch < 0x80) {
 			utfForm[lenU++] = uch;
 		} else {
