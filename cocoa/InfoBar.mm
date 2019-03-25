@@ -10,6 +10,8 @@
  * This file is dual licensed under LGPL v2.1 and the Scintilla license (http://www.scintilla.org/License.txt).
  */
 
+#include <cmath>
+
 #import "InfoBar.h"
 
 //--------------------------------------------------------------------------------------------------
@@ -33,7 +35,7 @@
 		CGFloat heightDelta = newRect.size.height - textSize.height;
 		if (heightDelta > 0) {
 			newRect.size.height -= heightDelta;
-			newRect.origin.y += ceil(heightDelta / 2);
+			newRect.origin.y += std::ceil(heightDelta / 2);
 		}
 	}
 

@@ -9,6 +9,8 @@
  * This file is dual licensed under LGPL v2.1 and the Scintilla license (http://www.scintilla.org/License.txt).
  */
 
+#include <cmath>
+
 #include <string_view>
 #include <vector>
 
@@ -58,7 +60,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 	[super tile];
 
 #if defined(MAC_OS_X_VERSION_10_14)
-	if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_13) {
+	if (std::floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_13) {
 		NSRect frame = self.contentView.frame;
 		frame.origin.x = self.verticalRulerView.requiredThickness;
 		frame.size.width -= frame.origin.x;
@@ -744,14 +746,14 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 		// Only snap for positions inside the document - allow outside
 		// for overshoot.
 		long lineHeight = mOwner.backend->WndProc(SCI_TEXTHEIGHT, 0, 0);
-		rc.origin.y = roundf(static_cast<XYPOSITION>(rc.origin.y) / lineHeight) * lineHeight;
+		rc.origin.y = std::round(static_cast<XYPOSITION>(rc.origin.y) / lineHeight) * lineHeight;
 	}
 	// Snap to whole points - on retina displays this avoids visual debris
 	// when scrolling horizontally.
 	if ((rc.origin.x > 0) && (NSMaxX(rc) < contentRect.size.width)) {
 		// Only snap for positions inside the document - allow outside
 		// for overshoot.
-		rc.origin.x = roundf(static_cast<XYPOSITION>(rc.origin.x));
+		rc.origin.x = std::round(static_cast<XYPOSITION>(rc.origin.x));
 	}
 	return rc;
 }
@@ -1398,7 +1400,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 #if defined(MAC_OS_X_VERSION_10_14)
 		// Let SCIScrollView account for other subviews such as vertical ruler by turning off
 		// automaticallyAdjustsContentInsets.
-		if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_13) {
+		if (std::floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_13) {
 			scrollView.contentView.automaticallyAdjustsContentInsets = NO;
 			scrollView.contentView.contentInsets = NSEdgeInsetsMake(0., 0., 0., 0.);
 		}

@@ -1681,8 +1681,8 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 		evbtn = gdk_event_copy(reinterpret_cast<GdkEvent *>(event));
 		buttonMouse = event->button;
 		Point pt;
-		pt.x = floor(event->x);
-		pt.y = floor(event->y);
+		pt.x = std::floor(event->x);
+		pt.y = std::floor(event->y);
 		PRectangle rcClient = GetClientRectangle();
 		//Platform::DebugPrintf("Press %0d,%0d in %0d,%0d %0d,%0d\n",
 		//	pt.x, pt.y, rcClient.left, rcClient.top, rcClient.right, rcClient.bottom);
@@ -1811,12 +1811,12 @@ gint ScintillaGTK::ScrollEvent(GtkWidget *widget, GdkEventScroll *event) {
 			sciThis->smoothScrollY += event->delta_y * smoothScrollFactor;
 			sciThis->smoothScrollX += event->delta_x * smoothScrollFactor;;
 			if (ABS(sciThis->smoothScrollY) >= 1.0) {
-				const int scrollLines = trunc(sciThis->smoothScrollY);
+				const int scrollLines = std::trunc(sciThis->smoothScrollY);
 				sciThis->ScrollTo(sciThis->topLine + scrollLines);
 				sciThis->smoothScrollY -= scrollLines;
 			}
 			if (ABS(sciThis->smoothScrollX) >= 1.0) {
-				const int scrollPixels = trunc(sciThis->smoothScrollX);
+				const int scrollPixels = std::trunc(sciThis->smoothScrollX);
 				sciThis->HorizontalScrollTo(sciThis->xOffset + scrollPixels);
 				sciThis->smoothScrollX -= scrollPixels;
 			}
