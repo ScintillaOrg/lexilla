@@ -1483,7 +1483,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 		const char *charSet = ::CharacterSetID(text->characterSet);
 		if (*charSet) {
 			std::string tmputf = ConvertText(text->Data(), text->Length(), "UTF-8", charSet, false);
-			converted.reset(new SelectionText());
+			converted = std::make_unique<SelectionText>();
 			converted->Copy(tmputf, SC_CP_UTF8, 0, text->rectangular, false);
 			text = converted.get();
 		}
