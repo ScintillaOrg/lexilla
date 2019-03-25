@@ -1235,7 +1235,7 @@ static NSCursor *cursorFromEnum(Window::Cursor cursor) {
 #if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5
 	zoomDelta += event.magnification * 10.0;
 
-	if (fabs(zoomDelta)>=1.0) {
+	if (std::abs(zoomDelta)>=1.0) {
 		long zoomFactor = static_cast<long>([self getGeneralProperty: SCI_GETZOOM] + zoomDelta);
 		[self setGeneralProperty: SCI_SETZOOM parameter: zoomFactor value: 0];
 		zoomDelta = 0.0;

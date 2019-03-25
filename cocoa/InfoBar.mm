@@ -351,7 +351,7 @@ static float BarFontSize = 10.0;
 
 			// We only work with some preset zoom values. If the given value does not correspond
 			// to one then show no selection.
-			while (count < numberOfDefaultItems && (fabs(newScaleFactor - DefaultScaleMenuFactors[count]) > 0.07))
+			while (count < numberOfDefaultItems && (std::abs(newScaleFactor - DefaultScaleMenuFactors[count]) > 0.07))
 				count++;
 			if (count == numberOfDefaultItems)
 				[mZoomPopup selectItemAtIndex: -1];

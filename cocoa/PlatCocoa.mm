@@ -252,7 +252,7 @@ void AddToIntervalVector(std::vector<Interval> &vi, XYPOSITION left, XYPOSITION 
 		vi.push_back(interval);
 	} else {
 		Interval &last = vi.back();
-		if (fabs(last.right-interval.left) < 0.01) {
+		if (std::abs(last.right-interval.left) < 0.01) {
 			// If new left is very close to previous right then extend last item
 			last.right = interval.right;
 		} else {
