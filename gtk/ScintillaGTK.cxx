@@ -29,7 +29,9 @@
 #include <gdk/gdkwayland.h>
 #endif
 
-#if defined(__WIN32__) || defined(_MSC_VER)
+#if defined(_WIN32)
+// On Win32 use windows.h to access clipboard (rectangular format) and systems parameters
+#define NOMINMAX
 #include <windows.h>
 #endif
 

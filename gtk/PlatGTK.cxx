@@ -13,6 +13,7 @@
 #include <string_view>
 #include <vector>
 #include <map>
+#include <algorithm>
 #include <memory>
 #include <sstream>
 

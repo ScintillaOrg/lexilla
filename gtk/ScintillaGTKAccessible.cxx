@@ -78,7 +78,9 @@
 # include <gtk/gtk-a11y.h>
 #endif
 
-#if defined(__WIN32__) || defined(_MSC_VER)
+#if defined(_WIN32)
+// On Win32 use windows.h to access CLIPFORMAT
+#define NOMINMAX
 #include <windows.h>
 #endif
 
