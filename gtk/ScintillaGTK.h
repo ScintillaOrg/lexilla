@@ -99,7 +99,7 @@ private:
 		TickReason reason;
 		ScintillaGTK *scintilla;
 		guint timer;
-		TimeThunk() : reason(tickCaret), scintilla(nullptr), timer(0) {}
+		TimeThunk() noexcept : reason(tickCaret), scintilla(nullptr), timer(0) {}
 	};
 	TimeThunk timers[tickDwell+1];
 	bool FineTickerRunning(TickReason reason) override;

@@ -94,7 +94,7 @@
 #define SC_INDICATOR_CONVERTED INDIC_IME+2
 #define SC_INDICATOR_UNKNOWN INDIC_IME_MAX
 
-static GdkWindow *WindowFromWidget(GtkWidget *w) {
+static GdkWindow *WindowFromWidget(GtkWidget *w) noexcept {
 	return gtk_widget_get_window(w);
 }
 
@@ -107,7 +107,7 @@ static GdkWindow *WindowFromWidget(GtkWidget *w) {
 
 using namespace Scintilla;
 
-static GdkWindow *PWindow(const Window &w) {
+static GdkWindow *PWindow(const Window &w) noexcept {
 	GtkWidget *widget = static_cast<GtkWidget *>(w.GetID());
 	return gtk_widget_get_window(widget);
 }
@@ -645,7 +645,7 @@ void ScintillaGTK::Init() {
 		gint value;
 		g_object_get(G_OBJECT(
 			gtk_settings_get_default()), "gtk-cursor-blink-time", &value, nullptr);
-		caret.period = gint(value / 1.75);
+		caret.period = static_cast<int>(value / 1.75);
 	} else {
 		caret.period = 0;
 	}
@@ -1048,7 +1048,7 @@ bool ScintillaGTK::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) {
 	int horizEndPreferred = scrollWidth;
 	if (horizEndPreferred < 0)
 		horizEndPreferred = 0;
-	unsigned int pageWidth = rcText.Width();
+	unsigned int pageWidth = static_cast<unsigned int>(rcText.Width());
 	unsigned int pageIncrement = pageWidth / 3;
 	unsigned int charWidth = vs.styles[STYLE_DEFAULT].aveCharWidth;
 	if (gtk_adjustment_get_upper(adjustmenth) != horizEndPreferred ||
@@ -1073,7 +1073,7 @@ bool ScintillaGTK::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) {
 
 void ScintillaGTK::ReconfigureScrollBars() {
 	PRectangle rc = wMain.GetClientPosition();
-	Resize(rc.Width(), rc.Height());
+	Resize(static_cast<int>(rc.Width()), static_cast<int>(rc.Height()));
 }
 
 void ScintillaGTK::NotifyChange() {
@@ -1313,10 +1313,12 @@ void ScintillaGTK::CreateCallTipWindow(PRectangle rc) {
 		gtk_window_set_transient_for(GTK_WINDOW(static_cast<GtkWidget *>(PWidget(ct.wCallTip))),
 			GTK_WINDOW(top));
 	}
-	gtk_widget_set_size_request(PWidget(ct.wDraw), rc.Width(), rc.Height());
+	const int width = static_cast<int>(rc.Width());
+	const int height = static_cast<int>(rc.Height());
+	gtk_widget_set_size_request(PWidget(ct.wDraw), width, height);
 	ct.wDraw.Show();
 	if (PWindow(ct.wCallTip)) {
-		gdk_window_resize(PWindow(ct.wCallTip), rc.Width(), rc.Height());
+		gdk_window_resize(PWindow(ct.wCallTip), width, height);
 	}
 }
 
@@ -1648,7 +1650,9 @@ void ScintillaGTK::Resize(int width, int height) {
 	gtk_widget_size_allocate(GTK_WIDGET(PWidget(wText)), &alloc);
 }
 
-static void SetAdjustmentValue(GtkAdjustment *object, int value) {
+namespace {
+
+void SetAdjustmentValue(GtkAdjustment *object, int value) {
 	GtkAdjustment *adjustment = GTK_ADJUSTMENT(object);
 	int maxValue = static_cast<int>(
 		gtk_adjustment_get_upper(adjustment) - gtk_adjustment_get_page_size(adjustment));
@@ -1660,7 +1664,7 @@ static void SetAdjustmentValue(GtkAdjustment *object, int value) {
 	gtk_adjustment_set_value(adjustment, value);
 }
 
-static int modifierTranslated(int sciModifier) {
+int modifierTranslated(int sciModifier) noexcept {
 	switch (sciModifier) {
 		case SCMOD_SHIFT:
 			return GDK_SHIFT_MASK;
@@ -1675,6 +1679,14 @@ static int modifierTranslated(int sciModifier) {
 	}
 }
 
+Point PointOfEvent(const GdkEventButton *event) noexcept {
+	// Use floor as want to round in the same direction (-infinity) so
+	// there is no stickiness crossing 0.0.
+	return Point(static_cast<XYPOSITION>(std::floor(event->x)), static_cast<XYPOSITION>(std::floor(event->y)));
+}
+
+}
+
 gint ScintillaGTK::PressThis(GdkEventButton *event) {
 	try {
 		//Platform::DebugPrintf("Press %x time=%d state = %x button = %x\n",this,event->time, event->state, event->button);
@@ -1687,9 +1699,7 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 		}
 		evbtn = gdk_event_copy(reinterpret_cast<GdkEvent *>(event));
 		buttonMouse = event->button;
-		Point pt;
-		pt.x = std::floor(event->x);
-		pt.y = std::floor(event->y);
+		const Point pt = PointOfEvent(event);
 		PRectangle rcClient = GetClientRectangle();
 		//Platform::DebugPrintf("Press %0d,%0d in %0d,%0d %0d,%0d\n",
 		//	pt.x, pt.y, rcClient.left, rcClient.top, rcClient.right, rcClient.bottom);
@@ -1782,9 +1792,7 @@ gint ScintillaGTK::MouseRelease(GtkWidget *widget, GdkEventButton *event) {
 		if (!sciThis->HaveMouseCapture())
 			return FALSE;
 		if (event->button == 1) {
-			Point pt;
-			pt.x = int(event->x);
-			pt.y = int(event->y);
+			Point pt = PointOfEvent(event);
 			//Platform::DebugPrintf("Up %x %x %d %d %d\n",
 			//	sciThis,event->window,event->time, pt.x, pt.y);
 			if (event->window != PWindow(sciThis->wMain))
@@ -1931,7 +1939,7 @@ gint ScintillaGTK::Motion(GtkWidget *widget, GdkEventMotion *event) {
 		}
 		//Platform::DebugPrintf("Move %x %x %d %c %d %d\n",
 		//	sciThis,event->window,event->time,event->is_hint? 'h' :'.', x, y);
-		Point pt(x, y);
+		const Point pt(static_cast<XYPOSITION>(x), static_cast<XYPOSITION>(y));
 		const int modifiers = ModifierFlags(
 				(event->state & GDK_SHIFT_MASK) != 0,
 				(event->state & GDK_CONTROL_MASK) != 0,
@@ -2287,8 +2295,8 @@ void ScintillaGTK::SetCandidateWindowPos() {
 	// Composition box accompanies candidate box.
 	Point pt = PointMainCaret();
 	GdkRectangle imeBox = {0}; // No need to set width
-	imeBox.x = pt.x;           // Only need positiion
-	imeBox.y = pt.y + vs.lineHeight; // underneath the first charater
+	imeBox.x = static_cast<gint>(pt.x);           // Only need positiion
+	imeBox.y = static_cast<gint>(pt.y) + vs.lineHeight; // underneath the first charater
 	gtk_im_context_set_cursor_location(im_context, &imeBox);
 }
 
@@ -2607,10 +2615,11 @@ gboolean ScintillaGTK::ExposeTextThis(GtkWidget * /*widget*/, GdkEventExpose *os
 	try {
 		paintState = painting;
 
-		rcPaint.left = ose->area.x;
-		rcPaint.top = ose->area.y;
-		rcPaint.right = ose->area.x + ose->area.width;
-		rcPaint.bottom = ose->area.y + ose->area.height;
+		rcPaint = PRectangle::FromInts(
+			ose->area.x,
+			ose->area.y,
+			ose->area.x + ose->area.width,
+			ose->area.y + ose->area.height);
 
 		PLATFORM_ASSERT(rgnUpdate == nullptr);
 		rgnUpdate = gdk_region_copy(ose->region);
@@ -2722,7 +2731,7 @@ gint ScintillaGTK::SelectionClear(GtkWidget *widget, GdkEventSelection *selectio
 gboolean ScintillaGTK::DragMotionThis(GdkDragContext *context,
                                  gint x, gint y, guint dragtime) {
 	try {
-		Point npt(x, y);
+		const Point npt = Point::FromInts(x, y);
 		SetDragPosition(SPositionFromLocation(npt, false, false, UserVirtualSpace()));
 		GdkDragAction preferredAction = gdk_drag_context_get_suggested_action(context);
 		GdkDragAction actions = gdk_drag_context_get_actions(context);
@@ -2896,9 +2905,7 @@ gboolean ScintillaGTK::PressCT(GtkWidget *widget, GdkEventButton *event, Scintil
 			return FALSE;
 		if (event->type != GDK_BUTTON_PRESS)
 			return FALSE;
-		Point pt;
-		pt.x = int(event->x);
-		pt.y = int(event->y);
+		const Point pt = PointOfEvent(event);
 		sciThis->ct.MouseClick(pt);
 		sciThis->CallTipClick();
 	} catch (...) {
