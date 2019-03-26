@@ -99,7 +99,7 @@ private:
 		TickReason reason;
 		ScintillaGTK *scintilla;
 		guint timer;
-		TimeThunk() : reason(tickCaret), scintilla(NULL), timer(0) {}
+		TimeThunk() : reason(tickCaret), scintilla(nullptr), timer(0) {}
 	};
 	TimeThunk timers[tickDwell+1];
 	bool FineTickerRunning(TickReason reason) override;
@@ -256,7 +256,7 @@ class GObjectWatcher {
 		PLATFORM_ASSERT(obj == weakRef);
 
 		Destroyed();
-		weakRef = 0;
+		weakRef = nullptr;
 	}
 
 	static void WeakNotify(gpointer data, GObject *obj) {
@@ -278,7 +278,7 @@ public:
 	virtual void Destroyed() {}
 
 	bool IsDestroyed() const {
-		return weakRef != 0;
+		return weakRef != nullptr;
 	}
 };
 

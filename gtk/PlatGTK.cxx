@@ -33,27 +33,6 @@
 
 #include "Converter.h"
 
-static const double kPi = 3.14159265358979323846;
-
-// The Pango version guard for pango_units_from_double and pango_units_to_double
-// is more complex than simply implementing these here.
-
-static int pangoUnitsFromDouble(double d) {
-	return static_cast<int>(d * PANGO_SCALE + 0.5);
-}
-
-static double doubleFromPangoUnits(int pu) {
-	return static_cast<double>(pu) / PANGO_SCALE;
-}
-
-static cairo_surface_t *CreateSimilarSurface(GdkWindow *window, cairo_content_t content, int width, int height) {
-	return gdk_window_create_similar_surface(window, content, width, height);
-}
-
-static GdkWindow *WindowFromWidget(GtkWidget *w) {
-	return gtk_widget_get_window(w);
-}
-
 #ifdef _MSC_VER
 // Ignore unreferenced local functions in GTK+ headers
 #pragma warning(disable: 4505)
@@ -61,23 +40,50 @@ static GdkWindow *WindowFromWidget(GtkWidget *w) {
 
 using namespace Scintilla;
 
-enum encodingType { singleByte, UTF8, dbcs};
+namespace {
+
+const double kPi = 3.14159265358979323846;
+
+// The Pango version guard for pango_units_from_double and pango_units_to_double
+// is more complex than simply implementing these here.
+
+int pangoUnitsFromDouble(double d) noexcept {
+	return static_cast<int>(d * PANGO_SCALE + 0.5);
+}
+
+double doubleFromPangoUnits(int pu) noexcept {
+	return static_cast<double>(pu) / PANGO_SCALE;
+}
+
+cairo_surface_t *CreateSimilarSurface(GdkWindow *window, cairo_content_t content, int width, int height) noexcept {
+	return gdk_window_create_similar_surface(window, content, width, height);
+}
+
+GdkWindow *WindowFromWidget(GtkWidget *w) noexcept {
+	return gtk_widget_get_window(w);
+}
+
+GtkWidget *PWidget(WindowID wid) noexcept {
+	return static_cast<GtkWidget *>(wid);
+}
+
+enum encodingType { singleByte, UTF8, dbcs };
 
 // Holds a PangoFontDescription*.
 class FontHandle {
 public:
 	PangoFontDescription *pfd;
 	int characterSet;
-	FontHandle() : pfd(0), characterSet(-1) {
+	FontHandle() noexcept : pfd(nullptr), characterSet(-1) {
 	}
-	FontHandle(PangoFontDescription *pfd_, int characterSet_) {
+	FontHandle(PangoFontDescription *pfd_, int characterSet_) noexcept {
 		pfd = pfd_;
 		characterSet = characterSet_;
 	}
 	~FontHandle() {
 		if (pfd)
 			pango_font_description_free(pfd);
-		pfd = 0;
+		pfd = nullptr;
 	}
 	static FontHandle *CreateNewFont(const FontParameters &fp);
 };
@@ -93,21 +99,19 @@ FontHandle *FontHandle::CreateNewFont(const FontParameters &fp) {
 		return new FontHandle(pfd,fp.characterSet);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 // X has a 16 bit coordinate space, so stop drawing here to avoid wrapping
-static const int maxCoordinate = 32000;
+const int maxCoordinate = 32000;
 
-static FontHandle *PFont(Font &f) {
+FontHandle *PFont(const Font &f) noexcept {
 	return static_cast<FontHandle *>(f.GetID());
 }
 
-static GtkWidget *PWidget(WindowID wid) {
-	return static_cast<GtkWidget *>(wid);
 }
 
-Font::Font() noexcept : fid(0) {}
+Font::Font() noexcept : fid(nullptr) {}
 
 Font::~Font() {}
 
@@ -119,7 +123,7 @@ void Font::Create(const FontParameters &fp) {
 void Font::Release() {
 	if (fid)
 		delete static_cast<FontHandle *>(fid);
-	fid = 0;
+	fid = nullptr;
 }
 
 // Required on OS X
@@ -140,14 +144,14 @@ class SurfaceImpl : public Surface {
 	int characterSet;
 	void SetConverter(int characterSet_);
 public:
-	SurfaceImpl();
+	SurfaceImpl() noexcept;
 	~SurfaceImpl() override;
 
 	void Init(WindowID wid) override;
 	void Init(SurfaceID sid, WindowID wid) override;
 	void InitPixMap(int width, int height, Surface *surface_, WindowID wid) override;
 
-	void Clear();
+	void Clear() noexcept;
 	void Release() override;
 	bool Initialised() override;
 	void PenColour(ColourDesired fore) override;
@@ -190,7 +194,7 @@ public:
 };
 }
 
-const char *CharacterSetID(int characterSet) {
+const char *CharacterSetID(int characterSet) noexcept {
 	switch (characterSet) {
 	case SC_CHARSET_ANSI:
 		return "";
@@ -248,33 +252,33 @@ void SurfaceImpl::SetConverter(int characterSet_) {
 	}
 }
 
-SurfaceImpl::SurfaceImpl() : et(singleByte),
-context(0),
-psurf(0),
-x(0), y(0), inited(false), createdGC(false)
-, pcontext(0), layout(0), characterSet(-1) {
+SurfaceImpl::SurfaceImpl() noexcept : et(singleByte),
+context(nullptr),
+psurf(nullptr),
+x(0), y(0), inited(false), createdGC(false),
+pcontext(nullptr), layout(nullptr), characterSet(-1) {
 }
 
 SurfaceImpl::~SurfaceImpl() {
 	Clear();
 }
 
-void SurfaceImpl::Clear() {
+void SurfaceImpl::Clear() noexcept {
 	et = singleByte;
 	if (createdGC) {
 		createdGC = false;
 		cairo_destroy(context);
 	}
-	context = 0;
+	context = nullptr;
 	if (psurf)
 		cairo_surface_destroy(psurf);
-	psurf = 0;
+	psurf = nullptr;
 	if (layout)
 		g_object_unref(layout);
-	layout = 0;
+	layout = nullptr;
 	if (pcontext)
 		g_object_unref(pcontext);
-	pcontext = 0;
+	pcontext = nullptr;
 	conv.Close();
 	characterSet = -1;
 	x = 0;
@@ -311,8 +315,8 @@ void SurfaceImpl::Init(WindowID wid) {
 	Release();
 	PLATFORM_ASSERT(wid);
 	// if we are only created from a window ID, we can't perform drawing
-	psurf = 0;
-	context = 0;
+	psurf = nullptr;
+	context = nullptr;
 	createdGC = false;
 	pcontext = gtk_widget_create_pango_context(PWidget(wid));
 	PLATFORM_ASSERT(pcontext);
@@ -388,7 +392,7 @@ void SurfaceImpl::MoveTo(int x_, int y_) {
 	y = y_;
 }
 
-static int Delta(int difference) {
+static int Delta(int difference) noexcept {
 	if (difference < 0)
 		return -1;
 	else if (difference > 0)
@@ -468,7 +472,7 @@ void SurfaceImpl::FillRectangle(PRectangle rc, ColourDesired back) {
 
 void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 	SurfaceImpl &surfi = static_cast<SurfaceImpl &>(surfacePattern);
-	bool canDraw = surfi.psurf != NULL;
+	bool canDraw = surfi.psurf != nullptr;
 	if (canDraw) {
 		PLATFORM_ASSERT(context);
 		// Tile pattern over rectangle
@@ -510,7 +514,7 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesi
 	}
 }
 
-static void PathRoundRectangle(cairo_t *context, double left, double top, double width, double height, int radius) {
+static void PathRoundRectangle(cairo_t *context, double left, double top, double width, double height, int radius) noexcept {
 	double degrees = kPi / 180.0;
 
 	cairo_new_sub_path(context);
@@ -619,7 +623,7 @@ void SurfaceImpl::Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back)
 
 void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	SurfaceImpl &surfi = static_cast<SurfaceImpl &>(surfaceSource);
-	bool canDraw = surfi.psurf != NULL;
+	bool canDraw = surfi.psurf != nullptr;
 	if (canDraw) {
 		PLATFORM_ASSERT(context);
 		cairo_set_source_surface(context, surfi.psurf,
@@ -744,19 +748,19 @@ public:
 	XYPOSITION position;
 	XYPOSITION distance;
 	int curIndex;
-	ClusterIterator(PangoLayout *layout, size_t len) : lenPositions(len), finished(false),
+	ClusterIterator(PangoLayout *layout, size_t len) noexcept : lenPositions(len), finished(false),
 		positionStart(0), position(0), distance(0), curIndex(0) {
 		iter = pango_layout_get_iter(layout);
-		pango_layout_iter_get_cluster_extents(iter, NULL, &pos);
+		pango_layout_iter_get_cluster_extents(iter, nullptr, &pos);
 	}
 	~ClusterIterator() {
 		pango_layout_iter_free(iter);
 	}
 
-	void Next() {
+	void Next() noexcept {
 		positionStart = position;
 		if (pango_layout_iter_next_cluster(iter)) {
-			pango_layout_iter_get_cluster_extents(iter, NULL, &pos);
+			pango_layout_iter_get_cluster_extents(iter, nullptr, &pos);
 			position = doubleFromPangoUnits(pos.x);
 			curIndex = pango_layout_iter_get_index(iter);
 		} else {
@@ -845,7 +849,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *
 						if (rtlCheck && ((clusterEnd <= clusterStart) || (ligatureLength == 0) || (ligatureLength > 3))) {
 							// Something has gone wrong: exit quickly but pretend all the characters are equally spaced:
 							int widthLayout = 0;
-							pango_layout_get_size(layout, &widthLayout, NULL);
+							pango_layout_get_size(layout, &widthLayout, nullptr);
 							XYPOSITION widthTotal = doubleFromPangoUnits(widthLayout);
 							for (size_t bytePos=0; bytePos<lenPositions; bytePos++) {
 								positions[bytePos] = widthTotal / lenPositions * (bytePos + 1);
@@ -891,7 +895,7 @@ XYPOSITION SurfaceImpl::WidthText(Font &font_, std::string_view text) {
 				pango_layout_set_text(layout, utfForm.c_str(), utfForm.length());
 			}
 			PangoLayoutLine *pangoLine = pango_layout_get_line_readonly(layout,0);
-			pango_layout_line_get_extents(pangoLine, NULL, &pos);
+			pango_layout_line_get_extents(pangoLine, nullptr, &pos);
 			return doubleFromPangoUnits(pos.width);
 		}
 		return 1;
@@ -984,7 +988,7 @@ void Window::Destroy() {
 		} else {
 			gtk_widget_destroy(GTK_WIDGET(wid));
 		}
-		wid = 0;
+		wid = nullptr;
 	}
 }
 
@@ -1163,7 +1167,7 @@ struct ListImage {
 	GdkPixbuf *pixbuf;
 };
 
-static void list_image_free(gpointer, gpointer value, gpointer) {
+static void list_image_free(gpointer, gpointer value, gpointer) noexcept {
 	ListImage *list_image = static_cast<ListImage *>(value);
 	if (list_image->pixbuf)
 		g_object_unref(list_image->pixbuf);
@@ -1200,28 +1204,29 @@ class ListBoxX : public ListBox {
 public:
 	IListBoxDelegate *delegate;
 
-	ListBoxX() : widCached(0), frame(0), list(0), scroller(0), pixhash(NULL), pixbuf_renderer(0),
-		renderer(0),
+	ListBoxX() noexcept : widCached(nullptr), frame(nullptr), list(nullptr), scroller(nullptr),
+		pixhash(nullptr), pixbuf_renderer(nullptr),
+		renderer(nullptr),
 		desiredVisibleRows(5), maxItemCharacters(0),
 		aveCharWidth(1),
 #if GTK_CHECK_VERSION(3,0,0)
-		cssProvider(NULL),
+		cssProvider(nullptr),
 #endif
 		delegate(nullptr) {
 	}
 	~ListBoxX() override {
 		if (pixhash) {
-			g_hash_table_foreach((GHashTable *) pixhash, list_image_free, NULL);
+			g_hash_table_foreach((GHashTable *) pixhash, list_image_free, nullptr);
 			g_hash_table_destroy((GHashTable *) pixhash);
 		}
 		if (widCached) {
 			gtk_widget_destroy(GTK_WIDGET(widCached));
-			wid = widCached = 0;
+			wid = widCached = nullptr;
 		}
 #if GTK_CHECK_VERSION(3,0,0)
 		if (cssProvider) {
 			g_object_unref(cssProvider);
-			cssProvider = NULL;
+			cssProvider = nullptr;
 		}
 #endif
 	}
@@ -1259,7 +1264,7 @@ static int treeViewGetRowHeight(GtkTreeView *view) {
 	// version is inaccurate for GTK 3.14.
 	GdkRectangle rect;
 	GtkTreePath *path = gtk_tree_path_new_first();
-	gtk_tree_view_get_background_area(view, path, NULL, &rect);
+	gtk_tree_view_get_background_area(view, path, nullptr, &rect);
 	gtk_tree_path_free(path);
 	return rect.height;
 #else
@@ -1267,10 +1272,10 @@ static int treeViewGetRowHeight(GtkTreeView *view) {
 	int vertical_separator=0;
 	int expander_size=0;
 	GtkTreeViewColumn *column = gtk_tree_view_get_column(view, 0);
-	gtk_tree_view_column_cell_get_size(column, NULL, NULL, NULL, NULL, &row_height);
+	gtk_tree_view_column_cell_get_size(column, nullptr, nullptr, nullptr, nullptr, &row_height);
 	gtk_widget_style_get(GTK_WIDGET(view),
 		"vertical-separator", &vertical_separator,
-		"expander-size", &expander_size, NULL);
+		"expander-size", &expander_size, nullptr);
 	row_height += vertical_separator;
 	row_height = std::max(row_height, expander_size);
 	return row_height;
@@ -1304,7 +1309,7 @@ static void small_scroller_get_preferred_height(GtkWidget *widget, gint *min, gi
 	GtkWidget *child = gtk_bin_get_child(GTK_BIN(widget));
 	if (GTK_IS_TREE_VIEW(child)) {
 		GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(child));
-		int n_rows = gtk_tree_model_iter_n_children(model, NULL);
+		int n_rows = gtk_tree_model_iter_n_children(model, nullptr);
 		int row_height = treeViewGetRowHeight(GTK_TREE_VIEW(child));
 
 		*min = MAX(1, row_height);
@@ -1365,7 +1370,7 @@ static gboolean ButtonRelease(GtkWidget *, GdkEventButton* ev, gpointer p) {
 scheme that it would use if it had the focus. */
 static void StyleSet(GtkWidget *w, GtkStyle*, void*) {
 
-	g_return_if_fail(w != NULL);
+	g_return_if_fail(w != nullptr);
 
 	/* Copy the selected color to active.  Note that the modify calls will cause
 	recursive calls to this function after the value is updated and w->style to
@@ -1377,7 +1382,7 @@ static void StyleSet(GtkWidget *w, GtkStyle*, void*) {
 	// The *override* calls are deprecated now, so only call them for older versions of GTK+.
 #elif GTK_CHECK_VERSION(3,0,0)
 	GtkStyleContext *styleContext = gtk_widget_get_style_context(w);
-	if (styleContext == NULL)
+	if (styleContext == nullptr)
 		return;
 
 	GdkRGBA colourForeSelected;
@@ -1388,7 +1393,7 @@ static void StyleSet(GtkWidget *w, GtkStyle*, void*) {
 		gtk_widget_override_color(w, GTK_STATE_FLAG_ACTIVE, &colourForeSelected);
 
 	styleContext = gtk_widget_get_style_context(w);
-	if (styleContext == NULL)
+	if (styleContext == nullptr)
 		return;
 
 	GdkRGBA colourBaseSelected;
@@ -1399,12 +1404,12 @@ static void StyleSet(GtkWidget *w, GtkStyle*, void*) {
 		gtk_widget_override_background_color(w, GTK_STATE_FLAG_ACTIVE, &colourBaseSelected);
 #else
 	GtkStyle *style = gtk_widget_get_style(w);
-	if (style == NULL)
+	if (style == nullptr)
 		return;
 	if (!gdk_color_equal(&style->base[GTK_STATE_SELECTED], &style->base[GTK_STATE_ACTIVE]))
 		gtk_widget_modify_base(w, GTK_STATE_ACTIVE, &style->base[GTK_STATE_SELECTED]);
 	style = gtk_widget_get_style(w);
-	if (style == NULL)
+	if (style == nullptr)
 		return;
 	if (!gdk_color_equal(&style->text[GTK_STATE_SELECTED], &style->text[GTK_STATE_ACTIVE]))
 		gtk_widget_modify_text(w, GTK_STATE_ACTIVE, &style->text[GTK_STATE_SELECTED]);
@@ -1412,7 +1417,7 @@ static void StyleSet(GtkWidget *w, GtkStyle*, void*) {
 }
 
 void ListBoxX::Create(Window &parent, int, Point, int, bool, int) {
-	if (widCached != 0) {
+	if (widCached != nullptr) {
 		wid = widCached;
 		return;
 	}
@@ -1425,13 +1430,13 @@ void ListBoxX::Create(Window &parent, int, Point, int, bool, int) {
 
 	wid = widCached = gtk_window_new(GTK_WINDOW_POPUP);
 
-	frame = gtk_frame_new(NULL);
+	frame = gtk_frame_new(nullptr);
 	gtk_widget_show(PWidget(frame));
 	gtk_container_add(GTK_CONTAINER(GetID()), PWidget(frame));
 	gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_OUT);
 	gtk_container_set_border_width(GTK_CONTAINER(frame), 0);
 
-	scroller = g_object_new(small_scroller_get_type(), NULL);
+	scroller = g_object_new(small_scroller_get_type(), nullptr);
 	gtk_container_set_border_width(GTK_CONTAINER(scroller), 0);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller),
 	                               GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
@@ -1443,7 +1448,7 @@ void ListBoxX::Create(Window &parent, int, Point, int, bool, int) {
 		gtk_list_store_new(N_COLUMNS, GDK_TYPE_PIXBUF, G_TYPE_STRING);
 
 	list = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
-	g_signal_connect(G_OBJECT(list), "style-set", G_CALLBACK(StyleSet), NULL);
+	g_signal_connect(G_OBJECT(list), "style-set", G_CALLBACK(StyleSet), nullptr);
 
 #if GTK_CHECK_VERSION(3,0,0)
 	GtkStyleContext *styleContext = gtk_widget_get_style_context(GTK_WIDGET(list));
@@ -1478,7 +1483,7 @@ void ListBoxX::Create(Window &parent, int, Point, int, bool, int) {
 
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
 	if (g_object_class_find_property(G_OBJECT_GET_CLASS(list), "fixed-height-mode"))
-		g_object_set(G_OBJECT(list), "fixed-height-mode", TRUE, NULL);
+		g_object_set(G_OBJECT(list), "fixed-height-mode", TRUE, nullptr);
 
 	GtkWidget *widget = PWidget(list);	// No code inside the G_OBJECT macro
 	gtk_container_add(GTK_CONTAINER(PWidget(scroller)), widget);
@@ -1508,7 +1513,7 @@ void ListBoxX::SetFont(Font &font) {
 			// On GTK < 3.21.0 the units are incorrectly parsed, so a font size in points
 			// need to use the "px" unit.  Normally we only get fonts in points here, so
 			// don't bother to handle the case the font is actually in pixels on < 3.21.0.
-			if (gtk_check_version(3, 21, 0) != NULL || // on < 3.21.0
+			if (gtk_check_version(3, 21, 0) != nullptr || // on < 3.21.0
 			    pango_font_description_get_size_is_absolute(pfd)) {
 				ssFontSetting << "px; ";
 			} else {
@@ -1517,7 +1522,7 @@ void ListBoxX::SetFont(Font &font) {
 			ssFontSetting << "font-weight:"<< pango_font_description_get_weight(pfd) << "; ";
 			ssFontSetting << "}";
 			gtk_css_provider_load_from_data(GTK_CSS_PROVIDER(cssProvider),
-				ssFontSetting.str().c_str(), -1, NULL);
+				ssFontSetting.str().c_str(), -1, nullptr);
 		}
 #else
 		gtk_widget_modify_font(PWidget(list), PFont(font)->pfd);
@@ -1555,7 +1560,7 @@ PRectangle ListBoxX::GetDesiredRect() {
 		// This, apparently unnecessary call, ensures gtk_tree_view_column_cell_get_size
 		// returns reasonable values.
 #if GTK_CHECK_VERSION(3,0,0)
-		gtk_widget_get_preferred_size(GTK_WIDGET(frame), NULL, &req);
+		gtk_widget_get_preferred_size(GTK_WIDGET(frame), nullptr, &req);
 #else
 		gtk_widget_size_request(GTK_WIDGET(frame), &req);
 #endif
@@ -1585,7 +1590,7 @@ PRectangle ListBoxX::GetDesiredRect() {
 		gtk_style_context_get_border(styleContextFrameBorder, stateFlagsFrame, &border_border);
 		g_object_unref(styleContextFrameBorder);
 #	else // < 3.20
-		if (gtk_check_version(3, 20, 0) == NULL) {
+		if (gtk_check_version(3, 20, 0) == nullptr) {
 			// default to 1px all around as it's likely what it is, and so we don't miss 2px height
 			// on GTK 3.20 when built against an earlier version.
 			border_border.top = border_border.bottom = border_border.left = border_border.right = 1;
@@ -1611,7 +1616,7 @@ PRectangle ListBoxX::GetDesiredRect() {
 		// Add horizontal padding and borders
 		int horizontal_separator=0;
 		gtk_widget_style_get(PWidget(list),
-			"horizontal-separator", &horizontal_separator, NULL);
+			"horizontal-separator", &horizontal_separator, nullptr);
 		rc.right += horizontal_separator;
 #if GTK_CHECK_VERSION(3,0,0)
 		rc.right += (padding.left + padding.right
@@ -1627,7 +1632,7 @@ PRectangle ListBoxX::GetDesiredRect() {
 			GtkWidget *vscrollbar =
 				gtk_scrolled_window_get_vscrollbar(GTK_SCROLLED_WINDOW(scroller));
 #if GTK_CHECK_VERSION(3,0,0)
-			gtk_widget_get_preferred_size(vscrollbar, NULL, &req);
+			gtk_widget_get_preferred_size(vscrollbar, nullptr, &req);
 #else
 			gtk_widget_size_request(vscrollbar, &req);
 #endif
@@ -1663,15 +1668,15 @@ static void init_pixmap(ListImage *list_image) {
                                                          list_image->rgba_data->GetWidth(),
                                                          list_image->rgba_data->GetHeight(),
                                                          list_image->rgba_data->GetWidth() * 4,
-                                                         NULL,
-                                                         NULL);
+                                                         nullptr,
+                                                         nullptr);
 	}
 }
 
 #define SPACING 5
 
 void ListBoxX::Append(char *s, int type) {
-	ListImage *list_image = NULL;
+	ListImage *list_image = nullptr;
 	if ((type >= 0) && pixhash) {
 		list_image = static_cast<ListImage *>(g_hash_table_lookup((GHashTable *) pixhash
 		             , (gconstpointer) GINT_TO_POINTER(type)));
@@ -1681,7 +1686,7 @@ void ListBoxX::Append(char *s, int type) {
 		GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(list)));
 	gtk_list_store_append(GTK_LIST_STORE(store), &iter);
 	if (list_image) {
-		if (NULL == list_image->pixbuf)
+		if (nullptr == list_image->pixbuf)
 			init_pixmap(list_image);
 		if (list_image->pixbuf) {
 			gtk_list_store_set(GTK_LIST_STORE(store), &iter,
@@ -1711,7 +1716,7 @@ void ListBoxX::Append(char *s, int type) {
 int ListBoxX::Length() {
 	if (wid)
 		return gtk_tree_model_iter_n_children(gtk_tree_view_get_model
-											   (GTK_TREE_VIEW(list)), NULL);
+											   (GTK_TREE_VIEW(list)), nullptr);
 	return 0;
 }
 
@@ -1726,7 +1731,7 @@ void ListBoxX::Select(int n) {
 		return;
 	}
 
-	bool valid = gtk_tree_model_iter_nth_child(model, &iter, NULL, n) != FALSE;
+	bool valid = gtk_tree_model_iter_nth_child(model, &iter, nullptr, n) != FALSE;
 	if (valid) {
 		gtk_tree_selection_select_iter(selection, &iter);
 
@@ -1777,7 +1782,7 @@ int ListBoxX::GetSelection() {
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(list));
 	if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
 		GtkTreePath *path = gtk_tree_model_get_path(model, &iter);
-		int *indices = gtk_tree_path_get_indices(path);
+		const int *indices = gtk_tree_path_get_indices(path);
 		// Don't free indices.
 		if (indices)
 			index = indices[0];
@@ -1807,10 +1812,10 @@ int ListBoxX::Find(const char *prefix) {
 }
 
 void ListBoxX::GetValue(int n, char *value, int len) {
-	char *text = NULL;
+	char *text = nullptr;
 	GtkTreeIter iter;
 	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(list));
-	bool valid = gtk_tree_model_iter_nth_child(model, &iter, NULL, n) != FALSE;
+	bool valid = gtk_tree_model_iter_nth_child(model, &iter, nullptr, n) != FALSE;
 	if (valid) {
 		gtk_tree_model_get(model, &iter, TEXT_COLUMN, &text, -1);
 	}
@@ -1839,7 +1844,7 @@ void ListBoxX::RegisterRGBA(int type, RGBAImage *image) {
 		// Drop icon already registered
 		if (list_image->pixbuf)
 			g_object_unref(list_image->pixbuf);
-		list_image->pixbuf = NULL;
+		list_image->pixbuf = nullptr;
 		list_image->rgba_data = image;
 	} else {
 		list_image = g_new0(ListImage, 1);
@@ -1872,7 +1877,7 @@ void ListBoxX::SetList(const char *listText, char separator, char typesep) {
 	int count = strlen(listText) + 1;
 	std::vector<char> words(listText, listText+count);
 	char *startword = &words[0];
-	char *numword = NULL;
+	char *numword = nullptr;
 	int i = 0;
 	for (; words[i]; i++) {
 		if (words[i] == separator) {
@@ -1881,7 +1886,7 @@ void ListBoxX::SetList(const char *listText, char separator, char typesep) {
 				*numword = '\0';
 			Append(startword, numword?atoi(numword + 1):-1);
 			startword = &words[0] + i + 1;
-			numword = NULL;
+			numword = nullptr;
 		} else if (words[i] == typesep) {
 			numword = &words[0] + i;
 		}
@@ -1893,7 +1898,7 @@ void ListBoxX::SetList(const char *listText, char separator, char typesep) {
 	}
 }
 
-Menu::Menu() noexcept : mid(0) {}
+Menu::Menu() noexcept : mid(nullptr) {}
 
 void Menu::CreatePopUp() {
 	Destroy();
@@ -1904,7 +1909,7 @@ void Menu::CreatePopUp() {
 void Menu::Destroy() {
 	if (mid)
 		g_object_unref(G_OBJECT(mid));
-	mid = 0;
+	mid = nullptr;
 }
 
 #if !GTK_CHECK_VERSION(3,22,0)
@@ -1920,12 +1925,12 @@ void Menu::Show(Point pt, Window &w) {
 	gtk_widget_show_all(GTK_WIDGET(widget));
 #if GTK_CHECK_VERSION(3,22,0)
 	// Rely on GTK+ to do the right thing with positioning
-	gtk_menu_popup_at_pointer(widget, NULL);
+	gtk_menu_popup_at_pointer(widget, nullptr);
 #else
 	GdkRectangle rcMonitor = MonitorRectangleForWidget(PWidget(w.GetID()));
 	GtkRequisition requisition;
 #if GTK_CHECK_VERSION(3,0,0)
-	gtk_widget_get_preferred_size(GTK_WIDGET(widget), NULL, &requisition);
+	gtk_widget_get_preferred_size(GTK_WIDGET(widget), nullptr, &requisition);
 #else
 	gtk_widget_size_request(GTK_WIDGET(widget), &requisition);
 #endif
@@ -1935,7 +1940,7 @@ void Menu::Show(Point pt, Window &w) {
 	if ((pt.y + requisition.height) > rcMonitor.y + rcMonitor.height) {
 		pt.y = rcMonitor.y + rcMonitor.height - requisition.height;
 	}
-	gtk_menu_popup(widget, NULL, NULL, MenuPositionFunc,
+	gtk_menu_popup(widget, nullptr, nullptr, MenuPositionFunc,
 		GINT_TO_POINTER((static_cast<int>(pt.y) << 16) | static_cast<int>(pt.x)), 0,
 		gtk_get_current_event_time());
 #endif
@@ -1945,31 +1950,31 @@ class DynamicLibraryImpl : public DynamicLibrary {
 protected:
 	GModule* m;
 public:
-	explicit DynamicLibraryImpl(const char *modulePath) {
+	explicit DynamicLibraryImpl(const char *modulePath) noexcept {
 		m = g_module_open(modulePath, G_MODULE_BIND_LAZY);
 	}
 
 	~DynamicLibraryImpl() override {
-		if (m != NULL)
+		if (m != nullptr)
 			g_module_close(m);
 	}
 
 	// Use g_module_symbol to get a pointer to the relevant function.
 	Function FindFunction(const char *name) override {
-		if (m != NULL) {
-			gpointer fn_address = NULL;
+		if (m != nullptr) {
+			gpointer fn_address = nullptr;
 			gboolean status = g_module_symbol(m, name, &fn_address);
 			if (status)
 				return static_cast<Function>(fn_address);
 			else
-				return NULL;
+				return nullptr;
 		} else {
-			return NULL;
+			return nullptr;
 		}
 	}
 
 	bool IsValid() override {
-		return m != NULL;
+		return m != nullptr;
 	}
 };
 
