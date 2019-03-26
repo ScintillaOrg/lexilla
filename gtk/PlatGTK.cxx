@@ -823,7 +823,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *
 					}
 				}
 				if (positionsCalculated < 1 ) {
-					const int lenPositions = static_cast<int>(text.length());
+					const size_t lenPositions = text.length();
 					// Either 8-bit or DBCS conversion failed so treat as 8-bit.
 					SetConverter(PFont(font_)->characterSet);
 					const bool rtlCheck = PFont(font_)->characterSet == SC_CHARSET_HEBREW ||
@@ -833,7 +833,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *
 						utfForm = UTF8FromLatin1(text);
 					}
 					pango_layout_set_text(layout, utfForm.c_str(), utfForm.length());
-					int i = 0;
+					size_t i = 0;
 					int clusterStart = 0;
 					// Each 8-bit input character may take 1 or 2 bytes in UTF-8
 					// and groups of up to 3 may be represented as ligatures.
@@ -847,7 +847,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *
 							int widthLayout = 0;
 							pango_layout_get_size(layout, &widthLayout, NULL);
 							XYPOSITION widthTotal = doubleFromPangoUnits(widthLayout);
-							for (int bytePos=0; bytePos<lenPositions; bytePos++) {
+							for (size_t bytePos=0; bytePos<lenPositions; bytePos++) {
 								positions[bytePos] = widthTotal / lenPositions * (bytePos + 1);
 							}
 							return;
@@ -862,7 +862,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *
 						// If something failed, fill in rest of the positions
 						positions[i++] = clusterStart;
 					}
-					PLATFORM_ASSERT(static_cast<size_t>(i) == text.length());
+					PLATFORM_ASSERT(i == text.length());
 				}
 			}
 		}
