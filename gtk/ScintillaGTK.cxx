@@ -149,7 +149,7 @@ static const gint nClipboardPasteTargets = ELEMENTS(clipboardPasteTargets);
 
 static const GdkDragAction actionCopyOrMove = static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE);
 
-static GtkWidget *PWidget(Window &w) {
+static GtkWidget *PWidget(const Window &w) noexcept {
 	return static_cast<GtkWidget *>(w.GetID());
 }
 
