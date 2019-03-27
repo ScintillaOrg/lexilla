@@ -27,7 +27,7 @@ public:
 	}
 	Converter(const char *charSetDestination, const char *charSetSource, bool transliterations) {
 		iconvh = iconvhBad;
-	    	Open(charSetDestination, charSetSource, transliterations);
+		Open(charSetDestination, charSetSource, transliterations);
 	}
 	~Converter() {
 		Close();
@@ -56,7 +56,7 @@ public:
 			iconvh = iconvhBad;
 		}
 	}
-	gsize Convert(char** src, gsize *srcleft, char **dst, gsize *dstleft) const noexcept {
+	gsize Convert(char **src, gsize *srcleft, char **dst, gsize *dstleft) const noexcept {
 		if (!Succeeded()) {
 			return sizeFailure;
 		} else {
