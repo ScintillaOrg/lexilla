@@ -36,7 +36,6 @@ class ScintillaGTK : public ScintillaBase {
 
 	GtkWidgetClass *parentClass;
 
-	static GdkAtom atomClipboard;
 	static GdkAtom atomUTF8;
 	static GdkAtom atomString;
 	static GdkAtom atomUriList;

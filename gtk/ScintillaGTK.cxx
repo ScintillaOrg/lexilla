@@ -131,7 +131,6 @@ enum {
 	TARGET_URI
 };
 
-GdkAtom ScintillaGTK::atomClipboard = nullptr;
 GdkAtom ScintillaGTK::atomUTF8 = nullptr;
 GdkAtom ScintillaGTK::atomString = nullptr;
 GdkAtom ScintillaGTK::atomUriList = nullptr;
@@ -1302,7 +1301,7 @@ void ScintillaGTK::RequestSelection(GdkAtom atomSelection) {
 }
 
 void ScintillaGTK::Paste() {
-	RequestSelection(atomClipboard);
+	RequestSelection(GDK_SELECTION_CLIPBOARD);
 }
 
 void ScintillaGTK::CreateCallTipWindow(PRectangle rc) {
@@ -1439,7 +1438,7 @@ GObject *ScintillaGTK::MainObject() const noexcept {
 
 void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 	try {
-		if ((SelectionOfGSD(selection_data) == atomClipboard) ||
+		if ((SelectionOfGSD(selection_data) == GDK_SELECTION_CLIPBOARD) ||
 				(SelectionOfGSD(selection_data) == GDK_SELECTION_PRIMARY)) {
 			if ((atomSought == atomUTF8) && (LengthOfGSD(selection_data) <= 0)) {
 				atomSought = atomString;
@@ -1540,7 +1539,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 
 void ScintillaGTK::StoreOnClipboard(SelectionText *clipText) {
 	GtkClipboard *clipBoard =
-		gtk_widget_get_clipboard(GTK_WIDGET(PWidget(wMain)), atomClipboard);
+		gtk_widget_get_clipboard(GTK_WIDGET(PWidget(wMain)), GDK_SELECTION_CLIPBOARD);
 	if (clipBoard == nullptr) // Occurs if widget isn't in a toplevel
 		return;
 
@@ -3032,7 +3031,6 @@ void ScintillaGTK::ClassInit(OBJECT_CLASS *object_class, GtkWidgetClass *widget_
 #ifdef SCI_LEXER
 	Scintilla_LinkLexers();
 #endif
-	atomClipboard = gdk_atom_intern("CLIPBOARD", FALSE);
 	atomUTF8 = gdk_atom_intern("UTF8_STRING", FALSE);
 	atomString = GDK_SELECTION_TYPE_STRING;
 	atomUriList = gdk_atom_intern("text/uri-list", FALSE);
