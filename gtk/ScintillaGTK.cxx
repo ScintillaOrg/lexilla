@@ -727,7 +727,7 @@ std::string ConvertText(const char *s, size_t len, const char *charSetDest,
 		gsize inLeft = len;
 		char *putf = &destForm[0];
 		char *pout = putf;
-		gsize conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
+		const gsize conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
 		if (conversions == sizeFailure) {
 			if (!silent) {
 				if (len == 1)
@@ -751,7 +751,7 @@ std::string ConvertText(const char *s, size_t len, const char *charSetDest,
 // Returns the target converted to UTF8.
 // Return the length in bytes.
 Sci::Position ScintillaGTK::TargetAsUTF8(char *text) const {
-	Sci::Position targetLength = targetEnd - targetStart;
+	const Sci::Position targetLength = targetEnd - targetStart;
 	if (IsUnicodeMode()) {
 		if (text) {
 			pdoc->GetCharRange(text, targetStart, targetLength);
@@ -778,7 +778,7 @@ Sci::Position ScintillaGTK::TargetAsUTF8(char *text) const {
 // Translates a nul terminated UTF8 string into the document encoding.
 // Return the length of the result in bytes.
 Sci::Position ScintillaGTK::EncodedFromUTF8(const char *utf8, char *encoded) const {
-	Sci::Position inputLength = (lengthForEncode >= 0) ? lengthForEncode : strlen(utf8);
+	const Sci::Position inputLength = (lengthForEncode >= 0) ? lengthForEncode : strlen(utf8);
 	if (IsUnicodeMode()) {
 		if (encoded) {
 			memcpy(encoded, utf8, inputLength);
@@ -848,7 +848,7 @@ sptr_t ScintillaGTK::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			return rectangularSelectionModifier;
 
 		case SCI_SETREADONLY: {
-			sptr_t ret = ScintillaBase::WndProc(iMessage, wParam, lParam);
+			const sptr_t ret = ScintillaBase::WndProc(iMessage, wParam, lParam);
 			if (accessible) {
 				ScintillaGTKAccessible *sciAccessible = ScintillaGTKAccessible::FromAccessible(accessible);
 				if (sciAccessible) {
@@ -1030,7 +1030,7 @@ void ScintillaGTK::SetHorizontalScrollPos() {
 
 bool ScintillaGTK::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) {
 	bool modified = false;
-	int pageScroll = LinesToScroll();
+	const int pageScroll = LinesToScroll();
 
 	if (gtk_adjustment_get_upper(adjustmentv) != (nMax + 1) ||
 	        gtk_adjustment_get_page_size(adjustmentv) != nPage ||
@@ -1044,13 +1044,13 @@ bool ScintillaGTK::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) {
 		modified = true;
 	}
 
-	PRectangle rcText = GetTextRectangle();
+	const PRectangle rcText = GetTextRectangle();
 	int horizEndPreferred = scrollWidth;
 	if (horizEndPreferred < 0)
 		horizEndPreferred = 0;
-	unsigned int pageWidth = static_cast<unsigned int>(rcText.Width());
-	unsigned int pageIncrement = pageWidth / 3;
-	unsigned int charWidth = vs.styles[STYLE_DEFAULT].aveCharWidth;
+	const unsigned int pageWidth = static_cast<unsigned int>(rcText.Width());
+	const unsigned int pageIncrement = pageWidth / 3;
+	const unsigned int charWidth = vs.styles[STYLE_DEFAULT].aveCharWidth;
 	if (gtk_adjustment_get_upper(adjustmenth) != horizEndPreferred ||
 	        gtk_adjustment_get_page_size(adjustmenth) != pageWidth ||
 	        gtk_adjustment_get_page_increment(adjustmenth) != pageIncrement ||
@@ -1072,7 +1072,7 @@ bool ScintillaGTK::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) {
 }
 
 void ScintillaGTK::ReconfigureScrollBars() {
-	PRectangle rc = wMain.GetClientPosition();
+	const PRectangle rc = wMain.GetClientPosition();
 	Resize(static_cast<int>(rc.Width()), static_cast<int>(rc.Height()));
 }
 
@@ -1212,7 +1212,7 @@ std::string ScintillaGTK::CaseMapString(const std::string &s, int caseMapping) {
 
 	if (IsUnicodeMode()) {
 		std::string retMapped(s.length() * maxExpansionCaseConversion, 0);
-		size_t lenMapped = CaseConvertString(&retMapped[0], retMapped.length(), s.c_str(), s.length(),
+		const size_t lenMapped = CaseConvertString(&retMapped[0], retMapped.length(), s.c_str(), s.length(),
 			(caseMapping == cmUpper) ? CaseConversionUpper : CaseConversionLower);
 		retMapped.resize(lenMapped);
 		return retMapped;
@@ -1604,9 +1604,9 @@ void ScintillaGTK::Resize(int width, int height) {
 
 	// These allocations should never produce negative sizes as they would wrap around to huge
 	// unsigned numbers inside GTK+ causing warnings.
-	bool showSBHorizontal = horizontalScrollBarVisible && !Wrapping();
+	const bool showSBHorizontal = horizontalScrollBarVisible && !Wrapping();
 
-	GtkAllocation alloc;
+	GtkAllocation alloc = {};
 	if (showSBHorizontal) {
 		gtk_widget_show(GTK_WIDGET(PWidget(scrollbarh)));
 		alloc.x = 0;
@@ -1654,7 +1654,7 @@ namespace {
 
 void SetAdjustmentValue(GtkAdjustment *object, int value) {
 	GtkAdjustment *adjustment = GTK_ADJUSTMENT(object);
-	int maxValue = static_cast<int>(
+	const int maxValue = static_cast<int>(
 		gtk_adjustment_get_upper(adjustment) - gtk_adjustment_get_page_size(adjustment));
 
 	if (value > maxValue)
@@ -1700,7 +1700,7 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 		evbtn = gdk_event_copy(reinterpret_cast<GdkEvent *>(event));
 		buttonMouse = event->button;
 		const Point pt = PointOfEvent(event);
-		PRectangle rcClient = GetClientRectangle();
+		const PRectangle rcClient = GetClientRectangle();
 		//Platform::DebugPrintf("Press %0d,%0d in %0d,%0d %0d,%0d\n",
 		//	pt.x, pt.y, rcClient.left, rcClient.top, rcClient.right, rcClient.bottom);
 		if ((pt.x > rcClient.right) || (pt.y > rcClient.bottom)) {
@@ -1708,27 +1708,27 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 			return FALSE;
 		}
 
-		bool shift = (event->state & GDK_SHIFT_MASK) != 0;
+		const bool shift = (event->state & GDK_SHIFT_MASK) != 0;
 		bool ctrl = (event->state & GDK_CONTROL_MASK) != 0;
 		// On X, instead of sending literal modifiers use the user specified
 		// modifier, defaulting to control instead of alt.
 		// This is because most X window managers grab alt + click for moving
-		bool alt = (event->state & modifierTranslated(rectangularSelectionModifier)) != 0;
+		const bool alt = (event->state & modifierTranslated(rectangularSelectionModifier)) != 0;
 
 		gtk_widget_grab_focus(PWidget(wMain));
 		if (event->button == 1) {
 #if PLAT_GTK_MACOSX
-			bool meta = ctrl;
+			const bool meta = ctrl;
 			// GDK reports the Command modifer key as GDK_MOD2_MASK for button events,
 			// not GDK_META_MASK like in key events.
 			ctrl = (event->state & GDK_MOD2_MASK) != 0;
 #else
-			bool meta = false;
+			const bool meta = false;
 #endif
 			ButtonDownWithModifiers(pt, event->time, ModifierFlags(shift, ctrl, alt, meta));
 		} else if (event->button == 2) {
 			// Grab the primary selection if it exists
-			SelectionPosition pos = SPositionFromLocation(pt, false, false, UserVirtualSpace());
+			const SelectionPosition pos = SPositionFromLocation(pt, false, false, UserVirtualSpace());
 			if (OwnPrimarySelection() && primary.Empty())
 				CopySelectionRange(&primary);
 
@@ -1749,12 +1749,12 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 				ContextMenu(Point(pt.x + ox, pt.y + oy));
 			} else {
 #if PLAT_GTK_MACOSX
-				bool meta = ctrl;
+				const bool meta = ctrl;
 				// GDK reports the Command modifer key as GDK_MOD2_MASK for button events,
 				// not GDK_META_MASK like in key events.
 				ctrl = (event->state & GDK_MOD2_MASK) != 0;
 #else
-				bool meta = false;
+				const bool meta = false;
 #endif
 				RightButtonDownWithModifiers(pt, event->time, ModifierFlags(shift, ctrl, alt, meta));
 				return FALSE;
@@ -2105,10 +2105,10 @@ gboolean ScintillaGTK::KeyThis(GdkEventKey *event) {
 			return true;
 		}
 
-		bool shift = (event->state & GDK_SHIFT_MASK) != 0;
+		const bool shift = (event->state & GDK_SHIFT_MASK) != 0;
 		bool ctrl = (event->state & GDK_CONTROL_MASK) != 0;
-		bool alt = (event->state & GDK_MOD1_MASK) != 0;
-		bool super = (event->state & GDK_MOD4_MASK) != 0;
+		const bool alt = (event->state & GDK_MOD1_MASK) != 0;
+		const bool super = (event->state & GDK_MOD4_MASK) != 0;
 		guint key = event->keyval;
 		if ((ctrl || alt) && (key < 128))
 			key = toupper(key);
@@ -2125,12 +2125,12 @@ gboolean ScintillaGTK::KeyThis(GdkEventKey *event) {
 
 		bool consumed = false;
 #if !(PLAT_GTK_MACOSX)
-		bool meta = false;
+		const bool meta = false;
 #else
-		bool meta = ctrl;
+		const bool meta = ctrl;
 		ctrl = (event->state & GDK_META_MASK) != 0;
 #endif
-		bool added = KeyDownWithModifiers(key, ModifierFlags(shift, ctrl, alt, meta, super), &consumed) != 0;
+		const bool added = KeyDownWithModifiers(key, ModifierFlags(shift, ctrl, alt, meta, super), &consumed) != 0;
 		if (!consumed)
 			consumed = added;
 		//fprintf(stderr, "SK-key: %d %x %x\n",event->keyval, event->state, consumed);
@@ -2219,7 +2219,7 @@ bool ScintillaGTK::KoreanIME() {
 void ScintillaGTK::MoveImeCarets(int pos) {
 	// Move carets relatively by bytes
 	for (size_t r=0; r<sel.Count(); r++) {
-		int positionInsert = sel.Range(r).Start().Position();
+		const Sci::Position positionInsert = sel.Range(r).Start().Position();
 		sel.Range(r).caret.SetPosition(positionInsert + pos);
 		sel.Range(r).anchor.SetPosition(positionInsert + pos);
 	}
@@ -2235,7 +2235,7 @@ void ScintillaGTK::DrawImeIndicator(int indicator, int len) {
 	}
 	pdoc->DecorationSetCurrentIndicator(indicator);
 	for (size_t r=0; r<sel.Count(); r++) {
-		int positionInsert = sel.Range(r).Start().Position();
+		const Sci::Position positionInsert = sel.Range(r).Start().Position();
 		pdoc->DecorationFillRange(positionInsert - len, 1, len);
 	}
 }
@@ -2244,7 +2244,7 @@ static std::vector<int> MapImeIndicators(PangoAttrList *attrs, const char *u8Str
 	// Map input style to scintilla ime indicator.
 	// Attrs position points between UTF-8 bytes.
 	// Indicator index to be returned is character based though.
-	glong charactersLen = g_utf8_strlen(u8Str, strlen(u8Str));
+	const glong charactersLen = g_utf8_strlen(u8Str, strlen(u8Str));
 	std::vector<int> indicator(charactersLen, SC_INDICATOR_UNKNOWN);
 
 	PangoAttrIterator *iterunderline = pango_attr_list_get_iterator(attrs);
@@ -2252,9 +2252,9 @@ static std::vector<int> MapImeIndicators(PangoAttrList *attrs, const char *u8Str
 		do {
 			PangoAttribute  *attrunderline = pango_attr_iterator_get(iterunderline, PANGO_ATTR_UNDERLINE);
 			if (attrunderline) {
-				glong start = g_utf8_strlen(u8Str, attrunderline->start_index);
-				glong end = g_utf8_strlen(u8Str, attrunderline->end_index);
-				PangoUnderline uline = (PangoUnderline)((PangoAttrInt *)attrunderline)->value;
+				const glong start = g_utf8_strlen(u8Str, attrunderline->start_index);
+				const glong end = g_utf8_strlen(u8Str, attrunderline->end_index);
+				const PangoUnderline uline = (PangoUnderline)((PangoAttrInt *)attrunderline)->value;
 				for (glong i=start; i < end; ++i) {
 					switch (uline) {
 					case PANGO_UNDERLINE_NONE:
@@ -2277,10 +2277,10 @@ static std::vector<int> MapImeIndicators(PangoAttrList *attrs, const char *u8Str
 	PangoAttrIterator *itercolor = pango_attr_list_get_iterator(attrs);
 	if (itercolor) {
 		do {
-			PangoAttribute  *backcolor = pango_attr_iterator_get(itercolor, PANGO_ATTR_BACKGROUND);
+			const PangoAttribute *backcolor = pango_attr_iterator_get(itercolor, PANGO_ATTR_BACKGROUND);
 			if (backcolor) {
-				glong start = g_utf8_strlen(u8Str, backcolor->start_index);
-				glong end = g_utf8_strlen(u8Str, backcolor->end_index);
+				const glong start = g_utf8_strlen(u8Str, backcolor->start_index);
+				const glong end = g_utf8_strlen(u8Str, backcolor->end_index);
 				for (glong i=start; i < end; ++i) {
 					indicator[i] = SC_INDICATOR_TARGET;  // target converted
 				}
@@ -2293,7 +2293,7 @@ static std::vector<int> MapImeIndicators(PangoAttrList *attrs, const char *u8Str
 
 void ScintillaGTK::SetCandidateWindowPos() {
 	// Composition box accompanies candidate box.
-	Point pt = PointMainCaret();
+	const Point pt = PointMainCaret();
 	GdkRectangle imeBox = {0}; // No need to set width
 	imeBox.x = static_cast<gint>(pt.x);           // Only need positiion
 	imeBox.y = static_cast<gint>(pt.y) + vs.lineHeight; // underneath the first charater
@@ -2315,7 +2315,7 @@ void ScintillaGTK::CommitThis(char *commitStr) {
 		gunichar *uniStr = g_utf8_to_ucs4_fast(commitStr, strlen(commitStr), &uniStrLen);
 		for (glong i = 0; i < uniStrLen; i++) {
 			gchar u8Char[UTF8MaxBytes+2] = {0};
-			gint u8CharLen = g_unichar_to_utf8(uniStr[i], u8Char);
+			const gint u8CharLen = g_unichar_to_utf8(uniStr[i], u8Char);
 			std::string docChar = u8Char;
 			if (!IsUnicodeMode())
 				docChar = ConvertText(u8Char, u8CharLen, charSetSource, "UTF-8", true);
@@ -2373,11 +2373,11 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 
 		std::vector<int> indicator = MapImeIndicators(preeditStr.attrs, preeditStr.str);
 
-		bool tmpRecordingMacro = recordingMacro;
+		const bool tmpRecordingMacro = recordingMacro;
 		recordingMacro = false;
 		for (glong i = 0; i < preeditStr.uniStrLen; i++) {
 			gchar u8Char[UTF8MaxBytes+2] = {0};
-			gint u8CharLen = g_unichar_to_utf8(preeditStr.uniStr[i], u8Char);
+			const gint u8CharLen = g_unichar_to_utf8(preeditStr.uniStr[i], u8Char);
 			std::string docChar = u8Char;
 			if (!IsUnicodeMode())
 				docChar = ConvertText(u8Char, u8CharLen, charSetSource, "UTF-8", true);
@@ -2389,8 +2389,8 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 		recordingMacro = tmpRecordingMacro;
 
 		// Move caret to ime cursor position.
-		int imeEndToImeCaretU32 = preeditStr.cursor_pos - preeditStr.uniStrLen;
-		int imeCaretPosDoc = pdoc->GetRelativePosition(CurrentPosition(), imeEndToImeCaretU32);
+		const int imeEndToImeCaretU32 = preeditStr.cursor_pos - preeditStr.uniStrLen;
+		const int imeCaretPosDoc = pdoc->GetRelativePosition(CurrentPosition(), imeEndToImeCaretU32);
 
 		MoveImeCarets(- CurrentPosition() + imeCaretPosDoc);
 
@@ -2623,7 +2623,7 @@ gboolean ScintillaGTK::ExposeTextThis(GtkWidget * /*widget*/, GdkEventExpose *os
 
 		PLATFORM_ASSERT(rgnUpdate == nullptr);
 		rgnUpdate = gdk_region_copy(ose->region);
-		PRectangle rcClient = GetClientRectangle();
+		const PRectangle rcClient = GetClientRectangle();
 		paintingAllText = rcPaint.Contains(rcClient);
 		std::unique_ptr<Surface> surfaceWindow(Surface::Allocate(SC_TECHNOLOGY_DEFAULT));
 		cairo_t *cr = gdk_cairo_create(PWindow(wText));
@@ -2734,8 +2734,8 @@ gboolean ScintillaGTK::DragMotionThis(GdkDragContext *context,
 		const Point npt = Point::FromInts(x, y);
 		SetDragPosition(SPositionFromLocation(npt, false, false, UserVirtualSpace()));
 		GdkDragAction preferredAction = gdk_drag_context_get_suggested_action(context);
-		GdkDragAction actions = gdk_drag_context_get_actions(context);
-		SelectionPosition pos = SPositionFromLocation(npt);
+		const GdkDragAction actions = gdk_drag_context_get_actions(context);
+		const SelectionPosition pos = SPositionFromLocation(npt);
 		if ((inDragDrop == ddDragging) && (PositionInSelection(pos.Position()))) {
 			// Avoid dragging selection onto itself as that produces a move
 			// with no real effect but which creates undo actions.
@@ -2811,7 +2811,7 @@ void ScintillaGTK::DragDataGet(GtkWidget *widget, GdkDragContext *context,
 		if (!sciThis->sel.Empty()) {
 			sciThis->GetSelection(selection_data, info, &sciThis->drag);
 		}
-		GdkDragAction action = gdk_drag_context_get_selected_action(context);
+		const GdkDragAction action = gdk_drag_context_get_selected_action(context);
 		if (action == GDK_ACTION_MOVE) {
 			for (size_t r=0; r<sciThis->sel.Count(); r++) {
 				if (sciThis->posDrop >= sciThis->sel.Range(r).Start()) {
@@ -2840,7 +2840,7 @@ gboolean ScintillaGTK::IdleCallback(gpointer pSci) {
 	ScintillaGTK *sciThis = static_cast<ScintillaGTK *>(pSci);
 	// Idler will be automatically stopped, if there is nothing
 	// to do while idle.
-	bool ret = sciThis->Idle();
+	const bool ret = sciThis->Idle();
 	if (ret == false) {
 		// FIXME: This will remove the idler from GTK, we don't want to
 		// remove it as it is removed automatically when this function
@@ -2893,7 +2893,7 @@ void ScintillaGTK::SetDocPointer(Document *document) {
 }
 
 void ScintillaGTK::PopUpCB(GtkMenuItem *menuItem, ScintillaGTK *sciThis) {
-	guint action = GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(menuItem), "CmdNum"));
+	guint const action = GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(menuItem), "CmdNum"));
 	if (action) {
 		sciThis->Command(action);
 	}
@@ -3076,7 +3076,7 @@ static void scintilla_class_init(ScintillaClass *klass) {
 		GtkWidgetClass *widget_class = (GtkWidgetClass*) klass;
 		GtkContainerClass *container_class = (GtkContainerClass*) klass;
 
-		GSignalFlags sigflags = GSignalFlags(G_SIGNAL_ACTION | G_SIGNAL_RUN_LAST);
+		const GSignalFlags sigflags = GSignalFlags(G_SIGNAL_ACTION | G_SIGNAL_RUN_LAST);
 		scintilla_signals[COMMAND_SIGNAL] = g_signal_new(
 		            "command",
 		            G_TYPE_FROM_CLASS(object_class),
@@ -3148,7 +3148,7 @@ static void free_(void *) { }
 GType scnotification_get_type(void) {
 	static gsize type_id = 0;
 	if (g_once_init_enter(&type_id)) {
-		gsize id = (gsize) g_boxed_type_register_static(
+		const gsize id = (gsize) g_boxed_type_register_static(
 		                            g_intern_static_string("SCNotification"),
 		                            (GBoxedCopyFunc) copy_,
 		                            (GBoxedFreeFunc) free_);

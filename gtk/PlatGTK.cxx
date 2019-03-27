@@ -28,6 +28,7 @@
 #include "Scintilla.h"
 #include "ScintillaWidget.h"
 #include "StringCopy.h"
+#include "IntegerRectangle.h"
 #include "XPM.h"
 #include "UniConversion.h"
 
@@ -51,8 +52,8 @@ int pangoUnitsFromDouble(double d) noexcept {
 	return static_cast<int>(d * PANGO_SCALE + 0.5);
 }
 
-double doubleFromPangoUnits(int pu) noexcept {
-	return static_cast<double>(pu) / PANGO_SCALE;
+float floatFromPangoUnits(int pu) noexcept {
+	return static_cast<float>(pu) / PANGO_SCALE;
 }
 
 cairo_surface_t *CreateSimilarSurface(GdkWindow *window, cairo_content_t content, int width, int height) noexcept {
@@ -370,7 +371,7 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID 
 
 void SurfaceImpl::PenColour(ColourDesired fore) {
 	if (context) {
-		ColourDesired cdFore(fore.AsInteger());
+		const ColourDesired cdFore(fore.AsInteger());
 		cairo_set_source_rgb(context,
 			cdFore.GetRed() / 255.0,
 			cdFore.GetGreen() / 255.0,
@@ -383,7 +384,7 @@ int SurfaceImpl::LogPixelsY() {
 }
 
 int SurfaceImpl::DeviceHeightFont(int points) {
-	int logPix = LogPixelsY();
+	const int logPix = LogPixelsY();
 	return (points * logPix + logPix / 2) / 72;
 }
 
@@ -405,18 +406,18 @@ void SurfaceImpl::LineTo(int x_, int y_) {
 	// cairo_line_to draws the end position, unlike Win32 or GDK with GDK_CAP_NOT_LAST.
 	// For simple cases, move back one pixel from end.
 	if (context) {
-		int xDiff = x_ - x;
-		int xDelta = Delta(xDiff);
-		int yDiff = y_ - y;
-		int yDelta = Delta(yDiff);
+		const int xDiff = x_ - x;
+		const int xDelta = Delta(xDiff);
+		const int yDiff = y_ - y;
+		const int yDelta = Delta(yDiff);
 		if ((xDiff == 0) || (yDiff == 0)) {
 			// Horizontal or vertical lines can be more precisely drawn as a filled rectangle
-			int xEnd = x_ - xDelta;
-			int left = std::min(x, xEnd);
-			int width = std::abs(x - xEnd) + 1;
-			int yEnd = y_ - yDelta;
-			int top = std::min(y, yEnd);
-			int height = std::abs(y - yEnd) + 1;
+			const int xEnd = x_ - xDelta;
+			const int left = std::min(x, xEnd);
+			const int width = std::abs(x - xEnd) + 1;
+			const int yEnd = y_ - yDelta;
+			const int top = std::min(y, yEnd);
+			const int height = std::abs(y - yEnd) + 1;
 			cairo_rectangle(context, left, top, width, height);
 			cairo_fill(context);
 		} else if ((std::abs(xDiff) == std::abs(yDiff))) {
@@ -472,17 +473,18 @@ void SurfaceImpl::FillRectangle(PRectangle rc, ColourDesired back) {
 
 void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 	SurfaceImpl &surfi = static_cast<SurfaceImpl &>(surfacePattern);
-	bool canDraw = surfi.psurf != nullptr;
+	const bool canDraw = surfi.psurf != nullptr;
 	if (canDraw) {
 		PLATFORM_ASSERT(context);
 		// Tile pattern over rectangle
 		// Currently assumes 8x8 pattern
-		int widthPat = 8;
-		int heightPat = 8;
-		for (int xTile = rc.left; xTile < rc.right; xTile += widthPat) {
-			int widthx = (xTile + widthPat > rc.right) ? rc.right - xTile : widthPat;
-			for (int yTile = rc.top; yTile < rc.bottom; yTile += heightPat) {
-				int heighty = (yTile + heightPat > rc.bottom) ? rc.bottom - yTile : heightPat;
+		const int widthPat = 8;
+		const int heightPat = 8;
+		const IntegerRectangle irc(rc);
+		for (int xTile = irc.left; xTile < irc.right; xTile += widthPat) {
+			const int widthx = (xTile + widthPat > irc.right) ? irc.right - xTile : widthPat;
+			for (int yTile = irc.top; yTile < irc.bottom; yTile += heightPat) {
+				const int heighty = (yTile + heightPat > irc.bottom) ? irc.bottom - yTile : heightPat;
 				cairo_set_source_surface(context, surfi.psurf, xTile, yTile);
 				cairo_rectangle(context, xTile, yTile, widthx, heighty);
 				cairo_fill(context);
@@ -515,7 +517,7 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, ColourDesired fore, ColourDesi
 }
 
 static void PathRoundRectangle(cairo_t *context, double left, double top, double width, double height, int radius) noexcept {
-	double degrees = kPi / 180.0;
+	const double degrees = kPi / 180.0;
 
 	cairo_new_sub_path(context);
 	cairo_arc(context, left + width - radius, top + radius, radius, -90 * degrees, 0 * degrees);
@@ -528,7 +530,7 @@ static void PathRoundRectangle(cairo_t *context, double left, double top, double
 void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
 		ColourDesired outline, int alphaOutline, int /*flags*/) {
 	if (context && rc.Width() > 0) {
-		ColourDesired cdFill(fill.AsInteger());
+		const ColourDesired cdFill(fill.AsInteger());
 		cairo_set_source_rgba(context,
 			cdFill.GetRed() / 255.0,
 			cdFill.GetGreen() / 255.0,
@@ -540,7 +542,7 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fi
 			cairo_rectangle(context, rc.left + 1.0, rc.top + 1.0, rc.right - rc.left - 2.0, rc.bottom - rc.top - 2.0);
 		cairo_fill(context);
 
-		ColourDesired cdOutline(outline.AsInteger());
+		const ColourDesired cdOutline(outline.AsInteger());
 		cairo_set_source_rgba(context,
 			cdOutline.GetRed() / 255.0,
 			cdOutline.GetGreen() / 255.0,
@@ -590,12 +592,12 @@ void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsi
 	rc.bottom = rc.top + height;
 
 	int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
-	int ucs = stride * height;
+	const int ucs = stride * height;
 	std::vector<unsigned char> image(ucs);
 	for (int iy=0; iy<height; iy++) {
 		for (int ix=0; ix<width; ix++) {
 			unsigned char *pixel = &image[0] + iy*stride + ix * 4;
-			unsigned char alpha = pixelsImage[3];
+			const unsigned char alpha = pixelsImage[3];
 			pixel[2] = (*pixelsImage++) * alpha / 255;
 			pixel[1] = (*pixelsImage++) * alpha / 255;
 			pixel[0] = (*pixelsImage++) * alpha / 255;
@@ -623,7 +625,7 @@ void SurfaceImpl::Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back)
 
 void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	SurfaceImpl &surfi = static_cast<SurfaceImpl &>(surfaceSource);
-	bool canDraw = surfi.psurf != nullptr;
+	const bool canDraw = surfi.psurf != nullptr;
 	if (canDraw) {
 		PLATFORM_ASSERT(context);
 		cairo_set_source_surface(context, surfi.psurf,
@@ -661,7 +663,7 @@ static std::string UTF8FromIconv(const Converter &conv, std::string_view text) {
 		char *putf = &utfForm[0];
 		char *pout = putf;
 		gsize outLeft = text.length()*3+1;
-		gsize conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
+		const gsize conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
 		if (conversions != sizeFailure) {
 			*pout = '\0';
 			utfForm.resize(pout - putf);
@@ -680,7 +682,7 @@ static size_t MultiByteLenFromIconv(const Converter &conv, const char *s, size_t
 		gsize inLeft = lenMB;
 		char *pout = wcForm;
 		gsize outLeft = 2;
-		gsize conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
+		const gsize conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
 		if (conversions != sizeFailure) {
 			return lenMB;
 		}
@@ -692,7 +694,7 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, XYPOSITION ybase, std
                                  ColourDesired fore) {
 	PenColour(fore);
 	if (context) {
-		XYPOSITION xText = rc.left;
+		const XYPOSITION xText = rc.left;
 		if (PFont(font_)->pfd) {
 			std::string utfForm;
 			if (et == UTF8) {
@@ -761,11 +763,11 @@ public:
 		positionStart = position;
 		if (pango_layout_iter_next_cluster(iter)) {
 			pango_layout_iter_get_cluster_extents(iter, nullptr, &pos);
-			position = doubleFromPangoUnits(pos.x);
+			position = floatFromPangoUnits(pos.x);
 			curIndex = pango_layout_iter_get_index(iter);
 		} else {
 			finished = true;
-			position = doubleFromPangoUnits(pos.x + pos.width);
+			position = floatFromPangoUnits(pos.x + pos.width);
 			curIndex = lenPositions;
 		}
 		distance = position - positionStart;
@@ -783,7 +785,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *
 				ClusterIterator iti(layout, text.length());
 				while (!iti.finished) {
 					iti.Next();
-					int places = iti.curIndex - i;
+					const int places = iti.curIndex - i;
 					while (i < iti.curIndex) {
 						// Evenly distribute space among bytes of this cluster.
 						// Would be better to find number of characters and then
@@ -810,8 +812,8 @@ void SurfaceImpl::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *
 						ClusterIterator iti(layout, strlen(utfForm.c_str()));
 						while (!iti.finished) {
 							iti.Next();
-							int clusterEnd = iti.curIndex;
-							int places = g_utf8_strlen(utfForm.c_str() + clusterStart, clusterEnd - clusterStart);
+							const int clusterEnd = iti.curIndex;
+							const int places = g_utf8_strlen(utfForm.c_str() + clusterStart, clusterEnd - clusterStart);
 							int place = 1;
 							while (clusterStart < clusterEnd) {
 								size_t lenChar = MultiByteLenFromIconv(convMeasure, text.data()+i, text.length()-i);
@@ -844,13 +846,13 @@ void SurfaceImpl::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *
 					ClusterIterator iti(layout, utfForm.length());
 					while (!iti.finished) {
 						iti.Next();
-						int clusterEnd = iti.curIndex;
-						int ligatureLength = g_utf8_strlen(utfForm.c_str() + clusterStart, clusterEnd - clusterStart);
+						const int clusterEnd = iti.curIndex;
+						const int ligatureLength = g_utf8_strlen(utfForm.c_str() + clusterStart, clusterEnd - clusterStart);
 						if (rtlCheck && ((clusterEnd <= clusterStart) || (ligatureLength == 0) || (ligatureLength > 3))) {
 							// Something has gone wrong: exit quickly but pretend all the characters are equally spaced:
 							int widthLayout = 0;
 							pango_layout_get_size(layout, &widthLayout, nullptr);
-							XYPOSITION widthTotal = doubleFromPangoUnits(widthLayout);
+							const XYPOSITION widthTotal = floatFromPangoUnits(widthLayout);
 							for (size_t bytePos=0; bytePos<lenPositions; bytePos++) {
 								positions[bytePos] = widthTotal / lenPositions * (bytePos + 1);
 							}
@@ -896,7 +898,7 @@ XYPOSITION SurfaceImpl::WidthText(Font &font_, std::string_view text) {
 			}
 			PangoLayoutLine *pangoLine = pango_layout_get_line_readonly(layout,0);
 			pango_layout_line_get_extents(pangoLine, nullptr, &pos);
-			return doubleFromPangoUnits(pos.width);
+			return floatFromPangoUnits(pos.width);
 		}
 		return 1;
 	} else {
@@ -909,12 +911,12 @@ XYPOSITION SurfaceImpl::WidthText(Font &font_, std::string_view text) {
 XYPOSITION SurfaceImpl::Ascent(Font &font_) {
 	if (!(font_.GetID()))
 		return 1;
-	int ascent = 0;
+	XYPOSITION ascent = 0;
 	if (PFont(font_)->pfd) {
 		PangoFontMetrics *metrics = pango_context_get_metrics(pcontext,
 			PFont(font_)->pfd, pango_context_get_language(pcontext));
-		ascent =
-			doubleFromPangoUnits(pango_font_metrics_get_ascent(metrics));
+		ascent = std::floor(floatFromPangoUnits(
+			pango_font_metrics_get_ascent(metrics)));
 		pango_font_metrics_unref(metrics);
 	}
 	if (ascent == 0) {
@@ -929,7 +931,8 @@ XYPOSITION SurfaceImpl::Descent(Font &font_) {
 	if (PFont(font_)->pfd) {
 		PangoFontMetrics *metrics = pango_context_get_metrics(pcontext,
 			PFont(font_)->pfd, pango_context_get_language(pcontext));
-		int descent = doubleFromPangoUnits(pango_font_metrics_get_descent(metrics));
+		const XYPOSITION descent = std::floor(floatFromPangoUnits(
+			pango_font_metrics_get_descent(metrics)));
 		pango_font_metrics_unref(metrics);
 		return descent;
 	}
@@ -998,8 +1001,8 @@ PRectangle Window::GetPosition() const {
 	if (wid) {
 		GtkAllocation allocation;
 		gtk_widget_get_allocation(PWidget(wid), &allocation);
-		rc.left = allocation.x;
-		rc.top = allocation.y;
+		rc.left = static_cast<XYPOSITION>(allocation.x);
+		rc.top = static_cast<XYPOSITION>(allocation.y);
 		if (allocation.width > 20) {
 			rc.right = rc.left + allocation.width;
 			rc.bottom = rc.top + allocation.height;
@@ -1010,10 +1013,10 @@ PRectangle Window::GetPosition() const {
 
 void Window::SetPosition(PRectangle rc) {
 	GtkAllocation alloc;
-	alloc.x = rc.left;
-	alloc.y = rc.top;
-	alloc.width = rc.Width();
-	alloc.height = rc.Height();
+	alloc.x = static_cast<int>(rc.left);
+	alloc.y = static_cast<int>(rc.top);
+	alloc.width = static_cast<int>(rc.Width());
+	alloc.height = static_cast<int>(rc.Height());
 	gtk_widget_size_allocate(PWidget(wid), &alloc);
 }
 
@@ -1028,7 +1031,7 @@ GdkRectangle MonitorRectangleForWidget(GtkWidget *wid) {
 	gdk_monitor_get_geometry(monitor, &rcScreen);
 #else
 	GdkScreen* screen = gtk_widget_get_screen(wid);
-	gint monitor_num = gdk_screen_get_monitor_at_window(screen, wnd);
+	const gint monitor_num = gdk_screen_get_monitor_at_window(screen, wnd);
 	gdk_screen_get_monitor_geometry(screen, monitor_num, &rcScreen);
 #endif
 	return rcScreen;
@@ -1037,18 +1040,19 @@ GdkRectangle MonitorRectangleForWidget(GtkWidget *wid) {
 }
 
 void Window::SetPositionRelative(PRectangle rc, const Window *relativeTo) {
+	const IntegerRectangle irc(rc);
 	int ox = 0;
 	int oy = 0;
 	GdkWindow *wndRelativeTo = WindowFromWidget(PWidget(relativeTo->wid));
 	gdk_window_get_origin(wndRelativeTo, &ox, &oy);
-	ox += rc.left;
-	oy += rc.top;
+	ox += irc.left;
+	oy += irc.top;
 
-	GdkRectangle rcMonitor = MonitorRectangleForWidget(PWidget(relativeTo->wid));
+	const GdkRectangle rcMonitor = MonitorRectangleForWidget(PWidget(relativeTo->wid));
 
 	/* do some corrections to fit into screen */
-	int sizex = rc.right - rc.left;
-	int sizey = rc.bottom - rc.top;
+	const int sizex = irc.Width();
+	const int sizey = irc.Height();
 	if (sizex > rcMonitor.width || ox < rcMonitor.x)
 		ox = rcMonitor.x; /* the best we can do */
 	else if (ox + sizex > rcMonitor.x + rcMonitor.width)
@@ -1081,9 +1085,10 @@ void Window::InvalidateAll() {
 
 void Window::InvalidateRectangle(PRectangle rc) {
 	if (wid) {
+		const IntegerRectangle irc(rc);
 		gtk_widget_queue_draw_area(PWidget(wid),
-		                           rc.left, rc.top,
-		                           rc.right - rc.left, rc.bottom - rc.top);
+		                           irc.left, irc.top,
+		                           irc.Width(), irc.Height());
 	}
 }
 
@@ -1151,13 +1156,13 @@ PRectangle Window::GetMonitorRect(Point pt) {
 	gdk_monitor_get_geometry(monitor, &rect);
 #else
 	GdkScreen* screen = gtk_widget_get_screen(PWidget(wid));
-	gint monitor_num = gdk_screen_get_monitor_at_point(screen,
+	const gint monitor_num = gdk_screen_get_monitor_at_point(screen,
 		pt.x + x_offset, pt.y + y_offset);
 	gdk_screen_get_monitor_geometry(screen, monitor_num, &rect);
 #endif
 	rect.x -= x_offset;
 	rect.y -= y_offset;
-	return PRectangle(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
+	return PRectangle::FromInts(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
 }
 
 typedef std::map<int, RGBAImage*> ImageMap;
@@ -1569,7 +1574,7 @@ PRectangle ListBoxX::GetDesiredRect() {
 		// First calculate height of the clist for our desired visible
 		// row count otherwise it tries to expand to the total # of rows
 		// Get cell height
-		int row_height = GetRowHeight();
+		const int row_height = GetRowHeight();
 #if GTK_CHECK_VERSION(3,0,0)
 		GtkStyleContext *styleContextFrame = gtk_widget_get_style_context(PWidget(frame));
 		GtkStateFlags stateFlagsFrame = gtk_style_context_get_state(styleContextFrame);
@@ -1693,7 +1698,7 @@ void ListBoxX::Append(char *s, int type) {
 								PIXBUF_COLUMN, list_image->pixbuf,
 								TEXT_COLUMN, s, -1);
 
-			gint pixbuf_width = gdk_pixbuf_get_width(list_image->pixbuf);
+			const gint pixbuf_width = gdk_pixbuf_get_width(list_image->pixbuf);
 			gint renderer_height, renderer_width;
 			gtk_cell_renderer_get_fixed_size(pixbuf_renderer,
 								&renderer_width, &renderer_height);
@@ -1708,7 +1713,7 @@ void ListBoxX::Append(char *s, int type) {
 			gtk_list_store_set(GTK_LIST_STORE(store), &iter,
 								TEXT_COLUMN, s, -1);
 	}
-	size_t len = strlen(s);
+	const size_t len = strlen(s);
 	if (maxItemCharacters < len)
 		maxItemCharacters = len;
 }
@@ -1731,12 +1736,12 @@ void ListBoxX::Select(int n) {
 		return;
 	}
 
-	bool valid = gtk_tree_model_iter_nth_child(model, &iter, nullptr, n) != FALSE;
+	const bool valid = gtk_tree_model_iter_nth_child(model, &iter, nullptr, n) != FALSE;
 	if (valid) {
 		gtk_tree_selection_select_iter(selection, &iter);
 
 		// Move the scrollbar to show the selection.
-		int total = Length();
+		const int total = Length();
 #if GTK_CHECK_VERSION(3,0,0)
 		GtkAdjustment *adj =
 			gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(list));
@@ -1744,10 +1749,10 @@ void ListBoxX::Select(int n) {
 		GtkAdjustment *adj =
 			gtk_tree_view_get_vadjustment(GTK_TREE_VIEW(list));
 #endif
-		gfloat value = ((gfloat)n / total) * (gtk_adjustment_get_upper(adj) - gtk_adjustment_get_lower(adj))
+		gfloat value = (static_cast<gfloat>(n) / total) * (gtk_adjustment_get_upper(adj) - gtk_adjustment_get_lower(adj))
 							+ gtk_adjustment_get_lower(adj) - gtk_adjustment_get_page_size(adj) / 2;
 		// Get cell height
-		int row_height = GetRowHeight();
+		const int row_height = GetRowHeight();
 
 		int rows = Length();
 		if ((rows == 0) || (rows > desiredVisibleRows))
@@ -1755,7 +1760,7 @@ void ListBoxX::Select(int n) {
 		if (rows & 0x1) {
 			// Odd rows to display -- We are now in the middle.
 			// Align it so that we don't chop off rows.
-			value += (gfloat)row_height / 2.0;
+			value += static_cast<gfloat>(row_height) / 2.0f;
 		}
 		// Clamp it.
 		value = (value < 0)? 0 : value;
@@ -1815,7 +1820,7 @@ void ListBoxX::GetValue(int n, char *value, int len) {
 	char *text = nullptr;
 	GtkTreeIter iter;
 	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(list));
-	bool valid = gtk_tree_model_iter_nth_child(model, &iter, nullptr, n) != FALSE;
+	const bool valid = gtk_tree_model_iter_nth_child(model, &iter, nullptr, n) != FALSE;
 	if (valid) {
 		gtk_tree_model_get(model, &iter, TEXT_COLUMN, &text, -1);
 	}
@@ -1874,7 +1879,7 @@ void ListBoxX::SetDelegate(IListBoxDelegate *lbDelegate) {
 
 void ListBoxX::SetList(const char *listText, char separator, char typesep) {
 	Clear();
-	int count = strlen(listText) + 1;
+	const size_t count = strlen(listText) + 1;
 	std::vector<char> words(listText, listText+count);
 	char *startword = &words[0];
 	char *numword = nullptr;
@@ -1927,7 +1932,7 @@ void Menu::Show(Point pt, Window &w) {
 	// Rely on GTK+ to do the right thing with positioning
 	gtk_menu_popup_at_pointer(widget, nullptr);
 #else
-	GdkRectangle rcMonitor = MonitorRectangleForWidget(PWidget(w.GetID()));
+	const GdkRectangle rcMonitor = MonitorRectangleForWidget(PWidget(w.GetID()));
 	GtkRequisition requisition;
 #if GTK_CHECK_VERSION(3,0,0)
 	gtk_widget_get_preferred_size(GTK_WIDGET(widget), nullptr, &requisition);
@@ -1963,7 +1968,7 @@ public:
 	Function FindFunction(const char *name) override {
 		if (m != nullptr) {
 			gpointer fn_address = nullptr;
-			gboolean status = g_module_symbol(m, name, &fn_address);
+			const gboolean status = g_module_symbol(m, name, &fn_address);
 			if (status)
 				return static_cast<Function>(fn_address);
 			else
@@ -2034,7 +2039,7 @@ void Platform::DebugPrintf(const char *, ...) {}
 static bool assertionPopUps = true;
 
 bool Platform::ShowAssertionPopUps(bool assertionPopUps_) {
-	bool ret = assertionPopUps;
+	const bool ret = assertionPopUps;
 	assertionPopUps = assertionPopUps_;
 	return ret;
 }
