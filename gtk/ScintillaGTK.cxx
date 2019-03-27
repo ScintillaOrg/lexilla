@@ -31,6 +31,7 @@
 
 #if defined(_WIN32)
 // On Win32 use windows.h to access clipboard (rectangular format) and systems parameters
+#undef NOMINMAX
 #define NOMINMAX
 #include <windows.h>
 #endif

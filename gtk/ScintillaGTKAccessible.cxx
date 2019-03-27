@@ -80,6 +80,7 @@
 
 #if defined(_WIN32)
 // On Win32 use windows.h to access CLIPFORMAT
+#undef NOMINMAX
 #define NOMINMAX
 #include <windows.h>
 #endif
