@@ -1,7 +1,8 @@
 PlatGTK.o: PlatGTK.cxx \
  ../include/Scintilla.h ../include/Sci_Position.h \
- ../include/ScintillaWidget.h ../lexlib/StringCopy.h ../src/XPM.h \
- ../src/UniConversion.h Converter.h
+ ../include/ScintillaWidget.h ../lexlib/StringCopy.h \
+ ../src/IntegerRectangle.h ../src/XPM.h ../src/UniConversion.h \
+ Converter.h
 ScintillaGTK.o: ScintillaGTK.cxx \
  ../include/ILoader.h ../include/Sci_Position.h ../include/ILexer.h \
  ../include/Scintilla.h ../include/ScintillaWidget.h \
@@ -34,11 +35,10 @@ AutoComplete.o: ../src/AutoComplete.cxx ../include/Platform.h \
  ../include/Scintilla.h ../include/Sci_Position.h \
  ../lexlib/CharacterSet.h ../src/Position.h ../src/AutoComplete.h
 CallTip.o: ../src/CallTip.cxx ../include/Platform.h \
- ../include/Scintilla.h ../include/Sci_Position.h \
- ../src/IntegerRectangle.h ../lexlib/StringCopy.h ../src/Position.h \
- ../src/CallTip.h
-CaseConvert.o: ../src/CaseConvert.cxx ../lexlib/StringCopy.h \
- ../src/CaseConvert.h ../src/UniConversion.h
+ ../include/Scintilla.h ../include/Sci_Position.h ../src/Position.h \
+ ../src/IntegerRectangle.h ../src/CallTip.h
+CaseConvert.o: ../src/CaseConvert.cxx ../src/CaseConvert.h \
+ ../src/UniConversion.h
 CaseFolder.o: ../src/CaseFolder.cxx ../src/CaseFolder.h \
  ../src/CaseConvert.h
 Catalogue.o: ../src/Catalogue.cxx ../include/ILexer.h \
@@ -48,7 +48,8 @@ CellBuffer.o: ../src/CellBuffer.cxx ../include/Platform.h \
  ../include/Scintilla.h ../include/Sci_Position.h ../src/Position.h \
  ../src/SplitVector.h ../src/Partitioning.h ../src/CellBuffer.h \
  ../src/UniConversion.h
-CharClassify.o: ../src/CharClassify.cxx ../src/CharClassify.h
+CharClassify.o: ../src/CharClassify.cxx ../lexlib/CharacterSet.h \
+ ../src/CharClassify.h
 ContractionState.o: ../src/ContractionState.cxx ../include/Platform.h \
  ../src/Position.h ../src/UniqueString.h ../src/SplitVector.h \
  ../src/Partitioning.h ../src/RunStyles.h ../src/SparseVector.h \
@@ -68,34 +69,35 @@ Document.o: ../src/Document.cxx ../include/Platform.h \
  ../src/UniConversion.h ../src/ElapsedPeriod.h
 EditModel.o: ../src/EditModel.cxx ../include/Platform.h \
  ../include/ILoader.h ../include/Sci_Position.h ../include/ILexer.h \
- ../include/Scintilla.h ../lexlib/StringCopy.h ../src/Position.h \
- ../src/UniqueString.h ../src/SplitVector.h ../src/Partitioning.h \
- ../src/RunStyles.h ../src/ContractionState.h ../src/CellBuffer.h \
- ../src/KeyMap.h ../src/Indicator.h ../src/LineMarker.h ../src/Style.h \
- ../src/ViewStyle.h ../src/CharClassify.h ../src/Decoration.h \
- ../src/CaseFolder.h ../src/Document.h ../src/UniConversion.h \
- ../src/Selection.h ../src/PositionCache.h ../src/EditModel.h
+ ../include/Scintilla.h ../src/Position.h ../src/UniqueString.h \
+ ../src/SplitVector.h ../src/Partitioning.h ../src/RunStyles.h \
+ ../src/ContractionState.h ../src/CellBuffer.h ../src/KeyMap.h \
+ ../src/Indicator.h ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
+ ../src/CharClassify.h ../src/Decoration.h ../src/CaseFolder.h \
+ ../src/Document.h ../src/UniConversion.h ../src/Selection.h \
+ ../src/PositionCache.h ../src/EditModel.h
 EditView.o: ../src/EditView.cxx ../include/Platform.h \
  ../include/ILoader.h ../include/Sci_Position.h ../include/ILexer.h \
- ../include/Scintilla.h ../lexlib/StringCopy.h ../lexlib/CharacterSet.h \
- ../src/Position.h ../src/IntegerRectangle.h ../src/UniqueString.h \
+ ../include/Scintilla.h ../lexlib/CharacterSet.h ../src/Position.h \
+ ../src/IntegerRectangle.h ../src/UniqueString.h ../src/SplitVector.h \
+ ../src/Partitioning.h ../src/RunStyles.h ../src/ContractionState.h \
+ ../src/CellBuffer.h ../src/PerLine.h ../src/KeyMap.h ../src/Indicator.h \
+ ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
+ ../src/CharClassify.h ../src/Decoration.h ../src/CaseFolder.h \
+ ../src/Document.h ../src/UniConversion.h ../src/Selection.h \
+ ../src/PositionCache.h ../src/EditModel.h ../src/MarginView.h \
+ ../src/EditView.h ../src/ElapsedPeriod.h
+Editor.o: ../src/Editor.cxx ../include/Platform.h ../include/ILoader.h \
+ ../include/Sci_Position.h ../include/ILexer.h ../include/Scintilla.h \
+ ../lexlib/CharacterSet.h ../src/Position.h ../src/UniqueString.h \
  ../src/SplitVector.h ../src/Partitioning.h ../src/RunStyles.h \
  ../src/ContractionState.h ../src/CellBuffer.h ../src/PerLine.h \
  ../src/KeyMap.h ../src/Indicator.h ../src/LineMarker.h ../src/Style.h \
  ../src/ViewStyle.h ../src/CharClassify.h ../src/Decoration.h \
  ../src/CaseFolder.h ../src/Document.h ../src/UniConversion.h \
  ../src/Selection.h ../src/PositionCache.h ../src/EditModel.h \
- ../src/MarginView.h ../src/EditView.h ../src/ElapsedPeriod.h
-Editor.o: ../src/Editor.cxx ../include/Platform.h ../include/ILoader.h \
- ../include/Sci_Position.h ../include/ILexer.h ../include/Scintilla.h \
- ../lexlib/StringCopy.h ../lexlib/CharacterSet.h ../src/Position.h \
- ../src/UniqueString.h ../src/SplitVector.h ../src/Partitioning.h \
- ../src/RunStyles.h ../src/ContractionState.h ../src/CellBuffer.h \
- ../src/PerLine.h ../src/KeyMap.h ../src/Indicator.h ../src/LineMarker.h \
- ../src/Style.h ../src/ViewStyle.h ../src/CharClassify.h \
- ../src/Decoration.h ../src/CaseFolder.h ../src/Document.h \
- ../src/UniConversion.h ../src/Selection.h ../src/PositionCache.h \
- ../src/EditModel.h ../src/MarginView.h ../src/EditView.h ../src/Editor.h
+ ../src/MarginView.h ../src/EditView.h ../src/Editor.h \
+ ../src/ElapsedPeriod.h
 ExternalLexer.o: ../src/ExternalLexer.cxx ../include/Platform.h \
  ../include/ILexer.h ../include/Sci_Position.h ../include/Scintilla.h \
  ../include/SciLexer.h ../lexlib/LexerModule.h ../src/Catalogue.h \
@@ -106,19 +108,18 @@ Indicator.o: ../src/Indicator.cxx ../include/Platform.h \
 KeyMap.o: ../src/KeyMap.cxx ../include/Platform.h ../include/Scintilla.h \
  ../include/Sci_Position.h ../src/KeyMap.h
 LineMarker.o: ../src/LineMarker.cxx ../include/Platform.h \
- ../include/Scintilla.h ../include/Sci_Position.h ../lexlib/StringCopy.h \
+ ../include/Scintilla.h ../include/Sci_Position.h \
  ../src/IntegerRectangle.h ../src/XPM.h ../src/LineMarker.h
 MarginView.o: ../src/MarginView.cxx ../include/Platform.h \
  ../include/ILoader.h ../include/Sci_Position.h ../include/ILexer.h \
- ../include/Scintilla.h ../lexlib/StringCopy.h ../src/Position.h \
- ../src/IntegerRectangle.h ../src/UniqueString.h ../src/SplitVector.h \
- ../src/Partitioning.h ../src/RunStyles.h ../src/ContractionState.h \
- ../src/CellBuffer.h ../src/KeyMap.h ../src/Indicator.h \
- ../src/LineMarker.h ../src/Style.h ../src/ViewStyle.h \
- ../src/CharClassify.h ../src/Decoration.h ../src/CaseFolder.h \
- ../src/Document.h ../src/UniConversion.h ../src/Selection.h \
- ../src/PositionCache.h ../src/EditModel.h ../src/MarginView.h \
- ../src/EditView.h
+ ../include/Scintilla.h ../src/Position.h ../src/IntegerRectangle.h \
+ ../src/UniqueString.h ../src/SplitVector.h ../src/Partitioning.h \
+ ../src/RunStyles.h ../src/ContractionState.h ../src/CellBuffer.h \
+ ../src/KeyMap.h ../src/Indicator.h ../src/LineMarker.h ../src/Style.h \
+ ../src/ViewStyle.h ../src/CharClassify.h ../src/Decoration.h \
+ ../src/CaseFolder.h ../src/Document.h ../src/UniConversion.h \
+ ../src/Selection.h ../src/PositionCache.h ../src/EditModel.h \
+ ../src/MarginView.h ../src/EditView.h
 PerLine.o: ../src/PerLine.cxx ../include/Platform.h \
  ../include/Scintilla.h ../include/Sci_Position.h ../src/Position.h \
  ../src/SplitVector.h ../src/Partitioning.h ../src/CellBuffer.h \
@@ -194,8 +195,7 @@ PropSetSimple.o: ../lexlib/PropSetSimple.cxx ../lexlib/PropSetSimple.h
 StyleContext.o: ../lexlib/StyleContext.cxx ../include/ILexer.h \
  ../include/Sci_Position.h ../lexlib/LexAccessor.h ../lexlib/Accessor.h \
  ../lexlib/StyleContext.h ../lexlib/CharacterSet.h
-WordList.o: ../lexlib/WordList.cxx ../lexlib/StringCopy.h \
- ../lexlib/WordList.h
+WordList.o: ../lexlib/WordList.cxx ../lexlib/WordList.h
 LexA68k.o: ../lexers/LexA68k.cxx ../include/ILexer.h \
  ../include/Sci_Position.h ../include/Scintilla.h ../include/SciLexer.h \
  ../lexlib/WordList.h ../lexlib/LexAccessor.h ../lexlib/Accessor.h \
@@ -253,9 +253,10 @@ LexBaan.o: ../lexers/LexBaan.cxx ../include/ILexer.h \
  ../lexlib/DefaultLexer.h
 LexBash.o: ../lexers/LexBash.cxx ../include/ILexer.h \
  ../include/Sci_Position.h ../include/Scintilla.h ../include/SciLexer.h \
- ../lexlib/WordList.h ../lexlib/LexAccessor.h ../lexlib/Accessor.h \
+ ../lexlib/StringCopy.h ../lexlib/WordList.h ../lexlib/LexAccessor.h \
  ../lexlib/StyleContext.h ../lexlib/CharacterSet.h \
- ../lexlib/LexerModule.h
+ ../lexlib/LexerModule.h ../lexlib/OptionSet.h ../lexlib/SubStyles.h \
+ ../lexlib/DefaultLexer.h
 LexBasic.o: ../lexers/LexBasic.cxx ../include/ILexer.h \
  ../include/Sci_Position.h ../include/Scintilla.h ../include/SciLexer.h \
  ../lexlib/WordList.h ../lexlib/LexAccessor.h ../lexlib/StyleContext.h \
@@ -281,6 +282,12 @@ LexCaml.o: ../lexers/LexCaml.cxx ../include/ILexer.h \
  ../lexlib/PropSetSimple.h ../lexlib/WordList.h ../lexlib/LexAccessor.h \
  ../lexlib/Accessor.h ../lexlib/StyleContext.h ../lexlib/CharacterSet.h \
  ../lexlib/LexerModule.h
+LexCIL.o: ../lexers/LexCIL.cxx ../include/ILexer.h \
+ ../include/Sci_Position.h ../include/Scintilla.h ../include/SciLexer.h \
+ ../lexlib/StringCopy.h ../lexlib/WordList.h ../lexlib/LexAccessor.h \
+ ../lexlib/Accessor.h ../lexlib/StyleContext.h ../lexlib/CharacterSet.h \
+ ../lexlib/CharacterCategory.h ../lexlib/LexerModule.h \
+ ../lexlib/OptionSet.h ../lexlib/DefaultLexer.h
 LexCLW.o: ../lexers/LexCLW.cxx ../include/ILexer.h \
  ../include/Sci_Position.h ../include/Scintilla.h ../include/SciLexer.h \
  ../lexlib/WordList.h ../lexlib/LexAccessor.h ../lexlib/Accessor.h \
@@ -413,9 +420,9 @@ LexHex.o: ../lexers/LexHex.cxx ../include/ILexer.h \
  ../lexlib/LexerModule.h
 LexHTML.o: ../lexers/LexHTML.cxx ../include/ILexer.h \
  ../include/Sci_Position.h ../include/Scintilla.h ../include/SciLexer.h \
- ../lexlib/StringCopy.h ../lexlib/WordList.h ../lexlib/LexAccessor.h \
- ../lexlib/Accessor.h ../lexlib/StyleContext.h ../lexlib/CharacterSet.h \
- ../lexlib/LexerModule.h
+ ../lexlib/WordList.h ../lexlib/LexAccessor.h ../lexlib/Accessor.h \
+ ../lexlib/StyleContext.h ../lexlib/CharacterSet.h \
+ ../lexlib/LexerModule.h ../lexlib/OptionSet.h ../lexlib/DefaultLexer.h
 LexIndent.o: ../lexers/LexIndent.cxx ../include/ILexer.h \
  ../include/Sci_Position.h ../include/Scintilla.h ../include/SciLexer.h \
  ../lexlib/WordList.h ../lexlib/LexAccessor.h ../lexlib/Accessor.h \
@@ -516,6 +523,12 @@ LexMySQL.o: ../lexers/LexMySQL.cxx ../include/ILexer.h \
  ../lexlib/WordList.h ../lexlib/LexAccessor.h ../lexlib/Accessor.h \
  ../lexlib/StyleContext.h ../lexlib/CharacterSet.h \
  ../lexlib/LexerModule.h
+LexNim.o: ../lexers/LexNim.cxx ../include/ILexer.h \
+ ../include/Sci_Position.h ../include/Scintilla.h ../include/SciLexer.h \
+ ../lexlib/StringCopy.h ../lexlib/WordList.h ../lexlib/LexAccessor.h \
+ ../lexlib/Accessor.h ../lexlib/StyleContext.h ../lexlib/CharacterSet.h \
+ ../lexlib/CharacterCategory.h ../lexlib/LexerModule.h \
+ ../lexlib/OptionSet.h ../lexlib/DefaultLexer.h
 LexNimrod.o: ../lexers/LexNimrod.cxx ../include/ILexer.h \
  ../include/Sci_Position.h ../include/Scintilla.h ../include/SciLexer.h \
  ../lexlib/WordList.h ../lexlib/LexAccessor.h ../lexlib/Accessor.h \
@@ -626,6 +639,11 @@ LexRust.o: ../lexers/LexRust.cxx ../include/ILexer.h \
  ../lexlib/PropSetSimple.h ../lexlib/WordList.h ../lexlib/LexAccessor.h \
  ../lexlib/Accessor.h ../lexlib/StyleContext.h ../lexlib/CharacterSet.h \
  ../lexlib/LexerModule.h ../lexlib/OptionSet.h ../lexlib/DefaultLexer.h
+LexSAS.o: ../lexers/LexSAS.cxx ../include/ILexer.h \
+ ../include/Sci_Position.h ../include/Scintilla.h ../include/SciLexer.h \
+ ../lexlib/WordList.h ../lexlib/LexAccessor.h ../lexlib/Accessor.h \
+ ../lexlib/StyleContext.h ../lexlib/CharacterSet.h \
+ ../lexlib/LexerModule.h
 LexScriptol.o: ../lexers/LexScriptol.cxx ../include/ILexer.h \
  ../include/Sci_Position.h ../include/Scintilla.h ../include/SciLexer.h \
  ../lexlib/WordList.h ../lexlib/LexAccessor.h ../lexlib/Accessor.h \
@@ -662,6 +680,11 @@ LexSQL.o: ../lexers/LexSQL.cxx ../include/ILexer.h \
  ../lexlib/StyleContext.h ../lexlib/CharacterSet.h \
  ../lexlib/LexerModule.h ../lexlib/OptionSet.h ../lexlib/SparseState.h \
  ../lexlib/DefaultLexer.h
+LexStata.o: ../lexers/LexStata.cxx ../include/ILexer.h \
+ ../include/Sci_Position.h ../include/Scintilla.h ../include/SciLexer.h \
+ ../lexlib/WordList.h ../lexlib/LexAccessor.h ../lexlib/Accessor.h \
+ ../lexlib/StyleContext.h ../lexlib/CharacterSet.h \
+ ../lexlib/LexerModule.h
 LexSTTXT.o: ../lexers/LexSTTXT.cxx ../include/ILexer.h \
  ../include/Sci_Position.h ../include/Scintilla.h ../include/SciLexer.h \
  ../lexlib/WordList.h ../lexlib/LexAccessor.h ../lexlib/Accessor.h \
