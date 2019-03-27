@@ -131,7 +131,6 @@ enum {
 	TARGET_URI
 };
 
-GdkAtom ScintillaGTK::atomClipboard = nullptr;
 GdkAtom ScintillaGTK::atomUTF8 = nullptr;
 GdkAtom ScintillaGTK::atomString = nullptr;
 GdkAtom ScintillaGTK::atomUriList = nullptr;
@@ -1262,37 +1261,47 @@ void ScintillaGTK::Copy() {
 	}
 }
 
-void ScintillaGTK::Paste() {
+namespace {
+
+// Helper class for the asynchronous paste not to risk calling in a destroyed ScintillaGTK
+
+class SelectionReceiver : GObjectWatcher {
+	ScintillaGTK *sci;
+
+	void Destroyed() override {
+		sci = nullptr;
+	}
+
+public:
+	SelectionReceiver(ScintillaGTK *sci_) :
+		GObjectWatcher(G_OBJECT(sci_->MainObject())),
+		sci(sci_) {
+	}
+
+	static void ClipboardReceived(GtkClipboard *, GtkSelectionData *selection_data, gpointer data) {
+		SelectionReceiver *self = static_cast<SelectionReceiver *>(data);
+		if (self->sci) {
+			self->sci->ReceivedSelection(selection_data);
+		}
+		delete self;
+	}
+};
+
+}
+
+void ScintillaGTK::RequestSelection(GdkAtom atomSelection) {
 	atomSought = atomUTF8;
 	GtkClipboard *clipBoard =
-		gtk_widget_get_clipboard(GTK_WIDGET(PWidget(wMain)), atomClipboard);
-	if (clipBoard == nullptr)
-		return;
+		gtk_widget_get_clipboard(GTK_WIDGET(PWidget(wMain)), atomSelection);
+	if (clipBoard) {
+		gtk_clipboard_request_contents(clipBoard, atomSought,
+					       SelectionReceiver::ClipboardReceived,
+					       new SelectionReceiver(this));
+	}
+}
 
-	// helper class for the asynchronous paste not to risk calling in a destroyed ScintillaGTK
-	class Helper : GObjectWatcher {
-		ScintillaGTK *sci;
-
-		void Destroyed() override {
-			sci = nullptr;
-		}
-
-	public:
-		Helper(ScintillaGTK *sci_) :
-			GObjectWatcher(G_OBJECT(PWidget(sci_->wMain))),
-			sci(sci_) {
-		}
-
-		static void ClipboardReceived(GtkClipboard *, GtkSelectionData *selection_data, gpointer data) {
-			Helper *self = static_cast<Helper *>(data);
-			if (self->sci) {
-				self->sci->ReceivedSelection(selection_data);
-			}
-			delete self;
-		}
-	};
-
-	gtk_clipboard_request_contents(clipBoard, atomSought, Helper::ClipboardReceived, new Helper(this));
+void ScintillaGTK::Paste() {
+	RequestSelection(GDK_SELECTION_CLIPBOARD);
 }
 
 void ScintillaGTK::CreateCallTipWindow(PRectangle rc) {
@@ -1423,9 +1432,13 @@ void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, Selectio
 	}
 }
 
+GObject *ScintillaGTK::MainObject() const noexcept {
+	return G_OBJECT(PWidget(wMain));
+}
+
 void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 	try {
-		if ((SelectionOfGSD(selection_data) == atomClipboard) ||
+		if ((SelectionOfGSD(selection_data) == GDK_SELECTION_CLIPBOARD) ||
 				(SelectionOfGSD(selection_data) == GDK_SELECTION_PRIMARY)) {
 			if ((atomSought == atomUTF8) && (LengthOfGSD(selection_data) <= 0)) {
 				atomSought = atomString;
@@ -1526,7 +1539,7 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 
 void ScintillaGTK::StoreOnClipboard(SelectionText *clipText) {
 	GtkClipboard *clipBoard =
-		gtk_widget_get_clipboard(GTK_WIDGET(PWidget(wMain)), atomClipboard);
+		gtk_widget_get_clipboard(GTK_WIDGET(PWidget(wMain)), GDK_SELECTION_CLIPBOARD);
 	if (clipBoard == nullptr) // Occurs if widget isn't in a toplevel
 		return;
 
@@ -1737,9 +1750,7 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 
 			sel.Clear();
 			SetSelection(pos, pos);
-			atomSought = atomUTF8;
-			gtk_selection_convert(GTK_WIDGET(PWidget(wMain)), GDK_SELECTION_PRIMARY,
-					      atomSought, event->time);
+			RequestSelection(GDK_SELECTION_PRIMARY);
 		} else if (event->button == 3) {
 			if (!PointInSelection(pt))
 				SetEmptySelection(PositionFromLocation(pt));
@@ -3020,7 +3031,6 @@ void ScintillaGTK::ClassInit(OBJECT_CLASS *object_class, GtkWidgetClass *widget_
 #ifdef SCI_LEXER
 	Scintilla_LinkLexers();
 #endif
-	atomClipboard = gdk_atom_intern("CLIPBOARD", FALSE);
 	atomUTF8 = gdk_atom_intern("UTF8_STRING", FALSE);
 	atomString = GDK_SELECTION_TYPE_STRING;
 	atomUriList = gdk_atom_intern("text/uri-list", FALSE);
