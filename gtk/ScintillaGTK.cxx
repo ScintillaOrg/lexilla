@@ -1262,37 +1262,47 @@ void ScintillaGTK::Copy() {
 	}
 }
 
-void ScintillaGTK::Paste() {
+namespace {
+
+// Helper class for the asynchronous paste not to risk calling in a destroyed ScintillaGTK
+
+class SelectionReceiver : GObjectWatcher {
+	ScintillaGTK *sci;
+
+	void Destroyed() override {
+		sci = nullptr;
+	}
+
+public:
+	SelectionReceiver(ScintillaGTK *sci_) :
+		GObjectWatcher(G_OBJECT(sci_->MainObject())),
+		sci(sci_) {
+	}
+
+	static void ClipboardReceived(GtkClipboard *, GtkSelectionData *selection_data, gpointer data) {
+		SelectionReceiver *self = static_cast<SelectionReceiver *>(data);
+		if (self->sci) {
+			self->sci->ReceivedSelection(selection_data);
+		}
+		delete self;
+	}
+};
+
+}
+
+void ScintillaGTK::RequestSelection(GdkAtom atomSelection) {
 	atomSought = atomUTF8;
 	GtkClipboard *clipBoard =
-		gtk_widget_get_clipboard(GTK_WIDGET(PWidget(wMain)), atomClipboard);
-	if (clipBoard == nullptr)
-		return;
+		gtk_widget_get_clipboard(GTK_WIDGET(PWidget(wMain)), atomSelection);
+	if (clipBoard) {
+		gtk_clipboard_request_contents(clipBoard, atomSought,
+					       SelectionReceiver::ClipboardReceived,
+					       new SelectionReceiver(this));
+	}
+}
 
-	// helper class for the asynchronous paste not to risk calling in a destroyed ScintillaGTK
-	class Helper : GObjectWatcher {
-		ScintillaGTK *sci;
-
-		void Destroyed() override {
-			sci = nullptr;
-		}
-
-	public:
-		Helper(ScintillaGTK *sci_) :
-			GObjectWatcher(G_OBJECT(PWidget(sci_->wMain))),
-			sci(sci_) {
-		}
-
-		static void ClipboardReceived(GtkClipboard *, GtkSelectionData *selection_data, gpointer data) {
-			Helper *self = static_cast<Helper *>(data);
-			if (self->sci) {
-				self->sci->ReceivedSelection(selection_data);
-			}
-			delete self;
-		}
-	};
-
-	gtk_clipboard_request_contents(clipBoard, atomSought, Helper::ClipboardReceived, new Helper(this));
+void ScintillaGTK::Paste() {
+	RequestSelection(atomClipboard);
 }
 
 void ScintillaGTK::CreateCallTipWindow(PRectangle rc) {
@@ -1421,6 +1431,10 @@ void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, Selectio
 			selText.Copy(dest, SC_CP_UTF8, 0, isRectangular, false);
 		}
 	}
+}
+
+GObject *ScintillaGTK::MainObject() const noexcept {
+	return G_OBJECT(PWidget(wMain));
 }
 
 void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
@@ -1737,9 +1751,7 @@ gint ScintillaGTK::PressThis(GdkEventButton *event) {
 
 			sel.Clear();
 			SetSelection(pos, pos);
-			atomSought = atomUTF8;
-			gtk_selection_convert(GTK_WIDGET(PWidget(wMain)), GDK_SELECTION_PRIMARY,
-					      atomSought, event->time);
+			RequestSelection(GDK_SELECTION_PRIMARY);
 		} else if (event->button == 3) {
 			if (!PointInSelection(pt))
 				SetEmptySelection(PositionFromLocation(pt));

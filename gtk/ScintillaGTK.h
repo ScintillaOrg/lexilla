@@ -127,13 +127,17 @@ private:
 	int KeyDefault(int key, int modifiers) override;
 	void CopyToClipboard(const SelectionText &selectedText) override;
 	void Copy() override;
+	void RequestSelection(GdkAtom atomSelection);
 	void Paste() override;
 	void CreateCallTipWindow(PRectangle rc) override;
 	void AddToPopUp(const char *label, int cmd = 0, bool enabled = true) override;
 	bool OwnPrimarySelection();
 	void ClaimSelection() override;
 	void GetGtkSelectionText(GtkSelectionData *selectionData, SelectionText &selText);
+public:	// Public for SelectionReceiver
+	GObject *MainObject() const noexcept;
 	void ReceivedSelection(GtkSelectionData *selection_data);
+private:
 	void ReceivedDrop(GtkSelectionData *selection_data);
 	static void GetSelection(GtkSelectionData *selection_data, guint info, SelectionText *text);
 	void StoreOnClipboard(SelectionText *clipText);
