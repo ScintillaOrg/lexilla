@@ -2282,6 +2282,11 @@ class TestWordChars(unittest.TestCase):
 		data = self.ed.GetPunctuationChars(None)
 		self.assertCharSetsEqual(data, expected)
 
+	def testCharacterCategoryOptimization(self):
+		self.assertEquals(self.ed.CharacterCategoryOptimization, 0x100)
+		self.ed.CharacterCategoryOptimization = 0x1000
+		self.assertEquals(self.ed.CharacterCategoryOptimization, 0x1000)
+
 class TestExplicitTabStops(unittest.TestCase):
 
 	def setUp(self):
