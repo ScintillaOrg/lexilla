@@ -32,6 +32,7 @@
 #include "PropSetSimple.h"
 #endif
 
+#include "CharacterCategory.h"
 #include "Position.h"
 #include "UniqueString.h"
 #include "SplitVector.h"
