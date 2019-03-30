@@ -13,6 +13,7 @@
 **.html = native
 **.bat = native
 **.mak = native
+**.deps = native
 **.def = native
 **.manifest = native
 **.properties = native
