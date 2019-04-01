@@ -110,12 +110,8 @@ LEXOBJS:=$(addsuffix .o,$(basename $(sort $(notdir $(wildcard $(srcdir)/../lexer
 analyze:
 	clang --analyze $(CONFIGFLAGS) $(CXXTFLAGS) $(CXXFLAGS) $(srcdir)/*.cxx $(srcdir)/../src/*.cxx $(srcdir)/../lexlib/*.cxx $(srcdir)/../lexers/*.cxx
 
-# To minimize deltas, including between Unix and Windows, the lexer file names are sorted case-insensitively
-LEXSORTED=$(shell ls $(srcdir)/../lexers/Lex*.cxx | sort -f)
-DEPSRCS=$(srcdir)/*.cxx $(srcdir)/../src/*.cxx $(srcdir)/../lexlib/*.cxx $(LEXSORTED)
-deps: deps.mak
-deps.mak:
-	$(CXX) -MM $(CONFIGFLAGS) $(CXXTFLAGS) $(DEPSRCS) | sed -e 's/\/usr.* //' | grep [a-zA-Z] > $@
+depend deps.mak:
+	python DepGen.py
 
 $(COMPLIB): Accessor.o CharacterSet.o DefaultLexer.o LexerBase.o LexerModule.o LexerSimple.o StyleContext.o WordList.o \
 	CharClassify.o Decoration.o Document.o PerLine.o Catalogue.o CallTip.o CaseConvert.o CaseFolder.o \

@@ -1,9 +1,9 @@
 # Created by DepGen.py. To recreate, run 'python DepGen.py'.
-HanjaDic.o: \
+$(DIR_O)/HanjaDic.obj: \
 	HanjaDic.cxx \
 	../src/UniConversion.h \
 	HanjaDic.h
-PlatWin.o: \
+$(DIR_O)/PlatWin.obj: \
 	PlatWin.cxx \
 	../include/Platform.h \
 	../src/XPM.h \
@@ -11,12 +11,12 @@ PlatWin.o: \
 	../src/DBCS.h \
 	../src/FontQuality.h \
 	PlatWin.h
-ScintillaDLL.o: \
+$(DIR_O)/ScintillaDLL.obj: \
 	ScintillaDLL.cxx \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	ScintillaWin.h
-ScintillaWin.o: \
+$(DIR_O)/ScintillaWin.obj: \
 	ScintillaWin.cxx \
 	../include/Platform.h \
 	../include/ILoader.h \
@@ -58,7 +58,7 @@ ScintillaWin.o: \
 	PlatWin.h \
 	HanjaDic.h \
 	ScintillaWin.h
-ScintillaWinL.o: \
+$(DIR_O)/ScintillaWinL.obj: \
 	ScintillaWin.cxx \
 	../include/Platform.h \
 	../include/ILoader.h \
@@ -100,7 +100,7 @@ ScintillaWinL.o: \
 	PlatWin.h \
 	HanjaDic.h \
 	ScintillaWin.h
-AutoComplete.o: \
+$(DIR_O)/AutoComplete.obj: \
 	../src/AutoComplete.cxx \
 	../include/Platform.h \
 	../include/Scintilla.h \
@@ -108,7 +108,7 @@ AutoComplete.o: \
 	../lexlib/CharacterSet.h \
 	../src/Position.h \
 	../src/AutoComplete.h
-CallTip.o: \
+$(DIR_O)/CallTip.obj: \
 	../src/CallTip.cxx \
 	../include/Platform.h \
 	../include/Scintilla.h \
@@ -116,15 +116,15 @@ CallTip.o: \
 	../src/Position.h \
 	../src/IntegerRectangle.h \
 	../src/CallTip.h
-CaseConvert.o: \
+$(DIR_O)/CaseConvert.obj: \
 	../src/CaseConvert.cxx \
 	../src/CaseConvert.h \
 	../src/UniConversion.h
-CaseFolder.o: \
+$(DIR_O)/CaseFolder.obj: \
 	../src/CaseFolder.cxx \
 	../src/CaseFolder.h \
 	../src/CaseConvert.h
-Catalogue.o: \
+$(DIR_O)/Catalogue.obj: \
 	../src/Catalogue.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -132,7 +132,7 @@ Catalogue.o: \
 	../include/SciLexer.h \
 	../lexlib/LexerModule.h \
 	../src/Catalogue.h
-CellBuffer.o: \
+$(DIR_O)/CellBuffer.obj: \
 	../src/CellBuffer.cxx \
 	../include/Platform.h \
 	../include/Scintilla.h \
@@ -142,11 +142,11 @@ CellBuffer.o: \
 	../src/Partitioning.h \
 	../src/CellBuffer.h \
 	../src/UniConversion.h
-CharClassify.o: \
+$(DIR_O)/CharClassify.obj: \
 	../src/CharClassify.cxx \
 	../lexlib/CharacterSet.h \
 	../src/CharClassify.h
-ContractionState.o: \
+$(DIR_O)/ContractionState.obj: \
 	../src/ContractionState.cxx \
 	../include/Platform.h \
 	../src/Position.h \
@@ -156,10 +156,10 @@ ContractionState.o: \
 	../src/RunStyles.h \
 	../src/SparseVector.h \
 	../src/ContractionState.h
-DBCS.o: \
+$(DIR_O)/DBCS.obj: \
 	../src/DBCS.cxx \
 	../src/DBCS.h
-Decoration.o: \
+$(DIR_O)/Decoration.obj: \
 	../src/Decoration.cxx \
 	../include/Platform.h \
 	../include/Scintilla.h \
@@ -169,7 +169,7 @@ Decoration.o: \
 	../src/Partitioning.h \
 	../src/RunStyles.h \
 	../src/Decoration.h
-Document.o: \
+$(DIR_O)/Document.obj: \
 	../src/Document.cxx \
 	../include/Platform.h \
 	../include/ILoader.h \
@@ -191,7 +191,7 @@ Document.o: \
 	../src/RESearch.h \
 	../src/UniConversion.h \
 	../src/ElapsedPeriod.h
-EditModel.o: \
+$(DIR_O)/EditModel.obj: \
 	../src/EditModel.cxx \
 	../include/Platform.h \
 	../include/ILoader.h \
@@ -219,7 +219,7 @@ EditModel.o: \
 	../src/Selection.h \
 	../src/PositionCache.h \
 	../src/EditModel.h
-Editor.o: \
+$(DIR_O)/Editor.obj: \
 	../src/Editor.cxx \
 	../include/Platform.h \
 	../include/ILoader.h \
@@ -253,7 +253,7 @@ Editor.o: \
 	../src/EditView.h \
 	../src/Editor.h \
 	../src/ElapsedPeriod.h
-EditView.o: \
+$(DIR_O)/EditView.obj: \
 	../src/EditView.cxx \
 	../include/Platform.h \
 	../include/ILoader.h \
@@ -287,7 +287,7 @@ EditView.o: \
 	../src/MarginView.h \
 	../src/EditView.h \
 	../src/ElapsedPeriod.h
-ExternalLexer.o: \
+$(DIR_O)/ExternalLexer.obj: \
 	../src/ExternalLexer.cxx \
 	../include/Platform.h \
 	../include/ILexer.h \
@@ -297,7 +297,7 @@ ExternalLexer.o: \
 	../lexlib/LexerModule.h \
 	../src/Catalogue.h \
 	../src/ExternalLexer.h
-Indicator.o: \
+$(DIR_O)/Indicator.obj: \
 	../src/Indicator.cxx \
 	../include/Platform.h \
 	../include/Scintilla.h \
@@ -305,13 +305,13 @@ Indicator.o: \
 	../src/IntegerRectangle.h \
 	../src/Indicator.h \
 	../src/XPM.h
-KeyMap.o: \
+$(DIR_O)/KeyMap.obj: \
 	../src/KeyMap.cxx \
 	../include/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/KeyMap.h
-LineMarker.o: \
+$(DIR_O)/LineMarker.obj: \
 	../src/LineMarker.cxx \
 	../include/Platform.h \
 	../include/Scintilla.h \
@@ -319,7 +319,7 @@ LineMarker.o: \
 	../src/IntegerRectangle.h \
 	../src/XPM.h \
 	../src/LineMarker.h
-MarginView.o: \
+$(DIR_O)/MarginView.obj: \
 	../src/MarginView.cxx \
 	../include/Platform.h \
 	../include/ILoader.h \
@@ -350,7 +350,7 @@ MarginView.o: \
 	../src/EditModel.h \
 	../src/MarginView.h \
 	../src/EditView.h
-PerLine.o: \
+$(DIR_O)/PerLine.obj: \
 	../src/PerLine.cxx \
 	../include/Platform.h \
 	../include/Scintilla.h \
@@ -360,7 +360,7 @@ PerLine.o: \
 	../src/Partitioning.h \
 	../src/CellBuffer.h \
 	../src/PerLine.h
-PositionCache.o: \
+$(DIR_O)/PositionCache.obj: \
 	../src/PositionCache.cxx \
 	../include/Platform.h \
 	../include/ILoader.h \
@@ -387,12 +387,12 @@ PositionCache.o: \
 	../src/UniConversion.h \
 	../src/Selection.h \
 	../src/PositionCache.h
-RESearch.o: \
+$(DIR_O)/RESearch.obj: \
 	../src/RESearch.cxx \
 	../src/Position.h \
 	../src/CharClassify.h \
 	../src/RESearch.h
-RunStyles.o: \
+$(DIR_O)/RunStyles.obj: \
 	../src/RunStyles.cxx \
 	../include/Platform.h \
 	../include/Scintilla.h \
@@ -401,7 +401,7 @@ RunStyles.o: \
 	../src/SplitVector.h \
 	../src/Partitioning.h \
 	../src/RunStyles.h
-ScintillaBase.o: \
+$(DIR_O)/ScintillaBase.obj: \
 	../src/ScintillaBase.cxx \
 	../include/Platform.h \
 	../include/ILoader.h \
@@ -438,7 +438,7 @@ ScintillaBase.o: \
 	../src/Editor.h \
 	../src/AutoComplete.h \
 	../src/ScintillaBase.h
-ScintillaBaseL.o: \
+$(DIR_O)/ScintillaBaseL.obj: \
 	../src/ScintillaBase.cxx \
 	../include/Platform.h \
 	../include/ILoader.h \
@@ -475,23 +475,23 @@ ScintillaBaseL.o: \
 	../src/Editor.h \
 	../src/AutoComplete.h \
 	../src/ScintillaBase.h
-Selection.o: \
+$(DIR_O)/Selection.obj: \
 	../src/Selection.cxx \
 	../include/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/Position.h \
 	../src/Selection.h
-Style.o: \
+$(DIR_O)/Style.obj: \
 	../src/Style.cxx \
 	../include/Platform.h \
 	../include/Scintilla.h \
 	../include/Sci_Position.h \
 	../src/Style.h
-UniConversion.o: \
+$(DIR_O)/UniConversion.obj: \
 	../src/UniConversion.cxx \
 	../src/UniConversion.h
-ViewStyle.o: \
+$(DIR_O)/ViewStyle.obj: \
 	../src/ViewStyle.cxx \
 	../include/Platform.h \
 	../include/Scintilla.h \
@@ -503,11 +503,11 @@ ViewStyle.o: \
 	../src/LineMarker.h \
 	../src/Style.h \
 	../src/ViewStyle.h
-XPM.o: \
+$(DIR_O)/XPM.obj: \
 	../src/XPM.cxx \
 	../include/Platform.h \
 	../src/XPM.h
-Accessor.o: \
+$(DIR_O)/Accessor.obj: \
 	../lexlib/Accessor.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -517,13 +517,13 @@ Accessor.o: \
 	../lexlib/WordList.h \
 	../lexlib/LexAccessor.h \
 	../lexlib/Accessor.h
-CharacterCategory.o: \
+$(DIR_O)/CharacterCategory.obj: \
 	../lexlib/CharacterCategory.cxx \
 	../lexlib/CharacterCategory.h
-CharacterSet.o: \
+$(DIR_O)/CharacterSet.obj: \
 	../lexlib/CharacterSet.cxx \
 	../lexlib/CharacterSet.h
-DefaultLexer.o: \
+$(DIR_O)/DefaultLexer.obj: \
 	../lexlib/DefaultLexer.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -535,7 +535,7 @@ DefaultLexer.o: \
 	../lexlib/Accessor.h \
 	../lexlib/LexerModule.h \
 	../lexlib/DefaultLexer.h
-LexerBase.o: \
+$(DIR_O)/LexerBase.obj: \
 	../lexlib/LexerBase.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -547,7 +547,7 @@ LexerBase.o: \
 	../lexlib/Accessor.h \
 	../lexlib/LexerModule.h \
 	../lexlib/LexerBase.h
-LexerModule.o: \
+$(DIR_O)/LexerModule.obj: \
 	../lexlib/LexerModule.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -560,7 +560,7 @@ LexerModule.o: \
 	../lexlib/LexerModule.h \
 	../lexlib/LexerBase.h \
 	../lexlib/LexerSimple.h
-LexerNoExceptions.o: \
+$(DIR_O)/LexerNoExceptions.obj: \
 	../lexlib/LexerNoExceptions.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -573,7 +573,7 @@ LexerNoExceptions.o: \
 	../lexlib/LexerModule.h \
 	../lexlib/LexerBase.h \
 	../lexlib/LexerNoExceptions.h
-LexerSimple.o: \
+$(DIR_O)/LexerSimple.obj: \
 	../lexlib/LexerSimple.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -586,10 +586,10 @@ LexerSimple.o: \
 	../lexlib/LexerModule.h \
 	../lexlib/LexerBase.h \
 	../lexlib/LexerSimple.h
-PropSetSimple.o: \
+$(DIR_O)/PropSetSimple.obj: \
 	../lexlib/PropSetSimple.cxx \
 	../lexlib/PropSetSimple.h
-StyleContext.o: \
+$(DIR_O)/StyleContext.obj: \
 	../lexlib/StyleContext.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -597,10 +597,10 @@ StyleContext.o: \
 	../lexlib/Accessor.h \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h
-WordList.o: \
+$(DIR_O)/WordList.obj: \
 	../lexlib/WordList.cxx \
 	../lexlib/WordList.h
-LexA68k.o: \
+$(DIR_O)/LexA68k.obj: \
 	../lexers/LexA68k.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -612,7 +612,7 @@ LexA68k.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexAbaqus.o: \
+$(DIR_O)/LexAbaqus.obj: \
 	../lexers/LexAbaqus.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -624,7 +624,7 @@ LexAbaqus.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexAda.o: \
+$(DIR_O)/LexAda.obj: \
 	../lexers/LexAda.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -636,7 +636,7 @@ LexAda.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexAPDL.o: \
+$(DIR_O)/LexAPDL.obj: \
 	../lexers/LexAPDL.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -648,7 +648,7 @@ LexAPDL.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexAsm.o: \
+$(DIR_O)/LexAsm.obj: \
 	../lexers/LexAsm.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -661,7 +661,7 @@ LexAsm.o: \
 	../lexlib/LexerModule.h \
 	../lexlib/OptionSet.h \
 	../lexlib/DefaultLexer.h
-LexAsn1.o: \
+$(DIR_O)/LexAsn1.obj: \
 	../lexers/LexAsn1.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -673,7 +673,7 @@ LexAsn1.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexASY.o: \
+$(DIR_O)/LexASY.obj: \
 	../lexers/LexASY.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -685,7 +685,7 @@ LexASY.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexAU3.o: \
+$(DIR_O)/LexAU3.obj: \
 	../lexers/LexAU3.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -697,7 +697,7 @@ LexAU3.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexAVE.o: \
+$(DIR_O)/LexAVE.obj: \
 	../lexers/LexAVE.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -709,7 +709,7 @@ LexAVE.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexAVS.o: \
+$(DIR_O)/LexAVS.obj: \
 	../lexers/LexAVS.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -721,7 +721,7 @@ LexAVS.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexBaan.o: \
+$(DIR_O)/LexBaan.obj: \
 	../lexers/LexBaan.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -734,7 +734,7 @@ LexBaan.o: \
 	../lexlib/LexerModule.h \
 	../lexlib/OptionSet.h \
 	../lexlib/DefaultLexer.h
-LexBash.o: \
+$(DIR_O)/LexBash.obj: \
 	../lexers/LexBash.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -749,7 +749,7 @@ LexBash.o: \
 	../lexlib/OptionSet.h \
 	../lexlib/SubStyles.h \
 	../lexlib/DefaultLexer.h
-LexBasic.o: \
+$(DIR_O)/LexBasic.obj: \
 	../lexers/LexBasic.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -762,7 +762,7 @@ LexBasic.o: \
 	../lexlib/LexerModule.h \
 	../lexlib/OptionSet.h \
 	../lexlib/DefaultLexer.h
-LexBatch.o: \
+$(DIR_O)/LexBatch.obj: \
 	../lexers/LexBatch.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -774,7 +774,7 @@ LexBatch.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexBibTeX.o: \
+$(DIR_O)/LexBibTeX.obj: \
 	../lexers/LexBibTeX.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -787,7 +787,7 @@ LexBibTeX.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexBullant.o: \
+$(DIR_O)/LexBullant.obj: \
 	../lexers/LexBullant.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -799,7 +799,7 @@ LexBullant.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexCaml.o: \
+$(DIR_O)/LexCaml.obj: \
 	../lexers/LexCaml.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -813,7 +813,7 @@ LexCaml.o: \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h \
 	../src/ExternalLexer.h
-LexCIL.o: \
+$(DIR_O)/LexCIL.obj: \
 	../lexers/LexCIL.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -828,7 +828,7 @@ LexCIL.o: \
 	../lexlib/LexerModule.h \
 	../lexlib/OptionSet.h \
 	../lexlib/DefaultLexer.h
-LexCLW.o: \
+$(DIR_O)/LexCLW.obj: \
 	../lexers/LexCLW.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -840,7 +840,7 @@ LexCLW.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexCmake.o: \
+$(DIR_O)/LexCmake.obj: \
 	../lexers/LexCmake.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -852,7 +852,7 @@ LexCmake.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexCOBOL.o: \
+$(DIR_O)/LexCOBOL.obj: \
 	../lexers/LexCOBOL.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -864,7 +864,7 @@ LexCOBOL.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexCoffeeScript.o: \
+$(DIR_O)/LexCoffeeScript.obj: \
 	../lexers/LexCoffeeScript.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -876,7 +876,7 @@ LexCoffeeScript.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexConf.o: \
+$(DIR_O)/LexConf.obj: \
 	../lexers/LexConf.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -888,7 +888,7 @@ LexConf.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexCPP.o: \
+$(DIR_O)/LexCPP.obj: \
 	../lexers/LexCPP.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -904,7 +904,7 @@ LexCPP.o: \
 	../lexlib/OptionSet.h \
 	../lexlib/SparseState.h \
 	../lexlib/SubStyles.h
-LexCrontab.o: \
+$(DIR_O)/LexCrontab.obj: \
 	../lexers/LexCrontab.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -916,7 +916,7 @@ LexCrontab.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexCsound.o: \
+$(DIR_O)/LexCsound.obj: \
 	../lexers/LexCsound.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -928,7 +928,7 @@ LexCsound.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexCSS.o: \
+$(DIR_O)/LexCSS.obj: \
 	../lexers/LexCSS.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -940,7 +940,7 @@ LexCSS.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexD.o: \
+$(DIR_O)/LexD.obj: \
 	../lexers/LexD.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -953,7 +953,7 @@ LexD.o: \
 	../lexlib/LexerModule.h \
 	../lexlib/OptionSet.h \
 	../lexlib/DefaultLexer.h
-LexDiff.o: \
+$(DIR_O)/LexDiff.obj: \
 	../lexers/LexDiff.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -965,7 +965,7 @@ LexDiff.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexDMAP.o: \
+$(DIR_O)/LexDMAP.obj: \
 	../lexers/LexDMAP.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -977,7 +977,7 @@ LexDMAP.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexDMIS.o: \
+$(DIR_O)/LexDMIS.obj: \
 	../lexers/LexDMIS.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -989,7 +989,7 @@ LexDMIS.o: \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h \
 	../lexlib/DefaultLexer.h
-LexECL.o: \
+$(DIR_O)/LexECL.obj: \
 	../lexers/LexECL.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1003,7 +1003,7 @@ LexECL.o: \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h \
 	../lexlib/OptionSet.h
-LexEDIFACT.o: \
+$(DIR_O)/LexEDIFACT.obj: \
 	../lexers/LexEDIFACT.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1012,7 +1012,7 @@ LexEDIFACT.o: \
 	../lexlib/LexAccessor.h \
 	../lexlib/LexerModule.h \
 	../lexlib/DefaultLexer.h
-LexEiffel.o: \
+$(DIR_O)/LexEiffel.obj: \
 	../lexers/LexEiffel.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1024,7 +1024,7 @@ LexEiffel.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexErlang.o: \
+$(DIR_O)/LexErlang.obj: \
 	../lexers/LexErlang.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1036,7 +1036,7 @@ LexErlang.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexErrorList.o: \
+$(DIR_O)/LexErrorList.obj: \
 	../lexers/LexErrorList.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1048,7 +1048,7 @@ LexErrorList.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexEScript.o: \
+$(DIR_O)/LexEScript.obj: \
 	../lexers/LexEScript.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1060,7 +1060,7 @@ LexEScript.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexFlagship.o: \
+$(DIR_O)/LexFlagship.obj: \
 	../lexers/LexFlagship.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1072,7 +1072,7 @@ LexFlagship.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexForth.o: \
+$(DIR_O)/LexForth.obj: \
 	../lexers/LexForth.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1084,7 +1084,7 @@ LexForth.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexFortran.o: \
+$(DIR_O)/LexFortran.obj: \
 	../lexers/LexFortran.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1096,7 +1096,7 @@ LexFortran.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexGAP.o: \
+$(DIR_O)/LexGAP.obj: \
 	../lexers/LexGAP.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1108,7 +1108,7 @@ LexGAP.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexGui4Cli.o: \
+$(DIR_O)/LexGui4Cli.obj: \
 	../lexers/LexGui4Cli.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1120,7 +1120,7 @@ LexGui4Cli.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexHaskell.o: \
+$(DIR_O)/LexHaskell.obj: \
 	../lexers/LexHaskell.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1136,7 +1136,7 @@ LexHaskell.o: \
 	../lexlib/LexerModule.h \
 	../lexlib/OptionSet.h \
 	../lexlib/DefaultLexer.h
-LexHex.o: \
+$(DIR_O)/LexHex.obj: \
 	../lexers/LexHex.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1148,7 +1148,7 @@ LexHex.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexHTML.o: \
+$(DIR_O)/LexHTML.obj: \
 	../lexers/LexHTML.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1162,7 +1162,7 @@ LexHTML.o: \
 	../lexlib/LexerModule.h \
 	../lexlib/OptionSet.h \
 	../lexlib/DefaultLexer.h
-LexIndent.o: \
+$(DIR_O)/LexIndent.obj: \
 	../lexers/LexIndent.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1174,7 +1174,7 @@ LexIndent.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexInno.o: \
+$(DIR_O)/LexInno.obj: \
 	../lexers/LexInno.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1186,7 +1186,7 @@ LexInno.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexJSON.o: \
+$(DIR_O)/LexJSON.obj: \
 	../lexers/LexJSON.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1199,7 +1199,7 @@ LexJSON.o: \
 	../lexlib/LexerModule.h \
 	../lexlib/OptionSet.h \
 	../lexlib/DefaultLexer.h
-LexKix.o: \
+$(DIR_O)/LexKix.obj: \
 	../lexers/LexKix.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1211,7 +1211,7 @@ LexKix.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexKVIrc.o: \
+$(DIR_O)/LexKVIrc.obj: \
 	../lexers/LexKVIrc.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1223,7 +1223,7 @@ LexKVIrc.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexLaTeX.o: \
+$(DIR_O)/LexLaTeX.obj: \
 	../lexers/LexLaTeX.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1238,7 +1238,7 @@ LexLaTeX.o: \
 	../lexlib/LexerModule.h \
 	../lexlib/DefaultLexer.h \
 	../lexlib/LexerBase.h
-LexLisp.o: \
+$(DIR_O)/LexLisp.obj: \
 	../lexers/LexLisp.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1250,7 +1250,7 @@ LexLisp.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexLout.o: \
+$(DIR_O)/LexLout.obj: \
 	../lexers/LexLout.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1262,7 +1262,7 @@ LexLout.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexLua.o: \
+$(DIR_O)/LexLua.obj: \
 	../lexers/LexLua.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1275,7 +1275,7 @@ LexLua.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexMagik.o: \
+$(DIR_O)/LexMagik.obj: \
 	../lexers/LexMagik.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1287,7 +1287,7 @@ LexMagik.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexMake.o: \
+$(DIR_O)/LexMake.obj: \
 	../lexers/LexMake.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1299,7 +1299,7 @@ LexMake.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexMarkdown.o: \
+$(DIR_O)/LexMarkdown.obj: \
 	../lexers/LexMarkdown.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1311,7 +1311,7 @@ LexMarkdown.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexMatlab.o: \
+$(DIR_O)/LexMatlab.obj: \
 	../lexers/LexMatlab.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1323,7 +1323,7 @@ LexMatlab.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexMaxima.o: \
+$(DIR_O)/LexMaxima.obj: \
 	../lexers/LexMaxima.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1335,7 +1335,7 @@ LexMaxima.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexMetapost.o: \
+$(DIR_O)/LexMetapost.obj: \
 	../lexers/LexMetapost.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1347,7 +1347,7 @@ LexMetapost.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexMMIXAL.o: \
+$(DIR_O)/LexMMIXAL.obj: \
 	../lexers/LexMMIXAL.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1359,7 +1359,7 @@ LexMMIXAL.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexModula.o: \
+$(DIR_O)/LexModula.obj: \
 	../lexers/LexModula.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1372,7 +1372,7 @@ LexModula.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexMPT.o: \
+$(DIR_O)/LexMPT.obj: \
 	../lexers/LexMPT.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1384,7 +1384,7 @@ LexMPT.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexMSSQL.o: \
+$(DIR_O)/LexMSSQL.obj: \
 	../lexers/LexMSSQL.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1396,7 +1396,7 @@ LexMSSQL.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexMySQL.o: \
+$(DIR_O)/LexMySQL.obj: \
 	../lexers/LexMySQL.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1408,7 +1408,7 @@ LexMySQL.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexNim.o: \
+$(DIR_O)/LexNim.obj: \
 	../lexers/LexNim.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1423,7 +1423,7 @@ LexNim.o: \
 	../lexlib/LexerModule.h \
 	../lexlib/OptionSet.h \
 	../lexlib/DefaultLexer.h
-LexNimrod.o: \
+$(DIR_O)/LexNimrod.obj: \
 	../lexers/LexNimrod.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1435,7 +1435,7 @@ LexNimrod.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexNsis.o: \
+$(DIR_O)/LexNsis.obj: \
 	../lexers/LexNsis.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1447,7 +1447,7 @@ LexNsis.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexNull.o: \
+$(DIR_O)/LexNull.obj: \
 	../lexers/LexNull.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1459,7 +1459,7 @@ LexNull.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexOpal.o: \
+$(DIR_O)/LexOpal.obj: \
 	../lexers/LexOpal.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1471,7 +1471,7 @@ LexOpal.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexOScript.o: \
+$(DIR_O)/LexOScript.obj: \
 	../lexers/LexOScript.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1483,7 +1483,7 @@ LexOScript.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexPascal.o: \
+$(DIR_O)/LexPascal.obj: \
 	../lexers/LexPascal.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1495,7 +1495,7 @@ LexPascal.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexPB.o: \
+$(DIR_O)/LexPB.obj: \
 	../lexers/LexPB.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1507,7 +1507,7 @@ LexPB.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexPerl.o: \
+$(DIR_O)/LexPerl.obj: \
 	../lexers/LexPerl.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1520,7 +1520,7 @@ LexPerl.o: \
 	../lexlib/LexerModule.h \
 	../lexlib/OptionSet.h \
 	../lexlib/DefaultLexer.h
-LexPLM.o: \
+$(DIR_O)/LexPLM.obj: \
 	../lexers/LexPLM.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1532,7 +1532,7 @@ LexPLM.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexPO.o: \
+$(DIR_O)/LexPO.obj: \
 	../lexers/LexPO.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1544,7 +1544,7 @@ LexPO.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexPOV.o: \
+$(DIR_O)/LexPOV.obj: \
 	../lexers/LexPOV.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1556,7 +1556,7 @@ LexPOV.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexPowerPro.o: \
+$(DIR_O)/LexPowerPro.obj: \
 	../lexers/LexPowerPro.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1568,7 +1568,7 @@ LexPowerPro.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexPowerShell.o: \
+$(DIR_O)/LexPowerShell.obj: \
 	../lexers/LexPowerShell.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1580,7 +1580,7 @@ LexPowerShell.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexProgress.o: \
+$(DIR_O)/LexProgress.obj: \
 	../lexers/LexProgress.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1594,7 +1594,7 @@ LexProgress.o: \
 	../lexlib/OptionSet.h \
 	../lexlib/SparseState.h \
 	../lexlib/DefaultLexer.h
-LexProps.o: \
+$(DIR_O)/LexProps.obj: \
 	../lexers/LexProps.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1606,7 +1606,7 @@ LexProps.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexPS.o: \
+$(DIR_O)/LexPS.obj: \
 	../lexers/LexPS.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1618,7 +1618,7 @@ LexPS.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexPython.o: \
+$(DIR_O)/LexPython.obj: \
 	../lexers/LexPython.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1635,7 +1635,7 @@ LexPython.o: \
 	../lexlib/OptionSet.h \
 	../lexlib/SubStyles.h \
 	../lexlib/DefaultLexer.h
-LexR.o: \
+$(DIR_O)/LexR.obj: \
 	../lexers/LexR.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1647,7 +1647,7 @@ LexR.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexRebol.o: \
+$(DIR_O)/LexRebol.obj: \
 	../lexers/LexRebol.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1659,7 +1659,7 @@ LexRebol.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexRegistry.o: \
+$(DIR_O)/LexRegistry.obj: \
 	../lexers/LexRegistry.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1672,7 +1672,7 @@ LexRegistry.o: \
 	../lexlib/LexerModule.h \
 	../lexlib/OptionSet.h \
 	../lexlib/DefaultLexer.h
-LexRuby.o: \
+$(DIR_O)/LexRuby.obj: \
 	../lexers/LexRuby.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1684,7 +1684,7 @@ LexRuby.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexRust.o: \
+$(DIR_O)/LexRust.obj: \
 	../lexers/LexRust.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1699,7 +1699,7 @@ LexRust.o: \
 	../lexlib/LexerModule.h \
 	../lexlib/OptionSet.h \
 	../lexlib/DefaultLexer.h
-LexSAS.o: \
+$(DIR_O)/LexSAS.obj: \
 	../lexers/LexSAS.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1711,7 +1711,7 @@ LexSAS.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexScriptol.o: \
+$(DIR_O)/LexScriptol.obj: \
 	../lexers/LexScriptol.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1723,7 +1723,7 @@ LexScriptol.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexSmalltalk.o: \
+$(DIR_O)/LexSmalltalk.obj: \
 	../lexers/LexSmalltalk.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1735,7 +1735,7 @@ LexSmalltalk.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexSML.o: \
+$(DIR_O)/LexSML.obj: \
 	../lexers/LexSML.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1747,7 +1747,7 @@ LexSML.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexSorcus.o: \
+$(DIR_O)/LexSorcus.obj: \
 	../lexers/LexSorcus.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1759,7 +1759,7 @@ LexSorcus.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexSpecman.o: \
+$(DIR_O)/LexSpecman.obj: \
 	../lexers/LexSpecman.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1771,7 +1771,7 @@ LexSpecman.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexSpice.o: \
+$(DIR_O)/LexSpice.obj: \
 	../lexers/LexSpice.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1783,7 +1783,7 @@ LexSpice.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexSQL.o: \
+$(DIR_O)/LexSQL.obj: \
 	../lexers/LexSQL.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1798,7 +1798,7 @@ LexSQL.o: \
 	../lexlib/OptionSet.h \
 	../lexlib/SparseState.h \
 	../lexlib/DefaultLexer.h
-LexStata.o: \
+$(DIR_O)/LexStata.obj: \
 	../lexers/LexStata.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1810,7 +1810,7 @@ LexStata.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexSTTXT.o: \
+$(DIR_O)/LexSTTXT.obj: \
 	../lexers/LexSTTXT.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1822,7 +1822,7 @@ LexSTTXT.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexTACL.o: \
+$(DIR_O)/LexTACL.obj: \
 	../lexers/LexTACL.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1834,7 +1834,7 @@ LexTACL.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexTADS3.o: \
+$(DIR_O)/LexTADS3.obj: \
 	../lexers/LexTADS3.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1846,7 +1846,7 @@ LexTADS3.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexTAL.o: \
+$(DIR_O)/LexTAL.obj: \
 	../lexers/LexTAL.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1858,7 +1858,7 @@ LexTAL.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexTCL.o: \
+$(DIR_O)/LexTCL.obj: \
 	../lexers/LexTCL.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1870,7 +1870,7 @@ LexTCL.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexTCMD.o: \
+$(DIR_O)/LexTCMD.obj: \
 	../lexers/LexTCMD.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1882,7 +1882,7 @@ LexTCMD.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexTeX.o: \
+$(DIR_O)/LexTeX.obj: \
 	../lexers/LexTeX.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1894,7 +1894,7 @@ LexTeX.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexTxt2tags.o: \
+$(DIR_O)/LexTxt2tags.obj: \
 	../lexers/LexTxt2tags.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1906,7 +1906,7 @@ LexTxt2tags.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexVB.o: \
+$(DIR_O)/LexVB.obj: \
 	../lexers/LexVB.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1918,7 +1918,7 @@ LexVB.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexVerilog.o: \
+$(DIR_O)/LexVerilog.obj: \
 	../lexers/LexVerilog.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1933,7 +1933,7 @@ LexVerilog.o: \
 	../lexlib/OptionSet.h \
 	../lexlib/SubStyles.h \
 	../lexlib/DefaultLexer.h
-LexVHDL.o: \
+$(DIR_O)/LexVHDL.obj: \
 	../lexers/LexVHDL.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1945,7 +1945,7 @@ LexVHDL.o: \
 	../lexlib/StyleContext.h \
 	../lexlib/CharacterSet.h \
 	../lexlib/LexerModule.h
-LexVisualProlog.o: \
+$(DIR_O)/LexVisualProlog.obj: \
 	../lexers/LexVisualProlog.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
@@ -1960,7 +1960,7 @@ LexVisualProlog.o: \
 	../lexlib/LexerModule.h \
 	../lexlib/OptionSet.h \
 	../lexlib/DefaultLexer.h
-LexYAML.o: \
+$(DIR_O)/LexYAML.obj: \
 	../lexers/LexYAML.cxx \
 	../include/ILexer.h \
 	../include/Sci_Position.h \
