@@ -3384,6 +3384,8 @@ LRESULT PASCAL ScintillaWin::CTWndProc(
 						::EndPaint(hWnd, &ps);
 						return 0;
 					}
+					// If above SUCCEEDED, then pCTRenderTarget not nullptr
+					assert(pCTRenderTarget);
 					surfaceWindow->Init(pCTRenderTarget, hWnd);
 					pCTRenderTarget->BeginDraw();
 #endif
