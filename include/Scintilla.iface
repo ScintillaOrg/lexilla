@@ -1239,6 +1239,12 @@ set void FoldDisplayTextSetStyle=2701(int style,)
 # Get the style of fold display text.
 get int FoldDisplayTextGetStyle=2707(,)
 
+# Set the default fold display text.
+fun void SetDefaultFoldDisplayText=2722(, string text)
+
+# Get the default fold display text.
+fun int GetDefaultFoldDisplayText=2723(, stringresult text)
+
 enu FoldAction=SC_FOLDACTION_
 val SC_FOLDACTION_CONTRACT=0
 val SC_FOLDACTION_EXPAND=1

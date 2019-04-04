@@ -1639,6 +1639,11 @@ class TestStyleAttributes(unittest.TestCase):
 		self.ed.FoldDisplayTextSetStyle(self.ed.SC_FOLDDISPLAYTEXT_BOXED)
 		self.assertEquals(self.ed.FoldDisplayTextGetStyle(), self.ed.SC_FOLDDISPLAYTEXT_BOXED)
 
+	def testDefaultFoldDisplayText(self):
+		self.assertEquals(self.ed.GetDefaultFoldDisplayText(), b"")
+		self.ed.SetDefaultFoldDisplayText(0, b"...")
+		self.assertEquals(self.ed.GetDefaultFoldDisplayText(), b"...")
+
 class TestIndices(unittest.TestCase):
 	def setUp(self):
 		self.xite = Xite.xiteFrame
