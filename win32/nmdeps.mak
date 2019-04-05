@@ -491,6 +491,9 @@ $(DIR_O)/Style.obj: \
 $(DIR_O)/UniConversion.obj: \
 	../src/UniConversion.cxx \
 	../src/UniConversion.h
+$(DIR_O)/UniqueString.obj: \
+	../src/UniqueString.cxx \
+	../src/UniqueString.h
 $(DIR_O)/ViewStyle.obj: \
 	../src/ViewStyle.cxx \
 	../include/Platform.h \

@@ -449,6 +449,9 @@ Style.o: \
 UniConversion.o: \
 	../src/UniConversion.cxx \
 	../src/UniConversion.h
+UniqueString.o: \
+	../src/UniqueString.cxx \
+	../src/UniqueString.h
 ViewStyle.o: \
 	../src/ViewStyle.cxx \
 	../include/Platform.h \
