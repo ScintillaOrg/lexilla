@@ -93,6 +93,7 @@ BASEOBJS=\
 	$(DIR_O)\Selection.obj \
 	$(DIR_O)\Style.obj \
 	$(DIR_O)\UniConversion.obj \
+	$(DIR_O)\UniqueString.obj \
 	$(DIR_O)\ViewStyle.obj \
 	$(DIR_O)\XPM.obj \
 	$(DIR_O)\HanjaDic.obj \

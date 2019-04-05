@@ -118,7 +118,7 @@ $(COMPLIB): Accessor.o CharacterSet.o DefaultLexer.o LexerBase.o LexerModule.o L
 	ScintillaBase.o ContractionState.o EditModel.o Editor.o EditView.o ExternalLexer.o MarginView.o \
 	PropSetSimple.o PlatGTK.o \
 	KeyMap.o LineMarker.o PositionCache.o ScintillaGTK.o ScintillaGTKAccessible.o CellBuffer.o CharacterCategory.o ViewStyle.o \
-	RESearch.o RunStyles.o Selection.o Style.o Indicator.o AutoComplete.o UniConversion.o XPM.o \
+	RESearch.o RunStyles.o Selection.o Style.o Indicator.o AutoComplete.o UniConversion.o UniqueString.o XPM.o \
 	$(MARSHALLER) $(LEXOBJS)
 	$(AR) $(ARFLAGS) $@ $^
 	$(RANLIB) $@

@@ -200,6 +200,7 @@
 		280056FC188DDD2C00F200AE /* StringCopy.h in Headers */ = {isa = PBXBuildFile; fileRef = 280056F9188DDD2C00F200AE /* StringCopy.h */; };
 		280056FD188DDD2C00F200AE /* SubStyles.h in Headers */ = {isa = PBXBuildFile; fileRef = 280056FA188DDD2C00F200AE /* SubStyles.h */; };
 		28064A05190F12E100E6E47F /* LexDMIS.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28064A04190F12E100E6E47F /* LexDMIS.cxx */; };
+		281225362256DD2D00AFE50C /* UniqueString.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 281225352256DD2D00AFE50C /* UniqueString.cxx */; };
 		282D4A961F53FE270082E4D3 /* ILoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 282D4A951F53FE270082E4D3 /* ILoader.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		28804B2C1EEE232E00C0D154 /* DBCS.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28804B2B1EEE232E00C0D154 /* DBCS.cxx */; };
 		28A067111A36B42600B4966A /* LexHex.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 28A067101A36B42600B4966A /* LexHex.cxx */; };
@@ -428,6 +429,7 @@
 		280056F9188DDD2C00F200AE /* StringCopy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StringCopy.h; path = ../../lexlib/StringCopy.h; sourceTree = "<group>"; };
 		280056FA188DDD2C00F200AE /* SubStyles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SubStyles.h; path = ../../lexlib/SubStyles.h; sourceTree = "<group>"; };
 		28064A04190F12E100E6E47F /* LexDMIS.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexDMIS.cxx; path = ../../lexers/LexDMIS.cxx; sourceTree = "<group>"; };
+		281225352256DD2D00AFE50C /* UniqueString.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UniqueString.cxx; path = ../../src/UniqueString.cxx; sourceTree = "<group>"; };
 		282D4A951F53FE270082E4D3 /* ILoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ILoader.h; path = ../../include/ILoader.h; sourceTree = "<group>"; };
 		282E41F3B9E2BFEDD6A05BE7 /* LexIndent.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexIndent.cxx; path = ../../lexers/LexIndent.cxx; sourceTree = SOURCE_ROOT; };
 		28804B2B1EEE232E00C0D154 /* DBCS.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DBCS.cxx; path = ../../src/DBCS.cxx; sourceTree = "<group>"; };
@@ -772,6 +774,7 @@
 				114B6F7311FA7598004FB6AB /* Style.cxx */,
 				114B6F9511FA75BE004FB6AB /* StyleContext.cxx */,
 				114B6F7411FA7598004FB6AB /* UniConversion.cxx */,
+				281225352256DD2D00AFE50C /* UniqueString.cxx */,
 				114B6F7511FA7598004FB6AB /* ViewStyle.cxx */,
 				114B6F9611FA75BE004FB6AB /* WordList.cxx */,
 				114B6F7611FA7598004FB6AB /* XPM.cxx */,
@@ -978,6 +981,7 @@
 				2744E5B60FC168C500E85C33 /* ScintillaView.mm in Sources */,
 				28D191A21DEA72C800159938 /* LexEDIFACT.cxx in Sources */,
 				28BDA1221EFB8F7C00EBD3F3 /* DefaultLexer.cxx in Sources */,
+				281225362256DD2D00AFE50C /* UniqueString.cxx in Sources */,
 				114B6F0D11FA7526004FB6AB /* LexAbaqus.cxx in Sources */,
 				114B6F0E11FA7526004FB6AB /* LexAda.cxx in Sources */,
 				28B6470C1B54C0720009DC49 /* LexBatch.cxx in Sources */,

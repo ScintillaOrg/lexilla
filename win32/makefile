@@ -103,6 +103,7 @@ BASEOBJS = \
 	Selection.o \
 	Style.o \
 	UniConversion.o \
+	UniqueString.o \
 	ViewStyle.o \
 	XPM.o \
 	HanjaDic.o
