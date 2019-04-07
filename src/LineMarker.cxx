@@ -430,6 +430,16 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 			Point::FromInts(ircWhole.left, centreY + halfHeight),
 		};
 		surface->Polygon(pts, std::size(pts), fore, back);
+	} else if (markType == SC_MARK_VERTICALBOOKMARK) {
+		const int halfWidth = minDim / 3;
+		Point pts[] = {
+			Point::FromInts(centreX - halfWidth, centreY - dimOn2),
+			Point::FromInts(centreX + halfWidth, centreY - dimOn2),
+			Point::FromInts(centreX + halfWidth, centreY + dimOn2),
+			Point::FromInts(centreX, centreY + dimOn2 - halfWidth),
+			Point::FromInts(centreX - halfWidth, centreY + dimOn2),
+		};
+		surface->Polygon(pts, std::size(pts), fore, back);
 	} else { // SC_MARK_FULLRECT
 		surface->FillRectangle(rcWhole, back);
 	}
