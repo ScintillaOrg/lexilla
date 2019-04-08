@@ -6,9 +6,9 @@
 
 import sys
 
-sys.path.append("../")
+sys.path.append("..")
 
-import scripts.Dependencies as Dependencies
+from scripts import Dependencies
 
 topComment = "# Created by DepGen.py. To recreate, run 'python DepGen.py'.\n"
 

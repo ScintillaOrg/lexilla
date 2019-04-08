@@ -21,7 +21,10 @@
 
 import codecs, glob, os, sys
 
-from . import FileGenerator
+if __name__ == "__main__":
+	import FileGenerator
+else:
+	from . import FileGenerator
 
 continuationLineEnd = " \\"
 
