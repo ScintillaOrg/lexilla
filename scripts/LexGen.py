@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # LexGen.py - implemented 2002 by Neil Hodgson neilh@scintilla.org
 # Released to the public domain.
 
 # Regenerate the Scintilla source files that list all the lexers.
 # Should be run whenever a new lexer is added or removed.
-# Requires Python 2.5 or later
+# Requires Python 3.6 or later
 # Files are regenerated in place with templates stored in comments.
 # The format of generation comments is documented in FileGenerator.py.
 
