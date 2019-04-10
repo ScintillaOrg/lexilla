@@ -328,7 +328,6 @@ class ScintillaWin :
 	static int MouseModifiers(uptr_t wParam) noexcept;
 
 	Sci::Position TargetAsUTF8(char *text) const;
-	void AddCharUTF16(wchar_t const *wcs, unsigned int wclen);
 	Sci::Position EncodedFromUTF8(const char *utf8, char *encoded) const;
 	sptr_t WndPaint();
 
@@ -341,7 +340,7 @@ class ScintillaWin :
 	void SelectionToHangul();
 	void EscapeHanja();
 	void ToggleHanja();
-	void AddWString(std::wstring wcs);
+	void AddWString(std::wstring_view wsv);
 
 	UINT CodePageOfDocument() const;
 	bool ValidCodePage(int codePage) const override;
@@ -832,27 +831,6 @@ Sci::Position ScintillaWin::EncodedFromUTF8(const char *utf8, char *encoded) con
 	}
 }
 
-// Add one character from a UTF-16 string, by converting to either UTF-8 or
-// the current codepage. Code is similar to HandleCompositionWindowed().
-void ScintillaWin::AddCharUTF16(wchar_t const *wcs, unsigned int wclen) {
-	if (IsUnicodeMode()) {
-		const std::wstring_view wsv(wcs, wclen);
-		size_t len = UTF8Length(wsv);
-		char utfval[maxLenInputIME * 3];
-		UTF8FromUTF16(wsv, utfval, len);
-		utfval[len] = '\0';
-		AddCharUTF(utfval, static_cast<unsigned int>(len));
-	} else {
-		const UINT cpDest = CodePageOfDocument();
-		char inBufferCP[maxLenInputIME * 2];
-		const int size = MultiByteFromWideChar(cpDest,
-			std::wstring_view(wcs, wclen), inBufferCP, sizeof(inBufferCP) - 1);
-		for (int i=0; i<size; i++) {
-			AddChar(inBufferCP[i]);
-		}
-	}
-}
-
 sptr_t ScintillaWin::WndPaint() {
 	//ElapsedPeriod ep;
 
@@ -1068,15 +1046,14 @@ std::vector<int> MapImeIndicators(std::vector<BYTE> inputStyle) {
 
 }
 
-void ScintillaWin::AddWString(std::wstring wcs) {
-	if (wcs.empty())
+void ScintillaWin::AddWString(std::wstring_view wsv) {
+	if (wsv.empty())
 		return;
 
 	const int codePage = CodePageOfDocument();
-	for (size_t i = 0; i < wcs.size(); ) {
-		const size_t ucWidth = UTF16CharLength(wcs[i]);
-		const std::wstring uniChar(wcs, i, ucWidth);
-		std::string docChar = StringEncode(uniChar, codePage);
+	for (size_t i = 0; i < wsv.size(); ) {
+		const size_t ucWidth = UTF16CharLength(wsv[i]);
+		const std::string docChar = StringEncode(wsv.substr(i, ucWidth), codePage);
 
 		AddCharUTF(docChar.c_str(), static_cast<unsigned int>(docChar.size()));
 		i += ucWidth;
@@ -1122,10 +1099,10 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 		const bool tmpRecordingMacro = recordingMacro;
 		recordingMacro = false;
 		const int codePage = CodePageOfDocument();
-		for (size_t i = 0; i < wcs.size(); ) {
-			const size_t ucWidth = UTF16CharLength(wcs[i]);
-			const std::wstring uniChar(wcs, i, ucWidth);
-			std::string docChar = StringEncode(uniChar, codePage);
+		const std::wstring_view wsv = wcs;
+		for (size_t i = 0; i < wsv.size(); ) {
+			const size_t ucWidth = UTF16CharLength(wsv[i]);
+			const std::string docChar = StringEncode(wsv.substr(i, ucWidth), codePage);
 
 			AddCharUTF(docChar.c_str(), static_cast<unsigned int>(docChar.size()));
 
@@ -1505,7 +1482,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 					lastHighSurrogateChar = 0;
 					wclen = 2;
 				}
-				AddCharUTF16(wcs, wclen);
+				AddWString(std::wstring_view(wcs, wclen));
 			}
 			return 0;
 
@@ -1517,7 +1494,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 			} else {
 				wchar_t wcs[3] = {0};
 				const unsigned int wclen = UTF16FromUTF32Character(static_cast<unsigned int>(wParam), wcs);
-				AddCharUTF16(wcs, wclen);
+				AddWString(std::wstring_view(wcs, wclen));
 				return FALSE;
 			}
 
