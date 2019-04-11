@@ -2392,8 +2392,7 @@ void ScintillaGTK::PreeditChangedInlineThis() {
 			return;
 		}
 
-		if (preeditStr.uniStrLen == 0 || preeditStr.uniStrLen > maxLenInputIME) {
-			//fprintf(stderr, "Do not allow over 200 chars: %i\n", preeditStr.uniStrLen);
+		if (preeditStr.uniStrLen == 0) {
 			ShowCaretAtCurrentPosition();
 			return;
 		}

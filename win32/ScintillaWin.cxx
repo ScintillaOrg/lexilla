@@ -1085,7 +1085,7 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 
 	if (lParam & GCS_COMPSTR) {
 		const std::wstring wcs = imc.GetCompositionString(GCS_COMPSTR);
-		if ((wcs.size() == 0) || (wcs.size() >= maxLenInputIME)) {
+		if (wcs.empty()) {
 			ShowCaretAtCurrentPosition();
 			return 0;
 		}

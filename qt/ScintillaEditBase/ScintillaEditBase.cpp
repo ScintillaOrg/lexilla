@@ -23,7 +23,6 @@
 
 #define INDIC_INPUTMETHOD 24
 
-#define MAXLENINPUTIME 200
 #define SC_INDICATOR_INPUT INDIC_IME
 #define SC_INDICATOR_TARGET INDIC_IME+1
 #define SC_INDICATOR_CONVERTED INDIC_IME+2
@@ -557,7 +556,7 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 	} else if (!event->preeditString().isEmpty()) {
 		const QString preeditStr = event->preeditString();
 		const unsigned int preeditStrLen = preeditStr.length();
-		if ((preeditStrLen == 0) || (preeditStrLen > MAXLENINPUTIME)) {
+		if (preeditStrLen == 0) {
 			sqt->ShowCaretAtCurrentPosition();
 			return;
 		}
