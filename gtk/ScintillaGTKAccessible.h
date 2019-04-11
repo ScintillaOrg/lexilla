@@ -32,6 +32,9 @@ private:
 	}
 
 	Sci::Position ByteOffsetFromCharacterOffset(Sci::Position startByte, int characterOffset) {
+		if (!(sci->pdoc->LineCharacterIndex() & SC_LINECHARACTERINDEX_UTF32)) {
+			return startByte + characterOffset;
+		}
 		if (characterOffset > 0) {
 			// Try and reduce the range by reverse-looking into the character offset cache
 			Sci::Line lineStart = sci->pdoc->LineFromPosition(startByte);
@@ -59,6 +62,9 @@ private:
 	}
 
 	Sci::Position CharacterOffsetFromByteOffset(Sci::Position byteOffset) {
+		if (!(sci->pdoc->LineCharacterIndex() & SC_LINECHARACTERINDEX_UTF32)) {
+			return byteOffset;
+		}
 		const Sci::Line line = sci->pdoc->LineFromPosition(byteOffset);
 		const Sci::Position lineStart = sci->pdoc->LineStart(line);
 		return sci->pdoc->IndexLineStart(line, SC_LINECHARACTERINDEX_UTF32) + sci->pdoc->CountCharacters(lineStart, byteOffset);
