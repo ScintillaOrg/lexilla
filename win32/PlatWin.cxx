@@ -1194,7 +1194,7 @@ void SurfaceD2D::SetFont(Font &font_) {
 	yDescent = pfm->yDescent;
 	yInternalLeading = pfm->yInternalLeading;
 	codePageText = codePage;
-	if (pfm->characterSet) {
+	if (!unicodeMode && pfm->characterSet) {
 		codePageText = Scintilla::CodePageFromCharSet(pfm->characterSet, codePage);
 	}
 	if (pRenderTarget) {
@@ -2021,7 +2021,7 @@ void SurfaceD2D::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *p
 		while (i<text.length()) {
 			positions[i++] = lastPos;
 		}
-	} else if (codePageText == 0) {
+	} else if (!IsDBCSCodePage(codePageText)) {
 
 		// One char per position
 		PLATFORM_ASSERT(text.length() == static_cast<size_t>(tbuf.tlen));
