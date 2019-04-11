@@ -133,10 +133,12 @@ private:
 	bool OwnPrimarySelection();
 	void ClaimSelection() override;
 	void GetGtkSelectionText(GtkSelectionData *selectionData, SelectionText &selText);
+	void InsertSelection(GtkSelectionData *selectionData);
 public:	// Public for SelectionReceiver
 	GObject *MainObject() const noexcept;
-	void ReceivedSelection(GtkSelectionData *selection_data);
+	void ReceivedClipboard(GtkSelectionData *selection_data) noexcept;
 private:
+	void ReceivedSelection(GtkSelectionData *selection_data);
 	void ReceivedDrop(GtkSelectionData *selection_data);
 	static void GetSelection(GtkSelectionData *selection_data, guint info, SelectionText *text);
 	void StoreOnClipboard(SelectionText *clipText);

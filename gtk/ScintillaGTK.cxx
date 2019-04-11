@@ -1282,7 +1282,7 @@ public:
 	static void ClipboardReceived(GtkClipboard *, GtkSelectionData *selection_data, gpointer data) {
 		SelectionReceiver *self = static_cast<SelectionReceiver *>(data);
 		if (self->sci) {
-			self->sci->ReceivedSelection(selection_data);
+			self->sci->ReceivedClipboard(selection_data);
 		}
 		delete self;
 	}
@@ -1433,8 +1433,35 @@ void ScintillaGTK::GetGtkSelectionText(GtkSelectionData *selectionData, Selectio
 	}
 }
 
+void ScintillaGTK::InsertSelection(GtkSelectionData *selectionData) {
+	const gint length = gtk_selection_data_get_length(selectionData);
+	if (length >= 0) {
+		GdkAtom selection = gtk_selection_data_get_selection(selectionData);
+		SelectionText selText;
+		GetGtkSelectionText(selectionData, selText);
+
+		UndoGroup ug(pdoc);
+		if (selection == GDK_SELECTION_CLIPBOARD) {
+			ClearSelection(multiPasteMode == SC_MULTIPASTE_EACH);
+		}
+
+		InsertPasteShape(selText.Data(), selText.Length(),
+				 selText.rectangular ? pasteRectangular : pasteStream);
+		EnsureCaretVisible();
+	}
+	Redraw();
+}
+
 GObject *ScintillaGTK::MainObject() const noexcept {
 	return G_OBJECT(PWidget(wMain));
+}
+
+void ScintillaGTK::ReceivedClipboard(GtkSelectionData *selection_data) noexcept {
+	try {
+		InsertSelection(selection_data);
+	} catch (...) {
+		errorStatus = SC_STATUS_FAILURE;
+	}
 }
 
 void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
@@ -1447,22 +1474,11 @@ void ScintillaGTK::ReceivedSelection(GtkSelectionData *selection_data) {
 						      SelectionOfGSD(selection_data), atomSought, GDK_CURRENT_TIME);
 			} else if ((LengthOfGSD(selection_data) > 0) &&
 					((TypeOfGSD(selection_data) == GDK_TARGET_STRING) || (TypeOfGSD(selection_data) == atomUTF8))) {
-				SelectionText selText;
-				GetGtkSelectionText(selection_data, selText);
-
-				UndoGroup ug(pdoc);
-				if (SelectionOfGSD(selection_data) != GDK_SELECTION_PRIMARY) {
-					ClearSelection(multiPasteMode == SC_MULTIPASTE_EACH);
-				}
-
-				InsertPasteShape(selText.Data(), selText.Length(),
-						 selText.rectangular ? pasteRectangular : pasteStream);
-				EnsureCaretVisible();
+				InsertSelection(selection_data);
 			}
 		}
 //	else fprintf(stderr, "Target non string %d %d\n", (int)(selection_data->type),
 //		(int)(atomUTF8));
-		Redraw();
 	} catch (...) {
 		errorStatus = SC_STATUS_FAILURE;
 	}
