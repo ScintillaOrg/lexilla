@@ -1980,7 +1980,7 @@ void Editor::AddCharUTF(const char *s, unsigned int len, bool treatAsDBCS) {
 	if (treatAsDBCS || pdoc->dbcsCodePage != SC_CP_UTF8) {
 		if (len > 1) {
 			// DBCS code page or DBCS font character set.
-			ch |= (ch << 8) | static_cast<unsigned char>(s[1]);
+			ch = (ch << 8) | static_cast<unsigned char>(s[1]);
 		}
 	} else {
 		if ((ch < 0xC0) || (1 == len)) {
