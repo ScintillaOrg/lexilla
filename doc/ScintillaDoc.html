@@ -7337,7 +7337,10 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
      This is sent when the user types an ordinary text character (as opposed to a command
     character) that is entered into the text. The container can use this to decide to display a <a
     class="jump" href="#CallTips">call tip</a> or an <a class="jump" href="#Autocompletion">auto
-    completion list</a>. The character is in <code>SCNotification.ch</code>.
+    completion list</a>. The character is in <code>SCNotification::ch</code>.
+        For single byte character sets, this is the byte value of the character;
+        for UTF-8, it is the Unicode code point;
+        for DBCS, it is (first byte * 256 + second byte) for 2 byte characters and the byte value for 1 byte characters.
         This notification is sent before the character has been styled so processing that depends on
         styling should instead be performed in the SCN_UPDATEUI notification.</p>
 
@@ -7356,7 +7359,7 @@ href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE</a>(lineNumber);
 
     <p><b id="SCN_KEY">SCN_KEY</b><br />
      Reports all keys pressed but not consumed by Scintilla. Used on GTK+ because of
-     some problems with keyboard focus and is not sent by the Windows version. <code>SCNotification.ch</code> holds the key code and
+     some problems with keyboard focus and is not sent by the Windows version. <code>SCNotification::ch</code> holds the key code and
     <code>SCNotification.modifiers</code> holds the modifiers. This notification is sent if the
     modifiers include <code>SCMOD_ALT</code> or <code>SCMOD_CTRL</code> and the key code is less
     than 256.</p>
