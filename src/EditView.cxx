@@ -387,8 +387,8 @@ void EditView::LayoutLine(const EditModel &model, Sci::Line line, Surface *surfa
 					allSame = allSame &&
 					(ll->chars[numCharsInLine] == MakeUpperCase(chDoc));
 				else	{ // Style::caseCamel
-					if ((model.pdoc->IsASCIIWordByte(ll->chars[numCharsInLine])) &&
-					  ((numCharsInLine == 0) || (!model.pdoc->IsASCIIWordByte(ll->chars[numCharsInLine - 1])))) {
+					if ((IsUpperOrLowerCase(ll->chars[numCharsInLine])) &&
+					  ((numCharsInLine == 0) || (!IsUpperOrLowerCase(ll->chars[numCharsInLine - 1])))) {
 						allSame = allSame && (ll->chars[numCharsInLine] == MakeUpperCase(chDoc));
 					} else {
 						allSame = allSame && (ll->chars[numCharsInLine] == MakeLowerCase(chDoc));
@@ -434,8 +434,8 @@ void EditView::LayoutLine(const EditModel &model, Sci::Line line, Surface *surfa
 				else if (vstyle.styles[ll->styles[charInLine]].caseForce == Style::caseLower)
 					ll->chars[charInLine] = MakeLowerCase(chDoc);
 				else if (vstyle.styles[ll->styles[charInLine]].caseForce == Style::caseCamel) {
-					if ((model.pdoc->IsASCIIWordByte(ll->chars[charInLine])) &&
-					  ((charInLine == 0) || (!model.pdoc->IsASCIIWordByte(ll->chars[charInLine - 1])))) {
+					if ((IsUpperOrLowerCase(ll->chars[charInLine])) &&
+					  ((charInLine == 0) || (!IsUpperOrLowerCase(ll->chars[charInLine - 1])))) {
 						ll->chars[charInLine] = MakeUpperCase(chDoc);
 					} else {
 						ll->chars[charInLine] = MakeLowerCase(chDoc);
