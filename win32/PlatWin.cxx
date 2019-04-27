@@ -423,7 +423,6 @@ class SurfaceGDI : public Surface {
 	HPEN penOld{};
 	HBRUSH brush{};
 	HBRUSH brushOld{};
-	HFONT font{};
 	HFONT fontOld{};
 	HBITMAP bitmap{};
 	HBITMAP bitmapOld{};
@@ -517,7 +516,6 @@ void SurfaceGDI::Clear() noexcept {
 		::SelectObject(hdc, fontOld);
 		fontOld = 0;
 	}
-	font = 0;
 	if (bitmapOld) {
 		::SelectObject(hdc, bitmapOld);
 		::DeleteObject(bitmap);
@@ -587,16 +585,14 @@ void SurfaceGDI::BrushColor(ColourDesired back) {
 	brush = ::CreateSolidBrush(colourNearest.AsInteger());
 	brushOld = SelectBrush(hdc, brush);
 }
+
 void SurfaceGDI::SetFont(Font &font_) {
-	if (font_.GetID() != font) {
-		const FormatAndMetrics *pfm = FamFromFontID(font_.GetID());
-		PLATFORM_ASSERT(pfm->technology == SCWIN_TECH_GDI);
-		if (fontOld) {
-			SelectFont(hdc, pfm->hfont);
-		} else {
-			fontOld = SelectFont(hdc, pfm->hfont);
-		}
-		font = pfm->hfont;
+	const FormatAndMetrics *pfm = FamFromFontID(font_.GetID());
+	PLATFORM_ASSERT(pfm->technology == SCWIN_TECH_GDI);
+	if (fontOld) {
+		SelectFont(hdc, pfm->hfont);
+	} else {
+		fontOld = SelectFont(hdc, pfm->hfont);
 	}
 }
 
@@ -960,7 +956,6 @@ void SurfaceGDI::SetClip(PRectangle rc) {
 void SurfaceGDI::FlushCachedState() {
 	pen = 0;
 	brush = 0;
-	font = 0;
 }
 
 void SurfaceGDI::SetUnicodeMode(bool unicodeMode_) {
