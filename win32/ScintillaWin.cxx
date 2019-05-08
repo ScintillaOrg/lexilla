@@ -240,18 +240,18 @@ public:
 	}
 
 	unsigned int GetImeCaretPos() const noexcept {
-		return ImmGetCompositionStringW(hIMC, GCS_CURSORPOS, NULL, 0);
+		return ImmGetCompositionStringW(hIMC, GCS_CURSORPOS, nullptr, 0);
 	}
 
 	std::vector<BYTE> GetImeAttributes() {
-		const int attrLen = ::ImmGetCompositionStringW(hIMC, GCS_COMPATTR, NULL, 0);
+		const int attrLen = ::ImmGetCompositionStringW(hIMC, GCS_COMPATTR, nullptr, 0);
 		std::vector<BYTE> attr(attrLen, 0);
 		::ImmGetCompositionStringW(hIMC, GCS_COMPATTR, &attr[0], static_cast<DWORD>(attr.size()));
 		return attr;
 	}
 
 	std::wstring GetCompositionString(DWORD dwIndex) {
-		const LONG byteLen = ::ImmGetCompositionStringW(hIMC, dwIndex, NULL, 0);
+		const LONG byteLen = ::ImmGetCompositionStringW(hIMC, dwIndex, nullptr, 0);
 		std::wstring wcs(byteLen / 2, 0);
 		::ImmGetCompositionStringW(hIMC, dwIndex, &wcs[0], byteLen);
 		return wcs;
@@ -1360,7 +1360,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		case SC_WIN_IDLE:
 			// wParam=dwTickCountInitial, or 0 to initialize.  lParam=bSkipUserInputTest
 			if (idler.state) {
-				if (lParam || (WAIT_TIMEOUT == MsgWaitForMultipleObjects(0, 0, 0, 0, QS_INPUT|QS_HOTKEY))) {
+				if (lParam || (WAIT_TIMEOUT == MsgWaitForMultipleObjects(0, nullptr, 0, 0, QS_INPUT|QS_HOTKEY))) {
 					if (Idle()) {
 						// User input was given priority above, but all events do get a turn.  Other
 						// messages, notifications, etc. will get interleaved with the idle messages.
@@ -1806,9 +1806,9 @@ bool ScintillaWin::FineTickerRunning(TickReason reason) {
 void ScintillaWin::FineTickerStart(TickReason reason, int millis, int tolerance) {
 	FineTickerCancel(reason);
 	if (SetCoalescableTimerFn && tolerance) {
-		timers[reason] = SetCoalescableTimerFn(MainHWND(), fineTimerStart + reason, millis, NULL, tolerance);
+		timers[reason] = SetCoalescableTimerFn(MainHWND(), fineTimerStart + reason, millis, nullptr, tolerance);
 	} else {
-		timers[reason] = ::SetTimer(MainHWND(), fineTimerStart + reason, millis, NULL);
+		timers[reason] = ::SetTimer(MainHWND(), fineTimerStart + reason, millis, nullptr);
 	}
 }
 
@@ -1826,7 +1826,7 @@ bool ScintillaWin::SetIdle(bool on) {
 	// and are only posted when the message queue is empty, i.e. during idle time.
 	if (idler.state != on) {
 		if (on) {
-			idler.idlerID = ::SetTimer(MainHWND(), idleTimerID, 10, NULL)
+			idler.idlerID = ::SetTimer(MainHWND(), idleTimerID, 10, nullptr)
 				? reinterpret_cast<IdlerID>(idleTimerID) : 0;
 		} else {
 			::KillTimer(MainHWND(), reinterpret_cast<uptr_t>(idler.idlerID));
@@ -2386,7 +2386,7 @@ STDMETHODIMP FormatEnumerator_Next(FormatEnumerator *fe, ULONG celt, FORMATETC *
 	unsigned int putPos = 0;
 	while ((fe->pos < fe->formats.size()) && (putPos < celt)) {
 		rgelt->cfFormat = fe->formats[fe->pos];
-		rgelt->ptd = 0;
+		rgelt->ptd = nullptr;
 		rgelt->dwAspect = DVASPECT_CONTENT;
 		rgelt->lindex = -1;
 		rgelt->tymed = TYMED_HGLOBAL;
@@ -2494,7 +2494,7 @@ STDMETHODIMP DataObject_GetDataHere(DataObject *, FORMATETC *, STGMEDIUM *) {
 
 STDMETHODIMP DataObject_QueryGetData(DataObject *pd, FORMATETC *pFE) {
 	if (pd->sci->DragIsRectangularOK(pFE->cfFormat) &&
-	    pFE->ptd == 0 &&
+	    pFE->ptd == nullptr &&
 	    (pFE->dwAspect & DVASPECT_CONTENT) != 0 &&
 	    pFE->lindex == -1 &&
 	    (pFE->tymed & TYMED_HGLOBAL) != 0
@@ -2505,7 +2505,7 @@ STDMETHODIMP DataObject_QueryGetData(DataObject *pd, FORMATETC *pFE) {
 	const bool formatOK = (pFE->cfFormat == CF_TEXT) ||
 		((pFE->cfFormat == CF_UNICODETEXT) && pd->sci->IsUnicodeMode());
 	if (!formatOK ||
-	    pFE->ptd != 0 ||
+	    pFE->ptd != nullptr ||
 	    (pFE->dwAspect & DVASPECT_CONTENT) == 0 ||
 	    pFE->lindex != -1 ||
 	    (pFE->tymed & TYMED_HGLOBAL) == 0
@@ -2524,7 +2524,7 @@ STDMETHODIMP DataObject_GetCanonicalFormatEtc(DataObject *pd, FORMATETC *, FORMA
 		pFEOut->cfFormat = CF_UNICODETEXT;
 	else
 		pFEOut->cfFormat = CF_TEXT;
-	pFEOut->ptd = 0;
+	pFEOut->ptd = nullptr;
 	pFEOut->dwAspect = DVASPECT_CONTENT;
 	pFEOut->lindex = -1;
 	pFEOut->tymed = TYMED_HGLOBAL;
@@ -2540,7 +2540,7 @@ STDMETHODIMP DataObject_EnumFormatEtc(DataObject *pd, DWORD dwDirection, IEnumFO
 	try {
 		//Platform::DebugPrintf("DOB EnumFormatEtc %d\n", dwDirection);
 		if (dwDirection != DATADIR_GET) {
-			*ppEnum = 0;
+			*ppEnum = nullptr;
 			return E_FAIL;
 		}
 		FormatEnumerator *pfe;
@@ -2756,7 +2756,7 @@ LRESULT ScintillaWin::ImeOnReconvert(LPARAM lParam) {
 	if (!imc.hIMC)
 		return 0;
 
-	if (!::ImmSetCompositionStringW(imc.hIMC, SCS_QUERYRECONVERTSTRING, rc, rcSize, NULL, 0))
+	if (!::ImmSetCompositionStringW(imc.hIMC, SCS_QUERYRECONVERTSTRING, rc, rcSize, nullptr, 0))
 		return 0;
 
 	// No selection asks IME to fill target fields with its own value.
@@ -3100,7 +3100,7 @@ STDMETHODIMP ScintillaWin::Drop(LPDATAOBJECT pIDataSource, DWORD grfKeyState,
 
 		SetDragPosition(SelectionPosition(Sci::invalidPosition));
 
-		STGMEDIUM medium = {0, {0}, 0};
+		STGMEDIUM medium {};
 
 		std::vector<char> data;	// Includes terminating NUL
 
@@ -3174,7 +3174,7 @@ STDMETHODIMP ScintillaWin::GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM) {
 	const bool formatOK = (pFEIn->cfFormat == CF_TEXT) ||
 		((pFEIn->cfFormat == CF_UNICODETEXT) && IsUnicodeMode());
 	if (!formatOK ||
-	    pFEIn->ptd != 0 ||
+	    pFEIn->ptd != nullptr ||
 	    (pFEIn->dwAspect & DVASPECT_CONTENT) == 0 ||
 	    pFEIn->lindex != -1 ||
 	    (pFEIn->tymed & TYMED_HGLOBAL) == 0
@@ -3201,7 +3201,7 @@ STDMETHODIMP ScintillaWin::GetData(FORMATETC *pFEIn, STGMEDIUM *pSTM) {
 		}
 	}
 	pSTM->hGlobal = text ? text.Unlock() : 0;
-	pSTM->pUnkForRelease = 0;
+	pSTM->pUnkForRelease = nullptr;
 	return S_OK;
 }
 
@@ -3211,37 +3211,26 @@ bool ScintillaWin::Register(HINSTANCE hInstance_) noexcept {
 
 	// Register the Scintilla class
 	// Register Scintilla as a wide character window
-	WNDCLASSEXW wndclass;
+	WNDCLASSEXW wndclass {};
 	wndclass.cbSize = sizeof(wndclass);
 	wndclass.style = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW;
 	wndclass.lpfnWndProc = ScintillaWin::SWndProc;
-	wndclass.cbClsExtra = 0;
 	wndclass.cbWndExtra = sizeof(ScintillaWin *);
 	wndclass.hInstance = hInstance;
-	wndclass.hIcon = NULL;
-	wndclass.hCursor = NULL;
-	wndclass.hbrBackground = NULL;
-	wndclass.lpszMenuName = NULL;
 	wndclass.lpszClassName = L"Scintilla";
-	wndclass.hIconSm = 0;
 	scintillaClassAtom = ::RegisterClassExW(&wndclass);
 	bool result = 0 != scintillaClassAtom;
 
 	if (result) {
 		// Register the CallTip class
-		WNDCLASSEX wndclassc;
+		WNDCLASSEX wndclassc {};
 		wndclassc.cbSize = sizeof(wndclassc);
 		wndclassc.style = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW;
-		wndclassc.cbClsExtra = 0;
 		wndclassc.cbWndExtra = sizeof(ScintillaWin *);
 		wndclassc.hInstance = hInstance;
-		wndclassc.hIcon = NULL;
-		wndclassc.hbrBackground = NULL;
-		wndclassc.lpszMenuName = NULL;
 		wndclassc.lpfnWndProc = ScintillaWin::CTWndProc;
 		wndclassc.hCursor = ::LoadCursor(NULL, IDC_ARROW);
 		wndclassc.lpszClassName = callClassName;
-		wndclassc.hIconSm = 0;
 
 		callClassAtom = ::RegisterClassEx(&wndclassc);
 		result = 0 != callClassAtom;
