@@ -1116,7 +1116,7 @@ void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION yba
 	CGColorRef color = CGColorCreateGenericRGB(colour.GetRed()/255.0, colour.GetGreen()/255.0, colour.GetBlue()/255.0, 1.0);
 
 	QuartzTextStyle *style = TextStyleFromFont(font_);
-	style->setCTStyleColor(color);
+	style->setCTStyleColour(color);
 
 	CGColorRelease(color);
 
