@@ -570,6 +570,11 @@
 	<li>
 	Fix bug where changing identifier sets in lexers preserved previous identifiers.
 	</li>
+	<li>
+	Fixed bug where changing to Unicode would rediscover line end positions even if still
+	sticking to ASCII (not Unicode NEL, LS, PS) line ends.
+	Only noticeable on huge files with over 100,000 lines.
+	</li>
  	<li>
 	Changed behaviour of SCI_STYLESETCASE(*,SC_CASE_CAMEL) so that it only treats 'a-zA-Z'
 	as word characters because this covers the feature's intended use (viewing case-insensitive ASCII-only
