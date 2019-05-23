@@ -5887,15 +5887,14 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 				pdoc->LineStart(static_cast<Sci::Line>(wParam));
 			const Sci::Position lineEnd =
 				pdoc->LineStart(static_cast<Sci::Line>(wParam + 1));
+			// not NUL terminated
+			const Sci::Position len = lineEnd - lineStart;
 			if (lParam == 0) {
-				return lineEnd - lineStart;
+				return len;
 			}
 			char *ptr = CharPtrFromSPtr(lParam);
-			Sci::Position iPlace = 0;
-			for (Sci::Position iChar = lineStart; iChar < lineEnd; iChar++) {
-				ptr[iPlace++] = pdoc->CharAt(iChar);
-			}
-			return iPlace;
+			pdoc->GetCharRange(ptr, lineStart, len);
+			return len;
 		}
 
 	case SCI_GETLINECOUNT:
