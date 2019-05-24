@@ -6360,8 +6360,8 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			if (lParam == 0)
 				return 0;
 			Sci_TextRange *tr = static_cast<Sci_TextRange *>(PtrFromSPtr(lParam));
-			int iPlace = 0;
-			for (long iChar = tr->chrg.cpMin; iChar < tr->chrg.cpMax; iChar++) {
+			Sci::Position iPlace = 0;
+			for (Sci::Position iChar = tr->chrg.cpMin; iChar < tr->chrg.cpMax; iChar++) {
 				tr->lpstrText[iPlace++] = pdoc->CharAt(iChar);
 				tr->lpstrText[iPlace++] = pdoc->StyleAt(iChar);
 			}
