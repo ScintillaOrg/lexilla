@@ -5928,10 +5928,10 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 				return selectedText.LengthWithTerminator();
 			} else {
 				char *ptr = CharPtrFromSPtr(lParam);
-				size_t iChar = 0;
-				if (selectedText.Length()) {
-					for (; iChar < selectedText.LengthWithTerminator(); iChar++)
-						ptr[iChar] = selectedText.Data()[iChar];
+				size_t iChar = selectedText.Length();
+				if (iChar) {
+					memcpy(ptr, selectedText.Data(), iChar);
+					ptr[iChar++] = '\0';
 				} else {
 					ptr[0] = '\0';
 				}
