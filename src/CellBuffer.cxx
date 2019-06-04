@@ -140,14 +140,14 @@ class LineVector : public ILineVector {
 public:
 	LineVector() : starts(256), perLine(nullptr) {
 		Init();
- 	}
+	}
 	// Deleted so LineVector objects can not be copied.
 	LineVector(const LineVector &) = delete;
 	LineVector(LineVector &&) = delete;
 	LineVector &operator=(const LineVector &) = delete;
 	LineVector &operator=(LineVector &&) = delete;
 	~LineVector() override {
- 	}
+	}
 	void Init() override {
 		starts.DeleteAll();
 		if (perLine) {
