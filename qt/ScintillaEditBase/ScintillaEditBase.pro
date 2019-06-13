@@ -12,7 +12,7 @@ TEMPLATE = lib
 CONFIG += lib_bundle
 CONFIG += c++1z
 
-VERSION = 4.1.6
+VERSION = 4.1.7
 
 SOURCES += \
     PlatQt.cpp \
