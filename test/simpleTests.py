@@ -19,6 +19,13 @@ class TestSimple(unittest.TestCase):
 		self.ed.ClearAll()
 		self.ed.EmptyUndoBuffer()
 
+	def testStatus(self):
+		self.assertEquals(self.ed.GetStatus(), 0)
+		self.ed.SetStatus(1)
+		self.assertEquals(self.ed.GetStatus(), 1)
+		self.ed.SetStatus(0)
+		self.assertEquals(self.ed.GetStatus(), 0)
+
 	def testLength(self):
 		self.assertEquals(self.ed.Length, 0)
 
