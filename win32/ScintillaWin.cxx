@@ -121,7 +121,7 @@
 // Two idle messages SC_WIN_IDLE and SC_WORK_IDLE.
 
 // SC_WIN_IDLE is low priority so should occur after the next WM_PAINT
-// It is for lengthy actions like wrapping and background styling 
+// It is for lengthy actions like wrapping and background styling
 constexpr UINT SC_WIN_IDLE = 5001;
 // SC_WORK_IDLE is high priority and should occur before the next WM_PAINT
 // It is for shorter actions like restyling the text just inserted
