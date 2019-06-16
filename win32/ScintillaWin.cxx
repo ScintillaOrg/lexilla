@@ -924,7 +924,7 @@ void ScintillaWin::MoveImeCarets(Sci::Position offset) {
 void ScintillaWin::DrawImeIndicator(int indicator, int len) {
 	// Emulate the visual style of IME characters with indicators.
 	// Draw an indicator on the character before caret by the character bytes of len
-	// so it should be called after addCharUTF().
+	// so it should be called after InsertCharacter().
 	// It does not affect caret positions.
 	if (indicator < 8 || indicator > INDIC_MAX) {
 		return;
@@ -1055,7 +1055,7 @@ void ScintillaWin::AddWString(std::wstring_view wsv) {
 		const size_t ucWidth = UTF16CharLength(wsv[i]);
 		const std::string docChar = StringEncode(wsv.substr(i, ucWidth), codePage);
 
-		AddCharUTF(docChar.c_str(), static_cast<unsigned int>(docChar.size()));
+		InsertCharacter(docChar);
 		i += ucWidth;
 	}
 }
@@ -1104,7 +1104,7 @@ sptr_t ScintillaWin::HandleCompositionInline(uptr_t, sptr_t lParam) {
 			const size_t ucWidth = UTF16CharLength(wsv[i]);
 			const std::string docChar = StringEncode(wsv.substr(i, ucWidth), codePage);
 
-			AddCharUTF(docChar.c_str(), static_cast<unsigned int>(docChar.size()));
+			InsertCharacter(docChar);
 
 			DrawImeIndicator(imeIndicator[i], static_cast<unsigned int>(docChar.size()));
 			i += ucWidth;

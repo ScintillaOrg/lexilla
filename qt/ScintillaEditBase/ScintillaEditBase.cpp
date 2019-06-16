@@ -258,7 +258,7 @@ void ScintillaEditBase::keyPressEvent(QKeyEvent *event)
 		QString text = event->text();
 		if (input && !text.isEmpty() && text[0].isPrint()) {
 			QByteArray utext = sqt->BytesForDocument(text);
-			sqt->AddCharUTF(utext.data(), utext.size());
+			sqt->InsertCharacter(std::string_view(utext.data(), utext.size()));
 		} else {
 			event->ignore();
 		}
@@ -449,7 +449,7 @@ void ScintillaEditBase::DrawImeIndicator(int indicator, int len)
 {
 	// Emulate the visual style of IME characters with indicators.
 	// Draw an indicator on the character before caret by the character bytes of len
-	// so it should be called after AddCharUTF().
+	// so it should be called after InsertCharacter().
 	// It does not affect caret positions.
 	if (indicator < 8 || indicator > INDIC_MAX) {
 		return;
@@ -547,9 +547,8 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 			const unsigned int ucWidth = commitStr.at(i).isHighSurrogate() ? 2 : 1;
 			const QString oneCharUTF16 = commitStr.mid(i, ucWidth);
 			const QByteArray oneChar = sqt->BytesForDocument(oneCharUTF16);
-			const int oneCharLen = oneChar.length();
 
-			sqt->AddCharUTF(oneChar.data(), oneCharLen);
+			sqt->InsertCharacter(std::string_view(oneChar.data(), oneChar.length()));
 			i += ucWidth;
 		}
 
@@ -575,7 +574,7 @@ void ScintillaEditBase::inputMethodEvent(QInputMethodEvent *event)
 			const QByteArray oneChar = sqt->BytesForDocument(oneCharUTF16);
 			const int oneCharLen = oneChar.length();
 
-			sqt->AddCharUTF(oneChar.data(), oneCharLen);
+			sqt->InsertCharacter(std::string_view(oneChar.data(), oneCharLen));
 
 			DrawImeIndicator(imeIndicator[i], oneCharLen);
 			i += ucWidth;

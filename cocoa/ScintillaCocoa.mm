@@ -2187,11 +2187,11 @@ ptrdiff_t ScintillaCocoa::InsertText(NSString *input) {
 			while (sv.length()) {
 				const unsigned char leadByte = sv[0];
 				const unsigned int bytesInCharacter = UTF8BytesOfLead[leadByte];
-				AddCharUTF(sv.data(), bytesInCharacter, false);
+				InsertCharacter(sv.substr(0, bytesInCharacter));
 				sv.remove_prefix(bytesInCharacter);
 			}
 		} else {
-			AddCharUTF(encoded.c_str(), static_cast<unsigned int>(encoded.length()), false);
+			InsertCharacter(encoded);
 		}
 	}
 	return encoded.length();
