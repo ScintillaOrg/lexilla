@@ -690,6 +690,7 @@ set void IndicSetHoverFore=2682(int indicator, colour fore)
 # Retrieve the foreground hover colour of an indicator.
 get colour IndicGetHoverFore=2683(int indicator,)
 
+enu IndicValue=SC_INDICVALUE
 val SC_INDICVALUEBIT=0x1000000
 val SC_INDICVALUEMASK=0xFFFFFF
 
@@ -957,6 +958,7 @@ set void SetPrintColourMode=2148(int mode,)
 get int GetPrintColourMode=2149(,)
 
 enu FindOption=SCFIND_
+val SCFIND_NONE=0x0
 val SCFIND_WHOLEWORD=0x2
 val SCFIND_MATCHCASE=0x4
 val SCFIND_WORDSTART=0x00100000
@@ -2364,6 +2366,8 @@ fun void ReleaseAllExtendedStyles=2552(,)
 # Allocate some extended (>255) style numbers and return the start of the range
 fun int AllocateExtendedStyles=2553(int numberStyles,)
 
+enu UndoFlags=UNDO_
+val UNDO_NONE=0
 val UNDO_MAY_COALESCE=1
 
 # Add a container action to the undo stack
@@ -2764,6 +2768,7 @@ fun int DescriptionOfStyle=4032(int style, stringresult description)
 # These are defined as a bit mask to make it easy to specify which notifications are wanted.
 # One bit is set from each of SC_MOD_* and SC_PERFORMED_*.
 enu ModificationFlags=SC_MOD_ SC_PERFORMED_ SC_MULTISTEPUNDOREDO SC_LASTSTEPINUNDOREDO SC_MULTILINEUNDOREDO SC_STARTACTION SC_MODEVENTMASKALL
+val SC_MOD_NONE=0x0
 val SC_MOD_INSERTTEXT=0x1
 val SC_MOD_DELETETEXT=0x2
 val SC_MOD_CHANGESTYLE=0x4
